@@ -142,7 +142,7 @@ $prompt $"			{ pass "core-file command" }
 # file correctly.  I don't think the other tests do this.
 
 # Haven't investigated this xfail
-setup_xfail "m68k-*-hpux*" "i*86-*-linux*"
+setup_xfail "m68k-*-hpux*" "i*86-*-linux*" "i*86-*-sysv4*"
 gdb_test "bt" "abort.*func2.*func1.*main.*" "backtrace in corefile.exp"
 
 # test reinit_frame_cache

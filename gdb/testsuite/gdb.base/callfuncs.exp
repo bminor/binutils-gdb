@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
@@ -179,10 +179,10 @@ proc do_function_calls {} {
 	"call inferior func with struct - returns int"
     gdb_test "p t_structs_l(struct_val1)" "= 51" \
 	"call inferior func with struct - returns long"
-    setup_xfail "i*86-*-linux*"
+    setup_xfail "i*86-*-*"
     gdb_test "p t_structs_f(struct_val1)" "= 2.12.*" \
 	"call inferior func with struct - returns float"
-    setup_xfail "i*86-*-linux*"
+    setup_xfail "i*86-*-*"
     gdb_test "p t_structs_d(struct_val1)" "= 9.87.*" \
 	"call inferior func with struct - returns double"
     gdb_test "p t_structs_a(struct_val1)" "= \"foo\"" \

@@ -1,3 +1,24 @@
+Wed Aug  9 08:04:12 1995  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.base/a1-selftest.exp: Change "i*86-*-sysv4" xfail for
+	"backtrace through signal handler" to "i*86-*-sysv4*".
+	* gdb.base/signals.exp: Add xfail for "'next' behaved as
+	continue" case.  Add "known SVR4 bug" to fail message.
+	Add "i*86-*-bsdi2.0" xfail for "handle all print".
+	Add "i*86-*-bsdi2.0" xfail for "backtrace in signals_tests_1".
+	* gdb.base/ptype.exp: Add "i*86-*-sysv4*" xfail for
+	"whatis unnamed typedef'd enum..." and "ptype t_char_array".
+	* gdb.base/langs.exp: Add "i*86-*-sysv4*" xfail for
+	"up to foo in langs.exp", "show language at foo in
+	langs.exp", "up to cppsub_ in langs.exp", "show
+	language at cppsub_ in langs.exp", "up to fsub in
+	langs.exp", and "show language at fsub in langs.exp".
+	* gdb.base/corefile.exp: Add "i*86-*-sysv4*" to xfail for
+	"bactrace in corefile.exp".
+	* gdb.base/callfuncs.exp: Change xfail to "i*86-*-*" for
+	"call inferior function with struct - returns float" and
+	"call inferior function with struct - returns double".
+	
 start-sanitize-sh3e
 Mon Aug  7 02:43:28 1995  Jeff Law  (law@snake.cs.utah.edu)
 
@@ -7,6 +28,15 @@ Mon Aug  7 02:43:28 1995  Jeff Law  (law@snake.cs.utah.edu)
 	* gdb.disasm/sh3.mt: Makefile fragment for sh3 ests.
 
 end-sanitize-sh3e
+Mon Aug  7 08:09:37 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (CHILL_FOR_TARGET): Use previously defined
+	(or overriden) "CHILL" macro rather then bare "gcc".
+	Also look for ../../gcc/xgcc since that is what we will
+	actually need, not "Makefile".  Remove following assignment
+	of CHILL to CHILL_FOR_TARGET because that results in
+	recursive definition.
+
 Sun Aug  6 16:52:29 1995  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/corefile.exp:  Change xfail for backtrace in

@@ -1,4 +1,4 @@
-#   Copyright (C) 1988, 1990, 1991, 1992 Free Software Foundation, Inc.
+#   Copyright (C) 1988, 1990, 1991, 1992, 1994 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
@@ -198,6 +198,7 @@ expect {
 # GDB's behavior is correct; the type which the variable is defined
 # as (51) doesn't have a name.  Only 55 has a name.
 
+setup_xfail "i*86-*-sysv4*"
 gdb_test "whatis v_boolean" "type = boolean" \
   "whatis unnamed typedef'd enum (compiler bug in IBM's xlc)"
 
@@ -470,6 +471,10 @@ expect {
 #    timeout		{ fail "(timeout) ptype double array" }
 #}
 #
+
+setup_xfail "i*86-*-sysv4*"
+gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
+
 #
 ##
 ## test ptype command with pointers
@@ -589,7 +594,6 @@ expect {
 #    timeout		{ fail "(timeout) ptype double pointer" }
 #}
 
-
 #
 # test ptype command with nested structure and union
 #
@@ -686,10 +690,9 @@ expect {
 # the operation causes a slow painful death rather than a nice simple failure.
 
 if ![istarget "*-*-udi*"] then {
-  if [runto main] then {
-    set timeout 120
+  if [runto_main] then {
     setup_xfail "a29k-*-udi" 2416
-    gdb_test "ptype \\\"abc\\\""	"type = char \\\[4\\\]"
+    gdb_test "ptype \"abc\""	"type = char \\\[4\\\]"
     setup_xfail "a29k-*-udi" 2416
     gdb_test "ptype {'a','b','c'}"	"type = char \\\[3\\\]"
     setup_xfail "a29k-*-udi" 2416
@@ -701,13 +704,8 @@ if ![istarget "*-*-udi*"] then {
     setup_xfail "a29k-*-udi" 2416
     gdb_test "ptype {{0,1,2},{3,4,5}}"	"type = int \\\[2\\\]\\\[3\\\]"
     setup_xfail "a29k-*-udi" 2416
-    gdb_test "ptype {4,5,6}\\\[2\\\]"	"type = int"
+    gdb_test "ptype {4,5,6}\[2\]"	"type = int"
     setup_xfail "a29k-*-udi" 2416
-    gdb_test "ptype *&{4,5,6}\\\[1\\\]"	"type = int"
-    set timeout 10
-    if [istarget "a29k-*-udi"] then {
-	# FIXME: If PR 2415 is fixed, this is not needed.
-	gdb_target_udi
-    }
+    gdb_test "ptype *&{4,5,6}\[1\]"	"type = int"
   }
 }

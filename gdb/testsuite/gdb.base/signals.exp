@@ -92,7 +92,20 @@ proc signal_tests_1 {} {
 		# Solaris is not a relevant data point either way
 		# because it lacks single stepping.
 
-		fail "'next' behaved as 'continue'"
+		# fnf: I don't agree with the above philosophy.  We
+		# can never be sure that any particular XFAIL is
+		# specified 100% correctly in that no systems with
+		# the bug are missed and all systems without the bug
+		# are excluded.  If we include an XFAIL that isn't
+		# appropriate for a particular system, then when that
+		# system gets tested it will XPASS, and someone should
+		# investigate and fix the setup_xfail as appropriate,
+		# or more preferably, the actual bug.  Each such case
+		# adds more data to narrowing down the scope of the
+		# problem and ultimately fixing it.
+
+		setup_xfail "i*86-*-sysv4*"
+		fail "'next' behaved as 'continue (known SVR4 bug)'"
 		return 0
 	    }
 	    -re ".*$prompt $" { fail "next to 2nd alarm (1)" }
@@ -128,7 +141,7 @@ proc signal_tests_1 {} {
 	# This doesn't test that main is frame #2, just that main is frame
 	# #2, #3, or higher.  At some point this should be fixed (but
 	# it quite possibly would introduce new FAILs on some systems).
-	setup_xfail "i*86-*-linux"
+	setup_xfail "i*86-*-linux" "i*86-*-bsdi2.0"
 	gdb_test "backtrace" "#0.*handler.*#1.*#2.*main.*" \
 	    "backtrace in signals_tests_1"
 
@@ -276,6 +289,7 @@ gdb_start
 # This will need to be updated as the exact list of signals changes,
 # but I want to test that TARGET_SIGNAL_0, TARGET_SIGNAL_DEFAULT, and
 # TARGET_SIGNAL_UNKNOWN are skipped.
+setup_xfail "i*86-unknown-bsdi2.0"
 gdb_test "handle all print" "Signal        Stop	Print	Pass to program	Description\r\nSIGHUP        Yes	Yes	Yes		Hangup.*SIG63         Yes	Yes	Yes		Real-time event 63"
 
 gdb_exit
