@@ -1,3 +1,53 @@
+2002-11-22  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.h: Add opaque declarations for struct namespace_info and
+	struct obstack.
+	(struct block): The language_specific stuff is now a struct
+	namespace_info rather than a struct using_direct_node.
+	(BLOCK_NAMESPACE): New macro.
+	Delete macro BLOCK_USING.
+	Add declarations for block_using, block_all_usings,
+	block_set_using, block_scope, block_set_scope.
+	* symtab.c: #include "gdb_assert.h"
+	(lookup_symbol_aux): Move minsym stuff inside
+	lookup_symbol_aux_nonlocal, and always do global search via
+	lookup_symbol_aux_using.
+	(lookup_symbol_aux_nonlocal): Do minsym search.
+	(lookup_symbol_aux_using): Calculate usings via block_all_usings;
+	handle namespace scope.
+	(lookup_symbol_aux_using_loop): New function, not to be confused
+	with the previous function of the same name.  (Sorry about that.)
+	(lookup_symbol_namespace): Renamed from
+	lookup_symbol_aux_using_loop.
+	(lookup_symbol_aux_minsyms): Add block_index argument, delete
+	is_a_field_of_this argument, and only check either global or
+	static symbols rather than both of them.
+	(block_using): New function.
+	(block_all_usings): New function.
+	(block_set_using): New function.
+	(block_scope): New function.
+	(block_set_scope): New function.
+	(block_initialize_namespace): New function.
+	* jv-lang.c (get_java_class_symtab): BLOCK_NAMESPACE instead of
+	BLOCK_USING.
+	* dwarf2read.c: Delete variable current_namespace, and replace its
+	uses by processing_current_namespace (from buildsym.h).
+	(scan_partial_symbols): Allow empty pdi.name if we're
+	reading a namespace.
+	* cp-support.h (struct namespace_info): New struct.
+	* cp-support.c: Add comment.
+	* buildsym.h: New variable processing_current_namespace.
+	* buildsym.c (add_symbol_to_list): Do fast search for
+	"(anonymous namespace)".
+	(scan_for_anonymous_namespaces): Delete FIXME.  Convert for loop
+	into a clearer while loop.
+	(finish_block): Replace BLOCK_USING by BLOCK_NAMESPACE.
+	(finish_block): Set block_scope of function blocks rather than
+	generating using directives that would have a similar effect.
+	(end_symtab): Set using via block_set_using rather than
+	BLOCK_USING.
+	* Makefile.in (symtab.o): Depend on gdb_assert_h.
+
 2002-11-01  Daniel Jacobowitz  <drow@mvista.com>
 
 	* c-typeprint.c (c_type_print_args): Remove.

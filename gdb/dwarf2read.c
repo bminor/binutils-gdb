@@ -388,13 +388,6 @@ static struct partial_die_info zeroed_partial_die;
    in buildsym.c.  */
 static struct pending **list_in_scope = &file_symbols;
 
-/* If we're debugging C++ code, this string should contain the name of
-   the current namespace.  Other people shouldn't have to copy it when
-   referring to it, so don't free its previous contents when setting
-   this to a new value.  */
-
-static const char *current_namespace;
-
 /* FIXME: decode_locdesc sets these variables to describe the location
    to the caller.  These ought to be a structure or something.   If
    none of the flags are set, the object lives at the address returned
@@ -1370,7 +1363,9 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
     {
       info_ptr = read_partial_die (&pdi, abfd, info_ptr, cu_header);
 
-      if (pdi.name)
+      /* Anonymous namespaces have no name but are interesting.  */
+
+      if (pdi.name != NULL || pdi.tag == DW_TAG_namespace)
 	{
 	  switch (pdi.tag)
 	    {
@@ -1632,7 +1627,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
   info_ptr = dwarf_info_buffer + offset;
 
   /* We're in the global namespace.  */
-  current_namespace = "";
+  processing_current_namespace = "";
 
   obstack_init (&dwarf2_tmp_obstack);
   back_to = make_cleanup (dwarf2_free_tmp_obstack, NULL);
@@ -2998,7 +2993,7 @@ static void
 read_namespace (struct die_info *die, struct objfile *objfile,
 		const struct comp_unit_head *cu_header)
 {
-  const char *previous_namespace = current_namespace;
+  const char *previous_namespace = processing_current_namespace;
   const char *name = NULL;
   int is_anonymous;
   struct die_info *current_die;
@@ -3021,18 +3016,19 @@ read_namespace (struct die_info *die, struct objfile *objfile,
 
   /* Now build the name of the current namespace.  */
 
-  current_namespace = obconcat (&objfile->symbol_obstack,
-				previous_namespace,
-				previous_namespace[0] == '\0' ? "" : "::",
-				name);
+  processing_current_namespace = obconcat (&objfile->symbol_obstack,
+					   previous_namespace,
+					   previous_namespace[0] == '\0'
+					   ? "" : "::",
+					   name);
 
   /* If it's an anonymous namespace that we're seeing for the first
      time, add a using directive.  */
 
   if (is_anonymous && dwarf_attr (die, DW_AT_extension) == NULL)
-    add_using_directive (current_namespace,
+    add_using_directive (processing_current_namespace,
 			 strlen (previous_namespace),
-			 strlen (current_namespace));
+			 strlen (processing_current_namespace));
   
   
   if (die->has_children)
@@ -3046,7 +3042,7 @@ read_namespace (struct die_info *die, struct objfile *objfile,
 	}
     }
 
-  current_namespace = previous_namespace;
+  processing_current_namespace = previous_namespace;
 }
 
 /* Extract all information from a DW_TAG_pointer_type DIE and add to

@@ -50,6 +50,7 @@
 #include <ctype.h>
 #include "cp-abi.h"
 #include "cp-support.h"
+#include "gdb_assert.h"
 
 /* Prototypes for local functions */
 
@@ -119,21 +120,29 @@ struct symbol *lookup_symbol_aux_using (const char *name,
 					struct symtab **symtab);
 
 static
-struct symbol *lookup_symbol_aux_using_loop (const char *prefix,
-					     int prefix_len,
-					     const char *rest,
-					     struct using_direct_node *using,
+struct symbol *lookup_symbol_aux_using_loop (const char *name,
 					     const char *mangled_name,
 					     namespace_enum namespace,
-					     struct symtab **symtab);
+					     struct symtab **symtab,
+					     const char *scope,
+					     int scope_len,
+					     struct using_direct_node *using);
 
 static
-struct symbol *lookup_symbol_aux_minsyms (const char *name,
+struct symbol *lookup_symbol_namespace (const char *prefix,
+					int prefix_len,
+					const char *rest,
+					struct using_direct_node *using,
+					const char *mangled_name,
+					namespace_enum namespace,
+					struct symtab **symtab);
+
+static
+struct symbol *lookup_symbol_aux_minsyms (int block_index,
+					  const char *name,
 					  const char *mangled_name,
 					  const namespace_enum namespace,
-					  int *is_a_field_of_this,
 					  struct symtab **symtab);
-
 
 static struct symbol *find_active_alias (struct symbol *sym, CORE_ADDR addr);
 
@@ -153,6 +162,9 @@ static void print_msymbol_info (struct minimal_symbol *);
 static void symtab_symbol_info (char *, namespace_enum, int);
 
 static void overload_list_add_symbol (struct symbol *sym, char *oload_name);
+
+static void block_initialize_namespace (struct block *block,
+					struct obstack *obstack);
 
 void _initialize_symtab (void);
 
@@ -842,83 +854,34 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 	}
     }
 
-  /* Now search all global blocks.  Do the symtab's first, then
-     check the psymtab's. If a psymtab indicates the existence
-     of the desired name as a global, then do psymtab-to-symtab
-     conversion on the fly and return the found symbol. */
+  /* Now search all global blocks.  Do the symtab's first, then the
+     minsyms, then check the psymtab's. If minsyms or psymtabs
+     indicate the existence of the desired name as a global, then
+     generate the appropriate symtab on the fly and return the found
+     symbol.
 
-  sym = lookup_symbol_aux_nonlocal (GLOBAL_BLOCK, name, mangled_name,
-				    namespace, symtab);
+     We do this from within lookup_symbol_aux_using: that will apply
+     appropriate using directives in the C++ case.  But it works fine
+     in the non-C++ case, too.  */
+
+  /* NOTE: carlton/2002-10-22: Is it worthwhile to try to figure out
+     whether or not we're in the C++ case?  Doing
+     lookup_symbol_aux_using won't slow things down significantly in
+     the general case, though: other parts of this function are much,
+     much more expensive.  */
+
+  sym = lookup_symbol_aux_using (name, mangled_name, block, namespace,
+				 symtab);
   if (sym != NULL)
     return sym;
-
-  /* If we're in the C++ case, check to see if the symbol is defined
-     in a namespace accessible via a "using" declaration.  */
-
-  /* FIXME: carlton/2002-10-10: is "is_a_field_of_this" always
-     non-NULL if we're in the C++ case?  Maybe we should always do
-     this, and delete the two previous searches: this will always
-     search the global namespace, after all.  */
-
-  if (is_a_field_of_this)
-    {
-      sym = lookup_symbol_aux_using (name, mangled_name, block, namespace,
-				     symtab);
-      if (sym != NULL)
-	return sym;
-    }
-
-#ifndef HPUXHPPA
-
-  /* Check for the possibility of the symbol being a function or a
-     mangled variable that is stored in one of the minimal symbol
-     tables.  Eventually, all global symbols might be resolved in this
-     way.  */
-
-  sym = lookup_symbol_aux_minsyms (name, mangled_name,
-				   namespace, is_a_field_of_this,
-				   symtab);
-  if (sym != NULL)
-    return sym;
-
-#endif
 
   /* Now search all static file-level symbols.  Not strictly correct,
-     but more useful than an error.  Do the symtabs first, then check
-     the psymtabs.  If a psymtab indicates the existence of the
-     desired name as a file-level static, then do psymtab-to-symtab
-     conversion on the fly and return the found symbol. */
+     but more useful than an error.  */
 
   sym = lookup_symbol_aux_nonlocal (STATIC_BLOCK, name, mangled_name,
 				    namespace, symtab);
   if (sym != NULL)
     return sym;
-
-#ifdef HPUXHPPA
-
-  /* Check for the possibility of the symbol being a function or a
-     global variable that is stored in one of the minimal symbol
-     tables.  The "minimal symbol table" is built from linker-supplied
-     info.
-
-     RT: I moved this check to last, after the complete search of the
-     global (p)symtab's and static (p)symtab's. For HP-generated
-     symbol tables, this check was causing a premature exit from
-     lookup_symbol with NULL return, and thus messing up symbol
-     lookups of things like "c::f". It seems to me a check of the
-     minimal symbol table ought to be a last resort in any case. I'm
-     vaguely worried about the comment within
-     lookup_symbol_aux_minsyms which talks about FORTRAN routines
-     "foo_" though... is it saying we need to do the "minsym" check
-     before the static check in this case?  */
-
-  sym = lookup_symbol_aux_minsyms (name, mangled_name,
-				   namespace, is_a_field_of_this,
-				   symtab);
-  if (sym != NULL)
-    return sym;
-
-#endif
 
   if (symtab != NULL)
     *symtab = NULL;
@@ -975,9 +938,6 @@ lookup_symbol_aux_local (const char *name, const char *mangled_name,
    STATIC_BLOCK, depending on whether or not we want to search global
    symbols or static symbols.  */
 
-/* FIXME: carlton/2002-10-11: Should this also do some minsym
-   lookup?  */
-
 static struct symbol *
 lookup_symbol_aux_nonlocal (int block_index,
 			    const char *name,
@@ -992,8 +952,63 @@ lookup_symbol_aux_nonlocal (int block_index,
   if (sym != NULL)
     return sym;
 
-  return lookup_symbol_aux_psymtabs (block_index, name, mangled_name,
-				     namespace, symtab);
+#ifndef HPUXHPPA
+  sym = lookup_symbol_aux_minsyms (block_index, name, mangled_name,
+				   namespace, symtab);
+  if (sym != NULL)
+    return sym;
+#endif
+
+  sym = lookup_symbol_aux_psymtabs (block_index, name, mangled_name,
+				    namespace, symtab);
+  if (sym != NULL)
+    return sym;
+
+#ifdef HPUXHPPA
+
+  /* FIXME: carlton/2002-10-28: The following comment was present in
+     lookup_symbol_aux before I broke it up: at that time, the HP
+     search order for nonlocal stuff was global symtab, global
+     psymtab, static symtab, static psymtab, global and static
+     minsyms.  (The minsyms are stored so that it's just as easy to do
+     global and static searches of them at the same time.)  Now it's
+     global symtab, global psymtab, global minsyms, static symtab,
+     static psymtab, static minsyms.  Also, it's now impossible for a
+     global minsym search to cause a NULL return by itself: if a
+     minsym search returns NULL, then the next search after that is
+     still performed.
+
+     Given that that's the case, I'm pretty sure that my search order
+     is safe; indeed, given that the comment below warns against
+     premature NULL returns, it even seems plausible to me that we can
+     treat HP symbol tables the same as non-HP symbol tables.  It
+     would be great if somebody who has access to HP machines (or,
+     even better, who understands the reason behind the HP special
+     case in the first place) could check on this.
+
+     But there's still the comment about "foo_" symbols in
+     lookup_symbol_aux_minsyms which I really don't understand, sigh.
+     _Should_ a minsym lookup sometimes be able to force a NULL return
+     from lookup_symbol?  */
+
+  /* RT: I moved this check to last, after the complete search of the
+     global (p)symtab's and static (p)symtab's. For HP-generated
+     symbol tables, this check was causing a premature exit from
+     lookup_symbol with NULL return, and thus messing up symbol
+     lookups of things like "c::f". It seems to me a check of the
+     minimal symbol table ought to be a last resort in any case. I'm
+     vaguely worried about the comment within
+     lookup_symbol_aux_minsyms which talks about FORTRAN routines
+     "foo_" though... is it saying we need to do the "minsym" check
+     before the static check in this case?  */
+
+  sym = lookup_symbol_aux_minsyms (block_index, name, mangled_name,
+				   namespace, symtab);
+  if (sym != NULL)
+    return sym;
+#endif
+
+  return NULL;
 }
 
 /* Check to see if the symbol is defined in one of the symtabs.
@@ -1092,32 +1107,69 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
 /* This function gathers using directives from BLOCK and its
    superblocks, and then searches for symbols in the global namespace
    by trying to apply those various using directives.  */
+
 static struct symbol *lookup_symbol_aux_using (const char *name,
 					       const char *mangled_name,
 					       const struct block *block,
 					       const namespace_enum namespace,
 					       struct symtab **symtab)
 {
-  struct using_direct_node *using = NULL;
+  struct using_direct_node *using;
+  const char *scope;
   struct symbol *sym;
 
-  while (block != NULL)
-    {
-      using = cp_copy_usings (BLOCK_USING (block), using);
-      block = BLOCK_SUPERBLOCK (block);
-    }
-
-  sym = lookup_symbol_aux_using_loop ("", 0, name, using, mangled_name,
-				      namespace, symtab);
+  using = block_all_usings (block);
+  scope = block_scope (block);
+  
+  sym = lookup_symbol_aux_using_loop (name, mangled_name, namespace, symtab,
+				      scope, 0, using);
   cp_free_usings (using);
   
   return sym;
 }
 
+/* Look up NAME in the namespaces given by SCOPE and its initial
+   prefixes, applying using directives given by USING; only consider
+   prefixes that are at least as long as SCOPE_LEN, however.  Look up
+   longest prefixes first.  */
+
+static struct
+symbol *lookup_symbol_aux_using_loop (const char *name,
+				      const char *mangled_name,
+				      namespace_enum namespace,
+				      struct symtab **symtab,
+				      const char *scope,
+				      int scope_len,
+				      struct using_direct_node *using)
+{
+  if (scope[scope_len] != '\0')
+    {
+      struct symbol *sym;
+      int next_component;
+      int new_scope_len = scope_len;
+
+      /* If the current scope is followed by "::", skip past that.  */
+      if (new_scope_len != 0)
+	{
+	  gdb_assert (scope[new_scope_len] == ':');
+	  new_scope_len += 2;
+	}
+      next_component = cp_find_first_component (scope + new_scope_len) - scope;
+      sym = lookup_symbol_aux_using_loop (name, mangled_name, namespace,
+					  symtab, scope, next_component,
+					  using);
+      if (sym != NULL)
+	return sym;
+    }
+
+  return lookup_symbol_namespace (scope, scope_len, name, using,
+				  mangled_name, namespace, symtab);
+}
+
 /* This tries to look up REST in the namespace given by the initial
    substring of PREFIX of length PREFIX_LEN.
 
-   Basically, assume that we have using directives adding A to the
+   For example, assume that we have using directives adding A to the
    global namespace, adding A::inner to namespace A, and adding B to
    the global namespace.  Then, when looking up a symbol "foo", we
    want to recurse by looking up stuff in A::foo and seeing which
@@ -1138,14 +1190,19 @@ static struct symbol *lookup_symbol_aux_using (const char *name,
    namespaces first-class objects.  (Which is certainly a good idea
    for other reasons, but it will take a little while.)  */
 
+/* NOTE: carlton/2002-11-19: This is optimistically called
+   lookup_symbol_namespace instead of lookup_symbol_aux_namespace in
+   hopes that it or something like it might eventually be useful
+   outside of lookup_symbol.  */
+
 static struct symbol *
-lookup_symbol_aux_using_loop (const char *prefix,
-			      int prefix_len,
-			      const char *rest,
-			      struct using_direct_node *using,
-			      const char *mangled_name,
-			      namespace_enum namespace,
-			      struct symtab **symtab)
+lookup_symbol_namespace (const char *prefix,
+			 int prefix_len,
+			 const char *rest,
+			 struct using_direct_node *using,
+			 const char *mangled_name,
+			 namespace_enum namespace,
+			 struct symtab **symtab)
 {
   struct using_direct_node *current;
   struct symbol *sym;
@@ -1179,14 +1236,13 @@ lookup_symbol_aux_using_loop (const char *prefix,
 	      if (*new_rest == ':')
 		new_rest += 2;
 
-	      sym = lookup_symbol_aux_using_loop
-		(current->current->name,
-		 current->current->inner_length,
-		 new_rest,
-		 using,
-		 mangled_name,
-		 namespace,
-		 symtab);
+	      sym = lookup_symbol_namespace (current->current->name,
+					     current->current->inner_length,
+					     new_rest,
+					     using,
+					     mangled_name,
+					     namespace,
+					     symtab);
 	      if (sym != NULL)
 		return sym;
 	    }
@@ -1223,10 +1279,9 @@ lookup_symbol_aux_using_loop (const char *prefix,
    way.  */
 
 static struct symbol *
-lookup_symbol_aux_minsyms (const char *name,
+lookup_symbol_aux_minsyms (int block_index, const char *name,
 			   const char *mangled_name,
 			   const namespace_enum namespace,
-			   int *is_a_field_of_this,
 			   struct symtab **symtab)
 {
   struct symbol *sym;
@@ -1250,7 +1305,30 @@ lookup_symbol_aux_minsyms (const char *name,
 	     know about demangled names, but we were given a mangled
 	     name...  */
 
-	  /* We first use the address in the msymbol to try to locate
+	  /* First, check to see that the symbol looks like it's
+	     global or static (depending on what we were asked to look
+	     for).  */
+
+	  /* NOTE: carlton/2002-10-28: lookup_minimal_symbol gives
+	     preference to global symbols over static symbols, so if
+	     block_index is STATIC_BLOCK then this might well miss
+	     static symbols that are shadowed by global symbols.  But
+	     that's okay: this is only called with block_index equal
+	     to STATIC_BLOCK if a global search has failed.  */
+
+	  switch (MSYMBOL_TYPE (msymbol))
+	    {
+	    case mst_file_text:
+	    case mst_file_data:
+	    case mst_file_bss:
+	      if (block_index == GLOBAL_BLOCK)
+		return NULL;
+	    default:
+	      if (block_index == STATIC_BLOCK)
+		return NULL;
+	    }
+	  
+	  /* We next use the address in the msymbol to try to locate
 	     the appropriate symtab. Note that find_pc_sect_symtab()
 	     has a side-effect of doing psymtab-to-symtab expansion,
 	     for the found symtab.  */
@@ -1260,7 +1338,7 @@ lookup_symbol_aux_minsyms (const char *name,
 	    {
 	      /* This is a function which has a symtab for its address.  */
 	      bv = BLOCKVECTOR (s);
-	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+	      block = BLOCKVECTOR_BLOCK (bv, block_index);
 
 	      /* This call used to pass `SYMBOL_NAME (msymbol)' as the
 	         `name' argument to lookup_block_symbol.  But the name
@@ -1269,14 +1347,16 @@ lookup_symbol_aux_minsyms (const char *name,
 	         unmangled name.  */
 	      sym =
 		lookup_block_symbol (block, name, mangled_name, namespace);
-	      /* We kept static functions in minimal symbol table as well as
-	         in static scope. We want to find them in the symbol table. */
-	      if (!sym)
-		{
-		  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-		  sym = lookup_block_symbol (block, name,
-					     mangled_name, namespace);
-		}
+
+	      /* FIXME: carlton/2002-10-28: this next comment dates
+		 from when this code was part of lookup_symbol_aux, so
+		 this return could return NULL from lookup_symbol_aux.
+		 Are there really situations where we want a minimal
+		 symbol lookup to be able to force a NULL return from
+		 lookup_symbol?  If so, maybe the thing to do would be
+		 to have lookup_symbol_aux_minsym to set a
+		 minsym_found flag, and to have lookup_symbol_aux only
+		 do the psymtab search if that flag is zero.  */
 
 	      /* sym == 0 if symbol was found in the minimal symbol table
 	         but not in the symtab.
@@ -1297,13 +1377,15 @@ lookup_symbol_aux_minsyms (const char *name,
 	    }
 	  else if (MSYMBOL_TYPE (msymbol) != mst_text
 		   && MSYMBOL_TYPE (msymbol) != mst_file_text
-		   && !STREQ (name, SYMBOL_NAME (msymbol)))
+		   && strcmp (name, SYMBOL_NAME (msymbol)) != 0)
 	    {
 	      /* This is a mangled variable, look it up by its
 	         mangled name.  */
-	      return lookup_symbol_aux (SYMBOL_NAME (msymbol), mangled_name,
-					NULL, namespace, is_a_field_of_this,
-					symtab);
+	      return lookup_symbol_aux_nonlocal (block_index,
+						 SYMBOL_NAME (msymbol),
+						 mangled_name,
+						 namespace,
+						 symtab);
 	    }
 	}
     }
@@ -3275,6 +3357,96 @@ contained_in (struct block *a, struct block *b)
   return BLOCK_START (a) >= BLOCK_START (b)
     && BLOCK_END (a) <= BLOCK_END (b);
 }
+
+/* Now come some functions designed to deal with C++ namespace issues.
+   The accessors are safe to use even in the non-C++ case.  */
+
+/* This returns the using directives associated to BLOCK (but _not_
+   its parents), if any.  */
+
+struct using_direct_node *
+block_using (const struct block *block)
+{
+  if (BLOCK_NAMESPACE (block) == NULL)
+    return NULL;
+  else
+    return BLOCK_NAMESPACE (block)->using;
+}
+
+/* This returns the using directives associated to BLOCK and its
+   parents, if any.  The resulting structure must be freed by calling
+   cp_free_usings on it.  */
+
+struct using_direct_node *
+block_all_usings (const struct block *block)
+{
+  struct using_direct_node *using = NULL;
+
+  while (block != NULL)
+    {
+      using = cp_copy_usings (block_using (block), using);
+      block = BLOCK_SUPERBLOCK (block);
+    }
+
+  return using;
+}
+
+/* Set block_using (BLOCK) to USING; if needed, allocate memory via
+   OBSTACK.  */
+
+void
+block_set_using (struct block *block, struct using_direct_node *using,
+		 struct obstack *obstack)
+{
+  block_initialize_namespace (block, obstack);
+
+  BLOCK_NAMESPACE (block)->using = using;
+}
+
+/* This returns the namespace that BLOCK is enclosed in, or "" if it
+   isn't enclosed in a namespace at all.  This travels the chain of
+   superblocks looking for a scope, if necessary.  */
+
+const char *
+block_scope (const struct block *block)
+{
+  for (; block != NULL; block = BLOCK_SUPERBLOCK (block))
+    {
+      if (BLOCK_NAMESPACE (block) != NULL
+	  && BLOCK_NAMESPACE (block)->scope != NULL)
+	return BLOCK_NAMESPACE (block)->scope;
+    }
+
+  return "";
+}
+
+/* Set block_scope (BLOCK) to SCOPE; if needed, allocate memory via
+   OBSTACK.  (It won't make a copy of SCOPE, however, so that already
+   has to be allocated correctly.)  */
+
+void
+block_set_scope (struct block *block, const char *scope,
+		 struct obstack *obstack)
+{
+  block_initialize_namespace (block, obstack);
+
+  BLOCK_NAMESPACE (block)->scope = scope;
+}
+
+/* If BLOCK_NAMESPACE (block) is NULL, allocate it via OBSTACK and
+   ititialize its members to zero.  */
+
+static void
+block_initialize_namespace (struct block *block, struct obstack *obstack)
+{
+  if (BLOCK_NAMESPACE (block) == NULL)
+    {
+      BLOCK_NAMESPACE (block)
+	= obstack_alloc (obstack, sizeof (struct namespace_info));
+      BLOCK_NAMESPACE (block)->using = NULL;
+    }
+}
+
 
 
 /* Helper routine for make_symbol_completion_list.  */

@@ -160,7 +160,9 @@ add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
   
    if (SYMBOL_LANGUAGE (symbol) == language_cplus
        && !processing_has_namespace_info
-       && SYMBOL_CPLUS_DEMANGLED_NAME (symbol) != NULL)
+       && SYMBOL_CPLUS_DEMANGLED_NAME (symbol) != NULL
+       && strstr (SYMBOL_CPLUS_DEMANGLED_NAME (symbol),
+		  "(anonymous namespace)") != NULL)
      scan_for_anonymous_namespaces (symbol);
 }
 
@@ -175,27 +177,26 @@ static void
 scan_for_anonymous_namespaces (struct symbol *symbol)
 {
   const char *name = SYMBOL_CPLUS_DEMANGLED_NAME (symbol);
-  const char *beginning, *end;
+  const char *beginning = name;
+  const char *end = cp_find_first_component (beginning);
 
-  /* FIXME: carlton/2002-10-14: Should we do some sort of fast search
-     first to see if the substring "(anonymous namespace)" occurs in
-     name at all?  */
-
-  for (beginning = name, end = cp_find_first_component (name);
-       *end == ':';
-       /* The "+ 2" is for the "::"-.  */
-       beginning = end + 2, end = cp_find_first_component (beginning))
+  while (*end == ':')
     {
       if ((end - beginning) == ANONYMOUS_NAMESPACE_LEN
 	  && strncmp (beginning, "(anonymous namespace)",
 		      ANONYMOUS_NAMESPACE_LEN) == 0)
-	/* We've found a component of the name that's an anonymous
-	   namespace.  So add symbols in it to the namespace given by
-	   the previous component if there is one, or to the global
-	   namespace if there isn't.  */
-	add_using_directive (name,
-			     beginning == name ? 0 : beginning - name - 2,
-			     end - name);
+	{
+	  /* We've found a component of the name that's an anonymous
+	     namespace.  So add symbols in it to the namespace given
+	     by the previous component if there is one, or to the
+	     global namespace if there isn't.  */
+	  add_using_directive (name,
+			       beginning == name ? 0 : beginning - name - 2,
+			       end - name);
+	}
+      /* The "+ 2" is for the "::".  */
+       beginning = end + 2;
+       end = cp_find_first_component (beginning);
     }
 }
 
@@ -384,7 +385,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
   BLOCK_END (block) = end;
   /* Superblock filled in when containing block is made */
   BLOCK_SUPERBLOCK (block) = NULL;
-  BLOCK_USING (block) = NULL;
+  BLOCK_NAMESPACE (block) = NULL;
 
   BLOCK_GCC_COMPILED (block) = processing_gcc_compilation;
 
@@ -485,21 +486,38 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	  const char *name = SYMBOL_CPLUS_DEMANGLED_NAME (symbol);
 	  const char *next;
 
-	  for (next = cp_find_first_component (name);
-	       *next == ':';
-	       /* The '+ 2' is to skip the '::'.  */
-	       next = cp_find_first_component (next + 2))
+	  if (processing_has_namespace_info)
+	    block_set_scope (block, processing_current_namespace,
+			     &objfile->symbol_obstack);
+	  else
 	    {
-	      BLOCK_USING (block)
-		= cp_add_using_obstack (name, 0, next - name,
-					BLOCK_USING (block),
-					&objfile->symbol_obstack);
-	    }
+	      const char *current, *next;
 
-	  /* FIMXE: carlton/2002-10-09: Until I understand the
-	     possible pitfalls of demangled names a lot better, I want
-	     to make sure I'm not running into surprises.  */
-	  gdb_assert (*next == '\0');
+	      /* FIXME: carlton/2002-11-14: For members of classes,
+		 with this include the class name as well?  I don't
+		 think that's a problem yet, but it will be.  */
+
+	      current = name;
+	      next = cp_find_first_component (current);
+	      while (*next == ':')
+		{
+		  current = next;
+		  /* The '+ 2' is to skip the '::'.  */
+		  next = cp_find_first_component (current + 2);
+		}
+	      if (current == name)
+		block_set_scope (block, "", &objfile->symbol_obstack);
+	      else
+		block_set_scope (block,
+				 obsavestring (name, current - name,
+					       &objfile->symbol_obstack),
+				 &objfile->symbol_obstack);
+	      
+	      /* FIXME: carlton/2002-10-09: Until I understand the
+		 possible pitfalls of demangled names a lot better, I
+		 want to make sure I'm not running into surprises.  */
+	      gdb_assert (*next == '\0');
+	    }
 	}
     }
   else
@@ -1063,9 +1081,10 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
       blockvector = make_blockvector (objfile);
       if (using_list != NULL)
 	{
-	  BLOCK_USING (BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK))
-	    = copy_usings_to_obstack (using_list,
-				      &objfile->symbol_obstack);
+	  block_set_using (BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK),
+			   copy_usings_to_obstack (using_list,
+						   &objfile->symbol_obstack),
+			   &objfile->symbol_obstack);
 	  using_list = NULL;
 	}
     }

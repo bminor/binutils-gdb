@@ -2206,7 +2206,7 @@ symtab.o: symtab.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(gdbcore_h) \
 	$(gdbcmd_h) $(call_cmds_h) $(gdb_regex_h) $(expression_h) \
 	$(language_h) $(demangle_h) $(inferior_h) $(linespec_h) \
 	$(filenames_h) $(gdb_obstack_h) $(gdb_string_h) $(gdb_stat_h) \
-	$(cp_abi_h) $(source_h) $(cp_support_h)
+	$(cp_abi_h) $(source_h) $(cp_support_h) $(gdb_assert_h)
 target.o: target.c $(defs_h) $(gdb_string_h) $(target_h) $(gdbcmd_h) \
 	$(symtab_h) $(inferior_h) $(bfd_h) $(symfile_h) $(objfiles_h) \
 	$(gdb_wait_h) $(dcache_h) $(regcache_h)

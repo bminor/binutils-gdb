@@ -52,6 +52,12 @@
      fairly restrictive set of locations (in particular, they have be
      at depth 0, don't they?).  */
 
+/* NOTE: carlton/2002-10-25: Daniel Jacobowitz came up with an example
+   where operator names don't occur at depth 0.  Sigh.  (It involved a
+   template argument that was a pointer: I hadn't realized that was
+   possible.)  Handling such edge cases does not seem like a
+   high-priority problem to me.  */
+
 /* FIXME: carlton/2002-10-09: Do all the functions here handle all the
    above considerations correctly?  */
 

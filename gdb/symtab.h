@@ -25,7 +25,9 @@
 
 /* Opaque declarations.  */
 struct obstack;
+struct namespace_info;
 struct using_direct_node;
+struct obstack;
 
 /* Don't do this; it means that if some .o's are compiled with GNU C
    and some are not (easy to do accidentally the way we configure
@@ -374,12 +376,11 @@ struct block
   {
     struct
     {
-      /* Contains information about what using directives or other
-	 similar features are added by this block.  This should always
-	 be NULL for global blocks: if there are using directives that
-	 affect an entire file, put it in the static block.  */
+      /* Contains information about namespace-related info relevant to
+	 this block: using directives and the current namespace
+	 scope.  */
       
-      struct using_direct_node *using;
+      struct namespace_info *namespace;
     }
     cplus_specific;
   }
@@ -430,7 +431,7 @@ struct block
 #define BLOCK_END(bl)		(bl)->endaddr
 #define BLOCK_FUNCTION(bl)	(bl)->function
 #define BLOCK_SUPERBLOCK(bl)	(bl)->superblock
-#define BLOCK_USING(bl)		(bl)->language_specific.cplus_specific.using
+#define BLOCK_NAMESPACE(bl)	(bl)->language_specific.cplus_specific.namespace
 #define BLOCK_GCC_COMPILED(bl)	(bl)->gcc_compile_flag
 #define BLOCK_HASHTABLE(bl)	(bl)->hashtable
 
@@ -1143,6 +1144,19 @@ extern struct partial_symbol *find_pc_sect_psymbol (struct partial_symtab *,
 extern int find_pc_line_pc_range (CORE_ADDR, CORE_ADDR *, CORE_ADDR *);
 
 extern int contained_in (struct block *, struct block *);
+
+extern struct using_direct_node *block_using (const struct block *);
+
+extern struct using_direct_node *block_all_usings (const struct block *block);
+
+extern void block_set_using (struct block *block,
+			     struct using_direct_node *using,
+			     struct obstack *obstack);
+
+extern const char *block_scope (const struct block *block);
+
+extern void block_set_scope (struct block *block, const char *scope,
+			     struct obstack *obstack);
 
 extern void reread_symbols (void);
 
