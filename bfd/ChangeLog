@@ -1,3 +1,13 @@
+Tue Nov  9 11:26:05 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* libelf.h: Added some comments.
+	(struct elf_backend_data): Added elf_backend_ecoff_debug_swap
+	field.  Removed unused write_relocs field.
+	* elf32-target.h: Adjusted elf_backend_data initialization
+	accordingly.
+	* elf64-target.h: Corrected elf_backend_data initialization to
+	fill in all fields and to set elf_64_p to 1.
+
 Mon Nov  8 18:13:14 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elfcode.h (bfd_section_from_shdr): Remove duplicate assignment

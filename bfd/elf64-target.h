@@ -59,6 +59,28 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define ELF_MAXPAGESIZE 1
 #endif
 
+#ifndef elf_backend_symbol_processing
+#define elf_backend_symbol_processing	0	/* elf_backend_symbol_processing */
+#endif
+#ifndef elf_backend_symbol_table_processing
+#define elf_backend_symbol_table_processing	0	/* elf_backend_symbol_table_processing */
+#endif
+#ifndef elf_backend_section_processing
+#define elf_backend_section_processing	0	/* elf_backend_section_processing */
+#endif
+#ifndef elf_backend_section_from_shdr
+#define elf_backend_section_from_shdr	0	/* elf_backend_section_from_shdr */
+#endif
+#ifndef elf_backend_fake_sections
+#define elf_backend_fake_sections	0	/* elf_backend_fake_sections */
+#endif
+#ifndef elf_backend_section_from_bfd_section
+#define elf_backend_section_from_bfd_section	0	/* elf_backend_section_from_bfd_section */
+#endif
+#ifndef elf_backend_ecoff_debug_swap
+#define elf_backend_ecoff_debug_swap	0	/* elf_backed_ecoff_debug_swap */
+#endif
+
 static CONST struct elf_backend_data elf64_bed =
 {
 #ifdef USE_REL
@@ -66,15 +88,18 @@ static CONST struct elf_backend_data elf64_bed =
 #else
   1,				/* use_rela_p */
 #endif
-  0,				/* elf_64_p */
+  1,				/* elf_64_p */
   ELF_ARCH,			/* arch */
-  elf_info_to_howto,		/* elf_info_to_howto */
-#ifdef elf_info_to_howto_rel
-  elf_info_to_howto_rel,	/* elf_info_to_howto_rel */
-#else
-  0,				/* elf_info_to_howto_rel */
-#endif
   ELF_MAXPAGESIZE,		/* maxpagesize */
+  elf_info_to_howto,		/* elf_info_to_howto */
+  elf_info_to_howto_rel,	/* elf_info_to_howto_rel */
+  elf_backend_symbol_processing,	/* elf_backend_symbol_processing */
+  elf_backend_symbol_table_processing,	/* elf_backend_symbol_table_processing */
+  elf_backend_section_processing,	/* elf_backend_section_processing */
+  elf_backend_section_from_shdr,	/* elf_backend_section_from_shdr */
+  elf_backend_fake_sections,		/* elf_backend_fake_sections */
+  elf_backend_section_from_bfd_section,	/* elf_backend_section_from_bfd_section */
+  elf_backend_ecoff_debug_swap		/* elf_backend_ecoff_debug_swap */
 };
 
 #ifdef TARGET_BIG_SYM

@@ -42,10 +42,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define ElfNAME(X)	NAME(Elf,X)
 #define elfNAME(X)	NAME(elf,X)
 
+/* Information held for an ELF symbol.  The first field is the
+   corresponding asymbol.  Every symbol is an ELF file is actually a
+   pointer to this structure, although it is often handled as a
+   pointer to an asymbol.  */
+
 typedef struct
 {
+  /* The BFD symbol.  */
   asymbol symbol;
+  /* ELF symbol information.  */
   Elf_Internal_Sym internal_elf_sym;
+  /* Backend specific information.  */
   union
     {
       unsigned int hppa_arg_reloc;
@@ -54,24 +62,77 @@ typedef struct
   tc_data;
 } elf_symbol_type;
 
+/* Constant information held for an ELF backend.  */
+
 struct elf_backend_data
 {
+  /* Whether the backend uses REL or RELA relocations.  FIXME: some
+     ELF backends use both.  When we need to support one, this whole
+     approach will need to be changed.  */
   int use_rela_p;
+
+  /* Whether this backend is 64 bits or not.  FIXME: Who cares?  */
   int elf_64_p;
+
+  /* The architecture for this backend.  */
   enum bfd_architecture arch;
+
+  /* The maximum page size for this backend.  */
+  bfd_vma maxpagesize;
+
+  /* A function to translate an ELF RELA relocation to a BFD arelent
+     structure.  */
   void (*elf_info_to_howto) PARAMS ((bfd *, arelent *,
 				     Elf_Internal_Rela *));
+
+  /* A function to translate an ELF REL relocation to a BFD arelent
+     structure.  */
   void (*elf_info_to_howto_rel) PARAMS ((bfd *, arelent *,
 					 Elf_Internal_Rel *));
-  bfd_vma maxpagesize;
-  void (*write_relocs) PARAMS ((bfd *, asection *, PTR));
 
+  /* The remaining functions are hooks which are called only if they
+     are not NULL.  */
+
+  /* A function to do additional symbol processing when reading the
+     ELF symbol table.  This is where any processor-specific special
+     section indices are handled.  */
   void (*elf_backend_symbol_processing) PARAMS ((bfd *, asymbol *));
-  boolean (*elf_backend_symbol_table_processing) PARAMS ((bfd *, elf_symbol_type *, int));
-  boolean (*elf_backend_section_processing) PARAMS ((bfd *, Elf32_Internal_Shdr *));
-  boolean (*elf_backend_section_from_shdr) PARAMS ((bfd *, Elf32_Internal_Shdr *, char *));
-  boolean (*elf_backend_fake_sections) PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
-  boolean (*elf_backend_section_from_bfd_section) PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *, int *));
+
+  /* A function to do additional symbol processing after reading the
+     entire ELF symbol table.  */
+  boolean (*elf_backend_symbol_table_processing) PARAMS ((bfd *,
+							  elf_symbol_type *,
+							  int));
+
+  /* A function to do additional processing on the ELF section header
+     just before writing it out.  This is used to set the flags and
+     type fields for some sections, or to actually write out data for
+     unusual sections.  */
+  boolean (*elf_backend_section_processing) PARAMS ((bfd *,
+						     Elf32_Internal_Shdr *));
+
+  /* A function to handle unusual section types when creating BFD
+     sections from ELF sections.  */
+  boolean (*elf_backend_section_from_shdr) PARAMS ((bfd *,
+						    Elf32_Internal_Shdr *,
+						    char *));
+
+  /* A function to set up the ELF section header for a BFD section in
+     preparation for writing it out.  This is where the flags and type
+     fields are set for unusual sections.  */
+  boolean (*elf_backend_fake_sections) PARAMS ((bfd *, Elf32_Internal_Shdr *,
+						asection *));
+
+  /* A function to get the ELF section index for a BFD section.  If
+     this returns true, the section was found.  If it is a normal ELF
+     section, *RETVAL should be left unchanged.  If it is not a normal
+     ELF section *RETVAL should be set to the SHN_xxxx index.  */
+  boolean (*elf_backend_section_from_bfd_section)
+    PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *, int *retval));
+
+  /* The swapping table to use when dealing with ECOFF information.
+     Used for the MIPS ELF .mdebug section.  */
+  const struct ecoff_debug_swap *elf_backend_ecoff_debug_swap;
 };
 
 struct elf_sym_extra
