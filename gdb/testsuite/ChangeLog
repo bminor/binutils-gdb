@@ -1,3 +1,10 @@
+2003-11-03  Kris Warkentin  <kewarken@qnx.com>
+
+	* gdb.arch/gdb1291.c: New test file.
+	* gdb.arch/gdb1291.exp: New test script.
+	* gdb.arch/gdb1431.c: New test file.
+	* gdb.arch/gdb1431.exp: New test script.
+
 2003-10-22  Michael Chastain  <mec@shout.net>
 
 	* gdb.mi/pthreads.c: Add copyright notice.
