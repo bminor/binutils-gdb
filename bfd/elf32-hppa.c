@@ -345,6 +345,9 @@ static boolean hppa_discard_copies
   PARAMS ((struct elf_link_hash_entry *, PTR));
 #endif
 
+static boolean clobber_millicode_symbols
+  PARAMS ((struct elf_link_hash_entry *, struct bfd_link_info *));
+
 static boolean elf32_hppa_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 
@@ -621,27 +624,11 @@ hppa_add_stub (stub_name, section, sec_count, info)
   stub_sec = hplink->stub_section_created[sec_count];
   if (stub_sec == NULL)
     {
-      int special_sec = 0;
-
-      /* We only want one stub for .init and .fini because glibc
-	 splits the _init and _fini functions into two parts.  We
-	 don't want to put a stub in the middle of a function.
-	 It would be better to merge all the stub sections for an
-	 output section if the output section + stubs is small enough.
-	 This would fix the .init and .fini case and also allow stubs
-	 to be merged.  It's more linker work though.  */
       if (strncmp (section->name, ".init", 5) == 0)
-	{
-	  if (hplink->first_init_sec != 0)
-	    stub_sec = hplink->stub_section_created[hplink->first_init_sec-1];
-	  special_sec = 1;
-	}
+	stub_sec = hplink->stub_section_created[hplink->first_init_sec - 1];
       else if (strncmp (section->name, ".fini", 5) == 0)
-	{
-	  if (hplink->first_fini_sec != 0)
-	    stub_sec = hplink->stub_section_created[hplink->first_fini_sec-1];
-	  special_sec = 2;
-	}
+	stub_sec = hplink->stub_section_created[hplink->first_fini_sec - 1];
+
       if (stub_sec == NULL)
 	{
 	  size_t len;
@@ -657,14 +644,6 @@ hppa_add_stub (stub_name, section, sec_count, info)
 	  stub_sec = (*hplink->add_stub_section) (s_name, section);
 	  if (stub_sec == NULL)
 	    return NULL;
-
-	  if (special_sec != 0)
-	    {
-	      if (special_sec == 1)
-		hplink->first_init_sec = sec_count + 1;
-	      else
-		hplink->first_fini_sec = sec_count + 1;
-	    }
 	}
       hplink->stub_section_created[sec_count] = stub_sec;
     }
@@ -2127,6 +2106,27 @@ hppa_discard_copies (h, inf)
 #endif
 
 
+/* This function is called via elf_link_hash_traverse to force
+   millicode symbols local so they do not end up as globals in the
+   dynamic symbol table.  We ought to be able to do this in
+   adjust_dynamic_symbol, but our adjust_dynamic_symbol is not called
+   for all dynamic symbols.  Arguably, this is a bug in
+   elf_adjust_dynamic_symbol.  */
+
+static boolean
+clobber_millicode_symbols (h, info)
+     struct elf_link_hash_entry *h;
+     struct bfd_link_info *info;
+{
+  if (h->type == STT_PARISC_MILLI)
+    {
+      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
+      elf32_hppa_hide_symbol(info, h);
+    }
+  return true;
+}
+
+
 /* Set the sizes of the dynamic sections.  */
 
 static boolean
@@ -2157,6 +2157,11 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 	  s->_raw_size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
 	}
+
+      /* Force millicode symbols local.  */
+      elf_link_hash_traverse (&hplink->root,
+			      clobber_millicode_symbols,
+			      info);
 
       /* DT_INIT and DT_FINI need a .plt entry.  Make sure they have
 	 one.  */
@@ -2511,6 +2516,50 @@ elf32_hppa_size_stubs (stub_bfd, multi_subspace, info,
       /* Now we can free the external symbols.  */
       free (ext_syms);
 
+      /* Go looking for .init and .fini sections.  We only want one
+	 stub section for each of .init* and .fini* because glibc
+	 splits the _init and _fini functions into multiple parts, and
+	 putting a stub in the middle of a function is not a good idea.
+	 It would be better to merge all the stub sections for an
+	 output section if the output section + stubs is small enough.
+	 This would fix the .init and .fini case and also allow stubs
+	 to be merged.  It's more linker work though.  */
+      for (section = input_bfd->sections;
+	   section != NULL;
+	   section = section->next, sec_count++)
+	{
+	  if (hplink->first_init_sec == 0)
+	    {
+	      if (strncmp (section->name, ".init", 5) == 0)
+		hplink->first_init_sec = sec_count + 1;
+	    }
+	  if (hplink->first_fini_sec == 0)
+	    {
+	      if (strncmp (section->name, ".fini", 5) == 0)
+		hplink->first_fini_sec = sec_count + 1;
+	    }
+
+#if ! LONG_BRANCH_PIC_IN_SHLIB
+	  /* If this is a shared link, find all the stub reloc
+	     sections.  */
+	  if (info->shared)
+	    {
+	      char *name;
+	      asection *reloc_sec;
+
+	      name = bfd_malloc (strlen (section->name)
+				 + sizeof STUB_SUFFIX
+				 + 5);
+	      if (name == NULL)
+		return false;
+	      sprintf (name, ".rela%s%s", section->name, STUB_SUFFIX);
+	      reloc_sec = bfd_get_section_by_name (hplink->root.dynobj, name);
+	      hplink->reloc_section_created[sec_count] = reloc_sec;
+	      free (name);
+	    }
+#endif
+	}
+
       if (info->shared && hplink->multi_subspace)
 	{
 	  unsigned int symndx;
@@ -2558,7 +2607,8 @@ elf32_hppa_size_stubs (stub_bfd, multi_subspace, info,
 		    {
 		      stub_entry = hppa_add_stub (stub_name,
 						  sec,
-						  sec_count + sec->index,
+						  (sec_count + sec->index
+						   - input_bfd->section_count),
 						  info);
 		      if (!stub_entry)
 			goto error_ret_free_local;
@@ -2578,30 +2628,6 @@ elf32_hppa_size_stubs (stub_bfd, multi_subspace, info,
 		}
 	    }
 	}
-#if LONG_BRANCH_PIC_IN_SHLIB
-      sec_count += input_bfd->section_count;
-#else
-      if (! info->shared)
-	sec_count += input_bfd->section_count;
-      else
-	for (section = input_bfd->sections;
-	     section != NULL;
-	     section = section->next, sec_count++)
-	  {
-	    char *name;
-	    asection *reloc_sec;
-
-	    name = bfd_malloc (strlen (section->name)
-			       + sizeof STUB_SUFFIX
-			       + 5);
-	    if (name == NULL)
-	      return false;
-	    sprintf (name, ".rela%s%s", section->name, STUB_SUFFIX);
-	    reloc_sec = bfd_get_section_by_name (hplink->root.dynobj, name);
-	    hplink->reloc_section_created[sec_count] = reloc_sec;
-	    free (name);
-	  }
-#endif
     }
 
   while (1)
@@ -3734,11 +3760,6 @@ elf32_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
 
   hplink = hppa_link_hash_table (info);
   dynobj = hplink->root.dynobj;
-
-  /* Millicode symbols should not be put in the dynamic
-     symbol table under any circumstances.  */
-  if (ELF_ST_TYPE (sym->st_info) == STT_PARISC_MILLI)
-    h->dynindx = -1;
 
   if (h->plt.offset != (bfd_vma) -1)
     {

@@ -1,3 +1,15 @@
+2000-09-15  Alan Modra  <alan@linuxcare.com.au>
+
+	* elf32-hppa.c (hppa_add_stub): Dont set first_init_sec and
+	first_fini_sec here.
+	(elf32_hppa_size_stubs): Instead correctly find the first .init
+	and .fini section here.
+
+2000-09-15  David Huggins-Daines  <dhd@linuxcare.com>
+
+	* elf32-hppa.c (clobber_millicode_symbols): New function.
+	(elf32_hppa_size_dynamic_sections): Call it.
+
 2000-09-14  Alan Modra  <alan@linuxcare.com.au>
 
 	* elf32-hppa.c (elf32_hppa_link_hash_entry): Make pic_call
