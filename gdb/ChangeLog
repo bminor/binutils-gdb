@@ -1,3 +1,8 @@
+2001-11-17  Kevin Buettner  <kevinb@redhat.com>
+
+	* i386-linux-nat.c (fill_gregset): Don't invoke read_register_gen()
+	when fetching ORIG_EAX.
+
 2001-11-17  Daniel Jacobowitz  <drow@mvista.com>
 
 	* arm-linux-nat.c: Don't include <asm/ptrace.h>.

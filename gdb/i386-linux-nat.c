@@ -325,7 +325,8 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
       *(regp + regmap[i]) = *(elf_greg_t *) &registers[REGISTER_BYTE (i)];
 
   if (regno == -1 || regno == I386_LINUX_ORIG_EAX_REGNUM)
-    read_register_gen (I386_LINUX_ORIG_EAX_REGNUM, (char *) (regp + ORIG_EAX));
+    *(regp + regmap[ORIG_EAX]) =
+      *(elf_greg_t *) &registers[REGISTER_BYTE (I386_LINUX_ORIG_EAX_REGNUM)];
 }
 
 #ifdef HAVE_PTRACE_GETREGS
