@@ -67,7 +67,9 @@ static bfd_boolean disassemble;		/* -d */
 static bfd_boolean disassemble_all;	/* -D */
 static int disassemble_zeroes;		/* --disassemble-zeroes */
 static bfd_boolean formats_info;	/* -i */
-static char *only;			/* -j secname */
+static char **only;			/* -j secname */
+static size_t only_size = 0;
+static size_t only_used = 0;
 static int wide_output;			/* -w */
 static bfd_vma start_address = (bfd_vma) -1; /* --start-address */
 static bfd_vma stop_address = (bfd_vma) -1;  /* --stop-address */
@@ -1628,8 +1630,18 @@ disassemble_data (abfd)
 	      && only == NULL
 	      && (section->flags & SEC_CODE) == 0))
 	continue;
-      if (only != (char *) NULL && strcmp (only, section->name) != 0)
-	continue;
+
+      if (only != NULL)
+	{
+	  size_t i;
+
+	  for (i = 0; i < only_used; i++)
+	    if (strcmp (only [i], section->name) == 0)
+	      break;
+
+	  if (i == only_used)
+	    continue;
+	}
 
       if ((section->flags & SEC_RELOC) != 0
 #ifndef DISASSEMBLER_NEEDS_RELOCS
@@ -2221,9 +2233,13 @@ dump_data (abfd)
        section->next)
     {
       int onaline = 16;
+      size_t i;
 
-      if (only == (char *) NULL ||
-	  strcmp (only, section->name) == 0)
+      for (i = 0; i < only_used; i++)
+	if (strcmp (only [i], section->name) == 0)
+	  break;
+
+      if (only_used == 0 || i != only_used)
 	{
 	  if (section->flags & SEC_HAS_CONTENTS)
 	    {
@@ -2286,7 +2302,7 @@ dump_data (abfd)
 
 		  bfd_sprintf_vma (abfd, buf, (addr_offset + section->vma));
 		  count = strlen (buf);
-		  if (count >= sizeof (buf))
+		  if ((size_t) count >= sizeof (buf))
 		    abort ();
 		  putchar (' ');
 		  while (count < width)
@@ -2411,7 +2427,13 @@ dump_relocs (abfd)
 
       if (only)
 	{
-	  if (strcmp (only, a->name))
+	  size_t i;
+
+	  for (i = 0; i < only_used; i++)
+	    if (strcmp (only [i], a->name) == 0)
+	      break;
+
+	  if (i == only_used)
 	    continue;
 	}
       else if ((a->flags & SEC_RELOC) == 0)
@@ -2641,7 +2663,18 @@ main (argc, argv)
 	  disassembler_options = optarg;
 	  break;
 	case 'j':
-	  only = optarg;
+	  if (only == NULL)
+	    {
+	      only_size = 8;
+	      only = (char **) xmalloc (only_size * sizeof (char *));
+	    }
+	  else if (only_used == only_size)
+	    {
+	      only_size += 8;
+	      only = (char **) xrealloc (only,
+					 only_size * sizeof (char *));
+	    }
+	  only [only_used++] = optarg;
 	  break;
 	case 'l':
 	  with_line_numbers = TRUE;

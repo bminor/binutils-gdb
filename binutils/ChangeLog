@@ -1,3 +1,13 @@
+2003-04-30  H.J. Lu <hjl@gnu.org>
+
+	* objdump.c (only): Change it to char **.
+	(only_size): New.
+	(only_used): New.
+	(disassemble_data): Check only as an array.
+	(dump_data): Likewise.
+	(dump_relocs): Likewise.
+	(main): Treat only as an array.
+
 2003-04-24  Dimitrie O. Paun <dpaun@rogers.com>
 
         * doc/binutils.texi: Fix the documentation for the -fo option.
