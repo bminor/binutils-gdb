@@ -1,3 +1,29 @@
+Wed Mar 25 14:32:48 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* i960-dis.c (pinsn): Change type of first argument to bfd_vma.
+	(ctrl, cobr, mem, ea): Likewise.
+	(print_addr): Likewise.  Remove cast.
+	(ea): Cast argument of print_addr to bfd_vma.
+
+	* cgen-asm.c (cgen_parse_signed_integer): Fix type of local
+	variable value.
+	(cgen_parse_unsigned_integer): Likewise.
+	(cgen_parse_address): Likewise.
+
+Wed Mar 25 14:31:31 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* i960-dis.c (ctrl): Add full braces to structure initialization.
+	(cobr, mem, reg): Likewise.
+	(ea): Correct parenthesization in expression.
+
+	* cgen-asm.c: Include <ctype.h>.
+	(build_asm_hash_table): Remove unused local variable i.
+	(cgen_parse_keyword): Add casts to avoid warnings.
+
+	* arm-dis.c (print_insn_big_arm): Only call coffsymbol for a COFF
+	symbol.  Fix indentation.
+	(print_insn_little_arm): Likewise.
+
 start-sanitize-r5900
 Tue Mar 24 18:11:13 1998  Jeffrey A Law  (law@cygnus.com)
 
