@@ -1,3 +1,20 @@
+2002-11-16  Klee Dienes  <kdienes@apple.com>
+
+	* m88k-dis.c: Include libiberty.h (for xmalloc).
+	(HASHTAB): New type, used to build instruction hash tables.
+	Contains a pointer to an INSTAB and a pointer to the next hash
+	chain entry.
+	(instructions): Move definition from m88k.h; remove initialization
+	of 'next' field.
+	(hashtable): Now an aray of pointer-to-HASHTAB, not INSTAB.
+	(printop): Mark pointer to OPSPEC as const.
+	(install): Remove; fold into init_disasm.
+	(m88kdis): Update to ihashtab_initialized to 1 after calling
+	init_disasm.  entry_ptr now iterates through HASHTABs, not
+	INSTABs.
+	(init_disasm): Iterate through the instructions and add to
+	hashtable[].
+
 2002-11-16  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* tic4x-dis.c: (c4x_print_op): Add support for the new argument
