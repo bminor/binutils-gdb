@@ -1,3 +1,7 @@
+2004-12-31  Alan Modra  <amodra@bigpond.net.au>
+
+	* objdump.c (remove_useless_symbols): Discard section symbols.
+
 2004-12-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (read_leb128): Support 64bit host.

@@ -458,7 +458,7 @@ remove_useless_symbols (asymbol **symbols, long count)
 
       if (sym->name == NULL || sym->name[0] == '\0')
 	continue;
-      if (sym->flags & (BSF_DEBUGGING))
+      if (sym->flags & (BSF_DEBUGGING | BSF_SECTION_SYM))
 	continue;
       if (bfd_is_und_section (sym->section)
 	  || bfd_is_com_section (sym->section))
