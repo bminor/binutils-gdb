@@ -2313,6 +2313,8 @@ Symnum n_type n_othr n_desc n_value  n_strx String
 * Simple Classes::
 * Class Instance::
 * Methods::			Method definition
+* Method Type Descriptor::      The @samp{#} type descriptor
+* Member Type Descriptor::      The @samp{@@} type descriptor
 * Protections::
 * Method Modifiers::
 * Virtual Methods::
@@ -2320,25 +2322,6 @@ Symnum n_type n_othr n_desc n_value  n_strx String
 * Virtual Base Classes::
 * Static Members::
 @end menu
-
-Type descriptors added for C++ descriptions:
-
-@table @code
-@item #
-method type (@code{##} if minimal debug)
-
-@item @@
-Member (class and variable) type.  It is followed by type information
-for the offset basetype, a comma, and type information for the type of
-the field being pointed to.  (FIXME: this is acknowledged to be
-gibberish.  Can anyone say what really goes here?).
-
-Note that there is a conflict between this and type attributes
-(@pxref{String Field}); both use type descriptor @samp{@@}.
-Fortunately, the @samp{@@} type descriptor used in this C++ sense always
-will be followed by a digit, @samp{(}, or @samp{-}, and type attributes
-never start with those things.
-@end table
 
 @node Class Names
 @section C++ Class Names
@@ -2483,12 +2466,11 @@ method.
 
 When the field name is a method name it is followed by two colons rather
 than one.  This is followed by a new type definition for the method.
-This is a number followed by an equal sign and the type descriptor
-@samp{#}, indicating a method type, and a second @samp{#}, indicating
-that this is the @dfn{minimal} type of method definition used by GCC2,
-not larger method definitions used by earlier versions of GCC.  This is
-followed by a type reference showing the return type of the method and a
-semi-colon.
+This is a number followed by an equal sign and the type of the method.
+Normally this will be a type declared using the @samp{#} type
+descriptor; see @ref{Method Type Descriptor}; static member functions
+are declared using the @samp{f} type descriptor instead; see
+@ref{Function Types}.
 
 The format of an overloaded operator method name differs from that of
 other methods.  It is @samp{op$::@var{operator-name}.} where
@@ -2624,6 +2606,39 @@ pointer.
 @end example
 
 << The examples that follow are based on A1.C >>
+
+@node Method Type Descriptor
+@section The @samp{#} Type Descriptor
+
+This is like the @samp{f} type descriptor for functions (@pxref{Function
+Types}), except that a function which uses the @samp{#} type descriptor
+takes an extra argument as its first argument, for the @code{this}
+pointer.  The @samp{#} type descriptor is optionally followed by the
+types of the arguments, then another @samp{#}.  If the types of the
+arguments are omitted, so that the second @samp{#} immediately follows
+the @samp{#} which is the type descriptor, the arguments are being
+omitted (to save space) and can be deduced from the mangled name of the
+method.  After the second @samp{#} there is type information for the
+return type of the method and a semicolon.
+
+Note that although such a type will normally be used to describe fields
+in structures, unions, or classes, for at least some versions of the
+compiler it can also be used in other contexts.
+
+@node Member Type Descriptor
+@section The @samp{@@} Type Descriptor
+
+The @samp{@@} type descriptor is for a member (class and variable) type.
+It is followed by type information for the offset basetype, a comma, and
+type information for the type of the field being pointed to.  (FIXME:
+this is acknowledged to be gibberish.  Can anyone say what really goes
+here?).
+
+Note that there is a conflict between this and type attributes
+(@pxref{String Field}); both use type descriptor @samp{@@}.
+Fortunately, the @samp{@@} type descriptor used in this C++ sense always
+will be followed by a digit, @samp{(}, or @samp{-}, and type attributes
+never start with those things.
 
 @node Protections
 @section Protections
@@ -3384,7 +3399,7 @@ Type reference; see @ref{String Field}.
 Reference to builtin type; see @ref{Negative Type Numbers}.
 
 @item #
-Method (C++); see @ref{Cplusplus}.
+Method (C++); see @ref{Method Type Descriptor}.
 
 @item *
 Pointer; see @ref{Miscellaneous Types}.
@@ -3394,7 +3409,7 @@ Reference (C++).
 
 @item @@
 Type Attributes (AIX); see @ref{String Field}.  Member (class and variable)
-type (GNU C++); see @ref{Cplusplus}.
+type (GNU C++); see @ref{Member Type Descriptor}.
 
 @item a
 Array; see @ref{Arrays}.
@@ -3526,7 +3541,7 @@ The third line is the stab format with the significant stab fields
 named and the rest NIL.
 
 Subsequent lines expand upon the meaning and possible values for each
-significant stab field.  @samp{#} stands in for the type descriptor.
+significant stab field.
 
 Finally, any further information.
 
