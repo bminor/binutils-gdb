@@ -598,7 +598,7 @@ parse_reg (src, mode, reg)
 	}
     }
 
-  if (l0 == 'i' && l1 && ! IDENT_CHAR ((unsigned char) src[3]))
+  if (l0 == 'i' && l1 && ! IDENT_CHAR ((unsigned char) src[2]))
     {
       if (l1 == 's')
 	{
@@ -733,7 +733,7 @@ parse_reg (src, mode, reg)
 	}
     }
   if (l0 == 'm' && l1 == 'o' && TOLOWER (src[2]) == 'd'
-      && ! IDENT_CHAR ((unsigned char) src[4]))
+      && ! IDENT_CHAR ((unsigned char) src[3]))
     {
       *mode = A_MOD;
       return 3;

@@ -1,3 +1,8 @@
+2002-01-30  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-sh.c (parse_reg): Fix end-of-word check for is, ix, iy
+	and mod.
+
 2002-01-29  Chris Demetriou  <cgd@broadcom.com>
 
 	* config/tc-mips.c (tc_gen_reloc): Arrange for
