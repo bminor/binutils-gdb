@@ -437,6 +437,11 @@ parse_args (int * pargc, char *** pargv)
        the end of the preceeding line so that it is simpler to
        selectively add and remove lines from this list.  */
     {"alternate", no_argument, NULL, OPTION_ALTERNATE}
+    /* The entry for "a" is here to prevent getopt_long_only() from
+       considering that -a is an abbreviation for --alternate.  This is
+       necessary because -a=<FILE> is a valid switch but getopt would
+       normally reject it since --alternate does not take an argument.  */
+    ,{"a", optional_argument, NULL, 'a'}
     ,{"defsym", required_argument, NULL, OPTION_DEFSYM}
     ,{"dump-config", no_argument, NULL, OPTION_DUMPCONFIG}
     ,{"emulation", required_argument, NULL, OPTION_EMULATION}
@@ -786,6 +791,9 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	case 'a':
 	  if (optarg)
 	    {
+	      if (optarg != old_argv[optind] && optarg[-1] == '=')
+		--optarg;
+
 	      if (md_parse_option (optc, optarg) != 0)
 		break;
 

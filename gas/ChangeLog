@@ -1,3 +1,10 @@
+2005-01-20  Nick Clifton  <nickc@redhat.com>
+
+	* as.c (std_longopts): Add an entry for "--a" in order to prevent
+	getopt_long_only() from considering -a as an abbreviation for
+	--alternate.
+	(parse_args): Fix the parsing of -a=<file>.
+
 2005-01-20  Alan Modra  <amodra@bigpond.net.au>
 
 	PR gas/684
