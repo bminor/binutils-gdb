@@ -1,5 +1,9 @@
 Thu Mar 25 08:59:14 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* config/obj-coffbfd.c (do_relocs_for): Remove a29k special case.
+	(fixup_segment): Add a29k special case; the linker is not prepared
+	to see a segment offset here.
+
 	* app.c (do_scrub_next_char): Added new state, 10, modifying state
 	9 to only keep a space in between identifier characters.
 

@@ -434,14 +434,6 @@ DEFUN (do_relocs_for, (abfd, h, file_cursor),
 			  /* now emit the second bit */
 			  intr.r_type = R_IHCONST;
 			  intr.r_symndx = fix_ptr->fx_addnumber;
-
-			  /* The offset to the segment holding the symbol
-			     has already been counted in the R_IHIHALF.
-			     We don't want to add it in again for the
-			     R_IHCONST.  */
-			  if (symbol_ptr)
-			    intr.r_symndx -=
-			      segment_info[S_GET_SEGMENT (symbol_ptr)].scnhdr.s_paddr;
 			  (void) bfd_coff_swap_reloc_out (abfd, &intr, ext_ptr);
 			  ext_ptr++;
 			}
@@ -2513,8 +2505,14 @@ DEFUN (fixup_segment, (segP, this_segment_type),
 		  break;
 		default:
 
+#ifdef TC_A29K
+		  /* This really should be handled in the linker, but
+		     backward compatibility forbids.  */
+		  add_number += S_GET_VALUE (add_symbolP);
+#else
 		  add_number += S_GET_VALUE (add_symbolP) +
 		    segment_info[S_GET_SEGMENT (add_symbolP)].scnhdr.s_paddr;
+#endif
 		  break;
 
 		case SEG_UNKNOWN:
