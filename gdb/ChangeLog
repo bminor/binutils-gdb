@@ -1,3 +1,12 @@
+2002-02-19  Richard Earnshaw  <rearnsha@arm.com>
+
+	* armnbsd-tdep.c (arm_netbsd_aout_in_solib_call_trampoline): New
+	function.
+	(arm_netbsd_aout_init_abi): Initialize IN_SOLIB_CALL_TRAMPOLINE.
+	* config/arm/tm-nbsd.h: Don't include config/tm-nbsd.h, it only 
+	defines one thing and that is incorrect for this port.
+	(IN_SOLIB_CALL_TRAMPOLINE): Delete.
+
 2002-02-18  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* go32-nat.c: add i386-tdep.h include to import FP_REGNUM_P macro.

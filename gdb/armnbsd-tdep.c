@@ -30,6 +30,15 @@
    override the default little-endian breakpoint.  */
 static const char arm_nbsd_arm_le_breakpoint[] = {0x11, 0x00, 0x00, 0xe6};
 
+static int
+arm_netbsd_aout_in_solib_call_trampoline (CORE_ADDR pc, char *name)
+{
+  if (strcmp (name, "_PROCEDURE_LINKAGE_TABLE_") == 0)
+    return 1;
+
+  return 0;
+}
+
 static void
 arm_netbsd_init_abi_common (struct gdbarch_info info,
 			    struct gdbarch *gdbarch)
@@ -49,6 +58,9 @@ arm_netbsd_aout_init_abi (struct gdbarch_info info,
 			  struct gdbarch *gdbarch)
 {
   arm_netbsd_init_abi_common (info, gdbarch);
+
+  set_gdbarch_in_solib_call_trampoline
+    (gdbarch, arm_netbsd_aout_in_solib_call_trampoline);
 }
 
 static void

@@ -22,12 +22,6 @@
 #define TM_NBSD_H
 
 #include "arm/tm-arm.h"
-#include "tm-nbsd.h"
-
-/* Return non-zero if inside a shared-library entry stub.  */
-#undef IN_SOLIB_CALL_TRAMPOLINE
-#define IN_SOLIB_CALL_TRAMPOLINE(pc, name) \
-  STREQ ((name), "_PROCEDURE_LINKAGE_TABLE_")
 
 /* By convention, NetBSD uses the "other" register names. */
 #define DEFAULT_REGISTER_NAMES additional_register_names
