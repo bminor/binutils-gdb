@@ -156,7 +156,9 @@ extern struct frame_info *frame_find_by_id (struct frame_id id);
 /* Base attributes of a frame: */
 
 /* The frame's `resume' address.  Where the program will resume in
-   this frame.  */
+   this frame.
+
+   This replaced: frame->pc; */
 extern CORE_ADDR get_frame_pc (struct frame_info *);
 
 /* Following on from the `resume' address.  Return the entry point
@@ -204,7 +206,9 @@ extern void find_frame_sal (struct frame_info *frame,
    get_frame_args_address: A set of high-level debug-info dependant
    addresses that fall within the frame.  These addresses almost
    certainly will not match the stack address part of a frame ID (as
-   returned by get_frame_base).  */
+   returned by get_frame_base).
+
+   This replaced: frame->frame; */
 
 extern CORE_ADDR get_frame_base (struct frame_info *);
 
@@ -544,7 +548,9 @@ extern CORE_ADDR *get_frame_saved_regs (struct frame_info *);
 
 /* FIXME: cagney/2002-12-06: Has the PC in the current frame changed?
    "infrun.c", Thanks to DECR_PC_AFTER_BREAK, can change the PC after
-   the initial frame create.  This puts things back in sync.  */
+   the initial frame create.  This puts things back in sync.
+
+   This replaced: frame->pc = ....; */
 extern void deprecated_update_frame_pc_hack (struct frame_info *frame,
 					     CORE_ADDR pc);
 
@@ -552,7 +558,9 @@ extern void deprecated_update_frame_pc_hack (struct frame_info *frame,
    more exact, whas that initial guess at the frame's base as returned
    by read_fp() wrong.  If it was, fix it.  This shouldn't be
    necessary since the code should be getting the frame's base correct
-   from the outset.  */
+   from the outset.
+
+   This replaced: frame->frame = ....; */
 extern void deprecated_update_frame_base_hack (struct frame_info *frame,
 					       CORE_ADDR base);
 

@@ -1,3 +1,11 @@
+2003-04-13  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.h: Mention what replaced what in "struct frame_info".
+	* hppa-hpux-tdep.c: Use get_frame_base, get_frame_pc and
+	deprecated_update_frame_base_hack and
+	deprecated_update_frame_pc_hack.
+	* hppa-tdep.c: Ditto.
+
 2003-04-13  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2expr.h (struct dwarf_expr_context): Remove extra arguments
