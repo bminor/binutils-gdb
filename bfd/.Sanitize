@@ -31,12 +31,6 @@ else
 	lose_these_too="${tic80_files} ${lose_these_too}"
 fi
 
-if ( echo $* | grep keep\-v850 > /dev/null ) ; then
-	keep_these_too="cpu-v850.c elf32-v850.c ${keep_these_too}"
-else
-	lose_these_too="cpu-v850.c elf32-v850.c ${lose_these_too}"
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -140,6 +134,7 @@ cpu-powerpc.c
 cpu-rs6000.c
 cpu-sh.c
 cpu-sparc.c
+cpu-v850.c
 cpu-vax.c
 cpu-we32k.c
 cpu-w65.c
@@ -168,6 +163,7 @@ elf-m10300.c
 elf32-ppc.c
 elf32-sh.c
 elf32-sparc.c
+elf32-v850.c
 elf32.c
 elf64-alpha.c
 elf64-gen.c
@@ -322,32 +318,6 @@ else
 fi
 
 v850_files="ChangeLog Makefile.in Makefile.am archures.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h elf.c libbfd.h elf32-v850.c cpu-v850.c"
-if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
-	for i in $v850_files ; do
-		if test -r $i && (grep sanitize-v850eq $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping v850eq stuff in $i
-			fi
-		fi
-	done
-else
-	for i in $v850_files ; do
-		if test -f $i && (grep sanitize-v850eq $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"v850eq\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-v850eq/,/end\-sanitize\-v850eq/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
 if ( echo $* | grep keep\-v850e > /dev/null ) ; then
 	for i in $v850_files ; do
 		if test -r $i && (grep sanitize-v850e $i > /dev/null) ; then

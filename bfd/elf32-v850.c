@@ -1606,10 +1606,8 @@ v850_elf_object_p (abfd)
     case E_V850_ARCH:   (void) bfd_default_set_arch_mach (abfd, bfd_arch_v850, 0); break;
 /* start-sanitize-v850e */
     case E_V850E_ARCH:  (void) bfd_default_set_arch_mach (abfd, bfd_arch_v850, bfd_mach_v850e); break;
-/* end-sanitize-v850e */
-/* start-sanitize-v850eq */
     case E_V850EQ_ARCH: (void) bfd_default_set_arch_mach (abfd, bfd_arch_v850, bfd_mach_v850eq); break;
-/* end-sanitize-v850eq */
+/* end-sanitize-v850e */
     }
 }
 
@@ -1626,11 +1624,9 @@ v850_elf_final_write_processing (abfd, linker)
     default:
     case 0: val = E_V850_ARCH; break;
 /* start-sanitize-v850e */
-    case bfd_mach_v850e: val = E_V850E_ARCH; break;
-/* end-sanitize-v850e */
-/* start-sanitize-v850eq */
+    case bfd_mach_v850e:  val = E_V850E_ARCH; break;
     case bfd_mach_v850eq: val = E_V850EQ_ARCH;  break;
-/* end-sanitize-v850eq */
+/* end-sanitize-v850e */
     }
 
   elf_elfheader (abfd)->e_flags &=~ EF_V850_ARCH;
@@ -1711,8 +1707,12 @@ v850_elf_merge_private_bfd_data (ibfd, obfd)
     {
       _bfd_error_handler ("%s: Architecture mismatch with previous modules",
 	     bfd_get_filename (ibfd));
+#if 0
       bfd_set_error (bfd_error_bad_value);
       return false;
+#else
+      return true;
+#endif
     }
 
   return true;
@@ -1735,11 +1735,9 @@ v850_elf_print_private_bfd_data (abfd, ptr)
     default:
     case E_V850_ARCH: fprintf (file, ": v850 architecture"); break;
 /* start-sanitize-v850e */
-    case E_V850E_ARCH: fprintf (file, ": v850e architecture"); break;
-/* end-sanitize-v850e */
-/* start-sanitize-v850eq */
+    case E_V850E_ARCH:  fprintf (file, ": v850e architecture"); break;
     case E_V850EQ_ARCH: fprintf (file, ": v850eq architecture"); break;
-/* end-sanitize-v850eq */
+/* end-sanitize-v850e */
     }
   
   fputc ('\n', file);
