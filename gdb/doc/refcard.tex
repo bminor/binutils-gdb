@@ -1,3 +1,5 @@
+%%%%%%%%%%%%%%%% gdb-refcard.tex %%%%%%%%%%%%%%%%
+
 %This file is TeX source for a reference card describing GDB, the GNU debugger.
 %$Id$
 %Copyright (C) 1991 Free Software Foundation, Inc.
@@ -35,6 +37,14 @@
 %            support of free software.  For general information
 %            contact ``info@cygnus.com''
 %
+% Uncomment the following `magnification' command if you want to print
+% out in a larger font.  Caution!  You may need larger paper.  You had
+% best avoid using 3-column output if you try this.  See the ``Three
+% column format'' section below if you want to print in three column
+% format.
+%
+%\magnification=\magstep 1
+%
 % NOTE ON INTENTIONAL OMISSIONS: This reference card includes most GDB
 % commands, but due to space constraints there are some things I chose
 % to omit.  In general, not all synonyms for commands are covered, nor
@@ -50,8 +60,69 @@
 \def\$#1${{#1}}%   Kluge: collect RCS revision info without $...$
 \xdef\manvers{\$Revision$}%
 }%
-\input threecol
-\input rcfonts
+%-------------------- Three column format -----------------------
+
+%%%% --- To disable three column format, comment out this entire section
+
+% Three-column format for landscape printing on 8.5x11 paper
+
+% We want output .25 inch *from paper edge*; i.e. -.75in from TeX default
+\hoffset=-0.8in \voffset=-0.75in
+\newdimen\fullhsize
+\fullhsize=10.5in \hsize=3.3in
+\def\fulline{\hbox to \fullhsize}
+\let\lcr=L \newbox\leftcolumn\newbox\centercolumn
+\output={\if L\lcr
+            \global\setbox\leftcolumn=\columnbox \global\let\lcr=C
+	 \else
+            \if C\lcr
+               \global\setbox\centercolumn=\columnbox \global\let\lcr=R
+            \else \tripleformat \global\let\lcr=L
+            \fi
+         \fi
+%         \ifnum\outputpenalty>-20000 \else\dosupereject\fi
+      }
+%
+%ALTERNATIVE FOLDING GUIDES:
+%
+%For NO printed folding guide, comment out other \def\vdecor's and uncomment:
+%\def\vdecor{\hskip .2in plus1fil}
+%
+%For SOLID LINE folding guide, comment out other \def\vdecor's and uncomment:
+%\def\vdecor{\hskip .1in plus1fil \vrule width .1pt \hskip .1in plus1fil}
+%
+%For SMALL MARKS NEAR TOP AND BOTTOM as folding guide,
+%comment out other \def\vdecor's and uncomment:
+\def\vdecor{\hskip .1in plus1fil 
+\vbox to \vsize{\hbox to .1pt{\vrule height 2pt width .1pt}\vfill
+\hbox to .1pt{\vrule height 2pt width .1pt}}
+\hskip .1in plus1fil}
+%
+%END OF ALTERNATIVES FOR FOLDING GUIDES
+%
+\def\tripleformat{\shipout\vbox{\fulline{\box\leftcolumn\vdecor
+                                         \box\centercolumn\vdecor
+                                         \columnbox}
+			       }
+                 \advancepageno}
+\def\columnbox{\leftline{\pagebody}}
+\def\bye{\par\vfill
+         \supereject
+         \if R\lcr \null\vfill\eject\fi
+         \end}
+
+%-------------------- end three column format -----------------------
+
+%-------------------- Computer Modern font defs: --------------------
+\font\bbf=cmbx10
+\font\vbbf=cmbx12
+\font\smrm=cmr6
+\font\brm=cmr10
+\font\rm=cmr7
+\font\it=cmti7
+\font\tt=cmtt8
+%-------------------- end font defs ---------------------------------
+
 %
 \vsize=8in
 \hyphenpenalty=5000\tolerance=2000\raggedright\raggedbottom
@@ -140,9 +211,9 @@ shell {\it cmd}&execute arbitrary shell command string\cr
 \endsec
 
 \vfill
-\line{\smrm \opt{ } surround optional arguments \hfil $\ldots$ show
-one or more arguments\rm\qquad}
-
+\line{\smrm \opt{ } surround optional arguments \hfill $\ldots$ show
+one or more arguments}
+\vskip\baselineskip
 \centerline{\smrm \copyright 1991, 1992 Free Software Foundation, Inc.\qquad Permissions on back}
 \eject
 \sec Breakpoints and Watchpoints;
