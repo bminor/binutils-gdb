@@ -1,3 +1,11 @@
+2003-11-28  Christian Groessler  <chris@groessler.org>
+
+	* z8k-dis.c: Convert to ISO C90.
+	* z8kgen.c: Convert to ISO C90.
+	(opt): Move long opcode for "ldb rdb,imm8" after short one, now
+	the short one is created when assembling.
+	* z8k-opc.h: Regenerate with new z8kgen.c.
+
 2003-11-19  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* h8300-dis.c (print_colon_thingie): Remove.

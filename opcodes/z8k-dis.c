@@ -24,7 +24,7 @@
 
 #define DEFINE_TABLE
 #include "z8k-opc.h"
-
+
 #include <setjmp.h>
 
 typedef struct
@@ -53,9 +53,6 @@ typedef struct
 }
 instr_data_s;
 
-static int fetch_data PARAMS ((struct disassemble_info *, int));
-
-
 /* Make sure that bytes from INFO->PRIVATE_DATA->BUFFER (inclusive)
    to ADDR (exclusive) are valid.  Returns 1 for success, longjmps
    on error.  */
@@ -64,9 +61,7 @@ static int fetch_data PARAMS ((struct disassemble_info *, int));
    ? 1 : fetch_data ((info), (nibble)))
 
 static int
-fetch_data (info, nibble)
-     struct disassemble_info *info;
-     int nibble;
+fetch_data (struct disassemble_info *info, int nibble)
 {
   unsigned char mybuf[20];
   int status;
@@ -142,18 +137,13 @@ static char *ctrl_names[8] =
   };
 
 static int seg_length;
-static int print_insn_z8k PARAMS ((bfd_vma, disassemble_info *, int));
-int z8k_lookup_instr PARAMS ((unsigned char *, disassemble_info *));
-static void output_instr
-  PARAMS ((instr_data_s *, unsigned long, disassemble_info *));
-static void unpack_instr PARAMS ((instr_data_s *, int, disassemble_info *));
-static void unparse_instr PARAMS ((instr_data_s *, int));
+int z8k_lookup_instr (unsigned char *, disassemble_info *);
+static void output_instr (instr_data_s *, unsigned long, disassemble_info *);
+static void unpack_instr (instr_data_s *, int, disassemble_info *);
+static void unparse_instr (instr_data_s *, int);
 
 static int
-print_insn_z8k (addr, info, is_segmented)
-     bfd_vma addr;
-     disassemble_info *info;
-     int is_segmented;
+print_insn_z8k (bfd_vma addr, disassemble_info *info, int is_segmented)
 {
   instr_data_s instr_data;
 
@@ -186,27 +176,20 @@ print_insn_z8k (addr, info, is_segmented)
 }
 
 int
-print_insn_z8001 (addr, info)
-     bfd_vma addr;
-     disassemble_info *info;
+print_insn_z8001 (bfd_vma addr, disassemble_info *info)
 {
   return print_insn_z8k (addr, info, 1);
 }
 
 int
-print_insn_z8002 (addr, info)
-     bfd_vma addr;
-     disassemble_info *info;
+print_insn_z8002 (bfd_vma addr, disassemble_info *info)
 {
   return print_insn_z8k (addr, info, 0);
 }
 
 int
-z8k_lookup_instr (nibbles, info)
-     unsigned char *nibbles;
-     disassemble_info *info;
+z8k_lookup_instr (unsigned char *nibbles, disassemble_info *info)
 {
-
   int nibl_index, tabl_index;
   int nibl_matched;
   int need_fetch = 0;
@@ -295,10 +278,9 @@ z8k_lookup_instr (nibbles, info)
 }
 
 static void
-output_instr (instr_data, addr, info)
-     instr_data_s *instr_data;
-     unsigned long addr ATTRIBUTE_UNUSED;
-     disassemble_info *info;
+output_instr (instr_data_s *instr_data,
+              unsigned long addr ATTRIBUTE_UNUSED,
+              disassemble_info *info)
 {
   int num_bytes;
   char out_str[100];
@@ -314,10 +296,7 @@ output_instr (instr_data, addr, info)
 }
 
 static void
-unpack_instr (instr_data, is_segmented, info)
-     instr_data_s *instr_data;
-     int is_segmented;
-     disassemble_info *info;
+unpack_instr (instr_data_s *instr_data, int is_segmented, disassemble_info *info)
 {
   int nibl_count, loop;
   unsigned short instr_nibl, instr_byte, instr_word;
@@ -501,9 +480,7 @@ static char *intr_names[] = {
 };
 
 static void
-unparse_instr (instr_data, is_segmented)
-     instr_data_s *instr_data;
-     int is_segmented;
+unparse_instr (instr_data_s *instr_data, int is_segmented)
 {
   unsigned short datum_value;
   unsigned int tabl_datum, datum_class;
