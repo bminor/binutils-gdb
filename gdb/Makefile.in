@@ -265,10 +265,13 @@ FLAGS_TO_PASS = \
 
 # Flags that we pass when building the testsuite.
 
+# empty for native, $(target_alias)/ for cross
+target_subdir = @target_subdir@
+
 CC_FOR_TARGET = ` \
   if [ -f $${rootme}/../gcc/xgcc ] ; then \
-    if [ -f $${rootme}/../newlib/Makefile ] ; then \
-      echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/ -idirafter $${rootme}/newlib/targ-include -idirafter $${rootsrc}/../newlib/libc/include -nostdinc -L$${rootme}/../newlib -B$${rootme}/../newlib/; \
+    if [ -f $${rootme}/../$(target_subdir)newlib/Makefile ] ; then \
+      echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/ -idirafter $${rootme}/$(target_subdir)newlib/targ-include -idirafter $${rootsrc}/../$(target_subdir)newlib/libc/include -nostdinc -B$${rootme}/../$(target_subdir)newlib/; \
     else \
       echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/; \
     fi; \
@@ -283,8 +286,8 @@ CC_FOR_TARGET = ` \
 CXX = gcc
 CXX_FOR_TARGET = ` \
   if [ -f $${rootme}/../gcc/xgcc ] ; then \
-    if [ -f $${rootme}/../newlib/Makefile ] ; then \
-      echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/ -idirafter $${rootme}/newlib/targ-include -idirafter $${rootsrc}/../newlib/libc/include -nostdinc -L$${rootme}/../newlib -B$${rootme}/../newlib/; \
+    if [ -f $${rootme}/../$(target_subdir)newlib/Makefile ] ; then \
+      echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/ -idirafter $${rootme}/$(target_subdir)newlib/targ-include -idirafter $${rootsrc}/../$(target_subdir)newlib/libc/include -nostdinc -B$${rootme}/../$(target_subdir)newlib/; \
     else \
       echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/; \
     fi; \
@@ -345,7 +348,7 @@ TARGET_FLAGS_TO_PASS = \
 
 SFILES = blockframe.c breakpoint.c buildsym.c callback.c c-exp.y c-lang.c \
 	c-typeprint.c c-valprint.c ch-exp.y ch-lang.c ch-typeprint.c \
-	ch-valprint.c coffread.c command.c complaints.c core.c cp-valprint.c \
+	ch-valprint.c coffread.c command.c complaints.c corefile.c cp-valprint.c \
 	dbxread.c demangle.c dwarfread.c \
 	elfread.c environ.c eval.c expprint.c \
 	f-exp.y f-lang.c f-typeprint.c f-valprint.c findvar.c \
@@ -462,7 +465,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
 	exec.o objfiles.o minsyms.o maint.o demangle.o \
 	dbxread.o coffread.o elfread.o \
-	dwarfread.o mipsread.o stabsread.o core.o \
+	dwarfread.o mipsread.o stabsread.o corefile.o \
 	c-lang.o ch-lang.o f-lang.o m2-lang.o \
 	scm-exp.o scm-lang.o scm-valprint.o complaints.o typeprint.o \
 	c-typeprint.o ch-typeprint.o f-typeprint.o m2-typeprint.o \
@@ -921,8 +924,8 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	ns32k-tdep.c ns32km3-nat.c osfsolib.c \
 	somread.c somsolib.c $(HPREAD_SOURCE) \
 	procfs.c pyr-tdep.c pyr-xdep.c \
-	remote-adapt.c  remote-bug.c remote-e7000.c remote-eb.c remote-es.c \
-	remote-hms.c remote-mips.c \
+	remote-adapt.c remote-array.c remote-bug.c remote-e7000.c remote-eb.c \
+	remote-es.c remote-hms.c remote-mips.c \
 	remote-mm.c remote-nindy.c remote-os9k.c remote-rdp.c remote-sim.c \
 	remote-st.c remote-utils.c dcache.c \
 	remote-udi.c remote-vx.c remote-vx29k.c \
@@ -1092,7 +1095,7 @@ core-sol2.o: core-sol2.c $(command_h) $(defs_h) $(gdbcore_h) \
 core-svr4.o: core-svr4.c $(command_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h
 
-core.o: core.c $(dis-asm_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
+corefile.o: corefile.c $(dis-asm_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) target.h language.h
 
 coredep.o: coredep.c $(defs_h) $(gdbcore_h) $(value_h) $(inferior_h)
@@ -1336,6 +1339,9 @@ gnu-regex.o: gnu-regex.c gnu-regex.h $(defs_h)
 
 remote-adapt.o: remote-adapt.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h
+
+remote-array.o: remote-array.c $(wait_h) $(defs_h) $(gdbcore_h) target.h \
+      gdb_string.h $(command_h) serial.h monitor.h $(remote_utils_h)
 
 remote-rdp.o: remote-rdp.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) 

@@ -140,7 +140,7 @@ if test "${enable_gdbtk}" = "yes"; then
 fi
 
 AC_SUBST(ENABLE_GDBTK)
-AC_SUBST(X_CLFAGS)
+AC_SUBST(X_CFLAGS)
 AC_SUBST(X_LDFLAGS)
 AC_SUBST(X_LIBS)
 # end-sanitize-gdbtk
@@ -149,6 +149,12 @@ AC_SUBST(ENABLE_CFLAGS)
 AC_SUBST(ENABLE_CLIBS)
 AC_SUBST(ENABLE_OBS)
 
+# target_subdir is used by the testsuite to find the target libraries.
+target_subdir=
+if test "${host}" != "${target}"; then
+    target_subdir="${target_alias}/"
+fi
+AC_SUBST(target_subdir)
 
 configdirs="doc testsuite"
 
