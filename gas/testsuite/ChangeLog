@@ -1,3 +1,15 @@
+Thu Oct  7 12:52:25 1999  Geoffrey Keating  <geoffk@cygnus.com>
+
+	* gas/mips/elf-rel.s: New file.
+	* gas/mips/elf-rel.d: New file.
+	* gas/mips/elf-rel2.d: New file.
+	* gas/mips/e32-rel2.d: New file.
+	* gas/mips/elf-rel2.s: New file.
+	* gas/mips/mips.exp: Add elf-rel, elf-rel2.
+
+	* gas/mips/elf_e_flags1.d: Tweak a little so it passes
+	even if the CPU is set to something by default.
+
 Mon Oct  4 18:25:49 1999  Doug Evans  <devans@canuck.cygnus.com>
 
 	* gas/m32r/error.exp: New testcase driver.

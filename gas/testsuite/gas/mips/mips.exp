@@ -99,4 +99,13 @@ if [istarget mips*-*-*] then {
     run_dump_test "elf_e_flags2"
     run_dump_test "elf_e_flags3"
     run_dump_test "elf_e_flags4"
+    
+    if $svr4pic {
+	run_dump_test "elf-rel"
+	if [istarget mips64*-*-*] { 
+	    run_dump_test "elf-rel2" 
+	} {
+	    run_dump_test "e32-rel2" 
+	} 
+    }
 }
