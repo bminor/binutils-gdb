@@ -1,3 +1,9 @@
+Mon Mar 28 12:40:25 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/obj-aout.c (obj_aout_frob_symbols): Don't let BFD clobber
+	the type of symbol set symbols which happen to be in the absolute
+	or undefined section.
+
 Mon Mar 28 12:35:00 1994  David Edelsohn  (edelsohn@npac.syr.edu)
 
 	* config/tc-ppc.c (md_parse_option): Add -mpwrx (POWER/2 aka
