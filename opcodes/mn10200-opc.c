@@ -155,7 +155,7 @@ const struct mn10200_operand mn10200_operands[] = {
    sorted by major opcode.  */
 
 const struct mn10200_opcode mn10200_opcodes[] = {
-{ "mov",	0x8000,		0xfc00,		FMT_5, {SIMM8, DN01}},
+{ "mov",	0x8000,		0xfc00,		FMT_2, {SIMM8, DN01}},
 { "mov",	0x80,		0xf0,		FMT_1, {DN1, DM0}},
 { "mov",	0xf230,		0xfff0,		FMT_4, {DM1, AN0}},
 { "mov",	0xf2f0,		0xfff0,		FMT_4, {AN1, DM0}},
@@ -206,7 +206,7 @@ const struct mn10200_opcode mn10200_opcodes[] = {
 { "movb",	0xf7d00000,	0xfff00000,	FMT_6, {MEM2(SD16, AN1), DM0}},
 { "movb",	0xf4a00000,	0xfff00000,	FMT_7, {MEM2(IMM24,AN1), DM0}},
 { "movb",	0xf040,		0xffc0,		FMT_4, {MEM2(DI, AN1), DM0}},
-{ "movb",	0xf4c00000,	0xfffc0000,	FMT_7, {MEM(IMM24_MEM), DN0}},
+{ "movb",	0xf4c40000,	0xfffc0000,	FMT_7, {MEM(IMM24_MEM), DN0}},
 { "movb",	0x10,		0xf0,		FMT_1, {DM1, MEM(AN0)}},
 { "movb",	0xf51000,	0xfff000,	FMT_5, {DM0, MEM2(SD8, AN1)}},
 { "movb",	0xf7900000,	0xfff00000,	FMT_6, {DM0, MEM2(SD16, AN1)}},

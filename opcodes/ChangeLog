@@ -1,5 +1,8 @@
 Tue Dec 10 12:08:05 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* mn10200-opc.c (mn10200_opcodes): "mov imm8,d0" is a format 2
+	instruction.  Fix opcode field for "movb (imm24),dn".
+
 	* mn10200-opc.c (mn10200_operands): Fix insertion position
 	for DI operand.
 
