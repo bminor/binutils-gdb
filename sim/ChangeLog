@@ -1,3 +1,13 @@
+Mon Jun 24 14:18:26 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Only configure erc32 if using gcc.
+
+Tue Jun  4 09:24:21 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (sim_target): Build PowerPC simulator for powerpc
+	System V.4, Solaris, and Elf targets.
+	* configure: Regenerate with autoconf 2.10.
+
 Wed May 22 12:10:49 1996  Rob Savoye  <rob@chinadoll>
 
 	* configure.in: Only built erc32 simulator on Unix hosts as it

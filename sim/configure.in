@@ -56,7 +56,16 @@ case "${target}" in
 			  *-*-go32)	sim_target=none ;;
 			  *-*-winnt)	sim_target=none ;;
 			  *-*-cygwin32)	sim_target=none ;;
-  			  *) 		sim_target=erc32 ;;
+  			  *)
+				# The SPARC simulator can only be compiled
+				# by gcc.  Highly bogus, but just skip
+				# building it for now.
+				if test "${GCC}" = "yes"; then
+				  sim_target=erc32
+				else
+				  sim_target=non
+				fi
+				;;
   			esac ;;
   *)			sim_target=none ;;
 esac
