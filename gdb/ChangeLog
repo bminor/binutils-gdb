@@ -1,3 +1,68 @@
+Thu Dec 10 15:19:40 1998  David Taylor  <taylor@texas.cygnus.com>
+
+	The following changes were made by Jim Blandy <jimb@cygnus.com>,
+ 	Edith Epstein <eepstein@cygnus.com>, Elena Zannoni
+ 	<ezannoni@cygnus.com> Stan Shebs <shebs@cygnus.com>, and David
+ 	Taylor <taylor@cygnus.com>, as part of the project to merge in
+ 	changes originally made by HP; HP did not create ChangeLog
+ 	entries.
+	
+	* annotate.c: (annotate_catchpoint): New function.
+
+	* annotate.h: (annotate_catchpoint): declare it; add new includes
+ 	(symtab.h and gdbtypes.h).
+
+	* buildsym.h: added external var processing_hp_compilation.
+
+	* coff-solib.h: 
+	(SOLIB_REMOVE_INFERIOR_HOOK): new macro. defined to 0.
+	functionality not implemented for coff.
+	(SOLIB_CREATE_CATCH_LOAD_HOOK): New macro; generate error msg for coff.
+	(SOLIB_CREATE_CATCH_UNLOAD_HOOK): ditto.
+	(SOLIB_HAVE_LOAD_EVENT): ditto.
+	(SOLIB_LOADED_LIBRARY_PATHNAME): ditto.
+	(SOLIB_HAVE_UNLOAD_EVENT): ditto.
+	(SOLIB_UNLOADED_LIBRARY_PATHNAME): ditto.
+	(SOLIB_IN_DYNAMIC_LINKER): ditto.
+	(SOLIB_RESTART): ditto.
+
+	* complaints.h: add ifdef...endif pair at beginning and end of file.
+
+	* dstread.c (dst_symfile_read): the parameter to fileno
+	must be of type FILE *. So cast abfd->iostream in the 
+	call to fileno must be cast as a FILE *, not a GDB_FILE *.
+	This will work because abfd->iostream is declared and 
+	given a value in bdf and bfd will continue to use FILE 
+	rather than GDB_FILE.
+
+	* dwarf2read.c (dwarf_bool_name): change parameter from bool
+	to mybool.  sigh.
+
+	* expression.h: include symtab.h
+	
+	* frame.h (print_only_stack_frame, show_stack_frame,
+	show_frame_info): add prototypes.
+
+	* gdbcmd.h (togglelist, stoplist): declare.
+
+	* gdbcore.h (read_memory_string): declare it.
+	(exec_file_attach): add prototype.
+
+	* inflow.c (terminal_is_ours): make non static.
+
+	* minsyms.c: minor spacing change.
+
+	* parser-defs.h (parse_nested_classes_for_hpacc): add prototype.
+	(find_template_name_end): add prototype.
+
+	* scm-lang.c (scm_unpack): cast svalue to (int).
+
+	* top.h: declare it.
+	
+	* valprint.h: (print_binary_chars): new prototype definition.
+	(print_octal_chars): new prototype definition.
+	(print_decimal_chars): new prototype definition.
+
 Thu Dec 10 07:14:56 1998  Andrew Cagney  <cagney@chook>
 
 	* config/arm/tm-arm.h, arm-tdep.c: Replace REGISTER_NAMES with

@@ -43,3 +43,12 @@ val_print_array_elements PARAMS ((struct type *, char *, CORE_ADDR, GDB_FILE *,
 extern void
 val_print_type_code_int PARAMS ((struct type *, char *, GDB_FILE *));
 
+extern void
+print_binary_chars PARAMS ((GDB_FILE *, unsigned char *, unsigned int));
+ 
+extern void
+print_octal_chars PARAMS ((GDB_FILE *, unsigned char *, unsigned int));
+ 
+extern void
+print_decimal_chars PARAMS ((GDB_FILE *, unsigned char *, unsigned int));
+

@@ -115,29 +115,25 @@ struct dummy_frame
    is the outermost one and has no caller.
 
    If a particular target needs a different definition, then it can override
-   the definition here by providing one in the tm file. */
+   the definition here by providing one in the tm file.
+
+   XXXX - both default and alternate frame_chain_valid functions are
+   deprecated.  New code should use generic dummy frames. */
+
+extern int default_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
+extern int alternate_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
+extern int nonnull_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
+extern int generic_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
 
 #if !defined (FRAME_CHAIN_VALID)
-
-#if defined (FRAME_CHAIN_VALID_ALTERNATE)
-
+#if !defined (FRAME_CHAIN_VALID_ALTERNATE)
+#define FRAME_CHAIN_VALID(chain, thisframe) default_frame_chain_valid (chain, thisframe)
+#else
 /* Use the alternate method of avoiding running up off the end of the frame
    chain or following frames back into the startup code.  See the comments
    in objfiles.h. */
-   
-#define FRAME_CHAIN_VALID(chain, thisframe)	\
-  ((chain) != 0					\
-   && !inside_main_func ((thisframe) -> pc)	\
-   && !inside_entry_func ((thisframe) -> pc))
-
-#else
-
-#define FRAME_CHAIN_VALID(chain, thisframe)	\
-  ((chain) != 0					\
-   && !inside_entry_file (FRAME_SAVED_PC (thisframe)))
-
+#define FRAME_CHAIN_VALID(chain, thisframe) alternate_frame_chain_valid (chain,thisframe)
 #endif	/* FRAME_CHAIN_VALID_ALTERNATE */
-
 #endif	/* FRAME_CHAIN_VALID */
 
 /* The stack frame that the user has specified for commands to act on.
@@ -195,11 +191,17 @@ extern struct frame_info *find_relative_frame PARAMS ((struct frame_info *, int*
 
 extern void print_stack_frame PARAMS ((struct frame_info *, int, int));
 
+extern void print_only_stack_frame PARAMS ((struct frame_info *, int, int));
+
+extern void show_stack_frame PARAMS ((struct frame_info *));
+
 extern void select_frame PARAMS ((struct frame_info *, int));
 
 extern void record_selected_frame PARAMS ((CORE_ADDR *, int *));
 
 extern void print_frame_info PARAMS ((struct frame_info *, int, int, int));
+
+extern void show_frame_info PARAMS ((struct frame_info *, int, int, int));
 
 extern CORE_ADDR find_saved_register PARAMS ((struct frame_info *, int));
 
@@ -209,12 +211,11 @@ extern struct frame_info *find_frame_addr_in_frame_chain PARAMS ((CORE_ADDR));
 
 extern CORE_ADDR sigtramp_saved_pc PARAMS ((struct frame_info *));
 
-extern int       generic_frame_chain_valid   PARAMS ((CORE_ADDR, 
-						      struct frame_info *));
 extern CORE_ADDR generic_read_register_dummy PARAMS ((CORE_ADDR pc, 
 						      CORE_ADDR fp, 
 						      int));
 extern void      generic_push_dummy_frame    PARAMS ((void));
+extern void      generic_pop_current_frame   PARAMS ((void (*) (struct frame_info *)));
 extern void      generic_pop_dummy_frame     PARAMS ((void));
 
 extern int       generic_pc_in_call_dummy    PARAMS ((CORE_ADDR pc, 
@@ -223,10 +224,10 @@ extern char *    generic_find_dummy_frame    PARAMS ((CORE_ADDR pc,
 						      CORE_ADDR fp));
 
 #ifdef __GNUC__
+/* Some native compilers, even ones that are supposed to be ANSI and for which __STDC__
+   is true, complain about forward decls of enums. */
 enum lval_type;
-#endif
-
 extern void	 generic_get_saved_register  PARAMS ((char *, int *, CORE_ADDR *, struct frame_info *, int, enum lval_type *));
-
+#endif
 
 #endif /* !defined (FRAME_H)  */

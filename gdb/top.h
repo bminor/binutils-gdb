@@ -52,7 +52,14 @@ extern void command_loop PARAMS ((void));
 extern int quit_confirm PARAMS ((void));
 extern void quit_force PARAMS ((char *, int));
 extern void quit_command PARAMS ((char *, int));
+
+/* This function returns a pointer to the string that is used
+   by gdb for its command prompt. */
 extern char *get_prompt PARAMS((void));
+ 
+/* This function copies the specified string into the string that
+   is used by gdb for its command prompt. */
+extern void set_prompt PARAMS ((char *));
 
 /* From random places.  */
 extern int mapped_symbol_files;

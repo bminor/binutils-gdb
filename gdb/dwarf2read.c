@@ -5344,10 +5344,10 @@ dwarf_stack_op_name (op)
 }
 
 static char *
-dwarf_bool_name (bool)
-     unsigned bool;
+dwarf_bool_name (mybool)
+     unsigned mybool;
 {
-  if (bool)
+  if (mybool)
     return "TRUE";
   else
     return "FALSE";

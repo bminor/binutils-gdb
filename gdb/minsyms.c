@@ -142,7 +142,7 @@ lookup_minimal_symbol (name, sfile, objf)
 #endif
 		      break;
 
-		    case mst_solib_trampoline:
+                    case mst_solib_trampoline:
 
 		      /* If a trampoline symbol is found, we prefer to
 			 keep looking for the *real* symbol. If the

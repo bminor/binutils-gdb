@@ -105,7 +105,7 @@ scm_unpack (type, valaddr, context)
 	  else
 	    return 1;
 	}
-      switch (7 & svalue)
+      switch (7 & (int) svalue)
 	{
 	case 2:  case 6: /* fixnum */
 	  return svalue >> 2;
@@ -114,7 +114,7 @@ scm_unpack (type, valaddr, context)
 	    return SCM_ICHR (svalue);
 	  else if (SCM_IFLAGP (svalue))
 	    {
-	      switch (svalue)
+	      switch ((int) svalue)
 		{
 #ifndef SICP
 		case SCM_EOL:

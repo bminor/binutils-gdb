@@ -80,6 +80,16 @@ EXTERN unsigned char processing_gcc_compilation;
 
 EXTERN unsigned char processing_acc_compilation;
 
+/* elz: added this flag to know when a block is compiled with HP
+   compilers (cc, aCC). This is necessary because of the macro
+   COERCE_FLOAT_TO_DOUBLE defined in tm_hppa.h, which causes
+   a coercion of float to double to always occur in parameter passing
+   for a function called by gdb (see the function value_arg_coerce in 
+   valops.c). This is necessary only if the target
+   was compiled with gcc, not with HP compilers or with g++ */
+
+EXTERN unsigned char processing_hp_compilation;
+
 /* Count symbols as they are processed, for error messages.  */
 
 EXTERN unsigned int symnum;
@@ -105,6 +115,8 @@ EXTERN struct pending *global_symbols;	/* global functions and variables */
 
 EXTERN struct pending *local_symbols;	/* everything local to lexic context */
 
+EXTERN struct pending *param_symbols;	/* func params local to lexic context */
+
 /* Stack representing unclosed lexical contexts
    (that will become blocks, eventually).  */
 
@@ -113,6 +125,10 @@ struct context_stack
   /* Outer locals at the time we entered */
 
   struct pending *locals;
+
+  /* Pending func params at the time we entered */
+
+  struct pending *params;
 
   /* Pointer into blocklist as of entry */
 
@@ -274,6 +290,9 @@ record_pending_block PARAMS ((struct objfile *, struct block *,
 
 extern void
 record_debugformat PARAMS ((char *));
+
+extern void
+merge_symbol_lists PARAMS ((struct pending **, struct pending **));
 
 #undef EXTERN
 

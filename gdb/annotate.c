@@ -65,6 +65,14 @@ annotate_breakpoint (num)
 }
 
 void
+annotate_catchpoint (num)
+     int num;
+{
+  if (annotation_level > 1)
+    printf_filtered ("\n\032\032catchpoint %d\n", num);
+}
+
+void
 annotate_watchpoint (num)
      int num;
 {

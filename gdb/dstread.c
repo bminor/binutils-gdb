@@ -277,7 +277,7 @@ dst_symfile_read (objfile, section_offsets, mainline)
   symfile_bfd = abfd;			/* Kludge for swap routines */
 
 /* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
-   desc = fileno ((GDB_FILE *)(abfd->iostream));	/* File descriptor */
+   desc = fileno ((FILE *)(abfd->iostream));	/* File descriptor */
 
   /* Read the line number table, all at once.  */
   bfd_map_over_sections (abfd, find_dst_sections, (PTR)NULL);

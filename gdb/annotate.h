@@ -17,9 +17,13 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#include "symtab.h"
+#include "gdbtypes.h"
+
 extern void breakpoints_changed PARAMS ((void));
 
 extern void annotate_breakpoint PARAMS ((int));
+extern void annotate_catchpoint PARAMS ((int));
 extern void annotate_watchpoint PARAMS ((int));
 extern void annotate_starting PARAMS ((void));
 extern void annotate_stopped PARAMS ((void));
