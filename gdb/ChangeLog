@@ -1,3 +1,8 @@
+2004-02-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-nat.c (sparc_xfer_wcookie): Try to fetch the cookie using
+	the PT_WCOOKIE request.
+
 2004-02-08  Andrew Cagney  <cagney@redhat.com>
 
 	* mips-tdep.c (mips_unwind_pc): New function.

@@ -270,8 +270,32 @@ sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
   /* If PT_WCOOKIE is defined (by <sys/ptrace.h>), assume we're
      running on an OpenBSD release that uses StackGhost (3.1 or
      later).  As of release 3.4, OpenBSD doesn't use a randomized
-     cookie yet.  */
-  wcookie = 0x3;
+     cookie yet, but a future release probably will.  */
+  {
+    int pid;
+
+    pid = TIDGET (inferior_ptid);
+    if (pid == 0)
+      pid = PIDGET (inferior_ptid);
+
+    /* Sanity check.  The proper type for a cookie is register_t, but
+       we can't assume that this type exists on all systems supported
+       by the code in this file.  */
+    gdb_assert (sizeof (wcookie) == sizeof (register_t));
+
+    /* Fetch the cookie.  */
+    if (ptrace (PT_WCOOKIE, pid, (PTRACE_ARG3_TYPE) &wcookie, 0) == -1)
+      {
+	if (errno != EINVAL)
+	  perror_with_name ("Couldn't get StackGhost cookie");
+
+	/* Although PT_WCOOKIE is defined on OpenBSD 3.1 and later,
+	   the request wasn't implemented until after OpenBSD 3.4.  If
+	   the kernel doesn't support the PT_WCOOKIE request, assume
+	   we're running on a kernel that uses non-randomized cookies.  */
+	wcookie = 0x3;
+      }
+  }
 #endif /* PT_WCOOKIE */
 
   if (len > sizeof (unsigned long) - offset)
