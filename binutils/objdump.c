@@ -88,10 +88,10 @@ dump_symbols PARAMS ((bfd *abfd));
 void
 usage ()
 {
-  fprintf (stderr, "\
-usage: %s [-ahifdrtxsl] [-m machine] [-j section_name]\n\
-         [--syms] [--reloc] [--header] [--version] obj ...\n",
-	   program_name);
+  fprintf (stderr, "objdump %s\n\
+Usage: %s [-ahifdrtxsl] [-m machine] [-j section_name] [-b bfdname]\n\
+       [--syms] [--reloc] [--header] [--version] objfile...\n",
+	   program_version, program_name);
   exit (1);
 }
 
@@ -104,7 +104,8 @@ static struct option long_options[]=
 #ifdef	ELF_STAB_DISPLAY
   {"stabs", no_argument, &dump_stab_section_info, 1},
 #endif
-  {0, no_argument, 0, 0}};
+  {0, no_argument, 0, 0}
+};
 
 
 static void
@@ -745,6 +746,7 @@ display_file (filename, target)
   file = bfd_openr (filename, target);
   if (file == NULL)
     {
+      fprintf (stderr, "%s: ", program_name);
       bfd_perror (filename);
       return;
     }
@@ -760,7 +762,10 @@ display_file (filename, target)
 	  if (arfile == NULL)
 	    {
 	      if (bfd_error != no_more_archived_files)
-		bfd_perror (bfd_get_filename (file));
+		{
+		  fprintf (stderr, "%s: ", program_name);
+		  bfd_perror (bfd_get_filename (file));
+		}
 	      return;
 	    }
 
@@ -1052,12 +1057,12 @@ main (argc, argv)
   extern char *optarg;
   char *target = default_target;
   boolean seenflag = false;
-  int ind = 0;
 
   bfd_init ();
   program_name = *argv;
 
-  while ((c = getopt_long (argc, argv, "ib:m:Vdlfahrtxsj:", long_options, &ind))
+  while ((c = getopt_long (argc, argv, "ib:m:Vdlfahrtxsj:", long_options,
+			   (int *) 0))
 	 != EOF)
     {
       seenflag = true;

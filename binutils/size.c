@@ -26,7 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    o - We also handle core files.
    o - We also handle archives.
    If you write shell scripts which manipulate this info then you may be
-   out of luck; there's no +predantic switch.
+   out of luck; there's no --predantic option.
 */
 
 #include "bfd.h"
@@ -64,31 +64,26 @@ print_sizes PARAMS ((bfd *file));
 void
 usage ()
 {
-  fprintf (stderr, "size %s\nUsage: %s -{dox}{AB}V files ...\n",
-	 program_version, program_name);
-  fputs("\t+radix={8|10|16} -- select appropriate output radix.\n\
-\t-d -- output in decimal\n\
-\t-o -- output in octal\n\
-\t-x -- output in hex", stderr);
-  fputs("\t+format={Berkeley|SysV} -- select display format.\n\
-\t-A -- SysV(AT&T) format\n\
-\t-B -- BSD format", stderr);
+  fprintf (stderr, "size %s\n\
+Usage: %s [-ABdoxV] [--format=berkeley|sysv] [--radix=8|10|16]\n\
+       [--target=bfdname] [--version] [--help] [file...]\n",
+	   program_version, program_name);
 #if BSD_DEFAULT
-  fputs("\t  (Default is +format=Berkeley)", stderr);
+  fputs ("       (default is --format=berkeley)\n", stderr);
 #else
-  fputs("\t  (Default is +format=SysV)", stderr);
+  fputs ("       (default is --format=sysv)\n", stderr);
 #endif
-  fputs("\t-V, +version -- display program version, etc.\n\
-\t+help -- this message\n", stderr);
-  exit(1);
+  exit (1);
 }
 
-struct option long_options[] = {{"radix",   no_argument, 0, 0},
-				{"format",  required_argument, 0, 0},
-				{"version", no_argument, &show_version, 1},
-				{"target",  optional_argument, NULL, 0},
-				{"help",    no_argument, &show_help, 1},
-				{0, no_argument, 0, 0}};
+struct option long_options[] = {
+  {"format",  required_argument, 0, 200},
+  {"radix",   required_argument, 0, 201},
+  {"target",  required_argument, 0, 202},
+  {"version", no_argument, &show_version, 1},
+  {"help",    no_argument, &show_help, 1},
+  {0, no_argument, 0, 0}
+};
 
 int
 main (argc, argv)
@@ -97,32 +92,29 @@ main (argc, argv)
 {
   int temp;
   int c;			/* sez which option char */
-  int option_index = 0;
   extern int optind;		/* steps thru options */
+
   program_name = *argv;
 
   bfd_init();
 
   while ((c = getopt_long(argc, argv, "ABVdox", long_options,
-			  &option_index)) != EOF)
+			  (int *) 0)) != EOF)
     switch(c) {
-    case 0:
-      if (!strcmp("format",(long_options[option_index]).name)) {
+    case 200:			/* --format */
 	switch(*optarg) {
 	case 'B': case 'b': berkeley_format = 1; break;
 	case 'S': case 's': berkeley_format = 0; break;
-	default: printf("Unknown option to +format: %s\n", optarg);
+	default: fprintf(stderr, "invalid argument to --format: %s\n", optarg);
 	  usage();
 	}
 	break;
-      }
 
-      if (!strcmp("target",(long_options[option_index]).name)) {
+      case 202:			/* --target */
 	target = optarg;
 	break;
-      }
 
-      if (!strcmp("radix",(long_options[option_index]).name)) {
+      case 201:			/* --radix */
 #ifdef ANSI_LIBRARIES
 	temp = strtol(optarg, NULL, 10);
 #else
@@ -135,8 +127,8 @@ main (argc, argv)
 	default: printf("Unknown radix: %s\n", optarg);
 	  usage();
 	}
-      }
-      break;
+	break;
+
     case 'A': berkeley_format = 0; break;
     case 'B': berkeley_format = 1; break;
     case 'V': show_version = 1; break;
@@ -202,6 +194,7 @@ display_file(filename)
 
   file = bfd_openr (filename, target);
   if (file == NULL) {
+    fprintf (stderr, "%s: ", program_name);
     bfd_perror (filename);
     return_code = 1;
     return;
@@ -215,6 +208,7 @@ display_file(filename)
        arfile = bfd_openr_next_archived_file (file, arfile);
       if (arfile == NULL) {
 	if (bfd_error != no_more_archived_files) {
+	  fprintf (stderr, "%s: ", program_name);
 	  bfd_perror (bfd_get_filename (file));
 	  return_code = 2;
         }
@@ -237,8 +231,9 @@ lprint_number (width, num)
      int width;
      bfd_size_type num;
 {
-  printf ((radix == decimal ? "%-*ld\t" :
-	   ((radix == octal) ? "%-*lo\t" : "%-*lx\t")), width, (long)num);
+  printf ((radix == decimal ? "%-*lu\t" :
+	   ((radix == octal) ? "%-*lo\t" : "%-*lx\t")),
+	  width, (unsigned long)num);
 }
 
 void
@@ -246,8 +241,9 @@ rprint_number(width, num)
      int width;
      bfd_size_type num;
 {
-  printf ((radix == decimal ? "%*ld\t" :
-	   ((radix == octal) ? "%*lo\t" : "%*lx\t")), width, (long)num);
+  printf ((radix == decimal ? "%*lu\t" :
+	   ((radix == octal) ? "%*lo\t" : "%*lx\t")),
+	  width, (unsigned long)num);
 }
 
 static char *bss_section_name = ".bss";
@@ -304,8 +300,8 @@ bfd *abfd;
   lprint_number (7, textsize);
   lprint_number (7, datasize);
   lprint_number (7, bsssize);
-  printf (((radix == octal) ? "%-7lo\t%-7lx\t" : "%-7ld\t%-7lx\t"),
-	  (long)total, (long)total);
+  printf (((radix == octal) ? "%-7lo\t%-7lx\t" : "%-7lu\t%-7lx\t"),
+	  (unsigned long)total, (unsigned long)total);
 
   fputs(bfd_get_filename(abfd), stdout);
   if (abfd->my_archive) printf (" (ex %s)", abfd->my_archive->filename);
@@ -322,7 +318,7 @@ sysv_internal_printer(file, sec, ignore)
 {
   bfd_size_type size = bfd_section_size (file, sec);
   if (sec!= &bfd_abs_section 
-      && sec!= &bfd_com_section
+      && ! bfd_is_com_section (sec)
       && sec!=&bfd_und_section) 
   {
   

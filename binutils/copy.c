@@ -104,9 +104,13 @@ static
 void            
 copy_usage()
 {
-    fprintf(stderr,
-    "Usage %s [-vVSgxX] [-I informat] [-O outformat] infile [outfile]\n",
-	    program_name);
+    fprintf(stderr, "copy %s\n\
+Usage: %s [-vVSgxX] [-I format] [-O format] [-F format]\n\
+       [--format=format] [--target=format] [--input-format=format]\n\
+       [--output-format=format] [--strip-all] [--strip-debug]\n\
+       [--discard-all] [--discard-locals] [--verbose] [--version]\n\
+       infile [outfile]\n",
+	    program_version, program_name);
     exit(1);
 }
 
@@ -114,7 +118,12 @@ static
 void            
 strip_usage()
 {
-    fprintf(stderr, "Usage %s [-vVsSgxX] [-I informat] [-O outformat] filename ...\n", program_name);
+    fprintf(stderr, "strip %s\n\
+Usage: %s [-vVsSgxX] [-I format] [-O format] [-F format]\n\
+       [--format=format] [--target=format] [--input-format=format]\n\
+       [--output-format=format] [--strip-all] [--strip-debug]\n\
+       [--discard-all] [--discard-locals] [--verbose] [--version] file...\n",
+	    program_version, program_name);
     exit(1);
 }
 
@@ -498,7 +507,6 @@ main(argc, argv)
 {
   int             i;
   int c;			/* sez which option char */
-  int option_index = 0;	/* used by getopt and ignored by us */
 
   program_name = argv[0];
 
@@ -515,7 +523,7 @@ main(argc, argv)
   if (is_strip) {
     
       while ((c = getopt_long(argc, argv, "I:O:F:sSgxXVv",
-			      strip_options, &option_index))
+			      strip_options, (int *) 0))
 	     != EOF) {
 	  switch (c) {
 	    case 'I':
@@ -578,7 +586,7 @@ main(argc, argv)
   /* Invoked as "copy", not "strip" */
 
   while ((c = getopt_long(argc, argv, "I:s:O:d:F:b:SgxXVv",
-			  strip_options, &option_index))
+			  strip_options, (int *) 0))
 	 != EOF) {
       switch (c) {
 	case 'I':

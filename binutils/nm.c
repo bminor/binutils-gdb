@@ -28,13 +28,14 @@ static boolean
 display_file PARAMS ((char *filename));
 
 static void
-do_one_rel_file PARAMS ((bfd *file));
+do_one_rel_file PARAMS ((bfd* file, bfd *archive));
 
 static unsigned int
 filter_symbols PARAMS ((bfd *file, asymbol **syms, unsigned long symcount));
 
 static void
-print_symbols PARAMS ((bfd *file, asymbol **syms, unsigned long symcount));
+print_symbols PARAMS ((bfd *file, asymbol **syms, unsigned long symcount,
+		       bfd *archive));
 
 static void
 print_symdef_entry PARAMS ((bfd * abfd));
@@ -62,14 +63,14 @@ extern int print_version;
 struct option long_options[] = {
 	{"debug-syms",	    no_argument, &print_debug_syms,  1},
 	{"extern-only",	    no_argument, &external_only,     1},
-	{"no-sort",	    no_argument, &no_sort,	   1},
+	{"no-sort",	    no_argument, &no_sort,	     1},
 	{"numeric-sort",    no_argument, &sort_numerically,  1},
 	{"print-armap",	    no_argument, &print_armap,       1},
 	{"print-file-name", no_argument, &file_on_each_line, 1},
 	{"reverse-sort",    no_argument, &reverse_sort,      1},
-	{"target", 	    optional_argument, (int *)NULL,	   0},
+	{"target", 	    optional_argument, 0,            200},
 	{"undefined-only",  no_argument, &undefined_only,    1},
-	{"version",         no_argument, &show_version,    1},
+	{"version",         no_argument, &show_version,      1},
 	{0, no_argument, 0, 0}
 };
 
@@ -80,9 +81,12 @@ int show_names = 0;
 void
 usage ()
 {
-  fprintf(stderr, "nm %s\nUsage: %s [-agnoprsuV] filename...\n",
+  fprintf(stderr, "nm %s\n\
+Usage: %s [-agnoprsuV] [--debug-syms] [--extern-only] [--print-armap]\n\
+       [--print-file-name] [--numeric-sort] [--no-sort] [--reverse-sort]\n\
+       [--undefined-only] [--target=bfdname] [file...]\n",
 	  program_version, program_name);
-  exit(0);
+  exit(1);
 }
 
 int
@@ -91,13 +95,12 @@ main (argc, argv)
      char **argv;
 {
   int c;			/* sez which option char */
-  int option_index = 0;		/* used by getopt and ignored by us */
   int retval;
   program_name = *argv;
 
   bfd_init();
 
-  while ((c = getopt_long(argc, argv, "agnoprsuV", long_options, &option_index)) != EOF) {
+  while ((c = getopt_long(argc, argv, "agnoprsuvABV", long_options, (int *) 0)) != EOF) {
     switch (c) {
     case 'a': print_debug_syms = 1; break;
     case 'g': external_only = 1; break;
@@ -107,14 +110,18 @@ main (argc, argv)
     case 'r': reverse_sort = 1; break;
     case 's': print_armap = 1; break;
     case 'u': undefined_only = 1; break;
+    case 'v':
     case 'V': show_version = 1; break;
 
-    case  0:
-      if (!strcmp("target",(long_options[option_index]).name)) {
-	target = optarg;
-      }
+    /* For MIPS compatibility, -A selects System V style output, -B
+       selects BSD style output.  These are not implemented.  When
+       they are, they should be added to usage ().  */
+    case 'A': break;
+    case 'B': break;
 
-      break;			/* we've been given a long option */
+    case 200:			/* --target */
+      target = optarg;
+      break;
 
     default:
       usage ();
@@ -128,7 +135,7 @@ main (argc, argv)
      on sucess -- the inverse of the C sense. */
 
   /* OK, all options now parsed.  If no filename specified, do a.out. */
-  if (option_index == argc) return !display_file ("a.out");
+  if (optind == argc) return !display_file ("a.out");
 
   retval = 0;
   show_names = (argc -optind)>1;
@@ -156,7 +163,8 @@ display_file (filename)
 
   file = bfd_openr(filename, target);
   if (file == NULL) {
-    fprintf (stderr, "\n%s: can't open '%s'.\n", program_name, filename);
+    fprintf (stderr, "%s: ", program_name);
+    bfd_perror (filename);
     return false;
   }
 
@@ -165,16 +173,17 @@ display_file (filename)
 	if (show_names) {
 	  printf ("\n%s:\n",filename);
 	}
-	do_one_rel_file (file);
+	do_one_rel_file (file, NULL);
       }
   else if (bfd_check_format (file, bfd_archive)) {
     if (!bfd_check_format (file, bfd_archive)) {
-      fprintf (stderr, "%s:  %s: unknown format.\n", program_name, filename);
+      fprintf (stderr, "%s: %s: unknown format\n", program_name, filename);
       retval = false;
       goto closer;
     }
 
-    printf("\n%s:\n", filename);
+    if (!file_on_each_line)
+      printf("\n%s:\n", filename);
     if (print_armap) print_symdef_entry (file);
     for (;;) {
       arfile = bfd_openr_next_archived_file (file, arfile);
@@ -188,13 +197,14 @@ display_file (filename)
       if (!bfd_check_format(arfile, bfd_object))
 	printf("%s: not an object file\n", arfile->filename);
       else {
-	printf ("\n%s:\n", arfile->filename);
-	do_one_rel_file (arfile) ;
+	if (!file_on_each_line)
+	  printf ("\n%s:\n", arfile->filename);
+	do_one_rel_file (arfile, file) ;
       }
     }
   }
   else {
-    fprintf (stderr, "\n%s:  %s: unknown format.\n", program_name, filename);
+    fprintf (stderr, "\n%s: %s: unknown format\n", program_name, filename);
     retval = false;
   }
 
@@ -249,8 +259,9 @@ int (*(sorters[2][2])) PARAMS ((CONST void *, CONST void *)) = {
 };
 
 static void
-do_one_rel_file (abfd)
+do_one_rel_file (abfd, archive_bfd)
      bfd *abfd;
+     bfd *archive_bfd; /* If non-NULL: archive containing abfd. */
 {
   unsigned int storage;
   asymbol **syms;
@@ -266,7 +277,7 @@ do_one_rel_file (abfd)
   nosymz:
     fprintf (stderr, "%s: Symflags set but there are none?\n",
 	     bfd_get_filename (abfd));
-    exit (1);
+    return;
   }
 
   syms = (asymbol **) xmalloc (storage);
@@ -287,7 +298,7 @@ do_one_rel_file (abfd)
   if (print_each_filename && !file_on_each_line)
     printf("\n%s:\n", bfd_get_filename(abfd));
 
-  print_symbols (abfd, syms, symcount);
+  print_symbols (abfd, syms, symcount, archive_bfd);
   free (syms);
 }
 
@@ -315,7 +326,7 @@ filter_symbols (abfd, syms, symcount)
     } else if (external_only) {
       keep = ((flags & BSF_GLOBAL)
 	      || (sym->section == &bfd_und_section)
-	      ||   (sym->section == &bfd_com_section));
+	      || (bfd_is_com_section (sym->section)));
     } else {
       keep = 1;
     }
@@ -333,15 +344,20 @@ filter_symbols (abfd, syms, symcount)
 }
 
 static void
-print_symbols (abfd, syms, symcount)
+print_symbols (abfd, syms, symcount, archive_bfd)
      bfd *abfd;
      asymbol **syms;
      unsigned long symcount;
+     bfd *archive_bfd;
 {
   asymbol **sym = syms, **end = syms + symcount;
 
   for (; sym < end; ++sym) {
-    if (file_on_each_line) printf("%s:", bfd_get_filename(abfd));
+    if (file_on_each_line) {
+      if (archive_bfd)
+	printf("%s:", bfd_get_filename(archive_bfd));
+      printf("%s:", bfd_get_filename(abfd));
+    }
 
     if (undefined_only) {
       if ((*sym)->section == &bfd_und_section)

@@ -95,13 +95,16 @@ int             preserve_dates = 0;
    than the corresponding files.
 */
 int             newer_only = 0;
-/* write a __.SYMDEF member into the modified archive.  */
-boolean         write_armap = false;
-/*
-   Nonzero means don't update __.SYMDEF unless command line explicitly
-   requested it
-*/
-int             ignore_symdef = 0;
+
+/* Controls the writing of an archive symbol table (in BSD: a __.SYMDEF
+   member).  -1 means we've been explicitly asked to not write a symbol table;
+   +1 means we've been explictly asked to write it;
+   0 is the default.
+   Traditionally, the default in BSD has been to not write the table.
+   However, for Posix.2 compliance the default is now to write a symbol table
+   if any of the members are object files. */
+int write_armap = 0;
+
 /*
    Nonzero means it's the name of an existing member; position new or moved
    files with respect to this one.
@@ -196,11 +199,22 @@ DEFUN(map_over_members,(function, files, count),
 
 boolean operation_alters_arch = false;
 
+extern char *program_version;
+
 void
 do_show_version ()
 {
-  extern char *program_version;
   printf ("%s version %s\n", program_name, program_version);
+}
+
+void
+usage ()
+{
+  fprintf(stderr, "ar %s\n\
+Usage: %s [-]{dmpqrtx}[abcilosuv] [membername] archive-file file...\n\
+       %s -M [<mri-script]\n",
+	  program_version, program_name, program_name);
+  exit(1);
 }
 
 /*
@@ -240,7 +254,7 @@ main(argc, argv)
    ++temp;
   if (is_ranlib > 0 || (is_ranlib < 0 && strcmp(temp, "ranlib") == 0)) {
     if (argc < 2)
-     fatal("Too few command arguments.");
+      usage ();
     arg_ptr = argv[1];
     if (strcmp(argv[1], "-V") == 0 || strcmp(argv[1], "-v") == 0) {
       do_show_version();
@@ -257,7 +271,7 @@ main(argc, argv)
   }
 
   if (argc < 2)
-   fatal("Too few command arguments.");
+    usage ();
 
   arg_ptr = argv[1];
 
@@ -314,7 +328,7 @@ main(argc, argv)
       show_version = true;
       break;
      case 's':
-      write_armap = true;
+      write_armap = 1;
       break;
      case 'u':
       newer_only = 1;
@@ -347,14 +361,14 @@ main(argc, argv)
     if (show_version)
        exit(0);
     else
-      fatal("Too few command arguments.");
+      usage ();
 
   if (mri_mode) {
     mri_emul();
   }
   else {
     if ((operation == none || operation == print_table) 
-	&& write_armap == true)
+	&& write_armap == 1)
      ranlib_only(argv[2]);
 
     if (operation == none)
@@ -370,16 +384,7 @@ main(argc, argv)
 
     inarch_filename = argv[arg_index++];
 
-    if (arg_index < argc) {
-      files = argv + arg_index;
-      while (arg_index < argc)
-       if (!strcmp(argv[arg_index++], "__.SYMDEF")) {
-	 ignore_symdef = 1;
-	 break;
-       }
-    }
-    else
-     files = NULL;
+    files = arg_index < argc ? argv + arg_index : NULL;
 
     if (operation == quick_append) {
       if (files != NULL)
@@ -415,7 +420,7 @@ main(argc, argv)
       break;
 
      case replace:
-      if (files != NULL || write_armap)
+      if (files != NULL || write_armap > 0)
        replace_members(files);
       break;
 
@@ -470,6 +475,7 @@ open_inarch(archive_filename)
 #endif
     if (inarch == NULL) {
       bloser:
+        fprintf (stderr, "%s: ", program_name);
 	bfd_perror(archive_filename);
 	exit(1);
     }
@@ -602,7 +608,7 @@ extract_file(abfd)
         struct utimbuf	tb;
 	tb.actime = buf.st_mtime;
 	tb.modtime = buf.st_mtime;
-	utime(abfd->filename, tb);	/* FIXME check result */
+	utime(abfd->filename, &tb);	/* FIXME check result */
 #else /* ! POSIX_UTIME */
 #ifdef USE_UTIME
 	long            tb[2];
@@ -660,6 +666,7 @@ do_quick_append(archive_filename, files_to_append)
     temp = bfd_openr(archive_filename, NULL);
 #endif
     if (temp == NULL) {
+        fprintf (stderr, "%s: ", program_name);
 	bfd_perror(archive_filename);
 	exit(1);
     }
@@ -682,6 +689,7 @@ do_quick_append(archive_filename, files_to_append)
     for (; files_to_append && *files_to_append; ++files_to_append) {
 	struct ar_hdr  *hdr = bfd_special_undocumented_glue(temp, *files_to_append);
 	if (hdr == NULL) {
+	    fprintf (stderr, "%s: ", program_name);
 	    bfd_perror(*files_to_append);
 	    exit(1);
 	}
@@ -690,10 +698,15 @@ do_quick_append(archive_filename, files_to_append)
 
 	ifile = fopen(*files_to_append, FOPEN_RB);
 	if (ifile == NULL)
+	  {
 	    bfd_perror(program_name);
+	  }
 
 	if (stat(*files_to_append, &sbuf) != 0)
+	  {
+	    fprintf (stderr, "%s: ", program_name);
 	    bfd_perror(*files_to_append);
+	  }
 
 	tocopy = sbuf.st_size;
 
@@ -736,7 +749,10 @@ write_archive()
 	    bfd_fatal(inarch->filename);
 
 	bfd_set_format(obfd, bfd_archive);
-	obfd->has_armap = write_armap;
+
+	/* Request writing the archive symbol table unless we've
+	   been explicitly requested not to. */
+	obfd->has_armap = write_armap >= 0;
 
 	if (bfd_set_archive_head(obfd, contents_head) != true)
 	    bfd_fatal(inarch->filename);
@@ -795,12 +811,13 @@ delete_members(files_to_delete)
 	/*
 	   In a.out systems, the armap is optional.  It's also called
 	   __.SYMDEF.  So if the user asked to delete it, we should remember
-	   that fact. The name is NULL in COFF archives, so using this as a
-	   key is as good as anything I suppose
-	*/
+	   that fact. This isn't quite right for COFF systems (where
+	   __.SYMDEF might be regular member), but it's very unlikely
+	   to be a problem.  FIXME */
+
 	if (!strcmp(*files_to_delete, "__.SYMDEF")) {
 	    inarch->has_armap = false;
-	    write_armap = false;
+	    write_armap = -1;
 	    continue;
 	}
 
@@ -890,15 +907,6 @@ replace_members(files_to_move)
     bfd            *current;
     bfd           **current_ptr;
     bfd            *temp;
-    /*
-       If the first item in the archive is an __.SYMDEF then remove it
-    */
-    if (inarch->next &&
-	strcmp(inarch->next->filename, "__.SYMDEF") == 0) {
-	inarch->next = inarch->next->next;
-    }
-
-
 
     while (files_to_move && *files_to_move) {
 	current_ptr = &inarch->next;
@@ -984,7 +992,7 @@ static void
 ranlib_only(archname)
     char           *archname;
 {
-    write_armap = true;
+    write_armap = 1;
     open_inarch(archname);
     write_archive();
     exit(0);
