@@ -1,5 +1,10 @@
 2001-07-25  Michael Snyder  <msnyder@redhat.com>
 
+	* gdb.base/call-rt-st.exp: Use double-backslash to quote
+	curly braces in regular expressions.
+
+2001-07-25  Michael Snyder  <msnyder@redhat.com>
+
 	* gdb.base/ending-run.exp: Accept "Program exited normally" as
 	legitimate output from stepping out of main.
 
