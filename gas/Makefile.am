@@ -633,7 +633,8 @@ DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 
 .dep: dep.sed $(DEP_FILE_DEPS) .tcdep .objdep .dep2
 	rm -f .dep1
-	$(MAKE) DEP=$(DEP) .dep1
+	srcdir=`cd $(srcdir); pwd`; \
+	$(MAKE) DEP=$(DEP) srcdir=$${srcdir} VPATH=$${srcdir} .dep1
 	rm -rf .depdir
 	sed -f dep.sed < .dep1 > .depa
 	sed -f dep.sed < .tcdep >> .depa
