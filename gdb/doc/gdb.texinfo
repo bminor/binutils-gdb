@@ -9778,17 +9778,16 @@ their corresponding response @var{data}:
 @tab Request
 @tab Description
 
-@item extended ops
+@item extended mode
 @tab @code{!}
 @tab
-Use the extended remote protocol.  Sticky---only needs to be set once.
-The extended remote protocol supports the @samp{R} packet.
+Enable extended mode.  In extended mode, the remote server is made
+persistent.  The (@samp{R}) packet is used to restart the program being
+debugged.
 @item
-@tab reply @samp{}
+@tab reply @samp{OK}
 @tab
-Stubs that support the extended remote protocol return @samp{} which,
-unfortunately, is identical to the response returned by stubs that do not
-support protocol extensions.
+The remote target both supports and has enabled extended mode.
 
 @item last signal
 @tab @code{?}
@@ -10081,9 +10080,13 @@ Reset the entire system.
 @item remote restart
 @tab @code{R}@var{XX}
 @tab
-Restart the remote server.  @var{XX} while needed has no clear
-definition.  FIXME: @emph{An example interaction explaining how this
-packet is used in extended-remote mode is needed}.
+Restart the program being debugged.  @var{XX}, while needed, is ignored.
+This packet is only available in extended mode.
+@item
+@tab
+no reply
+@tab
+The @samp{R} packet has no reply.
 
 @item step
 @tab @code{s}@var{addr}
