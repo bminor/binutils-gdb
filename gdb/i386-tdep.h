@@ -56,6 +56,16 @@ enum struct_return
 /* i386 architecture specific information.  */
 struct gdbarch_tdep
 {
+  /* General-purpose registers.  */
+  struct regset *gregset;
+  int *gregset_reg_offset;
+  int gregset_num_regs;
+  size_t sizeof_gregset;
+
+  /* Floating-point registers.  */
+  struct regset *fpregset;
+  size_t sizeof_fpregset;
+
   /* Register number for %st(0).  The register numbers for the other
      registers follow from this one.  Set this to -1 to indicate the
      absence of an FPU.  */

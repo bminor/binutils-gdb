@@ -37,6 +37,7 @@
 #include "osabi.h"
 #include "regcache.h"
 #include "reggroups.h"
+#include "regset.h"
 #include "symfile.h"
 #include "symtab.h"
 #include "target.h"
@@ -1548,7 +1549,42 @@ i386_value_to_register (struct frame_info *frame, int regnum,
     }
 }
 
+/* Supply register REGNUM from the general-purpose register set REGSET
+   to register cache REGCACHE.  If REGNUM is -1, do this for all
+   registers in REGSET.  */
 
+static void
+i386_supply_gregset (const struct regset *regset, struct regcache *regcache,
+		     int regnum, const void *gregs, size_t len)
+{
+  const struct gdbarch_tdep *tdep = regset->descr;
+  const char *regs = gregs;
+  int i;
+
+  gdb_assert (len == tdep->sizeof_gregset);
+
+  for (i = 0; i < tdep->gregset_num_regs; i++)
+    {
+      if ((regnum == i || regnum == -1)
+	  && tdep->gregset_reg_offset[i] != -1)
+	regcache_raw_supply (regcache, i, regs + tdep->gregset_reg_offset[i]);
+    }
+}
+
+/* Supply register REGNUM from the floating-point register set REGSET
+   to register cache REGCACHE.  If REGNUM is -1, do this for all
+   registers in REGSET.  */
+
+static void
+i386_supply_fpregset (const struct regset *regset, struct regcache *regcache,
+		      int regnum, const void *fpregs, size_t len)
+{
+  const struct gdbarch_tdep *tdep = regset->descr;
+
+  gdb_assert (len == tdep->sizeof_fpregset);
+  i387_supply_fsave (regcache, regnum, fpregs);
+}
+
 
 #ifdef STATIC_TRANSFORM_NAME
 /* SunPRO encodes the static variables.  This is not related to C++
@@ -1802,6 +1838,16 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Allocate space for the new architecture.  */
   tdep = XMALLOC (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
+
+  /* General-purpose registers.  */
+  tdep->gregset = NULL;
+  tdep->gregset_reg_offset = NULL;
+  tdep->gregset_num_regs = I386_NUM_GREGS;
+  tdep->sizeof_gregset = 0;
+
+  /* Floating-point registers.  */
+  tdep->fpregset = NULL;
+  tdep->sizeof_fpregset = I387_SIZEOF_FSAVE;
 
   /* The default settings include the FPU registers, the MMX registers
      and the SSE registers.  This can be overidden for a specific ABI

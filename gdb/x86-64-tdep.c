@@ -1203,11 +1203,30 @@ x86_64_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 {
   return sp & -(CORE_ADDR)16;
 }
+
+
+/* Supply register REGNUM from the floating-point register set REGSET
+   to register cache REGCACHE.  If REGNUM is -1, do this for all
+   registers in REGSET.  */
+
+static void
+x86_64_supply_fpregset (const struct regset *regset, struct regcache *regcache,
+			int regnum, const void *fpregs, size_t len)
+{
+  const struct gdbarch_tdep *tdep = regset->descr;
+
+  gdb_assert (len == tdep->sizeof_fpregset);
+  x86_64_supply_fxsave (regcache, regnum, fpregs);
+}
 
 void
 x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  /* AMD64 generally uses `fxsave' instead of `fsave' for saving its
+     floating-point registers.  */
+  tdep->sizeof_fpregset = I387_SIZEOF_FXSAVE;
 
   /* AMD64 has an FPU and 16 SSE registers.  */
   tdep->st0_regnum = X86_64_ST0_REGNUM;

@@ -1,3 +1,16 @@
+2003-10-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.h (struct gdbarch_tdep): Add members gregset,
+	gregset_reg_offset, gregset_num_regs, sizeof_gregset, fpregset,
+	sizeof_fpregset.
+	* i386-tdep.c: Include "regset.h".
+	(i386_supply_gregset): New function.
+	(i386_supply_fpregset): New function.
+	(i386_gdbarch_init): Initialze register set-related members of
+	TDEP.
+	* x86-64-tdep.c (x86_64_supply_fpregset): New function.
+	(x86_64_init_abi): Initialize TDEP->sizeof_fpregset.
+
 2003-10-03  Andrew Cagney  <cagney@redhat.com>
 
 	* rs6000-tdep.c (rs6000_gdbarch_init): When the 64 bit SysV ABI,
