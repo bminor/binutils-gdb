@@ -9,7 +9,7 @@
 	* config.in: Regenerate.
 	* configure: Regenerate.
 	* po/gas.pot: Regenerate.
-	
+
 2000-09-05  Hans-Peter Nilsson  <hp@axis.com>
 
 	* config/tc-cris.c: Correct comment typos.
@@ -160,9 +160,9 @@
 
 2000-08-25  J. David Anglin  <dave@hiauly1.hia.nrc.ca>
 
-        * tc-vax.c (md_convert_frag): Correctly calculate the pc relative
-        offset of the target destination for jmp instructions.
-        (md_assemble): Change mode to VAX_ABSOLUTE_MODE as per comments.
+	* tc-vax.c (md_convert_frag): Correctly calculate the pc relative
+	offset of the target destination for jmp instructions.
+	(md_assemble): Change mode to VAX_ABSOLUTE_MODE as per comments.
 
 2000-08-24  Hans-Peter Nilsson  <hp@axis.com>
 
@@ -274,7 +274,7 @@ Thu Aug 24 20:41:05 2000  Denis Chertykov  <denisc@overta.ru>
 
 2000-08-16  Jason Eckhardt  <jle@cygnus.com>
 
-        * config/tc-i860.c (md_operand): Silly typo fixed.
+	* config/tc-i860.c (md_operand): Silly typo fixed.
 
 2000-08-16  Nick Clifton  <nickc@redhat.com>
 
@@ -500,10 +500,10 @@ Wed Aug  9 16:28:21 EDT 2000	Diego Novillo <dnovillo@cygnus.com>
 
 2000-07-31  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
-        * config/tc-m68k.c (flag_keep_pcrel, OPTION_PCREL): Add --pcrel option.
-        (md_convert_frag_1, md_estimate_size_before_relax): When making DBcc
-        long emit a long branch if available instead of an absolute jump, never
-        emit absolute jumps for anything with --pcrel.
+	* config/tc-m68k.c (flag_keep_pcrel, OPTION_PCREL): Add --pcrel option.
+	(md_convert_frag_1, md_estimate_size_before_relax): When making DBcc
+	long emit a long branch if available instead of an absolute jump, never
+	emit absolute jumps for anything with --pcrel.
 
 	* doc/c-m68k.texi: Document new command line option.
 
@@ -516,10 +516,10 @@ Wed Aug  9 16:28:21 EDT 2000	Diego Novillo <dnovillo@cygnus.com>
 
 2000-07-28  Jason Eckhardt  <jle@cygnus.com>
 
-        * configure.in: Add bits for i860-stardent-{sysv4, elf}*.
-        * configure: Regenerated.
-        * config/obj-elf.c (obj_elf_type): Recognize a fifth type
-        of operand to the .type directive (.e.g, "type").
+	* configure.in: Add bits for i860-stardent-{sysv4, elf}*.
+	* configure: Regenerated.
+	* config/obj-elf.c (obj_elf_type): Recognize a fifth type
+	of operand to the .type directive (.e.g, "type").
 
 2000-07-28  Alan Modra  <alan@linuxcare.com.au>
 
@@ -537,7 +537,7 @@ Thu Jul 27 11:25:01 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/tc-mn10300.c (md_convert_frag): Fix printfs.
 	(tc_gen_reloc): Add cast when assigning bfd_abs_symbol to
- 	sym_ptr_ptr
+	sym_ptr_ptr
 	(md_estimate_size_before_relax): Don't fall off end of function.
 
 2000-07-27  Kazu Hirata  <kazu@hxi.com>
@@ -585,7 +585,7 @@ Thu Jul 27 11:25:01 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	(CPU_OBJ_VALID) [aout]: Add cris.
 	(MULTI_CPU_TYPES): Add cris.
 	(MULTI_CPU_OBJ_VALID) [aout]: Add cris.
- 	[coff]: Only i386 and mips are valid.
+	[coff]: Only i386 and mips are valid.
 	(TARGET_CPU_CFILES): Add config/tc-cris.c.
 	(TARGET_CPU_HFILES): Add config/tc-cris.h.
 	(MULTI_CFILES): Add config/e-crisaout.c and config/e-criself.c.
@@ -817,7 +817,7 @@ Thu Jul  6 17:20:58 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 Tue Jul  4 14:08:28 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/tc-d30v.h: Include "write.h" for fixS.
- 	(d30v_start_line, md_pcrel_from_section): Add function prototypes.
+	(d30v_start_line, md_pcrel_from_section): Add function prototypes.
 
 2000-07-05  Nick Clifton  <nickc@cygnus.com>
 
@@ -856,14 +856,14 @@ Tue Jul  4 14:08:28 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 2000-07-01  Koundinya K  <kk@ddeorg.soft.net>
 
-        * configure.in: Add entry for mips-*-sysv4*MP*
-        * configure: Rebuild
-        * config/tc-mips.c (mips_target_format): Return elf32-tradbigmips or
-        elf32-tradlittlemips for traditional mips targets.
-        * config/tc-mips.c (md_estimate_size_before_relax): Duplicate the
-        test for Link Once sections as in adjust_reloc_syms.
-        * config/te-tmips.h: New file for traditional mips targets. Define
-        TE_TMIPS.
+	* configure.in: Add entry for mips-*-sysv4*MP*
+	* configure: Rebuild
+	* config/tc-mips.c (mips_target_format): Return elf32-tradbigmips or
+	elf32-tradlittlemips for traditional mips targets.
+	* config/tc-mips.c (md_estimate_size_before_relax): Duplicate the
+	test for Link Once sections as in adjust_reloc_syms.
+	* config/te-tmips.h: New file for traditional mips targets. Define
+	TE_TMIPS.
 
 2000-06-29 Mark Elbrecht <snowball3@bigfoot.com>
 
@@ -913,13 +913,13 @@ Thu Jun 29 21:30:00 2000  Hans-Peter Nilsson  <hp@axis.com>
 
 2000-06-25  Kazu Hirata  <kazu@hxi.com>
 
-        * config/obj-aout.c: Remove all uses of DEFUN.
-        * config/obj-ieee.c: Likewise.
-        * config/tc-sh.c: Fix comment typos.
-        * config/tc-tahoe.c: Likewise.
-        * config/tc-vax.c: Likewise.
-        * config/tc-w65.c: Likewise.
-        * config/tc-z8k.c: Likewise.
+	* config/obj-aout.c: Remove all uses of DEFUN.
+	* config/obj-ieee.c: Likewise.
+	* config/tc-sh.c: Fix comment typos.
+	* config/tc-tahoe.c: Likewise.
+	* config/tc-vax.c: Likewise.
+	* config/tc-w65.c: Likewise.
+	* config/tc-z8k.c: Likewise.
 	* config/tc-h8300.c (build_bytes): Assemble ldmac correctly.
 
 2000-06-24  DJ Delorie  <dj@cygnus.com>
@@ -952,8 +952,7 @@ Thu Jun 29 21:30:00 2000  Hans-Peter Nilsson  <hp@axis.com>
 2000-06-23  matthew green  <mrg@redhat.com>
 
 	* expr.c (operand): Do not as_bad() if RELAX_PAREN_GROUPING is
-	defined.  Fix error message and double increment of
-	input_line_pointer for `[' grouping.
+	defined.  Fix error message for `[' grouping.
 
 2000-06-22  Kazu Hirata  <kazu@hxi.com>
 
