@@ -1607,6 +1607,9 @@ get_machine_flags (e_flags, e_machine)
 	  if (e_flags & EF_MIPS_ABI2)
 	    strcat (buf, ", abi2");
 
+	  if (e_flags & EF_MIPS_32BITMODE)
+	    strcat (buf, ", 32bitmode");
+
 	  if ((e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_1)
 	    strcat (buf, ", mips1");
 
