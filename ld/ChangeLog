@@ -1,5 +1,7 @@
 Thu Sep  7 10:48:26 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (distclean): Remove config.h and stamp-h.
+
 	* configure.host (sparc-*-sunos64*): Remove.
 	* ldlang.c (lang_map): Check BFD64, not HOST_64_BIT.
 

@@ -757,7 +757,7 @@ LDDISTSTUFF = ldgram.c ldgram.h ldlex.c
 diststuff: $(LDDISTSTUFF)
 
 mostlyclean:
-	-rm -f $(STAGESTUFF) ld.?? ld.??? ldlex.[qp]
+	-rm -f $(STAGESTUFF) ld.?? ld.??? ldlex.[qp] config.log
 	-rm -f ld ld1 ld2 ld3 *.o y.output cdtest cdtest.out cdtest.tmp
 	-rm -f cdtest-ur cdtest-ur.out cdtest-ur.tmp
 	-rm -f $(GENERATED_CFILES) $(GENERATED_HFILES)
@@ -765,7 +765,9 @@ mostlyclean:
 clean: mostlyclean
 	-rm -f $(LD_PROG) configdoc.texi
 distclean: clean
-	-rm -rf Makefile config.status TAGS ldscripts site.exp site.bak
+	-rm -f Makefile config.status TAGS site.exp site.bak config.cache
+	-rm -f config.h stamp-h
+	-rm -rf ldscripts
 realclean: clean distclean
 	-rm -f $(LDDISTSTUFF)
 
