@@ -313,6 +313,9 @@ enum mips_pic_level
 
 static enum mips_pic_level mips_pic;
 
+/* Warn about all NOPS that the assembler generates.  */
+static int warn_nops = 0;
+
 /* 1 if we should generate 32 bit offsets from the GP register in
    SVR4_PIC mode.  Currently has no meaning in other modes.  */
 static int mips_big_got;
@@ -3626,12 +3629,16 @@ macro (ip)
 	  /* result is always false */
 	  if (! likely)
 	    {
-	      as_warn (_("Branch %s is always false (nop)"), ip->insn_mo->name);
+	      if (warn_nops)
+		as_warn (_("Branch %s is always false (nop)"),
+			 ip->insn_mo->name);
 	      macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
 	    }
 	  else
 	    {
-	      as_warn (_("Branch likely %s is always false"), ip->insn_mo->name);
+	      if (warn_nops)
+		as_warn (_("Branch likely %s is always false"),
+			 ip->insn_mo->name);
 	      macro_build ((char *) NULL, &icnt, &offset_expr, "bnel",
 			   "s,t,p", 0, 0);
 	    }
@@ -8867,7 +8874,7 @@ md_number_to_chars (buf, val, n)
     number_to_chars_littleendian (buf, val, n);
 }
 
-CONST char *md_shortopts = "O::g::G:";
+CONST char *md_shortopts = "nO::g::G:";
 
 struct option md_longopts[] =
 {
@@ -8982,6 +8989,10 @@ md_parse_option (c, arg)
 
     case OPTION_EL:
       target_big_endian = 0;
+      break;
+
+    case 'n':
+      warn_nops = 1;
       break;
 
     case 'O':

@@ -1,5 +1,13 @@
 2001-06-08  H.J. Lu  <hjl@gnu.org>
 
+	* config/tc-mips.c (warn_nops): New variable. Set to 0 to
+	disable warning about all NOPS that the assembler generates.
+	(macro): Warn NOPS generated only if warn_nops is not 0.
+	(md_shortopts): Add `n'.
+	(md_parse_option): Set warn_nops to 1 for `n'.
+
+2001-06-08  H.J. Lu  <hjl@gnu.org>
+
 	* config/tc-mips.c (mips_ip): Properly handle illegal operands.
 
 2001-06-08  H.J. Lu  <hjl@gnu.org>
