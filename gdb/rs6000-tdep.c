@@ -1323,7 +1323,7 @@ static CORE_ADDR
 ppc_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   write_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum,
-		  CALL_DUMMY_ADDRESS ());
+		  entry_point_address ());
   return sp;
 }
 

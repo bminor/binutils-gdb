@@ -1490,7 +1490,7 @@ cris_abi_v2_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 static CORE_ADDR
 cris_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
-  write_register (SRP_REGNUM, CALL_DUMMY_ADDRESS ());
+  write_register (SRP_REGNUM, entry_point_address ());
   return sp;
 }
 

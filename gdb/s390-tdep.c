@@ -2536,7 +2536,7 @@ s390_addr_bits_remove (CORE_ADDR addr)
 static CORE_ADDR
 s390_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
-  write_register (S390_RETADDR_REGNUM, CALL_DUMMY_ADDRESS ());
+  write_register (S390_RETADDR_REGNUM, entry_point_address ());
   return sp;
 }
 

@@ -1178,7 +1178,7 @@ arm_unwind_sp (struct gdbarch *gdbarch, struct frame_info *this_frame)
 static CORE_ADDR
 arm_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
-  write_register (ARM_LR_REGNUM, CALL_DUMMY_ADDRESS ());
+  write_register (ARM_LR_REGNUM, entry_point_address ());
   return sp;
 }
 

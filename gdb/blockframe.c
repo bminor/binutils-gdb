@@ -570,8 +570,10 @@ int
 deprecated_pc_in_call_dummy_at_entry_point (CORE_ADDR pc, CORE_ADDR sp,
 					    CORE_ADDR frame_address)
 {
-  return ((pc) >= CALL_DUMMY_ADDRESS ()
-	  && (pc) <= (CALL_DUMMY_ADDRESS () + DECR_PC_AFTER_BREAK));
+  CORE_ADDR addr = entry_point_address ();
+  if (DEPRECATED_CALL_DUMMY_ADDRESS_P ())
+    addr = DEPRECATED_CALL_DUMMY_ADDRESS ();
+  return ((pc) >= addr && (pc) <= (addr + DECR_PC_AFTER_BREAK));
 }
 
 /* Returns true for a user frame or a call_function_by_hand dummy

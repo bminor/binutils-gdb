@@ -862,7 +862,7 @@ mn10300_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   unsigned char buf[4];
 
-  store_unsigned_integer (buf, 4, CALL_DUMMY_ADDRESS ());
+  store_unsigned_integer (buf, 4, entry_point_address ());
   write_memory (sp - 4, buf, 4);
   return sp - 4;
 }

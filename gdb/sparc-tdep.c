@@ -2967,8 +2967,10 @@ sparc_push_return_address (CORE_ADDR pc_unused, CORE_ADDR sp)
 	 This address will actually be the program's entry point.  
 	 There will be a special call_dummy breakpoint there.  */
 
-      write_register (O7_REGNUM, 
-		      CALL_DUMMY_ADDRESS () - 8);
+      if (DEPRECATED_CALL_DUMMY_ADDRESS_P ())
+	write_register (O7_REGNUM, DEPRECATED_CALL_DUMMY_ADDRESS () - 8);
+      else
+	write_register (O7_REGNUM, entry_point_address () - 8);
     }
 
   return sp;
@@ -3136,7 +3138,8 @@ sparc_gdbarch_fix_call_dummy (char *dummy,
     sparc_fix_call_dummy (dummy, pc, fun, type, gcc_p);
 }
 
-/* CALL_DUMMY_ADDRESS: fetch the breakpoint address for a call dummy.  */
+/* DEPRECATED_CALL_DUMMY_ADDRESS: fetch the breakpoint address for a
+   call dummy.  */
 
 static CORE_ADDR
 sparc_call_dummy_address (void)
@@ -3314,7 +3317,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 #ifdef SPARC32_CALL_DUMMY_ON_STACK
       set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
-      set_gdbarch_call_dummy_address (gdbarch, sparc_call_dummy_address);
+      set_gdbarch_deprecated_call_dummy_address (gdbarch, sparc_call_dummy_address);
       set_gdbarch_deprecated_call_dummy_breakpoint_offset (gdbarch, 0x30);
       set_gdbarch_deprecated_call_dummy_length (gdbarch, 0x38);
 
@@ -3414,7 +3417,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 #ifdef SPARC64_CALL_DUMMY_ON_STACK
       set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
-      set_gdbarch_call_dummy_address (gdbarch, sparc_call_dummy_address);
+      set_gdbarch_deprecated_call_dummy_address (gdbarch, sparc_call_dummy_address);
       set_gdbarch_deprecated_call_dummy_breakpoint_offset (gdbarch, 8 * 4);
       set_gdbarch_deprecated_call_dummy_length (gdbarch, 192);
       set_gdbarch_call_dummy_location (gdbarch, ON_STACK);

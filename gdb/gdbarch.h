@@ -846,14 +846,29 @@ extern void set_gdbarch_call_dummy_location (struct gdbarch *gdbarch, int call_d
 #define CALL_DUMMY_LOCATION (gdbarch_call_dummy_location (current_gdbarch))
 #endif
 
-typedef CORE_ADDR (gdbarch_call_dummy_address_ftype) (void);
-extern CORE_ADDR gdbarch_call_dummy_address (struct gdbarch *gdbarch);
-extern void set_gdbarch_call_dummy_address (struct gdbarch *gdbarch, gdbarch_call_dummy_address_ftype *call_dummy_address);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (CALL_DUMMY_ADDRESS)
-#error "Non multi-arch definition of CALL_DUMMY_ADDRESS"
+#if defined (DEPRECATED_CALL_DUMMY_ADDRESS)
+/* Legacy for systems yet to multi-arch DEPRECATED_CALL_DUMMY_ADDRESS */
+#if !defined (DEPRECATED_CALL_DUMMY_ADDRESS_P)
+#define DEPRECATED_CALL_DUMMY_ADDRESS_P() (1)
 #endif
-#if !defined (CALL_DUMMY_ADDRESS)
-#define CALL_DUMMY_ADDRESS() (gdbarch_call_dummy_address (current_gdbarch))
+#endif
+
+extern int gdbarch_deprecated_call_dummy_address_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_CALL_DUMMY_ADDRESS_P)
+#error "Non multi-arch definition of DEPRECATED_CALL_DUMMY_ADDRESS"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_CALL_DUMMY_ADDRESS_P)
+#define DEPRECATED_CALL_DUMMY_ADDRESS_P() (gdbarch_deprecated_call_dummy_address_p (current_gdbarch))
+#endif
+
+typedef CORE_ADDR (gdbarch_deprecated_call_dummy_address_ftype) (void);
+extern CORE_ADDR gdbarch_deprecated_call_dummy_address (struct gdbarch *gdbarch);
+extern void set_gdbarch_deprecated_call_dummy_address (struct gdbarch *gdbarch, gdbarch_deprecated_call_dummy_address_ftype *deprecated_call_dummy_address);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_CALL_DUMMY_ADDRESS)
+#error "Non multi-arch definition of DEPRECATED_CALL_DUMMY_ADDRESS"
+#endif
+#if !defined (DEPRECATED_CALL_DUMMY_ADDRESS)
+#define DEPRECATED_CALL_DUMMY_ADDRESS() (gdbarch_deprecated_call_dummy_address (current_gdbarch))
 #endif
 
 /* DEPRECATED_CALL_DUMMY_START_OFFSET can be deleted. */

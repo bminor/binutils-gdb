@@ -557,7 +557,10 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 				     value_type, using_gcc);
 	}
       real_pc = funaddr;
-      dummy_addr = CALL_DUMMY_ADDRESS ();
+      dummy_addr = entry_point_address ();
+      if (DEPRECATED_CALL_DUMMY_ADDRESS_P ())
+	/* Override it.  */
+	dummy_addr = DEPRECATED_CALL_DUMMY_ADDRESS ();
       /* Make certain that the address points at real code, and not a
          function descriptor.  */
       dummy_addr = CONVERT_FROM_FUNC_PTR_ADDR (dummy_addr);

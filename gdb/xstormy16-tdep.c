@@ -312,7 +312,7 @@ xstormy16_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   unsigned char buf[xstormy16_pc_size];
 
-  store_unsigned_integer (buf, xstormy16_pc_size, CALL_DUMMY_ADDRESS ());
+  store_unsigned_integer (buf, xstormy16_pc_size, entry_point_address ());
   write_memory (sp, buf, xstormy16_pc_size);
   return sp + xstormy16_pc_size;
 }

@@ -1,5 +1,25 @@
 2003-09-08  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (DEPRECATED_CALL_DUMMY_ADDRESS): Rename
+	CALL_DUMMY_ADDRESS, change to a predicate.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* blockframe.c (deprecated_pc_in_call_dummy_at_entry_point):
+	Use either DEPRECATED_CALL_DUMMY_ADDRESS or entry_point_address.
+	* infcall.c (call_function_by_hand): Ditto.
+	* sparc-tdep.c (sparc_push_return_address): Ditto.
+	(sparc_gdbarch_init): Set deprecated_call_dummy_address.
+	* xstormy16-tdep.c (xstormy16_push_return_address): Replace
+	CALL_DUMMY_ADDRESS with entry_point_address.
+	* v850-tdep.c (v850_push_return_address): Ditto.
+	* s390-tdep.c (s390_push_return_address): Ditto.
+	* rs6000-tdep.c (ppc_push_return_address): Ditto.
+	* mn10300-tdep.c (mn10300_push_return_address): Ditto.
+	* mcore-tdep.c (mcore_push_return_address): Ditto.
+	* cris-tdep.c (cris_push_return_address): Ditto.
+	* arm-tdep.c (arm_push_return_address): Ditto.
+
+2003-09-08  Andrew Cagney  <cagney@redhat.com>
+
 	* dwarf2-frame.c (enum dwarf2_reg_rule): New, replace anonymous
 	enum.  Add REG_UNSPECIFIED, rename REG_UNSAVED to REG_UNDEFINED
 	and REG_UNMODIFIED to REG_SAME_VALUE.

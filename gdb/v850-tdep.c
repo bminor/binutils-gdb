@@ -1000,7 +1000,7 @@ v850_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 static CORE_ADDR
 v850_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
-  write_register (E_RP_REGNUM, CALL_DUMMY_ADDRESS ());
+  write_register (E_RP_REGNUM, entry_point_address ());
   return sp;
 }
 
