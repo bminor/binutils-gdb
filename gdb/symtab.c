@@ -193,6 +193,10 @@ lookup_symtab (name)
   s = lookup_symtab_1 (name);
   if (s) return s;
 
+#if 0
+  /* This screws c-exp.y:yylex if there is both a type "tree" and a symtab
+     "tree.c".  */
+
   /* If name not found as specified, see if adding ".c" helps.  */
   /* Why is this?  Is it just a user convenience?  (If so, it's pretty
      questionable in the presence of C++, FORTRAN, etc.).  It's not in
@@ -203,6 +207,7 @@ lookup_symtab (name)
   strcat (copy, ".c");
   s = lookup_symtab_1 (copy);
   if (s) return s;
+#endif /* 0 */
 
   /* We didn't find anything; die.  */
   return 0;
@@ -420,6 +425,21 @@ find_pc_psymbol (psymtab, pc)
 
   best_pc = psymtab->textlow - 1;
 
+  /* Search the global symbols as well as the static symbols, so that
+     find_pc_partial_function doesn't use a minimal symbol and thus
+     cache a bad endaddr.  */
+  for (p = psymtab->objfile->global_psymbols.list + psymtab->globals_offset;
+       (p - (psymtab->objfile->global_psymbols.list + psymtab->globals_offset)
+	< psymtab->n_global_syms);
+       p++)
+    if (SYMBOL_NAMESPACE (p) == VAR_NAMESPACE
+	&& SYMBOL_CLASS (p) == LOC_BLOCK
+	&& pc >= SYMBOL_VALUE_ADDRESS (p)
+	&& SYMBOL_VALUE_ADDRESS (p) > best_pc)
+      {
+	best_pc = SYMBOL_VALUE_ADDRESS (p);
+	best = p;
+      }
   for (p = psymtab->objfile->static_psymbols.list + psymtab->statics_offset;
        (p - (psymtab->objfile->static_psymbols.list + psymtab->statics_offset)
 	< psymtab->n_static_syms);

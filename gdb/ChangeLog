@@ -1,5 +1,7 @@
 Thu Jan  6 07:17:53 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* symtab.c (lookup_symbol): Don't try adding .c to the name.
+
 	* remote-bug.c: At the start of each section, reset srec_frame
 	back to 160.
 
