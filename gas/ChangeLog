@@ -1,3 +1,8 @@
+2003-06-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-i960.c (line_comment_chars): Add '#'.
+	* config/tc-mn10200.c (tc_gen_reloc): Don't ignore fx_subsy.
+
 2003-06-11  H.J. Lu <hongjiu.lu@intel.com>
 
 	* po/Make-in (DESTDIR): New.

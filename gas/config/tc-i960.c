@@ -1,6 +1,6 @@
 /* tc-i960.c - All the i80960-specific stuff
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002
+   1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS.
@@ -206,7 +206,7 @@ const char comment_chars[] = "#";
 
 /* Also note that comments started like this one will always work.  */
 
-const char line_comment_chars[] = "";
+const char line_comment_chars[] = "#";
 
 const char line_separator_chars[] = ";";
 
