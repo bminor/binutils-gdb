@@ -1,3 +1,8 @@
+2003-08-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/interrupt.exp: XFAIL "call function when asleep" for
+	*-*-*bsd*.
+
 2003-08-28  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdb.base/dump.exp: Skip for ia64.
