@@ -235,6 +235,26 @@ linux_corefile_thread_callback (struct lwp_info *ti, void *data)
   return 0;
 }
 
+/* Function: linux_do_registers
+ * 
+ * Records the register state for the corefile note section.
+ */
+
+static char *
+linux_do_registers (bfd *obfd, ptid_t ptid,
+		    char *note_data, int *note_size)
+{
+  registers_changed ();
+  target_fetch_registers (-1);	/* FIXME should not be necessary; 
+				   fill_gregset should do it automatically. */
+  return linux_do_thread_registers (obfd,
+				    ptid_build (ptid_get_pid (inferior_ptid),
+						ptid_get_pid (inferior_ptid),
+						0),
+				    note_data, note_size);
+  return note_data;
+}
+
 /* Function: linux_make_note_section
  *
  * Fills the "to_make_corefile_note" target vector.
@@ -277,8 +297,8 @@ linux_make_note_section (bfd *obfd, int *note_size)
     {
       /* iterate_over_threads didn't come up with any threads;
          just use inferior_ptid.  */
-      note_data = linux_do_thread_registers (obfd, inferior_ptid,
-					     note_data, note_size);
+      note_data = linux_do_registers (obfd, inferior_ptid,
+				      note_data, note_size);
     }
   else
     {
