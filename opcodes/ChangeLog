@@ -2,6 +2,13 @@
 
 	* i386-dis.c (prefix_user_table): Correct movq2dq, movdq2q, and
 	movq operands.
+	(twobyte_has_modrm): Update table.
+	(need_modrm): Give it file scope.
+	(MODRM_CHECK): Define.
+	(dofloat): Use MODRM_CHECK.
+	(OP_E): Likewise.
+	(OP_EM): Likewise.
+	(OP_EX): Likewise.
 
 2001-05-07  Frank Ch. Eigler  <fche@redhat.com>
 

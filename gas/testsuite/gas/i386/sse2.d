@@ -152,5 +152,5 @@ Disassembly of section .text:
  26b:	f2 0f 70 c8 01[ 	]+pshuflw \$0x1,%xmm0,%xmm1
  270:	66 0f 73 f8 01[ 	]+pslldq \$0x1,%xmm0
  275:	66 0f 73 d8 01[ 	]+psrldq \$0x1,%xmm0
- 27a:	66 0f 6d c8[ 	]+punpckhqdq %xmm0,%xmm3
+ 27a:	66 0f 6d c8[ 	]+punpckhqdq %xmm0,%xmm1
  27e:	89 f6[ 	]+mov[ 	]+%esi,%esi

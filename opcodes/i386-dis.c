@@ -2228,20 +2228,20 @@ static const unsigned char twobyte_has_modrm[256] = {
   /*       -------------------------------        */
   /* 00 */ 1,1,1,1,0,0,0,0,0,0,0,0,0,1,0,1, /* 0f */
   /* 10 */ 1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0, /* 1f */
-  /* 20 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 2f */
+  /* 20 */ 1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1, /* 2f */
   /* 30 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 3f */
   /* 40 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 4f */
-  /* 50 */ 1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1, /* 5f */
-  /* 60 */ 1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1, /* 6f */
+  /* 50 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 5f */
+  /* 60 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 6f */
   /* 70 */ 1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1, /* 7f */
   /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
   /* 90 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 9f */
-  /* a0 */ 0,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1, /* af */
+  /* a0 */ 0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,1, /* af */
   /* b0 */ 1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1, /* bf */
   /* c0 */ 1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1, /* df */
-  /* e0 */ 1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1, /* ef */
-  /* f0 */ 0,1,1,1,0,1,1,1,1,1,1,1,1,1,1,0  /* ff */
+  /* d0 */ 0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* df */
+  /* e0 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* ef */
+  /* f0 */ 0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0  /* ff */
   /*       -------------------------------        */
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
 };
@@ -2279,7 +2279,13 @@ static disassemble_info *the_info;
 static int mod;
 static int rm;
 static int reg;
+static unsigned char need_modrm;
 static void oappend PARAMS ((const char *s));
+
+/* If we are accessing mod/rm/reg without need_modrm set, then the
+   values are stale.  Hitting this abort likely indicates that you
+   need to update onebyte_has_modrm or twobyte_has_modrm.  */
+#define MODRM_CHECK  if (!need_modrm) abort ()
 
 static const char *names64[] = {
   "%rax","%rcx","%rdx","%rbx", "%rsp","%rbp","%rsi","%rdi",
@@ -2989,7 +2995,6 @@ print_insn_i386 (pc, info)
   int two_source_ops;
   char *first, *second, *third;
   int needcomma;
-  unsigned char need_modrm;
   unsigned char uses_SSE_prefix;
   VOLATILE int sizeflag;
   VOLATILE int orig_sizeflag;
@@ -3624,6 +3629,8 @@ dofloat (sizeflag)
         OP_E (v_mode, sizeflag);
       return;
     }
+  /* skip mod/rm byte */
+  MODRM_CHECK;
   codep++;
 
   dp = &float_reg[floatop - 0xd8][reg];
@@ -4038,6 +4045,7 @@ OP_E (bytemode, sizeflag)
     add += 8;
 
   /* skip mod/rm byte */
+  MODRM_CHECK;
   codep++;
 
   if (mod == 3)
@@ -4927,6 +4935,8 @@ OP_EM (bytemode, sizeflag)
   if (rex & REX_EXTZ)
     add = 8;
 
+  /* skip mod/rm byte */
+  MODRM_CHECK;
   codep++;
   used_prefixes |= (prefixes & PREFIX_DATA);
   if (prefixes & PREFIX_DATA)
@@ -4951,6 +4961,8 @@ OP_EX (bytemode, sizeflag)
   if (rex & REX_EXTZ)
     add = 8;
 
+  /* skip mod/rm byte */
+  MODRM_CHECK;
   codep++;
   sprintf (scratchbuf, "%%xmm%d", rm + add);
   oappend (scratchbuf);
