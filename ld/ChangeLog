@@ -1,3 +1,7 @@
+Thu Apr 21 17:24:24 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* Makefile.in (clean, distclean): Remove configdoc.texi.
+
 Tue Apr 19 12:12:15 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* configure.in: Add i[34]86-*-bsd386 to the patterns recognized.

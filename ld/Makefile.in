@@ -662,11 +662,12 @@ mostlyclean:
 	-rm -f $(STAGESTUFF) ld.?? ld.??? ldlex.[qp]
 	-rm -f ld ld1 ld2 ld3 *.o y.output cdtest cdtest.out
 clean: mostlyclean
-	-rm -f $(LD_PROG)
+	-rm -f $(LD_PROG) configdoc.texi
 distclean:
 	-rm -fr Makefile config.status TAGS sysdep.h ldscripts site.exp \
 		$(STAGESTUFF) ld.?? ld.??s ld.toc ld.aux ld.log ldlex.[qp] \
-		$(LD_PROG) ld ld1 ld2 ld3 *.o y.output cdtest cdtest.out
+		$(LD_PROG) ld ld1 ld2 ld3 *.o y.output cdtest cdtest.out \
+		configdoc.texi
 realclean: clean distclean
 	-rm -f $(LDDISTSTUFF)
 
