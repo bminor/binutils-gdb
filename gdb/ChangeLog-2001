@@ -27,13 +27,6 @@
         * ppc-tdep.h (struct gdbarch_tdep): Add altivec regnum fields.
         (altivec_register_p): Export.
 
-2001-12-29  Mark Kettenis  <kettenis@gnu.org>
-
-	* i386bsd-nat.c (reg_offset): Fix typo.
-
-	* i386-tdep.c (i386_push_dummy_frame): Don't write back the
-	modified frame pointer until the old frame pointer has been saved.
-
 2001-12-30  Andrew Cagney  <ac131313@redhat.com>
 
 	* arch-utils.c (initialize_current_architecture): Test byte_order
@@ -43,6 +36,26 @@
 	(verify_gdbarch, gdbarch_update_p): Test byte_order against
 	BFD_ENDIAN_UNKNOWN.
 	* gdbarch.h, gdbarch.c: Re-generate.
+
+2001-12-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386bsd-nat.c (reg_offset): Fix typo.
+
+	* i386-tdep.c (i386_push_dummy_frame): Don't write back the
+	modified frame pointer until the old frame pointer has been saved.
+
+2001-12-28  Michael Snyder  <msnyder@redhat.com>
+
+	Abstract the functionality of iterating over mapped memory
+	regions into a general purpose iterator function.
+	* procfs.c (iterate_over_mappings): New function, general purpose 
+	iterator for memory sections.
+	(proc_iterate_over_mappings): Reimplement using iterate_over_mappings.
+	(solib_mappings_callback): New function, callback for above.
+	(info_proc_mappings): Reimpliment using iterate_over_mappings.
+	(info_mappings_callback): New function, callback for above.
+
+	* procfs.c (proc_set_watchpoint): Add cast to suppress warning.
 
 2001-12-27  Michael Snyder  <msnyder@redhat.com>
 

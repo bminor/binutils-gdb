@@ -2848,7 +2848,11 @@ proc_set_watchpoint (procinfo *pi, CORE_ADDR addr, int len, int wflags)
   prwatch_t *pwatch;
 
   pwatch            = (prwatch_t *) &arg.watch;
-  pwatch->pr_vaddr  = address_to_host_pointer (addr);
+#ifdef PCAGENT	/* Horrible hack: only defined on Solaris 2.6+ */
+  pwatch->pr_vaddr  = (uintptr_t) address_to_host_pointer (addr);
+#else
+  pwatch->pr_vaddr  = (caddr_t) address_to_host_pointer (addr);
+#endif
   pwatch->pr_size   = len;
   pwatch->pr_wflags = wflags;
 #if defined(NEW_PROC_API) && defined (PCWATCH)
@@ -2863,115 +2867,6 @@ proc_set_watchpoint (procinfo *pi, CORE_ADDR addr, int len, int wflags)
 #endif
 #endif
 #endif
-}
-
-/*
- * Function: proc_iterate_over_mappings
- *
- * Given a pointer to a function, call that function once for every
- * mapped address space in the process.  The callback function 
- * receives an open file descriptor for the file corresponding to
- * that mapped address space (if there is one), and the base address
- * of the mapped space.  Quit when the callback function returns a
- * nonzero value, or at teh end of the mappings.
- *
- * Returns: the first non-zero return value of the callback function,
- * or zero.
- */
-
-int
-proc_iterate_over_mappings (int (*func) (int, CORE_ADDR))
-{
-  struct prmap *map;
-  procinfo *pi;
-#ifndef NEW_PROC_API	/* avoid compiler warning */
-  int nmaps = 0;
-  int i;
-#else
-  int map_fd;
-  char pathname[MAX_PROC_NAME_SIZE];
-#endif
-  int funcstat = 0;
-  int fd;
-
-  pi = find_procinfo_or_die (PIDGET (inferior_ptid), 0);
-
-#ifdef NEW_PROC_API
-  /* Open map fd.  */
-  sprintf (pathname, "/proc/%d/map", pi->pid);
-  if ((map_fd = open_with_retry (pathname, O_RDONLY)) < 0)
-    proc_error (pi, "proc_iterate_over_mappings (open)", __LINE__);
-
-  /* Make sure it gets closed again.  */
-  make_cleanup_close (map_fd);
-
-  /* Allocate space for mapping (lifetime only for this function). */
-  map = alloca (sizeof (struct prmap));
-
-  /* Now read the mappings from the file, 
-     open a file descriptor for those that have a name, 
-     and call the callback function.  */
-  while (read (map_fd, 
-	       (void *) map, 
-	       sizeof (struct prmap)) == sizeof (struct prmap))
-    {
-      char name[MAX_PROC_NAME_SIZE + sizeof (map->pr_mapname)];
-
-      if (map->pr_vaddr == 0 && map->pr_size == 0)
-	break;		/* sanity */
-
-      if (map->pr_mapname[0] == 0)
-	{
-	  fd = -1;	/* no map file */
-	}
-      else
-	{
-	  sprintf (name, "/proc/%d/object/%s", pi->pid, map->pr_mapname);
-	  /* Note: caller's responsibility to close this fd!  */
-	  fd = open_with_retry (name, O_RDONLY);
-	  /* Note: we don't test the above call for failure;
-	     we just pass the FD on as given.  Sometimes there is 
-	     no file, so the ioctl may return failure, but that's
-	     not a problem.  */
-	}
-
-      /* Stop looping if the callback returns non-zero.  */
-      if ((funcstat = (*func) (fd, (CORE_ADDR) map->pr_vaddr)) != 0)
-	break;
-    }  
-#else
-  /* Get the number of mapping entries.  */
-  if (ioctl (pi->ctl_fd, PIOCNMAP, &nmaps) < 0)
-    proc_error (pi, "proc_iterate_over_mappings (PIOCNMAP)", __LINE__);
-
-  /* Allocate space for mappings (lifetime only this function).  */
-  map = (struct prmap *) alloca ((nmaps + 1) * sizeof (struct prmap));
-
-  /* Read in all the mappings.  */
-  if (ioctl (pi->ctl_fd, PIOCMAP, map) < 0)
-    proc_error (pi, "proc_iterate_over_mappings (PIOCMAP)", __LINE__);
-
-  /* Now loop through the mappings, open an fd for each, and
-     call the callback function.  */
-  for (i = 0; 
-       i < nmaps && map[i].pr_size != 0; 
-       i++)
-    {
-      /* Note: caller's responsibility to close this fd!  */
-      fd = ioctl (pi->ctl_fd, PIOCOPENM, &map[i].pr_vaddr);
-      /* Note: we don't test the above call for failure;
-	 we just pass the FD on as given.  Sometimes there is 
-	 no file, so the ioctl may return failure, but that's
-	 not a problem.  */
-
-      /* Stop looping if the callback returns non-zero.  */
-      funcstat = (*func) (fd, host_pointer_to_address (map[i].pr_vaddr));
-      if (funcstat != 0)
-	break;
-    }
-#endif
-
-  return funcstat;
 }
 
 #ifdef TM_I386SOL2_H		/* Is it hokey to use this? */
@@ -5308,6 +5203,158 @@ procfs_find_LDT_entry (ptid_t ptid)
 #endif /* TM_I386SOL2_H */
 
 /*
+ * Memory Mappings Functions:
+ */
+
+/* 
+ * Function: iterate_over_mappings
+ *
+ * Call a callback function once for each mapping, passing it the mapping,
+ * an optional secondary callback function, and some optional opaque data.
+ * Quit and return the first non-zero value returned from the callback.
+ *
+ * Arguments:
+ *   pi   -- procinfo struct for the process to be mapped.
+ *   func -- callback function to be called by this iterator.
+ *   data -- optional opaque data to be passed to the callback function.
+ *   child_func -- optional secondary function pointer to be passed
+ *                 to the child function.
+ *
+ * Return: First non-zero return value from the callback function, 
+ *         or zero.
+ */
+
+static int
+iterate_over_mappings (procinfo *pi, int (*child_func) (), void *data, 
+		       int (*func) (struct prmap *map, 
+				    int (*child_func) (), 
+				    void *data))
+{
+  char pathname[MAX_PROC_NAME_SIZE];
+  struct prmap *prmaps;
+  struct prmap *prmap;
+  int funcstat;
+  int map_fd;
+  int nmap;
+#ifdef NEW_PROC_API
+  struct stat sbuf;
+#endif
+
+  /* Get the number of mappings, allocate space, 
+     and read the mappings into prmaps.  */
+#ifdef NEW_PROC_API
+  /* Open map fd. */
+  sprintf (pathname, "/proc/%d/map", pi->pid);
+  if ((map_fd = open (pathname, O_RDONLY)) < 0)
+    proc_error (pi, "iterate_over_mappings (open)", __LINE__);
+
+  /* Make sure it gets closed again. */
+  make_cleanup_close (map_fd);
+
+  /* Use stat to determine the file size, and compute 
+     the number of prmap_t objects it contains.  */
+  if (fstat (map_fd, &sbuf) != 0)
+    proc_error (pi, "iterate_over_mappings (fstat)", __LINE__);
+
+  nmap = sbuf.st_size / sizeof (prmap_t);
+  prmaps = (struct prmap *) alloca ((nmap + 1) * sizeof (*prmaps));
+  if (read (map_fd, (char *) prmaps, nmap * sizeof (*prmaps))
+      != (nmap * sizeof (*prmaps)))
+    proc_error (pi, "iterate_over_mappings (read)", __LINE__);
+#else
+  /* Use ioctl command PIOCNMAP to get number of mappings.  */
+  if (ioctl (pi->ctl_fd, PIOCNMAP, &nmap) != 0)
+    proc_error (pi, "iterate_over_mappings (PIOCNMAP)", __LINE__);
+
+  prmaps = (struct prmap *) alloca ((nmap + 1) * sizeof (*prmaps));
+  if (ioctl (pi->ctl_fd, PIOCMAP, prmaps) != 0)
+    proc_error (pi, "iterate_over_mappings (PIOCMAP)", __LINE__);
+#endif
+
+  for (prmap = prmaps; nmap > 0; prmap++, nmap--)
+    if ((funcstat = (*func) (prmap, child_func, data)) != 0)
+      return funcstat;
+
+  return 0;
+}
+
+/*
+ * Function: solib_mappings_callback
+ *
+ * Calls the supplied callback function once for each mapped address 
+ * space in the process.  The callback function  receives an open 
+ * file descriptor for the file corresponding to that mapped 
+ * address space (if there is one), and the base address of the 
+ * mapped space.  Quit when the callback function returns a
+ * nonzero value, or at teh end of the mappings.
+ *
+ * Returns: the first non-zero return value of the callback function,
+ * or zero.
+ */
+
+int solib_mappings_callback (struct prmap *map, 
+			     int (*func) (int, CORE_ADDR),
+			     void *data)
+{
+  procinfo *pi = data;
+  int fd;
+
+#ifdef NEW_PROC_API
+  char name[MAX_PROC_NAME_SIZE + sizeof (map->pr_mapname)];
+
+  if (map->pr_vaddr == 0 && map->pr_size == 0)
+    return -1;		/* sanity */
+
+  if (map->pr_mapname[0] == 0)
+    {
+      fd = -1;	/* no map file */
+    }
+  else
+    {
+      sprintf (name, "/proc/%d/object/%s", pi->pid, map->pr_mapname);
+      /* Note: caller's responsibility to close this fd!  */
+      fd = open_with_retry (name, O_RDONLY);
+      /* Note: we don't test the above call for failure;
+	 we just pass the FD on as given.  Sometimes there is 
+	 no file, so the open may return failure, but that's
+	 not a problem.  */
+    }
+#else
+  fd = ioctl (pi->ctl_fd, PIOCOPENM, &map->pr_vaddr);
+  /* Note: we don't test the above call for failure;
+     we just pass the FD on as given.  Sometimes there is 
+     no file, so the ioctl may return failure, but that's
+     not a problem.  */
+#endif
+  return (*func) (fd, (CORE_ADDR) map->pr_vaddr);
+}
+
+/*
+ * Function: proc_iterate_over_mappings
+ *
+ * Uses the unified "iterate_over_mappings" function
+ * to implement the exported interface to solib-svr4.c.
+ *
+ * Given a pointer to a function, call that function once for every
+ * mapped address space in the process.  The callback function 
+ * receives an open file descriptor for the file corresponding to
+ * that mapped address space (if there is one), and the base address
+ * of the mapped space.  Quit when the callback function returns a
+ * nonzero value, or at teh end of the mappings.
+ *
+ * Returns: the first non-zero return value of the callback function,
+ * or zero.
+ */
+
+int
+proc_iterate_over_mappings (int (*func) (int, CORE_ADDR))
+{
+  procinfo *pi = find_procinfo_or_die (PIDGET (inferior_ptid), 0);
+
+  return iterate_over_mappings (pi, func, pi, solib_mappings_callback);
+}
+
+/*
  * Function: mappingflags
  *
  * Returns an ascii representation of a memory mapping's flags.
@@ -5340,6 +5387,37 @@ mappingflags (flags)
 }
 
 /*
+ * Function: info_mappings_callback
+ *
+ * Callback function, does the actual work for 'info proc mappings'.
+ */
+
+/* ARGSUSED */
+static int
+info_mappings_callback (struct prmap *map, int (*ignore) (), void *unused)
+{
+  char *data_fmt_string;
+
+  if (TARGET_ADDR_BIT == 32)
+    data_fmt_string   = "\t%#10lx %#10lx %#10x %#10x %7s\n";
+  else
+    data_fmt_string   = "  %#18lx %#18lx %#10x %#10x %7s\n";
+
+  printf_filtered (data_fmt_string, 
+		   (unsigned long) map->pr_vaddr,
+		   (unsigned long) map->pr_vaddr + map->pr_size - 1,
+		   map->pr_size,
+#ifdef PCAGENT	/* Horrible hack: only defined on Solaris 2.6+ */
+		   (unsigned int) map->pr_offset, 
+#else
+		   map->pr_off,
+#endif
+		   mappingflags (map->pr_mflags));
+
+  return 0;
+}
+
+/*
  * Function: info_proc_mappings
  *
  * Implement the "info proc mappings" subcommand.
@@ -5348,58 +5426,15 @@ mappingflags (flags)
 static void
 info_proc_mappings (procinfo *pi, int summary)
 {
-  char *header_fmt_string, *data_fmt_string;
-  char pathname[MAX_PROC_NAME_SIZE];
-  struct prmap *prmaps;
-  struct prmap *prmap;
-  int map_fd;
-  int nmap;
-#ifdef NEW_PROC_API
-  struct stat sbuf;
-#endif
+  char *header_fmt_string;
 
   if (TARGET_PTR_BIT == 32)
-    {
-      header_fmt_string = "\t%10s %10s %10s %10s %7s\n";
-      data_fmt_string   = "\t%#10lx %#10lx %#10x %#10x %7s\n";
-    }
+    header_fmt_string = "\t%10s %10s %10s %10s %7s\n";
   else
-    {
-      header_fmt_string = "  %18s %18s %10s %10s %7s\n";
-      data_fmt_string   = "  %#18lx %#18lx %#10x %#10x %7s\n";
-    }
+    header_fmt_string = "  %18s %18s %10s %10s %7s\n";
 
   if (summary)
     return;	/* No output for summary mode. */
-
-  /* Get the number of mappings, allocate space, 
-     and read the mappings into prmaps.  */
-#ifdef NEW_PROC_API
-  /* Open map fd. */
-  sprintf (pathname, "/proc/%d/map", pi->pid);
-  if ((map_fd = open (pathname, O_RDONLY)) < 0)
-    return;		/* Can't open map file. */
-  /* Make sure it gets closed again. */
-  make_cleanup_close (map_fd);
-
-  /* Use stat to determine the file size, and compute 
-     the number of prmap_t objects it contains.  */
-  if (fstat (map_fd, &sbuf) != 0)
-    return;		/* Can't stat file.  */
-
-  nmap = sbuf.st_size / sizeof (prmap_t);
-  prmaps = (struct prmap *) alloca ((nmap + 1) * sizeof (*prmaps));
-  if (read (map_fd, (char *) prmaps, nmap * sizeof (*prmaps))
-      != (nmap * sizeof (*prmaps)))
-    return;		/* Can't read file. */
-#else
-  /* Use ioctl command PIOCNMAP to get number of mappings.  */
-  if (ioctl (pi->ctl_fd, PIOCNMAP, &nmap) != 0)
-    return;	/* Can't get number of mappings.  */
-  prmaps = (struct prmap *) alloca ((nmap + 1) * sizeof (*prmaps));
-  if (ioctl (pi->ctl_fd, PIOCMAP, prmaps) != 0)
-    return;	/* Can't read mappings. */
-#endif
 
   printf_filtered ("Mapped address spaces:\n\n");
   printf_filtered (header_fmt_string, 
@@ -5409,20 +5444,7 @@ info_proc_mappings (procinfo *pi, int summary)
 		   "    Offset",
 		   "Flags");
 
-  for (prmap = prmaps; nmap > 0; prmap++, nmap--)
-    {
-      printf_filtered (data_fmt_string, 
-		       (unsigned long) prmap->pr_vaddr,
-		       (unsigned long) prmap->pr_vaddr
-		       + prmap->pr_size - 1,
-		       prmap->pr_size,
-#ifdef PCAGENT		/* Gross hack: only defined on Solaris 2.6+ */
-		       (unsigned int) prmap->pr_offset, 
-#else
-		       prmap->pr_off,
-#endif
-		       mappingflags (prmap->pr_mflags));
-    }
+  iterate_over_mappings (pi, NULL, NULL, info_mappings_callback);
   printf_filtered ("\n");
 }
 
