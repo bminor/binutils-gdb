@@ -120,6 +120,8 @@
 @V@/gdb/gdbtk/library/ChangeLog-2000 @V@/gdb/gdbtk/library/ChangeLog.000
 @V@/gdb/gdbtk/plugins/intel-pentium/intel-pentium.tcl.in @V@/gdb/gdbtk/plugins/intel-pentium/intel-pentium.t-in
 @V@/gdb/gdbtk/plugins/rhabout/rhabout.tcl.in @V@/gdb/gdbtk/plugins/rhabout/rhabout.t-in
+@V@/gdb/hppabsd-nat.c @V@/gdb/hppab-nat.c
+@V@/gdb/hppabsd-tdep.c @V@/gdb/hppab-tdep.c
 @V@/gdb/i386-interix-nat.c @V@/gdb/i386ix-nat.c
 @V@/gdb/i386-interix-tdep.c @V@/gdb/i386ix-tdep.c
 @V@/gdb/i386-linux-tdep.c @V@/gdb/i386lx-tdep.c
