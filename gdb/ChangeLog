@@ -1,3 +1,8 @@
+2004-09-20  Daniel Jacobowitz  <dan@debian.org>
+
+	* symtab.c (lookup_partial_symtab): Use psymtab_to_fullname.
+	(lookup_partial_symtab): Use symtab_to_fullname.
+
 2004-09-19  Jim Blandy  <jimb@redhat.com>
 
 	* minsyms.c (lookup_minimal_symbol): Doc fix.

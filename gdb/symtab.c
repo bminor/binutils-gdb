@@ -272,8 +272,7 @@ lookup_partial_symtab (const char *name)
        this symtab and use its absolute path.  */
     if (full_path != NULL)
       {
-	if (pst->fullname == NULL)
-	  source_full_path_of (pst->filename, &pst->fullname);
+	psymtab_to_fullname (pst);
 	if (pst->fullname != NULL
 	    && FILENAME_CMP (full_path, pst->fullname) == 0)
 	  {
@@ -284,8 +283,7 @@ lookup_partial_symtab (const char *name)
     if (real_path != NULL)
       {
         char *rp = NULL;
-	if (pst->fullname == NULL)
-	  source_full_path_of (pst->filename, &pst->fullname);
+	psymtab_to_fullname (pst);
         if (pst->fullname != NULL)
           {
             rp = gdb_realpath (pst->fullname);
