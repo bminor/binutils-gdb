@@ -1,5 +1,5 @@
 /* MIPS-specific support for 64-bit ELF
-   Copyright 1996, 1997 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998 Free Software Foundation, Inc.
    Ian Lance Taylor, Cygnus Support
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -76,53 +76,6 @@ static boolean mips_elf64_slurp_armap PARAMS ((bfd *));
 static boolean mips_elf64_write_armap
   PARAMS ((bfd *, unsigned int, struct orl *, unsigned int, int));
 
-/* The relocation types.  */
-
-enum mips_elf64_reloc_type
-{
-#if 0
-  /* These are now in elf/mips.h.  */
-  R_MIPS_NONE = 0,
-  R_MIPS_16 = 1,
-  R_MIPS_32 = 2,
-  R_MIPS_ADD = 2,
-  R_MIPS_REL32 = 3,
-  R_MIPS_REL = 3,
-  R_MIPS_26 = 4,
-  R_MIPS_HI16 = 5,
-  R_MIPS_LO16 = 6,
-  R_MIPS_GPREL16 = 7,
-  R_MIPS_GPREL = 7,
-  R_MIPS_LITERAL = 8,
-  R_MIPS_GOT16 = 9,
-  R_MIPS_GOT = 9,
-  R_MIPS_PC16 = 10,
-  R_MIPS_CALL16 = 11,
-  R_MIPS_CALL = 11,
-  R_MIPS_GPREL32 = 12,
-  R_MIPS_SHIFT5 = 16,
-  R_MIPS_SHIFT6 = 17,
-  R_MIPS_64 = 18,
-  R_MIPS_GOT_DISP = 19,
-  R_MIPS_GOT_PAGE = 20,
-  R_MIPS_GOT_OFST = 21,
-  R_MIPS_GOT_HI16 = 22,
-  R_MIPS_GOT_LO16 = 23,
-  R_MIPS_SUB = 24,
-  R_MIPS_INSERT_A = 25,
-  R_MIPS_INSERT_B = 26,
-  R_MIPS_DELETE = 27,
-  R_MIPS_HIGHER = 28,
-  R_MIPS_HIGHEST = 29,
-  R_MIPS_CALL_HI16 = 30,
-  R_MIPS_CALL_LO16 = 31,
-#endif
-  R_MIPS_SCN_DISP = 32,
-  R_MIPS_REL16 = 33,
-  R_MIPS_ADD_IMMEDIATE = 34,
-  R_MIPS_PJUMP = 35,
-  R_MIPS_RELGOT = 36
-};
 
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value
    from smaller values.  Start with zero, widen, *then* decrement.  */
