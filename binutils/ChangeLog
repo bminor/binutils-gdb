@@ -1,3 +1,24 @@
+1998-07-21 13:13  Ulrich Drepper  <drepper@cygnus.com>
+
+	* readelf.c: Use symbolic names of relocation entries for the various
+	architectures.  Correct more layout details.
+	Print names of MIPS specific section types.  Print Alpha, ARM, and
+	MIPS relocation type names.
+
+1998-07-20  Vladimir N. Makarov  <vmakarov@cygnus.com>
+
+	* objcopy.c (filter_symbols): Add code for strip all symbols case.
+        (copy_objects): Strip all case is now processed also through
+	filter_symbols.  No marking symbols used in relocations when strip
+	all symbols case.
+	(copy_section): When strip all symbols case, remove relocations
+	which are not in keep strip specific list.
+	(strip_main): Remove guard `strip_specific_list == NULL' for
+	setting up strip all symbols by default.
+
+	* objcopy.exp: Two new tests - strip object file with saving a
+	symbol and strip executable file with saving a symbol.
+
 Mon Jul 20 12:51:16 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* addr2line.c (find_address_in_section): Only consider a section
