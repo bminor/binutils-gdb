@@ -662,14 +662,13 @@ configdoc.texi:	${DOCVER}-doc.texi
 	  || ln ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi >/dev/null 2>&1 \
 	  || cp ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi
 
-ld.info: $(srcdir)/ld.texinfo configdoc.texi bfdsumm.texi
-ld.dvi: $(srcdir)/ld.texinfo configdoc.texi bfdsumm.texi
+ld.info: $(srcdir)/ld.texinfo configdoc.texi
+	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
+	$(MAKEINFO) -I $(srcdir) -I $(BFDDIR)/doc $(srcdir)/ld.texinfo
 
-# We want to include a file from the BFD documentation.  automake
-# doesn't give us a way to set the include directories for makeinfo,
-# so we just create a file locally to include it.
-bfdsumm.texi: Makefile
-	echo @include $(BFDDIR)/doc/bfdsumm.texi > bfdsumm.texi
+ld.dvi: $(srcdir)/ld.texinfo configdoc.texi
+	TEXINPUTS=$(top_srcdir)/../texinfo:$$TEXINPUTS \
+	  MAKEINFO='$(MAKEINFO) -I $(srcdir) -I $(BFDDIR)/doc' $(TEXI2DVI) $(srcdir)/ld.texinfo
 
 # We want to reconfigure if configure.host or configure.tgt changes.
 Makefile: configure.host configure.tgt
@@ -678,7 +677,7 @@ MOSTLYCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
 	ldemul-list.h crtbegin.o crtend.o ld.log ld.sum
 mostlyclean-local:
 	-rm -rf tmpdir
-CLEANFILES = dep.sed .dep .dep1 bfdsumm.texi
+CLEANFILES = dep.sed .dep .dep1
 
 .PHONY: install-exec-local install-data-local
 

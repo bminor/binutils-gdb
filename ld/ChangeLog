@@ -1,3 +1,13 @@
+Mon Apr  6 15:33:39 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (ld.info): Invoke makeinfo with -I options directly
+	rather than relying on default rule.  Don't depend upon
+	bfdsumm.texi.
+	(ld.dvi): Likewise.
+	(bfdsumm.texi): Remove target.
+	(CLEANFILES): Take bfdsumm.texi out of value.
+	* Makefile.in: Rebuild.
+
 Sun Apr  5 13:07:57 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* scripttempl/pe.sc: Use shell variables to avoid depending upon
