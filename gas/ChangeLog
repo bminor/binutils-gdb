@@ -1,3 +1,9 @@
+2001-01-07  Philip Blundell  <philb@gnu.org>
+
+	* doc/as.texinfo (Bug Reporting): Update email address for
+	reports.
+	* README: Likewise.
+
 Sat Jan  6 13:33:10 MET 2001  Jan Hubicka  <jh@suse.cz>
 
 	* configure.in: Define DEFAULT_ARCH for i386.
