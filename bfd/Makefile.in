@@ -71,6 +71,12 @@ STAGESTUFF = $(TARGETLIB) $(OFILES)
 all: $(TARGETLIB) 
 	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS)"
 
+all-info: force
+	$(MAKE) subdir_do DO=all-info "DODIRS=$(SUBDIRS)"
+
+install-info: force
+	$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)"
+
 # HDEPFILES comes from the host config; TDEPFILES from the target config.
 OFILES = $(BFD_LIBS) $(BFD_BACKENDS) $(BFD_MACHINES) $(HDEPFILES) $(TDEPFILES)
 
@@ -243,17 +249,11 @@ dep: $(CFILES)
 
 
 headers:
-	cp $(srcdir)/bfd-in.h $(docdir)
-	cp $(srcdir)/libbfd-in.h $(docdir)
-	cp $(srcdir)/libcoff-in.h $(docdir)
 	(cd $(docdir); $(MAKE) protos)
 	# Rebuild prototypes in bfd.h
 	cp $(docdir)/bfd.h $(BFD_H)
 	cp $(docdir)/libbfd.h $(srcdir)/libbfd.h
 	cp $(docdir)/libcoff.h $(srcdir)/libcoff.h
-	rm -f $(docdir)/bfd-in.h 
-	rm -f $(docdir)/libbfd-in.h 
-	rm -f $(docdir)/libcoff-in.h 
 
 bfd.info:
 	( cd $(docdir); $(MAKE) bfd.info)
