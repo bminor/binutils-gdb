@@ -1,3 +1,23 @@
+Thu Jul 27 21:06:21 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* configure.in (i[345]86-*-linuxoldld): Treat like linuxaout*.
+
+Thu Jul 27 15:26:28 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* scripttempl/i386pe.sc: Cope with constructors.
+	* scripttempl/z8ksim.sc: Deleted.
+	* scripttempl/z8000.sc: Resurrected as this, but
+	can handle z8001 and z8002 formats.
+	* emulparams/z8ksim.sh: Deleted.
+	* emulparams/{z8001.sh, z8002.sh}: New files.
+	* config/z8ksim.mt: Deleted
+	* config/z8k-coff.mt: New, generates both emulations.
+
+Tue Jul 25 14:53:02 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldmisc.c (vfinfo): In %C and %D case, always print the BFD using
+	%B, in case it is in an archive.
+
 Mon Jul 24 15:23:39 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlang.c (lang_process): Call reset_memory_regions for each
