@@ -340,9 +340,9 @@ map_vmap (bfd *bf, bfd *arch)
     obj = allocate_objfile (bf, 0);
 
 #if 0
-    This is only needed if we want to load shared libraries no matter what.
-    Since we provide the choice of incremental loading of shared objects now,
-    we don't have to load them as default anymore.
+    /* This is only needed if we want to load shared libraries no matter what.
+       Since we provide the choice of incremental loading of shared objects
+       now, we don't have to load them as default anymore. */
     
     syms_from_objfile (obj, 0, 0, 0);
     new_symfile_objfile (obj, 0, 0);
