@@ -122,6 +122,8 @@ proc gdb_run_cmd {} {
 	    send "y\n"
 	    exp_continue
 	}
+
+	-re "Starting program: .*$" {}
     }
 }
 
@@ -159,20 +161,25 @@ proc runto { function } {
 	timeout { fail "setting breakpoint at $function (timeout)" ; return 0 }
     }
 
-    send "run\n"
+    gdb_run_cmd
+    
     # the "at foo.c:36" output we get with -g.
     # the "in func" output we get without -g.
     expect {
-	-re "The program .* has been started already.*y or n. $" {
-	    send "y\n"
-	    exp_continue
+	-re "Break.* at .*:$decimal.*$prompt $" {
+	    return 1
 	}
-	-re "Starting.*Break.* at .*:$decimal.*$prompt $" { return 1 }
 	-re "Breakpoint \[0-9\]*, \[0-9xa-f\]* in $function.*$prompt $" { 
 	    return 1
 	}
-	-re "$prompt $" { fail "running to $function" ; return 0 }
-	timeout { fail "running to $function (timeout)" ; return 0 }
+	-re "$prompt $" { 
+	    fail "running to $function"
+	    return 0
+	}
+	timeout { 
+	    fail "running to $function (timeout)"
+	    return 0
+	}
     }
 }
 
