@@ -40,6 +40,7 @@ static void insert_operand_final
 
 static int insert_file PARAMS ((const char *));
 
+static int cur_pke_insn_length PARAMS ((void));
 static void install_pke_length PARAMS ((char *, int));
 
 const char comment_chars[] = ";";
@@ -51,11 +52,16 @@ const char FLT_CHARS[] = "dD";
 /* Current assembler state.
    Instructions like mpg and direct are followed by a restricted set of
    instructions until an end marker (e.g. mpg is followed by vu insns).  */
-typedef enum { ASM_INIT, ASM_MPG, ASM_GPUIF, ASM_VU } asm_state;
+typedef enum {
+  ASM_INIT, ASM_MPG, ASM_DIRECT, ASM_UNPACK, ASM_GPUIF, ASM_VU
+} asm_state;
 static asm_state cur_asm_state = ASM_INIT;
 
-/* Pointer to pke insn currently being assembled or NULL if none.  */
-static char *cur_pke_insn;
+/* For variable length instructions, pointer to the initial frag
+   and pointer into that frag.  These only hold valid values if
+   cur_asm_state is one of ASM_MPG, ASM_DIRECT, ASM_UNPACK.  */
+static fragS *cur_varlen_frag;
+static char *cur_varlen_insn;
 
 /* Non-zero if packing pke instructions in dma tags.  */
 static int dma_pack_pke_p;
@@ -83,7 +89,7 @@ md_show_usage (stream)
   FILE *stream;
 {
 #if 0
-  fprintf (stream, "TX VU options:\n");
+  fprintf (stream, "DVP options:\n");
 #endif
 } 
 
@@ -102,17 +108,17 @@ static void s_state PARAMS ((int));
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
-    { "dmadata", s_dmadata, 1 },
-    { "dmapackpke", s_dmapackpke, 0 },
-    { "enddirect", s_enddirect, 0 },
-    { "enddmadata", s_dmadata, 0 },
-    { "endgpuif", s_endgpuif, 0 },
-    { "endmpg", s_endmpg, 0 },
-    { "endunpack", s_endunpack, 0 },
-    /* .vu,.gpuif added to simplify debugging */
-    { "vu", s_state, ASM_VU },
-    { "gpuif", s_state, ASM_GPUIF },
-    { NULL, NULL, 0 }
+  { "dmadata", s_dmadata, 1 },
+  { "dmapackpke", s_dmapackpke, 0 },
+  { "enddirect", s_enddirect, 0 },
+  { "enddmadata", s_dmadata, 0 },
+  { "endgpuif", s_endgpuif, 0 },
+  { "endmpg", s_endmpg, 0 },
+  { "endunpack", s_endunpack, 0 },
+  /* .vu,.gpuif added to simplify debugging */
+  { "vu", s_state, ASM_VU },
+  { "gpuif", s_state, ASM_GPUIF },
+  { NULL, NULL, 0 }
 };
 
 void
@@ -249,12 +255,12 @@ assemble_pke (str)
   else
     len = 1;
 
-  f = frag_more (len * 4);
-
-  /* Write out the instruction.
-     Reminder: it is important to fetch enough space in one call to
+  /* Reminder: it is important to fetch enough space in one call to
      `frag_more'.  We use (f - frag_now->fr_literal) to compute where
      we are and we don't want frag_now to change between calls.  */
+  f = frag_more (len * 4);
+
+  /* Write out the instruction.  */
   for (i = 0; i < len; ++i)
     md_number_to_chars (f + i * 4, insn_buf[i], 4);
 
@@ -283,14 +289,15 @@ assemble_pke (str)
 		   (bfd_reloc_code_real_type) reloc_type);
     }
 
+  /* Handle variable length insns.  */
+
   if (opcode->flags & PKE_OPCODE_LENVAR)
     {
       /* Name of file to read data from.  */
       char *file;
-      /* In 32 bit words.  */
+      /* Length in 32 bit words.  */
       int data_len;
 
-      cur_pke_insn = NULL;
       file = NULL;
       data_len = 0;
       pke_get_var_data (&file, &data_len);
@@ -308,11 +315,22 @@ assemble_pke (str)
 	  if (data_len == 0 || data_len < -2)
 	    as_bad ("invalid data length");
 	  else if (data_len == -1)
-	    cur_pke_insn = f;
+	    {
+	      cur_varlen_frag = frag_now;
+	      cur_varlen_insn = f;
+	      if (opcode->flags & PKE_OPCODE_MPG)
+		cur_asm_state = ASM_MPG;
+	    }
 	  else
-	    install_pke_length (f, data_len * 4);
-	  if (opcode->flags & PKE_OPCODE_MPG)
-	    cur_asm_state = ASM_VU;
+	    {
+	      install_pke_length (f, data_len * 4);
+	      /* Switch to VU state.  We don't use MPG state as that is
+		 used to indicate we're expecting to see a .endmpg.  */
+	      if (opcode->flags & PKE_OPCODE_MPG)
+		cur_asm_state = ASM_VU;
+	      /* FIXME: We assume there is exactly the right amount of
+		 data.  */
+	    }
 	}
     }
 }
@@ -734,6 +752,20 @@ md_undefined_symbol (name)
 {
   return 0;
 }
+
+/* Called after parsing the file via md_after_pass_hook.  */
+
+void
+dvp_parse_done ()
+{
+  /* Check for missing .EndMpg, and supply one if necessary.  */
+  if (cur_asm_state == ASM_MPG)
+    s_endmpg (0);
+  else if (cur_asm_state == ASM_DIRECT)
+    s_enddirect (0);
+  else if (cur_asm_state == ASM_UNPACK)
+    s_endunpack (0);
+}
 
 /* Functions concerning relocs.  */
 
@@ -795,8 +827,9 @@ md_pcrel_from_section (fixP, sec)
       return 0;
     }
 
-  /* FIXME: `& -16L'? */
-  return (fixP->fx_frag->fr_address + fixP->fx_where) & -8L;
+  /* We assume this is a vu branch.
+     Offsets are calculated based on the address of the next insn.  */
+  return ((fixP->fx_frag->fr_address + fixP->fx_where) & -8L) + 8;
 }
 
 /* Apply a fixup to the object code.  This is called for all the
@@ -1084,7 +1117,8 @@ parse_dma_ptr_autocount( opcode, operand, mods, insn_buf, pstr, errmsg)
 
     /* Data reference must be a .DmaData label. */
     struct symbol *label, *label2;
-    char *name, *name2;
+    const char *name;
+    char *name2;
     int len;
     long count;
 
@@ -1131,6 +1165,29 @@ parse_dma_ptr_autocount( opcode, operand, mods, insn_buf, pstr, errmsg)
     return retval;
 }
 
+/* Return length in bytes of the variable length PKE insn
+   currently being assembled.  */
+
+static int
+cur_pke_insn_length ()
+{
+  int byte_len;
+  fragS *f;
+
+  if (cur_varlen_frag == frag_now)
+    byte_len = frag_more (0) - cur_varlen_insn - 4; /* -4 for mpg itself */
+  else
+    {
+      byte_len = (cur_varlen_frag->fr_fix + cur_varlen_frag->fr_offset -
+		  (cur_varlen_insn - cur_varlen_frag->fr_literal)) - 4;
+      for (f = cur_varlen_frag->fr_next; f != frag_now; f = f->fr_next)
+	byte_len += f->fr_fix + f->fr_offset;
+      byte_len += frag_now_fix ();
+    }
+
+  return byte_len;
+}
+
 /* Install length LEN, in bytes, in the pke insn at BUF.
    The bytes in BUF are in target order.  */
 
@@ -1400,35 +1457,66 @@ static void
 s_enddirect (ignore)
      int ignore;
 {
-}
+  int byte_len;
 
-static void
-s_endgpuif (ignore)
-     int ignore;
-{
+  if (cur_asm_state != ASM_DIRECT)
+    {
+      as_bad ("`.enddirect' has no matching `direct' instruction");
+      return;
+    }
+
+  byte_len = cur_pke_insn_length ();
+  install_pke_length (cur_varlen_insn, byte_len);
+
+  cur_asm_state = ASM_INIT;
+  cur_varlen_frag = NULL;
+  cur_varlen_insn = NULL;
 }
 
 static void
 s_endmpg (ignore)
      int ignore;
 {
-  if (cur_asm_state != ASM_MPG || cur_pke_insn == NULL)
-    as_bad ("`.endmpg' has no matching `mpg' instruction");
-  else
-    {
-      /* Compute the length and install it in the instruction.  */
-      /*FIXME*/
+  int byte_len;
 
-      cur_asm_state = ASM_INIT;
-      cur_pke_insn = NULL;
+  if (cur_asm_state != ASM_MPG)
+    {
+      as_bad ("`.endmpg' has no matching `mpg' instruction");
+      return;
     }
+
+  byte_len = cur_pke_insn_length ();
+  install_pke_length (cur_varlen_insn, byte_len);
+
+  cur_asm_state = ASM_INIT;
+  cur_varlen_frag = NULL;
+  cur_varlen_insn = NULL;
+
+  /* Update $.MpgLoc.  */
+  pke_set_mpgloc (pke_get_mpgloc () + byte_len);
 }
 
 static void
 s_endunpack (ignore)
      int ignore;
 {
+  int byte_len;
+
+  if (cur_asm_state != ASM_UNPACK)
+    {
+      as_bad ("`.endunpack' has no matching `unpack' instruction");
+      return;
+    }
+
+  byte_len = cur_pke_insn_length ();
+  install_pke_length (cur_varlen_insn, byte_len);
+
   cur_asm_state = ASM_INIT;
+  cur_varlen_frag = NULL;
+  cur_varlen_insn = NULL;
+
+  /* Update $.UnpackLoc.  */
+  pke_set_unpackloc (pke_get_unpackloc () + byte_len);
 }
 
 static void
@@ -1438,6 +1526,12 @@ s_state (state)
   cur_asm_state = state;
 }
 
+static void
+s_endgpuif (ignore)
+     int ignore;
+{
+}
+
 /* Parse a DMA data spec which can be either of '*' or a quad word count.  */
 
 static int
