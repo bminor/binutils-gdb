@@ -1674,9 +1674,10 @@ i386_supply_fpregset (const struct regset *regset, struct regcache *regcache,
   i387_supply_fsave (regcache, regnum, fpregs);
 }
 
-/* Supply register REGNUM from the buffer specified by FPREGS and LEN
-   in the floating-point register set REGSET to register cache
-   REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
+/* Collect register REGNUM from the register cache REGCACHE and store
+   it in the buffer specified by FPREGS and LEN as described by the
+   floating-point register set REGSET.  If REGNUM is -1, do this for
+   all registers in REGSET.  */
 
 static void
 i386_collect_fpregset (const struct regset *regset,
