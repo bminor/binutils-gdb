@@ -1,3 +1,11 @@
+Sun May  9 16:36:59 1993  Fred Fish  (fnf@cygnus.com)
+
+	* configure.in (hppa*-*-bsd):  Change to hppa*-*-bsd*
+	* configure.in (hppa*-*-hpux):  Change to hppa*-*-hpux*
+	* configure.in (m68*-hp-bsd):  Change to m68*-hp-bsd*
+	* configure.in (m68*-*-hpux):  Change to m68*-*-hpux*
+	* configure.in (*-*-bsd):  Change to *-*-bsd*
+
 Wed May  5 16:08:32 1993  Per Bothner  (bothner@cygnus.com)
 
 	* elf32-hppa.c (elf_hppa_reloc_type_lookup):  Cast enums to
