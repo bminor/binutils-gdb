@@ -134,7 +134,8 @@ static const char **valid_flavors;
 
 /* Disassembly flavor to use. Default to "std" register names. */
 static const char *disassembly_flavor;
-static int current_option;	/* Index to that option in the opcodes table. */
+/* Index to that option in the opcodes table. */
+static int current_option;
 
 /* This is used to keep the bfd arch_info in sync with the disassembly
    flavor.  */
@@ -348,13 +349,16 @@ static CORE_ADDR
 thumb_skip_prologue (CORE_ADDR pc, CORE_ADDR func_end)
 {
   CORE_ADDR current_pc;
-  int findmask = 0;  	/* findmask:
-      			   bit 0 - push { rlist }
-			   bit 1 - mov r7, sp  OR  add r7, sp, #imm  (setting of r7)
-      			   bit 2 - sub sp, #simm  OR  add sp, #simm  (adjusting of sp)
-			*/
+  /* findmask:
+     bit 0 - push { rlist }
+     bit 1 - mov r7, sp  OR  add r7, sp, #imm  (setting of r7)
+     bit 2 - sub sp, #simm  OR  add sp, #simm  (adjusting of sp)
+  */
+  int findmask = 0;
 
-  for (current_pc = pc; current_pc + 2 < func_end && current_pc < pc + 40; current_pc += 2)
+  for (current_pc = pc; 
+       current_pc + 2 < func_end && current_pc < pc + 40; 
+       current_pc += 2)
     {
       unsigned short insn = read_memory_unsigned_integer (current_pc, 2);
 
@@ -362,7 +366,8 @@ thumb_skip_prologue (CORE_ADDR pc, CORE_ADDR func_end)
 	{
 	  findmask |= 1;  /* push found */
 	}
-      else if ((insn & 0xff00) == 0xb000)	/* add sp, #simm  OR  sub sp, #simm */
+      else if ((insn & 0xff00) == 0xb000)	/* add sp, #simm  OR  
+						   sub sp, #simm */
 	{
 	  if ((findmask & 1) == 0)  /* before push ? */
 	    continue;
@@ -379,18 +384,21 @@ thumb_skip_prologue (CORE_ADDR pc, CORE_ADDR func_end)
 	}
       else if (findmask == (4+2+1))
 	{
-	  break;	/* We have found one of each type of prologue instruction */
+	  /* We have found one of each type of prologue instruction */
+	  break;
 	}
       else
-	continue;	/* something in the prolog that we don't care about or some
-	  		   instruction from outside the prolog scheduled here for optimization */
+	/* something in the prolog that we don't care about or some
+	   instruction from outside the prolog scheduled here for
+	   optimization */
+	continue;
     }
 
   return current_pc;
 }
 
-/* Advance the PC across any function entry prologue instructions to reach
-   some "real" code.
+/* Advance the PC across any function entry prologue instructions to
+   reach some "real" code.
 
    The APCS (ARM Procedure Call Standard) defines the following
    prologue:
@@ -500,8 +508,8 @@ arm_skip_prologue (CORE_ADDR pc)
    The frame size would thus be 36 bytes, and the frame offset would be
    12 bytes.  The frame register is R7. 
    
-   The comments for thumb_skip_prolog() describe the algorithm we use to detect
-   the end of the prolog */
+   The comments for thumb_skip_prolog() describe the algorithm we use
+   to detect the end of the prolog.  */
 /* *INDENT-ON* */
 
 static void
@@ -510,12 +518,14 @@ thumb_scan_prologue (struct frame_info *fi)
   CORE_ADDR prologue_start;
   CORE_ADDR prologue_end;
   CORE_ADDR current_pc;
-  int saved_reg[16];		/* which register has been copied to register n? */
-  int findmask = 0;  	/* findmask:
-      			   bit 0 - push { rlist }
-			   bit 1 - mov r7, sp  OR  add r7, sp, #imm  (setting of r7)
-      			   bit 2 - sub sp, #simm  OR  add sp, #simm  (adjusting of sp)
-			*/
+  /* Which register has been copied to register n? */
+  int saved_reg[16];
+  /* findmask:
+     bit 0 - push { rlist }
+     bit 1 - mov r7, sp  OR  add r7, sp, #imm  (setting of r7)
+     bit 2 - sub sp, #simm  OR  add sp, #simm  (adjusting of sp)
+  */
+  int findmask = 0;
   int i;
 
   if (find_pc_partial_function (fi->pc, NULL, &prologue_start, &prologue_end))
@@ -528,8 +538,9 @@ thumb_scan_prologue (struct frame_info *fi)
 	prologue_end = sal.end;	/* (probably means no prologue)  */
     }
   else
-    prologue_end = prologue_start + 40;		/* We're in the boondocks: allow for */
-  /* 16 pushes, an add, and "mv fp,sp" */
+    /* We're in the boondocks: allow for 
+       16 pushes, an add, and "mv fp,sp".  */
+    prologue_end = prologue_start + 40;
 
   prologue_end = min (prologue_end, fi->pc);
 
@@ -568,10 +579,12 @@ thumb_scan_prologue (struct frame_info *fi)
 		fi->extra_info->framesize += 4;
 		fi->saved_regs[saved_reg[regno]] =
 		  -(fi->extra_info->framesize);
-		saved_reg[regno] = regno;	/* reset saved register map */
+		/* Reset saved register map.  */
+		saved_reg[regno] = regno;
 	      }
 	}
-      else if ((insn & 0xff00) == 0xb000)	/* add sp, #simm  OR  sub sp, #simm */
+      else if ((insn & 0xff00) == 0xb000)	/* add sp, #simm  OR  
+						   sub sp, #simm */
 	{
 	  if ((findmask & 1) == 0)  /* before push ? */
 	    continue;
@@ -602,13 +615,15 @@ thumb_scan_prologue (struct frame_info *fi)
 	}
       else if ((insn & 0xffc0) == 0x4640)	/* mov r0-r7, r8-r15 */
 	{
-	  int lo_reg = insn & 7;	/* dest. register (r0-r7) */
+	  int lo_reg = insn & 7;		/* dest.  register (r0-r7) */
 	  int hi_reg = ((insn >> 3) & 7) + 8;	/* source register (r8-15) */
 	  saved_reg[lo_reg] = hi_reg;	/* remember hi reg was saved */
 	}
       else
-	continue;	/* something in the prolog that we don't care about or some
-	  		   instruction from outside the prolog scheduled here for optimization */
+	/* Something in the prolog that we don't care about or some
+	   instruction from outside the prolog scheduled here for
+	   optimization.  */ 
+	continue;
     }
 }
 
@@ -936,7 +951,7 @@ arm_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi; fi = fi->next)
 
-#if 0				/* FIXME: enable this code if we convert to new call dummy scheme.  */
+#if 0	/* FIXME: enable this code if we convert to new call dummy scheme.  */
     if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
       return generic_read_register_dummy (fi->pc, fi->frame, regnum);
     else
@@ -955,7 +970,7 @@ arm_find_callers_reg (struct frame_info *fi, int regnum)
 static CORE_ADDR
 arm_frame_chain (struct frame_info *fi)
 {
-#if 0				/* FIXME: enable this code if we convert to new call dummy scheme.  */
+#if 0	/* FIXME: enable this code if we convert to new call dummy scheme.  */
   CORE_ADDR fn_start, callers_pc, fp;
 
   /* is this a dummy frame? */
@@ -1053,11 +1068,11 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
   memset (fi->saved_regs, '\000', sizeof fi->saved_regs);
 
-#if 0				/* FIXME: enable this code if we convert to new call dummy scheme.  */
+#if 0	/* FIXME: enable this code if we convert to new call dummy scheme.  */
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
-      /* We need to setup fi->frame here because run_stack_dummy gets it wrong
-         by assuming it's always FP.  */
+      /* We need to setup fi->frame here because run_stack_dummy gets
+         it wrong by assuming it's always FP.  */
       fi->frame = generic_read_register_dummy (fi->pc, fi->frame,
 					       ARM_SP_REGNUM);
       fi->extra_info->framesize = 0;
@@ -1067,8 +1082,8 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   else
 #endif
 
-  /* Compute stack pointer for this frame.  We use this value for both the
-     sigtramp and call dummy cases.  */
+  /* Compute stack pointer for this frame.  We use this value for both
+     the sigtramp and call dummy cases.  */
   if (!fi->next)
     sp = read_sp();
   else
@@ -1168,7 +1183,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 static CORE_ADDR
 arm_frame_saved_pc (struct frame_info *fi)
 {
-#if 0				/* FIXME: enable this code if we convert to new call dummy scheme.  */
+#if 0	/* FIXME: enable this code if we convert to new call dummy scheme.  */
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return generic_read_register_dummy (fi->pc, fi->frame, ARM_PC_REGNUM);
   else
@@ -1456,10 +1471,10 @@ arm_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   return sp;
 }
 
-/* Pop the current frame.  So long as the frame info has been initialized
-   properly (see arm_init_extra_frame_info), this code works for dummy frames
-   as well as regular frames.  I.e, there's no need to have a special case
-   for dummy frames.  */
+/* Pop the current frame.  So long as the frame info has been
+   initialized properly (see arm_init_extra_frame_info), this code
+   works for dummy frames as well as regular frames.  I.e, there's no
+   need to have a special case for dummy frames.  */
 static void
 arm_pop_frame (void)
 {
@@ -2022,10 +2037,11 @@ gdb_print_insn_arm (bfd_vma memaddr, disassemble_info *info)
 
       if (csym.native == NULL)
 	{
-	  /* Create a fake symbol vector containing a Thumb symbol.  This is
-	     solely so that the code in print_insn_little_arm() and
-	     print_insn_big_arm() in opcodes/arm-dis.c will detect the presence
-	     of a Thumb symbol and switch to decoding Thumb instructions.  */
+	  /* Create a fake symbol vector containing a Thumb symbol.
+	     This is solely so that the code in print_insn_little_arm() 
+	     and print_insn_big_arm() in opcodes/arm-dis.c will detect
+	     the presence of a Thumb symbol and switch to decoding
+	     Thumb instructions.  */
 
 	  fake_target.flavour = bfd_target_coff_flavour;
 	  fake_bfd.xvec = &fake_target;
@@ -2381,10 +2397,10 @@ arm_skip_stub (CORE_ADDR pc)
   return 0;			/* not a stub */
 }
 
-/* If the user changes the register disassembly flavor used for info register
-   and other commands, we have to also switch the flavor used in opcodes
-   for disassembly output.
-   This function is run in the set disassembly_flavor command, and does that. */
+/* If the user changes the register disassembly flavor used for info
+   register and other commands, we have to also switch the flavor used
+   in opcodes for disassembly output.  This function is run in the set
+   disassembly_flavor command, and does that. */
 
 static void
 set_disassembly_flavor_sfunc (char *args, int from_tty,
@@ -2732,12 +2748,12 @@ arm_gdbarch_register_os_abi (enum arm_abi abi,
   (*handler_p)->init_abi = init_abi;
 }
 
-/* Initialize the current architecture based on INFO.  If possible, re-use an
-   architecture from ARCHES, which is a list of architectures already created
-   during this debugging session.
+/* Initialize the current architecture based on INFO.  If possible,
+   re-use an architecture from ARCHES, which is a list of
+   architectures already created during this debugging session.
 
-   Called e.g. at program startup, when reading a core file, and when reading
-   a binary file.  */
+   Called e.g. at program startup, when reading a core file, and when
+   reading a binary file.  */
 
 static struct gdbarch *
 arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
