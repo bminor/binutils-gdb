@@ -1,3 +1,13 @@
+Sun Mar 27 14:05:33 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/reloc/funcrelocbug.s: New test.
+	* gas/hppa/reloc/reloc.exp: Run it.
+
+Thu Mar 17 13:38:04 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/unsorted/importbug.s: New test.
+	* gas/hppa/unsorted/unsorted.exp: Run it.
+
 Wed Mar 16 11:57:07 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/more.parse/regpopbug.s: Add trivial .equ test.

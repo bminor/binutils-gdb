@@ -30,6 +30,7 @@ blebug.s
 blebug2.s
 exitbug.s
 fixupbug.s
+funcrelocbug.s
 labelopbug.s
 plabelbug.s
 reloc.exp
