@@ -60,6 +60,7 @@ static const char * const gdb_osabi_names[] =
   "FreeBSD ELF",
   "NetBSD a.out",
   "NetBSD ELF",
+  "OpenBSD ELF",
   "Windows CE",
   "DJGPP",
   "NetWare",
