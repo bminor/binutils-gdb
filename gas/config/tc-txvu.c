@@ -296,6 +296,8 @@ assemble_insn (str, lower_p)
 	      if (operand->parse)
 		{
 		  value = (*operand->parse) (&str, &errmsg);
+		  if (errmsg)
+		    break;
 		}
 	      else
 		{
@@ -305,18 +307,13 @@ assemble_insn (str, lower_p)
 		  str = input_line_pointer;
 		  input_line_pointer = hold;
 
-		  if (exp.X_op == O_illegal)
-		    as_bad ("illegal operand");
-		  else if (exp.X_op == O_absent)
-		    as_bad ("missing operand");
+		  if (exp.X_op == O_illegal
+		      || exp.X_op == O_absent)
+		    break;
 		  else if (exp.X_op == O_constant)
-		    {
-		      value = exp.X_add_number;
-		    }
+		    value = exp.X_add_number;
 		  else if (exp.X_op == O_register)
-		    {
-		      as_fatal ("got O_register");
-		    }
+		    as_fatal ("got O_register");
 		  else
 		    {
 		      /* We need to generate a fixup for this expression.  */

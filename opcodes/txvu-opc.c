@@ -50,10 +50,12 @@ static void CONCAT2 (print_,fn) \
      PARAMS ((disassemble_info *, TXVU_INSN, long));
 
 PARSE_FN (dotdest);
+INSERT_FN (dotdest);
+EXTRACT_FN (dotdest);
 PRINT_FN (dotdest);
 
-PARSE_FN (reg);
-PRINT_FN (reg);
+PARSE_FN (vfreg);
+PRINT_FN (vfreg);
 
 /* Various types of ARC operands, including insn suffixes.
 
@@ -73,28 +75,28 @@ const struct txvu_operand txvu_operands[] =
 /* Destination indicator, with leading '.'.  */
 #define DOTDEST (UNUSED + 1)
   { 4, TXVU_SHIFT_DEST, TXVU_OPERAND_SUFFIX,
-      parse_dotdest, 0, 0, print_dotdest },
+      parse_dotdest, insert_dotdest, extract_dotdest, print_dotdest },
 
 /* ft reg */
 #define FTREG (DOTDEST + 1)
-  { 5, TXVU_SHIFT_FTREG, 0, parse_reg, 0, 0, print_reg },
+  { 5, TXVU_SHIFT_FTREG, 0, parse_vfreg, 0, 0, print_vfreg },
 
 /* fs reg */
 #define FSREG (FTREG + 1)
-  { 5, TXVU_SHIFT_FSREG, 0, parse_reg, 0, 0, print_reg },
+  { 5, TXVU_SHIFT_FSREG, 0, parse_vfreg, 0, 0, print_vfreg },
 
 /* fd reg */
 #define FDREG (FSREG + 1)
-  { 5, TXVU_SHIFT_FDREG, 0, parse_reg, 0, 0, print_reg },
+  { 5, TXVU_SHIFT_FDREG, 0, parse_vfreg, 0, 0, print_vfreg },
 
 /* end of list place holder */
   { 0 }
 };
 
 /* Macros to put a field's value into the right place.  */
-#define FT(x) (((x) & TXVU_MASK_REG) << TXVU_SHIFT_FTREG)
-#define FS(x) (((x) & TXVU_MASK_REG) << TXVU_SHIFT_FSREG)
-#define FD(x) (((x) & TXVU_MASK_REG) << TXVU_SHIFT_FDREG)
+#define FT(x) (((x) & TXVU_MASK_VFREG) << TXVU_SHIFT_FTREG)
+#define FS(x) (((x) & TXVU_MASK_VFREG) << TXVU_SHIFT_FSREG)
+#define FD(x) (((x) & TXVU_MASK_VFREG) << TXVU_SHIFT_FDREG)
 #define R(x,b,m) (((x) & (m)) << (b))	/* value X, mask M, at bit B */
 
 /* TXVU instructions.
@@ -248,7 +250,7 @@ txvu_lower_opcode_lookup_dis (insn)
 }
 
 /* Value of DEST in use.
-   Each of the registers must specify the same value.
+   Each of the registers must specify the same value as the opcode.
    ??? Perhaps remove the duplication?  */
 static int dest;
 
@@ -275,20 +277,17 @@ txvu_opcode_init_print ()
    The "dest" string selects any combination of x,y,z,w.
    [The letters are ordered that way to follow the manual's style.]  */
 
+/* Parse a `dest' spec.
+   Return the found value.
+   *PSTR is set to the character that terminated the parsing.
+   It is up to the caller to do any error checking.  */
+
 static long
-parse_dotdest (pstr, errmsg)
+parse_dest (pstr)
      char **pstr;
-     const char **errmsg;
 {
   long dest = 0;
 
-  if (**pstr != '.')
-    {
-      *errmsg = "missing `.'";
-      return 0;
-    }
-
-  ++*pstr;
   while (**pstr)
     {
       switch (**pstr)
@@ -297,22 +296,71 @@ parse_dotdest (pstr, errmsg)
 	case 'y' : case 'Y' : dest |= TXVU_DEST_Y; break;
 	case 'z' : case 'Z' : dest |= TXVU_DEST_Z; break;
 	case 'w' : case 'W' : dest |= TXVU_DEST_W; break;
-	default : *errmsg = "unknown dest letter"; return 0;
+	default : return dest;
 	}
       ++*pstr;
     }
 
+  return dest;
+}
+
+static long
+parse_dotdest (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+  long dest;
+
+  if (**pstr != '.')
+    {
+      *errmsg = "missing `.'";
+      return 0;
+    }
+
+  ++*pstr;
+  dest = parse_dest (pstr);
+  if (dest == 0 || isalnum (**pstr))
+    {
+      *errmsg = "invalid `dest'";
+      return 0;
+    }
   *errmsg = NULL;
   return dest;
 }
 
+static TXVU_INSN
+insert_dotdest (insn, operand, mods, value, errmsg)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     long value;
+     const char **errmsg;
+{
+  /* Record the DEST value in use so the register parser can use it.  */
+  dest = value;
+  if (errmsg)
+    *errmsg = NULL;
+  return insn |= value << operand->shift;
+}
+
+static long
+extract_dotdest (insn, operand, mods, pinvalid)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     int *pinvalid;
+{
+  /* Record the DEST value in use so the register printer can use it.  */
+  dest = (insn >> operand->shift) & ((1 << operand->bits) - 1);
+  return dest;
+}
+
 static void
-print_dotdest (info, insn, value)
+print_dest (info, insn, value)
      disassemble_info *info;
      TXVU_INSN insn;
      long value;
 {
-  (*info->fprintf_func) (info->stream, ".");
   if (value & TXVU_DEST_X)
     (*info->fprintf_func) (info->stream, "x");
   if (value & TXVU_DEST_Y)
@@ -322,15 +370,26 @@ print_dotdest (info, insn, value)
   if (value & TXVU_DEST_W)
     (*info->fprintf_func) (info->stream, "w");
 }
+
+static void
+print_dotdest (info, insn, value)
+     disassemble_info *info;
+     TXVU_INSN insn;
+     long value;
+{
+  (*info->fprintf_func) (info->stream, ".");
+  print_dest (info, insn, value);
+}
 
 static long
-parse_reg (pstr, errmsg)
+parse_vfreg (pstr, errmsg)
      char **pstr;
      const char **errmsg;
 {
   char *str = *pstr;
   char *start;
   long reg;
+  int reg_dest;
 
   if (tolower (str[0]) != 'v'
       || tolower (str[1]) != 'f')
@@ -344,16 +403,28 @@ parse_reg (pstr, errmsg)
   while (*str && isdigit (*str))
     ++str;
   reg = atoi (start);
+  reg_dest = parse_dest (&str);
+  if (reg_dest == 0 || isalnum (*str))
+    {
+      *errmsg = "invalid `dest'";
+      return 0;
+    }
+  if (reg_dest != dest)
+    {
+      *errmsg = "register `dest' does not match instruction `dest'";
+      return 0;
+    }
   *pstr = str;
   *errmsg = NULL;
   return reg;
 }
 
 static void
-print_reg (info, insn, value)
+print_vfreg (info, insn, value)
      disassemble_info *info;
      TXVU_INSN insn;
      long value;
 {
   (*info->fprintf_func) (info->stream, "vf%ld", value);
+  print_dest (info, insn, dest);
 }
