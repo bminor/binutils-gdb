@@ -72,16 +72,17 @@
 
 if [ -n "${ac_configure_args}" ]; then
   Makefile=${ac_file-Makefile}
-  config_shell=${CONFIG_SHELL-/bin/sh}
-  arguments="${ac_configure_args}"
+  ml_config_shell=${CONFIG_SHELL-/bin/sh}
+  ml_arguments="${ac_configure_args}"
 else
   Makefile=${Makefile-Makefile}
-  config_shell=${config_shell-/bin/sh}
+  ml_config_shell=${config_shell-/bin/sh}
+  ml_arguments="${arguments}"
 fi
 
 # Scan all the arguments and set all the ones we need.
 
-for option in $arguments
+for option in ${ml_arguments}
 do
   case $option in
   --*) ;;
@@ -108,10 +109,10 @@ do
 	eval $enableopt="$optarg"
 	;;
   --norecursion | --no*)
-	norecursion=yes
+	ml_norecursion=yes
 	;;
   --verbose | --v | --verb*)
-	verbose=--verbose
+	ml_verbose=--verbose
 	;;
   --with-*)
 	case "$option" in
@@ -184,11 +185,8 @@ arc-*-*)
 hppa*-*-*)
 	multidirs="soft-float"
 	;;
-#m68*-*-aout* | m68*-*-coff* | m68*-*-elf* | m68*-*-vxworks*)
-#	multidirs="m68000 m68020 m68881 msoft-float m68000/m68881 m68000/msoft-float m68020/m68881 m68020/msoft-float"
-#	;;
 m68*-*-aout* | m68*-*-coff* | m68*-*-elf* | m68*-*-vxworks*)
-	multidirs="m68000 m68000/m68881"
+	multidirs="m68000 m68020 m68881 msoft-float m68000/m68881 m68000/msoft-float m68020/m68881 m68020/msoft-float"
 	;;
 i960-*-*)
 	multidirs=float
@@ -520,7 +518,7 @@ mv Makefile.tem ${Makefile}
 
 fi # ${ml_toplevel_p} = yes
 
-if [ "${verbose}" = --verbose ]; then
+if [ "${ml_verbose}" = --verbose ]; then
   echo "Adding multilib support to Makefile in `pwd`"
   if [ "${ml_toplevel_p}" = yes ]; then
     echo "multidirs=${multidirs}"
@@ -604,9 +602,9 @@ if [ "${ml_toplevel_p}" = yes ]; then
 # We must freshly configure each subdirectory.  This bit of code is
 # actually partially stolen from the main configure script.  FIXME.
 
-if [ -n "${multidirs}" ] && [ -z "${norecursion}" ]; then
+if [ -n "${multidirs}" ] && [ -z "${ml_norecursion}" ]; then
 
-  if [ "${verbose}" = --verbose ]; then
+  if [ "${ml_verbose}" = --verbose ]; then
     echo "Running configure in multilib subdirs ${multidirs}"
     echo "pwd: `pwd`"
   fi
@@ -616,62 +614,62 @@ if [ -n "${multidirs}" ] && [ -z "${norecursion}" ]; then
   # cd to top-level-build-dir/${with_target_subdir}
   cd ..
 
-  for dir in ${multidirs}; do
+  for ml_dir in ${multidirs}; do
 
-    if [ "${verbose}" = --verbose ]; then
-      echo "Running configure in multilib subdir ${dir}"
+    if [ "${ml_verbose}" = --verbose ]; then
+      echo "Running configure in multilib subdir ${ml_dir}"
       echo "pwd: `pwd`"
     fi
 
-    if [ -d ${dir} ]; then true; else mkdir ${dir}; fi
-    if [ -d ${dir}/${ml_libdir} ]; then true; else mkdir ${dir}/${ml_libdir}; fi
+    if [ -d ${ml_dir} ]; then true; else mkdir ${ml_dir}; fi
+    if [ -d ${ml_dir}/${ml_libdir} ]; then true; else mkdir ${ml_dir}/${ml_libdir}; fi
 
-    # Eg: if ${dir} = m68000/m68881, dotdot = ../../
-    dotdot=../`echo ${dir} | sed -e 's|[^/]||g' -e 's|/|../|g'`
+    # Eg: if ${ml_dir} = m68000/m68881, dotdot = ../../
+    dotdot=../`echo ${ml_dir} | sed -e 's|[^/]||g' -e 's|/|../|g'`
 
     case ${srcdir} in
     ".")
-      echo Building symlink tree in `pwd`/${dir}/${ml_libdir}
+      echo Building symlink tree in `pwd`/${ml_dir}/${ml_libdir}
       if [ "${with_target_subdir}" != "." ]; then
 	ml_unsubdir="../"
       else
 	ml_unsubdir=""
       fi
-      (cd ${dir}/${ml_libdir};
+      (cd ${ml_dir}/${ml_libdir};
        ../${dotdot}${ml_unsubdir}symlink-tree ../${dotdot}${ml_unsubdir}${ml_libdir} "")
-      newsrcdir="."
-      srcdiroption=
+      ml_newsrcdir="."
+      ml_srcdiroption=
       multisrctop=${dotdot}
       ;;
     *)
       case "${srcdir}" in
       /*) # absolute path
-        newsrcdir=${srcdir}
+        ml_newsrcdir=${srcdir}
         ;;
       *) # otherwise relative
-        newsrcdir=${dotdot}${srcdir}
+        ml_newsrcdir=${dotdot}${srcdir}
         ;;
       esac
-      srcdiroption="-srcdir=${newsrcdir}"
+      ml_srcdiroption="-srcdir=${ml_newsrcdir}"
       multisrctop=
       ;;
     esac
 
     case "${progname}" in
-    /*)     recprog=${progname} ;;
-    *)      recprog=${dotdot}${progname} ;;
+    /*)     ml_recprog=${progname} ;;
+    *)      ml_recprog=${dotdot}${progname} ;;
     esac
 
     # FIXME: POPDIR=${PWD=`pwd`} doesn't work here.
     ML_POPDIR=`pwd`
-    cd ${dir}/${ml_libdir}
+    cd ${ml_dir}/${ml_libdir}
 
-    if [ -f ${newsrcdir}/configure ]; then
-      recprog=${newsrcdir}/configure
+    if [ -f ${ml_newsrcdir}/configure ]; then
+      ml_recprog=${ml_newsrcdir}/configure
     fi
-    if eval ${config_shell} ${recprog} \
-	--with-multisubdir=${dir} --with-multisrctop=${multisrctop} \
-	$arguments ${srcdiroption} ; then
+    if eval ${ml_config_shell} ${ml_recprog} \
+	--with-multisubdir=${ml_dir} --with-multisrctop=${multisrctop} \
+	${ml_arguments} ${ml_srcdiroption} ; then
       true
     else
       exit 1

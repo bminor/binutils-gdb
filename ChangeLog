@@ -1,3 +1,8 @@
+Fri Nov 24 17:29:29 1995  Doug Evans  <dje@deneb.cygnus.com>
+
+	* config-ml.in: Prefix more variables with ml_ so they don't collide
+	with configure's.
+
 Wed Nov 22 11:27:02 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Don't turn -v into --v.
