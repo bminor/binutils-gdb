@@ -1,3 +1,7 @@
+Wed Jan 21 21:24:08 1998  Manfred Hollstein  <manfred@s-direktnet.de>
+
+	* gas/m88k/init.d: Fix hexadecimal offsets.
+
 Wed Jan 14 17:49:22 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/m32r/uppercase.d: Fix white space matching.
