@@ -1259,7 +1259,7 @@ op movsxy_tab[] =
     "R[n] += ((R[n] & 0xffff) == MOD_ME) ? MOD_DELTA : 2;",
     "iword &= 0xfd53; goto top;",
   },
-  { "n", "n8","movx.w <DSP_Aa>,@<REG_x>+REG_8","111100xxaa101000",
+  { "n", "n8","movx.w <DSP_Aa>,@<REG_x>+REG_8","111100xxaa101100",
     "WWAT (R[n], DSP_R (m) >> 16);",
     "R[n] += ((R[n] & 0xffff) == MOD_ME) ? MOD_DELTA : R[8];",
     "iword &= 0xfd53; goto top;",
