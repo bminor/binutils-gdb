@@ -1570,18 +1570,18 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 
   sp = PUSH_ARGUMENTS (nargs, args, sp, struct_return, struct_addr);
 
-#ifdef PUSH_RETURN_ADDRESS	/* for targets that use no CALL_DUMMY */
-  /* There are a number of targets now which actually don't write any
-     CALL_DUMMY instructions into the target, but instead just save the
-     machine state, push the arguments, and jump directly to the callee
-     function.  Since this doesn't actually involve executing a JSR/BSR
-     instruction, the return address must be set up by hand, either by
-     pushing onto the stack or copying into a return-address register
-     as appropriate.  Formerly this has been done in PUSH_ARGUMENTS,
-     but that's overloading its functionality a bit, so I'm making it
-     explicit to do it here.  */
-  sp = PUSH_RETURN_ADDRESS (real_pc, sp);
-#endif /* PUSH_RETURN_ADDRESS */
+  if (PUSH_RETURN_ADDRESS_P ())
+    /* for targets that use no CALL_DUMMY */
+    /* There are a number of targets now which actually don't write
+       any CALL_DUMMY instructions into the target, but instead just
+       save the machine state, push the arguments, and jump directly
+       to the callee function.  Since this doesn't actually involve
+       executing a JSR/BSR instruction, the return address must be set
+       up by hand, either by pushing onto the stack or copying into a
+       return-address register as appropriate.  Formerly this has been
+       done in PUSH_ARGUMENTS, but that's overloading its
+       functionality a bit, so I'm making it explicit to do it here.  */
+    sp = PUSH_RETURN_ADDRESS (real_pc, sp);
 
   if (STACK_ALIGN_P () && !INNER_THAN (1, 2))
     {

@@ -678,9 +678,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->push_dummy_frame == 0))
     fprintf_unfiltered (log, "\n\tpush_dummy_frame");
-  if ((GDB_MULTI_ARCH >= 1)
-      && (gdbarch->push_return_address == 0))
-    fprintf_unfiltered (log, "\n\tpush_return_address");
+  /* Skip verify of push_return_address, has predicate */
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->pop_frame == 0))
     fprintf_unfiltered (log, "\n\tpop_frame");
@@ -3487,6 +3485,12 @@ set_gdbarch_push_dummy_frame (struct gdbarch *gdbarch,
                               gdbarch_push_dummy_frame_ftype push_dummy_frame)
 {
   gdbarch->push_dummy_frame = push_dummy_frame;
+}
+
+int
+gdbarch_push_return_address_p (struct gdbarch *gdbarch)
+{
+  return gdbarch->push_return_address != 0;
 }
 
 CORE_ADDR

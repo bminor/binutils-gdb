@@ -1,3 +1,11 @@
+2001-11-05  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (push_return_address): Change to a function with
+	predicate.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* valops.c (hand_function_call): Replace #ifdef
+	PUSH_RETURN_ADDRESS with run-time test of PUSH_RETURN_ADDRESS_P.
+	
 2001-11-06  Corinna Vinschen  <vinschen@redhat.com>
 
 	* arch-utils.c (generic_in_function_epilogue_p): New function.
@@ -22,7 +30,7 @@
 2001-11-05  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (init_extra_frame_info): Change to a function with
-	pedicate.
+	predicate.
 	* gdbarch.h, gdbarch.c: Re-generate.	
 	* blockframe.c (create_new_frame): Replace #ifdef
 	INIT_EXTRA_FRAME_INFO with run-time test of
