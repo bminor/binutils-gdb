@@ -1,5 +1,9 @@
 2003-02-27  J. Brobecker  <brobecker@gnat.com>
 
+	* observer.c: Minor comments edits.
+
+2003-02-27  J. Brobecker  <brobecker@gnat.com>
+
 	* observer.h, observer.c: New file.
 
 2003-02-27  Andrew Cagney  <cagney@redhat.com>

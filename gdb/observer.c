@@ -95,9 +95,9 @@ xfree_observer_list_node (struct observer_list *node)
   xfree (node);
 }
 
-/* Attach the callback NOTIFY to a subject represented by its list
-   of observers LIST.  The DATA is also stored, in order for the subject
-   to provide it back to the observer during a notification.  */
+/* Attach the callback NOTIFY to a SUBJECT.  The DATA is also stored,
+   in order for the subject to provide it back to the observer during
+   a notification.  */
 
 static struct observer *
 generic_observer_attach (struct observer_list **subject,
@@ -114,10 +114,9 @@ generic_observer_attach (struct observer_list **subject,
   return observer_list->observer;
 }
 
-/* Remove the given OBSERVER from the list of observers that need
-   to be notified by the subject represented by its LIST of observers.
-   Once detached, OBSERVER should no longer be used, as it is no longer
-   valid.  */
+/* Remove the given OBSERVER from the SUBJECT.  Once detached, OBSERVER
+   should no longer be used, as it is no longer valid.  */
+
 static void
 generic_observer_detach (struct observer_list **subject,
 			 const struct observer *observer)
@@ -145,9 +144,8 @@ generic_observer_detach (struct observer_list **subject,
   warning ("Failed to detach observer");
 }
 
-/* Send a notification to all the observers of a subject represented by
-   its LIST of observers.  ARGS is passed to all observers as an argument
-   to the notification callback.  */
+/* Send a notification to all the observers of SUBJECT.  ARGS is passed to
+   all observers as an argument to the notification callback.  */
 
 static void
 generic_observer_notify (struct observer_list *subject, const void *args)
