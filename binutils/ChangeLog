@@ -1,3 +1,19 @@
+Wed Feb  1 15:04:57 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* objdump.c (disassemble_data): Pass section offset, not absolute
+	address, to bfd_find_nearest_line.
+
+	* nlmconv.c (powerpc_mangle_relocs): Don't use const with
+	reloc_howto_type.
+
+Thu Jan 26 18:50:06 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (compare_symbols): Use bfd_asymbol_value (VAR) rather
+	than VAR->value.
+	(objdump_print_address): Likewise.
+	(disassemble_data): Don't change the symbol values.  It can
+	confuse bfd_canonicalize_reloc.
+
 Thu Jan 26 12:03:56 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in: Add support for powerpc-*-ebai.
