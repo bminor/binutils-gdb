@@ -33,6 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Prototypes for static functions.  */
 
+static bfd_target *alpha_ecoff_object_p PARAMS ((bfd *));
 static boolean alpha_ecoff_bad_format_hook PARAMS ((bfd *abfd, PTR filehdr));
 static void alpha_ecoff_swap_reloc_in PARAMS ((bfd *, PTR,
 					      struct internal_reloc *));
@@ -401,6 +402,45 @@ static reloc_howto_type alpha_howto_table[] =
 	 false)			/* pcrel_offset */
 };
 
+/* Recognize an Alpha ECOFF file.  */
+
+static bfd_target *
+alpha_ecoff_object_p (abfd)
+     bfd *abfd;
+{
+  static bfd_target *ret;
+
+  ret = coff_object_p (abfd);
+
+  if (ret != (bfd_target *) NULL)
+    {
+      asection *sec;
+
+      /* Alpha ECOFF has a .pdata section.  The lnnoptr field of the
+	 .pdata section is the number of entries it contains.  Each
+	 entry takes up 8 bytes.  The number of entries is required
+	 since the section is aligned to a 16 byte boundary.  When we
+	 link .pdata sections together, we do not want to include the
+	 alignment bytes.  We handle this on input by faking the size
+	 of the .pdata section to remove the unwanted alignment bytes.
+	 On output we will set the lnnoptr field and force the
+	 alignment.  */
+      sec = bfd_get_section_by_name (abfd, _PDATA);
+      if (sec != (asection *) NULL)
+	{
+	  bfd_size_type size;
+
+	  size = sec->line_filepos * 8;
+	  BFD_ASSERT (size == bfd_section_size (abfd, sec)
+		      || size + 8 == bfd_section_size (abfd, sec));
+	  if (! bfd_set_section_size (abfd, sec, size))
+	    return NULL;
+	}
+    }
+
+  return ret;
+}
+
 /* See whether the magic number matches.  */
 
 static boolean
@@ -1638,7 +1678,7 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  else
 	    {
-	      if (r_symndx < 0 || r_symndx >= NUM_RELOC_SECTIONS)
+	      if (r_symndx >= NUM_RELOC_SECTIONS)
 		s = NULL;
 	      else
 		s = symndx_to_section[r_symndx];
@@ -1919,7 +1959,7 @@ bfd_target ecoffalpha_little_vec =
      bfd_getl32, bfd_getl_signed_32, bfd_putl32,
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
 
-  {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
+  {_bfd_dummy_target, alpha_ecoff_object_p, /* bfd_check_format */
      ecoff_archive_p, _bfd_dummy_target},
   {bfd_false, ecoff_mkobject,  /* bfd_set_format */
      _bfd_generic_mkarchive, bfd_false},

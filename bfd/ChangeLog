@@ -9,6 +9,27 @@ Mon Jan 24 14:41:23 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 Mon Jan 24 12:38:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* coff-alpha.c (alpha_ecoff_object_p): New function.  Set size of
+	.pdata section based on lnnoptr field, not section header.
+	(alpha_relocate_section): Don't bother to check if r_symndx >= 0,
+	since it is unsigned.
+	(ecoffalpha_little_vec): Use alpha_ecoff_object_p rather than
+	coff_object_p.
+	* ecoff.c (ecoff_new_section_hook): Set alignment_power field of
+	.pdata section to 3.
+	(ecoff_compute_section_file_positions): Save the size of the
+	.pdata section in the line_filepos field, and actually align the
+	.pdata section to an alignment power of 4.
+	(ecoff_compute_reloc_file_positions): Set output_has_begun after
+	calling ecoff_compute_section_file_positions.
+	(ecoff_write_object_contents): Set s_lnnoptr for the .pdata
+	section from the line_filepos field.  Set vstamp for the optional
+	header from the vstamp of the symbolic header.
+	(ecoff_bfd_final_link): Set vstamp of the symbolic header to the
+	vstamp used by the first object file in the link.
+
+	* ecofflink.c (ecoff_align_debug): Align RFDs to debug_align.
+
 	* linker.c (generic_link_check_achive_element): Set SEC_ALLOC flag
 	for a created common section.
 	(_bfd_generic_link_add_one_symbol): Likewise.

@@ -156,7 +156,15 @@ ecoff_new_section_hook (abfd, section)
      bfd *abfd;
      asection *section;
 {
-  section->alignment_power = abfd->xvec->align_power_min;
+  /* For the .pdata section, which has a special meaning on the Alpha,
+     we set the alignment to 8.  We correct this later in
+     ecoff_compute_section_file_positions.  We do this hackery because
+     we need to know the exact unaligned size of the .pdata section in
+     order to set the lnnoptr field correctly.  */
+  if (strcmp (section->name, _PDATA) == 0)
+    section->alignment_power = 3;
+  else
+    section->alignment_power = abfd->xvec->align_power_min;
 
   if (strcmp (section->name, _TEXT) == 0)
     section->flags |= SEC_CODE | SEC_LOAD | SEC_ALLOC;
@@ -2177,10 +2185,24 @@ ecoff_compute_section_file_positions (abfd)
        current != (asection *) NULL;
        current = current->next)
     {
+      unsigned int alignment_power;
+
       /* Only deal with sections which have contents */
       if ((current->flags & (SEC_HAS_CONTENTS | SEC_LOAD)) == 0
 	  || strcmp (current->name, REGINFO) == 0)
 	continue;
+
+      /* For the Alpha ECOFF .pdata section the lnnoptr field is
+	 supposed to indicate the number of .pdata entries that are
+	 really in the section.  Each entry is 8 bytes.  We store this
+	 away in line_filepos before increasing the section size.  */
+      if (strcmp (current->name, _PDATA) != 0)
+	alignment_power = current->alignment_power;
+      else
+	{
+	  current->line_filepos = current->_raw_size / 8;
+	  alignment_power = 4;
+	}
 
       /* On Ultrix, the data sections in an executable file must be
 	 aligned to a page boundary within the file.  This does not
@@ -2205,7 +2227,7 @@ ecoff_compute_section_file_positions (abfd)
       /* Align the sections in the file to the same boundary on
 	 which they are aligned in virtual memory.  */
       old_sofar = sofar;
-      sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);
+      sofar = BFD_ALIGN (sofar, 1 << alignment_power);
 
       current->filepos = sofar;
 
@@ -2213,7 +2235,7 @@ ecoff_compute_section_file_positions (abfd)
 
       /* make sure that this section is of the right size too */
       old_sofar = sofar;
-      sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);
+      sofar = BFD_ALIGN (sofar, 1 << alignment_power);
       current->_raw_size += sofar - old_sofar;
     }
 
@@ -2221,7 +2243,8 @@ ecoff_compute_section_file_positions (abfd)
 }
 
 /* Determine the location of the relocs for all the sections in the
-   output file.  */
+   output file, as well as the location of the symbolic debugging
+   information.  */
 
 static bfd_size_type
 ecoff_compute_reloc_file_positions (abfd)
@@ -2232,9 +2255,13 @@ ecoff_compute_reloc_file_positions (abfd)
   file_ptr reloc_base;
   bfd_size_type reloc_size;
   asection *current;
+  file_ptr sym_base;
 
   if (! abfd->output_has_begun)
-    ecoff_compute_section_file_positions (abfd);
+    {
+      ecoff_compute_section_file_positions (abfd);
+      abfd->output_has_begun = true;
+    }
   
   reloc_base = ecoff_data (abfd)->reloc_filepos;
 
@@ -2257,6 +2284,18 @@ ecoff_compute_reloc_file_positions (abfd)
 	  reloc_base += relsize;
 	}
     }
+
+  sym_base = ecoff_data (abfd)->reloc_filepos + reloc_size;
+
+  /* At least on Ultrix, the symbol table of an executable file must
+     be aligned to a page boundary.  FIXME: Is this true on other
+     platforms?  */
+  if ((abfd->flags & EXEC_P) != 0
+      && (abfd->flags & D_PAGED) != 0)
+    sym_base = ((sym_base + ecoff_backend (abfd)->round - 1)
+		&~ (ecoff_backend (abfd)->round - 1));
+
+  ecoff_data (abfd)->sym_filepos = sym_base;
 
   return reloc_size;
 }
@@ -2373,7 +2412,15 @@ ecoff_get_extr (sym, esym)
 
   /* Adjust the FDR index for the symbol by that used for the input
      BFD.  */
-  esym->ifd += ecoff_data (input_bfd)->debug_info.ifdbase;
+  if (esym->ifd != -1)
+    {
+      struct ecoff_debug_info *input_debug;
+
+      input_debug = &ecoff_data (input_bfd)->debug_info;
+      BFD_ASSERT (esym->ifd < input_debug->symbolic_header.ifdMax);
+      if (input_debug->ifdmap != (RFDT *) NULL)
+	esym->ifd = input_debug->ifdmap[esym->ifd];
+    }
 
   return true;
 }
@@ -2415,7 +2462,6 @@ ecoff_write_object_contents (abfd)
   HDRR * const symhdr = &debug->symbolic_header;
   asection *current;
   unsigned int count;
-  file_ptr sym_base;
   bfd_size_type reloc_size;
   unsigned long text_size;
   unsigned long text_start;
@@ -2443,17 +2489,6 @@ ecoff_write_object_contents (abfd)
       current->target_index = count;
       ++count;
     }
-
-  sym_base = ecoff_data (abfd)->reloc_filepos + reloc_size;
-
-  /* At least on Ultrix, the symbol table of an executable file must
-     be aligned to a page boundary.  FIXME: Is this true on other
-     platforms?  */
-  if ((abfd->flags & EXEC_P) != 0
-      && (abfd->flags & D_PAGED) != 0)
-    sym_base = (sym_base + round - 1) &~ (round - 1);
-
-  ecoff_data (abfd)->sym_filepos = sym_base;
 
   if ((abfd->flags & D_PAGED) != 0)
     text_size = ecoff_sizeof_headers (abfd, false);
@@ -2512,7 +2547,16 @@ ecoff_write_object_contents (abfd)
 	 want the linker to compute the best size to use, or
 	 something.  I don't know what happens if the information is
 	 not present.  */
-      section.s_lnnoptr = 0;
+      if (strcmp (current->name, _PDATA) != 0)
+	section.s_lnnoptr = 0;
+      else
+	{
+	  /* The Alpha ECOFF .pdata section uses the lnnoptr field to
+	     hold the number of entries in the section (each entry is
+	     8 bytes).  We stored this in the line_filepos field in
+	     ecoff_compute_section_file_positions.  */
+	  section.s_lnnoptr = current->line_filepos;
+	}
 
       section.s_nreloc = current->reloc_count;
       section.s_nlnno = 0;
@@ -2567,7 +2611,7 @@ ecoff_write_object_contents (abfd)
       /* The ECOFF f_nsyms field is not actually the number of
 	 symbols, it's the size of symbolic information header.  */
       internal_f.f_nsyms = external_hdr_size;
-      internal_f.f_symptr = sym_base;
+      internal_f.f_symptr = ecoff_data (abfd)->sym_filepos;
     }
   else
     {
@@ -2596,9 +2640,8 @@ ecoff_write_object_contents (abfd)
   else
     internal_a.magic = ECOFF_AOUT_OMAGIC;
 
-  /* FIXME: This is what Ultrix puts in, and it makes the Ultrix
-     linker happy.  But, is it right?  */
-  internal_a.vstamp = 0x20a;
+  /* FIXME: Is this really correct?  */
+  internal_a.vstamp = symhdr->vstamp;
 
   /* At least on Ultrix, these have to be rounded to page boundaries.
      FIXME: Is this true on other platforms?  */
@@ -2658,8 +2701,7 @@ ecoff_write_object_contents (abfd)
      condition checks makes sure this object was not created by
      ecoff_bfd_final_link, since if it was we do not want to tamper
      with the external symbols.  */
-  if (bfd_get_outsymbols (abfd) != (asymbol **) NULL
-      || bfd_get_symcount (abfd) == 0)
+  if (bfd_get_outsymbols (abfd) != (asymbol **) NULL)
     {
       symhdr->iextMax = 0;
       symhdr->issExtMax = 0;
@@ -2766,34 +2808,34 @@ ecoff_write_object_contents (abfd)
 	    return false;
 	  bfd_release (abfd, buff);
 	}
-    }
 
-  /* Write out the symbolic debugging information.  */
-  if (bfd_get_symcount (abfd) > 0)
-    {
-      /* Write out the debugging information.  */
-      if (bfd_ecoff_write_debug (abfd, debug, &backend->debug_swap,
-				 ecoff_data (abfd)->sym_filepos)
-	  == false)
-	return false;
-    }
-  else if ((abfd->flags & EXEC_P) != 0
-	   && (abfd->flags & D_PAGED) != 0)
-    {
-      char c;
+      /* Write out the symbolic debugging information.  */
+      if (bfd_get_symcount (abfd) > 0)
+	{
+	  /* Write out the debugging information.  */
+	  if (bfd_ecoff_write_debug (abfd, debug, &backend->debug_swap,
+				     ecoff_data (abfd)->sym_filepos)
+	      == false)
+	    return false;
+	}
+      else if ((abfd->flags & EXEC_P) != 0
+	       && (abfd->flags & D_PAGED) != 0)
+	{
+	  char c;
 
-      /* A demand paged executable must occupy an even number of
-	 pages.  */
-      if (bfd_seek (abfd, (file_ptr) ecoff_data (abfd)->sym_filepos - 1,
-		    SEEK_SET) != 0)
-	return false;
-      if (bfd_read (&c, 1, 1, abfd) == 0)
-	c = 0;
-      if (bfd_seek (abfd, (file_ptr) ecoff_data (abfd)->sym_filepos - 1,
-		    SEEK_SET) != 0)
-	return false;
-      if (bfd_write (&c, 1, 1, abfd) != 1)
-	return false;      
+	  /* A demand paged executable must occupy an even number of
+	     pages.  */
+	  if (bfd_seek (abfd, (file_ptr) ecoff_data (abfd)->sym_filepos - 1,
+			SEEK_SET) != 0)
+	    return false;
+	  if (bfd_read (&c, 1, 1, abfd) == 0)
+	    c = 0;
+	  if (bfd_seek (abfd, (file_ptr) ecoff_data (abfd)->sym_filepos - 1,
+			SEEK_SET) != 0)
+	    return false;
+	  if (bfd_write (&c, 1, 1, abfd) != 1)
+	    return false;      
+	}
     }
 
   return true;
@@ -3819,7 +3861,8 @@ ecoff_link_add_externals (abfd, info, external_ext, ssext)
 /* ECOFF final link routines.  */
 
 static boolean ecoff_final_link_debug_accumulate
-  PARAMS ((bfd *output_bfd, bfd *input_bfd, struct bfd_link_info *));
+  PARAMS ((bfd *output_bfd, bfd *input_bfd, struct bfd_link_info *,
+	   PTR handle));
 static boolean ecoff_link_write_external
   PARAMS ((struct ecoff_link_hash_entry *, PTR));
 static boolean ecoff_indirect_link_order
@@ -3839,6 +3882,7 @@ ecoff_bfd_final_link (abfd, info)
   const struct ecoff_backend_data * const backend = ecoff_backend (abfd);
   struct ecoff_debug_info * const debug = &ecoff_data (abfd)->debug_info;
   HDRR *symhdr;
+  PTR handle;
   register bfd *input_bfd;
   asection *o;
   struct bfd_link_order *p;
@@ -3847,7 +3891,6 @@ ecoff_bfd_final_link (abfd, info)
      header.  */
   symhdr = &debug->symbolic_header;
   symhdr->magic = backend->debug_swap.sym_magic;
-  /* FIXME: What should the version stamp be?  */
   symhdr->vstamp = 0;
   symhdr->ilineMax = 0;
   symhdr->cbLine = 0;
@@ -3864,17 +3907,21 @@ ecoff_bfd_final_link (abfd, info)
 
   /* We accumulate the debugging information itself in the debug_info
      structure.  */
-  debug->line = debug->line_end = NULL;
-  debug->external_dnr = debug->external_dnr_end = NULL;
-  debug->external_pdr = debug->external_pdr_end = NULL;
-  debug->external_sym = debug->external_sym_end = NULL;
-  debug->external_opt = debug->external_opt_end = NULL;
-  debug->external_aux = debug->external_aux_end = NULL;
-  debug->ss = debug->ss_end = NULL;
+  debug->line = NULL;
+  debug->external_dnr = NULL;
+  debug->external_pdr = NULL;
+  debug->external_sym = NULL;
+  debug->external_opt = NULL;
+  debug->external_aux = NULL;
+  debug->ss = NULL;
   debug->ssext = debug->ssext_end = NULL;
-  debug->external_fdr = debug->external_fdr_end = NULL;
-  debug->external_rfd = debug->external_rfd_end = NULL;
+  debug->external_fdr = NULL;
+  debug->external_rfd = NULL;
   debug->external_ext = debug->external_ext_end = NULL;
+
+  handle = bfd_ecoff_debug_init (abfd, debug, &backend->debug_swap, info);
+  if (handle == (PTR) NULL)
+    return false;
 
   /* Accumulate the debugging symbols from each input BFD.  */
   for (input_bfd = info->input_bfds;
@@ -3892,12 +3939,19 @@ ecoff_bfd_final_link (abfd, info)
 #endif
 
       if (bfd_get_flavour (input_bfd) == bfd_target_ecoff_flavour)
-	ret = ecoff_final_link_debug_accumulate (abfd, input_bfd, info);
+	{
+	  /* Abitrarily set the symbolic header vstamp to the vstamp
+	     of the first object file in the link.  */
+	  if (symhdr->vstamp == 0)
+	    symhdr->vstamp
+	      = ecoff_data (input_bfd)->debug_info.symbolic_header.vstamp;
+	  ret = ecoff_final_link_debug_accumulate (abfd, input_bfd, info,
+						   handle);
+	}
       else
-	ret = bfd_ecoff_debug_link_other (abfd,
-					  debug,
-					  &backend->debug_swap,
-					  input_bfd);
+	ret = bfd_ecoff_debug_accumulate_other (handle, abfd,
+						debug, &backend->debug_swap,
+						input_bfd, info);
       if (! ret)
 	return false;
 
@@ -3929,9 +3983,21 @@ ecoff_bfd_final_link (abfd, info)
 	    if (p->type == bfd_indirect_link_order)
 	      o->reloc_count += p->u.indirect.section->reloc_count;
 	}
+    }
 
-      ecoff_compute_reloc_file_positions (abfd);
+  /* Compute the reloc and symbol file positions.  */
+  ecoff_compute_reloc_file_positions (abfd);
 
+  /* Write out the debugging information.  */
+  if (! bfd_ecoff_write_accumulated_debug (handle, abfd, debug,
+					   &backend->debug_swap, info,
+					   ecoff_data (abfd)->sym_filepos))
+    return false;
+
+  bfd_ecoff_debug_free (handle, abfd, debug, &backend->debug_swap, info);
+
+  if (info->relocateable)
+    {
       /* Now reset the reloc_count field of the sections in the output
 	 BFD to 0, so that we can use them to keep track of how many
 	 relocs we have output thus far.  */
@@ -4020,10 +4086,11 @@ ecoff_bfd_final_link (abfd, info)
    input BFD.  */
 
 static boolean
-ecoff_final_link_debug_accumulate (output_bfd, input_bfd, info)
+ecoff_final_link_debug_accumulate (output_bfd, input_bfd, info, handle)
      bfd *output_bfd;
      bfd *input_bfd;
      struct bfd_link_info *info;
+     PTR handle;
 {
   struct ecoff_debug_info * const debug = &ecoff_data (input_bfd)->debug_info;
   const struct ecoff_debug_swap * const swap =
@@ -4059,9 +4126,9 @@ ecoff_final_link_debug_accumulate (output_bfd, input_bfd, info)
   /* We do not read the external strings or the external symbols.  */
 
   ret = (bfd_ecoff_debug_accumulate
-	 (output_bfd, &ecoff_data (output_bfd)->debug_info,
+	 (handle, output_bfd, &ecoff_data (output_bfd)->debug_info,
 	  &ecoff_backend (output_bfd)->debug_swap,
-	  input_bfd, debug, swap, info->relocateable));
+	  input_bfd, debug, swap, info));
 
   /* Make sure we don't accidentally follow one of these pointers on
      to the stack.  */
@@ -4107,11 +4174,16 @@ ecoff_link_write_external (h, data)
       h->esym.asym.reserved = 0;
       h->esym.asym.index = indexNil;
     }
-  else
+  else if (h->esym.ifd != -1)
     {
+      struct ecoff_debug_info *debug;
+
       /* Adjust the FDR index for the symbol by that used for the
 	 input BFD.  */
-      h->esym.ifd += ecoff_data (h->abfd)->debug_info.ifdbase;
+      debug = &ecoff_data (h->abfd)->debug_info;
+      BFD_ASSERT (h->esym.ifd >= 0
+		  && h->esym.ifd < debug->symbolic_header.ifdMax);
+      h->esym.ifd = debug->ifdmap[h->esym.ifd];
     }
 
   switch (h->root.type)
