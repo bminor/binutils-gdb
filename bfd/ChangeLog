@@ -1,3 +1,8 @@
+Thu Mar 21 14:59:11 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* peicode.h (pe_print_pdata): Warn if the .pdata section is not a
+	multiple of 20 bytes.
+
 Thu Mar 21 13:54:40 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coffcode.h (coff_compute_section_file_positions): If not
