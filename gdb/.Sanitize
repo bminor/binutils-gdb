@@ -257,6 +257,8 @@ remote-vx.c
 remote-vx29k.c
 remote-vx68.c
 remote-vx960.c
+remote-vxmips.c
+remote-vxsparc.c
 remote-z8k.c
 remote.c
 rs6000-nat.c
