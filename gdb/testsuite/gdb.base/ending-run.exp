@@ -170,6 +170,10 @@ gdb_expect {
 		# This is what happens on Solaris currently -sts 1999-08-25
 		pass "step out of main on Solaris"
 	    }
+	    -re ".*in _int_reset ().*$gdb_prompt $" {
+		# This is what happens on Sanyo Stormy16
+		pass "step out of main"
+	    }
 	    -re ".*in ..change.mode ().*$gdb_prompt $" {
 		# This is what happens on ARM in thumb mode -fn 2000-02-01
 		pass "step out of main on ARM thumb"

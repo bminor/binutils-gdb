@@ -22,7 +22,7 @@ int main()
     int i;
 
     p = (int *) malloc( 4 );
-    
+    setvbuf (stdout, alloca (64), _IOLBF, 64);
     for (i = 1; i < 10; i++)
         {
             printf( "%d ", callee( i ));

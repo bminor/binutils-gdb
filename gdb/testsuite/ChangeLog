@@ -1,3 +1,10 @@
+2001-09-18  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/ending-run.c (main): Set stdout buffersize
+	to the same reasonable value for any target.
+	* gdb.base/ending-run.exp: Add a regular expression
+	to make testsuite happy on Sanyo Stormy16 target.
+
 2001-09-17  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.base/display.c (do_loops): Add float variable `f'.
