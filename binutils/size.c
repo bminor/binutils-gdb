@@ -86,7 +86,7 @@ Usage: %s [-ABdoxV] [--format=berkeley|sysv] [--radix=8|10|16]\n\
 #endif
   list_supported_targets (program_name, stream);
   if (status == 0)
-    fprintf (stream, _("Report bugs to bug-gnu-utils@gnu.org\n"));
+    fprintf (stream, REPORT_BUGS_TO);
   exit (status);
 }
 

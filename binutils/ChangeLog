@@ -1,3 +1,7 @@
+2000-04-03  H.J. Lu  (hjl@gnu.org)
+
+	* size.c (usage): Use REPORT_BUGS_TO.
+
 2000-04-03  Alan Modra  <alan@linuxcare.com.au>
 
 	* bucomm.h: #include "bin-bugs.h"
