@@ -1,13 +1,14 @@
 Thu Feb 19 11:15:45 1998  Nick Clifton  <nickc@cygnus.com>
 
-	* sim/m32r/sra.cgs: Test sra instruction.
-	* sim/m32r/sra3.cgs: Test sra3 instruction.
-	* sim/m32r/srai.cgs: Test srai instruction.
-	* sim/m32r/srl.cgs: Test srl instruction.
-	* sim/m32r/srl3.cgs: Test srl3 instruction.
-	* sim/m32r/srli.cgs: Test srli instruction.
-	* sim/m32r/xor3.cgs: Test xor3 instruction.
-	* sim/m32r/xor.cgs: Test xor instruction.
+	* sim/m32r/bcl24.cgs: Test long version of BCL instruction
+	* sim/m32r/sra.cgs: Test SRA instruction.
+	* sim/m32r/sra3.cgs: Test SRA3 instruction.
+	* sim/m32r/srai.cgs: Test SRAI instruction.
+	* sim/m32r/srl.cgs: Test SRL instruction.
+	* sim/m32r/srl3.cgs: Test SRL3 instruction.
+	* sim/m32r/srli.cgs: Test SRLI instruction.
+	* sim/m32r/xor3.cgs: Test XOR3 instruction.
+	* sim/m32r/xor.cgs: Test XOR instruction.
 
 Tue Feb 17 12:46:05 1998  Doug Evans  <devans@seba.cygnus.com>
 
