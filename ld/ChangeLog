@@ -1,3 +1,21 @@
+Tue Aug  8 15:24:05 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* Makefile.in (CC_FOR_TARGET, CXX_FOR_TARGET): Don't use
+	$r/../gcc/xgcc unless it is present.
+
+Thu Aug  3 11:56:22 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* scripttempl/m68kcoff.sc: Only put .ctors and .dtors in .text
+	when CONSTRUCTING.
+	* scripttempl/m68klynx.sc: Likewise.
+	* scripttempl/nw.sc: Likewise.
+	* scripttempl/sa29200.sc: Likewise.
+	* scripttempl/sparclynx.sc: Likewise.
+
+Fri Jul 28 12:02:23 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* emulparams/{z8001.sh, z8002.sh}: Fix typo.
+
 Thu Jul 27 21:06:21 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* configure.in (i[345]86-*-linuxoldld): Treat like linuxaout*.

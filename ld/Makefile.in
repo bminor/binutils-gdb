@@ -131,7 +131,7 @@ RUNTEST = `if [ -f $${srcroot}/../dejagnu/runtest ] ; \
 RUNTESTFLAGS =
 
 CC_FOR_TARGET = ` \
-  if [ -f $$r/../gcc/Makefile ] ; then \
+  if [ -f $$r/../gcc/xgcc ] ; then \
     if [ -f $$r/../newlib/Makefile ] ; then \
       echo $$r/../gcc/xgcc -B$$r/../gcc/ -idirafter $$r/../newlib/targ-include -idirafter $${srcroot}/../newlib/libc/include -nostdinc; \
     else \
@@ -147,7 +147,7 @@ CC_FOR_TARGET = ` \
 
 CXX = gcc
 CXX_FOR_TARGET = ` \
-  if [ -f $$r/../gcc/Makefile ] ; then \
+  if [ -f $$r/../gcc/xgcc ] ; then \
     if [ -f $$r/../newlib/Makefile ] ; then \
       echo $$r/../gcc/xgcc -B$$r/../gcc/ -idirafter $$r/../newlib/targ-include -idirafter $${srcroot}/../newlib/libc/include -nostdinc; \
     else \
@@ -194,7 +194,7 @@ BFDLIB = ../bfd/libbfd.a
 LIBIBERTY = ../libiberty/libiberty.a
 
 
-ALL_EMULATIONS = ea29k.o ealpha.o earmaoutl.o earmoutb.o \
+ALL_EMULATIONS = ea29k.o ealpha.o earmaoutl.o earmaoutb.o \
 	ecoff_sparc.o eebmon29k.o \
 	eelf32_sparc.o eelf32bmip.o eelf32lmip.o eelf32ppc.o eelf32lppc.o \
 	eelf64_sparc.o eelf_i386.o egld960.o ego32.o eh8300.o \
@@ -206,7 +206,7 @@ ALL_EMULATIONS = ea29k.o ealpha.o earmaoutl.o earmoutb.o \
 	emipsidt.o emipsidtl.o emipslit.o enews.o ens32knbsd.o eppcnw.o \
 	eriscix.o esa29200.o eshl.o esh.o esparclynx.o esparcnbsd.o \
 	est2000.o esun3.o esun4.o evanilla.o evax.o evsta.o \
-	ez8ksim.o ei386pe.o earmpe.o
+	ez8001.o ez8002.o ei386pe.o earmpe.o
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
@@ -485,10 +485,12 @@ earmaoutl.c:	$(srcdir)/emulparams/armaoutl.sh \
 earmaoutb.c:	$(srcdir)/emulparams/armaoutb.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/armaout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armaoutb
-ez8ksim.c: $(srcdir)/emulparams/z8ksim.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/z8ksim.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} z8ksim
-
+ez8001.c: $(srcdir)/emulparams/z8001.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/z8000.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} z8001
+ez8002.c: $(srcdir)/emulparams/z8002.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/z8000.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} z8002
 # start-sanitize-arc
 earcelf.c: $(srcdir)/emulparams/arcelf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
@@ -874,8 +876,8 @@ ldexp.o: ldexp.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   ldgram.h ldlang.h
 ldfile.o: ldfile.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
-  ld.h ldmisc.h ldexp.h ldlang.h ldfile.h ldmain.h ldgram.h \
-  ldlex.h ldemul.h
+  $(INCDIR)/bfdlink.h ld.h ldmisc.h ldexp.h ldlang.h \
+  ldfile.h ldmain.h ldgram.h ldlex.h ldemul.h
 ldlang.o: ldlang.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/libiberty.h $(INCDIR)/bfdlink.h ld.h ldmain.h \
@@ -883,9 +885,9 @@ ldlang.o: ldlang.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   ldctor.h ldfile.h
 ldmain.o: ldmain.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h $(INCDIR)/bfdlink.h config.h \
-  ld.h ldmain.h ldmisc.h ldwrite.h ldgram.h ldexp.h ldlang.h \
-  ldemul.h ldlex.h ldfile.h ldctor.h
+  $(INCDIR)/libiberty.h $(INCDIR)/progress.h $(INCDIR)/bfdlink.h \
+  config.h ld.h ldmain.h ldmisc.h ldwrite.h ldgram.h \
+  ldexp.h ldlang.h ldemul.h ldlex.h ldfile.h ldctor.h
 ldmisc.o: ldmisc.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
   ld.h ldmisc.h ldexp.h ldlang.h ldgram.h ldlex.h ldmain.h \
