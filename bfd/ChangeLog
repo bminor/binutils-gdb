@@ -1,3 +1,11 @@
+Fri Apr 24 09:16:00 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-v850.c (v850_elf_print_private_bfd_data): Add
+	internationalisation of printed information.
+	
+	* coff-arm.c (coff_arm_print_private_bfd_data): Add
+	internationalisation of printed information.
+
 Fri Apr 24 12:09:18 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* syms.c (struct indexentry): Change directory_name, file_name,
