@@ -1,3 +1,8 @@
+Fri Mar 11 08:22:00 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t00/help.exp: Replace most of docstrings for "tbreak",
+	"enable once", and "enable breakpoints once" with ".*".
+
 Thu Mar 10 08:34:27 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* TODO: Add suggestions about structure passing tests.
