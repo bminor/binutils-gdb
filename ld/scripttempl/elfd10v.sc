@@ -65,10 +65,19 @@ ${RELOCATING+${EXECUTABLE_SYMBOLS}}
 
 MEMORY
 {
-  UNIFIED : org = 0,         len = 0x1000000
-  INSN    : org = 0x1014000, len = 0x40000
-  DATA    : org = 0x2000004, len = 0x7FFC
-  STACK   : org = 0x200BFFE, len = 4
+  /* These are the values for the D10V-TS3 board.
+     There are other memory regions available on
+     the TS3 (eg ROM, FLASH, etc) but these are not
+     used by this script.  */
+     
+  INSN       : org = 0x01000000, len = 256K
+  DATA       : org = 0x02000000, len = 48K
+
+  /* This is a fake memory region at the top of the
+     on-chip RAM, used as the start of the
+     (descending) stack.  */
+     
+  STACK      : org = 0x0200BFFC, len = 4
 }
 
 SECTIONS
@@ -89,7 +98,7 @@ SECTIONS
     ${RELOCATING+PROVIDE (etext = .);}
   } ${RELOCATING+ >INSN} =${NOP-0}
 
-  .rodata  ${RELOCATING-0} : {
+  .rodata ${RELOCATING+${READONLY_START_ADDR}} : {
     *(.rodata)
     *(.gnu.linkonce.r*)
     *(.rodata.*)

@@ -1,3 +1,11 @@
+2002-08-30  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/elfd10v.sc (MEMORY): Remove UNIFIED, it is not
+	used.  Change INSN to start at 0x01000000 and extend for
+	256K (ignoring holes).  Start the STACK on a word aligned
+	boundary.
+        (.rodata): Start it at the READONLY_START_ADDR.
+
 2002-08-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* emulparams/elf32ppc.sh (ARCH): Set to "powerpc:common".
