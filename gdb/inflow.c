@@ -57,16 +57,6 @@ kill_command PARAMS ((char *, int));
 
 static void
 terminal_ours_1 PARAMS ((int));
-
-/* Nonzero if we have job control. */
-
-int job_control;
-
-/* Nonzero if we are debugging an attached outside process
-   rather than an inferior.  */
-
-int attach_flag;
-
 
 /* Record terminal status separately for debugger and inferior.  */
 
@@ -561,29 +551,6 @@ kill_command (arg, from_tty)
     else
       print_stack_frame (selected_frame, selected_frame_level, 1);
   }
-}
-
-/* The inferior process has died.  Long live the inferior!  */
-
-void
-generic_mourn_inferior ()
-{
-  inferior_pid = 0;
-  attach_flag = 0;
-  breakpoint_init_inferior ();
-  registers_changed ();
-
-#ifdef CLEAR_DEFERRED_STORES
-  /* Delete any pending stores to the inferior... */
-  CLEAR_DEFERRED_STORES;
-#endif
-
-  reopen_exec_file ();
-  reinit_frame_cache ();
-
-  /* It is confusing to the user for ignore counts to stick around
-     from previous runs of the inferior.  So clear them.  */
-  breakpoint_clear_ignore_counts ();
 }
 
 /* Call set_sigint_trap when you need to pass a signal on to an attached

@@ -1,3 +1,11 @@
+Sat May 14 15:13:52 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* inflow.c (job_control, attach_flag, generic_mourn_inferior):
+	Remove, needed for both native and cross.
+	* target.c (attach_flag, generic_mourn_inferior): Put here.
+	* utils.c (job_control): Put here.
+	(terminal.h): Don't include anymore.
+
 Sat May 14 09:11:44 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* source.c (find_source_lines): Always use code that was #ifdef

@@ -117,6 +117,11 @@ struct target_ops **current_target_stack;
 
 static struct cmd_list_element *targetlist = NULL;
 
+/* Nonzero if we are debugging an attached outside process
+   rather than an inferior.  */
+
+int attach_flag;
+
 /* The user just typed 'target' without the name of a target.  */
 
 /* ARGSUSED */
@@ -718,6 +723,8 @@ target_link (modname, t_reloc)
   if (STREQ(current_target->to_shortname, "rombug"))
     {
       (current_target->to_lookup_symbol) (modname, t_reloc);
+      if (*t_reloc == 0)
+      error("Unable to link to %s and get relocation in rombug", modname);
     }
   else
     *t_reloc = (CORE_ADDR)-1;
@@ -806,6 +813,29 @@ find_core_target ()
     }
   
   return(count == 1 ? runable : NULL);
+}
+
+/* The inferior process has died.  Long live the inferior!  */
+
+void
+generic_mourn_inferior ()
+{
+  inferior_pid = 0;
+  attach_flag = 0;
+  breakpoint_init_inferior ();
+  registers_changed ();
+
+#ifdef CLEAR_DEFERRED_STORES
+  /* Delete any pending stores to the inferior... */
+  CLEAR_DEFERRED_STORES;
+#endif
+
+  reopen_exec_file ();
+  reinit_frame_cache ();
+
+  /* It is confusing to the user for ignore counts to stick around
+     from previous runs of the inferior.  So clear them.  */
+  breakpoint_clear_ignore_counts ();
 }
 
 /* This table must match in order and size the signals in enum target_signal

@@ -30,7 +30,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "signals.h"
 #include "gdbcmd.h"
 #include "serial.h"
-#include "terminal.h" /* For job_control */
 #include "bfd.h"
 #include "target.h"
 #include "demangle.h"
@@ -72,6 +71,10 @@ set_width_command PARAMS ((char *, int, struct cmd_list_element *));
    to be executed if an error happens.  */
 
 static struct cleanup *cleanup_chain;
+
+/* Nonzero if we have job control. */
+
+int job_control;
 
 /* Nonzero means a quit has been requested.  */
 
