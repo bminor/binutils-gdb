@@ -4,14 +4,6 @@
 	top level.
 	* aclocal.m4, configure: Rebuilt.
 
-2000-08-28  Mark Hatle  <mhatle@mvista.com>
-
-	* ppc-opc.c: Add XTLB macro for a few PPC 4xx extended mnemonics.
-	(powerpc_opcodes): Add table entries for PPC 405 instructions.
-	Changed rfci, icbt, mfdcr, dccci, mtdcr, iccci from PPC to PPC403
-	instructions.  Added extended mnemonic mftbl as defined in the
-	405GP manual for all PPCs.
-
 2000-08-30  Kazu Hirata  <kazu@hxi.com>
 
 	* tic80-dis.c: Fix formatting.
@@ -19,6 +11,14 @@
 2000-08-29  Kazu Hirata  <kazu@hxi.com>
 
 	* w65-dis.c: Fix formatting.
+
+2000-08-28  Mark Hatle  <mhatle@mvista.com>
+
+	* ppc-opc.c: Add XTLB macro for a few PPC 4xx extended mnemonics.
+	(powerpc_opcodes): Add table entries for PPC 405 instructions.
+	Changed rfci, icbt, mfdcr, dccci, mtdcr, iccci from PPC to PPC403
+	instructions.  Added extended mnemonic mftbl as defined in the
+	405GP manual for all PPCs.
 
 2000-08-28  Jim Wilson  <wilson@cygnus.com>
 
@@ -90,6 +90,15 @@
 	* ia64-dis.c (print_insn_ia64): Get byte skip count correct
 	for MLI templates.  Handle IA64_OPND_TGT64.
 
+2000-08-04  Ben Elliston  <bje@redhat.com>
+
+	* cgen-dis.in, cgen-asm.in, cgen-ibld.in: New files.
+	* cgen.sh: Likewise.
+
+2000-08-02  Jim Wilson  <wilson@cygnus.com>
+	
+	* ia64-dis.c (print_insn_ia64): Call ia64_free_opcode at end.
+
 2000-07-29  Marek Michalkiewicz  <marekm@linux.org.pl>
 
 	* avr-dis.c (avr_operand): Use PARAMS macro in declaration.
@@ -101,15 +110,6 @@
 	(print_insn_avr): Disassemble ldd/std with displacement of 0
 	as ld/st.  Check avr_operand () return value, handle invalid
 	combinations of operands like unknown opcodes.
-
-2000-08-04  Ben Elliston  <bje@redhat.com>
-
-	* cgen-dis.in, cgen-asm.in, cgen-ibld.in: New files.
-	* cgen.sh: Likewise.
-
-2000-08-02  Jim Wilson  <wilson@cygnus.com>
-	
-	* ia64-dis.c (print_insn_ia64): Call ia64_free_opcode at end.
 
 2000-07-28  Ben Elliston  <bje@redhat.com>
 
@@ -370,6 +370,17 @@ Fri May 19 12:29:27 EDT 2000	Diego Novillo <dnovillo@redhat.com>
 	(print_insn_little_powerpc): Likewise.
 	(print_insn_powerpc): Prepend 'v' when printing vector registers.
 
+Mon Apr 24 15:21:35 2000  Clinton Popetz  <cpopetz@cygnus.com>
+
+	* configure.in: Add bfd_powerpc_64_arch.
+	* disassemble.c (disassembler): Use print_insn_big_powerpc for
+	64 bit code.
+
+2000-04-24  Nick Clifton  <nickc@cygnus.com>
+
+	* fr30-desc.c (fr30_cgen_cpu_open): Initialise signed_overflow
+	field.
+
 Sun Apr 23 17:54:14 2000  Denis Chertykov  <denisc@overta.ru>
 
 	* avr-dis.c (reg_fmul_d): New. Extract destination register from
@@ -381,17 +392,6 @@ Sun Apr 23 17:54:14 2000  Denis Chertykov  <denisc@overta.ru>
 	(reg_movw_r): New. Extract source register from MOVW instruction.
 	(print_insn_avr): Handle MOVW, MULS, MULSU, FMUL, FMULS, FMULSU,
 	EICALL, EIJMP, LPM r,Z, ELPM r,Z, SPM, ESPM instructions.
-
-Mon Apr 24 15:21:35 2000  Clinton Popetz  <cpopetz@cygnus.com>
-
-	* configure.in: Add bfd_powerpc_64_arch.
-	* disassemble.c (disassembler): Use print_insn_big_powerpc for
-	64 bit code.
-
-2000-04-24  Nick Clifton  <nickc@cygnus.com>
-
-	* fr30-desc.c (fr30_cgen_cpu_open): Initialise signed_overflow
-	field.
 
 2000-04-22  Timothy Wall  <twall@cygnus.com>
 

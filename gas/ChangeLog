@@ -1,4 +1,4 @@
-2000-08-03  Richard Henderson  <rth@cygnus.com>
+2000-09-03  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-ia64.c (emit_one_bundle): Stop collecting insns
 	for template selection when a label is needed.
@@ -224,7 +224,7 @@ Thu Aug 24 20:41:05 2000  Denis Chertykov  <denisc@overta.ru>
 	* config/tc-arm.c (do_bx): Warn about "bx px" not being very
 	useful.
 
-2000-08-14  Will Cohen  <wcohen@redhat.com>
+2000-08-15  Will Cohen  <wcohen@redhat.com>
 
 	* config/tc-sh.h (DWARF2_LINE_MIN_INSN_LENGTH): Defined.
 
@@ -303,6 +303,11 @@ Wed Aug  9 16:28:21 EDT 2000	Diego Novillo <dnovillo@cygnus.com>
 	* configure.in: Use elf on Unixware 7 (i586-sco-sysv5uw7.1.0)
 	* configure: Regenerate.
 
+2000-08-09  Kazu Hirata  <kazu@hxi.com>
+
+	* hash.c: Fix formatting.
+	* gasp.c: Likewise.
+
 2000-08-08  Jason Eckhardt  <jle@cygnus.com>
 
 	* config/tc-i860.h: Rework completely for BFD_ASSEMBLER.
@@ -329,11 +334,6 @@ Wed Aug  9 16:28:21 EDT 2000	Diego Novillo <dnovillo@cygnus.com>
 	(md_apply_fix3): New function.
 	(tc_gen_reloc): New function.
 
-2000-08-09  Kazu Hirata  <kazu@hxi.com>
-
-	* hash.c: Fix formatting.
-	* gasp.c: Likewise.
-
 2000-08-08  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* config/tc-m68hc11.c (build_jump_insn): Make sure the
@@ -355,14 +355,7 @@ Wed Aug  9 16:28:21 EDT 2000	Diego Novillo <dnovillo@cygnus.com>
 	* config/atof-ieee.c: Fix formatting.
 	* config/atof-tahoe.c: Likewise.
 
-2000-07-29  Marek Michalkiewicz  <marekm@linux.org.pl>
-
-	* config/tc-avr.c: Use PARAMS macro in function declarations.
-	Don't declare md_pcrel_from_section (already in tc-avr.h).
-	(avr_operands): Use AVR_UNDEF_P and AVR_SKIP_P macros.
-	(avr_operand): Don't set (unsigned) op_mask to -1.
-
-2000-08-04  Nick Clifton  <nickc@cygnus.com>
+2000-08-06  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-sparc.c (md_begin): Fix typo in recent formatting
 	work.
@@ -392,7 +385,7 @@ Wed Aug  9 16:28:21 EDT 2000	Diego Novillo <dnovillo@cygnus.com>
 
 2000-08-01  Nick Clifton  <nickc@cygnus.com>
 
-	* config/tc-arm.c (do_mrs): Fix skip fo 'cpsr_all' flag.
+	* config/tc-arm.c (do_mrs): Fix skip of 'cpsr_all' flag.
 	Undo some formatting fixes.
 
 2000-08-01  Kazu Hirata  <kazu@hxi.com>
@@ -432,6 +425,13 @@ Wed Aug  9 16:28:21 EDT 2000	Diego Novillo <dnovillo@cygnus.com>
         emit absolute jumps for anything with --pcrel.
 
 	* doc/c-m68k.texi: Document new command line option.
+
+2000-07-29  Marek Michalkiewicz  <marekm@linux.org.pl>
+
+	* config/tc-avr.c: Use PARAMS macro in function declarations.
+	Don't declare md_pcrel_from_section (already in tc-avr.h).
+	(avr_operands): Use AVR_UNDEF_P and AVR_SKIP_P macros.
+	(avr_operand): Don't set (unsigned) op_mask to -1.
 
 2000-07-28  Jason Eckhardt  <jle@cygnus.com>
 
@@ -806,8 +806,9 @@ Thu Jun 29 21:30:00 2000  Hans-Peter Nilsson  <hp@axis.com>
 2000-06-27  Aldy Hernandez  <aldyh@redhat.com>
 
 	* config/tc-mips.c (mips_ip): handle "(foo-.-4)" type of
-	expressions.  Ignore the problem when handling 16 bit immediates,
-	because the assembler will take care of the relocation later.
+	expressions.  Ignore the problem when handling 16 bit signed
+	immediates, because the assembler will take care of the relocation
+	later.
 
 2000-06-27  Nick Clifton  <nickc@cygnus.com>
 
@@ -870,7 +871,8 @@ Thu Jun 29 21:30:00 2000  Hans-Peter Nilsson  <hp@axis.com>
 2000-06-23  matthew green  <mrg@redhat.com>
 
 	* expr.c (operand): Do not as_bad() if RELAX_PAREN_GROUPING is
-	defined.  Fix error message for `[' grouping.
+	defined.  Fix error message and double increment of
+	input_line_pointer for `[' grouping.
 
 2000-06-22  Kazu Hirata  <kazu@hxi.com>
 
@@ -1589,18 +1591,6 @@ Mon May  1 14:19:39 2000  Denis Chertykov  <denisc@overta.ru>
 	(md_assemble): use skip_space () before parsing instruction
 	operands.
 
-Sun Apr 23 16:45:45 2000  Denis Chertykov  <denisc@overta.ru>
-
-	* config/tc-avr.c: New AVR_ISA_ defined.
-	(md_assemble): Handle opcodes with optional operands (lpm,elpm).
-	(avr_operand): Handle 'a', 'v' and 'z' constraint letters needed
-	for `fmul', `movw' and `lpm R,Z' instructions.
-	(avr_operands): Warn if current opcode is a two-word instruction
-	and previous opcode was cpse/sbic/sbis/sbrc/sbrs.
-	(avr_opcodes): New commands added.
-	(REGISTER_P): Check 'a' and 'v' constraint letters.
-	(mcu_types): New MCU added.
-
 2000-05-01  Alan Modra  <alan@linuxcare.com.au>
 
 	* configure.in: Set bfd_gas=yes on i386-*-pe and i386-*-nt* to
@@ -1611,25 +1601,6 @@ Sun Apr 23 16:45:45 2000  Denis Chertykov  <denisc@overta.ru>
 2000-04-29  Andreas Jaeger  <aj@suse.de>
 
 	* as.h: Correctly check GCC version.
-
-Mon Apr 24 15:21:11 2000  Clinton Popetz  <cpopetz@cygnus.com>
-
-	* as.c (parse_args): Allow md_parse_option to override -a listing
-	option.
-	* config/obj-coff.c (add_lineno): Change type of offset parameter
-	from "int" to "bfd_vma."
-	* config/tc-ppc.c (md_pseudo_table): Add "llong" and "machine."
-	(ppc_mach, ppc_subseg_align, ppc_target_format): New.
-	(ppc_change_csect): Align correctly for XCOFF64.
-	(ppc_machine): New function, which discards "ppc_machine" line.
-	(ppc_tc): Cons for 8 when code is 64 bit.
-	(md_apply_fix3): Don't check operand->insert.  Handle 64 bit
-	relocations.
-	(md_parse_option): Handle -a64 and -a32.
-	(ppc_xcoff64): New.
-	* config/tc-ppc.h (TARGET_MACH): Define.
-	(TARGET_FORMAT): Move to function.
-	(SUB_SEGMENT_ALIGN): Use ppc_subseg_align.
 
 2000-04-26  David O'Brien  <obrien@FreeBSD.org>
 
@@ -1664,6 +1635,37 @@ Tue Apr 25 11:02:02 2000  Jeffrey A Law  (law@cygnus.com)
 2000-04-24  Mark Klein <mklein@dis.com>
 
 	 * obj-som.c: Terminate obj_pseudo_table.
+
+Mon Apr 24 15:21:11 2000  Clinton Popetz  <cpopetz@cygnus.com>
+
+	* as.c (parse_args): Allow md_parse_option to override -a listing
+	option.
+	* config/obj-coff.c (add_lineno): Change type of offset parameter
+	from "int" to "bfd_vma."
+	* config/tc-ppc.c (md_pseudo_table): Add "llong" and "machine."
+	(ppc_mach, ppc_subseg_align, ppc_target_format): New.
+	(ppc_change_csect): Align correctly for XCOFF64.
+	(ppc_machine): New function, which discards "ppc_machine" line.
+	(ppc_tc): Cons for 8 when code is 64 bit.
+	(md_apply_fix3): Don't check operand->insert.  Handle 64 bit
+	relocations.
+	(md_parse_option): Handle -a64 and -a32.
+	(ppc_xcoff64): New.
+	* config/tc-ppc.h (TARGET_MACH): Define.
+	(TARGET_FORMAT): Move to function.
+	(SUB_SEGMENT_ALIGN): Use ppc_subseg_align.
+
+Sun Apr 23 16:45:45 2000  Denis Chertykov  <denisc@overta.ru>
+
+	* config/tc-avr.c: New AVR_ISA_ defined.
+	(md_assemble): Handle opcodes with optional operands (lpm,elpm).
+	(avr_operand): Handle 'a', 'v' and 'z' constraint letters needed
+	for `fmul', `movw' and `lpm R,Z' instructions.
+	(avr_operands): Warn if current opcode is a two-word instruction
+	and previous opcode was cpse/sbic/sbis/sbrc/sbrs.
+	(avr_opcodes): New commands added.
+	(REGISTER_P): Check 'a' and 'v' constraint letters.
+	(mcu_types): New MCU added.
 
 2000-04-22  Timothy Wall  <twall@cygnus.com>
 
@@ -2053,6 +2055,7 @@ Sat Mar 11 00:01:39 2000  Hans-Peter Nilsson  <hp@axis.se>
 
 	* config/tc-m32r.c (m32r_fix_adjustable):  Look up the
 	relocation type based on the entry in the fixup structure.
+	Put S_IS_EXTERN processing back in.
 
 2000-03-08  H.J. Lu  (hjl@gnu.org)
 
@@ -2277,6 +2280,9 @@ Sat Mar 11 00:01:39 2000  Hans-Peter Nilsson  <hp@axis.se>
 	(mips_ip): Ditto.
 	(md_longopts): Add "-mgp32" and "-mgp64".
 	(md_parse_option): Add OPTION_GP32 and OPTION_GP64.
+
+	(OPTION_M7900): Change offset
+	(OPTION_NO_M7900): Ditto.
 
 2000-02-22  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
 
