@@ -1,3 +1,10 @@
+2003-07-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c: Remove NULL pointer checks.  Formatting.  Remove
+	extraneous ATTRIBUTE_UNUSED.
+	* ppc-dis.c (print_insn_powerpc): Always pass a valid address to
+	operand->extract.
+
 2003-07-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-opc.c: Convert to C90, removing unnecessary prototypes and
