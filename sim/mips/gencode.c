@@ -1134,7 +1134,7 @@ process_instructions(doarch,features)
 
          /* If HI32 specified, then shift range is 32..63 */
          if (MIPS_DECODE[loop].flags & HI32)
-          printf("   op1 |= (1 << 6);\n");
+          printf("   op1 |= (1 << 5);\n");
 
          /* We do not need to perform pre-masking with 0xFFFFFFFF when
             dealing with 32bit shift lefts, since the sign-extension
@@ -1144,9 +1144,12 @@ process_instructions(doarch,features)
          else
           printf("   GPR[destreg] = ((uword64)(op2%s) >> op1);\n",((bits == 32) ? " & 0xFFFFFFFF" : ""));
 
-         /* For ARITHMETIC shifts, we must duplicate the sign-bit */
+         /* For ARITHMETIC shifts, we must duplicate the sign-bit.  We
+            don't do this if op1 is zero, since it is not needed and
+            since that would cause an undefined shift of the number of
+            bits in the type.  */
          if (MIPS_DECODE[loop].flags & ARITHMETIC)
-          printf("   GPR[destreg] |= ((op2 & ((%s)1 << %d)) ? ((((%s)1 << (op1 + 1)) - 1) << (%d - op1)) : 0);\n",ltype,(bits - 1),ltype,(bits - 1));
+          printf("   GPR[destreg] |= (op1 != 0 && (op2 & ((%s)1 << %d)) ? ((((%s)1 << op1) - 1) << (%d - op1)) : 0);\n",ltype,(bits - 1),ltype,bits);
 
          /* Ensure WORD values are sign-extended into 64bit registers */
          if ((bits == 32) && (gprlen == 64))

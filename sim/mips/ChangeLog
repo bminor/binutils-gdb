@@ -1,7 +1,9 @@
 Thu Sep 19 15:34:17 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gencode.c (process_instructions): Correct handling of nor
-	instruction.
+	instruction.  Correct shift count for 32 bit shift instructions.
+	Correct sign extension for arithmetic shifts to not shift the
+	number of bits in the type.
 
 Mon Sep 16 11:38:16 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
