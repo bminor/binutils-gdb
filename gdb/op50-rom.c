@@ -61,7 +61,7 @@ static struct monitor_ops op50n_cmds =
   op50n_inits,			/* Init strings */
   "g\r",			/* continue command */
   "t\r",			/* single step */
-  "\003",			/* Interrupt char */
+  "\003.\r",			/* Interrupt char */
   "b %x\r",			/* set a breakpoint */
   "b %x,0\r",			/* clear breakpoint at addr */
   "bx\r",			/* clear all breakpoints */

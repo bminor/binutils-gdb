@@ -1,3 +1,8 @@
+Wed Sep 20 21:06:35 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* op50-rom.c (op50n_cmds): Send ".\r" after the interrupt
+	character.
+
 Wed Sep 20 13:12:56 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (maintainer-clean): New target, synonym for
