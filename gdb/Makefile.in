@@ -75,6 +75,8 @@ srcdir = .
 # CFLAGS section if your system doesn't have fcntl.h in /usr/include (which 
 # is where it should be according to Posix).
 
+# If you use bison instead of yacc, it needs to include the "-y" argument.
+#BISON="bison -y"
 BISON=yacc
 YACC=$(BISON)
 

@@ -45,9 +45,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "parser-defs.h"
 #include "m2-lang.h"
 
-/* These MUST be included in any grammar file!!!! Please choose unique names!
-   Note that this are a combined list of variables that can be produced
-   by any one of bison, byacc, or yacc. */
+/* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
+   as well as gratuitiously global symbol names, so we can have multiple
+   yacc generated parsers in gdb.  Note that these are only the variables
+   produced by yacc.  If other parser generators (bison, byacc, etc) produce
+   additional global names that conflict at link time, then those parser
+   generators need to be fixed instead of adding those names to this list. */
+
 #define	yymaxdepth m2_maxdepth
 #define	yyparse	m2_parse
 #define	yylex	m2_lex
@@ -75,14 +79,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yy_yyv	m2_yyv
 #define	yyval	m2_val
 #define	yylloc	m2_lloc
-#define yyrule	m2_rule		/* With YYDEBUG defined, byacc */
-#define yyname  m2_name		/* With YYDEBUG defined, byacc */
 #define yyreds	m2_reds		/* With YYDEBUG defined */
 #define yytoks	m2_toks		/* With YYDEBUG defined */
-#define yyss	m2_yyss		/* byacc */
-#define	yyssp	m2_yysp		/* byacc */
-#define	yyvs	m2_yyvs		/* byacc */
-#define	yyvsp	m2_yyvsp	/* byacc */
+
+#ifndef YYDEBUG
+#define	YYDEBUG	0		/* Default to no yydebug support */
+#endif
+
+int
+yyparse PARAMS ((void));
+
+static int
+yylex PARAMS ((void));
+
+void
+yyerror PARAMS ((char *));
 
 #if 0
 static char *
@@ -92,15 +103,6 @@ make_qualname PARAMS ((char *, char *));
 static int
 parse_number PARAMS ((int));
 
-static int
-yylex PARAMS ((void));
-
-void
-yyerror PARAMS ((char *));
-
-int
-yyparse PARAMS ((void));
-
 /* The sign of the number being parsed. */
 static int number_sign = 1;
 
@@ -108,10 +110,6 @@ static int number_sign = 1;
    contained in, */
 #if 0
 static struct block *modblock=0;
-#endif
-
-#if MAINTENANCE_CMDS
-#define	YYDEBUG	1
 #endif
 
 %}

@@ -43,9 +43,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "language.h"
 #include "c-lang.h"
 
-/* These MUST be included in any grammar file!!!! Please choose unique names!
-   Note that this are a combined list of variables that can be produced
-   by any one of bison, byacc, or yacc. */
+/* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
+   as well as gratuitiously global symbol names, so we can have multiple
+   yacc generated parsers in gdb.  Note that these are only the variables
+   produced by yacc.  If other parser generators (bison, byacc, etc) produce
+   additional global names that conflict at link time, then those parser
+   generators need to be fixed instead of adding those names to this list. */
+
 #define	yymaxdepth c_maxdepth
 #define	yyparse	c_parse
 #define	yylex	c_lex
@@ -73,27 +77,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yy_yyv	c_yyv
 #define	yyval	c_val
 #define	yylloc	c_lloc
-#define yyrule	c_rule		/* With YYDEBUG defined, byacc */
-#define yyname  c_name		/* With YYDEBUG defined, byacc */
 #define yyreds	c_reds		/* With YYDEBUG defined */
 #define yytoks	c_toks		/* With YYDEBUG defined */
-#define yyss	c_yyss		/* byacc */
-#define	yyssp	c_yysp		/* byacc */
-#define	yyvs	c_yyvs		/* byacc */
-#define	yyvsp	c_yyvsp		/* byacc */
+
+#ifndef YYDEBUG
+#define	YYDEBUG	0		/* Default to no yydebug support */
+#endif
 
 int
 yyparse PARAMS ((void));
 
-int
+static int
 yylex PARAMS ((void));
 
 void
 yyerror PARAMS ((char *));
-
-#if MAINTENANCE_CMDS
-#define	YYDEBUG	1
-#endif
 
 %}
 

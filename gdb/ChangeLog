@@ -1,3 +1,14 @@
+Thu Dec 31 11:06:38 1992  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (BISON):  Add comment that when bison is used, it
+	must include the "-y" option.
+	* c-exp.y, m2-exp.y (yyrule, yyname, yyss, yyssp, yyvs, yyvsp):
+	Remove defines to remap non-yacc symbols, thus backing out of
+	previous recent changes.  Standard policy is that non-yacc parser
+	generators get fixed, rather than adding bug workarounds in gdb
+	for each new one that pops up.  Expand comment to note this.
+	* c-exp.y, m2-exp.y (YYDEBUG):  Revert back to disabled by default.
+
 Thu Dec 31 09:03:02 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* partial-stab.h (near N_BINCL):  Remove redundant code in N_BINCL
