@@ -14085,6 +14085,7 @@ Then give @file{gdb.dvi} to your @sc{dvi} printing program.
 @appendix Installing @value{GDBN}
 @cindex configuring @value{GDBN}
 @cindex installation
+@cindex configuring @value{GDBN}, and source tree subdirectories
 
 @value{GDBN} comes with a @code{configure} script that automates the process
 of preparing @value{GDBN} for installation; you can then use @code{make} to
@@ -14175,19 +14176,15 @@ directories for multiple libraries or programs, such as the
 creates configuration files for every directory level underneath (unless
 you tell it not to, with the @samp{--norecursion} option).
 
-You can run the @code{configure} script from any of the
-subordinate directories in the @value{GDBN} distribution if you only want to
-configure that subdirectory, but be sure to specify a path to it.
-
-For example, with version @value{GDBVN}, type the following to configure only
-the @code{bfd} subdirectory:
-
-@smallexample
-@group
-cd gdb-@value{GDBVN}/bfd
-../configure @var{host}
-@end group
-@end smallexample
+You should run the @code{configure} script from the top directory in the
+source tree, the @file{gdb-@var{version-number}} directory.  If you run
+@code{configure} from one of the subdirectories, you will configure only
+that subdirectory.  That is usually not what you want.  In particular,
+if you run the first @code{configure} from the @file{gdb} subdirectory
+of the @file{gdb-@var{version-number}} directory, you will omit the
+configuration of @file{bfd}, @file{readline}, and other sibling
+directories of the @file{gdb} subdirectory.  This leads to build errors
+about missing include files such as @file{bfd/bfd.h}.
 
 You can install @code{@value{GDBP}} anywhere; it has no hardwired paths.
 However, you should make sure that the shell on your path (named by
@@ -14239,6 +14236,12 @@ directory, it creates a tree for the binaries with the same structure
 the example, you'd find the Sun 4 library @file{libiberty.a} in the
 directory @file{gdb-sun4/libiberty}, and @value{GDBN} itself in
 @file{gdb-sun4/gdb}.
+
+Make sure that your path to the @file{configure} script has just one
+instance of @file{gdb} in it.  If your path to @file{configure} looks
+like @file{../gdb-@value{GDBVN}/gdb/configure}, you are configuring only
+one subdirectory of @value{GDBN}, not the whole package.  This leads to
+build errors about missing include files such as @file{bfd/bfd.h}.
 
 One popular reason to build several @value{GDBN} configurations in separate
 directories is to configure @value{GDBN} for cross-compiling (where
