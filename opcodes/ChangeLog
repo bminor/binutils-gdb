@@ -1,3 +1,9 @@
+start-sanitize-d10v
+Fri Dec 20 14:30:19 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d10v-opc.c (pre_defined_registers):  Add cr[0-15], dpc, dpsw, link.
+
+end-sanitize-d10v	
 Mon Dec 16 13:00:15 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10200-opc.c (mn10200_operands): Add SIMM16N.
