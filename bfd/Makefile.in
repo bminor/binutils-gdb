@@ -128,7 +128,7 @@ all: Makefile $(TARGETLIB)
 
 check:
 
-info: force
+info dvi : force
 	@$(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 
 clean-info:
