@@ -1,3 +1,8 @@
+Sun Nov 28 12:12:50 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/unsorted/align3.s: New test.
+	* gas/hppa/unsorted/unsorted.exp: Run it.
+
 Sat Nov 27 22:50:01 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/all/p2425.s: Insert a tab before assembler directives so

@@ -26,6 +26,7 @@ Do-first:
 
 Things-to-keep:
 
+align3.s
 fragbug.s
 labeldiffs.s
 locallabel.s
