@@ -1,3 +1,9 @@
+Sat Nov 13 23:17:48 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gdb.stabs/hppa.mt: A makefile fragment for the PA.
+	* gdb.stabs/configure.in (hppa*-*-*): Use it.
+	* gdb.stabs/hppa.sed: New sed script for the PA.
+
 Sat Nov 13 22:50:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.stabs: Re-write weird.def and configuration to use sed

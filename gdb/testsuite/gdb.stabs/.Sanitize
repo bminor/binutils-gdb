@@ -28,6 +28,8 @@ configure.in
 ecoff.mt
 aout.sed
 ecoff.sed
+hppa.mt
+hppa.sed
 xcoff.sed
 weird.def
 weird.exp

@@ -22,6 +22,8 @@ alpha-*-*)		if [ x${with_gnu_as} = xyes ]; then
 			fi
 			;;
 
+hppa*-*-*)		target_makefile_frag=hppa.mt ;;
+
 mips-*-bsd*)		target_makefile_frag=aout.mt ;;
 mips-*-*)		if [ x${with_gnu_as} = xyes ]; then
 			  target_makefile_frag=aout.mt
