@@ -589,8 +589,8 @@ f:2:REMOTE_TRANSLATE_XFER_ADDRESS:void:remote_translate_xfer_address:CORE_ADDR g
 #
 v:2:FRAME_ARGS_SKIP:CORE_ADDR:frame_args_skip::::0:-1
 f:2:FRAMELESS_FUNCTION_INVOCATION:int:frameless_function_invocation:struct frame_info *fi:fi:::generic_frameless_function_invocation_not::0
-F:2:FRAME_CHAIN:CORE_ADDR:frame_chain:struct frame_info *frame:frame::0:0
-F:2:FRAME_CHAIN_VALID:int:frame_chain_valid:CORE_ADDR chain, struct frame_info *thisframe:chain, thisframe::0:0
+F:2:DEPRECATED_FRAME_CHAIN:CORE_ADDR:deprecated_frame_chain:struct frame_info *frame:frame::0:0
+F:2:DEPRECATED_FRAME_CHAIN_VALID:int:deprecated_frame_chain_valid:CORE_ADDR chain, struct frame_info *thisframe:chain, thisframe::0:0
 # DEPRECATED_FRAME_SAVED_PC has been replaced by UNWIND_PC.  Please
 # note, per UNWIND_PC's doco, that while the two have similar
 # interfaces they have very different underlying implementations.

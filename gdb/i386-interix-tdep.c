@@ -224,10 +224,10 @@ i386_interix_back_one_frame (int fromleaf, struct frame_info *frame)
       /* No...  We must be pointing at the frame that was called
          by PdxSignalDeliverer; back up across the whole mess.  */
 
-      /* Extract the frame for PdxSignalDeliverer.
-         Note: FRAME_CHAIN used the "old" frame pointer because we were
-         a deliverer.  Get the address of the context record that's on
-         here frameless.  */
+      /* Extract the frame for PdxSignalDeliverer.  Note:
+         DEPRECATED_FRAME_CHAIN used the "old" frame pointer because
+         we were a deliverer.  Get the address of the context record
+         that's on here frameless.  */
       context = read_memory_integer (frame->frame, 4);  /* an Arg */
 
       /* Now extract the frame pointer contained in the context.  */
@@ -333,7 +333,7 @@ i386_interix_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
                                     i386_interix_skip_trampoline_code);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, i386_interix_back_one_frame);
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_noop);
-  set_gdbarch_frame_chain_valid (gdbarch, i386_interix_frame_chain_valid);
+  set_gdbarch_deprecated_frame_chain_valid (gdbarch, i386_interix_frame_chain_valid);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, i386_interix_frame_saved_pc);
   set_gdbarch_name_of_malloc (gdbarch, "_malloc");
 }

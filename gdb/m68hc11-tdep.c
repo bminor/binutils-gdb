@@ -1403,7 +1403,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_register_convertible (gdbarch, generic_register_convertible_not);
 
 
-  set_gdbarch_frame_chain (gdbarch, m68hc11_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, m68hc11_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, m68hc11_frame_saved_pc);
   set_gdbarch_frame_args_address (gdbarch, m68hc11_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, m68hc11_frame_locals_address);

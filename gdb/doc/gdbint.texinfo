@@ -253,9 +253,9 @@ if it is defined; that is where you should use the @code{FP_REGNUM}
 value, if your frames are nonstandard.)
 
 @cindex frame chain
-Given a @value{GDBN} frame, define @code{FRAME_CHAIN} to determine the
-address of the calling function's frame.  This will be used to create a
-new @value{GDBN} frame struct, and then
+Given a @value{GDBN} frame, define @code{DEPRECATED_FRAME_CHAIN} to
+determine the address of the calling function's frame.  This will be
+used to create a new @value{GDBN} frame struct, and then
 @code{DEPRECATED_INIT_EXTRA_FRAME_INFO} and
 @code{DEPRECATED_INIT_FRAME_PC} will be called for the new frame.
 
@@ -3263,12 +3263,12 @@ By default, no frame based stack alignment is performed.
 @findex FRAME_ARGS_ADDRESS_CORRECT
 See @file{stack.c}.
 
-@item FRAME_CHAIN(@var{frame})
-@findex FRAME_CHAIN
+@item DEPRECATED_FRAME_CHAIN(@var{frame})
+@findex DEPRECATED_FRAME_CHAIN
 Given @var{frame}, return a pointer to the calling frame.
 
-@item FRAME_CHAIN_VALID(@var{chain}, @var{thisframe})
-@findex FRAME_CHAIN_VALID
+@item DEPRECATED_FRAME_CHAIN_VALID(@var{chain}, @var{thisframe})
+@findex DEPRECATED_FRAME_CHAIN_VALID
 Define this to be an expression that returns zero if the given frame is an
 outermost frame, with no caller, and nonzero otherwise.  Most normal
 situations can be handled without defining this macro, including @code{NULL}

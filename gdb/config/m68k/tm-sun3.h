@@ -86,17 +86,18 @@
 /* The code which tries to deal with this bug is never harmful on a sun3.  */
 #define SUN_FIXED_LBRAC_BUG (0)
 
-/* On the sun3 the kernel pushes a sigcontext on the user stack and then
-   `calls' _sigtramp in user code. _sigtramp saves the floating point status
-   on the stack and calls the signal handler function. The stack does not
-   contain enough information to allow a normal backtrace, but sigcontext
-   contains the saved user pc/sp. FRAME_CHAIN and friends in tm-m68k.h and
-   m68k_find_saved_regs deal with this situation by manufacturing a fake frame
-   for _sigtramp.
-   SIG_PC_FP_OFFSET is the offset from the signal handler frame to the
-   saved pc in sigcontext.
-   SIG_SP_FP_OFFSET is the offset from the signal handler frame to the end
-   of sigcontext which is identical to the saved sp at SIG_PC_FP_OFFSET - 4.
+/* On the sun3 the kernel pushes a sigcontext on the user stack and
+   then `calls' _sigtramp in user code. _sigtramp saves the floating
+   point status on the stack and calls the signal handler
+   function. The stack does not contain enough information to allow a
+   normal backtrace, but sigcontext contains the saved user
+   pc/sp. DEPRECATED_FRAME_CHAIN and friends in tm-m68k.h and
+   m68k_find_saved_regs deal with this situation by manufacturing a
+   fake frame for _sigtramp.  SIG_PC_FP_OFFSET is the offset from the
+   signal handler frame to the saved pc in sigcontext.
+   SIG_SP_FP_OFFSET is the offset from the signal handler frame to the
+   end of sigcontext which is identical to the saved sp at
+   SIG_PC_FP_OFFSET - 4.
 
    Please note that it is impossible to correctly backtrace from a breakpoint
    in _sigtramp as _sigtramp modifies the stack pointer a few times.  */

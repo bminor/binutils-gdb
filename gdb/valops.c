@@ -1374,9 +1374,9 @@ hand_function_call (struct value *function, int nargs, struct value **args)
        be able to correctly perform back traces.  If a target is
        having trouble with backtraces, first thing to do is add
        FRAME_ALIGN() to its architecture vector.  After that, try
-       adding SAVE_DUMMY_FRAME_TOS() and modifying FRAME_CHAIN so that
-       when the next outer frame is a generic dummy, it returns the
-       current frame's base.  */
+       adding SAVE_DUMMY_FRAME_TOS() and modifying
+       DEPRECATED_FRAME_CHAIN so that when the next outer frame is a
+       generic dummy, it returns the current frame's base.  */
     sp = old_sp;
 
   if (INNER_THAN (1, 2))

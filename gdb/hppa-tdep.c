@@ -1069,9 +1069,10 @@ hppa_init_extra_frame_info (int fromleaf, struct frame_info *frame)
   if (frame->next && !fromleaf)
     return;
 
-  /* If the next frame represents a frameless function invocation
-     then we have to do some adjustments that are normally done by
-     FRAME_CHAIN.  (FRAME_CHAIN is not called in this case.)  */
+  /* If the next frame represents a frameless function invocation then
+     we have to do some adjustments that are normally done by
+     DEPRECATED_FRAME_CHAIN.  (DEPRECATED_FRAME_CHAIN is not called in
+     this case.)  */
   if (fromleaf)
     {
       /* Find the framesize of *this* frame without peeking at the PC
@@ -4991,8 +4992,8 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     (gdbarch, hppa_extract_struct_value_address);
   set_gdbarch_cannot_store_register (gdbarch, hppa_cannot_store_register);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, hppa_init_extra_frame_info);
-  set_gdbarch_frame_chain (gdbarch, hppa_frame_chain);
-  set_gdbarch_frame_chain_valid (gdbarch, hppa_frame_chain_valid);
+  set_gdbarch_deprecated_frame_chain (gdbarch, hppa_frame_chain);
+  set_gdbarch_deprecated_frame_chain_valid (gdbarch, hppa_frame_chain_valid);
   set_gdbarch_frameless_function_invocation
     (gdbarch, hppa_frameless_function_invocation);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, hppa_frame_saved_pc);

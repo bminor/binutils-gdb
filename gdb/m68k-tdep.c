@@ -245,10 +245,10 @@ m68k_store_return_value (struct type *type, char *valbuf)
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
 
-/* FRAME_CHAIN takes a frame's nominal address and produces the frame's
-   chain-pointer.
-   In the case of the 68000, the frame's nominal address
-   is the address of a 4-byte word containing the calling frame's address.  */
+/* DEPRECATED_FRAME_CHAIN takes a frame's nominal address and produces
+   the frame's chain-pointer.  In the case of the 68000, the frame's
+   nominal address is the address of a 4-byte word containing the
+   calling frame's address.  */
 
 /* If we are chaining from sigtramp, then manufacture a sigtramp frame
    (which isn't really on the stack.  I'm not sure this is right for anything
@@ -1010,7 +1010,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					       m68k_deprecated_extract_return_value);
   set_gdbarch_deprecated_store_return_value (gdbarch, m68k_store_return_value);
 
-  set_gdbarch_frame_chain (gdbarch, m68k_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, m68k_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, m68k_frame_saved_pc);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, m68k_frame_init_saved_regs);
   set_gdbarch_frameless_function_invocation (gdbarch,

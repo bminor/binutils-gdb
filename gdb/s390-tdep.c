@@ -1808,7 +1808,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frame_args_address (gdbarch, s390_frame_args_address);
-  set_gdbarch_frame_chain (gdbarch, s390_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, s390_frame_chain);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, s390_frame_init_saved_regs);
   set_gdbarch_frame_locals_address (gdbarch, s390_frame_args_address);
   /* We can't do this */
@@ -1840,9 +1840,9 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					     s390_frameless_function_invocation);
   /* Return saved PC from a frame */
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, s390_frame_saved_pc);
-  /* FRAME_CHAIN takes a frame's nominal address
-     and produces the frame's chain-pointer. */
-  set_gdbarch_frame_chain (gdbarch, s390_frame_chain);
+  /* DEPRECATED_FRAME_CHAIN takes a frame's nominal address and
+     produces the frame's chain-pointer. */
+  set_gdbarch_deprecated_frame_chain (gdbarch, s390_frame_chain);
   set_gdbarch_saved_pc_after_call (gdbarch, s390_saved_pc_after_call);
   set_gdbarch_register_byte (gdbarch, s390_register_byte);
   set_gdbarch_pc_regnum (gdbarch, S390_PC_REGNUM);

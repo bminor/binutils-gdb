@@ -452,8 +452,8 @@ enum print_what
 extern void *frame_obstack_zalloc (unsigned long size);
 #define FRAME_OBSTACK_ZALLOC(TYPE) ((TYPE *) frame_obstack_zalloc (sizeof (TYPE)))
 
-/* If FRAME_CHAIN_VALID returns zero it means that the given frame
-   is the outermost one and has no caller.  */
+/* If DEPRECATED_FRAME_CHAIN_VALID returns zero it means that the
+   given frame is the outermost one and has no caller.  */
 
 extern int frame_chain_valid (CORE_ADDR, struct frame_info *);
 

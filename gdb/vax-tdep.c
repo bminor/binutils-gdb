@@ -42,7 +42,7 @@ static gdbarch_register_virtual_type_ftype vax_register_virtual_type;
 static gdbarch_skip_prologue_ftype vax_skip_prologue;
 static gdbarch_saved_pc_after_call_ftype vax_saved_pc_after_call;
 static gdbarch_frame_num_args_ftype vax_frame_num_args;
-static gdbarch_frame_chain_ftype vax_frame_chain;
+static gdbarch_deprecated_frame_chain_ftype vax_frame_chain;
 static gdbarch_frame_args_address_ftype vax_frame_args_address;
 static gdbarch_frame_locals_address_ftype vax_frame_locals_address;
 
@@ -647,7 +647,7 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation (gdbarch,
 				   generic_frameless_function_invocation_not);
 
-  set_gdbarch_frame_chain (gdbarch, vax_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, vax_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, vax_frame_saved_pc);
 
   set_gdbarch_frame_args_address (gdbarch, vax_frame_args_address);

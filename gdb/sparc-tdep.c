@@ -432,9 +432,9 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 CORE_ADDR
 sparc_frame_chain (struct frame_info *frame)
 {
-  /* Value that will cause FRAME_CHAIN_VALID to not worry about the chain
-     value.  If it really is zero, we detect it later in
-     sparc_init_prev_frame.
+  /* Value that will cause DEPRECATED_FRAME_CHAIN_VALID to not worry
+     about the chain value.  If it really is zero, we detect it later
+     in sparc_init_prev_frame.
      
      Note:  kevinb/2003-02-18:  The constant 1 used to be returned
      here, but, after some recent changes to frame_chain_valid(),
@@ -3147,7 +3147,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_float_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_fp_regnum (gdbarch, SPARC_FP_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, SPARC_FP0_REGNUM);
-  set_gdbarch_frame_chain (gdbarch, sparc_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, sparc_frame_chain);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sparc_frame_init_saved_regs);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, sparc_frame_saved_pc);

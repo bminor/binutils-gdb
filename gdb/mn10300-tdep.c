@@ -1170,7 +1170,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, mn10300_init_extra_frame_info);
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_noop);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, mn10300_frame_init_saved_regs);
-  set_gdbarch_frame_chain (gdbarch, mn10300_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, mn10300_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, mn10300_frame_saved_pc);
   set_gdbarch_deprecated_extract_return_value (gdbarch, mn10300_extract_return_value);
   set_gdbarch_deprecated_extract_struct_value_address

@@ -4371,7 +4371,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_bytes (gdbarch, SH_DEFAULT_NUM_REGS * 4);
   set_gdbarch_deprecated_do_registers_info (gdbarch, sh_do_registers_info);
   set_gdbarch_breakpoint_from_pc (gdbarch, sh_breakpoint_from_pc);
-  set_gdbarch_frame_chain (gdbarch, sh_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, sh_frame_chain);
   set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, sh_init_extra_frame_info);
   set_gdbarch_deprecated_extract_return_value (gdbarch, sh_extract_return_value);
@@ -4614,7 +4614,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh64_nofp_frame_init_saved_regs);
       set_gdbarch_breakpoint_from_pc (gdbarch, sh_sh64_breakpoint_from_pc);
       set_gdbarch_deprecated_init_extra_frame_info (gdbarch, sh64_init_extra_frame_info);
-      set_gdbarch_frame_chain (gdbarch, sh64_frame_chain);
+      set_gdbarch_deprecated_frame_chain (gdbarch, sh64_frame_chain);
       set_gdbarch_deprecated_get_saved_register (gdbarch, sh64_get_saved_register);
       set_gdbarch_deprecated_extract_return_value (gdbarch, sh64_extract_return_value);
       set_gdbarch_push_arguments (gdbarch, sh64_push_arguments);

@@ -1055,12 +1055,12 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				     xstormy16_init_extra_frame_info);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch,
 				     xstormy16_frame_init_saved_regs);
-  set_gdbarch_frame_chain (gdbarch, xstormy16_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, xstormy16_frame_chain);
   set_gdbarch_deprecated_get_saved_register (gdbarch, xstormy16_get_saved_register);
   set_gdbarch_saved_pc_after_call (gdbarch, xstormy16_saved_pc_after_call);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, xstormy16_frame_saved_pc);
   set_gdbarch_skip_prologue (gdbarch, xstormy16_skip_prologue);
-  set_gdbarch_frame_chain_valid (gdbarch, xstormy16_frame_chain_valid);
+  set_gdbarch_deprecated_frame_chain_valid (gdbarch, xstormy16_frame_chain_valid);
 
   set_gdbarch_in_function_epilogue_p (gdbarch,
 				      xstormy16_in_function_epilogue_p);

@@ -2154,77 +2154,77 @@ extern void set_gdbarch_frameless_function_invocation (struct gdbarch *gdbarch, 
 #endif
 #endif
 
-#if defined (FRAME_CHAIN)
-/* Legacy for systems yet to multi-arch FRAME_CHAIN */
-#if !defined (FRAME_CHAIN_P)
-#define FRAME_CHAIN_P() (1)
+#if defined (DEPRECATED_FRAME_CHAIN)
+/* Legacy for systems yet to multi-arch DEPRECATED_FRAME_CHAIN */
+#if !defined (DEPRECATED_FRAME_CHAIN_P)
+#define DEPRECATED_FRAME_CHAIN_P() (1)
 #endif
 #endif
 
 /* Default predicate for non- multi-arch targets. */
-#if (!GDB_MULTI_ARCH) && !defined (FRAME_CHAIN_P)
-#define FRAME_CHAIN_P() (0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_FRAME_CHAIN_P)
+#define DEPRECATED_FRAME_CHAIN_P() (0)
 #endif
 
-extern int gdbarch_frame_chain_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_CHAIN_P)
-#error "Non multi-arch definition of FRAME_CHAIN"
+extern int gdbarch_deprecated_frame_chain_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAME_CHAIN_P)
+#error "Non multi-arch definition of DEPRECATED_FRAME_CHAIN"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_CHAIN_P)
-#define FRAME_CHAIN_P() (gdbarch_frame_chain_p (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FRAME_CHAIN_P)
+#define DEPRECATED_FRAME_CHAIN_P() (gdbarch_deprecated_frame_chain_p (current_gdbarch))
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (FRAME_CHAIN)
-#define FRAME_CHAIN(frame) (internal_error (__FILE__, __LINE__, "FRAME_CHAIN"), 0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_FRAME_CHAIN)
+#define DEPRECATED_FRAME_CHAIN(frame) (internal_error (__FILE__, __LINE__, "DEPRECATED_FRAME_CHAIN"), 0)
 #endif
 
-typedef CORE_ADDR (gdbarch_frame_chain_ftype) (struct frame_info *frame);
-extern CORE_ADDR gdbarch_frame_chain (struct gdbarch *gdbarch, struct frame_info *frame);
-extern void set_gdbarch_frame_chain (struct gdbarch *gdbarch, gdbarch_frame_chain_ftype *frame_chain);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_CHAIN)
-#error "Non multi-arch definition of FRAME_CHAIN"
+typedef CORE_ADDR (gdbarch_deprecated_frame_chain_ftype) (struct frame_info *frame);
+extern CORE_ADDR gdbarch_deprecated_frame_chain (struct gdbarch *gdbarch, struct frame_info *frame);
+extern void set_gdbarch_deprecated_frame_chain (struct gdbarch *gdbarch, gdbarch_deprecated_frame_chain_ftype *deprecated_frame_chain);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAME_CHAIN)
+#error "Non multi-arch definition of DEPRECATED_FRAME_CHAIN"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_CHAIN)
-#define FRAME_CHAIN(frame) (gdbarch_frame_chain (current_gdbarch, frame))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FRAME_CHAIN)
+#define DEPRECATED_FRAME_CHAIN(frame) (gdbarch_deprecated_frame_chain (current_gdbarch, frame))
 #endif
 #endif
 
-#if defined (FRAME_CHAIN_VALID)
-/* Legacy for systems yet to multi-arch FRAME_CHAIN_VALID */
-#if !defined (FRAME_CHAIN_VALID_P)
-#define FRAME_CHAIN_VALID_P() (1)
+#if defined (DEPRECATED_FRAME_CHAIN_VALID)
+/* Legacy for systems yet to multi-arch DEPRECATED_FRAME_CHAIN_VALID */
+#if !defined (DEPRECATED_FRAME_CHAIN_VALID_P)
+#define DEPRECATED_FRAME_CHAIN_VALID_P() (1)
 #endif
 #endif
 
 /* Default predicate for non- multi-arch targets. */
-#if (!GDB_MULTI_ARCH) && !defined (FRAME_CHAIN_VALID_P)
-#define FRAME_CHAIN_VALID_P() (0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_FRAME_CHAIN_VALID_P)
+#define DEPRECATED_FRAME_CHAIN_VALID_P() (0)
 #endif
 
-extern int gdbarch_frame_chain_valid_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_CHAIN_VALID_P)
-#error "Non multi-arch definition of FRAME_CHAIN_VALID"
+extern int gdbarch_deprecated_frame_chain_valid_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAME_CHAIN_VALID_P)
+#error "Non multi-arch definition of DEPRECATED_FRAME_CHAIN_VALID"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_CHAIN_VALID_P)
-#define FRAME_CHAIN_VALID_P() (gdbarch_frame_chain_valid_p (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FRAME_CHAIN_VALID_P)
+#define DEPRECATED_FRAME_CHAIN_VALID_P() (gdbarch_deprecated_frame_chain_valid_p (current_gdbarch))
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (FRAME_CHAIN_VALID)
-#define FRAME_CHAIN_VALID(chain, thisframe) (internal_error (__FILE__, __LINE__, "FRAME_CHAIN_VALID"), 0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_FRAME_CHAIN_VALID)
+#define DEPRECATED_FRAME_CHAIN_VALID(chain, thisframe) (internal_error (__FILE__, __LINE__, "DEPRECATED_FRAME_CHAIN_VALID"), 0)
 #endif
 
-typedef int (gdbarch_frame_chain_valid_ftype) (CORE_ADDR chain, struct frame_info *thisframe);
-extern int gdbarch_frame_chain_valid (struct gdbarch *gdbarch, CORE_ADDR chain, struct frame_info *thisframe);
-extern void set_gdbarch_frame_chain_valid (struct gdbarch *gdbarch, gdbarch_frame_chain_valid_ftype *frame_chain_valid);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_CHAIN_VALID)
-#error "Non multi-arch definition of FRAME_CHAIN_VALID"
+typedef int (gdbarch_deprecated_frame_chain_valid_ftype) (CORE_ADDR chain, struct frame_info *thisframe);
+extern int gdbarch_deprecated_frame_chain_valid (struct gdbarch *gdbarch, CORE_ADDR chain, struct frame_info *thisframe);
+extern void set_gdbarch_deprecated_frame_chain_valid (struct gdbarch *gdbarch, gdbarch_deprecated_frame_chain_valid_ftype *deprecated_frame_chain_valid);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAME_CHAIN_VALID)
+#error "Non multi-arch definition of DEPRECATED_FRAME_CHAIN_VALID"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_CHAIN_VALID)
-#define FRAME_CHAIN_VALID(chain, thisframe) (gdbarch_frame_chain_valid (current_gdbarch, chain, thisframe))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FRAME_CHAIN_VALID)
+#define DEPRECATED_FRAME_CHAIN_VALID(chain, thisframe) (gdbarch_deprecated_frame_chain_valid (current_gdbarch, chain, thisframe))
 #endif
 #endif
 

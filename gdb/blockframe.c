@@ -44,11 +44,11 @@
 
 void _initialize_blockframe (void);
 
-/* Is ADDR inside the startup file?  Note that if your machine
-   has a way to detect the bottom of the stack, there is no need
-   to call this function from FRAME_CHAIN_VALID; the reason for
-   doing so is that some machines have no way of detecting bottom
-   of stack. 
+/* Is ADDR inside the startup file?  Note that if your machine has a
+   way to detect the bottom of the stack, there is no need to call
+   this function from DEPRECATED_FRAME_CHAIN_VALID; the reason for
+   doing so is that some machines have no way of detecting bottom of
+   stack.
 
    A PC of zero is always considered to be the bottom of the stack. */
 
@@ -75,7 +75,7 @@ inside_entry_file (CORE_ADDR addr)
    that correspond to the main() function.  See comments above for why
    we might want to do this.
 
-   Typically called from FRAME_CHAIN_VALID.
+   Typically called from DEPRECATED_FRAME_CHAIN_VALID.
 
    A PC of zero is always considered to be the bottom of the stack. */
 
@@ -87,9 +87,10 @@ inside_main_func (CORE_ADDR pc)
   if (symfile_objfile == 0)
     return 0;
 
-  /* If the addr range is not set up at symbol reading time, set it up now.
-     This is for FRAME_CHAIN_VALID_ALTERNATE. I do this for coff, because
-     it is unable to set it up and symbol reading time. */
+  /* If the addr range is not set up at symbol reading time, set it up
+     now.  This is for DEPRECATED_FRAME_CHAIN_VALID_ALTERNATE. I do
+     this for coff, because it is unable to set it up and symbol
+     reading time. */
 
   if (symfile_objfile->ei.main_func_lowpc == INVALID_ENTRY_LOWPC &&
       symfile_objfile->ei.main_func_highpc == INVALID_ENTRY_HIGHPC)
@@ -113,7 +114,7 @@ inside_main_func (CORE_ADDR pc)
    that correspond to the process entry point function.  See comments
    in objfiles.h for why we might want to do this.
 
-   Typically called from FRAME_CHAIN_VALID.
+   Typically called from DEPRECATED_FRAME_CHAIN_VALID.
 
    A PC of zero is always considered to be the bottom of the stack. */
 
@@ -586,9 +587,10 @@ frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
   if (inside_entry_file (frame_pc_unwind (fi)))
       return 0;
 
-  /* If the architecture has a custom FRAME_CHAIN_VALID, call it now.  */
-  if (FRAME_CHAIN_VALID_P ())
-    return FRAME_CHAIN_VALID (fp, fi);
+  /* If the architecture has a custom DEPRECATED_FRAME_CHAIN_VALID,
+     call it now.  */
+  if (DEPRECATED_FRAME_CHAIN_VALID_P ())
+    return DEPRECATED_FRAME_CHAIN_VALID (fp, fi);
 
   return 1;
 }

@@ -2934,10 +2934,10 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_arguments (gdbarch, arm_push_arguments);
 
   /* Frame handling.  */
-  set_gdbarch_frame_chain_valid (gdbarch, arm_frame_chain_valid);
+  set_gdbarch_deprecated_frame_chain_valid (gdbarch, arm_frame_chain_valid);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, arm_init_extra_frame_info);
   set_gdbarch_read_fp (gdbarch, arm_read_fp);
-  set_gdbarch_frame_chain (gdbarch, arm_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, arm_frame_chain);
   set_gdbarch_frameless_function_invocation
     (gdbarch, arm_frameless_function_invocation);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, arm_frame_saved_pc);

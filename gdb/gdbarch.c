@@ -239,8 +239,8 @@ struct gdbarch
   gdbarch_remote_translate_xfer_address_ftype *remote_translate_xfer_address;
   CORE_ADDR frame_args_skip;
   gdbarch_frameless_function_invocation_ftype *frameless_function_invocation;
-  gdbarch_frame_chain_ftype *frame_chain;
-  gdbarch_frame_chain_valid_ftype *frame_chain_valid;
+  gdbarch_deprecated_frame_chain_ftype *deprecated_frame_chain;
+  gdbarch_deprecated_frame_chain_valid_ftype *deprecated_frame_chain_valid;
   gdbarch_deprecated_frame_saved_pc_ftype *deprecated_frame_saved_pc;
   gdbarch_unwind_pc_ftype *unwind_pc;
   gdbarch_frame_args_address_ftype *frame_args_address;
@@ -758,8 +758,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
       && (gdbarch->frame_args_skip == -1))
     fprintf_unfiltered (log, "\n\tframe_args_skip");
   /* Skip verify of frameless_function_invocation, invalid_p == 0 */
-  /* Skip verify of frame_chain, has predicate */
-  /* Skip verify of frame_chain_valid, has predicate */
+  /* Skip verify of deprecated_frame_chain, has predicate */
+  /* Skip verify of deprecated_frame_chain_valid, has predicate */
   /* Skip verify of deprecated_frame_saved_pc, has predicate */
   /* Skip verify of unwind_pc, has predicate */
   /* Skip verify of frame_args_address, invalid_p == 0 */
@@ -1169,6 +1169,46 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS = <0x%08lx>\n",
                         (long) current_gdbarch->deprecated_extract_struct_value_address
                         /*DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
+#endif
+#ifdef DEPRECATED_FRAME_CHAIN_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_FRAME_CHAIN_P()",
+                      XSTRING (DEPRECATED_FRAME_CHAIN_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_FRAME_CHAIN_P() = %d\n",
+                      DEPRECATED_FRAME_CHAIN_P ());
+#endif
+#ifdef DEPRECATED_FRAME_CHAIN
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_FRAME_CHAIN(frame)",
+                      XSTRING (DEPRECATED_FRAME_CHAIN (frame)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_FRAME_CHAIN = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_frame_chain
+                        /*DEPRECATED_FRAME_CHAIN ()*/);
+#endif
+#ifdef DEPRECATED_FRAME_CHAIN_VALID_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_FRAME_CHAIN_VALID_P()",
+                      XSTRING (DEPRECATED_FRAME_CHAIN_VALID_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_FRAME_CHAIN_VALID_P() = %d\n",
+                      DEPRECATED_FRAME_CHAIN_VALID_P ());
+#endif
+#ifdef DEPRECATED_FRAME_CHAIN_VALID
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_FRAME_CHAIN_VALID(chain, thisframe)",
+                      XSTRING (DEPRECATED_FRAME_CHAIN_VALID (chain, thisframe)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_FRAME_CHAIN_VALID = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_frame_chain_valid
+                        /*DEPRECATED_FRAME_CHAIN_VALID ()*/);
 #endif
 #ifdef DEPRECATED_FRAME_INIT_SAVED_REGS_P
   fprintf_unfiltered (file,
@@ -1592,46 +1632,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: FRAME_ARGS_SKIP = %ld\n",
                       (long) FRAME_ARGS_SKIP);
-#endif
-#ifdef FRAME_CHAIN_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "FRAME_CHAIN_P()",
-                      XSTRING (FRAME_CHAIN_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: FRAME_CHAIN_P() = %d\n",
-                      FRAME_CHAIN_P ());
-#endif
-#ifdef FRAME_CHAIN
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "FRAME_CHAIN(frame)",
-                      XSTRING (FRAME_CHAIN (frame)));
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: FRAME_CHAIN = <0x%08lx>\n",
-                        (long) current_gdbarch->frame_chain
-                        /*FRAME_CHAIN ()*/);
-#endif
-#ifdef FRAME_CHAIN_VALID_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "FRAME_CHAIN_VALID_P()",
-                      XSTRING (FRAME_CHAIN_VALID_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: FRAME_CHAIN_VALID_P() = %d\n",
-                      FRAME_CHAIN_VALID_P ());
-#endif
-#ifdef FRAME_CHAIN_VALID
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "FRAME_CHAIN_VALID(chain, thisframe)",
-                      XSTRING (FRAME_CHAIN_VALID (chain, thisframe)));
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: FRAME_CHAIN_VALID = <0x%08lx>\n",
-                        (long) current_gdbarch->frame_chain_valid
-                        /*FRAME_CHAIN_VALID ()*/);
 #endif
 #ifdef FRAME_LOCALS_ADDRESS
   fprintf_unfiltered (file,
@@ -4779,55 +4779,55 @@ set_gdbarch_frameless_function_invocation (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_frame_chain_p (struct gdbarch *gdbarch)
+gdbarch_deprecated_frame_chain_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->frame_chain != 0;
+  return gdbarch->deprecated_frame_chain != 0;
 }
 
 CORE_ADDR
-gdbarch_frame_chain (struct gdbarch *gdbarch, struct frame_info *frame)
+gdbarch_deprecated_frame_chain (struct gdbarch *gdbarch, struct frame_info *frame)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->frame_chain == 0)
+  if (gdbarch->deprecated_frame_chain == 0)
     internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_frame_chain invalid");
+                    "gdbarch: gdbarch_deprecated_frame_chain invalid");
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_frame_chain called\n");
-  return gdbarch->frame_chain (frame);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_frame_chain called\n");
+  return gdbarch->deprecated_frame_chain (frame);
 }
 
 void
-set_gdbarch_frame_chain (struct gdbarch *gdbarch,
-                         gdbarch_frame_chain_ftype frame_chain)
+set_gdbarch_deprecated_frame_chain (struct gdbarch *gdbarch,
+                                    gdbarch_deprecated_frame_chain_ftype deprecated_frame_chain)
 {
-  gdbarch->frame_chain = frame_chain;
+  gdbarch->deprecated_frame_chain = deprecated_frame_chain;
 }
 
 int
-gdbarch_frame_chain_valid_p (struct gdbarch *gdbarch)
+gdbarch_deprecated_frame_chain_valid_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->frame_chain_valid != 0;
+  return gdbarch->deprecated_frame_chain_valid != 0;
 }
 
 int
-gdbarch_frame_chain_valid (struct gdbarch *gdbarch, CORE_ADDR chain, struct frame_info *thisframe)
+gdbarch_deprecated_frame_chain_valid (struct gdbarch *gdbarch, CORE_ADDR chain, struct frame_info *thisframe)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->frame_chain_valid == 0)
+  if (gdbarch->deprecated_frame_chain_valid == 0)
     internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_frame_chain_valid invalid");
+                    "gdbarch: gdbarch_deprecated_frame_chain_valid invalid");
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_frame_chain_valid called\n");
-  return gdbarch->frame_chain_valid (chain, thisframe);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_frame_chain_valid called\n");
+  return gdbarch->deprecated_frame_chain_valid (chain, thisframe);
 }
 
 void
-set_gdbarch_frame_chain_valid (struct gdbarch *gdbarch,
-                               gdbarch_frame_chain_valid_ftype frame_chain_valid)
+set_gdbarch_deprecated_frame_chain_valid (struct gdbarch *gdbarch,
+                                          gdbarch_deprecated_frame_chain_valid_ftype deprecated_frame_chain_valid)
 {
-  gdbarch->frame_chain_valid = frame_chain_valid;
+  gdbarch->deprecated_frame_chain_valid = deprecated_frame_chain_valid;
 }
 
 int

@@ -636,10 +636,10 @@ i386_frame_num_args (struct frame_info *fi)
   if (pfi == 0)
     {
       /* NOTE: This can happen if we are looking at the frame for
-         main, because FRAME_CHAIN_VALID won't let us go into start.
-         If we have debugging symbols, that's not really a big deal;
-         it just means it will only show as many arguments to main as
-         are declared.  */
+         main, because DEPRECATED_FRAME_CHAIN_VALID won't let us go
+         into start.  If we have debugging symbols, that's not really
+         a big deal; it just means it will only show as many arguments
+         to main as are declared.  */
       return -1;
     }
   else
@@ -1614,7 +1614,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 8);
   set_gdbarch_frameless_function_invocation (gdbarch,
                                            i386_frameless_function_invocation);
-  set_gdbarch_frame_chain (gdbarch, i386_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, i386_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, i386_frame_saved_pc);
   set_gdbarch_saved_pc_after_call (gdbarch, i386_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, i386_frame_num_args);

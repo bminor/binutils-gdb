@@ -791,8 +791,8 @@ legacy_saved_regs_this_id (struct frame_info *next_frame,
          this to after the ffi test; I'd rather have backtraces from
          start go curfluy than have an abort called from main not show
          main.  */
-      gdb_assert (FRAME_CHAIN_P ());
-      base = FRAME_CHAIN (next_frame);
+      gdb_assert (DEPRECATED_FRAME_CHAIN_P ());
+      base = DEPRECATED_FRAME_CHAIN (next_frame);
 
       if (!frame_chain_valid (base, next_frame))
 	return;
@@ -1048,8 +1048,9 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 
 	 Note that the pc-unwind is intentionally performed before the
 	 frame chain.  This is ok since, for old targets, both
-	 frame_pc_unwind (nee, FRAME_SAVED_PC) and FRAME_CHAIN()) assume
-	 THIS_FRAME's data structures have already been initialized (using
+	 frame_pc_unwind (nee, DEPRECATED_FRAME_SAVED_PC) and
+	 DEPRECATED_FRAME_CHAIN()) assume THIS_FRAME's data structures
+	 have already been initialized (using
 	 DEPRECATED_INIT_EXTRA_FRAME_INFO) and hence the call order
 	 doesn't matter.
 	 
@@ -1196,8 +1197,8 @@ legacy_get_prev_frame (struct frame_info *this_frame)
          this to after the ffi test; I'd rather have backtraces from
          start go curfluy than have an abort called from main not show
          main.  */
-      gdb_assert (FRAME_CHAIN_P ());
-      address = FRAME_CHAIN (this_frame);
+      gdb_assert (DEPRECATED_FRAME_CHAIN_P ());
+      address = DEPRECATED_FRAME_CHAIN (this_frame);
 
       if (!frame_chain_valid (address, this_frame))
 	return 0;
@@ -1244,10 +1245,11 @@ legacy_get_prev_frame (struct frame_info *this_frame)
      DEPRECATED_INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC.
      This should also return a flag saying whether to keep the new
      frame, or whether to discard it, because on some machines (e.g.
-     mips) it is really awkward to have FRAME_CHAIN_VALID called
-     BEFORE DEPRECATED_INIT_EXTRA_FRAME_INFO (there is no good way to
-     get information deduced in FRAME_CHAIN_VALID into the extra
-     fields of the new frame).  std_frame_pc(fromleaf, prev)
+     mips) it is really awkward to have DEPRECATED_FRAME_CHAIN_VALID
+     called BEFORE DEPRECATED_INIT_EXTRA_FRAME_INFO (there is no good
+     way to get information deduced in DEPRECATED_FRAME_CHAIN_VALID
+     into the extra fields of the new frame).  std_frame_pc(fromleaf,
+     prev)
 
      This is the default setting for INIT_PREV_FRAME.  It just does
      what the default DEPRECATED_INIT_FRAME_PC does.  Some machines
@@ -1273,13 +1275,14 @@ legacy_get_prev_frame (struct frame_info *this_frame)
      means that the convolution below - needing to carefully order a
      frame's initialization - isn't needed.
 
-     The irony here though, is that FRAME_CHAIN(), at least for a more
-     up-to-date architecture, always calls FRAME_SAVED_PC(), and
-     FRAME_SAVED_PC() computes the PC but without first needing the
-     frame!  Instead of the convolution below, we could have simply
-     called FRAME_SAVED_PC() and been done with it!  Note that
-     FRAME_SAVED_PC() is being superseed by frame_pc_unwind() and that
-     function does have somewhere to cache that PC value.  */
+     The irony here though, is that DEPRECATED_FRAME_CHAIN(), at least
+     for a more up-to-date architecture, always calls
+     FRAME_SAVED_PC(), and FRAME_SAVED_PC() computes the PC but
+     without first needing the frame!  Instead of the convolution
+     below, we could have simply called FRAME_SAVED_PC() and been done
+     with it!  Note that FRAME_SAVED_PC() is being superseed by
+     frame_pc_unwind() and that function does have somewhere to cache
+     that PC value.  */
 
   if (DEPRECATED_INIT_FRAME_PC_FIRST_P ())
     prev->pc = (DEPRECATED_INIT_FRAME_PC_FIRST (fromleaf, prev));
@@ -1295,8 +1298,9 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 
   /* If ->frame and ->pc are unchanged, we are in the process of
      getting ourselves into an infinite backtrace.  Some architectures
-     check this in FRAME_CHAIN or thereabouts, but it seems like there
-     is no reason this can't be an architecture-independent check.  */
+     check this in DEPRECATED_FRAME_CHAIN or thereabouts, but it seems
+     like there is no reason this can't be an architecture-independent
+     check.  */
   if (prev->frame == this_frame->frame
       && prev->pc == this_frame->pc)
     {
@@ -1483,8 +1487,9 @@ get_prev_frame (struct frame_info *this_frame)
 
      Note that the pc-unwind is intentionally performed before the
      frame chain.  This is ok since, for old targets, both
-     frame_pc_unwind (nee, FRAME_SAVED_PC) and FRAME_CHAIN()) assume
-     THIS_FRAME's data structures have already been initialized (using
+     frame_pc_unwind (nee, FRAME_SAVED_PC) and
+     DEPRECATED_FRAME_CHAIN()) assume THIS_FRAME's data structures
+     have already been initialized (using
      DEPRECATED_INIT_EXTRA_FRAME_INFO) and hence the call order
      doesn't matter.
 
@@ -1782,7 +1787,7 @@ legacy_frame_p (struct gdbarch *current_gdbarch)
   return (DEPRECATED_INIT_FRAME_PC_P ()
 	  || DEPRECATED_INIT_FRAME_PC_FIRST_P ()
 	  || DEPRECATED_INIT_EXTRA_FRAME_INFO_P ()
-	  || FRAME_CHAIN_P ()
+	  || DEPRECATED_FRAME_CHAIN_P ()
 	  || !gdbarch_unwind_dummy_id_p (current_gdbarch)
 	  || !SAVE_DUMMY_FRAME_TOS_P ());
 }

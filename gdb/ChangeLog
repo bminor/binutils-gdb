@@ -1,3 +1,49 @@
+2003-03-23  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_FRAME_CHAIN): Replace FRAME_CHAIN.
+	(DEPRECATED_FRAME_CHAIN_VALID): Replace FRAME_CHAIN_VALID.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* valops.c (hand_function_call): Update.
+	* objfiles.h (DEPRECATED_FRAME_CHAIN_VALID): Update.
+	* frame.c (legacy_saved_regs_this_id): Update.
+	(legacy_get_prev_frame, get_prev_frame, legacy_frame_p): Update.
+	* dummy-frame.h: Update.
+	* config/sparc/tm-sparc.h (DEPRECATED_FRAME_CHAIN): Update.
+	* config/pa/tm-hppa.h (DEPRECATED_FRAME_CHAIN_VALID): Update.
+	* config/m68k/tm-vx68.h (DEPRECATED_FRAME_CHAIN): Update.
+	* config/m68k/tm-os68k.h (DEPRECATED_FRAME_CHAIN): Update.
+	* config/m68k/tm-sun3.h: Update.
+	* blockframe.c (inside_main_func, frame_chain_valid): Update.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.
+	* x86-64-tdep.c (x86_64_init_abi): Update.
+	* vax-tdep.c (vax_gdbarch_init): Update.
+	* v850-tdep.c (v850_gdbarch_init): Update.
+	* sparc-tdep.c (sparc_frame_chain, sparc_gdbarch_init): Update.
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* rs6000-tdep.c (rs6000_frame_saved_pc): Update.
+	(rs6000_gdbarch_init, rs6000_frame_saved_pc): Update.
+	(frame_get_saved_regs): Update.
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Update.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Update.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	* mcore-tdep.c (mcore_gdbarch_init): Update.
+	* m68k-tdep.c (m68k_gdbarch_init): Update.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Update.
+	* ia64-tdep.c (ia64_gdbarch_init): Update.
+	* i386-tdep.c (i386_frame_num_args, i386_gdbarch_init): Update.
+	* i386-interix-tdep.c (i386_interix_init_abi): Update.
+	(i386_interix_back_one_frame): Update.
+	* hppa-tdep.c (hppa_gdbarch_init): Update.
+	(hppa_init_extra_frame_info): Update.
+	* h8300-tdep.c (h8300_gdbarch_init): Update.
+	* frv-tdep.c (frv_gdbarch_init): Update.
+	* cris-tdep.c (cris_gdbarch_init): Update.
+	* avr-tdep.c (avr_gdbarch_init): Update.
+	* arm-tdep.c (arm_gdbarch_init): Update.
+	* alpha-tdep.c (alpha_gdbarch_init): Update.
+
 2003-03-22  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-tdep.h (arm_float_model): Add AUTO and LAST values.
