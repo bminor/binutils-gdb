@@ -751,6 +751,38 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
     case stProc:		/* Procedure, usually goes into global block */
     case stStaticProc:		/* Static procedure, goes into current block */
+      /* For stProc symbol records, we need to check the storage class
+         as well, as only (stProc, scText) entries represent "real"
+         procedures - See the Compaq document titled "Object File /
+         Symbol Table Format Specification" for more information.
+         If the storage class is not scText, we discard the whole block
+         of symbol records for this stProc.  */
+      if (sh->st == stProc && sh->sc != scText)
+        {
+          char *ext_tsym = ext_sh;
+          int keep_counting = 1;
+          SYMR tsym;
+
+          while (keep_counting)
+            {
+              ext_tsym += external_sym_size;
+              (*swap_sym_in) (cur_bfd, ext_tsym, &tsym);
+              count++;
+              switch (tsym.st)
+                {
+                  case stParam:
+                    break;
+                  case stEnd:
+                    keep_counting = 0;
+                    break;
+                  default:
+                    complaint (&symfile_complaints,
+                               "unknown symbol type 0x%x", sh->st);
+                    break;
+                }
+            }
+          break;
+        }
       s = new_symbol (name);
       SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
       SYMBOL_CLASS (s) = LOC_BLOCK;
@@ -3328,6 +3360,39 @@ parse_partial_symbols (struct objfile *objfile)
 		  /* FALLTHROUGH */
 
 		case stProc:
+		  /* Ignore all parameter symbol records.  */
+		  if (sh.index >= hdr->iauxMax)
+		    {
+		      /* Should not happen, but does when cross-compiling
+		         with the MIPS compiler.  FIXME -- pull later.  */
+		      index_complaint (name);
+		      new_sdx = cur_sdx + 1;	/* Don't skip at all */
+		    }
+		  else
+		    new_sdx = AUX_GET_ISYM (fh->fBigendian,
+					    (debug_info->external_aux
+					     + fh->iauxBase
+					     + sh.index));
+
+		  if (new_sdx <= cur_sdx)
+		    {
+		      /* This should not happen either... FIXME.  */
+		      complaint (&symfile_complaints,
+				 "bad proc end in aux found from symbol %s",
+				 name);
+		      new_sdx = cur_sdx + 1;	/* Don't skip backward */
+		    }
+
+                  /* For stProc symbol records, we need to check the
+                     storage class as well, as only (stProc, scText)
+                     entries represent "real" procedures - See the
+                     Compaq document titled "Object File / Symbol Table
+                     Format Specification" for more information.  If the
+                     storage class is not scText, we discard the whole
+                     block of symbol records for this stProc.  */
+                  if (sh.st == stProc && sh.sc != scText)
+                    goto skip;
+
 		  /* Usually there is a local and a global stProc symbol
 		     for a function. This means that the function name
 		     has already been entered into the mimimal symbol table
@@ -3350,29 +3415,7 @@ parse_partial_symbols (struct objfile *objfile)
 					 &objfile->static_psymbols,
 				    0, sh.value, psymtab_language, objfile);
 
-		  /* Skip over procedure to next one. */
-		  if (sh.index >= hdr->iauxMax)
-		    {
-		      /* Should not happen, but does when cross-compiling
-		         with the MIPS compiler.  FIXME -- pull later.  */
-		      index_complaint (name);
-		      new_sdx = cur_sdx + 1;	/* Don't skip at all */
-		    }
-		  else
-		    new_sdx = AUX_GET_ISYM (fh->fBigendian,
-					    (debug_info->external_aux
-					     + fh->iauxBase
-					     + sh.index));
 		  procaddr = sh.value;
-
-		  if (new_sdx <= cur_sdx)
-		    {
-		      /* This should not happen either... FIXME.  */
-		      complaint (&symfile_complaints,
-				 "bad proc end in aux found from symbol %s",
-				 name);
-		      new_sdx = cur_sdx + 1;	/* Don't skip backward */
-		    }
 
 		  cur_sdx = new_sdx;
 		  (*swap_sym_in) (cur_bfd,
