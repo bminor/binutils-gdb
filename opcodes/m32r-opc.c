@@ -143,7 +143,8 @@ m32r_cgen_get_insn_operands (insn, insn_value, length, indices)
     return NULL;
 
   for (i = 0, opinst = CGEN_INSN_OPERANDS (insn);
-       CGEN_OPERAND_INSTANCE_TYPE (opinst) != CGEN_OPERAND_INSTANCE_END;
+       opinst != NULL
+	 && CGEN_OPERAND_INSTANCE_TYPE (opinst) != CGEN_OPERAND_INSTANCE_END;
        ++i, ++opinst)
     {
       const CGEN_OPERAND *op = CGEN_OPERAND_INSTANCE_OPERAND (opinst);

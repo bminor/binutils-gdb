@@ -1,3 +1,9 @@
+Fri Feb 13 14:26:06 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* cgen-opc.in (@arch@_cgen_get_insn_operands): Handle empty
+	operand instance list.
+	* m32r-opc.c: Regenerate.
+
 Fri Feb 13 14:53:02 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (AUTOMAKE_OPTIONS): Define.
