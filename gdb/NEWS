@@ -1,6 +1,164 @@
 		What has changed since GDB-3.5?
 		(Organized release by release)
 
+*** Changes in GDB-4.8:
+
+ * New features
+
+GDB now supports array constants that can be used in expressions typed in by
+the user.  The syntax is `{element, element, ...}'.  Ie: you can now type
+`print {1, 2, 3}', and it will build up an array.
+
+There is also a new directory `gdb/sparclite' that contains a program that can
+be run on a Fujitsu SPARClite processor to demonstrate how the sparc-stub
+remote stub works.
+
+ * Faster and better demangling
+
+We have improved template demangling and fixed numerous bugs in the GNU style
+demangler.  It can now handle type modifiers such as `static' or `const'.  Wide
+character types (wchar_t) are now supported.  Demangling of each symbol is now
+only done once, and is cached when the symbol table for a file is read in.
+This results in a moderate increase in memory usage, but a fantastic speedup in
+symbol lookups.
+
+`Cfront' style demangling still doesn't work with AT&T cfront.  It was written
+from the specifications in the Annotated Reference Manual, which AT&T's
+compiler does not actually implement.
+
+ * Improved configure script
+
+The `configure' script will now attempt to guess your system type if you don't
+supply a host system type.  WE CAN GIVE NO GUARANTEES ABOUT THE VALIDITY OF THE
+GUESSES MADE BY THIS METHOD.  The old scheme of supplying a host system triplet
+is greatly preferable over using this.  All the magic is done in the new
+`config.guess' script.  Examine it for details.
+
+We have also brought our configure script much more in line with the FSF's
+version.  It now supports the --with-xxx options.  In particular,
+`--with-minimal-bfd' is of interest to those people who want a minimal BFD
+that only supports target file formats.
+
+We have also cleaned up the issue with the rpc and ptrace header files for
+VxWorks that was discovered at the last minute during the 4.7 release.  You
+should now be able to build a VxWorks GDB.
+
+ * Documentation
+
+There's lots of new internal documentation on how to modify GDB, and produce
+clean changes to the code.  We implore people to look at this before submitting
+changes.
+
+The GDB manual uses new, sexy Texinfo conditionals, rather than the arcane M4
+macros.  This requires the use of the new Texinfo program, which is available
+from the same place that you got this copy of GDB.
+
+*NOTE*  The new Texinfo program produces TeX output that can cause old versions
+of TeX to hang.  We're not sure exactly which versions have this problem, but
+it has been seen in 3.0.  We highly recommend upgrading to TeX version 3.141 or
+better.  If that isn't possible, there is a patch in `texinfo/tex3patch' that
+will modify `texinfo/texinfo.tex' to work around this problem.
+
+ * Mmalloc now licensed under the GNU Library General Public License
+
+ * New native hosts supported
+
+HP/PA-RISC under HPUX using GNU tools	hppa1.1-hp-hpux
+
+386 CPUs running SCO Unix		i386-unknown-scosysv322  or  sco
+    (core file support added)
+386 CPUs running SCO Unix 3.2v4		i386-unknown-sco3.2v4
+
+ * New targets supported
+
+AMD 29k family via UDI			a29k-amd-udi  or  udi29k
+
+ * New file formats supported
+
+BFD now has minimal support for reading HP/PA-RISC executables (SOM?), and
+HPUX core files.  We can't write them yet.
+
+ * New commands
+
+We now accept --silent as an alias for --quiet.
+
+ * Major bug fixes
+
+This version fixes the attach problem that many of you reported.  We have
+also stomped on a bunch more printf_filtered("%s") problems.
+
+You can also now ^C a gdb that is attached to a process.  This will cause the
+attached process to stop, and give control back to GDB.
+
+We also fixed a lot of problems associated with either not closing file
+descriptors, or using too many.  This was especially a problem for programs
+that used many (~100) shared libraries.
+
+
+ * Library changes
+
+ * Configuration
+
+ * New hosts supported
+
+
+PA/HPUX support (cleaned up), uses unwind info, needs gcc/gas...
+HP300 native support (???)
+Vax Ultrix native (was already there)
+step only goes into a subr if there is line # info present
+rs6000 bug fixes...
+Language interfaces
+VxWorks/rpc problems resolved
+symbols/psymbols/msymbols combined
+Lotsa host/native/target stuff cleaned up
+
+Don Allen
+Gerald Baumgartner
+Michael Ben-Gershon
+Art Berggreen
+Karl Berry
+Per Bothner
+Ralph Campbell
+John Carr
+Steve Chamberlain
+Lee W. Cooprider
+John Eaton
+Paul Eggert
+John M. Farell
+Fred Fish
+Eddie Fung
+John Gilmore
+Carl Greco
+Stu Grossman
+Robert R. Henry
+Nobuyuki Hikichi
+Andy Jackson
+Mark Jungerman
+Brian Kernighan
+Alexander Klaiber
+Jeffrey Law
+Marty Leisner
+Ulf Linde
+Roland H. Pesch
+K. Richard Pixley
+Ken Raeburn
+Dennis Ritchie
+Rob Ryan
+Peter Schauer
+Lynn D. Shumaker
+Richard Stallman
+Allan Steel
+Johanthan Stone
+Ian Lance Taylor
+Michael Tiemann
+Minh Tran-Le 
+Martin Walker
+
+david d `zoo' zuhn
+karl@hq.ileaf.com
+rhealey@ub.d.umn.edu.
+sato@sm.sony.co.jp.
+
 *** Changes in GDB-4.7:
 
  * Host/native/target split
