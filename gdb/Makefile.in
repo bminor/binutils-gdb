@@ -1502,6 +1502,8 @@ fork-child.o: fork-child.c $(gdb_wait_h) $(defs_h) $(gdbcore_h) \
 
 install-gdbtk:
 	$(SHELL) $(srcdir)/../mkinstalldirs $(GDBTK_LIBRARY) ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs $(libdir)/insight$(GDBTK_VERSION) ; \
+	$(INSTALL_DATA) $(srcdir)/gdbtk/plugins/plugins.tcl $(libdir)/insight$(GDBTK_VERSION)/plugins.tcl ; \
 	$(SHELL) $(srcdir)/../mkinstalldirs \
 		$(GDBTK_LIBRARY)/images \
 		$(GDBTK_LIBRARY)/images2 ; \

@@ -1,5 +1,10 @@
 2002-08-14  Keith Seitz  <keiths@redhat.com>
 
+	* Makefile.in (install-gdbtk): Create insight plugin directory.
+	Install plugins.tcl file.
+
+2002-08-14  Keith Seitz  <keiths@redhat.com>
+
 	* configure.in: Move SUBDIRS to near top of the file so that
 	--enable options may add things to it.
 	If gdbtk is enabled, add gdbtk directory to SUBDIRS and configdirs.
