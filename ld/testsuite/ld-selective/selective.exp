@@ -20,7 +20,10 @@
 
 
 # COFF based ports do not support selective linking
-if {[istarget "*-*-coff" "*-*-pe"]} {
+if {[istarget "*-*-coff"]} {
+  return
+}
+if {[istarget "*-*-pe"]} {
   return
 }
 
