@@ -1,8 +1,9 @@
 Fri Jun 12 17:38:07 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* scripttempl/elf.sc (INPUT_FILES): Optional INPUT spec.
-	* emulparams/m32relf.sh (INPUT_FILES): Define.
-	(OTHER_RELOCATING_SECTIONS): Change top of stack to 8MB.
+
+	* emulparams/m32relf.sh (OTHER_RELOCATING_SECTIONS): Change top of
+	stack to 8MB.
 
 Fri Jun 12 19:33:17 1998  Ian Lance Taylor  <ian@cygnus.com>
 
