@@ -1,3 +1,15 @@
+2001-12-20  Julian v. Bock  <julian@wongr.net>
+
+	* readelf.c (print_symbol): New function: Print a formatted symbol
+	name.  If --wide is specified do not truncate it.
+	(dump_relocations): Use print_symbol() to print symbol names.
+	(process_symbol_table): Likewise.
+	(process_syminfo): Likewise.
+	(process_mips_specific): Likewise.
+	(usage): Document new feature of --wide switch.
+	* doc/binutils.texi (objdump): Document additional behaviour of
+	--wide.
+	
 2001-12-18  Michael Snyder  <msnyder@redhat.com>
 
 	* objcopy.c (copy_file): Accept corefiles (format bfd_core).

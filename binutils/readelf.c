@@ -153,6 +153,7 @@ print_mode;
 
 /* Forward declarations for dumb compilers.  */
 static void		  print_vma		      PARAMS ((bfd_vma, print_mode));
+static void		  print_symbol		      PARAMS ((int, char *));
 static bfd_vma (*         byte_get)                   PARAMS ((unsigned char *, int));
 static bfd_vma            byte_get_little_endian      PARAMS ((unsigned char *, int));
 static bfd_vma            byte_get_big_endian         PARAMS ((unsigned char *, int));
@@ -509,6 +510,25 @@ print_vma (vma, mode)
 	}
     }
 #endif
+}
+
+/* Display a symbol on stdout.  If do_wide is not true then
+   format the symbol to be at most WIDTH characters,
+   truhncating as necessary.  If WIDTH is negative then
+   format the string to be exactly - WIDTH characters,
+   truncating or padding as necessary.  */
+
+static void
+print_symbol (width, symbol)
+     int width;
+     char * symbol;
+{
+  if (do_wide)
+    printf (symbol);
+  else if (width < 0)
+    printf ("%-*.*s", width, width, symbol);
+  else 
+    printf ("%-.*s", width, symbol);
 }
 
 static bfd_vma
@@ -1058,12 +1078,11 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	      printf ("  ");
 
 	      if (psym->st_name == 0)
-		printf ("%-25.25s",
-			SECTION_NAME (SECTION_HEADER (psym->st_shndx)));
+		print_symbol (-25, SECTION_NAME (section_headers + psym->st_shndx));
 	      else if (strtab == NULL)
 		printf (_("<string table index %3ld>"), psym->st_name);
 	      else
-		printf ("%-25.25s", strtab + psym->st_name);
+		print_symbol (-25, strtab + psym->st_name);
 
 	      if (is_rela)
 		printf (" + %lx", (unsigned long) relas [i].r_addend);
@@ -2133,7 +2152,7 @@ usage ()
 #endif
   fprintf (stdout, _("  -I or --histogram         Display histogram of bucket list lengths\n"));
   fprintf (stdout, _("  -v or --version           Display the version number of readelf\n"));
-  fprintf (stdout, _("  -W or --wide              Don't split lines to fit into 80 columns\n"));
+  fprintf (stdout, _("  -W or --wide              Don't split lines or truncate symbols to fit into 80 columns\n"));
   fprintf (stdout, _("  -H or --help              Display this information\n"));
   fprintf (stdout, _("Report bugs to %s\n"), REPORT_BUGS_TO);
 
@@ -5305,8 +5324,9 @@ process_symbol_table (file)
 	      printf ("  %6s", get_symbol_type (ELF_ST_TYPE (psym->st_info)));
 	      printf (" %6s",  get_symbol_binding (ELF_ST_BIND (psym->st_info)));
 	      printf (" %3s",  get_symbol_visibility (ELF_ST_VISIBILITY (psym->st_other)));
-	      printf (" %3.3s", get_symbol_index_type (psym->st_shndx));
-	      printf (" %s\n", dynamic_strings + psym->st_name);
+	      printf (" %3.3s ", get_symbol_index_type (psym->st_shndx));
+	      print_symbol (25, dynamic_strings + psym->st_name);
+	      putchar ('\n');
 	    }
 	}
     }
@@ -5364,8 +5384,8 @@ process_symbol_table (file)
 	      printf (" %-7s", get_symbol_type (ELF_ST_TYPE (psym->st_info)));
 	      printf (" %-6s", get_symbol_binding (ELF_ST_BIND (psym->st_info)));
 	      printf (" %-3s", get_symbol_visibility (ELF_ST_VISIBILITY (psym->st_other)));
-	      printf (" %4s", get_symbol_index_type (psym->st_shndx));
-	      printf (" %s", strtab + psym->st_name);
+	      printf (" %4s ", get_symbol_index_type (psym->st_shndx));
+	      print_symbol (25, strtab + psym->st_name);
 
 	      if (section->sh_type == SHT_DYNSYM &&
 		  version_info [DT_VERSIONTAGIDX (DT_VERSYM)] != 0)
@@ -5602,8 +5622,9 @@ process_syminfo (file)
     {
       unsigned short int flags = dynamic_syminfo[i].si_flags;
 
-      printf ("%4d: %-30s ", i,
-	      dynamic_strings + dynamic_symbols[i].st_name);
+      printf ("%4d: ", i);
+      print_symbol (30, dynamic_strings + dynamic_symbols[i].st_name);
+      putchar (' ');
 
       switch (dynamic_syminfo[i].si_boundto)
 	{
@@ -5616,9 +5637,12 @@ process_syminfo (file)
 	default:
 	  if (dynamic_syminfo[i].si_boundto > 0
 	      && dynamic_syminfo[i].si_boundto < dynamic_size)
-	    printf ("%-10s ",
-		    dynamic_strings
-		    + dynamic_segment[dynamic_syminfo[i].si_boundto].d_un.d_val);
+	    {
+	      print_symbol (10, dynamic_strings
+			    + dynamic_segment
+			    [dynamic_syminfo[i].si_boundto].d_un.d_val);
+	      putchar (' ' );
+	    }
 	  else
 	    printf ("%-10d ", dynamic_syminfo[i].si_boundto);
 	  break;
@@ -8708,9 +8732,10 @@ process_mips_specific (file)
 		       tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
 		       tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
 
-	      printf ("%3lu: %-20s %s %#10lx %-7ld", (unsigned long) cnt,
-		      dynamic_strings + liblist.l_name, timebuf,
-		      liblist.l_checksum, liblist.l_version);
+	      printf ("%3lu: ", (unsigned long) cnt);
+	      print_symbol (20, dynamic_strings + liblist.l_name);
+	      printf (" %s %#10lx %-7ld", timebuf, liblist.l_checksum,
+		      liblist.l_version);
 
 	      if (liblist.l_flags == 0)
 		puts (" NONE");
@@ -9008,11 +9033,13 @@ process_mips_specific (file)
 
       for (cnt = 0; cnt < conflictsno; ++cnt)
 	{
-	  Elf_Internal_Sym * psym = &dynamic_symbols[iconf[cnt]];
+	  Elf_Internal_Sym * psym = & dynamic_symbols [iconf [cnt]];
 
-	  printf ("%5lu: %8lu  ", (unsigned long) cnt, iconf[cnt]);
+	  printf ("%5lu: %8lu  ", (unsigned long) cnt, iconf [cnt]);
 	  print_vma (psym->st_value, FULL_HEX);
-	  printf ("  %s\n", dynamic_strings + psym->st_name);
+	  putchar (' ');
+	  print_symbol (25, dynamic_strings + psym->st_name);
+	  putchar ('\n');
 	}
 
       free (iconf);

@@ -1685,6 +1685,7 @@ relocation entries.  Using @option{-x} is equivalent to specifying all of
 @itemx --wide
 @cindex wide output, printing
 Format some lines for output devices that have more than 80 columns.
+Also do not truncate symbol names when they are displayed.
 @end table
 
 @c man end
