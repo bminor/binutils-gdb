@@ -1,3 +1,7 @@
+2004-01-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-selective/selective.exp: Skip ia64-*-*.
+
 2004-01-09  Daniel Jacobowitz  <drow@mvista.com>
 
 	* ld-arm/arm-lib.d, ld-arm/arm-lib.r: Update for R_ARM_PLT32
