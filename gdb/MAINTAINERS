@@ -45,7 +45,8 @@ problems.
 hp testsuite (gdb.hp)	Jimmy Guo	 adl-debugger-wdb-merge-guru@cup.hp.com
 djgpp native		Eli Zaretskii		eliz@gnu.org
 			DJ Delorie		dj@cygnus.com
-win32 host & native	Chris Faylor		cgf@cygnus.com
+MS Windows (N.T., CE, '00) host & native
+			Chris Faylor		cgf@cygnus.com
 GNU/Linux x86 native	Jim Blandy		jimb@cygnus.com
 GNU/Linux PPC native	Kevin Buettner		kevinb@cygnus.com
 hurd native		Mark Kettenis		kettenis@wins.va.nl
@@ -66,6 +67,7 @@ generic symtabs		Jim Blandy		jimb@cygnus.com
 dwarf readers		Jim Blandy		jimb@cygnus.com
 elf reader		Jim Blandy		jimb@cygnus.com
 stabs reader		Jim Blandy		jimb@cygnus.com
+tracing bytecode stuff  Jim Blandy              jimb@cygnus.com
 tracing			Michael Snyder		msnyder@cygnus.com
 threads			Michael Snyder		msnyder@cygnus.com
 breakpoint.c		Michael Snyder		msnyder@cygnus.com
