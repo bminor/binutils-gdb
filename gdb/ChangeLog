@@ -1,3 +1,11 @@
+2002-01-19  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* alpha-tdep.c (alpha_call_dummy_words): New.
+	* config/alpha/tm-alpha.h (CALL_DUMMY): Remove.
+	(CALL_DUMMY_P): Define.
+	(CALL_DUMMY_WORDS): Define.
+	(SIZEOF_CALL_DUMMY_WORDS): Define.
+
 2002-01-19  Per Bothner  <per@bothner.com>
 
 	* gnu-v3-abi.c (gnuv3_rtti_type):  Guard that vtable_symbol_name

@@ -333,14 +333,19 @@ extern void alpha_pop_frame (void);
    call_function_by_hand and to avoid zero length array warnings
    in valops.c  */
 
-#define CALL_DUMMY { 0 }	/* Content doesn't matter. */
+#define CALL_DUMMY_P (1)
+
+#define CALL_DUMMY_WORDS alpha_call_dummy_words
+extern LONGEST alpha_call_dummy_words[];
+
+#define SIZEOF_CALL_DUMMY_WORDS 0
 
 #define CALL_DUMMY_START_OFFSET (0)
 
 #define CALL_DUMMY_BREAKPOINT_OFFSET (0)
 
-extern CORE_ADDR alpha_call_dummy_address (void);
 #define CALL_DUMMY_ADDRESS() alpha_call_dummy_address()
+extern CORE_ADDR alpha_call_dummy_address (void);
 
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.

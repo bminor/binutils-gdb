@@ -1505,6 +1505,11 @@ alpha_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
   write_register (T12_REGNUM, fun);
 }
 
+/* On the Alpha, the call dummy code is nevery copied to user space
+   (see alpha_fix_call_dummy() above).  The contents of this do not
+   matter.  */
+LONGEST alpha_call_dummy_words[] = { 0 };
+
 int
 alpha_use_struct_convention (int gcc_p, struct type *type)
 {
