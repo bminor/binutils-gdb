@@ -124,20 +124,4 @@ trad-core.c
 
 Do-last:
 
-if ( echo $* | grep keep\-v9 > /dev/null ) ; then
-	echo Keeping v9 in aoutx.h 
-else
-	echo Sanitizing v9 in aoutx.h
-	rm -f new
-	while grep -s start-sanitize-v9 aoutx.h ; do
-		sed -e '/start-sanitize-v9/,/end-sanitize-v9/d' <aoutx.h >new
-		if [ -n "${safe}" ] ; then
-			mv aoutx.h .Recover
-		else
-			rm aoutx.h
-		fi
-		mv new aoutx.h
-	done
-fi
-
 # End of file.
