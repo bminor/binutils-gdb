@@ -213,6 +213,12 @@ Tue Mar 17 16:59:00 1998  Syd Polk <spolk@cygnus.com>
 	* Makefile.in - changed sn targets to snavigator
 	* configure.in - changed sn targets to snavigator
 
+Tue Mar 17 10:33:28 1998  Manfred Hollstein  <manfred@s-direktnet.de>
+
+	* config-ml.in: After building symlink tree call make distclean
+	if a Makefile got linked into ${ml_dir}/${ml_libdir}; this happens
+	to be the case for libiberty.
+
 Fri Mar  6 01:02:03 1998  Richard Henderson  <rth@cygnus.com>
 
 	* config.sub: Accept alphapca56 and alphaev6 properly.
