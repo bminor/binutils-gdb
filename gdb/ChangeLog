@@ -1,5 +1,8 @@
 Tue Mar 14 05:52:36 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* valops.c (value_cast, value_slice), parse.c (follow_types): Add
+	FIXME-type-allocation comments.
+
 	* gdbtypes.h (struct type): Fix comment about what units the
 	TYPE_LENGTH is in.
 

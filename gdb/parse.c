@@ -875,6 +875,8 @@ follow_types (follow_type)
 	break;
       case tp_array:
 	array_size = pop_type_int ();
+	/* FIXME-type-allocation: need a way to free this type when we are
+	   done with it.  */
 	range_type =
 	  create_range_type ((struct type *) NULL,
 			     builtin_type_int, 0,
@@ -887,6 +889,8 @@ follow_types (follow_type)
 	    = BOUND_CANNOT_BE_DETERMINED;
 	break;
       case tp_function:
+	/* FIXME-type-allocation: need a way to free this type when we are
+	   done with it.  */
 	follow_type = lookup_function_type (follow_type);
 	break;
       }

@@ -140,6 +140,8 @@ value_cast (type, arg2)
       int new_length = val_length / TYPE_LENGTH (element_type);
       if (val_length % TYPE_LENGTH (element_type) != 0)
 	warning("array element type size does not divide object size in cast");
+      /* FIXME-type-allocation: need a way to free this type when we are
+	 done with it.  */
       range_type = create_range_type ((struct type *) NULL,
 				      TYPE_TARGET_TYPE (range_type),
 				      low_bound, new_length + low_bound - 1);
@@ -2054,6 +2056,7 @@ value_slice (array, lowbound, length)
      value_ptr array;
      int lowbound, length;
 {
+  COERCE_VARYING_ARRAY (array);
   if (TYPE_CODE (VALUE_TYPE (array)) == TYPE_CODE_BITSTRING)
     error ("not implemented - bitstring slice");
   if (TYPE_CODE (VALUE_TYPE (array)) != TYPE_CODE_ARRAY
@@ -2071,6 +2074,8 @@ value_slice (array, lowbound, length)
       if (lowbound < lowerbound || length < 0
 	  || lowbound + length - 1 > upperbound)
 	error ("slice out of range");
+      /* FIXME-type-allocation: need a way to free this type when we are
+	 done with it.  */
       slice_range_type = create_range_type ((struct type*) NULL,
 					    TYPE_TARGET_TYPE (range_type),
 					    lowerbound,
