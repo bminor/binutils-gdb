@@ -1,3 +1,11 @@
+Tue May  7 16:10:19 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* ppcboot.c: New target for looking at PPCbug boot records.
+
+	* config{ure.in,.bfd}: Add support for ppcboot target.
+	* targets.c: Ditto.
+	* configure: Regenerate.
+		
 Tue May  7 11:15:19 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* coff-h8300.c (howto_table): Update names to match recent
