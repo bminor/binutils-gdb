@@ -136,7 +136,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"4byte", s_uacons, 4},
   {"8byte", s_uacons, 8},
 #ifdef BFD_ASSEMBLER
-  {"file", dwarf2_directive_file, 0 },
+  {"file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0 },
   {"loc", dwarf2_directive_loc, 0 },
 #endif
 #ifdef HAVE_SH64

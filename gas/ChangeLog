@@ -1,3 +1,18 @@
+2002-08-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-arc.c (md_pseudo_table <dwarf2_directive_file>): Cast. 
+	* config/tc-frv.c: Likewise.
+	* config/tc-hppa.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-ip2k.c: Likewise.
+	* config/tc-m68hc11.c: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-mmix.c: Likewise.
+	* config/tc-mn10300.c: Likewise.
+	* config/tc-sh.c: Likewise.
+	* config/tc-sparc.c: Likewise.
+	* config/tc-v850.c: Likewise.
+
 2002-08-20  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-mips.c (macro2): Implement rotates by zero using shifts

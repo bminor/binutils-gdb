@@ -1,5 +1,5 @@
 /* tc-arc.c -- Assembler for the ARC
-   Copyright 1994, 1995, 1997, 1999, 2000, 2001
+   Copyright 1994, 1995, 1997, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Contributed by Doug Evans (dje@cygnus.com).
 
@@ -93,7 +93,7 @@ const pseudo_typeS md_pseudo_table[] = {
   { "option", arc_option, 0 },
   { "cpu", arc_option, 0 },
   { "block", s_space, 0 },
-  { "file", dwarf2_directive_file, 0 },
+  { "file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0 },
   { "loc", dwarf2_directive_loc, 0 },
   { "extcondcode", arc_extoper, 0 },
   { "extcoreregister", arc_extoper, 1 },

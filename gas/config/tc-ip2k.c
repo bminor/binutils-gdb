@@ -66,7 +66,7 @@ static void ip2k_elf_section_rtn (int);
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
-    { "file",	dwarf2_directive_file,	0 },
+    { "file",	(void (*) PARAMS ((int))) dwarf2_directive_file, 0 },
     { "loc",	dwarf2_directive_loc,	0 },
     { "text",   ip2k_elf_section_text,  0 },
     { "sect",   ip2k_elf_section_rtn,   0 },

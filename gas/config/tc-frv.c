@@ -185,7 +185,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "eflags",	frv_set_flags,		0 },
   { "word",	cons,			4 },
   { "picptr",	frv_pic_ptr,		4 },
-  { "file",	dwarf2_directive_file,	0 },
+  { "file",	(void (*) PARAMS ((int))) dwarf2_directive_file, 0 },
   { "loc",	dwarf2_directive_loc,	0 },
   { NULL, 	NULL,			0 }
 };

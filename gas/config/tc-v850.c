@@ -493,7 +493,7 @@ const pseudo_typeS md_pseudo_table[] = {
   { "call_table_text",	v850_seg,		CALL_TABLE_TEXT_SECTION	},
   { "v850e",		set_machine,		bfd_mach_v850e		},
   { "v850ea",		set_machine,		bfd_mach_v850ea 	},
-  { "file",		dwarf2_directive_file,	0			},
+  { "file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0 },
   { "loc",		dwarf2_directive_loc,	0			},
   { NULL,		NULL,			0			}
 };

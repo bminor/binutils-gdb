@@ -556,7 +556,7 @@ const pseudo_typeS md_pseudo_table[] =
 
 #ifdef OBJ_ELF
   /* Dwarf2 support for Gcc.  */
-  {"file", dwarf2_directive_file, 0},
+  {"file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0},
   {"loc", dwarf2_directive_loc, 0},
 #endif
 
