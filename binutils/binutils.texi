@@ -826,10 +826,12 @@ Show a summary of the options to @code{objcopy}.
 @kindex objdump
 
 @smallexample
-objdump [ -a | --archive-headers ]  [ -b @var{bfdname} | --target=@var{bfdname} ]
+objdump [ -a | --archive-headers ] 
+        [ -b @var{bfdname} | --target=@var{bfdname} ]
         [ -d | --disassemble ]  [ -f | --file-headers ]
         [ -h | --section-headers | --headers ]  [ -i | --info ]
-        [ -j @var{section} | --section=@var{section} ]  [ -l | --line-numbers ]
+        [ -j @var{section} | --section=@var{section} ]
+        [ -l | --line-numbers ]
         [ -m @var{machine} | --architecture=@var{machine} ]  [ -r | --reloc ]
         [ -s | --full-contents ]  [ --stabs ] [ -t | --syms ]
         [ -x | --all-headers ]  [ --version ]  [ --help ]
@@ -1433,7 +1435,8 @@ It may also have variations for different operating systems or architectures.
 
 Command to list valid values: @samp{objdump -i} (first column).
 
-Sample values: @samp{a.out-hp300bsd}, @samp{ecoff-littlemips}, @samp{a.out-sunos-big}.
+Some sample values are: @samp{a.out-hp300bsd}, @samp{ecoff-littlemips},
+@samp{a.out-sunos-big}.
 
 @menu
 * objdump Target::              
