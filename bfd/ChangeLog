@@ -1,3 +1,8 @@
+Mon Jan 23 14:53:35 1995  Steve Chamberlain  <sac@splat>
+
+	* coff-sh.c (coff_sh_relocate_section):  Don't subtract
+	vma twice.
+
 Mon Jan 23 13:33:18 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* coff-sh.c (sh_reloc): Don't ignore the previous contents of an

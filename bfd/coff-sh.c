@@ -219,7 +219,6 @@ coff_sh_relocate_section (output_bfd, info, input_bfd, input_section,
 	      val = (sec->output_section->vma
 		     + sec->output_offset
 		     + sym->n_value
-		     - sec->vma 
 		     - sec->vma);
 	    }
 	}
