@@ -1,3 +1,8 @@
+2005-02-09  Andreas Schwab  <schwab@suse.de>
+
+	Committed by Andrew Cagney  <cagney@gnu.org>
+	* gdb.base/remotetimeout.exp: New file.
+
 2005-02-07  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/interp.exp: Remove trailing \n in gdb_test commands.
