@@ -1,3 +1,10 @@
+Thu Aug 12 08:30:05 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* bfd.c (_bfd_host_big_endian): Removed.
+	* bfd-in.h (HOST_BYTE_ORDER_BIG_P, bfd_header_twiddle_required):
+	Removed.
+	* bfd-in2.h: Regenerated.
+
 Wed Aug 11 12:11:23 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* archures.c (archures_init_table): Add bfd_sh_arch.
