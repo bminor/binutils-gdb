@@ -190,6 +190,8 @@ else
 		fi
 		mv new $f
 	done
+	chmod a+x config.bfd
 fi
+
 
 # End of file.
