@@ -62,14 +62,14 @@ ${srcdir}/pyr-tdep.c\
 ${srcdir}/pyr-xdep.c\
 ${srcdir}/remote-adapt.c\
 ${srcdir}/remote-eb.c\
-${srcdir}/remote-es1800.c\
+${srcdir}/remote-es.c\
 ${srcdir}/remote-hms.c\
 ${srcdir}/remote-mips.c\
 ${srcdir}/remote-mm.c\
 ${srcdir}/remote-monitor.c\
 ${srcdir}/remote-nindy.c\
 ${srcdir}/remote-sim.c\
-${srcdir}/remote-st2000.c\
+${srcdir}/remote-st.c\
 ${srcdir}/remote-udi.c\
 ${srcdir}/remote-vx.c\
 ${srcdir}/remote-z8k.c\
@@ -224,6 +224,7 @@ ${srcdir}/config/sparc/tm-sparclite.h\
 ${srcdir}/config/sparc/tm-spc-em.h\
 ${srcdir}/config/sparc/tm-sun4os4.h\
 ${srcdir}/config/sparc/tm-sun4sol2.h\
+${srcdir}/config/sparc/tm-vxsparc.h\
 ${srcdir}/config/sparc/xm-sun4os4.h\
 ${srcdir}/config/sparc/xm-sun4sol2.h\
 ${srcdir}/config/tahoe/tm-tahoe.h\
@@ -346,6 +347,7 @@ ${srcdir}/config/sparc/sun4os4.mh\
 ${srcdir}/config/sparc/sun4os4.mt\
 ${srcdir}/config/sparc/sun4sol2.mh\
 ${srcdir}/config/sparc/sun4sol2.mt\
+${srcdir}/config/sparc/vxsparc.mt\
 ${srcdir}/config/tahoe/tahoe.mh\
 ${srcdir}/config/tahoe/tahoe.mt\
 ${srcdir}/config/vax/vax.mt\
