@@ -1,3 +1,7 @@
+2003-09-19  Christopher Faylor  <cgf@redhat.com>
+ 
+ 	* win32-nat.c (mappings): Remove HAVE_SSE conditional.
+ 
 2003-09-15  GDB Administrator  <gdbadmin@sourceware.org>
 
 	* version.in: Bump to version 5.3.92.
