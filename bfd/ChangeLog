@@ -32,6 +32,9 @@
 	* coffcode.h (coff_std_swap_table): Add an unused attribute in
 	case it is not used.
 
+	* elf32-ip2k.c (ip2k_call_opcode, IS_CALL_OPCODE): Remove unused
+	structure and macro.
+
 2005-02-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (toc_adjusting_stub_needed): Return true for

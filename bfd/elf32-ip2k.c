@@ -106,15 +106,6 @@ static const struct ip2k_opcode ip2k_jmp_opcode[] =
 #define IS_JMP_OPCODE(code) \
   ip2k_is_opcode (code, ip2k_jmp_opcode)
 
-static const struct ip2k_opcode ip2k_call_opcode[] =
-{
-  {0xC000, 0xE000},	/* call */
-  {0x0000, 0x0000},
-};
-
-#define IS_CALL_OPCODE(code) \
-  ip2k_is_opcode (code, ip2k_call_opcode)
-
 static const struct ip2k_opcode ip2k_snc_opcode[] =
 {
   {0xA00B, 0xFFFF},	/* snc */
