@@ -1223,6 +1223,20 @@ md_begin ()
   symbol_table_insert (symbol_new ("$pc", reg_section, -1,
 				   &zero_address_frag));
 
+  /* If we don't add these register names to the symbol table, they
+     may end up being added as regular symbols by operand(), and then
+     make it to the object file as undefined in case they're not
+     regarded as local symbols.  They're local in o32, since `$' is a
+     local symbol prefix, but not in n32 or n64.  */
+  for (i = 0; i < 8; i++)
+    {
+      char buf[6];
+
+      sprintf (buf, "$fcc%i", i);
+      symbol_table_insert (symbol_new (buf, reg_section, -1,
+				       &zero_address_frag));
+    }
+
   mips_no_prev_insn (false);
 
   mips_gprmask = 0;

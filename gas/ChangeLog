@@ -1,3 +1,8 @@
+2002-10-18  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-mips.c (md_begin): Add $fcc registers to the symbol
+	table as register names.
+
 2002-10-18  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* config/tc-s390.c (md_parse_option): Set s390_arch_size to 32
