@@ -1,3 +1,7 @@
+1999-09-22  Nick Clifton  <nickc@cygnus.com>
+
+	* Makefile.am: Add earm_epoc_pe.c build target. 
+
 Sat Sep 18 07:57:10 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* emulparms/elf64hppa.sh (OTHER_READONLY_SYMBOLS): Remove ".stubs",
