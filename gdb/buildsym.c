@@ -422,18 +422,15 @@ start_subfile (name, dirname)
      directives which specify a file name ending in .C.
 
      So if the filename of this subfile ends in .C, then change the language
-     of any pending subfiles from C to C++.  .cc is also accepted, even
-     though I don't think cfront allows it.  */
+     of any pending subfiles from C to C++.  We also accept any other C++
+     suffixes accepted by deduce_language_from_filename (in particular,
+     some people use .cxx with cfront).  */
 
   if (subfile->name)
     {
-      char *p;
       struct subfile *s;
 
-      p = strrchr (subfile->name, '.');
-      if (p != NULL
-	  && ((p[1] == 'C' && p[2] == '\0')
-	      || (p[1] == 'c' && p[2] == 'c' && p[3] == '\0')))
+      if (deduce_language_from_filename (subfile->name) == language_cplus)
 	for (s = subfiles; s != NULL; s = s->next)
 	  if (s->language == language_c)
 	    s->language = language_cplus;

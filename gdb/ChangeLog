@@ -1,3 +1,9 @@
+Tue Sep 21 11:44:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* symfile.c (deduce_language_from_filename): Accept .cxx for C++.
+	* buildsym.c (start_subfile): Use deduce_language_from_filename
+	rather than checking for .C or .cc ourself.
+
 Mon Sep 20 14:53:11 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* defs.h: Declare argument of re_comp as const char *.
