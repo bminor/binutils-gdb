@@ -1,3 +1,8 @@
+Thu Feb 16 15:56:56 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* lib/gdb.exp: Just use "file exists", rather than undocumented
+	dejagnu procedure "findfile".
+
 Thu Feb 16 10:30:24 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* Makefile.in, gdb.{base,c++,chill}/Makefile.in (GDB, GDBFLAGS):

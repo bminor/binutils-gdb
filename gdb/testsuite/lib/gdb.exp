@@ -25,7 +25,11 @@
 
 global GDB
 if ![info exists GDB] then {
-    set GDB [findfile $base_dir/../gdb $base_dir/../gdb [transform gdb ]]
+    if [file exists $base_dir/../gdb] then {
+	set GDB $base_dir/../gdb
+    } else {
+	set GDB [transform gdb]
+    }
 }
 
 global GDBFLAGS
