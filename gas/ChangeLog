@@ -1,3 +1,8 @@
+2004-08-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (tc_ppc_regname_to_dw2regnum <regnames>): Replace
+	{ "cc", 68 }, with { "cr", 70 }.
+
 2004-08-13 Jan Beulich <jbeulich@novell.com>
 	   Nick Clifton <nickc@redhat.com>
 

@@ -6038,7 +6038,7 @@ tc_ppc_regname_to_dw2regnum (const char *regname)
     {
       { "sp", 1 }, { "r.sp", 1 }, { "rtoc", 2 }, { "r.toc", 2 },
       { "mq", 64 }, { "lr", 65 }, { "ctr", 66 }, { "ap", 67 },
-      { "cc", 68 }, { "xer", 76 }, { "vrsave", 109 }, { "vscr", 110 },
+      { "cr", 70 }, { "xer", 76 }, { "vrsave", 109 }, { "vscr", 110 },
       { "spe_acc", 111 }, { "spefscr", 112 }
     };
 
