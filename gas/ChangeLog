@@ -1,3 +1,9 @@
+start-sanitize-d10v
+Wed Jul 31 14:46:11 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c: Disable range checking on 16-bit values.
+
+end-sanitize-d10v	
 Wed Jul 31 16:27:19 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-m68k.c (m68k_ip): Set ok_arch for every instruction,
