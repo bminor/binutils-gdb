@@ -1,3 +1,8 @@
+2001-07-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/xm-go32.h (HOST_I386): Removed.
+	* config/i386/xm-linux.h (HOST_I386): Removed.
+
 2001-07-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* i387-tdep.c (print_i387_value): Add extra space after final full

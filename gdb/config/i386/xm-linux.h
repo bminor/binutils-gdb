@@ -22,8 +22,6 @@
 #ifndef XM_LINUX_H
 #define XM_LINUX_H
 
-#define HOST_I386
-
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
 
 #define HOST_LONG_DOUBLE_FORMAT &floatformat_i387_ext
