@@ -1,5 +1,9 @@
 2004-11-21  Daniel Jacobowitz  <dan@debian.org>
 
+	* sparc-tdep.c (sparc_software_single_step): Handle stepping to NULL.
+
+2004-11-21  Daniel Jacobowitz  <dan@debian.org>
+
 	* linux-nat.c (my_waitpid): New function.
 	(linux_test_for_tracefork): Make more robust and verbose.  Take
 	an ORIGINAL_PID argument and test for PTRACE_SETOPTIONS first.
