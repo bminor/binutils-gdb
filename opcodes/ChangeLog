@@ -1,3 +1,9 @@
+2005-02-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* cris-dis.c (format_hex): Remove ineffective warning fix.
+	* crx-dis.c (make_instruction): Warning fix.
+	* frv-asm.c: Regenerate.
+
 2005-02-23  Nick Clifton  <nickc@redhat.com>
 
 	* cgen-dis.in: Use bfd_byte for buffers that are passed to

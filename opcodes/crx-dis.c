@@ -658,8 +658,9 @@ make_instruction (void)
 
   for (i = 0; i < currInsn.nargs; i++)
     {
-      argument a = { 0 };
+      argument a;
 
+      memset (&a, 0, sizeof (a));
       a.type = getargtype (instruction->operands[i].op_type);
       if (instruction->operands[i].op_type == cst4
 	  || instruction->operands[i].op_type == rbase_dispu4)

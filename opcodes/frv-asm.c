@@ -71,7 +71,7 @@ static const char * parse_A0
 static const char * parse_A1
   PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
 static const char * parse_A
-  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *, long));
+  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *, unsigned long));
 
 inline static const char *
 parse_symbolic_address (CGEN_CPU_DESC cd,
@@ -924,7 +924,7 @@ parse_A (cd, strp, opindex, valuep, A)
      const char **strp;
      int opindex;
      unsigned long *valuep;
-     long A;
+     unsigned long A;
 {
   const char *errmsg;
  

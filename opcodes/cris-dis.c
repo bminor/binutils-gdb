@@ -448,10 +448,8 @@ format_hex (number, outbuffer, disdata)
      char *outbuffer;
      struct cris_disasm_data *disdata;
 {
-  /* Obfuscate to avoid warning on 32-bit host, but properly truncate
-     negative numbers on >32-bit hosts.  */
-  if (sizeof (number) > 4)
-    number &= (1 << (sizeof (number) > 4 ? 32 : 1)) - 1;
+  /* Truncate negative numbers on >32-bit hosts.  */
+  number &= 0xffffffff;
 
   sprintf (outbuffer, "0x%lx", number);
 
