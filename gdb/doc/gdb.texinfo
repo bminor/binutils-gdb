@@ -6922,24 +6922,29 @@ Without this, we won't know whether there is any point in looking for
 the bug in the current version of _GDBN__.
 
 @item
-A complete input script, and all necessary source files, that will
-reproduce the bug.
+The type of machine you are using, and the operating system name and
+version number.
 
 @item
 What compiler (and its version) was used to compile _GDBN__---e.g.
 ``_GCC__-1.37.1''.
 
 @item
+What compiler (and its version) was used to compile the program you
+are debugging---e.g.  ``_GCC__-1.37.1''.
+
+@item
 The command arguments you gave the compiler to compile your example and
 observe the bug.  For example, did you use @samp{-O}?  To guarantee
-you won't omit something important, list them all.
+you won't omit something important, list them all.  A copy of the
+Makefile (or the output from make) is sufficient.
 
 If we were to try to guess the arguments, we would probably guess wrong
 and then we might not encounter the bug.
 
 @item
-The type of machine you are using, and the operating system name and
-version number.
+A complete input script, and all necessary source files, that will
+reproduce the bug.
 
 @item
 A description of what behavior you observe that you believe is
