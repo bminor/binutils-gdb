@@ -40,7 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "coff/internal.h"
 #include "coff/ecoff.h"
 #include "coff/mips.h"
-#define ECOFF_32
+#define ECOFF_SIGNED_32
 #include "ecoffswap.h"
 
 /* This structure is used to hold .got information when linking.  It

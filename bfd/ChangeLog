@@ -1,3 +1,13 @@
+Tue Jul 11 16:25:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ecoffswap.h (ecoff_get_off, ecoff_put_off): Add ECOFF_SIGNED_32
+ 	and ECOF_SIGNED_64 to list ways to extract an offset.
+	(ecoff_swap_fdr_in, ecoff_swap_fdr_out, ecoff_swap_pdr_in,
+ 	ecoff_swap_pdr_out, ecoff_swap_ext_in, ecoff_swap_ext_out):
+ 	Update.
+	* elf64-mips.c (ECOFF_SIGNED_64): Define instead of ECOFF_64.
+	* elf32-mips.c (ECOFF_SIGNED_32): Define instead of ECOFF_32.
+
 Tue Jul 11 16:03:04 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* elfcode.h (elf_object_p): Use bfd_set_start_address and not

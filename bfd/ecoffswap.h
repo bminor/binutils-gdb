@@ -1,5 +1,5 @@
 /* Generic ECOFF swapping routines, for BFD.
-   Copyright 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994, 1995, 1996, 2000 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -27,10 +27,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    on them in gdb by naming the including source file; e.g.,
    'coff-mips.c':ecoff_swap_hdr_in.
 
-   Before including this header file, one of ECOFF_32 or ECOFF_64 must
-   be defined.  These are checked when swapping information that
-   depends upon the target size.  This code works for 32 bit and 64
-   bit ECOFF, but may need to be generalized in the future.
+   Before including this header file, one of ECOFF_32, ECOFF_64,
+   ECOFF_SIGNED_32 or ECOFF_SIGNED_64 must be defined.  These are
+   checked when swapping information that depends upon the target
+   size.  This code works for 32 bit and 64 bit ECOFF, but may need to
+   be generalized in the future.
 
    Some header file which defines the external forms of these
    structures must also be included before including this header file.
@@ -49,6 +50,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifdef ECOFF_64
 #define ecoff_get_off bfd_h_get_64
 #define ecoff_put_off bfd_h_put_64
+#endif
+#ifdef ECOFF_SIGNED_32
+#define ecoff_get_off bfd_h_get_signed_32
+#define ecoff_put_off bfd_h_put_signed_32
+#endif
+#ifdef ECOFF_SIGNED_64
+#define ecoff_get_off bfd_h_get_signed_64
+#define ecoff_put_off bfd_h_put_signed_64
 #endif
 
 /* ECOFF auxiliary information swapping routines.  These are the same
@@ -185,7 +194,7 @@ ecoff_swap_fdr_in (abfd, ext_copy, intern)
   
   intern->adr           = ecoff_get_off (abfd, (bfd_byte *)ext->f_adr);
   intern->rss           = bfd_h_get_32 (abfd, (bfd_byte *)ext->f_rss);
-#ifdef ECOFF_64
+#if defined (ECOFF_64) || defined (ECOFF_SIGNED_64)
   if (intern->rss == 0xffffffff)
     intern->rss = -1;
 #endif
@@ -197,11 +206,11 @@ ecoff_swap_fdr_in (abfd, ext_copy, intern)
   intern->cline         = bfd_h_get_32 (abfd, (bfd_byte *)ext->f_cline);
   intern->ioptBase      = bfd_h_get_32 (abfd, (bfd_byte *)ext->f_ioptBase);
   intern->copt          = bfd_h_get_32 (abfd, (bfd_byte *)ext->f_copt);
-#ifdef ECOFF_32
+#if defined (ECOFF_32) || defined (ECOFF_SIGNED_32)
   intern->ipdFirst      = bfd_h_get_16 (abfd, (bfd_byte *)ext->f_ipdFirst);
   intern->cpd           = bfd_h_get_16 (abfd, (bfd_byte *)ext->f_cpd);
 #endif
-#ifdef ECOFF_64
+#if defined (ECOFF_64) || defined (ECOFF_SIGNED_64)
   intern->ipdFirst      = bfd_h_get_32 (abfd, (bfd_byte *)ext->f_ipdFirst);
   intern->cpd           = bfd_h_get_32 (abfd, (bfd_byte *)ext->f_cpd);
 #endif
@@ -262,11 +271,11 @@ ecoff_swap_fdr_out (abfd, intern_copy, ext_ptr)
   bfd_h_put_32 (abfd, intern->cline, (bfd_byte *)ext->f_cline);
   bfd_h_put_32 (abfd, intern->ioptBase, (bfd_byte *)ext->f_ioptBase);
   bfd_h_put_32 (abfd, intern->copt, (bfd_byte *)ext->f_copt);
-#ifdef ECOFF_32
+#if defined (ECOFF_32) || defined (ECOFF_SIGNED_32)
   bfd_h_put_16 (abfd, intern->ipdFirst, (bfd_byte *)ext->f_ipdFirst);
   bfd_h_put_16 (abfd, intern->cpd, (bfd_byte *)ext->f_cpd);
 #endif
-#ifdef ECOFF_64
+#if defined (ECOFF_64) || defined (ECOFF_SIGNED_64)
   bfd_h_put_32 (abfd, intern->ipdFirst, (bfd_byte *)ext->f_ipdFirst);
   bfd_h_put_32 (abfd, intern->cpd, (bfd_byte *)ext->f_cpd);
 #endif
@@ -341,7 +350,7 @@ ecoff_swap_pdr_in (abfd, ext_copy, intern)
   intern->lnHigh        = bfd_h_get_32 (abfd, (bfd_byte *)ext->p_lnHigh);
   intern->cbLineOffset  = ecoff_get_off (abfd, (bfd_byte *)ext->p_cbLineOffset);
 
-#ifdef ECOFF_64
+#if defined (ECOFF_64) || defined (ECOFF_SIGNED_64)
   intern->gp_prologue = bfd_h_get_8 (abfd, (bfd_byte *) ext->p_gp_prologue);
   if (bfd_header_big_endian (abfd))
     {
@@ -400,7 +409,7 @@ ecoff_swap_pdr_out (abfd, intern_copy, ext_ptr)
   bfd_h_put_32 (abfd, intern->lnHigh, (bfd_byte *)ext->p_lnHigh);
   ecoff_put_off (abfd, intern->cbLineOffset, (bfd_byte *)ext->p_cbLineOffset);
 
-#ifdef ECOFF_64
+#if defined (ECOFF_64) || defined (ECOFF_SIGNED_64)
   bfd_h_put_8 (abfd, intern->gp_prologue, (bfd_byte *) ext->p_gp_prologue);
   if (bfd_header_big_endian (abfd))
     {
@@ -629,10 +638,10 @@ ecoff_swap_ext_in (abfd, ext_copy, intern)
   }
   intern->reserved = 0;
 
-#ifdef ECOFF_32
+#if defined (ECOFF_32) || defined (ECOFF_SIGNED_32)
   intern->ifd           = bfd_h_get_signed_16 (abfd, (bfd_byte *)ext->es_ifd);
 #endif
-#ifdef ECOFF_64
+#if defined (ECOFF_64) || defined (ECOFF_SIGNED_64)
   intern->ifd           = bfd_h_get_signed_32 (abfd, (bfd_byte *)ext->es_ifd);
 #endif
 
@@ -663,7 +672,7 @@ ecoff_swap_ext_out (abfd, intern_copy, ext_ptr)
 			| (intern->cobol_main ? EXT_BITS1_COBOL_MAIN_BIG : 0)
 			| (intern->weakext ? EXT_BITS1_WEAKEXT_BIG : 0));
     ext->es_bits2[0] = 0;
-#ifdef ECOFF_64
+#if defined (ECOFF_64) || defined (ECOFF_SIGNED_64)
     ext->es_bits2[1] = 0;
     ext->es_bits2[2] = 0;
 #endif
@@ -672,16 +681,16 @@ ecoff_swap_ext_out (abfd, intern_copy, ext_ptr)
 			| (intern->cobol_main ? EXT_BITS1_COBOL_MAIN_LITTLE : 0)
 			| (intern->weakext ? EXT_BITS1_WEAKEXT_LITTLE : 0));
     ext->es_bits2[0] = 0;
-#ifdef ECOFF_64
+#if defined (ECOFF_64) || defined (ECOFF_SIGNED_64)
     ext->es_bits2[1] = 0;
     ext->es_bits2[2] = 0;
 #endif
   }
 
-#ifdef ECOFF_32
+#if defined (ECOFF_32) || defined (ECOFF_SIGNED_32)
   bfd_h_put_signed_16 (abfd, intern->ifd, (bfd_byte *)ext->es_ifd);
 #endif
-#ifdef ECOFF_64
+#if defined (ECOFF_64) || defined (ECOFF_SIGNED_64)
   bfd_h_put_signed_32 (abfd, intern->ifd, (bfd_byte *)ext->es_ifd);
 #endif
 

@@ -45,7 +45,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "coff/ecoff.h"
 /* The 64 bit versions of the mdebug data structures are in alpha.h.  */
 #include "coff/alpha.h"
-#define ECOFF_64
+#define ECOFF_SIGNED_64
 #include "ecoffswap.h"
 
 static void mips_elf64_swap_reloc_in
