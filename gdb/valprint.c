@@ -263,14 +263,8 @@ val_print_type_code_int (type, valaddr, stream)
 	  if (len <= sizeof (LONGEST))
 	    {
 	      /* We can print it in decimal.  */
-	      fprintf_filtered
-		(stream, 
-#if defined (LONG_LONG)
-		 "%llu",
-#else
-		 "%lu",
-#endif
-		 unpack_long (BUILTIN_TYPE_LONGEST, first_addr));
+	      print_longest (stream, 'u', 0,
+			    unpack_long (BUILTIN_TYPE_LONGEST, first_addr));
 	    }
 	  else
 	    {
@@ -291,16 +285,129 @@ val_print_type_code_int (type, valaddr, stream)
 #ifdef PRINT_TYPELESS_INTEGER
       PRINT_TYPELESS_INTEGER (stream, type, unpack_long (type, valaddr));
 #else
-      fprintf_filtered (stream, TYPE_UNSIGNED (type) ?
-#if defined (LONG_LONG)
-			"%llu" : "%lld",
-#else
-			"%u" : "%d",
-#endif
-			unpack_long (type, valaddr));
+      print_longest (stream, TYPE_UNSIGNED (type) ? 'u' : 'd', 0,
+		     unpack_long (type, valaddr));
 #endif
     }
 }			
+
+/* Print a number according to FORMAT which is one of d,u,x,o,b,h,w,g.
+   The raison d'etre of this function is to consolidate printing of LONG_LONG's
+   into this one function.  Some platforms have long longs but don't have a
+   printf() that supports "ll" in the format string.  We handle these by seeing
+   if the number is actually a long, and if not we just bail out and print the
+   number in hex.  The format chars b,h,w,g are from
+   print_scalar_formatted().  USE_LOCAL says whether or not to call the
+   local formatting routine to get the format.  */
+
+void
+print_longest (stream, format, use_local, val_long)
+     FILE *stream;
+     char format;
+     int use_local;
+     LONGEST val_long;
+{
+#if defined (CC_HAS_LONG_LONG) && !defined (PRINTF_HAS_LONG_LONG)
+  long vtop, vbot;
+
+  vtop = val_long >> (sizeof (long) * HOST_CHAR_BIT);
+  vbot = (long) val_long;
+
+  if ((format == 'd' && (val_long < INT_MIN || val_long > INT_MAX))
+      || ((format == 'u' || format == 'x') && val_long > UINT_MAX))
+    {
+      fprintf_filtered (stream, "0x%x%08x", vtop, vbot);
+      return;
+    }
+#endif
+
+#ifdef PRINTF_HAS_LONG_LONG
+  switch (format)
+    {
+    case 'd':
+      fprintf_filtered (stream,
+			use_local ? local_decimal_format_custom ("ll")
+				  : "%lld",
+			val_long);
+      break;
+    case 'u':
+      fprintf_filtered (stream, "%llu", val_long);
+      break;
+    case 'x':
+      fprintf_filtered (stream,
+			use_local ? local_hex_format_custom ("ll")
+				  : "%llx",
+			val_long);
+      break;
+    case 'o':
+      fprintf_filtered (stream,
+			use_local ? local_octal_format_custom ("ll")
+				  : "%llo",
+      break;
+    case 'b':
+      fprintf_filtered (stream, local_hex_format_custom ("02ll"), val_long);
+      break;
+    case 'h':
+      fprintf_filtered (stream, local_hex_format_custom ("04ll"), val_long);
+      break;
+    case 'w':
+      fprintf_filtered (stream, local_hex_format_custom ("08ll"), val_long);
+      break;
+    case 'g':
+      fprintf_filtered (stream, local_hex_format_custom ("016ll"), val_long);
+      break;
+    default:
+      abort ();
+    }
+#else /* !PRINTF_HAS_LONG_LONG */
+  /* In the following it is important to coerce (val_long) to a long. It does
+     nothing if !LONG_LONG, but it will chop off the top half (which we know
+     we can ignore) if the host supports long longs.  */
+
+  switch (format)
+    {
+    case 'd':
+      fprintf_filtered (stream,
+			use_local ? local_decimal_format_custom ("l")
+				  : "%ld",
+			(long) val_long);
+      break;
+    case 'u':
+      fprintf_filtered (stream, "%lu", (unsigned long) val_long);
+      break;
+    case 'x':
+      fprintf_filtered (stream,
+			use_local ? local_hex_format_custom ("l")
+				  : "%lx",
+			(long) val_long);
+      break;
+    case 'o':
+      fprintf_filtered (stream,
+			use_local ? local_octal_format_custom ("l")
+				  : "%lo",
+			(long) val_long);
+      break;
+    case 'b':
+      fprintf_filtered (stream, local_hex_format_custom ("02l"),
+			(long) val_long);
+      break;
+    case 'h':
+      fprintf_filtered (stream, local_hex_format_custom ("04l"),
+			(long) val_long);
+      break;
+    case 'w':
+      fprintf_filtered (stream, local_hex_format_custom ("08l"),
+			(long) val_long);
+      break;
+    case 'g':
+      fprintf_filtered (stream, local_hex_format_custom ("016l"),
+			(long) val_long);
+      break;
+    default:
+      abort ();
+    }
+#endif /* !PRINTF_HAS_LONG_LONG */
+}
 
 /* Print a floating point value of type TYPE, pointed to in GDB by VALADDR,
    on STREAM.  */
@@ -550,17 +657,46 @@ value_print_array_elements (val, stream, format, pretty)
     }
 }
 
+/*  Print a string from the inferior, starting at ADDR and printing up to LEN
+    characters, to STREAM.  If LEN is zero, printing stops at the first null
+    byte, otherwise printing proceeds (including null bytes) until either
+    print_max or LEN characters have been printed.
+
+    Always fetch print_max+1 characters, even though LA_PRINT_STRING might want
+    to print more or fewer (with repeated characters).  This is so that we
+    don't spend forever fetching if we print a long string consisting of the
+    same character repeated.  Also so we can do it all in one memory operation,
+    which is faster.  However, this will be slower if print_max is set high,
+    e.g. if you set print_max to 1000, not only will it take a long time to
+    fetch short strings, but if you are near the end of the address space, it
+    might not work.
+
+    If the number of characters we actually print is limited because of hitting
+    print_max, when LEN would have explicitly or implicitly (in the case of a
+    null terminated string with another non-null character available to print)
+    allowed us to print more, we print ellipsis ("...") after the printed string
+    to indicate that more characters were available to print but that we were
+    limited by print_max.  To do this correctly requires that we always fetch
+    one more than the number of characters we could potentially print, so that
+    if we do print the maximum number, we can tell whether or not a null byte
+    would have been the next character, in the case of C style strings.
+    For non-C style strings, only the value of LEN is pertinent in deciding
+    whether or not to print ellipsis.
+
+    FIXME:  If LEN is nonzero and less than print_max, we could get away
+    with only fetching the specified number of characters from the inferior. */
+
 int
-val_print_string (addr, stream)
+val_print_string (addr, len, stream)
     CORE_ADDR addr;
+    unsigned int len;
     FILE *stream;
 {
-  int first_addr_err;
+  int first_addr_err = 0;	/* Nonzero if first address out of bounds */
+  int force_ellipsis = 0;	/* Force ellipsis to be printed if nonzero */
   int errcode;
   unsigned char c;
   char *string;
-  int force_ellipses;
-  unsigned int i = 0;		/* Number of characters printed.  */
 
   /* Get first character.  */
   errcode = target_read_memory (addr, (char *)&c, 1);
@@ -569,53 +705,58 @@ val_print_string (addr, stream)
       /* First address out of bounds.  */
       first_addr_err = 1;
     }
-  else
+  else if (print_max < UINT_MAX)
     {
-      first_addr_err = 0;
-      /* A real string.  */
-      string = (char *) alloca (print_max);
+      string = (char *) alloca (print_max + 1);
+      memset (string, 0, print_max + 1);
       
-      /* If the loop ends by us hitting print_max characters,
-	 we need to have elipses at the end.  */
-      force_ellipses = 1;
-      
-      /* This loop always fetches print_max characters, even
-	 though LA_PRINT_STRING might want to print more or fewer
-	 (with repeated characters).  This is so that
-	 we don't spend forever fetching if we print
-	 a long string consisting of the same character
-	 repeated.  Also so we can do it all in one memory
-	 operation, which is faster.  However, this will be
-	 slower if print_max is set high, e.g. if you set
-	 print_max to 1000, not only will it take a long
-	 time to fetch short strings, but if you are near
-	 the end of the address space, it might not work. */
       QUIT;
-      errcode = target_read_memory (addr, string, print_max);
+      errcode = target_read_memory (addr, string, print_max + 1);
       if (errcode != 0)
 	{
-	  /* Try reading just one character.  If that succeeds,
-	     assume we hit the end of the address space, but
-	     the initial part of the string is probably safe. */
+	  /* Try reading just one character.  If that succeeds, assume we hit
+	     the end of the address space, but the initial part of the string
+	     is probably safe. */
 	  char x[1];
 	  errcode = target_read_memory (addr, x, 1);
 	}
-      if (errcode != 0)
-	force_ellipses = 0;
-      else 
-	for (i = 0; i < print_max; i++)
-	  if (string[i] == '\0')
+      if (len == 0)
+	{
+	  /* When the length is unspecified, such as when printing C style
+	     null byte terminated strings, then scan the string looking for
+	     the terminator in the first print_max characters.  If a terminator
+	     is found, then it determines the length, otherwise print_max
+	     determines the length. */
+	  for (;len < print_max; len++)
 	    {
-	      force_ellipses = 0;
-	      break;
+	      if (string[len] == '\0')
+		{
+		  break;
+		}
 	    }
+	  /* If the first unprinted character is not the null terminator, set
+	     the flag to force ellipses.  This is true whether or not we broke
+	     out of the above loop because we found a terminator, or whether
+	     we simply hit the limit on how many characters to print. */
+	  if (string[len] != '\0')
+	    {
+	      force_ellipsis = 1;
+	    }
+	}
+      else if (len > print_max)
+	{
+	  /* Printing less than the number of characters actually requested
+	     always makes us print ellipsis. */
+	  len = print_max;
+	  force_ellipsis = 1;
+	}
       QUIT;
       
       if (addressprint)
 	{
 	  fputs_filtered (" ", stream);
 	}
-      LA_PRINT_STRING (stream, string, i, force_ellipses);
+      LA_PRINT_STRING (stream, string, len, force_ellipsis);
     }
   
   if (errcode != 0)
@@ -624,16 +765,16 @@ val_print_string (addr, stream)
 	{
 	  fprintf_filtered (stream,
 			    (" <Address 0x%x out of bounds>" + first_addr_err),
-			    addr + i);
+			    addr + len);
 	}
       else
 	{
-	  error ("Error reading memory address 0x%x: %s.", addr + i,
+	  error ("Error reading memory address 0x%x: %s.", addr + len,
 		 safe_strerror (errcode));
 	}
     }
   fflush (stream);
-  return (i);
+  return (len);
 }
 
 #if 0

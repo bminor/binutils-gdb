@@ -2966,7 +2966,7 @@ read_range_type (pp, typenums, objfile)
 	       *dbx_lookup_type (rangenums) == lookup_fundamental_type (objfile, FT_INTEGER)))
     {
       /* an unsigned type */
-#ifdef LONG_LONG
+#ifdef CC_HAS_LONG_LONG
       if (n3 == - sizeof (long long))
 	return (lookup_fundamental_type (objfile, FT_UNSIGNED_LONG_LONG));
 #endif
@@ -2984,7 +2984,7 @@ read_range_type (pp, typenums, objfile)
       if (n3 == (unsigned char)~0L)
 	return (lookup_fundamental_type (objfile, FT_UNSIGNED_CHAR));
     }
-#ifdef LONG_LONG
+#ifdef CC_HAS_LONG_LONG
   else if (n3 == 0 && n2 == -sizeof (long long))
     return (lookup_fundamental_type (objfile, FT_LONG_LONG));
 #endif  

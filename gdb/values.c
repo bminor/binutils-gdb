@@ -637,7 +637,7 @@ unpack_long (type, valaddr)
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
 	}
-#ifdef LONG_LONG
+#ifdef CC_HAS_LONG_LONG
       if (len == sizeof (long long))
 	{
 	  unsigned long long retval;
@@ -685,7 +685,7 @@ unpack_long (type, valaddr)
 	  return retval;
 	}
 
-#ifdef LONG_LONG
+#ifdef CC_HAS_LONG_LONG
       if (len == sizeof (long long))
 	{
 	  long long retval;
@@ -717,6 +717,15 @@ unpack_long (type, valaddr)
 	SWAP_TARGET_AND_HOST (&retval, len);
 	return retval;
       }
+#ifdef CC_HAS_LONG_LONG
+      else if (len == sizeof(long long))
+      {
+	unsigned long long retval;
+	memcpy (&retval, valaddr, len);
+	SWAP_TARGET_AND_HOST (&retval, len);
+	return retval;
+      }
+#endif
     }
   else if (code == TYPE_CODE_MEMBER)
     error ("not implemented: member types in unpack_long");
@@ -775,11 +784,7 @@ unpack_double (type, valaddr, invp)
     }
   else if (nosign) {
    /* Unsigned -- be sure we compensate for signed LONGEST.  */
-#ifdef LONG_LONG
-   return (unsigned long long) unpack_long (type, valaddr);
-#else
-   return (unsigned long     ) unpack_long (type, valaddr);
-#endif
+   return (unsigned LONGEST) unpack_long (type, valaddr);
   } else {
     /* Signed -- we are OK with unpack_long.  */
     return unpack_long (type, valaddr);
@@ -1393,10 +1398,8 @@ value_from_longest (type, num)
 	* (int *) VALUE_CONTENTS_RAW (val) = num;
       else if (len == sizeof (long))
 	* (long *) VALUE_CONTENTS_RAW (val) = num;
-#ifdef LONG_LONG
-      else if (len == sizeof (long long))
-	* (long long *) VALUE_CONTENTS_RAW (val) = num;
-#endif
+      else if (len == sizeof (LONGEST))
+	* (LONGEST *) VALUE_CONTENTS_RAW (val) = num;
       else
 	error ("Integer type encountered with unexpected data length.");
     }

@@ -304,11 +304,7 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	}
       else
 	{
-#ifdef LONG_LONG
-	  fprintf_filtered (stream, "%lld", val);
-#else
-	  fprintf_filtered (stream, "%ld", val);
-#endif
+	  print_longest (stream, 'd', 0, val);
 	}
       break;
 

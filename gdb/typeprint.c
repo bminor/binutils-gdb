@@ -198,20 +198,12 @@ print_type_scalar (type, val, stream)
 	}
       else
 	{
-#ifdef LONG_LONG
-	  fprintf_filtered (stream, "%lld", val);
-#else
-	  fprintf_filtered (stream, "%ld", val);
-#endif
+	  print_longest (stream, 'd', 0, val);
 	}
       break;
 
     case TYPE_CODE_INT:
-#ifdef LONG_LONG
-      fprintf_filtered (stream, TYPE_UNSIGNED (type) ? "%llu" : "%lld", val);
-#else
-      fprintf_filtered (stream, TYPE_UNSIGNED (type) ? "%u" : "%d", val);
-#endif
+      print_longest (stream, TYPE_UNSIGNED (type) ? 'u' : 'd', 0, val);
       break;
 
     case TYPE_CODE_CHAR:

@@ -102,7 +102,7 @@ struct value
     union {
       long contents[1];
       double force_double_align;
-#ifdef LONG_LONG
+#ifdef CC_HAS_LONG_LONG
       long long force_longlong_align;
 #endif
     } aligner;
@@ -272,6 +272,12 @@ extern value
 value_string PARAMS ((char *ptr, int len));
 
 extern value
+value_array PARAMS ((int lowbound, int highbound, value *elemvec));
+
+extern value
+value_concat PARAMS ((value arg1, value arg2));
+
+extern value
 value_binop PARAMS ((value arg1, value arg2, enum exp_opcode op));
 
 extern value
@@ -420,9 +426,6 @@ extern int
 unop_user_defined_p PARAMS ((enum exp_opcode op, value arg1));
 
 extern int
-typecmp PARAMS ((int staticp, struct type *t1[], value t2[]));
-
-extern int
 destructor_name_p PARAMS ((const char *name, const struct type *type));
 
 #define value_free(val) free ((PTR)val)
@@ -475,6 +478,10 @@ baseclass_addr PARAMS ((struct type *type, int index, char *valaddr,
 			value *valuep, int *errp));
 
 extern void
+print_longest PARAMS ((FILE *stream, char format, int use_local,
+		       LONGEST value));
+
+extern void
 print_floating PARAMS ((char *valaddr, struct type *type, FILE *stream));
 
 extern int
@@ -487,7 +494,7 @@ val_print PARAMS ((struct type *type, char *valaddr, CORE_ADDR address,
 		   int recurse, enum val_prettyprint pretty));
 
 extern int
-val_print_string PARAMS ((CORE_ADDR addr, FILE *stream));
+val_print_string PARAMS ((CORE_ADDR addr, unsigned int len, FILE *stream));
 
 /* FIXME:  Assumes equivalence of "struct frame_info *" and "FRAME" */
 extern void

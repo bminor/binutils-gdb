@@ -506,29 +506,48 @@ enum val_prettyprint
 #define TARGET_PTR_BIT TARGET_INT_BIT
 #endif
 
-/* Convert a LONGEST to an int.  This is used in contexts (e.g. number
-   of arguments to a function, number in a value history, register
-   number, etc.) where the value must not be larger than can fit
-   in an int.  */
-#if !defined (longest_to_int)
-#if defined (LONG_LONG)
-#define longest_to_int(x) (((x) > INT_MAX || (x) < INT_MIN) \
-			   ? (error ("Value out of range."),0) : (int) (x))
-#else /* No LONG_LONG.  */
-/* Assume sizeof (int) == sizeof (long).  */
-#define longest_to_int(x) ((int) (x))
-#endif /* No LONG_LONG.  */
-#endif /* No longest_to_int.  */
+/* Default to support for "long long" if the host compiler being used is gcc.
+   Config files must define CC_HAS_LONG_LONG to use other host compilers
+   that are capable of supporting "long long", and to cause gdb to use that
+   support.  Not defining CC_HAS_LONG_LONG will suppress use of "long long"
+   regardless of what compiler is used.
 
-/* This should not be a typedef, because "unsigned LONGEST" needs
-   to work. LONG_LONG is defined if the host has "long long".  */
+   FIXME: For now, automatic selection of "long long" as the default when
+   gcc is used is disabled, pending further testing.  Concerns include the
+   impact on gdb performance and the universality of bugfree long long
+   support on platforms that do have gcc.  Compiling with FORCE_LONG_LONG
+   will select "long long" use for testing purposes.  -fnf */
+
+#ifndef CC_HAS_LONG_LONG
+#  if defined (__GNUC__) && defined (FORCE_LONG_LONG) /* See FIXME above */
+#    define CC_HAS_LONG_LONG 1
+#  endif
+#endif
+	
+/* LONGEST should not be a typedef, because "unsigned LONGEST" needs to work.
+   CC_HAS_LONG_LONG is defined if the host compiler supports "long long"
+   variables and we wish to make use of that support.  */
 
 #ifndef LONGEST
-# ifdef LONG_LONG
-#  define LONGEST long long
-# else
-#  define LONGEST long
-# endif
+#  ifdef CC_HAS_LONG_LONG
+#    define LONGEST long long
+#  else
+#    define LONGEST long
+#  endif
+#endif
+
+/* Convert a LONGEST to an int.  This is used in contexts (e.g. number of
+   arguments to a function, number in a value history, register number, etc.)
+   where the value must not be larger than can fit in an int.  */
+
+#ifndef longest_to_int
+#  ifdef CC_HAS_LONG_LONG
+#    define longest_to_int(x) (((x) > INT_MAX || (x) < INT_MIN) \
+			       ? (error ("Value out of range."),0) : (int) (x))
+#  else
+     /* Assume sizeof (int) == sizeof (long).  */
+#    define longest_to_int(x) ((int) (x))
+#  endif
 #endif
 
 /* If we picked up a copy of CHAR_BIT from a configuration file
@@ -653,7 +672,7 @@ strsignal PARAMS ((int));
 
 #ifndef PSIGNAL_IN_SIGNAL_H
 extern void
-psignal PARAMS ((unsigned, char *));
+psignal PARAMS ((unsigned, const char *));
 #endif
 
 /* For now, we can't include <stdlib.h> because it conflicts with

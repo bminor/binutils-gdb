@@ -1,3 +1,41 @@
+Thu Apr 29 00:03:59 1993  Fred Fish  (fnf@cygnus.com)
+
+	* defs.h (CC_HAS_LONG_LONG):  Set up to define CC_HAS_LONG_LONG
+	when compiling with gcc, but disable it for now.  See comment.
+	* defs.h (LONGEST):  Define as either "long" or "long long"
+	based on CC_HAS_LONG_LONG.
+	* defs.h (longest_to_int):  Use CC_HAS_LONG_LONG to control
+	how longest_to_int is defined.
+	* c-valprint.c (c_val_print):  Call print_longest.
+	* expprint.c (dump_expression):  Use PRINTF_HAS_LONG_LONG
+	instead of LONG_LONG.
+	* {printcmd.c, gdbtypes.h} (LONG_LONG):  Replace usages with
+	CC_HAS_LONG_LONG.
+	* printcmd.c (print_scalar_formatted):  Call print_longest
+	and let it figure out what to do for PRINTF_HAS_LONG_LONG.
+	* typeprint.c (print_type_scalar):  Call print_longest and let
+	it figure out what to do for PRINTF_HAS_LONG_LONG.
+	* valprint.c (val_print_type_code_int):  Call print_longest
+	and let it figure out what to do for PRINTF_HAS_LONG_LONG.
+	* stabsread.c (LONG_LONG):  Replace usages with CC_HAS_LONG_LONG.
+	* value.h (struct value):  Replace usage of LONG_LONG with
+	CC_HAS_LONG_LONG.
+	* value.h (print_longest):  Add prototype.
+	* values.c (LONG_LONG):  Replace usages with CC_HAS_LONG_LONG.
+	* values.c (unpack_double):  Collapse code that was unnecessarily
+	dependent on CC_HAS_LONG_LONG.  Use LONGEST instead of direct types.
+	* values.c (value_from_longest):  Remove dependency on
+	CC_HAS_LONG_LONG and just use LONGEST.
+	* solib.c (solib_map_sections):  Use bfd_get_filename
+	to access filename field.
+	* solib.c (clear_solib):  Save filename and free it later, after
+	bfd_close, since bfd_close may reference it.  Use bfd_get_filename
+	to access the field.
+	* config/convex/xm-convex.h (LONG_LONG):  Replace with
+	CC_HAS_LONG_LONG.  Add define for PRINTF_HAS_LONG_LONG.
+	* doc/gdbint.texinfo (LONG_LONG):  Replace with CC_HAS_LONG_LONG.
+	Add PRINTF_HAS_LONG_LONG references.
+
 Wed Apr 28 06:11:38 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* inflow.c (kill_command), infcmd.c (attach_command),
