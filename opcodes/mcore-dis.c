@@ -126,7 +126,7 @@ print_insn_mcore (memaddr, info)
       break;
 
   if (op->name == 0)
-    fprintf (stream, ".word 0x%04x", inst);
+    fprintf (stream, ".short 0x%04x", inst);
   else
     {
       const char * name = grname[inst & 0x0F];
