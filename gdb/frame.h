@@ -411,6 +411,7 @@ struct frame_info
 
     /* This frame's ID.  Note that the frame's ID, base and PC contain
        redundant information.  */
+    int id_p;
     struct frame_id id;
 
     /* Pointers to the next (down, inner, younger) and previous (up,

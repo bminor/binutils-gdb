@@ -57,13 +57,19 @@ get_frame_id (struct frame_info *fi)
     {
       return null_frame_id;
     }
-  else
+  if (!fi->id_p)
     {
-      struct frame_id id;
-      id.base = fi->frame;
-      id.pc = fi->pc;
-      return id;
+      gdb_assert (!legacy_frame_p (current_gdbarch));
+      /* Find THIS frame's ID.  */
+      fi->unwind->this_id (fi->next, &fi->prologue_cache, &fi->id);
+      fi->id_p = 1;
+      /* FIXME: cagney/2002-12-18: Instead of this hack, should only
+	 store the frame ID in PREV_FRAME.  Unfortunatly, some
+	 architectures (HP/UX) still reply on EXTRA_FRAME_INFO and,
+	 hence, still poke at the "struct frame_info" object directly.  */
+      fi->frame = fi->id.base;
     }
+  return frame_id_build (fi->frame, fi->pc);
 }
 
 const struct frame_id null_frame_id; /* All zeros.  */
@@ -1038,6 +1044,9 @@ legacy_get_prev_frame (struct frame_info *this_frame)
      problem.  */
   prev->type = NORMAL_FRAME;
 
+  /* A legacy frame's ID is always computed here.  Mark it as valid.  */
+  prev->id_p = 1;
+
   /* Handle sentinel frame unwind as a special case.  */
   if (this_frame->level < 0)
     {
@@ -1546,24 +1555,7 @@ get_prev_frame (struct frame_info *this_frame)
   prev_frame->unwind = frame_unwind_find_by_pc (current_gdbarch,
 						prev_frame->pc);
 
-  /* Find the prev's frame's ID.  */
-
-  /* The callee expects to be invoked with:
-
-     this->unwind->this_id (this->next, &this->cache, &this->id);
-
-     The below is carefully shifted one frame `to the left' so that
-     both the unwind->this_id and unwind->prev_register methods are
-     consistently invoked with NEXT_FRAME and THIS_PROLOGUE_CACHE.
-       
-     Also note that, while the PC for this new previous frame was
-     unwound first (see above), the below is the first call that
-     [potentially] requires analysis of the new previous frame's
-     prologue.  Consequently, it is this call, that typically ends up
-     initializing the previous frame's prologue cache.  */
-  prev_frame->unwind->this_id (this_frame,
-			       &prev_frame->prologue_cache,
-			       &prev_frame->id);
+  /* The prev's frame's ID is computed by demand in get_frame_id().  */
 
   /* The unwound frame ID is validate at the start of this function,
      as part of the logic to decide if that frame should be further
@@ -1576,12 +1568,6 @@ get_prev_frame (struct frame_info *this_frame)
      trashed (which is one reason that "info frame" exists).  So,
      return 0 (indicating we don't know the address of the arglist) if
      we don't know what frame this frame calls.  */
-
-  /* FIXME: cagney/2002-12-18: Instead of this hack, should only store
-     the frame ID in PREV_FRAME.  Unfortunatly, some architectures
-     (HP/UX) still reply on EXTRA_FRAME_INFO and, hence, still poke at
-     the "struct frame_info" object directly.  */
-  prev_frame->frame = prev_frame->id.base;
 
   /* Link it in.  */
   this_frame->prev = prev_frame;
@@ -1624,6 +1610,12 @@ find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
 CORE_ADDR
 get_frame_base (struct frame_info *fi)
 {
+  if (!fi->id_p)
+    {
+      /* HACK: Force the ID code to (indirectly) initialize the
+         ->frame pointer.  */
+      get_frame_id (fi);
+    }
   return fi->frame;
 }
 

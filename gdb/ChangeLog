@@ -1,3 +1,11 @@
+2003-03-30  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (get_frame_base): Force ID initialization.
+	(get_prev_frame): Move computation of the frame ID from here ...
+	(get_frame_id): ... to here.
+	(legacy_get_prev_frame): Mark the frame ID as valid.
+	* frame.h (struct frame_info): Add field "id_p".
+
 2003-03-30  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_store_struct_return): Removed.
