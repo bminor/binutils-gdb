@@ -83,7 +83,7 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 #define END 4
 
 #define BYTE_F 127
-#define BYTE_B -128
+#define BYTE_B -126
 #define WORD_F 32767
 #define WORD_B 32768
 
@@ -452,7 +452,7 @@ get_operand (ptr, op, ispage)
   int mode;
   unsigned int num;
   unsigned int len;
-
+  op->page = 0;
   if (src[0] == '(' && src[1] == 'r')
     {
       /* This is a register list */
@@ -677,6 +677,12 @@ get_specific (opcode, operands)
 
 	    case SPDEC:
 	      if (user->type == RNDEC && user->reg == 7)
+		{
+		  continue;
+		}
+	      break;
+	    case SPINC:
+	      if (user->type == RNINC && user->reg == 7)
 		{
 		  continue;
 		}
