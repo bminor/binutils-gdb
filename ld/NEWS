@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.16:
+
 * Support for the R_ARM_V4BX relocation as defined in the ARM AAELF
   specification has been added via the --fix-v4bx command-line option.
 

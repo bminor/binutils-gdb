@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.16:
+
 * Redefinition of macros now results in an error.
 
 * New command line option -mhint.b=[ok|warning|error] for IA64 targets.

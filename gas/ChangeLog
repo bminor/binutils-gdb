@@ -1,3 +1,7 @@
+2005-03-15  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Add cutoff for changes in 2.16 release.
+
 2005-03-15  Jan Beulich  <jbeulich@novell.com>
 
 	* expr.c (operand): Merge handling of unary + into that for unary
