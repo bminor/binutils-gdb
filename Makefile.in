@@ -28,18 +28,18 @@ all:
 subdir_do: force
 	for i in $(DODIRS); \
 	  do \
-	if [ -d $(srcdir)/$$i -o -d $(srcdir)/$$i.$(target) ] ; then \
-	    if (cd $(srcdir)/$$i`if [ -d $(srcdir)/$$i.$(target) ] ; \
-		then echo .$(target) ; fi`$(subdir); \
-		$(MAKE) \
-		    "destdir=$(destdir)" \
-		    "AR=$(AR)" \
-		    "AR_FLAGS=$(AR_FLAGS)" \
-		    "RANLIB=$(RANLIB)" $(DO)) ; \
-	    then true ; \
-	    else exit 1 ; \
-	    fi ;\
-	fi ; \
+	    if [ -d $(srcdir)/$$i -o -d $(srcdir)/$$i.$(target) ] ; then \
+	      if (cd $(srcdir)/$$i`if [ -d $(srcdir)/$$i.$(target) ] ; \
+		  then echo .$(target) ; fi`$(subdir); \
+		  $(MAKE) \
+		      "destdir=$(destdir)" \
+		      "AR=$(AR)" \
+		      "AR_FLAGS=$(AR_FLAGS)" \
+		      "RANLIB=$(RANLIB)" $(DO)) ; \
+	      then true ; \
+	      else exit 1 ; \
+	      fi ;\
+	    else true; fi ; \
 	  done
 
 bootstrap:
@@ -132,7 +132,10 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 
 #
 # $Log$
-# Revision 1.13  1991/05/27 23:03:20  rich
+# Revision 1.14  1991/05/31 12:34:55  gnu
+# Avoid error stop from Make if a directory doesn't exist during subdir_do.
+#
+# Revision 1.13  1991/05/27  23:03:20  rich
 # Put gcc/gstdarg.h where gas can find it; gas/stdarg.h.
 #
 # Revision 1.12  1991/05/19  00:36:44  rich
