@@ -1,3 +1,7 @@
+2002-01-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Releasing GDB): New chapter.
+
 2002-01-14  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb.texinfo (Embedded Processors, Calling program functions):

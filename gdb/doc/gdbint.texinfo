@@ -93,6 +93,7 @@ as the mechanisms that adapt @value{GDBN} to specific hosts and targets.
 * Support Libraries::
 * Coding::
 * Porting GDB::
+* Releasing GDB::
 * Testsuite::
 * Hints::
 * Index::
@@ -4820,6 +4821,190 @@ distribution, generate @file{gdb-all.texinfo} locally, and include the
 files @file{gdb.info*} in the distribution.  Note the plural;
 @code{makeinfo} will split the document into one overall file and five
 or so included files.
+
+@node Releasing GDB
+
+@chapter Releasing @value{GDBN}
+@cindex making a new release of gdb
+
+@section Before the branch
+
+The most important objective at this stage is to find and fix simple
+changes that become a pain to track once the branch is created.  For
+instance, configuration problems that stop @value{GDBN} from even
+building.  If you can't get the problem fixed, document it in the
+@file{PROBLEMS} file.
+
+@subheading Obsolete any code
+
+Mark as @kbd{OBSOLETE} any uninteresting targets or code files.  This
+has a number of steps and is slow --- mainly to ensure that people have
+had a reasonable chance to respond.  Remember, everything on the
+internet takes a week.
+
+@itemize @bullet
+@item
+announce the change on @email{gdb@@sources.redhat.com, GDB mailing list}
+@item
+wait a week
+@item
+announce the change on @email{gdb-announce@@sources.redhat.com, GDB
+Announcement mailing list}
+@item
+wait a week or so
+@item
+post / commit the change
+@end itemize
+
+@subheading Refresh any imported files.
+
+A number of files are taken from external repositories.  They include:
+
+@itemize @bullet
+@item
+@file{texinfo/texinfo.tex}
+@item
+@file{config.guess} et.@: al.@: 
+@end itemize
+
+and should be refreshed.
+
+@subheading Organize and announce the schedule.
+
+The following is a possible schedule.  It is based on the rule-of-thumb
+that everything on the Internet takes a week.  You may want to even
+increase those times further since an analysis of the actual data
+strongly suggests that the below is far to aggressive.
+
+@itemize @bullet
+@item
+announce it
+@item
+wait a week
+@item
+announce branch date
+@item
+wait a week
+@item
+Cut the branch
+@item
+wait a week
+@item
+start enjoying all the fun
+@end itemize
+
+As an aside, the branch tag name is probably regrettable vis:
+@file{gdb_N_M-YYYY-MM-DD-@{branch,branchpoint@}}.
+
+
+@section Building a Release
+
+@subheading Establish a few defaults.
+
+@example
+$  b=gdb_5_1_0_1-2002-01-03-branch
+$  v=5.1.0.1
+$  cd /sourceware/snapshot-tmp/gdbadmin-tmp/$b
+$  which autoconf
+/home/gdbadmin/bin/autoconf
+@end example
+
+NB: Check the autoconf version carefully.  You want to be using
+@file{gdbadmin}'s version (which is really the version taken from the
+binutils snapshot).  SWARE may have a different version installed.
+
+@subheading Check out the relevant modules:
+
+@example
+$  for m in gdb insight dejagnu; do
+( mkdir -p $m && cd $m && cvs -q -f -d /cvs/src co -P -r $b $m )
+done
+@end example
+
+NB: The reading of @file{.cvsrc} is disabled (@file{-f}) so that there
+isn't any confusion between what is written here and what CVS really
+does.
+
+@subheading Update the file @file{gdb/version.in} where applicable.
+
+@example
+$ for m in gdb insight; do echo $v > $m/src/gdb/version.in ; done
+@end example
+
+
+@subheading Mutter something about creating a @file{ChangeLog} entry. (both trunk and branch).
+
+@example
+$  emacs gdb/src/gdb/version.in
+c-x 4 a
+Bump version to 5.1.0.1.
+c-x c-s c-x c-c
+@end example
+
+ditto for @file{insight/src/gdb/version.in}
+
+@subheading Mutter something about updating @file{README}
+
+For dejagnu, edit @file{dejagnu/src/dejagnu/configure.in} and set it to
+gdb-$v and then regenerate configure.  Mention this in the dejagnu
+@file{ChangeLog}.
+
+@example
+$  emacs dejagnu/src/dejagnu/configure.in
+...
+c-x 4 a
+Bump version to 5.1.0.1.
+* configure: Re-generate.
+c-x c-s c-x c-c
+$  ( cd dejagnu/src/dejagnu && autoconf )
+@end example
+
+@subheading Build the snapshot:
+
+@example
+$  for m in gdb insight dejagnu; do
+( cd $m/src && gmake -f Makefile.in $m.tar.bz2 )
+done
+@end example
+
+@subheading Do another @kpd{CVS update} to see what the damage is.
+
+@example
+$ ( cd gdb/src && cvs -q update )
+@end example
+
+You're looking for files that have mysteriously disappeared as the
+@kbd{distclean} has the habit of deleting files it shouldn't.  Watch out
+for the @file{version.in} update cronjob.
+
+@subheading Copy all the @file{.bz2} files to the ftp directory:
+
+@example
+cp */src/*.bz2 ~ftp/.....
+@end example
+
+@subheading Something about @kbd{gzip}'ing them.
+
+@subheading Something about web pages?
+
+@subheading Something about documentation?
+
+@subheading Cleanup the release tree
+
+In particular you'll need to:
+
+@itemize @bullet
+@item
+Commit the changes to @file{ChangeLog} and @file{version.in}
+@item
+Tag the repository.
+@end itemize
+
+
+@section After the release
+
+Remove any @kbd{OBSOLETE} code.
+
 
 @node Testsuite
 
