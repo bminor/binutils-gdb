@@ -1,3 +1,7 @@
+Mon Dec  6 11:49:03 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* config/tc-h8300.c (md_assemble): Don't update input_line_pointer.
+
 Mon Dec  6 11:20:02 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/obj-som.[ch] (obj_read_begin_hook): Remove last change.
