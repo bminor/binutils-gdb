@@ -120,6 +120,11 @@ case "${target}" in
   sparc64-*-*)
 	sim_target=none # Don't build erc32 if sparc64.
 	;;
+  sparclite*-*-* | sparc86x*-*-*)
+	# The SPARC simulator can only be compiled by gcc.
+	sim_target=erc32
+	only_if_gcc=yes
+	;;
   sparc*-*-*)
 	# The SPARC simulator can only be compiled by gcc.
 	sim_target=erc32
