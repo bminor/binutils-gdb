@@ -2402,6 +2402,26 @@ ppc64_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   return TRUE;
 }
 
+/* Add extra PPC sections.  */
+
+static struct bfd_elf_special_section const ppc64_elf_special_sections[]=
+{
+  { ".sdata",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
+  { ".sbss",		0,	NULL,	0,
+    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE },
+  { ".plt",		0,	NULL,	0,
+    SHT_NOBITS,		0 },
+  { ".toc",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
+  { ".toc1",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
+  { ".tocbss",		0,	NULL,	0,
+    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE },
+  { NULL,		0,	NULL,	0,
+    0,			0 }
+};
+
 struct _ppc64_elf_section_data
 {
   struct bfd_elf_section_data elf;
@@ -2580,7 +2600,18 @@ struct plt_entry
 /* If ELIMINATE_COPY_RELOCS is non-zero, the linker will try to avoid
    copying dynamic variables from a shared lib into an app's dynbss
    section, and instead use a dynamic relocation to point into the
-   shared lib.  */
+   shared lib.  With code that gcc generates, it's vital that this be
+   enabled;  In the PowerPC64 ABI, the address of a function is actually
+   the address of a function descriptor, which resides in the .opd
+   section.  gcc uses the descriptor directly rather than going via the
+   GOT as some other ABI's do, which means that initialized function
+   pointers must reference the descriptor.  Thus, a function pointer
+   initialized to the address of a function in a shared library will
+   either require a copy reloc, or a dynamic reloc.  Using a copy reloc
+   redefines the function desctriptor symbol to point to the copy.  This
+   presents a problem as a plt entry for that function is also
+   initialized from the function descriptor symbol and the copy reloc
+   may not be initialized first.  */
 #define ELIMINATE_COPY_RELOCS 1
 
 /* Section name for stubs is the associated section name plus this
@@ -4500,9 +4531,6 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       return TRUE;
     }
 
-  /* This is a reference to a symbol defined by a dynamic object which
-     is not a function.  */
-
   /* If we are creating a shared library, we must presume that the
      only references to the symbol are via the global offset table.
      For such cases we need not do anything here; the relocations will
@@ -4536,6 +4564,12 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	  return TRUE;
 	}
     }
+
+  if (h->plt.plist != NULL)
+    return TRUE;
+
+  /* This is a reference to a symbol defined by a dynamic object which
+     is not a function.  */
 
   /* We must allocate the symbol in our .dynbss section, which will
      become part of the .bss section of the executable.  There will be
@@ -8761,38 +8795,5 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 
   return TRUE;
 }
-
-/* Add extra PPC sections -- Note, for now, make .sbss2 and
-   .PPC.EMB.sbss0 a normal section, and not a bss section so
-   that the linker doesn't crater when trying to make more than
-   2 sections.  */
-
-static struct bfd_elf_special_section const ppc64_elf_special_sections[]=
-{
-  { ".tags",		0,	NULL,	0,
-    SHT_ORDERED,	SHF_ALLOC },
-  { ".sdata",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
-  { ".sbss",		0,	NULL,	0,
-    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE },
-  { ".sdata2",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC },
-  { ".sbss2",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC },
-  { ".PPC.EMB.apuinfo",	0,	NULL,	0,
-    SHT_NOTE,		0 },
-  { ".PPC.EMB.sdata0",	0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC },
-  { ".PPC.EMB.sbss0",	0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC },
-  { ".plt",		0,	NULL,	0,
-    SHT_NOBITS,		0 },
-  { ".toc",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
-  { ".tocbss",		0,	NULL,	0,
-    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE },
-  { NULL,		0,	NULL,	0,
-    0,			0 }
-};
 
 #include "elf64-target.h"

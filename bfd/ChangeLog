@@ -1,3 +1,11 @@
+2003-07-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Ensure no copy relocs
+	on function descriptors.
+	(ELIMINATE_COPY_RELOCS): Expand comment.
+	(ppc64_elf_special_sections): Move.  Don't include non-ppc64 sections.
+	Do include ".toc1".
+
 2003-07-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (_bfd_elf_new_section_hook): Set the default section
