@@ -130,7 +130,7 @@
 
 
 // Helper:
-// 
+//
 // Check that an access to a HI/LO register meets timing requirements
 //
 // The following requirements exist:
@@ -148,7 +148,7 @@
       sim_engine_abort (SD, CPU, CIA, "HILO: %s: %s at 0x%08lx too close to MF at 0x%08lx\n",
 			itable[MY_INDEX].name,
 			new, (long) CIA,
-			(long) history->mf.cia);      
+			(long) history->mf.cia);
       return 0;
     }
   return 1;
@@ -206,7 +206,7 @@
 			itable[MY_INDEX].name,
 			(long) CIA,
 			(long) history->op.cia,
-			(long) peer->mt.cia);      
+			(long) peer->mt.cia);
       ok = 0;
     }
   history->mf.timestamp = time;
@@ -272,7 +272,7 @@
 
 
 // Helper:
-// 
+//
 // Check that the 64-bit instruction can currently be used, and signal
 // an ReservedInstruction exception if not.
 //
@@ -834,7 +834,7 @@
 
   else
     {
-      /* If we get this far, we're not an instruction reserved by the sim.  Raise 
+      /* If we get this far, we're not an instruction reserved by the sim.  Raise
 	 the exception. */
       SignalException(BreakPoint, instruction_0);
     }
@@ -1100,7 +1100,7 @@
   unsigned64 op2 = GPR[rt];
   check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
-  /* make signed multiply unsigned */ 
+  /* make signed multiply unsigned */
   sign = 0;
   if (signed_p)
     {
@@ -3036,13 +3036,13 @@
 }
 
 // Helper:
-// 
+//
 // Check that the FPU is currently usable, and signal a CoProcessorUnusable
 // exception if not.
 //
 
 :function:::void:check_fpu:
-*mipsI: 
+*mipsI:
 *mipsII:
 *mipsIII:
 *mipsIV:
@@ -3484,7 +3484,7 @@
       else
 	{
 	  if (STATE_VERBOSE_P(SD))
-	    sim_io_eprintf (SD, 
+	    sim_io_eprintf (SD,
 	      "Warning: PC 0x%lx: semantic_DMxC1_COP1Sa 32-bit use of odd FPR number\n",
 	      (long) CIA);
 	  PENDING_FILL(RT,SET64HI(0xDEADC0DE) | 0xBAD0BAD0);
@@ -3517,7 +3517,7 @@
       else
 	{
 	  if (STATE_VERBOSE_P(SD))
-	    sim_io_eprintf (SD, 
+	    sim_io_eprintf (SD,
 	      "Warning: PC 0x%lx: DMxC1 32-bit use of odd FPR number\n",
 			    (long) CIA);
 	  GPR[RT] = SET64HI (0xDEADC0DE) | 0xBAD0BAD0;
@@ -3595,7 +3595,7 @@
 
 
 
-110001,5.BASE,5.FT,16.OFFSET:COP1:32,f::LWC1 
+110001,5.BASE,5.FT,16.OFFSET:COP1:32,f::LWC1
 "lwc1 f<FT>, <OFFSET>(r<BASE>)"
 *mipsI:
 *mipsII:
@@ -3667,7 +3667,7 @@
       if (SizeFGR() == 64)
 	{
 	  if (STATE_VERBOSE_P(SD))
-	    sim_io_eprintf (SD, 
+	    sim_io_eprintf (SD,
 			    "Warning:  PC 0x%lx: MTC1 not DMTC1 with 64 bit regs\n",
 			    (long) CIA);
 	  PENDING_FILL ((FS + FGRIDX), (SET64HI(0xDEADC0DE) | VL4_8(GPR[RT])));
