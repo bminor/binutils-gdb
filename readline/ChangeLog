@@ -1,3 +1,8 @@
+Tue Apr 21 11:54:23 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: rework CFLAGS so that they can be set on the
+	  command line to make.  Remove MINUS_G.  Default CFLAGS to -g.
+
 Fri Apr 10 23:02:27 1992  Fred Fish  (fnf@cygnus.com)
 
 	* configure.in:  Recognize new ncr3000 config.
