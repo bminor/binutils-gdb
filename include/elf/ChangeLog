@@ -1,3 +1,9 @@
+start-sanitize-r5900
+Thu Jul 23 23:28:08 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mips.h (R_MIPS16_S3): Change to a higher value.
+
+end-sanitize-r5900
 Wed Jul 22 19:29:00 Catherine Moore  <clm@cygnus.com>
 
         * arm.h: Rename relocations.

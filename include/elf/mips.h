@@ -65,14 +65,14 @@ START_RELOC_NUMBERS (elf_mips_reloc_type)
   RELOC_NUMBER (R_MIPS_HIGHEST, 29)
   RELOC_NUMBER (R_MIPS_CALL_HI16, 30)
   RELOC_NUMBER (R_MIPS_CALL_LO16, 31)
-/* start-sanitize-r5900 */
-  /* This is used by a mips co-processor instruction.  */
-  RELOC_NUMBER (R_MIPS15_S3, 32)
-/* end-sanitize-r5900 */
   RELOC_NUMBER (R_MIPS_max, 33)
   /* These relocs are used for the mips16.  */
   RELOC_NUMBER (R_MIPS16_26, 100)
   RELOC_NUMBER (R_MIPS16_GPREL, 101)
+/* start-sanitize-r5900 */
+  /* This is used by a mips co-processor instruction.  */
+  RELOC_NUMBER (R_MIPS15_S3, 119)
+/* end-sanitize-r5900 */
 /* start-sanitize-sky */
   /* These relocs are for the dvp.  */
   RELOC_NUMBER (R_MIPS_DVP_11_PCREL, 120)
