@@ -894,6 +894,7 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
   if (deprecated_target_new_objfile_hook)
     deprecated_target_new_objfile_hook (objfile);
 
+  bfd_cache_close_all ();
   return (objfile);
 }
 

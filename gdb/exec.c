@@ -270,6 +270,7 @@ exec_file_attach (char *filename, int from_tty)
       if (deprecated_exec_file_display_hook)
 	(*deprecated_exec_file_display_hook) (filename);
     }
+  bfd_cache_close_all ();
 }
 
 /*  Process the first arg in ARGS as the new exec file.

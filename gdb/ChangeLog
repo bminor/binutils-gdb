@@ -1,3 +1,9 @@
+2004-07-30  Jerome Guitton  <guitton@gnat.com>
+
+	* inflow.c (kill_command): release file handles in BFD.
+	* exec.c (exec_file_attach): Ditto.
+	* symfile.c (symbol_file_add_with_addrs_or_offsets): Ditto.
+
 2004-07-29  Andrew Cagney  <cagney@gnu.org>
 
 	* PROBLEMS (mips-irix): Note that it is broken.

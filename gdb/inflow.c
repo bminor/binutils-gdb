@@ -597,6 +597,7 @@ kill_command (char *arg, int from_tty)
       else
 	print_stack_frame (get_selected_frame (), 1, SRC_AND_LOC);
     }
+  bfd_cache_close_all ();
 }
 
 /* Call set_sigint_trap when you need to pass a signal on to an attached
