@@ -37,8 +37,8 @@ Disassembly of section \.data:
 			10630: R_FRV_32	\.data
 
 00010634 <GD0>:
-   10634:	00 00 00 00 	add\.p gr0,gr0,gr0
-			10634: R_FRV_FUNCDESC	GFb
+   10634:	00 00 00 04 	add\.p gr0,gr4,gr0
+			10634: R_FRV_FUNCDESC	\.text
    10638:	00 00 00 04 	add\.p gr0,gr4,gr0
 			10638: R_FRV_32	\.text
 Disassembly of section \.got:
@@ -56,12 +56,14 @@ Disassembly of section \.got:
 
 000106d0 <_GLOBAL_OFFSET_TABLE_>:
 	\.\.\.
-			106dc: R_FRV_FUNCDESC	GF4
+   106dc:	00 00 00 04 	add\.p gr0,gr4,gr0
+			106dc: R_FRV_FUNCDESC	\.text
    106e0:	00 00 00 04 	add\.p gr0,gr4,gr0
 			106e0: R_FRV_32	\.text
-	\.\.\.
-			106e4: R_FRV_FUNCDESC	GF6
-			106e8: R_FRV_FUNCDESC	GF5
+   106e4:	00 00 00 04 	add\.p gr0,gr4,gr0
+			106e4: R_FRV_FUNCDESC	\.text
+   106e8:	00 00 00 04 	add\.p gr0,gr4,gr0
+			106e8: R_FRV_FUNCDESC	\.text
    106ec:	00 00 00 04 	add\.p gr0,gr4,gr0
 			106ec: R_FRV_32	\.data
    106f0:	00 00 00 04 	add\.p gr0,gr4,gr0

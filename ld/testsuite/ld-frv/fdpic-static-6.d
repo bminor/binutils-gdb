@@ -1,4 +1,4 @@
-#name: FRV uClinux PIC relocs to undefined symbols, static linking
+#name: FRV uClinux PIC relocs to weak undefined symbols, static linking
 #source: fdpic6.s
 #objdump: -D
 #as: -mfdpic
