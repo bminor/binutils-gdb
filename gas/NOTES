@@ -24,10 +24,11 @@ New environments: ???
 
 DOCUMENTATION:
 
-The internals of gas need documenting.
+The internals of gas need documenting.  (Actually, there is some documentation
+in doc/as.texinfo, but it's *way* out of date.)
 
-Roland's going to work on removing the m4 processing from the user
-documentation.  With the latest texinfo code, it's not needed.
+The documentation should also contain a "Trouble" section similar to gcc's
+manual: real bugs, common problems, incompatibilities, etc.
 
 Anyone want to offer to maintain a man page?
 
