@@ -117,13 +117,13 @@ Tue Mar 28 18:28:40 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* remote.c (remote_threads_extra_info): Replace qfThreadExtraInfo
  	with qThreadExtraInfo.
 
-2000-03-29  J.T. Conklin  <jtc@redback.com>
-
-	* i386nbsd-nat.c (fetch_core_registers): Make static.
-
-	* m68knbsd-nat.c (fetch_core_registers): Make static.
-	(m68knbsd_core_fns, _initialize_m68knbsd_nat): Added.
-
+2000-03-29  J.T. Conklin  <jtc@redback.com> 
+ 
+	* i386nbsd-nat.c (fetch_core_registers): Make static. 
+ 
+	* m68knbsd-nat.c (fetch_core_registers): Make static. 
+	(m68knbsd_core_fns, _initialize_m68knbsd_nat): Added. 
+ 
 Wed Mar 29 13:40:40 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO: Update GDB 5 status.
@@ -150,8 +150,8 @@ Wed Mar 29 10:16:35 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* procfs.c (proc_set_watchpoint):  Declare addr parameter as
 	CORE_ADDR, to match call from procfs_set_watchpoint.
 
-	* breakpoint.c (insert_breakpoints, do_enable_breakpoint):
-	Reselect the saved frame silently after frame selection for
+	* breakpoint.c (insert_breakpoints, do_enable_breakpoint):  
+	Reselect the saved frame silently after frame selection for 
 	watchpoint evaluation.
 	(insert_breakpoints):  Add missing space in `Hardware watchpoint
 	deleted' message.  Do not reinsert hardware watchpoint if it is
@@ -206,7 +206,7 @@ Tue Mar 28 09:59:00 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* acconfig.h: Fix typo in comment describing HAVE_PTRACE_GETREGS.
 	* config.h: Regenerate.
-
+	
 Mon Mar 27 19:53:29 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO: Update.  Add criteria for next release of GDB.
@@ -292,13 +292,13 @@ Sat Mar 25 18:51:50 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* config/tm-cygwin.h: Eliminate special frame handling.  Just use
 	normal i386 handling.
 
-2000-03-24  J.T. Conklin  <jtc@redback.com>
-
-	* i386/tm-nbsd.h (USE_STRUCT_CONVENTION): Define.
-	* i386nbsd-nat.c (i386nbsd_use_struct_convention): New function.
-	(fetch_core_registers): Read fp registers.
-	(i386nbsd_core_fns, _initialize_i386nbsd_nat): Added.
-
+2000-03-24  J.T. Conklin  <jtc@redback.com> 
+ 
+	* i386/tm-nbsd.h (USE_STRUCT_CONVENTION): Define. 
+	* i386nbsd-nat.c (i386nbsd_use_struct_convention): New function. 
+	(fetch_core_registers): Read fp registers. 
+	(i386nbsd_core_fns, _initialize_i386nbsd_nat): Added. 
+ 
 2000-03-24  Jonathan Larmour  <jlarmour@redhat.co.uk>
 
 	* arm-tdep.c (thumb_skip_prologue): Take function end addr argument
@@ -329,11 +329,11 @@ Thu Mar 23 13:18:26 2000  Philippe De Muyter  <phdm@macqel.be>
  	`moveml to (fp + displacement)'.
 	* m68/tm-delta68.h (IN_SIGTRAMP): New macro.
 	(FRAME_SAVED_PC, FRAME_ARGS_ADDRESS): Ditto.
-
+	
 Fri Mar 24 13:44:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	* MAINTAINERS: Add Fernando Nasser to testsuite maintainers.
-
+	* MAINTAINERS: Add Fernando Nasser to testsuite maintainers. 
+	
 2000-03-23  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* solib.c (open_symbol_file_object): To sneak an int argument
@@ -354,12 +354,12 @@ Fri Mar 24 13:44:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	deprecated, warns user if appropriate.
 	(add_info), (add_info_alias), (add_com) , (add_com_alias): Changed
 	return values from void to struct cmd_list_element *.
-	* command.c (lookup_cmd_1): Check aliases before following link
+	* command.c (lookup_cmd_1): Check aliases before following link 
 	in case user needs to be warned about a deprecated alias.
 	(deprecate_cmd): new exported function for command deprecation,
 	sets flags and posibly a replacement string.
 	(deprecated_cmd_warning): New exported funciton to warn user about
-	a deprecated command.
+	a deprecated command. 
 	(lookup_cmd_composition): New exported function that determines
 	alias, prefix_command, and cmd based on a string.  This is useful
 	is we want to full name of a command.
@@ -443,17 +443,17 @@ Wed Mar 22 15:09:34 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (CONFIG_INITS): Do not append remote-nrom.c
 
-2000-03-21  J.T. Conklin  <jtc@redback.com>
-
-        * i386/nbsd.mh (NATDEPFILES): Change i386b-nat.o to i386nbsd-nat.o.
-        * i386nbsd-nat.c: New file.
-
-        * i386/tm-nbsd.h (NUM_REGS): Removed.
-        (HAVE_I387_REGS): Defined.
-        * i386/nm-nbsd.h (FLOAT_INFO): Removed.
-
-        * tm-nbsd.h (IN_SOLIB_CALL_TRAMPOLINE): Define if not
-        SVR4_SHARED_LIBS.
+2000-03-21  J.T. Conklin  <jtc@redback.com> 
+ 
+        * i386/nbsd.mh (NATDEPFILES): Change i386b-nat.o to i386nbsd-nat.o. 
+        * i386nbsd-nat.c: New file. 
+ 
+        * i386/tm-nbsd.h (NUM_REGS): Removed. 
+        (HAVE_I387_REGS): Defined. 
+        * i386/nm-nbsd.h (FLOAT_INFO): Removed. 
+ 
+        * tm-nbsd.h (IN_SOLIB_CALL_TRAMPOLINE): Define if not 
+        SVR4_SHARED_LIBS. 
 
 Wed Mar 22 11:18:59 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -504,7 +504,7 @@ Wed Mar 22 11:18:59 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	(bpstat_stop_status, can_use_hardware_watchpoint): Don't insert,
 	remove, or check status of hardware watchpoints for entire structs
 	and arrays unless the user explicitly asked to watch that struct
-	or array.
+	or array.  
 	(insert_breakpoints): Try to insert watchpoints for all the values
 	on the value chain, even if some of them fail to insert.
 
@@ -517,7 +517,7 @@ Wed Mar 22 11:18:59 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	Implement the extra thread info query for "info threads".
 	(remote_threads_info): Clean up a bit.
 	(use_threadinfo_query, use_threadextra_query): New variables.
-	Control whether GDB will use the new or old protocol for
+	Control whether GDB will use the new or old protocol for 
 	thread info queries.
 	(remote_open_1): Initialize new variables.
 	(remote_async_open_1): Ditto.
@@ -662,7 +662,7 @@ Fri Mar 17 11:06:59 2000  Philippe De Muyter  <phdm@macqel.be>
 	* config/i386/tm-linux.h (I386_LINUX_SIGTRAMP): No need to define
 	this any more, since we're not enabling OS-specific code in a
 	OS-independent file.
-
+	
 2000-03-16  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* Makefile.in (go32-nat.o): Add prerequisites.
@@ -700,7 +700,7 @@ Fri Mar 17 11:06:59 2000  Philippe De Muyter  <phdm@macqel.be>
 
 	* solib.c (special_symbol_handling): Delete argument; it's not
 	used.
-
+	
 	Changes from Peter Schauer <pes@regent.e-technik.tu-muenchen.de>:
 
 	* solib.c (SOLIB_EXTRACT_ADDRESS):  New macro to extract addresses
@@ -738,27 +738,27 @@ Mon Mar 13 21:21:41 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 2000-03-13  James Ingham  <jingham@leda.cygnus.com>
 
-	Add support for a variable object that tries to evaluate itself in
+	Add support for a variable object that tries to evaluate itself in 
 	the currently selected frame, rather than in a fixed frame.
-
+	
 	* wrapper.c,h (gdb_parse_exp_1): Added a wrapper for
  	gdb_parse_exp_1.
-	* varobj.h: Added USE_CURRENT_FRAME to varobj_type & changed def'n
+	* varobj.h: Added USE_CURRENT_FRAME to varobj_type & changed def'n 
 	of varobj_create.
 	* varobj.c (varobj_list): Return type indicates whether the
 	variable's type has changed (for current frame variables).
 	(varobj_update): Handle the case where the variable's type has
 	changed.
-	(delete_variable_1): Allow for deletion of variables that have not
+	(delete_variable_1): Allow for deletion of variables that have not 
 	been installed yet.
 	(new_root_variable): Initialize use_selected_frame variable.
-	(value_of_root): This is where most of the work to handle "current
+	(value_of_root): This is where most of the work to handle "current 
 	frame" variables was added.  Most of the complexity involves
 	handling the case where the type of the variable has changed.
 	(varobj_create): Add a "type" argument, to tell if the
 	variable is one of these "current frame" variables.  Also protect
 	call to parse_exp_1 from long jumping.
-
+	
 2000-03-13  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* go32-nat.c (struct env387): Remove declaration.
@@ -807,7 +807,7 @@ Mon Mar 13 18:54:42 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbtypes.c (rank_one_type): Add comment on how to eliminate the
  	#ifdef DEBUG_OLOAD.
-
+	
 2000-03-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* gnu-nat.c: Fix the formatting where indent misinterpreted `&' as
@@ -1009,7 +1009,7 @@ Sat Mar  4 10:57:25 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	other function typedefs.  Document as not be used out side of
  	make_cleanup code. Use in make_cleanup declarations.
 	(null_cleanup): Replace PTR with void*.
-
+	
 	* utils.c (make_cleanup, make_final_cleanup, make_run_cleanup,
  	make_exec_cleanup, make_exec_error_cleanup, make_my_cleanup,
  	null_cleanup): Change K&R definition to ISO-C using void* and
@@ -1034,7 +1034,7 @@ Fri Mar  3 15:39:34 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	(all-gdbtk, clean-gdbtk): New targets.
 	(all): Add CONFIG_ALL as dependency.
 	(clean): Add CONFIG_CLEAN as dependency.
-
+	
 	* configure.in (CONFIG_ALL, CONFIG_CLEAN): Define.
 	(LN_S): Define.  Delete GDBtk's link code.
 
@@ -1074,7 +1074,7 @@ Fri Mar  3 13:12:34 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 Thu Mar  2 09:04:46 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	* MAINTAINERS: Daniel Berlin is C++ maintainer.
+	* MAINTAINERS: Daniel Berlin is C++ maintainer.		
 
 Thu Mar  2 08:55:35 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -1084,10 +1084,10 @@ Thu Mar  2 08:55:35 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	Solaris/x86.
 
 Wed Mar  1 22:12:35 2000  Andrew Cagney  <cagney@b1.cygnus.com>
-
+	
 	From Wed 23 Feb 2000 Fernando Nasser <fnasser@redhat.com>:
 	* remote-sim.c (gdbsim_close): Call generic_mourn_inferior.
-	* remote-rdi.c (arm_rdi_close): Ditto.
+	* remote-rdi.c (arm_rdi_close): Ditto. 
 
 Wed Mar  1 19:31:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -1183,10 +1183,10 @@ Tue Feb 29 15:14:56 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	as in the Linux kernel.  Modified prototype to get rid of
 	unused parameters.
 	(store_nw_fpe_*): Renamed to store_nwfpe_* to use the same
-	naming convention as in the Linux kernel.  Fixed calls to
+	naming convention as in the Linux kernel.  Fixed calls to 
 	fetch_nwfpe_*.
 	(store_fpregs): Fixed calls to store_nwfpe_*.  Removed
-	unused variable.
+	unused variable. 
 
 Mon Feb 28 18:24:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -1298,7 +1298,7 @@ Thu Feb 24 18:42:15 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* configure.in (CONFIG_INSTALL, CONFIG_UNINSTALL): Set to
  	$(SUBDIR_*_INSTALL) when so configured.
 	* configure: Regenerate.
-
+	
 	* Makefile.in (CONFIG_INSTALL, CONFIG_UNINSTALL): Define using
  	configure.
 	(install-only): Add dependency on $(CONFIG_INSTALL).  Delete code
@@ -1312,7 +1312,7 @@ Thu Feb 24 18:19:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (SUBDIR_MI_CFLAGS): Fix typo, wrong brace.
 	* configure: Regenerate.
-
+	
 2000-02-24  Christopher Faylor  <cgf@cygnus.com>
 
 	* configure.tgt: Add arm, mips, sh wince targets.
@@ -1366,7 +1366,7 @@ Mon Feb 21 13:57:27 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	interface.
 
 	* configure: Regenerate.
-
+	
 	* Makefile.in (SUBDIR_MI_OBS, SUBDIR_MI_SRCS, SUBDIR_MI_DEPS,
  	SUBDIR_MI_INITS, SUBDIR_MI_LDFLAGS, SUBDIR_MI_CFLAGS): New macros.
 	(CONFIG_OBS, CONFIG_SRCS, CONFIG_DEPS, CONFIG_INITS,
@@ -1487,7 +1487,7 @@ Mon Feb 21 11:03:01 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	Andrew Cagney, Elena Zannoni and Fernando Nasser; Web pages - Jim
  	Kingdon.
 	* MAINTAINERS: Add Nick Clifton to write after approval list.
-
+	
 Mon Feb 21 10:30:39 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Add note on multiple maintainers.
@@ -1584,7 +1584,7 @@ Wed Feb 16 19:00:02 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	code to also handle the PowerOpen ABI.
 	(ppc_push_return_address): Enable for all ports.
 	* config/powerpc/tm-ppc-aix.h (USE_GENERIC_DUMMY_FRAMES,
-	PUSH_DUMMY_FRAME, PUSH_RETURN_ADDRESS, GET_SAVED_REGISTER,
+	PUSH_DUMMY_FRAME, PUSH_RETURN_ADDRESS, GET_SAVED_REGISTER, 
 	CALL_DUMMY_BREAKPOINT_OFFSET, CALL_DUMMY_LOCATION,
 	CALL_DUMMY_ADDRESS, CALL_DUMMY_START_OFFSET): Override defaults
 	provided by generic RS6000 definitions so that call dummies
@@ -1607,7 +1607,7 @@ Wed Feb 16 19:00:02 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 2000-02-15  Jesper Skov  <jskov@cygnus.co.uk>
 
 	Patch applied by Kevin Buettner <kevinb@redhat.com>
-
+	
 	* rs6000-tdep.c (skip_prologue): skip copying of argument
 	registers to local variable registers.
 
@@ -1648,7 +1648,7 @@ Mon Feb 14 15:20:26 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* configure.tgt (i[3456]86-*-netbsd*): add gdbserver to
  	configdirs.
 	* gdbserver/low-nbsd.c: New file.
-
+	
 	* gdbserver/Makefile.in: convert to autoconf.
 	* gdbserver/configure.in: likewise.
 	* gdbserver/configure: generate.
@@ -1854,7 +1854,7 @@ Tue Feb  1 00:17:12 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* ui-file.c, ui-file.h: Rename gdb-file.h, gdb-file.c.  Rename
  	``struct gdb_file'' to ``struct ui_file''.  Delete typedef
  	GDB_FILE.
-
+	
 	* Makefile.in: Update.
 
 	* ax-gdb.c, ax-general.c, ax.h, buildsym.c, c-lang.c, c-lang.h,
@@ -1915,7 +1915,7 @@ Mon Jan 31 17:14:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	tui_file_get_strbuf, tui_file_adjust_strbuf, tui_file_flush,
 	fputs_unfiltered_hook):
  	Moved to tui/tui-file.c and tui/tui-file.h.
-
+	
 	* Makefile.in (COMMON_OBS): Add gdb-file.o, tui-file.o.
 	(tui-file.o, gdb-file.o): Add dependencies.
 	(corefile.o, main.o, utils.o, simmisc.o): Update dependencies.
@@ -2064,11 +2064,11 @@ Mon Jan 31 17:14:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* infrun.c (normal_stop): Use enum values rather than integers for the
 	source_flag to be passed to show_and_print_stack_frame().
         Update copyright.
-
+	
 	* frame.h (print_what): New enum for 'source' argument to
  	print_frame_info_base(). Use this instead of obscure numbers.
 	Update copyright.
-
+	
 Sun Jan 16 17:58:00 2000  David Taylor  <taylor@texas.cygnus.com>
 
 	* event-top.c (stdin_event_handler): call quit_command rather than
@@ -2182,7 +2182,7 @@ Thu Jan 13 23:34:17 EST 2000  Nicholas Duffek <nsd@cygnus.com>
 	(proc_flags): combine flags that UnixWare splits into two locations.
 	(proc_modify_flag): add support for PR_KLC (kill on last close).
 	(proc_[un]set_kill_on_last_close): new functions.
-
+	
 2000-01-07  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* infrun.c (normal_stop): Print out thread id when we stop.
