@@ -1,3 +1,8 @@
+Thu May 27 16:09:04 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* aout-target.h (minimum_alignment): 8 byte alignment is right.
+	(fix ld/2680)
+
 Thu May 27 13:38:47 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* configure.in, Makefile.in: Build bfd-in2.h in source directory,
