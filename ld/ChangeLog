@@ -1,3 +1,8 @@
+2003-02-03  Daniel Jacobowitz  <drow@mvista.com>
+
+	* emultempl/elf32.em: Move gld${EMULATION_NAME}_add_sysroot
+	outside of GNU/Linux conditional.
+
 2003-01-28  Ralf Habacker  <ralf.habacker@freenet.de>
 
 	* deffilep.y (def_get_module): New function: locate an already

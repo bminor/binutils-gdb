@@ -440,9 +440,7 @@ gld${EMULATION_NAME}_search_needed (path, name, force)
 
 EOF
 if [ "x${USE_LIBPATH}" = xyes ] ; then
-  case ${target} in
-    *-*-linux-gnu*)
-      cat >>e${EMULATION_NAME}.c <<EOF
+  cat >>e${EMULATION_NAME}.c <<EOF
 
 /* Add the sysroot to every entry in a colon-separated path.  */
 
@@ -482,6 +480,10 @@ gld${EMULATION_NAME}_add_sysroot (path)
   return ret;
 }
 
+EOF
+  case ${target} in
+    *-*-linux-gnu*)
+      cat >>e${EMULATION_NAME}.c <<EOF
 /* For a native linker, check the file /etc/ld.so.conf for directories
    in which we may find shared libraries.  /etc/ld.so.conf is really
    only meaningful on Linux.  */
