@@ -1,0 +1,554 @@
+#    Makefile template for Configure for the BFD library.
+#    Copyright (C) 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+#    Written by Cygnus Support.
+# 
+# This file is part of BFD, the Binary File Descriptor library.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option} any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+s = "{srcdir}"
+
+o = :
+
+CC = C -d MPW_C -d __ALMOST__STDC__ -w
+
+"{o}" Ä : "{s}"
+
+# Default rule that puts each file into separate segment.
+
+.c.o  Ä .c
+   {CC}  {DepDir}{Default}.c {ALL_CFLAGS} {SymOptions} -s {Default} -o {TargDir}{Default}.c.o
+
+HDEFINES =
+TDEFINES =
+CSWITCHES =
+SymOptions =
+
+prefix = :usr:local
+
+exec_prefix = {prefix}
+bindir = {exec_prefix}:bin
+libdir = {exec_prefix}:lib
+
+datadir = {prefix}:lib
+mandir = {prefix}:man
+man1dir = {mandir}:man1
+man2dir = {mandir}:man2
+man3dir = {mandir}:man3
+man4dir = {mandir}:man4
+man5dir = {mandir}:man5
+man6dir = {mandir}:man6
+man7dir = {mandir}:man7
+man8dir = {mandir}:man8
+man9dir = {mandir}:man9
+infodir = {prefix}:info
+includedir = {prefix}:include
+oldincludedir =
+docdir = doc
+
+SHELL = :bin:sh
+
+INSTALL = install -c
+INSTALL_PROGRAM = {INSTALL}
+INSTALL_DATA = {INSTALL}
+
+AR = ar
+AR_FLAGS =
+CFLAGS = -mc68020 -mc68881 -model far
+BISON = bison
+MAKEINFO = makeinfo
+RANLIB = ranlib
+
+CC_FOR_BUILD = {CC}
+
+INCDIR = "{topsrcdir}"include
+#CSEARCH = -i : -i {srcdir} -i {INCDIR}:
+CSEARCH =  -i "{INCDIR}","{INCDIR}":,"{srcdir}"
+DEP = mkdep
+
+SUBDIRS = doc
+
+
+TARGETLIB = libbfd.o
+
+# bfd.h goes here, for now
+BFD_H = bfd.h
+
+# Some of these files should be in BFD*_BACKENDS below, but some programs
+# won't link without them.  So, in order for some of the minimal-bfd
+# hacks to work, they're also included here for now.
+#	gdbÄ ecoff.c.o ecofflink.c.o elf.o
+#	objdumpÄ elf.o
+#
+# Also, Jim Kingdon notesÄ
+# Writing S-records should be included in all (or at least most}
+# *-*-coff, *-*-aout, etc., configurations, because people will want to
+# be able to use objcopy to create S-records.  (S-records are not useful
+# for the debugger, so if you are downloading things as S-records you
+# need two copies of the executable, one to download and one for the
+# debugger}.
+BFD_LIBS = ¶
+	"{o}"archive.c.o "{o}"archures.c.o "{o}"bfd.c.o "{o}"cache.c.o "{o}"coffgen.c.o "{o}"core.c.o "{o}"ctor.c.o ¶
+	"{o}"format.c.o "{o}"init.c.o "{o}"libbfd.c.o "{o}"opncls.c.o "{o}"reloc.c.o ¶
+	"{o}"section.c.o "{o}"syms.c.o "{o}"targets.c.o "{o}"hash.o "{o}"linker.o ¶
+	"{o}"ecoff.c.o "{o}"ecofflink.c.o "{o}"elf.c.o "{o}"srec.c.o
+
+# This list is alphabetized to make it easier to keep in sync
+# with the decls and initializer in archures.c.
+ALL_MACHINES = ¶
+	"{o}"cpu-a29k.c.o ¶
+	"{o}"cpu-alpha.c.o ¶
+	"{o}"cpu-h8300.c.o ¶
+	"{o}"cpu-h8500.c.o ¶
+	"{o}"cpu-hppa.c.o ¶
+	"{o}"cpu-i386.c.o ¶
+	"{o}"cpu-i960.c.o ¶
+	"{o}"cpu-m68k.c.o ¶
+	"{o}"cpu-m88k.c.o ¶
+	"{o}"cpu-mips.c.o ¶
+	"{o}"cpu-rs6000.c.o ¶
+	"{o}"cpu-sh.c.o ¶
+	"{o}"cpu-sparc.c.o ¶
+	"{o}"cpu-vax.c.o ¶
+	"{o}"cpu-we32k.c.o ¶
+	"{o}"cpu-z8k.c.o
+
+# The .c.o files needed by all of the 32 bit vectors that are configured into
+# target_vector in targets.c if configured with --with-targets=all.
+BFD32_BACKENDS = ¶
+	"{o}"aout-adobe.c.o ¶
+	"{o}"aout32.c.o ¶
+	"{o}"bout.c.o ¶
+	"{o}"cf-i386lynx.c.o ¶
+	"{o}"cf-m68klynx.c.o ¶
+	"{o}"cf-sparclynx.c.o ¶
+	"{o}"coff-a29k.c.o ¶
+	"{o}"coff-apollo.c.o ¶
+	"{o}"coff-h8300.c.o ¶
+	"{o}"coff-h8500.c.o ¶
+	"{o}"coff-i386.c.o ¶
+	"{o}"coff-i960.c.o ¶
+	"{o}"coff-m68k.c.o ¶
+	"{o}"coff-m88k.c.o ¶
+	"{o}"coff-mips.c.o ¶
+	"{o}"coff-rs6000.c.o ¶
+	"{o}"coff-sh.c.o ¶
+	"{o}"coff-u68k.c.o ¶
+	"{o}"coff-we32k.c.o ¶
+	"{o}"coff-z8k.c.o ¶
+	"{o}"elf32-gen.c.o ¶
+	"{o}"elf32-hppa.c.o ¶
+	"{o}"elf32-i386.c.o ¶
+	"{o}"elf32-i860.c.o ¶
+	"{o}"elf32-m68k.c.o ¶
+	"{o}"elf32-m88k.c.o ¶
+	"{o}"elf32-mips.c.o ¶
+	"{o}"elf32-sparc.c.o ¶
+	"{o}"elf32.c.o ¶
+	"{o}"hp300hpux.c.o ¶
+	"{o}"som.c.o ¶
+	"{o}"i386aout.c.o ¶
+	"{o}"i386bsd.c.o ¶
+	"{o}"i386linux.c.o ¶
+	"{o}"i386lynx.c.o ¶
+	"{o}"netbsd386.c.o ¶
+	"{o}"i386mach3.c.o ¶
+	"{o}"ieee.c.o ¶
+	"{o}"m68klynx.c.o ¶
+	"{o}"mipsbsd.c.o ¶
+	"{o}"newsos3.c.o ¶
+	"{o}"nlm.c.o ¶
+	"{o}"nlm32-gen.c.o ¶
+	"{o}"nlm32-i386.c.o ¶
+	"{o}"nlm32-sparc.c.o ¶
+	"{o}"nlm32-alpha.c.o ¶
+	"{o}"nlm32.c.o ¶
+	"{o}"oasys.c.o ¶
+	"{o}"reloc16.c.o ¶
+	"{o}"sparclynx.c.o ¶
+	"{o}"stab-syms.c.o ¶
+	"{o}"sunos.c.o
+
+# The .c.o files needed by all of the 64 bit vectors that are configured into
+# target_vector in targets.c if configured with --with-targets=all
+# and --with-64-bit-bfd.
+BFD64_BACKENDS = ¶
+	"{o}"aout64.c.o ¶
+	"{o}"coff-alpha.c.o ¶
+	"{o}"demo64.c.o ¶
+	"{o}"elf64-gen.c.o ¶
+	"{o}"elf64.c.o ¶
+	"{o}"nlm64-gen.c.o ¶
+	"{o}"nlm64.c.o
+
+OPTIONAL_BACKENDS = ¶
+	"{o}"aix386-core.c.o ¶
+	"{o}"hpux-core.c.o ¶
+	"{o}"irix-core.c.o ¶
+	"{o}"lynx-core.c.o ¶
+	"{o}"osf-core.c.o ¶
+	"{o}"trad-core.c.o
+
+# These are defined by configure.inÄ
+WORDSIZE=32
+BFD_BACKENDS = "{o}"coff-mips.c.o
+BFD_MACHINES = "{o}"cpu-mips.c.o
+TDEFAULTS = -d DEFAULT_VECTOR=ecoff_big_vec -d SELECT_VECS='&ecoff_big_vec,&ecoff_little_vec' -d SELECT_ARCHITECTURES='bfd_mips_arch'
+
+
+all Ä libbfd.o
+
+#### host and target dependent Makefile fragments come in here.
+###
+
+FLAGS_TO_PASS = ¶
+	"prefix={prefix}" ¶
+	"exec_prefix={exec_prefix}" ¶
+	"against={against}" ¶
+	"AR={AR}" ¶
+	"AR_FLAGS={AR_FLAGS}" ¶
+	"CC={CC}" ¶
+	"CC_FOR_BUILD={CC_FOR_BUILD}" ¶
+	"CFLAGS={CFLAGS}" ¶
+	"RANLIB={RANLIB}" ¶
+	"MAKEINFO={MAKEINFO}" ¶
+	"INSTALL={INSTALL}" ¶
+	"INSTALL_DATA={INSTALL_DATA}" ¶
+	"INSTALL_PROGRAM={INSTALL_PROGRAM}" ¶
+	"BISON={BISON}"
+
+ALL_CFLAGS={CFLAGS} {HDEFINES} {TDEFINES} {CSEARCH} {CSWITCHES}
+
+# C source files that correspond to .o's.
+CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c ¶
+	 archures.c coff-i386.c aout64.c aout32.c sunos.c demo64.c ¶
+	 coff-i960.c srec.c tekhex.c oasys.c ieee.c ¶
+	 ecoff.c ecofflink.c coff-m68k.c coff-u68k.c coff-apollo.c ¶
+	 coff-a29k.c coff-rs6000.c coffgen.c format.c ¶
+	 section.c core.c syms.c stab-syms.c reloc.c init.c ctor.c ¶
+	 coff-m88k.c coff-mips.c coff-sh.c trad-core.c newsos3.c ¶
+	 i386aout.c i386linux.c netbsd386.c i386mach3.c bout.c aout-adobe.c coff-we32k.c ¶
+	 i386bsd.c cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c ¶
+	 cpu-m88k.c cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c ¶
+	 cpu-rs6000.c coff-h8300.c som.c cpu-hppa.c cpu-we32k.c reloc16.c ¶
+	 mipsbsd.c cpu-sh.c ¶
+	 elf.c elf32.c elf32-sparc.c elf32-i386.c elf32-i860.c elf32-m68k.c ¶
+	 elf32-hppa.c elf32-m88k.c elf32-mips.c elf32-gen.c ¶
+	 elf64.c elf64-gen.c ¶
+	 nlm.c nlm32.c nlm32-gen.c nlm32-i386.c nlm32-sparc.c nlm32-alpha.c ¶
+	 nlm64.c nlm64-gen.c ¶
+	 coff-alpha.c cpu-alpha.c ¶
+	 hp300bsd.c hp300hpux.c ¶
+	 i386lynx.c cf-i386lynx.c m68klynx.c cf-m68klynx.c ¶
+	 sparclynx.c cf-sparclynx.c aix386-core.c hpux-core.c ¶
+	 irix-core.c lynx-core.c osf-core.c
+
+HFILES = aout-target.h aoutf1.h aoutx.h coffcode.h ¶
+	 "{s}"coffswap.h "{s}"ecoffswap.h elf32-hppa.h elf32-target.h elf64-target.h ¶
+	 elfcode.h hppa_stubs.h "{s}"libaout.h "{s}"libbfd.h ¶
+	 libcoff.h "{s}"libecoff.h libelf.h libhppa.h libieee.h libnlm.h ¶
+	 liboasys.h nlm-target.h nlmcode.h som.h
+
+STAGESTUFF = {TARGETLIB} {OFILES}
+
+all Ä {TARGETLIB} 
+#	@{MAKE} subdir_do DO=all "DODIRS={SUBDIRS}" {FLAGS_TO_PASS}
+
+# Various kinds of .c.o files to put in libbfd.aÄ
+# BFD_LIBS	Generic routines, always needed.
+# BFD_BACKENDS	Routines the configured targets need.
+# BFD_MACHINES	Architecture-specific routines the configured targets need.
+# HDEPFILES	Routines the host needs, regardless of target.
+# TDEPFILES	Routines the target needs, regardless of host.
+TDEPFILES =
+HDEPFILES =
+
+OFILES = {BFD_LIBS} {BFD_BACKENDS} {BFD_MACHINES} {HDEPFILES} {TDEPFILES}
+
+{TARGETLIB} Ä {OFILES}
+#	rm -f {TARGETLIB}
+	Lib -o {TARGETLIB} {OFILES}
+#	{RANLIB} {TARGETLIB}
+
+# When compiling archures.c and targets.c, supply the default target
+# info from configure.
+
+
+"{o}"targets.c.o Ä "{s}"targets.c
+	{CC} "{s}"targets.c {CFLAGS} {HDEFINES} {TDEFINES} {CSEARCH} {CSWITCHES} {TDEFAULTS} -o "{o}"targets.c.o
+
+"{o}"archures.c.o Ä "{s}"archures.c
+	{CC} "{s}"archures.c {CFLAGS} {HDEFINES} {TDEFINES} {CSEARCH} {CSWITCHES} {TDEFAULTS} -o "{o}"archures.c.o
+
+do_mostlyclean Ä
+	rm -f *.c.o *~ core *.E *.p *.ip aout-params.h gen-aout
+do_clean Ä do_mostlyclean
+	rm -f libbfd.a TAGS "{s}"bfd.h stmp-"{s}"bfd.h ofiles
+do_distclean Ä do_clean
+	rm -f Makefile config.status sysdep.h
+
+# Should we remove {srcdir}:libcoff.h {srcdir}:"{s}"libbfd.h {srcdir}:bfd-in2.h?
+# make-stds.texi says it depends on whether they can be regenerated using
+# this makefile.  Well, they can, but only via an explicit "make headers";
+# the makefile does not regenerate them as needed.  So I guess we should not
+# remove them in realclean.
+do_realclean Ä do_distclean
+
+mostlyclean Ä do_mostlyclean
+	{MAKE} subdir_do DO=mostlyclean "DODIRS={SUBDIRS}" {FLAGS_TO_PASS}
+clean Ä do_clean
+	{MAKE} subdir_do DO=clean "DODIRS={SUBDIRS}" {FLAGS_TO_PASS}
+distclean Ä
+	{MAKE} subdir_do DO=distclean "DODIRS={SUBDIRS}" {FLAGS_TO_PASS}
+	{MAKE} do_distclean
+clobber realclean Ä
+	{MAKE} subdir_do DO=realclean "DODIRS={SUBDIRS}" {FLAGS_TO_PASS}
+	{MAKE} do_realclean
+
+# Mark everything as depending on config.status, since the timestamp on
+# sysdep.h might actually move backwards if we reconfig and relink it
+# to a different hosts:h-xxx.h file.  This will force a recompile anyway.
+BFD_H_DEPS= {INCDIR}:ansidecl.h {INCDIR}:obstack.h
+RECONFIG = # config.status
+{BFD_LIBS} Ä  "{s}"libbfd.h {BFD_H} {RECONFIG} {BFD_H_DEPS}
+{BFD_MACHINES} Ä  "{s}"libbfd.h {BFD_H} {RECONFIG} {BFD_H_DEPS}
+{BFD_BACKENDS} Ä  "{s}"libbfd.h {BFD_H} {RECONFIG} {BFD_H_DEPS}
+{OPTIONAL_BACKENDS} Ä  "{s}"libbfd.h {BFD_H} {RECONFIG} {BFD_H_DEPS}
+
+# Get around a Sun Make bug in SunOS 4.1.1 with VPATH
+"{o}"cpu-i386.c.o Ä cpu-i386.c
+"{o}"cpu-z8k.c.o Ä cpu-z8k.c
+"{o}"cpu-h8500.c.o Ä cpu-h8500.c
+"{o}"cpu-we32k.c.o Ä cpu-we32k.c
+
+saber Ä
+	#suppress 65 on bfd_map_over_sections 
+	#suppress 66 on bfd_map_over_sections 
+	#suppress 67 on bfd_map_over_sections 
+	#suppress 68 on bfd_map_over_sections 
+	#suppress 69 on bfd_map_over_sections 
+	#suppress 70 on bfd_map_over_sections 
+	#suppress 110 in bfd_map_over_sections 
+	#suppress 112 in bfd_map_over_sections 
+	#suppress 530 
+	#suppress 590 in swap_exec_header 
+	#suppress 590 in _bfd_dummy_core_file_matches_executable_p 
+	#suppress 590 in bfd_dont_truncate_arname
+	#suppress 590 on ignore 
+	#suppress 590 on abfd 
+	#setopt load_flags {CFLAGS}
+	#load {CFILES}
+
+
+
+# What appears below is generated by a hacked mkdep using gcc -MM.
+
+# DO NOT DELETE THIS LINE -- mkdep uses it.
+# DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
+
+"{o}"libbfd.c.o  Ä "{s}"libbfd.c
+"{o}"opncls.c.o  Ä "{s}"opncls.c
+"{o}"bfd.c.o  Ä "{s}"bfd.c {INCDIR}:coff:internal.h {INCDIR}:coff:sym.h ¶
+  "{s}"libcoff.h "{s}"libecoff.h {INCDIR}:coff:ecoff.h "{s}"libelf.h ¶
+  {INCDIR}:elf:common.h {INCDIR}:elf:internal.h {INCDIR}:elf:external.h
+"{o}"archive.c.o  Ä "{s}"archive.c {INCDIR}:aout:ar.h {INCDIR}:aout:ranlib.h
+"{o}"targets.c.o  Ä "{s}"targets.c
+"{o}"cache.c.o  Ä "{s}"cache.c
+"{o}"archures.c.o  Ä "{s}"archures.c
+"{o}"coff-i386.c.o  Ä "{s}"coff-i386.c {INCDIR}:coff:i386.h {INCDIR}:coff:internal.h ¶
+  "{s}"libcoff.h coffcode.h "{s}"coffswap.h
+"{o}"aout64.c.o  Ä "{s}"aout64.c aoutx.h "{s}"libaout.h {INCDIR}:aout:aout64.h ¶
+  {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h
+"{o}"aout32.c.o  Ä "{s}"aout32.c aoutx.h "{s}"libaout.h {INCDIR}:aout:aout64.h ¶
+  {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h
+"{o}"sunos.c.o  Ä "{s}"sunos.c aoutf1.h {INCDIR}:aout:sun4.h "{s}"libaout.h ¶
+  {INCDIR}:aout:aout64.h {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def ¶
+  {INCDIR}:aout:ar.h aout-target.h
+"{o}"demo64.c.o  Ä "{s}"demo64.c aoutf1.h {INCDIR}:aout:sun4.h ¶
+  "{s}"libaout.h {INCDIR}:aout:aout64.h {INCDIR}:aout:stab_gnu.h ¶
+  {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h aout-target.h
+"{o}"coff-i960.c.o  Ä "{s}"coff-i960.c {INCDIR}:coff:i960.h {INCDIR}:coff:internal.h ¶
+  "{s}"libcoff.h coffcode.h "{s}"coffswap.h
+"{o}"srec.c.o  Ä "{s}"srec.c
+"{o}"tekhex.c.o  Ä "{s}"tekhex.c
+"{o}"oasys.c.o  Ä "{s}"oasys.c {INCDIR}:oasys.h liboasys.h
+"{o}"ieee.c.o  Ä "{s}"ieee.c {INCDIR}:ieee.h libieee.h
+"{o}"ecoff.c.o  Ä "{s}"ecoff.c {INCDIR}:aout:ar.h {INCDIR}:aout:ranlib.h ¶
+  "{s}"libaout.h {INCDIR}:aout:aout64.h {INCDIR}:coff:internal.h ¶
+  {INCDIR}:coff:sym.h {INCDIR}:coff:symconst.h {INCDIR}:coff:ecoff.h ¶
+  "{s}"libcoff.h "{s}"libecoff.h
+"{o}"ecofflink.c.o  Ä "{s}"ecofflink.c {INCDIR}:coff:internal.h ¶
+  {INCDIR}:coff:sym.h {INCDIR}:coff:symconst.h {INCDIR}:coff:ecoff.h
+"{o}"coff-m68k.c.o  Ä "{s}"coff-m68k.c {INCDIR}:coff:m68k.h {INCDIR}:coff:internal.h ¶
+  "{s}"libcoff.h coffcode.h "{s}"coffswap.h
+"{o}"coff-u68k.c.o  Ä "{s}"coff-u68k.c coff-m68k.c {INCDIR}:coff:m68k.h ¶
+  {INCDIR}:coff:internal.h "{s}"libcoff.h coffcode.h ¶
+  "{s}"coffswap.h
+"{o}"coff-apollo.c.o  Ä "{s}"coff-apollo.c {INCDIR}:coff:apollo.h ¶
+  {INCDIR}:coff:internal.h "{s}"libcoff.h coffcode.h ¶
+  "{s}"coffswap.h
+"{o}"coff-a29k.c.o  Ä "{s}"coff-a29k.c {INCDIR}:coff:a29k.h {INCDIR}:coff:internal.h ¶
+  "{s}"libcoff.h coffcode.h "{s}"coffswap.h
+"{o}"coff-rs6000.c.o  Ä "{s}"coff-rs6000.c {INCDIR}:coff:internal.h ¶
+  {INCDIR}:coff:rs6000.h "{s}"libcoff.h coffcode.h ¶
+  "{s}"coffswap.h
+"{o}"coffgen.c.o  Ä "{s}"coffgen.c {INCDIR}:coff:internal.h ¶
+  "{s}"libcoff.h
+"{o}"format.c.o  Ä "{s}"format.c
+"{o}"section.c.o  Ä "{s}"section.c
+"{o}"core.c.o  Ä "{s}"core.c
+"{o}"syms.c.o  Ä "{s}"syms.c {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def
+"{o}"stab-syms.c.o  Ä "{s}"stab-syms.c "{s}"libaout.h {INCDIR}:aout:aout64.h ¶
+  {INCDIR}:aout:stab.def
+"{o}"reloc.c.o  Ä "{s}"reloc.c
+"{o}"init.c.o  Ä "{s}"init.c
+"{o}"ctor.c.o  Ä "{s}"ctor.c
+"{o}"coff-m88k.c.o  Ä "{s}"coff-m88k.c {INCDIR}:coff:m88k.h {INCDIR}:coff:internal.h ¶
+  "{s}"libcoff.h coffcode.h "{s}"coffswap.h
+"{o}"coff-mips.c.o  Ä "{s}"coff-mips.c {INCDIR}:coff:internal.h ¶
+  {INCDIR}:coff:sym.h {INCDIR}:coff:symconst.h {INCDIR}:coff:ecoff.h ¶
+  {INCDIR}:coff:mips.h "{s}"libcoff.h "{s}"libecoff.h "{s}"coffswap.h ¶
+  "{s}"ecoffswap.h
+"{o}"coff-sh.c.o  Ä "{s}"coff-sh.c {INCDIR}:coff:sh.h {INCDIR}:coff:internal.h ¶
+  "{s}"libcoff.h coffcode.h "{s}"coffswap.h
+"{o}"trad-core.c.o  Ä "{s}"trad-core.c "{s}"libaout.h
+"{o}"newsos3.c.o  Ä "{s}"newsos3.c {INCDIR}:aout:aout64.h {INCDIR}:aout:stab_gnu.h ¶
+  {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h "{s}"libaout.h ¶
+  aout-target.h
+"{o}"i386aout.c.o  Ä "{s}"i386aout.c "{s}"libaout.h aout-target.h {INCDIR}:aout:aout64.h ¶
+  {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h
+"{o}"i386linux.c.o  Ä "{s}"i386linux.c {INCDIR}:aout:aout64.h {INCDIR}:aout:stab_gnu.h ¶
+  {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h "{s}"libaout.h ¶
+  aout-target.h
+"{o}"netbsd386.c.o  Ä "{s}"netbsd386.c "{s}"libaout.h aout-target.h {INCDIR}:aout:aout64.h ¶
+  {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h
+"{o}"i386mach3.c.o  Ä "{s}"i386mach3.c {INCDIR}:aout:aout64.h {INCDIR}:aout:stab_gnu.h ¶
+  {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h "{s}"libaout.h ¶
+  aout-target.h
+"{o}"bout.c.o  Ä "{s}"bout.c {INCDIR}:bout.h {INCDIR}:aout:stab_gnu.h ¶
+  {INCDIR}:aout:stab.def "{s}"libaout.h
+"{o}"aout-adobe.c.o  Ä "{s}"aout-adobe.c {INCDIR}:aout:adobe.h ¶
+  {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def "{s}"libaout.h
+"{o}"coff-we32k.c.o  Ä "{s}"coff-we32k.c {INCDIR}:coff:we32k.h ¶
+  {INCDIR}:coff:internal.h "{s}"libcoff.h coffcode.h ¶
+  "{s}"coffswap.h
+"{o}"i386bsd.c.o  Ä "{s}"i386bsd.c "{s}"libaout.h aout-target.h {INCDIR}:aout:aout64.h ¶
+  {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h
+"{o}"cpu-h8300.c.o  Ä "{s}"cpu-h8300.c
+"{o}"cpu-i960.c.o  Ä "{s}"cpu-i960.c
+"{o}"cpu-sparc.c.o  Ä "{s}"cpu-sparc.c
+"{o}"cpu-m68k.c.o  Ä "{s}"cpu-m68k.c
+"{o}"cpu-m88k.c.o  Ä "{s}"cpu-m88k.c
+"{o}"cpu-vax.c.o  Ä "{s}"cpu-vax.c
+"{o}"cpu-mips.c.o  Ä "{s}"cpu-mips.c
+"{o}"cpu-a29k.c.o  Ä "{s}"cpu-a29k.c
+"{o}"cpu-i386.c.o  Ä "{s}"cpu-i386.c
+"{o}"cpu-rs6000.c.o  Ä "{s}"cpu-rs6000.c
+"{o}"coff-h8300.c.o  Ä "{s}"coff-h8300.c {INCDIR}:coff:h8300.h ¶
+  {INCDIR}:coff:internal.h "{s}"libcoff.h coffcode.h ¶
+  "{s}"coffswap.h
+"{o}"som.c.o  Ä "{s}"som.c
+"{o}"cpu-hppa.c.o  Ä "{s}"cpu-hppa.c
+"{o}"cpu-we32k.c.o  Ä "{s}"cpu-we32k.c
+"{o}"reloc16.c.o  Ä "{s}"reloc16.c {INCDIR}:coff:internal.h ¶
+  "{s}"libcoff.h
+"{o}"mipsbsd.c.o  Ä "{s}"mipsbsd.c "{s}"libaout.h aout-target.h {INCDIR}:aout:aout64.h ¶
+  {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h
+"{o}"cpu-sh.c.o  Ä "{s}"cpu-sh.c
+"{o}"elf.c.o  Ä "{s}"elf.c "{s}"libelf.h {INCDIR}:elf:common.h {INCDIR}:elf:internal.h ¶
+  {INCDIR}:elf:external.h
+"{o}"elf32.c.o  Ä "{s}"elf32.c elfcode.h "{s}"libelf.h {INCDIR}:elf:common.h ¶
+  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h
+"{o}"elf32-sparc.c.o  Ä "{s}"elf32-sparc.c "{s}"libelf.h {INCDIR}:elf:common.h ¶
+  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h elf32-target.h
+"{o}"elf32-i386.c.o  Ä "{s}"elf32-i386.c "{s}"libelf.h {INCDIR}:elf:common.h ¶
+  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h elf32-target.h
+"{o}"elf32-i860.c.o  Ä "{s}"elf32-i860.c "{s}"libelf.h {INCDIR}:elf:common.h ¶
+  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h elf32-target.h
+"{o}"elf32-m68k.c.o  Ä "{s}"elf32-m68k.c "{s}"libelf.h {INCDIR}:elf:common.h ¶
+  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h elf32-target.h
+"{o}"elf32-hppa.c.o  Ä "{s}"elf32-hppa.c "{s}"libelf.h {INCDIR}:elf:common.h ¶
+  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h elf32-hppa.h ¶
+  libhppa.h {INCDIR}:aout:aout64.h hppa_stubs.h elf32-target.h
+"{o}"elf32-m88k.c.o  Ä "{s}"elf32-m88k.c "{s}"libelf.h {INCDIR}:elf:common.h ¶
+  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h elf32-target.h
+"{o}"elf32-mips.c.o  Ä "{s}"elf32-mips.c "{s}"libelf.h {INCDIR}:elf:common.h ¶
+  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h {INCDIR}:elf:mips.h ¶
+  {INCDIR}:coff:sym.h {INCDIR}:coff:symconst.h {INCDIR}:coff:internal.h ¶
+  {INCDIR}:coff:ecoff.h {INCDIR}:coff:mips.h "{s}"ecoffswap.h ¶
+  elf32-target.h
+"{o}"elf32-gen.c.o  Ä "{s}"elf32-gen.c "{s}"libelf.h {INCDIR}:elf:common.h ¶
+  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h elf32-target.h
+"{o}"elf64.c.o  Ä "{s}"elf64.c elfcode.h "{s}"libelf.h {INCDIR}:elf:common.h ¶
+  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h
+"{o}"elf64-gen.c.o  Ä "{s}"elf64-gen.c "{s}"libelf.h {INCDIR}:elf:common.h ¶
+  {INCDIR}:elf:internal.h {INCDIR}:elf:external.h elf64-target.h
+"{o}"nlm.c.o  Ä "{s}"nlm.c libnlm.h {INCDIR}:nlm:common.h {INCDIR}:nlm:internal.h ¶
+  {INCDIR}:nlm:external.h
+"{o}"nlm32.c.o  Ä "{s}"nlm32.c nlmcode.h libnlm.h {INCDIR}:nlm:common.h ¶
+  {INCDIR}:nlm:internal.h {INCDIR}:nlm:external.h
+"{o}"nlm32-gen.c.o  Ä "{s}"nlm32-gen.c libnlm.h {INCDIR}:nlm:common.h ¶
+  {INCDIR}:nlm:internal.h {INCDIR}:nlm:external.h nlm-target.h
+"{o}"nlm32-i386.c.o  Ä "{s}"nlm32-i386.c {INCDIR}:nlm:i386-ext.h ¶
+  libnlm.h {INCDIR}:nlm:common.h {INCDIR}:nlm:internal.h ¶
+  {INCDIR}:nlm:external.h nlmswap.h nlm-target.h
+"{o}"nlm32-sparc.c.o  Ä "{s}"nlm32-sparc.c {INCDIR}:nlm:sparc32-ext.h ¶
+  libnlm.h {INCDIR}:nlm:common.h {INCDIR}:nlm:internal.h ¶
+  {INCDIR}:nlm:external.h nlmswap.h nlm-target.h
+"{o}"nlm32-alpha.c.o  Ä "{s}"nlm32-alpha.c {INCDIR}:nlm:alpha-ext.h ¶
+  libnlm.h {INCDIR}:nlm:common.h {INCDIR}:nlm:internal.h ¶
+  {INCDIR}:nlm:external.h nlmswap.h nlm-target.h
+"{o}"nlm64.c.o  Ä "{s}"nlm64.c nlmcode.h libnlm.h {INCDIR}:nlm:common.h ¶
+  {INCDIR}:nlm:internal.h {INCDIR}:nlm:external.h
+"{o}"nlm64-gen.c.o  Ä "{s}"nlm64-gen.c libnlm.h {INCDIR}:nlm:common.h ¶
+  {INCDIR}:nlm:internal.h {INCDIR}:nlm:external.h nlm-target.h
+"{o}"coff-alpha.c.o  Ä "{s}"coff-alpha.c {INCDIR}:coff:internal.h ¶
+  {INCDIR}:coff:sym.h {INCDIR}:coff:symconst.h {INCDIR}:coff:ecoff.h ¶
+  {INCDIR}:coff:alpha.h "{s}"libcoff.h "{s}"libecoff.h "{s}"coffswap.h ¶
+  "{s}"ecoffswap.h
+"{o}"cpu-alpha.c.o  Ä "{s}"cpu-alpha.c
+"{o}"hp300bsd.c.o  Ä "{s}"hp300bsd.c "{s}"libaout.h aout-target.h {INCDIR}:aout:aout64.h ¶
+  {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h
+"{o}"hp300hpux.c.o  Ä "{s}"hp300hpux.c {INCDIR}:aout:hp300hpux.h ¶
+  aoutx.h "{s}"libaout.h {INCDIR}:aout:aout64.h {INCDIR}:aout:stab_gnu.h ¶
+  {INCDIR}:aout:stab.def {INCDIR}:aout:ar.h aout-target.h
+"{o}"i386lynx.c.o  Ä "{s}"i386lynx.c "{s}"libaout.h {INCDIR}:aout:aout64.h ¶
+  aout-target.h {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def ¶
+  {INCDIR}:aout:ar.h
+"{o}"cf-i386lynx.c.o  Ä "{s}"cf-i386lynx.c "{s}"coff-i386.c {INCDIR}:coff:i386.h ¶
+  {INCDIR}:coff:internal.h "{s}"libcoff.h coffcode.h ¶
+  "{s}"coffswap.h
+"{o}"m68klynx.c.o  Ä "{s}"m68klynx.c "{s}"libaout.h {INCDIR}:aout:aout64.h ¶
+  aout-target.h {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def ¶
+  {INCDIR}:aout:ar.h
+"{o}"cf-m68klynx.c.o  Ä "{s}"cf-m68klynx.c "{s}"coff-m68k.c {INCDIR}:coff:m68k.h ¶
+  {INCDIR}:coff:internal.h "{s}"libcoff.h coffcode.h ¶
+  "{s}"coffswap.h
+"{o}"sparclynx.c.o  Ä "{s}"sparclynx.c {INCDIR}:aout:sun4.h "{s}"libaout.h ¶
+  {INCDIR}:aout:aout64.h {INCDIR}:aout:stab_gnu.h {INCDIR}:aout:stab.def ¶
+  {INCDIR}:aout:ar.h aout-target.h
+"{o}"cf-sparclynx.c.o  Ä "{s}"cf-sparclynx.c "{s}"coff-sparc.c {INCDIR}:coff:sparc.h ¶
+  {INCDIR}:coff:internal.h "{s}"libcoff.h coffcode.h ¶
+  "{s}"coffswap.h
+"{o}"aix386-core.c.o  Ä "{s}"aix386-core.c {INCDIR}:coff:i386.h ¶
+  {INCDIR}:coff:internal.h "{s}"libcoff.h
+"{o}"hpux-core.c.o  Ä "{s}"hpux-core.c
+"{o}"irix-core.c.o  Ä "{s}"irix-core.c
+"{o}"lynx-core.c.o  Ä "{s}"lynx-core.c
+
+"{o}"hash.c.o  Ä "{s}"hash.c
+"{o}"linker.o  Ä "{s}"linker.c {INCDIR}:bfdlink.h "{s}"genlink.h
+
+# IF YOU PUT ANYTHING HERE IT WILL GO AWAY

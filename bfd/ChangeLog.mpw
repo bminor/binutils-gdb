@@ -1,0 +1,6 @@
+Mon Jan  3 10:59:28 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-config.in: New file, MPW version of configure.in.
+	* mpw-make.in: New file, MPW version of Makefile.in.
+	* hosts/mpw.h: New file, MPW host definitions.
+
