@@ -1,0 +1,1 @@
+EMUL=coff_sparc
