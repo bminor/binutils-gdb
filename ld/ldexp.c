@@ -427,6 +427,7 @@ fold_binary (etree_type *tree,
 			 a common page boundary.  */
 		      bfd_vma relro;
 
+		      result.value += dot & (maxpage - 1);
 		      relro = exp_data_seg.relro_end - exp_data_seg.base;
 		      result.value += -relro & (other.value - 1);
 		      exp_data_seg.base = result.value;

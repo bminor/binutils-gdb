@@ -1,3 +1,8 @@
+2004-09-07  Andreas Schwab  <schwab@suse.de>
+
+	* ldexp.c (fold_binary) [DATA_SEGMENT_ALIGN]: Apply data segment
+	alignment before adjusting DATA_SEGMENT_RELRO_END.
+
 2004-09-06  Mark Mitchell  <mark@codesourcery.com>
 
 	* emulparams/armsymbian.sh: Use armbpabi script.
