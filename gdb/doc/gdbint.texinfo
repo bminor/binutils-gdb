@@ -2297,9 +2297,6 @@ warning.  This is currently defined if you configure using
 @findex siginterrupt
 Define this to indicate that @code{siginterrupt} is not available.
 
-@item R_OK
-Define if this is not in a system header file (typically, @file{unistd.h}).
-
 @item SEEK_CUR
 @itemx SEEK_SET
 Define these to appropriate value for the system @code{lseek}, if not already
