@@ -23,8 +23,18 @@
 #include "elf/reloc-macros.h"
 
 /* Processor specific flags for the ELF header e_flags field.  */
-#define EF_ARM_RELEXEC   0x01
-#define EF_ARM_HASENTRY  0x02
+#define EF_ARM_RELEXEC     0x01
+#define EF_ARM_HASENTRY    0x02
+#define EF_INTERWORK       0x04
+#define EF_APCS_26         0x08
+#define EF_APCS_FLOAT      0x10
+#define EF_PIC             0x20
+
+/* Local aliases for some flags to match names used by COFF port.  */
+#define F_INTERWORK	   EF_INTERWORK
+#define F_APCS26	   EF_APCS_26
+#define F_APCS_FLOAT	   EF_APCS_FLOAT
+#define F_PIC              EF_PIC
 
 /* ARM-specific values for sh_flags */
 #define SHF_ENTRYSECT      0x10000000   /* Section contains an entry point */

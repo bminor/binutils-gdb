@@ -1,3 +1,11 @@
+Wed Aug  5 15:52:35 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* arm.h: Add ELF header flags to specify compile time optins:
+	EF_INTERWORK: New flag.
+	EF_APCS_26: New flag.
+	EF_APCS_FLOAT: New flag.
+	EF_PIC: New flag.
+
 1998-07-31 21:28  Ulrich Drepper  <drepper@cygnus.com>
 
 	* mips.h: Add missing RHF_* constants.
