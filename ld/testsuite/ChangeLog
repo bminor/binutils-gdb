@@ -1,3 +1,14 @@
+2003-12-01  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* ld-sh/sh64/shmix-1.s: Add align to match data alignment.
+	* ld-sh/sh64/shmix-3.s: Likewise.
+	* ld-sh/sh64/mix1.sd: Update.
+	* ld-sh/sh64/mix1.xd: Likewise.
+	* ld-sh/sh64/mix1-noexp.sd: Likewise.
+	* ld-sh/sh64/mix2.sd: Likewise.
+	* ld-sh/sh64/mix2.xd: Likewise.
+	* ld-sh/sh64/mix2-noexp.sd: Likewise.
+
 2003-12-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-sh/tlsbin-2.d: Update section alignment.
