@@ -231,54 +231,64 @@ struct pending_stabs **stabvector;
   }
   (*stabvector)->stab [(*stabvector)->count++] = stabname;
 }
+
+/* Linenos are processed on a file-by-file basis.
 
+   Two reasons:
 
-#if 0
-/* for all the stabs in a given stab vector, build appropriate types 
-   and fix their symbols in given symbol vector. */
+    1) xlc (IBM's native c compiler) postpones static function code
+       emission to the end of a compilation unit. This way it can
+       determine if those functions (statics) are needed or not, and
+       can do some garbage collection (I think). This makes line
+       numbers and corresponding addresses unordered, and we end up
+       with a line table like:
+       
 
-void
-patch_block_stabs (symbols, stabs)
-struct pending *symbols;
-struct pending_stabs *stabs;
-{
-  int ii;
+		lineno	addr
+        foo()	  10	0x100
+		  20	0x200
+		  30	0x300
 
-  if (!stabs)
-    return;
+	foo3()	  70	0x400
+		  80	0x500
+		  90	0x600
 
-  /* for all the stab entries, find their corresponding symbols and 
-     patch their types! */
+	static foo2()
+		  40	0x700
+		  50	0x800
+		  60	0x900		
 
-  for (ii=0; ii < stabs->count; ++ii) {
-    char *name = stabs->stab[ii];
-    char *pp = (char*) index (name, ':');
-    struct symbol *sym = find_symbol_in_list (symbols, name, pp-name);
-    if (!sym) {
-      ;
-      /* printf ("ERROR! stab symbol not found!\n"); */	/* FIXME */
-      /* The above is a false alarm. There are cases the we can have
-         a stab, without its symbol. xlc generates this for the extern
-	 definitions in inner blocks. */
-    }
-    else {
-      pp += 2;
+	and that breaks gdb's binary search on line numbers, if the
+	above table is not sorted on line numbers. And that sort
+	should be on function based, since gcc can emit line numbers
+	like:
+	
+		10	0x100	- for the init/test part of a for stmt.
+		20	0x200
+		30	0x300
+		10	0x400	- for the increment part of a for stmt.
 
-      if (*(pp-1) == 'F' || *(pp-1) == 'f')
-	SYMBOL_TYPE (sym) = lookup_function_type (read_type (&pp, objfile));
-      else
-	SYMBOL_TYPE (sym) = read_type (&pp, objfile);
-    }
-  }
-}
-#endif
+	arrange_linetable() will do this sorting.		
 
+     2)	aix symbol table might look like:
+
+		c_file		// beginning of a new file
+		.bi		// beginning of include file
+		.ei		// end of include file
+		.bi
+		.ei
+
+	basically, .bi/.ei pairs do not necessarily encapsulate
+	their scope. They need to be recorded, and processed later
+	on when we come the end of the compilation unit.
+	Include table (inclTable) and process_linenos() handle
+	that.  */
 
 /* compare line table entry addresses. */
 
-  static int
+static int
 compare_lte (lte1, lte2)
-  struct linetable_entry *lte1, *lte2;
+     struct linetable_entry *lte1, *lte2;
 {
   return lte1->pc - lte2->pc;
 }
@@ -1390,60 +1400,6 @@ function_entry_point:
 
 	within_function = 1;
 
-	/* Linenos are now processed on a file-by-file, not fn-by-fn, basis.
-	   Metin did it, I'm not sure why.  FIXME.  -- gnu@cygnus.com */
-
-	/* Two reasons:
-	
-	    1) xlc (IBM's native c compiler) postpones static function code
-	       emission to the end of a compilation unit. This way it can
-	       determine if those functions (statics) are needed or not, and
-	       can do some garbage collection (I think). This makes line
-	       numbers and corresponding addresses unordered, and we end up
-	       with a line table like:
-	       
-
- 			lineno	addr
-	        foo()	  10	0x100
-			  20	0x200
-			  30	0x300
-
-		foo3()	  70	0x400
-			  80	0x500
-			  90	0x600
-
-		static foo2()
-			  40	0x700
-			  50	0x800
-			  60	0x900		
-
-		and that breaks gdb's binary search on line numbers, if the
-		above table is not sorted on line numbers. And that sort
-		should be on function based, since gcc can emit line numbers
-		like:
-		
-			10	0x100	- for the init/test part of a for stmt.
-			20	0x200
-			30	0x300
-			10	0x400	- for the increment part of a for stmt.
-
- 		arrange_linenos() will do this sorting.		
-
-
-	     2)	aix symbol table might look like:
-	
-			c_file		// beginning of a new file
-			.bi		// beginning of include file
-			.ei		// end of include file
-			.bi
-			.ei
-
-		basically, .bi/.ei pairs do not necessarily encapsulate
-		their scope. They need to be recorded, and processed later
-		on when we come the end of the compilation unit.
-		Include table (inclTable) and process_linenos() handle
-		that.
-	*/
 	mark_first_line (fcn_line_offset, cs->c_symnum);
 
 	new = push_context (0, fcn_start_addr);
