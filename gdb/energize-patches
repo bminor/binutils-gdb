@@ -1,0 +1,1021 @@
+# Apply these patches to GDB to produce an Energize GDB.
+# To apply these patches, first cd to gdb-XX/gdb, run "patch -p0 <thisfile",
+# and then Sanitize.
+
+===================================================================
+
+diff -rc .Sanitize .Sanitize
+*** .Sanitize	Mon Jun 22 23:26:00 1992
+--- .Sanitize	Sat Jun 27 12:29:59 1992
+***************
+*** 53,58 ****
+--- 53,59 ----
+  buildsym.c
+  buildsym.h
+  c-exp.y
++ cadillac.c
+  call-cmds.h
+  coffread.c
+  command.c
+***************
+*** 70,75 ****
+--- 71,77 ----
+  cplus-dem.c
+  createtags
+  dbxread.c
++ deblib
+  defs.h
+  demangle.h
+  depend
+diff -rc Makefile.in Makefile.in
+*** Makefile.in	Sat Jun 27 12:16:43 1992
+--- Makefile.in	Sat Jun 27 12:31:29 1992
+***************
+*** 123,128 ****
+--- 123,135 ----
+  READLINE_DEP = $$(READLINE_DIR)
+  RL_LIB = ./../readline${subdir}/libreadline.a
+  
++ # Cadillac libraries
++ CONNECTION_DIR = deblib/connection
++ CONNECTION_LIB = ${CONNECTION_DIR}/libconn.a
++ CADILLAC_DIR = ${srcdir}/deblib
++ CADILLAC_INCLUDES = -I${CADILLAC_DIR}/connection -I${CADILLAC_DIR}/debugger
++ CADILLAC_LIBS = ${CONNECTION_LIB}
++ 
+  # All the includes used for CFLAGS and for lint.
+  # -I. for config files.
+  # -I${srcdir} possibly for regex.h also.
+***************
+*** 155,166 ****
+  # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
+  # TERMCAP comes after readline, since readline depends on it.
+  CLIBS = ${BFD_LIB}  ${RL_LIB} ${TERMCAP} ${MMALLOC_LIB} ${LIBIBERTY} \
+! 	${XM_CLIBS} ${TM_CLIBS}
+  CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${MMALLOC_LIB} ${LIBIBERTY} \
+  	${RL_LIB} ${MMALLOC_LIB}
+  
+  ADD_FILES = ${REGEX} ${ALLOCA} ${XM_ADD_FILES} ${TM_ADD_FILES}
+! ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES}
+  
+  VERSION = 4.5.6
+  DIST=gdb
+--- 162,174 ----
+  # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
+  # TERMCAP comes after readline, since readline depends on it.
+  CLIBS = ${BFD_LIB}  ${RL_LIB} ${TERMCAP} ${MMALLOC_LIB} ${LIBIBERTY} \
+! 	${XM_CLIBS} ${TM_CLIBS} ${CADILLAC_LIBS}
+  CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${MMALLOC_LIB} ${LIBIBERTY} \
+  	${RL_LIB} ${MMALLOC_LIB}
+  
+  ADD_FILES = ${REGEX} ${ALLOCA} ${XM_ADD_FILES} ${TM_ADD_FILES}
+! ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES} \
+! 	${CONNECTION_LIB}
+  
+  VERSION = 4.5.6
+  DIST=gdb
+***************
+*** 176,182 ****
+  # demangling.  For other demangling styles, such as the Annotated C++
+  # Reference Manual (section 7.2.1c) style, set this define in the target-
+  # dependent makefile fragment.
+! DEMANGLE_OPTS=
+  
+  # Host and target-dependent makefile fragments come in here.
+  ####
+--- 184,195 ----
+  # demangling.  For other demangling styles, such as the Annotated C++
+  # Reference Manual (section 7.2.1c) style, set this define in the target-
+  # dependent makefile fragment.
+! #
+! # For Energize, default to using style specified in the Annotated C++
+! # Reference Manual, section 7.2.1c, which is what is used by the Lucid C++
+! # compiler for most things.  But there are places where Lucid varies from
+! # the ARM, so select the Lucid specific code also.
+! DEMANGLE_OPTS=-DARM_DEMANGLING -DLUCID_DEMANGLING
+  
+  # Host and target-dependent makefile fragments come in here.
+  ####
+***************
+*** 194,200 ****
+  	 ${DEMANGLER}.c mem-break.c target.c inftarg.c \
+  	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c \
+  	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
+! 	 minsyms.c mipsread.c
+  
+  # Source files in subdirectories (which will be handled separately by
+  #  'make gdb.tar.Z').
+--- 207,213 ----
+  	 ${DEMANGLER}.c mem-break.c target.c inftarg.c \
+  	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c \
+  	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
+! 	 minsyms.c mipsread.c cadillac.c
+  
+  # Source files in subdirectories (which will be handled separately by
+  #  'make gdb.tar.Z').
+***************
+*** 279,285 ****
+      command.o utils.o expprint.o environ.o version.o gdbtypes.o \
+      copying.o $(DEPFILES) ${DEMANGLER}.o mem-break.o target.o \
+      inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
+!     buildsym.o objfiles.o minsyms.o \
+      dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o
+  
+  RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
+--- 292,298 ----
+      command.o utils.o expprint.o environ.o version.o gdbtypes.o \
+      copying.o $(DEPFILES) ${DEMANGLER}.o mem-break.o target.o \
+      inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
+!     buildsym.o objfiles.o minsyms.o cadillac.o \
+      dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o
+  
+  RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
+***************
+*** 292,298 ****
+  
+  NTSSTART = kdb-start.o
+  
+! SUBDIRS = doc
+  
+  # For now, shortcut the "configure GDB for fewer languages" stuff.
+  YYFILES = c-exp.tab.c m2-exp.tab.c
+--- 305,311 ----
+  
+  NTSSTART = kdb-start.o
+  
+! SUBDIRS = doc ${CONNECTION_DIR}
+  
+  # For now, shortcut the "configure GDB for fewer languages" stuff.
+  YYFILES = c-exp.tab.c m2-exp.tab.c
+***************
+*** 346,351 ****
+--- 359,378 ----
+  	#load `echo " "$(DEPFILES) | sed -e 's/\.o/.c/g' -e 's, , ../,g'`
+  	echo "Load .c corresponding to:" $(DEPFILES)
+  
++ ${CONNECTION_LIB} :
++ 	@(cd ${CONNECTION_DIR}; \
++ 		$(MAKE) \
++ 			"against=$(against)" \
++ 			"AR=$(AR)" \
++ 			"AR_FLAGS=$(AR_FLAGS)" \
++ 			"CC=$(CC)" \
++ 			"CFLAGS=$(CFLAGS)" \
++ 			"RANLIB=$(RANLIB)" \
++ 			"MAKEINFO=$(MAKEINFO)" \
++ 			"INSTALL=$(INSTALL)" \
++ 			"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
++ 			"INSTALL_DATA=$(INSTALL_DATA)" \
++ 			"BISON=$(BISON)")
+  
+  # This is useful when debugging GDB, because some Unix's don't let you run GDB
+  # on itself without copying the executable.  So "make gdb1" will make
+***************
+*** 694,699 ****
+--- 721,729 ----
+  
+  ttyflush.o: ${srcdir}/nindy-share/ttyflush.c
+  	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/nindy-share/ttyflush.c
++ 
++ cadillac.o: ${srcdir}/cadillac.c
++ 	${CC} -c ${INTERNAL_CFLAGS} ${CADILLAC_INCLUDES} ${srcdir}/cadillac.c
+  
+  lint: $(LINTFILES)
+  	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \
+diff -rc breakpoint.c breakpoint.c
+*** breakpoint.c	Wed Jun 17 14:53:28 1992
+--- breakpoint.c	Sat Jun 27 12:30:01 1992
+***************
+*** 273,278 ****
+--- 273,280 ----
+  	    b->cond_string = NULL;
+  	    if (from_tty)
+  	      printf_filtered ("Breakpoint %d now unconditional.\n", bnum);
++ 	    if (cadillac)
++ 	      cadillac_condition_breakpoint(b);
+  	  }
+  	else
+  	  {
+***************
+*** 281,286 ****
+--- 283,290 ----
+  	       typed in or the decompiled expression.  */
+  	    b->cond_string = savestring (arg, strlen (arg));
+  	    b->cond = parse_exp_1 (&arg, block_for_pc (b->address), 0);
++ 	    if (cadillac)
++ 	      cadillac_condition_breakpoint(b);
+  	    if (*arg)
+  	      error ("Junk at end of expression");
+  	  }
+***************
+*** 316,330 ****
+    ALL_BREAKPOINTS (b)
+      if (b->number == bnum)
+        {
+! 	if (from_tty && input_from_terminal_p ())
+! 	  {
+! 	    printf_filtered ("Type commands for when breakpoint %d is hit, one per line.\n\
+  End with a line saying just \"end\".\n", bnum);
+- 	    fflush (stdout);
+- 	  }
+  	l = read_command_lines ();
+  	free_command_lines (&b->commands);
+  	b->commands = l;
+  	return;
+        }
+    error ("No breakpoint number %d.", bnum);
+--- 320,333 ----
+    ALL_BREAKPOINTS (b)
+      if (b->number == bnum)
+        {
+! 	if ((from_tty && input_from_terminal_p ()) || cadillac)
+! 	  printf_filtered ("Type commands for when breakpoint %d is hit, one per line.\n\
+  End with a line saying just \"end\".\n", bnum);
+  	l = read_command_lines ();
+  	free_command_lines (&b->commands);
+  	b->commands = l;
++ 	if (cadillac)
++ 	  cadillac_commands_breakpoint(b);
+  	return;
+        }
+    error ("No breakpoint number %d.", bnum);
+***************
+*** 925,930 ****
+--- 928,935 ----
+  	    {
+  	      b->ignore_count--;
+  	      this_bp_stop = 0;
++ 	      if (cadillac)
++ 		cadillac_ignore_breakpoint(b);
+  	    }
+  	  else
+  	    {
+***************
+*** 1365,1370 ****
+--- 1370,1378 ----
+  mention (b)
+       struct breakpoint *b;
+  {
++   if (cadillac)
++     cadillac_create_breakpoint(b);
++ 
+    switch (b->type)
+      {
+      case bp_watchpoint:
+***************
+*** 2106,2111 ****
+--- 2114,2122 ----
+    register struct breakpoint *b;
+    register bpstat bs;
+  
++   if (cadillac)
++     cadillac_delete_breakpoint(bpt);
++ 
+    if (bpt->inserted)
+        target_remove_breakpoint(bpt->address, bpt->shadow_contents);
+  
+***************
+*** 2277,2282 ****
+--- 2288,2295 ----
+      if (b->number == bptnum)
+        {
+  	b->ignore_count = count;
++ 	if (cadillac)
++ 	  cadillac_ignore_breakpoint(b);
+  	if (!from_tty)
+  	  return;
+  	else if (count == 0)
+***************
+*** 2301,2307 ****
+    struct breakpoint *b;
+  
+    ALL_BREAKPOINTS (b)
+!     b->ignore_count = 0;
+  }
+  
+  /* Command to set ignore-count of breakpoint N to COUNT.  */
+--- 2314,2324 ----
+    struct breakpoint *b;
+  
+    ALL_BREAKPOINTS (b)
+!     {
+!       b->ignore_count = 0;
+!       if (cadillac)
+! 	cadillac_ignore_breakpoint(b);
+!     }
+  }
+  
+  /* Command to set ignore-count of breakpoint N to COUNT.  */
+***************
+*** 2368,2373 ****
+--- 2385,2393 ----
+  {
+    bpt->enable = enabled;
+  
++   if (cadillac)
++     cadillac_enable_breakpoint(bpt);
++ 
+    if (xgdb_verbose && bpt->type == bp_breakpoint)
+      printf ("breakpoint #%d enabled\n", bpt->number);
+  
+***************
+*** 2415,2420 ****
+--- 2435,2443 ----
+  disable_breakpoint (bpt)
+       struct breakpoint *bpt;
+  {
++   if (cadillac)
++     cadillac_disable_breakpoint(bpt);
++ 
+    bpt->enable = disabled;
+  
+    if (xgdb_verbose && bpt->type == bp_breakpoint)
+diff -rc command.c command.c
+*** command.c	Mon Jun 22 20:33:41 1992
+--- command.c	Sat Jun 27 12:30:01 1992
+***************
+*** 1149,1155 ****
+      }
+  
+    if (pid != -1)
+!     while ((rc = wait (&status)) != pid && rc != -1)
+        ;
+    else
+      error ("Fork failed");
+--- 1149,1155 ----
+      }
+  
+    if (pid != -1)
+!     while ((rc = cadillac ? cadillac_wait(&status) : wait (&status)) != pid && rc != -1)
+        ;
+    else
+      error ("Fork failed");
+diff -rc config/amix.mh config/amix.mh
+*** config/amix.mh	Tue Jun  9 19:05:16 1992
+--- config/amix.mh	Sat Jun 27 12:31:29 1992
+***************
+*** 22,24 ****
+--- 22,31 ----
+  
+  # SVR4 puts the BSD compatible install in /usr/ucb.
+  INSTALL = /usr/ucb/install -c
++ 
++ # These are the libs that are needed for the Cadillac version of gdb on
++ # SVR4.  Note that we MUST include the standard C library before libucb.a,
++ # otherwise we get lots of broken stuff we don't want.
++ CONNECTION_LIB = deblib/connection/libconn.a
++ CADILLAC_LIBS = ${CONNECTION_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
++ 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
+diff -rc config/ncr3000.mh config/ncr3000.mh
+*** config/ncr3000.mh	Mon Jun 15 12:25:13 1992
+--- config/ncr3000.mh	Sat Jun 27 12:31:30 1992
+***************
+*** 38,40 ****
+--- 38,47 ----
+  # The /usr/ucb/install program is incompatible (complains about unknown
+  # group staff).  Use good old cp...
+  INSTALL = cp
++ 
++ # These are the libs that are needed for the Cadillac version of gdb on
++ # SVR4.  Note that we MUST include the standard C library before libucb.a,
++ # otherwise we get lots of broken stuff we don't want.
++ CONNECTION_LIB = deblib/connection/libconn.a
++ CADILLAC_LIBS = ${CONNECTION_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
++ 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
+diff -rc configure.in configure.in
+*** configure.in	Mon Jun 22 17:25:00 1992
+--- configure.in	Sat Jun 27 12:31:29 1992
+***************
+*** 1,4 ****
+! configdirs="doc"
+  srcname="GDB"
+  srctrigger=main.c
+  target_dependent=true
+--- 1,4 ----
+! configdirs="deblib doc"
+  srcname="GDB"
+  srctrigger=main.c
+  target_dependent=true
+diff -rc defs.h defs.h
+*** defs.h	Thu Jun 25 04:50:31 1992
+--- defs.h	Sat Jun 27 12:30:02 1992
+***************
+*** 770,773 ****
+--- 770,842 ----
+  extern CORE_ADDR
+  push_word ();
+  
++ /* Energize/Cadillac stuff */
++ 
++ /* Non-zero means that we're doing the cadillac interface. */
++ extern int cadillac;
++ 
++ /* Get a pty for use with cadillac */
++ extern char *cadillac_getpty PARAMS ((void));
++ 
++ /* Notify cadillac of new process creation */
++ extern void cadillac_new_process PARAMS ((void));
++ 
++ /* Low level wait routine for wait_for_inferior */
++ extern int cadillac_wait PARAMS ((int *));
++ 
++ /* Initialize */
++ extern void cadillac_initialize PARAMS ((char *, char *));
++ 
++ /* Main loop for cadillac protocol driver */
++ extern void cadillac_main_loop PARAMS ((void));
++ 
++ struct cmd_list_element;
++ 
++ /* Command hook for cadillac */
++ extern void cadillac_call_command PARAMS ((struct cmd_list_element *,
++ 					   char *, int));
++ 
++ /* Read commands for the command command, and others */
++ extern char *cadillac_command_line_input PARAMS ((void));
++ 
++ struct symbol;
++ struct type;
++ 
++ extern void cadillac_start_variable_annotation PARAMS ((char *,
++ 							struct symbol *,
++ 							struct type *,
++ 							CORE_ADDR,
++ 							char *));
++ 
++ extern void cadillac_end_variable_annotation PARAMS ((void));
++ 
++ extern void cadillac_annotate_function PARAMS ((char *, int, int));
++ 
++ struct objfile;
++ extern void cadillac_symbol_file PARAMS ((struct objfile *));
++ 
++ /*extern void cadillac_query PARAMS ((char *, ...));*/
++ extern void cadillac_query ();	/* Prototypes for varargs don't work */
++ 
++ extern char *cadillac_command_line_input PARAMS ((void));
++ 
++ extern void cadillac_acknowledge_query PARAMS ((char *));
++ 
++ extern void cadillac_fputs PARAMS ((const char *));
++ 
++ struct breakpoint;
++ extern void cadillac_condition_breakpoint PARAMS ((struct breakpoint *));
++ 
++ extern void cadillac_commands_breakpoint PARAMS ((struct breakpoint *));
++ 
++ extern void cadillac_ignore_breakpoint PARAMS ((struct breakpoint *));
++ 
++ extern void cadillac_create_breakpoint PARAMS ((struct breakpoint *));
++ 
++ extern void cadillac_delete_breakpoint PARAMS ((struct breakpoint *));
++ 
++ extern void cadillac_enable_breakpoint PARAMS ((struct breakpoint *));
++ 
++ extern void cadillac_disable_breakpoint PARAMS ((struct breakpoint *));
++ 
+  #endif /* !defined (DEFS_H) */
+diff -rc inflow.c inflow.c
+*** inflow.c	Tue Jun 23 21:49:19 1992
+--- inflow.c	Sat Jun 27 12:30:03 1992
+***************
+*** 81,87 ****
+  static short pgrp_inferior;
+  static short pgrp_ours;
+  # else /* not def SHORT_PGRP */
+! static int pgrp_inferior;
+  static int pgrp_ours;
+  # endif /* not def SHORT_PGRP */
+  #else /* not def TIOCGPGRP */
+--- 81,87 ----
+  static short pgrp_inferior;
+  static short pgrp_ours;
+  # else /* not def SHORT_PGRP */
+! int pgrp_inferior;
+  static int pgrp_ours;
+  # endif /* not def SHORT_PGRP */
+  #else /* not def TIOCGPGRP */
+diff -rc infrun.c infrun.c
+*** infrun.c	Tue Jun 23 21:49:22 1992
+--- infrun.c	Sat Jun 27 12:30:04 1992
+***************
+*** 617,622 ****
+--- 617,624 ----
+     Here we must get it up to actual execution of the real program.  */
+  
+    inferior_pid = pid;		/* Needed for wait_for_inferior stuff below */
++   if (cadillac)
++     cadillac_new_process();
+  
+    clear_proceed_status ();
+  
+***************
+*** 755,760 ****
+--- 757,764 ----
+  
+    attach (pid);
+    inferior_pid = pid;
++   if (cadillac) 
++     cadillac_new_process();
+    push_target (&child_ops);
+  
+    mark_breakpoints_out ();
+diff -rc inftarg.c inftarg.c
+*** inftarg.c	Sun Mar 29 15:21:27 1992
+--- inftarg.c	Sat Jun 27 12:30:04 1992
+***************
+*** 58,64 ****
+  #ifdef USE_PROC_FS
+      pid = proc_wait (status);
+  #else
+!     pid = wait (status);
+  #endif
+      if (pid == -1)		/* No more children to wait for */
+        {
+--- 58,67 ----
+  #ifdef USE_PROC_FS
+      pid = proc_wait (status);
+  #else
+!     if (cadillac)
+!       pid = cadillac_wait (status);
+!     else
+!       pid = wait (status);
+  #endif
+      if (pid == -1)		/* No more children to wait for */
+        {
+diff -rc main.c main.c
+*** main.c	Mon Jun  8 23:09:23 1992
+--- main.c	Sat Jun 27 12:30:05 1992
+***************
+*** 397,402 ****
+--- 397,403 ----
+    char *corearg = NULL;
+    char *cdarg = NULL;
+    char *ttyarg = NULL;
++   char *cadillac_id = NULL;
+  
+    /* Pointers to all arguments of +command option.  */
+    char **cmdarg;
+***************
+*** 492,497 ****
+--- 493,499 ----
+  	{"tty", required_argument, 0, 't'},
+  	{"baud", required_argument, 0, 'b'},
+  	{"b", required_argument, 0, 'b'},
++ 	{"context", required_argument, 0, 12},
+  /* Allow machine descriptions to add more options... */
+  #ifdef ADDITIONAL_OPTIONS
+  	ADDITIONAL_OPTIONS
+***************
+*** 524,529 ****
+--- 526,534 ----
+  	  case 11:
+  	    cdarg = optarg;
+  	    break;
++ 	  case 12:
++ 	    cadillac_id = optarg;
++ 	    break;
+  	  case 's':
+  	    symarg = optarg;
+  	    break;
+***************
+*** 670,675 ****
+--- 675,683 ----
+    free ((PTR)dirarg);
+    do_cleanups (ALL_CLEANUPS);
+  
++   if (cadillac_id)
++     cadillac_initialize (cadillac_id, execarg);
++ 
+    if (execarg != NULL
+        && symarg != NULL
+        && strcmp (execarg, symarg) == 0)
+***************
+*** 691,696 ****
+--- 699,705 ----
+  	if (!setjmp (to_top_level))
+  	  symbol_file_command (symarg, 0);
+      }
++ 
+    do_cleanups (ALL_CLEANUPS);
+  
+    /* After the symbol file has been read, print a newline to get us
+***************
+*** 818,824 ****
+        if (!setjmp (to_top_level))
+  	{
+  	  do_cleanups (ALL_CLEANUPS);		/* Do complete cleanup */
+! 	  command_loop ();
+            quit_command ((char *)0, instream == stdin);
+  	}
+      }
+--- 827,836 ----
+        if (!setjmp (to_top_level))
+  	{
+  	  do_cleanups (ALL_CLEANUPS);		/* Do complete cleanup */
+! 	  if (cadillac_id)
+! 	    cadillac_main_loop();
+! 	  else
+! 	    command_loop ();
+            quit_command ((char *)0, instream == stdin);
+  	}
+      }
+***************
+*** 880,886 ****
+        else if (c->function.cfunc == NO_FUNCTION)
+  	error ("That is not a command, just a help topic.");
+        else
+! 	(*c->function.cfunc) (arg, from_tty & caution);
+     }
+  
+    /* Tell the user if the language has changed (except first time).  */
+--- 892,901 ----
+        else if (c->function.cfunc == NO_FUNCTION)
+  	error ("That is not a command, just a help topic.");
+        else
+! 	if (cadillac)
+! 	  cadillac_call_command (c, arg, from_tty & caution);
+! 	else
+! 	  (*c->function.cfunc) (arg, from_tty & caution);
+     }
+  
+    /* Tell the user if the language has changed (except first time).  */
+***************
+*** 1516,1522 ****
+    while (1)
+      {
+        dont_repeat ();
+!       p = command_line_input ((char *) NULL, instream == stdin);
+        if (p == NULL)
+  	/* Treat end of file like "end".  */
+  	break;
+--- 1531,1540 ----
+    while (1)
+      {
+        dont_repeat ();
+!       if (cadillac)
+! 	p = cadillac_command_line_input();
+!       else
+! 	p = command_line_input ((char *) NULL, instream == stdin);
+        if (p == NULL)
+  	/* Treat end of file like "end".  */
+  	break;
+***************
+*** 1820,1826 ****
+  void
+  print_prompt ()
+  {
+!   printf ("%s", prompt);
+    fflush (stdout);
+  }
+  
+--- 1838,1844 ----
+  void
+  print_prompt ()
+  {
+!   printf_filtered ("%s", prompt);
+    fflush (stdout);
+  }
+  
+diff -rc printcmd.c printcmd.c
+*** printcmd.c	Thu Jun 25 03:58:47 1992
+--- printcmd.c	Sat Jun 27 12:30:05 1992
+***************
+*** 778,783 ****
+--- 778,792 ----
+      {
+        int histindex = record_latest_value (val);
+  
++       if (cadillac)
++ 	{
++ 	  char buf[20];
++ 
++ 	  sprintf(buf, "$%d", histindex);
++ 	  cadillac_start_variable_annotation(buf, NULL, VALUE_TYPE(val),
++ 					     VALUE_ADDRESS(val), "");
++ 	}
++ 
+        if (inspect)
+  	printf ("\031(gdb-makebuffer \"%s\"  %d '(\"", exp, histindex);
+        else
+***************
+*** 784,789 ****
+--- 793,800 ----
+  	if (histindex >= 0) printf_filtered ("$%d = ", histindex);
+  
+        print_formatted (val, format, fmt.size);
++       if (cadillac)
++ 	cadillac_end_variable_annotation();
+        printf_filtered ("\n");
+        if (inspect)
+  	printf("\") )\030");
+***************
+*** 1610,1620 ****
+--- 1621,1641 ----
+  	 standard indentation here is 4 spaces, and val_print indents
+  	 2 for each recurse.  */
+        val = read_var_value (sym, FRAME_INFO_ID (fi));
++ 
++       if (cadillac)
++ 	cadillac_start_variable_annotation(SYMBOL_NAME(sym), sym,
++ 					   VALUE_TYPE(val),
++ 					   VALUE_ADDRESS(val), "");
++ 
+        if (val)
+          val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), VALUE_ADDRESS (val),
+  		   stream, 0, 0, 2, Val_no_prettyprint);
+        else
+  	fputs_filtered ("???", stream);
++ 
++       if (cadillac)
++ 	cadillac_end_variable_annotation();
++ 
+        first = 0;
+      }
+  
+diff -rc stack.c stack.c
+*** stack.c	Sat Jun 20 16:30:33 1992
+--- stack.c	Sat Jun 27 12:30:06 1992
+***************
+*** 159,165 ****
+        if (addressprint)
+          printf_filtered ("%s in ", local_hex_string(fi->pc));
+  
+!       fputs_demangled (fname, stdout, 0);
+        fputs_filtered (" (...)\n", stdout);
+        
+        return;
+--- 159,168 ----
+        if (addressprint)
+          printf_filtered ("%s in ", local_hex_string(fi->pc));
+  
+!       if (cadillac)
+! 	cadillac_annotate_function(fname, 0, level);
+!       else
+! 	fputs_demangled (fname, stdout, 0);
+        fputs_filtered (" (...)\n", stdout);
+        
+        return;
+***************
+*** 218,224 ****
+        if (addressprint)
+  	if (fi->pc != sal.pc || !sal.symtab)
+  	  printf_filtered ("%s in ", local_hex_string(fi->pc));
+!       fputs_demangled (funname ? funname : "??", stdout, 0);
+        wrap_here ("   ");
+        fputs_filtered (" (", stdout);
+        if (args)
+--- 221,230 ----
+        if (addressprint)
+  	if (fi->pc != sal.pc || !sal.symtab)
+  	  printf_filtered ("%s in ", local_hex_string(fi->pc));
+!       if (cadillac)
+! 	cadillac_annotate_function(funname ? funname : "??", 0, level);
+!       else
+! 	fputs_demangled (funname ? funname : "??", stdout, 0);
+        wrap_here ("   ");
+        fputs_filtered (" (", stdout);
+        if (args)
+***************
+*** 255,261 ****
+  	{
+  	  if (addressprint && mid_statement)
+  	    printf_filtered ("%s\t", local_hex_string(fi->pc));
+! 	  print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
+  	}
+        current_source_line = max (sal.line - lines_to_list/2, 1);
+      }
+--- 261,268 ----
+  	{
+  	  if (addressprint && mid_statement)
+  	    printf_filtered ("%s\t", local_hex_string(fi->pc));
+! 	  if (!cadillac)
+! 	    print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
+  	}
+        current_source_line = max (sal.line - lines_to_list/2, 1);
+      }
+***************
+*** 429,435 ****
+    if (funname)
+      {
+        printf_filtered (" in ");
+!       fputs_demangled (funname, stdout, DMGL_ANSI | DMGL_PARAMS);
+      }
+    wrap_here ("   ");
+    if (sal.symtab)
+--- 436,446 ----
+    if (funname)
+      {
+        printf_filtered (" in ");
+!       if (cadillac)
+! 	cadillac_annotate_function(funname, DMGL_ANSI | DMGL_PARAMS,
+! 				 selected_frame_level);
+!       else
+! 	fputs_demangled (funname, stdout, DMGL_ANSI | DMGL_PARAMS);
+      }
+    wrap_here ("   ");
+    if (sal.symtab)
+diff -rc symfile.c symfile.c
+*** symfile.c	Sat Jun 13 09:20:12 1992
+--- symfile.c	Sat Jun 27 12:30:06 1992
+***************
+*** 555,560 ****
+--- 555,563 ----
+        fflush (stdout);
+      }
+  
++   if (cadillac)
++     cadillac_symbol_file(objfile);
++ 
+    return (objfile);
+  }
+  
+diff -rc utils.c utils.c
+*** utils.c	Mon Jun 15 07:27:07 1992
+--- utils.c	Sat Jun 27 12:30:07 1992
+***************
+*** 96,101 ****
+--- 96,102 ----
+  
+  char *error_pre_print;
+  char *warning_pre_print = "\nwarning: ";
++ 
+  
+  /* Add a new cleanup to the cleanup_chain,
+     and return the previous chain pointer
+***************
+*** 694,700 ****
+    register int ans2;
+  
+    /* Automatically answer "yes" if input is not from a terminal.  */
+!   if (!input_from_terminal_p ())
+      return 1;
+  
+    while (1)
+--- 695,701 ----
+    register int ans2;
+  
+    /* Automatically answer "yes" if input is not from a terminal.  */
+!   if (!input_from_terminal_p () && !cadillac)
+      return 1;
+  
+    while (1)
+***************
+*** 701,721 ****
+      {
+        va_start (args);
+        ctlstr = va_arg (args, char *);
+        vfprintf_filtered (stdout, ctlstr, args);
+-       va_end (args);
+        printf_filtered ("(y or n) ");
+!       fflush (stdout);
+!       answer = fgetc (stdin);
+!       clearerr (stdin);		/* in case of C-d */
+!       if (answer == EOF)	/* C-d */
+!         return 1;
+!       if (answer != '\n')	/* Eat rest of input line, to EOF or newline */
+! 	do 
+! 	  {
+! 	    ans2 = fgetc (stdin);
+! 	    clearerr (stdin);
+! 	  }
+!         while (ans2 != EOF && ans2 != '\n');
+        if (answer >= 'a')
+  	answer -= 040;
+        if (answer == 'Y')
+--- 702,734 ----
+      {
+        va_start (args);
+        ctlstr = va_arg (args, char *);
++       if (cadillac)
++ 	cadillac_query (ctlstr, args);
+        vfprintf_filtered (stdout, ctlstr, args);
+        printf_filtered ("(y or n) ");
+!       if (cadillac)
+! 	{
+! 	  char *buf;
+! 
+! 	  buf = cadillac_command_line_input();
+! 	  answer = buf ? *buf : 'Y';
+! 	  cadillac_acknowledge_query(buf);
+! 	}
+!       else
+! 	{
+! 	  fflush (stdout);
+! 	  answer = fgetc (stdin);
+! 	  clearerr (stdin);		/* in case of C-d */
+! 	  if (answer == EOF)	/* C-d */
+! 	    return 1;
+! 	  if (answer != '\n')	/* Eat rest of input line, to EOF or newline */
+! 	    do 
+! 	      {
+! 		ans2 = fgetc (stdin);
+! 		clearerr (stdin);
+! 	      }
+! 	  while (ans2 != EOF && ans2 != '\n');
+! 	}
+        if (answer >= 'a')
+  	answer -= 040;
+        if (answer == 'Y')
+***************
+*** 723,728 ****
+--- 736,742 ----
+        if (answer == 'N')
+  	return 0;
+        printf_filtered ("Please answer y or n.\n");
++       va_end (args);
+      }
+  }
+  
+***************
+*** 989,994 ****
+--- 1003,1014 ----
+    if (linebuffer == 0)
+      return;
+    
++   if (cadillac)
++     {
++       cadillac_fputs(linebuffer);
++       return;
++     }
++ 
+    /* Don't do any filtering if it is disabled.  */
+    if (stream != stdout
+     || (lines_per_page == UINT_MAX && chars_per_line == UINT_MAX))
+diff -rc valprint.c valprint.c
+*** valprint.c	Tue Jun 23 23:24:51 1992
+--- valprint.c	Sat Jun 27 12:30:07 1992
+***************
+*** 485,490 ****
+--- 485,491 ----
+       struct type **dont_print;
+  {
+    int i, len, n_baseclasses;
++   char expr_tag[100];		/* Cadillac */
+  
+    check_stub_type (type);
+  
+***************
+*** 549,554 ****
+--- 550,563 ----
+  	      fprint_symbol (stream, TYPE_FIELD_NAME (type, i));
+  	      fputs_filtered (" = ", stream);
+  	    }
++ 
++ 	  sprintf(expr_tag, ".%s", TYPE_FIELD_NAME(type, i));
++ 
++ 	  if (cadillac)
++ 	    cadillac_start_variable_annotation(expr_tag, NULL,
++ 					       TYPE_FIELD_TYPE(type, i),
++ 					       (CORE_ADDR) (valaddr + TYPE_FIELD_BITPOS(type, i) / 8),
++ 					       "");
+  	  if (TYPE_FIELD_PACKED (type, i))
+  	    {
+  	      value v;
+***************
+*** 567,572 ****
+--- 576,583 ----
+  			 valaddr + TYPE_FIELD_BITPOS (type, i) / 8,
+  			 0, stream, format, 0, recurse + 1, pretty);
+  	    }
++ 	  if (cadillac)
++ 	    cadillac_end_variable_annotation();
+  	}
+        if (pretty)
+  	{
+***************
+*** 801,806 ****
+--- 812,818 ----
+  		  unsigned int rep1;
+  		  /* Number of repetitions we have detected so far.  */
+  		  unsigned int reps;
++ 		  char expr_tag[100]; /* Cadillac */
+  		  
+  		  if (i != 0)
+  		    if (arrayprint)
+***************
+*** 822,827 ****
+--- 834,845 ----
+  		      ++rep1;
+  		    }
+  
++ 		  sprintf(expr_tag, "[%d]", i);
++ 		  if (cadillac)
++ 		    cadillac_start_variable_annotation(expr_tag, NULL,
++ 						       elttype,
++ 						       (CORE_ADDR) (valaddr + i * eltlen),
++ 						       "");
+  		  if (reps > REPEAT_COUNT_THRESHOLD)
+  		    {
+  		      val_print (elttype, valaddr + i * eltlen,
+***************
+*** 838,843 ****
+--- 856,863 ----
+  				 recurse + 1, pretty);
+  		      things_printed++;
+  		    }
++ 		  if (cadillac)
++ 		    cadillac_end_variable_annotation();
+  		}
+  	      if (i < len)
+  		fprintf_filtered (stream, "...");
