@@ -1,5 +1,7 @@
 Tue Mar 24 23:50:16 1992  K. Richard Pixley  (rich@cygnus.com)
 
+	* Maskefile.in: add .stmp-rcs to all.
+
 	* configure.in: remove gas from rs6000 build, use aix host fragment.
 
 Mon Mar 23 19:43:35 1992  K. Richard Pixley  (rich@cygnus.com)
