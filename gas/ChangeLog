@@ -1,3 +1,18 @@
+Mon Sep 15 18:33:06 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-v850.c (processor_mask): New variable.
+	(set_machine, md_parse_option): Set processor_mask.
+	(md_assemble): Check that instruction is available to target
+	processor. 
+
+	* config/tc-v850.h (TARGET_PROCESSOR): New constant.
+start-sanitize-v850e
+	(TARGET_PROCESSOR): New constant.
+end-sanitize-v850e
+start-sanitize-v850eq
+	(TARGET_PROCESSOR): New constant.
+end-sanitize-v850eq
+
 start-sanitize-tx19
 Mon Sep 15 17:26:46 1997  Gavin Koch  <gavin@cygnus.com>
 

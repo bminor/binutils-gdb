@@ -34,8 +34,11 @@ static bfd_reloc_code_real_type hold_cons_reloc;
 static boolean warn_signed_overflows   = FALSE;
 static boolean warn_unsigned_overflows = FALSE;
 
-/* Indicates the target processor type.  */
+/* Indicates the target BFD machine number.  */
 static int     machine                 = TARGET_MACHINE;
+
+/* Indicates the target processor(s) for the assemble.  */
+static unsigned int	processor_mask = TARGET_PROCESSOR;
 
 
 /* Structure to hold information about predefined registers.  */
@@ -211,6 +214,17 @@ set_machine (int number)
 {
   machine = number;
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, machine);
+
+  switch (machine)
+    {
+    case 0: processor_mask = PROCESSOR_V850; break;
+/* start-sanitize-v850e */
+    case bfd_mach_v850e: processor_mask = PROCESSOR_V850E; break;
+/* end-sanitize-v850e */
+/* start-sanitize-v850eq */
+    case bfd_mach_v850eq: processor_mask = PROCESSOR_V850EQ; break;
+/* end-sanitize-v850eq */
+    }
 }
 
 /* The target specific pseudo-ops which we support.  */
@@ -821,6 +835,8 @@ md_parse_option (c, arg)
       else if (strcmp (arg, "v850e") == 0)
 	{
 	  machine = bfd_mach_v850e;
+	  processor_mask = PROCESSOR_V850 | PROCESSOR_V850E;
+	  
 	  return 1;
 	}
 /* end-sanitize-v850e */
@@ -828,6 +844,7 @@ md_parse_option (c, arg)
       else if (strcmp (arg, "v850eq") == 0)
 	{
 	  machine = bfd_mach_v850eq;
+	  processor_mask = PROCESSOR_V850EQ;
 	  return 1;
 	}
 /* end-sanitize-v850eq */
@@ -1133,9 +1150,16 @@ md_assemble (str)
     {
       const char * errmsg = NULL;
 
+      match = 0;
+      
+      if ((opcode->processors & processor_mask) == 0)
+	{
+	  errmsg = "Target processor doe snot support this instruction.";
+	  goto error;
+	}
+      
       relaxable = 0;
       fc = 0;
-      match = 0;
       next_opindex = 0;
       insn = opcode->opcode;
       extra_data_after_insn = false;
