@@ -60,8 +60,6 @@ static void resume_cleanups (void *);
 
 static int hook_stop_stub (void *);
 
-static void delete_breakpoint_current_contents (void *);
-
 static int restore_selected_frame (void *);
 
 static void build_infrun (void);
@@ -305,6 +303,8 @@ static int breakpoints_failed;
 static int stop_print_frame;
 
 static struct breakpoint *step_resume_breakpoint = NULL;
+/* NOTE: cagney/2004-05-08: This variable needs to be garbage
+   collected, it isn't used.  */
 static struct breakpoint *through_sigtramp_breakpoint = NULL;
 
 /* On some platforms (e.g., HP-UX), hardware watchpoints have bad
@@ -422,9 +422,6 @@ follow_exec (int pid, char *execd_pathname)
   step_resume_breakpoint = NULL;
   step_range_start = 0;
   step_range_end = 0;
-
-  /* If there was one, it's gone now. */
-  through_sigtramp_breakpoint = NULL;
 
   /* What is this a.out's name? */
   printf_unfiltered ("Executing new program: %s\n", execd_pathname);
@@ -905,17 +902,6 @@ init_wait_for_inferior (void)
 
   stepping_past_singlestep_breakpoint = 0;
 }
-
-static void
-delete_breakpoint_current_contents (void *arg)
-{
-  struct breakpoint **breakpointp = (struct breakpoint **) arg;
-  if (*breakpointp != NULL)
-    {
-      delete_breakpoint (*breakpointp);
-      *breakpointp = NULL;
-    }
-}
 
 /* This enum encodes possible reasons for doing a target_wait, so that
    wfi can call target_wait in one place.  (Ultimately the call will be
@@ -984,9 +970,10 @@ void init_execution_control_state (struct execution_control_state *ecs);
 static void handle_step_into_function (struct execution_control_state *ecs);
 void handle_inferior_event (struct execution_control_state *ecs);
 
-static void check_sigtramp2 (struct execution_control_state *ecs);
 static void step_into_function (struct execution_control_state *ecs);
 static void step_over_function (struct execution_control_state *ecs);
+static void insert_step_resume_breakpoint (struct frame_info *step_frame,
+					   struct execution_control_state *ecs);
 static void stop_stepping (struct execution_control_state *ecs);
 static void prepare_to_wait (struct execution_control_state *ecs);
 static void keep_going (struct execution_control_state *ecs);
@@ -1008,8 +995,6 @@ wait_for_inferior (void)
 
   old_cleanups = make_cleanup (delete_step_resume_breakpoint,
 			       &step_resume_breakpoint);
-  make_cleanup (delete_breakpoint_current_contents,
-		&through_sigtramp_breakpoint);
 
   /* wfi still stays in a loop, so it's OK just to take the address of
      a local to get the ecs pointer.  */
@@ -1070,8 +1055,6 @@ fetch_inferior_event (void *client_data)
     {
       old_cleanups = make_exec_cleanup (delete_step_resume_breakpoint,
 					&step_resume_breakpoint);
-      make_exec_cleanup (delete_breakpoint_current_contents,
-			 &through_sigtramp_breakpoint);
 
       /* Fill in with reasonable starting values.  */
       init_execution_control_state (async_ecs);
@@ -1989,15 +1972,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  return;
 	}
 
-      /* Don't even think about breakpoints
-         if just proceeded over a breakpoint.
-
-         However, if we are trying to proceed over a breakpoint
-         and end up in sigtramp, then through_sigtramp_breakpoint
-         will be set and we should check whether we've hit the
-         step breakpoint.  */
-      if (stop_signal == TARGET_SIGNAL_TRAP && trap_expected
-	  && through_sigtramp_breakpoint == NULL)
+      /* Don't even think about breakpoints if just proceeded over a
+         breakpoint.  */
+      if (stop_signal == TARGET_SIGNAL_TRAP && trap_expected)
 	bpstat_clear (&stop_bpstat);
       else
 	{
@@ -2080,39 +2057,22 @@ process_event_stop_test:
       if (signal_program[stop_signal] == 0)
 	stop_signal = TARGET_SIGNAL_0;
 
-      /* I'm not sure whether this needs to be check_sigtramp2 or
-         whether it could/should be keep_going.
+      if (step_range_end != 0
+	  && stop_signal != TARGET_SIGNAL_0
+	  && stop_pc >= step_range_start && stop_pc < step_range_end
+	  && frame_id_eq (get_frame_id (get_current_frame ()), step_frame_id))
+	{
+	  /* The inferior is about to take a signal that will take it
+	     out of the single step range.  Set a breakpoint at the
+	     current PC (which is presumably where the signal handler
+	     will eventually return) and then allow the inferior to
+	     run free.
 
-         This used to jump to step_over_function if we are stepping,
-         which is wrong.
-
-         Suppose the user does a `next' over a function call, and while
-         that call is in progress, the inferior receives a signal for
-         which GDB does not stop (i.e., signal_stop[SIG] is false).  In
-         that case, when we reach this point, there is already a
-         step-resume breakpoint established, right where it should be:
-         immediately after the function call the user is "next"-ing
-         over.  If we call step_over_function now, two bad things
-         happen:
-
-         - we'll create a new breakpoint, at wherever the current
-         frame's return address happens to be.  That could be
-         anywhere, depending on what function call happens to be on
-         the top of the stack at that point.  Point is, it's probably
-         not where we need it.
-
-         - the existing step-resume breakpoint (which is at the correct
-         address) will get orphaned: step_resume_breakpoint will point
-         to the new breakpoint, and the old step-resume breakpoint
-         will never be cleaned up.
-
-         The old behavior was meant to help HP-UX single-step out of
-         sigtramps.  It would place the new breakpoint at prev_pc, which
-         was certainly wrong.  I don't know the details there, so fixing
-         this probably breaks that.  As with anything else, it's up to
-         the HP-UX maintainer to furnish a fix that doesn't break other
-         platforms.  --JimB, 20 May 1999 */
-      check_sigtramp2 (ecs);
+	     Note that this is only needed for a signal delivered
+	     while in the single-step range.  Nested signals aren't a
+	     problem as they eventually all return.  */
+	  insert_step_resume_breakpoint (get_current_frame (), ecs);
+	}
       keep_going (ecs);
       return;
     }
@@ -2152,13 +2112,6 @@ process_event_stop_test:
 	if (step_resume_breakpoint != NULL)
 	  {
 	    delete_step_resume_breakpoint (&step_resume_breakpoint);
-	  }
-	/* Not sure whether we need to blow this away too, but probably
-	   it is like the step-resume breakpoint.  */
-	if (through_sigtramp_breakpoint != NULL)
-	  {
-	    delete_breakpoint (through_sigtramp_breakpoint);
-	    through_sigtramp_breakpoint = NULL;
 	  }
 
 #if 0
@@ -2207,9 +2160,8 @@ process_event_stop_test:
       case BPSTAT_WHAT_STOP_NOISY:
 	stop_print_frame = 1;
 
-	/* We are about to nuke the step_resume_breakpoint and
-	   through_sigtramp_breakpoint via the cleanup chain, so
-	   no need to worry about it here.  */
+	/* We are about to nuke the step_resume_breakpointt via the
+	   cleanup chain, so no need to worry about it here.  */
 
 	stop_stepping (ecs);
 	return;
@@ -2217,9 +2169,8 @@ process_event_stop_test:
       case BPSTAT_WHAT_STOP_SILENT:
 	stop_print_frame = 0;
 
-	/* We are about to nuke the step_resume_breakpoint and
-	   through_sigtramp_breakpoint via the cleanup chain, so
-	   no need to worry about it here.  */
+	/* We are about to nuke the step_resume_breakpoin via the
+	   cleanup chain, so no need to worry about it here.  */
 
 	stop_stepping (ecs);
 	return;
@@ -2251,10 +2202,6 @@ process_event_stop_test:
 	break;
 
       case BPSTAT_WHAT_THROUGH_SIGTRAMP:
-	if (through_sigtramp_breakpoint)
-	  delete_breakpoint (through_sigtramp_breakpoint);
-	through_sigtramp_breakpoint = NULL;
-
 	/* If were waiting for a trap, hitting the step_resume_break
 	   doesn't count as getting it.  */
 	if (trap_expected)
@@ -2398,9 +2345,6 @@ process_event_stop_test:
       /* Having a step-resume breakpoint overrides anything
          else having to do with stepping commands until
          that breakpoint is reached.  */
-      /* I'm not sure whether this needs to be check_sigtramp2 or
-         whether it could/should be keep_going.  */
-      check_sigtramp2 (ecs);
       keep_going (ecs);
       return;
     }
@@ -2408,9 +2352,6 @@ process_event_stop_test:
   if (step_range_end == 0)
     {
       /* Likewise if we aren't even stepping.  */
-      /* I'm not sure whether this needs to be check_sigtramp2 or
-         whether it could/should be keep_going.  */
-      check_sigtramp2 (ecs);
       keep_going (ecs);
       return;
     }
@@ -2422,9 +2363,6 @@ process_event_stop_test:
      within it! */
   if (stop_pc >= step_range_start && stop_pc < step_range_end)
     {
-      /* We might be doing a BPSTAT_WHAT_SINGLE and getting a signal.
-         So definately need to check for sigtramp here.  */
-      check_sigtramp2 (ecs);
       keep_going (ecs);
       return;
     }
@@ -2688,48 +2626,11 @@ process_event_stop_test:
 static int
 currently_stepping (struct execution_control_state *ecs)
 {
-  return ((through_sigtramp_breakpoint == NULL
-	   && !ecs->handling_longjmp
+  return ((!ecs->handling_longjmp
 	   && ((step_range_end && step_resume_breakpoint == NULL)
 	       || trap_expected))
 	  || ecs->stepping_through_solib_after_catch
 	  || bpstat_should_step ());
-}
-
-static void
-check_sigtramp2 (struct execution_control_state *ecs)
-{
-  char *name;
-  struct symtab_and_line sr_sal;
-
-  /* Check that what has happened here is that we have just stepped
-     the inferior with a signal (because it is a signal which
-     shouldn't make us stop), thus stepping into sigtramp.  */
-
-  if (!trap_expected)
-    return;
-  if (get_frame_type (get_current_frame ()) != SIGTRAMP_FRAME)
-    return;
-
-  /* So we need to set a step_resume_break_address breakpoint and
-     continue until we hit it, and then step.  FIXME: This should be
-     more enduring than a step_resume breakpoint; we should know that
-     we will later need to keep going rather than re-hitting the
-     breakpoint here (see the testsuite, gdb.base/signals.exp where it
-     says "exceedingly difficult").  */
-
-  init_sal (&sr_sal);	/* initialize to zeroes */
-  sr_sal.pc = prev_pc;
-  sr_sal.section = find_pc_overlay (sr_sal.pc);
-  /* We perhaps could set the frame if we kept track of what the frame
-     corresponding to prev_pc was.  But we don't, so don't.  */
-  through_sigtramp_breakpoint =
-    set_momentary_breakpoint (sr_sal, null_frame_id, bp_through_sigtramp);
-  if (breakpoints_inserted)
-    insert_breakpoints ();
-
-  ecs->remove_breakpoints_on_following_step = 1;
-  ecs->another_trap = 1;
 }
 
 /* Subroutine call with source code we should not step over.  Do step
@@ -2807,6 +2708,38 @@ step_into_function (struct execution_control_state *ecs)
       step_range_end = step_range_start;
     }
   keep_going (ecs);
+}
+
+/* The inferior, as a result of a function call (has left) or signal
+   (about to leave) the single-step range.  Set a momentary breakpoint
+   within the step range where the inferior is expected to later
+   return.  */
+
+static void
+insert_step_resume_breakpoint (struct frame_info *step_frame,
+			       struct execution_control_state *ecs)
+{
+  struct symtab_and_line sr_sal;
+
+  /* This is only used within the step-resume range/frame.  */
+  gdb_assert (frame_id_eq (step_frame_id, get_frame_id (step_frame)));
+  gdb_assert (step_range_end != 0);
+  gdb_assert (get_frame_pc (step_frame) >= step_range_start
+	      && get_frame_pc (step_frame) < step_range_end);
+
+  init_sal (&sr_sal);		/* initialize to zeros */
+
+  sr_sal.pc = ADDR_BITS_REMOVE (get_frame_pc (step_frame));
+  sr_sal.section = find_pc_overlay (sr_sal.pc);
+
+  check_for_old_step_resume_breakpoint ();
+
+  step_resume_breakpoint
+    = set_momentary_breakpoint (sr_sal, get_frame_id (step_frame),
+				bp_step_resume);
+
+  if (breakpoints_inserted)
+    insert_breakpoints ();
 }
 
 /* We've just entered a callee, and we wish to resume until it returns
@@ -2933,15 +2866,13 @@ keep_going (struct execution_control_state *ecs)
       /* If we've just finished a special step resume and we don't
          want to hit a breakpoint, pull em out.  */
       if (step_resume_breakpoint == NULL
-	  && through_sigtramp_breakpoint == NULL
 	  && ecs->remove_breakpoints_on_following_step)
 	{
 	  ecs->remove_breakpoints_on_following_step = 0;
 	  remove_breakpoints ();
 	  breakpoints_inserted = 0;
 	}
-      else if (!breakpoints_inserted &&
-	       (through_sigtramp_breakpoint != NULL || !ecs->another_trap))
+      else if (!breakpoints_inserted && !ecs->another_trap)
 	{
 	  breakpoints_failed = insert_breakpoints ();
 	  if (breakpoints_failed)

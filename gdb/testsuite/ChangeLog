@@ -1,3 +1,8 @@
+2004-05-10  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/signals.exp (signal_tests_1): Simplify "continue to
+	func1" and "next to 2nd alarm", kernel bug avoided.
+
 2004-05-10  Daniel Jacobowitz  <dan@debian.org>
 
 	PR external/1568

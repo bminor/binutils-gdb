@@ -1,3 +1,16 @@
+2004-05-10  Andrew Cagney  <cagney@redhat.com>
+
+	* infrun.c (check_sigtramp2): Delete function.
+	(handle_inferior_event): When single stepping, and taking a
+	signal, set a breakpoint at the signal return address.  Delete
+	redundant calls to check_sigtramp2.
+	(insert_step_resume_breakpoint): New function.
+	(through_sigtramp_breakpoint, handle_inferior_event)
+	(follow_exec, wait_for_inferior, fetch_inferior_event)
+	(currently_stepping, keep_going): Delete most uses of
+	through_sigtramp_breakpoint, not that it should be deleted.
+	(delete_breakpoint_current_contents): Delete function.
+
 2004-05-10  Randolph Chung  <tausq@debian.org>
 
 	* config/pa/linux.mt (TM_FILE): Use new tm-linux.h for hppa-linux
