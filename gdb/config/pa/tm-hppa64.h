@@ -24,6 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* PA 64-bit specific definitions.  Override those which are in
    tm-hppa.h */
 
+struct frame_info;
+
 /* jimb: this must go.  I'm just using it to disable code I haven't
    gotten working yet.  */
 #define GDB_TARGET_IS_HPPA_20W

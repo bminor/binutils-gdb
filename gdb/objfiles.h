@@ -29,6 +29,7 @@
 struct bcache;
 struct htab;
 struct symtab;
+struct objfile_data;
 
 /* This structure maintains information on a per-objfile basis about the
    "entry point" of the objfile, and the scope within which the entry point

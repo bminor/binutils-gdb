@@ -1,3 +1,11 @@
+2003-09-13  Andrew Cagney  <cagney@redhat.com>
+
+	* config/pa/tm-hppa64.h (struct frame_info): Declare opaque.
+	* ppc-tdep.h (struct regcache): Declare opaque.
+	* objfiles.h (struct objfile_data): Declare opaque.
+	* cp-support.h (struct objfile): Declare opaque.
+	* linux-nat.h (target_waitstatus): Declare opaque.
+
 2003-09-14  Mark Kettenis  <kettenis@gnu.org>
 
 	* cris-tdep.c (cris_gdbarch_init): Set

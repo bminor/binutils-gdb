@@ -1,3 +1,7 @@
+2003-09-13  Andrew Cagney  <cagney@redhat.com>
+
+	* tui.h (struct ui_file): Add opaque declaration.
+
 2003-08-04  Daniel Jacobowitz  <drow@mvista.com>
 
 	* tui-interp.c: Include "cli-out.h".

@@ -25,6 +25,7 @@
 struct gdbarch;
 struct frame_info;
 struct value;
+struct regcache;
 
 /* From ppc-linux-tdep.c... */
 CORE_ADDR ppc_linux_frame_saved_pc (struct frame_info *fi);
