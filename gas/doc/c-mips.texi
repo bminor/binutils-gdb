@@ -71,7 +71,7 @@ assembly; see @ref{MIPS ISA,, Directives to override the ISA level}.
 Assume that 32-bit general purpose registers are available.  This
 affects synthetic instructions such as @code{move}, which will assemble
 to a 32-bit or a 64-bit instruction depending on this flag.  On some
-MIPS variants there is be a 32-bit mode flag; when this flag is set,
+MIPS variants there is a 32-bit mode flag; when this flag is set,
 64-bit instructions generate a trap.  Also, some 32-bit OSes only save
 the 32-bit registers on a context switch, so it is essential never to
 use the 64-bit registers.
