@@ -1,5 +1,9 @@
 Mon Mar 29 12:56:56 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* configure.in: Set BFDDEF and BFDLIB at the top of Makefile, not
+	the bottom (make expands variables in dependencies when the
+	dependencies are read, not when they are used).
+
 	* config/obj-coffbfd.c (fill_section): Don't set NOLOAD bit for
 	a29k .bss section; the mondfe program doesn't like it.
 
