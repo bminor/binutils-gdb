@@ -1,3 +1,8 @@
+1998-12-08  James E Wilson  <wilson@wilson-pc.cygnus.com>
+
+	* gennltvals.sh: Add i960.
+	* nltvals.def: Rebuild.
+
 1998-12-04  Doug Evans  <devans@casey.cygnus.com>
 
 	* cgen-defs.h: New file, old cgen-sim.h.
