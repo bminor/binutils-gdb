@@ -1,3 +1,9 @@
+Sat Apr  4 10:05:00 1998  Dawn Perchik  <dawn@cygnus.com>
+	* mdebugread.c (parse_partial_symbols): If this is an .mdebug 
+	section in an ELF file, override a symbol's ECOFF section with its 
+	ELF section.  Also, fix stabs continuation where a stabs string 
+	continues for more than one continuation.
+
 Mon Apr  6 09:17:48 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips-tdep.c (mips_push_arguments): Specify dimention of valbuf

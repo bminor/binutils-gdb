@@ -88,10 +88,19 @@ typedef struct mips_extra_func_info {
 #include "expression.h"
 #include "language.h"		/* Needed inside partial-stab.h */
 
+
 /* Provide a default mapping from a ecoff register number to a gdb REGNUM.  */
 #ifndef ECOFF_REG_TO_REGNUM
 #define ECOFF_REG_TO_REGNUM(num) (num)
 #endif
+
+/* Provide a way to test if we have both ECOFF and ELF symbol tables.  
+   We use this define in order to know whether we should override a 
+   symbol's ECOFF section with its ELF section.  This is necessary in 
+   case the symbol's ELF section could not be represented in ECOFF.  */
+#define ECOFF_IN_ELF(bfd) (bfd_get_flavour (bfd) == bfd_target_elf_flavour \
+			   && bfd_get_section_by_name (bfd, ".mdebug") != NULL)
+
 
 /* We put a pointer to this structure in the read_symtab_private field
    of the psymtab.  */
@@ -118,6 +127,20 @@ struct symloc
 #define DEBUG_SWAP(p) (PST_PRIVATE(p)->debug_swap)
 #define DEBUG_INFO(p) (PST_PRIVATE(p)->debug_info)
 #define PENDING_LIST(p) (PST_PRIVATE(p)->pending_list)
+
+#define SC_IS_TEXT(sc) ((sc) == scText \
+		   || (sc) == scRConst \
+          	   || (sc) == scInit \
+          	   || (sc) == scFini)
+#define SC_IS_DATA(sc) ((sc) == scData \
+		   || (sc) == scSData \
+		   || (sc) == scRData \
+		   || (sc) == scPData \
+		   || (sc) == scXData)
+#define SC_IS_COMMON(sc) ((sc) == scCommon || (sc) == scSCommon)
+#define SC_IS_BSS(sc) ((sc) == scBss || (sc) == scSBss)
+#define SC_IS_UNDEF(sc) ((sc) == scUndefined || (sc) == scSUndefined)
+                                      
 
 /* Things we import explicitly from other modules */
 
@@ -760,7 +783,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
       class = LOC_STATIC;
       b = top_stack->cur_block;
       s = new_symbol (name);
-      if (sh->sc == scCommon || sh->sc == scSCommon)
+      if (SC_IS_COMMON(sh->sc))
 	{
 	  /* It is a FORTRAN common block.  At least for SGI Fortran the
 	     address is not in the symbol; we need to fix it later in
@@ -791,7 +814,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
       add_symbol (s, b);
 
       /* Type could be missing if file is compiled without debugging info.  */
-      if (sh->sc == scUndefined || sh->sc == scSUndefined
+      if (SC_IS_UNDEF(sh->sc)
 	  || sh->sc == scNil || sh->index == indexNil)
 	SYMBOL_TYPE (s) = nodebug_var_symbol_type;
       else
@@ -851,7 +874,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
       SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
       SYMBOL_CLASS (s) = LOC_BLOCK;
       /* Type of the return value */
-      if (sh->sc == scUndefined || sh->sc == scSUndefined || sh->sc == scNil)
+      if (SC_IS_UNDEF(sh->sc) || sh->sc == scNil)
 	t = mdebug_type_int;
       else
 	{
@@ -900,7 +923,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
       add_block (b, top_stack->cur_st);
 
       /* Not if we only have partial info */
-      if (sh->sc == scUndefined || sh->sc == scSUndefined || sh->sc == scNil)
+      if (SC_IS_UNDEF(sh->sc) || sh->sc == scNil)
 	break;
 
       push_parse_stack ();
@@ -934,7 +957,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 	goto structured_common;
 
     case stBlock:		/* Either a lexical block, or some type */
-	if (sh->sc != scInfo && sh->sc != scCommon && sh->sc != scSCommon)
+	if (sh->sc != scInfo && !SC_IS_COMMON(sh->sc))
 	  goto case_stBlock_code;	/* Lexical block */
 
 	type_code = TYPE_CODE_UNDEF;	/* We have a type.  */
@@ -1207,7 +1230,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
       break;
 
     case stEnd:		/* end (of anything) */
-      if (sh->sc == scInfo || sh->sc == scCommon || sh->sc == scSCommon)
+      if (sh->sc == scInfo || SC_IS_COMMON(sh->sc))
 	{
 	  /* Finished with type */
 	  top_stack->cur_type = 0;
@@ -2096,8 +2119,7 @@ parse_external (es, bigend, section_offsets)
     }
 
   /* Reading .o files */
-  if (es->asym.sc == scUndefined || es->asym.sc == scSUndefined
-      || es->asym.sc == scNil)
+  if (SC_IS_UNDEF(es->asym.sc) || es->asym.sc == scNil)
     {
       char *what;
       switch (es->asym.st)
@@ -2150,7 +2172,7 @@ parse_external (es, bigend, section_offsets)
     case stLabel:
       /* Global common symbols are resolved by the runtime loader,
 	 ignore them.  */
-      if (es->asym.sc == scCommon || es->asym.sc == scSCommon)
+      if (SC_IS_COMMON(es->asym.sc))
 	break;
 
       /* Note that the case of a symbol with indexNil must be handled
@@ -2378,107 +2400,141 @@ parse_partial_symbols (objfile, section_offsets)
       fdr_to_pst[f_idx].n_globals = 0;
     }
 
-  /* Pass 2 over external syms: fill in external symbols */
-  ext_in = ext_block;
-  ext_in_end = ext_in + hdr->iextMax;
-  for (; ext_in < ext_in_end; ext_in++)
+  /* ECOFF in ELF:
+
+     For ECOFF in ELF, we skip the creation of the minimal symbols.
+     The ECOFF symbols should be a subset of the Elf symbols, and the 
+     section information of the elf symbols will be more accurate.
+     FIXME!  What about Irix 5's native linker?
+
+     By default, Elf sections which don't exist in ECOFF 
+     get put in ECOFF's absolute section by the gnu linker.
+     Since absolute sections don't get relocated, we 
+     end up calculating an address different from that of 
+     the symbol's minimal symbol (created earlier from the
+     Elf symtab).  
+
+     To fix this, either :
+     1) don't create the duplicate symbol
+	 (assumes ECOFF symtab is a subset of the ELF symtab;
+	 assumes no side-effects result from ignoring ECOFF symbol)
+     2) create it, only if lookup for existing symbol in ELF's minimal 
+        symbols fails
+	 (inefficient; 
+	 assumes no side-effects result from ignoring ECOFF symbol)
+     3) create it, but lookup ELF's minimal symbol and use it's section
+        during relocation, then modify "uniqify" phase to merge and 
+        eliminate the duplicate symbol
+	 (highly inefficient)
+
+     I've implemented #1 here...
+     Skip the creation of the minimal symbols based on the ECOFF 
+     symbol table. */
+
+  if (ECOFF_IN_ELF(cur_bfd))
     {
-      enum minimal_symbol_type ms_type = mst_text;
-      CORE_ADDR svalue = ext_in->asym.value;
-
-      /* The Irix 5 native tools seem to sometimes generate bogus
-	 external symbols.  */
-      if (ext_in->ifd < -1 || ext_in->ifd >= hdr->ifdMax)
+      /* Pass 2 over external syms: fill in external symbols */
+      ext_in = ext_block;
+      ext_in_end = ext_in + hdr->iextMax;
+      for (; ext_in < ext_in_end; ext_in++)
 	{
-	  complain (&bad_ext_ifd_complaint, ext_in->ifd, hdr->ifdMax);
-	  continue;
-	}
-      if (ext_in->asym.iss < 0 || ext_in->asym.iss >= hdr->issExtMax)
-	{
-	  complain (&bad_ext_iss_complaint, ext_in->asym.iss,
-		    hdr->issExtMax);
-	  continue;
-	}
+	  enum minimal_symbol_type ms_type = mst_text;
+	  CORE_ADDR svalue = ext_in->asym.value;
 
-      extern_tab[fdr_to_pst[ext_in->ifd].globals_offset
-		 + fdr_to_pst[ext_in->ifd].n_globals++] = *ext_in;
-
-      if (ext_in->asym.sc == scUndefined || ext_in->asym.sc == scSUndefined
-	  || ext_in->asym.sc == scNil)
-	continue;
-
-      name = debug_info->ssext + ext_in->asym.iss;
-      switch (ext_in->asym.st)
-	{
-	case stProc:
-	  svalue += ANOFFSET (section_offsets, SECT_OFF_TEXT);
-	  break;
-	case stStaticProc:
-	  ms_type = mst_file_text;
-	  svalue += ANOFFSET (section_offsets, SECT_OFF_TEXT);
-	  break;
-	case stGlobal:
-          if (ext_in->asym.sc == scCommon || ext_in->asym.sc == scSCommon)
+	  /* The Irix 5 native tools seem to sometimes generate bogus
+	     external symbols.  */
+	  if (ext_in->ifd < -1 || ext_in->ifd >= hdr->ifdMax)
 	    {
-	      /* The value of a common symbol is its size, not its address.
-		 Ignore it.  */
+	      complain (&bad_ext_ifd_complaint, ext_in->ifd, hdr->ifdMax);
 	      continue;
 	    }
-          else if (ext_in->asym.sc == scData
-	      || ext_in->asym.sc == scSData
-	      || ext_in->asym.sc == scRData
-	      || ext_in->asym.sc == scPData
-	      || ext_in->asym.sc == scXData)
+	  if (ext_in->asym.iss < 0 || ext_in->asym.iss >= hdr->issExtMax)
 	    {
-	      ms_type = mst_data;
-	      svalue += ANOFFSET (section_offsets, SECT_OFF_DATA);
+	      complain (&bad_ext_iss_complaint, ext_in->asym.iss,
+			hdr->issExtMax);
+	      continue;
 	    }
-	  else
+
+	  extern_tab[fdr_to_pst[ext_in->ifd].globals_offset
+		     + fdr_to_pst[ext_in->ifd].n_globals++] = *ext_in;
+
+
+	  if (SC_IS_UNDEF(ext_in->asym.sc) || ext_in->asym.sc == scNil)
+	    continue;
+
+      
+	  /* Pass 3 over files, over local syms: fill in static symbols */
+	  name = debug_info->ssext + ext_in->asym.iss;
+
+	  /* Process ECOFF Symbol Types and Storage Classes */
+	  switch (ext_in->asym.st)
 	    {
-	      ms_type = mst_bss;
-	      svalue += ANOFFSET (section_offsets, SECT_OFF_BSS);
-	    }
-	  break;
-	case stLabel:
-          if (ext_in->asym.sc == scAbs)
-	    ms_type = mst_abs;
-          else if (ext_in->asym.sc == scText
-          	   || ext_in->asym.sc == scInit
-          	   || ext_in->asym.sc == scFini)
-	    {
+	    case stProc:
+	      /* Beginnning of Procedure */
+	      svalue += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	      break;
+	    case stStaticProc:
+	      /* Load time only static procs */
 	      ms_type = mst_file_text;
 	      svalue += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	      break;
+	    case stGlobal:
+	      /* External symbol */
+	      if (SC_IS_COMMON (ext_in->asym.sc))
+		{
+		  /* The value of a common symbol is its size, not its address.
+		     Ignore it.  */
+		  continue;
+		}
+	      else if (SC_IS_DATA (ext_in->asym.sc))
+		{
+		  ms_type = mst_data;
+		  svalue += ANOFFSET (section_offsets, SECT_OFF_DATA);
+		}
+	      else if (SC_IS_BSS (ext_in->asym.sc))
+		{
+		  ms_type = mst_bss;
+		  svalue += ANOFFSET (section_offsets, SECT_OFF_BSS);
+		}
+	      else
+		ms_type = mst_abs;
+	      break;
+	    case stLabel:
+	      /* Label */
+	      if (SC_IS_TEXT (ext_in->asym.sc))
+		{
+		  ms_type = mst_file_text;
+		  svalue += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+		}
+	      else if (SC_IS_DATA (ext_in->asym.sc))
+		{
+		  ms_type = mst_file_data;
+		  svalue += ANOFFSET (section_offsets, SECT_OFF_DATA);
+		}
+	      else if (SC_IS_BSS (ext_in->asym.sc))
+		{
+		  ms_type = mst_file_bss;
+		  svalue += ANOFFSET (section_offsets, SECT_OFF_BSS);
+		}
+	      else
+		ms_type = mst_abs;
+	      break;
+	    case stLocal:
+	    case stNil:
+	      /* The alpha has the section start addresses in stLocal symbols
+		 whose name starts with a `.'. Skip those but complain for all
+		 other stLocal symbols.
+		 Irix6 puts the section start addresses in stNil symbols, skip
+		 those too.  */
+	      if (name[0] == '.')
+		continue;
+	      /* Fall through.  */
+	    default:
+	      ms_type = mst_unknown;
+	      complain (&unknown_ext_complaint, name);
 	    }
-          else if (ext_in->asym.sc == scData
-		   || ext_in->asym.sc == scSData
-		   || ext_in->asym.sc == scRData
-		   || ext_in->asym.sc == scPData
-		   || ext_in->asym.sc == scXData)
-	    {
-	      ms_type = mst_file_data;
-	      svalue += ANOFFSET (section_offsets, SECT_OFF_DATA);
-	    }
-	  else
-	    {
-	      ms_type = mst_file_bss;
-	      svalue += ANOFFSET (section_offsets, SECT_OFF_BSS);
-	    }
-	  break;
-	case stLocal:
-	case stNil:
-	  /* The alpha has the section start addresses in stLocal symbols
-	     whose name starts with a `.'. Skip those but complain for all
-	     other stLocal symbols.
-	     Irix6 puts the section start addresses in stNil symbols, skip
-	     those too.  */
-	  if (name[0] == '.')
-	    continue;
-	  /* Fall through.  */
-	default:
-	  ms_type = mst_unknown;
-	  complain (&unknown_ext_complaint, name);
+	  prim_record_minimal_symbol (name, svalue, ms_type, objfile);
 	}
-      prim_record_minimal_symbol (name, svalue, ms_type, objfile);
     }
 
   /* Pass 3 over files, over local syms: fill in static symbols */
@@ -2652,6 +2708,8 @@ parse_partial_symbols (objfile, section_offsets)
 			  break;
 
 			default:
+			  /* FIXME!  Shouldn't this use cases for bss, 
+			     then have the default be abs? */
 			  namestring = debug_info->ss + fh->issBase + sh.iss;
 		          sh.value += ANOFFSET (section_offsets, SECT_OFF_BSS);
 			  prim_record_minimal_symbol_and_info (namestring,
@@ -2666,8 +2724,42 @@ parse_partial_symbols (objfile, section_offsets)
 		    }
 		  continue;
 		}
+	      /* Handle stabs continuation */
+	      {
+		char *stabstring = debug_info->ss + fh->issBase + sh.iss;
+		int len = strlen (stabstring);
+		while (stabstring[len-1] == '\\')
+		  {
+		    SYMR sh2;
+		    char *stabstring1 = stabstring;
+		    char *stabstring2;
+		    int len2;
+
+		    /* Ignore continuation char from 1st string */
+		    len--;
+
+		    /* Read next stabstring */
+		    cur_sdx++;
+		    (*swap_sym_in) (cur_bfd,
+				    (((char *) debug_info->external_sym)
+				     + (fh->isymBase + cur_sdx) 
+				     * external_sym_size),
+				    &sh2);
+		    stabstring2 = debug_info->ss + fh->issBase + sh2.iss;
+		    len2 = strlen (stabstring2);
+
+		    /* Concatinate stabstring2 with stabstring1 */
+		    if (stabstring
+			&& stabstring != debug_info->ss + fh->issBase + sh.iss)
+		      stabstring = realloc (stabstring, len + len2 + 1);
+		    else
+		      stabstring = malloc (len + len2 + 1);
+		    strcpy (stabstring, stabstring1);
+		    strcpy (stabstring + len, stabstring2);
+		  }
+
 #define SET_NAMESTRING() \
-  namestring = debug_info->ss + fh->issBase + sh.iss
+  namestring = stabstring
 #define CUR_SYMBOL_TYPE type_code
 #define CUR_SYMBOL_VALUE sh.value
 #define START_PSYMTAB(ofile,secoff,fname,low,symoff,global_syms,static_syms)\
@@ -2676,6 +2768,12 @@ parse_partial_symbols (objfile, section_offsets)
 #define HANDLE_RBRAC(val) \
   if ((val) > save_pst->texthigh) save_pst->texthigh = (val);
 #include "partial-stab.h"
+
+	        if (stabstring 
+		    && stabstring != debug_info->ss + fh->issBase + sh.iss)
+		  free (stabstring);
+	      }
+	    /* end - Handle continuation */
 	    }
 	}
       else
@@ -2698,8 +2796,7 @@ parse_partial_symbols (objfile, section_offsets)
 		}
 
 	      /* Non absolute static symbols go into the minimal table.  */
-	      if (sh.sc == scUndefined || sh.sc == scSUndefined
-		  || sh.sc == scNil
+	      if (SC_IS_UNDEF(sh.sc) || sh.sc == scNil
 		  || (sh.index == indexNil
 		      && (sh.st != stStatic || sh.sc == scAbs)))
 		{
@@ -2811,11 +2908,7 @@ parse_partial_symbols (objfile, section_offsets)
 		  continue;
 
 		case stStatic:	/* Variable */
-		  if (sh.sc == scData
-		      || sh.sc == scSData
-		      || sh.sc == scRData
-		      || sh.sc == scPData
-		      || sh.sc == scXData)
+          	  if (SC_IS_DATA (sh.sc))
 		    prim_record_minimal_symbol_and_info (name, sh.value,
 							 mst_file_data, NULL,
 							 SECT_OFF_DATA,
@@ -2853,7 +2946,7 @@ parse_partial_symbols (objfile, section_offsets)
 		  /* Do not create a partial symbol for cc unnamed aggregates
 		     and gcc empty aggregates. */
 		  if ((sh.sc == scInfo
-		       || sh.sc == scCommon || sh.sc == scSCommon)
+		       || SC_IS_COMMON(sh.sc))
 		      && sh.iss != 0
 		      && sh.index != cur_sdx + 2)
 		    {
@@ -2921,8 +3014,7 @@ parse_partial_symbols (objfile, section_offsets)
 	      psh = &ext_ptr->asym;
 
 	      /* Do not add undefined symbols to the partial symbol table.  */
-	      if (psh->sc == scUndefined || psh->sc == scSUndefined
-		  || psh->sc == scNil)
+	      if (SC_IS_UNDEF(psh->sc) || psh->sc == scNil)
 		continue;
 
 	      svalue = psh->value;
@@ -2967,7 +3059,7 @@ parse_partial_symbols (objfile, section_offsets)
 		case stGlobal:
 		  /* Global common symbols are resolved by the runtime loader,
 		     ignore them.  */
-		  if (psh->sc == scCommon || psh->sc == scSCommon)
+		  if (SC_IS_COMMON(psh->sc))
 		    continue;
 
 		  class = LOC_STATIC;
@@ -3685,7 +3777,7 @@ cross_ref (fd, ax, tpp, type_code, pname, bigend, sym_name)
        || (sh.st != stBlock && sh.st != stTypedef && sh.st != stIndirect
 	   && sh.st != stStruct && sh.st != stUnion
 	   && sh.st != stEnum))
-      && (sh.st != stBlock || (sh.sc != scCommon && sh.sc != scSCommon)))
+      && (sh.st != stBlock || !SC_IS_COMMON(sh.sc)))
     {
       /* File indirect entry is corrupt.  */
       *pname = "<illegal>";
