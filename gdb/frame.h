@@ -410,8 +410,10 @@ struct frame_info
     CORE_ADDR pc_unwind_cache;
 
     /* This frame's ID.  Note that the frame's ID, base and PC contain
-       redundant information.  */
+       redundant information.  If id_p is non-zero, the ID is assumed
+       to be valid.  */
     struct frame_id id;
+    int id_p;
 
     /* Pointers to the next (down, inner, younger) and previous (up,
        outer, older) frame_info's in the frame cache.  */

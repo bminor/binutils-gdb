@@ -1,5 +1,14 @@
 2003-03-17  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (get_frame_id): If the frame's ID isn't valid, get it.
+	(get_prev_frame): Validate THIS frame's ID before trying to unwind
+	to prev frame.  Don't compute PREV's frame's ID.
+	(get_frame_base): Force the update of frame ID before returning
+	the frame.
+	* frame.h (struct frame_info): Add "id_p".
+
+2003-03-17  Andrew Cagney  <cagney@redhat.com>
+
 	Fix frame off-by-one bug.
 	* frame-unwind.h (frame_this_id_ftype): Replace
 	frame_unwind_id_ftype.

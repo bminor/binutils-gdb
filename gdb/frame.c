@@ -53,17 +53,50 @@ static int backtrace_below_main;
 struct frame_id
 get_frame_id (struct frame_info *fi)
 {
+  struct frame_id id;
   if (fi == NULL)
     {
+      /* Should never happen!  */
       return null_frame_id;
     }
-  else
+  if (!fi->id_p)
     {
-      struct frame_id id;
-      id.base = fi->frame;
-      id.pc = fi->pc;
-      return id;
+      gdb_assert (!legacy_frame_p (current_gdbarch));
+
+      /* Find THIS frame's ID.  */
+      fi->unwind->this_id (fi->next, &fi->prologue_cache, &fi->id);
+      fi->id_p = 1;
+
+      /* Check that the unwound ID is valid.  */
+      if (!frame_id_p (fi->id) && frame_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Unwound frame ID invalid\n");
+
+      /* Check that the new frame isn't inner to (younger, below, next)
+	 the old frame.  If that happens the frame unwind is going
+	 backwards.  */
+      /* FIXME: cagney/2003-02-25: Ignore the sentinel frame since
+	 that doesn't have a valid frame ID.  Should instead set the
+	 sentinel frame's frame ID to a true `sentinel'.  Leave it
+	 until after the switch to storing the frame ID, instead of
+	 the frame base, in the frame object.  */
+      if (fi->level >= 0 && frame_id_p (fi->id) && fi->next->id_p
+	  && frame_id_inner (fi->id, get_frame_id (fi->next)))
+	error ("Unwound frame inner-to selected frame (corrupt stack?)");
+
+      /* Note that, due to frameless functions, the stronger test of
+	 the new frame being outer to the old frame can't be used -
+	 frameless functions differ by only their PC value.  */
+
+      /* FIXME: cagney/2002-12-18: Instead of this hack, should only
+	 store the frame ID in PREV_FRAME.  Unfortunatly, some
+	 architectures (HP/UX) still reply on EXTRA_FRAME_INFO and,
+	 hence, still poke at the "struct frame_info" object directly.  */
+      fi->frame = fi->id.base;
     }
+  id.base = fi->frame;
+  id.pc = fi->pc;
+  return id;
 }
 
 const struct frame_id null_frame_id; /* All zeros.  */
@@ -1452,6 +1485,39 @@ get_prev_frame (struct frame_info *this_frame)
       return NULL;
     }
 
+  /* If THIS frame ended up with a NULL frame ID, don't bother trying
+     to unwind it.  */
+  if (this_frame->level >= 0 && !frame_id_p (get_frame_id (this_frame)))
+    {
+      if (frame_debug)
+ 	fprintf_filtered (gdb_stdlog,
+ 			  "Outermost frame - next ID is NULL\n");
+      return NULL;
+    }
+
+  /* Check that THIS frame isn't inner to (younger, below, next) the
+     NEXT frame.  If that happens the frame unwind went backwards.  */
+  /* FIXME: cagney/2003-02-25: Instead of ignoring the sentinel frame
+     (since that doesn't have a valid frame ID), the code should set
+     the sentinel frame's frame ID to a true `sentinel'.  Leave it
+     until after the switch to storing the frame ID, instead of the
+     frame base, in the frame object.  */
+  if (this_frame->level > 0
+      && frame_id_inner (get_frame_id (this_frame),
+			 get_frame_id (this_frame->next)))
+    error ("This frame inner-to next frame (corrupt stack?)");
+
+  /* Check that THIS and NEXT frame are different.  If they are not,
+     there is most likely a stack cycle.  */
+  /* FIXME: cagney/2003-03-17: Can't yet do this check. The
+     frame_id_eq() method doesn't yet use function addresses when
+     comparing IDs.  */
+  if (0
+      && this_frame->level > 0
+      && frame_id_eq (get_frame_id (this_frame),
+		      get_frame_id (this_frame->next)))
+    error ("This frame identical to next frame (corrupt stack?)");
+
   /* If any of the old frame initialization methods are around, use
      the legacy get_prev_frame method.  */
   if (legacy_frame_p (current_gdbarch))
@@ -1509,63 +1575,7 @@ get_prev_frame (struct frame_info *this_frame)
   prev_frame->unwind = frame_unwind_find_by_pc (current_gdbarch,
 						prev_frame->pc);
 
-  /* Find the prev's frame's ID.  */
-
-  /* The callee expects to be invoked with:
-
-     this->unwind->this_id (this->next, &this->cache, &this->id);
-
-     The below is carefully shifted one frame `to the left' so that
-     both the unwind->this_id and unwind->prev_register methods are
-     consistently invoked with NEXT_FRAME and THIS_PROLOGUE_CACHE.
-       
-     Also note that, while the PC for this new previous frame was
-     unwound first (see above), the below is the first call that
-     [potentially] requires analysis of the new previous frame's
-     prologue.  Consequently, it is this call, that typically ends up
-     initializing the previous frame's prologue cache.  */
-  prev_frame->unwind->this_id (this_frame,
-			       &prev_frame->prologue_cache,
-			       &prev_frame->id);
-
-  /* Check that the unwound ID is valid.  */
-  if (!frame_id_p (prev_frame->id))
-    {
-      if (frame_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "Outermost frame - unwound frame ID invalid\n");
-      return NULL;
-    }
-
-  /* Check that the new frame isn't inner to (younger, below, next)
-     the old frame.  If that happens the frame unwind is going
-     backwards.  */
-  /* FIXME: cagney/2003-02-25: Ignore the sentinel frame since that
-     doesn't have a valid frame ID.  Should instead set the sentinel
-     frame's frame ID to a true `sentinel'.  Leave it until after the
-     switch to storing the frame ID, instead of the frame base, in the
-     frame object.  */
-  if (this_frame->level >= 0
-      && frame_id_inner (prev_frame->id, get_frame_id (this_frame)))
-    error ("Unwound frame inner-to selected frame (corrupt stack?)");
-
-  /* FIXME: cagney/2003-03-14: Should check that this and next frame's
-     IDs are different (i.e., !frame_id_eq()).  Can't yet do that as
-     the EQ function doesn't yet compare PC values.  */
-
-  /* FIXME: cagney/2003-03-14: Should delay the evaluation of the
-     frame ID until when it is needed.  That way the inner most frame
-     can be created without needing to do prologue analysis.  */
-
-  /* Note that, due to frameless functions, the stronger test of the
-     new frame being outer to the old frame can't be used - frameless
-     functions differ by only their PC value.  */
-
-  /* FIXME: cagney/2002-12-18: Instead of this hack, should only store
-     the frame ID in PREV_FRAME.  Unfortunatly, some architectures
-     (HP/UX) still reply on EXTRA_FRAME_INFO and, hence, still poke at
-     the "struct frame_info" object directly.  */
-  prev_frame->frame = prev_frame->id.base;
+  /* The PREV's frame ID is computed on-demand in get_frame_id().  */
 
   /* Link it in.  */
   this_frame->prev = prev_frame;
@@ -1608,6 +1618,12 @@ find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
 CORE_ADDR
 get_frame_base (struct frame_info *fi)
 {
+  if (!fi->id_p)
+    {
+      /* Force the ID code to (indirectly) initialize the ->frame
+         pointer.  */
+      get_frame_id (fi);
+    }
   return fi->frame;
 }
 
