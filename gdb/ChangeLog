@@ -1,3 +1,8 @@
+Thu Jun  8 11:41:41 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* infrun.c (follow_inferior_fork): Bad merge from below.  Compare
+ 	strings using follow_fork_mode_ask and not "ask".
+
 Wed Jun  7 15:13:04 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* command.h (add_set_enum_cmd): Make ``enumlist'' and ``var''

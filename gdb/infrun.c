@@ -466,7 +466,7 @@ follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
   const char *follow_mode = follow_fork_mode_string;
 
   /* Or, did the user not know, and want us to ask? */
-  if (follow_fork_mode_string == "ask")
+  if (follow_fork_mode_string == follow_fork_mode_ask)
     {
       internal_error ("follow_inferior_fork: \"ask\" mode not implemented");
       /* follow_mode = follow_fork_mode_...; */
