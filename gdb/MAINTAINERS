@@ -193,6 +193,8 @@ GNU/Linux/x86 native & host
 			Mark Kettenis		kettenis@gnu.org
 			Jim Blandy		jimb@cygnus.com
 GNU/Linux PPC native	Kevin Buettner		kevinb@cygnus.com
+GNU/Linux MIPS native & host
+			Daniel Jacobowitz	dan@debian.org
 FreeBSD native & host	Mark Kettenis		kettenis@gnu.org
 			David O'Brien		obrien@freebsd.org
 hurd native		Mark Kettenis		kettenis@gnu.org

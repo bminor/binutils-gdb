@@ -1,5 +1,10 @@
 2001-07-11  Daniel Jacobowitz  <drow@mvista.com>
 
+	* MAINTAINERS: List myself for MIPS/Linux
+	port.
+
+2001-07-11  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdbserver/remote-utils.c (remote_open): Only
 	check for F_SETOWN if we had F_SETFL and FASYNC.
 
