@@ -1,3 +1,9 @@
+2003-10-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	* emulparams/armelf.sh: Define NO_SMALL_DATA.
+	* emulparams/armelf_linux.sh, emulparams/armelf_oabi.sh,
+	emulparams/armnto.sh: Likewise.
+
 2003-10-08  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ldlang.c (lang_size_sections_1): Use IGNORE_SECTION to tell

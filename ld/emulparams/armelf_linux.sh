@@ -15,3 +15,6 @@ OTHER_BSS_SYMBOLS='__bss_start__ = .;'
 OTHER_BSS_END_SYMBOLS='_bss_end__ = . ; __bss_end__ = . ; __end__ = . ;'
 
 TEXT_START_ADDR=0x00008000
+
+# ARM does not support .s* sections.
+NO_SMALL_DATA=yes
