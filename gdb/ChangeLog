@@ -1,3 +1,17 @@
+2004-12-13  Jerome Guitton  <guitton@gnat.com>
+
+	* stabsread.c (read_huge_number): Add support for reading octal
+	signed number in twos complement, based on the size of this
+	number.
+	(read_range_type): Add support for reading octal signed bounds
+	in twos complements, based on the size of the type.
+	(read_type_number, read_cpp_abbrev, read_member_functions,
+	read_cpp_abbrev, read_one_struct_field, read_baseclasses,
+	read_struct_type, read_array_type, read_enum_type,
+	read_sun_builtin_type, read_sun_floating_type): Update calls to
+	read_huge_number.
+	(read_type): Update call to read_range_type.
+
 2004-12-13  Randolph Chung  <tausq@debian.org>
 
 	* hppa-hpux-tdep.c (internalize_hp_cxx_exception_support): Call
