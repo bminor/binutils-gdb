@@ -46,6 +46,7 @@ alpha
 arc
 arm
 d30v
+fr30
 h8300
 hppa
 i386
@@ -70,8 +71,6 @@ vtable
 vax
 
 Things-to-lose:
-
-fr30
 
 # The lines between the "Do-last:" line and the end of the file
 # are executed as a /bin/sh shell script after everything else is

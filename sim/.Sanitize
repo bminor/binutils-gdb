@@ -49,6 +49,7 @@ common
 d10v
 d30v
 erc32
+fr30
 h8300
 h8500
 i960
@@ -65,8 +66,6 @@ w65
 z8k
 
 Things-to-lose:
-
-fr30
 
 Do-last:
 
