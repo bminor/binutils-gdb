@@ -1327,6 +1327,12 @@ fix_new_hppa (frag, where, size, add_symbol, offset, exp, pcrel,
       obj_attach_unwind_info (add_symbol->bsym, unwind_desc);
 #endif
     }
+
+  /* foo-$global$ is used to access non-automatic storage.  $global$
+     is really just a marker and has served its purpose, so eliminate
+     it now so as not to confuse write.c.  */
+  if (!strcmp (S_GET_NAME (new_fix->fx_subsy), "$global$"))
+    new_fix->fx_subsy = NULL;
 }
 
 /* Parse a .byte, .word, .long expression for the HPPA.  Called by
