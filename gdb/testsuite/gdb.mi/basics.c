@@ -37,5 +37,9 @@ main ()
   return 0;
 }
 
-
+/*
+Local variables: 
+change-log-default-name: "ChangeLog-mi"
+End: 
+*/
 

@@ -18,3 +18,7 @@ distclean maintainer-clean realclean: clean
 
 Makefile: $(srcdir)/Makefile.in $(srcdir)/configure.in
 	$(SHELL) ./config.status --recheck
+
+# Local variables: 
+# change-log-default-name: "ChangeLog-mi"
+# End: 
