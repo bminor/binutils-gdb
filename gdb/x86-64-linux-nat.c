@@ -55,7 +55,7 @@
 /* Mapping between the general-purpose registers in GNU/Linux x86-64
    `struct user' format and GDB's register cache layout.  */
 
-static int x86_64_linux_gregset64_reg_offset[] =
+static int amd64_linux_gregset64_reg_offset[] =
 {
   RAX * 8, RBX * 8,		/* %rax, %rbx */
   RCX * 8, RDX * 8,		/* %rcx, %rdx */
@@ -81,7 +81,7 @@ static int x86_64_linux_gregset64_reg_offset[] =
    little-endian we get away with that.  */
 
 /* From <sys/reg.h> on GNU/Linux i386.  */
-static int x86_64_linux_gregset32_reg_offset[] =
+static int amd64_linux_gregset32_reg_offset[] =
 {
   RAX * 8, RCX * 8,		/* %eax, %ecx */
   RDX * 8, RBX * 8,		/* %edx, %ebx */
@@ -277,7 +277,7 @@ store_inferior_registers (int regnum)
 
 
 static unsigned long
-x86_64_linux_dr_get (int regnum)
+amd64_linux_dr_get (int regnum)
 {
   int tid;
   unsigned long value;
@@ -306,7 +306,7 @@ x86_64_linux_dr_get (int regnum)
 }
 
 static void
-x86_64_linux_dr_set (int regnum, unsigned long value)
+amd64_linux_dr_set (int regnum, unsigned long value)
 {
   int tid;
 
@@ -322,31 +322,31 @@ x86_64_linux_dr_set (int regnum, unsigned long value)
 }
 
 void
-x86_64_linux_dr_set_control (unsigned long control)
+amd64_linux_dr_set_control (unsigned long control)
 {
-  x86_64_linux_dr_set (DR_CONTROL, control);
+  amd64_linux_dr_set (DR_CONTROL, control);
 }
 
 void
-x86_64_linux_dr_set_addr (int regnum, CORE_ADDR addr)
+amd64_linux_dr_set_addr (int regnum, CORE_ADDR addr)
 {
   gdb_assert (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR);
 
-  x86_64_linux_dr_set (DR_FIRSTADDR + regnum, addr);
+  amd64_linux_dr_set (DR_FIRSTADDR + regnum, addr);
 }
 
 void
-x86_64_linux_dr_reset_addr (int regnum)
+amd64_linux_dr_reset_addr (int regnum)
 {
   gdb_assert (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR);
 
-  x86_64_linux_dr_set (DR_FIRSTADDR + regnum, 0L);
+  amd64_linux_dr_set (DR_FIRSTADDR + regnum, 0L);
 }
 
 unsigned long
-x86_64_linux_dr_get_status (void)
+amd64_linux_dr_get_status (void)
 {
-  return x86_64_linux_dr_get (DR_STATUS);
+  return amd64_linux_dr_get (DR_STATUS);
 }
 
 
@@ -389,17 +389,17 @@ child_post_startup_inferior (ptid_t ptid)
 
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_x86_64_linux_nat (void);
+void _initialize_amd64_linux_nat (void);
 
 void
-_initialize_x86_64_linux_nat (void)
+_initialize_amd64_linux_nat (void)
 {
-  amd64_native_gregset32_reg_offset = x86_64_linux_gregset32_reg_offset;
+  amd64_native_gregset32_reg_offset = amd64_linux_gregset32_reg_offset;
   amd64_native_gregset32_num_regs = I386_LINUX_NUM_REGS;
-  amd64_native_gregset64_reg_offset = x86_64_linux_gregset64_reg_offset;
+  amd64_native_gregset64_reg_offset = amd64_linux_gregset64_reg_offset;
 
-  gdb_assert (ARRAY_SIZE (x86_64_linux_gregset32_reg_offset)
+  gdb_assert (ARRAY_SIZE (amd64_linux_gregset32_reg_offset)
 	      == amd64_native_gregset32_num_regs);
-  gdb_assert (ARRAY_SIZE (x86_64_linux_gregset64_reg_offset)
+  gdb_assert (ARRAY_SIZE (amd64_linux_gregset64_reg_offset)
 	      == amd64_native_gregset64_num_regs);
 }

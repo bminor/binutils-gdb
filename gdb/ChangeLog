@@ -1,5 +1,25 @@
 2004-02-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* x86-64-linux-nat.c (amd64_linux_gregset64_reg_offset): Rename
+	from x86_64_linux_gregset64_reg_offset.
+	(amd64_linux_gregset32_reg_offset): Rename from
+	x86_64_linux_gregset64_reg_offset.
+	(amd64_linux_dr_get): Renamed from x86_64_linux_dr_get.
+	(amd64_linux_dr_set): Renamed from x86_64_linux_dr_set.
+	(amd64_linux_dr_set_control): Renamed from
+	x86_64_linux_dr_set_control.  Adjust for renamed functions.
+	(amd64_linux_dr_set_addr): Renamed from x86_64_linux_dr_set_addr.
+	Adjust for renamed functions.
+	(amd64_linux_dr_reset_addr): Renamed from
+	x86_64_linux_dr_reset_addr. Adjust for renamed functions.
+	(amd64_linux_dr_get_status): Renamed from
+	x86_64_linux_dr_get_status.  Adjust for renamed functions.
+	(_initialize_amd64_linux_nat): Renamed from
+	_initialize_x86_64_linux_nat.  Adjust for renamed variables and
+	functions.
+	* config/i386/nm-x86-64linux.h: Update copyright year.
+	Adjust for renamed functions.
+
 	* amd64fbsd-tdep.c (amd64fbsd_sigtramp_start_addr): Renamed from
 	amd64fbsd_sigtramp_start.
 	(amd64fbsd_sigtramp_end_addr): Renamed from
