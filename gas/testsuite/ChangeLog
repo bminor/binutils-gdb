@@ -1,3 +1,9 @@
+2005-02-09  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/i386/intelok.s: Remove comments disabling alternative forms of
+	fbld, fbstp, and fldcw.
+	* gas/i386/intelok.d: Expect two instances of fbld, fbstp, and fldcw.
+
 2005-02-07  Inderpreet Singh <inderpreetb@noida.hcltech.com>
 
 	* gas/maxq10/jump.d: Fixed relative jump offset.
