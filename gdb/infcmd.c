@@ -1651,7 +1651,8 @@ registers_info (char *addr_exp, int fpregs)
 
       /* A register name?  */
       {
-	int regnum = frame_map_name_to_regnum (start, end - start);
+	int regnum = frame_map_name_to_regnum (deprecated_selected_frame,
+					       start, end - start);
 	if (regnum >= 0)
 	  {
 	    gdbarch_print_registers_info (current_gdbarch, gdb_stdout,

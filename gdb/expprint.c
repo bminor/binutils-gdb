@@ -27,7 +27,7 @@
 #include "value.h"
 #include "language.h"
 #include "parser-defs.h"
-#include "frame.h"		/* For frame_map_regnum_to_name.  */
+#include "user-regs.h"		/* For user_reg_map_regnum_to_name.  */
 #include "target.h"
 #include "gdb_string.h"
 #include "block.h"
@@ -126,8 +126,10 @@ print_subexp (register struct expression *exp, register int *pos,
     case OP_REGISTER:
       {
 	int regnum = longest_to_int (exp->elts[pc + 1].longconst);
+	const char *name = user_reg_map_regnum_to_name (current_gdbarch,
+							regnum);
 	(*pos) += 2;
-	fprintf_filtered (stream, "$%s", frame_map_regnum_to_name (regnum));
+	fprintf_filtered (stream, "$%s", name);
 	return;
       }
 

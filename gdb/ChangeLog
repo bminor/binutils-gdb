@@ -1,3 +1,33 @@
+2003-07-07  Andrew Cagney  <cagney@redhat.com>
+
+	* expprint.c: Include "user-regs.h" instead of "frame.h".
+	(print_subexp): Use user_reg_map_regnum_to_name, instead of
+	frame_map_regnum_to_name.
+	* frame.c: Include "user-regs.h" instead of "builtin-regs.h".
+	(frame_map_name_to_regnum): Simplify, call
+	user_reg_map_name_to_regnum.
+	(frame_map_regnum_to_name): Simplify, call
+	user_reg_map_regnum_to_name.
+	(frame_register_unwind): Update.
+	* std-regs.c: Include "user-regs.h" instead of "builtin-regs.h".
+	(_initialize_frame_reg): Call user_reg_add_builtin.
+	* findvar.c: Include "user-regs.h" instead of "builtin-regs.h".
+	(value_of_register): Use value_of_user_reg.
+	* eval.c (evaluate_subexp_standard): Update.
+	* parse.c (write_dollar_variable): Update.
+	* d10v-tdep.c (d10v_print_registers_info): Update.
+	* infcmd.c (registers_info): Update.
+	* Makefile.in (SFILES): Delete "builtin-regs.c", add "user-regs.c".
+	(builtin_regs_h): Delete macro.
+	(user_regs_h): Define.
+	(COMMON_OBS): Delete "builtin-regs.o", add "user-regs.o".
+	(builtin-regs.o): Delete target.
+	(user-regs.o): Specify dependencies.
+	(expprint.o): Update dependencies.
+	(findvar.o): Update dependencies.
+	(frame.o): Update dependencies.
+	(std-regs.o): Update dependencies.
+
 2003-07-06  Christopher Faylor  <cgf@redhat.com>
 
 	* win32-nat.c (solib_symbols_add): Use one variable for all section

@@ -454,7 +454,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	(*pos) += 2;
 	if (val == NULL)
 	  error ("Value of register %s not available.",
-		 frame_map_regnum_to_name (regno));
+		 frame_map_regnum_to_name (get_selected_frame (), regno));
 	else
 	  return val;
       }

@@ -510,7 +510,7 @@ TARGET_FLAGS_TO_PASS = \
 
 SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	ax-general.c ax-gdb.c \
-	bcache.c block.c blockframe.c breakpoint.c buildsym.c builtin-regs.c \
+	bcache.c block.c blockframe.c breakpoint.c buildsym.c \
 	c-exp.y c-lang.c c-typeprint.c c-valprint.c \
 	charset.c cli-out.c coffread.c coff-pe-read.c \
 	complaints.c completer.c corefile.c \
@@ -554,6 +554,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	tui/tuiStack.c tui/tuiStack.h tui/tuiWin.c tui/tuiWin.h \
 	tui/tui-file.h tui/tui-file.c tui/tui-out.c tui/tui-hooks.c \
 	ui-out.c utils.c ui-file.h ui-file.c \
+	user-regs.c \
 	valarith.c valops.c valprint.c values.c varobj.c \
 	wrapper.c
 
@@ -618,7 +619,6 @@ bcache_h = bcache.h
 block_h = block.h
 breakpoint_h = breakpoint.h $(frame_h) $(value_h) $(gdb_events_h)
 buildsym_h = buildsym.h
-builtin_regs_h = builtin-regs.h
 c_lang_h = c-lang.h $(value_h) $(macroexp_h)
 call_cmds_h = call-cmds.h
 ch_lang_h = ch-lang.h
@@ -749,6 +749,7 @@ tracepoint_h = tracepoint.h
 typeprint_h = typeprint.h
 ui_file_h = ui-file.h
 ui_out_h = ui-out.h
+user_regs_h = user-regs.h
 valprint_h = valprint.h
 value_h = value.h $(doublest_h) $(frame_h) $(symtab_h) $(gdbtypes_h) $(expression_h)
 varobj_h = varobj.h $(symtab_h) $(gdbtypes_h)
@@ -862,7 +863,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	event-loop.o event-top.o inf-loop.o completer.o \
 	gdbarch.o arch-utils.o gdbtypes.o osabi.o copying.o $(DEPFILES) \
 	memattr.o mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
-	builtin-regs.o std-regs.o \
+	std-regs.o \
 	signals.o \
 	kod.o kod-cisco.o \
 	gdb-events.o \
@@ -882,6 +883,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	c-valprint.o cp-valprint.o f-valprint.o m2-valprint.o \
 	nlmread.o serial.o mdebugread.o top.o utils.o \
 	ui-file.o \
+	user-regs.o \
 	frame.o frame-unwind.o doublest.o \
 	frame-base.o \
 	gnu-v2-abi.o gnu-v3-abi.o hpacc-abi.o cp-abi.o cp-support.o \
@@ -1597,8 +1599,6 @@ buildsym.o: buildsym.c $(defs_h) $(bfd_h) $(gdb_obstack_h) $(symtab_h) \
 	$(complaints_h)	$(gdb_string_h) $(expression_h) $(language_h) \
 	$(bcache_h) $(filenames_h) $(macrotab_h) $(demangle_h) $(buildsym_h) \
 	$(stabsread_h) $(block_h) $(cp_support_h) $(dictionary_h)
-builtin-regs.o: builtin-regs.c $(defs_h) $(builtin_regs_h) $(gdbtypes_h) \
-	$(gdb_string_h) $(gdb_assert_h)
 c-lang.o: c-lang.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 	$(parser_defs_h) $(language_h) $(c_lang_h) $(valprint_h) \
 	$(macroscope_h) $(gdb_assert_h) $(charset_h) $(gdb_string_h) \
@@ -1728,8 +1728,8 @@ exec.o: exec.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) $(gdbcmd_h) \
 	$(gdb_string_h) $(gdbcore_h) $(gdb_stat_h) $(xcoffsolib_h) \
 	$(readline_h)
 expprint.o: expprint.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
-	$(value_h) $(language_h) $(parser_defs_h) $(target_h) $(gdb_string_h) \
-	$(block_h)
+	$(value_h) $(language_h) $(parser_defs_h) $(user_regs_h) $(target_h) \
+	$(gdb_string_h) $(block_h)
 f-lang.o: f-lang.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(parser_defs_h) $(language_h) $(f_lang_h) \
 	$(valprint_h) $(value_h)
@@ -1744,12 +1744,12 @@ fbsd-proc.o: fbsd-proc.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 findvar.o: findvar.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(frame_h) \
 	$(value_h) $(gdbcore_h) $(inferior_h) $(target_h) $(gdb_string_h) \
 	$(gdb_assert_h) $(floatformat_h) $(symfile_h) $(regcache_h) \
-	$(builtin_regs_h) $(block_h)
+	$(user_regs_h) $(block_h)
 fork-child.o: fork-child.c $(defs_h) $(gdb_string_h) $(frame_h) \
 	$(inferior_h) $(target_h) $(gdb_wait_h) $(gdb_vfork_h) $(gdbcore_h) \
 	$(terminal_h) $(gdbthread_h) $(command_h)
 frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \
-	$(regcache_h) $(gdb_assert_h) $(gdb_string_h) $(builtin_regs_h) \
+	$(regcache_h) $(gdb_assert_h) $(gdb_string_h) $(user_regs_h) \
 	$(gdb_obstack_h) $(dummy_frame_h) $(sentinel_frame_h) $(gdbcore_h) \
 	$(annotate_h) $(language_h) $(frame_unwind_h) $(frame_base_h) \
 	$(command_h) $(gdbcmd_h)
@@ -2288,7 +2288,7 @@ stack.o: stack.c $(defs_h) $(gdb_string_h) $(value_h) $(symtab_h) \
 	$(gdb_assert_h) $(dictionary_h)
 standalone.o: standalone.c $(gdb_stat_h) $(defs_h) $(symtab_h) $(frame_h) \
 	$(inferior_h) $(gdb_wait_h)
-std-regs.o: std-regs.c $(defs_h) $(builtin_regs_h) $(frame_h) $(gdbtypes_h) \
+std-regs.o: std-regs.c $(defs_h) $(user_regs_h) $(frame_h) $(gdbtypes_h) \
 	$(value_h) $(gdb_string_h)
 stop-gdb.o: stop-gdb.c $(defs_h)
 sun3-nat.o: sun3-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(regcache_h)
@@ -2342,6 +2342,8 @@ typeprint.o: typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 ui-file.o: ui-file.c $(defs_h) $(ui_file_h) $(gdb_string_h)
 ui-out.o: ui-out.c $(defs_h) $(gdb_string_h) $(expression_h) $(language_h) \
 	$(ui_out_h) $(gdb_assert_h)
+user-regs.o: user-regs.c $(defs_h) $(user_regs_h) $(gdbtypes_h) \
+	$(gdb_string_h) $(gdb_assert_h) $(frame_h)
 utils.o: utils.c $(config_h) $(defs_h) $(gdb_assert_h) $(gdb_string_h) \
 	$(event_top_h) $(gdbcmd_h) $(serial_h) $(bfd_h) $(target_h) \
 	$(demangle_h) $(expression_h) $(language_h) $(annotate_h) \
