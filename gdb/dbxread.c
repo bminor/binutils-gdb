@@ -1914,23 +1914,30 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 }
 
 /* Copy a pending list, used to record the contents of a common
-   block for later fixup.  */
+   block for later fixup.  We copy the symbols starting with all
+   symbols in BEG, and ending with the symbols which are in 
+   END at index ENDI.  */
 static struct pending *
-copy_pending (beg, begi, end)
+copy_pending (beg, endi, end)
     struct pending *beg;
-    int begi;
+    int endi;
     struct pending *end;
 {
   struct pending *new = 0;
   struct pending *next;
+  int j;
 
-  for (next = beg; next != 0 && (next != end || begi < end->nsyms);
-       next = next->next, begi = 0)
+  /* Copy all the struct pendings before end.  */
+  for (next = beg; next != NULL && next != end; next = next->next)
     {
-      register int j;
-      for (j = begi; j < next->nsyms; j++)
+      for (j = 0; j < next->nsyms; j++)
 	add_symbol_to_list (next->symbol[j], &new);
     }
+
+  /* Copy however much of END we need.  */
+  for (j = endi; j < end->nsyms; j++)
+    add_symbol_to_list (end->symbol[j], &new);
+
   return new;
 }
 
