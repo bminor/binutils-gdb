@@ -1,5 +1,9 @@
 2004-06-27  Joel Brobecker  <brobecker@gnat.com>
 
+	* ada-lang.c: Minor reformatting to conform to GNU coding standards.
+
+2004-06-27  Joel Brobecker  <brobecker@gnat.com>
+
 	* ada-lang.c: Re-indent file.
 
 2004-06-27  Joel Brobecker  <brobecker@gnat.com>
