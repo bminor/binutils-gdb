@@ -38,7 +38,7 @@
 #endif /* NO_VARARGS */
 #endif /* NO_STDARG */
 
-#include "mips-opcode.h"
+#include "opcode/mips.h"
 
 #define AT  1
 #define GP  28
@@ -212,7 +212,7 @@ const pseudo_typeS md_pseudo_table[] =
 
 const relax_typeS md_relax_table[] =
 {
-  0
+  { 0 }
 };
 
 
@@ -287,7 +287,9 @@ md_assemble (str)
       /* set the default alignment for the text section (2**2) */
       /* This should go in md_begin but text_section isn't initialized then */
       record_alignment (text_section, 2);
+#ifdef OBJ_ECOFF
       bfd_set_gp_size (stdoutput, g_switch_value);
+#endif
       init = 1;
     }
 
@@ -389,7 +391,7 @@ append_insn (ip, address_expr, reloc_type)
 	};
 
       /* One extra nop */
-      if (ip->insn_mo->pinfo & INSN_EXTRA_DELAY)
+      if (ip->insn_mo->pinfo & (INSN_READ_HI | INSN_READ_LO))
 	{
 	  f = frag_more (4);
 	  md_number_to_chars (f, 0, 4);
@@ -508,6 +510,7 @@ macro_build (counter, ep, name, fmt, va_alist)
 
 	case 't':
 	case 'w':
+	case 'E':
 	  insn.insn_opcode |= va_arg (args, int) << 16;
 	  continue;
 
@@ -518,6 +521,7 @@ macro_build (counter, ep, name, fmt, va_alist)
 	  continue;
 
 	case 'd':
+	case 'G':
 	  insn.insn_opcode |= va_arg (args, int) << 11;
 	  continue;
 
@@ -531,6 +535,10 @@ macro_build (counter, ep, name, fmt, va_alist)
 	  continue;
 
 	case 'D':
+	  insn.insn_opcode |= va_arg (args, int) << 6;
+	  continue;
+
+	case 'B':
 	  insn.insn_opcode |= va_arg (args, int) << 6;
 	  continue;
 
@@ -1776,18 +1784,18 @@ macro (ip)
        */
       save_reorder_condition = mips_noreorder;
       mips_noreorder = 1;
-      macro_build (&icnt, NULL, "cfc1", "t,d", treg, 31);
-      macro_build (&icnt, NULL, "cfc1", "t,d", treg, 31);
+      macro_build (&icnt, NULL, "cfc1", "t,G", treg, 31);
+      macro_build (&icnt, NULL, "cfc1", "t,G", treg, 31);
       macro_build (&icnt, NULL, "nop", "");
       expr1.X_add_number = 3;
       macro_build (&icnt, &expr1, "ori", "t,r,i", AT, treg);
       expr1.X_add_number = 2;
       macro_build (&icnt, &expr1, "xori", "t,r,i", AT, AT);
-      macro_build (&icnt, NULL, "ctc1", "t,d", AT, 31);
+      macro_build (&icnt, NULL, "ctc1", "t,G", AT, 31);
       macro_build (&icnt, NULL, "nop", "");
       macro_build (&icnt, NULL,
 	      mask == M_TRUNCWD ? "cvt.w.d" : "cvt.w.s", "D,S", dreg, sreg);
-      macro_build (&icnt, NULL, "ctc1", "t,d", treg, 31);
+      macro_build (&icnt, NULL, "ctc1", "t,G", treg, 31);
       macro_build (&icnt, NULL, "nop", "");
       mips_noreorder = save_reorder_condition;
       break;
@@ -2025,6 +2033,16 @@ mips_ip (str, ip)
 	      s = expr_end;
 	      continue;
 
+	    case 'B':		/* syscall code */
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      if ((unsigned) imm_expr.X_add_number > 0xfffff)
+		as_warn ("Illegal syscall code (%d)", imm_expr.X_add_number);
+	      ip->insn_opcode |= imm_expr.X_add_number << 6;
+	      imm_expr.X_seg = absent_section;
+	      s = expr_end;
+	      continue;
+
 	    case 'b':		/* base register */
 	    case 'd':		/* destination register */
 	    case 's':		/* source register */
@@ -2032,6 +2050,8 @@ mips_ip (str, ip)
 	    case 'r':		/* both target and source */
 	    case 'v':		/* both dest and source */
 	    case 'w':		/* both dest and target */
+	    case 'E':		/* coprocessor target register */
+	    case 'G':		/* coprocessor destination register */
 	      s_reset = s;
 	      if (s[0] == '$')
 		{
@@ -2094,10 +2114,12 @@ mips_ip (str, ip)
 		      ip->insn_opcode |= regno << 21;
 		      break;
 		    case 'd':
+		    case 'G':
 		      ip->insn_opcode |= regno << 11;
 		      break;
 		    case 'w':
 		    case 't':
+		    case 'E':
 		      ip->insn_opcode |= regno << 16;
 		    }
 		  lastregno = regno;
@@ -2424,7 +2446,7 @@ md_atof (type, litP, sizeP)
 void
 md_number_to_chars (buf, val, n)
      char *buf;
-     long val;
+     valueT val;
      int n;
 {
   switch (byte_order)
@@ -2527,7 +2549,7 @@ md_pcrel_from (fixP)
 int
 md_apply_fix (fixP, valueP)
      fixS *fixP;
-     long *valueP;
+     valueT *valueP;
 {
   unsigned char *buf;
   long insn, value;
@@ -2577,7 +2599,7 @@ md_apply_fix (fixP, valueP)
 	  return 0;
 	}
       insn |= value & 0xFFFF;
-      md_number_to_chars (buf, insn, 4);
+      md_number_to_chars ((char *) buf, insn, 4);
       break;
 
     default:
@@ -2628,10 +2650,12 @@ printInsn (oc)
 		  continue;
 
 		case 'd':
+		case 'G':
 		  printf ("$%d", dreg);
 		  continue;
 
 		case 't':
+		case 'E':
 		  printf ("$%d", treg);
 		  continue;
 
@@ -3042,23 +3066,14 @@ tc_gen_reloc (section, fixp)
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
   assert (reloc->howto != 0);
 
-#ifdef OBJ_ECOFF
-  /* FIXME: This does the right thing, but it's confusing.  There
-     should be a more coherent approach, but I don't know what it
-     would be.  */
-  reloc->addend -=
-    bfd_get_section_vma (stdoutput,
-			 bfd_get_section (fixp->fx_addsy->bsym));
-#endif
-
   return reloc;
 }
 
 /* should never be called */
-long
+valueT
 md_section_align (seg, addr)
      asection *seg;
-     long addr;
+     valueT addr;
 {
   int align = bfd_get_section_alignment (stdoutput, seg);
 

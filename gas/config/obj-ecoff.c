@@ -35,6 +35,9 @@
 /* Why isn't this in coff/sym.h?  */
 #define ST_RFDESCAPE 0xfff
 
+/* Why isn't this in listing.h?  */
+extern int listing;
+
 /* The ECOFF file format uses COFF style sections, but with a unique
    debugging format.  We just build generic BFD sections since BFD
    knows how to write them out.  The debugging format, however, we
@@ -975,7 +978,7 @@ static const efdr_t init_file =
     0,			/* rfdBase:	index into the file indirect table */
     0,			/* crfd:	count file indirect entries */
     langC,		/* lang:	language for this file */
-    1,			/* fMerge:	whether this file can be merged */
+    0,			/* fMerge:	whether this file can be merged */
     0,			/* fReadin:	true if read in (not just created) */
 #ifdef TARGET_BYTES_BIG_ENDIAN
     1,			/* fBigendian:	if 1, compiled on big endian machine */
@@ -1479,7 +1482,6 @@ static long ecoff_build_ss PARAMS ((char **buf, char **bufend,
 				     long offset));
 static long ecoff_build_fdr PARAMS ((char **buf, char **bufend,
 				     long offset));
-static void ecoff_set_vma PARAMS ((void));
 static page_t *allocate_cluster PARAMS ((unsigned long npages));
 static page_t *allocate_page PARAMS ((void));
 static scope_t *allocate_scope PARAMS ((void));
@@ -1563,8 +1565,6 @@ void
 obj_read_begin_hook ()
 {
   tag_hash = hash_new ();
-  if (tag_hash == (struct hash_control *) NULL)
-    as_fatal ("Can't create hash table");
   top_tag_head = allocate_thead ();
   top_tag_head->first_tag = (tag_t *) NULL;
   top_tag_head->free = (thead_t *) NULL;
@@ -1578,6 +1578,8 @@ void
 obj_symbol_new_hook (symbolP)
      symbolS *symbolP;
 {
+  if (cur_file_ptr == (efdr_t *) NULL)
+    add_file ((const char *) NULL, 0);
   symbolP->ecoff_file = cur_file_ptr;
   symbolP->ecoff_symbol = 0;
   symbolP->ecoff_undefined = 0;
@@ -1679,7 +1681,7 @@ add_ecoff_symbol (str, type, storage, sym_value, value, indx)
   register thead_t *ptag_head;
   register tag_t *ptag;
   register tag_t *ptag_next;
-  register varray_t *vp = &cur_file_ptr->symbols;
+  register varray_t *vp;
   register int scope_delta = 0;
   shash_t *hash_ptr = (shash_t *) NULL;
 
@@ -2266,6 +2268,11 @@ add_file (file_name, indx)
 	}
     }
 
+#ifndef NO_LISTING
+  if (listing)
+    listing_source_file (file_name);
+#endif
+
   /* If we're creating stabs, then we don't actually make a new FDR.
      Instead, we just create a stabs symbol.  */
   if (stabs_seen)
@@ -2307,8 +2314,6 @@ add_file (file_name, indx)
 
       /* Allocate the string hash table.  */
       fil_ptr->str_hash = hash_new ();
-      if (fil_ptr->str_hash == (struct hash_control *) NULL)
-	as_fatal ("Can't create hash table");
 
       /* Make sure 0 byte in string table is null  */
       add_string (&fil_ptr->strings,
@@ -3216,6 +3221,7 @@ obj_ecoff_loc (ignore)
      int ignore;
 {
   lineno_list_t *list;
+  int lineno;
 
   if (cur_file_ptr == (efdr_t *) NULL)
     {
@@ -3236,6 +3242,13 @@ obj_ecoff_loc (ignore)
   get_absolute_expression ();
   SKIP_WHITESPACE ();
 
+  lineno = get_absolute_expression ();
+
+#ifndef NO_LISTING
+  if (listing)
+    listing_source_line (lineno);
+#endif
+
   /* If we're building stabs, then output a special label rather than
      ECOFF line number info.  */
   if (stabs_seen)
@@ -3243,7 +3256,7 @@ obj_ecoff_loc (ignore)
       (void) add_ecoff_symbol ((char *) NULL, st_Label, sc_Text,
 			       symbol_new ("L0\001", now_seg,
 					   frag_now_fix (), frag_now),
-			       0, get_absolute_expression ());
+			       0, lineno);
       return;
     }
 
@@ -3254,7 +3267,7 @@ obj_ecoff_loc (ignore)
   list->proc = cur_proc_ptr;
   list->frag = frag_now;
   list->paddr = frag_now_fix ();
-  list->lineno = get_absolute_expression ();
+  list->lineno = lineno;
 
   /* A .loc directive will sometimes appear before a .ent directive,
      which means that cur_proc_ptr will be NULL here.  Arrange to
@@ -3332,6 +3345,12 @@ obj_ecoff_stab (type)
   st_t st;
   sc_t sc;
 
+  if (cur_file_ptr == (efdr_t *) NULL)
+    {
+      add_file ((const char *) NULL, 0);
+      save_file_ptr = cur_file_ptr;
+    }
+
   if (stabs_seen == 0)
     mark_stabs (0);
 
@@ -3393,6 +3412,11 @@ obj_ecoff_stab (type)
 
       code = (symint_t) get_absolute_expression ();
 
+#ifndef NO_LISTING
+      if (listing)
+	listing_source_line (code);
+#endif
+
       if (*input_line_pointer++ != ',')
 	{
 	  as_warn ("Bad .stab%c directive", type);
@@ -3423,6 +3447,11 @@ obj_ecoff_stab (type)
     }
   else
     {
+#ifndef NO_LISTING
+      if (listing && (code == N_SO || code == N_SOL))
+	listing_source_file (string);
+#endif
+      
       /* The next number is sometimes the line number of the
 	 declaration.  We have nowhere to put it, so we just ignore
 	 it.  */
@@ -3551,6 +3580,9 @@ ecoff_build_lineno (buf, bufend, offset, linecntptr)
   long iline;
   long totcount;
 
+  if (linecntptr != (long *) NULL)
+    *linecntptr = 0;
+
   bufptr = *buf + offset;
 
   file = (efdr_t *) NULL;
@@ -3591,6 +3623,9 @@ ecoff_build_lineno (buf, bufend, offset, linecntptr)
 	      /* The cline field is ill-documented.  This is a guess
 		 at the right value.  */
 	      file->fdr.cline = totcount + count;
+	      if (linecntptr != (long *) NULL)
+		*linecntptr += totcount + count;
+	      totcount = 0;
 	    }
 
 	  if (l->file != file)
@@ -3710,10 +3745,10 @@ ecoff_build_lineno (buf, bufend, offset, linecntptr)
       file->fdr.cline = totcount;
     }
 
-  c = ecoff_longword_adjust (buf, bufend, c, &bufptr);
-
   if (linecntptr != (long *) NULL)
-    *linecntptr = totcount;
+    *linecntptr += totcount;
+
+  c = ecoff_longword_adjust (buf, bufend, c, &bufptr);
 
   return c;
 }
@@ -3815,11 +3850,20 @@ ecoff_build_symbols (buf,
 			{
 			  know (sym_ptr->proc_ptr != (proc_t *) NULL);
 			  sym_ptr->ecoff_sym.value =
-			    (S_GET_VALUE (as_sym)
-			     - S_GET_VALUE (sym_ptr->proc_ptr->sym->as_sym));
+			    (bfd_asymbol_value (as_sym->bsym)
+			     - bfd_asymbol_value (sym_ptr->proc_ptr->sym
+						  ->as_sym->bsym));
 			}
 		      else
-			sym_ptr->ecoff_sym.value = S_GET_VALUE (as_sym);
+			sym_ptr->ecoff_sym.value =
+			  bfd_asymbol_value (as_sym->bsym);
+
+		      /* Set st_Proc to st_StaticProc for local
+			 functions.  */
+		      if (sym_ptr->ecoff_sym.st == st_Proc
+			  && S_IS_DEFINED (as_sym)
+			  && ! S_IS_EXTERNAL (as_sym))
+			sym_ptr->ecoff_sym.st = st_StaticProc;
 
 		      /* Get the type and storage class based on where
 			 the symbol actually wound up.  Traditionally,
@@ -3878,6 +3922,8 @@ ecoff_build_symbols (buf,
 			    sc = sc_Bss;
 			  else if (strcmp (segname, ".sbss") == 0)
 			    sc = sc_SBss;
+			  else if (seg == &bfd_abs_section)
+			    sc = sc_Abs;
 			  else
 			    abort ();
 
@@ -3955,8 +4001,8 @@ ecoff_build_symbols (buf,
 			  know (as_sym != (symbolS *) NULL);
 			  know (begin_ptr->as_sym != (symbolS *) NULL);
 			  sym_ptr->ecoff_sym.value =
-			    (S_GET_VALUE (as_sym)
-			     - S_GET_VALUE (begin_ptr->as_sym));
+			    (bfd_asymbol_value (as_sym->bsym)
+			     - bfd_asymbol_value (begin_ptr->as_sym->bsym));
 			}
 		      else if (begin_type == st_Block
 			       && sym_ptr->ecoff_sym.sc != (int) sc_Info)
@@ -3964,8 +4010,9 @@ ecoff_build_symbols (buf,
 			  know (as_sym != (symbolS *) NULL);
 			  know (sym_ptr->proc_ptr != (proc_t *) NULL);
 			  sym_ptr->ecoff_sym.value =
-			    (S_GET_VALUE (as_sym)
-			     - S_GET_VALUE (sym_ptr->proc_ptr->sym->as_sym));
+			    (bfd_asymbol_value (as_sym->bsym)
+			     - bfd_asymbol_value (sym_ptr->proc_ptr->sym
+						  ->as_sym->bsym));
 			}
 		    }
 
@@ -4008,6 +4055,12 @@ ecoff_build_symbols (buf,
 
 		      memset (&ext, 0, sizeof ext);
 		      ext.asym = sym_ptr->ecoff_sym;
+		      if (sym_ptr->ecoff_sym.st == st_Proc
+			  || sym_ptr->ecoff_sym.st == st_StaticProc)
+			{
+			  know (local);
+			  ext.asym.index = isym - ifilesym - 1;
+			}
 		      ext.ifd = fil_ptr->file_index;
 		      ext.asym.iss = add_string (ext_strings,
 						 ext_str_hash,
@@ -4043,11 +4096,13 @@ ecoff_build_procs (buf, bufend, offset)
      long offset;
 {
   struct pdr_ext *pdr_out;
+  int first_fil;
   long iproc;
   vlinks_t *file_link;
 
   pdr_out = (struct pdr_ext *) (*buf + offset);
   
+  first_fil = 1;
   iproc = 0;
 
   /* The procedures are stored by file.  */
@@ -4090,10 +4145,13 @@ ecoff_build_procs (buf, bufend, offset)
 		{
 		  unsigned long adr;
 
-		  adr = S_GET_VALUE (proc_ptr->sym->as_sym);
+		  adr = bfd_asymbol_value (proc_ptr->sym->as_sym->bsym);
 		  if (first)
 		    {
-		      fil_ptr->fdr.adr = adr;
+		      if (first_fil)
+			first_fil = 0;
+		      else
+			fil_ptr->fdr.adr = adr;
 		      first = 0;
 		    }
 		  proc_ptr->pdr.adr = adr - fil_ptr->fdr.adr;
@@ -4349,42 +4407,6 @@ ecoff_build_fdr (buf, bufend, offset)
   return offset + ifile * sizeof (struct fdr_ext);
 }
 
-/* Set the vma for all the sections.  */
-
-static void
-ecoff_set_vma ()
-{
-  register bfd_vma addr;
-  register asection *sec;
-
-  addr = 0;
-  for (sec = stdoutput->sections; sec != (asection *) NULL; sec = sec->next)
-    {
-      bfd_set_section_vma (stdoutput, sec, addr);
-      addr += bfd_section_size (stdoutput, sec);
-    }
-}
-
-/* Adjust the value of a symbol by the vma of the section.  */
-
-void
-ecoff_frob_symbol (sym)
-     symbolS *sym;
-{
-  static int setvma = 0;
-
-  if (! setvma)
-    {
-      ecoff_set_vma ();
-      setvma = 1;
-    }
-
-  S_SET_VALUE (sym,
-	       (S_GET_VALUE (sym)
-		+ bfd_get_section_vma (stdoutput,
-				       bfd_get_section (sym->bsym))));
-}
-
 /* Swap out the symbols and debugging information for BFD.  */
 
 void
@@ -4395,6 +4417,8 @@ ecoff_frob_file ()
   efdr_t *fil_ptr;
   efdr_t *hold_file_ptr;
   proc_t * hold_proc_ptr;
+  bfd_vma addr;
+  asection *sec;
   symbolS *sym;
   HDRR *hdr;
   char *buf;
@@ -4442,6 +4466,14 @@ ecoff_frob_file ()
 			       (symint_t) 0);
     }
 
+  /* Set the section VMA values.  */
+  addr = 0;
+  for (sec = stdoutput->sections; sec != (asection *) NULL; sec = sec->next)
+    {
+      bfd_set_section_vma (stdoutput, sec, addr);
+      addr += bfd_section_size (stdoutput, sec);
+    }
+
   /* Look through the symbols.  Add debugging information for each
      symbol that has not already received it.  */
   hold_file_ptr = cur_file_ptr;
@@ -4450,12 +4482,13 @@ ecoff_frob_file ()
   for (sym = symbol_rootP; sym != (symbolS *) NULL; sym = symbol_next (sym))
     {
       if (sym->ecoff_symbol
-	  || sym->ecoff_file == (efdr_t *) NULL)
+	  || sym->ecoff_file == (efdr_t *) NULL
+	  || (sym->bsym->flags & BSF_SECTION_SYM) != 0)
 	continue;
 
       cur_file_ptr = sym->ecoff_file;
       add_ecoff_symbol ((const char *) NULL, st_Nil, sc_Nil, sym,
-			S_GET_VALUE (sym), indexNil);
+			bfd_asymbol_value (sym->bsym), indexNil);
     }
   cur_proc_ptr = hold_proc_ptr;
   cur_file_ptr = hold_file_ptr;
@@ -4571,6 +4604,9 @@ ecoff_frob_file ()
 
   hdr->magic = magicSym;
   /* FIXME: what should hdr->vstamp be?  */
+
+  bfd_set_symtab (stdoutput, bfd_get_outsymbols (stdoutput),
+		  hdr->isymMax + hdr->iextMax);
 }
 
 /* Allocate a cluster of pages.  */

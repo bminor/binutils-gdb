@@ -24,16 +24,14 @@
 
 #define TARGET_ARCH bfd_arch_mips
 
-#define NO_LISTING
 #define ONLY_STANDARD_ESCAPES
 #define BACKSLASH_V
 #define WORKING_DOT_WORD	1
 #define OLD_FLOAT_READS
+#define REPEAT_CONS_EXPRESSIONS
 #define LOCAL_LABELS_FB
 
-#ifdef OBJ_ECOFF
-#define LOCAL_LABEL(name) ((name)[0] == '$' && (name)[1] == 'L')
-#endif
+#define LOCAL_LABEL(name) ((name)[0] == '$')
 
 #define md_undefined_symbol(name)	(0)
 #define md_operand(x)
@@ -71,14 +69,6 @@
 #endif
 #endif /* OBJ_ECOFF */
 #endif /* ! defined (TARGET_FORMAT) */
-
-struct mips_opcode {
-    const char *name;
-    const char *args;
-    unsigned long match;
-    unsigned long mask;  /* used only for error checking */
-    unsigned long pinfo; /* Information used for insn/pipeline scheduling. */
-};
 
 struct mips_cl_insn {
     unsigned long		insn_opcode;

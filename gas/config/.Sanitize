@@ -63,7 +63,6 @@ m88k-opcode.h
 m88k.patches
 mips-big.mt
 mips-lit.mt
-mips-opcode.h
 obj-aout.c
 obj-aout.h
 obj-bout.c
