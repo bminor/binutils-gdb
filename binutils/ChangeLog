@@ -1,3 +1,7 @@
+2005-03-24  Dmitry Diky   <diwil@spec.ru>
+
+	* MAINTAINERS: Add myself as MSP430 maintainer. 
+
 2005-03-23  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated translation.
