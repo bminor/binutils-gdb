@@ -94,14 +94,16 @@ m68k_linux_sigtramp_saved_pc (struct frame_info *frame)
 
   /* Get sigcontext address, it is the third parameter on the stack.  */
   if (frame->next)
-    sigcontext_addr = read_memory_integer (FRAME_ARGS_ADDRESS (frame->next)
-					   + FRAME_ARGS_SKIP
-					   + sigcontext_offs,
-					   ptrbytes);
+    sigcontext_addr
+      = read_memory_unsigned_integer (FRAME_ARGS_ADDRESS (frame->next)
+				      + FRAME_ARGS_SKIP
+				      + sigcontext_offs,
+				      ptrbytes);
   else
-    sigcontext_addr = read_memory_integer (read_register (SP_REGNUM)
-					   + sigcontext_offs,
-					   ptrbytes);
+    sigcontext_addr
+      = read_memory_unsigned_integer (read_register (SP_REGNUM)
+				      + sigcontext_offs,
+				      ptrbytes);
 
   /* Don't cause a memory_error when accessing sigcontext in case the
      stack layout has changed or the stack is corrupt.  */
@@ -120,5 +122,5 @@ m68k_linux_frame_saved_pc (struct frame_info *frame)
   if (get_frame_type (frame) == SIGTRAMP_FRAME)
     return m68k_linux_sigtramp_saved_pc (frame);
 
-  return read_memory_integer (frame->frame + 4, 4);
+  return read_memory_unsigned_integer (frame->frame + 4, 4);
 }

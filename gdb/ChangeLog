@@ -1,3 +1,14 @@
+2002-11-29  Andreas Schwab  <schwab@suse.de>
+
+	* m68k-tdep.c (m68k_frame_chain, m68k_frame_saved_pc)
+	(altos_skip_prologue, delta68_frame_saved_pc, isi_frame_num_args)
+	(delta68_frame_num_args, news_frame_num_args, m68k_skip_prologue)
+	(m68k_frame_init_saved_regs, m68k_saved_pc_after_call): Use
+	read_memory_unsigned_integer instead of read_memory_integer when
+	dealing with addresses and instruction opcodes.
+	* m68klinux-tdep.c (m68k_linux_sigtramp_saved_pc) 
+	(m68k_linux_frame_saved_pc): Likewise.
+
 2002-11-29  Andrew Cagney  <ac131313@redhat.com>
 
 	* stack.c (selected_frame, select_frame): Move from here ...
