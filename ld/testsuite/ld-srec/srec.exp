@@ -229,11 +229,11 @@ proc run_srec_test { test objs } {
     }
 
     # ARM targets call __gccmain
-    if [istarget arm-*-*] {
+    if [istarget arm*-*-*] {
 	set flags "$flags --defsym ___gccmain=0"
     }
     
-    if [istarget strongarm-*-*] {
+    if [istarget strongarm*-*-*] {
 	set flags "$flags --defsym __gccmain=0"
     }
     
@@ -326,12 +326,13 @@ setup_xfail "*-*-aix*" "*-*-xcoff*"
 
 # The S-record linker doesn't build ARM/Thumb stubs.
 setup_xfail "arm-*-coff"
-setup_xfail "strongarm-*-*"
+setup_xfail "strongarm*-*-*"
 setup_xfail "arm-*-pe*"
 # setup_xfail "arm-*elf*"
 setup_xfail "thumb-*-coff*"
 setup_xfail "thumb-*-pe*"
 setup_xfail "thumb-*-elf*"
+setup_xfail "arm*-*-linux*"
 
 # The S-record linker doesn't build special EABI sections.
 setup_xfail "powerpc*-*-eabi*"
@@ -368,8 +369,8 @@ if ![ld_compile "$CXX $CXXFLAGS -fgnu-linker" $srcdir/$subdir/sr3.cc tmpdir/sr3.
 setup_xfail "i*86-*-aout*"
 setup_xfail "mips*-*-irix5*" "mips*-*-irix6*"
 setup_xfail "*-*-aix*" "*-*-xcoff*"
-setup_xfail "arm-*-*"
-setup_xfail "strongarm-*-*"
+setup_xfail "arm*-*-*"
+setup_xfail "strongarm*-*-*"
 setup_xfail "thumb-*-*"
 setup_xfail "powerpc*-*-eabi*"
 setup_xfail "v850*-*-elf"

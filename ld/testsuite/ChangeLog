@@ -1,3 +1,8 @@
+1999-10-28  Scott Bambrough  <scottb@netwinder.org>
+
+	* ld/testsuite/ld-srec/srec.exp: Setup expected failures for
+	srec tests on ARM Linux.
+
 1999-09-17  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* ld-shared/shared.exp: xfail linux*libc1 shared (non PIC, load
