@@ -2000,13 +2000,13 @@ monitor_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
   return len;
 }
 
+/* Transfer LEN bytes between target address MEMADDR and GDB address
+   MYADDR.  Returns 0 for success, errno code for failure. TARGET is
+   unused. */
+
 static int
-monitor_xfer_memory (memaddr, myaddr, len, write, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
-     struct target_ops *target;	/* ignored */
+monitor_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		     struct target_ops *target)
 {
   return dcache_xfer_memory (remote_dcache, memaddr, myaddr, len, write);
 }

@@ -3182,9 +3182,10 @@ handle_psymbol_enumerators (struct objfile *objfile, FDR *fh, int stype,
     }
 }
 
+/* Get the next symbol.  OBJFILE is unused. */
+
 static char *
-mdebug_next_symbol_text (objfile)
-     struct objfile *objfile;	/* argument objfile is currently unused */
+mdebug_next_symbol_text (struct objfile *objfile)
 {
   SYMR sh;
 

@@ -1,3 +1,8 @@
+2000-09-23  Kevin Buettner  <kevinb@redhat.com>
+
+	* mdebugread.c (mdebug_next_symbol_text): Protoize.
+	* monitor.c (monitor_xfer_memory): Protoize.
+
 2000-09-22  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* i386-linux-nat.c (OLD_CANNOT_FETCH_REGISTER,
