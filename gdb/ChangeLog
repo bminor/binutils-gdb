@@ -1,3 +1,11 @@
+2002-03-07  Daniel Jacobowitz  <drow@mvista.com>   
+
+	* gdbserver/linux-low.c (PTRACE_XFER_TYPE): Change to long.
+	(num_regs, regmap): Move inside HAVE_LINUX_USRREGS.
+	(register_addr, REGISTER_RAW_SIZE): Likewise.
+	(usr_store_inferior_registers): Use PTRACE_XFER_TYPE.
+	* gdbserver/linux-x86-64-low.c: Remove extra #endif.
+
 2002-03-06  Alexandre Oliva  <aoliva@redhat.com>
 
 	* configure.in (gdb_cv_bigtoc): Check for -bbigtoc on AIX.
