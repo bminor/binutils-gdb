@@ -3585,7 +3585,7 @@ child_has_syscall_event (int pid, enum target_waitkind *kind, int *syscall_id)
 int
 child_thread_alive (ptid_t ptid)
 {
-  lwpid_t gdp_tid = PIDGET (ptid);
+  lwpid_t gdb_tid = PIDGET (ptid);
   lwpid_t tid;
 
   /* This spins down the lists twice.

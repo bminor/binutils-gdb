@@ -1,3 +1,10 @@
+2001-07-19  Andrew Cagney  <ac131313@redhat.com>
+
+	From 2001-07-16 Rodney Brown <rbrown64@csc.com.au>:
+	* infttrace.c (child_thread_alive): Fix gdb_tid typo.
+	* somsolib.c (no_shared_libraries): Provide stub.
+	* xcoffsolib.c (no_shared_libraries): Provide stub.
+
 2001-07-18  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* Makefile.in (COMMON_OBS): Remove tui-file.o.
