@@ -1,6 +1,21 @@
 Tue Aug 29 13:50:21 1995  steve chamberlain  <sac@slash.cygnus.com>
 
-	* bfd-in2.h: regenerated.
+	* coff-arm.c (coff_rtype_to_howto): Deal with reloc 11.
+	* coffcode.h (coff_write_object_contents): Remove #if0ed code
+	Only remove empty sections in PE inmage files.
+	* libbfd.h, bfd-in2.h: regenerated.
+	* coff-arm.c (aoutarm_std_relo): New entry at 11.
+	(arm_reloc_type_lookup) : Understand type 11.
+	* coff-i386.c (howto_table): fix name of rva type.
+	(coff-i386_rtype_to_howto): Understand R_IMAGEBASE type.
+	* coffcode.h (sec_to_styp_flags): .edata is data.
+	(coff_compute_section_file_positions): Get page size right for PE.
+	(fill_pe_header_info): Fix fields.
+	(coff_write_object_contents): Remove end_of_image calc.
+	(_bfd_coff_generate_reloc_section): Remove orphaned comment.
+	* coffswap.h (coff_swap_scnhdr_in): Don't always add IMAGE_BASE.
+	(coff_swap_scnhdr_out): Setup PE flags correctly.
+	* reloc.c (BFD_RELOC_RVA): New field.
 
 Thu Aug 24 17:49:59 1995  Ian Lance Taylor  (ian@cygnus.com)
 

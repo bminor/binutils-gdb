@@ -1918,7 +1918,7 @@ coff_write_object_contents (abfd)
   struct bfd_link_pe_info *pe_info;
 
   if (coff_data (abfd)->link_info)
-      info =coff_data (abfd)->link_info;
+    info =coff_data (abfd)->link_info;
   else 
     {
       coff_data (abfd)->link_info = info = &dummy_info;
@@ -1983,128 +1983,107 @@ coff_write_object_contents (abfd)
   /* Write section headers to the file.  */
   internal_f.f_nscns = 0;
 
-#if 0 
   if (bfd_seek (abfd,
 		(file_ptr) ((abfd->flags & EXEC_P) ?
-			    (EXTRA_NT_HDRSZ + FILHSZ + AOUTSZ) : 
-                            (EXTRA_NT_HDRSZ + FILHSZ)),
-		SEEK_SET)
-      != 0)
-#else
-    if (bfd_seek (abfd,
-		  (file_ptr) ((abfd->flags & EXEC_P) ?
-			      (FILHSZ + AOUTSZ) : FILHSZ),
-		  SEEK_SET)
-	!= 0)
-#endif
-      return false;
+			    (FILHSZ + AOUTSZ) : FILHSZ),
+		SEEK_SET) != 0)
+    return false;
 
-  {
-    for (current = abfd->sections;
-	 current != NULL;
-	 current = current->next)
-      {
-	struct internal_scnhdr section;
+  for (current = abfd->sections;
+       current != NULL;
+       current = current->next)
+    {
+      struct internal_scnhdr section;
 
 #ifdef COFF_WITH_PE
-        /* Do not include the .junk section.  This is where we collect section
-           data which we don't need.  This is mainly the MS .debug$ data which
-           stores codeview debug data. */
-        if (strcmp (current->name, ".junk") == 0)
-          {
-	    continue;
-          }
+      /* Do not include the .junk section.  This is where we collect section
+	 data which we don't need.  This is mainly the MS .debug$ data which
+	 stores codeview debug data. */
+      if (strcmp (current->name, ".junk") == 0)
+	{
+	  continue;
+	}
 #endif
-	internal_f.f_nscns++;
-	strncpy (&(section.s_name[0]), current->name, 8);
+      internal_f.f_nscns++;
+      strncpy (&(section.s_name[0]), current->name, 8);
 #ifdef _LIB
-	/* Always set s_vaddr of .lib to 0.  This is right for SVR3.2
-	   Ian Taylor <ian@cygnus.com>.  */
-	if (strcmp (current->name, _LIB) == 0)
-	  section.s_vaddr = 0;
-	else
+      /* Always set s_vaddr of .lib to 0.  This is right for SVR3.2
+	 Ian Taylor <ian@cygnus.com>.  */
+      if (strcmp (current->name, _LIB) == 0)
+	section.s_vaddr = 0;
+      else
 #endif
 	section.s_vaddr = current->lma;
-	section.s_paddr = current->lma;
-	section.s_size = current->_raw_size;
+      section.s_paddr = current->lma;
+      section.s_size = current->_raw_size;
 
-	/*
-	   If this section has no size or is unloadable then the scnptr
-	   will be 0 too
-	   */
-	if (current->_raw_size == 0 ||
-	    (current->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
-	  {
-	    section.s_scnptr = 0;
-	  }
-	else
-	  {
-	    section.s_scnptr = current->filepos;
-	  }
-	section.s_relptr = current->rel_filepos;
-	section.s_lnnoptr = current->line_filepos;
-	section.s_nreloc = current->reloc_count;
-	section.s_nlnno = current->lineno_count;
-	if (current->reloc_count != 0)
-	  hasrelocs = true;
-	if (current->lineno_count != 0)
-	  haslinno = true;
+      /*
+	 If this section has no size or is unloadable then the scnptr
+	 will be 0 too
+	 */
+      if (current->_raw_size == 0 ||
+	  (current->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
+	{
+	  section.s_scnptr = 0;
+	}
+      else
+	{
+	  section.s_scnptr = current->filepos;
+	}
+      section.s_relptr = current->rel_filepos;
+      section.s_lnnoptr = current->line_filepos;
+      section.s_nreloc = current->reloc_count;
+      section.s_nlnno = current->lineno_count;
+      if (current->reloc_count != 0)
+	hasrelocs = true;
+      if (current->lineno_count != 0)
+	haslinno = true;
 
-	section.s_flags = sec_to_styp_flags (current->name, current->flags);
+      section.s_flags = sec_to_styp_flags (current->name, current->flags);
 
-	if (!strcmp (current->name, _TEXT))
-	  {
-	    text_sec = current;
-	  }
-	else if (!strcmp (current->name, _DATA))
-	  {
-	    data_sec = current;
+      if (!strcmp (current->name, _TEXT))
+	{
+	  text_sec = current;
+	}
+      else if (!strcmp (current->name, _DATA))
+	{
+	  data_sec = current;
 #ifdef TWO_DATA_SECS
-	  }
-	else if (!strcmp (current->name, ".data2"))
-	  {
-	    data_sec = current;
+	}
+      else if (!strcmp (current->name, ".data2"))
+	{
+	  data_sec = current;
 #endif /* TWO_DATA_SECS */
-	  }
-	else if (!strcmp (current->name, _BSS))
-	  {
-	    bss_sec = current;
-	  }
+	}
+      else if (!strcmp (current->name, _BSS))
+	{
+	  bss_sec = current;
+	}
 
 #ifdef I960
-	section.s_align = (current->alignment_power
-			   ? 1 << current->alignment_power
-			   : 0);
+      section.s_align = (current->alignment_power
+			 ? 1 << current->alignment_power
+			 : 0);
 
+#endif
+
+#ifdef COFF_IMAGE_WITH_PE
+      /* suppress output of the sections if they are null.  ld includes
+	 the bss and data sections even if there is no size assigned
+	 to them.  NT loader doesn't like it if these section headers are
+	 included if the sections themselves are not needed */
+      if (section.s_size == 0)
+	internal_f.f_nscns--;
+      else
 #endif
 	{
 	  SCNHDR buff;
-
-	  if (obj_pe (abfd)) 
-	    {
-	    /* suppress output of the sections if they are null.  ld includes
-	       the bss and data sections even if there is no size assigned
-	       to them.  NT loader doesn't like it if these section headers are
-	       included if the sections themselves are not needed */
-	    if (section.s_size == 0)
-	      internal_f.f_nscns--;
-	    else
-	      { 
-		coff_swap_scnhdr_out (abfd, &section, &buff);
-		if (bfd_write ((PTR) (&buff), 1, SCNHSZ, abfd) != SCNHSZ)
-		  return false;
-	      }
-	  }
-	  else 
-	    {
-	    if (coff_swap_scnhdr_out (abfd, &section, &buff) == 0
-		|| bfd_write ((PTR) (&buff), 1, SCNHSZ, abfd) != SCNHSZ)
-	      return false;
-	  }
-
+	  if (coff_swap_scnhdr_out (abfd, &section, &buff) == 0
+	      || bfd_write ((PTR) (&buff), 1, SCNHSZ, abfd) != SCNHSZ)
+	    return false;
 	}
-      }
-  }
+    }
+
 
 
   /* OK, now set up the filehdr... */
