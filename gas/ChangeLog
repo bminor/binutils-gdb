@@ -1,5 +1,8 @@
 Wed May  6 15:26:34 1998  Klaus Kaempf  <kkaempf@progis.de>
 
+	* makefile.vms: Run dec c with /nodebug.  Pass CC value when
+	calling make.
+
         * makefile.vms (OBJS): Add ehopt.obj
 
 Wed May  6 15:11:12 1998  Klaus Kaempf  <kkaempf@progis.de>

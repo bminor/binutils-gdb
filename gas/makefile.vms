@@ -13,7 +13,7 @@ else
 DEFS=/define=("table_size_of_flonum_powers_of_ten"="tabsiz_flonum_powers_of_ten",\
 "_bfd_generic_get_section_contents_in_window"="_bfd_generic_get_win_section_cont",\
 "_elf_section_from_bfd_section"="_bfd_elf_sec_from_bfd_sec","const=")
-CFLAGS=/noopt/debug/include=([],[-.bfd],[.config],[-.include],[-])$(DEFS)\
+CFLAGS=/noopt/nodebug/include=([],[-.bfd],[.config],[-.include],[-])$(DEFS)\
 /warnings=disable=(missingreturn,implicitfunc,ptrmismatch,undefescap,longextern,duptypespec)
 LFLAGS=
 LIBS=,sys$$library:vaxcrtl.olb/lib
@@ -59,7 +59,7 @@ targ-cpu.obj: targ-cpu.c targ-cpu.h [.config]atof-vax.c
 
 [-.bfd]bfd.h:
 	$(CD) [-.bfd]
-	gmake -f makefile.vms
+	gmake -f makefile.vms "CC=$(CC)"
 	$(CD) [-.gas]
 
 clean:
