@@ -66,19 +66,20 @@ SIM_AC_OPTION_ENDIAN($mips_endian,$default_endian)
 #
 # Select the bitsize of the target
 #
+mips_addr_bitsize=
 case "${target}" in
 # start-sanitize-tx19
   mipstx19*-*-*)        mips_bitsize=32 ; mips_msb=31 ;;
 # end-sanitize-tx19
 # start-sanitize-r5900
-  mips64r59*-*-*)	mips_bitsize=64 ; mips_msb=63 ;;
+  mips64r59*-*-*)	mips_bitsize=64 ; mips_msb=63 ; mips_addr_bitsize=32;;
 # end-sanitize-r5900
   mips64*-*-*)          mips_bitsize=64 ; mips_msb=63 ;;
   mips16*-*-*)          mips_bitsize=64 ; mips_msb=63 ;;
   mips*-*-*)            mips_bitsize=32 ; mips_msb=31 ;;
   *)                    mips_bitsize=64 ; mips_msb=63 ;;
 esac
-SIM_AC_OPTION_BITSIZE($mips_bitsize,$mips_msb)
+SIM_AC_OPTION_BITSIZE($mips_bitsize,$mips_msb,$mips_addr_bitsize)
 
 
 
@@ -95,7 +96,7 @@ case "${target}" in
 			mips_fpu_bitsize=32
 			;;
 # start-sanitize-r5900
-  mips64r59*-*-*)       mips_fpu=HARD_FLOATING_POINT ;;
+  mips64r59*-*-*)       mips_fpu=HARD_FLOATING_POINT ; mips_fpu_bitsize=32 ;;
 # end-sanitize-r5900
   mips64*-*-*)          mips_fpu=HARD_FLOATING_POINT ;;
   mips16*-*-*)          mips_fpu=HARD_FLOATING_POINT ;;

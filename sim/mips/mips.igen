@@ -12,14 +12,14 @@
 
 
 // IGEN config - mips16
-:option:16::insn-bit-size:16
-:option:16::hi-bit-nr:15
+// :option:16::insn-bit-size:16
+// :option:16::hi-bit-nr:15
 :option:16::insn-specifying-widths:true
 :option:16::gen-delayed-branch:false
 
 // IGEN config - mips32/64..
-:option:32::insn-bit-size:32
-:option:32::hi-bit-nr:31
+// :option:32::insn-bit-size:32
+// :option:32::hi-bit-nr:31
 :option:32::insn-specifying-widths:true
 :option:32::gen-delayed-branch:false
 
@@ -35,17 +35,17 @@
 :model:::mipsIV:mipsIV:
 :model:::mips16:mips16:
 // start-sanitize-r5900
-:model:::r5900:r5900:
+:model:::r5900:mips5900:
 // end-sanitize-r5900
-:model:::r3900:r3900:
+:model:::r3900:mips3900:
 // start-sanitize-tx19
 :model:::tx19:tx19:
 // end-sanitize-tx19
 // start-sanitize-vr5400
-:model:::vr5400:vr5400:
+:model:::vr5400:mips5400:
 :model:::mdmx:mdmx:
 // end-sanitize-vr5400
-:model:::vr5000:vr5000:
+:model:::vr5000:mips5000:
 
 
 
@@ -1258,6 +1258,25 @@
 }
 
 
+:function:::void:do_load_byte:address_word gpr_base, int rt, signed16 offset
+{
+  address_word vaddr = offset + gpr_base;
+  address_word paddr;
+  int uncached;
+  if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
+    {
+      unsigned64 memval = 0;
+      address_word mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
+      unsigned int reverse = (ReverseEndian ? mask : 0);
+      unsigned int bigend = (BigEndianCPU ? mask : 0);
+      unsigned int byte;
+      paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
+      LoadMemory (&memval, NULL, uncached, AccessLength_BYTE, paddr, vaddr, isDATA, isREAL);
+      byte = ((vaddr & mask) ^ bigend);
+      GPR[rt] = EXTEND8 ((memval >> (8 * byte)));
+    }
+}
+
 100000,5.BASE,5.RT,16.OFFSET:NORMAL:32::LB
 "lb r<RT>, <OFFSET>(r<BASE>)"
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -1273,6 +1292,8 @@
 *tx19:
 // end-sanitize-tx19
 {
+  do_load_byte (SD_, GPR[BASE], RT, OFFSET);
+#if 0
   unsigned32 instruction = instruction_0;
   signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
   int destreg = ((instruction >> 16) & 0x0000001F);
@@ -1298,6 +1319,7 @@
 	}
     }
   }
+#endif
 }
 
 
@@ -3430,9 +3452,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -3452,16 +3471,13 @@
 
 
 
-010001,10,3.FMT,5.FT,5.FS,5.FD,000000:COP1:32,f::ADD
+010001,10,3.FMT,5.FT,5.FS,5.FD,000000:COP1:32,f::ADD.fmt
 "add.%s<FMT> f<FD>, f<FS>, f<FT>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -3494,13 +3510,21 @@
 *r5900:
 // end-sanitize-r5900
 {
+  TRACE_BRANCH_INPUT (PREVCOC1());
   if (PREVCOC1() == TF)
     {
-      DELAY_SLOT (NIA + (EXTEND16 (OFFSET) << 2));
+      address_word dest = NIA + (EXTEND16 (OFFSET) << 2);
+      TRACE_BRANCH_RESULT (dest);
+      DELAY_SLOT (dest);
     }
   else if (ND)
     {
+      TRACE_BRANCH_RESULT (0);
       NULLIFY_NEXT_INSTRUCTION ();
+    }
+  else
+    {
+      TRACE_BRANCH_RESULT (NIA);
     }
 }
 
@@ -3584,9 +3608,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -3841,9 +3862,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -4133,16 +4151,13 @@
 //
 // FIXME: Not correct for mips*
 //
-010011,5.FR,5.FT,5.FS,5.FD,100,001:COP1X:32::MADD.D
+010011,5.FR,5.FT,5.FS,5.FD,100,001:COP1X:32,f::MADD.D
 "madd.d f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 {
   unsigned32 instruction = instruction_0;
   int destreg = ((instruction >> 6) & 0x0000001F);
@@ -4155,16 +4170,13 @@
 }
 
 
-010011,5.FR,5.FT,5.FS,5.FD,100,000:COP1X:32::MADD.S
+010011,5.FR,5.FT,5.FS,5.FD,100,000:COP1X:32,f::MADD.S
 "madd.s f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 {
   unsigned32 instruction = instruction_0;
   int destreg = ((instruction >> 6) & 0x0000001F);
@@ -4202,9 +4214,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -4225,9 +4234,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -4387,9 +4393,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -4416,9 +4419,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -4739,9 +4739,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -5099,10 +5096,10 @@
 // end-sanitize-r5900
 
 
-:include:::m16.igen
+:include:16::m16.igen
 // start-sanitize-vr5400
 :include::vr5400:vr5400.igen
-:include:::mdmx.igen
+:include:64,f::mdmx.igen
 // end-sanitize-vr5400
 // start-sanitize-r5900
 :include::r5900:r5900.igen
@@ -5206,4 +5203,4 @@
 //   }
 // }
 
-// start-sanitize-cygnus-never
+// end-sanitize-cygnus-never

@@ -111,6 +111,8 @@ unsigned64 Multiply PARAMS ((unsigned64 op1, unsigned64 op2, FP_formats fmt));
 unsigned64 Divide PARAMS ((unsigned64 op1, unsigned64 op2, FP_formats fmt));
 unsigned64 Recip PARAMS ((unsigned64 op, FP_formats fmt));
 unsigned64 SquareRoot PARAMS ((unsigned64 op, FP_formats fmt));
+unsigned64 Max PARAMS ((unsigned64 op1, unsigned64 op2, FP_formats fmt));
+unsigned64 Min PARAMS ((unsigned64 op1, unsigned64 op2, FP_formats fmt));
 unsigned64 convert PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int rm, unsigned64 op, FP_formats from, FP_formats to));
 #define Convert(rm,op,from,to) \
 convert (SD, CPU, cia, rm, op, from, to)
@@ -131,7 +133,7 @@ convert (SD, CPU, cia, rm, op, from, to)
 #define PREVCOC1() ((STATE & simPCOC1) ? 1 : 0)
 
 #if 1
-#define SizeFGR() (WITH_TARGET_WORD_BITSIZE)
+#define SizeFGR() (WITH_TARGET_FLOATING_POINT_BITSIZE)
 #else
 /* They depend on the CPU being simulated */
 #define SizeFGR() ((WITH_TARGET_WORD_BITSIZE == 64 && ((SR & status_FR) == 1)) ? 64 : 32)
@@ -183,7 +185,54 @@ convert (SD, CPU, cia, rm, op, from, to)
     SignalExceptionIntegerOverflow (); \
   (ANS) = ALU64_OVERFLOW_RESULT;
 
+
 /* start-sanitize-r5900 */
+
+typedef struct _sim_r5900_cpu {
+
+  /* The R5900 has 32 x 128bit general purpose registers.
+     Fortunatly, the high 64 bits are only touched by multimedia (MMI)
+     instructions.  The normal mips instructions just use the lower 64
+     bits.  To avoid changing the older parts of the simulator to
+     handle this weirdness, the high 64 bits of each register are kept
+     in a separate array (registers1).  The high 64 bits of any
+     register are by convention refered by adding a '1' to the end of
+     the normal register's name.  So LO still refers to the low 64
+     bits of the LO register, LO1 refers to the high 64 bits of that
+     same register.  */
+  signed_word gpr1[32];
+#define GPR1     ((CPU)->r5900.gpr1)
+  signed_word lo1;
+  signed_word hi1;
+#define LO1      ((CPU)->r5900.lo1)
+#define HI1      ((CPU)->r5900.hi1)
+
+  /* The R5900 defines a shift amount register, that controls the
+     amount of certain shift instructions */
+  unsigned_word sa;        /* the shift amount register */
+#define REGISTER_SA	(124) /* GET RID IF THIS! */
+#define SA ((CPU)->r5900.sa)
+
+  /* The R5900, in addition to the (almost) standard floating point
+     registers, defines a 32 bit accumulator.  This is used in
+     multiply/accumulate style instructions */
+  fp_word acc; /* floating-point accumulator */
+#define ACC ((CPU)->r5900.acc)
+
+  /* See comments below about needing to count cycles between updating
+     and setting HI/LO registers */
+  int hi1access;
+  int lo1access;
+#define HI1ACCESS ((CPU)->r5900.hi1access)
+#define LO1ACCESS ((CPU)->r5900.lo1access)
+#if 0
+#define CHECKHILO(s) {\
+  if ((HIACCESS != 0) || (LOACCESS != 0) || (HI1ACCESS != 0) || (LO1ACCESS != 0))\
+    sim_io_eprintf(sd,"%s over-writing HI and LO registers values (PC = 0x%s HLPC = 0x%s)\n",(s),pr_addr(PC),pr_addr(HLPC));\
+}
+#endif
+
+} sim_r5900_cpu;
 
 #define BYTES_IN_MMI_REGS       (sizeof(signed_word) + sizeof(signed_word))
 #define HALFWORDS_IN_MMI_REGS   (BYTES_IN_MMI_REGS/2)
@@ -228,15 +277,15 @@ GPR_<type>(R,I) - return, as lvalue, the I'th <type> of general register R
 #define SUB_REG_UW(A,A1,I) SUB_REG_FETCH(unsigned32, WORDS_IN_MIPS_REGS,       A, A1, I)
 #define SUB_REG_UD(A,A1,I) SUB_REG_FETCH(unsigned64, DOUBLEWORDS_IN_MIPS_REGS, A, A1, I)
   
-#define GPR_SB(R,I) SUB_REG_SB(&REGISTERS[R], &REGISTERS1[R], I)
-#define GPR_SH(R,I) SUB_REG_SH(&REGISTERS[R], &REGISTERS1[R], I)
-#define GPR_SW(R,I) SUB_REG_SW(&REGISTERS[R], &REGISTERS1[R], I)
-#define GPR_SD(R,I) SUB_REG_SD(&REGISTERS[R], &REGISTERS1[R], I)
+#define GPR_SB(R,I) SUB_REG_SB(&GPR[R], &GPR1[R], I)
+#define GPR_SH(R,I) SUB_REG_SH(&GPR[R], &GPR1[R], I)
+#define GPR_SW(R,I) SUB_REG_SW(&GPR[R], &GPR1[R], I)
+#define GPR_SD(R,I) SUB_REG_SD(&GPR[R], &GPR1[R], I)
 
-#define GPR_UB(R,I) SUB_REG_UB(&REGISTERS[R], &REGISTERS1[R], I)
-#define GPR_UH(R,I) SUB_REG_UH(&REGISTERS[R], &REGISTERS1[R], I)
-#define GPR_UW(R,I) SUB_REG_UW(&REGISTERS[R], &REGISTERS1[R], I)
-#define GPR_UD(R,I) SUB_REG_UD(&REGISTERS[R], &REGISTERS1[R], I)
+#define GPR_UB(R,I) SUB_REG_UB(&GPR[R], &GPR1[R], I)
+#define GPR_UH(R,I) SUB_REG_UH(&GPR[R], &GPR1[R], I)
+#define GPR_UW(R,I) SUB_REG_UW(&GPR[R], &GPR1[R], I)
+#define GPR_UD(R,I) SUB_REG_UD(&GPR[R], &GPR1[R], I)
 
 
 #define RS_SB(I) SUB_REG_SB(&rs_reg, &rs_reg1, I)
@@ -377,9 +426,9 @@ struct _sim_cpu {
     address_word target = (TARGET); \
     instruction_word delay_insn; \
     sim_events_slip (SD, 1); \
-    CIA = CIA + 4; \
+    CIA = CIA + 4; /* NOTE not mips16 */ \
     STATE |= simDELAYSLOT; \
-    delay_insn = IMEM (CIA); \
+    delay_insn = IMEM32 (CIA); /* NOTE not mips16 */ \
     idecode_issue (CPU_, delay_insn, (CIA)); \
     STATE &= ~simDELAYSLOT; \
     NIA = target; \
@@ -443,6 +492,21 @@ struct _sim_cpu {
 /* end-sanitize-r5900 */
 #endif
 
+/* start-sanitize-sky */
+#ifdef TARGET_SKY
+#ifndef TM_TXVU_H
+
+/* Number of machine registers */
+#define NUM_VU_REGS 152
+
+#define NUM_R5900_REGS 128
+
+#undef NUM_REGS
+#define NUM_REGS (NUM_R5900_REGS + 2*(NUM_VU_REGS))
+#endif /* no tm-txvu.h */
+#endif
+/* end-sanitize-sky */
+
 /* To keep this default simulator simple, and fast, we use a direct
    vector of registers. The internal simulator engine then uses
    manifests to access the correct slot. */
@@ -453,9 +517,16 @@ struct _sim_cpu {
 
 #define GPR     (&REGISTERS[0])
 #define GPR_SET(N,VAL) (REGISTERS[(N)] = (VAL))
+
+  /* While space is allocated for the floating point registers in the
+     main registers array, they are stored separatly.  This is because
+     their size may not necessarily match the size of either the
+     general-purpose or system specific registers */
 #define NR_FGR  (32)
 #define FGRIDX  (38)
-#define FGR     (&REGISTERS[FGRIDX])
+  fp_word fgr[NR_FGR];
+#define FGR     ((CPU)->fgr)
+
 #define LO      (REGISTERS[33])
 #define HI      (REGISTERS[34])
 #define PCIDX	37
@@ -502,6 +573,7 @@ struct _sim_cpu {
 #define LLBIT ((CPU)->llbit)
 
 
+#if 0
 /* The HIACCESS and LOACCESS counts are used to ensure that
    corruptions caused by using the HI or LO register to close to a
    following operation are spotted. */
@@ -510,18 +582,7 @@ struct _sim_cpu {
   int loaccess;
 #define HIACCESS ((CPU)->hiaccess)
 #define LOACCESS ((CPU)->loaccess)
-  /* start-sanitize-r5900 */
-  int hi1access;
-  int lo1access;
-#define HI1ACCESS ((CPU)->hi1access)
-#define LO1ACCESS ((CPU)->lo1access)
-  /* end-sanitize-r5900 */
-#if 1
-  /* The 4300 and a few other processors have interlocks on hi/lo
-     register reads, and hence do not have this problem.  To avoid
-     spurious warnings, we just disable this always.  */
-#define CHECKHILO(s)
-#else
+
   unsigned_word HLPC;
   /* If either of the preceding two instructions have accessed the HI
      or LO registers, then the values they see should be
@@ -532,36 +593,17 @@ struct _sim_cpu {
   if ((HIACCESS != 0) || (LOACCESS != 0)) \
     sim_io_eprintf(sd,"%s over-writing HI and LO registers values (PC = 0x%s HLPC = 0x%s)\n",(s),pr_addr(PC),pr_addr(HLPC));\
 }
-  /* start-sanitize-r5900 */
-#undef CHECKHILO
-#define CHECKHILO(s) {\
-  if ((HIACCESS != 0) || (LOACCESS != 0) || (HI1ACCESS != 0) || (LO1ACCESS != 0))\
-    sim_io_eprintf(sd,"%s over-writing HI and LO registers values (PC = 0x%s HLPC = 0x%s)\n",(s),pr_addr(PC),pr_addr(HLPC));\
-}
-  /* end-sanitize-r5900 */
 #endif
 
+#if !defined CHECKHILO
+  /* The 4300 and a few other processors have interlocks on hi/lo
+     register reads, and hence do not have this problem.  To avoid
+     spurious warnings, we just disable this always.  */
+#define CHECKHILO(s)
+#endif
 
   /* start-sanitize-r5900 */
-  /* The R5900 has 128 bit registers, but the hi 64 bits are only
-     touched by multimedia (MMI) instructions.  The normal mips
-     instructions just use the lower 64 bits.  To avoid changing the
-     older parts of the simulator to handle this weirdness, the high
-     64 bits of each register are kept in a separate array
-     (registers1).  The high 64 bits of any register are by convention
-     refered by adding a '1' to the end of the normal register's name.
-     So LO still refers to the low 64 bits of the LO register, LO1
-     refers to the high 64 bits of that same register.  */
-
-  signed_word registers1[LAST_EMBED_REGNUM + 1];
-#define REGISTERS1 ((CPU)->registers1)
-#define GPR1     (&REGISTERS1[0])
-#define LO1      (REGISTERS1[32])
-#define HI1      (REGISTERS1[33])
-#define REGISTER_SA	(124)
-
-  unsigned_word sa;        /* the shift amount register */
-#define SA ((CPU)->sa)
+  sim_r5900_cpu r5900;
 
   /* end-sanitize-r5900 */
   /* start-sanitize-vr5400 */
@@ -775,7 +817,10 @@ void prefetch PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int CCA, add
 prefetch (SD, CPU, cia, CCA, pAddr, vAddr, DATA, hint)
 
 unsigned32 ifetch32 PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, address_word vaddr));
-#define IMEM(CIA) ifetch32 (SD, CPU, (CIA), (CIA))
+#define IMEM32(CIA) ifetch32 (SD, CPU, (CIA), (CIA))
+unsigned16 ifetch16 PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, address_word vaddr));
+#define IMEM16(CIA,NR) ifetch16 (SD, CPU, (CIA), ((CIA) & ~1) + 2 * (NR))
+#define IMEM16_IMMED(CIA,NR) ifetch16 (SD, CPU, (CIA), ((CIA) & ~1) + 2 * (NR))
 
 void dotrace PARAMS ((SIM_DESC sd, sim_cpu *cpu, FILE *tracefh, int type, SIM_ADDR address, int width, char *comment, ...));
 FILE *tracefh;

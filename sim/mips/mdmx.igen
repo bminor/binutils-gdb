@@ -26,7 +26,11 @@
 // If valid, return the scale (log nr bits) of a vector element
 // as determined by SEL.
 
-:function:::int:get_scale:int sel
+:function:64,f::int:get_scale:int sel
+*mdmx:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
 #if 0
   switch (my_index X STATE_ARCHITECTURE)
@@ -63,7 +67,11 @@
 // Fetch/Store VALUE in ELEMENT of vector register FPR.
 // The the of the element determined by SCALE.
 
-:function:::signed:value_vr:int scale, int fpr, int el
+:function:64,f::signed:value_vr:int scale, int fpr, int el
+*mdmx:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   switch (FPR_STATE[fpr])
     {
@@ -96,7 +104,11 @@
   return 0;
 }
 
-:function:::void:store_vr:int scale, int fpr, int element, signed value
+:function:64,f::void:store_vr:int scale, int fpr, int element, signed value
+*mdmx:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   switch (FPR_STATE[fpr])
     {
@@ -132,7 +144,11 @@
 // Select a value from onr of FGR[VT][ELEMENT], VT and GFR[VT][CONST]
 // according to SEL
 
-:function:::unsigned:select_vr:int sel, int vt, int element
+:function:64,f::unsigned:select_vr:int sel, int vt, int element
+*mdmx:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   switch (sel)
     {
@@ -182,7 +198,11 @@
 
 // Saturate (clamp) the signed value to (8 << SCALE) bits.
 
-:function:::signed:Clamp:int scale, signed value
+:function:64,f::signed:Clamp:int scale, signed value
+*mdmx:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   switch (scale)
     {
@@ -217,12 +237,20 @@
 
 // Access a single bit of the floating point CC register.
 
-:function:::void:store_cc:int i, int value
+:function:64,f::void:store_cc:int i, int value
+*mdmx:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   SETFCC (i, value);
 }
 
-:function:::int:value_cc:int i
+:function:64,f::int:value_cc:int i
+*mdmx:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   return GETFCC (i);
 }
@@ -230,7 +258,11 @@
 
 //  Read/write the accumulator
 
-:function:::signed64:value_acc:int scale, int element
+:function:64,f::signed64:value_acc:int scale, int element
+*mdmx:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   signed64 value = 0;
   switch (scale)
@@ -252,7 +284,11 @@
   return value;
 }
 
-:function:::void:store_acc:int scale, int element, signed64 value
+:function:64,f::void:store_acc:int scale, int element, signed64 value
+*mdmx:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   switch (scale)
     {
@@ -275,7 +311,11 @@
 
 // Formatting
 
-:%s::::VT:int sel, int vt
+:%s:64,f:::VT:int sel, int vt
+*mdmx:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   static char buf[20];
   if (sel < 8)
@@ -289,7 +329,11 @@
   return buf;
 }
 
-:%s::::SEL:int sel
+:%s:64,f:::SEL:int sel
+*mdmx:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   switch (sel & 7)
     {
@@ -311,7 +355,7 @@
 
 // Vector Add.
 
-010010,5.SEL,5.VT,5.VS,5.VD,001011::::ADD.fmt
+010010,5.SEL,5.VT,5.VS,5.VD,001011::64,f::ADD.fmt
 "add.%s<SEL> v<VD>, v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -330,7 +374,7 @@
 
 // Accumulate Vector Add
 
-010010,5.SEL,5.VT,5.VS,1,0000,110111::::ADDA.fmt
+010010,5.SEL,5.VT,5.VS,1,0000,110111::64,f::ADDA.fmt
 "adda.%s<SEL> v<VD>, v<VS>"
 *mdmx:
 {
@@ -346,7 +390,7 @@
 
 // Load Vector Add
 
-010010,5.SEL,5.VT,5.VS,0,0000,110111::::ADDA.fmt
+010010,5.SEL,5.VT,5.VS,0,0000,110111::64,f::ADDA.fmt
 "addl.%s<SEL> v<VD>, v<VS>"
 *mdmx:
 {
@@ -362,7 +406,11 @@
 
 // Vector align, Constant Alignment
 
-:function:::void:ByteAlign:int vd, int imm, int vs, int vt
+:function:64,f::void:ByteAlign:int vd, int imm, int vs, int vt
+*mdmx:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   int s = imm * 8;
   unsigned64 rs = ValueFPR (vs, fmt_long);
@@ -389,7 +437,7 @@
   StoreFPR (vd, fmt_long, rd);
 }
 
-010010,00,3.IMM,5.VT,5.VS,5.VD,0110,X,0::::ALNI.fmt
+010010,00,3.IMM,5.VT,5.VS,5.VD,0110,X,0::64,f::ALNI.fmt
 "alni.%s<FMT#X> v<VD>, v<VS>, v<VT>, <IMM>"
 *mdmx:
 // start-sanitize-vr5400
@@ -403,7 +451,7 @@
 
 // Vector align, Variable Alignment
 
-010010,5.RS,5.VT,5.VS,5.VD,0110,X,1::::ALNV.fmt
+010010,5.RS,5.VT,5.VS,5.VD,0110,X,1::64,f::ALNV.fmt
 "alnv.%s<FMT#X> v<VD>, v<VS>, v<VT>, r<RS>"
 *mdmx:
 {
@@ -414,7 +462,7 @@
 
 // Vector And.
 
-010010,5.SEL,5.VT,5.VS,5.VD,001100::::AND.fmt
+010010,5.SEL,5.VT,5.VS,5.VD,001100::64,f::AND.fmt
 "and.%s<SEL> v<VD>, v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -434,7 +482,7 @@
 // Vector Compare Equal.
 
 
-010010,5.SEL,5.VT,5.VS,00000,000001::::C.EQ.fmt
+010010,5.SEL,5.VT,5.VS,00000,000001::64,f::C.EQ.fmt
 "c.EQ.%s<SEL> v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -453,7 +501,7 @@
 
 // Vector Compare Less Than or Equal.
 
-010010,5.SEL,5.VT,5.VS,00000,000101::::C.LE.fmt
+010010,5.SEL,5.VT,5.VS,00000,000101::64,f::C.LE.fmt
 "c.le.%s<SEL> v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -472,7 +520,7 @@
 
 // Vector Compare Less Than.
 
-010010,5.SEL,5.VT,5.VS,00000,000100::::C.LT.fmt
+010010,5.SEL,5.VT,5.VS,00000,000100::64,f::C.LT.fmt
 "c.lt.%s<SEL> v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -491,7 +539,11 @@
 
 // Vector Maximum.
 
-:function:::signed:Max:int scale, signed l, signed r
+:function:64,f::signed:Max:int scale, signed l, signed r
+*mdmx:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   if (l < r)
     return r;
@@ -499,7 +551,7 @@
     return l;
 }
 
-010010,5.SEL,5.VT,5.VS,5.VD,000111::::MAX.fmt
+010010,5.SEL,5.VT,5.VS,5.VD,000111::64,f::MAX.fmt
 "max.%s<SEL> v<VD>, v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -519,7 +571,11 @@
 
 // Vector Minimum.
 
-:function:::signed:Min:int scale, signed l, signed r
+:function:64,f::signed:Min:int scale, signed l, signed r
+*mdmx:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   if (l < r)
     return l;
@@ -527,7 +583,7 @@
     return r;
 }
 
-010010,5.SEL,5.VT,5.VS,5.VD,000110::::MIN.fmt
+010010,5.SEL,5.VT,5.VS,5.VD,000110::64,f::MIN.fmt
 "min.%s<SEL> v<VD>, v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -547,7 +603,11 @@
 
 // Vector Sign.
 
-:function:::signed:Sign:int scale, signed l, signed r
+:function:64,f::signed:Sign:int scale, signed l, signed r
+*mdmx:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   if (l >= 0)
     return r;
@@ -575,7 +635,7 @@
     }
 }
 
-010010,5.SEL,5.VT,5.VS,5.VD,000110::::MSGN.fmt
+010010,5.SEL,5.VT,5.VS,5.VD,000110::64,f::MSGN.fmt
 "msgn.%s<SEL> v<VD>, v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 {
@@ -595,7 +655,7 @@
 
 // Vector Multiply.
 
-010010,5.SEL,5.VT,5.VS,5.VD,110000::::MUL.fmt
+010010,5.SEL,5.VT,5.VS,5.VD,110000::64,f::MUL.fmt
 "mul.%s<SEL> v<VD>, v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -615,7 +675,7 @@
 
 // Accumulate Vector Multiply
 
-010010,5.SEL,5.VT,5.VS,00000,110011::::MULA.fmt
+010010,5.SEL,5.VT,5.VS,00000,110011::64,f::MULA.fmt
 "mula.%s<SEL> v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -635,7 +695,7 @@
 
 // Add Vector Multiply to Accumulator.
 
-010010,5.SEL,5.VT,5.VS,10000,110011::::MULL.fmt
+010010,5.SEL,5.VT,5.VS,10000,110011::64,f::MULL.fmt
 "mull.%s<SEL> v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -654,7 +714,7 @@
 
 // Subtract Vector Multiply from Accumulator
 
-010010,5.SEL,5.VT,5.VS,00000,110010::::MULS.fmt
+010010,5.SEL,5.VT,5.VS,00000,110010::64,f::MULS.fmt
 "muls.%s<SEL> v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -674,7 +734,7 @@
 
 // Load Negative Vector Multiply
 
-010010,5.SEL,5.VT,5.VS,10000,110010::::MULSL.fmt
+010010,5.SEL,5.VT,5.VS,10000,110010::64,f::MULSL.fmt
 "mulsl.%s<SEL> v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -693,7 +753,7 @@
 
 // Vector Nor.
 
-010010,5.SEL,5.VT,5.VS,5.VD,001111::::NOR.fmt
+010010,5.SEL,5.VT,5.VS,5.VD,001111::64,f::NOR.fmt
 "nor.%s<SEL> v<VD>, v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -712,7 +772,7 @@
 
 // Vector Or.
 
-010010,5.SEL,5.VT,5.VS,5.VD,001110::::OR.fmt
+010010,5.SEL,5.VT,5.VS,5.VD,001110::64,f::OR.fmt
 "or.%s<SEL> v<VD>, v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -731,7 +791,7 @@
 
 // Select Vector Elements - False
 
-010010,5.SEL,5.VT,5.VS,5.VD,000010::::PICKF.fmt
+010010,5.SEL,5.VT,5.VS,5.VD,000010::64,f::PICKF.fmt
 "pickf.%s<SEL> v<VD>, v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -751,7 +811,7 @@
 
 // Select Vector Elements - True
 
-010010,5.SEL,5.VT,5.VS,5.VD,000011::::PICKT.fmt
+010010,5.SEL,5.VT,5.VS,5.VD,000011::64,f::PICKT.fmt
 "pickt.%s<SEL> v<VD>, v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -771,7 +831,11 @@
 
 // Scale, Round and Clamp Accumulator
 
-:%s::::RND:int rnd
+:%s:64,f:::RND:int rnd
+*mdmx:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   switch (rnd)
     {
@@ -792,7 +856,11 @@
     }
 }
 
-:function:::signed:ScaleRoundClamp:int scale, int rnd, signed val, signed shift
+:function:64,f::signed:ScaleRoundClamp:int scale, int rnd, signed val, signed shift
+*mdmx:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   int halfway = (1 << (shift - 1));
   /* must be positive */
@@ -871,7 +939,7 @@
   return val;
 }
 
-010010,5.SEL,5.VT,00000,5.VD,100,3.RND::::Rx.fmt
+010010,5.SEL,5.VT,00000,5.VD,100,3.RND::64,f::Rx.fmt
 "r%s<RND>.%s<SEL> v<VD>, v<VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -891,7 +959,7 @@
 
 // Vector Read  Accumulator Low.
 
-010010,0000,1.SEL,00000,00000,5.VD,111111::::RACL.fmt
+010010,0000,1.SEL,00000,00000,5.VD,111111::64,f::RACL.fmt
 "racl.%s<SEL> v<VD>"
 *mdmx:
 // start-sanitize-vr5400
@@ -911,7 +979,7 @@
 
 // Vector Read  Accumulator Middle.
 
-010010,0100,1.SEL,00000,00000,5.VD,111111::::RACM.fmt
+010010,0100,1.SEL,00000,00000,5.VD,111111::64,f::RACM.fmt
 "racm.%s<SEL> v<VD>"
 *mdmx:
 // start-sanitize-vr5400
@@ -931,7 +999,7 @@
 
 // Vector Read  Accumulator High.
 
-010010,1000,1.SEL,00000,00000,5.VD,111111::::RACH.fmt
+010010,1000,1.SEL,00000,00000,5.VD,111111::64,f::RACH.fmt
 "rach.%s<SEL> v<VD>"
 *mdmx:
 // start-sanitize-vr5400
@@ -951,7 +1019,7 @@
 
 // Vector Element Shuffle.
 
-010010,0000,0,5.VT,5.VS,5.VD,011111::::SHFL.UPUH.fmt
+010010,0000,0,5.VT,5.VS,5.VD,011111::64,f::SHFL.UPUH.fmt
 "shfl.upuh.%s<SEL> v<VD>, v<VS>, <VT>"
 *mdmx:
 {
@@ -964,7 +1032,7 @@
     }
 }
 
-010010,0001,0,5.VT,5.VS,5.VD,011111::::SHFL.UPUL.fmt
+010010,0001,0,5.VT,5.VS,5.VD,011111::64,f::SHFL.UPUL.fmt
 "shfl.upul.%s<SEL> v<VD>, v<VS>, <VT>"
 *mdmx:
 {
@@ -976,7 +1044,7 @@
     }
 }
 
-010010,0000,0,5.VT,5.VS,5.VD,011111::::SHFL.UPSH.fmt
+010010,0000,0,5.VT,5.VS,5.VD,011111::64,f::SHFL.UPSH.fmt
 "shfl.upsh.%s<SEL> v<VD>, v<VS>, <VT>"
 *mdmx:
 {
@@ -989,7 +1057,7 @@
     }
 }
 
-010010,0001,0,5.VT,5.VS,5.VD,011111::::SHFL.UPSL.fmt
+010010,0001,0,5.VT,5.VS,5.VD,011111::64,f::SHFL.UPSL.fmt
 "shfl.upsl.%s<SEL> v<VD>, v<VS>, <VT>"
 *mdmx:
 {
@@ -1001,7 +1069,7 @@
     }
 }
 
-010010,0100,1.SEL,5.VT,5.VS,5.VD,011111::::SHFL.PACH.fmt
+010010,0100,1.SEL,5.VT,5.VS,5.VD,011111::64,f::SHFL.PACH.fmt
 "shfl.pach.%s<SEL> v<VD>, v<VS>, <VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -1019,7 +1087,7 @@
     }
 }
 
-010010,0101,1.SEL,5.VT,5.VS,5.VD,011111::::SHFL.PACL.fmt
+010010,0101,1.SEL,5.VT,5.VS,5.VD,011111::64,f::SHFL.PACL.fmt
 "shfl.pacl.%s<SEL> v<VD>, v<VS>, <VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -1037,7 +1105,7 @@
     }
 }
 
-010010,0110,1.SEL,5.VT,5.VS,5.VD,011111::::SHFL.MIXH.fmt
+010010,0110,1.SEL,5.VT,5.VS,5.VD,011111::64,f::SHFL.MIXH.fmt
 "shfl.mixh.%s<SEL> v<VD>, v<VS>, <VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -1055,7 +1123,7 @@
     }
 }
 
-010010,0111,1.SEL,5.VT,5.VS,5.VD,011111::::SHFL.MIXL.fmt
+010010,0111,1.SEL,5.VT,5.VS,5.VD,011111::64,f::SHFL.MIXL.fmt
 "shfl.mixl.%s<SEL> v<VD>, v<VS>, <VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -1073,7 +1141,7 @@
     }
 }
 
-010010,100,01,5.VT,5.VS,5.VD,011111::::SHFL.BFLA.fmt
+010010,100,01,5.VT,5.VS,5.VD,011111::64,f::SHFL.BFLA.fmt
 "shfl.bfla.qh v<VD>, v<VS>, <VT>"
 *mdmx:
 {
@@ -1087,7 +1155,7 @@
 	    value_vr (SD_, 1, VS, 2));
 }
 
-010010,101,01,5.VT,5.VS,5.VD,011111::::SHFL.BFLB.fmt
+010010,101,01,5.VT,5.VS,5.VD,011111::64,f::SHFL.BFLB.fmt
 "shfl.bflb.qh v<VD>, v<VS>, <VT>"
 *mdmx:
 {
@@ -1101,7 +1169,7 @@
 	    value_vr (SD_, 1, VS, 0));
 }
 
-010010,101,01,5.VT,5.VS,5.VD,011111::::SHFL.REPA.fmt
+010010,101,01,5.VT,5.VS,5.VD,011111::64,f::SHFL.REPA.fmt
 "shfl.repa.qh v<VD>, v<VS>, <VT>"
 *mdmx:
 {
@@ -1115,7 +1183,7 @@
 	    value_vr (SD_, 1, VS, 3));
 }
 
-010010,101,01,5.VT,5.VS,5.VD,011111::::SHFL.REPB.fmt
+010010,101,01,5.VT,5.VS,5.VD,011111::64,f::SHFL.REPB.fmt
 "shfl.repb.qh v<VD>, v<VS>, <VT>"
 *mdmx:
 {
@@ -1133,7 +1201,7 @@
 
 // Vector Shift Left Logical
 
-010010,5.SEL,5.VT,5.VS,5.VD,010000::::SLL.fmt
+010010,5.SEL,5.VT,5.VS,5.VD,010000::64,f::SLL.fmt
 "sll.%s<SEL> v<VD>, v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -1153,7 +1221,7 @@
 
 // Vector Shift Right Arithmetic
 
-010010,5.SEL,5.VT,5.VS,5.VD,010011::::SRA.fmt
+010010,5.SEL,5.VT,5.VS,5.VD,010011::64,f::SRA.fmt
 "sra.%s<SEL> v<VD>, v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 {
@@ -1170,7 +1238,7 @@
 
 // Vector Shift Right Logical.
 
-010010,5.SEL,5.VT,5.VS,5.VD,010010::::SRL.fmt
+010010,5.SEL,5.VT,5.VS,5.VD,010010::64,f::SRL.fmt
 "srl.%s<SEL> v<VD>, v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -1191,7 +1259,7 @@
 
 // Vector Subtract.
 
-010010,5.SEL,5.VT,5.VS,5.VD,001010::::SUB.fmt
+010010,5.SEL,5.VT,5.VS,5.VD,001010::64,f::SUB.fmt
 "sub.%s<SEL> v<VD>, v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -1210,7 +1278,7 @@
 
 // Accumulate Vector Difference
 
-010010,5.SEL,5.VT,5.VS,0,0000,110110::::SUBA.fmt
+010010,5.SEL,5.VT,5.VS,0,0000,110110::64,f::SUBA.fmt
 "suba.%s<SEL> v<VD>, v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 {
@@ -1227,7 +1295,7 @@
 
 // Load Vector Difference
 
-010010,5.SEL,5.VT,5.VS,1,0000,110110::::SUBL.fmt
+010010,5.SEL,5.VT,5.VS,1,0000,110110::64,f::SUBL.fmt
 "subl.%s<SEL> v<VD>, v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 {
@@ -1243,7 +1311,7 @@
 
 // Write Accumulator High.
 
-010010,1000,1.SEL,00000,5.VS,00000,111110::::WACH.fmt
+010010,1000,1.SEL,00000,5.VS,00000,111110::64,f::WACH.fmt
 "wach.%s<SEL> v<VS>"
 *mdmx:
 // start-sanitize-vr5400
@@ -1262,7 +1330,7 @@
 
 // Vector Write Accumulator Low.
 
-010010,0000,1.SEL,5.VT,5.VS,00000,111110::::WACL.fmt
+010010,0000,1.SEL,5.VT,5.VS,00000,111110::64,f::WACL.fmt
 "wacl.%s<SEL> v<VS>, <VT>"
 *mdmx:
 // start-sanitize-vr5400
@@ -1282,7 +1350,7 @@
 
 // Vector Xor.
 
-010010,5.SEL,5.VT,5.VS,5.VD,001101::::XOR.fmt
+010010,5.SEL,5.VT,5.VS,5.VD,001101::64,f::XOR.fmt
 "xor.%s<SEL> v<VD>, v<VS>, %s<VT#SEL,VT>"
 *mdmx:
 // start-sanitize-vr5400

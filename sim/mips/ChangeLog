@@ -1,3 +1,46 @@
+start-sanitize-r5900
+Tue Feb 24 02:47:33 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_store_register, sim_fetch_register): Pull swifty
+ 	to get gdb talking to re-aranged sim_cpu register structure.
+
+end-sanitize-r5900
+Fri Feb 20 17:43:21 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-main.h (Max, Min): Declare.
+
+	* interp.c (Max, Min): New functions.
+
+	* mips.igen (BC1): Add tracing.
+	
+start-sanitize-vr5400
+Fri Feb 20 16:27:17 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mdmx.igen: Tag all functions as requiring either with mdmx or
+ 	vr5400 processor.
+
+end-sanitize-vr5400
+start-sanitize-r5900
+Fri Feb 20 15:55:51 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (SIM_AC_OPTION_FLOAT): For r5900, set FP bit size
+ 	to 32.
+	(SIM_AC_OPTION_BITSIZE): For r5900, set nr address bits to 32.
+
+	* mips.igen (C.cond.fmt, ..): Not part of r5900 insn set.
+
+	* r5900.igen: Rewrite.
+
+	* sim-main.h: Move r5900 registers to a separate _sim_r5900_cpu
+ 	struct.
+	(GPR_SB, GPR_SH, GPR_SW, GPR_SD, GPR_UB, GPR_UH, GPR_UW, GPR_UD):
+ 	Define in terms of GPR/GPR1 instead of REGISTERS/REGISTERS.1
+	
+end-sanitize-r5900
+Thu Feb 19 14:50:00 1998  John Metzler  <jmetzler@cygnus.com>
+	
+	* interp.c Added memory map for stack in vr4100
+	
 Thu Feb 19 10:21:21 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* interp.c (load_memory): Add missing "break"'s.

@@ -305,6 +305,7 @@ sim_open (kind, cb, abfd, argv)
   /* For compatibility with the old code - under this (at level one)
      are the kernel spaces K0 & K1.  Both of these map to a single
      smaller sub region */
+  sim_do_command(sd," memory region 0x7fff8000,0x8000") ; /* MTZ- 32 k stack */
   sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx%%0x%lx,0x%0x",
 		   K1BASE, K0SIZE,
 		   MEM_SIZE, /* actual size */
@@ -367,7 +368,10 @@ sim_open (kind, cb, abfd, argv)
 	  cpu->register_widths[rn] = WITH_TARGET_FLOATING_POINT_BITSIZE;
 	else if ((rn >= 33) && (rn <= 37))
 	  cpu->register_widths[rn] = WITH_TARGET_WORD_BITSIZE;
-	else if ((rn == SRIDX) || (rn == FCR0IDX) || (rn == FCR31IDX) || ((rn >= 72) && (rn <= 89)))
+	else if ((rn == SRIDX)
+		 || (rn == FCR0IDX)
+		 || (rn == FCR31IDX)
+		 || ((rn >= 72) && (rn <= 89)))
 	  cpu->register_widths[rn] = 32;
 	else
 	  cpu->register_widths[rn] = 0;
@@ -605,7 +609,31 @@ sim_store_register (sd,rn,memory,length)
      register number is for the architecture being simulated. */
 
   if (cpu->register_widths[rn] == 0)
-    sim_io_eprintf(sd,"Invalid register width for %d (register store ignored)\n",rn);
+    {
+      sim_io_eprintf(sd,"Invalid register width for %d (register store ignored)\n",rn);
+      return 0;
+    }
+
+  /* start-sanitize-r5900 */
+  if (rn >= 90 && rn < 90 + 32)
+    {
+      GPR1[rn - 90] = T2H_8 (*(unsigned64*)memory);
+      return 8;
+    }
+  switch (rn)
+    {
+    case REGISTER_SA:
+      SA = T2H_8(*(unsigned64*)memory);
+      return 8;
+    case 122: /* FIXME */
+      LO1 = T2H_8(*(unsigned64*)memory);
+      return 8;
+    case 123: /* FIXME */
+      HI1 = T2H_8(*(unsigned64*)memory);
+      return 8;
+    }
+
+  /* end-sanitize-r5900 */
   /* start-sanitize-sky */
 #ifdef TARGET_SKY
   else if( rn > NUM_R5900_REGS ) {
@@ -628,25 +656,31 @@ sim_store_register (sd,rn,memory,length)
   }
 #endif
   /* end-sanitize-sky */
-  /* start-sanitize-r5900 */
-  else if (rn == REGISTER_SA)
-    SA = T2H_8(*(unsigned64*)memory);
-  else if (rn > LAST_EMBED_REGNUM)
-    cpu->registers1[rn - LAST_EMBED_REGNUM - 1] = T2H_8(*(unsigned64*)memory);
-  /* end-sanitize-r5900 */
-  else if (rn >= FGRIDX && rn < FGRIDX + NR_FGR)
+
+  if (rn >= FGRIDX && rn < FGRIDX + NR_FGR)
     {
       if (cpu->register_widths[rn] == 32)
-	cpu->fgr[rn - FGRIDX] = T2H_4 (*(unsigned32*)memory);
+	{
+	  cpu->fgr[rn - FGRIDX] = T2H_4 (*(unsigned32*)memory);
+	  return 4;
+	}
       else
-	cpu->fgr[rn - FGRIDX] = T2H_8 (*(unsigned64*)memory);
+	{
+	  cpu->fgr[rn - FGRIDX] = T2H_8 (*(unsigned64*)memory);
+	  return 8;
+	}
     }
-  else if (cpu->register_widths[rn] == 32)
-    cpu->registers[rn] = T2H_4 (*(unsigned32*)memory);
-  else
-    cpu->registers[rn] = T2H_8 (*(unsigned64*)memory);
 
-  return -1;
+  if (cpu->register_widths[rn] == 32)
+    {
+      cpu->registers[rn] = T2H_4 (*(unsigned32*)memory);
+      return 4;
+    }
+  else
+    {
+      cpu->registers[rn] = T2H_8 (*(unsigned64*)memory);
+      return 8;
+    }
 }
 
 int
@@ -664,10 +698,34 @@ sim_fetch_register (sd,rn,memory,length)
 #endif /* DEBUG */
 
   if (cpu->register_widths[rn] == 0)
-    sim_io_eprintf(sd,"Invalid register width for %d (register fetch ignored)\n",rn);
+    {
+      sim_io_eprintf (sd, "Invalid register width for %d (register fetch ignored)\n",rn);
+      return 0;
+    }
+
+  /* start-sanitize-r5900 */
+  if (rn >= 90 && rn < 90 + 32)
+    {
+      *(unsigned64*)memory = GPR1[rn - 90];
+      return 8;
+    }
+  switch (rn)
+    {
+    case REGISTER_SA:
+      *((unsigned64*)memory) = H2T_8(SA);
+      return 8;
+    case 122: /* FIXME */
+      *((unsigned64*)memory) = H2T_8(LO1);
+      return 8;
+    case 123: /* FIXME */
+      *((unsigned64*)memory) = H2T_8(HI1);
+      return 8;
+    }
+
+  /* end-sanitize-r5900 */
   /* start-sanitize-sky */
 #ifdef TARGET_SKY
-  else if( rn > NUM_R5900_REGS ) {
+  if( rn > NUM_R5900_REGS ) {
     rn = rn - NUM_R5900_REGS;
 
     if( rn < 16 ) 
@@ -684,28 +742,37 @@ sim_fetch_register (sd,rn,memory,length)
       else
 	sim_io_eprintf( sd, "Invalid VU register (register fetch ignored)\n" );
     }
+    return -1;
   }
 #endif
+
   /* end-sanitize-sky */
-  /* start-sanitize-r5900 */
-  else if (rn == REGISTER_SA)
-    *((unsigned64*)memory) = H2T_8(SA);
-  else if (rn > LAST_EMBED_REGNUM)
-    *((unsigned64*)memory) = H2T_8(cpu->registers1[rn - LAST_EMBED_REGNUM - 1]);
-  /* end-sanitize-r5900 */
-  else if (rn >= FGRIDX && rn < FGRIDX + NR_FGR)
+
+  /* Any floating point register */
+  if (rn >= FGRIDX && rn < FGRIDX + NR_FGR)
     {
       if (cpu->register_widths[rn] == 32)
-	*(unsigned32*)memory = H2T_4 (cpu->fgr[rn - FGRIDX]);
+	{
+	  *(unsigned32*)memory = H2T_4 (cpu->fgr[rn - FGRIDX]);
+	  return 4;
+	}
       else
-	*(unsigned64*)memory = H2T_8 (cpu->fgr[rn - FGRIDX]);
+	{
+	  *(unsigned64*)memory = H2T_8 (cpu->fgr[rn - FGRIDX]);
+	  return 8;
+	}
     }
-  else if (cpu->register_widths[rn] == 32)
-    *(unsigned32*)memory = H2T_4 ((unsigned32)(cpu->registers[rn]));
-  else /* 64bit register */
-    *(unsigned64*)memory = H2T_8 ((unsigned64)(cpu->registers[rn]));
 
-  return -1;
+  if (cpu->register_widths[rn] == 32)
+    {
+      *(unsigned32*)memory = H2T_4 ((unsigned32)(cpu->registers[rn]));
+      return 4;
+    }
+  else
+    {
+      *(unsigned64*)memory = H2T_8 ((unsigned64)(cpu->registers[rn]));
+      return 8;
+    }
 }
 
 
@@ -2851,6 +2918,142 @@ SquareRoot(op,fmt)
 
 #ifdef DEBUG
   printf("DBG: SquareRoot: returning 0x%s (format = %s)\n",pr_addr(result),DOFMT(fmt));
+#endif /* DEBUG */
+
+  return(result);
+}
+
+uword64
+Max (uword64 op1,
+     uword64 op2,
+     FP_formats fmt)
+{
+  int cmp;
+  unsigned64 result;
+
+#ifdef DEBUG
+  printf("DBG: Max: %s: op1 = 0x%s : op2 = 0x%s\n",DOFMT(fmt),pr_addr(op1),pr_addr(op2));
+#endif /* DEBUG */
+
+  /* The registers must specify FPRs valid for operands of type
+     "fmt". If they are not valid, the result is undefined. */
+
+  /* The format type should already have been checked: */
+  switch (fmt)
+    {
+    case fmt_single:
+      {
+	sim_fpu wop1;
+	sim_fpu wop2;
+	sim_fpu_32to (&wop1, op1);
+	sim_fpu_32to (&wop2, op2);
+	cmp = sim_fpu_cmp (&wop1, &wop2);
+	break;
+      }
+    case fmt_double:
+      {
+	sim_fpu wop1;
+	sim_fpu wop2;
+	sim_fpu_64to (&wop1, op1);
+	sim_fpu_64to (&wop2, op2);
+	cmp = sim_fpu_cmp (&wop1, &wop2);
+	break;
+      }
+    default:
+      fprintf (stderr, "Bad switch\n");
+      abort ();
+    }
+  
+  switch (cmp)
+    {
+    case SIM_FPU_IS_SNAN:
+    case SIM_FPU_IS_QNAN:
+      result = op1;
+    case SIM_FPU_IS_NINF:
+    case SIM_FPU_IS_NNUMBER:
+    case SIM_FPU_IS_NDENORM:
+    case SIM_FPU_IS_NZERO:
+      result = op2; /* op1 - op2 < 0 */
+    case SIM_FPU_IS_PINF:
+    case SIM_FPU_IS_PNUMBER:
+    case SIM_FPU_IS_PDENORM:
+    case SIM_FPU_IS_PZERO:
+      result = op1; /* op1 - op2 > 0 */
+    default:
+      fprintf (stderr, "Bad switch\n");
+      abort ();
+    }
+
+#ifdef DEBUG
+  printf("DBG: Max: returning 0x%s (format = %s)\n",pr_addr(result),DOFMT(fmt));
+#endif /* DEBUG */
+
+  return(result);
+}
+
+uword64
+Min (uword64 op1,
+     uword64 op2,
+     FP_formats fmt)
+{
+  int cmp;
+  unsigned64 result;
+
+#ifdef DEBUG
+  printf("DBG: Min: %s: op1 = 0x%s : op2 = 0x%s\n",DOFMT(fmt),pr_addr(op1),pr_addr(op2));
+#endif /* DEBUG */
+
+  /* The registers must specify FPRs valid for operands of type
+     "fmt". If they are not valid, the result is undefined. */
+
+  /* The format type should already have been checked: */
+  switch (fmt)
+    {
+    case fmt_single:
+      {
+	sim_fpu wop1;
+	sim_fpu wop2;
+	sim_fpu_32to (&wop1, op1);
+	sim_fpu_32to (&wop2, op2);
+	cmp = sim_fpu_cmp (&wop1, &wop2);
+	break;
+      }
+    case fmt_double:
+      {
+	sim_fpu wop1;
+	sim_fpu wop2;
+	sim_fpu_64to (&wop1, op1);
+	sim_fpu_64to (&wop2, op2);
+	cmp = sim_fpu_cmp (&wop1, &wop2);
+	break;
+      }
+    default:
+      fprintf (stderr, "Bad switch\n");
+      abort ();
+    }
+  
+  switch (cmp)
+    {
+    case SIM_FPU_IS_SNAN:
+    case SIM_FPU_IS_QNAN:
+      result = op1;
+    case SIM_FPU_IS_NINF:
+    case SIM_FPU_IS_NNUMBER:
+    case SIM_FPU_IS_NDENORM:
+    case SIM_FPU_IS_NZERO:
+      result = op1; /* op1 - op2 < 0 */
+    case SIM_FPU_IS_PINF:
+    case SIM_FPU_IS_PNUMBER:
+    case SIM_FPU_IS_PDENORM:
+    case SIM_FPU_IS_PZERO:
+      result = op2; /* op1 - op2 > 0 */
+    default:
+      fprintf (stderr, "Bad switch\n");
+      abort ();
+    }
+
+#ifdef DEBUG
+  printf("DBG: Min: returning 0x%s (format = %s)\n",pr_addr(result),DOFMT(fmt));
 #endif /* DEBUG */
 
   return(result);
