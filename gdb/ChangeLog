@@ -411,6 +411,30 @@ Fri Jun 25 11:22:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 Fri Jun 25 17:02:45 1993  Stu Grossman  (grossman at cygnus.com)
 
+	* gdbserver/Makefile.in:  Add dependancies on server.h.
+	* gdbserver/remote-gutils.c:  Remove lots of unused functions and
+	variables.
+	* gdbserver/remote-inflow.c:  Remove lots of unused variables and
+	#includes.  Also, use PTRACE_* symbols instead of constants. 
+	(mywait):  Surround calls to wait() with enable/disable_async_io()
+	so that we can be interrupted from GDB while waiting for the
+	child.  Also, handle child exit more gracefully.
+	* gdbserver/remote-server.c:  Remove lots of unused variables.
+	Move all extern defs into server.h.  Redo main loop so that
+	failure from getpkt() causes communications to be re-established.
+	Fix 'k' command so that it restarts the child.
+	* gdbserver/remote-utils.c:  Remove lots of unloved vars and
+	subrs.  Move many extern decls into server.h.  (remote_open):  For
+	tcp, seperate usage of proto fd from connected fd.  Close proto
+	fd after getting connection.  (putpkt/getpkt):  Pay attention to
+	errors when reading/writing.  Report these to the caller.  New
+	routines input_interrupt/enable_async_io/disable_async_io to make
+	it possible to get an I/O interrupt when data arrives from the
+	comm link.
+	* serial.h:  New file to contain common defs for all remote files.
+
+Fri Jun 25 17:02:45 1993  Stu Grossman  (grossman at cygnus.com)
+
 	* remote.c:  Add arg names to prototypes, in a modest effort at
 	clarification.  Also add prototypes for some new functions.
 	* (remote_wait):  Better error reporting for 'T' responses.
@@ -422,6 +446,11 @@ Fri Jun 25 17:02:45 1993  Stu Grossman  (grossman at cygnus.com)
 	restart select() if we got EINTR.
 	* ser-unix.c (wait_for):  Restart select() if we got EINTR.
 	* serial.c: (serial_close):  Clean up code.
+
+Fri Jun 25 11:22:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/m68k/tm-m68k.h: Remove obsolete comment about duplicating
+	CALL_DUMMY between different 68k machines.
 
 Fri Jun 25 11:22:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
