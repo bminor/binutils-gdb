@@ -2989,6 +2989,10 @@ error_return:
       elf32_hppa_hash_table(link_info)->args_hash_table = NULL;
       free (args_hash_table);
     }
+  /* Set the size of the stub section to zero since we're never going
+     to create them.   Avoids losing when we try to get its contents
+     too.  */
+  bfd_set_section_size (stub_bfd, stub_sec, 0);
   return false;
 }
 

@@ -1,5 +1,8 @@
 Sat Jun 17 09:40:44 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* elf32-hppa.c (elf32_hppa_size_stubs): Set the size of the stub
+	section if we get an error.
+
 	* elf32-hppa.c (elf32_hppa_bfd_final_link_relocate): Don't mess
 	with the operands of an R_PARISC_DPREL21L relocation if the insn
 	is not "addil <symbol>,%r27".
