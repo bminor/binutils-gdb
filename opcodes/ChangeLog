@@ -1,3 +1,7 @@
+2003-10-27  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* m68hc11-dis.c: Convert to ISO C90 prototypes.
+
 2003-10-21  Peter Barada  <pbarada@mail.wm.sps.mot.com>
             Bernardo Innocenti  <bernie@develer.com>
 
