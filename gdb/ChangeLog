@@ -1,8 +1,3 @@
-Fri Oct 11 10:20:06 1996  Fred Fish  <fnf@cygnus.com>
-
-	Bug reported by Paul Flinders <paul@dawa.demon.co.uk>:
-	* Makefile.in (init.c): Restore '-n' option in sed command.
-
 Thu Oct 10 16:32:08 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* Makefile.in (init.c):  Fixup final sed script to work around
