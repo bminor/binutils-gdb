@@ -2320,7 +2320,9 @@ pa_ip (str)
 		{
 		  unsigned int w2, w1, w, result;
 
-		  sign_unext (the_insn.exp.X_add_number >> 2, 17, &result);
+	          result = evaluate_absolute (the_insn.exp,
+					      the_insn.field_selector);
+		  sign_unext (result >> 2, 17, &result);
 		  dis_assemble_17 (result, &w1, &w2, &w);
 		  opcode |= ((w2 << 2) | (w1 << 16) | w);
 		}

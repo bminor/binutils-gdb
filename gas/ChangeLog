@@ -1,3 +1,8 @@
+Sun Nov  7 01:02:08 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (pa-ip, case 'z'): Make field selectors work
+	for 'z' operands (target of ble branch).
+
 Sat Nov  6 22:41:57 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c: (update_subspace): Fix type and name of last
