@@ -864,20 +864,7 @@ bfd_section_from_shdr (abfd, shindex)
 	   represent such a section, so at least for now, we don't
 	   try.  We just present it as a normal section.  */
 	if (hdr->sh_link != elf_onesymtab (abfd))
-	  {
-	    if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
-	      return false;
-	    if (hdr->bfd_section != NULL
-		&& hdr->sh_info > 0
-		&& bfd_section_from_shdr (abfd, hdr->sh_info))
-	      {
-		target_sect = bfd_section_from_elf_index (abfd, hdr->sh_info);
-		if (target_sect != NULL
-		    && (target_sect->flags & SEC_DEBUGGING) != 0)
-		  hdr->bfd_section->flags |= SEC_DEBUGGING;
-	      }
-	    return true;
-	  }
+	  return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
 
 	if (! bfd_section_from_shdr (abfd, hdr->sh_info))
 	  return false;
