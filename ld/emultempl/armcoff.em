@@ -44,17 +44,21 @@ static void gld${EMULATION_NAME}_before_allocation PARAMS ((void));
 static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
 static int  gld${EMULATION_NAME}_parse_args PARAMS((int, char **));
 static void gld${EMULATION_NAME}_list_options PARAMS ((FILE *));
+static void gld_${EMULATION_NAME}_finish PARAMS ((void));
 
 /* If true, then interworking stubs which support calls to old, non-interworking
    aware ARM code should be generated.  */
 
 static int support_old_code = 0;
+static char * thumb_entry_symbol = NULL;
 
 #define OPTION_SUPPORT_OLD_CODE		300
+#define OPTION_THUMB_ENTRY		301
 
 static struct option longopts[] =
 {
   {"support-old-code", no_argument, NULL, OPTION_SUPPORT_OLD_CODE},
+  {"thumb-entry", required_argument, NULL, OPTION_THUMB_ENTRY},
   {NULL, no_argument, NULL, 0}
 };
 
@@ -63,6 +67,7 @@ gld${EMULATION_NAME}_list_options (file)
      FILE * file;
 {
   fprintf (file, _("  --support-old-code   Support interworking with old code\n"));
+  fprintf (file, _("  --thumb-entry=<sym>  Set the entry point to be Thumb symbol <sym>\n"));
 }
 
 static int
@@ -96,6 +101,10 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 
     case OPTION_SUPPORT_OLD_CODE:
       support_old_code = 1;
+      break;
+
+    case OPTION_THUMB_ENTRY:
+      thumb_entry_symbol = optarg;
       break;
     }
   
@@ -144,6 +153,49 @@ gld${EMULATION_NAME}_after_open ()
       if (bfd_arm_get_bfd_for_interworking (is->the_bfd, & link_info))
 	break;
     }
+}
+
+static void
+gld${EMULATION_NAME}_finish PARAMS((void))
+{
+  struct bfd_link_hash_entry * h;
+
+  if (thumb_entry_symbol == NULL)
+    return;
+  
+  h = bfd_link_hash_lookup (link_info.hash, thumb_entry_symbol, false, false, true);
+
+  if (h != (struct bfd_link_hash_entry *) NULL
+      && (h->type == bfd_link_hash_defined
+	  || h->type == bfd_link_hash_defweak)
+      && h->u.def.section->output_section != NULL)
+    {
+      static char buffer[32];
+      bfd_vma val;
+      
+      /* Special procesing is required for a Thumb entry symbol.  The
+	 bottom bit of its address must be set.  */
+      val = (h->u.def.value
+	     + bfd_get_section_vma (output_bfd,
+				    h->u.def.section->output_section)
+	     + h->u.def.section->output_offset);
+      
+      val |= 1;
+
+      /* Now convert this value into a string and store it in entry_symbol
+         where the lang_finish() function will pick it up.  */
+      buffer[0] = '0';
+      buffer[1] = 'x';
+      
+      sprintf_vma (buffer + 2, val);
+
+      if (entry_symbol != NULL && entry_from_cmdline)
+	einfo (_("%P: warning: '--thumb-entry %s' is overriding '-e %s'\n"),
+	       thumb_entry_symbol, entry_symbol);
+      entry_symbol = buffer;
+    }
+  else
+    einfo (_("%P: warning: connot find thumb start symbol %s\n"), thumb_entry_symbol);
 }
 
 static char *
@@ -214,7 +266,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld${EMULATION_NAME}_get_script,
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",
-  NULL, /* finish */
+  gld${EMULATION_NAME}_finish, /* finish */
   NULL, /* create output section statements */
   NULL, /* open dynamic archive */
   NULL, /* place orphan */

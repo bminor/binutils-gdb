@@ -1,3 +1,10 @@
+1999-06-18  Nick Clifton  <nickc@cygnus.com>
+
+	* emultempl/pe.em: Add new command line switch --thumb-entry.
+	* emultempl/armelf.em: Add new command line switch --thumb-entry.
+	* emultempl/armcoff.em: Add new command line switch --thumb-entry.
+	* ld.texinfo: Document new ARM command line switch: --thumb-entry.	
+
 1999-06-20  H.J. Lu  <hjl@gnu.org>
 
 	* configure.in (all_libpath): Accumulate across all enabled targets.

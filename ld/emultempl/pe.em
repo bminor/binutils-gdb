@@ -74,10 +74,12 @@ static void gld${EMULATION_NAME}_place_section
   PARAMS ((lang_statement_union_type *));
 static char *gld_${EMULATION_NAME}_get_script PARAMS ((int *));
 static int gld_${EMULATION_NAME}_parse_args PARAMS ((int, char **));
+static void gld_${EMULATION_NAME}_finish PARAMS ((void));
 
 static struct internal_extra_pe_aouthdr pe;
 static int dll;
 static int support_old_code = 0;
+static char * thumb_entry_symbol = NULL;
 extern def_file *pe_def_file;
 static lang_assignment_statement_type *image_base_statement = 0;
 
@@ -126,6 +128,7 @@ gld_${EMULATION_NAME}_before_parse()
 #define OPTION_ENABLE_STDCALL_FIXUP	(OPTION_STDCALL_ALIASES + 1)
 #define OPTION_DISABLE_STDCALL_FIXUP	(OPTION_ENABLE_STDCALL_FIXUP + 1)
 #define OPTION_IMPLIB_FILENAME		(OPTION_DISABLE_STDCALL_FIXUP + 1)
+#define OPTION_THUMB_ENTRY		(OPTION_IMPLIB_FILENAME + 1)
 
 static struct option longopts[] =
 {
@@ -145,6 +148,7 @@ static struct option longopts[] =
   {"stack", required_argument, NULL, OPTION_STACK},
   {"subsystem", required_argument, NULL, OPTION_SUBSYSTEM},
   {"support-old-code", no_argument, NULL, OPTION_SUPPORT_OLD_CODE},
+  {"thumb-entry", required_argument, NULL, OPTION_THUMB_ENTRY},
 #ifdef DLL_SUPPORT
   /* getopt allows abbreviations, so we do this to stop it from treating -o
      as an abbreviation for this option */
@@ -219,6 +223,7 @@ gld_${EMULATION_NAME}_list_options (file)
   fprintf (file, _("  --stack <size>                     Set size of the initial stack\n"));
   fprintf (file, _("  --subsystem <name>[:<version>]     Set required OS subsystem [& version]\n"));
   fprintf (file, _("  --support-old-code                 Support interworking with old code\n"));
+  fprintf (file, _("  --thumb-entry=<symbol>             Set the entry point to be Thumb <symbol>\n"));
 #ifdef DLL_SUPPORT
   fprintf (file, _("  --add-stdcall-alias                Export symbols with and without @nn\n"));
   fprintf (file, _("  --disable-stdcall-fixup            Don't link _sym to _sym@nn\n"));
@@ -426,6 +431,9 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
       break;
     case OPTION_SUPPORT_OLD_CODE:
       support_old_code = 1;
+      break;
+    case OPTION_THUMB_ENTRY:
+      thumb_entry_symbol = optarg;
       break;
 #ifdef DLL_SUPPORT
     case OPTION_OUT_DEF:
@@ -884,6 +892,47 @@ gld_${EMULATION_NAME}_recognized_file(entry)
 static void
 gld_${EMULATION_NAME}_finish ()
 {
+#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe)
+  struct bfd_link_hash_entry * h;
+
+  if (thumb_entry_symbol != NULL)
+    {
+      h = bfd_link_hash_lookup (link_info.hash, thumb_entry_symbol, false, false, true);
+      
+      if (h != (struct bfd_link_hash_entry *) NULL
+	  && (h->type == bfd_link_hash_defined
+	      || h->type == bfd_link_hash_defweak)
+	  && h->u.def.section->output_section != NULL)
+	{
+	  static char buffer[32];
+	  bfd_vma val;
+	  
+	  /* Special procesing is required for a Thumb entry symbol.  The
+	     bottom bit of its address must be set.  */
+	  val = (h->u.def.value
+		 + bfd_get_section_vma (output_bfd,
+					h->u.def.section->output_section)
+		 + h->u.def.section->output_offset);
+	  
+	  val |= 1;
+	  
+	  /* Now convert this value into a string and store it in entry_symbol
+	     where the lang_finish() function will pick it up.  */
+	  buffer[0] = '0';
+	  buffer[1] = 'x';
+	  
+	  sprintf_vma (buffer + 2, val);
+	  
+	  if (entry_symbol != NULL && entry_from_cmdline)
+	    einfo (_("%P: warning: '--thumb-entry %s' is overriding '-e %s'\n"),
+		   thumb_entry_symbol, entry_symbol);
+	  entry_symbol = buffer;
+	}
+      else
+	einfo (_("%P: warning: connot find thumb start symbol %s\n"), thumb_entry_symbol);
+    }
+#endif /* defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe) */
+
 #ifdef DLL_SUPPORT
   if (link_info.shared)
     {
