@@ -1,3 +1,21 @@
+2003-06-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elfvsb/elfvsb.exp: Run for powerpc64 too.
+	* ld-powerpc/tls.t: Update.
+	* ld-powerpc/tlsexe.d: Update.
+	* ld-powerpc/tlsexe.r: Update.
+	* ld-powerpc/tlsexetoc.d: Update.
+	* ld-powerpc/tlsexetoc.r: Update.
+	* ld-powerpc/tlsexetoc.t: Update.
+	* ld-powerpc/tlsso.d: Update.
+	* ld-powerpc/tlsso.g: Update.
+	* ld-powerpc/tlsso.r: Update.
+	* ld-powerpc/tlsso.t: Update.
+	* ld-powerpc/tlstocso.d: Update.
+	* ld-powerpc/tlstocso.g: Update.
+	* ld-powerpc/tlstocso.r: Update.
+	* ld-powerpc/tlstocso.t: Update.
+
 2003-06-03  H.J. Lu <hongjiu.lu@intel.com>
 
 	* ld-discard/extern.d: Updated.
