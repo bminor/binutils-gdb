@@ -275,12 +275,18 @@ thread_get_info_callback (const td_thrhandle_t *thp, void *infop)
   thread_info = find_thread_pid (thread_ptid);
 
   /* In the case of a zombie thread, don't continue.  We don't want to
-     attach to it thinking it is a new thread and we don't want to mark
-     it as valid.  */
+     attach to it thinking it is a new thread.  */
   if (ti.ti_state == TD_THR_UNKNOWN || ti.ti_state == TD_THR_ZOMBIE)
     {
       if (infop != NULL)
         *(struct thread_info **) infop = thread_info;
+      if (thread_info != NULL)
+	{
+	  memcpy (&thread_info->private->th, thp, sizeof (*thp));
+	  thread_info->private->th_valid = 1;
+	  memcpy (&thread_info->private->ti, &ti, sizeof (ti));
+	  thread_info->private->ti_valid = 1;
+	}
       return TD_THR_ZOMBIE;
     }
 

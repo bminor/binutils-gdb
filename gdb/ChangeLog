@@ -1,3 +1,8 @@
+2004-06-07  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* thread-db.c (thread_get_info_callback): Fill in the thread_info
+	struct if one exists, even if we are dealing with a zombie thread.
+
 2004-06-07  Andrew Cagney  <cagney@gnu.org>
 
 	* target.h (PC_REQUIRES_RUN_BEFORE_USE): Delete definition.
