@@ -122,11 +122,12 @@ sim_write (sd, addr, buffer, size)
      int size;
 {
   int i;
+
   init ();
+
   for (i = 0; i < size; i++)
-    {
-      ARMul_WriteByte (state, addr + i, buffer[i]);
-    }
+    ARMul_WriteByte (state, addr + i, buffer[i]);
+
   return size;
 }
 
@@ -208,40 +209,44 @@ sim_create_inferior (sd, abfd, argv, env)
 
   mach = bfd_get_mach (abfd);
 
-  switch (mach) {
-  default:
-    (*sim_callback->printf_filtered) (sim_callback,
-				      "Unknown machine type; please update sim_create_inferior.\n");
-    /* fall through */
+  switch (mach)
+    {
+    default:
+      (*sim_callback->printf_filtered) (sim_callback,
+					"Unknown machine type; please update sim_create_inferior.\n");
+      /* fall through */
 
-  case 0: /* arm */
-    /* We wouldn't set the machine type with earlier toolchains, so we
-       explicitly select a processor capable of supporting all ARM
-       32bit mode. */
-    /* fall through */
+    case 0: /* arm */
+      /* We wouldn't set the machine type with earlier toolchains, so we
+	 explicitly select a processor capable of supporting all ARM
+	 32bit mode. */
+      /* fall through */
 
-  case 5: /* armv4 */
-  case 6: /* armv4t */
-  case 7: /* armv5 */
-  case 8: /* armv5t */
-    ARMul_SelectProcessor (state, STRONGARM);
-    /* Reset mode to ARM.  A gdb user may rerun a program that had entered
-       THUMB mode from the start and cause the ARM-mode startup code to be
-       executed in THUMB mode. */
-    ARMul_SetCPSR (state, USER32MODE);
-    break;
+    case 5: /* armv4 */
+    case 6: /* armv4t */
+    case 7: /* armv5 */
+    case 8: /* armv5t */
+      if (mach == 7 || mach == 8)
+	ARMul_SelectProcessor (state, ARM_v5_Prop);
+      else
+	ARMul_SelectProcessor (state, ARM_v4_Prop);
+      /* Reset mode to ARM.  A gdb user may rerun a program that had entered
+	 THUMB mode from the start and cause the ARM-mode startup code to be
+	 executed in THUMB mode. */
+      ARMul_SetCPSR (state, USER32MODE);
+      break;
 
-  case 3: /* armv3 */
-  case 4: /* armv3m */
-    ARMul_SelectProcessor (state, ARM600);
-    break;
-    
-  case 1: /* armv2 */
-  case 2: /* armv2a */
-    ARMul_SelectProcessor (state, ARM2);
-    break;
-  }
-    
+    case 3: /* armv3 */
+    case 4: /* armv3m */
+      ARMul_SelectProcessor (state, ARM_Lock_Prop);
+      break;
+
+    case 1: /* armv2 */
+    case 2: /* armv2a */
+      ARMul_SelectProcessor (state, ARM_Fix26_Prop);
+      break;
+    }
+
   if (argv != NULL)
     {
       /*

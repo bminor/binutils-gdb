@@ -85,7 +85,7 @@ ARMul_NewState (void)
     }
   for (i = 0; i < 7; i++)
     state->Spsr[i] = 0;
-  
+
   state->Mode = USER26MODE;
 
   state->CallDebug = FALSE;
@@ -124,20 +124,22 @@ ARMul_NewState (void)
   state->lateabtSig = LOW;
   state->bigendSig = LOW;
 
-  state->is_StrongARM = LOW;
+  state->is_v4 = LOW;
+  state->is_v5 = LOW;
 
   ARMul_Reset (state);
-  return (state);
+
+  return state;
 }
 
 /***************************************************************************\
-*       Call this routine to set ARMulator to model a certain processor     *
+  Call this routine to set ARMulator to model certain processor properities
 \***************************************************************************/
 
 void
-ARMul_SelectProcessor (ARMul_State * state, unsigned processor)
+ARMul_SelectProcessor (ARMul_State * state, unsigned properties)
 {
-  if (processor & ARM_Fix26_Prop)
+  if (properties & ARM_Fix26_Prop)
     {
       state->prog32Sig = LOW;
       state->data32Sig = LOW;
@@ -150,7 +152,8 @@ ARMul_SelectProcessor (ARMul_State * state, unsigned processor)
 
   state->lateabtSig = LOW;
 
-  state->is_StrongARM = (processor & ARM_Strong_Prop) ? HIGH : LOW;
+  state->is_v4 = (properties & (ARM_v4_Prop | ARM_v5_Prop)) ? HIGH : LOW;
+  state->is_v5 = (properties & ARM_v5_Prop) ? HIGH : LOW;
 }
 
 /***************************************************************************\

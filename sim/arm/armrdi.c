@@ -180,22 +180,23 @@ RDIInit (unsigned type)
 typedef struct
 {
   char name[16];
-  unsigned val;
+  unsigned properties;
 }
 Processor;
 
-Processor const p_arm2 = { "ARM2", ARM2 };
-Processor const p_arm2as = { "ARM2AS", ARM2as };
-Processor const p_arm61 = { "ARM61", ARM61 };
-Processor const p_arm3 = { "ARM3", ARM3 };
-Processor const p_arm6 = { "ARM6", ARM6 };
-Processor const p_arm60 = { "ARM60", ARM60 };
-Processor const p_arm600 = { "ARM600", ARM600 };
-Processor const p_arm610 = { "ARM610", ARM610 };
-Processor const p_arm620 = { "ARM620", ARM620 };
-Processor const p_unknown = { "", UNKNOWNPROC };
+Processor const p_arm2 =    { "ARM2",   ARM_Fix26_Prop };
+Processor const p_arm2as =  { "ARM2AS", ARM_Fix26_Prop };
+Processor const p_arm61 =   { "ARM61",  ARM_Fix26_Prop };
+Processor const p_arm3 =    { "ARM3",   ARM_Fix26_Prop };
+Processor const p_arm6 =    { "ARM6",   ARM_Lock_Prop };
+Processor const p_arm60 =   {  "ARM60", ARM_Lock_Prop };
+Processor const p_arm600 =  { "ARM600", ARM_Lock_Prop };
+Processor const p_arm610 =  { "ARM610", ARM_Lock_Prop };
+Processor const p_arm620 =  { "ARM620", ARM_Lock_Prop };
+Processor const p_unknown = { "",       0 };
 
-Processor const *const processors[] = {
+Processor const *const processors[] =
+{
   &p_arm6,			/* default: must come first */
   &p_arm2,
   &p_arm2as,

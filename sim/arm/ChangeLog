@@ -1,3 +1,27 @@
+2000-09-15  Nick Clifton  <nickc@redhat.com>
+
+	* armdefs.h: Rename StrongARM property to v4_ARM and add v5 ARM
+	property.  Delete unnecessary processor names.
+	(ARM_Strong_Prop): Delete.
+	(STRONGARM): Delete.
+	(ARM_v4_Prop): Add.
+	(ARM_v5_Prop): Add
+	(State): Delete is_StrongARM boolean.  Add is_v4 and is_v5
+	booleans.
+
+	* armemu.h (BUSUSEDINCPCS): Use is_v4 boolean.
+	(BUSUSEDINCPCN): Use is_v4 boolean.
+
+	* arminit.c (ARMul_NewState): Initialise is_v4 and is_v5 fields.
+	(ARMul_SelectProcessor): Change second parameter from 'processor'
+	to 'properties'.  Set is_v4 and is_v5 booleans in State.
+
+	* armrdi.c: Remove use of ARM processor names.  Replace with ARM
+	processor properties.
+
+	* wrapper.c (sim_create_inferior): Choose properties passed to
+	ARMul_SelectProcessor based on machine number.
+
 2000-08-14  Nick Clifton  <nickc@redhat.com>
 
 	* armemu.c (LHPOSTDOWN): Compute write back value before

@@ -123,9 +123,9 @@ struct ARMul_State
 
   const struct Dbg_HostosInterface *hostif;
 
-  unsigned is_StrongARM;	/* Are we emulating a StrongARM? */
-
-  int verbose;			/* non-zero means print various messages like the banner */
+  unsigned is_v4;		/* Are we emulating a v4 architecture (or higher) ?  */
+  unsigned is_v5;		/* Are we emulating a v5 architecture ?  */
+  unsigned verbose;		/* Print various messages like the banner */
 };
 
 #define ResetPin NresetSig
@@ -139,7 +139,7 @@ struct ARMul_State
 #define LateAbortPin lateabtSig
 
 /***************************************************************************\
-*                        Types of ARM we know about                         *
+*                        Properties of ARM we know about                    *
 \***************************************************************************/
 
 /* The bitflags */
@@ -148,26 +148,8 @@ struct ARMul_State
 #define ARM_Debug_Prop   0x10
 #define ARM_Isync_Prop   ARM_Debug_Prop
 #define ARM_Lock_Prop    0x20
-#define ARM_Strong_Prop  0x40
-
-/* ARM2 family */
-#define ARM2    (ARM_Fix26_Prop)
-#define ARM2as  ARM2
-#define ARM61   ARM2
-#define ARM3    ARM2
-
-#ifdef ARM60			/* previous definition in armopts.h */
-#undef ARM60
-#endif
-
-/* ARM6 family */
-#define ARM6    (ARM_Lock_Prop)
-#define ARM60   ARM6
-#define ARM600  ARM6
-#define ARM610  ARM6
-#define ARM620  ARM6
-
-#define STRONGARM (ARM_Strong_Prop)
+#define ARM_v4_Prop      0x40
+#define ARM_v5_Prop      0x80
 
 /***************************************************************************\
 *                   Macros to extract instruction fields                    *
