@@ -1,3 +1,20 @@
+Thu Apr  3 13:18:39 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (VERSION): Set to 2.8.1.
+
+	* Branched binutils 2.8.
+
+Tue Apr  1 16:21:44 1997  Klaus Kaempf  <kkaempf@progis.de>
+
+	* configure.com: New file.
+	* config.h-vms: Remove file.
+	* makefile.vms: Update for new configure scheme.
+
+Mon Mar 31 15:30:43 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
+
+	* objcopy.c (make_same_dates): Use statbuf, not buf, if not
+	HAVE_GOOD_UTIME_H.
+
 Fri Mar 28 17:57:53 1997  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* Makefile.in ($(OBJDUMP_PROG)): Don't link against BFDLIB twice.

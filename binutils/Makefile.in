@@ -75,7 +75,7 @@ LEX_OPTIONS =
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo flex ; fi`
 
 # Distribution version
-VERSION=cygnus-2.7.1
+VERSION=cygnus-2.8.1
 # Distribution name
 DIST_NAME=binutils-${VERSION}
 
@@ -101,14 +101,16 @@ OBJDUMP_PROG=objdump
 # Note: This one is used as the installed name too, unlike the above.
 DEMANGLER_PROG=c++filt
 
+ADDR2LINE_PROG=addr2line
+
 NLMCONV_PROG=nlmconv
 DLLTOOL_PROG=dlltool
 
 SRCONV_PROG=srconv sysdump coffdump 
 
-MANPAGES= ar nm objdump ranlib size strings strip objcopy nlmconv
+MANPAGES= ar nm objdump ranlib size strings strip objcopy addr2line nlmconv
 
-PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@
+PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) $(ADDR2LINE_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@
 STAGESTUFF = $(PROGS) *.o
 # Files that can be generated, but should be in the distribution.
 # Don't build $(DEMANGLER_PROG).1, since its name may vary with the
@@ -131,8 +133,8 @@ HFILES = arsup.h bucomm.h budbg.h coffgrok.h debug.h nlmconv.h
 
 GENERATED_HFILES = arparse.h sysroff.h sysinfo.h defparse.h
 
-CFILES = ar.c arsup.c bucomm.c coffdump.c coffgrok.c debug.c dlltool.c \
-	filemode.c ieee.c is-ranlib.c is-strip.c maybe-ranlib.c \
+CFILES = addr2line.c ar.c arsup.c bucomm.c coffdump.c coffgrok.c debug.c \
+	dlltool.c filemode.c ieee.c is-ranlib.c is-strip.c maybe-ranlib.c \
 	maybe-strip.c nlmconv.c nm.c not-ranlib.c not-strip.c \
 	objcopy.c objdump.c prdbg.c rdcoff.c rddbg.c size.c srconv.c \
 	stabs.c strings.c sysdump.c version.c wrstabs.c
@@ -259,11 +261,8 @@ $(STRIP_PROG): $(ADDL_DEPS) objcopy.o is-strip.o $(WRITE_DEBUG_OBJS)
 $(NM_PROG): $(ADDL_DEPS) nm.o
 	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(NM_PROG) nm.o $(ADDL_LIBS) $(EXTRALIBS)
 
-#libbfd is searched twice here ($(BFDLIB) and $(ADDL_LIBS)) because when a
-#shared libbfd is built with --enable-commonbfdlib, all of libopcodes is
-#available in libbfd.so and we don't want to link anything from libopcodes.a
 $(OBJDUMP_PROG): $(ADDL_DEPS) objdump.o prdbg.o $(DEBUG_OBJS) $(OPCODES_DEP)
-	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(OBJDUMP_PROG) objdump.o prdbg.o $(DEBUG_OBJS) $(BFDLIB) $(OPCODES) $(ADDL_LIBS) $(EXTRALIBS)
+	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(OBJDUMP_PROG) objdump.o prdbg.o $(DEBUG_OBJS) $(OPCODES) $(ADDL_LIBS) $(EXTRALIBS)
 
 underscore.c: stamp-under ; @true
 
@@ -303,6 +302,9 @@ $(AR_PROG): $(ADDL_DEPS) ar.o arparse.o arlex.o not-ranlib.o arsup.o
 
 $(RANLIB_PROG): $(ADDL_DEPS) ar.o is-ranlib.o arparse.o arlex.o arsup.o
 	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(RANLIB_PROG) ar.o arparse.o arlex.o arsup.o is-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
+
+$(ADDR2LINE_PROG): $(ADDL_DEPS) addr2line.o
+	$(HLDENV) $(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(ADDR2LINE_PROG) addr2line.o $(ADDL_LIBS) $(EXTRALIBS)
 
 # This rule creates a single binary that switches between ar and ranlib
 # by looking at argv[0].  Use this kludge to save some disk space.
@@ -651,6 +653,9 @@ config.status: configure $(srcdir)/../bfd/configure.host $(srcdir)/../bfd/config
 # DO NOT DELETE THIS LINE -- mkdep uses it.
 # DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
 
+addr2line.o: addr2line.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/getopt.h $(INCDIR)/libiberty.h $(INCDIR)/demangle.h \
+  bucomm.h config.h $(INCDIR)/fopen-same.h
 ar.o: ar.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
   $(INCDIR)/progress.h bucomm.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/aout/ar.h $(BFDDIR)/libbfd.h arsup.h
@@ -669,7 +674,8 @@ debug.o: debug.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 dlltool.o: dlltool.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/libiberty.h bucomm.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/getopt.h $(INCDIR)/demangle.h
-filemode.o: filemode.c ../bfd/bfd.h $(INCDIR)/ansidecl.h
+filemode.o: filemode.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  bucomm.h config.h $(INCDIR)/fopen-same.h
 ieee.o: ieee.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/ieee.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
   debug.h budbg.h
@@ -727,7 +733,7 @@ wrstabs.o: wrstabs.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 underscore.o: underscore.c
 arparse.o: arparse.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h arsup.h
-arlex.o: arlex.c arparse.h
+arlex.o: arlex.c $(INCDIR)/libiberty.h arparse.h
 sysroff.o: sysroff.c
 sysinfo.o: sysinfo.c
 syslex.o: syslex.c sysinfo.h
