@@ -15,14 +15,6 @@
 
 Do-first:
 
-arc_files="arc.h"
-
-if ( echo $* | grep keep\-arc > /dev/null ) ; then
-	keep_these_too="${arc_files} ${keep_these_too}"
-else
-	lose_these_too="${arc_files} ${lose_these_too}"
-fi
-
 d30v_files="d30v.h"
 
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
@@ -85,35 +77,6 @@ vax.h
 Things-to-lose:
 
 Do-last:
-
-arc_files="ChangeLog"
-if ( echo $* | grep keep\-arc > /dev/null ) ; then
-	for i in $arc_files ; do
-		if test ! -d $i && (grep sanitize-arc $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping arc stuff in $i
-			fi
-		fi
-	done
-else
-	for i in $arc_files ; do
-		if test ! -d $i && (grep sanitize-arc $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"arc\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-arc/,/end-\sanitize\-arc/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
 
 d30v_files="ChangeLog"
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
