@@ -1,3 +1,8 @@
+Thu Nov 11 19:58:05 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* printcmd.c (address_info): Use filtered, not unfiltered functions.
+	We should be able to deal with a QUIT here.
+
 Thu Nov 11 15:22:20 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* printcmd.c (address_info): Use fprintf_symbol_filtered
