@@ -1,0 +1,188 @@
+# Test Framework Driver for GDB driving an external simulator
+#   Copyright 1999 Free Software Foundation, Inc. ?
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+
+load_lib gdb.exp
+
+proc sid_start {} {
+    global sid_spawn_id
+    global verbose
+
+    set port [lindex [split [target_info netport] ":"] 1]
+
+    # Set a default endianness
+    case [target_info multilib_flags] in {
+	{ *big-endian* *-EB* *-meb* } { set sidendian "-EB" }
+	{ *little-endian* *-EL* *-mel* } { set sidendian "-EL" }
+	default { 
+	    if {[target_info exists sim,defaultendian]} then {
+		set sidendian [target_info sim,defaultendian] 
+	    } else { 
+		warning "Unknown target endianness - assuming -EB"
+		set sidendian "-EB" 
+	    }
+	}
+    }
+    # set verbosity conditionally
+    if {$verbose > 0} then { set sidverbose "--verbose" } else { set sidverbose "" }
+
+    # test to see whether to use use sid in build or install tree
+    set use_build_tree [file exists ../../sid]
+
+    if {$use_build_tree} then {
+	set pre_spawn {
+	    global env
+	    set env(SID_LIBRARY_PATH) [join [glob "../../sid/component/*"] ":"]
+	    set env(SID) "../../sid/main/dynamic/sid"
+	    set env(MKSID) "../../sid/main/static/mksid"
+	    if {! [file exists $env(SID)]} then { error "Cannot find sid in build tree" }
+	}
+	set spawncmd "../../sid/bsp/[target_info sim] $sidverbose $sidendian --persistent --gdb=$port [target_info sim,options]"
+	set post_spawn {
+	    global env
+	    unset env(SID_LIBRARY_PATH)
+	    unset env(MKSID)
+	    unset env(SID)
+	}
+    } else {
+	set pre_spawn {}
+	set spawncmd "[target_info sim] $sidverbose $sidendian --persistent --gdb=$port [target_info sim,options]"
+	set post_spawn {}
+    }
+
+    eval $pre_spawn
+    if {[catch "spawn $spawncmd" msg]} {
+	perror $msg
+	exit 1
+    }
+    eval $post_spawn
+
+    expect_background {
+	-re \[^\n\]*\n { 
+	    regsub "\n" $expect_out(buffer) {} msg
+	    verbose "SID: $msg" 2
+	}
+    }
+
+    # There should be no need to sleep to give SID time to start;
+    # GDB would wait for a fair while for the stub to respond.
+    sleep 4
+
+    set sid_spawn_id $spawn_id
+}
+
+#
+# Handle GDB talking to SID
+#
+
+proc gdb_start {} {
+    sid_start
+    return [default_gdb_start]
+}
+
+proc sid_exit {} {
+    global sid_spawn_id 
+    if {[info exists sid_spawn_id]} {
+	catch {exec kill [exp_pid -i $sid_spawn_id]}
+	catch {wait -i $sid_spawn_id}
+	unset sid_spawn_id
+        sleep 4
+    }
+}
+
+proc gdb_exit {} {
+    set result [default_gdb_exit]
+    sid_exit
+    return $result
+}
+
+#
+# gdb_target_sid
+# Set gdb to target the simulator
+#
+proc send_target_sid { } {
+    # wait a little while, giving sid time to shut down & restart its
+    # gdb socket
+    sleep 4
+    send_gdb "target [target_info gdb_protocol] [target_info netport]\n"
+}
+
+proc gdb_target_sid { } {
+    global gdb_prompt
+    global exit_status
+
+    send_target_sid
+
+    global timeout
+    set prev_timeout $timeout
+    set timeout 60
+    verbose "Timeout is now $timeout seconds" 2
+    gdb_expect {
+	-re "Remote debugging using.*$gdb_prompt"	{
+	    verbose "Set target to sid"
+	}
+	timeout { 
+	    perror "Couldn't set target for remote simulator."
+	    cleanup
+	    exit $exit_status
+	}
+    }
+    set timeout $prev_timeout
+    verbose "Timeout is now $timeout seconds" 2
+}
+
+#
+# gdb_load -- load a file into the debugger.
+#             return a -1 if anything goes wrong.
+#
+proc gdb_load { arg } {
+    global verbose
+    global loadpath
+    global loadfile
+    global GDB
+    global gdb_prompt
+
+    gdb_unload
+    if [gdb_file_cmd $arg] then { return -1 }
+    gdb_target_sid
+
+    send_gdb "load\n"
+    global timeout
+    set prev_timeout $timeout
+    set timeout 2400
+    verbose "Timeout is now $timeout seconds" 2
+    gdb_expect {
+	-re ".*$gdb_prompt $" {
+	    if $verbose>1 then {
+		send_user "Loaded $arg into $GDB\n"
+	    }
+	    set timeout 30
+	    verbose "Timeout is now $timeout seconds" 2
+	    return 1
+	}
+	-re "$gdb_prompt $"     {
+	    if $verbose>1 then {
+		perror "GDB couldn't load."
+	    }
+	}
+	timeout {
+	    if $verbose>1 then {
+		perror "Timed out trying to load $arg."
+	    }
+	}
+    }
+    set timeout $prev_timeout
+}

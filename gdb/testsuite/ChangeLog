@@ -1,3 +1,7 @@
+2001-01-17  Ben Elliston  <bje@redhat.com>
+
+	* config/sid.exp: New file.
+
 Fri Jan 12 18:29:01 2001  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.base/callfuncs.exp: Add space after ``Value returned is''.
