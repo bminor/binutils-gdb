@@ -1,3 +1,18 @@
+2003-08-19  Mark Kettenis  <kettenis@gnu.org>
+
+	* utils.c (set_width_command): Remove prototypes.
+	(set_screen_size): New prototype.
+	(init_page_info): Simplify by fetching the screen size from
+	Readline.  Call set_screen_size.
+	(set_screen_size): New function.
+	(set_width): Add missing whitespace in comment.
+	(set_width_command): Call set_screen_size.
+	(set_height_command): New function.
+	(initialize_utils): Fix formatting.  Make "set height" command
+	call set_height_command.  Remove redundant code that turns off
+	pagination if output isn't a terminal.  Remove redundant call to
+	set_width_command.
+	
 2003-08-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64-tdep.h (sparc64_regnum): Fix comment.

@@ -102,8 +102,7 @@ static void malloc_botch (void);
 
 static void prompt_for_continue (void);
 
-static void set_width_command (char *, int, struct cmd_list_element *);
-
+static void set_screen_size (void);
 static void set_width (void);
 
 /* Chain of cleanup actions established with make_cleanup,
@@ -1567,11 +1566,12 @@ fputstrn_unfiltered (const char *str, int n, int quoter,
 }
 
 
-
 /* Number of lines per page or UINT_MAX if paging is disabled.  */
 static unsigned int lines_per_page;
+
 /* Number of chars per line or UINT_MAX if line folding is disabled.  */
 static unsigned int chars_per_line;
+
 /* Current count of lines printed on this page, chars on this line.  */
 static unsigned int lines_printed, chars_printed;
 
@@ -1600,7 +1600,8 @@ static char *wrap_indent;
 static int wrap_column;
 
 
-/* Inialize the lines and chars per page */
+/* Inialize the number of lines per page and chars per line.  */
+
 void
 init_page_info (void)
 {
@@ -1608,65 +1609,64 @@ init_page_info (void)
   if (!tui_get_command_dimension (&chars_per_line, &lines_per_page))
 #endif
     {
-      /* These defaults will be used if we are unable to get the correct
-         values from termcap.  */
 #if defined(__GO32__)
       lines_per_page = ScreenRows ();
       chars_per_line = ScreenCols ();
 #else
-      lines_per_page = 24;
-      chars_per_line = 80;
+      int rows, cols;
 
-#if !defined (_WIN32)
-      /* Initialize the screen height and width from termcap.  */
-      {
-	char *termtype = getenv ("TERM");
+      /* Make sure Readline has initialized its terminal settings.  */
+      rl_reset_terminal (NULL);
 
-	/* Positive means success, nonpositive means failure.  */
-	int status;
+      /* Get the screen size from Readline.  */
+      rl_get_screen_size (&rows, &cols);
+      lines_per_page = rows;
+      chars_per_line = cols;
 
-	/* 2048 is large enough for all known terminals, according to the
-	   GNU termcap manual.  */
-	char term_buffer[2048];
+      /* Readline should have fetched the termcap entry for us.  */
+      if (tgetnum ("li") < 0 || getenv ("EMACS"))
+	{
+	  /* The number of lines per page is not mentioned in the
+	     terminal description.  This probably means that paging is
+	     not useful (e.g. emacs shell window), so disable paging.  */
+	  lines_per_page = UINT_MAX;
+	}
 
-	if (termtype)
-	  {
-	    status = tgetent (term_buffer, termtype);
-	    if (status > 0)
-	      {
-		int val;
-		int running_in_emacs = getenv ("EMACS") != NULL;
-
-		val = tgetnum ("li");
-		if (val >= 0 && !running_in_emacs)
-		  lines_per_page = val;
-		else
-		  /* The number of lines per page is not mentioned
-		     in the terminal description.  This probably means
-		     that paging is not useful (e.g. emacs shell window),
-		     so disable paging.  */
-		  lines_per_page = UINT_MAX;
-
-		val = tgetnum ("co");
-		if (val >= 0)
-		  chars_per_line = val;
-	      }
-	  }
-      }
-#endif
-
+      /* FIXME: Get rid of this junk.  */
 #if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
-
-      /* If there is a better way to determine the window size, use it. */
       SIGWINCH_HANDLER (SIGWINCH);
 #endif
-#endif
+
       /* If the output is not a terminal, don't paginate it.  */
       if (!ui_file_isatty (gdb_stdout))
 	lines_per_page = UINT_MAX;
-    }				/* the command_line_version */
+    }
+#endif
+
+  set_screen_size ();
   set_width ();
 }
+
+/* Set the screen size based on LINES_PER_PAGE and CHARS_PER_LINE.  */
+
+static void
+set_screen_size (void)
+{
+  int rows = lines_per_page;
+  int cols = chars_per_line;
+
+  if (rows <= 0)
+    rows = INT_MAX;
+
+  if (cols <= 0)
+    rl_get_screen_size (NULL, &cols);
+
+  /* Update Readline's idea of the terminal size.  */
+  rl_set_screen_size (rows, cols);
+}
+
+/* Reinitialize WRAP_BUFFER according to the current value of
+   CHARS_PER_LINE.  */
 
 static void
 set_width (void)
@@ -1681,14 +1681,22 @@ set_width (void)
     }
   else
     wrap_buffer = (char *) xrealloc (wrap_buffer, chars_per_line + 2);
-  wrap_pointer = wrap_buffer;	/* Start it at the beginning */
+  wrap_pointer = wrap_buffer;	/* Start it at the beginning.  */
 }
 
 /* ARGSUSED */
 static void
 set_width_command (char *args, int from_tty, struct cmd_list_element *c)
 {
+  set_screen_size ();
   set_width ();
+}
+
+/* ARGSUSED */
+static void
+set_height_command (char *args, int from_tty, struct cmd_list_element *c)
+{
+  set_screen_size ();
 }
 
 /* Wait, so the user can read what's on the screen.  Prompt the user
@@ -2486,26 +2494,18 @@ initialize_utils (void)
 {
   struct cmd_list_element *c;
 
-  c = add_set_cmd ("width", class_support, var_uinteger,
-		   (char *) &chars_per_line,
+  c = add_set_cmd ("width", class_support, var_uinteger, &chars_per_line,
 		   "Set number of characters gdb thinks are in a line.",
 		   &setlist);
   add_show_from_set (c, &showlist);
   set_cmd_sfunc (c, set_width_command);
 
-  add_show_from_set
-    (add_set_cmd ("height", class_support,
-		  var_uinteger, (char *) &lines_per_page,
-		  "Set number of lines gdb thinks are in a page.", &setlist),
-     &showlist);
+  c = add_set_cmd ("height", class_support, var_uinteger, &lines_per_page,
+		   "Set number of lines gdb thinks are in a page.", &setlist);
+  add_show_from_set (c, &showlist);
+  set_cmd_sfunc (c, set_height_command);
 
   init_page_info ();
-
-  /* If the output is not a terminal, don't paginate it.  */
-  if (!ui_file_isatty (gdb_stdout))
-    lines_per_page = UINT_MAX;
-
-  set_width_command ((char *) NULL, 0, c);
 
   add_show_from_set
     (add_set_cmd ("demangle", class_support, var_boolean,
