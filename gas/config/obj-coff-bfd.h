@@ -146,7 +146,7 @@ typedef struct
 #define C_DEBUG_SECTION		N_DEBUG
 #define C_NTV_SECTION		N_TV
 #define C_PTV_SECTION		P_TV
-#define C_REGISTER_SECTION	4
+#define C_REGISTER_SECTION	20
 
 /*
  *  Macros to extract information from a symbol table entry.

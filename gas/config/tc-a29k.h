@@ -27,5 +27,13 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define tc_coff_symbol_emit_hook(a)	; /* not used */
 
 #define AOUT_MACHTYPE 101
-
+#define TC_COFF_FIX2RTYPE(fix_ptr) tc_coff_fix2rtype(fix_ptr)
+#define BFD_ARCH bfd_arch_a29k
+#define COFF_MAGIC SIPFBOMAGIC
+/* Should the reloc be output ? 
+	on the 29k, this is true only if there is a symbol attatched.
+	on the h8, this is allways true, since no fixup is done
+*/
+#define TC_COUNT_RELOC(x) (x->fx_addsy)
 /* end of tc-a29k.h */
+

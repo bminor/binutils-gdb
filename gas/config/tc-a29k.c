@@ -770,27 +770,6 @@ void md_apply_fix(fixP, val)
 
     fixP->fx_addnumber = val;	/* Remember value for emit_reloc */
 
-    if (fixP->fx_r_type == NO_RELOC) {
-	as_fatal("failed sanity check.");		/* FIXME-SOON, if this is never used, remove */
-	switch (fixP->fx_size) {
-	case 1:
-		*buf = val;
-		break;
-	case 2:
-		*buf++ = (val>>8);
-		*buf = val;
-		break;
-	case 4:
-		*buf++ = (val>>24);
-		*buf++ = (val>>16);
-		*buf++ = (val>>8);
-		*buf = val;
-		break;
-	default:
-		as_fatal("failed sanity check.");
-	}
-	return;
-    }
 
     know(fixP->fx_size == 4);
     know(fixP->fx_r_type < NO_RELOC);

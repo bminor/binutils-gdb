@@ -100,6 +100,9 @@ bfd *abfd;
 void EXFUN(bfd_as_write_hook,(struct internal_filehdr *,
 			      bfd *abfd));
 
+static void EXFUN(fixup_segment,(fixS *	fixP,
+		  segT	this_segment_type));
+
 static void EXFUN(fill_section,(bfd *abfd ,
 				struct internal_filehdr *f, unsigned
 				long *));
@@ -207,7 +210,16 @@ seg_info_type seg_info_off_by_4[N_SEG] =
 {SEG_E7},
 {SEG_E8}, 
 {SEG_E9},
-{SEG_REGISTER},
+{15},
+{16},
+{17},
+{18},
+{19},
+{20},
+{21},
+{22},
+{23},
+{SEG_REGISTER},0x1111,0x2222,0x3333,0x4444
 
 };
 
@@ -267,24 +279,35 @@ static unsigned int  DEFUN(size_section,(abfd, idx),
   return size;
 }
 
-/* Count the relocations in a chain */
 
 static unsigned int DEFUN(count_entries_in_chain,(idx),
 			  unsigned int idx)
 {
-  unsigned int nrelocs;
-  fixS *fixup_ptr;
+    unsigned int nrelocs;
+    fixS *fixup_ptr;
 
-  /* Count the relocations */
-  fixup_ptr = segment_info[idx].fix_root;
-  nrelocs = 0;
-  while (fixup_ptr != (fixS *)NULL) 
-      {
-	nrelocs ++ ;
+    /* Count the relocations */
+    fixup_ptr = segment_info[idx].fix_root;
+    nrelocs = 0;
+    while (fixup_ptr != (fixS *)NULL) 
+    {
+	if (TC_COUNT_RELOC(fixup_ptr)) 
+	{
+	    
+#ifdef TC_A29K
+
+	    if (fixup_ptr->fx_r_type == RELOC_CONSTH)  
+	     nrelocs+=2;
+	    else					
+	     nrelocs++;		
+#else
+	    nrelocs++;
+#endif
+	}
+	
 	fixup_ptr = fixup_ptr->fx_next;
-
-      }
-  return nrelocs;
+    }
+    return nrelocs;
 }
 
 /* output all the relocations for a section */
@@ -292,64 +315,97 @@ void DEFUN(do_relocs_for,(abfd, file_cursor),
 	   bfd *abfd AND
 	   unsigned long *file_cursor)
 {
-  unsigned int nrelocs;
-  arelent **reloc_ptr_vector;
-  arelent *reloc_vector;
-  asymbol **ptrs;
-  unsigned int idx;
+    unsigned int nrelocs;
+    arelent **reloc_ptr_vector;
+    arelent *reloc_vector;
+    asymbol **ptrs;
+    unsigned int idx;
   
-  asection *section = (asection *)(segment_info[idx].user_stuff);
-  unsigned int i;
-  fixS *from;
-  for (idx = SEG_E0; idx < SEG_E9; idx++) 
-  {
-    if (segment_info[idx].scnhdr.s_name[0]) 
+
+    unsigned int i;
+    fixS *from;
+    for (idx = SEG_E0; idx < SEG_E9; idx++) 
     {
+	if (segment_info[idx].scnhdr.s_name[0]) 
+	{
 
-      struct external_reloc *ext_ptr;
-      struct external_reloc *external_reloc_vec;
-      unsigned int external_reloc_size;
-      fixS *   fix_ptr = segment_info[idx].fix_root;
-      nrelocs = count_entries_in_chain(idx);
-      external_reloc_size = nrelocs * RELSZ;
-      external_reloc_vec = (struct external_reloc*)alloca(external_reloc_size);
+	    struct external_reloc *ext_ptr;
+	    struct external_reloc *external_reloc_vec;
+	    unsigned int external_reloc_size;
+	    unsigned int count = 0;
+	    unsigned int base  = segment_info[idx].scnhdr.s_paddr;
+	    fixS *   fix_ptr = segment_info[idx].fix_root;
+	    nrelocs = count_entries_in_chain(idx);
+	    external_reloc_size = nrelocs * RELSZ;
+	    external_reloc_vec =
+	     (struct external_reloc*)alloca(external_reloc_size);
 
-      ext_ptr = external_reloc_vec;
-      
-      /* Fill in the internal coff style reloc struct from the
-	 internal fix list */
-      while (fix_ptr)
-      {
-	symbolS *symbol_ptr;
-	struct internal_reloc intr;
 	
-	symbol_ptr = fix_ptr->fx_addsy;
+	    
+	    ext_ptr = external_reloc_vec;
+	    
+	    /* Fill in the internal coff style reloc struct from the
+	       internal fix list */
+	    while (fix_ptr)
+	    {
+		symbolS *symbol_ptr;
+		struct internal_reloc intr;
 
-	  /* If this relocation is attached to a symbol then it's ok
-	     to output it */
-	  intr.r_type = TC_COFF_FIX2RTYPE(fix_ptr);
-	  intr.r_vaddr = fix_ptr->fx_frag->fr_address +  fix_ptr->fx_where ;
-	  
-	  intr.r_offset = fix_ptr->fx_offset;
-	  
-	if (symbol_ptr)
-	  intr.r_symndx = symbol_ptr->sy_number;
-	else
-  	 intr.r_symndx = -1;
-	
-	  (void)bfd_coff_swap_reloc_out(abfd, &intr, ext_ptr);
-	  ext_ptr++;
+		/* Only output some of the relocations */
+		if (TC_COUNT_RELOC(fix_ptr))
+		{
+		    symbolS *dot;
+		    symbol_ptr = fix_ptr->fx_addsy;
+		    
+		    intr.r_type = TC_COFF_FIX2RTYPE(fix_ptr);
+		    intr.r_vaddr = base +  fix_ptr->fx_frag->fr_address +  fix_ptr->fx_where ;
 
-	fix_ptr = fix_ptr->fx_next;
-      }
+
+		    /* Turn the segment of the symbol into an offset
+		     */
+		    dot =
+		     segment_info[S_GET_SEGMENT(symbol_ptr)].dot;
+   
+		    if (dot)
+		    {
+			intr.r_symndx = dot->sy_number;
+		    }
+		    else 
+		    {
+			intr.r_symndx = symbol_ptr->sy_number;
+		    }
+
+		
+		    (void)bfd_coff_swap_reloc_out(abfd, &intr, ext_ptr);
+		    ext_ptr++;
+
+#if defined(TC_A29K)
+		    /* The 29k has a special kludge for the high 16 bit reloc.
+		       Two relocations are emmited, R_IHIHALF, and
+		       R_IHCONST. The second one doesn't contain a symbol,
+		       but uses the value for offset */
+		
+		    if (intr.r_type == R_IHIHALF)
+		    {
+			/* now emit the second bit */
+			intr.r_type = R_IHCONST;	
+			intr.r_symndx = fix_ptr->fx_addnumber;
+			(void)bfd_coff_swap_reloc_out(abfd,&intr,ext_ptr);
+			ext_ptr++;
+		    }
+#endif
+		}
+		
+		fix_ptr = fix_ptr->fx_next;
+	    }
       
-      /* Write out the reloc table */
-      segment_info[idx].scnhdr.s_relptr = *file_cursor;
-      segment_info[idx].scnhdr.s_nreloc = nrelocs;
-      bfd_write(external_reloc_vec, 1, external_reloc_size, abfd);
-      *file_cursor += external_reloc_size;
+	    /* Write out the reloc table */
+	    segment_info[idx].scnhdr.s_relptr = *file_cursor;
+	    segment_info[idx].scnhdr.s_nreloc = nrelocs;
+	    bfd_write(external_reloc_vec, 1, external_reloc_size, abfd);
+	    *file_cursor += external_reloc_size;
+	}
     }
-  }
 }
 
 
@@ -368,6 +424,7 @@ static void DEFUN(fill_section,(abfd, filehdr, file_cursor),
   for (i = SEG_E0; i < SEG_UNKNOWN; i++) {  
       unsigned int offset = 0;
 
+
       struct internal_scnhdr *s = &( segment_info[i].scnhdr);
 	  
       if (s->s_name[0]) {
@@ -382,13 +439,11 @@ static void DEFUN(fill_section,(abfd, filehdr, file_cursor),
 	   s->s_flags |= STYP_TEXT;
 	  else if (strcmp(s->s_name,".data")==0)
 	   s->s_flags |= STYP_DATA;
-	  else if (strcmp(s->s_name,".text")==0)
+	  else if (strcmp(s->s_name,".bss")==0)
 	   s->s_flags |= STYP_BSS | STYP_NOLOAD;
-
 
 	  while (frag) {
 	      unsigned int fill_size;
-	      unsigned int count;
 	      switch (frag->fr_type) {
 		case rs_fill:
 		case rs_align:
@@ -404,16 +459,17 @@ static void DEFUN(fill_section,(abfd, filehdr, file_cursor),
 		  fill_size = frag->fr_var;
 		  if (fill_size)	
 		  {
-		    unsigned int off = frag->fr_fix;
-		    for (count = frag->fr_offset; count;  count--) 
-		    {
-		      memcpy(buffer +  frag->fr_address  + off,
-			     frag->fr_literal + frag->fr_fix,
-			     fill_size);
-		      off += fill_size;
-		      offset += fill_size;
+		      unsigned int count ;
+		      unsigned int off = frag->fr_fix;
+		      for (count = frag->fr_offset; count;  count--) 
+		      {
+			  memcpy(buffer +  frag->fr_address  + off,
+				 frag->fr_literal + frag->fr_fix,
+				 fill_size);
+			  off += fill_size;
+			  offset += fill_size;
 		      
-		    }
+		      }
 
 		  }
 		  break;
@@ -423,14 +479,14 @@ static void DEFUN(fill_section,(abfd, filehdr, file_cursor),
 	      frag = frag->fr_next;
 	    }
 
-	  /*paddr += offset; 
-	   This causes problems with relocation. For the moment, all
-	   sections start at 0
-	   */
+
+
 	  bfd_write(buffer, s->s_size,1,abfd);
 	  *file_cursor += s->s_size;
+	  paddr += s->s_size;
 	}      
     }
+
 }
 
 
@@ -488,6 +544,12 @@ DEFUN(symbol_to_chars,(abfd, where, symbolP),
   {
     S_SET_SEGMENT(symbolP, SEG_ABSOLUTE);
   }
+    /* At the same time, relocate all symbols to their output value */
+
+    S_SET_VALUE(symbolP,
+		segment_info[S_GET_SEGMENT(symbolP)].scnhdr.s_paddr 
+		+ S_GET_VALUE(symbolP));
+
   *where += bfd_coff_swap_sym_out(abfd, &symbolP->sy_symbol.ost_entry,
 				  *where);
 	
@@ -1259,6 +1321,9 @@ static unsigned int DEFUN_VOID(tie_tags)
        symbol_next(symbolP)) 
   {
     symbolP->sy_number = symbol_number;
+
+
+
     if (SF_GET_TAGGED(symbolP)) 
     {
       SA_SET_SYM_TAGNDX
@@ -1277,102 +1342,76 @@ static void DEFUN(crawl_symbols,(headers, abfd),
 	   bfd *abfd)
 {
 
-  unsigned int i;	
-  unsigned int ptr = 0;
+    unsigned int i;	
+    unsigned int ptr = 0;
 
 
-  symbolS *symbolP;
+    symbolS *symbolP;
 
-  /* Initialize the stack used to keep track of the matching .bb .be */
+    /* Initialize the stack used to keep track of the matching .bb .be */
 
-  block_stack = stack_init(512, sizeof(symbolS*));
-  /* JF deal with forward references first... */
-  for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next(symbolP)) {
+    block_stack = stack_init(512, sizeof(symbolS*));
+    /* JF deal with forward references first... */
+    for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next(symbolP)) {
 
-      if (symbolP->sy_forward) {
-	  S_SET_VALUE(symbolP, (S_GET_VALUE(symbolP)
-				+ S_GET_VALUE(symbolP->sy_forward)
-				+ symbolP->sy_forward->sy_frag->fr_address));
+	    if (symbolP->sy_forward) {
+		    S_SET_VALUE(symbolP, (S_GET_VALUE(symbolP)
+					  + S_GET_VALUE(symbolP->sy_forward)
+					  + symbolP->sy_forward->sy_frag->fr_address));
 
-	  if (SF_GET_GET_SEGMENT(symbolP)) {
-	      S_SET_SEGMENT(symbolP, S_GET_SEGMENT(symbolP->sy_forward));
-	    }			/* forward segment also */
+		    if (SF_GET_GET_SEGMENT(symbolP)) {
+			    S_SET_SEGMENT(symbolP, S_GET_SEGMENT(symbolP->sy_forward));
+			}	/* forward segment also */
 
-	  symbolP->sy_forward=0;
-	}			/* if it has a forward reference */
-    }				/* walk the symbol chain */
-
-
-  /* The symbol list should be ordered according to the following sequence
-   * order :
-   * . .file symbol
-   * . debug entries for functions
-   * . fake symbols for the sections, including.text .data and .bss
-   * . defined symbols
-   * . undefined symbols
-   * But this is not mandatory. The only important point is to put the
-   * undefined symbols at the end of the list.
-   */
-
-  if (symbol_rootP == NULL
-      || S_GET_STORAGE_CLASS(symbol_rootP) != C_FILE) {
-      c_dot_file_symbol("fake");
-    }
-  /* Is there a .file symbol ? If not insert one at the beginning. */
-
-  /*
-   * Build up static symbols for the sections
-   */
+		    symbolP->sy_forward=0;
+		}		/* if it has a forward reference */
+	}			/* walk the symbol chain */
 
 
-  for (i = SEG_E0; i < SEG_E9; i++) 
-  {
-    if (segment_info[i].scnhdr.s_name[0])
+    /* The symbol list should be ordered according to the following sequence
+     * order :
+     * . .file symbol
+     * . debug entries for functions
+     * . fake symbols for the sections, including.text .data and .bss
+     * . defined symbols
+     * . undefined symbols
+     * But this is not mandatory. The only important point is to put the
+     * undefined symbols at the end of the list.
+     */
+
+    if (symbol_rootP == NULL
+	|| S_GET_STORAGE_CLASS(symbol_rootP) != C_FILE) {
+	    c_dot_file_symbol("fake");
+	}
+    /* Is there a .file symbol ? If not insert one at the beginning. */
+
+    /*
+     * Build up static symbols for the sections, they are filled in later
+     */
+
+
+    for (i = SEG_E0; i < SEG_E9; i++) 
     {
-      segment_info[i].dot = 
-       c_section_symbol(segment_info[i].scnhdr.s_name,
-			i,
-			ptr,
-			i-SEG_E0+1,
-			segment_info[i].scnhdr.s_size,
-			segment_info[i].scnhdr.s_paddr,
-			0,0);
+	if (segment_info[i].scnhdr.s_name[0])
+	{
+	    segment_info[i].dot = 
+	     c_section_symbol(segment_info[i].scnhdr.s_name,
+			      i-SEG_E0+1);
+	    
+	}
     }
-  }
 
 
-#if defined(DEBUG)
-  verify_symbol_chain(symbol_rootP, symbol_lastP);
-#endif				/* DEBUG */
+    /* Take all the externals out and put them into another chain */
+    headers->f_nsyms =   yank_symbols();
+    /* Take the externals and glue them onto the end.*/
+    headers->f_nsyms +=  glue_symbols();
 
-  /* Take all the externals out and put them into another chain */
-headers->f_nsyms =   yank_symbols();
-  /* Take the externals and glue them onto the end.*/
- headers->f_nsyms +=  glue_symbols();
+    headers->f_nsyms =   tie_tags();
+    know(symbol_externP == NULL);
+    know(symbol_extern_lastP  == NULL);
 
-headers->f_nsyms =   tie_tags();
-  know(symbol_externP == NULL);
-  know(symbol_extern_lastP  == NULL);
-
-#if 0
-  /* FIXME-SOMEDAY 
-     I'm counting line no's here so we know what to put in the section
-     headers, and I'm resolving the addresses since I'm not sure how to
-     do it later. I am NOT resolving the linno's representing functions.
-     Their symbols need a fileptr pointing to this linno when emitted.
-     Thus, I resolve them on emit.  xoxorich. */
-
-  for (lineP = lineno_rootP; lineP; lineP = lineP->next) 
-  {
-      if (lineP->line.l_lnno > 0) {
-	  lineP->line.l_addr.l_paddr += ((fragS*)lineP->frag)->fr_address;
-	} else {
-	    ;
-	  }
-      text_lineno_number++;
-    }				/* for each line number */
-#endif
-  return;
+    return;
 }
 
 /*
@@ -1404,6 +1443,74 @@ char *where;
 
 }
 
+
+
+
+/* This is a copy from aout.  All I do is neglect to actually build the symbol. */
+
+static void obj_coff_stab(what)
+int what;
+{
+	char *string;
+	expressionS e;
+	int goof = 0;	/* TRUE if we have aborted. */
+	int length;
+	int saved_type = 0;
+	long longint;
+	symbolS *symbolP = 0;
+
+	if (what == 's') {
+		string = demand_copy_C_string(&length);
+		SKIP_WHITESPACE();
+
+		if (*input_line_pointer == ',') {
+			input_line_pointer++;
+		} else {
+			as_bad("I need a comma after symbol's name");
+			goof = 1;
+		} /* better be a comma */
+	} /* skip the string */
+
+	/*
+	 * Input_line_pointer->after ','.  String->symbol name.
+	 */
+	if (!goof) {
+		if (get_absolute_expression_and_terminator(&longint) != ',') {
+			as_bad("I want a comma after the n_type expression");
+			goof = 1;
+			input_line_pointer--; /* Backup over a non-',' char. */
+		} /* on error */
+	} /* no error */
+
+	if (!goof) {
+		if (get_absolute_expression_and_terminator(&longint) != ',') {
+			as_bad("I want a comma after the n_other expression");
+			goof = 1;
+			input_line_pointer--; /* Backup over a non-',' char. */
+		} /* on error */
+	} /* no error */
+
+	if (!goof) {
+		get_absolute_expression();
+
+		if (what == 's' || what == 'n') {
+			if (*input_line_pointer != ',') {
+				as_bad("I want a comma after the n_desc expression");
+				goof = 1;
+			} else {
+				input_line_pointer++;
+			} /* on goof */
+		} /* not stabd */
+	} /* no error */
+
+	expression(&e);
+
+	if (goof) {
+		ignore_rest_of_line();
+	} else {
+		demand_empty_rest_of_line();
+	} /* on error */
+} /* obj_coff_stab() */
 
 
 static void 
@@ -1493,15 +1600,17 @@ extern void DEFUN_VOID(write_object_file)
     struct internal_aouthdr aouthdr;
     unsigned long file_cursor;  
     bfd *abfd;
-  
+      unsigned int addr = 0;  
     abfd = bfd_openw(out_file_name, TARGET_FORMAT);
+
 
     if (abfd == 0) {
 	    as_perror ("FATAL: Can't create %s", out_file_name);
 	    exit(42);
 	}
     bfd_set_format(abfd, bfd_object);
-    bfd_set_arch_mach(abfd, bfd_arch_h8300, 0);
+    bfd_set_arch_mach(abfd, BFD_ARCH, 0);
+
 
 
     string_byte_count = 4;
@@ -1525,21 +1634,16 @@ extern void DEFUN_VOID(write_object_file)
 
     remove_subsegs();
     
-#if 1
+
     for (i = SEG_E0; i < SEG_UNKNOWN; i++) 
     {
 	relax_segment(segment_info[i].frchainP->frch_root, i);
     }
   
-    for (i = SEG_E0; i < SEG_UNKNOWN; i++) 
-    {
-	/*      fixup_segment(segment_info[i].fix_root, i);*/
-    }
-  
-#endif
 
-  {
-      unsigned int addr = 0;
+
+
+
       filehdr.f_nscns = 0;
   
       /* Find out how big the sections are */
@@ -1554,52 +1658,59 @@ extern void DEFUN_VOID(write_object_file)
 	  if (i == SEG_E2) {
 		  /* THis is a special case, we leave the size alone, which will have */
 		  /* been made up from all and any lcomms seen */
-
 	      }
 	  else {
 		  addr += size_section(abfd, i);
 	      }
       }
-  }
+
+
 
     /* Turn the gas native symbol table shape into a coff symbol table */
-  crawl_symbols(&filehdr, abfd);
+    crawl_symbols(&filehdr, abfd);
 
-  file_cursor =   FILHSZ + SCNHSZ * filehdr.f_nscns ;
+    for (i = SEG_E0; i < SEG_UNKNOWN; i++) 
+    {
+	fixup_segment(segment_info[i].fix_root, i);
+    }
 
-  bfd_seek(abfd, file_cursor, 0);
+    file_cursor =   FILHSZ + SCNHSZ * filehdr.f_nscns ;
 
-  do_relocs_for(abfd, &file_cursor);
-  do_linenos_for(abfd, &file_cursor);
-
-
-  /* Plant the data */
-
-  fill_section(abfd,&filehdr, &file_cursor);
-
-  filehdr.f_magic = 0x8300;
-  filehdr.f_timdat = 0;
-  filehdr.f_flags = 0;
+    bfd_seek(abfd, file_cursor, 0);
 
 
+    do_relocs_for(abfd, &file_cursor);
 
-{
+    do_linenos_for(abfd, &file_cursor);
 
-  unsigned int   symtable_size = filehdr.f_nsyms * SYMESZ;
-  char *buffer1 = malloc(symtable_size);
-  char *buffer2 = malloc(string_byte_count+4);
-  char *ptr = buffer1;
-  filehdr.f_symptr = bfd_tell(abfd);
-  w_symbols(abfd,&buffer1, symbol_rootP);
-  bfd_write(ptr, 1, symtable_size, abfd);
 
-  w_strings(buffer2);
-  bfd_write(buffer2, 1, string_byte_count, abfd);
+    /* Plant the data */
 
-}
-  coff_header_append(abfd, &filehdr, &aouthdr);
+    fill_section(abfd,&filehdr, &file_cursor);
 
-  bfd_close_all_done(abfd);
+    filehdr.f_magic = COFF_MAGIC;
+    filehdr.f_timdat = 0;
+    filehdr.f_flags = 0;
+
+
+
+  {
+
+      unsigned int   symtable_size = filehdr.f_nsyms * SYMESZ;
+      char *buffer1 = alloca(symtable_size);
+      char *buffer2 = alloca(string_byte_count+4);
+      char *ptr = buffer1;
+      filehdr.f_symptr = bfd_tell(abfd);
+      w_symbols(abfd,&buffer1, symbol_rootP);
+      bfd_write(ptr, 1, symtable_size, abfd);
+
+      w_strings(buffer2);
+      bfd_write(buffer2, 1, string_byte_count, abfd);
+
+  }
+    coff_header_append(abfd, &filehdr, &aouthdr);
+
+    bfd_close_all_done(abfd);
 }
 
 
@@ -1764,25 +1875,18 @@ char *filename;
  * Build a 'section static' symbol.
  */
 
-symbolS *c_section_symbol(name,idx, value, length, nreloc, nlnno)
+symbolS *c_section_symbol(name,idx)
 char *name;
-long value;
-long length;
-unsigned short nreloc;
-unsigned short nlnno;
+int idx;
 {
     symbolS *symbolP;
 
     symbolP = symbol_new(name,idx,
-			 value,
+			 0,
 			 &zero_address_frag);
 
     S_SET_STORAGE_CLASS(symbolP, C_STAT);
     S_SET_NUMBER_AUXILIARY(symbolP, 1);
-
-    SA_SET_SCN_SCNLEN(symbolP, length);
-    SA_SET_SCN_NRELOC(symbolP, nreloc);
-    SA_SET_SCN_NLINNO(symbolP, nlnno);
 
     SF_SET_STATICS(symbolP);
 
@@ -1795,6 +1899,22 @@ char **where AND
 symbolS *symbol_rootP)
 {
     symbolS *symbolP;
+    unsigned int i;
+    
+    /* First fill in those values we have only just worked out */
+    for (i = SEG_E0; i < SEG_E9; i++) 
+    {
+	symbolP = segment_info[i].dot;
+	if (symbolP) 
+	{
+    
+	    SA_SET_SCN_SCNLEN(symbolP, segment_info[i].scnhdr.s_size);
+	    SA_SET_SCN_NRELOC(symbolP, segment_info[i].scnhdr.s_nreloc);
+	    SA_SET_SCN_NLINNO(symbolP, segment_info[i].scnhdr.s_nlnno);
+	    
+	}
+    }
+    
     /*
      * Emit all symbols left in the symbol chain.
      */
@@ -1809,214 +1929,16 @@ symbolS *symbol_rootP)
 	    if (SF_GET_STRING(symbolP)) {
 		    S_SET_OFFSET(symbolP, symbolP->sy_name_offset);
 		    S_SET_ZEROES(symbolP, 0);
-	    } else {
-		    bzero(symbolP->sy_symbol.ost_entry.n_name, SYMNMLEN);
-		    strncpy(symbolP->sy_symbol.ost_entry.n_name, temp, SYMNMLEN);
-	    }
+		} else {
+			bzero(symbolP->sy_symbol.ost_entry.n_name, SYMNMLEN);
+			strncpy(symbolP->sy_symbol.ost_entry.n_name, temp, SYMNMLEN);
+		    }
 	    symbol_to_chars(abfd, where, symbolP);
 	    S_SET_NAME(symbolP,temp);
-    }
-} /* w_symbols() */
+	}
+}				/* w_symbols() */
 
-#if 0
-static long fixup_segment(fixP, this_segment_type)
-register fixS *	fixP;
-segT		this_segment_type; /* N_TYPE bits for segment. */
-{
-  register long seg_reloc_count;
-  register symbolS *add_symbolP;
-  register symbolS *sub_symbolP;
-  register long add_number;
-  register int size;
-  register char *place;
-  register long where;
-  register char pcrel;
-  register fragS *fragP;
-  register segT add_symbol_segment = SEG_ABSOLUTE;
-	
-  /* FIXME: remove this line */ /*	fixS *orig = fixP; */
-  seg_reloc_count = 0;
-	
-  for ( ;  fixP;  fixP = fixP->fx_next) {
-      fragP       = fixP->fx_frag;
-      know(fragP);
-      where	  = fixP->fx_where;
-      place       = fragP->fr_literal + where;
-      size	  = fixP->fx_size;
-      add_symbolP = fixP->fx_addsy;
-#ifdef TC_I960
-      if (fixP->fx_callj && TC_S_IS_CALLNAME(add_symbolP)) {
-	  /* Relocation should be done via the
-	     associated 'bal' entry point
-	     symbol. */
-
-	  if (!TC_S_IS_BALNAME(tc_get_bal_of_call(add_symbolP))) {
-	      as_bad("No 'bal' entry point for leafproc %s",
-		     S_GET_NAME(add_symbolP));
-	      continue;
-	    }
-	  fixP->fx_addsy = add_symbolP = tc_get_bal_of_call(add_symbolP);
-	}			/* callj relocation */
-#endif
-      sub_symbolP = fixP->fx_subsy;
-      add_number  = fixP->fx_offset;
-      pcrel	  = fixP->fx_pcrel;
-
-      if (add_symbolP) {
-	  add_symbol_segment = S_GET_SEGMENT(add_symbolP);
-	}			/* if there is an addend */
-		
-      if (sub_symbolP) {
-	  if (!add_symbolP) {
-	      /* Its just -sym */
-	      if (S_GET_SEGMENT(sub_symbolP) != SEG_ABSOLUTE) {
-		  as_bad("Negative of non-absolute symbol %s", S_GET_NAME(sub_symbolP));
-		}		/* not absolute */
-				
-	      add_number -= S_GET_VALUE(sub_symbolP);
-				
-	      /* if sub_symbol is in the same segment that add_symbol
-		 and add_symbol is either in DATA, TEXT, BSS or ABSOLUTE */
-	    } else if ((S_GET_SEGMENT(sub_symbolP) == add_symbol_segment)
-		       && (SEG_NORMAL(add_symbol_segment)
-			   || (add_symbol_segment == SEG_ABSOLUTE))) {
-		/* Difference of 2 symbols from same segment. */
-		/* Can't make difference of 2 undefineds: 'value' means */
-		/* something different for N_UNDF. */
-#ifdef TC_I960
-		/* Makes no sense to use the difference of 2 arbitrary symbols
-		 * as the target of a call instruction.
-		 */
-		if (fixP->fx_callj) {
-		    as_bad("callj to difference of 2 symbols");
-		  }
-#endif				/* TC_I960 */
-		add_number += S_GET_VALUE(add_symbolP) - 
-		 S_GET_VALUE(sub_symbolP);
-				
-		add_symbolP = NULL;
-		fixP->fx_addsy = NULL;
-	      } else {
-		  /* Different segments in subtraction. */
-		  know(!(S_IS_EXTERNAL(sub_symbolP) && (S_GET_SEGMENT(sub_symbolP) == SEG_ABSOLUTE)));
-				
-		  if ((S_GET_SEGMENT(sub_symbolP) == SEG_ABSOLUTE)) {
-		      add_number -= S_GET_VALUE(sub_symbolP);
-		    } else {
-			as_bad("Can't emit reloc {- %s-seg symbol \"%s\"} @ file address %d.",
-			       segment_name(S_GET_SEGMENT(sub_symbolP)),
-			       S_GET_NAME(sub_symbolP), fragP->fr_address + where);
-		      }		/* if absolute */
-		}
-	}			/* if sub_symbolP */
-
-      if (add_symbolP) {
-	  if (add_symbol_segment == this_segment_type && pcrel) {
-	      /*
-	       * This fixup was made when the symbol's segment was
-	       * SEG_UNKNOWN, but it is now in the local segment.
-	       * So we know how to do the address without relocation.
-	       */
-#ifdef TC_I960
-	      /* reloc_callj() may replace a 'call' with a 'calls' or a 'bal',
-	       * in which cases it modifies *fixP as appropriate.  In the case
-	       * of a 'calls', no further work is required, and *fixP has been
-	       * set up to make the rest of the code below a no-op.
-	       */
-	      reloc_callj(fixP);
-#endif				/* TC_I960 */
-				
-	      add_number += S_GET_VALUE(add_symbolP);
-	      add_number -= md_pcrel_from (fixP);
-	      pcrel = 0;	/* Lie. Don't want further pcrel processing. */
-	      fixP->fx_addsy = NULL; /* No relocations please. */
-	    } else {
-		switch (add_symbol_segment) {
-		  case SEG_ABSOLUTE:
-#ifdef TC_I960
-		    reloc_callj(fixP); /* See comment about reloc_callj() above*/
-#endif				/* TC_I960 */
-		    add_number += S_GET_VALUE(add_symbolP);
-		    fixP->fx_addsy = NULL;
-		    add_symbolP = NULL;
-		    break;
-		  default:
-		    seg_reloc_count ++;
-		    add_number += S_GET_VALUE(add_symbolP);
-		    break;
-					
-		  case SEG_UNKNOWN:
-#ifdef TC_I960
-		    if ((int)fixP->fx_bit_fixP == 13) {
-			/* This is a COBR instruction.  They have only a
-			 * 13-bit displacement and are only to be used
-			 * for local branches: flag as error, don't generate
-			 * relocation.
-			 */
-			as_bad("can't use COBR format with external label");
-			fixP->fx_addsy = NULL; /* No relocations please. */
-			continue;
-		      }		/* COBR */
-#endif				/* TC_I960 */
-		    /* FIXME-SOON: I think this is trash, but I'm not sure.  xoxorich. */
-#ifdef comment
-#ifdef OBJ_COFF
-		    if (S_IS_COMMON(add_symbolP))
-		     add_number += S_GET_VALUE(add_symbolP);
-#endif				/* OBJ_COFF */
-#endif				/* comment */
-		
-		    ++seg_reloc_count;
-
-		    break;
-					
-
-		  }		/* switch on symbol seg */
-	      }			/* if not in local seg */
-	}			/* if there was a + symbol */
-
-      if (pcrel) {
-	  add_number -= md_pcrel_from(fixP);
-	  if (add_symbolP == 0) {
-	      fixP->fx_addsy = & abs_symbol;
-	      ++seg_reloc_count;
-	    }			/* if there's an add_symbol */
-	}			/* if pcrel */
-		
-      if (!fixP->fx_bit_fixP) {
-	  if ((size==1 &&
-	       (add_number& ~0xFF)   && (add_number&~0xFF!=(-1&~0xFF))) ||
-	      (size==2 &&
-	       (add_number& ~0xFFFF) && (add_number&~0xFFFF!=(-1&~0xFFFF)))) {
-	      as_bad("Value of %d too large for field of %d bytes at 0x%x",
-		     add_number, size, fragP->fr_address + where);
-	    }			/* generic error checking */
-	}			/* not a bit fix */
-		
-      md_apply_fix(fixP, add_number);
-    }				/* For each fixS in this segment. */
-	
-#ifdef OBJ_COFF
-#ifdef TC_I960
-{
-  fixS *topP = fixP;
-		
-  /* two relocs per callj under coff. */
-  for (fixP = topP; fixP; fixP = fixP->fx_next) {
-      if (fixP->fx_callj && fixP->fx_addsy != 0) {
-	  ++seg_reloc_count;
-	}			/* if callj and not already fixed. */
-    }				/* for each fix */
-}
-#endif				/* TC_I960 */
-
-#endif				/* OBJ_COFF */
-  return(seg_reloc_count);
-}				/* fixup_segment() */
-#endif
-
-
-void obj_coff_lcomm(void)
+static void DEFUN_VOID(obj_coff_lcomm)
 {
     char *name;
     char c;
@@ -2024,6 +1946,8 @@ void obj_coff_lcomm(void)
     char *p;
     symbolS *symbolP;
     name = input_line_pointer;
+
+
 
     c = get_symbol_end();
     p = input_line_pointer;
@@ -2052,3 +1976,184 @@ void obj_coff_lcomm(void)
     S_SET_STORAGE_CLASS(symbolP, C_STAT);
     demand_empty_rest_of_line();
 }
+
+
+#if 1
+static void DEFUN(fixup_segment,(fixP, this_segment_type),
+register fixS *	fixP AND
+segT		this_segment_type)
+{
+    register symbolS *add_symbolP;
+    register symbolS *sub_symbolP;
+    register long add_number;
+    register int size;
+    register char *place;
+    register long where;
+    register char pcrel;
+    register fragS *fragP;
+    register segT add_symbol_segment = SEG_ABSOLUTE;
+	
+	
+    for ( ;  fixP;  fixP = fixP->fx_next) 
+    {
+	fragP       = fixP->fx_frag;
+	know(fragP);
+	where	  = fixP->fx_where;
+	place       = fragP->fr_literal + where;
+	size	  = fixP->fx_size;
+	add_symbolP = fixP->fx_addsy;
+#ifdef TC_I960
+	if (fixP->fx_callj && TC_S_IS_CALLNAME(add_symbolP)) {
+		/* Relocation should be done via the
+		   associated 'bal' entry point
+		   symbol. */
+
+		if (!TC_S_IS_BALNAME(tc_get_bal_of_call(add_symbolP))) {
+			as_bad("No 'bal' entry point for leafproc %s",
+			       S_GET_NAME(add_symbolP));
+			continue;
+		    }
+		fixP->fx_addsy = add_symbolP = tc_get_bal_of_call(add_symbolP);
+	    }			/* callj relocation */
+#endif
+	sub_symbolP = fixP->fx_subsy;
+	add_number  = fixP->fx_offset;
+	pcrel	  = fixP->fx_pcrel;
+
+	if (add_symbolP) {
+		add_symbol_segment = S_GET_SEGMENT(add_symbolP);
+	    }			/* if there is an addend */
+		
+	if (sub_symbolP) {
+		if (!add_symbolP) {
+			/* Its just -sym */
+			if (S_GET_SEGMENT(sub_symbolP) != SEG_ABSOLUTE) {
+				as_bad("Negative of non-absolute symbol %s", S_GET_NAME(sub_symbolP));
+			    }	/* not absolute */
+				
+			add_number -= S_GET_VALUE(sub_symbolP);
+				
+			/* if sub_symbol is in the same segment that add_symbol
+			   and add_symbol is either in DATA, TEXT, BSS or ABSOLUTE */
+		    } else if ((S_GET_SEGMENT(sub_symbolP) == add_symbol_segment)
+			       && (SEG_NORMAL(add_symbol_segment)
+				   || (add_symbol_segment == SEG_ABSOLUTE))) {
+			    /* Difference of 2 symbols from same segment. */
+			    /* Can't make difference of 2 undefineds: 'value' means */
+			    /* something different for N_UNDF. */
+#ifdef TC_I960
+			    /* Makes no sense to use the difference of 2 arbitrary symbols
+			     * as the target of a call instruction.
+			     */
+			    if (fixP->fx_callj) {
+				    as_bad("callj to difference of 2 symbols");
+				}
+#endif				/* TC_I960 */
+			    add_number += S_GET_VALUE(add_symbolP) - 
+			     S_GET_VALUE(sub_symbolP);
+				
+			    add_symbolP = NULL;
+			    fixP->fx_addsy = NULL;
+			} else {
+				/* Different segments in subtraction. */
+				know(!(S_IS_EXTERNAL(sub_symbolP) && (S_GET_SEGMENT(sub_symbolP) == SEG_ABSOLUTE)));
+				
+				if ((S_GET_SEGMENT(sub_symbolP) == SEG_ABSOLUTE)) {
+					add_number -= S_GET_VALUE(sub_symbolP);
+				    } else {
+					    as_bad("Can't emit reloc {- %s-seg symbol \"%s\"} @ file address %d.",
+						   segment_name(S_GET_SEGMENT(sub_symbolP)),
+						   S_GET_NAME(sub_symbolP), fragP->fr_address + where);
+					} /* if absolute */
+			    }
+	    }			/* if sub_symbolP */
+
+	if (add_symbolP) {
+		if (add_symbol_segment == this_segment_type && pcrel) {
+			/*
+			 * This fixup was made when the symbol's segment was
+			 * SEG_UNKNOWN, but it is now in the local segment.
+			 * So we know how to do the address without relocation.
+			 */
+#ifdef TC_I960
+			/* reloc_callj() may replace a 'call' with a 'calls' or a 'bal',
+			 * in which cases it modifies *fixP as appropriate.  In the case
+			 * of a 'calls', no further work is required, and *fixP has been
+			 * set up to make the rest of the code below a no-op.
+			 */
+			reloc_callj(fixP);
+#endif				/* TC_I960 */
+				
+			add_number += S_GET_VALUE(add_symbolP);
+			add_number -= md_pcrel_from (fixP);
+			pcrel = 0; /* Lie. Don't want further pcrel processing. */
+			fixP->fx_addsy = NULL; /* No relocations please. */
+		    } else 
+		    {
+			switch (add_symbol_segment) 
+			{
+			  case SEG_ABSOLUTE:
+#ifdef TC_I960
+			    reloc_callj(fixP); /* See comment about reloc_callj() above*/
+#endif				/* TC_I960 */
+			    add_number += S_GET_VALUE(add_symbolP);
+			    fixP->fx_addsy = NULL;
+			    add_symbolP = NULL;
+			    break;
+			  default:
+
+			    add_number += S_GET_VALUE(add_symbolP) +
+		segment_info[S_GET_SEGMENT(add_symbolP)].scnhdr.s_paddr ;
+			    break;
+					
+			  case SEG_UNKNOWN:
+#ifdef TC_I960
+			    if ((int)fixP->fx_bit_fixP == 13) {
+				    /* This is a COBR instruction.  They have only a
+				     * 13-bit displacement and are only to be used
+				     * for local branches: flag as error, don't generate
+				     * relocation.
+				     */
+				    as_bad("can't use COBR format with external label");
+				    fixP->fx_addsy = NULL; /* No relocations please. */
+				    continue;
+				} /* COBR */
+#endif				/* TC_I960 */
+		
+
+
+			    break;
+					
+
+			}	/* switch on symbol seg */
+		    }		/* if not in local seg */
+	    }			/* if there was a + symbol */
+
+	if (pcrel) {
+		add_number -= md_pcrel_from(fixP);
+		if (add_symbolP == 0) {
+			fixP->fx_addsy = & abs_symbol;
+		    }		/* if there's an add_symbol */
+	    }			/* if pcrel */
+		
+	if (!fixP->fx_bit_fixP) {
+		if ((size==1 &&
+		     (add_number& ~0xFF)   && (add_number&~0xFF!=(-1&~0xFF))) ||
+		    (size==2 &&
+		     (add_number& ~0xFFFF) && (add_number&~0xFFFF!=(-1&~0xFFFF)))) {
+			as_bad("Value of %d too large for field of %d bytes at 0x%x",
+			       add_number, size, fragP->fr_address + where);
+		    }		/* generic error checking */
+	    }			/* not a bit fix */
+	/* once this fix has been applied, we don't have to output anything 
+	   nothing more need be done -*/
+	md_apply_fix(fixP, add_number);
+      
+    }				/* For each fixS in this segment. */
+	
+
+}				/* fixup_segment() */
+#endif
+
+
+
