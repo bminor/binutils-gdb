@@ -139,6 +139,12 @@ proc gdb_load { arg } {
 	    error "couldn't load $arg into $GDB (timed out)."
 	    return -1
 	}
+	eof {
+	    # It's possible this should be a FAIL.  Usually it means GDB
+	    # dumped core.
+	    error "couldn't load $arg into $GDB (timed out)."
+	    return -1
+	}
     }
 }
 
