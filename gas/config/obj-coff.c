@@ -212,47 +212,6 @@ obj_coff_bss (ignore)
     s_lcomm (0);
 }
 
-/* Handle .weak.  This is a GNU extension.  */
-
-static void
-obj_coff_weak (ignore)
-     int ignore ATTRIBUTE_UNUSED;
-{
-  char *name;
-  int c;
-  symbolS *symbolP;
-
-  do
-    {
-      name = input_line_pointer;
-      c = get_symbol_end ();
-      symbolP = symbol_find_or_make (name);
-      *input_line_pointer = c;
-      SKIP_WHITESPACE ();
-
-#if defined BFD_ASSEMBLER || defined S_SET_WEAK
-      S_SET_WEAK (symbolP);
-#endif
-
-#ifdef TE_PE
-      S_SET_STORAGE_CLASS (symbolP, C_NT_WEAK);
-#else
-      S_SET_STORAGE_CLASS (symbolP, C_WEAKEXT);
-#endif
-
-      if (c == ',')
-	{
-	  input_line_pointer++;
-	  SKIP_WHITESPACE ();
-	  if (*input_line_pointer == '\n')
-	    c = '\n';
-	}
-    }
-  while (c == ',');
-
-  demand_empty_rest_of_line ();
-}
-
 #ifdef BFD_ASSEMBLER
 
 static segT fetch_coff_debug_section PARAMS ((void));
@@ -1131,6 +1090,86 @@ obj_coff_val (ignore)
     {
       S_SET_VALUE (def_symbol_in_progress, get_absolute_expression ());
     }				/* if symbol based */
+
+  demand_empty_rest_of_line ();
+}
+
+/* Handle .weak.  This is a GNU extension in formats other than PE. */
+static void
+obj_coff_weak (ignore)
+     int ignore ATTRIBUTE_UNUSED;
+{
+  char *name;
+  int c;
+  symbolS *symbolP;
+
+  do
+    {
+      name = input_line_pointer;
+      c = get_symbol_end ();
+      if (*name == 0)
+	{
+	  as_warn (_("badly formed .weak directive ignored"));
+	  ignore_rest_of_line ();
+	  return;
+	}
+      symbolP = symbol_find_or_make (name);
+      *input_line_pointer = c;
+      SKIP_WHITESPACE ();
+
+#if defined BFD_ASSEMBLER || defined S_SET_WEAK
+      S_SET_WEAK (symbolP);
+#endif
+
+#ifdef TE_PE
+      /* See _Microsoft Portable Executable and Common Object
+       * File Format Specification_, section 5.5.3.
+       * Note that weak symbols without aux records are a GNU
+       * extension.
+       */
+      S_SET_STORAGE_CLASS (symbolP, C_NT_WEAK);
+
+      if (c == '=')
+	{
+	  symbolS *alternateP;
+	  long characteristics = 2;
+	  ++input_line_pointer;
+	  if (*input_line_pointer == '=')
+	    {
+	      characteristics = 1;
+	      ++input_line_pointer;
+	    }
+
+	  SKIP_WHITESPACE();
+	  name = input_line_pointer;
+	  c = get_symbol_end();
+	  if (*name == 0)
+	    {
+	      as_warn (_("alternate name missing in .weak directive"));
+	      ignore_rest_of_line ();
+	      return;
+	    }
+	  alternateP = symbol_find_or_make (name);
+	  *input_line_pointer = c;
+
+	  S_SET_NUMBER_AUXILIARY (symbolP, 1);
+	  SA_SET_SYM_TAGNDX (symbolP, alternateP);
+	  SA_SET_SYM_FSIZE (symbolP, characteristics);
+	}
+#else  /* TE_PE */
+      S_SET_STORAGE_CLASS (symbolP, C_WEAKEXT);
+#endif  /* TE_PE */
+
+      if (c == ',')
+	{
+	  input_line_pointer++;
+	  SKIP_WHITESPACE ();
+	  if (*input_line_pointer == '\n')
+	    c = '\n';
+	}
+
+    }
+  while (c == ',');
 
   demand_empty_rest_of_line ();
 }

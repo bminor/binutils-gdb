@@ -3400,8 +3400,8 @@ respectively, with @code{.val} and @code{.type}.
 
 @cindex auxiliary attributes, COFF symbols
 The @command{@value{AS}} directives @code{.dim}, @code{.line}, @code{.scl},
-@code{.size}, and @code{.tag} can generate auxiliary symbol table
-information for COFF.
+@code{.size}, @code{.tag}, and @code{.weak} can generate auxiliary symbol
+table information for COFF.
 @end ifset
 
 @ifset SOM
@@ -3823,9 +3823,9 @@ Some machine configurations provide additional directives.
 * Version::                     @code{.version "@var{string}"}
 * VTableEntry::                 @code{.vtable_entry @var{table}, @var{offset}}
 * VTableInherit::               @code{.vtable_inherit @var{child}, @var{parent}}
-* Weak::                        @code{.weak @var{names}}
 @end ifset
 
+* Weak::                        @code{.weak @var{names}}
 * Word::                        @code{.word @var{expressions}}
 * Deprecated::                  Deprecated Directives
 @end menu
@@ -5808,14 +5808,31 @@ parent whose addend is the value of the child symbol.  As a special case the
 parent name of @code{0} is treated as refering the @code{*ABS*} section.
 @end ifset
 
-@ifset ELF
 @node Weak
 @section @code{.weak @var{names}}
 
 @cindex @code{weak} directive
 This directive sets the weak attribute on the comma separated list of symbol
 @code{names}.  If the symbols do not already exist, they will be created.
-@end ifset
+
+Weak symbols are supported in COFF as a GNU extension.  This directive
+sets the weak attribute on the comma separated list of symbol
+@code{names}.  If the symbols do not already exist, they will be created.
+
+@smallexample
+@code{.weak @var{name} [ < = | == > @var{alternate}] [, ...]}
+@end smallexample
+
+On the PE target, weak aliases are supported natively.  Weak aliases
+(usually called "weak externals" in PE) are created when an alternate
+name is specified.  When a weak symbol is linked and the symbol is not
+defined, the weak symbol becomes an alias for the alternate symbol.  If
+one equal sign is used, the linker searches for defined symbols within
+other objects and libraries.  This is the usual mode, historically
+called "lazy externals."  Otherwise, when two equal signs are used,
+the linker searches for defined symbols only within other objects.
+
+Non-alias weak symbols are supported on PE as a GNU extension.
 
 @node Word
 @section @code{.word @var{expressions}}

@@ -748,7 +748,8 @@ The symbol is a weak symbol that has not been specifically tagged as a
 weak object symbol.  When a weak defined symbol is linked with a normal
 defined symbol, the normal defined symbol is used with no error.
 When a weak undefined symbol is linked and the symbol is not defined,
-the value of the weak symbol becomes zero with no error.
+the value of the symbol is determined in a system-specific manner without
+error.  Uppercase indicates that a default value has been specified.
 
 @item -
 The symbol is a stabs symbol in an a.out object file.  In this case, the

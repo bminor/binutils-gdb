@@ -5280,6 +5280,12 @@ tc_gen_reloc (section, fixp)
   *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
+
+#ifdef TE_PE
+  if (S_IS_WEAK (fixp->fx_addsy))
+    rel->addend = rel->address - (*rel->sym_ptr_ptr)->value + 4;
+  else
+#endif
   if (!use_rela_relocations)
     {
       /* HACK: Since i386 ELF uses Rel instead of Rela, encode the

@@ -1,3 +1,7 @@
+2004-07-03  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
+
+	* ld.texinfo (WIN32): Document PE weak symbols.
+
 2004-07-02  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* emulparams/shlelf32_linux.sh (COMMONPAGESIZE): Set to 4KB.

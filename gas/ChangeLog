@@ -1,3 +1,9 @@
+2004-07-03  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
+
+	* config/obj-coff.c (obj_coff_weak): New .weak syntax for PE weak
+	externals.
+	* doc/as.texinfo (Weak): Document PE weak symbols.
+
 2004-07-03  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-mips.c (HAVE_IN_PLACE_ADDENDS): New macro.

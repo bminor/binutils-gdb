@@ -2923,16 +2923,41 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
 	  if (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
 	    {
+	      /* Defined weak symbols are a GNU extension. */
 	      asection *sec;
 
 	      sec = h->root.u.def.section;
 	      val = (h->root.u.def.value
 		     + sec->output_section->vma
 		     + sec->output_offset);
-	      }
+	    }
 
 	  else if (h->root.type == bfd_link_hash_undefweak)
-	    val = 0;
+	    {
+              if (h->class == C_NT_WEAK && h->numaux == 1)
+		{
+		  /* See _Microsoft Portable Executable and Common Object
+                   * File Format Specification_, section 5.5.3.
+		   * Note that weak symbols without aux records are a GNU
+		   * extension.
+		   * FIXME: All weak externals are treated as having
+		   * characteristics IMAGE_WEAK_EXTERN_SEARCH_LIBRARY (2).
+		   * There are no known uses of the other two types of
+		   * weak externals.
+		   */
+		  asection *sec;
+		  struct coff_link_hash_entry *h2 =
+		    input_bfd->tdata.coff_obj_data->sym_hashes[
+		    h->aux->x_sym.x_tagndx.l];
+
+		  sec = h2->root.u.def.section;
+		  val = h2->root.u.def.value + sec->output_section->vma
+		    + sec->output_offset;
+		}
+	      else
+                /* This is a GNU extension. */
+		val = 0;
+	    }
 
 	  else if (! info->relocatable)
 	    {

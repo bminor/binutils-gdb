@@ -5292,6 +5292,24 @@ to handle the other symbols, then the both the new names @emph{and}
 the original names for the renamed symbols will be exported.  
 In effect, you'd be aliasing those symbols, not renaming them, 
 which is probably not what you wanted.
+
+@cindex weak externals
+@item weak externals
+The Windows object format, PE, specifies a form of weak symbols called
+weak externals.  When a weak symbol is linked and the symbol is not
+defined, the weak symbol becomes an alias for some other symbol.  There
+are three variants of weak externals:
+@itemize
+@item Definition is searched for in objects and libraries, historically
+called lazy externals.
+@item Definition is searched for only in other objects, not in libraries.
+This form is not presently implemented.
+@item No search; the symbol is an alias.  This form is not presently
+implemented.
+@end itemize
+As a GNU extension, weak symbols that do not specify an alternate symbol
+are supported.  If the symbol is undefined when linking, the symbol
+uses a default value.
 @end table
 
 @ifclear GENERIC

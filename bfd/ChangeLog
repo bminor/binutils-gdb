@@ -1,3 +1,8 @@
+2004-07-03  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
+
+	* cofflink.c (_bfd_coff_generic_relocate_section): Resolve PE weak
+	externals properly.
+
 2004-07-02  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* config.bfd: Add want64 to configuration target s390-*-linux*.

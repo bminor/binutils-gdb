@@ -1,3 +1,7 @@
+2004-07-03  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
+
+	* doc/binutils.texi (nm): Clarify weak symbol description.
+
 2004-06-24  Ben Elliston  <bje@au.ibm.com>
 
 	* readelf.c (get_segment_type): Display "GNU_STACK", not just
