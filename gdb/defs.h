@@ -1218,6 +1218,7 @@ extern int use_windows;
 #ifndef PIDGET
 #define PIDGET(PID) (PID)
 #define TIDGET(PID) 0
+#define MERGEPID(PID, TID) (PID)
 #endif
 
 /* If under Cygwin, provide backwards compatibility with older

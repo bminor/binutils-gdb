@@ -1,3 +1,8 @@
+2000-02-10  Jim Kingdon  <kingdon@redhat.com>
+
+	* defs.h (MERGEPID): Added.  Patch submitted by Andrew Hobson and
+	approved by Michael Snyder.
+
 2000-02-09  Mark Kettenis  <kettenis@gnu.org>
 
         * linux-thread.c: Include defs.h before gdb_wait.h.
