@@ -84,6 +84,7 @@ responsibility among the other maintainers.
   SH		   Kaz Kojima <kkojima@rr.iij4u.or.jp>
   SPARC		   Jakub Jelinek <jakub@redhat.com>
   TESTSUITES	   Ben Elliston <bje@redhat.com>
+  TIC4X            Svein Seldal <svein.seldal@solidas.com>
   TIC54X           Timothy Wall <twall@alum.mit.edu>
   VAX		   Jason R Thorpe <thorpej@wasabisystems.com>
   x86_64	   Jan Hubicka <jh@suse.cz>

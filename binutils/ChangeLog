@@ -1,3 +1,7 @@
+2002-11-06  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* MAINTAINERS: Add self as TIC4X maintainer.
+
 2002-11-06  Hiroyuki Machida  <machida@sm.sony.co.jp>
 
 	* readelf.c (get_symbol_index_type): Add hex number to
