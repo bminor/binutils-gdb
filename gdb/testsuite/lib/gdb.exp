@@ -627,6 +627,14 @@ proc test_print_reject { args } {
 	    pass "reject $sendthis"
 	    return 1
 	}
+        -re "Unmatched single quote.*$gdb_prompt $" {
+            pass "reject $sendthis"
+            return 1
+        }
+        -re "A character constant must contain at least one character.*$gdb_prompt $" {
+            pass "reject $sendthis"
+            return 1
+        }
 	-re "$expectthis.*$gdb_prompt $" {
 	    pass "reject $sendthis"
 	    return 1
