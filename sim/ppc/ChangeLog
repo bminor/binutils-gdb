@@ -1,3 +1,8 @@
+Wed Mar  7 10:45:12 HST 2001  Glen Nakamura  <gen@lava.net>
+
+	* hw_init.c (dma_file): Fixed problem with loading last 1KB of
+	file.
+	
 2001-03-04  Andrew Cagney  <ac131313@redhat.com>
 
 	* emul_netbsd.c [WITH_NetBSD_HOST]: Include <sys/mount.h> and

@@ -47,7 +47,7 @@ dma_file(device *me,
   count = 0;
   while (1) {
     inc = fread(buf, 1, sizeof(buf), image);
-    if (feof(image) || ferror(image))
+    if (inc <= 0)
       break;
     if (device_dma_write_buffer(device_parent(me),
 				buf,
