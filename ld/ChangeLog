@@ -1,3 +1,19 @@
+Tue Mar 12 12:02:21 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	Don't do SunOS style dynamic linking for sparc-aout:
+	* configure.tgt (sparc64-*-aout*): Use sparcaout, not sun4.
+	(sparclite*-fujitsu-*, sparc*-*-aout): Likewise.
+	(sparc*-wrs-vxworks*): Likewise.
+	* emulparams/sparcaout.sh: New file.
+	* Makefile.in (ALL_EMULATIONS): Add esparcaout.o.
+	(esparcaout.c): New target.
+
+Wed Mar  6 16:06:52 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* scripttempl/elfppc.sc (.sdata2, .sbss2): Implement Feb 2 change
+ 	in a different manner to work around differences in shell variable
+ 	expansion.
+
 Wed Mar  6 18:08:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldemul.h (ldemul_unrecognized_file): Declare.

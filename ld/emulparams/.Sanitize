@@ -111,6 +111,7 @@ riscix.sh
 sa29200.sh
 sh.sh
 shl.sh
+sparcaout.sh
 sparclynx.sh
 sparcnbsd.sh
 st2000.sh
