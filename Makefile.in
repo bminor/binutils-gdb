@@ -190,7 +190,7 @@ XTRAFLAGS = ` \
      echo ; \
   fi`
 
-PRMS = install-prms
+PRMS = all-prms
 
 #### host and target specific makefile fragments come in here.
 ###
@@ -1056,6 +1056,11 @@ gas.tar.z: $(DEVO_SUPPORT) $(GAS_SUPPORT_DIRS) gas texinfo/texinfo.tex
 	$(MAKE) -f Makefile.in setup-dirs SUPPORT_FILES="$(GAS_SUPPORT_DIRS)"
 	$(MAKE) -f Makefile.in taz SUPPORT_FILES="$(GAS_SUPPORT_DIRS)" TOOL=gas
 
+.PHONY: gas+binutils.tar.z
+GASB_SUPPORT_DIRS= $(GAS_SUPPORT_DIRS) binutils ld
+gas+binutils.tar.z: $(DEVO_SUPPORT) $(GASB_SUPPORT_DIRS) gas texinfo/texinfo.tex
+	$(MAKE) -f Makefile.in setup-dirs SUPPORT_FILES="$(GASB_SUPPORT_DIRS)"
+	$(MAKE) -f Makefile.in taz SUPPORT_FILES="$(GASB_SUPPORT_DIRS)" TOOL=gas
 
 .NOEXPORT:
 MAKEOVERRIDES=
