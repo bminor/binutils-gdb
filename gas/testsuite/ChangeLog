@@ -1,3 +1,8 @@
+2000-06-17  Alan Modra  <alan@linuxcare.com.au>
+
+	* gas/macros/strings.s: Don't start directives in first column
+	(for LABELS_WITHOUT_COLONS targets).
+
 2000-06-14  H.J. Lu <hjl@gnu.org>
 
 	* gas/macros/strings.d: Support a.out and coff.

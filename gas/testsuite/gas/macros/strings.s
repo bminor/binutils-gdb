@@ -1,6 +1,6 @@
-.macro M arg1
+	.macro M arg1
 	.ascii	"\arg1"
-.endm
+	.endm
 
 	.data
 foo:
