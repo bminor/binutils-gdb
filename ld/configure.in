@@ -9,17 +9,6 @@ target_dependent=true
 
 # per-host:
 
-. ${srcdir}/../bfd/configure.host
-
-# Set up to make a link between the host's include file and "sysdep.h".
-files="../bfd/hosts/${my_host}.h"
-links="sysdep.h"
-
-if [ ! -f ${srcdir}/${files} ] ; then
-	files=../bfd/hosts/std-host.h
-	echo "[${srcname} has no specific support for host ${host} -- using std-host]"
-fi
-
 host_makefile_frag=
 
 if [ -f ${srcdir}/config/${my_host}.mh ] ; then
@@ -64,6 +53,8 @@ case "${target}" in
 			;;
   i[34]86-*-go32)	my_target=go32
 			;;
+  i[34]86-*-aix*)	my_target=i386-coff
+			;;
   i[34]86-*-sco*)	my_target=i386-coff
 			;;
   i[34]86-*-coff)	my_target=i386-coff
@@ -98,8 +89,12 @@ case "${target}" in
 			;;
   m68*-*-coff)		my_target=m68k-coff
 			;;
+  m68*-*-hpux)		my_target=hp300hpux
+			;;
   m68*-*-*)		echo '***' "Unknown m68k target vendor for ld:" ${target_vendor} 1>&2
 			exit 1
+			;;
+  hppa*-hp-osf)		my_target=hppaosf
 			;;
   vax-dec-ultrix* | vax-dec-bsd*) my_target=vax
 			;;
@@ -107,7 +102,9 @@ case "${target}" in
 			;;
   mips-sgi-irix*)	my_target=mips-big
 			;;
-  mips-idt-ecoff)	my_target=mips-idt
+  mips-idt-ecoffl*)	my_target=mips-idtl
+			;;
+  mips-idt-ecoff*)	my_target=mips-idt
 			;;
   mips-dec-bsd*)	my_target=mipsbsd
 			;;
@@ -119,6 +116,9 @@ case "${target}" in
 			;;
 esac
 
-
-
 target_makefile_frag=config/${my_target}.mt
+
+if [ ! -r ${srcdir}/${target_makefile_frag} ]; then
+	echo '***' GNU LD does not support target ${target} 1>&2
+	exit 1
+fi
