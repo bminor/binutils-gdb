@@ -813,6 +813,14 @@ check_operand (operand, width, string)
 		 fit a 16 bit address truncated into an 8 bit address
 		 of something like bset.  */
 	    }
+	  else if (strcmp (string, "@") == 0
+		   && width == 0xffff
+		   && (operand->exp.X_add_number & 0xff8000) == 0xff8000)
+	    {
+	      /* Just ignore this one - which happens when trying to
+		 fit a 24 bit address truncated into a 16 bit address
+		 of something like mov.w.  */
+	    }
 	  else
 	    {
 	      as_warn (_("operand %s0x%lx out of range."), string,

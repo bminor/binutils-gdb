@@ -1,3 +1,9 @@
+2002-01-24  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-h8300.c (check_operand): Don't print a warning
+	when a valid 24-bit address is given to a 16-bit address
+	operand.
+
 2002-01-24  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-sh.c (sh_elf_suffix): Removed.
