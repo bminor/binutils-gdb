@@ -1,3 +1,8 @@
+2002-08-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* objdump.c (dump_bfd): Restore lines accidentally deleted in
+	last commit.
+
 2002-08-28  Michael Hayes <m.hayes@elec.canterbury.ac.nz>
 
 	* objdump.c (dump_headers): Add printing of HAS_LOAD_PAGE flag. 
