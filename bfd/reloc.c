@@ -4030,7 +4030,8 @@ SYNOPSIS
 
 DESCRIPTION
 	Provides default handling for relaxing for back ends which
-	don't do relaxing -- i.e., does nothing.
+	don't do relaxing -- i.e., does nothing except make sure that the
+	final size of the section is set.
 */
 
 bfd_boolean
@@ -4039,6 +4040,11 @@ bfd_generic_relax_section (bfd *abfd ATTRIBUTE_UNUSED,
 			   struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
 			   bfd_boolean *again)
 {
+  /* We're not relaxing the section, so just copy the size info if it's
+     zero.  Someone else, like bfd_merge_sections, might have set it, so
+     don't overwrite a non-zero value.  */
+  if (section->_cooked_size == 0)
+    section->_cooked_size = section->_raw_size;
   *again = FALSE;
   return TRUE;
 }
@@ -4133,8 +4139,13 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 				 input_section->_raw_size))
     goto error_return;
 
-  /* We're not relaxing the section, so just copy the size info.  */
-  input_section->_cooked_size = input_section->_raw_size;
+  /* Don't set input_section->_cooked_size here.  The caller has set
+     _cooked_size or called bfd_relax_section, which sets _cooked_size.
+     Despite using this generic relocation function, some targets perform
+     target-specific relaxation or string merging, which happens before
+     this function is called.  We do not want to clobber the _cooked_size
+     they computed.  */
+
   input_section->reloc_done = TRUE;
 
   reloc_count = bfd_canonicalize_reloc (input_bfd,

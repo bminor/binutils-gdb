@@ -1,3 +1,10 @@
+2003-10-18  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* reloc.c (bfd_generic_relax_section): Default-set
+	section->_cooked_size here.
+	(bfd_generic_get_relocated_section_contents): Don't set it here.
+	Explain why.
+
 2003-10-17  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* elf32-hppa.c (elf32_hppa_relocate_section): Skip relocation if
