@@ -1,3 +1,29 @@
+2002-09-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* reloc.c (BFD_RELOC_386_TLS_TPOFF, BFD_RELOC_386_TLS_IE,
+	BFD_RELOC_386_TLS_GOTIE): Add.
+	* bfd-in2.h, libbfd.h: Rebuilt.
+	* elf32-i386.c (elf_howto_table): Add R_386_TLS_TPOFF, R_386_TLS_IE
+	and R_386_TLS_GOTIE.
+	(elf_i386_reloc_type_lookup): Handle it.
+	(struct elf_i386_link_hash_entry): Change tls_type type to unsigned
+	char instead of enum, change GOT_* into defines.
+	(GOT_TLS_IE_POS, GOT_TLS_IE_NEG, GOT_TLS_IE_BOTH): Define.
+	(elf_i386_tls_transition): Handle R_386_TLS_IE and R_386_TLS_GOTIE.
+	(elf_i386_check_relocs): Likewise.  Avoid crash if local symbol is
+	accessed both as normal and TLS symbol.  Move R_386_TLS_LDM and
+	R_386_PLT32 cases so that R_386_TLS_IE can fall through.
+	Handle R_386_TLS_LE_32 and R_386_TLS_LE in shared libs.
+	(elf_i386_gc_sweep_hook): Handle R_386_TLS_IE and R_386_TLS_GOTIE.
+	Handle R_386_TLS_LE_32 and R_386_TLS_LE in shared libs.
+	(allocate_dynrelocs): Allocate 2 .got and 2 .rel.got entries if
+	tls_type is GOT_TLS_IE_BOTH.
+	(elf_i386_size_dynamic_sections): Likewise.
+	(elf_i386_relocate_section): Handle R_386_TLS_IE and R_386_TLS_GOTIE.
+	Handle R_386_TLS_LE_32 and R_386_TLS_LE in shared libs.
+	(elf_i386_finish_dynamic_symbol): Use tls_type & GOT_TLS_IE to catch
+	all 4 GOT_TLS_* TLS types.
+
 2002-09-19  Nick Clifton  <nickc@redhat.com>
 
 	* elflink.h (elf_fix_symbol_flags): When examining weak symbols,

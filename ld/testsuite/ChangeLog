@@ -1,3 +1,25 @@
+2002-09-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* ld-i386/i386.exp: New.
+	* ld-i386/tlsbin.dd: New test.
+	* ld-i386/tlsbinpic.s: New test.
+	* ld-i386/tlsbin.rd: New test.
+	* ld-i386/tlsbin.s: New test.
+	* ld-i386/tlsbin.sd: New test.
+	* ld-i386/tlsbin.td: New test.
+	* ld-i386/tlslib.s: New test.
+	* ld-i386/tlsnopic1.s: New test.
+	* ld-i386/tlsnopic2.s: New test.
+	* ld-i386/tlsnopic.dd: New test.
+	* ld-i386/tlsnopic.rd: New test.
+	* ld-i386/tlsnopic.sd: New test.
+	* ld-i386/tlspic1.s: New test.
+	* ld-i386/tlspic2.s: New test.
+	* ld-i386/tlspic.dd: New test.
+	* ld-i386/tlspic.rd: New test.
+	* ld-i386/tlspic.sd: New test.
+	* ld-i386/tlspic.td: New test.
+
 2002-09-18  Chris Demetriou  <cgd@broadcom.com>
 
 	* ld-mips-elf/branch-misc-1.d: New file.

@@ -1,3 +1,13 @@
+2002-09-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-i386.c (tc_i386_fix_adjustable): Handle
+	BFD_RELOC_386_TLS_IE and BFD_RELOC_386_TLS_GOTIE.
+	(BFD_RELOC_386_TLS_IE, BFD_RELOC_386_TLS_GOTIE): Define to 0
+	if not defined.
+	(lex_got): Handle @GOTNTPOFF and @INDNTPOFF.
+	(md_apply_fix3, tc_gen_reloc): Handle BFD_RELOC_386_TLS_IE and
+	BFD_RELOC_386_TLS_GOTIE.
+
 2002-09-19  Richard Henderson  <rth@redhat.com>
 
 	* config/tc-alpha.c (md_pcrel_from): Only adjust special for
