@@ -1,3 +1,10 @@
+start-sanitize-v850
+Thu Dec 19 19:42:44 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* v850-tdep.c (v850_scan_prologue): Deal with -mep shorting
+	register saves by using the ep register.
+
+end-sanitize-v850
 start-sanitize-m32r
 Thu Dec 19 15:57:16 1996  Doug Evans  <dje@canuck.cygnus.com>
 

@@ -65,6 +65,7 @@ v850_scan_prologue (pc, pi)
   CORE_ADDR func_addr, prologue_end, current_pc;
   struct pifsr *pifsr;
   int fp_used;
+  int ep_used;
 
   /* First, figure out the bounds of the prologue so that we can limit the
      search to something reasonable.  */
@@ -104,6 +105,7 @@ v850_scan_prologue (pc, pi)
   pi->frameoffset = 0;
   pi->framereg = SP_REGNUM;
   fp_used = 0;
+  ep_used = 0;
   pifsr = pi->pifsrs;
 
   for (current_pc = func_addr; current_pc < prologue_end; current_pc += 2)
@@ -125,18 +127,30 @@ v850_scan_prologue (pc, pi)
 	  fp_used = 1;
 	  pi->framereg = FP_REGNUM;
 	}
-      else if ((insn & 0x07ff) == (0x0760 | SP_REGNUM)	/* st.w <reg>,<offset>[sp] */
-	       || (fp_used
-		   && (insn & 0x07ff) == (0x0760 | FP_REGNUM))) /* st.w <reg>,<offset>[fp] */
-	if (pifsr)
-	  {
-	    pifsr->framereg = insn & 0x1f;
-	    pifsr->reg = (insn >> 11) & 0x1f; /* Extract <reg> */
+      else if (insn == 0xf003)	/* mov sp,ep */
+	ep_used = 1;
+      else if (insn == 0xf001)	/* mov r1,ep */
+	ep_used = 0;
+      else if (((insn & 0x07ff) == (0x0760 | SP_REGNUM)		 /* st.w <reg>,<offset>[sp] */
+		|| (fp_used
+		    && (insn & 0x07ff) == (0x0760 | FP_REGNUM))) /* st.w <reg>,<offset>[fp] */
+	       && pifsr)
+	{
+	  pifsr->framereg = insn & 0x1f;
+	  pifsr->reg = (insn >> 11) & 0x1f; /* Extract <reg> */
+	  pifsr->offset = read_memory_integer (current_pc + 2, 2) & ~1;
+	  pifsr++;
+	}
 
-	    pifsr->offset = read_memory_integer (current_pc + 2, 2) & ~1;
-
-	    pifsr++;
-	  }
+      else if (ep_used			/* sst.w <reg>,<offset>[ep] */
+	       && ((insn & 0x0781) == 0x0501)
+	       && pifsr)
+	{
+	  pifsr->framereg = 3;
+	  pifsr->reg = (insn >> 11) & 0x1f; /* Extract <reg> */
+	  pifsr->offset = (insn & 0x007e) << 2;
+	  pifsr++;
+	}
 
       if ((insn & 0x0780) >= 0x0600) /* Four byte instruction? */
 	current_pc += 2;
