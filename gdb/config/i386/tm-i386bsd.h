@@ -24,5 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "i386/tm-i386v.h"
 
 /* 386BSD cannot handle the segment registers. */
+/* BSDI can't handle them either.  */
 #undef NUM_REGS
-#define NUM_REGS 11
+#define NUM_REGS 10

@@ -1,5 +1,7 @@
 Thu Aug  5 08:58:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config/i386/tm-i386bsd.h (NUM_REGS):  There are only 10, not 11.
+
 	* inflow.c: Put all uses of F_GETFL and F_SETFL in #ifdef F_GETFL.
 
 	* 29k-share/udi/udip2soc.c: Include fcntl.h not sys/fcntl.h.
