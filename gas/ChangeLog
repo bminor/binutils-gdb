@@ -1,3 +1,24 @@
+start-sanitize-v850
+Tue Oct 29 12:28:16 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-v850.h (TC_GENERIC_RELAX_TABLE): Define.
+	* config/tc-v850.c: Fix some indention problems.
+	(md_relax_table): Define for D9->D99 branch displacement
+	relaxing.
+	(md_convert_frag): Do something useful instead of aborting.
+	(md_estimate_size_before_relax): Likewise.
+	(md_assemble): Note if the matching instruction has a relaxable
+	operand.  If it does, allocate frag with frag_var and don't
+	do any fixups.
+
+end-sanitize-v850
+start-sanitize-d10v
+Mon Oct 28 10:48:40 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.h (md_cleanup): New function.  This is needed to
+	write out any buffered instructions when a ".end" is found.
+
+end-sanitize-d10v	
 Mon Oct 28 10:43:45 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* read.c (read_a_source_file): New hook md_cleanup().

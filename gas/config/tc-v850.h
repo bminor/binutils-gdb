@@ -52,3 +52,10 @@
 #define tc_fix_adjustable(FIX) \
   (!(FIX)->fx_pcrel && (FIX)->fx_r_type != BFD_RELOC_V850_TDA_OFFSET)
 
+/* We need to handle lo(), hi(), etc etc in .hword, .word, etc
+   directives, so we have to parse "cons" expressions ourselves.  */
+#define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) parse_cons_expression_v850 (EXP)
+#define TC_CONS_FIX_NEW cons_fix_new_v850
+extern const struct relax_type md_relax_table[];
+#define TC_GENERIC_RELAX_TABLE md_relax_table
+

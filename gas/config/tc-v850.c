@@ -56,6 +56,11 @@ const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "dD";
 
 
+const relax_typeS md_relax_table[] = {
+  {0xff, -0x100, 2, 1},
+  {0x1fffff, -0x200000, 6, 0},
+};
+
 /* local functions */
 static unsigned long v850_insert_operand
   PARAMS ((unsigned long insn, const struct v850_operand *operand,
@@ -410,14 +415,42 @@ md_atof (type, litp, sizep)
 }
 
 
+/* Very gross.  */
 void
 md_convert_frag (abfd, sec, fragP)
   bfd *abfd;
   asection *sec;
   fragS *fragP;
 {
-  /* printf ("call to md_convert_frag \n"); */
-  abort ();
+  subseg_change (sec, 0);
+  if (fragP->fr_subtype == 0)
+    {
+      fragP->fr_var = 0;
+      fragP->fr_fix = 2;
+      fix_new (fragP, 0, 2, fragP->fr_symbol,
+	       fragP->fr_offset, 1, BFD_RELOC_UNUSED + (int)fragP->fr_opcode);
+    }
+  else if (fragP->fr_subtype == 1)
+    {
+      fragP->fr_var = 0;
+      fragP->fr_fix = 6;
+      /* Reverse the condition of the first branch.  */
+      fragP->fr_literal[0] &= 0xf7;
+      /* Mask off all the displacement bits.  */
+      fragP->fr_literal[0] &= 0x8f;
+      fragP->fr_literal[1] &= 0x07;
+      /* Now set the displacement bits so that we branch
+	 around the unconditional branch.  */
+      fragP->fr_literal[0] |= 0x30;
+
+      /* Now create the unconditional branch + fixup to the final
+	 target.  */
+      md_number_to_chars (&fragP->fr_literal[2], 0x00000780, 4);
+      fix_new (fragP, 2, 4, fragP->fr_symbol,
+	       fragP->fr_offset, 1, BFD_RELOC_UNUSED + (int)fragP->fr_opcode + 1);
+    }
+  else
+    abort ();
 }
 
 valueT
@@ -537,7 +570,7 @@ md_assemble (str)
   struct v850_opcode *opcode;
   struct v850_opcode *next_opcode;
   const unsigned char *opindex_ptr;
-  int next_opindex;
+  int next_opindex, relaxable;
   unsigned long insn, insn_size;
   char *f;
   int i;
@@ -568,6 +601,7 @@ md_assemble (str)
     {
       const char *errmsg = NULL;
 
+      relaxable = 0;
       fc = 0;
       match = 0;
       next_opindex = 0;
@@ -592,6 +626,9 @@ md_assemble (str)
 
 	  while (*str == ' ' || *str == ',' || *str == '[' || *str == ']')
 	    ++str;
+
+	  if (operand->flags & V850_OPERAND_RELAX)
+	    relaxable = 1;
 
 	  /* Gather the operand. */
 	  hold = input_line_pointer;
@@ -647,107 +684,107 @@ md_assemble (str)
 	    }
 	  else
 	    {
-	  if ((operand->flags & V850_OPERAND_REG) != 0) 
-	    {
-	      if (!register_name(&ex))
+	      if ((operand->flags & V850_OPERAND_REG) != 0) 
 		{
-		  errmsg = "invalid register name";
-		  goto error;
+		  if (!register_name(&ex))
+		    {
+		      errmsg = "invalid register name";
+		      goto error;
+		    }
 		}
-	    }
-	  else if ((operand->flags & V850_OPERAND_SRG) != 0) 
-	    {
-	      if (!system_register_name(&ex))
+	      else if ((operand->flags & V850_OPERAND_SRG) != 0) 
 		{
-		  errmsg = "invalid system register name";
-		  goto error;
+		  if (!system_register_name(&ex))
+		    {
+		      errmsg = "invalid system register name";
+		      goto error;
+		    }
 		}
-	    }
-	  else if ((operand->flags & V850_OPERAND_EP) != 0)
-	    {
-	      char *start = input_line_pointer;
-	      char c = get_symbol_end ();
-	      if (strcmp (start, "ep") != 0 && strcmp (start, "r30") != 0)
+	      else if ((operand->flags & V850_OPERAND_EP) != 0)
 		{
-		  /* Put things back the way we found them.  */
+		  char *start = input_line_pointer;
+		  char c = get_symbol_end ();
+		  if (strcmp (start, "ep") != 0 && strcmp (start, "r30") != 0)
+		    {
+		      /* Put things back the way we found them.  */
+		      *input_line_pointer = c;
+		      input_line_pointer = start;
+		      errmsg = "expected EP register";
+		      goto error;
+		    }
 		  *input_line_pointer = c;
-		  input_line_pointer = start;
-		  errmsg = "expected EP register";
-		  goto error;
-		}
-	      *input_line_pointer = c;
-	      str = input_line_pointer;
-	      input_line_pointer = hold;
+		  str = input_line_pointer;
+		  input_line_pointer = hold;
 	      
-	      while (*str == ' ' || *str == ',' || *str == '[' || *str == ']')
-		++str;
-	      continue;
-	    }
-	  else if ((operand->flags & V850_OPERAND_CC) != 0) 
-	    {
-	      if (!cc_name(&ex))
+		  while (*str == ' ' || *str == ',' || *str == '[' || *str == ']')
+		    ++str;
+		  continue;
+		}
+	      else if ((operand->flags & V850_OPERAND_CC) != 0) 
 		{
-		  errmsg = "invalid condition code name";
+		  if (!cc_name(&ex))
+		    {
+		      errmsg = "invalid condition code name";
+		      goto error;
+		    }
+		}
+	      else if (register_name (&ex)
+		       && (operand->flags & V850_OPERAND_REG) == 0)
+		{
+		  errmsg = "syntax error: register not expected";
 		  goto error;
 		}
-	    }
-	  else if (register_name (&ex)
-		   && (operand->flags & V850_OPERAND_REG) == 0)
-	    {
-	      errmsg = "syntax error: register not expected";
-	      goto error;
-	    }
-	  else if (system_register_name (&ex)
-		   && (operand->flags & V850_OPERAND_SRG) == 0)
-	    {
-	      errmsg = "syntax error: system register not expected";
-	      goto error;
-	    }
-	  else if (cc_name (&ex)
-		   && (operand->flags & V850_OPERAND_CC) == 0)
-	    {
-	      errmsg = "syntax error: condition code not expected";
-	      goto error;
-	    }
-	  else
-	    {
-	      expression(&ex);
-	    }
+	      else if (system_register_name (&ex)
+		       && (operand->flags & V850_OPERAND_SRG) == 0)
+		{
+		  errmsg = "syntax error: system register not expected";
+		  goto error;
+		}
+	      else if (cc_name (&ex)
+		       && (operand->flags & V850_OPERAND_CC) == 0)
+		{
+		  errmsg = "syntax error: condition code not expected";
+		  goto error;
+		}
+	      else
+		{
+		  expression(&ex);
+		}
 
-	  switch (ex.X_op) 
-	    {
-	    case O_illegal:
-	      errmsg = "illegal operand";
-	      goto error;
-	    case O_absent:
-	      errmsg = "missing operand";
-	      goto error;
-	    case O_register:
-	      if ((operand->flags & (V850_OPERAND_REG | V850_OPERAND_SRG)) == 0)
+	      switch (ex.X_op) 
 		{
-		  errmsg = "invalid operand";
+		case O_illegal:
+		  errmsg = "illegal operand";
 		  goto error;
-		}
+		case O_absent:
+		  errmsg = "missing operand";
+		  goto error;
+		case O_register:
+		  if ((operand->flags & (V850_OPERAND_REG | V850_OPERAND_SRG)) == 0)
+		    {
+		      errmsg = "invalid operand";
+		      goto error;
+		    }
 		
-	      insn = v850_insert_operand (insn, operand, ex.X_add_number,
-					  (char *) NULL, 0);
-	      break;
+		  insn = v850_insert_operand (insn, operand, ex.X_add_number,
+					      (char *) NULL, 0);
+		  break;
 
-	    case O_constant:
-	      insn = v850_insert_operand (insn, operand, ex.X_add_number,
-					  (char *) NULL, 0);
-	      break;
+		case O_constant:
+		  insn = v850_insert_operand (insn, operand, ex.X_add_number,
+					      (char *) NULL, 0);
+		  break;
 
-	    default:
-	      /* We need to generate a fixup for this expression.  */
-	      if (fc >= MAX_INSN_FIXUPS)
-		as_fatal ("too many fixups");
-	      fixups[fc].exp = ex;
-	      fixups[fc].opindex = *opindex_ptr;
-	      fixups[fc].reloc = BFD_RELOC_UNUSED;
-	      ++fc;
-	      break;
-	    }
+		default:
+		  /* We need to generate a fixup for this expression.  */
+		  if (fc >= MAX_INSN_FIXUPS)
+		    as_fatal ("too many fixups");
+		  fixups[fc].exp = ex;
+		  fixups[fc].opindex = *opindex_ptr;
+		  fixups[fc].reloc = BFD_RELOC_UNUSED;
+		  ++fc;
+		  break;
+		}
 
 	    }
 
@@ -787,12 +824,27 @@ md_assemble (str)
   /* Write out the instruction.
 
      Four byte insns have an opcode with the two high bits on.  */ 
-  if ((insn & 0x0600) == 0x0600)
-    insn_size = 4;
+  if (relaxable && fc > 0)
+    {
+      f = frag_var (rs_machine_dependent, 6, 4, 0,
+		    fixups[0].exp.X_add_symbol, 0, (char *)fixups[0].opindex);
+      insn_size = 2;
+      md_number_to_chars (f, insn, insn_size);
+      md_number_to_chars (f + 2, 0, 4);
+      fc = 0;
+    }
+  else if ((insn & 0x0600) == 0x0600)
+    {
+      insn_size = 4;
+      f = frag_more (insn_size);
+      md_number_to_chars (f, insn, insn_size);
+    }
   else
-    insn_size = 2;
-  f = frag_more (insn_size);
-  md_number_to_chars (f, insn, insn_size);
+    {
+      insn_size = 2;
+      f = frag_more (insn_size);
+      md_number_to_chars (f, insn, insn_size);
+    }
 
   /* Create any fixups.  At this point we do not use a
      bfd_reloc_code_real_type, but instead just use the
@@ -867,13 +919,16 @@ tc_gen_reloc (seg, fixp)
   return reloc;
 }
 
+/* Assume everything will fit in two bytes, then expand as necessary.  */
 int
 md_estimate_size_before_relax (fragp, seg)
      fragS *fragp;
      asection *seg;
 {
-  return 0;
+  fragp->fr_var = 4;
+  return 2;
 } 
+
 
 long
 md_pcrel_from (fixp)
