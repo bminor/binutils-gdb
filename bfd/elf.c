@@ -6096,7 +6096,7 @@ _bfd_elf_sizeof_headers (bfd *abfd, bfd_boolean reloc)
 bfd_boolean
 _bfd_elf_set_section_contents (bfd *abfd,
 			       sec_ptr section,
-			       void *location,
+			       const void *location,
 			       file_ptr offset,
 			       bfd_size_type count)
 {

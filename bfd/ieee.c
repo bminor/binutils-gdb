@@ -160,7 +160,7 @@ static bfd_boolean ieee_write_data_part
 static bfd_boolean init_for_output
   PARAMS ((bfd *));
 static bfd_boolean ieee_set_section_contents
-  PARAMS ((bfd *, sec_ptr, PTR, file_ptr, bfd_size_type));
+  PARAMS ((bfd *, sec_ptr, const PTR, file_ptr, bfd_size_type));
 static bfd_boolean ieee_write_external_part
   PARAMS ((bfd *));
 static bfd_boolean ieee_write_me_part
@@ -3440,7 +3440,7 @@ static bfd_boolean
 ieee_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      sec_ptr section;
-     PTR location;
+     const PTR location;
      file_ptr offset;
      bfd_size_type count;
 {

@@ -80,7 +80,7 @@ extern bfd_boolean _bfd_mips_elf_find_nearest_line
   PARAMS ((bfd *, asection *, asymbol **, bfd_vma, const char **,
 	   const char **, unsigned int *));
 extern bfd_boolean _bfd_mips_elf_set_section_contents
-  PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
+  PARAMS ((bfd *, asection *, const PTR, file_ptr, bfd_size_type));
 extern bfd_byte *_bfd_elf_mips_get_relocated_section_contents
   PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *,
 	   bfd_byte *, bfd_boolean, asymbol **));

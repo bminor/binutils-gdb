@@ -1,5 +1,5 @@
 /* BFD ECOFF object file private structure.
-   Copyright 1993, 1994, 1995, 1996, 1999, 2001, 2002
+   Copyright 1993, 1994, 1995, 1996, 1999, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
@@ -324,7 +324,7 @@ extern long _bfd_ecoff_canonicalize_reloc
 extern bfd_boolean _bfd_ecoff_set_arch_mach
   PARAMS ((bfd *, enum bfd_architecture, unsigned long));
 extern bfd_boolean _bfd_ecoff_set_section_contents
-  PARAMS ((bfd *, asection *, PTR location, file_ptr, bfd_size_type));
+  PARAMS ((bfd *, asection *, const PTR location, file_ptr, bfd_size_type));
 
 extern int _bfd_ecoff_sizeof_headers PARAMS ((bfd *abfd, bfd_boolean reloc));
 /* ecoff_bfd_get_relocated_section_contents defined by backend.  */

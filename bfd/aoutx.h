@@ -1265,7 +1265,7 @@ bfd_boolean
 NAME(aout,set_section_contents) (abfd, section, location, offset, count)
      bfd *abfd;
      sec_ptr section;
-     PTR location;
+     const PTR location;
      file_ptr offset;
      bfd_size_type count;
 {

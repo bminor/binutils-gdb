@@ -1,5 +1,48 @@
 2003-11-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* aout-adobe.c (aout_adobe_set_section_contents): Constify location.
+	* aoutx.h (NAME(aout,set_section_contents)): Ditto.
+	* bfd-in2.h: Regenerate.
+	* binary.c (binary_set_section_contents): Ditto.
+	* bout.c (b_out_set_section_contents): Ditto.
+	* coff-tic54x.c (tic54x_set_section_contents): Ditto.
+	* coffcode.h (coff_set_section_contents): Ditto.
+	* ecoff.c (_bfd_ecoff_set_section_contents): Ditto.
+	* elf-bfd.h (_bfd_elf_set_section_contents): Ditto.
+	* elf.c (_bfd_elf_set_section_contents): Ditto.
+	* elfxx-mips.c (_bfd_mips_elf_set_section_contents): Ditto.
+	* elfxx-mips.h (_bfd_mips_elf_set_section_contents): Ditto.
+	* i386msdos.c (msdos_set_section_contents): Ditto.
+	* ieee.c (ieee_set_section_contents): Ditto.
+	* ihex.c (ihex_set_section_contents): Ditto.
+	* libaout.h (NAME(aout,set_section_contents)): Ditto.
+	* libbfd-in.h (_bfd_nowrite_set_section_contents): Ditto.
+	(_bfd_generic_set_section_contents): Ditto.
+	* libbfd.h: Regenerate.
+	* libbfd.c (_bfd_generic_set_section_contents): Ditto.
+	* libecoff.h (_bfd_ecoff_set_section_contents): Ditto.
+	* libnlm.h (nlmNAME(set_section_contents)): Ditto.
+	(struct nlm_backend_data <nlm_mangle_relocs>): Ditto.
+	* mmo.c (mmo_set_section_contents): Ditto.
+	* nlm32-alpha.c (nlm_alpha_mangle_relocs): Ditto.
+	* nlm32-i386.c (nlm_i386_mangle_relocs): Ditto.
+	* nlm32-ppc.c (nlm_powerpc_mangle_relocs): Ditto.
+	* nlm32-sparc.c (nlm_sparc_mangle_relocs): Ditto.
+	* nlmcode.h (nlm_set_section_contents): Ditto.
+	* oasys.c (oasys_set_section_contents): Ditto.
+	* pdp11.c (NAME(aout,set_section_contents)): Ditto.
+	* ppcboot.c (ppcboot_set_section_contents): Ditto.
+	* srec.c (srec_set_section_contents): Ditto.
+	* targets.c (BFD_JUMP_TABLE_WRITE <_bfd_set_section_contents>): Ditto.
+	* tekhex.c (tekhex_set_section_contents): Ditto.
+	(move_section_contents): Ditto.
+	* versados.c (versados_set_section_contents): Ditto.
+	* vms-misc.c (_bfd_save_vms_section): Ditto.
+	* vms.c (vms_set_section_contents): Ditto.
+	* vms.h (_bfd_save_vms_section): Ditto.
+
+2003-11-04  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (ppc_size_one_stub): Size relbrlt.  Accept info arg
 	rather than htab.
 	(ppc64_elf_size_stubs): Adjust ppc_size_one_stub traversal.  Zero

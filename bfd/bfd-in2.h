@@ -4285,7 +4285,7 @@ typedef struct bfd_target
   bfd_boolean (*_bfd_set_arch_mach)
     (bfd *, enum bfd_architecture, unsigned long);
   bfd_boolean (*_bfd_set_section_contents)
-    (bfd *, sec_ptr, void *, file_ptr, bfd_size_type);
+    (bfd *, sec_ptr, const void *, file_ptr, bfd_size_type);
 
   /* Routines used by the linker.  */
 #define BFD_JUMP_TABLE_LINK(NAME) \

@@ -55,7 +55,7 @@ static bfd_boolean versados_pass_2 PARAMS ((bfd *));
 static bfd_boolean versados_get_section_contents
   PARAMS ((bfd *, asection *, void *, file_ptr, bfd_size_type));
 static bfd_boolean versados_set_section_contents
-  PARAMS ((bfd *, sec_ptr, void *, file_ptr, bfd_size_type));
+  PARAMS ((bfd *, sec_ptr, const void *, file_ptr, bfd_size_type));
 static int versados_sizeof_headers PARAMS ((bfd *, bfd_boolean));
 static long int versados_get_symtab_upper_bound PARAMS ((bfd *));
 static long int versados_canonicalize_symtab PARAMS ((bfd *, asymbol **));
@@ -713,7 +713,7 @@ static bfd_boolean
 versados_set_section_contents (abfd, section, location, offset, bytes_to_do)
      bfd *abfd ATTRIBUTE_UNUSED;
      sec_ptr section ATTRIBUTE_UNUSED;
-     PTR location ATTRIBUTE_UNUSED;
+     const PTR location ATTRIBUTE_UNUSED;
      file_ptr offset ATTRIBUTE_UNUSED;
      bfd_size_type bytes_to_do ATTRIBUTE_UNUSED;
 {

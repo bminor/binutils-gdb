@@ -333,7 +333,7 @@ static bfd_boolean coff_compute_section_file_positions
 static bfd_boolean coff_write_object_contents
   PARAMS ((bfd *)) ATTRIBUTE_UNUSED;
 static bfd_boolean coff_set_section_contents
-  PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
+  PARAMS ((bfd *, asection *, const PTR, file_ptr, bfd_size_type));
 static PTR buy_and_read
   PARAMS ((bfd *, file_ptr, bfd_size_type));
 static bfd_boolean coff_slurp_line_table
@@ -4271,7 +4271,7 @@ static bfd_boolean
 coff_set_section_contents (abfd, section, location, offset, count)
      bfd * abfd;
      sec_ptr section;
-     PTR location;
+     const PTR location;
      file_ptr offset;
      bfd_size_type count;
 {

@@ -70,7 +70,7 @@ static int comp
 static bfd_boolean oasys_write_object_contents
   PARAMS ((bfd *));
 static bfd_boolean oasys_set_section_contents
-  PARAMS ((bfd *, sec_ptr, void *, file_ptr, bfd_size_type));
+  PARAMS ((bfd *, sec_ptr, const void *, file_ptr, bfd_size_type));
 static asymbol *oasys_make_empty_symbol
   PARAMS ((bfd *));
 static bfd *oasys_openr_next_archived_file
@@ -1346,7 +1346,7 @@ static bfd_boolean
 oasys_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      sec_ptr section;
-     PTR location;
+     const PTR location;
      file_ptr offset;
      bfd_size_type count;
 {

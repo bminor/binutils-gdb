@@ -125,7 +125,7 @@ static const struct reloc_howto_struct *vms_bfd_reloc_type_lookup
 static bfd_boolean vms_set_arch_mach
   PARAMS ((bfd *abfd, enum bfd_architecture arch, unsigned long mach));
 static bfd_boolean vms_set_section_contents
-  PARAMS ((bfd *abfd, asection *section, PTR location, file_ptr offset,
+  PARAMS ((bfd *abfd, asection *section, const PTR location, file_ptr offset,
 	   bfd_size_type count));
 static int vms_sizeof_headers
   PARAMS ((bfd *abfd, bfd_boolean reloc));
@@ -1659,7 +1659,7 @@ static bfd_boolean
 vms_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      asection *section;
-     PTR location;
+     const PTR location;
      file_ptr offset;
      bfd_size_type count;
 {

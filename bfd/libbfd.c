@@ -771,7 +771,7 @@ _bfd_generic_get_section_contents_in_window
 bfd_boolean
 _bfd_generic_set_section_contents (bfd *abfd,
 				   sec_ptr section,
-				   void *location,
+				   const void *location,
 				   file_ptr offset,
 				   bfd_size_type count)
 {

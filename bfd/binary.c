@@ -1,6 +1,5 @@
 /* BFD back-end for binary objects.
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support, <ian@cygnus.com>
 
@@ -51,7 +50,7 @@ static char *mangle_name PARAMS ((bfd *, char *));
 static long binary_canonicalize_symtab PARAMS ((bfd *, asymbol **));
 static void binary_get_symbol_info PARAMS ((bfd *, asymbol *, symbol_info *));
 static bfd_boolean binary_set_section_contents
-  PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
+  PARAMS ((bfd *, asection *, const PTR, file_ptr, bfd_size_type));
 static int binary_sizeof_headers PARAMS ((bfd *, bfd_boolean));
 
 /* Set by external programs - specifies the BFD architecture and
@@ -257,7 +256,7 @@ static bfd_boolean
 binary_set_section_contents (abfd, sec, data, offset, size)
      bfd *abfd;
      asection *sec;
-     PTR data;
+     const PTR data;
      file_ptr offset;
      bfd_size_type size;
 {

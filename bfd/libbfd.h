@@ -331,7 +331,7 @@ extern bfd_boolean _bfd_archive_coff_construct_extended_name_table
   ((bfd_boolean (*) (bfd *, enum bfd_architecture, unsigned long)) \
    bfd_false)
 #define _bfd_nowrite_set_section_contents \
-  ((bfd_boolean (*) (bfd *, asection *, void *, file_ptr, bfd_size_type)) \
+  ((bfd_boolean (*) (bfd *, asection *, const void *, file_ptr, bfd_size_type)) \
    bfd_false)
 
 /* Generic routines to use for BFD_JUMP_TABLE_WRITE.  Use
@@ -339,7 +339,7 @@ extern bfd_boolean _bfd_archive_coff_construct_extended_name_table
 
 #define _bfd_generic_set_arch_mach bfd_default_set_arch_mach
 extern bfd_boolean _bfd_generic_set_section_contents
-  (bfd *, asection *, void *, file_ptr, bfd_size_type);
+  (bfd *, asection *, const void *, file_ptr, bfd_size_type);
 
 /* Routines to use for BFD_JUMP_TABLE_LINK for targets which do not
    support linking.  Use BFD_JUMP_TABLE_LINK (_bfd_nolink).  */
