@@ -1,3 +1,13 @@
+2003-07-08  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in: Make dependency section headers consistent.
+	(config_h): Move to $BUILD headers section.
+	(exc_request_U_h, exc_request_S_h, msg_reply_S_h): Ditto.
+	(msg_U_h, notify_S_h, process_reply_S_h): Ditto.
+	(ada-exp.tab.c): Move to YACC/LEX section.
+	(ada-lex.c, c-exp.tab.c, f-exp.tab.c): Ditto.
+	(jv-exp.tab.c, m2-exp.tab.c, objc-exp.tab.c, p-exp.tab.c): Ditto.
+
 2003-07-07  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.c (get_prev_frame): Enable check for identical frames.

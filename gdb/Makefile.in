@@ -598,12 +598,28 @@ readline_headers = \
 	$(READLINE_SRC)/keymaps.h \
 	$(READLINE_SRC)/readline.h
 
+#
+# $BUILD/ headers
+#
+
+config_h = config.h
+exc_request_U_h = exc_request_U.h
+exc_request_S_h = exc_request_S.h
+msg_reply_S_h = msg_reply_S.h
+msg_U_h = msg_U.h
+notify_S_h = notify_S.h
+process_reply_S_h = process_reply_S.h
+
+#
+# config/ headers
+#
+
 xm_h =		@xm_h@
 tm_h =		@tm_h@
 nm_h =		@nm_h@
 
 #
-# gdb/ header files
+# gdb/ headers
 #
 
 ada_lang_h = ada-lang.h $(value_h) $(gdbtypes_h)
@@ -628,7 +644,6 @@ coff_pe_read_h = coff-pe-read.h
 command_h = command.h
 complaints_h = complaints.h
 completer_h = completer.h
-config_h = config.h
 cp_abi_h = cp-abi.h
 cp_support_h = cp-support.h $(symtab_h)
 dcache_h = dcache.h
@@ -647,8 +662,6 @@ dwarf2_frame_h = dwarf2-frame.h
 environ_h = environ.h
 event_loop_h = event-loop.h
 event_top_h = event-top.h
-exc_request_U_h = exc_request_U.h
-exc_request_S_h = exc_request_S.h
 expression_h = expression.h $(symtab_h) $(doublest_h)
 f_lang_h = f-lang.h
 frame_h = frame.h
@@ -699,10 +712,7 @@ minimon_h = minimon.h
 mips_tdep_h = mips-tdep.h
 mipsnbsd_tdep_h = mipsnbsd-tdep.h
 monitor_h = monitor.h
-msg_reply_S_h = msg_reply_S.h
-msg_U_h = msg_U.h
 nbsd_tdep_h = nbsd-tdep.h
-notify_S_h = notify_S.h
 ns32k_tdep_h = ns32k-tdep.h
 objc_lang_h = objc-lang.h
 objfiles_h = objfiles.h $(gdb_obstack_h) $(symfile_h)
@@ -715,7 +725,6 @@ parser_defs_h = parser-defs.h $(doublest_h)
 ppc_tdep_h = ppc-tdep.h
 ppcnbsd_tdep_h = ppcnbsd-tdep.h
 proc_utils_h = proc-utils.h
-process_reply_S_h = process_reply_S.h
 regcache_h = regcache.h
 reggroups_h = reggroups.h
 remote_utils_h = remote-utils.h $(target_h)
@@ -1214,141 +1223,6 @@ version.c: Makefile version.in
 version.o: version.c $(version_h)
 
 
-# LANG-exp.tab.c is generated in objdir from LANG-exp.y if it doesn't
-# exist in srcdir, then compiled in objdir to LANG-exp.tab.o.
-
-# If we said LANG-exp.tab.c rather than ./c-exp.tab.c some makes would
-# sometimes re-write it into $(srcdir)/c-exp.tab.c.
-
-# Remove bogus decls for malloc/realloc/free which conflict with
-# everything else.  Strictly speaking c-exp.tab.c should therefore
-# depend on Makefile.in, but that was a pretty big annoyance.
-
-# See comments above ...
-.PRECIOUS: c-exp.tab.c
-c-exp.tab.o: c-exp.tab.c
-c-exp.tab.c: c-exp.y
-	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/c-exp.y  y.tab.c c-exp.tmp -- $(YFLAGS) 
-	-sed -e '/extern.*malloc/d' \
-	     -e '/extern.*realloc/d' \
-	     -e '/extern.*free/d' \
-	     -e '/include.*malloc.h/d' \
-	     -e 's/malloc/xmalloc/g' \
-	     -e 's/realloc/xrealloc/g' \
-	     -e '/^#line.*y.tab.c/d' \
-	  < c-exp.tmp > c-exp.new
-	-rm c-exp.tmp
-	mv c-exp.new ./c-exp.tab.c
-
-# See comments above ...
-.PRECIOUS: objc-exp.tab.c
-objc-exp.tab.o: objc-exp.tab.c
-objc-exp.tab.c: objc-exp.y
-	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/objc-exp.y y.tab.c objc-exp.tmp -- $(YFLAGS) 
-	-sed -e '/extern.*malloc/d' \
-	     -e '/extern.*realloc/d' \
-	     -e '/extern.*free/d' \
-	     -e '/include.*malloc.h/d' \
-	     -e 's/malloc/xmalloc/g' \
-	     -e 's/realloc/xrealloc/g' \
-	     -e '/^#line.*y.tab.c/d' \
-	  < objc-exp.tmp > objc-exp.new
-	-rm objc-exp.tmp
-	mv objc-exp.new ./objc-exp.tab.c
-
-# See comments above ...
-.PRECIOUS: jv-exp.tab.c
-jv-exp.tab.o: jv-exp.tab.c
-jv-exp.tab.c: jv-exp.y
-	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/jv-exp.y  y.tab.c jv-exp.tmp -- $(YFLAGS) 
-	-sed -e '/extern.*malloc/d' \
-	     -e '/extern.*realloc/d' \
-	     -e '/extern.*free/d' \
-	     -e '/include.*malloc.h/d' \
-	     -e 's/malloc/xmalloc/g' \
-	     -e 's/realloc/xrealloc/g' \
-	     -e '/^#line.*y.tab.c/d' \
-	  < jv-exp.tmp > jv-exp.new
-	-rm jv-exp.tmp
-	mv jv-exp.new ./jv-exp.tab.c
-
-# See comments above ...
-.PRECIOUS: f-exp.tab.c
-f-exp.tab.o: f-exp.tab.c
-f-exp.tab.c: f-exp.y
-	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/f-exp.y  y.tab.c f-exp.tmp -- $(YFLAGS) 
-	-sed -e '/extern.*malloc/d' \
-	     -e '/extern.*realloc/d' \
-	     -e '/extern.*free/d' \
-	     -e '/include.*malloc.h/d' \
-	     -e 's/malloc/xmalloc/g' \
-	     -e 's/realloc/xrealloc/g' \
-	     -e '/^#line.*y.tab.c/d' \
-	  < f-exp.tmp > f-exp.new
-	-rm f-exp.tmp
-	mv f-exp.new ./f-exp.tab.c
-
-# See comments above ...
-.PRECIOUS: m2-exp.tab.c
-m2-exp.tab.o: m2-exp.tab.c
-m2-exp.tab.c: m2-exp.y
-	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/m2-exp.y  y.tab.c m2-exp.tmp -- $(YFLAGS) 
-	-sed -e '/extern.*malloc/d' \
-	     -e '/extern.*realloc/d' \
-	     -e '/extern.*free/d' \
-	     -e '/include.*malloc.h/d' \
-	     -e 's/malloc/xmalloc/g' \
-	     -e 's/realloc/xrealloc/g' \
-	     -e '/^#line.*y.tab.c/d' \
-	  < m2-exp.tmp > m2-exp.new
-	-rm m2-exp.tmp
-	mv m2-exp.new ./m2-exp.tab.c
-
-# See comments above ...
-.PRECIOUS: ada-exp.tab.c
-ada-exp.tab.o: ada-exp.tab.c
-ada-exp.tab.c: ada-exp.y 
-	$(YACC) $(YFLAGS) $(srcdir)/ada-exp.y
-	-sed -e '/extern.*malloc/d' \
-	-e '/extern.*realloc/d' \
-	-e '/extern.*free/d' \
-	-e '/include.*malloc.h/d' \
-	-e 's/malloc/xmalloc/g' \
-	-e 's/realloc/xrealloc/g' \
-	< y.tab.c > ada-exp.new
-	-rm y.tab.c
-	mv ada-exp.new ./ada-exp.tab.c
-
-# See comments above ...
-.PRECIOUS: ada-lex.c
-ada-lex.o: ada-lex.c
-ada-lex.c: ada-lex.l
-	@if [ "$(FLEX)" ] && $(FLEX) --version >/dev/null 2>&1; then \
-	    echo $(FLEX) -Isit $(srcdir)/ada-lex.l ">" ada-lex.c; \
-	    $(FLEX) -Isit $(srcdir)/ada-lex.l > ada-lex.c; \
-	elif [ ! -f ada-lex.c -a ! -f $(srcdir)/ada-lex.c ]; then \
-	    echo "ada-lex.c missing and flex not available."; \
-	    false; \
-	elif [ ! -f ada-lex.c ]; then \
-	    echo "Warning: ada-lex.c older than ada-lex.l and flex not available."; \
-	fi
-
-# See comments above ...
-.PRECIOUS: p-exp.tab.c
-p-exp.tab.o: p-exp.tab.c
-p-exp.tab.c: p-exp.y
-	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/p-exp.y  y.tab.c p-exp.tmp -- $(YFLAGS)
-	-sed -e '/extern.*malloc/d' \
-	     -e '/extern.*realloc/d' \
-	     -e '/extern.*free/d' \
-	     -e '/include.*malloc.h/d' \
-	     -e 's/malloc/xmalloc/g' \
-	     -e 's/realloc/xrealloc/g' \
-	     -e '/^#line.*y.tab.c/d' \
-	  < p-exp.tmp > p-exp.new
-	-rm p-exp.tmp
-	mv p-exp.new ./p-exp.tab.c
-
 lint: $(LINTFILES)
 	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \
 	   `echo $(DEPFILES) | sed 's/\.o /\.c /g'`
@@ -1469,41 +1343,144 @@ z8k-tdep.o: $(srcdir)/z8k-tdep.c
 		$(srcdir)/z8k-tdep.c
 
 #
-# Generated YACC/LEX dependencies
+# YACC/LEX dependencies
 #
+# LANG-exp.tab.c is generated in objdir from LANG-exp.y if it doesn't
+# exist in srcdir, then compiled in objdir to LANG-exp.tab.o.  If we
+# said LANG-exp.tab.c rather than ./c-exp.tab.c some makes would
+# sometimes re-write it into $(srcdir)/c-exp.tab.c.  Remove bogus
+# decls for malloc/realloc/free which conflict with everything else.
+# Strictly speaking c-exp.tab.c should therefore depend on
+# Makefile.in, but that was a pretty big annoyance.
 
-c-exp.tab.o: c-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
-	$(value_h) $(parser_defs_h) $(language_h) $(c_lang_h) $(bfd_h) \
-	$(charset_h) \
-	$(symfile_h) $(objfiles_h) $(block_h)
-
-objc-exp.tab.o: objc-exp.tab.c $(objc_lang_h) $(defs_h) $(expression_h) \
-	$(gdbtypes_h) $(language_h) $(parser_defs_h) $(symtab_h) $(value_h) \
-	$(bfd_h) $(objfiles_h) $(symfile_h) $(block_h)
-
-jv-exp.tab.o: jv-exp.tab.c jv-lang.h $(defs_h) $(expression_h) \
-	$(gdbtypes_h) $(language_h) $(parser_defs_h) $(symtab_h) $(value_h) \
-	$(bfd_h) $(objfiles_h) $(symfile_h) $(block_h)
-
-f-exp.tab.o: f-exp.tab.c f-lang.h $(defs_h) $(expression_h) \
-	$(language_h) $(parser_defs_h) $(value_h) $(bfd_h) $(objfiles_h) \
-	$(symfile_h) $(block_h)
-
-m2-exp.tab.o: m2-exp.tab.c $(defs_h) $(expression_h) $(gdbtypes_h) \
-	$(language_h) m2-lang.h $(parser_defs_h) $(symtab_h) $(value_h) \
-	$(bfd_h) $(objfiles_h) $(symfile_h) $(block_h)
-
-p-exp.tab.o: p-exp.tab.c $(defs_h) $(expression_h) $(gdbtypes_h) \
-	$(language_h) p-lang.h $(parser_defs_h) $(symtab_h) $(value_h) \
-	$(bfd_h) $(objfiles_h) $(symfile_h) $(block_h)
-
+.PRECIOUS: ada-exp.tab.c
 ada-exp.tab.o: ada-exp.tab.c ada-lex.c ada-lang.h \
 	$(defs_h) $(expression_h) \
 	$(gdbtypes_h) language.h parser-defs.h $(symtab_h) $(value_h) \
 	$(bfd_h) objfiles.h symfile.h $(block_h)
+ada-exp.tab.c: ada-exp.y 
+	$(YACC) $(YFLAGS) $(srcdir)/ada-exp.y
+	-sed -e '/extern.*malloc/d' \
+	     -e '/extern.*realloc/d' \
+	     -e '/extern.*free/d' \
+	     -e '/include.*malloc.h/d' \
+	     -e 's/malloc/xmalloc/g' \
+	     -e 's/realloc/xrealloc/g' \
+	     < y.tab.c > ada-exp.new
+	-rm y.tab.c
+	mv ada-exp.new ./ada-exp.tab.c
+.PRECIOUS: ada-lex.c
+ada-lex.o: ada-lex.c
+ada-lex.c: ada-lex.l
+	@if [ "$(FLEX)" ] && $(FLEX) --version >/dev/null 2>&1; then \
+	    echo $(FLEX) -Isit $(srcdir)/ada-lex.l ">" ada-lex.c; \
+	    $(FLEX) -Isit $(srcdir)/ada-lex.l > ada-lex.c; \
+	elif [ ! -f ada-lex.c -a ! -f $(srcdir)/ada-lex.c ]; then \
+	    echo "ada-lex.c missing and flex not available."; \
+	    false; \
+	elif [ ! -f ada-lex.c ]; then \
+	    echo "Warning: ada-lex.c older than ada-lex.l and flex not available."; \
+	fi
+.PRECIOUS: c-exp.tab.c
+c-exp.tab.o: c-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
+	$(value_h) $(parser_defs_h) $(language_h) $(c_lang_h) $(bfd_h) \
+	$(charset_h) \
+	$(symfile_h) $(objfiles_h) $(block_h)
+c-exp.tab.c: c-exp.y
+	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/c-exp.y  y.tab.c c-exp.tmp -- $(YFLAGS) 
+	-sed -e '/extern.*malloc/d' \
+	     -e '/extern.*realloc/d' \
+	     -e '/extern.*free/d' \
+	     -e '/include.*malloc.h/d' \
+	     -e 's/malloc/xmalloc/g' \
+	     -e 's/realloc/xrealloc/g' \
+	     -e '/^#line.*y.tab.c/d' \
+	  < c-exp.tmp > c-exp.new
+	-rm c-exp.tmp
+	mv c-exp.new ./c-exp.tab.c
+.PRECIOUS: f-exp.tab.c
+f-exp.tab.o: f-exp.tab.c f-lang.h $(defs_h) $(expression_h) \
+	$(language_h) $(parser_defs_h) $(value_h) $(bfd_h) $(objfiles_h) \
+	$(symfile_h) $(block_h)
+f-exp.tab.c: f-exp.y
+	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/f-exp.y  y.tab.c f-exp.tmp -- $(YFLAGS) 
+	-sed -e '/extern.*malloc/d' \
+	     -e '/extern.*realloc/d' \
+	     -e '/extern.*free/d' \
+	     -e '/include.*malloc.h/d' \
+	     -e 's/malloc/xmalloc/g' \
+	     -e 's/realloc/xrealloc/g' \
+	     -e '/^#line.*y.tab.c/d' \
+	  < f-exp.tmp > f-exp.new
+	-rm f-exp.tmp
+	mv f-exp.new ./f-exp.tab.c
+.PRECIOUS: jv-exp.tab.c
+jv-exp.tab.o: jv-exp.tab.c jv-lang.h $(defs_h) $(expression_h) \
+	$(gdbtypes_h) $(language_h) $(parser_defs_h) $(symtab_h) $(value_h) \
+	$(bfd_h) $(objfiles_h) $(symfile_h) $(block_h)
+jv-exp.tab.c: jv-exp.y
+	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/jv-exp.y  y.tab.c jv-exp.tmp -- $(YFLAGS) 
+	-sed -e '/extern.*malloc/d' \
+	     -e '/extern.*realloc/d' \
+	     -e '/extern.*free/d' \
+	     -e '/include.*malloc.h/d' \
+	     -e 's/malloc/xmalloc/g' \
+	     -e 's/realloc/xrealloc/g' \
+	     -e '/^#line.*y.tab.c/d' \
+	  < jv-exp.tmp > jv-exp.new
+	-rm jv-exp.tmp
+	mv jv-exp.new ./jv-exp.tab.c
+.PRECIOUS: m2-exp.tab.c
+m2-exp.tab.o: m2-exp.tab.c $(defs_h) $(expression_h) $(gdbtypes_h) \
+	$(language_h) m2-lang.h $(parser_defs_h) $(symtab_h) $(value_h) \
+	$(bfd_h) $(objfiles_h) $(symfile_h) $(block_h)
+m2-exp.tab.c: m2-exp.y
+	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/m2-exp.y  y.tab.c m2-exp.tmp -- $(YFLAGS) 
+	-sed -e '/extern.*malloc/d' \
+	     -e '/extern.*realloc/d' \
+	     -e '/extern.*free/d' \
+	     -e '/include.*malloc.h/d' \
+	     -e 's/malloc/xmalloc/g' \
+	     -e 's/realloc/xrealloc/g' \
+	     -e '/^#line.*y.tab.c/d' \
+	  < m2-exp.tmp > m2-exp.new
+	-rm m2-exp.tmp
+	mv m2-exp.new ./m2-exp.tab.c
+.PRECIOUS: objc-exp.tab.c
+objc-exp.tab.o: objc-exp.tab.c $(objc_lang_h) $(defs_h) $(expression_h) \
+	$(gdbtypes_h) $(language_h) $(parser_defs_h) $(symtab_h) $(value_h) \
+	$(bfd_h) $(objfiles_h) $(symfile_h) $(block_h)
+objc-exp.tab.c: objc-exp.y
+	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/objc-exp.y y.tab.c objc-exp.tmp -- $(YFLAGS) 
+	-sed -e '/extern.*malloc/d' \
+	     -e '/extern.*realloc/d' \
+	     -e '/extern.*free/d' \
+	     -e '/include.*malloc.h/d' \
+	     -e 's/malloc/xmalloc/g' \
+	     -e 's/realloc/xrealloc/g' \
+	     -e '/^#line.*y.tab.c/d' \
+	  < objc-exp.tmp > objc-exp.new
+	-rm objc-exp.tmp
+	mv objc-exp.new ./objc-exp.tab.c
+.PRECIOUS: p-exp.tab.c
+p-exp.tab.o: p-exp.tab.c $(defs_h) $(expression_h) $(gdbtypes_h) \
+	$(language_h) p-lang.h $(parser_defs_h) $(symtab_h) $(value_h) \
+	$(bfd_h) $(objfiles_h) $(symfile_h) $(block_h)
+p-exp.tab.c: p-exp.y
+	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/p-exp.y  y.tab.c p-exp.tmp -- $(YFLAGS)
+	-sed -e '/extern.*malloc/d' \
+	     -e '/extern.*realloc/d' \
+	     -e '/extern.*free/d' \
+	     -e '/include.*malloc.h/d' \
+	     -e 's/malloc/xmalloc/g' \
+	     -e 's/realloc/xrealloc/g' \
+	     -e '/^#line.*y.tab.c/d' \
+	  < p-exp.tmp > p-exp.new
+	-rm p-exp.tmp
+	mv p-exp.new ./p-exp.tab.c
 
 #
-# The dependencies.  In aphabetic order.
+# gdb/ dependencies
 #
 
 abug-rom.o: abug-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
@@ -2416,7 +2393,7 @@ z8k-tdep.o: z8k-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(gdbcmd_h) \
 # gdb/cli/ dependencies
 #
 # Need to explicitly specify the compile rule as make will do nothing
-# or try to compile the object file into the cli directory.
+# or try to compile the object file into the sub-directory.
 
 cli-cmds.o: $(srcdir)/cli/cli-cmds.c $(defs_h) $(completer_h) $(target_h) \
 	$(gdb_wait_h) $(gdb_regex_h) $(gdb_string_h) $(filenames_h) \
@@ -2602,7 +2579,7 @@ gdbtk-wrapper.o: $(srcdir)/gdbtk/generic/gdbtk-wrapper.c \
 # gdb/mi/ dependencies
 #
 # Need to explicitly specify the compile rule as make will do nothing
-# or try to compile the object file into the mi directory.
+# or try to compile the object file into the sub-directory.
 
 mi-cmd-break.o: $(srcdir)/mi/mi-cmd-break.c $(defs_h) $(mi_cmds_h) \
 	$(ui_out_h) $(mi_out_h) $(breakpoint_h) $(gdb_string_h) \
@@ -2671,19 +2648,19 @@ rdi-share/libangsd.a:	force
 	fi
 
 #
-# Signals sub-directory
+# gdb/signals/ dependencies
 #
 # Need to explicitly specify the compile rule as make will do nothing
-# or try to compile the object file into the mi directory.
+# or try to compile the object file into the sub-directory.
 
 signals.o: $(srcdir)/signals/signals.c $(defs_h) $(target_h) $(gdb_string_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/signals/signals.c
 
 #
-# TUI dependencies
+# gdb/tui/ dependencies
 #
 # Need to explicitly specify the compile rule as make will do nothing
-# or try to compile the object file into the mi directory.
+# or try to compile the object file into the sub-directory.
 
 tui-file.o: $(srcdir)/tui/tui-file.c $(defs_h) $(ui_file_h) $(tui_file_h) \
 	$(tui_tuiIO_h) $(tui_h)
