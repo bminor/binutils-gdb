@@ -1,3 +1,10 @@
+Mon Mar  7 16:08:25 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (load_address): When calling frag_grow, allow
+	for the (up to) two nops which may be inserted by append_insn if
+	mips_optimize is 0.
+	(macro): Likewise.
+
 Thu Mar  3 11:37:55 1994  Doug Evans  (dje@canuck.cygnus.com)
 
 	* config/atof-ieee.c (make_invalid_floating_point_number):

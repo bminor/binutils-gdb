@@ -107,6 +107,10 @@ static int file_mips_isa;
    SVR4 ABI PIC calls.  1 doesn't mean anything.  */
 static int mips_pic;
 
+/* 1 if trap instructions should used for overflow rather than break
+   instructions.  */
+static int mips_trap;
+
 static int mips_warn_about_macros;
 static int mips_noreorder;
 static int mips_any_noreorder;
@@ -478,6 +482,9 @@ md_begin ()
       else
 	mips_isa = 1;
     }
+
+  if (mips_isa < 2 && mips_trap)
+    as_bad ("trap exception not supported at ISA 1");
 
   switch (mips_isa)
     {
@@ -1564,7 +1571,7 @@ load_address (counter, reg, ep)
 	p = NULL;
       else
 	{
-	  frag_grow (12);
+	  frag_grow (20);
 	  macro_build ((char *) NULL, counter, ep,
 		       mips_isa < 3 ? "addiu" : "daddiu",
 		       "t,r,j", reg, GP, (int) BFD_RELOC_MIPS_GPREL);
@@ -1592,7 +1599,7 @@ load_address (counter, reg, ep)
 	 If there is a constant, it must be added in afterward.  */
       ex.X_add_number = ep->X_add_number;
       ep->X_add_number = 0;
-      frag_grow (12);
+      frag_grow (20);
       macro_build ((char *) NULL, counter, ep,
 		   mips_isa < 3 ? "lw" : "ld",
 		   "t,o(b)", reg, (int) BFD_RELOC_MIPS_GOT16, GP);
@@ -2121,7 +2128,10 @@ macro (ip)
       if (treg == 0)
 	{
 	  as_warn ("Divide by zero.");
-	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
+	  if (mips_trap)
+	    macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", 0, 0);
+	  else
+	    macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
 	  return;
 	}
 
@@ -2131,15 +2141,20 @@ macro (ip)
       macro_build ((char *) NULL, &icnt, NULL,
 		   dbl ? "ddiv" : "div",
 		   "z,s,t", sreg, treg);
-      expr1.X_add_number = 8;
-      macro_build ((char *) NULL, &icnt, &expr1, "bne", "s,t,p", treg, 0);
-      macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
-      macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
+      if (mips_trap)
+	macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", treg, 0);
+      else
+	{
+	  expr1.X_add_number = 8;
+	  macro_build ((char *) NULL, &icnt, &expr1, "bne", "s,t,p", treg, 0);
+	  macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
+	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
+	}
       expr1.X_add_number = -1;
       macro_build ((char *) NULL, &icnt, &expr1,
 		   dbl ? "daddiu" : "addiu",
 		   "t,r,j", AT, 0, (int) BFD_RELOC_LO16);
-      expr1.X_add_number = dbl ? 20 : 16;
+      expr1.X_add_number = mips_trap ? (dbl ? 12 : 8) : (dbl ? 20 : 16);
       macro_build ((char *) NULL, &icnt, &expr1, "bne", "s,t,p", treg, AT);
       if (dbl)
 	{
@@ -2154,10 +2169,15 @@ macro (ip)
 	  expr1.X_add_number = 0x80000000;
 	  macro_build ((char *) NULL, &icnt, &expr1, "lui", "t,u", AT);
 	}
-      expr1.X_add_number = 8;
-      macro_build ((char *) NULL, &icnt, &expr1, "bne", "s,t,p", sreg, AT);
-      macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
-      macro_build ((char *) NULL, &icnt, NULL, "break", "c", 6);
+      if (mips_trap)
+	macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", sreg, AT);
+      else
+	{
+	  expr1.X_add_number = 8;
+	  macro_build ((char *) NULL, &icnt, &expr1, "bne", "s,t,p", sreg, AT);
+	  macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
+	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 6);
+	}
       --mips_noreorder;
       macro_build ((char *) NULL, &icnt, NULL, s, "d", dreg);
       break;
@@ -2201,7 +2221,10 @@ macro (ip)
       if (imm_expr.X_add_number == 0)
 	{
 	  as_warn ("Divide by zero.");
-	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
+	  if (mips_trap)
+	    macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", 0, 0);
+	  else
+	    macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
 	  return;
 	}
       if (imm_expr.X_add_number == 1)
@@ -2255,10 +2278,15 @@ macro (ip)
       ++mips_noreorder;
       mips_any_noreorder = 1;
       macro_build ((char *) NULL, &icnt, NULL, s, "z,s,t", sreg, treg);
-      expr1.X_add_number = 8;
-      macro_build ((char *) NULL, &icnt, &expr1, "bne", "s,t,p", treg, 0);
-      macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
-      macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
+      if (mips_trap)
+	macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", treg, 0);
+      else
+	{
+	  expr1.X_add_number = 8;
+	  macro_build ((char *) NULL, &icnt, &expr1, "bne", "s,t,p", treg, 0);
+	  macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
+	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
+	}
       --mips_noreorder;
       macro_build ((char *) NULL, &icnt, NULL, s2, "d", dreg);
       return;
@@ -2299,7 +2327,7 @@ macro (ip)
 	    p = NULL;
 	  else
 	    {
-	      frag_grow (12);
+	      frag_grow (20);
 	      macro_build ((char *) NULL, &icnt, &offset_expr,
 			   mips_isa < 3 ? "addiu" : "daddiu",
 			   "t,r,j", tempreg, GP, (int) BFD_RELOC_MIPS_GPREL);
@@ -2346,7 +2374,7 @@ macro (ip)
 	     addiu instruction.  */
 	  expr1.X_add_number = offset_expr.X_add_number;
 	  offset_expr.X_add_number = 0;
-	  frag_grow (24);
+	  frag_grow (32);
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       mips_isa < 3 ? "lw" : "ld",
 		       "t,o(b)", tempreg, (int) BFD_RELOC_MIPS_GOT16, GP);
@@ -2515,7 +2543,7 @@ macro (ip)
 	   nop
 	   lw		$gp,cprestore($sp)
 	 */
-      frag_grow (12);
+      frag_grow (20);
       macro_build ((char *) NULL, &icnt, &offset_expr,
 		   mips_isa < 3 ? "lw" : "ld",
 		   "t,o(b)", PIC_CALL_REG, (int) BFD_RELOC_MIPS_CALL16, GP);
@@ -2724,7 +2752,7 @@ macro (ip)
 		p = NULL;
 	      else
 		{
-		  frag_grow (12);
+		  frag_grow (20);
 		  macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
 			       treg, (int) BFD_RELOC_MIPS_GPREL, GP);
 		  p = frag_var (rs_machine_dependent, 8, 0,
@@ -2747,7 +2775,7 @@ macro (ip)
 		p = NULL;
 	      else
 		{
-		  frag_grow (20);
+		  frag_grow (28);
 		  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 			       mips_isa < 3 ? "addu" : "daddu",
 			       "d,v,t", tempreg, breg, GP);
@@ -2793,7 +2821,7 @@ macro (ip)
 	  if (expr1.X_add_number < -0x8000
 	      || expr1.X_add_number >= 0x8000)
 	    as_bad ("PIC code offset overflow (max 16 signed bits)");
-	  frag_grow (12);
+	  frag_grow (20);
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       mips_isa < 3 ? "lw" : "ld",
 		       "t,o(b)", tempreg, (int) BFD_RELOC_MIPS_GOT16, GP);
@@ -3028,14 +3056,14 @@ macro (ip)
 
 	      if (breg == 0)
 		{
-		  frag_grow (20);
+		  frag_grow (28);
 		  tempreg = GP;
 		  off = 0;
 		  used_at = 0;
 		}
 	      else
 		{
-		  frag_grow (28);
+		  frag_grow (36);
 		  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 			       mips_isa < 3 ? "addu" : "daddu",
 			       "d,v,t", AT, breg, GP);
@@ -3117,7 +3145,7 @@ macro (ip)
 	    off = 0;
 	  else
 	    off = 4;
-	  frag_grow (16 + off);
+	  frag_grow (24 + off);
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       mips_isa < 3 ? "lw" : "ld",
 		       "t,o(b)", AT, (int) BFD_RELOC_MIPS_GOT16, GP);
@@ -3236,10 +3264,15 @@ macro2 (ip)
 		   dbl ? "dsra32" : "sra",
 		   "d,w,<", dreg, dreg, 31);
       macro_build ((char *) NULL, &icnt, NULL, "mfhi", "d", AT);
-      expr1.X_add_number = 8;
-      macro_build ((char *) NULL, &icnt, &expr1, "beq", "s,t,p", dreg, AT);
-      macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
-      macro_build ((char *) NULL, &icnt, NULL, "break", "c", 6);
+      if (mips_trap)
+	macro_build ((char *) NULL, &icnt, NULL, "tne", "s,t", dreg, AT);
+      else
+	{
+	  expr1.X_add_number = 8;
+	  macro_build ((char *) NULL, &icnt, &expr1, "beq", "s,t,p", dreg, AT);
+	  macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
+	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 6);
+	}
       --mips_noreorder;
       macro_build ((char *) NULL, &icnt, NULL, "mflo", "d", dreg);
       break;
@@ -3255,10 +3288,15 @@ macro2 (ip)
 		   "s,t", sreg, treg);
       macro_build ((char *) NULL, &icnt, NULL, "mfhi", "d", AT);
       macro_build ((char *) NULL, &icnt, NULL, "mflo", "d", dreg);
-      expr1.X_add_number = 8;
-      macro_build ((char *) NULL, &icnt, &expr1, "beq", "s,t,p", AT, 0);
-      macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
-      macro_build ((char *) NULL, &icnt, NULL, "break", "c", 6);
+      if (mips_trap)
+	macro_build ((char *) NULL, &icnt, NULL, "tne", "s,t", AT, 0);
+      else
+	{
+	  expr1.X_add_number = 8;
+	  macro_build ((char *) NULL, &icnt, &expr1, "beq", "s,t,p", AT, 0);
+	  macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
+	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 6);
+	}
       --mips_noreorder;
       break;
 
@@ -3615,11 +3653,17 @@ macro2 (ip)
     case M_ULHU:
       s = "lbu";
     ulh:
+      if (offset_expr.X_add_number >= 0x7fff)
+	as_bad ("operand overflow");
       /* avoid load delay */
-      offset_expr.X_add_number += 1;
+      if (byte_order == LITTLE_ENDIAN)
+	offset_expr.X_add_number += 1;
       macro_build ((char *) NULL, &icnt, &offset_expr, s, "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, breg);
-      offset_expr.X_add_number -= 1;
+      if (byte_order == LITTLE_ENDIAN)
+	offset_expr.X_add_number -= 1;
+      else
+	offset_expr.X_add_number += 1;
       macro_build ((char *) NULL, &icnt, &offset_expr, "lbu", "t,o(b)", AT,
 		   (int) BFD_RELOC_LO16, breg);
       macro_build ((char *) NULL, &icnt, NULL, "sll", "d,w,<", treg, treg, 8);
@@ -3627,11 +3671,16 @@ macro2 (ip)
       break;
 
     case M_ULW:
-      /* does this work on a big endian machine? */
-      offset_expr.X_add_number += 3;
+      if (offset_expr.X_add_number >= 0x7ffd)
+	as_bad ("operand overflow");
+      if (byte_order == LITTLE_ENDIAN)
+	offset_expr.X_add_number += 3;
       macro_build ((char *) NULL, &icnt, &offset_expr, "lwl", "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, breg);
-      offset_expr.X_add_number -= 3;
+      if (byte_order == LITTLE_ENDIAN)
+	offset_expr.X_add_number -= 3;
+      else
+	offset_expr.X_add_number += 3;
       macro_build ((char *) NULL, &icnt, &offset_expr, "lwr", "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, breg);
       return;
@@ -3642,19 +3691,30 @@ macro2 (ip)
       load_address (&icnt, AT, &offset_expr);
       if (mask == M_ULW_A)
 	{
-	  expr1.X_add_number = 3;
+	  if (byte_order == LITTLE_ENDIAN)
+	    expr1.X_add_number = 3;
+	  else
+	    expr1.X_add_number = 0;
 	  macro_build ((char *) NULL, &icnt, &expr1, "lwl", "t,o(b)", treg,
 		       (int) BFD_RELOC_LO16, AT);
-	  expr1.X_add_number = 0;
+	  if (byte_order == LITTLE_ENDIAN)
+	    expr1.X_add_number = 0;
+	  else
+	    expr1.X_add_number = 3;
 	  macro_build ((char *) NULL, &icnt, &expr1, "lwr", "t,o(b)", treg,
 		       (int) BFD_RELOC_LO16, AT);
 	}
       else
 	{
+	  if (byte_order == BIG_ENDIAN)
+	    expr1.X_add_number = 0;
 	  macro_build ((char *) NULL, &icnt, &expr1,
 		       mask == M_ULH_A ? "lb" : "lbu", "t,o(b)", treg,
 		       (int) BFD_RELOC_LO16, AT);
-	  expr1.X_add_number = 0;
+	  if (byte_order == BIG_ENDIAN)
+	    expr1.X_add_number = 1;
+	  else
+	    expr1.X_add_number = 0;
 	  macro_build ((char *) NULL, &icnt, &expr1, "lbu", "t,o(b)", AT,
 		       (int) BFD_RELOC_LO16, AT);
 	  macro_build ((char *) NULL, &icnt, NULL, "sll", "d,w,<", treg,
@@ -3665,19 +3725,32 @@ macro2 (ip)
       break;
 
     case M_USH:
+      if (offset_expr.X_add_number >= 0x7fff)
+	as_bad ("operand overflow");
+      if (byte_order == BIG_ENDIAN)
+	offset_expr.X_add_number += 1;
       macro_build ((char *) NULL, &icnt, &offset_expr, "sb", "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, breg);
       macro_build ((char *) NULL, &icnt, NULL, "srl", "d,w,<", AT, treg, 8);
-      offset_expr.X_add_number += 1;
+      if (byte_order == BIG_ENDIAN)
+	offset_expr.X_add_number -= 1;
+      else
+	offset_expr.X_add_number += 1;
       macro_build ((char *) NULL, &icnt, &offset_expr, "sb", "t,o(b)", AT,
 		   (int) BFD_RELOC_LO16, breg);
       break;
 
     case M_USW:
-      offset_expr.X_add_number += 3;
+      if (offset_expr.X_add_number >= 0x7ffd)
+	as_bad ("operand overflow");
+      if (byte_order == LITTLE_ENDIAN)
+	offset_expr.X_add_number += 3;
       macro_build ((char *) NULL, &icnt, &offset_expr, "swl", "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, breg);
-      offset_expr.X_add_number -= 3;
+      if (byte_order == LITTLE_ENDIAN)
+	offset_expr.X_add_number -= 3;
+      else
+	offset_expr.X_add_number += 3;
       macro_build ((char *) NULL, &icnt, &offset_expr, "swr", "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, breg);
       return;
@@ -3687,24 +3760,37 @@ macro2 (ip)
       load_address (&icnt, AT, &offset_expr);
       if (mask == M_USW_A)
 	{
-	  expr1.X_add_number = 3;
+	  if (byte_order == LITTLE_ENDIAN)
+	    expr1.X_add_number = 3;
+	  else
+	    expr1.X_add_number = 0;
 	  macro_build ((char *) NULL, &icnt, &expr1, "swl", "t,o(b)", treg,
 		       (int) BFD_RELOC_LO16, AT);
-	  expr1.X_add_number = 0;
+	  if (byte_order == LITTLE_ENDIAN)
+	    expr1.X_add_number = 0;
+	  else
+	    expr1.X_add_number = 3;
 	  macro_build ((char *) NULL, &icnt, &expr1, "swr", "t,o(b)", treg,
 		       (int) BFD_RELOC_LO16, AT);
 	}
       else
 	{
-	  expr1.X_add_number = 0;
+	  if (byte_order == LITTLE_ENDIAN)
+	    expr1.X_add_number = 0;
 	  macro_build ((char *) NULL, &icnt, &expr1, "sb", "t,o(b)", treg,
 		       (int) BFD_RELOC_LO16, AT);
 	  macro_build ((char *) NULL, &icnt, NULL, "srl", "d,w,<", treg,
 		       treg, 8);
-	  expr1.X_add_number = 1;
+	  if (byte_order == LITTLE_ENDIAN)
+	    expr1.X_add_number = 1;
+	  else
+	    expr1.X_add_number = 0;
 	  macro_build ((char *) NULL, &icnt, &expr1, "sb", "t,o(b)", treg,
 		       (int) BFD_RELOC_LO16, AT);
-	  expr1.X_add_number = 0;
+	  if (byte_order == LITTLE_ENDIAN)
+	    expr1.X_add_number = 0;
+	  else
+	    expr1.X_add_number = 1;
 	  macro_build ((char *) NULL, &icnt, &expr1, "lbu", "t,o(b)", AT,
 		       (int) BFD_RELOC_LO16, AT);
 	  macro_build ((char *) NULL, &icnt, NULL, "sll", "d,w,<", treg,
@@ -4700,6 +4786,28 @@ md_parse_option (argP, cntP, vecP)
   return 1;			/* pretend you parsed the character */
 }
 
+/* Handle a long option name.  */
+
+int
+mips_parse_long_option (arg)
+     const char *arg;
+{
+  if (strcmp (arg, "--trap") == 0
+      || strcmp (arg, "--no-break") == 0)
+    {
+      mips_trap = 1;
+      return 1;
+    }
+  else if (strcmp (arg, "--no-trap") == 0
+	   || strcmp (arg, "--break") == 0)
+    {
+      mips_trap = 0;
+      return 1;
+    }
+
+  return 0;
+}
+
 long
 md_pcrel_from (fixP)
      fixS *fixP;
@@ -5082,13 +5190,10 @@ s_extern (x)
   if (*input_line_pointer == ',')
     input_line_pointer++;
   size = get_absolute_expression ();
-  S_SET_VALUE (symbolP, size);
   S_SET_EXTERNAL (symbolP);
 
 #ifdef ECOFF_DEBUGGING
-  /* ECOFF needs to distinguish a .comm symbol from a .extern symbol,
-     so we use an additional ECOFF specific field.  */
-  symbolP->ecoff_undefined = 1;
+  symbolP->ecoff_extern_size = size;
 #endif
 }
 
@@ -5480,8 +5585,10 @@ md_estimate_size_before_relax (fragp, segtype)
 	      || strcmp (symname, "_gp_disp") == 0))
 	change = 1;
       else if (! S_IS_DEFINED (fragp->fr_symbol)
-	       && S_GET_VALUE (fragp->fr_symbol) != 0
-	       && S_GET_VALUE (fragp->fr_symbol) <= g_switch_value)
+	       && ((fragp->fr_symbol->ecoff_extern_size != 0
+		    && fragp->fr_symbol->ecoff_extern_size <= g_switch_value)
+		   || (S_GET_VALUE (fragp->fr_symbol) != 0
+		       && S_GET_VALUE (fragp->fr_symbol) <= g_switch_value)))
 	change = 0;
       else
 	{
