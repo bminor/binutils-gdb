@@ -63,7 +63,6 @@ glob
 gprof
 grep
 groff
-h8300sim
 include
 ispell
 ld
@@ -83,6 +82,7 @@ readline
 sed
 send_pr
 shellutils
+sim
 tcl
 textutils
 tk
@@ -92,7 +92,6 @@ tgas
 uudecode
 wdiff
 xiberty
-z8ksim
 
 # The lines between the "Do-last:" line and the end of the file
 # are executed as a /bin/sh shell script after everything else is
