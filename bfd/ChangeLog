@@ -1,3 +1,11 @@
+2002-12-05  Richard Henderson  <rth@redhat.com>
+
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Handle PCREL21BI.
+	Only send PCREL21B though the plt.  Fix installed reloc type.
+	(elfNN_ia64_relocate_section): Give error for dynamic reloc
+	against PCREL22 or PCREL64I; clean up error messages for
+	branch relocs.
+
 2002-12-04  Kevin Buettner  <kevinb@redhat.com>
 
 	* elf64-mips.c (elf64_mips_grok_prstatus, elf64_mips_grok_psinfo):

@@ -672,7 +672,8 @@ static const bfd_byte oor_ip[48] =
 /* These functions do relaxation for IA-64 ELF.
 
    This is primarily to support branches to targets out of range;
-   relaxation of R_IA64_LTOFF22X and R_IA64_LDXMOV not yet supported.  */
+   relaxation of R_IA64_LTOFF22X and R_IA64_LDXMOV is handled in
+   relocate_section directly.  */
 
 static bfd_boolean
 elfNN_ia64_relax_section (abfd, sec, link_info, again)
@@ -726,10 +727,14 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
   irelend = internal_relocs + sec->reloc_count;
 
   for (irel = internal_relocs; irel < irelend; irel++)
-    if (ELFNN_R_TYPE (irel->r_info) == (int) R_IA64_PCREL21B
-	|| ELFNN_R_TYPE (irel->r_info) == (int) R_IA64_PCREL21M
-	|| ELFNN_R_TYPE (irel->r_info) == (int) R_IA64_PCREL21F)
-      break;
+    {
+      unsigned long r_type = ELFNN_R_TYPE (irel->r_info);
+      if (r_type == R_IA64_PCREL21B
+	  || r_type == R_IA64_PCREL21BI
+	  || r_type == R_IA64_PCREL21M
+	  || r_type == R_IA64_PCREL21F)
+	break;
+    }
 
   /* No branch-type relocations.  */
   if (irel == irelend)
@@ -755,14 +760,16 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 
   for (; irel < irelend; irel++)
     {
+      unsigned long r_type = ELFNN_R_TYPE (irel->r_info);
       bfd_vma symaddr, reladdr, trampoff, toff, roff;
       asection *tsec;
       struct one_fixup *f;
       bfd_size_type amt;
 
-      if (ELFNN_R_TYPE (irel->r_info) != (int) R_IA64_PCREL21B
-	  && ELFNN_R_TYPE (irel->r_info) != (int) R_IA64_PCREL21M
-	  && ELFNN_R_TYPE (irel->r_info) != (int) R_IA64_PCREL21F)
+      if (r_type != R_IA64_PCREL21B
+	  && r_type != R_IA64_PCREL21BI
+	  && r_type != R_IA64_PCREL21M
+	  && r_type != R_IA64_PCREL21F)
 	continue;
 
       /* Get the value of the symbol referred to by the reloc.  */
@@ -817,6 +824,11 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	     in a branch to the PLT entry.  */
 	  if (dyn_i && dyn_i->want_plt2)
 	    {
+	      /* Internal branches shouldn't be sent to the PLT.
+		 Leave this for now and we'll give an error later.  */
+	      if (r_type != R_IA64_PCREL21B)
+		continue;
+
 	      tsec = ia64_info->plt_sec;
 	      toff = dyn_i->plt2_offset;
 	    }
@@ -928,7 +940,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	 hell this doesn't overflow too.  */
       if (elfNN_ia64_install_value (abfd, contents + roff,
 				    f->trampoff - (roff & (bfd_vma) -4),
-				    R_IA64_PCREL21B) != bfd_reloc_ok)
+				    r_type) != bfd_reloc_ok)
 	goto error_return;
 
       changed_contents = TRUE;
@@ -4035,29 +4047,6 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  goto finish_pcrel;
 
-	case R_IA64_PCREL21BI:
-	case R_IA64_PCREL21F:
-	case R_IA64_PCREL21M:
-	  /* ??? These two are only used for speculation fixup code.
-	     They should never be dynamic.  */
-	  if (dynamic_symbol_p)
-	    {
-	      (*_bfd_error_handler)
-		(_("%s: dynamic relocation against speculation fixup"),
-		 bfd_archive_filename (input_bfd));
-	      ret_val = FALSE;
-	      continue;
-	    }
-	  if (undef_weak_ref)
-	    {
-	      (*_bfd_error_handler)
-		(_("%s: speculation fixup against undefined weak symbol"),
-		 bfd_archive_filename (input_bfd));
-	      ret_val = FALSE;
-	      continue;
-	    }
-	  goto finish_pcrel;
-
 	case R_IA64_PCREL21B:
 	case R_IA64_PCREL60B:
 	  /* We should have created a PLT entry for any dynamic symbol.  */
@@ -4089,8 +4078,32 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  goto finish_pcrel;
 
+	case R_IA64_PCREL21BI:
+	case R_IA64_PCREL21F:
+	case R_IA64_PCREL21M:
 	case R_IA64_PCREL22:
 	case R_IA64_PCREL64I:
+	  /* The PCREL21BI reloc is specifically not intended for use with
+	     dynamic relocs.  PCREL21F and PCREL21M are used for speculation
+	     fixup code, and thus probably ought not be dynamic.  The 
+	     PCREL22 and PCREL64I relocs aren't emitted as dynamic relocs.  */
+	  if (dynamic_symbol_p)
+	    {
+	      const char *msg;
+
+	      if (r_type == R_IA64_PCREL21BI)
+		msg = _("%s: @internal branch to dynamic symbol %s");
+	      else if (r_type == R_IA64_PCREL21F || r_type == R_IA64_PCREL21M)
+		msg = _("%s: speculation fixup to dynamic symbol %s");
+	      else
+		msg = _("%s: @pcrel relocation against dynamic symbol %s");
+	      (*_bfd_error_handler) (msg, bfd_archive_filename (input_bfd),
+				     h->root.root.string);
+	      ret_val = FALSE;
+	      continue;
+	    }
+	  goto finish_pcrel;
+
 	finish_pcrel:
 	  /* Make pc-relative.  */
 	  value -= (input_section->output_section->vma
