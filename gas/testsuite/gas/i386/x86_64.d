@@ -121,4 +121,4 @@ Disassembly of section .text:
  1f0:	8b 04 25 00 00 00 00 	mov[ 	]+0x0,%eax
  1f7:	8b 80 00 00 00 00[ 	]+mov[ 	]+0x0\(%rax\),%eax
  1fd:	8b 05 00 00 00 00[ 	]+mov[ 	]+0\(%rip\),%eax.*
-	...
+#pass

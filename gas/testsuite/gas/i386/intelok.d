@@ -103,4 +103,4 @@ Disassembly of section .text:
 [ 	]*[0-9a-f]+:	6a 02[ 	]+push[ 	]+0x2
 [ 	]*[0-9a-f]+:	6a 03[ 	]+push[ 	]+0x3
 [ 	]*[0-9a-f]+:	6a 0d[ 	]+push[ 	]+0xd
-	\.\.\.
+#pass

@@ -24,4 +24,4 @@ Disassembly of section .text:
   3a:[	 ]*f3 0f a6 c8 [	 ]*repz xsha1 
   3e:[	 ]*f3 0f a6 d0 [	 ]*repz xsha256 
   42:[	 ]*f3 0f a6 d0 [	 ]*repz xsha256 
-[ 	]*\.\.\.
+#pass

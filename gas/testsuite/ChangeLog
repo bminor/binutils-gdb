@@ -1,3 +1,12 @@
+2005-01-09  Andreas Schwab  <schwab@suse.de>
+
+	* gas/i386/intel16.d: Ignore trailing text with #pass. 
+	* gas/i386/intelok.d: Likewise.
+	* gas/i386/prefix.d: Likewise.
+	* gas/i386/sub.d: Likewise.
+	* gas/i386/padlock.d: Likewise.
+	* gas/i386/x86_64.d: Likewise.
+
 2005-01-05  Eric Botcazou  <ebotcazou@libertysurf.fr>
 
 	* gas/elf/elf.exp (section5): Use 0-9 instead of [:digit:].
