@@ -1,5 +1,8 @@
 Mon Mar 30 10:39:34 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf.c (_bfd_elf_copy_private_section_data): Call
+	copy_private_bfd_data once we've seen the last SEC_ALLOC section.
+
 	* cpu-mips.c: Remove trailing comma at end of enumeration list.
 
 Sat Mar 28 16:33:02 1998  Ian Lance Taylor  <ian@cygnus.com>
