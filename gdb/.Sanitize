@@ -179,6 +179,7 @@ solib.c
 solib.h
 source.c
 sparc-pinsn.c
+sparc-stub.c
 sparc-tdep.c
 sparc-xdep.c
 stabsread.c
