@@ -143,7 +143,7 @@ extern PTR EXFUN((*__malloc_hook), (size_t __size));
 extern PTR EXFUN((*__realloc_hook), (PTR __ptr, size_t __size));
 
 /* Activate a standard collection of debugging hooks.  */
-extern void EXFUN(mcheck, (void EXFUN((*func), (void))));
+extern void EXFUN(mcheck, (void EXFUN((*func), (NOARGS))));
 
 /* Statistics available to the user.  */
 struct mstats

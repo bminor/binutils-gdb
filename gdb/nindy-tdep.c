@@ -38,7 +38,7 @@ nindy_frame_chain_valid (chain, curframe)
     FRAME curframe;
 {
 	struct symbol *sym;
-	int i;
+	struct minimal_symbol *msymbol;
 
 	/* crtnindy.o is an assembler module that is assumed to be linked
 	 * first in an i80960 executable.  It contains the true entry point;
@@ -64,10 +64,10 @@ nindy_frame_chain_valid (chain, curframe)
 	if ( sym != 0 ){
 		a = sym->value.value;
 	} else {
-		i = lookup_misc_func (sf);
-		if (i < 0)
+		msymbol = lookup_minimal_symbol (sf, (struct objfile *) NULL);
+		if (msymbol == NULL)
 			return 0;
-		a = misc_function_vector[i].address;
+		a = msymbol -> address;
 	}
 
 	return ( chain != read_memory_integer(a,4) );

@@ -34,7 +34,7 @@ static PTR EXFUN((*old_realloc_hook), (PTR ptr, size_t size));
 
 /* Function to call when something awful happens. */
 extern void abort();
-static void EXFUN((*abortfunc), (void)) = (void (*)()) abort;
+static void EXFUN((*abortfunc), (NOARGS)) = (void (*)()) abort;
 
 /* Arbitrary magical numbers.  */
 #define MAGICWORD	0xfedabeeb
@@ -103,7 +103,7 @@ DEFUN(reallochook, (ptr, size), PTR ptr AND size_t size)
 }
 
 void
-DEFUN(mcheck, (func), void EXFUN((*func), (void)))
+DEFUN(mcheck, (func), void EXFUN((*func), (NOARGS)))
 {
   static int mcheck_used = 0;
 

@@ -18,16 +18,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* This is for SunOS version 4, not for earlier versions.  */
 
-#define CLEAR_SOLIB			clear_solib
-extern void clear_solib ();
-
-#define SOLIB_ADD(filename, from_tty, targ) solib_add (filename, from_tty, targ)
-extern void solib_add ();
-
-#define SOLIB_CREATE_INFERIOR_HOOK	solib_create_inferior_hook
-extern void solib_create_inferior_hook();
-
-/* If we can't set a breakpoint, and it's in a shared library, just
-   disable it.  */
-#define DISABLE_UNSETTABLE_BREAK(addr)	solib_address(addr)
-extern int solib_address ();			/* solib.c */
+#include "solib.h"	/* Support for shared libraries. */

@@ -33,6 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
+#include "gdbtypes.h"
 #include "value.h"
 #include "gdbcmd.h"
 #include "frame.h"
@@ -1112,8 +1113,8 @@ _initialize_language()
 		      "Set the current source language.",
 		      &setlist);
    show = add_show_from_set (set, &showlist);
-   set->function = set_language_command;
-   show->function = show_language_command;
+   set->function.cfunc = set_language_command;
+   show->function.cfunc = show_language_command;
 
    add_prefix_cmd ("check", no_class, set_check,
 		   "Set the status of the type/range checker",
@@ -1132,16 +1133,16 @@ _initialize_language()
 		      "Set type checking.  (on/warn/off/auto)",
 		      &setchecklist);
    show = add_show_from_set (set, &showchecklist);
-   set->function = set_type_command;
-   show->function = show_type_command;
+   set->function.cfunc = set_type_command;
+   show->function.cfunc = show_type_command;
 
    set = add_set_cmd ("range", class_support, var_string_noescape,
 		      (char *)&range,
 		      "Set range checking.  (on/warn/off/auto)",
 		      &setchecklist);
    show = add_show_from_set (set, &showchecklist);
-   set->function = set_range_command;
-   show->function = show_range_command;
+   set->function.cfunc = set_range_command;
+   show->function.cfunc = show_range_command;
 
    add_language (&unknown_language_defn);
    add_language (&local_language_defn);

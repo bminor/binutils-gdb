@@ -258,6 +258,7 @@ fetch_inferior_registers (regno)
 /* Store our register values back into the inferior.
    For Convex, do this only once, right before resuming inferior.  */
 
+void
 store_inferior_registers (regno)
      int regno;
 {

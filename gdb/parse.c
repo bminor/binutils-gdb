@@ -31,12 +31,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include "defs.h"
 #include "symtab.h"
+#include "gdbtypes.h"
 #include "frame.h"
 #include "expression.h"
 #include "value.h"
 #include "command.h"
 #include "language.h"
 #include "parser-defs.h"
+
+static void
+prefixify_expression PARAMS ((struct expression *));
+
+static int
+length_of_subexp PARAMS ((struct expression *, int));
+
+static void
+prefixify_subexp PARAMS ((struct expression *, struct expression *, int, int));
 
 /* Assign machine-independent names to certain registers 
    (unless overridden by the REGISTER_NAMES table) */
@@ -117,7 +127,7 @@ write_exp_elt (expelt)
   if (expout_ptr >= expout_size)
     {
       expout_size *= 2;
-      expout = (struct expression *) xrealloc (expout,
+      expout = (struct expression *) xrealloc ((char *) expout,
 					       sizeof (struct expression)
 					       + expout_size * sizeof (union exp_element));
     }
@@ -207,7 +217,7 @@ write_exp_string (str)
     {
       expout_size = max (expout_size * 2, expout_ptr + 10);
       expout = (struct expression *)
-	xrealloc (expout, (sizeof (struct expression)
+	xrealloc ((char *) expout, (sizeof (struct expression)
 			   + (expout_size * sizeof (union exp_element))));
     }
   bcopy (str.ptr, (char *) &expout->elts[expout_ptr - lenelt], len);
@@ -230,9 +240,7 @@ copy_name (token)
 /* Reverse an expression from suffix form (in which it is constructed)
    to prefix form (in which we can conveniently print or execute it).  */
 
-static void prefixify_subexp ();
-
-void
+static void
 prefixify_expression (expr)
      register struct expression *expr;
 {
@@ -252,7 +260,7 @@ prefixify_expression (expr)
 /* Return the number of exp_elements in the subexpression of EXPR
    whose last exp_element is at index ENDPOS - 1 in EXPR.  */
 
-int
+static int
 length_of_subexp (expr, endpos)
      register struct expression *expr;
      register int endpos;
@@ -552,7 +560,7 @@ parse_exp_1 (stringptr, block, comma)
   discard_cleanups (old_chain);
   expout->nelts = expout_ptr;
   expout = (struct expression *)
-    xrealloc (expout,
+    xrealloc ((char *) expout,
 	      sizeof (struct expression)
 	      + expout_ptr * sizeof (union exp_element));
   prefixify_expression (expout);
@@ -582,7 +590,7 @@ push_type (tp)
     {
       type_stack_size *= 2;
       type_stack = (union type_stack_elt *)
-	xrealloc (type_stack, type_stack_size * sizeof (*type_stack));
+	xrealloc ((char *) type_stack, type_stack_size * sizeof (*type_stack));
     }
   type_stack[type_stack_depth++].piece = tp;
 }
@@ -595,7 +603,7 @@ push_type_int (n)
     {
       type_stack_size *= 2;
       type_stack = (union type_stack_elt *)
-	xrealloc (type_stack, type_stack_size * sizeof (*type_stack));
+	xrealloc ((char *) type_stack, type_stack_size * sizeof (*type_stack));
     }
   type_stack[type_stack_depth++].int_val = n;
 }

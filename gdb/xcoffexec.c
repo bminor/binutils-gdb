@@ -40,6 +40,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "libbfd.h"		/* BFD internals (sigh!)  FIXME */
 
+/* Prototypes for local functions */
+
+static void
+add_to_section_table PARAMS ((bfd *, sec_ptr, PTR));
+
+static void
+file_command PARAMS ((char *, int));
+
+static void
+exec_close PARAMS ((int));
+
 struct section_table *exec_sections, *exec_sections_end;
 
 #define eq(s0, s1)	!strcmp(s0, s1)
@@ -90,7 +101,7 @@ extern struct target_ops exec_ops;
 
 /* exec_close -	done with exec file, clean up all resources. */
 
-void
+static void
 exec_close(quitting) {
 	register struct vmap *vp, *nxt;
 
@@ -124,7 +135,7 @@ char *filename;
   	int scratch_chan;
       
   	filename = tilde_expand(filename);
-  	make_cleanup(free, filename);
+  	make_cleanup (free, filename);
       
   	scratch_chan = openp(getenv("PATH"), 1, filename, O_RDONLY, 0
   			     , &scratch_pathname);
@@ -177,7 +188,7 @@ char *filename;
  * novelty.  Why did GDB go through four major releases before this
  * command was added?
  */
-void
+static void
 file_command(arg, from_tty)
 char *arg; {
 
@@ -189,7 +200,7 @@ char *arg; {
    table_pp_char is a char * to get it through bfd_map_over_sections;
    we cast it back to its proper type.  */
 
-void
+static void
 add_to_section_table (abfd, asect, table_pp_char)
      bfd *abfd;
      sec_ptr asect;
@@ -283,7 +294,6 @@ map_vmap (bfd *bf, bfd *arch)
   struct vmap_and_bfd vmap_bfd;
   struct vmap *vp, **vpp;
   struct objfile *obj;
-  char *name;
 
   vp = (void*) xmalloc (sizeof (*vp));
   vp->nxt = 0;
@@ -297,8 +307,7 @@ map_vmap (bfd *bf, bfd *arch)
 
   obj = lookup_objfile_bfd (bf);
   if (exec_bfd && !obj) {
-    name = savestring (bfd_get_filename (bf), strlen (bfd_get_filename (bf)));
-    obj = allocate_objfile (bf, name);
+    obj = allocate_objfile (bf, bfd_get_filename (bf), 0);
     syms_from_objfile (obj, 0, 0, 0);
   }
 
@@ -308,8 +317,20 @@ map_vmap (bfd *bf, bfd *arch)
   *vpp = vp;
 }
 
+/* Called via iterate_over_msymbols to relocate minimal symbols */
 
-/* true, if symbol table and misc_function_vector is relocated. */
+static void
+relocate_minimal_symbol (objfile, msymbol, arg1, arg2, arg3)
+     struct objfile *objfile;
+     struct minimal_symbol *msymbol;
+     PTR arg1;
+     PTR arg2;
+     PTR arg3;
+{
+  msymbol -> address += (int) arg1;
+}
+
+/* true, if symbol table and minimal symbol table are relocated. */
 
 int symtab_relocated = 0;
 
@@ -321,56 +342,61 @@ register struct vmap *vp;
 CORE_ADDR old_start;
 struct stat *vip; 
 {
-	register struct symtab *s;
-
-	/*
-	 * for each symbol table generated from the vp->bfd
-	 */
-	for (s = symtab_list; s; s = s->next) {
-
-	  /* skip over if this is not relocatable and doesn't have a line table */
-	  if (s->nonreloc && !LINETABLE (s))
+  register struct symtab *s;
+  register struct objfile *objfile;
+  
+  /*
+   * for each symbol table generated from the vp->bfd
+   */
+  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+    {
+      for (s = objfile -> symtabs; s != NULL; s = s -> next) {
+	
+	/* skip over if this is not relocatable and doesn't have a line table */
+	if (s->nonreloc && !LINETABLE (s))
+	  continue;
+	
+	/* matching the symbol table's BFD and the *vp's BFD is hairy.
+	   exec_file creates a seperate BFD for possibly the
+	   same file as symbol_file.FIXME ALL THIS MUST BE RECTIFIED. */
+	
+	if (objfile->obfd == vp->bfd) {
+	  /* if they match, we luck out. */
+	  ;
+	} else if (vp->member[0]) {
+	  /* no match, and member present, not this one. */
+	  continue;
+	} else {
+	  struct stat si;
+	  FILE *io;
+	  
+	  /*
+	   * no match, and no member. need to be sure.
+	   */
+	  io = bfd_cache_lookup(objfile->obfd);
+	  if (!io)
+	    fatal("cannot find BFD's iostream for sym");
+	  /*
+	   * see if we are referring to the same file
+	   */
+	  if (fstat(fileno(io), &si) < 0)
+	    fatal("cannot fstat BFD for sym");
+	  
+	  if (si.st_dev != vip->st_dev
+	      || si.st_ino != vip->st_ino)
 	    continue;
-
-		/* matching the symbol table's BFD and the *vp's BFD is hairy.
-		   exec_file creates a seperate BFD for possibly the
-		   same file as symbol_file.FIXME ALL THIS MUST BE RECTIFIED. */
-
-		if (s->objfile->obfd == vp->bfd) {
-			/* if they match, we luck out. */
-			;
-		} else if (vp->member[0]) {
-			/* no match, and member present, not this one. */
-			continue;
-		} else {
-			struct stat si;
-			FILE *io;
-
-			/*
-			 * no match, and no member. need to be sure.
-			 */
-			io = bfd_cache_lookup(s->objfile->obfd);
-			if (!io)
-				fatal("cannot find BFD's iostream for sym");
-			/*
-			 * see if we are referring to the same file
-			 */
-			if (fstat(fileno(io), &si) < 0)
-				fatal("cannot fstat BFD for sym");
-
-			if (si.st_dev != vip->st_dev
-			    || si.st_ino != vip->st_ino)
-				continue;
-		}
-
-		if (vp->tstart != old_start)
-		  vmap_symtab_1(s, vp, old_start);
 	}
-
+	
 	if (vp->tstart != old_start)
-	  fixup_misc_vector (vp->tstart - old_start);
-
-	symtab_relocated = 1;
+	  vmap_symtab_1(s, vp, old_start);
+      }
+    }
+  if (vp->tstart != old_start)
+    iterate_over_msymbols (relocate_minimal_symbol,
+			   (PTR) (vp->tstart - old_start),
+			   (PTR) NULL, (PTR) NULL);
+  
+  symtab_relocated = 1;
 }
 
 

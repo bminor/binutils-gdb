@@ -57,12 +57,16 @@ fetch_core_registers ()
   return;
 }
 
+/* ARGSUSED */
 void
-fetch_inferior_registers ()
+fetch_inferior_registers (regno)
+     int regno;
 {
   return;
 }
 
+/* ARGSUSED */
+void
 store_inferior_registers (regno)
      int regno;
 {
@@ -88,9 +92,9 @@ store_inferior_registers (regno)
 /* Get all registers from the inferior */
 
 void
-fetch_inferior_registers ()
+fetch_inferior_registers (regno)
+     int regno;
 {
-  register int regno;
   register unsigned int regaddr;
   char buf[MAX_REGISTER_RAW_SIZE];
   register int i;

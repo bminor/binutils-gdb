@@ -32,11 +32,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/user.h>		/* After a.out.h  */
 #include <sys/file.h>
 #include <sys/stat.h>
+
 
 void
-fetch_inferior_registers ()
+fetch_inferior_registers (regno)
+     int regno;
 {
-  register int regno, datum;
+  register int datum;
   register unsigned int regaddr;
   int reg_buf[NUM_REGS+1];
   struct user u;
@@ -124,6 +126,7 @@ fetch_inferior_registers ()
    If REGNO is -1, do this for all registers.
    Otherwise, REGNO specifies which register (so we can save time).  */
 
+void
 store_inferior_registers (regno)
      int regno;
 {

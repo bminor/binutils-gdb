@@ -24,6 +24,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "opcode/m68k.h"
 #include "gdbcore.h"
 
+/* Local function prototypes */
+
+static int
+fetch_arg PARAMS ((unsigned char *, int, int));
+
+static void
+print_base PARAMS ((int, int, FILE *));
+
+static unsigned char *
+print_indexed PARAMS ((int, unsigned char *, CORE_ADDR, FILE *));
+
+static unsigned char *
+print_insn_arg PARAMS ((char *, unsigned char *, unsigned char *, CORE_ADDR,
+			FILE *));
+
 /* 68k instructions are never longer than this many bytes.  */
 #define MAXLEN 22
 
@@ -34,10 +49,6 @@ extern char *reg_names[];
 char *fpcr_names[] = { "", "fpiar", "fpsr", "fpiar/fpsr", "fpcr",
 		     "fpiar/fpcr", "fpsr/fpcr", "fpiar-fpcr"};
 
-static unsigned char *print_insn_arg ();
-static unsigned char *print_indexed ();
-static void print_base ();
-static int fetch_arg ();
 
 #define NEXTBYTE(p)  (p += 2, ((char *)p)[-1])
 
@@ -78,7 +89,7 @@ print_insn (memaddr, stream)
   register int bestmask;
   int best;
 
-  read_memory (memaddr, buffer, MAXLEN);
+  read_memory (memaddr, (char *) buffer, MAXLEN);
 
   bestmask = 0;
   best = -1;
@@ -574,7 +585,7 @@ print_insn_arg (d, buffer, p, addr, stream)
 static int
 fetch_arg (buffer, code, bits)
      unsigned char *buffer;
-     char code;
+     int code;
      int bits;
 {
   register int val;
@@ -674,8 +685,8 @@ static unsigned char *
 print_indexed (basereg, p, addr, stream)
      int basereg;
      unsigned char *p;
-     FILE *stream;
      CORE_ADDR addr;
+     FILE *stream;
 {
   register int word;
   static char *scales[] = {"", "*2", "*4", "*8"};

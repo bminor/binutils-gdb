@@ -17,6 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#if !defined (BUILDSYM_H)
+#define BUILDSYM_H 1
+
 /* This module provides definitions used for creating and adding to
    the symbol table.  These routines are called from various symbol-
    file-reading routines.  
@@ -32,36 +35,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef EXTERN
 #define	EXTERN	extern
 #endif
-
-extern void add_symbol_to_list ();
-struct symbol *find_symbol_in_list ();
-extern void read_type_number ();
-extern struct type *read_type ();
-extern struct type *read_range_type ();
-extern struct type *read_enum_type ();
-extern struct type *read_struct_type ();
-extern struct type *read_array_type ();
-extern struct type **read_args ();
-extern struct type **dbx_lookup_type ();
-extern long read_number ();
-extern void finish_block ();
-extern struct blockvector *make_blockvector ();
-extern void add_undefined_type ();
-extern void really_free_pendings ();
-extern void start_subfile ();
-extern void push_subfile ();
-extern char *pop_subfile ();
-extern struct symtab *end_symtab ();
-extern void scan_file_globals ();
-extern void buildsym_new_init ();
-extern void buildsym_init ();
-extern struct context_stack *push_context ();
-extern void record_line ();
-extern void start_symtab ();
-extern struct symbol *define_symbol ();
-extern struct partial_symtab *start_psymtab ();
-extern void end_psymtab();
-
 
 /* Convert stab register number (from `r' declaration) to a gdb REGNUM.  */
 
@@ -309,4 +282,82 @@ extern struct complaint unknown_symtype_complaint;
 
 /* Function to invoke get the next symbol.  Return the symbol name. */
 
-EXTERN char * (*next_symbol_text_func)();
+EXTERN char *(*next_symbol_text_func) PARAMS ((void));
+
+extern void
+add_symbol_to_list PARAMS ((struct symbol *, struct pending **));
+
+extern struct symbol *
+find_symbol_in_list PARAMS ((struct pending *, char *, int));
+
+extern void
+read_type_number PARAMS ((char **, int *));
+
+extern struct type *
+read_type PARAMS ((char **, struct objfile *));
+
+extern struct type **
+dbx_lookup_type PARAMS ((int [2]));
+
+extern long
+read_number PARAMS ((char **, int));
+
+extern void
+finish_block PARAMS ((struct symbol *, struct pending **,
+		      struct pending_block *, CORE_ADDR, CORE_ADDR,
+		      struct objfile *));
+
+extern void
+add_undefined_type PARAMS ((struct type *));
+
+extern void
+really_free_pendings PARAMS ((int foo));
+
+extern void
+start_subfile PARAMS ((char *, char *));
+
+extern void
+push_subfile PARAMS ((void));
+
+extern char *
+pop_subfile PARAMS ((void));
+
+extern struct symtab *
+end_symtab PARAMS ((CORE_ADDR, int, int,struct objfile *));
+
+extern void
+scan_file_globals PARAMS ((struct objfile *));
+
+extern void
+buildsym_new_init PARAMS ((void));
+
+extern void
+buildsym_init PARAMS ((void));
+
+extern struct context_stack *
+push_context PARAMS ((int, CORE_ADDR));
+
+extern void
+record_line PARAMS ((struct subfile *, int, CORE_ADDR));
+
+extern void
+start_symtab PARAMS ((char *, char *, CORE_ADDR));
+
+extern struct symbol *
+define_symbol PARAMS ((unsigned int, char *, int, int, struct objfile *));
+
+extern struct partial_symtab *
+start_psymtab PARAMS ((struct objfile *, CORE_ADDR, char *, CORE_ADDR, int,
+		       struct partial_symbol *, struct partial_symbol *));
+
+extern void
+end_psymtab PARAMS ((struct partial_symtab *, char **, int, int, CORE_ADDR,
+		     struct partial_symtab **, int));
+
+extern void
+process_one_symbol PARAMS ((int, int, CORE_ADDR, char *, int));
+
+extern int
+hashname PARAMS ((char *));
+
+#endif	/* defined (BUILDSYM_H) */

@@ -19,6 +19,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#if !defined (PARSER_DEFS_H)
+#define PARSER_DEFS_H 1
+
 struct std_regs {
 	char *name;
 	int regnum;
@@ -30,21 +33,6 @@ extern unsigned num_std_regs;
 struct expression *expout;
 int expout_size;
 int expout_ptr;
-
-extern struct type *init_type ();
-
-void write_exp_elt ();
-void write_exp_elt_opcode ();
-void write_exp_elt_sym ();
-void write_exp_elt_longcst ();
-void write_exp_elt_dblcst ();
-void write_exp_elt_type ();
-void write_exp_elt_intern ();
-void write_exp_string ();
-void start_arglist ();
-int end_arglist ();
-void free_funcalls ();
-char *copy_name ();
 
 /* If this is nonzero, this block is used as the lexical context
    for symbol names.  */
@@ -106,10 +94,53 @@ union type_stack_elt {
 union type_stack_elt *type_stack;
 int type_stack_depth, type_stack_size;
 
-void push_type ();
-void push_type_int ();
-enum type_pieces pop_type ();
-int pop_type_int ();
+extern void
+write_exp_elt PARAMS ((union exp_element));
+
+extern void
+write_exp_elt_opcode PARAMS ((enum exp_opcode));
+
+extern void
+write_exp_elt_sym PARAMS ((struct symbol *));
+
+extern void
+write_exp_elt_longcst PARAMS ((LONGEST));
+
+extern void
+write_exp_elt_dblcst PARAMS ((double));
+
+extern void
+write_exp_elt_type PARAMS ((struct type *));
+
+extern void
+write_exp_elt_intern PARAMS ((struct internalvar *));
+
+extern void
+write_exp_string PARAMS ((struct stoken));
+
+extern void
+start_arglist PARAMS ((void));
+
+extern int
+end_arglist PARAMS ((void));
+
+extern void
+free_funcalls PARAMS ((void));
+
+extern char *
+copy_name PARAMS ((struct stoken));
+
+extern void 
+push_type PARAMS ((enum type_pieces));
+
+extern void
+push_type_int PARAMS ((int));
+
+extern enum type_pieces 
+pop_type PARAMS ((void));
+
+extern int
+pop_type_int PARAMS ((void));
 
 /* During parsing of a C expression, the pointer to the next character
    is in this variable.  */
@@ -160,3 +191,5 @@ struct op_print
   enum precedence precedence;
   int right_assoc;
 };
+
+#endif	/* PARSER_DEFS_H */

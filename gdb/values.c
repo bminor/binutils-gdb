@@ -21,13 +21,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <string.h>
 #include "defs.h"
 #include "symtab.h"
+#include "gdbtypes.h"
 #include "value.h"
 #include "gdbcore.h"
 #include "frame.h"
 #include "command.h"
 #include "gdbcmd.h"
 
-extern char *cplus_demangle ();
+/* Local function prototypes. */
+
+static value
+value_headof PARAMS ((value, struct type *, struct type *));
+
+static void
+show_values PARAMS ((char *, int));
+
+static void
+show_convenience PARAMS ((void));
 
 /* The value-history records all the values printed
    by print commands during this session.  Each chunk
@@ -1002,6 +1012,8 @@ value_headof (arg, btype, dtype)
   struct symbol *sym;
   CORE_ADDR pc_for_sym;
   char *demangled_name;
+  struct minimal_symbol *msymbol;
+
   btype = TYPE_VPTR_BASETYPE (dtype);
   check_stub_type (btype);
   if (btype != dtype)
@@ -1011,8 +1023,9 @@ value_headof (arg, btype, dtype)
   vtbl = value_ind (value_field (value_ind (vtbl), TYPE_VPTR_FIELDNO (btype)));
 
   /* Check that VTBL looks like it points to a virtual function table.  */
-  i = find_pc_misc_function (VALUE_ADDRESS (vtbl));
-  if (i < 0 || ! VTBL_PREFIX_P (demangled_name = misc_function_vector[i].name))
+  msymbol = lookup_minimal_symbol_by_pc (VALUE_ADDRESS (vtbl));
+  if (msymbol == NULL
+      || !VTBL_PREFIX_P (demangled_name = msymbol -> name))
     {
       /* If we expected to find a vtable, but did not, let the user
 	 know that we aren't happy, but don't throw an error.
@@ -1249,7 +1262,7 @@ unpack_field_as_long (type, valaddr, fieldno)
      char *valaddr;
      int fieldno;
 {
-  long val;
+  unsigned long val;
   int bitpos = TYPE_FIELD_BITPOS (type, fieldno);
   int bitsize = TYPE_FIELD_BITSIZE (type, fieldno);
 

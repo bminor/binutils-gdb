@@ -301,7 +301,7 @@ nindy_load( filename, from_tty )
 
   tmpfile = coffstrip(scratch_pathname);
   if ( tmpfile ){
-	  old_chain = make_cleanup(unlink,tmpfile);
+	  old_chain = make_cleanup (unlink,tmpfile);
 	  immediate_quit++;
 	  ninDownload( tmpfile, !from_tty );
 /* FIXME, don't we want this merged in here? */

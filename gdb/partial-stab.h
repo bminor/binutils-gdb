@@ -47,8 +47,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	  SET_NAMESTRING();
 
 	bss_ext_symbol:
-	  record_misc_function (namestring, CUR_SYMBOL_VALUE,
-				CUR_SYMBOL_TYPE); /* Always */
+	  record_minimal_symbol (namestring, CUR_SYMBOL_VALUE,
+				 CUR_SYMBOL_TYPE, objfile); /* Always */
 #endif /* DBXREAD_ONLY */
 	  continue;
 
@@ -108,8 +108,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	      || VTBL_PREFIX_P ((namestring+HASH_OFFSET)))
 	    {
 	      /* Not really a function here, but... */
-	      record_misc_function (namestring, CUR_SYMBOL_VALUE,
-				    CUR_SYMBOL_TYPE); /* Always */
+	      record_minimal_symbol (namestring, CUR_SYMBOL_VALUE,
+				    CUR_SYMBOL_TYPE, objfile); /* Always */
 	  }
 #endif /* DBXREAD_ONLY */
 	  continue;
@@ -182,15 +182,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 		 The first one is a directory name; the second the file name.
 		 If pst exists, is empty, and has a filename ending in '/',
 		 we assume the previous N_SO was a directory name. */
-	      if (global_psymbols.next
-		  ==  (global_psymbols.list + pst->globals_offset)
-		&& static_psymbols.next
-		  == (static_psymbols.list + pst->statics_offset)
+	      if (pst -> objfile -> global_psymbols.next
+		  ==  (pst -> objfile -> global_psymbols.list + pst->globals_offset)
+		&& pst -> objfile -> static_psymbols.next
+		  == (pst -> objfile -> static_psymbols.list + pst->statics_offset)
 		&& pst->filename && pst->filename[0]
 		&& pst->filename[strlen(pst->filename)-1] == '/') {
 		  /* Just replace the directory name with the real filename. */
 		  pst->filename =
-		      (char *) obstack_alloc (psymbol_obstack,
+		      (char *) obstack_alloc (&pst->objfile->psymbol_obstack,
 					      strlen (namestring) + 1);
 		  strcpy (pst->filename, namestring);
 		  continue;
@@ -208,7 +208,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	  pst = START_PSYMTAB (objfile, addr,
 			       namestring, valu,
 			       first_symnum * symbol_size,
-			       global_psymbols.next, static_psymbols.next);
+			       objfile -> global_psymbols.next,
+			       objfile -> static_psymbols.next);
 	  continue;
 	}
 
@@ -299,20 +300,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	    case 'T':
 	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
 				   STRUCT_NAMESPACE, LOC_TYPEDEF,
-				   static_psymbols, CUR_SYMBOL_VALUE);
+				   objfile->static_psymbols, CUR_SYMBOL_VALUE);
 	      if (p[2] == 't')
 		{
 		  /* Also a typedef with the same name.  */
 		  ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
 				       VAR_NAMESPACE, LOC_TYPEDEF,
-				       static_psymbols, CUR_SYMBOL_VALUE);
+				       objfile->static_psymbols, CUR_SYMBOL_VALUE);
 		  p += 1;
 		}
 	      goto check_enum;
 	    case 't':
 	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_TYPEDEF,
-				   static_psymbols, CUR_SYMBOL_VALUE);
+				   objfile->static_psymbols, CUR_SYMBOL_VALUE);
 	    check_enum:
 	      /* If this is an enumerated type, we need to
 		 add all the enum constants to the partial symbol
@@ -361,7 +362,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 			 enum constants in psymtabs, just in symtabs.  */
 		      ADD_PSYMBOL_TO_LIST (p, q - p,
 					   VAR_NAMESPACE, LOC_CONST,
-					   static_psymbols, 0);
+					   objfile->static_psymbols, 0);
 		      /* Point past the name.  */
 		      p = q;
 		      /* Skip over the value.  */
@@ -377,7 +378,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	      /* Constant, e.g. from "const" in Pascal.  */
 	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_CONST,
-				   static_psymbols, CUR_SYMBOL_VALUE);
+				   objfile->static_psymbols, CUR_SYMBOL_VALUE);
 	      continue;
 	    default:
 	      /* Skip if the thing following the : is
@@ -418,13 +419,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	    case 'c':
 	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_CONST,
-				   static_psymbols, CUR_SYMBOL_VALUE);
+				   objfile->static_psymbols, CUR_SYMBOL_VALUE);
 	      continue;
 	    case 'S':
 	      CUR_SYMBOL_VALUE += addr;		/* Relocate */
 	      ADD_PSYMBOL_ADDR_TO_LIST (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_STATIC,
-				   static_psymbols, CUR_SYMBOL_VALUE);
+				   objfile->static_psymbols, CUR_SYMBOL_VALUE);
 	      continue;
 	    case 'G':
 	      CUR_SYMBOL_VALUE += addr;		/* Relocate */
@@ -432,19 +433,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 		 wrong.  See the code that reads 'G's for symtabs. */
 	      ADD_PSYMBOL_ADDR_TO_LIST (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_STATIC,
-				   global_psymbols, CUR_SYMBOL_VALUE);
+				   objfile->global_psymbols, CUR_SYMBOL_VALUE);
 	      continue;
 
 	    case 't':
 	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_TYPEDEF,
-				   static_psymbols, CUR_SYMBOL_VALUE);
+				   objfile->static_psymbols, CUR_SYMBOL_VALUE);
 	      continue;
 
 	    case 'f':
 	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_BLOCK,
-				   static_psymbols, CUR_SYMBOL_VALUE);
+				   objfile->static_psymbols, CUR_SYMBOL_VALUE);
 	      continue;
 
 	      /* Global functions were ignored here, but now they
@@ -455,7 +456,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	    case 'F':
 	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_BLOCK,
-				   global_psymbols, CUR_SYMBOL_VALUE);
+				   objfile->global_psymbols, CUR_SYMBOL_VALUE);
 	      continue;
 
 	      /* Two things show up here (hopefully); static symbols of

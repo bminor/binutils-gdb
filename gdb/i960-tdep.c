@@ -463,20 +463,18 @@ CORE_ADDR
 leafproc_return (ip)
      CORE_ADDR ip;	/* ip from currently executing function	*/
 {
-  int i;
-  register struct misc_function *mf;
+  register struct minimal_symbol *msymbol;
   char *p;
   int dst;
   unsigned int insn1, insn2;
   CORE_ADDR return_addr;
   char *index ();
 
-  if ((i = find_pc_misc_function (ip)) >= 0)
+  if ((msymbol = lookup_minimal_symbol_by_pc (ip)) != NULL)
     {
-      mf = &misc_function_vector[i];
-      if ((p = index (mf->name, '.')) && !strcmp (p, ".lf"))
+      if ((p = index (msymbol -> name, '.')) && !strcmp (p, ".lf"))
 	{
-	  if (next_insn (mf->address, &insn1, &insn2)
+	  if (next_insn (msymbol -> address, &insn1, &insn2)
 	      && (insn1 & 0xff87ffff) == 0x5c80161e       /* mov g14, gx */
 	      && (dst = REG_SRCDST (insn1)) <= G0_REGNUM + 7)
 	    {
@@ -485,7 +483,7 @@ leafproc_return (ip)
 		 the return address from g14; otherwise, read it
 		 from the register into which g14 was moved.  */
 
-	      return_addr = read_register ((ip == mf->address)
+	      return_addr = read_register ((ip == msymbol->address)
 				           ? G14_REGNUM : dst);
 
 	      /* We know we are in a leaf procedure, but we don't know
@@ -498,7 +496,7 @@ leafproc_return (ip)
 
 	      if (!next_insn (return_addr, &insn1, &insn2)
 		  || (insn1 & 0xff000000) != 0xa000000   /* ret */
-	          || find_pc_misc_function (return_addr) != i)
+	          || lookup_minimal_symbol_by_pc (return_addr) != msymbol)
 		return (return_addr);
 	    }
 	}

@@ -35,7 +35,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/ptrace.h>
 #endif
 
-
 /* Extract the register values out of the core file and store
    them where `read_register' will find them.
 

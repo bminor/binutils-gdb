@@ -1,6 +1,6 @@
 /* DWARF debugging format support for GDB.
-   Copyright (C) 1991 Free Software Foundation, Inc.
-   Written by Fred Fish at Cygnus Support, portions based on dbxread.c,
+   Copyright (C) 1991, 1992 Free Software Foundation, Inc.
+   Written by Fred Fish at Cygnus Support.  Portions based on dbxread.c,
    mipsread.c, coffread.c, and dwarfread.c from a Data General SVR4 gdb port.
 
 This file is part of GDB.
@@ -55,19 +55,15 @@ other things to work on, if you get bored. :-)
 */
 
 #include <stdio.h>
-#ifdef __STDC__
-#include <stdarg.h>
-#else
 #include <varargs.h>
-#endif
 #include <fcntl.h>
 
 #include "defs.h"
 #include "bfd.h"
 #include "symtab.h"
+#include "gdbtypes.h"
 #include "symfile.h"
 #include "elf/dwarf.h"
-#include "ansidecl.h"
 #include "buildsym.h"
 
 #ifdef MAINTENANCE	/* Define to 1 to compile in some maintenance stuff */
@@ -266,131 +262,119 @@ static struct type **utypes;	/* Pointer to array of user type pointers */
 static int numutypes;		/* Max number of user type pointers */
 
 /* Forward declarations of static functions so we don't have to worry
-   about ordering within this file.  The EXFUN macro may be slightly
-   misleading.  Should probably be called DCLFUN instead, or something
-   more intuitive, since it can be used for both static and external
-   definitions. */
+   about ordering within this file.  */
 
 static void
-EXFUN (dwarfwarn, (char *fmt DOTS));
+add_enum_psymbol PARAMS ((struct dieinfo *, struct objfile *));
 
 static void
-EXFUN (scan_partial_symbols, (char *thisdie AND char *enddie));
+read_file_scope PARAMS ((struct dieinfo *, char *, char *, struct objfile *));
 
 static void
-EXFUN (scan_compilation_units,
-       (char *filename AND char *thisdie AND char *enddie
-	AND unsigned int dbfoff AND unsigned int lnoffset
-        AND struct objfile *objfile));
-
-static struct partial_symtab *
-EXFUN(dwarf_start_psymtab, (struct objfile *objfile AND CORE_ADDR addr
-		      AND char *filename AND CORE_ADDR textlow
-		      AND CORE_ADDR texthigh AND int dbfoff
-		      AND int curoff AND int culength AND int lnfoff
-		      AND struct partial_symbol *global_syms
-		      AND struct partial_symbol *static_syms));
+read_func_scope PARAMS ((struct dieinfo *, char *, char *, struct objfile *));
 
 static void
-EXFUN(add_partial_symbol, (struct dieinfo *dip));
+read_lexical_block_scope PARAMS ((struct dieinfo *, char *, char *,
+				  struct objfile *));
 
 static void
-EXFUN(init_psymbol_list, (int total_symbols));
+dwarfwarn ();
 
 static void
-EXFUN(basicdieinfo, (struct dieinfo *dip AND char *diep));
+scan_partial_symbols PARAMS ((char *, char *, struct objfile *));
 
 static void
-EXFUN(completedieinfo, (struct dieinfo *dip));
+scan_compilation_units PARAMS ((char *, char *, char *, unsigned int,
+				unsigned int, struct objfile *));
 
 static void
-EXFUN(dwarf_psymtab_to_symtab, (struct partial_symtab *pst));
+add_partial_symbol PARAMS ((struct dieinfo *, struct objfile *));
 
 static void
-EXFUN(psymtab_to_symtab_1, (struct partial_symtab *pst));
+init_psymbol_list PARAMS ((struct objfile *, int));
+
+static void
+basicdieinfo PARAMS ((struct dieinfo *, char *));
+
+static void
+completedieinfo PARAMS ((struct dieinfo *));
+
+static void
+dwarf_psymtab_to_symtab PARAMS ((struct partial_symtab *));
+
+static void
+psymtab_to_symtab_1 PARAMS ((struct partial_symtab *));
 
 static struct symtab *
-EXFUN(read_ofile_symtab, (struct partial_symtab *pst));
+read_ofile_symtab PARAMS ((struct partial_symtab *));
 
 static void
-EXFUN(process_dies,
-     (char *thisdie AND char *enddie AND struct objfile *objfile));
+process_dies PARAMS ((char *, char *, struct objfile *));
 
 static void
-EXFUN(read_structure_scope,
-     (struct dieinfo *dip AND char *thisdie AND char *enddie AND
-      struct objfile *objfile));
+read_structure_scope PARAMS ((struct dieinfo *, char *, char *,
+			      struct objfile *));
 
 static struct type *
-EXFUN(decode_array_element_type, (char *scan AND char *end));
+decode_array_element_type PARAMS ((char *, char *));
 
 static struct type *
-EXFUN(decode_subscr_data, (char *scan AND char *end));
+decode_subscr_data PARAMS ((char *, char *));
 
 static void
-EXFUN(dwarf_read_array_type, (struct dieinfo *dip));
+dwarf_read_array_type PARAMS ((struct dieinfo *));
 
 static void
-EXFUN(read_tag_pointer_type, (struct dieinfo *dip));
+read_tag_pointer_type PARAMS ((struct dieinfo *dip));
 
 static void
-EXFUN(read_subroutine_type,
-     (struct dieinfo *dip AND char *thisdie AND char *enddie));
+read_subroutine_type PARAMS ((struct dieinfo *, char *, char *));
 
 static void
-EXFUN(read_enumeration,
-     (struct dieinfo *dip AND char *thisdie AND char *enddie));
+read_enumeration PARAMS ((struct dieinfo *, char *, char *, struct objfile *));
 
 static struct type *
-EXFUN(struct_type,
-      (struct dieinfo *dip AND char *thisdie AND char *enddie AND
-       struct objfile *objfile));
+struct_type PARAMS ((struct dieinfo *, char *, char *, struct objfile *));
 
 static struct type *
-EXFUN(enum_type, (struct dieinfo *dip));
+enum_type PARAMS ((struct dieinfo *, struct objfile *));
 
 static void
-EXFUN(decode_line_numbers, (char *linetable));
+decode_line_numbers PARAMS ((char *));
 
 static struct type *
-EXFUN(decode_die_type, (struct dieinfo *dip));
+decode_die_type PARAMS ((struct dieinfo *));
 
 static struct type *
-EXFUN(decode_mod_fund_type, (char *typedata));
+decode_mod_fund_type PARAMS ((char *));
 
 static struct type *
-EXFUN(decode_mod_u_d_type, (char *typedata));
+decode_mod_u_d_type PARAMS ((char *));
 
 static struct type *
-EXFUN(decode_modified_type,
-      (unsigned char *modifiers AND unsigned short modcount AND int mtype));
+decode_modified_type PARAMS ((unsigned char *, unsigned int, int));
 
 static struct type *
-EXFUN(decode_fund_type, (unsigned short fundtype));
+decode_fund_type PARAMS ((unsigned int));
 
 static char *
-EXFUN(create_name, (char *name AND struct obstack *obstackp));
+create_name PARAMS ((char *, struct obstack *));
 
 static struct type *
-EXFUN(lookup_utype, (DIEREF dieref));
+lookup_utype PARAMS ((DIEREF));
 
 static struct type *
-EXFUN(alloc_utype, (DIEREF dieref AND struct type *usetype));
+alloc_utype PARAMS ((DIEREF, struct type *));
 
 static struct symbol *
-EXFUN(new_symbol, (struct dieinfo *dip));
+new_symbol PARAMS ((struct dieinfo *, struct objfile *));
 
 static int
-EXFUN(locval, (char *loc));
+locval PARAMS ((char *));
 
 static void
-EXFUN(record_misc_function, (char *name AND CORE_ADDR address AND
-			     enum misc_function_type));
-
-static int
-EXFUN(compare_psymbols,
-      (struct partial_symbol *s1 AND struct partial_symbol *s2));
-
+record_minimal_symbol PARAMS ((char *, CORE_ADDR, enum minimal_symbol_type,
+			       struct objfile *));
 
 /*
 
@@ -425,18 +409,17 @@ RETURNS
  */
 
 void
-DEFUN(dwarf_build_psymtabs,
-      (desc, filename, addr, mainline, dbfoff, dbsize, lnoffset, lnsize,
-	objfile),
-      int desc AND
-      char *filename AND
-      CORE_ADDR addr AND
-      int mainline AND
-      unsigned int dbfoff AND
-      unsigned int dbsize AND
-      unsigned int lnoffset AND
-      unsigned int lnsize AND
-      struct objfile *objfile)
+dwarf_build_psymtabs (desc, filename, addr, mainline, dbfoff, dbsize,
+		      lnoffset, lnsize, objfile)
+     int desc;
+     char *filename;
+     CORE_ADDR addr;
+     int mainline;
+     unsigned int dbfoff;
+     unsigned int dbsize;
+     unsigned int lnoffset;
+     unsigned int lnsize;
+     struct objfile *objfile;
 {
   struct cleanup *back_to;
   
@@ -454,9 +437,9 @@ DEFUN(dwarf_build_psymtabs,
      Since we have no idea how many DIES we are looking at, we just guess
      some arbitrary value. */
   
-  if (mainline || global_psymbols.size == 0 || static_psymbols.size == 0)
+  if (mainline || objfile->global_psymbols.size == 0 || objfile->static_psymbols.size == 0)
     {
-      init_psymbol_list (1024);
+      init_psymbol_list (objfile, 1024);
     }
   
   /* From this point on, we don't need to pass mainline around, so zap
@@ -486,28 +469,32 @@ DEFUN(dwarf_build_psymtabs,
 
 LOCAL FUNCTION
 
-	record_misc_function -- add entry to miscellaneous function vector
+	record_minimal_symbol -- add entry to gdb's minimal symbol table
 
 SYNOPSIS
 
-	static void record_misc_function (char *name, CORE_ADDR address,
-					  enum misc_function_type mf_type)
+	static void record_minimal_symbol (char *name, CORE_ADDR address,
+					  enum minimal_symbol_type ms_type,
+					  struct objfile *objfile)
 
 DESCRIPTION
 
 	Given a pointer to the name of a symbol that should be added to the
-	miscellaneous function vector, and the address associated with that
+	minimal symbol table, and the address associated with that
 	symbol, records this information for later use in building the
-	miscellaneous function vector.
+	minimal symbol table.
 
  */
 
 static void
-DEFUN(record_misc_function, (name, address, mf_type),
-      char *name AND CORE_ADDR address AND enum misc_function_type mf_type)
+record_minimal_symbol (name, address, ms_type, objfile)
+     char *name;
+     CORE_ADDR address;
+     enum minimal_symbol_type ms_type;
+     struct objfile *objfile;
 {
-  prim_record_misc_function (obsavestring (name, strlen (name)), address,
-			     mf_type);
+  name = obsavestring (name, strlen (name), &objfile -> symbol_obstack);
+  prim_record_minimal_symbol (name, address, ms_type);
 }
 
 /*
@@ -538,28 +525,6 @@ NOTES
 	information for the DIE where the problem was noticed.
 */
 
-#ifdef __STDC__
-
-static void
-DEFUN(dwarfwarn, (fmt), char *fmt DOTS)
-{
-  va_list ap;
-  
-  va_start (ap, fmt);
-  warning_setup ();
-  fprintf (stderr, "DWARF warning (ref 0x%x): ", curdie -> dieref);
-  if (curdie -> at_name)
-    {
-      fprintf (stderr, "'%s': ", curdie -> at_name);
-    }
-  vfprintf (stderr, fmt, ap);
-  fprintf (stderr, "\n");
-  fflush (stderr);
-  va_end (ap);
-}
-
-#else
-
 static void
 dwarfwarn (va_alist)
      va_dcl
@@ -581,55 +546,6 @@ dwarfwarn (va_alist)
   va_end (ap);
 }
 
-#endif
-
-/*
-
-LOCAL FUNCTION
-
-	compare_psymbols -- compare two partial symbols by name
-
-DESCRIPTION
-
-	Given pointer to two partial symbol table entries, compare
-	them by name and return -N, 0, or +N (ala strcmp).  Typically
-	used by sorting routines like qsort().
-
-NOTES
-
-	This is a copy from dbxread.c.  It should be moved to a generic
-	gdb file and made available for all psymtab builders (FIXME).
-
-	Does direct compare of first two characters before punting
-	and passing to strcmp for longer compares.  Note that the
-	original version had a bug whereby two null strings or two
-	identically named one character strings would return the
-	comparison of memory following the null byte.
-
- */
-
-static int
-DEFUN(compare_psymbols, (s1, s2), 
-      struct partial_symbol *s1 AND
-      struct partial_symbol *s2)
-{
-  register char *st1 = SYMBOL_NAME (s1);
-  register char *st2 = SYMBOL_NAME (s2);
-
-  if ((st1[0] - st2[0]) || !st1[0])
-    {
-      return (st1[0] - st2[0]);
-    }
-  else if ((st1[1] - st2[1]) || !st1[1])
-    {
-      return (st1[1] - st2[1]);
-    }
-  else
-    {
-      return (strcmp (st1 + 2, st2 + 2));
-    }
-}
-
 /*
 
 LOCAL FUNCTION
@@ -649,11 +565,11 @@ DESCRIPTION
  */
 
 static void
-DEFUN(read_lexical_block_scope, (dip, thisdie, enddie, objfile),
-     struct dieinfo *dip AND
-     char *thisdie AND
-     char *enddie AND
-     struct objfile *objfile)
+read_lexical_block_scope (dip, thisdie, enddie, objfile)
+     struct dieinfo *dip;
+     char *thisdie;
+     char *enddie;
+     struct objfile *objfile;
 {
   register struct context_stack *new;
 
@@ -663,7 +579,7 @@ DEFUN(read_lexical_block_scope, (dip, thisdie, enddie, objfile),
   if (local_symbols != NULL)
     {
       finish_block (0, &local_symbols, new -> old_blocks, new -> start_addr,
-		    dip -> at_high_pc);
+		    dip -> at_high_pc, objfile);
     }
   local_symbols = new -> locals;
 }
@@ -688,7 +604,8 @@ DESCRIPTION
  */
 
 static struct type *
-DEFUN(lookup_utype, (dieref), DIEREF dieref)
+lookup_utype (dieref)
+     DIEREF dieref;
 {
   struct type *type = NULL;
   int utypeidx;
@@ -728,9 +645,9 @@ DESCRIPTION
  */
 
 static struct type *
-DEFUN(alloc_utype, (dieref, utypep),
-     DIEREF dieref AND
-     struct type *utypep)
+alloc_utype (dieref, utypep)
+     DIEREF dieref;
+     struct type *utypep;
 {
   struct type **typep;
   int utypeidx;
@@ -739,7 +656,7 @@ DEFUN(alloc_utype, (dieref, utypep),
   typep = utypes + utypeidx;
   if ((utypeidx < 0) || (utypeidx >= numutypes))
     {
-      utypep = builtin_type_int;
+      utypep = lookup_fundamental_type (current_objfile, FT_INTEGER);
       dwarfwarn ("reference to DIE (0x%x) outside compilation unit", dieref);
     }
   else if (*typep != NULL)
@@ -752,8 +669,10 @@ DEFUN(alloc_utype, (dieref, utypep),
       if (utypep == NULL)
 	{
 	  utypep = (struct type *)
-	    obstack_alloc (symbol_obstack, sizeof (struct type));
+	    obstack_alloc (&current_objfile -> type_obstack,
+			   sizeof (struct type));
 	  (void) memset (utypep, 0, sizeof (struct type));
+	  TYPE_OBJFILE (utypep) = current_objfile;
 	}
       *typep = utypep;
     }
@@ -778,7 +697,8 @@ DESCRIPTION
  */
 
 static struct type *
-DEFUN(decode_die_type, (dip), struct dieinfo *dip)
+decode_die_type (dip)
+     struct dieinfo *dip;
 {
   struct type *type = NULL;
   
@@ -803,7 +723,7 @@ DEFUN(decode_die_type, (dip), struct dieinfo *dip)
     }
   else
     {
-      type = builtin_type_int;
+      type = lookup_fundamental_type (current_objfile, FT_INTEGER);
     }
   return (type);
 }
@@ -829,11 +749,11 @@ DESCRIPTION
  */
 
 static struct type *
-DEFUN(struct_type, (dip, thisdie, enddie, objfile),
-     struct dieinfo *dip AND
-     char *thisdie AND
-     char *enddie AND
-     struct objfile *objfile)
+struct_type (dip, thisdie, enddie, objfile)
+     struct dieinfo *dip;
+     char *thisdie;
+     char *enddie;
+     struct objfile *objfile;
 {
   struct type *type;
   struct nextfield {
@@ -878,7 +798,8 @@ DEFUN(struct_type, (dip, thisdie, enddie, objfile),
       && *dip -> at_name != '~'
       && *dip -> at_name != '.')
     {
-      TYPE_NAME (type) = obconcat (tpart1, " ", dip -> at_name);
+      TYPE_NAME (type) = obconcat (&current_objfile -> type_obstack,
+				   tpart1, " ", dip -> at_name);
     }
   if (dip -> at_byte_size != 0)
     {
@@ -934,7 +855,8 @@ DEFUN(struct_type, (dip, thisdie, enddie, objfile),
     {
       TYPE_NFIELDS (type) = nfields;
       TYPE_FIELDS (type) = (struct field *)
-	obstack_alloc (symbol_obstack, sizeof (struct field) * nfields);
+	obstack_alloc (&current_objfile -> type_obstack,
+		       sizeof (struct field) * nfields);
       /* Copy the saved-up fields into the field vector.  */
       for (n = nfields; list; list = list -> next)
 	{
@@ -979,11 +901,11 @@ NOTES
  */
 
 static void
-DEFUN(read_structure_scope, (dip, thisdie, enddie, objfile),
-     struct dieinfo *dip AND
-     char *thisdie AND
-     char *enddie AND
-     struct objfile *objfile)
+read_structure_scope (dip, thisdie, enddie, objfile)
+     struct dieinfo *dip;
+     char *thisdie;
+     char *enddie;
+     struct objfile *objfile;
 {
   struct type *type;
   struct symbol *sym;
@@ -991,7 +913,7 @@ DEFUN(read_structure_scope, (dip, thisdie, enddie, objfile),
   type = struct_type (dip, thisdie, enddie, objfile);
   if (!(TYPE_FLAGS (type) & TYPE_FLAG_STUB))
     {
-      if ((sym = new_symbol (dip)) != NULL)
+      if ((sym = new_symbol (dip, objfile)) != NULL)
 	{
 	  SYMBOL_TYPE (sym) = type;
 	}
@@ -1018,7 +940,9 @@ DESCRIPTION
  */
 
 static struct type *
-DEFUN(decode_array_element_type, (scan, end), char *scan AND char *end)
+decode_array_element_type (scan, end)
+     char *scan;
+     char *end;
 {
   struct type *typep;
   short attribute;
@@ -1048,7 +972,7 @@ DEFUN(decode_array_element_type, (scan, end), char *scan AND char *end)
       break;
     default:
       SQUAWK (("bad array element type attribute 0x%x", attribute));
-      typep = builtin_type_int;
+      typep = lookup_fundamental_type (current_objfile, FT_INTEGER);
       break;
     }
   return (typep);
@@ -1087,7 +1011,9 @@ BUGS
  */
 
 static struct type *
-DEFUN(decode_subscr_data, (scan, end), char *scan AND char *end)
+decode_subscr_data (scan, end)
+     char *scan;
+     char *end;
 {
   struct type *typep = NULL;
   struct type *nexttype;
@@ -1121,8 +1047,10 @@ DEFUN(decode_subscr_data, (scan, end), char *scan AND char *end)
 	  if (nexttype != NULL)
 	    {
 	      typep = (struct type *)
-		obstack_alloc (symbol_obstack, sizeof (struct type));
+		obstack_alloc (&current_objfile -> type_obstack,
+			       sizeof (struct type));
 	      (void) memset (typep, 0, sizeof (struct type));
+	      TYPE_OBJFILE (typep) = current_objfile;
 	      TYPE_CODE (typep) = TYPE_CODE_ARRAY;
 	      TYPE_LENGTH (typep) = TYPE_LENGTH (nexttype);
 	      TYPE_LENGTH (typep) *= lowbound + highbound + 1;
@@ -1163,7 +1091,8 @@ DESCRIPTION
  */
 
 static void
-DEFUN(dwarf_read_array_type, (dip), struct dieinfo *dip)
+dwarf_read_array_type (dip)
+     struct dieinfo *dip;
 {
   struct type *type;
   struct type *utype;
@@ -1189,7 +1118,8 @@ DEFUN(dwarf_read_array_type, (dip), struct dieinfo *dip)
 	      utype = alloc_utype (dip -> dieref, NULL);
 	    }
 	  TYPE_CODE (utype) = TYPE_CODE_ARRAY;
-	  TYPE_TARGET_TYPE (utype) = builtin_type_int;
+	  TYPE_TARGET_TYPE (utype) = 
+      	    lookup_fundamental_type (current_objfile, FT_INTEGER);
 	  TYPE_LENGTH (utype) = 1 * TYPE_LENGTH (TYPE_TARGET_TYPE (utype));
 	}
       else
@@ -1225,7 +1155,8 @@ DESCRIPTION
  */
 
 static void
-DEFUN(read_tag_pointer_type, (dip), struct dieinfo *dip)
+read_tag_pointer_type (dip)
+     struct dieinfo *dip;
 {
   struct type *type;
   struct type *utype;
@@ -1281,10 +1212,10 @@ NOTES
  */
 
 static void
-DEFUN(read_subroutine_type, (dip, thisdie, enddie),
-     struct dieinfo *dip AND
-     char *thisdie AND
-     char *enddie)
+read_subroutine_type (dip, thisdie, enddie)
+     struct dieinfo *dip;
+     char *thisdie;
+     char *enddie;
 {
   struct type *type;		/* Type that this function returns */
   struct type *ftype;		/* Function that returns above type */
@@ -1323,7 +1254,7 @@ LOCAL FUNCTION
 SYNOPSIS
 
 	static void read_enumeration (struct dieinfo *dip, char *thisdie,
-		char *enddie)
+		char *enddie, struct objfile *objfile)
 
 DESCRIPTION
 
@@ -1338,16 +1269,17 @@ NOTES
  */
 
 static void
-DEFUN(read_enumeration, (dip, thisdie, enddie),
-     struct dieinfo *dip AND
-     char *thisdie AND
-     char *enddie)
+read_enumeration (dip, thisdie, enddie, objfile)
+     struct dieinfo *dip;
+     char *thisdie;
+     char *enddie;
+     struct objfile *objfile;
 {
   struct type *type;
   struct symbol *sym;
   
-  type = enum_type (dip);
-  if ((sym = new_symbol (dip)) != NULL)
+  type = enum_type (dip, objfile);
+  if ((sym = new_symbol (dip, objfile)) != NULL)
     {
       SYMBOL_TYPE (sym) = type;
     }
@@ -1361,7 +1293,7 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	static type *enum_type (struct dieinfo *dip)
+	static type *enum_type (struct dieinfo *dip, struct objfile *objfile)
 
 DESCRIPTION
 
@@ -1378,14 +1310,16 @@ NOTES
 	Note that the DWARF specification explicitly mandates that enum
 	constants occur in reverse order from the source program order,
 	for "consistency" and because this ordering is easier for many
-	compilers to generate. (Draft 5, sec 3.9.5, Enumeration type
+	compilers to generate. (Draft 6, sec 3.8.5, Enumeration type
 	Entries).  Because gdb wants to see the enum members in program
 	source order, we have to ensure that the order gets reversed while
 	we are processing them.
  */
 
 static struct type *
-DEFUN(enum_type, (dip), struct dieinfo *dip)
+enum_type (dip, objfile)
+     struct dieinfo *dip;
+     struct objfile *objfile;
 {
   struct type *type;
   struct nextfield {
@@ -1415,7 +1349,8 @@ DEFUN(enum_type, (dip), struct dieinfo *dip)
       && *dip -> at_name != '~'
       && *dip -> at_name != '.')
     {
-      TYPE_NAME (type) = obconcat ("enum", " ", dip -> at_name);
+      TYPE_NAME (type) = obconcat (&current_objfile -> type_obstack, "enum",
+				   " ", dip -> at_name);
     }
   if (dip -> at_byte_size != 0)
     {
@@ -1448,10 +1383,10 @@ DEFUN(enum_type, (dip), struct dieinfo *dip)
 	  scan += strlen (scan) + 1;
 	  nfields++;
 	  /* Handcraft a new symbol for this enum member. */
-	  sym = (struct symbol *) obstack_alloc (symbol_obstack,
+	  sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
 						 sizeof (struct symbol));
 	  (void) memset (sym, 0, sizeof (struct symbol));
-	  SYMBOL_NAME (sym) = create_name (list -> field.name, symbol_obstack);
+	  SYMBOL_NAME (sym) = create_name (list -> field.name, &objfile->symbol_obstack);
 	  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
 	  SYMBOL_CLASS (sym) = LOC_CONST;
 	  SYMBOL_TYPE (sym) = type;
@@ -1467,7 +1402,7 @@ DEFUN(enum_type, (dip), struct dieinfo *dip)
 	{
 	  TYPE_NFIELDS (type) = nfields;
 	  TYPE_FIELDS (type) = (struct field *)
-	    obstack_alloc (symbol_obstack, sizeof (struct field) * nfields);
+	    obstack_alloc (&objfile->symbol_obstack, sizeof (struct field) * nfields);
 	  /* Copy the saved-up fields into the field vector.  */
 	  for (n = 0; (n < nfields) && (list != NULL); list = list -> next)
 	    {
@@ -1500,11 +1435,11 @@ DESCRIPTION
  */
 
 static void
-DEFUN(read_func_scope, (dip, thisdie, enddie, objfile),
-     struct dieinfo *dip AND
-     char *thisdie AND
-     char *enddie AND
-     struct objfile *objfile)
+read_func_scope (dip, thisdie, enddie, objfile)
+     struct dieinfo *dip;
+     char *thisdie;
+     char *enddie;
+     struct objfile *objfile;
 {
   register struct context_stack *new;
   
@@ -1519,13 +1454,13 @@ DEFUN(read_func_scope, (dip, thisdie, enddie, objfile),
       main_scope_highpc = dip -> at_high_pc;
     }
   new = push_context (0, dip -> at_low_pc);
-  new -> name = new_symbol (dip);
+  new -> name = new_symbol (dip, objfile);
   list_in_scope = &local_symbols;
   process_dies (thisdie + dip -> dielength, enddie, objfile);
   new = pop_context ();
   /* Make a block for the local symbols within.  */
   finish_block (new -> name, &local_symbols, new -> old_blocks,
-		new -> start_addr, dip -> at_high_pc);
+		new -> start_addr, dip -> at_high_pc, objfile);
   list_in_scope = &file_symbols;
 }
 
@@ -1552,11 +1487,11 @@ DESCRIPTION
  */
 
 static void
-DEFUN(read_file_scope, (dip, thisdie, enddie, objfile),
-     struct dieinfo *dip AND
-     char *thisdie AND
-     char *enddie AND
-     struct objfile *objfile)
+read_file_scope (dip, thisdie, enddie, objfile)
+     struct dieinfo *dip;
+     char *thisdie;
+     char *enddie;
+     struct objfile *objfile;
 {
   struct cleanup *back_to;
   struct symtab *symtab;
@@ -1615,8 +1550,10 @@ DESCRIPTION
  */
 
 static void
-DEFUN(process_dies, (thisdie, enddie, objfile),
-      char *thisdie AND char *enddie AND struct objfile *objfile)
+process_dies (thisdie, enddie, objfile)
+     char *thisdie;
+     char *enddie;
+     struct objfile *objfile;
 {
   char *nextdie;
   struct dieinfo di;
@@ -1663,7 +1600,7 @@ DEFUN(process_dies, (thisdie, enddie, objfile),
 	      read_structure_scope (&di, thisdie, nextdie, objfile);
 	      break;
 	    case TAG_enumeration_type:
-	      read_enumeration (&di, thisdie, nextdie);
+	      read_enumeration (&di, thisdie, nextdie, objfile);
 	      break;
 	    case TAG_subroutine_type:
 	      read_subroutine_type (&di, thisdie, nextdie);
@@ -1675,7 +1612,7 @@ DEFUN(process_dies, (thisdie, enddie, objfile),
 	      read_tag_pointer_type (&di);
 	      break;
 	    default:
-	      (void) new_symbol (&di);
+	      (void) new_symbol (&di, objfile);
 	      break;
 	    }
 	}
@@ -1744,7 +1681,8 @@ BUGS
  */
 
 static void
-DEFUN(decode_line_numbers, (linetable), char *linetable)
+decode_line_numbers (linetable)
+     char *linetable;
 {
   char *tblscan;
   char *tblend;
@@ -1810,7 +1748,8 @@ NOTES
  */
 
 static int
-DEFUN(locval, (loc), char *loc)
+locval (loc)
+     char *loc;
 {
   unsigned short nbytes;
   auto int stack[64];
@@ -1887,17 +1826,26 @@ SYNOPSIS
 
 DESCRIPTION
 
+	When expanding a partial symbol table entry to a full symbol table
+	entry, this is the function that gets called to read in the symbols
+	for the compilation unit.
+
+	Returns a pointer to the newly constructed symtab (which is now
+	the new first one on the objfile's symtab list).
  */
 
 static struct symtab *
-DEFUN(read_ofile_symtab, (pst),
-      struct partial_symtab *pst)
+read_ofile_symtab (pst)
+     struct partial_symtab *pst;
 {
   struct cleanup *back_to;
   long lnsize;
   int foffset;
-  bfd *abfd = pst->objfile->obfd;
-  
+  bfd *abfd;
+
+  abfd = pst -> objfile -> obfd;
+  current_objfile = pst -> objfile;
+
   /* Allocate a buffer for the entire chunk of DIE's for this compilation
      unit, seek to the location in the file, and read in all the DIE's. */
 
@@ -1940,7 +1888,8 @@ DEFUN(read_ofile_symtab, (pst),
 
   process_dies (dbbase, dbbase + DBLENGTH(pst), pst -> objfile);
   do_cleanups (back_to);
-  return (symtab_list);
+  current_objfile = NULL;
+  return (pst -> objfile -> symtabs);
 }
 
 /*
@@ -1961,52 +1910,54 @@ DESCRIPTION
 */
 
 static void
-DEFUN(psymtab_to_symtab_1,
-      (pst),
-      struct partial_symtab *pst)
+psymtab_to_symtab_1 (pst)
+     struct partial_symtab *pst;
 {
   int i;
   
-  if (!pst)
+  if (pst != NULL)
     {
-      return;
-    }
-  if (pst->readin)
-    {
-      fprintf (stderr, "Psymtab for %s already read in.  Shouldn't happen.\n",
-	       pst -> filename);
-      return;
-    }
-  
-  /* Read in all partial symtabs on which this one is dependent */
-  for (i = 0; i < pst -> number_of_dependencies; i++)
-    if (!pst -> dependencies[i] -> readin)
-      {
-	/* Inform about additional files that need to be read in.  */
-	if (info_verbose)
-	  {
-	    fputs_filtered (" ", stdout);
-	    wrap_here ("");
-	    fputs_filtered ("and ", stdout);
-	    wrap_here ("");
-	    printf_filtered ("%s...", pst -> dependencies[i] -> filename);
-	    wrap_here ("");		/* Flush output */
-	    fflush (stdout);
-	  }
-	psymtab_to_symtab_1 (pst -> dependencies[i]);
-      }
-  
-  if (DBLENGTH(pst))		/* Otherwise it's a dummy */
-    {
-      pst -> symtab = read_ofile_symtab (pst);
-      if (info_verbose)
+      if (pst->readin)
 	{
-	  printf_filtered ("%d DIE's, sorting...", diecount);
-	  fflush (stdout);
+	  warning ("Psymtab for %s already read in.  Shouldn't happen.",
+		   pst -> filename);
 	}
-      sort_symtab_syms (pst -> symtab);
+      else
+	{
+	  /* Read in all partial symtabs on which this one is dependent */
+	  for (i = 0; i < pst -> number_of_dependencies; i++)
+	    {
+	      if (!pst -> dependencies[i] -> readin)
+		{
+		  /* Inform about additional files that need to be read in. */
+		  if (info_verbose)
+		    {
+		      fputs_filtered (" ", stdout);
+		      wrap_here ("");
+		      fputs_filtered ("and ", stdout);
+		      wrap_here ("");
+		      printf_filtered ("%s...",
+				       pst -> dependencies[i] -> filename);
+		      wrap_here ("");
+		      fflush (stdout);		/* Flush output */
+		    }
+		  psymtab_to_symtab_1 (pst -> dependencies[i]);
+		}
+	    }	  
+	  if (DBLENGTH (pst))		/* Otherwise it's a dummy */
+	    {
+	      pst -> symtab = read_ofile_symtab (pst);
+	      if (info_verbose)
+		{
+		  printf_filtered ("%d DIE's, sorting...", diecount);
+		  wrap_here ("");
+		  fflush (stdout);
+		}
+	      sort_symtab_syms (pst -> symtab);
+	    }
+	  pst -> readin = 1;
+	}
     }
-  pst -> readin = 1;
 }
 
 /*
@@ -2028,44 +1979,48 @@ DESCRIPTION
 */
 
 static void
-DEFUN(dwarf_psymtab_to_symtab, (pst), struct partial_symtab *pst)
+dwarf_psymtab_to_symtab (pst)
+     struct partial_symtab *pst;
 {
 
-  if (!pst)
+  if (pst != NULL)
     {
-      return;
-    }
-  if (pst -> readin)
-    {
-      fprintf (stderr, "Psymtab for %s already read in.  Shouldn't happen.\n",
-	       pst -> filename);
-      return;
-    }
-  
-  if (DBLENGTH(pst) || pst -> number_of_dependencies)
-    {
-      /* Print the message now, before starting serious work, to avoid
-	 disconcerting pauses.  */
-      if (info_verbose)
+      if (pst -> readin)
 	{
-	  printf_filtered ("Reading in symbols for %s...", pst -> filename);
-	  fflush (stdout);
+	  warning ("Psymtab for %s already read in.  Shouldn't happen.",
+		   pst -> filename);
 	}
-      
-      psymtab_to_symtab_1 (pst);
-      
-#if 0 /* FIXME:  Check to see what dbxread is doing here and see if
-	 we need to do an equivalent or is this something peculiar to
-	 stabs/a.out format. */
-      /* Match with global symbols.  This only needs to be done once,
-         after all of the symtabs and dependencies have been read in.   */
-      scan_file_globals ();
-#endif
-      
-      /* Finish up the debug error message.  */
-      if (info_verbose)
+      else
 	{
-	  printf_filtered ("done.\n");
+	  if (DBLENGTH (pst) || pst -> number_of_dependencies)
+	    {
+	      /* Print the message now, before starting serious work, to avoid
+		 disconcerting pauses.  */
+	      if (info_verbose)
+		{
+		  printf_filtered ("Reading in symbols for %s...",
+				   pst -> filename);
+		  fflush (stdout);
+		}
+	      
+	      psymtab_to_symtab_1 (pst);
+	      
+#if 0	      /* FIXME:  Check to see what dbxread is doing here and see if
+		 we need to do an equivalent or is this something peculiar to
+		 stabs/a.out format.
+		 Match with global symbols.  This only needs to be done once,
+		 after all of the symtabs and dependencies have been read in.
+		 */
+	      scan_file_globals (pst -> objfile);
+#endif
+	      
+	      /* Finish up the verbose info message.  */
+	      if (info_verbose)
+		{
+		  printf_filtered ("done.\n");
+		  fflush (stdout);
+		}
+	    }
 	}
     }
 }
@@ -2078,7 +2033,7 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	static void init_psymbol_list (int total_symbols)
+	static void init_psymbol_list (struct objfile *objfile, int total_symbols)
 
 DESCRIPTION
 
@@ -2087,95 +2042,35 @@ DESCRIPTION
  */
 
 static void
-DEFUN(init_psymbol_list, (total_symbols), int total_symbols)
+init_psymbol_list (objfile, total_symbols)
+     struct objfile *objfile;
+     int total_symbols;
 {
   /* Free any previously allocated psymbol lists.  */
   
-  if (global_psymbols.list)
+  if (objfile -> global_psymbols.list)
     {
-      free (global_psymbols.list);
+      (*objfile -> free) (objfile -> global_psymbols.list);
     }
-  if (static_psymbols.list)
+  if (objfile -> static_psymbols.list)
     {
-      free (static_psymbols.list);
+      (*objfile -> free) (objfile -> static_psymbols.list);
     }
   
   /* Current best guess is that there are approximately a twentieth
      of the total symbols (in a debugging file) are global or static
      oriented symbols */
   
-  global_psymbols.size = total_symbols / 10;
-  static_psymbols.size = total_symbols / 10;
-  global_psymbols.next = global_psymbols.list = (struct partial_symbol *)
-    xmalloc (global_psymbols.size * sizeof (struct partial_symbol));
-  static_psymbols.next = static_psymbols.list = (struct partial_symbol *)
-    xmalloc (static_psymbols.size * sizeof (struct partial_symbol));
-}
-
-/*
-
-LOCAL FUNCTION
-
-	dwarf_start_psymtab -- allocate and fill a partial symtab entry
-
-DESCRIPTION
-
-	Allocate and partially fill a partial symtab.  It will be completely
-	filled at the end of the symbol list.
-   
-	SYMFILE_NAME is the name of the symbol-file we are reading from, and
-	ADDR is the address relative to which its symbols are (incremental)
-	or 0 (normal).  FILENAME is the name of the compilation unit that
-	these symbols were defined in, and they appear starting a address
-	TEXTLOW.  DBROFF is the absolute file offset in SYMFILE_NAME where
-	the full symbols can be read for compilation unit FILENAME.
-	GLOBAL_SYMS and STATIC_SYMS are pointers to the current end of the
-	psymtab vector.
-
- */
-
-static struct partial_symtab *
-DEFUN(dwarf_start_psymtab,
-      (objfile, addr, filename, textlow, texthigh, dbfoff, curoff,
-       culength, lnfoff, global_syms, static_syms),
-      struct objfile *objfile AND
-      CORE_ADDR addr AND
-      char *filename AND
-      CORE_ADDR textlow AND
-      CORE_ADDR texthigh AND
-      int dbfoff AND
-      int curoff AND
-      int culength AND
-      int lnfoff AND
-      struct partial_symbol *global_syms AND
-      struct partial_symbol *static_syms)
-{
-  struct partial_symtab *result;
-
-  result = (struct partial_symtab *)
-      obstack_alloc (psymbol_obstack, sizeof (struct partial_symtab));
-  (void) memset (result, 0, sizeof (struct partial_symtab));
-  result -> addr = addr;
-  result -> objfile = objfile;
-  result -> filename = create_name (filename, psymbol_obstack);
-  result -> textlow = textlow;
-  result -> texthigh = texthigh;
-  result -> read_symtab_private = (char *) obstack_alloc (psymbol_obstack,
-						  sizeof (struct dwfinfo));
-  DBFOFF (result) = dbfoff;
-  DBROFF (result) = curoff;
-  DBLENGTH (result) = culength;
-  LNFOFF (result)  = lnfoff;
-  result -> readin = 0;
-  result -> symtab = NULL;
-  result -> read_symtab = dwarf_psymtab_to_symtab;
-  result -> globals_offset = global_syms - global_psymbols.list;
-  result -> statics_offset = static_syms - static_psymbols.list;
-  
-  result->n_global_syms = 0;
-  result->n_static_syms = 0;
-  
-  return result;
+  objfile -> global_psymbols.size = total_symbols / 10;
+  objfile -> static_psymbols.size = total_symbols / 10;
+  objfile -> global_psymbols.next =
+    objfile -> global_psymbols.list = (struct partial_symbol *)
+      (*objfile -> xmalloc) (objfile -> global_psymbols.size
+			     * sizeof (struct partial_symbol));
+  objfile -> static_psymbols.next =
+    objfile -> static_psymbols.list = (struct partial_symbol *)
+      (*objfile -> xmalloc) (objfile -> static_psymbols.size
+			     * sizeof (struct partial_symbol));
 }
 
 /*
@@ -2192,7 +2087,9 @@ DESCRIPTION
 */
 
 static void
-DEFUN(add_enum_psymbol, (dip), struct dieinfo *dip)
+add_enum_psymbol (dip, objfile)
+     struct dieinfo *dip;
+     struct objfile *objfile;
 {
   char *scan;
   char *listend;
@@ -2217,7 +2114,7 @@ DEFUN(add_enum_psymbol, (dip), struct dieinfo *dip)
 	{
 	  scan += sizeof (long);
 	  ADD_PSYMBOL_TO_LIST (scan, strlen (scan), VAR_NAMESPACE, LOC_CONST,
-			       static_psymbols, 0);
+			       objfile -> static_psymbols, 0);
 	  scan += strlen (scan) + 1;
 	}
     }
@@ -2238,52 +2135,62 @@ DESCRIPTION
 */
 
 static void
-DEFUN(add_partial_symbol, (dip), struct dieinfo *dip)
+add_partial_symbol (dip, objfile)
+     struct dieinfo *dip;
+     struct objfile *objfile;
 {
   switch (dip -> dietag)
     {
     case TAG_global_subroutine:
-      record_misc_function (dip -> at_name, dip -> at_low_pc, mf_text);
+      record_minimal_symbol (dip -> at_name, dip -> at_low_pc, mst_text,
+			    objfile);
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
-			   VAR_NAMESPACE, LOC_BLOCK, global_psymbols,
+			   VAR_NAMESPACE, LOC_BLOCK,
+			   objfile -> global_psymbols,
 			   dip -> at_low_pc);
       break;
     case TAG_global_variable:
-      record_misc_function (dip -> at_name, locval (dip -> at_location),
-			    mf_data);
+      record_minimal_symbol (dip -> at_name, locval (dip -> at_location),
+			    mst_data, objfile);
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
-			   VAR_NAMESPACE, LOC_STATIC, global_psymbols,
+			   VAR_NAMESPACE, LOC_STATIC,
+			   objfile -> global_psymbols,
 			   0);
       break;
     case TAG_subroutine:
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
-			   VAR_NAMESPACE, LOC_BLOCK, static_psymbols,
+			   VAR_NAMESPACE, LOC_BLOCK,
+			   objfile -> static_psymbols,
 			   dip -> at_low_pc);
       break;
     case TAG_local_variable:
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
-			   VAR_NAMESPACE, LOC_STATIC, static_psymbols,
+			   VAR_NAMESPACE, LOC_STATIC,
+			   objfile -> static_psymbols,
 			   0);
       break;
     case TAG_typedef:
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
-			   VAR_NAMESPACE, LOC_TYPEDEF, static_psymbols,
+			   VAR_NAMESPACE, LOC_TYPEDEF,
+			   objfile -> static_psymbols,
 			   0);
       break;
     case TAG_structure_type:
     case TAG_union_type:
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
-			   STRUCT_NAMESPACE, LOC_TYPEDEF, static_psymbols,
+			   STRUCT_NAMESPACE, LOC_TYPEDEF,
+			   objfile -> static_psymbols,
 			   0);
       break;
     case TAG_enumeration_type:
       if (dip -> at_name)
 	{
 	  ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
-			       STRUCT_NAMESPACE, LOC_TYPEDEF, static_psymbols,
+			       STRUCT_NAMESPACE, LOC_TYPEDEF,
+			       objfile -> static_psymbols,
 			       0);
 	}
-      add_enum_psymbol (dip);
+      add_enum_psymbol (dip, objfile);
       break;
     }
 }
@@ -2318,7 +2225,10 @@ NOTES
  */
 
 static void
-DEFUN(scan_partial_symbols, (thisdie, enddie), char *thisdie AND char *enddie)
+scan_partial_symbols (thisdie, enddie, objfile)
+     char *thisdie;
+     char *enddie;
+     struct objfile *objfile;
 {
   char *nextdie;
   struct dieinfo di;
@@ -2344,7 +2254,7 @@ DEFUN(scan_partial_symbols, (thisdie, enddie), char *thisdie AND char *enddie)
 	      completedieinfo (&di);
 	      if (di.at_name && (di.has_at_low_pc || di.at_location))
 		{
-		  add_partial_symbol (&di);
+		  add_partial_symbol (&di, objfile);
 		}
 	      break;
 	    case TAG_typedef:
@@ -2353,12 +2263,12 @@ DEFUN(scan_partial_symbols, (thisdie, enddie), char *thisdie AND char *enddie)
 	      completedieinfo (&di);
 	      if (di.at_name)
 		{
-		  add_partial_symbol (&di);
+		  add_partial_symbol (&di, objfile);
 		}
 	      break;
 	    case TAG_enumeration_type:
 	      completedieinfo (&di);
-	      add_partial_symbol (&di);
+	      add_partial_symbol (&di, objfile);
 	      break;
 	    }
 	}
@@ -2410,14 +2320,13 @@ RETURNS
  */
 
 static void
-DEFUN(scan_compilation_units,
-      (filename, thisdie, enddie, dbfoff, lnoffset, objfile),
-      char *filename AND
-      char *thisdie AND
-      char *enddie AND
-      unsigned int dbfoff AND
-      unsigned int lnoffset AND
-      struct objfile *objfile)
+scan_compilation_units (filename, thisdie, enddie, dbfoff, lnoffset, objfile)
+     char *filename;
+     char *thisdie;
+     char *enddie;
+     unsigned int dbfoff;
+     unsigned int lnoffset;
+     struct objfile *objfile;
 {
   char *nextdie;
   struct dieinfo di;
@@ -2451,28 +2360,37 @@ DEFUN(scan_compilation_units,
 	  curoff = thisdie - dbbase;
 	  culength = nextdie - thisdie;
 	  curlnoffset = di.has_at_stmt_list ? lnoffset + di.at_stmt_list : 0;
-	  pst = dwarf_start_psymtab (objfile, baseaddr, di.at_name,
-				     di.at_low_pc,
-				     di.at_high_pc,
-				     dbfoff, curoff, culength, curlnoffset,
-				     global_psymbols.next,
-				     static_psymbols.next);
-	  scan_partial_symbols (thisdie + di.dielength, nextdie);
-	  pst -> n_global_syms = global_psymbols.next -
-	    (global_psymbols.list + pst -> globals_offset);
-	  pst -> n_static_syms = static_psymbols.next - 
-	    (static_psymbols.list + pst -> statics_offset);
-	  /* Sort the global list; don't sort the static list */
-	  qsort (global_psymbols.list + pst -> globals_offset,
-		 pst -> n_global_syms, sizeof (struct partial_symbol),
-		 compare_psymbols);
+
+	  /* First allocate a new partial symbol table structure */
+
+	  pst = start_psymtab_common (objfile, baseaddr, di.at_name,
+				      di.at_low_pc,
+				      objfile -> global_psymbols.next,
+				      objfile -> static_psymbols.next);
+
+	  pst -> texthigh = di.at_high_pc;
+	  pst -> read_symtab_private = (char *)
+	      obstack_alloc (&objfile -> psymbol_obstack,
+			     sizeof (struct dwfinfo));
+	  DBFOFF (pst) = dbfoff;
+	  DBROFF (pst) = curoff;
+	  DBLENGTH (pst) = culength;
+	  LNFOFF (pst)  = curlnoffset;
+	  pst -> read_symtab = dwarf_psymtab_to_symtab;
+
+	  /* Now look for partial symbols */
+
+	  scan_partial_symbols (thisdie + di.dielength, nextdie, objfile);
+
+	  pst -> n_global_syms = objfile -> global_psymbols.next -
+	    (objfile -> global_psymbols.list + pst -> globals_offset);
+	  pst -> n_static_syms = objfile -> static_psymbols.next - 
+	    (objfile -> static_psymbols.list + pst -> statics_offset);
+	  sort_pst_symbols (pst);
 	  /* If there is already a psymtab or symtab for a file of this name,
 	     remove it. (If there is a symtab, more drastic things also
 	     happen.)  This happens in VxWorks.  */
 	  free_named_symtabs (pst -> filename);
-	  /* Place the partial symtab on the partial symtab list */
-	  pst -> next = partial_symtab_list;
-	  partial_symtab_list = pst;
 	}
       thisdie = nextdie;      
     }
@@ -2486,7 +2404,8 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	static struct symbol *new_symbol (struct dieinfo *dip)
+	static struct symbol *new_symbol (struct dieinfo *dip,
+					  struct objfile *objfile)
 
 DESCRIPTION
 
@@ -2496,16 +2415,18 @@ DESCRIPTION
  */
 
 static struct symbol *
-DEFUN(new_symbol, (dip), struct dieinfo *dip)
+new_symbol (dip, objfile)
+     struct dieinfo *dip;
+     struct objfile *objfile;
 {
   struct symbol *sym = NULL;
   
   if (dip -> at_name != NULL)
     {
-      sym = (struct symbol *) obstack_alloc (symbol_obstack,
+      sym = (struct symbol *) obstack_alloc (&objfile -> symbol_obstack,
 					     sizeof (struct symbol));
       (void) memset (sym, 0, sizeof (struct symbol));
-      SYMBOL_NAME (sym) = create_name (dip -> at_name, symbol_obstack);
+      SYMBOL_NAME (sym) = create_name (dip -> at_name, &objfile->symbol_obstack);
       /* default assumptions */
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       SYMBOL_CLASS (sym) = LOC_STATIC;
@@ -2624,7 +2545,8 @@ DESCRIPTION
 */
 
 static struct type *
-DEFUN(decode_mod_fund_type, (typedata), char *typedata)
+decode_mod_fund_type (typedata)
+     char *typedata;
 {
   struct type *typep = NULL;
   unsigned short modcount;
@@ -2665,7 +2587,8 @@ DESCRIPTION
 */
 
 static struct type *
-DEFUN(decode_mod_u_d_type, (typedata), char *typedata)
+decode_mod_u_d_type (typedata)
+     char *typedata;
 {
   struct type *typep = NULL;
   unsigned short modcount;
@@ -2723,9 +2646,10 @@ BUGS
  */
 
 static struct type *
-DEFUN(decode_modified_type,
-      (modifiers, modcount, mtype),
-      unsigned char *modifiers AND unsigned short modcount AND int mtype)
+decode_modified_type (modifiers, modcount, mtype)
+     unsigned char *modifiers;
+     unsigned int modcount;
+     int mtype;
 {
   struct type *typep = NULL;
   unsigned short fundtype;
@@ -2749,7 +2673,7 @@ DEFUN(decode_modified_type,
 	  break;
 	default:
 	  SQUAWK (("botched modified type decoding (mtype 0x%x)", mtype));
-	  typep = builtin_type_int;
+	  typep = lookup_fundamental_type (current_objfile, FT_INTEGER);
 	  break;
 	}
     }
@@ -2799,11 +2723,12 @@ NOTES
 	If we encounter a fundamental type that we are unprepared to
 	deal with, and it is not in the range of those types defined
 	as application specific types, then we issue a warning and
-	treat the type as builtin_type_int.
+	treat the type as an "int".
 */
 
 static struct type *
-DEFUN(decode_fund_type, (fundtype), unsigned short fundtype)
+decode_fund_type (fundtype)
+     unsigned int fundtype;
 {
   struct type *typep = NULL;
   
@@ -2811,85 +2736,108 @@ DEFUN(decode_fund_type, (fundtype), unsigned short fundtype)
     {
 
     case FT_void:
-      typep = builtin_type_void;
+      typep = lookup_fundamental_type (current_objfile, FT_VOID);
       break;
     
+    case FT_boolean:		/* Was FT_set in AT&T version */
+      typep = lookup_fundamental_type (current_objfile, FT_BOOLEAN);
+      break;
+
     case FT_pointer:		/* (void *) */
-      typep = lookup_pointer_type (builtin_type_void);
+      typep = lookup_fundamental_type (current_objfile, FT_VOID);
+      typep = lookup_pointer_type (typep);
       break;
     
     case FT_char:
+      typep = lookup_fundamental_type (current_objfile, FT_CHAR);
+      break;
+    
     case FT_signed_char:
-      typep = builtin_type_char;
+      typep = lookup_fundamental_type (current_objfile, FT_SIGNED_CHAR);
+      break;
+
+    case FT_unsigned_char:
+      typep = lookup_fundamental_type (current_objfile, FT_UNSIGNED_CHAR);
       break;
     
     case FT_short:
+      typep = lookup_fundamental_type (current_objfile, FT_SHORT);
+      break;
+
     case FT_signed_short:
-      typep = builtin_type_short;
-      break;
-    
-    case FT_integer:
-    case FT_signed_integer:
-    case FT_boolean:		/* Was FT_set in AT&T version */
-      typep = builtin_type_int;
-      break;
-    
-    case FT_long:
-    case FT_signed_long:
-      typep = builtin_type_long;
-      break;
-    
-    case FT_float:
-      typep = builtin_type_float;
-      break;
-    
-    case FT_dbl_prec_float:
-      typep = builtin_type_double;
-      break;
-    
-    case FT_unsigned_char:
-      typep = builtin_type_unsigned_char;
+      typep = lookup_fundamental_type (current_objfile, FT_SIGNED_SHORT);
       break;
     
     case FT_unsigned_short:
-      typep = builtin_type_unsigned_short;
+      typep = lookup_fundamental_type (current_objfile, FT_UNSIGNED_SHORT);
+      break;
+    
+    case FT_integer:
+      typep = lookup_fundamental_type (current_objfile, FT_INTEGER);
+      break;
+
+    case FT_signed_integer:
+      typep = lookup_fundamental_type (current_objfile, FT_SIGNED_INTEGER);
       break;
     
     case FT_unsigned_integer:
-      typep = builtin_type_unsigned_int;
+      typep = lookup_fundamental_type (current_objfile, FT_UNSIGNED_INTEGER);
+      break;
+    
+    case FT_long:
+      typep = lookup_fundamental_type (current_objfile, FT_LONG);
+      break;
+
+    case FT_signed_long:
+      typep = lookup_fundamental_type (current_objfile, FT_SIGNED_LONG);
       break;
     
     case FT_unsigned_long:
-      typep = builtin_type_unsigned_long;
-      break;
-    
-    case FT_ext_prec_float:
-      typep = builtin_type_long_double;
-      break;
-    
-    case FT_complex:
-      typep = builtin_type_complex;
-      break;
-    
-    case FT_dbl_prec_complex:
-      typep = builtin_type_double_complex;
+      typep = lookup_fundamental_type (current_objfile, FT_UNSIGNED_LONG);
       break;
     
     case FT_long_long:
+      typep = lookup_fundamental_type (current_objfile, FT_LONG_LONG);
+      break;
+
     case FT_signed_long_long:
-      typep = builtin_type_long_long;
+      typep = lookup_fundamental_type (current_objfile, FT_SIGNED_LONG_LONG);
       break;
 
     case FT_unsigned_long_long:
-      typep = builtin_type_unsigned_long_long;
+      typep = lookup_fundamental_type (current_objfile, FT_UNSIGNED_LONG_LONG);
       break;
 
+    case FT_float:
+      typep = lookup_fundamental_type (current_objfile, FT_FLOAT);
+      break;
+    
+    case FT_dbl_prec_float:
+      typep = lookup_fundamental_type (current_objfile, FT_DBL_PREC_FLOAT);
+      break;
+    
+    case FT_ext_prec_float:
+      typep = lookup_fundamental_type (current_objfile, FT_EXT_PREC_FLOAT);
+      break;
+    
+    case FT_complex:
+      typep = lookup_fundamental_type (current_objfile, FT_COMPLEX);
+      break;
+    
+    case FT_dbl_prec_complex:
+      typep = lookup_fundamental_type (current_objfile, FT_DBL_PREC_COMPLEX);
+      break;
+    
+    case FT_ext_prec_complex:
+      typep = lookup_fundamental_type (current_objfile, FT_EXT_PREC_COMPLEX);
+      break;
+    
     }
 
   if ((typep == NULL) && !(FT_lo_user <= fundtype && fundtype <= FT_hi_user))
     {
       SQUAWK (("unexpected fundamental type 0x%x", fundtype));
-      typep = builtin_type_void;
+      typep = lookup_fundamental_type (current_objfile, FT_VOID);
     }
     
   return (typep);
@@ -2909,7 +2857,9 @@ DESCRIPTION
 */
 
 static char *
-DEFUN(create_name, (name, obstackp), char *name AND struct obstack *obstackp)
+create_name (name, obstackp)
+     char *name;
+     struct obstack *obstackp;
 {
   int length;
   char *newname;
@@ -2967,7 +2917,9 @@ NOTES
  */
 
 static void
-DEFUN(basicdieinfo, (dip, diep), struct dieinfo *dip AND char *diep)
+basicdieinfo (dip, diep)
+     struct dieinfo *dip;
+     char *diep;
 {
   curdie = dip;
   (void) memset (dip, 0, sizeof (struct dieinfo));
@@ -3020,7 +2972,8 @@ NOTES
  */
 
 static void
-DEFUN(completedieinfo, (dip), struct dieinfo *dip)
+completedieinfo (dip)
+     struct dieinfo *dip;
 {
   char *diep;			/* Current pointer into raw DIE data */
   char *end;			/* Terminate DIE scan here */

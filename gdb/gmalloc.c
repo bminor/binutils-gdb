@@ -205,7 +205,7 @@ typedef unsigned long size_t;
 #include <stddef.h>
 #endif
 
-extern void EXFUN(abort, (void));
+extern void EXFUN(abort, (NOARGS));
 extern void EXFUN(free, (PTR));
 extern PTR EXFUN(malloc, (size_t));
 extern PTR EXFUN(realloc, (PTR, size_t));
@@ -267,7 +267,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    fragments in a block have been freed, the block itself is freed.  */
 #define INT_BIT		(CHAR_BIT * sizeof(int))
 #define BLOCKLOG	(INT_BIT > 16 ? 12 : 9)
-#define BLOCKSIZE	(1 << BLOCKLOG)
+#define BLOCKSIZE	((unsigned int) 1 << BLOCKLOG)
 #define BLOCKIFY(SIZE)	(((SIZE) + BLOCKSIZE - 1) / BLOCKSIZE)
 
 /* The difference between two pointers is a signed int.  On machines where
@@ -377,7 +377,7 @@ extern PTR EXFUN((*__malloc_hook), (size_t __size));
 extern PTR EXFUN((*__realloc_hook), (PTR __ptr, size_t __size));
 
 /* Activate a standard collection of debugging hooks.  */
-extern void EXFUN(mcheck, (void EXFUN((*func), (void))));
+extern void EXFUN(mcheck, (void EXFUN((*func), (NOARGS))));
 
 /* Statistics available to the user.  */
 struct mstats

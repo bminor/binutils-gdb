@@ -60,10 +60,6 @@
 #include <string.h>
 #else
 #include <strings.h>
-#define memcpy(s1, s2, n) bcopy ((s2), (s1), (n))
-#define memcmp(s1, s2, n) bcmp ((s2), (s1), (n))
-#define strchr index 
-#define strrchr rindex
 #endif
 
 /* This is '$' on systems where the assembler can deal with that.
@@ -187,48 +183,59 @@ typedef struct string {
   char *e;			/* pointer after end of allocated space */
 } string;
 
-#ifdef __STDC__
-static void string_need (string *s, int n);
-static void string_delete (string *s);
-static void string_init (string *s);
-static void string_clear (string *s);
-static int string_empty (string *s);
-static void string_append (string *p, const char *s);
-static void string_appends (string *p, string *s);
-static void string_appendn (string *p, const char *s, int n);
-static void string_prepend (string *p, const char *s);
+static void
+string_need PARAMS ((string *, int));
+
+static void
+string_delete PARAMS ((string *));
+
+static void
+string_init PARAMS ((string *));
+
+static void
+string_clear PARAMS ((string *));
+
+static int
+string_empty PARAMS ((string *));
+
+static void
+string_append PARAMS ((string *, const char *));
+
+static void
+string_appends PARAMS ((string *, string *));
+
+static void
+string_appendn PARAMS ((string *, const char *, int));
+
+static void
+string_prepend PARAMS ((string *, const char *));
+
+static void
+string_prependn PARAMS ((string *, const char *, int));
+
+static int
+get_count PARAMS ((const char **, int *));
+
+static int
+do_args PARAMS ((const char **, string *, int));
+
+static int
+do_type PARAMS ((const char **, string *, int));
+
+static int
+do_arg PARAMS ((const char **, string *, int));
+
+static void
+munge_function_name PARAMS ((string *, int));
+
+static void
+remember_type PARAMS ((const char *, int));
+
 #if 0
-static void string_prepends (string *p, string *s);
+static void
+string_prepends PARAMS ((string *, string *));
 #endif
-static void string_prependn (string *p, const char *s, int n);
-static int get_count (const char **type, int *count);
-static int do_args (const char **type, string *decl, int arg_mode);
-static int do_type (const char **type, string *result, int arg_mode);
-static int do_arg (const char **type, string *result, int arg_mode);
-static void munge_function_name (string *name, int arg_mode);
-static void remember_type (const char *type, int len);
-#else
-static void string_need ();
-static void string_delete ();
-static void string_init ();
-static void string_clear ();
-static int string_empty ();
-static void string_append ();
-static void string_appends ();
-static void string_appendn ();
-static void string_prepend ();
-#if 0
-static void string_prepends ();
-#endif
-static void string_prependn ();
-static int get_count ();
-static int do_args ();
-static int do_type ();
-static int do_arg ();
-static int do_args ();
-static void munge_function_name ();
-static void remember_type ();
-#endif
+
 
 /* Takes operator name as e.g. "++" and returns mangled
    operator name (e.g. "postincrement_expr"), or NULL if not found.

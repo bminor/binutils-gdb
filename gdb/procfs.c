@@ -32,6 +32,7 @@ regardless of whether or not the actual target has floating point hardware.
  */
 
 
+#include <stdio.h>
 
 #include "defs.h"
 
@@ -42,20 +43,11 @@ regardless of whether or not the actual target has floating point hardware.
 #include <fcntl.h>
 #include <errno.h>
 
-#include "ansidecl.h"
 #include "inferior.h"
 #include "target.h"
 
 #ifndef PROC_NAME_FMT
 #define PROC_NAME_FMT "/proc/%d"
-#endif
-
-extern void EXFUN(supply_gregset, (gregset_t *gregsetp));
-extern void EXFUN(fill_gregset, (gregset_t *gresetp, int regno));
-
-#if defined (FP0_REGNUM)
-extern void EXFUN(supply_fpregset, (fpregset_t *fpregsetp));
-extern void EXFUN(fill_fpregset, (fpregset_t *fpresetp, int regno));
 #endif
 
 #if 1	/* FIXME: Gross and ugly hack to resolve coredep.c global */
@@ -89,16 +81,47 @@ struct procinfo {
 
 static struct procinfo pi;	/* Inferior's process information */
 
-/* Forward declarations of static functions so we don't have to worry
-   about ordering within this file.  The EXFUN macro may be slightly
-   misleading.  Should probably be called DCLFUN instead, or something
-   more intuitive, since it can be used for both static and external
-   definitions. */
+/* Prototypes for local functions */
 
-static void EXFUN(proc_init_failed, (char *why));
-static int EXFUN(open_proc_file, (int pid, struct procinfo *pip));
-static void EXFUN(close_proc_file, (struct procinfo *pip));
-static void EXFUN(unconditionally_kill_inferior, (void));
+static int
+proc_address_to_fd PARAMS ((CORE_ADDR, int));
+
+static int
+open_proc_file PARAMS ((int, struct procinfo *));
+
+static void
+close_proc_file PARAMS ((struct procinfo *));
+
+static void
+unconditionally_kill_inferior PARAMS ((void));
+
+static void
+proc_init_failed PARAMS ((char *));
+
+static void
+proc_info PARAMS ((char *, int));
+
+static void
+proc_info_address_map PARAMS ((struct procinfo *, int));
+
+static char *
+mappingflags PARAMS ((long));
+
+/* External function prototypes that can't be easily included in any
+   header file because the args are typedefs in system include files. */
+
+extern void
+supply_gregset PARAMS ((gregset_t *));
+
+extern void
+fill_gregset PARAMS ((gregset_t *, int));
+
+extern void
+supply_fpregset PARAMS ((fpregset_t *));
+
+extern void
+fill_fpregset PARAMS ((fpregset_t *, int));
+
 
 /*
 
@@ -120,11 +143,11 @@ DESCRIPTION
 */
 
 int
-DEFUN(ptrace, (request, pid, arg3, arg4),
-      int request AND
-      int pid AND
-      int arg3 AND
-      int arg4)
+ptrace (request, pid, arg3, arg4)
+     int request;
+     int pid;
+     int arg3;
+     int arg4;
 {
   error ("internal error - there is a call to ptrace() somewhere");
   /*NOTREACHED*/
@@ -155,7 +178,7 @@ NOTES
 */
 
 void
-DEFUN_VOID(kill_inferior_fast)
+kill_inferior_fast ()
 {
   if (inferior_pid != 0 && !attach_flag)
     {
@@ -186,7 +209,7 @@ NOTES
 */
 
 void
-DEFUN_VOID(kill_inferior)
+kill_inferior ()
 {
   if (inferior_pid != 0)
     {
@@ -219,7 +242,7 @@ NOTE
 */
 
 static void
-DEFUN_VOID(unconditionally_kill_inferior)
+unconditionally_kill_inferior ()
 {
   int signo;
   
@@ -258,12 +281,12 @@ NOTES
 
 
 int
-DEFUN(child_xfer_memory, (memaddr, myaddr, len, dowrite, target),
-      CORE_ADDR memaddr AND
-      char *myaddr AND
-      int len AND
-      int dowrite AND
-      struct target_ops *target /* ignored */)
+child_xfer_memory (memaddr, myaddr, len, dowrite, target)
+     CORE_ADDR memaddr;
+     char *myaddr;
+     int len;
+     int dowrite;
+     struct target_ops *target; /* ignored */
 {
   int nbytes = 0;
 
@@ -324,8 +347,8 @@ NOTES
  */
 
 void
-DEFUN(store_inferior_registers, (regno),
-      int regno)
+store_inferior_registers (regno)
+     int regno;
 {
   if (regno != -1)
     {
@@ -376,8 +399,8 @@ NOTES
  */
 
 void
-DEFUN(inferior_proc_init, (pid),
-      int pid)
+inferior_proc_init (pid)
+     int pid;
 {
   if (!open_proc_file (pid, &pi))
     {
@@ -432,7 +455,7 @@ NOTE
  */
 
 void
-DEFUN_VOID(proc_set_exec_trap)
+proc_set_exec_trap ()
 {
   sysset_t exitset;
   auto char procname[32];
@@ -476,8 +499,8 @@ DESCRIPTION
  */
 
 int
-DEFUN(proc_iterate_over_mappings, (func),
-      int (*func)())
+proc_iterate_over_mappings (func)
+     int (*func) PARAMS ((int, CORE_ADDR));
 {
   int nmap;
   int fd;
@@ -488,13 +511,13 @@ DEFUN(proc_iterate_over_mappings, (func),
 
   if (pi.valid && (ioctl (pi.fd, PIOCNMAP, &nmap) == 0))
     {
-      prmaps = alloca ((nmap + 1) * sizeof (*prmaps));
+      prmaps = (struct prmap *) alloca ((nmap + 1) * sizeof (*prmaps));
       if (ioctl (pi.fd, PIOCMAP, prmaps) == 0)
 	{
 	  for (prmap = prmaps; prmap -> pr_size && funcstat == 0; ++prmap)
 	    {
-	      fd = proc_address_to_fd (prmap -> pr_vaddr, 0);
-	      funcstat = (*func) (fd, prmap -> pr_vaddr);
+	      fd = proc_address_to_fd ((CORE_ADDR) prmap -> pr_vaddr, 0);
+	      funcstat = (*func) (fd, (CORE_ADDR) prmap -> pr_vaddr);
 	      close (fd);
 	    }
 	}
@@ -524,9 +547,11 @@ DESCRIPTION
 */
 
 
+#if 0	/* Currently unused */
+
 CORE_ADDR
-DEFUN(proc_base_address, (addr),
-      CORE_ADDR addr)
+proc_base_address (addr)
+CORE_ADDR addr;
 {
   int nmap;
   struct prmap *prmaps;
@@ -535,7 +560,7 @@ DEFUN(proc_base_address, (addr),
 
   if (pi.valid && (ioctl (pi.fd, PIOCNMAP, &nmap) == 0))
     {
-      prmaps = alloca ((nmap + 1) * sizeof (*prmaps));
+      prmaps = (struct prmap *) alloca ((nmap + 1) * sizeof (*prmaps));
       if (ioctl (pi.fd, PIOCMAP, prmaps) == 0)
 	{
 	  for (prmap = prmaps; prmap -> pr_size; ++prmap)
@@ -551,6 +576,8 @@ DEFUN(proc_base_address, (addr),
     }
   return (baseaddr);
 }
+
+#endif	/* 0 */
 
 /*
 
@@ -572,10 +599,10 @@ DESCRIPTION
 
 */
 
-int
-DEFUN(proc_address_to_fd, (addr, complain),
-      CORE_ADDR addr AND
-      int complain)
+static int
+proc_address_to_fd (addr, complain)
+     CORE_ADDR addr;
+     int complain;
 {
   int fd = -1;
 
@@ -621,8 +648,8 @@ NOTES
 */
 
 int
-DEFUN(attach, (pid),
-      int pid)
+attach (pid)
+     int pid;
 {
   if (!open_proc_file (pid, &pi))
     {
@@ -714,8 +741,8 @@ DESCRIPTION
  */
 
 void
-DEFUN(detach, (signal),
-      int signal)
+detach (signal)
+     int signal;
 {
   if (signal)
     {
@@ -815,8 +842,8 @@ NOTES
  */
 
 int
-DEFUN(proc_wait, (statloc),
-      int *statloc)
+proc_wait (statloc)
+     int *statloc;
 {
   short what;
   short why;
@@ -950,9 +977,9 @@ NOTE
  */
 
 void
-DEFUN(child_resume, (step, signal),
-      int step AND
-      int signal)
+child_resume (step, signal)
+     int step;
+     int signal;
 {
   errno = 0;
   pi.prrun.pr_flags = PRSVADDR | PRSTRACE | PRSFAULT | PRCFAULT;
@@ -991,7 +1018,7 @@ GLOBAL FUNCTION
 
 SYNOPSIS
 
-	void fetch_inferior_registers (void)
+	void fetch_inferior_registers (int regno)
 
 DESCRIPTION
 
@@ -1002,7 +1029,8 @@ DESCRIPTION
 */
 
 void
-DEFUN_VOID(fetch_inferior_registers)
+fetch_inferior_registers (regno)
+     int regno;
 {
   if (ioctl (pi.fd, PIOCGREG, &pi.gregset) != -1)
     {
@@ -1025,7 +1053,7 @@ GLOBAL FUNCTION
 SYNOPSIS
 
 	void fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
-				   int which)
+				   int which, unsigned in reg_addr)
 
 DESCRIPTION
 
@@ -1041,10 +1069,11 @@ NOTES
 */
 
 void
-fetch_core_registers (core_reg_sect, core_reg_size, which)
+fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
   char *core_reg_sect;
   unsigned core_reg_size;
   int which;
+  unsigned int reg_addr;	/* Unused in this version */
 {
 
   if (which == 0)
@@ -1096,8 +1125,8 @@ DESCRIPTION
  */
 
 static void
-DEFUN(proc_init_failed, (why),
-      char *why)
+proc_init_failed (why)
+     char *why;
 {
   print_sys_errmsg (pi.pathname, errno);
   (void) kill (pi.pid, SIGKILL);
@@ -1126,8 +1155,8 @@ DESCRIPTION
  */
 
 static void
-DEFUN(close_proc_file, (pip),
-      struct procinfo *pip)
+close_proc_file (pip)
+     struct procinfo *pip;
 {
   pip -> pid = 0;
   if (pip -> valid)
@@ -1167,9 +1196,9 @@ DESCRIPTION
  */
 
 static int
-DEFUN(open_proc_file, (pid, pip),
-      int pid AND
-      struct procinfo *pip)
+open_proc_file (pid, pip)
+     int pid;
+     struct procinfo *pip;
 {
   pip -> valid = 0;
   if (pip -> valid)
@@ -1190,8 +1219,8 @@ DEFUN(open_proc_file, (pid, pip),
 }
 
 static char *
-DEFUN (mappingflags, (flags),
-       long flags)
+mappingflags (flags)
+     long flags;
 {
   static char asciiflags[7];
   
@@ -1206,9 +1235,9 @@ DEFUN (mappingflags, (flags),
 }
 
 static void
-DEFUN(proc_info_address_map, (pip, verbose),
-      struct procinfo *pip AND
-      int verbose)
+proc_info_address_map (pip, verbose)
+     struct procinfo *pip;
+     int verbose;
 {
   int nmap;
   struct prmap *prmaps;
@@ -1223,7 +1252,7 @@ DEFUN(proc_info_address_map, (pip, verbose),
 		   "Flags");
   if (ioctl (pip -> fd, PIOCNMAP, &nmap) == 0)
     {
-      prmaps = alloca ((nmap + 1) * sizeof (*prmaps));
+      prmaps = (struct prmap *) alloca ((nmap + 1) * sizeof (*prmaps));
       if (ioctl (pip -> fd, PIOCMAP, prmaps) == 0)
 	{
 	  for (prmap = prmaps; prmap -> pr_size; ++prmap)
@@ -1265,9 +1294,9 @@ DESCRIPTION
  */
 
 static void
-DEFUN(proc_info, (args, from_tty),
-      char *args AND
-      int from_tty)
+proc_info (args, from_tty)
+     char *args;
+     int from_tty;
 {
   int verbose = 0;
   int pid;
@@ -1275,7 +1304,6 @@ DEFUN(proc_info, (args, from_tty),
   struct procinfo *pip;
   struct cleanup *old_chain;
   char *nexttok;
-  extern char *strtok ();
 
   old_chain = make_cleanup (null_cleanup, 0);
 

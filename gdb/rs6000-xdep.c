@@ -60,7 +60,8 @@ static int special_regs[] = {
 extern int one_stepped;
 
 
-fetch_inferior_registers ()
+fetch_inferior_registers (regno)
+     int regno;
 {
   int ii;
   extern char registers[];
@@ -87,6 +88,7 @@ fetch_inferior_registers ()
    If REGNO is -1, do this for all registers.
    Otherwise, REGNO specifies which register (so we can save time).  */
 
+void
 store_inferior_registers (regno)
      int regno;
 {
@@ -156,16 +158,15 @@ store_inferior_registers (regno)
 
   if ( errno ) {
     perror ("ptrace write");  errno = 0;
-    return -1;
   }
-  return 0;
 }
 
 void
-fetch_core_registers (core_reg_sect, core_reg_size, which)
+fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      char *core_reg_sect;
      unsigned core_reg_size;
      int which;
+     unsigned int reg_addr;	/* Unused in this version */
 {
   /* fetch GPRs and special registers from the first register section
      in core bfd. */
@@ -230,7 +231,6 @@ unsigned int pid;
 {
 #define	MAX_LOAD_SEGS 64		/* maximum number of load segments */
 
-    extern int compare_misc_functions ();
     struct ld_info *ldi;
     int temp;
 
@@ -256,7 +256,7 @@ unsigned int pid;
 	     && (ldi = (void *) (ldi->ldinfo_next + (char *) ldi)));
 
   /* Now that we've jumbled things around, re-sort them.  */
-  sort_misc_function_vector ();
+  sort_minimal_symbols ();
 
   /* relocate the exec and core sections as well. */
   vmap_exec ();

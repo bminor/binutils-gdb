@@ -43,9 +43,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "target.h"
 
-extern void print_387_control_word ();		/* i387-tdep.h */
-extern void print_387_status_word ();
-
 extern struct ext_format ext_format_i387;
 
 /* this table must line up with REGISTER_NAMES in m-i386.h */
@@ -61,7 +58,11 @@ static int regmap[] =
 /* blockend is the value of u.u_ar0, and points to the
  * place where GS is stored
  */
+
+int
 i386_register_u_addr (blockend, regnum)
+     int blockend;
+     int regnum;
 {
 #if 0
   /* this will be needed if fp registers are reinstated */

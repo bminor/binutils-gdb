@@ -43,9 +43,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 void
 fetch_inferior_registers (regno)
-     int regno;
+     int regno;		/* Original value discarded */
 {
-  register int regno;
   register unsigned int regaddr;
   char buf[MAX_REGISTER_RAW_SIZE];
   register int i;
@@ -83,6 +82,7 @@ fetch_inferior_registers (regno)
    If REGNO is -1, do this for all registers.
    Otherwise, REGNO specifies which register (so we can save time).  */
 
+void
 store_inferior_registers (regno)
      int regno;
 {

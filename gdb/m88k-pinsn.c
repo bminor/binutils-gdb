@@ -329,7 +329,7 @@ void sprint_address (addr, buffer)
      char	*buffer;
 
 {
-	register int	i;
+	struct minimal_symbol *msymbol;
 	struct symbol	*fs;
 	char		*name;
 	int		name_location;
@@ -339,13 +339,13 @@ void sprint_address (addr, buffer)
 	fs = find_pc_function (addr);
 
 	if (!fs) {
-	    i = find_pc_misc_function (addr);
+	    msymbol = lookup_minimal_symbol_by_pc (addr);
 
-	    if (i < 0) return;	/* If nothing comes through, don't
+	    if (i == NULL) return;/* If nothing comes through, don't
 				   print anything symbolic */
 
-	    name = misc_function_vector[i].name;
-	    name_location = misc_function_vector[i].address;
+	    name = msymbol -> name;
+	    name_location = msymbol -> address;
 	} else {
 	    name = fs->name;
 	    name_location = BLOCK_START (SYMBOL_BLOCK_VALUE (fs));

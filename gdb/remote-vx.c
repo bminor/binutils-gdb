@@ -47,10 +47,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "xdr_rdb.h"
 #include "dbgRpcLib.h"
 
-/* get rid of value.h if possible */
-#include <value.h>
 #include <symtab.h>
- 
+
 extern void symbol_file_command ();
 extern int stop_soon_quietly;		/* for wait_for_inferior */
 
@@ -718,7 +716,7 @@ vx_load_command (arg_string, from_tty)
   immediate_quit--;
 
   /* FIXME, for now we ignore data_addr and bss_addr.  */
-  symbol_file_add (arg_string, from_tty, text_addr, 0);
+  (void) symbol_file_add (arg_string, from_tty, text_addr, 0);
 }
 
 #ifdef FIXME  /* Not ready for prime time */
@@ -1041,7 +1039,7 @@ add_symbol_stub (arg)
   struct ldfile *pLoadFile = (struct ldfile *)arg;
 
   printf("\t%s: ", pLoadFile->name);
-  symbol_file_add (pLoadFile->name, 0, pLoadFile->txt_addr, 0);
+  (void) symbol_file_add (pLoadFile->name, 0, pLoadFile->txt_addr, 0);
   printf ("ok\n");
   return 1;
 }
