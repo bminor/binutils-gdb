@@ -5,7 +5,7 @@ This file is part of GAS, the GNU Assembler.
 
 GAS is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 GAS is distributed in the hope that it will be useful,
@@ -23,7 +23,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*
  * $Log$
- * Revision 1.1.1.1  1991/04/04 18:15:43  rich
+ * Revision 1.2  1991/06/14 14:01:58  rich
+ * Version 2 GPL.
+ *
+ * Revision 1.1.1.1  1991/04/04  18:15:43  rich
  * new gas main line
  *
  * Revision 1.1  1991/04/04  18:15:42  rich
