@@ -59,10 +59,6 @@ typedef elf_symbol_type obj_symbol_type;
 
 /* Use space aliases.  */
 #define USE_ALIASES 1
-
-/* Some local functions only used by ELF.  */
-static void pa_build_symextn_section PARAMS ((void));
-static void hppa_tc_make_symextn_section PARAMS ((void));
 #endif
 
 #ifdef OBJ_SOM
@@ -1690,8 +1686,18 @@ pa_ip (str)
 		}
 	      INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
 
-	    /* Handle a negated or non-negated add condition.  */
+	    /* Handle non-negated add condition.  */
 	    case '!':
+	      cmpltr = pa_parse_nonneg_add_cmpltr (&s, 1);
+	      if (cmpltr < 0)
+		{
+		  as_bad ("Invalid Compare/Subtract Condition: %c", *s);
+		  cmpltr = 0;
+		}
+	      INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
+
+	    /* Handle a negated or non-negated add condition.  */
+	    case '@':
 	      save_s = s;
 	      cmpltr = pa_parse_nonneg_add_cmpltr (&s, 1);
 	      if (cmpltr < 0)
@@ -4575,9 +4581,6 @@ pa_export (unused)
 	{
 	  input_line_pointer++;
 	  pa_type_args (symbol, 1);
-#ifdef OBJ_ELF
-	  pa_build_symextn_section ();
-#endif
 	}
     }
 
@@ -6272,38 +6275,8 @@ hppa_tc_symbol (abfd, symbolP, sym_idx)
      elf_symbol_type *symbolP;
      int sym_idx;
 {
-  symext_chainS *symextP;
-  unsigned int arg_reloc;
-
-  /* Only functions can have argument relocations.  */
-  if (!(symbolP->symbol.flags & BSF_FUNCTION))
-    return;
-
-  arg_reloc = symbolP->tc_data.hppa_arg_reloc;
-
-  /* If there are no argument relocation bits, then no relocation is
-     necessary.  Do not add this to the symextn section.  */
-  if (arg_reloc == 0)
-    return;
-
-  symextP = (symext_chainS *) bfd_alloc (abfd, sizeof (symext_chainS) * 2);
-
-  symextP[0].entry = ELF32_HPPA_SX_WORD (HPPA_SXT_SYMNDX, sym_idx);
-  symextP[0].next = &symextP[1];
-
-  symextP[1].entry = ELF32_HPPA_SX_WORD (HPPA_SXT_ARG_RELOC, arg_reloc);
-  symextP[1].next = NULL;
-
-  if (symext_rootP == NULL)
-    {
-      symext_rootP = &symextP[0];
-      symext_lastP = &symextP[1];
-    }
-  else
-    {
-      symext_lastP->next = &symextP[0];
-      symext_lastP = &symextP[1];
-    }
+  /* Just call the ELF BFD routine.  */
+  elf_hppa_tc_symbol (abfd, symbolP, sym_idx, &symext_rootP, &symext_lastP);
 }
 
 /* Make sections needed by the target cpu and/or target format.  */
@@ -6311,102 +6284,8 @@ void
 hppa_tc_make_sections (abfd)
      bfd *abfd;
 {
-  symext_chainS *symextP;
-  segT save_seg = now_seg;
-  subsegT save_subseg = now_subseg;
-
-  /* Build the symbol extension section.  */
-  hppa_tc_make_symextn_section ();
-
-  /* Force some calculation to occur.  */
-  bfd_set_section_contents (stdoutput, stdoutput->sections, "", 0, 0);
-
-  hppa_elf_stub_finish (abfd);
-
-  /* If no symbols for the symbol extension section, then stop now.  */
-  if (symext_rootP == NULL)
-    return;
-
-  /* Switch to the symbol extension section.  */
-  subseg_new (SYMEXTN_SECTION_NAME, 0);
-
-  frag_wane (frag_now);
-  frag_new (0);
-
-  for (symextP = symext_rootP; symextP; symextP = symextP->next)
-    {
-      char *ptr;
-      int *symtab_map = elf_sym_extra (abfd);
-      int idx;
-
-      /* First, patch the symbol extension record to reflect the true
-         symbol table index.  */
-
-      if (ELF32_HPPA_SX_TYPE (symextP->entry) == HPPA_SXT_SYMNDX)
-	{
-	  idx = ELF32_HPPA_SX_VAL (symextP->entry) - 1;
-	  symextP->entry = ELF32_HPPA_SX_WORD (HPPA_SXT_SYMNDX,
-					       symtab_map[idx]);
-	}
-
-      ptr = frag_more (sizeof (symextP->entry));
-      md_number_to_chars (ptr, symextP->entry, sizeof (symextP->entry));
-    }
-
-  frag_now->fr_fix = obstack_next_free (&frags) - frag_now->fr_literal;
-  frag_wane (frag_now);
-
-  /* Switch back to the original segment.  */
-  subseg_set (save_seg, save_subseg);
-}
-
-/* Make the symbol extension section.  */
-
-static void
-hppa_tc_make_symextn_section ()
-{
-  if (symext_rootP)
-    {
-      symext_chainS *symextP;
-      int n;
-      unsigned int size;
-      segT symextn_sec;
-      segT save_seg = now_seg;
-      subsegT save_subseg = now_subseg;
-
-      for (n = 0, symextP = symext_rootP; symextP; symextP = symextP->next, ++n)
-	;
-
-      size = sizeof (symext_entryS) * n;
-
-      symextn_sec = subseg_new (SYMEXTN_SECTION_NAME, 0);
-
-      bfd_set_section_flags (stdoutput, symextn_sec,
-			     SEC_LOAD | SEC_HAS_CONTENTS | SEC_DATA);
-      bfd_set_section_size (stdoutput, symextn_sec, size);
-
-      /* Now, switch back to the original segment.  */
-      subseg_set (save_seg, save_subseg);
-    }
-}
-
-/* Build the symbol extension section.  */
-
-static void
-pa_build_symextn_section ()
-{
-  segT seg;
-  asection *save_seg = now_seg;
-  subsegT subseg = (subsegT) 0;
-  subsegT save_subseg = now_subseg;
-
-  seg = subseg_new (".hppa_symextn", subseg);
-  bfd_set_section_flags (stdoutput,
-			 seg,
-			 SEC_HAS_CONTENTS | SEC_READONLY
-			 | SEC_ALLOC | SEC_LOAD);
-
-  subseg_set (save_seg, save_subseg);
+  /* Just call the ELF BFD routine.  */
+  elf_hppa_tc_make_sections (abfd, symext_rootP);
 }
 
 /* For ELF, this function serves one purpose:  to setup the st_size

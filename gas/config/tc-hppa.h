@@ -67,13 +67,8 @@
 /* Labels are not required to have a colon for a suffix.  */
 #define LABELS_WITHOUT_COLONS
 
-/* FIXME.  */
-#ifdef OBJ_ELF
-extern void elf_hppa_final_processing PARAMS ((void));
-extern void hppa_tc_symbol PARAMS ((bfd *, elf_symbol_type *, int));
-#endif
-
 extern void hppa_tc_make_sections PARAMS ((bfd *));
+extern void hppa_tc_symbol PARAMS ((bfd *, elf_symbol_type *, int));
 
 /* FIXME.  This should be static and declared in tc-hppa.c, but 
    pa_define_label gets used outside of tc-hppa.c via tc_frob_label.
@@ -83,6 +78,7 @@ extern void pa_define_label ();
 /* FIXME.  Types not available here, so they can't be PARAMized.  */
 extern void parse_cons_expression_hppa ();
 extern void cons_fix_new_hppa ();
+extern int hppa_force_relocation ();
 
 #define tc_frob_label(sym) pa_define_label (sym)
 
@@ -119,6 +115,11 @@ extern void cons_fix_new_hppa ();
 #define TC_EOL_IN_INSN(PTR)	(is_end_of_line[*(PTR)] && (PTR)[-1] == ',')
 
 #define tc_fix_adjustable hppa_fix_adjustable
+
+/* Because of the strange PA calling conventions, it is sometimes
+   necessary to emit a relocation for a call even though it would
+   normally appear safe to handle it completely within GAS.  */
+#define TC_FORCE_RELOCATION(FIXP) hppa_force_relocation (FIXP)
 
 /* If a symbol is imported, but never used, then the symbol should
    *not* end up in the symbol table.  Likewise for absolute symbols

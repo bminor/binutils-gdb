@@ -1,3 +1,15 @@
+Fri Feb 25 20:56:57 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (hppa_tc_symbol): Call PA ELF BFD version.
+	(hppa_tc_make_sections): Likewise.
+	(pa_build_symextn_section): Delete unused function.
+	(hppa_tc_make_symextn_section): Likewise.
+	(pa_export): Delete call to pa_build_symextn_section.
+
+	* config/tc-hppa.h (hppa_tc_symbol): Add extern decl.
+	(elf_hppa_final_processing): Delete extern decl.
+	(hppa_tc_symbol): Delete extern decl.
+
 Fri Feb 25 13:15:31 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config/obj-coffbfd.c (fill_section): Correct test for whether to
