@@ -1,5 +1,8 @@
 Wed Dec 17 09:45:09 1997  Nick Clifton  <nickc@cygnus.com>
 
+	* coff-arm.c (coff_arm_relocate_section): Only look at section
+	owner if there is one.
+
 	* elf.c (assign_file_positions_for_segments): Fail if there is not
 	enough room for the program headers.  (PR14186)
 
