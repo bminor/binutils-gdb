@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
+#include "libiberty.h"
 #include "libbfd.h"
 #include "bfdlink.h"
 #include "coff/sh.h"
@@ -460,6 +461,8 @@ coff_sh_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
   return howto;
 }
 
+#endif /* COFF_WITH_PE */
+
 /* This structure is used to map BFD reloc codes to SH PE relocs.  */
 struct shcoff_reloc_map
 {
@@ -486,16 +489,13 @@ sh_coff_reloc_type_lookup (abfd, code)
 {
   unsigned int i;
 
-  for (i = 0; i < sizeof (sh_reloc_map) / sizeof (struct shcoff_reloc_map); i++)
-    {
-      if (sh_reloc_map[i].bfd_reloc_val == code)
-	return &sh_coff_howtos[(int) sh_reloc_map[i].shcoff_reloc_val];
-    }
+  for (i = ARRAY_SIZE (sh_reloc_map); i--;)
+    if (sh_reloc_map[i].bfd_reloc_val == code)
+      return &sh_coff_howtos[(int) sh_reloc_map[i].shcoff_reloc_val];
 
   fprintf (stderr, "SH Error: unknown reloc type %d\n", code);
   return NULL;
 }
-#endif /* COFF_WITH_PE */
 
 /* This macro is used in coffcode.h to get the howto corresponding to
    an internal reloc.  */

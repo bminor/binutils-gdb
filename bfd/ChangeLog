@@ -1,3 +1,8 @@
+2001-08-07  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* coff-sh.c (sh_coff_reloc_type_lookup): Provide for sh-coff
+	targets as well as sh-pe.
+
 2001-08-03  Ben Harris <bjh21@netbsd.org>
 
 	* elf32-arm.h (elf32_arm_final_link_relocate): Include offset of
