@@ -1,4 +1,14 @@
+Fri Sep 30 19:05:20 1994  Pat Rankin  (rankin@eql.caltech.edu)
+
+	* vmsconf.sh (make-gas.com): handle DCL verification to enable
+	sensible feedback to the user while gas is being built.
+
 Fri Sep 30 16:23:31 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (diststuff): Build make-gas.com.
+	(clean, mostlyclean): Delete make-gas.com.
+	(realclean): Separate target, depend on clean and distclean.
+	* make-gas.com: Deleted.
 
 	* config/tc-i386.c (i386_validate_fix) [BFD_ASSEMBLER]: New
 	function.  Converts reloc for "foo-GOT" to BFD_RELOC_386_GOTOFF
