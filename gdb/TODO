@@ -64,17 +64,6 @@ E.g. MIPS (mips-xdep.c).
 unpack_double() does not handle IEEE float on the target unless the host
 is also IEEE.  Death on a vax.
 
-Test cross-debugging Unix-to-Unix.
-
-Integrate the RAPP remote debugging protocol.
-`rapp' runs under unix and acts as a remote stub (like rem-multi.shar
-distributed with GDB version 3).  Currently it just works over UDP
-(network), not over a serial line.  To get it running
-* Compile GDB on the host machine as usual
-* Compile rapp on the target machine, giving for both host and target
-  the type of the target machine
-* Install "gdb" in /etc/services on both machines.
-
 Set up interface between GDB and INFO so that you can hop into interactive
 INFO and back out again.  When running under Emacs, should use Emacs
 info, else fork the info program.  Installation of GDB should install
@@ -153,13 +142,6 @@ wait_for_inferior loops forever if wait() gives it an error.
 "i frame" shows wrong "arglist at" location, doesn't show where the args
 should be found, only their actual values.
 
-Symbolic display of addrs, (& disassembly prefixes), don't show static
-fns, e.g. enable_command in gdb.
-
-'ptype yylval' ==> "union YYSTYPE { ..... }".  However, it is not a
-union YYSTYPE, but is simply a YYSTYPE, which is a typedef for an
-unnamed union.
-
 There should be a way for "set" commands to validate the new setting
 before it takes effect.
 
@@ -188,8 +170,8 @@ Eliminate separate declarations of registers[] everywhere.
 Line numbers are off in some spots.  In proceed() at 1st "oneproc = 1",
 it seems to run that statement, but it doesn't actually.
 
-Perhaps move the tdep and xdep files, and the tm and xm files, into a config
-subdirectory.  If not, at least straighten out their names so that
+Perhaps move the tdep, xdep, and nat files, into the config
+subdirectories.  If not, at least straighten out their names so that
 they all start with the machine name.
 
 inferior_status should include stop_print_frame.  It won't need to be
