@@ -52,16 +52,16 @@ AR_FLAGS = qc
 CFLAGS = -g
 RANLIB = ranlib
 
-BISON = `if [ -d $${rootme}/byacc ] ; \
+BISON = `if [ -f $${rootme}/byacc/byacc ] ; \
 	    then echo $${rootme}/byacc/byacc ; \
 	    else echo bison -y ; \
 	fi`
 
-LEX = `if [ -d $${rootme}/flex ] ; \
+LEX = `if [ -f $${rootme}/flex/flex ] ; \
 	then echo $${rootme}/flex/flex ; \
 	else echo flex ; fi`
 
-MAKEINFO = `if [ -d $${rootme}/texinfo/C ] ; \
+MAKEINFO = `if [ -f $${rootme}/texinfo/C/makeinfo ] ; \
 	then echo $${rootme}/texinfo/C/makeinfo ; \
 	else echo makeinfo ; fi`
 
@@ -74,11 +74,11 @@ INSTALL_TARGET = install.all
 ### for debugging
 #GCCVERBOSE=-v
 
-GXX = `if [ -d $${rootme}/gcc ] ; \
+GXX = `if [ -f $${rootme}/gcc/gcc ] ; \
 	then echo $${rootme}/gcc/gcc -B$${rootme}/gcc/ ; \
 	else echo gcc ; fi`
 
-XTRAFLAGS = `if [ -d $${rootme}/gcc ] ; \
+XTRAFLAGS = `if [ -f $${rootme}/gcc/gcc ] ; \
 	then echo -I$${rootme}/gcc/include ; \
 	else echo ; fi`
 
@@ -108,37 +108,24 @@ FLAGS_TO_PASS = \
 
 all:	$(ALL)
 
-info:	cfg-paper.info configure.info standards.info
-	@rootme=`pwd` ; export rootme ; $(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
+info:	
+	@rootme=`pwd` ; export rootme ; $(MAKE) $(FLAGS_TO_PASS) subdir_do DO=info "DODIRS=$(SUBDIRS)" 
 
 # Note libg++ has to be handled specially (we can't compile it with CC=cc).
 check:
-	@rootme=`pwd` ; export rootme ; $(MAKE) subdir_do DO=check \
-	  "DODIRS=`echo $(SUBDIRS) | sed -e \"s/libg\+\+//\"" $(FLAGS_TO_PASS)
-	@rootme=`pwd` ; export rootme ; $(MAKE) subdir_do DO=check \
-	  "DODIRS=libg++" $(FLAGS_TO_PASS) "CC=${GXX}" "XTRAFLAGS=${XTRAFLAGS}"
+	@rootme=`pwd` ; export rootme ; $(MAKE) $(FLAGS_TO_PASS) subdir_do DO=check \
+	  "DODIRS=`echo $(SUBDIRS) | sed -e \"s/libg\+\+//\"" 
+	@rootme=`pwd` ; export rootme ; $(MAKE) $(FLAGS_TO_PASS) subdir_do DO=check \
+	  "DODIRS=libg++" "CC=${GXX}" "XTRAFLAGS=${XTRAFLAGS}"
 
 clean-info:
 	@$(MAKE) $(FLAGS_TO_PASS)  subdir_do DO=clean-info "DODIRS=$(SUBDIRS)"
-	rm -f *.info*
-
-cfg-paper.info: cfg-paper.texi
-	rootme=`pwd` ; export rootme ; $(MAKEINFO) -o cfg-paper.info $(srcdir)/cfg-paper.texi
-
-configure.info: configure.texi
-	rootme=`pwd` ; export rootme ; $(MAKEINFO) -o configure.info $(srcdir)/configure.texi
-
-standards.info: standards.texi
-	rootme=`pwd` ; export rootme ; $(MAKEINFO) -o standards.info $(srcdir)/standards.texi
-
+	
 install-info: install-info-dirs force
 	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
 	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
 	-if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
 	@$(MAKE) $(FLAGS_TO_PASS) subdir_do DO=install-info "DODIRS=$(SUBDIRS)"
-	$(INSTALL_DATA) cfg-paper.info $(infodir)/cfg-paper.info
-	$(INSTALL_DATA) configure.info $(infodir)/configure.info
-	$(INSTALL_DATA) standards.info $(infodir)/standards.info
 	@$(MAKE) $(FLAGS_TO_PASS) dir.info install-dir.info
 
 install-dir.info:
@@ -151,7 +138,7 @@ all.normal: all-autoconf all-libiberty all-mmalloc all-texinfo \
 	all-byacc all-flex all-bfd all-ld all-gas all-tgas all-gcc \
 	all-binutils all-libg++ all-readline all-gdb \
 	all-make all-rcs all-cvs all-diff all-grep \
-	all-patch all-emacs all-ispell \
+	all-patch all-emacs all-ispell all-etc \
 	all-newlib all-gprof all-send_pr all-libm
 
 all.cross: all-libiberty all-mmalloc all-gas all-byacc all-flex all-ld \
@@ -160,7 +147,7 @@ all.cross: all-libiberty all-mmalloc all-gas all-byacc all-flex all-ld \
 
 clean: clean-autoconf clean-libiberty clean-mmalloc clean-texinfo \
 	clean-bfd clean-newlib clean-binutils clean-flex \
-	clean-byacc clean-ld clean-gas \
+	clean-byacc clean-ld clean-gas clean-etc \
 	clean-gcc clean-readline clean-glob clean-gdb \
 	clean-make clean-diff clean-grep clean-rcs \
 	clean-cvs clean-patch clean-emacs clean-ispell \
@@ -170,11 +157,10 @@ clean: clean-autoconf clean-libiberty clean-mmalloc clean-texinfo \
 clean-stamps:
 	-rm -f all-*
 
-install: $(INSTALL_TARGET) $(srcdir)/configure.man
+install: $(INSTALL_TARGET) 
 	-parent=`echo $(man1dir)|sed -e 's@/[^/]*$$@@'`; \
 	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
 	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
-	$(INSTALL_DATA) $(srcdir)/configure.man $(man1dir)/configure.1
 
 install.all: install-no-fixedincludes
 	@if [ -f ./gcc/Makefile ] ; then \
@@ -193,6 +179,7 @@ install-no-fixedincludes: install-dirs gcc-no-fixedincludes \
 	install-cvs \
 	install-diff \
 	install-emacs \
+	install-etc \
 	install-flex \
 	install-gas \
 	install-gdb \
@@ -227,14 +214,13 @@ install.cross: install-dirs install-libiberty install-mmalloc \
         install-binutils install-byacc install-flex \
         install-ld install-gas install-readline \
         install-glob install-gdb install-mmalloc \
-        install-newlib install-gcc
+        install-newlib install-gcc install-etc
 
 ### autoconf
 all-autoconf: force
-	@if [ -f ./autoconf/Makefile ] ; then \
+	if [ -f ./autoconf/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
-		(cd ./autoconf; \
-		$(MAKE) $(FLAGS_TO_PASS) all) ; \
+		(cd ./autoconf; echo "XX" $${rootme} "XXX" ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -242,8 +228,7 @@ all-autoconf: force
 clean-autoconf: force
 	@if [ -f ./autoconf/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
-		(cd ./autoconf; \
-		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
+		(cd ./autoconf;	$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -251,8 +236,32 @@ clean-autoconf: force
 install-autoconf: force
 	@if [ -f ./autoconf/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
-		(cd ./autoconf; \
-		$(MAKE) $(FLAGS_TO_PASS) install) ; \
+		(cd ./autoconf;	$(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
+### etc
+all-etc: force
+	@if [ -f ./etc/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./etc; $(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+clean-etc: force
+	@if [ -f ./etc/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./etc; $(MAKE) $(FLAGS_TO_PASS) clean) ; \
+	else \
+		true ; \
+	fi
+
+install-etc: force
+	@if [ -f ./etc/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./etc; $(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -938,7 +947,7 @@ install-send_pr: force
 
 ### libm
 all-libm: force
-	@if [ -d ./libm ] ; then \
+	@if [ -f ./libm/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libm; \
 		$(MAKE) $(FLAGS_TO_PASS) all) ; \
@@ -947,7 +956,7 @@ all-libm: force
 	fi
 
 clean-libm: force
-	@if [ -d ./libm ] ; then \
+	@if [ -f ./libm/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libm; \
 		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
@@ -956,7 +965,7 @@ clean-libm: force
 	fi
 
 install-libm: force
-	@if [ -d ./libm ] ; then \
+	@if [ -f ./libm/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libm; \
 		$(MAKE) $(FLAGS_TO_PASS) install) ; \
@@ -996,7 +1005,7 @@ install-libg++: force
 ### other supporting targets
 # this is a bad hack.
 all.xclib:	all.normal
-	if [ -d clib ] ; then \
+	if [ -f clib/Makefile ] ; then \
 		(cd clib ; $(MAKE) $(FLAGS_TO_PASS)) ; \
 	fi
 
