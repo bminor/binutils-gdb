@@ -1231,8 +1231,8 @@ read_frame (buf)
 
 	    *bp = '\000';
 
-	    pktcsum = fromhex (readchar (remote_timeout)) << 4
-	      | fromhex (readchar (remote_timeout));
+	    pktcsum = fromhex (readchar (remote_timeout)) << 4;
+	    pktcsum |= fromhex (readchar (remote_timeout));
 
 	    if (csum == pktcsum)
 	      return 1;

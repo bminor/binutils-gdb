@@ -1,3 +1,8 @@
+Fri Jul 29 21:56:23 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* remote.c (read_frame):  Split readchar/checksum calculation into
+	two parts since evaluation order is undefined.
+
 Fri Jul 29 13:46:08 1994  Fred Fish  (fnf@cygnus.com)
 
         From Kevin A. Buettner (kev@cujo.geg.mot.com).
