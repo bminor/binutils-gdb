@@ -29,7 +29,8 @@ Disassembly of section \.text:
 0+0050 <stuff\+(0x|)50> adda.s	\$f12,\$f14
 0+0054 <stuff\+(0x|)54> suba.s	\$f10,\$f12
 0+0058 <stuff\+(0x|)58> msuba.s	\$f10,\$f12
-0+005c <stuff\+(0x|)5c> multa.s	\$f10,\$f12
+0+005c <stuff\+(0x|)5c> mula.s	\$f10,\$f12
 0+0060 <stuff\+(0x|)60> madda.s	\$f10,\$f12
 0+0064 <stuff\+(0x|)64> max.s	\$f10,\$f12,\$f14
 0+0068 <stuff\+(0x|)68> min.s	\$f10,\$f12,\$f14
+0+006c <stuff\+(0x|)6c> nop

@@ -2,11 +2,6 @@
 
 stuff:
 	.ent stuff
-	/* Integer instructions.  */
-
-	/* Coprocessor 0 instructions, minus standard ISA 3 ones.
-	   That leaves just the performance monitoring registers.  */
-
 	di
 	ei
 	mfbpc	$10
@@ -28,3 +23,13 @@ stuff:
 	mtpc	$4,$1
 	mtps	$4,$1
 
+
+	adda.s  $f12,$f14
+	suba.s  $f10,$f12
+	msuba.s $f10,$f12
+	mula.s  $f10,$f12
+	madda.s $f10,$f12
+	max.s   $f10,$f12,$f14
+	min.s   $f10,$f12,$f14
+# Nop just to fill out ot a 16byte boundary
+	nop
