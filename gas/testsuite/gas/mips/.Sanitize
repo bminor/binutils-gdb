@@ -40,6 +40,8 @@ blt.d
 blt.s
 bltu.d
 bltu.s
+delay.d
+delay.s
 div-ilocks.d
 div.d
 div.s
@@ -86,6 +88,7 @@ mips4.s
 mul-ilocks.d
 mul.d
 mul.s
+nodelay.d
 rol.d
 rol.s
 sb.d
