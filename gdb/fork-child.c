@@ -274,10 +274,18 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
   if (pre_trace_fun != NULL)
     (*pre_trace_fun) ();
 
-  /* Create the child process.  Note that the apparent call to vfork()
-     below *might* actually be a call to fork() due to the fact that
-     autoconf will ``#define vfork fork'' on certain platforms.  */
-  if (debug_fork)
+  /* Create the child process.  Since the child process is going to
+     exec(3) shortlty afterwards, try to reduce the overhead by
+     calling vfork(2).  However, if PRE_TRACE_FUN is non-null, it's
+     likely that this optimization won't work since there's too much
+     work to do between the vfork(2) and the exec(3).  This is known
+     to be the case on ttrace(2)-based HP-UX, where some handshaking
+     between parent and child needs to happen between fork(2) and
+     exec(2).  However, since the parent is suspended in the vforked
+     state, this doesn't work.  Also note that the vfork(2) call might
+     actually be a call to fork(2) due to the fact that autoconf will
+     ``#define vfork fork'' on certain platforms.  */
+  if (pre_trace_fun || debug_fork)
     pid = fork ();
   else
     pid = vfork ();
