@@ -229,6 +229,7 @@ if { ![istarget *-*-elf*] \
      && ![istarget mips*-*-irix5*] \
      && ![istarget mips*-*-irix6*] \
      && ![istarget powerpc-*-sysv4*] \
+     && ![istarget powerpc-*-eabi*] \
      && ![istarget sparc*-*-solaris2*] } {
     verbose "$READELF is only intended for ELF targets" 2
     return
