@@ -1787,9 +1787,17 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	p = strchr (name, ':');
 	if (p != 0 && p[1] == 'S')
 	  {
-	    /* The linker relocated it.  There used to be a kludge here
-	       to add the text offset, but that will break if we ever
-	       start using the text offset (currently it is always zero).  */
+	    /* The linker relocated it.  We don't want to add an
+	       elfstab_offset_sections-type offset, but we *do* want
+	       to add whatever solib.c passed to symbol_file_add as
+	       addr (this is known to affect SunOS4, and I suspect ELF
+	       too).  Since elfstab_offset_sections currently does not
+	       muck with the text offset (there is no Ttext.text
+	       symbol), we can get addr from the text offset.  If
+	       elfstab_offset_sections ever starts dealing with the
+	       text offset, and we still need to do this, we need to
+	       invent a SECT_OFF_ADDR_KLUDGE or something.  */
+	    valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
 	    goto define_a_symbol;
 	  }
 	/* Since it's not the kludge case, re-dispatch to the right handler. */

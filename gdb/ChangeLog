@@ -1,5 +1,8 @@
 Thu Nov  4 08:27:24 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* dbxread.c (process_one_symbol): Do relocate 'S' symbols by
+	the text offset (revert 12 Oct 93 change).
+
 	* configure.in: Make hppa*-*-hiux* use hppahpux,
 	not non-existent hppahiux.
 
