@@ -1,3 +1,10 @@
+Wed Dec  1 21:47:58 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_section_type, som_decode_symcalss): New functions.
+	(som_get_symbol_info): Use them.
+	(som_slurp_symbol_table): Set the section of common and undefined
+	symbols correctly.
+
 Wed Dec  1 14:15:10 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* elfcode.h (write_relocs): Initialize local var LAST_SYM_IDX, to
