@@ -59,11 +59,13 @@ news.mt
 ose68.mt
 rtbsd.mh
 sa29200.mt
+sparc64-elf.mt
 sparc-ll.mh
 st2000.mt
 sun3.mh
 sun3.mt
 sun4.mt
+sun4sol2.mt
 vax.mt
 vxworks68.mt
 z8ksim.mt
@@ -76,3 +78,17 @@ Things-to-lose:
 
 Do-last:
 
+if ( echo $* | grep keep-v9 > /dev/null ) ; then
+	if [ -n "${verbose}" ] ; then
+		echo Keeping `pwd`/sparc64-elf.mt.
+	fi
+else
+	if [ -n "${verbose}" ] ; then
+		echo Removing `pwd`/sparc64-elf.mt.
+	fi
+	if [ -n "${safe}" ] ; then
+		mv sparc64-elf.mt .Recover
+	else
+		rm sparc64-elf.mt
+	fi
+fi
