@@ -1,3 +1,8 @@
+Thu Jun 27 18:24:17 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* config/i386/cygwin32.mh, config/powerpc/cygwin32.mh
+	(NATDEPFILES): Add a space.
+
 Wed Jun 26 06:05:39 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
 
 	* gdbtypes.c (create_array_type): If TYPE_LENGTH (result_type)
