@@ -1,5 +1,8 @@
 Thu Feb  8 20:02:58 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-i960.c (tc_coff_symbol_emit_hook): Correct storage
+	class setting for a CALLNAME symbol in COFF.
+
 	* read.c (potable): Pass negative numbers for new .balign[wl] and
 	.p2align[wl] pseudo-ops.
 	(s_align_bytes): Treat a negative argument as specifying the fill
