@@ -1,3 +1,12 @@
+1999-06-22  Mark Mitchell  <mark@codesourcery.com>
+
+	* ldmain.c (main): Initialize link_info.init_function and
+	link_info.fini_function.
+	* lexsup.c (OPTION_INIT): New macro.
+	(OPTION_FINI): Likewise.
+	(ld_options): Add descriptions for them.
+	(parse_args): Handle them.
+
 1999-06-23  Ian Lance Taylor  <ian@zembu.com>
 
 	* ldlang.c (section_already_linked): Only discard link once

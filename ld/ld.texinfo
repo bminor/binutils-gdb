@@ -404,6 +404,14 @@ purpose: the @code{-b}, @code{--format}, @code{--oformat} options, the
 environment variable.  The @sc{gnu} linker will ignore the @code{-F}
 option when not creating an ELF shared object.
 
+@cindex finalization function
+@kindex -fini
+@item -fini @var{name}
+When creating an ELF executable or shared object, call NAME when the
+executable or shared object is unloaded, by setting DT_FINI to the
+address of the function.  By default, the linker uses @code{_fini} as
+the function to call.
+
 @kindex -g
 @item -g
 Ignored.  Provided for compatibility with other tools.
@@ -433,6 +441,14 @@ field rather than the using the file name given to the linker.
 @cindex incremental link
 @item -i
 Perform an incremental link (same as option @samp{-r}).
+
+@cindex initialization function
+@kindex -init
+@item -init @var{name}
+When creating an ELF executable or shared object, call NAME when the
+executable or shared object is loaded, by setting DT_INIT to the address
+of the function.  By default, the linker uses @code{_init} as the
+function to call.
 
 @cindex archive files, from cmd line
 @kindex -l@var{archive}

@@ -231,7 +231,11 @@ main (argc, argv)
   link_info.notice_hash = NULL;
   link_info.wrap_hash = NULL;
   link_info.mpc860c0 = 0;
-  
+  /* SVR4 linkers seem to set DT_INIT and DT_FINI based on magic _init
+     and _fini symbols.  We are compatible.  */
+  link_info.init_function = "_init";
+  link_info.fini_function = "_fini";
+
   ldfile_add_arch ("");
 
   config.make_executable = true;

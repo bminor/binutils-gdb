@@ -120,6 +120,8 @@ int parsing_defsym = 0;
 #define OPTION_NO_CHECK_SECTIONS	(OPTION_CHECK_SECTIONS + 1)
 #define OPTION_MPC860C0                 (OPTION_NO_CHECK_SECTIONS + 1)
 #define OPTION_NO_UNDEFINED		(OPTION_MPC860C0 + 1)
+#define OPTION_INIT                     (OPTION_NO_UNDEFINED + 1)
+#define OPTION_FINI                     (OPTION_INIT + 1)
 
 /* The long options.  This structure is used for both the option
    parsing and the help text.  */
@@ -270,6 +272,8 @@ static const struct ld_option ld_options[] =
       '\0', N_("PROGRAM"), N_("Set the dynamic linker to use"), TWO_DASHES },
   { {"embedded-relocs", no_argument, NULL, OPTION_EMBEDDED_RELOCS},
       '\0', NULL, N_("Generate embedded relocs"), TWO_DASHES},
+  { {"fini", required_argument, NULL, OPTION_FINI},
+     '\0', N_("SYMBOL"), N_("Call SYMBOL at unload-time"), ONE_DASH },
   { {"force-exe-suffix", no_argument, NULL, OPTION_FORCE_EXE_SUFFIX},
       '\0', NULL, N_("Force generation of file with .exe suffix"), TWO_DASHES},
   { {"gc-sections", no_argument, NULL, OPTION_GC_SECTIONS},
@@ -280,6 +284,8 @@ static const struct ld_option ld_options[] =
       TWO_DASHES },
   { {"help", no_argument, NULL, OPTION_HELP},
       '\0', NULL, N_("Print option help"), TWO_DASHES },
+  { {"init", required_argument, NULL, OPTION_INIT},
+     '\0', N_("SYMBOL"), N_("Call SYMBOL at load-time"), ONE_DASH },
   { {"Map", required_argument, NULL, OPTION_MAP},
       '\0', N_("FILE"), N_("Write a map file"), ONE_DASH },
   { {"no-demangle", no_argument, NULL, OPTION_NO_DEMANGLE },
@@ -988,6 +994,14 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
             }
           command_line.relax = true;
           break;
+
+	case OPTION_INIT:
+	  link_info.init_function = optarg;
+	  break;
+	  
+	case OPTION_FINI:
+	  link_info.fini_function = optarg;
+	  break;
 	}
     }
 
