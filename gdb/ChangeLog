@@ -1,3 +1,11 @@
+2002-08-29  Jim Blandy  <jimb@redhat.com>
+
+	* symtab.c (lookup_symbol_aux): In the cases where we find a
+	minimal symbol of an appropriate name and use its address to
+	select a symtab to read and search, use `name' (as passed to us)
+	as the demangled name when searching the symtab's global and
+	static blocks, not the minsym's name.
+
 2002-08-29  Keith Seitz  <keiths@redhat.com>
 
 	* stack.c (print_frame_info_base): Always set current_source_symtab

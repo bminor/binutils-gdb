@@ -860,15 +860,20 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 	      /* This is a function which has a symtab for its address.  */
 	      bv = BLOCKVECTOR (s);
 	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	      sym = lookup_block_symbol (block, SYMBOL_NAME (msymbol),
-					 mangled_name, namespace);
+
+              /* This call used to pass `SYMBOL_NAME (msymbol)' as the
+                 `name' argument to lookup_block_symbol.  But the name
+                 of a minimal symbol is always mangled, so that seems
+                 to be clearly the wrong thing to pass as the
+                 unmangled name.  */
+	      sym = lookup_block_symbol (block, name, mangled_name, namespace);
 	      /* We kept static functions in minimal symbol table as well as
 	         in static scope. We want to find them in the symbol table. */
 	      if (!sym)
 		{
 		  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-		  sym = lookup_block_symbol (block, SYMBOL_NAME (msymbol),
-					     mangled_name, namespace);
+		  sym = lookup_block_symbol (block, name,
+                                             mangled_name, namespace);
 		}
 
 	      /* sym == 0 if symbol was found in the minimal symbol table
@@ -1027,15 +1032,19 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 	    {
 	      bv = BLOCKVECTOR (s);
 	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	      sym = lookup_block_symbol (block, SYMBOL_NAME (msymbol),
-					 mangled_name, namespace);
+              /* This call used to pass `SYMBOL_NAME (msymbol)' as the
+                 `name' argument to lookup_block_symbol.  But the name
+                 of a minimal symbol is always mangled, so that seems
+                 to be clearly the wrong thing to pass as the
+                 unmangled name.  */
+	      sym = lookup_block_symbol (block, name, mangled_name, namespace);
 	      /* We kept static functions in minimal symbol table as well as
 	         in static scope. We want to find them in the symbol table. */
 	      if (!sym)
 		{
 		  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-		  sym = lookup_block_symbol (block, SYMBOL_NAME (msymbol),
-					     mangled_name, namespace);
+		  sym = lookup_block_symbol (block, name,
+                                             mangled_name, namespace);
 		}
 	      /* If we found one, return it */
 	      if (sym)
