@@ -147,7 +147,7 @@ DESCRIPTION
 .  bfd_target_srec_flavour,
 .  bfd_target_som_flavour,
 .  bfd_target_os9k_flavour,
-.  bfd_target_msdos_flavour
+.  bfd_target_versados_flavour
 .};
 .
 .{* Forward declaration.  *}
@@ -265,6 +265,7 @@ The general target vector.
 .CAT(NAME,_bfd_copy_private_bfd_data),\
 .CAT(NAME,_bfd_merge_private_bfd_data),\
 .CAT(NAME,_bfd_copy_private_section_data),\
+.CAT(NAME,_bfd_copy_private_symbol_data),\
 .CAT(NAME,_bfd_set_private_flags)
 .  {* Called to copy BFD general private data from one object file
 .     to another.  *}
@@ -276,6 +277,10 @@ The general target vector.
 .     to another.  *}
 .  boolean       (*_bfd_copy_private_section_data) PARAMS ((bfd *, sec_ptr,
 .                                                       bfd *, sec_ptr));
+.  {* Called to copy BFD private symbol data from one symbol 
+.     to another.  *}
+.  boolean       (*_bfd_copy_private_symbol_data) PARAMS ((bfd *, asymbol *,
+.							   bfd *, asymbol *));
 .  {* Called to set private backend flags *}
 .  boolean	 (*_bfd_set_private_flags) PARAMS ((bfd *, flagword));
 .
@@ -380,7 +385,8 @@ The general target vector.
 .CAT(NAME,_bfd_relax_section),\
 .CAT(NAME,_bfd_link_hash_table_create),\
 .CAT(NAME,_bfd_link_add_symbols),\
-.CAT(NAME,_bfd_final_link)
+.CAT(NAME,_bfd_final_link),\
+.CAT(NAME,_bfd_link_split_section)
 .  int        (*_bfd_sizeof_headers) PARAMS ((bfd *, boolean));
 .  bfd_byte * (*_bfd_get_relocated_section_contents) PARAMS ((bfd *,
 .                    struct bfd_link_info *, struct bfd_link_order *,
@@ -400,6 +406,9 @@ The general target vector.
 .  {* Do a link based on the link_order structures attached to each
 .     section of the BFD.  *}
 .  boolean (*_bfd_final_link) PARAMS ((bfd *, struct bfd_link_info *));
+.
+.  {* Should this section be split up into smaller pieces during linking.  *}
+.  boolean (*_bfd_link_split_section) PARAMS ((bfd *, struct sec *));
 .
 . {* Routines to handle dynamic symbols and relocs.  *}
 .#define BFD_JUMP_TABLE_DYNAMIC(NAME)\
@@ -433,10 +442,14 @@ in this structure.
    we can't intermix extern's and initializers.  */
 extern const bfd_target a29kcoff_big_vec;
 extern const bfd_target a_out_adobe_vec;
+extern const bfd_target aout_arm_big_vec;
+extern const bfd_target aout_arm_little_vec;
 extern const bfd_target aout_mips_big_vec;
 extern const bfd_target aout_mips_little_vec;
 extern const bfd_target aout0_big_vec;
 extern const bfd_target apollocoff_vec;
+extern const bfd_target armpe_vec;
+extern const bfd_target armpei_vec;
 extern const bfd_target b_out_vec_big_host;
 extern const bfd_target b_out_vec_little_host;
 /* start-sanitize-arc */
@@ -473,6 +486,8 @@ extern const bfd_target i386bsd_vec;
 extern const bfd_target i386dynix_vec;
 extern const bfd_target i386os9k_vec;
 extern const bfd_target i386coff_vec;
+extern const bfd_target i386pe_vec;
+extern const bfd_target i386pei_vec;
 extern const bfd_target go32coff_vec;
 extern const bfd_target i386linux_vec;
 extern const bfd_target i386lynx_aout_vec;
@@ -511,6 +526,7 @@ extern const bfd_target sparcnetbsd_vec;
 extern const bfd_target sparccoff_vec;
 extern const bfd_target sunos_big_vec;
 extern const bfd_target tekhex_vec;
+extern const bfd_target versados_vec;
 extern const bfd_target we32kcoff_vec;
 extern const bfd_target w65_vec;
 extern const bfd_target z8kcoff_vec;
@@ -630,6 +646,10 @@ const bfd_target * const bfd_target_vector[] = {
 	&i386msdos_vec,
 	&i386netbsd_vec,
 	&i386os9k_vec,
+	&i386pe_vec,
+	&i386pei_vec,
+	&armpe_vec,
+	&armpei_vec,
 	&icoff_big_vec,
 	&icoff_little_vec,
 	&ieee_vec,
@@ -657,7 +677,9 @@ const bfd_target * const bfd_target_vector[] = {
 #endif
 	&pc532machaout_vec,
 #if 0
-	/* We have no way of distinguishing this from other a.out variants */
+	/* We have no way of distinguishing these from other a.out variants */
+	&aout_arm_big_vec,
+	&aout_arm_little_vec,
 	&riscix_vec,
 #endif
 	&rs6000coff_vec,
@@ -673,6 +695,7 @@ const bfd_target * const bfd_target_vector[] = {
 	&aout0_big_vec,
 	&tekhex_vec,
 	&we32kcoff_vec,
+	&versados_vec,
 	&z8kcoff_vec,
 
 #endif /* not SELECT_VECS */
@@ -680,7 +703,8 @@ const bfd_target * const bfd_target_vector[] = {
 /* Always support S-records, for convenience.  */
 	&srec_vec,
 	&symbolsrec_vec,
-
+/* And tekhex */
+	&tekhex_vec,
 /* Likewise for binary output.  */
 	&binary_vec,
 

@@ -1,5 +1,5 @@
 /* BFD back-end for Intel 386 COFF files.
-   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -22,19 +22,26 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 #include "obstack.h"
+
 #include "coff/i386.h"
+
 #include "coff/internal.h"
+
+#ifdef COFF_WITH_PE
+#include "coff/pe.h"
+#endif
+
 #include "libcoff.h"
 
 static bfd_reloc_status_type coff_i386_reloc 
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static const struct reloc_howto_struct *coff_i386_rtype_to_howto
+static reloc_howto_type *coff_i386_rtype_to_howto
   PARAMS ((bfd *, asection *, struct internal_reloc *,
 	   struct coff_link_hash_entry *, struct internal_syment *,
+
 	   bfd_vma *));
 
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
-
 /* The page size is a guess based on ELF.  */
 #define COFF_PAGE_SIZE 0x1000
 
@@ -130,6 +137,12 @@ coff_i386_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
   return bfd_reloc_continue;
 }
 
+
+
+#ifndef PCRELOFFSET
+#define PCRELOFFSET false
+#endif
+
 static reloc_howto_type howto_table[] = 
 {
   {0},
@@ -150,8 +163,21 @@ static reloc_howto_type howto_table[] =
 	 true,	                /* partial_inplace */                      
 	 0xffffffff,            /* src_mask */                             
 	 0xffffffff,            /* dst_mask */                             
+	 true),                /* pcrel_offset */
+  /* {7}, */
+  HOWTO (7,               /* type */                                 
+	 0,	                /* rightshift */                           
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 32,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 coff_i386_reloc,       /* special_function */                     
+	 "dir32",               /* name */                                 
+	 true,	                /* partial_inplace */                      
+	 0xffffffff,            /* src_mask */                             
+	 0xffffffff,            /* dst_mask */                             
 	 false),                /* pcrel_offset */
-  {7},
   {010},
   {011},
   {012},
@@ -171,7 +197,7 @@ static reloc_howto_type howto_table[] =
 	 true,			/* partial_inplace */                      
 	 0x000000ff,		/* src_mask */                             
 	 0x000000ff,		/* dst_mask */                             
-	 false),		/* pcrel_offset */
+	 PCRELOFFSET),		/* pcrel_offset */
   HOWTO (R_RELWORD,		/* type */                                 
 	 0,			/* rightshift */                           
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */ 
@@ -184,7 +210,7 @@ static reloc_howto_type howto_table[] =
 	 true,			/* partial_inplace */                      
 	 0x0000ffff,		/* src_mask */                             
 	 0x0000ffff,		/* dst_mask */                             
-	 false),		/* pcrel_offset */
+	 PCRELOFFSET),		/* pcrel_offset */
   HOWTO (R_RELLONG,		/* type */                                 
 	 0,			/* rightshift */                           
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */ 
@@ -197,7 +223,7 @@ static reloc_howto_type howto_table[] =
 	 true,			/* partial_inplace */                      
 	 0xffffffff,		/* src_mask */                             
 	 0xffffffff,		/* dst_mask */                             
-	 false),		/* pcrel_offset */
+	 PCRELOFFSET),		/* pcrel_offset */
   HOWTO (R_PCRBYTE,		/* type */                                 
 	 0,			/* rightshift */                           
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */ 
@@ -210,7 +236,7 @@ static reloc_howto_type howto_table[] =
 	 true,			/* partial_inplace */                      
 	 0x000000ff,		/* src_mask */                             
 	 0x000000ff,		/* dst_mask */                             
-	 false),		/* pcrel_offset */
+	 PCRELOFFSET),		/* pcrel_offset */
   HOWTO (R_PCRWORD,		/* type */                                 
 	 0,			/* rightshift */                           
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */ 
@@ -223,7 +249,7 @@ static reloc_howto_type howto_table[] =
 	 true,			/* partial_inplace */                      
 	 0x0000ffff,		/* src_mask */                             
 	 0x0000ffff,		/* dst_mask */                             
-	 false),		/* pcrel_offset */
+	 PCRELOFFSET),		/* pcrel_offset */
   HOWTO (R_PCRLONG,		/* type */                                 
 	 0,			/* rightshift */                           
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */ 
@@ -236,7 +262,7 @@ static reloc_howto_type howto_table[] =
 	 true,			/* partial_inplace */                      
 	 0xffffffff,		/* src_mask */                             
 	 0xffffffff,		/* dst_mask */                             
-	 false)			/* pcrel_offset */
+	 PCRELOFFSET)		/* pcrel_offset */
 };
 
 /* Turn a howto into a reloc  nunmber */
@@ -294,7 +320,7 @@ static reloc_howto_type howto_table[] =
 /* We use the special COFF backend linker.  */
 #define coff_relocate_section _bfd_coff_generic_relocate_section
 
-static const struct reloc_howto_struct *
+static reloc_howto_type *
 coff_i386_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
      bfd *abfd;
      asection *sec;
@@ -303,9 +329,14 @@ coff_i386_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
      struct internal_syment *sym;
      bfd_vma *addendp;
 {
-  const struct reloc_howto_struct *howto;
+
+  reloc_howto_type *howto;
 
   howto = howto_table + rel->r_type;
+
+#ifdef COFF_WITH_PE
+  *addendp = 0;
+#endif
 
   if (howto->pc_relative)
     *addendp += sec->vma;
@@ -317,15 +348,32 @@ coff_i386_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 	 function will be adding in the final value of the symbol.  We
 	 need to subtract out the current size in order to get the
 	 correct result.  */
+ 
       BFD_ASSERT (h != NULL);
+
+
+#ifndef COFF_WITH_PE
+ /* I think we *do* want to bypass this.  If we don't, I have seen some data
+    parameters get the wrong relcation address.  If I link two versions
+    with and without this section bypassed and then do a binary comparison,
+    the addresses which are different can be looked up in the map.  The 
+    case in which this section has been bypassed has addresses which correspond
+    to values I can find in the map */
       *addendp -= sym->n_value;
+#endif
     }
 
   /* If the output symbol is common (in which case this must be a
      relocateable link), we need to add in the final size of the
      common symbol.  */
-  if (h != NULL && h->root.type == bfd_link_hash_common)
+  if (h != NULL && h->root.type == bfd_link_hash_common) 
     *addendp += h->root.u.c.size;
+
+
+#ifdef COFF_WITH_PE
+  if (howto->pc_relative)
+  *addendp -= 4;
+#endif
 
   return howto;
 }

@@ -86,7 +86,7 @@ BFD_LIBS = \
 	archive.o archures.o bfd.o cache.o coffgen.o core.o \
 	format.o init.o libbfd.o opncls.o reloc.o \
 	section.o syms.o targets.o hash.o linker.o \
-	elf.o srec.o binary.o
+	elf.o srec.o binary.o tekhex.o 
 
 # This list is alphabetized to make it easier to keep in sync
 # with the decls and initializer in archures.c.
@@ -171,6 +171,7 @@ BFD32_BACKENDS = \
 	i386bsd.o \
 	i386linux.o \
 	i386lynx.o \
+	i386msdos.o \
 	i386netbsd.o \
 	i386mach3.o \
 	i386os9k.o \
@@ -188,6 +189,10 @@ BFD32_BACKENDS = \
 	ns32knetbsd.o \
 	oasys.o \
 	pc532-mach.o \
+	pe-arm.o \
+	pei-arm.o \
+	pe-i386.o \
+	pei-i386.o \
 	reloc16.o \
 	sparclynx.o \
 	sparcnetbsd.o \
@@ -447,11 +452,13 @@ install:
 # if configured as $(oldincludedir) -- which it usually isnt.
 	$(INSTALL_DATA) $(BFD_H) $(includedir)/bfd.h
 	$(INSTALL_DATA) $(INCDIR)/ansidecl.h $(includedir)/ansidecl.h
+	$(INSTALL_DATA) $(INCDIR)/bfdlink.h $(includedir)/bfdlink.h
 	$(INSTALL_DATA) $(INCDIR)/obstack.h $(includedir)/obstack.h
 	-if test -z "$(oldincludedir)"; then true; else \
 	test -d $(oldincludedir) || mkdir $(oldincludedir); \
 	$(INSTALL_DATA) $(BFD_H) $(oldincludedir)/bfd.h; \
 	$(INSTALL_DATA) $(INCDIR)/ansidecl.h $(oldincludedir)/ansidecl.h; \
+	$(INSTALL_DATA) $(INCDIR)/bfdlink.h $(oldincludedir)/bfdlink.h; \
 	$(INSTALL_DATA) $(INCDIR)/obstack.h $(oldincludedir)/obstack.h; \
 	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS); \
 	fi
@@ -559,6 +566,8 @@ cache.o: cache.c
 archures.o: archures.c
 coff-i386.o: coff-i386.c $(INCDIR)/coff/i386.h $(INCDIR)/coff/internal.h \
   libcoff.h $(INCDIR)/bfdlink.h coffcode.h coffswap.h
+pe-i386.o: pe-i386.c coff-i386.c $(INCDIR)/coff/i386.h $(INCDIR)/coff/internal.h   libcoff.h $(INCDIR)/bfdlink.h coffcode.h coffswap.h
+pei-i386.o: pei-i386.c coff-i386.c $(INCDIR)/coff/i386.h $(INCDIR)/coff/internal.h   libcoff.h $(INCDIR)/bfdlink.h coffcode.h coffswap.h
 coff-go32.o: coff-go32.c coff-i386.c $(INCDIR)/coff/i386.h \
   $(INCDIR)/coff/internal.h libcoff.h $(INCDIR)/bfdlink.h \
   coffcode.h coffswap.h
@@ -577,6 +586,7 @@ demo64.o: demo64.c aoutf1.h $(INCDIR)/aout/sun4.h libaout.h \
 coff-i960.o: coff-i960.c $(INCDIR)/coff/i960.h $(INCDIR)/coff/internal.h \
   libcoff.h $(INCDIR)/bfdlink.h coffcode.h coffswap.h
 srec.o: srec.c $(INCDIR)/libiberty.h
+versados.o: versados.c $(INCDIR)/libiberty.h
 binary.o: binary.c
 tekhex.o: tekhex.c $(INCDIR)/libiberty.h
 oasys.o: oasys.c $(INCDIR)/oasys.h liboasys.h
@@ -589,8 +599,9 @@ ecoff.o: ecoff.c $(INCDIR)/bfdlink.h $(INCDIR)/aout/ar.h \
   libaout.h $(INCDIR)/aout/aout64.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h $(INCDIR)/coff/ecoff.h \
   libcoff.h libecoff.h
-ecofflink.o: ecofflink.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
-  $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h $(INCDIR)/coff/ecoff.h
+ecofflink.o: ecofflink.c $(INCDIR)/bfdlink.h $(INCDIR)/aout/stab_gnu.h \
+  $(INCDIR)/aout/stab.def $(INCDIR)/coff/internal.h $(INCDIR)/coff/sym.h \
+  $(INCDIR)/coff/symconst.h $(INCDIR)/coff/ecoff.h
 coff-m68k.o: coff-m68k.c $(INCDIR)/coff/m68k.h $(INCDIR)/coff/internal.h \
   libcoff.h $(INCDIR)/bfdlink.h coffcode.h coffswap.h
 coff-u68k.o: coff-u68k.c coff-m68k.c $(INCDIR)/coff/m68k.h \

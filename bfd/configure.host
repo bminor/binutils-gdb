@@ -30,9 +30,11 @@ i[345]86-sequent-bsd*)	my_host=symmetry ;;
 i[345]86-sequent-sysv4*) my_host=sysv4 ;;
 i[345]86-sequent-sysv*)	my_host=symmetry ;;
 i[345]86-*-bsd*)	my_host=i386bsd ;;
+i[345]86-*-freebsd*)	my_host=i386bsd ;;
 i[345]86-*-netbsd*)	my_host=i386bsd ;;
 i[345]86-ncr*-sysv4*)	my_host=ncr3000 ;;
 i[345]86-*-go32*)	my_host=go32 ;;
+i[345]86-*-pe*)		my_host=i386pe ;;
 i[345]86-esix-sysv3*)	my_host=esix ;;
 i[345]86-*-sysv4*)	my_host=i386v4 ;;
 i[345]86-*-sysv*)	my_host=i386v ;;
@@ -88,6 +90,7 @@ romp-*-*)		my_host=rtbsd ;;
 rs6000-*-lynx*)		my_host=rs6000lynx ;;
 
 rs6000-*-*)		my_host=rs6000 ;;
+powerpc-*-aix*)		my_host=rs6000 ;;
 
 sparc-*-lynxos*)	my_host=sparclynx ;;
 sparc-*-netbsd*)	my_host=sparcnbsd;;

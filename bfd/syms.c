@@ -262,12 +262,15 @@ CODE_FRAGMENT
 .
 .	{* A pointer to the section to which this symbol is
 .	   relative.  This will always be non NULL, there are special
-.          sections for undefined and absolute symbols *}
+.          sections for undefined and absolute symbols.  *}
 .  struct sec *section;
 .
-.	{* Back end special data. This is being phased out in favour
-.	   of making this a union. *}
-.  PTR udata;
+.	{* Back end special data.  *}
+.  union
+.    {
+.      PTR p;
+.      bfd_vma i;
+.    } udata;
 .
 .} asymbol;
 */
@@ -392,16 +395,17 @@ bfd_print_symbol_vandf (arg, symbol)
     }
 
   /* This presumes that a symbol can not be both BSF_DEBUGGING and
-     BSF_DYNAMIC.  */
+     BSF_DYNAMIC, nor both BSF_FUNCTION and BSF_FILE.  */
   fprintf (file, " %c%c%c%c%c%c%c",
-	   (type & BSF_LOCAL) ? 'l' : ' ',
-	   (type & BSF_GLOBAL) ? 'g' : ' ',
+	   ((type & BSF_LOCAL)
+	    ? (type & BSF_GLOBAL) ? '!' : 'l'
+	    : (type & BSF_GLOBAL) ? 'g' : ' '),
 	   (type & BSF_WEAK) ? 'w' : ' ',
 	   (type & BSF_CONSTRUCTOR) ? 'C' : ' ',
 	   (type & BSF_WARNING) ? 'W' : ' ',
 	   (type & BSF_INDIRECT) ? 'I' : ' ',
-	   (type & BSF_DEBUGGING) ? 'd'
-	   : (type & BSF_DYNAMIC) ? 'D' : ' ');
+	   (type & BSF_DEBUGGING) ? 'd' : (type & BSF_DYNAMIC) ? 'D' : ' ',
+	   (type & BSF_FUNCTION) ? 'F' : (type & BSF_FILE) ? 'f' : ' ');
 }
 
 
@@ -459,7 +463,10 @@ static CONST struct section_to_type stt[] =
 };
 
 /* Return the single-character symbol type corresponding to
-   section S, or '?' for an unknown COFF section.  */
+   section S, or '?' for an unknown COFF section.  
+
+   Check for any leading string which matches, so .text5 returns
+   't' as well as .text */
 
 static char
 coff_section_type (s)
@@ -467,9 +474,10 @@ coff_section_type (s)
 {
   CONST struct section_to_type *t;
 
-  for (t = &stt[0]; t->section; t++)
-    if (!strcmp (s, t->section))
+  for (t = &stt[0]; t->section; t++) 
+    if (!strncmp (s, t->section, strlen (t->section)))
       return t->type;
+
   return '?';
 }
 
@@ -503,6 +511,8 @@ bfd_decode_symclass (symbol)
     return 'U';
   if (bfd_is_ind_section (symbol->section))
     return 'I';
+  if (symbol->flags & BSF_WEAK)
+    return 'W';
   if (!(symbol->flags & (BSF_GLOBAL | BSF_LOCAL)))
     return '?';
 
@@ -557,3 +567,25 @@ bfd_symbol_is_absolute ()
 {
   abort ();
 }
+
+/*
+FUNCTION
+	bfd_copy_private_symbol_data
+
+SYNOPSIS
+	boolean bfd_copy_private_symbol_data(bfd *ibfd, asymbol *isym, bfd *obfd, asymbol *osym);
+
+DESCRIPTION
+	Copy private symbol information from @var{isym} in the BFD
+	@var{ibfd} to the symbol @var{osym} in the BFD @var{obfd}.
+	Return <<true>> on success, <<false>> on error.  Possible error
+	returns are:
+
+	o <<bfd_error_no_memory>> -
+	Not enough memory exists to create private data for @var{osec}.
+
+.#define bfd_copy_private_symbol_data(ibfd, isymbol, obfd, osymbol) \
+.     BFD_SEND (ibfd, _bfd_copy_private_symbol_data, \
+.		(ibfd, isymbol, obfd, osymbol))
+
+*/

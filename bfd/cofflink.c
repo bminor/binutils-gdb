@@ -674,9 +674,9 @@ process_embedded_commands (abfd)
   char *s;
   char *e;
   char *copy;
-  if (!s) 
+  if (!sec) 
     return 1;
-
+  
   copy = malloc (sec->_raw_size);
   if (!copy) 
     {
@@ -2312,6 +2312,10 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 		  {
 		    if (strncmp (sec->name, ".idata$", 7) == 0)
 		      val -= NT_IMAGE_BASE;
+		    if (strncmp (sec->name, ".reloc", 6) == 0)
+		      val -= NT_IMAGE_BASE;
+		    else if (strncmp (sec->name, ".edata", 5) == 0)
+		      val -= NT_IMAGE_BASE;
 		    else if (strncmp (sec->name, ".rsrc$", 6) == 0) 
 		      {
 			val -= NT_IMAGE_BASE;
@@ -2338,6 +2342,10 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 		if (strcmp (input_section->name, ".text") != 0)
 		  {
 		    if (strncmp (sec->name, ".idata$", 7) == 0)
+		      val -= NT_IMAGE_BASE;
+		    else if (strncmp (sec->name, ".reloc", 5) == 0)
+		      val -= NT_IMAGE_BASE;
+		    else if (strncmp (sec->name, ".edata", 5) == 0)
 		      val -= NT_IMAGE_BASE;
 		    else if (strncmp (sec->name, ".rsrc$", 6) == 0) 
 		      {
@@ -2451,6 +2459,24 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 	val = val + add_to_val;
        
       }
+
+      if (info->base_file)
+	{
+	  /* So if this is non pcrelative, and is referenced
+	     to a section or a common symbol, then it needs a reloc */
+	  if (!howto->pc_relative
+	      && (sym->n_scnum
+		  || sym->n_value))
+	    {
+	      /* relocation to a symbol in a section which
+		 isn't absolute - we output the address here 
+		 to a file */
+	      bfd_vma addr = rel->r_vaddr +
+		+ input_section->output_offset 
+		  + input_section->output_section->vma;
+	      fwrite (&addr, 1,4, info->base_file);
+	    }
+	}
   
       rstat = _bfd_final_link_relocate (howto, input_bfd, input_section,
 					contents,

@@ -298,6 +298,10 @@ CODE_FRAGMENT
 
 */
 
+#ifndef IMAGE_BASE
+#define IMAGE_BASE 0
+#endif
+
 #include "coffswap.h"
 
 /* void warning(); */
@@ -359,8 +363,7 @@ sec_to_styp_flags (sec_name, sec_flags)
       styp_flags = STYP_INFO;
 #endif
     }
-  else if (!strcmp (sec_name, ".stab")
-	   || !strncmp (sec_name, ".stabstr", 8))
+  else if (!strncmp (sec_name, ".stab", 5))
     {
       styp_flags = STYP_INFO;
     }
@@ -489,8 +492,7 @@ styp_to_sec_flags (abfd, hdr, name)
 #ifdef _COMMENT
 	   || strcmp (name, _COMMENT) == 0
 #endif
-	   || strcmp (name, ".stab") == 0
-	   || strcmp (name, ".stabstr") == 0)
+	   || strncmp (name, ".stab", 5) == 0)
     {
 #ifdef COFF_PAGE_SIZE
       sec_flags |= SEC_DEBUGGING;
@@ -873,8 +875,7 @@ coff_new_section_hook (abfd, section)
      .stabstr section this way for backward compatibility, although I
      believe it would work anyhow.  */
   if (COFF_DEFAULT_SECTION_ALIGNMENT_POWER > 2
-      && (strcmp (section->name, ".stab") == 0
-	  || strcmp (section->name, ".stabstr") == 0))
+      && (strncmp (section->name, ".stab", 5) == 0))
     section->alignment_power = 2;
 
   return true;
@@ -924,6 +925,10 @@ coff_mkobject (abfd)
   coff->raw_syments = (struct coff_ptr_struct *) NULL;
   coff->relocbase = 0;
 /*  make_abs_section(abfd);*/
+
+#ifdef COFF_WITH_PE
+  obj_pe (abfd) = 1;
+#endif
   return true;
 }
 
@@ -991,7 +996,6 @@ coff_set_arch_mach_hook (abfd, filehdr)
       machine = 0;
       break;
 #endif
-
 #ifdef A29K_MAGIC_BIG
     case A29K_MAGIC_BIG:
     case A29K_MAGIC_LITTLE:
@@ -999,7 +1003,12 @@ coff_set_arch_mach_hook (abfd, filehdr)
       machine = 0;
       break;
 #endif
-
+#ifdef ARMMAGIC
+    case ARMMAGIC:
+      arch = bfd_arch_arm;
+      machine =0;
+      break;
+#endif
 #ifdef MC68MAGIC
     case MC68MAGIC:
     case M68MAGIC:
@@ -1178,8 +1187,9 @@ SUBSUBSECTION
 */
 
 static boolean
-coff_write_relocs (abfd)
+coff_write_relocs (abfd, first_undef)
      bfd * abfd;
+     int first_undef;
 {
   asection *s;
   for (s = abfd->sections; s != (asection *) NULL; s = s->next)
@@ -1196,31 +1206,57 @@ coff_write_relocs (abfd)
 	  arelent *q = p[i];
 	  memset ((PTR) & n, 0, sizeof (n));
 
+	  /* Now we've renumbered the symbols we know where the
+	     undefined symbols live in the table.  Check the reloc
+	     entries for symbols who's output bfd isn't the right one.
+	     This is because the symbol was undefined (which means
+	     that all the pointers are never made to point to the same
+	     place). This is a bad thing,'cause the symbols attached
+	     to the output bfd are indexed, so that the relocation
+	     entries know which symbol index they point to.  So we
+	     have to look up the output symbol here. */
+
+	  if (q->sym_ptr_ptr[0]->the_bfd != abfd)
+	    {
+	      int i;
+	      const char *sname = q->sym_ptr_ptr[0]->name;
+	      asymbol **outsyms = abfd->outsymbols;
+	      for (i = first_undef; outsyms[i]; i++)
+		{
+		  const char *intable = outsyms[i]->name;
+		  if (strcmp (intable, sname) == 0) {
+		    /* got a hit, so repoint the reloc */
+		    q->sym_ptr_ptr = outsyms + i;
+		    break;
+		  }
+		}
+	    }
+
 	  n.r_vaddr = q->address + s->vma;
 
 #ifdef R_IHCONST
 	  /* The 29k const/consth reloc pair is a real kludge.  The consth
-	 part doesn't have a symbol; it has an offset.  So rebuilt
-	 that here.  */
+	     part doesn't have a symbol; it has an offset.  So rebuilt
+	     that here.  */
 	  if (q->howto->type == R_IHCONST)
 	    n.r_symndx = q->addend;
 	  else
 #endif
-	  if (q->sym_ptr_ptr)
-	    {
-	      if (q->sym_ptr_ptr == bfd_abs_section_ptr->symbol_ptr_ptr)
-		/* This is a relocation relative to the absolute symbol.  */
-		n.r_symndx = -1;
-	      else
-		{
-		  n.r_symndx = get_index ((*(q->sym_ptr_ptr)));
-		  /* Take notice if the symbol reloc points to a symbol
-		   we don't have in our symbol table.  What should we
-		   do for this??  */
-		  if (n.r_symndx > obj_conv_table_size (abfd))
-		    abort ();
-		}
-	    }
+	    if (q->sym_ptr_ptr)
+	      {
+		if (q->sym_ptr_ptr == bfd_abs_section_ptr->symbol_ptr_ptr)
+		  /* This is a relocation relative to the absolute symbol.  */
+		  n.r_symndx = -1;
+		else
+		  {
+		    n.r_symndx = get_index ((*(q->sym_ptr_ptr)));
+		    /* Take notice if the symbol reloc points to a symbol
+		       we don't have in our symbol table.  What should we
+		       do for this??  */
+		    if (n.r_symndx > obj_conv_table_size (abfd))
+		      abort ();
+		  }
+	      }
 
 #ifdef SWAP_OUT_RELOC_OFFSET
 	  n.r_offset = q->addend;
@@ -1311,6 +1347,11 @@ coff_set_flags (abfd, magicp, flagsp)
 	return true;
       }
       break;
+#endif
+#ifdef ARMMAGIC
+    case bfd_arch_arm:
+      *magicp = ARMMAGIC;
+      return true;
 #endif
 #ifdef I386MAGIC
     case bfd_arch_i386:
@@ -1474,6 +1515,16 @@ coff_compute_section_file_positions (abfd)
       if (!(current->flags & SEC_HAS_CONTENTS))
 	continue;
 
+#ifdef COFF_WITH_PE
+      /* Do not include the .junk section.  This is where we collect section
+         data which we don't need.  This is mainly the MS .debug$ data which
+         stores codeview debug data. */
+      if (strcmp (current->name, ".junk") == 0)
+        {
+         continue;
+        }
+#endif
+
       /* Align the sections in the file to the same boundary on
 	 which they are aligned in virtual memory.  I960 doesn't
 	 do this (FIXME) so we can stay in sync with Intel.  960
@@ -1521,8 +1572,17 @@ coff_compute_section_file_positions (abfd)
 
       previous = current;
     }
+#ifdef COFF_WITH_PE
+  /* Normally, the starting location for the symbol table will be at the end
+     of the last section.  However, when dealing with NT, the last section
+     must be as long as its size rounded up to the next page (0x1000). */
+  sofar = ((sofar + NT_FILE_ALIGNMENT - 1) /
+                           NT_FILE_ALIGNMENT) * NT_FILE_ALIGNMENT; 
+#endif
+
   obj_relocbase (abfd) = sofar;
   abfd->output_has_begun = true;
+
 }
 
 #ifndef RS6000COFF_C
@@ -1600,6 +1660,24 @@ coff_add_missing_symbols (abfd)
 
 #endif /* ! defined (RS6000COFF_C) */
 
+#ifdef COFF_WITH_PE
+static void add_data_entry (abfd, aout, idx, name)
+     bfd *abfd;
+     struct internal_aouthdr *aout;
+     int idx;
+     char *name;
+{
+  asection *sec = bfd_get_section_by_name (abfd, name);
+
+  /* add import directory information if it exists */
+  if (sec != NULL)
+    {
+      aout->DataDirectory[idx].VirtualAddress = sec->lma - NT_IMAGE_BASE;
+      aout->DataDirectory[idx].Size = sec->_raw_size;
+    }
+}
+#endif
+
 /* SUPPRESS 558 */
 /* SUPPRESS 529 */
 static boolean
@@ -1617,10 +1695,10 @@ coff_write_object_contents (abfd)
   asection *text_sec = NULL;
   asection *data_sec = NULL;
   asection *bss_sec = NULL;
+  bfd_vma end_of_image = 0;
 
   struct internal_filehdr internal_f;
   struct internal_aouthdr internal_a;
-
 
   bfd_set_error (bfd_error_system_call);
 
@@ -1670,12 +1748,22 @@ coff_write_object_contents (abfd)
 
   /* Write section headers to the file.  */
   internal_f.f_nscns = 0;
+
+#if 0 
   if (bfd_seek (abfd,
 		(file_ptr) ((abfd->flags & EXEC_P) ?
-			    (FILHSZ + AOUTSZ) : FILHSZ),
+			    (EXTRA_NT_HDRSZ + FILHSZ + AOUTSZ) : 
+                            (EXTRA_NT_HDRSZ + FILHSZ)),
 		SEEK_SET)
       != 0)
-    return false;
+#else
+    if (bfd_seek (abfd,
+		  (file_ptr) ((abfd->flags & EXEC_P) ?
+			      (FILHSZ + AOUTSZ) : FILHSZ),
+		  SEEK_SET)
+	!= 0)
+#endif
+      return false;
 
   {
     for (current = abfd->sections;
@@ -1684,6 +1772,15 @@ coff_write_object_contents (abfd)
       {
 	struct internal_scnhdr section;
 
+#ifdef COFF_WITH_PE
+        /* Do not include the .junk section.  This is where we collect section
+           data which we don't need.  This is mainly the MS .debug$ data which
+           stores codeview debug data. */
+        if (strcmp (current->name, ".junk") == 0)
+          {
+	    continue;
+          }
+#endif
 	internal_f.f_nscns++;
 	strncpy (&(section.s_name[0]), current->name, 8);
 #ifdef _LIB
@@ -1696,6 +1793,12 @@ coff_write_object_contents (abfd)
 	  section.s_vaddr = current->lma;
 	section.s_paddr = current->lma;
 	section.s_size = current->_raw_size;
+
+        /* Remember the address of the end of the last section */
+
+	if (current->lma + current->_raw_size > end_of_image)
+	  end_of_image = current->lma + current->_raw_size ;
+
 	/*
 	   If this section has no size or is unloadable then the scnptr
 	   will be 0 too
@@ -1748,9 +1851,24 @@ coff_write_object_contents (abfd)
 	{
 	  SCNHDR buff;
 
-	  coff_swap_scnhdr_out (abfd, &section, &buff);
-	  if (bfd_write ((PTR) (&buff), 1, SCNHSZ, abfd) != SCNHSZ)
+#ifdef WINDOWS_NT
+	  /* suppress output of the sections if they are null.  ld includes
+	     the bss and data sections even if there is no size assigned
+	     to them.  NT loader doesn't like it if these section headers are
+	     included if the sections themselves are not needed */
+	  if (section.s_size == 0)
+ 	    internal_f.f_nscns--;
+	  else
+	    { 
+	      coff_swap_scnhdr_out (abfd, &section, &buff);
+	      if (bfd_write ((PTR) (&buff), 1, SCNHSZ, abfd) != SCNHSZ)
+		return false;
+            }
+#else
+	  if (coff_swap_scnhdr_out (abfd, &section, &buff) == 0
+	      || bfd_write ((PTR) (&buff), 1, SCNHSZ, abfd) != SCNHSZ)
 	    return false;
+#endif
 
 	}
       }
@@ -1762,11 +1880,11 @@ coff_write_object_contents (abfd)
   /* Don't include the internal abs section in the section count */
 
   /*
-    We will NOT put a fucking timestamp in the header here. Every time you
-    put it back, I will come in and take it out again.  I'm sorry.  This
-    field does not belong here.  We fill it with a 0 so it compares the
-    same but is not a reasonable time. -- gnu@cygnus.com
-    */
+     We will NOT put a fucking timestamp in the header here. Every time you
+     put it back, I will come in and take it out again.  I'm sorry.  This
+     field does not belong here.  We fill it with a 0 so it compares the
+     same but is not a reasonable time. -- gnu@cygnus.com
+     */
   internal_f.f_timdat = 0;
 
   internal_f.f_flags = 0;
@@ -1788,10 +1906,62 @@ coff_write_object_contents (abfd)
   else
     internal_f.f_flags |= F_AR32W;
 
+#ifdef COFF_WITH_PE
+  /* assign other filehdr fields for DOS header and NT signature */
+  internal_f.e_magic    = DOSMAGIC;
+  internal_f.e_cblp     = 0x90;
+  internal_f.e_cp       = 0x3;
+  internal_f.e_crlc     = 0x0;
+  internal_f.e_cparhdr  = 0x4;
+  internal_f.e_minalloc = 0x0;
+  internal_f.e_maxalloc = 0xffff;
+  internal_f.e_ss       = 0x0;
+  internal_f.e_sp       = 0xb8;
+  internal_f.e_csum     = 0x0;
+  internal_f.e_ip       = 0x0;
+  internal_f.e_cs       = 0x0;
+  internal_f.e_lfarlc   = 0x40;
+  internal_f.e_ovno     = 0x0;
+  {
+    int idx;
+    for (idx=0; idx < 4; idx++)
+      internal_f.e_res[idx] = 0x0;
+  }
+  internal_f.e_oemid   = 0x0;
+  internal_f.e_oeminfo = 0x0;
+  {
+    int idx;
+    for (idx=0; idx < 10; idx++)
+      internal_f.e_res2[idx] = 0x0;
+  }
+  internal_f.e_lfanew = 0x80;
+
+  /* this next collection of data are mostly just characters.  It appears
+     to be constant within the headers put on NT exes */
+  internal_f.dos_message[0]  = 0x0eba1f0e;
+  internal_f.dos_message[1]  = 0xcd09b400;
+  internal_f.dos_message[2]  = 0x4c01b821;
+  internal_f.dos_message[3]  = 0x685421cd;
+  internal_f.dos_message[4]  = 0x70207369;
+  internal_f.dos_message[5]  = 0x72676f72;
+  internal_f.dos_message[6]  = 0x63206d61;
+  internal_f.dos_message[7]  = 0x6f6e6e61;
+  internal_f.dos_message[8]  = 0x65622074;
+  internal_f.dos_message[9]  = 0x6e757220;
+  internal_f.dos_message[10] = 0x206e6920;
+  internal_f.dos_message[11] = 0x20534f44;
+  internal_f.dos_message[12] = 0x65646f6d;
+  internal_f.dos_message[13] = 0x0a0d0d2e;
+  internal_f.dos_message[14] = 0x24;
+  internal_f.dos_message[15] = 0x0;
+  internal_f.nt_signature = NT_SIGNATURE;
+#endif
+
+
   /*
-    FIXME, should do something about the other byte orders and
-    architectures.
-    */
+     FIXME, should do something about the other byte orders and
+     architectures.
+     */
 
   memset (&internal_a, 0, sizeof internal_a);
 
@@ -1808,14 +1978,14 @@ coff_write_object_contents (abfd)
 #ifdef A29K
 #ifdef ULTRA3			/* NYU's machine */
     /* FIXME: This is a bogus check.  I really want to see if there
-   * is a .shbss or a .shdata section, if so then set the magic
-   * number to indicate a shared data executable.
-   */
+     * is a .shbss or a .shdata section, if so then set the magic
+     * number to indicate a shared data executable.
+     */
     if (internal_f.f_nscns >= 7)
-      internal_a.magic = SHMAGIC;	/* Shared magic */
+      internal_a.magic = SHMAGIC; /* Shared magic */
     else
 #endif /* ULTRA3 */
-      internal_a.magic = NMAGIC;/* Assume separate i/d */
+      internal_a.magic = NMAGIC; /* Assume separate i/d */
 #define __A_MAGIC_SET__
 #endif /* A29K */
 #ifdef I960
@@ -1836,14 +2006,18 @@ coff_write_object_contents (abfd)
 #define __A_MAGIC_SET__
 #if defined(LYNXOS)
     internal_a.magic = LYNXCOFFMAGIC;
-#endif				/* LYNXOS */
-#endif				/* M68 || WE32K || M68K */
+#endif /* LYNXOS */
+#endif /* M68 || WE32K || M68K */
 
+#if defined(ARM)
+#define __A_MAGIC_SET__
+    internal_a.magic = ZMAGIC;
+#endif 
 #if defined(I386)
 #define __A_MAGIC_SET__
 #if defined(LYNXOS)
     internal_a.magic = LYNXCOFFMAGIC;
-#else				/* LYNXOS */
+#else  /* LYNXOS */
     internal_a.magic = ZMAGIC;
 #endif /* LYNXOS */
 #endif /* I386 */
@@ -1851,15 +2025,15 @@ coff_write_object_contents (abfd)
 #if defined(SPARC)
 #define __A_MAGIC_SET__
 #if defined(LYNXOS)
-  internal_a.magic = LYNXCOFFMAGIC;
-#endif				/* LYNXOS */
-#endif				/* SPARC */
+    internal_a.magic = LYNXCOFFMAGIC;
+#endif /* LYNXOS */
+#endif /* SPARC */
 
 #if RS6000COFF_C
 #define __A_MAGIC_SET__
     internal_a.magic = (abfd->flags & D_PAGED) ? RS6K_AOUTHDR_ZMAGIC :
-      (abfd->flags & WP_TEXT) ? RS6K_AOUTHDR_NMAGIC :
-      RS6K_AOUTHDR_OMAGIC;
+    (abfd->flags & WP_TEXT) ? RS6K_AOUTHDR_NMAGIC :
+    RS6K_AOUTHDR_OMAGIC;
 #endif
 
 #ifndef __A_MAGIC_SET__
@@ -1873,18 +2047,19 @@ coff_write_object_contents (abfd)
 
   if (bfd_get_symcount (abfd) != 0)
     {
+      int firstundef;
 #ifndef RS6000COFF_C
       if (!coff_add_missing_symbols (abfd))
 	return false;
 #endif
-      if (!coff_renumber_symbols (abfd))
+      if (!coff_renumber_symbols (abfd, &firstundef))
 	return false;
       coff_mangle_symbols (abfd);
       if (! coff_write_symbols (abfd))
 	return false;
       if (! coff_write_linenumbers (abfd))
 	return false;
-      if (! coff_write_relocs (abfd))
+      if (! coff_write_relocs (abfd, firstundef))
 	return false;
     }
 
@@ -1902,20 +2077,127 @@ coff_write_object_contents (abfd)
   if (text_sec)
     {
       internal_a.tsize = bfd_get_section_size_before_reloc (text_sec);
-      internal_a.text_start = internal_a.tsize ? text_sec->vma : 0;
+      internal_a.text_start = internal_a.tsize ? 
+	(text_sec->vma - IMAGE_BASE) : 0;
     }
   if (data_sec)
     {
       internal_a.dsize = bfd_get_section_size_before_reloc (data_sec);
-      internal_a.data_start = internal_a.dsize ? data_sec->vma : 0;
+      internal_a.data_start = internal_a.dsize ? 
+	(data_sec->vma - IMAGE_BASE) : 0;
     }
   if (bss_sec)
     {
       internal_a.bsize = bfd_get_section_size_before_reloc (bss_sec);
     }
 
-  internal_a.entry = bfd_get_start_address (abfd);
+  internal_a.entry = bfd_get_start_address (abfd) - IMAGE_BASE;
   internal_f.f_nsyms = obj_raw_syment_count (abfd);
+
+#ifdef COFF_WITH_PE		/* write all of the other optional header data */
+  /* Note; the entries for subsystem, stack reserve, stack commit, heap reserve
+     and heap commit may be supplied on the command line via the -subsystem,
+     -stack and/or -heap switches.  This data is initially stored in variable
+     link_info.  This is eventually passed to the bfd (from ld) in (cofflink.c)
+     _bfd_coff_final_link.  Once this function gets it, we copy it into variables
+     NT_subsystem and NT_stack_heap which are defined in internal.h.  With
+     respect to the stack/heap reserve/commit parameters, if nothing has been
+     defined for these, the input values will be '0' (i.e. the values stored
+     in NT_stack_heap) will be 0. */ 
+
+  internal_a.ImageBase = NT_IMAGE_BASE;	/* 0x400000 */
+  internal_a.SectionAlignment = NT_SECTION_ALIGNMENT; /* 0x1000 */ 
+  internal_a.FileAlignment = NT_FILE_ALIGNMENT;	/* 0x200 */
+  internal_a.MajorOperatingSystemVersion = 1;
+  internal_a.MinorOperatingSystemVersion = 0;
+  internal_a.MajorImageVersion = 0;
+  internal_a.MinorImageVersion = 0;
+  internal_a.MajorSubsystemVersion = 3;
+  internal_a.MinorSubsystemVersion = 0xA;
+  internal_a.Reserved1 = 0;
+  /* Virtual start address, take virtual start address of last section, 
+     add its physical size and round up the next page (NT_SECTION_ALIGNMENT).
+     An assumption has been made that the sections stored in the abfd
+     structure are in order and that I have successfully saved the last
+     section's address and size. */
+
+  internal_a.SizeOfImage = 
+    (end_of_image - NT_IMAGE_BASE + NT_SECTION_ALIGNMENT - 1)
+      & ~ (NT_SECTION_ALIGNMENT-1);
+
+  /* Start of .text section will do here since it is the first section after
+     the headers.  Note that NT_IMAGE_BASE has already been removed above */
+  internal_a.SizeOfHeaders = internal_a.text_start; 
+  internal_a.CheckSum = 0;
+  switch (NT_subsystem)
+    {
+      /* The possible values are:
+	 1 - NATIVE   Doesn't require a subsystem
+	 2 - WINDOWS_GUI runs in Windows GUI subsystem
+	 3 - WINDOWS_CUI runs in Windows char sub. (console app)
+	 5 - OS2_CUI runs in OS/2 character subsystem
+	 7 - POSIX_CUI runs in Posix character subsystem */
+    case native:
+      internal_a.Subsystem = 1;
+      break;
+    case windows:
+      internal_a.Subsystem = 2;
+      break;
+    case console:
+      internal_a.Subsystem = 3;
+      break;
+    case os2:
+      internal_a.Subsystem = 5;
+      break;
+    case posix:
+      internal_a.Subsystem = 7;
+      break;
+    default:
+      internal_a.Subsystem = 3;
+    }
+  internal_a.DllCharacteristics = 0;
+  if (NT_stack_heap.stack_defined)
+    {
+      internal_a.SizeOfStackReserve = NT_stack_heap.stack_reserve;
+      /* since commit is an optional parameter, verify that it is non-zero */
+      if (NT_stack_heap.stack_commit > 0)
+	internal_a.SizeOfStackCommit = NT_stack_heap.stack_commit;
+      else
+	internal_a.SizeOfStackCommit = NT_DEF_COMMIT;
+    }
+  else
+    {
+      internal_a.SizeOfStackReserve = NT_DEF_RESERVE; /* 0x100000 */
+      internal_a.SizeOfStackCommit = NT_DEF_COMMIT; /* 0x1000 */
+    }
+  if (NT_stack_heap.heap_defined)
+    {
+      internal_a.SizeOfHeapReserve = NT_stack_heap.heap_reserve;
+      /* since commit is an optional parameter, verify that it is non-zero */
+      if (NT_stack_heap.heap_commit > 0)
+	internal_a.SizeOfHeapCommit = NT_stack_heap.heap_commit;
+      else
+	internal_a.SizeOfHeapCommit = NT_DEF_COMMIT;
+    }
+  else
+    {
+      internal_a.SizeOfHeapReserve = NT_DEF_RESERVE; /* 0x100000 */
+      internal_a.SizeOfHeapCommit = NT_DEF_COMMIT; /* 0x1000 */
+    }
+  internal_a.LoaderFlags = 0;
+  internal_a.NumberOfRvaAndSizes = IMAGE_NUMBEROF_DIRECTORY_ENTRIES; /* 0x10 */
+
+  /* first null out all data directory entries .. */
+  memset (internal_a.DataDirectory, sizeof (internal_a.DataDirectory), 0);
+
+  add_data_entry (abfd, &internal_a, 0, ".edata");
+  add_data_entry (abfd, &internal_a, 1, ".idata");
+  add_data_entry (abfd, &internal_a, 2, ".rsrc");
+  add_data_entry (abfd, &internal_a, 5, ".reloc");
+
+
+
+#endif
 
   /* now write them */
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
@@ -1933,6 +2215,7 @@ coff_write_object_contents (abfd)
       if (bfd_write ((PTR) & buff, 1, AOUTSZ, abfd) != AOUTSZ)
 	return false;
     }
+
   return true;
 }
 
@@ -2107,6 +2390,7 @@ coff_slurp_symbol_table (abfd)
   unsigned int *table_ptr;
 
   unsigned int number_of_symbols = 0;
+
   if (obj_symbols (abfd))
     return true;
   if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0)
@@ -2174,6 +2458,10 @@ coff_slurp_symbol_table (abfd)
 	    case C_EXT:
 #ifdef RS6000COFF_C
 	    case C_HIDEXT:
+#endif
+#ifdef COFF_WITH_PE
+            /* PE uses storage class 0x68 to denote a section symbol */
+            case C_SECTION:
 #endif
 	      if ((src->u.syment.n_scnum) == 0)
 		{
@@ -2319,7 +2607,11 @@ coff_slurp_symbol_table (abfd)
 	    case C_EXTDEF:	/* external definition		 */
 	    case C_ULABEL:	/* undefined label		 */
 	    case C_USTATIC:	/* undefined static		 */
+#ifndef COFF_WITH_PE
+            /* C_LINE in regular coff is 0x68.  NT has taken over this storage
+               class to represent a section symbol */
 	    case C_LINE:	/* line # reformatted as symbol table entry */
+#endif
 	    case C_ALIAS:	/* duplicate tag		 */
 	    case C_HIDDEN:	/* ext symbol in dmert public lib */
 	    default:
@@ -2376,6 +2668,10 @@ coff_slurp_symbol_table (abfd)
 
 #ifdef RS6000COFF_C
 #define OTHER_GLOBAL_CLASS C_HIDEXT
+#endif
+
+#ifdef COFF_WITH_PE
+#define OTHER_GLOBAL_CLASS C_SECTION
 #endif
 
 #ifdef OTHER_GLOBAL_CLASS
@@ -2686,6 +2982,7 @@ dummy_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 #define coff_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define coff_bfd_final_link _bfd_generic_final_link
 #endif /* ! defined (coff_relocate_section) */
+#define coff_bfd_link_split_section  _bfd_generic_link_split_section
 
 #ifndef coff_adjust_symndx
 #define coff_adjust_symndx NULL
@@ -2717,9 +3014,13 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
 #define coff_bfd_free_cached_info _bfd_generic_bfd_free_cached_info
 #define	coff_get_section_contents _bfd_generic_get_section_contents
 
+#define coff_bfd_copy_private_symbol_data \
+  _bfd_generic_bfd_copy_private_symbol_data
 #define coff_bfd_copy_private_section_data \
   _bfd_generic_bfd_copy_private_section_data
 #define coff_bfd_copy_private_bfd_data _bfd_generic_bfd_copy_private_bfd_data
+#define coff_bfd_merge_private_bfd_data _bfd_generic_bfd_merge_private_bfd_data
+#define coff_bfd_set_private_flags _bfd_generic_bfd_set_private_flags
 
 #ifndef coff_bfd_is_local_label
 #define coff_bfd_is_local_label bfd_generic_is_local_label

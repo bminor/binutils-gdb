@@ -1,3 +1,19 @@
+Wed Jun 28 18:04:42 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* Makefile.in: versados.o is now conditionally built.
+	* coffcode.h (add_data_entry): New function.
+	(coff_write_object_contents): Clean up. Calculate
+	data entries.
+	* cofflink.c (_bfd_coff_generic_relocate_section):
+	.reloc and .edata sections are IMAGE_BASED too.
+	If there's a base_file then write out base information.
+	* configure.host (i386-*-pe): New.
+	* syms.c (coff_section_type): Only scan prefixes.
+	* targets.c (bfd_target_vector): Versados is now conditionally
+	built.
+	* config/m68k-coff.mt: Build versados.o
+	* hosts/i386pe.h: New file.
+
 Mon Jun 26 13:53:49 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* elf32-hpa.c (elf32_hppa_relocate_section): Close comment before
