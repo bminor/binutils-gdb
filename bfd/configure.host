@@ -91,7 +91,7 @@ if [ "${shared}" = "true" ]; then
     ;;
   *-*-linux*)
     SHLIB_CFLAGS='-shared -Wl,-soname,$(SONAME)'
-    case "$(libdir)" in
+    case "${libdir}" in
       /lib | /usr/lib) ;;
       *) HLDFLAGS='-Wl,-rpath,$(libdir)' ;;
     esac
