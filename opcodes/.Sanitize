@@ -15,14 +15,6 @@
 
 Do-first:
 
-mpw_files="mpw-make.in mpw-config.in ChangeLog.mpw"
-
-if ( echo $* | grep keep\-mpw > /dev/null ) ; then
-	keep_these_too="${mpw_files} ${keep_these_too}"
-else
-	lose_these_too="${mpw_files} ${lose_these_too}"
-fi
-
 rce_files="rce-dis.c rce-opc.h"
 
 if ( echo $* | grep keep\-rce > /dev/null ) ; then
@@ -68,6 +60,8 @@ m68k-dis.c
 m88k-dis.c
 mips-dis.c
 mips-opc.c
+mpw-config.in
+mpw-make.in
 ns32k-dis.c
 ppc-dis.c
 ppc-opc.c
