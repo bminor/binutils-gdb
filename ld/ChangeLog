@@ -1,3 +1,20 @@
+Wed Jun 22 13:42:14 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* scripttempl/mipsbsd.sc: Let sections align to their natural
+	boundaries.
+
+Tue Jun 21 11:27:04 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* ldlang.c (lang_init): Use new bfd_abs_section_ptr, not
+	&bfd_abs_section.
+	(lang_abs_symbol_at_beginning_of): Likewise.
+	(lang_abs_symbol_at_end_of): Likewise.
+	(lang_size_sections): Use bfd_is_abs_section to check for the
+	absolute section.  Don't try to set the VMA or output_offset or
+	size of the absolute section.
+	* ldmain.c (notice_ysym): Use bfd_is_und_section to check for the
+	undefined section.
+
 Thu Jun 16 22:48:41 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* scripttempl/hppaelf.sc: Place .data and .bss at 0x40000000
