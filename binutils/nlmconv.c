@@ -35,8 +35,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/file.h>
 #include <assert.h>
 #include <getopt.h>
-#include <bfd.h>
-#include <libiberty.h>
+#include "bfd.h"
+#include "libiberty.h"
 #include "sysdep.h"
 #include "bucomm.h"
 /* Internal BFD NLM header.  */
@@ -125,7 +125,7 @@ static void alpha_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
 					 long *, char *,
 					 bfd_size_type));
 /* start-sanitize-powerpc-netware */
-static void powerpc_build_stubs PARAMS ((bfd *, asymbol ***, long *));
+static void powerpc_build_stubs PARAMS ((bfd *, bfd *, asymbol ***, long *));
 static void powerpc_resolve_stubs PARAMS ((bfd *, bfd *));
 static void powerpc_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
 					   long *, char *,
@@ -384,7 +384,7 @@ main (argc, argv)
      section, we must do this before determining where the TOC section
      goes in setup_sections.  */
   if (bfd_get_arch (inbfd) == bfd_arch_powerpc)
-    powerpc_build_stubs (inbfd, &symbols, &symcount);
+    powerpc_build_stubs (inbfd, outbfd, &symbols, &symcount);
 /* end-sanitize-powerpc-netware */
 
   /* Set up the sections.  */
@@ -1661,8 +1661,9 @@ static bfd_size_type powerpc_initial_got_size;
    build a stub for each one.  */
 
 static void
-powerpc_build_stubs (inbfd, symbols_ptr, symcount_ptr)
+powerpc_build_stubs (inbfd, outbfd, symbols_ptr, symcount_ptr)
      bfd *inbfd;
+     bfd *outbfd;
      asymbol ***symbols_ptr;
      long *symcount_ptr;
 {
@@ -1774,6 +1775,23 @@ powerpc_build_stubs (inbfd, symbols_ptr, symcount_ptr)
 					 * POWERPC_STUB_TOC_ENTRY_SIZE))))
 	bfd_fatal ("stub section sizes");
     }
+
+  /* PowerPC NetWare requires a custom header.  We create it here.
+     The first word is the header version number, currently 1.  The
+     second word is the timestamp of the input file.  */
+  memcpy (nlm_custom_header (outbfd)->stamp, "CuStHeAd", 8);
+  nlm_custom_header (outbfd)->dataLength = 8;
+  nlm_custom_header (outbfd)->data = xmalloc (8);
+  bfd_h_put_32 (outbfd, (bfd_vma) 1,
+		(bfd_byte *) nlm_custom_header (outbfd)->data);
+  {
+    struct stat s;
+
+    if (stat (bfd_get_filename (inbfd), &s) < 0)
+      s.st_mtime = 0;
+    bfd_h_put_32 (outbfd, (bfd_vma) s.st_mtime,
+		  (bfd_byte *) nlm_custom_header (outbfd)->data + 4);
+  }
 }
 
 /* Resolve all the stubs for PowerPC NetWare.  We fill in the contents

@@ -344,10 +344,14 @@ objcopy.o: objcopy.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 is-strip.o: is-strip.c 
 is-ranlib.o: is-ranlib.c 
 not-strip.o: not-strip.c 
-nlmheader.o: nlmheader.c nlmconv.h $(INCDIR)/nlm/common.h \
-  $(INCDIR)/nlm/internal.h
-nlmconv.o: $(INCDIR)/nlm/common.h $(INCDIR)/nlm/internal.h \
-  $(BFDDIR)/libnlm.h bucomm.h
+nlmheader.o: nlmheader.c ../bfd/bfd.h ../bfd/sysdep.h \
+  $(BFDDIR)/hosts/std-host.h $(INCDIR)/fopen-same.h bucomm.h \
+  $(INCDIR)/nlm/common.h $(INCDIR)/nlm/internal.h nlmconv.h
+nlmconv.o: nlmconv.c ../bfd/bfd.h $(INCDIR)/libiberty.h ../bfd/sysdep.h \
+  $(BFDDIR)/hosts/std-host.h $(INCDIR)/fopen-same.h bucomm.h \
+  $(BFDDIR)/libnlm.h $(INCDIR)/nlm/common.h \
+  $(INCDIR)/nlm/internal.h $(INCDIR)/nlm/external.h nlmconv.h \
+  $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h
 
 stage1: force
 	- mkdir stage1
@@ -487,10 +491,16 @@ install: all
 	   done; \
 	 else true; fi		
 
-# Use binutils.info as the target so that VPATH will DTRT.
-# (Use "$<*" in case the output is multiple files, though.)
+# This little path search is required because in the FSF net releases,
+# the info files are included in the source tree, and that may not be
+# the same as the build directory.
 install-info: binutils.info
-	for i in $<* ; do \
+	if [ -r binutils.info ]; then \
+	  dir=. ; \
+	else \
+	  dir=$(srcdir) ; \
+	fi ; \
+	for i in $$dir/binutils.info* ; do \
 		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done
 
