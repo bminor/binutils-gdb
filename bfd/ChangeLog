@@ -1,3 +1,25 @@
+Fri May 21 13:44:18 1993  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* aix386-core.c, aout-target.h, aoutx.h, coff-alpha.c,
+	coff-mips.c, coffgen.c, elf32.c, ieee.c, libaout.h, libcoff-in.h,
+	libelf.h, mipsbsd.c, oasys.c, sco-core.c, srec.c, tekhex.c,
+	trad-core.c: Define a TARGET_get_symbol_info function or macro.
+	Remove the bfd_print_symbol_nm case from TARGET_print_symbol.
+
+	* bfd-in.h: Don't define bfd_print_symbol_nm.
+	Define symbol_info type.
+	(JUMP_TABLE): Set _get_symbol_info element.
+
+	* syms.c (coff_section_type, bfd_symbol_info): New functions.
+	(bfd_decode_symclass): Use coff_section_type.
+
+	* targets.c: Add bfd_get_symbol_info call.
+
+Wed May 19 15:30:52 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* coff-i386.c (coff_i386_reloc):  Use unsigned char to avoid
+	complaints from ancient gcc's.
+
 Wed May 19 15:51:19 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* trad-core.c:  Check macro TRAD_CORE_EXTRA_SIZE_ALLOWED.
