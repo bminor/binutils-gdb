@@ -1,5 +1,10 @@
 Wed Nov 29 12:42:36 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf.c (_bfd_elf_print_private_bfd_data): New function.
+	* elf-bfd.h (_bfd_elf_print_private_bfd_data): Declare.
+	* elfxx-target.h (bfd_elfNN_bfd_print_private_bfd_data): Define to
+	_bfd_elf_print_private_bfd_data.
+
 	* coff-alpha.c (alpha_ecoff_swap_reloc_in): Don't abort if
 	r_symndx is RELOC_SECTION_NONE for an ALPHA_R_IGNORE reloc.
 	Change a RELOC_SECTION_LITA symndx to RELOC_SECTION_ABS.

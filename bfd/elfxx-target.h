@@ -101,7 +101,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 #ifndef bfd_elfNN_bfd_print_private_bfd_data
 #define bfd_elfNN_bfd_print_private_bfd_data \
-  ((boolean (*) PARAMS ((bfd *, void *))) bfd_true)
+  _bfd_elf_print_private_bfd_data
 #endif
 #ifndef bfd_elfNN_bfd_merge_private_bfd_data
 #define bfd_elfNN_bfd_merge_private_bfd_data \

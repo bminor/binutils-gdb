@@ -330,6 +330,61 @@ bfd_elf_generic_reloc (abfd,
   return bfd_reloc_continue;
 }
 
+/* Print out the program headers.  */
+
+boolean
+_bfd_elf_print_private_bfd_data (abfd, farg)
+     bfd *abfd;
+     PTR farg;
+{
+  FILE *f = (FILE *) farg;
+  Elf_Internal_Phdr *p;
+  unsigned int i, c;
+
+  p = elf_tdata (abfd)->phdr;
+  if (p == NULL)
+    return true;
+
+  c = elf_elfheader (abfd)->e_phnum;
+  for (i = 0; i < c; i++, p++)
+    {
+      const char *s;
+      char buf[20];
+
+      switch (p->p_type)
+	{
+	case PT_NULL: s = "NULL"; break;
+	case PT_LOAD: s = "LOAD"; break;
+	case PT_DYNAMIC: s = "DYNAMIC"; break;
+	case PT_INTERP: s = "INTERP"; break;
+	case PT_NOTE: s = "NOTE"; break;
+	case PT_SHLIB: s = "SHLIB"; break;
+	case PT_PHDR: s = "PHDR"; break;
+	default: sprintf (buf, "0x%lx", p->p_type); s = buf; break;
+	}
+      fprintf (f, "%8s off    0x", s);
+      fprintf_vma (f, p->p_offset);
+      fprintf (f, " vaddr 0x");
+      fprintf_vma (f, p->p_vaddr);
+      fprintf (f, " paddr 0x");
+      fprintf_vma (f, p->p_paddr);
+      fprintf (f, " align 2**%u\n", bfd_log2 (p->p_align));
+      fprintf (f, "         filesz 0x");
+      fprintf_vma (f, p->p_filesz);
+      fprintf (f, " memsz 0x");
+      fprintf_vma (f, p->p_memsz);
+      fprintf (f, " flags %c%c%c",
+	       (p->p_flags & PF_R) != 0 ? 'r' : '-',
+	       (p->p_flags & PF_W) != 0 ? 'w' : '-',
+	       (p->p_flags & PF_X) != 0 ? 'x' : '-');
+      if ((p->p_flags &~ (PF_R | PF_W | PF_X)) != 0)
+	fprintf (f, " %lx", p->p_flags &~ (PF_R | PF_W | PF_X));
+      fprintf (f, "\n");
+    }
+
+  return true;
+}
+
 /* Display ELF-specific fields of a symbol.  */
 void
 bfd_elf_print_symbol (ignore_abfd, filep, symbol, how)
