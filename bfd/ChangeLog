@@ -5,6 +5,9 @@ Mon Jul 10 11:45:55 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 Mon Jul 10 11:09:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coff-i960.c (coff_i960_relocate): Correct typo: use ! on strcmp,
+	not on string.
+
 	* aoutx.h (NAME(aout,link_hash_table_create)): Allocate hash table
 	using bfd_alloc, not malloc.
 	* cofflink.c (_bfd_coff_link_hash_table_create): Likewise.
