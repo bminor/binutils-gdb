@@ -2639,15 +2639,42 @@ the breakpoints are conditional, this is even useful
 (@pxref{Conditions, ,Break conditions}).
 
 @cindex pending breakpoints
-If a specified breakpoint location cannot be found, @value{GDBN} will
-prompt you
-as to whether to make the breakpoint pending on a future shared
-library load.  This is useful for setting breakpoints at the start of your
+If a specified breakpoint location cannot be found, it may be due to the fact
+that the location is in a shared library that is yet to be loaded.  In such
+a case, you may want @value{GDBN} to create a special breakpoint (known as
+a @dfn{pending breakpoint}) that
+attempts to resolve itself in the future when an appropriate shared library
+gets loaded.
+
+Pending breakpoints are useful to set at the start of your
 @value{GDBN} session for locations that you know will be dynamically loaded
 later by the program being debugged.  When shared libraries are loaded,
-a check is made to see if the load resoloves any pending breakpoint locations.
-If a pending breakpoint location has been resolved,
-a real breakpoint is created and the original pending breakpoint is removed.
+a check is made to see if the load resolves any pending breakpoint locations.
+If a pending breakpoint location gets resolved,
+a regular breakpoint is created and the original pending breakpoint is removed.
+
+@value{GDBN} provides some additional commands for controlling pending
+breakpoint support:
+
+@kindex set breakpoint pending
+@kindex show breakpoint pending
+@table @code
+@item set breakpoint pending auto
+This is the default behavior.  When @value{GDBN} cannot find the breakpoint
+location, it queries you whether a pending breakpoint should be created.
+
+@item set breakpoint pending on
+This indicates that an unrecognized breakpoint location should automatically
+result in a pending breakpoint being created.
+
+@item set breakpoint pending off
+This indicates that pending breakpoints are not to be created.  Any
+unrecognized breakpoint location results in an error.  This setting does
+not affect any pending breakpoints previously created.
+
+@item show breakpoint pending
+Show the current behavior setting for creating pending breakpoints.
+@end table
 
 @cindex operations allowed on pending breakpoints
 Normal breakpoint operations apply to pending breakpoints as well.  You may
