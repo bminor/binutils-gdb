@@ -325,9 +325,11 @@ perhaps)
 Make a watchpoint which contains a function call an error (it is
 broken now, making it work is probably not worth the effort).
 
-Make SIGINT handling independent of the debugging target.  Do this
-by adding a new target_send_signal which sends a signal to a running
-process.  (This is to replace the calls to signal() in remote.c).
+Re-do calls to signal() in remote.c, and inflow.c (set_sigint_trap and
+so on) to be independent of the debugging target, using target_stop to
+stop the inferior.  Probably the part which is now handled by
+interrupt_query in remote.c can be done without any new features in
+the debugging target.
 
 New test case based on weird.exp but in which type numbers are not
 renumbered (thus multiply defining a type).  This currently causes an
