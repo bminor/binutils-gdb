@@ -472,7 +472,7 @@ remote_open (name, from_tty)
 }
 
 /* Open a connection to a remote debugger using the extended
-   remote gdb protocol.  NAME is hte filename used for communication.  */
+   remote gdb protocol.  NAME is the filename used for communication.  */
 
 static void
 extended_remote_open (name, from_tty)
