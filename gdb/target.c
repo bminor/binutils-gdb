@@ -781,7 +781,7 @@ target_read_string (CORE_ADDR memaddr, char **string, int len, int *errnop)
       tlen = MIN (len, 4 - (memaddr & 3));
       offset = memaddr & 3;
 
-      errcode = target_xfer_memory (memaddr & ~3, buf, 4, 0);
+      errcode = target_read_memory (memaddr & ~3, buf, 4);
       if (errcode != 0)
 	{
 	  /* The transfer request might have crossed the boundary to an
@@ -789,7 +789,7 @@ target_read_string (CORE_ADDR memaddr, char **string, int len, int *errnop)
 	     a single byte.  */
 	  tlen = 1;
 	  offset = 0;
-	  errcode = target_xfer_memory (memaddr, buf, 1, 0);
+	  errcode = target_read_memory (memaddr, buf, 1);
 	  if (errcode != 0)
 	    goto done;
 	}
