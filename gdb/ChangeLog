@@ -1,3 +1,8 @@
+Fri Sep 30 17:17:21 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+        * nlm/Makefile.in: Get rid of NWINCLUDES.
+        * config/{alpha,powerpc}/gdbserve.mt: define NWINCLUDES.
+
 Fri Sep 30 15:59:55 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdbserver/low-lynx.c (create_inferior): Pass all 4 args to ptrace.
