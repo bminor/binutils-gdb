@@ -251,6 +251,9 @@ struct m68k_it
 #define float_of_arch(x)	((x) & mfloat)
 #define mmu_of_arch(x)		((x) & mmmu)
 
+/* Macros for determining if cpu supports a specific addressing mode */
+#define HAVE_LONG_BRANCH(x)	((x) & (m68020|m68030|m68040|m68060|cpu32))
+
 static struct m68k_it the_ins;	/* the instruction being assembled */
 
 #define op(ex)		((ex)->exp.X_op)
@@ -2250,7 +2253,7 @@ m68k_ip (instring)
 		      && opP->disp.pic_reloc == pic_none
 #endif
 		      && S_GET_SEGMENT (adds (&opP->disp)) == now_seg
-		      && cpu_of_arch (current_architecture) >= m68020
+		      && HAVE_LONG_BRANCH(current_architecture)
 		      && !flag_long_jumps
 		      && !strchr ("~%&$?", s[0]))
 		    {
@@ -2385,8 +2388,8 @@ m68k_ip (instring)
 	      break;
 	    case 'L':
 	    long_branch:
-	      if (cpu_of_arch (current_architecture) < m68020)
-		as_warn ("Can't use long branches on 68000/68010");
+	      if (!HAVE_LONG_BRANCH(current_architecture))
+		as_warn ("Can't use long branches on 68000/68010/5200");
 	      the_ins.opcode[the_ins.numo - 1] |= 0xff;
 	      add_fix ('l', &opP->disp, 1, 0);
 	      addword (0);
@@ -2409,7 +2412,7 @@ m68k_ip (instring)
 		 BCC68000 for the case where opnd is absolute (it
 		 needs to use the 68000 hack since no conditional abs
 		 jumps).  */
-	      if (((cpu_of_arch (current_architecture) < m68020)
+	      if (( !HAVE_LONG_BRANCH(current_architecture)
 		   || (0 == adds (&opP->disp)))
 		  && (the_ins.opcode[0] >= 0x6200)
 		  && (the_ins.opcode[0] <= 0x6f00))
@@ -3770,6 +3773,7 @@ m68k_frob_label (sym)
   n->next = labels;
   n->label = sym;
   as_where (&n->file, &n->line);
+  n->text = 0;
   labels = n;
   current_label = n;
 }
@@ -4073,7 +4077,7 @@ md_convert_frag_1 (fragP)
       ext = 2;
       break;
     case TAB (ABRANCH, LONG):
-      if (cpu_of_arch (current_architecture) < m68020)
+      if (!HAVE_LONG_BRANCH(current_architecture))
 	{
 	  if (fragP->fr_opcode[0] == 0x61)
 	    /* BSR */
@@ -4284,7 +4288,7 @@ md_estimate_size_before_relax (fragP, segment)
 	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), BYTE);
 	    break;
 	  }
-	else if ((fragP->fr_symbol == 0) || (cpu_of_arch (current_architecture) < m68020))
+	else if ((fragP->fr_symbol == 0) || !HAVE_LONG_BRANCH(current_architecture))
 	  {
 	    /* On 68000, or for absolute value, switch to abs long */
 	    /* FIXME, we should check abs val, pick short or long */
@@ -4598,7 +4602,7 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
 {
   valueT offset;
 
-  if (cpu_of_arch (current_architecture) < m68020)
+  if (!HAVE_LONG_BRANCH(current_architecture))
     {
       offset = to_addr - S_GET_VALUE (to_symbol);
       md_number_to_chars (ptr, (valueT) 0x4EF9, 2);

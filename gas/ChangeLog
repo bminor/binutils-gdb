@@ -1,3 +1,10 @@
+Mon Jan 20 10:39:36 1997  J.T. Conklin  <jtc@beauty.cygnus.com>
+
+	* config/tc-m68k.c (HAVE_LONG_BRANCH): New macro, returns true for
+ 	m68k family cpus which support long branch addressing modes.
+	(m68k_ip, md_convert_frag_1, md_estimate_size_before_relax,
+ 	md_create_long_jump): Use it.
+
 Mon Jan 20 12:42:06 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (md_begin): Don't set interlocks for
