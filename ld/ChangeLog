@@ -1,3 +1,7 @@
+2002-06-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* scripttempl/elf.sc (.tbss): Fix mismatched parentheses/braces.
+
 2002-06-06  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* configure.host (hppa*64*-*-hpux11*): Define NATIVE_LIB_DIRS,
