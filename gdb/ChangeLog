@@ -1,3 +1,7 @@
+Tue Aug  3 10:58:04 1993  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (SFILES): Add thread.c
+
 start-sanitize-v9
 Tue Aug  3 10:21:58 1993  Doug Evans  (dje@canuck.cygnus.com)
 

@@ -293,8 +293,8 @@ SFILES = blockframe.c breakpoint.c buildsym.c c-exp.y c-lang.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c main.c maint.c \
 	mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c parse.c \
 	printcmd.c remote.c source.c stabsread.c stack.c symfile.c symmisc.c \
-	symtab.c target.c typeprint.c utils.c valarith.c valops.c valprint.c \
-	values.c serial.c ser-unix.c
+	symtab.c target.c thread.c typeprint.c utils.c valarith.c valops.c \
+	valprint.c values.c serial.c ser-unix.c
 
 # Files that are not source code, but need to go into
 # gdb-$(VERSION).tar.Z.
