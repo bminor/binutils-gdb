@@ -1,3 +1,9 @@
+Wed Mar 25 10:41:35 1998  Richard Henderson  <rth@cygnus.com>
+
+	* bout.c (BALX): Include return register g14 as part of the insn.
+	(BALX_MASK): New.
+	(calljx_callback): Use it.
+
 Wed Mar 25 11:19:28 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	From Yan Meroth <YAN.MEROTH@st.com>:
