@@ -590,7 +590,7 @@ print_insn_thumb (pc, info, given)
 	      info->bytes_per_chunk = 4;
 	      info->bytes_per_line  = 4;
 	      
-              func (stream, "%04x\tbl\t", given & 0xffff);
+              func (stream, "bl\t");
               (*info->print_address_func)
                 (BDISP23 (given) * 2 + pc + 4, info);
               return 4;
@@ -601,8 +601,7 @@ print_insn_thumb (pc, info, given)
 	      info->bytes_per_line  = 4;
 	  	      
               given &= 0xffff;
-              func (stream, "%04x\t", given);
-	      
+
               for (; *c; c++)
                 {
                   if (*c == '%')
