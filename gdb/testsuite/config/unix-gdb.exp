@@ -140,9 +140,10 @@ proc gdb_load { arg } {
 	    return -1
 	}
 	eof {
-	    # It's possible this should be a FAIL.  Usually it means GDB
-	    # dumped core.
-	    error "couldn't load $arg into $GDB (timed out)."
+	    # This is an attempt to detect a core dump, but seems not to
+	    # work.  Perhaps we need to match .* followed by eof, in which
+	    # expect does not seem to have a way to do that.
+	    error "couldn't load $arg into $GDB (end of file)."
 	    return -1
 	}
     }
