@@ -1,5 +1,15 @@
 Fri Dec  1 14:46:51 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf.c (assign_file_positions_for_segments): Sort the sections in
+	each segment.
+	(get_program_header_size): Return the right size if segment_map is
+	not NULL.
+	(copy_private_bfd_data): Don't bother to sort the sections.
+
+	* bfd.c (bfd_record_phdr): New function.
+	* bfd-in.h (bfd_record_phdr): Declare.
+	* bfd_in2.h: Rebuild.
+
 	* elf32-sparc.c (elf32_sparc_relocate_section): Remove bogus
 	BFD_ASSERT.
 

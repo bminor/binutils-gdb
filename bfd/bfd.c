@@ -153,6 +153,7 @@ CODE_FRAGMENT
 .      struct _oasys_ar_data *oasys_ar_data;
 .      struct coff_tdata *coff_obj_data;
 .      struct pe_tdata *pe_obj_data;
+.      struct xcoff_tdata *xcoff_obj_data;
 .      struct ecoff_tdata *ecoff_obj_data;
 .      struct ieee_data_struct *ieee_data;
 .      struct ieee_ar_data_struct *ieee_ar_data;
@@ -199,7 +200,7 @@ CODE_FRAGMENT
 #include "libcoff.h"
 #include "libecoff.h"
 #undef obj_symbols
-#include "libelf.h"
+#include "elf-bfd.h"
 
 #include <ctype.h>
 
@@ -647,7 +648,7 @@ bfd_assert (file, line)
      const char *file;
      int line;
 {
-  (*_bfd_error_handler) ("bfd assertion fail %s:%d\n", file, line);
+  (*_bfd_error_handler) ("bfd assertion fail %s:%d", file, line);
 }
 
 
@@ -1043,5 +1044,49 @@ bfd_get_relocated_section_contents (abfd, link_info, link_order, data,
   return (*fn) (abfd, link_info, link_order, data, relocateable, symbols);
 }
 
+/* Record information about an ELF program header.  */
 
+boolean
+bfd_record_phdr (abfd, type, flags_valid, flags, at_valid, at,
+		 includes_filehdr, includes_phdrs, count, secs)
+     bfd *abfd;
+     unsigned long type;
+     boolean flags_valid;
+     flagword flags;
+     boolean at_valid;
+     bfd_vma at;
+     boolean includes_filehdr;
+     boolean includes_phdrs;
+     unsigned int count;
+     asection **secs;
+{
+  struct elf_segment_map *m, **pm;
 
+  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+    return true;
+
+  m = ((struct elf_segment_map *)
+       bfd_alloc (abfd,
+		  (sizeof (struct elf_segment_map)
+		   + (count - 1) * sizeof (asection *))));
+  if (m == NULL)
+    return false;
+
+  m->next = NULL;
+  m->p_type = type;
+  m->p_flags = flags;
+  m->p_paddr = at;
+  m->p_flags_valid = flags_valid;
+  m->p_paddr_valid = at_valid;
+  m->includes_filehdr = includes_filehdr;
+  m->includes_phdrs = includes_phdrs;
+  m->count = count;
+  if (count > 0)
+    memcpy (m->sections, secs, count * sizeof (asection *));
+
+  for (pm = &elf_tdata (abfd)->segment_map; *pm != NULL; pm = &(*pm)->next)
+    ;
+  *pm = m;
+
+  return true;
+}

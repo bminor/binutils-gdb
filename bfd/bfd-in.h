@@ -482,6 +482,10 @@ extern int bfd_stat PARAMS ((bfd *abfd, struct stat *));
 
 #define bfd_set_cacheable(abfd,bool) (((abfd)->cacheable = (boolean)(bool)), true)
 
+extern boolean bfd_record_phdr
+  PARAMS ((bfd *, unsigned long, boolean, flagword, boolean, bfd_vma,
+	   boolean, boolean, unsigned int, struct sec **));
+
 /* Byte swapping routines.  */
 
 bfd_vma		bfd_getb64	   PARAMS ((const unsigned char *));
@@ -641,6 +645,6 @@ extern boolean bfd_xcoff_record_link_assignment
 extern boolean bfd_xcoff_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *, const char *, const char *,
 	   unsigned long, unsigned long, unsigned long, boolean,
-	   int, boolean));
+	   int, boolean, struct sec **));
 
 /* And more from the source.  */
