@@ -311,8 +311,8 @@ on the VxWorks target.  These routines are included in the VxWorks library
 debugging is enabled in the VxWorks configuration.
 
 @kindex INCLUDE_RDB
-Defining @code{INCLUDE_RDB} in the VxWorks configuration file
-@file{configAll.h} includes the RDB interface routines and spawns the
+You can define @code{INCLUDE_RDB} in the VxWorks configuration file
+@file{configAll.h} to include the RDB interface routines and spawn the
 source debugging task @code{tRdbTask} when VxWorks is booted.  For more
 information on configuring and remaking VxWorks, see the @cite{VxWorks
 Programmer's Guide}.
