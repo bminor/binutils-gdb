@@ -1,3 +1,8 @@
+2003-05-12  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-xstormy16.c (xstormy16_elf_howto_table): use 'bitfield'
+	overflow detection for R_XSTORMY16_16 reloc.
+
 2003-05-12  Paul Clarke  <paulc@senet.com.au>
 
 	* elf32-h8300.c: Fix typo in name of R_H8_DIR8 reloc.
