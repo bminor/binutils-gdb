@@ -1,3 +1,11 @@
+2000-06-27  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d30v.c (write_2_short): Do not allow opcodes with
+	the EITHER_BUT_PREFER_MU attribute to be combined into a reverse 
+	sequential order, and emit warning messages if the input source
+	code contains constructs like that, or parallel constructs
+	containing such opcodes.
+
 2000-06-26  Marek Michalkiewicz  <marekm@linux.org.pl>
 
 	* config/tc-avr.c (mcu_types): Rename avr4 to avr5, add avr4.

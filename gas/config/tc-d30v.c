@@ -832,10 +832,17 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	  write_1_short (opcode1, insn1, fx->next, false);
 	  return 1;
 	}
-      else if (opcode1->op->unit == IU
-	       || (opcode1->op->unit == EITHER
-		   && opcode2->op->unit == EITHER_BUT_PREFER_MU))
+      else if (opcode1->op->unit == IU)
 	{
+	  if (opcode2->op->unit == EITHER_BUT_PREFER_MU)
+	    {
+	      /* Case 103810 is a request from Mitsubishi that opcodes
+		 with EITHER_BUT_PREFER_MU should not be executed in
+		 reverse sequential order.  */
+	      write_1_short (opcode1, insn1, fx->next, false);
+	      return 1;
+	    }
+
 	  /* reverse sequential */
 	  insn = FM10 | (insn2 << 32) | insn1;
 	  exec_type = EXEC_REVSEQ;
@@ -872,7 +879,8 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
       else
 	{
 	  if (opcode2->op->unit == EITHER_BUT_PREFER_MU)
-	    as_warn (_("Executing %s in IU may not work"), opcode2->op->name);
+	    as_warn (_("Executing %s in IU in parallel with %s may not work"),
+		     opcode1->op->name, opcode2->op->name);
 	  
 	  insn = FM00 | (insn1 << 32) | insn2;  
 	  fx = fx->next;
@@ -887,8 +895,6 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	as_bad (_("special left instruction `%s' kills instruction "
 		   "`%s' in right container"),
 		 opcode1->op->name, opcode2->op->name);
-      if (opcode2->op->unit == EITHER_BUT_PREFER_MU)
-	as_warn (_("Executing %s in IU may not work"), opcode2->op->name);
       insn = FM01 | (insn1 << 32) | insn2;  
       fx = fx->next;
       break;
@@ -896,8 +902,10 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
     case EXEC_REVSEQ:	/* reverse sequential */
       if (opcode2->op->unit == MU)
 	as_bad (_("MU instruction may not be in the right container"));
-      if (opcode2->op->unit == EITHER_BUT_PREFER_MU)
-	as_warn (_("Executing %s in IU may not work"), opcode2->op->name);
+      if (opcode1->op->unit == EITHER_BUT_PREFER_MU
+	  || opcode2->op->unit == EITHER_BUT_PREFER_MU)
+	as_warn (_("Executing %s in reverse serial with %s may not work"),
+		 opcode1->op->name, opcode2->op->name);
       insn = FM10 | (insn1 << 32) | insn2;  
       fx = fx->next;
       break;
