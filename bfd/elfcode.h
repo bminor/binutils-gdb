@@ -63,6 +63,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libbfd.h"
 #include "libelf.h"
 
+#ifndef alloca
+PTR alloca ();
+#endif
+
 /* Renaming structures, typedefs, macros and functions to be size-specific.  */
 #define Elf_External_Ehdr	NAME(Elf,External_Ehdr)
 #define Elf_External_Sym	NAME(Elf,External_Sym)
@@ -671,7 +675,9 @@ DEFUN (elf_new_section_hook, (abfd, sec),
        AND asection *sec)
 {
   struct bfd_elf_section_data *sdata;
-  sec->used_by_bfd = sdata = bfd_alloc (abfd, sizeof (*sdata));
+
+  sdata = (struct bfd_elf_section_data *) bfd_alloc (abfd, sizeof (*sdata));
+  sec->used_by_bfd = (PTR) sdata;
   memset (sdata, 0, sizeof (*sdata));
   return true;
 }
@@ -893,7 +899,8 @@ DEFUN (elf_object_p, (abfd), bfd * abfd)
     goto wrong;
   i_shdrp = (Elf_Internal_Shdr *)
     bfd_alloc (abfd, sizeof (*i_shdrp) * i_ehdrp->e_shnum);
-  elf_elfsections (abfd) = bfd_alloc (abfd, sizeof (i_shdrp) * i_ehdrp->e_shnum);
+  elf_elfsections (abfd) =
+    (Elf_Internal_Shdr **) bfd_alloc (abfd, sizeof (i_shdrp) * i_ehdrp->e_shnum);
   if (!i_shdrp || !elf_elfsections(abfd))
     {
       bfd_error = no_memory;
@@ -1076,12 +1083,7 @@ DEFUN (elf_make_sections, (abfd, asect, obj),
   this_hdr->sh_size = asect->_raw_size;
   /* contents already set by elf_set_section_contents */
 
-  if ((asect->flags & SEC_RELOC)
-#if 0
-      /* The flags are sometimes inconsistent.  */
-      && asect->reloc_count > 0
-#endif
-      )
+  if (asect->flags & SEC_RELOC)
     {
       /* emit a reloc section, and thus strtab and symtab... */
       Elf_Internal_Shdr *rela_hdr;
@@ -1135,8 +1137,9 @@ write_relocs (abfd, sec, xxx)
   Elf_External_Rel *outbound_relocs;
   int idx;
   int use_rela_p = get_elf_backend_data (abfd)->use_rela_p;
+  asymbol *last_sym = 0;
+  int last_sym_idx;
 
-malloc(0);
   if ((sec->flags & SEC_RELOC) == 0)
     return;
   /* Flags are sometimes inconsistent.  */
@@ -1149,81 +1152,77 @@ malloc(0);
   rela_hdr->contents = (void *) bfd_alloc (abfd, rela_hdr->sh_size);
 
   /* orelocation has the data, reloc_count has the count... */
-      if (use_rela_p)
+  if (use_rela_p)
+    {
+      outbound_relocas = (Elf_External_Rela *) rela_hdr->contents;
+
+      for (idx = 0; idx < sec->reloc_count; idx++)
 	{
-	  outbound_relocas = (Elf_External_Rela *) rela_hdr->contents;
+	  Elf_Internal_Rela dst_rela;
+	  Elf_External_Rela *src_rela;
+	  arelent *ptr;
+	  asymbol *sym;
+	  int n;
 
-	  for (idx = 0; idx < sec->reloc_count; idx++)
+	  ptr = sec->orelocation[idx];
+	  src_rela = outbound_relocas + idx;
+	  if (!(abfd->flags & EXEC_P))
+	    dst_rela.r_offset = ptr->address - sec->vma;
+	  else
+	    dst_rela.r_offset = ptr->address;
+
+	  sym = *ptr->sym_ptr_ptr;
+	  if (sym == last_sym)
+	    n = last_sym_idx;
+	  else
 	    {
-	      Elf_Internal_Rela dst_rela;
-	      Elf_External_Rela *src_rela;
-	      arelent *ptr;
-	      asymbol *sym;
-
-	      ptr = sec->orelocation[idx];
-	      src_rela = outbound_relocas + idx;
-	      if (!(abfd->flags & EXEC_P))
-		dst_rela.r_offset = ptr->address - sec->vma;
-	      else
-		dst_rela.r_offset = ptr->address;
-
-	      sym = *ptr->sym_ptr_ptr;
-#if 0
-	      /* I think this bit is wrong.  But doing it right here means
-		 fixing bfd_perform_relocation, and verifying that it doesn't
-		 break other targets.  Sigh.
-
-		 Problem I'm trying to solve here: `ld -r' tends to get
-		 offset of target symbol in output-file section put into
-		 addend, but retains the original symbol, so the net
-		 result is doubling of that offset.  */
-	      if (!bfd_is_com_section (sym->section)
-		  && sym->section != &bfd_und_section)
-		{
-		  /* Could adjust either the offset or the symbol here.
-		     I'm pretty indifferent.  */
-		  sym = sym->section->symbol;
-		}
-#endif
-	      dst_rela.r_info
-		= ELF_R_INFO (elf_symbol_from_bfd_symbol (abfd, &sym),
-				ptr->howto->type);
-
-	      dst_rela.r_addend = ptr->addend;
-	      elf_swap_reloca_out (abfd, &dst_rela, src_rela);
-malloc(0);
+	      last_sym = sym;
+	      last_sym_idx = n = elf_symbol_from_bfd_symbol (abfd, &sym);
 	    }
+	  dst_rela.r_info = ELF_R_INFO (n, ptr->howto->type);
+
+	  dst_rela.r_addend = ptr->addend;
+	  elf_swap_reloca_out (abfd, &dst_rela, src_rela);
 	}
-      else
-	/* REL relocations */
+    }
+  else
+    /* REL relocations */
+    {
+      outbound_relocs = (Elf_External_Rel *) rela_hdr->contents;
+
+      for (idx = 0; idx < sec->reloc_count; idx++)
 	{
-	  outbound_relocs = (Elf_External_Rel *) rela_hdr->contents;
+	  Elf_Internal_Rel dst_rel;
+	  Elf_External_Rel *src_rel;
+	  arelent *ptr;
+	  int n;
+	  asymbol *sym;
 
-	  for (idx = 0; idx < sec->reloc_count; idx++)
+	  ptr = sec->orelocation[idx];
+	  sym = *ptr->sym_ptr_ptr;
+	  src_rel = outbound_relocs + idx;
+	  if (!(abfd->flags & EXEC_P))
+	    dst_rel.r_offset = ptr->address - sec->vma;
+	  else
+	    dst_rel.r_offset = ptr->address;
+
+	  if (sym == last_sym)
+	    n = last_sym_idx;
+	  else
 	    {
-	      Elf_Internal_Rel dst_rel;
-	      Elf_External_Rel *src_rel;
-	      arelent *ptr;
-
-	      ptr = sec->orelocation[idx];
-	      src_rel = outbound_relocs + idx;
-	      if (!(abfd->flags & EXEC_P))
-		dst_rel.r_offset = ptr->address - sec->vma;
-	      else
-		dst_rel.r_offset = ptr->address;
-	
-	      dst_rel.r_info
-		= ELF_R_INFO (elf_symbol_from_bfd_symbol (abfd, ptr->sym_ptr_ptr),
-				ptr->howto->type);
-	
-	      elf_swap_reloc_out (abfd, &dst_rel, src_rel);
-	
-	      /* Update the addend -- FIXME add 64 bit support.  */
-	      bfd_put_32 (abfd, ptr->addend,
-			  (unsigned char *) (elf_section_data (sec)->this_hdr.contents)
-			  + dst_rel.r_offset);
+	      last_sym = sym;
+	      last_sym_idx = n = elf_symbol_from_bfd_symbol (abfd, &sym);
 	    }
+	  dst_rel.r_info = ELF_R_INFO (n, ptr->howto->type);
+
+	  elf_swap_reloc_out (abfd, &dst_rel, src_rel);
+
+	  /* Update the addend -- FIXME add 64 bit support.  */
+	  bfd_put_32 (abfd, ptr->addend,
+		      (unsigned char *) (elf_section_data (sec)->this_hdr.contents)
+		      + dst_rel.r_offset);
 	}
+    }
 }
 
 static void
@@ -1296,9 +1295,7 @@ DEFUN (elf_fake_sections, (abfd, asect, obj),
     /* Note that only one symtab is used, so just remember it
        for now.  */
 
-    if ((asect->flags & SEC_RELOC)
-	/* inconsistent flags... */
-	&& asect->reloc_count > 0)
+    if (asect->flags & SEC_RELOC)
       {
 	int use_rela_p = get_elf_backend_data (abfd)->use_rela_p;
 
@@ -1511,7 +1508,7 @@ DEFUN (elf_write_phdrs, (abfd, i_ehdrp, i_phdrp, phdr_cnt),
        Elf32_Half phdr_cnt)
 {
   /* first program header entry goes after the file header */
-  int outbase = i_ehdrp->e_ehsize;
+  int outbase = i_ehdrp->e_phoff;
   int i;
   Elf_External_Phdr x_phdr;
 
@@ -1526,6 +1523,7 @@ DEFUN (elf_write_phdrs, (abfd, i_ehdrp, i_phdrp, phdr_cnt),
   return true;
 }
 
+#if 0
 static Elf_Internal_Phdr *
 DEFUN (elf_build_phdrs, (abfd, i_ehdrp, i_shdrp, phdr_cnt),
        bfd * abfd AND
@@ -1700,6 +1698,7 @@ DEFUN (elf_build_phdrs, (abfd, i_ehdrp, i_shdrp, phdr_cnt),
 
   return phdr_buf;
 }
+#endif
 
 static const Elf_Internal_Shdr null_shdr;
 
@@ -1733,7 +1732,7 @@ assign_section_numbers (abfd)
     {
       struct bfd_elf_section_data *d = elf_section_data (sec);
       d->this_idx = section_number++;
-      if (sec->reloc_count != 0)
+      if (sec->flags & SEC_RELOC)
 	{
 	  d->rel_idx = section_number++;
 	  d->rel_hdr.sh_link = t->symtab_section;
@@ -1747,8 +1746,8 @@ assign_section_numbers (abfd)
 
   /* Set up the list of section header pointers, in agreement with the
      indices.  */
-  i_shdrp = bfd_alloc (abfd,
-		       section_number * sizeof (Elf_Internal_Shdr *));
+  i_shdrp = (Elf_Internal_Shdr **)
+    bfd_alloc (abfd, section_number * sizeof (Elf_Internal_Shdr *));
   elf_elfsections(abfd) = i_shdrp;
   for (i = 0; i < section_number; i++)
     i_shdrp[i] = 0;
@@ -1779,8 +1778,194 @@ assign_file_position_for_section (i_shdrp, offset)
      file_ptr offset;
 {
   i_shdrp->sh_offset = offset;
-  offset += i_shdrp->sh_size;
+  if (i_shdrp->sh_type != SHT_NOBITS)
+    offset += i_shdrp->sh_size;
   return offset;
+}
+
+static INLINE file_ptr
+assign_file_positions_for_symtab_and_strtabs (abfd, off)
+     bfd *abfd;
+     file_ptr off;
+{
+  struct elf_obj_tdata *t = elf_tdata (abfd);
+
+  off = assign_file_position_for_section (&t->shstrtab_hdr, off);
+  off = assign_file_position_for_section (&t->symtab_hdr, off);
+  off = assign_file_position_for_section (&t->strtab_hdr, off);
+  return off;
+}
+
+struct seg_info {
+  bfd_vma low, mem_size;
+  file_ptr file_size;
+  int start_pos;
+  int sh_flags;
+  struct seg_info *next;
+};
+
+static void
+map_program_segments (abfd)
+     bfd *abfd;
+{
+  Elf_Internal_Shdr **i_shdrpp = elf_elfsections (abfd);
+  Elf_Internal_Ehdr *i_ehdrp = elf_elfheader (abfd);
+  Elf_Internal_Shdr *i_shdrp;
+  Elf_Internal_Phdr *phdr;
+  char *done;
+  int i, n_left = 0;
+  file_ptr lowest_offset = 0;
+  struct seg_info *seg = 0;
+
+  done = alloca (i_ehdrp->e_shnum);
+  memset (done, 0, i_ehdrp->e_shnum);
+  for (i = 0; i < i_ehdrp->e_shnum; i++)
+    {
+      i_shdrp = i_shdrpp[i];
+      /* If it's going to be mapped in, it's been assigned a position.  */
+      if (i_shdrp->sh_offset + 1 == 0)
+	{
+	  /* Well, not really, but we won't process it here.   */
+	  done[i] = 1;
+	  continue;
+	}
+      if (i_shdrp->sh_offset < lowest_offset
+	  || lowest_offset == 0)
+	lowest_offset = i_shdrp->sh_offset;
+      /* Only interested in PROGBITS or NOBITS for generating segments.  */
+      switch (i_shdrp->sh_type)
+	{
+	case SHT_PROGBITS:
+	case SHT_NOBITS:
+	  break;
+	default:
+	  done[i] = 1;
+	}
+      if (!done[i])
+	n_left++;
+    }
+  while (n_left)
+    {
+      bfd_vma lowest_vma = -1, high;
+      int low_sec = 0;
+      int mem_size;
+      int file_size = 0;
+
+      for (i = 1; i < i_ehdrp->e_shnum; i++)
+	{
+	  i_shdrp = i_shdrpp[i];
+	  if (!done[i] && i_shdrp->sh_addr < lowest_vma)
+	    {
+	      lowest_vma = i_shdrp->sh_addr;
+	      low_sec = i;
+	    }
+	}
+      if (low_sec == 0)
+	abort ();
+      /* So now we know the lowest vma of any unassigned sections; start
+	 a segment there.  */
+      {
+	struct seg_info *s;
+	s = (struct seg_info *) bfd_alloc (abfd, sizeof (struct seg_info));
+	s->next = seg;
+	seg = s;
+      }
+      seg->low = lowest_vma;
+      i_shdrp = i_shdrpp[low_sec];
+      seg->start_pos = i_shdrp->sh_offset;
+      seg->sh_flags = i_shdrp->sh_flags;
+      done[low_sec] = 1, n_left--;
+      mem_size = i_shdrp->sh_size;
+      high = lowest_vma + i_shdrp->sh_size;
+
+      if (i_shdrp->sh_type == SHT_PROGBITS)
+	file_size = i_shdrp->sh_size;
+
+      for (i = 0; i < i_ehdrp->e_shnum; i++)
+	{
+	  file_ptr f1;
+
+	  if (file_size != mem_size)
+	    break;
+	  if (done[i])
+	    continue;
+	  i_shdrp = i_shdrpp[i];
+	  /* position of next byte on disk */
+	  f1 = seg->start_pos + file_size;
+	  if (i_shdrp->sh_type == SHT_PROGBITS)
+	    {
+	      if (i_shdrp->sh_offset - f1 != i_shdrp->sh_addr - high)
+		continue;
+	    }
+	  else /* sh_type == NOBITS */
+	    {
+	      /* If the section in question has no contents in the disk
+		 file, we really don't care where it supposedly starts.
+		 But we don't want to bother merging it into this segment
+		 if it doesn't start on this memory page.  */
+	      bfd_vma page1, page2;
+	      bfd_vma maxpagesize = get_elf_backend_data (abfd)->maxpagesize;
+
+	      /* page number in address space of current end of seg */
+	      page1 = (high - 1 + maxpagesize - 1) / maxpagesize;
+	      /* page number in address space of start of this section */
+	      page2 = (i_shdrp->sh_addr + maxpagesize - 1) / maxpagesize;
+
+	      if (page1 != page2)
+		continue;
+	    }
+	  done[i] = 1, n_left--;
+	  if (i_shdrp->sh_type == SHT_PROGBITS)
+	    file_size = i_shdrp->sh_offset + i_shdrp->sh_size - seg->start_pos;
+	  mem_size = i_shdrp->sh_addr + i_shdrp->sh_size - seg->low;
+	  high = i_shdrp->sh_addr + i_shdrp->sh_size;
+	  i = 0;
+	}
+      seg->file_size = file_size;
+      seg->mem_size = mem_size;
+    }
+  /* Now do something with the list of segments we've built up.  */
+  {
+    bfd_vma maxpagesize = get_elf_backend_data (abfd)->maxpagesize;
+    struct seg_info *s;
+    int n_segs = 0;
+    int sz;
+
+    for (s = seg; s; s = s->next)
+      {
+	n_segs++;
+      }
+    i_ehdrp->e_phentsize = sizeof (Elf_External_Phdr);
+    sz = sizeof (Elf_External_Phdr) * n_segs;
+    if (i_ehdrp->e_ehsize + sz <= lowest_offset)
+      i_ehdrp->e_phoff = i_ehdrp->e_ehsize;
+    else
+      {
+	i_ehdrp->e_phoff = elf_tdata (abfd)->next_file_pos;
+	elf_tdata (abfd)->next_file_pos += sz;
+      }
+    phdr = bfd_alloc (abfd, n_segs * sizeof (Elf_Internal_Phdr));
+    elf_tdata (abfd)->phdr = phdr;
+    while (seg)
+      {
+	phdr->p_type = PT_LOAD;	/* only type we really support so far */
+	phdr->p_offset = seg->start_pos;
+	phdr->p_vaddr = seg->low;
+	phdr->p_paddr = 0;
+	phdr->p_filesz = seg->file_size;
+	phdr->p_memsz = seg->mem_size;
+	phdr->p_flags = PF_R;
+	phdr->p_align = maxpagesize; /* ? */
+	if (seg->sh_flags & SHF_WRITE)
+	  phdr->p_flags |= PF_W;
+	if (seg->sh_flags & SHF_EXECINSTR)
+	  phdr->p_flags |= PF_X;
+	phdr++;
+	seg = seg->next;
+      }
+    i_ehdrp->e_phnum = n_segs;
+  }
+  elf_write_phdrs (abfd, i_ehdrp, elf_tdata (abfd)->phdr, i_ehdrp->e_phnum);
 }
 
 static void
@@ -1795,20 +1980,27 @@ assign_file_positions_except_relocs (abfd)
      a given section, we don't figure them in here.  We'll put them at the
      end of the file, at positions computed during bfd_close.
 
-     The order, for now: <ehdr> <shdr> <sec1> <sec2> <sec3> ... <rel1> ...  */
+     The order, for now: <ehdr> <shdr> <sec1> <sec2> <sec3> ... <rel1> ...
+     or:                 <ehdr> <phdr> <sec1> <sec2> ... <shdr> <rel1> ... */
 
   file_ptr off;
   int i;
   Elf_Internal_Shdr **i_shdrpp = elf_elfsections (abfd);
   Elf_Internal_Shdr *i_shdrp;
   Elf_Internal_Ehdr *i_ehdrp = elf_elfheader (abfd);
+  int exec_p = (abfd->flags & EXEC_P) != 0;
 
+  /* Everything starts after the ELF file header.  */
   off = i_ehdrp->e_ehsize;
-  i_ehdrp->e_shoff = off;
-  off += i_ehdrp->e_shnum * i_ehdrp->e_shentsize;
-  off = assign_file_position_for_section (&elf_tdata(abfd)->shstrtab_hdr, off);
-  off = assign_file_position_for_section (&elf_tdata(abfd)->symtab_hdr, off);
-  off = assign_file_position_for_section (&elf_tdata(abfd)->strtab_hdr, off);
+
+  if (!exec_p)
+    {
+      /* Section headers.  */
+      i_ehdrp->e_shoff = off;
+      off += i_ehdrp->e_shnum * i_ehdrp->e_shentsize;
+
+      off = assign_file_positions_for_symtab_and_strtabs (abfd, off);
+    }
   for (i = 0; i < i_ehdrp->e_shnum; i++)
     {
       i_shdrp = i_shdrpp[i];
@@ -1817,7 +2009,70 @@ assign_file_positions_except_relocs (abfd)
 	  i_shdrp->sh_offset = -1;
 	  continue;
 	}
+      if (exec_p)
+	{
+	  bfd_vma maxpagesize = get_elf_backend_data (abfd)->maxpagesize;
+	  if (maxpagesize == 0)
+	    maxpagesize = 1;	/* make the arithmetic work */
+	  /* This isn't necessarily going to give the best packing, if the
+	     segments require padding between them, but since that isn't
+	     usually the case, this'll do.  */
+	  if ((i_shdrp->sh_flags & SHF_ALLOC) == 0)
+	    {
+	      i_shdrp->sh_offset = -1;
+	      continue;
+	    }
+	  /* Blindly assume that the segments are ordered optimally.  With
+	     the default LD script, they will be.  */
+	  {
+	    /* need big unsigned type */
+	    bfd_vma addtl_off;
+	    addtl_off = i_shdrp->sh_addr - off;
+	    addtl_off = addtl_off % maxpagesize;
+	    if (addtl_off)
+	      {
+		off += addtl_off;
+	      }
+	  }
+	  if (i_shdrp->sh_type == SHT_NOBITS)
+	    {
+	      file_ptr off2;
+	      i_shdrp->sh_offset = off;
+	      if (off % maxpagesize != 0)
+		off2 = maxpagesize - (off % maxpagesize);
+	      if (off2 > i_shdrp->sh_size)
+		off2 = i_shdrp->sh_size;
+	      off += off2;
+	    }
+	}
       off = assign_file_position_for_section (i_shdrp, off);
+      if (exec_p
+	  && get_elf_backend_data(abfd)->maxpagesize > 1
+	  && i_shdrp->sh_type == SHT_PROGBITS
+	  && (i_shdrp->sh_flags & SHF_ALLOC)
+	  && (i_shdrp->sh_offset - i_shdrp->sh_addr) % get_elf_backend_data(abfd)->maxpagesize != 0)
+	abort ();
+    }
+  if (exec_p)
+    {
+      elf_tdata (abfd)->next_file_pos = off;
+      map_program_segments (abfd);
+      off = elf_tdata (abfd)->next_file_pos;
+
+      /* Section headers.  */
+      i_ehdrp->e_shoff = off;
+      off += i_ehdrp->e_shnum * i_ehdrp->e_shentsize;
+
+      off = assign_file_positions_for_symtab_and_strtabs (abfd, off);
+
+      for (i = 0; i < i_ehdrp->e_shnum; i++)
+	{
+	  i_shdrp = i_shdrpp[i];
+	  if (i_shdrp->sh_offset + 1 == 0
+	      && i_shdrp->sh_type != SHT_REL
+	      && i_shdrp->sh_type != SHT_RELA)
+	    off = assign_file_position_for_section (i_shdrp, off);
+	}
     }
   elf_tdata (abfd)->next_file_pos = off;
 }
@@ -1906,8 +2161,7 @@ prep_headers (abfd)
   /* if we're building an executable, we'll need a program header table */
   if (abfd->flags & EXEC_P)
     {
-      abort ();
-
+      /* it all happens later */
 #if 0
       i_ehdrp->e_phentsize = sizeof (Elf_External_Phdr);
 
@@ -2117,30 +2371,6 @@ write_shdrs_and_ehdr (abfd)
   bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
   bfd_write ((PTR) & x_ehdr, sizeof (x_ehdr), 1, abfd);
 
-  /* If we're building an executable, fixup the program header table
-     offsets.
-
-     @@ For now, assume that the entries are in a fixed order: text,
-     data, bss.  FIXME */
-
-  if (abfd->flags & EXEC_P)
-    {
-      static char *CONST section_name[] =
-      {".text", ".data", ".bss"};
-
-      for (count = 0; count < 3; count++)
-	{
-	  asection *asect = bfd_get_section_by_name (abfd,
-						     section_name[count]);
-	  int sh_idx = elf_section_from_bfd_section (abfd, asect);
-
-	  i_phdrp[count].p_offset = i_shdrp[sh_idx]->sh_offset;
-	}
-
-      /* write out the program header table entries */
-      elf_write_phdrs (abfd, i_ehdrp, i_phdrp, i_ehdrp->e_phnum);
-    }
-
   /* at this point we've concocted all the ELF sections... */
   x_shdrp = (Elf_External_Shdr *)
     bfd_alloc (abfd, sizeof (*x_shdrp) * (i_ehdrp->e_shnum));
@@ -2192,11 +2422,8 @@ DEFUN (NAME(bfd_elf,write_object_contents), (abfd), bfd * abfd)
 
   if (abfd->output_has_begun == false)
     {
-      malloc (0);
       prep_headers (abfd);
-malloc(0);
       elf_compute_section_file_positions (abfd);
-malloc(0);
       abfd->output_has_begun = true;
     }
 
@@ -2204,7 +2431,6 @@ malloc(0);
   i_ehdrp = elf_elfheader (abfd);
 
   bfd_map_over_sections (abfd, write_relocs, (PTR) 0);
-malloc(0);
   assign_file_positions_for_relocs (abfd);
 
   /* After writing the headers, we need to write the sections too... */
@@ -2513,6 +2739,7 @@ DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
 	  sym->symbol.flags |= BSF_FUNCTION;
 	  break;
 	}
+
       /* Is this a definition of $global$?  If so, keep it because it will be
 	 needd if any relocations are performed.  */
       if (!strcmp (sym->symbol.name, "$global$")
