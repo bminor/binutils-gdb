@@ -1,3 +1,16 @@
+2003-12-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/sparc/nm-sol2.h [NEW_PROC_API]
+	(TARGET_HAS_HARDWARE_WAITCHPOINTS): Define.
+	(TARGET_CAN_USE_HARDWARE_WATCHPOINT): Define to 1.
+	(TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT): Define to 1.
+	(HAVE_CONTINUABLE_WATCHPOINT): Define to 1.
+	(procfs_stopped_by_watchpoint): New prototype.
+	(STOPPED_BY_WATCHPOINT): New define.
+	(procfs_set_watchpoint): New prototype.
+	(target_insert_watchpoint, target_remove_watchpoint): Define using
+	procfs_set_watchpoint.
+
 2003-12-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparcnbsd-tdep.c: Include "frame.h", "frame-unwind.h",
