@@ -1453,7 +1453,14 @@ obj_elf_size (ignore)
   sym = symbol_find_or_make (name);
   *p = c;
   if (exp.X_op == O_constant)
-    S_SET_SIZE (sym, exp.X_add_number);
+    {
+      S_SET_SIZE (sym, exp.X_add_number);
+      if (symbol_get_obj (sym)->size)
+	{
+	  xfree (symbol_get_obj (sym)->size);
+	  symbol_get_obj (sym)->size = NULL;
+	}
+    }
   else
     {
       symbol_get_obj (sym)->size =

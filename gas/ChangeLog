@@ -1,3 +1,9 @@
+2001-08-23  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-ia64.c (dot_endp): Set function symbol sizes.
+	* config/obj-elf.c (obj_elf_size): When size is constant, free
+	and clear symbol_get_obj(sym)->size if any.
+
 2001-08-21  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* tc_mips.c (md_begin): Warn about incompatibility between -march=FOO

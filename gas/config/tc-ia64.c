@@ -3841,6 +3841,8 @@ dot_endp (dummy)
   segT saved_seg;
   subsegT saved_subseg;
   const char *sec_name, *text_name;
+  char *name, *p, c;
+  symbolS *sym;
 
   if (unwind.saved_text_seg)
     {
@@ -3897,9 +3899,6 @@ dot_endp (dummy)
   if (strcmp (text_name, ".text") == 0)
     text_name = "";
 
-  expression (&e);
-  demand_empty_rest_of_line ();
-
   insn_group_break (1, 0, 0);
 
   /* If there wasn't a .handlerdata, we haven't generated an image yet.  */
@@ -3955,6 +3954,50 @@ dot_endp (dummy)
 
     }
   subseg_set (saved_seg, saved_subseg);
+
+  /* Parse names of main and alternate entry points and set symbol sizes.  */
+  while (1)
+    {
+      SKIP_WHITESPACE ();
+      name = input_line_pointer;
+      c = get_symbol_end ();
+      p = input_line_pointer;
+      sym = symbol_find (name);
+      if (sym && unwind.proc_start
+	  && (symbol_get_bfdsym (sym)->flags & BSF_FUNCTION)
+	  && S_GET_SIZE (sym) == 0 && symbol_get_obj (sym)->size == NULL)
+	{
+	  fragS *fr = symbol_get_frag (unwind.proc_start);
+	  fragS *frag = symbol_get_frag (sym);
+
+	  /* Check whether the function label is at or beyond last
+	     .proc directive.  */
+	  while (fr && fr != frag)
+	    fr = fr->fr_next;
+	  if (fr)
+	    {
+	      if (frag == frag_now && SEG_NORMAL (now_seg))
+		S_SET_SIZE (sym, frag_now_fix () - S_GET_VALUE (sym));
+	      else
+		{
+		  symbol_get_obj (sym)->size =
+		    (expressionS *) xmalloc (sizeof (expressionS));
+		  symbol_get_obj (sym)->size->X_op = O_subtract;
+		  symbol_get_obj (sym)->size->X_add_symbol
+		    = symbol_new (FAKE_LABEL_NAME, now_seg,
+				  frag_now_fix (), frag_now);
+		  symbol_get_obj (sym)->size->X_op_symbol = sym;
+		  symbol_get_obj (sym)->size->X_add_number = 0;
+		}
+	    }
+	}
+      *p = c;
+      SKIP_WHITESPACE ();
+      if (*input_line_pointer != ',')
+	break;
+      ++input_line_pointer;
+    }
+  demand_empty_rest_of_line ();
   unwind.proc_start = unwind.proc_end = unwind.info = 0;
 }
 
