@@ -1,3 +1,11 @@
+Wed Jan 11 00:44:01 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* command.c (show_user_1): Use print_command_line to show a user
+	defined command (including control structures).
+
+	* top.c (init_main): Change documentation for user defined
+	commands to indicate they may accept up to ten arguments.
+
 Tue Jan 10 16:22:41 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
 
 	* mips-tdep.c (mips_skip_prologue): Accept or as well as addu for
