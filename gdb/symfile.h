@@ -3,19 +3,19 @@
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* This file requires that you first include "bfd.h".  */
 
@@ -29,7 +29,7 @@ struct sym_fns {
 
   /* sym_name
      is the name, or name prefix, of the BFD "target type" that this
-     set of functions handles.  E.g. "a.out" or "sunOs" or "coff".  */
+     set of functions handles.  E.g. "a.out" or "sunOs" or "coff" or "elf".  */
 
   char *sym_name;
 
@@ -44,7 +44,7 @@ struct sym_fns {
 
   /* sym_new_init
      initializes anything that is global to the entire
-     symbol table.  It is called e.g. during symbol_file_command, when
+     symbol table.  It is called during symbol_file_add, when
      we begin debugging an entirely new program.  */
 
   void (*sym_new_init) ();
@@ -67,20 +67,14 @@ struct sym_fns {
 
   void (*sym_read) ();
 
-  /* sym_discard (sf)
-     discards any cached information from SF or elsewhere, that
-     was saved as part of reading a single symbol file.  */
-
-  void (*sym_discard) ();
-
   /* sym_bfd
      is the accessor for the symbol file being read.  */
 
   bfd  *sym_bfd;
 
   /* sym_private
-     is where information can be shared among sym_init, sym_read and
-     sym_discard.  It is typically a pointer to malloc'd memory.  */
+     is where information can be shared among sym_init and sym_read.
+     It is typically a pointer to malloc'd memory.  */
 
   char *sym_private;			/* Should be void * */
 
@@ -93,6 +87,7 @@ struct sym_fns {
 
 			/*   Functions   */
 
+extern struct symtab *allocate_symtab ();
 extern int  free_named_symtabs ();
 extern void fill_in_vptr_fieldno ();
 extern void add_symtab_fns ();
@@ -132,12 +127,7 @@ extern char *symfile;
 
 /* The modification date of the file when they were loaded.  */
 
-extern int symfile_mtime;
-
-/* The BFD for this file -- only good while we're actively reading
-   symbols into a psymtab or a symtab.  */
-
-static bfd *symfile_bfd;
+extern long /* really time_t */ symfile_mtime;
 
 /* Vectors of all partial symbols read in from file.  */
 
