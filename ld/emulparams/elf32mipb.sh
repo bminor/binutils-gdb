@@ -10,6 +10,8 @@ OTHER_READWRITE_SECTIONS='
   .lit8 . : { *(.lit8) }
   .lit4 . : { *(.lit4) }
 '
+TEXT_START_SYMBOLS='_ftext = . ;'
+DATA_START_SYMBOLS='_fdata = . ;'
 OTHER_BSS_SYMBOLS='_fbss = .;'
 EXECUTABLE_SYMBOLS='_DYNAMIC_LINK = 0;'
 ARCH=mips

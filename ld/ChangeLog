@@ -1,3 +1,10 @@
+Mon Mar  7 15:23:24 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elf.sc: Permit TEXT_START_SYMBOLS and DATA_START_SYMBOLS to be
+	defined.
+	* emulparams/elf32mipb.s (TEXT_START_SYMBOLS): Define _ftext.
+	(DATA_START_SYMBOLS): Define _fdata.
+
 Mon Feb 28 10:59:14 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* ldlang.c (cat): Define using ANSI style if ALMOST_STDC defined.
