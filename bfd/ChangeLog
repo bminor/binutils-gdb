@@ -1,3 +1,8 @@
+2004-06-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Ignore reloc
+	overflow on branches to undefweaks.
+
 2004-06-11  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
 	* coff-alpha.c (alpha_relocate_section): Set used_by_bfd directly

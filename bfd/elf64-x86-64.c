@@ -2420,6 +2420,11 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	  if (r == bfd_reloc_overflow)
 	    {
+	      if (h != NULL
+		  && h->root.type == bfd_link_hash_undefweak
+		  && howto->pc_relative)
+		/* Ignore reloc overflow on branches to undefweak syms.  */
+		continue;
 
 	      if (! ((*info->callbacks->reloc_overflow)
 		     (info, name, howto->name, (bfd_vma) 0,
