@@ -586,17 +586,17 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of virtual_frame_pointer, invalid_p == 0 */
   /* Skip verify of register_read, has predicate */
   /* Skip verify of register_write, has predicate */
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->num_regs == -1))
     fprintf_unfiltered (log, "\n\tnum_regs");
   /* Skip verify of num_pseudo_regs, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->sp_regnum == -1))
     fprintf_unfiltered (log, "\n\tsp_regnum");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->fp_regnum == -1))
     fprintf_unfiltered (log, "\n\tfp_regnum");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->pc_regnum == -1))
     fprintf_unfiltered (log, "\n\tpc_regnum");
   /* Skip verify of fp0_regnum, invalid_p == 0 */
@@ -608,28 +608,28 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of sdb_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of dwarf2_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of register_name, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->register_size == -1))
     fprintf_unfiltered (log, "\n\tregister_size");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->register_bytes == -1))
     fprintf_unfiltered (log, "\n\tregister_bytes");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->register_byte == 0))
     fprintf_unfiltered (log, "\n\tregister_byte");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->register_raw_size == 0))
     fprintf_unfiltered (log, "\n\tregister_raw_size");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->max_register_raw_size == -1))
     fprintf_unfiltered (log, "\n\tmax_register_raw_size");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->register_virtual_size == 0))
     fprintf_unfiltered (log, "\n\tregister_virtual_size");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->max_register_virtual_size == -1))
     fprintf_unfiltered (log, "\n\tmax_register_virtual_size");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->register_virtual_type == 0))
     fprintf_unfiltered (log, "\n\tregister_virtual_type");
   /* Skip verify of do_registers_info, invalid_p == 0 */
@@ -638,48 +638,48 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of register_bytes_ok, has predicate */
   /* Skip verify of cannot_fetch_register, invalid_p == 0 */
   /* Skip verify of cannot_store_register, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH >= 1)
+  if ((GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->use_generic_dummy_frames == -1))
     fprintf_unfiltered (log, "\n\tuse_generic_dummy_frames");
-  if ((GDB_MULTI_ARCH >= 1)
+  if ((GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->call_dummy_location == 0))
     fprintf_unfiltered (log, "\n\tcall_dummy_location");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->call_dummy_location == AT_ENTRY_POINT && gdbarch->call_dummy_address == 0))
     fprintf_unfiltered (log, "\n\tcall_dummy_address");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->call_dummy_start_offset == -1))
     fprintf_unfiltered (log, "\n\tcall_dummy_start_offset");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->call_dummy_breakpoint_offset_p && gdbarch->call_dummy_breakpoint_offset == -1))
     fprintf_unfiltered (log, "\n\tcall_dummy_breakpoint_offset");
-  if ((GDB_MULTI_ARCH >= 1)
+  if ((GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->call_dummy_breakpoint_offset_p == -1))
     fprintf_unfiltered (log, "\n\tcall_dummy_breakpoint_offset_p");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->call_dummy_length == -1))
     fprintf_unfiltered (log, "\n\tcall_dummy_length");
-  if ((GDB_MULTI_ARCH >= 1)
+  if ((GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->pc_in_call_dummy == 0))
     fprintf_unfiltered (log, "\n\tpc_in_call_dummy");
-  if ((GDB_MULTI_ARCH >= 1)
+  if ((GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->call_dummy_p == -1))
     fprintf_unfiltered (log, "\n\tcall_dummy_p");
   /* Skip verify of call_dummy_words, invalid_p == 0 */
   /* Skip verify of sizeof_call_dummy_words, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH >= 1)
+  if ((GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->call_dummy_stack_adjust_p == -1))
     fprintf_unfiltered (log, "\n\tcall_dummy_stack_adjust_p");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->call_dummy_stack_adjust_p && gdbarch->call_dummy_stack_adjust == 0))
     fprintf_unfiltered (log, "\n\tcall_dummy_stack_adjust");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->fix_call_dummy == 0))
     fprintf_unfiltered (log, "\n\tfix_call_dummy");
   /* Skip verify of init_frame_pc_first, invalid_p == 0 */
   /* Skip verify of init_frame_pc, invalid_p == 0 */
   /* Skip verify of coerce_float_to_double, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH >= 1)
+  if ((GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->get_saved_register == 0))
     fprintf_unfiltered (log, "\n\tget_saved_register");
   /* Skip verify of register_convertible, invalid_p == 0 */
@@ -691,70 +691,70 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of address_to_pointer, invalid_p == 0 */
   /* Skip verify of integer_to_address, has predicate */
   /* Skip verify of return_value_on_stack, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->extract_return_value == 0))
     fprintf_unfiltered (log, "\n\textract_return_value");
   /* Skip verify of push_arguments, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->push_dummy_frame == 0))
     fprintf_unfiltered (log, "\n\tpush_dummy_frame");
   /* Skip verify of push_return_address, has predicate */
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->pop_frame == 0))
     fprintf_unfiltered (log, "\n\tpop_frame");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->store_struct_return == 0))
     fprintf_unfiltered (log, "\n\tstore_struct_return");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->store_return_value == 0))
     fprintf_unfiltered (log, "\n\tstore_return_value");
   /* Skip verify of extract_struct_value_address, has predicate */
   /* Skip verify of use_struct_convention, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->frame_init_saved_regs == 0))
     fprintf_unfiltered (log, "\n\tframe_init_saved_regs");
   /* Skip verify of init_extra_frame_info, has predicate */
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->skip_prologue == 0))
     fprintf_unfiltered (log, "\n\tskip_prologue");
   /* Skip verify of prologue_frameless_p, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->inner_than == 0))
     fprintf_unfiltered (log, "\n\tinner_than");
   /* Skip verify of breakpoint_from_pc, invalid_p == 0 */
   /* Skip verify of memory_insert_breakpoint, invalid_p == 0 */
   /* Skip verify of memory_remove_breakpoint, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->decr_pc_after_break == -1))
     fprintf_unfiltered (log, "\n\tdecr_pc_after_break");
   /* Skip verify of prepare_to_proceed, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->function_start_offset == -1))
     fprintf_unfiltered (log, "\n\tfunction_start_offset");
   /* Skip verify of remote_translate_xfer_address, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->frame_args_skip == -1))
     fprintf_unfiltered (log, "\n\tframe_args_skip");
   /* Skip verify of frameless_function_invocation, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->frame_chain == 0))
     fprintf_unfiltered (log, "\n\tframe_chain");
-  if ((GDB_MULTI_ARCH >= 1)
+  if ((GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->frame_chain_valid == 0))
     fprintf_unfiltered (log, "\n\tframe_chain_valid");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->frame_saved_pc == 0))
     fprintf_unfiltered (log, "\n\tframe_saved_pc");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->frame_args_address == 0))
     fprintf_unfiltered (log, "\n\tframe_args_address");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->frame_locals_address == 0))
     fprintf_unfiltered (log, "\n\tframe_locals_address");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->saved_pc_after_call == 0))
     fprintf_unfiltered (log, "\n\tsaved_pc_after_call");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->frame_num_args == 0))
     fprintf_unfiltered (log, "\n\tframe_num_args");
   /* Skip verify of stack_align, has predicate */

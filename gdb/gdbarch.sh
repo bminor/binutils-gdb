@@ -25,7 +25,7 @@ compare_new ()
     if test ! -r ${file}
     then
 	echo "${file} missing? cp new-${file} ${file}" 1>&2
-    elif diff -c ${file} new-${file}
+    elif diff -u ${file} new-${file}
     then
 	echo "${file} unchanged" 1>&2
     else
@@ -75,6 +75,13 @@ EOF
 		    eval ${r}=""
 		fi
 	    done
+
+	    case "${level}" in
+		1 ) gt_level=">= GDB_MULTI_ARCH_PARTIAL" ;;
+		2 ) gt_level="> GDB_MULTI_ARCH_PARTIAL" ;;
+		"" ) ;;
+		* ) error "Error: bad level for ${function}" 1>&2 ; kill $$ ; exit 1 ;;
+	    esac
 
 	    case "${class}" in
 		m ) staticdefault="${predefault}" ;;
@@ -354,7 +361,9 @@ do
 
 	# Currently unused.
 
-    *) exit 1;;
+    *)
+	echo "Bad field ${field}"
+	exit 1;;
   esac
 done
 
@@ -1438,12 +1447,12 @@ do
 	    printf "    gdbarch->${function} = ${postdefault};\n"
 	elif [ -n "${invalid_p}" ]
 	then
-	    printf "  if ((GDB_MULTI_ARCH >= ${level})\n"
+	    printf "  if ((GDB_MULTI_ARCH ${gt_level})\n"
 	    printf "      && (${invalid_p}))\n"
 	    printf "    fprintf_unfiltered (log, \"\\\\n\\\\t${function}\");\n"
 	elif [ -n "${predefault}" ]
 	then
-	    printf "  if ((GDB_MULTI_ARCH >= ${level})\n"
+	    printf "  if ((GDB_MULTI_ARCH ${gt_level})\n"
 	    printf "      && (gdbarch->${function} == ${predefault}))\n"
 	    printf "    fprintf_unfiltered (log, \"\\\\n\\\\t${function}\");\n"
 	fi
