@@ -591,6 +591,15 @@ DEFUN (wild_doit, (ptr, section, output, file),
   if (output->bfd_section == (asection *) NULL)
   {
     init_os (output);
+    /* Initialize the vma and size to the existing section.  This will
+       be overriden in lang_size_sections unless SEC_NEVER_LOAD gets
+       set.  */
+    if (section != (asection *) NULL)
+    {
+      bfd_set_section_vma (0, output->bfd_section,
+			   bfd_section_vma (0, section));
+      output->bfd_section->_raw_size = section->_raw_size;
+    }
   }
 
   if (section != (asection *) NULL
@@ -1485,6 +1494,11 @@ DEFUN (lang_size_sections, (s, output_section_statement, prev, fill,
      {
        bfd_vma after;
        lang_output_section_statement_type *os = &s->output_section_statement;
+
+       /* If this section is never loaded, don't change the size and
+	  address.  */
+       if (os->bfd_section->flags & SEC_NEVER_LOAD)
+	 break;
 
        if (os->bfd_section == &bfd_abs_section)
        {

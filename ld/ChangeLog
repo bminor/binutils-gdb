@@ -1,3 +1,18 @@
+Mon Oct 19 09:45:38 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Support for i386-sysv.
+	configure.in: check for i386-*-sysv* and i386-*-sco*.
+	i386coff.sc-sh: rewrote to support SVR3 by default.
+	ldctor.c (find_constructors): preserve stat_ptr.
+	ldlang.c (wild_doit): initialize vma and size of new output
+	section to corresponding input section.  This is required for
+	shared library support.
+	(lang_size_sections): don't modify vma and size of sections which
+	are never loaded (for shared libraries).
+	ldwrite.c (copy_and_relocate): copy the contents of any section
+	which has contents, not just sections which are loaded (for shared
+	libraries).
+
 Thu Oct 15 15:20:26 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* ldlang.c (size_input_section): count the sizes of all sections
