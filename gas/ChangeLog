@@ -1,3 +1,8 @@
+Fri Feb 21 10:08:25 1997  Jim Wilson  <wilson@cygnus.com>
+
+	* tc-mips.c (mips_ip): If configured for an embedded ELF system,
+	don't set the section alignment to 2**4.
+
 Fri Feb 21 11:55:03 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* app.c (LEX_IS_TWOCHAR_COMMENT_2ND): Don't define.

@@ -6227,20 +6227,11 @@ mips_ip (str, ip)
 
   insn_error = NULL;
 
-  for (s = str; islower (*s) || (*s >= '0' && *s <= '3') || *s == '6' || *s == '.'; ++s)
+  for (s = str; *s != '\0' && !isspace(*s); ++s)
     continue;
-  switch (*s)
-    {
-    case '\0':
-      break;
-
-    case ' ':
-      *s++ = '\0';
-      break;
-
-    default:
-      as_fatal ("Unknown opcode: `%s'", str);
-    }
+  if ( isspace(*s) )
+    *s++ = '\0';
+    
   if ((insn = (struct mips_opcode *) hash_find (op_hash, str)) == NULL)
     {
       insn_error = "unrecognized opcode";
@@ -6767,8 +6758,9 @@ mips_ip (str, ip)
 					      | SEC_LOAD
 					      | SEC_READONLY
 					      | SEC_DATA));
-		    frag_align (*args == 'l' ? 2 : 3, 0);
-		    if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+		    frag_align (*args == 'l' ? 2 : 3, 0, 0);
+		    if (OUTPUT_FLAVOR == bfd_target_elf_flavour
+			&& strcmp (TARGET_OS, "elf") != 0)
 		      record_alignment (new_seg, 4);
 		    else
 		      record_alignment (new_seg, *args == 'l' ? 2 : 3);
@@ -8815,7 +8807,7 @@ mips_align (to, fill, label)
      symbolS *label;
 {
   mips_emit_delays (false);
-  frag_align (to, fill);
+  frag_align (to, fill, 0);
   record_alignment (now_seg, to);
   if (label != NULL)
     {
@@ -9618,7 +9610,9 @@ mips16_extended_frag (fragp, sec, stretch)
 	{
 	  fragS *f;
 
-	  /* Adjust stretch for any alignment frag.  */
+	  /* Adjust stretch for any alignment frag.  FIXME: This
+             doesn't handle the fr_subtype field, which specifies a
+             maximum number of bytes to skip when doing an alignment.  */
 	  for (f = fragp; f != fragp->fr_symbol->sy_frag; f = f->fr_next)
 	    {
 	      assert (f != NULL);
