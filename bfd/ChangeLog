@@ -1,5 +1,8 @@
 Mon Jan 23 13:33:18 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* config.bfd (i[345]86-*-gnu*): Set bfd_name to i386-gnu.
+	* config/i386-gnu.mt: New file.  Include ELF support.
+
 	* opncls.c (bfd_openstreamr): Call bfd_cache_init.
 
 Fri Jan 20 11:44:45 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
