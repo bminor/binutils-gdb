@@ -618,7 +618,7 @@ unpack_long (type, valaddr)
       error ("not implemented: member types in unpack_long");
 
     default:
-      error ("Value can't be converted to intenot integer or pointer.");
+      error ("Value can't be converted to integer.");
     }
   return 0; /* Placate lint.  */
 }
