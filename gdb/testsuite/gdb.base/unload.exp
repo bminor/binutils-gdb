@@ -126,7 +126,7 @@ Breakpoint.*, shrfunc1 \\\(x=3\\\).*unloadshr.c:$unloadshr_line.*" \
 "running program"
 
 gdb_test "continue" \
-"Continuing.*y is 7.*warning: Temporarily disabling unloaded shared library breakpoints.*warning: breakpoint #.*Program exited normally." \
+"Continuing.*y is 7.*warning: Temporarily disabling breakpoints for.*unloadshr.sl.*Program exited normally." \
 "continuing to end of program"
 
 #
@@ -138,5 +138,6 @@ gdb_test "run" \
 "rerun to shared library breakpoint"
 
 gdb_test "continue" \
-"Continuing.*y is 7.*warning: Temporarily disabling unloaded shared library breakpoints.*warning: breakpoint #.*Program exited normally." \
-"continuing to end of program second time"
+"Continuing.*y is 7.*warning: Temporarily disabling breakpoints for.*unloadshr.sl.*Program exited normally." \
+"continuing to end of program"
+
