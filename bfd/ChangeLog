@@ -1,4 +1,28 @@
+Thu Jul 21 12:26:01 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* reloc.c (struct reloc_howto_struct): Remove special_function1.
+	It's the wrong way to do things.
+	(HOWTO): Change accordingly.
+	(HOWTO2): Remove.
+	(_bfd_final_link_relocate): Remove references to
+	special_function1.
+	* bfd-in2.h: Rebuilt.
+	* aoutx.h (aout_link_input_section_std): Remove references to
+	special_function1.
+	(aout_link_reloc_link_order): Likewise.
+
+Wed Jul 20 15:46:44 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* elfcode.h (NAME(bfd_elf,size_dynamic_sections)): Add rpath
+	argument.  If it is not NULL, use it to set DT_RPATH.
+	* bfd-in.h (bfd_elf32_size_dynamic_sections): Update prototype.
+	(bfd_elf64_size_dynamic_sections): Likewise.
+	* bfd-in2.h: Rebuilt.
+
 Sat Jul 16 21:10:39 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* elfcode.h (elf_get_dynamic_symtab_upper_bound): If there is no
+	dynamic symtab, return error.
 
 	* libelf.h (ELF_LINK_HASH_DEFINED_WEAK): Define.
 	* elfcode.h (elf_link_add_object_symbols): If symbol is defined as

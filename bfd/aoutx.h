@@ -151,7 +151,20 @@ DESCRIPTION
 	addend.
 
 */
+#ifndef CTOR_TABLE_RELOC_HOWTO
 #define CTOR_TABLE_RELOC_IDX 2
+#define CTOR_TABLE_RELOC_HOWTO(BFD) ((obj_reloc_entry_size(BFD) == RELOC_EXT_SIZE \
+	     ? howto_table_ext : howto_table_std) \
+	    + CTOR_TABLE_RELOC_IDX)
+#endif
+
+#ifndef MY_swap_std_reloc_in
+#define MY_swap_std_reloc_in NAME(aout,swap_std_reloc_in)
+#endif
+
+#ifndef MY_swap_std_reloc_out
+#define MY_swap_std_reloc_out NAME(aout,swap_std_reloc_out)
+#endif
 
 #define howto_table_ext NAME(aout,ext_howto_table)
 #define howto_table_std NAME(aout,std_howto_table)
@@ -549,16 +562,20 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
 
   result = (*callback_to_real_object_p)(abfd);
 
-#ifdef MACH
-  /* Stat the file to decide whether or not it's executable.
-     Many Mach programs use text at very unconventional addresses,
-     including the emulator, so the standard heuristic is incorrect.  */
+#if defined(MACH) || defined(STAT_FOR_EXEC)
+  /* The original heuristic doesn't work in some important cases. The
+   * a.out file has no information about the text start address. For
+   * files (like kernels) linked to non-standard addresses (ld -Ttext
+   * nnn) the entry point may not be between the default text start
+   * (obj_textsec(abfd)->vma) and (obj_textsec(abfd)->vma) + text size
+   * This is not just a mach issue. Many kernels are loaded at non
+   * standard addresses.
+   */
   {
-    struct stat st;
-
-    stat (abfd->filename, &st);
-    /* Are any exec 'x' bits on? */
-    if (st.st_mode & 0111)
+    struct stat stat_buf;
+    if (abfd->iostream
+	&& (fstat(fileno((FILE *) (abfd->iostream)), &stat_buf) == 0)
+	&& ((stat_buf.st_mode & 0111) != 0))
       abfd->flags |= EXEC_P;
   }
 #else /* ! MACH */
@@ -690,6 +707,15 @@ NAME(aout,machine_type) (arch, machine, unknown)
     case 4400:
     case 6000:          arch_flags = M_MIPS2; break;
     default:            arch_flags = M_UNKNOWN; break;
+    }
+    break;
+
+  case bfd_arch_ns32k:
+    switch (machine) {
+    case 0:    		arch_flags = M_NS32532; break;
+    case 32032:		arch_flags = M_NS32032; break;
+    case 32532:		arch_flags = M_NS32532; break;
+    default:		arch_flags = M_UNKNOWN; break;
     }
     break;
 
@@ -1380,10 +1406,7 @@ translate_from_native_sym_flags (abfd, cache_ptr)
 	reloc->relent.address = section->_raw_size;
 	section->_raw_size += BYTES_IN_WORD;
 
-	if (obj_reloc_entry_size (abfd) == RELOC_EXT_SIZE)
-	  reloc->relent.howto = howto_table_ext + CTOR_TABLE_RELOC_IDX;
-	else
-	  reloc->relent.howto = howto_table_std + CTOR_TABLE_RELOC_IDX;
+	reloc->relent.howto = CTOR_TABLE_RELOC_HOWTO(abfd);
 
 	cache_ptr->symbol.flags |= BSF_CONSTRUCTOR;
       }
@@ -2283,6 +2306,8 @@ NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
     reloc_size = exec_hdr(abfd)->a_drsize;
   else if (asect == obj_textsec (abfd))
     reloc_size = exec_hdr(abfd)->a_trsize;
+  else if (asect == obj_bsssec (abfd))
+    reloc_size = 0;
   else
     {
       bfd_set_error (bfd_error_invalid_operation);
@@ -2334,7 +2359,7 @@ NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
 	(struct reloc_std_external *) relocs;
 
       for (; counter < count; counter++, rptr++, cache_ptr++)
-	NAME(aout,swap_std_reloc_in) (abfd, rptr, cache_ptr, symbols);
+	MY_swap_std_reloc_in(abfd, rptr, cache_ptr, symbols);
     }
 
   free (relocs);
@@ -2383,7 +2408,7 @@ NAME(aout,squirt_out_relocs) (abfd, section)
       for (natptr = native;
 	   count != 0;
 	   --count, natptr += each_size, ++generic)
-	NAME(aout,swap_std_reloc_out)(abfd, *generic, (struct reloc_std_external *)natptr);
+	MY_swap_std_reloc_out(abfd, *generic, (struct reloc_std_external *)natptr);
     }
 
   if ( bfd_write ((PTR) native, 1, natsize, abfd) != natsize) {
@@ -2460,6 +2485,9 @@ NAME(aout,get_reloc_upper_bound) (abfd, asect)
 
   if (asect == obj_bsssec (abfd))
     return sizeof (arelent *);
+
+  if (asect == obj_bsssec (abfd))
+    return 0;
 
   bfd_set_error (bfd_error_invalid_operation);
   return -1;
@@ -4185,11 +4213,15 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
       int r_relative;
       int r_length;
       int howto_idx;
+      reloc_howto_type *howto;
       bfd_vma relocation;
       bfd_reloc_status_type r;
 
       r_addr = GET_SWORD (input_bfd, rel->r_address);
 
+#ifdef MY_reloc_howto
+      howto = MY_reloc_howto(input_bfd, rel, r_index, r_extern, r_pcrel);
+#else      
       if (input_bfd->xvec->header_byteorder_big_p)
 	{
 	  r_index   =  ((rel->r_index[0] << 16)
@@ -4220,6 +4252,8 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
       howto_idx = r_length + 4 * r_pcrel + 8 * r_baserel
 		  + 16 * r_jmptable + 32 * r_relative;
       BFD_ASSERT (howto_idx < TABLE_SIZE (howto_table_std));
+      howto = howto_table_std + howto_idx;
+#endif
 
       if (relocateable)
 	{
@@ -4325,7 +4359,7 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 	  if (relocation == 0)
 	    r = bfd_reloc_ok;
 	  else
-	    r = _bfd_relocate_contents (howto_table_std + howto_idx,
+	    r = _bfd_relocate_contents (howto,
 					input_bfd, relocation,
 					contents + r_addr);
 	}
@@ -4385,7 +4419,7 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 		relocation += input_section->vma;
 	    }
 
-	  r = _bfd_final_link_relocate (howto_table_std + howto_idx,
+	  r = _bfd_final_link_relocate (howto,
 					input_bfd, input_section,
 					contents, r_addr, relocation,
 					(bfd_vma) 0);
@@ -4413,7 +4447,7 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 		    name = bfd_section_name (input_bfd, s);
 		  }
 		if (! ((*finfo->info->callbacks->reloc_overflow)
-		       (finfo->info, name, howto_table_std[howto_idx].name,
+		       (finfo->info, name, howto->name,
 			(bfd_vma) 0, input_bfd, input_section, r_addr)))
 		  return false;
 	      }
@@ -4821,6 +4855,9 @@ aout_link_reloc_link_order (finfo, o, p)
       int r_relative;
       int r_length;
 
+#ifdef MY_put_reloc
+      MY_put_reloc(finfo->output_bfd, r_extern, r_index, p->offset, howto, &srel);
+#else
       r_pcrel = howto->pc_relative;
       r_baserel = (howto->type & 8) != 0;
       r_jmptable = (howto->type & 16) != 0;
@@ -4854,7 +4891,7 @@ aout_link_reloc_link_order (finfo, o, p)
 	     | (r_relative ? RELOC_STD_BITS_RELATIVE_LITTLE : 0)
 	     | (r_length <<  RELOC_STD_BITS_LENGTH_SH_LITTLE));
 	}
-
+#endif
       rel_ptr = (PTR) &srel;
 
       /* We have to write the addend into the object file, since
