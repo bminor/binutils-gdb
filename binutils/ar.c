@@ -211,7 +211,7 @@ void
 usage ()
 {
   fprintf(stderr, "ar %s\n\
-Usage: %s [-]{dmpqrtx}[abcilosuv] [membername] archive-file file...\n\
+Usage: %s [-]{dmpqrtx}[abcilosuv] [member-name] archive-file file...\n\
        %s -M [<mri-script]\n",
 	  program_version, program_name, program_name);
   exit(1);
