@@ -610,6 +610,8 @@ d10v_skip_prologue (CORE_ADDR pc)
 struct d10v_unwind_cache
 {
   CORE_ADDR return_pc;
+  /* The frame's base.  Used when constructing a frame ID.  */
+  CORE_ADDR base;
   int size;
   CORE_ADDR *saved_regs;
   /* How far the SP and r11 (FP) have been offset from the start of
@@ -706,7 +708,9 @@ struct d10v_unwind_cache *
 d10v_frame_unwind_cache (struct frame_info *fi,
 			 void **cache)
 {
-  CORE_ADDR fp, pc;
+  CORE_ADDR pc;
+  ULONGEST prev_sp;
+  ULONGEST this_base;
   unsigned long op;
   unsigned short op1, op2;
   int i;
@@ -721,8 +725,6 @@ d10v_frame_unwind_cache (struct frame_info *fi,
 
   info->size = 0;
   info->return_pc = 0;
-
-  fp = get_frame_base (fi);
   info->sp_offset = 0;
 
   pc = get_pc_function_start (get_frame_pc (fi));
@@ -780,13 +782,43 @@ d10v_frame_unwind_cache (struct frame_info *fi,
 
   info->size = -info->sp_offset;
 
-  if (!(fp & 0xffff))
-    fp = d10v_read_sp ();
+  /* Compute the frame's base, and the previous frame's SP.  */
+  if (info->uses_frame)
+    {
+      /* The SP was moved to the FP.  This indicates that a new frame
+         was created.  Get THIS frame's FP value by unwinding it from
+         the next frame.  */
+      frame_read_unsigned_register (fi, FP_REGNUM, &this_base);
+      /* The FP points at the last saved register.  Adjust the FP back
+         to before the first saved register giving the SP.  */
+      prev_sp = this_base + info->size;
+    }
+  else if (info->saved_regs[SP_REGNUM])
+    {
+      /* The SP was saved (which is very unusual), the frame base is
+	 just the PREV's frame's TOP-OF-STACK.  */
+      this_base = read_memory_unsigned_integer (info->saved_regs[SP_REGNUM], 
+						register_size (current_gdbarch,
+							       SP_REGNUM));
+      prev_sp = this_base;
+    }
+  else
+    {
+      /* Assume that the FP is this frame's SP but with that pushed
+         stack space added back.  */
+      frame_read_unsigned_register (fi, SP_REGNUM, &this_base);
+      prev_sp = this_base + info->size;
+    }
 
+  info->base = d10v_make_daddr (this_base);
+  prev_sp = d10v_make_daddr (prev_sp);
+
+  /* Adjust all the saved registers so that they contain addresses and
+     not offsets.  */
   for (i = 0; i < NUM_REGS - 1; i++)
     if (info->saved_regs[i])
       {
-	info->saved_regs[i] = fp - (info->sp_offset - info->saved_regs[i]);
+	info->saved_regs[i] = (prev_sp + info->saved_regs[i]);
       }
 
   if (info->saved_regs[LR_REGNUM])
@@ -803,20 +835,9 @@ d10v_frame_unwind_cache (struct frame_info *fi,
       info->return_pc = d10v_make_iaddr (return_pc);
     }
 
-  /* The SP is not normally (ever?) saved, but check anyway */
-  if (!info->saved_regs[SP_REGNUM])
-    {
-      /* if the FP was saved, that means the current FP is valid, */
-      /* otherwise, it isn't being used, so we use the SP instead */
-      if (info->uses_frame)
-	info->saved_regs[SP_REGNUM] 
-	  = d10v_read_fp () + info->size;
-      else
-	{
-	  info->saved_regs[SP_REGNUM] = fp + info->size;
-	  info->saved_regs[FP_REGNUM] = 0;
-	}
-    }
+  /* The SP_REGNUM is special.  Instead of the address of the SP, the
+     previous frame's SP value is saved.  */
+  info->saved_regs[SP_REGNUM] = prev_sp;
 
   return info;
 }

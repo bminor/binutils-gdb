@@ -1,5 +1,12 @@
 2003-03-05  Andrew Cagney  <cagney@redhat.com>
 
+	* d10v-tdep.c (struct d10v_unwind_cache): Add field "base".
+	(d10v_frame_unwind_cache): Rewrite code computing the base and SP.
+	Do not use d10v_read_sp or d10v_read_fp when obtaining register
+	values.
+
+2003-03-05  Andrew Cagney  <cagney@redhat.com>
+
 	* d10v-tdep.c (struct frame_extra_info): Delete unused structure.
 	(struct d10v_unwind_cache): Delete field "frameless".  Replace
 	"next_addr" with "sp_offset".  Add "r11_offset".
