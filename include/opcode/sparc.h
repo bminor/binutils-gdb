@@ -17,7 +17,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with GAS or GDB; see the file COPYING.	If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.	*/
+the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.	*/
 
 /* The SPARC opcode table (and other related data) is defined in
    the opcodes library in sparc-opc.c.  If you change anything here, make
@@ -66,8 +66,10 @@ struct sparc_opcode {
 #define	F_UNBR		4	/* Unconditional branch */
 #define	F_CONDBR	8	/* Conditional branch */
 #define	F_JSR		16	/* Subroutine call */
+/* ??? One can argue this shouldn't be here and the architecture
+   field should be used instead.  */
+#define F_NOTV9		32	/* Doesn't exist in v9 */
 /* FIXME: Add F_ANACHRONISTIC flag for v9.  */
-/* FIXME: Add F_OBSOLETE flag for v9, for instructions that no longer exist? */
 
 /*
 
@@ -140,7 +142,7 @@ Kinds of operands:
 	x	OPF field (v9 impdep).
 
 The following chars are unused: (note: ,[] are used as punctuation)
-[uxOUXY3450]
+[uOUXY3450]
 
 */
 

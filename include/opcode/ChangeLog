@@ -1,4 +1,42 @@
+Wed Aug  2 08:16:46 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc.h (F_NOTV9): Define.
+
+Tue Jul 11 14:20:42 1995  Jeff Spiegel  <jeffs@lsil.com>
+
+	* mips.h (INSN_4010): Define.
+
+Wed Jun 21 18:49:51 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* m68k.h (TBL1): Reverse sense of "round" argument in result.
+
+	Changes from Andreas Schwab <schwab@issan.informatik.uni-dortmund.de>:
+	* m68k.h: Fix argument descriptions of coprocessor
+	instructions to allow only alterable operands where appropriate.
+	[!NO_DEFAULT_SIZES]: An omitted size defaults to `w'.
+	(m68k_opcode_aliases): Add more aliases.
+
 start-sanitize-arc
+Sat Apr 29 23:17:03 1995  Doug Evans  <dje@chestnut.cygnus.com>
+
+	* arc.h (struct arc_opcode): New flag value ARC_OPCODE_COND_BRANCH.
+	(ARC_DELAY_{NONE,NORMAL,JUMP): Define delay slot types.
+end-sanitize-arc
+
+Fri Apr 14 22:15:34 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* m68k.h: Added explcitly short-sized conditional branches, and a
+	bunch of aliases (fmov*, ftest*, tdivul) to support gcc's
+	svr4-based configurations.
+
+start-sanitize-arc
+Wed Apr 12 08:54:32 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* arc.h (struct arc_opcode): New members next_asm, next_dis.
+	(ARC_HASH_OPCODE, ARC_HASH_ICODE): Define.
+	(ARC_OPCODE_NEXT_ASM, ARC_OPCODE_NEXT_DIS): Define.
+	(arc_opcode_lookup_asm, arc_opcode_lookup_dis): Add prototypes.
+
 Thu Apr  6 20:36:55 1995  Doug Evans  <dje@chestnut.cygnus.com>
 
 	* arc.h (arc_get_opcode_mach): Define prototype.
