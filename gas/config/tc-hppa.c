@@ -1285,7 +1285,6 @@ md_begin ()
   if (flagseen['R'])
     {
       as_warn ("-R option not supported on this target.");
-      flag_readonly_data_in_text = 0;
       flagseen['R'] = 0;
     }
 
@@ -2788,17 +2787,27 @@ md_estimate_size_before_relax (fragP, segment)
 
   return size;
 }
+
+CONST char *md_shortopts = "";
+struct option md_longopts[] = {
+  {NULL, no_argument, NULL, 0}
+};
+size_t md_longopts_size = sizeof(md_longopts);
 
-/* Parse machine dependent options.  There are none on the PA.  */
 int
-md_parse_option (argP, cntP, vecP)
-     char **argP;
-     int *cntP;
-     char ***vecP;
+md_parse_option (c, arg)
+     int c;
+     char *arg;
 {
-  return 1;
+  return 0;
 }
 
+void
+md_show_usage (stream)
+     FILE *stream;
+{
+}
+
 /* We have no need to default values of symbols.  */
 
 symbolS *

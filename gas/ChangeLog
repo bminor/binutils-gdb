@@ -1,3 +1,20 @@
+Fri Jun  3 12:50:13 1994  David J. MacKenzie  (djm@rtl.cygnus.com)
+
+	* as.c (show_usage): Remove target specific messages;
+	instead, call md_show_usage.
+	(parse_args): Use getopt_long_only.  Take pointers to argc and
+	argv.
+	(main): Pass parse_args pointers.
+	* as.h: Remove 3 variables that are redundant with flagseen.
+	* as.c, messages.c: Change their users to use flagseen.
+	Define getopt stuff.
+	* tc.h: Update md_parse_option decl.  Add md_show_usage decl.
+	* config/tc-*.c: Add md_shortopts, md_longopts,
+	md_longopts_size, md_show_usage.  Change calling convention for
+	md_parse_option.  Remove md_parse_long_option.
+	* config/tc-ns32k.c: Rename `struct option' to `struct ns32k_option'.
+	* config/tc-i386.h: Don't define md_parse_option.
+
 Thu Jun  2 13:54:46 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
 
 	* as.c (show_usage): New function.

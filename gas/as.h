@@ -42,6 +42,14 @@
 #include "config.h"
 
 #include <stdio.h>
+#include <getopt.h>
+/* The first getopt value for machine-independent long options.
+   150 isn't special; it's just an arbitrary non-ASCII char value.  */
+#define OPTION_STD_BASE 150
+/* The first getopt value for machine-dependent long options.
+   170 gives the standard options room to grow.  */
+#define OPTION_MD_BASE 170
+
 #ifdef DEBUG
 #undef NDEBUG
 #endif
@@ -335,9 +343,6 @@ COMMON fragS bss_address_frag;
 
 /* ['x'] TRUE if "-x" seen. */
 COMMON char flagseen[128];
-COMMON unsigned char flag_readonly_data_in_text;
-COMMON unsigned char flag_suppress_warnings;
-COMMON unsigned char flag_always_generate_output;
 
 /* name of emitted object file */
 COMMON char *out_file_name;

@@ -17,7 +17,7 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-#include <stdio.h>		/* define stderr */
+#include <stdio.h>
 #include <errno.h>
 
 #include "as.h"
@@ -37,6 +37,10 @@
 #endif /* NO_STDARG */
 
 extern char *strerror ();
+
+static void as_show_where PARAMS ((void));
+static void as_warn_internal PARAMS ((char *, unsigned int, char *));
+static void as_bad_internal PARAMS ((char *, unsigned int, char *));
 
 /*
  * Despite the rest of the comments in this file, (FIXME-SOON),
@@ -76,29 +80,23 @@ extern char *strerror ();
  * continues as though no error occurred.
  */
 
-/*
-  ERRORS
+static void
+identify (file)
+     char *file;
+{
+  static int identified;
+  if (identified)
+    return;
+  identified++;
 
-  JF: this is now bogus.  We now print more standard error messages
-  that try to look like everyone else's.
+  if (!file)
+    {
+      unsigned int x;
+      as_where (&file, &x);
+    }
 
-  We print the error message 1st, beginning in column 1.
-  All ancillary info starts in column 2 on lines after the
-  key error text.
-  We try to print a location in logical and physical file
-  just after the main error text.
-  Caller then prints any appendices after that, begining all
-  lines with at least 1 space.
-
-  Optionally, we may die.
-  There is no need for a trailing '\n' in your error text format
-  because we supply one.
-
-  as_warn(fmt,args)  Like fprintf(stderr,fmt,args) but also call errwhere().
-
-  as_fatal(fmt,args) Like as_warn() but exit with a fatal status.
-
-  */
+  fprintf (stderr, "%s: Assembler messages:\n", file);
+}
 
 static int warning_count;	/* Count of number of warnings issued */
 
@@ -120,21 +118,45 @@ had_errors ()
 }				/* had_errors() */
 
 
+/* Print the current location to stderr.  */
+
+static void
+as_show_where ()
+{
+  char *file;
+  unsigned int line;
+
+  as_where (&file, &line);
+  identify (file);
+  fprintf (stderr, "%s:%u: ", file, line);
+}
+
 /*
  *			a s _ p e r r o r
  *
  * Like perror(3), but with more info.
  */
+
 void 
 as_perror (gripe, filename)
-     char *gripe;		/* Unpunctuated error theme. */
-     char *filename;
+     const char *gripe;		/* Unpunctuated error theme. */
+     const char *filename;
 {
-  as_where ();
+  const char *errtxt;
+
+  as_show_where ();
   fprintf (stderr, gripe, filename);
-  fprintf (stderr, ": %s\n", strerror (errno));
-  errno = 0;			/* After reporting, clear it. */
-}				/* as_perror() */
+#ifdef BFD_ASSEMBLER
+  errtxt = bfd_errmsg (bfd_get_error ());
+#else
+  errtxt = strerror (errno);
+#endif
+  fprintf (stderr, ": %s\n", errtxt);
+  errno = 0;
+#ifdef BFD_ASSEMBLER
+  bfd_set_error (bfd_error_no_error);
+#endif
+}
 
 /*
  *			a s _ t s k t s k ()
@@ -147,13 +169,13 @@ as_perror (gripe, filename)
 
 #ifndef NO_STDARG
 void 
-as_tsktsk (const char *Format,...)
+as_tsktsk (const char *format,...)
 {
   va_list args;
 
-  as_where ();
-  va_start (args, Format);
-  vfprintf (stderr, Format, args);
+  as_show_where ();
+  va_start (args, format);
+  vfprintf (stderr, format, args);
   va_end (args);
   (void) putc ('\n', stderr);
 }				/* as_tsktsk() */
@@ -161,32 +183,53 @@ as_tsktsk (const char *Format,...)
 #else
 #ifndef NO_VARARGS
 void 
-as_tsktsk (Format, va_alist)
-     char *Format;
+as_tsktsk (format, va_alist)
+     char *format;
      va_dcl
 {
   va_list args;
 
-  as_where ();
+  as_show_where ();
   va_start (args);
-  vfprintf (stderr, Format, args);
+  vfprintf (stderr, format, args);
   va_end (args);
   (void) putc ('\n', stderr);
 }				/* as_tsktsk() */
 
 #else
 /*VARARGS1 */
-as_tsktsk (Format, args)
-     char *Format;
+as_tsktsk (format, args)
+     char *format;
 {
-  as_where ();
-  _doprnt (Format, &args, stderr);
+  as_show_where ();
+  _doprnt (format, &args, stderr);
   (void) putc ('\n', stderr);
-  /* as_where(); */
 }				/* as_tsktsk */
 
 #endif /* not NO_VARARGS */
 #endif /* not NO_STDARG */
+
+/* The common portion of as_warn and as_warn_where.  */
+
+static void
+as_warn_internal (file, line, buffer)
+     char *file;
+     unsigned int line;
+     char *buffer;
+{
+  ++warning_count;
+
+  if (file == NULL)
+    as_where (&file, &line);
+
+  identify (file);
+  fprintf (stderr, "%s:%u: Warning: ", file, line);
+  fputs (buffer, stderr);
+  (void) putc ('\n', stderr);
+#ifndef NO_LISTING
+  listing_warning (buffer);
+#endif
+}
 
 /*
  *			a s _ w a r n ()
@@ -199,70 +242,139 @@ as_tsktsk (Format, args)
 
 #ifndef NO_STDARG
 void 
-as_warn (const char *Format,...)
+as_warn (const char *format,...)
 {
   va_list args;
   char buffer[200];
 
-  if (!flag_suppress_warnings)
+  if (!flagseen['W'])
     {
-      ++warning_count;
-      as_where ();
-      va_start (args, Format);
-      fprintf (stderr, "Warning: ");
-      vsprintf (buffer, Format, args);
-      fputs (buffer, stderr);
-#ifndef NO_LISTING
-      listing_warning (buffer);
-#endif
+      va_start (args, format);
+      vsprintf (buffer, format, args);
       va_end (args);
-      (void) putc ('\n', stderr);
+      as_warn_internal ((char *) NULL, 0, buffer);
     }
 }				/* as_warn() */
 
 #else
 #ifndef NO_VARARGS
 void 
-as_warn (Format, va_alist)
-     char *Format;
+as_warn (format, va_alist)
+     char *format;
      va_dcl
 {
   va_list args;
   char buffer[200];
 
-  if (!flag_suppress_warnings)
+  if (!flagseen['W'])
     {
-      ++warning_count;
-      as_where ();
       va_start (args);
-      fprintf (stderr, "Warning: ");
-      vsprintf (buffer, Format, args);
-      fputs (buffer, stderr);
-#ifndef NO_LISTING
-      listing_warning (buffer);
-#endif
+      vsprintf (buffer, format, args);
       va_end (args);
-      (void) putc ('\n', stderr);
+      as_warn_internal ((char *) NULL, 0, buffer);
     }
 }				/* as_warn() */
 
 #else
 /*VARARGS1 */
-as_warn (Format, args)
-     char *Format;
+as_warn (format, args)
+     char *format;
 {
-  if (!flag_suppress_warnings)
+  if (!flagseen['W'])
     {
       ++warning_count;
-      as_where ();
-      _doprnt (Format, &args, stderr);
+      as_show_where ();
+      fprintf (stderr, "Warning: ");
+      _doprnt (format, &args, stderr);
       (void) putc ('\n', stderr);
-      /* as_where(); */
     }
 }				/* as_warn() */
 
 #endif /* not NO_VARARGS */
 #endif /* not NO_STDARG */
+
+/* as_warn_where, like as_bad but the file name and line number are
+   passed in.  Unfortunately, we have to repeat the function in order
+   to handle the varargs correctly and portably.  */
+
+#ifndef NO_STDARG
+void 
+as_warn_where (char *file, unsigned int line, const char *format,...)
+{
+  va_list args;
+  char buffer[200];
+
+  if (!flagseen['W'])
+    {
+      va_start (args, format);
+      vsprintf (buffer, format, args);
+      va_end (args);
+      as_warn_internal (file, line, buffer);
+    }
+}				/* as_warn() */
+
+#else
+#ifndef NO_VARARGS
+void 
+as_warn_where (file, line, format, va_alist)
+     char *file;
+     unsigned int line;
+     char *format;
+     va_dcl
+{
+  va_list args;
+  char buffer[200];
+
+  if (!flagseen['W'])
+    {
+      va_start (args);
+      vsprintf (buffer, format, args);
+      va_end (args);
+      as_warn_internal (file, line, buffer);
+    }
+}				/* as_warn() */
+
+#else
+/*VARARGS1 */
+as_warn_where (file, line, format, args)
+     char *file;
+     unsigned int line;
+     char *format;
+{
+  if (!flagseen['W'])
+    {
+      ++warning_count;
+      identify (file);
+      fprintf (stderr, "%s:%u: Warning: ", file, line);
+      _doprnt (format, &args, stderr);
+      (void) putc ('\n', stderr);
+    }
+}				/* as_warn() */
+
+#endif /* not NO_VARARGS */
+#endif /* not NO_STDARG */
+
+/* The common portion of as_bad and as_bad_where.  */
+
+static void
+as_bad_internal (file, line, buffer)
+     char *file;
+     unsigned int line;
+     char *buffer;
+{
+  ++error_count;
+
+  if (file == NULL)
+    as_where (&file, &line);
+
+  identify (file);
+  fprintf (stderr, "%s:%u: Error: ", file, line);
+  fputs (buffer, stderr);
+  (void) putc ('\n', stderr);
+#ifndef NO_LISTING
+  listing_error (buffer);
+#endif
+}
 
 /*
  *			a s _ b a d ()
@@ -275,60 +387,101 @@ as_warn (Format, args)
 
 #ifndef NO_STDARG
 void 
-as_bad (const char *Format,...)
+as_bad (const char *format,...)
 {
   va_list args;
   char buffer[200];
 
-  ++error_count;
-  as_where ();
-  va_start (args, Format);
-  fprintf (stderr, "Error: ");
-
-  vsprintf (buffer, Format, args);
-  fputs (buffer, stderr);
-#ifndef NO_LISTING
-  listing_error (buffer);
-#endif
+  va_start (args, format);
+  vsprintf (buffer, format, args);
   va_end (args);
-  (void) putc ('\n', stderr);
-}				/* as_bad() */
+
+  as_bad_internal ((char *) NULL, 0, buffer);
+}
 
 #else
 #ifndef NO_VARARGS
 void 
-as_bad (Format, va_alist)
-     char *Format;
+as_bad (format, va_alist)
+     char *format;
      va_dcl
 {
   va_list args;
   char buffer[200];
 
-  ++error_count;
-  as_where ();
   va_start (args);
-  vsprintf (buffer, Format, args);
-  fputs (buffer, stderr);
-#ifndef NO_LISTING
-  listing_error (buffer);
-#endif
-
+  vsprintf (buffer, format, args);
   va_end (args);
-  (void) putc ('\n', stderr);
-}				/* as_bad() */
+
+  as_bad_internal ((char *) NULL, 0, buffer);
+}
 
 #else
 /*VARARGS1 */
-as_bad (Format, args)
-     char *Format;
+as_bad (format, args)
+     char *format;
 {
   ++error_count;
 
-  as_where ();
+  as_show_where ();
   fprintf (stderr, "Error: ");
-  _doprnt (Format, &args, stderr);
+  _doprnt (format, &args, stderr);
   (void) putc ('\n', stderr);
-  /* as_where(); */
+}				/* as_bad() */
+
+#endif /* not NO_VARARGS */
+#endif /* not NO_STDARG */
+
+/* as_bad_where, like as_bad but the file name and line number are
+   passed in.  Unfortunately, we have to repeat the function in order
+   to handle the varargs correctly and portably.  */
+
+#ifndef NO_STDARG
+void 
+as_bad_where (char *file, unsigned int line, const char *format,...)
+{
+  va_list args;
+  char buffer[200];
+
+  va_start (args, format);
+  vsprintf (buffer, format, args);
+  va_end (args);
+
+  as_bad_internal (file, line, buffer);
+}
+
+#else
+#ifndef NO_VARARGS
+void 
+as_bad_where (file, line, format, va_alist)
+     char *file;
+     unsigned int line;
+     char *format;
+     va_dcl
+{
+  va_list args;
+  char buffer[200];
+
+  va_start (args);
+  vsprintf (buffer, format, args);
+  va_end (args);
+
+  as_bad_internal (file, line, buffer);
+}
+
+#else
+/*VARARGS1 */
+as_bad_where (file, line, format, args)
+     char *file;
+     unsigned int line;
+     char *format;
+{
+  ++error_count;
+
+  identify (file);
+  fprintf (stderr, "%s:%u: Error: ", file, line);
+  _doprnt (format, &args, stderr);
+  (void) putc ('\n', stderr);
 }				/* as_bad() */
 
 #endif /* not NO_VARARGS */
@@ -345,14 +498,14 @@ as_bad (Format, args)
 
 #ifndef NO_STDARG
 void 
-as_fatal (const char *Format,...)
+as_fatal (const char *format,...)
 {
   va_list args;
 
-  as_where ();
-  va_start (args, Format);
-  fprintf (stderr, "Assembler fatal error:");
-  vfprintf (stderr, Format, args);
+  as_show_where ();
+  va_start (args, format);
+  fprintf (stderr, "Fatal error:");
+  vfprintf (stderr, format, args);
   (void) putc ('\n', stderr);
   va_end (args);
   exit (33);
@@ -361,16 +514,16 @@ as_fatal (const char *Format,...)
 #else
 #ifndef NO_VARARGS
 void 
-as_fatal (Format, va_alist)
-     char *Format;
+as_fatal (format, va_alist)
+     char *format;
      va_dcl
 {
   va_list args;
 
-  as_where ();
+  as_show_where ();
   va_start (args);
-  fprintf (stderr, "Assembler fatal error:");
-  vfprintf (stderr, Format, args);
+  fprintf (stderr, "Fatal error:");
+  vfprintf (stderr, format, args);
   (void) putc ('\n', stderr);
   va_end (args);
   exit (33);
@@ -378,14 +531,13 @@ as_fatal (Format, va_alist)
 
 #else
 /*VARARGS1 */
-as_fatal (Format, args)
-     char *Format;
+as_fatal (format, args)
+     char *format;
 {
-  as_where ();
-  fprintf (stderr, "Assembler fatal error:");
-  _doprnt (Format, &args, stderr);
+  as_show_where ();
+  fprintf (stderr, "Fatal error:");
+  _doprnt (format, &args, stderr);
   (void) putc ('\n', stderr);
-  /* as_where(); */
   exit (33);			/* What is a good exit status? */
 }				/* as_fatal() */
 

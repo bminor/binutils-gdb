@@ -1033,17 +1033,27 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
 }
 
 #endif /* OBJ_AOUT */
+
+CONST char *md_shortopts = "";
+struct option md_longopts[] = {
+  {NULL, no_argument, NULL, 0}
+};
+size_t md_longopts_size = sizeof(md_longopts);
 
 int
-md_parse_option (argP, cntP, vecP)
-     char **argP;
-     int *cntP;
-     char ***vecP;
+md_parse_option (c, arg)
+     int c;
+     char *arg;
 {
   return 0;
 }
 
-
+void
+md_show_usage (stream)
+     FILE *stream;
+{
+}
+
 /* Default the values of symbols known that should be "predefined".  We
    don't bother to predefine them unless you actually use one, since there
    are a lot of them.  */

@@ -2001,81 +2001,75 @@ md_bignum_to_chars (buf, bignum, nchars)
       while (--nb);
     }
 }
+
+CONST char *md_shortopts = "Fm:";
+struct option md_longopts[] = {
+#define OPTION_32ADDR (OPTION_MD_BASE)
+  {"32addr", no_argument, NULL, OPTION_32ADDR},
+  {NULL, no_argument, NULL, 0}
+};
+size_t md_longopts_size = sizeof(md_longopts);
 
 int
-md_parse_option (argP, cntP, vecP)
-     char **argP;
-     int *cntP;
-     char ***vecP;
+md_parse_option (c, arg)
+     int c;
+     char *arg;
 {
-  if (**argP == 'F')
+  switch (c)
     {
+    case 'F':
       nofloats = 1;
-      return 1;
-    }
-#if 0 /* I have no idea if this stuff would work any more.  And it's
-	 probably not right for ECOFF anyways.  */
-  /* Use base-register addressing, e.g. PIC code */
-  if (**argP == 'B')
-    {
-      if (first_32bit_quadrant)
-	{
-	  first_32bit_quadrant = 0;
-	  base_register = GP;
-	}
-      else
-	{
-	  first_32bit_quadrant = 1;
-	  base_register = ZERO;
-	}
-      if (argP[0][1] == 'k')
-	no_mixed_code = 1;
-      argP[0][1] = 0;
-      return 1;
-    }
-#endif
-  if (!strcmp (*argP, "32addr"))
-    {
+      break;
+
+    case OPTION_32ADDR:
       addr32 = 1;
-      *argP += 6;
-      return 1;
-    }
-  if (!strcmp (*argP, "nocpp"))
-    {
-      *argP += 5;
-      return 1;
-    }
-  if (**argP == 'm')
-    {
-      unsigned long mach;
+      break;
 
-      (*argP)++;
-      if (!strcmp (*argP, "21064"))
-	mach = 21064;
-      else if (!strcmp (*argP, "21066"))
-	mach = 21066;
-      else if (!strcmp (*argP, "21164"))
-	mach = 21164;
-      else
-	{
-	  mach = 0;
-	  (*argP)--;
-	  return 0;
-	}
-      (*argP) += 5;
+    case 'm':
+      {
+	unsigned long mach;
 
-      if (machine != 0 && machine != mach)
-	{
-	  as_warn ("machine type %lu already chosen, overriding with %lu",
-		   machine, mach);
-	}
-      machine = mach;
+	if (!strcmp (arg, "21064"))
+	  mach = 21064;
+	else if (!strcmp (arg, "21066"))
+	  mach = 21066;
+	else if (!strcmp (arg, "21164"))
+	  mach = 21164;
+	else
+	  {
+	    as_bad ("invalid architecture %s", arg);
+	    return 0;
+	  }
 
-      return 1;
+	if (machine != 0 && machine != mach)
+	  {
+	    as_warn ("machine type %lu already chosen, overriding with %lu",
+		     machine, mach);
+	  }
+	machine = mach;
+      }
+      break;
+
+    default:
+      return 0;
     }
-  return 0;
+
+  return 1;
 }
 
+void
+md_show_usage (stream)
+     FILE *stream;
+{
+  fprintf(stream, "\
+Alpha options:\n\
+-32addr			treat addresses as 32-bit values\n\
+-F			lack floating point instructions support\n\
+-m21064 | -m21066 | -m21164\n\
+			specify variant of Alpha architecture\n\
+-nocpp			ignored\n");
+}
+
 static void
 s_proc (is_static)
 {

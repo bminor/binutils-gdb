@@ -371,59 +371,37 @@ md_begin ()
     as_fatal (errorval);
 }
 
-int
-md_parse_option (argP, cntP, vecP)
-     char **argP;
-     int *cntP;
-     char ***vecP;
-{
-  char *temp_name;		/* name for -t or -d options */
-  char opt;
+CONST char *md_shortopts = "ad:STt:V";
+struct option md_longopts[] = {
+  {NULL, no_argument, NULL, 0}
+};
+size_t md_longopts_size = sizeof(md_longopts);
 
-  switch (**argP)
+int
+md_parse_option (c, arg)
+     int c;
+     char *arg;
+{
+  switch (c)
     {
     case 'a':
-      as_warn ("The -a option doesn't exits. (Dispite what the man page says!");
+      as_warn ("The -a option doesn't exist. (Despite what the man page says!");
+      break;
 
-    case 'J':
-      as_warn ("JUMPIFY (-J) not implemented, use psuedo ops instead.");
+    case 'd':
+      as_warn ("Displacement length %s ignored!", arg);
       break;
 
     case 'S':
       as_warn ("SYMBOL TABLE not implemented");
-      break;			/* SYMBOL TABLE not implemented */
+      break;
 
     case 'T':
       as_warn ("TOKEN TRACE not implemented");
-      break;			/* TOKEN TRACE not implemented */
+      break;
 
-    case 'd':
     case 't':
-      opt = **argP;
-      if (**argP)
-	{			/* Rest of argument is filename. */
-	  temp_name = *argP;
-	  while (**argP)
-	    (*argP)++;
-	}
-      else if (*cntP)
-	{
-	  while (**argP)
-	    (*argP)++;
-	  --(*cntP);
-	  temp_name = *++(*vecP);
-	  **vecP = NULL;	/* Remember this is not a file-name. */
-	}
-      else
-	{
-	  as_warn ("I expected a filename after -%c.", opt);
-	  temp_name = "{absent}";
-	}
-
-      if (opt == 'd')
-	as_warn ("Displacement length %s ignored!", temp_name);
-      else
-	as_warn ("I don't need or use temp. file \"%s\".", temp_name);
+      as_warn ("I don't need or use temp. file \"%s\".", arg);
       break;
 
     case 'V':
@@ -432,9 +410,24 @@ md_parse_option (argP, cntP, vecP)
 
     default:
       return 0;
-
     }
+
   return 1;
+}
+
+void
+md_show_usage (stream)
+     FILE *stream;
+{
+  fprintf(stream, "\
+Tahoe options:\n\
+-a			ignored\n\
+-d LENGTH		ignored\n\
+-J			ignored\n\
+-S			ignored\n\
+-t FILE			ignored\n\
+-T			ignored\n\
+-V			ignored\n");
 }
 
 /* The functions in this section take numbers in the machine format, and

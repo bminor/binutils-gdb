@@ -4925,6 +4925,7 @@ s_proc (ignore)
 
 /* s_space is defined in read.c .skip is simply an alias to it. */
 
+
 /*
  * md_parse_option
  *	Invocation line includes a switch not recognized by the base assembler.
@@ -4956,27 +4957,23 @@ s_proc (ignore)
 #define	MAYBE_FLOAT_TOO	/* m68881 */ 0	/* this is handled later */
 #endif
 
-int
-m68k_parse_long_option (opt)
-     char *opt;
-{
-  /* Skip over double-dash.  */
-  opt += 2;
-  if (!strcmp (opt, "register-prefix-optional"))
-    {
-      flag_reg_prefix_optional = 1;
-      return 1;
-    }
-  return 0;
-}
+CONST char *md_shortopts = "lSA:m:k";
+struct option md_longopts[] = {
+#define OPTION_PIC (OPTION_MD_BASE)
+  {"pic", no_argument, NULL, OPTION_PIC},
+#define OPTION_REGISTER_PREFIX_OPTIONAL (OPTION_MD_BASE + 1)
+  {"register-prefix-optional", no_argument, NULL,
+     OPTION_REGISTER_PREFIX_OPTIONAL},
+  {NULL, no_argument, NULL, 0}
+};
+size_t md_longopts_size = sizeof(md_longopts);
 
 int
-md_parse_option (argP, cntP, vecP)
-     char **argP;
-     int *cntP;
-     char ***vecP;
+md_parse_option (c, arg)
+     int c;
+     char *arg;
 {
-  switch (**argP)
+  switch (c)
     {
     case 'l':			/* -l means keep external to 2 bit offset
 				   rather than 16 bit one */
@@ -4987,48 +4984,45 @@ md_parse_option (argP, cntP, vecP)
       break;
 
     case 'A':
-      (*argP)++;
+      if (*arg == 'm')
+ 	arg++;
       /* intentional fall-through */
     case 'm':
-      (*argP)++;
+      if (*arg == 'c')
+ 	arg++;
 
-      if (**argP == 'c')
-	{
-	  (*argP)++;
-	}			/* allow an optional "c" */
-
-      if (!strcmp (*argP, "68000")
-	  || !strcmp (*argP, "68008")
-	  || !strcmp (*argP, "68302"))
+      if (!strcmp (arg, "68000")
+	  || !strcmp (arg, "68008")
+	  || !strcmp (arg, "68302"))
 	{
 	  current_architecture |= m68000;
 	}
-      else if (!strcmp (*argP, "68010"))
+      else if (!strcmp (arg, "68010"))
 	{
 	  current_architecture |= m68010;
 	}
-      else if (!strcmp (*argP, "68020"))
+      else if (!strcmp (arg, "68020"))
 	{
 	  current_architecture |= m68020 | MAYBE_FLOAT_TOO;
 	}
-      else if (!strcmp (*argP, "68030"))
+      else if (!strcmp (arg, "68030"))
 	{
 	  current_architecture |= m68030 | MAYBE_FLOAT_TOO;
 	}
-      else if (!strcmp (*argP, "68040"))
+      else if (!strcmp (arg, "68040"))
 	{
 	  current_architecture |= m68040 | MAYBE_FLOAT_TOO;
 	}
-      else if (!strcmp (*argP, "68060"))
+      else if (!strcmp (arg, "68060"))
 	{
 	  current_architecture |= m68060 | MAYBE_FLOAT_TOO;
 	}
 #ifndef NO_68881
-      else if (!strcmp (*argP, "68881"))
+      else if (!strcmp (arg, "68881"))
 	{
 	  current_architecture |= m68881;
 	}
-      else if (!strcmp (*argP, "68882"))
+      else if (!strcmp (arg, "68882"))
 	{
 	  current_architecture |= m68882;
 	}
@@ -5036,63 +5030,74 @@ md_parse_option (argP, cntP, vecP)
       /* Even if we aren't configured to support the processor,
 	 it should still be possible to assert that the user
 	 doesn't have it...  */
-      else if (!strcmp (*argP, "no-68881")
-	       || !strcmp (*argP, "no-68882"))
+      else if (!strcmp (arg, "no-68881")
+	       || !strcmp (arg, "no-68882"))
 	{
 	  no_68881 = 1;
 	}
 #ifndef NO_68851
-      else if (!strcmp (*argP, "68851"))
+      else if (!strcmp (arg, "68851"))
 	{
 	  current_architecture |= m68851;
 	}
 #endif /* NO_68851 */
-      else if (!strcmp (*argP, "no-68851"))
+      else if (!strcmp (arg, "no-68851"))
 	{
 	  no_68851 = 1;
 	}
-      else if (!strcmp (*argP, "pu32") /* "cpu32" minus 'c' */
-	       || !strcmp (*argP, "68331")
-	       || !strcmp (*argP, "68332")
-	       || !strcmp (*argP, "68333")
-	       || !strcmp (*argP, "68340"))
+      else if (!strcmp (arg, "pu32") /* "cpu32" minus 'c' */
+	       || !strcmp (arg, "68331")
+	       || !strcmp (arg, "68332")
+	       || !strcmp (arg, "68333")
+	       || !strcmp (arg, "68340"))
 	{
 	  current_architecture |= cpu32;
 	}
       else
 	{
-	  as_warn ("Unknown architecture, \"%s\". option ignored", *argP);
-	}			/* switch on architecture */
-
-      while (**argP)
-	(*argP)++;
-
+	  as_bad ("invalid architecture %s", arg);
+	  return 0;
+	}
       break;
 
-    case 'p':
-      if (!strcmp (*argP, "pic"))
-	{
-	  *argP += 3;
-	  flag_want_pic = 1;
-	  break;		/* -pic, Position Independent Code */
-	}
-      else
-	goto bad_arg;
-
-#ifdef TE_SUN3
+    case OPTION_PIC:
     case 'k':
       flag_want_pic = 1;
+      break;			/* -pic, Position Independent Code */
+
+    case OPTION_REGISTER_PREFIX_OPTIONAL:
+      flag_reg_prefix_optional = 1;
       break;
-#endif
 
     default:
-    bad_arg:
       return 0;
     }
+
   return 1;
 }
 
-
+void
+md_show_usage (stream)
+     FILE *stream;
+{
+  fprintf(stream, "\
+680X0 options:\n\
+-l			use 1 word for refs to undefined symbols [default 2]\n\
+-m68000 | -m68008 | -m68010 | -m68020 | -m68030 | -m68040\n\
+ | -m68302 | -m68331 | -m68332 | -m68333 | -m68340 | -mcpu32\n\
+			specify variant of 680X0 architecture [default 68020]\n\
+-m68881 | -m68882 | -mno-68881 | -mno-68882\n\
+			target has/lacks floating-point coprocessor\n\
+			[default yes for 68020, 68030, and cpu32]\n\
+-m68851 | -mno-68851\n\
+			target has/lacks memory-management unit coprocessor\n\
+			[default yes for 68020 and up]\n\
+-pic, -k		generate position independent code\n\
+-S			turn jbsr into jsr\n\
+--register-prefix-optional\n\
+			recognize register names without prefix character\n");
+}
+
 #ifdef TEST2
 
 /* TEST2:  Test md_assemble() */

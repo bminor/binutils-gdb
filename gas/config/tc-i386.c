@@ -104,7 +104,7 @@ const char comment_chars[] = "#";
    first line of the input file.  This is because the compiler outputs
    #NO_APP at the beginning of its output. */
 /* Also note that comments started like this one will always work if
-   '/' isn't otherwise defined. */
+   '/' isn't otherwise defined.  */
 #if defined (TE_I386AIX) || defined (OBJ_ELF)
 const char line_comment_chars[] = "";
 #else
@@ -284,9 +284,17 @@ static int
 smallest_imm_type (num)
      long num;
 {
-  return ((num == 1)
-	  ? (Imm1 | Imm8 | Imm8S | Imm16 | Imm32)
-	  : fits_in_signed_byte (num)
+#if 0
+  /* This code is disabled because all the Imm1 forms in the opcode table
+     are slower on the i486, and they're the versions with the implicitly
+     specified single-position displacement, which has another syntax if
+     you really want to use that form.  If you really prefer to have the
+     one-byte-shorter Imm1 form despite these problems, re-enable this
+     code.  */
+  if (num == 1)
+    return Imm1 | Imm8 | Imm8S | Imm16 | Imm32;
+#endif
+  return (fits_in_signed_byte (num)
 	  ? (Imm8S | Imm8 | Imm16 | Imm32)
 	  : fits_in_unsigned_byte (num)
 	  ? (Imm8 | Imm16 | Imm32)
@@ -311,9 +319,6 @@ const pseudo_typeS md_pseudo_table[] =
   {"value", cons, 2},
   {"noopt", s_ignore, 0},
   {"optim", s_ignore, 0},
-#ifdef OBJ_ELF
-  {"zero", s_space, 0},
-#endif
   {0, 0, 0}
 };
 
@@ -324,11 +329,11 @@ extern char *input_line_pointer;
 struct obstack o;
 
 /* hash table for opcode lookup */
-static struct hash_control *op_hash = (struct hash_control *) 0;
+static struct hash_control *op_hash;
 /* hash table for register lookup */
-static struct hash_control *reg_hash = (struct hash_control *) 0;
+static struct hash_control *reg_hash;
 /* hash table for prefix lookup */
-static struct hash_control *prefix_hash = (struct hash_control *) 0;
+static struct hash_control *prefix_hash;
 
 
 void
@@ -339,7 +344,7 @@ md_begin ()
   obstack_begin (&o, 4096);
 
   /* initialize op_hash hash table */
-  op_hash = hash_new ();	/* xmalloc handles error */
+  op_hash = hash_new ();
 
   {
     register const template *optab;
@@ -460,11 +465,6 @@ md_begin ()
   record_alignment (bss_section, 2);
 #endif
 }
-
-void
-md_end ()
-{
-}				/* not much to do here. */
 
 
 #ifdef DEBUG386
@@ -679,7 +679,7 @@ md_assemble (line)
      We assume that the scrubber has arranged it so that line[0] is the valid
      start of a (possibly prefixed) opcode. */
   {
-    register char *l = line;	/* Fast place to put LINE. */
+    char *l = line;
 
     /* 1 if operand is pending after ','. */
     unsigned int expecting_operand = 0;
@@ -702,9 +702,10 @@ md_assemble (line)
 	    l++;
 	  }
 	else
-	  {			/* this opcode's got a prefix */
-	    register unsigned int q;
-	    register prefix_entry *prefix;
+	  {
+	    /* This opcode's got a prefix.  */
+	    unsigned int q;
+	    prefix_entry *prefix;
 
 	    if (l == token_start)
 	      {
@@ -920,7 +921,6 @@ md_assemble (line)
 	 t < current_templates->end;
 	 t++)
       {
-
 	/* must have right number of operands */
 	if (i.operands != t->operands)
 	  continue;
@@ -989,7 +989,7 @@ md_assemble (line)
       }
 
     /* Copy the template we found (we may change it!). */
-    memcpy (&i.tm, t, sizeof (template));
+    i.tm = *t;
     t = &i.tm;			/* alter new copy of template */
 
     /* If there's no opcode suffix we try to invent one based on register
@@ -1654,9 +1654,7 @@ md_assemble (line)
 	pi (line, &i);
       }
 #endif /* DEBUG386 */
-
   }
-  return;
 }
 
 /* Parse OPERAND_STRING into the i386_insn structure I.  Returns non-zero
@@ -2266,26 +2264,7 @@ md_number_to_chars (con, value, nbytes)
      valueT value;		/* The value of the bits. */
      int nbytes;		/* Number of bytes in the output. */
 {
-  register char *p = con;
-
-  switch (nbytes)
-    {
-    case 1:
-      p[0] = value & 0xff;
-      break;
-    case 2:
-      p[0] = value & 0xff;
-      p[1] = (value >> 8) & 0xff;
-      break;
-    case 4:
-      p[0] = value & 0xff;
-      p[1] = (value >> 8) & 0xff;
-      p[2] = (value >> 16) & 0xff;
-      p[3] = (value >> 24) & 0xff;
-      break;
-    default:
-      BAD_CASE (nbytes);
-    }
+  number_to_chars_littleendian (con, value, nbytes);
 }
 
 
@@ -2303,7 +2282,7 @@ md_apply_fix_1 (fixP, value)
 {
   register char *p = fixP->fx_where + fixP->fx_frag->fr_literal;
 
-#ifdef BFD_ASSEMBLER
+#if defined (BFD_ASSEMBLER) && !defined (TE_Mach)
   /*
    * This is a hack.  There should be a better way to
    * handle this.
@@ -2311,27 +2290,19 @@ md_apply_fix_1 (fixP, value)
   if (fixP->fx_r_type == BFD_RELOC_32_PCREL && fixP->fx_addsy)
     {
       value += fixP->fx_where + fixP->fx_frag->fr_address;
+#ifdef OBJ_ELF
+      if (S_GET_SEGMENT (fixP->fx_addsy) != undefined_section)
+	{
+	  /* Yes, we add the values in twice.  This is because
+	     bfd_perform_relocation subtracts them out again.  I think
+	     bfd_perform_relocation is broken, but I don't dare change
+	     it.  FIXME.  */
+	  value += fixP->fx_where + fixP->fx_frag->fr_address;
+	}
+#endif
     }
 #endif
-
-  switch (fixP->fx_size)
-    {
-    case 1:
-      *p = value;
-      break;
-    case 2:
-      *p++ = value;
-      *p = (value >> 8);
-      break;
-    case 4:
-      *p++ = value;
-      *p++ = (value >> 8);
-      *p++ = (value >> 16);
-      *p = (value >> 24);
-      break;
-    default:
-      BAD_CASE (fixP->fx_size);
-    }
+  md_number_to_chars (p, value, fixP->fx_size);
 }
 
 #ifdef BFD_ASSEMBLER
@@ -2455,8 +2426,27 @@ parse_register (reg_string)
   *p = '\0';
   return (reg_entry *) hash_find (reg_hash, reg_name_given);
 }
+
+CONST char *md_shortopts = "";
+struct option md_longopts[] = {
+  {NULL, no_argument, NULL, 0}
+};
+size_t md_longopts_size = sizeof(md_longopts);
 
+int
+md_parse_option (c, arg)
+     int c;
+     char *arg;
+{
+  return 0;
+}
 
+void
+md_show_usage (stream)
+     FILE *stream;
+{
+}
+
 /* We have no need to default values of symbols.  */
 
 /* ARGSUSED */

@@ -208,16 +208,27 @@ md_begin ()
 	;
     }
 }
+
+CONST char *md_shortopts = "";
+struct option md_longopts[] = {
+  {NULL, no_argument, NULL, 0}
+};
+size_t md_longopts_size = sizeof(md_longopts);
 
 int
-md_parse_option (argP, cntP, vecP)
-     char **argP;
-     int *cntP;
-     char ***vecP;
+md_parse_option (c, arg)
+     int c;
+     char *arg;
 {
   return 0;
 }
 
+void
+md_show_usage (stream)
+     FILE *stream;
+{
+}
+
 void
 md_assemble (op)
      char *op;

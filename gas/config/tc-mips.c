@@ -4845,42 +4845,83 @@ md_number_to_chars (buf, val, n)
       internalError ();
     }
 }
+
+#ifdef GPOPT
+CONST char *md_shortopts = "E:O::g::G:";
+#else
+CONST char *md_shortopts = "E:O::g::";
+#endif
+struct option md_longopts[] = {
+#define OPTION_MIPS1 (OPTION_MD_BASE + 1)
+  {"mips0", no_argument, NULL, OPTION_MIPS1},
+  {"mips1", no_argument, NULL, OPTION_MIPS1},
+#define OPTION_MIPS2 (OPTION_MD_BASE + 2)
+  {"mips2", no_argument, NULL, OPTION_MIPS2},
+#define OPTION_MIPS3 (OPTION_MD_BASE + 3)
+  {"mips3", no_argument, NULL, OPTION_MIPS3},
+#define OPTION_MCPU (OPTION_MD_BASE + 4)
+  {"mcpu", required_argument, NULL, OPTION_MCPU},
+#define OPTION_MEMBEDDED_PIC (OPTION_MD_BASE + 5)
+  {"membedded-pic", no_argument, NULL, OPTION_MEMBEDDED_PIC},
+#define OPTION_TRAP (OPTION_MD_BASE + 8)
+  {"trap", no_argument, NULL, OPTION_TRAP},
+  {"no-break", no_argument, NULL, OPTION_TRAP},
+#define OPTION_BREAK (OPTION_MD_BASE + 9)
+  {"break", no_argument, NULL, OPTION_BREAK},
+  {"no-trap", no_argument, NULL, OPTION_BREAK},
+
+#ifdef OBJ_ELF
+#define OPTION_CALL_SHARED (OPTION_MD_BASE + 6)
+  {"KPIC", no_argument, NULL, OPTION_CALL_SHARED},
+  {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
+#define OPTION_NON_SHARED (OPTION_MD_BASE + 7)
+  {"non_shared", no_argument, NULL, OPTION_NON_SHARED},
+#endif
+
+  {NULL, no_argument, NULL, 0}
+};
+size_t md_longopts_size = sizeof(md_longopts);
 
 int
-md_parse_option (argP, cntP, vecP)
-     char **argP;
-     int *cntP;
-     char ***vecP;
+md_parse_option (c, arg)
+     int c;
+     char *arg;
 {
-  /* Accept -nocpp but ignore it. */
-  if (strcmp (*argP, "nocpp") == 0)
+  switch (c)
     {
-      *argP += 5;
-      return 1;
-    }
+    case OPTION_TRAP:
+      mips_trap = 1;
+      break;
 
-  if (strcmp (*argP, "EL") == 0
-      || strcmp (*argP, "EB") == 0)
-    {
-      if ((*argP)[1] == 'B')
+    case OPTION_BREAK:
+      mips_trap = 0;
+      break;
+
+    case 'E':
+      if (arg[1] == 'B')
 	byte_order = BIG_ENDIAN;
-      else
+      else if (arg[1] == 'L')
 	byte_order = LITTLE_ENDIAN;
+      else
+	{
+	  as_bad("invalid endianness -E%c", arg[1]);
+	  return 0;
+	}
 
 #ifdef OBJ_AOUT
-      if ((*argP)[1] == 'B')
+      if (arg[1] == 'B')
 	mips_target_format = "a.out-mips-big";
       else
 	mips_target_format = "a.out-mips-little";
 #endif
 #ifdef OBJ_ECOFF
-      if ((*argP)[1] == 'B')
+      if (arg[1] == 'B')
 	mips_target_format = "ecoff-bigmips";
       else
 	mips_target_format = "ecoff-littlemips";
 #endif
 #ifdef OBJ_ELF
-      if ((*argP)[1] == 'B')
+      if (arg[1] == 'B')
 	mips_target_format = "elf32-bigmips";
       else
 	mips_target_format = "elf32-littlemips";
@@ -4888,179 +4929,165 @@ md_parse_option (argP, cntP, vecP)
 
       /* FIXME: This breaks -L -EL.  */
       flagseen['L'] = 0;
-      *argP = "";
-      return 1;
-    }
+      break;
 
-  if (**argP == 'O')
-    {
-      if ((*argP)[1] == '0')
+    case 'O':
+      if (arg && arg[1] == '0')
 	mips_optimize = 1;
       else
 	mips_optimize = 2;
-      return 1;
-    }
+      break;
 
-  if (**argP == 'g')
-    {
-      if ((*argP)[1] == '\0' || (*argP)[1] == '2')
+    case 'g':
+      if (arg == NULL || arg[1] == '2')
 	mips_optimize = 0;
-      return 1;
-    }
+      break;
 
-  if (strncmp (*argP, "mips", 4) == 0)
-    {
-      mips_isa = atol (*argP + 4);
-      if (mips_isa == 0)
-	mips_isa = 1;
-      else if (mips_isa < 1 || mips_isa > 3)
-	{
-	  as_bad ("-mips%d not supported", mips_isa);
-	  mips_isa = 1;
-	}
-      *argP = "";
-      return 1;
-    }
+    case OPTION_MIPS1:
+      mips_isa = 1;
+      break;
 
-  if (strncmp (*argP, "mcpu=", 5) == 0)
-    {
-      char *p;
+    case OPTION_MIPS2:
+      mips_isa = 2;
+      break;
 
-      /* Identify the processor type */
-      p = *argP + 5;
-      if (strcmp (p, "default") == 0
-	  || strcmp (p, "DEFAULT") == 0)
-	mips_isa = -1;
-      else
-	{
-	  if (*p == 'r' || *p == 'R')
-	    p++;
+    case OPTION_MIPS3:
+      mips_isa = 3;
+      break;
 
+    case OPTION_MCPU:
+      {
+	char *p;
+
+	/* Identify the processor type */
+	p = arg;
+	if (strcmp (p, "default") == 0
+	    || strcmp (p, "DEFAULT") == 0)
 	  mips_isa = -1;
-	  switch (*p)
-	    {
-	    case '2':
-	      if (strcmp (p, "2000") == 0
-		  || strcmp (p, "2k") == 0
-		  || strcmp (p, "2K") == 0)
-		mips_isa = 1;
-	      break;
+	else
+	  {
+	    if (*p == 'r' || *p == 'R')
+	      p++;
 
-	    case '3':
-	      if (strcmp (p, "3000") == 0
-		  || strcmp (p, "3k") == 0
-		  || strcmp (p, "3K") == 0)
-		mips_isa = 1;
-	      break;
+	    mips_isa = -1;
+	    switch (*p)
+	      {
+	      case '2':
+		if (strcmp (p, "2000") == 0
+		    || strcmp (p, "2k") == 0
+		    || strcmp (p, "2K") == 0)
+		  mips_isa = 1;
+		break;
 
-	    case '4':
-	      if (strcmp (p, "4000") == 0
-		  || strcmp (p, "4k") == 0
-		  || strcmp (p, "4K") == 0)
-		mips_isa = 3;
-	      break;
+	      case '3':
+		if (strcmp (p, "3000") == 0
+		    || strcmp (p, "3k") == 0
+		    || strcmp (p, "3K") == 0)
+		  mips_isa = 1;
+		break;
 
-	    case '6':
-	      if (strcmp (p, "6000") == 0
-		  || strcmp (p, "6k") == 0
-		  || strcmp (p, "6K") == 0)
-		mips_isa = 2;
-	      break;
-	    }
+	      case '4':
+		if (strcmp (p, "4000") == 0
+		    || strcmp (p, "4k") == 0
+		    || strcmp (p, "4K") == 0)
+		  mips_isa = 3;
+		break;
 
-	  if (mips_isa == -1)
-	    {
-	      as_bad ("bad value (%s) for -mcpu= switch", *argP + 5);
-	      mips_isa = 1;
-	    }
-	}
+	      case '6':
+		if (strcmp (p, "6000") == 0
+		    || strcmp (p, "6k") == 0
+		    || strcmp (p, "6K") == 0)
+		  mips_isa = 2;
+		break;
+	      }
 
-      *argP = "";
-      return 1;
-    }
+	    if (mips_isa == -1)
+	      {
+		as_bad ("invalid architecture -mcpu=%s", arg);
+		return 0;
+	      }
+	  }
+      }
+      break;
 
-  /* Argument -membedded-pic means to use EMBEDDED_PIC.  */
-  if (strcmp (*argP, "membedded-pic") == 0)
-    {
+    case OPTION_MEMBEDDED_PIC:
       mips_pic = EMBEDDED_PIC;
 #ifdef GPOPT
       if (g_switch_seen)
-	as_warn ("-G may not be used with embedded PIC code");
+	{
+	  as_bad ("-G may not be used with embedded PIC code");
+	  return 0;
+	}
       g_switch_value = 0x7fffffff;
 #endif
-      *argP = "";
-      return 1;
-    }
+      break;
 
 #ifdef OBJ_ELF
   /* When generating ELF code, we permit -KPIC and -call_shared to
      select SVR4_PIC, and -non_shared to select no PIC.  This is
      intended to be compatible with Irix 5.  */
-  if (strcmp (*argP, "KPIC") == 0
-      || strcmp (*argP, "call_shared") == 0)
-    {
+    case OPTION_CALL_SHARED:
       mips_pic = SVR4_PIC;
       if (g_switch_seen && g_switch_value != 0)
-	as_warn ("-G may not be used with SVR4 PIC code");
+	{
+	  as_bad ("-G may not be used with SVR4 PIC code");
+	  return 0;
+	}
       g_switch_value = 0;
-      *argP = "";
-      return 1;
-    }
-  else if (strcmp (*argP, "non_shared") == 0)
-    {
+      break;
+
+    case OPTION_NON_SHARED:
       mips_pic = NO_PIC;
-      *argP = "";
-      return 1;
-    }
+      break;
 #endif /* OBJ_ELF */
 
 #ifdef GPOPT
-  if (**argP == 'G')
-    {
+    case 'G':
       if (mips_pic == SVR4_PIC || mips_pic == EMBEDDED_PIC)
-	as_warn ("-G may not be used with SVR4 or embedded PIC code");
-      else if ((*argP)[1] != '\0')
-	g_switch_value = atoi (*argP + 1);
-      else if (*cntP)
 	{
-	  **vecP = (char *) NULL;
-	  (*cntP)--;
-	  (*vecP)++;
-	  g_switch_value = atoi (**vecP);
+	  as_bad ("-G may not be used with SVR4 or embedded PIC code");
+	  return 0;
 	}
       else
-	as_warn ("Number expected after -G");
+	g_switch_value = atoi (arg);
       g_switch_seen = 1;
-      *argP = "";
-      return 1;
-    }
+      break;
 #endif
 
-  return 1;			/* pretend you parsed the character */
+    default:
+      return 0;
+    }
+
+  return 1;
 }
 
-/* Handle a long option name.  */
-
-int
-mips_parse_long_option (arg)
-     const char *arg;
+void
+md_show_usage (stream)
+     FILE *stream;
 {
-  if (strcmp (arg, "--trap") == 0
-      || strcmp (arg, "--no-break") == 0)
-    {
-      mips_trap = 1;
-      return 1;
-    }
-  else if (strcmp (arg, "--no-trap") == 0
-	   || strcmp (arg, "--break") == 0)
-    {
-      mips_trap = 0;
-      return 1;
-    }
-
-  return 0;
+  fprintf(stream, "\
+MIPS options:\n\
+-membedded-pic		generate embedded position independent code\n\
+-nocpp			ignored\n\
+-EB			generate big endian output\n\
+-EL			generate little endian output\n\
+-g, -g2			do not remove uneeded NOPs or swap branches\n\
+-G NUM			allow referencing objects up to NUM bytes\n\
+			implicitly with the gp register [default 8]\n\
+-mips1, -mcpu=r{2,3}000	generate code for r2000 and r3000\n\
+-mips2, -mcpu=r6000	generate code for r6000\n\
+-mips3, -mcpu=r4000	generate code for r4000\n\
+-O0			remove unneeded NOPs, do not swap branches\n\
+-O			remove unneeded NOPs and swap branches\n\
+--trap, --no-break	trap exception on div by 0 and mult overflow\n\
+--break, --no-trap	break exception on div by 0 and mult overflow\n");
+#ifdef OBJ_ELF
+  fprintf(stream, "\
+-KPIC, -call_shared	generate SVR4 position independent code\n\
+-non_shared		do not generate position independent code\n");
+#endif
 }
-
+
 long
 md_pcrel_from (fixP)
      fixS *fixP;

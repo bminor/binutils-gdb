@@ -119,154 +119,17 @@ Options:\n\
 -K			warn when differences altered for long displacements\n\
 -L			keep local symbols (starting with `L')\n");
   fprintf (stream, "\
--o OBJFILE		name the object-file output OBJFILE [default a.out]\n\
+-o OBJFILE		name the object-file output OBJFILE (default a.out)\n\
 -R			fold data section into text section\n\
 --statistics		print maximum bytes and total seconds used\n\
--v, -version		print assembler version number\n\
+-v			print assembler version number\n\
 --version		print assembler version number and exit\n\
 -W			suppress warnings\n\
 -w			ignored\n\
 -x			ignored\n\
 -Z			generate object file even after errors\n");
 
-#ifdef TC_ALPHA
-  fprintf(stream, "\
-ALPHA options:\n\
--32addr			treat addresses as 32-bit values\n\
--F			lack floating point instructions support\n\
--nocpp			ignored\n");
-#endif
-
-#ifdef TC_I960
-  fprintf(stream, "\
-I960 options:\n\
--ACA | -ACA_A | -ACB | -ACC | -AKA | -AKB | -AKC | -AMC\n\
-			specify variant of 960 architecture\n\
--b			add code to collect statistics about branches taken\n\
--linkrelax		make relocatable instructions undefined (?)\n\
--norelax		don't alter compare-and-branch instructions for\n\
-			long displacements\n");
-#endif
-
-#ifdef TC_M68K
-  fprintf(stream, "\
-680X0 options:\n\
--l			use 1 word for refs to undefined symbols [default 2]\n\
--m68000 | -m68008 | -m68010 | -m68020 | -m68030 | -m68040\n\
- | -m68302 | -m68331 | -m68332 | -m68333 | -m68340 | -mcpu32\n\
-			specify variant of 680X0 architecture [default 68020]\n\
--m68881 | -m68882 | -mno-68881 | -mno-68882\n\
-			target has/lacks floating-point coprocessor\n\
-			[default yes for 68020, 68030, and cpu32]\n\
--m68851 | -mno-68851\n\
-			target has/lacks memory-management unit coprocessor\n\
-			[default yes for 68020 and up]\n\
--pic, -k (sun3)		generate position independent code\n\
--S			turn jbsr into jsr\n\
---register-prefix-optional\n\
-			recognize register names without prefix character\n");
-#endif
-
-#ifdef TC_MIPS
-  fprintf(stream, "\
-MIPS options:\n\
--membedded-pic		generate embedded position independent code\n\
--nocpp			ignored\n\
--EB			generate big endian output\n\
--EL			generate little endian output\n\
--g, -g2			do not remove uneeded NOPs or swap branches\n\
--G NUM			allow referencing objects up to NUM bytes\n\
-			implicitly with the gp register [default 8]\n\
--mips1, -mcpu=r{2,3}000	generate code for r2000 and r3000\n\
--mips2, -mcpu=r6000	generate code for r6000\n\
--mips3, -mcpu=r4000	generate code for r4000\n\
--O0			remove unneeded NOPs, do not swap branches\n\
--O			remove unneeded NOPs and swap branches\n\
---trap, --no-break	trap exception on div by 0 and mult overflow\n\
---break, --no-trap	break exception on div by 0 and mult overflow\n");
-#ifdef OBJ_ELF
-  fprintf(stream, "\
-MIPS ELF options:\n\
--KPIC, -call_shared	generate SVR4 position independent code\n\
--non_shared		do not generate position independent code\n");
-#endif
-#endif
-
-#ifdef TC_NS32K
-  fprintf(stream, "\
-NS32K options:\n\
--m32032 | -m32532	select variant of NS32K architecture\n");
-#endif
-
-#ifdef TC_PPC
-  fprintf(stream, "\
-PowerPC options:\n\
--u			ignored\n\
--mpwrx			generate code for IBM POWER/2 (RIOS2)\n\
--mpwr			generate code for IBM POWER (RIOS1)\n\
--m601			generate code for Motorola PowerPC 601\n\
--mppc			generate code for Motorola PowerPC 603/604\n\
--many			generate code for any architecture (PWR/PWRX/PPC)\n");
-#ifdef OBJ_ELF
-  fprintf(stream, "\
-PowerPC ELF options:\n\
--V			print assembler version number\n\
--Qy, -Qn		ignored\n");
-#endif
-#endif
-
-#ifdef TC_SH
-  fprintf(stream, "\
-SH options:\n\
--relax			alter jump instructions for long displacements\n");
-#endif
-
-#ifdef TC_SPARC
-  fprintf(stream, "\
-SPARC options:\n\
--Av6 | -Av7 | -Av8 | -Asparclite\n\
-			specify variant of SPARC architecture\n\
--bump			warn when assembler switches architectures\n\
--sparc			ignored\n");
-#ifdef OBJ_ELF
-  fprintf(stream, "\
-SPARC ELF options:\n\
--V			print assembler version number\n\
--q			ignored\n\
--Qy, -Qn		ignored\n\
--s			ignored\n");
-#endif
-#endif
-
-#ifdef TC_TAHOE
-  fprintf(stream, "\
-Tahoe options:\n\
--a			ignored\n\
--d LENGTH		ignored\n\
--J			ignored\n\
--S			ignored\n\
--t FILE			ignored\n\
--T			ignored\n\
--V			ignored\n");
-#endif
-
-#ifdef TC_VAX
-  fprintf(stream, "\
-VAX options:\n\
--d LENGTH		ignored\n\
--J			ignored\n\
--S			ignored\n\
--t FILE			ignored\n\
--T			ignored\n\
--V			ignored\n");
-#endif
-
-#ifdef TC_Z8K
-  fprintf(stream, "\
-Z8K options:\n\
--z8001			generate segmented code\n\
--z8002			generate unsegmented code\n");
-#endif
+  md_show_usage (stream);
 }
 
 /*
@@ -278,249 +141,188 @@ Z8K options:\n\
  * After we have munged argv[], the only things left are source file
  * name(s) and ""(s) denoting stdin. These file names are used
  * (perhaps more than once) later.
- */
-/* FIXME-SOMEDAY this should use getopt. */
-/*
+ *
  * check for new machine-dep cmdline options in
  * md_parse_option definitions in config/tc-*.c
  */
 
 void
-parse_args (argc, argv)
-     int argc;
-     char **argv;
+parse_args (pargc, pargv)
+     int *pargc;
+     char ***pargv;
 {
-  char *arg;			/* an arg to program */
-  char a;			/* an arg flag (after -) */
+  int old_argc, new_argc;
+  char **old_argv, **new_argv;
 
-  argc--;			/* don't count argv[0] */
-  argv++;			/* skip argv[0] */
+  /* Starting the short option string with '-' is for programs that
+     expect options and other ARGV-elements in any order and that care about
+     the ordering of the two.  We describe each non-option ARGV-element
+     as if it were the argument of an option with character code 1.  */
 
-  for (; argc--; argv++)
+  char *shortopts;
+  extern CONST char *md_shortopts;
+  CONST char *std_shortopts = "-1JKLRWZfa::DI:o:vwX";
+
+  struct option *longopts;
+  extern struct option md_longopts[];
+  extern size_t md_longopts_size;
+  static struct option std_longopts[] = {
+#define OPTION_HELP (OPTION_STD_BASE)
+    {"help", no_argument, NULL, OPTION_HELP},
+#define OPTION_NOCPP (OPTION_STD_BASE + 1)
+    {"nocpp", no_argument, NULL, OPTION_NOCPP},
+#define OPTION_STATISTICS (OPTION_STD_BASE + 2)
+    {"statistics", no_argument, NULL, OPTION_STATISTICS},
+#define OPTION_VERSION (OPTION_STD_BASE + 3)
+    {"version", no_argument, NULL, OPTION_VERSION},
+  };
+
+  /* Construct the option lists from the standard list and the
+     target dependent list.  */
+  shortopts = concat (std_shortopts, md_shortopts, (char *) NULL);
+  longopts = xmalloc (sizeof (std_longopts) + md_longopts_size);
+  memcpy (longopts, std_longopts, sizeof (std_longopts));
+  memcpy ((char *) longopts + sizeof (std_longopts),
+	  md_longopts, md_longopts_size);
+
+  /* Make a local copy of the old argv.  */
+  old_argc = *pargc;
+  old_argv = *pargv;
+
+  /* Initialize a new argv that contains no options.  */
+  new_argv = (char **) xmalloc (sizeof (char *) * (old_argc + 1));
+  new_argv[0] = old_argv[0];
+  new_argc = 1;
+  new_argv[new_argc] = NULL;
+
+  while (1)
     {
-      arg = *argv;		/* argv points to this argument */
+      /* getopt_long_only is like getopt_long, but '-' as well as '--' can
+	 indicate a long option.  */
+      int longind;
+      int optc = getopt_long_only (old_argc, old_argv, shortopts, longopts,
+				   &longind);
 
-      if (*arg != '-')		/* Filename. We need it later. */
-	continue;		/* Keep scanning args looking for flags. */
-      /* Handle double-dash options. */
-      if (arg[1] == '-')
+      if (optc == -1)
+	break;
+
+      switch (optc)
 	{
-	  if (arg[2] == 0)
+	default:
+	  /* md_parse_option should return 1 if it recognizes optc,
+	     0 if not.  */
+	  if (md_parse_option (optc, optarg) == 0)
+	    exit (EXIT_FAILURE);
+	  break;
+
+	case '?':
+	  exit (EXIT_FAILURE);
+
+	case 1:			/* File name.  */
+	  if (!strcmp (optarg, "-"))
+	    optarg = "";
+	  new_argv[new_argc++] = optarg;
+	  new_argv[new_argc] = NULL;
+	  break;
+
+	case OPTION_HELP:
+	  show_usage (stdout);
+	  exit (0);
+
+	case OPTION_NOCPP:
+	  break;
+
+	case OPTION_STATISTICS:
+	  statistics_flag = 1;
+	  break;
+
+	case OPTION_VERSION:
+	  print_version_id ();
+	  exit (0);
+
+	case '1':
+	case 'J':
+	case 'K':
+	case 'L':
+	case 'R':
+	case 'W':
+	case 'Z':
+	case 'f':
+	  flagseen[(unsigned char) optc] = 1;
+	  break;
+
+	case 'a':
+	  if (optarg)
 	    {
-	      /* "--" as an argument means read stdin. */
-	      /* On this scan, we don't want to think about filenames. */
-	      *argv = "";	/* A code that means 'use stdin'. */
+	      while (*optarg)
+		{
+		  switch (*optarg)
+		    {
+		    case 'd':
+		      listing |= LISTING_NODEBUG;
+		      break;
+		    case 'h':
+		      listing |= LISTING_HLL;
+		      break;
+		    case 'l':
+		      listing |= LISTING_LISTING;
+		      break;
+		    case 'n':
+		      listing |= LISTING_NOFORM;
+		      break;
+		    case 's':
+		      listing |= LISTING_SYMBOLS;
+		      break;
+		    default:
+		      as_bad ("invalid listing option `%c'", *optarg);
+		      exit (EXIT_FAILURE);
+		      break;
+		    }
+		  optarg++;
+		}
 	    }
-	  else if (strcmp (arg, "--statistics") == 0)
-	    {
-	      statistics_flag = 1;
-	      *argv = NULL;
-	    }
-	  else if (strcmp (arg, "--help") == 0)
-	    {
-	      show_usage (stdout);
-	      exit (0);
-	    }
-	  else if (strcmp (arg, "--version") == 0)
-	    {
-	      print_version_id ();
-	      exit (0);
-	    }
-#ifdef md_parse_long_option
-	  else if (md_parse_long_option (arg))
-	    *argv = NULL;
-#endif
-	  else
-	    {
-	      as_warn ("Unknown option `%s' ignored", arg);
-	      *argv = NULL;
-	    }
-	  continue;
+	  if (!listing)
+	    listing = LISTING_DEFAULT;
+	  break;
+
+	case 'D':
+	  /* DEBUG is implemented: it debugs different */
+	  /* things to other people's assemblers. */
+	  break;
+
+	case 'I':
+	  {			/* Include file directory */
+	    char *temp = strdup (optarg);
+	    if (!temp)
+	      as_fatal ("virtual memory exhausted");
+	    add_include_dir (temp);
+	    break;
+	  }
+
+	case 'o':
+	  out_file_name = strdup (optarg);
+	  if (!out_file_name)
+	    as_fatal ("virtual memory exhausted");
+	  break;
+
+	case 'v':
+	  print_version_id ();
+	  break;
+
+	case 'w':
+	  break;
+
+	case 'X':
+	  /* -X means treat warnings as errors */
+	  break;
 	}
-
-      /* This better be a switch. */
-      arg++;			/*->letter. */
-
-      while ((a = *arg) != '\0')
-	{			/* scan all the 1-char flags */
-	  arg++;		/* arg->after letter. */
-	  a &= 0x7F;		/* ascii only please */
-	  flagseen[(unsigned char) a] = 1;
-	  switch (a)
-	    {
-	    case 'a':
-	      {
-		int loop = 1;
-
-		while (loop)
-		  {
-		    switch (*arg)
-		      {
-		      case 'l':
-			listing |= LISTING_LISTING;
-			arg++;
-			break;
-		      case 's':
-			listing |= LISTING_SYMBOLS;
-			arg++;
-			break;
-		      case 'h':
-			listing |= LISTING_HLL;
-			arg++;
-			break;
-
-		      case 'n':
-			listing |= LISTING_NOFORM;
-			arg++;
-			break;
-		      case 'd':
-			listing |= LISTING_NODEBUG;
-			arg++;
-			break;
-		      default:
-			if (!listing)
-			  listing = LISTING_DEFAULT;
-			loop = 0;
-			break;
-		      }
-		  }
-	      }
-
-	      break;
-
-
-	    case 'f':
-	      break;		/* -f means fast - no need for "app" preprocessor. */
-
-	    case 'D':
-	      /* DEBUG is implemented: it debugs different */
-	      /* things to other people's assemblers. */
-	      break;
-
-	    case 'I':
-	      {			/* Include file directory */
-
-		char *temp = NULL;
-		if (*arg)
-		  {
-		    temp = strdup (arg);
-		    if (!temp)
-		      as_fatal ("virtual memory exhausted");
-		  }
-		else if (argc)
-		  {
-		    *argv = NULL;
-		    argc--;
-		    temp = *++argv;
-		  }
-		else
-		  as_warn ("%s: I expected a filename after -I", myname);
-		add_include_dir (temp);
-		arg = "";	/* Finished with this arg. */
-		break;
-	      }
-
-#ifdef WARN_SIGNED_OVERFLOW_WORD
-	      /* Don't warn about signed overflow.  */
-	    case 'J':
-	      break;
-#endif
-
-#ifndef WORKING_DOT_WORD
-	    case 'K':
-	      break;
-#endif
-
-	    case 'L':		/* -L means keep L* symbols */
-	      break;
-
-	    case 'o':
-	      if (*arg)		/* Rest of argument is object file-name. */
-		{
-		  out_file_name = strdup (arg);
-		  if (!out_file_name)
-		    as_fatal ("virtual memory exhausted");
-		}
-	      else if (argc)
-		{		/* Want next arg for a file-name. */
-		  *argv = NULL;	/* This is not a file-name. */
-		  argc--;
-		  out_file_name = *++argv;
-		}
-	      else
-		as_warn ("%s: I expected a filename after -o. \"%s\" assumed.",
-			 myname, out_file_name);
-	      arg = "";		/* Finished with this arg. */
-	      break;
-
-	    case 'n':
-	      if (*arg && strcmp(arg, "ocpp") == 0)
-		;
-	      else
-		{
-		  as_warn ("Unknown option `-n%s' ignored", arg);
-		  arg += strlen (arg);
-		  break;
-		}
-
-	    case 'R':
-	      /* -R means put data into text segment */
-	      flag_readonly_data_in_text = 1;
-	      break;
-
-	    case 'v':
-#ifdef	VMS
-	      {
-		extern char *compiler_version_string;
-		compiler_version_string = arg;
-	      }
-#else /* not VMS */
-	      if (*arg && strcmp (arg, "ersion"))
-		{
-		  as_warn ("Unknown option `-v%s' ignored", arg);
-		  arg += strlen (arg);
-		  break;
-		}
-
-	      print_version_id ();
-#endif /* not VMS */
-	      while (*arg)
-		arg++;		/* Skip the rest */
-	      break;
-
-	    case 'W':
-	      /* -W means don't warn about things */
-	      flag_suppress_warnings = 1;
-	      break;
-
-	    case 'w':
-	    case 'X':
-	      /* -X means treat warnings as errors */
-	      break;
-	    case 'Z':
-	      /* -Z means attempt to generate object file even after errors. */
-	      flag_always_generate_output = 1;
-	      break;
-
-	    default:
-	      --arg;
-	      if (md_parse_option (&arg, &argc, &argv) == 0)
-		as_warn ("%s: I don't understand '%c' flag.", myname, a);
-	      if (arg && *arg)
-		arg++;
-	      break;
-	    }
-	}
-      /*
-       * We have just processed a "-..." arg, which was not a
-       * file-name. Smash it so the
-       * things that look for filenames won't ever see it.
-       *
-       * Whatever argv points to, it has already been used
-       * as part of a flag, so DON'T re-use it as a filename.
-       */
-      *argv = NULL;	/* NULL means 'not a file-name' */
     }
+
+  free (shortopts);
+  free (longopts);
+
+  *pargc = new_argc;
+  *pargv = new_argv;
 }
 
 int 
@@ -558,7 +360,7 @@ main (argc, argv)
   read_begin ();
   input_scrub_begin ();
   frag_init ();
-  parse_args (argc, argv);
+  parse_args (&argc, &argv);
 
 #ifdef BFD_ASSEMBLER
   output_file_create (out_file_name);
@@ -576,7 +378,7 @@ main (argc, argv)
 #endif
 
   if (seen_at_least_1_file ()
-      && !((had_warnings () && flag_always_generate_output)
+      && !((had_warnings () && flagseen['Z'])
 	   || had_errors () > 0))
     keep_it = 1;
   else

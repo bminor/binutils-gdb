@@ -2191,7 +2191,7 @@ print_insn (insn)
   fprintf (stderr, "}\n");
 }
 #endif
-
+
 /*
  * md_parse_option
  *	Invocation line includes a switch not recognized by the base assembler.
@@ -2228,74 +2228,105 @@ print_insn (insn)
  * end-sanitize-v9
  */
 
-int 
-md_parse_option (argP, cntP, vecP)
-     char **argP;
-     int *cntP;
-     char ***vecP;
-{
-  char *p;
-  const char **arch;
-
-  if (!strcmp (*argP, "bump"))
-    {
-      warn_on_bump = 1;
-    }
-  else if (**argP == 'A')
-    {
-      p = (*argP) + 1;
-
-      for (arch = architecture_pname; *arch != NULL; ++arch)
-	{
-	  if (strcmp (p, *arch) == 0)
-	    {
-	      break;
-	    }			/* found a match */
-	}			/* walk the pname table */
-
-      if (*arch == NULL)
-	{
-	  as_bad ("unknown architecture: %s", p);
-	}
-      else
-	{
-	  current_architecture = (enum sparc_architecture) (arch - architecture_pname);
-	  architecture_requested = 1;
-	}
-    }
 #ifdef OBJ_ELF
-  else if (**argP == 'V')
+CONST char *md_shortopts = "A:VQ:sq";
+#else
+CONST char *md_shortopts = "A:";
+#endif
+struct option md_longopts[] = {
+#define OPTION_BUMP (OPTION_MD_BASE)
+  {"bump", no_argument, NULL, OPTION_BUMP},
+#define OPTION_SPARC (OPTION_MD_BASE + 1)
+  {"sparc", no_argument, NULL, OPTION_SPARC},
+  {NULL, no_argument, NULL, 0}
+};
+size_t md_longopts_size = sizeof(md_longopts);
+
+int
+md_parse_option (c, arg)
+     int c;
+     char *arg;
+{
+  switch (c)
     {
+    case OPTION_BUMP:
+      warn_on_bump = 1;
+      break;
+
+    case 'A':
+      {
+	char *p = arg;
+	const char **arch;
+
+	for (arch = architecture_pname; *arch != NULL; ++arch)
+	  {
+	    if (strcmp (p, *arch) == 0)
+	      break;
+	  }
+
+	if (*arch == NULL)
+	  {
+	    as_bad ("invalid architecture -A%s", p);
+	    return 0;
+	  }
+	else
+	  {
+	    current_architecture = (enum sparc_architecture)
+	      (arch - architecture_pname);
+	    architecture_requested = 1;
+	  }
+      }
+      break;
+
+    case OPTION_SPARC:
+      /* Ignore -sparc, used by SunOS make default .s.o rule.  */
+      break;
+
+#ifdef OBJ_ELF
+    case 'V':
       print_version_id ();
-    }
-  else if (**argP == 'Q')
-    {
+      break;
+
+    case 'Q':
       /* Qy - do emit .comment
 	 Qn - do not emit .comment */
-    }
-  else if (**argP == 's')
-    {
+      break;
+
+    case 's':
       /* use .stab instead of .stab.excl */
-    }
-  else if (**argP == 'q')
-    {
+      break;
+
+    case 'q':
       /* quick -- native assembler does fewer checks */
-    }
+      break;
 #endif
-  else if (strcmp (*argP, "sparc") == 0)
-    {
-      /* Ignore -sparc, used by SunOS make default .s.o rule.  */
-    }
-  else
-    {
-      /* Unknown option */
-      (*argP)++;
+
+    default:
       return 0;
     }
-  **argP = '\0';		/* Done parsing this switch */
-  return 1;
-}				/* md_parse_option() */
 
+ return 1;
+}
+
+void
+md_show_usage (stream)
+     FILE *stream;
+{
+  fprintf(stream, "\
+SPARC options:\n\
+-Av6 | -Av7 | -Av8 | -Asparclite\n\
+			specify variant of SPARC architecture\n\
+-bump			warn when assembler switches architectures\n\
+-sparc			ignored\n");
+#ifdef OBJ_ELF
+  fprintf(stream, "\
+-V			print assembler version number\n\
+-q			ignored\n\
+-Qy, -Qn		ignored\n\
+-s			ignored\n");
+#endif
+}
+
 /* We have no need to default values of symbols. */
 
 /* ARGSUSED */
