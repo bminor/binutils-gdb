@@ -1,3 +1,26 @@
+Tue Feb  6 11:47:49 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* reloc.c (BFD_RELOC_SPARC_[567]): New reloc types.
+	(BFD_RELOC_SPARC_LO7 reloc type): Deleted.
+	* libbfd.h, bfd-in2.h: Regenerated.
+	* elf32-sparc.c (_bfd_sparc_elf_reloc_type_lookup): Renamed from
+	bfd_elf32_bfd_reloc_type_lookup.
+	(reloc_type{,_names}): Deleted.
+	(_bfd_sparc_elf_howto_table): Renamed from elf_sparc_howto_table.
+	Add sparc64 relocs.
+	(sparc_reloc_map): Add sparc64 relocs.
+	(sparc_elf_notsupported_reloc): New static function.
+	(sparc_elf_wdisp16_reloc): New static function.
+	(elf32_sparc_check_relocs): Handle R_SPARC_WDISP{16,19}.
+	(elf32_sparc_relocate_section): Likewise.
+	(bfd_elf32_bfd_reloc_type_lookup): Define.
+	* elf64-sparc.c (sparc64_elf_wdisp16_reloc): Deleted.
+	(reloc_type{,_names}): Deleted.
+	(elf_sparc_howto_table): Deleted.
+	(sparc_reloc_map): Deleted.
+	(_bfd_sparc_elf_howto_table): Renamed from elf_sparc_howto_table.
+	(bfd_elf64_bfd_reloc_type_lookup): Change from function to #define.
+
 Tue Feb  6 12:12:22 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.host: Make SHLIB_CFLAGS include $(PICFLAG) on a
