@@ -34,4 +34,23 @@ internal.h
 
 Do-last:
 
+v9dirty="common.h"
+
+if ( echo $* | grep keep\-v9 > /dev/null ) ; then
+	echo Keeping v9 in ${v9dirty}
+else
+	for i in ${v9dirty} ; do
+		echo Sanitizing v9 in $i
+		rm -f new
+		grep -v v9 $i > new
+		if [ -n "${safe}" ] ; then
+			mv $i .Recover
+		else
+			rm $i
+		fi
+		mv new $i
+	done
+fi
+
+
 # End of file.
