@@ -1197,14 +1197,19 @@ insn_uses_reg (ip, reg, class)
   else
     {
       if ((ip->insn_mo->pinfo & MIPS16_INSN_READ_X)
-	  && ((ip->insn_opcode >> MIPS16OP_SH_RX) & MIPS16OP_MASK_RX) == reg)
+	  && (mips16_to_32_reg_map[((ip->insn_opcode >> MIPS16OP_SH_RX)
+				    & MIPS16OP_MASK_RX)]
+	      == reg))
 	return 1;
       if ((ip->insn_mo->pinfo & MIPS16_INSN_READ_Y)
-	  && ((ip->insn_opcode >> MIPS16OP_SH_RY) & MIPS16OP_MASK_RY) == reg)
+	  && (mips16_to_32_reg_map[((ip->insn_opcode >> MIPS16OP_SH_RY)
+				    & MIPS16OP_MASK_RY)]
+	      == reg))
 	return 1;
       if ((ip->insn_mo->pinfo & MIPS16_INSN_READ_Z)
-	  && ((ip->insn_opcode >> MIPS16OP_SH_MOVE32Z)
-	      & MIPS16OP_MASK_MOVE32Z) == reg)
+	  && (mips16_to_32_reg_map[((ip->insn_opcode >> MIPS16OP_SH_MOVE32Z)
+				    & MIPS16OP_MASK_MOVE32Z)]
+	      == reg))
 	return 1;
       if ((ip->insn_mo->pinfo & MIPS16_INSN_READ_T) && reg == TREG)
 	return 1;
@@ -9659,7 +9664,7 @@ nopic_need_relax (sym)
 	      || strcmp (symname, "end") == 0
 	      || strcmp (symname, "_gp_disp") == 0))
 	change = 1;
-      else if (! S_IS_DEFINED (sym)
+      else if ((! S_IS_DEFINED (sym) || S_IS_COMMON (sym))
 	       && (0
 #ifndef NO_ECOFF_DEBUGGING
 		   || (sym->ecoff_extern_size != 0

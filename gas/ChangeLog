@@ -1,3 +1,17 @@
+Thu Mar 27 12:23:56 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* read.c (s_comm): Check S_IS_COMMON as well as S_IS_DEFINED.
+	(s_mri_common): Check S_IS_COMMON unconditionally.
+	* symbols.c (colon): Check S_IS_COMMON as well as S_IS_DEFINED.
+	* config/tc-alpha.c (s_alpha_comm): Likewise.
+	* config/tc-mips.c (nopic_need_relax): Likewise.
+	* config/tc-ppc.c (ppc_elf_lcomm): Likewise.
+	(ppc_pe_comm): Likewise.
+	* config/obj-elf.c (obj_elf_common): Likewise.  Set segment of
+	common symbol to bfd_com_section_ptr.
+	* config/tc-sparc.c (s_common): Likewise.
+	(tc_gen_reloc): Likewise.
+
 start-sanitize-d30v
 Thu Mar 27 00:29:46 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 

@@ -41,6 +41,14 @@
 #include "elf/ppc.h"
 #endif
 
+static bfd_vma elf_s_get_size PARAMS ((symbolS *));
+static void elf_s_set_size PARAMS ((symbolS *, bfd_vma));
+static bfd_vma elf_s_get_align PARAMS ((symbolS *));
+static void elf_s_set_align PARAMS ((symbolS *, bfd_vma));
+static void elf_copy_symbol_attributes PARAMS ((symbolS *, symbolS *));
+static int elf_sec_sym_ok_for_reloc PARAMS ((asection *));
+static void adjust_stab_sections PARAMS ((bfd *, asection *, PTR));
+
 #ifdef NEED_ECOFF_DEBUG
 static boolean elf_get_extr PARAMS ((asymbol *, EXTR *));
 static void elf_set_index PARAMS ((asymbol *, bfd_size_type));
@@ -264,7 +272,7 @@ obj_elf_common (ignore)
   *p = 0;
   symbolP = symbol_find_or_make (name);
   *p = c;
-  if (S_IS_DEFINED (symbolP))
+  if (S_IS_DEFINED (symbolP) && ! S_IS_COMMON (symbolP))
     {
       as_bad ("Ignoring attempt to re-define symbol");
       ignore_rest_of_line ();
@@ -330,8 +338,8 @@ obj_elf_common (ignore)
 	  if (S_GET_SEGMENT (symbolP) == bss_section)
 	    symbolP->sy_frag->fr_symbol = 0;
 	  symbolP->sy_frag = frag_now;
-	  pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP, size,
-			    (char *) 0);
+	  pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP,
+			    (offsetT) size, (char *) 0);
 	  *pfrag = 0;
 	  S_SET_SIZE (symbolP, size);
 	  S_SET_SEGMENT (symbolP, bss_section);
@@ -344,8 +352,7 @@ obj_elf_common (ignore)
 	  S_SET_VALUE (symbolP, (valueT) size);
 	  S_SET_ALIGN (symbolP, temp);
 	  S_SET_EXTERNAL (symbolP);
-	  /* should be common, but this is how gas does it for now */
-	  S_SET_SEGMENT (symbolP, bfd_und_section_ptr);
+	  S_SET_SEGMENT (symbolP, bfd_com_section_ptr);
 	}
     }
   else
