@@ -143,7 +143,7 @@ enum pos
   } postype = pos_default;
 
 /* Whether to truncate names of files stored in the archive.  */
-static boolean truncate = false;
+static boolean ar_truncate = false;
 
 int interactive = 0;
 
@@ -250,7 +250,7 @@ normalize (file, abfd)
   else
     filename = file;
 
-  if (truncate
+  if (ar_truncate
       && abfd != NULL
       && strlen (filename) > abfd->xvec->ar_max_namelen)
     {
@@ -439,7 +439,7 @@ main (argc, argv)
 	  mri_mode = 1;
 	  break;
 	case 'f':
-	  truncate = true;
+	  ar_truncate = true;
 	  break;
 	default:
 	  fprintf (stderr, "%s: illegal option -- %c\n", program_name, c);
@@ -493,7 +493,7 @@ main (argc, argv)
 	 rebuild the name table.  Unfortunately, at this point we
 	 don't actually know the maximum name length permitted by this
 	 object file format.  So, we guess.  FIXME.  */
-      if (operation == quick_append && ! truncate)
+      if (operation == quick_append && ! ar_truncate)
 	{
 	  char **chk;
 
@@ -823,7 +823,7 @@ do_quick_append (archive_filename, files_to_append)
 		 program_name, archive_filename);
     }
 
-  if (truncate)
+  if (ar_truncate)
     temp->flags |= BFD_TRADITIONAL_FORMAT;
 
   /* assume it's an achive, go straight to the end, sans $200 */
@@ -901,7 +901,7 @@ write_archive (iarch)
      been explicitly requested not to.  */
   obfd->has_armap = write_armap >= 0;
 
-  if (truncate)
+  if (ar_truncate)
     {
       /* This should really use bfd_set_file_flags, but that rejects
          archives.  */
