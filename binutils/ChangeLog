@@ -1,3 +1,12 @@
+Wed Jun  9 11:40:16 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* readelf.c (dump_section): Cast values from byte_get to
+ 	[unsigned] long for printing, in case it is wider than long.
+	(display_block): Likewise.
+	(read_and_display_attr): Likewise.
+	(decode_location_expression): Likewise.  Don't depend on
+ 	evaluation order.
+
 Mon Jun  7 12:14:57 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 	* windres.c (usage): Fix typo.
