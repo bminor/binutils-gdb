@@ -98,7 +98,7 @@ notice identical to this one except for the removal of this paragraph
 
 @vskip 0pt plus 1filll
 @c man begin COPYRIGHT
-Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1
@@ -277,10 +277,8 @@ linker script or the one specified by using @samp{-T}).  This feature
 permits the linker to link against a file which appears to be an object
 or an archive, but actually merely defines some symbol values, or uses
 @code{INPUT} or @code{GROUP} to load other objects.  Note that
-specifying a script in this way should only be used to augment the main
-linker script; if you want to use some command that logically can only
-appear once, such as the @code{SECTIONS} or @code{MEMORY} command, you
-must replace the default linker script using the @samp{-T} option.
+specifying a script in this way merely augments the main linker script;
+use the @samp{-T} option to replace the default linker script entirely.
 @xref{Scripts}.
 
 For options whose names are a single letter,
@@ -754,12 +752,10 @@ Print the names of the input files as @code{ld} processes them.
 Use @var{scriptfile} as the linker script.  This script replaces
 @code{ld}'s default linker script (rather than adding to it), so
 @var{commandfile} must specify everything necessary to describe the
-output file.  You must use this option if you want to use a command
-which can only appear once in a linker script, such as the
-@code{SECTIONS} or @code{MEMORY} command.  @xref{Scripts}.  If
-@var{scriptfile} does not exist in the current directory, @code{ld}
-looks for it in the directories specified by any preceding @samp{-L}
-options.  Multiple @samp{-T} options accumulate.
+output file.  @xref{Scripts}.  If @var{scriptfile} does not exist in
+the current directory, @code{ld} looks for it in the directories
+specified by any preceding @samp{-L} options.  Multiple @samp{-T}
+options accumulate.
 
 @kindex -u @var{symbol}
 @kindex --undefined=@var{symbol}

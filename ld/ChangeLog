@@ -1,3 +1,10 @@
+2001-10-31  John Marshall  <jmarshall@acm.org>
+
+	* ld.texinfo: A historical requirement that MEMORY and SECTIONS
+	appear only once across all the linker scripts involved in a link
+	invocation no longer applies.  Make the documentation reflect
+	that.
+
 2001-10-31  NIIBE Yutaka  <gniibe@m17n.org>
 
 	* configure.tgt: Supports sh3/sh4/sh3eb/sh4eb-unknown-linux-gnu
