@@ -66,8 +66,14 @@ static asection * ppc64_elf_gc_mark_hook
 static boolean ppc64_elf_gc_sweep_hook
   PARAMS ((bfd *abfd, struct bfd_link_info *info, asection *sec,
 	   const Elf_Internal_Rela *relocs));
+static boolean func_desc_adjust
+  PARAMS ((struct elf_link_hash_entry *, PTR));
+static boolean ppc64_elf_func_desc_adjust
+  PARAMS ((bfd *, struct bfd_link_info *));
 static boolean ppc64_elf_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
+static void ppc64_elf_hide_symbol
+  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, boolean));
 static boolean allocate_dynrelocs
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean readonly_dynrelocs
@@ -1582,7 +1588,70 @@ ppc64_elf_section_from_shdr (abfd, hdr, name)
    or less in the order in which they are called.  eg.
    ppc64_elf_check_relocs is called early in the link process,
    ppc64_elf_finish_dynamic_sections is one of the last functions
-   called.  */
+   called.
+
+   PowerPC64-ELF uses a similar scheme to PowerPC64-XCOFF in that
+   functions have both a function code symbol and a function descriptor
+   symbol.  A call to foo in a relocatable object file looks like:
+
+   .		.text
+   .	x:
+   .		bl	.foo
+   .		nop
+
+   The function definition in another object file might be:
+
+   .		.section .opd
+   .	foo:	.quad	.foo
+   .		.quad	.TOC.@tocbase
+   .		.quad	0
+   .
+   .		.text
+   .	.foo:	blr
+
+   When the linker resolves the call during a static link, the branch
+   unsurprisingly just goes to .foo and the .opd information is unused.
+   If the function definition is in a shared library, things are a little
+   different:  The call goes via a plt call stub, the opd information gets
+   copied to the plt, and the linker patches the nop.
+
+   .	x:
+   .		bl	.foo_stub
+   .		ld	2,40(1)
+   .
+   .
+   .	.foo_stub:
+   .		addis	12,2,Lfoo@toc@ha	# in practice, the call stub
+   .		addi	12,12,Lfoo@toc@l	# is slightly optimised, but
+   .		std	2,40(1)			# this is the general idea
+   .		ld	11,0(12)
+   .		ld	2,8(12)
+   .		mtctr	11
+   .		ld	11,16(12)
+   .		bctr
+   .
+   .		.section .plt
+   .	Lfoo:	reloc (R_PPC64_JMP_SLOT, foo)
+
+   The "reloc ()" notation is supposed to indicate that the linker emits
+   an R_PPC64_JMP_SLOT reloc against foo.  The dynamic linker does the opd
+   copying.
+
+   What are the difficulties here?  Well, firstly, the relocations
+   examined by the linker in check_relocs are against the function code
+   sym .foo, while the dynamic relocation in the plt is emitted against
+   the function descriptor symbol, foo.  Somewhere along the line, we need
+   to carefully copy dynamic link information from one symbol to the other.
+   Secondly, the generic part of the elf linker will make .foo a dynamic
+   symbol as is normal for most other backends.  We need foo dynamic
+   instead, at least for an application final link.  However, when
+   creating a shared library containing foo, we need to have both symbols
+   dynamic so that references to .foo are satisfied during the early
+   stages of linking.  Otherwise the linker might decide to pull in a
+   definition from some other object, eg. a static library.  Thirdly, we'd
+   like to use .foo as the stub symbol to avoid creating another symbol.
+   We need to make sure that when .foo labels a stub in a shared library,
+   it isn't exported.  */
 
 /* The linker needs to keep track of the number of relocs that it
    decides to copy as dynamic relocs in check_relocs for each symbol.
@@ -1623,6 +1692,10 @@ struct ppc_link_hash_entry
 
   /* Track dynamic relocs copied for this symbol.  */
   struct ppc_dyn_relocs *dyn_relocs;
+
+  /* Flag function code and descriptor symbols.  */
+  unsigned int is_func:1;
+  unsigned int is_func_descriptor:1;
 };
 
 /* ppc64 ELF linker hash table.  */
@@ -1677,6 +1750,8 @@ link_hash_newfunc (entry, table, string)
       struct ppc_link_hash_entry *eh = (struct ppc_link_hash_entry *) entry;
 
       eh->dyn_relocs = NULL;
+      eh->is_func = 0;
+      eh->is_func_descriptor = 0;
     }
 
   return entry;
@@ -1834,6 +1909,9 @@ ppc64_elf_copy_indirect_symbol (dir, ind)
       eind->dyn_relocs = NULL;
     }
 
+  edir->is_func |= eind->is_func;
+  edir->is_func_descriptor |= eind->is_func_descriptor;
+
   _bfd_elf_link_hash_copy_indirect (dir, ind);
 }
 
@@ -1854,6 +1932,7 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
+  boolean is_opd;
 
   if (info->relocateable)
     return true;
@@ -1868,6 +1947,7 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
     sym_hashes_end -= symtab_hdr->sh_info;
 
   sreloc = NULL;
+  is_opd = strcmp (bfd_get_section_name (abfd, sec), ".opd") == 0;
 
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
@@ -1948,6 +2028,7 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
 	  h->plt.refcount += 1;
+	  ((struct ppc_link_hash_entry *) h)->is_func = 1;
 	  break;
 
 	  /* The following relocations don't need to propagate the
@@ -1982,14 +2063,40 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	  break;
 
 	case R_PPC64_REL24:
-	  if (h != NULL)
+	  if (h != NULL
+	      && h->root.root.string[0] == '.'
+	      && h->root.root.string[1] != 0)
 	    {
 	      /* We may need a .plt entry if the function this reloc
 		 refers to is in a shared lib.  */
 	      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
 	      h->plt.refcount += 1;
+	      ((struct ppc_link_hash_entry *) h)->is_func = 1;
 	    }
 	  break;
+
+	case R_PPC64_ADDR64:
+	  if (is_opd
+	      && h != NULL
+	      && h->root.root.string[0] == '.'
+	      && h->root.root.string[1] != 0)
+	    {
+	      struct elf_link_hash_entry *fdh;
+
+	      fdh = elf_link_hash_lookup (&htab->elf, h->root.root.string + 1,
+					  false, false, false);
+	      if (fdh != NULL)
+		{
+		  /* Ensure the function descriptor symbol string is
+		     part of the code symbol string.  We aren't
+		     changing the name here, just allowing some tricks
+		     in ppc64_elf_hide_symbol.  */
+		  fdh->root.root.string = h->root.root.string + 1;
+		  ((struct ppc_link_hash_entry *) fdh)->is_func_descriptor = 1;
+		  ((struct ppc_link_hash_entry *) h)->is_func = 1;
+		}
+	    }
+	  /* Fall through.  */
 
 	case R_PPC64_REL64:
 	case R_PPC64_REL32:
@@ -2012,11 +2119,16 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	case R_PPC64_ADDR24:
 	case R_PPC64_ADDR30:
 	case R_PPC64_ADDR32:
-	case R_PPC64_ADDR64:
 	case R_PPC64_UADDR16:
 	case R_PPC64_UADDR32:
 	case R_PPC64_UADDR64:
 	case R_PPC64_TOC:
+#if 0
+	      /* Don't propagate .opd relocs.  */
+	  if (is_opd)
+	    break;
+#endif
+
 	  /* If we are creating a shared library, and this is a reloc
 	     against a global symbol, or a non PC relative reloc
 	     against a local symbol, then we need to copy the reloc
@@ -2055,12 +2167,6 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	    {
 	      struct ppc_dyn_relocs *p;
 	      struct ppc_dyn_relocs **head;
-
-#if 0
-	      /* Don't propagate .opd relocs.  */
-	      if (strcmp (bfd_get_section_name (abfd, sec), ".opd") == 0)
-		break;
-#endif
 
 	      /* We must copy these reloc types into the output file.
 		 Create a reloc section in dynobj and make room for
@@ -2275,7 +2381,7 @@ ppc64_elf_gc_sweep_hook (abfd, info, sec, relocs)
 	      if (h->plt.refcount > 0)
 		h->plt.refcount--;
 	    }
-	  /* Fall thru.  */
+	  break;
 
 	case R_PPC64_REL14:
 	case R_PPC64_REL14_BRNTAKEN:
@@ -2351,6 +2457,123 @@ ppc64_elf_gc_sweep_hook (abfd, info, sec, relocs)
   return true;
 }
 
+/* Called via elf_link_hash_traverse to transfer dynamic linking
+   information on function code symbol entries to their corresponding
+   function descriptor symbol entries.  */
+static boolean
+func_desc_adjust (h, inf)
+     struct elf_link_hash_entry *h;
+     PTR inf;
+{
+  struct bfd_link_info *info;
+  struct ppc_link_hash_table *htab;
+
+  if (h->root.type == bfd_link_hash_indirect
+      || h->root.type == bfd_link_hash_warning)
+    return true;
+
+  info = (struct bfd_link_info *) inf;
+  htab = ppc_hash_table (info);
+
+  /* If this is a function code symbol, transfer dynamic linking
+     information to the function descriptor symbol.  */
+  if (!((struct ppc_link_hash_entry *) h)->is_func)
+    return true;
+
+  if (h->plt.refcount > 0
+      && h->root.root.string[0] == '.'
+      && h->root.root.string[1] != '\0')
+    {
+      struct elf_link_hash_entry *fdh;
+      boolean force_local;
+
+      /* Find the corresponding function descriptor symbol.  Create it
+	 as undefined if necessary.  */
+
+      fdh = elf_link_hash_lookup (&htab->elf, h->root.root.string + 1,
+				  false, false, true);
+
+      if (fdh == NULL && info->shared)
+	{
+	  bfd *abfd;
+	  asymbol *newsym;
+
+	  /* Create it as undefined.  */
+	  if (h->root.type == bfd_link_hash_undefined
+	      || h->root.type == bfd_link_hash_undefweak)
+	    abfd = h->root.u.undef.abfd;
+	  else if (h->root.type == bfd_link_hash_defined
+		   || h->root.type == bfd_link_hash_defweak)
+	    abfd = h->root.u.def.section->owner;
+	  else
+	    abort ();
+	  newsym = bfd_make_empty_symbol (abfd);
+	  newsym->name = h->root.root.string + 1;
+	  newsym->section = bfd_und_section_ptr;
+	  newsym->value = 0;
+	  newsym->flags = BSF_OBJECT;
+	  if (h->root.type == bfd_link_hash_undefweak)
+	    newsym->flags |= BSF_WEAK;
+
+	  if ( !(_bfd_generic_link_add_one_symbol
+		 (info, abfd, newsym->name, newsym->flags,
+		  newsym->section, newsym->value, NULL, false, false,
+		  (struct bfd_link_hash_entry **) &fdh)))
+	    {
+	      return false;
+	    }
+	}
+
+      if (fdh != NULL
+	  && (fdh->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0
+	  && (info->shared
+	      || (fdh->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+	      || (fdh->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0))
+	{
+	  if (fdh->dynindx == -1)
+	    if (! bfd_elf64_link_record_dynamic_symbol (info, fdh))
+	      return false;
+	  fdh->plt.refcount = h->plt.refcount;
+	  fdh->elf_link_hash_flags |= (h->elf_link_hash_flags
+				       & (ELF_LINK_HASH_REF_REGULAR
+					  | ELF_LINK_HASH_REF_DYNAMIC
+					  | ELF_LINK_HASH_REF_REGULAR_NONWEAK
+					  | ELF_LINK_NON_GOT_REF));
+	  fdh->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+	  ((struct ppc_link_hash_entry *) fdh)->is_func_descriptor = 1;
+	  fdh->root.root.string = h->root.root.string + 1;
+	}
+
+      /* Now that the info is on the function descriptor, clear the
+	 function code sym info.  Any function code syms for which we
+	 don't have a definition in a regular file, we force local.
+	 This prevents a shared library from exporting syms that have
+	 been imported from another library.  Function code syms that
+	 are really in the library we must leave global to prevent the
+	 linker dragging a definition in from a static library.  */
+      force_local = (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0;
+      _bfd_elf_link_hash_hide_symbol (info, h, force_local);
+    }
+
+  return true;
+}
+
+/* Called near the start of bfd_elf_size_dynamic_sections.  We use
+   this hook to transfer dynamic linking information gathered so far
+   on function code symbol entries, to their corresponding function
+   descriptor symbol entries.  */
+static boolean
+ppc64_elf_func_desc_adjust (obfd, info)
+     bfd *obfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info;
+{
+  struct ppc_link_hash_table *htab;
+
+  htab = ppc_hash_table (info);
+  elf_link_hash_traverse (&htab->elf, func_desc_adjust, (PTR) info);
+  return true;
+}
+
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
    dynamic object, but we're not including those sections.  We have to
@@ -2370,73 +2593,22 @@ ppc64_elf_adjust_dynamic_symbol (info, h)
 
   htab = ppc_hash_table (info);
 
-  /* If this is a function, put it in the procedure linkage table.  We
-     will fill in the contents of the procedure linkage table later.  */
+  /* Deal with function syms.  */
   if (h->type == STT_FUNC
       || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {
-      struct elf_link_hash_entry *fdh;
-
-      /* If it's a function entry point, the name starts with a dot
-         unless someone has written some poor assembly code.  The ABI
-	 for .plt calls requires that there be a function descriptor
-	 sym which has the name of the function minus the dot.  */
-
-      if (h->plt.refcount <= 0
-	  || h->root.root.string[0] != '.'
-	  || h->root.root.string[1] == '\0')
+      /* Clear procedure linkage table information for any symbol that
+	 won't need a .plt entry.  */
+      if (!((struct ppc_link_hash_entry *) h)->is_func_descriptor
+	  || h->plt.refcount <= 0
+	  || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0
+	  || (! info->shared
+	      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
+	      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0))
 	{
 	  h->plt.offset = (bfd_vma) -1;
 	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
-	  return true;
 	}
-
-      /* Find the corresponding function descriptor symbol.  Create it
-	 as undefined if necessary.  ppc_elf64_finish_dynamic_symbol
-	 will look it up again and create a JMP_SLOT reloc for it.  */
-
-      fdh = elf_link_hash_lookup (elf_hash_table (info),
-				  h->root.root.string + 1,
-				  false, false, false);
-
-      if (fdh == NULL)
-	{
-	  asymbol *newsym;
-
-	  /* Create it as undefined.  */
-	  newsym = bfd_make_empty_symbol (htab->elf.dynobj);
-	  newsym->name = h->root.root.string + 1;
-	  newsym->section = bfd_und_section_ptr;
-	  newsym->value = 0;
-	  newsym->flags = BSF_DYNAMIC | BSF_OBJECT;
-
-	  if ( !(_bfd_generic_link_add_one_symbol
-		 (info, htab->elf.dynobj, newsym->name, newsym->flags,
-		  newsym->section, newsym->value, NULL, false, false,
-		  (struct bfd_link_hash_entry **) &fdh)))
-	    {
-	      return false;
-	    }
-	}
-
-      while (fdh->root.type == bfd_link_hash_indirect
-	     || fdh->root.type == bfd_link_hash_warning)
-	fdh = (struct elf_link_hash_entry *) fdh->root.u.i.link;
-
-      if (! info->shared
-	  && (fdh->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
-	  && (fdh->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0)
-	{
-	  /* This case can occur if we saw a PLT reloc in an input
-	     file, but the symbol was never referred to by a dynamic
-	     object, or if all references were garbage collected.  In
-	     such a case, we don't actually need to build a procedure
-	     linkage table entry.  */
-	  h->plt.offset = (bfd_vma) -1;
-	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
-	  return true;
-	}
-
       return true;
     }
   else
@@ -2530,6 +2702,30 @@ ppc64_elf_adjust_dynamic_symbol (info, h)
   return true;
 }
 
+/* If given a function descriptor symbol, hide both the function code
+   sym and the descriptor.  */
+static void
+ppc64_elf_hide_symbol (info, h, force_local)
+     struct bfd_link_info *info;
+     struct elf_link_hash_entry *h;
+     boolean force_local;
+{
+  _bfd_elf_link_hash_hide_symbol (info, h, force_local);
+
+  if (((struct ppc_link_hash_entry *) h)->is_func_descriptor)
+    {
+      const char *name;
+      struct elf_link_hash_entry *fh;
+      struct ppc_link_hash_table *htab;
+
+      name = h->root.root.string - 1;
+      htab = ppc_hash_table (info);
+      fh = elf_link_hash_lookup (&htab->elf, name, false, false, false);
+      if (fh != NULL)
+	_bfd_elf_link_hash_hide_symbol (info, fh, force_local);
+    }
+}
+
 /* This is the condition under which ppc64_elf_finish_dynamic_symbol
    will be called from elflink.h.  If elflink.h doesn't call our
    finish_dynamic_symbol routine, we'll need to do something about
@@ -2563,44 +2759,13 @@ allocate_dynrelocs (h, inf)
   htab = ppc_hash_table (info);
 
   if (htab->elf.dynamic_sections_created
-      && h->plt.refcount > 0)
+      && h->plt.refcount > 0
+      && h->dynindx != -1)
     {
-      /* Make sure this symbol is output as a dynamic symbol.
-	 Undefined weak syms won't yet be marked as dynamic.  */
-      if (h->dynindx == -1
-	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
-	{
-	  if (! bfd_elf64_link_record_dynamic_symbol (info, h))
-	    return false;
-	}
-
-      BFD_ASSERT (h->root.root.string[0] == '.'
-		  && h->root.root.string[1] != '\0');
+      BFD_ASSERT (((struct ppc_link_hash_entry *) h)->is_func_descriptor);
 
       if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, h))
 	{
-	  /* Make sure the corresponding function descriptor symbol is
-	     dynamic too.  */
-
-	  if (h->dynindx != -1)
-	    {
-	      struct elf_link_hash_entry *fdh;
-
-	      fdh = elf_link_hash_lookup (elf_hash_table (info),
-					  h->root.root.string + 1,
-					  false, false, false);
-
-	      if (fdh == NULL)
-		abort ();
-
-	      if (fdh->dynindx == -1
-		  && (fdh->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
-		{
-		  if (! bfd_elf64_link_record_dynamic_symbol (info, fdh))
-		    return false;
-		}
-	    }
-
 	  /* If this is the first .plt entry, make room for the special
 	     first entry.  */
 	  s = htab->splt;
@@ -2608,7 +2773,6 @@ allocate_dynrelocs (h, inf)
 	    s->_raw_size += PLT_INITIAL_ENTRY_SIZE;
 
 	  h->plt.offset = s->_raw_size;
-	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
 
 	  /* Make room for this entry.  */
 	  s->_raw_size += PLT_ENTRY_SIZE;
@@ -2930,7 +3094,7 @@ ppc64_elf_size_dynamic_sections (output_bfd, info)
 	return false;
     }
 
-  if (elf_hash_table (info)->dynamic_sections_created)
+  if (htab->elf.dynamic_sections_created)
     {
       /* Add some entries to the .dynamic section.  We fill in the
 	 values later, in ppc64_elf_finish_dynamic_sections, but we
@@ -3151,18 +3315,29 @@ build_one_stub (h, inf)
   if (htab->elf.dynamic_sections_created
       && h->plt.offset != (bfd_vma) -1)
     {
+      struct elf_link_hash_entry *fh;
       asection *s;
       bfd_vma plt_r2;
       bfd_byte *p;
       unsigned int indx;
 
+      BFD_ASSERT (((struct ppc_link_hash_entry *) h)->is_func_descriptor);
+
+      fh = elf_link_hash_lookup (&htab->elf, h->root.root.string - 1,
+				 false, false, true);
+
+      if (fh == NULL)
+	abort ();
+
+      BFD_ASSERT (((struct ppc_link_hash_entry *) fh)->is_func);
+
       /* Point the function at the linkage stub.  This works because
 	 the only references to the function code sym are calls.
 	 Function pointer comparisons use the function descriptor.  */
       s = htab->sstub;
-      h->root.type = bfd_link_hash_defined;
-      h->root.u.def.section = s;
-      h->root.u.def.value = s->_cooked_size;
+      fh->root.type = bfd_link_hash_defined;
+      fh->root.u.def.section = s;
+      fh->root.u.def.value = s->_cooked_size;
 
       /* Build the .plt call stub.  */
       plt_r2 = (htab->splt->output_section->vma
@@ -3171,10 +3346,11 @@ build_one_stub (h, inf)
 		- elf_gp (htab->splt->output_section->owner)
 		- TOC_BASE_OFF);
 
-      if (plt_r2 + 0x80000000 > 0xffffffff)
+      if (plt_r2 + 0x80000000 > 0xffffffff
+	  || (plt_r2 & 3) != 0)
 	{
 	  (*_bfd_error_handler)
-	    (_("linkage table overflow against `%s'"),
+	    (_("linkage table error against `%s'"),
 	     h->root.root.string);
 	  bfd_set_error (bfd_error_bad_value);
 	  htab->plt_overflow = true;
@@ -3351,6 +3527,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       unsigned long r_symndx;
       bfd_vma relocation;
       boolean unresolved_reloc;
+      boolean has_nop;
       long insn;
 
       r_type = (enum elf_ppc_reloc_type) ELF64_R_TYPE (rel->r_info);
@@ -3480,6 +3657,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	     order to restore the TOC base pointer.  Only calls to
 	     shared objects need to alter the TOC base.  These are
 	     recognized by their need for a PLT entry.  */
+	  has_nop = 0;
 	  if (h != NULL
 	      && (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0
 	      /* Make sure that there really is an instruction after
@@ -3498,7 +3676,23 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  bfd_put_32 (input_bfd,
 			      (bfd_vma) 0xe8410028, /* ld r2,40(r1) */
 			      pnext);
+		  has_nop = 1;
 		}
+	    }
+
+	  if (h != NULL
+	      && h->root.type == bfd_link_hash_undefweak
+	      && r_type == R_PPC64_REL24
+	      && addend == 0
+	      && relocation == 0)
+	    {
+	      /* Tweak calls to undefined weak functions to behave as
+		 if the "called" function immediately returns.  We can
+		 thus call to a weak function without first checking
+		 whether the function is defined.  */
+	      relocation = 4;
+	      if (has_nop)
+		relocation = 8;
 	    }
 	  break;
 	}
@@ -3784,7 +3978,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  /* This symbol is local, or marked to become local.  */
 		  outrel.r_addend += relocation;
 		  relocate = true;
-		  if (r_type == R_PPC64_ADDR64)
+		  if (r_type == R_PPC64_ADDR64 || r_type == R_PPC64_TOC)
 		    {
 		      outrel.r_info = ELF64_R_INFO (0, R_PPC64_RELATIVE);
 		    }
@@ -3993,7 +4187,6 @@ ppc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 
   if (h->plt.offset != (bfd_vma) -1)
     {
-      struct elf_link_hash_entry *funcdesc_h;
       Elf_Internal_Rela rela;
       Elf64_External_Rela *loc;
 
@@ -4002,20 +4195,10 @@ ppc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       if (htab->splt == NULL
 	  || htab->srelplt == NULL
-	  || htab->sglink == NULL
-	  || h->root.root.string[0] != '.'
-	  || h->root.root.string[1] == '\0')
+	  || htab->sglink == NULL)
 	abort ();
 
-      /* Find its corresponding function descriptor.
-	 ppc64_elf_adjust_dynamic_symbol has already set it up for us.  */
-
-      funcdesc_h = elf_link_hash_lookup (elf_hash_table (info),
-					 h->root.root.string + 1,
-					 false, false, false);
-
-      if (funcdesc_h == NULL || funcdesc_h->dynindx == -1)
-	abort ();
+      BFD_ASSERT (((struct ppc_link_hash_entry *) h)->is_func_descriptor);
 
       /* Create a JMP_SLOT reloc to inform the dynamic linker to
 	 fill in the PLT entry.  */
@@ -4023,7 +4206,7 @@ ppc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       rela.r_offset = (htab->splt->output_section->vma
 		       + htab->splt->output_offset
 		       + h->plt.offset);
-      rela.r_info = ELF64_R_INFO (funcdesc_h->dynindx, R_PPC64_JMP_SLOT);
+      rela.r_info = ELF64_R_INFO (h->dynindx, R_PPC64_JMP_SLOT);
       rela.r_addend = 0;
 
       loc = (Elf64_External_Rela *) htab->srelplt->contents;
@@ -4257,6 +4440,8 @@ ppc64_elf_finish_dynamic_sections (output_bfd, info)
 #define elf_backend_gc_mark_hook	      ppc64_elf_gc_mark_hook
 #define elf_backend_gc_sweep_hook	      ppc64_elf_gc_sweep_hook
 #define elf_backend_adjust_dynamic_symbol     ppc64_elf_adjust_dynamic_symbol
+#define elf_backend_hide_symbol		      ppc64_elf_hide_symbol
+#define elf_backend_always_size_sections      ppc64_elf_func_desc_adjust
 #define elf_backend_size_dynamic_sections     ppc64_elf_size_dynamic_sections
 #define elf_backend_fake_sections	      ppc64_elf_fake_sections
 #define elf_backend_relocate_section	      ppc64_elf_relocate_section

@@ -1,5 +1,31 @@
 2002-01-21  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (struct ppc_link_hash_entry): Add is_func and
+	is_func_descriptor fields.
+	(link_hash_newfunc): Init them.
+	(ppc64_elf_check_relocs): Only R_PPC24_REL24 syms starting with a
+	dot are candidates for plt entries.  When processing .opd relocs,
+	set function descriptor strings to point inside function code
+	string, and set new ppc_link_hash_entry fields.
+	(ppc64_elf_gc_sweep_hook): Don't sweep R_PPC64_REL24 relocs.
+	(ppc64_elf_adjust_dynamic_symbol): Remove most code dealing with
+	function descriptors.  It's now done in..
+	(func_desc_adjust): New.
+	(ppc64_elf_func_desc_adjust): New.
+	(define elf_backend_always_size_sections): Define.
+	(ppc64_elf_hide_symbol): New.
+	(define elf_backend_hide_symbol): Define.
+	(allocate_dynrelocs): Remove code looking up function descriptors
+	as that has been done earlier.
+	(ppc64_elf_size_dynamic_sections): Use htab shortcut to elf hash
+	table.
+	(ppc64_elf_finish_dynamic_symbol): Likewise.  Remove code looking
+	up function descriptor.
+	(build_one_stub): Look up the function code sym.  Check for
+	invalid plt offsets.
+	(ppc64_elf_relocate_section): Tweak calls to undefined weak syms.
+	Convert R_PPC64_TOC relocs to R_PPC64_RELATIVE in shared libs.
+
 	* elf-bfd.h (elf_backend_data <elf_backend_hide_symbol>): Add
 	boolean param.
 	(_bfd_elf_link_hash_hide_symbol): Likewise.
