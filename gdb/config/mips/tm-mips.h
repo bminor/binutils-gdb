@@ -209,7 +209,6 @@ extern struct frame_info *setup_arbitrary_frame (int, CORE_ADDR *);
 
 #define TM_PRINT_INSN_MACH 0
 
-
 /* These are defined in mdebugread.c and are used in mips-tdep.c  */
 extern CORE_ADDR sigtramp_address, sigtramp_end;
 extern void fixup_sigtramp (void);
@@ -239,33 +238,8 @@ typedef unsigned long t_inst;	/* Integer big enough to hold an instruction */
 
 #endif /* TM_MIPS_H */
 
-/* Macros for setting and testing a bit in a minimal symbol that
-   marks it as 16-bit function.  The MSB of the minimal symbol's
-   "info" field is used for this purpose. This field is already
-   being used to store the symbol size, so the assumption is
-   that the symbol size cannot exceed 2^31.
-
-   ELF_MAKE_MSYMBOL_SPECIAL
-   tests whether an ELF symbol is "special", i.e. refers
-   to a 16-bit function, and sets a "special" bit in a 
-   minimal symbol to mark it as a 16-bit function
-   MSYMBOL_IS_SPECIAL   tests the "special" bit in a minimal symbol
-   MSYMBOL_SIZE         returns the size of the minimal symbol, i.e.
-   the "info" field with the "special" bit masked out
- */
-
-#define MSYMBOL_IS_SPECIAL(msym) \
-  mips_msymbol_is_special (msym)
-#define MSYMBOL_SIZE(msym) \
-  mips_msymbol_size (msym)
-struct minimal_symbol;
-extern int mips_msymbol_is_special (struct minimal_symbol *msym);
-extern long mips_msymbol_size (struct minimal_symbol *msym);
-
-
 /* Command to set the processor type. */
 extern void mips_set_processor_type_command (char *, int);
-
 
 /* Single step based on where the current instruction will take us.  */
 extern void mips_software_single_step (enum target_signal, int);

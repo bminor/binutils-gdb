@@ -1,3 +1,12 @@
+2002-08-20  Michael Snyder  <msnyder@redhat.com>
+
+	* mips-tdep.c (MSYMBOL_IS_SPECIAL, MSYMBOL_SIZE): These are only
+	used locally, so move them from the target machine header to here.
+	(mips_set_processor_type, mips_register_name, mips32_next_pc, 
+	mips16_next_pc, cached_proc_desc, mips_set_processor_type): 
+	Make static.
+	* config/mips/tm-mips.h (MSYMBOL_IS_SPECIAL, MSYMBOL_SIZE): Delete.
+
 2002-08-20  Andrew Cagney  <cagney@redhat.com>
 
 	* NEWS: Mention that the Apollo line was made obsolete.

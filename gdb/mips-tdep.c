@@ -173,6 +173,36 @@ mips_saved_regsize (void)
     return 4;
 }
 
+/* Macros for setting and testing a bit in a minimal symbol that
+   marks it as 16-bit function.  The MSB of the minimal symbol's
+   "info" field is used for this purpose. This field is already
+   being used to store the symbol size, so the assumption is
+   that the symbol size cannot exceed 2^31.
+
+   ELF_MAKE_MSYMBOL_SPECIAL tests whether an ELF symbol is "special",
+   i.e. refers to a 16-bit function, and sets a "special" bit in a
+   minimal symbol to mark it as a 16-bit function
+
+   MSYMBOL_IS_SPECIAL   tests the "special" bit in a minimal symbol
+   MSYMBOL_SIZE         returns the size of the minimal symbol, i.e.
+   the "info" field with the "special" bit masked out */
+
+#define MSYMBOL_IS_SPECIAL(msym) \
+  (((long) MSYMBOL_INFO (msym) & 0x80000000) != 0)
+#define MSYMBOL_SIZE(msym) \
+  ((long) MSYMBOL_INFO (msym) & 0x7fffffff)
+
+static void
+mips_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
+{
+  if (((elf_symbol_type *)(sym))->internal_elf_sym.st_other == STO_MIPS16) 
+    { 
+      MSYMBOL_INFO (msym) = (char *) 
+	(((long) MSYMBOL_INFO (msym)) | 0x80000000); 
+      SYMBOL_VALUE_ADDRESS (msym) |= 1; 
+    } 
+}
+
 /* XFER a value from the big/little/left end of the register.
    Depending on the size of the value it might occupy the entire
    register or just part of it.  Make an allowance for this, aligning
@@ -297,7 +327,7 @@ static CORE_ADDR heuristic_proc_start (CORE_ADDR);
 
 static CORE_ADDR read_next_frame_reg (struct frame_info *, int);
 
-int mips_set_processor_type (char *);
+static int mips_set_processor_type (char *);
 
 static void mips_show_processor_type_command (char *, int);
 
@@ -333,7 +363,7 @@ static struct cmd_list_element *showmipscmdlist = NULL;
 char *mips_generic_reg_names[] = MIPS_REGISTER_NAMES;
 char **mips_processor_reg_names = mips_generic_reg_names;
 
-const char *
+static const char *
 mips_register_name (int i)
 {
   return mips_processor_reg_names[i];
@@ -720,38 +750,6 @@ pc_is_mips16 (bfd_vma memaddr)
     return 0;
 }
 
-/* ELF_MAKE_MSYMBOL_SPECIAL tests whether an ELF symbol is "special",
-   i.e. refers to a 16-bit function, and sets a "special" bit in a
-   minimal symbol to mark it as a 16-bit function.  */
-
-static void
-mips_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
-{
-  if (((elf_symbol_type *)(sym))->internal_elf_sym.st_other == STO_MIPS16) 
-    { 
-      MSYMBOL_INFO (msym) = (char *) 
-	(((long) MSYMBOL_INFO (msym)) | 0x80000000); 
-      SYMBOL_VALUE_ADDRESS (msym) |= 1; 
-    } 
-}
-
-/* MSYMBOL_IS_SPECIAL tests the "special" bit in a minimal symbol.  */
-
-int
-mips_msymbol_is_special (struct minimal_symbol *msym) 
-{
-  return (((long) MSYMBOL_INFO (msym) & 0x80000000) != 0); 
-}
-
-/* MSYMBOL_SIZE returns the size of the minimal symbol, i.e.  the
-   "info" field with the "special" bit masked out.  */
-
-long
-mips_msymbol_size (struct minimal_symbol *msym)
-{
-  return ((long) MSYMBOL_INFO (msym) & 0x7fffffff);
-}
-
 /* MIPS believes that the PC has a sign extended value.  Perhaphs the
    all registers should be sign extended for simplicity? */
 
@@ -915,7 +913,7 @@ mips32_relative_offset (unsigned long inst)
 
 /* Determine whate to set a single step breakpoint while considering
    branch prediction */
-CORE_ADDR
+static CORE_ADDR
 mips32_next_pc (CORE_ADDR pc)
 {
   unsigned long inst;
@@ -1354,7 +1352,7 @@ extended_mips16_next_pc (CORE_ADDR pc,
   return pc;
 }
 
-CORE_ADDR
+static CORE_ADDR
 mips16_next_pc (CORE_ADDR pc)
 {
   unsigned int insn = fetch_mips_16 (pc);
@@ -1676,7 +1674,7 @@ mips_init_frame_pc_first (int fromleaf, struct frame_info *prev)
 
   pc = ((fromleaf) ? SAVED_PC_AFTER_CALL (prev->next) :
 	prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
-  tmp = mips_skip_stub (pc);
+  tmp = SKIP_TRAMPOLINE_CODE (pc);
   prev->pc = tmp ? tmp : pc;
 }
 
@@ -2391,7 +2389,7 @@ get_frame_pointer (struct frame_info *frame,
 			   PROC_FRAME_ADJUST (proc_desc));
 }
 
-mips_extra_func_info_t cached_proc_desc;
+static mips_extra_func_info_t cached_proc_desc;
 
 static CORE_ADDR
 mips_frame_chain (struct frame_info *frame)
@@ -2405,7 +2403,7 @@ mips_frame_chain (struct frame_info *frame)
 
   /* Check if the PC is inside a call stub.  If it is, fetch the
      PC of the caller of that stub.  */
-  if ((tmp = mips_skip_stub (saved_pc)) != 0)
+  if ((tmp = SKIP_TRAMPOLINE_CODE (saved_pc)) != 0)
     saved_pc = tmp;
 
   /* Look up the procedure descriptor for this PC.  */
@@ -5035,7 +5033,7 @@ mips_show_processor_type_command (char *args, int from_tty)
 
 /* Modify the actual processor type. */
 
-int
+static int
 mips_set_processor_type (char *str)
 {
   int i;
