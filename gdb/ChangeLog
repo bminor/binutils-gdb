@@ -1,5 +1,9 @@
 2004-11-09  Andrew Cagney  <cagney@gnu.org>
 
+	GDB 6.3 released from GDB 6.3 branch.
+
+2004-11-09  Andrew Cagney  <cagney@gnu.org>
+
 	* values.c: Rename to ...
 	* value.c: ..., new file.
 	* Makefile.in: Update.
