@@ -1,3 +1,0 @@
-# Host: OpenBSD/vax
-NATDEPFILES= vaxbsd-nat.o fork-child.o infptrace.o inftarg.o
-NAT_FILE= nm-obsd.h
