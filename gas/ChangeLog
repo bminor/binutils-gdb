@@ -366,7 +366,6 @@ Thu Jan 30 12:08:40 1997  Ian Lance Taylor  <ian@cygnus.com>
 	(s_space): Set mri_pending_align if an odd number of bytes were
 	output.
 
-start-sanitize-d10v
 Wed Jan 29 15:31:12 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.h (md_do_align): Add this hook to call
@@ -375,7 +374,6 @@ Wed Jan 29 15:31:12 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* config/tc-d10v.c (find_opcode): Correctly calculate
 	branch displacement when .aligns are present.
 
-end-sanitize-d10v	
 Wed Jan 29 09:42:11 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10200.c (md_relax_table): Define.
@@ -654,7 +652,6 @@ Wed Dec 18 22:54:39 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed: Use NewFolderRecursive for installation.
 
-start-sanitize-d10v
 Wed Dec 18 16:00:42 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c (do_assemble): Correct previous bug fix.
@@ -664,7 +661,6 @@ Wed Dec 18 15:27:40 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* config/tc-d10v.c (md_assemble): Fix bug which caused
 	second instruction in a line to be case sensitize. PR11312
 
-end-sanitize-d10v	
 Wed Dec 18 10:08:46 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10200.c (mn10200_insert_operand): Don't
@@ -768,13 +764,11 @@ Thu Dec 12 15:18:21 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	BFD_RELOC_24_PLT_PCREL relocation.
 	(md_apply_fix3): Support BFD_RELOC_24_PLT_PCREL.
 
-start-sanitize-d10v
 Tue Dec 10 13:51:55 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c (write_2_short): Remove code that called
 	parallel_ok() when the programmer specified parallel instructions.
 
-end-sanitize-d10v
 Tue Dec 10 12:23:19 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10300.c (md_assemble): Update to handle endianness
@@ -837,7 +831,6 @@ Fri Dec  6 15:36:32 1996  Jeffrey A Law  (law@cygnus.com)
 	* config/tc-mn10300.c: Fix various gcc -Wall warnings.
 	Remove '$' prefixing for registers.
 
-start-sanitize-d10v
 Fri Dec  6 00:55:48 1996  Martin  <hunt@cygnus.com>
 
 	* config/tc-d10v.c (md_assemble): Check to see if prev_seg
@@ -846,19 +839,16 @@ Fri Dec  6 00:55:48 1996  Martin  <hunt@cygnus.com>
 
 	* config/tc-d10v.h (d10v_cleanup): Change prototype.
 	
-end-sanitize-d10v	
 Thu Dec  5 11:03:31 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* write.c (fixup_segment): Don't discard the symbol for a PC
 	relative fixup to an absolute symbol.
 
-start-sanitize-d10v
 Wed Dec  4 15:42:41 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c (md_assemble, d10v_cleanup): Fix bug
 	with multiple sections.
 
-end-sanitize-d10v	
 Wed Dec  4 13:00:07 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (md_longopts): Rename mips-16 to mips16, and
@@ -980,14 +970,12 @@ Thu Nov 21 11:56:11 1996  Jeffrey A Law  (law@cygnus.com)
 	(md_assemble): Create fixups as needed.
 	(md_apply_fix3): Gut.  It shouldn't ever get called anymore.
 
-start-sanitize-d10v
 Tue Nov 19 17:48:06 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-d10v.c (parallel_ok): When automatically converting
 	serial ops to parallel, do not consider a branch as the first
 	instruction.
 
-end-sanitize-d10v
 Tue Nov 19 13:35:22 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10300.c (md_assemble): Handle MN10300_OPERAND_REG_LIST.
@@ -998,7 +986,6 @@ Mon Nov 18 15:26:55 1996  Jeffrey A Law  (law@cygnus.com)
 	via PARAMS.
 	(check_operand): Likewise.
 
-start-sanitize-d10v
 Mon Nov 18 15:22:28 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-d10v.c (parallel_ok): Branch and link instructions
@@ -1016,7 +1003,6 @@ Fri Nov  8 13:55:03 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* doc/c-d10v.texi: Add info on @word modifier.
 
-end-sanitize-d10v	
 Wed Nov  6 13:46:07 1996  Jeffrey A Law  (law@cygnus.com)
 	
 	* config/tc-mn10300.c (mn10300_insert_operand): MN10300_OPERAND_SPLIT
@@ -1106,13 +1092,11 @@ Tue Oct 29 12:28:16 1996  Jeffrey A Law  (law@cygnus.com)
 	do any fixups.
 
 end-sanitize-v850
-start-sanitize-d10v
 Mon Oct 28 10:48:40 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.h (md_cleanup): New function.  This is needed to
 	write out any buffered instructions when a ".end" is found.
 
-end-sanitize-d10v	
 Mon Oct 28 10:43:45 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* read.c (read_a_source_file): New hook md_cleanup().
@@ -1160,13 +1144,11 @@ Tue Oct 22 22:01:25 1996  Jeffrey A Law  (law@cygnus.com)
 	differently for movea & sst/sld insns.
 
 end-sanitize-v850
-start-sanitize-d10v
 Tue Oct 22 17:09:32 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-d10v.c (parallel_ok): Don't allow illegal combinations
 	of instructions.
 
-end-sanitize-d10v
 Tue Oct 22 11:28:39 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* obj.h (struct format_ops): Add frob_file_after_relocs field.
@@ -1399,14 +1381,12 @@ Tue Sep 24 19:05:08 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* read.c (float_cons): Call md_flush_pending_output if it is
 	defined.
 
-start-sanitize-d10v
 Tue Sep 24 12:22:18 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c (md_operand): Created.  Allows operands to 
 	start with '#'.
 	* config/tc-d10v.h (md_operand): Undefined.
 
-end-sanitize-d10v	
 Mon Sep 23 12:13:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-m68k.c (add_fix): Treat a width of '3' like 'B'.
@@ -1469,7 +1449,6 @@ Sat Sep  7 13:25:55 1996  James G. Smith  <jsmith@cygnus.co.uk>
  	instruction field. Add code to generate shorter sequences for
  	constants with a single contiguous seqeuence of ones.
 
-start-sanitize-d10v
 Fri Sep  6 17:07:12 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c (d10v_dot_word): New function to support
@@ -1477,7 +1456,6 @@ Fri Sep  6 17:07:12 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	(md_apply_fix3): Cleanup and changes to support correct sizes
 	for 16 and 18-bit relocs.
 
-end-sanitize-d10v	
 Fri Sep  6 16:00:29 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* configure.in (sparc-*-aout): Set `em'.
@@ -1521,13 +1499,11 @@ Wed Sep  4 11:24:29 1996  James G. Smith  <jsmith@cygnus.co.uk>
 	* config/tc-mips.c (load_register): Remove unnecessary code that
  	was causing the high 32bits of 64bit constants to be lost.
 	
-start-sanitize-d10v
 Tue Sep  3 13:52:56 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c: Added changes to support function
 	pointers and "@word" syntax.
 
-end-sanitize-d10v	
 start-sanitize-v850
 Tue Sep  3 11:57:18 1996  Jeffrey A Law  (law@cygnus.com)
 
@@ -1614,13 +1590,11 @@ Fri Aug 30 18:12:00 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* read.c (emit_expr): Fix conversion of byte count to BFD reloc
 	code.
 
-start-sanitize-d10v
 Fri Aug 30 14:47:38 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c (find_opcode): Fix problem with calculating 
 	branch sizes in across sections.
 
-end-sanitize-d10v	
 start-sanitize-v850
 Fri Aug 30 00:44:13 1996  Jeffrey A Law  (law@cygnus.com)
 
@@ -1633,14 +1607,12 @@ Wed Aug 28 23:11:08 1996  Jeffrey A Law  (law@cygnus.com)
 	table marker.
 
 end-sanitize-v850
-start-sanitize-d10v
 Wed Aug 28 19:20:04 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c (find_opcode): Fix a bug which could generate
 	the wrong opcode for cases like st2w where there are many forms
 	of the same instruction.
 
-end-sanitize-d10v
 Tue Aug 27 13:53:22 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* expr.c (operand): If md_parse_name is defined, call it before
@@ -1661,7 +1633,6 @@ Tue Aug 27 09:05:50 1996  Jeffrey A Law  (law@cygnus.com)
 	* config/tc-hppa.c (tc_gen_reloc): Add new argument to
 	hppa_gen_reloc_type call.
 
-start-sanitize-d10v
 Mon Aug 26 18:24:51 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c: Fixed ".word".  Fixed problem with range checking
@@ -1673,7 +1644,6 @@ Mon Aug 26 13:39:27 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* config/tc-d10v.c (parallel_ok): Fix bug in parallel 
 	checking code.
 
-end-sanitize-d10v
 Mon Aug 26 14:38:22 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ecoff.c (init_file): Initialize fMerge to 1.
@@ -1682,12 +1652,10 @@ Mon Aug 26 14:38:22 1996  Ian Lance Taylor  <ian@cygnus.com>
 	(ecoff_directive_loc): Clear fMerge field of current file.
 	(ecoff_generate_asm_lineno): Likewise.
 
-start-sanitize-d10v
 Fri Aug 23 11:40:47 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* doc/c-d10v.texi: Fix typo. 
 
-end-sanitize-d10v	
 start-sanitize-v850
 Fri Aug 23 10:41:32 1996  Jeffrey A Law  (law@cygnus.com)
 
@@ -1728,13 +1696,11 @@ Thu Aug 22 10:20:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* ecoff.c (ecoff_directive_endef): Avoid a division by zero error
 	if an array dimension is not known.
 
-start-sanitize-d10v
 Thu Aug 22 10:50:00 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c: Fix a reloc bug caused by my last change. 
 	* doc/c-d10v.texi: Cleanup.
 	
-end-sanitize-d10v	
 start-sanitize-v850
 Tue Aug 20 15:15:16 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 
@@ -1744,7 +1710,6 @@ Tue Aug 20 15:15:16 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 	* configure.in (v850-*-elf): New target.
 	
 end-sanitize-v850
-start-sanitize-d10v
 Wed Aug 21 15:50:54 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* doc/c-d10v.texi: New file.
@@ -1756,7 +1721,6 @@ Tue Aug 20 14:10:02 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* config/tc-d10v.c: All references to defined symbols should
  	now use the optimal instruction.  .float and .double now work. 
 
-end-sanitize-d10v	
 Mon Aug 19 14:41:36 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-coff.c (fixup_segment): Adjust PC relative reloc by
@@ -1767,14 +1731,12 @@ Thu Aug 15 16:37:59 1996  Stan Shebs  <shebs@andros.cygnus.com>
 	* mpw-config.in: Add wildcards for config matching, add mips-*-*
 	case, forward-include bfd/elf-bfd.h.
 
-start-sanitize-d10v
 Thu Aug 15 13:24:30 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c: Add additional information to the opcode
         table to help determinine which instructions can be done
         in parallel. 
 
-end-sanitize-d10v	
 Thu Aug 15 17:01:31 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* config/tc-arm.c: Major changes to add Thumb support, with lots
@@ -1824,12 +1786,10 @@ Mon Aug 12 16:49:43 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.h (BYTE_ORDER): Don't define.  No longer used.
 
-start-sanitize-d10v
 Fri Aug  9 17:48:28 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c: Fix problem with relocs. 
 
-end-sanitize-d10v	
 Fri Aug  9 14:16:14 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-sh.c (sh_do_align): If not BFD_ASSEMBLER, always align
@@ -1883,12 +1843,10 @@ Wed Aug  7 11:50:26 1996  Ian Lance Taylor  <ian@cygnus.com>
 	as_fatal.  Change the error message slightly.  Set howto to a
 	non-NULL value in order to keep going.
 
-start-sanitize-d10v
 Tue Aug  6 12:58:03 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c: Added code to support 32-bit fixups for stabs.
 
-end-sanitize-d10v	
 Tue Aug  6 11:15:26 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-h8300.c (get_specific): New operand "size" derived
@@ -1909,23 +1867,19 @@ Thu Aug  1 23:51:52 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c: Revert yesterday's changes.
 	
-start-sanitize-d10v
 Wed Jul 31 14:46:11 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c: Disable range checking on 16-bit values.
 
-end-sanitize-d10v	
 Wed Jul 31 16:27:19 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-m68k.c (m68k_ip): Set ok_arch for every instruction,
 	not just the ones that don't match.
 
-start-sanitize-d10v
 Wed Jul 31 11:45:15 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c: Fixed bugs in short relocs and range checking.
 
-end-sanitize-d10v
 Wed Jul 31 15:41:42 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* config/tc-arm.c: Changed INSN_SIZE to variable insn_size, as
@@ -1963,20 +1917,17 @@ Tue Jul 30 15:51:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* config/tc-sparc.c (md_pseudo_table): Add 2byte, 4byte, and 8byte
 	pseudo-ops.
 
-start-sanitize-d10v
 Fri Jul 26 11:43:03 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c: Added lots of error checking.  Added hacks
 	to support accumulator shifts.
 	
-end-sanitize-d10v
 Fri Jul 26 11:56:08 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* symbols.c (S_SET_EXTERNAL): Let .weak override.
 	(S_CLEAR_EXTERNAL): Likewise.
 	(S_SET_WEAK): Remove error; just let .weak override.
 
-start-sanitize-d10v
 Thu Jul 25 15:22:51 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c (md_assemble): Now handles multiline
@@ -2002,7 +1953,6 @@ Mon Jul 22 11:32:36 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	(d10v_insert_operand): Now works correctly for either container.
 	* config/tc-d10v.h (d10v_cleanup): Declare. 
 	
-end-sanitize-d10v	
 Mon Jul 22 14:01:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (tc_gen_reloc): BFD_RELOC_PCREL_HI16_S and
@@ -2059,7 +2009,6 @@ Thu Jul 18 15:54:54 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* config/tc-m68k.c (m68k_ip): Use the correct length when
 	allocating space for the unsupported architecture error message.
 
-start-sanitize-d10v
 Thu Jul 18 12:57:10 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (d10v-*-*): Allow d10v-*-*, don't require d10v-*-elf*.
@@ -2070,7 +2019,6 @@ Wed Jul 17 14:25:13 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* config/tc-d10v.h: New file.
 	* configure (d10v-*-elf): New target.
 	* configure.in (d10v-*-elf): New target.
-end-sanitize-d10v
 	
 Fri Jul 12 20:54:19 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 

@@ -1,3 +1,17 @@
+Fri Feb 14 18:28:31 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld.texinfo (Option Commands): Document the INCLUDE command.
+
+Thu Feb 13 20:31:37 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
+
+	* configure.in: Call BFD_NEED_DECLARATION on getenv.
+	* acconfig.h (NEED_DECLARATION_GETENV): New macro.
+	* sysdep.h (getenv): Declare if NEED_DECLARATION_GETENV.
+	* ldemul.c (ld_emul_default_target): Do not cast getenv return
+	value.
+	* ldmain.c (get_emulation): Likewise.
+	* configure, config.in: Rebuild.
+
 Tue Feb 11 15:34:26 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* scripttempl/elfmips.sc: When relocating, put .mips16.fn.* and
@@ -183,9 +197,7 @@ Wed Nov 27 03:22:05 1996  Jason Merrill  <jason@yorick.cygnus.com>
 
 	* scripttempl/elf{,mips,ppc}.sc: Add the remaining DWARF sections.
 
-start-sanitize-d10v
 	* scripttempl/elfd10v.sc: Likewise.
-end-sanitize-d10v
 start-sanitize-v850
 	* scripttempl/v850.sc: Likewise.
 end-sanitize-v850
@@ -210,13 +222,11 @@ Fri Nov 15 13:00:18 1996  Jeffrey A Law  (law@cygnus.com)
 	* configure.tgt: Handle mn10300.
 	* emulparms/mn10300.sh: New file.
 
-start-sanitize-d10v
 Tue Nov  5 10:57:50 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* emulparams/d10velf.sh (READONLY_START_ADDR): Changed to 0x2000004.
 	(EMBEDDED): Define.
 	
-end-sanitize-d10v	
 Fri Nov  1 10:01:27 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.texinfo: Add section on reporting bugs.
@@ -231,7 +241,6 @@ Thu Oct 31 09:28:59 1996  Jeffrey A Law  (law@cygnus.com)
 	romzbss too.
 
 end-sanitize-v850
-start-sanitize-d10v
 Tue Oct 29 12:33:05 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* emulparams/d10velf.sh: Changes needed for D10V-EVA board. 
@@ -241,7 +250,6 @@ Tue Oct 29 12:33:05 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* scripttempl/elfd10v.sc:  Fix calculation of .text.  Change
 	.stack to start at 0x2007ffe.
 
-end-sanitize-d10v	
 Mon Oct 28 15:37:00 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* configure.tgt (sparclet*-*-aout*): Delete, use sparc*-*-aout*.
@@ -263,7 +271,6 @@ Tue Oct 22 11:36:47 1996  Jeffrey A Law  (law@cygnus.com)
 	the external memory region (0x100000 - 0x200000).
 
 end-sanitize-v850
-start-sanitize-d10v
 Mon Oct 21 17:16:59 1996  Michael Meissner  <meissner@wogglebug.tiac.net>
 
 	* scripttempl/elfd10v.sc: Clone from elf.sc, move .text to
@@ -275,7 +282,6 @@ Mon Oct 21 17:16:59 1996  Michael Meissner  <meissner@wogglebug.tiac.net>
 
 	* Makefile.in (ed10velf.c): Depend on elfd10v.sc, not elf.sc.
 
-end-sanitize-d10v
 start-sanitize-m32r
 Fri Oct 18 22:12:49 1996  Doug Evans  <dje@canuck.cygnus.com>
 
@@ -448,13 +454,11 @@ Sun Sep 15 22:09:56 1996  Jeffrey A Law  (law@cygnus.com)
 	* emulparms/v850.sh: Fix OTHER_RELOCATING_SECTIONS.
 
 end-sanitize-v850
-start-sanitize-d10v
 Sun Sep 15 10:38:16 1996  Mark Alexander  <marka@cygnus.com>
 
 	* emulparms/d10v.sh: Set OTHER_RELOCATING_SECTIONS to put
 	stack at top of simulator memory.
 
-end-sanitize-d10v
 Fri Sep 13 15:49:45 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlex.l (SYMBOLCHARN): Add $, _, and ~.
@@ -555,10 +559,8 @@ Mon Aug 19 11:28:29 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* genscripts.sh: Undo 8/16 change.
 
-start-sanitize-d10v
 	* emulparams/d10velf.sh (MACHINE): Explicitly set to nothing.
 
-end-sanitize-d10v
 Fri Aug 16 19:18:08 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* genscripts.sh: Explicitly reset any shell variables set or used
@@ -566,10 +568,8 @@ Fri Aug 16 19:18:08 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	names as normal environment variables by the person running
 	configure.
 
-start-sanitize-d10v
 	* Makefile.in (ed10velf.c): Use tdir_d10v, not tdir_arcelf.
 
-end-sanitize-d10v
 Fri Aug 16 14:15:41 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* scripttempl/armcoff.sc (__bss_start__, __bss_end__,
@@ -676,7 +676,6 @@ Thu Aug  1 12:52:19 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* emultempl/sunos.em (gld${EMULATION_NAME}_after_open): Move
 	definition of lib_path inside condition where it is used.
 
-start-sanitize-d10v
 Wed Jul 31 13:17:10 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
  	* emulparams/d10velf.sh: Now works with elf.sc.
@@ -685,7 +684,6 @@ Wed Jul 31 11:52:03 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* emulparams/d10velf.sh (SCRIPT_NAME): Change to vanilla.
 
-end-sanitize-d10v	
 Tue Jul 30 14:46:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlang.c (lang_size_sections): Add the section VMA to the result
@@ -727,7 +725,6 @@ Mon Jul 29 17:23:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* ldlang.c (lang_place_orphans): Correct condition: place a common
 	section if not relocateable or if common definitions are forced.
 
-start-sanitize-d10v
 Wed Jul 24 12:16:38 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* emulparams/d10velf.sh (SCRIPT_NAME): Change to elf.
@@ -742,7 +739,6 @@ Tue Jul 23 10:36:19 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* configure.tgt (d10v-*-elf*): New target.
 	* emulparams/d10velf.sh: New file.
 
-end-sanitize-d10v
 Thu Jul 18 16:25:39 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.tgt (sparc*-*-sysv4*): New target.  From Andrew Gierth
@@ -6950,7 +6946,7 @@ Fri Oct  4 21:51:58 1991  John Gilmore  (gnu at cygnus.com)
 
 
 Local Variables:
-mode: indented-text
+mode: change-log
 left-margin: 8
 fill-column: 74
 version-control: never

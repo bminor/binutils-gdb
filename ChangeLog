@@ -117,12 +117,10 @@ Tue Nov 26 11:45:33 1996  Kim Knuttila  <krk@cygnus.com>
 
 	* config.sub (basic_machine): added mips16 configuration
 
-start-sanitize-d10v
 Sat Nov 23 19:26:22 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config.sub: Handle d10v-unknown.
 
-end-sanitize-d10v
 start-sanitize-v850
 Sat Nov 23 14:23:01 1996  Gavin Koch  <gavin@cygnus.com>
         
@@ -142,12 +140,10 @@ Wed Nov 20 10:09:01 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config.sub: Handle mn10200 and mn10300.
 
-start-sanitize-d10v
 Tue Nov 19 16:35:14 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (d10v-*): Do not build librx.
 
-end-sanitize-d10v
 Mon Nov 18 13:28:41 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* configure.in (mn10300): Build everything except gdb & libgloss.
@@ -363,13 +359,11 @@ Fri Sep 27 17:39:44 1996  Stu Grossman  (grossman@critters.cygnus.com)
 	* configure.in:  You can now configure GDB for the v850.
 
 end-sanitize-v850
-start-sanitize-d10v
 Tue Sep 24 19:05:12 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* configure.in (noconfigdirs): Don't configure any C++ dirs
 	if targeting D10V.
 
-end-sanitize-d10v
 Tue Sep 17 12:15:31 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.sub: Recognize mips64vr5000.
@@ -406,12 +400,10 @@ Thu Aug 29 16:44:58 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config.guess (i[345]86): Ditto.
 
-start-sanitize-d10v
 Mon Aug 26 18:34:42 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* configure.in (noconfigdirs): Removed gdb for D10V.
 
-end-sanitize-d10v
 start-sanitize-v850
 Thu Aug 22 17:13:52 1996  Jeffrey A Law  (law@cygnus.com)
 
@@ -466,12 +458,10 @@ Sat Jul 27 15:10:43 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-config.in: Generate Mac include for elf/dwarf2.h.
 
-start-sanitize-d10v
 Tue Jul 23 10:47:04 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* configure.in (d10v-*-*): Remove ld from $noconfigdirs. 
 
-end-sanitize-d10v	
 Mon Jul 22 13:28:51 1996  Brendan Kehoe  <brendan@lisa.cygnus.com>
 
 	* configure.in (native_only): Add prms.
@@ -481,7 +471,6 @@ Mon Jul 22 12:27:58 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* Makefile.in (GAS_SUPPORT_DIRS): Add make-all.com and setup.com.
 	(BINUTILS_SUPPORT_DIRS): Likewise.
 
-start-sanitize-d10v
 Thu Jul 18 12:55:40 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (d10v-*-*): Don't configure ld or gdb until the
@@ -491,7 +480,6 @@ Wed Jul 17 14:33:09 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* configure.in (d10v-*-*): New target.
 
-end-sanitize-d10v
 Mon Jul 15 11:53:00 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config.guess (HP 9000/811): Recognize this as a PA1.1
@@ -532,11 +520,9 @@ Mon Jul  8 17:33:14 1996  Jim Wilson  <wilson@cygnus.com>
 
 	* configure.in (mips-sgi-irix6*): Use mh-irix6 instead of mh-irix5.
 
-start-sanitize-d10v
 Mon Jul  1 13:31:35 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config.sub (basic_machine): Recognize d10v as a valid processor.
-end-sanitize-d10v
 
 Fri Jun 28 12:14:35 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
@@ -4860,8 +4846,8 @@ Fri Nov 22 07:38:11 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
 
 Local Variables:
-mode: indented-text
+mode: change-log
 left-margin: 8
-fill-column: 74
+fill-column: 76
 version-control: never
 End:

@@ -15,9 +15,7 @@ arm-*-pe)		targ_emul=armpe ;;
 # start-sanitize-arc
 arc-*-elf*)		targ_emul=arcelf ;;
 # end-sanitize-arc
-# start-sanitize-d10v
 d10v-*-*)		targ_emul=d10velf ;;
-# end-sanitize-d10v
 sparc64-*-aout*)	targ_emul=sparcaout ;;
 sparc64-*-elf*)		targ_emul=elf64_sparc ;;
 sparc-sun-sunos4*) 	targ_emul=sun4 ;;
@@ -138,6 +136,10 @@ mips*vr4100el-*-elf*)	targ_emul=elf32l4300 ;;
 mips*vr4100-*-elf*)	targ_emul=elf32b4300 ;;
 mips*vr5000el-*-elf*)	targ_emul=elf32l4300 ;;
 mips*vr5000-*-elf*)	targ_emul=elf32b4300 ;;
+# start-sanitize-r5900 
+mips*vr5900el-*-elf*)	targ_emul=elf32l4300 ;;
+mips*vr5900-*-elf*)	targ_emul=elf32b4300 ;;
+# end-sanitize-r5900 
 mips*el-*-elf*)		targ_emul=elf32elmip ;;
 mips*-*-elf*)		targ_emul=elf32ebmip ;;
 mips*-*-rtems*)		targ_emul=elf32ebmip ;;

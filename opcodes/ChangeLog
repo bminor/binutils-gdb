@@ -124,13 +124,11 @@ Thu Jan 30 14:09:03 1997  Fred Fish  <fnf@cygnus.com>
 	Remove private tables and use tic80_value_to_symbol function.
 
 end-sanitize-tic80
-start-sanitize-d10v
 Thu Jan 30 11:30:45 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-dis.c (print_operand): Change address printing
 	to correctly handle PC wrapping.  Fixes PR11490.
 
-end-sanitize-d10v	
 Wed Jan 29 09:39:17 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10200-opc.c (mn10200_operands): Make 8 and 16 bit pc-relative
@@ -365,12 +363,10 @@ Fri Dec 27 22:30:57 1996  Fred Fish  <fnf@cygnus.com>
 	* tic80-opc.c: Add file.
 	
 end-sanitize-tic80
-start-sanitize-d10v
 Fri Dec 20 14:30:19 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-opc.c (pre_defined_registers):  Add cr[0-15], dpc, dpsw, link.
 
-end-sanitize-d10v	
 Mon Dec 16 13:00:15 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10200-opc.c (mn10200_operands): Add SIMM16N.
@@ -535,12 +531,10 @@ Tue Nov 19 13:33:01 1996  Jeffrey A Law  (law@cygnus.com)
 	list.
 	(mn10300_opcodes): Use REGS for register list in "movm" instructions.
 	
-start-sanitize-d10v
 Mon Nov 18 15:20:35 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* d10v-opc.c (d10v_opcodes): Add3 sets the carry.
 
-end-sanitize-d10v
 Fri Nov 15 13:43:19 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-opc.c (mn10300_opcodes): Demand parens around
@@ -578,14 +572,12 @@ Tue Nov  5 13:26:58 1996  Jeffrey A Law  (law@cygnus.com)
 	the extended part of an instruction.
 	(mn10300_operands): Use new opcodes as appropriate.
 
-start-sanitize-d10v
 Tue Nov  5 10:30:51 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-opc.c (d10v_opcodes): Declare the trap instruction
  	sequential so the assembler never parallelizes it with
 	other instructions.
 
-end-sanitize-d10v
 Mon Nov  4 12:50:40 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-opc.c (mn10300_operands): Add DN01 and AN01 for
@@ -864,13 +856,11 @@ Wed Aug 28 15:55:43 1996  Jeffrey A Law  (law@cygnus.com)
 	end of the opcode table.
 
 end-sanitize-v850
-start-sanitize-d10v
 Mon Aug 26 13:35:53 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-opc.c (pre_defined_registers): Added register pairs,
 	"r0-r1", "r2-r3", etc.
 
-end-sanitize-d10v	
 start-sanitize-v850
 Fri Aug 23 00:27:01 1996  Jeffrey A Law  (law@cygnus.com)
 
@@ -959,14 +949,12 @@ Mon Aug 19 15:21:38 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc-dis.c (print_insn_sparc): Handle little endian sparcs.
 
-start-sanitize-d10v
 Thu Aug 15 13:14:43 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-opc.c: Add additional information to the opcode
 	table to help determinine which instructions can be done
 	in parallel.
 
-end-sanitize-d10v
 Thu Aug 15 13:11:13 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed: Update editing of include pathnames to be
@@ -980,7 +968,6 @@ Wed Aug 14 17:00:04 1996  Richard Henderson  <rth@tamu.edu>
 
 	* alpha-opc.c (EV4EXTHWINDEX): Field width should be 8 not 5.
 
-start-sanitize-d10v
 Mon Aug 12 14:30:37 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-opc.c (d10v_opcodes): Minor fixes to addi and bl.l.
@@ -989,7 +976,6 @@ Fri Aug  9 13:21:59 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-opc.c (d10v_opcodes): Correct 'mv' unit entry to EITHER.
 
-end-sanitize-d10v	
 Thu Aug  8 12:43:52 1996  Klaus Kaempf  <kkaempf@progis.de>
 
 	* makefile.vms: Update for alpha-opc changes.
@@ -999,13 +985,11 @@ Wed Aug  7 11:55:10 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* i386-dis.c (print_insn_i386): Actually return the correct value.
  	(ONE, OP_ONE): #ifdef out; not used.
 
-start-sanitize-d10v
 Fri Aug  2 17:47:03 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-opc.c (d10v_opcodes): Added 2 accumulator sub instructions.
 	Changed subi operand type to treat 0 as 16.
 
-end-sanitize-d10v
 Wed Jul 31 16:21:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* m68k-opc.c: Add cpushl for the mcf5200.  From Ken Rose
@@ -1018,13 +1002,11 @@ Wed Jul 31 14:39:27 1996  James G. Smith  <jsmith@cygnus.co.uk>
 	* arm-dis.c: (print_insn_arm): Provide decoding of the new
 	formats %h and %s.
 
-start-sanitize-d10v
 Fri Jul 26 11:45:04 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-opc.c (d10v_operands): Added UNUM4S; a 4-bit accumulator shift.
  	(d10v_opcodes): Modified accumulator shift instructions to use UNUM4S.
 
-end-sanitize-d10v	
 Fri Jul 26 14:01:43 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* alpha-dis.c (print_insn_alpha_osf): Remove.
@@ -1033,7 +1015,6 @@ Fri Jul 26 14:01:43 1996  Ian Lance Taylor  <ian@cygnus.com>
 	names based on info->flavour.
 	* disassemble.c: Always return print_insn_alpha for the alpha.
 
-start-sanitize-d10v
 Thu Jul 25 15:24:17 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-dis.c (dis_long): Handle unknown opcodes.
@@ -1049,20 +1030,17 @@ Tue Jul 23 11:02:53 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-dis.c: Change all functions to use info->print_address_func.
 
-end-sanitize-d10v	
 Mon Jul 22 15:38:53 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* m68k-opc.c (m68k_opcodes): Make opcode masks for the ColdFire
  	move ccr/sr insns more strict so that the disassembler only
  	selects them when the addressing mode is data register.
 
-start-sanitize-d10v
 Mon Jul 22 11:25:24 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
         * d10v-opc.c (pre_defined_registers):  Declare.
         * d10v-dis.c (print_operand): Now uses pre_defined_registers
         to pick a better name for the registers.
 
-end-sanitize-d10v	
 Mon Jul 22 13:47:23 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* sparc-opc.c: Fix opcode values for fpack16, and fpackfix.  Fix
@@ -1085,8 +1063,7 @@ Thu Jul 18 17:19:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* configure: Rebuild.
 	* Makefile.in (install): Use @INSTALL_SHLIB@.
 
-start-sanitize-d10v
-	Wed Jul 17 14:39:05 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+Wed Jul 17 14:39:05 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* configure: (bfd_d10v_arch) Add new case.
 	* configure.in: (bfd_d10v_arch) Add new case.
@@ -1094,7 +1071,6 @@ start-sanitize-d10v
 	* d10v-opc.c: New file.
 	* disassemble.c (disassembler) Add entry for d10v.
 
-end-sanitize-d10v
 Wed Jul 17 10:12:05 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* m68k-opc.c (m68k_opcodes): Fix bugs in coldfire insns relating

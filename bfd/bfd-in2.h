@@ -1210,9 +1210,7 @@ enum bfd_architecture
   bfd_arch_powerpc,    /* PowerPC */
   bfd_arch_rs6000,     /* IBM RS/6000 */
   bfd_arch_hppa,       /* HP PA RISC */
-  /* start-sanitize-d10v */
   bfd_arch_d10v,       /* Mitsubishi D10V */
-  /* end-sanitize-d10v */
   /* start-sanitize-d30v */
   bfd_arch_d30v,       /* Mitsubishi D30V */
   /* end-sanitize-d30v */
@@ -1841,8 +1839,6 @@ through 0. */
   BFD_RELOC_ARC_B26,
 /* end-sanitize-arc */
 
-/* start-sanitize-d10v */
-
 /* Mitsubishi D10V relocs.
 This is a 10-bit reloc with the right 2 bits
 assumed to be 0. */
@@ -1862,7 +1858,6 @@ assumed to be 0. */
 /* This is an 18-bit reloc with the right 2 bits
 assumed to be 0. */
   BFD_RELOC_D10V_18_PCREL,
-/* end-sanitize-d10v */
 
 /* start-sanitize-d30v */
 

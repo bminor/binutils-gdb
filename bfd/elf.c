@@ -2513,11 +2513,9 @@ prep_headers (abfd)
     case bfd_arch_sh:
       i_ehdrp->e_machine = EM_SH;
       break;
-/* start-sanitize-d10v */
     case bfd_arch_d10v:
       i_ehdrp->e_machine = EM_CYGNUS_D10V;
       break;
-/* end-sanitize-d10v */
 /* start-sanitize-d30v */
     case bfd_arch_d30v:
       i_ehdrp->e_machine = EM_CYGNUS_D30V;

@@ -249,13 +249,11 @@ Fri Aug 16 00:15:15 1996  Jeffrey A Law  (law@cygnus.com)
 	* hppa.h (pitlb, pitlbe, iitlba, iitlbp, fic, fice): Accept
 	a 3 bit space id instead of a 2 bit space id.
 
-start-sanitize-d10v
 Thu Aug 15 13:11:46 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v.h: Add some additional defines to support the
  	assembler in determining which operations can be done in parallel.
 
-end-sanitize-d10v	
 Tue Aug  6 11:13:22 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* h8300.h (SN): Define.
@@ -263,7 +261,6 @@ Tue Aug  6 11:13:22 1996  Jeffrey A Law  (law@cygnus.com)
 	(nop, bpt, rte, rts, sleep, clrmac): These have no size associated
 	with them.
 
-start-sanitize-d10v
 Fri Jul 26 11:47:10 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v.h (OPERAND_SHIFT): New operand flag.
@@ -278,18 +275,15 @@ Mon Jul 22 11:21:15 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* d10v.h (pd_reg): Define. Putting the definition here allows
 	the assembler and disassembler to share the same struct.
 
-end-sanitize-d10v
 Mon Jul 22 12:15:25 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* i960.h (i960_opcodes): "halt" takes an argument.  From Stephen
 	Williams <steve@icarus.com>.
 
-start-sanitize-d10v
 Wed Jul 17 14:46:38 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v.h: New file. 
 
-end-sanitize-d10v
 Thu Jul 11 12:09:15 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* h8300.h (band, bclr): Force high bit of immediate nibble to zero.

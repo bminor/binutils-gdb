@@ -119,10 +119,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Alpha backend magic number.  Written in the absence of an ABI.  */
 #define EM_ALPHA	0x9026
 
-/* start-sanitize-d10v */
 /* D10V backend magic number.  Written in the absence of an ABI.  */
 #define EM_CYGNUS_D10V	0x7650
-/* end-sanitize-d10v */
 
 /* start-sanitize-d30v */
 /* D30V backend magic number.  Written in the absence of an ABI.  */

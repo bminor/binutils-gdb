@@ -423,11 +423,9 @@ case "${target}" in
   arm-*-riscix*)
     noconfigdirs="$noconfigdirs ld target-libgloss"
     ;;
-# start-sanitize-d10v
   d10v-*-*)
     noconfigdirs="$noconfigdirs target-librx target-libg++ target-libstdc++ target-libio target-libgloss"
     ;;
-# end-sanitize-d10v
 # start-sanitize-d30v
   d30v-*-*)
     noconfigdirs="$noconfigdirs sim tcl tk expect gcc gdb newlib ld target-librx target-libg++ target-libstdc++ target-libio target-libgloss"

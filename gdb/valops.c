@@ -45,7 +45,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 static int typecmp PARAMS ((int staticp, struct type *t1[], value_ptr t2[]));
 
+#ifdef CALL_DUMMY
 static CORE_ADDR find_function_addr PARAMS ((value_ptr, struct type **));
+static value_ptr value_arg_coerce PARAMS ((value_ptr, struct type *));
+#endif
+
 
 #ifndef PUSH_ARGUMENTS
 static CORE_ADDR value_push PARAMS ((CORE_ADDR, value_ptr));
@@ -63,8 +67,6 @@ static int check_field_in PARAMS ((struct type *, const char *));
 static CORE_ADDR allocate_space_in_inferior PARAMS ((int));
 
 static value_ptr cast_into_complex PARAMS ((struct type *, value_ptr));
-
-static value_ptr value_arg_coerce PARAMS ((value_ptr, struct type *));
 
 #define VALUE_SUBSTRING_START(VAL) VALUE_FRAME(VAL)
 
@@ -178,7 +180,7 @@ value_cast (type, arg2)
 	    low_bound = 0, high_bound = 0;
 	  new_length = val_length / element_length;
 	  if (val_length % element_length != 0)
-       warning("array element type size does not divide object size in cast");
+	    warning("array element type size does not divide object size in cast");
 	  /* FIXME-type-allocation: need a way to free this type when we are
 	     done with it.  */
 	  range_type = create_range_type ((struct type *) NULL,
@@ -303,7 +305,8 @@ value_cast (type, arg2)
     }
   else if (VALUE_LVAL (arg2) == lval_memory)
     {
-      return value_at_lazy (type, VALUE_ADDRESS (arg2) + VALUE_OFFSET (arg2));
+      return value_at_lazy (type, VALUE_ADDRESS (arg2) + VALUE_OFFSET (arg2),
+			    VALUE_BFD_SECTION (arg2));
     }
   else if (code1 == TYPE_CODE_VOID)
     {
@@ -341,9 +344,10 @@ value_zero (type, lv)
    the contents are actually required.  */
 
 value_ptr
-value_at (type, addr)
+value_at (type, addr, sect)
      struct type *type;
      CORE_ADDR addr;
+     asection *sect;
 {
   register value_ptr val;
 
@@ -352,7 +356,6 @@ value_at (type, addr)
 
   val = allocate_value (type);
 
-/* start-sanitize-d10v */
 #ifdef GDB_TARGET_IS_D10V
   if (TYPE_TARGET_TYPE(type) && TYPE_CODE(TYPE_TARGET_TYPE(type)) == TYPE_CODE_FUNC)
     {
@@ -364,12 +367,12 @@ value_at (type, addr)
     }
   else
 #endif
-/* end-sanitize-d10v */
 
-  read_memory (addr, VALUE_CONTENTS_RAW (val), TYPE_LENGTH (type));
+  read_memory_section (addr, VALUE_CONTENTS_RAW (val), TYPE_LENGTH (type), sect);
 
   VALUE_LVAL (val) = lval_memory;
   VALUE_ADDRESS (val) = addr;
+  VALUE_BFD_SECTION (val) = sect;
 
   return val;
 }
@@ -377,9 +380,10 @@ value_at (type, addr)
 /* Return a lazy value with type TYPE located at ADDR (cf. value_at).  */
 
 value_ptr
-value_at_lazy (type, addr)
+value_at_lazy (type, addr, sect)
      struct type *type;
      CORE_ADDR addr;
+     asection *sect;
 {
   register value_ptr val;
 
@@ -391,6 +395,7 @@ value_at_lazy (type, addr)
   VALUE_LVAL (val) = lval_memory;
   VALUE_ADDRESS (val) = addr;
   VALUE_LAZY (val) = 1;
+  VALUE_BFD_SECTION (val) = sect;
 
   return val;
 }
@@ -414,7 +419,6 @@ value_fetch_lazy (val)
   CORE_ADDR addr = VALUE_ADDRESS (val) + VALUE_OFFSET (val);
   int length = TYPE_LENGTH (VALUE_TYPE (val));
 
-/* start-sanitize-d10v */
 #ifdef GDB_TARGET_IS_D10V
   struct type *type = VALUE_TYPE(val);
   if (TYPE_TARGET_TYPE(type) && TYPE_CODE(TYPE_TARGET_TYPE(type)) == TYPE_CODE_FUNC)
@@ -427,10 +431,10 @@ value_fetch_lazy (val)
     }
   else
 #endif
-/* end-sanitize-d10v */
 
   if (length)
-    read_memory (addr, VALUE_CONTENTS_RAW (val), length);
+    read_memory_section (addr, VALUE_CONTENTS_RAW (val), length,
+			 VALUE_BFD_SECTION (val));
   VALUE_LAZY (val) = 0;
   return 0;
 }
@@ -710,7 +714,7 @@ value_of_variable (var, b)
      struct block *b;
 {
   value_ptr val;
-  struct frame_info *frame;
+  struct frame_info *frame = NULL;
 
   if (!b)
     frame = NULL;		/* Use selected frame.  */
@@ -776,12 +780,15 @@ value_ptr
 value_coerce_function (arg1)
      value_ptr arg1;
 {
+  value_ptr retval;
 
   if (VALUE_LVAL (arg1) != lval_memory)
     error ("Attempt to take address of value not located in memory.");
 
-  return value_from_longest (lookup_pointer_type (VALUE_TYPE (arg1)),
-		(LONGEST) (VALUE_ADDRESS (arg1) + VALUE_OFFSET (arg1)));
+  retval = value_from_longest (lookup_pointer_type (VALUE_TYPE (arg1)),
+			       (LONGEST) (VALUE_ADDRESS (arg1) + VALUE_OFFSET (arg1)));
+  VALUE_BFD_SECTION (retval) = VALUE_BFD_SECTION (arg1);
+  return retval;
 }  
 
 /* Return a pointer value for the object for which ARG1 is the contents.  */
@@ -790,6 +797,8 @@ value_ptr
 value_addr (arg1)
      value_ptr arg1;
 {
+  value_ptr retval;
+
   struct type *type = check_typedef (VALUE_TYPE (arg1));
   if (TYPE_CODE (type) == TYPE_CODE_REF)
     {
@@ -806,8 +815,10 @@ value_addr (arg1)
   if (VALUE_LVAL (arg1) != lval_memory)
     error ("Attempt to take address of value not located in memory.");
 
-  return value_from_longest (lookup_pointer_type (VALUE_TYPE (arg1)),
-		(LONGEST) (VALUE_ADDRESS (arg1) + VALUE_OFFSET (arg1)));
+  retval = value_from_longest (lookup_pointer_type (VALUE_TYPE (arg1)),
+			       (LONGEST) (VALUE_ADDRESS (arg1) + VALUE_OFFSET (arg1)));
+  VALUE_BFD_SECTION (retval) = VALUE_BFD_SECTION (arg1);
+  return retval;
 }
 
 /* Given a value of a pointer type, apply the C unary * operator to it.  */
@@ -829,9 +840,11 @@ value_ind (arg1)
      BUILTIN_TYPE_LONGEST would seem to be a mistake.  */
   if (TYPE_CODE (type1) == TYPE_CODE_INT)
     return value_at (builtin_type_int,
-		     (CORE_ADDR) value_as_long (arg1));
+		     (CORE_ADDR) value_as_long (arg1),
+		     VALUE_BFD_SECTION (arg1));
   else if (TYPE_CODE (type1) == TYPE_CODE_PTR)
-    return value_at_lazy (TYPE_TARGET_TYPE (type1), value_as_pointer (arg1));
+    return value_at_lazy (TYPE_TARGET_TYPE (type1), value_as_pointer (arg1),
+			  VALUE_BFD_SECTION (arg1));
   error ("Attempt to take contents of a non-pointer value.");
   return 0;  /* For lint -- never reached */
 }
@@ -903,6 +916,7 @@ value_push (sp, arg)
 
 #endif	/* !PUSH_ARGUMENTS */
 
+#ifdef CALL_DUMMY
 /* Perform the standard coercions that are specified
    for arguments to be passed to C functions.
 
@@ -1030,7 +1044,6 @@ find_function_addr (function, retval_type)
   return funaddr;
 }
 
-#if defined (CALL_DUMMY)
 /* All this stuff with a dummy frame may seem unnecessarily complicated
    (why not just save registers in GDB?).  The purpose of pushing a dummy
    frame which looks just like a real frame is so that if you call a
@@ -1466,6 +1479,7 @@ value_array (lowbound, highbound, elemvec)
 		  VALUE_CONTENTS (elemvec[idx]),
 		  typelength);
 	}
+      VALUE_BFD_SECTION (val) = VALUE_BFD_SECTION (elemvec[0]);
       return val;
     }
 
@@ -1483,7 +1497,7 @@ value_array (lowbound, highbound, elemvec)
 
   /* Create the array type and set up an array value to be evaluated lazily. */
 
-  val = value_at_lazy (arraytype, addr);
+  val = value_at_lazy (arraytype, addr, VALUE_BFD_SECTION (elemvec[0]));
   return (val);
 }
 
@@ -1523,7 +1537,7 @@ value_string (ptr, len)
   addr = allocate_space_in_inferior (len);
   write_memory (addr, ptr, len);
 
-  val = value_at_lazy (stringtype, addr);
+  val = value_at_lazy (stringtype, addr, NULL);
   return (val);
 }
 
@@ -1648,7 +1662,7 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
 		    error ("Internal error: could not find physical static variable named %s",
 			   phys_name);
 		v = value_at (TYPE_FIELD_TYPE (type, i),
-			      SYMBOL_VALUE_ADDRESS (sym));
+			      SYMBOL_VALUE_ADDRESS (sym), SYMBOL_BFD_SECTION (sym));
 	      }
 	    else
 	      v = value_primitive_field (arg1, offset, i, type);
@@ -2104,7 +2118,8 @@ value_struct_elt_for_reference (domain, offset, curtype, name, intype)
 		error ("Internal error: could not find physical static variable named %s",
 		       phys_name);
 	      return value_at (SYMBOL_TYPE (sym),
-			       SYMBOL_VALUE_ADDRESS (sym));
+			       SYMBOL_VALUE_ADDRESS (sym),
+			       SYMBOL_BFD_SECTION (sym));
 	    }
 	  if (TYPE_FIELD_PACKED (t, i))
 	    error ("pointers to bitfield members not allowed");

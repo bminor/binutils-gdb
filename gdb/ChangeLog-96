@@ -90,13 +90,11 @@ Mon Dec 23 02:25:58 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	to reflect the fact that we are now using an AT_ENTRY_POINT
 	call dummy.
 
-start-sanitize-d10v
 Sun Dec 22 15:52:25 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-tdep.c (d10v_skip_prologue): PR11287.  Fix problem where
 	some breakpoints weren't being set.
 
-end-sanitize-d10v	
 Sat Dec 21 12:57:59 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config/mips/tm-mips.h (PC_IN_CALL_DUMMY):  Removed, the default
@@ -244,14 +242,12 @@ Sun Dec  8 00:36:31 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	(xfer_link_map_member):  Work around problem with alignments
 	in struct obj when compiling GDB under N32 ABI.
 
-start-sanitize-d10v
 Thu Dec  5 23:30:44 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* d10v-tdep.c: Add support for examination and interpretation
 	of instruction trace buffer.
 	(trace, untrace, info trace, tdisassemble): New commands.
 
-end-sanitize-d10v
 Thu Dec  5 14:06:23 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config/sparc/tm-sparclet.h (TARGET_BYTE_ORDER): Undef.
@@ -562,7 +558,6 @@ Mon Nov 25 13:17:16 1996  Fred Fish  <fnf@ninemoons.com>
 	From: Paul Eggert <eggert@twinsun.com>
 	* remote-bug.c (wait_strings): Avoid creating a trigraph.
 
-start-sanitize-d10v
 Fri Nov 22 15:55:22 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* valops.c (value_at, value_fetch_lazy): Put in D10V call 
@@ -570,7 +565,6 @@ Fri Nov 22 15:55:22 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* values.c (value_from_longest): Removed previous d10v changes.
 	* config/d10v/tm-d10v.h (TARGET_PTR_BIT): Change to 4 bytes.
 	
-end-sanitize-d10v
 Fri Nov 22 10:06:19 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config/i386/nm-i386v4.h (LOSING_POLL):  Define, needed for
@@ -593,7 +587,6 @@ Wed Nov 20 19:09:16 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	virtual buf instead of the raw buf.  Needed for REGISTER_CONVERT 
 	to work with non-floating point regs.
 
-start-sanitize-d10v
 	* d10v-tdep.c (d10v_skip_prologue): If we have line debugging 
 	information, then the end of the prologue should the first 
 	assembly instruction of the first source line.
@@ -608,7 +601,7 @@ start-sanitize-d10v
 	(REGISTER_CONVERT_TO_RAW): Define.
 	(D10V_MAKE_DADDR): Define.
 	(D10V_MAKE_IADDR): Define.
-end-sanitize-d10v
+
 Wed Nov 20 16:15:15 1996  Geoffrey Noer  <noer@cygnus.com>
 
         * config/i386/cygwin32.mh: add MMALLOC_CFLAGS = -I$(MMALLOC_SRC)
@@ -667,10 +660,8 @@ Thu Nov 14 15:54:20 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	instead of doing addr>>32 to eliminate a warning produced by GCC
 	on 32-bit systems.
 
-start-sanitize-d10v
 	* config/d10v/tm-d10v.h (ULONGEST): Define.
 
-end-sanitize-d10v
 Tue Nov 12 12:25:27 1996  Jim Wilson  <wilson@cygnus.com>
 
 	* c-typeprint.c (cp_type_print_method_args): Pass -1 for show in
@@ -768,14 +759,12 @@ Fri Nov  8 12:29:51 1996  Stan Shebs  <shebs@andros.cygnus.com>
 	* remote-sim.c (simulator_command): Set up callbacks before
 	entering the simulator.
 
-start-sanitize-d10v
 Thu Nov  7 15:19:08 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-tdep.c: Fix some problems with inferior function calls.
 	* config/d10v/tm-d10v.h (EXTRA_FRAME_INFO): Change dummy to be
 	a pointer to the dummy's stack instead of just a flag.
 	
-end-sanitize-d10v	
 start-sanitize-m32r
 Tue Nov  5 10:21:02 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
@@ -808,14 +797,12 @@ Sat Nov  2 03:54:13 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	for shared libraries from the minimal symbol table of the main
 	executable first.
 
-start-sanitize-d10v
 Fri Nov  1 13:59:28 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-tdep.c, config/d10v/tm-d10v.h:  Major fixes to support
 	inferior function calls and proper stack backtracing on D10V-EVA
 	board.
 
-end-sanitize-d10v
 Fri Nov  1 10:50:51 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/powerpc/linux.mh (NATDEPFILES): Fix up things so that it
@@ -859,7 +846,6 @@ Tue Oct 29 14:59:20 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* TODO: Add item suggesting an "info bfd" command.
 
-start-sanitize-d10v
 Tue Oct 29 12:48:04 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-tdep.c: Snapshot that supports D10V-EVA board.
@@ -867,7 +853,6 @@ Tue Oct 29 12:48:04 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* config/d10v/tm-d10v.h (REGISTER_NAMES): Add imap0,imap1,dmap.
 	(TARGET_READ_FP,TARGET_WRITE_FP): Define. 
 	
-end-sanitize-d10v
 Mon Oct 28 17:34:24 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* mswin/genmakes mswin/recordit:  New scripts to generate make
@@ -939,13 +924,11 @@ Tue Oct 22 16:28:20 1996  Stu Grossman  (grossman@critters.cygnus.com)
 	* (v850_frame_chain):  Use new calling convention for scan_prologue.
 
 end-sanitize-v850
-start-sanitize-d10v
 Tue Oct 22 10:25:29 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-tdep.c, config/d10v/tm-d10v.h: Changes to allow stack
  	backtraces and inferior function calls.
 
-end-sanitize-d10v	
 Tue Oct 22 10:32:46 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed: Update init.c editing to work with Oct 8 change.
@@ -1252,13 +1235,11 @@ start-sanitize-gdbtk
 	15 seconds to 30 seconds.
 end-sanitize-gdbtk
 	
-start-sanitize-d10v
 Fri Sep 27 13:32:53 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/d10v/tm-d10v.h (TARGET_{INT,PTR}_BIT): Define.
 	(TARGET_{,LONG_}DOUBLE_BIT): Ditto.
 
-end-sanitize-d10v
 Thu Sep 26 23:10:26 1996  Mark Alexander  <marka@cygnus.com>
 
 	* configure.in, config/i386/tm-linux.h: Fix configure
@@ -1271,14 +1252,12 @@ Wed Sep 25 18:31:33 1996  Stan Shebs  <shebs@andros.cygnus.com>
 	* config/m68k/monitor.mt (TDEPFILES): Add it.
 	* NEWS: Mention it.
 
-start-sanitize-d10v
 Mon Sep 23 16:13:50 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/d10v/tm-d10v.h (SAVED_PC_AFTER_CALL): Fixed.  
 	Now single-steps correctly.
 	* d10v-tdep.c (d10v_pop_frame): Fixed.
 
-end-sanitize-d10v	
 Fri Sep 20 16:10:58 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* config/sh/tm-sh.h (REGISTER_NAMES): Move fp registers to
@@ -1289,7 +1268,6 @@ Fri Sep 20 16:10:58 1996  Stan Shebs  <shebs@andros.cygnus.com>
 	Rearrange to match REGISTER_NAMES.
 	* sh3-rom.c (sh3_regnames, sh3e_regnames): Ditto.
 
-start-sanitize-d10v
 Thu Sep 19 16:19:01 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-tdep.c:  Stack chain should work now. 
@@ -1298,7 +1276,6 @@ Tue Sep 17 18:46:57 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-tdep.c, config/d10v/tm-d10v.h: Snapshot. 
 
-end-sanitize-d10v	
 Tue Sep 17 12:20:50 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Add cases for MIPS 5000 like MIPS 4300.
@@ -1498,7 +1475,6 @@ Tue Aug 27 04:25:08 1996  Geoffrey Noer  <noer@cygnus.com>
         to before the first.
 	* configure: regenerated
 
-start-sanitize-d10v
 Mon Aug 26 18:36:54 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/d10v/d10v.mt: New file.
@@ -1506,7 +1482,6 @@ Mon Aug 26 18:36:54 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* configure.in: New target D10V.	 
 	* d10v-tdep.c: New file. 
 
-end-sanitize-d10v	
 Sun Aug 25 00:09:47 1996  Fred Fish  <fnf@rtl.cygnus.com>
 
 	* rs6000-tdep.c: Fix typo in comment.
@@ -5552,7 +5527,7 @@ Tue Jan  2 13:41:14 1996  Stan Shebs  <shebs@andros.cygnus.com>
 For older changes see ChangeLog-95
 
 Local Variables:
-mode: indented-text
+mode: change-log
 left-margin: 8
 fill-column: 74
 version-control: never

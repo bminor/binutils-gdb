@@ -2240,7 +2240,6 @@ COMMENT
 {* end-sanitize-arc *}
 
 COMMENT
-{* start-sanitize-d10v *}
 ENUM
   BFD_RELOC_D10V_10_PCREL_R
 ENUMDOC
@@ -2266,7 +2265,6 @@ ENUMDOC
   This is an 18-bit reloc with the right 2 bits
   assumed to be 0.
 COMMENT
-{* end-sanitize-d10v *}
 
 COMMENT
 {* start-sanitize-d30v *}

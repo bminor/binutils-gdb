@@ -384,11 +384,9 @@ earmpe.c: $(srcdir)/emulparams/armpe.sh \
 ecoff_sparc.c: $(srcdir)/emulparams/coff_sparc.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sparccoff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} coff_sparc "$(tdir_coff_sparc)"
-# start-sanitize-d10v
 ed10velf.c: $(srcdir)/emulparams/d10velf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfd10v.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} d10velf "$(tdir_d10v)"
-# end-sanitize-d10v
 edelta68.c: $(srcdir)/emulparams/delta68.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/delta68.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} delta68 "$(tdir_delta68)"
@@ -622,6 +620,11 @@ esun3.c: $(srcdir)/emulparams/sun3.sh \
 esun4.c: $(srcdir)/emulparams/sun4.sh \
   $(srcdir)/emultempl/sunos.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} sun4 "$(tdir_sun4)"
+# start-sanitize-tic80
+etic80coff.c: $(srcdir)/emulparams/tic80coff.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/tic80coff.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} tic80coff "$(tdir_tic80coff)"
+# end-sanitize-tic80
 evanilla.c: $(srcdir)/emulparams/vanilla.sh \
   $(srcdir)/emultempl/vanilla.em $(srcdir)/scripttempl/vanilla.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} vanilla "$(tdir_vanilla)"

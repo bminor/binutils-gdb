@@ -1,3 +1,22 @@
+Thu Feb  6 14:20:01 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* dis-asm.h: (disassemble_info):  Add new fields
+	bytes_per_chunk and display_endian to control the
+	display of raw instructions.
+
+start-sanitize-tic80
+Fri Dec 27 22:17:37 1996  Fred Fish  <fnf@cygnus.com>
+
+	* dis-asm.h (print_insn_tic80): Declare.
+
+end-sanitize-tic80
+Sun Dec  8 17:11:12 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* callback.h (host_callback): New member `error'.
+
+Wed Nov 20 00:40:23 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* callback.h: New file, moved here from gdb.
 
 Mon Nov 18 16:34:00 1996  Dawn Perchik  <dawn@critters.cygnus.com>
 
@@ -90,12 +109,10 @@ Mon Jul 22 13:16:13 1996  Richard Henderson  <rth@tamu.edu>
 	* dis-asm.h (print_insn_alpha): Don't declare.
 	(print_insn_alpha_osf, print_insn_alpha_vms): Declare.
 
-start-sanitize-d10v
 Wed Jul 17 14:45:12 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* dis-asm.h: (print_insn_d10v): Declare.
 
-end-sanitize-d10v
 Mon Jul 15 16:55:38 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* dis-asm.h:  Get rid of decls for print_insn_i8086,
@@ -1127,7 +1144,7 @@ Wed Aug 21 20:32:13 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 
 Local Variables:
-mode: indented-text
+mode: change-log
 left-margin: 8
 fill-column: 74
 version-control: never

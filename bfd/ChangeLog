@@ -628,13 +628,11 @@ Wed Nov 20 16:31:31 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-mn10300.c: Rough cut at relocs for the mn10300.
 
-start-sanitize-d10v
 Wed Nov 13 08:12:38 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* Makefile.in (elf32-d10v.o): Don't depend on elf/d10v.h
 	anymore.
 
-end-sanitize-d10v
 Tue Nov 12 13:30:00 1996  Dawn Perchik  <dawn@cygnus.com>
 
 	* filemode.c: Include sysdep.h.
@@ -656,13 +654,11 @@ Tue Oct 29 15:03:02 1996  Doug Evans  <dje@canuck.cygnus.com>
 	complain_overflow_unsigned.
 
 end-sanitize-m32r
-start-sanitize-d10v
 Tue Oct 29 12:53:46 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* elf32-d10v.c (elf_d10v_howto_table): Don't complain on
 	overflows for R_D10V_16 and R_D10V_18.
 
-end-sanitize-d10v
 Tue Oct 29 13:23:53 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ieee.c (ieee_write_section_part): Use LMA rather than VMA.
@@ -1205,13 +1201,11 @@ Mon Sep  9 11:48:41 1996  Jeffrey A Law  (law@cygnus.com)
 	(case R_V850_HI16_S): Likewise.
 
 end-sanitize-v850 
-start-sanitize-d10v
 Fri Sep  6 17:04:39 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* elf32-d10v.c (elf_d10v_howto_table): Modify the size of R_D10V_16
 	and R_D10V_18 to be 1 (word).
 
-end-sanitize-d10v	
 Thu Sep  5 15:23:08 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* stabs.c (_bfd_link_section_stabs): If the output_section field
@@ -1537,12 +1531,10 @@ Wed Aug  7 12:12:03 1996  Ian Lance Taylor  <ian@cygnus.com>
 	(elf_i386_info_to_howto_rel): Check that the reloc type is valid.
 	(elf_i386_relocate_section): Likewise.
 
-start-sanitize-d10v
 Tue Aug  6 12:54:56 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* elf32-d10v.c (elf_d10v_howto_table): Added R_D10V_32.
 
-end-sanitize-d10v	
 Mon Aug  5 13:42:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf.c (_bfd_elf_make_section_from_shdr): For a loadable section,
@@ -1606,13 +1598,11 @@ Wed Jul 24 12:02:53 1996  Ian Lance Taylor  <ian@cygnus.com>
 	memory position separately from the file position, and use it to
 	compute the alignment adjustment.
 
-start-sanitize-d10v
 Tue Jul 23 10:43:31 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* elf32-d10v.c (elf_d10v_howto_table): Changed all relocs to "long"
  	and fixed mask on R_D10V_10_PCREL_L.
 
-end-sanitize-d10v	
 Mon Jul 22 15:30:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf64-mips.c: Include "aout/ar.h".
@@ -1702,7 +1692,6 @@ Wed Jul 17 18:02:32 1996  Kim Knuttila  <krk@cygnus.com>
 	* coff-ppc.c: Redid debug scheme - numerous fprintf's gone.
 	Also removed most abort calls, in favor of using bfd reporting.
 
-start-sanitize-d10v
 Wed Jul 17 14:51:52 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* Makefile.in (ALL_MACHINES): Add cpu-d10v.o.
@@ -1719,7 +1708,6 @@ Wed Jul 17 14:51:52 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* reloc.c (BFD_RELOC_D10V_10_PCREL_R, BFD_RELOC_D10V_10_PCREL_L,
  	BFD_RELOC_D10V_18, BFD_RELOC_D10V_18_PCREL): Define.
 	* targets.c (bfd_elf32_d10v_vec): New vector.
-end-sanitize-d10v
 	
 Wed Jul 17 10:58:55 1996  Kim Knuttila  <krk@cygnus.com>
 
@@ -6411,7 +6399,7 @@ See file ChangeLog.2
 
 
 Local Variables:
-mode: indented-text
+mode: change-log
 left-margin: 8
 fill-column: 74
 version-control: never

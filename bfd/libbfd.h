@@ -743,12 +743,10 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_ARC_B26",
 /* end-sanitize-arc */
 
-/* start-sanitize-d10v */
   "BFD_RELOC_D10V_10_PCREL_R",
   "BFD_RELOC_D10V_10_PCREL_L",
   "BFD_RELOC_D10V_18",
   "BFD_RELOC_D10V_18_PCREL",
-/* end-sanitize-d10v */
 
 /* start-sanitize-d30v */
   "BFD_RELOC_D30V_6",

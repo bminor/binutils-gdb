@@ -130,9 +130,7 @@ changequote([,])dnl
       arm-*-riscix*)        fmt=aout ;;
       arm-*-pe)             fmt=coff targ=armcoff em=pe ;;
 
-# start-sanitize-d10v
       d10v-*-*)		    fmt=elf bfd_gas=yes ;;
-# end-sanitize-d10v
 # start-sanitize-d30v
       d30v-*-*)		    fmt=elf bfd_gas=yes ;;
 # end-sanitize-d30v
