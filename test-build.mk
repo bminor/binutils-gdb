@@ -272,6 +272,7 @@ HOLES := \
 	touch \
 	tr \
 	true \
+	wc \
 	whoami
 
 ### so far only sun make supports VPATH
