@@ -20,14 +20,15 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
-
+
+#include "bfd.h"
+#include "bucomm.h"
 
 #include <assert.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 
 #include "readelf.h"
-#include "bucomm.h"
 #include "getopt.h"
 
 #ifdef ANSI_PROTOTYPES
@@ -1015,26 +1016,27 @@ struct option options [] =
 static void
 usage ()
 {
-  fprintf (stderr, _("Usage: readelf {options} elf-file(s)\n"));
-  fprintf (stderr, _("  Options are:\n"));
-  fprintf (stderr, _("  -a or --all               Display all the information\n"));
-  fprintf (stderr, _("  -h or --file-header       Display the ELF file header\n"));
-  fprintf (stderr, _("  -l or --program-headers or --segments\n"));
-  fprintf (stderr, _("                            Display the program headers\n"));
-  fprintf (stderr, _("  -S or --sections          Display the sections' headers\n"));
-  fprintf (stderr, _("  -s or --symbols           Display the symbol table\n"));
-  fprintf (stderr, _("  -r or --relocs            Display the relocations (if present)\n"));
-  fprintf (stderr, _("  -d or --dynamic           Display the dynamic section (if present)\n"));
-  fprintf (stderr, _("  -V or --version-info      Display the version sections (if present)\n"));
-  fprintf (stderr, _("  -D or --use-dynamic       Use the dynamic section info when displaying symbols\n"));
-  fprintf (stderr, _("  -x <number> or --hex-dump=<number>\n"));
-  fprintf (stderr, _("                            Dump the contents of section <number>\n"));
+  fprintf (stdout, _("Usage: readelf {options} elf-file(s)\n"));
+  fprintf (stdout, _("  Options are:\n"));
+  fprintf (stdout, _("  -a or --all               Display all the information\n"));
+  fprintf (stdout, _("  -h or --file-header       Display the ELF file header\n"));
+  fprintf (stdout, _("  -l or --program-headers or --segments\n"));
+  fprintf (stdout, _("                            Display the program headers\n"));
+  fprintf (stdout, _("  -S or --sections          Display the sections' headers\n"));
+  fprintf (stdout, _("  -s or --symbols           Display the symbol table\n"));
+  fprintf (stdout, _("  -r or --relocs            Display the relocations (if present)\n"));
+  fprintf (stdout, _("  -d or --dynamic           Display the dynamic section (if present)\n"));
+  fprintf (stdout, _("  -V or --version-info      Display the version sections (if present)\n"));
+  fprintf (stdout, _("  -D or --use-dynamic       Use the dynamic section info when displaying symbols\n"));
+  fprintf (stdout, _("  -x <number> or --hex-dump=<number>\n"));
+  fprintf (stdout, _("                            Dump the contents of section <number>\n"));
 #ifdef SUPPORT_DISASSEMBLY  
-  fprintf (stderr, _("  -i <number> or --instruction-dump=<number>\n"));
-  fprintf (stderr, _("                            Disassemble the contents of section <number>\n"));
+  fprintf (stdout, _("  -i <number> or --instruction-dump=<number>\n"));
+  fprintf (stdout, _("                            Disassemble the contents of section <number>\n"));
 #endif  
-  fprintf (stderr, _("  -v or --version           Display the version number of readelf\n"));
-  fprintf (stderr, _("  -H or --help              Display this information\n"));
+  fprintf (stdout, _("  -v or --version           Display the version number of readelf\n"));
+  fprintf (stdout, _("  -H or --help              Display this information\n"));
+  fprintf (stdout, _("Report bugs to bug-gnu-utils@gnu.org\n"));
   
   exit (0);
 }
@@ -1044,8 +1046,8 @@ parse_args (argc, argv)
      int argc;
      char ** argv;
 {
-  char c;
-  
+  int c;
+
   if (argc < 2)
     usage ();
 
@@ -1131,7 +1133,10 @@ parse_args (argc, argv)
       && !do_load && !do_header && !do_dump && !do_version)
     usage ();
   else if (argc < 3)
-    warn (_("Nothing to do.\n"));
+    {
+      warn (_("Nothing to do.\n"));
+      usage();
+    }
 }
 
 static int

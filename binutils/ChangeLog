@@ -1,3 +1,13 @@
+Mon Jun 22 18:28:19 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* readelf.c: Include bfd.h and bucomm.h before system header
+	files.
+	(parse_args): Change type of c from char to int.
+
+Sun Jun 14 14:26:28 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (usage): Write to stdout, not stderr.
+
 Fri Jun 12 13:33:51 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* po/Make-in (all-yes): Depend on .pot file if maintainer mode
