@@ -129,7 +129,6 @@ typedef struct file_info_struct
   FILE *file;
   struct file_info_struct *next;
   int end_pending;
-
 }
 
 file_info_type;
@@ -231,11 +230,7 @@ listing_message (name, message)
     {
       listing_tail->message = n;
     }
-
 }
-
-
-
 
 void
 listing_warning (message)
@@ -280,8 +275,7 @@ file_info (file_name)
   p->linenum = 0;
   p->end_pending = 0;
 
-  /* Do we really prefer binary mode for this??  */
-  p->file = fopen (p->filename, FOPEN_RB);
+  p->file = fopen (p->filename, "r");
   if (p->file)
     fgetc (p->file);
 
@@ -305,12 +299,14 @@ listing_newline (ps)
   char *file;
   unsigned int line;
   static unsigned int last_line = 0xffff;
+  static char *last_file = NULL;
   list_info_type *new;
 
   as_where (&file, &line);
-  if (line != last_line)
+  if (line != last_line || last_file && file && strcmp(file, last_file))
     {
       last_line = line;
+      last_file = file;
       new_frag ();
 
       new = (list_info_type *) xmalloc (sizeof (list_info_type));
@@ -394,8 +390,12 @@ buffer_line (file, line, size)
   if (file->end_pending == 10)
     {
       *p++ = '\n';
+#if 1
       fseek (file->file, 0, 0);
       file->linenum = 0;
+#else
+      file->linenum = 9999999;
+#endif
       file->end_pending = 0;
     }
   c = fgetc (file->file);
@@ -666,12 +666,11 @@ static void
 list_symbol_table ()
 {
   extern symbolS *symbol_rootP;
+  int got_some = 0;
 
   symbolS *ptr;
   eject = 1;
   listing_page (0);
-  printf ("DEFINED SYMBOLS\n");
-  on_page++;
 
   for (ptr = symbol_rootP; ptr != (symbolS *) NULL; ptr = symbol_next (ptr))
     {
@@ -679,14 +678,19 @@ list_symbol_table ()
 	{
 	  if (S_GET_NAME (ptr))
 	    {
-	      char buf[30];
+	      char buf[30], fmt[8];
 	      valueT val = S_GET_VALUE (ptr);
 
 	      /* @@ Note that this is dependent on the compilation options,
 		 not solely on the target characteristics.  */
 	      if (sizeof (val) == 4 && sizeof (int) == 4)
 		sprintf (buf, "%08lx", (unsigned long) val);
-#if defined (BFD_ASSEMBLER) && defined (BFD64)
+	      else if (sizeof (val) <= sizeof (unsigned long))
+		{
+		  sprintf (fmt, "%%0%dlx", sizeof (val) * 2);
+		  sprintf (buf, fmt, (unsigned long) val);
+		}
+#if defined (BFD64)
 	      else if (sizeof (val) > 4)
 		{
 		  char buf1[30];
@@ -697,6 +701,13 @@ list_symbol_table ()
 #endif
 	      else
 		abort ();
+
+	      if (!got_some)
+		{
+		  printf ("DEFINED SYMBOLS\n");
+		  on_page++;
+		  got_some = 1;
+		}
 
 	      printf ("%20s:%-5d  %s:%s %s\n",
 		      ptr->sy_frag->line->file->filename,
@@ -710,25 +721,45 @@ list_symbol_table ()
 	}
 
     }
+  if (!got_some)
+    {
+      printf ("NO DEFINED SYMBOLS\n");
+      on_page++;
+    }
   printf ("\n");
   on_page++;
   listing_page (0);
-  printf ("UNDEFINED SYMBOLS\n");
-  on_page++;
-  listing_page (0);
+
+  got_some = 0;
 
   for (ptr = symbol_rootP; ptr != (symbolS *) NULL; ptr = symbol_next (ptr))
     {
       if (S_GET_NAME (ptr) && strlen (S_GET_NAME (ptr)) != 0)
 	{
 	  if (ptr->sy_frag->line == 0
+#ifdef S_IS_REGISTER
+	      && !S_IS_REGISTER (ptr)
+#endif
 	      && S_GET_SEGMENT (ptr) != reg_section)
 	    {
+	      if (!got_some)
+		{
+		  got_some = 1;
+		  printf ("UNDEFINED SYMBOLS\n");
+		  on_page++;
+		  listing_page (0);
+		}
 	      printf ("%s\n", S_GET_NAME (ptr));
 	      on_page++;
 	      listing_page (0);
 	    }
 	}
+    }
+  if (!got_some)
+    {
+      printf ("NO UNDEFINED SYMBOLS\n");
+      on_page++;
+      listing_page (0);
     }
 }
 
@@ -741,7 +772,8 @@ print_source (current_file, list, buffer, width)
 {
   if (current_file->file)
     {
-      while (current_file->linenum < list->hll_line)
+      while (current_file->linenum < list->hll_line
+	     && current_file->end_pending == 0)
 	{
 	  char *p = buffer_line (current_file, buffer, width);
 	  printf ("%4d:%-13s **** %s\n", current_file->linenum, current_file->filename, p);
@@ -866,11 +898,16 @@ listing_listing (name)
 	      print_source (current_hll_file, list, buffer, width);
 	    }
 
-	  p = buffer_line (list->file, buffer, width);
-
-	  if (!((listing & LISTING_NODEBUG) && debugging_pseudo (p)))
+	  while (list->file->file
+		 && list->file->linenum < list->line
+		 && !list->file->end_pending)
 	    {
-	      print_lines (list, p, calc_hex (list));
+	      p = buffer_line (list->file, buffer, width);
+
+	      if (!((listing & LISTING_NODEBUG) && debugging_pseudo (p)))
+		{
+		  print_lines (list, p, calc_hex (list));
+		}
 	    }
 
 	  if (list->edict == EDICT_EJECT)
@@ -880,8 +917,10 @@ listing_listing (name)
 	}
       else
 	{
-
-	  p = buffer_line (list->file, buffer, width);
+	  while (list->file->file
+		 && list->file->linenum < list->line
+		 && !list->file->end_pending)
+	    p = buffer_line (list->file, buffer, width);
 	}
 
       list = list->next;
