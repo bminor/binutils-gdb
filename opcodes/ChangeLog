@@ -1,3 +1,9 @@
+Wed Sep 24 11:29:35 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Call AC_CHECK_TOOL before AM_PROG_LIBTOOL.
+	* aclocal.m4: Rebuild with new libtool.
+	* configure: Rebuild.
+
 start-sanitize-v850e
 Fri Sep 19 11:45:49 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -161,27 +167,23 @@ Tue Aug 19 10:59:59 1997  Richard Henderson  <rth@cygnus.com>
 
 	* alpha-opc.c (alpha_opcodes): Fix hw_rei_stall mungage.
 
+start-sanitize-v850e
 Mon Aug 18 11:10:03 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850-opc.c (v850_opcodes[]): Remove use of flag field.
-start-sanitize-v850eq
 	* v850-opc.c (v850_opcodes[]): Add support for reversed short load
 	opcodes..
-end-sanitize-v850eq
 
-start-sanitize-v850e
 Mon Aug 18 11:08:25 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* configure (cgen_files): Add support for v850e target.
 	* configure.in (cgen_files):  Add support for v850e target.
-end-sanitize-v850e
 
-start-sanitize-v850eq
 Mon Aug 18 11:08:25 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* configure (cgen_files): Add support for v850eq target.
 	* configure.in (cgen_files):  Add support for v850eq target.
-end-sanitize-v850eq
+end-sanitize-v850e
 
 Fri Aug 15 05:17:48 1997  Doug Evans  <dje@canuck.cygnus.com>
 
@@ -195,13 +197,12 @@ Fri Aug 15 05:17:48 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 Wed Aug 13 18:52:11 1997  Nick Clifton  <nickc@cygnus.com>
 
-start-sanitize-v850eq
+start-sanitize-v850e
 	* v850-dis.c (disassemble): Add support for v850EQ instructions.
 	
 	* v850-opc.c (insert_i5div, extract_i5div): New Functions.
 	(v850_opcodes): Add v850EQ instructions.
-end-sanitize-v850eq
-start-sanitize-v850e
+
 	* v850-dis.c (disassemble): Add support for v850E instructions.
 	
 	* v850-opc.c (insert_d5_4, extract_d5_4, insert_d16_16,
