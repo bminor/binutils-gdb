@@ -1,3 +1,21 @@
+2004-09-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (IS_LOADED): Define.
+	(assign_file_positions_for_segments): Don't round up file offset of
+	PT_LOAD segments containing no SEC_LOAD sections, instead round down.
+	Delete code handling link script adjustment of lma.  Do the adjust
+	in later code handling similar ajustments.  Remove dead code error
+	check.  Warn if section lma would require a negative offset
+	adjustment.  Tweak lma adjustment to use p_filesz rather than p_memsz.
+	Use p_vaddr + p_memsz inside section loop in place of voff.  Don't
+	update voff in section loop.  Change voff in segment loop to be an
+	adjustment on top of "off".  Set sec->filepos and update "off" later.
+	Test for loadable sections consistently using IS_LOADED.  Similarly,
+	test for alloc-only sections other than .tbss consistently.  
+	Don't bother checking SEC_ALLOC in PT_LOAD segments.  Remove FIXME.
+	Tidy PT_NOTE handling.  Use %B and %A in error messages.
+	(assign_file_positions_except_relocs): Use %B in error message.
+
 2004-09-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (AUTOMAKE_OPTIONS): Require 1.9.

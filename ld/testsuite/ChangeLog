@@ -1,3 +1,10 @@
+2004-09-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-scripts/overlay-size.d: Don't check .mbss lma.
+	* ld-sh/sh64/mix1.xd: Update for changed .bss file offset.
+	* ld-sh/sh64/shdl32.xd: Likewise.
+	* ld-sh/sh64/shdl64.xd: Likewise.
+
 2004-09-17  Paul Brook  <paul@codesourcery.com>
 
 	* ld-arm/arm-target1-{abs,rel}.d}: New files.
