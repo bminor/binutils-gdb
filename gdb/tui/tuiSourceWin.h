@@ -1,5 +1,5 @@
 /* TUI display source/assembly window.
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Hewlett-Packard Company.
 
    This file is part of GDB.
@@ -31,7 +31,6 @@ extern void tuiUpdateSourceWindowsWithAddr (CORE_ADDR);
 extern void tuiUpdateSourceWindowsWithLine (struct symtab *, int);
 extern void tuiUpdateSourceWindowsFromLocator (void);
 extern void tuiClearSourceContent (TuiWinInfoPtr, int);
-extern void tuiClearAllSourceWinsContent (int);
 extern void tuiEraseSourceContent (TuiWinInfoPtr, int);
 extern void tuiEraseAllSourceWinsContent (int);
 extern void tuiSetSourceContentNil (TuiWinInfoPtr, char *);

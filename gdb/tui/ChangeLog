@@ -1,5 +1,28 @@
 2002-08-24  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* tuiSourceWin.c (tui_show_source_line): New function.
+	(tuiShowSourceContent): Call it and avoid clearing the window before
+	redrawing it.
+	(tuiClearAllSourceWinsContent): Remove.
+	* tuiSourceWin.h (tuiClearAllSourceWinsContent): Don't declare.
+	* tuiWin.h (tuiClearWinFocus, tuiClearWinFocusFrom): Don't declare.
+	* tuiWin.c (tuiClearWinFocus, tuiClearWinFocusFrom): Remove.
+	(tuiRefreshAll): Don't clear the window.
+	(_makeVisibleWithNewHeight): Don't clear locator line.
+	(tuiResizeAll): Remove unused locals.
+	(_tuiAdjustWinHeights): Likewise.
+	(_makeInvisibleAndSetNewHeight): Likewise.
+	(_newHeightOk): Likewise.
+	* tuiLayout.c (showLayout): Don't clear source windows.
+	(tuiSetLayout): Don't clear the window.
+	(_initAndMakeWin): Likewise for status line.
+	* tuiGeneralWin.c (makeVisible): Don't clear or refresh the window.
+	(makeWindow): Likewise.
+	(tuiClearWin): Remove.
+	* tuiGeneralWin.h (tuiClearWin): Don't declare.
+
+2002-08-24  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tuiSourceWin.c (tuiSrcWinIsDisplayed): Remove.
 	(tuiAsmWinIsDisplayed): Remove.
 	(tuiShowAllSourceWinsContent): Remove.

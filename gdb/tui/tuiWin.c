@@ -398,37 +398,6 @@ Usage: w <#lines>\n");
 
 
 /*
-   ** tuiClearWinFocusFrom
-   **        Clear the logical focus from winInfo
- */
-void
-tuiClearWinFocusFrom (TuiWinInfoPtr winInfo)
-{
-  if (m_winPtrNotNull (winInfo))
-    {
-      if (winInfo->generic.type != CMD_WIN)
-	unhighlightWin (winInfo);
-      tuiSetWinWithFocus ((TuiWinInfoPtr) NULL);
-    }
-
-  return;
-}				/* tuiClearWinFocusFrom */
-
-
-/*
-   ** tuiClearWinFocus().
-   **        Clear the window that has focus.
- */
-void
-tuiClearWinFocus (void)
-{
-  tuiClearWinFocusFrom (tuiWinWithFocus ());
-
-  return;
-}				/* tuiClearWinFocus */
-
-
-/*
    ** tuiSetWinFocusTo
    **        Set the logical focus to winInfo
  */
@@ -607,9 +576,6 @@ tuiRefreshAll (void)
 	    {
 	    case SRC_WIN:
 	    case DISASSEM_WIN:
-	      tuiClearWin (&winList[type]->generic);
-	      if (winList[type]->detail.sourceInfo.hasLocator)
-		tuiClearLocatorDisplay ();
 	      tuiShowSourceContent (winList[type]);
 	      checkAndDisplayHighlightIfNeeded (winList[type]);
 	      tuiEraseExecInfoContent (winList[type]);
@@ -623,11 +589,8 @@ tuiRefreshAll (void)
 	    }
 	}
     }
-  tuiClearLocatorDisplay ();
   tuiShowLocatorContent ();
-
-  return;
-}				/* tuiRefreshAll */
+}
 
 
 /*
@@ -650,7 +613,7 @@ tuiResizeAll (void)
       TuiWinInfoPtr firstWin, secondWin;
       TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
       TuiWinType winType;
-      int i, newHeight, splitDiff, cmdSplitDiff, numWinsDisplayed = 2;
+      int newHeight, splitDiff, cmdSplitDiff, numWinsDisplayed = 2;
 
       /* turn keypad off while we resize */
       if (winWithFocus != cmdWin)
@@ -1168,7 +1131,7 @@ _tuiAdjustWinHeights (TuiWinInfoPtr primaryWinInfo, int newHeight)
       status = TUI_SUCCESS;
       if (newHeight != primaryWinInfo->generic.height)
 	{
-	  int i, diff;
+	  int diff;
 	  TuiWinInfoPtr winInfo;
 	  TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
 	  TuiLayoutType curLayout = currentLayout ();
@@ -1316,7 +1279,6 @@ static void
 _makeInvisibleAndSetNewHeight (TuiWinInfoPtr winInfo, int height)
 {
   int i;
-  struct symtab *s;
   TuiGenWinInfoPtr genWinInfo;
 
 
@@ -1365,9 +1327,7 @@ _makeInvisibleAndSetNewHeight (TuiWinInfoPtr winInfo, int height)
     default:
       break;
     }
-
-  return;
-}				/* _makeInvisibleAndSetNewHeight */
+}
 
 
 /*
@@ -1379,7 +1339,6 @@ _makeInvisibleAndSetNewHeight (TuiWinInfoPtr winInfo, int height)
 static void
 _makeVisibleWithNewHeight (TuiWinInfoPtr winInfo)
 {
-  int i;
   struct symtab *s;
 
   m_beVisible (&winInfo->generic);
@@ -1421,7 +1380,6 @@ _makeVisibleWithNewHeight (TuiWinInfoPtr winInfo)
       if (m_hasLocator (winInfo))
 	{
 	  m_beVisible (locatorWinInfoPtr ());
-	  tuiClearLocatorDisplay ();
 	  tuiShowLocatorContent ();
 	}
       break;
@@ -1450,7 +1408,7 @@ _newHeightOk (TuiWinInfoPtr primaryWinInfo, int newHeight)
 
   if (ok)
     {
-      int diff, curHeight;
+      int diff;
       TuiLayoutType curLayout = currentLayout ();
 
       diff = (newHeight - primaryWinInfo->generic.height) * (-1);

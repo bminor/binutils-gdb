@@ -111,7 +111,6 @@ showLayout (TuiLayoutType layout)
          ** should free the content and reallocate on next display of
          ** source/asm
        */
-      tuiClearAllSourceWinsContent (NO_EMPTY_SOURCE_PROMPT);
       freeAllSourceWinsContent ();
       clearSourceWindows ();
       if (layout == SRC_DATA_COMMAND || layout == DISASSEM_DATA_COMMAND)
@@ -146,9 +145,7 @@ showLayout (TuiLayoutType layout)
 	    }
 	}
     }
-
-  return;
-}				/* showLayout */
+}
 
 
 /*
@@ -195,8 +192,6 @@ tuiSetLayout (TuiLayoutType layoutType,
 	{
 	  if (newLayout != curLayout)
 	    {
-	      if (winWithFocus != cmdWin)
-		tuiClearWinFocus ();
 	      showLayout (newLayout);
 	      /*
 	         ** Now determine where focus should be
@@ -291,7 +286,7 @@ tuiSetLayout (TuiLayoutType layoutType,
     status = TUI_FAILURE;
 
   return status;
-}				/* tuiSetLayout */
+}
 
 /*
    ** tuiAddWinToLayout().
@@ -1033,13 +1028,9 @@ _initAndMakeWin (Opaque * winInfoPtr, TuiWinType winType,
 	    ((TuiWinInfoPtr) opaqueWinInfo)->canHighlight = TRUE;
 	}
       makeWindow (generic, boxIt);
-      if (winType == LOCATOR_WIN)
-	tuiClearLocatorDisplay ();
     }
   *winInfoPtr = opaqueWinInfo;
-
-  return;
-}				/* _initAndMakeWin */
+}
 
 
 /*

@@ -191,43 +191,8 @@ makeWindow (TuiGenWinInfoPtr winInfo, int boxIt)
 	boxWin (winInfo, NO_HILITE);
       winInfo->isVisible = TRUE;
       scrollok (handle, TRUE);
-      tuiRefreshWin (winInfo);
-
-#ifndef FOR_TEST
-      if (			/*!m_WinIsAuxillary(winInfo->type) && */
-	   (winInfo->type != CMD_WIN) &&
-	   (winInfo->content == (OpaquePtr) NULL))
-	{
-	  mvwaddstr (handle, 1, 1, winName (winInfo));
-	  tuiRefreshWin (winInfo);
-	}
-#endif /*FOR_TEST */
     }
-
-  return;
-}				/* makeWindow */
-
-
-/*
-   ** tuiClearWin().
-   **        Clear the window of all contents without calling wclear.
- */
-void
-tuiClearWin (TuiGenWinInfoPtr winInfo)
-{
-  if (m_genWinPtrNotNull (winInfo) && winInfo->handle != (WINDOW *) NULL)
-    {
-      int curRow, curCol;
-
-      for (curRow = 0; (curRow < winInfo->height); curRow++)
-	for (curCol = 0; (curCol < winInfo->width); curCol++)
-	  mvwaddch (winInfo->handle, curRow, curCol, ' ');
-
-      tuiRefreshWin (winInfo);
-    }
-
-  return;
-}				/* tuiClearWin */
+}
 
 
 /*
@@ -252,13 +217,11 @@ makeVisible (TuiGenWinInfoPtr winInfo, int visible)
 	   (winInfo->type != CMD_WIN && !m_winIsAuxillary (winInfo->type)));
 	  winInfo->isVisible = TRUE;
 	}
-      tuiRefreshWin (winInfo);
     }
   else if (!visible &&
 	   winInfo->isVisible && winInfo->handle != (WINDOW *) NULL)
     {
       winInfo->isVisible = FALSE;
-      tuiClearWin (winInfo);
       tuiDelwin (winInfo->handle);
       winInfo->handle = (WINDOW *) NULL;
     }

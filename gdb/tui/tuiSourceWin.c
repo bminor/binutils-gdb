@@ -260,22 +260,6 @@ tuiClearSourceContent (TuiWinInfoPtr winInfo, int displayPrompt)
 
 
 /*
-   ** tuiClearAllSourceWinsContent().
- */
-void
-tuiClearAllSourceWinsContent (int displayPrompt)
-{
-  int i;
-
-  for (i = 0; i < (sourceWindows ())->count; i++)
-    tuiClearSourceContent ((TuiWinInfoPtr) (sourceWindows ())->list[i],
-			   displayPrompt);
-
-  return;
-}				/* tuiClearAllSourceWinsContent */
-
-
-/*
    ** tuiEraseSourceContent().
  */
 void
@@ -334,33 +318,51 @@ tuiEraseAllSourceWinsContent (int displayPrompt)
 }				/* tuiEraseAllSourceWinsContent */
 
 
+/* Redraw the complete line of a source or disassembly window.  */
+static void
+tui_show_source_line (TuiWinInfoPtr winInfo, int lineno)
+{
+  TuiWinElementPtr line;
+  int x, y;
+
+  line = (TuiWinElementPtr) winInfo->generic.content[lineno - 1];
+  if (line->whichElement.source.isExecPoint)
+    wattron (winInfo->generic.handle, A_STANDOUT);
+
+  mvwaddstr (winInfo->generic.handle, lineno, 1,
+             line->whichElement.source.line);
+  if (line->whichElement.source.isExecPoint)
+    wattroff (winInfo->generic.handle, A_STANDOUT);
+
+  /* Clear to end of line but stop before the border.  */
+  getyx (winInfo->generic.handle, y, x);
+  while (x + 1 < winInfo->generic.width)
+    {
+      waddch (winInfo->generic.handle, ' ');
+      getyx (winInfo->generic.handle, y, x);
+    }
+}
+
 /*
    ** tuiShowSourceContent().
  */
 void
 tuiShowSourceContent (TuiWinInfoPtr winInfo)
 {
-  int curLine, i, curX;
-
-  tuiEraseSourceContent (winInfo, (winInfo->generic.contentSize <= 0));
   if (winInfo->generic.contentSize > 0)
     {
-      char *line;
+      int lineno;
 
-      for (curLine = 1; (curLine <= winInfo->generic.contentSize); curLine++)
-	mvwaddstr (
-		    winInfo->generic.handle,
-		    curLine,
-		    1,
-		    ((TuiWinElementPtr)
-	  winInfo->generic.content[curLine - 1])->whichElement.source.line);
+      for (lineno = 1; lineno <= winInfo->generic.contentSize; lineno++)
+        tui_show_source_line (winInfo, lineno);
     }
+  else
+    tuiEraseSourceContent (winInfo, TRUE);
+
   checkAndDisplayHighlightIfNeeded (winInfo);
   tuiRefreshWin (&winInfo->generic);
   winInfo->generic.contentInUse = TRUE;
-
-  return;
-}				/* tuiShowSourceContent */
+}
 
 
 /*
