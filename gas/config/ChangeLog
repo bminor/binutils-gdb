@@ -1,3 +1,7 @@
+Mon Sep 21 14:44:17 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* tc-m68k.c (m68k_ip): fixed move16 operand handling, from WRS.
+
 Fri Sep 18 08:02:18 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* tc-m68k.c (m68k_ip): An(disp) is not pc relative.

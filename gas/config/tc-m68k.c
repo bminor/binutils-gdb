@@ -2648,8 +2648,7 @@ void m68k_ip (instring)
       break;
     case '_':		/* used only for move16 absolute 32-bit address */
       tmpreg=get_num(opP->con1,80);
-      addword (tmpreg >> 16);
-      addword (tmpreg & 0xFFFF);
+      install_operand(s[1], tmpreg);
       break;
     default:
       as_fatal("Internal error:  Operand type %c unknown in line %d of file \"%s\"",
