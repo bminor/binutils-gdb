@@ -171,10 +171,11 @@ ld [-o @var{output} ] @var{objfile}@dots{}
   [ -format @var{input-format} ]  [ -g ]  [ -G @var{size} ]  [ -i ]
   [ -l@var{ar} ]  [ -L@var{searchdir} ]  [ -M ]  [ -Map @var{mapfile} ]
   [ -m @var{emulation} ]  [ -N | -n ]  [ -noinhibit-exec ]
-  [ -R @var{filename} ]  [ -relax ]  [ -r | -Ur ]  [ -S ]  [ -s ]
-  [ -T @var{commandfile} ]  [ -Ttext @var{textorg} ]  [ -Tdata @var{dataorg} ]
+  [ -oformat @var{output-format} ]  [ -R @var{filename} ]  [ -relax ]
+  [ -r | -Ur ]  [ -S ]  [ -s ]  [ -T @var{commandfile} ]
+  [ -Ttext @var{textorg} ]  [ -Tdata @var{dataorg} ]
   [ -Tbss @var{bssorg} ]  [ -t ]  [ -u @var{sym}]  [-V]  [-v]  [ -X ]  [-x ]
-  [ -y@var{symbol} ]  [ @{ @var{script} @} ] 
+  [ -y@var{symbol} ]
 @end smallexample
 
 This plethora of command-line options may seem intimidating, but in
@@ -255,7 +256,9 @@ on the command line.  You don't usually need to specify this, as
 @code{ld} is configured to expect as a default input format the most
 usual format on each machine.  @var{input-format} is a text string, the
 name of a particular format supported by the BFD libraries.
-@w{@samp{-format @var{input-format}}} has the same effect.  @xref{BFD}.
+(You can list the available binary formats with @samp{objdump -i}.)
+@w{@samp{-format @var{input-format}}} has the same effect, as does the
+script command @code{TARGET}.  @xref{BFD}.
 
 You may want to use this option if you are linking files with an unusual
 binary format.  You can also use @samp{-b} to switch formats explicitly (when
@@ -436,6 +439,17 @@ Use @var{output} as the name for the program produced by @code{ld}; if this
 option is not specified, the name @file{a.out} is used by default.  The
 script command @code{OUTPUT} can also specify the output file name.
 
+@kindex -oformat
+@item -oformat @var{output-format}
+Specify the binary format for the output object file.  You don't usually
+need to specify this, as @code{ld} is configured to produce as a default
+output format the most usual format on each machine.
+@var{output-format} is a text string, the name of a particular format
+supported by the BFD libraries.  (You can list the available binary
+formats with @samp{objdump -i}.)  The script command
+@code{OUTPUT_FORMAT} can also specify the output format, but this option
+overrides it.  @xref{BFD}.
+
 @item -R @var{filename}
 @kindex -R @var{file}
 @cindex symbol-only input
@@ -487,17 +501,6 @@ Omit debugger symbol information (but not all symbols) from the output file.
 @kindex -s
 @cindex strip all symbols
 Omit all symbol information from the output file.
-
-@item @{ @var{script} @}
-@kindex @{ @var{script} @}
-@cindex scripts on command line
-You can, if you wish, include a script of linker commands directly in
-the command line instead of referring to it via an input file.  When the
-character @samp{@{} occurs on the command line, the linker switches to
-interpreting the command language until the end of the list of commands
-is reached; the end is indicated with a closing brace @samp{@}}.
-@code{ld} does not recognize other command-line options while parsing
-the script.  @xref{Commands}, for a description of the command language.
 
 @item -Tbss @var{bssorg}
 @kindex -Tbss @var{bssorg}

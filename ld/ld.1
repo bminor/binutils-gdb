@@ -69,6 +69,9 @@ ld \- the GNU linker
 \&\|] 
 .RB "[\|" \-n | \-N "\|]" 
 .RB "[\|" \-noinhibit-exec "\|]" 
+.RB "[\|" "\-oformat\ "\c
+.I output-format\c
+\&\|] 
 .RB "[\|" "\-R\ "\c
 .I filename\c
 \&\|]
@@ -96,9 +99,6 @@ ld \- the GNU linker
 .RB "[\|" \-v "\|]"
 .RB "[\|" \-X "\|]" 
 .RB "[\|" \-x "\|]" 
-.RB "[\|" { \c
-.I script\c
-.BR } "\|]" 
 .ad b
 .hy 1
 .SH DESCRIPTION
@@ -317,7 +317,8 @@ name of a particular format supported by the BFD libraries.
 .B \-format \c
 .I input-format\c
 \&\c
-\& has the same effect.
+\& has the same effect, as does the script command
+.BR TARGET .
 
 You may want to use this option if you are linking files with an unusual
 binary format.  You can also use \c
@@ -587,6 +588,22 @@ script command \c
 \& can also specify the output file name.
 
 .TP
+.BI "-oformat " "output-format"\c
+\&
+Specify the binary format for the output object file.
+You don't usually need to specify this, as
+\c
+.B ld\c
+\& is configured to produce as a default output format the most
+usual format on each machine.  \c
+.I output-format\c
+\& is a text string, the
+name of a particular format supported by the BFD libraries.  
+The script command
+.B OUTPUT_FORMAT
+can also specify the output format, but this option overrides it.
+
+.TP
 .BI "-R " "filename"\c
 \&
 .I file\c
@@ -644,27 +661,6 @@ Omits debugger symbol information (but not all symbols) from the output file.
 .TP
 .B \-s 
 Omits all symbol information from the output file.
-
-.TP
-.BI "{ " "script" " }"
-You can, if you wish, include a script of linker commands directly in
-the command line instead of referring to it via an input file.  When the
-character `\|\c
-.B {\c
-\|' occurs on the command line, the linker switches to
-interpreting the command language until the end of the list of commands
-is reached\(em\&flagged with a closing brace `\|\c
-.B }\c
-\|'.  Other command-line
-options will not be recognized while parsing the script.
-See the `\|\c
-.B ld\c
-\|' entry in `\|\c
-.B info\c
-\|', or the manual
-.I
-ld: the GNU linker
-\&, for a description of the command language.
 
 .TP
 .BI "-Tbss " "org"\c
