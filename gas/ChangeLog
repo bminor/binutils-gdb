@@ -1,5 +1,8 @@
 Mon Feb 21 11:41:18 1994  Ian Lance Taylor  (ian@cygnus.com)
 
+	* ecoff.c (ecoff_build_debug): Don't set hdr->magic here.  It is
+	now set in bfd/ecofflink.c:ecoff_write_symhdr.
+
 	* config/obj-coffbfd.c (write_object_file): use bfd_get_error (),
 	not bfd_error.
 	* config/obj-elf.c (elf_frob_file): Likewise.
