@@ -1,3 +1,9 @@
+2001-08-16  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* mips-opc.c (M1): Define. Reformatted Code.
+	(mips_builtin_opcodes): Added performance counter opcodes mfpc, mfps,
+	mtps, mtps. Typo.
+
 2001-08-16  Jonathan Larmour  <jlarmour@redhat.com>
 
 	* mips-opc.c: R3900s can support all branch likely INSN_MACROs where

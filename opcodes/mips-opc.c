@@ -86,15 +86,16 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #define L1	INSN_4010
 #define V1      INSN_4100
 #define T3      INSN_3900
+#define M1	INSN_10000
 
 #define G1      (T3             \
                  )
 
-#define G2      (T3                   \
+#define G2      (T3             \
                  )
 
-#define G3 (I4             \
-            )
+#define G3      (I4             \
+                 )
 
 /* The order of overloaded instructions matters.  Label arguments and
    register arguments look the same. Instructions that can have either
@@ -557,6 +558,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"maddu",   "s,t",      0x70000001, 0xfc00ffff, RD_s|RD_t|WR_HILO|IS_M,      G1	},
 {"maddu",   "d,s,t",    0x70000001, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d|IS_M, G1	},
 {"madd16",  "s,t",      0x00000028, 0xfc00ffff, RD_s|RD_t|MOD_HILO,          V1 },
+{"mfpc",    "t,P",	0x4000c801, 0xffe0ffc1,	LCD|WR_t|RD_C0,		M1	},
+{"mfps",    "t,P",	0x4000c800, 0xffe0ffc1,	LCD|WR_t|RD_C0,		M1	},
 {"mfc0",    "t,G",	0x40000000, 0xffe007ff,	LCD|WR_t|RD_C0,		I1	},
 {"mfc0",    "t,G,H",    0x40000000, 0xffe007f8, LCD|WR_t|RD_C0, 	I32     },
 {"mfc1",    "t,S",	0x44000000, 0xffe007ff,	LCD|WR_t|RD_S|FP_S,	I1	},
@@ -594,6 +597,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"msub",    "s,t",      0x70000004, 0xfc00ffff, RD_s|RD_t|MOD_HILO,     I32     },
 {"msubu",   "s,t",      0x0000001f, 0xfc00ffff, RD_s|RD_t|WR_HILO,	L1	},
 {"msubu",   "s,t",      0x70000005, 0xfc00ffff, RD_s|RD_t|MOD_HILO,     I32     },
+{"mtpc",    "t,P",	0x4080c801, 0xffe0ffc1,	COD|RD_t|WR_C0,		M1	},
+{"mtps",    "t,P",	0x4080c800, 0xffe0ffc1,	COD|RD_t|WR_C0,		M1	},
 {"mtc0",    "t,G",	0x40800000, 0xffe007ff,	COD|RD_t|WR_C0|WR_CC,	I1	},
 {"mtc0",    "t,G,H",    0x40800000, 0xffe007f8, COD|RD_t|WR_C0|WR_CC,   I32     },
 {"mtc1",    "t,S",	0x44800000, 0xffe007ff,	COD|RD_t|WR_S|FP_S,	I1	},
@@ -836,7 +841,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 /* No hazard protection on coprocessor instructions--they shouldn't
    change the state of the processor and if they do it's up to the
    user to put in nops as necessary.  These are at the end so that the
-   disasembler recognizes more specific versions first.  */
+   disassembler recognizes more specific versions first.  */
 {"c0",      "C",	0x42000000, 0xfe000000,	0,			I1	},
 {"c1",      "C",	0x46000000, 0xfe000000,	0,			I1	},
 {"c2",      "C",	0x4a000000, 0xfe000000,	0,			I1	},
