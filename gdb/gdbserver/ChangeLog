@@ -1,3 +1,10 @@
+2003-05-29  Jim Blandy  <jimb@redhat.com>
+
+	* linux-low.c (usr_store_inferior_registers): Transfer buf in
+	PTRACE_XFER_TYPE-sized chunks, not int-sized chunks.  Otherwise,
+	if 'int' is smaller than PTRACE_XFER_TYPE, you end up throwing
+	away part of the register's value.
+
 2003-04-24  Andrew Cagney  <cagney@redhat.com>
 
 	* low-nbsd.c (fetch_inferior_registers): 
