@@ -1,3 +1,8 @@
+Thu Feb  4 12:15:38 1999  Ian Lance Taylor  <ian@cygnus.com>
+
+	* format.c (bfd_check_format_matches): Change last patch to only
+	take effect for the binary target.
+
 Wed Feb  3 19:40:12 1999  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-i386.c (elf_i386_reloc_type_lookup): Add BFD_RELOC_CTOR.
