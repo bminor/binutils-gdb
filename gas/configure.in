@@ -433,7 +433,7 @@ changequote([,])dnl
 		AC_MSG_ERROR(Solaris must be configured little endian)
 	    fi ;;
       ppc-*-rtems*)			fmt=elf ;;
-      ppc-*-macos* | ppc-*-mpw*)	fmt=coff em=macos ;;
+      ppc-*-macos*)			fmt=coff em=macos ;;
       ppc-*-netware*)			fmt=elf em=ppcnw ;;
       ppc-**-nto*)			fmt=elf ;;
       ppc-*-kaos*)			fmt=elf ;;
