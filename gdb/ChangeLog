@@ -1,5 +1,6 @@
 2001-05-01  Michael Snyder  <msnyder@redhat.com>
 
+	* lin-lwp.c: Change printf to fprintf_unfiltered.
 	* Makefile.in: Add rules for thread-db.o, lin-lwp.o, proc-service.o.
 
 2001-05-01  Nicholas Duffek  <nsd@redhat.com>
