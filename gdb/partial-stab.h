@@ -551,14 +551,28 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	    case '9':
 	      continue;
 
-	    default:
-	      /* Unexpected symbol.  Ignore it; perhaps it is an extension
-		 that we don't know about.
-
-		 Someone says sun cc puts out symbols like
+	    case ':':
+	      /* It is a C++ nested symbol.  We don't need to record it
+		 (I don't think); if we try to look up foo::bar::baz,
+		 then symbols for the symtab containing foo should get
+		 read in, I think.  */
+	      /* Someone says sun cc puts out symbols like
 		 /foo/baz/maclib::/usr/local/bin/maclib,
 		 which would get here with a symbol type of ':'.  */
+	      continue;
+
+	    default:
+	      /* Unexpected symbol descriptor.  The second and subsequent stabs
+		 of a continued stab can show up here.  The question is
+		 whether they ever can mimic a normal stab--it would be
+		 nice if not, since we certainly don't want to spend the
+		 time searching to the end of every string looking for
+		 a backslash.  */
+
 	      complain (&unknown_symchar_complaint, p[1]);
+
+	      /* Ignore it; perhaps it is an extension that we don't
+		 know about.  */
 	      continue;
 	    }
 
