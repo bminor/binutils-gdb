@@ -1,3 +1,9 @@
+2002-04-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* configure.in: Only define AIX_CORE_DUMPX_CORE when AIX version
+	is greater or equal to 4.3.3.
+	* configure: Re-generate.
+
 2002-03-02  Tom Rix  <trix@redhat.com>
 
 	* coff64-rs6000.c (xcoff64_howto_table): Replace howto types with 
