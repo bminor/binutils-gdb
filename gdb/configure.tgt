@@ -284,6 +284,11 @@ tic80-*-*)		gdb_target=tic80
 			configdirs="${configdirs} gdbserver" ;;
 # end-sanitize-tic80
 
+# start-sanitize-sky
+txvu-*-*)		gdb_target=txvu
+			gdb_target_cpu=mips ;;
+# end-sanitize-sky
+
 vax-*-*)		gdb_target=vax ;;
 
 v850-*-*)		gdb_target=v850
