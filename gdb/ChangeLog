@@ -125,10 +125,8 @@ Fri Apr  9 10:20:55 1993  Jim Kingdon  (kingdon@cygnus.com)
 Fri Apr  9 00:45:41 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* valarith.c (value_subscript):  Add COERCE_REF.
-	**** start-sanitize-chill ****
 	* ch-exp.y (operand_5):  We can generalize the 2nd operand
 	of a string repetition ot 'literal' without ambiguity.
-	**** end-sanitize-chill ****
 
 Thu Apr  8 10:15:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
@@ -299,9 +297,7 @@ Fri Apr  2 08:23:14 1993  Jim Kingdon  (kingdon@cygnus.com)
 	findvar.c (read_var_value), printcmd.c (address_info),
 	symmisc.c (print_{,partial_}symbol), c-exp.y (variable),
 	m2-exp.y (yylex): Deal with it.
-	**** start-sanitize-chill ****
 	ch-exp.y (yylex): Deal with it.
-	**** end-sanitize-chill ****
 
 Thu Apr  1 18:43:02 1993  Stu Grossman  (grossman@cygnus.com)
 
@@ -654,9 +650,7 @@ Thu Mar 18 14:26:57 1993  Per Bothner  (bothner@rtl.cygnus.com)
 	prologue (some callers _do_ care).
 	* mips-pinsn.c (print_insn), z8k-tdep.c (print_insn):  Convert to
 	new interface of ../opcodes/*-dis.c. 
-	**** start-sanitize-chill ****
 	* ch-exp.y:  Add #include <ctype.h>.
-	**** end-sanitize-chill ****
 
 Thu Mar 18 11:57:49 1993  Jim Kingdon  (kingdon@cygnus.com)
 
@@ -797,11 +791,9 @@ Thu Mar 11 09:33:01 1993  Fred Fish  (fnf@cygnus.com)
 	to fprintf_symbol_filtered.
 	* symtab.c (find_methods):  Replace call to fputs_demangled with
 	call to fprintf_symbol_filtered.
-	**** start-sanitize-chill ****
 	* ch-valprint.c (demangle.h):  Include.
 	* ch-valprint.c (chill_print_value_fields):  Replace call to
 	fprint_symbol with call to new fprintf_symbol_filtered.
-	**** end-sanitize-chill ****
 
 Wed Mar 10 17:37:11 1993  Fred Fish  (fnf@cygnus.com)
 
@@ -975,7 +967,6 @@ Wed Feb 24 07:41:15 1993  Fred Fish  (fnf@cygnus.com)
 	symbols if their language is known at the time they are created,
 	but sometimes the language is not known until later.
 
-	**** start-sanitize-chill ****
 	* ch-typeprint.c (chill_print_type_base):  Name changed to
 	chill_type_print_base to match pattern for C and C++ names.
 	* ch-typeprint.c (chill_print_type):  Change "char" to "CHAR"
@@ -989,7 +980,6 @@ Wed Feb 24 07:41:15 1993  Fred Fish  (fnf@cygnus.com)
 	that was being called with two args instead of three.
 	* ch-valprint.c (chill_val_print):  Call chill_print_value_fields
 	to print Chill STRUCT values.
-	**** end-sanitize-chill ****
 
 Tue Feb 23 18:58:11 1993  Mike Werner  (mtw@poseidon.cygnus.com)
 
@@ -1004,11 +994,9 @@ Tue Feb 23 11:21:33 1993  Fred Fish  (fnf@cygnus.com)
 
 	* dwarfread.c (read_tag_string_type):  Rewrite to allow forward
 	references of TAG_string_type DIEs in user defined types.
-	**** start-sanitize-chill ****
 	* ch-lang.c (chill_create_fundamental_type):  Track compiler
 	change that now emits debugging info with the type long for Chill
 	longs.
-	**** end-sanitize-chill ****
 
 Mon Feb 22 15:21:54 1993  Ian Lance Taylor  (ian@cygnus.com)
 
@@ -1309,9 +1297,7 @@ Tue Feb  2 16:10:31 1993  Fred Fish  (fnf@cygnus.com)
 	* tm-sparc.h (setup_arbitrary_frame):  Fix prototype.
 	* valops.c (typecmp):  Moved prototype from values.h.
 	* value.h (typecmp):  Moved prototype to valops.c, made static.
-	**** start-sanitize-chill ****
 	* ch-exp.y (yylex):  Change way control sequences are disabled.
-	**** end-sanitize-chill ****
 	
 Tue Feb  2 16:11:43 1993  John Gilmore  (gnu@cygnus.com)
 
@@ -1422,7 +1408,6 @@ Wed Jan 27 21:34:21 1993  Fred Fish  (fnf@cygnus.com)
 	concatenation case.
 	* valarith.c (value_concat):  Rewrite to support self
 	concatenation an integral number of times.
-	**** start-sanitize-chill ****
 	* Makefile.in (ch-exp.tab.c):  Change "expect" message.
 	* ch-exp.y (FIXME's):  Make all FIXME tokens distinct, to
 	eliminate hundreds of spurious shift/reduce and reduce/reduce
@@ -1430,7 +1415,6 @@ Wed Jan 27 21:34:21 1993  Fred Fish  (fnf@cygnus.com)
 	* ch-exp.y (STRING, CONSTANT, SC):  Remove unused tokens.
 	* ch-exp.y (integer_literal_expression):  Remove production,
 	no longer used.
-	**** end-sanitize-chill ****
 
 Thu Jan 21 09:58:36 1993  Fred Fish  (fnf@cygnus.com)
 
@@ -1449,12 +1433,10 @@ Thu Jan 21 09:58:36 1993  Fred Fish  (fnf@cygnus.com)
 	* valops.c (value_string):  Remove error stub and implement
 	function body.
 	* value.h (value_concat):  Add prototype.
-	**** start-sanitize-chill ****
 	* ch-exp.y (operand_3):  Add actions for SLASH_SLASH (//).
 	* ch-exp.y (yylex):  Recognize SLASH_SLASH.
 	* ch-lang.c (chill_op_print_tab):  Add SLASH_SLASH (//) as
 	BINOP_CONCAT.
-	**** end-sanitize-chill ****
 
 Tue Jan 19 14:26:15 1993  Fred Fish  (fnf@cygnus.com)
 
@@ -1468,12 +1450,10 @@ Tue Jan 19 14:26:15 1993  Fred Fish  (fnf@cygnus.com)
 	* expprint.c (print_subexp):  Add support for OP_ARRAY.
 	* gdbtypes.c (create_range_type, create_array_type):  Inherit
 	objfile from the index type.
-	**** start-sanitize-chill ****
 	* ch-typeprint.c (chill_print_type):  Add case for
 	TYPE_CODE_STRING.
 	* ch-valprint.c (chill_val_print):  Fix case for
 	TYPE_CODE_STRING.
-	**** end-sanitize-chill ****
 
 Mon Jan 18 11:58:45 1993  Ian Lance Taylor  (ian@cygnus.com)
 
@@ -1534,11 +1514,9 @@ Fri Jan 15 20:26:50 1993  Fred Fish  (fnf@cygnus.com)
 	complete rewrite to fix several small buglets.
 	* value.h (value_array):  Add prototype.
 	* value.h (val_print_string):  Change prototype to match rewrite.
-	**** start-sanitize-chill ****
 	* ch-valprint.c (chill_val_print):  Add case for TYPE_CODE_STRING.
 	* ch-exp.y (match_character_literal):  Disable recognition of 
 	control sequence form of character literals and document why.
-	**** end-sanitize-chill ****
 
 Thu Jan 14 15:48:12 1993  Stu Grossman  (grossman at cygnus.com)
 
@@ -1572,7 +1550,6 @@ Wed Jan 13 20:49:59 1993  Fred Fish  (fnf@cygnus.com)
 	* valprint.c (val_print_string):  New function using code
 	extracted from c_val_print.
 	* value.h (val_print_string):  Add prototype.
-	**** start-sanitize-chill ****
 	* ch-exp.y (CHARACTER_STRING_LITERAL):  Set correct token type.
 	* ch-exp.y (literal):  Add action for CHARACTER_STRING_LITERAL.
 	* ch-exp.y (tempbuf, tempbufsize, tempbufindex, GROWBY_MIN_SIZE,
@@ -1583,7 +1560,6 @@ Wed Jan 13 20:49:59 1993  Fred Fish  (fnf@cygnus.com)
 	removed and replaced with new CHECKBUF macro.
 	* ch-exp.y (yylex):  Call match_string_literal when appropriate.
 	* ch-valprint.c (ch_val_print):  Add code for TYPE_CODE_PTR.
-	**** end-sanitize-chill ****
 
 Sat Jan  9 19:59:33 1993  Stu Grossman  (grossman at cygnus.com)
 
@@ -1691,7 +1667,6 @@ Wed Jan  6 08:19:11 1993  Fred Fish  (fnf@cygnus.com)
 	* parser-defs.h (struct stoken):  Document that it is used for
 	OP_BITSTRING as well as OP_STRING.
 	* parser-defs.h (write_exp_bitstring):  Add prototype.
-	**** start-sanitize-chill ****
 	* ch-exp.y (BIT_STRING_LITERAL):  Change token type to sval.
 	* ch-exp.y (NUM, PRED, SUCC, ABS, CARD, MAX, MIN, SIZE, UPPER,
 	LOWER, LENGTH):  New tokens for keywords.
@@ -1708,7 +1683,6 @@ Wed Jan  6 08:19:11 1993  Fred Fish  (fnf@cygnus.com)
 	* ch-exp.y (tokentab3):  Add NUM, ABS, MIN, MAX.
 	* ch-exp.y (yylex):  Check tokentab6.
 	* ch-exp.y (yylex):  Call match_bitstring_literal.
-	**** end-sanitize-chill ****
 
 Mon Jan  4 16:54:18 1993  Fred Fish  (fnf@cygnus.com)
 
@@ -1729,14 +1703,12 @@ Mon Jan  4 16:54:18 1993  Fred Fish  (fnf@cygnus.com)
 	* valarith.c (value_x_binop):  Handle BINOP_MOD if seen.
 	* valarith.c (value_binop):  Allow arithmetic operations on
 	TYPE_CODE_CHAR variables.  Add case to handle new BINOP_MOD.
-	**** start-sanitize-chill ****
 	* ch-exp.y (operand_4):  Add useful actions for MOD and REM.
 	* ch-exp.y (tokentab3):  Add MOD and REM.
 	* ch-exp.y (yylex):  Set innermost_block for symbols found
 	in local scopes.  Return LOCATION_NAME for local symbols.
 	* ch-lang.c (chill_op_print_tab):  Fix MOD entry to use
 	BINOP_MOD instead of BINOP_REM.  Add REM entry, using BINOP_REM.
-	**** end-sanitize-chill ****
 
 Mon Jan  4 07:35:31 1993  Steve Chamberlain  (sac@wahini.cygnus.com)
 
@@ -1768,7 +1740,6 @@ Sun Jan  3 14:16:10 1993  Fred Fish  (fnf@cygnus.com)
 
 Sat Jan  2 12:16:41 1993  Fred Fish  (fnf@cygnus.com)
 
-	**** start-sanitize-chill ****
 	* ch-exp.y (FLOAT_LITERAL):  Add token.
 	* ch-exp.y (literal):  Add FLOAT_LITERAL.
 	* ch-exp.y (match_float_literal):  New lexer routine.
@@ -1776,7 +1747,6 @@ Sat Jan  2 12:16:41 1993  Fred Fish  (fnf@cygnus.com)
 	* ch-exp.y (yylex):  Call match_float_literal.
 	* ch-exp.y (yylex):  Match single '.' after trying
 	to match floating point literals.
-	**** end-sanitize-chill ****
 
 	* eval.c (evaluate_subexp):  Add case MULTI_SUBSCRIPT.
 	* expprint.c (print_subexp):  Rename BINOP_MULTI_SUBSCRIPT to
@@ -1793,12 +1763,10 @@ Sat Jan  2 12:16:41 1993  Fred Fish  (fnf@cygnus.com)
 	* parse.c (parse_exp_1):  Call DUMP_EXPRESSION before and after
 	prefixify'ing the expression.
 	* printcmd.c (print_command_1):  Add comment.
-	**** start-sanitize-chill ****
 	* ch-exp.y (expression_list):  Add useful actions.
 	* ch-exp.y (value_array_element):  Add useful actions.
 	* ch-exp.y (array_primitive_value):  Add production.
 	* ch-exp.y (yylex):  Recognize ',' as a token.
-	**** end-sanitize-chill ****
 
 Fri Jan  1 18:22:02 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
@@ -1844,14 +1812,12 @@ Fri Jan  1 11:56:23 1993  Fred Fish  (fnf@cygnus.com)
 	* utils.c (fputs_demangled, fprint_symbol):  Use current language
 	to select an appropriate demangling algorithm.
 	* utils.c (strdup_demangled):  Remove, no longer used.
-	**** start-sanitize-chill ****
 	* symtab.h (SYMBOL_CHILL_DEMANGLED_NAME):  New macro that directly
 	access the Chill mangled name member in the language dependent
 	portion of a symbol.
 	* ch-lang.c (chill_demangle):  New function, simple demangler.
 	* defs.h (chill_demangle):  Add prototype.
 	* symtab.h (language_dependent_info):  Add struct for Chill.	
-	**** end-sanitize-chill ****
 
 Thu Dec 31 11:06:38 1992  Fred Fish  (fnf@cygnus.com)
 
@@ -1882,9 +1848,7 @@ Wed Dec 30 19:47:13 1992  Fred Fish  (fnf@cygnus.com)
 
 	* c-exp.y, m2-exp.y (yyrule, yyname):  Remap like other yy* names
 	for byacc.
-	**** start-sanitize-chill ****
 	* ch-exp.y (yyrule, yyname):  Remap like other yy* names for byacc.
-	**** end-sanitize-chill ****
 
 	* c-exp.y, m2-exp.y (yyreds, yytoks):  Remap like other yy* names.
 	* c-exp.y, m2-exp.y (YYDEBUG):  Define if MAINTENANCE_CMDS is defined
@@ -1894,7 +1858,6 @@ Wed Dec 30 19:47:13 1992  Fred Fish  (fnf@cygnus.com)
 	* printcmd.c (_initialize_printcmd):  Update internal documentation
 	for "set" command to note that the assignment syntax is language
 	dependent.
-	**** start-sanitize-chill ****
 	* ch-exp.y (yyreds, yytoks):  Remap like other yy* names.
 	* ch-exp.y (YYDEBUG):  Define if MAINTENANCE_CMDS is defined
 	and YYDEBUG is not already defined.
@@ -1905,7 +1868,6 @@ Wed Dec 30 19:47:13 1992  Fred Fish  (fnf@cygnus.com)
 	tokens that start with '$' (register names, convenience vars, etc).
 	* ch-exp.y (tokentab2):  Add GDB_ASSIGNMENT.
 	* ch-exp.y (yylex):  Call match_dollar_tokens.
-	**** end-sanitize-chill ****
 
 Mon Dec 28 15:00:01 1992  Stu Grossman  (grossman at cygnus.com)
 
@@ -2072,13 +2034,11 @@ Mon Dec 21 22:24:33 1992  Fred Fish  (fnf@cygnus.com)
 
 	* valprint.c (val_print):  Reorganize comment and add note
 	about dependency on target byte ordering.
-	**** start-sanitize-chill ****
 	* ch-exp.y (value_array_slice):  Fix typo.
 	* ch-valprint.c (chill_val_print): Remove C'ism that arrays of
 	byte sized ints are assumed to be char strings and printed with
 	string syntax.  In chill, arrays of chars and arrays of
 	bytes/ubytes are distinquishable, and printed appropriately.
-	**** end-sanitize-chill ****
 
 Mon Dec 21 18:02:35 1992  Stu Grossman  (grossman at cygnus.com)
 
@@ -2245,7 +2205,6 @@ Fri Dec 18 10:32:25 1992  Fred Fish  (fnf@cygnus.com)
 	* value.h (enum val_prettyprint):  Moved to defs.h.
 	* value.h (typedef_print):  Prototype renamed to c_typedef_print.
 	* value.h (baseclass_offset):  Add prototype.
-	**** start-sanitize-chill ****
 	* Makefile.in (SFILES_MAINDIR):  Add ch-typeprint.c, ch-valprint.c.
 	* Makefile.in (OBS):  Add ch-typeprint.o, ch-valprint.o.
 	* ch-typeprint.c:  New file for language dependent type printing.
@@ -2268,7 +2227,6 @@ Fri Dec 18 10:32:25 1992  Fred Fish  (fnf@cygnus.com)
 	* ch-lang.c (chill_language_defn):  Add chill_print_type and
 	  chill_val_print.
 	* ch-lang.h (chill_print_type, chill_val_print):  Add prototypes.
-	**** end-sanitize-chill ****
 
 Thu Dec 17 00:44:57 1992  John Gilmore  (gnu@cygnus.com)
 
@@ -2447,7 +2405,6 @@ Tue Dec  8 13:30:58 1992  Fred Fish  (fnf@cygnus.com)
 	* Makefile.in (OBS):  Add c-lang.o, m2-lang.o.
 	* expression.h (struct block):  Forward declaration for prototypes.
 	* language.h (struct objfile):  Forward declaration for prototypes.
-	**** start-sanitize-chill ****
 	* Makefile.in (SFILES_MAINDIR):  Add ch-lang.c.
 	* Makefile.in (HFILES):  Add ch-lang.h.
 	* Makefile.in (OBS):  Add ch-lang.o.
@@ -2457,7 +2414,6 @@ Tue Dec  8 13:30:58 1992  Fred Fish  (fnf@cygnus.com)
 	* ch-lang.h:  New file, internal interface between ch-* files.
 	* ch-lang.c (_initialize_chill_language):  Name changed from
 	_initialize_chill_exp.
-	**** end-sanitize-chill ****
 
 	Changes for Amiga Unix from rhealey@ub.d.umn.edu.
 	* config/amix.mh (NAT_FILE):  Add, set to nm-sysv4.h.
@@ -2469,7 +2425,6 @@ Tue Dec  8 13:30:58 1992  Fred Fish  (fnf@cygnus.com)
 	accepted only integer subscript types.  We don't do anything
 	with the type at the moment anyway.
 
-	**** start-sanitize-chill ****
 Fri Dec  4 06:56:56 1992  Fred Fish  (fnf@cygnus.com)
 
 	* ch-exp.y (match_character_literal):  Fix case where no
@@ -2478,7 +2433,6 @@ Fri Dec  4 06:56:56 1992  Fred Fish  (fnf@cygnus.com)
 	width types.  For example, "INT" is always 2 bytes regardless
 	of the values of any TARGET_*_BIT macros.  So use explicit
 	numeric sizes for the types.
-	**** end-sanitize-chill ****
 
 Thu Dec  3 12:00:06 1992  Fred Fish  (fnf@cygnus.com)
 
@@ -2520,20 +2474,16 @@ Thu Dec  3 12:00:06 1992  Fred Fish  (fnf@cygnus.com)
 	for initializing language structs, calls error if called.
 	* language.c (unk_language_defn, auto_language_defn, 
 	local_language_defn):  Use unk_lang_create_fundamental_type.	
-	**** start-sanitize-chill ****
 	ch-exp.y (chill_create_fundamental_type):  New function.
 	ch-exp.y (chill_language_defn):  Add chill_create_fundamental_type.
 	ch-exp.y (_initialize_chill_exp):  BOOL types are only one byte.
-	**** end-sanitize-chill ****
 
-	**** start-sanitize-chill ****
 Tue Dec  1 17:07:31 1992  Fred Fish  (fnf@cygnus.com)
 
 	* dwarfread.c (CHILL_PRODUCER):  Add producer string for
 	GNU chill.
 	* dwarfread.c (handle_producer):  Test CHILL_PRODUCER as well
 	as GCC_PRODUCER and GPLUS_PRODUCER.
-	**** end-sanitize-chill ****
 
 Mon Nov 30 18:46:58 1992  Stu Grossman  (grossman at cygnus.com)
 
@@ -2570,7 +2520,6 @@ Sun Nov 29 15:22:42 1992  Fred Fish  (fnf@cygnus.com)
 	* stabsread.c (define_symbol):  For the sake of dbx, gcc emits
 	a single blank as the name of nameless enumerations.  Recognize
 	this special case and set nameless flag.
-	**** start-sanitize-chill ****
 	* ch-exp.y (GENERAL_PROCEDURE_NAME, LOCATION_NAME):  New
 	terminal tokens.
 	* ch-exp.y (access_name):  New non-terminal token and
@@ -2580,7 +2529,6 @@ Sun Nov 29 15:22:42 1992  Fred Fish  (fnf@cygnus.com)
 	* ch-exp.y (match_simple_name_string):  New function.
 	* ch-exp.y (yylex):  Call match_simple_name_string and return
 	GENERAL_PROCEDURE_NAME or LOCATION_NAME as appropriate.
-	**** end-sanitize-chill ****
 
 Wed Nov 25 07:17:13 1992  Fred Fish  (fnf@cygnus.com)
 
@@ -2614,11 +2562,9 @@ Mon Nov 23 11:14:15 1992  Fred Fish  (fnf@cygnus.com)
 	form, based on it's ASCII value and setting of sevenbit_strings.
 	* {c-exp.y, m2-exp.y} (emit_char):  Use new PRINT_LITERAL_FORM
 	macro, change indentation style.
-	**** start-sanitize-chill ****
 	* ch-exp.y (chill_printchar):  Use new PRINT_LITERAL_FORM macro.
 	* ch-exp.y (chill_printstr):  First cut at real function instead
 	of error stub.
-	**** end-sanitize-chill ****
 
 Sun Nov 22 16:21:41 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
@@ -2667,14 +2613,12 @@ Fri Nov 20 21:35:57 1992  Fred Fish  (fnf@cygnus.com)
 	* valprint.c (val_print):  Add case for TYPE_CODE_CHAR.
 	* valprint.c (_initialize_valprint):  Add add_show_from_set
 	call for setting up repeat_count_threshold as print variable.
-	**** start-sanitize-chill ****
 	* ch-exp.y (decode_integer_value):  New function.
 	* ch-exp.y (decode_integer_literal):  Use decode_integer_value.
 	* ch-exp.y (chill_printchar, chill_printstr):  New language
 	dependent functions for printing characters and strings.
 	* ch-exp.y (chill_language_defn):  Add chill_printchar and
 	chill_printstr.
-	**** end-sanitize-chill ****
 
 Thu Nov 19 21:22:21 1992  John Gilmore  (gnu@cygnus.com)
 
@@ -2722,14 +2666,12 @@ Wed Nov 18 14:27:47 1992  Fred Fish  (fnf@cygnus.com)
 	local_language_defn):  Update for new format handling.
 	* printcmd.c (print_scalar_formatted):  Use new macros
 	to access decimal and binary format info for printing.
-	**** start-sanitize-chill ****
 	* c-exp.y (chill_language_defn):  Update for new format handling.
 	* ch-exp.y (CHARACTER_LITERAL):  Add support to yylex.
 	* ch-exp.y (decode_integer_literal):  Add function
 	* ch-exp.y (match_integer_literal):  Use decode_integer_literal.
 	* ch-exp.y (builtin_type_chill_char):  Add definition.
 	* gdbtypes.h (builtin_type_chill_char):  Add declaration.
-	**** end-sanitize-chill ****
 
 Tue Nov 17 11:17:06 1992  Ian Lance Taylor  (ian@cygnus.com)
 
@@ -2806,7 +2748,6 @@ Sun Nov 15 09:22:09 1992  Fred Fish  (fnf@cygnus.com)
 	* valprint.c (val_print):  Print TYPE_CODE_BOOL type values as
 	"TRUE" or "FALSE".
 	* values.c (value_from_longest):  Handle TYPE_CODE_BOOL.
-	**** start-sanitize-chill ****
 	* ch-exp.y:  New expression parser, for GNU-Chill.
 	* defs.h (enum language):  Add language_chill.
 	* dwarfread.c (set_cu_language):  Add LANG_CHILL case and make
@@ -2833,7 +2774,6 @@ Sun Nov 15 09:22:09 1992  Fred Fish  (fnf@cygnus.com)
 	* Makefile.in (ch-exp.tab.o, ch-exp.tab.c):  New targets.
 	* eval.c (evaluate_subexp):  Add OP_BOOL case.
 	* expprint.c (print_subexp):  Add OP_BOOL case.	
-	**** end-sanitize-chill ****
 
 Fri Nov 13 20:36:28 1992  John Gilmore  (gnu@cygnus.com)
 
