@@ -1,3 +1,8 @@
+2005-04-06  Paul Gilliam  <pgilliam@us.ibm.com>
+
+        * lib/gdb.exp (test_compiler_info): Return compiler_info
+        if no arguments are given.
+
 2005-04-01  Paul Gilliam  <pgilliam@us.ibm.com>
 
 	* gdb.arch/altivec-abi.exp: Check for compiler and set

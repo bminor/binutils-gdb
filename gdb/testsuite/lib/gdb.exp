@@ -1293,6 +1293,17 @@ proc get_compiler_info {binfile args} {
 
 proc test_compiler_info { compiler } {
     global compiler_info
+
+     # if no arg, return the compiler_info string
+
+     if [string match "" $compiler] {
+         if [info exists compiler_info] {
+             return $compiler_info
+         } else {
+             perror "No compiler info found."
+         }
+     }
+
     return [string match $compiler $compiler_info]
 }
 
