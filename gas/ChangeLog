@@ -1,3 +1,9 @@
+Mon Jun  3 11:34:41 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (mips_ip): Don't call as_warn if we are setting
+	insn_error.  Don't put the string "ERROR" in insn_error.  Set
+	insn_error rather than calling as_warn for an unsupported opcode.
+
 Sat Jun  1 21:51:55 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (md_parse_option): Check for a 64 bit format
