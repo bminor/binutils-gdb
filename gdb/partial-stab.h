@@ -202,7 +202,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	     If pst exists, is empty, and has a filename ending in '/',
 	     we assume the previous N_SO was a directory name. */
 
-	  p = rindex(namestring, '/');
+	  p = strrchr (namestring, '/');
 	  if (p && *(p+1) == '\000')
 	    {
 	      dir_so_symnum = symnum;

@@ -1,3 +1,10 @@
+Wed Jun 17 11:10:40 1992  Fred Fish  (fnf@cygnus.com)
+
+	* partial-stab.h: Convert single rindex use to strrchr.
+	* mipsread.c, dbxread.c:  Remove troublesome inclusion of non-
+	standard <strings.h> file, now that the only single use of
+	rindex in the gdb source files is gone.
+
 Tue Jun 16 22:17:49 1992  Fred Fish  (fnf@cygnus.com)
 
 	* mipsread.c:  Undo ill effects from including <strings.h>,
