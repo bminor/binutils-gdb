@@ -1,3 +1,28 @@
+Thu Mar  5 23:51:42 1992  John Gilmore  (gnu at cygnus.com)
+
+	* coff-msym.c:  Move this file from gdb/ecoff.c.  It
+	handles byte-swapping for ECOFF (MIPS symbol) files.
+	* config/mh-decstation, config/mh-irix3:  Add coff-msym.o
+	to the files built on MIPS-based hosts.
+
+Sun Mar  1 22:32:58 1992  Per Bothner  (bothner@cygnus.com)
+
+	* coff-rs6000.c:  Move core file functions into separate
+	new file rs6000-core.c.  This is needed because reading
+	core files depends on native include files that conflict
+	with ../include/coff/rs6000.h.
+	* config/mh-rs6000:  Add rs6000-core.o to HDEPFILES.
+
+Thu Feb 27 22:19:55 1992  Per Bothner  (bothner@cygnus.com)
+
+	* aoutx.h (NAME(aout,print_symbol)): Don't print
+	symbol addresss for undefined symbols.
+	* coff-rs6000.c:  Various updates (due to target-
+	independent changes).
+	* libbfd.h:  Ditto (tdata field is now a union).
+	* hosts/h-sparc.h:  Removed prototype for bogus function
+	'emset' (presumably should have been 'memset' - which is there).
+
 Thu Feb 27 09:24:56 1992  Steve Chamberlain  (sac at thepub.cygnus.com)
 
 	* aoutx.h (translate_from_native_sym_flags): when creating an
