@@ -2,6 +2,7 @@ Mon Jan  3 11:41:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* libbfd-in.h (struct artdata): Added tdata field.
 	(_bfd_add_bfd_to_archive_cache): Declare.
+	(_bfd_get_elt_at_filepos): Declare.
 	(_bfd_snarf_ar_hdr): Renamed from snarf_ar_hdr.
 	* libbfd.h: Rebuilt.
 	* archive.c: Cleaned up some more.
@@ -9,9 +10,9 @@ Mon Jan  3 11:41:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 	pointer elements of artdata.
 	(_bfd_add_bfd_to_archive_cache): Renamed from add_bfd_to_cache.
 	(_bfd_snarf_ar_hdr): Renamed from snarf_ar_hdr.
-	(get_extended_arelt_filename, get_elt_at_filepos,
-	bfd_construct_extended_name_table, bfd_ar_hdr_from_filesystem,
-	compute_and_write_armap): Made static.
+	(_bfd_get_elt_at_filepos): Renamed from get_elt_at_filepos.
+	(get_extended_arelt_filename, bfd_construct_extended_name_table,
+	bfd_ar_hdr_from_filesystem, compute_and_write_armap): Made static.
 	* ecoff.c: Some comment changes.
 	(ecoff_slurp_armap): Handle rename of snarf_ar_hdr.  Set
 	ardata->tdata to raw_armap.

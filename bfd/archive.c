@@ -172,7 +172,6 @@ struct ar_cache {
 
 static char *get_extended_arelt_filename PARAMS ((bfd *arch,
 						  const char *name));
-static bfd *get_elt_at_filepos PARAMS ((bfd *archive, file_ptr filepos));
 static boolean do_slurp_bsd_armap PARAMS ((bfd *abfd));
 static boolean do_slurp_coff_armap PARAMS ((bfd *abfd));
 static const char *normalize PARAMS ((const char *file));
@@ -486,8 +485,8 @@ _bfd_snarf_ar_hdr (abfd)
    element, since it handles the bookkeeping so nicely for us.
 */
 
-static bfd *
-get_elt_at_filepos (archive, filepos)
+bfd *
+_bfd_get_elt_at_filepos (archive, filepos)
      bfd *archive;
      file_ptr filepos;
 {
@@ -546,7 +545,7 @@ bfd_get_elt_at_index (abfd, index)
      int index;
 {
   bfd *result =
-    get_elt_at_filepos
+    _bfd_get_elt_at_filepos
       (abfd, (bfd_ardata (abfd)->symdefs + index)->file_offset);
   return result;
 }
@@ -604,7 +603,7 @@ bfd_generic_openr_next_archived_file (archive, last_file)
     filestart += filestart % 2;
   }
 
-  return get_elt_at_filepos (archive, filestart);
+  return _bfd_get_elt_at_filepos (archive, filestart);
 }
 
 
