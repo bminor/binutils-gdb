@@ -543,7 +543,6 @@ Wed Feb  7 19:41:21 2001  Andrew Cagney  <cagney@redhat.com>
 	(fill_fpregset): Likewise.
 	(supply_fpregset): Likewise.
 
->>>>>>> 1.973
 Tue Feb  6 11:58:57 2001  David Taylor  <taylor@redhat.com>
 
 	* valops.c (value_cast): If casting a scalar to a pointer, do not
