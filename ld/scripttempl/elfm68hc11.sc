@@ -311,6 +311,8 @@ SECTIONS
     *(COMMON)
     ${RELOCATING+PROVIDE (_end = .);}
   } ${RELOCATING+ > ${DATA_MEMORY}}
+  ${RELOCATING+__bss_size = SIZEOF(.bss);}
+  ${RELOCATING+PROVIDE (__bss_size = SIZEOF(.bss));}
 
   ${RELOCATING+${CTOR}}
   ${RELOCATING+${DTOR}}
