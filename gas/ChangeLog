@@ -1,3 +1,7 @@
+2002-06-26  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* po/tr.po: New translation imported.
+
 2002-06-26  Elias Athanasopoulos  <eathan@otenet.gr>
 
 	* ecoff.c: (get_tag): Replace strcpy with xstrdup.
@@ -11,7 +15,7 @@
 	* Makefile.am (check-DEJAGNU): Set LC_ALL=C and export it.
 	* Makefile.in: Regenerated.
 
-Wed Jun 19 15:12:00 2002  Dhananjay R. Deshpande <dhananjayd@kpit.com>
+2002-06-19  Dhananjay R. Deshpande <dhananjayd@kpit.com>
 
 	* config/tc-sh.c (get_specific): Revert 2002-05-01 change.
 	(assemble_ppi): Generate warning if the same register is used
@@ -38,7 +42,7 @@ Wed Jun 19 15:12:00 2002  Dhananjay R. Deshpande <dhananjayd@kpit.com>
 
 	* config/obj-elf.h (TARGET_SYMBOL_FIELDS): Conditionally define.
 
-Mon Jun 17 16:29:58 2002  J"orn Rennecke <joern.rennecke@superh.com>
+2002-06-17  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* config/tc-sh.c (assemble_ppi): Initialize reg_n.
 
@@ -217,7 +221,7 @@ Mon Jun 17 16:29:58 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	(elf_frob_file): If group name matches an exported symbol, use that
 	symbol for the signature and ".group" as the section name.
 
-Thu Jun  6 17:42:12 2002  J"orn Rennecke <joern.rennecke@superh.com>
+2002-06-06  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* config/tc-sh.c (parse_at): @(symbol,pc) is A_DISP_PC again,
 	but warn about it.
@@ -853,7 +857,7 @@ Thu Jun  6 17:42:12 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	BFD_VERSION_STRING unavailable.
 	* config/tc-i386.c (INLINE): Define (for non-BFD assembler).
 
-Tue Apr  9 16:45:48 2002  J"orn Rennecke <joern.rennecke@superh.com>
+2002-04-09  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* config/tc-sh.h (TC_FIX_ADJUSTABLE): Disable adjusting if
 	symbol_used_in_reloc_p is true.
@@ -1264,12 +1268,12 @@ Tue Apr  9 16:45:48 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	* config/tc-ppc.c (md_apply_fix3): Check for insert fop invalid for
 	xcoff64.
 
-Mon Feb 11 11:23:38 2002  Alexandre Oliva  <aoliva@redhat.com>
+2002-06-11  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-sparc.c (U0x80000000, U0xffffffff): New constants.
 	Use all over.
 
-Mon Feb 11 12:59:29 CET 2002  Jan Hubicka  <jh@suse.cz>
+2002-02-11  Jan Hubicka  <jh@suse.cz>
 
 	* i386.c (md_assemble): Support 32bit address prefix.
 	(i386_displacement): Likewise.
