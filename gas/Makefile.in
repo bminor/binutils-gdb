@@ -270,7 +270,7 @@ as.new: $(OBJS) $(LIBDEPS)
 
 $(OBJS): config.h as.h targ-env.h obj-format.h targ-cpu.h flonum.h expr.h \
 	struc-symbol.h write.h frags.h hash.h read.h symbols.h tc.h obj.h \
-	listing.h bignum.h $(IT_HDRS) $(srcdir)/../include/libiberty.h
+	listing.h bignum.h $(srcdir)/../include/libiberty.h
 
 gasp.new: $(GASPOBJS) ../libiberty/libiberty.a
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o gasp.new $(GASPOBJS) ../libiberty/libiberty.a $(LOADLIBES)
@@ -357,7 +357,7 @@ TARG_CPU_DEP_m68k    = $(srcdir)/../include/opcode/m68k.h \
 			$(srcdir)/config/m68k-parse.h subsegs.h
 TARG_CPU_DEP_m88k    = $(srcdir)/config/m88k-opcode.h subsegs.h
 TARG_CPU_DEP_mips    = $(srcdir)/../include/opcode/mips.h subsegs.h  \
-			$(srcdir)/config/itbl-mips.h 
+			$(srcdir)/config/itbl-mips.h $(srcdir)/itbl-ops.h
 TARG_CPU_DEP_ns32k   =
 TARG_CPU_DEP_ppc     = subsegs.h
 TARG_CPU_DEP_sh      = $(srcdir)/../opcodes/sh-opc.h subsegs.h
@@ -406,11 +406,17 @@ obj-elf.o : $(srcdir)/config/obj-elf.c
 	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/config/obj-elf.c
 obj-ecoff.o : $(srcdir)/config/obj-ecoff.c
 	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/config/obj-ecoff.c
+obj-coff.o: $(srcdir)/config/obj-coff.c
+	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/config/obj-coff.c
 
 e-mipself.o : $(srcdir)/config/e-mipself.c
 	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/config/e-mipself.c
 e-mipsecoff.o : $(srcdir)/config/e-mipsecoff.c
 	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/config/e-mipsecoff.c
+e-i386coff.o: $(srcdir)/config/e-i386coff.c
+	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/config/e-i386coff.c
+e-i386elf.o: $(srcdir)/config/e-i386elf.c
+	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/config/e-i386elf.c
 
 # The m68k operand parser.
 
@@ -431,7 +437,7 @@ itbl-lex.c: $(srcdir)/itbl-lex.l
 	$(LEX) $(LEXFLAGS) $(srcdir)/itbl-lex.l
 	mv -f lex.yy.c itbl-lex.c
 
-itbl-lex.o: itbl-lex.c 
+itbl-lex.o: itbl-lex.c itbl-parse.h
 	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) itbl-lex.c
 
 itbl-parse.c itbl-parse.h: $(srcdir)/itbl-parse.y
@@ -442,8 +448,7 @@ itbl-parse.c itbl-parse.h: $(srcdir)/itbl-parse.y
 itbl-parse.o: itbl-parse.c itbl-parse.h $(srcdir)/itbl-ops.h
 	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) itbl-parse.c
 
-itbl-ops.o: $(srcdir)/itbl-ops.c \
-	$(srcdir)/itbl-ops.h itbl-parse.h
+itbl-ops.o: $(srcdir)/itbl-ops.c $(srcdir)/itbl-ops.h itbl-parse.h
 	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/itbl-ops.c
 
 # stand-alone itbl assembler & disassembler

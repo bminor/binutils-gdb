@@ -7,6 +7,30 @@ Tue Feb 25 22:02:23 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 Tue Feb 25 13:17:27 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	Based on patches from Robert Lipe <robertl@dgii.com>:
+	* configure.in: Add i386coff and i386elf to emulation list.
+	* configure: Rebuild.
+	* as.c (i386coff, i386elf): Declare.
+	* obj.h (coff_format_ops): Declare.
+	* config/obj-coff.c (OBJ_HEADER): Define.
+	(coff_obj_symbol_new_hook): Rename from obj_symbol_new_hook.
+	(coff_obj_read_begin_hook): Rename from obj_read_begin_hook.
+	(obj_pseudo_table): Add "version".
+	(coff_pop_insert): New static function.
+	(coff_sec_sym_ok_for_reloc): New static function.
+	(no_func): New static function.
+	(coff_format_ops): New variable.
+	* config/obj-coff.h (coff_obj_symbol_new_hook): Declare.
+	(obj_symbol_new_hook): Define.
+	(coff_obj_read_begin_hook): Declare.
+	(obj_read_begin_hook): Define.
+	* config/tc-i386.h (i386_target_format): Declare.
+	* config/tc-i386.c: Check OBJ_MAYBE_ELF as well as OBJ_ELF; check
+	OUTPUT_FLAVOR when appropriate.
+	(i386_target_format): New function.
+	* Makefile.in (obj-coff.o): New target.
+	(e-i386coff.o, e-i386elf.o): New targets.
+
 	From Stephen Williams <steve@icarus.icarus.com>:
 	* config/tc-i960.h (TC_SYMFIELD_TYPE): Define if OBJ_COFF.
 	(_tc_get_bal_of_call): Don't declare.
