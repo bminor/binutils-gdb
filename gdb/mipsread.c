@@ -1359,7 +1359,11 @@ parse_type (ax, bs, bigend)
 	  complain (&bad_tag_guess_complaint, name);
 	  TYPE_CODE (tp) = type_code;
 	}
-      if (TYPE_TAG_NAME (tp) == NULL || !STREQ (TYPE_TAG_NAME (tp), name))
+      /* Do not set the tag name if it is a compiler generated tag name
+	  (.Fxx or .xxfake) for unnamed struct/union/enums.  */
+      if (name[0] == '.')
+	TYPE_TAG_NAME (tp) = NULL;
+      else if (TYPE_TAG_NAME (tp) == NULL || !STREQ (TYPE_TAG_NAME (tp), name))
 	TYPE_TAG_NAME (tp) = obsavestring (name, strlen (name),
 					   &current_objfile->type_obstack);
     }
