@@ -1,3 +1,7 @@
+Fri Aug 18 17:48:55 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* dcache.c (dcache_write_line): Write dirty lines right.
+
 Fri Aug 18 06:26:56 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* sparc-tdep.c (isbranch):  Fix typo which caused wrong

@@ -230,22 +230,22 @@ dcache_write_line (dcache, db)
 	      int len = 0;
 	      for (e = s ; e < LINE_SIZE; e++, len++)
 		if (db->state[e] != ENTRY_DIRTY)
-		  {
-		    /* all bytes from s..s+len-1 need to
-		       be written out */
-		    int done = 0;
-		    while (done < len) {
-		      int t = dcache->write_memory (db->addr + s + done,
-						    db->data + s + done,
-						    len - done);
-		      if (t == 0)
-			return 0;
-		      done += t;
-		    }
-		    memset (db->state + s, ENTRY_OK, len);
-		    s = e;
-		    break;
-		  }
+		  break;
+	      {
+		/* all bytes from s..s+len-1 need to
+		   be written out */
+		int done = 0;
+		while (done < len) {
+		  int t = dcache->write_memory (db->addr + s + done,
+						db->data + s + done,
+						len - done);
+		  if (t == 0)
+		    return 0;
+		  done += t;
+		}
+		memset (db->state + s, ENTRY_OK, len);
+		s = e;
+	      }
 	    }
 	}
       db->anydirty = 0;
