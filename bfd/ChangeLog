@@ -1,5 +1,17 @@
 Wed Aug  4 08:33:55 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* libnlm.h (nlm_backend_data): Added nlm_mangle_relocs.
+	(nlm_mangle_relocs_func): New macro.
+	* nlm32-i386.c (nlm_i386_write_reloc): Rewrote correctly.
+	(nlm_i386_mangle_relocs): New function.
+	* nlmcode.h (nlm_compute_section_file_positions): Move all common
+	symbols into the .bss section.
+	(nlm_set_section_contents): Call the mangle_relocs function.
+	(nlm_write_object_contents): Treat a reloc against any defined
+	symbol as an internal reloc.  Fix bug in external reloc counting.
+	Get the offset and debugging type right for .bss symbols.  Only
+	output debugging symbols for defined symbols.
+
 	* coff-h8500.c (rtype2howto): Do an fprintf to stderr rather than
 	using printf.
 	* coff-z8k.c (rtype2howto): Likewise.
