@@ -1,3 +1,4 @@
+cat << EOF
 OUTPUT_FORMAT("elf32-v850", "elf32-v850",
 	      "elf32-v850")
 OUTPUT_ARCH(v850)
@@ -108,3 +109,4 @@ SECTIONS
   .stack 0x200000 : { _stack = .; *(.stack) }
   /* These must appear regardless of  .  */
 }
+EOF
