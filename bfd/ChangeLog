@@ -1,3 +1,14 @@
+Thu Feb 25 02:15:52 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* elf.c (elf_write_object_contents): Section ".shstrtab" should be
+	type SHT_STRTAB.  Don't alter file offset for section 0.
+	(reloc_type_names): Now an array instead of a macro.  Still inside
+	"#if 0", since it's used only in debugging code also in "#if 0".
+	(struct elf_reloc_map_elt, struct elf_reloc_map): New types.
+	(sort_reloc_map): New function.
+	(sparc_reloc_map): New variable.
+	(elf_bfd_reloc_type_lookup): New function.
+
 Tue Feb 23 12:17:16 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* bfd-in.h (JUMP_TABLE): Added bfd_reloc_type_lookup and
