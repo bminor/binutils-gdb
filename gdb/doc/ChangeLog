@@ -1,3 +1,7 @@
+2003-07-26  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gdb.texinfo (TUI Keys): Document C-x o key to switch active window.
+
 2003-07-02  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.texinfo (Logging output): New chapter.

@@ -13844,6 +13844,14 @@ previous layout and the new one.
 
 Think of it as the Emacs @kbd{C-x 2} binding.
 
+@kindex C-x o
+@item C-x o
+Change the active window.  The TUI associates several key bindings
+(like scrolling and arrow keys) to the active window. This command
+gives the focus to the next TUI window.
+
+Think of it as the Emacs @kbd{C-x o} binding.
+
 @kindex C-x s
 @item C-x s
 Use the TUI @emph{SingleKey} keymap that binds single key to gdb commands
@@ -13885,9 +13893,10 @@ Refresh the screen.
 @end table
 
 In the TUI mode, the arrow keys are used by the active window
-for scrolling.  This means they are not available for readline.  It is
-necessary to use other readline key bindings such as @key{C-p}, @key{C-n},
-@key{C-b} and @key{C-f}.
+for scrolling.  This means they are available for readline when the
+active window is the command window.  When the command window
+does not have the focus, it is necessary to use other readline
+key bindings such as @key{C-p}, @key{C-n}, @key{C-b} and @key{C-f}.
 
 @node TUI Single Key Mode
 @section TUI Single Key Mode
