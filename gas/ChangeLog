@@ -1,5 +1,22 @@
 2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
 
+	* config/tc-mips.h (mips_flush_pending_output): Delete.
+	(mips_emit_delays): Declare.
+	(md_flush_pending_output): Use mips_emit_delays.
+	* config/tc-mips.c (mips_no_prev_insn): Remove parameter; always forget
+	the previous instructions.
+	(md_begin, append_insn, md_parse_option): Update callers.
+	(mips_emit_delay): Remove parameter.  Move INSNS != 0 code to
+	start_noreorder.
+	(mips_align, s_change_sec, s_cons, s_float_cons, s_gpword)
+	(s_gpdword): Update callers.
+	(start_noreorder, end_noreorder): New functions.
+	(macro, macro2, mips16_macro, s_mipsset): Use them instead of
+	manipulating mips_opts or prev_nop_frag directly.
+	(mips_flush_pending_output): Delete.
+
+2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
+
 	* config/tc-mips.c (mips_move_labels): New function, taken from...
 	(append_insn, mips_emit_delays): ...here.
 

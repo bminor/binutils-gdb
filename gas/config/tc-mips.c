@@ -928,7 +928,7 @@ enum mips_regclass { MIPS_GR_REG, MIPS_FP_REG, MIPS16_REG };
 
 static void append_insn
   (struct mips_cl_insn *ip, expressionS *p, bfd_reloc_code_real_type *r);
-static void mips_no_prev_insn (int);
+static void mips_no_prev_insn (void);
 static void mips16_macro_build
   (expressionS *, const char *, const char *, va_list);
 static void load_register (int, expressionS *, int);
@@ -1477,7 +1477,7 @@ md_begin (void)
 				       &zero_address_frag));
     }
 
-  mips_no_prev_insn (FALSE);
+  mips_no_prev_insn ();
 
   mips_gprmask = 0;
   mips_cprmask[0] = 0;
@@ -2664,7 +2664,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  /* If that was an unconditional branch, forget the previous
 	     insn information.  */
 	  if (pinfo & INSN_UNCOND_BRANCH_DELAY)
-	    mips_no_prev_insn (FALSE);
+	    mips_no_prev_insn ();
 	}
       else if (pinfo & INSN_COND_BRANCH_LIKELY)
 	{
@@ -2685,49 +2685,57 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
   mips_clear_insn_labels ();
 }
 
-/* This function forgets that there was any previous instruction or
-   label.  If PRESERVE is non-zero, it remembers enough information to
-   know whether nops are needed before a noreorder section.  */
+/* Forget that there was any previous instruction or label.  */
 
 static void
-mips_no_prev_insn (int preserve)
+mips_no_prev_insn (void)
 {
-  size_t i;
- 
-  if (! preserve)
-    {
-      prev_nop_frag = NULL;
-      prev_nop_frag_holds = 0;
-      prev_nop_frag_required = 0;
-      prev_nop_frag_since = 0;
-      for (i = 0; i < ARRAY_SIZE (history); i++)
-	history[i] = (mips_opts.mips16 ? mips16_nop_insn : nop_insn);
-    }
-  else
-    for (i = 0; i < ARRAY_SIZE (history); i++)
-      {
-	history[i].fixed_p = 1;
-	history[i].noreorder_p = 0;
-	history[i].mips16_absolute_jump_p = 0;
-      }
+  prev_nop_frag = NULL;
+  insert_into_history (0, ARRAY_SIZE (history), NOP_INSN);
   mips_clear_insn_labels ();
 }
 
-/* This function must be called whenever we turn on noreorder or emit
-   something other than instructions.  It inserts any NOPS which might
-   be needed by the previous instruction, and clears the information
-   kept for the previous instructions.  The INSNS parameter is true if
-   instructions are to follow.  */
+/* This function must be called before we emit something other than
+   instructions.  It is like mips_no_prev_insn except that it inserts
+   any NOPS that might be needed by previous instructions.  */
 
-static void
-mips_emit_delays (bfd_boolean insns)
+void
+mips_emit_delays (void)
 {
   if (! mips_opts.noreorder)
     {
       int nops = nops_for_insn (history, NULL);
       if (nops > 0)
 	{
-	  if (insns && mips_optimize != 0)
+	  while (nops-- > 0)
+	    add_fixed_insn (NOP_INSN);
+	  mips_move_labels ();
+	}
+    }
+  mips_no_prev_insn ();
+}
+
+/* Start a (possibly nested) noreorder block.  */
+
+static void
+start_noreorder (void)
+{
+  if (mips_opts.noreorder == 0)
+    {
+      unsigned int i;
+      int nops;
+
+      /* None of the instructions before the .set noreorder can be moved.  */
+      for (i = 0; i < ARRAY_SIZE (history); i++)
+	history[i].fixed_p = 1;
+
+      /* Insert any nops that might be needed between the .set noreorder
+	 block and the previous instructions.  We will later remove any
+	 nops that turn out not to be needed.  */
+      nops = nops_for_insn (history, NULL);
+      if (nops > 0)
+	{
+	  if (mips_optimize != 0)
 	    {
 	      /* Record the frag which holds the nop instructions, so
                  that we can remove them if we don't need them.  */
@@ -2741,23 +2749,35 @@ mips_emit_delays (bfd_boolean insns)
 	  for (; nops > 0; --nops)
 	    add_fixed_insn (NOP_INSN);
 
-	  if (insns)
-	    {
-	      /* Move on to a new frag, so that it is safe to simply
-                 decrease the size of prev_nop_frag.  */
-	      frag_wane (frag_now);
-	      frag_new (0);
-	    }
-
+	  /* Move on to a new frag, so that it is safe to simply
+	     decrease the size of prev_nop_frag.  */
+	  frag_wane (frag_now);
+	  frag_new (0);
 	  mips_move_labels ();
 	}
+      mips16_mark_labels ();
+      mips_clear_insn_labels ();
     }
+  mips_opts.noreorder++;
+  mips_any_noreorder = 1;
+}
 
-  /* Mark instruction labels in mips16 mode.  */
-  if (insns)
-    mips16_mark_labels ();
+/* End a nested noreorder block.  */
 
-  mips_no_prev_insn (insns);
+static void
+end_noreorder (void)
+{
+  mips_opts.noreorder--;
+  if (mips_opts.noreorder == 0 && prev_nop_frag != NULL)
+    {
+      /* Commit to inserting prev_nop_frag_required nops and go back to
+	 handling nop insertion the .set reorder way.  */
+      prev_nop_frag->fr_fix -= ((prev_nop_frag_holds - prev_nop_frag_required)
+				* (mips_opts.mips16 ? 2 : 4));
+      insert_into_history (prev_nop_frag_since,
+			   prev_nop_frag_required, NOP_INSN);
+      prev_nop_frag = NULL;
+    }
 }
 
 /* Set up global variables for the start of a new macro.  */
@@ -4061,9 +4081,7 @@ macro (struct mips_cl_insn *ip)
 	 sub v0,$zero,$a0
 	 */
 
-      mips_emit_delays (TRUE);
-      ++mips_opts.noreorder;
-      mips_any_noreorder = 1;
+      start_noreorder ();
 
       expr1.X_add_number = 8;
       macro_build (&expr1, "bgez", "s,p", sreg);
@@ -4073,7 +4091,7 @@ macro (struct mips_cl_insn *ip)
 	move_register (dreg, sreg);
       macro_build (NULL, dbl ? "dsub" : "sub", "d,v,t", dreg, 0, sreg);
 
-      --mips_opts.noreorder;
+      end_noreorder ();
       break;
 
     case M_ADD_I:
@@ -4581,9 +4599,7 @@ macro (struct mips_cl_insn *ip)
 	  break;
 	}
 
-      mips_emit_delays (TRUE);
-      ++mips_opts.noreorder;
-      mips_any_noreorder = 1;
+      start_noreorder ();
       if (mips_trap)
 	{
 	  macro_build (NULL, "teq", "s,t,q", treg, 0, 7);
@@ -4617,7 +4633,7 @@ macro (struct mips_cl_insn *ip)
 	  macro_build (NULL, "teq", "s,t,q", sreg, AT, 6);
 	  /* We want to close the noreorder block as soon as possible, so
 	     that later insns are available for delay slot filling.  */
-	  --mips_opts.noreorder;
+	  end_noreorder ();
 	}
       else
 	{
@@ -4627,7 +4643,7 @@ macro (struct mips_cl_insn *ip)
 
 	  /* We want to close the noreorder block as soon as possible, so
 	     that later insns are available for delay slot filling.  */
-	  --mips_opts.noreorder;
+	  end_noreorder ();
 
 	  macro_build (NULL, "break", "c", 6);
 	}
@@ -4722,16 +4738,14 @@ macro (struct mips_cl_insn *ip)
       s = "ddivu";
       s2 = "mfhi";
     do_divu3:
-      mips_emit_delays (TRUE);
-      ++mips_opts.noreorder;
-      mips_any_noreorder = 1;
+      start_noreorder ();
       if (mips_trap)
 	{
 	  macro_build (NULL, "teq", "s,t,q", treg, 0, 7);
 	  macro_build (NULL, s, "z,s,t", sreg, treg);
 	  /* We want to close the noreorder block as soon as possible, so
 	     that later insns are available for delay slot filling.  */
-	  --mips_opts.noreorder;
+	  end_noreorder ();
 	}
       else
 	{
@@ -4741,7 +4755,7 @@ macro (struct mips_cl_insn *ip)
 
 	  /* We want to close the noreorder block as soon as possible, so
 	     that later insns are available for delay slot filling.  */
-	  --mips_opts.noreorder;
+	  end_noreorder ();
 	  macro_build (NULL, "break", "c", 7);
 	}
       macro_build (NULL, s2, "d", dreg);
@@ -6669,9 +6683,7 @@ macro2 (struct mips_cl_insn *ip)
       dbl = 1;
     case M_MULO:
     do_mulo:
-      mips_emit_delays (TRUE);
-      ++mips_opts.noreorder;
-      mips_any_noreorder = 1;
+      start_noreorder ();
       used_at = 1;
       if (imm)
 	load_register (AT, &imm_expr, dbl);
@@ -6688,7 +6700,7 @@ macro2 (struct mips_cl_insn *ip)
 	  macro_build (NULL, "nop", "", 0);
 	  macro_build (NULL, "break", "c", 6);
 	}
-      --mips_opts.noreorder;
+      end_noreorder ();
       macro_build (NULL, "mflo", "d", dreg);
       break;
 
@@ -6702,9 +6714,7 @@ macro2 (struct mips_cl_insn *ip)
       dbl = 1;
     case M_MULOU:
     do_mulou:
-      mips_emit_delays (TRUE);
-      ++mips_opts.noreorder;
-      mips_any_noreorder = 1;
+      start_noreorder ();
       used_at = 1;
       if (imm)
 	load_register (AT, &imm_expr, dbl);
@@ -6721,7 +6731,7 @@ macro2 (struct mips_cl_insn *ip)
 	  macro_build (NULL, "nop", "", 0);
 	  macro_build (NULL, "break", "c", 6);
 	}
-      --mips_opts.noreorder;
+      end_noreorder ();
       break;
 
     case M_DROL:
@@ -7186,9 +7196,7 @@ macro2 (struct mips_cl_insn *ip)
        * Is the double cfc1 instruction a bug in the mips assembler;
        * or is there a reason for it?
        */
-      mips_emit_delays (TRUE);
-      ++mips_opts.noreorder;
-      mips_any_noreorder = 1;
+      start_noreorder ();
       macro_build (NULL, "cfc1", "t,G", treg, RA);
       macro_build (NULL, "cfc1", "t,G", treg, RA);
       macro_build (NULL, "nop", "");
@@ -7202,7 +7210,7 @@ macro2 (struct mips_cl_insn *ip)
 		   dreg, sreg);
       macro_build (NULL, "ctc1", "t,G", treg, RA);
       macro_build (NULL, "nop", "");
-      --mips_opts.noreorder;
+      end_noreorder ();
       break;
 
     case M_ULH:
@@ -7442,9 +7450,7 @@ mips16_macro (struct mips_cl_insn *ip)
     case M_REM_3:
       s = "mfhi";
     do_div3:
-      mips_emit_delays (TRUE);
-      ++mips_opts.noreorder;
-      mips_any_noreorder = 1;
+      start_noreorder ();
       macro_build (NULL, dbl ? "ddiv" : "div", "0,x,y", xreg, yreg);
       expr1.X_add_number = 2;
       macro_build (&expr1, "bnez", "x,p", yreg);
@@ -7454,7 +7460,7 @@ mips16_macro (struct mips_cl_insn *ip)
          since that causes an overflow.  We should do that as well,
          but I don't see how to do the comparisons without a temporary
          register.  */
-      --mips_opts.noreorder;
+      end_noreorder ();
       macro_build (NULL, s, "x", zreg);
       break;
 
@@ -7474,14 +7480,12 @@ mips16_macro (struct mips_cl_insn *ip)
       s = "ddivu";
       s2 = "mfhi";
     do_divu3:
-      mips_emit_delays (TRUE);
-      ++mips_opts.noreorder;
-      mips_any_noreorder = 1;
+      start_noreorder ();
       macro_build (NULL, s, "0,x,y", xreg, yreg);
       expr1.X_add_number = 2;
       macro_build (&expr1, "bnez", "x,p", yreg);
       macro_build (NULL, "break", "6", 7);
-      --mips_opts.noreorder;
+      end_noreorder ();
       macro_build (NULL, s2, "x", zreg);
       break;
 
@@ -10194,12 +10198,12 @@ md_parse_option (int c, char *arg)
 
     case OPTION_MIPS16:
       mips_opts.mips16 = 1;
-      mips_no_prev_insn (FALSE);
+      mips_no_prev_insn ();
       break;
 
     case OPTION_NO_MIPS16:
       mips_opts.mips16 = 0;
-      mips_no_prev_insn (FALSE);
+      mips_no_prev_insn ();
       break;
 
     case OPTION_MIPS3D:
@@ -11058,7 +11062,7 @@ get_symbol (void)
 static void
 mips_align (int to, int fill, symbolS *label)
 {
-  mips_emit_delays (FALSE);
+  mips_emit_delays ();
   frag_align (to, fill, 0);
   record_alignment (now_seg, to);
   if (label != NULL)
@@ -11120,13 +11124,6 @@ s_align (int x ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
-void
-mips_flush_pending_output (void)
-{
-  mips_emit_delays (FALSE);
-  mips_clear_insn_labels ();
-}
-
 static void
 s_change_sec (int sec)
 {
@@ -11142,7 +11139,7 @@ s_change_sec (int sec)
   obj_elf_section_change_hook ();
 #endif
 
-  mips_emit_delays (FALSE);
+  mips_emit_delays ();
   switch (sec)
     {
     case 't':
@@ -11273,7 +11270,7 @@ s_cons (int log_size)
   symbolS *label;
 
   label = insn_labels != NULL ? insn_labels->label : NULL;
-  mips_emit_delays (FALSE);
+  mips_emit_delays ();
   if (log_size > 0 && auto_align)
     mips_align (log_size, 0, label);
   mips_clear_insn_labels ();
@@ -11287,7 +11284,7 @@ s_float_cons (int type)
 
   label = insn_labels != NULL ? insn_labels->label : NULL;
 
-  mips_emit_delays (FALSE);
+  mips_emit_delays ();
 
   if (auto_align)
     {
@@ -11415,22 +11412,13 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
 
   if (strcmp (name, "reorder") == 0)
     {
-      if (mips_opts.noreorder && prev_nop_frag != NULL)
-	{
-	  /* If we still have pending nops, we can discard them.  The
-	     usual nop handling will insert any that are still
-	     needed.  */
-	  prev_nop_frag->fr_fix -= (prev_nop_frag_holds
-				    * (mips_opts.mips16 ? 2 : 4));
-	  prev_nop_frag = NULL;
-	}
-      mips_opts.noreorder = 0;
+      if (mips_opts.noreorder)
+	end_noreorder ();
     }
   else if (strcmp (name, "noreorder") == 0)
     {
-      mips_emit_delays (TRUE);
-      mips_opts.noreorder = 1;
-      mips_any_noreorder = 1;
+      if (!mips_opts.noreorder)
+	start_noreorder ();
     }
   else if (strcmp (name, "at") == 0)
     {
@@ -11575,16 +11563,9 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
 	  /* If we're changing the reorder mode we need to handle
              delay slots correctly.  */
 	  if (s->options.noreorder && ! mips_opts.noreorder)
-	    mips_emit_delays (TRUE);
+	    start_noreorder ();
 	  else if (! s->options.noreorder && mips_opts.noreorder)
-	    {
-	      if (prev_nop_frag != NULL)
-		{
-		  prev_nop_frag->fr_fix -= (prev_nop_frag_holds
-					    * (mips_opts.mips16 ? 2 : 4));
-		  prev_nop_frag = NULL;
-		}
-	    }
+	    end_noreorder ();
 
 	  mips_opts = s->options;
 	  mips_opts_stack = s->next;
@@ -11924,7 +11905,7 @@ s_gpword (int ignore ATTRIBUTE_UNUSED)
     }
 
   label = insn_labels != NULL ? insn_labels->label : NULL;
-  mips_emit_delays (TRUE);
+  mips_emit_delays ();
   if (auto_align)
     mips_align (2, 0, label);
   mips_clear_insn_labels ();
@@ -11960,7 +11941,7 @@ s_gpdword (int ignore ATTRIBUTE_UNUSED)
     }
 
   label = insn_labels != NULL ? insn_labels->label : NULL;
-  mips_emit_delays (TRUE);
+  mips_emit_delays ();
   if (auto_align)
     mips_align (3, 0, label);
   mips_clear_insn_labels ();
