@@ -1169,6 +1169,25 @@ amd64_supply_fxsave (struct regcache *regcache, int regnum,
 }
 
 /* Fill register REGNUM (if it is a floating-point or SSE register) in
+   *FXSAVE with the value from REGCACHE.  If REGNUM is -1, do this for
+   all registers.  This function doesn't touch any of the reserved
+   bits in *FXSAVE.  */
+
+void
+amd64_collect_fxsave (const struct regcache *regcache, int regnum,
+		      void *fxsave)
+{
+  char *regs = fxsave;
+
+  i387_collect_fxsave (regcache, regnum, fxsave);
+
+  if (regnum == -1 || regnum == I387_FISEG_REGNUM)
+    regcache_raw_collect (regcache, I387_FISEG_REGNUM, regs + 12);
+  if (regnum == -1 || regnum == I387_FOSEG_REGNUM)
+    regcache_raw_collect (regcache, I387_FOSEG_REGNUM, regs + 20);
+}
+
+/* Fill register REGNUM (if it is a floating-point or SSE register) in
    *FXSAVE with the value in GDB's register cache.  If REGNUM is -1, do
    this for all registers.  This function doesn't touch any of the
    reserved bits in *FXSAVE.  */
@@ -1176,10 +1195,5 @@ amd64_supply_fxsave (struct regcache *regcache, int regnum,
 void
 amd64_fill_fxsave (char *fxsave, int regnum)
 {
-  i387_fill_fxsave (fxsave, regnum);
-
-  if (regnum == -1 || regnum == I387_FISEG_REGNUM)
-    regcache_collect (I387_FISEG_REGNUM, fxsave + 12);
-  if (regnum == -1 || regnum == I387_FOSEG_REGNUM)
-    regcache_collect (I387_FOSEG_REGNUM, fxsave + 20);
+  amd64_collect_fxsave (current_regcache, regnum, fxsave);
 }

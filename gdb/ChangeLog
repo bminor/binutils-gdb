@@ -1,5 +1,9 @@
 2004-02-28  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64-tdep.h: (amd64_collect_fxsave): New prototype.
+	* amd64-tdep.c (amd64_collect_fxsave): New function.
+	(amd64_fill_fxsave): Simply call amd64_collect_fxsave.
+
 	* i387-tdep.h: Update copyright year.
 	(i387_collect_fxsave): New prototype.
 	* i387-tdep.c: Update copyright year.
