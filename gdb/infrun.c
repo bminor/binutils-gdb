@@ -3916,9 +3916,6 @@ struct inferior_status
   /* A frame unique identifier.  */
   struct frame_id selected_frame_id;
 
-  /* A frame unique identifier.  */
-  struct frame_id selected_frame_id;
-
   int breakpoint_proceeded;
   int restore_stack_info;
   int proceed_to_finish;

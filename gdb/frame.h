@@ -140,11 +140,6 @@ struct frame_info
     frame_register_unwind_ftype *register_unwind;
     void *register_unwind_cache;
 
-    /* See description above.  Return the register value for the
-       previous frame.  */
-    frame_register_unwind_ftype *register_unwind;
-    void *register_unwind_cache;
-
     /* Pointers to the next (down, inner) and previous (up, outer)
        frame_info's in the frame cache.  */
     struct frame_info *next; /* down, inner */
