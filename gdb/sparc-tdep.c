@@ -188,6 +188,8 @@ sparc_address_from_register (int regnum)
 static int
 sparc_integral_or_pointer_p (const struct type *type)
 {
+  int len = TYPE_LENGTH (type);
+
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_INT:
@@ -195,22 +197,14 @@ sparc_integral_or_pointer_p (const struct type *type)
     case TYPE_CODE_CHAR:
     case TYPE_CODE_ENUM:
     case TYPE_CODE_RANGE:
-      {
-	/* We have byte, half-word, word and extended-word/doubleword
-           integral types.  The doubleword is an extension to the
-           original 32-bit ABI by the SCD 2.4.x.  */
-	int len = TYPE_LENGTH (type);
-	return (len == 1 || len == 2 || len == 4 || len == 8);
-      }
-      return 1;
+      /* We have byte, half-word, word and extended-word/doubleword
+	 integral types.  The doubleword is an extension to the
+	 original 32-bit ABI by the SCD 2.4.x.  */
+      return (len == 1 || len == 2 || len == 4 || len == 8);
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
-      {
-	/* Allow either 32-bit or 64-bit pointers.  */
-	int len = TYPE_LENGTH (type);
-	return (len == 4 || len == 8);
-      }
-      return 1;
+      /* Allow either 32-bit or 64-bit pointers.  */
+      return (len == 4 || len == 8);
     default:
       break;
     }
