@@ -71,7 +71,7 @@ configure.host
 core.c
 demo64.c
 elf.c
-elf32=generic.c
+elf32-generic.c
 elf32-hppa.c
 elf32-hppa.h
 elf32-i386.c
