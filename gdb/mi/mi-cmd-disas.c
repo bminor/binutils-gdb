@@ -36,11 +36,11 @@
    reordering in this function.  */
 
 struct dis_line_entry
-  {
-    int line;
-    CORE_ADDR start_pc;
-    CORE_ADDR end_pc;
-  };
+{
+  int line;
+  CORE_ADDR start_pc;
+  CORE_ADDR end_pc;
+};
 
 /* This variable determines where memory used for disassembly is read from. */
 int gdb_disassemble_from_exec = -1;
@@ -83,7 +83,7 @@ compare_lines (const PTR mle1p, const PTR mle2p)
 }
 
 static int
-dump_insns (disassemble_info *di, CORE_ADDR low, CORE_ADDR high,
+dump_insns (disassemble_info * di, CORE_ADDR low, CORE_ADDR high,
 	    int how_many, struct ui_stream *stb)
 {
   int num_displayed = 0;
@@ -139,7 +139,7 @@ static void
 do_mixed_source_and_assembly (struct disassemble_info *di, int nlines,
 			      struct linetable_entry *le,
 			      CORE_ADDR low, CORE_ADDR high,
-			      struct symtab *symtab, 
+			      struct symtab *symtab,
 			      int how_many, struct ui_stream *stb)
 {
   int newlines = 0;
@@ -166,8 +166,7 @@ do_mixed_source_and_assembly (struct disassemble_info *di, int nlines,
 
   for (; i < nlines - 1 && le[i].pc < high; i++)
     {
-      if (le[i].line == le[i + 1].line
-	  && le[i].pc == le[i + 1].pc)
+      if (le[i].line == le[i + 1].line && le[i].pc == le[i + 1].pc)
 	continue;		/* Ignore duplicates */
 
       /* Skip any end-of-function markers.  */
@@ -185,8 +184,7 @@ do_mixed_source_and_assembly (struct disassemble_info *di, int nlines,
   /* If we're on the last line, and it's part of the function,
      then we need to get the end pc in a special way.  */
 
-  if (i == nlines - 1
-      && le[i].pc < high)
+  if (i == nlines - 1 && le[i].pc < high)
     {
       mle[newlines].line = le[i].line;
       mle[newlines].start_pc = le[i].pc;
@@ -227,7 +225,8 @@ do_mixed_source_and_assembly (struct disassemble_info *di, int nlines,
 		  for (; next_line < mle[i].line; next_line++)
 		    {
 		      ui_out_tuple_begin (uiout, "src_and_asm_line");
-		      print_source_lines (symtab, next_line, next_line + 1, 0);
+		      print_source_lines (symtab, next_line, next_line + 1,
+					  0);
 		      ui_out_list_begin (uiout, "line_asm_insn");
 		      ui_out_list_end (uiout);
 		      ui_out_tuple_end (uiout);
@@ -268,7 +267,7 @@ do_mixed_source_and_assembly (struct disassemble_info *di, int nlines,
 
 
 static void
-do_assembly_only (disassemble_info *di, CORE_ADDR low,
+do_assembly_only (disassemble_info * di, CORE_ADDR low,
 		  CORE_ADDR high, int how_many, struct ui_stream *stb)
 {
   int num_displayed = 0;
@@ -282,11 +281,9 @@ do_assembly_only (disassemble_info *di, CORE_ADDR low,
 
 enum mi_cmd_result
 do_disassembly (char *file_string,
-		int  line_num,
-		int  mixed_source_and_assembly,
-		int how_many,
-		CORE_ADDR low,
-		CORE_ADDR high)
+		int line_num,
+		int mixed_source_and_assembly,
+		int how_many, CORE_ADDR low, CORE_ADDR high)
 {
   static disassemble_info di;
   static int di_initialized;
@@ -361,7 +358,7 @@ do_disassembly (char *file_string,
     do_assembly_only (&di, low, high, how_many, stb);
 
   else if (mixed_source_and_assembly)
-    do_mixed_source_and_assembly (&di, nlines, le, low, 
+    do_mixed_source_and_assembly (&di, nlines, le, low,
 				  high, symtab, how_many, stb);
 
   gdb_flush (gdb_stdout);
@@ -416,11 +413,10 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
   int optind = 0;
   char *optarg;
   enum opt
-    {
-      FILE_OPT, LINE_OPT, NUM_OPT, START_OPT, END_OPT
-    };
-  static struct mi_opt opts[] =
   {
+    FILE_OPT, LINE_OPT, NUM_OPT, START_OPT, END_OPT
+  };
+  static struct mi_opt opts[] = {
     {"f", FILE_OPT, 1},
     {"l", LINE_OPT, 1},
     {"n", NUM_OPT, 1},
@@ -469,11 +465,13 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 
   if (!((line_seen && file_seen && num_seen && !start_seen && !end_seen)
 	|| (line_seen && file_seen && !num_seen && !start_seen && !end_seen)
-      || (!line_seen && !file_seen && !num_seen && start_seen && end_seen)))
-    error ("mi_cmd_disassemble: Usage: ( [-f filename -l linenum [-n howmany]] | [-s startaddr -e endaddr]) [--] mixed_mode.");
+	|| (!line_seen && !file_seen && !num_seen && start_seen && end_seen)))
+    error
+      ("mi_cmd_disassemble: Usage: ( [-f filename -l linenum [-n howmany]] | [-s startaddr -e endaddr]) [--] mixed_mode.");
 
   if (argc != 1)
-    error ("mi_cmd_disassemble: Usage: [-f filename -l linenum [-n howmany]] [-s startaddr -e endaddr] [--] mixed_mode.");
+    error
+      ("mi_cmd_disassemble: Usage: [-f filename -l linenum [-n howmany]] [-s startaddr -e endaddr] [--] mixed_mode.");
 
   mixed_source_and_assembly = atoi (argv[0]);
   if ((mixed_source_and_assembly != 0) && (mixed_source_and_assembly != 1))
@@ -494,11 +492,8 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 	error ("mi_cmd_disassemble: No function contains specified address");
     }
 
-   retval = do_disassembly (file_string,
-		 	    line_num,
-			    mixed_source_and_assembly,
-			    how_many,
-			    low,
-			    high);
-   return retval;
+  retval = do_disassembly (file_string,
+			   line_num,
+			   mixed_source_and_assembly, how_many, low, high);
+  return retval;
 }
