@@ -1,3 +1,18 @@
+Wed Nov 22 13:18:58 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lib/utils-lib.exp (prune_system_crud): Discard -g -O warnings
+	from native compilers on OSF/1 and SunOS.
+
+Fri Nov 17 10:36:09 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lib/utils-lib.exp (default_binutils_compiler: Change error
+	message to say compilation rather than assembly.
+
+Wed Nov 15 18:34:42 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* binutils-all/objcopy.exp: Simple copy test does appear to work
+	on i*86-svr4.
+
 Wed Nov 15 12:19:28 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* binutils-all/objcopy.exp: If assembly fails, call unresolved.
