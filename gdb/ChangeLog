@@ -1,3 +1,10 @@
+2000-03-06  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        From  Eli Zaretskii  <eliz@is.elta.co.il>:
+
+	* event-loop.c (poll_timers): Don't compare delta.tv_sec with
+	zero, since time_t might be unsigned.
+
 2000-03-06  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-linux-nat.c (supply_fpregset): Mask off the reserved bits

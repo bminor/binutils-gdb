@@ -1114,8 +1114,11 @@ poll_timers (void)
 	}
 
       /* Oops it expired already. Tell select / poll to return
-         immediately. */
-      if (delta.tv_sec < 0)
+         immediately. (Cannot simply test if delta.tv_sec is negative
+	 because time_t might be unsigned.)  */
+      if (timer_list.first_timer->when.tv_sec < time_now.tv_sec
+	  || (timer_list.first_timer->when.tv_sec == time_now.tv_sec
+	      && timer_list.first_timer->when.tv_usec < time_now.tv_usec))
 	{
 	  delta.tv_sec = 0;
 	  delta.tv_usec = 0;
