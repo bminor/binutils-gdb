@@ -72,18 +72,13 @@ notice identical to this one except for the removal of this paragraph
 (this paragraph not being relevant to the printed manual).
 
 @end ignore
-Permission is granted to copy and distribute modified versions of this
-manual under the conditions for verbatim copying, provided also that the
-section entitled ``GNU General Public License'' is included exactly as
-in the original, and provided that the entire resulting derived work is
-distributed under the terms of a permission notice identical to this
-one.
+Permission is granted to copy and distribute modified versions of this manual
+under the conditions for verbatim copying, provided that the entire resulting
+derived work is distributed under the terms of a permission notice identical to
+this one.
 
 Permission is granted to copy and distribute translations of this manual
-into another language, under the above conditions for modified versions,
-except that the section entitled ``GNU General Public License'' may be
-included in a translation approved by the Free Software Foundation
-instead of in the original English.
+into another language, under the above conditions for modified versions.
 @end ifinfo
 
 @titlepage
@@ -125,18 +120,13 @@ Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
 are preserved on all copies.
 
-Permission is granted to copy and distribute modified versions of this
-manual under the conditions for verbatim copying, provided also that the
-section entitled ``GNU General Public License'' is included exactly as
-in the original, and provided that the entire resulting derived work is
-distributed under the terms of a permission notice identical to this
-one.
+Permission is granted to copy and distribute modified versions of this manual
+under the conditions for verbatim copying, provided that the entire resulting
+derived work is distributed under the terms of a permission notice identical to
+this one.
 
 Permission is granted to copy and distribute translations of this manual
-into another language, under the above conditions for modified versions,
-except that the section entitled ``GNU General Public License'' may be
-included in a translation approved by the Free Software Foundation
-instead of in the original English.
+into another language, under the above conditions for modified versions.
 @end titlepage
 
 @ifinfo
@@ -157,12 +147,7 @@ code for @value{TARGET} architectures.
 * Expressions::                 Expressions
 * Pseudo Ops::                  Assembler Directives
 * Machine Dependencies::        Machine Dependent Features
-@ifset GENERIC
-* Copying::                     GNU GENERAL PUBLIC LICENSE
-@end ifset
-
 * Acknowledgements::            Who Did What
-
 * Index::                       Index
 @end menu
 @end ifinfo
@@ -199,23 +184,23 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @c HPPA has no machine-dependent assembler options (yet).
 @end ifset
 @ifset SPARC
-   [ -Av6 | -Av7 | -Av8 | -Asparclite | -bump ]
+ [ -Av6 | -Av7 | -Av8 | -Asparclite | -bump ]
 @end ifset
 @ifset Z8000
 @c Z8000 has no machine-dependent assembler options
 @end ifset
 @ifset I960
 @c see md_parse_option in tc-i960.c
-   [ -ACA | -ACA_A | -ACB | -ACC | -AKA | -AKB | -AKC | -AMC ]
-   [ -b ] [ -norelax ]
+ [ -ACA | -ACA_A | -ACB | -ACC | -AKA | -AKB | -AKC | -AMC ]
+ [ -b ] [ -norelax ]
 @end ifset
 @ifset M680X0
-   [ -l ] [ -m68000 | -m68010 | -m68020 | ... ]
+ [ -l ] [ -m68000 | -m68010 | -m68020 | ... ]
 @end ifset
 @ifset MIPS
-   [ -nocpp ] [ -EL ] [ -EB ] [ -G @var{num} ]
+ [ -nocpp ] [ -EL ] [ -EB ] [ -G @var{num} ]
 @end ifset
-   [ -- | @var{files} @dots{} ]
+ [ -- | @var{files} @dots{} ]
 @end smallexample
 
 @table @code
@@ -720,11 +705,11 @@ gcc -c -g -O -Wa,-alh,-L file.c
 emits a listing to standard output with high-level
 and assembly source.
 
-Many compiler command-line options, such as @samp{-R} and many machine-specific
-options, are automatically passed to the assembler by the compiler, so usually
-you do not need to use this @samp{-Wa} mechanism.  (You can call the GNU
-compiler driver with the @samp{-v} option to see precisely what options it
-passes to each compilation pass, including the assembler.)
+Usually you do not need to use this @samp{-Wa} mechanism, since many compiler
+command-line options are automatically passed to the assembler by the compiler.
+(You can call the GNU compiler driver with the @samp{-v} option to see
+precisely what options it passes to each compilation pass, including the
+assembler.)
 
 @menu
 * a::             -a[dhlns] enable listings
@@ -930,7 +915,7 @@ this option is only useful if you use sections named @samp{.text} and
 @end ifset
 
 @node statistics
-@section Display Statistics about Assembly: @code{--statistics}
+@section Display Assembly Statistics: @code{--statistics}
 
 @kindex --statistics
 @cindex statistics, about assembly
@@ -2073,9 +2058,10 @@ different locations: the first definition overrides any other
 definitions.
 
 @ifset HPPA
-On the HPPA, a label need not be immediately followed by a colon,
-but instead must start in column zero.  Only one label may be
-defined on a single line.
+On the HPPA, the usual form for a label need not be immediately followed by a
+colon, but instead must start in column zero.  Only one label may be defined on
+a single line.  To work around this, the HPPA version of @code{@value{AS}} also
+provides a special directive @code{.label} for defining labels more flexibly.
 @end ifset
 
 @node Setting Symbols
@@ -3596,6 +3582,7 @@ All five fields are specified.
 Copy the characters in @var{str} to the object file.  You may specify more than
 one string to copy, separated by commas.  Unless otherwise specified for a
 particular machine, the assembler marks the end of each string with a 0 byte.
+You can use any of the escape sequences described in @ref{Strings,,Strings}.
 
 @ifset COFF
 @node Tag
@@ -3796,6 +3783,9 @@ subject, see the hardware manufacturer's manual.
 @end ifset
 @ifset Z8000
 * Z8000-Dependent::             Z8000 Dependent Features
+@end ifset
+@ifset MIPS
+* MIPS-Dependent::              MIPS Dependent Features
 @end ifset
 @ifset I80386
 * i386-Dependent::              80386 Dependent Features
@@ -5156,9 +5146,8 @@ to refer to a character in hexadecimal.
 @c FIXME! Is that all?  HP manual mentions more, which I don't see in
 @c        pa_stringer. 
 
-@emph{Warning!} The HPPA version of @code{.string} differs in two ways from the
-usual @code{@value{AS}} definition.  First, it performs @samp{\} escape
-preprocessing, as described above; second, it does @emph{not} write a zero byte
+@emph{Warning!} The HPPA version of @code{.string} differs from the
+usual @code{@value{AS}} definition: it does @emph{not} write a zero byte
 after copying @var{str}.
 
 @item .stringz "@var{str}"
@@ -7213,12 +7202,6 @@ Many others have contributed large or small bugfixes and enhancements.  If
 you have contributed significant work and are not mentioned on this list, and
 want to be, let us know.  Some of the history has been lost; we are not
 intentionally leaving anyone out.
-
-@ifset GENERIC
-@node Copying
-@unnumbered
-@include gpl.texinfo
-@end ifset
 
 @node Index
 @unnumbered Index
