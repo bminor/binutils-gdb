@@ -3085,7 +3085,7 @@ process_section_headers (file)
 	{
 	  putchar (' ');
 	  print_vma (section->sh_addr, LONG_HEX);
-	  printf ("  %8.8lx", section->sh_offset);
+	  printf ("  %8.8lx", (unsigned long) section->sh_offset);
 	  printf ("\n       ");
 	  print_vma (section->sh_size, LONG_HEX);
 	  printf ("  ");
@@ -3650,7 +3650,7 @@ process_unwind (file)
 	    printf ("'%s'", SECTION_NAME (unwsec));
 
 	  printf (_(" at offset 0x%lx contains %lu entries:\n"),
-		  unwsec->sh_offset,
+		  (unsigned long) unwsec->sh_offset,
 		  (unsigned long) (unwsec->sh_size / (3 * addr_size)));
 
 	  (void) slurp_ia64_unwind_table (file, & aux, unwsec);

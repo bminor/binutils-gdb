@@ -1,3 +1,14 @@
+2001-09-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* ar.c (print_contents): Cast args of bfd_seek to the right types.
+	Replace bfd_read call with call to bfd_bread.
+	(extract_file): Likewise.
+
+	* objdump.c (dump_section_header): Cast section->filepos to
+	unsigned long to suit printf format string.
+	* readelf.c (process_section_headers): Similarly for sh_offset.
+	(process_unwind): Likewise.
+
 2001-09-14  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* strings.c (encoding, encoding_bytes): New variables.

@@ -287,7 +287,7 @@ dump_section_header (abfd, section, ignored)
   bfd_printf_vma (abfd, bfd_get_section_vma (abfd, section));
   printf ("  ");
   bfd_printf_vma (abfd, section->lma);
-  printf ("  %08lx  2**%u", section->filepos,
+  printf ("  %08lx  2**%u", (unsigned long) section->filepos,
 	  bfd_get_section_alignment (abfd, section));
   if (! wide_output)
     printf ("\n                ");
