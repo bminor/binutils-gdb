@@ -917,7 +917,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
 	}
 
       if (rtype == NULL)
-	printf ("unrecognised: %-7x", ELF32_R_TYPE (info));
+	printf (_("unrecognised: %-7x"), ELF32_R_TYPE (info));
       else
 	printf ("%-21.21s", rtype);
 
