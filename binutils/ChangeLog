@@ -16,9 +16,6 @@
 	(strip_main): Remove guard `strip_specific_list == NULL' for
 	setting up strip all symbols by default.
 
-	* objcopy.exp: Two new tests - strip object file with saving a
-	symbol and strip executable file with saving a symbol.
-
 Mon Jul 20 12:51:16 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* addr2line.c (find_address_in_section): Only consider a section

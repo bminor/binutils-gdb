@@ -1,9 +1,18 @@
+Wed Jul  1 16:27:40 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* binutils-all/objcopy.exp: ARM simple objcopy now passes.
+
 Wed Jun 24 09:20:21 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* binutils-all/objdump.exp: Look for '.data' rather than 'data'
 	when parsing output of objdump -h.
 	* binutils-all/size.exp: Look for '.data' rather than 'data' when
 	parsing output of size -A.
+
+1998-07-20  Vladimir N. Makarov  <vmakarov@cygnus.com>
+
+	* objcopy.exp: Two new tests - strip object file with saving a
+	symbol and strip executable file with saving a symbol.
 
 Fri May 29 14:50:24 1998  Ian Lance Taylor  <ian@cygnus.com>
 
