@@ -39,6 +39,7 @@ extern bfd_target ieee_vec;
 extern bfd_target oasys_vec;
 extern bfd_target m88k_bcs_vec;
 extern bfd_target m68kcoff_vec;
+extern bfd_target i386coff_vec;
 
 #ifdef GNU960
 #define ICOFF_LITTLE_VEC	icoff_little_vec
@@ -61,6 +62,7 @@ extern bfd_target m68kcoff_vec;
 #define M88K_BCS_VEC		m88k_bcs_vec
 #define SREC_VEC		srec_vec
 #define M68KCOFF_VEC		m68kcoff_vec
+#define I386COFF_VEC		i386coff_vec
 #endif
 bfd_target *target_vector[] = {
 
@@ -68,15 +70,16 @@ bfd_target *target_vector[] = {
 	&DEFAULT_VECTOR,
 #endif /* DEFAULT_VECTOR */
 
+#ifdef	I386COFF_VEC
+	&I386COFF_VEC,
+#endif	/* I386COFF_VEC */
+
 #ifdef ECOFF_LITTLE_VEC
 	&ECOFF_LITTLE_VEC,
 #endif
 
 #ifdef ECOFF_BIG_VEC
 	&ECOFF_BIG_VEC,
-#endif
-#ifdef M68KCOFF_VEC
-	&M68KCOFF_VEC,
 #endif
 #ifdef IEEE_VEC
 	&IEEE_VEC,
@@ -120,6 +123,11 @@ bfd_target *target_vector[] = {
 #ifdef B_OUT_VEC_BIG_HOST
 	&B_OUT_VEC_BIG_HOST,
 #endif /* B_OUT_VEC_BIG_HOST */
+
+#ifdef	M68KCOFF_VEC
+	&M68KCOFF_VEC,
+#endif	/* M68KCOFF_VEC */
+
 
 	NULL, /* end of list marker */
 };

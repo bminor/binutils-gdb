@@ -418,6 +418,9 @@ DEFUN(coff_new_section_hook,(abfd_ignore, section_ignore),
 #if M68
   section_ignore->alignment_power = 3;
 #endif
+#if I386
+  section_ignore->alignment_power = 2;
+#endif
   return true;
 }
 
@@ -545,10 +548,16 @@ DEFUN(coff_real_object_p,(abfd, nscns, internal_f, internal_a),
   /* Determine the machine architecture and type.  */
   abfd->obj_machine = 0;
   switch (internal_f->f_magic) {
+#ifdef I386MAGIC
+  case I386MAGIC:
+    abfd->obj_arch = bfd_arch_i386;
+    abfd->obj_machine = 0;
+    break;
+#endif
 #ifdef MIPS
-case  MIPS_MAGIC_1:
-case  MIPS_MAGIC_2:
-case  MIPS_MAGIC_3:
+  case  MIPS_MAGIC_1:
+  case  MIPS_MAGIC_2:
+  case  MIPS_MAGIC_3:
     abfd->obj_arch = bfd_arch_mips;
     abfd->obj_machine = 0;
     break;
@@ -671,10 +680,10 @@ DEFUN(coff_object_p,(abfd),
       quit; the only difference I can see between m88k dgux headers (MC88DMAGIC)
 	and Intel 960 readwrite headers (I960WRMAGIC) is that the
 	  optional header is of a different size.
-
-	But the mips keeps extra stuff in it's opthdr, so dont check
-	when doing that
-	    */
+	    
+	    But the mips keeps extra stuff in it's opthdr, so dont check
+	      when doing that
+		*/
     
 #ifndef MIPS    
     if (internal_f.f_opthdr != 0 && AOUTSZ != internal_f.f_opthdr)
@@ -695,15 +704,15 @@ static coff_symbol_type *
 DEFUN(coff_symbol_from,(abfd, symbol),
       bfd            *abfd AND
       asymbol        *symbol)
-{
-  if (symbol->the_bfd->xvec->flavour != bfd_target_coff_flavour_enum) 
-    return (coff_symbol_type *)NULL;
-
-  if (symbol->the_bfd->tdata == (PTR)NULL)
-    return (coff_symbol_type *)NULL;
-
-  return  (coff_symbol_type *) symbol;
-}
+  {
+    if (symbol->the_bfd->xvec->flavour != bfd_target_coff_flavour_enum) 
+      return (coff_symbol_type *)NULL;
+    
+    if (symbol->the_bfd->tdata == (PTR)NULL)
+      return (coff_symbol_type *)NULL;
+    
+    return  (coff_symbol_type *) symbol;
+  }
 
 
 
@@ -714,59 +723,59 @@ DEFUN(coff_symbol_from,(abfd, symbol),
 static void 
 DEFUN(coff_count_linenumbers,(abfd),
       bfd            *abfd)
-{
+  {
     unsigned int    limit = bfd_get_symcount(abfd);
     unsigned int    i;
     asymbol       **p;
-    {
+      {
 	asection       *s = abfd->sections->output_section;
 	while (s) {
-	    BFD_ASSERT(s->lineno_count == 0);
-	    s = s->next;
+	  BFD_ASSERT(s->lineno_count == 0);
+	  s = s->next;
 	}
-    }
-
-
+      }
+    
+    
     for (p = abfd->outsymbols, i = 0; i < limit; i++, p++) {
-	asymbol        *q_maybe = *p;
-	if (q_maybe->the_bfd->xvec->flavour == bfd_target_coff_flavour_enum) {
-	    coff_symbol_type *q = coffsymbol(q_maybe);
-	    if (q->lineno) {
-		/*
-		   This symbol has a linenumber, increment the owning
-		   section's linenumber count
+      asymbol        *q_maybe = *p;
+      if (q_maybe->the_bfd->xvec->flavour == bfd_target_coff_flavour_enum) {
+	coff_symbol_type *q = coffsymbol(q_maybe);
+	if (q->lineno) {
+	  /*
+	    This symbol has a linenumber, increment the owning
+	      section's linenumber count
 		*/
-		alent          *l = q->lineno;
-		q->symbol.section->output_section->lineno_count++;
-		l++;
-		while (l->line_number) {
-		    q->symbol.section->output_section->lineno_count++;
-		    l++;
-		}
-	    }
+	  alent          *l = q->lineno;
+	  q->symbol.section->output_section->lineno_count++;
+	  l++;
+	  while (l->line_number) {
+	    q->symbol.section->output_section->lineno_count++;
+	    l++;
+	  }
 	}
+      }
     }
-}
+  }
 
 /*
- This function returns true if the supplied SYMENT has an AUXENT with
- a tagndx field which should be relocated.
+This function returns true if the supplied SYMENT has an AUXENT with
+a tagndx field which should be relocated.
 
- The coff book says that all auxents have this and should be moved,
- but all the actual implementations I've looked at do this ..
- (sac@cygnus.com)
+The coff book says that all auxents have this and should be moved,
+but all the actual implementations I've looked at do this ..
+(sac@cygnus.com)
 
 */
 static boolean
 DEFUN(uses_x_sym_x_tagndx_p,(abfd, native),
       bfd *abfd AND
       struct internal_syment *native)
-{
+  {
     if (BTYPE(native->n_type) == T_STRUCT) return true;
     if (BTYPE(native->n_type) == T_UNION)  return true;
     if (BTYPE(native->n_type) == T_ENUM)   return true;
     return false;
-}
+  }
 
 
 /* 
@@ -808,73 +817,73 @@ applied so we can dig it out through a pointer.  */
 static void 
 DEFUN(coff_mangle_symbols,(bfd_ptr),
       bfd *bfd_ptr)
-{
-  unsigned int symbol_count = bfd_get_symcount(bfd_ptr);
-  asymbol **symbol_ptr_ptr = bfd_ptr->outsymbols;
-  struct internal_syment *last_tagndx = (struct internal_syment *)NULL;
-  struct internal_syment *last_file = (struct internal_syment *)NULL;
-  struct internal_syment *last_fcn = (struct internal_syment *)NULL;
-  struct internal_syment *block_stack[50];
-  struct internal_syment **last_block = &block_stack[0];
-  boolean first_time = true;  
-  unsigned int symbol_index;
-  unsigned int native_index = 0;
-
-  for (symbol_index = 0; symbol_index < symbol_count; symbol_index++) {
-    coff_symbol_type *coff_symbol_ptr =
-      coff_symbol_from(bfd_ptr, symbol_ptr_ptr[symbol_index]);
-    if (coff_symbol_ptr == (coff_symbol_type *)NULL) {
-      /* 
-	This symbol has no coff information in it, it will take up
-	only one slot in the output symbol table
-	*/
-      native_index++;
-    }
-    else {
-      struct internal_syment *syment = coff_symbol_ptr->native;
-      if (syment == (struct internal_syment *)NULL) {
+  {
+    unsigned int symbol_count = bfd_get_symcount(bfd_ptr);
+    asymbol **symbol_ptr_ptr = bfd_ptr->outsymbols;
+    struct internal_syment *last_tagndx = (struct internal_syment *)NULL;
+    struct internal_syment *last_file = (struct internal_syment *)NULL;
+    struct internal_syment *last_fcn = (struct internal_syment *)NULL;
+    struct internal_syment *block_stack[50];
+    struct internal_syment **last_block = &block_stack[0];
+    boolean first_time = true;  
+    unsigned int symbol_index;
+    unsigned int native_index = 0;
+    
+    for (symbol_index = 0; symbol_index < symbol_count; symbol_index++) {
+      coff_symbol_type *coff_symbol_ptr =
+	coff_symbol_from(bfd_ptr, symbol_ptr_ptr[symbol_index]);
+      if (coff_symbol_ptr == (coff_symbol_type *)NULL) {
+	/* 
+	  This symbol has no coff information in it, it will take up
+	    only one slot in the output symbol table
+	      */
 	native_index++;
       }
       else {
-	/* Normalize the symbol flags */
-	if (coff_symbol_ptr->symbol.flags & BSF_FORT_COMM) {
-	  /* a common symbol is undefined with a value */
-	  syment->n_scnum = N_UNDEF;
-	  syment->n_value = coff_symbol_ptr->symbol.value;
+	struct internal_syment *syment = coff_symbol_ptr->native;
+	if (syment == (struct internal_syment *)NULL) {
+	  native_index++;
 	}
-	else if (coff_symbol_ptr->symbol.flags & BSF_DEBUGGING) {
-	  syment->n_value = coff_symbol_ptr->symbol.value;
-	}
-	else if (coff_symbol_ptr->symbol.flags & BSF_UNDEFINED) {
-	  syment->n_scnum = N_UNDEF;
-	  syment->n_value = 0;
-	}	  
-	else if (coff_symbol_ptr->symbol.flags & BSF_ABSOLUTE) {
-	  syment->n_scnum = N_ABS;
-	  syment->n_value = coff_symbol_ptr->symbol.value;
-	}	  
 	else {
-	  syment->n_scnum	 = 
-	    coff_symbol_ptr->symbol.section->output_section->index+1;
-	  
-	  syment->n_value = 
-	    coff_symbol_ptr->symbol.value +
-	      coff_symbol_ptr->symbol.section->output_offset +
-		coff_symbol_ptr->symbol.section->output_section->vma;
-	}
-	
-	
-	/* If this symbol ties up something then do it */
-
-	if (syment->n_sclass == C_FILE && last_file != (struct internal_syment *)NULL)
-	  {
-	     last_file->n_value = native_index;
+	  /* Normalize the symbol flags */
+	  if (coff_symbol_ptr->symbol.flags & BSF_FORT_COMM) {
+	    /* a common symbol is undefined with a value */
+	    syment->n_scnum = N_UNDEF;
+	    syment->n_value = coff_symbol_ptr->symbol.value;
 	  }
-	else if ((syment->n_sclass == C_EXT 
-		  || syment->n_sclass == C_STAT 
+	  else if (coff_symbol_ptr->symbol.flags & BSF_DEBUGGING) {
+	    syment->n_value = coff_symbol_ptr->symbol.value;
+	  }
+	  else if (coff_symbol_ptr->symbol.flags & BSF_UNDEFINED) {
+	    syment->n_scnum = N_UNDEF;
+	    syment->n_value = 0;
+	  }	  
+	  else if (coff_symbol_ptr->symbol.flags & BSF_ABSOLUTE) {
+	    syment->n_scnum = N_ABS;
+	    syment->n_value = coff_symbol_ptr->symbol.value;
+	  }	  
+	  else {
+	    syment->n_scnum	 = 
+	      coff_symbol_ptr->symbol.section->output_section->index+1;
+	    
+	    syment->n_value = 
+	      coff_symbol_ptr->symbol.value +
+		coff_symbol_ptr->symbol.section->output_offset +
+		  coff_symbol_ptr->symbol.section->output_section->vma;
+	  }
+	  
+	  
+	  /* If this symbol ties up something then do it */
+	  
+	  if (syment->n_sclass == C_FILE && last_file != (struct internal_syment *)NULL)
+	      {
+		last_file->n_value = native_index;
+	      }
+	  else if ((syment->n_sclass == C_EXT 
+		    || syment->n_sclass == C_STAT 
 #ifdef C_LEAFEXT
-		  || syment->n_sclass == C_LEAFEXT 
-		  || syment->n_sclass == C_LEAFSTAT
+		    || syment->n_sclass == C_LEAFEXT 
+		      || syment->n_sclass == C_LEAFSTAT
 #endif
 		  )
 		 && last_fcn != (struct internal_syment *)NULL) 
@@ -1342,6 +1351,11 @@ unsigned       *magicp,
 	  *magicp = MIPS_MAGIC_2;
 	return true;
 	break;
+#endif
+#ifdef I386MAGIC
+      case bfd_arch_i386:
+	*magicp = I386MAGIC;
+	return true;
 #endif
 #ifdef MC68MAGIC
       case bfd_arch_m68k:
@@ -2398,7 +2412,10 @@ DEFUN(coff_slurp_reloc_table,(abfd, asect, symbols),
 	cache_ptr->address -= asect->vma;
 	
 	cache_ptr->section = (asection *) NULL;
-	
+
+#if I386
+	cache_ptr->howto = howto_table + dst.r_type;
+#endif
 #if I960
 	cache_ptr->howto = howto_table + dst.r_type;
 #endif
@@ -2510,10 +2527,11 @@ DEFUN(coff_find_nearest_line,(abfd,
     file didn't have a C_FILE. xoxorich.
     */
     
+/*
 #ifdef WEREBEINGPEDANTIC
   return false;
 #endif
-    
+  */  
   for (i = 0; i < cof->raw_syment_count; i++) {
     if (p->n_sclass == C_FILE) {
       /* File name is embeded in auxent */
