@@ -1,6 +1,6 @@
 /* nm.c -- Describe symbol table of a rel file.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002
+   2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -288,7 +288,8 @@ usage (stream, status)
   -B                     Same as --format=bsd\n\
   -C, --demangle[=STYLE] Decode low-level symbol names into user-level names\n\
                           The STYLE, if specified, can be `auto' (the default),\n\
-                          `gnu', 'lucid', 'arm', 'hp', 'edg' or 'gnu-v3'\n\
+                          `gnu', `lucid', `arm', `hp', `edg', `gnu-v3', `java'\n\
+                          or `gnat'\n\
       --no-demangle      Do not demangle low-level symbol names\n\
   -D, --dynamic          Display dynamic symbols instead of normal symbols\n\
       --defined-only     Display only defined symbols\n\

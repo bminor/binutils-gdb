@@ -1,6 +1,6 @@
 /* objdump.c -- dump information about an object file.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002
+   2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -230,12 +230,13 @@ usage (stream, status)
       --file-start-context       Include context from start of file (with -S)\n\
   -l, --line-numbers             Include line numbers and filenames in output\n\
   -C, --demangle[=STYLE]         Decode mangled/processed symbol names\n\
-                                  The STYLE, if specified, can be `auto', 'gnu',\n\
-                                  'lucid', 'arm', 'hp', 'edg', or 'gnu-v3'\n\
+                                  The STYLE, if specified, can be `auto', `gnu',\n\
+                                  `lucid', `arm', `hp', `edg', `gnu-v3', `java'\n\
+                                  or `gnat'\n\
   -w, --wide                     Format output for more than 80 columns\n\
   -z, --disassemble-zeroes       Do not skip blocks of zeroes when disassembling\n\
-      --start-address=ADDR       Only process data whoes address is >= ADDR\n\
-      --stop-address=ADDR        Only process data whoes address is <= ADDR\n\
+      --start-address=ADDR       Only process data whose address is >= ADDR\n\
+      --stop-address=ADDR        Only process data whose address is <= ADDR\n\
       --prefix-addresses         Print complete address alongside disassembly\n\
       --[no-]show-raw-insn       Display hex alongside symbolic disassembly\n\
       --adjust-vma=OFFSET        Add OFFSET to all displayed section addresses\n\
