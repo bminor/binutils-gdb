@@ -1185,7 +1185,7 @@ infrun.o: infrun.c $(wait_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 inftarg.o: inftarg.c $(wait_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	target.h terminal.h $(command_h)
 
-irix4-nat.o: irix4-nat.c $(defs_h) $(inferior_h)
+irix4-nat.o: irix4-nat.c $(defs_h) $(inferior_h) $(gdbcore_h)
 irix5-nat.o: irix5-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) target.h \
 	$(symtab_h) symfile.h objfiles.h $(command_h) $(frame_h) gnu-regex.h \
 	language.h
@@ -1195,7 +1195,8 @@ language.o: language.c $(bfd_h) $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbcmd_h) $(gdbtypes_h) language.h parser-defs.h $(symtab_h) \
 	target.h $(value_h)
 
-lynx-nat.o: lynx-nat.c $(defs_h) $(frame_h) $(inferior_h) target.h
+lynx-nat.o: lynx-nat.c $(defs_h) $(frame_h) $(inferior_h) $(gdbcore_h) \
+	target.h
 
 m2-lang.o: m2-lang.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h m2-lang.h parser-defs.h $(symtab_h)
@@ -1407,7 +1408,8 @@ solib.o: solib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 source.o: source.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
 	$(gdbcore_h) language.h objfiles.h gnu-regex.h symfile.h $(symtab_h)
 
-sparc-nat.o: sparc-nat.c $(bfd_h) $(defs_h) $(inferior_h) target.h
+sparc-nat.o: sparc-nat.c $(bfd_h) $(defs_h) $(inferior_h) $(gdbcore_h) \
+	target.h
 
 sparc-tdep.o: sparc-tdep.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) objfiles.h symfile.h target.h

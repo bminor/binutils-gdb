@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "frame.h"
 #include "inferior.h"
 #include "target.h"
+#include "gdbcore.h"
 
 #include <sys/ptrace.h>
 #include <sys/wait.h>

@@ -1,3 +1,10 @@
+Fri Jan 12 07:14:27 1996  Fred Fish  <fnf@cirdan.cygnus.com>
+
+	* lynx-nat.c, irix4-nat.c, sparc-nat.c: Include gdbcore.h
+	to get "struct core_fns" defined.
+	* Makefile.in (lynx-nat.o, irix4-nat.o, sparc-nat.o):
+ 	Are dependant upon gdbcore_h.
+
 Thu Jan 11 23:13:24 1996  Per Bothner  <bothner@cygnus.com>
 
 	* symfile.c (decrement_reading_symtab):  New function.
@@ -116,7 +123,7 @@ Wed Jan 10 16:08:49 1996  Brendan Kehoe  <brendan@lisa.cygnus.com>
 	* config/rs6000/xm-aix4.h: New file.
 	* config/xm-aix4.h: New file.
 
-Wed Jan 10 11:25:37 1996  Fred Fish  <fnf@fishpond.amigalib.com>
+Wed Jan 10 11:25:37 1996  Fred Fish  <fnf@cygnus.com>
 
 	From Wilfried Moser <wilfried.moser@aut.alcatel.at>:
 	* gdbserver/low-linux.c: New file.
