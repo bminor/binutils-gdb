@@ -1,5 +1,7 @@
 Mon Oct 16 11:12:24 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* rs6000.h (SMALL_AOUTSZ): Define.
+
 	* internal.h (XMC_TD): Define.
 
 Tue Oct 10 18:41:03 1995  Ian Lance Taylor  <ian@cygnus.com>
