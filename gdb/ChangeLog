@@ -1,3 +1,8 @@
+2002-09-24  Jim Blandy  <jimb@redhat.com>
+
+	Fix from Paul Breed:
+	* main.c (captured_main): Add a `break' after the case for 'b'.
+
 2002-09-24  Keith Seitz  <keiths@redhat.com>
 
 	* varobj.c (c_type_of_child): Use get_target_type instead
