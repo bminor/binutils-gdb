@@ -6301,30 +6301,31 @@ elf_gc_record_vtentry (abfd, sec, h, addend)
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
   unsigned int log_file_align = bed->s->log_file_align;
 
-  if (addend > h->vtable_entries_size)
+  if (addend >= h->vtable_entries_size)
     {
-      size_t size, bytes;
+      size_t size, bytes, file_align;
       bfd_boolean *ptr = h->vtable_entries_used;
 
       /* While the symbol is undefined, we have to be prepared to handle
 	 a zero size.  */
+      file_align = 1 << log_file_align;
       if (h->root.type == bfd_link_hash_undefined)
-	size = addend;
+	size = addend + file_align;
       else
 	{
 	  size = h->size;
-	  if (size < addend)
+	  if (addend >= size)
 	    {
 	      /* Oops!  We've got a reference past the defined end of
 		 the table.  This is probably a bug -- shall we warn?  */
-	      size = addend;
+	      size = addend + file_align;
 	    }
 	}
+      size = (size + file_align - 1) & -file_align;
 
       /* Allocate one extra entry for use as a "done" flag for the
-	 consolidation pass and another extra entry because we are
-	 going to write up to and including 'size' entries.  */
-      bytes = ((size >> log_file_align) + 2) * sizeof (bfd_boolean);
+	 consolidation pass.  */
+      bytes = ((size >> log_file_align) + 1) * sizeof (bfd_boolean);
 
       if (ptr)
 	{
