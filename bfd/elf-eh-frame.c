@@ -260,6 +260,102 @@ size_of_output_cie_fde (struct eh_cie_fde *entry, unsigned int alignment)
 	  + alignment - 1) & -alignment;
 }
 
+/* Assume that the bytes between *ITER and END are CFA instructions.
+   Try to move *ITER past the first instruction and return true on
+   success.  ENCODED_PTR_WIDTH gives the width of pointer entries.  */
+
+static bfd_boolean
+skip_cfa_op (bfd_byte **iter, bfd_byte *end, unsigned int encoded_ptr_width)
+{
+  bfd_byte op;
+  bfd_vma length;
+
+  if (!read_byte (iter, end, &op))
+    return FALSE;
+
+  switch (op & 0x80 ? op & 0xc0 : op)
+    {
+    case DW_CFA_nop:
+    case DW_CFA_advance_loc:
+    case DW_CFA_restore:
+      /* No arguments.  */
+      return TRUE;
+
+    case DW_CFA_offset:
+    case DW_CFA_restore_extended:
+    case DW_CFA_undefined:
+    case DW_CFA_same_value:
+    case DW_CFA_def_cfa_register:
+    case DW_CFA_def_cfa_offset:
+    case DW_CFA_def_cfa_offset_sf:
+    case DW_CFA_GNU_args_size:
+      /* One leb128 argument.  */
+      return skip_leb128 (iter, end);
+
+    case DW_CFA_offset_extended:
+    case DW_CFA_register:
+    case DW_CFA_def_cfa:
+    case DW_CFA_offset_extended_sf:
+    case DW_CFA_GNU_negative_offset_extended:
+    case DW_CFA_def_cfa_sf:
+      /* Two leb128 arguments.  */
+      return (skip_leb128 (iter, end)
+	      && skip_leb128 (iter, end));
+
+    case DW_CFA_def_cfa_expression:
+      /* A variable-length argument.  */
+      return (read_uleb128 (iter, end, &length)
+	      && skip_bytes (iter, end, length));
+
+    case DW_CFA_expression:
+      /* A leb128 followed by a variable-length argument.  */
+      return (skip_leb128 (iter, end)
+	      && read_uleb128 (iter, end, &length)
+	      && skip_bytes (iter, end, length));
+
+    case DW_CFA_set_loc:
+      return skip_bytes (iter, end, encoded_ptr_width);
+
+    case DW_CFA_advance_loc1:
+      return skip_bytes (iter, end, 1);
+
+    case DW_CFA_advance_loc2:
+      return skip_bytes (iter, end, 2);
+
+    case DW_CFA_advance_loc4:
+      return skip_bytes (iter, end, 4);
+
+    case DW_CFA_MIPS_advance_loc8:
+      return skip_bytes (iter, end, 8);
+
+    default:
+      return FALSE;
+    }
+}
+
+/* Try to interpret the bytes between BUF and END as CFA instructions.
+   If every byte makes sense, return a pointer to the first DW_CFA_nop
+   padding byte, or END if there is no padding.  Return null otherwise.
+   ENCODED_PTR_WIDTH is as for skip_cfa_op.  */
+
+static bfd_byte *
+skip_non_nops (bfd_byte *buf, bfd_byte *end, unsigned int encoded_ptr_width)
+{
+  bfd_byte *last;
+
+  last = buf;
+  while (buf < end)
+    if (*buf == DW_CFA_nop)
+      buf++;
+    else
+      {
+	if (!skip_cfa_op (&buf, end, encoded_ptr_width))
+	  return 0;
+	last = buf;
+      }
+  return last;
+}
+
 /* This function is called for each input file before the .eh_frame
    section is relocated.  It discards duplicate CIEs and FDEs for discarded
    functions.  The function returns TRUE iff any entries have been
@@ -356,7 +452,7 @@ _bfd_elf_discard_section_eh_frame
   for (;;)
     {
       unsigned char *aug;
-      bfd_byte *start, *end;
+      bfd_byte *start, *end, *insns;
       bfd_size_type length;
 
       if (sec_info->count == sec_info->alloced)
@@ -602,12 +698,13 @@ _bfd_elf_discard_section_eh_frame
 	  if (cie.fde_encoding == DW_EH_PE_omit)
 	    cie.fde_encoding = DW_EH_PE_absptr;
 
-	  initial_insn_length = cie.hdr.length - (buf - last_fde - 4);
+	  initial_insn_length = end - buf;
 	  if (initial_insn_length <= 50)
 	    {
 	      cie.initial_insn_length = initial_insn_length;
 	      memcpy (cie.initial_instructions, buf, initial_insn_length);
 	    }
+	  insns = buf;
 	  buf += initial_insn_length;
 	  ENSURE_NO_RELOCS (buf);
 	  last_cie = last_fde;
@@ -648,17 +745,37 @@ _bfd_elf_discard_section_eh_frame
 
 	  /* Skip the augmentation size, if present.  */
 	  if (cie.augmentation[0] == 'z')
-	    REQUIRE (skip_leb128 (&buf, end));
+	    REQUIRE (read_uleb128 (&buf, end, &length));
+	  else
+	    length = 0;
 
 	  /* Of the supported augmentation characters above, only 'L'
 	     adds augmentation data to the FDE.  This code would need to
 	     be adjusted if any future augmentations do the same thing.  */
 	  if (cie.lsda_encoding != DW_EH_PE_omit)
-	    this_inf->lsda_offset = buf - start;
+	    {
+	      this_inf->lsda_offset = buf - start;
+	      /* If there's no 'z' augmentation, we don't know where the
+		 CFA insns begin.  Assume no padding.  */
+	      if (cie.augmentation[0] != 'z')
+		length = end - buf;
+	    }
+
+	  /* Skip over the augmentation data.  */
+	  REQUIRE (skip_bytes (&buf, end, length));
+	  insns = buf;
 
 	  buf = last_fde + 4 + hdr.length;
 	  SKIP_RELOCS (buf);
 	}
+
+      /* Try to interpret the CFA instructions and find the first
+	 padding nop.  Shrink this_inf's size so that it doesn't
+	 including the padding.  */
+      length = get_DW_EH_PE_width (cie.fde_encoding, ptr_size);
+      insns = skip_non_nops (insns, end, length);
+      if (insns != 0)
+	this_inf->size -= end - insns;
 
       this_inf->fde_encoding = cie.fde_encoding;
       this_inf->lsda_encoding = cie.lsda_encoding;

@@ -1,5 +1,12 @@
 2005-01-17  Richard Sandiford  <rsandifo@redhat.com>
 
+	* elf-eh-frame.c (skip_cfa_op, skip_non_nops): New functions.
+	(_bfd_elf_discard_section_eh_frame): Use them to interpret the CFA
+	instructions.  If the amount of padding is known, reduce the size
+	of the CIE or FDE by that amount.
+
+2005-01-17  Richard Sandiford  <rsandifo@redhat.com>
+
 	* elf-bfd.h (struct cie): Use bfd_vmas for code_align, ra_column and
 	augmentation_size.  Use bfd_signed_vmas for data_align.
 	* elf-eh-frame.c (read_uleb128, read_sleb128): Delete in favor of...

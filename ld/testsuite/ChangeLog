@@ -1,3 +1,8 @@
+2005-01-17  Richard Sandiford  <rsandifo@redhat.com>
+
+	* ld-mips-elf/eh-frame2-{n32,n64}.d: New tests.
+	* ld-mips-elf/mips-elf.exp: Run them.
+
 2005-01-17  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* ld-sh/arch/arch.exp: Correct the email address.
