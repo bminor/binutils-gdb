@@ -71,7 +71,7 @@ $(BFD_LIBS) $(BFD_BACKENDS):  libbfd.h $(BFD_H)
 archive.o : archive.c libbfd.h $(BFD_H) $(SYSDEP_H)  
 archures.o : archures.c $(BFD_H) $(SYSDEP_H) archures.h 
 b.out.o : b.out.c libbfd.h $(BFD_H) $(SYSDEP_H) liba.out.h archures.h 
-bcs88kcoff.o : bcs88kcoff.c libbfd.h $(BFD_H) $(SYSDEP_H) libcoff.h coff-code.h archures.h 
+m88k-bcs.o: m88k-bcs.c libbfd.h $(BFD_H) $(SYSDEP_H) libcoff.h coff-code.h archures.h 
 bfd.o : bfd.c libbfd.h $(BFD_H) $(SYSDEP_H)     
 cache.o : cache.c libbfd.h $(BFD_H) $(SYSDEP_H)     
 coff.o : coff.c  
