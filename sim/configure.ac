@@ -50,6 +50,11 @@ if test "${enable_sim}" != no; then
 	   testsuite=yes
 	   common=yes
 	   ;;
+       cris-*-* | crisv32-*-*)
+	   AC_CONFIG_SUBDIRS(cris)
+	   testsuite=yes
+	   common=yes
+	   ;;
        d10v-*-*)
            AC_CONFIG_SUBDIRS(d10v)
 	   ;;
