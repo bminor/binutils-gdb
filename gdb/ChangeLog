@@ -1,8 +1,22 @@
+Thu Oct  3 09:33:26 1991  John Gilmore  (gnu at cygnus.com)
+
+	* dbxread.c (read_type):  Handle error case slightly better.
+	Make complaint message not C++-specific.
+
 Wed Oct  2 17:21:07 1991  Stu Grossman  (grossman at cygnus.com)
 
 	* infrun.c (wait_for_inferior):  Fix step/next so that you only
 	stop at the beginning of a new line.  This fixes various problems
 	with for loops, nested if-else's and switch statements.
+
+Tue Oct  1 06:33:55 1991  John Gilmore  (gnu at cygnus.com)
+
+	* symtab.c (lookup_symtab_1, lookup_symbol):  "fatal" errors
+	between symtabs and psymtabs become ordinary error()s.
+
+	* dbxread.c (read_dbx_symtab):  Relocate end_of_text_addr
+	properly, making "end pc" correct in shared lib psymtabs.
+	(From Guy Harris <guy@auspex.com>.)
 
 Mon Sep 30 13:15:31 1991  John Gilmore  (gnu at cygnus.com)
 

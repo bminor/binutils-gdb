@@ -403,7 +403,7 @@ struct complaint const_vol_complaint =
   {"const/volatile indicator missing (ok if using g++ v1.x), got '%c'", 0, 0};
 
 struct complaint error_type_complaint =
-  {"C++ type mismatch between compiler and debugger", 0, 0};
+  {"debug info mismatch between compiler and debugger", 0, 0};
 
 struct complaint invalid_member_complaint =
   {"invalid (minimal) member type data format at symtab pos %d.", 0, 0};
@@ -1711,7 +1711,7 @@ read_dbx_symtab (symfile_name, addr,
 #ifdef END_OF_TEXT_DEFAULT
   end_of_text_addr = END_OF_TEXT_DEFAULT;
 #else
-  end_of_text_addr = text_addr + text_size;
+  end_of_text_addr = text_addr + addr + text_size;	/* Relocate */
 #endif
 
   symtab_input_desc = desc;	/* This is needed for fill_symbuf below */
@@ -4089,6 +4089,8 @@ read_type (pp)
       break;
 
     default:
+      --*pp;			/* Go back to the symbol in error */
+				/* Particularly important if it was \0! */
       return error_type (pp);
     }
 
