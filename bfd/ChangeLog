@@ -1,3 +1,12 @@
+Mon May 26 10:57:48 1997  Fred Fish  <fnf@cygnus.com>
+
+	* peicode.h (coff_bfd_print_private_bfd_data): #undef before #define.
+	(coff_bfd_copy_private_bfd_data): Ditto.
+	* coff-arm.c (coff_arm_bfd_merge_private_bfd_data): Make static.
+	(coff_arm_bfd_print_private_bfd_data): Ditto.
+	(coff_arm_bfd_set_private_flags): Ditto.
+	(coff_arm_bfd_copy_private_bfd_data): Ditto.
+
 Fri May 23 15:14:58 1997  Fred Fish  <fnf@cygnus.com>
 
 	* libcoff-in.h (struct coff_final_link_info): Add boolean

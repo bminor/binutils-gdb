@@ -488,12 +488,12 @@ coff_arm_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
    attempting to merge binaries compiled for different ARM
    targets, eg different CPUs or differents APCS's.     */
 
-boolean
+static boolean
 coff_arm_bfd_merge_private_bfd_data (ibfd, obfd)
      bfd *   ibfd;
      bfd *   obfd;
 {
-  BFD_ASSERT (ibfd != NULL && obfd != NULL)
+  BFD_ASSERT (ibfd != NULL && obfd != NULL);
 
   if (ibfd == obfd)
     return true;
@@ -521,7 +521,12 @@ coff_arm_bfd_merge_private_bfd_data (ibfd, obfd)
 	    }
 	}
       else
-	SET_APCS_FLAG (obfd, APCS_FLAG (ibfd));
+	{
+	  SET_APCS_FLAG (obfd, APCS_FLAG (ibfd));
+	  
+	  /* Set up the arch and fields as well as these are probably wrong */
+	  bfd_set_arch_mach (obfd, bfd_get_arch (ibfd), bfd_get_mach (ibfd));
+	}
     }
   
   return true;
@@ -530,7 +535,7 @@ coff_arm_bfd_merge_private_bfd_data (ibfd, obfd)
 
 /* Display the flags field */
 
-boolean
+static boolean
 coff_arm_bfd_print_private_bfd_data (abfd, ptr)
      bfd *   abfd;
      PTR     ptr;
@@ -555,13 +560,13 @@ coff_arm_bfd_print_private_bfd_data (abfd, ptr)
    the COFF filehdr structure, which contains important,
    target specific information.                       */
 
-boolean
+static boolean
 coff_arm_bfd_set_private_flags (abfd, flags)
 	bfd *	   abfd;
 	flagword   flags;
 {
   int flag;
-  
+
   BFD_ASSERT (abfd != NULL);
 
   flag = (flags & F_APCS26) ? F_APCS_26 : 0;
@@ -579,12 +584,12 @@ coff_arm_bfd_set_private_flags (abfd, flags)
 /* Copy the important parts of the target specific data
    from one instance of a BFD to another.            */
 
-boolean
+static boolean
 coff_arm_bfd_copy_private_bfd_data (src, dest)
      bfd *  src;
      bfd *  dest;
 {
-  BFD_ASSERT (src != NULL && dest != NULL)
+  BFD_ASSERT (src != NULL && dest != NULL);
 
   if (src == dest)
     return true;
