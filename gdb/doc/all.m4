@@ -17,5 +17,6 @@ _define__(<_SPARC__>,<1>)
 _define__(<_ST2000__>,<1>)
 _define__(<_VAX__>,<1>)
 _define__(<_VXWORKS__>,<1>)
+_define__(<_Z8000__>,<1>)
 
 _divert__<>

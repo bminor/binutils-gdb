@@ -42,6 +42,7 @@ _define__(<_SPARC__>,<0>)
 _define__(<_ST2000__>,<0>)
 _define__(<_VAX__>,<0>)
 _define__(<_VXWORKS__>,<0>)
+_define__(<_Z8000__>,<0>)
 
 Text:
 
