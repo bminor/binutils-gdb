@@ -1,5 +1,9 @@
 Wed Aug 16 12:49:17 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-z8k.c (md_number_to_chars): Don't do it here, call
+	number_to_chars_bigendian.
+	* config/tc-z8k.h (TARGET_BYTES_BIG_ENDIAN): Define.
+
 	* expr.c (operand): Add support for .startof. and .sizeof. by
 	using magic symbol names which the linker will recognize
 	specially.
@@ -136,7 +140,7 @@ Fri Aug 11 19:16:08 1995  Ian Lance Taylor  <ian@cygnus.com>
 	(new_file): Make parameter name into a const pointer.
 	(do_define): Make parameter string into a const pointer.
 
-	* config/tc-h8300.c (md_pcrel_from): Don't do it here, call
+	* config/tc-h8300.c (md_number_to_chars): Don't do it here, call
 	number_to_chars_bigendian.
 	* config/tc-h8300.h (TARGET_BYTES_BIG_ENDIAN): Define.
 
