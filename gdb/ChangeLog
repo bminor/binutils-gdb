@@ -1,3 +1,10 @@
+Tue Mar 24 14:17:48 1992  Stu Grossman  (grossman@cygnus.com)
+
+	* mipsread.c (fixup_sigtramp):  Make sure that current_objfile is setup
+	when calling new_symbol.
+	* mips-tdep.c (mips_frame_chain):  Use symfile_objfile instead of
+	current_objfile.
+
 Tue Mar 24 13:26:25 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* config/rs6000.mh:  Update (for Fred's new mmalloc)
