@@ -1,3 +1,14 @@
+Wed Oct 11 13:36:13 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* dlltool.c (mtable): HOW_ALIGN_LONG, new.
+	(d_ord): Deleted.
+	(d_low_ord, d_high_ord, d_named_funcs): New.
+	(gen_exp_file): Create noname entries correctly.
+	(gen_lib_file): Dump exports alphabetically.
+	(process_duplicates):  Count nonamed functions.
+	(fill_ordinals): Keep track of highest ord too.
+	(mangle_defs): Create alphabetically ordered list of names.
+
 Tue Oct 10 09:39:09 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* Makefile.in (TOOL_PROGS): Include DLLTOOL_PROG.

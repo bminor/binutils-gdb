@@ -1,3 +1,5 @@
+#define show_allnames 0
+
 /* dlltool.c -- tool to generate stuff for PE style DLLs 
    Copyright (C) 1995 Free Software Foundation, Inc.
 
@@ -232,18 +234,19 @@ struct mac
     char *how_global;
     char *how_space;
     char *how_align_short;
+    char *how_align_long;
   }
 mtable[]
 =
 {
   {
 #define MARM 0
-    "arm", ".byte", ".short", ".long", ".asciz", "@", "ldr\tip,[pc]\n\tldr\tpc,[ip]\n\t.long", ".global", ".space", ".align\t2",
+    "arm", ".byte", ".short", ".long", ".asciz", "@", "ldr\tip,[pc]\n\tldr\tpc,[ip]\n\t.long", ".global", ".space", ".align\t2",".align\t4",
   }
   ,
   {
 #define M386 1
-    "i386", ".byte", ".short", ".long", ".asciz", "#", "jmp *", ".global", ".space", ".align\t2",
+    "i386", ".byte", ".short", ".long", ".asciz", "#", "jmp *", ".global", ".space", ".align\t2",".align\t4"
   }
   ,
     0
@@ -299,9 +302,9 @@ asm_prefix (machine)
 #define ASM_RVA_BEFORE 	rvabefore(machine)
 #define ASM_RVA_AFTER  	rvaafter(machine)
 #define ASM_PREFIX	asm_prefix(machine)
+#define ASM_ALIGN_LONG mtable[machine].how_align_long
 static char **oav;
 
-int i;
 
 FILE *yyin;			/* communications with flex */
 extern int linenumber;
@@ -340,14 +343,18 @@ typedef struct export
     int ordinal;
     int constant;
     int noname;
+    int hint;
     struct export *next;
   }
 export_type;
 
 static char *d_name;		/* Arg to NAME or LIBRARY */
 static int d_nfuncs;		/* Number of functions exported */
-static int d_ord;		/* Base ordinal index */
+static int d_named_nfuncs;	/* Number of named functions exported */
+static int d_low_ord;		/* Lowest ordinal index */
+static int d_high_ord;		/* Highest ordinal index */
 static export_type *d_exports;	/*list of exported functions */
+static export_type **d_exports_lexically;	/* vector of exported functions in alpha order */
 static dlist_type *d_list;	/* Descriptions */
 static dlist_type *a_list;	/* Stuff to go in directives */
 
@@ -740,6 +747,7 @@ flush_page (f, need, page_addr, on_page)
      int on_page;
 {
   int i;
+
   /* Flush this page */
   fprintf (f, "\t%s\t0x%08x\t%s Starting RVA for chunk\n",
 	   ASM_LONG,
@@ -813,67 +821,75 @@ gen_exp_file ()
       fprintf (f, "\t%s	0	%s Time and date\n", ASM_LONG, ASM_C);
       fprintf (f, "\t%s	0	%s Major and Minor version\n", ASM_LONG, ASM_C);
       fprintf (f, "\t%sname%s	%s Ptr to name of dll\n", ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
-      fprintf (f, "\t%s	%d	%s Starting ordinal of exports\n", ASM_LONG, d_ord, ASM_C);
-      fprintf (f, "\t%s The next field is documented as being the number of functions\n", ASM_C);
-      fprintf (f, "\t%s yet it doesn't look like that in real PE dlls\n", ASM_C);
-      fprintf (f, "\t%s But it shouldn't be a problem, causes there's\n", ASM_C);
-      fprintf (f, "\t%s always the number of names field\n", ASM_C);
-      fprintf (f, "\t%s	%d	%s Number of functions\n", ASM_LONG, d_nfuncs, ASM_C);
-      fprintf (f, "\t%s	%d	%s Number of names\n", ASM_LONG, d_nfuncs, ASM_C);
+      fprintf (f, "\t%s	%d	%s Starting ordinal of exports\n", ASM_LONG, d_low_ord, ASM_C);
+
+
+      fprintf (f, "\t%s	%d	%s Number of functions\n", ASM_LONG, d_high_ord - d_low_ord + 1, ASM_C);
+      fprintf(f,"\t%s named funcs %d, low ord %d, high ord %d\n",
+	      ASM_C,
+	      d_named_nfuncs, d_low_ord, d_high_ord);
+      fprintf (f, "\t%s	%d	%s Number of names\n", ASM_LONG,
+	       show_allnames ? d_high_ord - d_low_ord + 1 : d_named_nfuncs, ASM_C);
       fprintf (f, "\t%safuncs%s  %s Address of functions\n", ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
-      fprintf (f, "\t%sanames%s	%s Address of names\n", ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
+
+      fprintf (f, "\t%sanames%s	%s Address of Name Pointer Table\n", 
+	       ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
+
       fprintf (f, "\t%sanords%s	%s Address of ordinals\n", ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
 
       fprintf (f, "name:	%s	\"%s\"\n", ASM_TEXT, dll_name);
 
+
+      fprintf(f,"%s Export address Table\n", ASM_C);
+      fprintf(f,"\t%s\n", ASM_ALIGN_LONG);
       fprintf (f, "afuncs:\n");
-      i = d_ord;
+      i = d_low_ord;
+
       for (exp = d_exports; exp; exp = exp->next)
 	{
-#if 0
-	  /* This seems necessary in the doc, but in real
-	     life it's not used.. */
 	  if (exp->ordinal != i)
 	    {
-	      fprintf (f, "%s\t%s\t%d\t@ %d..%d missing\n", ASM_C, ASM_SPACE,
+#if 0	      
+	      fprintf (f, "\t%s\t%d\t%s %d..%d missing\n",
+		       ASM_SPACE,
 		       (exp->ordinal - i) * 4,
+		       ASM_C,
 		       i, exp->ordinal - 1);
 	      i = exp->ordinal;
-	    }
 #endif
+	      while (i < exp->ordinal)
+		{
+		  fprintf(f,"\t%s\t0\n", ASM_LONG);
+		  i++;
+		}
+	    }
 	  fprintf (f, "\t%s%s%s%s\t%s %d\n", ASM_RVA_BEFORE,
 		   ASM_PREFIX,
 		   exp->internal_name, ASM_RVA_AFTER, ASM_C, exp->ordinal);
 	  i++;
 	}
 
-
+      fprintf (f,"%s Export Name Pointer Table\n", ASM_C);
       fprintf (f, "anames:\n");
-      for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
+
+      for (i = 0; exp = d_exports_lexically[i]; i++)
 	{
-	  if (exp->noname)
-	    {
-	      had_noname = 1;
-	      fprintf (f, "\t%s	nNoname\n", ASM_LONG, ASM_C);
-	    }
-	  else
-	    {
-	      fprintf (f, "\t%sn%d%s\n", ASM_RVA_BEFORE, i, ASM_RVA_AFTER);
-	    }
+	  if (!exp->noname || show_allnames)
+	    fprintf (f, "\t%sn%d%s\n", ASM_RVA_BEFORE, exp->ordinal, ASM_RVA_AFTER);
 	}
 
+      fprintf (f,"%s Export Oridinal Table\n", ASM_C);
       fprintf (f, "anords:\n");
-      for (exp = d_exports; exp; exp = exp->next)
-	fprintf (f, "\t%s	%d\n", ASM_SHORT, exp->ordinal - d_ord);
+      for (i = 0; exp = d_exports_lexically[i]; i++)
+	{
+	  if (!exp->noname || show_allnames)
+	    fprintf (f, "\t%s	%d\n", ASM_SHORT, exp->ordinal - d_low_ord);
+	}
 
-      for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
-	if (exp->noname)
-	  fprintf (f, "@n%d:	%s	\"%s\"\n", i, ASM_TEXT, exp->name);
-	else
-	  fprintf (f, "n%d:	%s	\"%s\"\n", i, ASM_TEXT, exp->name);
-
-      if (had_noname)
-	fprintf (f, "nNoname:	%s	\"__noname__\"\n", ASM_TEXT);
+      fprintf(f,"%s Export Name Table\n", ASM_C);
+      for (i = 0; exp = d_exports_lexically[i]; i++)
+	if (!exp->noname || show_allnames)
+	  fprintf (f, "n%d:	%s	\"%s\"\n", exp->ordinal, ASM_TEXT, exp->name);
 
       if (a_list)
 	{
@@ -923,7 +939,7 @@ gen_exp_file ()
     {
       fprintf (f, "\t.section\t.rdata\n");
       for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
-	if (!exp->noname)
+	if (!exp->noname || show_allnames)
 	  {
 	    fprintf (f, "\t%s\t__imp_%s\n", ASM_GLOBAL, exp->name);
 	    fprintf (f, "__imp_%s:\n", exp->name);
@@ -956,8 +972,18 @@ gen_exp_file ()
       fprintf (f, "\t.section\t.reloc\n");
       if (num_entries)
 	{
-	  qsort (copy, num_entries, sizeof (long), sfunc);
 
+	  int src;
+	  int dst;
+	  int last = -1;
+	  qsort (copy, num_entries, sizeof (long), sfunc);
+	  /* Delete duplcates */
+	  for (src = 0; src < num_entries; src++)
+	    {
+	      if (last != copy[src]) 
+		last = copy[dst++] = copy[src];
+	    }
+	  num_entries = dst;
 	  addr = copy[0];
 	  page_addr = addr & PAGE_MASK;		/* work out the page addr */
 	  on_page = 0;
@@ -1012,6 +1038,24 @@ xlate (char *name)
 }
 
 /**********************************************************************/
+
+static void dump_iat (f, exp)
+FILE *f;
+export_type *exp;
+{
+  if (exp->noname && !show_allnames ) 
+    {
+      fprintf (f, "\t%s\t0x%08x\n",
+	       ASM_LONG,
+	       exp->ordinal | 0x80000000); /* hint or orindal ?? */
+    }
+  else
+    {
+      fprintf (f, "\t%sID%d%s\n", ASM_RVA_BEFORE,
+	       exp->ordinal,
+	       ASM_RVA_AFTER);
+    }
+}
 static void
 gen_lib_file ()
 {
@@ -1059,6 +1103,7 @@ gen_lib_file ()
   fprintf (f, "\t%s\t0\n", ASM_LONG);
   fprintf (f, "fthunk:\n");
   fprintf (f, "\t.section\t.idata$4\n");
+
   fprintf (f, "\t%s\t0\n", ASM_LONG);
   fprintf (f, "\t.section	.idata$4\n");
   fprintf (f, "hname:\n");
@@ -1068,7 +1113,7 @@ gen_lib_file ()
   sprintf (outfile, "-o %sh.o %sh.s", prefix, prefix);
   run (as_name, outfile);
 
-  for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
+  for (i = 0; exp = d_exports_lexically[i]; i++)
     {
       sprintf (outfile, "%ss%d.s", prefix, i);
       f = fopen (outfile, "w");
@@ -1080,27 +1125,28 @@ gen_lib_file ()
 
       fprintf (f, "\t.section\t.idata$7\t%s To force loading of head\n", ASM_C);
       fprintf (f, "\t%s\t__%s_head\n", ASM_LONG, imp_name_lab);
+
+
+      fprintf (f,"%s Import Address Table\n", ASM_C);
+
       fprintf (f, "\t.section	.idata$5\n");
-
-
       fprintf (f, "__imp_%s:\n", exp->name);
-      fprintf (f, "\t%sID%d%s\n",
-	       ASM_RVA_BEFORE,
-	       i,
-	       ASM_RVA_AFTER);
 
-      fprintf (f, "\n%s Hint name array\n", ASM_C);
+      dump_iat (f, exp);
+
+      fprintf (f, "\n%s Import Lookup Table\n", ASM_C);
       fprintf (f, "\t.section	.idata$4\n");
-      fprintf (f, "\t%sID%d%s\n", ASM_RVA_BEFORE,
-	       i,
-	       ASM_RVA_AFTER);
 
-      fprintf (f, "%s Hint/name array storage and import dll name\n", ASM_C);
-      fprintf (f, "\t.section	.idata$6\n");
+      dump_iat (f, exp);
 
-      fprintf (f, "\t%s\n", ASM_ALIGN_SHORT);
-      fprintf (f, "ID%d:\t%s\t%d\n", i, ASM_SHORT, exp->ordinal);
-      fprintf (f, "\t%s\t\"%s\"\n", ASM_TEXT, xlate (exp->name));
+      if(!exp->noname || show_allnames) 
+	{
+	  fprintf (f, "%s Hint/Name table\n", ASM_C);
+	  fprintf (f, "\t.section	.idata$6\n");
+	  fprintf (f, "ID%d:\t%s\t%d\n", exp->ordinal, ASM_SHORT, exp->hint);      
+	  fprintf (f, "\t%s\t\"%s\"\n", ASM_TEXT, xlate (exp->name));
+	}
+
       fclose (f);
 
 
@@ -1257,9 +1303,10 @@ process_duplicates (d_export_vec)
      export_type **d_export_vec;
 {
   int more = 1;
-
+  int i;  
   while (more)
     {
+
       more = 0;
       /* Remove duplicates */
       qsort (d_export_vec, d_nfuncs, sizeof (export_type *), nfunc);
@@ -1300,6 +1347,14 @@ process_duplicates (d_export_vec)
 	  dtab (d_export_vec);
 	}
     }
+
+
+  /* Count the names */
+  for (i = 0; i < d_nfuncs; i++)
+    {
+      if (!d_export_vec[i]->noname)
+	d_named_nfuncs++;
+    }
 }
 
 static void
@@ -1308,6 +1363,8 @@ fill_ordinals (d_export_vec)
 {
   int lowest = 0;
   int unset = 0;
+  int hint = 0;
+  int i;
   char *ptr;
   qsort (d_export_vec, d_nfuncs, sizeof (export_type *), pfunc);
 
@@ -1359,10 +1416,26 @@ fill_ordinals (d_export_vec)
 
   qsort (d_export_vec, d_nfuncs, sizeof (export_type *), pfunc);
 
+
   /* Work out the lowest ordinal number */
   if (d_export_vec[0])
-    d_ord = d_export_vec[0]->ordinal;
+    d_low_ord = d_export_vec[0]->ordinal;
+  if (d_nfuncs) {
+  if (d_export_vec[d_nfuncs-1])
+    d_high_ord = d_export_vec[d_nfuncs-1]->ordinal;
 }
+}
+
+int alphafunc(av,bv)
+void *av;
+void *bv;
+{
+  export_type **a = av;
+  export_type **b = bv;
+
+  return strcmp ((*a)->name, (*b)->name);
+}
+
 void
 mangle_defs ()
 {
@@ -1371,6 +1444,7 @@ mangle_defs ()
   export_type *exp;
   int lowest = 0;
   int i;
+  int hint = 0;
   export_type **d_export_vec
   = (export_type **) xmalloc (sizeof (export_type *) * d_nfuncs);
 
@@ -1389,6 +1463,26 @@ mangle_defs ()
       d_export_vec[i]->next = d_exports;
       d_exports = d_export_vec[i];
     }
+
+  /* Build list in alpha order */
+  d_exports_lexically = (export_type **)xmalloc (sizeof(export_type *)*(d_nfuncs+1));
+
+  for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
+    {
+      d_exports_lexically[i] = exp;
+    }
+  d_exports_lexically[i] = 0;
+
+  qsort (d_exports_lexically, i, sizeof (export_type *), alphafunc);
+
+  /* Fill exp entries with their hint values */
+  
+  for (i = 0; i < d_nfuncs; i++)
+    {
+      if (!d_exports_lexically[i]->noname || show_allnames)
+	d_exports_lexically[i]->hint = hint++;
+    }
+
 }
 
 
@@ -1500,6 +1594,7 @@ main (ac, av)
      char **av;
 {
   int c;
+  int i;
   char *firstarg = 0;
   program_name = av[0];
   oav = av;
