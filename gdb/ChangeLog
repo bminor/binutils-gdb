@@ -1,3 +1,8 @@
+Fri Apr 22 11:27:39 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* solib.c (symbol_add_stub): If so->textsection is NULL, don't
+	dump core.
+
 Thu Apr 21 07:45:49 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* utils.c (prompt_for_continue): Annotate prompt.
