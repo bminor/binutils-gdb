@@ -1,3 +1,8 @@
+Wed May  5 14:00:49 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/tc-mips.c (macro): Correct floating point double word
+	loads and stores for big endian target.
+
 Wed May  5 08:39:21 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
 
 	* config/tc-i386.c: Replace SEG_* with *_section, fix up subseg_*
