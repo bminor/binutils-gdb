@@ -1,3 +1,14 @@
+Tue Apr 15 15:16:11 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (install-sis): Depend upon installdirs.  Use
+	$(program_transform_name) directly, rather than using
+	$(INSTALL_XFORM).
+
+Mon Apr  7 15:45:02 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
 Wed Apr  2 15:06:28 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* interf.c (sim_open): New arg `kind'.
