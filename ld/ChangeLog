@@ -1,3 +1,14 @@
+2000-06-07  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* emultempl/mipsecoff.em (gld{EMULATION_NAME}_after_open): Require all
+	input objects to be ECOFF.
+	(check_sections): einfo takes %B, not %P, to print a BFD name.
+
+2000-07-31  Rodney Brown  <RodneyBrown@pmsc.com>
+
+	* configure.tgt: Select targ_emul=elf_i386 for Unixware 7
+	(i586-sco-sysv5uw7.1.0).
+
 2000-06-18  Alan Modra  <alan@linuxcare.com.au>
 
 	* NEWS: Update list of targets supporting --gc-sections.
