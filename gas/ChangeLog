@@ -1,3 +1,15 @@
+Fri Oct 16 13:36:34 CDT Catherine Moore  <clm@cygnus.com>
+
+        * cgen.c (gas_cgen_md_apply_fix3):  Handle VTABLE relocs.
+        (gas_cgen_tc_gen_reloc):  Likewise.
+        * config/tc-m32r.h (obj_fix_adjustable):  Define.
+        * config/tc-m32r.c (m32r_fix_adjustable):  New.
+        (m32r_force_relocation):  Handle VTABLE relocs.
+
+Wed Oct 14 11:33:38 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* doc/c-arm.texi (ARM Directives): Document .ltorn directive.
+
 Mon Oct 12 11:07:21 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c (assemble_parallel_insn): Convert second opcode

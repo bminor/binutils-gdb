@@ -798,8 +798,25 @@ assemble_parallel_insn (str, str2)
   str   = str2 + 2;  /* Advanced past the parsed string.  */
   str2  = str3;      /* Remember the entire string in case it is needed for error messages.  */
 
+  /* Convert the opcode to lower case.  */
+  {
+    char *s2 = str;
+    
+    while (isspace (*s2 ++))
+      continue;
+
+    --s2;
+
+    while (isalnum (*s2))
+      {
+	if (isupper ((unsigned char) *s2))
+	  *s2 = tolower (*s2);
+	s2 ++;
+      }
+  }
+  
   /* Preserve any fixups that have been generated and reset the list to empty.  */
-  gas_cgen_save_fixups();
+  gas_cgen_save_fixups ();
 
   /* Get the indices of the operands of the instruction.  */
   /* FIXME: CGEN_FIELDS is already recorded, but relying on that fact
@@ -1740,6 +1757,10 @@ int
 m32r_force_relocation (fix)
      fixS * fix;
 {
+  if (fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT)
+    return 1;
+
   if (! m32r_relax)
     return 0;
 
@@ -1840,4 +1861,26 @@ m32r_elf_section_change_hook ()
   
   if (prev_insn.insn || seen_relaxable_p)
     (void) m32r_fill_insn (0);
+}
+
+boolean
+m32r_fix_adjustable (fixP)
+   fixS *fixP;
+{
+
+  if (fixP->fx_addsy == NULL)
+    return 1;
+  
+  /* Prevent all adjustments to global symbols. */
+  if (S_IS_EXTERN (fixP->fx_addsy))
+    return 0;
+  if (S_IS_WEAK (fixP->fx_addsy))
+    return 0;
+  
+  /* We need the symbol name for the VTABLE entries */
+  if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 0;
+
+  return 1;
 }
