@@ -1,3 +1,14 @@
+Fri Sep  8 14:27:20 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Remove AC_PROG_INSTALL.
+	* configure: Rebuild.
+	* Makefile.in (INSTALL): Revert to using install.sh.
+	(INSTALL_PROGRAM, INSTALL_DATA): Set to $(INSTALL).
+	(INSTALL_XFORM, INSTALL_XFORM1): Restore.
+	(mostlyclean): Make the same as clean, not distclean.
+	(clean): Remove config.log.
+	(install): Don't install in $(tooldir).
+
 Thu Sep  7 12:00:17 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	(Try to) Update to new bfd autoconf scheme.
