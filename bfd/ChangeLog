@@ -1,3 +1,16 @@
+Sun Jun  9 16:30:20 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* coff-h8300.c (h8300_reloc16_estimate): Fix many minor spacing
+	problems.
+	(h8300_reloc16_estimate, cases R_JMP1, R_JMP2): Adjust "dot"
+	correctly for the two variants.  Allow relaxing if the target
+	is 128 bytes away since after relaxation it'll be 126 bytes away.
+	(h8300_reloc16_estimate, case R_PCRWORD): Correctly adjust
+	"dot" and "value".  Allow relaxing if the target is 128 bytes
+	away since after relaxation it'll be 126 bytes away.
+	* reloc16.c (bfd_coff_reloc16_relax_section): Keep relaxing
+	the given section until nothing changes.
+
 Thu Jun  6 15:24:45 1996  Richard Henderson  <rth@tamu.edu>
 
 	* ecoff.c (_bfd_ecoff_new_section_hook): Remove the _PDATA
