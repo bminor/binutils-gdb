@@ -1,3 +1,7 @@
+Fri Nov  5 14:43:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Version 4.11.2.
+
 Fri Nov  5 09:49:22 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* inflow.c (terminal_init_inferior): Temporarily use Lynx PIDGET
