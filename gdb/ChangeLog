@@ -1,5 +1,10 @@
 2005-01-28  Andrew Cagney  <cagney@gnu.org>
 
+	* p-lang.h (pascal_object_print_class_member)
+	(pascal_object_print_class_method): Make buffer a const bfd_byte.
+	* p-valprint.c (pascal_object_print_class_method)
+	(pascal_object_print_class_method): Ditto.
+	
 	* language.h (struct language_defn): Make la_printstr's buffer
 	parameter a const bfd_byte.
 	* p-lang.h (pascal_printstr): Update function to match.

@@ -1,5 +1,6 @@
 /* Pascal language support definitions for GDB, the GNU debugger.
-   Copyright 2000 Free Software Foundation, Inc.
+
+   Copyright 2000, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -64,9 +65,11 @@ extern int vtblprint;		/* Controls printing of vtbl's */
 
 extern int static_field_print;
 
-extern void pascal_object_print_class_member (char *, struct type *, struct ui_file *, char *);
+extern void pascal_object_print_class_member (const bfd_byte *, struct type *,
+					      struct ui_file *, char *);
 
-extern void pascal_object_print_class_method (char *, struct type *, struct ui_file *);
+extern void pascal_object_print_class_method (const bfd_byte *, struct type *,
+					      struct ui_file *);
 
 extern void pascal_object_print_value_fields (struct type *, char *, CORE_ADDR,
 			   struct ui_file *, int, int, enum val_prettyprint,

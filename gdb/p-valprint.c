@@ -1,6 +1,6 @@
 /* Support for printing Pascal values for GDB, the GNU debugger.
-   Copyright 2000, 2001, 2003
-   Free Software Foundation, Inc.
+
+   Copyright 2000, 2001, 2003, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -591,7 +591,7 @@ static void
 			     int, int, enum val_prettyprint, struct type **);
 
 void
-pascal_object_print_class_method (char *valaddr, struct type *type,
+pascal_object_print_class_method (const bfd_byte *valaddr, struct type *type,
 				  struct ui_file *stream)
 {
   struct type *domain;
@@ -1045,7 +1045,7 @@ pascal_object_print_static_field (struct type *type, struct value *val,
 }
 
 void
-pascal_object_print_class_member (char *valaddr, struct type *domain,
+pascal_object_print_class_member (const bfd_byte *valaddr, struct type *domain,
 				  struct ui_file *stream, char *prefix)
 {
 
