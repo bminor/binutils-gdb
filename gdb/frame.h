@@ -23,6 +23,29 @@
 #if !defined (FRAME_H)
 #define FRAME_H 1
 
+/* Return the location (and possibly value) of REGNUM for the previous
+   (older, up) frame.  All parameters except VALUEP can be assumed to
+   be non NULL.  When VALUEP is NULL, just the location of the
+   register should be returned.
+
+   UNWIND_CACHE is provided as mechanism for implementing a per-frame
+   local cache.  It's initial value being NULL.  Memory for that cache
+   should be allocated using frame_obstack_alloc().
+
+   Register window architectures (eg SPARC) should note that REGNUM
+   identifies the register for the previous frame.  For instance, a
+   request for the value of "o1" for the previous frame would be found
+   in the register "i1" in this FRAME.  */
+
+typedef void (frame_register_unwind_ftype) (struct frame_info *frame,
+					    void **unwind_cache,
+					    int regnum,
+					    int *optimized,
+					    enum lval_type *lvalp,
+					    CORE_ADDR *addrp,
+					    int *realnump,
+					    void *valuep);
+
 /* Describe the saved registers of a frame.  */
 
 #if defined (EXTRA_FRAME_INFO) || defined (FRAME_FIND_SAVED_REGS)
@@ -111,6 +134,11 @@ struct frame_info
     /* If dwarf2 unwind frame informations is used, this structure holds all
        related unwind data.  */
     struct unwind_contect *context;
+
+    /* See description above.  Return the register value for the
+       previous frame.  */
+    frame_register_unwind_ftype *register_unwind;
+    void *register_unwind_cache;
 
     /* Pointers to the next (down, inner) and previous (up, outer)
        frame_info's in the frame cache.  */
@@ -277,6 +305,22 @@ extern void generic_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 extern void generic_get_saved_register (char *, int *, CORE_ADDR *,
 					struct frame_info *, int,
 					enum lval_type *);
+
+extern void generic_unwind_get_saved_register (char *raw_buffer,
+					       int *optimized,
+					       CORE_ADDR * addrp,
+					       struct frame_info *frame,
+					       int regnum,
+					       enum lval_type *lval);
+
+/* Unwind the stack frame so that the value of REGNUM, in the previous
+   frame is returned.  If VALUEP is NULL, don't fetch/compute the
+   value.  Instead just return the location of the value.  */
+
+extern void frame_register_unwind (struct frame_info *frame, int regnum,
+				   int *optimizedp, enum lval_type *lvalp,
+				   CORE_ADDR *addrp, int *realnump,
+				   void *valuep);
 
 extern void generic_save_call_dummy_addr (CORE_ADDR lo, CORE_ADDR hi);
 

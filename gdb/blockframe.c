@@ -34,8 +34,27 @@
 #include "inferior.h"		/* for read_pc */
 #include "annotate.h"
 #include "regcache.h"
+#include "gdb_assert.h"
 
 /* Prototypes for exported functions. */
+
+static void generic_call_dummy_register_unwind (struct frame_info *frame,
+						void **cache,
+						int regnum,
+						int *optimized,
+						enum lval_type *lval,
+						CORE_ADDR *addrp,
+						int *realnum,
+						void *raw_buffer);
+static void frame_saved_regs_register_unwind (struct frame_info *frame,
+					      void **cache,
+					      int regnum,
+					      int *optimized,
+					      enum lval_type *lval,
+					      CORE_ADDR *addrp,
+					      int *realnum,
+					      void *buffer);
+
 
 void _initialize_blockframe (void);
 
@@ -208,6 +227,27 @@ set_current_frame (struct frame_info *frame)
   current_frame = frame;
 }
 
+
+/* Using the PC, select a mechanism for unwinding a frame returning
+   the previous frame.  The register unwind function should, on
+   demand, initialize the ->context object.  */
+
+static void
+set_unwind_by_pc (CORE_ADDR pc, CORE_ADDR fp,
+		  frame_register_unwind_ftype **unwind)
+{
+  if (!USE_GENERIC_DUMMY_FRAMES)
+    /* Still need to set this to something.  The ``info frame'' code
+       calls this function to find out where the saved registers are.
+       Hopefully this is robust enough to stop any core dumps and
+       return vaguely correct values..  */
+    *unwind = frame_saved_regs_register_unwind;
+  else if (PC_IN_CALL_DUMMY (pc, fp, fp))
+    *unwind = generic_call_dummy_register_unwind;
+  else
+    *unwind = frame_saved_regs_register_unwind;
+}
+
 /* Create an arbitrary (i.e. address specified by user) or innermost frame.
    Always returns a non-NULL value.  */
 
@@ -231,6 +271,9 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 
   if (INIT_EXTRA_FRAME_INFO_P ())
     INIT_EXTRA_FRAME_INFO (0, fi);
+
+  /* Select/initialize an unwind function.  */
+  set_unwind_by_pc (fi->pc, fi->frame, &fi->register_unwind);
 
   return fi;
 }
@@ -455,6 +498,12 @@ get_prev_frame (struct frame_info *next_frame)
 	  return NULL;
 	}
     }
+
+  /* Initialize the code used to unwind the frame PREV based on the PC
+     (and probably other architectural information).  The PC lets you
+     check things like the debug info at that point (dwarf2cfi?) and
+     use that to decide how the frame should be unwound.  */
+  set_unwind_by_pc (prev->pc, prev->frame, &prev->register_unwind);
 
   find_pc_partial_function (prev->pc, &name,
 			    (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
@@ -1267,6 +1316,141 @@ generic_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
 			struct value **args, struct type *type, int gcc_p)
 {
   return;
+}
+
+/* Given a call-dummy dummy-frame, return the registers.  Here the
+   register value is taken from the local copy of the register buffer.  */
+
+static void
+generic_call_dummy_register_unwind (struct frame_info *frame, void **cache,
+				    int regnum, int *optimized,
+				    enum lval_type *lvalp, CORE_ADDR *addrp,
+				    int *realnum, void *bufferp)
+{
+  gdb_assert (frame != NULL);
+  gdb_assert (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame));
+
+  /* Describe the register's location.  Generic dummy frames always
+     have the register value in an ``expression''.  */
+  *optimized = 0;
+  *lvalp = not_lval;
+  *addrp = 0;
+  *realnum = -1;
+
+  /* If needed, find and return the value of the register.  */
+  if (bufferp != NULL)
+    {
+      char *registers;
+#if 1
+      /* Get the address of the register buffer that contains all the
+	 saved registers for this dummy frame.  Cache that address.  */
+      registers = (*cache);
+      if (registers == NULL)
+	{
+	  registers = generic_find_dummy_frame (frame->pc, frame->frame);
+	  (*cache) = registers;
+	}
+#else
+      /* Get the address of the register buffer that contains the
+         saved registers and then extract the value from that.  */
+      registers = generic_find_dummy_frame (frame->pc, frame->frame);
+#endif
+      gdb_assert (registers != NULL);
+      /* Return the actual value.  */
+      memcpy (bufferp, registers + REGISTER_BYTE (regnum),
+	      REGISTER_RAW_SIZE (regnum));
+    }
+}
+
+/* Return the register saved in the simplistic ``saved_regs'' cache.
+   If the value isn't here AND a value is needed, try the next inner
+   most frame.  */
+
+static void
+frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
+				  int regnum, int *optimizedp,
+				  enum lval_type *lvalp, CORE_ADDR *addrp,
+				  int *realnump, void *bufferp)
+{
+  /* There is always a frame at this point.  And THIS is the frame
+     we're interested in.  */
+  gdb_assert (frame != NULL);
+  gdb_assert (!PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame));
+
+  /* Load the saved_regs register cache.  */
+  if (frame->saved_regs == NULL)
+    FRAME_INIT_SAVED_REGS (frame);
+
+  if (frame->saved_regs != NULL
+      && frame->saved_regs[regnum] != 0)
+    {
+      if (regnum == SP_REGNUM)
+	{
+	  /* SP register treated specially.  */
+	  *optimizedp = 0;
+	  *lvalp = not_lval;
+	  *addrp = 0;
+	  *realnump = -1;
+	  if (bufferp != NULL)
+	    store_address (bufferp, REGISTER_RAW_SIZE (regnum),
+			   frame->saved_regs[regnum]);
+	}
+      else
+	{
+	  /* Any other register is saved in memory, fetch it but cache
+             a local copy of its value.  */
+	  *optimizedp = 0;
+	  *lvalp = lval_memory;
+	  *addrp = frame->saved_regs[regnum];
+	  *realnump = -1;
+	  if (bufferp != NULL)
+	    {
+#if 1
+	      /* Save each register value, as it is read in, in a
+                 frame based cache.  */
+	      void **regs = (*cache);
+	      if (regs == NULL)
+		{
+		  int sizeof_cache = ((NUM_REGS + NUM_PSEUDO_REGS)
+				      * sizeof (void *));
+		  regs = frame_obstack_alloc (sizeof_cache);
+		  memset (regs, 0, sizeof_cache);
+		  (*cache) = regs;
+		}
+	      if (regs[regnum] == NULL)
+		{
+		  regs[regnum]
+		    = frame_obstack_alloc (REGISTER_RAW_SIZE (regnum));
+		  read_memory (frame->saved_regs[regnum], regs[regnum],
+			       REGISTER_RAW_SIZE (regnum));
+		}
+	      memcpy (bufferp, regs[regnum], REGISTER_RAW_SIZE (regnum));
+#else
+	      /* Read the value in from memory.  */
+	      read_memory (frame->saved_regs[regnum], bufferp,
+			   REGISTER_RAW_SIZE (regnum));
+#endif
+	    }
+	}
+      return;
+    }
+
+  /* No luck, assume this and the next frame have the same register
+     value.  If a value is needed, pass the request on down the chain;
+     otherwise just return an indication that the value is in the same
+     register as the next frame.  */
+  if (bufferp == NULL)
+    {
+      *optimizedp = 0;
+      *lvalp = lval_register;
+      *addrp = 0;
+      *realnump = regnum;
+    }
+  else
+    {
+      frame_register_unwind (frame->next, regnum, optimizedp, lvalp, addrp,
+			     realnump, bufferp);
+    }
 }
 
 /* Function: get_saved_register

@@ -1,4 +1,4 @@
-/* Cache and manage the values of registers for GDB, the GNU debugger.
+/* Cache and manage frames for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000,
    2001, 2002 Free Software Foundation, Inc.
@@ -26,6 +26,7 @@
 #include "value.h"
 #include "inferior.h"	/* for inferior_ptid */
 #include "regcache.h"
+#include "gdb_assert.h"
 
 /* FIND_SAVED_REGISTER ()
 
@@ -125,6 +126,95 @@ default_get_saved_register (char *raw_buffer,
     }
   if (addrp != NULL)
     *addrp = addr;
+}
+
+void
+frame_register_unwind (struct frame_info *frame, int regnum,
+		       int *optimizedp, enum lval_type *lvalp,
+		       CORE_ADDR *addrp, int *realnump, void *bufferp)
+{
+  struct frame_unwind_cache *cache;
+
+  /* Require all but BUFFERP to be valid.  A NULL BUFFERP indicates
+     that the value proper does not need to be fetched.  */
+  gdb_assert (optimizedp != NULL);
+  gdb_assert (lvalp != NULL);
+  gdb_assert (addrp != NULL);
+  gdb_assert (realnump != NULL);
+  /* gdb_assert (bufferp != NULL); */
+
+  /* NOTE: cagney/2002-04-14: It would be nice if, instead of a
+     special case, there was always an inner frame dedicated to the
+     hardware registers.  Unfortunatly, there is too much unwind code
+     around that looks up/down the frame chain while making the
+     assumption that each frame level is using the same unwind code.  */
+
+  if (frame == NULL)
+    {
+      /* We're in the inner-most frame, get the value direct from the
+	 register cache.  */
+      *optimizedp = 0;
+      *lvalp = lval_register;
+      *addrp = 0;
+      /* Should this code test ``register_cached (regnum) < 0'' and do
+         something like set realnum to -1 when the register isn't
+         available?  */
+      *realnump = regnum;
+      if (bufferp)
+	read_register_gen (regnum, bufferp);
+      return;
+    }
+
+  /* Ask this frame to unwind its register.  */
+  frame->register_unwind (frame, &frame->register_unwind_cache, regnum,
+			  optimizedp, lvalp, addrp, realnump, bufferp);
+}
+
+
+void
+generic_unwind_get_saved_register (char *raw_buffer,
+				   int *optimizedp,
+				   CORE_ADDR *addrp,
+				   struct frame_info *frame,
+				   int regnum,
+				   enum lval_type *lvalp)
+{
+  int optimizedx;
+  CORE_ADDR addrx;
+  int realnumx;
+  enum lval_type lvalx;
+
+  if (!target_has_registers)
+    error ("No registers.");
+
+  /* Keep things simple, ensure that all the pointers (except valuep)
+     are non NULL.  */
+  if (optimizedp == NULL)
+    optimizedp = &optimizedx;
+  if (lvalp == NULL)
+    lvalp = &lvalx;
+  if (addrp == NULL)
+    addrp = &addrx;
+
+  /* Reached the the bottom (youngest, inner most) of the frame chain
+     (youngest, inner most) frame, go direct to the hardware register
+     cache (do not pass go, do not try to cache the value, ...).  The
+     unwound value would have been cached in frame->next but that
+     doesn't exist.  This doesn't matter as the hardware register
+     cache is stopping any unnecessary accesses to the target.  */
+
+  /* NOTE: cagney/2002-04-14: It would be nice if, instead of a
+     special case, there was always an inner frame dedicated to the
+     hardware registers.  Unfortunatly, there is too much unwind code
+     around that looks up/down the frame chain while making the
+     assumption that each frame level is using the same unwind code.  */
+
+  if (frame == NULL)
+    frame_register_unwind (NULL, regnum, optimizedp, lvalp, addrp, &realnumx,
+			   raw_buffer);
+  else
+    frame_register_unwind (frame->next, regnum, optimizedp, lvalp, addrp,
+			   &realnumx, raw_buffer);
 }
 
 #if !defined (GET_SAVED_REGISTER)

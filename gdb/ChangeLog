@@ -1,3 +1,23 @@
+2002-06-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* stack.c (frame_info): Use frame_register_unwind instead of
+	saved_regs.  Mention when the SP is on the stack or in a register.
+
+	* frame.h (frame_register_unwind_ftype): Define.  Document.
+	(struct frame_info): Add field register_unwind and
+	register_unwind_cache.
+	(frame_register_unwind): Declare.
+	(generic_unwind_get_saved_register): Declare.
+
+	* frame.c (frame_register_unwind): New function.
+	(generic_unwind_get_saved_register): New function.
+
+	* blockframe.c (generic_call_dummy_register_unwind): New function.
+	(frame_saved_regs_register_unwind): New function.
+	(set_unwind_by_pc): New function.
+	(create_new_frame): New function.
+	(get_prev_frame): New function.
+
 2002-05-30  Andrew Cagney  <ac131313@redhat.com>
 
 	* a29k-share/: Delete directory.

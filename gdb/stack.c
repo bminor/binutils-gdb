@@ -929,39 +929,84 @@ frame_info (char *addr_exp, int from_tty)
       }
   }
 
-  FRAME_INIT_SAVED_REGS (fi);
-  if (fi->saved_regs != NULL)
-    {
-      /* The sp is special; what's returned isn't the save address, but
-         actually the value of the previous frame's sp.  */
-      printf_filtered (" Previous frame's sp is ");
-      print_address_numeric (fi->saved_regs[SP_REGNUM], 1, gdb_stdout);
-      printf_filtered ("\n");
-      count = 0;
-      numregs = NUM_REGS + NUM_PSEUDO_REGS;
-      for (i = 0; i < numregs; i++)
-	if (fi->saved_regs[i] && i != SP_REGNUM)
+  if (fi->saved_regs == NULL)
+    FRAME_INIT_SAVED_REGS (fi);
+  /* Print as much information as possible on the location of all the
+     registers.  */
+  {
+    enum lval_type lval;
+    int optimized;
+    CORE_ADDR addr;
+    int realnum;
+    int count;
+    int i;
+    int need_nl = 1;
+
+    /* The sp is special; what's displayed isn't the save address, but
+       the value of the previous frame's sp.  This is a legacy thing,
+       at one stage the frame cached the previous frame's SP instead
+       of its address, hence it was easiest to just display the cached
+       value.  */
+    if (SP_REGNUM >= 0)
+      {
+	/* Find out the location of the saved stack pointer with out
+           actually evaluating it.  */
+	frame_register_unwind (fi, SP_REGNUM, &optimized, &lval, &addr,
+			       &realnum, NULL);
+	if (!optimized && lval == not_lval)
 	  {
-	    if (count == 0)
-	      puts_filtered (" Saved registers:\n ");
-	    else
-	      puts_filtered (",");
-	    wrap_here (" ");
-	    printf_filtered (" %s at ", REGISTER_NAME (i));
-	    print_address_numeric (fi->saved_regs[i], 1, gdb_stdout);
-	    count++;
+	    void *value = alloca (MAX_REGISTER_RAW_SIZE);
+	    CORE_ADDR sp;
+	    frame_register_unwind (fi, SP_REGNUM, &optimized, &lval, &addr,
+				   &realnum, value);
+	    sp = extract_address (value, REGISTER_RAW_SIZE (SP_REGNUM));
+	    printf_filtered (" Previous frame's sp is ");
+	    print_address_numeric (sp, 1, gdb_stdout);
+	    printf_filtered ("\n");
+	    need_nl = 0;
 	  }
-      if (count)
-	puts_filtered ("\n");
-    }
-  else
-    {
-      /* We could get some information about saved registers by
-         calling get_saved_register on each register.  Which info goes
-         with which frame is necessarily lost, however, and I suspect
-         that the users don't care whether they get the info.  */
+	else if (!optimized && lval == lval_memory)
+	  {
+	    printf_filtered (" Previous frame's sp at ");
+	    print_address_numeric (addr, 1, gdb_stdout);
+	    printf_filtered ("\n");
+	    need_nl = 0;
+	  }
+	else if (!optimized && lval == lval_register)
+	  {
+	    printf_filtered (" Previous frame's sp in %s\n",
+			     REGISTER_NAME (realnum));
+	    need_nl = 0;
+	  }
+	/* else keep quiet.  */
+      }
+
+    count = 0;
+    numregs = NUM_REGS + NUM_PSEUDO_REGS;
+    for (i = 0; i < numregs; i++)
+      if (i != SP_REGNUM)
+	{
+	  /* Find out the location of the saved register without
+             fetching the corresponding value.  */
+	  frame_register_unwind (fi, i, &optimized, &lval, &addr, &realnum,
+				 NULL);
+	  /* For moment, only display registers that were saved on the
+	     stack.  */
+	  if (!optimized && lval == lval_memory)
+	    {
+	      if (count == 0)
+		puts_filtered (" Saved registers:\n ");
+	      else
+		puts_filtered (",");
+	      wrap_here (" ");
+	      printf_filtered (" %s at ", REGISTER_NAME (i));
+	      print_address_numeric (addr, 1, gdb_stdout);
+	      count++;
+	    }
+	}
+    if (count || need_nl)
       puts_filtered ("\n");
-    }
+  }
 }
 
 #if 0
