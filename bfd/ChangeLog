@@ -1,5 +1,23 @@
 Thu Jan 25 12:14:16 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* libcoff-in.h (struct xcoff_tdata): Remove toc_section and
+	entry_section fields.  Add sntoc and snentry fields.
+	* libcoff.h: Rebuild.
+	* coffcode.h (coff_mkobject_hook): Initialize sntoc and snentry,
+	not toc_section and entry_section (the COFF file does not have any
+	sections at this point).
+	(coff_write_object_contents): Set o_snentry and o_sntoc from
+	snentry and sntoc rather than entry_section and toc_section.
+	* coff-rs6000.c (xcoff_copy_private_bfd_data): Copy sntoc and
+	snentry, not toc_section and entry_section.
+	* xcofflink.c (bfd_xcoff_size_dynamic_sections): Don't set
+	entry_section from hentry.
+	(xcoff_link_input_bfd): If a defined symbol has XCOFF_ENTRY set,
+	set snentyr.
+	(xcoff_link_input_bfd): Set sntoc, not toc_section.
+	(xcoff_write_global_symbol): Get toc_section from sntoc, rather
+	than using toc_section directly.
+
 	* archures.c: Add missing `.' in enum bfd_architecture.
 	* bfd-in2.h: Rebuild.
 
