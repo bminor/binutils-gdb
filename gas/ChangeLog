@@ -1,3 +1,12 @@
+Mon Jul 31 21:40:47 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	Sat Jul 29 18:55:23 1995  Pat Rankin  <rankin@eql.caltech.edu>
+
+	* config/obj-vms.c (COPY_SHORT, COPY_LONG, PUT_SHORT, PUT_LONG):
+	Make expansion be safe for use in expressions.
+	(PUT_COUNTED_STRING): Bracket expansion with `do {...} while (0)'
+	rather than just `{...}'.
+
 Mon Jul 31 18:19:26 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* gasp.c (change_base): Don't modify numbers in strings. (pr7583)

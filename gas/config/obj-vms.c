@@ -262,41 +262,41 @@ static int Current_Object_Record_Type;	/* Type of record in above	   */
  *	Macros for moving data around.  Must work on big-endian systems.
  */
 #ifdef VMS  /* These are more efficient for VMS->VMS systems */
-#define COPY_LONG(dest,val) {*(long *) dest = val; }
-#define COPY_SHORT(dest,val) {*(short *) dest = val; }
+#define COPY_LONG(dest,val)	( *(long *)(dest) = (val) )
+#define COPY_SHORT(dest,val)	( *(short *)(dest) = (val) )
 #else
-#define	COPY_LONG(dest,val) { md_number_to_chars(dest, val, 4); }
-#define	COPY_SHORT(dest,val) { md_number_to_chars(dest, val, 2); }
+#define COPY_LONG(dest,val)	md_number_to_chars ((dest), (val), 4)
+#define COPY_SHORT(dest,val)	md_number_to_chars ((dest), (val), 2)
 #endif
 /*
  *	Macros for placing data into the object record buffer
  */
-#define	PUT_LONG(val) \
-{ COPY_LONG(&Object_Record_Buffer[Object_Record_Offset], val); \
-			 Object_Record_Offset += 4; }
+#define PUT_LONG(val) \
+	( COPY_LONG (&Object_Record_Buffer[Object_Record_Offset], (val)), \
+	  Object_Record_Offset += 4 )
 
-#define	PUT_SHORT(val) \
-{ COPY_SHORT(&Object_Record_Buffer[Object_Record_Offset], val); \
-			 Object_Record_Offset += 2; }
+#define PUT_SHORT(val) \
+	( COPY_SHORT (&Object_Record_Buffer[Object_Record_Offset], (val)), \
+	  Object_Record_Offset += 2 )
 
-#define	PUT_CHAR(val)	Object_Record_Buffer[Object_Record_Offset++] = val
+#define PUT_CHAR(val) ( Object_Record_Buffer[Object_Record_Offset++] = (val) )
 
-#define	PUT_COUNTED_STRING(cp) {\
-			register const char *p = cp; \
-			PUT_CHAR(strlen(p)); \
-			while (*p) PUT_CHAR(*p++);}
+#define PUT_COUNTED_STRING(cp) do { \
+			register const char *p = (cp); \
+			PUT_CHAR ((char) strlen (p)); \
+			while (*p) PUT_CHAR (*p++); } while (0)
 
 /*
  *	Macro for determining if a Name has psect attributes attached
  *	to it.
  */
-#define	PSECT_ATTRIBUTES_STRING		"$$PsectAttributes_"
-#define	PSECT_ATTRIBUTES_STRING_LENGTH	18
+#define PSECT_ATTRIBUTES_STRING		"$$PsectAttributes_"
+#define PSECT_ATTRIBUTES_STRING_LENGTH	18
 
-#define	HAS_PSECT_ATTRIBUTES(Name) \
-		(strncmp((Name[0] == '_' ? Name + 1 : Name), \
-		 PSECT_ATTRIBUTES_STRING, \
-		 PSECT_ATTRIBUTES_STRING_LENGTH) == 0)
+#define HAS_PSECT_ATTRIBUTES(Name) \
+		(strncmp ((*Name == '_' ? Name + 1 : Name), \
+			  PSECT_ATTRIBUTES_STRING, \
+			  PSECT_ATTRIBUTES_STRING_LENGTH) == 0)
 
 
  /* in: segT   out: N_TYPE bits */
@@ -439,6 +439,9 @@ const pseudo_typeS obj_pseudo_table[] =
   {0, 0, 0},
 };				/* obj_pseudo_table */
 
+
+/* Routine to perform RESOLVE_SYMBOL_REDEFINITION().  */
+
 int
 vms_resolve_symbol_redef (sym)
      symbolS *sym;
@@ -458,16 +461,15 @@ vms_resolve_symbol_redef (sym)
    *	If the old symbol is .comm and it has a size of zero,
    *	we override it with the new symbol value.
    */
-  if (S_IS_EXTERNAL(sym) &&  S_IS_DEFINED(sym)
-      && (S_GET_VALUE(sym) == 0))
+  if (S_IS_EXTERNAL (sym) && S_IS_DEFINED (sym) && S_GET_VALUE (sym) == 0)
     {
       as_warn ("compiler redefined zero-size common symbol `%s'",
 	       S_GET_NAME (sym));
       sym->sy_frag  = frag_now;
-      S_SET_OTHER(sym, const_flag);
-      S_SET_VALUE(sym, frag_now_fix ());
+      S_SET_OTHER (sym, const_flag);
+      S_SET_VALUE (sym, frag_now_fix ());
       /* Keep N_EXT bit.  */
-      sym->sy_symbol.n_type |= SEGMENT_TO_SYMBOL_TYPE((int) now_seg);
+      sym->sy_symbol.n_type |= SEGMENT_TO_SYMBOL_TYPE ((int) now_seg);
       return 1;
     }
 
@@ -486,7 +488,7 @@ symbolS *symbolP;
   /* Special labels only occur prior to explicit section directives.  */
   if ((const_flag & IN_DEFAULT_SECTION) != 0)
     {
-      char *sym_name = S_GET_NAME(symbolP);
+      char *sym_name = S_GET_NAME (symbolP);
 
       if (*sym_name == '_')
 	++sym_name;
@@ -613,7 +615,7 @@ Flush_VMS_Object_Record_Buffer ()
    *	Write the data to the file
    */
 #ifndef VMS			/* For cross-assembly purposes. */
-  md_number_to_chars((char *) &RecLen, Object_Record_Offset, 2);
+  md_number_to_chars ((char *) &RecLen, Object_Record_Offset, 2);
   i = write (VMS_Object_File_FD, &RecLen, 2);
 #endif /* not VMS */
   i = write (VMS_Object_File_FD,
@@ -1684,8 +1686,8 @@ find_symbol (dbx_type)
 {
   struct VMS_DBG_Symbol *spnt;
 
-  spnt = VMS_Symbol_type_list[SYMTYP_HASH(dbx_type)];
-  while (spnt != (struct VMS_DBG_Symbol *) NULL)
+  spnt = VMS_Symbol_type_list[SYMTYP_HASH (dbx_type)];
+  while (spnt)
     {
       if (spnt->dbx_type == dbx_type)
 	break;
@@ -1693,7 +1695,7 @@ find_symbol (dbx_type)
     }
   if (!spnt || spnt->advanced != ALIAS)
     return spnt;
-  return find_symbol(spnt->type2);
+  return find_symbol (spnt->type2);
 }
 
 
@@ -2021,7 +2023,7 @@ generate_suffix (spnt, dbx_type)
       VMS_Store_Immediate_Data (Local, Lpnt, OBJ_S_C_DBG);
       Lpnt = 0;
       VMS_Def_Struct (struct_number);
-      COPY_LONG(&Local[Lpnt], 0L);
+      COPY_LONG (&Local[Lpnt], 0L);
       Lpnt += 4;
       VMS_Store_Immediate_Data (Local, Lpnt, OBJ_S_C_DBG);
       Lpnt = 0;
@@ -2046,11 +2048,11 @@ bitfield_suffix (spnt, width)
   Local[Lpnt++] = 13;			/* rec.len==13 */
   Local[Lpnt++] = DST_K_TYPSPEC;	/* a type specification record */
   Local[Lpnt++] = 0;			/* not named */
-  COPY_SHORT(&Local[Lpnt], 9);		/* typ.len==9 */
+  COPY_SHORT (&Local[Lpnt], 9);		/* typ.len==9 */
   Lpnt += 2;
   Local[Lpnt++] = DST_K_TS_NOV_LENG;	/* This type is a "novel length"
 					   incarnation of some other type.  */
-  COPY_LONG(&Local[Lpnt], width);	/* size in bits == novel length */
+  COPY_LONG (&Local[Lpnt], width);	/* size in bits == novel length */
   Lpnt += 4;
   VMS_Store_Immediate_Data (Local, Lpnt, OBJ_S_C_DBG);
   Lpnt = 0;
@@ -2078,7 +2080,7 @@ setup_basic_type (spnt)
   struct VMS_DBG_Symbol *spnt2;
 
   /* first check whether this type has already been seen by another name */
-  for (spnt2 = VMS_Symbol_type_list[SYMTYP_HASH(spnt->VMS_type)];
+  for (spnt2 = VMS_Symbol_type_list[SYMTYP_HASH (spnt->VMS_type)];
        spnt2;
        spnt2 = spnt2->next)
     if (spnt2 != spnt && spnt2->VMS_type == spnt->VMS_type)
@@ -2101,7 +2103,7 @@ setup_basic_type (spnt)
   Local[Lpnt++] = '_';
   for (p = symbol_name; *p; p++)
     Local[Lpnt++] = *p == ' ' ? '_' : *p;
-  COPY_SHORT(&Local[Lpnt], 2);		/* typ.len==2 */
+  COPY_SHORT (&Local[Lpnt], 2);		/* typ.len==2 */
   Lpnt += 2;
   Local[Lpnt++] = DST_K_TS_ATOM;	/* typ.kind is simple type */
   Local[Lpnt++] = spnt->VMS_type;	/* typ.type */
@@ -2130,7 +2132,7 @@ VMS_DBG_record (spnt, Psect, Offset, Name)
   /* if there are bad characters in name, convert them */
   Name_pnt = fix_name (Name);
 
-  len = strlen(Name_pnt);
+  len = strlen (Name_pnt);
   if (Psect < 0)
     {				/* this is a local variable, referenced to SP */
       Local[i++] = 7 + len;
@@ -2458,17 +2460,17 @@ VMS_RSYM_Parse (sp, Current_Routine, Text_Psect)
     return;			/*Dunno what this is yet*/
   *pnt1 = '\0';
   pnt = fix_name (S_GET_NAME (sp));	/* if there are bad characters in name, convert them */
-  len = strlen(pnt);
+  len = strlen (pnt);
   Local[i++] = 25 + len;
   Local[i++] = spnt->VMS_type;
   Local[i++] = DST_K_VFLAGS_TVS;	/* trailing value specified */
-  COPY_LONG(&Local[i], 1 + len);	/* relative offset, beyond name */
+  COPY_LONG (&Local[i], 1 + len);	/* relative offset, beyond name */
   i += 4;
   Local[i++] = len;			/* name length (ascic prefix) */
   while (*pnt != '\0')
     Local[i++] = *pnt++;
   Local[i++] = DST_K_VS_FOLLOWS;	/* value specification follows */
-  COPY_SHORT(&Local[i], 15);		/* length of rest of record */
+  COPY_SHORT (&Local[i], 15);		/* length of rest of record */
   i += 2;
   Local[i++] = DST_K_VS_ALLOC_SPLIT;	/* split lifetime */
   Local[i++] = 1;			/* one binding follows */
@@ -2477,7 +2479,7 @@ VMS_RSYM_Parse (sp, Current_Routine, Text_Psect)
   VMS_Set_Data (Text_Psect, Min_Offset, OBJ_S_C_DBG, 1);
   VMS_Set_Data (Text_Psect, Max_Offset, OBJ_S_C_DBG, 1);
   Local[i++] = DST_K_VALKIND_REG;		/* nested value spec */
-  COPY_LONG(&Local[i], S_GET_VALUE (sp));
+  COPY_LONG (&Local[i], S_GET_VALUE (sp));
   i += 4;
   VMS_Store_Immediate_Data (Local, i, OBJ_S_C_DBG);
   *pnt1 = ':';
@@ -2505,8 +2507,8 @@ forward_reference (pnt)
       pnt = (char *) strchr (pnt, ':');
       pnt = cvt_integer (pnt + 1, &i);
       spnt = find_symbol (i);
-      if(spnt != (struct VMS_DBG_Symbol*) NULL) {
-	while((spnt->advanced == POINTER) || (spnt->advanced == ARRAY))
+      if (spnt) {
+	while (spnt->advanced == POINTER || spnt->advanced == ARRAY)
 	{
 	  i = spnt->type2;
 	  spnt1 = find_symbol (spnt->type2);
@@ -2534,7 +2536,7 @@ final_forward_reference (spnt)
 
   while (spnt && (spnt->advanced == POINTER || spnt->advanced == ARRAY))
     {
-      spnt1 = find_symbol(spnt->type2);
+      spnt1 = find_symbol (spnt->type2);
       if (spnt->advanced == ARRAY && !spnt1) return 1;
       spnt = spnt1;
     }
@@ -2592,7 +2594,7 @@ VMS_typedef_parse (str)
 /* first we see if this has been defined already, due to a forward reference*/
   if (!spnt)
     {
-      i2 = SYMTYP_HASH(i1);
+      i2 = SYMTYP_HASH (i1);
       spnt = (struct VMS_DBG_Symbol *) xmalloc (sizeof (struct VMS_DBG_Symbol));
       spnt->next = VMS_Symbol_type_list[i2];
       VMS_Symbol_type_list[i2] = spnt;
@@ -2622,12 +2624,12 @@ VMS_typedef_parse (str)
 	  spnt->advanced = UNKNOWN;
 	  return 0;
 	}
-      pnt1 = cvt_integer(pnt,&i1);
-      if(i1 != spnt->dbx_type)
+      pnt1 = cvt_integer (pnt, &i1);
+      if (i1 != spnt->dbx_type)
 	{
 	  spnt->advanced = ALIAS;
 	  spnt->type2 = i1;
-	  strcpy(str, pnt1);
+	  strcpy (str, pnt1);
 	  return 0;
 	}
       as_tsktsk ("debugginer output: %d is an unknown untyped variable.",
@@ -2737,7 +2739,7 @@ VMS_typedef_parse (str)
 	  spnt->data_size = 0;
 	}
       if (spnt->VMS_type != 0)
-	setup_basic_type(spnt);
+	setup_basic_type (spnt);
       pnt1 = (char *) strchr (str, ';') + 1;
       break;
     case 's':
@@ -2745,7 +2747,7 @@ VMS_typedef_parse (str)
       spnt->advanced = (*pnt == 's') ? STRUCT : UNION;
       spnt->VMS_type = DBG_S_C_ADVANCED_TYPE;
       pnt1 = cvt_integer (pnt + 1, &spnt->data_size);
-      if (!final_pass && forward_reference(pnt))
+      if (!final_pass && forward_reference (pnt))
 	{
 	  spnt->struc_numb = -1;
 	  return 1;
@@ -2769,14 +2771,14 @@ VMS_typedef_parse (str)
       Local[i++] = 11 + strlen (pnt);
       Local[i++] = DBG_S_C_STRUCT_START;
       Local[i++] = DST_K_VFLAGS_NOVAL;	/* structure definition only */
-      COPY_LONG(&Local[i], 0L);		/* hence value is unused */
+      COPY_LONG (&Local[i], 0L);	/* hence value is unused */
       i += 4;
       Local[i++] = strlen (pnt);
       pnt2 = pnt;
       while (*pnt2 != '\0')
 	Local[i++] = *pnt2++;
       i2 = spnt->data_size * 8;	/* number of bits */
-      COPY_LONG(&Local[i], i2);
+      COPY_LONG (&Local[i], i2);
       i += 4;
       VMS_Store_Immediate_Data (Local, i, OBJ_S_C_DBG);
       i = 0;
@@ -2846,7 +2848,7 @@ VMS_typedef_parse (str)
 	  else
 	    {			/* not a bitfield */
 	      /* check if this is a forward reference */
-	      if(final_pass && final_forward_reference(spnt1))
+	      if (final_pass && final_forward_reference (spnt1))
 		{
 		  as_tsktsk ("debugger output: structure element `%s' has undefined type",
 			   pnt2);
@@ -3025,7 +3027,7 @@ VMS_LSYM_Parse ()
 		case N_FUN:	/*sometimes these contain typedefs*/
 		  str = S_GET_NAME (sp);
 		  symbol_name = str;
-		  pnt = str + strlen(str) -1;
+		  pnt = str + strlen (str) - 1;
 		  if (*pnt == '?')  /* Continuation stab.  */
 		    {
 		      symbolS *spnext;
@@ -3033,22 +3035,22 @@ VMS_LSYM_Parse ()
 
 		      spnext = sp;
 		      do {
-			tlen += strlen(str) - 1;
+			tlen += strlen (str) - 1;
 			spnext = symbol_next (spnext);
 			str = S_GET_NAME (spnext);
-			pnt = str + strlen(str) - 1;
+			pnt = str + strlen (str) - 1;
 		      } while (*pnt == '?');
-		      tlen += strlen(str);
+		      tlen += strlen (str);
 		      parse_buffer = (char *) xmalloc (tlen + 1);
-		      strcpy(parse_buffer, S_GET_NAME (sp));
-		      pnt2 = parse_buffer + strlen(S_GET_NAME (sp)) - 1;
+		      strcpy (parse_buffer, S_GET_NAME (sp));
+		      pnt2 = parse_buffer + strlen(parse_buffer) - 1;
 		      *pnt2 = '\0';
 		      spnext = sp;
 		      do {
 			spnext = symbol_next (spnext);
 			str = S_GET_NAME (spnext);
-			strcat (pnt2, S_GET_NAME (spnext));
-			pnt2 +=  strlen(str) - 1;
+			strcat (pnt2, str);
+			pnt2 +=  strlen (str) - 1;
 			*str = '\0';  /* Erase this string  */
 			if (*pnt2 != '?') break;
 			*pnt2 = '\0';
@@ -3082,14 +3084,14 @@ VMS_LSYM_Parse ()
 	}			/*for*/
       pass++;
 /* Make one last pass, if needed, and define whatever we can that is left */
-      if(final_pass == 0 && incomplete == incom1)
+      if (final_pass == 0 && incomplete == incom1)
         {
           final_pass = 1;
 	  incom1 ++;  /* Force one last pass through */
 	}
   } while ((incomplete != 0) && (incomplete != incom1));
   /* repeat until all refs resolved if possible */
-/*	if (pass > 1) printf(" Required %d passes\n",pass);*/
+/*	if (pass > 1) printf (" Required %d passes\n", pass);*/
   if (incomplete != 0)
     {
       as_tsktsk ("debugger output: Unable to resolve %d circular references.",
@@ -3481,8 +3483,8 @@ VMS_Case_Hack_Symbol (In, Out)
     }
 
   old_name = In;
-/*	if (strlen(In) > 31 && flag_hash_long_names)
-		as_tsktsk("Symbol name truncated: %s\n", In); */
+/*	if (strlen (In) > 31 && flag_hash_long_names)
+	  as_tsktsk ("Symbol name truncated: %s\n", In); */
   /*
    *	Do the case conversion
    */
@@ -3497,20 +3499,20 @@ VMS_Case_Hack_Symbol (In, Out)
       switch (vms_name_mapping)
 	{
 	case 0:
-	  if (isupper(*In)) {
+	  if (isupper (*In)) {
 	    *Out++ = *In++;
 	    Case_Hack_Bits |= 1;
 	  } else {
-	    *Out++ = islower(*In) ? toupper(*In++) : *In++;
+	    *Out++ = islower (*In) ? toupper (*In++) : *In++;
 	  }
 	  break;
 	case 3: *Out++ = *In++;
 	  break;
 	case 2:
-	  if (islower(*In)) {
+	  if (islower (*In)) {
 	    *Out++ = *In++;
 	  } else {
-	    *Out++ = isupper(*In) ? tolower(*In++) : *In++;
+	    *Out++ = isupper (*In) ? tolower (*In++) : *In++;
 	  }
 	  break;
 	}
@@ -3541,7 +3543,7 @@ VMS_Case_Hack_Symbol (In, Out)
 	   *		and ensure that they are lowercase
 	   */
 	  for (i = 0; (In[i] != 0) && (i < 8); i++)
-	    if (isupper(In[i]) && !Saw_Dollar && !flag_no_hash_mixed_case)
+	    if (isupper (In[i]) && !Saw_Dollar && !flag_no_hash_mixed_case)
 	      break;
 
 	  if (In[i] == 0)
@@ -3556,15 +3558,11 @@ VMS_Case_Hack_Symbol (In, Out)
 	      i = 8;
 	      while ((--i >= 0) && (*In))
 		switch (vms_name_mapping){
-		case 0: *Out++ = islower(*In) ?
-		  toupper (*In++) :
-		    *In++;
+		case 0: *Out++ = islower (*In) ? toupper (*In++) : *In++;
 		  break;
 		case 3: *Out++ = *In++;
 		  break;
-		case 2: *Out++ = isupper(*In) ?
-		  tolower(*In++) :
-		    *In++;
+		case 2: *Out++ = isupper (*In) ? tolower (*In++) : *In++;
 		  break;
 		}
 	    }
@@ -4091,12 +4089,12 @@ VMS_Emit_Globalvalues (text_siz, data_siz, Data_Segment)
 	      if (Current_Environment < 0)
 		VMS_Local_Environment_Setup (".N_ABS");
 	      VMS_Global_Symbol_Spec (Name, 0,
-				      S_GET_VALUE(sp),
+				      S_GET_VALUE (sp),
 				      GBLSYM_DEF|GBLSYM_VAL|GBLSYM_LCL);
 	      break;
 	    case N_ABS | N_EXT:
 	      VMS_Global_Symbol_Spec (Name, 0,
-				      S_GET_VALUE(sp),
+				      S_GET_VALUE (sp),
 				      GBLSYM_DEF|GBLSYM_VAL);
 	      break;
 	    case N_UNDF | N_EXT:
@@ -4854,7 +4852,7 @@ vms_fixup_text_section (text_siz, text_frag_root, data_frag_root)
  *	Create a buffer holding the data segment.
  */
 static void
-synthesize_data_segment(data_siz, text_siz, data_frag_root)
+synthesize_data_segment (data_siz, text_siz, data_frag_root)
      unsigned data_siz, text_siz;
      struct frag *data_frag_root;
 {
@@ -5584,7 +5582,7 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
    *	can be properly emitted.
    */
   if (data_siz > 0)
-    synthesize_data_segment(data_siz, text_siz, data_frag_root);
+    synthesize_data_segment (data_siz, text_siz, data_frag_root);
 
 
   /*******  Global Symbol Directory  *******/
