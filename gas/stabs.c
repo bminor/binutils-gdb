@@ -18,6 +18,7 @@ License along with GAS; see the file COPYING.  If not, write
 to the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "as.h"
+#include "libiberty.h"
 #include "obstack.h"
 #include "subsegs.h"
 
@@ -76,7 +77,6 @@ get_stab_string_offset (string, stabstr_secname)
     {				/* Ordinary case. */
       segT save_seg;
       subsegT save_subseg;
-      char *newsecname;
       segT seg;
       char *p;
 
@@ -84,15 +84,10 @@ get_stab_string_offset (string, stabstr_secname)
       save_subseg = now_subseg;
 
       /* Create the stab string section.  */
-      newsecname = xmalloc ((unsigned long) (strlen (stabstr_secname) + 1));
-      strcpy (newsecname, stabstr_secname);
-
-      seg = subseg_new (newsecname, 0);
+      seg = subseg_new (stabstr_secname, 0);
 
       retval = seg_info (seg)->stabu.stab_string_size;
-      if (retval > 0)
-	free (newsecname);
-      else
+      if (retval <= 0)
 	{
 	  /* Make sure the first string is empty.  */
 	  p = frag_more (1);
@@ -100,8 +95,8 @@ get_stab_string_offset (string, stabstr_secname)
 	  retval = seg_info (seg)->stabu.stab_string_size = 1;
 #ifdef BFD_ASSEMBLER
 	  bfd_set_section_flags (stdoutput, seg, SEC_READONLY | SEC_DEBUGGING);
-#else
-	  free (newsecname);
+	  if (seg->name == stabstr_secname)
+	    seg->name = xstrdup (stabstr_secname);
 #endif
 	}
 
@@ -245,9 +240,24 @@ s_stab_generic (what, stab_secname, stabstr_secname)
       unsigned int stroff;
       char *p;
 
+      static segT cached_sec;
+      static char *cached_secname;
+
       dot = frag_now_fix ();
 
-      seg = subseg_new (stab_secname, 0);
+      if (cached_secname && !strcmp (cached_secname, stab_secname))
+	{
+	  seg = cached_sec;
+	  subseg_set (seg, 0);
+	}
+      else
+	{
+	  seg = subseg_new (stab_secname, 0);
+	  if (cached_secname)
+	    free (cached_secname);
+	  cached_secname = xstrdup (stab_secname);
+	  cached_sec = seg;
+	}
 
       if (! seg_info (seg)->hadone)
 	{
@@ -262,6 +272,11 @@ s_stab_generic (what, stab_secname, stabstr_secname)
 	}
 
       stroff = get_stab_string_offset (string, stabstr_secname);
+      if (what == 's')
+	{
+	  /* release the string */
+	  obstack_free (&notes, string);
+	}
 
       /* At least for now, stabs in a special stab section are always
 	 output as 12 byte blocks of information.  */
@@ -345,7 +360,11 @@ s_xstab (what)
 {
   int length;
   char *stab_secname, *stabstr_secname;
+  static char *saved_secname, *saved_strsecname;
 
+  /* @@ MEMORY LEAK: This allocates a copy of the string, but in most
+     cases it will be the same string, so we could release the storage
+     back to the obstack it came from.  */
   stab_secname = demand_copy_C_string (&length);
   SKIP_WHITESPACE ();
   if (*input_line_pointer == ',')
@@ -359,11 +378,20 @@ s_xstab (what)
 
   /* To get the name of the stab string section, simply add "str" to
      the stab section name.  */
-  stabstr_secname = (char *) xmalloc (strlen (stab_secname) + 4);
-  strcpy (stabstr_secname, stab_secname);
-  strcat (stabstr_secname, "str");
-  s_stab_generic (what, stab_secname, stabstr_secname);
-  free (stabstr_secname);
+  if (saved_secname == 0 || strcmp (saved_secname, stab_secname))
+    {
+      stabstr_secname = (char *) xmalloc (strlen (stab_secname) + 4);
+      strcpy (stabstr_secname, stab_secname);
+      strcat (stabstr_secname, "str");
+      if (saved_secname)
+	{
+	  free (saved_secname);
+	  free (saved_strsecname);
+	}
+      saved_secname = stab_secname;
+      saved_strsecname = stabstr_secname;
+    }
+  s_stab_generic (what, saved_secname, saved_strsecname);
 }
 
 #ifdef S_SET_DESC

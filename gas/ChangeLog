@@ -1,5 +1,12 @@
 Fri Mar 22 11:13:00 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* as.h (strdup): Don't declare.
+	* stabs.c: Include libiberty.h
+	(get_stab_string_offset): Use xstrdup rather than strdup.
+	(s_stab_generic): Likewise.
+	* as.c (parse_args): Likewise.
+	* read.c (s_mri_sect): Likewise.
+
 	* gasp.c (change_base): Recognize \(...) construct documented to
 	pass through enclosed characters literally through to the output.
 	(process_assigns): Likewise.  Also, be more careful to avoid

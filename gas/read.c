@@ -2108,9 +2108,9 @@ s_org (ignore)
 /* Handle parsing for the MRI SECT/SECTION pseudo-op.  This should be
    called by the obj-format routine which handles section changing
    when in MRI mode.  It will create a new section, and return it.  It
-   will set *TYPE to the section type: one of '\0' (unspecified), 'C'
-   (code), 'D' (data), 'M' (mixed), or 'R' (romable).  If
-   BFD_ASSEMBLER is defined, the flags will be set in the section.  */
+   will set *TYPE to the section type: one of 'C' (code), 'D' (data),
+   'M' (mixed), or 'R' (romable).  If BFD_ASSEMBLER is defined, the
+   flags will be set in the section.  */
 
 void
 s_mri_sect (type)
@@ -2138,9 +2138,7 @@ s_mri_sect (type)
       *input_line_pointer = '\0';
     }
 
-  name = strdup (name);
-  if (name == NULL)
-    as_fatal ("virtual memory exhausted");
+  name = xstrdup (name);
 
   *input_line_pointer = c;
 
@@ -2155,7 +2153,7 @@ s_mri_sect (type)
       record_alignment (seg, align);
     }
 
-  *type = '\0';
+  *type = 'C';
   if (*input_line_pointer == ',')
     {
       c = *++input_line_pointer;
@@ -2172,11 +2170,11 @@ s_mri_sect (type)
 
 	flags = SEC_NO_FLAGS;
 	if (*type == 'C')
-	  flags = SEC_CODE;
-	else if (*type == 'D')
-	  flags = SEC_DATA;
+	  flags = SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE;
+	else if (*type == 'D' || *type == 'M')
+	  flags = SEC_ALLOC | SEC_LOAD | SEC_DATA;
 	else if (*type == 'R')
-	  flags = SEC_ROM;
+	  flags = SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_READONLY | SEC_ROM;
 	if (flags != SEC_NO_FLAGS)
 	  {
 	    if (! bfd_set_section_flags (stdoutput, seg, flags))
@@ -2206,9 +2204,7 @@ s_mri_sect (type)
   name = input_line_pointer;
   c = get_symbol_end ();
 
-  name = strdup (name);
-  if (name == NULL)
-    as_fatal ("virtual memory exhausted");
+  name = xstrdup (name);
 
   *input_line_pointer = c;
 
