@@ -1,3 +1,8 @@
+Thu Jul 15 18:03:37 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* m88k-pinsn.c: Moved code into opcodes/m88k-dis.c.
+	(print_insn): Now just calls print_insn_m88k.
+
 Thu Jul 15 14:54:05 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* h8300-tdep.c (examine_prologue): Make prototype match definition.
