@@ -1,5 +1,23 @@
 2002-05-11  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* Makefile.in (ALLDEPFILES): Add nbsd-tdep.c.
+	(alphanbsd-tdep.o): Add nbsd-tdep.h to dependency list.
+	(nbsd-tdep.o): New dependency list.
+	* alphanbsd-tdep.c: Don't include solib-svr4.h.  Include
+	nbsd-tdep.h.
+	(alphanbsd_solib_svr4_fetch_link_map_offsets): Remove.
+	(alphanbsd_init_abi): Use nbsd_lp64_solib_svr4_fetch_link_map_offsets.
+	* nbsd-tdep.c: New file.
+	* nbsd-tdep.h: New file.
+	* shnbsd-tdep.c: Don't include solib-svr4.h.  Include
+	nbsd-tdep.h.
+	(shnbsd_solib_svr4_fetch_link_map_offsets): Remove.
+	(shnbsd_init_abi): Use nbsd_ilp32_solib_svr4_fetch_link_map_offsets.
+	* config/alpha/nbsd.mt (TDEPFILES): Add nbsd-tdep.o.
+	* config/sh/nbsd.mt (TDEPFILES): Ditto.
+
+2002-05-11  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* config/alpha/nbsd.mh (NATDEPFILES): Remove corelow.o.
 	* config/alpha/nbsd.mt (TDEPFILES): Add corelow.o.
 	* config/i386/nbsd.mh (NATDEPFILES): Remove corelow.o.

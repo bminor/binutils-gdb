@@ -1205,6 +1205,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	mips-linux-nat.c mips-linux-tdep.c \
 	mips-nat.c \
 	mips-tdep.c mipsm3-nat.c mipsv4-nat.c \
+	nbsd-tdep.c \
 	nindy-share/Onindy.c nindy-share/nindy.c \
 	nindy-share/ttyflush.c nindy-tdep.c \
 	ns32k-tdep.c solib-osf.c \
@@ -1261,7 +1262,7 @@ alphabsd-tdep.o: alphabsd-tdep.c $(defs_h) $(regcache_h) alphabsd-tdep.h
 alphafbsd-tdep.o: alphafbsd-tdep.c $(defs_h) $(value_h) alpha-tdep.h
 
 alphanbsd-tdep.o: alphanbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
-	$(value_h) alpha-tdep.h alphabsd-tdep.h
+	$(value_h) alpha-tdep.h alphabsd-tdep.h nbsd-tdep.h
 
 annotate.o: annotate.c $(defs_h) $(annotate_h) $(value_h) $(target_h) $(gdbtypes_h)
 
@@ -1798,6 +1799,8 @@ mn10300-tdep.o: mn10300-tdep.c $(defs_h) $(frame_h) $(inferior_h) \
 monitor.o: monitor.c $(monitor_h) $(bfd_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(target_h) $(serial_h) $(terminal_h) $(gdb_string_h) \
 	$(regcache_h)
+
+nbsd-tdep.o: nbsd-tdep.c $(defs_h) solib-svr4.h
 
 Onindy.o: nindy-share/Onindy.c gdb_wait.h nindy-share/block_io.h \
 	nindy-share/env.h

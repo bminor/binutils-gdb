@@ -23,10 +23,10 @@
 #include "gdbcore.h"
 #include "regcache.h"
 #include "value.h"
-#include "solib-svr4.h"
 
 #include "alpha-tdep.h"
 #include "alphabsd-tdep.h"
+#include "nbsd-tdep.h"
 
 static void
 fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
@@ -117,47 +117,6 @@ static struct core_fns alphanbsd_elfcore_fns =
   NULL					/* next */
 };
 
-/* Fetch (and possibly build) an appropriate link_map_offsets
-   structure for NetBSD/alpha targets using the struct offsets
-   defined in <link.h> (but without actual reference to that file).
-
-   This makes it possible to access NetBSD/alpha shared libraries
-   from a GDB that was not built on a NetBSD/alpha host (for cross
-   debugging).  */
-
-static struct link_map_offsets *
-alphanbsd_solib_svr4_fetch_link_map_offsets (void)
-{
-  static struct link_map_offsets lmo;
-  static struct link_map_offsets *lmp = NULL;
-
-  if (lmp == NULL)
-    {
-      lmp = &lmo;
-
-      lmo.r_debug_size = 32;
-
-      lmo.r_map_offset = 8;
-      lmo.r_map_size   = 8;
-
-      lmo.link_map_size = 40;
-
-      lmo.l_addr_offset = 0;
-      lmo.l_addr_size   = 8;
-
-      lmo.l_name_offset = 8;
-      lmo.l_name_size   = 8;
-
-      lmo.l_next_offset = 24;
-      lmo.l_next_size   = 8;
-
-      lmo.l_prev_offset = 32;
-      lmo.l_prev_size   = 8;
-    }
-
-  return lmp;
-}
-
 /* Under NetBSD/alpha, signal handler invocations can be identified by the
    designated code sequence that is used to return from a signal handler.
    In particular, the return address of a signal handler points to the
@@ -233,7 +192,7 @@ alphanbsd_init_abi (struct gdbarch_info info,
   set_gdbarch_software_single_step (gdbarch, alpha_software_single_step);
 
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
-                                  alphanbsd_solib_svr4_fetch_link_map_offsets);
+                                 nbsd_lp64_solib_svr4_fetch_link_map_offsets);
 
   tdep->dynamic_sigtramp_offset = alphanbsd_sigtramp_offset;
 

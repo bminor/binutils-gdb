@@ -23,8 +23,8 @@
 #include "gdbcore.h"
 #include "regcache.h"
 #include "value.h"
-#include "solib-svr4.h"
 
+#include "nbsd-tdep.h"
 #include "shnbsd-tdep.h"
 
 /* Convert an r0-r15 register number into an offset into a ptrace
@@ -107,47 +107,6 @@ shnbsd_fill_reg (char *regs, int regno)
     }
 }
 
-/* Fetch (and possibly build) an appropriate link_map_offsets
-   structure for NetBSD/sh targets using the struct offsets
-   defined in <link.h> (but without actual reference to that file).
-
-   This makes it possible to access NetBSD/sh shared libraries
-   from a GDB that was not built on a NetBSD/sh host (for cross
-   debugging).  */
-
-static struct link_map_offsets *
-shnbsd_solib_svr4_fetch_link_map_offsets (void)
-{
-  static struct link_map_offsets lmo;
-  static struct link_map_offsets *lmp = NULL;
-
-  if (lmp == NULL)
-    {
-      lmp = &lmo;
-
-      lmo.r_debug_size = 16;
-
-      lmo.r_map_offset = 4;
-      lmo.r_map_size   = 4;
-
-      lmo.link_map_size = 20;
-
-      lmo.l_addr_offset = 0;
-      lmo.l_addr_size   = 4;
-
-      lmo.l_name_offset = 4;
-      lmo.l_name_size   = 4;
-
-      lmo.l_next_offset = 12;
-      lmo.l_next_size   = 4;
-
-      lmo.l_prev_offset = 16;
-      lmo.l_prev_size   = 4;
-    }
-
-  return lmp;
-}
-
 static void
 fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
                       int which, CORE_ADDR ignore)
@@ -208,7 +167,7 @@ shnbsd_init_abi (struct gdbarch_info info,
                   struct gdbarch *gdbarch)
 {
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
-		                   shnbsd_solib_svr4_fetch_link_map_offsets);
+		                nbsd_ilp32_solib_svr4_fetch_link_map_offsets);
 }
 
 void
