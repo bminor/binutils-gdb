@@ -1,5 +1,11 @@
 2004-10-11  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 354
+	* elflink.c (elf_link_input_bfd): Check that relocs in SEC_ALLOC
+	sections do not reference symbols in non-SEC_ALLOC sections.
+
+2004-10-11  Alan Modra  <amodra@bigpond.net.au>
+
 	PR 437
 	* elflink.c (elf_link_sort_relocs): Don't bomb on unusual sections.
 	(_bfd_elf_link_omit_section_dynsym): Formatting.
