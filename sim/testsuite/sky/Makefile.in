@@ -40,28 +40,28 @@ RUNTEST_FOR_TARGET = `\
     fi; \
   fi`
 
-DVPAS_FOR_TARGET = `\
+DVPAS_FOR_TARGET := `\
   if [ -x ${bindir}/dvp-elf-as ]; then \
     echo ${bindir}/dvp-elf-as ; \
   else \
     echo $(target_alias)-as ; \
   fi`
 
-DVPOBJCP_FOR_TARGET = `\
+DVPOBJCP_FOR_TARGET := `\
   if [ -x ${bindir}/dvp-elf-objcopy ]; then \
     echo ${bindir}/dvp-elf-objcopy ; \
   else \
     echo $(target_alias)-objcopy ; \
   fi`
 
-AS_FOR_TARGET = `\
+AS_FOR_TARGET := `\
   if [ -x ../../../gas/as-new ]; then \
     echo ../../../gas/as-new ; \
   else \
     echo $(target_alias)-as ; \
   fi`
 
-LD_FOR_TARGET = `\
+LD_FOR_TARGET := `\
   if [ -x ../../../ld/ld-new ]; then \
     echo ../../../ld/ld-new ; \
   else \
@@ -71,14 +71,14 @@ LD_FOR_TARGET = `\
 
 RUNOPTS = 
 
-RUN_FOR_TARGET = `\
+RUN_FOR_TARGET := `\
   if [ -x ../../../sim/mips/run ]; then \
     echo ../../../sim/mips/run ; \
   else \
     echo $(target_alias)-run ; \
   fi` $(RUNOPTS)
 
-GCC_FOR_TARGET = `\
+GCC_FOR_TARGET := `\
   if [ -x ../../../gcc/xgcc ]; then \
     echo ../../../gcc/xgcc ; \
   else \
@@ -88,7 +88,7 @@ GCC_FOR_TARGET = `\
 C_GEN = perl $(srcdir)/c_gen.pl
 
 # cpu time limit (in seconds)
-ULIMIT = 30
+ULIMIT = 60
 
 .SUFFIXES: .trc .c .run .ok \
            .vif0out .vif0ok .vif0expect \
@@ -132,7 +132,7 @@ SCE_TESTS = \
         sce_test53.ok sce_test54.ok sce_test55.ok sce_test56.ok  \
         sce_test57.ok sce_test58.ok sce_test59.ok 
 
-check: sanity $(TESTS) 
+check: sanity $(TESTS) $(SCE_TESTS)
 check_sce: sanity $(SCE_TESTS)
 
 sanity:
@@ -173,18 +173,16 @@ sce2_%.vu.o: sce2_%.vuasm
 	$(DVPAS_FOR_TARGET) $(ASFLAGS) -o $@ $<
 
 sce%.ok: sce%.exe
-	rm -f sce$*.ok 
-	ulimit -t $(ULIMIT) ; $(RUN_FOR_TARGET) $<  > sce$*_our_gif.dat; \
+	rm -f sce$*.ok sce$*_our_gif.dat
+	GIF_TRACE=sce$*_our_gif.dat ; export GIF_TRACE; \
+	ulimit -t $(ULIMIT) ; $(RUN_FOR_TARGET) $< ; \
         if [ $$? -ne 0 ];  then \
+	   diff -bitw sce$*_out_dif.dat sce$*_our_gif.dat > sce$*.ok; \
 	   touch sce$*.ok; \
 	else \
 	   echo Running sce$*.exe returns $$? > sce$*.ok ;\
 	fi
 	   
-#	else 						   \
-#	   diff -bitw sce$*_out_dif.dat sce$*_our_gif.dat > sce$*.ok; \
-#        fi
-
 #------------------------
 # Rules for running tests
 #------------------------
