@@ -77,12 +77,14 @@ static struct amd64_register_info amd64_register_info[] =
   { "r15", &builtin_type_int64 },
   { "rip", &builtin_type_void_func_ptr },
   { "eflags", &builtin_type_int32 },
+  { "cs", &builtin_type_int32 },
+  { "ss", &builtin_type_int32 },
   { "ds", &builtin_type_int32 },
   { "es", &builtin_type_int32 },
   { "fs", &builtin_type_int32 },
   { "gs", &builtin_type_int32 },
 
-  /* %st0 is register number 22.  */
+  /* %st0 is register number 24.  */
   { "st0", &builtin_type_i387_ext },
   { "st1", &builtin_type_i387_ext },
   { "st2", &builtin_type_i387_ext },
@@ -100,7 +102,7 @@ static struct amd64_register_info amd64_register_info[] =
   { "fooff", &builtin_type_int32 },
   { "fop", &builtin_type_int32 },
 
-  /* %xmm0 is register number 38.  */
+  /* %xmm0 is register number 40.  */
   { "xmm0", &builtin_type_v4sf },
   { "xmm1", &builtin_type_v4sf },
   { "xmm2", &builtin_type_v4sf },

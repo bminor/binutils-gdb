@@ -18,6 +18,8 @@ expedite:rbp,rsp,rip
 64:r15
 64:rip
 32:eflags
+32:cs
+32:ss
 32:ds
 32:es
 32:fs

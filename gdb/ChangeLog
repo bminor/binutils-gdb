@@ -1,5 +1,27 @@
 2004-01-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* x86-64-tdep.c (amd64_register_info): Add %cs and %ss.  Adjust
+	register numbers in comments.
+	* x86-64-tdep.h: Update copyright year.
+	(X86_64_ST0_REGNUM, X86_64_XMM0_REGNUM, X86_64_XMM1_REGNUM):
+	Adjust for addition of %cs and %ss.
+	* amd64fbsd-nat.c: Update copyright year.
+	(reg_offset): Add register offsets for %cs and %ss.
+	* amd64fbsd-tdep.c: Update copyright year.
+	(amd64fbsd_r_reg_offset): Add register offsets for %cs and %ss.
+	(amd64fbsd_sc_reg_offset): Likewise.
+	* x86-64-linux-nat.c: Update copyright year.
+	(x86_64_linux_gregset64_reg_offset): Add register offsets for %cs
+	and %ss.
+	* amd64nbsd-nat.c: Update copyright year.
+	(amd64nbsd32_r_reg_offset): Add register offsets for %cs and %ss.
+	* amd64nbsd-tdep.c: Update copyright year.
+	(amd64nbsd_r_reg_offset): Add register offsets for %cs and %ss.
+	* x86-64-linux-tdep.c: Update copyright year.
+	(user_to_gdb_regmap): Add mapping for %cs and %ss.
+	(x86_64_linux_sc_reg_offset): Adjust for addition of %cs and %ss.
+	* regformats/reg-x86-64.dat: Add %cs and %ss.
+
 	* blockframe.c (inside_entry_func): Reformat.  Introduce new local
 	variables to prevent long lines.  Update comments to reflect
 	reality.

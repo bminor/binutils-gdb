@@ -1,7 +1,6 @@
 /* Target-dependent code for GNU/Linux running on x86-64, for GDB.
 
-   Copyright 2001, 2003 Free Software Foundation, Inc.
-
+   Copyright 2001, 2003, 2004 Free Software Foundation, Inc.
    Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
@@ -69,6 +68,7 @@ static int user_to_gdb_regmap[] =
   USER_R8, USER_R9, USER_R10, USER_R11,
   USER_R12, USER_R13, USER_R14, USER_R15,
   USER_RIP, USER_EFLAGS,
+  USER_CS, USER_SS,
   USER_DS, USER_ES, USER_FS, USER_GS
 };
 
@@ -254,13 +254,15 @@ static int x86_64_linux_sc_reg_offset[] =
   7 * 8,			/* %r15 */
   16 * 8,			/* %rip */
   17 * 8,			/* %eflags */
-  -1,				/* %ds */
-  -1,				/* %es */
 
-  /* FIXME: kettenis/2002030531: The registers %fs and %gs are
+  /* FIXME: kettenis/2002030531: The registers %cs, %fs and %gs are
      available in `struct sigcontext'.  However, they only occupy two
      bytes instead of four, which makes using them here rather
      difficult.  Leave them out for now.  */
+  -1,				/* %cs */
+  -1,				/* %ss */
+  -1,				/* %ds */
+  -1,				/* %es */
   -1,				/* %fs */
   -1				/* %gs */
 };
