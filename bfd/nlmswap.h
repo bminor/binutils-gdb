@@ -29,6 +29,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    At the moment this is only needed for one structure, the fixed NLM
    file header.  */
 
+static void nlm_swap_fixed_header_in PARAMS ((bfd *, PTR,
+					      Nlm_Internal_Fixed_Header *));
+static void nlm_swap_fixed_header_out PARAMS ((bfd *,
+					       Nlm_Internal_Fixed_Header *,
+					       PTR));
+
 /* Translate an NLM fixed length file header in external format into an NLM
    file header in internal format. */
 
