@@ -3,12 +3,6 @@
 	* config/obj-coff.c (coff_frob_symbol): Don't merge if the storage
 	class of the non-debug symbol is C_NULL.
 
-2001-07-10  John Healy  <jhealy@redhat.com>
-
-	* config/obj-elf.c (obj_elf_section): md_elf_section_change_data_hook
-	added to grab section information after it's been extracted from the
-	.section directive.
-
 2001-07-10  Anders Norlander <anorland@synergenix.se>
 
 	* doc/as.texinfo (Incbin): Fix grammatical errors.

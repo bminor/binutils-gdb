@@ -982,10 +982,6 @@ obj_elf_section (push)
       attr &= SHF_MERGE;
     }
 
-#ifdef md_elf_section_change_data_hook
-      md_elf_section_change_data_hook (name, type, attr, entsize, push);
-#endif
-
   obj_elf_change_section (name, type, attr, entsize, push);
 }
 
