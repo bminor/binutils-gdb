@@ -1,3 +1,8 @@
+Fri May 31 12:40:55 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/pe.em (sort_sections): Don't assume that a
+	wild_statement has a section name.
+
 Wed May 29 13:13:35 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* scripttempl/elfmips.sc: Quote test -z argument.
