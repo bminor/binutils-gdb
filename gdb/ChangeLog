@@ -1,3 +1,10 @@
+2002-05-30  Kevin Buettner  <kevinb@redhat.com>
+
+	* corefile.c (do_captured_read_memory_integer): Return non-zero
+	result.
+	(safe_read_memory_integer): Copy result of memory read when
+	status is non-zero.  Also, add comments.
+
 2002-05-20  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* Makefile.in (ppc_tdep_h): Define.
