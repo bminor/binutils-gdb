@@ -115,6 +115,12 @@ ia64-*-linux-gnu*)
   HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi` -L`dirname \`${CC} --print-file-name=libc.so\`` -lc `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi` `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else ${CC} --print-file-name=crtend.o; fi` `${CC} --print-file-name=crtn.o`'
   ;;
 
+ia64-*-aix*)
+  HOSTING_CRT0='-dynamic-linker `egrep "libc.so" \`${CC} --print-file-name=specs\` | sed -e "s,.*-dynamic-linker[ 	][ 	]*\(.*/libc.so..\).*,\1,"` `${CC} --print-file-name=crt1.o` `${CC} --print-file-name=crti.o` `if [ -f ../gcc/crtbegin.o ]; then echo ../gcc/crtbegin.o; else ${CC} --print-file-name=crtbegin.o; fi`'
+  HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi` -L`dirname \`${CC} --print-file-name=libc.so\`` -lc `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi` `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else ${CC} --print-file-name=crtend.o; fi` `${CC} --print-file-name=crtn.o`'
+  NATIVE_LIB_DIRS=/usr/lib/ia64l64
+  ;;
+
 mips*-dec-bsd*)
   HOSTING_CRT0=/usr/lib/crt0.o
   ;;

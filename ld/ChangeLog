@@ -1,3 +1,14 @@
+2001-02-22  Timothy Wall  <twall@cygnus.com>
+
+	* configure.host: Add configuration for ia64-*-aix*.
+	* Makefile.am (ALL_64_EMULATIONS): Add emulation for ia64-*-aix*.
+	Add dependencies for eelf64_aix.c.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add ia64-*-aix* mapping.
+	* emulparams/elf64_aix.sh: Add settings for elf64 on aix5.
+	* testsuite/ld-bootstrap/boostrap.exp: Exclude ia64 flavor from
+	AIX-specific test. 
+	
 2001-02-20  H.J. Lu  <hjl@gnu.org>
 
 	* ldfile.c (ldfile_open_file): Set entry->search_dirs_flag to

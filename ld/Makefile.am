@@ -242,6 +242,7 @@ ALL_EMULATIONS = \
 	ez8002.o
 
 ALL_64_EMULATIONS = \
+	eelf64_aix.o \
 	eelf64_ia64.o \
 	eelf_x86_64.o \
 	eelf64_s390.o \
@@ -486,6 +487,9 @@ eelf64alpha.c: $(srcdir)/emulparams/elf64alpha.sh \
 eelf64hppa.c: $(srcdir)/emulparams/elf64hppa.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64hppa "$(tdir_elf64hppa)"
+eelf64_aix.c: $(srcdir)/emulparams/elf64_aix.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf64_aix "$(tdir_elf64_aix)"
 eelf64_ia64.c: $(srcdir)/emulparams/elf64_ia64.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64_ia64 "$(tdir_elf64_ia64)"

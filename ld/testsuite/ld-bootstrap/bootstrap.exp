@@ -65,7 +65,8 @@ foreach flags {"" "strip" "--static" "--traditional-format" "--no-keep-memory"} 
     # On AIX, you need to specify an import list when using --static.
     # You only want the import list when creating the final
     # executable.
-    if [istarget "*-*-aix*"] {
+    if { [istarget "*-*-aix*"] 
+         && ![istarget "ia64-*-aix*"]} {
 	if {"$flags" == "--static"} {
 	    set flags "--static -bI:/lib/syscalls.exp"
 	}
