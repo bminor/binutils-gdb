@@ -32,7 +32,7 @@ struct frame_info;
    system and that might consider (confusing) debugging information.
    Each name (a basic regular expression string) is followed by a
    comma.  FIXME: Should be part of a configuration file. */
-#if defined(__alpha__) && defined(__osf__) && !defined(VXWORKS_TARGET)
+#if defined(__alpha__) && defined(__osf__)
 #define ADA_KNOWN_RUNTIME_FILE_NAME_PATTERNS \
    "^[agis]-.*\\.ad[bs]$", \
    "/usr/shlib/libpthread\\.so",

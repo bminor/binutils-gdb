@@ -1,4 +1,4 @@
-/* Parameters for execution on VxWorks m68k's, for GDB, the GNU debugger.
+/* Parameters for execution on os68k's, for GDB, the GNU debugger.
    Copyright 1986, 1987, 1989, 1991, 1998, 2003 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 

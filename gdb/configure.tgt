@@ -98,7 +98,6 @@ i[34567]86-*-gnu*)	gdb_target=i386gnu ;;
 i[34567]86-*-netware*)	gdb_target=i386
 			configdirs="${configdirs} nlm" ;;
 i[34567]86-*-cygwin*)	gdb_target=cygwin  ;;
-i[34567]86-*-vxworks*)	gdb_target=vxworks ;;
 i[34567]86-*-*)		gdb_target=i386 ;;
 
 ia64-*-aix*)		gdb_target=aix ;;
@@ -113,7 +112,6 @@ m32r*-*-*)		gdb_target=m32r ;;
 m68hc11*-*-*|m6811*-*-*)	gdb_target=m68hc11 ;;
 
 m68*-cisco*-*)		gdb_target=cisco ;;
-m68*-netx-*)		gdb_target=vxworks68 ;;
 m68*-tandem-*)		gdb_target=st2000 ;;
 m68*-*-aout*)		gdb_target=monitor ;;
 m68*-*-coff*)		gdb_target=monitor ;;
@@ -126,7 +124,6 @@ m68*-*-netbsd* | m68*-*-knetbsd*-gnu)
 m68*-*-openbsd*)	gdb_target=obsd ;;
 m68*-*-os68k*)		gdb_target=os68k ;;
 m68*-*-uclinux*)	gdb_target=monitor ;;
-m68*-*-vxworks*)	gdb_target=vxworks68 ;;
 
 m88*-*-openbsd*)	gdb_target=obsd ;;
 
@@ -141,7 +138,6 @@ mips*-*-linux*)		gdb_target=linux
 mips*-*-netbsd* | mips*-*-knetbsd*-gnu)
 			gdb_target=nbsd ;;
 mips64*-*-openbsd*)	gdb_target=obsd64 ;;
-mips*-*-vxworks*)       gdb_target=vxmips ;;
 mips*-*-*)		gdb_target=embed ;;
 
 mn10300-*-*)		gdb_target=mn10300 ;;
@@ -156,7 +152,6 @@ powerpc-*-linux*)	gdb_target=linux
 			build_gdbserver=yes
 			;;
 powerpc64-*-linux*)	gdb_target=linux ;;
-powerpc-*-vxworks*)	gdb_target=vxworks ;;
 powerpc*-*-*)		if test -f ../sim/ppc/Makefile; then
 			  gdb_target=ppc-sim
 			else
@@ -197,7 +192,6 @@ sparc-*-solaris2.[0-6] | sparc-*-solaris2.[0-6].*)
 sparc-*-solaris2* | sparcv9-*-solaris2* | sparc64-*-solaris2*)
 			gdb_target=sol2-64
 			;;
-sparc-*-vxworks*)	gdb_target=vxworks ;;
 sparc-*-*)		gdb_target=sparc ;;
 sparc64-*-*)		gdb_target=sparc64 ;;
 

@@ -1,3 +1,27 @@
+2004-11-13  Andrew Cagney  <cagney@gnu.org>
+
+	* configure.tgt: Delete i[34567]86-*-vxworks*, m68*-netx-*,
+	m68*-*-vxworks*, mips*-*-vxworks*, powerpc-*-vxworks*, and
+	sparc-*-vxworks*.
+	* NEWS: Mention that vxworks was deleted.
+	* config/m68k/tm-vx68.h, config/mips/tm-vxmips.h: Delete.
+	* config/powerpc/tm-vxworks.h, config/tm-vxworks.h: Delete.
+	* config/i386/vxworks.mt, config/m68k/vxworks68.mt: Delete.
+	* config/mips/vxmips.mt, config/powerpc/vxworks.mt: Delete.
+	* config/sparc/vxworks.mt, vx-share/dbgRpcLib.h: Delete.
+	* vx-share/ptrace.h, vx-share/regPacket.h: Delete.
+	* vx-share/vxTypes.h, vx-share/vxWorks.h: Delete.
+	* vx-share/wait.h, vx-share/xdr_ld.c: Delete.
+	* vx-share/xdr_ld.h, vx-share/xdr_ptrace.c: Delete.
+	* vx-share/xdr_ptrace.h, vx-share/xdr_rdb.c: Delete.
+	* vx-share/xdr_rdb.h, remote-vxsparc.c: Delete.
+	* remote-vxmips.c, remote-vx.c: Delete.
+	* remote-vx68.c: Delete.
+	* config/m68k/tm-os68k.h: Remove reference to VxWorks.
+	* config/m68k/os68k.mt, ada-lang.h: Ditto.
+	* Makefile.in (HFILES_NO_SRCDIR, ALLDEPFILES, remote-vx68.o)
+	(remote-vx.o, remote-vxmips.o, remote-vxsparc.o): Delete vx files.
+
 2004-11-13  Eli Zaretskii  <eliz@gnu.org>
 
 	* config/i386/xm-go32.h: Don't include fopen-bin.h.

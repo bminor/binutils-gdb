@@ -854,9 +854,7 @@ HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 	jv-lang.h \
 	m2-lang.h  p-lang.h \
 	complaints.h valprint.h \
-	vx-share/dbgRpcLib.h vx-share/ptrace.h vx-share/vxTypes.h \
-	vx-share/vxWorks.h vx-share/wait.h vx-share/xdr_ld.h \
-	vx-share/xdr_ptrace.h vx-share/xdr_rdb.h gdbthread.h \
+	gdbthread.h \
 	dcache.h remote-utils.h top.h somsolib.h
 
 # Header files that already have srcdir in them, or which are in objdir.
@@ -1411,7 +1409,6 @@ ALLDEPFILES = \
 	remote-hms.c remote-m32r-sdi.c remote-mips.c \
 	remote-rdp.c remote-sim.c \
 	remote-st.c remote-utils.c dcache.c \
-	remote-vx.c \
 	rs6000-nat.c rs6000-tdep.c \
 	s390-tdep.c s390-nat.c \
 	ser-go32.c ser-pipe.c ser-tcp.c \
@@ -1425,7 +1422,6 @@ ALLDEPFILES = \
 	sparcnbsd-nat.c sparcnbsd-tdep.c sparcobsd-tdep.c \
 	symm-tdep.c symm-nat.c \
 	vax-nat.c vax-tdep.c vaxbsd-nat.c vaxnbsd-tdep.c \
-	vx-share/xdr_ld.c vx-share/xdr_ptrace.c vx-share/xdr_rdb.c \
 	win32-nat.c \
 	xcoffread.c xcoffsolib.c \
 	xstormy16-tdep.c
@@ -2421,23 +2417,6 @@ remote-st.o: remote-st.c $(defs_h) $(gdbcore_h) $(target_h) $(gdb_string_h) \
 remote-utils.o: remote-utils.c $(defs_h) $(gdb_string_h) $(gdbcmd_h) \
 	$(target_h) $(serial_h) $(gdbcore_h) $(inferior_h) $(remote_utils_h) \
 	$(regcache_h)
-remote-vx68.o: remote-vx68.c $(defs_h) $(vx_share_regPacket_h) $(frame_h) \
-	$(inferior_h) $(target_h) $(gdbcore_h) $(command_h) $(symtab_h) \
-	$(symfile_h) $(regcache_h) $(gdb_string_h) $(vx_share_ptrace_h) \
-	$(vx_share_xdr_ptrace_h) $(vx_share_xdr_ld_h) $(vx_share_xdr_rdb_h) \
-	$(vx_share_dbgRpcLib_h)
-remote-vx.o: remote-vx.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
-	$(gdbcore_h) $(command_h) $(symtab_h) $(complaints_h) $(gdbcmd_h) \
-	$(bfd_h) $(symfile_h) $(objfiles_h) $(gdb_stabs_h) $(regcache_h) \
-	$(gdb_string_h) $(vx_share_ptrace_h) $(vx_share_xdr_ptrace_h) \
-	$(vx_share_xdr_ld_h) $(vx_share_xdr_rdb_h) $(vx_share_dbgRpcLib_h)
-remote-vxmips.o: remote-vxmips.c $(defs_h) $(vx_share_regPacket_h) \
-	$(frame_h) $(inferior_h) $(target_h) $(gdbcore_h) $(command_h) \
-	$(symtab_h) $(symfile_h) $(regcache_h) $(gdb_string_h) \
-	$(vx_share_ptrace_h) $(vx_share_xdr_ptrace_h) $(vx_share_xdr_ld_h) \
-	$(vx_share_xdr_rdb_h) $(vx_share_dbgRpcLib_h)
-remote-vxsparc.o: remote-vxsparc.c $(defs_h) $(regcache_h) $(gdb_string_h) \
-	$(sparc_tdep_h) $(vx_share_ptrace_h) $(vx_share_regPacket_h)
 rom68k-rom.o: rom68k-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(regcache_h) $(value_h) $(m68k_tdep_h)
 rs6000-nat.o: rs6000-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
@@ -3088,21 +3067,5 @@ tui-winsource.o: $(srcdir)/tui/tui-winsource.c $(defs_h) $(symtab_h) \
 	$(tui_winsource_h) $(tui_source_h) $(tui_disasm_h) $(gdb_string_h) \
 	$(gdb_curses_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-winsource.c
-
-#
-# vx-share sub-directory
-#
-
-xdr_ld.o: vx-share/xdr_ld.c $(defs_h) vx-share/vxTypes.h \
-	vx-share/vxWorks.h vx-share/xdr_ld.h
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/vx-share/xdr_ld.c
-
-xdr_ptrace.o: vx-share/xdr_ptrace.c $(defs_h) vx-share/vxTypes.h \
-	vx-share/vxWorks.h vx-share/xdr_ptrace.h
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/vx-share/xdr_ptrace.c
-
-xdr_rdb.o: vx-share/xdr_rdb.c $(defs_h) vx-share/vxTypes.h \
-	vx-share/vxWorks.h vx-share/xdr_rdb.h
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/vx-share/xdr_rdb.c
 
 ### end of the gdb Makefile.in.

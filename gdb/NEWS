@@ -3,6 +3,9 @@
 
 *** Changes since GDB 6.3
 
+* REMOVED configurations and files
+
+VxWorks and the XDR protocol			*-*-vxworks
 
 *** Changes in GDB 6.3:
 
