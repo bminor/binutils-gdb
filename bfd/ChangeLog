@@ -1,3 +1,10 @@
+2005-03-22  Bob Wilson  <bob.wilson@acm.org>
+
+	* xtensa-isa.c (xtensa_opcode_lookup, xtensa_state_lookup,
+	xtensa_sysreg_lookup_name, xtensa_interface_lookup,
+	xtensa_funcUnit_lookup): Skip bsearch call if count is zero.
+	(xtensa_opcode_decode): Rearrange code.
+
 2005-03-22  Nick Clifton  <nickc@redhat.com>
 
 	* binary.c: Convert to ISO C90 formatting.
@@ -5216,7 +5223,7 @@
 	between include sections when have the same sum but which
 	nevertheless are still unique.
 
-2004-03-31  Mattias Engdegård  <mattias@virtutech.se>
+2004-03-31  Mattias EngdegÃ¥rd  <mattias@virtutech.se>
 
 	* stabs.c (_bfd_link_section_stabs): Do not skip N_EXCL stabs.
 
