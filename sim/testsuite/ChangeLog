@@ -1,3 +1,14 @@
+start-sanitize-m32rx
+Tue Apr 14 14:06:34 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim/m32r/maclh1.cgs: Fix testcase.
+	* sim/m32r/maclh1-2.cgs: New testcase.
+
+Tue Mar  3 19:09:09 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim/m32r/sat.cgs: Change sath to sat.
+
+end-sanitize-m32rx
 Wed Feb 25 11:01:17 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* Makefile.in (RUNTEST): Fix path to runtest.
@@ -85,7 +96,7 @@ Thu Feb 19 11:15:45 1998  Nick Clifton  <nickc@cygnus.com>
 	* sim/m32r/srli.cgs: Test SRLI instruction.
 	* sim/m32r/xor3.cgs: Test XOR3 instruction.
 	* sim/m32r/xor.cgs: Test XOR instruction.
-start-sanitize-m342rx	
+start-sanitize-m32rx	
 	* sim/m32r/jnc.cgs: Test JNC instruction.
 	* sim/m32r/jc.cgs: Test JC instruction.
 	* sim/m32r/cmpz.cgs: Test CMPZ instruction.
@@ -95,7 +106,7 @@ start-sanitize-m342rx
 	* sim/m32r/bncl8.cgs: Test short BNCL instruction.
 	* sim/m32r/divh.cgs: Test DIVH instruction.
 	* sim/m32r/rach-dsi.cgs: Test extended RACH instruction.
-end-sanitize-m342rx	
+end-sanitize-m32rx	
 Tue Feb 17 12:46:05 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* config/default.exp: New file.
