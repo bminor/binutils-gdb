@@ -15,10 +15,12 @@
 
 Do-first:
 
+mpw_files="mpw-mh-mpw ChangeLog.mpw"
+
 if ( echo $* | grep keep\-mpw > /dev/null) ; then
-	keep_these_too="mpw-mh-mpw ChangeLog.mpw ${keep_these_too}"
+	keep_these_too="${mpw_files} ${keep_these_too}"
 else
-	lose_these_too="mpw-mh-mpw ChangeLog.mpw ${lose_these_too}"
+	lose_these_too="${mpw_files} ${lose_these_too}"
 fi
 
 # All files listed between the "Things-to-keep:" line and the
@@ -34,6 +36,7 @@ mh-a68bsd
 mh-aix
 mh-aix386
 mh-apollo68
+mh-cxux
 mh-decstation
 mh-delta88
 mh-dgux
