@@ -87,6 +87,11 @@ extern int cannot_store_register (int regno);
 /* Override child_resume in `infptrace.c'.  */
 #define CHILD_RESUME
 
+/* Override child_wait in `inftarg.c'.  */
+struct target_waitstatus;
+extern ptid_t child_wait (ptid_t ptid, struct target_waitstatus *ourstatus);
+#define CHILD_WAIT
+
 /* FIXME: kettenis/2000-09-03: This should be moved to ../nm-linux.h
    once we have converted all Linux targets to use the new threads
    stuff (without the #undef of course).  */

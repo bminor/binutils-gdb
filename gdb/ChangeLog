@@ -1,3 +1,27 @@
+2001-10-14  Mark Kettenis  <kettenis@gnu.org>
+
+	Fix attaching to cloned processes.  This fixes PR gdb/61.
+	* lin-lwp.c (struct lwp_info): Add new member `cloned'.
+	(is_cloned) Removed.
+	(lin_lwp_attach_lwp): Don't call stop_wait_callback.  Instead call
+	waitpid explicitly.  Mark the LWP as cloned if waitpid fails and
+	retry with __WCLONE flag.
+	(lin_lwp_attach): Likewise.  Warn if attaching to a cloned process.
+	(detach_callback): Replace use of is_cloned with explicit check on
+	LWP id and process id.
+	(stop_wait_callback): Replace use of is_cloned with check if LWP
+	is marked as cloned.
+	[CHILD_WAIT] (child_wait): New function.
+	(lin_lwp_wait): Replace use of is_cloned with check if LWP is
+	marked as cloned.  Mark newly detected LWPs as cloned if detected
+	by waitpid with __WCLONE flag.
+	(kill_wait_callback): Replace use of is_cloned with check if LWP
+	is marked as cloned.
+	* config/i386/nm-linux.h (struct target_waitstatus): Add forward
+	declaration.
+	(child_wait): Add prototype.
+	(CHILD_WAIT): Define.
+
 2001-10-13  Andrew Cagney  <ac131313@redhat.com>
 
 	S/390 31 & 64 bit target and GNU/Linux native support.

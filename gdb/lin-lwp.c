@@ -75,6 +75,11 @@ struct lwp_info
      and overall process id.  */
   ptid_t ptid;
 
+  /* Non-zero if this LWP is cloned.  In this context "cloned" means
+     that the LWP is reporting to its parent using a signal other than
+     SIGCHLD.  */
+  int cloned;
+
   /* Non-zero if we sent this LWP a SIGSTOP (but the LWP didn't report
      it back yet).  */
   int signalled;
@@ -114,8 +119,6 @@ static int threaded;
 #define GET_PID(ptid)		ptid_get_pid (ptid)
 #define is_lwp(ptid)		(GET_LWP (ptid) != 0)
 #define BUILD_LWP(lwp, pid)	ptid_build (pid, lwp, 0)
-
-#define is_cloned(pid)	(GET_LWP (pid) != GET_PID (pid))
 
 /* If the last reported event was a SIGTRAP, this variable is set to
    the process id of the LWP/thread that got it.  */
@@ -352,18 +355,33 @@ lin_lwp_attach_lwp (ptid_t ptid, int verbose)
   if (verbose)
     printf_filtered ("[New %s]\n", target_pid_to_str (ptid));
 
-  /* We assume that we're already tracing the initial process.  */
-  if (is_cloned (ptid) && ptrace (PTRACE_ATTACH, GET_LWP (ptid), 0, 0) < 0)
-    error ("Can't attach %s: %s", target_pid_to_str (ptid), strerror (errno));
-
   lp = find_lwp_pid (ptid);
   if (lp == NULL)
     lp = add_lwp (ptid);
 
-  if (is_cloned (ptid))
+  /* We assume that we're already attached to any LWP that has an
+     id equal to the overall process id.  */
+  if (GET_LWP (ptid) != GET_PID (ptid))
     {
-      lp->signalled = 1;
-      stop_wait_callback (lp, NULL);
+      pid_t pid;
+      int status;
+
+      if (ptrace (PTRACE_ATTACH, GET_LWP (ptid), 0, 0) < 0)
+	error ("Can't attach %s: %s", target_pid_to_str (ptid),
+	       strerror (errno));
+
+      pid = waitpid (GET_LWP (ptid), &status, 0);
+      if (pid == -1 && errno == ECHILD)
+	{
+	  /* Try again with __WCLONE to check cloned processes.  */
+	  pid = waitpid (GET_LWP (ptid), &status, __WCLONE);
+	  lp->cloned = 1;
+	}
+
+      gdb_assert (pid == GET_LWP (ptid)
+		  && WIFSTOPPED (status) && WSTOPSIG (status));
+
+      lp->stopped = 1;
     }
 }
 
@@ -371,20 +389,33 @@ static void
 lin_lwp_attach (char *args, int from_tty)
 {
   struct lwp_info *lp;
+  pid_t pid;
+  int status;
 
   /* FIXME: We should probably accept a list of process id's, and
      attach all of them.  */
   child_ops.to_attach (args, from_tty);
 
   /* Add the initial process as the first LWP to the list.  */
-  lp = add_lwp (BUILD_LWP (PIDGET (inferior_ptid), PIDGET (inferior_ptid)));
+  lp = add_lwp (BUILD_LWP (GET_PID (inferior_ptid), GET_PID (inferior_ptid)));
 
   /* Make sure the initial process is stopped.  The user-level threads
      layer might want to poke around in the inferior, and that won't
      work if things haven't stabilized yet.  */
-  lp->signalled = 1;
-  stop_wait_callback (lp, NULL);
-  gdb_assert (lp->status == 0);
+  pid = waitpid (GET_PID (inferior_ptid), &status, 0);
+  if (pid == -1 && errno == ECHILD)
+    {
+      warning ("%s is a cloned process", target_pid_to_str (inferior_ptid));
+
+      /* Try again with __WCLONE to check cloned processes.  */
+      pid = waitpid (GET_PID (inferior_ptid), &status, __WCLONE);
+      lp->cloned = 1;
+    }
+
+  gdb_assert (pid == GET_PID (inferior_ptid)
+	      && WIFSTOPPED (status) && WSTOPSIG (status) == SIGSTOP);
+
+  lp->stopped = 1;
 
   /* Fake the SIGSTOP that core GDB expects.  */
   lp->status = W_STOPCODE (SIGSTOP);
@@ -415,7 +446,9 @@ detach_callback (struct lwp_info *lp, void *data)
       gdb_assert (lp->status == 0 || WIFSTOPPED (lp->status));
     }
 
-  if (is_cloned (lp->ptid))
+  /* We don't actually detach from the LWP that has an id equal to the
+     overall process id just yet.  */
+  if (GET_LWP (lp->ptid) != GET_PID (lp->ptid))
     {
       if (ptrace (PTRACE_DETACH, GET_LWP (lp->ptid), 0,
 		  WSTOPSIG (lp->status)) < 0)
@@ -433,7 +466,7 @@ lin_lwp_detach (char *args, int from_tty)
 {
   iterate_over_lwps (detach_callback, NULL);
 
-  /* Only the initial (uncloned) process should be left right now.  */
+  /* Only the initial process should be left right now.  */
   gdb_assert (num_lwps == 1);
 
   trap_ptid = null_ptid;
@@ -610,8 +643,7 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 
       gdb_assert (lp->status == 0);
 
-      pid = waitpid (GET_LWP (lp->ptid), &status,
-		     is_cloned (lp->ptid) ? __WCLONE : 0);
+      pid = waitpid (GET_LWP (lp->ptid), &status, lp->cloned ? __WCLONE : 0);
       if (pid == -1 && errno == ECHILD)
 	/* OK, the proccess has disappeared.  We'll catch the actual
 	   exit event in lin_lwp_wait.  */
@@ -888,6 +920,55 @@ resumed_callback (struct lwp_info *lp, void *data)
   return lp->resumed;
 }
 
+#ifdef CHILD_WAIT
+
+/* We need to override child_wait to support attaching to cloned
+   processes, since a normal wait (as done by the default version)
+   ignores those processes.  */
+
+/* Wait for child PTID to do something.  Return id of the child,
+   minus_one_ptid in case of error; store status into *OURSTATUS.  */
+
+ptid_t
+child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
+{
+  int save_errno;
+  int status;
+  pid_t pid;
+
+  do
+    {
+      set_sigint_trap ();	/* Causes SIGINT to be passed on to the
+				   attached process.  */
+      set_sigio_trap ();
+
+      pid = waitpid (GET_PID (ptid), &status, 0);
+      if (pid == -1 && errno == ECHILD)
+	/* Try again with __WCLONE to check cloned processes.  */
+	pid = waitpid (GET_PID (ptid), &status, __WCLONE);
+      save_errno = errno;
+
+      clear_sigio_trap ();
+      clear_sigint_trap ();
+    }
+  while (pid == -1 && errno == EINTR);
+
+  if (pid == -1)
+    {
+      warning ("Child process unexpectedly missing: %s", strerror (errno));
+
+      /* Claim it exited with unknown signal.  */
+      ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
+      ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
+      return minus_one_ptid;
+    }
+
+  store_waitstatus (ourstatus, status);
+  return pid_to_ptid (pid);
+}
+
+#endif
+
 static ptid_t
 lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 {
@@ -954,7 +1035,7 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       /* If we have to wait, take into account whether PID is a cloned
          process or not.  And we have to convert it to something that
          the layer beneath us can understand.  */
-      options = is_cloned (lp->ptid) ? __WCLONE : 0;
+      options = lp->cloned ? __WCLONE : 0;
       pid = GET_LWP (ptid);
     }
 
@@ -997,6 +1078,9 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  if (! lp)
 	    {
 	      lp = add_lwp (BUILD_LWP (lwpid, GET_PID (inferior_ptid)));
+	      if (options & __WCLONE)
+		lp->cloned = 1;
+
 	      if (threaded)
 		{
 		  gdb_assert (WIFSTOPPED (status)
@@ -1189,7 +1273,7 @@ kill_wait_callback (struct lwp_info *lp, void *data)
   /* For cloned processes we must check both with __WCLONE and
      without, since the exit status of a cloned process isn't reported
      with __WCLONE.  */
-  if (is_cloned (lp->ptid))
+  if (lp->cloned)
     {
       do
 	{
