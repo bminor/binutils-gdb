@@ -2126,8 +2126,11 @@ som_prep_for_fixups (abfd, syms, num_syms)
 	  arelent *reloc = section->orelocation[i];
 	  int scale;
 
-	  /* If no symbol, then there is no counter to increase.  */
-	  if (reloc->sym_ptr_ptr == NULL)
+	  /* A relocation against a symbol in the *ABS* section really
+	     does not have a symbol.  Likewise if the symbol isn't associated
+	     with any section.  */
+	  if (reloc->sym_ptr_ptr == NULL
+	      || (*reloc->sym_ptr_ptr)->section == &bfd_abs_section)
 	    continue;
 
 	  /* Scaling to encourage symbols involved in R_DP_RELATIVE 
@@ -3509,12 +3512,18 @@ som_slurp_symbol_table (abfd)
 	/* symbol_info field is undefined for SS_EXTERNAL and SS_UNSAT symbols,
 	   so the section associated with this symbol can't be known.  */
 	case SS_EXTERNAL:
-	case SS_UNSAT:
 	  if (bufp->symbol_type != ST_STORAGE)
 	    sym->symbol.section = &bfd_und_section;
 	  else
 	    sym->symbol.section = &bfd_com_section;
 	  sym->symbol.flags |= (BSF_EXPORT | BSF_GLOBAL);
+	  break;
+
+	case SS_UNSAT:
+	  if (bufp->symbol_type != ST_STORAGE)
+	    sym->symbol.section = &bfd_und_section;
+	  else
+	    sym->symbol.section = &bfd_com_section;
 	  break;
 
 	case SS_UNIVERSAL:
@@ -3537,11 +3546,10 @@ som_slurp_symbol_table (abfd)
 	  break;
 	}
 
-      /* Mark symbols left around by the debugger.  */
-      if (strlen (sym->symbol.name) >= 2
-	  && sym->symbol.name[0] == 'L'
-	  && (sym->symbol.name[1] == '$' || sym->symbol.name[2] == '$'
-	      || sym->symbol.name[3] == '$'))
+      /* Mark section symbols and symbols used by the debugger.  */
+      if (!strcmp (sym->symbol.name, "L$0\002"))
+	sym->symbol.flags |= BSF_SECTION_SYM;
+      else if (!strncmp (sym->symbol.name, "L$0", 3))
 	sym->symbol.flags |= BSF_DEBUGGING;
 
       /* Note increment at bottom of loop, since we skip some symbols

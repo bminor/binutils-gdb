@@ -1,5 +1,12 @@
 Mon Mar 14 11:41:23 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som.c (som_prep_for_fixups): A relocation involving the section
+	symbol for the *ABS* section is really a relocation involving
+	no symbol.
+	(som_slurp_symbol_table): Do not set BSF_GLOBAL or BSF_EXPORT for
+	undefined symbols.  Correctly distinguish between debugger symbols
+	and section symbols.
+
 	* som (setup_sections): Set SEC_DEBUGGING and the section attributes
 	for spaces and subspaces.
 
