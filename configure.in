@@ -9,7 +9,15 @@ srcname="gnu development package"
 
 # per-host:
 
+# XXX - FIXME there needs to be a case for hmake-dgux
+
+case "${host_os}" in
+sysv* | irix*) host_makefile_frag=config/hmake-sysv ;;
+esac
+
 # per-target:
+
+# XXX - FIXME there needs to be a case for tmake-a29k
 
 #
 # Local Variables:
