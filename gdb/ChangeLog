@@ -1,3 +1,10 @@
+2003-06-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-nat.c (child_resume): Use I386_ESP_REGNUM instead of
+	SP_REGNUM.
+	* i386-linux-tdep.c (i386_linux_sigcontext_addr): Likewise.
+	* i386bsd-tdep.c (i386bsd_sigcontext_addr): Likewise.
+
 2003-06-01  Richard Henderson  <rth@redhat.com>
 
         * dwarf2-frame.c (struct dwarf2_cie): Add saw_z_augmentation.

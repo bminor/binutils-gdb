@@ -852,7 +852,7 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
 	  /* Then check the system call number.  */
 	  if (syscall == SYS_sigreturn || syscall == SYS_rt_sigreturn)
 	    {
-	      CORE_ADDR sp = read_register (SP_REGNUM);
+	      CORE_ADDR sp = read_register (I386_ESP_REGNUM);
 	      CORE_ADDR addr = sp;
 	      unsigned long int eflags;
 

@@ -252,7 +252,7 @@ i386_linux_sigcontext_addr (struct frame_info *next_frame)
   CORE_ADDR sp;
   char buf[4];
 
-  frame_unwind_register (next_frame, SP_REGNUM, buf);
+  frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);
   sp = extract_unsigned_integer (buf, 4);
 
   pc = i386_linux_sigtramp_start (frame_pc_unwind (next_frame));
@@ -291,7 +291,7 @@ i386_linux_sigcontext_addr (struct frame_info *next_frame)
 static void
 i386_linux_write_pc (CORE_ADDR pc, ptid_t ptid)
 {
-  write_register_pid (PC_REGNUM, pc, ptid);
+  write_register_pid (I386_EIP_REGNUM, pc, ptid);
 
   /* We must be careful with modifying the program counter.  If we
      just interrupted a system call, the kernel might try to restart
