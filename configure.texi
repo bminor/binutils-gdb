@@ -142,13 +142,14 @@ corresponding makefile variables are set accordingly.  If host, target, or
 site specific makefile fragments exist, these are inserted into the
 output file.  (See @ref{Makefiles, , , make, Makefiles}.)
 
-@item Generate @file{.gdbinit}
-If the source directory contains a @file{.gdbinit} file and the build
-directory is not the same as the source directory, a @file{.gdbinit}
-file is created in the build directory.  This @file{.gdbinit} file
-contains just a @code{source} command, which will cause the @file{.gdbinit} 
-file from the source directory to be read by GDB.  (see
-@ref{Command Files, , , gdb, Command Files}.)
+@item Generate @file{.gdbinit} If the source directory contains a
+@file{.gdbinit} file and the build directory is not the same as the
+source directory, a @file{.gdbinit} file is created in the build
+directory.  This @file{.gdbinit} file contains @code{dir} commands and
+a @code{source} command, which will cause the @file{.gdbinit} file from
+the source directory to be read by GDB, and will allow GDB to find
+source files in either the source directory or the build directory.
+(see @ref{Command Files, , , gdb, Command Files}.)
 
 @item Make symbolic links
 Most directories have some symbolic links with generic names built
