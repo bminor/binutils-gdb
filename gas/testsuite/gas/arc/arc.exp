@@ -65,6 +65,9 @@ proc test_template_insn { cpu tmpl opcode icode } {
     # Finally, run the test.
 
     run_dump_test $objdir/$opcode
+
+    # "make clean" won't delete these, so for now we must.
+    catch "exec rm -f $objdir/$opcode.s $objdir/$opcode.d"
 }
 
 # Run the tests.
@@ -103,12 +106,10 @@ if [istarget arc*-*-*] then {
     test_template_insn base insn3 extw 8
 
     run_dump_test "flag"
-
-#    run_dump_test "ld"
-#    run_dump_test "lr"
 #    run_dump_test "nop"
-#    run_dump_test "st"
-#    run_dump_test "sr"
+
+    run_dump_test "ld"
+    run_dump_test "st"
 
     # Host extension instructions
     run_dump_test "mul64"
