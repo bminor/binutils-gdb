@@ -270,6 +270,10 @@ print_insn_arg (d, buffer, p, addr, stream)
       fprintf_filtered (stream, "%s", reg_names[fetch_arg (buffer, place, 4)]);
       break;
 
+    case 'r':
+      fprintf_filtered (stream, "%s@", reg_names[fetch_arg (buffer, place, 4)]);
+      break;
+
     case 'F':
       fprintf_filtered (stream, "fp%d", fetch_arg (buffer, place, 3));
       break;
