@@ -6,7 +6,7 @@ Wed Dec 14 15:54:46 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	* binutils-all/nm.exp: Ditto.
 	* binutils-all/objcopy.exp: Ditto.  Also, move setup_xfail for
 	sh-coff to branch where objcopy execution produced no error
-	messages.
+	messages.  Expect failure for hp300 also.
 
 Thu Dec  8 14:36:15 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
