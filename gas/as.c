@@ -70,15 +70,15 @@ static void perform_an_assembly_pass ();
 
 #endif /* not __STDC__ */
 
-#ifdef DONTDEF
-static char *gdb_symbol_file_name;
-long gdb_begin ();
-#endif
-
 int listing;			/* true if a listing is wanted */
 
 char *myname;			/* argv[0] */
 extern char version_string[];
+#ifdef BFD_ASSEMBLER
+segT big_section, reg_section, pass1_section;
+segT diff_section, absent_section;
+segT text_section, data_section, bss_section;
+#endif
 
 int 
 main (argc, argv)
@@ -89,8 +89,7 @@ main (argc, argv)
   char **work_argv;		/* variable copy of argv */
   char *arg;			/* an arg to program */
   char a;			/* an arg flag (after -) */
-  static const int sig[] =
-  {SIGHUP, SIGINT, SIGPIPE, SIGTERM, 0};
+  static const int sig[] = {SIGHUP, SIGINT, SIGPIPE, SIGTERM, 0};
 
   for (a = 0; sig[a] != 0; a++)
     if (signal (sig[a], SIG_IGN) != SIG_IGN)
@@ -103,24 +102,25 @@ main (argc, argv)
 #endif /* OBJ_DEFAULT_OUTPUT_FILE_NAME */
   out_file_name = OBJ_DEFAULT_OUTPUT_FILE_NAME;
 
+#ifdef BFD_ASSEMBLER
+  bfd_init ();
+#endif
+
   symbol_begin ();		/* symbols.c */
   subsegs_begin ();		/* subsegs.c */
   read_begin ();		/* read.c */
   md_begin ();			/* MACHINE.c */
   input_scrub_begin ();		/* input_scrub.c */
-#ifdef DONTDEF
-  gdb_symbol_file_name = 0;
-#endif
   /*
-	 * Parse arguments, but we are only interested in flags.
-	 * When we find a flag, we process it then make it's argv[] NULL.
-	 * This helps any future argv[] scanners avoid what we processed.
-	 * Since it is easy to do here we interpret the special arg "-"
-	 * to mean "use stdin" and we set that argv[] pointing to "".
-	 * After we have munged argv[], the only things left are source file
-	 * name(s) and ""(s) denoting stdin. These file names are used
-	 * (perhaps more than once) later.
-	 */
+   * Parse arguments, but we are only interested in flags.
+   * When we find a flag, we process it then make it's argv[] NULL.
+   * This helps any future argv[] scanners avoid what we processed.
+   * Since it is easy to do here we interpret the special arg "-"
+   * to mean "use stdin" and we set that argv[] pointing to "".
+   * After we have munged argv[], the only things left are source file
+   * name(s) and ""(s) denoting stdin. These file names are used
+   * (perhaps more than once) later.
+   */
   /* FIXME-SOMEDAY this should use getopt. */
   work_argc = argc - 1;		/* don't count argv[0] */
   work_argv = argv + 1;		/* skip argv[0] */
@@ -144,12 +144,9 @@ main (argc, argv)
 	{			/* scan all the 1-char flags */
 	  arg++;		/* arg->after letter. */
 	  a &= 0x7F;		/* ascii only please */
-	  /* if (flagseen[a])
-			   as_tsktsk("%s: Flag option - %c has already been seen.", myname, a); */
 	  flagseen[a] = 1;
 	  switch (a)
 	    {
-
 	    case 'a':
 	      {
 		int loop = 1;
@@ -198,22 +195,6 @@ main (argc, argv)
 	      /* DEBUG is implemented: it debugs different */
 	      /* things to other people's assemblers. */
 	      break;
-
-#ifdef DONTDEF
-	    case 'G':		/* GNU AS switch: include gdbsyms. */
-	      if (*arg)		/* Rest of argument is file-name. */
-		gdb_symbol_file_name = stralloc (arg);
-	      else if (work_argc)
-		{		/* Next argument is file-name. */
-		  work_argc--;
-		  *work_argv = NULL;	/* Not a source file-name. */
-		  gdb_symbol_file_name = *++work_argv;
-		}
-	      else
-		as_warn ("%s: I expected a filename after -G", myname);
-	      arg = "";		/* Finished with this arg. */
-	      break;
-#endif
 
 	    case 'I':
 	      {			/* Include file directory */
@@ -264,6 +245,7 @@ main (argc, argv)
 
 	    case 'R':
 	      /* -R means put data into text segment */
+	      flag_readonly_data_in_text = 1;
 	      break;
 
 	    case 'v':
@@ -282,12 +264,17 @@ main (argc, argv)
 	      break;
 
 	    case 'W':
-	    case 'w':
 	      /* -W means don't warn about things */
+	      flag_suppress_warnings = 1;
+	      break;
+
+	    case 'w':
 	    case 'X':
 	      /* -X means treat warnings as errors */
+	      break;
 	    case 'Z':
 	      /* -Z means attempt to generate object file even after errors. */
+	      flag_always_generate_output = 1;
 	      break;
 
 	    default:
@@ -300,26 +287,28 @@ main (argc, argv)
 	    }
 	}
       /*
-		 * We have just processed a "-..." arg, which was not a
-		 * file-name. Smash it so the
-		 * things that look for filenames won't ever see it.
-		 *
-		 * Whatever work_argv points to, it has already been used
-		 * as part of a flag, so DON'T re-use it as a filename.
-		 */
+       * We have just processed a "-..." arg, which was not a
+       * file-name. Smash it so the
+       * things that look for filenames won't ever see it.
+       *
+       * Whatever work_argv points to, it has already been used
+       * as part of a flag, so DON'T re-use it as a filename.
+       */
       *work_argv = NULL;	/* NULL means 'not a file-name' */
     }
-#ifdef DONTDEF
-  if (gdb_begin (gdb_symbol_file_name) == 0)
-    flagseen['G'] = 0;		/* Don't do any gdbsym stuff. */
+
+#ifdef BFD_ASSEMBLER
+  output_file_create (out_file_name);
+  assert (stdoutput != 0);
 #endif
+
   /* Here with flags set up in flagseen[]. */
   perform_an_assembly_pass (argc, argv);	/* Assemble it. */
 #ifdef TC_I960
   brtab_emit ();
 #endif
   if (seen_at_least_1_file ()
-      && !((had_warnings () && flagseen['Z'])
+      && !((had_warnings () && flag_always_generate_output)
 	   || had_errors () > 0))
     {
       write_object_file ();	/* relax() addresses then emit object file */
@@ -361,11 +350,14 @@ perform_an_assembly_pass (argc, argv)
 {
   int saw_a_file = 0;
   unsigned int i;
+#ifdef BFD_ASSEMBLER
+  flagword applicable;
+#endif
+
   need_pass_2 = 0;
 
+#ifndef BFD_ASSEMBLER
 #ifdef MANY_SEGMENTS
-
-
   for (i = SEG_E0; i < SEG_UNKNOWN; i++)
     {
       segment_info[i].fix_root = 0;
@@ -386,6 +378,35 @@ perform_an_assembly_pass (argc, argv)
 
   subseg_new (SEG_TEXT, 0);
 #endif /* not MANY_SEGMENTS */
+#else /* BFD_ASSEMBLER */
+  /* Create the standard sections, and those the assembler uses
+     internally.  */
+  text_section = subseg_new (".text", 0);
+  text_section->output_section = text_section;
+  data_section = subseg_new (".data", 0);
+  data_section->output_section = data_section;
+  bss_section = subseg_new (".bss", 0);
+  bss_section->output_section = bss_section;
+  /* @@ FIXME -- we're setting the RELOC flag so that sections are assumed
+     to have relocs, otherwise we don't find out in time. */
+  applicable = bfd_applicable_section_flags (stdoutput);
+  bfd_set_section_flags (stdoutput, text_section,
+			 applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC
+				       | SEC_CODE | SEC_READONLY));
+  /* @@ FIXME -- SEC_CODE seems to mean code only, rather than code possibly.*/
+  bfd_set_section_flags (stdoutput, data_section,
+			 applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC));
+  bfd_set_section_flags (stdoutput, bss_section, applicable & SEC_ALLOC);
+  subseg_new (BFD_ABS_SECTION_NAME, 0);
+  subseg_new (BFD_UND_SECTION_NAME, 0);
+  big_section = subseg_new ("*GAS `big' section*", 0);
+  reg_section = subseg_new ("*GAS `reg' section*", 0);
+  pass1_section = subseg_new ("*GAS `pass1' section*", 0);
+  diff_section = subseg_new ("*GAS `diff' section*", 0);
+  absent_section = subseg_new ("*GAS `absent' section*", 0);
+
+  subseg_new (".text", 0);
+#endif /* BFD_ASSEMBLER */
 
   argv++;			/* skip argv[0] */
   argc--;			/* skip argv[0] */
@@ -423,16 +444,6 @@ stralloc (str)
   return (retval);
 }
 
-#ifdef comment
-static void 
-lose ()
-{
-  as_fatal ("%s: 2nd pass not implemented - get your code from random(3)", myname);
-  return;
-}				/* lose() */
-
-#endif /* comment */
-
 static SIGTY
 got_sig (sig)
      int sig;
@@ -444,12 +455,5 @@ got_sig (sig)
     exit (1);
   return ((SIGTY) 0);
 }
-
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
 
 /* end of as.c */
