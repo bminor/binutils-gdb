@@ -1,3 +1,7 @@
+2004-06-13  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/try_catch.cc: Add copyright notice.
+
 2004-06-12  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.cp/userdef.cc: Add copyright notice.
