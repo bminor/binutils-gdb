@@ -1,3 +1,9 @@
+Mon Jun 22 17:35:24 1992  Per Bothner  (bothner@cygnus.com)
+
+	* i386linux.c, hosts/i386linux.h, config/i386-linux.mt:
+	New files, for Linux (a free Unix clone for 386 machines).
+	* Makefile.in, configure.in, targets.c:  Update accordingly.
+
 Fri Jun 19 20:23:21 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	Lints for bfd_reloc_code_type->bfd_reloc_code_real_type, and
 	correct calling of howto special functions and fixes from Raeburn
