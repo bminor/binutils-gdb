@@ -141,27 +141,29 @@ z8k.mt
 
 Things-to-lose:
 
-
-
 Do-last:
 
 if ( echo $* | grep keep\-v9 > /dev/null ) ; then
-	echo Keeping tc-sparc64 and v9 stuff in tc-sparc.c obj-elf.h.
+	echo Keeping v9 stuff in `pwd`/tc-sparc'*' and obj-elf.h.
 else
-	echo Cleaning tc-sparc.c...
+	echo Cleaning `pwd`/tc-sparc.c...
 	sed '/start\-sanitize/,/end-sanitize/d' < tc-sparc.c > new
 	if [ -n "${safe}" ] ; then
 		cp tc-sparc.c .Recover
 	fi
 	mv new tc-sparc.c
-	echo Cleaning obj-elf.h...
+	echo Cleaning `pwd`/obj-elf.h...
 	grep -v v9 < obj-elf.h > new
 	if [ -n "${safe}" ] ; then
 		cp obj-elf.h .Recover
 	fi
 	mv new obj-elf.h
-	echo Deleting tc-sparc64 files.
-	rm -f tc-sparc64.c tc-sparc64.h
+	echo Deleting tc-sparc64 files in `pwd`.
+	if [ -n "${safe}" ] ; then
+		mv -f tc-sparc64.c tc-sparc64.h .Recover
+	else
+		rm -f tc-sparc64.c tc-sparc64.h
+	fi
 fi
 
 # End of file.
