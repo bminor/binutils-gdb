@@ -1,5 +1,6 @@
-/* Definitions to make GDB run on an Alpha box under OSF1.
-   Copyright 1993 Free Software Foundation, Inc.
+/* Definitions to make GDB run on an Alpha box under OSF1.  This is
+   also used by the Alpha/Netware and Alpha/Linux targets.
+   Copyright 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -15,7 +16,10 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+#ifndef TM_ALPHA_H
+#define TM_ALPHA_H
 
 #include "bfd.h"
 #include "coff/sym.h"		/* Needed for PDR below.  */
@@ -77,21 +81,20 @@ alpha_saved_pc_after_call PARAMS ((struct frame_info *));
    This is often the number of bytes in BREAKPOINT
    but not always.  */
 
+#ifndef DECR_PC_AFTER_BREAK
 #define DECR_PC_AFTER_BREAK 4
+#endif
 
 /* Nonzero if instruction at PC is a return instruction.
    "ret $zero,($ra),1" on alpha. */
 
 #define ABOUT_TO_RETURN(pc) (read_memory_integer (pc, 4) == 0x6bfa8001)
 
-/* Return 1 if P points to an invalid floating point value. */
+/* Say how long (ordinary) registers are.  This is a piece of bogosity
+   used in push_word and a few other places; REGISTER_RAW_SIZE is the
+   real way to know how big a register is.  */
 
-#define INVALID_FLOAT(p,l) 0
-
-/* Say how long (all) registers are.
-   This is unused for the alpha, but the define is necessary.  */
-
-#define REGISTER_TYPE long
+#define REGISTER_SIZE 8
 
 /* Number of machine registers */
 
@@ -120,8 +123,10 @@ alpha_saved_pc_after_call PARAMS ((struct frame_info *));
    but serves to get the desired value when passed to read_register.  */
 
 #define V0_REGNUM 0		/* Function integer return value */
+#define T7_REGNUM 8		/* Return address register for OSF/1 __add* */
 #define GCC_FP_REGNUM 15	/* Used by gcc as frame register */
 #define A0_REGNUM 16		/* Loc of first arg during a subr call */
+#define T9_REGNUM 23		/* Return address register for OSF/1 __div* */
 #define T12_REGNUM 27		/* Contains start addr of current proc */
 #define SP_REGNUM 30		/* Contains address of top of stack */
 #define RA_REGNUM 26		/* Contains return address value */
@@ -244,9 +249,8 @@ alpha_store_return_value PARAMS ((struct type *, char *));
 /* FRAME_CHAIN takes a frame's nominal address
    and produces the frame's chain-pointer. */
 
-#define FRAME_CHAIN(thisframe) (FRAME_ADDR)alpha_frame_chain(thisframe)
-extern CORE_ADDR
-alpha_frame_chain PARAMS ((struct frame_info *));
+#define FRAME_CHAIN(thisframe) (CORE_ADDR) alpha_frame_chain (thisframe)
+extern CORE_ADDR alpha_frame_chain PARAMS ((struct frame_info *));
 
 /* Define other aspects of the stack frame.  */
 
@@ -298,9 +302,15 @@ alpha_frame_saved_pc PARAMS ((struct frame_info *));
    ways in the stack frame.  sp is even more special:
    the address we return for it IS the sp for the next frame.  */
 
-#define FRAME_FIND_SAVED_REGS(fi, frame_saved_regs) ( \
-  (frame_saved_regs) = *(fi)->saved_regs, \
-  (frame_saved_regs).regs[SP_REGNUM] = (fi)->frame)
+extern void alpha_find_saved_regs PARAMS ((struct frame_info *));
+
+#define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
+  do { \
+    if ((frame_info)->saved_regs == NULL) \
+      alpha_find_saved_regs (frame_info); \
+    (frame_saved_regs) = *(frame_info)->saved_regs; \
+    (frame_saved_regs).regs[SP_REGNUM] = (frame_info)->frame; \
+  } while (0)
 
 
 /* Things needed for making the inferior call functions.  */
@@ -332,17 +342,20 @@ alpha_pop_frame PARAMS ((void));
 
 #define CALL_DUMMY_LOCATION AT_ENTRY_POINT
 
-/* We need a fake CALL_DUMMY definition to enable the proper
+/* On the Alpha the call dummy code is never copied to user space,
+   stopping the user call is achieved via a bp_call_dummy breakpoint.
+   But we need a fake CALL_DUMMY definition to enable the proper
    call_function_by_hand and to avoid zero length array warnings
    in valops.c  */
-   
-#define CALL_DUMMY {\
- 0x80,				/* call_pal bpt */			\
-}
+
+#define CALL_DUMMY { 0 }	/* Content doesn't matter. */
 
 #define CALL_DUMMY_START_OFFSET (0)
 
 #define CALL_DUMMY_BREAKPOINT_OFFSET (0)
+
+extern CORE_ADDR alpha_call_dummy_address PARAMS ((void));
+#define CALL_DUMMY_ADDRESS() alpha_call_dummy_address()
 
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.
@@ -351,7 +364,7 @@ alpha_pop_frame PARAMS ((void));
 
 #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)    \
 {									\
-  CORE_ADDR bp_address = entry_point_address ();			\
+  CORE_ADDR bp_address = CALL_DUMMY_ADDRESS ();			\
   if (bp_address == 0)							\
     error ("no place to put call");					\
   write_register (RA_REGNUM, bp_address);				\
@@ -390,6 +403,7 @@ typedef struct alpha_extra_func_info {
 
 #define EXTRA_FRAME_INFO \
   int localoff; \
+  int pc_reg; \
   alpha_extra_func_info_t proc_desc; \
   struct frame_saved_regs *saved_regs;
 
@@ -416,6 +430,58 @@ init_extra_frame_info PARAMS ((struct frame_info *));
    multiple functions with the same SP that are at different stack levels. */
 
 #define SETUP_ARBITRARY_FRAME(argc, argv) setup_arbitrary_frame (argc, argv)
-/* FIXME:  Depends on equivalence between FRAME and "struct frame_info *",
-   and equivalence between CORE_ADDR and FRAME_ADDR. */
 extern struct frame_info *setup_arbitrary_frame PARAMS ((int, CORE_ADDR *));
+
+/* This is used by heuristic_proc_start.  It should be shot it the head.  */
+#ifndef VM_MIN_ADDRESS
+#define VM_MIN_ADDRESS (CORE_ADDR)0x120000000
+#endif
+
+/* If PC is in a shared library trampoline code, return the PC
+   where the function itself actually starts.  If not, return 0.  */
+#define SKIP_TRAMPOLINE_CODE(pc)  find_solib_trampoline_target (pc)
+
+/* If the current gcc for for this target does not produce correct debugging
+   information for float parameters, both prototyped and unprototyped, then
+   define this macro.  This forces gdb to  always assume that floats are
+   passed as doubles and then converted in the callee.
+
+   For the alpha, it appears that the debug info marks the parameters as
+   floats regardless of whether the function is prototyped, but the actual
+   values are always passed in as doubles.  Thus by setting this to 1, both
+   types of calls will work. */
+
+#define COERCE_FLOAT_TO_DOUBLE 1
+
+/* Return TRUE if procedure descriptor PROC is a procedure descriptor
+   that refers to a dynamically generated sigtramp function.
+
+   OSF/1 doesn't use dynamic sigtramp functions, so this is always
+   FALSE.  */
+
+#define PROC_DESC_IS_DYN_SIGTRAMP(proc)	(0)
+#define SET_PROC_DESC_IS_DYN_SIGTRAMP(proc)
+
+/* If PC is inside a dynamically generated sigtramp function, return
+   how many bytes the program counter is beyond the start of that
+   function.  Otherwise, return a negative value.
+
+   OSF/1 doesn't use dynamic sigtramp functions, so this always
+   returns -1.  */
+
+#define DYNAMIC_SIGTRAMP_OFFSET(pc)	(-1)
+
+/* Translate a signal handler frame into the address of the sigcontext
+   structure.  */
+
+#define SIGCONTEXT_ADDR(frame) \
+  (read_memory_integer ((frame)->next ? frame->next->frame : frame->frame, 8))
+
+/* If FRAME refers to a sigtramp frame, return the address of the next
+   frame.  */
+
+#define FRAME_PAST_SIGTRAMP_FRAME(frame, pc) \
+  (alpha_osf_skip_sigtramp_frame (frame, pc))
+extern CORE_ADDR alpha_osf_skip_sigtramp_frame PARAMS ((struct frame_info *, CORE_ADDR));
+
+#endif /* TM_ALPHA_H */

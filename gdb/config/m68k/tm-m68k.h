@@ -44,9 +44,11 @@ extern CORE_ADDR m68k_skip_prologue PARAMS ((CORE_ADDR ip));
 
 #ifdef __STDC__
 struct frame_info;
+struct frame_saved_regs;
 #endif
 
 extern CORE_ADDR m68k_saved_pc_after_call PARAMS ((struct frame_info *));
+extern void m68k_find_saved_regs PARAMS ((struct frame_info *, struct frame_saved_regs *));
 
 #define SAVED_PC_AFTER_CALL(frame) \
   m68k_saved_pc_after_call(frame)

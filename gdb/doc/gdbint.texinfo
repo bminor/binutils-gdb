@@ -2197,7 +2197,7 @@ remote-adapt.c
 @item NO_SINGLE_STEP
 Define this if the target does not support single-stepping.
 If this is defined, you must supply, in @code{*-tdep.c}, the function
-@code{single_step}, which takes a pid as argument and returns nothing.
+@code{single_step}, which takes a target_signal as argument and returns nothing.
 It must insert breakpoints at each possible destinations of the next
 instruction.  See @code{sparc-tdep.c} and @code{rs6000-tdep.c}
 for examples.

@@ -60,8 +60,6 @@ extern CORE_ADDR skip_prologue PARAMS ((CORE_ADDR, int));
 /* We don't have a reliable single step facility.
    ??? We do have a cycle single step facility, but that won't work.  */
 #define NO_SINGLE_STEP
-extern int one_stepped;
-extern void single_step PARAMS ((int));
 
 /* Given a pc value as defined by the hardware, return the real address.
    Remember that on the ARC blink contains that status register which

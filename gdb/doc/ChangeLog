@@ -1,3 +1,8 @@
+Tue Jul 23 10:06:20 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbint.texinfo (NO_SINGLE_STEP): Document that single_step takes
+	a target_signal as arg type, not a pid.
+
 Fri Jul 12 11:10:05 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* gdb.texinfo:  Document `set assembly-language'.
