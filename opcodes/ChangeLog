@@ -1,3 +1,13 @@
+Fri Jan 21 19:01:39 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ppc-opc.c: New file.  Opcode table for PowerPC, including
+	opcodes for POWER (RS/6000).
+	* ppc-dis.c: New file.  PowerPC and Power (RS/6000) disassembler.
+	* Makefile.in (ALL_MACHINES): Add ppc-dis.o and ppc-opc.o.
+	(CFILES): Add ppc-dis.c.
+	(ppc-dis.o, ppc-opc.o): New targets.
+	* configure.in: Build ppc-dis.o and ppc-opc.o for bfd_rs6000_arch.
+
 Mon Jan 17 20:05:49 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* hppa-dis.c (print_insn_hppa): Handle 'N' in assembler template.
