@@ -1,5 +1,6 @@
 2001-10-30  Hans-Peter Nilsson  <hp@bitrange.com>
 
+	* MAINTAINERS: Add self as MMIX port maintainer.
 	* readelf.c: Include elf/mmix.h.
 	(guess_is_rela): MMIX is RELA.
 	(dump_relocations): Handle MMIX relocations.
