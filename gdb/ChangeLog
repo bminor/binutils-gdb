@@ -1,3 +1,10 @@
+2000-05-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* acconfig.h (HAVE_R_FS, HAVE_R_GS): Add.
+	* configure.in: Add checks for r_fs and r_gs members of
+	`struct reg'.
+	* config.in, configure: Regenerated.
+
 2000-05-25  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* ser-go32.c: Remove PARAMS.
