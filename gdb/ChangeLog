@@ -1,5 +1,8 @@
 Tue Mar  7 00:23:47 1995  Stu Grossman  (grossman@cygnus.com)
 
+	* main.c (main):  Don't start up GUI when running under gdb mode
+	in emacs.
+
 	* Makefile.in:  Add rules for monitor.o and rom68k-rom.o to make
 	Sun make (with VPATH) work...
 
