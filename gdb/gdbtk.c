@@ -2518,6 +2518,7 @@ gdb_actions_command (clientData, interp, objc, objv)
   Tcl_Obj **actions;
   int      nactions, i, len;
   char *number, *args, *action;
+  long step_count;
   struct action_line *next = NULL, *temp;
 
   if (objc != 3)
@@ -2543,6 +2544,7 @@ gdb_actions_command (clientData, interp, objc, objv)
         free (temp->action);
       free (temp);
     }
+  step_count = 0;
 
   Tcl_ListObjGetElements (interp, objv[2], &nactions, &actions);
   for (i = 0; i < nactions; i++)
@@ -2551,6 +2553,8 @@ gdb_actions_command (clientData, interp, objc, objv)
       temp->next = NULL;
       action = Tcl_GetStringFromObj (actions[i], &len);
       temp->action = savestring (action, len);
+      if (sscanf (temp->action, "while-stepping %d", &step_count) !=0)
+        tp->step_count = step_count;
       if (next == NULL)
         {
           tp->actions = temp;
