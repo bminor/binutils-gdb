@@ -1716,7 +1716,7 @@ bfd_mips_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
     }
 
   /* Get a copy of the native relocations.  */
-  internal_relocs = (_bfd_elf32_link_read_relocs
+  internal_relocs = (_bfd_elf_link_read_relocs
 		     (abfd, datasec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
 		      info->keep_memory));
   if (internal_relocs == NULL)

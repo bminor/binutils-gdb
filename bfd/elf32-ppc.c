@@ -1735,9 +1735,9 @@ ppc_elf_relax_section (abfd, isec, link_info, again)
 
 	  /* Get a copy of the native relocations.  */
 	  internal_relocs
-	    = _bfd_elf32_link_read_relocs (abfd, isec, (PTR) NULL,
-					   (Elf_Internal_Rela *) NULL,
-					   link_info->keep_memory);
+	    = _bfd_elf_link_read_relocs (abfd, isec, (PTR) NULL,
+					 (Elf_Internal_Rela *) NULL,
+					 link_info->keep_memory);
 	  if (internal_relocs == NULL)
 	    goto error_return;
 	  if (! link_info->keep_memory)
@@ -3860,9 +3860,9 @@ ppc_elf_tls_optimize (obfd, info)
 	    int expecting_tls_get_addr;
 
 	    /* Read the relocations.  */
-	    relstart = _bfd_elf32_link_read_relocs (ibfd, sec, (PTR) NULL,
-						    (Elf_Internal_Rela *) NULL,
-						    info->keep_memory);
+	    relstart = _bfd_elf_link_read_relocs (ibfd, sec, (PTR) NULL,
+						  (Elf_Internal_Rela *) NULL,
+						  info->keep_memory);
 	    if (relstart == NULL)
 	      return FALSE;
 

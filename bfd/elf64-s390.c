@@ -3271,7 +3271,7 @@ const struct elf_size_info s390_elf64_size_info =
   8,		/* hash-table entry size.  */
   1,		/* internal relocations per external relocations.  */
   64,		/* arch_size.  */
-  8,		/* file_align.  */
+  3,		/* log_file_align.  */
   ELFCLASS64, EV_CURRENT,
   bfd_elf64_write_out_phdrs,
   bfd_elf64_write_shdrs_and_ehdr,

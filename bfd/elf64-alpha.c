@@ -1556,7 +1556,7 @@ elf64_alpha_relax_opt_call (info, symval)
 	}
       else
 	{
-	  tsec_relocs = (_bfd_elf64_link_read_relocs
+	  tsec_relocs = (_bfd_elf_link_read_relocs
 		         (info->abfd, info->tsec, (PTR) NULL,
 			 (Elf_Internal_Rela *) NULL,
 			 info->link_info->keep_memory));
@@ -2072,7 +2072,7 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
   local_got_entries = alpha_elf_tdata(abfd)->local_got_entries;
 
   /* Load the relocations for this section.  */
-  internal_relocs = (_bfd_elf64_link_read_relocs
+  internal_relocs = (_bfd_elf_link_read_relocs
 		     (abfd, sec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
 		      link_info->keep_memory));
   if (internal_relocs == NULL)
@@ -5556,7 +5556,7 @@ static const struct elf_size_info alpha_elf_size_info =
   sizeof (Elf_External_Note),
   8,
   1,
-  64, 8,
+  64, 3,
   ELFCLASS64, EV_CURRENT,
   bfd_elf64_write_out_phdrs,
   bfd_elf64_write_shdrs_and_ehdr,

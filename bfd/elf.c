@@ -2335,7 +2335,7 @@ _bfd_elf_init_reloc_shdr (abfd, rel_hdr, asect, use_rela_p)
   rel_hdr->sh_entsize = (use_rela_p
 			 ? bed->s->sizeof_rela
 			 : bed->s->sizeof_rel);
-  rel_hdr->sh_addralign = bed->s->file_align;
+  rel_hdr->sh_addralign = 1 << bed->s->log_file_align;
   rel_hdr->sh_flags = 0;
   rel_hdr->sh_addr = 0;
   rel_hdr->sh_size = 0;
@@ -3748,7 +3748,7 @@ assign_file_positions_for_segments (abfd)
 	  && (abfd->flags & D_PAGED) != 0)
 	p->p_align = bed->maxpagesize;
       else if (m->count == 0)
-	p->p_align = bed->s->file_align;
+	p->p_align = 1 << bed->s->log_file_align;
       else
 	p->p_align = 0;
 
@@ -4245,7 +4245,7 @@ assign_file_positions_except_relocs (abfd)
     }
 
   /* Place the section headers.  */
-  off = align_file_position (off, bed->s->file_align);
+  off = align_file_position (off, 1 << bed->s->log_file_align);
   i_ehdrp->e_shoff = off;
   off += i_ehdrp->e_shnum * i_ehdrp->e_shentsize;
 
@@ -5302,7 +5302,7 @@ swap_out_syms (abfd, sttp, relocatable_p)
   symtab_hdr->sh_entsize = bed->s->sizeof_sym;
   symtab_hdr->sh_size = symtab_hdr->sh_entsize * (symcount + 1);
   symtab_hdr->sh_info = elf_num_locals (abfd) + 1;
-  symtab_hdr->sh_addralign = bed->s->file_align;
+  symtab_hdr->sh_addralign = 1 << bed->s->log_file_align;
 
   symstrtab_hdr = &elf_tdata (abfd)->strtab_hdr;
   symstrtab_hdr->sh_type = SHT_STRTAB;
@@ -7125,7 +7125,7 @@ elfcore_write_note (abfd, buf, bufsiz, name, type, input, size)
 
       namesz = strlen (name) + 1;
       bed = get_elf_backend_data (abfd);
-      pad = -namesz & (bed->s->file_align - 1);
+      pad = -namesz & ((1 << bed->s->log_file_align) - 1);
     }
 
   newspace = sizeof (Elf_External_Note) - 1 + namesz + pad + size;

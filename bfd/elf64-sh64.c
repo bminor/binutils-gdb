@@ -2226,7 +2226,7 @@ sh_elf64_get_relocated_section_contents (output_bfd, link_info, link_order,
 	    goto error_return;
 	}
 
-      internal_relocs = (_bfd_elf64_link_read_relocs
+      internal_relocs = (_bfd_elf_link_read_relocs
 			 (input_bfd, input_section, (PTR) NULL,
 			  (Elf_Internal_Rela *) NULL, FALSE));
       if (internal_relocs == NULL)

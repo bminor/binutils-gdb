@@ -1,6 +1,6 @@
 /* ELF executable support for BFD.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002 Free Software Foundation, Inc.
+   2001, 2002, 2003 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -121,8 +121,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define elf_write_out_phdrs		NAME(bfd_elf,write_out_phdrs)
 #define elf_write_relocs		NAME(bfd_elf,write_relocs)
 #define elf_slurp_reloc_table		NAME(bfd_elf,slurp_reloc_table)
-#define elf_link_create_dynamic_sections \
-  NAME(bfd_elf,link_create_dynamic_sections)
 #define elf_bfd_discard_info		NAME(bfd_elf,discard_info)
 #define elf_reloc_symbol_deleted_p	NAME(_bfd_elf,reloc_symbol_deleted_p)
 #define elf_link_record_dynamic_symbol  _bfd_elf_link_record_dynamic_symbol
@@ -1585,7 +1583,7 @@ const struct elf_size_info NAME(_bfd_elf,size_info) = {
   sizeof (Elf_External_Note),
   4,
   1,
-  ARCH_SIZE, FILE_ALIGN,
+  ARCH_SIZE, LOG_FILE_ALIGN,
   ELFCLASS, EV_CURRENT,
   elf_write_out_phdrs,
   elf_write_shdrs_and_ehdr,

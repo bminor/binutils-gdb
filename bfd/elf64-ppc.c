@@ -4873,9 +4873,9 @@ ppc64_elf_edit_opd (obfd, info)
       sym_hashes = elf_sym_hashes (ibfd);
 
       /* Read the relocations.  */
-      relstart = _bfd_elf64_link_read_relocs (ibfd, sec, (PTR) NULL,
-					      (Elf_Internal_Rela *) NULL,
-					      info->keep_memory);
+      relstart = _bfd_elf_link_read_relocs (ibfd, sec, (PTR) NULL,
+					    (Elf_Internal_Rela *) NULL,
+					    info->keep_memory);
       if (relstart == NULL)
 	return FALSE;
 
@@ -5196,9 +5196,9 @@ ppc64_elf_tls_optimize (obfd, info)
 	    int expecting_tls_get_addr;
 
 	    /* Read the relocations.  */
-	    relstart = _bfd_elf64_link_read_relocs (ibfd, sec, (PTR) NULL,
-						    (Elf_Internal_Rela *) NULL,
-						    info->keep_memory);
+	    relstart = _bfd_elf_link_read_relocs (ibfd, sec, (PTR) NULL,
+						  (Elf_Internal_Rela *) NULL,
+						  info->keep_memory);
 	    if (relstart == NULL)
 	      return FALSE;
 
@@ -6594,9 +6594,9 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
 
 	      /* Get the relocs.  */
 	      internal_relocs
-		= _bfd_elf64_link_read_relocs (input_bfd, section, NULL,
-					       (Elf_Internal_Rela *) NULL,
-					       info->keep_memory);
+		= _bfd_elf_link_read_relocs (input_bfd, section, NULL,
+					     (Elf_Internal_Rela *) NULL,
+					     info->keep_memory);
 	      if (internal_relocs == NULL)
 		goto error_ret_free_local;
 

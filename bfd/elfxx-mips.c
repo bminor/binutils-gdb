@@ -542,7 +542,7 @@ static bfd *reldyn_sorting_bfd;
 
 /* The default alignment for sections, as a power of two.  */
 #define MIPS_ELF_LOG_FILE_ALIGN(abfd)				\
-  (get_elf_backend_data (abfd)->s->file_align == 8 ? 3 : 2)
+  (get_elf_backend_data (abfd)->s->log_file_align)
 
 /* Get word-sized data.  */
 #define MIPS_ELF_GET_WORD(abfd, ptr) \
@@ -5106,10 +5106,10 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 			      sizeof CALL_FP_STUB - 1) == 0)
 		continue;
 
-	      sec_relocs = (MNAME(abfd,_bfd_elf,link_read_relocs)
-			    (abfd, o, (PTR) NULL,
-			     (Elf_Internal_Rela *) NULL,
-			     info->keep_memory));
+	      sec_relocs
+		= _bfd_elf_link_read_relocs (abfd, o, (PTR) NULL,
+					     (Elf_Internal_Rela *) NULL,
+					     info->keep_memory);
 	      if (sec_relocs == NULL)
 		return FALSE;
 
@@ -5561,9 +5561,9 @@ _bfd_mips_relax_section (abfd, sec, link_info, again)
   if (link_info->relocateable)
     return TRUE;
 
-  internal_relocs = (MNAME(abfd,_bfd_elf,link_read_relocs)
-                     (abfd, sec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
-                      link_info->keep_memory));
+  internal_relocs = _bfd_elf_link_read_relocs (abfd, sec, (PTR) NULL,
+					       (Elf_Internal_Rela *) NULL,
+					       link_info->keep_memory);
   if (internal_relocs == NULL)
     return TRUE;
 
@@ -7887,10 +7887,9 @@ _bfd_mips_elf_discard_info (abfd, cookie, info)
   if (! tdata)
     return FALSE;
 
-  cookie->rels = (MNAME(abfd,_bfd_elf,link_read_relocs)
-		  (abfd, o, (PTR) NULL,
-		   (Elf_Internal_Rela *) NULL,
-		   info->keep_memory));
+  cookie->rels = _bfd_elf_link_read_relocs (abfd, o, (PTR) NULL,
+					    (Elf_Internal_Rela *) NULL,
+					    info->keep_memory);
   if (!cookie->rels)
     {
       free (tdata);

@@ -2054,7 +2054,7 @@ sh_elf_relax_section (abfd, sec, link_info, again)
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
 
-  internal_relocs = (_bfd_elf32_link_read_relocs
+  internal_relocs = (_bfd_elf_link_read_relocs
 		     (abfd, sec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
 		      link_info->keep_memory));
   if (internal_relocs == NULL)
@@ -2736,7 +2736,7 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
       /* We always cache the relocs.  Perhaps, if info->keep_memory is
 	 FALSE, we should free them, if we are permitted to, when we
 	 leave sh_coff_relax_section.  */
-      internal_relocs = (_bfd_elf32_link_read_relocs
+      internal_relocs = (_bfd_elf_link_read_relocs
 			 (abfd, o, (PTR) NULL, (Elf_Internal_Rela *) NULL,
 			  TRUE));
       if (internal_relocs == NULL)
@@ -5735,7 +5735,7 @@ sh_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
       Elf_Internal_Sym *isym, *isymend;
       bfd_size_type amt;
 
-      internal_relocs = (_bfd_elf32_link_read_relocs
+      internal_relocs = (_bfd_elf_link_read_relocs
 			 (input_bfd, input_section, (PTR) NULL,
 			  (Elf_Internal_Rela *) NULL, FALSE));
       if (internal_relocs == NULL)

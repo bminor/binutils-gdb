@@ -720,7 +720,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
 
   /* Load the relocations for this section.  */
-  internal_relocs = (_bfd_elfNN_link_read_relocs
+  internal_relocs = (_bfd_elf_link_read_relocs
 		     (abfd, sec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
 		      link_info->keep_memory));
   if (internal_relocs == NULL)
@@ -1466,7 +1466,7 @@ elfNN_ia64_aix_link_add_symbols (abfd, info)
   if (! elf_hash_table (info)->dynamic_sections_created
       && abfd->xvec == info->hash->creator)
     {
-      if (! bfd_elfNN_link_create_dynamic_sections (abfd, info))
+      if (! _bfd_elf_link_create_dynamic_sections (abfd, info))
 	return FALSE;
     }
 

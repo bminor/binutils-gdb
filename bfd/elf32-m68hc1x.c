@@ -476,9 +476,9 @@ elf32_m68hc11_size_stubs (output_bfd, stub_bfd, info, add_stub_section)
 
           /* Get the relocs.  */
           internal_relocs
-            = _bfd_elf32_link_read_relocs (input_bfd, section, NULL,
-                                           (Elf_Internal_Rela *) NULL,
-                                           info->keep_memory);
+            = _bfd_elf_link_read_relocs (input_bfd, section, NULL,
+					 (Elf_Internal_Rela *) NULL,
+					 info->keep_memory);
           if (internal_relocs == NULL)
             goto error_ret_free_local;
 
