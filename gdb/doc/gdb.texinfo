@@ -16337,6 +16337,32 @@ information as this command.  @code{gdbtk} has a corresponding command
 N.A.
 
 
+@subheading The @code{-file-list-exec-source-file} Command
+@findex -file-list-exec-source-file
+
+@subsubheading Synopsis
+
+@smallexample
+ -file-list-exec-source-file
+@end smallexample
+
+List the line number, the current source file, and the absolute path 
+to the current source file for the current executable.
+
+@subsubheading @value{GDBN} Command
+
+There's no @value{GDBN} command which directly corresponds to this one.
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+123-file-list-exec-source-file
+123^done,line="1",file="foo.c",fullname="/home/bar/foo.c"
+(@value{GDBP})
+@end smallexample
+
+
 @subheading The @code{-file-list-exec-source-files} Command
 @findex -file-list-exec-source-files
 

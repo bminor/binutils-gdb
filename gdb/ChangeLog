@@ -1,3 +1,14 @@
+2003-04-02  Bob Rossi  <bob_rossi@cox.net>
+
+	* mi-cmd-file.c: Added file to implement mi file commands.
+	* mi-getopt.c: Added mi_valid_noargs to verify if a set of 
+	parameters passed to an MI function has no arguments
+	* mi-getopt.h: Prototyped mi_valid_noargs
+	* mi-cmds.c: Added -file-list-exec-source-file command.
+	* mi-cmds.h: Added -file-list-exec-source-file to proto list.
+	* doc/gdb.texinfo: Document -file-list-exec-source-file.
+	* mi-file.exp: Added testcase to test -file-list-exec-source-file.
+
 2003-04-01  Kevin Buettner  <kevinb@redhat.com>
 
 	* mips-tdep.c (mips_dwarf_dwarf2_ecoff_reg_to_regnum)
