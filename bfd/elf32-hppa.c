@@ -1522,7 +1522,7 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 		}
 	      else if (need_entry & PLT_PLABEL)
 		{
-		  int indx;
+		  bfd_signed_vma *local_plt_refcounts;
 
 		  if (local_got_refcounts == NULL)
 		    {
@@ -1538,11 +1538,12 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 		      elf_local_got_refcounts (abfd) = local_got_refcounts;
 		      memset (local_got_refcounts, -1, size);
 		    }
-		  indx = r_symndx + symtab_hdr->sh_info;
-		  if (local_got_refcounts[indx] == -1)
-		    local_got_refcounts[indx] = 1;
+		  local_plt_refcounts = (local_got_refcounts
+					 + symtab_hdr->sh_info);
+		  if (local_plt_refcounts[r_symndx] == -1)
+		    local_plt_refcounts[r_symndx] = 1;
 		  else
-		    local_got_refcounts[indx] += 1;
+		    local_plt_refcounts[r_symndx] += 1;
 		}
 	    }
 	}
@@ -2215,6 +2216,7 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 {
   struct elf32_hppa_link_hash_table *hplink;
   bfd *dynobj;
+  bfd *i;
   asection *s;
   boolean relocs;
   boolean reltext;
@@ -2226,7 +2228,6 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 
   if (hplink->root.dynamic_sections_created)
     {
-      bfd *i;
 
       /* Set the contents of the .interp section to the interpreter.  */
       if (! info->shared)
@@ -2242,45 +2243,64 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
       elf_link_hash_traverse (&hplink->root,
 			      clobber_millicode_symbols,
 			      info);
+    }
+  else
+    {
+      /* Run through the function symbols, looking for any that are
+	 PIC, and allocate space for the necessary .plt entries so
+	 that %r19 will be set up.  */
+      if (! info->shared)
+	elf_link_hash_traverse (&hplink->root,
+				hppa_handle_PIC_calls,
+				info);
+    }
 
-      /* Set up .got and .plt offsets for local syms.  */
-      for (i = info->input_bfds; i; i = i->link_next)
+  /* Set up .got and .plt offsets for local syms.  */
+  for (i = info->input_bfds; i; i = i->link_next)
+    {
+      bfd_signed_vma *local_got;
+      bfd_signed_vma *end_local_got;
+      bfd_signed_vma *local_plt;
+      bfd_signed_vma *end_local_plt;
+      bfd_size_type locsymcount;
+      Elf_Internal_Shdr *symtab_hdr;
+      asection *srel;
+
+      if (bfd_get_flavour (i) != bfd_target_elf_flavour)
+	continue;
+
+      local_got = elf_local_got_refcounts (i);
+      if (!local_got)
+	continue;
+
+      symtab_hdr = &elf_tdata (i)->symtab_hdr;
+      locsymcount = symtab_hdr->sh_info;
+      end_local_got = local_got + locsymcount;
+      s = hplink->sgot;
+      srel = hplink->srelgot;
+      for (; local_got < end_local_got; ++local_got)
 	{
-	  bfd_signed_vma *local_got;
-	  bfd_signed_vma *end_local_got;
-	  bfd_signed_vma *local_plt;
-	  bfd_signed_vma *end_local_plt;
-	  bfd_size_type locsymcount;
-	  Elf_Internal_Shdr *symtab_hdr;
-	  asection *srel;
-
-	  if (bfd_get_flavour (i) != bfd_target_elf_flavour)
-	    continue;
-
-	  local_got = elf_local_got_refcounts (i);
-	  if (!local_got)
-	    continue;
-
-	  symtab_hdr = &elf_tdata (i)->symtab_hdr;
-	  locsymcount = symtab_hdr->sh_info;
-	  end_local_got = local_got + locsymcount;
-	  s = hplink->sgot;
-	  srel = hplink->srelgot;
-	  for (; local_got < end_local_got; ++local_got)
+	  if (*local_got > 0)
 	    {
-	      if (*local_got > 0)
-		{
-		  *local_got = s->_raw_size;
-		  s->_raw_size += GOT_ENTRY_SIZE;
-		  if (info->shared)
-		    srel->_raw_size += sizeof (Elf32_External_Rela);
-		}
-	      else
-		*local_got = (bfd_vma) -1;
+	      *local_got = s->_raw_size;
+	      s->_raw_size += GOT_ENTRY_SIZE;
+	      if (info->shared)
+		srel->_raw_size += sizeof (Elf32_External_Rela);
 	    }
+	  else
+	    *local_got = (bfd_vma) -1;
+	}
 
-	  local_plt = end_local_got;
-	  end_local_plt = local_plt + locsymcount;
+      local_plt = end_local_got;
+      end_local_plt = local_plt + locsymcount;
+      if (! hplink->root.dynamic_sections_created)
+	{
+	  /* Won't be used, but be safe.  */
+	  for (; local_plt < end_local_plt; ++local_plt)
+	    *local_plt = (bfd_vma) -1;
+	}
+      else
+	{
 	  s = hplink->splt;
 	  srel = hplink->srelplt;
 	  for (; local_plt < end_local_plt; ++local_plt)
@@ -2296,16 +2316,6 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 		*local_plt = (bfd_vma) -1;
 	    }
 	}
-    }
-  else
-    {
-      /* Run through the function symbols, looking for any that are
-	 PIC, and allocate space for the necessary .plt entries so
-	 that %r19 will be set up.  */
-      if (! info->shared)
-	elf_link_hash_traverse (&hplink->root,
-				hppa_handle_PIC_calls,
-				info);
     }
 
   /* Allocate global sym .plt and .got entries.  */
@@ -2332,16 +2342,29 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
   reltext = false;
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
-      const char *name;
-
       if ((s->flags & SEC_LINKER_CREATED) == 0)
 	continue;
 
-      /* It's OK to base decisions on the section name, because none
-	 of the dynobj section names depend upon the input files.  */
-      name = bfd_get_section_name (dynobj, s);
+      if (s == hplink->splt)
+	{
+	  if (hplink->need_plt_stub)
+	    {
+	      /* Make space for the plt stub at the end of the .plt
+		 section.  We want this stub right at the end, up
+		 against the .got section.  */
+	      int gotalign = bfd_section_alignment (dynobj, hplink->sgot);
+	      int pltalign = bfd_section_alignment (dynobj, s);
+	      bfd_size_type mask;
 
-      if (strncmp (name, ".rela", 5) == 0)
+	      if (gotalign > pltalign)
+		bfd_set_section_alignment (dynobj, s, gotalign);
+	      mask = ((bfd_size_type) 1 << gotalign) - 1;
+	      s->_raw_size = (s->_raw_size + sizeof (plt_stub) + mask) & ~mask;
+	    }
+	}
+      else if (s == hplink->sgot)
+	;
+      else if (strncmp (bfd_get_section_name (dynobj, s), ".rela", 5) == 0)
 	{
 	  if (s->_raw_size != 0)
 	    {
@@ -2350,7 +2373,7 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 
 	      /* Remember whether there are any reloc sections other
 		 than .rela.plt.  */
-	      if (strcmp (name+5, ".plt") != 0)
+	      if (s != hplink->srelplt)
 		relocs = true;
 
 	      /* If this relocation section applies to a read only
@@ -2368,25 +2391,6 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 	      s->reloc_count = 0;
 	    }
 	}
-      else if (strcmp (name, ".plt") == 0)
-	{
-	  if (hplink->need_plt_stub)
-	    {
-	      /* Make space for the plt stub at the end of the .plt
-		 section.  We want this stub right at the end, up
-		 against the .got section.  */
-	      int gotalign = bfd_section_alignment (dynobj, hplink->sgot);
-	      int pltalign = bfd_section_alignment (dynobj, s);
-	      bfd_size_type mask;
-
-	      if (gotalign > pltalign)
-		bfd_set_section_alignment (dynobj, s, gotalign);
-	      mask = ((bfd_size_type) 1 << gotalign) - 1;
-	      s->_raw_size = (s->_raw_size + sizeof (plt_stub) + mask) & ~mask;
-	    }
-	}
-      else if (strcmp (name, ".got") == 0)
-	;
       else
 	{
 	  /* It's not one of our sections, so don't allocate space.  */
@@ -3587,6 +3591,7 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_reloc_status_type r;
       const char *sym_name;
       boolean plabel;
+      bfd_vma off;
 
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type >= (unsigned int) R_PARISC_UNIMPLEMENTED)
@@ -3690,13 +3695,9 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	     offset table.  */
 	  if (h != NULL)
 	    {
-	      bfd_vma off;
 	      boolean dyn;
 
 	      off = h->elf.got.offset;
-	      if (off == (bfd_vma) -1)
-		abort ();
-
 	      dyn = hplink->root.dynamic_sections_created;
 	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, &h->elf))
 		{
@@ -3721,17 +3722,14 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 		      h->elf.got.offset |= 1;
 		    }
 		}
-
-	      relocation = off;
 	    }
 	  else
 	    {
 	      /* Local symbol case.  */
-	      bfd_vma off;
-
-	      if (local_got_offsets == NULL
-		  || (off = local_got_offsets[r_symndx]) == (bfd_vma) -1)
+	      if (local_got_offsets == NULL)
 		abort ();
+
+	      off = local_got_offsets[r_symndx];
 
 	      /* The offset must always be a multiple of 4.  We use
 		 the least significant bit to record whether we have
@@ -3766,13 +3764,15 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 
 		  local_got_offsets[r_symndx] |= 1;
 		}
-
-	      relocation = off;
 	    }
 
+	  if (off >= (bfd_vma) -2)
+	    abort ();
+
 	  /* Add the base of the GOT to the relocation value.  */
-	  relocation += (hplink->sgot->output_offset
-			 + hplink->sgot->output_section->vma);
+	  relocation = (off
+			+ hplink->sgot->output_offset
+			+ hplink->sgot->output_section->vma);
 	  break;
 
 	case R_PARISC_SEGREL32:
@@ -3789,8 +3789,6 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_PARISC_PLABEL32:
 	  if (hplink->root.dynamic_sections_created)
 	    {
-	      bfd_vma off;
-
 	      /* If we have a global symbol with a PLT slot, then
 		 redirect this relocation to it.  */
 	      if (h != NULL)
@@ -3817,10 +3815,13 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 		}
 	      else
 		{
-		  int indx;
+		  bfd_vma *local_plt_offsets;
 
-		  indx = r_symndx + symtab_hdr->sh_info;
-		  off = local_got_offsets[indx];
+		  if (local_got_offsets == NULL)
+		    abort ();
+
+		  local_plt_offsets = local_got_offsets + symtab_hdr->sh_info;
+		  off = local_plt_offsets[r_symndx];
 
 		  /* As for the local .got entry case, we use the last
 		     bit to record whether we've already initialised
@@ -3855,11 +3856,11 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 			  ++srelplt->reloc_count;
 			}
 
-		      local_got_offsets[indx] |= 1;
+		      local_plt_offsets[r_symndx] |= 1;
 		    }
 		}
 
-	      if (off >= (bfd_vma) -2 || (off & 1) != 0)
+	      if (off >= (bfd_vma) -2)
 		abort ();
 
 	      /* PLABELs contain function pointers.  Relocation is to
@@ -3992,7 +3993,13 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 
 		  outrel.r_info = ELF32_R_INFO (indx, r_type);
 		}
-
+#if 0
+	      /* EH info can cause unaligned DIR32 relocs.
+		 Tweak the reloc type for the dynamic linker.  */
+	      if (r_type == R_PARISC_DIR32 && (outrel.r_offset & 3) != 0)
+		outrel.r_info = ELF32_R_INFO (ELF32_R_SYM (outrel.r_info),
+					      R_PARISC_DIR32U);
+#endif
 	      bfd_elf32_swap_reloca_out (output_bfd, &outrel,
 					 ((Elf32_External_Rela *)
 					  sreloc->contents

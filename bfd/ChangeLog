@@ -1,3 +1,14 @@
+2001-06-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-hppa.c (elf32_hppa_size_dynamic_sections): Always
+	allocate local .got space.  Use shortcuts from hash table for .got
+	and .plt rather than comparing section names.
+	(elf32_hppa_check_relocs): Use local_plt_refcounts var rather than
+	adjusting index into local_got_refcounts to document what we are
+	really doing.
+	(elf32_hppa_relocate_section): Similarly for local_plt_offsets.
+	Tidy .got and .plt error checking.
+
 2001-06-20  Catherine Moore  <clm@redhat.com>
 
         * elf-bfd.h (struct elf_backend_data):
