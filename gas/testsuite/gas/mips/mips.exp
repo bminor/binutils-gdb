@@ -376,6 +376,7 @@ if { [istarget mips*-*-*] } then {
     set ilocks [istarget mipstx39*-*-*]
     set gpr_ilocks [expr [istarget mipstx39*-*-*]]
     set addr32 [expr [istarget mipstx39*-*-*]]
+    set hasn32 [expr [istarget *-*-irix6*] || [istarget mips64*-*-linux*]]
 
     if { [istarget "mips*-*-*linux*"] } then {
 	set tmips "t"
@@ -611,6 +612,10 @@ if { [istarget mips*-*-*] } then {
 	    run_dump_test "${tmips}mips${el}16-f"
 	}
 	run_dump_test "elf-consthilo"
+    }
+
+    if $hasn32 {
+	run_dump_test "n32-consec"
     }
 
     # tests of objdump's ability to disassemble using different

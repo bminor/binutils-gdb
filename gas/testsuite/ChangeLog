@@ -1,3 +1,10 @@
+2003-01-27  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gas/mips/n32-consec.d: New.
+	* gas/mips/n32-consec.s: New.
+	* gas/mips/mips.exp (run_list_test_arches): Run it on irix6 and
+	mips64*-linux* systems.
+
 2003-01-23  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* gas/s390/reloc.s: Add test for PLT reloc against locally defined
