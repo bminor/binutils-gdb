@@ -183,7 +183,7 @@ typedef unsigned_4 quadword[4];
 #define PKE_REG_STAT_PPS_IDLE 0x00 /* ready to execute next instruction */
 #define PKE_REG_STAT_PPS_WAIT 0x01 /* not enough words in FIFO */
 #define PKE_REG_STAT_PPS_DECODE 0x02 /* decoding instruction */
-#define PKE_REG_STAT_PPS_STALL 0x02 /* alias state for FLUSHE stall */
+#define PKE_REG_STAT_PPS_STALL 0x02 /* alias state for stall (e.g., FLUSHE) */
 #define PKE_REG_STAT_PPS_XFER 0x03 /* transferring instruction operands */
 
 /* DBF register */
@@ -399,6 +399,7 @@ struct pke_device
 
 #define PKE_FLAG_NONE        0x00
 #define PKE_FLAG_PENDING_PSS 0x01 /* PSS bit written-to; set STAT:PSS after current instruction */
+#define PKE_FLAG_INT_NOLOOP  0x02 /* INT PKEcode received; INT/PIS set; suppress loop after resumption */
 
 
 /* Kludge alert */
