@@ -314,6 +314,7 @@ static int quiet_warnings = 0;
 
 /* CPU name.  */
 static const char *cpu_arch_name = NULL;
+static const char *cpu_sub_arch_name = NULL;
 
 /* CPU feature flags.  */
 static unsigned int cpu_arch_flags = CpuUnknownFlags | CpuNo64;
@@ -416,14 +417,24 @@ static const arch_entry cpu_arch[] = {
   {"i286",	Cpu086|Cpu186|Cpu286 },
   {"i386",	Cpu086|Cpu186|Cpu286|Cpu386 },
   {"i486",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486 },
-  {"i586",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuMMX },
-  {"i686",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuMMX|CpuSSE },
-  {"pentium",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuMMX },
-  {"pentiumpro",Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuMMX|CpuSSE },
-  {"pentium4",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX|CpuSSE|CpuSSE2 },
-  {"k6",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuK6|CpuMMX|Cpu3dnow },
-  {"athlon",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuAthlon|CpuMMX|Cpu3dnow },
-  {"sledgehammer",Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuAthlon|CpuSledgehammer|CpuMMX|Cpu3dnow|CpuSSE|CpuSSE2 },
+  {"i586",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586 },
+  {"i686",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686 },
+  {"pentium",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586 },
+  {"pentiumpro",Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686 },
+  {"pentiumii",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuMMX },
+  {"pentiumiii",Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuMMX|CpuMMX2|CpuSSE },
+  {"pentium4",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX|CpuMMX2|CpuSSE|CpuSSE2 },
+  {"prescott",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuPNI },
+  {"k6",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuK6|CpuMMX },
+  {"k6_2",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuK6|CpuMMX|Cpu3dnow },
+  {"athlon",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuAthlon|CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA },
+  {"sledgehammer",Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuAthlon|CpuSledgehammer|CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2 },
+  {".mmx",	CpuMMX },
+  {".sse",	CpuMMX|CpuMMX2|CpuSSE },
+  {".sse2",	CpuMMX|CpuMMX2|CpuSSE|CpuSSE2 },
+  {".3dnow",	CpuMMX|Cpu3dnow },
+  {".3dnowa",	CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA },
+  {".padlock",	CpuPadLock },
   {NULL, 0 }
 };
 
@@ -836,10 +847,22 @@ set_cpu_arch (dummy)
 	{
 	  if (strcmp (string, cpu_arch[i].name) == 0)
 	    {
-	      cpu_arch_name = cpu_arch[i].name;
-	      cpu_arch_flags = (cpu_arch[i].flags
-				| (flag_code == CODE_64BIT ? Cpu64 : CpuNo64));
-	      break;
+	      if (*string != '.')
+		{
+		  cpu_arch_name = cpu_arch[i].name;
+		  cpu_sub_arch_name = NULL;
+		  cpu_arch_flags = (cpu_arch[i].flags
+				    | (flag_code == CODE_64BIT ? Cpu64 : CpuNo64));
+		  break;
+		}
+	      if ((cpu_arch_flags | cpu_arch[i].flags) != cpu_arch_flags)
+		{
+		  cpu_sub_arch_name = cpu_arch[i].name;
+		  cpu_arch_flags |= cpu_arch[i].flags;
+		}
+	      *input_line_pointer = e;
+	      demand_empty_rest_of_line ();
+	      return;
 	    }
 	}
       if (!cpu_arch[i].name)
@@ -1561,6 +1584,8 @@ parse_insn (line, mnemonic)
   char *l = line;
   char *token_start = l;
   char *mnem_p;
+  int supported;
+  const template *t;
 
   /* Non-zero if we found a prefix only acceptable with string insns.  */
   const char *expecting_string_instruction = NULL;
@@ -1709,11 +1734,29 @@ parse_insn (line, mnemonic)
     }
 
   /* Check if instruction is supported on specified architecture.  */
-  if ((current_templates->start->cpu_flags & ~(Cpu64 | CpuNo64))
-      & ~(cpu_arch_flags & ~(Cpu64 | CpuNo64)))
+  supported = 0;
+  for (t = current_templates->start; t < current_templates->end; ++t)
     {
-      as_warn (_("`%s' is not supported on `%s'"),
-	       current_templates->start->name, cpu_arch_name);
+      if (!((t->cpu_flags & ~(Cpu64 | CpuNo64))
+	    & ~(cpu_arch_flags & ~(Cpu64 | CpuNo64))))
+	  supported |= 1;
+      if (!(t->cpu_flags & (flag_code == CODE_64BIT ? CpuNo64 : Cpu64)))
+	  supported |= 2;
+    }
+  if (!(supported & 2))
+    {
+      as_bad (flag_code == CODE_64BIT
+	      ? _("`%s' is not supported in 64-bit mode")
+	      : _("`%s' is only supported in 64-bit mode"),
+	      current_templates->start->name);
+      return NULL;
+    }
+  if (!(supported & 1))
+    {
+      as_warn (_("`%s' is not supported on `%s%s'"),
+	       current_templates->start->name,
+	       cpu_arch_name,
+	       cpu_sub_arch_name ? cpu_sub_arch_name : "");
     }
   else if ((Cpu386 & ~cpu_arch_flags) && (flag_code != CODE_16BIT))
     {

@@ -1,3 +1,19 @@
+2004-11-23 Jan Beulich <jbeulich@novell.com>
+
+	* config/tc-i386.h (CpuMMX2): Declare. Artificial classifier to
+	indicate the MMX extensions added by both SSE and 3DNow!A.
+	(Cpu3dnowA): Declare.
+	(CpuUnknownFlags): Update.
+	* config/tc-i386.c (cpu_sub_arch_name): Declare.
+	(cpu_arch): i586 and pentium do not imply MMX. i686 and pentiumpro do
+	neither imply SSE nor MMX. k6 implies MMX. k6_2 additionally implies
+	3DNow!. Athlon additionally implies 3DNow!A. Several new
+	entries (those starting with a dot are for sub-arch specification).
+	(set_cpu_arch): Handle sub-arch specifications.
+	(parse_insn): Distinguish between instructions not supported because
+	of insufficient CPU features and because of 64-bit mode.
+	* doc/c-i386.texi: Describe enhanced .arch directive.
+
 2004-11-22  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (xg_add_opcode_fix): Set fx_no_overflow.

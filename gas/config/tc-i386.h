@@ -174,18 +174,20 @@ typedef struct
 #define CpuAthlon	0x200	/* AMD Athlon or better required*/
 #define CpuSledgehammer 0x400	/* Sledgehammer or better required */
 #define CpuMMX		0x800	/* MMX support required */
-#define CpuSSE	       0x1000	/* Streaming SIMD extensions required */
-#define CpuSSE2	       0x2000	/* Streaming SIMD extensions 2 required */
-#define Cpu3dnow       0x4000	/* 3dnow! support required */
-#define CpuPNI	       0x8000	/* Prescott New Instructions required */
-#define CpuPadLock    0x10000	/* VIA PadLock required */
+#define CpuMMX2	       0x1000	/* extended MMX support (with SSE or 3DNow!Ext) required */
+#define CpuSSE	       0x2000	/* Streaming SIMD extensions required */
+#define CpuSSE2	       0x4000	/* Streaming SIMD extensions 2 required */
+#define Cpu3dnow       0x8000	/* 3dnow! support required */
+#define Cpu3dnowA     0x10000	/* 3dnow!Extensions support required */
+#define CpuPNI	      0x20000	/* Prescott New Instructions required */
+#define CpuPadLock    0x40000	/* VIA PadLock required */
 
   /* These flags are set by gas depending on the flag_code.  */
 #define Cpu64	     0x4000000   /* 64bit support required  */
 #define CpuNo64      0x8000000   /* Not supported in the 64bit mode  */
 
   /* The default value for unknown CPUs - enable all features to avoid problems.  */
-#define CpuUnknownFlags (Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuSledgehammer|CpuMMX|CpuSSE|CpuSSE2|CpuPNI|Cpu3dnow|CpuK6|CpuAthlon|CpuPadLock)
+#define CpuUnknownFlags (Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuSledgehammer|CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuPNI|Cpu3dnow|Cpu3dnowA|CpuK6|CpuAthlon|CpuPadLock)
 
   /* the bits in opcode_modifier are used to generate the final opcode from
      the base_opcode.  These bits also are used to detect alternate forms of
