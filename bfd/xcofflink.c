@@ -1672,8 +1672,13 @@ xcoff_link_add_symbols (abfd, info)
                  OK for symbol redefinitions to occur.  I can't figure
                  out just what the XCOFF linker is doing, but
                  something like this is required for -bnso to work.  */
-	      *sym_hash = xcoff_link_hash_lookup (xcoff_hash_table (info),
-						  name, true, copy, false);
+	      if (! bfd_is_und_section (section))
+		*sym_hash = xcoff_link_hash_lookup (xcoff_hash_table (info),
+						    name, true, copy, false);
+	      else
+		*sym_hash = ((struct xcoff_link_hash_entry *)
+			     bfd_wrapped_link_hash_lookup (abfd, info, name,
+							   true, copy, false));
 	      if (*sym_hash == NULL)
 		goto error_return;
 	      if (((*sym_hash)->root.type == bfd_link_hash_defined
@@ -1982,7 +1987,7 @@ xcoff_link_add_dynamic_symbols (abfd, info)
 	  name = nambuf;
 	}
 
-      /* Normally we could not xcoff_link_hash_lookup in an add
+      /* Normally we could not call xcoff_link_hash_lookup in an add
 	 symbols routine, since we might not be using an XCOFF hash
 	 table.  However, we verified above that we are using an XCOFF
 	 hash table.  */
@@ -2214,7 +2219,10 @@ xcoff_mark (info, sec)
 			  && h->root.root.string[0] == '.'
 			  && h->descriptor != NULL
 			  && ((h->descriptor->flags & XCOFF_DEF_DYNAMIC) != 0
-			      || info->shared)))
+			      || info->shared
+			      || ((h->descriptor->flags & XCOFF_IMPORT) != 0
+				  && (h->descriptor->flags
+				      & XCOFF_DEF_REGULAR) == 0))))
 		    break;
 		  /* Fall through.  */
 		case R_POS:
@@ -2488,8 +2496,9 @@ bfd_xcoff_link_count_reloc (output_bfd, info, name)
   if (! XCOFF_XVECP (output_bfd->xvec))
     return true;
 
-  h = xcoff_link_hash_lookup (xcoff_hash_table (info), name, false, false,
-			      false);
+  h = ((struct xcoff_link_hash_entry *)
+       bfd_wrapped_link_hash_lookup (output_bfd, info, name, false, false,
+				     false));
   if (h == NULL)
     {
       (*_bfd_error_handler) ("%s: no such symbol", name);
@@ -2629,13 +2638,7 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
   hentry = xcoff_link_hash_lookup (xcoff_hash_table (info), entry,
 				   false, false, true);
   if (hentry != NULL)
-    {
-      hentry->flags |= XCOFF_ENTRY;
-      if (hentry->root.type == bfd_link_hash_defined
-	  || hentry->root.type == bfd_link_hash_defweak)
-	xcoff_data (output_bfd)->entry_section =
-	  hentry->root.u.def.section->output_section;
-    }
+    hentry->flags |= XCOFF_ENTRY;
 
   /* Garbage collect unused sections.  */
   if (info->relocateable
@@ -2941,16 +2944,18 @@ xcoff_build_ldsyms (h, p)
     h->flags |= XCOFF_MARK;
 
   /* If this symbol is called and defined in a dynamic object, or not
-     defined at all when building a shared object, then we need to set
-     up global linkage code for it.  (Unless we did garbage collection
-     and we didn't need this symbol.)  */
+     defined at all when building a shared object, or imported, then
+     we need to set up global linkage code for it.  (Unless we did
+     garbage collection and we didn't need this symbol.)  */
   if ((h->flags & XCOFF_CALLED) != 0
       && (h->root.type == bfd_link_hash_undefined
 	  || h->root.type == bfd_link_hash_undefweak)
       && h->root.root.string[0] == '.'
       && h->descriptor != NULL
       && ((h->descriptor->flags & XCOFF_DEF_DYNAMIC) != 0
-	  || ldinfo->info->shared)
+	  || ldinfo->info->shared
+	  || ((h->descriptor->flags & XCOFF_IMPORT) != 0
+	      && (h->descriptor->flags & XCOFF_DEF_REGULAR) == 0))
       && (! xcoff_hash_table (ldinfo->info)->gc
 	  || (h->flags & XCOFF_MARK) != 0))
     {
@@ -3926,6 +3931,13 @@ xcoff_link_input_bfd (finfo, input_bfd)
 	  xcoff_swap_ldsym_out (finfo->output_bfd, ldsym,
 				finfo->ldsym + h->ldindx - 3);
 	  h->ldsym = NULL;
+
+	  /* Fill in snentry now that we know the target_index.  */
+	  if ((h->flags & XCOFF_ENTRY) != 0
+	      && (h->root.type == bfd_link_hash_defined
+		  || h->root.type == bfd_link_hash_defweak))
+	    xcoff_data (output_bfd)->snentry =
+	      h->root.u.def.section->output_section->target_index;
 	}
 
       *indexp = -1;
@@ -3987,8 +3999,8 @@ xcoff_link_input_bfd (finfo, input_bfd)
 
 	      finfo->toc_symindx = output_index;
 	      xcoff_data (finfo->output_bfd)->toc = tocval;
-	      xcoff_data (finfo->output_bfd)->toc_section =
-		(*csectpp)->output_section;
+	      xcoff_data (finfo->output_bfd)->sntoc =
+		(*csectpp)->output_section->target_index;
 	      require = true;
 	    }
 	}
@@ -4457,6 +4469,7 @@ xcoff_link_input_bfd (finfo, input_bfd)
 			      struct internal_syment *iisp, *iispend;
 			      long *iindp;
 			      bfd_byte *oos;
+			      int iiadd;
 
 			      /* Update any C_BINCL or C_EINCL symbols
                                  that refer to a line number in the
@@ -4468,8 +4481,9 @@ xcoff_link_input_bfd (finfo, input_bfd)
 			      oos = finfo->outsyms;
 			      while (iisp < iispend)
 				{
-				  if ((iisp->n_sclass == C_BINCL
-				       || iisp->n_sclass == C_EINCL)
+				  if (*iindp >= 0
+				      && (iisp->n_sclass == C_BINCL
+					  || iisp->n_sclass == C_EINCL)
 				      && ((bfd_size_type) iisp->n_value
 					  >= enclosing->line_filepos + linoff)
 				      && ((bfd_size_type) iisp->n_value
@@ -4492,9 +4506,11 @@ xcoff_link_input_bfd (finfo, input_bfd)
 				      --incls;
 				    }
 
-				  iisp += iisp->n_numaux + 1;
-				  iindp += iisp->n_numaux + 1;
-				  oos += (iisp->n_numaux + 1) * osymesz;
+				  iiadd = 1 + iisp->n_numaux;
+				  if (*iindp >= 0)
+				    oos += iiadd * osymesz;
+				  iisp += iiadd;
+				  iindp += iiadd;
 				}
 			    }
 			}
@@ -5073,7 +5089,8 @@ xcoff_write_global_symbol (h, p)
 
       bfd_put_32 (output_bfd, xcoff_data (output_bfd)->toc, p + 4);
 
-      tsec = xcoff_data (output_bfd)->toc_section;
+      tsec = coff_section_from_bfd_index (output_bfd,
+					  xcoff_data (output_bfd)->sntoc);
 
       ++irel;
       irel->r_vaddr = (osec->vma
@@ -5272,9 +5289,10 @@ xcoff_reloc_link_order (output_bfd, finfo, output_section, link_order)
       return false;
     }
 
-  h = xcoff_link_hash_lookup (xcoff_hash_table (finfo->info),
-			      link_order->u.reloc.p->u.name,
-			      false, false, true);
+  h = ((struct xcoff_link_hash_entry *)
+       bfd_wrapped_link_hash_lookup (output_bfd, finfo->info,
+				     link_order->u.reloc.p->u.name,
+				     false, false, true));
   if (h == NULL)
     {
       if (! ((*finfo->info->callbacks->unattached_reloc)

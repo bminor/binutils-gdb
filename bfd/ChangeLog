@@ -1,5 +1,8 @@
 Fri Mar 22 12:17:00 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* xcofflink.c (xcoff_link_input_bfd): Fix scan for C_BINCL/C_EINCL
+	symbols.
+
 	* config.bfd: Add ieee_vec to targ_selvecs for i960 targets and
 	m68k-aout, m68k-coff, and m68k-elf targets.
 
