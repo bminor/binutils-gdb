@@ -59,8 +59,9 @@
 #include "defs.h"
 #endif
 
-
-
+#ifdef PARAMS
+#undef PARAMS
+#endif
 #define PARAMS(x)  EXFUN(,x)
 
 /* This is '$' on systems where the assembler can deal with that.
