@@ -1,3 +1,8 @@
+2004-05-01  Andrew Cagney  <cagney@redhat.com>
+
+	* infrun.c (check_sigtramp2): Delete check for
+	DEPRECATED_PC_IN_SIGTRAMP and INNER_THAN.
+
 2004-05-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* m68k-tdep.h (m68kbsd_fpreg_offset): New prototype.

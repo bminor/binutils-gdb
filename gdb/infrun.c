@@ -2715,14 +2715,6 @@ check_sigtramp2 (struct execution_control_state *ecs)
     return;
   if (get_frame_type (get_current_frame ()) != SIGTRAMP_FRAME)
     return;
-  /* Long term, this function can be eliminated, replaced by the code:
-     get_frame_type(current_frame()) == SIGTRAMP_FRAME (for new
-     architectures this is very cheap).  */
-  find_pc_partial_function (prev_pc, &name, NULL, NULL);
-  if (DEPRECATED_PC_IN_SIGTRAMP (prev_pc, name))
-    return;
-  if (!INNER_THAN (read_sp (), step_sp))
-    return;
 
   /* So we need to set a step_resume_break_address breakpoint and
      continue until we hit it, and then step.  FIXME: This should be
