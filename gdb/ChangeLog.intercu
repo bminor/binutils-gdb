@@ -1,5 +1,17 @@
 2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (struct dwarf2_cu): Add abbrev_obstack.
+	(struct abbrev_info): Shorten two int flags.
+	(dwarf_alloc_abbrev): Take a CU argument.
+	(dwarf2_build_psymtabs_hard): Call dwarf2_empty_abbrev_table
+	each time through the loop.  Update cleanup argument.
+	(psymtab_to_symtab_1): Update cleanup argument.
+	(dwarf2_read_abbrevs, dwarf2_alloc_abbrev): Allocate on the
+	abbrev_obstack.
+	(dwarf2_empty_abbrev_table): Just call obstack_free.
+
+2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
+
 	* Makefile.in (hashtab_h): Add.
 	(dwarf2read.o): Update dependencies.
 	* dwarf2read.c: Include "hashtab.h".

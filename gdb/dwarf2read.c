@@ -263,6 +263,8 @@ struct dwarf2_cu
 
   htab_t partial_dies;
   struct obstack partial_die_obstack;
+
+  struct obstack abbrev_obstack;
 };
 
 /* The line number information for a compilation unit (found in the
@@ -314,8 +316,8 @@ struct abbrev_info
   {
     unsigned int number;	/* number identifying abbrev */
     enum dwarf_tag tag;		/* dwarf tag */
-    int has_children;		/* boolean */
-    unsigned int num_attrs;	/* number of attributes */
+    unsigned short has_children;		/* boolean */
+    unsigned short num_attrs;	/* number of attributes */
     struct attr_abbrev *attrs;	/* an array of attribute descriptions */
     struct abbrev_info *next;	/* next in chain */
   };
@@ -923,7 +925,7 @@ static void dwarf2_free_tmp_obstack (void *);
 
 static struct dwarf_block *dwarf_alloc_block (void);
 
-static struct abbrev_info *dwarf_alloc_abbrev (void);
+static struct abbrev_info *dwarf_alloc_abbrev (struct dwarf2_cu *);
 
 static struct die_info *dwarf_alloc_die (void);
 
@@ -1257,6 +1259,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
      left at all should be sufficient.  */
   while (info_ptr < dwarf_info_buffer + dwarf_info_size)
     {
+      struct cleanup *back_to_inner;
       struct dwarf2_cu cu;
       beg_of_comp_unit = info_ptr;
 
@@ -1296,7 +1299,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
       /* Read the abbrevs for this compilation unit into a table */
       dwarf2_read_abbrevs (abfd, &cu);
-      make_cleanup (dwarf2_empty_abbrev_table, cu.header.dwarf2_abbrevs);
+      back_to_inner = make_cleanup (dwarf2_empty_abbrev_table, &cu);
 
       /* Read the compilation unit die */
       info_ptr = load_partial_die (&comp_unit_die, abfd, info_ptr,
@@ -1387,6 +1390,8 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
       info_ptr = beg_of_comp_unit + cu.header.length 
                                   + cu.header.initial_length_size;
+
+      do_cleanups (back_to_inner);
     }
   do_cleanups (back_to);
 }
@@ -2041,7 +2046,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
 
   /* Read the abbrevs for this compilation unit  */
   dwarf2_read_abbrevs (abfd, &cu);
-  make_cleanup (dwarf2_empty_abbrev_table, cu.header.dwarf2_abbrevs);
+  make_cleanup (dwarf2_empty_abbrev_table, &cu);
 
   cu.header.offset = offset;
 
@@ -4350,8 +4355,11 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
   struct abbrev_info *cur_abbrev;
   unsigned int abbrev_number, bytes_read, abbrev_name;
   unsigned int abbrev_form, hash_number;
+  struct attr_abbrev *cur_attrs;
+  unsigned int allocated_attrs;
 
   /* Initialize dwarf2 abbrevs */
+  obstack_init (&cu->abbrev_obstack);
   memset (cu_header->dwarf2_abbrevs, 0,
           ABBREV_HASH_SIZE*sizeof (struct abbrev_info *));
 
@@ -4359,10 +4367,13 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
   abbrev_number = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
   abbrev_ptr += bytes_read;
 
+  allocated_attrs = ATTR_ALLOC_CHUNK;
+  cur_attrs = xmalloc (allocated_attrs * sizeof (struct attr_abbrev));
+  
   /* loop until we reach an abbrev number of 0 */
   while (abbrev_number)
     {
-      cur_abbrev = dwarf_alloc_abbrev ();
+      cur_abbrev = dwarf_alloc_abbrev (cu);
 
       /* read in abbrev header */
       cur_abbrev->number = abbrev_number;
@@ -4378,20 +4389,26 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
       abbrev_ptr += bytes_read;
       while (abbrev_name)
 	{
-	  if ((cur_abbrev->num_attrs % ATTR_ALLOC_CHUNK) == 0)
+	  if (cur_abbrev->num_attrs == allocated_attrs)
 	    {
-	      cur_abbrev->attrs = (struct attr_abbrev *)
-		xrealloc (cur_abbrev->attrs,
-			  (cur_abbrev->num_attrs + ATTR_ALLOC_CHUNK)
-			  * sizeof (struct attr_abbrev));
+	      allocated_attrs += ATTR_ALLOC_CHUNK;
+	      cur_attrs
+		= xrealloc (cur_attrs, (allocated_attrs
+					* sizeof (struct attr_abbrev)));
 	    }
-	  cur_abbrev->attrs[cur_abbrev->num_attrs].name = abbrev_name;
-	  cur_abbrev->attrs[cur_abbrev->num_attrs++].form = abbrev_form;
+	  cur_attrs[cur_abbrev->num_attrs].name = abbrev_name;
+	  cur_attrs[cur_abbrev->num_attrs++].form = abbrev_form;
 	  abbrev_name = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
 	  abbrev_ptr += bytes_read;
 	  abbrev_form = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
 	  abbrev_ptr += bytes_read;
 	}
+
+      cur_abbrev->attrs = obstack_alloc (&cu->abbrev_obstack,
+					 (cur_abbrev->num_attrs
+					  * sizeof (struct attr_abbrev)));
+      memcpy (cur_abbrev->attrs, cur_attrs,
+	      cur_abbrev->num_attrs * sizeof (struct attr_abbrev));
 
       hash_number = abbrev_number % ABBREV_HASH_SIZE;
       cur_abbrev->next = cu_header->dwarf2_abbrevs[hash_number];
@@ -4412,32 +4429,18 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
       if (dwarf2_lookup_abbrev (abbrev_number, cu) != NULL)
 	break;
     }
+
+  xfree (cur_attrs);
 }
 
 /* Empty the abbrev table for a new compilation unit.  */
 
 static void
-dwarf2_empty_abbrev_table (void *ptr_to_abbrevs_table)
+dwarf2_empty_abbrev_table (void *ptr_to_cu)
 {
-  int i;
-  struct abbrev_info *abbrev, *next;
-  struct abbrev_info **abbrevs;
+  struct dwarf2_cu *cu = ptr_to_cu;
 
-  abbrevs = (struct abbrev_info **)ptr_to_abbrevs_table;
-
-  for (i = 0; i < ABBREV_HASH_SIZE; ++i)
-    {
-      next = NULL;
-      abbrev = abbrevs[i];
-      while (abbrev)
-	{
-	  next = abbrev->next;
-	  xfree (abbrev->attrs);
-	  xfree (abbrev);
-	  abbrev = next;
-	}
-      abbrevs[i] = NULL;
-    }
+  obstack_free (&cu->abbrev_obstack, NULL);
 }
 
 /* Lookup an abbrev_info structure in the abbrev hash table.  */
@@ -7957,11 +7960,12 @@ dwarf_alloc_block (void)
 }
 
 static struct abbrev_info *
-dwarf_alloc_abbrev (void)
+dwarf_alloc_abbrev (struct dwarf2_cu *cu)
 {
   struct abbrev_info *abbrev;
 
-  abbrev = (struct abbrev_info *) xmalloc (sizeof (struct abbrev_info));
+  abbrev = (struct abbrev_info *)
+    obstack_alloc (&cu->abbrev_obstack, sizeof (struct abbrev_info));
   memset (abbrev, 0, sizeof (struct abbrev_info));
   return (abbrev);
 }
