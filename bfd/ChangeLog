@@ -1,3 +1,9 @@
+2004-04-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-sparc.c (elf32_sparc_relocate_section): Don't abort
+	when statically linking PIC code.
+	* elf64-sparc.c (sparc64_elf_relocate_section): Likewise.
+
 2004-04-11  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
 
 	* config.bfd: Remove mips*-*-mach3* and mips*-dec-mach3* targets.
