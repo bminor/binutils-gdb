@@ -263,13 +263,6 @@ build_section_lists (statement)
 static void
 gld${EMULATION_NAME}_finish ()
 {
-  int ret;
-
-  /* If generating a relocatable output file, then we don't
-     have to examine the relocs.  */
-  if (link_info.relocateable)
-    return;
-
   /* bfd_elf32_discard_info just plays with debugging sections,
      ie. doesn't affect any code, so we can delay resizing the
      sections.  It's likely we'll resize everything in the process of
@@ -277,46 +270,55 @@ gld${EMULATION_NAME}_finish ()
   if (bfd_elf${ELFSIZE}_discard_info (output_bfd, &link_info))
     need_laying_out = 1;
 
-  ret = elf32_hppa_setup_section_lists (output_bfd, &link_info);
-  if (ret != 0)
+  /* If generating a relocatable output file, then we don't
+     have to examine the relocs.  */
+  if (! link_info.relocateable)
     {
-      if (ret < 0)
-	{
-	  einfo ("%X%P: can not size stub section: %E\n");
-	  return;
-	}
+      int ret = elf32_hppa_setup_section_lists (output_bfd, &link_info);
 
-      lang_for_each_statement (build_section_lists);
-
-      /* Call into the BFD backend to do the real work.  */
-      if (! elf32_hppa_size_stubs (output_bfd,
-				   stub_file->the_bfd,
-				   &link_info,
-				   multi_subspace,
-				   group_size,
-				   &hppaelf_add_stub_section,
-				   &hppaelf_layout_sections_again))
+      if (ret != 0)
 	{
-	  einfo ("%X%P: can not size stub section: %E\n");
-	  return;
+	  if (ret < 0)
+	    {
+	      einfo ("%X%P: can not size stub section: %E\n");
+	      return;
+	    }
+
+	  lang_for_each_statement (build_section_lists);
+
+	  /* Call into the BFD backend to do the real work.  */
+	  if (! elf32_hppa_size_stubs (output_bfd,
+				       stub_file->the_bfd,
+				       &link_info,
+				       multi_subspace,
+				       group_size,
+				       &hppaelf_add_stub_section,
+				       &hppaelf_layout_sections_again))
+	    {
+	      einfo ("%X%P: can not size stub section: %E\n");
+	      return;
+	    }
 	}
     }
 
   if (need_laying_out)
     hppaelf_layout_sections_again ();
 
-  /* Set the global data pointer.  */
-  if (! elf32_hppa_set_gp (output_bfd, &link_info))
+  if (! link_info.relocateable)
     {
-      einfo ("%X%P: can not set gp\n");
-      return;
-    }
+      /* Set the global data pointer.  */
+      if (! elf32_hppa_set_gp (output_bfd, &link_info))
+	{
+	  einfo ("%X%P: can not set gp\n");
+	  return;
+	}
 
-  /* Now build the linker stubs.  */
-  if (stub_file->the_bfd->sections != NULL)
-    {
-      if (! elf32_hppa_build_stubs (&link_info))
-	einfo ("%X%P: can not build stubs: %E\n");
+      /* Now build the linker stubs.  */
+      if (stub_file->the_bfd->sections != NULL)
+	{
+	  if (! elf32_hppa_build_stubs (&link_info))
+	    einfo ("%X%P: can not build stubs: %E\n");
+	}
     }
 }
 

@@ -43,6 +43,7 @@ static int dotsyms = 1;
 
 static void ppc_create_output_section_statements PARAMS ((void));
 static void ppc_after_open PARAMS ((void));
+static void ppc_before_allocation PARAMS ((void));
 static asection *ppc_add_stub_section PARAMS ((const char *, asection *));
 static void ppc_layout_sections_again PARAMS ((void));
 static void gld${EMULATION_NAME}_after_allocation PARAMS ((void));
@@ -82,6 +83,18 @@ ppc_after_open ()
     }
 
   gld${EMULATION_NAME}_after_open ();
+}
+
+static void
+ppc_before_allocation ()
+{
+  if (!ppc64_elf_edit_opd (output_bfd, &link_info))
+    {
+      einfo ("%X%P: can not edit opd %E\n");
+      return;
+    }
+
+  gld${EMULATION_NAME}_before_allocation ();
 }
 
 struct hook_stub_info
@@ -265,17 +278,10 @@ build_section_lists (statement)
 static void
 gld${EMULATION_NAME}_finish ()
 {
-  int ret;
-
   /* e_entry on PowerPC64 points to the function descriptor for
      _start.  If _start is missing, default to the first function
      descriptor in the .opd section.  */
   entry_section = ".opd";
-
-  /* If generating a relocatable output file, then we don't have any
-     stubs.  */
-  if (link_info.relocateable)
-    return;
 
   /* bfd_elf64_discard_info just plays with debugging sections,
      ie. doesn't affect any code, so we can delay resizing the
@@ -284,27 +290,32 @@ gld${EMULATION_NAME}_finish ()
   if (bfd_elf${ELFSIZE}_discard_info (output_bfd, &link_info))
     need_laying_out = 1;
 
-  ret = ppc64_elf_setup_section_lists (output_bfd, &link_info);
-  if (ret != 0)
+  /* If generating a relocatable output file, then we don't have any
+     stubs.  */
+  if (!link_info.relocateable)
     {
-      if (ret < 0)
+      int ret = ppc64_elf_setup_section_lists (output_bfd, &link_info);
+      if (ret != 0)
 	{
-	  einfo ("%X%P: can not size stub section: %E\n");
-	  return;
-	}
+	  if (ret < 0)
+	    {
+	      einfo ("%X%P: can not size stub section: %E\n");
+	      return;
+	    }
 
-      lang_for_each_statement (build_section_lists);
+	  lang_for_each_statement (build_section_lists);
 
-      /* Call into the BFD backend to do the real work.  */
-      if (!ppc64_elf_size_stubs (output_bfd,
-				 stub_file->the_bfd,
-				 &link_info,
-				 group_size,
-				 &ppc_add_stub_section,
-				 &ppc_layout_sections_again))
-	{
-	  einfo ("%X%P: can not size stub section: %E\n");
-	  return;
+	  /* Call into the BFD backend to do the real work.  */
+	  if (!ppc64_elf_size_stubs (output_bfd,
+				     stub_file->the_bfd,
+				     &link_info,
+				     group_size,
+				     &ppc_add_stub_section,
+				     &ppc_layout_sections_again))
+	    {
+	      einfo ("%X%P: can not size stub section: %E\n");
+	      return;
+	    }
 	}
     }
 
@@ -486,6 +497,7 @@ PARSE_AND_LIST_ARGS_CASES='
 # Put these extra ppc64elf routines in ld_${EMULATION_NAME}_emulation
 #
 LDEMUL_AFTER_OPEN=ppc_after_open
+LDEMUL_BEFORE_ALLOCATION=ppc_before_allocation
 LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation
 LDEMUL_FINISH=gld${EMULATION_NAME}_finish
 LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=ppc_create_output_section_statements
