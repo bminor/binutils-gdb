@@ -476,9 +476,9 @@ gdb_clear_file (clientData, interp, objc, objv)
   if (inferior_pid != 0 && target_has_execution)
     {
       if (attach_flag)
-	target_detach (NULL, 0);
+        target_detach (NULL, 0);
       else
-	target_kill ();
+        target_kill ();
     }
 
   if (target_has_execution)
@@ -828,15 +828,15 @@ gdb_load_info (clientData, interp, objc, objv)
    for (s = loadfile_bfd->sections; s; s = s->next) 
      {
        if (s->flags & SEC_LOAD) 
-	 {
-	   bfd_size_type size = bfd_get_section_size_before_reloc (s);
-	   if (size > 0)
-	     {
-	       ob[0] = Tcl_NewStringObj ((char *) bfd_get_section_name (loadfile_bfd, s), -1);
-	       ob[1] = Tcl_NewLongObj ((long) size);
-	       Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr, Tcl_NewListObj (2, ob));
-	     }
-	 }
+         {
+           bfd_size_type size = bfd_get_section_size_before_reloc (s);
+           if (size > 0)
+             {
+               ob[0] = Tcl_NewStringObj ((char *) bfd_get_section_name (loadfile_bfd, s), -1);
+               ob[1] = Tcl_NewLongObj ((long) size);
+               Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr, Tcl_NewListObj (2, ob));
+             }
+         }
      }
    
    do_cleanups (old_cleanups);
@@ -940,8 +940,6 @@ gdb_get_vars_command (clientData, interp, objc, objv)
           default:
           case LOC_UNDEF:		  /* catches errors        */
           case LOC_CONST:	      /* constant              */
-          case LOC_STATIC:	      /* static                */
-          case LOC_REGISTER:      /* register              */
           case LOC_TYPEDEF:	      /* local typedef         */
           case LOC_LABEL:	      /* local label           */
           case LOC_BLOCK:	      /* local function        */
@@ -961,6 +959,8 @@ gdb_get_vars_command (clientData, interp, objc, objv)
             break;
           case LOC_LOCAL:	      /* stack local           */
           case LOC_BASEREG:	      /* basereg local         */
+          case LOC_STATIC:	      /* static                */
+          case LOC_REGISTER:      /* register              */
             if (!arguments)
               Tcl_ListObjAppendElement (interp, result_ptr->obj_ptr,
                                         Tcl_NewStringObj (SYMBOL_NAME (sym), -1));
@@ -1189,34 +1189,34 @@ gdb_listfiles (clientData, interp, objc, objv)
     {
       if (numfiles == files_size)
         {
-           files_size = files_size * 2;
-           files = (char **) xrealloc (files, sizeof (char *) * files_size);
+          files_size = files_size * 2;
+          files = (char **) xrealloc (files, sizeof (char *) * files_size);
         }
       if (psymtab->filename)
-	{
-	  if (!len || !strncmp(pathname, psymtab->filename,len)
-	      || !strcmp(psymtab->filename, basename(psymtab->filename)))
-	    {
-	      files[numfiles++] = basename(psymtab->filename);
-	    }
-	}
+        {
+          if (!len || !strncmp(pathname, psymtab->filename,len)
+              || !strcmp(psymtab->filename, basename(psymtab->filename)))
+            {
+              files[numfiles++] = basename(psymtab->filename);
+            }
+        }
     }
 
   ALL_SYMTABS (objfile, symtab)
     {
       if (numfiles == files_size)
         {
-           files_size = files_size * 2;
-           files = (char **) xrealloc (files, sizeof (char *) * files_size);
+          files_size = files_size * 2;
+          files = (char **) xrealloc (files, sizeof (char *) * files_size);
         }
       if (symtab->filename && symtab->linetable && symtab->linetable->nitems)
-	{
-	  if (!len || !strncmp(pathname, symtab->filename,len)
-	      || !strcmp(symtab->filename, basename(symtab->filename)))
-	    {
-	      files[numfiles++] = basename(symtab->filename);
-	    }
-	}
+        {
+          if (!len || !strncmp(pathname, symtab->filename,len)
+              || !strcmp(symtab->filename, basename(symtab->filename)))
+            {
+              files[numfiles++] = basename(symtab->filename);
+            }
+        }
     }
 
   qsort (files, numfiles, sizeof(char *), comp_files);
@@ -1231,7 +1231,7 @@ gdb_listfiles (clientData, interp, objc, objv)
   for (i = 0; i < numfiles; i++)
     {
       if (strcmp(files[i],lastfile))
-	Tcl_ListObjAppendElement (interp, result_ptr->obj_ptr, Tcl_NewStringObj(files[i], -1));
+        Tcl_ListObjAppendElement (interp, result_ptr->obj_ptr, Tcl_NewStringObj(files[i], -1));
       lastfile = files[i];
     }
 
@@ -1452,33 +1452,36 @@ gdb_listfuncs (clientData, interp, objc, objv)
       b = BLOCKVECTOR_BLOCK (bv, i);
       /* Skip the sort if this block is always sorted.  */
       if (!BLOCK_SHOULD_SORT (b))
-	sort_block_syms (b);
+        sort_block_syms (b);
       for (j = 0; j < BLOCK_NSYMS (b); j++)
-	{
-	  sym = BLOCK_SYM (b, j);
-	  if (SYMBOL_CLASS (sym) == LOC_BLOCK)
-	    {
+        {
+          sym = BLOCK_SYM (b, j);
+          if (SYMBOL_CLASS (sym) == LOC_BLOCK)
+            {
 	      
-	      char *name = cplus_demangle (SYMBOL_NAME(sym), 0);
-	      if (name)
-		{
-		  /* strip out "global constructors" and "global destructors" */
-		  /* because we aren't interested in them. */
-		  if (strncmp (name, "global ", 7))
-		    {
-		      funcVals[0] = Tcl_NewStringObj(name, -1);
-		      funcVals[1] = mangled;	  
-		    }
-		}
-	      else
-		{
-		  funcVals[0] = Tcl_NewStringObj(SYMBOL_NAME(sym), -1);
-		  funcVals[1] = not_mangled;
-		}
-	      Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr,
-					Tcl_NewListObj (2, funcVals));
-	    }
-	}
+              char *name = cplus_demangle (SYMBOL_NAME(sym), 0);
+              if (name)
+                {
+                  /* strip out "global constructors" and "global destructors" */
+                  /* because we aren't interested in them. */
+                  if (strncmp (name, "global ", 7))
+                    {
+                      funcVals[0] = Tcl_NewStringObj(name, -1);
+                      funcVals[1] = mangled;	  
+                    }
+                  else
+                    continue;
+
+                }
+              else
+                {
+                  funcVals[0] = Tcl_NewStringObj(SYMBOL_NAME(sym), -1);
+                  funcVals[1] = not_mangled;
+                }
+              Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr,
+                                        Tcl_NewListObj (2, funcVals));
+            }
+        }
     }
   return TCL_OK;
 }
@@ -1508,11 +1511,11 @@ map_arg_registers (objc, objv, func, argp)
   if (objc == 0)		/* No args, just do all the regs */
     {
       for (regnum = 0;
-	   regnum < NUM_REGS
-	   && reg_names[regnum] != NULL
-	   && *reg_names[regnum] != '\000';
-	   regnum++)
-	func (regnum, argp);
+           regnum < NUM_REGS
+             && reg_names[regnum] != NULL
+             && *reg_names[regnum] != '\000';
+           regnum++)
+        func (regnum, argp);
 
       return TCL_OK;
     }
@@ -1520,22 +1523,22 @@ map_arg_registers (objc, objv, func, argp)
   /* Else, list of register #s, just do listed regs */
   for (; objc > 0; objc--, objv++)
     {
-
-      if (Tcl_GetIntFromObj (NULL, *objv, &regnum) != TCL_OK) {
-	result_ptr->flags |= GDBTK_IN_TCL_RESULT;
-	return TCL_ERROR;
-      }
+      if (Tcl_GetIntFromObj (NULL, *objv, &regnum) != TCL_OK)
+        {
+          result_ptr->flags |= GDBTK_IN_TCL_RESULT;
+          return TCL_ERROR;
+        }
 
       if (regnum >= 0
-	  && regnum < NUM_REGS
-	  && reg_names[regnum] != NULL
-	  && *reg_names[regnum] != '\000')
-	func (regnum, argp);
+          && regnum < NUM_REGS
+          && reg_names[regnum] != NULL
+          && *reg_names[regnum] != '\000')
+        func (regnum, argp);
       else
-	{
-	  Tcl_SetStringObj (result_ptr->obj_ptr, "bad register number", -1);
-	  return TCL_ERROR;
-	}
+        {
+          Tcl_SetStringObj (result_ptr->obj_ptr, "bad register number", -1);
+          return TCL_ERROR;
+        }
     }
 
   return TCL_OK;
@@ -1563,7 +1566,7 @@ get_register_name (regnum, argp)
      void *argp;		/* Ignored */
 {
   Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr,
-			    Tcl_NewStringObj (reg_names[regnum], -1));
+                            Tcl_NewStringObj (reg_names[regnum], -1));
 }
 
 /* This implements the tcl command gdb_fetch_registers
@@ -1589,7 +1592,7 @@ gdb_fetch_registers (clientData, interp, objc, objv)
   if (objc < 2)
     {
       Tcl_SetStringObj (result_ptr->obj_ptr,
-			"wrong # args, should be gdb_fetch_registers format ?register1 register2 ...?", -1);
+                        "wrong # args, should be gdb_fetch_registers format ?register1 register2 ...?", -1);
     }
   objc -= 2;
   objv++;
@@ -1628,7 +1631,7 @@ get_register (regnum, fp)
   if (REGISTER_CONVERTIBLE (regnum))
     {
       REGISTER_CONVERT_TO_VIRTUAL (regnum, REGISTER_VIRTUAL_TYPE (regnum),
-				   raw_buffer, virtual_buffer);
+                                   raw_buffer, virtual_buffer);
     }
   else
     memcpy (virtual_buffer, raw_buffer, REGISTER_VIRTUAL_SIZE (regnum));
@@ -1638,15 +1641,15 @@ get_register (regnum, fp)
       int j;
       printf_filtered ("0x");
       for (j = 0; j < REGISTER_RAW_SIZE (regnum); j++)
-	{
-	  register int idx = TARGET_BYTE_ORDER == BIG_ENDIAN ? j
-	    : REGISTER_RAW_SIZE (regnum) - 1 - j;
-	  printf_filtered ("%02x", (unsigned char)raw_buffer[idx]);
-	}
+        {
+          register int idx = TARGET_BYTE_ORDER == BIG_ENDIAN ? j
+            : REGISTER_RAW_SIZE (regnum) - 1 - j;
+          printf_filtered ("%02x", (unsigned char)raw_buffer[idx]);
+        }
     }
   else
     val_print (REGISTER_VIRTUAL_TYPE (regnum), virtual_buffer, 0,
-	       gdb_stdout, format, 1, 0, Val_pretty_default);
+               gdb_stdout, format, 1, 0, Val_pretty_default);
 
 }
 
@@ -1708,13 +1711,13 @@ register_changed_p (regnum, argp)
     return;
 
   if (memcmp (&old_regs[REGISTER_BYTE (regnum)], raw_buffer,
-	      REGISTER_RAW_SIZE (regnum)) == 0)
+              REGISTER_RAW_SIZE (regnum)) == 0)
     return;
 
   /* Found a changed register.  Save new value and return its number. */
 
   memcpy (&old_regs[REGISTER_BYTE (regnum)], raw_buffer,
-	  REGISTER_RAW_SIZE (regnum));
+          REGISTER_RAW_SIZE (regnum));
 
   Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr, Tcl_NewIntObj(regnum));
 }
@@ -2026,7 +2029,7 @@ gdb_disassemble (clientData, interp, objc, objv)
   if (! di_initialized)
     {
       INIT_DISASSEMBLE_INFO_NO_ARCH (di, gdb_stdout,
-				     (fprintf_ftype) fprintf_unfiltered);
+                                     (fprintf_ftype) fprintf_unfiltered);
       di.flavour = bfd_target_unknown_flavour;
       di.memory_error_func = dis_asm_memory_error;
       di.print_address_func = dis_asm_print_address;
@@ -2052,7 +2055,7 @@ gdb_disassemble (clientData, interp, objc, objv)
   if (objc == 3)
     {
       if (find_pc_partial_function (low, NULL, &low, &high) == 0)
-	error ("No function contains specified address");
+        error ("No function contains specified address");
     }
   else
     high = parse_and_eval_address (Tcl_GetStringFromObj (objv[3], NULL));
@@ -2073,11 +2076,11 @@ gdb_disassemble (clientData, interp, objc, objv)
   if (disassemble_from_exec == -1)
     {
       if (strcmp (target_shortname, "child") == 0
-	  || strcmp (target_shortname, "procfs") == 0
-	  || strcmp (target_shortname, "vxprocess") == 0)
-	disassemble_from_exec = 0; /* It's a child process, read inferior mem */
+          || strcmp (target_shortname, "procfs") == 0
+          || strcmp (target_shortname, "vxprocess") == 0)
+        disassemble_from_exec = 0; /* It's a child process, read inferior mem */
       else
-	disassemble_from_exec = 1; /* It's remote, read the exec file */
+        disassemble_from_exec = 1; /* It's remote, read the exec file */
     }
 
   if (disassemble_from_exec)
@@ -2092,8 +2095,8 @@ gdb_disassemble (clientData, interp, objc, objv)
   if (mixed_source_and_assembly)
     {				/* Come here for mixed source/assembly */
       /* The idea here is to present a source-O-centric view of a function to
-	 the user.  This means that things are presented in source order, with
-	 (possibly) out of order assembly immediately following.  */
+         the user.  This means that things are presented in source order, with
+         (possibly) out of order assembly immediately following.  */
       struct symtab *symtab;
       struct linetable_entry *le;
       int nlines;
@@ -2107,103 +2110,103 @@ gdb_disassemble (clientData, interp, objc, objv)
       symtab = find_pc_symtab (low); /* Assume symtab is valid for whole PC range */
 
       if (!symtab)
-	goto assembly_only;
+        goto assembly_only;
 
-/* First, convert the linetable to a bunch of my_line_entry's.  */
+      /* First, convert the linetable to a bunch of my_line_entry's.  */
 
       le = symtab->linetable->item;
       nlines = symtab->linetable->nitems;
 
       if (nlines <= 0)
-	goto assembly_only;
+        goto assembly_only;
 
       mle = (struct my_line_entry *) alloca (nlines * sizeof (struct my_line_entry));
 
       out_of_order = 0;
+      
+      /* Copy linetable entries for this function into our data structure, creating
+         end_pc's and setting out_of_order as appropriate.  */
 
-/* Copy linetable entries for this function into our data structure, creating
-   end_pc's and setting out_of_order as appropriate.  */
-
-/* First, skip all the preceding functions.  */
+      /* First, skip all the preceding functions.  */
 
       for (i = 0; i < nlines - 1 && le[i].pc < low; i++) ;
 
-/* Now, copy all entries before the end of this function.  */
+      /* Now, copy all entries before the end of this function.  */
 
       newlines = 0;
       for (; i < nlines - 1 && le[i].pc < high; i++)
-	{
-	  if (le[i].line == le[i + 1].line
-	      && le[i].pc == le[i + 1].pc)
-	    continue;		/* Ignore duplicates */
+        {
+          if (le[i].line == le[i + 1].line
+              && le[i].pc == le[i + 1].pc)
+            continue;		/* Ignore duplicates */
 
-	  mle[newlines].line = le[i].line;
-	  if (le[i].line > le[i + 1].line)
-	    out_of_order = 1;
-	  mle[newlines].start_pc = le[i].pc;
-	  mle[newlines].end_pc = le[i + 1].pc;
-	  newlines++;
-	}
+          mle[newlines].line = le[i].line;
+          if (le[i].line > le[i + 1].line)
+            out_of_order = 1;
+          mle[newlines].start_pc = le[i].pc;
+          mle[newlines].end_pc = le[i + 1].pc;
+          newlines++;
+        }
 
-/* If we're on the last line, and it's part of the function, then we need to
-   get the end pc in a special way.  */
+      /* If we're on the last line, and it's part of the function, then we need to
+         get the end pc in a special way.  */
 
       if (i == nlines - 1
-	  && le[i].pc < high)
-	{
-	  mle[newlines].line = le[i].line;
-	  mle[newlines].start_pc = le[i].pc;
-	  sal = find_pc_line (le[i].pc, 0);
-	  mle[newlines].end_pc = sal.end;
-	  newlines++;
-	}
+          && le[i].pc < high)
+        {
+          mle[newlines].line = le[i].line;
+          mle[newlines].start_pc = le[i].pc;
+          sal = find_pc_line (le[i].pc, 0);
+          mle[newlines].end_pc = sal.end;
+          newlines++;
+        }
 
-/* Now, sort mle by line #s (and, then by addresses within lines). */
+      /* Now, sort mle by line #s (and, then by addresses within lines). */
 
       if (out_of_order)
-	qsort (mle, newlines, sizeof (struct my_line_entry), compare_lines);
+        qsort (mle, newlines, sizeof (struct my_line_entry), compare_lines);
 
-/* Now, for each line entry, emit the specified lines (unless they have been
-   emitted before), followed by the assembly code for that line.  */
+      /* Now, for each line entry, emit the specified lines (unless they have been
+         emitted before), followed by the assembly code for that line.  */
 
       next_line = 0;		/* Force out first line */
       for (i = 0; i < newlines; i++)
-	{
-/* Print out everything from next_line to the current line.  */
+        {
+          /* Print out everything from next_line to the current line.  */
 
-	  if (mle[i].line >= next_line)
-	    {
-	      if (next_line != 0)
-		print_source_lines (symtab, next_line, mle[i].line + 1, 0);
-	      else
-		print_source_lines (symtab, mle[i].line, mle[i].line + 1, 0);
+          if (mle[i].line >= next_line)
+            {
+              if (next_line != 0)
+                print_source_lines (symtab, next_line, mle[i].line + 1, 0);
+              else
+                print_source_lines (symtab, mle[i].line, mle[i].line + 1, 0);
 
-	      next_line = mle[i].line + 1;
-	    }
+              next_line = mle[i].line + 1;
+            }
 
-	  for (pc = mle[i].start_pc; pc < mle[i].end_pc; )
-	    {
-	      QUIT;
-	      fputs_unfiltered ("    ", gdb_stdout);
-	      print_address (pc, gdb_stdout);
-	      fputs_unfiltered (":\t    ", gdb_stdout);
-	      pc += (*tm_print_insn) (pc, &di);
-	      fputs_unfiltered ("\n", gdb_stdout);
-	    }
-	}
+          for (pc = mle[i].start_pc; pc < mle[i].end_pc; )
+            {
+              QUIT;
+              fputs_unfiltered ("    ", gdb_stdout);
+              print_address (pc, gdb_stdout);
+              fputs_unfiltered (":\t    ", gdb_stdout);
+              pc += (*tm_print_insn) (pc, &di);
+              fputs_unfiltered ("\n", gdb_stdout);
+            }
+        }
     }
   else
     {
-assembly_only:
+    assembly_only:
       for (pc = low; pc < high; )
-	{
-	  QUIT;
-	  fputs_unfiltered ("    ", gdb_stdout);
-	  print_address (pc, gdb_stdout);
-	  fputs_unfiltered (":\t    ", gdb_stdout);
-	  pc += (*tm_print_insn) (pc, &di);
-	  fputs_unfiltered ("\n", gdb_stdout);
-	}
+        {
+          QUIT;
+          fputs_unfiltered ("    ", gdb_stdout);
+          print_address (pc, gdb_stdout);
+          fputs_unfiltered (":\t    ", gdb_stdout);
+          pc += (*tm_print_insn) (pc, &di);
+          fputs_unfiltered ("\n", gdb_stdout);
+        }
     }
 
   gdb_flush (gdb_stdout);
@@ -2287,24 +2290,24 @@ gdb_loc (clientData, interp, objc, objv)
   if (objc == 1)
     {
       if (selected_frame && (selected_frame->pc != stop_pc))
-	{
-	  /* Note - this next line is not correct on all architectures. */
-	  /* For a graphical debugger we really want to highlight the */
-	  /* assembly line that called the next function on the stack. */
-	  /* Many architectures have the next instruction saved as the */
-	  /* pc on the stack, so what happens is the next instruction is hughlighted. */
-	  /* FIXME */
-	  pc = selected_frame->pc;
-	  sal = find_pc_line (selected_frame->pc,
-			      selected_frame->next != NULL
-			      && !selected_frame->next->signal_handler_caller
-			      && !frame_in_dummy (selected_frame->next));
-	}
+        {
+          /* Note - this next line is not correct on all architectures. */
+          /* For a graphical debugger we really want to highlight the */
+          /* assembly line that called the next function on the stack. */
+          /* Many architectures have the next instruction saved as the */
+          /* pc on the stack, so what happens is the next instruction is hughlighted. */
+          /* FIXME */
+          pc = selected_frame->pc;
+          sal = find_pc_line (selected_frame->pc,
+                              selected_frame->next != NULL
+                              && !selected_frame->next->signal_handler_caller
+                              && !frame_in_dummy (selected_frame->next));
+        }
       else
-	{
-	  pc = stop_pc;
-	  sal = find_pc_line (stop_pc, 0);
-	}
+        {
+          pc = stop_pc;
+          sal = find_pc_line (stop_pc, 0);
+        }
     }
   else if (objc == 2)
     {
@@ -2318,10 +2321,10 @@ gdb_loc (clientData, interp, objc, objv)
       free (sals.sals);
 
       if (sals.nelts != 1)
-	{
-	  Tcl_SetStringObj (result_ptr->obj_ptr, "Ambiguous line spec", -1);
-	  return TCL_ERROR;
-	}
+        {
+          Tcl_SetStringObj (result_ptr->obj_ptr, "Ambiguous line spec", -1);
+          return TCL_ERROR;
+        }
       pc = sal.pc;
     }
   else
@@ -2484,43 +2487,43 @@ gdb_get_mem (clientData, interp, objc, objv)
   for (i=0; i < nbytes; i+= size)
     {
       if ( i >= rnum)
-	{
-	  fputs_unfiltered ("N/A ", gdb_stdout);
-	  if (aschar)
-	    for ( j = 0; j < size; j++)
-	      *bptr++ = 'X';
-	}
+        {
+          fputs_unfiltered ("N/A ", gdb_stdout);
+          if (aschar)
+            for ( j = 0; j < size; j++)
+              *bptr++ = 'X';
+        }
       else
-	{
-	  print_scalar_formatted (mptr, val_type, format, asize, gdb_stdout);
+        {
+          print_scalar_formatted (mptr, val_type, format, asize, gdb_stdout);
 
-	  if (aschar)
-	    {
-	      for ( j = 0; j < size; j++)
-		{
-		  c = *cptr++;
-		  if (c < 32 || c > 126)
-		    c = aschar;
-		  if (c == '"')
-		    *bptr++ = '\\';
-		  *bptr++ = c;
-		}
-	    }
-	}
+          if (aschar)
+            {
+              for ( j = 0; j < size; j++)
+                {
+                  c = *cptr++;
+                  if (c < 32 || c > 126)
+                    c = aschar;
+                  if (c == '"')
+                    *bptr++ = '\\';
+                  *bptr++ = c;
+                }
+            }
+        }
 
       mptr += size;
       bc += size;
 
       if (aschar && (bc >= bpr))
-	{
-	  /* end of row. print it and reset variables */
-	  bc = 0;
-	  *bptr++ = '"';
-	  *bptr++ = ' ';
-	  *bptr = 0;
-	  fputs_unfiltered (buff, gdb_stdout);
-	  bptr = &buff[1];
-	}
+        {
+          /* end of row. print it and reset variables */
+          bc = 0;
+          *bptr++ = '"';
+          *bptr++ = ' ';
+          *bptr = 0;
+          fputs_unfiltered (buff, gdb_stdout);
+          bptr = &buff[1];
+        }
     }
   
   result_ptr->flags &= ~GDBTK_MAKES_LIST;
@@ -2636,25 +2639,25 @@ gdb_loadfile (clientData, interp, objc, objv)
     {
       le = symtab->linetable->item;
       for (ln = symtab->linetable->nitems ;ln > 0; ln--, le++)
-	{
-	  lnum = le->line >> 3;
-	  if (lnum >= ltable_size)
-	    {
-	      char *new_ltable;
-	      new_ltable = (char *)realloc (ltable, ltable_size*2);
-	      memset (new_ltable + ltable_size, 0, ltable_size);
-	      ltable_size *= 2;
-	      if (new_ltable == NULL)
-		{
-		  Tcl_SetStringObj ( result_ptr->obj_ptr, "Out of memory.", -1);
-		  free (ltable);
-		  fclose (fp);
-		  return TCL_ERROR;
-		}
-	      ltable = new_ltable;
-	    }
-	  ltable[lnum] |= 1 << (le->line % 8);
-	}
+        {
+          lnum = le->line >> 3;
+          if (lnum >= ltable_size)
+            {
+              char *new_ltable;
+              new_ltable = (char *)realloc (ltable, ltable_size*2);
+              memset (new_ltable + ltable_size, 0, ltable_size);
+              ltable_size *= 2;
+              if (new_ltable == NULL)
+                {
+                  Tcl_SetStringObj ( result_ptr->obj_ptr, "Out of memory.", -1);
+                  free (ltable);
+                  fclose (fp);
+                  return TCL_ERROR;
+                }
+              ltable = new_ltable;
+            }
+          ltable[lnum] |= 1 << (le->line % 8);
+        }
     }
     
   Tcl_DStringInit(&text_cmd_1);
@@ -2677,30 +2680,30 @@ gdb_loadfile (clientData, interp, objc, objv)
       prefix_len_2 = Tcl_DStringLength(&text_cmd_2);
       
       while (fgets (line + 1, 980, fp))
-	{
- 	  sprintf (line_num_buf, "%d", ln);
-	  if (ltable[ln >> 3] & (1 << (ln % 8)))
-	    {
-	      cur_cmd = &text_cmd_1;
-	      cur_prefix_len = prefix_len_1;
-	      Tcl_DStringAppend (cur_cmd, line_num_buf, -1);
-	      Tcl_DStringAppend (cur_cmd, "} break_tag", 11);
-	    }
-	  else
-	    {
-	      cur_cmd = &text_cmd_2;
-	      cur_prefix_len = prefix_len_2;
-	      Tcl_DStringAppend (cur_cmd, line_num_buf, -1);
-	      Tcl_DStringAppend (cur_cmd, "} \"\"", 4);
-	    }
+        {
+          sprintf (line_num_buf, "%d", ln);
+          if (ltable[ln >> 3] & (1 << (ln % 8)))
+            {
+              cur_cmd = &text_cmd_1;
+              cur_prefix_len = prefix_len_1;
+              Tcl_DStringAppend (cur_cmd, line_num_buf, -1);
+              Tcl_DStringAppend (cur_cmd, "} break_tag", 11);
+            }
+          else
+            {
+              cur_cmd = &text_cmd_2;
+              cur_prefix_len = prefix_len_2;
+              Tcl_DStringAppend (cur_cmd, line_num_buf, -1);
+              Tcl_DStringAppend (cur_cmd, "} \"\"", 4);
+            }
 
-	  Tcl_DStringAppendElement (cur_cmd, line);
-	  Tcl_DStringAppend (cur_cmd, " source_tag", 11);
-	  
-	  Tcl_Eval(interp, Tcl_DStringValue(cur_cmd));
-	  Tcl_DStringSetLength(cur_cmd, cur_prefix_len);
-	  ln++;
-	}
+          Tcl_DStringAppendElement (cur_cmd, line);
+          Tcl_DStringAppend (cur_cmd, " source_tag", 11);
+
+          Tcl_Eval(interp, Tcl_DStringValue(cur_cmd));
+          Tcl_DStringSetLength(cur_cmd, cur_prefix_len);
+          ln++;
+        }
     }
   else
     {
@@ -2709,28 +2712,27 @@ gdb_loadfile (clientData, interp, objc, objv)
       Tcl_DStringAppend (&text_cmd_2, " insert end {  } \"\"", -1);
       prefix_len_2 = Tcl_DStringLength(&text_cmd_2);
 
-  
       while (fgets (line + 1, 980, fp))
-	{
-	  if (ltable[ln >> 3] & (1 << (ln % 8)))
-	    {
-	      cur_cmd = &text_cmd_1;
-	      cur_prefix_len = prefix_len_1;
-	    }
-	  else
-	    {
-	      cur_cmd = &text_cmd_2;
-	      cur_prefix_len = prefix_len_2;
-	    }
+        {
+          if (ltable[ln >> 3] & (1 << (ln % 8)))
+            {
+              cur_cmd = &text_cmd_1;
+              cur_prefix_len = prefix_len_1;
+            }
+          else
+            {
+              cur_cmd = &text_cmd_2;
+              cur_prefix_len = prefix_len_2;
+            }
 
-	  Tcl_DStringAppendElement (cur_cmd, line);
-	  Tcl_DStringAppend (cur_cmd, " source_tag", 11);
-	  
-	  Tcl_Eval(interp, Tcl_DStringValue(cur_cmd));
-	  Tcl_DStringSetLength(cur_cmd, cur_prefix_len);
-	  
-	  ln++;
-	}
+          Tcl_DStringAppendElement (cur_cmd, line);
+          Tcl_DStringAppend (cur_cmd, " source_tag", 11);
+
+          Tcl_Eval(interp, Tcl_DStringValue(cur_cmd));
+          Tcl_DStringSetLength(cur_cmd, cur_prefix_len);
+
+          ln++;
+        }
     }
 
   Tcl_DStringFree (&text_cmd_1);
@@ -3250,30 +3252,30 @@ full_lookup_symtab(file)
   ALL_SYMTABS (objfile, st)
     {
       if (!strcmp (bfile, basename(st->filename)))
-	{
-	  if (!st->fullname)
-	    fullname = symtab_to_filename (st);
-	  else
-	    fullname = st->fullname;
+        {
+          if (!st->fullname)
+            fullname = symtab_to_filename (st);
+          else
+            fullname = st->fullname;
 
-	  if (!strcmp (file, fullname))
-	    return st;
-	}
+          if (!strcmp (file, fullname))
+            return st;
+        }
     }
   
   /* still no luck?  look at psymtabs */
   ALL_PSYMTABS (objfile, pt)
     {
       if (!strcmp (bfile, basename(pt->filename)))
-	{
-	  st = PSYMTAB_TO_SYMTAB (pt);
-	  if (st)
-	    {
-	      fullname = symtab_to_filename (st);
-	      if (!strcmp (file, fullname))
-		return st;
-	    }
-	}
+        {
+          st = PSYMTAB_TO_SYMTAB (pt);
+          if (st)
+            {
+              fullname = symtab_to_filename (st);
+              if (!strcmp (file, fullname))
+                return st;
+            }
+        }
     }
   return NULL;
 }

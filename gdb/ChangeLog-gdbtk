@@ -1,3 +1,8 @@
+1998-08-31  Keith Seitz  <keiths@cygnus.com>
+
+	* gdbtk-cmds.c (gdb_listfuncs): When stripping out "global destructors"
+	and "global constructors", do not append any elements to the result.
+
 Sun Aug 30 00:49:18 1998  Martin M. Hunt  <hunt@cygnus.com>
 
 	* gdbtk-cmds.c (Gdbtk_Init): Link C variable gdb_context
