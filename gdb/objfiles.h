@@ -384,6 +384,8 @@ allocate_objfile PARAMS ((bfd *, int));
 extern int
 build_objfile_section_table PARAMS ((struct objfile *));
 
+extern void objfile_to_front PARAMS ((struct objfile *));
+
 extern void
 unlink_objfile PARAMS ((struct objfile *));
 

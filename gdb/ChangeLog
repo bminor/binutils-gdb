@@ -1,3 +1,24 @@
+Wed Oct 19 11:32:15 1994  Jim Kingdon  <kingdon@cygnus.com>
+
+	* objfiles.c (objfile_relocate): When relocating ->sections, use
+	objfile not symfile_objfile.
+
+	* symtab.h, minsyms.c (minsyms_sort): New function.
+	* objfiles.c (objfile_relocate): Call it.
+
+	* remote-vx.c (vx_add_symbols): Call breakpoint_re_set.
+
+	* objfiles.c, objfiles.h (objfile_to_front): New function.
+	* remote-vx.c (vx_add_symbols): Call it.
+
+	* coffread.c (coff_symtab_read): Handle common symbols the same
+	way that partial-stab.h does.
+
+Wed Oct 19 21:06:12 1994  Rob Savoye  (rob@cirdan.cygnus.com)
+
+	* hppa-tdep.c: Remove include files a.out.h, ioctl.h, and
+	machine/psl.h. These are host files.
+
 Wed Oct 19 15:13:51 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* objfiles.h (struct objfile): Fix comment--minimal_symbol_count

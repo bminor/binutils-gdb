@@ -669,7 +669,15 @@ vx_add_symbols (name, from_tty, text_addr, data_addr, bss_addr)
   struct objfile *objfile;
   struct find_sect_args ss;
 
+  /* It might be nice to suppress the breakpoint_re_set which happens here
+     because we are going to do one again after the objfile_relocate.  */
   objfile = symbol_file_add (name, from_tty, 0, 0, 0, 0);
+
+  /* This is a (slightly cheesy) way of superceding the old symbols.  A less
+     cheesy way would be to find the objfile with the same name and
+     free_objfile it.  */
+  objfile_to_front (objfile);
+
   offs = (struct section_offsets *)
     alloca (sizeof (struct section_offsets)
 	    + objfile->num_sections * sizeof (offs->offsets));
@@ -687,6 +695,9 @@ vx_add_symbols (name, from_tty, text_addr, data_addr, bss_addr)
   ANOFFSET (offs, SECT_OFF_DATA) = data_addr - ss.data_start;
   ANOFFSET (offs, SECT_OFF_BSS) = bss_addr - ss.bss_start;
   objfile_relocate (objfile, offs);
+
+  /* Need to do this *after* things are relocated.  */
+  breakpoint_re_set ();
 }
 
 /* This function allows the addition of incrementally linked object files.  */

@@ -273,6 +273,27 @@ allocate_objfile (abfd, mapped)
   return (objfile);
 }
 
+/* Put OBJFILE at the front of the list.  */
+
+void
+objfile_to_front (objfile)
+     struct objfile *objfile;
+{
+  struct objfile **objp;
+  for (objp = &object_files; *objp != NULL; objp = &((*objp)->next))
+    {
+      if (*objp == objfile)
+	{
+	  /* Unhook it from where it is.  */
+	  *objp = objfile->next;
+	  /* Put it in the front.  */
+	  objfile->next = object_files;
+	  object_files = objfile;
+	  break;
+	}
+    }
+}
+
 /* Unlink OBJFILE from the list of known objfiles, if it is found in the
    list.
 
@@ -551,6 +572,9 @@ objfile_relocate (objfile, new_offsets)
       if (SYMBOL_SECTION (msym) >= 0)
 	SYMBOL_VALUE_ADDRESS (msym) += ANOFFSET (delta, SYMBOL_SECTION (msym));
   }
+  /* Relocating different sections by different amounts may cause the symbols
+     to be out of order.  */
+  msymbols_sort (objfile);
 
   {
     int i;
@@ -562,10 +586,10 @@ objfile_relocate (objfile, new_offsets)
     struct obj_section *s;
     bfd *abfd;
 
-    abfd = symfile_objfile->obfd;
+    abfd = objfile->obfd;
 
-    for (s = symfile_objfile->sections;
-	 s < symfile_objfile->sections_end; ++s)
+    for (s = objfile->sections;
+	 s < objfile->sections_end; ++s)
       {
 	flagword flags;
 

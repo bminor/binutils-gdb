@@ -38,6 +38,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdb-stabs.h"
 #include "stabsread.h"
 #include "complaints.h"
+#include "target.h"
 
 struct coff_symfile_info {
   file_ptr min_lineno_offset;		/* Where in file lowest line#s are */
@@ -908,10 +909,29 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
 
 	      /* FIXME: should use mst_abs, and not relocate, if absolute.  */
 	      enum minimal_symbol_type ms_type;
-	      int sec = cs_to_section (cs, objfile);
-	      tmpaddr = cs->c_value;
-	      if (cs->c_sclass != C_STAT)
-		tmpaddr += ANOFFSET (section_offsets, sec);
+	      int sec;
+
+	      if (cs->c_secnum == N_UNDEF)
+		{
+		  /* This is a common symbol.  See if the target
+		     environment knows where it has been relocated to.  */
+		  CORE_ADDR reladdr;
+		  if (target_lookup_symbol (cs->c_name, &reladdr))
+		    {
+		      /* Error in lookup; ignore symbol.  */
+		      break;
+		    }
+		  tmpaddr = reladdr;
+		  sec = SECT_OFF_BSS;
+		}
+	      else
+		{
+		  sec = cs_to_section (cs, objfile);
+		  tmpaddr = cs->c_value;
+		  if (cs->c_sclass != C_STAT)
+		    tmpaddr += ANOFFSET (section_offsets, sec);
+		}
+
 	      switch (sec)
 		{
 		case SECT_OFF_TEXT:
