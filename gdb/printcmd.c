@@ -88,19 +88,6 @@ int current_display_number;
 
 int inspect_it = 0;
 
-void
-print_value_flags (t)
-     struct type *t;
-{
-  /* FIXME: Should we be printing * for references as well as pointers?  */
-  if (t != NULL
-      && TYPE_CODE (t) == TYPE_CODE_PTR
-      && TYPE_CODE (TYPE_TARGET_TYPE (t)) != TYPE_CODE_VOID)
-    printf_filtered ("*");
-  else
-    printf_filtered ("-");
-}
-
 struct display
 {
   /* Chain link to next auto-display item.  */

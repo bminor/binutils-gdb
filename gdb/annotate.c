@@ -21,7 +21,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "annotate.h"
 #include "value.h"
 #include "target.h"
+#include "gdbtypes.h"
+
+static void print_value_flags PARAMS ((struct type *));
 
+static void
+print_value_flags (t)
+     struct type *t;
+{
+  if (can_dereference (t))
+    printf_filtered ("*");
+  else
+    printf_filtered ("-");
+}
+
 void
 breakpoints_changed ()
 {

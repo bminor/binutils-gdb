@@ -1146,6 +1146,17 @@ lookup_fundamental_type (objfile, typeid)
   return (*typep);
 }
 
+int
+can_dereference (t)
+     struct type *t;
+{
+  /* FIXME: Should we return true for references as well as pointers?  */
+  return
+    (t != NULL
+     && TYPE_CODE (t) == TYPE_CODE_PTR
+     && TYPE_CODE (TYPE_TARGET_TYPE (t)) != TYPE_CODE_VOID);
+}
+
 #if MAINTENANCE_CMDS
 
 static void

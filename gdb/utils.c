@@ -1389,7 +1389,10 @@ vfprintf_maybe_filtered (stream, format, args, filter)
 
   vasprintf (&linebuffer, format, args);
   if (linebuffer == NULL)
-    fatal ("virtual memory exhausted.");
+    {
+      fputs_unfiltered ("\ngdb: virtual memory exhausted.\n", gdb_stderr);
+      exit (1);
+    }
   old_cleanups = make_cleanup (free, linebuffer);
   fputs_maybe_filtered (linebuffer, stream, filter);
   do_cleanups (old_cleanups);
@@ -1416,7 +1419,10 @@ vfprintf_unfiltered (stream, format, args)
 
   vasprintf (&linebuffer, format, args);
   if (linebuffer == NULL)
-    fatal ("virtual memory exhausted.");
+    {
+      fputs_unfiltered ("\ngdb: virtual memory exhausted.\n", gdb_stderr);
+      exit (1);
+    }
   old_cleanups = make_cleanup (free, linebuffer);
   fputs_unfiltered (linebuffer, stream);
   do_cleanups (old_cleanups);
