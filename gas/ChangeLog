@@ -1,3 +1,10 @@
+Fri Jun  3 23:35:36 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* read.c (emit_expr): Use memset to zero out memory, rather than
+	going through md_number_to_chars.  This permits handling symbolic
+	arguments when the size is larger than sizeof (valueT), if
+	TC_CONS_FIX_NEW is prepared to handle the case (as it is on MIPS).
+
 Fri Jun  3 12:50:13 1994  David J. MacKenzie  (djm@rtl.cygnus.com)
 
 	* as.c (show_usage), config/tc-alpha.c (md_show_usage),

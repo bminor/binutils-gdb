@@ -1857,7 +1857,7 @@ emit_expr (exp, nbytes)
     }
   else
     {
-      md_number_to_chars (p, (valueT) 0, (int) nbytes);
+      memset (p, 0, nbytes);
 
       /* Now we need to generate a fixS to record the symbol value.
 	 This is easy for BFD.  For other targets it can be more
