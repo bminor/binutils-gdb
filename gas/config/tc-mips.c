@@ -11592,13 +11592,12 @@ mips_need_elf_addend_fixup (fixP)
 	  || S_IS_EXTERNAL (fixP->fx_addsy))
       && !S_IS_COMMON (fixP->fx_addsy))
     return 1;
-  if (symbol_used_in_reloc_p (fixP->fx_addsy)
-      && (((bfd_get_section_flags (stdoutput,
-				   S_GET_SEGMENT (fixP->fx_addsy))
-	    & (SEC_LINK_ONCE | SEC_MERGE)) != 0)
-	  || !strncmp (segment_name (S_GET_SEGMENT (fixP->fx_addsy)),
-		       ".gnu.linkonce",
-		       sizeof (".gnu.linkonce") - 1)))
+  if (((bfd_get_section_flags (stdoutput,
+			       S_GET_SEGMENT (fixP->fx_addsy))
+	& (SEC_LINK_ONCE | SEC_MERGE)) != 0)
+      || !strncmp (segment_name (S_GET_SEGMENT (fixP->fx_addsy)),
+		   ".gnu.linkonce",
+		   sizeof (".gnu.linkonce") - 1))
     return 1;
   return 0;
 }
@@ -11658,15 +11657,25 @@ md_apply_fix3 (fixP, valP, seg)
 	  value -= symval;
 
 	  howto = bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type);
-	  if (value != 0 && howto && howto->partial_inplace
-	      && (! fixP->fx_pcrel || howto->pcrel_offset))
+	  if (value != 0 && howto && howto->partial_inplace)
 	    {
 	      /* In this case, the bfd_install_relocation routine will
 		 incorrectly add the symbol value back in.  We just want
 		 the addend to appear in the object file.
 
-		 howto->pcrel_offset is added for R_MIPS_PC16, which is
-		 generated for code like
+		 The condition above used to include
+		 "&& (! fixP->fx_pcrel || howto->pcrel_offset)".
+
+		 However, howto can't be trusted here, because we
+		 might change the reloc type in tc_gen_reloc.  We can
+		 check howto->partial_inplace because that conversion
+		 happens to preserve howto->partial_inplace; but it
+		 does not preserve howto->pcrel_offset.  I've just
+		 eliminated the check, because all MIPS PC-relative
+		 relocations are marked howto->pcrel_offset.
+
+		 howto->pcrel_offset was originally added for
+		 R_MIPS_PC16, which is generated for code like
 
 		 	globl g1 .text
 			.text

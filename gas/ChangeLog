@@ -1,4 +1,10 @@
-2003-05-21  Christian Groessler <chris@groessler.org>
+2003-05-05  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/tc-mips.c (mips_need_elf_addend_fixup): Remove
+	symbol_used_in_reloc_p check.
+	(md_apply_fix3): Remove check for howto->pcrel_offset.
+
+2003-05-01  Christian Groessler <chris@groessler.org>
 
 	* expr.h: Fix comments in operatorT typedef.
 	* config/tc-z8k.c: Add 2003 to copyright message.  
