@@ -153,11 +153,16 @@ gdbtk_query (query, args)
      char *query;
      va_list args;
 {
-  char buf[200];
+  char buf[200], *merge[2];
+  char *command;
   long val;
 
   vsprintf (buf, query, args);
-  Tcl_VarEval (interp, "gdbtk_tcl_query ", "{", buf, "}", NULL);
+  merge[0] = "gdbtk_tcl_query";
+  merge[1] = buf;
+  command = Tcl_Merge (2, merge);
+  Tcl_Eval (interp, command);
+  free (command);
 
   val = atol (interp->result);
   return val;
@@ -277,6 +282,8 @@ breakpoint_notify(b, action)
   if (b->type != bp_breakpoint)
     return;
 
+  /* We ensure that ACTION contains no special Tcl characters, so we
+     can do this.  */
   sprintf (buf, "gdbtk_tcl_breakpoint %s %d", action, b->number);
 
   v = Tcl_Eval (interp, buf);
@@ -680,7 +687,7 @@ call_wrapper (clientData, interp, argc, argv)
 /* In case of an error, we may need to force the GUI into idle mode because
    gdbtk_call_command may have bombed out while in the command routine.  */
 
-      Tcl_VarEval (interp, "gdbtk_tcl_idle", NULL);
+      Tcl_Eval (interp, "gdbtk_tcl_idle");
     }
 
   do_cleanups (ALL_CLEANUPS);
@@ -1069,9 +1076,9 @@ gdbtk_call_command (cmdblk, arg, from_tty)
 {
   if (cmdblk->class == class_run)
     {
-      Tcl_VarEval (interp, "gdbtk_tcl_busy", NULL);
+      Tcl_Eval (interp, "gdbtk_tcl_busy");
       (*cmdblk->function.cfunc)(arg, from_tty);
-      Tcl_VarEval (interp, "gdbtk_tcl_idle", NULL);
+      Tcl_Eval (interp, "gdbtk_tcl_idle");
     }
   else
     (*cmdblk->function.cfunc)(arg, from_tty);

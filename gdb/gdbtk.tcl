@@ -18,14 +18,11 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 set cfile Blank
 set wins($cfile) .src.text
 set current_label {}
-set screen_height 0
-set screen_top 0
-set screen_bot 0
 set cfunc NIL
 set line_numbers 1
 set breakpoint_file(-1) {[garbage]}
@@ -35,14 +32,76 @@ set expr_update_list(0) 0
 #option add *Foreground Black
 #option add *Background White
 #option add *Font -*-*-medium-r-normal--18-*-*-*-m-*-*-1
-tk colormodel . monochrome
 
 proc echo string {puts stdout $string}
 
-if [info exists env(EDITOR)] then {
-	set editor $env(EDITOR)
-	} else {
-	set editor emacs
+# Assign elements from LIST to variables named in ARGS.  FIXME replace
+# with TclX version someday.
+proc lassign {list args} {
+  set len [expr {[llength $args] - 1}]
+  while {$len >= 0} {
+    upvar [lindex $args $len] local
+    set local [lindex $list $len]
+    decr len
+  }
+}
+
+#
+# Local procedure:
+#
+#	decr (var val) - compliment to incr
+#
+# Description:
+#
+#
+proc decr {var {val 1}} {
+  upvar $var num
+  set num [expr {$num - $val}]
+  return $num
+}
+
+#
+# Center a window on the screen.
+#
+proc center_window toplevel {
+  # Withdraw and update, to ensure geometry computations are finished.
+  wm withdraw $toplevel
+  update idletasks
+
+  set x [expr {[winfo screenwidth $toplevel] / 2
+	       - [winfo reqwidth $toplevel] / 2
+	       - [winfo vrootx $toplevel]}]
+  set y [expr {[winfo screenheight $toplevel] / 2
+	       - [winfo reqheight $toplevel] / 2
+	       - [winfo vrooty $toplevel]}]
+  wm geometry $toplevel +${x}+${y}
+  wm deiconify $toplevel
+}
+
+#
+# Rearrange the bindtags so the widget comes after the class.  I was
+# always for Ousterhout putting the class bindings first, but no...
+#
+proc bind_widget_after_class {widget} {
+  set class [winfo class $widget]
+  set newList {}
+  foreach tag [bindtags $widget] {
+    if {$tag == $widget} {
+      # Nothing.
+    } {
+      lappend newList $tag
+      if {$tag == $class} {
+	lappend newList $widget
+      }
+    }
+  }
+  bindtags $widget $newList
+}
+
+if {[info exists env(EDITOR)]} then {
+  set editor $env(EDITOR)
+} else {
+  set editor emacs
 }
 
 # GDB callbacks
@@ -64,13 +123,13 @@ if [info exists env(EDITOR)] then {
 #
 
 proc gdbtk_tcl_fputs {arg} {
-	.cmd.text insert end "$arg"
-	.cmd.text yview -pickplace end
+  .cmd.text insert end "$arg"
+  .cmd.text see end
 }
 
 proc gdbtk_tcl_fputs_error {arg} {
-	.cmd.text insert end "$arg"
-	.cmd.text yview -pickplace end
+  .cmd.text insert end "$arg"
+  .cmd.text see end
 }
 
 #
@@ -84,8 +143,8 @@ proc gdbtk_tcl_fputs_error {arg} {
 #
 
 proc gdbtk_tcl_flush {} {
-	.cmd.text yview -pickplace end
-	update idletasks
+  .cmd.text see end
+  update idletasks
 }
 
 #
@@ -101,8 +160,12 @@ proc gdbtk_tcl_flush {} {
 #
 
 proc gdbtk_tcl_query {message} {
-	tk_dialog .query "gdb : query" "$message" {} 1 "No" "Yes"
-	}
+  # FIXME We really want a Help button here.  But Tk's brain-damaged
+  # modal dialogs won't really allow it.  Should have async dialog
+  # here.
+  set result [tk_dialog .query "gdb : query" "$message" questhead 0 Yes No]
+  return [expr {!$result}]
+}
 
 #
 # GDB Callback:
@@ -114,8 +177,9 @@ proc gdbtk_tcl_query {message} {
 #	Not yet implemented.
 #
 
-proc gdbtk_tcl_start_variable_annotation {valaddr ref_type stor_cl cum_expr field type_cast} {
-	echo "gdbtk_tcl_start_variable_annotation $valaddr $ref_type $stor_cl $cum_expr $field $type_cast"
+proc gdbtk_tcl_start_variable_annotation {valaddr ref_type stor_cl
+					  cum_expr field type_cast} {
+  echo "gdbtk_tcl_start_variable_annotation $valaddr $ref_type $stor_cl $cum_expr $field $type_cast"
 }
 
 #
@@ -170,7 +234,7 @@ proc gdbtk_tcl_breakpoint {action bpnum} {
 proc create_breakpoints_window {} {
 	global bpframe_lasty
 
-	if [winfo exists .breakpoints] {raise .breakpoints ; return}
+	if {[winfo exists .breakpoints]} {raise .breakpoints ; return}
 
 	build_framework .breakpoints "Breakpoints" ""
 
@@ -185,11 +249,13 @@ proc create_breakpoints_window {} {
 # Replace text with a canvas and fix the scrollbars
 
 	destroy .breakpoints.text
-	canvas .breakpoints.c -relief sunken -bd 2 \
-		-cursor hand2 -yscrollcommand {.breakpoints.scroll set}
-	.breakpoints.scroll configure -command {.breakpoints.c yview}
 	scrollbar .breakpoints.scrollx -orient horizontal \
 		-command {.breakpoints.c xview} -relief sunken
+	canvas .breakpoints.c -relief sunken -bd 2 \
+		-cursor hand2 \
+	        -yscrollcommand {.breakpoints.scroll set} \
+	        -xscrollcommand {.breakpoints.scrollx set}
+	.breakpoints.scroll configure -command {.breakpoints.c yview}
 
 	pack .breakpoints.scrollx -side bottom -fill x -in .breakpoints.info
 	pack .breakpoints.c -side left -expand yes -fill both \
@@ -207,107 +273,100 @@ proc create_breakpoints_window {} {
 # Create a frame for bpnum in the .breakpoints canvas
 
 proc add_breakpoint_frame bpnum {
-	global bpframe_lasty
-	global enabled
-	global disposition
+  global bpframe_lasty
+  global enabled
+  global disposition
 
-	if ![winfo exists .breakpoints] return
+  if {![winfo exists .breakpoints]} return
 
-	set bpinfo [gdb_get_breakpoint_info $bpnum]
+  set bpinfo [gdb_get_breakpoint_info $bpnum]
 
-	set file [lindex $bpinfo 0]
-	set line [lindex $bpinfo 1]
-	set pc [lindex $bpinfo 2]
-	set type [lindex $bpinfo 3]
-	set enabled($bpnum) [lindex $bpinfo 4]
-	set disposition($bpnum) [lindex $bpinfo 5]
-	set silent [lindex $bpinfo 6]
-	set ignore_count [lindex $bpinfo 7]
-	set commands [lindex $bpinfo 8]
-	set cond [lindex $bpinfo 9]
-	set thread [lindex $bpinfo 10]
-	set hit_count [lindex $bpinfo 11]
+  lassign $bpinfo file line pc type enabled($bpnum) disposition($bpnum) \
+    silent ignore_count commands cond thread hit_count
 
-	set f .breakpoints.c.$bpnum
+  set f .breakpoints.c.$bpnum
 
-	if ![winfo exists $f] {
-		frame $f -relief sunken -bd 2
+  if {![winfo exists $f]} {
+    frame $f -relief sunken -bd 2
 
-		label $f.id -text "#$bpnum     $file:$line    ($pc)" \
-			-relief flat -bd 2 -anchor w
-		frame $f.hit_count
-		label $f.hit_count.label -text "Hit count:" -relief flat \
-			-bd 2 -anchor w -width 11
-		label $f.hit_count.val -text $hit_count -relief flat \
-			-bd 2 -anchor w
-		checkbutton $f.hit_count.enabled -text Enabled \
-			-variable enabled($bpnum) -anchor w -relief flat
-			
-		pack $f.hit_count.label $f.hit_count.val -side left
-		pack $f.hit_count.enabled -side right
+    label $f.id -text "#$bpnum     $file:$line    ($pc)" \
+      -relief flat -bd 2 -anchor w
+    frame $f.hit_count
+    label $f.hit_count.label -text "Hit count:" -relief flat \
+      -bd 2 -anchor w -width 11
+    label $f.hit_count.val -text $hit_count -relief flat \
+      -bd 2 -anchor w
+    checkbutton $f.hit_count.enabled -text Enabled \
+      -variable enabled($bpnum) -anchor w -relief flat
 
-		frame $f.thread
-		label $f.thread.label -text "Thread: " -relief flat -bd 2 \
-			-width 11 -anchor w
-		entry $f.thread.entry -bd 2 -relief sunken -width 10
-		$f.thread.entry insert end $thread
-		pack $f.thread.label -side left
-		pack $f.thread.entry -side left -fill x
+    pack $f.hit_count.label $f.hit_count.val -side left
+    pack $f.hit_count.enabled -side right
 
-		frame $f.cond
-		label $f.cond.label -text "Condition: " -relief flat -bd 2 \
-			-width 11 -anchor w
-		entry $f.cond.entry -bd 2 -relief sunken
-		$f.cond.entry insert end $cond
-		pack $f.cond.label -side left
-		pack $f.cond.entry -side left -fill x -expand yes
+    frame $f.thread
+    label $f.thread.label -text "Thread: " -relief flat -bd 2 \
+      -width 11 -anchor w
+    entry $f.thread.entry -bd 2 -relief sunken -width 10
+    $f.thread.entry insert end $thread
+    pack $f.thread.label -side left
+    pack $f.thread.entry -side left -fill x
 
-		frame $f.ignore_count
-		label $f.ignore_count.label -text "Ignore count: " \
-			-relief flat -bd 2 -width 11 -anchor w
-		entry $f.ignore_count.entry -bd 2 -relief sunken -width 10
-		$f.ignore_count.entry insert end $ignore_count
-		pack $f.ignore_count.label -side left
-		pack $f.ignore_count.entry -side left -fill x
+    frame $f.cond
+    label $f.cond.label -text "Condition: " -relief flat -bd 2 \
+      -width 11 -anchor w
+    entry $f.cond.entry -bd 2 -relief sunken
+    $f.cond.entry insert end $cond
+    pack $f.cond.label -side left
+    pack $f.cond.entry -side left -fill x -expand yes
 
-		frame $f.disps
+    frame $f.ignore_count
+    label $f.ignore_count.label -text "Ignore count: " \
+      -relief flat -bd 2 -width 11 -anchor w
+    entry $f.ignore_count.entry -bd 2 -relief sunken -width 10
+    $f.ignore_count.entry insert end $ignore_count
+    pack $f.ignore_count.label -side left
+    pack $f.ignore_count.entry -side left -fill x
 
-		label $f.disps.label -text "Disposition: " -relief flat -bd 2 \
-			-anchor w -width 11
+    frame $f.disps
 
-		radiobutton $f.disps.delete -text Delete \
-			-variable disposition($bpnum) -anchor w -relief flat \
-			-command "gdb_cmd \"delete break $bpnum\""
+    label $f.disps.label -text "Disposition: " -relief flat -bd 2 \
+      -anchor w -width 11
 
-		radiobutton $f.disps.disable -text Disable \
-			-variable disposition($bpnum) -anchor w -relief flat \
-			-command "gdb_cmd \"disable break $bpnum\""
+    radiobutton $f.disps.delete -text Delete \
+      -variable disposition($bpnum) -anchor w -relief flat \
+      -command "gdb_cmd \"delete break $bpnum\"" \
+      -value delete
 
-		radiobutton $f.disps.donttouch -text "Leave alone" \
-			-variable disposition($bpnum) -anchor w -relief flat \
-			-command "gdb_cmd \"enable break $bpnum\""
+    radiobutton $f.disps.disable -text Disable \
+      -variable disposition($bpnum) -anchor w -relief flat \
+      -command "gdb_cmd \"disable break $bpnum\"" \
+      -value disable
 
-		pack $f.disps.label $f.disps.delete $f.disps.disable \
-			$f.disps.donttouch -side left -anchor w
-		text $f.commands -relief sunken -bd 2 -setgrid true \
-			-cursor hand2 -height 3 -width 30
+    radiobutton $f.disps.donttouch -text "Leave alone" \
+      -variable disposition($bpnum) -anchor w -relief flat \
+      -command "gdb_cmd \"enable break $bpnum\"" \
+      -value donttouch
 
-		foreach line $commands {
-				$f.commands insert end "${line}\n"
-		}
+    pack $f.disps.label $f.disps.delete $f.disps.disable \
+      $f.disps.donttouch -side left -anchor w
+    text $f.commands -relief sunken -bd 2 -setgrid true \
+      -cursor hand2 -height 3 -width 30
 
-		pack $f.id -side top -anchor nw -fill x
-		pack $f.hit_count $f.cond $f.thread $f.ignore_count $f.disps \
-				$f.commands -side top -fill x -anchor nw
-	}
+    foreach line $commands {
+      $f.commands insert end "${line}\n"
+    }
 
-	set tag [.breakpoints.c create window 0 $bpframe_lasty -window $f -anchor nw]
-	update
-	set bbox [.breakpoints.c bbox $tag]
+    pack $f.id -side top -anchor nw -fill x
+    pack $f.hit_count $f.cond $f.thread $f.ignore_count $f.disps \
+      $f.commands -side top -fill x -anchor nw
+  }
 
-	set bpframe_lasty [lindex $bbox 3]
+  set tag [.breakpoints.c create window 0 $bpframe_lasty -window $f -anchor nw]
+  update
+  set bbox [.breakpoints.c bbox $tag]
 
-	.breakpoints.c configure -width [lindex $bbox 2]
+  set bpframe_lasty [lindex $bbox 3]
+
+  .breakpoints.c configure -width [lindex $bbox 2]
 }
 
 # Delete a breakpoint frame
@@ -315,7 +374,7 @@ proc add_breakpoint_frame bpnum {
 proc delete_breakpoint_frame bpnum {
 	global bpframe_lasty
 
-	if ![winfo exists .breakpoints] return
+	if {![winfo exists .breakpoints]} return
 
 # First, clear the canvas
 
@@ -367,26 +426,26 @@ proc create_breakpoint {bpnum file line pc} {
 	set breakpoint_file($bpnum) $file
 	set breakpoint_line($bpnum) $line
 	set pos_to_breakpoint($file:$line) $bpnum
-	if ![info exists pos_to_bpcount($file:$line)] {
+	if {![info exists pos_to_bpcount($file:$line)]} {
 		set pos_to_bpcount($file:$line) 0
 	}
 	incr pos_to_bpcount($file:$line)
 	set pos_to_breakpoint($pc) $bpnum
-	if ![info exists pos_to_bpcount($pc)] {
+	if {![info exists pos_to_bpcount($pc)]} {
 		set pos_to_bpcount($pc) 0
 	}
 	incr pos_to_bpcount($pc)
 	
 # If there's a window for this file, update it
 
-	if [info exists wins($file)] {
+	if {[info exists wins($file)]} {
 		insert_breakpoint_tag $wins($file) $line
 	}
 
 # If there's an assembly window, update that too
 
 	set win [asm_win_name $cfunc]
-	if [winfo exists $win] {
+	if {[winfo exists $win]} {
 		insert_breakpoint_tag $win [pc_to_line $pclist($cfunc) $pc]
 	}
 
@@ -436,7 +495,7 @@ proc delete_breakpoint {bpnum file line pc} {
 
 # If there's a window for this file, update it
 
-			if [info exists wins($file)] {
+			if {[info exists wins($file)]} {
 				delete_breakpoint_tag $wins($file) $line
 			}
 		}
@@ -451,7 +510,7 @@ proc delete_breakpoint {bpnum file line pc} {
 			catch "unset pos_to_breakpoint($pc)"
 
 			set win [asm_win_name $cfunc]
-			if [winfo exists $win] {
+			if {[winfo exists $win]} {
 				delete_breakpoint_tag $win [pc_to_line $pclist($cfunc) $pc]
 			}
 		}
@@ -477,20 +536,20 @@ proc enable_breakpoint {bpnum file line pc} {
 	global cfunc pclist
 	global enabled
 
-	if [info exists wins($file)] {
+	if {[info exists wins($file)]} {
 		$wins($file) tag configure $line -fgstipple {}
 	}
 
 # If there's an assembly window, update that too
 
 	set win [asm_win_name $cfunc]
-	if [winfo exists $win] {
+	if {[winfo exists $win]} {
 		$win tag configure [pc_to_line $pclist($cfunc) $pc] -fgstipple {}
 	}
 
 # If there's a breakpoint window, update that too
 
-	if [winfo exists .breakpoints] {
+	if {[winfo exists .breakpoints]} {
 		set enabled($bpnum) 1
 	}
 }
@@ -512,20 +571,20 @@ proc disable_breakpoint {bpnum file line pc} {
 	global cfunc pclist
 	global enabled
 
-	if [info exists wins($file)] {
+	if {[info exists wins($file)]} {
 		$wins($file) tag configure $line -fgstipple gray50
 	}
 
 # If there's an assembly window, update that too
 
 	set win [asm_win_name $cfunc]
-	if [winfo exists $win] {
+	if {[winfo exists $win]} {
 		$win tag configure [pc_to_line $pclist($cfunc) $pc] -fgstipple gray50
 	}
 
 # If there's a breakpoint window, update that too
 
-	if [winfo exists .breakpoints] {
+	if {[winfo exists .breakpoints]} {
 		set enabled($bpnum) 0
 	}
 }
@@ -578,7 +637,7 @@ proc delete_breakpoint_tag {win line} {
 }
 
 proc gdbtk_tcl_busy {} {
-	if [winfo exists .src] {
+	if {[winfo exists .src]} {
 		.src.start configure -state disabled
 		.src.stop configure -state normal
 		.src.step configure -state disabled
@@ -589,7 +648,7 @@ proc gdbtk_tcl_busy {} {
 		.src.down configure -state disabled
 		.src.bottom configure -state disabled
 	}
-	if [winfo exists .asm] {
+	if {[winfo exists .asm]} {
 		.asm.stepi configure -state disabled
 		.asm.nexti configure -state disabled
 		.asm.continue configure -state disabled
@@ -602,7 +661,7 @@ proc gdbtk_tcl_busy {} {
 }
 
 proc gdbtk_tcl_idle {} {
-	if [winfo exists .src] {
+	if {[winfo exists .src]} {
 		.src.start configure -state normal
 		.src.stop configure -state disabled
 		.src.step configure -state normal
@@ -614,7 +673,7 @@ proc gdbtk_tcl_idle {} {
 		.src.bottom configure -state normal
 	}
 
-	if [winfo exists .asm] {
+	if {[winfo exists .asm]} {
 		.asm.stepi configure -state normal
 		.asm.nexti configure -state normal
 		.asm.continue configure -state normal
@@ -624,20 +683,6 @@ proc gdbtk_tcl_idle {} {
 		.asm.bottom configure -state normal
 	}
 	return
-}
-
-#
-# Local procedure:
-#
-#	decr (var val) - compliment to incr
-#
-# Description:
-#
-#
-proc decr {var {val 1}} {
-	upvar $var num
-	set num [expr $num - $val]
-	return $num
 }
 
 #
@@ -660,7 +705,7 @@ proc pc_to_line {pclist pc} {
 		if {$pc < $linepc} { decr line ; return $line }
 		incr line
 	}
-	return [expr $line - 1]
+	return [expr {$line - 1}]
 }
 
 #
@@ -683,11 +728,13 @@ proc pc_to_line {pclist pc} {
 #		to notify us of where the breakpoint needs to show up.
 #
 
-menu .file_popup -cursor hand2
+menu .file_popup -cursor hand2 -tearoff 0
 .file_popup add command -label "Not yet set" -state disabled
 .file_popup add separator
-.file_popup add command -label "Edit" -command {exec $editor +$selected_line $selected_file &}
-.file_popup add command -label "Set breakpoint" -command {gdb_cmd "break $selected_file:$selected_line"}
+.file_popup add command -label "Edit" \
+  -command {exec $editor +$selected_line $selected_file &}
+.file_popup add command -label "Set breakpoint" \
+  -command {gdb_cmd "break $selected_file:$selected_line"}
 
 # Use this procedure to get the GDB core to execute the string `cmd'.  This is
 # a wrapper around gdb_cmd, which will catch errors, and send output to the
@@ -696,7 +743,7 @@ menu .file_popup -cursor hand2
 proc interactive_cmd {cmd} {
 	catch {gdb_cmd "$cmd"} result
 	.cmd.text insert end $result
-	.cmd.text yview -pickplace end
+	.cmd.text see end
 	update_ptr
 }
 
@@ -707,28 +754,14 @@ proc interactive_cmd {cmd} {
 #
 # Description:
 #
-#	This defines the binding for the file popup menu.  Currently, there is
-#	only one, which is activated when Button-1 is released.  This causes
-#	the menu to be unposted, releases the grab for the menu, and then
-#	unhighlights the line under the cursor.  After that, the selected menu
-#	item is invoked.
+#	This defines the binding for the file popup menu.  It simply
+#       unhighlights the line under the cursor.
 #
 
 bind .file_popup <Any-ButtonRelease-1> {
-	global selected_win
-
-# First, remove the menu, and release the pointer
-
-	.file_popup unpost
-	grab release .file_popup
-
-# Unhighlight the selected line
-
-	$selected_win tag delete breaktag
-
-# Actually invoke the menubutton here!
-
-	tk_invokeMenu %W
+  global selected_win
+  # Unhighlight the selected line
+  $selected_win tag delete breaktag
 }
 
 #
@@ -777,8 +810,7 @@ proc file_popup_menu {win x y xrel yrel} {
 # Post the menu near the pointer, (and grab it)
 
 	.file_popup entryconfigure 0 -label "$selected_file:$selected_line"
-	.file_popup post [expr $x-[winfo width .file_popup]/2] [expr $y-10]
-	grab .file_popup
+	tk_popup .file_popup $x $y
 }
 
 #
@@ -824,7 +856,7 @@ proc listing_window_button_1 {win x y xrel yrel} {
 		set pos_break $selected_file:$selected_line
 		set pos $file:$selected_line
 		set tmp pos_to_breakpoint($pos)
-		if [info exists $tmp] {
+		if {[info exists $tmp]} {
 			set bpnum [set $tmp]
 			gdb_cmd "delete	$bpnum"
 		} else {
@@ -836,8 +868,8 @@ proc listing_window_button_1 {win x y xrel yrel} {
 # Post the menu near the pointer, (and grab it)
 
 	.file_popup entryconfigure 0 -label "$selected_file:$selected_line"
-	.file_popup post [expr $x-[winfo width .file_popup]/2] [expr $y-10]
-	grab .file_popup
+
+        tk_popup .file_popup $x $y
 }
 
 #
@@ -882,7 +914,7 @@ proc asm_window_button_1 {win x y xrel yrel} {
 
 	if {$selected_col < 11} {
 		set tmp pos_to_breakpoint($pc)
-		if [info exists $tmp] {
+		if {[info exists $tmp]} {
 			set bpnum [set $tmp]
 			gdb_cmd "delete	$bpnum"
 		} else {
@@ -925,7 +957,7 @@ proc do_nothing {} {}
 proc not_implemented_yet {message} {
 	tk_dialog .unimpl "gdb : unimpl" \
 		"$message: not implemented in the interface yet" \
-		{} 1 "OK"
+		warning 0 "OK"
 }
 
 ##
@@ -939,81 +971,81 @@ proc not_implemented_yet {message} {
 #
 
 set expr_num 0
+set delete_expr_num 0
 
-proc add_expr {expr} {
-	global expr_update_list
-	global expr_num
-
-	incr expr_num
-
-	set e .expr.e${expr_num}
-
-	frame $e
-
-	checkbutton $e.update -text "      " -relief flat \
-		-variable expr_update_list($expr_num)
-	text $e.expr -width 20 -height 1
-	$e.expr insert 0.0 $expr
-	bind $e.expr <1> "update_expr $expr_num"
-	text $e.val -width 20 -height 1
-
-	update_expr $expr_num
-
-	pack $e.update -side left -anchor nw
-	pack $e.expr $e.val -side left -expand yes -fill x
-
-	pack $e -side top -fill x -anchor w
+# Set delete_expr_num, and set -state of Delete button.
+proc expr_update_button {num} {
+  global delete_expr_num
+  set delete_expr_num $num
+  if {$num > 0} then {
+    set state normal
+  } else {
+    set state disabled
+  }
+  .expr.buts.delete configure -state $state
 }
 
-set delete_expr_flag 0
+proc add_expr {expr} {
+  global expr_update_list
+  global expr_num
 
-# This is a krock!!!
+  incr expr_num
+
+  set e .expr.exprs
+  set f e$expr_num
+
+  checkbutton $e.updates.$f -text "" -relief flat \
+    -variable expr_update_list($expr_num)
+  text $e.expressions.$f -width 20 -height 1
+  $e.expressions.$f insert 0.0 $expr
+  bind $e.expressions.$f <1> "update_expr $expr_num"
+  text $e.values.$f -width 20 -height 1
+
+  # Set up some bindings.
+  foreach frame {updates expressions values} {
+    bind $e.$frame.$f <FocusIn> "expr_update_button $expr_num"
+    bind $e.$frame.$f <FocusOut> "expr_update_button 0"
+  }
+
+  update_expr $expr_num
+
+  pack $e.updates.$f -side top
+  pack $e.expressions.$f -side top -expand yes -fill x
+  pack $e.values.$f -side top -expand yes -fill x
+}
 
 proc delete_expr {} {
-	global delete_expr_flag
+  global delete_expr_num
+  if {$delete_expr_num > 0} then {
+    set e .expr.exprs
+    set f e${delete_expr_num}
 
-	if {$delete_expr_flag == 1} {
-		set delete_expr_flag 0
-		tk_butUp .expr.delete
-		bind .expr.delete <Any-Leave> {}
-	} else {
-		set delete_expr_flag 1
-		bind .expr.delete <Any-Leave> do_nothing
-		tk_butDown .expr.delete
-	}
+    destroy $e.updates.$f $e.expressions.$f $e.values.$f
+
+    # FIXME should we unset an element of expr_update_list here?
+  }
 }
 
 proc update_expr {expr_num} {
-	global delete_expr_flag
-	global expr_update_list
+  global expr_update_list
 
-	set e .expr.e${expr_num}
+  set e .expr.exprs
+  set f e${expr_num}
 
-	if {$delete_expr_flag == 1} {
-		set delete_expr_flag 0
-		destroy $e
-		tk_butUp .expr.delete
-		tk_butLeave .expr.delete
-		bind .expr.delete <Any-Leave> {}
-		unset expr_update_list($expr_num)
-		return
-	}
-
-	set expr [$e.expr get 0.0 end]
-
-	$e.val delete 0.0 end
-	if [catch "gdb_eval $expr" val] {
-		
-	} else {
-		$e.val insert 0.0 $val
-	}
+  set expr [$e.expressions.$f get 0.0 end]
+  $e.values.$f delete 0.0 end
+  if {! [catch {gdb_eval $expr} val]} {
+    $e.values.$f insert 0.0 $val
+  } {
+    # FIXME consider flashing widget here.
+  }
 }
 
 proc update_exprs {} {
 	global expr_update_list
 
 	foreach expr_num [array names expr_update_list] {
-		if $expr_update_list($expr_num) {
+		if {$expr_update_list($expr_num)} {
 			update_expr $expr_num
 		}
 	}
@@ -1021,48 +1053,59 @@ proc update_exprs {} {
 
 proc create_expr_window {} {
 
-	if [winfo exists .expr] {raise .expr ; return}
+	if {[winfo exists .expr]} {raise .expr ; return}
 
 	toplevel .expr
-	wm minsize .expr 1 1
-	wm title .expr Expression
-	wm iconname .expr "Reg config"
+	wm title .expr "GDB Expressions"
+	wm iconname .expr "Expressions"
 
-	frame .expr.entryframe
+	frame .expr.entryframe -borderwidth 2 -relief raised
+	label .expr.entryframe.entrylab -text "Expression: "
+	entry .expr.entryframe.entry -borderwidth 2 -relief sunken
+	bind .expr.entryframe.entry <Return> {
+	  add_expr [.expr.entryframe.entry get]
+	  .expr.entryframe.entry delete 0 end
+	}
 
-	entry .expr.entry -borderwidth 2 -relief sunken
-	bind .expr <Enter> {focus .expr.entry}
-	bind .expr.entry <Key-Return> {add_expr [.expr.entry get]
-					.expr.entry delete 0 end }
+	pack .expr.entryframe.entrylab -side left
+	pack .expr.entryframe.entry -side left -fill x -expand yes
 
-	label .expr.entrylab -text "Expression: "
+	frame .expr.buts -borderwidth 2 -relief raised
 
-	pack .expr.entrylab -in .expr.entryframe -side left
-	pack .expr.entry -in .expr.entryframe -side left -fill x -expand yes
+	button .expr.buts.delete -text Delete -command delete_expr \
+	  -state disabled
 
-	frame .expr.buts
+	button .expr.buts.close -text Close -command {destroy .expr}
+	button .expr.buts.help -text Help -state disabled
 
-	button .expr.delete -text Delete
-	bind .expr.delete <1> delete_expr
-
-	button .expr.close -text Close -command {destroy .expr}
-
-	pack .expr.delete -side left -fill x -expand yes -in .expr.buts
-	pack .expr.close -side right -fill x -expand yes -in .expr.buts
+	pack .expr.buts.delete -side left
+	pack .expr.buts.help .expr.buts.close -side right
 
 	pack .expr.buts -side bottom -fill x
 	pack .expr.entryframe -side bottom -fill x
 
-	frame .expr.labels
+	frame .expr.exprs -borderwidth 2 -relief raised
 
-	label .expr.updlab -text Update
-	label .expr.exprlab -text Expression
-	label .expr.vallab -text Value
+	# Use three subframes so columns will line up.  Easier than
+	# dealing with BLT for a table geometry manager.  Someday Tk
+	# will have one, use it then.  FIXME this messes up keyboard
+	# traversal.
+	frame .expr.exprs.updates -borderwidth 0 -relief flat
+	frame .expr.exprs.expressions -borderwidth 0 -relief flat
+	frame .expr.exprs.values -borderwidth 0 -relief flat
 
-	pack .expr.updlab -side left -in .expr.labels
-	pack .expr.exprlab .expr.vallab -side left -in .expr.labels -expand yes -anchor w
+	label .expr.exprs.updates.label -text Update
+	pack .expr.exprs.updates.label -side top -anchor w
+	label .expr.exprs.expressions.label -text Expression
+	pack .expr.exprs.expressions.label -side top -anchor w
+	label .expr.exprs.values.label -text Value
+	pack .expr.exprs.values.label -side top -anchor w
 
-	pack .expr.labels -side top -fill x -anchor w
+	pack .expr.exprs.updates -side left
+	pack .expr.exprs.values .expr.exprs.expressions \
+	  -side right -expand 1 -fill x
+
+	pack .expr.exprs -side top -fill both -expand 1 -anchor w
 }
 
 #
@@ -1112,12 +1155,12 @@ proc create_file_win {filename debug_file} {
 
 # Open the file, and read it into the text widget
 
-	if [catch "open $filename" fh] {
+	if {[catch "open $filename" fh]} {
 # File can't be read.  Put error message into .src.nofile window and return.
 
 		catch {destroy .src.nofile}
 		text .src.nofile -height 25 -width 88 -relief sunken \
-			-borderwidth 2 -yscrollcommand textscrollproc \
+			-borderwidth 2 -yscrollcommand ".src.scroll set" \
 			-setgrid true -cursor hand2
 		.src.nofile insert 0.0 $fh
 		.src.nofile configure -state disabled
@@ -1129,7 +1172,7 @@ proc create_file_win {filename debug_file} {
 # Actually create and do basic configuration on the text widget.
 
 	text $win -height 25 -width 88 -relief sunken -borderwidth 2 \
-		-yscrollcommand textscrollproc -setgrid true -cursor hand2
+		-yscrollcommand ".src.scroll set" -setgrid true -cursor hand2
 
 # Setup all the bindings
 
@@ -1144,7 +1187,7 @@ proc create_file_win {filename debug_file} {
 	bind $win <Key-Up> "$win yview {@0,0 - 1 lines}"
 	bind $win <Key-Down> "$win yview {@0,0 + 1 lines}"
 	bind $win <Key-Home> {update_listing [gdb_loc]}
-	bind $win <Key-End> "$win yview -pickplace end"
+	bind $win <Key-End> "$win see end"
 
 	bind $win n {interactive_cmd next}
 	bind $win s {interactive_cmd step}
@@ -1161,7 +1204,7 @@ proc create_file_win {filename debug_file} {
 
 	set numlines [$win index end]
 	set numlines [lindex [split $numlines .] 0]
-	if $line_numbers {
+	if {$line_numbers} {
 		for {set i 1} {$i <= $numlines} {incr i} {
 			$win insert $i.0 [format "   %4d " $i]
 			$win tag add source $i.8 "$i.0 lineend"
@@ -1252,7 +1295,7 @@ proc create_asm_win {funcname pc} {
 # Actually create and do basic configuration on the text widget.
 
 	text $win -height 25 -width 80 -relief sunken -borderwidth 2 \
-		-setgrid true -cursor hand2 -yscrollcommand asmscrollproc
+		-setgrid true -cursor hand2 -yscrollcommand ".asm.scroll set"
 
 # Setup all the bindings
 
@@ -1262,12 +1305,6 @@ proc create_asm_win {funcname pc} {
 
 	bind $win <Key-Alt_R> do_nothing
 	bind $win <Key-Alt_L> do_nothing
-	bind $win <Key-Prior> "$win yview {@0,0 - 10 lines}"
-	bind $win <Key-Next> "$win yview {@0,0 + 10 lines}"
-	bind $win <Key-Up> "$win yview {@0,0 - 1 lines}"
-	bind $win <Key-Down> "$win yview {@0,0 + 1 lines}"
-	bind $win <Key-Home> {update_assembly [gdb_loc]}
-	bind $win <Key-End> "$win yview -pickplace end"
 
 	bind $win n {interactive_cmd nexti}
 	bind $win s {interactive_cmd stepi}
@@ -1317,26 +1354,6 @@ proc create_asm_win {funcname pc} {
 #
 # Local procedure:
 #
-#	asmscrollproc (WINHEIGHT SCREENHEIGHT SCREENTOP SCREENBOT) - Update the
-#	asm window scrollbar.
-#
-# Description:
-#
-#	This procedure is called to update the assembler window's scrollbar.
-#
-
-proc asmscrollproc {args} {
-	global asm_screen_height asm_screen_top asm_screen_bot
-
-	eval ".asm.scroll set $args"
-	set asm_screen_height [lindex $args 1]
-	set asm_screen_top [lindex $args 2]
-	set asm_screen_bot [lindex $args 3]
-}
-
-#
-# Local procedure:
-#
 #	update_listing (linespec) - Update the listing window according to
 #				    LINESPEC.
 #
@@ -1373,9 +1390,6 @@ proc asmscrollproc {args} {
 
 proc update_listing {linespec} {
 	global pointers
-	global screen_height
-	global screen_top
-	global screen_bot
 	global wins cfile
 	global current_label
 	global win_to_file
@@ -1384,10 +1398,7 @@ proc update_listing {linespec} {
 
 # Rip the linespec apart
 
-	set line [lindex $linespec 3]
-	set filename [lindex $linespec 2]
-	set funcname [lindex $linespec 1]
-	set debug_file [lindex $linespec 0]
+        lassign $linespec debug_file funcname filename line
 
 # Sometimes there's no source file for this location
 
@@ -1402,7 +1413,7 @@ proc update_listing {linespec} {
 
 # Create a text widget for this file if necessary
 
-		if ![info exists wins($cfile)] then {
+		if {![info exists wins($cfile)]} then {
 			set wins($cfile) [create_file_win $cfile $debug_file]
 			if {$wins($cfile) != ".src.nofile"} {
 				set win_to_file($wins($cfile)) $cfile
@@ -1420,7 +1431,7 @@ proc update_listing {linespec} {
 
 		.src.scroll configure -command "$wins($cfile) yview"
 
-		$wins($cfile) yview [expr $line - $screen_height / 2]
+	        $wins($cfile) see "${line}.0 linestart"
 		}
 
 # Update the label widget in case the filename or function name has changed
@@ -1435,7 +1446,7 @@ proc update_listing {linespec} {
 # Update the pointer, scrolling the text widget if necessary to keep the
 # pointer in an acceptable part of the screen.
 
-	if [info exists pointers($cfile)] then {
+	if {[info exists pointers($cfile)]} then {
 		$wins($cfile) configure -state normal
 		set pointer_pos $pointers($cfile)
 		$wins($cfile) configure -state normal
@@ -1447,12 +1458,7 @@ proc update_listing {linespec} {
 
 		$wins($cfile) delete $pointer_pos "$pointer_pos + 2 char"
 		$wins($cfile) insert $pointer_pos "->"
-
-		if {$line < $screen_top + 1
-		    || $line > $screen_bot} then {
-			$wins($cfile) yview [expr $line - $screen_height / 2]
-			}
-
+	        $wins($cfile) see "${line}.0 linestart"
 		$wins($cfile) configure -state disabled
 		}
 }
@@ -1470,7 +1476,7 @@ proc update_listing {linespec} {
 proc create_asm_window {} {
 	global cfunc
 
-	if [winfo exists .asm] {raise .asm ; return}
+	if {[winfo exists .asm]} {raise .asm ; return}
 
 	set cfunc *None*
 	set win [asm_win_name $cfunc]
@@ -1481,7 +1487,7 @@ proc create_asm_window {} {
 
 	.asm.menubar.view.menu delete 0 last
 
-	.asm.text configure -yscrollcommand asmscrollproc
+	.asm.text configure -yscrollcommand ".asm.scroll set"
 
 	frame .asm.row1
 	frame .asm.row2
@@ -1602,11 +1608,11 @@ proc reg_config_menu {} {
 proc create_registers_window {} {
 	global reg_format
 
-	if [winfo exists .reg] {raise .reg ; return}
+	if {[winfo exists .reg]} {raise .reg ; return}
 
 # Create an initial register display list consisting of all registers
 
-	if ![info exists reg_format] {
+	if {![info exists reg_format]} {
 		global reg_display_list
 		global changed_reg_list
 		global regena
@@ -1789,25 +1795,17 @@ proc update_registers {which} {
 
 proc update_assembly {linespec} {
 	global asm_pointers
-	global screen_height
-	global screen_top
-	global screen_bot
 	global wins cfunc
 	global current_label
 	global win_to_file
 	global file_to_debug_file
 	global current_asm_label
 	global pclist
-	global asm_screen_height asm_screen_top asm_screen_bot
 	global .asm.label
 
 # Rip the linespec apart
 
-	set pc [lindex $linespec 4]
-	set line [lindex $linespec 3]
-	set filename [lindex $linespec 2]
-	set funcname [lindex $linespec 1]
-	set debug_file [lindex $linespec 0]
+	lassign $linespec debug_file funcname filename line pc
 
 	set win [asm_win_name $cfunc]
 
@@ -1839,8 +1837,8 @@ proc update_assembly {linespec} {
 			-after .asm.scroll
 		.asm.scroll configure -command "$win yview"
 		set line [pc_to_line $pclist($cfunc) $pc]
+	        $win see "${line}.0 linestart"
 		update
-		$win yview [expr $line - $asm_screen_height / 2]
 		}
 
 # Update the label widget in case the filename or function name has changed
@@ -1853,7 +1851,7 @@ proc update_assembly {linespec} {
 # Update the pointer, scrolling the text widget if necessary to keep the
 # pointer in an acceptable part of the screen.
 
-	if [info exists asm_pointers($cfunc)] then {
+	if {[info exists asm_pointers($cfunc)]} then {
 		$win configure -state normal
 		set pointer_pos $asm_pointers($cfunc)
 		$win configure -state normal
@@ -1874,12 +1872,7 @@ proc update_assembly {linespec} {
 
 		$win delete $pointer_pos "$pointer_pos + 2 char"
 		$win insert $pointer_pos "->"
-
-		if {$line < $asm_screen_top + 1
-		    || $line > $asm_screen_bot} then {
-			$win yview [expr $line - $asm_screen_height / 2]
-			}
-
+	        $win yview "${line}.0 linestart"
 		$win configure -state disabled
 		}
 }
@@ -1897,16 +1890,16 @@ proc update_assembly {linespec} {
 
 proc update_ptr {} {
 	update_listing [gdb_loc]
-	if [winfo exists .asm] {
+	if {[winfo exists .asm]} {
 		update_assembly [gdb_loc]
 	}
-	if [winfo exists .reg] {
+	if {[winfo exists .reg]} {
 		update_registers changed
 	}
-	if [winfo exists .expr] {
+	if {[winfo exists .expr]} {
 		update_exprs
 	}
-	if [winfo exists .autocmd] {
+	if {[winfo exists .autocmd]} {
 		update_autocmd
 	}
 }
@@ -1916,45 +1909,43 @@ proc update_ptr {} {
 wm withdraw .
 
 proc files_command {} {
-	toplevel .files_window
+  toplevel .files_window
 
-	wm minsize .files_window 1 1
-#	wm overrideredirect .files_window true
-	listbox .files_window.list -geometry 30x20 -setgrid true \
-		-yscrollcommand {.files_window.scroll set} -relief sunken \
-		-borderwidth 2
-	scrollbar .files_window.scroll -orient vertical \
-		-command {.files_window.list yview} -relief sunken
-	button .files_window.close -text Close -command {destroy .files_window}
-	tk_listboxSingleSelect .files_window.list
+  wm minsize .files_window 1 1
+  #	wm overrideredirect .files_window true
+  listbox .files_window.list -geometry 30x20 -setgrid true \
+    -yscrollcommand {.files_window.scroll set} -relief sunken \
+    -borderwidth 2
+  scrollbar .files_window.scroll -orient vertical \
+    -command {.files_window.list yview} -relief sunken
+  button .files_window.close -text Close -command {destroy .files_window}
+  .files_window.list configure -selectmode single
 
-# Get the file list from GDB, sort it, and format it as one entry per line.
+  # Get the file list from GDB, sort it, and format it as one entry per line.
+  set lastSeen {};			# Value that won't appear in
+					# list.
+  set fileList {}
+  foreach file [lsort [gdb_listfiles]] {
+    if {$file != $lastSeen} then {
+      lappend fileList $file
+      set lastSeen $file
+    }
+  }
+  set filelist [join [lsort [gdb_listfiles]] "\n"]
 
-	set filelist [join [lsort [gdb_listfiles]] "\n"]
+  # Insert the file list into the widget
 
-# Now, remove duplicates (by using uniq)
+  eval .files_window.list insert 0 $filelist
 
-	set fh [open "| uniq > /tmp/gdbtk.[pid]" w]
-	puts $fh $filelist
-	close $fh
-	set fh [open /tmp/gdbtk.[pid]]
-	set filelist [split [read $fh] "\n"]
-	set filelist [lrange $filelist 0 [expr [llength $filelist] - 2]]
-	close $fh
-	exec rm /tmp/gdbtk.[pid]
-
-# Insert the file list into the widget
-
-	eval .files_window.list insert 0 $filelist
-
-	pack .files_window.close -side bottom -fill x -expand no -anchor s
-	pack .files_window.scroll -side right -fill both
-	pack .files_window.list -side left -fill both -expand yes
-	bind .files_window.list <Any-ButtonRelease-1> {
-		set file [%W get [%W curselection]]
-		gdb_cmd "list $file:1,0"
-		update_listing [gdb_loc $file:1]
-		destroy .files_window}
+  pack .files_window.close -side bottom -fill x -expand no -anchor s
+  pack .files_window.scroll -side right -fill both
+  pack .files_window.list -side left -fill both -expand yes
+  bind .files_window.list <Any-ButtonRelease-1> {
+    set file [%W get [%W curselection]]
+    gdb_cmd "list $file:1,0"
+    update_listing [gdb_loc $file:1]
+    destroy .files_window
+  }
 }
 
 button .files -text Files -command files_command
@@ -1962,17 +1953,26 @@ button .files -text Files -command files_command
 proc apply_filespec {label default command} {
     set filename [FSBox $label $default]
     if {$filename != ""} {
-	if [catch {gdb_cmd "$command $filename"} retval] {
+	if {[catch {gdb_cmd "$command $filename"} retval]} {
 	    tk_dialog .filespec_error "gdb : $label error" \
-			"Error in command \"$command $filename\"" {} 0 Dismiss
+	      "Error in command \"$command $filename\"" error \
+	      0 Dismiss
 	    return
 	}
     update_ptr
     }
 }
 
-# Setup command window
+# Run editor.
+proc run_editor {editor file} {
+  # FIXME should use index of line in middle of window, not line at
+  # top.
+  global wins
+  set lineNo [lindex [split [$wins($file) index @0,0] .] 0]
+  exec $editor +$lineNo $file
+}
 
+# Setup command window
 proc build_framework {win {title GDBtk} {label {}}} {
 	global ${win}.label
 
@@ -1991,7 +1991,7 @@ proc build_framework {win {title GDBtk} {label {}}} {
 	${win}.menubar.file.menu add command -label Target... \
 		-command { not_implemented_yet "target" }
 	${win}.menubar.file.menu add command -label Edit \
-		-command {exec $editor +[expr ($screen_top + $screen_bot)/2] $cfile &}
+	        -command {run_editor $editor $cfile}
 	${win}.menubar.file.menu add separator
 	${win}.menubar.file.menu add command -label "Exec File..." \
 		-command {apply_filespec {Exec File} a.out exec-file}
@@ -2074,11 +2074,6 @@ proc build_framework {win {title GDBtk} {label {}}} {
 	${win}.menubar.help.menu add command -label "Report bug" \
 		-command {exec send-pr}
 
-	tk_menuBar ${win}.menubar \
-		${win}.menubar.file \
-		${win}.menubar.view \
-		${win}.menubar.window \
-		${win}.menubar.help
 	pack	${win}.menubar.file \
 		${win}.menubar.view \
 		${win}.menubar.window -side left
@@ -2096,12 +2091,6 @@ proc build_framework {win {title GDBtk} {label {}}} {
 
 	bind $win <Key-Alt_R> do_nothing
 	bind $win <Key-Alt_L> do_nothing
-	bind $win <Key-Prior> "$win yview {@0,0 - 10 lines}"
-	bind $win <Key-Next> "$win yview {@0,0 + 10 lines}"
-	bind $win <Key-Up> "$win yview {@0,0 - 1 lines}"
-	bind $win <Key-Down> "$win yview {@0,0 + 1 lines}"
-	bind $win <Key-Home> "$win yview -pickplace end"
-	bind $win <Key-End> "$win yview -pickplace end"
 
 	pack ${win}.label -side bottom -fill x -in ${win}.info
 	pack ${win}.scroll -side right -fill y -in ${win}.info
@@ -2115,7 +2104,7 @@ proc create_source_window {} {
 	global wins
 	global cfile
 
-	if [winfo exists .src] {raise .src ; return}
+	if {[winfo exists .src]} {raise .src ; return}
 
 	build_framework .src Source "*No file*"
 
@@ -2172,13 +2161,7 @@ proc create_source_window {} {
 
 	$wins($cfile) insert 0.0 "  This page intentionally left blank."
 	$wins($cfile) configure -width 88 -state disabled \
-		-yscrollcommand textscrollproc
-
-	proc textscrollproc {args} {global screen_height screen_top screen_bot
-				    eval ".src.scroll set $args"
-				    set screen_height [lindex $args 1]
-				    set screen_top [lindex $args 2]
-				    set screen_bot [lindex $args 3]}
+		-yscrollcommand ".src.scroll set"
 }
 
 proc update_autocmd {} {
@@ -2186,43 +2169,44 @@ proc update_autocmd {} {
 	global accumulate_output
 
 	catch {gdb_cmd "${.autocmd.label}"} result
-	if !$accumulate_output { .autocmd.text delete 0.0 end }
+	if {!$accumulate_output} { .autocmd.text delete 0.0 end }
 	.autocmd.text insert end $result
-	.autocmd.text yview -pickplace end
+	.autocmd.text see end
 }
 
 proc create_autocmd_window {} {
-	global .autocmd.label
+  global .autocmd.label
 
-	if [winfo exists .autocmd] {raise .autocmd ; return}
+  if {[winfo exists .autocmd]} {raise .autocmd ; return}
 
-	build_framework .autocmd "Auto Command" ""
+  build_framework .autocmd "Auto Command" ""
 
-# First, delete all the old view menu entries
+  # First, delete all the old view menu entries
 
-	.autocmd.menubar.view.menu delete 0 last
+  .autocmd.menubar.view.menu delete 0 last
 
-# Accumulate output option
+  # Accumulate output option
 
-	.autocmd.menubar.view.menu add checkbutton \
-		-variable accumulate_output \
-		-label "Accumulate output" -onvalue 1 -offvalue 0
+  .autocmd.menubar.view.menu add checkbutton \
+    -variable accumulate_output \
+    -label "Accumulate output" -onvalue 1 -offvalue 0
 
-# Now, create entry widget with label
+  # Now, create entry widget with label
 
-	frame .autocmd.entryframe
+  frame .autocmd.entryframe
 
-	entry .autocmd.entry -borderwidth 2 -relief sunken
-	bind .autocmd <Enter> {focus .autocmd.entry}
-	bind .autocmd.entry <Key-Return> {set .autocmd.label [.autocmd.entry get]
-					  .autocmd.entry delete 0 end }
+  entry .autocmd.entry -borderwidth 2 -relief sunken
+  bind .autocmd.entry <Key-Return> {
+    set .autocmd.label [.autocmd.entry get]
+    .autocmd.entry delete 0 end
+  }
 
-	label .autocmd.entrylab -text "Command: "
+  label .autocmd.entrylab -text "Command: "
 
-	pack .autocmd.entrylab -in .autocmd.entryframe -side left
-	pack .autocmd.entry -in .autocmd.entryframe -side left -fill x -expand yes
+  pack .autocmd.entrylab -in .autocmd.entryframe -side left
+  pack .autocmd.entry -in .autocmd.entryframe -side left -fill x -expand yes
 
-	pack .autocmd.entryframe -side bottom -fill x -before .autocmd.info
+  pack .autocmd.entryframe -side bottom -fill x -before .autocmd.info
 }
 
 # Return the longest common prefix in SLIST.  Can be empty string.
@@ -2262,9 +2246,12 @@ proc create_command_window {} {
 	global saw_tab
 
 	set saw_tab 0
-	if [winfo exists .cmd] {raise .cmd ; return}
+	if {[winfo exists .cmd]} {raise .cmd ; return}
 
 	build_framework .cmd Command "* Command Buffer *"
+
+        # Put focus on command area.
+        focus .cmd.text
 
 	set command_line {}
 
@@ -2272,99 +2259,97 @@ proc create_command_window {} {
 	gdb_cmd {set height 0}
 	gdb_cmd {set width 0}
 
-	bind .cmd.text <Enter> {focus %W}
-	bind .cmd.text <Delete> {delete_char %W}
+        # Tk uses the Motifism that Delete means delete forward.  I
+	# hate this, and I'm not gonna take it any more.
+        set bsBinding [bind Text <BackSpace>]
+        bind .cmd.text <Delete> "delete_char %W ; $bsBinding; break"
 	bind .cmd.text <BackSpace> {delete_char %W}
 	bind .cmd.text <Control-c> gdb_stop
-	bind .cmd.text <Control-u> {delete_line %W}
+	bind .cmd.text <Control-u> {delete_line %W ; break}
 	bind .cmd.text <Any-Key> {
-		global command_line
-		global saw_tab
-
-		set saw_tab 0
-		%W insert end %A
-		%W yview -pickplace end
-		append command_line %A
-		}
+	  set saw_tab 0
+	  %W insert end %A
+	  %W see end
+	  append command_line %A
+	  break
+	}
 	bind .cmd.text <Key-Return> {
-		global command_line
-		global saw_tab
+	  set saw_tab 0
+	  %W insert end \n
+	  interactive_cmd $command_line
 
-		set saw_tab 0
-		%W insert end \n
-		interactive_cmd $command_line
-
-#		%W yview -pickplace end
-#		catch "gdb_cmd [list $command_line]" result
-#		%W insert end $result
-		set command_line {}
-#		update_ptr
-		%W insert end "(gdb) "
-		%W yview -pickplace end
-		}
+	  # %W see end
+	  # catch "gdb_cmd [list $command_line]" result
+	  # %W insert end $result
+	  set command_line {}
+	  # update_ptr
+	  %W insert end "(gdb) "
+	  %W see end
+	  break
+	}
 	bind .cmd.text <Button-2> {
-		global command_line
-
-		%W insert end [selection get]
-		%W yview -pickplace end
-		append command_line [selection get]
+	  %W insert end [selection get]
+	  %W see end
+	  append command_line [selection get]
+	  break
 	}
 	bind .cmd.text <Key-Tab> {
-		global command_line
-		global saw_tab
-		global choices
+	  set choices [gdb_cmd "complete $command_line"]
+	  set choices [string trimright $choices \n]
+	  set choices [split $choices \n]
 
-		set choices [gdb_cmd "complete $command_line"]
-		set choices [string trimright $choices \n]
-		set choices [split $choices \n]
+	  # Just do completion if this is the first tab
+	  if {!$saw_tab} {
+	    set saw_tab 1
+	    set completion [find_completion $command_line $choices]
+	    append command_line $completion
+	    # Here is where the completion is actually done.  If there
+	    # is one match, complete the command and print a space.
+	    # If two or more matches, complete the command and beep.
+	    # If no match, just beep.
+	    switch [llength $choices] {
+	      0	{}
+	      1	{
+		%W insert end "$completion "
+		append command_line " "
+		return
+	      }
 
-# Just do completion if this is the first tab
-		if !$saw_tab {
-			set saw_tab 1
-			set completion [find_completion $command_line $choices]
-			append command_line $completion
-# Here is where the completion is actually done.  If there is one match,
-# complete the command and print a space.  If two or more matches, complete the
-# command and beep.  If no match, just beep.
-			switch -exact [llength $choices] {
-			0	{}
-			1	{%W insert end "$completion "
-				 append command_line " "
-				 return }
-			default	{%W insert end "$completion"}
-			}
-			puts -nonewline stdout \007
-			flush stdout
-			%W yview -pickplace end
-		} else {
-# User hit another consecutive tab.  List the choices.  Note that at this
-# point, choices may contain commands with spaces.  We have to lop off
-# everything before (and including) the last space so that the completion
-# list only shows the possibilities for the last token.
-
-			set choices [lsort $choices]
-			if [regexp ".* " $command_line prefix] {
-				regsub -all $prefix $choices {} choices
-			}
-			%W insert end "\n[join $choices { }]\n(gdb) $command_line"
-			%W yview -pickplace end
-		}
+	      default {
+		%W insert end $completion
+	      }
+	    }
+	    bell
+	    %W see end
+	  } else {
+	    # User hit another consecutive tab.  List the choices.
+	    # Note that at this point, choices may contain commands
+	    # with spaces.  We have to lop off everything before (and
+	    # including) the last space so that the completion list
+	    # only shows the possibilities for the last token.
+	    set choices [lsort $choices]
+	    if {[regexp ".* " $command_line prefix]} {
+	      regsub -all $prefix $choices {} choices
+	    }
+	    %W insert end "\n[join $choices { }]\n(gdb) $command_line"
+	    %W see end
+	  }
+	  break
 	}
-	proc delete_char {win} {
-		global command_line
+}
 
-		tk_textBackspace $win
-		$win yview -pickplace insert
-		set tmp [expr [string length $command_line] - 2]
-		set command_line [string range $command_line 0 $tmp]
-	}
-	proc delete_line {win} {
-		global command_line
+proc delete_char {win} {
+  global command_line
+  set tmp [expr [string length $command_line] - 2]
+  set command_line [string range $command_line 0 $tmp]
+}
 
-		$win delete {end linestart + 6 chars} end
-		$win yview -pickplace insert
-		set command_line {}
-	}
+proc delete_line {win} {
+  global command_line
+
+  $win delete {end linestart + 6 chars} end
+  $win see insert
+  set command_line {}
 }
 
 #
@@ -2405,7 +2390,7 @@ proc FSBox {{purpose "Select file:"} {defaultName ""} {cmd ""} {errorHandler
 ""}} {
     global fileselect
     set w .fileSelect
-    if [Exwin_Toplevel $w "Select File" FileSelect] {
+    if {[Exwin_Toplevel $w "Select File" FileSelect]} {
 	# path independent names for the widgets
 	
 	set fileselect(list) $w.file.sframe.list
@@ -2462,33 +2447,28 @@ proc FSBox {{purpose "Select file:"} {defaultName ""} {cmd ""} {errorHandler
 	bind $fileselect(direntry) <Return> [list fileselect.list.cmd %W]
 	bind $fileselect(direntry) <Tab> [list fileselect.tab.dircmd]
 	bind $fileselect(entry) <Tab> [list fileselect.tab.filecmd]
-    
-	tk_listboxSingleSelect $fileselect(list)
-    
-    
+
+        $fileselect(list) configure -selectmode single
+
 	bind $fileselect(list) <Button-1> {
 	    # puts stderr "button 1 release"
-	    %W select from [%W nearest %y]
 	    $fileselect(entry) delete 0 end
 	    $fileselect(entry) insert 0 [%W get [%W nearest %y]]
 	}
     
 	bind $fileselect(list) <Key> {
-	    %W select from [%W nearest %y]
 	    $fileselect(entry) delete 0 end
 	    $fileselect(entry) insert 0 [%W get [%W nearest %y]]
 	}
     
 	bind $fileselect(list) <Double-ButtonPress-1> {
 	    # puts stderr "double button 1"
-	    %W select from [%W nearest %y]
 	    $fileselect(entry) delete 0 end
 	    $fileselect(entry) insert 0 [%W get [%W nearest %y]]
 	    $fileselect(ok) invoke
 	}
     
 	bind $fileselect(list) <Return> {
-	    %W select from [%W nearest %y]
 	    $fileselect(entry) delete 0 end
 	    $fileselect(entry) insert 0 [%W get [%W nearest %y]]
 	    $fileselect(ok) invoke
@@ -2540,7 +2520,7 @@ proc FSBox {{purpose "Select file:"} {defaultName ""} {cmd ""} {errorHandler
 
 proc fileselect.cd { dir } {
     global fileselect
-    if [catch {cd $dir} err] {
+    if {[catch {cd $dir} err]} {
 	fileselect.yck $dir
 	cd
     }
@@ -2551,6 +2531,7 @@ proc fileselect.yck { {tag {}} } {
     global fileselect
     $fileselect(msg) configure -text "Yck! $tag"
 }
+
 proc fileselect.ok {} {
     global fileselect
     $fileselect(msg) configure -text $fileselect(text)
@@ -2577,7 +2558,7 @@ proc fileselect.list.cmd {w {state normal}} {
     }
     fileselect.ok
     update idletasks
-    if [file isdirectory $dir] {
+    if {[file isdirectory $dir]} {
 	fileselect.getfiles $dir $pat $state
 	focus $fileselect(entry)
     } else {
@@ -2590,10 +2571,10 @@ proc fileselect.ok.cmd {w cmd errorHandler} {
     set selname [$fileselect(entry) get]
     set seldir [$fileselect(direntry) get]
 
-    if [string match /* $selname] {
+    if {[string match /* $selname]} {
 	set selected $selname
     } else {
-	if [string match ~* $selname] {
+	if {[string match ~* $selname]} {
 	    set selected $selname
 	} else {
 	    set selected $seldir/$selname
@@ -2601,12 +2582,12 @@ proc fileselect.ok.cmd {w cmd errorHandler} {
     }
 
     # some nasty file names may cause "file isdirectory" to return an error
-    if [catch {file isdirectory $selected} isdir] {
+    if {[catch {file isdirectory $selected} isdir]} {
 	fileselect.yck "isdirectory failed"
 	return
     }
-    if [catch {glob $selected} globlist] {
-	if ![file isdirectory [file dirname $selected]] {
+    if {[catch {glob $selected} globlist]} {
+	if {![file isdirectory [file dirname $selected]]} {
 	    fileselect.yck "bad pathname"
 	    return
 	}
@@ -2623,7 +2604,7 @@ proc fileselect.ok.cmd {w cmd errorHandler} {
     } else {
 	set selected $globlist
     }
-    if [file isdirectory $selected] {
+    if {[file isdirectory $selected]} {
 	fileselect.getfiles $selected $fileselect(pattern)
 	$fileselect(entry) delete 0 end
 	return
@@ -2644,7 +2625,7 @@ proc fileselect.getfiles { dir {pat *} {state normal} } {
 
     set currentDir [pwd]
     fileselect.cd $dir
-    if [catch {set files [lsort [glob -nocomplain $pat]]} err] {
+    if {[catch {set files [lsort [glob -nocomplain $pat]]} err]} {
 	$fileselect(msg) configure -text $err
 	$fileselect(list) delete 0 end
 	update idletasks
@@ -2676,7 +2657,7 @@ proc fileselect.getfiles { dir {pat *} {state normal} } {
 
     # build a reordered list of the files: directories are displayed first
     # and marked with a trailing "/"
-    if [string compare $dir /] {
+    if {[string compare $dir /]} {
 	fileselect.putfiles $files [expr {($pat == "*") ? 1 : 0}]
     } else {
 	fileselect.putfiles $files
@@ -2724,10 +2705,12 @@ OK to overwrite it?"
     destroy $w
     return $fileExists(ok)
 }
+
 proc FileExistsCancel {} {
     global fileExists
     set fileExists(ok) 0
 }
+
 proc FileExistsOK {} {
     global fileExists
     set fileExists(ok) 1
@@ -2746,15 +2729,15 @@ proc fileselect.getfiledir { dir {basedir [pwd]} } {
     } else {
 	set path [$fileselect(entry) get]
     }
-    if [catch {set listFile [glob -nocomplain $path*]}] {
+    if {[catch {set listFile [glob -nocomplain $path*]}]} {
 	return  $returnList
     }
     foreach el $listFile {
 	if {$dir != 0} {
-	    if [file isdirectory $el] {
+	    if {[file isdirectory $el]} {
 		lappend returnList [file tail $el]
 	    }
-	} elseif ![file isdirectory $el] {
+	} elseif {![file isdirectory $el]} {
 	    lappend returnList [file tail $el]
 	}	    
     }
@@ -2779,7 +2762,9 @@ proc fileselect.gethead { list } {
 	}
     return $returnHead
 }
-	
+
+# FIXME this function is a crock.  Can write tilde expanding function
+# in terms of glob and quote_glob; do so.
 proc fileselect.expand.tilde { } {
     global fileselect
 
@@ -2793,15 +2778,15 @@ proc fileselect.expand.tilde { } {
     set listmatch {}
 
     ## look in /etc/passwd
-    if [file exists /etc/passwd] {
-	if [catch {set users [exec cat /etc/passwd | sed s/:.*//]} err] {
+    if {[file exists /etc/passwd]} {
+	if {[catch {set users [exec cat /etc/passwd | sed s/:.*//]} err]} {
 	    puts "Error\#1 $err"
 	    return
 	}
 	set list [split $users "\n"]
     }
     if {[lsearch -exact $list "+"] != -1} {
-	if [catch {set users [exec ypcat passwd | sed s/:.*//]} err] {
+	if {[catch {set users [exec ypcat passwd | sed s/:.*//]} err]} {
 	    puts "Error\#2 $err"
 	    return
 	}
@@ -2809,7 +2794,7 @@ proc fileselect.expand.tilde { } {
     }
     $fileselect(list) delete 0 end
     foreach el $list {
-	if [string match $dir* $el] {
+	if {[string match $dir* $el]} {
 	    lappend listmatch $el
 	    $fileselect(list) insert end $el
 	}
@@ -2834,12 +2819,12 @@ proc fileselect.tab.dircmd { } {
     if {$dir == ""} {
 	$fileselect(direntry) delete 0 end
 	    $fileselect(direntry) insert 0 [pwd]
-	if [string compare [pwd] "/"] {
+	if {[string compare [pwd] "/"]} {
 	    $fileselect(direntry) insert end /
 	}
 	return
     }
-    if [catch {set tmp [file isdirectory [file dirname $dir]]}] {
+    if {[catch {set tmp [file isdirectory [file dirname $dir]]}]} {
 	if {[string index $dir 0] == "~"} {
 	    fileselect.expand.tilde
 	}
@@ -2849,13 +2834,13 @@ proc fileselect.tab.dircmd { } {
 	return
     }
     set dirFile [fileselect.getfiledir 1 $dir]
-    if ![llength $dirFile] {
+    if {![llength $dirFile]} {
 	return
     }
     if {[llength $dirFile] == 1} {
 	$fileselect(direntry) delete 0 end
 	$fileselect(direntry) insert 0 [file dirname $dir]
-	if [string compare [file dirname $dir] /] {
+	if {[string compare [file dirname $dir] /]} {
 	    $fileselect(direntry) insert end /[lindex $dirFile 0]/
 	} else {
 	    $fileselect(direntry) insert end [lindex $dirFile 0]/
@@ -2867,7 +2852,7 @@ proc fileselect.tab.dircmd { } {
     set headFile [fileselect.gethead $dirFile]
     $fileselect(direntry) delete 0 end
     $fileselect(direntry) insert 0 [file dirname $dir]
-    if [string compare [file dirname $dir] /] {
+    if {[string compare [file dirname $dir] /]} {
 	$fileselect(direntry) insert end /$headFile
     } else {
 	$fileselect(direntry) insert end $headFile
@@ -2893,7 +2878,7 @@ proc fileselect.tab.filecmd { } {
     }
     set listFile [fileselect.getfiledir 0 $dir]
     puts $listFile
-    if ![llength $listFile] {
+    if {![llength $listFile]} {
 	return
     }
     if {[llength $listFile] == 1} {
@@ -2909,9 +2894,9 @@ proc fileselect.tab.filecmd { } {
 
 proc Exwin_Toplevel { path name {class Dialog} {dismiss yes}} {
     global exwin
-    if [catch {wm state $path} state] {
+    if {[catch {wm state $path} state]} {
 	set t [Widget_Toplevel $path $name $class]
-	if ![info exists exwin(toplevels)] {
+	if {![info exists exwin(toplevels)]} {
 	    set exwin(toplevels) [option get . exwinPaths {}]
 	}
 	set ix [lsearch $exwin(toplevels) $t]
@@ -2957,7 +2942,7 @@ proc Widget_Toplevel { path name {class Dialog} {x {}} {y {}} } {
     set self [toplevel $path -class $class]
     set usergeo [option get $path position Position]
     if {$usergeo != {}} {
-	if [catch {wm geometry $self $usergeo} err] {
+	if {[catch {wm geometry $self $usergeo} err]} {
 #	    Exmh_Debug Widget_Toplevel $self $usergeo => $err
 	}
     } else {
@@ -2985,17 +2970,18 @@ proc Widget_Frame {par child {class GDB} {where {top expand fill}} args } {
 proc Widget_AddBut {par but txt cmd {where {right padx 1}} } {
     # Create a Packed button.  Return the button pathname
     set cmd2 [list button $par.$but -text $txt -command $cmd]
-    if [catch $cmd2 t] {
+    if {[catch $cmd2 t]} {
 	puts stderr "Widget_AddBut (warning) $t"
 	eval $cmd2 {-font fixed}
     }
     pack append $par $par.$but $where
     return $par.$but
 }
+
 proc Widget_CheckBut {par but txt var {where {right padx 1}} } {
     # Create a check button.  Return the button pathname
     set cmd [list checkbutton $par.$but -text $txt -variable $var]
-    if [catch $cmd t] {
+    if {[catch $cmd t]} {
 	puts stderr "Widget_CheckBut (warning) $t"
 	eval $cmd {-font fixed}
     }
@@ -3005,16 +2991,17 @@ proc Widget_CheckBut {par but txt var {where {right padx 1}} } {
 
 proc Widget_Label { frame {name label} {where {left fill}} args} {
     set cmd [list label $frame.$name ]
-    if [catch [concat $cmd $args] t] {
+    if {[catch [concat $cmd $args] t]} {
 	puts stderr "Widget_Label (warning) $t"
 	eval $cmd $args {-font fixed}
     }
     pack append $frame $frame.$name $where
     return $frame.$name
 }
+
 proc Widget_Entry { frame {name entry} {where {left fill}} args} {
     set cmd [list entry $frame.$name ]
-    if [catch [concat $cmd $args] t] {
+    if {[catch [concat $cmd $args] t]} {
 	puts stderr "Widget_Entry (warning) $t"
 	eval $cmd $args {-font fixed}
     }
@@ -3024,32 +3011,40 @@ proc Widget_Entry { frame {name entry} {where {left fill}} args} {
 
 # End of fileselect.tcl.
 
-# Setup the initial windows
+#
+# Create a copyright window and center it on the screen.  Arrange for
+# it to disappear when the user clicks it, or after a suitable period
+# of time.
+#
+proc create_copyright_window {} {
+  toplevel .c
+  message .c.m -text [gdb_cmd {show version}] -aspect 500 -relief raised
+  pack .c.m
 
-create_source_window
+  bind .c.m <1> {destroy .c}
+  # "suitable period" currently means "15 seconds".
+  after 15000 {
+    if {[winfo exists .c]} then {
+      destroy .c
+    }
+  }
 
-if {[tk colormodel .src.text] == "color"} {
-	set highlight "-background red2 -borderwidth 2 -relief sunk"
-} else {
-	set fg [lindex [.src.text config -foreground] 4]
-	set bg [lindex [.src.text config -background] 4]
-	set highlight "-foreground $bg -background $fg -borderwidth 0"
+  wm transient .c .
+  center_window .c
 }
 
+# FIXME need to handle mono here.  In Tk4 that is more complicated.
+set highlight "-background red2 -borderwidth 2 -relief sunken"
+
+# Setup the initial windows
+create_source_window
 create_command_window
 
-# Create a copyright window
-
-update
-toplevel .c
-wm geometry .c +300+300
-wm overrideredirect .c true
-
-message .c.m -text [gdb_cmd "show version"] -aspect 500 -relief raised
-pack .c.m
-bind .c.m <Leave> {destroy .c}
+# Make this last so user actually sees it.
+create_copyright_window
+# Refresh.
 update
 
-if [file exists ~/.gdbtkinit] {
-	source ~/.gdbtkinit
+if {[file exists ~/.gdbtkinit]} {
+  source ~/.gdbtkinit
 }

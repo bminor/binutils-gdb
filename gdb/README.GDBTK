@@ -23,8 +23,7 @@ Building and installing
 
 Building GDBtk is very straightforward.  The main difference is that you will
 need to use the `--enable-gdbtk' option when you run configure in the top level
-directory.  You will also need to install Tcl version 7.3 (or 7.4), and Tk 3.6.
-[We haven't ported to Tk 4.0 yet.]
+directory.  You will also need to install Tcl version 7.5a2, and Tk 4.1a2.
 
 You will also need to have X11 (R4/R5/R6) installed (this is a prerequisite to
 installing Tk).
@@ -307,6 +306,7 @@ generic problems
 	window.  I.E. "argc" works, as does "*(argv+argc)" but not "argv[argc]".
 
 	Solution:  None
+	[ I believe this problem is fixed, but I have not tested it ]
 
     o	The Breakpoint window does not get automatically updated and changes
 	made in the window are not reflected back in the results from "info br".

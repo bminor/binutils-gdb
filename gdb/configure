@@ -21,6 +21,14 @@ ac_help="$ac_help
   --enable-gdbtk "
 ac_help="$ac_help
   --with-x                use the X Window System"
+ac_help="$ac_help
+  --with-tclinclude       directory where tcl private headers are"
+ac_help="$ac_help
+  --with-tcllib           directory where the tcl library is"
+ac_help="$ac_help
+  --with-tkinclude        directory where the tk private headers are"
+ac_help="$ac_help
+  --with-tklib            directory where the tk library is"
 
 # Initialize some variables set by options.
 # The variables have the same names as the options, with
@@ -616,7 +624,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 620 "configure"
+#line 628 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -630,7 +638,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 634 "configure"
+#line 642 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -657,7 +665,7 @@ echo "$ac_t""$CPP" 1>&6
 
 echo $ac_n "checking for AIX""... $ac_c" 1>&6
 cat > conftest.$ac_ext <<EOF
-#line 661 "configure"
+#line 669 "configure"
 #include "confdefs.h"
 #ifdef _AIX
   yes
@@ -684,7 +692,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 688 "configure"
+#line 696 "configure"
 #include "confdefs.h"
 #include <minix/config.h>
 EOF
@@ -1018,7 +1026,7 @@ else
   ac_cv_c_cross=yes
 else
 cat > conftest.$ac_ext <<EOF
-#line 1022 "configure"
+#line 1030 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
@@ -1040,7 +1048,7 @@ if eval "test \"`echo '$''{'ac_cv_header_stdc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1044 "configure"
+#line 1052 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 #include <stdarg.h>
@@ -1062,7 +1070,7 @@ rm -f conftest*
 if test $ac_cv_header_stdc = yes; then
   # SunOS 4.x string.h does not declare mem*, contrary to ANSI.
 cat > conftest.$ac_ext <<EOF
-#line 1066 "configure"
+#line 1074 "configure"
 #include "confdefs.h"
 #include <string.h>
 EOF
@@ -1080,7 +1088,7 @@ fi
 if test $ac_cv_header_stdc = yes; then
   # ISC 2.0.2 stdlib.h does not declare free, contrary to ANSI.
 cat > conftest.$ac_ext <<EOF
-#line 1084 "configure"
+#line 1092 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 EOF
@@ -1101,7 +1109,7 @@ if test "$cross_compiling" = yes; then
   :
 else
 cat > conftest.$ac_ext <<EOF
-#line 1105 "configure"
+#line 1113 "configure"
 #include "confdefs.h"
 #include <ctype.h>
 #define ISLOWER(c) ('a' <= (c) && (c) <= 'z')
@@ -1139,7 +1147,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1143 "configure"
+#line 1151 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -1172,7 +1180,7 @@ if eval "test \"`echo '$''{'ac_cv_header_stat_broken'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1176 "configure"
+#line 1184 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -1230,7 +1238,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1234 "configure"
+#line 1242 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1282,7 +1290,7 @@ else
   ac_cv_func_mmap=no
 else
 cat > conftest.$ac_ext <<EOF
-#line 1286 "configure"
+#line 1294 "configure"
 #include "confdefs.h"
 
 /* Thanks to Mike Haertel and Jim Avera for this test. */
@@ -1516,7 +1524,7 @@ test -z "$x_direct_test_library" && x_direct_test_library=Xt
 test -z "$x_direct_test_function" && x_direct_test_function=XtMalloc
 test -z "$x_direct_test_include" && x_direct_test_include=X11/Intrinsic.h
 cat > conftest.$ac_ext <<EOF
-#line 1520 "configure"
+#line 1528 "configure"
 #include "confdefs.h"
 #include <$x_direct_test_include>
 EOF
@@ -1579,7 +1587,7 @@ rm -f conftest*
 ac_save_LIBS="$LIBS"
 LIBS="-l$x_direct_test_library $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1583 "configure"
+#line 1591 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1698,7 +1706,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lICE  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1702 "configure"
+#line 1710 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1742,7 +1750,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldnet  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1746 "configure"
+#line 1754 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1777,7 +1785,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldnet_stub  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1781 "configure"
+#line 1789 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1817,7 +1825,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lnsl  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1821 "configure"
+#line 1829 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1856,7 +1864,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lsocket  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1860 "configure"
+#line 1868 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1888,134 +1896,80 @@ fi
 
 
     
-#
-# Ok, lets find the tk source trees so we can use the headers
-# If the directory (presumably symlink) named "tk" exists, use that one
-# in preference to any others.  Same logic is used when choosing library
-# and again with Tcl.
-#
-echo "checking for Tk source directory" 1>&6
-TKHDIR=""
-for i in `ls -d ${srcdir}/../tk* 2>/dev/null` ${srcdir}/../tk ; do
-  if test -f $i/tk.h ; then
-    TKHDIR="-I$i"
-  fi
-done
-# if we can't find it, see if one is installed
-if test x"$TKHDIR" = x ; then
-  installed=0
-  if test -f $prefix/include/tk.h; then
-    installed=1 TKHDIR="-I$prefix/include"
-  else
-  ac_safe=`echo "tk.h" | tr './\055' '___'`
-echo $ac_n "checking for tk.h""... $ac_c" 1>&6
-if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  cat > conftest.$ac_ext <<EOF
-#line 1917 "configure"
-#include "confdefs.h"
-#include <tk.h>
-EOF
-eval "$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-ac_err=`grep -v '^ *+' conftest.out`
-if test -z "$ac_err"; then
-  rm -rf conftest*
-  eval "ac_cv_header_$ac_safe=yes"
-else
-  echo "$ac_err" >&5
-  rm -rf conftest*
-  eval "ac_cv_header_$ac_safe=no"
-fi
-rm -f conftest*
-fi
-if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
-  echo "$ac_t""yes" 1>&6
-  installed=1
-else
-  echo "$ac_t""no" 1>&6
-fi
-
-  fi
-  if test $installed -eq 0 ; then
-    TKHDIR="# no Tk directory found"
-    echo "configure: warning: Can't find Tk directory" 1>&2
-  fi
-fi
-if test x"$TKHDIR" != x ; then
-  echo "$ac_t""Setting TKHDIR to be $i" 1>&6
-fi
-
-#
-# Ok, lets find the tk library
-# First, look for one uninstalled.  
-#
-TKLIB=""
-echo "checking for Tk library" 1>&6
-for i in `ls -d ../tk* 2>/dev/null` ../tk ; do
-  if test -f "$i/Makefile" ; then
-    TKLIB=$i/libtk.a
-  fi
-done    
-# If not found, look for installed version
-if test x"$TKLIB" = x ; then
-  if test -f $prefix/lib/libtk.a; then
-    installed=1
-  else
-    installed=0
-  fi
-  if test $installed -eq 1 ; then
-    TKLIB="-ltk"
-  fi
-fi
-
-# If still not found, assume Tk simply hasn't been built yet
-if test x"$TKLIB" = x ; then
-  for i in `ls -d ../tk* 2>/dev/null` ../tk ; do
-    if test -f "$i/tk.h" ; then
-      TKLIB=$i/libtk.a
-  fi
-  done    
-fi
-
-if test x"$TKLIB" = x ; then
-    TKLIB="# no Tk library found"
-    echo "configure: warning: Can't find Tk library" 1>&2
-else
-    echo "$ac_t""setting TKLIB to be $TKLIB" 1>&6
-    no_tk=
-fi
-
-
-
-
-    
+  
 #
 # Ok, lets find the tcl source trees so we can use the headers
-#
 # Warning: transition of version 9 to 10 will break this algorithm
-# because 10 sorts before 9.
+# because 10 sorts before 9. We also look for just tcl. We have to
+# be careful that we don't match stuff like tclX by accident.
+# the alternative search directory is involked by --with-tclinclude
 #
-echo "checking for Tcl source directory" 1>&6
-TCLHDIR=""
-for i in `ls -d ${srcdir}/../tcl* 2>/dev/null` ${srcdir}/../tcl ; do
-  if test -f $i/tclInt.h ; then
-    TCLHDIR="-I$i"
-  fi
-done
-# if we can't find it, see if one is installed
-if test x"$TCLHDIR" = x ; then
-  installed=0
-  if test -f $prefix/include/tclInt.h; then
-    installed=1 TCLHDIR="-I$prefix/include"
+no_tcl=true
+echo $ac_n "checking for Tcl private headers""... $ac_c" 1>&6
+# Check whether --with-tclinclude or --without-tclinclude was given.
+if test "${with_tclinclude+set}" = set; then
+  withval="$with_tclinclude"
+  with_tclinclude=${withval}
+fi
+
+if eval "test \"`echo '$''{'ac_cv_c_tclh'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  
+# first check to see if --with-tclinclude was specified
+if test x"${with_tclinclude}" != x ; then
+  if test -f ${with_tclinclude}/tclInt.h ; then
+    ac_cv_c_tclh=`(cd ${with_tclinclude}; pwd)`
   else
-  ac_safe=`echo "tclInt.h" | tr './\055' '___'`
+    { echo "configure: error: ${with_tclinclude} directory doesn't contain private headers" 1>&2; exit 1; }
+  fi
+fi
+# next check in private source directory
+#
+# since ls returns lowest version numbers first, reverse its output
+if test x"${ac_cv_c_tclh}" = x ; then
+  for i in \
+		${srcdir}/../tcl \
+		`ls -dr ${srcdir}/../tcl[0-9]* 2>/dev/null` \
+		${srcdir}/../../tcl \
+		`ls -dr ${srcdir}/../../tcl[0-9]* 2>/dev/null` \
+		${srcdir}/../../../tcl \
+		`ls -dr ${srcdir}/../../../tcl[0-9]* 2>/dev/null ` ; do
+    if test -f $i/tclInt.h ; then
+      ac_cv_c_tclh=`(cd $i; pwd)`
+      break
+    fi
+    # Tcl 7.5 and greater puts headers in subdirectory.
+    if test -f $i/generic/tclInt.h ; then
+       ac_cv_c_tclh=`(cd $i; pwd)`/generic
+    fi
+  done
+fi
+# finally check in a few common install locations
+#
+# since ls returns lowest version numbers first, reverse its output
+if test x"${ac_cv_c_tclh}" = x ; then
+  for i in \
+		`ls -dr /usr/local/src/tcl[0-9]* 2>/dev/null` \
+		`ls -dr /usr/local/lib/tcl[0-9]* 2>/dev/null` \
+		/usr/local/src/tcl \
+		/usr/local/lib/tcl \
+		${prefix}/include ; do
+    if test -f $i/tclInt.h ; then
+      ac_cv_c_tclh=`(cd $i; pwd)`
+      break
+    fi
+  done
+fi
+# see if one is installed
+if test x"${ac_cv_c_tclh}" = x ; then
+   ac_safe=`echo "tclInt.h" | tr './\055' '___'`
 echo $ac_n "checking for tclInt.h""... $ac_c" 1>&6
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2019 "configure"
+#line 1973 "configure"
 #include "confdefs.h"
 #include <tclInt.h>
 EOF
@@ -2033,52 +1987,594 @@ rm -f conftest*
 fi
 if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  installed=1
+  ac_cv_c_tclh=installed
+else
+  echo "$ac_t""no" 1>&6
+ac_cv_c_tclh=""
+fi
+
+fi
+
+fi
+
+if test x"${ac_cv_c_tclh}" = x ; then
+  TCLHDIR="# no Tcl private headers found"
+  { echo "configure: error: Can't find Tcl private headers" 1>&2; exit 1; }
+fi
+if test x"${ac_cv_c_tclh}" != x ; then
+  no_tcl=""
+  if test x"${ac_cv_c_tkh}" = x"installed" ; then
+    echo "$ac_t""is installed" 1>&6
+    TCLHDIR=""
+  else
+    echo "$ac_t""found in ${ac_cv_c_tclh}" 1>&6
+    # this hack is cause the TCLHDIR won't print if there is a "-I" in it.
+    TCLHDIR="-I${ac_cv_c_tclh}"
+  fi
+fi
+
+echo $ac_n "checking Tcl version""... $ac_c" 1>&6
+rm -rf tclmajor tclminor
+orig_includes="$CPPFLAGS"
+
+if test x"${TCLHDIR}" != x ; then
+  CPPFLAGS="$CPPFLAGS $TCLHDIR"
+fi
+
+if test "$cross_compiling" = yes; then
+  { echo "configure: error: can't be cross compiled" 1>&2; exit 1; }
+
+else
+cat > conftest.$ac_ext <<EOF
+#line 2030 "configure"
+#include "confdefs.h"
+
+#include <stdio.h>
+#include "tcl.h"
+main() {
+	FILE *maj = fopen("tclmajor","w");
+	FILE *min = fopen("tclminor","w");
+	fprintf(maj,"%d",TCL_MAJOR_VERSION);
+	fprintf(min,"%d",TCL_MINOR_VERSION);
+	fclose(maj);
+	fclose(min);
+	return 0;
+}
+EOF
+eval $ac_link
+if test -s conftest && (./conftest; exit) 2>/dev/null; then
+  tclmajor=`cat tclmajor`
+	tclminor=`cat tclminor`
+	tclversion=$tclmajor.$tclminor
+	echo "$ac_t""$tclversion" 1>&6
+	rm -f tclmajor tclminor
+
+else
+  echo "$ac_t""can't happen" 1>&6
+
+fi
+fi
+rm -fr conftest*
+CPPFLAGS="${orig_includes}"
+
+
+
+
+  
+#
+# Ok, lets find the tcl library
+# First, look for one uninstalled.  
+# the alternative search directory is invoked by --with-tcllib
+#
+
+if test $tclmajor -ge 7 -a $tclminor -ge 4 ; then
+  installedtcllibroot=tcl$tclversion
+else
+  installedtcllibroot=tcl
+fi
+
+if test x"${no_tcl}" = x ; then
+  # we reset no_tcl incase something fails here
+  no_tcl=true
+  # Check whether --with-tcllib or --without-tcllib was given.
+if test "${with_tcllib+set}" = set; then
+  withval="$with_tcllib"
+  with_tcllib=${withval}
+fi
+
+  echo $ac_n "checking for Tcl library""... $ac_c" 1>&6
+  if eval "test \"`echo '$''{'ac_cv_c_tcllib'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  
+  # First check to see if --with-tcllib was specified.
+  # This requires checking for both the installed and uninstalled name-styles
+  # since we have no idea if it's installed or not.
+  if test x"${with_tcllib}" != x ; then
+    if test -f "${with_tcllib}/lib$installedtcllibroot.so" ; then
+      ac_cv_c_tcllib=`(cd ${with_tcllib}; pwd)`/lib$installedtcllibroot.so
+    elif test -f "${with_tcllib}/libtcl.so" ; then
+      ac_cv_c_tcllib=`(cd ${with_tcllib}; pwd)`/libtcl.so
+    # then look for a freshly built statically linked library
+    # if Makefile exists we assume its configured and libtcl will be built first.
+    elif test -f "${with_tcllib}/lib$installedtcllibroot.a" ; then
+      ac_cv_c_tcllib=`(cd ${with_tcllib}; pwd)`/lib$installedtcllibroot.a
+    elif test -f "${with_tcllib}/libtcl.a" ; then
+      ac_cv_c_tcllib=`(cd ${with_tcllib}; pwd)`/libtcl.a
+    else
+      { echo "configure: error: ${with_tcllib} directory doesn't contain libraries" 1>&2; exit 1; }
+    fi
+  fi
+  # then check for a private Tcl library
+  # Since these are uninstalled, use the simple lib name root.
+  if test x"${ac_cv_c_tcllib}" = x ; then
+    for i in \
+		../tcl \
+		`ls -dr ../tcl[0-9]* 2>/dev/null` \
+		../../tcl \
+		`ls -dr ../../tcl[0-9]* 2>/dev/null` \
+		../../../tcl \
+		`ls -dr ../../../tcl[0-9]* 2>/dev/null` ; do
+      # Tcl 7.5 and greater puts library in subdir.  Look there first.
+      if test -f "$i/unix/libtcl.so" ; then
+	 ac_cv_c_tcllib=`(cd $i; pwd)`/unix/libtcl.so
+	 break
+      elif test -f "$i/unix/libtcl.a" -o -f "$i/unix/Makefile"; then
+	 ac_cv_c_tcllib=`(cd $i; pwd)`/unix/libtcl.a
+	 break
+      # look for a freshly built dynamically linked library
+      elif test -f "$i/libtcl.so" ; then
+        ac_cv_c_tcllib=`(cd $i; pwd)`/libtcl.so
+	break
+
+      # then look for a freshly built statically linked library
+      # if Makefile exists we assume its configured and libtcl will be
+      # built first.
+      elif test -f "$i/libtcl.a" -o -f "$i/Makefile" ; then
+        ac_cv_c_tcllib=`(cd $i; pwd)`/libtcl.a
+	break
+      fi
+    done
+  fi
+  # check in a few common install locations
+  if test x"${ac_cv_c_tcllib}" = x ; then
+    for i in `ls -d ${prefix}/lib /usr/local/lib 2>/dev/null` ; do
+      # first look for a freshly built dynamically linked library
+      if test -f "$i/lib$installedtcllibroot.so" ; then
+        ac_cv_c_tcllib=`(cd $i; pwd)`/lib$installedtcllibroot.so
+	break
+      # then look for a freshly built statically linked library
+      # if Makefile exists we assume its configured and libtcl will be built first.
+      elif test -f "$i/lib$installedtcllibroot.a" -o -f "$i/Makefile" ; then
+        ac_cv_c_tcllib=`(cd $i; pwd)`/lib$installedtcllibroot.a
+	break
+      fi
+    done
+  fi
+  # check in a few other private locations
+  if test x"${ac_cv_c_tcllib}" = x ; then
+    for i in \
+		${srcdir}/../tcl \
+		`ls -dr ${srcdir}/../tcl[0-9]* 2>/dev/null` ; do
+      # Tcl 7.5 and greater puts library in subdir.  Look there first.
+      if test -f "$i/unix/libtcl.so" ; then
+	 ac_cv_c_tcllib=`(cd $i; pwd)`/unix/libtcl.so
+	 break
+      elif test -f "$i/unix/libtcl.a" -o -f "$i/unix/Makefile"; then
+	 ac_cv_c_tcllib=`(cd $i; pwd)`/unix/libtcl.a
+	 break
+      # look for a freshly built dynamically linked library
+      elif test -f "$i/libtcl.so" ; then
+        ac_cv_c_tcllib=`(cd $i; pwd)`/libtcl.so
+	break
+
+      # then look for a freshly built statically linked library
+      # if Makefile exists we assume its configured and libtcl will be
+      # built first.
+      elif test -f "$i/libtcl.a" -o -f "$i/Makefile" ; then
+        ac_cv_c_tcllib=`(cd $i; pwd)`/libtcl.a
+	break
+      fi
+    done
+  fi
+
+  # see if one is conveniently installed with the compiler
+  if test x"${ac_cv_c_tcllib}" = x ; then	
+    orig_libs="$LIBS"
+    LIBS="$LIBS -l$installedtcllibroot -lm"    
+    if test "$cross_compiling" = yes; then
+  ac_cv_c_tclib="-l$installedtcllibroot"
+else
+cat > conftest.$ac_ext <<EOF
+#line 2190 "configure"
+#include "confdefs.h"
+
+    Tcl_AppInit()
+    { exit(0); }
+EOF
+eval $ac_link
+if test -s conftest && (./conftest; exit) 2>/dev/null; then
+  ac_cv_c_tcllib="-l$installedtcllibroot"
+else
+  ac_cv_c_tcllib=""
+    
+fi
+fi
+rm -fr conftest*
+    LIBS="${orig_libs}"
+   fi
+  
+fi
+
+  if test x"${ac_cv_c_tcllib}" = x ; then
+    TCLLIB="# no Tcl library found"
+    echo "configure: warning: Can't find Tcl library" 1>&2
+  else
+    TCLLIB=${ac_cv_c_tcllib}
+    echo "$ac_t""found $TCLLIB" 1>&6
+    no_tcl=
+  fi
+fi
+
+
+
+
+
+    
+  
+#
+# Ok, lets find the tk source trees so we can use the headers
+# If the directory (presumably symlink) named "tk" exists, use that one
+# in preference to any others.  Same logic is used when choosing library
+# and again with Tcl. The search order is the best place to look first, then in
+# decreasing significance. The loop breaks if the trigger file is found.
+# Note the gross little conversion here of srcdir by cd'ing to the found
+# directory. This converts the path from a relative to an absolute, so
+# recursive cache variables for the path will work right. We check all
+# the possible paths in one loop rather than many seperate loops to speed
+# things up.
+# the alternative search directory is invoked by --with-tkinclude
+#
+echo $ac_n "checking for Tk private headers""... $ac_c" 1>&6
+# Check whether --with-tkinclude or --without-tkinclude was given.
+if test "${with_tkinclude+set}" = set; then
+  withval="$with_tkinclude"
+  with_tkinclude=${withval}
+fi
+
+no_tk=true
+if eval "test \"`echo '$''{'ac_cv_c_tkh'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  
+# first check to see if --with-tkinclude was specified
+if test x"${with_tkinclude}" != x ; then
+  if test -f ${with_tkinclude}/tk.h ; then
+    ac_cv_c_tkh=`(cd ${with_tkinclude}; pwd)`
+  else
+    { echo "configure: error: ${with_tkinclude} directory doesn't contain private headers" 1>&2; exit 1; }
+  fi
+fi
+# next check in private source directory
+#
+# since ls returns lowest version numbers first, reverse the entire list
+# and search for the worst fit, overwriting it with better fits as we find them
+if test x"${ac_cv_c_tkh}" = x ; then
+  for i in \
+		${srcdir}/../tk \
+		`ls -dr ${srcdir}/../tk[0-9]* 2>/dev/null` \
+		${srcdir}/../../tk \
+		`ls -dr ${srcdir}/../../tk[0-9]* 2>/dev/null` \
+		${srcdir}/../../../tk \
+		`ls -dr ${srcdir}/../../../tk[0-9]* 2>/dev/null ` ; do
+    if test -f $i/tk.h ; then
+      ac_cv_c_tkh=`(cd $i; pwd)`
+      break
+    fi
+    # Tk 4.1 and greater puts this in a subdir.
+    if test -f $i/generic/tk.h; then
+       ac_cv_c_tkh=`(cd $i; pwd)`/generic
+    fi
+  done
+fi
+# finally check in a few common install locations
+#
+# since ls returns lowest version numbers first, reverse the entire list
+# and search for the worst fit, overwriting it with better fits as we find them
+if test x"${ac_cv_c_tkh}" = x ; then
+  for i in \
+		`ls -dr /usr/local/src/tk[0-9]* 2>/dev/null` \
+		`ls -dr /usr/local/lib/tk[0-9]* 2>/dev/null` \
+		/usr/local/src/tk \
+		/usr/local/lib/tk \
+		${prefix}/include ; do
+    if test -f $i/tk.h ; then
+      ac_cv_c_tkh=`(cd $i; pwd)`
+      break
+    fi
+  done
+fi
+# see if one is installed
+if test x"${ac_cv_c_tkh}" = x ; then
+  ac_safe=`echo "tk.h" | tr './\055' '___'`
+echo $ac_n "checking for tk.h""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 2306 "configure"
+#include "confdefs.h"
+#include <tk.h>
+EOF
+eval "$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
+ac_err=`grep -v '^ *+' conftest.out`
+if test -z "$ac_err"; then
+  rm -rf conftest*
+  eval "ac_cv_header_$ac_safe=yes"
+else
+  echo "$ac_err" >&5
+  rm -rf conftest*
+  eval "ac_cv_header_$ac_safe=no"
+fi
+rm -f conftest*
+fi
+if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+  ac_cv_c_tkh=installed
 else
   echo "$ac_t""no" 1>&6
 fi
 
-  fi
-  if test $installed -eq 0 ; then
-    TCLHDIR="# no Tcl directory found"
-    echo "configure: warning: Can't find Tcl directory" 1>&2
-  fi
-else
-  echo "$ac_t""setting TCLHDIR to be $i" 1>&6
 fi
 
-#
-# Ok, lets find the tcl library
-# First, look for the latest uninstalled
-#
-TCLLIB=""
-echo "checking for Tcl library" 1>&6
-for i in `ls -d ../tcl* 2>/dev/null` ../tcl ; do
-  if test -f "$i/Makefile" ; then
-    TCLLIB=$i/libtcl.a
-  fi
-done    
-# If not found, look for installed version
-if test x"$TCLLIB" = x ; then
-  if test -f $prefix/lib/libtcl.a; then installed=1; else installed=0; fi
-  if test $installed -eq 1 ; then
-    TCLLIB="-ltcl"
-  fi
-fi
-# If still not found, assume Tcl simply hasn't been built yet
-if test x"$TCLLIB" = x ; then
-  for i in `ls -d ../tcl* 2>/dev/null` ../tcl ; do
-    if test -f "$i/tcl.h" ; then
-      TCLLIB=$i/libtcl.a
-  fi
-  done    
 fi
 
-if test x"$TCLLIB" = x ; then
-    TCLLIB="# no Tcl library found"
-    echo "configure: warning: Can't find Tcl library" 1>&2
+if test x"${ac_cv_c_tkh}" != x ; then
+  no_tk=""
+  if test x"${ac_cv_c_tkh}" = x"installed" ; then
+    echo "$ac_t""is installed" 1>&6
+    TKHDIR=""
+  else
+    echo "$ac_t""found in $ac_cv_c_tkh" 1>&6
+    # this hack is cause the TKHDIR won't print if there is a "-I" in it.
+    TKHDIR="-I${ac_cv_c_tkh}"
+  fi
 else
-    echo "$ac_t""setting TCLLIB to be $TCLLIB" 1>&6
+  TKHDIR="# no Tk directory found"
+  echo "configure: warning: Can't find Tk private headers" 1>&2
+  no_tk=true
+fi
+
+# if Tk is installed, extract the major/minor version
+if test x"${no_tk}" = x ; then
+echo $ac_n "checking Tk version""... $ac_c" 1>&6
+rm -rf tkmajor tkminor
+orig_includes="$CPPFLAGS"
+
+if test x"${TCLHDIR}" != x ; then
+  CPPFLAGS="$CPPFLAGS $TCLHDIR"
+fi
+if test x"${TKHDIR}" != x ; then
+  CPPFLAGS="$CPPFLAGS $TKHDIR"
+fi
+if test x"${x_includes}" != x -a x"${x_includes}" != xNONE ; then
+  CPPFLAGS="$CPPFLAGS -I$x_includes"
+fi
+
+if test "$cross_compiling" = yes; then
+  { echo "configure: error: can't be cross compiled" 1>&2; exit 1; }
+
+else
+cat > conftest.$ac_ext <<EOF
+#line 2370 "configure"
+#include "confdefs.h"
+
+#include <stdio.h>
+#include "tk.h"
+  main() {
+	FILE *maj = fopen("tkmajor","w");
+	FILE *min = fopen("tkminor","w");
+	fprintf(maj,"%d",TK_MAJOR_VERSION);
+	fprintf(min,"%d",TK_MINOR_VERSION);
+	fclose(maj);
+	fclose(min);
+	return 0;
+}
+EOF
+eval $ac_link
+if test -s conftest && (./conftest; exit) 2>/dev/null; then
+  tkmajor=`cat tkmajor`
+	tkminor=`cat tkminor`
+	tkversion=$tkmajor.$tkminor
+	echo "$ac_t""$tkversion" 1>&6
+	rm -f tkmajor tkminor
+
+else
+  { echo "configure: error: 
+cannot compile a simple X program - suspect your xmkmf is
+misconfigured and is incorrectly reporting the location of your X
+include or libraries - report this to your system admin" 1>&2; exit 1; } 
+fi
+fi
+rm -fr conftest*
+CPPFLAGS="${orig_includes}"
+fi
+
+
+
+
+  
+
+#
+# Ok, lets find the tk library
+# First, look for the latest private (uninstalled) copy
+# Notice that the destinations in backwards priority since the tests have
+# no break.
+# Then we look for either .a, .so, or Makefile.  A Makefile is acceptable
+# is it indicates the target has been configured and will (probably)
+# soon be built.  This allows an entire tree of Tcl software to be
+# configured at once and then built.
+# the alternative search directory is invoked by --with-tklib
+#
+
+if test x"${no_tk}" = x ; then
+  # reset no_tk incase something fails here
+  no_tk="true"
+
+  if test $tkmajor -ge 4 ; then
+    installedtklibroot=tk$tkversion
+  else
+    installedtkllibroot=tk
+  fi
+
+  # Check whether --with-tklib or --without-tklib was given.
+if test "${with_tklib+set}" = set; then
+  withval="$with_tklib"
+  with_tklib=${withval}
+fi
+
+  echo $ac_n "checking for Tk library""... $ac_c" 1>&6
+  if eval "test \"`echo '$''{'ac_cv_c_tklib'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  
+  # first check to see if --with-tklib was specified
+  # This requires checking for both the installed and uninstalled name-styles
+  # since we have no idea if it's installed or not.
+  if test x"${with_tklib}" != x ; then
+    if test -f "${with_tklib}/lib$installedtklibroot.so" ; then
+      ac_cv_c_tklib=`(cd ${with_tklib}; pwd)`/lib$installedtklibroot.so
+      no_tk=""
+    elif test -f "${with_tklib}/libtk.so" ; then
+      ac_cv_c_tklib=`(cd ${with_tklib}; pwd)`/libtk.so
+      no_tk=""
+    # then look for a freshly built statically linked library
+    # if Makefile exists we assume its configured and libtk will be built
+    elif test -f "${with_tklib}/lib$installedtklibroot.a" ; then
+      ac_cv_c_tklib=`(cd ${with_tklib}; pwd)`/lib$installedtklibroot.a
+      no_tk=""
+    elif test -f "${with_tklib}/libtk.a" ; then
+      ac_cv_c_tklib=`(cd ${with_tklib}; pwd)`/libtk.a
+      no_tk=""
+    else
+      { echo "configure: error: ${with_tklib} directory doesn't contain libraries" 1>&2; exit 1; }
+    fi
+  fi
+  # then check for a private Tk library
+  # Since these are uninstalled, use the simple lib name root.
+  if test x"${ac_cv_c_tklib}" = x ; then
+    for i in \
+		../tk \
+		`ls -dr ../tk[0-9]* 2>/dev/null` \
+		../../tk \
+		`ls -dr ../../tk[0-9]* 2>/dev/null` \
+		../../../tk \
+		`ls -dr ../../../tk[0-9]* 2>/dev/null` ; do
+      # Tk 4.1 and greater puts things in subdirs.  Check these first.
+      if test -f "$i/unix/libtk.so" ; then
+	 ac_cv_c_tklib=`(cd $i; pwd)`/unix/libtk.so
+	 no_tk=
+	 break
+      elif test -f "$i/unix/libtk.a" -o -f "$i/unix/Makefile"; then
+	 ac_cv_c_tklib=`(cd $i; pwd)`/unix/libtk.a
+	 no_tk=
+	 break
+      # look for a freshly built dynamically linked library
+      elif test -f "$i/libtk.so" ; then
+        ac_cv_c_tklib=`(cd $i; pwd)`/libtk.so
+        no_tk=
+	break
+      # then look for a freshly built statically linked library
+      # if Makefile exists we assume its configured and libtk will be built 
+      elif test -f "$i/libtk.a" -o -f "$i/Makefile" ; then
+        ac_cv_c_tklib=`(cd $i; pwd)`/libtk.a
+        no_tk=""
+ 	break
+      fi
+    done
+  fi
+  # finally check in a few common install locations
+  if test x"${ac_cv_c_tklib}" = x ; then
+    for i in `ls -d ${prefix}/lib /usr/local/lib 2>/dev/null` ; do
+      # first look for a freshly built dynamically linked library
+      if test -f "$i/lib$installedtklibroot.so" ; then
+        ac_cv_c_tklib=`(cd $i; pwd)`/lib$installedtklibroot.so
+        no_tk=""
+	break
+      # then look for a freshly built statically linked library
+      # if Makefile exists, we assume it's configured and libtcl will be built 
+      elif test -f "$i/lib$installedtklibroot.a" -o -f "$i/Makefile" ; then
+        ac_cv_c_tklib=`(cd $i; pwd)`/lib$installedtklibroot.a
+        no_tk=""
+ 	break
+      fi
+    done
+  fi
+  # check in a few other private locations
+  if test x"${ac_cv_c_tklib}" = x ; then
+    for i in \
+		${srcdir}/../tk \
+		`ls -dr ${srcdir}/../tk[0-9]* 2>/dev/null` ; do
+      # Tk 4.1 and greater puts things in subdirs.  Check these first.
+      if test -f "$i/unix/libtk.so" ; then
+	 ac_cv_c_tklib=`(cd $i; pwd)`/unix/libtk.so
+	 no_tk=
+	 break
+      elif test -f "$i/unix/libtk.a" -o -f "$i/unix/Makefile"; then
+	 ac_cv_c_tcllib=`(cd $i; pwd)`/unix/libtk.a
+	 no_tk=
+	 break
+      # look for a freshly built dynamically linked library
+      elif test -f "$i/libtk.so" ; then
+        ac_cv_c_tklib=`(cd $i; pwd)`/libtk.so
+        no_tk=""
+	break
+      # then look for a freshly built statically linked library
+      # if Makefile exists, we assume it's configured and libtcl will be built 
+      elif test -f "$i/libtk.a" -o -f "$i/Makefile" ; then
+        ac_cv_c_tklib=`(cd $i; pwd)`/libtk.a
+        no_tk=""
+ 	break
+      fi
+    done
+  fi
+  # see if one is conveniently installed with the compiler
+  if test x"${ac_cv_c_tklib}" = x ; then
+       
+       orig_libs="$LIBS"
+       LIBS="$LIBS -l$installedtklibroot $x_libraries $ac_cv_c_tcllib -lm"    
+       if test "$cross_compiling" = yes; then
+  ac_cv_c_tklib="-l$installedtklibroot"
+else
+cat > conftest.$ac_ext <<EOF
+#line 2551 "configure"
+#include "confdefs.h"
+
+       Tcl_AppInit()
+       { exit(0); }
+EOF
+eval $ac_link
+if test -s conftest && (./conftest; exit) 2>/dev/null; then
+  ac_cv_c_tklib="-l$installedtklibroot"
+else
+  ac_cv_c_tklib=""
+       
+fi
+fi
+rm -fr conftest*
+       LIBS="${orig_libs}"
+   fi
+  
+fi
+
+  if test x"${ac_cv_c_tklib}" = x ; then
+    TKLIB="# no Tk library found"
+    echo "configure: warning: Can't find Tk library" 1>&2
+  else
+    TKLIB=$ac_cv_c_tklib
+    echo "$ac_t""found $TKLIB" 1>&6
+    no_tk=
+  fi
 fi
 
 
@@ -2755,10 +3251,10 @@ s%@X_CFLAGS@%$X_CFLAGS%g
 s%@X_PRE_LIBS@%$X_PRE_LIBS%g
 s%@X_LIBS@%$X_LIBS%g
 s%@X_EXTRA_LIBS@%$X_EXTRA_LIBS%g
-s%@TKHDIR@%$TKHDIR%g
-s%@TKLIB@%$TKLIB%g
 s%@TCLHDIR@%$TCLHDIR%g
 s%@TCLLIB@%$TCLLIB%g
+s%@TKHDIR@%$TKHDIR%g
+s%@TKLIB@%$TKLIB%g
 s%@ENABLE_GDBTK@%$ENABLE_GDBTK%g
 s%@X_LDFLAGS@%$X_LDFLAGS%g
 s%@ENABLE_CFLAGS@%$ENABLE_CFLAGS%g

@@ -87,14 +87,6 @@ Wed Jan 17 13:22:27 1996  Stan Shebs  <shebs@andros.cygnus.com>
 	* remote-nindy.c (nindy_ops): Ditto.
 	* remote-udi.c (udi_ops): Ditto.
 
-Tue Jan 16 11:22:58 1996  Stu Grossman  (grossman@cygnus.com)
-
-	* Makefile.in (CLIBS):  Add LIBS to allow libraries to be
-	specified on the make command line (via make LIBS=xxx).
-start-sanitize-gm
-	* configure.in (enable-gm):  magic.o -> gmagic.o.
-end-sanitize-gm
-
 Tue Jan 16 18:00:35 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* remote-mips.c (pmon_opn, pmon_wait, pmon_makeb64, pmon_zeroset,
@@ -107,6 +99,26 @@ Tue Jan 16 18:00:35 1996  James G. Smith  <jsmith@cygnus.co.uk>
 	(mips_enter_debug, mips_exit_debug): New functions.
 	(pmon_ops): New target definition structure.
 	
+Tue Jan 16 11:22:58 1996  Stu Grossman  (grossman@cygnus.com)
+
+	* Makefile.in (CLIBS):  Add LIBS to allow libraries to be
+	specified on the make command line (via make LIBS=xxx).
+start-sanitize-gm
+	* configure.in (enable-gm):  magic.o -> gmagic.o.
+end-sanitize-gm
+
+start-sanitize-gdbtk
+Mon Jan 15 09:58:41 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* gdbtk.tcl (create_expr_window): Many changes to update GUI.
+	(add_expr): Changes from create_expr_window.
+	(create_command_window): Set focus.
+	(delete_expr): Rewrote.
+	(expr_update_button): New proc.
+	(add_expr): Put bindings on FocusIn, FocusOut.
+	Don't allow .file_popup to be torn off.
+end-sanitize-gdbtk
+
 Fri Jan 12 21:41:58 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* symtab.c (find_pc_symtab): Don't lose if OBJF_REORDERED
@@ -131,6 +143,30 @@ Fri Jan 12 13:11:42 1996  Stan Shebs  <shebs@andros.cygnus.com>
 	From Wilfried Moser <wilfried.moser@aut.alcatel.at>:
 	* remote.c (remotetimeout): New GDB variable, use to set the
 	remote timeout for reading.
+
+start-sanitize-gdbtk
+Fri Jan 12 09:36:17 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* gdbtk.tcl (gdbtk_tcl_query): Swap Yes and No buttons.
+	(update_listing): Use lassign.  Use "see" to scroll.  Don't need
+	screen_top, screen_bot, screen_height.
+	(update_assembly): Use "see" to scroll.
+	(textscrollproc): Removed.
+	(create_file_win): Don't use textscrollproc.
+	(asmscrollproc): Removed.
+	(create_asm_window): Don't use asmscrollproc.
+	(create_asm_win): Ditto.
+	(screen_height, screen_top, screen_bot): Removed.
+	(run_editor): New proc.
+	(build_framework): Use it.
+	(create_file_win, create_source_window): Don't use textscrollproc.
+	(create_breakpoints_window): Set -xscrollcommand on canvas.
+	(not_implemented_yet): Default button is 0.
+	(delete_char): Don't use tk_textBackspace.
+	(create_command_window): Allow Tk bindings to fire after deleting
+	character.
+	(create_command_window): Make Delete delete left, not right.
+end-sanitize-gdbtk
 
 Fri Jan 12 07:14:27 1996  Fred Fish  <fnf@cirdan.cygnus.com>
 
@@ -158,97 +194,21 @@ Thu Jan 11 17:21:25 1996  Per Bothner  <bothner@kalessin.cygnus.com>
 	parameter type as the expected type when evaluating arg expressions.
 	* ch-lang.c (evaluate_subexp_chill):  Likewise (for MULTI_SUBSCRIPT).
 
-Wed Jan 10 11:25:37 1996  Fred Fish  <fnf@cygnus.com>
+start-sanitize-gdbtk
+Thu Jan 11 10:08:14 1996  Tom Tromey  <tromey@creche.cygnus.com>
 
-	* coredep.c: Renamed to core-aout.c
-	* core-svr4.c: Renamed to core-regset.c
-	* Makefile.in (ALLDEPFILES): Account for renamings.
-	* corelow.c (core_file_fns): Add, points to chain of structs.
-	(add_core_fns): New function to build chain of structs.
-	(get_core_registers): Modify to search core functions chain and call
- 	appropriate fetch_core_registers function based on core file flavour.
-	* gdbcore.h (fetch_core_registers):  Remove declaration.
-	(struct core_fns): Define struct for core function info.
-	* i386m3-nat.c: Update comment for filename change (coredep->core-aout)
-	* a68v-nat.c (fetch_core_registers): Remove stub, not needed now.
-	* alpha-nat.c (fetch_core_registers): Make static.
-	(alpha_core_fns, _initialize_core_alpha): New struct and func.
-	* core-aout.c (fetch_core_registers): Make static
-	(aout_core_fns, _initialize_core_aout): New struct and func.
-	* core-regset.c (fetch_core_registers): Make static.
-	(regset_core_fns, _initialize_core_regset): New struct and func.
-	* core-sol2.c (fetch_core_registers): Make static.
-	(solaris_core_fns, _initialize_core_solaris): New struct and func.
-	* hp300ux-nat.c (fetch_core_registers): Make static.
-	(hp300ux_core_fns, _initialize_core_hp300ux): New struct and func.
-	* i386aix-nat.c (fetch_core_registers): Make static.
-	(i386aix_core_fns, _initialize_core_i386aix): New struct and func.
-	* i386mach-nat.c (fetch_core_registers: Make static.
-	(i386mach_core_fns, _initialize_core_i386mach): New struct and func.
-	* irix4-nat.c (fetch_core_registers): Make static.
-	(irix4_core_fns, _initialize_core_irix4): New struct and func.
-	* irix5-nat.c (fetch_core_registers): 
-	(irix5_core_fns, _initialize_core_irix5): New struct and func.
-	* lynx-nat.c (fetch_core_registers): Make static.
-	(lynx_core_fns, _initialize_core_lynx): New struct and func.
-	* mips-nat.c (fetch_core_registers): Make static.
-	(mips_core_fns, _initialize_core_mips): New struct and func.
-	* ns32km3-nat.c (fetch_core_registers): Remove stub.
-	* rs6000-nat.c (fetch_core_registers): Make static.
-	(rs6000_core_fns, _initialize_core_rs6000): New struct and func.
-	* sparc-nat.c (fetch_core_registers): Make static.
-	(sparc_core_fns, _initialize_core_sparc): New struct and func.
-	* sun3-nat.c (fetch_core_registers): 
-	(sun3_core_fns, _initialize_core_sun3): New struct and func.
-	* sun386-nat.c (fetch_core_registers): Remove stub.
-	* ultra3-nat.c (fetch_core_registers): Make static.
-	(ultra3_core_fns, _initialize_core_ultra3): New struct and func.
-	* config/gould/pn.mh (XDEPFILES),
- 	config/i386/fbsd.mh (NATDEPFILES),
-	config/i386/i386bsd.mh (NATDEPFILES),
- 	config/i386/i386m3.mh (XDEPFILES),
-	config/i386/i386sco.mh (NATDEPFILES),
-	config/i386/i386sco4.mh (NATDEPFILES),
-	config/i386/i386v.mh (NATDEPFILES),
-	config/i386/i386v32.mh (NATDEPFILES),
-	config/i386/nbsd.mh (NATDEPFILES),
-	config/i386/ptx.mh (XDEPFILES),
-	config/i386/ptx4.mh (XDEPFILES),
-	config/i386/symmetry.mh (NATDEPFILES),
-	config/m68k/3b1.mh (XDEPFILES),
-	config/m68k/cisco.mt (TDEPFILES),
-	config/m68k/delta68.mh (NATDEPFILES),
-	config/m68k/dpx2.mh (NATDEPFILES),
-	config/m68k/hp300bsd.mh (NATDEPFILES),
-	config/m68k/hp300hpux.mh (NATDEPFILES),
-	config/m68k/isi.mh (XDEPFILES),
-	config/m68k/news.mh (NATDEPFILES),
-	config/m68k/news1000.mh (XDEPFILES),
-	config/m88k/cxux.mh (NATDEPFILES),
-	config/m88k/delta88.mh (NATDEPFILES),
-	config/mips/littlemips.mh (XDEPFILES),
-	config/mips/mipsm3.mh (XDEPFILES),
-	config/ns32k/merlin.mh (XDEPFILES),
-	config/ns32k/nbsd.mh (NATDEPFILES),
-	config/ns32k/ns32km3.mh (NATDEPFILES),
-	config/pa/hppabsd.mh (NATDEPFILES),
-	config/pa/hppahpux.mh (NATDEPFILES),
-	config/romp/rtbsd.mh (XDEPFILES),
-	config/tahoe/tahoe.mh (XDEPFILES),
-	config/vax/vaxbsd.mh (XDEPFILES),
-	config/vax/vaxult.mh (NATDEPFILES),
-	config/vax/vaxult2.mh (NATDEPFILES),
-	Account for coredep.o to core-aout.o name change.	
-	* config/i386/i386dgux (NATDEPFILES),
-	config/i386/i386sol2.mh (NATDEPFILES),
-	config/i386/i386v4.mh (NATDEPFILES),
-	config/i386/linux.mh (NATDEPFILES),
-	config/i386/ncr3000.mh (NATDEPFILES),
-	config/m68k/m68kv4.mh (NATDEPFILES),
-	config/m88k/delta88v4.mh (NATDEPFILES),
-	config/mips/mipsv4.mh (NATDEPFILES),
-	Account for core-svr4.o to core-regset.o name change.
-	
+	* main.c (main): Disable window interface if --help or --version
+	specified.
+
+	* gdbtk.tcl (FSBox): Don't use tk_listboxSingleSelect.
+
+	Changes in sync with expect:
+	* configure.in (ENABLE_GDBTK): Use CY_AC_PATH_TCL and
+	CY_AC_PATH_TK.
+	* aclocal.m4: Replaced with version from expect.
+	* configure: Regenerated.
+end-sanitize-gdbtk
+
 Wed Jan 10 16:08:49 1996  Brendan Kehoe  <brendan@lisa.cygnus.com>
 
 	* configure.in, configure: Recognize rs6000-*-aix4*.
@@ -267,6 +227,47 @@ Wed Jan 10 11:25:37 1996  Fred Fish  <fnf@cygnus.com>
 	Define.
 	* stabsread.c (define_symbol): If register value is too large,
 	tell what it is and what max is.
+
+start-sanitize-gdbtk
+Wed Jan 10 09:07:22 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* gdbtk.tcl (gdbtk_tcl_fputs, gdbtk_tcl_fputs_error,
+	gdbtk_tcl_flush): Use "see", not "yview".
+	(gdbtk_tcl_query): Use questhead bitmap.
+	various: Always wrap condition of 'if' in {...}.
+	(add_breakpoint_frame): Set -value on radiobuttons.
+	(lassign): New proc.
+	(add_breakpoint_frame): Use lassign, not series of assignments.
+	(decr): Made faster.
+	(interactive_cmd): Use "see", not "yview".
+	(not_implemented_yet): Use warning bitmap.
+	(update_expr): Don't allow $expr to be evalled by Tcl.
+	(create_expr_window): Don't use "focus".
+	(delete_char, delete_line): Define globally.
+	(delete_line, delete_char, create_command_window, update_autocmd,
+	build_framework, create_asm_win, create_file_win): Use "see", not
+	"yview".
+	(create_copyright_window, center_window, bind_widget_after_class):
+	New procs.
+	(FSBox,create_command_window, create_autocmd_window): Binding
+	changes for Tk4.
+	(textscrollproc): Define globally.
+	(build_framework): tk_menuBar no longer needed.  Keys Prior, Next,
+	Home, End, Up, and Down are all defined by Tk.
+	(apply_filespec): Use error bitmap in dialog.
+	(files_command): Don't use tk_listboxSingleSelect.
+	(files_command): Don't use "uniq" to remove duplicates from a
+	list.
+	(update_assembly): Use lassign.
+	(create_asm_win): Removed redundant bindings.
+	(listing_window_button_1, file_popup_menu): Use tk_popup.
+	(ButtonRelease-1 binding): Just remove tag from window; rest
+	handled by Tk.
+
+	* gdbtk.c (gdbtk_query): Use Tcl_Merge to provide quoting.
+	(call_wrapper): Use Tcl_Eval, not Tcl_VarEval.
+	(gdbtk_call_command): Ditto.
+end-sanitize-gdbtk
 
 Tue Jan  9 09:33:53 1996  Jeffrey A Law  (law@cygnus.com)
 

@@ -115,8 +115,8 @@ if test "${enable_gdbtk}" = "yes"; then
     AC_PATH_X
     AC_PATH_XTRA
 
-    CYGNUS_PATH_TK
-    CYGNUS_PATH_TCL
+    CY_AC_PATH_TCL
+    CY_AC_PATH_TK
 
     ENABLE_GDBTK=1
 

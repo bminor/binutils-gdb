@@ -15,6 +15,16 @@ Mon Jan 15 09:33:00 1996  Fred Fish  <fnf@cygnus.com>
 	[] tests with "test" and enclose string in quotes.
 	* gdb.stabs/configure: Rebuild
 	
+Thu Jan 11 09:43:14 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	Changes in sync with expect:
+	* aclocal.m4 (CY_AC_PATH_TCLH): Handle Tcl 7.5 and greater.
+	(CY_AC_PATH_TCLLIB): Handle Tcl 7.5 and greater.
+	(CY_AC_PATH_TKH): Handle Tk 4.1 and greater.
+	(CY_AC_PATH_TKLIB): Handle Tk 4.1 and greater.  Properly quote
+	argument to AC_REQUIRE.
+	* configure: Regenerated.
+
 Thu Jan  4 08:17:22 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/corefile.exp: When generating a core, discard any
