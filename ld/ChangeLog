@@ -1,3 +1,7 @@
+Fri Nov  5 09:02:52 1993  D. V. Henkel-Wallace  (gumby@blues.cygnus.com)
+
+	* configure.in: Support x86 unixware and netware plus generic netware.
+
 Fri Nov  5 21:47:55 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* emulparams/i386mach.sh (TEXT_START_ADDR, NONPAGED_TEXT_START_ADDR): 
