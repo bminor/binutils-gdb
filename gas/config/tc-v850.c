@@ -557,6 +557,27 @@ md_assemble (str)
 		  goto error;
 		}
 	    }
+	  else if ((operand->flags & V850_OPERAND_EP) != 0)
+	    {
+	      char *start = input_line_pointer;
+	      char c = get_symbol_end ();
+	      if (strcmp (start, "ep") != 0
+		  && strcmp (start, "r30") != 0)
+		{
+		  /* Put things back the way we found them.  */
+		  *input_line_pointer = c;
+		  input_line_pointer = start;
+		  errmsg = "expected EP register";
+		  goto error;
+		}
+	      *input_line_pointer = c;
+	      str = input_line_pointer;
+	      input_line_pointer = hold;
+
+	      while (*str == ' ' || *str == ',' || *str == '[' || *str == ']')
+		++str;
+	      continue;
+	    }
 	  else if ((operand->flags & V850_OPERAND_CC) != 0) 
 	    {
 	      if (!cc_name(&ex))
@@ -756,6 +777,9 @@ md_apply_fix3 (fixp, valuep, seg)
      valueT *valuep;
      segT seg;
 {
+  as_tsktsk ("relocations not supported yet.\n");
+  fixp->fx_done = 1;
+  return 1;
   abort();
 #if 0
   valueT value;

@@ -7,6 +7,11 @@ end-sanitize-d10v
 start-sanitize-v850
 Fri Aug 23 10:41:32 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* config/tc-v850.c (md_assemble): Rough cut at demanding
+	"ep" or "r30" in sst and sld instructions.
+	(md_apply_fix3): Don't abort.  Just warn that we don't
+	have relocs yet.
+
 	* config/tc-v850.c (CC_NAME_CNT): Define.
 	(cc_name): New function.
 	(md_assemble): Handle V850_OPERAND_CC correctly.
