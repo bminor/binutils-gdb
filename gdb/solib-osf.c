@@ -589,6 +589,12 @@ osf_open_symbol_file_object (void *from_ttyp)
 static int
 osf_in_dynsym_resolve_code (CORE_ADDR pc)
 {
+  /* This function currently always return False. This is a temporary
+     solution which only consequence is to introduce a minor incovenience
+     for the user: When stepping inside a subprogram located in a shared
+     library, gdb might stop inside the dynamic loader code instead of
+     inside the subprogram itself. See the explanations in infrun.c about
+     the IN_SOLIB_DYNSYM_RESOLVE_CODE macro for more details. */
   return 0;
 }
 
