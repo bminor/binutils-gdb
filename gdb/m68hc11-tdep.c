@@ -81,7 +81,16 @@ struct gdbarch_tdep
   {
     /* from the elf header */
     int elf_flags;
+
+    /* Stack pointer correction value.  For 68hc11, the stack pointer points
+       to the next push location.  An offset of 1 must be applied to obtain
+       the address where the last value is saved.  For 68hc12, the stack
+       pointer points to the last value pushed.  No offset is necessary.  */
+    int stack_correction;
   };
+
+#define M6811_TDEP gdbarch_tdep (current_gdbarch)
+#define STACK_CORRECTION (M6811_TDEP->stack_correction)
 
 struct frame_extra_info
 {
@@ -119,12 +128,6 @@ static struct m68hc11_soft_reg soft_regs[M68HC11_ALL_REGS];
 static int soft_min_addr;
 static int soft_max_addr;
 static int soft_reg_initialized = 0;
-
-/* Stack pointer correction value.  For 68hc11, the stack pointer points
-   to the next push location.  An offset of 1 must be applied to obtain
-   the address where the last value is saved.  For 68hc12, the stack
-   pointer points to the last value pushed.  No offset is necessary.  */
-static int stack_correction = 1;
 
 /* Look in the symbol table for the address of a pseudo register
    in memory.  If we don't find it, pretend the register is not used
@@ -281,7 +284,7 @@ m68hc11_saved_pc_after_call (struct frame_info *frame)
 {
   CORE_ADDR addr;
   
-  addr = read_register (HARD_SP_REGNUM) + stack_correction;
+  addr = read_register (HARD_SP_REGNUM) + STACK_CORRECTION;
   addr &= 0x0ffff;
   return read_memory_integer (addr, 2) & 0x0FFFF;
 }
@@ -634,7 +637,7 @@ m68hc11_frame_chain (struct frame_info *frame)
       return (CORE_ADDR) 0;
     }
 
-  addr = frame->frame + frame->extra_info->size + stack_correction - 2;
+  addr = frame->frame + frame->extra_info->size + STACK_CORRECTION - 2;
   addr = read_memory_unsigned_integer (addr, 2) & 0x0FFFF;
   if (addr == 0)
     {
@@ -664,7 +667,7 @@ m68hc11_frame_init_saved_regs (struct frame_info *fi)
   m68hc11_guess_from_prologue (pc, fi->frame, &pc, &fi->extra_info->size,
                                fi->saved_regs);
 
-  addr = fi->frame + fi->extra_info->size + stack_correction;
+  addr = fi->frame + fi->extra_info->size + STACK_CORRECTION;
   fi->saved_regs[SOFT_FP_REGNUM] = addr - 2;
   fi->saved_regs[HARD_SP_REGNUM] = addr;
   fi->saved_regs[HARD_PC_REGNUM] = fi->saved_regs[HARD_SP_REGNUM];
@@ -689,7 +692,7 @@ m68hc11_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     }
   else
     {
-      addr = fi->frame + fi->extra_info->size + stack_correction;
+      addr = fi->frame + fi->extra_info->size + STACK_CORRECTION;
       addr = read_memory_unsigned_integer (addr, 2) & 0x0ffff;
       fi->extra_info->return_pc = addr;
 #if 0
@@ -777,7 +780,7 @@ m68hc11_push_arguments (int nargs,
       /* The struct is allocated on the stack and gdb used the stack
          pointer for the address of that struct.  We must apply the
          stack offset on the address.  */
-      write_register (HARD_D_REGNUM, struct_addr + stack_correction);
+      write_register (HARD_D_REGNUM, struct_addr + STACK_CORRECTION);
     }
   else if (nargs > 0)
     {
@@ -804,7 +807,7 @@ m68hc11_push_arguments (int nargs,
     }
   sp -= stack_alloc;
 
-  stack_offset = stack_correction;
+  stack_offset = STACK_CORRECTION;
   for (argnum = first_stack_argnum; argnum < nargs; argnum++)
     {
       type = VALUE_TYPE (args[argnum]);
@@ -845,7 +848,7 @@ m68hc11_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
   /* The struct address computed by gdb is on the stack.
      It uses the stack pointer so we must apply the stack
      correction offset.  */
-  write_register (HARD_D_REGNUM, addr + stack_correction);
+  write_register (HARD_D_REGNUM, addr + STACK_CORRECTION);
 }
 
 static void
@@ -944,7 +947,7 @@ m68hc11_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
   pc = CALL_DUMMY_ADDRESS ();
   sp -= 2;
   store_unsigned_integer (valbuf, 2, pc);
-  write_memory (sp + stack_correction, valbuf, 2);
+  write_memory (sp + STACK_CORRECTION, valbuf, 2);
   return sp;
 }
 
@@ -993,7 +996,20 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->elf_flags = elf_flags;
+  switch (info.bfd_arch_info->arch)
+    {
+    case bfd_arch_m68hc11:
+      tdep->stack_correction = 1;
+      break;
 
+    case bfd_arch_m68hc12:
+      tdep->stack_correction = 0;
+      break;
+
+    default:
+      break;
+    }
+  
   /* Initially set everything according to the ABI.  */
   set_gdbarch_short_bit (gdbarch, 16);
   set_gdbarch_int_bit (gdbarch, 32);

@@ -1,3 +1,17 @@
+2000-11-24  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* m68hc11-tdep.c (gdbarch_tdep): Move stack_correction global to here.
+	(STACK_CORRECTION): Get stack correction using gdbarch_tdep.
+	(m68hc11_saved_pc_after_call): Use STACK_CORRECTION.
+	(m68hc11_frame_chain): Likewise.
+	(m68hc11_frame_init_saved_regs): Likewise.
+	(m68hc11_init_extra_frame_info): Likewise.
+	(m68hc11_push_arguments): Likewise.
+	(m68hc11_push_arguments): Likewise.
+	(m68hc11_store_struct_return): Likewise.
+	(m68hc11_push_return_address): Likewise.
+	(m68hc11_gdbarch_init): Setup stack_correction according to arch.
+
 Mon Nov 20 13:59:29 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in: Add support for configure option
