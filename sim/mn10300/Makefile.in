@@ -1,4 +1,4 @@
-#    Makefile template for Configure for the V850 sim library.
+#    Makefile template for Configure for the mn10300 sim library.
 #    Copyright (C) 1996 Free Software Foundation, Inc.
 #    Written by Cygnus Support.
 # 
@@ -17,10 +17,10 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 SIM_OBJS = interp.o table.o simops.o
-SIM_EXTRA_CFLAGS = -I$(srcdir)/../../newlib/libc/sys/sysnecv850
+SIM_EXTRA_CFLAGS = -I$(srcdir)/../../newlib/libc/sys/sysmec
 SIM_EXTRA_CLEAN = clean-extra
 
-INCLUDE = v850_sim.h $(srcdir)/../../include/callback.h
+INCLUDE = mn10300_sim.h $(srcdir)/../../include/callback.h
 
 @COMMON_MAKEFILE_FRAG@
 
@@ -33,11 +33,11 @@ table.c: gencode simops.h
 gencode.o: gencode.c $(INCLUDE)
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/gencode.c
 
-v850-opc.o: $(srcdir)/../../opcodes/v850-opc.c
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $<
+mn10300-opc.o: $(srcdir)/../../opcodes/mn10300-opc.c
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/../../opcodes/mn10300-opc.c
 
-gencode: gencode.o v850-opc.o
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -o gencode gencode.o v850-opc.o
+gencode: gencode.o mn10300-opc.o
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -o gencode gencode.o mn10300-opc.o $(BUILD_LIB)
 
 clean-extra:
 	rm -f table.c simops.h gencode

@@ -1,4 +1,4 @@
-dnl Process this file with autoconf to produce a configure script.
+dnl Process this file with `autoconf -l ../common' to produce a configure script.
 AC_PREREQ(2.5)dnl
 AC_INIT(Makefile.in)
 

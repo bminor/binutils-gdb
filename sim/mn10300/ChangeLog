@@ -1,3 +1,12 @@
+Thu Jan 23 11:46:23 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* configure configure.in Makefile.in:  Update to new configure
+	scheme which is more compatible with WinGDB builds.
+	* configure.in:  Improve comment on how to run autoconf.
+	* configure:  Re-run autoconf to get new ../common/aclocal.m4.
+	* Makefile.in:  Use autoconf substitution to install common
+	makefile fragment.
+
 Tue Jan 21 15:03:04 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* simops.c: Undo last change to "rol" and "ror", original code

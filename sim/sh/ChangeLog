@@ -1,3 +1,63 @@
+Thu Jan 23 11:46:23 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* configure configure.in Makefile.in:  Update to new configure
+	scheme which is more compatible with WinGDB builds.
+	* configure.in:  Improve comment on how to run autoconf.
+	* configure:  Re-run autoconf to get new ../common/aclocal.m4.
+	* Makefile.in:  Use autoconf substitution to install common
+	makefile fragment.
+
+Wed Nov 20 02:04:32 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in: Delete stuff moved to ../common/Make-common.in.
+	(SIM_OBJS,SIM_EXTRA_LIBS): Define.
+	* configure.in: Simplify using macros in ../common/aclocal.m4.
+	Call AC_CHECK_HEADERS(unistd.h).
+	* configure: Regenerated.
+	* config.in: New file.
+	* interp.c: #include "config.h".  #include <unistd.h> if present.
+	(trap): Fetch errno value with callback->get_errno.
+
+Tue Nov 12 13:34:00 1996  Dawn Perchik  <dawn@cygnus.com>   
+
+	* interp.c: Don't include windows polling code if inside simluator.
+
+Fri Sep 20 14:57:50 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* interp.c: Minor formatting improvements.
+	(saved_state_type): Add bank registers.
+	(bp_holder): New function, use to break on when debugging BUSERROR.
+	(BUSERROR): Call it if bus error occurs.
+
+Wed Jun 26 12:29:22 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
+
+        * Makefile.in (bindir, libdir, datadir, mandir, infodir, includedir,
+        INSTALL_PROGRAM, INSTALL_DATA): Use autoconf-set values.
+        (docdir): Removed.
+        * configure.in (AC_PREREQ): autoconf 2.5 or higher.
+        (AC_PROG_INSTALL): Added.
+        * configure: Rebuilt.
+
+Thu May 16 15:44:29 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* interp.c (saved_state_type): Add memstalls field.
+	(MA) Define macro.
+	(sim_resume): New local variable memstalls.  Add it back in to
+	saved_state at the end of the function.
+	(sim_info): Report memstalls.
+	* gencode.c (tab): Add MA() to the execution string of all
+	instructions which access memory.
+
+Wed Feb 21 12:16:41 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Regenerate with autoconf 2.7.
+
+Tue Dec  5 16:38:55 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* gencode.c (mac.l):  Don't abort GDB if executing mac.l
+	instruction (which is unimplemented).  Generate a SIGTRAP (in the
+	simulated target) instead.
+
 Mon Dec  4 12:22:24 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* gencode.c (tab): Added several sh3 opcodes.
@@ -11,12 +71,10 @@ Wed Nov 29 12:39:27 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 	the and operation instead of after.  For shad delete cast.  For shld
 	use UR instead of R and delete cast.
 
-start-sanitize-sh3e
 Fri Nov 17 12:48:55 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* gencode.c (tab): Add explicit NaN support for ftrc instruction.
 
-end-sanitize-sh3e
 Wed Nov 15 11:25:27 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* interp.c:  Make target_byte_order be extern to prevent SGI cc from
@@ -36,13 +94,11 @@ Sat Oct 21 13:01:18 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 	* gencode.c (gensim): Indicate SIGILL instead of calling abort for
 	default case.
 
-start-sanitize-sh3e
 Mon Oct 16 18:24:03 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* interp.c (saved_state_type): Move FP registers to immediately
 	after SR.
 
-end-sanitize-sh3e
 Tue Oct 10 11:12:15 1995  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (BISON): Remove macro.
@@ -82,14 +138,12 @@ Fri Sep 15 19:30:05 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* syscall.h: Copy from newlib.
 
-start-sanitize-sh3e
 Thu Sep 14 19:32:59 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* gencode.c:  Back up PC by 2 for breakpoints.
 	* interp.c:  Move fp regs beyond pc/pr/etc to avoid confusing GDB,
 	which expect pc to immediatly follow regs[].
 
-end-sanitize-sh3e
 Fri Sep  8 14:18:13 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Define CC_FOR_BUILD.  Don't call AC_PROG_INSTALL.
@@ -116,17 +170,14 @@ Thu Sep  7 15:02:31 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 	(CC, CFLAGS, AR, RANLIB, INSTALL): Compute values.
 	* configure: Regenerated.
 
-start-sanitize-sh3e
 Thu Aug 31 12:39:07 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* interp.c: Include <math.h>.
 
-end-sanitize-sh3e
 Wed Aug 30 22:05:17 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* Makefile.in (run): Link in math library too.
 	* gencode.c (gensim): abort if an unknown opcode is encountered.
-start-sanitize-sh3e
 	* interp.c (FPSCR, FPUL): Define.
 	(struct save_state): Add fields for floating point registers,
 	FPSCR and FPUL.
@@ -134,7 +185,6 @@ start-sanitize-sh3e
 	in the save state structure.
 	* gencode.c: Add sh3e opcodes.
 	(gensym): Define a buffer for int<->fp conversions.
-end-sanitize-sh3e
 
 Tue Aug 22 14:16:46 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 

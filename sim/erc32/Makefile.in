@@ -17,12 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-# SIM_AC_OUTPUT combines this with ../common/Make-common.in to produce the
-# real Makefile.
-
 TERMCAP_LIB = @TERMCAP@
 
-## Begin config
 SIM_OBJS = exec.o erc32.o func.o help.o float.o interf.o
 SIM_EXTRA_LIBS = ../../readline/libreadline.a  $(TERMCAP_LIB) -lm
 SIM_EXTRA_LIBDEPS = ../../readline/libreadline.a
@@ -35,14 +31,15 @@ SIM_EXTRA_CLEAN = clean-sis
 # CFLAGS if faster (infinite) UART speed is desired. Might affect the
 # behaviour of UART interrupt routines ...
 SIM_EXTRA_CFLAGS = -DSTAT -DFAST_UART -DIUREV0 -DMECREV0
-## End config
 
 # `sis' doesn't need interf.o.
 SIS_OFILES = exec.o erc32.o func.o help.o float.o
 
+@COMMON_MAKEFILE_FRAG@
+
 sis: sis.o $(SIS_OFILES) $(COMMON_OBJS) $(LIBDEPS)
 	$(CC) $(ALL_CFLAGS) -o sis \
-	  sis.o $(SIS_OFILES) $(COMMON_OBJS) $(SIM_EXTRA_LIBS)
+	  sis.o $(SIS_OFILES) $(COMMON_OBJS) $(EXTRA_LIBS)
 
 # FIXME: This computes the build host's endianness, doesn't it?
 # There is AC_C_BIGENDIAN but it doesn't handle float endianness.

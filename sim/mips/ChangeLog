@@ -1,3 +1,17 @@
+Thu Jan 23 11:46:23 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* configure configure.in Makefile.in:  Update to new configure
+	scheme which is more compatible with WinGDB builds.
+	* configure.in:  Improve comment on how to run autoconf.
+	* configure:  Re-run autoconf to get new ../common/aclocal.m4.
+	* Makefile.in:  Use autoconf substitution to install common
+	makefile fragment.
+
+Wed Jan  8 12:39:03 1997  Jim Wilson  <wilson@cygnus.com>
+
+	* gencode.c (build_instruction): Use BigEndianCPU instead of
+	ByteSwapMem.
+
 Thu Jan 02 22:23:04 1997  Mark Alexander  <marka@cygnus.com>
 
 	* interp.c (sim_monitor): Make output to stdout visible in

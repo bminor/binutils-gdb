@@ -1,3 +1,18 @@
+Thu Jan 23 11:46:23 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* configure configure.in Makefile.in:  Update to new configure
+	scheme which is more compatible with WinGDB builds.
+	* configure.in:  Improve comment on how to run autoconf.
+	* configure:  Re-run autoconf to get new ../common/aclocal.m4.
+	* Makefile.in:  Use autoconf substitution to install common
+	makefile fragment.
+
+Fri Dec 27 22:54:05 1996  Angela Marie Thomas (angela@cygnus.com)
+
+	* gencode.c: patch to not #include "d10v_sim.h" which
+	unecessarily includes bfd.h and causes wingdb configure
+	to fail.
+
 Mon Dec 16 13:39:03 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* interp.c (xfer_mem): Change unified memory to 0x0.

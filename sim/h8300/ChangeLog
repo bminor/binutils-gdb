@@ -1,3 +1,42 @@
+Thu Jan 23 11:46:23 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* configure configure.in Makefile.in:  Update to new configure
+	scheme which is more compatible with WinGDB builds.
+	* configure.in:  Improve comment on how to run autoconf.
+	* configure:  Re-run autoconf to get new ../common/aclocal.m4.
+	* Makefile.in:  Use autoconf substitution to install common
+	makefile fragment.
+
+Wed Nov 20 01:39:12 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in: Delete stuff moved to ../common/Make-common.in.
+	(SIM_OBJS): Define.
+	* configure.in: Simplify using macros in ../common/aclocal.m4.
+	* configure: Regenerated.
+	* inst.h (enum sim_state): Define.
+	(cpu_state_type): New member `state'.  Set it whenever `exception'
+	is set.
+	* compile.c (sim_callback): New global.
+	(sim_set_simcache_size): Renamed from sim_csize.
+	(sim_resume, case O_SLEEP): Add right way to decode r0 but #if 0 out
+	'cus it can't work.  Change main loop exit test to use cpu.state.
+	(sim_trace): New function.
+	(sim_stop_reason): Add right way to set results, but #if 0 out.
+	(sim_size): New function.
+	(sim_info): Redirect calls to printf_filtered through callback.
+	(sim_set_callbacks): Record callback.
+	* run.c: Deleted, using one in ../common now.
+	* tconfig.in: New file.
+
+Thu Oct  3 16:13:18 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
+
+	* Makefile.in (mostlyclean): Don't remove config.log here.
+
+Fri Aug  9 22:59:11 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* compile.c (sim_resume): rts, sleep, bpt and nop have
+	no associated "size".
+
 Tue Jul  9 22:15:39 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* compile.c (sim_resume): Fix all rotate-by-2-bits insns.
