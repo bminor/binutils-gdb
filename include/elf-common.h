@@ -132,3 +132,36 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define NT_PRSTATUS	1		/* Contains copy of prstatus struct */
 #define NT_FPREGSET	2		/* Contains copy of fpregset struct */
 #define NT_PRPSINFO	3		/* Contains copy of prpsinfo struct */
+
+/* These three macros disassemble and assemble a symbol table st_info field,
+   which contains the symbol binding and symbol type.  The STB_ and STT_
+   defines identify the binding and type. */
+
+#define ELF_ST_BIND(val)		(((unsigned int)(val)) >> 4)
+#define ELF_ST_TYPE(val)		((val) & 0xF)
+#define ELF_ST_INFO(bind,type)		(((bind) << 4) & ((type) & 0xF))
+
+#define STB_LOCAL	0		/* Symbol not visible outside obj */
+#define STB_GLOBAL	1		/* Symbol visible outside obj */
+#define STB_WEAK	2		/* Like globals, lower precedence */
+#define STB_LOPROC	13		/* Application-specific semantics */
+#define STB_HIPROC	15		/* Application-specific semantics */
+
+#define STT_NOTYPE	0		/* Symbol type is unspecified */
+#define STT_OBJECT	1		/* Symbol is a data object */
+#define STT_FUNC	2		/* Symbol is a code object */
+#define STT_SECTION	3		/* Symbol associated with a section */
+#define STT_FILE	4		/* Symbol gives a file name */
+#define STT_LOPROC	13		/* Application-specific semantics */
+#define STT_HIPROC	15		/* Application-specific semantics */
+
+/* Special section indices, which may show up in st_shndx fields, among
+   other places. */
+
+#define SHN_UNDEF	0		/* Undefined section reference */
+#define SHN_LORESERV	0xFF00		/* Begin range of reserved indices */
+#define SHN_LOPROC	0xFF00		/* Begin range of appl-specific */
+#define SHN_HIPROC	0xFF1F		/* End range of appl-specific */
+#define SHN_ABS		0xFFF1		/* Associated symbol is absolute */
+#define SHN_COMMON	0xFFF2		/* Associated symbol is in common */
+#define SHN_HIRESERVE	0xFFFF		/* End range of reserved indices */

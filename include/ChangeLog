@@ -1,3 +1,13 @@
+Thu Nov 14 19:17:03 1991  Fred Fish  (fnf at cygnus.com)
+
+	* elf-common.h:  Add defines to support ELF symbol table code.
+
+Mon Nov 11 19:01:06 1991  Fred Fish  (fnf at cygnus.com)
+
+	* elf-internal.h, elf-external.h, elf-common.h:  Add support for
+	note sections, which are used in ELF core files to hold copies
+	of various /proc structures.
+
 Thu Nov  7 08:58:26 1991  Steve Chamberlain  (sac at cygnus.com)
 
 	* internalcoff.h: took out the M88 dependency in the lineno
