@@ -1061,14 +1061,6 @@ x86_64_frame_cache (struct frame_info *next_frame, void **this_cache)
   cache = x86_64_alloc_frame_cache ();
   *this_cache = cache;
 
-  frame_unwind_register (next_frame, X86_64_RBP_REGNUM, buf);
-  cache->base = extract_unsigned_integer (buf, 8);
-  if (cache->base == 0)
-    return cache;
-
-  /* For normal frames, %rip is stored at 8(%rbp).  */
-  cache->saved_regs[X86_64_RIP_REGNUM] = 8;
-
   cache->pc = frame_func_unwind (next_frame);
   if (cache->pc != 0)
     x86_64_analyze_prologue (cache->pc, frame_pc_unwind (next_frame), cache);
@@ -1086,10 +1078,20 @@ x86_64_frame_cache (struct frame_info *next_frame, void **this_cache)
       frame_unwind_register (next_frame, X86_64_RSP_REGNUM, buf);
       cache->base = extract_unsigned_integer (buf, 8) + cache->sp_offset;
     }
+  else
+    {
+      frame_unwind_register (next_frame, X86_64_RBP_REGNUM, buf);
+      cache->base = extract_unsigned_integer (buf, 8);
+    }
 
   /* Now that we have the base address for the stack frame we can
      calculate the value of %rsp in the calling frame.  */
   cache->saved_sp = cache->base + 16;
+
+  /* For normal frames, %rip is stored at 8(%rbp).  If we don't have a
+     frame we find it at the same offset from the reconstructed base
+     address.  */
+  cache->saved_regs[X86_64_RIP_REGNUM] = 8;
 
   /* Adjust all the saved registers such that they contain addresses
      instead of offsets.  */
