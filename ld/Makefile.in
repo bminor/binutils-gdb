@@ -1,5 +1,6 @@
 # Makefile for the GNU linker ld (version 2)
-# Copyright (C) 1989, 90, 91, 92, 93, 1994 Free Software Foundation, Inc.
+# Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 1996
+# Free Software Foundation, Inc.
 
 # This file is part of GNU ld.
 
