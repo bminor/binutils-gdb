@@ -105,6 +105,9 @@
 // start-sanitize-vr4xxx
 *vr4121:
 // end-sanitize-vr4xxx
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
 // start-sanitize-cygnus
 *vr5400:
 // end-sanitize-cygnus

@@ -1,3 +1,9 @@
+start-sanitize-vr4320
+1998-12-14  Gavin Romig-Koch  <gavin@cygnus.com>
+	
+	* vr.igen (Low32Bits): Add vr4320.
+
+end-sanitize-vr4320
 1998-12-14  Gavin Romig-Koch  <gavin@cygnus.com>
 
 	* configure.in: Add support for 5xxx and "el".
