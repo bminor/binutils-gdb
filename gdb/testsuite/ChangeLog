@@ -1,5 +1,7 @@
 Thu Jan 12 01:14:53 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
 
+	* gdb.base/sigall.exp: Add workaround for alpha weirdness.
+
 	* gdb.base/help.exp: Don't test "help show".
 
 Wed Jan 11 14:37:04 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
