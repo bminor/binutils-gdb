@@ -1,3 +1,13 @@
+Thu Oct  5 17:28:09 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* values.c allocate_repeat_value):  Allocate an array type, and
+	a value of that type; use that instead of setting VALUE_REPEATED.
+	* value.h (struct value):  Remove fields repetitions and repeated.
+	(VALUE_REPEATED, VALUE_REPETITIONS):  Removed, no longer used.
+	* c-valprint.c, ch-valprint.c, eval.c, printcmd.c, valops.c,
+	value.h, values.c:  Simplify, since now VALUE_REPEATED is never used.
+	* valprint.c (value_print_array_elemen):  Removed never-used function.
+	
 Thu Oct  5 15:14:36 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* parse.c (write_dollar_variable):  New function.

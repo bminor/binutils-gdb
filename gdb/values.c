@@ -86,8 +86,6 @@ allocate_value (type)
   VALUE_OFFSET (val) = 0;
   VALUE_BITPOS (val) = 0;
   VALUE_BITSIZE (val) = 0;
-  VALUE_REPEATED (val) = 0;
-  VALUE_REPETITIONS (val) = 0;
   VALUE_REGNO (val) = -1;
   VALUE_LAZY (val) = 0;
   VALUE_OPTIMIZED_OUT (val) = 0;
@@ -103,25 +101,17 @@ allocate_repeat_value (type, count)
      struct type *type;
      int count;
 {
-  register value_ptr val;
-
-  val =
-    (value_ptr) xmalloc (sizeof (struct value) + TYPE_LENGTH (type) * count);
-  VALUE_NEXT (val) = all_values;
-  all_values = val;
-  VALUE_TYPE (val) = type;
-  VALUE_LVAL (val) = not_lval;
-  VALUE_ADDRESS (val) = 0;
-  VALUE_FRAME (val) = 0;
-  VALUE_OFFSET (val) = 0;
-  VALUE_BITPOS (val) = 0;
-  VALUE_BITSIZE (val) = 0;
-  VALUE_REPEATED (val) = 1;
-  VALUE_REPETITIONS (val) = count;
-  VALUE_REGNO (val) = -1;
-  VALUE_LAZY (val) = 0;
-  VALUE_OPTIMIZED_OUT (val) = 0;
-  return val;
+  struct type *element_type = type;
+  int low_bound = current_language->string_lower_bound; /* ??? */
+  /* FIXME-type-allocation: need a way to free this type when we are
+     done with it.  */
+  struct type *range_type
+    = create_range_type ((struct type *) NULL, builtin_type_int,
+			 low_bound, count + low_bound - 1);
+  /* FIXME-type-allocation: need a way to free this type when we are
+     done with it.  */
+  return allocate_value (create_array_type ((struct type *) NULL,
+					    type, range_type));
 }
 
 /* Return a mark in the value chain.  All values allocated after the
@@ -217,12 +207,8 @@ value_ptr
 value_copy (arg)
      value_ptr arg;
 {
-  register value_ptr val;
   register struct type *type = VALUE_TYPE (arg);
-  if (VALUE_REPEATED (arg))
-    val = allocate_repeat_value (type, VALUE_REPETITIONS (arg));
-  else
-    val = allocate_value (type);
+  register value_ptr val = allocate_value (type);
   VALUE_LVAL (val) = VALUE_LVAL (arg);
   VALUE_ADDRESS (val) = VALUE_ADDRESS (arg);
   VALUE_OFFSET (val) = VALUE_OFFSET (arg);
@@ -236,8 +222,7 @@ value_copy (arg)
   if (!VALUE_LAZY (val))
     {
       memcpy (VALUE_CONTENTS_RAW (val), VALUE_CONTENTS_RAW (arg),
-	      TYPE_LENGTH (VALUE_TYPE (arg))
-	      * (VALUE_REPEATED (arg) ? VALUE_REPETITIONS (arg) : 1));
+	      TYPE_LENGTH (VALUE_TYPE (arg)));
     }
   return val;
 }
@@ -1025,7 +1010,7 @@ value_from_vtable_info (arg, type)
   /* Take care of preliminaries.  */
   if (TYPE_VPTR_FIELDNO (type) < 0)
     fill_in_vptr_fieldno (type);
-  if (TYPE_VPTR_FIELDNO (type) < 0 || VALUE_REPEATED (arg))
+  if (TYPE_VPTR_FIELDNO (type) < 0)
     return 0;
 
   return value_headof (arg, 0, type);
