@@ -1,3 +1,7 @@
+2003-06-13  Robert Millan  <zeratul2@wanadoo.es>
+
+	* configure.tgt: Add i386-netbsd-gnu target.
+
 2003-06-12  Richard Sandiford  <rsandifo@redhat.com>
 
 	* configure.tgt (mips*-sgi-irix6*): Add the o32 and n64 emulations

@@ -1,3 +1,7 @@
+2003-06-13  Robert Millan  <zeratul2@wanadoo.es>
+
+	* config.bfd: Add i386-netbsd-gnu target.
+
 2003-06-12  Nick Clifton  <nickc@redhat.com>
 
 	* opncls.c (calc_crc32): Rename to
