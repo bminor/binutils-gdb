@@ -50,6 +50,9 @@ typedef enum {
   SIM_RC_OK = 1
 } SIM_RC;
 
+/* The bfd struct, as an opaque type.  */
+struct _bfd;
+
 /* Main simulator entry points.  */
 
 /* Initialize the simulator.  This function is called when the simulator
@@ -57,9 +60,8 @@ typedef enum {
    KIND specifies how the simulator will be used.  Currently there are only
    two kinds: standalone and debug.
    ARGV is passed from the command line and can be used to select whatever
-   run time options the simulator provides.
-   ARGV is the standard NULL terminated array of pointers, with argv[0]
-   being the program name.
+   run time options the simulator provides.  It is the standard NULL
+   terminated array of pointers, with argv[0] being the program name.
    The result is a descriptor that must be passed back to the other sim_foo
    functions.  */
 
@@ -73,22 +75,15 @@ SIM_DESC sim_open PARAMS ((SIM_OPEN_KIND kind, char **argv));
 void sim_close PARAMS ((SIM_DESC sd, int quitting));
 
 /* Load program PROG into the simulator.
-   Return non-zero if you wish the caller to handle it
-   (it is done this way because most simulators can use gr_load_image,
-   but defining it as a callback seems awkward).  */
+   If ABFD is non-NULL, the bfd for the file has already been opened.
+   The result is a return code indicating success.  */
 
-int sim_load PARAMS ((SIM_DESC sd, char *prog, int from_tty));
+SIM_RC sim_load PARAMS ((SIM_DESC sd, char *prog, struct _bfd *abfd, int from_tty));
 
 /* Prepare to run the simulated program.
-   START_ADDRESS is, yes, you guessed it, the start address of the program.
-   ARGV and ENV are NULL terminated lists of pointers.
-   Gdb will set the start address via sim_store_register as well, but
-   standalone versions of existing simulators are not set up to cleanly call
-   sim_store_register, so the START_ADDRESS argument is there as a
-   workaround.  */
+   ARGV and ENV are NULL terminated lists of pointers.  */
 
-void sim_create_inferior PARAMS ((SIM_DESC sd, SIM_ADDR start_address,
-				  char **argv, char **env));
+SIM_RC sim_create_inferior PARAMS ((SIM_DESC sd, char **argv, char **env));
 
 /* Kill the running program.
    This may involve closing any open files and deleting any mmap'd areas.  */
@@ -113,8 +108,8 @@ void sim_fetch_register PARAMS ((SIM_DESC sd, int regno, unsigned char *buf));
 
 void sim_store_register PARAMS ((SIM_DESC sd, int regno, unsigned char *buf));
 
-/* Print some interesting information about the simulator.
-   VERBOSE is non-zero for the wordy version.  */
+/* Print whatever statistics the simulator has collected.
+   VERBOSE is currently unused and must always be zero.  */
 
 void sim_info PARAMS ((SIM_DESC sd, int verbose));
 
