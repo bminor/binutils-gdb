@@ -1,5 +1,11 @@
 2002-05-21  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* Makefile.in (ALLDEPFILES): Add mipsnbsd-nat.c and
+	mipsnbsd-tdep.c
+	(mipsnbsd-nat.o, mipsnbsd-tdep.o): New dependency lists.
+
+2002-05-21  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* Makefile.in (ALLDEPFILES): Add shnbsd-tdep.c and
 	shnbsd-nat.c.
 	(shnbsd-tdep.o, shnbsd-nat.o): New dependency lists.

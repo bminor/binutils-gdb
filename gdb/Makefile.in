@@ -1219,6 +1219,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	mips-linux-nat.c mips-linux-tdep.c \
 	mips-nat.c \
 	mips-tdep.c mipsm3-nat.c mipsv4-nat.c \
+	mipsnbsd-nat.c mipsnbsd-tdep.c \
 	nbsd-tdep.c \
 	nindy-share/Onindy.c nindy-share/nindy.c \
 	nindy-share/ttyflush.c nindy-tdep.c \
@@ -1826,6 +1827,12 @@ mipsread.o: mipsread.c $(buildsym_h) $(complaints_h) $(bfd_h) $(defs_h) \
 
 mipsv4-nat.o: mipsv4-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(target_h) \
 	$(regcache_h)
+
+mipsnbsd-nat.o: mipsnbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
+	mipsnbsd-tdep.h
+
+mipsnbsd-tdep.o: mipsnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
+	$(target_h) $(value_h) osabi.h solib-svr4.h mipsnbsd-tdep.h
 
 mn10300-tdep.o: mn10300-tdep.c $(defs_h) $(frame_h) $(inferior_h) \
 	$(obstack_h) $(target_h) $(value_h) $(bfd_h) $(gdb_string_h) \
