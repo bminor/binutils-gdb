@@ -192,7 +192,7 @@ static bfd_vma mips_elf_got16_entry
 static boolean mips_elf_create_dynamic_relocation 
   PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Rela *,
 	   struct mips_elf_link_hash_entry *, asection *,
-	   bfd_vma, bfd_vma *, asection *));
+	   bfd_vma, bfd_vma *, asection *, boolean local_p));
 static void mips_elf_allocate_dynamic_relocations 
   PARAMS ((bfd *, unsigned int));
 static boolean mips_elf_stub_section_p 
@@ -5680,7 +5680,7 @@ mips_elf_next_relocation (r_type, relocation, relend)
 
 static boolean
 mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
-				    symbol, addendp, input_section)
+				    symbol, addendp, input_section, local_p)
      bfd *output_bfd;
      struct bfd_link_info *info;
      const Elf_Internal_Rela *rel;
@@ -5689,6 +5689,7 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
      bfd_vma symbol;
      bfd_vma *addendp;
      asection *input_section;
+     boolean local_p;
 {
   Elf_Internal_Rel outrel;
   boolean skip;
@@ -5778,10 +5779,10 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
 	  symbol = sec->output_section->vma;
 	}
       
-      /* If the relocation was previously an absolute relocation, we
-	 must adjust it by the value we give it in the dynamic symbol
-	 table.  */
-      if (r_type != R_MIPS_REL32)
+      /* If the relocation is against a local symbol was previously an absolute
+	 relocation, we must adjust it by the value we give it in the dynamic
+	 symbol table.  */
+      if (local_p && r_type != R_MIPS_REL32)
 	*addendp += symbol;
 
       /* The relocation is always an REL32 relocation because we don't
@@ -6219,7 +6220,7 @@ mips_elf_calculate_relocation (abfd,
 						   sec,
 						   symbol,
 						   &value,
-						   input_section))
+						   input_section, local_p))
 	    return false;
 	}
       else
@@ -8879,7 +8880,7 @@ _bfd_mips_elf_finish_dynamic_sections (output_bfd, info)
   if (sgot != NULL && sgot->_raw_size > 0)
     {
       MIPS_ELF_PUT_WORD (output_bfd, (bfd_vma) 0, sgot->contents);
-      MIPS_ELF_PUT_WORD (output_bfd, (bfd_vma) 0x80000001, 
+      MIPS_ELF_PUT_WORD (output_bfd, (bfd_vma) 0x80000000, 
 			 sgot->contents + MIPS_ELF_GOT_SIZE (output_bfd));
     }
 

@@ -1,3 +1,12 @@
+2000-10-13  Ulf Carlsson  <ulfc@engr.sgi.com>
+
+	From  Ralf Baechle  <ralf@gnu.org>
+
+	* elf32-mips.c (mips_elf_create_dynamic_relocation): New argument
+	local_p.  Add symbol value only for non-R_MIPS_REL32 relocations
+	against local symbols.
+	(_bfd_mips_elf_finish_dynamic_sections): Undo patch from 2000-10-01.
+	
 2000-10-12  Alan Modra  <alan@linuxcare.com.au>
 
 	* section.c (struct sec): Add kept_section.
