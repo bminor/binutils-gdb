@@ -53,13 +53,15 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
 proc test_breakpoint {name} {
-    gdb_breakpoint "${name}"
-    gdb_test "continue" "Continuing.\r\n\r\nBreakpoint \[0-9\]*, ${name}.*" "continue to ${name}"
-}
-
-if ![runto_main] then {
-    perror "couldn't run to breakpoint"
-    continue
+    # Restart the program every time, so that a single failure doesn't
+    # lead to a cascade.
+    if ![runto_main] then {
+	perror "couldn't run to main when testing ${name}"
+	continue
+    } else {
+	gdb_breakpoint "${name}"
+	gdb_test "continue" "Continuing.\r\n\r\nBreakpoint \[0-9\]*, ${name}.*" "continue to ${name}"
+    }
 }
 
 test_breakpoint "C1::Nested::foo"

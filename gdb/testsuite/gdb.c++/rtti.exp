@@ -88,13 +88,21 @@ gdb_test_multiple "print *e1" "print *e1" {
     -re "\\$\[0-9\]* = {<n1::Base1> = .*}\r\n$gdb_prompt $" {
 	pass "print *e1"
     }
+    -re "\\$\[0-9\]* = {<.*Base1> = .*}\r\n$gdb_prompt $" {
+	# NOTE: carlton/2003-05-09: Sometimes, the DWARF reader gets
+	# confused about names.  I've seen just Base1 or
+	# n1::D1::C1::Base1.
+	kfail "gdb/TBA" "print *e2"
+    }
 }
 
 # NOTE: carlton/2003-05-02: This test fails on my branch because,
 # within rtt1.cc, GDB has no way of knowing that the class is called
 # 'n2::D2' instead of just 'D2'.  This is an artifical test case,
 # though: if we were using these classes in a more substantial way,
-# G++ would emit more debug info.
+# G++ would emit more debug info.  Arguably, the "incomplete type"
+# kfail should really be an xfail, because it works using a compiler
+# that generates DW_TAG_namespace tags.
 
 gdb_test_multiple "print *e2" "print *e2" {
     -re "warning: can't find class named `n2::D2', as given by C\\+\\+ RTTI.*$gdb_prompt $" {
@@ -105,6 +113,9 @@ gdb_test_multiple "print *e2" "print *e2" {
     }
     -re "\\$\[0-9\]* = {<n2::Base2> = .*}\r\n$gdb_prompt $" {
 	pass "print *e2"
+    }
+    -re "\\$\[0-9\]* = {<.*Base2> = .*}\r\n$gdb_prompt $" {
+	kfail "gdb/TBA" "print *e2"
     }
 }
 

@@ -1,3 +1,12 @@
+2003-05-16  David Carlton  <carlton@bactrian.org>
+
+	* carlton_runnamespace: Run gdb.c++/rtti.exp, too.
+	* carlton_runtest (FASTTESTS): Add gdb.c++/breakpoint.exp and
+	gdb.c++/rtti.exp.
+	* gdb.c++/breakpoint.exp (test_breakpoint): Run to main for every
+	breakpoint.
+	* gdb.c++/rtti.exp: Add more KFAIL branches.
+
 2003-05-09  David Carlton  <carlton@bactrian.org>
 
 	* gdb.c++/breakpoint.cc: New.

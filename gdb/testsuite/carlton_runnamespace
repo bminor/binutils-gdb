@@ -6,13 +6,14 @@
 # stabs info, too?
 
 EXTRADEBUGPATH=/usr/local/testbed/gcc3/bin
+TESTS="gdb.c++/namespace.exp gdb.c++/rtti.exp"
 
 echo "Running tests using regular compiler."
-runtest gdb.c++/namespace.exp > /dev/null 2>&1
+runtest ${TESTS} > /dev/null 2>&1
 grep -v "^Test Run By" gdb.sum > /tmp/namespaceout
 diff -u {carlton_,/tmp/}namespaceout
 echo "Running tests using compiler with extra debug info."
-PATH=${EXTRADEBUGPATH}:${PATH} runtest gdb.c++/namespace.exp > /dev/null 2>&1
+PATH=${EXTRADEBUGPATH}:${PATH} runtest ${TESTS} > /dev/null 2>&1
 grep -v "^Test Run By" gdb.sum > /tmp/namespacedebugout
 diff -u {carlton_,/tmp/}namespacedebugout
 
