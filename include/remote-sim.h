@@ -53,8 +53,11 @@ typedef enum {
 /* Main simulator entry points.  */
 
 /* Initialize the simulator.  This function is called when the simulator
-   is selected from the command line.  ARGV is passed from the command line
-   and can be used to select whatever run time options the simulator provides.
+   is selected from the gdb command line.
+   KIND specifies how the simulator will be used.  Currently there are only
+   two kinds: standalone and debug.
+   ARGV is passed from the command line and can be used to select whatever
+   run time options the simulator provides.
    ARGV is the standard NULL terminated array of pointers, with argv[0]
    being the program name.
    The result is a descriptor that must be passed back to the other sim_foo
