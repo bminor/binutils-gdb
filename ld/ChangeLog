@@ -1,5 +1,8 @@
 Wed Sep 24 11:33:14 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ld.texinfo (Section Options): Improve documentation of NOLOAD
+	directive.
+
 	* aclocal.m4: Rebuild with new libtool.
 	* configure: Rebuild.
 
