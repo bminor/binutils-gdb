@@ -1,6 +1,7 @@
 2000-07-10  Kazu Hirata  <kazu@hxi.com>
 
 	* config/tc-h8500.c: Fix formatting.
+	* config/tc-tic54x.c: Fix formatting.
 
 2000-07-10  Alan Modra  <alan@linuxcare.com.au>
 
