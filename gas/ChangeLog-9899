@@ -337,12 +337,12 @@ Sun Sep 19 10:43:31 1999  Jeffrey A Law  (law@cygnus.com)
 	* config/tc-hppa.c (pa_ip): Handle 'J', 'K' and 'cc'
 	operands.
 
-	* config/tc-hppa.c (pa_ip); Handle "fe", and 'cJ'.
+	* config/tc-hppa.c (pa_ip): Handle "fe", and 'cJ'.
 
 	* config/tc-hppa.c (pa_ip): Handle 'd', '#' and 'cq'.
 
 	* config/tc-hppa.c (struct pa_it): New field "trunc".
-	(pa_ip): Hadnle 'h', 'm', '=', '{', and '_' operands.
+	(pa_ip): Handle 'h', 'm', '=', '{', and '_' operands.
 	(pa_parse_ftest_gfx_completer): New function
 	(pa_parse_fp_cnv_format): New function.
 
@@ -2495,10 +2495,10 @@ Thu Oct 22 12:41:33 1998  Catherine Moore  <clm@cygnus.com>
 
 Thu Oct 22 10:03:15 1998  Ron Unrau  <runrau@cygnus.com>
 
-	* config/tc-mips.c : support frame and regmask/fregmask when
+	* config/tc-mips.c: support frame and regmask/fregmask when
 	  MIPS_STABS_ELF is specified.
 
-Wed Oct 21 11;34:51 1998  Catherine Moore  <clm@cygnus.com>
+Wed Oct 21 11:34:51 1998  Catherine Moore  <clm@cygnus.com>
 
 	* config/tc-sh.c (sh_fix_adjustable):  Only include if OBJ_ELF.
 	(md_apply_fix):  Don't return 1 for VTABLE relocs.
