@@ -2914,6 +2914,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_locals_address (gdbarch, arm_frame_locals_address);
   set_gdbarch_frame_num_args (gdbarch, arm_frame_num_args);
   set_gdbarch_frame_args_skip (gdbarch, 0);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, arm_frame_init_saved_regs);
   set_gdbarch_frame_init_saved_regs (gdbarch, arm_frame_init_saved_regs);
   set_gdbarch_pop_frame (gdbarch, arm_pop_frame);
 

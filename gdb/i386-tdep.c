@@ -1598,7 +1598,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					    i386_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, i386_use_struct_convention);
 
-  set_gdbarch_frame_init_saved_regs (gdbarch, i386_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, i386_frame_init_saved_regs);
   set_gdbarch_skip_prologue (gdbarch, i386_skip_prologue);
 
   /* Stack grows downward.  */

@@ -1055,7 +1055,7 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    */
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch,
 				     xstormy16_init_extra_frame_info);
-  set_gdbarch_frame_init_saved_regs (gdbarch,
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch,
 				     xstormy16_frame_init_saved_regs);
   set_gdbarch_frame_chain (gdbarch, xstormy16_frame_chain);
   set_gdbarch_get_saved_register (gdbarch, xstormy16_get_saved_register);

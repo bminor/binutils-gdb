@@ -1242,8 +1242,8 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /*
    * Frame Info
    */
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, v850_frame_init_saved_regs);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, v850_init_extra_frame_info);
-  set_gdbarch_frame_init_saved_regs (gdbarch, v850_frame_init_saved_regs);
   set_gdbarch_frame_chain (gdbarch, v850_frame_chain);
   set_gdbarch_saved_pc_after_call (gdbarch, v850_saved_pc_after_call);
   set_gdbarch_frame_saved_pc (gdbarch, v850_frame_saved_pc);

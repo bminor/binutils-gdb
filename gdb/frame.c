@@ -609,12 +609,13 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
 		&& (get_frame_type (frame) == DUMMY_FRAME)));
 
   /* Only (older) architectures that implement the
-     FRAME_INIT_SAVED_REGS method should be using this function.  */
-  gdb_assert (FRAME_INIT_SAVED_REGS_P ());
+     DEPRECATED_FRAME_INIT_SAVED_REGS method should be using this
+     function.  */
+  gdb_assert (DEPRECATED_FRAME_INIT_SAVED_REGS_P ());
 
   /* Load the saved_regs register cache.  */
   if (get_frame_saved_regs (frame) == NULL)
-    FRAME_INIT_SAVED_REGS (frame);
+    DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
 
   if (get_frame_saved_regs (frame) != NULL
       && get_frame_saved_regs (frame)[regnum] != 0)
@@ -795,7 +796,7 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
   if (!target_has_registers)
     error ("No registers.");
 
-  gdb_assert (FRAME_INIT_SAVED_REGS_P ());
+  gdb_assert (DEPRECATED_FRAME_INIT_SAVED_REGS_P ());
 
   /* Normal systems don't optimize out things with register numbers.  */
   if (optimized != NULL)
@@ -831,7 +832,7 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 	      return;
 	    }
 
-	  FRAME_INIT_SAVED_REGS (frame);
+	  DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
 	  if (get_frame_saved_regs (frame) != NULL
 	      && get_frame_saved_regs (frame)[regnum] != 0)
 	    {
@@ -1464,7 +1465,7 @@ deprecated_set_frame_type (struct frame_info *frame, enum frame_type type)
 
 #ifdef FRAME_FIND_SAVED_REGS
 /* XXX - deprecated.  This is a compatibility function for targets
-   that do not yet implement FRAME_INIT_SAVED_REGS.  */
+   that do not yet implement DEPRECATED_FRAME_INIT_SAVED_REGS.  */
 /* Find the addresses in which registers are saved in FRAME.  */
 
 void

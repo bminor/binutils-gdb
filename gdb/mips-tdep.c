@@ -3846,7 +3846,7 @@ mips_pop_frame (void)
 
   write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
   if (get_frame_saved_regs (frame) == NULL)
-    FRAME_INIT_SAVED_REGS (frame);
+    DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     if (regnum != SP_REGNUM && regnum != PC_REGNUM
 	&& get_frame_saved_regs (frame)[regnum])
@@ -5982,8 +5982,8 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_ecoff_reg_to_regnum (gdbarch, mips_ecoff_reg_to_regnum);
 
   /* Initialize a frame */
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, mips_frame_init_saved_regs);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, mips_init_extra_frame_info);
-  set_gdbarch_frame_init_saved_regs (gdbarch, mips_frame_init_saved_regs);
 
   /* MIPS version of CALL_DUMMY */
 

@@ -2940,7 +2940,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_chain (gdbarch, rs6000_frame_chain);
   set_gdbarch_frame_saved_pc (gdbarch, rs6000_frame_saved_pc);
 
-  set_gdbarch_frame_init_saved_regs (gdbarch, rs6000_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, rs6000_frame_init_saved_regs);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, rs6000_init_extra_frame_info);
 
   if (!sysv_abi)

@@ -225,7 +225,7 @@ struct gdbarch
   gdbarch_extract_struct_value_address_ftype *extract_struct_value_address;
   gdbarch_deprecated_extract_struct_value_address_ftype *deprecated_extract_struct_value_address;
   gdbarch_use_struct_convention_ftype *use_struct_convention;
-  gdbarch_frame_init_saved_regs_ftype *frame_init_saved_regs;
+  gdbarch_deprecated_frame_init_saved_regs_ftype *deprecated_frame_init_saved_regs;
   gdbarch_deprecated_init_extra_frame_info_ftype *deprecated_init_extra_frame_info;
   gdbarch_skip_prologue_ftype *skip_prologue;
   gdbarch_prologue_frameless_p_ftype *prologue_frameless_p;
@@ -736,7 +736,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of extract_struct_value_address, has predicate */
   /* Skip verify of deprecated_extract_struct_value_address, has predicate */
   /* Skip verify of use_struct_convention, invalid_p == 0 */
-  /* Skip verify of frame_init_saved_regs, has predicate */
+  /* Skip verify of deprecated_frame_init_saved_regs, has predicate */
   /* Skip verify of deprecated_init_extra_frame_info, has predicate */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->skip_prologue == 0))
@@ -1170,6 +1170,29 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->deprecated_extract_struct_value_address
                         /*DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
 #endif
+#ifdef DEPRECATED_FRAME_INIT_SAVED_REGS_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_FRAME_INIT_SAVED_REGS_P()",
+                      XSTRING (DEPRECATED_FRAME_INIT_SAVED_REGS_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_FRAME_INIT_SAVED_REGS_P() = %d\n",
+                      DEPRECATED_FRAME_INIT_SAVED_REGS_P ());
+#endif
+#ifdef DEPRECATED_FRAME_INIT_SAVED_REGS
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_FRAME_INIT_SAVED_REGS(frame)",
+                      XSTRING (DEPRECATED_FRAME_INIT_SAVED_REGS (frame)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_FRAME_INIT_SAVED_REGS = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_frame_init_saved_regs
+                        /*DEPRECATED_FRAME_INIT_SAVED_REGS ()*/);
+#endif
 #ifdef DEPRECATED_INIT_EXTRA_FRAME_INFO_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1509,29 +1532,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: FRAME_CHAIN_VALID = <0x%08lx>\n",
                         (long) current_gdbarch->frame_chain_valid
                         /*FRAME_CHAIN_VALID ()*/);
-#endif
-#ifdef FRAME_INIT_SAVED_REGS_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "FRAME_INIT_SAVED_REGS_P()",
-                      XSTRING (FRAME_INIT_SAVED_REGS_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: FRAME_INIT_SAVED_REGS_P() = %d\n",
-                      FRAME_INIT_SAVED_REGS_P ());
-#endif
-#ifdef FRAME_INIT_SAVED_REGS
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "FRAME_INIT_SAVED_REGS(frame)",
-                      XSTRING (FRAME_INIT_SAVED_REGS (frame)));
-#endif
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: FRAME_INIT_SAVED_REGS = <0x%08lx>\n",
-                        (long) current_gdbarch->frame_init_saved_regs
-                        /*FRAME_INIT_SAVED_REGS ()*/);
 #endif
 #ifdef FRAME_LOCALS_ADDRESS
   fprintf_unfiltered (file,
@@ -4457,29 +4457,29 @@ set_gdbarch_use_struct_convention (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_frame_init_saved_regs_p (struct gdbarch *gdbarch)
+gdbarch_deprecated_frame_init_saved_regs_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->frame_init_saved_regs != 0;
+  return gdbarch->deprecated_frame_init_saved_regs != 0;
 }
 
 void
-gdbarch_frame_init_saved_regs (struct gdbarch *gdbarch, struct frame_info *frame)
+gdbarch_deprecated_frame_init_saved_regs (struct gdbarch *gdbarch, struct frame_info *frame)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->frame_init_saved_regs == 0)
+  if (gdbarch->deprecated_frame_init_saved_regs == 0)
     internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_frame_init_saved_regs invalid");
+                    "gdbarch: gdbarch_deprecated_frame_init_saved_regs invalid");
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_frame_init_saved_regs called\n");
-  gdbarch->frame_init_saved_regs (frame);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_frame_init_saved_regs called\n");
+  gdbarch->deprecated_frame_init_saved_regs (frame);
 }
 
 void
-set_gdbarch_frame_init_saved_regs (struct gdbarch *gdbarch,
-                                   gdbarch_frame_init_saved_regs_ftype frame_init_saved_regs)
+set_gdbarch_deprecated_frame_init_saved_regs (struct gdbarch *gdbarch,
+                                              gdbarch_deprecated_frame_init_saved_regs_ftype deprecated_frame_init_saved_regs)
 {
-  gdbarch->frame_init_saved_regs = frame_init_saved_regs;
+  gdbarch->deprecated_frame_init_saved_regs = deprecated_frame_init_saved_regs;
 }
 
 int

@@ -466,7 +466,7 @@ void sparc_get_saved_register (char *raw_buffer,
      sparc_get_saved_register (RAW_BUFFER, OPTIMIZED, ADDRP, \
 			       FRAME, REGNUM, LVAL)
 
-#define FRAME_INIT_SAVED_REGS(FP)	/*no-op */
+#define DEPRECATED_FRAME_INIT_SAVED_REGS(FP)	/*no-op */
 
 #define DEPRECATED_INIT_EXTRA_FRAME_INFO(FROMLEAF, FCI) \
      sparc_init_extra_frame_info (FROMLEAF, FCI)

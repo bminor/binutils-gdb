@@ -442,7 +442,7 @@ m68hc11_pop_frame (void)
   else
     {
       fp = get_frame_base (frame);
-      FRAME_INIT_SAVED_REGS (frame);
+      DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
 
       /* Copy regs from where they were saved in the frame.  */
       for (regnum = 0; regnum < M68HC11_ALL_REGS; regnum++)
@@ -1362,7 +1362,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_fp0_regnum (gdbarch, -1);
   set_gdbarch_max_register_raw_size (gdbarch, 2);
   set_gdbarch_max_register_virtual_size (gdbarch, 2);
-  set_gdbarch_frame_init_saved_regs (gdbarch, m68hc11_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, m68hc11_frame_init_saved_regs);
   set_gdbarch_frame_args_skip (gdbarch, 0);
 
   set_gdbarch_read_pc (gdbarch, generic_target_read_pc);

@@ -991,7 +991,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_extract_struct_value_address (gdbarch, NULL);
   set_gdbarch_use_struct_convention (gdbarch, x86_64_use_struct_convention);
 
-  set_gdbarch_frame_init_saved_regs (gdbarch, x86_64_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, x86_64_frame_init_saved_regs);
   set_gdbarch_skip_prologue (gdbarch, x86_64_skip_prologue);
 
   set_gdbarch_frame_chain (gdbarch, x86_64_linux_frame_chain);

@@ -62,7 +62,7 @@ extern struct gdbarch *current_gdbarch;
 
 #if GDB_MULTI_ARCH
 #if defined (FRAME_FIND_SAVED_REGS)
-#error "FRAME_FIND_SAVED_REGS: replaced by FRAME_INIT_SAVED_REGS"
+#error "FRAME_FIND_SAVED_REGS: replaced by DEPRECATED_FRAME_INIT_SAVED_REGS"
 #endif
 #endif
 
@@ -1856,40 +1856,40 @@ extern void set_gdbarch_use_struct_convention (struct gdbarch *gdbarch, gdbarch_
 #endif
 #endif
 
-#if defined (FRAME_INIT_SAVED_REGS)
-/* Legacy for systems yet to multi-arch FRAME_INIT_SAVED_REGS */
-#if !defined (FRAME_INIT_SAVED_REGS_P)
-#define FRAME_INIT_SAVED_REGS_P() (1)
+#if defined (DEPRECATED_FRAME_INIT_SAVED_REGS)
+/* Legacy for systems yet to multi-arch DEPRECATED_FRAME_INIT_SAVED_REGS */
+#if !defined (DEPRECATED_FRAME_INIT_SAVED_REGS_P)
+#define DEPRECATED_FRAME_INIT_SAVED_REGS_P() (1)
 #endif
 #endif
 
 /* Default predicate for non- multi-arch targets. */
-#if (!GDB_MULTI_ARCH) && !defined (FRAME_INIT_SAVED_REGS_P)
-#define FRAME_INIT_SAVED_REGS_P() (0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_FRAME_INIT_SAVED_REGS_P)
+#define DEPRECATED_FRAME_INIT_SAVED_REGS_P() (0)
 #endif
 
-extern int gdbarch_frame_init_saved_regs_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_INIT_SAVED_REGS_P)
-#error "Non multi-arch definition of FRAME_INIT_SAVED_REGS"
+extern int gdbarch_deprecated_frame_init_saved_regs_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAME_INIT_SAVED_REGS_P)
+#error "Non multi-arch definition of DEPRECATED_FRAME_INIT_SAVED_REGS"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_INIT_SAVED_REGS_P)
-#define FRAME_INIT_SAVED_REGS_P() (gdbarch_frame_init_saved_regs_p (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FRAME_INIT_SAVED_REGS_P)
+#define DEPRECATED_FRAME_INIT_SAVED_REGS_P() (gdbarch_deprecated_frame_init_saved_regs_p (current_gdbarch))
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (FRAME_INIT_SAVED_REGS)
-#define FRAME_INIT_SAVED_REGS(frame) (internal_error (__FILE__, __LINE__, "FRAME_INIT_SAVED_REGS"), 0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_FRAME_INIT_SAVED_REGS)
+#define DEPRECATED_FRAME_INIT_SAVED_REGS(frame) (internal_error (__FILE__, __LINE__, "DEPRECATED_FRAME_INIT_SAVED_REGS"), 0)
 #endif
 
-typedef void (gdbarch_frame_init_saved_regs_ftype) (struct frame_info *frame);
-extern void gdbarch_frame_init_saved_regs (struct gdbarch *gdbarch, struct frame_info *frame);
-extern void set_gdbarch_frame_init_saved_regs (struct gdbarch *gdbarch, gdbarch_frame_init_saved_regs_ftype *frame_init_saved_regs);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_INIT_SAVED_REGS)
-#error "Non multi-arch definition of FRAME_INIT_SAVED_REGS"
+typedef void (gdbarch_deprecated_frame_init_saved_regs_ftype) (struct frame_info *frame);
+extern void gdbarch_deprecated_frame_init_saved_regs (struct gdbarch *gdbarch, struct frame_info *frame);
+extern void set_gdbarch_deprecated_frame_init_saved_regs (struct gdbarch *gdbarch, gdbarch_deprecated_frame_init_saved_regs_ftype *deprecated_frame_init_saved_regs);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAME_INIT_SAVED_REGS)
+#error "Non multi-arch definition of DEPRECATED_FRAME_INIT_SAVED_REGS"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_INIT_SAVED_REGS)
-#define FRAME_INIT_SAVED_REGS(frame) (gdbarch_frame_init_saved_regs (current_gdbarch, frame))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FRAME_INIT_SAVED_REGS)
+#define DEPRECATED_FRAME_INIT_SAVED_REGS(frame) (gdbarch_deprecated_frame_init_saved_regs (current_gdbarch, frame))
 #endif
 #endif
 

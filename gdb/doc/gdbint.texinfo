@@ -3252,12 +3252,13 @@ chain pointers, dummy frames, and frames whose PC values are inside the
 startup file (e.g.@: @file{crt0.o}), inside @code{main}, or inside
 @code{_start}.
 
-@item FRAME_INIT_SAVED_REGS(@var{frame})
-@findex FRAME_INIT_SAVED_REGS
+@item DEPRECATED_FRAME_INIT_SAVED_REGS(@var{frame})
+@findex DEPRECATED_FRAME_INIT_SAVED_REGS
 See @file{frame.h}.  Determines the address of all registers in the
 current stack frame storing each in @code{frame->saved_regs}.  Space for
 @code{frame->saved_regs} shall be allocated by
-@code{FRAME_INIT_SAVED_REGS} using @code{frame_saved_regs_zalloc}.
+@code{DEPRECATED_FRAME_INIT_SAVED_REGS} using
+@code{frame_saved_regs_zalloc}.
 
 @code{FRAME_FIND_SAVED_REGS} and @code{EXTRA_FRAME_INFO} are deprecated.
 
@@ -4096,7 +4097,7 @@ Some mechanisms do not work with multi-arch.  They include:
 @item EXTRA_FRAME_INFO
 Delete.
 @item FRAME_FIND_SAVED_REGS
-Replaced with @code{FRAME_INIT_SAVED_REGS}
+Replaced with @code{DEPRECATED_FRAME_INIT_SAVED_REGS}
 @end table
 
 @noindent

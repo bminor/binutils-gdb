@@ -1138,7 +1138,7 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, mcore_init_extra_frame_info);
   set_gdbarch_frame_chain (gdbarch, mcore_frame_chain);
-  set_gdbarch_frame_init_saved_regs (gdbarch, mcore_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, mcore_frame_init_saved_regs);
   set_gdbarch_frame_saved_pc (gdbarch, mcore_frame_saved_pc);
   set_gdbarch_deprecated_store_return_value (gdbarch, mcore_store_return_value);
   set_gdbarch_deprecated_extract_return_value (gdbarch, 

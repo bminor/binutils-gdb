@@ -1012,7 +1012,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_frame_chain (gdbarch, m68k_frame_chain);
   set_gdbarch_frame_saved_pc (gdbarch, m68k_frame_saved_pc);
-  set_gdbarch_frame_init_saved_regs (gdbarch, m68k_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, m68k_frame_init_saved_regs);
   set_gdbarch_frameless_function_invocation (gdbarch,
 					     m68k_frameless_function_invocation);
   /* OK to default this value to 'unknown'. */

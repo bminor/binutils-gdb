@@ -381,7 +381,7 @@ struct frame_info
        special, the address here is the sp for the previous frame, not
        the address where the sp was saved.  */
     /* Allocated by frame_saved_regs_zalloc () which is called /
-       initialized by FRAME_INIT_SAVED_REGS(). */
+       initialized by DEPRECATED_FRAME_INIT_SAVED_REGS(). */
     CORE_ADDR *saved_regs;	/*NUM_REGS + NUM_PSEUDO_REGS*/
 
 #ifdef EXTRA_FRAME_INFO
@@ -465,7 +465,7 @@ extern void generic_save_dummy_frame_tos (CORE_ADDR sp);
 
 #ifdef FRAME_FIND_SAVED_REGS
 /* XXX - deprecated */
-#define FRAME_INIT_SAVED_REGS(FI) deprecated_get_frame_saved_regs (FI, NULL)
+#define DEPRECATED_FRAME_INIT_SAVED_REGS(FI) deprecated_get_frame_saved_regs (FI, NULL)
 extern void deprecated_get_frame_saved_regs (struct frame_info *,
 					     struct frame_saved_regs *);
 #endif

@@ -1,5 +1,52 @@
 2003-03-01  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (DEPRECATED_FRAME_INIT_SAVED_REGS): Rename
+	FRAME_INIT_SAVED_REGS.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* stack.c (frame_info): Update.
+	* sh-tdep.c (sh_find_callers_reg, sh64_get_saved_pr): Update.
+	(sh_init_extra_frame_info, sh64_init_extra_frame_info): Update.
+	(sh64_get_saved_register, sh_pop_frame, sh64_pop_frame): Update.
+	* ns32k-tdep.c (ns32k_pop_frame): Update.
+	* mips-tdep.c (mips_pop_frame): Update.
+	* m68hc11-tdep.c (m68hc11_pop_frame): Update.
+	* ia64-tdep.c (ia64_frame_chain): Update.
+	(ia64_frame_saved_pc, ia64_get_saved_register): Update.
+	(ia64_frameless_function_invocation): Update.
+	(ia64_init_extra_frame_info): Update.
+	(ia64_pop_frame_regular): Update.
+	* frame.h (struct frame_info): Update comment.
+	(DEPRECATED_FRAME_INIT_SAVED_REGS): Rename macro.
+	* frame.c (frame_saved_regs_register_unwind): Update.
+	(frame_saved_regs_register_unwind): Update.
+	(deprecated_generic_get_saved_register): Update.
+	* cris-tdep.c: Update comment.
+	* config/sparc/tm-sparc.h (DEPRECATED_FRAME_INIT_SAVED_REGS):
+	Rename macro.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.
+	* x86-64-tdep.c (x86_64_init_abi): Update.
+	* vax-tdep.c (vax_gdbarch_init): Update.
+	* v850-tdep.c (v850_gdbarch_init): Update.
+	* sparc-tdep.c (sparc_gdbarch_init): Update.
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Update.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Update.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	* mcore-tdep.c (mcore_gdbarch_init): Update.
+	* m68k-tdep.c (m68k_gdbarch_init): Update.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Update.
+	* ia64-tdep.c (ia64_gdbarch_init): Update.
+	* i386-tdep.c (i386_gdbarch_init): Update.
+	* frv-tdep.c (frv_gdbarch_init): Update.
+	* avr-tdep.c (avr_gdbarch_init): Update.
+	* arm-tdep.c (arm_gdbarch_init): Update.
+	* alpha-tdep.c (alpha_gdbarch_init): Update.
+	
+2003-03-01  Andrew Cagney  <cagney@redhat.com>
+
 	* main.c (captured_main): Add OPT_WINDOWS and OPT_NOWINDOWS to
 	option enum and switch.  When no windows, set the interpreter to
 	INTERP_CONSOLE.

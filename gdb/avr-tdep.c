@@ -418,7 +418,8 @@ avr_convert_from_func_ptr_addr (CORE_ADDR addr)
   return addr * 2;
 }
 
-/* avr_scan_prologue is also used as the frame_init_saved_regs().
+/* avr_scan_prologue is also used as the
+   deprecated_frame_init_saved_regs().
 
    Put here the code to store, into fi->saved_regs, the addresses of
    the saved registers of frame described by FRAME_INFO.  This
@@ -1187,7 +1188,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_use_struct_convention (gdbarch, generic_use_struct_convention);
   set_gdbarch_store_struct_return (gdbarch, avr_store_struct_return);
 
-  set_gdbarch_frame_init_saved_regs (gdbarch, avr_scan_prologue);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, avr_scan_prologue);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, avr_init_extra_frame_info);
   set_gdbarch_skip_prologue (gdbarch, avr_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

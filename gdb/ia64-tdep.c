@@ -94,7 +94,6 @@ static gdbarch_breakpoint_from_pc_ftype ia64_breakpoint_from_pc;
 static gdbarch_frame_chain_ftype ia64_frame_chain;
 static gdbarch_frame_saved_pc_ftype ia64_frame_saved_pc;
 static gdbarch_skip_prologue_ftype ia64_skip_prologue;
-static gdbarch_frame_init_saved_regs_ftype ia64_frame_init_saved_regs;
 static gdbarch_get_saved_register_ftype ia64_get_saved_register;
 static gdbarch_deprecated_extract_return_value_ftype ia64_extract_return_value;
 static gdbarch_deprecated_extract_struct_value_address_ftype ia64_extract_struct_value_address;
@@ -710,7 +709,7 @@ ia64_frame_chain (struct frame_info *frame)
     return get_frame_base (frame);
   else
     {
-      FRAME_INIT_SAVED_REGS (frame);
+      DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
       if (get_frame_saved_regs (frame)[IA64_VFP_REGNUM])
 	return read_memory_integer (get_frame_saved_regs (frame)[IA64_VFP_REGNUM], 8);
       else
@@ -731,7 +730,7 @@ ia64_frame_saved_pc (struct frame_info *frame)
 					   get_frame_base (frame), pc_regnum);
   else
     {
-      FRAME_INIT_SAVED_REGS (frame);
+      DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
 
       if (get_frame_saved_regs (frame)[IA64_VRAP_REGNUM])
 	return read_memory_integer (get_frame_saved_regs (frame)[IA64_VRAP_REGNUM], 8);
@@ -1311,7 +1310,7 @@ ia64_get_saved_register (char *raw_buffer,
 
       if (!is_dummy_frame)
 	{
-	  FRAME_INIT_SAVED_REGS (frame);
+	  DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
 	  gr_addr = get_frame_saved_regs (frame)[ regnum - IA64_NAT0_REGNUM 
 						+ IA64_GR0_REGNUM];
 	}
@@ -1353,7 +1352,7 @@ ia64_get_saved_register (char *raw_buffer,
       CORE_ADDR addr = 0;
       if (!is_dummy_frame)
 	{
-	  FRAME_INIT_SAVED_REGS (frame);
+	  DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
 	  addr = get_frame_saved_regs (frame)[regnum];
 	}
 
@@ -1461,7 +1460,7 @@ ia64_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 int
 ia64_frameless_function_invocation (struct frame_info *frame)
 {
-  FRAME_INIT_SAVED_REGS (frame);
+  DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
   return (get_frame_extra_info (frame)->mem_stack_frame_size == 0);
 }
 
@@ -1522,7 +1521,7 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
     {
       struct frame_info *frn = get_next_frame (frame);
 
-      FRAME_INIT_SAVED_REGS (frn);
+      DEPRECATED_FRAME_INIT_SAVED_REGS (frn);
 
       if (get_frame_saved_regs (frn)[IA64_CFM_REGNUM] != 0)
 	cfm = read_memory_integer (get_frame_saved_regs (frn)[IA64_CFM_REGNUM], 8);
@@ -1989,7 +1988,7 @@ ia64_pop_frame_regular (struct frame_info *frame)
   int regno;
   CORE_ADDR bsp, cfm, pfs;
 
-  FRAME_INIT_SAVED_REGS (frame);
+  DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
 
   for (regno = 0; regno < ia64_num_regs; regno++)
     {
@@ -2200,7 +2199,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_chain (gdbarch, ia64_frame_chain);
   set_gdbarch_frame_saved_pc (gdbarch, ia64_frame_saved_pc);
 
-  set_gdbarch_frame_init_saved_regs (gdbarch, ia64_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, ia64_frame_init_saved_regs);
   set_gdbarch_get_saved_register (gdbarch, ia64_get_saved_register);
 
   set_gdbarch_register_convertible (gdbarch, ia64_register_convertible);

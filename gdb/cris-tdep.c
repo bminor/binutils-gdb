@@ -1146,9 +1146,10 @@ cris_frameless_function_invocation (struct frame_info *fi)
     return frameless_look_for_prologue (fi);
 }
 
-/* See frame.h.  Determines the address of all registers in the current stack
-   frame storing each in frame->saved_regs.  Space for frame->saved_regs shall
-   be allocated by FRAME_INIT_SAVED_REGS using frame_saved_regs_zalloc.  */
+/* See frame.h.  Determines the address of all registers in the
+   current stack frame storing each in frame->saved_regs.  Space for
+   frame->saved_regs shall be allocated by
+   DEPRECATED_FRAME_INIT_SAVED_REGS using frame_saved_regs_zalloc.  */
 
 void
 cris_frame_init_saved_regs (struct frame_info *fi)
@@ -4291,7 +4292,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     (gdbarch, cris_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, cris_use_struct_convention);
 
-  set_gdbarch_frame_init_saved_regs (gdbarch, cris_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, cris_frame_init_saved_regs);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, cris_init_extra_frame_info);
   set_gdbarch_skip_prologue (gdbarch, cris_skip_prologue);
   set_gdbarch_prologue_frameless_p (gdbarch, generic_prologue_frameless_p);

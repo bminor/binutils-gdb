@@ -69,7 +69,6 @@ static gdbarch_skip_prologue_ftype alpha_skip_prologue;
 static gdbarch_saved_pc_after_call_ftype alpha_saved_pc_after_call;
 static gdbarch_frame_chain_ftype alpha_frame_chain;
 static gdbarch_frame_saved_pc_ftype alpha_frame_saved_pc;
-static gdbarch_frame_init_saved_regs_ftype alpha_frame_init_saved_regs;
 
 static gdbarch_push_arguments_ftype alpha_push_arguments;
 static gdbarch_pop_frame_ftype alpha_pop_frame;
@@ -1845,7 +1844,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_chain (gdbarch, alpha_frame_chain);
   set_gdbarch_frame_saved_pc (gdbarch, alpha_frame_saved_pc);
 
-  set_gdbarch_frame_init_saved_regs (gdbarch, alpha_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, alpha_frame_init_saved_regs);
 
   set_gdbarch_use_struct_convention (gdbarch, alpha_use_struct_convention);
   set_gdbarch_deprecated_extract_return_value (gdbarch, alpha_extract_return_value);

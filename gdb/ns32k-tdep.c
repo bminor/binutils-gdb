@@ -429,7 +429,7 @@ ns32k_pop_frame (void)
   int regnum;
 
   fp = get_frame_base (frame);
-  FRAME_INIT_SAVED_REGS (frame);
+  DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
 
   for (regnum = 0; regnum < 8; regnum++)
     if (get_frame_saved_regs (frame)[regnum])
@@ -578,7 +578,7 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_address (gdbarch, ns32k_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, ns32k_frame_locals_address);
 
-  set_gdbarch_frame_init_saved_regs (gdbarch, ns32k_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, ns32k_frame_init_saved_regs);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
 

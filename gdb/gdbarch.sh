@@ -572,7 +572,7 @@ F:2:EXTRACT_STRUCT_VALUE_ADDRESS:CORE_ADDR:extract_struct_value_address:struct r
 F:2:DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS:CORE_ADDR:deprecated_extract_struct_value_address:char *regbuf:regbuf:::0
 f:2:USE_STRUCT_CONVENTION:int:use_struct_convention:int gcc_p, struct type *value_type:gcc_p, value_type:::generic_use_struct_convention::0
 #
-F:2:FRAME_INIT_SAVED_REGS:void:frame_init_saved_regs:struct frame_info *frame:frame:::0
+F:2:DEPRECATED_FRAME_INIT_SAVED_REGS:void:deprecated_frame_init_saved_regs:struct frame_info *frame:frame:::0
 F:2:DEPRECATED_INIT_EXTRA_FRAME_INFO:void:deprecated_init_extra_frame_info:int fromleaf, struct frame_info *frame:fromleaf, frame:::0
 #
 f:2:SKIP_PROLOGUE:CORE_ADDR:skip_prologue:CORE_ADDR ip:ip::0:0
@@ -818,7 +818,7 @@ extern struct gdbarch *current_gdbarch;
 
 #if GDB_MULTI_ARCH
 #if defined (FRAME_FIND_SAVED_REGS)
-#error "FRAME_FIND_SAVED_REGS: replaced by FRAME_INIT_SAVED_REGS"
+#error "FRAME_FIND_SAVED_REGS: replaced by DEPRECATED_FRAME_INIT_SAVED_REGS"
 #endif
 #endif
 

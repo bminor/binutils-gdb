@@ -1809,7 +1809,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frame_args_address (gdbarch, s390_frame_args_address);
   set_gdbarch_frame_chain (gdbarch, s390_frame_chain);
-  set_gdbarch_frame_init_saved_regs (gdbarch, s390_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, s390_frame_init_saved_regs);
   set_gdbarch_frame_locals_address (gdbarch, s390_frame_args_address);
   /* We can't do this */
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
