@@ -1,5 +1,7 @@
 Fri Nov  1 10:42:49 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* doc/as.texinfo: Added section on reporting bugs.
+
 	* config/tc-alpha.c: Change uses of void * to PTR.  Change the
 	alpha_macro emit field to expect a const argument, and change the
 	arg field to be const.  Fix some spacing to follow the GNU
