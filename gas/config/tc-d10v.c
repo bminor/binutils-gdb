@@ -85,8 +85,10 @@ static unsigned long d10v_insert_operand PARAMS (( unsigned long insn, int op_ty
 static int parallel_ok PARAMS ((struct d10v_opcode *opcode1, unsigned long insn1, 
 				struct d10v_opcode *opcode2, unsigned long insn2,
 				int exec_type));
+static symbolS * find_symbol_matching_register PARAMS ((expressionS *));
 
-struct option md_longopts[] = {
+struct option md_longopts[] =
+{
 #define OPTION_NOWARNSWAP (OPTION_MD_BASE)
   {"nowarnswap", no_argument, NULL, OPTION_NOWARNSWAP},
   {NULL, no_argument, NULL, 0}
@@ -1124,6 +1126,29 @@ do_assemble (str, opcode)
   return (insn);
 }
 
+/* Find the symbol which has the same name as the register in the given expression.  */
+static symbolS *
+find_symbol_matching_register (exp)
+     expressionS * exp;
+{
+  int i;
+  
+  if (exp->X_op != O_register)
+    return NULL;
+  
+  /* Find the name of the register.  */
+  for (i = d10v_reg_name_cnt (); i--;)
+    if (d10v_predefined_registers [i].value == exp->X_add_number)
+      break;
+
+  if (i < 0)
+    abort ();
+
+  /* Now see if a symbol has been defined with the same name.  */
+  return symbol_find (d10v_predefined_registers [i].name);
+}
+
+
 /* find_opcode() gets a pointer to an entry in the opcode table.       */
 /* It must look at all opcodes with the same name and use the operands */
 /* to choose the correct opcode. */
@@ -1240,9 +1265,9 @@ find_opcode (opcode, myops)
 	      int X_op = myops[i].X_op;
 	      int num = myops[i].X_add_number;
 
-	      if (X_op==0)
+	      if (X_op == 0)
 		{
-		  match=0;
+		  match = 0;
 		  break;
 		}
 	      
@@ -1254,33 +1279,61 @@ find_opcode (opcode, myops)
 			     | OPERAND_FFLAG | OPERAND_CFLAG
 			     | OPERAND_CONTROL)))
 		    {
-		      match=0;
+		      match = 0;
 		      break;
 		    }
 		}
 	      
-	      if (((flags & OPERAND_MINUS) && ((X_op != O_absent) || (num != OPERAND_MINUS))) ||
-		  ((flags & OPERAND_PLUS) && ((X_op != O_absent) || (num != OPERAND_PLUS))) ||
+	      if (((flags & OPERAND_MINUS)   && ((X_op != O_absent) || (num != OPERAND_MINUS))) ||
+		  ((flags & OPERAND_PLUS)    && ((X_op != O_absent) || (num != OPERAND_PLUS))) ||
 		  ((flags & OPERAND_ATMINUS) && ((X_op != O_absent) || (num != OPERAND_ATMINUS))) ||
-		  ((flags & OPERAND_ATPAR) && ((X_op != O_absent) || (num != OPERAND_ATPAR))) ||
-		  ((flags & OPERAND_ATSIGN) && ((X_op != O_absent) || (num != OPERAND_ATSIGN))))
+		  ((flags & OPERAND_ATPAR)   && ((X_op != O_absent) || (num != OPERAND_ATPAR))) ||
+		  ((flags & OPERAND_ATSIGN)  && ((X_op != O_absent) || (num != OPERAND_ATSIGN))))
 		{
-		  match=0;
+		  match = 0;
 		  break;
-		}	      
+		}
+	      
+	      /* Unfortunatly, for the indirect operand in instructions such as
+		 ``ldb r1, @(c,r14)'' this function can be passed X_op == O_register
+		 (because 'c' is a valid register name).  However we cannot just
+		 ignore the case when X_op == O_register but flags & OPERAND_REG is
+		 null, so we check to see if a symbol of the same name as the register
+		 exists.  If the symbol does exist, then the parser was unable to
+		 distinguish the two cases and we fix things here.  (Ref: PR14826) */
+	      
+	      if (!(flags & OPERAND_REG) && (X_op == O_register))
+		{
+		  symbolS * sym;
+		  
+		  sym = find_symbol_matching_register (& myops[i]);
+		  
+		  if (sym != NULL)
+		    {
+		      myops [i].X_op == X_op == O_symbol;
+		      myops [i].X_add_symbol = sym;
+		    }
+		  else
+		    as_bad
+		      (_("illegal operand - register name found where none expected"));
+		}
 	    }
-	  /* we're only done if the operands matched so far AND there
-	     are no more to check */
-	  if (match && myops[i].X_op==0) 
+	  
+	  /* We're only done if the operands matched so far AND there
+	     are no more to check.  */
+	  if (match && myops[i].X_op == 0) 
 	    break;
 	  else
 	    match = 0;
 
-	  next_opcode = opcode+1;
+	  next_opcode = opcode + 1;
+	  
 	  if (next_opcode->opcode == 0) 
 	    break;
-	  if (strcmp(next_opcode->name, opcode->name))
+	  
+	  if (strcmp (next_opcode->name, opcode->name))
 	    break;
+	  
 	  opcode = next_opcode;
 	}
     }
@@ -1332,7 +1385,13 @@ tc_gen_reloc (seg, fixp)
                     _("reloc %d not supported by object file format"), (int)fixp->fx_r_type);
       return NULL;
     }
+
+  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    reloc->address = fixp->fx_offset;
+
   reloc->addend = fixp->fx_addnumber;
+
   return reloc;
 }
 
@@ -1427,6 +1486,17 @@ md_apply_fix3 (fixp, valuep, seg)
 	bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
       else
 	{
+	  struct d10v_opcode *rep, *repi;
+
+	  rep = (struct d10v_opcode *) hash_find (d10v_hash, "rep");
+	  repi = (struct d10v_opcode *) hash_find (d10v_hash, "repi");
+	  if ((insn & FM11) == FM11
+	      && (repi != NULL && (insn & repi->mask) == repi->opcode
+		  || rep != NULL && (insn & rep->mask) == rep->opcode)
+	      && value < 4)
+	    as_fatal
+	      (_("line %d: rep or repi must include at least 4 instructions"),
+	       fixp->fx_line);
 	  insn = d10v_insert_operand (insn, op_type, (offsetT)value, left, fixp);
 	  bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);  
 	}
@@ -1437,6 +1507,12 @@ md_apply_fix3 (fixp, valuep, seg)
     case BFD_RELOC_16:
       bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
       break;
+
+    case BFD_RELOC_VTABLE_INHERIT:
+    case BFD_RELOC_VTABLE_ENTRY:
+      fixp->fx_done = 0;
+      return 1;
+
     default:
       as_fatal (_("line %d: unknown relocation type: 0x%x"),fixp->fx_line,fixp->fx_r_type);
     }
@@ -1525,3 +1601,35 @@ md_operand (expressionP)
     }
 }
 
+boolean
+d10v_fix_adjustable (fixP)
+   fixS *fixP;
+{
+
+  if (fixP->fx_addsy == NULL)
+    return 1;
+  
+  /* Prevent all adjustments to global symbols. */
+  if (S_IS_EXTERN (fixP->fx_addsy))
+    return 0;
+  if (S_IS_WEAK (fixP->fx_addsy))
+    return 0;
+
+  /* We need the symbol name for the VTABLE entries */
+  if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 0;
+
+  return 1;
+}
+
+int
+d10v_force_relocation (fixp)
+      struct fix *fixp;
+{
+  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 1;
+
+  return 0;
+}

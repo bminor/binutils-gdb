@@ -1,3 +1,13 @@
+Tue Nov 10 14:41:33 1998  Catherine Moore  <clm@cygnus.com>
+
+        * config/tc-d10v.h (obj_fix_adjustable):  Define.
+        (TC_FORCE_RELOCATION):  Define.
+        (d10v_force_relocation):  Declare.
+        * config/tc-d10v.c (tc_gen_reloc):  Handle Vtable relocs.
+        (md_apply_fix3):  Handle Vtable relocs.
+        (d10v_fix_adjustable):  New.
+        (d10v_force_relocation):  New.
+
 Mon Nov  9 14:25:06 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d30v.c: Change default behaviour to ignore potential
