@@ -1,5 +1,12 @@
 2004-01-08  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/classes.exp: Accept gnu abi 2.
+	* gdb.cp/derivation.exp: Likewise.
+	* gdb.cp/overload.exp: Likewise.
+	* gdb.cp/virtfunc.exp: Likewise.
+
+2004-01-08  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.mi/pthreads.c (done_making_threads): Remove extraneous
 	semicolon after end of function.
 

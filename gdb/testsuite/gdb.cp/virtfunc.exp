@@ -98,7 +98,6 @@ set kk2 ""
 set kk3 ""
 set kk4 ""
 set kk5 ""
-set fk5 ""
 
 proc kk_debug { } {
     global kk0
@@ -107,14 +106,12 @@ proc kk_debug { } {
     global kk3
     global kk4
     global kk5
-    global fk5
     set kk0 " (0)"
     set kk1 " (1)"
     set kk2 " (2)"
     set kk3 " (3)"
     set kk4 " (4)"
     set kk5 " (5)"
-    set fk5 ""
 }
 
 proc test_one_ptype { command testname re_class re_vbptr re_access_fields re_fields re_access_methods re_methods re_synth_gcc_2 re_synth_gcc_3 re_star } {
@@ -129,7 +126,6 @@ proc test_one_ptype { command testname re_class re_vbptr re_access_fields re_fie
     global kk3
     global kk4
     global kk5
-    global fk5
 
     gdb_test_multiple "$command" "$testname" {
 	-re "type = $re_class${wsopt}$re_access_fields${wsopt}$re_fields${wsopt}$re_access_methods${wsopt}$re_methods$nl\}$re_star$nl$gdb_prompt $" {
@@ -158,11 +154,7 @@ proc test_one_ptype { command testname re_class re_vbptr re_access_fields re_fie
 	}
 	-re "type = $re_class${wsopt}$re_access_fields${wsopt}$re_fields${wsopt}$re_access_methods${wsopt}$re_methods${wsopt}$re_synth_gcc_3$nl\}$re_star$nl$gdb_prompt $" {
 	    # gcc 3.X, abi 2, stabs+
-	    if { "$fk5" == "fail" } {
-		fail "$testname$kk5"
-	    } else {
-		pass "$testname$kk5"
-	    }
+	    pass "$testname$kk5"
 	}
     }
 
@@ -172,7 +164,6 @@ proc test_one_ptype { command testname re_class re_vbptr re_access_fields re_fie
     set kk3 ""
     set kk4 ""
     set kk5 ""
-    set fk5 ""
 }
 
 proc test_ptype_of_classes {} {
@@ -186,7 +177,6 @@ proc test_ptype_of_classes {} {
     global kk3
     global kk4
     global kk5
-    global fk5
 
     # class VA
 
@@ -203,7 +193,6 @@ proc test_ptype_of_classes {} {
     # class VB
 
     set kk0 " (obsolescent gcc or gdb)"
-    set kk5 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype VB" "ptype VB" \
 	"((struct|class) VB \{${ws}public:|struct VB \{)" \
 	"" \
@@ -216,7 +205,6 @@ proc test_ptype_of_classes {} {
     # class V
 
     set kk0 " (obsolescent gcc or gdb)"
-    set kk5 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype V" "ptype V" \
 	"class V : public VA, public VB \{${ws}public:" \
 	"" \
@@ -230,7 +218,6 @@ proc test_ptype_of_classes {} {
 
     set kk0 " (aCC)"
     set kk1 " (obsolescent gcc or gdb)"
-    set fk5 "fail"
     test_one_ptype "ptype A" "ptype A" \
 	"class A : public virtual V \{(${ws}private:|)" \
 	"V \\*(_vb.1V|_vb.V);" \
@@ -243,7 +230,6 @@ proc test_ptype_of_classes {} {
     # class B
 
     set kk0 " (obsolescent gcc or gdb)"
-    set fk5 "fail"
     test_one_ptype "ptype B" "ptype B" \
 	"class B : public A \{(${ws}private:|)" \
 	"V \\*(_vb.1V|_vb.V);" \
@@ -269,7 +255,6 @@ proc test_ptype_of_classes {} {
     # class AD
 
     set kk0 " (obsolescent gcc or gdb)"
-    set kk5 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype AD" "ptype AD" \
 	"((struct|class) AD \{${ws}public:|struct AD \{)" \
 	"" \
@@ -283,7 +268,6 @@ proc test_ptype_of_classes {} {
 
     set kk0 " (aCC)"
     set kk1 " (obsolescent gcc or gdb)"
-    set fk5 "fail"
     test_one_ptype "ptype D" "ptype D" \
 	"class D : public AD, public virtual V \{(${ws}private:|)" \
     	"V \\*(_vb.1V|_vb.V);" \
@@ -297,7 +281,6 @@ proc test_ptype_of_classes {} {
     # TODO: E does not show a vbptr for V.  That seems strange.
 
     set kk0 " (obsolescent gcc or gdb)"
-    set fk5 "fail"
     test_one_ptype "ptype E" "ptype E" \
 	"class E : public B, public virtual V, public D, public C \{(${ws}private:|)" \
 	"" \
@@ -311,7 +294,6 @@ proc test_ptype_of_classes {} {
 
     set kk0 " (aCC)"
     set kk1 " (obsolescent gcc or gdb)"
-    set fk5 "fail"
     test_one_ptype "ptype dd" "ptype dd" \
 	"class D : public AD, public virtual V \{(${ws}private:|)" \
     	"V \\*(_vb.1V|_vb.V);" \
@@ -325,7 +307,6 @@ proc test_ptype_of_classes {} {
 
     set kk0 " (aCC)"
     set kk1 " (obsolescent gcc or gdb)"
-    set fk5 "fail"
     test_one_ptype "ptype ppd" "ptype ppd" \
 	"class D : public AD, public virtual V \{(${ws}private:|)" \
     	"V \\*(_vb.1V|_vb.V);" \
@@ -339,7 +320,6 @@ proc test_ptype_of_classes {} {
     # TODO: this should be named pADd, not pAd.
 
     set kk0 " (obsolescent gcc or gdb)"
-    set kk5 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype pAd" "ptype pAd" \
 	"((struct|class) AD \{${ws}public:|struct AD \{)" \
 	"" \
@@ -353,7 +333,6 @@ proc test_ptype_of_classes {} {
 
     set kk0 " (aCC)"
     set kk1 " (obsolescent gcc or gdb)"
-    set fk5 "fail"
     test_one_ptype "ptype a" "ptype a" \
 	"class A : public virtual V \{(${ws}private:|)" \
 	"V \\*(_vb.1V|_vb.V);" \
@@ -366,7 +345,6 @@ proc test_ptype_of_classes {} {
     # An instance of B
 
     set kk0 " (obsolescent gcc or gdb)"
-    set fk5 "fail"
     test_one_ptype "ptype b" "ptype b" \
 	"class B : public A \{(${ws}private:|)" \
 	"V \\*(_vb.1V|_vb.V);" \
@@ -393,7 +371,6 @@ proc test_ptype_of_classes {} {
 
     set kk0 " (aCC)"
     set kk1 " (obsolescent gcc or gdb)"
-    set fk5 "fail"
     test_one_ptype "ptype d" "ptype d" \
 	"class D : public AD, public virtual V \{(${ws}private:|)" \
     	"V \\*(_vb.1V|_vb.V);" \
@@ -406,7 +383,6 @@ proc test_ptype_of_classes {} {
     # An instance of E
 
     set kk0 " (obsolescent gcc or gdb)"
-    set fk5 "fail"
     test_one_ptype "ptype e" "ptype e" \
 	"class E : public B, public virtual V, public D, public C \{(${ws}private:|)" \
 	"" \
@@ -419,7 +395,6 @@ proc test_ptype_of_classes {} {
     # An instance of V
 
     set kk0 " (obsolescent gcc or gdb)"
-    set kk5 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype v" "ptype v" \
 	"class V : public VA, public VB \{${ws}public:" \
 	"" \
@@ -432,7 +407,6 @@ proc test_ptype_of_classes {} {
     # An instance of VB
 
     set kk0 " (obsolescent gcc or gdb)"
-    set kk5 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype vb" "ptype vb" \
 	"((struct|class) VB \{${ws}public:|struct VB \{)" \
 	"" \
@@ -446,7 +420,6 @@ proc test_ptype_of_classes {} {
 
     set kk0 " (aCC)"
     set kk1 " (obsolescent gcc or gdb)"
-    set fk5 "fail"
     test_one_ptype "ptype pAa" "ptype pAa" \
 	"class A : public virtual V \{(${ws}private:|)" \
 	"V \\*(_vb.1V|_vb.V);" \
@@ -460,7 +433,6 @@ proc test_ptype_of_classes {} {
 
     set kk0 " (aCC)"
     set kk1 " (obsolescent gcc or gdb)"
-    set fk5 "fail"
     test_one_ptype "ptype pAe" "ptype pAe" \
 	"class A : public virtual V \{(${ws}private:|)" \
 	"V \\*(_vb.1V|_vb.V);" \
@@ -473,7 +445,6 @@ proc test_ptype_of_classes {} {
     # An instance of B *
 
     set kk0 " (obsolescent gcc or gdb)"
-    set fk5 "fail"
     test_one_ptype "ptype pBe" "ptype pBe" \
 	"class B : public A \{(${ws}private:|)" \
 	"V \\*(_vb.1V|_vb.V);" \
@@ -487,7 +458,6 @@ proc test_ptype_of_classes {} {
 
     set kk0 " (aCC)"
     set kk1 " (obsolescent gcc or gdb)"
-    set fk5 "fail"
     test_one_ptype "ptype pDd" "ptype pDd" \
 	"class D : public AD, public virtual V \{(${ws}private:|)" \
     	"V \\*(_vb.1V|_vb.V);" \
@@ -501,7 +471,6 @@ proc test_ptype_of_classes {} {
 
     set kk0 " (aCC)"
     set kk1 " (obsolescent gcc or gdb)"
-    set fk5 "fail"
     test_one_ptype "ptype pDe" "ptype pDe" \
 	"class D : public AD, public virtual V \{(${ws}private:|)" \
     	"V \\*(_vb.1V|_vb.V);" \
@@ -514,7 +483,6 @@ proc test_ptype_of_classes {} {
     # An instance of V *
 
     set kk0 " (obsolescent gcc or gdb)"
-    set kk5 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype pVa" "ptype pVa" \
 	"class V : public VA, public VB \{${ws}public:" \
 	"" \
@@ -527,7 +495,6 @@ proc test_ptype_of_classes {} {
     # An instance of V *
 
     set kk0 " (obsolescent gcc or gdb)"
-    set kk5 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype pVv" "ptype pVv" \
 	"class V : public VA, public VB \{${ws}public:" \
 	"" \
@@ -540,7 +507,6 @@ proc test_ptype_of_classes {} {
     # An instance of V *
 
     set kk0 " (obsolescent gcc or gdb)"
-    set kk5 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype pVe" "ptype pVe" \
 	"class V : public VA, public VB \{${ws}public:" \
 	"" \
@@ -553,7 +519,6 @@ proc test_ptype_of_classes {} {
     # An instance of V *
 
     set kk0 " (obsolescent gcc or gdb)"
-    set kk5 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype pVd" "ptype pVd" \
 	"class V : public VA, public VB \{${ws}public:" \
 	"" \
@@ -566,7 +531,6 @@ proc test_ptype_of_classes {} {
     # An instance of AD *
 
     set kk0 " (obsolescent gcc or gdb)"
-    set kk5 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype pADe" "ptype pADe" \
 	"((struct|class) AD \{${ws}public:|struct AD \{)" \
 	"" \
@@ -579,7 +543,6 @@ proc test_ptype_of_classes {} {
     # An instance of E *
 
     set kk0 " (obsolescent gcc or gdb)"
-    set fk5 "fail"
     test_one_ptype "ptype pEe" "ptype pEe" \
 	"class E : public B, public virtual V, public D, public C \{(${ws}private:|)" \
 	"" \
@@ -592,7 +555,6 @@ proc test_ptype_of_classes {} {
     # An instance of VB *
 
     set kk0 " (obsolescent gcc or gdb)"
-    set kk5 " (obsolescent gcc or gdb)"
     test_one_ptype "ptype pVB" "ptype pVB" \
 	"((struct|class) VB \{${ws}public:|struct VB \{)" \
 	"" \

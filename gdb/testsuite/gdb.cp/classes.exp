@@ -347,8 +347,7 @@ proc test_ptype_class_objects {} {
 	}
 	-re "type = class Static \{${ws}public:${ws}static void ii\\(int, int\\);${ws}Static ?& ?operator ?=\\(Static const ?&\\);${ws}Static\\(Static const ?&\\);${ws}Static\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
-	    # TODO: this is okay.  It is just ABI 2.
-	    fail "ptype class Static"
+	    pass "ptype class Static"
 	}
     }
 
@@ -495,8 +494,7 @@ proc test_ptype_class_objects {} {
 	}
 	-re "type = class Base1 \{${ws}public:${ws}int x;${ws}Base1\\(int\\);${ws}Base1 ?& ?operator ?=\\(Base1 const ?&\\);${ws}Base1\\(Base1 const ?&\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
-	    # TODO: this is not obsolescent!
-	    pass "ptype class Base1 (obsolescent gcc or gdb)"
+	    pass "ptype class Base1"
 	}
     }
 
@@ -522,8 +520,7 @@ proc test_ptype_class_objects {} {
 	}
 	-re "type = class Foo \{${ws}public:${ws}int x;${ws}int y;${ws}static int st;${ws}Foo\\(int, int\\);${ws}int operator ?!\\((void|)\\);${ws}operator int\\((void|)\\);${ws}int times\\(int\\);${ws}Foo ?& ?operator ?=\\(Foo const ?&\\);${ws}Foo\\(Foo const ?&\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
-	    # TODO: this is okay, just the new ABI
-	    fail "ptype class Foo"
+	    pass "ptype class Foo"
 	}
     }
 
@@ -544,8 +541,7 @@ proc test_ptype_class_objects {} {
 	}
 	-re "type = class Bar : public Base1, public Foo \{${ws}public:${ws}int z;${ws}Bar\\(int, int, int\\);${ws}Bar ?& ?operator ?=\\(Bar const ?&\\);${ws}Bar\\(Bar const ?&\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
-	    # TODO: this is not obsolescent!
-	    pass "ptype class Bar (obsolescent gcc or gdb)"
+	    pass "ptype class Bar"
 	}
     }
 }

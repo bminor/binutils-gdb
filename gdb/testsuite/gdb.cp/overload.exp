@@ -64,7 +64,6 @@ gdb_test "up" ".*main.*" "up from marker1"
 #
 # This is hairy to begin with.  It is even more hairy because of the
 # XX_* alternate patterns to catch the KFAIL and XFAIL cases.
-# TODO: And then hair^3 to reutrn the same results as the old tests.
 
 set re_class	"((struct|class) foo \{${ws}public:|struct foo \{)"
 set re_fields	"int ifoo;${ws}const char ?\\* ?ccpfoo;"
@@ -143,9 +142,7 @@ gdb_test_multiple "ptype foo_instance1" "ptype foo_instance1" {
     }
     -re "type = $re_class${ws}$re_fields${ws}$re_ctor${ws}$re_dtor${ws}$re_methods${ws}$re_synth$nl\}$nl$gdb_prompt $" {
 	# gcc HEAD -gstabs+ (abi-2)
-	# TODO: just pass this
-	# pass "ptype foo_instance1"
-	fail "ptype foo_instance1"
+	pass "ptype foo_instance1 (shorter match)"
     }
 }
 
