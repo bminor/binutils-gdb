@@ -1,3 +1,10 @@
+2004-06-29  Joel Brobecker  <brobecker@gnat.com>
+
+	* i386-cygwin-tdep.c (i386-cygwin-tdep.c): New function.
+	(i386_cygwin_in_solib_call_trampoline): New function.
+	(i386_cygwin_init_abi): Initialize the in_solib_call_trampoline
+	and skip_trampoline_code gdbarch methods.
+
 2004-06-29  Jim Blandy  <jimb@redhat.com>
 
 	* Makefile.in (gdb_callback_h): Renamed from callback_h to the
