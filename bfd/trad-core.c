@@ -112,7 +112,7 @@ trad_unix_core_file_p (abfd)
 				 + u.u_ssize))
 	> (unsigned long) statbuf.st_size)
       {
-	bfd_set_error (bfd_error_file_truncated);
+	bfd_set_error (bfd_error_wrong_format);
 	return 0;
       }
 #ifndef TRAD_CORE_ALLOW_ANY_EXTRA_SIZE
