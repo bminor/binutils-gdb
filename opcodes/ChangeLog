@@ -1,5 +1,8 @@
 Mon Nov 25 11:17:01 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* mn10300-dis.c (disassemble): Use '$' instead of '%' for 
+	register prefix.
+
 	* mn10300-dis.c (disassemble): Prefix registers with '%'.
 
 Wed Nov 20 10:37:13 1996  Jeffrey A Law  (law@cygnus.com)
