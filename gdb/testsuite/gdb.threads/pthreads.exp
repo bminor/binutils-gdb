@@ -170,7 +170,11 @@ proc all_threads_running {} {
 
     send_gdb "p common_routine::full_coverage\n"
     gdb_expect {
-	-re ".*= 1\r\n$gdb_prompt $" {}
+	-re ".* = 1.*$gdb_prompt $" {}
+	-re ".* = 0.*$gdb_prompt $" {
+	    fail "some threads didn't run"
+	    return 0
+	}
 	default {
 	    fail "some threads didn't run"
 	    return 0

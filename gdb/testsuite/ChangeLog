@@ -1,3 +1,9 @@
+2001-05-24  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.threads/pthreads.exp (all_threads_running): Add an explicit
+	test for (full_coverage == 0).  This makes the test run faster, 
+	and prevents dejagnu getting out of step.
+
 2001-05-23  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.base/finish.exp (finish_void): Revise pattern for
