@@ -1,4 +1,4 @@
-/* MIPS-specific support for 32-bit ELF
+l/* MIPS-specific support for 32-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
@@ -539,7 +539,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  /* 26 bit branch address.  */
+  /* 26 bit jump address.  */
   HOWTO (R_MIPS_26,		/* type */
 	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -1667,7 +1667,7 @@ gprel32_with_gp (abfd, symbol, reloc_entry, input_section, relocateable, data,
 }
 
 /* Handle a 64 bit reloc in a 32 bit MIPS ELF file.  These are
-   generated when addreses are 64 bits.  The upper 32 bits are a simle
+   generated when addresses are 64 bits.  The upper 32 bits are a simple
    sign extension.  */
 
 static bfd_reloc_status_type
@@ -3071,8 +3071,8 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
 
 boolean
 _bfd_mips_elf_section_from_bfd_section (abfd, hdr, sec, retval)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     Elf32_Internal_Shdr *hdr ATTRIBUTE_UNUSED;
+     bfd *abfd;
+     Elf_Internal_Shdr *hdr ATTRIBUTE_UNUSED;
      asection *sec;
      int *retval;
 {

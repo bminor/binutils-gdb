@@ -4734,7 +4734,7 @@ _bfd_elf_slurp_version_tables (abfd)
       Elf_Internal_Verdef *iverdefarr;
       Elf_Internal_Verdef iverdefmem;
       unsigned int i;
-      int maxidx;
+      unsigned int maxidx;
 
       hdr = &elf_tdata (abfd)->dynverdef_hdr;
 
@@ -4754,8 +4754,8 @@ _bfd_elf_slurp_version_tables (abfd)
 	{
 	  _bfd_elf_swap_verdef_in (abfd, everdef, &iverdefmem);
 
-	  if ((iverdefmem.vd_ndx & VERSYM_VERSION) > maxidx)
-	    maxidx = iverdefmem.vd_ndx & VERSYM_VERSION;
+	  if ((iverdefmem.vd_ndx & ((unsigned) VERSYM_VERSION)) > maxidx)
+	    maxidx = iverdefmem.vd_ndx & ((unsigned) VERSYM_VERSION);
 
 	  everdef = ((Elf_External_Verdef *)
 		     ((bfd_byte *) everdef + iverdefmem.vd_next));

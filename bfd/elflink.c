@@ -108,7 +108,7 @@ _bfd_elf_create_dynamic_sections (abfd, info)
   flagword flags, pltflags;
   register asection *s;
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  int ptralign = 0;
+  int ptralign;
 
   switch (bed->s->arch_size)
     {
@@ -333,7 +333,7 @@ elf_link_renumber_hash_table_dynsyms (h, data)
   return true;
 }
 
-/* Assign dynsym indicies.  In a shared library we generate a section
+/* Assign dynsym indices.  In a shared library we generate a section
    symbol for each output section, which come first.  Next come all of
    the back-end allocated local dynamic syms, followed by the rest of
    the global symbols.  */

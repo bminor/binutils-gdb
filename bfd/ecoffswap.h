@@ -196,7 +196,7 @@ ecoff_swap_fdr_in (abfd, ext_copy, intern)
   intern->adr           = ecoff_get_off (abfd, (bfd_byte *)ext->f_adr);
   intern->rss           = bfd_h_get_32 (abfd, (bfd_byte *)ext->f_rss);
 #if defined (ECOFF_64) || defined (ECOFF_SIGNED_64)
-  if (intern->rss == 0xffffffff)
+  if (intern->rss == (signed long) 0xffffffff)
     intern->rss = -1;
 #endif
   intern->issBase       = bfd_h_get_32 (abfd, (bfd_byte *)ext->f_issBase);
