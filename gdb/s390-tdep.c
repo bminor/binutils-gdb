@@ -1439,7 +1439,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_stab_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
   set_gdbarch_dwarf_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
-  set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
   /* Stuff below here wouldn't be required if gdbarch.sh was a little */
   /* more intelligent */
