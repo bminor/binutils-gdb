@@ -1,3 +1,8 @@
+Mon May 10 15:28:27 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* hppa-tdep.c (hppa_push_arguments): Allocate correct amount of
+	memory.
+
 Mon May 10 13:14:46 1993  Fred Fish  (fnf@cygnus.com)
 
 	* ch-exp.y (start):  Apply work-around to avoid bison warning.

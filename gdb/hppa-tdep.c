@@ -674,7 +674,7 @@ hppa_push_arguments (nargs, args, sp, struct_return, struct_addr)
      CORE_ADDR struct_addr;
 {
   /* array of arguments' offsets */
-  int *offset = (int *)alloca(nargs);
+  int *offset = (int *)alloca(nargs * sizeof (int));
   int cum = 0;
   int i, alignment;
   
