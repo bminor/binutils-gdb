@@ -1,3 +1,7 @@
+Sat Mar 28 15:19:48 1998  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* NEWS: Update for 4.17 release.
+
 Thu Mar 26 22:29:28 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
         * tracepoint.c (trace_status_command): Recognize a boolean return
