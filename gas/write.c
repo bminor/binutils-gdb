@@ -2459,7 +2459,7 @@ relax_segment (segment_frag_root, segment)
 		    offsetT amount;
 
 		    amount = S_GET_VALUE (symbolP);
-		    if (symbol_get_frag (symbolP) != &zero_address_frag
+		    if (S_GET_SEGMENT (symbolP) != absolute_section
 			|| S_IS_COMMON (symbolP)
 			|| ! S_IS_DEFINED (symbolP))
 		      {

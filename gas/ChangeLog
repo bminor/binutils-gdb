@@ -1,5 +1,10 @@
 2001-05-27  Alan Modra  <amodra@one.net.au>
 
+	* write.c (relax_segment <rs_space>): Check the section of a
+	symbol to determine whether it is absolute rather than comparing
+	its frag against zero_address_frag as listings play tricks with
+	frags.
+
 	* config/tc-m68k.c (md_assemble): Ensure variable part of frag is
 	allocated in the same chunk as the fixed part.
 
