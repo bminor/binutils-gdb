@@ -75,6 +75,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yy_yyv	m2_yyv
 #define	yyval	m2_val
 #define	yylloc	m2_lloc
+#define yyreds	m2_reds		/* With YYDEBUG defined */
+#define yytoks	m2_toks		/* With YYDEBUG defined */
 #define yyss	m2_yyss		/* byacc */
 #define	yyssp	m2_yysp		/* byacc */
 #define	yyvs	m2_yyvs		/* byacc */
@@ -106,7 +108,10 @@ static int number_sign = 1;
 static struct block *modblock=0;
 #endif
 
-/* #define	YYDEBUG	1 */
+#if MAINTENANCE_CMDS
+#define	YYDEBUG	1
+#endif
+
 %}
 
 /* Although the yacc "value" of an expression is not used,
@@ -848,7 +853,7 @@ yylex ()
 
   /* See if it is a special token of length 2 */
   for( i = 0 ; i < sizeof tokentab2 / sizeof tokentab2[0] ; i++)
-     if(!strncmp(tokentab2[i].name, tokstart, 2))
+     if(STREQN(tokentab2[i].name, tokstart, 2))
      {
 	lexptr += 2;
 	return tokentab2[i].token;
@@ -1043,14 +1048,14 @@ yylex ()
   if (*tokstart == '$') {
     for (c = 0; c < NUM_REGS; c++)
       if (namelen - 1 == strlen (reg_names[c])
-	  && !strncmp (tokstart + 1, reg_names[c], namelen - 1))
+	  && STREQN (tokstart + 1, reg_names[c], namelen - 1))
 	{
 	  yylval.lval = c;
 	  return REGNAME;
 	}
     for (c = 0; c < num_std_regs; c++)
      if (namelen - 1 == strlen (std_regs[c].name)
-	 && !strncmp (tokstart + 1, std_regs[c].name, namelen - 1))
+	 && STREQN (tokstart + 1, std_regs[c].name, namelen - 1))
        {
 	 yylval.lval = std_regs[c].regnum;
 	 return REGNAME;
@@ -1060,7 +1065,7 @@ yylex ()
 
   /*  Lookup special keywords */
   for(i = 0 ; i < sizeof(keytab) / sizeof(keytab[0]) ; i++)
-     if(namelen == strlen(keytab[i].keyw) && !strncmp(tokstart,keytab[i].keyw,namelen))
+     if(namelen == strlen(keytab[i].keyw) && STREQN(tokstart,keytab[i].keyw,namelen))
 	   return keytab[i].token;
 
   yylval.sval.ptr = tokstart;
@@ -1126,12 +1131,12 @@ yylex ()
     else
     {
        /* Built-in BOOLEAN type.  This is sort of a hack. */
-       if(!strncmp(tokstart,"TRUE",4))
+       if(STREQN(tokstart,"TRUE",4))
        {
 	  yylval.ulval = 1;
 	  return M2_TRUE;
        }
-       else if(!strncmp(tokstart,"FALSE",5))
+       else if(STREQN(tokstart,"FALSE",5))
        {
 	  yylval.ulval = 0;
 	  return M2_FALSE;

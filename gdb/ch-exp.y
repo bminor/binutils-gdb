@@ -90,6 +90,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yy_yyv	chill_yyv
 #define	yyval	chill_val
 #define	yylloc	chill_lloc
+#define yyreds	chill_reds		/* With YYDEBUG defined */
+#define yytoks	chill_toks		/* With YYDEBUG defined */
 #define yyss	chill_yyss		/* byacc */
 #define	yyssp	chill_yysp		/* byacc */
 #define	yyvs	chill_yyvs		/* byacc */
@@ -104,7 +106,9 @@ yyerror PARAMS ((char *));
 int
 yyparse PARAMS ((void));
 
-/* #define	YYDEBUG	1 */
+#if MAINTENANCE_CMDS
+#define	YYDEBUG	1
+#endif
 
 %}
 
@@ -190,6 +194,15 @@ yyparse PARAMS ((void));
 %token <voidval>	ELSIF
 %token <voidval>	ILLEGAL_TOKEN
 
+/* Tokens which are not Chill tokens used in expressions, but rather GDB
+   specific things that we recognize in the same context as Chill tokens
+   (register names for example). */
+
+%token <lval>		GDB_REGNAME	/* Machine register name */
+%token <lval>		GDB_LAST	/* Value history */
+%token <ivar>		GDB_VARIABLE	/* Convenience variable */
+%token <voidval>	GDB_ASSIGNMENT	/* Assign value to somewhere */
+
 %type <voidval>		location
 %type <voidval>		access_name
 %type <voidval>		primitive_value
@@ -247,6 +260,8 @@ yyparse PARAMS ((void));
 %type <voidval>		case_label_specification
 %type <voidval>		buffer_location
 
+%type <voidval>		single_assignment_action
+
 %%
 
 /* Z.200, 5.3.1 */
@@ -286,6 +301,24 @@ access_name	:	LOCATION_NAME
 			  write_exp_elt_opcode (OP_VAR_VALUE);
 			  write_exp_elt_sym ($1.sym);
 			  write_exp_elt_opcode (OP_VAR_VALUE);
+			}
+		|	GDB_LAST		/* gdb specific */
+			{
+			  write_exp_elt_opcode (OP_LAST);
+			  write_exp_elt_longcst ($1);
+			  write_exp_elt_opcode (OP_LAST); 
+			}
+		|	GDB_REGNAME		/* gdb specific */
+			{
+			  write_exp_elt_opcode (OP_REGISTER);
+			  write_exp_elt_longcst ($1);
+			  write_exp_elt_opcode (OP_REGISTER); 
+			}
+		|	GDB_VARIABLE	/* gdb specific */
+			{
+			  write_exp_elt_opcode (OP_INTERNALVAR);
+			  write_exp_elt_intern ($1);
+			  write_exp_elt_opcode (OP_INTERNALVAR); 
 			}
   		|	FIXME
 			{
@@ -604,6 +637,10 @@ operand_0	:	operand_1
 			{
 			  write_exp_elt_opcode (BINOP_BITWISE_XOR);
 			}
+		|	single_assignment_action
+			{
+			  $$ = 0;	/* FIXME */
+			}
 		;
 
 /* Z.200, 5.3.4 */
@@ -739,6 +776,13 @@ operand_6	:	POINTER location
 			}
 		;
 
+
+/* Z.200, 6.2 */
+
+single_assignment_action :	location GDB_ASSIGNMENT value
+			{
+			  write_exp_elt_opcode (BINOP_ASSIGN);
+			}
 
 /* Z.200, 12.4.3 */
 /* FIXME:  For now we just accept only a single integer literal. */
@@ -1036,6 +1080,131 @@ match_integer_literal ()
     }
 }
 
+/* Recognize tokens that start with '$'.  These include:
+
+	$regname	A native register name or a "standard
+			register name".
+			Return token GDB_REGNAME.
+
+	$variable	A convenience variable with a name chosen
+			by the user.
+			Return token GDB_VARIABLE.
+
+	$digits		Value history with index <digits>, starting
+			from the first value which has index 1.
+			Return GDB_LAST.
+
+	$$digits	Value history with index <digits> relative
+			to the last value.  I.E. $$0 is the last
+			value, $$1 is the one previous to that, $$2
+			is the one previous to $$1, etc.
+			Return token GDB_LAST.
+
+	$ | $0 | $$0	The last value in the value history.
+			Return token GDB_LAST.
+
+	$$		An abbreviation for the second to the last
+			value in the value history, I.E. $$1
+			Return token GDB_LAST.
+
+    Note that we currently assume that register names and convenience
+    variables follow the convention of starting with a letter or '_'.
+
+   */
+
+static int
+match_dollar_tokens ()
+{
+  char *tokptr;
+  int regno;
+  int namelength;
+  int negate;
+  int ival;
+
+  /* We will always have a successful match, even if it is just for
+     a single '$', the abbreviation for $$0.  So advance lexptr. */
+
+  tokptr = ++lexptr;
+
+  if (*tokptr == '_' || isalpha (*tokptr))
+    {
+      /* Look for a match with a native register name, usually something
+	 like "r0" for example. */
+
+      for (regno = 0; regno < NUM_REGS; regno++)
+	{
+	  namelength = strlen (reg_names[regno]);
+	  if (STREQN (tokptr, reg_names[regno], namelength)
+	      && !isalnum (tokptr[namelength]))
+	    {
+	      yylval.lval = regno;
+	      lexptr += namelength + 1;
+	      return (GDB_REGNAME);
+	    }
+	}
+
+      /* Look for a match with a standard register name, usually something
+	 like "pc", which gdb always recognizes as the program counter
+	 regardless of what the native register name is. */
+
+      for (regno = 0; regno < num_std_regs; regno++)
+	{
+	  namelength = strlen (std_regs[regno].name);
+	  if (STREQN (tokptr, std_regs[regno].name, namelength)
+	      && !isalnum (tokptr[namelength]))
+	    {
+	      yylval.lval = std_regs[regno].regnum;
+	      lexptr += namelength;
+	      return (GDB_REGNAME);
+	    }
+	}
+
+      /* Attempt to match against a convenience variable.  Note that
+	 this will always succeed, because if no variable of that name
+	 already exists, the lookup_internalvar will create one for us.
+	 Also note that both lexptr and tokptr currently point to the
+	 start of the input string we are trying to match, and that we
+	 have already tested the first character for non-numeric, so we
+	 don't have to treat it specially. */
+
+      while (*tokptr == '_' || isalnum (*tokptr))
+	{
+	  tokptr++;
+	}
+      yylval.sval.ptr = lexptr;
+      yylval.sval.length = tokptr - lexptr;
+      yylval.ivar = lookup_internalvar (copy_name (yylval.sval));
+      lexptr = tokptr;
+      return (GDB_VARIABLE);
+    }
+
+  /* Since we didn't match against a register name or convenience
+     variable, our only choice left is a history value. */
+
+  if (*tokptr == '$')
+    {
+      negate = 1;
+      ival = 1;
+      tokptr++;
+    }
+  else
+    {
+      negate = 0;
+      ival = 0;
+    }
+
+  /* Attempt to decode more characters as an integer value giving
+     the index in the history list.  If successful, the value will
+     overwrite ival (currently 0 or 1), and if not, ival will be
+     left alone, which is good since it is currently correct for
+     the '$' or '$$' case. */
+
+  decode_integer_literal (&ival, &tokptr);
+  yylval.lval = negate ? -ival : ival;
+  lexptr = tokptr;
+  return (GDB_LAST);
+}
+
 #if 0
 static void convert_float ()
 {
@@ -1103,6 +1272,7 @@ static const struct token tokentab3[] =
 
 static const struct token tokentab2[] =
 {
+    { ":=", GDB_ASSIGNMENT },
     { "//", SLASH_SLASH },
     { "/=", NOTEQUAL },
     { "<=", LEQ },
@@ -1136,7 +1306,6 @@ yylex ()
 	        return (0);
 	    case '.':
 	    case '=':
-	    case ':':
 	    case ';':
 	    case '!':
 	    case '+':
@@ -1150,7 +1319,8 @@ yylex ()
 		return (*lexptr++);
 	}
     /* Look for characters which start a particular kind of multicharacter
-       token, such as a character literal. */
+       token, such as a character literal, register name, convenience
+       variable name, etc. */
     switch (*lexptr)
       {
         case 'C':
@@ -1162,11 +1332,18 @@ yylex ()
 	      return (token);
 	    }
 	  break;
+	case '$':
+	  token = match_dollar_tokens ();
+	  if (token != 0)
+	    {
+	      return (token);
+	    }
+	  break;
       }
     /* See if it is a special token of length 5.  */
     for (i = 0; i < sizeof (tokentab5) / sizeof (tokentab5[0]); i++)
 	{
-	    if (strncmp (lexptr, tokentab5[i].operator, 5) == 0)
+	    if (STREQN (lexptr, tokentab5[i].operator, 5))
 		{
 		    lexptr += 5;
 		    return (tokentab5[i].token);
@@ -1175,7 +1352,7 @@ yylex ()
     /* See if it is a special token of length 4.  */
     for (i = 0; i < sizeof (tokentab4) / sizeof (tokentab4[0]); i++)
 	{
-	    if (strncmp (lexptr, tokentab4[i].operator, 4) == 0)
+	    if (STREQN (lexptr, tokentab4[i].operator, 4))
 		{
 		    lexptr += 4;
 		    return (tokentab4[i].token);
@@ -1184,7 +1361,7 @@ yylex ()
     /* See if it is a special token of length 3.  */
     for (i = 0; i < sizeof (tokentab3) / sizeof (tokentab3[0]); i++)
 	{
-	    if (strncmp (lexptr, tokentab3[i].operator, 3) == 0)
+	    if (STREQN (lexptr, tokentab3[i].operator, 3))
 		{
 		    lexptr += 3;
 		    return (tokentab3[i].token);
@@ -1193,7 +1370,7 @@ yylex ()
     /* See if it is a special token of length 2.  */
     for (i = 0; i < sizeof (tokentab2) / sizeof (tokentab2[0]); i++)
 	{
-	    if (strncmp (lexptr, tokentab2[i].operator, 2) == 0)
+	    if (STREQN (lexptr, tokentab2[i].operator, 2))
 		{
 		    lexptr += 2;
 		    return (tokentab2[i].token);
@@ -1204,19 +1381,20 @@ yylex ()
        would already have found it. */
     switch (*lexptr)
 	{
+	    case ':':
 	    case '/':
 	    case '<':
 	    case '>':
 		return (*lexptr++);
 	}
     /* Look for other special tokens. */
-    if (strncmp (lexptr, "TRUE", 4) == 0) /* FIXME:  What about lowercase? */
+    if (STREQN (lexptr, "TRUE", 4)) /* FIXME:  What about lowercase? */
 	{
 	    yylval.ulval = 1;
 	    lexptr += 4;
 	    return (BOOLEAN_LITERAL);
 	}
-    if (strncmp (lexptr, "FALSE", 5) == 0) /* FIXME:  What about lowercase? */
+    if (STREQN (lexptr, "FALSE", 5)) /* FIXME:  What about lowercase? */
 	{
 	    yylval.ulval = 0;
 	    lexptr += 5;

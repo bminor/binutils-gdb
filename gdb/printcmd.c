@@ -1960,10 +1960,11 @@ This is useful for formatted output in user-defined commands.");
 This is useful in user-defined commands.");
 
   add_prefix_cmd ("set", class_vars, set_command,
-"Perform an assignment VAR = EXP.\n\
-You must type the \"=\".  VAR may be a debugger \"convenience\" variable\n\
-(names starting with $), a register (a few standard names starting with $),\n\
-or an actual variable in the program being debugged.  EXP is any expression.\n\
+"Evaluate expression EXP and assign result to variable VAR, using assignment\n\
+syntax appropriate for the current language (VAR = EXP or VAR := EXP for\n\
+example).  VAR may be a debugger \"convenience\" variable (names starting\n\
+with $), a register (a few standard names starting with $), or an actual\n\
+variable in the program being debugged.  EXP is any valid expression.\n\
 Use \"set variable\" for variables with names identical to set subcommands.\n\
 \nWith a subcommand, this command modifies parts of the gdb environment.\n\
 You can see these environment settings with the \"show\" command.",
@@ -1977,10 +1978,11 @@ current working language.  The result is printed and saved in the value\n\
 history, if it is not void.");
 
   add_cmd ("variable", class_vars, set_command,
-           "Perform an assignment VAR = EXP.\n\
-You must type the \"=\".  VAR may be a debugger \"convenience\" variable\n\
-(names starting with $), a register (a few standard names starting with $),\n\
-or an actual variable in the program being debugged.  EXP is any expression.\n\
+"Evaluate expression EXP and assign result to variable VAR, using assignment\n\
+syntax appropriate for the current language (VAR = EXP or VAR := EXP for\n\
+example).  VAR may be a debugger \"convenience\" variable (names starting\n\
+with $), a register (a few standard names starting with $), or an actual\n\
+variable in the program being debugged.  EXP is any valid expression.\n\
 This may usually be abbreviated to simply \"set\".",
            &setlist);
 

@@ -1,3 +1,26 @@
+Wed Dec 30 19:47:13 1992  Fred Fish  (fnf@cygnus.com)
+
+	* c-exp.y, m2-exp.y (yyreds, yytoks):  Remap like other yy* names.
+	* c-exp.y, m2-exp.y (YYDEBUG):  Define if MAINTENANCE_CMDS is defined
+	and YYDEBUG is not already defined.
+	* c-exp.y (strncmp):  Replace throughout with STREQN, missed
+	them during the previous replacements.
+	* printcmd.c (_initialize_printcmd):  Update internal documentation
+	for "set" command to note that the assignment syntax is language
+	dependent.
+	**** start-sanitize-chill ****
+	* ch-exp.y (yyreds, yytoks):  Remap like other yy* names.
+	* ch-exp.y (YYDEBUG):  Define if MAINTENANCE_CMDS is defined
+	and YYDEBUG is not already defined.
+	* ch-exp.y (GDB_REGNAME, GDB_LAST, GDB_VARIABLE, GDB_ASSIGNMENT,
+	single_assignment_action): New terminals and nonterminal for gdb
+	extensions to chill expression grammer.
+	* ch-exp.y (match_dollar_tokens):  Lexer routine to match all
+	tokens that start with '$' (register names, convenience vars, etc).
+	* ch-exp.y (tokentab2):  Add GDB_ASSIGNMENT.
+	* ch-exp.y (yylex):  Call match_dollar_tokens.
+	**** end-sanitize-chill ****
+
 Mon Dec 28 15:00:01 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* hppah-tdep.c (skip_trampoline_code):  Use new macros for

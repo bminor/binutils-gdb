@@ -73,6 +73,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yy_yyv	c_yyv
 #define	yyval	c_val
 #define	yylloc	c_lloc
+#define yyreds	c_reds		/* With YYDEBUG defined */
+#define yytoks	c_toks		/* With YYDEBUG defined */
 #define yyss	c_yyss		/* byacc */
 #define	yyssp	c_yysp		/* byacc */
 #define	yyvs	c_yyvs		/* byacc */
@@ -87,7 +89,9 @@ yylex PARAMS ((void));
 void
 yyerror PARAMS ((char *));
 
-/* #define	YYDEBUG	1 */
+#if MAINTENANCE_CMDS
+#define	YYDEBUG	1
+#endif
 
 %}
 
@@ -1094,7 +1098,7 @@ yylex ()
   tokstart = lexptr;
   /* See if it is a special token of length 3.  */
   for (i = 0; i < sizeof tokentab3 / sizeof tokentab3[0]; i++)
-    if (!strncmp (tokstart, tokentab3[i].operator, 3))
+    if (STREQN (tokstart, tokentab3[i].operator, 3))
       {
 	lexptr += 3;
 	yylval.opcode = tokentab3[i].opcode;
@@ -1103,7 +1107,7 @@ yylex ()
 
   /* See if it is a special token of length 2.  */
   for (i = 0; i < sizeof tokentab2 / sizeof tokentab2[0]; i++)
-    if (!strncmp (tokstart, tokentab2[i].operator, 2))
+    if (STREQN (tokstart, tokentab2[i].operator, 2))
       {
 	lexptr += 2;
 	yylval.opcode = tokentab2[i].opcode;
@@ -1369,14 +1373,14 @@ yylex ()
   if (*tokstart == '$') {
     for (c = 0; c < NUM_REGS; c++)
       if (namelen - 1 == strlen (reg_names[c])
-	  && !strncmp (tokstart + 1, reg_names[c], namelen - 1))
+	  && STREQN (tokstart + 1, reg_names[c], namelen - 1))
 	{
 	  yylval.lval = c;
 	  return REGNAME;
 	}
     for (c = 0; c < num_std_regs; c++)
      if (namelen - 1 == strlen (std_regs[c].name)
-	 && !strncmp (tokstart + 1, std_regs[c].name, namelen - 1))
+	 && STREQN (tokstart + 1, std_regs[c].name, namelen - 1))
        {
 	 yylval.lval = std_regs[c].regnum;
 	 return REGNAME;
@@ -1386,40 +1390,40 @@ yylex ()
   switch (namelen)
     {
     case 8:
-      if (!strncmp (tokstart, "unsigned", 8))
+      if (STREQN (tokstart, "unsigned", 8))
 	return UNSIGNED;
       if (current_language->la_language == language_cplus
-	  && !strncmp (tokstart, "template", 8))
+	  && STREQN (tokstart, "template", 8))
 	return TEMPLATE;
-      if (!strncmp (tokstart, "volatile", 8))
+      if (STREQN (tokstart, "volatile", 8))
 	return VOLATILE_KEYWORD;
       break;
     case 6:
-      if (!strncmp (tokstart, "struct", 6))
+      if (STREQN (tokstart, "struct", 6))
 	return STRUCT;
-      if (!strncmp (tokstart, "signed", 6))
+      if (STREQN (tokstart, "signed", 6))
 	return SIGNED_KEYWORD;
-      if (!strncmp (tokstart, "sizeof", 6))      
+      if (STREQN (tokstart, "sizeof", 6))      
 	return SIZEOF;
       break;
     case 5:
       if (current_language->la_language == language_cplus
-	  && !strncmp (tokstart, "class", 5))
+	  && STREQN (tokstart, "class", 5))
 	return CLASS;
-      if (!strncmp (tokstart, "union", 5))
+      if (STREQN (tokstart, "union", 5))
 	return UNION;
-      if (!strncmp (tokstart, "short", 5))
+      if (STREQN (tokstart, "short", 5))
 	return SHORT;
-      if (!strncmp (tokstart, "const", 5))
+      if (STREQN (tokstart, "const", 5))
 	return CONST_KEYWORD;
       break;
     case 4:
-      if (!strncmp (tokstart, "enum", 4))
+      if (STREQN (tokstart, "enum", 4))
 	return ENUM;
-      if (!strncmp (tokstart, "long", 4))
+      if (STREQN (tokstart, "long", 4))
 	return LONG;
       if (current_language->la_language == language_cplus
-	  && !strncmp (tokstart, "this", 4))
+	  && STREQN (tokstart, "this", 4))
 	{
 	  static const char this_name[] =
 				 { CPLUS_MARKER, 't', 'h', 'i', 's', '\0' };
@@ -1430,7 +1434,7 @@ yylex ()
 	}
       break;
     case 3:
-      if (!strncmp (tokstart, "int", 3))
+      if (STREQN (tokstart, "int", 3))
 	return INT_KEYWORD;
       break;
     default:
