@@ -1,3 +1,15 @@
+start-sanitize-tic80
+Fri Mar 28 15:37:30 1997  Fred Fish  <fnf@ninemoons.com>
+
+	* config/tic80/tm-tic80.h (NAMES_HAVE_UNDERSCORE): Define.
+
+end-sanitize-tic80
+Fri Mar 28 15:38:04 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* remote-sim.c (gdb_os_{,e}vprintf_filtered): Change stdarg type
+	to va_list from void *, since va_list might not be a pointer
+	type.
+
 start-sanitize-gdbtk
 Fri Mar 28 17:04:02 1997  Jason Molenda  (crash@godzilla.cygnus.co.jp)
 
