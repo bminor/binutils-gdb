@@ -1,5 +1,10 @@
 2001-06-07  H.J. Lu  <hjl@gnu.org>
 
+	* config.bfd: Put back ecoff for Linux/mips. Firmwares on some
+	MIPS-based machines need it.
+
+2001-06-07  H.J. Lu  <hjl@gnu.org>
+
 	* elf32-mips.c (_bfd_mips_elf_object_p): Set the bad symtab
 	for SGI only.
 
