@@ -665,6 +665,17 @@ static const unsigned int mips16_to_32_reg_map[] =
 #define RELAX_MIPS16_LONG_BRANCH(i) (((i) & 0x2000) != 0)
 #define RELAX_MIPS16_MARK_LONG_BRANCH(i) ((i) | 0x2000)
 #define RELAX_MIPS16_CLEAR_LONG_BRANCH(i) ((i) &~ 0x2000)
+
+/* Is the given value a sign-extended 32-bit value?  */
+#define IS_SEXT_32BIT_NUM(x)						\
+  (((x) &~ (offsetT) 0x7fffffff) == 0					\
+   || (((x) &~ (offsetT) 0x7fffffff) == ~ (offsetT) 0x7fffffff))
+
+/* Is the given value a sign-extended 16-bit value?  */
+#define IS_SEXT_16BIT_NUM(x)						\
+  (((x) &~ (offsetT) 0x7fff) == 0					\
+   || (((x) &~ (offsetT) 0x7fff) == ~ (offsetT) 0x7fff))
+
 
 /* Prototypes for static functions.  */
 
@@ -701,6 +712,9 @@ static void mips16_macro_build PARAMS ((char *, int *, expressionS *,
 static void macro_build_jalr PARAMS ((int, expressionS *));
 static void macro_build_lui PARAMS ((char *place, int *counter,
 				     expressionS * ep, int regnum));
+static void macro_build_ldst_constoffset PARAMS ((char *place, int *counter,
+						  expressionS * ep, const char *op,
+						  int valreg, int breg));
 static void set_at PARAMS ((int *counter, int reg, int unsignedp));
 static void check_absolute_expr PARAMS ((struct mips_cl_insn * ip,
 					 expressionS *));
@@ -3082,6 +3096,52 @@ macro_build_lui (place, counter, ep, regnum)
     append_insn (place, &insn, &high_expr, r, false);
 }
 
+/* Generate a sequence of instructions to do a load or store from a constant
+   offset off of a base register (breg) into/from a target register (treg),
+   using AT if necessary.  */
+static void
+macro_build_ldst_constoffset (place, counter, ep, op, treg, breg)
+     char *place;
+     int *counter;
+     expressionS *ep;
+     const char *op;
+     int treg, breg;
+{
+  assert (ep->X_op == O_constant);
+
+  /* Right now, this routine can only handle signed 32-bit contants.  */
+  if (! IS_SEXT_32BIT_NUM(ep->X_add_number))
+    as_warn (_("operand overflow"));
+
+  if (IS_SEXT_16BIT_NUM(ep->X_add_number))
+    {
+      /* Signed 16-bit offset will fit in the op.  Easy!  */
+      macro_build (place, counter, ep, op, "t,o(b)", treg,
+		   (int) BFD_RELOC_LO16, breg);
+    }
+  else
+    {
+      /* 32-bit offset, need multiple instructions and AT, like:
+	   lui      $tempreg,const_hi       (BFD_RELOC_HI16_S)
+	   addu     $tempreg,$tempreg,$breg
+           <op>     $treg,const_lo($tempreg)   (BFD_RELOC_LO16)
+         to handle the complete offset.  */
+      macro_build_lui (place, counter, ep, AT);
+      if (place != NULL)
+	place += 4;
+      macro_build (place, counter, (expressionS *) NULL,
+		   HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
+		   "d,v,t", AT, AT, breg);
+      if (place != NULL)
+	place += 4;
+      macro_build (place, counter, ep, op, "t,o(b)", treg,
+		   (int) BFD_RELOC_LO16, AT);
+
+      if (mips_opts.noat)
+	as_warn (_("Macro used $at after \".set noat\""));
+    }
+}
+
 /*			set_at()
  * Generates code to set the $at register to true (one)
  * if reg is less than the immediate expression.
@@ -3195,11 +3255,6 @@ check_absolute_expr (ip, ex)
          : ((v) & ~0x7fffffff) == 0     \
            ? 1                          \
            : 0)
-
-/* Is the given value a sign-extended 32-bit value?  */
-#define IS_SEXT_32BIT_NUM(x)						\
-  (((x) &~ (offsetT) 0x7fffffff) == 0					\
-   || (((x) &~ (offsetT) 0x7fffffff) == ~ (offsetT) 0x7fffffff))
 
 /*			load_register()
  *  This routine generates the least number of instructions neccessary to load
@@ -5063,10 +5118,9 @@ macro (ip)
 		      mips_cprestore_valid = 1;
 		    }
 		  expr1.X_add_number = mips_cprestore_offset;
-		  macro_build ((char *) NULL, &icnt, &expr1,
-			       HAVE_32BIT_ADDRESSES ? "lw" : "ld", "t,o(b)",
-			       mips_gp_register, (int) BFD_RELOC_LO16,
-			       mips_frame_reg);
+  		  macro_build_ldst_constoffset ((char *) NULL, &icnt, &expr1,
+					        HAVE_32BIT_ADDRESSES ? "lw" : "ld",
+					        mips_gp_register, mips_frame_reg);
 		}
 	    }
 	}
@@ -5196,10 +5250,9 @@ macro (ip)
 		    macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 				 "nop", "");
 		  expr1.X_add_number = mips_cprestore_offset;
-		  macro_build ((char *) NULL, &icnt, &expr1,
-			       HAVE_32BIT_ADDRESSES ? "lw" : "ld", "t,o(b)",
-			       mips_gp_register, (int) BFD_RELOC_LO16,
-			       mips_frame_reg);
+  		  macro_build_ldst_constoffset ((char *) NULL, &icnt, &expr1,
+					        HAVE_32BIT_ADDRESSES ? "lw" : "ld",
+					        mips_gp_register, mips_frame_reg);
 		}
 	    }
 	}
@@ -11863,8 +11916,9 @@ s_cprestore (ignore)
   ex.X_op_symbol = NULL;
   ex.X_add_number = mips_cprestore_offset;
 
-  macro_build ((char *) NULL, &icnt, &ex, HAVE_32BIT_ADDRESSES ? "sw" : "sd",
-	       "t,o(b)", mips_gp_register, (int) BFD_RELOC_LO16, SP);
+  macro_build_ldst_constoffset ((char *) NULL, &icnt, &ex,
+				HAVE_32BIT_ADDRESSES ? "sw" : "sd",
+				mips_gp_register, SP);
 
   demand_empty_rest_of_line ();
 }
