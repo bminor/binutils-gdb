@@ -1,4 +1,4 @@
-#   Copyright (C) 1999 2000 Cygnus Solutions
+#   Copyright (C) 1999, 2000, 2002 Cygnus Solutions
 #
 # This Program Is Free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -136,7 +136,7 @@ mi_gdb_test "-var-create lpsimple * lpsimple" \
 	"create local variable lpsimple"
 
 mi_gdb_test "-var-create func * func" \
-	"\\^done,name=\"func\",numchild=\"0\",type=\"void \\(\\*\\)\\(\\)\"" \
+	"\\^done,name=\"func\",numchild=\"0\",type=\"void \\(\\*\\)\\((void|)\\)\"" \
 	"create local variable func"
 
 # Test: c_variable-1.5
