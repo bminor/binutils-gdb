@@ -1,7 +1,8 @@
-Thu Aug 26 15:15:30 1993  Doug Evans  (dje@canuck.cygnus.com)
+Fri Sep  3 16:46:41 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
-	* ld.h (BYTE_SIZE, SHORT_SIZE, LONG_SIZE): Define as suggested by
-	Steve.
+	* ld.texinfo: re-enable included config file; conditionalize doc
+	for -oformat to interact properly with SingleFormat doc config
+	var; rename @up/@down to @raisesections/@lowersections.
 
 Wed Aug 25 16:29:56 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
