@@ -1,3 +1,8 @@
+2000-12-31  Nick Clifton  <nickc@redhat.com>
+
+	* lexsup.c (parse_args): Set opterr to 0 and detect unparsed long
+	options by checking for a return value of '?' not -1.
+
 2000-12-28  Nick Clifton  <nickc@redhat.com>
 
 	* lexsup.c (struct ld_option): Add new enum value:

@@ -237,7 +237,7 @@ proc run_srec_test { test objs } {
         set flags "$flags --defsym __gccmain=0"
 
         # ARM targets cannot convert format in the linker 
-        # using the -oformat command line switch
+        # using the --oformat command line switch
 	setup_xfail "*arm*-*-*"
 	setup_xfail "xscale-*-*"
 	setup_xfail "thumb-*-*"
@@ -259,7 +259,7 @@ proc run_srec_test { test objs } {
     }
     
     if { ![ld_simple_link $ld tmpdir/sr1 "$flags $objs"] \
-	 || ![ld_simple_link $ld tmpdir/sr2.sr "$flags -oformat srec $objs"] } {
+	 || ![ld_simple_link $ld tmpdir/sr2.sr "$flags --oformat srec $objs"] } {
 	setup_xfail "hppa*-*-*elf*"
 	fail $test
 	return

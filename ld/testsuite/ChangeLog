@@ -1,3 +1,7 @@
+2000-12-31  Nick Clifton  <nickc@redhat.com>
+
+	* ld-srec/srec.exp: Use --oformat instead of -oformat.
+
 2000-12-09  Nick Clifton  <nickc@redhat.com>
 
 	* ld-selective/selective.exp: Link in libgcc when target is v850.

@@ -543,14 +543,22 @@ parse_args (argc, argv)
 
       /* getopt_long_only is like getopt_long, but '-' as well as '--'
 	 can indicate a long option.  */
+      opterr = 0;
       optc = getopt_long_only (argc, argv, shortopts, longopts, &longind);
-      if (optc == -1)
-	optc = getopt_long (argc, argv, shortopts, really_longopts, &longind);
-
+      if (optc == '?')
+	{
+	  --optind;
+	  optc = getopt_long (argc, argv, shortopts, really_longopts, &longind);
+	}
+  
       if (optc == -1)
 	break;
+
       switch (optc)
 	{
+	case '?':
+	  fprintf (stderr, _("%s: unrecognized option '%s'\n"),
+		   program_name, argv[optind - 1]);
 	default:
 	  fprintf (stderr,
 		   _("%s: use the --help option for usage information\n"),
