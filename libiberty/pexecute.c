@@ -616,7 +616,7 @@ pexecute (program, argv, this_pname, temp_base, errmsg_fmt, errmsg_arg, flags)
      const char *program;
      char * const *argv;
      const char *this_pname;
-     const char *temp_base;
+     const char *temp_base ATTRIBUTE_UNUSED;
      char **errmsg_fmt, **errmsg_arg;
      int flags;
 {
@@ -723,7 +723,7 @@ int
 pwait (pid, status, flags)
      int pid;
      int *status;
-     int flags;
+     int flags ATTRIBUTE_UNUSED;
 {
   /* ??? Here's an opportunity to canonicalize the values in STATUS.
      Needed?  */

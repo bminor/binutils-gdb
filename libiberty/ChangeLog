@@ -1,3 +1,12 @@
+1999-08-03  Ian Lance Taylor  <ian@zembu.com>
+
+	* floatformat.c: Add casts to avoid signed/unsigned warnings.
+	* pexecute.c: Add ATTRIBUTE_UNUSED as needed on Unix.
+
+	* Makefile.in (install_to_libdir): Change $(TARGETLIB).n to
+	$(TARGETLIB)n so it works on MSDOS.
+	(install_to_tooldir): Likewise.
+
 1999-07-21  Ian Lance Taylor  <ian@zembu.com>
 
 	From Mark Elbrecht:
