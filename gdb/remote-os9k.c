@@ -366,10 +366,10 @@ rombug_open(args, from_tty)
     printf("Remote %s connected to %s\n", target_shortname,
 	   dev_name);
 
+  rombug_fetch_registers();
+
   printf_monitor ("ov e \r");
   expect_prompt(1);
-
-  rombug_fetch_registers();
   bufaddr = 0;
   buflen = 0;
 }
@@ -763,6 +763,8 @@ rombug_write_inferior_memory (memaddr, myaddr, len)
   is_trace_mode = 0;
   expect_prompt (1);
 
+  bufaddr = 0;
+  buflen = 0;
   return len;
 }
 

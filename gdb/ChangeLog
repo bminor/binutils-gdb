@@ -1,3 +1,10 @@
+Wed Jan 18 11:25:43 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* remote-os9k.c (rombug_open): Fix a bug in exception handling
+	command.
+	* remote-os9k.c (rombug_write_inferior_memory): reset buffer after
+	write.
+
 Tue Jan 17 09:48:38 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
 
 	* parse.c (_initialize_parse): Improve wording of names of
