@@ -1501,33 +1501,36 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
     case R_ARM_THM_PC11:
       /* Thumb B (branch) instruction).  */
       {
-	bfd_vma        relocation;
+	bfd_signed_vma relocation;
 	bfd_signed_vma reloc_signed_max = (1 << (howto->bitsize - 1)) - 1;
 	bfd_signed_vma reloc_signed_min = ~ reloc_signed_max;
-	bfd_vma        check;
 	bfd_signed_vma signed_check;
 
 #ifdef USE_REL
 	/* Need to refetch addend.  */
 	addend = bfd_get_16 (input_bfd, hit_data) & howto->src_mask;
-	/* ??? Need to determine shift amount from operand size.  */
-	addend >>= howto->rightshift;
+	if (addend & ((howto->src_mask + 1) >> 1))
+	  {
+	    signed_addend = -1;
+	    signed_addend &= ~ howto->src_mask;
+	    signed_addend |= addend;
+	  }
+	else
+	  signed_addend = addend;
+	/* The value in the insn has been right shifted.  We need to
+	   undo this, so that we can perform the address calculation
+	   in terms of bytes.  */
+	signed_addend <<= howto->rightshift;
 #endif
-	relocation = value + addend;
+	relocation = value + signed_addend;
 
 	relocation -= (input_section->output_section->vma
 		       + input_section->output_offset
 		       + rel->r_offset);
 
-	check = relocation >> howto->rightshift;
-
-	/* If this is a signed value, the rightshift just
-	   dropped leading 1 bits (assuming twos complement).  */
-	if ((bfd_signed_vma) relocation >= 0)
-	  signed_check = check;
-	else
-	  signed_check = check | ~((bfd_vma) -1 >> howto->rightshift);
-
+	relocation >>= howto->rightshift;
+	signed_check = relocation;
+	relocation &= howto->dst_mask;
 	relocation |= (bfd_get_16 (input_bfd, hit_data) & (~ howto->dst_mask));
 
 	bfd_put_16 (input_bfd, relocation, hit_data);
