@@ -1,3 +1,13 @@
+2002-07-15  H.J. Lu <hjl@gnu.org>
+
+	* ld-elfvers/vers.exp: Add vers21.
+
+	* ld-elfvers/vers21.c: New.
+	* ld-elfvers/vers21.dsym: New.
+	* ld-elfvers/vers21.map: New.
+	* ld-elfvers/vers21.sym: New.
+	* ld-elfvers/vers21.ver: New.
+
 2002-07-12  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/nodyn4.d, ld-cris/expdyn4.d, ld-cris/comref1.s,

@@ -821,3 +821,6 @@ build_exec "vers19" vers19.c vers19 "-rpath ." vers18.so vers19.ver vers19.dsym 
 build_vers_lib "vers20a" vers20.c vers20a "" vers20.map vers20a.ver vers20.dsym ""
 exec cp $tmpdir/vers20a.so $tmpdir/vers20b.so
 build_vers_lib "vers20" vers20.c vers20 "vers20a.so vers20b.so" vers20.map vers20.ver vers20.dsym ""
+
+# Test .symver override.
+build_vers_lib "vers21" vers21.c vers21 "" vers21.map vers21.ver vers21.dsym vers21.sym
