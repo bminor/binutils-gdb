@@ -2336,7 +2336,7 @@ arm_store_return_value (struct type *type, char *valbuf)
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
       struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-      char buf[MAX_REGISTER_RAW_SIZE];
+      char buf[ARM_MAX_REGISTER_RAW_SIZE];
 
       switch (tdep->fp_model)
 	{
@@ -2344,7 +2344,7 @@ arm_store_return_value (struct type *type, char *valbuf)
 
 	  convert_to_extended (valbuf, buf);
 	  write_register_bytes (REGISTER_BYTE (ARM_F0_REGNUM), buf,
-				MAX_REGISTER_RAW_SIZE);
+				FP_REGISTER_RAW_SIZE);
 	  break;
 
 	case ARM_FLOAT_SOFT:

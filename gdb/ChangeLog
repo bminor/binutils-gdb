@@ -1,3 +1,13 @@
+2002-05-07  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-tdep.h (ARM_MAX_REGISTER_RAW_SIZE): Define.
+	(ARM_MAX_REGISTER_VIRTUAL_SIZE): Define.
+	* arm-tdep.c (arm_store_return_value): Use them.  
+	Use FP_REGISTER_RAW_SIZE when setting the FPA return value.
+	* remote-rdp.c (remote_rdp_fetch_register): Use
+	ARM_MAX_REGISTER_RAW_SIZE.
+	(remote_rdp_store_register): Likewise.
+
 2002-05-07  Michal Ludvig  <mludvig@suse.cz>
 
 	* dwarf2cfi.c: Code cleanup, removed unused variables, 

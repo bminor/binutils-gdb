@@ -612,7 +612,7 @@ remote_rdp_fetch_register (int regno)
     }
   else
     {
-      char buf[MAX_REGISTER_RAW_SIZE];
+      char buf[ARM_MAX_REGISTER_RAW_SIZE];
       if (regno < 15)
 	rdp_fetch_one_register (1 << regno, buf);
       else if (regno == ARM_PC_REGNUM)
@@ -642,7 +642,7 @@ remote_rdp_store_register (int regno)
     }
   else
     {
-      char tmp[MAX_REGISTER_RAW_SIZE];
+      char tmp[ARM_MAX_REGISTER_RAW_SIZE];
       read_register_gen (regno, tmp);
       if (regno < 15)
 	rdp_store_one_register (1 << regno, tmp);

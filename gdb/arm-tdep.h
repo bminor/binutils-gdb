@@ -45,6 +45,10 @@ enum gdb_regnum {
   ARM_LAST_FP_ARG_REGNUM = ARM_F3_REGNUM
 };
 
+/* Used in target-specific code when we need to know the size of the
+   largest type of register we need to handle.  */
+#define ARM_MAX_REGISTER_RAW_SIZE	12
+#define ARM_MAX_REGISTER_VIRTUAL_SIZE	8
 
 /* Size of integer registers.  */
 #define INT_REGISTER_RAW_SIZE		4
