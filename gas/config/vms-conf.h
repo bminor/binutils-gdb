@@ -100,7 +100,7 @@
 #endif
 
 /* Define if you have the <unistd.h> header file.  */
-#undef HAVE_UNISTD_H
+#define HAVE_UNISTD_H	/* config-gas.com will make one if necessary */
 
 /* Define if you have the <varargs.h> header file.  */
 #undef HAVE_VARARGS_H

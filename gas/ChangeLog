@@ -1,3 +1,11 @@
+Wed Feb  8 18:51:23 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	Thu Jan 19 18:10:05 1995  Pat Rankin  (rankin@eql.caltech.edu)
+
+	* config/vms-conf.h (HAVE_UNISTD_H):  define it unconditionally.
+	* config-gas.com:  test for availability of <unistd.h>; create a
+	rudimentary one if necessary.
+
 Tue Feb  7 13:34:46 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in: Add powerpc-*-eabi support, which is the same as

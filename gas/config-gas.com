@@ -49,7 +49,9 @@ $copy _NL: version.opt
 $open/Append ifile$ version.opt
 $write ifile$ "identification="+""""+line+""""
 $close ifile$
+$!
 $! Now write config.h.
+$!
 $ if f$search("config.h").nes."" then DELETE config.h;*
 $copy _NL: config.h
 $open/Append ifile$ config.h
@@ -62,11 +64,99 @@ $append [.config]vms-conf.h ifile$:
 $close ifile$
 $ECHO "Created config.h."
 $!
+$! Check for, and possibly make, header file <unistd.h>.
+$!
+$ if f$search("tmp-chk-h.*").nes."" then  DELETE tmp-chk-h.*;*
+$!can't use simple `#include HDR' with `gcc /Define="HDR=<foo.h>"'
+$!because the 2.6.[0-3] preprocessor handles it wrong (VMS-specific gcc bug)
+$ create tmp-chk-h.c
+int tmp_chk_h;	/* guarantee non-empty output */
+#ifdef HAVE_STDIO_H
+#include <stdio.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_UNIXIO_H
+#include <unixio.h>
+#endif
+#ifdef HAVE_UNIXLIB_H
+#include <unixlib.h>
+#endif
+$ on warning then  continue
+$ CHECK = "call tmp_chk_h"
+$ CHECK "HAVE_STDIO_H"
+$ if .not.$status
+$ then	type sys$input:
+
+? could not compile <stdio.h>.
+  Since gcc is not set up correctly, gas configuration cannot proceed.
+
+$	DELETE tmp-chk-h.c;*
+$	exit %x002C
+$ endif
+$!
+$ CHECK "HAVE_UNISTD_H"
+$ if .not.$status
+$ then
+$  if f$trnlnm("HFILE$").nes."" then  close/noLog hfile$
+$  CHECK "HAVE_UNIXIO_H"
+$  got_unixio = ($status .and. 1)
+$  CHECK "HAVE_UNIXLIB_H"
+$  got_unixlib = ($status .and. 1)
+$  create []unistd.h	!with rudimentary contents
+/* <unistd.h> substitute for building gas */
+#ifndef UNISTD_H
+#define UNISTD_H
+
+$  open/Append hfile$ []unistd.h
+$  if got_unixio
+$  then  write hfile$ "#include <unixio.h>"
+$  else  append sys$input: hfile$:
+/* some of the routines normally prototyped in <unixio.h> */
+extern int creat(), open(), close(), read(), write();
+extern int access(), dup(), dup2(), fstat(), stat();
+extern long lseek();
+$  endif
+$  write hfile$ ""
+$  if got_unixlib
+$  then  write hfile$ "#include <unixlib.h>"
+$  else  append sys$input: hfile$:
+/* some of the routines normally prototyped in <unixlib.h> */
+extern char *sbrk(), *getcwd(), *cuserid();
+extern int brk(), chdir(), chmod(), chown(), mkdir();
+extern unsigned getuid(), umask();
+$  endif
+$  append sys$input: hfile$:
+
+#endif /*UNISTD_H*/
+$  close hfile$
+$  ECHO "Created ""[]unistd.h""."
+$ endif !gcc '#include <unistd.h>' failed
+$ DELETE tmp-chk-h.c;*
+$
+$tmp_chk_h: subroutine
+$  set noOn
+$  hname = f$edit("<" + (p1 - "HAVE_" - "_H") + ".h>","LOWERCASE")
+$  write sys$output "Checking for ''hname'."
+$  if f$search("tmp-chk-h.obj").nes."" then  DELETE tmp-chk-h.obj;*
+$  define/noLog sys$error _NL:	!can't use /User_Mode here due to gcc
+$  define/noLog sys$output _NL:	! driver's use of multiple image activation
+$  gcc /Include=([],[-.include]) /Define=("''p1'") tmp-chk-h.c
+$!can't just check $status; gcc 2.6.[0-3] preprocessor doesn't set it correctly
+$  ok = (($status.and.1).and.(f$search("tmp-chk-h.obj").nes."")) .or. %x10000000
+$  deassign sys$error	!restore, more or less
+$  deassign sys$output
+$  if ok then  DELETE tmp-chk-h.obj;*
+$  exit ok
+$ endsubroutine !tmp_chk_h
+$
+$!
+$! Done
+$!
 $ if f$search("config.status") .nes. "" then DELETE config.status;*
-$ copy _NL: config.status
-$ open/Append file config.status
-$ write file "Links are now set up for use with a vax running VMS."
-$ close file
+$ create config.status
+Links are now set up for use with a vax running VMS.
 $ type config.status
 $exit
 $!
