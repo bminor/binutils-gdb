@@ -1,4 +1,4 @@
-# Copyright (C) 1992 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1994 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ set srcfile $binfile.c
 
 if ![file exists $objdir/$subdir/$binfile] then {
     perror "$objdir/$subdir/$binfile does not exist."
-    continue
+    return 0
 }
 
 #
@@ -1304,11 +1304,6 @@ proc funcargs_reload { } {
     global binfile
     global srcdir
 
-    if [istarget "a29k-*-udi"] then {
-	# FIXME: If PR 2415 is fixed, this is not needed.
-	gdb_target_udi
-	gdb_load $objdir/$subdir/$binfile
-    }
     if [istarget "mips-idt-*"] then {
 	# Restart because IDT/SIM runs out of file descriptors.
 	gdb_exit
@@ -1500,10 +1495,5 @@ funcargs_reload
 localvars_in_indirect_call
 funcargs_reload
 test_stepping_over_trampolines
-
-if [istarget "a29k-*-udi"] then {
-    # FIXME: If PR 2415 is fixed, this is not needed.
-    gdb_target_udi
-}
 
 catch "set timeout $oldtimeout"

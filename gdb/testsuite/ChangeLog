@@ -1,5 +1,9 @@
 Mon Jul 18 12:18:07 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
+	* gdb.base/{a2-run,callfuncs,funcargs,interrupt,mips_pro,nodebug,
+	  return,signals,twice}.exp: Handle non-existant binaries
+	  consistantly.
+
 	* gdb.base/corefile.exp: Execute coremaker to generate core dump.
 	* gdb.base/Makefile.in: Don't try to generate a core dump, we
 	  might testing a cross development system.
