@@ -1,3 +1,8 @@
+Wed Oct  8 11:38:45 1997  Richard Henderson  <rth@cygnus.com>
+
+	* elfcore.h (bfd_prstatus): Pedanticly, alignment_power should
+	be LOG_FILE_ALIGN.
+
 Wed Oct  8 11:36:00 1997  Richard Henderson  <rth@cygnus.com>
 
 	* config.bfd: Missed one alpha* change.
