@@ -1,3 +1,13 @@
+2005-04-05  Richard Sandiford  <rsandifo@redhat.com>
+
+	* elfxx-mips.c (MIPS_ELF_OPTIONS_SECTION_NAME_P): New macro.
+	(_bfd_mips_elf_section_from_shdr): Use it to check for recognized
+	SHT_MIPS_OPTIONS names.  Allow all sections with unrecognised
+	section flags.
+	(_bfd_mips_elf_fake_sections): Use MIPS_ELF_OPTIONS_SECTION_NAME_P
+	to check for SHT_MIPS_OPTIONS sections.
+	(_bfd_mips_elf_set_section_contents): Likewise.
+
 2005-04-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Return -1 on errors
