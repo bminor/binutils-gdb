@@ -1,3 +1,7 @@
+Fri Nov 21 09:32:32 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-signal.c (sim_signal_to_host): Return 0 for SIM_SIGNONE.
+
 Thu Nov 20 20:35:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-signal.h: Start simulator signals at 64 so that host signal
