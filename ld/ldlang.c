@@ -459,27 +459,6 @@ lang_list_init (list)
   list->tail = &list->head;
 }
 
-/* Check if a file exist in the input_file_chain list.  */
-
-boolean
-lang_file_exists (name)
-    const char *name;
-{
-  lang_input_statement_type *p;
-
-  if (name == NULL)
-    return false;
-
-  for (p = (lang_input_statement_type *) input_file_chain.head;
-       p != (lang_input_statement_type *) NULL;
-       p = (lang_input_statement_type *) p->next_real_file)
-    if (p->filename != (char *) NULL
-	&& strcmp (p->filename, name) == 0)
-      return true;
-
-  return false;
-}
-
 /* Build a new statement node for the parse tree.  */
 
 static lang_statement_union_type *
@@ -515,11 +494,6 @@ new_afile (name, file_type, target, add_to_list)
 {
   lang_input_statement_type *p;
 
-  /* We abort if an input file name is identical with the output file name.  */
-  if (name != NULL && output_filename != NULL
-      && !strcmp (name, output_filename))
-    einfo ("%P%F: input file %s is also the output file!\n", name);
- 
   if (add_to_list)
     p = new_stat (lang_input_statement, stat_ptr);
   else

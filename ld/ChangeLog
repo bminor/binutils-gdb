@@ -1,3 +1,10 @@
+2002-10-08  H.J. Lu <hjl@gnu.org>
+
+	* ldlang.c (lang_file_exist): Removed.
+	(new_afile): Revert the last change.
+	* ldlang.h (lang_file_exist): Removed.
+	* lexsup.c (parse_args): Revert the last change.
+
 2002-10-07  Ralf Habacker  <Ralf.Habacker@freenet.de>
 
 	* pe-dll.cc (autofilter_symbolprefixlist): Don't re-export

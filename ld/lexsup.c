@@ -796,8 +796,6 @@ parse_args (argc, argv)
 	  link_info.optimize = strtoul (optarg, NULL, 0) ? true : false;
 	  break;
 	case 'o':
-	  if (lang_file_exists (optarg))
-	    einfo ("%P%F: output file %s is also an input file!\n", optarg);
 	  lang_add_output (optarg, 0);
 	  break;
 	case OPTION_OFORMAT:
