@@ -68,6 +68,7 @@ unsigned32 trace_values[3];
 int trace_num_values;
 unsigned32 trace_pc;
 const char *trace_name;
+const char *trace_module;
 
 
 void
@@ -82,6 +83,7 @@ trace_input (name, type, size)
 
   trace_pc = PC;
   trace_name = name;
+  trace_module = "alu";
 
   switch (type)
     {
@@ -238,7 +240,7 @@ trace_result (int has_result, unsigned32 result)
   
   trace_one_insn (simulator, STATE_CPU (simulator, 0), trace_pc,
 		  TRACE_LINENUM_P (STATE_CPU (simulator, 0)),
-		  "simops", __LINE__, "alu", 
+		  "simops", __LINE__, trace_module, 
 		  "%-*s -%s", SIZE_INSTRUCTION, trace_name, buf);
 }
 
@@ -2756,108 +2758,6 @@ OP_30007E0 (void)
 
   return 4;
   
-}
-
-/* end-sanitize-v850e */
-/* start-sanitize-v850e */
-/* ctret */
-int
-OP_14407E0 (void)
-{
-  trace_input ("ctret", OP_NONE, 0);
-
-  PC  = CTPC;
-  PSW = CTPSW;
-
-  trace_output (OP_NONE);
-
-  return 0;
-}
-
-/* end-sanitize-v850e */
-/* start-sanitize-v850e */
-/* hsw */
-int
-OP_34407E0 (void)
-{
-  unsigned long value;
-  
-  trace_input ("hsw", OP_REG_REG3, 0);
-
-  value = State.regs[ OP[ 1 ] ];
-  value >>= 16;
-  value |= (State.regs[ OP[ 1 ] ] << 16);
-  
-  State.regs[ OP[2] >> 11 ] = value;
-
-  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-
-  if (value == 0) PSW |= PSW_Z;
-  if (value & 0x80000000) PSW |= PSW_S;
-  if (((value & 0xffff) == 0) || (value & 0xffff0000) == 0) PSW |= PSW_CY;
-
-  trace_output (OP_REG_REG3);
-  
-  return 4;
-}
-
-/* end-sanitize-v850e */
-/* start-sanitize-v850e */
-#define WORDHASNULLBYTE(x) (((x) - 0x01010101) & ~(x)&0x80808080)
-
-/* bsw */
-int
-OP_34007E0 (void)
-{
-  unsigned long value;
-  
-  trace_input ("bsw", OP_REG_REG3, 0);
-
-  value = State.regs[ OP[ 1 ] ];
-  value >>= 24;
-  value |= (State.regs[ OP[ 1 ] ] << 24);
-  value |= ((State.regs[ OP[ 1 ] ] << 8) & 0x00ff0000);
-  value |= ((State.regs[ OP[ 1 ] ] >> 8) & 0x0000ff00);
-  
-  State.regs[ OP[2] >> 11 ] = value;
-
-  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-
-  if (value == 0) PSW |= PSW_Z;
-  if (value & 0x80000000) PSW |= PSW_S;
-  if (WORDHASNULLBYTE (value)) PSW |= PSW_CY;
-
-  trace_output (OP_REG_REG3);
-  
-  return 4;
-}
-
-/* end-sanitize-v850e */
-/* start-sanitize-v850e */
-/* bsh */
-int
-OP_34207E0 (void)
-{
-  unsigned long value;
-  
-  trace_input ("bsh", OP_REG_REG3, 0);
-
-  value   = State.regs[ OP[ 1 ] ];
-  value >>= 8;
-  value  |= ((State.regs[ OP[ 1 ] ] << 8) & 0xff00ff00);
-  value  |= ((State.regs[ OP[ 1 ] ] >> 8) & 0x000000ff);
-  
-  State.regs[ OP[2] >> 11 ] = value;
-
-  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-
-  if (value == 0) PSW |= PSW_Z;
-  if (value & 0x80000000) PSW |= PSW_S;
-  if (((value & 0xff) == 0) || (value & 0x00ff) == 0) PSW |= PSW_CY;
-
-  trace_output (OP_REG_REG3);
-  
-  return 4;
 }
 
 /* end-sanitize-v850e */

@@ -31,7 +31,6 @@
 :cache::unsigned:reg1:RRRRR:(RRRRR)
 :cache::unsigned:reg2:rrrrr:(rrrrr)
 :cache::unsigned:reg3:wwwww:(wwwww)
-:cache::unsigned:regID:rrrrr:(rrrrr)
 
 :cache::unsigned:disp4:dddd:(dddd)
 # start-sanitize-v850e
@@ -233,7 +232,21 @@ rrrrr,11111100000 + wwwww,01101000010:XII:::bsh
 // end-sanitize-v850eq
 "bsh r<reg2>, r<reg3>"
 {
-  COMPAT_2 (OP_34207E0 ());
+  unsigned32 value;
+  TRACE_ALU_INPUT1 (GR[reg2]);
+
+  value = (MOVED32 (GR[reg2], 23, 16, 31, 24)
+	   | MOVED32 (GR[reg2], 31, 24, 23, 16)
+	   | MOVED32 (GR[reg2], 7, 0, 15, 8)
+	   | MOVED32 (GR[reg2], 15, 8, 7, 0));
+
+  GR[reg3] = value;
+  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  if (value == 0) PSW |= PSW_Z;
+  if (value & 0x80000000) PSW |= PSW_S;
+  if (((value & 0xff) == 0) || (value & 0x00ff) == 0) PSW |= PSW_CY;
+
+  TRACE_ALU_RESULT (GR[reg3]);
 }
 
 
@@ -246,9 +259,26 @@ rrrrr,11111100000 + wwwww,01101000000:XII:::bsw
 // start-sanitize-v850eq
 *v850eq
 // end-sanitize-v850eq
-"bsw r<reg2>, reg3>"
+"bsw r<reg2>, r<reg3>"
 {
-  COMPAT_2 (OP_34007E0 ());
+#define WORDHASNULLBYTE(x) (((x) - 0x01010101) & ~(x)&0x80808080)
+  unsigned32 value;
+  TRACE_ALU_INPUT1 (GR[reg2]);
+
+  value = GR[reg2];
+  value >>= 24;
+  value |= (GR[reg2] << 24);
+  value |= ((GR[reg2] << 8) & 0x00ff0000);
+  value |= ((GR[reg2] >> 8) & 0x0000ff00);
+  GR[reg3] = value;
+
+  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+
+  if (value == 0) PSW |= PSW_Z;
+  if (value & 0x80000000) PSW |= PSW_S;
+  if (WORDHASNULLBYTE (value)) PSW |= PSW_CY;
+
+  TRACE_ALU_RESULT (GR[reg3]);
 }
 
 
@@ -263,14 +293,14 @@ rrrrr,11111100000 + wwwww,01101000000:XII:::bsw
 // end-sanitize-v850eq
 "callt <imm6>"
 {
-  unsigned long adr;
-  SAVE_1;
-  trace_input ("callt", OP_LOAD16, 1);
+  unsigned32 adr;
+  unsigned32 off;
   CTPC  = cia + 2;
   CTPSW = PSW;
-  adr = CTBP + ((OP[3] & 0x3f) << 1);
-  nia = CTBP + load_mem (adr, 1);
-  trace_output (OP_LOAD16);
+  adr = (CTBP & ~1) + (imm6 << 1);
+  off = load_mem (adr, 2) & ~1; /* Force alignment */
+  nia = (CTBP & ~1) + off;
+  TRACE_BRANCH3 (adr, CTBP, off);
 }
 
 
@@ -306,7 +336,9 @@ rrrrr,111111,RRRRR + 0000000011100100:IX:::clr1
 // end-sanitize-v850eq
 "ctret"
 {
-  COMPAT_2 (OP_14407E0 ());
+  nia  = (CTPC & ~1);
+  PSW = (CTPSW & (CPU)->psw_mask);
+  TRACE_BRANCH1 (PSW);
 }
 
 
@@ -484,7 +516,22 @@ rrrrr,11111100000 + wwwww,01101000100:XII:::hsw
 // end-sanitize-v850eq
 "hsw r<reg2>, r<reg3>"
 {
-  COMPAT_2 (OP_34407E0 ());
+  unsigned32 value;
+  TRACE_ALU_INPUT1 (GR[reg2]);
+
+  value = GR[reg2];
+  value >>= 16;
+  value |= (GR[reg2] << 16);
+  
+  GR[reg3] = value;
+
+  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+
+  if (value == 0) PSW |= PSW_Z;
+  if (value & 0x80000000) PSW |= PSW_S;
+  if (((value & 0xffff) == 0) || (value & 0xffff0000) == 0) PSW |= PSW_CY;
+
+  TRACE_ALU_RESULT (GR[reg3]);
 }
 
 
@@ -565,23 +612,17 @@ rrrrr!0,111111,RRRRR + ddddddddddddddd,1:VII:::ld.hu
 
 // end-sanitize-v850e
 // LDSR
-//rrrrr,111111,RRRRR + 0000000000100000:IX:::ldsr
-//"ldsr r<reg2>, r<regID>"
-//{
-//  COMPAT_2 (OP_2007E0 ());
-//}
-rrrrr,111111,RRRRR + 0000000000100000:IX:::ldsr
-"ldsr r<reg1>, r<regID>"
+regID,111111,RRRRR + 0000000000100000:IX:::ldsr
+"ldsr r<reg1>, s<regID>"
 {
-  SAVE_2;
-  trace_input ("ldsr", OP_LDSR, 0);
+  TRACE_ALU_INPUT1 (GR[reg1]);
   
-  if (&PSW == &State.sregs[ regID ])
-    PSW = (State.regs[ reg1 ] & (CPU)->psw_mask);
+  if (&PSW == &SR[regID])
+    PSW = (GR[reg1] & (CPU)->psw_mask);
   else
-    State.sregs[ regID ] = State.regs[ reg1 ];
+    SR[regID] = GR[reg1];
   
-  trace_output (OP_LDSR);
+  TRACE_ALU_RESULT (SR[regID]);
 }
 
 
@@ -1080,17 +1121,12 @@ rrrrr,111011,RRRRR + ddddddddddddddd,1:VII:::st.w
 
 
 // STSR
-//rrrrr,111111,RRRRR + 0000000001000000:IX:::stsr
-//"stsr r<regID>, r<reg2>"
-//{
-//  COMPAT_2 (OP_4007E0 ());
-//}
-rrrrr,111111,RRRRR + 0000000001000000:IX:::stsr
-"stsr r<regID>, r<reg1>"
+rrrrr,111111,regID + 0000000001000000:IX:::stsr
+"stsr s<regID>, r<reg2>"
 {
-  TRACE_ALU_INPUT0();
-  GR[reg1] = SR[regID];
-  TRACE_ALU_RESULT (GR[reg1]);
+  TRACE_ALU_INPUT1 (SR[regID]);
+  GR[reg2] = SR[regID];
+  TRACE_ALU_RESULT (GR[reg2]);
 }
 
 

@@ -139,8 +139,8 @@ nia = PC
 #define ECR   (State.sregs[4])
 #define PSW   (State.sregs[5])
 /* start-sanitize-v850e */
-#define CTPC  (State.sregs[16])
-#define CTPSW (State.sregs[17])
+#define CTPC  (SR[16])
+#define CTPSW (SR[17])
 /* end-sanitize-v850e */
 #define DBPC  (State.sregs[18])
 #define DBPSW (State.sregs[19])
@@ -275,11 +275,13 @@ extern int trace_num_values;
 extern unsigned32 trace_values[];
 extern unsigned32 trace_pc;
 extern const char *trace_name;
+extern const char *trace_module;
 
 #define TRACE_ALU_INPUT0() \
 do { \
   if (TRACE_ALU_P (CPU)) { \
-    trace_pc = CIA; \
+    trace_module = "alu"; \
+    trace_pc = cia; \
     trace_name = itable[MY_INDEX].name; \
     trace_num_values = 0; \
   } \
@@ -288,7 +290,8 @@ do { \
 #define TRACE_ALU_INPUT1(IN1) \
 do { \
   if (TRACE_ALU_P (CPU)) { \
-    trace_pc = CIA; \
+    trace_module = "alu"; \
+    trace_pc = cia; \
     trace_name = itable[MY_INDEX].name; \
     trace_values[0] = (IN1); \
     trace_num_values = 1; \
@@ -298,7 +301,8 @@ do { \
 #define TRACE_ALU_INPUT2(IN1, IN2) \
 do { \
   if (TRACE_ALU_P (CPU)) { \
-    trace_pc = CIA; \
+    trace_module = "alu"; \
+    trace_pc = cia; \
     trace_name = itable[MY_INDEX].name; \
     trace_values[0] = (IN1); \
     trace_values[1] = (IN2); \
@@ -313,6 +317,45 @@ do { \
   } \
 } while (0)
 
+#define TRACE_BRANCH1(IN1) \
+do { \
+  if (TRACE_BRANCH_P (CPU)) { \
+    trace_module = "branch"; \
+    trace_pc = cia; \
+    trace_name = itable[MY_INDEX].name; \
+    trace_values[0] = (IN1); \
+    trace_num_values = 1; \
+    trace_result (1, (nia)); \
+  } \
+} while (0)
+
+#define TRACE_BRANCH2(IN1, IN2) \
+do { \
+  if (TRACE_BRANCH_P (CPU)) { \
+    trace_module = "branch"; \
+    trace_pc = cia; \
+    trace_name = itable[MY_INDEX].name; \
+    trace_values[0] = (IN1); \
+    trace_values[1] = (IN2); \
+    trace_num_values = 2; \
+    trace_result (1, (nia)); \
+  } \
+} while (0)
+
+#define TRACE_BRANCH3(IN1, IN2, IN3) \
+do { \
+  if (TRACE_BRANCH_P (CPU)) { \
+    trace_module = "branch"; \
+    trace_pc = cia; \
+    trace_name = itable[MY_INDEX].name; \
+    trace_values[0] = (IN1); \
+    trace_values[1] = (IN2); \
+    trace_values[2] = (IN3); \
+    trace_num_values = 3; \
+    trace_result (1, (nia)); \
+  } \
+} while (0)
+
 
 #else
 #define trace_input(NAME, IN1, IN2)
@@ -323,6 +366,10 @@ do { \
 #define TRACE_ALU_INPUT1(IN1)
 #define TRACE_ALU_INPUT2(IN1, IN2)
 #define TRACE_ALU_RESULT(RESULT)
+
+#define TRACE_BRANCH1(IN1)
+#define TRACE_BRANCH2(IN1, IN2)
+#define TRACE_BRANCH2(IN1, IN2, IN3)
 #endif
 
 

@@ -1,3 +1,16 @@
+start-sanitize-v850e
+Wed Sep 17 14:02:10 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c: Move "ctret", "bsw", "hsw" to v850.igen, fix tracing.
+	(trace_module): Global, save component/module name across insn.
+
+	* simops.c: Move "bsh" to v850.igen, fix.
+	
+	* v850.igen (callt): Load correct number of bytes. Fix tracing.
+	(stsr, ldsr): Correct src, dest fields. Fix tracing.
+	(ctret): Force alignment.  Fix tracing.
+	
+end-sanitize-v850e
 Tue Sep 16 22:14:01 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* simops.c (trace_output): Add result argument.
