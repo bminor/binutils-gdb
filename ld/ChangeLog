@@ -1,3 +1,7 @@
+2001-01-07  Philip Blundell  <philb@gnu.org>
+
+	* ld.texinfo (Bug Reporting): Update email address for reports.
+
 2000-12-31  Nick Clifton  <nickc@redhat.com>
 
 	* lexsup.c (parse_args): Set opterr to 0 and detect unparsed long

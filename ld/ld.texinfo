@@ -4229,7 +4229,7 @@ individuals in the file @file{etc/SERVICE} in the @sc{gnu} Emacs
 distribution.
 
 Otherwise, send bug reports for @code{ld} to
-@samp{bug-gnu-utils@@gnu.org}.
+@samp{bug-binutils@@gnu.org}.
 
 The fundamental principle of reporting bugs usefully is this:
 @strong{report all the facts}.  If you are not sure whether to state a
