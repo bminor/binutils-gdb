@@ -1,3 +1,8 @@
+2004-02-17  Adam Fedor  <fedor@gnu.org>
+
+	* gdb.base/gdb1555.exp: New file.
+	* gdb.base/gdb1555-main.c, gdb.base/gdb1555.c: New files.
+
 2004-02-17  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdb.base/selftest.exp (do_steps_and_nexts): Add comment.
