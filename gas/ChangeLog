@@ -1,3 +1,9 @@
+Mon Jun 10 14:52:29 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (ppc_elf_lcomm): New function for .lcomm
+	directive.
+	(md_pseudo_table): Add ppc_elf_lcomm.
+
 Mon Jun 10 11:45:51 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-ns32k.c (convert_iif): Call frag_grow rather than
