@@ -202,8 +202,8 @@ static bfd_boolean elf64_hppa_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 
 static bfd_boolean elf64_hppa_link_output_symbol_hook
-  PARAMS ((bfd *abfd, struct bfd_link_info *, const char *,
-	   Elf_Internal_Sym *, asection *input_sec));
+  PARAMS ((struct bfd_link_info *, const char *, Elf_Internal_Sym *,
+	   asection *, struct elf_link_hash_entry *));
 
 static bfd_boolean elf64_hppa_finish_dynamic_symbol
   PARAMS ((bfd *, struct bfd_link_info *,
@@ -1893,12 +1893,12 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
    table.  Ick.  */
 
 static bfd_boolean
-elf64_hppa_link_output_symbol_hook (abfd, info, name, sym, input_sec)
-     bfd *abfd ATTRIBUTE_UNUSED;
+elf64_hppa_link_output_symbol_hook (info, name, sym, input_sec, h)
      struct bfd_link_info *info;
      const char *name;
      Elf_Internal_Sym *sym;
      asection *input_sec ATTRIBUTE_UNUSED;
+     struct elf_link_hash_entry *h;
 {
   struct elf64_hppa_link_hash_table *hppa_info;
   struct elf64_hppa_dyn_hash_entry *dyn_h;
@@ -1912,6 +1912,8 @@ elf64_hppa_link_output_symbol_hook (abfd, info, name, sym, input_sec)
   hppa_info = elf64_hppa_hash_table (info);
   dyn_h = elf64_hppa_dyn_hash_lookup (&hppa_info->dyn_hash_table,
 				      name, FALSE, FALSE);
+  if (dyn_h->h != h)
+    return TRUE;
 
   /* Function symbols for which we created .opd entries *may* have been
      munged by finish_dynamic_symbol and have to be un-munged here.

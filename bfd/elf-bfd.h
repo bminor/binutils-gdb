@@ -626,8 +626,8 @@ struct elf_backend_data
   /* If this field is not NULL, it is called by the elf_link_output_sym
      phase of a link for each symbol which will appear in the object file.  */
   bfd_boolean (*elf_backend_link_output_symbol_hook)
-    (bfd *, struct bfd_link_info *info, const char *, Elf_Internal_Sym *,
-     asection *);
+    (struct bfd_link_info *info, const char *, Elf_Internal_Sym *,
+     asection *, struct elf_link_hash_entry *);
 
   /* The CREATE_DYNAMIC_SECTIONS function is called by the ELF backend
      linker the first time it encounters a dynamic object in the link.
@@ -793,7 +793,8 @@ struct elf_backend_data
      not handled in the hash table.  */
   bfd_boolean (*elf_backend_output_arch_syms)
     (bfd *, struct bfd_link_info *, void *,
-     bfd_boolean (*) (void *, const char *, Elf_Internal_Sym *, asection *));
+     bfd_boolean (*) (void *, const char *, Elf_Internal_Sym *, asection *,
+		      struct elf_link_hash_entry *));
 
   /* Copy any information related to dynamic linking from a pre-existing
      symbol to a newly created symbol.  Also called to copy flags and

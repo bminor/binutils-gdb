@@ -92,6 +92,7 @@ static bfd_reloc_status_type ppc64_elf_unhandled_reloc
 #define elf_backend_finish_dynamic_symbol     ppc64_elf_finish_dynamic_symbol
 #define elf_backend_reloc_type_class	      ppc64_elf_reloc_type_class
 #define elf_backend_finish_dynamic_sections   ppc64_elf_finish_dynamic_sections
+#define elf_backend_link_output_symbol_hook   ppc64_elf_output_symbol_hook
 #define elf_backend_special_sections	      ppc64_elf_special_sections
 
 /* The name of the dynamic interpreter.  This is put in the .interp
@@ -2762,6 +2763,9 @@ struct ppc_link_hash_entry
   unsigned int is_func_descriptor:1;
   unsigned int is_entry:1;
 
+  /* Whether global opd sym has been adjusted or not.  */
+  unsigned int adjust_done:1;
+
   /* Contexts in which symbol is used in the GOT (or TOC).
      TLS_GD .. TLS_EXPLICIT bits are or'd into the mask as the
      corresponding relocs are encountered during check_relocs.
@@ -2971,6 +2975,7 @@ link_hash_newfunc (struct bfd_hash_entry *entry,
       eh->is_func = 0;
       eh->is_func_descriptor = 0;
       eh->is_entry = 0;
+      eh->adjust_done = 0;
       eh->tls_mask = 0;
     }
 
@@ -4875,10 +4880,53 @@ get_tls_mask (char **tls_maskp, unsigned long *toc_symndx,
   return 1;
 }
 
+/* Adjust all global syms defined in opd sections.  In gcc generated
+   code these will already have been done, but I suppose we have to
+   cater for all sorts of hand written assembly.  */
+
+static bfd_boolean
+adjust_opd_syms (struct elf_link_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
+{
+  struct ppc_link_hash_entry *eh;
+  asection *sym_sec;
+  long *opd_adjust;
+
+  if (h->root.type == bfd_link_hash_indirect)
+    return TRUE;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+  if (h->root.type != bfd_link_hash_defined
+      && h->root.type != bfd_link_hash_defweak)
+    return TRUE;
+
+  eh = (struct ppc_link_hash_entry *) h;
+  if (eh->adjust_done)
+    return TRUE;
+
+  sym_sec = eh->elf.root.u.def.section;
+  if (sym_sec != NULL
+      && elf_section_data (sym_sec) != NULL
+      && (opd_adjust = ppc64_elf_section_data (sym_sec)->opd.adjust) != NULL)
+    {
+      eh->elf.root.u.def.value += opd_adjust[eh->elf.root.u.def.value / 24];
+      eh->adjust_done = 1;
+    }
+  return TRUE;
+}
+
+/* Remove unused Official Procedure Descriptor entries.  Currently we
+   only remove those associated with functions in discarded link-once
+   sections, or weakly defined functions that have been overridden.  It
+   would be possible to remove many more entries for statically linked
+   applications.  */
+
 bfd_boolean
 ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info)
 {
   bfd *ibfd;
+  bfd_boolean some_edited = FALSE;
 
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
     {
@@ -5079,22 +5127,24 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info)
 
 		      if (h != NULL)
 			{
-			  /* Redefine the function descriptor symbol
-			     to this location in the opd section.
-			     We've checked above that opd relocs are
-			     ordered.  */
+			  /* Redefine the function descriptor symbol to
+			     this location in the opd section.  It is
+			     necessary to update the value here rather
+			     than using an array of adjustments as we do
+			     for local symbols, because various places
+			     in the generic ELF code use the value
+			     stored in u.def.value.  */
 			  fdh->elf.root.u.def.value = wptr - sec->contents;
+			  fdh->adjust_done = 1;
 			}
-		      else
-			{
-			  /* Local syms are a bit tricky.  We could
-			     tweak them as they can be cached, but
-			     we'd need to look through the local syms
-			     for the function descriptor sym which we
-			     don't have at the moment.  So keep an
-			     array of adjustments.  */
-			  adjust[rel->r_offset / 24] = wptr - rptr;
-			}
+
+		      /* Local syms are a bit tricky.  We could
+			 tweak them as they can be cached, but
+			 we'd need to look through the local syms
+			 for the function descriptor sym which we
+			 don't have at the moment.  So keep an
+			 array of adjustments.  */
+		      adjust[rel->r_offset / 24] = wptr - rptr;
 
 		      if (wptr != rptr)
 			memcpy (wptr, rptr, 24);
@@ -5153,6 +5203,7 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info)
 	  elf_section_data (sec)->rel_hdr.sh_size
 	    = sec->reloc_count * elf_section_data (sec)->rel_hdr.sh_entsize;
 	  BFD_ASSERT (elf_section_data (sec)->rel_hdr2 == NULL);
+	  some_edited = TRUE;
 	}
       else if (elf_section_data (sec)->relocs != relstart)
 	free (relstart);
@@ -5166,6 +5217,9 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info)
 	    symtab_hdr->contents = (unsigned char *) local_syms;
 	}
     }
+
+  if (some_edited)
+    elf_link_hash_traverse (elf_hash_table (info), adjust_opd_syms, NULL);
 
   return TRUE;
 }
@@ -5262,7 +5316,17 @@ ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 		    value = h->root.u.def.value;
 		  }
 		else
-		  value = sym->st_value;
+		  {
+		    value = sym->st_value;
+
+		    if (elf_section_data (sym_sec) != NULL)
+		      {
+			long *adjust;
+			adjust = ppc64_elf_section_data (sym_sec)->opd.adjust;
+			if (adjust != NULL)
+			  value += adjust[value / 24];
+		      }
+		  }
 
 		ok_tprel = FALSE;
 		is_local = FALSE;
@@ -7402,7 +7466,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      long *opd_sym_adjust;
 
 	      opd_sym_adjust = ppc64_elf_section_data (sec)->opd.adjust;
-	      if (opd_sym_adjust != NULL && sym->st_value % 24 == 0)
+	      if (opd_sym_adjust != NULL)
 		relocation += opd_sym_adjust[sym->st_value / 24];
 	    }
 	}
@@ -8671,6 +8735,32 @@ ppc64_elf_relocate_section (bfd *output_bfd,
     }
 
   return ret;
+}
+
+/* Adjust the value of any local symbols in opd sections.  */
+
+static bfd_boolean
+ppc64_elf_output_symbol_hook (struct bfd_link_info *info,
+			      const char *name ATTRIBUTE_UNUSED,
+			      Elf_Internal_Sym *elfsym,
+			      asection *input_sec,
+			      struct elf_link_hash_entry *h)
+{
+  long *adjust;
+  bfd_vma value;
+
+  if (h != NULL
+      || input_sec == NULL
+      || ppc64_elf_section_data (input_sec) == NULL
+      || (adjust = ppc64_elf_section_data (input_sec)->opd.adjust) == NULL)
+    return TRUE;
+
+  value = elfsym->st_value - input_sec->output_offset;
+  if (!info->relocatable)
+    value -= input_sec->output_section->vma;
+
+  elfsym->st_value += adjust[value / 24];
+  return TRUE;
 }
 
 /* Finish up dynamic symbol handling.  We set the contents of various

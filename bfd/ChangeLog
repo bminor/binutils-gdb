@@ -1,3 +1,32 @@
+2003-12-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct elf_backend_data): Remove "bfd *" and add
+	"elflink_hash_entry *" param to elf_backend_link_output_symbol_hook.
+	Add "elflink_hash_entry *" param to elf_backend_output_arch_syms.
+	* elflink.h (elf_link_output_sym): Add "elflink_hash_entry *" param,
+	and pass to output_symbol_hook.
+	(elf_bfd_final_link): Adjust elf_link_output_sym calls.
+	(elf_link_output_extsym): Likewise.
+	(elf_link_input_bfd): Likewise.
+	* elf32-sh64.c (sh64_elf_link_output_symbol_hook): Adjust.
+	* elf32-v850.c (v850_elf_link_output_symbol_hook): Likewise.
+	* elf64-mmix.c (mmix_elf_link_output_symbol_hook): Likewise.
+	* elf64-sh64.c (sh64_elf64_link_output_symbol_hook): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_link_output_symbol_hook): Likewise.
+	* elfxx-mips.h (_bfd_mips_elf_link_output_symbol_hook): Likewise.
+	* elf64-sparc.c (sparc64_elf_output_arch_syms): Likewise.
+	* elf64-hppa.c (elf64_hppa_link_output_symbol_hook): Likewise.
+	Validate dynh->h against h.
+	* elf64-ppc.c (struct ppc_link_hash_entry): Add adjust_done bitfield.
+	(link_hash_newfunc): Init it.
+	(adjust_opd_syms): New function.
+	(ppc64_elf_edit_opd): Set adjust_done when global .opd sym adjusted.
+	Set opd.adjust for all .opd relocs.  Call adjust_opd_syms.
+	(ppc64_elf_tls_optimize): Adjust possible .opd sym values here.
+	(ppc64_elf_relocate_section): Also adjust syms not a multiple of 24.
+	(ppc64_elf_output_symbol_hook): New function.
+	(elf_backend_link_output_symbol_hook): Define.
+
 2003-12-07  Richard Sandiford  <rsandifo@redhat.com>
 
 	* elf32-mips.c, elfn32-mips.c, elf64-mips.c: Convert prototypes.

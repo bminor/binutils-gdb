@@ -2833,7 +2833,8 @@ struct elf_final_link_info
 };
 
 static bfd_boolean elf_link_output_sym
-  (struct elf_final_link_info *, const char *, Elf_Internal_Sym *, asection *);
+  (struct elf_final_link_info *, const char *, Elf_Internal_Sym *, asection *,
+   struct elf_link_hash_entry *);
 static bfd_boolean elf_link_flush_output_syms
   (struct elf_final_link_info *);
 static bfd_boolean elf_link_output_extsym
@@ -3407,7 +3408,8 @@ elf_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
       elfsym.st_info = 0;
       elfsym.st_other = 0;
       elfsym.st_shndx = SHN_UNDEF;
-      if (! elf_link_output_sym (&finfo, NULL, &elfsym, bfd_und_section_ptr))
+      if (! elf_link_output_sym (&finfo, NULL, &elfsym, bfd_und_section_ptr,
+				 NULL))
 	goto error_return;
     }
 
@@ -3423,7 +3425,7 @@ elf_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
   elfsym.st_other = 0;
   elfsym.st_shndx = SHN_ABS;
   if (! elf_link_output_sym (&finfo, bfd_get_filename (abfd),
-			     &elfsym, bfd_abs_section_ptr))
+			     &elfsym, bfd_abs_section_ptr, NULL))
     goto error_return;
 #endif
 
@@ -3448,7 +3450,7 @@ elf_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 	    elfsym.st_value = 0;
 	  else
 	    elfsym.st_value = o->vma;
-	  if (! elf_link_output_sym (&finfo, NULL, &elfsym, o))
+	  if (! elf_link_output_sym (&finfo, NULL, &elfsym, o, NULL))
 	    goto error_return;
 	  if (i == SHN_LORESERVE - 1)
 	    i += SHN_HIRESERVE + 1 - SHN_LORESERVE;
@@ -3702,7 +3704,8 @@ elf_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
   if (bed->elf_backend_output_arch_syms)
     {
       typedef bfd_boolean (*out_sym_func)
-	(void *, const char *, Elf_Internal_Sym *, asection *);
+	(void *, const char *, Elf_Internal_Sym *, asection *,
+	 struct elf_link_hash_entry *);
 
       if (! ((*bed->elf_backend_output_arch_syms)
 	     (abfd, info, &finfo, (out_sym_func) elf_link_output_sym)))
@@ -4086,20 +4089,20 @@ static bfd_boolean
 elf_link_output_sym (struct elf_final_link_info *finfo,
 		     const char *name,
 		     Elf_Internal_Sym *elfsym,
-		     asection *input_sec)
+		     asection *input_sec,
+		     struct elf_link_hash_entry *h)
 {
   Elf_External_Sym *dest;
   Elf_External_Sym_Shndx *destshndx;
   bfd_boolean (*output_symbol_hook)
-    (bfd *, struct bfd_link_info *info, const char *,
-     Elf_Internal_Sym *, asection *);
+    (struct bfd_link_info *, const char *, Elf_Internal_Sym *, asection *,
+     struct elf_link_hash_entry *);
 
   output_symbol_hook = get_elf_backend_data (finfo->output_bfd)->
     elf_backend_link_output_symbol_hook;
   if (output_symbol_hook != NULL)
     {
-      if (! ((*output_symbol_hook)
-	     (finfo->output_bfd, finfo->info, name, elfsym, input_sec)))
+      if (! (*output_symbol_hook) (finfo->info, name, elfsym, input_sec, h))
 	return FALSE;
     }
 
@@ -4640,7 +4643,7 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
 
   h->indx = bfd_get_symcount (finfo->output_bfd);
 
-  if (! elf_link_output_sym (finfo, h->root.root.string, &sym, input_sec))
+  if (! elf_link_output_sym (finfo, h->root.root.string, &sym, input_sec, h))
     {
       eoinfo->failed = TRUE;
       return FALSE;
@@ -4845,7 +4848,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	    }
 	}
 
-      if (! elf_link_output_sym (finfo, name, &osym, isec))
+      if (! elf_link_output_sym (finfo, name, &osym, isec, NULL))
 	return FALSE;
     }
 
@@ -5207,7 +5210,8 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			  finfo->indices[r_symndx]
 			    = bfd_get_symcount (output_bfd);
 
-			  if (! elf_link_output_sym (finfo, name, &sym, sec))
+			  if (! elf_link_output_sym (finfo, name, &sym, sec,
+						     NULL))
 			    return FALSE;
 			}
 

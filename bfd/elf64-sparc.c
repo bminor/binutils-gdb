@@ -65,7 +65,8 @@ static bfd_boolean sparc64_elf_add_symbol_hook
 	   const char **, flagword *, asection **, bfd_vma *));
 static bfd_boolean sparc64_elf_output_arch_syms
   PARAMS ((bfd *, struct bfd_link_info *, PTR,
-	   bfd_boolean (*) (PTR, const char *, Elf_Internal_Sym *, asection *)));
+	   bfd_boolean (*) (PTR, const char *, Elf_Internal_Sym *,
+			    asection *, struct elf_link_hash_entry *)));
 static void sparc64_elf_symbol_processing
   PARAMS ((bfd *, asymbol *));
 
@@ -1511,7 +1512,8 @@ sparc64_elf_output_arch_syms (output_bfd, info, finfo, func)
      struct bfd_link_info *info;
      PTR finfo;
      bfd_boolean (*func)
-       PARAMS ((PTR, const char *, Elf_Internal_Sym *, asection *));
+       PARAMS ((PTR, const char *, Elf_Internal_Sym *, asection *,
+		struct elf_link_hash_entry *));
 {
   int reg;
   struct sparc64_elf_app_reg *app_regs =
@@ -1557,7 +1559,8 @@ sparc64_elf_output_arch_syms (output_bfd, info, finfo, func)
 	sym.st_shndx = app_regs [reg].shndx;
 	if (! (*func) (finfo, app_regs [reg].name, &sym,
 		       sym.st_shndx == SHN_ABS
-			 ? bfd_abs_section_ptr : bfd_und_section_ptr))
+			 ? bfd_abs_section_ptr : bfd_und_section_ptr,
+		       NULL))
 	  return FALSE;
       }
 

@@ -36,8 +36,8 @@ extern bfd_boolean _bfd_mips_elf_add_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
 extern bfd_boolean _bfd_mips_elf_link_output_symbol_hook
-  PARAMS ((bfd *, struct bfd_link_info *, const char *, Elf_Internal_Sym *,
-	   asection *));
+  PARAMS ((struct bfd_link_info *, const char *, Elf_Internal_Sym *,
+	   asection *, struct elf_link_hash_entry *));
 extern bfd_boolean _bfd_mips_elf_create_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 extern bfd_boolean _bfd_mips_elf_check_relocs

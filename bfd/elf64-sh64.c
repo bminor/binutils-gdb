@@ -144,8 +144,8 @@ static bfd_boolean sh64_elf64_add_symbol_hook
   (bfd *, struct bfd_link_info *, const Elf_Internal_Sym *, const char **,
    flagword *, asection **, bfd_vma *);
 static bfd_boolean sh64_elf64_link_output_symbol_hook
-  (bfd *, struct bfd_link_info *, const char *, Elf_Internal_Sym *,
-   asection *);
+  (struct bfd_link_info *, const char *, Elf_Internal_Sym *, asection *,
+   struct elf_link_hash_entry *);
 static bfd_boolean sh64_elf64_fake_sections
   (bfd *, Elf_Internal_Shdr *, asection *);
 static void sh64_elf64_final_write_processing
@@ -2982,11 +2982,11 @@ sh64_elf64_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
    DataLabel symbol.  */
 
 static bfd_boolean
-sh64_elf64_link_output_symbol_hook (bfd *abfd ATTRIBUTE_UNUSED,
-				    struct bfd_link_info *info,
+sh64_elf64_link_output_symbol_hook (struct bfd_link_info *info,
 				    const char *cname,
 				    Elf_Internal_Sym *sym,
-				    asection *input_sec ATTRIBUTE_UNUSED)
+				    asection *input_sec ATTRIBUTE_UNUSED,
+				    struct elf_link_hash_entry *h ATTRIBUTE_UNUSED)
 {
   char *name = (char *) cname;
 
