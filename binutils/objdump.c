@@ -43,6 +43,7 @@ extern Elf_Internal_Shdr *bfd_elf_find_section();
 #endif	/* ELF_STAB_DISPLAY */
 
 extern char *xmalloc ();
+extern int fprintf PARAMS ((FILE *, CONST char *, ...));
 
 char *default_target = NULL;	/* default at runtime */
 
@@ -388,6 +389,12 @@ disassemble_data (abfd)
 	  break;
 	case bfd_arch_h8500:
 	  disassemble = print_insn_h8500;
+	  break;
+	case bfd_arch_sh:
+	  disassemble = print_insn_sh;
+	  break;
+	case bfd_arch_alpha:
+	  disassemble = print_insn_alpha;
 	  break;
 	case bfd_arch_m68k:
 	  disassemble = print_insn_m68k;
