@@ -1,5 +1,8 @@
 Thu Jan 11 17:34:01 1996  Per Bothner  <bothner@kalessin.cygnus.com>
 
+	* Makefile.in (PROGS):  Removed.
+	(clean mostlyclean):  Remove *.exe rather than ${PROGS}.
+
 	* pr-8742.ch, pr-8742.exp:  New test case.
 
 Tue Jan  9 04:47:27 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
