@@ -1,3 +1,11 @@
+2003-08-13  Michael Snyder  <msnyder@redhat.com>
+
+	* frv-tdep.c (frv_push_arguments): Use deprecated ftype.
+	(frv_saved_pc_after_call): Use deprecated ftype.
+	(stupid_useless_init_extra_frame_info): Remove orphan prototype.
+	(frv_remote_translate_xfer_address): Remove.
+	(frv_gdbarch_init): Use generic_remote_translate_xfer_address.
+
 2003-08-13  J. Brobecker  <brobecker@gnat.com>
 
 	* hppa-tdep.c (hppa_gdbarch_init): Perform the ABI-specific gdbarch

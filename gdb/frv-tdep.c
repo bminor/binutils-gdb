@@ -35,9 +35,8 @@ static gdbarch_skip_prologue_ftype frv_skip_prologue;
 static gdbarch_deprecated_extract_return_value_ftype frv_extract_return_value;
 static gdbarch_deprecated_extract_struct_value_address_ftype frv_extract_struct_value_address;
 static gdbarch_frameless_function_invocation_ftype frv_frameless_function_invocation;
-static gdbarch_init_extra_frame_info_ftype stupid_useless_init_extra_frame_info;
-static gdbarch_push_arguments_ftype frv_push_arguments;
-static gdbarch_saved_pc_after_call_ftype frv_saved_pc_after_call;
+static gdbarch_deprecated_push_arguments_ftype frv_push_arguments;
+static gdbarch_deprecated_saved_pc_after_call_ftype frv_saved_pc_after_call;
 
 static void frv_pop_frame_regular (struct frame_info *frame);
 
@@ -920,16 +919,6 @@ frv_pop_frame_regular (struct frame_info *frame)
   flush_cached_frames ();
 }
 
-
-static void
-frv_remote_translate_xfer_address (CORE_ADDR memaddr, int nr_bytes,
-				   CORE_ADDR *targ_addr, int *targ_len)
-{
-  *targ_addr = memaddr;
-  *targ_len  = nr_bytes;
-}
-
-
 /* Hardware watchpoint / breakpoint support for the FR500
    and FR400.  */
 
@@ -1090,7 +1079,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_function_start_offset (gdbarch, 0);
 
   set_gdbarch_remote_translate_xfer_address
-    (gdbarch, frv_remote_translate_xfer_address);
+    (gdbarch, generic_remote_translate_xfer_address);
 
   /* Hardware watchpoint / breakpoint support.  */
   switch (info.bfd_arch_info->mach)
@@ -1128,4 +1117,4 @@ _initialize_frv_tdep (void)
   deprecated_tm_print_insn = print_insn_frv;
 }
 
-
+
