@@ -64,7 +64,7 @@ _fi__(0)
 This file documents the GNU debugger _GDBN__.
 
 @c !!set edition, date, version
-This is Edition 4.06, July 1992, 
+This is Edition 4.06, October 1992, 
 of @cite{Debugging with _GDBN__: the GNU Source-Level Debugger}
 for GDB Version _GDB_VN__.
 
@@ -104,7 +104,7 @@ _fi__(!_GENERIC__)
 @sp 1
 @c !!set edition, date, version
 @subtitle Edition 4.06, for _GDBN__ version _GDB_VN__
-@subtitle July 1992
+@subtitle October 1992
 @author by Richard M. Stallman and Roland H. Pesch
 @page
 @tex
@@ -144,7 +144,7 @@ instead of in the original English.
 This file describes _GDBN__, the GNU symbolic debugger.
 
 @c !!set edition, date, version
-This is Edition 4.06, July 1992, for GDB Version _GDB_VN__.
+This is Edition 4.06, October 1992, for GDB Version _GDB_VN__.
 @end ifinfo
 
 @menu
