@@ -1,3 +1,13 @@
+Sun Dec  5 19:24:57 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/reloc/roundmode.s: New test.
+	* gas/hppa/reloc/reloc.exp: Run it.  Fix typo in last change.
+
+Wed Dec  1 10:44:18 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/reloc/reloc.exp: Run the first half of bogus R_EXIT
+	test for ELF.  
+
 Tue Nov 30 13:43:21 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/more.parse/parse.exp: Test for error on for subspace
