@@ -1,4 +1,30 @@
+Wed Oct  2 21:31:26 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10x00.h: New file.
+
 start-sanitize-v850
+Fri Sep 27 18:26:46 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* v850.h:  Add new flag to indicate this instruction uses a PC
+	displacement.
+
+end-sanitize-v850
+Fri Sep 13 14:58:13 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* h8300.h (stmac): Add missing instruction.
+
+start-sanitize-v850
+Sat Aug 31 16:02:03 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* v850.h (v850_opcode): Remove "size" field.  Add "memop"
+	field.
+
+Fri Aug 23 10:39:08 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* v850.h (V850_OPERAND_EP): Define.
+
+	* v850.h (v850_opcode): Add size field.
+
 Thu Aug 22 16:51:25 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* v850.h (v850_operands): Add insert and extract fields, pointers
