@@ -472,7 +472,8 @@ typedef struct bfd_arch_info
   long mach;
   char *arch_name;
   CONST  char *printable_name;
- /* true if this is the default machine for the architecture */
+  /* true if this is the default machine for the architecture */
+ unsigned int section_align_power;
   boolean the_default;	
   CONST struct bfd_arch_info * EXFUN((*compatible),
 	(CONST struct bfd_arch_info *a,
