@@ -488,6 +488,10 @@ dos_open (scb, name)
       return -1;
     }
 
+  /* FIXME: this is a Bad Idea (tm)!  One should *never* invent file
+     handles, since they might be already used by other files/devices.
+     The Right Way to do this is to create a real handle by dup()'ing
+     some existing one.  */
   fd = name[3] - '1';
   port = &ports[fd];
   if (port->refcnt++ > 0)
@@ -649,6 +653,19 @@ dos_get_tty_state (scb)
 {
   struct dos_ttystate *port = &ports[scb->fd];
   struct dos_ttystate *state;
+
+  /* Are they asking about a port we opened?  */
+  if (port->refcnt <= 0)
+    {
+      /* We've never heard about this port.  We should fail this call,
+	 unless they are asking about one of the 3 standard handles,
+	 in which case we pretend the handle was open by us if it is
+	 connected to a terminal device.  This is beacuse Unix
+	 terminals use the serial interface, so GDB expects the
+	 standard handles to go through here.  */
+      if (scb->fd >= 3 || !isatty (scb->fd))
+	return NULL;
+    }
 
   state = (struct dos_ttystate *) xmalloc (sizeof *state);
   *state = *port;
