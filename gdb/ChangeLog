@@ -1,5 +1,8 @@
 2004-01-07  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (mips_gdbarch_init): Clean up code selecting the
+	MIPS ABI.
+
 	* mips-tdep.c: Update copyright.
 	(mips_gdbarch_init): Merge two code blocks handling the register
 	name and number layout.

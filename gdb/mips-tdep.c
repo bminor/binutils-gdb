@@ -5644,60 +5644,61 @@ mips_gdbarch_init (struct gdbarch_info info,
   enum mips_abi mips_abi, found_abi, wanted_abi;
   int num_regs;
 
-  elf_flags = 0;
-
-  if (info.abfd)
-    {
-      /* First of all, extract the elf_flags, if available.  */
-      if (bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
-	elf_flags = elf_elfheader (info.abfd)->e_flags;
-    }
+  /* First of all, extract the elf_flags, if available.  */
+  if (info.abfd && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
+    elf_flags = elf_elfheader (info.abfd)->e_flags;
+  else
+    elf_flags = 0;
+  if (gdbarch_debug)
+    fprintf_unfiltered (gdb_stdlog,
+			"mips_gdbarch_init: elf_flags = 0x%08x\n",
+			elf_flags);
 
   /* Check ELF_FLAGS to see if it specifies the ABI being used.  */
   switch ((elf_flags & EF_MIPS_ABI))
     {
     case E_MIPS_ABI_O32:
-      mips_abi = MIPS_ABI_O32;
+      found_abi = MIPS_ABI_O32;
       break;
     case E_MIPS_ABI_O64:
-      mips_abi = MIPS_ABI_O64;
+      found_abi = MIPS_ABI_O64;
       break;
     case E_MIPS_ABI_EABI32:
-      mips_abi = MIPS_ABI_EABI32;
+      found_abi = MIPS_ABI_EABI32;
       break;
     case E_MIPS_ABI_EABI64:
-      mips_abi = MIPS_ABI_EABI64;
+      found_abi = MIPS_ABI_EABI64;
       break;
     default:
       if ((elf_flags & EF_MIPS_ABI2))
-	mips_abi = MIPS_ABI_N32;
+	found_abi = MIPS_ABI_N32;
       else
-	mips_abi = MIPS_ABI_UNKNOWN;
+	found_abi = MIPS_ABI_UNKNOWN;
       break;
     }
 
   /* GCC creates a pseudo-section whose name describes the ABI.  */
-  if (mips_abi == MIPS_ABI_UNKNOWN && info.abfd != NULL)
-    bfd_map_over_sections (info.abfd, mips_find_abi_section, &mips_abi);
+  if (found_abi == MIPS_ABI_UNKNOWN && info.abfd != NULL)
+    bfd_map_over_sections (info.abfd, mips_find_abi_section, &found_abi);
 
-  /* If we have no bfd, then mips_abi will still be MIPS_ABI_UNKNOWN.
-     Use the ABI from the last architecture if there is one.  */
-  if (info.abfd == NULL && arches != NULL)
-    mips_abi = gdbarch_tdep (arches->gdbarch)->found_abi;
+  /* If we have no usefu BFD information, use the ABI from the last
+     MIPS architecture (if there is one).  */
+  if (found_abi == MIPS_ABI_UNKNOWN && info.abfd == NULL && arches != NULL)
+    found_abi = gdbarch_tdep (arches->gdbarch)->found_abi;
 
   /* Try the architecture for any hint of the correct ABI.  */
-  if (mips_abi == MIPS_ABI_UNKNOWN
+  if (found_abi == MIPS_ABI_UNKNOWN
       && info.bfd_arch_info != NULL
       && info.bfd_arch_info->arch == bfd_arch_mips)
     {
       switch (info.bfd_arch_info->mach)
 	{
 	case bfd_mach_mips3900:
-	  mips_abi = MIPS_ABI_EABI32;
+	  found_abi = MIPS_ABI_EABI32;
 	  break;
 	case bfd_mach_mips4100:
 	case bfd_mach_mips5000:
-	  mips_abi = MIPS_ABI_EABI64;
+	  found_abi = MIPS_ABI_EABI64;
 	  break;
 	case bfd_mach_mips8000:
 	case bfd_mach_mips10000:
@@ -5706,35 +5707,40 @@ mips_gdbarch_init (struct gdbarch_info info,
 	     on IRIX.  (Even for executables created by gcc.)  */
 	  if (bfd_get_flavour (info.abfd) == bfd_target_elf_flavour
 	      && elf_elfheader (info.abfd)->e_ident[EI_CLASS] == ELFCLASS64)
-	    mips_abi = MIPS_ABI_N64;
+	    found_abi = MIPS_ABI_N64;
 	  else
-	    mips_abi = MIPS_ABI_N32;
+	    found_abi = MIPS_ABI_N32;
 	  break;
 	}
     }
 
-  if (mips_abi == MIPS_ABI_UNKNOWN)
-    mips_abi = MIPS_ABI_O32;
+  if (gdbarch_debug)
+    fprintf_unfiltered (gdb_stdlog, "mips_gdbarch_init: found_abi = %d\n",
+			found_abi);
+
+  /* What has the user specified from the command line?  */
+  wanted_abi = global_mips_abi ();
+  if (gdbarch_debug)
+    fprintf_unfiltered (gdb_stdlog, "mips_gdbarch_init: wanted_abi = %d\n",
+			wanted_abi);
 
   /* Now that we have found what the ABI for this binary would be,
      check whether the user is overriding it.  */
-  found_abi = mips_abi;
-  wanted_abi = global_mips_abi ();
   if (wanted_abi != MIPS_ABI_UNKNOWN)
     mips_abi = wanted_abi;
-
+  else if (found_abi != MIPS_ABI_UNKNOWN)
+    mips_abi = found_abi;
+  else
+    mips_abi = MIPS_ABI_O32;
   if (gdbarch_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog,
-			  "mips_gdbarch_init: elf_flags = 0x%08x\n",
-			  elf_flags);
-      fprintf_unfiltered (gdb_stdlog,
-			  "mips_gdbarch_init: mips_abi = %d\n",
-			  mips_abi);
-      fprintf_unfiltered (gdb_stdlog,
-			  "mips_gdbarch_init: found_mips_abi = %d\n",
-			  found_abi);
-    }
+    fprintf_unfiltered (gdb_stdlog, "mips_gdbarch_init: mips_abi = %d\n",
+			mips_abi);
+
+  /* Also used when doing an architecture lookup.  */
+  if (gdbarch_debug)
+    fprintf_unfiltered (gdb_stdlog,
+			"mips_gdbarch_init: mips64_transfers_32bit_regs_p = %d\n",
+			mips64_transfers_32bit_regs_p);
 
   /* try to find a pre-existing architecture */
   for (arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -5760,6 +5766,8 @@ mips_gdbarch_init (struct gdbarch_info info,
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->elf_flags = elf_flags;
   tdep->mips64_transfers_32bit_regs_p = mips64_transfers_32bit_regs_p;
+  tdep->found_abi = found_abi;
+  tdep->mips_abi = mips_abi;
 
   /* Initially set everything according to the default ABI/ISA.  */
   set_gdbarch_short_bit (gdbarch, 16);
@@ -5770,8 +5778,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_register_reggroup_p (gdbarch, mips_register_reggroup_p);
   set_gdbarch_pseudo_register_read (gdbarch, mips_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, mips_pseudo_register_write);
-  tdep->found_abi = found_abi;
-  tdep->mips_abi = mips_abi;
 
   set_gdbarch_elf_make_msymbol_special (gdbarch, 
 					mips_elf_make_msymbol_special);
