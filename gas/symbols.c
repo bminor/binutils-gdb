@@ -588,15 +588,13 @@ symbol_make (name)
   return (symbolP);
 }
 
-static const char temp_label_name[] = ".L0\001";
-
 symbolS *
 symbol_temp_new (seg, ofs, frag)
      segT seg;
      valueT ofs;
      fragS *frag;
 {
-  return symbol_new (temp_label_name, seg, ofs, frag);
+  return symbol_new (FAKE_LABEL_NAME, seg, ofs, frag);
 }
 
 symbolS *
@@ -608,7 +606,7 @@ symbol_temp_new_now ()
 symbolS *
 symbol_temp_make ()
 {
-  return symbol_make (temp_label_name);
+  return symbol_make (FAKE_LABEL_NAME);
 }
 
 /* Implement symbol table lookup.

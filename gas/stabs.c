@@ -371,13 +371,11 @@ s_stab_generic (what, stab_secname, stabstr_secname)
 	}
       else
 	{
-	  const char *fake;
 	  symbolS *symbol;
 	  expressionS exp;
 
 	  /* Arrange for a value representing the current location.  */
-	  fake = FAKE_LABEL_NAME;
-	  symbol = symbol_new (fake, saved_seg, dot, saved_frag);
+	  symbol = symbol_temp_new (saved_seg, dot, saved_frag);
 
 	  exp.X_op = O_symbol;
 	  exp.X_add_symbol = symbol;

@@ -67,7 +67,6 @@ make_expr_symbol (expressionP)
      expressionS *expressionP;
 {
   expressionS zero;
-  const char *fake;
   symbolS *symbolP;
   struct expr_symbol_line *n;
 
@@ -91,13 +90,11 @@ make_expr_symbol (expressionP)
       expressionP = &zero;
     }
 
-  fake = FAKE_LABEL_NAME;
-
   /* Putting constant symbols in absolute_section rather than
      expr_section is convenient for the old a.out code, for which
      S_GET_SEGMENT does not always retrieve the value put in by
      S_SET_SEGMENT.  */
-  symbolP = symbol_create (fake,
+  symbolP = symbol_create (FAKE_LABEL_NAME,
 			   (expressionP->X_op == O_constant
 			    ? absolute_section
 			    : expr_section),
@@ -745,13 +742,8 @@ current_location (expressionp)
     }
   else
     {
-      symbolS *symbolp;
-
-      symbolp = symbol_new (FAKE_LABEL_NAME, now_seg,
-			    (valueT) frag_now_fix (),
-			    frag_now);
       expressionp->X_op = O_symbol;
-      expressionp->X_add_symbol = symbolp;
+      expressionp->X_add_symbol = symbol_temp_new_now ();
       expressionp->X_add_number = 0;
     }
 }

@@ -1,5 +1,14 @@
 2003-05-27  Richard Henderson  <rth@redhat.com>
 
+	* expr.c (make_expr_symbol): Fold FAKE_LABEL_NAME use into the
+	symbol_create call.
+	(current_location): Use symbol_temp_new_now.
+	* stabs.c (s_stab_generic): Use symbol_temp_new.
+	* symbols.c (temp_label_name): Remove.
+	(symbol_temp_new, symbol_temp_make): Use FAKE_LABEL_NAME.
+
+2003-05-27  Richard Henderson  <rth@redhat.com>
+
 	* dw2gencfi.c, dw2gencfi.h: Rewrite from scratch.
 	* as.c (main): Always call cfi_finish.
 	* config/tc-i386.c (x86_dwarf2_return_column): New.
