@@ -2057,6 +2057,7 @@ Error: %s passes floats in %s registers, whereas %s passes them in %s registers"
       flags_compatible = false;
     }
 
+#ifdef EF_SOFT_FLOAT
   if ((in_flags & EF_SOFT_FLOAT) != (out_flags & EF_SOFT_FLOAT))
     {
       _bfd_error_handler (_ ("\
@@ -2067,6 +2068,7 @@ Error: %s uses %s floating point, whereas %s uses %s floating point"),
 			  out_flags & EF_SOFT_FLOAT ? _("soft") : _("hard"));
       flags_compatible = false;
     }
+#endif
 
   /* Interworking mismatch is only a warning.  */
   if ((in_flags & EF_INTERWORK) != (out_flags & EF_INTERWORK))
