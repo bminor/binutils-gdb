@@ -554,16 +554,8 @@ EXTRA_GCC_FLAGS = \
 
 GCC_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_GCC_FLAGS)
 
-.PHONY: configure-host
-configure-host: maybe-configure-gcc [+
-  FOR host_modules +] \
-    maybe-configure-[+module+][+
-  ENDFOR host_modules +]
-.PHONY: configure-target
-configure-target: [+
-  FOR target_modules +] \
-    maybe-configure-target-[+module+][+
-  ENDFOR target_modules +]
+configure-host: @configure_host_modules@
+configure-target: @configure_target_modules@
 
 # This is a list of the targets for which we can do a clean-{target}.
 CLEAN_MODULES =[+
@@ -586,19 +578,14 @@ CLEAN_X11_MODULES = [+ FOR host_modules +][+ IF with_x +]\
 	clean-[+module+] [+ ENDIF with_x +][+ ENDFOR host_modules +]
 
 # The target built for a native build.
+# This list only includes modules actually being configured and built.
 .PHONY: all.normal
-all.normal: @all_build_modules@ all-host all-target
+all.normal: @all_build_modules@ \
+	@all_host_modules@ \
+	@all_target_modules@
 
-.PHONY: all-host
-all-host: maybe-all-gcc [+
-  FOR host_modules +] \
-    maybe-all-[+module+][+
-  ENDFOR host_modules +]
-.PHONY: all-target
-all-target: [+
-  FOR target_modules +] \
-    maybe-all-target-[+module+][+
-  ENDFOR target_modules +]
+all-host: @all_host_modules@
+all-target: @all_target_modules@
 
 # Do a target for all the subdirectories.  A ``make do-X'' will do a
 # ``make X'' in all subdirectories (because, in general, there is a
@@ -743,13 +730,8 @@ check:
 	$(MAKE) do-check NOTPARALLEL=parallel-ok
 
 # Only include modules actually being configured and built.
-do-check: maybe-check-gcc [+
-  FOR host_modules +] \
-    maybe-check-[+module+][+
-  ENDFOR host_modules +][+
-  FOR target_modules +] \
-    maybe-check-target-[+module+][+
-  ENDFOR target_modules +]
+do-check: @check_host_modules@ \
+	@check_target_modules@
 
 # Automated reporting of test results.
 
@@ -775,25 +757,9 @@ mail-report-with-warnings.log: warning.log
 # Installation targets.
 
 .PHONY: install uninstall
-install: installdirs install-host install-target
+install: installdirs @install_host_modules@ @install_target_modules@
 
-.PHONY: install-host-nogcc
-install-host-nogcc: [+
-  FOR host_modules +] \
-    maybe-install-[+module+][+
-  ENDFOR host_modules +]
-
-.PHONY: install-host
-install-host: maybe-install-gcc [+
-  FOR host_modules +] \
-    maybe-install-[+module+][+
-  ENDFOR host_modules +]
-
-.PHONY: install-target
-install-target: [+
-  FOR target_modules +] \
-    maybe-install-target-[+module+][+
-  ENDFOR target_modules +]
+install-target: @install_target_modules@
 
 uninstall:
 	@echo "the uninstall target is not supported in this tree"
@@ -812,8 +778,8 @@ install.all: install-no-fixedincludes
 # install-no-fixedincludes is used because Cygnus can not distribute
 # the fixed header files.
 .PHONY: install-no-fixedincludes
-install-no-fixedincludes: installdirs install-host-nogcc \
-	install-target gcc-no-fixedincludes
+install-no-fixedincludes: installdirs @install_host_modules_nogcc@ \
+	@install_target_modules@ gcc-no-fixedincludes
 
 ### other supporting targets
 
@@ -974,11 +940,11 @@ all-[+module+]: configure-[+module+]
 	    +] $(X11_FLAGS_TO_PASS)[+ 
 	  ENDIF with_x +] all)
 
-.PHONY: check-[+module+] maybe-check-[+module+]
-maybe-check-[+module+]:
 [+ IF no_check +]
+.PHONY: check-[+module+]
 check-[+module+]:
 [+ ELIF no_check_cross +]
+.PHONY: check-[+module+]
 # This module is only tested in a native toolchain.
 check-[+module+]:
 	@if [ '$(host_canonical)' = '$(target_canonical)' ] ; then \
@@ -991,6 +957,7 @@ check-[+module+]:
 	    ENDIF with_x +] check); \
 	fi
 [+ ELSE check +]
+.PHONY: check-[+module+]
 check-[+module+]:
 	@r=`${PWD}`; export r; \
 	s=`cd $(srcdir); ${PWD}`; export s; \
@@ -1001,11 +968,13 @@ check-[+module+]:
 	  ENDIF with_x +] check)
 [+ ENDIF no_check +]
 
+[+ IF no_install +]
 .PHONY: install-[+module+] maybe-install-[+module+]
 maybe-install-[+module+]:
-[+ IF no_install +]
 install-[+module+]:
 [+ ELSE install +]
+.PHONY: install-[+module+] maybe-install-[+module+]
+maybe-install-[+module+]:
 install-[+module+]: installdirs
 	@r=`${PWD}`; export r; \
 	s=`cd $(srcdir); ${PWD}`; export s; \
@@ -1110,13 +1079,12 @@ all-target-[+module+]: configure-target-[+module+]
 	  +] 'CXX=$$(RAW_CXX_FOR_TARGET)' 'CXX_FOR_TARGET=$$(RAW_CXX_FOR_TARGET)' [+ 
 	    ENDIF raw_cxx 
 	  +] all)
-
-.PHONY: check-target-[+module+] maybe-check-target-[+module+]
-maybe-check-target-[+module+]:
 [+ IF no_check +]
 # Dummy target for uncheckable module.
+.PHONY: check-target-[+module+]
 check-target-[+module+]:
 [+ ELSE check +]
+.PHONY: check-target-[+module+]
 check-target-[+module+]:
 	@r=`${PWD}`; export r; \
 	s=`cd $(srcdir); ${PWD}`; export s; \
@@ -1128,13 +1096,14 @@ check-target-[+module+]:
 	    ENDIF raw_cxx 
 	  +] check)
 [+ ENDIF no_check +]
-
+[+ IF no_install +]
 .PHONY: install-target-[+module+] maybe-install-target-[+module+]
 maybe-install-target-[+module+]:
-[+ IF no_install +]
 # Dummy target for uninstallable.
 install-target-[+module+]:
 [+ ELSE install +]
+.PHONY: install-target-[+module+] maybe-install-target-[+module+]
+maybe-install-target-[+module+]:
 install-target-[+module+]: installdirs
 	@r=`${PWD}`; export r; \
 	s=`cd $(srcdir); ${PWD}`; export s; \

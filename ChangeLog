@@ -1,29 +1,3 @@
-2003-05-20  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
-
-	* configure.in: Use curly braces in the definition of tooldir.
-	* configure: Regenerate.
-
-2003-05-19  Nathanael Nerode  <neroden@gcc.gnu.org>
-
-	* configure.in: Switch more things to use maybe dependencies.
-	* Makefile.tpl: Switch more things to use maybe dependencies.  
-	Factor out common code from autogen IF statements.
-	* configure: Regenerate.
-	* Makefile.in: Regenerate.
-
-2003-05-14  Kelley Cook  <kelleycook@wideopenwest.com>
-
-	* configure.in: Accept i[3456789]86 for machine type.
-	* configure: Regenerate.
-
-2003-05-18  Nathanael Nerode  <neroden@gcc.gnu.org>
-
-	* configure.in: Switch more things to use maybe dependencies.
-	Rearrange a little.  Use GCC_TOPLEV_SUBDIRS.
-	* configure: Regenerate.
-	* Makefile.tpl: Switch more things to use maybe dependencies.
-	* Makefile.in: Regenerate.
-
 2003-05-16  Andreas Schwab  <schwab@suse.de>
 
 	* Makefile.tpl (install-opcodes): Define.

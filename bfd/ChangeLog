@@ -1,58 +1,3 @@
-2003-05-21  Marcus Comstedt  <marcus@mc.pp.se>
-
-	* config.bfd: Check for a target triplet of shl-...-netbsdelf as
-	well as shle-...-netbsdelf.  Remove duplicate entry.
-
-2003-05-21  Nick Clifton  <nickc@redhat.com>
-
-	* elf32-xstormy16.c (xstormy16_elf_howto_table): Fix dst_mask
-	for X_STORMY16_REL_12 reloc.
-
-	* elf.c (bfd_elf_get_needed_list): Use is_elf_hash_table to check
-	the type of the has table in the bfd_link_info structure.
-	(bfd_elf_get_runpath_list): Likewise.
-
-2003-05-19  Roland McGrath  <roland@redhat.com>
-
-	* elf.c (bfd_elf_bfd_from_remote_memory): New function.
-	* bfd-in.h: Declare it.
-	* bfd-in2.h: Regenerated.
-	* elfcode.h (NAME(_bfd_elf,bfd_from_remote_memory)): New function.
-	* elf-bfd.h (struct elf_backend_data): New function pointer member
-	elf_backend_bfd_from_remote_memory.
-	(_bfd_elf32_bfd_from_remote_memory, _bfd_elf64_bfd_from_remote_memory):
-	Declare them.
-	* elfxx-target.h (elf_backend_bfd_from_remote_memory): New macro.
-	(elfNN_bed): Add that to the initializer.
-
-2003-05-15  Roland McGrath  <roland@redhat.com>
-
-	* elf.c (elfcore_grok_note): Grok NT_AUXV note, make ".auxv" section.
-
-2003-05-20  Jakub Jelinek  <jakub@redhat.com>
-
-	* elflink.h (elf_link_output_extsym): Only issue error about !=
-	STV_DEFAULT symbols if they are bfd_link_hash_undefined.
-
-2003-05-20  H.J. Lu <hongjiu.lu@intel.com>
-
-	* elflink.c (_bfd_elf_merge_symbol): Check ELF_LINK_DYNAMIC_DEF
-	when removing the old definition for symbols with non-default
-	visibility.
-
-2003-05-18  Jason Eckhardt  <jle@rice.edu>
-
-	* elf32-i860.c (elf32_i860_relocate_highadj): Simplify calculation.
-
-2003-05-17  Andreas Schwab  <schwab@suse.de>
-
-	* elf32-m68k.c (elf_m68k_check_relocs): Cache reloc section in
-	elf_section_data during processing of pc-relative and absolute
-	relocations.
-	(elf_m68k_relocate_section): Use the cached reloc section instead
-	of computing it again.  Fix handling of visibility.  Don't modify
-	addend when copying over a relocation into the output.
-
 2003-05-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Use SYMBOL_CALLS_LOCAL
@@ -367,7 +312,7 @@
 	(elf_i386_relocate_section): Initialize the GOT entries and
 	skip R_386_32/R_386_PC32 for weak undefined symbols with
 	non-default visibility.
-
+ 
 	* elfxx-ia64.c (allocate_fptr): Don't allocate function
 	descriptors for weak undefined symbols with non-default
 	visibility.
