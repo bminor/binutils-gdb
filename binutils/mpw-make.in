@@ -37,7 +37,7 @@ prefix = :usr:local
 
 program_transform_name =
 exec_prefix = {prefix}
-bindir = {exec_prefix}:bin
+bindir = {exec_prefix}bin:
 libdir = {exec_prefix}:lib
 tooldir = {exec_prefix}:{target_alias}
 
@@ -459,20 +459,17 @@ TAGS \Option-f  force
 	etags {INCDIR}:\Option-x.h "{srcdir}"\Option-x.[hc] 
 
 install \Option-f  all
-	for i in {PROGS} ; do \Option-d
-	  {INSTALL_XFORM} $$i {bindir}:$$i ; \Option-d
-	done
-	for i in {MANPAGES} ; do \Option-d
-	  {INSTALL_XFORM1} "{srcdir}"$$i.1 {man1dir}:$$i.1 ; \Option-d
-	done
-	if [ -d {tooldir} ]; then \Option-d
-	   if [ -d {tooldir}:bin ] ; then true ; else mkdir {tooldir}:bin ; fi; \Option-d
-	   for i in nm strip ar ranlib; do \Option-d
-	     Delete -y {tooldir}:bin:$$i; \Option-d
-	     # ln {bindir}:`t='{program_transform_name}'; echo $$i | sed -e "" $$t` {tooldir}:bin:$$i \Option-d
-	      || {INSTALL_PROGRAM} $$i {tooldir}:bin:$$i; \Option-d
-	   done; \Option-d
-	 else true; fi		
+	If "`Exists "{prefix}"`" == ""
+		Echo "{prefix}" does not exist, cannot install anything
+		Exit 1
+	End If
+	If "`Exists "{bindir}"`" == ""
+		NewFolder "{bindir}"
+	End If
+	# Need to copy all the tools
+	For prog in {PROGS}
+		Duplicate -y :{prog} "{bindir}"{prog}
+	End For
 
 # Use binutils.info as the target so that VPATH will DTRT.
 # (Use "$<\Option-x" in case the output is multiple files, though.)
