@@ -4790,8 +4790,11 @@ process_abbrev_section (start, end)
       entry = read_leb128 (start, & bytes_read, 0);
       start += bytes_read;
 
+      /* A single zero is supposed to end the section according
+	 to the standard.  If there's more, then signal that to
+	 the caller.  */
       if (entry == 0)
-	return start;
+	return start == end ? NULL : start;
 
       tag = read_leb128 (start, & bytes_read, 0);
       start += bytes_read;

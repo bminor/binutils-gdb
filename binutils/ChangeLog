@@ -1,3 +1,8 @@
+Thu Jul 15 22:44:21 1999  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* readelf.c (process_abbrev_section): Handle standard-conforming
+	single zero at the end of the section.
+
 1999-08-09  Ian Lance Taylor  <ian@zembu.com>
 
 	* objdump.c (exit_status): New static variable.
