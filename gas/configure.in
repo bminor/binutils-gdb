@@ -220,7 +220,6 @@ changequote([,])dnl
       arm-*-netbsdelf*)                 fmt=elf  em=nbsd ;;
       arm-*-*n*bsd*)			fmt=aout em=nbsd ;;
       arm-**-nto*)			fmt=elf ;;
-      arm-*-oabi | thumb-*-oabi)	fmt=elf ;;
       arm-epoc-pe | thumb-epoc-pe)	fmt=coff em=epoc-pe ;;
       arm-wince-pe | arm-*-wince)       fmt=coff em=wince-pe ;;
       arm-*-pe | thumb-*-pe)		fmt=coff em=pe ;;

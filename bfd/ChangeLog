@@ -1,3 +1,22 @@
+2004-11-04  Daniel Jacobowitz  <dan@debian.org>
+
+	* Makefile.am (BFD32_BACKENDS, BFD32_BACKENDS_CFILES): Replace
+	elfarm-nabi with elf32-arm.  Remove elfarm-oabi.
+	(elf32-arm.lo): Replace elfarm-nabi.lo rule.  Remove elf32-arm.h
+	dependency.
+	* config.bfd: Move arm-*-oabi* and thumb-*-oabi* from obsolete list
+	to a new removed list.  Remove normal configuration stanzas.
+	* configure.in: (bfd_elf32_bigarm_vec, bfd_elf32_bigarm_symbian_vec)
+	(bfd_elf32_littlearm_symbian_vec, bfd_elf32_littlearm_vec): Replace
+	elfarm-nabi.lo with elf32-arm.lo.
+	(bfd_elf32_bigarm_oabi_vec, bfd_elf32_littlearm_oabi_vec): Remove.
+	* elf32-arm.c: Renamed from elfarm-nabi.c.  Inline elf32-arm.h.
+	* elf32-arm.h: Remove.
+	* elfarm-oabi.c: Remove.
+	* targets.c (_bfd_target_vector): Remove bfd_elf32_bigarm_oabi_vec
+	and bfd_elf32_littlearm_oabi_vec.
+	* aclocal.m4, Makefile.in, configure, doc/Makefile.in: Regenerated.
+
 2004-11-04  Hans-Peter Nilsson  <hp@axis.com>
 
 	* config.bfd: Support crisv32-*-* like cris-*-*.

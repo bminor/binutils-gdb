@@ -534,7 +534,6 @@ extern const bfd_target bfd_efi_app_ia64_vec;
 extern const bfd_target bfd_elf32_avr_vec;
 extern const bfd_target bfd_elf32_big_generic_vec;
 extern const bfd_target bfd_elf32_bigarc_vec;
-extern const bfd_target bfd_elf32_bigarm_oabi_vec;
 extern const bfd_target bfd_elf32_bigarm_vec;
 extern const bfd_target bfd_elf32_bigarm_symbian_vec;
 extern const bfd_target bfd_elf32_bigmips_vec;
@@ -563,7 +562,6 @@ extern const bfd_target bfd_elf32_ip2k_vec;
 extern const bfd_target bfd_elf32_iq2000_vec;
 extern const bfd_target bfd_elf32_little_generic_vec;
 extern const bfd_target bfd_elf32_littlearc_vec;
-extern const bfd_target bfd_elf32_littlearm_oabi_vec;
 extern const bfd_target bfd_elf32_littlearm_vec;
 extern const bfd_target bfd_elf32_littlearm_symbian_vec;
 extern const bfd_target bfd_elf32_littlemips_vec;
@@ -832,7 +830,6 @@ static const bfd_target * const _bfd_target_vector[] = {
 	   the file even if we don't recognize the machine type.  */
 	&bfd_elf32_big_generic_vec,
 	&bfd_elf32_bigarc_vec,
-	&bfd_elf32_bigarm_oabi_vec,
 	&bfd_elf32_bigarm_vec,
 	&bfd_elf32_bigarm_symbian_vec,
 	&bfd_elf32_bigmips_vec,
@@ -863,7 +860,6 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_iq2000_vec,
 	&bfd_elf32_little_generic_vec,
 	&bfd_elf32_littlearc_vec,
-	&bfd_elf32_littlearm_oabi_vec,
 	&bfd_elf32_littlearm_vec,
 	&bfd_elf32_littlearm_symbian_vec,
 	&bfd_elf32_littlemips_vec,

@@ -1,3 +1,11 @@
+2004-11-04  Daniel Jacobowitz  <dan@debian.org>
+
+	* Makefile.am (ALL_EMULATIONS): Remove earmelf_oabi.o.
+	(earmelf_oabi.c): Remove rule.
+	* configure.tgt: Remove arm-*-oabi and thumb-*-oabi.
+	* emulparams/armelf_oabi.sh, emultempl/armelf_oabi.em: Delete files.
+	* Makefile.in: Regenerated.
+
 2004-11-04  Hans-Peter Nilsson  <hp@axis.com>
 
 	* configure.tgt (crisv32-*-*): Handle like cris-*-* for non-aout.

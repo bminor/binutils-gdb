@@ -261,13 +261,6 @@ be marked as being encoded for a little-endian processor.
 This option specifies that the output of the assembler should be marked
 as position-independent code (PIC).
 
-@cindex @code{-moabi} command line option, ARM
-@item -moabi
-This indicates that the code should be assembled using the old ARM ELF
-conventions, based on a beta release release of the ARM-ELF
-specifications, rather than the default conventions which are based on
-the final release of the ARM-ELF specifications.
-
 @end table
 
 

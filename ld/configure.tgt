@@ -261,7 +261,6 @@ arm-*-elf | arm-*-vxworks | arm*-*-eabi*)
 arm*-*-symbianelf*)     targ_emul=armsymbian;;
 arm-*-kaos*)		targ_emul=armelf ;;
 arm9e-*-elf)		targ_emul=armelf ;;
-arm-*-oabi)		targ_emul=armelf_oabi ;;
 arm*b-*-linux-gnu*)	targ_emul=armelfb_linux; targ_extra_emuls=armelfb ;;
 arm*-*-linux-gnu*)	targ_emul=armelf_linux; targ_extra_emuls=armelf ;;
 arm*-*-uclinux*)	targ_emul=armelf_linux; targ_extra_emuls=armelf ;;
@@ -272,7 +271,6 @@ strongarm-*-elf)	targ_emul=armelf ;;
 strongarm-*-kaos*)	targ_emul=armelf ;;
 thumb-*-coff)		targ_emul=armcoff ;;
 thumb-*-elf)		targ_emul=armelf ;;
-thumb-*-oabi)           targ_emul=armelf_oabi ;;
 thumb-epoc-pe)		targ_emul=arm_epoc_pe ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 thumb-*-pe)		targ_emul=armpe ;

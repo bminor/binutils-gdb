@@ -268,7 +268,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-EB}|@b{-EL}]
    [@b{-mapcs-32}|@b{-mapcs-26}|@b{-mapcs-float}|
     @b{-mapcs-reentrant}]
-   [@b{-mthumb-interwork}] [@b{-moabi}] [@b{-k}]
+   [@b{-mthumb-interwork}] [@b{-k}]
 @end ifset
 @ifset CRIS
 
@@ -615,7 +615,7 @@ Select which Floating Point architecture is the target.
 Select which floating point ABI is in use.
 @item -mthumb
 Enable Thumb only instruction decoding.
-@item -mapcs-32 | -mapcs-26 | -mapcs-float | -mapcs-reentrant | -moabi
+@item -mapcs-32 | -mapcs-26 | -mapcs-float | -mapcs-reentrant
 Select which procedure calling convention is in use.
 @item -EB | -EL
 Select either big-endian (-EB) or little-endian (-EL) output.

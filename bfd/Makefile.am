@@ -217,8 +217,7 @@ BFD32_BACKENDS = \
 	elf.lo \
 	elf32-am33lin.lo \
 	elf32-arc.lo \
-	elfarm-oabi.lo \
-	elfarm-nabi.lo \
+	elf32-arm.lo \
 	elf32-avr.lo \
 	elf32-cr16c.lo \
 	elf32-cris.lo \
@@ -386,8 +385,7 @@ BFD32_BACKENDS_CFILES = \
 	elf.c \
 	elf32-am33lin.c \
 	elf32-arc.c \
-	elfarm-oabi.c \
-	elfarm-nabi.c \
+	elf32-arm.c \
 	elf32-avr.c \
 	elf32-cr16c.c \
 	elf32-cris.c \
@@ -1154,14 +1152,10 @@ elf32-arc.lo: elf32-arc.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/arc.h $(INCDIR)/elf/reloc-macros.h \
   $(INCDIR)/libiberty.h elf32-target.h
-elfarm-oabi.lo: elfarm-oabi.c $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h \
+elf32-arm.lo: elf32-arm.c $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h \
   $(INCDIR)/filenames.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
-  elf32-arm.h elf32-target.h
-elfarm-nabi.lo: elfarm-nabi.c $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h \
-  $(INCDIR)/filenames.h elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
-  elf32-arm.h elf32-target.h
+  elf32-target.h
 elf32-avr.lo: elf32-avr.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/avr.h $(INCDIR)/elf/reloc-macros.h \

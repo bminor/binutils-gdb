@@ -34,8 +34,6 @@ case $targ in
  m68*-*-lynxos* | \
  sparc-*-lynxos* | \
  vax-*-vms* | \
- arm-*-oabi | \
- thumb-*-oabi | \
  null)
     if test "x$enable_obsolete" != xyes; then
       echo "*** Configuration $targ is obsolete." >&2
@@ -46,6 +44,15 @@ case $targ in
     fi;;
 esac
 
+case $targ in
+ arm-*-oabi | \
+ thumb-*-oabi | \
+ null)
+    echo "*** Configuration $targ is obsolete." >&2
+    echo "*** Support has been REMOVED." >&2
+    exit 1
+    ;;
+esac
 
 targ_cpu=`echo $targ | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
 case "${targ_cpu}" in
@@ -241,19 +248,11 @@ case "${targ}" in
     targ_defvec=bfd_elf32_littlearm_vec
     targ_selvecs=bfd_elf32_bigarm_vec
     ;;
-  arm-*-oabi)
-    targ_defvec=bfd_elf32_littlearm_oabi_vec
-    targ_selvecs=bfd_elf32_bigarm_oabi_vec
-    ;;
 
   thumb-*-coff)
     targ_defvec=armcoff_little_vec
     targ_selvecs=armcoff_big_vec
     targ_underscore=yes
-    ;;
-  thumb-*-oabi)
-    targ_defvec=bfd_elf32_littlearm_oabi_vec
-    targ_selvecs=bfd_elf32_bigarm_oabi_vec
     ;;
   thumb-*-elf)
     targ_defvec=bfd_elf32_littlearm_vec

@@ -1,3 +1,13 @@
+2004-11-04  Daniel Jacobowitz  <dan@debian.org>
+
+	* configure.in: Remove arm-*-oabi and thumb-*-oabi.
+	* config/tc-arm.c (target_oabi): Delete.
+	(md_apply_fix3, elf32_arm_target_format): Remove target_oabi checks.
+	(arm_opts): Remove moabi.
+	* doc/as.texinfo (Overview): Remove documentation of -moabi.
+	* doc/c-arm.texi (ARM Options): Likewise.
+	* configure: Regenerated.
+
 2004-11-04  Hans-Peter Nilsson  <hp@axis.com>
 
 	* configure.in (crisv32): Recognize.  AC_DEFINE_UNQUOTED

@@ -137,7 +137,6 @@ enum arm_float_abi
 #define skip_whitespace(str)  while (*(str) == ' ') ++(str)
 
 static unsigned long cpu_variant;
-static int target_oabi = 0;
 
 /* Flags stored in private area of BFD structure.  */
 static int uses_apcs_26      = FALSE;
@@ -11499,15 +11498,7 @@ md_apply_fix3 (fixS *   fixP,
       if (fixP->fx_addsy != NULL
 	  && S_IS_DEFINED (fixP->fx_addsy)
 	  && S_GET_SEGMENT (fixP->fx_addsy) != seg)
-	{
-	  if (target_oabi
-	      && (fixP->fx_r_type == BFD_RELOC_ARM_PCREL_BRANCH
-		  || fixP->fx_r_type == BFD_RELOC_ARM_PCREL_BLX
-		  ))
-	    value = 0;
-	  else
-	    value += md_pcrel_from (fixP);
-	}
+	value += md_pcrel_from (fixP);
     }
 
   /* Remember value for emit_reloc.  */
@@ -11726,8 +11717,7 @@ md_apply_fix3 (fixS *   fixP,
 #define SEXT24(x)	((((x) & 0xffffff) ^ (~ 0x7fffff)) + 0x800000)
 
 #ifdef OBJ_ELF
-      if (! target_oabi)
-	value = fixP->fx_offset;
+      value = fixP->fx_offset;
 #endif
 
       /* We are going to store value (shifted right by two) in the
@@ -11745,11 +11735,9 @@ md_apply_fix3 (fixS *   fixP,
 	     branch instruction itself, then we can compute the relocation for
 	     ourselves and not have to bother the linker with it.
 
-	     FIXME: The tests for OBJ_ELF and ! target_oabi are only here
-	     because I have not worked out how to do this for OBJ_COFF or
-	     target_oabi.  */
-	  if (! target_oabi
-	      && fixP->fx_addsy != NULL
+	     FIXME: The test for OBJ_ELF is only here because I have not
+	     worked out how to do this for OBJ_COFF.  */
+	  if (fixP->fx_addsy != NULL
 	      && S_IS_DEFINED (fixP->fx_addsy)
 	      && S_GET_SEGMENT (fixP->fx_addsy) == seg)
 	    {
@@ -11788,8 +11776,7 @@ md_apply_fix3 (fixS *   fixP,
 	newval = md_chars_to_number (buf, INSN_SIZE);
 
 #ifdef OBJ_ELF
-	if (! target_oabi)
-	  value = fixP->fx_offset;
+	value = fixP->fx_offset;
 #endif
 	hbit   = (value >> 1) & 1;
 	value  = (value >> 2) & 0x00ffffff;
@@ -11868,7 +11855,7 @@ md_apply_fix3 (fixS *   fixP,
       if (fixP->fx_done || fixP->fx_pcrel)
 	md_number_to_chars (buf, value, 1);
 #ifdef OBJ_ELF
-      else if (!target_oabi)
+      else
 	{
 	  value = fixP->fx_offset;
 	  md_number_to_chars (buf, value, 1);
@@ -11880,7 +11867,7 @@ md_apply_fix3 (fixS *   fixP,
       if (fixP->fx_done || fixP->fx_pcrel)
 	md_number_to_chars (buf, value, 2);
 #ifdef OBJ_ELF
-      else if (!target_oabi)
+      else
 	{
 	  value = fixP->fx_offset;
 	  md_number_to_chars (buf, value, 2);
@@ -11905,7 +11892,7 @@ md_apply_fix3 (fixS *   fixP,
       if (fixP->fx_done || fixP->fx_pcrel)
 	md_number_to_chars (buf, value, 4);
 #ifdef OBJ_ELF
-      else if (!target_oabi)
+      else
 	{
 	  value = fixP->fx_offset;
 	  md_number_to_chars (buf, value, 4);
@@ -12576,7 +12563,6 @@ struct arm_option_table arm_opts[] =
   {"mthumb", N_("assemble Thumb code"),    &thumb_mode,  1, NULL},
   {"mthumb-interwork", N_("support ARM/Thumb interworking"),
    &support_interwork, 1, NULL},
-  {"moabi",  N_("use old ABI (ELF only)"), &target_oabi, 1, NULL},
   {"mapcs-32", N_("code uses 32-bit program counter"), &uses_apcs_26, 0, NULL},
   {"mapcs-26", N_("code uses 26-bit program counter"), &uses_apcs_26, 1, NULL},
   {"mapcs-float", N_("floating point args are in fp regs"), &uses_apcs_float,
@@ -13520,19 +13506,9 @@ elf32_arm_target_format (void)
 	  : "elf32-littlearm-symbian");
 #else
   if (target_big_endian)
-    {
-      if (target_oabi)
-	return "elf32-bigarm-oabi";
-      else
-	return "elf32-bigarm";
-    }
+    return "elf32-bigarm";
   else
-    {
-      if (target_oabi)
-	return "elf32-littlearm-oabi";
-      else
-	return "elf32-littlearm";
-    }
+    return "elf32-littlearm";
 #endif
 }
 
