@@ -1,6 +1,10 @@
 Thu Sep 18 11:17:53 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* gas/sparc/splet.d: Update to new objdump output format.
+	* gas/sparc/{asi.d,membar.d,prefetch.d,rdpr.d,wrpr.d}: Likewise.
+	* gas/sparc/set64.[ds]: New testcase.
+	* gas/sparc/splet-2.[ds]: New testcase.
+	* gas/sparc/sparc.exp: Run them.
 
 start-sanitize-d30v
 Tue Sep 16 15:27:08 1997  Ken Raeburn  <raeburn@cygnus.com>
