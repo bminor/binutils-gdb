@@ -1,5 +1,29 @@
 Mon Mar 13 13:48:49 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elfcode.h (write_relocs): Make static.  Use PTR argument as a
+	pointer to a boolean variable set to true if something fails.
+	Cast to PTR rather than void *.
+	(sym_is_global): Rewrite for clarity.
+	(map_program_segments): If the program header size is too small,
+	call _bfd_error_handler and return failure rather than aborting.
+	(NAME(bfd_elf,write_object_contents)): Pass boolean variable when
+	calling write_relocs.
+	(elf_symbol_from_bfd_symbol): Use BFD_ASSERT rather than abort.
+	(struct elf_info_failed): Define.
+	(NAME(bfd_elf,size_dynamic_sections)): Declare variables in inner
+	blocks.  Pass elf_info_failed structure when calling
+	elf_export_symbol and elf_adjust_dynamic_symbol.
+	(elf_export_symbol): Treat data argument as elf_info_failed rather
+	than bfd_link_info.  Set failed field on error.
+	(elf_adjust_dynamic_symbol): Likewise.
+	(struct elf_finfo_failed): Define.
+	(elf_bfd_final_link): Pass elf_finfo_failed structure when calling
+	elf_link_output_extsym.  Use BFD_ASSERT rather than abort.
+	(elf_link_output_extsym): Treat data argument as elf_finfo_failed
+	rather than elf_final_link_info.  Set failed field on error.
+	(elf_link_input_bfd): Use BFD_ASSERT rather than abort.
+	(elf_reloc_link_order): Likewise.
+
 	* elf32-sparc.c (elf32_sparc_size_dynamic_sections): Only write
 	out PLTRELSZ, PLTREL and JMPREL relocs if there is a .rela.plt
 	section.  Solaris 2.4 apparently does not handle empty reloc
