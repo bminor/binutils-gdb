@@ -1,3 +1,12 @@
+2000-07-27  H.J. Lu  <hjl@gnu.org>
+
+	* emulparams/elf64alpha.sh (PARSE_AND_LIST_ARGS): Removed.
+	(PARSE_AND_LIST_PROLOGUE): New.
+	(PARSE_AND_LIST_LONGOPTS): Likewise.
+	(PARSE_AND_LIST_OPTIONS): Likewise.
+	(PARSE_AND_LIST_ARGS_CASES): Likewise.
+	(PARSE_AND_LIST_EPILOGUE): Likewise.
+
 2000-07-28  Alan Modra  <alan@linuxcare.com.au>
 
 	* emultempl/armelf.em: Elide functions common to elf32.em,
