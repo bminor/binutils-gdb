@@ -1,5 +1,12 @@
 2003-09-06  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* elf32-m68hc1x.h (struct m68hc11_elf_link_hash_table): Remove
+	all_local_syms member.
+	* elf32-m68hc1x.c (elf32_m68hc11_size_stubs): Use bfd_elf_get_elf_syms
+	to get the local symbols.
+
+2003-09-06  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* elf32-m68hc12.c (elf32_m68hc12_special_sections): New for hc11.
 	(elf_backend_special_sections): Define.a
 
