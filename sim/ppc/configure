@@ -4675,7 +4675,7 @@ echo $ac_n "checking for common simulator directory fpu implementation""... $ac_
 echo "configure:4676: checking for common simulator directory fpu implementation" >&5
 if test -f "${srcdir}/../common/sim-fpu.c"; then
   echo "$ac_t""yes" 1>&6
-  sim_fpu_cflags="-DHAVE_COMMON_FPU -I${srcdir}/../common"
+  sim_fpu_cflags="-DHAVE_COMMON_FPU -I../common -I${srcdir}/../common"
   sim_fpu="sim-fpu.o"
 else
   echo "$ac_t""no" 1>&6
