@@ -1,3 +1,8 @@
+Thu Jan 16 00:51:46 1992  Fred Fish  (fnf at cygnus.com)
+
+	* dbxread.c (process_one_symbol):  Pass address of structure
+	to complain(), rather than the whole structure.
+
 Wed Jan 15 09:56:16 1992  Fred Fish  (fnf at cygnus.com)
 
 	* solib.c (solib_add_common_symbols):  Only compile in when not
