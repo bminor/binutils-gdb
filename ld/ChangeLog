@@ -1,3 +1,7 @@
+2003-01-03  Charles Wilson  <cwilson@ece.gatech.edu>
+
+	* ld/pe-dll.c (autofilter_symbollist): Add cygwin_crt0.
+
 2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.am (ldmain.o): Pass BINDIR.

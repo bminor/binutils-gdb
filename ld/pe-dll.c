@@ -225,6 +225,7 @@ static autofilter_entry_type autofilter_symbollist[] =
   { "impure_ptr", 10 },
   { "_pei386_runtime_relocator", 25 },
   { "do_pseudo_reloc", 15 },
+  { "cygwin_crt0", 11 },
   { NULL, 0 }
 };
 
