@@ -1,3 +1,9 @@
+2004-11-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* inf-ptrace.c: Don't include "regcache.h" and "gdbcmd.h".
+	Reorder includes a bit.  Fix comment.
+	* Makefile.in (inf-ptrace.o): Update dependencies.
+
 2004-11-21  Andreas Schwab  <schwab@suse.de>
 
 	* m68klinux-tdep.c: Include "glibc-tdep.h" and "solib-svr4.h".

@@ -2082,9 +2082,9 @@ inf-loop.o: inf-loop.c $(defs_h) $(inferior_h) $(target_h) $(event_loop_h) \
 inflow.o: inflow.c $(defs_h) $(frame_h) $(inferior_h) $(command_h) \
 	$(serial_h) $(terminal_h) $(target_h) $(gdbthread_h) $(gdb_string_h) \
 	$(inflow_h)
-inf-ptrace.o: inf-ptrace.c $(defs_h) $(observer_h) $(gdb_ptrace_h) \
-	$(inflow_h) $(inferior_h) $(regcache_h) $(command_h) $(gdbcore_h) \
-	$(inf_child_h) $(gdbcmd_h) $(gdb_string_h) $(gdb_wait_h)
+inf-ptrace.o: inf-ptrace.c $(defs_h) $(command_h) $(inferior_h) $(inflow_h) \
+	$(gdbcore_h) $(observer_h) $(gdb_string_h) $(gdb_ptrace_h) \
+	$(gdb_wait_h) $(inf_child_h)
 infptrace.o: infptrace.c $(defs_h) $(command_h) $(frame_h) $(gdbcore_h) \
 	$(inferior_h) $(regcache_h) $(target_h) $(gdb_assert_h) \
 	$(gdb_wait_h) $(gdb_string_h) $(gdb_dirent_h) $(gdb_ptrace_h)

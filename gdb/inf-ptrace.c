@@ -1,4 +1,4 @@
-/* Low level Unix child interface to ptrace, for GDB when running under Unix.
+/* Low-level child interface to ptrace.
 
    Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
    1998, 1999, 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
@@ -21,21 +21,20 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "observer.h"
-#include "gdb_ptrace.h"
-#include "inflow.h"
-#include "inferior.h"
-#include "regcache.h"
 #include "command.h"
+#include "inferior.h"
+#include "inflow.h"
 #include "gdbcore.h"
-#include "inf-child.h"
-#include "gdbcmd.h"
-#include "gdb_string.h"
+#include "observer.h"
 
+#include "gdb_string.h"
+#include "gdb_ptrace.h"
 #include "gdb_wait.h"
 #include <signal.h>
 
-/* HACK: Save the ptrace ops returned by ptrace_target.  */
+#include "inf-child.h"
+
+/* HACK: Save the ptrace ops returned by inf_ptrace_target.  */
 static struct target_ops *ptrace_ops_hack;
 
 static void
