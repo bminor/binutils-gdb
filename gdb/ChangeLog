@@ -1,3 +1,10 @@
+2001-05-14  Michael Snyder  <msnyder@redhat.com>
+
+	* remote.c (hex2bin): 	Make first argument const.
+	Require explicit count, don't accept null-terminated str.
+	(remote_resume, remote_async_resume): White space fix-up.
+	(remote_write_bytes): Set nr_bytes to return value of bin2hex.
+
 2001-05-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* symtab.c (lookup_symtab_1): Use lbasename (NAME) instead of
@@ -9,8 +16,6 @@
 2001-05-14  Michael Snyder  <msnyder@redhat.com>
 
 	* solib.c, solib.h: Add comment for function no_shared_libraries.
-	* remote.c (remote_write_bytes): Set nr_bytes to return value of
-	bin2hex.
 	
 2001-05-14  Kevin Buettner  <kevinb@redhat.com>
 

@@ -190,6 +190,8 @@ static int fromhex (int a);
 
 static int hex2bin (const char *hex, char *bin, int);
 
+static int bin2hex (const char *bin, char *hex, int);
+
 static int putpkt_binary (char *buf, int cnt);
 
 static void check_binary_download (CORE_ADDR addr);
@@ -2346,10 +2348,6 @@ hex2bin (const char *hex, char *bin, int count)
 {
   int i;
 
-  /* May use a length, or a nul-terminated string as input. */
-  if (count == 0)
-    count = strlen (hex) / 2;
-
   for (i = 0; i < count; i++)
     {
       if (hex[0] == 0 || hex[1] == 0)
@@ -2376,7 +2374,7 @@ tohex (int nib)
 }
 
 static int
-bin2hex (char *bin, char *hex, int count)
+bin2hex (const char *bin, char *hex, int count)
 {
   int i;
   /* May use a length, or a nul-terminated string as input. */
@@ -2449,7 +2447,7 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
 	      putpkt (buf);
 	      getpkt (buf, PBUFSIZ, 0);
 
-	      if (packet_ok(buf, &remote_protocol_E) == PACKET_OK)
+	      if (packet_ok (buf, &remote_protocol_E) == PACKET_OK)
 		return;
 	    }
 	}
@@ -2467,7 +2465,7 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
 	      putpkt (buf);
 	      getpkt (buf, PBUFSIZ, 0);
 
-	      if (packet_ok(buf, &remote_protocol_e) == PACKET_OK)
+	      if (packet_ok (buf, &remote_protocol_e) == PACKET_OK)
 		return;
 	    }
 	}
@@ -2537,7 +2535,7 @@ remote_async_resume (ptid_t ptid, int step, enum target_signal siggnal)
 	      putpkt (buf);
 	      getpkt (buf, PBUFSIZ, 0);
 
-	      if (packet_ok(buf, &remote_protocol_E) == PACKET_OK)
+	      if (packet_ok (buf, &remote_protocol_E) == PACKET_OK)
 		goto register_event_loop;
 	    }
 	}
@@ -2555,7 +2553,7 @@ remote_async_resume (ptid_t ptid, int step, enum target_signal siggnal)
 	      putpkt (buf);
 	      getpkt (buf, PBUFSIZ, 0);
 
-	      if (packet_ok(buf, &remote_protocol_e) == PACKET_OK)
+	      if (packet_ok (buf, &remote_protocol_e) == PACKET_OK)
 		goto register_event_loop;
 	    }
 	}
