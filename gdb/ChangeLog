@@ -8,6 +8,10 @@ Wed Jul 16 10:38:03 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 	Solaris thread).  Use procfs_first_available to find a good LWP.
 	(info_solthreads): added a maintenance command to list all 
 	known Solaris threads and their attributes.
+	* mips-tdep.c (mips_do_registers_info): Completely changed the
+	output format to be neat and columnar.  Added the helper funcs
+	do_fp_register_row and do_gp_register_row.  Also small mods to
+	mips_print_register, which is still used to print a single reg.
 
 Mon Jul 14 18:02:53 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
