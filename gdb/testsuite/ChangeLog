@@ -1,3 +1,7 @@
+Fri Jun  4 08:23:57 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* gdb.t11/list.exp: Fixed a couple of typos.
+
 Tue Jun  1 21:28:06 1993  Fred Fish  (fnf@cygnus.com)
 
 	* gdb.t00 (teststrategy.exp):  Remove notice about PR 1823.  Bug
