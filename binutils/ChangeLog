@@ -1,3 +1,7 @@
+Thu Aug 31 19:21:48 1995  Jason Molenda    (crash@phydeaux.cygnus.com)
+
+	* configure.in: match i[3-6]86-*-win32, not just i386-*-win32.
+
 Thu Aug 31 16:30:22 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* dlltool.c (add_indirect): New.

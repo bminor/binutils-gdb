@@ -6,8 +6,6 @@
 srctrigger=ar.c
 srcname="Binutils"
 
-configdirs="testsuite"
-
 # per-host:
 
 . ${srcdir}/../bfd/configure.host
@@ -20,8 +18,8 @@ fi
 # per-target:
 
 # Canonicalize the secondary target names.
-if [ -n "$with_targets" ]; then
-    for targ in `echo $with_targets | sed 's/,/ /g'`
+if [ -n "$enable_targets" ]; then
+    for targ in `echo $enable_targets | sed 's/,/ /g'`
     do
 	result=`$configsub $targ 2>/dev/null`
 	if [ -n "$result" ]; then
@@ -40,23 +38,51 @@ fi
 
 all_targets=false
 build_nlmconv=false
+nlmconv_defs=
 build_srconv=false
+build_dlltool=false
+dlltool_defs=
 
 for targ in $target $canon_targets
 do
-    bfd_target=`$srcdir/../bfd/config.bfd $targ`
+    bfd_target=`${config_shell} $srcdir/../bfd/config.bfd $targ`
 
     if [ "x$bfd_target" = "xall" ]; then
         all_targets=true
 	build_nlmconv=true
 	build_srconv=true
+	nlmconv_defs="-DNLMCONV_I386 -DNLMCONV_ALPHA -DNLMCONV_POWERPC -DNLMCONV_SPARC"
     else
 	case $targ in
-	*-*-netware*) build_nlmconv=true ;;
+	i[345]86*-*-netware*) 
+	  build_nlmconv=true 
+	  nlmconv_defs="$nlmconv_defs -DNLMCONV_I386"
+	  ;;
+	alpha*-*-netware*)
+	  build_nlmconv=true
+	  nlmconv_defs="$nlmconv_defs -DNLMCONV_ALPHA"
+	  ;;
+	powerpc*-*-netware*)
+	  build_nlmconv=true
+	  nlmconv_defs="$nlmconv_defs -DNLMCONV_POWERPC"
+	  ;;
+	sparc*-*-netware*)
+	  build_nlmconv=true
+	  nlmconv_defs="$nlmconv_defs -DNLMCONV_SPARC"
+	  ;;
 	esac
-
 	case $targ in
 	*-*-hms*) build_srconv=true ;;
+	esac
+	case $targ in
+	arm-*pe*)
+  	  build_dlltool=true;
+	  dlltool_defs="$dlltool_defs -DDLLTOOL_ARM"
+	 ;;
+	i[3-6]86-*pe* | i[3-6]86-*-win32)
+  	  build_dlltool=true;
+	  dlltool_defs="$dlltool_defs -DDLLTOOL_I386"
+	 ;;
 	esac
     fi
 done
@@ -70,13 +96,19 @@ mv Makefile Makefile.tmp
 
 if [ "x${build_nlmconv}" = "xtrue" ]; then
     echo 'BUILD_NLMCONV = $(NLMCONV_PROG)' >> Makefile.2
+    echo "NLMCONV_DEFS = ${nlmconv_defs}" >> Makefile.2
 fi
 
 if [ "x${build_srconv}" = "xtrue" ]; then
     echo 'BUILD_SRCONV = $(SRCONV_PROG)' >> Makefile.2
 fi
 
-if [ "x`$srcdir/../bfd/config.bfd $target _`" = "xyes" ]; then
+if [ "x${build_dlltool}" = "xtrue" ]; then
+    echo 'BUILD_DLLTOOL = $(DLLTOOL_PROG)' >> Makefile.2
+    echo "DLLTOOL_DEFS = ${dlltool_defs}" >> Makefile.2
+fi
+
+if [ "x`${config_shell} $srcdir/../bfd/config.bfd $target _`" = "xyes" ]; then
     underscore=1
 else
     underscore=0
