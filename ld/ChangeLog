@@ -1,5 +1,8 @@
 Thu Nov  9 13:09:29 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ldfile.c (ldfile_try_open_bfd): If bfd_error_invalid_target,
+	report a better error.
+
 	* emultempl/aix.em (gld${EMULATION_NAME}_before_allocation): Add
 	new local variable special_sections, and pass it to
 	size_dynamic_sections.  Look through the results, and move the
