@@ -8,7 +8,7 @@
 TREE	= devo
 include $(TREE)/release-info
 
-TEST_INSTALL_DISK = /taxes
+TEST_INSTALL_DISK = /tug
 
 INSTALLDIR = $(TEST_INSTALL_DISK)/$(TREE)-test/$(RELEASE_TAG)
 
@@ -53,6 +53,9 @@ canonhost := i386-sco3.2v4
 endif
 ifeq ($(canonhost),i386-unknown-go32)
 canonhost := i386-go32
+endif
+ifeq ($(canonhost),i386-unknown-sysv4.2)
+canonhost := i386-sysv4.2
 endif
 ifeq ($(canonhost),i386-lynx-lynxos)
 canonhost := i386-lynxos
@@ -109,7 +112,8 @@ all: all-cygnus
 endif
 
 ifeq ($(canonhost),mips-sgi-irix4)
-TARGETS	= $(NATIVE) sh-hms
+TARGETS	= $(NATIVE) \
+	mips-idt-ecoff	sh-hms
 CC = cc -cckr -Wf,-XNg1500 -Wf,-XNk1000 -Wf,-XNh1500
 all: all-cygnus
 endif
@@ -117,16 +121,16 @@ endif
 ifeq ($(canonhost),rs6000-ibm-aix)
 TARGETS	= $(NATIVE) \
 	i960-vxworks	i960-intel-nindy \
-	m68k-aout	m68k-vxworks \
-	a29k-amd-udi 	\
-	h8300-hms 	h8500-hms \
-	i386-aout	i386-coff \
-	mips-idt-ecoff	\
-	m68k-coff \
-	m88k-coff \
-	sh-hms \
-	sparc-aout	sparc-vxworks	sparclite-aout \
-	z8k-sim		z8k-coff
+	m68k-aout	m68k-vxworks 
+#	a29k-amd-udi 	\
+#	h8300-hms 	h8500-hms \
+#	i386-aout	i386-coff \
+#	mips-idt-ecoff	\
+#	m68k-coff \
+#	m88k-coff \
+#	sh-hms \
+#	sparc-aout	sparc-vxworks	sparclite-aout \
+#	z8k-sim		z8k-coff
 all: all-cygnus
 endif
 
@@ -142,16 +146,16 @@ endif
 ifeq ($(canonhost),hppa1.1-hp-hpux)
 TARGETS = \
 	i960-vxworks \
-	m68k-aout	m68k-vxworks \
-	a29k-amd-udi 	\
-	h8300-hms 	h8500-hms \
-	i386-aout	i386-coff \
-	i960-intel-nindy \
-	mips-idt-ecoff	\
-	m68k-coff \
-	m88k-coff \
-	sparc-aout	sparc-vxworks	sparclite-aout \
-	z8k-coff 
+	m68k-aout	m68k-vxworks 
+#	sparc-aout	sparc-vxworks	sparclite-aout \
+#	z8k-coff \
+#	m88k-coff \
+#	mips-idt-ecoff	\
+#	h8300-hms 	h8500-hms \
+#	i386-aout	i386-coff \
+#	i960-intel-nindy \
+#	m68k-coff \
+#	a29k-amd-udi 	
 #	sh-hms		# doesn't work
 CC = cc 
 #CFLAGS = +Obb2000
@@ -165,7 +169,7 @@ all: all-cygnus
 endif
 
 ifeq ($(canonhost),i386-go32)
-TARGETS = \
+TARGETS = \p
 	a29k-amd-udi \
 	h8300-hms 	h8500-hms \
 	i386-aout \
@@ -182,20 +186,26 @@ all: all-cross
 endif
 
 ifeq ($(canonhost),i386-univel-sysv4.2)
-TARGETS = $(NATIVE) \
-	a29k-amd-udi 	\
-	h8300-hms 	h8500-hms \
-	i386-aout	i386-coff \
-	i960-intel-nindy		i960-vxworks \
-	mips-idt-ecoff	\
-	m68k-aout	m68k-vxworks 	m68k-coff \
-	m88k-coff \
-	sh-hms \
-	sparc-aout	sparc-vxworks	sparclite-aout \
-	z8k-sim		z8k-coff
+TARGETS = $(NATIVE) 
 CC = cc
 all: all-cygnus
 endif
+
+#ifeq ($(canonhost),i386-sysv4.2)
+#TARGETS = $(NATIVE) \
+#	a29k-amd-udi 	\
+#	h8300-hms 	h8500-hms \
+#	i386-aout	i386-coff \
+#	i960-intel-nindy		i960-vxworks \
+#	mips-idt-ecoff	\
+#	m68k-aout	m68k-vxworks 	m68k-coff \
+#	m88k-coff \
+#	sh-hms \
+#	sparc-aout	sparc-vxworks	sparclite-aout \
+#	z8k-sim		z8k-coff
+#CC = cc
+#all: all-cygnus
+#endif
 
 ifeq ($(canonhost),i386-lynxos)
 TARGETS = $(NATIVE)
