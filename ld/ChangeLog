@@ -1,3 +1,7 @@
+2002-08-21  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* ldlang.c (offsetof): Define if not defined.
+
 2002-08-14  H.J. Lu <hjl@gnu.org>
 
 	* configure.tgt: Always enable 64bit emulations for 32bit

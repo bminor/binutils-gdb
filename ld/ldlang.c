@@ -40,6 +40,10 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "fnmatch.h"
 #include "demangle.h"
 
+#ifndef offsetof
+#define offsetof(TYPE,MEMBER) ((size_t)&(((TYPE*)0)->MEMBER))
+#endif
+
 /* FORWARDS */
 static lang_statement_union_type *new_statement
   PARAMS ((enum statement_enum, size_t, lang_statement_list_type *));
