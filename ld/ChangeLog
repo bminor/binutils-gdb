@@ -1,5 +1,8 @@
 1999-08-08  Ian Lance Taylor  <ian@zembu.com>
 
+	* ldlang.c (wild_doit): Update for renaming of SEC_SHORT to
+	SEC_SMALL_DATA.
+
 	* Makefile.am: Rename .dep* files to DEP*.  Change DEP variable to
 	MKDEP.  Rebuild dependencies.
 	* Makefile.in: Rebuild.

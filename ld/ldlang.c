@@ -1108,9 +1108,9 @@ wild_doit (ptr, section, output, file)
 	  break;
 	}
 
-      /* Copy over SEC_SHORT.  */
-      if (section->flags & SEC_SHORT)
-	section->output_section->flags |= SEC_SHORT;
+      /* Copy over SEC_SMALL_DATA.  */
+      if (section->flags & SEC_SMALL_DATA)
+	section->output_section->flags |= SEC_SMALL_DATA;
 
       if (section->alignment_power > output->bfd_section->alignment_power)
 	output->bfd_section->alignment_power = section->alignment_power;
