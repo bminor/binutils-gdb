@@ -37,7 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/user.h>           /* After a.out.h  */
 #include <sys/file.h>
 #include <errno.h>
- 
+
 /* Magic not defined in standard HP-UX header files until 8.0 */
 
 #ifndef CPU_PA_RISC1_0
@@ -317,8 +317,12 @@ hppa_object_p (abfd)
     case EXEC_MAGIC:
     case SHARE_MAGIC:
     case DEMAND_MAGIC:
+#ifdef DL_MAGIC
     case DL_MAGIC:
+#endif
+#ifdef SHL_MAGIC
     case SHL_MAGIC:
+#endif
       break;
     default:
       bfd_error = wrong_format;

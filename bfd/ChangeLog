@@ -2,6 +2,8 @@ Mon Mar  8 14:55:13 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* hppa.c (_PA_RISC_ID): Defined if not already defined (e.g., for
 	hpux 7).  Patch from friedman@gnu.ai.mit.edu.
+	(hppa_object_p): Only check for DL_MAGIC and SHL_MAGIC if they're
+	defined, which they aren't in hpux 7.0.
 
 	* aix386-core.c: Include uinfo.h and coredump.h.  Patch from Minh
 	Tran-Le, tranle@intellicorp.com.
