@@ -21,19 +21,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 
-const bfd_arch_info_type bfd_m68hc11_arch = 
-{					
+const bfd_arch_info_type bfd_m68hc11_arch =
+{
     16,	/* 16 bits in a word */
-    16,	/* 16 bits in an address */	
-    8,	/* 8 bits in a byte */		
+    16,	/* 16 bits in an address */
+    8,	/* 8 bits in a byte */
     bfd_arch_m68hc11,
-    0,		
+    0,
     "m68hc11",
-    "m68hc11",				
-    4, /* section alignment power */	
-    true,				
-    bfd_default_compatible, 		
-    bfd_default_scan,			
-    0,				
+    "m68hc11",
+    4, /* section alignment power */
+    true,
+    bfd_default_compatible,
+    bfd_default_scan,
+    0,
 };
 

@@ -47,7 +47,7 @@ compatible (a,b)
      it can be polymorphed into the other */
   if (a->the_default)
     return b;
-  
+
   if (b->the_default)
     return a;
 
@@ -95,7 +95,7 @@ processors[] =
   { bfd_mach_arm_4,  "strongarm1100" },
 };
 
-static boolean 
+static boolean
 scan (info, string)
      const struct bfd_arch_info * info;
      const char * string;
@@ -119,16 +119,15 @@ scan (info, string)
   /* Finally check for the default architecture */
   if (strcasecmp (string, "arm") == 0)
     return info->the_default;
-  
+
   return false;
 }
-
 
 #define N(number, print, default, next)  \
 {  32, 32, 8, bfd_arch_arm, number, "arm", print, 4, default, compatible, scan, next }
 
 static const bfd_arch_info_type arch_info_struct[] =
-{ 
+{
   N( bfd_mach_arm_2,  "armv2",  false, & arch_info_struct[1] ),
   N( bfd_mach_arm_2a, "armv2a", false, & arch_info_struct[2] ),
   N( bfd_mach_arm_3,  "armv3",  false, & arch_info_struct[3] ),

@@ -32,7 +32,7 @@ const bfd_arch_info_type bfd_i386_arch_intel_syntax =
   "i386:intel",
   3,
   true,
-  bfd_default_compatible, 
+  bfd_default_compatible,
   bfd_default_scan ,
   0,
 };
@@ -47,7 +47,7 @@ static const bfd_arch_info_type i8086_arch =
   "i8086",
   3,
   false,
-  bfd_default_compatible, 
+  bfd_default_compatible,
   bfd_default_scan ,
   &bfd_i386_arch_intel_syntax,
 };
@@ -63,7 +63,7 @@ const bfd_arch_info_type bfd_i386_arch =
   "i386",
   3,
   true,
-  bfd_default_compatible, 
+  bfd_default_compatible,
   bfd_default_scan ,
   &i8086_arch,
 };

@@ -24,11 +24,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #if 0
 
-/* 
+/*
 Relocations for the Z8K
 
 */
-static bfd_reloc_status_type 
+static bfd_reloc_status_type
 howto16_callback (abfd, reloc_entry, symbol_in, data,
 		  ignore_input_section, ignore_bfd)
      bfd *abfd;
@@ -50,8 +50,7 @@ howto16_callback (abfd, reloc_entry, symbol_in, data,
   return bfd_reloc_ok;
 }
 
-
-static bfd_reloc_status_type 
+static bfd_reloc_status_type
 howto8_callback (abfd, reloc_entry, symbol_in, data,
 		 ignore_input_section, ignore_bfd)
      bfd *abfd;
@@ -73,8 +72,7 @@ howto8_callback (abfd, reloc_entry, symbol_in, data,
   return bfd_reloc_ok;
 }
 
-
-static bfd_reloc_status_type 
+static bfd_reloc_status_type
 howto8_FFnn_callback (abfd, reloc_entry, symbol_in, data,
 		      ignore_input_section, ignore_bfd)
      bfd *abfd;
@@ -88,7 +86,7 @@ howto8_FFnn_callback (abfd, reloc_entry, symbol_in, data,
   bfd_vma addr = reloc_entry->address;
 
   long x = bfd_get_8(abfd, (bfd_byte *)data + addr);
-  abort();
+  abort ();
   HOWTO_PREPARE(relocation, symbol_in);
 
   x = (x + relocation + reloc_entry->addend);
@@ -97,7 +95,7 @@ howto8_FFnn_callback (abfd, reloc_entry, symbol_in, data,
   return bfd_reloc_ok;
 }
 
-static bfd_reloc_status_type 
+static bfd_reloc_status_type
 howto8_pcrel_callback (abfd, reloc_entry, symbol_in, data,
 		       ignore_input_section, ignore_bfd)
      bfd *abfd;
@@ -110,7 +108,7 @@ howto8_pcrel_callback (abfd, reloc_entry, symbol_in, data,
   long relocation = 0;
   bfd_vma addr = reloc_entry->address;
   long x = bfd_get_8(abfd, (bfd_byte *)data + addr);
-  abort();
+  abort ();
   HOWTO_PREPARE(relocation, symbol_in);
 
   x = (x + relocation + reloc_entry->addend);
@@ -118,8 +116,6 @@ howto8_pcrel_callback (abfd, reloc_entry, symbol_in, data,
   bfd_put_8(abfd, x, (bfd_byte *)data + addr);
   return bfd_reloc_ok;
 }
-
-
 
 static reloc_howto_type howto_16
   = NEWHOWTO(howto16_callback,"abs16",1,false,false);
@@ -131,7 +127,6 @@ static reloc_howto_type howto_8_FFnn
 
 static reloc_howto_type howto_8_pcrel
   = NEWHOWTO(howto8_pcrel_callback,"pcrel8",0,false,true);
-
 
 static reloc_howto_type *
 local_bfd_reloc_type_lookup (arch, code)
@@ -154,7 +149,7 @@ local_bfd_reloc_type_lookup (arch, code)
 
 int bfd_default_scan_num_mach();
 
-static boolean 
+static boolean
 scan_mach (info, string)
      const struct bfd_arch_info *info ATTRIBUTE_UNUSED;
      const char *string;
@@ -165,7 +160,6 @@ scan_mach (info, string)
   if (strcmp(string,"H8500") == 0) return true;
   return false;
 }
-
 
 #if 0 /* not used currently */
 /* This routine is provided two arch_infos and returns whether

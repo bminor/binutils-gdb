@@ -39,28 +39,27 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
   }
 
 enum {
-I_mips3000, 
-I_mips3900, 
-I_mips4000, 
-I_mips4010, 
-I_mips4100, 
+I_mips3000,
+I_mips3900,
+I_mips4000,
+I_mips4010,
+I_mips4100,
 I_mips4111,
-I_mips4300, 
-I_mips4400, 
-I_mips4600, 
-I_mips4650, 
-I_mips5000, 
-I_mips6000, 
-I_mips8000, 
+I_mips4300,
+I_mips4400,
+I_mips4600,
+I_mips4650,
+I_mips5000,
+I_mips6000,
+I_mips8000,
 I_mips10000,
 I_mips4K,
 I_mips16
 };
 
-
 #define NN(index) (&arch_info_struct[(index)+1])
 
-static const bfd_arch_info_type arch_info_struct[] = 
+static const bfd_arch_info_type arch_info_struct[] =
 {
   N (32, 32, bfd_mach_mips3000, "mips:3000", false, NN(I_mips3000)),
   N (32, 32, bfd_mach_mips3900, "mips:3900", false, NN(I_mips3900)),

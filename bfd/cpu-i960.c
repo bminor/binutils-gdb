@@ -18,11 +18,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
-
 
 /* This routine is provided a string, and tries to work out if it
    could possibly refer to the i960 machine pointed at in the
@@ -36,7 +34,7 @@ scan_960_mach (ap, string)
   unsigned long machine;
   int i;
   int fail_because_not_80960 = false;
-  
+
   for (i = 0; i < strlen (string); i ++)
     string[i] = tolower (string[i]);
 
@@ -48,7 +46,7 @@ scan_960_mach (ap, string)
       /* i960 on it's own means core to us.  */
       if (* string == 0)
 	return ap->mach == bfd_mach_i960_core;
-      
+
       /* "i960:*" is valid, anything else is not.  */
       if (* string != ':')
 	return false;
@@ -68,10 +66,10 @@ scan_960_mach (ap, string)
   /* No match, can't be us.  */
   else
     return false;
-  
+
   if (* string == '\0')
     return false;
-  
+
   if (string[0] == 'c' && string[1] == 'o' && string[2] == 'r' &&
       string[3] == 'e' && string[4] == '\0')
     machine = bfd_mach_i960_core;
@@ -104,14 +102,12 @@ scan_960_mach (ap, string)
 
   if (fail_because_not_80960)
     return false;
-  
+
   if (machine == ap->mach)
     return true;
-  
+
   return false;
 }
-
-
 
 /* This routine is provided two arch_infos and works out the i960
    machine which would be compatible with both and returns a pointer
@@ -124,17 +120,17 @@ compatible (a,b)
 {
 
   /* The i960 has distinct subspecies which may not interbreed:
-	CORE CA          
+	CORE CA
 	CORE KA KB MC XA
 	CORE HX JX
      Any architecture on the same line is compatible, the one on
-     the right is the least restrictive.  
-     
+     the right is the least restrictive.
+
      We represent this information in an array, each machine to a side */
 
 #define ERROR	0
-#define CORE	bfd_mach_i960_core  /*1*/  
-#define KA 	bfd_mach_i960_ka_sa /*2*/ 
+#define CORE	bfd_mach_i960_core  /*1*/
+#define KA 	bfd_mach_i960_ka_sa /*2*/
 #define KB 	bfd_mach_i960_kb_sb /*3*/
 #define MC 	bfd_mach_i960_mc    /*4*/
 #define XA 	bfd_mach_i960_xa    /*5*/
@@ -143,7 +139,7 @@ compatible (a,b)
 #define HX	bfd_mach_i960_hx    /*8*/
 #define MAX_ARCH ((int)HX)
 
-  static CONST unsigned long matrix[MAX_ARCH+1][MAX_ARCH+1] = 
+  static CONST unsigned long matrix[MAX_ARCH+1][MAX_ARCH+1] =
     {
       { ERROR,	CORE,	KA,	KB,	MC,	XA,	CA,	JX,	HX },
       { CORE,	CORE,	KA,	KB,	MC,	XA,	CA,	JX,	HX },
@@ -156,25 +152,22 @@ compatible (a,b)
       { HX,	HX,	ERROR,	ERROR,	ERROR,	ERROR,	ERROR,	HX,	HX },
     };
 
-
-  if (a->arch != b->arch || matrix[a->mach][b->mach] == ERROR) 
+  if (a->arch != b->arch || matrix[a->mach][b->mach] == ERROR)
     {
     return NULL;
     }
-  else 
+  else
     {
     return (a->mach  ==  matrix[a->mach][b->mach]) ?  a : b;
     }
 }
 
-
-
 int bfd_default_scan_num_mach();
 #define N(a,b,d,n) \
 { 32, 32, 8,bfd_arch_i960,a,"i960",b,3,d,compatible,scan_960_mach,n,}
 
-static const bfd_arch_info_type arch_info_struct[] = 
-{ 
+static const bfd_arch_info_type arch_info_struct[] =
+{
   N(bfd_mach_i960_ka_sa,"i960:ka_sa",false, &arch_info_struct[1]),
   N(bfd_mach_i960_kb_sb,"i960:kb_sb",false, &arch_info_struct[2]),
   N(bfd_mach_i960_mc,   "i960:mc",   false, &arch_info_struct[3]),

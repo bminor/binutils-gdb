@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 {  32, 32, 8, bfd_arch_ns32k, machine, "ns32k",printable,3,d,bfd_default_compatible,bfd_default_scan, next, }
 
 static const bfd_arch_info_type arch_info_struct[] =
-{ 
+{
   N(32532,"ns32k:32532",true, 0), /* the word ns32k will match this too */
 };
 
@@ -200,7 +200,6 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
       && output_bfd == (bfd *) NULL)
     flag = bfd_reloc_undefined;
 
-
   /* Is the address of the relocation really within the section?  */
   if (reloc_entry->address > input_section->_cooked_size)
     return bfd_reloc_outofrange;
@@ -213,7 +212,6 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
     relocation = 0;
   else
     relocation = symbol->value;
-
 
   reloc_target_output_section = symbol->section->output_section;
 

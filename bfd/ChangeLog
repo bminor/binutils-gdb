@@ -1,6 +1,35 @@
 2000-11-16  Kazu Hirata  <kazu@hxi.com>
 
-	* dwarf1.c: Fix formatting.
+	* cpu-a29k.c: Fix formatting.
+	* cpu-alpha.c: Likewise.
+	* cpu-arm.c: Likewise.
+	* cpu-avr.c: Likewise.
+	* cpu-d10v.c: Likewise.
+	* cpu-h8500.c: Likewise.
+	* cpu-hppa.c: Likewise.
+	* cpu-i370.c: Likewise.
+	* cpu-i386.c: Likewise.
+	* cpu-i960.c: Likewise.
+	* cpu-ia64-opc.c: Likewise.
+	* cpu-ia64.c: Likewise.
+	* cpu-m32r.c: Likewise.
+	* cpu-m68hc11.c: Likewise.
+	* cpu-m68hc12.c: Likewise.
+	* cpu-m68k.c: Likewise.
+	* cpu-m88k.c: Likewise.
+	* cpu-mips.c: Likewise.
+	* cpu-ns32k.c: Likewise.
+	* cpu-pj.c: Likewise.
+	* cpu-powerpc.c: Likewise.
+	* cpu-sh.c: Likewise.
+	* cpu-sparc.c: Likewise.
+	* cpu-tic54x.c: Likewise.
+	* cpu-v850.c: Likewise.
+	* cpu-vax.c: Likewise.
+	* cpu-w65.c: Likewise.
+	* cpu-we32k.c: Likewise.
+	* cpu-z8k.c: Likewise.
+	* dwarf1.c: Likewise.
 	* dwarf2.c: Likewise.
 
 2000-11-15  Kazu Hirata  <kazu@hxi.com>

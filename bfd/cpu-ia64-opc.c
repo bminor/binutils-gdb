@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-
 /* Logically, this code should be part of libopcode but since some of
    the operand insertion/extraction functions help bfd to implement
    relocations, this code is included as part of elf64-ia64.c.  This
@@ -555,7 +554,7 @@ const struct ia64_operand elf64_ia64_operands[IA64_OPND_COUNT] =
     { ABS, ins_imms16,ext_imms16,0, {{27,  6}, { 1, 36}}, 0,	/* IMM44 */
       "a 44-bit unsigned (least 16 bits ignored/zeroes)" },
     { ABS, ins_rsvd,  ext_rsvd,	0, {{0,  0}}, 0,		/* IMMU62 */
-      "a 62-bit unsigned" },        
+      "a 62-bit unsigned" },
     { ABS, ins_rsvd,  ext_rsvd,	0, {{0,  0}}, 0,		/* IMMU64 */
       "a 64-bit unsigned" },
     { ABS, ins_inc3,  ext_inc3,  0, {{ 3, 13}}, SDEC,		/* INC3 */
@@ -580,7 +579,7 @@ const struct ia64_operand elf64_ia64_operands[IA64_OPND_COUNT] =
       {{ 7,  6}, {13, 20}, { 1, 36}}, 0,
       "a branch target" },
     { REL, ins_imms4, ext_imms4, 0, {{20, 13}, { 1, 36}}, 0,	/* TGT25c */
-      "a branch target" },         
-    { REL, ins_rsvd, ext_rsvd, 0, {{0, 0}}, 0,                  /* TGT64  */ 
+      "a branch target" },
+    { REL, ins_rsvd, ext_rsvd, 0, {{0, 0}}, 0,                  /* TGT64  */
       "a branch target" },
   };
