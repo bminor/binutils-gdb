@@ -1,3 +1,9 @@
+2005-03-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* proc-api.c: Update copyright year.
+	(_initialize_proc_api): Revert previous patch, removing spurious
+	space instead.
+
 2005-03-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* regcache.c: Fix typo in comment.
