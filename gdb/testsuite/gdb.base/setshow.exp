@@ -1,4 +1,4 @@
-# Copyright (C) 1992, 1994 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1994, 1997 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
@@ -92,9 +92,13 @@ gdb_test "info line 1" "Line 1 of .* is at address .* but contains no code.*"  "
 #test set args
 gdb_test "set args foo bar blup baz bubble" "" "set args" 
 #test show args
-gdb_test "show args" "Arguments to give program being debugged when it is started is \"foo bar blup baz bubble\"..*" "show args" 
-#test passing args
-gdb_test "run" "Starting program:.*foo bar blup baz bubble.*" "passing args" 
+gdb_test "show args" "Arguments to give program being debugged when it is started is \"foo bar blup baz bubble\"..*" "show args"
+
+# Don't test if we can't pass args or if we're using a stub.
+if { ![target_info gdb,use_stub] && ![target_info gdb,noargs] } {
+    #test passing args
+    gdb_test "run" "Starting program:.*foo bar blup baz bubble.*" "passing args"
+}
 #test set check range on
 gdb_test "set check range on" "" "set check range on" 
 #test show check range on

@@ -1,7 +1,26 @@
+Sat Mar 29 11:19:46 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* config/monitor.exp: Use gdb_serial in preference to serial
+	or netport.
+
+	* lib/gdb.exp: Set GDB to [transform gdb] if we're using a remote host
+ 	and it's not already set.
+
+Fri Mar 28 19:54:18 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* gdb.base/setshow.exp: Only test the run command if the target
+ 	isn't using a stub and if it supports argument passing.
+
 Sat Mar 22 19:50:25 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* config/udi.exp(gdb_start): Make sure UDICONF is set
 	properly before starting gdb.
+
+Mon Mar 24 14:40:33 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.disasm/mn10300.s: New test file for mn10300 disassembler.
+	* gdb.disasm/mn10300.exp: Run mn10300 disassembler tests.
+	* gdb.disasm/Makefile.in: Remove "mn10300" when cleaning.
 
 Tue Mar 11 11:42:58 1997  Bob Manson  <manson@charmed.cygnus.com>
 
