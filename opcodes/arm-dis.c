@@ -668,15 +668,32 @@ print_insn_thumb (pc, info, given)
           /* Special processing for Thumb 2 instruction BL sequence:  */
           if (!*c) /* Check for empty (not NULL) assembler string.  */
             {
+	      long offset;
+	      
 	      info->bytes_per_chunk = 4;
 	      info->bytes_per_line  = 4;
+
+	      offset = BDISP23 (given);
 	      
 	      if ((given & 0x10000000) == 0)
-                 func (stream, "blx\t");
+		{
+		  func (stream, "blx\t");
+
+		  /* The spec says that bit 1 of the branch's destination
+		     address comes from bit 1 of the instruction's
+		     address and not from the offset in the instruction.  */
+		  if (offset & 0x1)
+		    {
+		      /* func (stream, "*malformed!* "); */
+		      offset &= ~ 0x1;
+		    }
+
+		  offset |= ((pc & 0x2) >> 1);
+		}
 	      else
-                func (stream, "bl\t");
-		
-              info->print_address_func (BDISP23 (given) * 2 + pc + 4, info);
+		func (stream, "bl\t");
+
+	      info->print_address_func (offset * 2 + pc + 4, info);
               return 4;
             }
           else

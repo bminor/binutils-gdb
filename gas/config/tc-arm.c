@@ -7149,6 +7149,15 @@ md_apply_fix3 (fixP, val, seg)
 
 	newval  = (newval  & 0xf800) | ((value & 0x7fffff) >> 12);
 	newval2 = (newval2 & 0xf800) | ((value & 0xfff) >> 1);
+	if (fixP->fx_r_type == BFD_RELOC_THUMB_PCREL_BLX)
+	  /* Remove bit zero of the adjusted offset.  Bit zero can only be
+	     set if the upper insn is at a half-word boundary, since the
+	     destination address, an ARM instruction, must always be on a
+	     word boundary.  The semantics of the BLX (1) instruction, however,
+	     are that bit zero in the offset must always be zero, and the
+	     corresponding bit one in the target address will be set from bit
+	     one of the source address.  */
+	  newval2 &= ~1;
 	md_number_to_chars (buf, newval, THUMB_SIZE);
 	md_number_to_chars (buf + THUMB_SIZE, newval2, THUMB_SIZE);
       }

@@ -1588,18 +1588,18 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      BFD_ASSERT (size == 4);
 
-              /* howto->pc_relative should be TRUE for type 14 BRANCH23 */
+              /* howto->pc_relative should be TRUE for type 14 BRANCH23.  */
               relocation -= (input_section->output_section->vma
                              + input_section->output_offset);
 
-              /* howto->pcrel_offset should be TRUE for type 14 BRANCH23 */
+              /* howto->pcrel_offset should be TRUE for type 14 BRANCH23.  */
               relocation -= address;
 
 	      /* No need to negate the relocation with BRANCH23.  */
 	      /* howto->complain_on_overflow == complain_overflow_signed for BRANCH23.  */
 	      /* howto->rightshift == 1 */
-	      /* Drop unwanted bits from the value we are relocating to.  */
 
+	      /* Drop unwanted bits from the value we are relocating to.  */
 	      check = relocation >> howto->rightshift;
 
 	      /* If this is a signed value, the rightshift just dropped
@@ -1613,13 +1613,9 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      /* Get the value from the object file.  */
 	      if (bfd_big_endian (input_bfd))
-		{
-		  add = (((x) & 0x07ff0000) >> 4) | (((x) & 0x7ff) << 1);
-		}
+		add = (((x) & 0x07ff0000) >> 4) | (((x) & 0x7ff) << 1);
 	      else
-		{
-		  add = ((((x) & 0x7ff) << 12) | (((x) & 0x07ff0000) >> 15));
-		}
+		add = ((((x) & 0x7ff) << 12) | (((x) & 0x07ff0000) >> 15));
 
 	      /* Get the value from the object file with an appropriate sign.
 		 The expression involving howto->src_mask isolates the upper
@@ -1629,18 +1625,16 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 		 can not get the upper bit, but that does not matter since
 		 signed_add needs no adjustment to become negative in that
 		 case.  */
-
 	      signed_add = add;
 
 	      if ((add & (((~ src_mask) >> 1) & src_mask)) != 0)
 		signed_add -= (((~ src_mask) >> 1) & src_mask) << 1;
 
+	      /* howto->bitpos == 0 */
 	      /* Add the value from the object file, shifted so that it is a
 		 straight number.  */
-	      /* howto->bitpos == 0 */
-
 	      signed_check += signed_add;
-	      relocation += signed_add;
+	      relocation   += signed_add;
 
 	      BFD_ASSERT (howto->complain_on_overflow == complain_overflow_signed);
 
@@ -1649,21 +1643,26 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 		  || signed_check < reloc_signed_min)
 		overflow = true;
 
-	      /* Put RELOCATION into the correct bits:  */
+	      /* For the BLX(1) instruction remove bit 0 of the adjusted offset.
+		 Bit 0 can only be set if the upper insn is at a half-word boundary,
+		 since the destination address, an ARM instruction, must always be
+		 on a word boundary.  The semantics of the BLX (1) instruction,
+		 however, are that bit 0 in the offset must always be 0, and the
+		 corresponding bit 1 in the target address will be set from bit
+		 1 of the source address.  */
+	      if ((x & 0x18000000) == 0x08000000)
+		relocation &= ~0x2;
 
+	      /* Put the relocation into the correct bits.  */
 	      if (bfd_big_endian (input_bfd))
-		{
-		  relocation = (((relocation & 0xffe) >> 1)  | ((relocation << 4) & 0x07ff0000));
-		}
+		relocation = (((relocation & 0xffe) >> 1)  | ((relocation << 4) & 0x07ff0000));
 	      else
-		{
-		  relocation = (((relocation & 0xffe) << 15) | ((relocation >> 12) & 0x7ff));
-		}
+		relocation = (((relocation & 0xffe) << 15) | ((relocation >> 12) & 0x7ff));
 
-	      /* Add RELOCATION to the correct bits of X:  */
+	      /* Add the relocation to the correct bits of X.  */
 	      x = ((x & ~howto->dst_mask) | relocation);
 
-	      /* Put the relocated value back in the object file:  */
+	      /* Put the relocated value back in the object file.  */
 	      bfd_put_32 (input_bfd, x, location);
 
 	      rstat = overflow ? bfd_reloc_overflow : bfd_reloc_ok;

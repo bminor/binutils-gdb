@@ -481,7 +481,6 @@ tdstate ARMul_ThumbDecode (state, pc, tinstr, ainstr)
 	    }
 	  /* Drop through.  */
 	  
-	do_blx2:			/* BLX instruction 2 */
 	  /* Format 19 */
 	  /* There is no single ARM instruction equivalent for this
 	     instruction. Also, it should only ever be matched with the
@@ -514,17 +513,31 @@ tdstate ARMul_ThumbDecode (state, pc, tinstr, ainstr)
 	  |((tinstr & (1 << 10)) ? 0xFF800000 : 0));
       valid = t_branch;		/* in-case we don't have the 2nd half */
       tinstr = next_instr;	/* move the instruction down */
+      pc += 2;			/* point the pc at the 2nd half */
       if (((tinstr & 0xF800) >> 11) != 31)
 	{
 	  if (((tinstr & 0xF800) >> 11) == 29)
 	    {
-	      pc += 2;
-	      goto do_blx2;
+	      ARMword tmp = (pc + 2);
+
+	      /* Bit one of the destination address comes from bit one of the
+		 address of the first (H == 10) half of the instruction, not
+		 from the offset in the instruction.  */
+	      state->Reg[15] = ((state->Reg[14]
+				 + ((tinstr & 0x07FE) << 1)
+				 + ((pc - 2) & 2))
+				& 0xFFFFFFFC);
+	      CLEART;
+	      state->Reg[14] = (tmp | 1);
+	      valid = t_branch;
+	      FLUSHPIPE;
 	    }
-	  break;		/* exit, since not correct instruction */
+	  else
+	    /* Exit, since not correct instruction. */
+	    pc -= 2;
+	  break;
 	}
       /* else we fall through to process the second half of the BL */
-      pc += 2;			/* point the pc at the 2nd half */
     case 31:			/* BL instruction 2 */
       /* Format 19 */
       /* There is no single ARM instruction equivalent for this

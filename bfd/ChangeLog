@@ -1,5 +1,13 @@
 2001-03-06  Nick Clifton  <nickc@redhat.com>
 
+	* elf32-arm.h (elf32_arm_final_link_relocate): Clear bit zero
+	of offset in BLX(1) instruction.
+	* coff-arm.c (coff_arm_relocate_section): Clear bit zero of
+	offset in BLX(1) instruction.
+        Fix formatting.
+
+2001-03-06  Nick Clifton  <nickc@redhat.com>
+
 	* coff-arm.c (coff_arm_reloc_type_lookup): Add
 	BFD_RELOC_THUMB_PCREL_BLX.
 

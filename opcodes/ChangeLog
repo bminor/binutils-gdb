@@ -1,3 +1,9 @@
+2001-03-06  Nick Clifton  <nickc@redhat.com>
+
+	* arm-dis.c (print_insn_thumb): Compute destination address
+        of BLX(1) instruction by taking bit 1 from PC and not from bit
+        0 of the offset.
+
 2001-03-06  Igor Shevlyakov  <igor@windriver.com>
 
 	* m68k-dis.c (print_insn_m68k): Recognize Coldfire CPUs
