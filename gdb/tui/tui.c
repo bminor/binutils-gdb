@@ -25,7 +25,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <malloc.h>
 #ifdef HAVE_TERM_H
 #include <term.h>
 #endif

@@ -1,5 +1,7 @@
 2004-02-18  Mark Kettenis  <kettenis@gnu.org>
 
+	* tui/tui.c: Don't include <malloc.h>.
+
 	* Makefile.in (ALLDEPFILES): Add amd64-nat.c, amd64bsd-nat.c,
 	amdfbsd-nat.c, amd64-fbsd-tdep.c, amd64nbsd-nat.c and
 	amd64nbsd-tdep.c.
