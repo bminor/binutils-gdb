@@ -45,45 +45,44 @@ cpu_type=${target_cpu}
 
 # assign object format
 case ${target_os} in
-sysv* | -coff*  )
-	obj_format=coff
-	;;
+bout*) obj_format=bout ;;
+bsd* | sunos*) obj_format=aout ;;
 
 ebmon)
 	obj_format=coff
 	need_bfd="$(unsubdir)/../bfd$(subdir)/libbfd.a"
 	target_cpu=ebmon29k
 	;;
+
+generic) obj_format=generic ;;
+
 hds)
 	obj_format=ieee
 	need_bfd="$(unsubdir)/../bfd$(subdir)/libbfd.a"
 	;;
 
-bout*)
-	obj_format=bout
+coff* | sysv*) obj_format=coff ;;
+
+*)
+	case ${target_vendor} in
+	aout) obj_format=aout ;;
+	bout) obj_format=bout ;;
+	coff) obj_format=coff ;;
+	*) obj_format=aout ;;
+	esac
 	;;
-bsd* | sunos* | *)
-	obj_format=aout
-	;;
-generic)
-	obj_format=generic
-	;;
+
 esac
 
 # assign floating point type
 case ${target_cpu} in
-vax)
-	atof=vax
-	;;
-*)
-	atof=ieee
-	;;
+vax) atof=vax ;;
+*) atof=ieee ;;
 esac
 
 # and target makefile frag
 
-target_makefile_frag=config/tmake-${target_cpu}
-
+target_makefile_frag=config/mt-${target_cpu}
 
 files="config/ho-${gas_host}.h config/tc-${cpu_type}.c \
 	config/tc-${cpu_type}.h config/te-${emulation}.h \
