@@ -1,4 +1,4 @@
-/* Host machine description for Motorola Delta 88 system, for GDB.
+/* Native support macros for m88k, for GDB.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992
    Free Software Foundation, Inc.
 
@@ -18,27 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define HOST_BYTE_ORDER BIG_ENDIAN
+#define FETCH_INFERIOR_REGISTERS
 
-#if !defined (USG)
-#define USG 1
-#endif
-
-#include <sys/param.h>
-#include <sys/time.h>
-
-#define HAVE_TERMIO
-
-/*#define USIZE 2048*/
-#define NBPG NBPC
-#define UPAGES USIZE
-
-/* This is the amount to subtract from u.u_ar0
-   to get the offset in the core file of the register values.  */
-
-/* Since registers r0 through r31 are stored directly in the struct ptrace_user,
-   (for m88k BCS)
-   the ptrace_user offsets are sufficient and KERNEL_U_ADDRESS can be 0 */
-
-#define KERNEL_U_ADDR 0
-
+#define REGISTER_U_ADDR(addr, blockend, regno) \
+        (addr) = m88k_register_u_addr ((blockend),(regno));

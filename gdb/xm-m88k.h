@@ -60,7 +60,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define KERNEL_U_ADDR 0
 
-#define REGISTER_U_ADDR(addr, blockend, regno) \
-        (addr) = m88k_register_u_addr ((blockend),(regno));
-
-#define FETCH_INFERIOR_REGISTERS

@@ -125,9 +125,9 @@ m2-exp.y
 m68k-pinsn.c
 m68k-stub.c
 m68k-tdep.c
+m88k-nat.c
 m88k-pinsn.c
 m88k-tdep.c
-m88k-xdep.c
 mach386-xdep.c
 main.c
 maint.c
@@ -142,9 +142,11 @@ munch
 news-xdep.c
 nindy-share
 nindy-tdep.c
+nm-delta88.h
 nm-i386bsd.h
 nm-irix3.h
 nm-irix4.h
+nm-m88k.h
 nm-mips.h
 nm-news.h
 nm-rs6000.h
