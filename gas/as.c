@@ -375,7 +375,7 @@ parse_args (pargc, pargv)
     /* -K is not meaningful if .word is not being hacked.  */
     'K',
 #endif
-    'L', 'M', 'R', 'W', 'Z', 'f', 'a', ':', ':', 'D', 'I', ':', 'o', ':',
+    'L', 'M', 'R', 'W', 'Z', 'a', ':', ':', 'D', 'I', ':', 'o', ':',
 #ifndef VMS
     /* -v takes an argument on VMS, so we don't make it a generic
        option.  */
@@ -449,6 +449,12 @@ parse_args (pargc, pargv)
 #define OPTION_NOEXECSTACK (OPTION_STD_BASE + 21)
     {"noexecstack", no_argument, NULL, OPTION_NOEXECSTACK},
 #endif
+    /* Treat '-f' as a long switch so that getopt will not accept
+       -f<some-text> as a synonym for -f.  This can cause confusion
+       when -f switches are passed through from the compiler.
+       FIXME - should we handle other single character switches in the
+       same way ?  */
+    {"f", no_argument, NULL, 'f'},
 #define OPTION_WARN_FATAL (OPTION_STD_BASE + 22)
     {"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL}
     /* When you add options here, check that they do not collide with

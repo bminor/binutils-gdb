@@ -1,3 +1,9 @@
+2003-10-04  Nick Clifton  <nickc@redhat.com>
+
+	* as.c (std_shortopts): Remove 'f'.
+	(std_longopts): Add 'f'.  Doing this prevents -f<foo> being
+	acecpted as an alias for -f.
+
 2003-10-04  Danny Smith  <danny_r_smith_2001@yahoo.co.nz>
 
 	* config/obj-coff.c (obj_coff_section [BEF_ASSEMBLER]):
