@@ -1,3 +1,10 @@
+2002-10-06  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/nm-i386sco.h: Add protection against
+	multiple-inclusion.  Include "i386/nm-i386v.h".
+	(REGISTER_U_ADDR): Remove define.
+	(i386_register_u_addr): Remove prototype.
+
 2002-10-04  Michael Snyder  <msnyder@redhat.com>
 
 	* m32r-stub.c (handle_exception): Make sure exception is "trap"
