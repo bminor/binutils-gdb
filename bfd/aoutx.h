@@ -3430,8 +3430,9 @@ aout_link_add_symbols (abfd, info)
 	  break;
 	case N_WARNING:
 	  /* A warning symbol.  The next symbol is the one to warn
-	     about.  */
-	  BFD_ASSERT (p + 1 < pend);
+	     about.  If there is no next symbol, just look away.  */
+	  if (p + 1 >= pend)
+	    return TRUE;
 	  ++p;
 	  string = name;
 	  name = strings + GET_WORD (abfd, p->e_strx);

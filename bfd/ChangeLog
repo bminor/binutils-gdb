@@ -2,6 +2,8 @@
 
 	* aoutx.h (NAME(aout,find_nearest_line)): Correct case for N_SO
 	being the last symbol.
+	(aout_link_add_symbols): Just return TRUE if a warning
+	symbol was last.
 
 2005-02-07  Maciej W. Rozycki  <macro@mips.com>
 
