@@ -1,3 +1,8 @@
+2000-02-25  Scott Bambrough <scottb@netwinder.org>
+
+	* gdb.base/long_long.exp: Correct test suite failure when printing
+	a long long value as a double on ARM platforms.
+
 Thu Mar  9 14:21:07 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS (Core): Anthony Green is the Java - including

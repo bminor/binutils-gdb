@@ -1,4 +1,4 @@
-# Copyright (C) 1997, 1998, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -121,11 +121,27 @@ gdb_test "p/c oct" ".*'w'.*"
 
 if { $sizeof_double == 8 } {
 
+# ARM floating point numbers are not strictly little endian or big endian,
+# but a hybrid.  They are in little endian format with the two words
+# swapped in big endian format.
+
+  if [ istarget "arm*-*-*" ] then {
+
+#   assume the long long represents a floating point double in ARM format
+     gdb_test "p/f oct" ".*2.1386676354387559e\\+265.*"
+
+  } else {
+
+#   assume the long long represents a floating point double in little
+#   endian format
     gdb_test "p/f oct" ".*-5.9822653797615723e-120.*"
+
+  }
 
 } else {
 
     gdb_test "p/f oct" ".*-2.42716126e-15.*"
+
 }
 
 if { $target_bigendian_p } {
