@@ -332,7 +332,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [ -mips1 ] [ -mips2 ] [ -mips3 ] [ -mips4 ] [ -mips5 ]
  [ -mips32 ] [ -mips64 ]
  [ -m4650 ] [ -no-m4650 ]
- [ --trap ] [ --break ]
+ [ --trap ] [ --break ] [ -n ]
  [ --emulation=@var{name} ]
 @end ifset
  [ -- | @var{files} @dots{} ]
@@ -829,6 +829,10 @@ Control how to deal with multiplication overflow and division by zero.
 (and only work for Instruction Set Architecture level 2 and higher);
 @samp{--break} or @samp{--no-trap} (also synonyms, and the default) take a
 break exception.
+
+@item -n
+When this option is used, @code{@value{AS}} will issue a warning every
+time it generates a nop instruction from a macro.
 @end table
 @end ifset
 

@@ -189,6 +189,10 @@ are only supported at Instruction Set Architecture level 2 and higher.
 @itemx --no-trap
 Generate code to take a break exception rather than a trap exception when an
 error is detected.  This is the default.
+
+@item -n
+When this option is used, @code{@value{AS}} will issue a warning every
+time it generates a nop instruction from a macro.
 @end table
 
 @node MIPS Object

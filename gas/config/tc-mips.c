@@ -9331,6 +9331,7 @@ MIPS options:\n\
   fprintf (stream, _("\
 -O0			remove unneeded NOPs, do not swap branches\n\
 -O			remove unneeded NOPs and swap branches\n\
+-n			warn about NOPs generated from macros\n\
 --[no-]construct-floats [dis]allow floating point values to be constructed\n\
 --trap, --no-break	trap exception on div by 0 and mult overflow\n\
 --break, --no-trap	break exception on div by 0 and mult overflow\n"));

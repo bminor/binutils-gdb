@@ -1,3 +1,13 @@
+2001-06-11  H.J. Lu  <hjl@gnu.org>
+
+	* NEWS: Updated for the new -n option for the MIPS assembler.
+
+	* config/tc-mips.c (md_show_usage): Add -n.
+
+	* doc/as.texinfo: Document the new -n option.
+	* doc/c-mips.texi: Likewise.
+	* doc/as.1: Regenerated.
+
 2001-06-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/obj-coff.c (obj_coff_section): Formatting fix.
