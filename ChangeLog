@@ -1,3 +1,8 @@
+Wed Dec 20 17:41:40 1995  Brendan Kehoe  <brendan@lisa.cygnus.com>
+
+	* configure.in (noconfigdirs): Add gas or ld if --with-gnu-as=no or
+	--with-gnu-ld=no.
+
 Wed Dec 20 15:15:35 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config-ml.in (rs6000*, powerpc*): Add switches to control which

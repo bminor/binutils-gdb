@@ -526,6 +526,41 @@ if [ "${build}" != "${host}" ]; then
   noconfigdirs="$noconfigdirs expect dejagnu make texinfo diff"
 fi
 
+# Set with_gnu_as and with_gnu_ld as appropriate.
+#
+# This is done by determining whether or not the appropriate directory
+# is available, and by checking whether or not specific configurations
+# have requested that this magic not happen.
+# 
+# The command line options always override the explicit settings in 
+# configure.in, and the settings in configure.in override this magic.
+#
+# If the default for a toolchain is to use GNU as and ld, and you don't 
+# want to do that, then you should use the --without-gnu-as and
+# --without-gnu-ld options for the configure script.
+
+if [ x${use_gnu_as} = x ] ; then
+  if [ x${with_gnu_as} != xno ] ; then
+    if echo " ${configdirs} " | grep " ${gasdir} " > /dev/null 2>&1 && [ -d ${srcdir}/${gasdir} ] ; then
+      with_gnu_as=yes
+      withoptions="$withoptions --with-gnu-as"
+    fi
+  else
+    noconfigdirs="$noconfigdirs gas"
+  fi
+fi
+
+if [ x${use_gnu_ld} = x ] ; then
+  if [ x${with_gnu_ld} != xno ]; then
+    if echo " ${configdirs} " | grep " ld " > /dev/null 2>&1 && [ -d ${srcdir}/ld ] ; then
+      with_gnu_ld=yes
+      withoptions="$withoptions --with-gnu-ld"
+    fi
+  else
+    noconfigdirs="$noconfigdirs ld"
+  fi
+fi
+
 # Remove the entries in $skipdirs and $noconfigdirs from $configdirs and
 # $target_configdirs.
 # If we have the source for $noconfigdirs entries, add them to $notsupp.
@@ -621,33 +656,6 @@ if [ -n "${notsupp}" ] && [ -z "${norecursion}" ]; then
   echo "*** This configuration is not supported in the following subdirectories:" 1>&2
   echo "    ${notsupp}" 1>&2
   echo "    (Any other directories should still work fine.)" 1>&2
-fi
-
-# Set with_gnu_as and with_gnu_ld as appropriate.
-#
-# This is done by determining whether or not the appropriate directory
-# is available, and by checking whether or not specific configurations
-# have requested that this magic not happen.
-# 
-# The command line options always override the explicit settings in 
-# configure.in, and the settings in configure.in override this magic.
-#
-# If the default for a toolchain is to use GNU as and ld, and you don't 
-# want to do that, then you should use the --without-gnu-as and
-# --without-gnu-ld options for the configure script.
-
-if [ x${use_gnu_as} = x ] ; then
-  if [ x${with_gnu_as} != xno ] && echo " ${configdirs} " | grep " ${gasdir} " > /dev/null 2>&1 && [ -d ${srcdir}/${gasdir} ] ; then
-    with_gnu_as=yes
-    withoptions="$withoptions --with-gnu-as"
-  fi
-fi
-
-if [ x${use_gnu_ld} = x ] ; then
-  if [ x${with_gnu_ld} != xno ] && echo " ${configdirs} " | grep " ld " > /dev/null 2>&1 && [ -d ${srcdir}/ld ] ; then
-    with_gnu_ld=yes
-    withoptions="$withoptions --with-gnu-ld"
-  fi
 fi
 
 if [ x${enable_shared} = xyes ]; then
