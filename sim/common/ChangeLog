@@ -1,5 +1,7 @@
 1998-12-04  Doug Evans  <devans@casey.cygnus.com>
 
+	* sim-memopt.c (sim_memory_uninstall): Result type is `void'.
+
 	* sim-arange.c: New file.
 	* sim-arange.h: New file.
 
