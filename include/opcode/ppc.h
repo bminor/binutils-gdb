@@ -186,11 +186,45 @@ extern const struct powerpc_operand powerpc_operands[];
    print this operand out only if it is not zero.  */
 #define PPC_OPERAND_OPTIONAL (0400)
 
+/* This flag is only used with PPC_OPERAND_OPTIONAL.  If this operand
+   is omitted, then for the next operand use this operand value plus
+   1, ignoring the next operand field for the opcode.  This wretched
+   hack is needed because the Power rotate instructions can take
+   either 4 or 5 operands.  The disassembler should print this operand
+   out regardless of the PPC_OPERAND_OPTIONAL field.  */
+#define PPC_OPERAND_NEXT (01000)
+
 /* This operand should be regarded as a negative number for the
    purposes of overflow checking (i.e., the normal most negative
    number is disallowed and one more than the normal most positive
    number is allowed).  This flag will only be set for a signed
    operand.  */
-#define PPC_OPERAND_NEGATIVE (01000)
+#define PPC_OPERAND_NEGATIVE (02000)
+
+/* The POWER and PowerPC assemblers use a few macros.  We keep them
+   with the operands table for simplicity.  The macro table is an
+   array of struct powerpc_macro.  */
+
+struct powerpc_macro
+{
+  /* The macro name.  */
+  const char *name;
+
+  /* The number of operands the macro takes.  */
+  unsigned int operands;
+
+  /* One bit flags for the opcode.  These are used to indicate which
+     specific processors support the instructions.  The values are the
+     same as those for the struct powerpc_opcode flags field.  */
+  unsigned long flags;
+
+  /* A format string to turn the macro into a normal instruction.
+     Each %N in the string is replaced with operand number N (zero
+     based).  */
+  const char *format;
+};
+
+extern const struct powerpc_macro powerpc_macros[];
+extern const int powerpc_num_macros;
 
 #endif /* PPC_H */

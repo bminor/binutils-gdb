@@ -1,3 +1,10 @@
+Fri Feb  4 23:36:52 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ppc.h (PPC_OPERAND_NEXT): Define.
+	(PPC_OPERAND_NEGATIVE): Change value to make room for above.
+	(struct powerpc_macro): Define.
+	(powerpc_macros, powerpc_num_macros): Declare.
+
 Fri Jan 21 19:13:50 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ppc.h: New file.  Header file for PowerPC opcode table.
