@@ -1,5 +1,15 @@
 2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (struct dwarf2_cu): Add partial_die_obstack.
+	(splay_tree_obstack_allocate, splay_tree_obstack_deallocate): New
+	functions.
+	(dwarf2_build_psymtabs_hard): Use splay_tree_new_with_allocator
+	and obstack_free to manage partial_dies.
+	(load_partial_dies): Allocate partial DIEs on the obstack.  Don't
+	initialize the splay tree here.
+
+2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (skip_leb128, peek_die_abbrev, skip_one_die)
 	(skip_children): New functions.
 	(locate_pdi_sibling): Call skip_children.

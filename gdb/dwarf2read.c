@@ -261,6 +261,7 @@ struct dwarf2_cu
   struct type *ftypes[FT_NUM_MEMBERS];	/* Fundamental types */
 
   splay_tree partial_dies;
+  struct obstack partial_die_obstack;
 };
 
 /* The line number information for a compilation unit (found in the
@@ -939,6 +940,20 @@ static void
 dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 			     struct dwarf2_cu *cu);
 
+/* Allocation function for the libiberty splay tree which uses an obstack.  */
+static void *
+splay_tree_obstack_allocate (int size, void *data)
+{
+  return obstack_alloc ((struct obstack *) data, size);
+}
+
+/* Trivial deallocation function for the libiberty splay tree.  */
+static void
+splay_tree_obstack_deallocate (void *object, void *data)
+{
+  return;
+}
+
 /* Try to locate the sections we need for DWARF 2 debugging
    information and return true if we have enough to do something.  */
 
@@ -1301,12 +1316,20 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 	  lowpc = ((CORE_ADDR) -1);
 	  highpc = ((CORE_ADDR) 0);
 
+	  obstack_init (&cu.partial_die_obstack);
+	  cu.partial_dies
+	    = splay_tree_new_with_allocator (splay_tree_compare_ints, NULL,
+					     NULL, splay_tree_obstack_allocate,
+					     splay_tree_obstack_deallocate,
+					     &cu.partial_die_obstack);
+
 	  load_partial_dies (abfd, info_ptr, &cu);
 
 	  info_ptr = scan_partial_symbols (info_ptr, &lowpc, &highpc,
 					   &cu, NULL);
 
-	  splay_tree_delete (cu.partial_dies);
+	  cu.partial_dies = NULL;
+	  obstack_free (&cu.partial_die_obstack, NULL);
 
 	  /* If we didn't find a lowpc, set it to highpc to avoid
 	     complaints from `maint check'.  */
@@ -4486,10 +4509,8 @@ load_partial_dies (bfd *abfd, char *info_ptr, struct dwarf2_cu *cu)
   parent_die = NULL;
   last_die = NULL;
 
-  /* FIXME: All sorts of memory management issues.  */
-  cu->partial_dies = splay_tree_new (splay_tree_compare_ints, NULL,
-				     (splay_tree_delete_value_fn) xfree);
-  part_die = xmalloc (sizeof (struct partial_die_info));
+  part_die = obstack_alloc (&cu->partial_die_obstack,
+			    sizeof (struct partial_die_info));
 
   while (1)
     {
@@ -4499,7 +4520,8 @@ load_partial_dies (bfd *abfd, char *info_ptr, struct dwarf2_cu *cu)
 	{
 	  if (--nesting_level == 0)
 	    {
-	      xfree (part_die);
+	      /* This was the last thing allocated.  */
+	      obstack_free (&cu->partial_die_obstack, part_die);
 	      return;
 	    }
 	  info_ptr += bytes_read;
@@ -4539,7 +4561,9 @@ load_partial_dies (bfd *abfd, char *info_ptr, struct dwarf2_cu *cu)
       //      fprintf_unfiltered (gdb_stderr, "Inserting DIE %x\n", part_die->offset);
       splay_tree_insert (cu->partial_dies, part_die->offset,
 			 (splay_tree_value) part_die);
-      part_die = xmalloc (sizeof (struct partial_die_info));
+
+      part_die = obstack_alloc (&cu->partial_die_obstack,
+				sizeof (struct partial_die_info));
 
       /* For some DIEs we want to follow their children (if any).  */
       if (last_die->tag == DW_TAG_namespace
