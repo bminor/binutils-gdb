@@ -1,5 +1,13 @@
 2005-01-16  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc64fbsd-nat.c: Include "fbsd-nat.h".
+	(_initialize_sparc64fbsd_nat): Add some extra features to the
+	generic SPARC target.
+	* Makefile.in (sparc64fbsd-nat.o): Update dependencies.
+	* config/sparc/fbsd.mh (NATDEPFILES): Add fbsd-nat.o and gcore.o.
+	(NAT_FILE): Set to solib.h.
+	* config/sparc/nm-fbsd.h: Remove file.
+
 	* sparc64-tdep.c (sparc64_store_arguments): Fix typo.
 
 	* sparc-tdep.c (sparc_integral_or_pointer_p): Simplify.
