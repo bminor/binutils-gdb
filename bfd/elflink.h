@@ -298,11 +298,6 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
   bfd *oldbfd;
   boolean newdyn, olddyn, olddef, newdef, newdyncommon, olddyncommon;
 
-  /* This code is for coping with dynamic objects, and is only useful
-     if we are doing an ELF link.  */
-  if (info->hash->creator != abfd->xvec)
-    return true;
-
   *override = false;
   *type_change_ok = false;
   *size_change_ok = false;
@@ -318,6 +313,11 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
   if (h == NULL)
     return false;
   *sym_hash = h;
+
+  /* This code is for coping with dynamic objects, and is only useful
+     if we are doing an ELF link.  */
+  if (info->hash->creator != abfd->xvec)
+    return true;
 
   /* For merging, we only care about real symbols.  */
 
