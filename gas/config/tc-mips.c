@@ -6341,9 +6341,9 @@ mips_ip (str, ip)
 
   for (s = str; *s != '\0' && !isspace(*s); ++s)
     continue;
-  if ( isspace(*s) )
+  if (isspace (*s))
     *s++ = '\0';
-    
+
   if ((insn = (struct mips_opcode *) hash_find (op_hash, str)) == NULL)
     {
       insn_error = "unrecognized opcode";
