@@ -1519,12 +1519,14 @@ build_jump_insn (opcode, operands, nb_operands, jmp_mode)
       /* bra/bsr made be changed into jmp/jsr.  */
       else if (code == M6811_BSR || code == M6811_BRA || code == M6812_BSR)
 	{
-	  opcode = m68hc11_new_insn (2);
+          /* Allocate worst case storage.  */
+	  opcode = m68hc11_new_insn (3);
 	  number_to_chars_bigendian (opcode, code, 1);
 	  number_to_chars_bigendian (opcode + 1, 0, 1);
-	  frag_var (rs_machine_dependent, 2, 1,
-		    ENCODE_RELAX (STATE_PC_RELATIVE, STATE_UNDF),
-		    operands[0].exp.X_add_symbol, (offsetT) n, opcode);
+	  frag_variant (rs_machine_dependent, 1, 1,
+                        ENCODE_RELAX (STATE_PC_RELATIVE, STATE_UNDF),
+                        operands[0].exp.X_add_symbol, (offsetT) n,
+                        opcode);
 	}
       else if (current_architecture & cpu6812)
 	{
