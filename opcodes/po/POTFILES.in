@@ -61,6 +61,13 @@ ip2k-dis.c
 ip2k-ibld.c
 ip2k-opc.c
 ip2k-opc.h
+iq2000-asm.c
+iq2000-desc.c
+iq2000-desc.h
+iq2000-dis.c
+iq2000-ibld.c
+iq2000-opc.c
+iq2000-opc.h
 m10200-dis.c
 m10200-opc.c
 m10300-dis.c

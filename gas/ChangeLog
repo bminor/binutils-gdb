@@ -1,3 +1,9 @@
+2003-01-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2003-01-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* read.c (get_absolute_expr): New, split out from..

@@ -1,3 +1,9 @@
+2003-01-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2003-01-08  Klee Dienes  <kdienes@apple.com>
 
 	* Makefile.am (ALL_MACHINES): Add msp430-dis.lo.
