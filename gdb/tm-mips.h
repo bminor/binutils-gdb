@@ -19,6 +19,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#ifndef LANGUAGE_C
+#define LANGUAGE_C
+#endif
+#include <sym.h>
+#include <symconst.h>
+
 #if !defined (TARGET_BYTE_ORDER)
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
 #endif
@@ -320,20 +326,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    mipsread.c (ab)uses this to save memory */
 
 typedef struct mips_extra_func_info {
-	unsigned long	adr;	/* memory address of start of procedure */
-	long	isym;		/* pointer to procedure symbol */
-	long	pad2;		/* iline: start of line number entries*/
-	long	regmask;	/* save register mask */
-	long	regoffset;	/* save register offset */
 	long	numargs;	/* number of args to procedure (was iopt) */
-	long	fregmask;	/* save floating point register mask */
-	long	fregoffset;	/* save floating point register offset */
-	long	framesize;	/* frameoffset: frame size */
-	short	framereg;	/* frame pointer register */
-	short	pcreg;		/* offset or reg of return pc */
-	long	lnLow;		/* lowest line in the procedure */
-	long	lnHigh;		/* highest line in the procedure */
-	long	pad3;		/* cbLineOffset: byte offset for this procedure from the fd base */
+	PDR	pdr;		/* Procedure descriptor record */
 } *mips_extra_func_info_t;
 
 #define EXTRA_FRAME_INFO \

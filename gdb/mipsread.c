@@ -60,15 +60,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/param.h>
 #include <sys/file.h>
 #include <sys/stat.h>
-#ifdef	CMUCS
-#include <mips/syms.h>
-#else /* not CMUCS */
-#ifndef LANGUAGE_C
-#define	LANGUAGE_C
-#endif
-#include "symconst.h"
-#include "sym.h"
-#endif /* not CMUCS */
 
 #include "coff/mips.h"
 #include "libaout.h"		/* FIXME Secret internal BFD stuff for a.out */
@@ -843,57 +834,6 @@ free_pending(f_idx)
 	pending_list[f_idx] = 0;
 }
 
-/* The number of args to a procedure is not explicit in the symtab,
-   this is the list of all those we know of.
-   This makes parsing more reasonable and avoids extra passes */
-
-static struct numarg {
-	struct numarg	*next;		/* link */
-	unsigned	 adr;		/* procedure's start address */
-	unsigned	 num;		/* arg count */
-} *numargs_list;
-
-/* Record that the procedure at ADR takes NUM arguments. */
-
-static
-got_numargs(adr,num)
-{
-	struct numarg  *n = (struct numarg *) xmalloc(sizeof(struct numarg));
-
-	n->adr = adr;
-	n->num = num;
-	n->next = numargs_list;
-	numargs_list = n;
-}
-
-/* See if we know how many arguments the procedure at ADR takes */
-
-static
-lookup_numargs(adr)
-{
-	struct numarg  *n = numargs_list;
-
-	while (n && n->adr != adr)
-		n = n->next;
-	return (n) ? n->num : -1;
-}
-
-/* Release storage when done with this file */
-/* FIXME -- storage leak.  This is never called!  --gnu */
-
-static void
-free_numargs()
-{
-	struct numarg  *n = numargs_list, *m;
-
-	while (n) {
-		m = n->next;
-		free((PTR)n);
-		n = m;
-	}
-	numargs_list = 0;
-}
-
 char*
 prepend_tag_kind(tag_name, type_code)
      char *tag_name;
@@ -1144,6 +1084,9 @@ data:		/* Common code for symbols describing data */
 				max_value = tsym->value;
 			}
 			else if (tsym->st == stBlock
+				 || tsym->st == stUnion
+				 || tsym->st == stEnum
+				 || tsym->st == stStruct
 				 || tsym->st == stParsed) {
 			    if (tsym->sc == scVariant) ; /*UNIMPLEMENTED*/
 			    if (tsym->index != 0)
@@ -1256,11 +1199,25 @@ data:		/* Common code for symbols describing data */
 			    top_stack->blocktype == stStaticProc)) {
 		    /* Finished with procedure */
 		    struct blockvector *bv = BLOCKVECTOR(top_stack->cur_st);
+		    struct mips_extra_func_info *e;
 		    struct block *b;
 		    int i;
 
 		    BLOCK_END(top_stack->cur_block) += sh->value; /* size */
-		    got_numargs(top_stack->procadr, top_stack->numargs);
+
+		    /* Make up special symbol to contain procedure specific
+		       info */
+		    s = new_symbol(".gdbinfo.");
+		    SYMBOL_NAMESPACE(s) = LABEL_NAMESPACE;
+		    SYMBOL_CLASS(s) = LOC_CONST;
+		    SYMBOL_TYPE(s) = builtin_type_void;
+		    e = (struct mips_extra_func_info *)
+		      obstack_alloc (&current_objfile->symbol_obstack,
+				     sizeof (struct mips_extra_func_info));
+		    SYMBOL_VALUE(s) = (int)e;
+		    e->numargs = top_stack->numargs;
+		    add_symbol(s, top_stack->cur_block);
+
 		    /* Reallocate symbols, saving memory */
 		    b = shrink_block(top_stack->cur_block, top_stack->cur_st);
 
@@ -1615,7 +1572,7 @@ upgrade_type(tpp, tq, ax, bigend)
    of local symbols, and we have to cope with them here.
    The procedure's code ends at BOUND */
 
-static
+static void
 parse_procedure(pr, bound)
 	PDR *pr;
 {
@@ -1625,17 +1582,6 @@ parse_procedure(pr, bound)
 	struct mips_extra_func_info *e;
 	char name[100];
 	char *sh_name;
-
-	/* Reuse the MIPS record */
-	e = (struct mips_extra_func_info *) pr;
-	e->numargs = lookup_numargs(pr->adr);
-
-	/* Make up our special symbol */
-	i = new_symbol(".gdbinfo.");
-	SYMBOL_VALUE(i) = (int)e;
-	SYMBOL_NAMESPACE(i) = LABEL_NAMESPACE;
-	SYMBOL_CLASS(i) = LOC_CONST;
-	SYMBOL_TYPE(i) = builtin_type_void;
 
 	/* Make up a name for static procedures. Sigh. */
 	if (sh == (SYMR*)-1) {
@@ -1666,8 +1612,15 @@ parse_procedure(pr, bound)
 		BLOCK_SUPERBLOCK(b) = top_stack->cur_block;
 		add_block(b, top_stack->cur_st);
 	}
-	e->isym = (long)s;
-	add_symbol(i,b);
+
+	s = mylookup_symbol(".gdbinfo.", b, LABEL_NAMESPACE, LOC_CONST);
+
+	if (s)
+	  {
+	    e = (struct mips_extra_func_info *)SYMBOL_VALUE(s);
+	    e->pdr = *pr;
+	    e->pdr.isym = (long)s;
+	  }
 }
 
 /* Parse the external symbol ES. Just call parse_symbol() after
@@ -2052,6 +2005,9 @@ parse_partial_symbols(end_of_text_seg, objfile)
 		      case stConstant:		/* Constant decl */
 			class = LOC_CONST;
 			break;
+		      case stUnion:
+		      case stStruct:
+		      case stEnum:
 		      case stBlock:			/* { }, str, un, enum*/
 			if (sh->sc == scInfo) {
 			    ADD_PSYMBOL_TO_LIST(name, strlen(name),
@@ -2940,14 +2896,14 @@ fixup_sigtramp()
 
 		e->numargs = 0;	/* the kernel thinks otherwise */
 		/* align_longword(sigcontext + SIGFRAME) */
-		e->framesize = 0x150;
-		e->framereg = SP_REGNUM;
-		e->pcreg = 31;
-		e->regmask = -2;
-		e->regoffset = -(41 * sizeof(int));
-		e->fregmask = -1;
-		e->fregoffset = -(37 * sizeof(int));
-		e->isym = (long)s;
+		e->pdr.frameoffset = 0x150;
+		e->pdr.framereg = SP_REGNUM;
+		e->pdr.pcreg = 31;
+		e->pdr.regmask = -2;
+		e->pdr.regoffset = -(41 * sizeof(int));
+		e->pdr.fregmask = -1;
+		e->pdr.fregoffset = -(37 * sizeof(int));
+		e->pdr.isym = (long)s;
 
 		current_objfile = st->objfile; /* Keep new_symbol happy */
 		s = new_symbol(".gdbinfo.");

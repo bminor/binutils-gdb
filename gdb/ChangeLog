@@ -1,3 +1,14 @@
+Mon Mar 30 16:50:43 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* mipsread.c (parse_symbol, parse_procedure):  Re-do the way that
+	.gdbinfo. symbols are created.  Move creation from parse_procedure
+	to parse_symbol, where it is fairly easy to grow the symtab.  This
+	also fixes a symtab trashing bug on all mips-based systems.
+	* (got_numargs, lookup_numargs, free_numargs):  Delete.  Not
+	needed anymore.
+	* tm-mips.h, tm-iris3.h, mips-tdep.c, mipsread.c:  Re-do struct
+	mips_extra_func_info, and all the PROC_xxx macros that look at it.
+
 Mon Mar 30 14:17:53 1992  Per Bothner  (bothner@cygnus.com)
 
 	* c-exp.y:  Add missing return type to yyparse() prototype.
