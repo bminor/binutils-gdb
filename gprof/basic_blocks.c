@@ -281,6 +281,8 @@ print_exec_counts ()
 
   for (i = 0; i < len; ++i)
     {
+      sym = sorted_bbs [i];
+      
       if (sym->ncalls > 0 || ! ignore_zeros)
 	{
 	  /* FIXME: This only works if bfd_vma is unsigned long.  */
