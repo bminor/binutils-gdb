@@ -1,4 +1,4 @@
-2005-03-06  Daniel Jacobowitz  <dan@debian.org>
+2005-03-06  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-nat.c (child_follow_fork): Call target_terminal_ours before
 	printing output.  Use fprintf_unfiltered.  Only print output when
