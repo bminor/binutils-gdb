@@ -162,6 +162,7 @@ nm-sun2.h
 nm-sun3.h
 nm-sun386.h
 nm-sun4os4.h
+nm-sysv4.h
 nm-trash.h
 nm-ultra3.h
 nm-umax.h

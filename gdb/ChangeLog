@@ -1,3 +1,14 @@
+Wed Oct 21 17:46:07 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	Native support for sun4sol2.
+
+	* xm-sysv4.h (USE_PROC_FS, ATTACH_DETACH): removed to nm-sysv4.h.
+	* nm-sysv4.h: new file.
+	* Makefile.in (HFILES): added nm-sysv4.h.
+	* config/sun4sol2.mh (XDEPFILES): removed procfs.o fork-child.o.
+	  (NAT_FILE, NATDEPFILES): new macros.
+	* config/sun4sol2.mt (TDEPFILES): removed exec.o and solib.o.
+
 Wed Oct 21 03:51:01 1992  John Gilmore  (gnu@cygnus.com)
 
 	* coredep.c:  Include "nm.h" to get REGISTER_U_ADDR.

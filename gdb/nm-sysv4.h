@@ -18,38 +18,11 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* Use SVR4 style shared library support */
+/* SVR4 has /proc support, so use it instead of ptrace. */
 
-#define SVR4_SHARED_LIBS
+#define USE_PROC_FS
 
-/* SVR4 has termio facilities. */
+/* SVR4 machines can easily do attach and detach via /proc (procfs.c)
+   support */
 
-#define HAVE_TERMIO
-
-/* SVR4 has mmap facilities */
-
-#define HAVE_MMAP
-
-/* TIOCGETC and TIOCGLTC are picked up somewhere, but struct tchars
-   and struct ltchars are not.  This makes problems for inflow.c.
-   It is unknown at this time if this is a generic SVR4 problem or
-   one just limited to the initial SVR4 port host machine. */
-
-#define TIOCGETC_BROKEN
-#define TIOCGLTC_BROKEN
-
-/* SVR4 is a derivative of System V Release 3 (USG) */
-
-#define USG
-
-/* Get rid of any system-imposed stack limit if possible.  */
-
-/* #define SET_STACK_LIMIT_HUGE */
-
-/* Use setpgid(0,0) to run inferior in a separate process group */
-
-#define NEED_POSIX_SETPGID
-
-/* We have to include these files now, so that GDB will not make
-   competing definitions in defs.h.  */
-#include <limits.h>
+#define ATTACH_DETACH
