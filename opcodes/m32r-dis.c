@@ -421,10 +421,14 @@ print_insn (cd, pc, info, buf, buflen)
       CGEN_FIELDS fields;
       int length;
 
-#if 0 /* not needed as insn shouldn't be in hash lists if not supported */
+#ifdef CGEN_VALIDATE_INSN_SUPPORTED 
+      /* not needed as insn shouldn't be in hash lists if not supported */
       /* Supported by this cpu?  */
       if (! m32r_cgen_insn_supported (cd, insn))
-	continue;
+        {
+          insn_list = CGEN_DIS_NEXT_INSN (insn_list);
+	  continue;
+        }
 #endif
 
       /* Basic bit mask must be correct.  */

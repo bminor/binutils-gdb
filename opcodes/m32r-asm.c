@@ -486,6 +486,7 @@ m32r_cgen_assemble_insn (cd, str, fields, buf, errmsg)
 {
   const char *start;
   CGEN_INSN_LIST *ilist;
+  const char *tmp_errmsg;
 
   /* Skip leading white space.  */
   while (isspace (* str))
@@ -502,7 +503,8 @@ m32r_cgen_assemble_insn (cd, str, fields, buf, errmsg)
     {
       const CGEN_INSN *insn = ilist->insn;
 
-#if 0 /* not needed as unsupported opcodes shouldn't be in the hash lists */
+#ifdef CGEN_VALIDATE_INSN_SUPPORTED 
+      /* not usually needed as unsupported opcodes shouldn't be in the hash lists */
       /* Is this insn supported by the selected cpu?  */
       if (! m32r_cgen_insn_supported (cd, insn))
 	continue;
@@ -519,7 +521,7 @@ m32r_cgen_assemble_insn (cd, str, fields, buf, errmsg)
       /* Allow parse/insert handlers to obtain length of insn.  */
       CGEN_FIELDS_BITSIZE (fields) = CGEN_INSN_BITSIZE (insn);
 
-      if (! CGEN_PARSE_FN (cd, insn) (cd, insn, & str, fields))
+      if (!(tmp_errmsg = CGEN_PARSE_FN (cd, insn) (cd, insn, & str, fields)))
 	{
 	  /* ??? 0 is passed for `pc' */
 	  if (CGEN_INSERT_FN (cd, insn) (cd, insn, fields, buf, (bfd_vma) 0)
@@ -533,16 +535,25 @@ m32r_cgen_assemble_insn (cd, str, fields, buf, errmsg)
       /* Try the next entry.  */
     }
 
-  /* FIXME: We can return a better error message than this.
-     Need to track why it failed and pick the right one.  */
   {
-    static char errbuf[100];
+    static char errbuf[150];
+
+#ifdef CGEN_VERBOSE_ASSEMBLER_ERRORS
+    /* if verbose error messages, use errmsg from CGEN_PARSE_FN */
+    if (strlen (start) > 50)
+      /* xgettext:c-format */
+      sprintf (errbuf, "%s `%.50s...'", tmp_errmsg, start);
+    else 
+      /* xgettext:c-format */
+      sprintf (errbuf, "%s `%.50s'", tmp_errmsg, start);
+#else
     if (strlen (start) > 50)
       /* xgettext:c-format */
       sprintf (errbuf, _("bad instruction `%.50s...'"), start);
     else 
       /* xgettext:c-format */
       sprintf (errbuf, _("bad instruction `%.50s'"), start);
+#endif
       
     *errmsg = errbuf;
     return NULL;

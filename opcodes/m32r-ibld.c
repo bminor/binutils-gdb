@@ -3,7 +3,7 @@
 THIS FILE IS MACHINE GENERATED WITH CGEN: Cpu tools GENerator.
 - the resultant file is machine generated, cgen-ibld.in isn't
 
-Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and GDB, the GNU debugger.
 
@@ -203,6 +203,7 @@ insert_normal (cd, value, attrs, word_offset, start, length, word_length,
   if (! CGEN_BOOL_ATTR (attrs, CGEN_IFLD_SIGNED))
     {
       unsigned long maxval = mask;
+      
       if ((unsigned long) value > maxval)
 	{
 	  /* xgettext:c-format */
@@ -214,15 +215,19 @@ insert_normal (cd, value, attrs, word_offset, start, length, word_length,
     }
   else
     {
-      long minval = - (1L << (length - 1));
-      long maxval = (1L << (length - 1)) - 1;
-      if (value < minval || value > maxval)
+      if (! cgen_signed_overflow_ok_p (cd))
 	{
-	  sprintf
-	    /* xgettext:c-format */
-	    (errbuf, _("operand out of range (%ld not between %ld and %ld)"),
-	     value, minval, maxval);
-	  return errbuf;
+	  long minval = - (1L << (length - 1));
+	  long maxval =   (1L << (length - 1)) - 1;
+	  
+	  if (value < minval || value > maxval)
+	    {
+	      sprintf
+		/* xgettext:c-format */
+		(errbuf, _("operand out of range (%ld not between %ld and %ld)"),
+		 value, minval, maxval);
+	      return errbuf;
+	    }
 	}
     }
 

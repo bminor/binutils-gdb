@@ -1,3 +1,8 @@
+2000-02-23  Andrew Haley  <aph@cygnus.com>
+
+        * m32r-asm.c, m32r-desc.c, m32r-desc.h, m32r-dis.c,
+	m32r-ibld.c,m32r-opc.h: Rebuild.
+
 2000-02-23  Linas Vepstas <linas@linas.org>
 
 	* i370-dis.c, i370-opc.c: New.
