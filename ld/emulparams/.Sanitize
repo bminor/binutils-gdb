@@ -15,7 +15,7 @@
 
 Do-first:
 
-d30v_files="d30velf.sh"
+d30v_files="d30velf.sh d30velf_o.sh d30velf_e.sh"
 
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
 	keep_these_too="${d30v_files} ${keep_these_too}"

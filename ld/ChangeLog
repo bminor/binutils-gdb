@@ -9,13 +9,26 @@ start-sanitize-d30v
 end-sanitize-tic80
 
 start-sanitize-d30v
-	* Makefile.{am,in}: (ALL_EMULATIONS): Add ed30velf.o.
+	* Makefile.{am,in}: (ALL_EMULATIONS): Add ed30velf{,_e,_o}.o.
+	(ed30velf_e.c): Like d30velf, except .text/.data/etc always go in
+	external memory.
+	(ed30velf_o.c): Like d30velf, except .text/.data/etc always go in
+	onchip memory.
 
 	* emulparams/d30velf.sh (STACK_START_ADDR): Top of default
 	stack.
 	({TEXT,DATA,EMEM}_SIZE): Sizes of the 3 memory areas.
 	({TEXT,DATA,BSS}_MEMORY): Which memory region .text, .data, and
 	.bss should go in.
+
+	* emulparams/d30velf_{e,o}.sh: New files to be explicit whether
+	.text, .data, etc go in external memory or onchip memory.
+
+	* configure.tgt (d30v-*-*ext*): New configuration to default
+	.text, .data, etc. in external memory.
+	(d30v-*-*onchip*): New configuration to default .text, .data,
+	etc. in onchip memory.
+	(d30v-*-*): Add d30velf_{e,o} emulations.
 
 	* scripttempl/elfd30v.sc: Allow .text, .data, .bss to be put in
 	either the onchip text/data areas or the external memory area.
