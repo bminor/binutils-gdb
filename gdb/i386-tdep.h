@@ -27,6 +27,7 @@ struct frame_info;
 struct gdbarch;
 struct reggroup;
 struct regset;
+struct regcache;
 
 /* GDB's i386 target supports both the 32-bit Intel Architecture
    (IA-32) and the 64-bit AMD x86-64 architecture.  Internally it uses

@@ -1118,13 +1118,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 
 	  if (local_symbols
 	      && local_symbols->nsyms > 0
-#ifndef DEPRECATED_USE_REGISTER_NOT_ARG
-	      /* DEPRECATED_USE_REGISTER_NOT_ARG is only defined by
-                 the SPARC.  */
 	      && gdbarch_stabs_argument_has_addr (current_gdbarch,
-						  SYMBOL_TYPE (sym))
-#endif
-	    )
+						  SYMBOL_TYPE (sym)))
 	    {
 	      struct symbol *prev_sym;
 	      prev_sym = local_symbols->symbol[local_symbols->nsyms - 1];

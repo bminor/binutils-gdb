@@ -1215,7 +1215,7 @@ child_continue (DWORD continue_status, int id)
 /* Called in pathological case where Windows fails to send a
    CREATE_PROCESS_DEBUG_EVENT after an attach.  */
 DWORD
-fake_create_process ()
+fake_create_process (void)
 {
   current_process_handle = OpenProcess (PROCESS_ALL_ACCESS, FALSE,
 					current_event.dwProcessId);

@@ -1,3 +1,17 @@
+2004-01-05  Andrew Cagney  <cagney@redhat.com>
+
+	* libunwind-frame.h (struct frame_id): Add opaque declaration,
+	move to start of file.
+	* i386-tdep.h (struct regcache): Add opaque declaration.
+	* config/ia64/nm-linux.h (struct target_ops): Add opaque
+	declaration.
+	* ia64-tdep.c (ia64_find_proc_info_x): Do not use __FUNCTION__.
+	(ia64_gdbarch_init): Use "GNU/Linux" in comment.
+	* win32-nat.c (fake_create_process): Use ISO C style definition.
+	* stabsread.c (define_symbol): Delete #ifndef
+	DEPRECATED_USE_REGISTER_NOT_ARG wrapper around
+	stabs_argument_has_addr call, macro never defined.
+
 2004-01-04  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* op50-rom.c: Delete.
