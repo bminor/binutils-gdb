@@ -554,7 +554,7 @@ Requires prior use of @code{OPEN} or @code{CREATE}.
 @item LIST
 Display full contents of the current archive, in ``verbose'' style
 regardless of the state of @code{VERBOSE}.  The effect is like @samp{ar
-tv @var{archive}}).  (This single command is a @sc{gnu} @code{ld}
+tv @var{archive}}.  (This single command is a @sc{gnu} @code{ar}
 enhancement, rather than present for MRI compatibility.)
 
 Requires prior use of @code{OPEN} or @code{CREATE}.
@@ -2056,7 +2056,7 @@ option.  @code{windres} will also search this directory when looking for
 files named in the @code{rc} file.
 
 @item -D @var{target}
-@item --define @var{sym[=val]}
+@itemx --define @var{sym[=val]}
 Specify a @code{-D} option to pass to the preprocessor when reading an
 @code{rc} file.
 
