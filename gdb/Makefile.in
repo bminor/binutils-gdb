@@ -2318,7 +2318,7 @@ cli-dump.o: $(srcdir)/cli/cli-dump.c $(defs_h) $(gdb_string_h) \
 	$(cli_dump_h) $(gdb_assert_h) $(target_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-dump.c
 cli-interp.o: $(srcdir)/cli/cli-interp.c $(defs_h) $(value_h) \
-	$(wrapper_h) $(event_top_h) $(ui_out_h) $(cli_out_h)
+	$(wrapper_h) $(event_top_h) $(ui_out_h) $(cli_out_h) $(top_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-interp.c
 cli-script.o: $(srcdir)/cli/cli-script.c $(defs_h) $(value_h) $(language_h) \
 	$(ui_out_h) $(gdb_string_h) $(top_h) $(cli_cmds_h) $(cli_decode_h) \

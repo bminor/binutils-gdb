@@ -141,7 +141,9 @@ gdb_add_interpreter (struct gdb_interpreter *interp)
    runs the delete_proc, and if this is successful, the INTERP is deleted from
    the interpreter list and the function returns 1.  If the delete_proc fails, the
    function returns -1 and the interpreter is NOT removed from the list.  If the
-   interp is not found, 0 is returned. */
+   interp is not found, 0 is returned.
+
+   This isn't currently used by anything. */
 
 int
 gdb_delete_interpreter (struct gdb_interpreter *interp)
@@ -576,9 +578,7 @@ interpreter_exec_cmd (char *args, int from_tty)
 	{
 	  gdb_set_interpreter (old_interp);
 	  gdb_interpreter_set_quiet (interp_to_use, old_quiet);
-	  error
-	    ("interpreter-exec: mi_interpreter_execute: error in command: \"%s\".",
-	     prules[i]);
+	  error ("error in command: \"%s\".", prules[i]);
 	  break;
 	}
     }

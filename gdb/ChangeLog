@@ -1,3 +1,15 @@
+2002-10-01  Keith Seitz  <keiths@redhat.com>
+
+	* interps.c (interpreter_exec_cmd): Remove mention of "mi" in
+	error message.
+
+	* cli/cli-interp.c (do_captured_execute_command): New function.
+	(safe_execute_command): New function.
+	* Makefile.in (cli-interp.c): Depend on top_h.
+	* wrapper.c (do_captured_execute_command): Moved to cli/cli-interp.c.
+	(gdb_execute_command): Removed.
+	* wrapper.h (gdb_execute_command): Removed.
+
 2002-09-04  Keith Seitz  <keiths@redhat.com>
 
 	* thread.c (do_captured_list_thread_ids): Call prune_threads

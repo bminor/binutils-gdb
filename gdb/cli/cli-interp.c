@@ -24,30 +24,40 @@
 #include "event-top.h"
 #include "ui-out.h"
 #include "cli-out.h"
-
+#include "top.h"		/* for "execute_command" */
 /* Prototypes for the CLI Interpreter functions */
 
-int cli_interpreter_init (void *data);
-int cli_interpreter_resume (void *data);
-int cli_interpreter_do_one_event (void *data);
-int cli_interpreter_suspend (void *data);
-int cli_interpreter_delete (void *data);
-int cli_interpreter_exec (void *data, char *command_str);
-int cli_interpreter_display_prompt (void *data, char *new_prompt);
+static int cli_interpreter_init (void *data);
+static int cli_interpreter_resume (void *data);
+static int cli_interpreter_do_one_event (void *data);
+static int cli_interpreter_suspend (void *data);
+static int cli_interpreter_delete (void *data);
+static int cli_interpreter_exec (void *data, char *command_str);
+static int cli_interpreter_display_prompt (void *data, char *new_prompt);
 
 /* These are the ui_out and the interpreter for the console interpreter. */
 static struct ui_out *cli_uiout;
 static struct gdb_interpreter *cli_interp;
 
+/* Longjmp-safe wrapper for "execute_command" */
+static int do_captured_execute_command (struct ui_out *uiout, void *data);
+static enum gdb_rc safe_execute_command (struct ui_out *uiout, char *command,
+					 int from_tty);
+struct captured_execute_command_args
+{
+  char *command;
+  int from_tty;
+};
+
 /* These implement the cli out interpreter: */
 
-int
+static int
 cli_interpreter_init (void *data)
 {
   return 1;
 }
 
-int
+static int
 cli_interpreter_resume (void *data)
 {
   /*sync_execution = 1;*/
@@ -55,26 +65,26 @@ cli_interpreter_resume (void *data)
   return 1;
 }
 
-int
+static int
 cli_interpreter_do_one_event (void *data)
 {
   return 1;
 }
 
-int
+static int
 cli_interpreter_suspend (void *data)
 {
   gdb_disable_readline ();
   return 1;
 }
 
-int
+static int
 cli_interpreter_delete (void *data)
 {
   return 1;
 }
 
-int
+static int
 cli_interpreter_display_prompt (void *data, char *new_prompt)
 {
   if (gdb_interpreter_is_quiet (NULL))
@@ -87,7 +97,7 @@ cli_interpreter_display_prompt (void *data, char *new_prompt)
     }
 }
 
-int
+static int
 cli_interpreter_exec (void *data, char *command_str)
 {
   int result;
@@ -100,9 +110,28 @@ cli_interpreter_exec (void *data, char *command_str)
      It is important that it gets reset everytime, since the user could
      set gdb to use a different interpreter. */
   old_stream = cli_out_set_stream (cli_uiout, gdb_stdout);
-  result = gdb_execute_command (cli_uiout, command_str, 1);
+  result = safe_execute_command (cli_uiout, command_str, 1);
   cli_out_set_stream (cli_uiout, old_stream);
   return result;
+}
+
+static int
+do_captured_execute_command (struct ui_out *uiout, void *data)
+{
+  struct captured_execute_command_args *args =
+    (struct captured_execute_command_args *) data;
+  execute_command (args->command, args->from_tty);
+  return GDB_RC_OK;
+}
+
+static enum gdb_rc
+safe_execute_command (struct ui_out *uiout, char *command, int from_tty)
+{
+  struct captured_execute_command_args args;
+  args.command = command;
+  args.from_tty = from_tty;
+  return catch_exceptions (uiout, do_captured_execute_command, &args,
+			   NULL, RETURN_MASK_ALL);
 }
 
 /* standard gdb initialization hook */
