@@ -1,3 +1,7 @@
+Fri Jun 19 09:16:42 1998  Mark Alexander  <marka@cygnus.com>
+
+	* m10200-dis.c (print_insn_mn10200): Recognize 'break' pseudo-op.
+
 start-sanitize-am33
 Fri Jun 19 09:42:51 1998  Jeffrey A Law  (law@cygnus.com)
 
