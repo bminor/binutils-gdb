@@ -1,4 +1,7 @@
-Wed Aug 17 10:40:41 1994  Ian Lance Taylor  (ian@cygnus.com)
+Wed Aug 17 16:54:18 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* linker.c (_bfd_generic_link_add_archive_symbols): Initialize
+	PASS to the old value + 1.
 
 	* coffgen.c (coff_get_normalized_symtab): If a C_FILE symbol has
 	no aux entries, use the symbol name as the file name.
