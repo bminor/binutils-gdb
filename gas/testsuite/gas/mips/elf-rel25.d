@@ -12,4 +12,4 @@ Disassembly of section \.text:
 .*:	279c0000 	addiu	\$28,\$28,0
 			.*: R_MIPS_LO16	_gp_disp
 .*:	0399e021 	addu	\$28,\$28,\$25
-.*:	00000000 	nop
+#pass

@@ -12,4 +12,4 @@ Disassembly of section \.text:
 			.*: R_MIPS_HI16	_gp
 .*:	279c0000 	addiu	\$28,\$28,0
 			.*: R_MIPS_LO16	_gp
-	\.\.\.
+#pass

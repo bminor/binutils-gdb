@@ -1,3 +1,8 @@
+2004-12-13  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mips/elf-rel25.d, gas/mips/elf-rel25a.d: Cope with different
+	.text alignments.
+
 2004-12-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/alpha/elf-usepv-1.d: Update for changed section syms.
