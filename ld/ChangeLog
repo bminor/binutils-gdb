@@ -1,3 +1,8 @@
+2002-07-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldmisc.c (demangle): Move so that it doesn't intrude between
+	vfinfo comment and body.  Add comment.
+
 2002-07-01  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* emulparams/vax.sh (OUTPUT_FORMAT): Use a.out-vax-bsd format.
