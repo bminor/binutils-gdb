@@ -1,5 +1,8 @@
 Tue Jul 14 16:59:46 1992  Ken Raeburn  (raeburn@cygnus.com)
 
+	* i960-tdep.c (frame_args_address): If arg pointer can't be found,
+	use frame address.
+
 	* buildsym.c (read_struct_type): Don't die on TYPE_CODE_UNDEF
 	nodes as base classes.
 

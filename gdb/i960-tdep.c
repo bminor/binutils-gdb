@@ -410,6 +410,8 @@ frame_args_address (fi, must_be_correct)
       ap = 0;
     else
       ap = read_register (G14_REGNUM);
+    if (ap == 0)
+      ap = fi->frame;
   }
   fi->arg_pointer = ap;		/* Cache it for next time */
   return ap;
