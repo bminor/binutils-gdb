@@ -439,8 +439,10 @@ start_symtab ()
 #endif
 #endif
 
-  /* Initialize the source file information for this file.  */
+  /* Initialize the source file line number information for this file.  */
 
+  if (line_vector)		/* Unlikely, but maybe possible? */
+    free (line_vector);
   line_vector_index = 0;
   line_vector_length = 1000;
   prev_line_number = -2;	/* Force first line number to be explicit */
@@ -831,6 +833,8 @@ read_coff_symtab (desc, nsyms)
   last_source_file = 0;
   bzero (opaque_type_chain, sizeof opaque_type_chain);
 
+  if (type_vector)			/* Get rid of previous one */
+    free (type_vector);
   type_vector_length = 160;
   type_vector = (struct typevector *)
 		xmalloc (sizeof (struct typevector)
@@ -1697,7 +1701,7 @@ decode_type (cs, c_type, aux)
   /* Reference to existing type */
   if (cs->c_nsyms > 1 && aux->x_sym.x_tagndx.l != 0)
     {
-      type = coff_alloc_type (aux->x_sym.x_tagndx);
+      type = coff_alloc_type (aux->x_sym.x_tagndx.l);
       return type;
     }
 

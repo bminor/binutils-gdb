@@ -170,11 +170,12 @@ core_open (filename, from_tty)
 #ifdef SOLIB_ADD
     (void) catch_errors (solib_add_stub, (char *)from_tty, (char *)0);
 #endif
+
     /* Now, set up the frame cache, and print the top of stack */
-    set_current_frame ( create_new_frame (read_register (FP_REGNUM),
-					  read_pc ()));
+    set_current_frame (create_new_frame (read_register (FP_REGNUM),
+					 read_pc ()));
     select_frame (get_current_frame (), 0);
-    print_sel_frame (0);	/* Print the top frame and source line */
+    print_stack_frame (selected_frame, selected_frame_level, 1);
   } else {
     printf (
 "Warning: you won't be able to access this core file until you terminate\n\

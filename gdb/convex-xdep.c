@@ -976,7 +976,7 @@ core_file_command (filename, from_tty)
       select_frame (get_current_frame (), 0);
       validate_files ();
 
-      print_sel_frame (1);
+      print_stack_frame (selected_frame, selected_frame_level, -1);
     }
   else if (from_tty)
     printf_filtered ("No core file now.\n");

@@ -381,7 +381,7 @@ kill_command (arg, from_tty)
     if (selected_frame == NULL)
       fputs_filtered ("No selected stack frame.\n", stdout);
     else
-      print_sel_frame (0);
+      print_stack_frame (selected_frame, selected_frame_level, 1);
   }
 }
 
@@ -478,7 +478,7 @@ Report which ones can be written.");
   inferior_pid = 0;
 
   ioctl (0, TIOCGETP, &sg_ours);
-  fcntl (0, F_GETFL, tflags_ours);
+  tflags_ours = fcntl (0, F_GETFL, 0);
 
 #if defined(TIOCGETC) && !defined(TIOCGETC_BROKEN)
   ioctl (0, TIOCGETC, &tc_ours);

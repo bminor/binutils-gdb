@@ -3,19 +3,19 @@
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 
@@ -31,6 +31,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 extern int addressprint;	/* Print addresses, or stay symbolic only? */
 extern int info_verbose;	/* Verbosity of symbol reading msgs */
+extern unsigned lines_to_list;	/* # of lines "list" command shows by default */
 extern char *reg_names[];	/* Names of registers */
 
 /* Thie "selected" stack frame is used by default for local and arg access.
@@ -61,7 +62,7 @@ void print_frame_info ();
    If SOURCE is 1, print the source line as well.
    If SOURCE is -1, print ONLY the source line.  */
 
-static void
+void
 print_stack_frame (frame, level, source)
      FRAME frame;
      int level;
@@ -187,30 +188,12 @@ print_frame_info (fi, level, source, args)
 	    printf_filtered ("0x%x\t", fi->pc);
 	  print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
 	}
-      current_source_line = max (sal.line - lines_to_list () / 2, 1);
+      current_source_line = max (sal.line - lines_to_list/2, 1);
     }
   if (source != 0)
     set_default_breakpoint (1, fi->pc, sal.symtab, sal.line);
 
   fflush (stdout);
-}
-
-/* Call here to print info on selected frame, after a trap.  */
-
-void
-print_sel_frame (just_source)
-     int just_source;
-{
-  print_stack_frame (selected_frame, -1, just_source ? -1 : 1);
-}
-
-/* Print info on the selected frame, including level number
-   but not source.  */
-
-void
-print_selected_frame ()
-{
-  print_stack_frame (selected_frame, selected_frame_level, 0);
 }
 
 void flush_cached_frames ();
@@ -592,13 +575,11 @@ print_block_frame_locals (b, frame, stream)
   return values_printed;
 }
 
-/* Same, but print labels.
-   FIXME, this does not even reference FRAME... --gnu  */
+/* Same, but print labels.  */
 
 static int
-print_block_frame_labels (b, frame, have_default, stream)
+print_block_frame_labels (b, have_default, stream)
      struct block *b;
-     register FRAME frame;
      int *have_default;
      register FILE *stream;
 {
@@ -728,7 +709,7 @@ print_frame_label_vars (frame, this_level_only, stream)
 	{
 	  if (blocks_printed[index] == 0)
 	    {
-	      if (print_block_frame_labels (BLOCKVECTOR_BLOCK (bl, index), frame, &have_default, stream))
+	      if (print_block_frame_labels (BLOCKVECTOR_BLOCK (bl, index), &have_default, stream))
 		values_printed = 1;
 	      blocks_printed[index] = 1;
 	    }
@@ -762,18 +743,16 @@ locals_info (args, from_tty)
      char *args;
      int from_tty;
 {
-  if (!target_has_stack)
-    error ("No stack.");
-
+  if (!selected_frame)
+    error ("No frame selected.");
   print_frame_local_vars (selected_frame, stdout);
 }
 
 static void
 catch_info ()
 {
-  if (!target_has_stack)
-    error ("No stack.");
-
+  if (!selected_frame)
+    error ("No frame selected.");
   print_frame_label_vars (selected_frame, 0, stdout);
 }
 
@@ -834,8 +813,8 @@ print_frame_arg_vars (frame, stream)
 static void
 args_info ()
 {
-  if (!target_has_stack)
-    error ("No stack.");
+  if (!selected_frame)
+    error ("No frame selected.");
   print_frame_arg_vars (selected_frame, stdout);
 }
 
@@ -913,6 +892,11 @@ find_relative_frame (frame, level_offset_ptr)
      The following algorithm is linear.  */
   if (*level_offset_ptr < 0)
     {
+#if 0
+/* This is ancient and unnecessary? 			-- gnu@cygnus.com 
+   It also loops forever if frame #0 is not current_frame (e.g. when we have
+   used the "frame" command after the stack was invalid).  */
+
       /* First put frame1 at innermost frame
 	 and frame2 N levels up from there.  */
       frame1 = get_current_frame ();
@@ -931,6 +915,15 @@ find_relative_frame (frame, level_offset_ptr)
 	  frame2 = get_prev_frame (frame2);
 	}
       return frame1;
+#else
+      while (*level_offset_ptr < 0) {
+	frame1 = get_next_frame (frame);
+	if (!frame1)
+	  break;
+	frame = frame1;
+	(*level_offset_ptr)++;
+      }
+#endif
     }
   return frame;
 }
@@ -954,10 +947,15 @@ frame_command (level_exp, from_tty)
 
   frame = parse_frame_specification (level_exp);
 
-  for (frame1 = get_prev_frame (0);
-       frame1 && frame1 != frame;
-       frame1 = get_prev_frame (frame1))
-    level++;
+  /* Try to figure out what level this frame is.  But if there is
+     no current stack, don't error out -- let the user set one.  */
+  frame1 = 0;
+  if (get_current_frame()) {
+    for (frame1 = get_prev_frame (0);
+	 frame1 && frame1 != frame;
+	 frame1 = get_prev_frame (frame1))
+      level++;
+  }
 
   if (!frame1)
     level = 0;

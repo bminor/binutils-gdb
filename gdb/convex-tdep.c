@@ -723,7 +723,7 @@ set_thread_command (arg)
     set_current_frame (create_new_frame (read_register (FP_REGNUM),
 					 read_pc ()));
     select_frame (get_current_frame (), 0);
-    print_sel_frame (1);
+    print_stack_frame (selected_frame, selected_frame_level, -1);
 }
 
 /* Here on CONT command; gdb's dispatch address is changed to come here.
