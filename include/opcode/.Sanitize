@@ -49,7 +49,6 @@ ns32k.h
 pn.h
 ppc.h
 pyr.h
-rs6k.h
 sparc.h
 tahoe.h
 vax.h
