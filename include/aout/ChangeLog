@@ -1,3 +1,18 @@
+Sat Jun 11 16:16:09 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Add weak symbols as an extension to a.out.
+	* aout64.h (N_WEAKU, N_WEAKA, N_WEAKT, N_WEAKD, N_WEAKB): Define.
+	* stab.def: Update symbol value table.
+
+Thu Jun  2 17:13:38 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* sun4.h (EXTERNAL_SUN4_DYNAMIC_DEBUGGER_SIZE): Correct from 28 to
+	24.  Fix up ld_got comment.
+
+Wed Mar 30 00:31:49 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* dynix3.h:  Cleanup, adapt to current bfd version.
+
 Sat Feb 26 10:25:53 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	* aout64.h: Add casts to avoid warnings from SVR4 cc.
@@ -128,6 +143,7 @@ Sat Nov 30 20:34:52 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 	reloc.h, stab.def, stab_gnu.h, sun4.h: All moved from the
 	devo/include directory
 
-
-	
-
+
+Local Variables:
+version-control: never
+End:
