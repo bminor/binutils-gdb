@@ -1,6 +1,6 @@
 /* tc-sh.c -- Assemble code for the Renesas / SuperH SH
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+   2003, 2004  Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1426,6 +1426,8 @@ get_operand (char **ptr, sh_operand_info *op)
 
   if (src[0] == '#')
     {
+      if (! ISDIGIT (src[1]))
+	as_bad (_("syntax error in #Imm"));
       src++;
       *ptr = parse_exp (src, op);
       op->type = A_IMM;

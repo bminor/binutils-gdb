@@ -1,3 +1,8 @@
+2004-02-27  Anil Paranjpe  <anilp1@kpitcummins.com>
+
+	* config/tc-sh.c (get_operand):  In case of #Imm, check has been
+	added for wrong syntax.
+
 2004-02-26  Eric Christopher  <echristo@redhat.com>
 
 	* config/tc-mips.c (mips_dwarf2_addr_size): New.
