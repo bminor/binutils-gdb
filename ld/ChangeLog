@@ -1,3 +1,8 @@
+1999-07-11  Ian Lance Taylor  <ian@zembu.com>
+
+	* Many files: Changes to avoid gcc warnings: Add ATTRIBUTE_UNUSED
+	as appropriate.  Fill in structure initializations.
+
 1999-07-10  Ian Lance Taylor  <ian@zembu.com>
 
 	* ldfile.c: Revert patch of 1999-07-08.

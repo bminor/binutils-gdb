@@ -155,7 +155,7 @@ static void walk_wild_file
 /* EXPORTS */
 lang_output_section_statement_type *abs_output_section;
 lang_statement_list_type *stat_ptr = &statement_list;
-lang_statement_list_type file_chain = { 0 };
+lang_statement_list_type file_chain = { NULL, NULL };
 const char *entry_symbol = NULL;
 boolean entry_from_cmdline;
 boolean lang_has_input_file = false;
@@ -1430,7 +1430,7 @@ wild (s, section, file, target, output)
      lang_wild_statement_type *s;
      const char *section;
      const char *file;
-     const char *target;
+     const char *target ATTRIBUTE_UNUSED;
      lang_output_section_statement_type *output;
 {
   walk_wild (s, section, file, output_section_callback, (void *) output);
@@ -2292,7 +2292,7 @@ size_input_section (this_ptr, output_section_statement, fill, dot, relax)
      lang_output_section_statement_type * output_section_statement;
      fill_type fill;
      bfd_vma dot;
-     boolean relax;
+     boolean relax ATTRIBUTE_UNUSED;
 {
   lang_input_section_type *is = &((*this_ptr)->input_section);
   asection *i = is->section;
@@ -3023,10 +3023,10 @@ lang_finish ()
 
 static void
 #ifdef ANSI_PROTOTYPES
-ignore_bfd_errors (const char *s, ...)
+ignore_bfd_errors (const char *s ATTRIBUTE_UNUSED, ...)
 #else
 ignore_bfd_errors (s)
-     const char *s;
+     const char *s ATTRIBUTE_UNUSED;
 #endif
 {
   /* Don't do anything.  */
@@ -3526,8 +3526,8 @@ static void
 gc_section_callback (ptr, section, file, data)
      lang_wild_statement_type *ptr;
      asection *section;
-     lang_input_statement_type *file;
-     void *data;
+     lang_input_statement_type *file ATTRIBUTE_UNUSED;
+     void *data ATTRIBUTE_UNUSED;
 {
   /* If the wild pattern was marked KEEP, the member sections
      should be as well.  */
