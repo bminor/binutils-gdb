@@ -1,3 +1,10 @@
+Wed Jun 17 13:55:31 1992  Fred Fish  (fnf@cygnus.com)
+
+	* elf.c (bfd_section_from_shdr, elf_slurp_symbol_table):
+	Correct misconception that there can be only one symbol table.
+	Only call elf_slurp_symbol_table on the full symbol table, not
+	the dynamic one which is only a subset of the full one.
+
 Wed Jun 17 15:54:57 1992  Ken Raeburn  (Raeburn@Cygnus.COM)
 
 	* coffcode.h (coff_compute_section_file_positions): For I960,

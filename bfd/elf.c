@@ -466,6 +466,11 @@ DEFUN(bfd_section_from_shdr, (abfd, shindex),
     /* *these* do a lot of work -- but build no sections! */
     /* the spec says there can be multiple strtabs, but only one symtab */
     /* but there can be lots of REL* sections. */
+    /* FIXME:  The above statement is wrong!  There are typically at least
+       two symbol tables in a dynamically linked executable, ".dynsym"
+       which is the dynamic linkage symbol table and ".symtab", which is
+       the "traditional" symbol table.  -fnf */
+       
     {
       asection		*target_sect;
       unsigned int	idx;
@@ -474,8 +479,13 @@ DEFUN(bfd_section_from_shdr, (abfd, shindex),
       bfd_section_from_shdr (abfd, hdr->sh_info); /* target */
       target_sect = section_from_elf_index (abfd, hdr->sh_info);
       
+#if 0
+      /* FIXME:  We are only prepared to read one symbol table, so
+	 do NOT read the dynamic symbol table since it is only a
+	 subset of the full symbol table.  Also see comment above. -fnf */
       if (!elf_slurp_symbol_table(abfd, i_shdrp + hdr->sh_link))
 	return false;
+#endif
 
       target_sect->reloc_count = hdr->sh_size / hdr->sh_entsize;
       target_sect->flags |= SEC_RELOC;
@@ -1613,8 +1623,6 @@ DEFUN (elf_compute_section_file_positions, (abfd), bfd *abfd)
     i_ehdrp->e_entry = bfd_get_start_address (abfd);
     i_ehdrp->e_shentsize = sizeof (Elf_External_Shdr);
 
-    /* can't do this: we'll need many more... */
-    /* i_ehdr.e_shnum = bfd_count_sections(abfd)+1; /* include 0th, shstrtab */
     /* figure at most each section can have a rel, strtab, symtab */
     maxsections = 4*bfd_count_sections(abfd)+2;
 
@@ -1908,6 +1916,11 @@ DEFUN (elf_slurp_symbol_table, (abfd, hdr),
   unsigned int *table_ptr;	/* bfd symbol translation table */
 
   /* this is only valid because there is only one symtab... */
+  /* FIXME:  This is incorrect, there may also be a dynamic symbol
+     table which is a subset of the full symbol table.  We either need
+     to be prepared to read both (and merge them) or ensure that we
+     only read the full symbol table.  Currently we only get called to
+     read the full symbol table.  -fnf */
   if (bfd_get_outsymbols (abfd) != NULL)
     {
       return (true);
@@ -2051,7 +2064,7 @@ DEFUN (elf_get_symtab_upper_bound, (abfd), bfd *abfd)
 {
   unsigned int symtab_size = 0;
 
-  /* if (elf_slurp_symbol_table (abfd, ???)) */
+  /* if (elf_slurp_symbol_table (abfd, FIXME...)) */
     {
       symtab_size = (bfd_get_symcount (abfd) + 1) * (sizeof (asymbol));
     }
