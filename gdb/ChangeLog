@@ -1,3 +1,7 @@
+Thu Mar  5 15:10:35 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* Makefile.in (BISON): Configure substitutes in @YACC@, not @BISON@.
+
 Thu Mar  5 14:42:41 1998  Keith Seitz  <keiths@onions.cygnus.com>
 
 	* ocd.c (ocd_open): If we fail ocd_start_remote, make sure we
