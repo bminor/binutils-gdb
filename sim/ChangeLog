@@ -1,3 +1,13 @@
+Fri May 21 10:55:06 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (check, installcheck): Added dummy targets.
+
+Mon May  3 21:39:43 1993  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (endian): Find endian.c in $(srcdir), and also
+	explicitly make it, since some makes apparently don't work with
+	VPATH and .c to executable rules (SunOS make for example).
+
 Mon May  3 08:29:01 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* Makefile.in (endian): Add explicit rule for broken makes.
