@@ -102,6 +102,14 @@ static struct fde_entry **last_fde_data = &all_fde_data;
 /* List of CIEs so that they could be reused.  */
 static struct cie_entry *cie_root;
 
+/* Stack of old CFI data, for save/restore.  */
+struct cfa_save_data
+{
+  struct cfa_save_data *next;
+  offsetT cfa_offset;
+};
+
+static struct cfa_save_data *cfa_save_stack;
 
 /* Construct a new FDE structure and add it to the end of the fde list.  */
 
@@ -231,7 +239,14 @@ cfi_add_advance_loc (symbolS *label)
 void
 cfi_add_CFA_offset (unsigned regno, offsetT offset)
 {
+  unsigned int abs_data_align;
+
   cfi_add_CFA_insn_reg_offset (DW_CFA_offset, regno, offset);
+
+  abs_data_align = (DWARF2_CIE_DATA_ALIGNMENT < 0
+		    ? -DWARF2_CIE_DATA_ALIGNMENT : DWARF2_CIE_DATA_ALIGNMENT);
+  if (offset % abs_data_align)
+    as_bad (_("register save offset not a multiple of %u"), abs_data_align);
 }
 
 /* Add a DW_CFA_def_cfa record to the CFI data.  */
@@ -289,13 +304,30 @@ cfi_add_CFA_same_value (unsigned regno)
 void
 cfi_add_CFA_remember_state (void)
 {
+  struct cfa_save_data *p;
+
   cfi_add_CFA_insn (DW_CFA_remember_state);
+
+  p = xmalloc (sizeof (*p));
+  p->cfa_offset = cur_cfa_offset;
+  p->next = cfa_save_stack;
+  cfa_save_stack = p;
 }
 
 void
 cfi_add_CFA_restore_state (void)
 {
+  struct cfa_save_data *p;
+
   cfi_add_CFA_insn (DW_CFA_restore_state);
+
+  p = cfa_save_stack;
+  if (p)
+    {
+      cur_cfa_offset = p->cfa_offset;
+      cfa_save_stack = p->next;
+      free (p);
+    }
 }
 
 void
@@ -314,6 +346,7 @@ static void dot_cfi_endproc (int);
 /* Fake CFI type; outside the byte range of any real CFI insn.  */
 #define CFI_adjust_cfa_offset	0x100
 #define CFI_return_column	0x101
+#define CFI_rel_offset		0x102
 
 const pseudo_typeS cfi_pseudo_table[] =
   {
@@ -324,6 +357,7 @@ const pseudo_typeS cfi_pseudo_table[] =
     { "cfi_def_cfa_offset", dot_cfi, DW_CFA_def_cfa_offset },
     { "cfi_adjust_cfa_offset", dot_cfi, CFI_adjust_cfa_offset },
     { "cfi_offset", dot_cfi, DW_CFA_offset },
+    { "cfi_rel_offset", dot_cfi, CFI_rel_offset },
     { "cfi_register", dot_cfi, DW_CFA_register },
     { "cfi_return_column", dot_cfi, CFI_return_column },
     { "cfi_restore", dot_cfi, DW_CFA_restore },
@@ -420,6 +454,13 @@ dot_cfi (int arg)
       cfi_parse_separator ();
       offset = cfi_parse_const ();
       cfi_add_CFA_offset (reg1, offset);
+      break;
+
+    case CFI_rel_offset:
+      reg1 = cfi_parse_reg ();
+      cfi_parse_separator ();
+      offset = cfi_parse_const ();
+      cfi_add_CFA_offset (reg1, offset - cur_cfa_offset);
       break;
 
     case DW_CFA_def_cfa:

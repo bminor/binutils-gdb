@@ -1,3 +1,13 @@
+2003-06-07  Richard Henderson  <rth@redhat.com>
+
+	* dw2gencfi.c (struct cfa_save_data, cfa_save_stack): New.
+	(cfi_add_CFA_offset): Detect invalid offsets.
+	(cfi_add_CFA_remember_state): Save cur_cfa_offset.
+	(cfi_add_CFA_restore_state): Restore it.
+	(CFI_rel_offset): New.
+	(cfi_pseudo_table): Add it.
+	(dot_cfi): Handle it.
+
 2003-06-07  H.J. Lu <hongjiu.lu@intel.com>
 
 	* app.c (do_scrub_chars): Add states 14 and 15 to handle

@@ -1,3 +1,10 @@
+2003-06-07  Richard Henderson  <rth@redhat.com>
+
+	* gas/cfi/cfi-common-1.d, gas/cfi/cfi-common-1.s: New.
+	* gas/cfi/cfi-common-2.d, gas/cfi/cfi-common-2.s: New.
+	* gas/cfi/cfi-diag-1.d, gas/cfi/cfi-diag-1.s: New.
+	* gas/cfi/cfi.exp: Run them.
+
 2003-06-05  Michael Snyder  <msnyder@redhat.com>
 
 	* gas/h8300/t01_mov.s: New file, tests mov instructions.
