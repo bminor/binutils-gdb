@@ -1,3 +1,8 @@
+Fri Oct 14 11:07:50 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* bfd.c (bfd_scan_vma): Cast end to be non const before passing it
+	to strtoul.
+
 Thu Oct 13 14:40:41 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* bfd.c (bfd_scan_vma): Pass end argument on to strtoul.
