@@ -684,4 +684,13 @@ extern void deprecated_set_frame_extra_info_hack (struct frame_info *frame,
    been created.  By always creating a frame, this problem goes away.  */
 extern struct frame_info *deprecated_frame_xmalloc (void);
 
+/* FIXME: cagney/2003-01-05: Allocate a frame, along with the
+   saved_regs and extra_info.  Set up cleanups for all three.  Same as
+   for deprecated_frame_xmalloc, targets are calling this when
+   creating a scratch `struct frame_info'.  The frame overhaul makes
+   this unnecessary since all frame queries are parameterized with a
+   common cache parameter and a frame.  */
+extern struct frame_info *deprecated_frame_xmalloc_with_cleanup (long sizeof_saved_regs,
+								 long sizeof_extra_info);
+
 #endif /* !defined (FRAME_H)  */

@@ -1316,6 +1316,24 @@ deprecated_frame_xmalloc (void)
   return frame;
 }
 
+struct frame_info *
+deprecated_frame_xmalloc_with_cleanup (long sizeof_saved_regs,
+				       long sizeof_extra_info)
+{
+  struct frame_info *frame = deprecated_frame_xmalloc ();
+  make_cleanup (xfree, frame);
+  if (sizeof_saved_regs > 0)
+    {
+      frame->saved_regs = xcalloc (1, sizeof_saved_regs);
+      make_cleanup (xfree, frame->saved_regs);
+    }
+  if (sizeof_extra_info > 0)
+    {
+      frame->extra_info = xcalloc (1, sizeof_extra_info);
+      make_cleanup (xfree, frame->extra_info);
+    }
+  return frame;
+}
 
 void
 _initialize_frame (void)

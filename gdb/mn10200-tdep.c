@@ -607,7 +607,9 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
 CORE_ADDR
 mn10200_frame_chain (struct frame_info *fi)
 {
-  struct frame_info dummy_frame;
+  struct frame_info *dummy_frame = deprecated_frame_xmalloc ();
+  struct cleanup *old_chain = make_cleanup (xfree, dummy_frame);
+  CORE_ADDR ret;
 
   /* Walk through the prologue to determine the stack size,
      location of saved registers, end of the prologue, etc.  */
@@ -638,31 +640,33 @@ mn10200_frame_chain (struct frame_info *fi)
 
      So we set up a dummy frame and call mn10200_analyze_prologue to
      find stuff for us.  */
-  deprecated_update_frame_pc_hack (&dummy_frame, FRAME_SAVED_PC (fi));
-  deprecated_update_frame_base_hack (&dummy_frame, fi->frame);
-  memset (dummy_frame.fsr.regs, '\000', sizeof dummy_frame.fsr.regs);
-  dummy_frame.status = 0;
-  dummy_frame.stack_size = 0;
-  mn10200_analyze_prologue (&dummy_frame, 0);
+  deprecated_update_frame_pc_hack (dummy_frame, FRAME_SAVED_PC (fi));
+  deprecated_update_frame_base_hack (dummy_frame, fi->frame);
+  memset (dummy_frame->fsr.regs, '\000', sizeof dummy_frame->fsr.regs);
+  dummy_frame->status = 0;
+  dummy_frame->stack_size = 0;
+  mn10200_analyze_prologue (dummy_frame, 0);
 
-  if (dummy_frame.status & MY_FRAME_IN_FP)
+  if (dummy_frame->status & MY_FRAME_IN_FP)
     {
       /* Our caller has a frame pointer.  So find the frame in $a2, $a0,
          or in the stack.  */
       if (fi->fsr.regs[6])
-	return (read_memory_integer (fi->fsr.regs[FP_REGNUM], REGISTER_SIZE)
-		& 0xffffff);
+	ret = (read_memory_integer (fi->fsr.regs[FP_REGNUM], REGISTER_SIZE)
+	       & 0xffffff);
       else if (fi->status & CALLER_A2_IN_A0)
-	return read_register (4);
+	ret = read_register (4);
       else
-	return read_register (FP_REGNUM);
+	ret = read_register (FP_REGNUM);
     }
   else
     {
       /* Our caller does not have a frame pointer.  So his frame starts
          at the base of our frame (fi->frame) + <his size> + 4 (saved pc).  */
-      return fi->frame + -dummy_frame.stack_size + 4;
+      ret = fi->frame + -dummy_frame->stack_size + 4;
     }
+  do_cleanups (old_chain);
+  return ret;
 }
 
 /* Function: skip_prologue

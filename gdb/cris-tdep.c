@@ -734,17 +734,15 @@ cris_skip_prologue_frameless_p (CORE_ADDR pc)
 CORE_ADDR
 cris_skip_prologue_main (CORE_ADDR pc, int frameless_p)
 {
-  struct frame_info fi;
-  static struct frame_extra_info fei;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
+  struct frame_info *fi;
   struct symtab_and_line sal = find_pc_line (pc, 0);
   int best_limit;
   CORE_ADDR pc_after_prologue;
   
-  /* frame_info now contains dynamic memory.  Since fi is a dummy here,
-     I use static memory for extra_info, and don't bother allocating
-     memory for saved_regs.  */
-  memset (&fi, 0, sizeof (fi));
-  fi.extra_info = &fei;
+  /* frame_info now contains dynamic memory.  Since fi is a dummy
+     here, I don't bother allocating memory for saved_regs.  */
+  fi = deprecated_frame_xmalloc_with_cleanup (0, sizeof (struct frame_extra_info));
 
   /* If there is no symbol information then sal.end == 0, and we end up
      examining only the first instruction in the function prologue. 
@@ -754,7 +752,8 @@ cris_skip_prologue_main (CORE_ADDR pc, int frameless_p)
   else
     best_limit = pc + 100; 
 
-  pc_after_prologue = cris_examine (pc, best_limit, &fi, frameless_p);
+  pc_after_prologue = cris_examine (pc, best_limit, fi, frameless_p);
+  do_cleanups (old_chain);
   return pc_after_prologue;
 }
 

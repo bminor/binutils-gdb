@@ -1,3 +1,14 @@
+2003-01-06  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame.h (deprecated_frame_xmalloc_with_cleanup): Declare.
+	* frame.c (deprecated_frame_xmalloc_with_cleanup): New function.
+	* arm-tdep.c (arm_frame_chain): Allocate caller_fi using
+	deprecated_frame_xmalloc_with_cleanup.
+	* m32r-tdep.c (m32r_virtual_frame_pointer): Allocate `fi' using
+	deprecated_frame_xmalloc.
+	* mcore-tdep.c (analyze_dummy_frame): Ditto for dummy.
+	* mn10200-tdep.c (mn10200_frame_chain): Ditto for dummy_frame.
+
 2003-01-06  Andrew Cagney  <cagney@redhat.com>
 
 	* x86-64-linux-tdep.c: Include "osabi.h".

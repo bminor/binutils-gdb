@@ -426,20 +426,20 @@ m32r_init_extra_frame_info (struct frame_info *fi)
 void
 m32r_virtual_frame_pointer (CORE_ADDR pc, long *reg, long *offset)
 {
-  struct frame_info fi;
+  struct frame_info *fi = deprecated_frame_xmalloc ();
+  struct cleanup *old_chain = make_cleanup (xfree, fi);
 
   /* Set up a dummy frame_info. */
-  fi.next = NULL;
-  fi.prev = NULL;
-  fi.frame = 0;
-  fi.pc = pc;
+  fi->next = NULL;
+  fi->prev = NULL;
+  fi->frame = 0;
+  fi->pc = pc;
 
   /* Analyze the prolog and fill in the extra info.  */
-  m32r_init_extra_frame_info (&fi);
-
+  m32r_init_extra_frame_info (fi);
 
   /* Results will tell us which type of frame it uses.  */
-  if (fi.using_frame_pointer)
+  if (fi->using_frame_pointer)
     {
       *reg = FP_REGNUM;
       *offset = 0;
@@ -449,6 +449,7 @@ m32r_virtual_frame_pointer (CORE_ADDR pc, long *reg, long *offset)
       *reg = SP_REGNUM;
       *offset = 0;
     }
+  do_cleanups (old_chain);
 }
 
 /* Function: find_callers_reg

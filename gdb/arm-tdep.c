@@ -1041,23 +1041,15 @@ arm_frame_chain (struct frame_info *fi)
      caller_fi.  */
   if (arm_pc_is_thumb (caller_pc) != arm_pc_is_thumb (get_frame_pc (fi)))
     {
-      struct frame_info caller_fi;
-      struct cleanup *old_chain;
-
-      /* Create a temporary frame suitable for scanning the caller's
-	 prologue.  (Ugh.)  */
-      memset (&caller_fi, 0, sizeof (caller_fi));
-      caller_fi.extra_info = (struct frame_extra_info *)
-	xcalloc (1, sizeof (struct frame_extra_info));
-      old_chain = make_cleanup (xfree, caller_fi.extra_info);
-      caller_fi.saved_regs = (CORE_ADDR *)
-	xcalloc (1, SIZEOF_FRAME_SAVED_REGS);
-      make_cleanup (xfree, caller_fi.saved_regs);
+      struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
+      struct frame_info *caller_fi =
+	deprecated_frame_xmalloc_with_cleanup (SIZEOF_FRAME_SAVED_REGS,
+					       sizeof (struct frame_extra_info));
 
       /* Now, scan the prologue and obtain the frame register.  */
-      deprecated_update_frame_pc_hack (&caller_fi, caller_pc);
-      arm_scan_prologue (&caller_fi);
-      framereg = caller_fi.extra_info->framereg;
+      deprecated_update_frame_pc_hack (caller_fi, caller_pc);
+      arm_scan_prologue (caller_fi);
+      framereg = caller_fi->extra_info->framereg;
 
       /* Deallocate the storage associated with the temporary frame
 	 created above.  */
