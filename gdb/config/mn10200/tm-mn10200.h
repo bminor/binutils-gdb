@@ -210,10 +210,5 @@ extern CORE_ADDR mn10200_push_arguments (int, struct value **, CORE_ADDR,
 extern use_struct_convention_fn mn10200_use_struct_convention;
 #define USE_STRUCT_CONVENTION(GCC_P, TYPE) mn10200_use_struct_convention (GCC_P, TYPE)
 
-/* Override the default get_saved_register function with
-   one that takes account of generic CALL_DUMMY frames.  */
-#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
-      generic_unwind_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
-
 /* Define this for Wingdb */
 #define TARGET_MN10200

@@ -261,7 +261,7 @@ frame_read_signed_register (struct frame_info *frame, int regnum,
   frame_unwind_signed_register (get_next_frame (frame), regnum, val);
 }
 
-void
+static void
 generic_unwind_get_saved_register (char *raw_buffer,
 				   int *optimizedp,
 				   CORE_ADDR *addrp,

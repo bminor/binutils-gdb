@@ -1,5 +1,22 @@
 2002-11-15  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (generic_unwind_get_saved_register): Make static.
+	* frame.h (generic_unwind_get_saved_register): Delete declaration.
+	* avr-tdep.c (avr_gdbarch_init): Do not set get_saved_register,
+	defaults to generic_unwind_get_saved_register.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Ditto.
+	* h8300-tdep.c (h8300_gdbarch_init): Ditto.
+	* frv-tdep.c (frv_gdbarch_init): Ditto.
+	* i386-tdep.c (i386_gdbarch_init): Ditto.
+	* s390-tdep.c (s390_gdbarch_init): Ditto.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Ditto.
+	* v850-tdep.c (v850_gdbarch_init): Ditto.
+	* mcore-tdep.c (mcore_gdbarch_init): Ditto.
+	* d10v-tdep.c (d10v_gdbarch_init): Ditto.
+	* config/mn10200/tm-mn10200.h (GET_SAVED_REGISTER): Delete macro.
+
+2002-11-15  Andrew Cagney  <cagney@redhat.com>
+
 	* x86-64-linux-nat.c (i386_sse_regnum_p): New function.  Copy from
 	i386-tdep.c.
 

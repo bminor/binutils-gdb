@@ -1598,8 +1598,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					   i386_register_convert_to_virtual);
   set_gdbarch_register_convert_to_raw (gdbarch, i386_register_convert_to_raw);
 
-  set_gdbarch_get_saved_register (gdbarch, generic_unwind_get_saved_register);
-
   set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
 
   /* "An argument's size is increased, if necessary, to make it a
