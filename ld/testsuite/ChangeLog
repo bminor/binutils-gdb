@@ -1,3 +1,8 @@
+2004-03-22  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/dsofnf.s, ld-cris/dsofnf2.s, ld-cris/gotplt1.d,
+	ld-cris/gotplt2.d, ld-cris/gotplt3.d: New tests.
+
 2004-03-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tls.d: Update.
