@@ -91,7 +91,7 @@ static int warn_unmatched_high = 0;
    extended M32RX instruction set should be enabled.  */
 static int enable_m32rx = 0;
 
-/* Non-zero if --m32rx-enable-special has been specified, in which case support for
+/* Non-zero if --m32rx --hidden has been specified, in which case support for
    the special M32RX instruction set should be enabled.  */
 static int enable_special = 0;
 
@@ -170,8 +170,7 @@ struct option md_longopts[] =
   {"no-warn-explicit-parallel-conflicts", no_argument, NULL, OPTION_NO_WARN_PARALLEL},
   {"Wnp", no_argument, NULL, OPTION_NO_WARN_PARALLEL},
 #define OPTION_SPECIAL	(OPTION_MD_BASE + 3)
-  {"m32rx-enable-special", no_argument, NULL, OPTION_SPECIAL},
-  {"m32rx-es", no_argument, NULL, OPTION_SPECIAL},
+  {"hidden", no_argument, NULL, OPTION_SPECIAL},
 /* end-sanitize-m32rx */
 
   /* Sigh.  I guess all warnings must now have both variants.  */
@@ -218,8 +217,16 @@ md_parse_option (c, arg)
       break;
 
     case OPTION_SPECIAL:
-      allow_m32rx (1);
-      enable_special = 1;
+      if (enable_m32rx)
+	enable_special = 1;
+      else
+	{
+	  extern char * myname;
+
+	  /* Pretend that we do not recognise this option.  */
+	  fprintf (stderr, _("%s: unrecognised option: --hidden\n"), myname);
+	  return 0;
+	}
       break;
 /* end-sanitize-m32rx */
 
@@ -255,10 +262,6 @@ md_show_usage (stream)
 /* start-sanitize-m32rx */
   fprintf (stream, _("\
 --m32rx			support the extended m32rx instruction set\n"));
-  fprintf (stream, _("\
---m32rx-enable-special	support the special m32rx instructions\n"));
-  fprintf (stream, _("\
---m32rx-es		synonym for --m32rx-enable-special\n"));
   fprintf (stream, _("\
 -O			try to combine instructions in parallel\n"));
 

@@ -10,17 +10,6 @@ Mon May 18 09:31:43 1998  Michael Meissner  <meissner@cygnus.com>
 	* write.c (fixup_segment): Improve error message for sym1-sym2
 	errors when sym1 is in a different segment from sym2.
 
-start-sanitize-m32rx
-Thu May 14 13:49:39 1998  Nick Clifton  <nickc@cygnus.com>
-
-	* config/tc-m32r.c: Chnage command line switch from
-	--enable-special to --m32rx-enable-special and add shorter
-	synonym: --m32rx-es.
-	* doc/c-m32r.texi (M32R-Opts): Document changes to command line
-	switch. 
-	* testsuite/gas/m32rx/m32rx.d: Change switch.
-	
-end-sanitize-m32rx
 Wed May 13 10:16:37 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/tc-m32r.c (warn_unmatched_high): New static local.
@@ -39,14 +28,6 @@ Wed May 13 10:16:37 1998  Doug Evans  <devans@canuck.cygnus.com>
 	(stabs_generate_asm_lineno): Move file name handling into
 	generate_asm_file.
 
-start-sanitize-m32rx
-Tue May 12 13:34:12 1998  Nick Clifton  <nickc@cygnus.com>
-
-	* config/tc-m32r.c: Add command line switch to support special
-	M32Rx instructions.
-	* doc/c-m32r.texi: Document new command line switch.
-	
-end-sanitize-m32rx	
 Tue May 12 12:03:44 1998  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-d30v.c (cur_mul32_p, prev_mul32_p): Make static.
