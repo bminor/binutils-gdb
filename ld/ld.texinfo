@@ -172,6 +172,7 @@ ld [ -o @var{output} ]  @var{objfile}@dots{}
   [ -l@var{archive} ]  [ -L@var{searchdir} ]  [ -M ]  [ -Map @var{mapfile} ]
   [ -m @var{emulation} ]  [ -N | -n ]  [ -noinhibit-exec ]
   [ -oformat @var{output-format} ]  [ -R @var{filename} ]  [ -relax ]
+  [ -retain-symbols-file @var{filename} ]
   [ -r | -Ur ]  [ -S ]  [ -s ]  [ -sort-common ] [ -stats ]
   [ -T @var{commandfile} ]
   [ -Ttext @var{org} ]  [ -Tdata @var{org} ]
@@ -499,6 +500,25 @@ output object file.
 On platforms where this is not supported, @samp{-relax} is accepted, but
 ignored.
 @end ifset
+
+@item -retain-symbols-file @var{filename}
+@cindex retaining specified symbols
+@cindex stripping all but some symbols
+@cindex symbols, retaining selectively
+Retain @emph{only} the symbols listed in the file @var{filename},
+discarding all others.  @var{filename} is simply a flat file, with one
+symbol name per line.  This option is especially useful in environments
+@ifset GENERIC
+(such as VxWorks)
+@end ifset
+where a large global symbol table is accumulated gradually, to conserve
+run-time memory.
+
+@samp{-retain-symbols-file} does @emph{not} discard undefined symbols,
+or symbols needed for relocations.
+
+You may only specify @samp{-retain-symbols-file} once in the command
+line.  It overrides @samp{-s} and @samp{-S}.
 
 @item -r 
 @cindex partial link
