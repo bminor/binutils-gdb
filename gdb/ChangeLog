@@ -1,3 +1,8 @@
+2001-03-31  Kevin Buettner  <kevinb@redhat.com>
+
+	* ia64-linux-nat.c (ia64_linux_stopped_by_watchpoint): Change
+	TRAP_HWBKPT constant to match that in the kernel headers for
+	Linux/IA-64.
 2001-03-31  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386bsd-nat.c: Include "gdb_assert.h".
