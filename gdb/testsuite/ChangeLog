@@ -1,3 +1,7 @@
+Tue Jan 25 12:58:26 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.t09/corefile:  Increase timeout when spawning gdb explicitly.
+
 Wed Jan 19 12:40:25 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.t06/signals.exp:  Handle blocked SIGTRAP on sun3 for bash
