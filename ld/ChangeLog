@@ -1,3 +1,15 @@
+2000-09-28  Alan Modra  <alan@linuxcare.com.au>
+
+	* ld.texinfo (HPPA ELF32): New section.
+
+	* emultempl/hppaelf.em (group_size): New.
+	(hppaelf_finish): Pass group_size to elf32_hppa_size_stubs.
+	(PARSE_AND_LIST_PROLOGUE): Add OPTION_STUBGROUP_SIZE.
+	(PARSE_AND_LIST_LONGOPTS): Add --stub-group-size.  Duplicate
+	options to prevent abbreviations matching.
+	(PARSE_AND_LIST_OPTIONS): Describe the above.  Reformat.
+	(PARSE_AND_LIST_ARGS_CASES): Handle it.
+
 2000-09-21  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* emultempl/m68kelf.em: Conditionalise the embedded relocs feature

@@ -120,6 +120,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define GOT_ENTRY_SIZE 4
 #define ELF_DYNAMIC_INTERPRETER "/lib/ld.so.1"
 
+static const bfd_byte plt_stub[] =
+{
+  0x0e, 0x80, 0x10, 0x96,  /* 1: ldw	0(%r20),%r22		*/
+  0xea, 0xc0, 0xc0, 0x00,  /*    bv	%r0(%r22)		*/
+  0x0e, 0x88, 0x10, 0x95,  /*    ldw	4(%r20),%r21		*/
+#define PLT_STUB_ENTRY (3*4)
+  0xea, 0x9f, 0x1f, 0xdd,  /*    b,l	1b,%r20			*/
+  0xd6, 0x80, 0x1c, 0x1e,  /*    depi	0,31,2,%r20		*/
+  0x00, 0xc0, 0xff, 0xee,  /* 9: .word	fixup_func		*/
+  0xde, 0xad, 0xbe, 0xef   /*    .word	fixup_ltp		*/
+};
+
 /* Section name for stubs is the associated section name plus this
    string.  */
 #define STUB_SUFFIX ".stub"
@@ -240,9 +252,6 @@ struct elf32_hppa_link_hash_table {
   /* Linker stub bfd.  */
   bfd *stub_bfd;
 
-  /* Whether we support multiple sub-spaces for shared libs.  */
-  boolean multi_subspace;
-
   /* Linker call-backs.  */
   asection * (*add_stub_section) PARAMS ((const char *, asection *));
   void (*layout_sections_again) PARAMS ((void));
@@ -268,6 +277,17 @@ struct elf32_hppa_link_hash_table {
   asection *srelplt;
   asection *sdynbss;
   asection *srelbss;
+
+  /* Whether we support multiple sub-spaces for shared libs.  */
+  unsigned int multi_subspace:1;
+
+  /* Flags set when PCREL12F and PCREL17F branches detected.  Used to
+     select suitable defaults for the stub group size.  */
+  unsigned int has_12bit_branch:1;
+  unsigned int has_17bit_branch:1;
+
+  /* Set if we need a .plt stub to support lazy dynamic linking.  */
+  unsigned int need_plt_stub:1;
 };
 
 
@@ -498,7 +518,6 @@ elf32_hppa_link_hash_table_create (abfd)
     return NULL;
 
   ret->stub_bfd = NULL;
-  ret->multi_subspace = 0;
   ret->add_stub_section = NULL;
   ret->layout_sections_again = NULL;
   ret->stub_group = NULL;
@@ -508,6 +527,10 @@ elf32_hppa_link_hash_table_create (abfd)
   ret->srelplt = NULL;
   ret->sdynbss = NULL;
   ret->srelbss = NULL;
+  ret->multi_subspace = 0;
+  ret->has_12bit_branch = 0;
+  ret->has_17bit_branch = 0;
+  ret->need_plt_stub = 0;
 
   return &ret->root.root;
 }
@@ -896,11 +919,11 @@ hppa_build_one_stub (gen_entry, in_arg)
 		    + stub_sec->output_section->vma);
 
       bfd_put_32 (stub_bfd, (bfd_vma) BL_R1, loc);
-      val = hppa_field_adjust (sym_value, (bfd_signed_vma) -8, e_lsel);
+      val = hppa_field_adjust (sym_value, (bfd_signed_vma) -8, e_lrsel);
       insn = hppa_rebuild_insn ((int) ADDIL_R1, val, 21);
       bfd_put_32 (stub_bfd, insn, loc + 4);
 
-      val = hppa_field_adjust (sym_value, (bfd_signed_vma) -8, e_rsel) >> 2;
+      val = hppa_field_adjust (sym_value, (bfd_signed_vma) -8, e_rrsel) >> 2;
       insn = hppa_rebuild_insn ((int) BE_SR4_R1, val, 17);
       bfd_put_32 (stub_bfd, insn, loc + 8);
       size = 12;
@@ -918,17 +941,22 @@ hppa_build_one_stub (gen_entry, in_arg)
       if (stub_entry->stub_type == hppa_stub_import_shared)
 	insn = ADDIL_R19;
 #endif
-      val = hppa_field_adjust (sym_value, (bfd_signed_vma) 0, e_lsel),
+      val = hppa_field_adjust (sym_value, (bfd_signed_vma) 0, e_lrsel),
       insn = hppa_rebuild_insn ((int) insn, val, 21);
       bfd_put_32 (stub_bfd, insn, loc);
 
-      val = hppa_field_adjust (sym_value, (bfd_signed_vma) 0, e_rsel);
+      /* It is critical to use lrsel/rrsel here because we are using
+	 two different offsets (+0 and +4) from sym_value.  If we use
+	 lsel/rsel then with unfortunate sym_values we will round
+	 sym_value+4 up to the next 2k block leading to a mis-match
+	 between the lsel and rsel value.  */
+      val = hppa_field_adjust (sym_value, (bfd_signed_vma) 0, e_rrsel);
       insn = hppa_rebuild_insn ((int) LDW_R1_R21, val, 14);
       bfd_put_32 (stub_bfd, insn, loc + 4);
 
       if (hplink->multi_subspace)
 	{
-	  val = hppa_field_adjust (sym_value, (bfd_signed_vma) 4, e_rsel);
+	  val = hppa_field_adjust (sym_value, (bfd_signed_vma) 4, e_rrsel);
 	  insn = hppa_rebuild_insn ((int) LDW_R1_DLT, val, 14);
 	  bfd_put_32 (stub_bfd, insn, loc + 8);
 
@@ -942,7 +970,7 @@ hppa_build_one_stub (gen_entry, in_arg)
       else
 	{
 	  bfd_put_32 (stub_bfd, (bfd_vma) BV_R0_R21, loc + 8);
-	  val = hppa_field_adjust (sym_value, (bfd_signed_vma) 4, e_rsel);
+	  val = hppa_field_adjust (sym_value, (bfd_signed_vma) 4, e_rrsel);
 	  insn = hppa_rebuild_insn ((int) LDW_R1_DLT, val, 14);
 	  bfd_put_32 (stub_bfd, insn, loc + 12);
 
@@ -1146,8 +1174,6 @@ elf32_hppa_create_dynamic_sections (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
-  flagword flags;
-  asection *s;
   struct elf32_hppa_link_hash_table *hplink;
 
   /* Don't try to create the .plt and .got twice.  */
@@ -1159,14 +1185,7 @@ elf32_hppa_create_dynamic_sections (abfd, info)
   if (! _bfd_elf_create_dynamic_sections (abfd, info))
     return false;
 
-  /* Our .plt just contains pointers.  I suppose we should be using
-     .plt.got but .plt.got doesn't make too much sense without a .plt
-     section.  Set the flags to say the .plt isn't executable.  */
-  s = bfd_get_section_by_name (abfd, ".plt");
-  flags = bfd_get_section_flags (abfd, s);
-  if (! bfd_set_section_flags (abfd, s, flags & ~SEC_CODE))
-    return false;
-  hplink->splt = s;
+  hplink->splt = bfd_get_section_by_name (abfd, ".plt");
   hplink->srelplt = bfd_get_section_by_name (abfd, ".rela.plt");
 
   hplink->sgot = bfd_get_section_by_name (abfd, ".got");
@@ -1278,11 +1297,15 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 	  break;
 
 	case R_PARISC_PCREL12F:
+	  hplink->has_12bit_branch = 1;
+	  /* Fall thru.  */
 	case R_PARISC_PCREL17C:
 	case R_PARISC_PCREL17F:
+	  hplink->has_17bit_branch = 1;
+	  /* Fall thru.  */
 	case R_PARISC_PCREL22F:
-	  /* Handle calls, and function pointers as they might need to
-	     go through the .plt, and might require long branch stubs.  */
+	  /* Function calls might need to go through the .plt, and
+	     might require long branch stubs.  */
 	  if (h == NULL)
 	    {
 	      /* We know local syms won't need a .plt entry, and if
@@ -1329,7 +1352,8 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 
 	case R_PARISC_DIR17F: /* Used for external branches.  */
 	case R_PARISC_DIR17R:
-	case R_PARISC_DIR14R: /* Used for load/store from absolute locn.  */
+	case R_PARISC_DIR14F: /* Used for load/store from absolute locn.  */
+	case R_PARISC_DIR14R:
 	case R_PARISC_DIR21L: /* As above, and for ext branches too.  */
 #if 1
 	  /* Help debug shared library creation.  Any of the above
@@ -1932,6 +1956,8 @@ elf32_hppa_adjust_dynamic_symbol (info, h)
 	  /* We also need to make an entry in the .rela.plt section.  */
 	  s = hplink->srelplt;
 	  s->_raw_size += sizeof (Elf32_External_Rela);
+
+	  hplink->need_plt_stub = 1;
 	}
       return true;
     }
@@ -2295,28 +2321,22 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 	  if (s->_raw_size != 0)
 	    {
 	      asection *target;
+	      const char *outname;
 
 	      /* Remember whether there are any reloc sections other
 		 than .rela.plt.  */
 	      if (strcmp (name+5, ".plt") != 0)
-		{
-		  const char *outname;
+		relocs = true;
 
-		  relocs = true;
-
-		  /* If this relocation section applies to a read only
-		     section, then we probably need a DT_TEXTREL
-		     entry.  The entries in the .rela.plt section
-		     really apply to the .got section, which we
-		     created ourselves and so know is not readonly.  */
-		  outname = bfd_get_section_name (output_bfd,
-						  s->output_section);
-		  target = bfd_get_section_by_name (output_bfd, outname + 5);
-		  if (target != NULL
-		      && (target->flags & SEC_READONLY) != 0
-		      && (target->flags & SEC_ALLOC) != 0)
-		    reltext = true;
-		}
+	      /* If this relocation section applies to a read only
+		 section, then we probably need a DT_TEXTREL entry.  */
+	      outname = bfd_get_section_name (output_bfd,
+					      s->output_section);
+	      target = bfd_get_section_by_name (output_bfd, outname + 5);
+	      if (target != NULL
+		  && (target->flags & SEC_READONLY) != 0
+		  && (target->flags & SEC_ALLOC) != 0)
+		reltext = true;
 
 	      /* We use the reloc_count field as a counter if we need
 		 to copy relocs into the output file.  */
@@ -2324,7 +2344,22 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 	    }
 	}
       else if (strcmp (name, ".plt") == 0)
-	;
+	{
+	  if (hplink->need_plt_stub)
+	    {
+	      /* Make space for the plt stub at the end of the .plt
+		 section.  We want this stub right at the end, up
+		 against the .got section.  */
+	      int gotalign = bfd_section_alignment (dynobj, hplink->sgot);
+	      int pltalign = bfd_section_alignment (dynobj, s);
+	      bfd_size_type mask;
+
+	      if (gotalign > pltalign)
+		bfd_set_section_alignment (dynobj, s, gotalign);
+	      mask = ((bfd_size_type) 1 << gotalign) - 1;
+	      s->_raw_size = (s->_raw_size + sizeof (plt_stub) + mask) & ~mask;
+	    }
+	}
       else if (strcmp (name, ".got") == 0)
 	;
       else
@@ -2413,12 +2448,13 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
    instruction.  */
 
 boolean
-elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace,
+elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
 		       add_stub_section, layout_sections_again)
      bfd *output_bfd;
      bfd *stub_bfd;
      struct bfd_link_info *info;
      boolean multi_subspace;
+     bfd_signed_vma group_size;
      asection * (*add_stub_section) PARAMS ((const char *, asection *));
      void (*layout_sections_again) PARAMS ((void));
 {
@@ -2429,6 +2465,8 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace,
   unsigned int bfd_indx, bfd_count;
   int top_id, top_index;
   struct elf32_hppa_link_hash_table *hplink;
+  bfd_size_type stub_group_size;
+  boolean stubs_always_before_branch;
   boolean stub_changed = 0;
   boolean ret = 0;
 
@@ -2439,6 +2477,20 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace,
   hplink->multi_subspace = multi_subspace;
   hplink->add_stub_section = add_stub_section;
   hplink->layout_sections_again = layout_sections_again;
+  stubs_always_before_branch = group_size < 0;
+  if (group_size < 0)
+    stub_group_size = -group_size;
+  else
+    stub_group_size = group_size;
+  if (stub_group_size == 1)
+    {
+      /* Default values.  */
+      stub_group_size = 8000000;
+      if (hplink->has_17bit_branch || hplink->multi_subspace)
+	stub_group_size = 250000;
+      if (hplink->has_12bit_branch)
+	stub_group_size = 7812;
+    }
 
   /* Count the number of input BFDs and find the top input section id.  */
   for (input_bfd = info->input_bfds, bfd_count = 0, top_id = 0;
@@ -2490,7 +2542,7 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace,
        section != NULL;
        section = section->next)
     {
-      if ((section->flags & SEC_CODE) != 0 && section->index <= top_index)
+      if ((section->flags & SEC_CODE) != 0)
 	input_list[section->index] = NULL;
     }
 
@@ -2546,7 +2598,7 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace,
 	    total = tail->_raw_size;
 	  while ((prev = PREV_SEC (curr)) != NULL
 		 && ((total += curr->output_offset - prev->output_offset)
-		     < 250000))
+		     < stub_group_size))
 	    curr = prev;
 
 	  /* OK, the size from the start of CURR to the end is less
@@ -2570,14 +2622,17 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace,
 
 	  /* But wait, there's more!  Input sections up to 250000
 	     bytes before the stub section can be handled by it too.  */
-	  total = 0;
-	  while (prev != NULL
-		 && ((total += tail->output_offset - prev->output_offset)
-		     < 250000))
+	  if (!stubs_always_before_branch)
 	    {
-	      tail = prev;
-	      prev = PREV_SEC (tail);
-	      hplink->stub_group[tail->id].link_sec = curr;
+	      total = 0;
+	      while (prev != NULL
+		     && ((total += tail->output_offset - prev->output_offset)
+			 < stub_group_size))
+		{
+		  tail = prev;
+		  prev = PREV_SEC (tail);
+		  hplink->stub_group[tail->id].link_sec = curr;
+		}
 	    }
 	  tail = prev;
 	}
@@ -3256,6 +3311,7 @@ final_link_relocate (input_section, contents, rel, value, hplink, sym_sec, h)
   switch (r_type)
     {
     case R_PARISC_DIR32:
+    case R_PARISC_DIR14F:
     case R_PARISC_DIR17F:
     case R_PARISC_PCREL17C:
     case R_PARISC_PCREL14F:
@@ -3688,6 +3744,7 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	case R_PARISC_DIR17F:
 	case R_PARISC_DIR17R:
+	case R_PARISC_DIR14F:
 	case R_PARISC_DIR14R:
 	case R_PARISC_DIR21L:
 	case R_PARISC_DPREL14F:
@@ -3871,7 +3928,6 @@ elf32_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
   if (h->plt.offset != (bfd_vma) -1)
     {
       bfd_vma value;
-      Elf_Internal_Rela rel;
 
       /* This symbol has an entry in the procedure linkage table.  Set
 	 it up.
@@ -3879,15 +3935,7 @@ elf32_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
 	 The format of a plt entry is
 	 <funcaddr>
 	 <__gp>
-	 <used by ld.so>
-
-	 The last field is present only for plt entries that are used
-	 by global plabels.  */
-
-      /* We do not actually care about the value in the PLT entry if
-	 we are creating a shared library and the symbol is still
-	 undefined;  We create a dynamic relocation to fill in the
-	 correct value.  */
+      */
       value = 0;
       if (h->root.type == bfd_link_hash_defined
 	  || h->root.type == bfd_link_hash_defweak)
@@ -3898,22 +3946,10 @@ elf32_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
 		      + h->root.u.def.section->output_section->vma);
 	}
 
-      bfd_put_32 (hplink->splt->owner,
-		  value,
-		  hplink->splt->contents + h->plt.offset);
-      bfd_put_32 (hplink->splt->owner,
-		  elf_gp (hplink->splt->output_section->owner),
-		  hplink->splt->contents + h->plt.offset + 4);
-      if (PLABEL_PLT_ENTRY_SIZE != PLT_ENTRY_SIZE
-	  && ((struct elf32_hppa_link_hash_entry *) h)->plabel
-	  && h->dynindx != -1)
-	{
-	  memset (hplink->splt->contents + h->plt.offset + 8,
-		  0, PLABEL_PLT_ENTRY_SIZE - PLT_ENTRY_SIZE);
-	}
-
       if (! ((struct elf32_hppa_link_hash_entry *) h)->pic_call)
 	{
+	  Elf_Internal_Rela rel;
+
 	  /* Create a dynamic IPLT relocation for this entry.  */
 	  rel.r_offset = (h->plt.offset
 			  + hplink->splt->output_offset
@@ -3921,6 +3957,15 @@ elf32_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
 	  if (! ((struct elf32_hppa_link_hash_entry *) h)->plt_abs
 	      && h->dynindx != -1)
 	    {
+	      /* To support lazy linking, the function pointer is
+		 initialised to point to a special stub stored at the
+		 end of the .plt.  This is only done for plt entries
+		 with a non-*ABS* dynamic relocation.  */
+	      value = (hplink->splt->output_offset
+		       + hplink->splt->output_section->vma
+		       + hplink->splt->_raw_size
+		       - sizeof (plt_stub)
+		       + PLT_STUB_ENTRY);
 	      rel.r_info = ELF32_R_INFO (h->dynindx, R_PARISC_IPLT);
 	      rel.r_addend = 0;
 	    }
@@ -3938,6 +3983,20 @@ elf32_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
 				      hplink->srelplt->contents
 				      + hplink->srelplt->reloc_count));
 	  hplink->srelplt->reloc_count++;
+	}
+
+      bfd_put_32 (hplink->splt->owner,
+		  value,
+		  hplink->splt->contents + h->plt.offset);
+      bfd_put_32 (hplink->splt->owner,
+		  elf_gp (hplink->splt->output_section->owner),
+		  hplink->splt->contents + h->plt.offset + 4);
+      if (PLABEL_PLT_ENTRY_SIZE != PLT_ENTRY_SIZE
+	  && ((struct elf32_hppa_link_hash_entry *) h)->plabel
+	  && h->dynindx != -1)
+	{
+	  memset (hplink->splt->contents + h->plt.offset + 8,
+		  0, PLABEL_PLT_ENTRY_SIZE - PLT_ENTRY_SIZE);
 	}
 
       if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
@@ -4122,17 +4181,38 @@ elf32_hppa_finish_dynamic_sections (output_bfd, info)
 		  hplink->sgot->contents);
 
       /* The second entry is reserved for use by the dynamic linker.  */
-      bfd_put_32 (output_bfd, (bfd_vma) 0, hplink->sgot->contents + 4);
+      memset (hplink->sgot->contents + GOT_ENTRY_SIZE, 0, GOT_ENTRY_SIZE);
 
       /* Set .got entry size.  */
       elf_section_data (hplink->sgot->output_section)
 	->this_hdr.sh_entsize = GOT_ENTRY_SIZE;
     }
 
-  /* Set plt entry size.  */
   if (hplink->splt->_raw_size != 0)
-    elf_section_data (hplink->splt->output_section)
-      ->this_hdr.sh_entsize = PLT_ENTRY_SIZE;
+    {
+      /* Set plt entry size.  */
+      elf_section_data (hplink->splt->output_section)
+	->this_hdr.sh_entsize = PLT_ENTRY_SIZE;
+
+      if (hplink->need_plt_stub)
+	{
+	  /* Set up the .plt stub.  */
+	  memcpy (hplink->splt->contents
+		  + hplink->splt->_raw_size - sizeof (plt_stub),
+		  plt_stub, sizeof (plt_stub));
+
+	  if ((hplink->splt->output_offset
+	       + hplink->splt->output_section->vma
+	       + hplink->splt->_raw_size)
+	      != (hplink->sgot->output_offset
+		  + hplink->sgot->output_section->vma))
+	    {
+	      (*_bfd_error_handler)
+		(_(".got section not immediately after .plt section"));
+	      return false;
+	    }
+	}
+    }
 
   return true;
 }

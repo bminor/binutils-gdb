@@ -118,8 +118,8 @@ static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
     bfd_elf_generic_reloc, "R_PARISC_UNIMPLEMENTED", false, 0, 0, false },
   { R_PARISC_DIR14R, 0, 0, 14, false, 0, complain_overflow_bitfield,
     bfd_elf_generic_reloc, "R_PARISC_DIR14R", false, 0, 0, false },
-  { R_PARISC_UNIMPLEMENTED, 0, 0, 0, false, 0, complain_overflow_bitfield,
-    bfd_elf_generic_reloc, "R_PARISC_UNIMPLEMENTED", false, 0, 0, false },
+  { R_PARISC_DIR14F, 0, 0, 14, false, 0, complain_overflow_bitfield,
+    bfd_elf_generic_reloc, "R_PARISC_DIR14F", false, 0, 0, false },
   /* 8 */
   { R_PARISC_PCREL12F, 0, 0, 12, true, 0, complain_overflow_bitfield,
     bfd_elf_generic_reloc, "R_PARISC_PCREL12F", false, 0, 0, false },
@@ -657,8 +657,12 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	case 14:
 	  switch (field)
 	    {
+	    case e_fsel:
+	      final_type = R_PARISC_DIR14F;
+	      break;
 	    case e_rsel:
 	    case e_rrsel:
+	    case e_rdsel:
 	      final_type = R_PARISC_DIR14R;
 	      break;
 	    case e_rtsel:
@@ -686,6 +690,7 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	      break;
 	    case e_rsel:
 	    case e_rrsel:
+	    case e_rdsel:
 	      final_type = R_PARISC_DIR17R;
 	      break;
 	    default:
@@ -698,6 +703,7 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	    {
 	    case e_lsel:
 	    case e_lrsel:
+	    case e_ldsel:
 	    case e_nlsel:
 	    case e_nlrsel:
 	      final_type = R_PARISC_DIR21L;
@@ -763,6 +769,7 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	    {
 	    case e_rsel:
 	    case e_rrsel:
+	    case e_rdsel:
 	      /* R_PARISC_DLTREL14R for elf64, R_PARISC_DPREL14R for elf32  */
 	      final_type = base_type + OFFSET_14R_FROM_21L;
 	      break;
@@ -780,6 +787,7 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	    {
 	    case e_lsel:
 	    case e_lrsel:
+	    case e_ldsel:
 	    case e_nlsel:
 	    case e_nlrsel:
 	      /* R_PARISC_DLTREL21L for elf64, R_PARISC_DPREL21L for elf32  */
@@ -817,6 +825,7 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	    {
 	    case e_rsel:
 	    case e_rrsel:
+	    case e_rdsel:
 	      final_type = R_PARISC_PCREL14R;
 	      break;
 	    case e_fsel:
@@ -832,6 +841,7 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	    {
 	    case e_rsel:
 	    case e_rrsel:
+	    case e_rdsel:
 	      final_type = R_PARISC_PCREL17R;
 	      break;
 	    case e_fsel:
@@ -847,6 +857,7 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	    {
 	    case e_lsel:
 	    case e_lrsel:
+	    case e_ldsel:
 	    case e_nlsel:
 	    case e_nlrsel:
 	      final_type = R_PARISC_PCREL21L;
@@ -1712,6 +1723,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
     case R_PARISC_DIR17R:
     case R_PARISC_DIR17F:
     case R_PARISC_DIR14R:
+    case R_PARISC_DIR14F:
     case R_PARISC_DIR14WR:
     case R_PARISC_DIR14DR:
     case R_PARISC_DIR16F:
@@ -1728,7 +1740,8 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	else if (r_type == R_PARISC_DIR17F
 		 || r_type == R_PARISC_DIR16F
 		 || r_type == R_PARISC_DIR16WF
-		 || r_type == R_PARISC_DIR16DF)
+		 || r_type == R_PARISC_DIR16DF
+		 || r_type == R_PARISC_DIR14F)
 	  value = hppa_field_adjust (value, addend, e_fsel);
 	else
 	  value = hppa_field_adjust (value, addend, e_rrsel);
@@ -2055,6 +2068,7 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_PLTOFF14F:
     case R_PARISC_PLTOFF16F:
     case R_PARISC_DIR14R:
+    case R_PARISC_DIR14F:
     case R_PARISC_DIR16F:
     case R_PARISC_LTOFF16F:
       return (insn & ~ 0x3fff) | low_sign_unext (sym_value, 14);

@@ -3904,6 +3904,7 @@ functionality are not listed.
 * H8/300::                      @code{ld} and the H8/300
 * i960::                        @code{ld} and the Intel 960 family
 * ARM::				@code{ld} and the ARM family
+* HPPA ELF32::                  @code{ld} and HPPA 32-bit ELF
 @ifset TICOFF
 * TI COFF::                     @code{ld} and TI COFF
 @end ifset
@@ -4046,6 +4047,38 @@ The @samp{--thumb-entry} switch is a duplicate of the generic
 But it also sets the bottom bit of the address, so that it can be
 branched to using a BX instruction, and the program will start
 executing in Thumb mode straight away.
+
+@node HPPA ELF32
+@section @code{ld} and HPPA 32-bit ELF support
+@cindex HPPA multiple sub-space stubs
+@kindex --multi-subspace
+When generating a shared library, @code{ld} will by default generate
+import stubs suitable for use with a single sub-space application.
+The @samp{--multi-subspace} switch causes @code{ld} to generate export
+stubs, and different (larger) import stubs suitable for use with
+multiple sub-spaces.
+
+@cindex HPPA stub grouping
+@kindex --stub-group-size=@var{N}
+Long branch stubs and import/export stubs are placed by @code{ld} in
+stub sections located between groups of input sections.
+@samp{--stub-group-size} specifies the maximum size of a group of input
+sections handled by one stub section.  Since branch offsets are signed,
+a stub section may serve two groups of input sections, one group before
+the stub section, and one group after it.  However, when using
+conditional branches that require stubs, it may be better (for branch
+prediction) that stub sections only serve one group of input sections.
+A negative value for @samp{N} chooses this scheme, ensuring that
+branches to stubs always use a negative offset.  Two special values of
+@samp{N} are recognized, @samp{1} and @samp{-1}.  These both instruct
+@code{ld} to automatically size input section groups for the branch types
+detected, with the same behaviour regarding stub placement as other
+positive or negative values of @samp{N} respectively.
+
+Note that @samp{--stub-group-size} does not split input sections.  A
+single input section larger than the group size specified will of course
+create a larger group (of one section).  If input sections are too
+large, it may not be possible for a branch to reach its stub.
 
 @ifset TICOFF
 @node TI COFF

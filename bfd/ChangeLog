@@ -1,3 +1,40 @@
+2000-09-27  Alan Modra  <alan@linuxcare.com.au>
+
+	* elf32-hppa.c (plt_stub): New.
+	(PLT_STUB_ENTRY): Define.
+	(elf32_hppa_link_hash_table): Change multi_subspace to packed
+	boolean.  Add need_plt_stub, has_12bit_branch and has_17bit_branch.
+	(elf32_hppa_link_hash_table_create): Init to suit.
+	(elf32_hppa_check_relocs): Set has_12bit_branch and
+	has_17bit_branch as appropriate.
+	(elf32_hppa_adjust_dynamic_symbol): Set need_plt_stub for
+	non-local functions.
+	(elf32_hppa_size_dynamic_sections): Correct setting of reltext.
+	Add space for plt_stub as needed.
+	(elf32_hppa_finish_dynamic_symbol): Point .plt entries for global
+	functions at plt_stub.
+	(elf32_hppa_finish_dynamic_sections): Write plt_stub.
+	(elf32_hppa_create_dynamic_sections): Leave .plt executable.
+
+	* elf32-hppa.h (elf32_hppa_size_stubs): Add group_size param.
+	* elf32-hppa.c (elf32_hppa_size_stubs): Likewise.  Use it instead
+	of fixed size, and if negative, disable handling of input sections
+	before stub section.  Set up default stub group size depending
+	on detected branch relocs.
+	(hppa_build_one_stub): Use lrsel and rrsel for import stubs to
+	ensure different offsets from sym_value aren't rounded to
+	different 2k blocks.  Use lrsel and rrsel for other stubs too for
+	consistency rather than necessity.
+	(elf32_hppa_check_relocs): Handle R_PARISC_DIR14F.
+	(final_link_relocate): Likewise.
+	(elf32_hppa_relocate_section): Likewise.
+
+	* elf-hppa.h (elf_hppa_howto_table): Add R_PARISC_DIR14F reloc.
+	(_bfd_elf_hppa_gen_reloc_type): Generate them.
+	(elf_hppa_final_link_relocate): Handle them.
+	(elf_hppa_relocate_insn): Likewise.
+	(_bfd_elf_hppa_gen_reloc_type): Add missing e_ldsel and e_rdsel cases.
+
 2000-09-26  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elfcode.h (elf_object_p): Preserve and clear abfd section

@@ -6,6 +6,8 @@
 	(hppa_fix_adjustable): Undo 2000-09-23 change.
 	(hppa_force_relocation): Likewise.  Add fx_addsy assertion.
 	Correct distance calculation.
+	(tc_gen_reloc): Print the file name and line number if we can't
+	handle a fixup.
 
 	From John David Anglin <dave@hiauly1.hia.nrc.ca>
 	* config/tc-hppa.c (nonzero_dibits): Define.

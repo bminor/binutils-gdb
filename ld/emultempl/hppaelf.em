@@ -44,6 +44,10 @@ static lang_input_statement_type *stub_file;
    stubs.  */
 static int multi_subspace = 0;
 
+/* Maximum size of a group of input sections that can be handled by
+   one stub section.  A value of +/-1 indicates the bfd back-end
+   should use a suitable default size.  */
+static bfd_signed_vma group_size = 1;
 
 /* This is called before the input files are opened.  We create a new
    fake input file to hold the stub sections.  */
@@ -292,6 +296,7 @@ hppaelf_finish ()
 			       stub_file->the_bfd,
 			       &link_info,
 			       multi_subspace,
+			       group_size,
 			       &hppaelf_add_stub_section,
 			       &hppaelf_layaout_sections_again))
     {
@@ -349,22 +354,46 @@ EOF
 #
 PARSE_AND_LIST_PROLOGUE='
 #define OPTION_MULTI_SUBSPACE		301
+#define OPTION_STUBGROUP_SIZE		(OPTION_MULTI_SUBSPACE + 1)
 '
 
+# The options are repeated below so that no abbreviations are allowed.
+# Otherwise -s matches stub-group-size
 PARSE_AND_LIST_LONGOPTS='
-  { "multi-subspace", no_argument, NULL, OPTION_MULTI_SUBSPACE},
+  { "multi-subspace", no_argument, NULL, OPTION_MULTI_SUBSPACE },
+  { "multi-subspace", no_argument, NULL, OPTION_MULTI_SUBSPACE },
+  { "stub-group-size", required_argument, NULL, OPTION_STUBGROUP_SIZE },
+  { "stub-group-size", required_argument, NULL, OPTION_STUBGROUP_SIZE },
 '
 
 PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("\
-  --multi-subspace            Generate import and export stubs to support\n\
-                              multiple sub-space shared libraries\n"
+  --multi-subspace    Generate import and export stubs to support\n\
+                        multiple sub-space shared libraries\n"
+		   ));
+  fprintf (file, _("\
+  --stub-group-size=N Maximum size of a group of input sections that can be\n\
+                        handled by one stub section.  A negative value\n\
+                        locates all stubs before their branches (with a\n\
+                        group size of -N), while a positive value allows\n\
+                        two groups of input sections, one before, and one\n\
+                        after each stub section.  Values of +/-1 indicate\n\
+                        the linker should choose suitable defaults."
 		   ));
 '
 
 PARSE_AND_LIST_ARGS_CASES='
     case OPTION_MULTI_SUBSPACE:
       multi_subspace = 1;
+      break;
+
+    case OPTION_STUBGROUP_SIZE:
+      {
+	const char *end;
+        group_size = bfd_scan_vma (optarg, &end, 0);
+        if (*end)
+	  einfo (_("%P%F: invalid number `%s'\''\n"), optarg);
+      }
       break;
 '
 
