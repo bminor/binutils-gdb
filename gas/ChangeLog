@@ -1,3 +1,9 @@
+Tue Jul 13 12:09:44 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* config/tc-h8500.c (line_comment_chars): Add hash.
+	(parse_exp, skip_colonthing, build_bytes): Add support for
+	R_H8500_HIGH16 relocation type.
+
 Mon Jul 12 11:15:34 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
 
 	* config/obj-elf.c (obj_elf_section): Allow `@' to introduce an

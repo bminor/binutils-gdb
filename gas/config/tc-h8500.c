@@ -33,7 +33,7 @@
 
 const char comment_chars[] = "!";
 const char line_separator_chars[] = ";";
-const char line_comment_chars[] = "!";
+const char line_comment_chars[] = "!#";
 
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:
@@ -268,8 +268,12 @@ parse_exp (s, op, page)
       if (s[1] == 'p' && s[2] == 'a' && s[3] == 'g' && s[4] == 'e')
 	{
 	  s += 5;
-
 	  *page = 'p';
+	}
+      if (s[1] == 'h' && s[2] == 'i' && s[3] == '1' && s[4] == '6')
+	{
+	  s += 5;
+	  *page = 'h';
 	}
       else if (s[1] == 'o' && s[2] == 'f' && s[3] == 'f')
 	{
@@ -352,6 +356,10 @@ skip_colonthing (sign, ptr, exp, def, size8, size16, size24)
       if (exp->page == 'p')
 	{
 	  exp->type = IMM8;
+	}
+      else if (exp->page == 'h')
+	{
+	  exp->type = IMM16;
 	}
       else
 	{
@@ -982,9 +990,25 @@ build_bytes (opcode, operand)
 	    case FPIND_D8:
 	      insert (output, index, &displacement, R_H8500_IMM8, 0);
 	      break;
+
 	    case IMM16:
-	      insert (output, index, &immediate, immediate_inpage ?
-		      R_H8500_LOW16 : R_H8500_IMM16, 0);
+	      {
+		int p;
+		switch (immediate_inpage) {
+		case 'p':
+		  p = R_H8500_LOW16;
+		  break;
+		case 'h':		
+		  p = R_H8500_HIGH16;
+		  break;
+		default:
+		  p = R_H8500_IMM16;
+		  break;
+		}
+		
+		insert (output, index, &immediate,p, 0);
+	      }
+		
 	      index++;
 	      break;
 	    case RLIST:
@@ -1403,9 +1427,9 @@ md_convert_frag (headers, fragP)
 }
 
 valueT
-DEFUN (md_section_align, (seg, size),
-       segT seg AND
-       valueT size)
+md_section_align (seg, size)
+     segT seg ;
+     valueT size;
 {
   return ((size + (1 << section_alignment[(int) seg]) - 1) 
 	  & (-1 << section_alignment[(int) seg]));
@@ -1438,6 +1462,10 @@ md_apply_fix (fixP, val)
       *buf++ = val;
       break;
     case R_H8500_HIGH8:
+      *buf++ = val >> 16;
+      break;
+    case R_H8500_HIGH16:
+      *buf++ = val >> 24;
       *buf++ = val >> 16;
       break;
     case R_H8500_IMM24:
