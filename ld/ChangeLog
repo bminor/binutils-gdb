@@ -1,3 +1,8 @@
+2003-10-14  Danny Smith  <dannysmith@users.sourceforge.net>  
+
+	* pe-dll.c (pe_implied_import_dll): Also scan .rdata sections
+	to identify data symbols.
+
 2003-10-13  Richard Sandiford  <rsandifo@redhat.com>
 
 	* emulparams/elf32bmipn32-defs.sh (INITIAL_READONLY_SECTIONS): Move

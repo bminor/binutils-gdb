@@ -2441,9 +2441,11 @@ pe_implied_import_dll (const char *filename)
   /* Initialization with start > end guarantees that is_data
      will not be set by mistake, and avoids compiler warning.  */
   unsigned long data_start = 1;
-  unsigned long data_end   = 0;
-  unsigned long bss_start  = 1;
-  unsigned long bss_end    = 0;
+  unsigned long data_end = 0;
+  unsigned long rdata_start = 1;
+  unsigned long rdata_end = 0;
+  unsigned long bss_start = 1;
+  unsigned long bss_end = 0;
 
   /* No, I can't use bfd here.  kernel32.dll puts its export table in
      the middle of the .rdata section.  */
@@ -2520,6 +2522,15 @@ pe_implied_import_dll (const char *filename)
 	    printf ("%s %s: 0x%08lx-0x%08lx (0x%08lx)\n",
 		    __FUNCTION__, sec_name, vaddr, vaddr + vsize, flags);
 	}
+      else if (strcmp(sec_name,".rdata") == 0)
+	{
+	  rdata_start = vaddr;
+	  rdata_end = vaddr + vsize;
+
+	  if (pe_dll_extra_pe_debug)
+	    printf ("%s %s: 0x%08lx-0x%08lx (0x%08lx)\n",
+		    __FUNCTION__, sec_name, vaddr, vaddr + vsize, flags);
+	}
       else if (strcmp (sec_name,".bss") == 0)
 	{
 	  bss_start = vaddr;
@@ -2573,9 +2584,11 @@ pe_implied_import_dll (const char *filename)
 	 exported in buggy auto-import releases.  */
       if (strncmp (erva + name_rva, "_nm_", 4) != 0)
  	{
- 	  /* is_data is true if the address is in the data or bss segment.  */
+ 	  /* is_data is true if the address is in the data, rdata or bss
+	     segment.  */
  	  is_data =
 	    (func_rva >= data_start && func_rva < data_end)
+	    || (func_rva >= rdata_start && func_rva < rdata_end)
 	    || (func_rva >= bss_start && func_rva < bss_end);
 
 	  imp = def_file_add_import (pe_def_file, erva + name_rva,
