@@ -1,3 +1,14 @@
+Fri Apr 12 09:45:29 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* defs.h:  Define TARGET_{FLOAT DOUBLE LONG_DOUBLE}_FORMAT
+	defaults for bi-endian targets.  Replace function pointers for
+	floatformat routines with macros.  No need for these to be runtime
+	selectable.
+	* findvar.c:  Get rid of floatformat function pointers.  Use
+	macros in extract_floating and store_floating.
+	* remote-nindy.c (nindy_fetch_registers nindy_store_registers):
+	Use floatformat macros.
+
 Thu Apr 11 21:28:02 1996  Fred Fish  <fnf@cygnus.com>
 
 	From: Miles Bader  <miles@gnu.ai.mit.edu>

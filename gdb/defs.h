@@ -874,19 +874,21 @@ extern const struct floatformat floatformat_unknown;
 #      define TARGET_DOUBLE_FORMAT &floatformat_ieee_double_little
 #    endif
 #  endif
-#  ifndef TARGET_LONG_DOUBLE_FORMAT
-#    define TARGET_LONG_DOUBLE_FORMAT &floatformat_unknown
-#  endif
 #else				/* TARGET_BYTE_ORDER_SELECTABLE */
 #  ifndef TARGET_FLOAT_FORMAT
-	Need a definition for target float format
+#    define TARGET_FLOAT_FORMAT (target_byte_order == BIG_ENDIAN \
+				 ? &floatformat_ieee_single_big \
+				 : &floatformat_ieee_single_little)
 #  endif
 #  ifndef TARGET_DOUBLE_FORMAT
-	Need a definition for target double format
+#    define TARGET_DOUBLE_FORMAT (target_byte_order == BIG_ENDIAN \
+				  ? &floatformat_ieee_double_big \
+				  : &floatformat_ieee_double_little)
 #  endif
-#  ifndef TARGET_LONG_DOUBLE_FORMAT
-	Need a definition for target long double format
-#  endif
+#endif
+
+#ifndef TARGET_LONG_DOUBLE_FORMAT
+#  define TARGET_LONG_DOUBLE_FORMAT &floatformat_unknown
 #endif
 
 /* Use `long double' if the host compiler supports it.  (Note that this is not
@@ -904,19 +906,13 @@ extern void floatformat_to_long_double PARAMS ((const struct floatformat *,
 						char *, DOUBLEST *));
 extern void floatformat_from_long_double PARAMS ((const struct floatformat *,
 						  DOUBLEST *, char *));
+#define FLOATFORMAT_TO_DOUBLEST floatformat_to_long_double
+#define FLOATFORMAT_FROM_DOUBLEST floatformat_from_long_double
 #else
 typedef double DOUBLEST;
+#define FLOATFORMAT_TO_DOUBLEST floatformat_to_double
+#define FLOATFORMAT_FROM_DOUBLEST floatformat_from_double
 #endif
-
-/* Pointer to appropriate conversion routine to convert between target floating
-   point format and DOUBLEST.  */
-
-extern void
-(*floatformat_to_doublest) PARAMS ((const struct floatformat *,
-				    char *, DOUBLEST *));
-extern void
-(*floatformat_from_doublest) PARAMS ((const struct floatformat *,
-				      DOUBLEST *, char *));
 
 extern DOUBLEST extract_floating PARAMS ((void *, int));
 

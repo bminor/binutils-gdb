@@ -34,22 +34,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 const struct floatformat floatformat_unknown;
 
-#ifdef HAVE_LONG_DOUBLE
-void (*floatformat_to_doublest)
-     PARAMS ((const struct floatformat *,
-	      char *, DOUBLEST *)) = floatformat_to_long_double;
-void (*floatformat_from_doublest)
-     PARAMS ((const struct floatformat *,
-	      DOUBLEST *, char *)) = floatformat_from_long_double;
-#else
-void (*floatformat_to_doublest)
-     PARAMS ((const struct floatformat *,
-	      char *, DOUBLEST *)) = floatformat_to_double;
-void (*floatformat_from_doublest)
-     PARAMS ((const struct floatformat *,
-	      DOUBLEST *, char *)) = floatformat_from_double;
-#endif
-
 /* Registers we shouldn't try to store.  */
 #if !defined (CANNOT_STORE_REGISTER)
 #define CANNOT_STORE_REGISTER(regno) 0
@@ -320,7 +304,7 @@ extract_floating (addr, len)
 	  return retval;
 	}
       else
-	floatformat_to_doublest (TARGET_FLOAT_FORMAT, addr, &dretval);
+	FLOATFORMAT_TO_DOUBLEST (TARGET_FLOAT_FORMAT, addr, &dretval);
     }
   else if (len == sizeof (double))
     {
@@ -332,7 +316,7 @@ extract_floating (addr, len)
 	  return retval;
 	}
       else
-	floatformat_to_doublest (TARGET_DOUBLE_FORMAT, addr, &dretval);
+	FLOATFORMAT_TO_DOUBLEST (TARGET_DOUBLE_FORMAT, addr, &dretval);
     }
   else if (len == sizeof (DOUBLEST))
     {
@@ -344,7 +328,7 @@ extract_floating (addr, len)
 	  return retval;
 	}
       else
-	floatformat_to_doublest (TARGET_LONG_DOUBLE_FORMAT, addr, &dretval);
+	FLOATFORMAT_TO_DOUBLEST (TARGET_LONG_DOUBLE_FORMAT, addr, &dretval);
     }
   else
     {
@@ -369,7 +353,7 @@ store_floating (addr, len, val)
 	  memcpy (addr, &floatval, sizeof (floatval));
 	}
       else
-	floatformat_from_doublest (TARGET_FLOAT_FORMAT, &val, addr);
+	FLOATFORMAT_FROM_DOUBLEST (TARGET_FLOAT_FORMAT, &val, addr);
     }
   else if (len == sizeof (double))
     {
@@ -380,14 +364,14 @@ store_floating (addr, len, val)
 	  memcpy (addr, &doubleval, sizeof (doubleval));
 	}
       else
-	floatformat_from_doublest (TARGET_DOUBLE_FORMAT, &val, addr);
+	FLOATFORMAT_FROM_DOUBLEST (TARGET_DOUBLE_FORMAT, &val, addr);
     }
   else if (len == sizeof (DOUBLEST))
     {
       if (HOST_LONG_DOUBLE_FORMAT == TARGET_LONG_DOUBLE_FORMAT)
 	memcpy (addr, &val, sizeof (val));
       else
-	floatformat_from_doublest (TARGET_LONG_DOUBLE_FORMAT, &val, addr);
+	FLOATFORMAT_FROM_DOUBLEST (TARGET_LONG_DOUBLE_FORMAT, &val, addr);
     }
   else
     {

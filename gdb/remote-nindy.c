@@ -454,8 +454,8 @@ nindy_fetch_registers(regno)
 			 &nindy_regs.fp_as_double[8 * (regnum - FP0_REGNUM)],
 			 &inv);
     /* dub now in host byte order */
-    floatformat_from_double (&floatformat_i960_ext, &dub,
-			     &registers[REGISTER_BYTE (regnum)]);
+    FLOATFORMAT_FROM_DOUBLEST (&floatformat_i960_ext, &dub,
+			       &registers[REGISTER_BYTE (regnum)]);
   }
 
   registers_fetched ();
@@ -483,8 +483,8 @@ nindy_store_registers(regno)
   memcpy (nindy_regs.tcw, &registers[REGISTER_BYTE (TCW_REGNUM)], 1*4);
   for (regnum = FP0_REGNUM; regnum < FP0_REGNUM + 4; regnum++)
     {
-      floatformat_to_double (&floatformat_i960_ext,
-			     &registers[REGISTER_BYTE (regnum)], &dub);
+      FLOATFORMAT_TO_DOUBLEST (&floatformat_i960_ext,
+			       &registers[REGISTER_BYTE (regnum)], &dub);
       store_floating (&nindy_regs.fp_as_double[8 * (regnum - FP0_REGNUM)],
 		      REGISTER_VIRTUAL_SIZE (regnum),
 		      dub);
