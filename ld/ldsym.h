@@ -53,9 +53,14 @@ typedef struct user_symbol_struct
 #define SYM_WARNING 2
   /* IF this is an alias for another symbol */
 #define SYM_INDIRECT 4
+  /* If this symbol explicitly should be kept, despite discarding
+     most others.  */
+#define SYM_KEEP 8
   int flags;
 } ldsym_type;
 
+extern CONST char *keepsyms_file;
+extern int kept_syms;
 
 PROTO(ldsym_type *, ldsym_get, (CONST char *));
 PROTO(ldsym_type *, ldsym_get_soft, (CONST char *));

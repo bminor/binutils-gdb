@@ -1,3 +1,24 @@
+Fri Sep 25 13:49:52 1992  Ken Raeburn  (raeburn@kyriath.cygnus.com)
+
+	* Makefile.in (ldexp.o, ldctor.o, ldlang.o, ldmain.o, ldwrite.o,
+	lexsup.o, mri.o, relax.o): Indicate dependence on ldgram.h.
+
+	* ld.h (strip_symbols_type): Add value STRIP_SOME.
+	* ldgram.y (OPTION_RETAIN_SYMBOLS_FILE): New terminal token.
+	(lang_add_keepsyms_file): New function.
+	* ldlex.l: Handle "-retain-symbols-file".
+	* ldsym.c (keepsyms_file, kept_syms): New vars.
+	(process_keepsyms): New functihon; reads file, marks symbols for
+	saving.
+	(write_file_locals): File symbols should always be kept.
+	(ldsym_write): Warn about "-retain-symbols-file" overriding "-S"
+	and "-s".  Process retain-symbols file before setting symtab.
+	* ldsym.h (SYM_KEEP): New flag for ldsym_type flags.
+	(keepsyms_file, kept_syms): Declare them.
+
+	* ldmain.c (main): Non-fatal errors should still cause non-zero
+	exit status even with -r.
+
 Fri Sep 25 11:08:01 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	Added initial support for the z8k

@@ -65,6 +65,8 @@ extern discard_locals_type discard_locals;
 
 ldsym_type *symbol_head = (ldsym_type *)NULL;
 ldsym_type **symbol_tail_ptr = &symbol_head;
+CONST char *keepsyms_file;
+int kept_syms;
 
 extern ld_config_type config;
 
@@ -185,9 +187,103 @@ DEFUN(ldsym_get_soft,(key),
   return search(key, hashval);
 }
 
+static asymbol **
+process_keepsyms (table, size)
+     asymbol ** table;
+     int size;
+{
+  struct obstack obstack;
+  char *start_of_obstack;
+  FILE *ks_file = 0;
+  asymbol **out = table;
+  asymbol **end = table + size;
+  asymbol **sym;
 
+  if (!keepsyms_file || size == 0)
+    return end;
+  obstack_init (&obstack);
+  obstack_alloc (&obstack, 1);
+  obstack_finish (&obstack);
+  start_of_obstack = obstack_alloc (&obstack, 1);
+  ks_file = fopen (keepsyms_file, "r");
+  if (!ks_file)
+    {
+      info ("%X%P: can't open keep-symbols file `%s'\n", keepsyms_file);
+      goto egress;
+    }
+  errno = 0;
 
+#define KEEP(S) \
+  do { asymbol **p=(S), *tmp=*out; *out=*p; *p=tmp; out++; } while (0)
 
+  while (!feof (ks_file) && !ferror (ks_file))
+    {
+      int c;
+      char *ptr;
+      int found = 0;
+
+      obstack_free (&obstack, start_of_obstack);
+      do
+	{
+	  c = getc (ks_file);
+	  if (c == '\n')
+	    c = 0;
+	  obstack_1grow (&obstack, c);
+	}
+      while (c > 0);
+      if (c == EOF)
+	{
+	  if (!feof (ks_file))
+	    /* error occurred */
+	    {
+	      info ("%X%P: error reading keep-symbols file `%s': %E\n",
+		    keepsyms_file);
+	      out = end;
+	      goto egress;
+	    }
+	  if (obstack_next_free (&obstack) != obstack_base (&obstack) + 1)
+	    /* eof in middle of symbol */
+	    {
+	      info ("%X%P: eof reached mid-line while reading keep-symbols file `%s'\n",
+		    keepsyms_file);
+	      out = end;
+	      goto egress;
+	    }
+	  /* All okay -- no incomplete lines, EOF reached.  */
+	  break;
+	}
+      ptr = obstack_next_free (&obstack) - 2;
+      /* discard trailing trash */
+      while (*ptr == ' '
+	     || *ptr == '\t')
+	*ptr-- = 0;
+      ptr = obstack_base (&obstack);
+      for (sym = out; sym < end; sym++)
+	if (!strcmp ((*sym)->name, ptr))
+	  {
+	    KEEP (sym);
+	    found = 1;
+	  }
+      if (!found)
+	info ("%P: symbol `%s' (requested to be kept) not found\n", ptr);
+    }
+  /* It'd be slightly faster to move this pass above the previous one,
+     but that'd mean any symbols preserved in this pass would generate
+     warnings if they were also listed in the keepsyms file.  */
+  for (sym = out; sym < end; sym++)
+    {
+      asymbol *s = *sym;
+      if (s->section == &bfd_und_section
+	  || s->section == &bfd_com_section
+	  || s->flags & BSF_KEEP_G)
+	KEEP (sym);
+    }
+ egress:
+  obstack_free (&obstack, start_of_obstack);
+  if (ks_file)
+    fclose (ks_file);
+  return out;
+}
 
 static void
 list_file_locals (entry)
@@ -348,7 +444,11 @@ asymbol **output_buffer;
 
 	  /* The value is the start of this section in the output file*/
 	  newsym->value  = 0;
-	  newsym->flags = BSF_LOCAL;
+	  /* FIXME: Usurping BSF_KEEP_G flag, since it's defined as
+	     "used by the linker" and I can't find any other code that
+	     uses it.  Should be a cleaner way of doing this (like an
+	     "application flags" field in the symbol structure?).  */
+	  newsym->flags = BSF_LOCAL | BSF_KEEP_G;
 	  newsym->section = s;
 	  *output_buffer++ = newsym;
 	  break;
@@ -462,11 +562,15 @@ asymbol **symbol_table;
   return symbol_table;
 }
 
-
-
 void
 ldsym_write()
 {
+  if (keepsyms_file != 0
+      && strip_symbols != STRIP_SOME)
+    {
+      info ("%P `-retain-symbols-file' overrides `-s' and `-S'\n");
+      strip_symbols = STRIP_SOME;
+    }
   if (strip_symbols != STRIP_ALL) {
     /* We know the maximum size of the symbol table -
        it's the size of all the global symbols ever seen +
@@ -484,6 +588,7 @@ ldsym_write()
     asymbol ** tablep = write_file_locals(symbol_table);
 
     tablep = write_file_globals(tablep);
+    tablep = process_keepsyms (symbol_table, tablep - symbol_table);
 
     *tablep =  (asymbol *)NULL;
     bfd_set_symtab(output_bfd, symbol_table, (unsigned)( tablep - symbol_table));
