@@ -1,5 +1,7 @@
 echo Setting up the environment for debugging gdb.\n
 
+set complaints 1
+
 b fatal
 
 b info_command
@@ -9,4 +11,3 @@ commands
 end
 
 set prompt (top-gdb)
-set complaints 1
