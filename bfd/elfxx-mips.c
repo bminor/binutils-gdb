@@ -7898,7 +7898,7 @@ _bfd_mips_elf_discard_info (abfd, cookie, info)
   cookie->rel = cookie->rels;
   cookie->relend = cookie->rels + o->reloc_count;
 
-  for (i = 0, skip = 0; i < o->_raw_size; i ++)
+  for (i = 0, skip = 0; i < o->_raw_size / PDR_SIZE; i ++)
     {
       if (MNAME(abfd,_bfd_elf,reloc_symbol_deleted_p) (i * PDR_SIZE, cookie))
 	{
