@@ -1,4 +1,31 @@
+Fri Jan  2 20:15:37 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* ldgram.y (attributes_opt): Pass region pointer to
+	lang_set_flags, not &region->flags.
+
+	* ldlang.c (lang_memory_default): New function to figure out a
+	default memory region for a section if it was not specified.
+	(lang_memory_region_lookup): Zero flags, not_flags field.
+	(lang_map{,_flags}): Print attribute flags in memory map.
+	(lang_size_sections): Call lang_memory_default to get default
+	memory region.
+	(lang_set_flags): Implement attribute flags for real.  Take new
+	argument to give the flags we are to skip for this region.
+
+	* ldlang.h (memory_region_struct): Add not_flags field, make both
+	flags fields flagword type.
+	(lang_output_section_state): Make flags field flagword type.
+	(lang_set_flags): Update prototype to match new calling sequence.
+	(lang_memory_region_default): Add prototype.
+
 start-sanitize-d30v
+	* emulparams/d30v{_e,_o,elf}.sh ({TEXT,DATA,EMEM}_DEF_SECTION):
+	Define whether or not the region gets default sections, and if so,
+	what sections.
+
+	* scripttempl/elfd30v.sc (MEMORY): Set up which of the regions get
+	default sections.
+
 Thu Jan  1 22:58:04 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* scripttempl/elfd30v.sc (.eh_frame): Link into the data section.

@@ -128,6 +128,7 @@ static bfd_vma size_input_section
 	   lang_output_section_statement_type *output_section_statement,
 	   fill_type fill, bfd_vma dot, boolean relax));
 static void lang_finish PARAMS ((void));
+static void ignore_bfd_errors PARAMS ((const char *, ...));
 static void lang_check PARAMS ((void));
 static void lang_common PARAMS ((void));
 static boolean lang_one_common PARAMS ((struct bfd_link_hash_entry *, PTR));
@@ -412,7 +413,6 @@ lang_memory_region_type *
 lang_memory_region_lookup (name)
      CONST char *CONST name;
 {
-
   lang_memory_region_type *p;
 
   for (p = lang_memory_region_list;
@@ -451,6 +451,8 @@ lang_memory_region_lookup (name)
     *lang_memory_region_list_tail = new;
     lang_memory_region_list_tail = &new->next;
     new->origin = 0;
+    new->flags = 0;
+    new->not_flags = 0;
     new->length = ~(bfd_size_type)0;
     new->current = 0;
     new->had_full_message = false;
@@ -459,6 +461,31 @@ lang_memory_region_lookup (name)
   }
 }
 
+
+lang_memory_region_type *
+lang_memory_default (section)
+     asection *section;
+{
+  lang_memory_region_type *p;
+
+  flagword sec_flags = section->flags;
+
+  /* Override SEC_DATA to mean a writable section.  */
+  if (sec_flags & (SEC_ALLOC | SEC_READONLY | SEC_CODE) == SEC_ALLOC)
+    sec_flags |= SEC_DATA;
+
+  for (p = lang_memory_region_list;
+       p != (lang_memory_region_type *) NULL;
+       p = p->next)
+    {
+      if ((p->flags & sec_flags) != 0
+	  && (p->not_flags & sec_flags) == 0)
+	{
+	  return p;
+	}
+    }
+  return lang_memory_region_lookup ("*default*");
+}
 
 lang_output_section_statement_type *
 lang_output_section_find (name)
@@ -518,14 +545,34 @@ lang_output_section_statement_lookup (name)
   return lookup;
 }
 
+static void
+lang_map_flags (flag)
+     flagword flag;
+{
+  if (flag & SEC_ALLOC)
+    minfo ("a");
+
+  if (flag & SEC_CODE)
+    minfo ("x");
+
+  if (flag & SEC_READONLY)
+    minfo ("r");
+
+  if (flag & SEC_DATA)
+    minfo ("w");
+
+  if (flag & SEC_LOAD)
+    minfo ("l");
+}
+
 void
 lang_map ()
 {
   lang_memory_region_type *m;
 
   minfo ("\nMemory Configuration\n\n");
-  fprintf (config.map_file, "%-16s %-18s %-18s\n",
-	   "Name", "Origin", "Length");
+  fprintf (config.map_file, "%-16s %-18s %-18s %s\n",
+	   "Name", "Origin", "Length", "Attributes");
 
   for (m = lang_memory_region_list;
        m != (lang_memory_region_type *) NULL;
@@ -545,7 +592,26 @@ lang_map ()
 	  ++len;
 	}
 
-      minfo ("0x%V\n", m->length);
+      minfo ("0x%V", m->length);
+      if (m->flags || m->not_flags)
+	{
+#ifndef BFD64
+	  minfo ("        ");
+#endif
+	  if (m->flags)
+	    {
+	      print_space ();
+	      lang_map_flags (m->flags);
+	    }
+
+	  if (m->not_flags)
+	    {
+	      minfo (" !");
+	      lang_map_flags (m->not_flags);
+	    }
+	}
+
+      print_nl ();
     }
 
   fprintf (config.map_file, "\nLinker script and memory map\n\n");
@@ -2101,7 +2167,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	      */
 	   if (os->region == (lang_memory_region_type *) NULL)
 	   {
-	     os->region = lang_memory_region_lookup ("*default*");
+	     os->region = lang_memory_default (os->bfd_section);
 	   }
 	   dot = os->region->current;
 	   if (os->section_alignment == -1)
@@ -2630,6 +2696,20 @@ lang_finish ()
     }
 }
 
+/* This is a small function used when we want to ignore errors from
+   BFD.  */
+
+static void
+#ifdef ANSI_PROTOTYPES
+ignore_bfd_errors (const char *s, ...)
+#else
+ignore_bfd_errors (s)
+     const char *s;
+#endif
+{
+  /* Don't do anything.  */
+}
+
 /* Check that the architecture of all the input files is compatible
    with the output file.  Also call the backend to let it do any
    other checking that is needed.  */
@@ -2649,13 +2729,31 @@ lang_check ()
       compatible = bfd_arch_get_compatible (input_bfd,
 					    output_bfd);
       if (compatible == NULL)
-	einfo ("%P: warning: %s architecture of input file `%B' is incompatible with %s output\n",
-	       bfd_printable_name (input_bfd), input_bfd,
-	       bfd_printable_name (output_bfd));
-
-      else if (! bfd_merge_private_bfd_data (input_bfd, output_bfd))
 	{
-	  einfo ("%E%X: failed to merge target specific data of file %B\n", input_bfd);
+	  if (command_line.warn_mismatch)
+	    einfo ("%P: warning: %s architecture of input file `%B' is incompatible with %s output\n",
+		   bfd_printable_name (input_bfd), input_bfd,
+		   bfd_printable_name (output_bfd));
+	}
+      else
+	{
+	  bfd_error_handler_type pfn;
+
+	  /* If we aren't supposed to warn about mismatched input
+             files, temporarily set the BFD error handler to a
+             function which will do nothing.  We still want to call
+             bfd_merge_private_bfd_data, since it may set up
+             information which is needed in the output file.  */
+	  if (! command_line.warn_mismatch)
+	    pfn = bfd_set_error_handler (ignore_bfd_errors);
+	  if (! bfd_merge_private_bfd_data (input_bfd, output_bfd))
+	    {
+	      if (command_line.warn_mismatch)
+		einfo ("%E%X: failed to merge target specific data of file %B\n",
+		       input_bfd);
+	    }
+	  if (! command_line.warn_mismatch)
+	    bfd_set_error_handler (pfn);
 	}
     }
 }
@@ -2853,36 +2951,41 @@ lang_place_orphans ()
 
 void
 lang_set_flags (ptr, flags)
-     int *ptr;
+     lang_memory_region_type *ptr;
      CONST char *flags;
 {
-  boolean state = false;
+  flagword *ptr_flags = &ptr->flags;
 
-  *ptr = 0;
+  ptr->flags = ptr->not_flags = 0;
   while (*flags)
     {
-      if (*flags == '!')
-	{
-	  state = false;
-	  flags++;
-	}
-      else
-	state = true;
       switch (*flags)
 	{
-	case 'R':
-	  /*	  ptr->flag_read = state; */
+	case '!':
+	  ptr_flags = (ptr_flags == &ptr->flags) ? &ptr->not_flags : &ptr->flags;
 	  break;
-	case 'W':
-	  /*	  ptr->flag_write = state; */
+
+	case 'A': case 'a':
+	  *ptr_flags |= SEC_ALLOC;
 	  break;
-	case 'X':
-	  /*	  ptr->flag_executable= state;*/
+
+	case 'R': case 'r':
+	  *ptr_flags |= SEC_READONLY;
 	  break;
-	case 'L':
-	case 'I':
-	  /*	  ptr->flag_loadable= state;*/
+
+	case 'W': case 'w':
+	  *ptr_flags |= SEC_DATA;
 	  break;
+
+	case 'X': case 'x':
+	  *ptr_flags |= SEC_CODE;
+	  break;
+
+	case 'L': case 'l':
+	case 'I': case 'i':
+	  *ptr_flags |= SEC_LOAD;
+	  break;
+
 	default:
 	  einfo ("%P%F: invalid syntax in flags\n");
 	  break;
