@@ -1,3 +1,10 @@
+1999-08-10  Ian Lance Taylor  <ian@zembu.com>
+
+	From Wally Iimura <iimura@microunity.com>:
+	* dis-buf.c (buffer_read_memory): Rewrite expression to avoid
+	overflow at end of address space.
+	(generic_print_address): Use sprintf_vma.
+
 1999-08-08  Ian Lance Taylor  <ian@zembu.com>
 
 	* Makefile.am: Rename .dep* files to DEP*.  Change DEP variable to
