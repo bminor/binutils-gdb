@@ -1,3 +1,9 @@
+Mon May 15 12:07:55 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* printcmd.c (print_frame_args), stack.c (print_frame), command.c
+ 	(do_setshow_command), breakpoint.c (print_it_typical, mention):
+ 	Use make_cleanup_ui_out_stream_delete.
+
 Mon May 15 11:23:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* proc-events.c (init_syscall_table): Delete stray ``;''.

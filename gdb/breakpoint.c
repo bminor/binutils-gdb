@@ -1939,7 +1939,7 @@ print_it_typical (bs)
   struct cleanup *old_chain;
   struct ui_stream *stb;
   stb = ui_out_stream_new (uiout);
-  old_chain = make_cleanup ((make_cleanup_func) ui_out_stream_delete, stb);
+  old_chain = make_cleanup_ui_out_stream_delete (stb);
 #endif /* UI_OUT */
   /* bs->breakpoint_at can be NULL if it was a momentary breakpoint
      which has since been deleted.  */
@@ -4458,7 +4458,7 @@ mention (b)
   struct ui_stream *stb;
 
   stb = ui_out_stream_new (uiout);
-  old_chain = make_cleanup ((make_cleanup_func) ui_out_stream_delete, stb);
+  old_chain = make_cleanup_ui_out_stream_delete (stb);
 #endif /* UI_OUT */
 
   /* FIXME: This is misplaced; mention() is called by things (like hitting a

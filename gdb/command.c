@@ -1723,7 +1723,7 @@ do_setshow_command (arg, from_tty, c)
       int quote;
 
       stb = ui_out_stream_new (uiout);
-      old_chain = make_cleanup ((make_cleanup_func) ui_out_stream_delete, stb);
+      old_chain = make_cleanup_ui_out_stream_delete (stb);
 #endif /* UI_OUT */
 
       /* Print doc minus "show" at start.  */

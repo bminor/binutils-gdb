@@ -1852,7 +1852,7 @@ print_frame_args (func, fi, num, stream)
   struct ui_stream *stb;
 
   stb = ui_out_stream_new (uiout);
-  old_chain = make_cleanup (ui_out_stream_delete, stb);
+  old_chain = make_cleanup_ui_out_stream_delete (stb);
 #endif /* UI_OUT */
 
   if (func)
