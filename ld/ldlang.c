@@ -2801,8 +2801,7 @@ lang_size_sections_1
 		    /* If a loadable section is using the default memory
 		       region, and some non default memory regions were
 		       defined, issue an error message.  */
-		    if ((bfd_get_section_flags (output_bfd, os->bfd_section)
-			 & (SEC_ALLOC | SEC_LOAD)) != 0
+		    if (!IGNORE_SECTION (output_bfd, os->bfd_section)
 			&& (bfd_get_section_flags (output_bfd, os->bfd_section)
 			    & SEC_NEVER_LOAD) == 0
 			&& ! link_info.relocatable

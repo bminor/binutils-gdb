@@ -1,3 +1,8 @@
+2003-10-08  Alexandre Oliva  <aoliva@redhat.com>
+
+	* ldlang.c (lang_size_sections_1): Use IGNORE_SECTION to tell
+	whether to skip test for no memory region.
+
 2003-10-08  Nick Clifton  <nickc@redhat.com>
 
 	* lexsup.c (parse_args: OPTION_CALL_SHARED): Revise comment
