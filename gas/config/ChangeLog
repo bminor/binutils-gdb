@@ -1,3 +1,23 @@
+Wed Nov  4 07:50:46 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* obj-coff.c (callj_table): Delete global variable.
+	(obj_emit_relocations): Define it locally here, and only if
+	TC_I960 is defined.
+
+	* tc-m68k.c (m68k_reg_parse): Underscore is part of a symbol name.
+	(m68k_ip): Don't warn about bignum used as float bit-pattern.
+
+	* obj-coff.c: Replaced ANSI and non-ANSI function declarations
+	with a single set using PARAMS macro.
+
+	* tc-i960.c (tc_bout_fix_to_chars): Bit-field fixups want a length
+	of 2.
+
+	* tc-i960.c: Missed a couple of 0->NO_RELOC conversions.
+
+	* tc-i960.h (N_BALNAME, N_CALLNAME): Define as char-type values,
+	so widening works consistently.
+
 Fri Oct 23 14:40:38 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* obj-coffbfd.c (write_object_file): check return value of
