@@ -3592,6 +3592,7 @@ procfs_stopped_by_watchpoint(pid)
 #ifdef FLTKWATCH
 	  && (what == FLTKWATCH)
 #endif
+#endif
 	  )
 	return what;
     }
