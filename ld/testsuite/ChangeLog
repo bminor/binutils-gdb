@@ -1,3 +1,21 @@
+2001-06-06  H.J. Lu  <hjl@gnu.org>
+
+	* ld-bootstrap/bootstrap.exp: Rebuild tmpdir/ld2 with tmpdir/ld3
+	on Linux/mips.
+
+	* ld-elfvers/vers.exp: Also run on istarget Linux/mips.
+	* ld-elfvsb/elfvsb.exp: Likewise.
+	* ld-shared/shared.exp: Likewise.
+
+	* ld-selective/selective.exp: Mark selective2, selective3,
+	selective4 and selective5 xfail on Linux/mips.
+
+	* ld-shared/main.c: Skip invalid -Bsymbolic tests on Linux/mips.
+
+	* symbolic.dat: Remove invalid -Bsymbolic tests on Linux/mips.
+
+	* ld-srec/srec.exp: Add Linux/mips to xfail.
+
 2001-06-06  Martin Schwidefsky <schwidefsky@de.ibm.com>
 
 	* ld-undefined/undefined.exp: Add a setup_xfail line for a test

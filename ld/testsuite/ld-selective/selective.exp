@@ -39,10 +39,10 @@ if {[istarget "*-*-pe"]} {
 # FIXME: Instead of table, read settings from each source-file.
 set seltests {
   {selective1 C 1.c {} {} {dropme1 dropme2} {}}
-  {selective2 C 2.c {} {} {foo} {}}
-  {selective3 C 2.c {-u foo} {foo} {{foo 0}} {}}
-  {selective4 C++ 3.cc {} {start foo__1A foo__1B} {bar__1A} {}}
-  {selective5 C++ 4.cc {} {} {foo__1B foo__1A} {}}
+  {selective2 C 2.c {} {} {foo} {mips*-*}}
+  {selective3 C 2.c {-u foo} {foo} {{foo 0}} {mips*-*}}
+  {selective4 C++ 3.cc {} {start foo__1A foo__1B} {bar__1A} {mips*-*}}
+  {selective5 C++ 4.cc {} {} {foo__1B foo__1A} {mips*-*}}
   {selective6 C++ 5.cc {} {} {foo__1B foo__1A dropme1__Fv dropme2__Fv} {*-*-*}}
 }
 

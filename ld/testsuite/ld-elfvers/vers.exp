@@ -40,6 +40,7 @@ if { ![istarget i?86-*-sysv4*] \
      && ![istarget sparc*-*-solaris2*] \
      && ![istarget sparc*-*-linux*] \
      && ![istarget arm*-*-linux*] \
+     && ![istarget mips*-*-linux*] \
      && ![istarget alpha*-*-linux*] } {
     return
 }

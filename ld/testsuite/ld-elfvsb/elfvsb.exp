@@ -29,6 +29,7 @@ if ![isnative] then {return}
 if { ![istarget i?86-*-linux*] \
      && ![istarget ia64-*-linux*] \
      && ![istarget m68k-*-linux*] \
+     && ![istarget mips*-*-linux*] \
      && ![istarget powerpc-*-linux*] \
      && ![istarget arm*-*-linux*] \
      && ![istarget alpha*-*-linux*] \
@@ -266,6 +267,7 @@ proc visibility_run {visibility} {
 	    if { ![ string match $visibility "hidden_undef" ]
 		 && ![ string match $visibility "protected_undef" ] } {
 		setup_xfail "ia64-*-linux*"
+		setup_xfail "mips*-*-linux*"
 	    }
 	    visibility_test $visibility vnp "visibility ($visibility) (non PIC, load offset)" \
 		mainnp.o sh1np.o sh2np.o elfvsb \
