@@ -237,13 +237,12 @@ add_set_cmd (char *name,
 	     char *doc,
 	     struct cmd_list_element **list)
 {
-  struct cmd_list_element *c
-  = add_cmd (name, class, NO_FUNCTION, doc, list);
+  struct cmd_list_element *c = add_cmd (name, class, NULL, doc, list);
 
   c->type = set_cmd;
   c->var_type = var_type;
   c->var = var;
-  /* This needs to be something besides NO_FUNCTION so that this isn't
+  /* This needs to be something besides NULL so that this isn't
      treated as a help class.  */
   c->function.sfunc = empty_sfunc;
   return c;

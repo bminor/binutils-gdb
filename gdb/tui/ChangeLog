@@ -1,3 +1,7 @@
+2002-02-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* tuiWin.c (_initialize_tuiWin): Replace NO_FUNCTION with NULL.
+
 2001-10-20  Andrew Cagney  <ac131313@redhat.com>
 
 	* tuiDisassem.c: Include "value.h".

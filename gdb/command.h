@@ -126,9 +126,8 @@ struct cmd_list_element
     /* Command class; class values are chosen by application program.  */
     enum command_class class;
 
-    /* Function definition of this command.
-       NO_FUNCTION for command class names and for help topics that
-       are not really commands.  */
+    /* Function definition of this command.  NULL for command class
+       names and for help topics that are not really commands.  */
     union
       {
 	/* If type is not_set_cmd, call it like this:  */
@@ -139,7 +138,6 @@ struct cmd_list_element
 	void (*sfunc) (char *args, int from_tty, struct cmd_list_element * c);
       }
     function;
-#define NO_FUNCTION ((void (*) (char *args, int from_tty)) 0)
 
     /* Documentation of this command (or help topic).
        First line is brief documentation; remaining lines form, with it,

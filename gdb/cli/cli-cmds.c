@@ -604,24 +604,24 @@ init_cli_cmds (void)
   /* Define the classes of commands.
      They will appear in the help list in the reverse of this order.  */
 
-  add_cmd ("internals", class_maintenance, NO_FUNCTION,
+  add_cmd ("internals", class_maintenance, NULL,
 	   "Maintenance commands.\n\
 Some gdb commands are provided just for use by gdb maintainers.\n\
 These commands are subject to frequent change, and may not be as\n\
 well documented as user commands.",
 	   &cmdlist);
-  add_cmd ("obscure", class_obscure, NO_FUNCTION, "Obscure features.", &cmdlist);
-  add_cmd ("aliases", class_alias, NO_FUNCTION, "Aliases of other commands.", &cmdlist);
-  add_cmd ("user-defined", class_user, NO_FUNCTION, "User-defined commands.\n\
+  add_cmd ("obscure", class_obscure, NULL, "Obscure features.", &cmdlist);
+  add_cmd ("aliases", class_alias, NULL, "Aliases of other commands.", &cmdlist);
+  add_cmd ("user-defined", class_user, NULL, "User-defined commands.\n\
 The commands in this class are those defined by the user.\n\
 Use the \"define\" command to define a command.", &cmdlist);
-  add_cmd ("support", class_support, NO_FUNCTION, "Support facilities.", &cmdlist);
+  add_cmd ("support", class_support, NULL, "Support facilities.", &cmdlist);
   if (!dbx_commands)
-    add_cmd ("status", class_info, NO_FUNCTION, "Status inquiries.", &cmdlist);
-  add_cmd ("files", class_files, NO_FUNCTION, "Specifying and examining files.", &cmdlist);
-  add_cmd ("breakpoints", class_breakpoint, NO_FUNCTION, "Making program stop at certain points.", &cmdlist);
-  add_cmd ("data", class_vars, NO_FUNCTION, "Examining data.", &cmdlist);
-  add_cmd ("stack", class_stack, NO_FUNCTION, "Examining the stack.\n\
+    add_cmd ("status", class_info, NULL, "Status inquiries.", &cmdlist);
+  add_cmd ("files", class_files, NULL, "Specifying and examining files.", &cmdlist);
+  add_cmd ("breakpoints", class_breakpoint, NULL, "Making program stop at certain points.", &cmdlist);
+  add_cmd ("data", class_vars, NULL, "Examining data.", &cmdlist);
+  add_cmd ("stack", class_stack, NULL, "Examining the stack.\n\
 The stack is made up of stack frames.  Gdb assigns numbers to stack frames\n\
 counting from zero for the innermost (currently executing) frame.\n\n\
 At any time gdb identifies one frame as the \"selected\" frame.\n\
@@ -629,7 +629,7 @@ Variable lookups are done with respect to the selected frame.\n\
 When the program being debugged stops, gdb selects the innermost frame.\n\
 The commands below can be used to select other frames by number or address.",
 	   &cmdlist);
-  add_cmd ("running", class_run, NO_FUNCTION, "Running the program.", &cmdlist);
+  add_cmd ("running", class_run, NULL, "Running the program.", &cmdlist);
 
   /* Define general commands. */
 

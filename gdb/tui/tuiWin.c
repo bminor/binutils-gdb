@@ -280,7 +280,7 @@ _initialize_tuiWin (void)
 
   /* Define the classes of commands.
      They will appear in the help list in the reverse of this order.  */
-  add_cmd ("tui", class_tui, NO_FUNCTION,
+  add_cmd ("tui", class_tui, NULL,
 	   "Text User Interface commands.",
 	   &cmdlist);
 

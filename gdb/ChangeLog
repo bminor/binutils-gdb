@@ -1,3 +1,12 @@
+2002-02-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* command.h (NO_FUNCTION): Delete macro.
+	* cli/cli-decode.h (NO_FUNCTION): Ditto.
+	* top.c (execute_command): Replace NO_FUNCTION with NULL.
+	* tracepoint.c (_initialize_tracepoint): Ditto.
+	* cli/cli-decode.c (add_set_cmd): Ditto.
+	* cli/cli-cmds.c (init_cli_cmds): Ditto.
+	
 2002-02-01  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gnu-v3-abi.c (gnuv3_virtual_fn_field): Update comments.
