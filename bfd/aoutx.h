@@ -1331,14 +1331,14 @@ DEFUN(translate_to_native_sym_flags,(sym_pointer, cache_ptr, abfd),
   else if (bfd_get_output_section(cache_ptr) == NULL) {
     /* Protect the bfd_is_com_section call.
        This case occurs, e.g., for the *DEBUG* section of a COFF file.  */
-    bfd_error = bfd_error_nonrepresentable_section;
+    bfd_error = nonrepresentable_section;
     return false;
   }
   else if (bfd_is_com_section (bfd_get_output_section (cache_ptr))) {
     sym_pointer->e_type[0] = (N_UNDF | N_EXT);
   }
   else {
-    bfd_error = bfd_error_nonrepresentable_section;
+    bfd_error = nonrepresentable_section;
     return false;
   }
 

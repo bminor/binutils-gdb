@@ -1,3 +1,13 @@
+Fri Jan 21 09:29:01 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* aoutx.h (translate_to_native_sym_flags), bfd-in.h (bfd_ec),
+	oasys.c (oasys_write_sections): Rename
+	bfd_error_nonrepresentable_section to nonrepresentable_section.
+	None of the other bfd error names start with "bfd_error".
+	Remove errors symbol_not_found and no_relocation_info, which seem
+	to be unused.
+	* bfd-in2.h: Regenerated.
+
 Fri Jan 21 01:11:55 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* bfd.c (bfd_get_gp_size): Added support for ELF.
