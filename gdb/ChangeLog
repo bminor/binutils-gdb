@@ -1,5 +1,10 @@
 2004-10-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* ada-lang.c (lim_warning): Re-implement as a varargs function.
+	(decode_packed_array_type, value_subscript_packed)
+	(ada_evaluate_subexp, to_fixed_range_type): Remove redundant
+	argument in call to lim_warning.
+
 	* configure.in: Really disable the TUI if an enhanced curses
 	library isn't found.
 	* configure: Regenerate.

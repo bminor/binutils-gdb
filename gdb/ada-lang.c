@@ -477,12 +477,18 @@ cond_offset_target (CORE_ADDR address, long offset)
    with exactly one argument rather than ...), unless the limit on the
    number of warnings has passed during the evaluation of the current
    expression.  */
+
 static void
-lim_warning (const char *format, long arg)
+lim_warning (const char *format, ...)
 {
+  va_list args;
+  va_start (args, format);
+
   warnings_issued += 1;
   if (warnings_issued <= warning_limit)
-    warning (format, arg);
+    vwarning (format, args);
+
+  va_end (args);
 }
 
 /* Note: would have used MAX_OF_TYPE and MIN_OF_TYPE macros from
@@ -1604,22 +1610,21 @@ decode_packed_array_type (struct type *type)
   sym = standard_lookup (name, get_selected_block (0), VAR_DOMAIN);
   if (sym == NULL || SYMBOL_TYPE (sym) == NULL)
     {
-      lim_warning ("could not find bounds information on packed array", 0);
+      lim_warning ("could not find bounds information on packed array");
       return NULL;
     }
   shadow_type = SYMBOL_TYPE (sym);
 
   if (TYPE_CODE (shadow_type) != TYPE_CODE_ARRAY)
     {
-      lim_warning ("could not understand bounds information on packed array",
-                   0);
+      lim_warning ("could not understand bounds information on packed array");
       return NULL;
     }
 
   if (sscanf (tail + sizeof ("___XP") - 1, "%ld", &bits) != 1)
     {
       lim_warning
-        ("could not understand bit size information on packed array", 0);
+	("could not understand bit size information on packed array");
       return NULL;
     }
 
@@ -1705,7 +1710,7 @@ value_subscript_packed (struct value *arr, int arity, struct value **ind)
 
           if (get_discrete_bounds (range_type, &lowerbound, &upperbound) < 0)
             {
-              lim_warning ("don't know bounds of array", 0);
+              lim_warning ("don't know bounds of array");
               lowerbound = upperbound = 0;
             }
 
@@ -7417,7 +7422,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         {
         default:
           lim_warning ("Membership test incompletely implemented; "
-                       "always returns true", 0);
+                       "always returns true");
           return value_from_longest (builtin_type_int, (LONGEST) 1);
 
         case TYPE_CODE_RANGE:
@@ -8079,7 +8084,7 @@ to_fixed_range_type (char *name, struct value *dval, struct objfile *objfile)
           L = get_int_var_value (name_buf, &ok);
           if (!ok)
             {
-              lim_warning ("Unknown lower bound, using 1.", 1);
+              lim_warning ("Unknown lower bound, using 1.");
               L = 1;
             }
         }
