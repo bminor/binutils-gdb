@@ -1,3 +1,8 @@
+2003-09-22  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* top.c (quit_force): Fix indirect call to quit_target so
+	a struct qt_args pointer is passed.
+
 2003-09-22  Andrew Cagney  <cagney@redhat.com>
 
 	* arch-utils.h (init_frame_pc_noop): Delete declaration.
