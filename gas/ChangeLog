@@ -1,3 +1,8 @@
+2001-02-21  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo (Section): Note that some flags to the COFF
+	version of .section remove attributes rather than setting them.
+
 2001-02-20  Kazu Hirata  <kazu@hxi.com>
 
 	* tc-pdp11.c: Fix formatting.

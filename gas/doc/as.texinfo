@@ -4640,7 +4640,9 @@ shared section (meaningful for PE targets)
 
 If no flags are specified, the default flags depend upon the section name.  If
 the section name is not recognized, the default will be for the section to be
-loaded and writable.
+loaded and writable.  Note the @code{n} and @code{w} flags remove attributes
+from the section, rather than adding them, so if they are used on their own it
+will be as if no flags had been specified at all.
 
 If the optional argument to the @code{.section} directive is not quoted, it is
 taken as a subsegment number (@pxref{Sub-Sections}).
