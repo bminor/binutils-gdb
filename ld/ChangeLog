@@ -1,3 +1,10 @@
+2000-06-05  Michael Matz <matz@ifh.de>
+
+	* ldgram.y (vers_defns): Handle 'extern "C++" { ... }' in
+	 version scripts.
+
+	 * ldlex.l (V_IDENTIFIER): Accept `::' in symbols.
+
 2000-05-23  Marek Michalkiewicz  <marekm@linux.org.pl>
 
 	* emulparams/avr1200.sh (STACK): Define as 0.

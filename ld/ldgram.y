@@ -1113,6 +1113,7 @@ vers_defns:
 			}
 		vers_defns '}'
 			{
+			  $$ = $5;
 			  ldgram_vers_current_lang = $<name>4;
 			}
 	;
