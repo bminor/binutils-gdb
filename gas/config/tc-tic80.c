@@ -800,14 +800,19 @@ md_begin ()
   register const struct tic80_opcode *op;
   register const struct tic80_opcode *op_end;
   const struct predefined_symbol *pdsp;
+  extern int coff_flags;			/* Defined in obj-coff.c */
 
-  tic80_hash = hash_new ();
+  /* Set F_AR32WR in coff_flags, which will end up in the file header
+     f_flags field. */
+
+  coff_flags |= F_AR32WR;	/* TIc80 is 32 bit little endian */
 
   /* Insert unique names into hash table.  The TIc80 instruction set
      has many identical opcode names that have different opcodes based
      on the operands.  This hash table then provides a quick index to
      the first opcode with a particular name in the opcode table.  */
 
+  tic80_hash = hash_new ();
   op_end = tic80_opcodes + tic80_num_opcodes;
   for (op = tic80_opcodes; op < op_end; op++)
     {
