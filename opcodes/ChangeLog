@@ -1,4 +1,8 @@
 start-sanitize-d10v
+Mon Aug 12 14:30:37 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d10v-opc.c (d10v_opcodes): Minor fixes to addi and bl.l.
+
 Fri Aug  9 13:21:59 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-opc.c (d10v_opcodes): Correct 'mv' unit entry to EITHER.
