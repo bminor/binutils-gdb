@@ -1,3 +1,8 @@
+1999-06-12  David O'Brien  <obrien@freebsd.org>
+
+	* configure.in: (i[3456]86-*-freebsd*): Now defaults to ELF.
+	* configure: Rebuild.
+
 1999-06-12  Ian Lance Taylor  <ian@zembu.com>
 
 	* dwarf2dbg.c: Include elf/dwarf2.h with "", not <>.
