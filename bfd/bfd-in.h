@@ -1,5 +1,5 @@
 /* Main header file for the bfd library -- portable access to object files.
-   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 ** NOTE: bfd.h and bfd-in2.h are GENERATED files.  Don't change them;
@@ -82,6 +82,10 @@ typedef struct _bfd bfd;
 /* typedef enum boolean {false, true} boolean; */
 /* Yup, SVR4 has a "typedef enum boolean" in <sys/types.h>  -fnf */
 /* It gets worse if the host also defines a true/false enum... -sts */
+/* And even worse if your compiler has built-in boolean types... -law */
+#if defined (__GNUG__) && (__GNUC_MINOR__ > 5)
+#define TRUE_FALSE_ALREADY_DEFINED
+#endif
 #ifndef TRUE_FALSE_ALREADY_DEFINED
 typedef enum bfd_boolean {false, true} boolean;
 #define BFD_TRUE_FALSE
@@ -99,15 +103,16 @@ typedef enum bfd_boolean {bfd_false, bfd_true} boolean;
 /* typedef off_t	file_ptr; */
 typedef long int file_ptr;
 
-/* Support for different sizes of target format ints and addresses.  If the
-   host implements 64-bit values, it defines BFD_HOST_64_BIT to be the appropriate
-   type.  Otherwise, this code will fall back on gcc's "long long" type if gcc
-   is being used.  BFD_HOST_64_BIT must be defined in such a way as to be a valid
-   type name by itself or with "unsigned" prefixed.  It should be a signed
-   type by itself.
+/* Support for different sizes of target format ints and addresses.
+   If the host implements 64-bit values, it defines BFD_HOST_64_BIT to
+   be the appropriate type.  Otherwise, this code will fall back on
+   gcc's "long long" type if gcc is being used.  BFD_HOST_64_BIT must
+   be defined in such a way as to be a valid type name by itself or
+   with "unsigned" prefixed.  It should be a signed type by itself.
 
-   If neither is the case, then compilation will fail if 64-bit targets are
-   requested.  If you don't request any 64-bit targets, you should be safe. */
+   If neither is the case, then compilation will fail if 64-bit
+   targets are requested.  If you don't request any 64-bit targets,
+   you should be safe. */
 
 #ifdef	BFD64
 
@@ -159,6 +164,7 @@ typedef unsigned long bfd_size_type;
 #define printf_vma(x) fprintf_vma(stdout,x)
 
 typedef unsigned int flagword;	/* 32 bits of flags */
+typedef unsigned char bfd_byte;
 
 /** File formats */
 
@@ -213,7 +219,8 @@ typedef enum bfd_format {
 #define D_PAGED     	0x100
 
 /* BFD is relaxable (this means that bfd_relax_section may be able to
-   do something).  */
+   do something) (sometimes bfd_relax_section can do something even if
+   this is not set).  */
 #define BFD_IS_RELAXABLE 0x200
 
 /* This may be set before writing out a BFD to request using a
@@ -226,6 +233,9 @@ typedef enum bfd_format {
 
 /* A count of carsyms (canonical archive symbols).  */
 typedef unsigned long symindex;
+
+/* How to perform a relocation.  */
+typedef const struct reloc_howto_struct reloc_howto_type;
 
 #define BFD_NO_MORE_SYMBOLS ((symindex) ~0)
 
@@ -257,7 +267,6 @@ struct orl {			/* output ranlib */
   file_ptr pos;			/* bfd* or file position */
   int namidx;			/* index into string table */
 };
-
 
 
 /* Linenumber stuff */
@@ -270,7 +279,6 @@ typedef struct lineno_cache_entry {
 } alent;
 
 /* object and core file sections */
-
 
 #define	align_power(addr, align)	\
 	( ((addr) + ((1<<(align))-1)) & (-1 << (align)))
@@ -289,9 +297,9 @@ typedef struct sec *sec_ptr;
 
 #define bfd_is_com_section(ptr) (((ptr)->flags & SEC_IS_COMMON) != 0)
 
-#define bfd_set_section_vma(bfd, ptr, val) (((ptr)->vma = (ptr)->lma= (val)), ((ptr)->user_set_vma = true), true)
-#define bfd_set_section_alignment(bfd, ptr, val) (((ptr)->alignment_power = (val)),true)
-#define bfd_set_section_userdata(bfd, ptr, val) (((ptr)->userdata = (val)),true)
+#define bfd_set_section_vma(bfd, ptr, val) (((ptr)->vma = (ptr)->lma= (val)), ((ptr)->user_set_vma = bfd_true), bfd_true)
+#define bfd_set_section_alignment(bfd, ptr, val) (((ptr)->alignment_power = (val)),bfd_true)
+#define bfd_set_section_userdata(bfd, ptr, val) (((ptr)->userdata = (val)),bfd_true)
 
 typedef struct stat stat_type; 
 
@@ -424,6 +432,55 @@ extern void bfd_hash_traverse PARAMS ((struct bfd_hash_table *,
 
 /* User program access to BFD facilities */
 
+/* Direct I/O routines, for programs which know more about the object
+   file than BFD does.  Use higher level routines if possible.  */
+
+extern bfd_size_type bfd_read
+  PARAMS ((PTR, bfd_size_type size, bfd_size_type nitems, bfd *abfd));
+extern bfd_size_type bfd_write
+  PARAMS ((const PTR, bfd_size_type size, bfd_size_type nitems, bfd *abfd));
+extern int bfd_seek PARAMS ((bfd *abfd, file_ptr fp, int direction));
+extern long bfd_tell PARAMS ((bfd *abfd));
+extern int bfd_flush PARAMS ((bfd *abfd));
+extern int bfd_stat PARAMS ((bfd *abfd, struct stat *));
+
+/* PE STUFF */
+/* Also define some types which are used within bfdlink.h for the
+   bfd_link_info struct.  These are not defined in bfdlink.h for a reason.  
+   When the link_info data is passed to bfd from ld, it is copied into 
+   extern variables defined in internal.h.  The type class for these must
+   be available to any thing that includes internal.h.  When internal.h is
+   included, it is always preceeded by an include on this file.  If I leave the
+   type definitions in bfdlink.h, then I must include that file when ever
+   I include internal.h, and this is not always a good thing */
+
+/* These are the different types of subsystems to be used when linking for
+   Windows NT.  This information is passed in as an input parameter (default
+   is console) and ultimately ends up in the optional header data */
+enum bfd_link_subsystem
+{
+  native,    /* image doesn't require a subsystem */
+  windows,   /* image runs in the Windows GUI subsystem */
+  console,   /* image runs in the Windows CUI (character) subsystem */
+  os2,       /* image runs in the OS/2 character subsystem */
+  posix      /* image runs in the posix character subsystem */
+};
+/* The NT optional header file allows input of the stack and heap reserve
+   and commit size.  This data may be input on the command line and will
+   end up in the optional header.  Default sizes are provided. */
+struct _bfd_link_stack_heap
+{
+  boolean stack_defined;
+  boolean heap_defined;
+  bfd_vma stack_reserve;
+  bfd_vma stack_commit;
+  bfd_vma heap_reserve;
+  bfd_vma heap_commit; 
+};
+typedef struct _bfd_link_stack_heap bfd_link_stack_heap;
+
+/* END OF PE STUFF */
+
 /* Cast from const char * to char * so that caller can assign to
    a char * without a warning.  */
 #define bfd_get_filename(abfd) ((char *) (abfd)->filename)
@@ -447,7 +504,7 @@ extern void bfd_hash_traverse PARAMS ((struct bfd_hash_table *,
 
 #define bfd_get_symbol_leading_char(abfd) ((abfd)->xvec->symbol_leading_char)
 
-#define bfd_set_cacheable(abfd,bool) (((abfd)->cacheable = (bool)), true)
+#define bfd_set_cacheable(abfd,bool) (((abfd)->cacheable = (bool)), bfd_true)
 
 /* Byte swapping routines.  */
 
@@ -524,6 +581,9 @@ extern boolean bfd_ecoff_write_accumulated_debug
   PARAMS ((PTR handle, bfd *abfd, struct ecoff_debug_info *debug,
 	   const struct ecoff_debug_swap *swap,
 	   struct bfd_link_info *info, file_ptr where));
+extern boolean bfd_mips_ecoff_create_embedded_relocs
+  PARAMS ((bfd *, struct bfd_link_info *, struct sec *, struct sec *,
+	   char **));
 
 /* Externally visible ELF routines.  */
 
@@ -532,9 +592,11 @@ extern boolean bfd_elf32_record_link_assignment
 extern boolean bfd_elf64_record_link_assignment
   PARAMS ((bfd *, struct bfd_link_info *, const char *));
 extern boolean bfd_elf32_size_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *, struct sec **));
+  PARAMS ((bfd *, const char *, const char *, boolean,
+	   struct bfd_link_info *, struct sec **));
 extern boolean bfd_elf64_size_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *, struct sec **));
+  PARAMS ((bfd *, const char *, const char *, boolean,
+	   struct bfd_link_info *, struct sec **));
 extern void bfd_elf_set_dt_needed_name PARAMS ((bfd *, const char *));
 
 /* SunOS shared library support routines for the linker.  */
@@ -545,4 +607,17 @@ extern boolean bfd_sunos_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *, struct sec **, struct sec **,
 	   struct sec **));
 
+/* Linux shared library support routines for the linker.  */
+
+extern boolean bfd_linux_size_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
+
 /* And more from the source.  */
+
+/* provide storage for subsystem, stack and heap data which may have been
+   passed in on the command line.  Ld puts this data into a bfd_link_info
+   struct which ultimately gets passed in to the bfd.  When it arrives, copy
+   it to the following struct so that the data will be available in coffcode.h
+   where it is needed.  The typedef's used are defined in bfd.h */
+enum   bfd_link_subsystem  NT_subsystem;
+bfd_link_stack_heap NT_stack_heap;

@@ -1,3 +1,14 @@
+Fri Jun  9 12:49:00 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* bfd-in.h: (TRUE_FALSE_ALREADY_DEFINED): Define this if
+	compiling with g++-2.6 or later.
+	(bfd_set_section_vma): Use bfd_true and bfd_false rather than
+	true and false.
+	(bfd_set_section_alignment): Likewise.
+	(bfd_set_section_userdata): Likewise.
+	(bfd_set_cacheable): Likewise.
+	* bfd-in2.h: Rebuilt.
+
 Fri Jun  9 07:54:29 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* versados.c (struct esd, get_4): Lint; use unsigned chars.

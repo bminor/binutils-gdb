@@ -82,6 +82,10 @@ typedef struct _bfd bfd;
 /* typedef enum boolean {false, true} boolean; */
 /* Yup, SVR4 has a "typedef enum boolean" in <sys/types.h>  -fnf */
 /* It gets worse if the host also defines a true/false enum... -sts */
+/* And even worse if your compiler has built-in boolean types... -law */
+#if defined (__GNUG__) && (__GNUC_MINOR__ > 5)
+#define TRUE_FALSE_ALREADY_DEFINED
+#endif
 #ifndef TRUE_FALSE_ALREADY_DEFINED
 typedef enum bfd_boolean {false, true} boolean;
 #define BFD_TRUE_FALSE
@@ -293,9 +297,9 @@ typedef struct sec *sec_ptr;
 
 #define bfd_is_com_section(ptr) (((ptr)->flags & SEC_IS_COMMON) != 0)
 
-#define bfd_set_section_vma(bfd, ptr, val) (((ptr)->vma = (ptr)->lma= (val)), ((ptr)->user_set_vma = true), true)
-#define bfd_set_section_alignment(bfd, ptr, val) (((ptr)->alignment_power = (val)),true)
-#define bfd_set_section_userdata(bfd, ptr, val) (((ptr)->userdata = (val)),true)
+#define bfd_set_section_vma(bfd, ptr, val) (((ptr)->vma = (ptr)->lma= (val)), ((ptr)->user_set_vma = bfd_true), bfd_true)
+#define bfd_set_section_alignment(bfd, ptr, val) (((ptr)->alignment_power = (val)),bfd_true)
+#define bfd_set_section_userdata(bfd, ptr, val) (((ptr)->userdata = (val)),bfd_true)
 
 typedef struct stat stat_type; 
 
@@ -440,6 +444,43 @@ extern long bfd_tell PARAMS ((bfd *abfd));
 extern int bfd_flush PARAMS ((bfd *abfd));
 extern int bfd_stat PARAMS ((bfd *abfd, struct stat *));
 
+/* PE STUFF */
+/* Also define some types which are used within bfdlink.h for the
+   bfd_link_info struct.  These are not defined in bfdlink.h for a reason.  
+   When the link_info data is passed to bfd from ld, it is copied into 
+   extern variables defined in internal.h.  The type class for these must
+   be available to any thing that includes internal.h.  When internal.h is
+   included, it is always preceeded by an include on this file.  If I leave the
+   type definitions in bfdlink.h, then I must include that file when ever
+   I include internal.h, and this is not always a good thing */
+
+/* These are the different types of subsystems to be used when linking for
+   Windows NT.  This information is passed in as an input parameter (default
+   is console) and ultimately ends up in the optional header data */
+enum bfd_link_subsystem
+{
+  native,    /* image doesn't require a subsystem */
+  windows,   /* image runs in the Windows GUI subsystem */
+  console,   /* image runs in the Windows CUI (character) subsystem */
+  os2,       /* image runs in the OS/2 character subsystem */
+  posix      /* image runs in the posix character subsystem */
+};
+/* The NT optional header file allows input of the stack and heap reserve
+   and commit size.  This data may be input on the command line and will
+   end up in the optional header.  Default sizes are provided. */
+struct _bfd_link_stack_heap
+{
+  boolean stack_defined;
+  boolean heap_defined;
+  bfd_vma stack_reserve;
+  bfd_vma stack_commit;
+  bfd_vma heap_reserve;
+  bfd_vma heap_commit; 
+};
+typedef struct _bfd_link_stack_heap bfd_link_stack_heap;
+
+/* END OF PE STUFF */
+
 /* Cast from const char * to char * so that caller can assign to
    a char * without a warning.  */
 #define bfd_get_filename(abfd) ((char *) (abfd)->filename)
@@ -463,7 +504,7 @@ extern int bfd_stat PARAMS ((bfd *abfd, struct stat *));
 
 #define bfd_get_symbol_leading_char(abfd) ((abfd)->xvec->symbol_leading_char)
 
-#define bfd_set_cacheable(abfd,bool) (((abfd)->cacheable = (bool)), true)
+#define bfd_set_cacheable(abfd,bool) (((abfd)->cacheable = (bool)), bfd_true)
 
 /* Byte swapping routines.  */
 
@@ -572,6 +613,14 @@ extern boolean bfd_linux_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 
 /* And more from the source.  */
+
+/* provide storage for subsystem, stack and heap data which may have been
+   passed in on the command line.  Ld puts this data into a bfd_link_info
+   struct which ultimately gets passed in to the bfd.  When it arrives, copy
+   it to the following struct so that the data will be available in coffcode.h
+   where it is needed.  The typedef's used are defined in bfd.h */
+enum   bfd_link_subsystem  NT_subsystem;
+bfd_link_stack_heap NT_stack_heap;
 void 
 bfd_init PARAMS ((void));
 
@@ -1327,6 +1376,25 @@ The 24-bit relocation is used in some Intel 960 configurations. */
   BFD_RELOC_12_PCREL,
   BFD_RELOC_8_PCREL,
 
+/* For ELF. */
+  BFD_RELOC_32_GOT_PCREL,
+  BFD_RELOC_16_GOT_PCREL,
+  BFD_RELOC_8_GOT_PCREL,
+  BFD_RELOC_32_GOTOFF,
+  BFD_RELOC_16_GOTOFF,
+  BFD_RELOC_8_GOTOFF,
+  BFD_RELOC_32_PLT_PCREL,
+  BFD_RELOC_16_PLT_PCREL,
+  BFD_RELOC_8_PLT_PCREL,
+  BFD_RELOC_32_PLTOFF,
+  BFD_RELOC_16_PLTOFF,
+  BFD_RELOC_8_PLTOFF,
+
+/* Relocations used by 68K ELF. */
+  BFD_RELOC_68K_GLOB_DAT,
+  BFD_RELOC_68K_JMP_SLOT,
+  BFD_RELOC_68K_RELATIVE,
+
 /* Linkage-table relative. */
   BFD_RELOC_32_BASEREL,
   BFD_RELOC_16_BASEREL,
@@ -1524,13 +1592,22 @@ not stored in the instruction. */
   BFD_RELOC_ARM_SWI,
   BFD_RELOC_ARM_MULTI,
   BFD_RELOC_ARM_CP_OFF_IMM,
+  BFD_RELOC_ARM_ADR_IMM,
+  BFD_RELOC_ARM_LDR_IMM,
+  BFD_RELOC_ARM_LITERAL,
+  BFD_RELOC_ARM_IN_POOL,
 /* start-sanitize-arc */
 
 /* Argonaut RISC Core (ARC) relocs.
 ARC 22 bit pc-relative branch.  The lowest two bits must be zero and are
-not stored in the instruction.  High 20 bits installed in bits 7 through 26
-of instruction. */
+not stored in the instruction.  The high 20 bits are installed in bits 26
+through 7 of the instruction. */
   BFD_RELOC_ARC_B22_PCREL,
+
+/* ARC 26 bit absolute branch.  The lowest two bits must be zero and are not
+stored in the instruction.  The high 24 bits are installed in bits 23
+through 0. */
+  BFD_RELOC_ARC_B26,
 /* end-sanitize-arc */
 
   BFD_RELOC_UNUSED };
@@ -1820,6 +1897,7 @@ struct _bfd
       struct lynx_core_struct *lynx_core_data;
       struct osf_core_struct *osf_core_data;
       struct cisco_core_struct *cisco_core_data;
+      struct versados_data_struct *versados_data;
       PTR any;
       } tdata;
   
@@ -1864,6 +1942,14 @@ bfd_errmsg  PARAMS ((bfd_error_type error_tag));
 void 
 bfd_perror  PARAMS ((CONST char *message));
 
+typedef void (*bfd_error_handler_type) PARAMS ((const char *, ...));
+
+bfd_error_handler_type 
+bfd_set_error_handler  PARAMS ((bfd_error_handler_type));
+
+void 
+bfd_set_error_program_name  PARAMS ((const char *));
+
 long 
 bfd_get_reloc_upper_bound PARAMS ((bfd *abfd, asection *sect));
 
@@ -1907,6 +1993,18 @@ bfd_copy_private_bfd_data PARAMS ((bfd *ibfd, bfd *obfd));
 #define bfd_copy_private_bfd_data(ibfd, obfd) \
      BFD_SEND (ibfd, _bfd_copy_private_bfd_data, \
 		(ibfd, obfd))
+boolean 
+bfd_merge_private_bfd_data PARAMS ((bfd *ibfd, bfd *obfd));
+
+#define bfd_merge_private_bfd_data(ibfd, obfd) \
+     BFD_SEND (ibfd, _bfd_merge_private_bfd_data, \
+		(ibfd, obfd))
+boolean 
+bfd_set_private_flags PARAMS ((bfd *abfd, flagword flags));
+
+#define bfd_set_private_flags(abfd, flags) \
+     BFD_SEND (abfd, _bfd_set_private_flags, \
+		(abfd, flags))
 #define bfd_sizeof_headers(abfd, reloc) \
      BFD_SEND (abfd, _bfd_sizeof_headers, (abfd, reloc))
 
@@ -1933,10 +2031,6 @@ bfd_copy_private_bfd_data PARAMS ((bfd *ibfd, bfd *obfd));
 #define bfd_set_arch_mach(abfd, arch, mach)\
         BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
 
-#define bfd_get_relocated_section_contents(abfd, link_info, link_order, data, relocateable, symbols) \
-	BFD_SEND (abfd, _bfd_get_relocated_section_contents, \
-                 (abfd, link_info, link_order, data, relocateable, symbols))
- 
 #define bfd_relax_section(abfd, section, link_info, again) \
        BFD_SEND (abfd, _bfd_relax_section, (abfd, section, link_info, again))
 
@@ -1963,6 +2057,11 @@ bfd_copy_private_bfd_data PARAMS ((bfd *ibfd, bfd *obfd));
 
 #define bfd_canonicalize_dynamic_reloc(abfd, arels, asyms) \
 	BFD_SEND (abfd, _bfd_canonicalize_dynamic_reloc, (abfd, arels, asyms))
+
+extern bfd_byte *bfd_get_relocated_section_contents
+	PARAMS ((bfd *, struct bfd_link_info *,
+		  struct bfd_link_order *, bfd_byte *,
+		  boolean, asymbol **));
 
 symindex 
 bfd_get_next_mapent PARAMS ((bfd *abfd, symindex previous, carsym **sym));
@@ -2019,7 +2118,7 @@ enum bfd_flavour {
   bfd_target_srec_flavour,
   bfd_target_som_flavour,
   bfd_target_os9k_flavour,
-  bfd_target_msdos_flavour
+  bfd_target_versados_flavour
 };
 
  /* Forward declaration.  */
@@ -2078,14 +2177,21 @@ CAT(NAME,_get_section_contents)
    /* Entry points to copy private data.  */
 #define BFD_JUMP_TABLE_COPY(NAME)\
 CAT(NAME,_bfd_copy_private_bfd_data),\
-CAT(NAME,_bfd_copy_private_section_data)
+CAT(NAME,_bfd_merge_private_bfd_data),\
+CAT(NAME,_bfd_copy_private_section_data),\
+CAT(NAME,_bfd_set_private_flags)
    /* Called to copy BFD general private data from one object file
      to another.  */
   boolean	 (*_bfd_copy_private_bfd_data) PARAMS ((bfd *, bfd *));
+   /* Called to merge BFD general private data from one object file
+     to a common output file when linking.  */
+  boolean	 (*_bfd_merge_private_bfd_data) PARAMS ((bfd *, bfd *));
    /* Called to copy BFD private section data from one object file
      to another.  */
   boolean       (*_bfd_copy_private_section_data) PARAMS ((bfd *, sec_ptr,
                                                        bfd *, sec_ptr));
+   /* Called to set private backend flags */
+  boolean	 (*_bfd_set_private_flags) PARAMS ((bfd *, flagword));
 
    /* Core file entry points.  */
 #define BFD_JUMP_TABLE_CORE(NAME)\
