@@ -720,6 +720,11 @@ extern void set_gdbarch_register_byte (struct gdbarch *gdbarch, gdbarch_register
 #endif
 #endif
 
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_RAW_SIZE)
+#define REGISTER_RAW_SIZE(reg_nr) (generic_register_size (reg_nr))
+#endif
+
 typedef int (gdbarch_register_raw_size_ftype) (int reg_nr);
 extern int gdbarch_register_raw_size (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_register_raw_size (struct gdbarch *gdbarch, gdbarch_register_raw_size_ftype *register_raw_size);
@@ -741,6 +746,11 @@ extern void set_gdbarch_max_register_raw_size (struct gdbarch *gdbarch, int max_
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (MAX_REGISTER_RAW_SIZE)
 #define MAX_REGISTER_RAW_SIZE (gdbarch_max_register_raw_size (current_gdbarch))
 #endif
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_VIRTUAL_SIZE)
+#define REGISTER_VIRTUAL_SIZE(reg_nr) (generic_register_size (reg_nr))
 #endif
 
 typedef int (gdbarch_register_virtual_size_ftype) (int reg_nr);

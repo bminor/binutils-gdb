@@ -1486,7 +1486,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_byte (gdbarch, d10v_register_byte);
   set_gdbarch_register_raw_size (gdbarch, d10v_register_raw_size);
   set_gdbarch_max_register_raw_size (gdbarch, 8);
-  set_gdbarch_register_virtual_size (gdbarch, generic_register_virtual_size);
+  set_gdbarch_register_virtual_size (gdbarch, generic_register_size);
   set_gdbarch_max_register_virtual_size (gdbarch, 8);
   set_gdbarch_register_virtual_type (gdbarch, d10v_register_virtual_type);
 

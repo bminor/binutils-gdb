@@ -1002,7 +1002,7 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   for (i = 0, sum = 0; i < X86_64_NUM_REGS; i++)
     sum += x86_64_register_info_table[i].size;
   set_gdbarch_register_bytes (gdbarch, sum);
-  set_gdbarch_register_virtual_size (gdbarch, generic_register_virtual_size);
+  set_gdbarch_register_virtual_size (gdbarch, generic_register_size);
   set_gdbarch_max_register_virtual_size (gdbarch, 16);
 
   set_gdbarch_register_virtual_type (gdbarch, x86_64_register_virtual_type);

@@ -463,9 +463,9 @@ f:2:REGISTER_NAME:char *:register_name:int regnr:regnr:::legacy_register_name::0
 v:2:REGISTER_SIZE:int:register_size::::0:-1
 v:2:REGISTER_BYTES:int:register_bytes::::0:-1
 f:2:REGISTER_BYTE:int:register_byte:int reg_nr:reg_nr::0:0
-f:2:REGISTER_RAW_SIZE:int:register_raw_size:int reg_nr:reg_nr::generic_register_raw_size:0
+f:2:REGISTER_RAW_SIZE:int:register_raw_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
 v:2:MAX_REGISTER_RAW_SIZE:int:max_register_raw_size::::0:-1
-f:2:REGISTER_VIRTUAL_SIZE:int:register_virtual_size:int reg_nr:reg_nr::generic_register_virtual_size:0
+f:2:REGISTER_VIRTUAL_SIZE:int:register_virtual_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
 v:2:MAX_REGISTER_VIRTUAL_SIZE:int:max_register_virtual_size::::0:-1
 f:2:REGISTER_VIRTUAL_TYPE:struct type *:register_virtual_type:int reg_nr:reg_nr::0:0
 f:2:DO_REGISTERS_INFO:void:do_registers_info:int reg_nr, int fpregs:reg_nr, fpregs:::do_registers_info::0

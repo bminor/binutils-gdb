@@ -1,3 +1,10 @@
+2002-05-11  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Mention
+	defaults for REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE.
+	(Target Architecture Definition): Mention same.  Add references to
+	web pages.
+
 2002-05-08  Michael Snyder  <msnyder@redhat.com>
 
 	* stabs.texinfo (Attributes): Document new "vector" attribute.

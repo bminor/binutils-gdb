@@ -2496,8 +2496,13 @@ C@t{++} reference type.
 
 @emph{Maintainer's note: The way GDB manipulates registers is undergoing
 significant change.  Many of the macros and functions refered to in the
-sections below are likely to be made obsolete.  See the file @file{TODO}
-for more up-to-date information.}
+section below are likely to be made obsolete.  For instance, instead of
+having different raw and virtual register sizes, an architecture can
+define pseudo-registers that map onto the raw registers.
+
+See the @uref{http://www.gnu.org/software/gdb/bugs/, Bug Tracking
+Database} and @uref{http://sources.redhat.com/gdb/current/ari, ARI
+Index} for more up-to-date information.}
 
 Some architectures use one representation for a value when it lives in a
 register, but use a different representation when it lives in memory.
@@ -3175,12 +3180,14 @@ Return non-zero if @var{reg} uses different raw and virtual formats.
 
 @item REGISTER_RAW_SIZE (@var{reg})
 @findex REGISTER_RAW_SIZE
-Return the raw size of @var{reg}.
+Return the raw size of @var{reg}; defaults to the size of the register's
+virtual type.
 @xref{Target Architecture Definition, , Using Different Register and Memory Data Representations}.
 
 @item REGISTER_VIRTUAL_SIZE (@var{reg})
 @findex REGISTER_VIRTUAL_SIZE
-Return the virtual size of @var{reg}.
+Return the virtual size of @var{reg}; defaults to the size of the
+register's virtual type.
 @xref{Target Architecture Definition, , Using Different Register and Memory Data Representations}.
 
 @item REGISTER_VIRTUAL_TYPE (@var{reg})

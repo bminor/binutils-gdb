@@ -1,5 +1,23 @@
 2002-05-11  Andrew Cagney  <ac131313@redhat.com>
 
+	* arch-utils.h (generic_register_size): Declare.
+	(generic_register_raw_size, generic_register_virtual_size): Delete
+	declarations.
+	* arch-utils.c (generic_register_raw_size): Delete.
+	(generic_register_size): New function.
+	(generic_register_virtual_size): Delete.
+
+	* gdbarch.sh (REGISTER_RAW_SIZE, REGISTER_VIRTUAL_SIZE): Make
+	default generic_register_size.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	
+	* d10v-tdep.c (d10v_gdbarch_init): Use generic_register_size for
+	register_virtual_size.
+	* x86-64-tdep.c (x86_64_gdbarch_init): Ditto.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Ditto.
+
+2002-05-11  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbarch.sh (gdbarch_data): Add gdbarch parameter.
 	* gdbarch.h, gdbarch.c: Regenerate.
 	* gnu-v3-abi.c: Update copyright.

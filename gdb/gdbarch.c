@@ -312,9 +312,9 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
-  generic_register_raw_size,
+  generic_register_size,
   0,
-  generic_register_virtual_size,
+  generic_register_size,
   0,
   0,
   0,
@@ -479,7 +479,9 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->register_name = legacy_register_name;
   current_gdbarch->register_size = -1;
   current_gdbarch->register_bytes = -1;
+  current_gdbarch->register_raw_size = generic_register_size;
   current_gdbarch->max_register_raw_size = -1;
+  current_gdbarch->register_virtual_size = generic_register_size;
   current_gdbarch->max_register_virtual_size = -1;
   current_gdbarch->do_registers_info = do_registers_info;
   current_gdbarch->print_float_info = default_print_float_info;
@@ -615,15 +617,11 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->register_byte == 0))
     fprintf_unfiltered (log, "\n\tregister_byte");
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->register_raw_size == 0))
-    fprintf_unfiltered (log, "\n\tregister_raw_size");
+  /* Skip verify of register_raw_size, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->max_register_raw_size == -1))
     fprintf_unfiltered (log, "\n\tmax_register_raw_size");
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->register_virtual_size == 0))
-    fprintf_unfiltered (log, "\n\tregister_virtual_size");
+  /* Skip verify of register_virtual_size, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->max_register_virtual_size == -1))
     fprintf_unfiltered (log, "\n\tmax_register_virtual_size");
