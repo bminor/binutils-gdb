@@ -1,3 +1,8 @@
+2002-04-30  Michael Snyder  <msnyder@redhat.com>
+
+	* arm-tdep.c (arm_skip_prologue): Fix thinko; two lines
+	should have been removed as part of 4/24 change.
+
 2002-04-30  Kevin Buettner  <kevinb@redhat.com>
 
 	* rs6000-tdep.c: Added comment describing how fpscr register

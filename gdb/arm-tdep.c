@@ -460,8 +460,6 @@ arm_skip_prologue (CORE_ADDR pc)
       inst = read_memory_integer (skip_pc, 4);
     }
 
-  skip_pc += 4;
-  inst = read_memory_integer (skip_pc, 4);
   if ((inst & 0xfffffff0) == 0xe92d0000)	/* stmfd sp!,{a1,a2,a3,a4} */
     {
       skip_pc += 4;
