@@ -1896,7 +1896,8 @@ elf_bfd_final_link (abfd, info)
 	 zero.  This is done in elf_fake_sections as well, but forcing
 	 the VMA to 0 here will ensure that relocs against these
 	 sections are handled correctly.  */
-      if ((o->flags & SEC_ALLOC) == 0)
+      if ((o->flags & SEC_ALLOC) == 0
+	  && ! o->user_set_vma)
 	o->vma = 0;
     }
 

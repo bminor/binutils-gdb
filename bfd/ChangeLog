@@ -1,3 +1,18 @@
+Mon Jun 24 17:58:12 1996  Jouke Numan  <jnuman@bazis.nl>
+
+	* elf.c (elf_fake_sections): Don't set sh_addr of a non SEC_ALLOC
+	section to 0 if user_set_vma is set.
+	* elflink.h (elf_bfd_final_link): Likewise.
+
+Sun Jun 23 20:42:51 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	Partially undo patch of Jun 20.
+	* coffcode.h (coff_set_alignment_hook): Use COFF_IMAGE_WITH_PE.
+	(coff_compute_section_file_positions): Likewise.
+	(coff_write_object_contents): Likewise.  Re-add deleted code, but
+	use #ifdef COFF_WITH_PE, not COFF_OBJ_WITH_PE.
+	* peicode.h (pe_bfd_copy_private_bfd_data): Re-add #ifdef.
+
 Fri Jun 21 17:38:15 1996  Joel Sherrill  <joel@merlin.gcs.redstone.army.mil>
 
 	* config.bfd: Add support for *-*-rtems* configurations.
