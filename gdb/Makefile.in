@@ -600,90 +600,171 @@ xm_h =		@xm_h@
 tm_h =		@tm_h@
 nm_h =		@nm_h@
 
-alpha_tdep_h =	alpha-tdep.h osabi.h
-annotate_h =	annotate.h $(symtab_h) $(gdbtypes_h)
-arch_utils_h =	arch-utils.h
-arm_tdep_h =	arm-tdep.h osabi.h
-ax_h = 		ax.h $(doublest_h)
-bcache_h =	bcache.h
+#
+# gdb/ header files
+#
+
+acconfig_h = acconfig.h
+ada_lang_h = ada-lang.h $(value_h) $(gdbtypes_h)
+alpha_tdep_h = alpha-tdep.h $(osabi_h)
+alphabsd_tdep_h = alphabsd-tdep.h
+annotate_h = annotate.h $(symtab_h) $(gdbtypes_h)
+arch_utils_h = arch-utils.h
+arm_tdep_h = arm-tdep.h $(osabi_h)
+ax_gdb_h = ax-gdb.h
+ax_h = ax.h $(doublest_h)
+bcache_h = bcache.h
+breakpoint_h = breakpoint.h $(frame_h) $(value_h) $(gdb_events_h)
+buildsym_h = buildsym.h
 builtin_regs_h = builtin-regs.h
-breakpoint_h =	breakpoint.h $(frame_h) $(value_h)
-buildsym_h =	buildsym.h
-c_lang_h =	c-lang.h $(value_h) $(macroexp_h)
-call_cmds_h =	call-cmds.h
-cli_cmds_h =	$(srcdir)/cli/cli-cmds.h
-cli_decode_h =	$(srcdir)/cli/cli-decode.h $(command_h)
-cli_dump_h =	$(srcdir)/cli/cli-dump.h
-cli_out_h =	cli-out.h
-cli_script_h =	$(srcdir)/cli/cli-script.h
-cli_setshow_h =	$(srcdir)/cli/cli-setshow.h
-cli_utils_h =	$(srcdir)/cli/cli-utils.h
-command_h =	command.h
-complaints_h =	complaints.h
-completer_h =	completer.h
-cp_abi_h =	cp-abi.h
-dcache_h =	dcache.h
-defs_h =	defs.h $(xm_h) $(tm_h) $(nm_h) config.status config.h \
-		gdbarch.h ui-file.h $(INCLUDE_DIR)/gdb/signals.h gdb_locale.h
-doublest_h =	doublest.h $(floatformat_h)
-dwarf2cfi_h =	dwarf2cfi.h
-event_loop_h =  event-loop.h
-event_top_h = 	event-top.h
-expression_h =	expression.h $(doublest_h) $(symtab_h)
-f_lang_h =	f-lang.h
-frame_h =	frame.h
-gdb_h =		gdb.h
-gdb_assert_h =	gdb_assert.h
-gdb_events_h =	gdb-events.h
-gdb_obstack_h =	$(obstack_h)
-gdb_stabs_h =	gdb-stabs.h
-gdb_string_h =  gdb_string.h
-gdb_wait_h =	gdb_wait.h
-gdb_regex_h =	gdb_regex.h
-gdbcmd_h =	gdbcmd.h $(command_h) $(ui_out_h)
-gdbcore_h =	gdbcore.h $(bfd_h)
-gdbthread_h =	gdbthread.h $(breakpoint_h)
-gdbtypes_h =	gdbtypes.h
-i386_tdep_h =	i386-tdep.h
+c_lang_h = c-lang.h $(value_h) $(macroexp_h)
+call_cmds_h = call-cmds.h
+ch_lang_h = ch-lang.h
+cli_out_h = cli-out.h
+coff_solib_h = coff-solib.h
+command_h = command.h
+complaints_h = complaints.h
+completer_h = completer.h
+cp_abi_h = cp-abi.h
+dcache_h = dcache.h
+defs_h = defs.h $(config_h) $(gdb_locale_h) $(gdb_signals_h) $(ansidecl_h) \
+	$(libiberty_h) $(progress_h) $(bfd_h) $(tui_h) $(ui_file_h) $(xm_h) \
+	$(nm_h) $(tm_h) $(fopen_same_h) $(gdbarch_h) $(arch_utils_h)
+doublest_h = doublest.h $(floatformat_h)
+dst_h = dst.h
+dwarf2cfi_h = dwarf2cfi.h
+environ_h = environ.h
+event_loop_h = event-loop.h
+event_top_h = event-top.h
+expression_h = expression.h $(symtab_h) $(doublest_h)
+f_lang_h = f-lang.h
+frame_h = frame.h
+gdb_events_h = gdb-events.h
+gdb_stabs_h = gdb-stabs.h
+gdb_h = gdb.h
+gdb_assert_h = gdb_assert.h
+gdb_dirent_h = gdb_dirent.h
+gdb_locale_h = gdb_locale.h
+gdb_obstack_h = gdb_obstack.h $(obstack_h)
+gdb_proc_service_h = gdb_proc_service.h $(gregset_h)
+gdb_regex_h = gdb_regex.h $(xregex_h)
+gdb_stat_h = gdb_stat.h
+gdb_string_h = gdb_string.h
+gdb_thread_db_h = gdb_thread_db.h
+gdb_vfork_h = gdb_vfork.h
+gdb_wait_h = gdb_wait.h
+gdbarch_h = gdbarch.h $(dis_asm_h) $(value_h) $(inferior_h)
+gdbcmd_h = gdbcmd.h $(command_h) $(ui_out_h)
+gdbcore_h = gdbcore.h $(bfd_h)
+gdbthread_h = gdbthread.h $(breakpoint_h)
+gdbtypes_h = gdbtypes.h
+gnu_nat_h = gnu-nat.h
+gregset_h = gregset.h
 i386_linux_tdep_h = i386-linux-tdep.h
-i387_tdep_h =	i387-tdep.h
-inf_loop_h =  	inf-loop.h
-inferior_h =	inferior.h $(breakpoint_h)
-language_h =	language.h
-linespec_h =	linespec.h
-macroexp_h =	macroexp.h
-macrotab_h =    macrotab.h
-macroscope_h =  macroscope.h $(macrotab_h) $(symtab_h)
-memattr_h =     memattr.h
-monitor_h =	monitor.h
-objfiles_h =	objfiles.h $(gdb_obstack_h) $(symfile_h)
-parser_defs_h =	parser-defs.h $(doublest_h)
-ppc_tdep_h =	ppc-tdep.h osabi.h
-regcache_h =	regcache.h
-remote_h =	remote.h
-remote_utils_h =  remote-utils.h $(target_h)
-ser_unix_h =	ser-unix.h
-serial_h =	serial.h
-sh_tdep_h =	sh-tdep.h osabi.h
-sim_regno_h =	sim-regno.h
-solist_h =	solist.h
-source_h =	source.h
-stabsread_h =	stabsread.h
-symfile_h =	symfile.h
-symtab_h =	symtab.h
-target_h =      target.h $(bfd_h) $(symtab_h) $(dcache_h) $(memattr_h)
-terminal_h =	terminal.h
-top_h =		top.h
-tracepoint_h =	tracepoint.h
-typeprint_h =	typeprint.h
-ui_out_h =      ui-out.h
-valprint_h =	valprint.h
-value_h =	value.h $(symtab_h) $(gdbtypes_h) $(expression_h) $(doublest_h)
-varobj_h =      varobj.h $(symtab_h) $(gdbtypes_h)
-vax_tdep_h =	vax-tdep.h osabi.h
-version_h = 	version.h
-wrapper_h =	wrapper.h
-xcoffsolib_h =	xcoffsolib.h
+i386_tdep_h = i386-tdep.h $(osabi_h)
+i387_tdep_h = i387-tdep.h
+inf_loop_h = inf-loop.h
+inferior_h = inferior.h $(breakpoint_h) $(target_h)
+jv_lang_h = jv-lang.h
+kod_h = kod.h
+language_h = language.h
+linespec_h = linespec.h
+m2_lang_h = m2-lang.h
+macroexp_h = macroexp.h
+macroscope_h = macroscope.h $(macrotab_h) $(symtab_h)
+macrotab_h = macrotab.h
+memattr_h = memattr.h
+minimon_h = minimon.h
+mipsnbsd_tdep_h = mipsnbsd-tdep.h
+monitor_h = monitor.h
+nbsd_tdep_h = nbsd-tdep.h
+ns32k_tdep_h = ns32k-tdep.h $(osabi_h)
+objfiles_h = objfiles.h $(gdb_obstack_h) $(symfile_h)
+ocd_h = ocd.h
+osabi_h = osabi.h
+p_lang_h = p-lang.h
+pa64solib_h = pa64solib.h
+parser_defs_h = parser-defs.h $(doublest_h)
+ppc_tdep_h = ppc-tdep.h $(osabi_h)
+ppcnbsd_tdep_h = ppcnbsd-tdep.h
+proc_utils_h = proc-utils.h
+regcache_h = regcache.h
+remote_utils_h = remote-utils.h $(target_h)
+remote_h = remote.h
+scm_lang_h = scm-lang.h $(scm_tags_h)
+scm_tags_h = scm-tags.h
+ser_unix_h = ser-unix.h
+serial_h = serial.h
+sh_tdep_h = sh-tdep.h $(osabi_h)
+shnbsd_tdep_h = shnbsd-tdep.h
+sim_regno_h = sim-regno.h
+solib_svr4_h = solib-svr4.h
+solib_h = solib.h
+solist_h = solist.h
+somsolib_h = somsolib.h
+source_h = source.h
+sparcnbsd_tdep_h = sparcnbsd-tdep.h
+srec_h = srec.h
+stabsread_h = stabsread.h
+symfile_h = symfile.h
+symtab_h = symtab.h
+target_h = target.h $(bfd_h) $(symtab_h) $(dcache_h) $(memattr_h)
+terminal_h = terminal.h
+top_h = top.h
+tracepoint_h = tracepoint.h
+typeprint_h = typeprint.h
+ui_file_h = ui-file.h
+ui_out_h = ui-out.h
+valprint_h = valprint.h
+value_h = value.h $(doublest_h) $(symtab_h) $(gdbtypes_h) $(expression_h)
+varobj_h = varobj.h $(symtab_h) $(gdbtypes_h)
+vax_tdep_h = vax-tdep.h $(osabi_h)
+version_h = version.h
+wince_stub_h = wince-stub.h
+wrapper_h = wrapper.h $(gdb_h)
+x86_64_tdep_h = x86-64-tdep.h $(i386_tdep_h)
+xcoffsolib_h = xcoffsolib.h
+xmodem_h = xmodem.h
+
+#
+# gdb/cli/ headers
+#
+
+cli_cmds_h = $(srcdir)/cli/cli-cmds.h
+cli_decode_h = $(srcdir)/cli/cli-decode.h $(gdb_regex_h) $(command_h)
+cli_dump_h = $(srcdir)/cli/cli-dump.h
+cli_script_h = $(srcdir)/cli/cli-script.h
+cli_setshow_h = $(srcdir)/cli/cli-setshow.h
+cli_utils_h = $(srcdir)/cli/cli-utils.h
+
+#
+# gdb/mi/ headers
+#
+
+mi_cmds_h = $(srcdir)/mi/mi-cmds.h
+mi_console_h = $(srcdir)/mi/mi-console.h
+mi_getopt_h = $(srcdir)/mi/mi-getopt.h
+mi_out_h = $(srcdir)/mi/mi-out.h
+mi_parse_h = $(srcdir)/mi/mi-parse.h
+
+#
+# gdb/tui/ headers
+#
+
+tui_file_h = $(srcdir)/tui/tui-file.h
+tui_h = $(srcdir)/tui/tui.h $(ansidecl_h)
+tuiCommand_h = $(srcdir)/tui/tuiCommand.h
+tuiData_h = $(srcdir)/tui/tuiData.h
+tuiDataWin_h = $(srcdir)/tui/tuiDataWin.h
+tuiDisassem_h = $(srcdir)/tui/tuiDisassem.h
+tuiGeneralWin_h = $(srcdir)/tui/tuiGeneralWin.h
+tuiIO_h = $(srcdir)/tui/tuiIO.h
+tuiLayout_h = $(srcdir)/tui/tuiLayout.h
+tuiRegs_h = $(srcdir)/tui/tuiRegs.h
+tuiSource_h = $(srcdir)/tui/tuiSource.h $(defs_h)
+tuiSourceWin_h = $(srcdir)/tui/tuiSourceWin.h
+tuiStack_h = $(srcdir)/tui/tuiStack.h
+tuiWin_h = $(srcdir)/tui/tuiWin.h
 
 # Header files that need to have srcdir added.  Note that in the cases
 # where we use a macro like $(gdbcmd_h), things are carefully arranged
@@ -2453,12 +2534,6 @@ gdbtk-wrapper.o: $(srcdir)/gdbtk/generic/gdbtk-wrapper.c \
 #
 # Need to explicitly specify the compile rule as make will do nothing
 # or try to compile the object file into the mi directory.
-
-mi_cmds_h =	$(srcdir)/mi/mi-cmds.h
-mi_out_h =	$(srcdir)/mi/mi-out.h
-mi_parse_h =	$(srcdir)/mi/mi-parse.h
-mi_getopt_h =	$(srcdir)/mi/mi-getopt.h
-mi_console_h =	$(srcdir)/mi/mi-console.h
 
 mi-cmds.o: $(srcdir)/mi/mi-cmds.c $(defs_h) $(top_h) $(mi_cmds_h) $(ui_out_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmds.c
