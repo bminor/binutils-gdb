@@ -1,3 +1,18 @@
+Tue Aug 27 13:53:22 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* expr.c (operand): If md_parse_name is defined, call it before
+	calling symbol_find_or_make.
+	* config/tc-ppc.h (md_parse_name): Define.
+	(ppc_parse_name): Declare.
+	* config/tc-ppc.c (reg_name_search): Add regs and regcount
+	parameters.
+	(register_name): Update call to reg_name_search.
+	(cr_operand): New static variable.
+	(cr_names): New static const array.
+	(ppc_parse_name): New function.
+	(md_assemble): If PPC_OPERAND_CR is set in the operand flags, set
+	cr_operand before calling expression.
+
 Tue Aug 27 09:05:50 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (tc_gen_reloc): Add new argument to
