@@ -26,6 +26,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Forward declarations.  */
 static bfd_reloc_status_type fr30_elf_i20_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static reloc_howto_type * fr30_reloc_type_lookup
+  PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
+static void fr30_info_to_howto_rela 
+  PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
+static boolean fr30_elf_relocate_section 
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *, Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 
 static reloc_howto_type fr30_elf_howto_table [] =
 {
@@ -231,8 +237,8 @@ fr30_elf_i20_reloc (abfd, reloc_entry, symbol, data,
 
 struct fr30_reloc_map
 {
-  unsigned char bfd_reloc_val;
-  unsigned char elf_reloc_val;
+  unsigned int bfd_reloc_val;
+  unsigned int fr30_reloc_val;
 };
 
 static const struct fr30_reloc_map fr30_reloc_map [] =
@@ -250,7 +256,7 @@ static const struct fr30_reloc_map fr30_reloc_map [] =
 };
 
 static reloc_howto_type *
-bfd_elf32_bfd_reloc_type_lookup (abfd, code)
+fr30_reloc_type_lookup (abfd, code)
      bfd * abfd;
      bfd_reloc_code_real_type code;
 {
@@ -258,18 +264,16 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
 
   for (i = sizeof (fr30_reloc_map) / sizeof (fr30_reloc_map[0]);
        --i;)
-    {
-      if (fr30_reloc_map [i].bfd_reloc_val == code)
-	return & fr30_elf_howto_table [fr30_reloc_map[i].elf_reloc_val];
-    }
-
+    if (fr30_reloc_map [i].bfd_reloc_val == code)
+      return & fr30_elf_howto_table [fr30_reloc_map[i].fr30_reloc_val];
+  
   return NULL;
 }
 
 /* Set the howto pointer for an FR30 ELF reloc.  */
 
 static void
-fr30_info_to_howto_rel (abfd, cache_ptr, dst)
+fr30_info_to_howto_rela (abfd, cache_ptr, dst)
      bfd * abfd;
      arelent * cache_ptr;
      Elf32_Internal_Rela * dst;
@@ -509,8 +513,10 @@ fr30_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 #define TARGET_BIG_SYM          bfd_elf32_fr30_vec
 #define TARGET_BIG_NAME		"elf32-fr30"
 
-#define elf_info_to_howto			0
-#define elf_info_to_howto_rel			fr30_info_to_howto_rel
+#define elf_info_to_howto_rel			NULL
+#define elf_info_to_howto			fr30_info_to_howto_rela
 #define elf_backend_relocate_section		fr30_elf_relocate_section
+
+#define bfd_elf32_bfd_reloc_type_lookup		fr30_reloc_type_lookup
 					
 #include "elf32-target.h"
