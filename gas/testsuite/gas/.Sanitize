@@ -43,6 +43,7 @@ m68k-coff
 macros
 mips
 mri
+sparc
 sparc-solaris
 sun4
 template
