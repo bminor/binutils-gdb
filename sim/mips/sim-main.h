@@ -763,23 +763,26 @@ void signal_exception (SIM_DESC sd, sim_cpu *cpu, address_word cia, int exceptio
 
 void cop_lw  PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg, unsigned int memword));
 void cop_ld  PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg, uword64 memword));
-void cop_lq  PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg, unsigned128 memword));
 unsigned int cop_sw PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg));
 uword64 cop_sd PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg));
-unsigned128 cop_sq PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg));
 
 #define COP_LW(coproc_num,coproc_reg,memword) \
 cop_lw (SD, CPU, cia, coproc_num, coproc_reg, memword)
 #define COP_LD(coproc_num,coproc_reg,memword) \
 cop_ld (SD, CPU, cia, coproc_num, coproc_reg, memword)
-#define COP_LQ(coproc_num,coproc_reg,memword) \
-cop_lq (SD, CPU, cia, coproc_num, coproc_reg, memword)
 #define COP_SW(coproc_num,coproc_reg) \
 cop_sw (SD, CPU, cia, coproc_num, coproc_reg)
 #define COP_SD(coproc_num,coproc_reg) \
 cop_sd (SD, CPU, cia, coproc_num, coproc_reg)
+
+/* start-sanitize-sky */
+void cop_lq  PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg, unsigned128 memword));
+unsigned128 cop_sq PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg));
+#define COP_LQ(coproc_num,coproc_reg,memword) \
+cop_lq (SD, CPU, cia, coproc_num, coproc_reg, memword)
 #define COP_SQ(coproc_num,coproc_reg) \
 cop_sq (SD, CPU, cia, coproc_num, coproc_reg)
+/* end-sanitize-sky */
 
 void decode_coproc PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, unsigned int instruction));
 #define DecodeCoproc(instruction) \

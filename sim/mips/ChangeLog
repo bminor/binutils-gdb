@@ -1,3 +1,12 @@
+start-sanitize-sky
+Mon Mar 30 18:41:43 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* interp.c (decode_coproc): Continuing COP2 work.
+  	(cop_[ls]q): Hide 128-bit COP2 more.
+
+	* sim-main.h (COP_[LS]Q): Hide 128-bit COP2 more.
+end-sanitize-sky
+	
 Mon Mar 30 14:46:05 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* configure.in (mipstx39*-*-*): Use gencode simulator rather
@@ -30,13 +39,12 @@ start-sanitize-sky
 	* sim-main.h (status_CU[012]): Added COP[n]-enabled flags for
  	status register.
 	
-end-sanitize-sky
-
 	* interp.c (cop_lq, cop_sq): New functions for future 128-bit
  	access to coprocessor registers.
 
 	* sim-main.h (COP_LQ, COP_SQ): New macro front-ends for above.
-	
+end-sanitize-sky
+
 Fri Mar 27 16:15:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

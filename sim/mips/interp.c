@@ -3248,6 +3248,8 @@ cop_ld (SIM_DESC sd,
 }
 
 
+/* start-sanitize-sky */
+#ifdef TARGET_SKY
 void
 cop_lq (SIM_DESC sd,
 	sim_cpu *cpu,
@@ -3258,11 +3260,9 @@ cop_lq (SIM_DESC sd,
 {
   switch (coproc_num)
     {
-      /* start-sanitize-sky */
     case 2:
       /* XXX COP2 */
       break;
-      /* end-sanitize-sky */
       
     default:
       sim_io_printf(sd,"COP_LQ(%d,%d,??) at PC = 0x%s : TODO (architecture specific)\n",
@@ -3272,6 +3272,8 @@ cop_lq (SIM_DESC sd,
   
   return;
 }
+#endif /* TARGET_SKY */
+/* end-sanitize-sky */
 
 
 unsigned int
@@ -3334,6 +3336,8 @@ cop_sd (SIM_DESC sd,
 }
 
 
+/* start-sanitize-sky */
+#ifdef TARGET_SKY
 unsigned128
 cop_sq (SIM_DESC sd,
 	sim_cpu *cpu,
@@ -3341,14 +3345,12 @@ cop_sq (SIM_DESC sd,
 	int coproc_num,
 	int coproc_reg)
 {
-  unsigned128 value = {0, 0};
+  unsigned128 value = U16_8(0, 0);
   switch (coproc_num)
     {
-      /* start-sanitize-sky */
     case 2:
       /* XXX COP2 */
       break;
-      /* end-sanitize-sky */
 
     default:
       sim_io_printf(sd,"COP_SQ(%d,%d) at PC = 0x%s : TODO (architecture specific)\n",
@@ -3358,6 +3360,8 @@ cop_sq (SIM_DESC sd,
 
   return(value);
 }
+#endif /* TARGET_SKY */
+/* end-sanitize-sky */
 
 
 void
@@ -3513,9 +3517,9 @@ decode_coproc (SIM_DESC sd,
 	int i_15_11 = (instruction >> 11) & 0x1f;
 	int i_15_0 = instruction & 0xffff;
 	int i_10_1 = (instruction >> 1) & 0x3ff;
+	int i_5_0 = instruction & 0x03f;
 	int interlock = instruction & 0x01;
-	unsigned_4 vpe_status = sim_core_read_aligned_4 (cpu, cia, read_map, VPE0_STAT);
-	int vpe_busy = (vpe_status & 0x00000001);
+	int co = (instruction >> 25) & 0x01;
 	/* setup for semantic.c-like actions below */
 	typedef unsigned_4 instruction_word;
 	int CIA = cia;
@@ -3535,91 +3539,128 @@ decode_coproc (SIM_DESC sd,
 	if(i_25_21 == 0x08 && i_20_16 == 0x00) /* BC2F */
 	  {
 	    address_word offset = EXTEND16(i_15_0) << 2;
-	    if(! vpe_busy) DELAY_SLOT(cia + 4 + offset);
+	    if(! vu0_busy()) DELAY_SLOT(cia + 4 + offset);
 	  }
 	else if(i_25_21 == 0x08 && i_20_16==0x02) /* BC2FL */
 	  {
 	    address_word offset = EXTEND16(i_15_0) << 2;
-	    if(! vpe_busy) DELAY_SLOT(cia + 4 + offset);
+	    if(! vu0_busy()) DELAY_SLOT(cia + 4 + offset);
 	    else NULLIFY_NEXT_INSTRUCTION();
 	  }
 	else if(i_25_21 == 0x08 && i_20_16 == 0x01) /* BC2T */
 	  {
 	    address_word offset = EXTEND16(i_15_0) << 2;
-	    if(vpe_busy) DELAY_SLOT(cia + 4 + offset);
+	    if(vu0_busy()) DELAY_SLOT(cia + 4 + offset);
 	  }
 	else if(i_25_21 == 0x08 && i_20_16 == 0x03) /* BC2TL */
 	  {
 	    address_word offset = EXTEND16(i_15_0) << 2;
-	    if(vpe_busy) DELAY_SLOT(cia + 4 + offset);
+	    if(vu0_busy()) DELAY_SLOT(cia + 4 + offset);
 	    else NULLIFY_NEXT_INSTRUCTION();
 	  }
 	else if((i_25_21 == 0x02 && i_10_1 == 0x000) || /* CFC2 */
-		(i_25_21 == 0x06 && i_10_1 == 0x000)) /* CTC2 */
+		(i_25_21 == 0x01)) /* QMFC2 */
 	  {
 	    int rt = i_20_16;
 	    int id = i_15_11;
-	    int to_vu = (i_25_21 == 0x06); /* transfer direction */
 	    address_word vu_cr_addr; /* VU control register address */
+	    unsigned_4 data;
 
-	    if(interlock)
-	      while(vpe_busy)
-		{
-		  vu0_issue(sd); /* advance one clock cycle */
-		  vpe_status = sim_core_read_aligned_4 (cpu, cia, read_map, VPE0_STAT);
-		  vpe_busy = vpe_status & 0x00000001;
-		}
+	    /* interlock checking */
+	    if(vu0_busy_in_macro_mode()) /* busy in macro mode */
+	      {
+		/* interlock bit invalid here */
+		if(interlock) 
+		  ; /* XXX: warning */
+
+		/* always check data hazard */
+		while(vu0_macro_hazard_check(id))
+		  vu0_issue(sd);
+	      }
+	    else if(vu0_busy_in_micro_mode() && interlock)
+	      {
+		while(vu0_busy_in_micro_mode())
+		  vu0_issue(sd);
+	      }
 
 	    /* compute VU register address */
-	    vu_cr_addr = VU0_MST + (id * 16);
+	    if(i_25_21 == 0x01) /* QMFC2 */
+	      vu_cr_addr = VU0_VF00 + (id * 16);
+	    else /* CFC2 */
+	      vu_cr_addr = VU0_MST + (id * 16);
 
 	    /* read or write word */
-	    if(to_vu) /* CTC2 */
-	      {
-		unsigned_4 data = GPR[rt];
-		sim_core_write_aligned_4(cpu, cia, write_map, vu_cr_addr, data);
-	      }
-	    else /* CFC2 */
-	      {
-		unsigned_4 data = sim_core_read_aligned_4(cpu, cia, read_map, vu_cr_addr);
-		GPR[rt] = EXTEND64(data);
-	      }
+	    data = sim_core_read_aligned_4(cpu, cia, read_map, vu_cr_addr);
+	    GPR[rt] = EXTEND64(data);
 	  }
-	else if((i_25_21 == 0x01) || /* QMFC2 */
-		(i_25_21 == 0x05))   /* QMTC2 */
+	else if((i_25_21 == 0x06 && i_10_1 == 0x000) || /* CTC2 */
+		(i_25_21 == 0x05)) /* QMTC2 */
 	  {
 	    int rt = i_20_16;
 	    int id = i_15_11;
-	    int to_vu = (i_25_21 == 0x05); /* transfer direction */
 	    address_word vu_cr_addr; /* VU control register address */
+	    unsigned_4 data;
 
-	    if(interlock)
-	      while(vpe_busy)
-		{
-		  vu0_issue(sd); /* advance one clock cycle */
-		  vpe_status = sim_core_read_aligned_4 (cpu, cia, read_map, VPE0_STAT);
-		  vpe_busy = vpe_status & 0x00000001;
-		}
+	    /* interlock checking */
+	    if(vu0_busy_in_macro_mode()) /* busy in macro mode */
+	      {
+		/* interlock bit invalid here */
+		if(interlock) 
+		  ; /* XXX: warning */
+
+		/* always check data hazard */
+		while(vu0_macro_hazard_check(id))
+		  vu0_issue(sd);
+	      }
+	    else if(vu0_busy_in_micro_mode())
+	      {
+		if(interlock)
+		  {
+		    while(! vu0_micro_interlock_released())
+		      vu0_issue(sd);
+		  }
+	      }
 
 	    /* compute VU register address */
-	    vu_cr_addr = VU0_VF00 + (id * 16);
+	    if(i_25_21 == 0x05) /* QMTC2 */
+	      vu_cr_addr = VU0_VF00 + (id * 16);
+	    else /* CTC2 */
+	      vu_cr_addr = VU0_MST + (id * 16);
 
-	    /* read or write word */
-	    if(to_vu) /* CTC2 */
-	      {
-		unsigned_4 data = GPR[rt];
-		sim_core_write_aligned_4(cpu, cia, write_map, vu_cr_addr, data);
-	      }
-	    else /* CFC2 */
-	      {
-		unsigned_4 data = sim_core_read_aligned_4(cpu, cia, read_map, vu_cr_addr);
-		GPR[rt] = EXTEND64(data);
-	      }
+	    data = GPR[rt];
+	    sim_core_write_aligned_4(cpu, cia, write_map, vu_cr_addr, data);
 	  }
-	/* other COP2 instructions */
+	else if( 0 /* XXX: ... upper ... */)
+	  {
+	    unsigned_4 vu_upper, vu_lower;
+	    vu_upper =
+	      0x00000000 | /* bits 31 .. 25 */
+	      instruction & 0x01ffffff; /* bits 24 .. 0 */
+	    vu_lower = 0x8000033c; /* NOP */
+
+	    while(vu0_busy_in_micro_mode())
+	      vu0_issue(sd);
+
+	    vu0_macro_issue(vu_upper, vu_lower);
+	  }
+	else if( 0 /* XXX: ... lower ... */)
+	  {
+	    unsigned_4 vu_upper, vu_lower;
+	    vu_upper = 0x000002ff; /* NOP */
+	    vu_lower =
+	      0x10000000 | /* bits 31 .. 25 */
+	      instruction & 0x01ffffff; /* bits 24 .. 0 */
+
+	    while(vu0_busy_in_micro_mode())
+	      vu0_issue(sd);
+
+	    vu0_macro_issue(vu_upper, vu_lower);
+	  }
+	/* XXX */
+	/* ... other COP2 instructions ... */
 	else
 	  {
-	    SignalException(ReservedInstruction,instruction); 
+	    SignalException(ReservedInstruction, instruction); 
 	    /* NOTREACHED */
 	  }
 	
