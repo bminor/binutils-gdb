@@ -72,20 +72,16 @@ void _initialize_core_regset (void);
    Read the values of either the general register set (WHICH equals 0)
    or the floating point register set (WHICH equals 2) from the core
    file data (pointed to by CORE_REG_SECT), and update gdb's idea of
-   their current values.  The CORE_REG_SIZE parameter is ignored.
+   their current values.  The CORE_REG_SIZE parameter is compared to
+   the size of the gregset or fpgregset structures (as appropriate) to
+   validate the size of the structure from the core file.  The
+   REG_ADDR parameter is ignored.
 
-   NOTES
-
-   Use the indicated sizes to validate the gregset and fpregset
-   structures.
  */
 
 static void
-fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-     CORE_ADDR reg_addr;	/* Unused in this version */
+fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
+		      CORE_ADDR reg_addr)
 {
 #if defined (HAVE_GREGSET_T) && defined (HAVE_FPREGSET_T)
   gregset_t gregset;

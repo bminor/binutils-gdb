@@ -1,3 +1,10 @@
+2000-08-06  Kevin Buettner  <kevinb@redhat.com>
+
+	* ch-exp.c (parse_opt_name_string): Protoize.  [Thanks to Eli
+	Zaretskii for the prefatory comment.]
+	* core-regset.c (fetch_core_registers): Protoize; revise
+	comment.
+
 2000-08-06  Christopher Faylor  <cgf@cygnus.com>
 
 	* win32-nat.c: Perform various gcc warning cleanups.

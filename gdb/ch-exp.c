@@ -301,9 +301,10 @@ expect (enum ch_terminal token, char *message)
 }
 
 #if 0
+/* Parse a name string.  If ALLOW_ALL is 1, ALL is allowed as a postfix. */
+
 static tree
-parse_opt_name_string (allow_all)
-     int allow_all;		/* 1 if ALL is allowed as a postfix */
+parse_opt_name_string (int allow_all)
 {
   int token = PEEK_TOKEN ();
   tree name;
