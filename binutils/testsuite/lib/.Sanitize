@@ -23,12 +23,7 @@ Do-first:
 
 Things-to-keep:
 
-ChangeLog
-Makefile.in
-binutils.all
-config
-configure.in
-lib
+utils-lib.exp
 
 Things-to-lose:
 
