@@ -25,7 +25,7 @@ Fri Dec 27 22:30:57 1996  Fred Fish  <fnf@cygnus.com>
 	* tic80-dis.c: Add file.
 	* tic80-opc.c: Add file.
 	
-start-sanitize-tic80
+end-sanitize-tic80
 start-sanitize-d10v
 Fri Dec 20 14:30:19 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 

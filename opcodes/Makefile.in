@@ -235,7 +235,7 @@ arm-dis.o: arm-dis.c arm-opc.h $(INCDIR)/dis-asm.h
 # start-sanitize-tic80
 tic80-dis.o: tic80-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/tic80.h
 tic80-opc.o: tic80-opc.c $(INCDIR)/opcode/tic80.h
-# start-sanitize-tic80
+# end-sanitize-tic80
 
 
 tags etags: TAGS
