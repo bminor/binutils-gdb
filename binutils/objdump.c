@@ -18,7 +18,6 @@ along with this program; if not, write to the Free Software
 Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
-#include "sysdep.h"
 #include "getopt.h"
 #include "progress.h"
 #include "bucomm.h"
@@ -31,8 +30,9 @@ Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define	BYTES_IN_WORD	32
 #include "aout/aout64.h"
 
-#ifndef FPRINTF_ALREADY_DECLARED
-extern int fprintf PARAMS ((FILE *, CONST char *, ...));
+#ifdef NEED_DECLARATION_FPRINTF
+/* This is needed by INIT_DISASSEMBLE_INFO.  */
+extern int fprintf ();
 #endif
 
 char *default_target = NULL;	/* default at runtime */
@@ -870,8 +870,8 @@ disassemble_data (abfd)
 	      && (section->flags & SEC_RELOC) != 0)
 	    {
 	      while (relpp < relppend
-		     && ((*relpp)->address >= i
-			 && (*relpp)->address < i + bytes))
+		     && ((*relpp)->address >= (bfd_vma) i
+			 && (*relpp)->address < (bfd_vma) i + bytes))
 		{
 		  arelent *q;
 		  const char *sym_name;
