@@ -1,3 +1,12 @@
+start-sanitize-am33
+Wed Jul 29 10:39:29 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-tdep.c (set_movm_offsets): Do nothing for the am33
+	registers if we are not in am33 mode.
+	(mn10300_frame_chain, mn10300_frame_saved_pc): Similarly.
+	(set_machine_hook): Keep track of whether or not we're in am33 mode.
+
+end-sanitize-am33
 Mon Jul 27 16:11:42 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* tracepoint.c (remote_set_transparent_ranges): new function.
