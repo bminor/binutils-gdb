@@ -141,8 +141,8 @@ xcoff64_swap_sym_in (abfd, ext1, in1)
   struct internal_syment      *in = (struct internal_syment *)in1;
 
   in->_n._n_n._n_zeroes = 0;
-  in->_n._n_n._n_offset = bfd_h_get_32(abfd, (bfd_byte *) ext->e_offset);
-  in->n_value = bfd_h_get_64(abfd, (bfd_byte *) ext->e.e_value);
+  in->_n._n_n._n_offset = bfd_h_get_32(abfd, (bfd_byte *) ext->e.e.e_offset);
+  in->n_value = bfd_h_get_64(abfd, (bfd_byte *) ext->e_value);
   in->n_scnum = bfd_h_get_16(abfd, (bfd_byte *) ext->e_scnum);
   in->n_type = bfd_h_get_16(abfd, (bfd_byte *) ext->e_type);
   in->n_sclass = bfd_h_get_8(abfd, ext->e_sclass);
@@ -158,8 +158,8 @@ xcoff64_swap_sym_out (abfd, inp, extp)
   struct internal_syment *in = (struct internal_syment *)inp;
   SYMENT *ext =(SYMENT *)extp;
 
-  bfd_h_put_32(abfd, in->_n._n_n._n_offset, (bfd_byte *)  ext->e_offset);
-  bfd_h_put_64(abfd,  in->n_value , (bfd_byte *) ext->e.e_value);
+  bfd_h_put_32(abfd, in->_n._n_n._n_offset, (bfd_byte *)  ext->e.e.e_offset);
+  bfd_h_put_64(abfd,  in->n_value , (bfd_byte *) ext->e_value);
   bfd_h_put_16(abfd,  in->n_scnum , (bfd_byte *) ext->e_scnum);
   bfd_h_put_16(abfd,  in->n_type , (bfd_byte *) ext->e_type);
   bfd_h_put_8(abfd,  in->n_sclass , ext->e_sclass);
