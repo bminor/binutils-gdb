@@ -1,3 +1,7 @@
+2002-05-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb_indent.sh: Allow the script to be run in the sim directory.
+
 2002-05-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/nm-cygwin.h (NO_PTRACE_H): Remove define.
