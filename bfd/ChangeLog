@@ -1,3 +1,9 @@
+Fri Dec 18 10:20:27 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* aoutf1.h (sunos4_write_object_contents): set flags to 0, fixing
+	1927.
+
+	    
 Thu Dec 17 00:36:24 1992  John Gilmore  (gnu@cygnus.com)
 
 	* bfd.c:  Use right name for tekhex tdata struct.
