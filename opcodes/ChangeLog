@@ -1,3 +1,4 @@
+start-sanitize-r5900
 Fri Feb 27 13:16:42 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips-opc.c (r5900/madd.s): Takes three operands, not four.  Fix
@@ -5,6 +6,7 @@ Fri Feb 27 13:16:42 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	(r5900/min.s): Incorrect opcode ....,101001 not ...110000.
 	(r5900/msub.s): Takes three operands, not four.  Fix opcode.
 
+end-sanitize-r5900
 start-sanitize-d30v
 Thu Feb 26 15:53:09 1998  Michael Meissner  <meissner@cygnus.com>
 
