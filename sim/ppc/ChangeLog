@@ -1,3 +1,13 @@
+2001-03-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* emul_netbsd.c [WITH_NetBSD_HOST]: Include <sys/mount.h> and
+	<errno.h>.
+	(do_stat): Only do SYS test when SYS_stat defined.
+	(do_sigprocmask): Ditto for SYS_sigprocmask.
+	(do_fstat): Ditto for SYS_fstat.
+	(do_getdirentries): Ditto for SYS_getdirentries.
+	(do_lstat): Ditto for SYS_lstat.
+
 2001-01-15  Geoffrey Keating  <geoffk@redhat.com>
 
 	* emul_netbsd.c (do_open): Translate the flag parameter to the

@@ -42,6 +42,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include <fcntl.h>
+#include <errno.h>
 #include <sys/errno.h>
 #include <sys/param.h>
 #include <sys/time.h>
@@ -91,6 +92,7 @@ int getrusage();
 #if WITH_NetBSD_HOST /* here NetBSD as that is what we're emulating */
 #include <sys/syscall.h> /* FIXME - should not be including this one */
 #include <sys/sysctl.h>
+#include <sys/mount.h>
 extern int getdirentries(int fd, char *buf, int nbytes, long *basep);
 #else
 
@@ -595,7 +597,9 @@ do_sigprocmask(os_emul_data *emul,
   natural_word how = cpu_registers(processor)->gpr[arg0];
   unsigned_word set = cpu_registers(processor)->gpr[arg0+1];
   unsigned_word oset = cpu_registers(processor)->gpr[arg0+2];
+#ifdef SYS_sigprocmask
   SYS(sigprocmask);
+#endif
 
   if (WITH_TRACE && ppc_trace[trace_os_emul])
     printf_filtered ("%ld, 0x%ld, 0x%ld", (long)how, (long)set, (long)oset);
@@ -811,7 +815,9 @@ do_stat(os_emul_data *emul,
   char *path = emul_read_string(path_buf, path_addr, PATH_MAX, processor, cia);
   struct stat buf;
   int status;
+#ifdef SYS_stat
   SYS(stat);
+#endif
   status = stat(path, &buf);
   emul_write_status(processor, status, errno);
   if (status == 0)
@@ -833,7 +839,9 @@ do_fstat(os_emul_data *emul,
   unsigned_word stat_buf_addr = cpu_registers(processor)->gpr[arg0+1];
   struct stat buf;
   int status;
+#ifdef SYS_fstat
   SYS(fstat);
+#endif
   /* Can't combine these statements, cuz fstat sets errno. */
   status = fstat(fd, &buf);
   emul_write_status(processor, status, errno);
@@ -857,7 +865,9 @@ do_lstat(os_emul_data *emul,
   unsigned_word stat_buf_addr = cpu_registers(processor)->gpr[arg0+1];
   struct stat buf;
   int status;
+#ifdef SYS_lstat
   SYS(lstat);
+#endif
   /* Can't combine these statements, cuz lstat sets errno. */
   status = lstat(path, &buf);
   emul_write_status(processor, status, errno);
@@ -882,7 +892,9 @@ do_getdirentries(os_emul_data *emul,
   unsigned_word basep_addr = cpu_registers(processor)->gpr[arg0+3];
   long basep;
   int status;
+#ifdef SYS_getdirentries
   SYS(getdirentries);
+#endif
   if (buf_addr != 0 && nbytes >= 0)
     buf = zalloc(nbytes);
   else
