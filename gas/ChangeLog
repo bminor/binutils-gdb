@@ -1,3 +1,12 @@
+2000-09-18  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-hppa.h (TC_FORCE_RELOCATION_SECTION): Allow
+	subtraction of two syms without emitting a relocation.
+
+	From  David Huggins-Daines  <dhd@linuxcare.com>
+	* config/tc-hppa.c (hppa_force_relocation): Force relocations for
+	global or weak symbols.
+
 2000-09-15  Kazu Hirata  <kazu@hxi.com>
 
 	* config/tc-h8300.h: Fix formatting.

@@ -145,6 +145,10 @@ int hppa_fix_adjustable PARAMS((struct fix *));
 #endif
 
 #ifdef OBJ_ELF
+/* It's OK to subtract two symbols in the same section without
+   emitting a relocation.  */
+#define TC_FORCE_RELOCATION_SECTION(FIXP, SEC) 0
+
 /* Handle .type psuedo.  Given a type string of `millicode', set the
    internal elf symbol type to STT_PARISC_MILLI, and return
    BSF_FUNCTION for the BFD symbol type.  */

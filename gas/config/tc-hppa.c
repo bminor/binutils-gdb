@@ -8416,9 +8416,15 @@ hppa_force_relocation (fixp)
     return 1;
 #endif
 
+  /* Ensure we emit a relocation for global symbols so that dynamic
+     linking works.  */
+  if (fixp->fx_addsy && (S_IS_EXTERNAL (fixp->fx_addsy)
+			 || S_IS_WEAK (fixp->fx_addsy)))
+    return 1;
+
   /* It is necessary to force PC-relative calls/jumps to have a relocation
      entry if they're going to need either a argument relocation or long
-     call stub.  FIXME.  Can't we need the same for absolute calls?  */
+     call stub.  */
   if (fixp->fx_pcrel && fixp->fx_addsy
       && (arg_reloc_stub_needed (symbol_arg_reloc_info (fixp->fx_addsy),
 				 hppa_fixp->fx_arg_reloc)))
