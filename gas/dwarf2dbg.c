@@ -873,7 +873,11 @@ process_entries (seg, e)
 	  changed = 1;
 	}
 
-      if (line != e->loc.line || changed)
+      /* Don't try to optimize away redundant entries; gdb wants two
+	 entries for a function where the code starts on the same line as
+	 the {, and there's no way to identify that case here.  Trust gcc
+	 to optimize appropriately.  */
+      if (1 /* line != e->loc.line || changed */)
 	{
 	  int line_delta = e->loc.line - line;
 	  if (frag == NULL)

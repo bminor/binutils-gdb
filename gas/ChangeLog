@@ -1,3 +1,7 @@
+2001-04-12  Jason Merrill  <jason_merrill@redhat.com>
+
+	* dwarf2dbg.c (process_entries): Don't optimize redundant line notes.
+
 2001-04-12  Alexandre Oliva  <aoliva@redhat.com>
 
 	* expr.c (operand): Pass &c to md_parse_name().
