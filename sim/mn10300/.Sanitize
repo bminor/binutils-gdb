@@ -32,6 +32,10 @@ mn10300_sim.h
 gencode.c
 interp.c
 simops.c
+mn10300.igen
+mn10300.dc
+sim-main.h
+op_utils.c
 
 Things-to-lose:
 
