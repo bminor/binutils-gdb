@@ -1290,7 +1290,8 @@ ppc_elf_create_linker_section (abfd, info, which)
       defaults.which = which;
       defaults.hole_written_p = false;
       defaults.alignment = 2;
-      defaults.flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
+      defaults.flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
+			| SEC_IN_MEMORY | SEC_LINKER_CREATED);
 
       switch (which)
 	{
@@ -1648,7 +1649,7 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
       const char *name;
       boolean strip;
 
-      if ((s->flags & SEC_IN_MEMORY) == 0)
+      if ((s->flags & SEC_LINKER_CREATED) == 0)
 	continue;
 
       /* It's OK to base decisions on the section name, because none
@@ -2067,6 +2068,7 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 						       | SEC_LOAD
 						       | SEC_HAS_CONTENTS
 						       | SEC_IN_MEMORY
+						       | SEC_LINKER_CREATED
 						       | SEC_READONLY))
 			  || ! bfd_set_section_alignment (dynobj, sreloc, 2))
 			{

@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 static reloc_howto_type *elf32_sparc_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
-static void elf_info_to_howto
+static void elf32_sparc_info_to_howto
   PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static boolean elf32_sparc_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
@@ -64,7 +64,7 @@ static bfd_reloc_status_type sparc_elf_notsupported_reloc
 static bfd_reloc_status_type sparc_elf_wdisp16_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 
-reloc_howto_type _bfd_sparc_elf_howto_table[] = 
+reloc_howto_type _bfd_sparc_elf_howto_table[] =
 {
   HOWTO(R_SPARC_NONE,      0,0, 0,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_NONE",    false,0,0x00000000,true),
   HOWTO(R_SPARC_8,         0,0, 8,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_8",       false,0,0x000000ff,true),
@@ -126,7 +126,7 @@ reloc_howto_type _bfd_sparc_elf_howto_table[] =
 #endif
   HOWTO(R_SPARC_WDISP16,   2,2,16,true, 0,complain_overflow_signed,  sparc_elf_wdisp16_reloc,"R_SPARC_WDISP16", false,0,0x00000000,true),
   HOWTO(R_SPARC_WDISP19,   2,2,22,true, 0,complain_overflow_signed,  bfd_elf_generic_reloc,  "R_SPARC_WDISP19", false,0,0x0007ffff,true),
-  HOWTO(R_SPARC_GLOB_JMP,  0,0,00,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_GLOB_DAT",false,0,0x00000000,true),
+  HOWTO(R_SPARC_GLOB_JMP,  0,0,00,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_GLOB_JMP",false,0,0x00000000,true),
   HOWTO(R_SPARC_7,         0,2, 7,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_7",       false,0,0x0000007f,true),
   HOWTO(R_SPARC_5,         0,2, 5,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_5",       false,0,0x0000001f,true),
   HOWTO(R_SPARC_6,         0,2, 6,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_6",       false,0,0x0000003f,true),
@@ -202,7 +202,7 @@ elf32_sparc_reloc_type_lookup (abfd, code)
    and elf64-sparc.c has its own copy.  */
 
 static void
-elf_info_to_howto (abfd, cache_ptr, dst)
+elf32_sparc_info_to_howto (abfd, cache_ptr, dst)
      bfd *abfd;
      arelent *cache_ptr;
      Elf_Internal_Rela *dst;
@@ -394,6 +394,7 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 						   | SEC_LOAD
 						   | SEC_HAS_CONTENTS
 						   | SEC_IN_MEMORY
+						   | SEC_LINKER_CREATED
 						   | SEC_READONLY))
 		      || ! bfd_set_section_alignment (dynobj, srelgot, 2))
 		    return false;
@@ -512,8 +513,7 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 	case R_SPARC_13:
 	case R_SPARC_LO10:
 	case R_SPARC_UA32:
-	  if (info->shared
-	      && (sec->flags & SEC_ALLOC) != 0)
+	  if (info->shared)
 	    {
 	      /* When creating a shared object, we must copy these
                  relocs into the output file.  We create a reloc
@@ -536,14 +536,15 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 		  sreloc = bfd_get_section_by_name (dynobj, name);
 		  if (sreloc == NULL)
 		    {
+		      flagword flags;
+
 		      sreloc = bfd_make_section (dynobj, name);
+		      flags = (SEC_HAS_CONTENTS | SEC_READONLY
+			       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
+		      if ((sec->flags & SEC_ALLOC) != 0)
+			flags |= SEC_ALLOC | SEC_LOAD;
 		      if (sreloc == NULL
-			  || ! bfd_set_section_flags (dynobj, sreloc,
-						      (SEC_ALLOC
-						       | SEC_LOAD
-						       | SEC_HAS_CONTENTS
-						       | SEC_IN_MEMORY
-						       | SEC_READONLY))
+			  || ! bfd_set_section_flags (dynobj, sreloc, flags)
 			  || ! bfd_set_section_alignment (dynobj, sreloc, 2))
 			return false;
 		    }
@@ -778,7 +779,7 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
       const char *name;
       boolean strip;
 
-      if ((s->flags & SEC_IN_MEMORY) == 0)
+      if ((s->flags & SEC_LINKER_CREATED) == 0)
 	continue;
 
       /* It's OK to base decisions on the section name, because none
@@ -1043,7 +1044,6 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 		      && (! info->symbolic
 			  || (h->elf_link_hash_flags
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0)
-		      && (input_section->flags & SEC_ALLOC) != 0
 		      && (r_type == R_SPARC_8
 			  || r_type == R_SPARC_16
 			  || r_type == R_SPARC_32
@@ -1232,8 +1232,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_SPARC_13:
 	case R_SPARC_LO10:
 	case R_SPARC_UA32:
-	  if (info->shared
-	      && (input_section->flags & SEC_ALLOC) != 0)
+	  if (info->shared)
 	    {
 	      Elf_Internal_Rela outrel;
 
@@ -1328,7 +1327,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	default:
 	  break;
-	}		
+	}
 
       if (r_type != R_SPARC_WDISP16)
 	r = _bfd_final_link_relocate (howto, input_bfd, input_section,
@@ -1673,10 +1672,8 @@ elf32_sparc_merge_private_bfd_data (ibfd, obfd)
 {
   boolean error;
 
-  /* This function is selected based on the input vector.  We only
-     want to copy information over if the output BFD also uses Elf
-     format.  */
-  if (bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return true;
 
   error = false;
@@ -1784,6 +1781,7 @@ elf32_sparc_final_write_processing (abfd, linker)
 #define ELF_MAXPAGESIZE 0x10000
 
 #define bfd_elf32_bfd_reloc_type_lookup	elf32_sparc_reloc_type_lookup
+#define elf_info_to_howto		elf32_sparc_info_to_howto
 #define elf_backend_create_dynamic_sections \
 					_bfd_elf_create_dynamic_sections
 #define elf_backend_check_relocs	elf32_sparc_check_relocs

@@ -154,6 +154,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define bfd_elfNN_write_archive_contents _bfd_write_archive_contents
 #endif
 
+#ifndef bfd_elfNN_mkobject
+#define bfd_elfNN_mkobject bfd_elf_mkobject
+#endif
+
 #ifndef bfd_elfNN_mkarchive
 #define bfd_elfNN_mkarchive _bfd_generic_mkarchive
 #endif
@@ -219,6 +223,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 #ifndef elf_backend_adjust_dynamic_symbol
 #define elf_backend_adjust_dynamic_symbol 0
+#endif
+#ifndef elf_backend_always_size_sections
+#define elf_backend_always_size_sections 0
 #endif
 #ifndef elf_backend_size_dynamic_sections
 #define elf_backend_size_dynamic_sections 0
@@ -289,6 +296,7 @@ static CONST struct elf_backend_data elfNN_bed =
   elf_backend_create_dynamic_sections,
   elf_backend_check_relocs,
   elf_backend_adjust_dynamic_symbol,
+  elf_backend_always_size_sections,
   elf_backend_size_dynamic_sections,
   elf_backend_relocate_section,
   elf_backend_finish_dynamic_symbol,
@@ -324,7 +332,7 @@ const bfd_target TARGET_BIG_SYM =
   /* object_flags: mask of all file flags */
   (HAS_RELOC | EXEC_P | HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS |
    DYNAMIC | WP_TEXT | D_PAGED),
-  
+
   /* section_flags: mask of all section flags */
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_READONLY |
    SEC_CODE | SEC_DATA | SEC_DEBUGGING | SEC_EXCLUDE | SEC_SORT_ENTRIES),
@@ -363,7 +371,7 @@ const bfd_target TARGET_BIG_SYM =
 
   /* bfd_set_format: set the format of a file being written */
   { bfd_false,
-    bfd_elf_mkobject,
+    bfd_elfNN_mkobject,
     bfd_elfNN_mkarchive,
     bfd_false
   },
@@ -412,7 +420,7 @@ const bfd_target TARGET_LITTLE_SYM =
   /* object_flags: mask of all file flags */
   (HAS_RELOC | EXEC_P | HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS |
    DYNAMIC | WP_TEXT | D_PAGED),
-  
+
   /* section_flags: mask of all section flags */
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_READONLY |
    SEC_CODE | SEC_DATA | SEC_DEBUGGING | SEC_EXCLUDE | SEC_SORT_ENTRIES),
@@ -451,7 +459,7 @@ const bfd_target TARGET_LITTLE_SYM =
 
   /* bfd_set_format: set the format of a file being written */
   { bfd_false,
-    bfd_elf_mkobject,
+    bfd_elfNN_mkobject,
     bfd_elfNN_mkarchive,
     bfd_false
   },

@@ -2415,7 +2415,7 @@ static asymbol mips_elf_scom_symbol;
 static asymbol *mips_elf_scom_symbol_ptr;
 
 /* MIPS ELF also uses an acommon section, which represents an
-   allocated common symbol which may be overridden by a 	
+   allocated common symbol which may be overridden by a
    definition in a shared library.  */
 static asection mips_elf_acom_section;
 static asymbol mips_elf_acom_symbol;
@@ -2581,7 +2581,7 @@ mips_elf_modify_segment_map (abfd)
 	  *pm = m;
 	}
     }
-	  
+
   /* If there are .dynamic and .mdebug sections, we make a room for
      the RTPROC header.  FIXME: Rewrite without section names.  */
   if (bfd_get_section_by_name (abfd, ".interp") == NULL
@@ -3307,7 +3307,7 @@ mips_elf_output_extsym (h, data)
 	  else
 	    {
 	      name = bfd_section_name (output_section->owner, output_section);
-	
+
 	      if (strcmp (name, ".text") == 0)
 		h->esym.asym.sc = scText;
 	      else if (strcmp (name, ".data") == 0)
@@ -3373,7 +3373,7 @@ mips_elf_output_extsym (h, data)
 #if 0 /* FIXME?  */
       h->esym.ifd = 0;
 #endif
-    }      
+    }
 
   if (! bfd_ecoff_debug_one_external (einfo->abfd, einfo->debug, einfo->swap,
 				      h->root.root.root.string,
@@ -3768,7 +3768,7 @@ mips_elf_final_link (abfd, info)
 		    }
 		  else
 		    esym.asym.value = last;
-		
+
 		  if (! bfd_ecoff_debug_one_external (abfd, &debug, swap,
 						      name[i], &esym))
 		    return false;
@@ -3886,7 +3886,7 @@ mips_elf_final_link (abfd, info)
 	      if (rtproc_sec == NULL)
 		{
 		  flagword flags = (SEC_HAS_CONTENTS | SEC_IN_MEMORY
-				    | SEC_READONLY);
+				    | SEC_LINKER_CREATED | SEC_READONLY);
 
 		  rtproc_sec = bfd_make_section (abfd, ".rtproc");
 		  if (rtproc_sec == NULL
@@ -5043,7 +5043,7 @@ mips_elf_create_dynamic_sections (abfd, info)
   const char * const *namep;
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
-	   | SEC_READONLY);
+	   | SEC_LINKER_CREATED | SEC_READONLY);
 
   /* Mips ABI requests the .dynamic section to be read only.  */
   s = bfd_get_section_by_name (abfd, ".dynamic");
@@ -5175,7 +5175,8 @@ mips_elf_create_compact_rel_section (abfd, info)
 
   if (bfd_get_section_by_name (abfd, ".compact_rel") == NULL)
     {
-      flags = SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_READONLY;
+      flags = (SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED
+	       | SEC_READONLY);
 
       s = bfd_make_section (abfd, ".compact_rel");
       if (s == NULL
@@ -5188,7 +5189,7 @@ mips_elf_create_compact_rel_section (abfd, info)
 
   return true;
 }
-  
+
 /* Create the .got section to hold the global offset table. */
 
 static boolean
@@ -5205,7 +5206,8 @@ mips_elf_create_got_section (abfd, info)
   if (bfd_get_section_by_name (abfd, ".got") != NULL)
     return true;
 
-  flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
+  flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
+	   | SEC_LINKER_CREATED);
 
   s = bfd_make_section (abfd, ".got");
   if (s == NULL
@@ -5436,6 +5438,7 @@ mips_elf_check_relocs (abfd, info, sec, relocs)
 						       | SEC_LOAD
 						       | SEC_HAS_CONTENTS
 						       | SEC_IN_MEMORY
+						       | SEC_LINKER_CREATED
 						       | SEC_READONLY))
 			  || ! bfd_set_section_alignment (dynobj, sreloc,
 							  4))
@@ -5661,7 +5664,7 @@ mips_elf_size_dynamic_sections (output_bfd, info)
 	 of the dynobj section names depend upon the input files.  */
       name = bfd_get_section_name (dynobj, s);
 
-      if ((s->flags & SEC_IN_MEMORY) == 0)
+      if ((s->flags & SEC_LINKER_CREATED) == 0)
 	continue;
 
       strip = false;
@@ -6226,7 +6229,7 @@ mips_elf_finish_dynamic_sections (output_bfd, info)
 	      time ((time_t *) &dyn.d_un.d_val);
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
-	      
+
 	    case DT_MIPS_ICHECKSUM:
 	      /* XXX FIXME: */
 	      break;
@@ -6398,7 +6401,7 @@ mips_elf_finish_dynamic_sections (output_bfd, info)
 			  + sizeof (Elf32_External_compact_rel));
 	    cpt.reserved0 = 0;
 	    cpt.reserved1 = 0;
-	    bfd_elf32_swap_compact_rel_out (output_bfd, &cpt, 
+	    bfd_elf32_swap_compact_rel_out (output_bfd, &cpt,
 					    ((Elf32_External_compact_rel *)
 					     s->contents));
 

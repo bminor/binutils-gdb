@@ -60,6 +60,13 @@ enum reloc_type
     R_386_RELATIVE,
     R_386_GOTOFF,
     R_386_GOTPC,
+    FIRST_INVALID_RELOC,
+    LAST_INVALID_RELOC = 19,
+    /* The remaining relocs are a GNU extension.  */
+    R_386_16 = 20,
+    R_386_PC16,
+    R_386_8,
+    R_386_PC8,
     R_386_max
   };
 
@@ -93,6 +100,20 @@ static reloc_howto_type elf_howto_table[]=
   HOWTO(R_386_RELATIVE,  0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_RELATIVE", true,0xffffffff,0xffffffff,false),
   HOWTO(R_386_GOTOFF,    0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_GOTOFF",   true,0xffffffff,0xffffffff,false),
   HOWTO(R_386_GOTPC,     0,2,32,true,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_GOTPC",    true,0xffffffff,0xffffffff,true),
+  { 11 },
+  { 12 },
+  { 13 },
+  { 14 },
+  { 15 },
+  { 16 },
+  { 17 },
+  { 18 },
+  { 19 },
+  /* The remaining relocs are a GNU extension.  */
+  HOWTO(R_386_16,	 0,1,16,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_16",	    true,0xffff,0xffff,false),
+  HOWTO(R_386_PC16,	 0,1,16,true, 0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_PC16",	    true,0xffff,0xffff,true),
+  HOWTO(R_386_8,	 0,0,8,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_8",	    true,0xff,0xff,false),
+  HOWTO(R_386_PC8,	 0,0,8,true, 0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_PC8",	    true,0xff,0xff,true),
 };
 
 #ifdef DEBUG_GEN_RELOC
@@ -152,6 +173,23 @@ elf_i386_reloc_type_lookup (abfd, code)
       TRACE ("BFD_RELOC_386_GOTPC");
       return &elf_howto_table[ (int)R_386_GOTPC ];
 
+      /* The remaining relocs are a GNU extension.  */
+    case BFD_RELOC_16:
+      TRACE ("BFD_RELOC_16");
+      return &elf_howto_table[(int) R_386_16];
+
+    case BFD_RELOC_16_PCREL:
+      TRACE ("BFD_RELOC_16_PCREL");
+      return &elf_howto_table[(int) R_386_PC16];
+
+    case BFD_RELOC_8:
+      TRACE ("BFD_RELOC_8");
+      return &elf_howto_table[(int) R_386_8];
+
+    case BFD_RELOC_8_PCREL:
+      TRACE ("BFD_RELOC_8_PCREL");
+      return &elf_howto_table[(int) R_386_PC8];
+
     default:
       break;
     }
@@ -166,20 +204,22 @@ elf_i386_info_to_howto (abfd, cache_ptr, dst)
      arelent		*cache_ptr;
      Elf32_Internal_Rela *dst;
 {
-  BFD_ASSERT (ELF32_R_TYPE(dst->r_info) < (unsigned int) R_386_max);
-
-  cache_ptr->howto = &elf_howto_table[ELF32_R_TYPE(dst->r_info)];
+  abort ();
 }
 
 static void
 elf_i386_info_to_howto_rel (abfd, cache_ptr, dst)
-     bfd		*abfd;
-     arelent		*cache_ptr;
+     bfd *abfd;
+     arelent *cache_ptr;
      Elf32_Internal_Rel *dst;
 {
-  BFD_ASSERT (ELF32_R_TYPE(dst->r_info) < (unsigned int) R_386_max);
+  enum reloc_type type;
 
-  cache_ptr->howto = &elf_howto_table[ELF32_R_TYPE(dst->r_info)];
+  type = (enum reloc_type) ELF32_R_TYPE (dst->r_info);
+  BFD_ASSERT (type < R_386_max);
+  BFD_ASSERT (type < FIRST_INVALID_RELOC || type > LAST_INVALID_RELOC);
+
+  cache_ptr->howto = &elf_howto_table[(int) type];
 }
 
 /* Functions for the i386 ELF linker.  */
@@ -222,8 +262,8 @@ static const bfd_byte elf_i386_plt_entry[PLT_ENTRY_SIZE] =
 
 static const bfd_byte elf_i386_pic_plt0_entry[PLT_ENTRY_SIZE] =
 {
-  0xff, 0xb3, 4, 0, 0, 0,	/* pushl 4(%ebx) */	
-  0xff, 0xa3, 8, 0, 0, 0,	/* jmp *8(%ebx) */	
+  0xff, 0xb3, 4, 0, 0, 0,	/* pushl 4(%ebx) */
+  0xff, 0xa3, 8, 0, 0, 0,	/* jmp *8(%ebx) */
   0, 0, 0, 0			/* pad out to 16 bytes.  */
 };
 
@@ -307,7 +347,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	{
 	case R_386_GOT32:
 	  /* This symbol requires a global offset table entry.  */
-     
+
 	  if (sgot == NULL)
 	    {
 	      sgot = bfd_get_section_by_name (dynobj, ".got");
@@ -327,6 +367,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 						   | SEC_LOAD
 						   | SEC_HAS_CONTENTS
 						   | SEC_IN_MEMORY
+						   | SEC_LINKER_CREATED
 						   | SEC_READONLY))
 		      || ! bfd_set_section_alignment (dynobj, srelgot, 2))
 		    return false;
@@ -391,21 +432,15 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	case R_386_PLT32:
 	  /* This symbol requires a procedure linkage table entry.  We
              actually build the entry in adjust_dynamic_symbol,
-             because this might be a case of linking PIC code without
-             linking in any dynamic objects, in which case we don't
-             need to generate a procedure linkage table after all.  */
-	  
+             because this might be a case of linking PIC code which is
+             never referenced by a dynamic object, in which case we
+             don't need to generate a procedure linkage table entry
+             after all.  */
+
 	  /* If this is a local symbol, we resolve it directly without
              creating a procedure linkage table entry.  */
 	  if (h == NULL)
 	    continue;
-
-	  /* Make sure this symbol is output as a dynamic symbol.  */
-	  if (h->dynindx == -1)
-	    {
-	      if (! bfd_elf32_link_record_dynamic_symbol (info, h))
-		return false;
-	    }
 
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
 
@@ -414,7 +449,6 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	case R_386_32:
 	case R_386_PC32:
 	  if (info->shared
-	      && (sec->flags & SEC_ALLOC) != 0
 	      && (ELF32_R_TYPE (rel->r_info) != R_386_PC32 || h != NULL))
 	    {
 	      /* When creating a shared object, we must copy these
@@ -438,14 +472,15 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 		  sreloc = bfd_get_section_by_name (dynobj, name);
 		  if (sreloc == NULL)
 		    {
+		      flagword flags;
+
 		      sreloc = bfd_make_section (dynobj, name);
+		      flags = (SEC_HAS_CONTENTS | SEC_READONLY
+			       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
+		      if ((sec->flags & SEC_ALLOC) != 0)
+			flags |= SEC_ALLOC | SEC_LOAD;
 		      if (sreloc == NULL
-			  || ! bfd_set_section_flags (dynobj, sreloc,
-						      (SEC_ALLOC
-						       | SEC_LOAD
-						       | SEC_HAS_CONTENTS
-						       | SEC_IN_MEMORY
-						       | SEC_READONLY))
+			  || ! bfd_set_section_flags (dynobj, sreloc, flags)
 			  || ! bfd_set_section_alignment (dynobj, sreloc, 2))
 			return false;
 		    }
@@ -453,7 +488,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 
 	      sreloc->_raw_size += sizeof (Elf32_External_Rel);
 	    }
-	     
+
 	  break;
 
 	default:
@@ -498,15 +533,24 @@ elf_i386_adjust_dynamic_symbol (info, h)
   if (h->type == STT_FUNC
       || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {
-      if (! elf_hash_table (info)->dynamic_sections_created)
+      if (! info->shared
+	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
+	  && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0)
 	{
 	  /* This case can occur if we saw a PLT32 reloc in an input
-             file, but none of the input files were dynamic objects.
-             In such a case, we don't actually need to build a
-             procedure linkage table, and we can just do a PC32 reloc
-             instead.  */
+             file, but the symbol was never referred to by a dynamic
+             object.  In such a case, we don't actually need to build
+             a procedure linkage table, and we can just do a PC32
+             reloc instead.  */
 	  BFD_ASSERT ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0);
 	  return true;
+	}
+
+      /* Make sure this symbol is output as a dynamic symbol.  */
+      if (h->dynindx == -1)
+	{
+	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	    return false;
 	}
 
       s = bfd_get_section_by_name (dynobj, ".plt");
@@ -677,7 +721,7 @@ elf_i386_size_dynamic_sections (output_bfd, info)
       const char *name;
       boolean strip;
 
-      if ((s->flags & SEC_IN_MEMORY) == 0)
+      if ((s->flags & SEC_LINKER_CREATED) == 0)
 	continue;
 
       /* It's OK to base decisions on the section name, because none
@@ -766,7 +810,7 @@ elf_i386_size_dynamic_sections (output_bfd, info)
       if (s->contents == NULL && s->_raw_size != 0)
 	return false;
     }
-	  
+
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Add some entries to the .dynamic section.  We fill in the
@@ -855,7 +899,10 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_reloc_status_type r;
 
       r_type = ELF32_R_TYPE (rel->r_info);
-      if (r_type < 0 || r_type >= (int) R_386_max)
+      if (r_type < 0
+	  || r_type >= (int) R_386_max
+	  || (r_type >= (int) FIRST_INVALID_RELOC
+	      && r_type <= (int) LAST_INVALID_RELOC))
 	{
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
@@ -923,12 +970,19 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 			  || (h->elf_link_hash_flags
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0)
 		      && (r_type == R_386_32
-			  || r_type == R_386_PC32)
-		      && (input_section->flags & SEC_ALLOC) != 0))
+			  || r_type == R_386_PC32)))
 		{
 		  /* In these cases, we don't need the relocation
                      value.  We check specially because in some
                      obscure cases sec->output_section will be NULL.  */
+		  relocation = 0;
+		}
+	      else if (sec->output_section == NULL)
+		{
+		  (*_bfd_error_handler)
+		    ("%s: warning: unresolvable relocation against symbol `%s' from %s section",
+		     bfd_get_filename (input_bfd), h->root.root.string,
+		     bfd_get_section_name (input_bfd, input_section));
 		  relocation = 0;
 		}
 	      else
@@ -1105,7 +1159,6 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_386_32:
 	case R_386_PC32:
 	  if (info->shared
-	      && (input_section->flags & SEC_ALLOC) != 0
 	      && (r_type != R_386_PC32
 		  || (h != NULL
 		      && (! info->symbolic
@@ -1327,7 +1380,7 @@ elf_i386_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       /* This symbol has an entry in the global offset table.  Set it
 	 up.  */
-      
+
       BFD_ASSERT (h->dynindx != -1);
 
       sgot = bfd_get_section_by_name (dynobj, ".got");

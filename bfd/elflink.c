@@ -38,7 +38,8 @@ _bfd_elf_create_got_section (abfd, info)
   if (bfd_get_section_by_name (abfd, ".got") != NULL)
     return true;
 
-  flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
+  flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
+	   | SEC_LINKER_CREATED);
 
   s = bfd_make_section (abfd, ".got");
   if (s == NULL
@@ -72,6 +73,8 @@ _bfd_elf_create_got_section (abfd, info)
       && ! _bfd_elf_link_record_dynamic_symbol (info, h))
     return false;
 
+  elf_hash_table (info)->hgot = h;
+
   /* The first three global offset table entries are reserved.  */
   s->_raw_size += 3 * 4;
 
@@ -93,7 +96,8 @@ _bfd_elf_create_dynamic_sections (abfd, info)
   /* We need to create .plt, .rel[a].plt, .got, .got.plt, .dynbss, and
      .rel[a].bss sections.  */
 
-  flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
+  flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
+	   | SEC_LINKER_CREATED);
 
   s = bfd_make_section (abfd, ".plt");
   if (s == NULL
@@ -226,7 +230,6 @@ _bfd_elf_create_linker_section (abfd, info, which, defaults)
   if (!lsect)
     {
       asection *s;
-      static elf_linker_section_t zero_section;
 
       lsect = (elf_linker_section_t *)
 	bfd_alloc (dynobj, sizeof (elf_linker_section_t));
@@ -238,9 +241,9 @@ _bfd_elf_create_linker_section (abfd, info, which, defaults)
 
       /* See if the sections already exist */
       lsect->section = s = bfd_get_section_by_name (dynobj, lsect->name);
-      if (!s)
+      if (!s || (s->flags & defaults->flags) != defaults->flags)
 	{
-	  lsect->section = s = bfd_make_section (dynobj, lsect->name);
+	  lsect->section = s = bfd_make_section_anyway (dynobj, lsect->name);
 
 	  if (s == NULL)
 	    return (elf_linker_section_t *)0;
@@ -284,21 +287,28 @@ _bfd_elf_create_linker_section (abfd, info, which, defaults)
 		   lsect->sym_name,
 		   lsect->name);
 #endif
-	  if (!(_bfd_generic_link_add_one_symbol (info,
-						  abfd,
-						  lsect->sym_name,
-						  BSF_GLOBAL,
-						  s,
-						  ((lsect->hole_size)
-						   ? s->_raw_size - lsect->hole_size + lsect->sym_offset
-						   : lsect->sym_offset),
-						  (const char *) NULL,
-						  false,
-						  get_elf_backend_data (abfd)->collect,
-						  (struct bfd_link_hash_entry **) &h)))
+	  h = (struct elf_link_hash_entry *)
+	    bfd_link_hash_lookup (info->hash, lsect->sym_name, false, false, false);
+
+	  if ((h == NULL || h->root.type == bfd_link_hash_undefined)
+	      && !(_bfd_generic_link_add_one_symbol (info,
+						     abfd,
+						     lsect->sym_name,
+						     BSF_GLOBAL,
+						     s,
+						     ((lsect->hole_size)
+						      ? s->_raw_size - lsect->hole_size + lsect->sym_offset
+						      : lsect->sym_offset),
+						     (const char *) NULL,
+						     false,
+						     get_elf_backend_data (abfd)->collect,
+						     (struct bfd_link_hash_entry **) &h)))
 	    return (elf_linker_section_t *)0;
 
-	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_DYNAMIC;
+	  if ((defaults->which != LINKER_SECTION_SDATA)
+	      && (defaults->which != LINKER_SECTION_SDATA2))
+	    h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_DYNAMIC;
+
 	  h->type = STT_OBJECT;
 	  lsect->sym_hash = h;
 
@@ -359,6 +369,7 @@ _bfd_elf_make_linker_section_rela (dynobj, lsect, alignment)
 				       | SEC_LOAD
 				       | SEC_HAS_CONTENTS
 				       | SEC_IN_MEMORY
+				       | SEC_LINKER_CREATED
 				       | SEC_READONLY))
 	  || ! bfd_set_section_alignment (dynobj, lsect->rel_section, alignment))
 	return false;
@@ -366,4 +377,3 @@ _bfd_elf_make_linker_section_rela (dynobj, lsect, alignment)
 
   return true;
 }
-

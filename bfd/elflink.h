@@ -35,7 +35,7 @@ struct elf_info_failed
 {
   boolean failed;
   struct bfd_link_info *info;
-};  
+};
 
 /* Given an ELF BFD, add symbols to the global hash table as
    appropriate.  */
@@ -281,7 +281,7 @@ elf_link_add_object_symbols (abfd, info)
 		goto error_return;
 
 	      if (! (_bfd_generic_link_add_one_symbol
-		     (info, abfd, 
+		     (info, abfd,
 		      name + sizeof ".gnu.warning." - 1,
 		      BSF_WARNING, s, (bfd_vma) 0, msg, false, collect,
 		      (struct bfd_link_hash_entry **) NULL)))
@@ -1051,7 +1051,8 @@ elf_link_create_dynamic_sections (abfd, info)
 
   /* Note that we set the SEC_IN_MEMORY flag for all of these
      sections.  */
-  flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
+  flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
+	   | SEC_IN_MEMORY | SEC_LINKER_CREATED);
 
   /* A dynamically linked executable has a .interp section, but a
      shared library does not.  */
@@ -1257,7 +1258,7 @@ NAME(_bfd_elf,link_read_relocs) (abfd, o, external_relocs, internal_relocs,
   /* Cache the results for next time, if we can.  */
   if (keep_memory)
     elf_section_data (o)->relocs = internal_relocs;
-		 
+
   if (alloc1 != NULL)
     free (alloc1);
 
@@ -1371,6 +1372,13 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
   if (info->hash->creator->flavour != bfd_target_elf_flavour)
     return true;
 
+  /* The backend may have to create some sections regardless of whether
+     we're dynamic or not.  */
+  bed = get_elf_backend_data (output_bfd);
+  if (bed->elf_backend_always_size_sections
+      && ! (*bed->elf_backend_always_size_sections) (output_bfd, info))
+    return false;
+
   dynobj = elf_hash_table (info)->dynobj;
 
   /* If there were no dynamic objects in the link, there is nothing to
@@ -1410,7 +1418,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	  if (indx == (bfd_size_type) -1
 	      || ! elf_add_dynamic_entry (info, DT_SONAME, indx))
 	    return false;
-	}      
+	}
 
       if (info->symbolic)
 	{
@@ -1494,7 +1502,6 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 
   /* The backend must work out the sizes of all the other dynamic
      sections.  */
-  bed = get_elf_backend_data (output_bfd);
   if (! (*bed->elf_backend_size_dynamic_sections) (output_bfd, info))
     return false;
 
@@ -1805,7 +1812,7 @@ struct elf_finfo_failed
 {
   boolean failed;
   struct elf_final_link_info *finfo;
-};  
+};
 
 /* Do the final step of an ELF link.  */
 
@@ -2221,7 +2228,7 @@ elf_bfd_final_link (abfd, info)
 	{
 	  if (*rel_hash == NULL)
 	    continue;
-	      
+
 	  BFD_ASSERT ((*rel_hash)->indx >= 0);
 
 	  if (rel_hdr->sh_entsize == sizeof (Elf_External_Rel))
@@ -2375,11 +2382,10 @@ elf_bfd_final_link (abfd, info)
 	  if ((o->flags & SEC_HAS_CONTENTS) == 0
 	      || o->_raw_size == 0)
 	    continue;
-	  if ((o->flags & SEC_IN_MEMORY) == 0)
+	  if ((o->flags & SEC_LINKER_CREATED) == 0)
 	    {
 	      /* At this point, we are only interested in sections
-                 created by elf_link_create_dynamic_sections.  FIXME:
-                 This test is fragile.  */
+                 created by elf_link_create_dynamic_sections.  */
 	      continue;
 	    }
 	  if ((elf_section_data (o->output_section)->this_hdr.sh_type
@@ -2927,11 +2933,10 @@ elf_link_input_bfd (finfo, input_bfd)
 	  || (o->_raw_size == 0 && (o->flags & SEC_RELOC) == 0))
 	continue;
 
-      if ((o->flags & SEC_IN_MEMORY) != 0
-	  && input_bfd == elf_hash_table (finfo->info)->dynobj)
+      if ((o->flags & SEC_LINKER_CREATED) != 0)
 	{
-	  /* Section was created by elf_link_create_dynamic_sections.
-             FIXME: This test is fragile.  */
+	  /* Section was created by elf_link_create_dynamic_sections
+	     or somesuch.  */
 	  continue;
 	}
 

@@ -360,6 +360,13 @@ struct elf_backend_data
   boolean (*elf_backend_adjust_dynamic_symbol)
     PARAMS ((struct bfd_link_info *info, struct elf_link_hash_entry *h));
 
+  /* The ALWAYS_SIZE_SECTIONS function is called by the backend linker
+     after all the linker input files have been seen but before the
+     section sizes have been set.  This is called after
+     ADJUST_DYNAMIC_SYMBOL, but before SIZE_DYNAMIC_SECTIONS.  */
+  boolean (*elf_backend_always_size_sections)
+    PARAMS ((bfd *output_bfd, struct bfd_link_info *info));
+
   /* The SIZE_DYNAMIC_SECTIONS function is called by the ELF backend
      linker after all the linker input files have been seen but before
      the sections sizes have been set.  This is called after
@@ -660,9 +667,6 @@ extern void bfd_elf_print_symbol PARAMS ((bfd *, PTR, asymbol *,
 
 #define bfd_elf32_print_symbol	bfd_elf_print_symbol
 #define bfd_elf64_print_symbol	bfd_elf_print_symbol
-#define bfd_elf32_mkobject	bfd_elf_mkobject
-#define bfd_elf64_mkobject	bfd_elf_mkobject
-#define elf_mkobject		bfd_elf_mkobject
 
 extern unsigned long bfd_elf_hash PARAMS ((CONST unsigned char *));
 

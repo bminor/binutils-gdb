@@ -939,6 +939,12 @@ typedef struct sec
 	   contents.  */
 #define SEC_LINK_DUPLICATES_SAME_CONTENTS 0x600000
 
+	 /* This section was created by the linker as part of dynamic
+	   relocation or other arcane processing.  It is skipped when
+	   going through the first-pass output, trusting that someone
+	   else up the line will take care of it later.  */
+#define SEC_LINKER_CREATED 0x800000
+
 	 /*  End of section flags.  */
 
 	 /* Some internal packed boolean fields.  */

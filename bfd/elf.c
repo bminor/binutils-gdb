@@ -103,7 +103,7 @@ elf_read (abfd, offset, size)
 }
 
 boolean
-elf_mkobject (abfd)
+bfd_elf_mkobject (abfd)
      bfd * abfd;
 {
   /* this just does initialization */

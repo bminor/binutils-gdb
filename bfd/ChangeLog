@@ -1,3 +1,41 @@
+Fri Jan  3 16:58:31 1997  Richard Henderson  <rth@tamu.edu>
+
+	elf64-alpha multiple .got rewrite:
+
+	* elf-bfd.h (struct elf_backend_data): Add always_size_sections entry.
+	(bfd_elf*_mkobject): Don't define here ...
+	* elfxx-target.h: ... but rather here.  Default always_size_sections
+	hook to NULL.
+	* elf.c (elf_mkobject): Rename to bfd_elf_mkobject, since that was 
+	what the #defines in elf-bfd.h transmuted it to anyway.
+
+	* section.c: Add SEC_LINKER_CREATED flag.
+	* bfd-in2.h: Rebuild.
+	* elf32-i386.c (elf_i386_check_relocs): Add SEC_LINKER_CREATED to
+	relocation section flags.
+	(elf_i386_size_dynamic_sections): Use SEC_LINKER_CREATED instead of
+	SEC_IN_MEMORY to recognize generated bits.
+	* elf32-m68k.c (elf_m68k_check_relocs, elf_m68k_size_dynamic_sections):
+	Likewise.
+	* elf32-mips.c (mips_elf_final_link, mips_elf_create_dynamic_sections,
+	mips_elf_create_compact_rel_section, mips_elf_create_got_section,
+	mips_elf_check_relocs, mips_elf_size_dynamic_sections): Likewise.
+	* elf32-ppc.c (ppc_elf_create_linker_section,
+	ppc_elf_size_dynamic_sections): Likewise.
+	* elf32-sparc.c (elf32_sparc_check_relocs,
+	elf32_sparc_size_dynamic_sections): Likewise.
+	* elflink.c (_bfd_elf_create_got_section): Add SEC_LINKER_CREATED to 
+	section flags.
+	(_bfd_elf_create_dynamic_sections): Likewise.
+	(_bfd_elf_make_linker_section_rela): Likewise.
+	* elflink.h (elf_link_create_dynamic_sections): Likewise.
+	(bfd_elf,size_dynamic_sections): Call the always_size_sections hook.
+	(elf_bfd_final_link): Use SEC_LINKER_CREATED instead of SEC_IN_MEMORY
+	to identify generated bits.
+	(elf_link_input_bfd): Likewise.
+
+	* elf64-alpha.c: Rewrite everything touching relocations.
+
 start-sanitize-v850
 Fri Jan  3 11:42:53 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 
