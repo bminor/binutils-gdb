@@ -1,3 +1,9 @@
+Sun Dec  1 00:18:59 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* configure.in, configure:  Handle mips*-sgi-irix6*.
+	* irix-core.c (irix_core_core_file_p):  Accept CORE_MAGICN32
+	core files.
+
 Wed Nov 27 12:10:25 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-i386.c (elf_i386_relocate_section): Warn about a
