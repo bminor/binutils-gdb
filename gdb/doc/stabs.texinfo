@@ -956,8 +956,11 @@ which gives the address of the common block.  Then each stab between the
 @code{N_BCOMM} and the @code{N_ECOMM} specifies a member of that common
 block; its value is the offset within the common block of that variable.
 The @code{N_ECOML} stab type is documented for this purpose, but Sun's
-@sc{fortran} compiler uses @code{N_GSYM} instead, with the @samp{V}
-symbol descriptor.
+@sc{fortran} compiler uses @code{N_GSYM} instead.  The test case I
+looked at had a common block local to a function and it used the
+@samp{V} symbol descriptor; I assume one would use @samp{S} if not local
+to a function (that is, if a common block @emph{can} be anything other
+than local to a function).
 
 @node Initialized statics
 @section Initialized static variables 
