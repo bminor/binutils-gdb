@@ -60,7 +60,7 @@ gdbdir = ..
 M4=m4
 
 # where to find texinfo; GDB dist should include a recent one
-TEXIDIR=$(srcdir)/${gdbdir}/../texinfo/fsf
+TEXIDIR=$(srcdir)/${gdbdir}/../texinfo
 
 # where to find makeinfo, preferably one designed for texinfo-2
 MAKEINFO=makeinfo
