@@ -64,6 +64,7 @@ typedef enum mode_type {
 extern const char *mode_names[];
 #define MODE_NAME(m) (mode_names[m])
 
+typedef void VOID;
 typedef unsigned char BI;
 typedef signed8 QI;
 typedef signed16 HI;
