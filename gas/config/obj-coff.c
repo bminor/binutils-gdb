@@ -19,14 +19,16 @@
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "as.h"
-#include "subsegs.h"
 #include "obstack.h"
+#include "subsegs.h"
 
-const char *s_get_name PARAMS ((symbolS * s));
 static symbolS *tag_find_or_make PARAMS ((char *name));
 static symbolS *tag_find PARAMS ((char *name));
+static void tag_init PARAMS ((void));
+static void tag_insert PARAMS ((const char *name, symbolS * symbolP));
+const char *s_get_name PARAMS ((symbolS * s));
 
-static void obj_coff_def PARAMS ((int what));
+static void obj_coff_def PARAMS ((int));
 static void obj_coff_dim PARAMS ((int));
 static void obj_coff_endef PARAMS ((int));
 static void obj_coff_line PARAMS ((int));
@@ -36,8 +38,6 @@ static void obj_coff_size PARAMS ((int));
 static void obj_coff_tag PARAMS ((int));
 static void obj_coff_type PARAMS ((int));
 static void obj_coff_val PARAMS ((int));
-static void tag_init PARAMS ((void));
-static void tag_insert PARAMS ((const char *name, symbolS * symbolP));
 
 static void SA_SET_SYM_TAGNDX PARAMS ((symbolS *, symbolS *));
 
@@ -46,7 +46,6 @@ static symbolS *def_symbol_in_progress;
 
 const pseudo_typeS obj_pseudo_table[] =
 {
-#ifndef IGNORE_DEBUG
   {"def", obj_coff_def, 0},
   {"dim", obj_coff_dim, 0},
   {"endef", obj_coff_endef, 0},
@@ -58,21 +57,7 @@ const pseudo_typeS obj_pseudo_table[] =
   {"tag", obj_coff_tag, 0},
   {"type", obj_coff_type, 0},
   {"val", obj_coff_val, 0},
-#else
-  {"def", s_ignore, 0},
-  {"dim", s_ignore, 0},
-  {"endef", s_ignore, 0},
-  {"line", s_ignore, 0},
-  {"ln", s_ignore, 0},
-  {"scl", s_ignore, 0},
-  {"size", s_ignore, 0},
-  {"tag", s_ignore, 0},
-  {"type", s_ignore, 0},
-  {"val", s_ignore, 0},
-#endif /* ignore debug */
-
   { "section", obj_coff_section, 0 },
-
   {"ident", s_ignore, 0},	/* we don't yet handle this. */
   {"optim", s_ignore, 0},	/* For sun386i cc (?) */
   /* other stuff */
@@ -80,7 +65,131 @@ const pseudo_typeS obj_pseudo_table[] =
 
   {NULL}			/* end sentinel */
 };				/* obj_pseudo_table */
+
+/* stack stuff */
+typedef struct
+  {
+    unsigned long chunk_size;
+    unsigned long element_size;
+    unsigned long size;
+    char *data;
+    unsigned long pointer;
+  }
+stack;
 
+static stack *
+stack_init (chunk_size, element_size)
+     unsigned long chunk_size;
+     unsigned long element_size;
+{
+  stack *st;
+
+  st = (stack *) malloc (sizeof (stack));
+  if (!st)
+    return 0;
+  st->data = malloc (chunk_size);
+  if (!st->data)
+    {
+      free (st);
+      return 0;
+    }
+  st->pointer = 0;
+  st->size = chunk_size;
+  st->chunk_size = chunk_size;
+  st->element_size = element_size;
+  return st;
+}
+
+static void
+stack_delete (st)
+     stack *st;
+{
+  free (st->data);
+  free (st);
+}
+
+static char *
+stack_push (st, element)
+     stack *st;
+     char *element;
+{
+  if (st->pointer + st->element_size >= st->size)
+    {
+      st->size += st->chunk_size;
+      if ((st->data = xrealloc (st->data, st->size)) == (char *) 0)
+	return (char *) 0;
+    }
+  memcpy (st->data + st->pointer, element, st->element_size);
+  st->pointer += st->element_size;
+  return st->data + st->pointer;
+}
+
+static char *
+stack_pop (st)
+     stack *st;
+{
+  if (st->pointer < st->element_size)
+    {
+      st->pointer = 0;
+      return (char *) 0;
+    }
+  st->pointer -= st->element_size;
+  return st->data + st->pointer;
+}
+
+/*
+ * Maintain a list of the tagnames of the structres.
+ */
+
+static void
+tag_init ()
+{
+  tag_hash = hash_new ();
+}
+
+static void
+tag_insert (name, symbolP)
+     const char *name;
+     symbolS *symbolP;
+{
+  const char *error_string;
+
+  if ((error_string = hash_jam (tag_hash, name, (char *) symbolP)))
+    {
+      as_fatal ("Inserting \"%s\" into structure table failed: %s",
+		name, error_string);
+    }
+}
+
+static symbolS *
+tag_find_or_make (name)
+     char *name;
+{
+  symbolS *symbolP;
+
+  if ((symbolP = tag_find (name)) == NULL)
+    {
+      symbolP = symbol_new (name, undefined_section,
+			    0, &zero_address_frag);
+
+      tag_insert (S_GET_NAME (symbolP), symbolP);
+      symbol_table_insert (symbolP);
+    }				/* not found */
+
+  return symbolP;
+}
+
+static symbolS *
+tag_find (name)
+     char *name;
+{
+#ifdef STRIP_UNDERSCORE
+  if (*name == '_')
+    name++;
+#endif /* STRIP_UNDERSCORE */
+  return (symbolS *) hash_find (tag_hash, name);
+}
+
 struct line_no {
   struct line_no *next;
   fragS *frag;
@@ -308,75 +417,6 @@ obj_symbol_new_hook (symbolP)
 }
 
 
-/* stack stuff */
-stack *
-stack_init (chunk_size, element_size)
-     unsigned long chunk_size;
-     unsigned long element_size;
-{
-  stack *st;
-
-  st = (stack *) malloc (sizeof (stack));
-  if (!st)
-    return 0;
-  st->data = malloc (chunk_size);
-  if (!st->data)
-    {
-      free (st);
-      return 0;
-    }
-  st->pointer = 0;
-  st->size = chunk_size;
-  st->chunk_size = chunk_size;
-  st->element_size = element_size;
-  return st;
-}
-
-void
-stack_delete (st)
-     stack *st;
-{
-  free (st->data);
-  free (st);
-}
-
-char *
-stack_push (st, element)
-     stack *st;
-     char *element;
-{
-  if (st->pointer + st->element_size >= st->size)
-    {
-      st->size += st->chunk_size;
-      if ((st->data = xrealloc (st->data, st->size)) == (char *) 0)
-	return (char *) 0;
-    }
-  memcpy (st->data + st->pointer, element, st->element_size);
-  st->pointer += st->element_size;
-  return st->data + st->pointer;
-}
-
-char *
-stack_pop (st)
-     stack *st;
-{
-  if (st->pointer < st->element_size)
-    {
-      st->pointer = 0;
-      return (char *) 0;
-    }
-  st->pointer -= st->element_size;
-  return st->data + st->pointer;
-}
-
-char *
-stack_top (st)
-     stack *st;
-{
-  return st->data + st->pointer - st->element_size;
-}
-
-
 /*
  * Handle .ln directives.
  */
@@ -515,8 +555,8 @@ obj_coff_def (what)
 unsigned int dim_index;
 
 static void
-obj_coff_endef (ignored)
-     int ignored;
+obj_coff_endef (ignore)
+     int ignore;
 {
   symbolS *symbolP;
   /* DIM BUG FIX sac@cygnus.com */
@@ -679,8 +719,8 @@ obj_coff_endef (ignored)
 }
 
 static void
-obj_coff_dim (ignored)
-     int ignored;
+obj_coff_dim (ignore)
+     int ignore;
 {
   int dim_index;
 
@@ -719,8 +759,8 @@ obj_coff_dim (ignored)
 }
 
 static void
-obj_coff_line (ignored)
-     int ignored;
+obj_coff_line (ignore)
+     int ignore;
 {
   int this_base;
 
@@ -742,8 +782,8 @@ obj_coff_line (ignored)
 }
 
 static void
-obj_coff_size (ignored)
-     int ignored;
+obj_coff_size (ignore)
+     int ignore;
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -758,8 +798,8 @@ obj_coff_size (ignored)
 }
 
 static void
-obj_coff_scl (ignored)
-     int ignored;
+obj_coff_scl (ignore)
+     int ignore;
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -773,8 +813,8 @@ obj_coff_scl (ignored)
 }
 
 static void
-obj_coff_tag (ignored)
-     int ignored;
+obj_coff_tag (ignore)
+     int ignore;
 {
   char *symbol_name;
   char name_end;
@@ -806,8 +846,8 @@ obj_coff_tag (ignored)
 }
 
 static void
-obj_coff_type (ignored)
-     int ignored;
+obj_coff_type (ignore)
+     int ignore;
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -828,8 +868,8 @@ obj_coff_type (ignored)
 }
 
 static void
-obj_coff_val (ignored)
-     int ignored;
+obj_coff_val (ignore)
+     int ignore;
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -846,7 +886,7 @@ obj_coff_val (ignored)
       if (!strcmp (symbol_name, "."))
 	{
 	  def_symbol_in_progress->sy_frag = frag_now;
-	  S_SET_VALUE (def_symbol_in_progress, obstack_next_free (&frags) - frag_now->fr_literal);
+	  S_SET_VALUE (def_symbol_in_progress, (valueT) frag_now_fix ());
 	  /* If the .val is != from the .def (e.g. statics) */
 	}
       else if (strcmp (S_GET_NAME (def_symbol_in_progress), symbol_name))
@@ -871,59 +911,6 @@ obj_coff_val (ignored)
     }				/* if symbol based */
 
   demand_empty_rest_of_line ();
-}
-
-/*
- * Maintain a list of the tagnames of the structres.
- */
-
-static void
-tag_init ()
-{
-  tag_hash = hash_new ();
-}
-
-static void
-tag_insert (name, symbolP)
-     const char *name;
-     symbolS *symbolP;
-{
-  const char *error_string;
-
-  if ((error_string = hash_jam (tag_hash, name, (char *) symbolP)))
-    {
-      as_fatal ("Inserting \"%s\" into structure table failed: %s",
-		name, error_string);
-    }
-}
-
-static symbolS *
-tag_find_or_make (name)
-     char *name;
-{
-  symbolS *symbolP;
-
-  if ((symbolP = tag_find (name)) == NULL)
-    {
-      symbolP = symbol_new (name, undefined_section,
-			    0, &zero_address_frag);
-
-      tag_insert (S_GET_NAME (symbolP), symbolP);
-      symbol_table_insert (symbolP);
-    }				/* not found */
-
-  return symbolP;
-}
-
-static symbolS *
-tag_find (name)
-     char *name;
-{
-#ifdef STRIP_UNDERSCORE
-  if (*name == '_')
-    name++;
-#endif /* STRIP_UNDERSCORE */
-  return (symbolS *) hash_find (tag_hash, name);
 }
 
 void
@@ -1175,13 +1162,22 @@ coff_frob_file ()
 }
 
 void
-coff_frob_section (strsec)
-     segT strsec;
+coff_frob_section (sec)
+     segT sec;
 {
-  segT sec;
+  segT strsec;
   char *strname, *p;
   fragS *fragp;
-  bfd_vma size, n_entries;
+  bfd_vma size, n_entries, mask;
+
+  /* The COFF back end in BFD requires that all section sizes be
+     rounded up to multiples of the corresponding section alignments.
+     Seems kinda silly to me, but that's the way it is.  */
+  size = bfd_get_section_size_before_reloc (sec);
+  assert (sec->alignment_power >= stdoutput->xvec->align_power_min);
+  mask = ((bfd_vma) 1 << (bfd_vma) sec->alignment_power) - 1;
+  if (size & mask)
+    bfd_set_section_size (stdoutput, sec, (size + mask) & ~mask);
 
   /* @@ these should be in a "stabs.h" file, or maybe as.h */
 #ifndef STAB_SECTION_NAME
@@ -1190,9 +1186,10 @@ coff_frob_section (strsec)
 #ifndef STAB_STRING_SECTION_NAME
 #define STAB_STRING_SECTION_NAME ".stabstr"
 #endif
-  if (strcmp (STAB_STRING_SECTION_NAME, strsec->name))
+  if (strcmp (STAB_STRING_SECTION_NAME, sec->name))
     return;
 
+  strsec = sec;
   sec = subseg_get (STAB_SECTION_NAME, 0);
   /* size is already rounded up, since other section will be listed first */
   size = bfd_get_section_size_before_reloc (strsec);

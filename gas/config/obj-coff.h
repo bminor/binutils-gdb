@@ -17,43 +17,23 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#ifndef OBJ_FORMAT_H
+#define OBJ_FORMAT_H
+
 #define OBJ_COFF 1
 
 #include "targ-cpu.h"
 
+#include "bfd.h"
+
 /* This internal_lineno crap is to stop namespace pollution from the
    bfd internal coff headerfile. */
 
-#include "bfd.h"
 #define internal_lineno bfd_internal_lineno
 #include "coff/internal.h"
 #undef internal_lineno
 
 #include "../bfd/libcoff.h"
-
-#ifdef TC_A29K
-#include "coff/a29k.h"
-#define TARGET_FORMAT "coff-a29k-big"
-extern bfd *stdoutput;
-
-#endif /* TC_A29K */
-
-#ifdef TC_I960
-#include "coff/i960.h"
-#define TARGET_FORMAT "coff-i960-big"
-#endif
-
-#ifdef TC_I386
-#  include "coff/i386.h"
-#  define TARGET_FORMAT "coff-i386"
-extern bfd *stdoutput;
-
-#endif /* TC_I386 */
-
-#ifdef TC_M68K
-#  include "coff/m68k.h"
-#  define TARGET_FORMAT "coff-m68k"
-#endif /* TC_M68K */
 
 #ifdef TC_PPC
 #include "coff/rs6000.h"
@@ -68,12 +48,35 @@ extern bfd *stdoutput;
 #endif
 #endif
 
+#ifdef TC_I386
+#include "coff/i386.h"
+#ifndef TARGET_FORMAT
+#define TARGET_FORMAT "coff-i386"
+#endif
+#endif
+
+#ifdef TC_M68K
+#include "coff/m68k.h"
+#ifndef TARGET_FORMAT
+#define TARGET_FORMAT "coff-m68k"
+#endif
+#endif
+
+#ifdef TC_A29K
+#include "coff/a29k.h"
+#define TARGET_FORMAT "coff-a29k-big"
+#endif
+
+#ifdef TC_I960
+#include "coff/i960.h"
+#define TARGET_FORMAT "coff-Intel-little"
+#endif
+
 /* SYMBOL TABLE */
 
 /* targets may also set this */
-#ifndef SYMBOLS_NEED_BACKPOINTERS
+#undef SYMBOLS_NEED_BACKPOINTERS
 #define SYMBOLS_NEED_BACKPOINTERS 1
-#endif /* SYMBOLS_NEED_BACKPOINTERS */
 
 /* Alter the field names, for now, until we've fixed up the other
    references to use the new name.  */
@@ -219,24 +222,8 @@ extern int coff_line_base;
 #define obj_emit_lineno(WHERE,LINE,FILE_START)	abort ()
 extern void coff_add_linesym PARAMS ((struct symbol *));
 
-/* stack stuff */
-typedef struct
-  {
-    unsigned long chunk_size;
-    unsigned long element_size;
-    unsigned long size;
-    char *data;
-    unsigned long pointer;
-  }
-stack;
 
-char *stack_pop PARAMS ((stack * st));
-char *stack_push PARAMS ((stack * st, char *element));
-char *stack_top PARAMS ((stack * st));
-stack *stack_init PARAMS ((unsigned long chunk_size,
-			   unsigned long element_size));
 void c_dot_file_symbol PARAMS ((char *filename));
-void stack_delete PARAMS ((stack * st));
 
 #ifndef tc_coff_symbol_emit_hook
 void tc_coff_symbol_emit_hook PARAMS ((/* symbolS * */));
@@ -272,11 +259,12 @@ hey ! Where is the C_LEAFSTAT definition ? i960 - coff support is depending on i
 #endif /* no C_LEAFSTAT */
 #endif /* TC_I960 */
 
+/* Stabs in a coff file go into their own section.  */
 #define SEPARATE_STAB_SECTIONS
+
 /* We need 12 bytes at the start of the section to hold some initial
    information.  */
 extern void obj_coff_init_stab_section PARAMS ((segT));
 #define INIT_STAB_SECTION(seg) obj_coff_init_stab_section (seg)
 
-
-/* end of obj-coff.h */
+#endif /* OBJ_FORMAT_H */
