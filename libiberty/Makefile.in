@@ -429,7 +429,8 @@ clock.o: config.h
 concat.o: config.h $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h
 copysign.o: $(INCDIR)/ansidecl.h
 cp-demangle.o: config.h $(INCDIR)/ansidecl.h $(INCDIR)/demangle.h \
-	$(INCDIR)/dyn-string.h $(INCDIR)/getopt.h $(INCDIR)/libiberty.h
+	$(INCDIR)/dyn-string.h $(INCDIR)/getopt.h $(INCDIR)/libiberty.h \
+	$(INCDIR)/cp-demangle.h
 cplus-dem.o: config.h $(INCDIR)/ansidecl.h $(INCDIR)/demangle.h \
 	$(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h
 dyn-string.o: config.h $(INCDIR)/ansidecl.h $(INCDIR)/dyn-string.h \

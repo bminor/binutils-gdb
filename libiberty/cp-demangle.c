@@ -82,6 +82,9 @@
 #include "libiberty.h"
 #include "demangle.h"
 
+#define IN_CP_DEMANGLE
+#include "cp-demangle.h"
+
 /* See if the compiler supports dynamic arrays.  */
 
 #ifdef __GNUC__
@@ -129,38 +132,6 @@ struct d_operator_info
   int args;
 };
 
-/* How to print the value of a builtin type.  */
-
-enum d_builtin_type_print
-{
-  /* Print as (type)val.  */
-  D_PRINT_DEFAULT,
-  /* Print as integer.  */
-  D_PRINT_INT,
-  /* Print as long, with trailing `l'.  */
-  D_PRINT_LONG,
-  /* Print as bool.  */
-  D_PRINT_BOOL,
-  /* Print in usual way, but here to detect void.  */
-  D_PRINT_VOID
-};
-
-/* Information we keep for a builtin type.  */
-
-struct d_builtin_type_info
-{
-  /* Type name.  */
-  const char *name;
-  /* Length of type name.  */
-  int len;
-  /* Type name when using Java.  */
-  const char *java_name;
-  /* Length of java name.  */
-  int java_len;
-  /* How to print a value of this type.  */
-  enum d_builtin_type_print print;
-};
-
 /* Information we keep for the standard substitutions.  */
 
 struct d_standard_sub_info
@@ -183,190 +154,6 @@ struct d_standard_sub_info
   /* The length of set_last_name.  */
   int set_last_name_len;
 };
-
-/* Component types found in mangled names.  */
-
-enum d_comp_type
-{
-  /* A name.  */
-  D_COMP_NAME,
-  /* A qualified name.  */
-  D_COMP_QUAL_NAME,
-  /* A local name.  */
-  D_COMP_LOCAL_NAME,
-  /* A typed name.  */
-  D_COMP_TYPED_NAME,
-  /* A template.  */
-  D_COMP_TEMPLATE,
-  /* A template parameter.  */
-  D_COMP_TEMPLATE_PARAM,
-  /* A constructor.  */
-  D_COMP_CTOR,
-  /* A destructor.  */
-  D_COMP_DTOR,
-  /* A vtable.  */
-  D_COMP_VTABLE,
-  /* A VTT structure.  */
-  D_COMP_VTT,
-  /* A construction vtable.  */
-  D_COMP_CONSTRUCTION_VTABLE,
-  /* A typeinfo structure.  */
-  D_COMP_TYPEINFO,
-  /* A typeinfo name.  */
-  D_COMP_TYPEINFO_NAME,
-  /* A typeinfo function.  */
-  D_COMP_TYPEINFO_FN,
-  /* A thunk.  */
-  D_COMP_THUNK,
-  /* A virtual thunk.  */
-  D_COMP_VIRTUAL_THUNK,
-  /* A covariant thunk.  */
-  D_COMP_COVARIANT_THUNK,
-  /* A Java class.  */
-  D_COMP_JAVA_CLASS,
-  /* A guard variable.  */
-  D_COMP_GUARD,
-  /* A reference temporary.  */
-  D_COMP_REFTEMP,
-  /* A standard substitution.  */
-  D_COMP_SUB_STD,
-  /* The restrict qualifier.  */
-  D_COMP_RESTRICT,
-  /* The volatile qualifier.  */
-  D_COMP_VOLATILE,
-  /* The const qualifier.  */
-  D_COMP_CONST,
-  /* The restrict qualifier modifying a member function.  */
-  D_COMP_RESTRICT_THIS,
-  /* The volatile qualifier modifying a member function.  */
-  D_COMP_VOLATILE_THIS,
-  /* The const qualifier modifying a member function.  */
-  D_COMP_CONST_THIS,
-  /* A vendor qualifier.  */
-  D_COMP_VENDOR_TYPE_QUAL,
-  /* A pointer.  */
-  D_COMP_POINTER,
-  /* A reference.  */
-  D_COMP_REFERENCE,
-  /* A complex type.  */
-  D_COMP_COMPLEX,
-  /* An imaginary type.  */
-  D_COMP_IMAGINARY,
-  /* A builtin type.  */
-  D_COMP_BUILTIN_TYPE,
-  /* A vendor's builtin type.  */
-  D_COMP_VENDOR_TYPE,
-  /* A function type.  */
-  D_COMP_FUNCTION_TYPE,
-  /* An array type.  */
-  D_COMP_ARRAY_TYPE,
-  /* A pointer to member type.  */
-  D_COMP_PTRMEM_TYPE,
-  /* An argument list.  */
-  D_COMP_ARGLIST,
-  /* A template argument list.  */
-  D_COMP_TEMPLATE_ARGLIST,
-  /* An operator.  */
-  D_COMP_OPERATOR,
-  /* An extended operator.  */
-  D_COMP_EXTENDED_OPERATOR,
-  /* A typecast.  */
-  D_COMP_CAST,
-  /* A unary expression.  */
-  D_COMP_UNARY,
-  /* A binary expression.  */
-  D_COMP_BINARY,
-  /* Arguments to a binary expression.  */
-  D_COMP_BINARY_ARGS,
-  /* A trinary expression.  */
-  D_COMP_TRINARY,
-  /* Arguments to a trinary expression.  */
-  D_COMP_TRINARY_ARG1,
-  D_COMP_TRINARY_ARG2,
-  /* A literal.  */
-  D_COMP_LITERAL,
-  /* A negative literal.  */
-  D_COMP_LITERAL_NEG
-};
-
-/* A component of the mangled name.  */
-
-struct d_comp
-{
-  /* The type of this component.  */
-  enum d_comp_type type;
-  union
-  {
-    /* For D_COMP_NAME.  */
-    struct
-    {
-      /* A pointer to the name (not NULL terminated) and it's
-	 length.  */
-      const char *s;
-      int len;
-    } s_name;
-
-    /* For D_COMP_OPERATOR.  */
-    struct
-    {
-      /* Operator.  */
-      const struct d_operator_info *op;
-    } s_operator;
-
-    /* For D_COMP_EXTENDED_OPERATOR.  */
-    struct
-    {
-      /* Number of arguments.  */
-      int args;
-      /* Name.  */
-      struct d_comp *name;
-    } s_extended_operator;
-
-    /* For D_COMP_CTOR.  */
-    struct
-    {
-      enum gnu_v3_ctor_kinds kind;
-      struct d_comp *name;
-    } s_ctor;
-
-    /* For D_COMP_DTOR.  */
-    struct
-    {
-      enum gnu_v3_dtor_kinds kind;
-      struct d_comp *name;
-    } s_dtor;
-
-    /* For D_COMP_BUILTIN_TYPE.  */
-    struct
-    {
-      const struct d_builtin_type_info *type;
-    } s_builtin;
-
-    /* For D_COMP_SUB_STD.  */
-    struct
-    {
-      const char* string;
-      int len;
-    } s_string;
-
-    /* For D_COMP_TEMPLATE_PARAM.  */
-    struct
-    {
-      long number;
-    } s_number;
-
-    /* For other types.  */
-    struct
-    {
-      struct d_comp *left;
-      struct d_comp *right;
-    } s_binary;
-
-  } u;
-};
-
-#define d_left(dc) ((dc)->u.s_binary.left)
-#define d_right(dc) ((dc)->u.s_binary.right)
 
 /* The information structure we pass around.  */
 
@@ -490,25 +277,8 @@ struct d_print_info
 #ifdef CP_DEMANGLE_DEBUG
 static void d_dump PARAMS ((struct d_comp *, int));
 #endif
-static struct d_comp *d_make_empty PARAMS ((struct d_info *,
-					    enum d_comp_type));
-static struct d_comp *d_make_comp PARAMS ((struct d_info *, enum d_comp_type,
-					   struct d_comp *, struct d_comp *));
-static struct d_comp *d_make_name PARAMS ((struct d_info *, const char *,
-					   int));
-static struct d_comp *d_make_builtin_type PARAMS ((struct d_info *,
-						   const struct d_builtin_type_info *));
 static struct d_comp *d_make_operator PARAMS ((struct d_info *,
 					       const struct d_operator_info *));
-static struct d_comp *d_make_extended_operator PARAMS ((struct d_info *,
-							int,
-							struct d_comp *));
-static struct d_comp *d_make_ctor PARAMS ((struct d_info *,
-					   enum gnu_v3_ctor_kinds,
-					   struct d_comp *));
-static struct d_comp *d_make_dtor PARAMS ((struct d_info *,
-					   enum gnu_v3_dtor_kinds,
-					   struct d_comp *));
 static struct d_comp *d_make_template_param PARAMS ((struct d_info *, long));
 static struct d_comp *d_make_sub PARAMS ((struct d_info *, const char *, int));
 static struct d_comp *d_mangled_name PARAMS ((struct d_info *, int));
@@ -548,7 +318,6 @@ static void d_print_append_char PARAMS ((struct d_print_info *, int));
 static void d_print_append_buffer PARAMS ((struct d_print_info *, const char *,
 					   size_t));
 static void d_print_error PARAMS ((struct d_print_info *));
-static char *d_print PARAMS ((int, const struct d_comp *, int, size_t *));
 static void d_print_comp PARAMS ((struct d_print_info *,
 				  const struct d_comp *));
 static void d_print_java_identifier PARAMS ((struct d_print_info *,
@@ -752,8 +521,8 @@ d_dump (dc, indent)
 
 /* Add a new component.  */
 
-static struct d_comp *
-d_make_empty (di, type)
+struct d_comp *
+cp_v3_d_make_empty (di, type)
      struct d_info *di;
      enum d_comp_type type;
 {
@@ -769,8 +538,8 @@ d_make_empty (di, type)
 
 /* Add a new generic component.  */
 
-static struct d_comp *
-d_make_comp (di, type, left, right)
+struct d_comp *
+cp_v3_d_make_comp (di, type, left, right)
      struct d_info *di;
      enum d_comp_type type;
      struct d_comp *left;
@@ -850,7 +619,7 @@ d_make_comp (di, type, left, right)
       return NULL;
     }
 
-  p = d_make_empty (di, type);
+  p = cp_v3_d_make_empty (di, type);
   if (p != NULL)
     {
       p->u.s_binary.left = left;
@@ -861,8 +630,8 @@ d_make_comp (di, type, left, right)
 
 /* Add a new name component.  */
 
-static struct d_comp *
-d_make_name (di, s, len)
+struct d_comp *
+cp_v3_d_make_name (di, s, len)
      struct d_info *di;
      const char *s;
      int len;
@@ -871,7 +640,7 @@ d_make_name (di, s, len)
 
   if (s == NULL || len == 0)
     return NULL;
-  p = d_make_empty (di, D_COMP_NAME);
+  p = cp_v3_d_make_empty (di, D_COMP_NAME);
   if (p != NULL)
     {
       p->u.s_name.s = s;
@@ -882,16 +651,50 @@ d_make_name (di, s, len)
 
 /* Add a new builtin type component.  */
 
-static struct d_comp *
-d_make_builtin_type (di, type)
+#define NL(s) s, (sizeof s) - 1
+
+const struct d_builtin_type_info d_builtin_types[26] =
+{
+  /* a */ { NL ("signed char"),	NL ("signed char"),	D_PRINT_INT },
+  /* b */ { NL ("bool"),	NL ("boolean"),		D_PRINT_BOOL },
+  /* c */ { NL ("char"),	NL ("byte"),		D_PRINT_INT },
+  /* d */ { NL ("double"),	NL ("double"),		D_PRINT_DEFAULT },
+  /* e */ { NL ("long double"),	NL ("long double"),	D_PRINT_DEFAULT },
+  /* f */ { NL ("float"),	NL ("float"),		D_PRINT_DEFAULT },
+  /* g */ { NL ("__float128"),	NL ("__float128"),	D_PRINT_DEFAULT },
+  /* h */ { NL ("unsigned char"), NL ("unsigned char"),	D_PRINT_INT },
+  /* i */ { NL ("int"),		NL ("int"),		D_PRINT_INT },
+  /* j */ { NL ("unsigned int"), NL ("unsigned"),	D_PRINT_INT },
+  /* k */ { NULL, 0,		NULL, 0,		D_PRINT_DEFAULT },
+  /* l */ { NL ("long"),	NL ("long"),		D_PRINT_LONG },
+  /* m */ { NL ("unsigned long"), NL ("unsigned long"),	D_PRINT_LONG },
+  /* n */ { NL ("__int128"),	NL ("__int128"),	D_PRINT_DEFAULT },
+  /* o */ { NL ("unsigned __int128"), NL ("unsigned __int128"),	D_PRINT_DEFAULT },
+  /* p */ { NULL, 0,		NULL, 0,		D_PRINT_DEFAULT },
+  /* q */ { NULL, 0,		NULL, 0,		D_PRINT_DEFAULT },
+  /* r */ { NULL, 0,		NULL, 0,		D_PRINT_DEFAULT },
+  /* s */ { NL ("short"),	NL ("short"),		D_PRINT_INT },
+  /* t */ { NL ("unsigned short"), NL ("unsigned short"), D_PRINT_INT },
+  /* u */ { NULL, 0,		NULL, 0,		D_PRINT_DEFAULT },
+  /* v */ { NL ("void"),	NL ("void"),		D_PRINT_VOID },
+  /* w */ { NL ("wchar_t"),	NL ("char"),		D_PRINT_INT },
+  /* x */ { NL ("long long"),	NL ("long"),		D_PRINT_DEFAULT },
+  /* y */ { NL ("unsigned long long"), NL ("unsigned long long"), D_PRINT_DEFAULT },
+  /* z */ { NL ("..."),		NL ("..."),		D_PRINT_DEFAULT },
+};
+
+struct d_comp *
+cp_v3_d_make_builtin_type (di, c)
      struct d_info *di;
-     const struct d_builtin_type_info *type;
+     int c;
 {
   struct d_comp *p;
+  const struct d_builtin_type_info *type;
 
+  type = &d_builtin_types[c - 'a'];
   if (type == NULL)
     return NULL;
-  p = d_make_empty (di, D_COMP_BUILTIN_TYPE);
+  p = cp_v3_d_make_empty (di, D_COMP_BUILTIN_TYPE);
   if (p != NULL)
     p->u.s_builtin.type = type;
   return p;
@@ -906,7 +709,7 @@ d_make_operator (di, op)
 {
   struct d_comp *p;
 
-  p = d_make_empty (di, D_COMP_OPERATOR);
+  p = cp_v3_d_make_empty (di, D_COMP_OPERATOR);
   if (p != NULL)
     p->u.s_operator.op = op;
   return p;
@@ -914,8 +717,8 @@ d_make_operator (di, op)
 
 /* Add a new extended operator component.  */
 
-static struct d_comp *
-d_make_extended_operator (di, args, name)
+struct d_comp *
+cp_v3_d_make_extended_operator (di, args, name)
      struct d_info *di;
      int args;
      struct d_comp *name;
@@ -924,7 +727,7 @@ d_make_extended_operator (di, args, name)
 
   if (name == NULL)
     return NULL;
-  p = d_make_empty (di, D_COMP_EXTENDED_OPERATOR);
+  p = cp_v3_d_make_empty (di, D_COMP_EXTENDED_OPERATOR);
   if (p != NULL)
     {
       p->u.s_extended_operator.args = args;
@@ -935,8 +738,8 @@ d_make_extended_operator (di, args, name)
 
 /* Add a new constructor component.  */
 
-static struct d_comp *
-d_make_ctor (di, kind,  name)
+struct d_comp *
+cp_v3_d_make_ctor (di, kind,  name)
      struct d_info *di;
      enum gnu_v3_ctor_kinds kind;
      struct d_comp *name;
@@ -945,7 +748,7 @@ d_make_ctor (di, kind,  name)
 
   if (name == NULL)
     return NULL;
-  p = d_make_empty (di, D_COMP_CTOR);
+  p = cp_v3_d_make_empty (di, D_COMP_CTOR);
   if (p != NULL)
     {
       p->u.s_ctor.kind = kind;
@@ -956,8 +759,8 @@ d_make_ctor (di, kind,  name)
 
 /* Add a new destructor component.  */
 
-static struct d_comp *
-d_make_dtor (di, kind, name)
+struct d_comp *
+cp_v3_d_make_dtor (di, kind, name)
      struct d_info *di;
      enum gnu_v3_dtor_kinds kind;
      struct d_comp *name;
@@ -966,7 +769,7 @@ d_make_dtor (di, kind, name)
 
   if (name == NULL)
     return NULL;
-  p = d_make_empty (di, D_COMP_DTOR);
+  p = cp_v3_d_make_empty (di, D_COMP_DTOR);
   if (p != NULL)
     {
       p->u.s_dtor.kind = kind;
@@ -984,7 +787,7 @@ d_make_template_param (di, i)
 {
   struct d_comp *p;
 
-  p = d_make_empty (di, D_COMP_TEMPLATE_PARAM);
+  p = cp_v3_d_make_empty (di, D_COMP_TEMPLATE_PARAM);
   if (p != NULL)
     p->u.s_number.number = i;
   return p;
@@ -1000,7 +803,7 @@ d_make_sub (di, name, len)
 {
   struct d_comp *p;
 
-  p = d_make_empty (di, D_COMP_SUB_STD);
+  p = cp_v3_d_make_empty (di, D_COMP_SUB_STD);
   if (p != NULL)
     {
       p->u.s_string.string = name;
@@ -1115,7 +918,7 @@ d_encoding (di, top_level)
       peek = d_peek_char (di);
       if (peek == '\0' || peek == 'E')
 	return dc;
-      return d_make_comp (di, D_COMP_TYPED_NAME, dc,
+      return cp_v3_d_make_comp (di, D_COMP_TYPED_NAME, dc,
 			  d_bare_function_type (di, has_return_type (dc)));
     }
 }
@@ -1159,7 +962,7 @@ d_name (di)
 	else
 	  {
 	    d_advance (di, 2);
-	    dc = d_make_comp (di, D_COMP_QUAL_NAME, d_make_name (di, "std", 3),
+	    dc = cp_v3_d_make_comp (di, D_COMP_QUAL_NAME, cp_v3_d_make_name (di, "std", 3),
 			      d_unqualified_name (di));
 	    di->expansion += 3;
 	    subst = 0;
@@ -1182,7 +985,7 @@ d_name (di)
 		if (! d_add_substitution (di, dc))
 		  return NULL;
 	      }
-	    dc = d_make_comp (di, D_COMP_TEMPLATE, dc, d_template_args (di));
+	    dc = cp_v3_d_make_comp (di, D_COMP_TEMPLATE, dc, d_template_args (di));
 	  }
 
 	return dc;
@@ -1197,7 +1000,7 @@ d_name (di)
 	     candidate.  */
 	  if (! d_add_substitution (di, dc))
 	    return NULL;
-	  dc = d_make_comp (di, D_COMP_TEMPLATE, dc, d_template_args (di));
+	  dc = cp_v3_d_make_comp (di, D_COMP_TEMPLATE, dc, d_template_args (di));
 	}
       return dc;
     }
@@ -1287,7 +1090,7 @@ d_prefix (di)
       if (ret == NULL)
 	ret = dc;
       else
-	ret = d_make_comp (di, comb_type, ret, dc);
+	ret = cp_v3_d_make_comp (di, comb_type, ret, dc);
 
       if (peek != 'S' && d_peek_char (di) != 'E')
 	{
@@ -1414,12 +1217,12 @@ d_identifier (di, len)
 	  && s[1] == 'N')
 	{
 	  di->expansion -= len - sizeof "(anonymous namespace)";
-	  return d_make_name (di, "(anonymous namespace)",
+	  return cp_v3_d_make_name (di, "(anonymous namespace)",
 			      sizeof "(anonymous namespace)" - 1);
 	}
     }
 
-  return d_make_name (di, name, len);
+  return cp_v3_d_make_name (di, name, len);
 }
 
 /* operator_name ::= many different two character encodings.
@@ -1427,9 +1230,7 @@ d_identifier (di, len)
                  ::= v <digit> <source-name>
 */
 
-#define NL(s) s, (sizeof s) - 1
-
-static const struct d_operator_info d_operators[] =
+const struct d_operator_info d_operators[] =
 {
   { "aN", NL ("&="),        2 },
   { "aS", NL ("="),         2 },
@@ -1492,9 +1293,9 @@ d_operator_name (di)
   c1 = d_next_char (di);
   c2 = d_next_char (di);
   if (c1 == 'v' && IS_DIGIT (c2))
-    return d_make_extended_operator (di, c2 - '0', d_source_name (di));
+    return cp_v3_d_make_extended_operator (di, c2 - '0', d_source_name (di));
   else if (c1 == 'c' && c2 == 'v')
-    return d_make_comp (di, D_COMP_CAST, d_type (di), NULL);
+    return cp_v3_d_make_comp (di, D_COMP_CAST, d_type (di), NULL);
   else
     {
       int low = 0;
@@ -1519,6 +1320,22 @@ d_operator_name (di)
 	    return NULL;
 	}
     }
+}
+
+struct d_comp *
+cp_v3_d_make_operator_from_string (di, opname)
+     struct d_info *di;
+     const char *opname;
+{
+  unsigned int i;
+
+  for (i = 0; i < ARRAY_SIZE (d_operators); i++)
+    {
+      if (strcmp (d_operators[i].name, opname) == 0)
+        return d_make_operator (di, &d_operators[i]);
+    }
+
+  return NULL;
 }
 
 /* <special-name> ::= TV <type>
@@ -1549,24 +1366,24 @@ d_special_name (di)
 	{
 	case 'V':
 	  di->expansion -= 5;
-	  return d_make_comp (di, D_COMP_VTABLE, d_type (di), NULL);
+	  return cp_v3_d_make_comp (di, D_COMP_VTABLE, d_type (di), NULL);
 	case 'T':
 	  di->expansion -= 10;
-	  return d_make_comp (di, D_COMP_VTT, d_type (di), NULL);
+	  return cp_v3_d_make_comp (di, D_COMP_VTT, d_type (di), NULL);
 	case 'I':
-	  return d_make_comp (di, D_COMP_TYPEINFO, d_type (di), NULL);
+	  return cp_v3_d_make_comp (di, D_COMP_TYPEINFO, d_type (di), NULL);
 	case 'S':
-	  return d_make_comp (di, D_COMP_TYPEINFO_NAME, d_type (di), NULL);
+	  return cp_v3_d_make_comp (di, D_COMP_TYPEINFO_NAME, d_type (di), NULL);
 
 	case 'h':
 	  if (! d_call_offset (di, 'h'))
 	    return NULL;
-	  return d_make_comp (di, D_COMP_THUNK, d_encoding (di, 0), NULL);
+	  return cp_v3_d_make_comp (di, D_COMP_THUNK, d_encoding (di, 0), NULL);
 
 	case 'v':
 	  if (! d_call_offset (di, 'v'))
 	    return NULL;
-	  return d_make_comp (di, D_COMP_VIRTUAL_THUNK, d_encoding (di, 0),
+	  return cp_v3_d_make_comp (di, D_COMP_VIRTUAL_THUNK, d_encoding (di, 0),
 			      NULL);
 
 	case 'c':
@@ -1574,7 +1391,7 @@ d_special_name (di)
 	    return NULL;
 	  if (! d_call_offset (di, '\0'))
 	    return NULL;
-	  return d_make_comp (di, D_COMP_COVARIANT_THUNK, d_encoding (di, 0),
+	  return cp_v3_d_make_comp (di, D_COMP_COVARIANT_THUNK, d_encoding (di, 0),
 			      NULL);
 
 	case 'C':
@@ -1593,14 +1410,14 @@ d_special_name (di)
 	    /* We don't display the offset.  FIXME: We should display
 	       it in verbose mode.  */
 	    di->expansion += 5;
-	    return d_make_comp (di, D_COMP_CONSTRUCTION_VTABLE, base_type,
+	    return cp_v3_d_make_comp (di, D_COMP_CONSTRUCTION_VTABLE, base_type,
 				derived_type);
 	  }
 
 	case 'F':
-	  return d_make_comp (di, D_COMP_TYPEINFO_FN, d_type (di), NULL);
+	  return cp_v3_d_make_comp (di, D_COMP_TYPEINFO_FN, d_type (di), NULL);
 	case 'J':
-	  return d_make_comp (di, D_COMP_JAVA_CLASS, d_type (di), NULL);
+	  return cp_v3_d_make_comp (di, D_COMP_JAVA_CLASS, d_type (di), NULL);
 
 	default:
 	  return NULL;
@@ -1611,10 +1428,10 @@ d_special_name (di)
       switch (d_next_char (di))
 	{
 	case 'V':
-	  return d_make_comp (di, D_COMP_GUARD, d_name (di), NULL);
+	  return cp_v3_d_make_comp (di, D_COMP_GUARD, d_name (di), NULL);
 
 	case 'R':
-	  return d_make_comp (di, D_COMP_REFTEMP, d_name (di), NULL);
+	  return cp_v3_d_make_comp (di, D_COMP_REFTEMP, d_name (di), NULL);
 
 	default:
 	  return NULL;
@@ -1705,7 +1522,7 @@ d_ctor_dtor_name (di)
 	  default:
 	    return NULL;
 	  }
-	return d_make_ctor (di, kind, di->last_name);
+	return cp_v3_d_make_ctor (di, kind, di->last_name);
       }
 
     case 'D':
@@ -1726,7 +1543,7 @@ d_ctor_dtor_name (di)
 	  default:
 	    return NULL;
 	  }
-	return d_make_dtor (di, kind, di->last_name);
+	return cp_v3_d_make_dtor (di, kind, di->last_name);
       }
 
     default:
@@ -1752,36 +1569,6 @@ d_ctor_dtor_name (di)
    <builtin-type> ::= various one letter codes
                   ::= u <source-name>
 */
-
-static const struct d_builtin_type_info d_builtin_types[26] =
-{
-  /* a */ { NL ("signed char"),	NL ("signed char"),	D_PRINT_INT },
-  /* b */ { NL ("bool"),	NL ("boolean"),		D_PRINT_BOOL },
-  /* c */ { NL ("char"),	NL ("byte"),		D_PRINT_INT },
-  /* d */ { NL ("double"),	NL ("double"),		D_PRINT_DEFAULT },
-  /* e */ { NL ("long double"),	NL ("long double"),	D_PRINT_DEFAULT },
-  /* f */ { NL ("float"),	NL ("float"),		D_PRINT_DEFAULT },
-  /* g */ { NL ("__float128"),	NL ("__float128"),	D_PRINT_DEFAULT },
-  /* h */ { NL ("unsigned char"), NL ("unsigned char"),	D_PRINT_INT },
-  /* i */ { NL ("int"),		NL ("int"),		D_PRINT_INT },
-  /* j */ { NL ("unsigned int"), NL ("unsigned"),	D_PRINT_INT },
-  /* k */ { NULL, 0,		NULL, 0,		D_PRINT_DEFAULT },
-  /* l */ { NL ("long"),	NL ("long"),		D_PRINT_LONG },
-  /* m */ { NL ("unsigned long"), NL ("unsigned long"),	D_PRINT_LONG },
-  /* n */ { NL ("__int128"),	NL ("__int128"),	D_PRINT_DEFAULT },
-  /* o */ { NL ("unsigned __int128"), NL ("unsigned __int128"),	D_PRINT_DEFAULT },
-  /* p */ { NULL, 0,		NULL, 0,		D_PRINT_DEFAULT },
-  /* q */ { NULL, 0,		NULL, 0,		D_PRINT_DEFAULT },
-  /* r */ { NULL, 0,		NULL, 0,		D_PRINT_DEFAULT },
-  /* s */ { NL ("short"),	NL ("short"),		D_PRINT_INT },
-  /* t */ { NL ("unsigned short"), NL ("unsigned short"), D_PRINT_INT },
-  /* u */ { NULL, 0,		NULL, 0,		D_PRINT_DEFAULT },
-  /* v */ { NL ("void"),	NL ("void"),		D_PRINT_VOID },
-  /* w */ { NL ("wchar_t"),	NL ("char"),		D_PRINT_INT },
-  /* x */ { NL ("long long"),	NL ("long"),		D_PRINT_DEFAULT },
-  /* y */ { NL ("unsigned long long"), NL ("unsigned long long"), D_PRINT_DEFAULT },
-  /* z */ { NL ("..."),		NL ("..."),		D_PRINT_DEFAULT },
-};
 
 static struct d_comp *
 d_type (di)
@@ -1828,7 +1615,7 @@ d_type (di)
     case 'h': case 'i': case 'j':           case 'l': case 'm': case 'n':
     case 'o':                               case 's': case 't':
     case 'v': case 'w': case 'x': case 'y': case 'z':
-      ret = d_make_builtin_type (di, &d_builtin_types[peek - 'a']);
+      ret = cp_v3_d_make_builtin_type (di, peek);
       di->expansion += ret->u.s_builtin.type->len;
       can_subst = 0;
       d_advance (di, 1);
@@ -1836,7 +1623,7 @@ d_type (di)
 
     case 'u':
       d_advance (di, 1);
-      ret = d_make_comp (di, D_COMP_VENDOR_TYPE, d_source_name (di), NULL);
+      ret = cp_v3_d_make_comp (di, D_COMP_VENDOR_TYPE, d_source_name (di), NULL);
       break;
 
     case 'F':
@@ -1867,7 +1654,7 @@ d_type (di)
 	     candidate.  */
 	  if (! d_add_substitution (di, ret))
 	    return NULL;
-	  ret = d_make_comp (di, D_COMP_TEMPLATE, ret, d_template_args (di));
+	  ret = cp_v3_d_make_comp (di, D_COMP_TEMPLATE, ret, d_template_args (di));
 	}
       break;
 
@@ -1886,7 +1673,7 @@ d_type (di)
 	    /* The substituted name may have been a template name and
 	       may be followed by tepmlate args.  */
 	    if (d_peek_char (di) == 'I')
-	      ret = d_make_comp (di, D_COMP_TEMPLATE, ret,
+	      ret = cp_v3_d_make_comp (di, D_COMP_TEMPLATE, ret,
 				 d_template_args (di));
 	    else
 	      can_subst = 0;
@@ -1906,28 +1693,28 @@ d_type (di)
 
     case 'P':
       d_advance (di, 1);
-      ret = d_make_comp (di, D_COMP_POINTER, d_type (di), NULL);
+      ret = cp_v3_d_make_comp (di, D_COMP_POINTER, d_type (di), NULL);
       break;
 
     case 'R':
       d_advance (di, 1);
-      ret = d_make_comp (di, D_COMP_REFERENCE, d_type (di), NULL);
+      ret = cp_v3_d_make_comp (di, D_COMP_REFERENCE, d_type (di), NULL);
       break;
 
     case 'C':
       d_advance (di, 1);
-      ret = d_make_comp (di, D_COMP_COMPLEX, d_type (di), NULL);
+      ret = cp_v3_d_make_comp (di, D_COMP_COMPLEX, d_type (di), NULL);
       break;
 
     case 'G':
       d_advance (di, 1);
-      ret = d_make_comp (di, D_COMP_IMAGINARY, d_type (di), NULL);
+      ret = cp_v3_d_make_comp (di, D_COMP_IMAGINARY, d_type (di), NULL);
       break;
 
     case 'U':
       d_advance (di, 1);
       ret = d_source_name (di);
-      ret = d_make_comp (di, D_COMP_VENDOR_TYPE_QUAL, d_type (di), ret);
+      ret = cp_v3_d_make_comp (di, D_COMP_VENDOR_TYPE_QUAL, d_type (di), ret);
       break;
 
     default:
@@ -1975,7 +1762,7 @@ d_cv_qualifiers (di, pret, member_fn)
 	  di->expansion += sizeof "const";
 	}
 
-      *pret = d_make_comp (di, t, NULL, NULL);
+      *pret = cp_v3_d_make_comp (di, t, NULL, NULL);
       if (*pret == NULL)
 	return NULL;
       pret = &d_left (*pret);
@@ -2040,7 +1827,7 @@ d_bare_function_type (di, has_return_type)
 	}
       else
 	{
-	  *ptl = d_make_comp (di, D_COMP_ARGLIST, type, NULL);
+	  *ptl = cp_v3_d_make_comp (di, D_COMP_ARGLIST, type, NULL);
 	  if (*ptl == NULL)
 	    return NULL;
 	  ptl = &d_right (*ptl);
@@ -2062,7 +1849,7 @@ d_bare_function_type (di, has_return_type)
       tl = NULL;
     }
 
-  return d_make_comp (di, D_COMP_FUNCTION_TYPE, return_type, tl);
+  return cp_v3_d_make_comp (di, D_COMP_FUNCTION_TYPE, return_type, tl);
 }
 
 /* <class-enum-type> ::= <name>  */
@@ -2102,7 +1889,7 @@ d_array_type (di)
 	  peek = d_peek_char (di);
 	}
       while (IS_DIGIT (peek));
-      dim = d_make_name (di, s, d_str (di) - s);
+      dim = cp_v3_d_make_name (di, s, d_str (di) - s);
       if (dim == NULL)
 	return NULL;
     }
@@ -2116,7 +1903,7 @@ d_array_type (di)
   if (d_next_char (di) != '_')
     return NULL;
 
-  return d_make_comp (di, D_COMP_ARRAY_TYPE, dim, d_type (di));
+  return cp_v3_d_make_comp (di, D_COMP_ARRAY_TYPE, dim, d_type (di));
 }
 
 /* <pointer-to-member-type> ::= M <(class) type> <(member) type>  */
@@ -2152,7 +1939,7 @@ d_pointer_to_member_type (di)
     return NULL;
   *pmem = d_type (di);
 
-  return d_make_comp (di, D_COMP_PTRMEM_TYPE, cl, mem);
+  return cp_v3_d_make_comp (di, D_COMP_PTRMEM_TYPE, cl, mem);
 }
 
 /* <template-param> ::= T_
@@ -2214,7 +2001,7 @@ d_template_args (di)
       if (a == NULL)
 	return NULL;
 
-      *pal = d_make_comp (di, D_COMP_TEMPLATE_ARGLIST, a, NULL);
+      *pal = cp_v3_d_make_comp (di, D_COMP_TEMPLATE_ARGLIST, a, NULL);
       if (*pal == NULL)
 	return NULL;
       pal = &d_right (*pal);
@@ -2289,10 +2076,10 @@ d_expression (di)
       type = d_type (di);
       name = d_unqualified_name (di);
       if (d_peek_char (di) != 'I')
-	return d_make_comp (di, D_COMP_QUAL_NAME, type, name);
+	return cp_v3_d_make_comp (di, D_COMP_QUAL_NAME, type, name);
       else
-	return d_make_comp (di, D_COMP_QUAL_NAME, type,
-			    d_make_comp (di, D_COMP_TEMPLATE, name,
+	return cp_v3_d_make_comp (di, D_COMP_QUAL_NAME, type,
+			    cp_v3_d_make_comp (di, D_COMP_TEMPLATE, name,
 					 d_template_args (di)));
     }
   else
@@ -2309,7 +2096,7 @@ d_expression (di)
 
       if (op->type == D_COMP_OPERATOR
 	  && strcmp (op->u.s_operator.op->code, "st") == 0)
-	return d_make_comp (di, D_COMP_UNARY, op, d_type (di));
+	return cp_v3_d_make_comp (di, D_COMP_UNARY, op, d_type (di));
 
       switch (op->type)
 	{
@@ -2329,14 +2116,14 @@ d_expression (di)
       switch (args)
 	{
 	case 1:
-	  return d_make_comp (di, D_COMP_UNARY, op, d_expression (di));
+	  return cp_v3_d_make_comp (di, D_COMP_UNARY, op, d_expression (di));
 	case 2:
 	  {
 	    struct d_comp *left;
 
 	    left = d_expression (di);
-	    return d_make_comp (di, D_COMP_BINARY, op,
-				d_make_comp (di, D_COMP_BINARY_ARGS, left,
+	    return cp_v3_d_make_comp (di, D_COMP_BINARY, op,
+				cp_v3_d_make_comp (di, D_COMP_BINARY_ARGS, left,
 					     d_expression (di)));
 	  }
 	case 3:
@@ -2346,9 +2133,9 @@ d_expression (di)
 
 	    first = d_expression (di);
 	    second = d_expression (di);
-	    return d_make_comp (di, D_COMP_TRINARY, op,
-				d_make_comp (di, D_COMP_TRINARY_ARG1, first,
-					     d_make_comp (di,
+	    return cp_v3_d_make_comp (di, D_COMP_TRINARY, op,
+				cp_v3_d_make_comp (di, D_COMP_TRINARY_ARG1, first,
+					     cp_v3_d_make_comp (di,
 							  D_COMP_TRINARY_ARG2,
 							  second,
 							  d_expression (di))));
@@ -2408,7 +2195,7 @@ d_expr_primary (di)
       s = d_str (di);
       while (d_peek_char (di) != 'E')
 	d_advance (di, 1);
-      ret = d_make_comp (di, t, type, d_make_name (di, s, d_str (di) - s));
+      ret = cp_v3_d_make_comp (di, t, type, cp_v3_d_make_name (di, s, d_str (di) - s));
     }
   if (d_next_char (di) != 'E')
     return NULL;
@@ -2438,8 +2225,8 @@ d_local_name (di)
       d_advance (di, 1);
       if (! d_discriminator (di))
 	return NULL;
-      return d_make_comp (di, D_COMP_LOCAL_NAME, function,
-			  d_make_name (di, "string literal",
+      return cp_v3_d_make_comp (di, D_COMP_LOCAL_NAME, function,
+			  cp_v3_d_make_name (di, "string literal",
 				       sizeof "string literal" - 1));
     }
   else
@@ -2449,7 +2236,7 @@ d_local_name (di)
       name = d_name (di);
       if (! d_discriminator (di))
 	return NULL;
-      return d_make_comp (di, D_COMP_LOCAL_NAME, function, name);
+      return cp_v3_d_make_comp (di, D_COMP_LOCAL_NAME, function, name);
     }
 }
 
@@ -2712,8 +2499,8 @@ d_print_error (dpi)
    sets *PALC to 0 for a bad parse, or to 1 for a memory allocation
    failure.  */
 
-static char *
-d_print (options, dc, estimate, palc)
+char *
+cp_v3_d_print (options, dc, estimate, palc)
      int options;
      const struct d_comp *dc;
      int estimate;
@@ -3754,6 +3541,60 @@ d_init_info (mangled, options, len, di)
   di->expansion = 0;
 }
 
+/* Allocate and initialize a d_info structure.  The demangler bypasses
+   this in order to allocate everything on the stack, for speed.  */
+
+struct d_info *
+cp_v3_d_init_info_alloc (mangled, options, len)
+     const char *mangled;
+     int options;
+     size_t len;
+{
+  struct d_info *di;
+
+  di = (struct d_info *) malloc (sizeof (struct d_info));
+  if (di == NULL)
+    return NULL;
+
+  d_init_info (mangled, options, len, di);
+  di->comps = (struct d_comp *) malloc (di->num_comps
+					* sizeof (struct d_comp));
+  if (di->comps == NULL)
+    {
+      free (di);
+      return NULL;
+    }
+
+  if (mangled != NULL)
+    {
+      di->subs = (struct d_comp **) malloc (di->num_subs
+					    * sizeof (struct d_comp *));
+      if (di->subs == NULL)
+	{
+	  free (di->comps);
+	  free (di);
+	  return NULL;
+	}
+    }
+  else
+    di->subs = NULL;
+
+  return di;
+}
+
+/* Release a d_info structure, as allocated by cp_v3_d_init_info_alloc.  */
+
+void
+cp_v3_d_free_info (di)
+     struct d_info *di;
+{
+  if (di->comps != NULL)
+    free (di->comps);
+  if (di->subs != NULL)
+    free (di->subs);
+  free (di);
+}
+
 /* Entry point for the demangler.  If MANGLED is a g++ v3 ABI mangled
    name, return a buffer allocated with malloc holding the demangled
    name.  OPTIONS is the usual libiberty demangler options.  On
@@ -3858,7 +3699,7 @@ d_demangle (mangled, options, palc)
 
     ret = NULL;
     if (dc != NULL)
-      ret = d_print (options, dc, estimate, palc);
+      ret = cp_v3_d_print (options, dc, estimate, palc);
 
 #ifndef CP_DYNAMIC_ARRAYS
     free (di.comps);
