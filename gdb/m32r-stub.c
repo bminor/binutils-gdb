@@ -1288,8 +1288,7 @@ restore_and_return:
 	ld r13, @r0+	; restore r13
 	ld r14, @r0+	; restore r14
 	ld r15, @r0+	; restore r15
-	ld r1, @r0+	; restore cr0 == PSW
-	mvtc r1, cr0
+	addi r0, #4	; don't restore PSW (rte will do it)
 	ld r1, @r0+	; restore cr1 == CBR (no-op, because it's read only)
 	mvtc r1, cr1
 	ld r1, @r0+	; restore cr2 == SPI
