@@ -11,7 +11,7 @@ Thu Jan 29 15:55:35 1998  J.J. van der Heijden  <J.J.vanderHeijden@student.utwen
 	* aclocal.m4, configure: Rebuild.
 
 start-sanitize-sky
-Mon Dec 22 15:14:28 1997  Doug Evans  <devans@canuck.cygnus.com>
+Wed Jan 28 15:14:28 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config.bfd, configure.in: Add dvp support.
 	* configure: Regenerate.
