@@ -1,3 +1,7 @@
+2001-02-26  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c (x86_64_elf_howto_table): Fix order of entries.
+
 2001-02-22  Timothy Wall  <twall@cygnus.com>
 
 	* config.bfd (targ_cpu): Add vectors for ia64-*-aix* (aka Monterey).
@@ -8,7 +12,7 @@
 	for AIX.  AIX5 requires most relocations to be dynamic (*all*
 	binaries are somewhat similar to shared libraries).
 	* targets.c: Add elf64_ia64_aix vectors.
-	
+
 2001-02-21  David Mosberger  <davidm@hpl.hp.com>
 
 	* cpu-ia64-opc.c (elf64_ia64_operands}: Fix typo: error string for
