@@ -413,7 +413,8 @@ symbol_file_add (name, from_tty, addr, mainline)
 
   if (from_tty)
     {
-      printf ("Reading symbol data from %s...", name);
+      printf_filtered ("Reading symbol data from %s...", name);
+      wrap_here ("");
       fflush (stdout);
     }
 
@@ -457,9 +458,12 @@ symbol_file_add (name, from_tty, addr, mainline)
       symfile_fns = sf;
     }
 
+  /* If we have wiped out any old symbol tables, clean up.  */
+  clear_symtab_users_once ();
+
   if (from_tty)
     {
-      printf ("done.\n");
+      printf_filtered ("done.\n");
       fflush (stdout);
     }
 }
@@ -489,9 +493,11 @@ symbol_file_command (name, from_tty)
       /* FIXME, this does not account for the main file and subsequent
          files (shared libs, dynloads, etc) having different formats. 
          It only calls the cleanup routine for the main file's format.  */
-      (*symfile_fns->sym_new_init) ();
-      free (symfile_fns);
-      symfile_fns = 0;
+      if (symfile_fns) {
+        (*symfile_fns->sym_new_init) ();
+        free (symfile_fns);
+        symfile_fns = 0;
+      }
       return;
     }
 
