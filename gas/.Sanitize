@@ -41,7 +41,6 @@ bignum-copy.c
 bignum.h
 bit_fix.h
 cond.c
-conf-a-gas.com
 conf.in
 config
 config-gas.com

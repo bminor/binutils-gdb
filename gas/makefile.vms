@@ -6,10 +6,9 @@
 
 ifeq ($(CC),gcc)
 DEFS=
-CFLAGS=/cc1="-fno-exceptions -g0"/include=([],[-.bfd],[.config],[-.include],[-])$(DEFS)
+CFLAGS=/include=([],[-.bfd],[.config],[-.include],[-])$(DEFS)
 LFLAGS=
-LIBS=,GNU:[000000]LIBGCC2/lib,GNU:[000000]LIBGCCLIB/lib,\
-	sys$$library:vaxcrtl.olb/lib,GNU:[000000]crt0.obj
+LIBS=,GNU:[000000]libgcc/lib,sys$$library:vaxcrtl.olb/lib,GNU:[000000]crt0.obj
 else
 DEFS=/define=("table_size_of_flonum_powers_of_ten"="tabsiz_flonum_powers_of_ten",\
 "_bfd_generic_get_section_contents_in_window"="_bfd_generic_get_win_section_cont",\
@@ -30,12 +29,16 @@ LIBIBERTY = [-.libiberty]libiberty.olb
 LIBBFD = [-.bfd]libbfd.olb
 LIBOPCODES = [-.opcodes]libopcodes.olb
 
+all: config.status [-.bfd]bfd.h as.exe gasp.exe
 
 as.exe: $(OBJS) $(LIBOPCODES) $(LIBBFD) $(LIBIBERTY)
 	link$(LFLAGS)/exe=$@ $(OBJS),$(LIBOPCODES)/lib,$(LIBBFD)/lib,$(LIBIBERTY)/lib$(LIBS)
 
 gasp.exe: gasp.obj $(LIBBFD) $(LIBIBERTY)
 	link$(LFLAGS)/exe=$@ gasp.obj,$(LIBBFD)/lib,$(LIBIBERTY)/lib$(LIBS)
+
+config.status:
+	$$ @config-gas
 
 targ-cpu.c: [.config]tc-alpha.c
 	copy $< $@
@@ -51,3 +54,20 @@ atof-targ.c: [.config]atof-ieee.c
 	copy $< $@
 
 targ-cpu.obj: targ-cpu.c targ-cpu.h [.config]atof-vax.c
+
+[-.bfd]bfd.h:
+	$(CD) [-.bfd]
+	gmake -f makefile.vms
+	$(CD) [-.gas]
+
+clean:
+	$$ purge
+	$(RM) *.obj;
+	$(RM) *.exe;
+	$(RM) atof-targ.c;
+	$(RM) obj-format.c;
+	$(RM) obj-format.h;
+	$(RM) targ-env.h;
+	$(RM) targ-cpu.h;
+	$(RM) targ-cpu.c;
+	$(RM) config.status;

@@ -1,3 +1,9 @@
+Tue Apr  1 16:24:28 1997  Klaus Kaempf  <kkaempf@progis.de>
+
+	* config-gas.com: Update to handle both vax and alpha.
+	* makefile.vms: Update to use config-gas.
+	* conf-a-gas.com: Remove file.
+
 Tue Apr  1 16:08:21 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in: Remove unnecessary itbl-parse.h, ibtl-parse.c, and
