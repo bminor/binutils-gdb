@@ -146,7 +146,7 @@ static reloc_howto_type elf_mn10200_howto_table[] =
 	 true,
 	 0xffffff,
 	 0xffffff,
-	 false),
+	 true),
 };
 
 struct mn10200_reloc_map
