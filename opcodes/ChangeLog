@@ -1,3 +1,8 @@
+Tue Jul 19 21:00:00 1994  DJ Delorie (dj@ctron.com)
+
+	* configure.bat: the disassember needs to be enabled for
+	"objdump -d" to work in djgpp.
+
 Wed Jul 13 18:01:58 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* ns32k-dis.c: Deleted all code in "#ifdef GDB".
@@ -6,6 +11,13 @@ Wed Jul 13 18:01:58 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	explicitly specified sizes, instead of using sizeof() on host CPU
 	types.
 	(INVALID_FLOAT): Cast first argument.
+	(opt_u, opt_U, opt_O, opt_C, opt_S, list_P532, list_M532,
+	list_P032, list_M032): Now const.
+	(optlist, list_search): Made appropriate arguments now point to
+	const.
+	(print_insn_arg): Changed static array of one-character-string
+	pointers into a static const array of characters; fixed sprintf
+	statement accordingly.
 
 Sun Jul 10 00:27:47 1994  Ian Dall  (dall@hfrd.dsto.gov.au)
 
