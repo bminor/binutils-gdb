@@ -395,7 +395,7 @@ Tim Tucker contributed support for the Gould NP1 and Gould Powernode.
 Pace Willison contributed Intel 386 support.
 Jay Vosburgh contributed Symmetry support.
 
-Andreas Schwab contributed M68K Linux support.
+Andreas Schwab contributed M68K @sc{gnu}/Linux support.
 
 Rich Schaefer and Peter Schauer helped with support of SunOS shared
 libraries.
@@ -2622,7 +2622,7 @@ times slower than normal execution.  (But this may still be worth it, to
 catch errors where you have no clue what part of your program is the
 culprit.)
 
-On some systems, such as HP-UX, Linux and some other x86-based targets,
+On some systems, such as HP-UX, @sc{gnu}/Linux and some other x86-based targets,
 @value{GDBN} includes support for
 hardware watchpoints, which do not slow down the running of your
 program.
@@ -11194,7 +11194,7 @@ this facility, the command @code{info proc} is available to report on
 several kinds of information about the process running your program.
 @code{info proc} works only on SVR4 systems that include the
 @code{procfs} code.  This includes OSF/1 (Digital Unix), Solaris, Irix,
-and Unixware, but not HP-UX or Linux, for example.
+and Unixware, but not HP-UX or @sc{gnu}/Linux, for example.
 
 @table @code
 @kindex info proc

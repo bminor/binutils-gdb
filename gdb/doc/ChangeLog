@@ -1,3 +1,7 @@
+2002-09-25  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.texinfo: Use GNU/Linux instead of Linux.
+
 2002-09-25  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb.texinfo (Packets): Replace @samp{} with ``an empty string''.
