@@ -185,7 +185,7 @@ mips*-*-riscos*)	gdb_target=bigmips ;;
 mips*-*-vxworks*)       gdb_target=vxmips ;;
 mips*-*-*)		gdb_target=embed ;;
 
-mn10200-*-*)		gdb_target=mn10200 ;;
+# OBSOLETE mn10200-*-*)		gdb_target=mn10200 ;;
 mn10300-*-*)		gdb_target=mn10300 ;;
 
 none-*-*)		gdb_target=none ;;

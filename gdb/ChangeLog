@@ -1,5 +1,17 @@
 2003-02-04  Andrew Cagney  <ac131313@redhat.com>
 
+	* NEWS: Mention that the mn10200-elf is obsolete.
+	* configure.tgt: Obsolete mn10200-*-* target.
+	* breakpoint.c (update_breakpoints_after_exec): Update comment to
+	mention that the mn10200 is obsolete.
+	* breakpoint.h: Ditto.
+	* MAINTAINERS: Mark the mn10200-elf as obsolete.
+	* config/mn10200/mn10200.mt: Obsolete file.
+	* config/mn10200/tm-mn10200.h: Obsolete file.
+	* mn10200-tdep.c: Obsolete file.
+
+2003-02-04  Andrew Cagney  <ac131313@redhat.com>
+
 	* MAINTAINERS: Mark h8500 as obsolete.
 	* configure.tgt (h8500-*-*): Mark h8500 code as obsolete.
 	* findvar.c (value_from_register): Ditto.
