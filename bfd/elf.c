@@ -141,8 +141,8 @@ DEFUN(elf_swap_symbol_in,(abfd, src, dst),
 }
 
 
-/* Translate an ELF header in external format into an ELF header in internal
-   format. */
+/* Translate an ELF file header in external format into an ELF file header in
+   internal format. */
 
 static void
 DEFUN(elf_swap_ehdr_in,(abfd, src, dst),
@@ -244,6 +244,10 @@ DEFUN(bfd_section_from_shdr, (abfd, hdr, shstrtab),
   if (hdr -> sh_flags & SHF_EXECINSTR)
     {
       newsect -> flags |= SEC_CODE;	/* FIXME: may only contain SOME code */
+    }
+  else
+    {
+      newsect -> flags |= SEC_DATA;
     }
   if (hdr -> sh_type == SHT_SYMTAB)
     {
@@ -460,8 +464,10 @@ DEFUN(elf_core_file_matches_executable_p, (core_bfd, exec_bfd),
       bfd *core_bfd AND
       bfd *exec_bfd)
 {
+#if HAVE_PROCFS
   char *corename;
   char *execname;
+#endif
 
   /* First, xvecs must match since both are ELF files for the same target. */
 
@@ -544,7 +550,7 @@ DEFUN(elf_corefile_note, (abfd, hdr),
   asection *newsect;
 
   if (hdr -> p_filesz > 0
-      && (buf = malloc (hdr -> p_filesz)) != NULL
+      && (buf = (char *)malloc(hdr -> p_filesz)) != NULL
       && bfd_seek (abfd, hdr -> p_offset, SEEK_SET) != -1L
       && bfd_read ((PTR) buf, hdr -> p_filesz, 1, abfd) == hdr -> p_filesz)
     {
@@ -594,8 +600,40 @@ DEFUN(elf_corefile_note, (abfd, hdr),
     {
       free (buf);
     }
+  return true;
+  
 }
 
+
+/* Read a specified number of bytes at a specified offset in an ELF
+   file, into a newly allocated buffer, and return a pointer to the 
+   buffer. */
+
+static char *
+DEFUN(elf_read, (abfd, offset, size),
+      bfd	*abfd AND
+      long	offset AND
+      int	size)
+{
+  char *buf;
+
+  if ((buf = bfd_alloc (abfd, size)) == NULL)
+    {
+      bfd_error = no_memory;
+      return (NULL);
+    }
+  if (bfd_seek (abfd, offset, SEEK_SET) == -1)
+    {
+      bfd_error = system_call_error;
+      return (NULL);
+    }
+  if (bfd_read ((PTR) buf, size, 1, abfd) != size)
+    {
+      bfd_error = system_call_error;
+      return (NULL);
+    }
+  return (buf);
+}
 
 /* Begin processing a given object.
 
@@ -614,6 +652,7 @@ DEFUN (elf_object_p, (abfd), bfd *abfd)
   int shindex;
   char *shstrtab;		/* Internal copy of section header stringtab */
   int shstrtabsize;		/* Size of section header string table */
+  Elf_Off offset;		/* Temp place to stash file offsets */
   
   /* Read in the ELF header in external format.  */
 
@@ -726,22 +765,12 @@ wrong:
      will need the base pointer to this table later. */
 
   shstrtabsize = i_shdr[i_ehdr.e_shstrndx].sh_size;
-  if ((shstrtab = bfd_alloc (abfd, shstrtabsize)) == NULL)
+  offset = i_shdr[i_ehdr.e_shstrndx].sh_offset;
+  if ((shstrtab = elf_read (abfd, offset, shstrtabsize)) == NULL)
     {
-      bfd_error = no_memory;
       return (NULL);
     }
-  if (bfd_seek (abfd, i_shdr[i_ehdr.e_shstrndx].sh_offset, SEEK_SET) == -1)
-    {
-      bfd_error = system_call_error;
-      return (NULL);
-    }
-  if (bfd_read ((PTR) shstrtab, shstrtabsize, 1, abfd) != shstrtabsize)
-    {
-      bfd_error = system_call_error;
-      return (NULL);
-    }
-  
+
   /* Once all of the section headers have been read and converted, we
      can start processing them.  Note that the first section header is
      a dummy placeholder entry, so we ignore it.
@@ -762,6 +791,10 @@ wrong:
 	  elf_strtab_filesz(abfd) = (i_shdr + hdr -> sh_link) -> sh_size;
 	}
     }
+
+  /* Remember the entry point specified in the ELF file header. */
+
+  bfd_get_start_address (abfd) = i_ehdr.e_entry;
 
   return (abfd->xvec);
 }
@@ -903,6 +936,10 @@ wrong:
 	}
     }
 
+  /* Remember the entry point specified in the ELF file header. */
+
+  bfd_get_start_address (abfd) = i_ehdr.e_entry;
+
   return (abfd->xvec);
 }
 
@@ -965,20 +1002,9 @@ DEFUN (elf_slurp_symbol_table, (abfd), bfd *abfd)
      long as the bfd is in use, since we will end up setting up pointers
      into it for the names of all the symbols. */
 
-  if (bfd_seek (abfd, elf_strtab_filepos (abfd), SEEK_SET) == -1)
+  strtab = elf_read (abfd, elf_strtab_filepos(abfd), elf_strtab_filesz(abfd));
+  if (strtab == NULL)
     {
-      bfd_error = system_call_error;
-      return (false);
-    }
-  if ((strtab = bfd_alloc (abfd, elf_strtab_filesz (abfd))) == NULL)
-    {
-      bfd_error = system_call_error;
-      return (false);
-    }
-  if (bfd_read ((PTR) strtab, elf_strtab_filesz (abfd), 1, abfd) !=
-      elf_strtab_filesz (abfd))
-    {
-      bfd_error = system_call_error;
       return (false);
     }
 

@@ -1,3 +1,17 @@
+Tue Dec 17 19:48:59 1991  Fred Fish  (fnf at cygnus.com)
+
+	* elf.c (elf_core_file_matches_executable_p):  Enclose corename
+	and execname inside HAVE_PROCFS ifdef since they are unused
+	when it is not defined.
+
+Mon Dec 16 12:00:10 1991  Fred Fish  (fnf at cygnus.com)
+
+	* elf.c:  Flag all sections as either code or data.  We can't
+	be sure what they are anyway, since ELF doesn't fit the
+	traditional model of text+data+bss very well.  Add new local
+	function elf_read() to simplify code.  Record entry point in
+	the bfd structure.
+
 Thu Dec 12 21:01:22 1991  John Gilmore  (gnu at cygnus.com)
 
 	* hosts/h-*.h:  Configure fopen using ../include/fopen-*.h
