@@ -1,5 +1,8 @@
 Wed Jan 28 14:10:01 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ld.texinfo (Options): Mention LDEMULATION in description of -m.
+	(Environment): Mention LDEMULATION.
+
 	* ld.texinfo (Options): Clarify --export-dynamic a bit.
 
 Thu Jan 22 16:07:23 1998  Richard Henderson  <rth@cygnus.com>
