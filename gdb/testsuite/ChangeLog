@@ -1,3 +1,9 @@
+2004-07-22  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Test for PR exp/1715.
+	* gdb.base/radix.exp: Refactor common procedures.  Make all
+	test names unique.  Change XFAIL to KFAIL.
+
 2004-07-20  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.ada/gnat_ada.gpr.in: Rename from here ...
