@@ -1,5 +1,27 @@
 Tue Feb  9 12:42:27 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* Makefile.in: Various changes to eliminate a level of make
+	recursion and reduce the required command line length.
+	(BASE_FLAGS_TO_PASS): New variable holding flags passed to all
+	sub-makes.
+	(EXTRA_HOST_FLAGS, EXTRA_TARGET_FLAGS, EXTRA_GCC_FLAGS): New
+	variables holding settings for specific sub-makes.
+	(FLAGS_TO_PASS, TARGET_FLAGS_TO_PASS, GCC_FLAGS_TO_PASS): Rewrote
+	in terms of BASE_FLAGS_TO_PASS.
+	(TARGET_LIBS): New variable listing directories which use
+	TARGET_FLAGS_TO_PASS.
+	(subdir_do): Eliminated.
+	(do-*): New set of targets to replace subdir_do.
+	(various): All targets which used subdir_do now depend on do-*.
+	(local-clean): Renamed from do_clean.
+	(local-distclean): New target, dependency of distclean and
+	realclean.
+	(install-info): Don't create directories.  Depend on dir.info
+	rather than calling make recursively.
+	(install-dir.info): Eliminated.
+	(install-info-dirs): Create all info directories here.
+	(dir.info): Depend upon do-install-info.
+
 	* test-build.mk (HOLES): Added false.
 
 Sat Feb  6 14:05:09 1993  Per Bothner  (bothner@rtl.cygnus.com)

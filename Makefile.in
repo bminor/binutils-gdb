@@ -184,6 +184,7 @@ NM_FOR_TARGET = ` \
     fi \
   fi`
 
+# FIXME: This is badly named.
 XTRAFLAGS = ` \
   if [ -f $${rootme}/gcc/Makefile ] ; then \
     if [ -f $${rootme}/newlib/Makefile ] ; then \
@@ -199,22 +200,24 @@ XTRAFLAGS = ` \
 #### host and target specific makefile fragments come in here.
 ###
 
-# Flags to pass down to sub-makes -- please keep these in alphabetical order
-FLAGS_TO_PASS = \
-	"AR=$(AR)" \
+# Flags to pass down to all sub-makes.
+# Please keep these in alphabetical order.
+BASE_FLAGS_TO_PASS = \
 	"AR_FLAGS=$(AR_FLAGS)" \
 	"AR_FOR_TARGET=$(AR_FOR_TARGET)" \
+	"AS_FOR_TARGET=$(AS_FOR_TARGET)" \
 	"BISON=$(BISON)" \
-	"CXXFLAGS=$(CXXFLAGS)" \
-	"CXX_FOR_BUILD=$(CXX_FOR_BUILD)" \
-	"CC=$(CC)" \
 	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
+	"CC_FOR_TARGET=$(CC_FOR_TARGET)" \
 	"CFLAGS=$(CFLAGS)" \
 $(start-sanitize-chill)\
 	"CHILLFLAGS=$(CHILLFLAGS)" \
 	"CHILL_FOR_TARGET=$(CHILL_FOR_TARGET)" \
 	"CHILL_LIB=$(CHILL_LIB)" \
 $(end-sanitize-chill)\
+	"CXX_FOR_BUILD=$(CXX_FOR_BUILD)" \
+	"CXXFLAGS=$(CXXFLAGS)" \
+	"CXX_FOR_TARGET=$(CXX_FOR_TARGET)" \
 	"GCC_FOR_TARGET=$(GCC_FOR_TARGET)" \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
@@ -223,103 +226,120 @@ $(end-sanitize-chill)\
 	"LEX=$(LEX)" \
 	"LOADLIBES=$(LOADLIBES)" \
 	"MAKEINFO=$(MAKEINFO)" \
-	"RANLIB=$(RANLIB)" \
+	"NM_FOR_TARGET=$(NM_FOR_TARGET)" \
 	"RANLIB_FOR_TARGET=$(RANLIB_FOR_TARGET)" \
+	"XTRAFLAGS_FOR_TARGET=$(XTRAFLAGS)" \
 	"exec_prefix=$(exec_prefix)" \
 	"prefix=$(prefix)" \
 	"tooldir=$(tooldir)" 
 
+# Flags to pass down to most sub-makes, in which we're building with
+# the host environment.
+# Because of the way do-info, et. al., use this, this must not contain
+# any backquotes.
+EXTRA_HOST_FLAGS = \
+	"AR=$(AR)" \
+	"AS=$(AS)" \
+	"CC=$(CC)" \
+	"CXX=$(CXX)" \
+	"NM=$(NM)" \
+	"RANLIB=$(RANLIB)" \
+	"XTRAFLAGS="
+
+FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_HOST_FLAGS)
+
 # Flags that are concerned with the location of the X11 include files
 # and library files
-
 X11_FLAGS_TO_PASS = \
 	"X11_INCLUDE_FLAGS=$(X11_INCLUDE_FLAGS)" \
 	"X11_LIB_FLAGS=$(X11_LIB_FLAGS)" \
 	"X11_LIB=$(X11_LIB)"
 
-# Flags to pass down to makes which are built with the target
-# environment (e.g. libg++, xiberty, newlib).  -- keep these in alpha order please
-TARGET_FLAGS_TO_PASS = \
-	"AR=$(AR_FOR_TARGET)" \
-	"AR_FLAGS=$(AR_FLAGS)" \
-	"AS=$(AS_FOR_TARGET)" \
-	"BISON=$(BISON)" \
-	"CXX=$(CXX_FOR_TARGET)" \
-	"CXX_FOR_BUILD=$(CXX_FOR_BUILD)" \
-	"CXXFLAGS=$(CXXFLAGS)" \
-	"CC=$(CC_FOR_TARGET)" \
-	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
-	"CFLAGS=$(CFLAGS)" \
-	"INSTALL=$(INSTALL)" \
-	"INSTALL_DATA=$(INSTALL_DATA)" \
-	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
-	"LDFLAGS=$(LDFLAGS)" \
-	"LEX=$(LEX)" \
-	"LOADLIBES=$(LOADLIBES)" \
-	"MAKEINFO=$(MAKEINFO)" \
-	"NM=$(NM_FOR_TARGET)" \
-	"RANLIB=$(RANLIB_FOR_TARGET)" \
-	"XTRAFLAGS=$(XTRAFLAGS)" \
-	"exec_prefix=$(exec_prefix)" \
-	"prefix=$(prefix)" \
-	"tooldir=$(tooldir)" 
+# Shell case of subdirectories which are built with the target environment.
+TARGET_LIBS=libg++ | xiberty | newlib
+$(start-sanitize-chill)
+TARGET_LIBS=libg++ | xiberty | newlib | chillrt
+$(end-sanitize-chill)
+
+# Flags to pass down to makes which are built with the target environment.
+# The double $ decreases the length of the command line; the variables
+# are set in BASE_FLAGS_TO_PASS, and the sub-make will expand them.
+# Because of the way do-info, et. al., use this, this must not contain
+# any backquotes.
+EXTRA_TARGET_FLAGS = \
+	'AR=$$(AR_FOR_TARGET)' \
+	'AS=$$(AS_FOR_TARGET)' \
+	'CC=$$(CC_FOR_TARGET)' \
+	'CXX=$$(CXX_FOR_TARGET)' \
+	'NM=$$(NM_FOR_TARGET)' \
+	'RANLIB=$$(RANLIB_FOR_TARGET)' \
+	'XTRAFLAGS=$$(XTRAFLAGS_FOR_TARGET)'
+
+TARGET_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_TARGET_FLAGS)
 
 # Flags to pass down to gcc.  gcc builds a library, libgcc.a, so it
 # unfortunately needs the native compiler and the target ar and
-# ranlib.  Keep these in alphabetical order, please.
-GCC_FLAGS_TO_PASS = \
-	"AR=$(AR_FOR_TARGET)" \
-	"AR_FLAGS=$(AR_FLAGS)" \
-	"AR_FOR_TARGET=$(AR_FOR_TARGET)" \
+# ranlib.
+# Because of the way do-info, et. al., use this, this must not contain
+# any backquotes.
+EXTRA_GCC_FLAGS = \
+	'AR=$$(AR_FOR_TARGET)' \
 	"AS=$(AS)" \
-	"BISON=$(BISON)" \
-	"CXX=$(CXX)" \
-	"CXX_FOR_BUILD=$(CXX_FOR_BUILD)" \
-	"CXXFLAGS=$(CXXFLAGS)" \
 	"CC=$(CC)" \
-	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
-	"CFLAGS=$(CFLAGS)" \
-	"INSTALL=$(INSTALL)" \
-	"INSTALL_DATA=$(INSTALL_DATA)" \
-	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
-	"LDFLAGS=$(LDFLAGS)" \
-	"LEX=$(LEX)" \
-	"LOADLIBES=$(LOADLIBES)" \
-	"MAKEINFO=$(MAKEINFO)" \
+	"CXX=$(CXX)" \
 	"NM=$(NM)" \
-	"RANLIB=$(RANLIB_FOR_TARGET)" \
-	"RANLIB_FOR_TARGET=$(RANLIB_FOR_TARGET)" \
-	"XTRAFLAGS=$(XTRAFLAGS)" \
-	"exec_prefix=$(exec_prefix)" \
-	"prefix=$(prefix)" \
-	"tooldir=$(tooldir)" 
+	'RANLIB=$$(RANLIB_FOR_TARGET)' \
+	"XTRAFLAGS="
+
+GCC_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_GCC_FLAGS)
 
 # The first rule in the file had better be this one.  Don't put any above it.
 all:	$(ALL)
 
-.PHONY: all check dvi info install-info 
+.PHONY: all check dvi info install-info install-info-dirs
+.PHONY: do-info do-check do-dvi do-install-info
+.PHONY: do-clean do-mostlyclean do-distclean do-realclean
 .NOEXPORT:
 
-info: all-texinfo
-	@rootme=`pwd` ; export rootme ; \
-	  $(MAKE) $(FLAGS_TO_PASS) DO=info "DODIRS=$(SUBDIRS)" subdir_do
+# Do a target for all the subdirectories.  A ``make do-X'' will do a
+# ``make X'' in all subdirectories (because, in general, X depends on
+# fdo-X, a ``make X'' will also do this, but it may do additional work
+# as well).
+# This target ensures that $(BASE_FLAGS_TO_PASS) appears only once,
+# because it is so large that it can easily overflow the command line
+# length limit on some systems.
+do-info do-check do-dvi do-install-info do-clean do-mostlyclean do-distclean do-realclean:
+	@target=`echo $@ | sed -e 's/^do-//'`; \
+	rootme=`pwd`; export rootme; \
+	srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	for i in $(SUBDIRS); do \
+	  if [ -f ./$$i/localenv ] || [ -f ./$$i/Makefile ]; then \
+	    case $$i in \
+	    $(TARGET_LIBS) ) \
+	      extra_flags=`echo $(EXTRA_TARGET_FLAGS)`; \
+	      ;; \
+	    gcc) \
+	      extra_flags=`echo $(EXTRA_GCC_FLAGS)`; \
+	      ;; \
+	    *) \
+	      extra_flags=`echo $(EXTRA_HOST_FLAGS)`; \
+	      ;; \
+	    esac ; \
+	    export extra_flags; \
+	    if (cd ./$$i; \
+	        $(MAKE) $(BASE_FLAGS_TO_PASS) $${extra_flags} $${target}); \
+	    then true; else exit 1; fi; \
+	  else true; fi; \
+	done
 
-check dvi:	
-	@rootme=`pwd` ; export rootme ; \
-	  $(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
+info: do-info
+check: do-check
+dvi: do-dvi
 
-install-info: install-info-dirs force
-	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
-	@rootme='pwd' ; export rootme ; $(MAKE) $(FLAGS_TO_PASS) DO=install-info "DODIRS=$(SUBDIRS)" subdir_do
-	@rootme='pwd' ; export rootme ; $(MAKE) $(FLAGS_TO_PASS) dir.info install-dir.info
-
-install-dir.info:
-	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
+install-info: install-info-dirs do-install-info dir.info
 	$(INSTALL_DATA) dir.info $(infodir)/dir.info
+
+do-install-info: install-info-dirs
 
 all.normal: all-m4 all-autoconf all-libiberty all-mmalloc all-texinfo \
 	all-byacc all-flex all-opcodes all-bfd all-ld all-gas all-tgas \
@@ -344,19 +364,18 @@ all.cross: all-libiberty all-mmalloc all-gas all-byacc all-flex all-ld \
 	$(end-sanitize-chill) \
 	all-deja-gnu
 
-.PHONY: clean distclean mostlyclean realclean do_clean
+.PHONY: clean distclean mostlyclean realclean local-clean local-distclean
 
-do_clean:
+local-clean:
 	-rm -f *.a TEMP errs core *.o *~ \#* TAGS *.E
 
-clean mostlyclean: do_clean
-	@rootme=`pwd` ; export rootme ; \
-	  $(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
-
-distclean realclean: do_clean
-	@rootme=`pwd` ; export rootme ; \
-	  $(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
+local-distclean:
 	-rm -f Makefile config.status
+
+clean: do-clean local-clean
+mostlyclean: do-mostlyclean local-clean
+distclean: do-distclean local-clean local-distclean
+realclean: do-realclean local-clean local-distclean
 
 uninstall:
 	@echo "the uninstall target is not supported in this tree"
@@ -1329,55 +1348,6 @@ install-textutils: force
 
 ### other supporting targets
 
-subdir_do:
-### start-sanitize-chill
-### 
-### WARNING: THIS IS VERY UGLY AND I DID NOT DO THIS WILLINGLY
-###
-### if you change the code for libg++ et al, also change the
-### code for chillrt
-###
-### end-sanitize-chill
-	@for i in $(DODIRS); do \
-	  if [ -f ./$$i/localenv ] || [ -f ./$$i/Makefile ] ; then \
-	    case $$i in \
-	    libg++ | xiberty | newlib) \
-	      if (rootme=`pwd` ; export rootme ; \
-		  srcroot=`cd $(srcdir); pwd` ; export srcroot ; \
-		  cd ./$$i ; \
-		  $(MAKE) $(TARGET_FLAGS_TO_PASS) $(DO)) ; then true ; \
-	      else exit 1 ; fi \
-	      ;; \
-	$(start-sanitize-chill) \
-	    chillrt) \
-	      if (rootme=`pwd` ; export rootme ; \
-		  srcroot=`cd $(srcdir); pwd` ; export srcroot ; \
-		  cd ./$$i ; \
-		  $(MAKE) $(TARGET_FLAGS_TO_PASS) $(DO)) ; then true ; \
-	      else exit 1 ; fi \
-	      ;; \
-	$(end-sanitize-chill) \
-	    gcc) \
-	      if (rootme=`pwd` ; export rootme ; \
-		  srcroot=`cd $(srcdir); pwd` ; export srcroot ; \
-		  cd ./$$i ; \
-		  $(MAKE) $(GCC_FLAGS_TO_PASS) $(DO)) ; then true ; \
-	      else exit 1 ; fi \
-	      ;; \
-	    *) \
-	      if (rootme=`pwd` ; export rootme ; \
-		  cd ./$$i ; \
-		  $(MAKE) $(FLAGS_TO_PASS) $(DO)) ; then true ; \
-	      else exit 1 ; fi \
-	      ;; \
-	    esac ; \
-	  else true ; fi ; \
-	done
-
-# The "else true" stuff is for Ultrix; the shell returns the exit code
-# of the "if" command, if no commands are run in the "then" or "else" part,
-# causing Make to quit.
-
 MAKEDIRS= \
 	$(prefix) \
 	$(exec_prefix) \
@@ -1417,8 +1387,11 @@ install-dirs:
 
 install-info-dirs:
 	if [ -d $(prefix) ] ; then true ; else mkdir $(prefix) ; fi
+	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
+	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+	-if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
 
-dir.info:
+dir.info: do-install-info
 	$(srcdir)/texinfo/gen-info-dir $(infodir) $(srcdir)/texinfo/dir.info-template > dir.info.new
 	mv -f dir.info.new dir.info
 
