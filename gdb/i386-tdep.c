@@ -472,21 +472,123 @@ i386_skip_probe (CORE_ADDR pc)
   return pc;
 }
 
+/* Maximum instruction length we need to handle.  */
+#define I386_MAX_INSN_LEN	6
+
+/* Instruction description.  */
+struct i386_insn
+{
+  size_t len;
+  unsigned char insn[I386_MAX_INSN_LEN];
+  unsigned char mask[I386_MAX_INSN_LEN];
+};
+
+/* Search for the instruction at PC in the list SKIP_INSNS.  Return
+   the first instruction description that matches.  Otherwise, return
+   NULL.  */
+
+static struct i386_insn *
+i386_match_insn (CORE_ADDR pc, struct i386_insn *skip_insns)
+{
+  struct i386_insn *insn;
+  unsigned char op;
+
+  op = read_memory_unsigned_integer (pc, 1);
+
+  for (insn = skip_insns; insn->len > 0; insn++)
+    {
+      if ((op & insn->mask[0]) == insn->insn[0])
+	{
+	  unsigned char buf[I386_MAX_INSN_LEN - 1];
+	  size_t i;
+
+	  gdb_assert (insn->len > 1);
+	  gdb_assert (insn->len <= I386_MAX_INSN_LEN);
+
+	  read_memory (pc + 1, buf, insn->len - 1);
+	  for (i = 1; i < insn->len; i++)
+	    {
+	      if ((buf[i - 1] & insn->mask[i]) != insn->insn[i])
+		break;
+
+	      return insn;
+	    }
+	}
+    }
+
+  return NULL;
+}
+
+/* Some special instructions that might be migrated by GCC into the
+   part of the prologue that sets up the new stack frame.  Because the
+   stack frame hasn't been setup yet, no registers have been saved
+   yet, and only the scratch registers %eax, %ecx and %edx can be
+   touched.  */
+
+struct i386_insn i386_frame_setup_skip_insns[] =
+{
+  /* Check for `movb imm8, r' and `movl imm32, r'. 
+    
+     ??? Should we handle 16-bit operand-sizes here?  */
+
+  /* `movb imm8, %al' and `movb imm8, %ah' */
+  /* `movb imm8, %cl' and `movb imm8, %ch' */
+  { 2, { 0xb0, 0x00 }, { 0xfa, 0x00 } },
+  /* `movb imm8, %dl' and `movb imm8, %dh' */
+  { 2, { 0xb2, 0x00 }, { 0xfb, 0x00 } },
+  /* `movl imm32, %eax' and `movl imm32, %ecx' */
+  { 5, { 0xb8 }, { 0xfe } },
+  /* `movl imm32, %edx' */
+  { 5, { 0xba }, { 0xff } },
+
+  /* Check for `mov imm32, r32'.  Note that there is an alternative
+     encoding for `mov m32, %eax'.
+
+     ??? Should we handle SIB adressing here?
+     ??? Should we handle 16-bit operand-sizes here?  */
+
+  /* `movl m32, %eax' */
+  { 5, { 0xa1 }, { 0xff } },
+  /* `movl m32, %eax' and `mov; m32, %ecx' */
+  { 6, { 0x89, 0x05 }, {0xff, 0xf7 } },
+  /* `movl m32, %edx' */
+  { 6, { 0x89, 0x15 }, {0xff, 0xff } },
+
+  /* Check for `xorl r32, r32' and the equivalent `subl r32, r32'.
+     Because of the symmetry, there are actually two ways to encode
+     these instructions; opcode bytes 0x29 and 0x2b for `subl' and
+     opcode bytes 0x31 and 0x33 for `xorl'.  */
+
+  /* `subl %eax, %eax' */
+  { 2, { 0x29, 0xc0 }, { 0xfd, 0xff } },
+  /* `subl %ecx, %ecx' */
+  { 2, { 0x29, 0xc9 }, { 0xfd, 0xff } },
+  /* `subl %edx, %edx' */
+  { 2, { 0x29, 0xd2 }, { 0xfd, 0xff } },
+  /* `xorl %eax, %eax' */
+  { 2, { 0x31, 0xc0 }, { 0xfd, 0xff } },
+  /* `xorl %ecx, %ecx' */
+  { 2, { 0x31, 0xc9 }, { 0xfd, 0xff } },
+  /* `xorl %edx, %edx' */
+  { 2, { 0x31, 0xd2 }, { 0xfd, 0xff } },
+  { 0 }
+};
+
 /* Check whether PC points at a code that sets up a new stack frame.
    If so, it updates CACHE and returns the address of the first
-   instruction after the sequence that sets removes the "hidden"
-   argument from the stack or CURRENT_PC, whichever is smaller.
-   Otherwise, return PC.  */
+   instruction after the sequence that sets up the frame or LIMIT,
+   whichever is smaller.  If we don't recognize the code, return PC.  */
 
 static CORE_ADDR
-i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
+i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR limit,
 			  struct i386_frame_cache *cache)
 {
+  struct i386_insn *insn;
   unsigned char op;
   int skip = 0;
 
-  if (current_pc <= pc)
-    return current_pc;
+  if (limit <= pc)
+    return limit;
 
   op = read_memory_unsigned_integer (pc, 1);
 
@@ -496,87 +598,48 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
 	 starts this instruction sequence.  */
       cache->saved_regs[I386_EBP_REGNUM] = 0;
       cache->sp_offset += 4;
+      pc++;
 
       /* If that's all, return now.  */
-      if (current_pc <= pc + 1)
-	return current_pc;
-
-      op = read_memory_unsigned_integer (pc + 1, 1);
+      if (limit <= pc)
+	return limit;
 
       /* Check for some special instructions that might be migrated by
-	 GCC into the prologue.  At this point in the prologue, code
-	 should only touch the scratch registers %eax, %ecx and %edx,
-	 so we check for
-
-	    movl $XXX, %eax
-	    movl $XXX, %ecx
-	    movl $XXX, %edx
-
-	 These instructions have opcodes 0xb8, 0xb9 and 0xba.
-
-	 We also check for
-
-	    xorl %eax, %eax
-	    xorl %ecx, %ecx
-	    xorl %edx, %edx
-
-	 and the equivalent
-
-	    subl %eax, %eax
-	    subl %ecx, %ecx
-	    subl %edx, %edx
-
-	 Because of the symmetry, there are actually two ways to
-	 encode these instructions; with opcode bytes 0x29 and 0x2b
-	 for `subl' and opcode bytes 0x31 and 0x33 for `xorl'.
+	 GCC into the prologue and skip them.  At this point in the
+	 prologue, code should only touch the scratch registers %eax,
+	 %ecx and %edx, so while the number of posibilities is sheer,
+	 it is limited.
 
 	 Make sure we only skip these instructions if we later see the
 	 `movl %esp, %ebp' that actually sets up the frame.  */
-      while ((op >= 0xb8 && op <= 0xba)
-	     || op == 0x29 || op == 0x2b
-	     || op == 0x31 || op == 0x33)
+      while (pc + skip < limit)
 	{
-	  if (op >= 0xb8 && op <= 0xba)
-	    {
-	      /* Skip the `movl' instructions cited above.  */
-	      skip += 5;
-	    }
-	  else
-	    {
-	      /* Skip the `subl' and `xorl' instructions cited above.  */
-	      op = read_memory_unsigned_integer (pc + skip + 2, 1);
-	      switch (op)
-		{
-		case 0xc0:	/* %eax */
-		case 0xc9:	/* %ecx */
-		case 0xd2:	/* %edx */
-		  skip += 2;
-		  break;
-		default:
-		  return pc + 1;
-		}
-	    }
+	  insn = i386_match_insn (pc + skip, i386_frame_setup_skip_insns);
+	  if (insn == NULL)
+	    break;
 
-	  /* If that's all, return now.  */
-	  if (current_pc <= pc + skip + 1)
-	    return current_pc;
-
-	  op = read_memory_unsigned_integer (pc + skip + 1, 1);
+	  skip += insn->len;
 	}
+
+      /* If that's all, return now.  */
+      if (limit <= pc + skip)
+	return limit;
+
+      op = read_memory_unsigned_integer (pc + skip, 1);
 
       /* Check for `movl %esp, %ebp' -- can be written in two ways.  */
       switch (op)
 	{
 	case 0x8b:
-	  if (read_memory_unsigned_integer (pc + skip + 2, 1) != 0xec)
-	    return pc + 1;
+	  if (read_memory_unsigned_integer (pc + skip + 1, 1) != 0xec)
+	    return pc;
 	  break;
 	case 0x89:
-	  if (read_memory_unsigned_integer (pc + skip + 2, 1) != 0xe5)
-	    return pc + 1;
+	  if (read_memory_unsigned_integer (pc + skip + 1, 1) != 0xe5)
+	    return pc;
 	  break;
 	default:
-	  return pc + 1;
+	  return pc;
 	}
 
       /* OK, we actually have a frame.  We just don't know how large
@@ -584,11 +647,11 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
 	 necessary.  We also now commit to skipping the special
 	 instructions mentioned before.  */
       cache->locals = 0;
-      pc += skip;
+      pc += (skip + 2);
 
       /* If that's all, return now.  */
-      if (current_pc <= pc + 3)
-	return current_pc;
+      if (limit <= pc)
+	return limit;
 
       /* Check for stack adjustment 
 
@@ -596,37 +659,37 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
 
 	 NOTE: You can't subtract a 16-bit immediate from a 32-bit
 	 reg, so we don't have to worry about a data16 prefix.  */
-      op = read_memory_unsigned_integer (pc + 3, 1);
+      op = read_memory_unsigned_integer (pc, 1);
       if (op == 0x83)
 	{
 	  /* `subl' with 8-bit immediate.  */
-	  if (read_memory_unsigned_integer (pc + 4, 1) != 0xec)
+	  if (read_memory_unsigned_integer (pc + 1, 1) != 0xec)
 	    /* Some instruction starting with 0x83 other than `subl'.  */
-	    return pc + 3;
+	    return pc;
 
-	  /* `subl' with signed byte immediate (though it wouldn't make
-	     sense to be negative).  */
-	  cache->locals = read_memory_integer (pc + 5, 1);
-	  return pc + 6;
+	  /* `subl' with signed 8-bit immediate (though it wouldn't
+	     make sense to be negative).  */
+	  cache->locals = read_memory_integer (pc + 2, 1);
+	  return pc + 3;
 	}
       else if (op == 0x81)
 	{
 	  /* Maybe it is `subl' with a 32-bit immediate.  */
-	  if (read_memory_unsigned_integer (pc + 4, 1) != 0xec)
+	  if (read_memory_unsigned_integer (pc + 1, 1) != 0xec)
 	    /* Some instruction starting with 0x81 other than `subl'.  */
-	    return pc + 3;
+	    return pc;
 
 	  /* It is `subl' with a 32-bit immediate.  */
-	  cache->locals = read_memory_integer (pc + 5, 4);
-	  return pc + 9;
+	  cache->locals = read_memory_integer (pc + 2, 4);
+	  return pc + 6;
 	}
       else
 	{
 	  /* Some instruction other than `subl'.  */
-	  return pc + 3;
+	  return pc;
 	}
     }
-  else if (op == 0xc8)		/* enter $XXX */
+  else if (op == 0xc8)		/* enter */
     {
       cache->locals = read_memory_unsigned_integer (pc + 1, 2);
       return pc + 4;

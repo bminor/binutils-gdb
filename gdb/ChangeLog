@@ -1,3 +1,13 @@
+2004-08-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (I386_MAX_INSN_LEN): New define.
+	(struct i386_insn): New structure.
+	(i386_match_insn): New function.
+	(i386_frame_setup_skip_insns): New variable.
+	(i386_analyze_frame_setup): Change to use i386_match_insn and the
+	array i386_frame_setup_insns of instructions that should be
+	skipped inside the frame setup sequence.
+
 2004-08-01  Andrew Cagney  <cagney@gnu.org>
 
 	* frame.h (deprecated_frame_xmalloc_with_cleanup)
