@@ -1,3 +1,17 @@
+2000-11-29  Zack Weinberg  <zack@wolery.stanford.edu>
+
+	* aclocal.m4 (LIB_AC_PROG_CC): Moved here from configure.in.
+	(AC_DEFINE_NOAUTOHEADER): New - work around bug in autoheader.
+	* configure.in: Call AC_C_INLINE and AC_C_CONST.  Use three
+	argument form of AC_DEFINE in dummy definitions block.  Use
+	AC_DEFINE_NOAUTOHEADER for real definitions of things defined
+	in dummy block.  Preload cache variables instead of bypassing
+	tests, where possible.
+	* acconfig.h: Removed.
+	* xmalloc.c (xmalloc_failed): New function, does error
+	reporting on failed allocation.
+	(xmalloc, xcalloc, xrealloc): Use it.
+	
 2000-11-22  H.J. Lu  <hjl@gnu.org>
 
 	* cplus-dem.c (main): Handle gnat_demangling.
