@@ -1773,7 +1773,6 @@ elf_get_extr (sym, ext)
 /* This function is called by bfd_ecoff_debug_externals.  It has
    nothing to do for ELF.  */
 
-/*ARGSUSED*/
 static void
 elf_set_index (sym, indx)
      asymbol *sym ATTRIBUTE_UNUSED;
