@@ -1,3 +1,9 @@
+2003-08-02  Adam Fedor  <fedor@gnu.org>
+
+	* linespec.c (is_objc_method_format): New function
+	(decode_line_1, locate_first_half): Use it.
+	Fixes PR objc/1298
+
 2003-08-01  Andrew Cagney  <cagney@redhat.com>
 
 	* NEWS: Mention that m32r is multi-arch.
