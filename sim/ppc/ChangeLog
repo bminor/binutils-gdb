@@ -35,6 +35,11 @@ Fri Mar 29 12:17:58 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
 	(emul_bugapi_instruction_call): Change calls to
 	emul_bugapi_do_{read,write} to pass device instance argument.
 
+Wed Feb 28 00:43:07 1996  Andrew Cagney - aka Noid  <cagney@highland.com.au>
+
+	* Makefile.in (corefile.o): missing dependency on device_table.h
+        etc.
+
 Tue Mar 26 14:57:58 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* igen.c (idecode_switch_end): Fix 2/26 change so that an extra

@@ -316,7 +316,7 @@ idecode.o: idecode.c $(CPU_H) $(IDECODE_H) semantics.h
 vm.o: vm.c vm.h vm_n.h $(BASICS_H) $(REGISTERS_H) \
 	device.h corefile.h interrupts.h itable.h mon.h
 
-corefile.o: corefile.c corefile.h corefile-n.h $(BASICS_H) device.h
+corefile.o: corefile.c corefile.h corefile-n.h $(BASICS_H) device.h device_table.h
 
 model.o: model.c $(CPU_H)
 
