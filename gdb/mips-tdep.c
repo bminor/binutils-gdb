@@ -43,6 +43,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 #include "gdbcore.h"
+#include "symfile.h"
+#include "objfiles.h"
 
 #ifndef	MIPSMAGIC
 #ifdef MIPSEL
@@ -287,7 +289,7 @@ FRAME_ADDR mips_frame_chain(frame)
 {
     mips_extra_func_info_t proc_desc;
     CORE_ADDR saved_pc = FRAME_SAVED_PC(frame);
-    if (current_objfile -> ei.entry_file_lowpc)
+    if (current_objfile->ei.entry_file_lowpc)
       { /* has at least the __start symbol */
 	if (saved_pc == 0 || inside_entry_file (saved_pc)) return 0;
       }

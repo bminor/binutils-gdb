@@ -1,3 +1,8 @@
+Mon Mar 23 23:01:41 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* mips-tdep.c:  include symfile.h and objfiles.h to fix
+	compilation errors.
+
 Mon Mar 23 15:49:14 1992  Per Bothner  (bothner@cygnus.com)
 
 	* valops.c (value_struct_elt_for_reference):  Added 'offset'
