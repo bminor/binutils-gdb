@@ -1,3 +1,8 @@
+2001-07-12  Daniel Jacobowitz  <drow@mvista.com>
+
+	* mips-linux-tdep.c (_initialize_mips_linux_tdep):  Use ISO C
+	definition.
+
 2001-07-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* lin-lwp.c (lin_lwp_wait): Avoid check for resumed LWPs if there

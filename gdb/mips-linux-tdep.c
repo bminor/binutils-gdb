@@ -338,7 +338,7 @@ mips_linux_svr4_fetch_link_map_offsets (void)
 }
 
 void
-_initialize_mips_linux_tdep ()
+_initialize_mips_linux_tdep (void)
 {
   add_core_fns (&regset_core_fns);
 }
