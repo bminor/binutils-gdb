@@ -65,26 +65,24 @@ are preserved on all copies.
 This document describes the stabs debugging format.
 
 @menu
-* Overview::                    Overview of stabs
-* Program structure::           Encoding of the structure of the program
+* Overview::			Overview of stabs
+* Program structure::		Encoding of the structure of the program
 * Constants::			Constants
-* Example::                     A comprehensive example in C 
-* Variables::
+* Example::			A comprehensive example in C 
+* Variables::			
 * Types::			Type definitions
-* Symbol Tables::               Symbol information in symbol tables
-* Cplusplus::
-
-Appendixes:
-* Example2.c::                  Source code for extended example
-* Example2.s::                  Assembly code for extended example
-* Stab Types:: 			Symbol types in a.out files
-* Symbol Descriptors:: 		Table of Symbol Descriptors
-* Type Descriptors:: 		Table of Symbol Descriptors
-* Expanded reference::          Reference information by stab type
-* Questions::                   Questions and anomolies
-* xcoff-differences::           Differences between GNU stabs in a.out
+* Symbol Tables::		Symbol information in symbol tables
+* Cplusplus::			Appendixes:
+* Example2.c::			Source code for extended example
+* Example2.s::			Assembly code for extended example
+* Stab Types::			Symbol types in a.out files
+* Symbol Descriptors::		Table of Symbol Descriptors
+* Type Descriptors::		Table of Symbol Descriptors
+* Expanded reference::		Reference information by stab type
+* Questions::			Questions and anomolies
+* xcoff-differences::		Differences between GNU stabs in a.out
                                 and GNU stabs in xcoff
-* Sun-differences::             Differences between GNU stabs and Sun
+* Sun-differences::		Differences between GNU stabs and Sun
                                 native stabs
 * Stabs-in-elf::		Stabs in an ELF file.
 @end menu
@@ -116,10 +114,10 @@ incorporate the information from those two sources except where it
 explictly directs you to them for more information.
 
 @menu
-* Flow:: Overview of debugging information flow
-* Stabs Format:: Overview of stab format
-* C example:: A simple example in C source
-* Assembly code:: The simple example at the assembly level
+* Flow::			Overview of debugging information flow
+* Stabs Format::		Overview of stab format
+* C example::			A simple example in C source
+* Assembly code::		The simple example at the assembly level
 @end menu
 
 @node Flow
@@ -359,10 +357,10 @@ types used to describe C language source files.
 @chapter Encoding for the structure of the program
 
 @menu
-* Source Files:: The path and name of the source file
-* Line Numbers::
-* Procedures::
-* Block Structure::
+* Source Files::		The path and name of the source file
+* Line Numbers::		
+* Procedures::			
+* Block Structure::		
 @end menu
 
 @node Source Files
@@ -800,10 +798,10 @@ nesting is reflected in the nested bracketing stabs (@code{N_LBRAC},
 @chapter Variables
 
 @menu
-* Automatic variables:: 	Variables allocated on the stack.
+* Automatic variables::		Variables allocated on the stack.
 * Global Variables::		Variables used by more than one source file.
-* Common Blocks::		Variables statically allocated together.
 * Register variables::		Variables in registers.
+* Common Blocks::		Variables statically allocated together.
 * Initialized statics::		Static variables with values.
 * Un-initialized statics::	Static variables initialialized to 0.
 * Parameters::			Passing variables to functions.
@@ -1195,7 +1193,7 @@ type definition.
 * Structures::			An aggregate type of different-typed elements.
 * Typedefs::			Giving a type a name.
 * Unions::			Different types sharing storage.
-* Function Types::
+* Function Types::		
 @end menu
 
 @node Builtin types
@@ -2100,16 +2098,16 @@ entry now holds an absolute address.
 @chapter GNU C++ stabs
 
 @menu
-* Basic Cplusplus types::
-* Simple classes::
-* Class instance::
-* Methods:: Method definition
-* Protections::
-* Method Modifiers:: (const, volatile, const volatile)
-* Virtual Methods::
-* Inheritence::
-* Virtual Base Classes::
-* Static Members::
+* Basic Cplusplus types::	
+* Simple classes::		
+* Class instance::		
+* Methods::			Method definition
+* Protections::			
+* Method Modifiers::		
+* Virtual Methods::		
+* Inheritence::			
+* Virtual Base Classes::	
+* Static Members::		
 @end menu
 
 @subsection type descriptors added for C++ descriptions
@@ -3405,28 +3403,28 @@ significant stab field.  # stands in for the type descriptor.
 Finally, any further information.
 
 @menu
-* N_GSYM::      Global variable
-* N_FNAME::     Function name (BSD Fortran)
-* N_FUN::       C Function name or text segment variable
-* N_STSYM::     Initialized static symbol
-* N_LCSYM::     Uninitialized static symbol
-* N_MAIN::      Name of main routine (not for C)
-* N_PC::        Pascal global symbol
-* N_NSYMS::     Number of symbols
-* N_NOMAP::     No DST map
-* N_RSYM::      Register variable
-* N_M2C::       Modula-2 compilation unit
-* N_BROWS::     Path to .cb file for Sun source code browser
-* N_DEFD::      GNU Modula2 definition module dependency
-* N_EHDECL::    GNU C++ exception variable
-* N_MOD2::      Modula2 information "for imc"
-* N_CATCH::     GNU C++ "catch" clause
-* N_SSYM::      Structure or union element
-* N_LSYM::      Automatic variable
-* N_ENTRY::     Alternate entry point
-* N_SCOPE::     Modula2 scope information (Sun only)
-* Gould::       non-base register symbols used on Gould systems
-* N_LENG::      Length of preceding entry
+* N_GSYM::			Global variable
+* N_FNAME::			Function name (BSD Fortran)
+* N_FUN::			C Function name or text segment variable
+* N_STSYM::			Initialized static symbol
+* N_LCSYM::			Uninitialized static symbol
+* N_MAIN::			Name of main routine (not for C)
+* N_PC::			Pascal global symbol
+* N_NSYMS::			Number of symbols
+* N_NOMAP::			No DST map
+* N_RSYM::			Register variable
+* N_M2C::			Modula-2 compilation unit
+* N_BROWS::			Path to .cb file for Sun source code browser
+* N_DEFD::			GNU Modula2 definition module dependency
+* N_EHDECL::			GNU C++ exception variable
+* N_MOD2::			Modula2 information "for imc"
+* N_CATCH::			GNU C++ "catch" clause
+* N_SSYM::			Structure or union element
+* N_LSYM::			Automatic variable
+* N_ENTRY::			Alternate entry point
+* N_SCOPE::			Modula2 scope information (Sun only)
+* Gould::			non-base register symbols used on Gould systems
+* N_LENG::			Length of preceding entry
 @end menu
 
 @node N_GSYM
