@@ -37,8 +37,9 @@ include $(TREE)/release-info
 TIME 		:=
 
 CONFIG_SHELL	:= 
-GCC 		:= $(host)-gcc -O2 
-GNUC		:= CC="$(GCC)"
+GCC 		:= $(host)-gcc
+GNUCFLAGS	:= -g -O2
+GNUC		:= CC="$(GCC)" CFLAGS="$(GNUCFLAGS)"
 CFLAGS		:= -g
 CXXFLAGS	:= -g -O2
 GNU_MAKE 	:= /usr/latest/bin/make -w 
@@ -85,9 +86,10 @@ BISON		:= byacc
 CC		:= $(host)-gcc
 CC_FOR_BUILD	:= gcc
 CC_FOR_TARGET	:= $(target)-gcc
+CFLAGS		:= $(GNUCFLAGS)
 CXX		:= $(host)-gcc 
 CXX_FOR_TARGET	:= $(target)-gcc
-GCC		:= $(host)-gcc -O2
+GCC		:= $(host)-gcc
 GXX		:= $(host)-g++
 GXX_FOR_TARGET	:= $(target)-g++
 HOST_PREFIX	:= $(build)-
@@ -174,6 +176,10 @@ ifeq ($(host),hppa1.1-hp-hpux)
 CC := cc -Wp,-H256000
 endif
 
+ifeq ($(host),m68k-hp-hpux)
+CC := cc -Wp,-P,-H256000
+endif
+
 ifeq ($(host),mips-mips-riscos5sysv)
 CC := cc -non_shared -systype sysv
 endif
@@ -186,30 +192,33 @@ ifeq ($(host),m68k-sun-sunos4.1.1)
 CC := cc -J
 endif
 
+# Support gdbtk everywhere
+configargs = --enable-gdbtk
+
 # We want to use stabs for MIPS targets.
 ifeq ($(target),mips-idt-ecoff)
-configargs = -with-stabs
+configargs := $(configargs) --with-stabs
 endif
 
 ifeq ($(target),mips-dec-ultrix)
-configargs = -with-stabs
+configargs := $(configargs) --with-stabs
 endif
 
 ifeq ($(target),mips-sgi-irix4)
-configargs = -with-stabs
+configargs := $(configargs) --with-stabs
 endif
 
-ifeq ($(target),mips-sgi-irix5.2)
-configargs = -with-stabs
+ifeq ($(target),mips-sgi-irix5)
+configargs := $(configargs) --with-stabs
 endif
 
-ifeq ($(target),alpha-dec-osf1.3)
-configargs = -with-stabs
+ifeq ($(patsubst alpha-dec-osf%,alpha,$(target)),alpha)
+configargs := $(configargs) --with-stabs
 endif
 
 # We must use stabs for SVR4 targets.
 ifeq ($(target),i386-sysv4.2)
-configargs = -with-stabs
+configargs := $(configargs) --with-stabs
 endif
 
 ifneq ($(CC), 'cc')
@@ -280,14 +289,38 @@ configargs := $(configargs) --with-headers=/s1/cygnus/dejagnu/$(target)/include 
                 --with-libs=/s1/cygnus/dejagnu/$(target)/lib
 endif
 
+ifeq ($(patsubst %-i386-netware,i386-netware,$(target)),i386-netware)
+configargs := $(configargs) \
+	--with-headers=/s1/cygnus/dejagnu/$(target)/include \
+	--with-libs=/s1/cygnus/dejagnu/$(target)/lib
+endif
+
 ifeq ($(patsubst %-sparc-sun-sunos4.1.3,sparc-sun-sunos4.1.3,$(target)),sparc-sun-sunos4.1.3)
-configargs := $(configargs) --with-headers=/s1/cygnus/dejagnu/$(target)/include \
-                --with-libs=/s1/cygnus/dejagnu/$(target)/lib
+configargs := $(configargs) \
+	--with-headers=/s1/cygnus/dejagnu/$(target)/include \
+	--with-libs=/s1/cygnus/dejagnu/$(target)/lib
 endif
 
 ifeq ($(patsubst %-sparc-sun-solaris2,sparc-sun-solaris2,$(target)),sparc-sun-solaris2)
-configargs := $(configargs) --with-headers=/s1/cygnus/dejagnu/$(target)/include \
-                --with-libs=/s1/cygnus/dejagnu/$(target)/lib
+configargs := $(configargs) \
+	--with-headers=/s1/cygnus/dejagnu/$(target)/include \
+	--with-libs=/s1/cygnus/dejagnu/$(target)/lib
+endif
+
+ifeq ($(patsubst %-i960-vxworks5.1,i960-vxworks5.1,$(target)),i960-vxworks5.1)
+configargs := $(configargs) \
+	--with-headers=/s1/cygnus/dejagnu/$(target)/include
+endif
+
+ifeq ($(patsubst %-m68k-vxworks5.1,m68k-vxworks5.1,$(target)),m68k-vxworks5.1)
+configargs := $(configargs) \
+	--with-headers=/s1/cygnus/dejagnu/$(target)/include
+endif
+
+ifeq ($(patsubst %-i386-unixware,i386-unixware,$(target)),i386-unixware)
+configargs := $(configargs) \
+	--with-headers=/s1/cygnus/dejagnu/$(target)/include \
+	--with-libs=/s1/cygnus/dejagnu/$(target)/lib
 endif
 
 ifneq ($(build),$(host))
@@ -546,6 +579,9 @@ $(host)-stamp-stage1-installed: $(host)-stamp-stage1-checked
 ifeq ($(host),rs6000-ibm-aix)
 	-rm $(relbindir)/make
 endif
+ifeq ($(host),rs6000-ibm-aix3.2.5)
+	-rm $(relbindir)/make
+endif
 	touch $@
 
 $(host)-stamp-stage1-checked: $(host)-stamp-stage1-built
@@ -568,9 +604,9 @@ do2:	$(HOLESDIR) $(host)-stamp-stage2
 
 do2-vault: $(HOLESSTAMP) $(host)-stamp-stage2-built
 	if [ -d $(WORKING_DIR).2 ] ; then \
-	  $(SET_CYGNUS_PATH) cd $(WORKING_DIR).2 ; $(MAKE) $(FLAGS_TO_PASS) host=$(host) "CFLAGS=$(CFLAGS)" vault-install ; \
+	  $(SET_CYGNUS_PATH) cd $(WORKING_DIR).2 ; $(MAKE) $(FLAGS_TO_PASS) host=$(host) "CFLAGS=$(GNUCFLAGS)" vault-install ; \
 	else \
-	  $(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(MAKE) $(FLAGS_TO_PASS) host=$(host) "CFLAGS=$(CFLAGS)" vault-install ; \
+	  $(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(MAKE) $(FLAGS_TO_PASS) host=$(host) "CFLAGS=$(GNUCFLAGS)" vault-install ; \
 	fi
 
 
@@ -592,17 +628,17 @@ $(host)-stamp-stage2:
 # we delete the installed make program.
 $(host)-stamp-stage2-installed: $(host)-stamp-stage2-checked
 	-rm -f $(relbindir)/make
-	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(GNU_MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" install host=$(host)
-	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" install-info host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(GNU_MAKE) -w $(FLAGS_TO_PASS) $(GNUC) install host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) install-info host=$(host)
 	touch $@
 
 $(host)-stamp-stage2-checked: $(host)-stamp-stage2-built
-#	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" check host=$(host)
+#	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) check host=$(host)
 	touch $@
 
 $(host)-stamp-stage2-built: $(host)-stamp-stage2-configured
-	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" all host=$(host)
-	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" info host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) all host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) info host=$(host)
 	touch $@
 
 $(host)-stamp-stage2-configured:
@@ -616,9 +652,9 @@ do3:	$(HOLESDIR) $(host)-stamp-stage3
 
 do3-vault: $(HOLESSTAMP) $(host)-stamp-stage3-built
 	if [ -d $(WORKING_DIR).3 ] ; then \
-	  $(SET_CYGNUS_PATH) cd $(WORKING_DIR).3 ; $(MAKE) $(FLAGS_TO_PASS) host=$(host) "CFLAGS=$(CFLAGS)" vault-install ; \
+	  $(SET_CYGNUS_PATH) cd $(WORKING_DIR).3 ; $(MAKE) $(FLAGS_TO_PASS) host=$(host) "CFLAGS=$(GNUCFLAGS)" vault-install ; \
 	else \
-	  $(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(MAKE) $(FLAGS_TO_PASS) host=$(host) "CFLAGS=$(CFLAGS)" vault-install ; \
+	  $(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(MAKE) $(FLAGS_TO_PASS) host=$(host) "CFLAGS=$(GNUCFLAGS)" vault-install ; \
 	fi
 
 $(host)-stamp-stage3:
@@ -638,24 +674,24 @@ $(host)-stamp-stage3:
 # we delete the installed make program.
 $(host)-stamp-stage3-installed: $(host)-stamp-stage3-checked
 	-rm -f $(relbindir)/make
-	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(GNU_MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" install host=$(host)
-	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" install-info host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(GNU_MAKE) -w $(FLAGS_TO_PASS) $(GNUC) install host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) install-info host=$(host)
 	if [ -f VAULT-INSTALL ] ; then \
 	  $(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(MAKE) $(FLAGS_TO_PASS) $(GNUC) vault-install ; \
 	else true ; fi
 	touch $@
 
 $(host)-stamp-stage3-checked: $(host)-stamp-stage3-built
-#	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" check host=$(host)
+#	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) check host=$(host)
 	touch $@
 
 $(host)-check-3stage: $(host)-stamp-stage3
-	$(SET_CYGNUS_PATH) cd $(STAGE3DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" check host=$(host)
+	$(SET_CYGNUS_PATH) cd $(STAGE3DIR) ; $(TIME) $(MAKE) -k -w $(FLAGS_TO_PASS) $(GNUC) check host=$(host)
 	touch $@
 
 $(host)-stamp-stage3-built: $(host)-stamp-stage3-configured
-	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" all host=$(host)
-	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" info host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) all host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) info host=$(host)
 	touch $@
 
 $(host)-stamp-stage3-configured:
@@ -679,17 +715,17 @@ $(host)-stamp-stage4:
 
 
 $(host)-stamp-stage4-installed: $(host)-stamp-stage4-checked
-	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" install host=$(host)
-	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" install-info host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) install host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) install-info host=$(host)
 	touch $@
 
 $(host)-stamp-stage4-checked: $(host)-stamp-stage4-built
-#	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" check host=$(host)
+#	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) check host=$(host)
 	touch $@
 
 $(host)-stamp-stage4-built: $(host)-stamp-stage4-configured
-	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" all host=$(host)
-	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" info host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) all host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) info host=$(host)
 	touch $@
 
 $(host)-stamp-stage4-configured:
@@ -743,6 +779,7 @@ HOLES := \
 	sh \
 	sleep \
 	sort \
+	tail \
 	tar \
 	test \
 	time \
@@ -751,6 +788,7 @@ HOLES := \
 	true \
 	uname \
 	uniq \
+	uptime \
 	uudecode \
 	wc \
 	whoami
@@ -804,6 +842,7 @@ HOLE_DIRS := \
 	/bin \
 	/usr/bin \
 	/usr/ucb \
+	/etc /usr/etc \
 	/usr/unsupported/bin
 
 ### look in these directories for alternate versions of some tools.
