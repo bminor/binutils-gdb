@@ -18,21 +18,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ansidecl.h"
 #include "opcode/mn10300.h"
 
-/* Formats.  Right now we don't use this.  We probably will later for
-   the size of the instruction and other random stuff.  */
-#define FMT_S0 1
-#define FMT_S1 2
-#define FMT_S2 3
-#define FMT_S4 4
-#define FMT_S6 5
-#define FMT_D0 6
-#define FMT_D1 7
-#define FMT_D2 8
-#define FMT_D4 9
-#define FMT_D5 10
-
-/* Operands currently used.  This is temporary.  */
-
 
 const struct mn10300_operand mn10300_operands[] = {
 #define UNUSED	0
