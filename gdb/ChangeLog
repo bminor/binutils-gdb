@@ -1,5 +1,8 @@
 Wed Oct 21 03:51:01 1992  John Gilmore  (gnu@cygnus.com)
 
+	* coredep.c:  Include "nm.h" to get REGISTER_U_ADDR.
+	* doc/gdbint.texinfo:  Improve REGISTER_U_ADDR and USE_PROC_FS doc.
+
 	* Makefile.in (VERSION):  Tick to 4.6.9.
 
 Tue Oct 20 23:27:56 1992  John Gilmore  (gnu@cygnus.com)
