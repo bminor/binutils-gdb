@@ -24,6 +24,9 @@
 /* Define if the "%Lg" format works to print long doubles. */
 #undef PRINTF_HAS_LONG_DOUBLE
 
+/* Define if the "%Lg" format works to scan long doubles. */
+#undef SCANF_HAS_LONG_DOUBLE
+
 /* Define if using Solaris thread debugging.  */
 #undef HAVE_THREAD_DB_LIB
 

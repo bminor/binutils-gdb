@@ -1,3 +1,21 @@
+Mon Nov 24 08:59:28 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/i386/tm-fbsd.h: New file.
+	* config/i386/fbsd.mt (TM_FILE): Change to tm-fbsd.h.
+
+	* config/i386/nm-fbsd.h (FLOAT_INFO): Move definition from here.
+ 	* config/i386/tm-fbsd.h (FLOAT_INFO): To here.
+
+	* configure.in (PRINTF_HAS_LONG_LONG): Check full functionality of
+ 	%ll format specifier.
+	(SCANF_HAS_LONG_DOUBLE): Check the scanf family for support of
+ 	long double using %Lg.
+	* acconfig.h: Provide default undef for SCANF_HAS_LONG_DOUBLE.
+	* configure: Re-generate.
+	
+	* c-exp.y (parse_number): Use sscanf %Lg when host has
+ 	SCANF_HAS_LONG_DOUBLE not PRINTF_HAS_LONG_DOUBLE
+
 Sun Nov 23 17:12:58 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* printcmd.c (print_insn): Set the machine type if known.

@@ -1,3 +1,8 @@
+Mon Nov 24 13:55:21 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbint.texinfo (Host Conditionals): Document
+ 	PRINTF_HAS_LONG_DOUBLE, SCANF_HAS_LONG_DOUBLE, HAVE_LONG_DOUBLE.
+
 Fri Jul  4 14:52:31 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gdbint.texinfo (Host Conditionals): Add CRLF_SOURCE_LINES.

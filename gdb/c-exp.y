@@ -936,7 +936,7 @@ parse_number (p, len, parsed_float, putithere)
 	num = sscanf (p, "%lg%c", (double *) &putithere->typed_val_float.dval,&c);
       else
 	{
-#ifdef PRINTF_HAS_LONG_DOUBLE
+#ifdef SCANF_HAS_LONG_DOUBLE
 	  num = sscanf (p, "%Lg%c", &putithere->typed_val_float.dval,&c);
 #else
 	  /* Scan it into a double, then assign it to the long double.

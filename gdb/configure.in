@@ -119,10 +119,14 @@ AC_MSG_CHECKING(for long long support in printf)
 AC_CACHE_VAL(gdb_cv_printf_has_long_long,
 [AC_TRY_RUN([
 int main () {
-  char buf[16];
-  long long l = 0x12345;
-  sprintf (buf, "%llx", l);
-  return (strcmp ("12345", buf));
+  char buf[32];
+  long long l = 0;
+  l = (l << 16) + 0x0123;
+  l = (l << 16) + 0x4567;
+  l = (l << 16) + 0x89ab;
+  l = (l << 16) + 0xcdef;
+  sprintf (buf, "0x%016llx", l);
+  return (strcmp ("0x0123456789abcdef", buf));
 }],
 gdb_cv_printf_has_long_long=yes,
 gdb_cv_printf_has_long_long=no,
@@ -163,6 +167,25 @@ if test $gdb_cv_printf_has_long_double = yes; then
   AC_DEFINE(PRINTF_HAS_LONG_DOUBLE)
 fi
 AC_MSG_RESULT($gdb_cv_printf_has_long_double)
+
+dnl See if the compiler and runtime support scanning long doubles
+
+AC_MSG_CHECKING(for long double support in scanf)
+AC_CACHE_VAL(gdb_cv_scanf_has_long_double,
+[AC_TRY_RUN([
+int main () {
+  char *buf = "3.141592653";
+  long double f = 0;
+  sscanf (buf, "%Lg", &f);
+  return !(f > 3.14159 && f < 3.14160);
+}],
+gdb_cv_scanf_has_long_double=yes,
+gdb_cv_scanf_has_long_double=no,
+gdb_cv_scanf_has_long_double=no)])
+if test $gdb_cv_scanf_has_long_double = yes; then
+  AC_DEFINE(SCANF_HAS_LONG_DOUBLE)
+fi
+AC_MSG_RESULT($gdb_cv_scanf_has_long_double)
 
 AC_FUNC_MMAP
 
