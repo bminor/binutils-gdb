@@ -1,3 +1,7 @@
+2004-08-08  Daniel Jacobowitz  <dan@debian.org>
+
+	* gdb.arch/i386-prologue.exp: Compile without debug information.
+
 2004-08-08  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* lib/gdb.exp (gdb_get_line_number): Rewrite with native tcl
