@@ -1,3 +1,8 @@
+Mon Apr 28 17:27:40 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* top.c: change "to enable to enable" to "to enable" in a couple
+	of help strings.
+
 Thu Apr 24 14:38:18 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* gdb.base/callfuncs.exp: Mark some tests as expected to fail

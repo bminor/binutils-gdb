@@ -1,3 +1,8 @@
+Mon Apr 28 17:27:40 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* top.c: change "to enable to enable" to "to enable" in a couple
+	of help strings.
+
 Mon Apr 28 09:01:59 1997  Mark Alexander  <marka@cygnus.com>
 
 	* breakpoint.c (remove_breakpoint): Pass correct type to

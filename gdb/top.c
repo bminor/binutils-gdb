@@ -3567,7 +3567,7 @@ hitting return.");
   add_show_from_set
     (add_set_cmd ("editing", class_support, var_boolean, (char *)&command_editing_p,
 	   "Set editing of command lines as they are typed.\n\
-Use \"on\" to enable to enable the editing, and \"off\" to disable it.\n\
+Use \"on\" to enable the editing, and \"off\" to disable it.\n\
 Without an argument, command line editing is enabled.  To edit, use\n\
 EMACS-like or VI-like commands like control-P or ESC.", &setlist),
      &showlist);
@@ -3588,7 +3588,7 @@ Without an argument, history expansion is enabled.", &sethistlist),
   add_show_from_set
     (add_set_cmd ("save", no_class, var_boolean, (char *)&write_history_p,
 	   "Set saving of the history record on exit.\n\
-Use \"on\" to enable to enable the saving, and \"off\" to disable it.\n\
+Use \"on\" to enable the saving, and \"off\" to disable it.\n\
 Without an argument, saving is enabled.", &sethistlist),
      &showhistlist);
 
