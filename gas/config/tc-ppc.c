@@ -182,6 +182,11 @@ static asection *ppc_coff_debug_section;
 static bfd_size_type ppc_debug_name_section_size;
 
 #endif /* OBJ_COFF */
+
+#ifdef OBJ_ELF
+symbolS *GOT_symbol;		/* Pre-defined "_GLOBAL_OFFSET_TABLE" */
+#endif /* OBJ_ELF */
+
 
 #ifdef OBJ_ELF
 CONST char *md_shortopts = "um:VQ:";

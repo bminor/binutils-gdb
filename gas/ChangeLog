@@ -1,3 +1,12 @@
+Thu Jan 26 11:35:33 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* configure: Add support for configuring powerpc-*-eabi.
+
+	* config/tc-ppc.c (GOT_symbol): Define if object format is ELF.
+
+	* config/tc-ppc.h (GLOBAL_OFFSET_TABLE_NAME): Define if object
+	format is ELF and not defined to be "_GLOBAL_OFFSET_TABLE_".
+
 Wed Jan 25 16:23:13 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* tc-sh.c (little): Add argument IGNORE to avoid compiler warnings.
