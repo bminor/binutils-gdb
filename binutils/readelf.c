@@ -27,6 +27,9 @@
 #include <stdio.h>
 #include <time.h>
 
+/* Define BFD64 here, even if our default architecture is 32 bit ELF
+   as this will allow us to read in and parse 64bit and 32bit ELF files.  */
+#define BFD64
 #include "bfd.h"
 
 #include "elf/common.h"
@@ -76,6 +79,7 @@ unsigned int    	rela_addr;
 unsigned int    	rela_size;
 char *          	dynamic_strings;
 char *			string_table;
+unsigned long           num_dynamic_syms;
 Elf_Internal_Sym * 	dynamic_symbols;
 Elf_Internal_Syminfo *	dynamic_syminfo;
 unsigned long   	dynamic_syminfo_offset;
@@ -120,7 +124,7 @@ static bfd_vma            byte_get_little_endian      PARAMS ((unsigned char *, 
 static bfd_vma            byte_get_big_endian         PARAMS ((unsigned char *, int));
 static const char *       get_mips_dynamic_type       PARAMS ((unsigned long));
 static const char *       get_dynamic_type            PARAMS ((unsigned long));
-static int                dump_relocations            PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Sym *, char *, int));
+static int                dump_relocations            PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Sym *, unsigned long, char *, int));
 static char *             get_file_type               PARAMS ((unsigned));
 static char *             get_machine_name            PARAMS ((unsigned));
 static char *             get_machine_flags           PARAMS ((unsigned, unsigned));
@@ -430,11 +434,12 @@ guess_is_rela (e_machine)
 
 /* Display the contents of the relocation data found at the specified offset.  */
 static int
-dump_relocations (file, rel_offset, rel_size, symtab, strtab, is_rela)
+dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
      FILE *             file;
      unsigned long      rel_offset;
      unsigned long      rel_size;
      Elf_Internal_Sym * symtab;
+     unsigned long      nsyms;
      char *             strtab;
      int                is_rela;
 {
@@ -592,7 +597,6 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab, is_rela)
 	  offset = rels [i].r_offset;
 	  info   = rels [i].r_info;
 	}
-
       
       if (is_32bit_elf)
 	{
@@ -708,24 +712,32 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab, is_rela)
       else
 	printf ("%-21.21s", rtype);
 
-      if (symtab_index && symtab != NULL)
+      if (symtab_index)
 	{
-	  Elf_Internal_Sym * psym;
+	  if (symtab != NULL)
+	    {
+	      if (symtab_index >= nsyms)
+		printf (" bad symbol index: %08lx", (unsigned long) symtab_index);
+	      else
+		{
+		  Elf_Internal_Sym * psym;
 
-	  psym = symtab + symtab_index;
-
-	  printf (" %08lx  ", (unsigned long) psym->st_value);
-
-	  if (psym->st_name == 0)
-	    printf ("%-25.25s",
-		    SECTION_NAME (section_headers + psym->st_shndx));
-	  else if (strtab == NULL)
-	    printf (_("<string table index %3ld>"), psym->st_name);
-	  else
-	    printf ("%-25.25s", strtab + psym->st_name);
-
-	  if (is_rela)
-	    printf (" + %lx", (unsigned long) relas [i].r_addend);
+		  psym = symtab + symtab_index;
+		  
+		  printf (" %08lx  ", (unsigned long) psym->st_value);
+		  
+		  if (psym->st_name == 0)
+		    printf ("%-25.25s",
+			    SECTION_NAME (section_headers + psym->st_shndx));
+		  else if (strtab == NULL)
+		    printf (_("<string table index %3ld>"), psym->st_name);
+		  else
+		    printf ("%-25.25s", strtab + psym->st_name);
+		  
+		  if (is_rela)
+		    printf (" + %lx", (unsigned long) relas [i].r_addend);
+		}
+	    }
 	}
       else if (is_rela)
 	printf ("%34c%lx", ' ', (unsigned long) relas[i].r_addend);
@@ -2042,9 +2054,9 @@ process_section_headers (file)
 	      continue;
 	    }
 
+	  num_dynamic_syms = section->sh_size / section->sh_entsize;
 	  dynamic_symbols =
-	    GET_ELF_SYMBOLS (file, section->sh_offset,
-			     section->sh_size / section->sh_entsize);
+	    GET_ELF_SYMBOLS (file, section->sh_offset, num_dynamic_syms);
 	}
       else if (section->sh_type == SHT_STRTAB
 	       && strcmp (name, ".dynstr") == 0)
@@ -2144,6 +2156,7 @@ process_relocs (file)
 	{
 	  rel_offset = dynamic_info[DT_JMPREL];
 	  rel_size   = dynamic_info[DT_PLTRELSZ];
+	  
 	  switch (dynamic_info[DT_PLTREL])
 	    {
 	    case DT_REL:
@@ -2165,7 +2178,7 @@ process_relocs (file)
 	     rel_offset, rel_size);
 
 	  dump_relocations (file, rel_offset - loadaddr, rel_size,
-			    dynamic_symbols, dynamic_strings, is_rela);
+			    dynamic_symbols, num_dynamic_syms, dynamic_strings, is_rela);
 	}
       else
 	printf (_("\nThere are no dynamic relocations in this file.\n"));
@@ -2194,26 +2207,22 @@ process_relocs (file)
 	      Elf_Internal_Sym *    symtab;
 	      char *                strtab;
 	      int                   is_rela;
+	      unsigned long         nsyms;
 	      
 	      printf (_("\nRelocation section "));
 
 	      if (string_table == NULL)
-		{
-		  printf ("%d", section->sh_name);
-		}
+		printf ("%d", section->sh_name);
 	      else
-		{
-		  printf ("'%s'", SECTION_NAME (section));
-		}
+		printf ("'%s'", SECTION_NAME (section));
 
 	      printf (_(" at offset 0x%lx contains %lu entries:\n"),
 		 rel_offset, (unsigned long) (rel_size / section->sh_entsize));
 
 	      symsec = section_headers + section->sh_link;
 
-	      symtab = 
-		GET_ELF_SYMBOLS (file, symsec->sh_offset,
-				 symsec->sh_size / symsec->sh_entsize);
+	      nsyms = symsec->sh_size / symsec->sh_entsize;
+	      symtab = GET_ELF_SYMBOLS (file, symsec->sh_offset, nsyms);
 
 	      if (symtab == NULL)
 		continue;
@@ -2225,7 +2234,7 @@ process_relocs (file)
 	      
 	      is_rela = section->sh_type == SHT_RELA;
 
-	      dump_relocations (file, rel_offset, rel_size, symtab, strtab, is_rela);
+	      dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela);
 
 	      free (strtab);
 	      free (symtab);
@@ -2425,7 +2434,6 @@ process_dynamic_segment (file)
 	   ++i, ++ entry)
 	{
 	  unsigned long        offset;
-	  long                 num_syms;
 
 	  if (entry->d_tag != DT_SYMTAB)
 	    continue;
@@ -2442,17 +2450,17 @@ process_dynamic_segment (file)
 	    error (_("Unable to seek to end of file!"));
 
 	  if (is_32bit_elf)
-	    num_syms = (ftell (file) - offset) / sizeof (Elf32_External_Sym);
+	    num_dynamic_syms = (ftell (file) - offset) / sizeof (Elf32_External_Sym);
 	  else
-	    num_syms = (ftell (file) - offset) / sizeof (Elf64_External_Sym);
+	    num_dynamic_syms = (ftell (file) - offset) / sizeof (Elf64_External_Sym);
 
-	  if (num_syms < 1)
+	  if (num_dynamic_syms < 1)
 	    {
 	      error (_("Unable to determine the number of symbols to load\n"));
 	      continue;
 	    }
 
-	  dynamic_symbols = GET_ELF_SYMBOLS (file, offset, num_syms);
+	  dynamic_symbols = GET_ELF_SYMBOLS (file, offset, num_dynamic_syms);
 	}
     }
 
@@ -5866,7 +5874,7 @@ process_mips_specific (file)
 
       for (cnt = 0; cnt < conflictsno; ++cnt)
 	{
-	  Elf_Internal_Sym *psym = &dynamic_symbols[iconf[cnt]];
+	  Elf_Internal_Sym * psym = &dynamic_symbols[iconf[cnt]];
 
 	  printf ("%5u: %8lu  %#10lx  %s\n",
 		  cnt, iconf[cnt], (unsigned long) psym->st_value,
@@ -6050,6 +6058,7 @@ process_file (file_name)
     {
       free (dynamic_symbols);
       dynamic_symbols = NULL;
+      num_dynamic_syms = 0;
     }
 
   if (dynamic_syminfo)
