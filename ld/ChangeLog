@@ -1,3 +1,7 @@
+Wed Sep 30 07:34:09 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* config/z8ksim.mt: new file
+
 Fri Sep 25 13:49:52 1992  Ken Raeburn  (raeburn@kyriath.cygnus.com)
 
 	* Makefile.in (ldexp.o, ldctor.o, ldlang.o, ldmain.o, ldwrite.o,
@@ -5,7 +9,7 @@ Fri Sep 25 13:49:52 1992  Ken Raeburn  (raeburn@kyriath.cygnus.com)
 
 	* ld.h (strip_symbols_type): Add value STRIP_SOME.
 	* ldgram.y (OPTION_RETAIN_SYMBOLS_FILE): New terminal token.
-	(lang_add_keepsyms_file): New function.
+	* ldlang.c (lang_add_keepsyms_file): New function.
 	* ldlex.l: Handle "-retain-symbols-file".
 	* ldsym.c (keepsyms_file, kept_syms): New vars.
 	(process_keepsyms): New functihon; reads file, marks symbols for

@@ -1,0 +1,2 @@
+EMUL=z8ksim
+

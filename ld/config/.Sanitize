@@ -58,6 +58,7 @@ sun3.mt
 sun4.mt
 vxworks68.mt
 vxworks960.mt
+z8ksim.mt
 Do-last:
 
 echo Done in `pwd`.
