@@ -130,18 +130,20 @@ extern void sh_coff_reloc_mangle
 extern int tc_coff_sizemachdep PARAMS ((fragS *));
 
 #ifdef BFD_ASSEMBLER
-#define SUB_SEGMENT_ALIGN(SEG) 4
+#define SEG_NAME(SEG) segment_name (SEG)
 #else
-/* We align most sections to a 16 byte boundary.  */
-#define SUB_SEGMENT_ALIGN(SEG)					\
-  (strncmp (obj_segment_name (SEG), ".stabstr", 8) == 0		\
-   ? 0								\
-   : ((strncmp (obj_segment_name (SEG), ".stab", 5) == 0	\
-       || strcmp (obj_segment_name (SEG), ".ctors") == 0	\
-       || strcmp (obj_segment_name (SEG), ".dtors") == 0)	\
-      ? 2							\
-      : (sh_small ? 2 : 4)))
+#define SEG_NAME(SEG) obj_segment_name (SEG)
 #endif
+
+/* We align most sections to a 16 byte boundary.  */
+#define SUB_SEGMENT_ALIGN(SEG)				\
+  (strncmp (SEG_NAME (SEG), ".stabstr", 8) == 0		\
+   ? 0							\
+   : ((strncmp (SEG_NAME (SEG), ".stab", 5) == 0	\
+       || strcmp (SEG_NAME (SEG), ".ctors") == 0	\
+       || strcmp (SEG_NAME (SEG), ".dtors") == 0)	\
+      ? 2						\
+      : (sh_small ? 2 : 4)))
 
 #endif /* OBJ_COFF */
 
