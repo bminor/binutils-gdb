@@ -1,3 +1,7 @@
+2003-08-11  Ben Elliston  <bje@wasabisystems.com>
+
+	* MAINTAINERS (write after approval): Update my mail address.
+
 2003-08-10  Andrew Cagney  <cagney@redhat.com>
 
 	* Makefile.in (monitor.o): Do not build monitor.c with -Werror.
