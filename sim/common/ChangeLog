@@ -1,3 +1,11 @@
+Wed Mar 18 12:38:12 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* aclocal.m4 (SIM_AC_OPTION_HARDWARE): Set sim_hw_obj, sim_dv_obj,
+ 	sim_dv_src in Makefile. Take list of devices as parameter to m4
+ 	macro..
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Mon Mar 16 12:37:33 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-trace.h, sim-trace.c (trace_prefix): Pass in sim_cia so that

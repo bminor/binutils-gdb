@@ -1,3 +1,7 @@
+Wed Mar 18 12:38:12 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Wed Mar 11 14:12:56 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* alu.h (IMEM32_IMMED, IMEM32, STORE, MEM): Replace sim_core_*_map

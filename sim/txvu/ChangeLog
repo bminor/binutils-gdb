@@ -1,3 +1,7 @@
+Wed Mar 18 12:38:12 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Wed Mar 11 14:14:02 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_write, sim_read, load_memory, store_memory):
