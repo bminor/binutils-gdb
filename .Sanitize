@@ -241,7 +241,7 @@ if [ -n "${verbose}" ] ; then
 	echo Processing \"d10v\"...
 fi
 
-d10v_files="ChangeLog config.sub"
+d10v_files="ChangeLog config.sub configure.in"
 
 if ( echo $* | grep keep\-d10v > /dev/null ) ; then
 	for i in $d10v_files ; do

@@ -418,6 +418,11 @@ case "${target}" in
   arm-*-riscix*)
     noconfigdirs="$noconfigdirs ld target-libgloss"
     ;;
+# start-sanitize-d10v
+  d10v-*-*)
+    noconfigdirs="$noconfigdirs target-libgloss"
+    ;;
+# end-sanitize-d10v
   h8300*-*-* | \
   h8500-*-*)
     noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio target-librx target-libgloss"
