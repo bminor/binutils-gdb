@@ -252,9 +252,12 @@ typedef struct unwind_record
    True if we are willing to perform this relocation while building
    the .o file.  This is only used for pcrel relocations.  */
 
+/* If the reloc type is BFD_RELOC_UNUSED, then this is for a TAG13/TAG13b field
+   which has no external reloc, so we must resolve the value now.  */
+
 #define TC_RELOC_RTSYM_LOC_FIXUP(FIX)				\
   ((FIX)->fx_addsy == NULL					\
-   || (FIX)->fx_r_type == 0					\
+   || (FIX)->fx_r_type == BFD_RELOC_UNUSED			\
    || (! S_IS_EXTERNAL ((FIX)->fx_addsy)			\
        && ! S_IS_WEAK ((FIX)->fx_addsy)				\
        && S_IS_DEFINED ((FIX)->fx_addsy)			\

@@ -5165,7 +5165,10 @@ operand_match (idesc, index, e)
 
 	case O_symbol:
 	  fix = CURR_SLOT.fixup + CURR_SLOT.num_fixups;
-	  fix->code = ia64_gen_real_reloc_type (e->X_op_symbol, 0);
+	  /* There are no external relocs for TAG13/TAG13b fields, so we
+	     create a dummy reloc.  This will not live past md_apply_fix3.  */
+	  fix->code = BFD_RELOC_UNUSED;
+	  fix->code = ia64_gen_real_reloc_type (e->X_op_symbol, fix->code);
 	  fix->opnd = idesc->operands[index];
 	  fix->expr = *e;
 	  fix->is_pcrel = 1;
@@ -9804,16 +9807,15 @@ md_apply_fix3 (fix, valuep, seg)
     }
   if (fix->fx_addsy)
     {
-      switch (fix->fx_r_type)
+      if (fix->fx_r_type == (int) BFD_RELOC_UNUSED)
 	{
-	case 0:
+	  /* This must be a TAG13 or TAG13b operand.  There are no external
+	     relocs defined for them, so we must give an error.  */
 	  as_bad_where (fix->fx_file, fix->fx_line,
 			"%s must have a constant value",
 			elf64_ia64_operands[fix->tc_fix_data.opnd].desc);
-	  break;
-
-	default:
-	  break;
+	  fix->fx_done = 1;
+	  return 1;
 	}
 
       /* ??? This is a hack copied from tc-i386.c to make PCREL relocs

@@ -1,3 +1,11 @@
+2001-02-13  Jim Wilson  <wilson@redhat.com>
+
+	* config/tc-ia64.c (operand_match, case TAG13): Make a BFD_RELOC_UNUSED
+	reloc instead of a 0 reloc.
+	(md_apply_fix3): Check for BFD_RELOC_UNUSED instead of 0, and mark it
+	as done.
+	* config/tc-ia64.h (TC_RELOC_RTSYM_LOC_FIXUP): Likewise.
+
 2001-02-13  Ian Lance Taylor  <ian@zembu.com>
 
 	* write.c (is_dnrange): Stop as soon as the address becomes
