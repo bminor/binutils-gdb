@@ -32,7 +32,10 @@ typedef void *serial_ttystate;
 struct serial;
 
 /* Try to open NAME.  Returns a new `struct serial *' on success, NULL
-   on failure. */
+   on failure. Note that some open calls can block and, if possible, 
+   should be  written to be non-blocking, with calls to ui_look_hook 
+   so they can be cancelled. An async interface for open could be
+   added to GDB if necessary. */
 
 extern struct serial *serial_open (const char *name);
 
