@@ -180,7 +180,7 @@ ALL_EMULATIONS = elnk960.o esun3.o ei386aout.o ego32.o evsta.o \
 	ehppaelf.o emipsidtl.o esh.o eelf_i386.o ealpha.o \
 	ei386lynx.o em68klynx.o esparclynx.o ecoff_sparc.o \
 	eelf32ppc.o ei386go32.o em68kaout.o ei386linux.o \
-	eelf32_sparc.o eelf64_sparc.o eriscix.o
+	eelf32_sparc.o eelf64_sparc.o eriscix.o eelf32mipb.o eelf32mipl.o
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
@@ -373,6 +373,9 @@ eelf_i386.c: $(srcdir)/emulparams/elf_i386.sh \
 eelf32mipb.c: $(srcdir)/emulparams/elf32mipb.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32mipb
+eelf32mipl.c: $(srcdir)/emulparams/elf32mipl.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32mipl
 ealpha.c: $(srcdir)/emulparams/alpha.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/alpha.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} alpha

@@ -1,6 +1,8 @@
 Tue Sep 20 14:35:27 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* configure.in (mips*el-elf*): New target.
+	* Makefile.in (ALL_EMULATIONS): Add eelf32mipb.o and eelf32mipl.o.
+	(eelf32mipl.c): New target.
 	* config/mipsl-elf32.mt: New file.
 	* emulparams/elf32mipl.sh: New file.
 
