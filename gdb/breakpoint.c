@@ -5141,7 +5141,10 @@ break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_b
 	{
 	  /* If called to resolve pending breakpoint, just return error code.  */
 	  if (pending_bp)
-	    return rc;
+	    {
+	      xfree (err_msg);
+	      return rc;
+	    }
 
 	  error_output_message (NULL, err_msg);
 	  xfree (err_msg);
@@ -5169,7 +5172,10 @@ break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_b
 	  pending = 1;
 	}
       else
-	return rc;
+	{
+	  xfree (err_msg);
+	  return rc;
+	}
     }
   else if (!sals.nelts)
     return GDB_RC_FAIL;

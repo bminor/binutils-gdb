@@ -1,3 +1,8 @@
+2005-01-04  Andreas Schwab  <schwab@suse.de>
+
+	* breakpoint.c (break_command_1): Always free err_msg before
+	returning when an exception was caught.
+
 2005-01-01  Joel Brobecker  <brobecker@gnat.com>
 
         * hppa-tdep.c (prologue_inst_adjust_sp): Fix small confusion
