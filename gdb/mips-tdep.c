@@ -431,9 +431,6 @@ static CORE_ADDR read_next_frame_reg (struct frame_info *, int);
 
 static void reinit_frame_cache_sfunc (char *, int, struct cmd_list_element *);
 
-static mips_extra_func_info_t find_proc_desc (CORE_ADDR pc,
-					      struct frame_info *next_frame);
-
 static CORE_ADDR after_prologue (CORE_ADDR pc);
 
 static struct type *mips_float_register_type (void);
@@ -1559,6 +1556,7 @@ struct mips_frame_cache
 static struct mips_frame_cache *
 mips_mdebug_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
+  CORE_ADDR startaddr = 0;
   mips_extra_func_info_t proc_desc;
   struct mips_frame_cache *cache;
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
@@ -1575,12 +1573,11 @@ mips_mdebug_frame_cache (struct frame_info *next_frame, void **this_cache)
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
   /* Get the mdebug proc descriptor.  */
-  proc_desc = find_proc_desc (frame_pc_unwind (next_frame), next_frame);
-  if (proc_desc == NULL)
-    /* I'm not sure how/whether this can happen.  Normally when we
-       can't find a proc_desc, we "synthesize" one using
-       heuristic_proc_desc and set the saved_regs right away.  */
-    return cache;
+  proc_desc = non_heuristic_proc_desc (frame_pc_unwind (next_frame),
+				       &startaddr);
+  /* Must be true.  This is only called when the sniffer detected a
+     proc descriptor.  */
+  gdb_assert (proc_desc != NULL);
 
   /* Extract the frame's base.  */
   cache->base = (frame_unwind_register_signed (next_frame, NUM_REGS + PROC_FRAME_REG (proc_desc))
@@ -1850,14 +1847,18 @@ mips_insn16_frame_cache (struct frame_info *next_frame, void **this_cache)
   (*this_cache) = cache;
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
-  /* Get the mdebug proc descriptor.  */
-  proc_desc = find_proc_desc (frame_pc_unwind (next_frame), next_frame);
-  if (proc_desc == NULL)
-    /* I'm not sure how/whether this can happen.  Normally when we
-       can't find a proc_desc, we "synthesize" one using
-       heuristic_proc_desc and set the saved_regs right away.  */
-    return cache;
+  /* Synthesize a proc descriptor.  */
+  {
+    const CORE_ADDR pc = frame_pc_unwind (next_frame);
+    CORE_ADDR start_addr;
 
+    find_pc_partial_function (pc, NULL, &start_addr, NULL);
+    if (start_addr == 0)
+      start_addr = heuristic_proc_start (pc);
+
+    proc_desc = heuristic_proc_desc (start_addr, pc, next_frame);
+  }
+  
   /* Extract the frame's base.  */
   cache->base = (frame_unwind_register_signed (next_frame, NUM_REGS + PROC_FRAME_REG (proc_desc))
 		 + PROC_FRAME_OFFSET (proc_desc) - PROC_FRAME_ADJUST (proc_desc));
@@ -3137,24 +3138,6 @@ non_heuristic_proc_desc (CORE_ADDR pc, CORE_ADDR *addrptr)
     }
   else
     return NULL;
-}
-
-
-static mips_extra_func_info_t
-find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame)
-{
-  mips_extra_func_info_t proc_desc;
-  CORE_ADDR startaddr = 0;
-
-  proc_desc = non_heuristic_proc_desc (pc, &startaddr);
-  if (proc_desc == NULL)
-    {
-      if (startaddr == 0)
-	startaddr = heuristic_proc_start (pc);
-
-      proc_desc = heuristic_proc_desc (startaddr, pc, next_frame);
-    }
-  return proc_desc;
 }
 
 /* MIPS stack frames are almost impenetrable.  When execution stops,

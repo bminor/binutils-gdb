@@ -1,5 +1,11 @@
 2004-09-03  Andrew Cagney  <cagney@gnu.org>
 
+	* mips-tdep.c (find_proc_desc): Delete function.
+	(mips_mdebug_frame_cache): Inline call to find_proc_desc,
+	simplify.
+	(mips_insn16_frame_cache): Replace find_proc_desc with code from
+	mips_insn32_frame_cache.
+
 	* mips-tdep.c (find_proc_desc): Inline call to find_proc_desc.
 	Simplify as NEXT_FRAME is NULL.
 	(find_proc_desc): Simplify as NEXT_FRAME is non-NULL.
