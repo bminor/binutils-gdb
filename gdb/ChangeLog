@@ -1,3 +1,7 @@
+2004-07-08  Jim Blandy  <jimb@redhat.com>
+
+	* rs6000-tdep.c (registers_powerpc_nofp): Unused; deleted.
+
 2004-07-08  Bob Rossi  <bob@brasko.net>
 
 	* symtab.c (lookup_symtab): check return value of symtab_to_fullname

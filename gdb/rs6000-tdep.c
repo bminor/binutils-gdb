@@ -2176,14 +2176,6 @@ static const struct reg registers_powerpc[] =
   PPC_ALTIVEC_REGS
 };
 
-/* PowerPC UISA - a PPC processor as viewed by user-level
-   code, but without floating point registers.  */
-static const struct reg registers_powerpc_nofp[] =
-{
-  COMMON_UISA_NOFP_REGS,
-  PPC_UISA_SPRS
-};
-
 /* IBM PowerPC 403.  */
 static const struct reg registers_403[] =
 {
