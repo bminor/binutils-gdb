@@ -1,5 +1,20 @@
 start-sanitize-v850
+Tue Oct 29 12:22:21 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* v850-opc.c (D9_RELAX): Renamed from D9, all references
+	changed.
+	(v850_operands): Make sure D22 immediately follows D9_RELAX.
+
+end-sanitize-v850
+Fri Oct 25 12:12:53 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* i386-dis.c (print_insn_x86): Set info->bytes_per_line to 5.
+
+start-sanitize-v850
 Thu Oct 24 17:53:52 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* v850-opc.c (insert_d8_6): Fix operand insertion for sld.w
+	and sst.w instructions.
 
 	* v850-opc.c (v850_opcodes): Add "jCC" instructions (aliases for
 	"bCC"instructions).

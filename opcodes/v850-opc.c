@@ -74,19 +74,11 @@ const struct v850_operand v850_operands[] = {
 #define D7	(I16+1)
   { 7, 0, 0, 0, 0},
 
-/* The DISP9 field in a format 3 insn. */
-#define D9	(D7+1)
-  { 9, 0, insert_d9, extract_d9, V850_OPERAND_SIGNED | V850_OPERAND_DISP },
-
 /* The DISP16 field in a format 6 insn. */
-#define D16_15	(D9+1)
+#define D16_15	(D7+1)
   { 16, 16, insert_d16_15, extract_d16_15, V850_OPERAND_SIGNED }, 
 
-/* The DISP22 field in a format 4 insn. */
-#define D22	(D16_15+1)
-  { 22, 0, insert_d22, extract_d22, V850_OPERAND_SIGNED | V850_OPERAND_DISP },
-
-#define B3	(D22+1)
+#define B3	(D16_15+1)
 /* The 3 bit immediate field in format 8 insn.  */
   { 3, 11, 0, 0, 0 },
 
@@ -122,6 +114,17 @@ const struct v850_operand v850_operands[] = {
 #define D16	(SR2+1)
   { 16, 16, 0, 0, V850_OPERAND_SIGNED }, 
 
+/* The DISP22 field in a format 4 insn, relaxable. */
+#define D9_RELAX	(D16+1)
+  { 9, 0, insert_d9, extract_d9, V850_OPERAND_RELAX | V850_OPERAND_SIGNED | V850_OPERAND_DISP },
+
+/* The DISP22 field in a format 4 insn.
+
+   This _must_ follow D9_RELAX; the assembler assumes that the longer
+   version immediately follows the shorter version for relaxing.  */
+#define D22	(D9_RELAX+1)
+  { 22, 0, insert_d22, extract_d22, V850_OPERAND_SIGNED | V850_OPERAND_DISP },
+
 } ; 
 
 
@@ -132,7 +135,7 @@ const struct v850_operand v850_operands[] = {
 #define IF2	{I5, R2}
 
 /* conditional branch instruction format (Format III) */
-#define IF3	{D9}
+#define IF3	{D9_RELAX}
 
 /* 16-bit load/store instruction (Format IV) */
 #define IF4A	{D7, EP, R2}
@@ -265,7 +268,11 @@ const struct v850_opcode v850_opcodes[] = {
 { "br",		BOP(0x5),		BOP_MASK,	IF3, 0 },
 { "bsa",	BOP(0xd),		BOP_MASK,	IF3, 0 },
 
-/* Branch aliases */
+/* Branch macros.
+
+   We use the short form in the opcode/mask fields.  The assembler
+   will twiddle bits as necessary if the long form is needed.  */
+
 	/* signed integer */
 { "jgt",	BOP(0xf),		BOP_MASK,	IF3, 0 },
 { "jge",	BOP(0xe),		BOP_MASK,	IF3, 0 },
@@ -435,7 +442,7 @@ insert_d8_6 (insn, value, errmsg)
   if ((value % 4) != 0)
     *errmsg = "short load/store word at odd offset";
 
-  value >>= 2;
+  value >>= 1;
 
   return (insn | (value & 0x7e));
 }
