@@ -96,6 +96,8 @@ int 			do_dump;
 int 			do_version;
 int			do_histogram;
 
+int			binary_class;
+
 static unsigned long int (* byte_get) PARAMS ((unsigned char *, int));
 
 #define NUM_DUMP_SECTS	100
@@ -1161,7 +1163,8 @@ process_file_header ()
       return 0;
     }
 
-  if (elf_header.e_ident [EI_CLASS] != ELFCLASS32)
+  binary_class = elf_header.e_ident [EI_CLASS];
+  if (binary_class != ELFCLASS32)
     {
       error (_("Not a 32 bit ELF file\n"));
       return 0;
@@ -3285,10 +3288,12 @@ static int
 process_mips_specific (file)
      FILE *file;
 {
-  Elf_Internal_Dyn *    entry;
+  Elf_Internal_Dyn *entry;
   size_t liblist_offset = 0;
   size_t liblistno = 0;
+  size_t conflictsno = 0;
   size_t options_offset = 0;
+  size_t conflicts_offset = 0;
 
   /* We have a lot of special sections.  Thanks SGI!  */
   if (dynamic_segment == NULL)
@@ -3306,6 +3311,12 @@ process_mips_specific (file)
 	break;
       case DT_MIPS_OPTIONS:
 	options_offset = entry->d_un.d_val - loadaddr;
+	break;
+      case DT_MIPS_CONFLICT:
+	conflicts_offset = entry->d_un.d_val - loadaddr;
+	break;
+      case DT_MIPS_CONFLICTNO:
+	conflictsno = entry->d_un.d_val;
 	break;
       default:
 	break;
@@ -3567,6 +3578,59 @@ process_mips_specific (file)
 	}
 
       free (eopt);
+    }
+
+  if (conflicts_offset != 0 && conflictsno != 0)
+    {
+      Elf32_External_Conflict *econf32;
+      Elf64_External_Conflict *econf64;
+      Elf32_Conflict *iconf;
+      size_t cnt;
+
+      if (dynamic_symbols == NULL)
+	{
+	  error (_("conflict list with without table"));
+	  return 0;
+	}
+
+      iconf = (Elf32_Conflict *) malloc (conflictsno * sizeof (*iconf));
+      if (iconf == NULL)
+	{
+	  error (_("Out of memory"));
+	  return 0;
+	}
+
+      if (binary_class == ELFCLASS32)
+	{
+	  GET_DATA_ALLOC (conflicts_offset, conflictsno * sizeof (*econf32),
+			  econf32, Elf32_External_Conflict *, "conflict");
+
+	  for (cnt = 0; cnt < conflictsno; ++cnt)
+	    iconf[cnt] = BYTE_GET (econf32[cnt]);
+	}
+      else
+	{
+	  GET_DATA_ALLOC (conflicts_offset, conflictsno * sizeof (*econf64),
+			  econf64, Elf64_External_Conflict *, "conflict");
+
+	  for (cnt = 0; cnt < conflictsno; ++cnt)
+	    iconf[cnt] = BYTE_GET (econf64[cnt]);
+	}
+
+      printf (_("\nSection '.conflict' contains %d entries:\n"), conflictsno);
+      puts (_("  Num:    Index       Value  Name"));
+
+      for (cnt = 0; cnt < conflictsno; ++cnt)
+	{
+	  Elf_Internal_Sym *psym = &dynamic_symbols[iconf[cnt]];
+
+	  printf ("%5u: %8u  %#10x  %s\n",
+		  cnt, iconf[cnt], (unsigned long) psym->st_value,
+		  dynamic_strings + psym->st_name);
+	}
+
+
+      free (iconf);
     }
 
   return 1;
