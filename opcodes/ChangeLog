@@ -1,3 +1,17 @@
+Wed Feb  7 13:59:54 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (SONAME): New variable.
+	($(SHLINK)): Make a link to the transformed name, as well.
+	(stamp-tshlink): New target.
+	(install): Skip stamp-tshlink during install.
+
+Tue Feb  6 12:28:54 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Call AC_ARG_PROGRAM.
+	* configure: Rebuild.
+	* Makefile.in (program_transform_name): New variable.
+	(install): Transform library name before installing it.
+
 Mon Feb  5 16:14:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* i960-dis.c (mem): Add HX dcinva instruction.
