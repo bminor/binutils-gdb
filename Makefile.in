@@ -1106,8 +1106,7 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) texinfo/texinfo.tex texinfo/gpl.texinfo
 	ln -s ../../texinfo/texinfo.tex proto-toplev/texinfo/
 	ln -s ../../texinfo/gpl.texinfo proto-toplev/texinfo/
 	ln -s ../../texinfo/tex3patch   proto-toplev/texinfo/
-	chmod og=u `find proto-toplev \
-	  etc $(DEVO_SUPPORT) $(SUPPORT_FILES) $(TOOL) -print`
+	chmod og=u `find . -print`
 	(VER=`sed <$(TOOL)/Makefile.in -n 's/^VERSION *= *//p'`; \
 		echo "==> Making $(TOOL)-$$VER.tar.gz"; \
 		ln -s proto-toplev $(TOOL)-$$VER; \
@@ -1134,7 +1133,7 @@ gas+binutils.tar.gz: $(DIST_SUPPORT) $(GASB_SUPPORT_DIRS) gas
 	$(MAKE) -f Makefile.in taz SUPPORT_FILES="$(GASB_SUPPORT_DIRS)" TOOL=gas
 
 .PHONY: libg++.tar.gz
-LIBGXX_SUPPORT_DIRS=include libiberty
+LIBGXX_SUPPORT_DIRS=include libiberty xiberty
 libg++.tar.gz: $(DIST_SUPPORT) libg++
 	$(MAKE) -f Makefile.in taz SUPPORT_FILES="$(LIBGXX_SUPPORT_DIRS)" TOOL=libg++
 
