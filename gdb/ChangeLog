@@ -1,3 +1,8 @@
+2005-03-14  Ben Elliston  <bje@au.ibm.com>
+
+	* Makefile.in (CLIBS): Link libbfd after libopcodes, as it is a
+	more primitive library.
+
 2005-03-13  Mark Kettenis  <kettenis@elgar.gnu.org>
 
 	* inf-ttrace.c (inf_ttrace_pid_to_str): Use snprintf instead of
