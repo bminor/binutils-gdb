@@ -1,3 +1,7 @@
+Tue Mar 21 12:10:06 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* tuples.exp (do_tests): Make names of "print v_ps" test unique.
+
 Wed Mar  8 13:26:36 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* *.exp: Skip all tests silently if skip_chill_tests returns true.
