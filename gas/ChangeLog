@@ -1,5 +1,11 @@
 Mon Jun 10 11:45:51 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* app.c (do_scrub_chars): If '/' is LINE_COMMENT_START, check
+ 	whether the next character is '*' before checking whether we are
+	at the start of a line.  Permit LINE_COMMENT_START to start a
+	comment in state 1 (seen some whitespace) as well, to match the
+	documentation.
+
 	* gasp.c (do_align): Permit a fill value for .align.
 
 Wed Jun  5 17:09:26 1996  Ian Lance Taylor  <ian@cygnus.com>
