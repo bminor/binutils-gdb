@@ -1,3 +1,9 @@
+Tue Sep  9 16:28:28 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gencode.c (build_instruction): Use SIGNED64 for 64 bit
+ 	constants.
+	(build_instruction): Ditto for LL.
+
 start-sanitize-tx19
 Sun Sep  7 16:05:46 1997  Gavin Koch  <gavin@cygnus.com>
 
