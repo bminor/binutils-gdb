@@ -1,3 +1,16 @@
+2004-02-13  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.mi/mi1-basics.exp, gdb.mi/mi1-break.exp: Delete file.
+	* gdb.mi/mi1-console.exp, gdb.mi/mi1-disassemble.exp: Delete file.
+	* gdb.mi/mi1-eval.exp, gdb.mi/mi1-hack-cli.exp: Delete file.
+	* gdb.mi/mi1-pthreads.exp, gdb.mi/mi1-read-memory.exp: Delete file.
+	* gdb.mi/mi1-regs.exp, gdb.mi/mi1-return.exp: Delete file.
+	* gdb.mi/mi1-simplerun.exp, gdb.mi/mi1-stack.exp: Delete file.
+	* gdb.mi/mi1-stepi.exp, gdb.mi/mi1-symbol.exp: Delete file.
+	* gdb.mi/mi1-until.exp, gdb.mi/mi1-var-block.exp: Delete file.
+	* gdb.mi/mi1-var-child.exp, gdb.mi/mi1-var-cmd.exp: Delete file.
+	* gdb.mi/mi1-var-display.exp, gdb.mi/mi1-watch.exp: Delete file.
+
 2004-02-11  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdb.asm/ia64.inc (gdbasm_startup): Make sure first instruction
