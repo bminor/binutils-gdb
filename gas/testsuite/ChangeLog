@@ -1,3 +1,9 @@
+start-sanitize-r5900
+1999-01-06  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* gas/mips/r5900.[sd]: Add tests for multu1/div1/divu1 insns.
+
+end-sanitize-r5900
 1998-12-18  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/fr30/allinsn.s: Fix to match latest assembler syntax.

@@ -34,5 +34,11 @@ stuff:
 
 	mult1	$3,$4,$0
 	mult1	$4,$3
+	multu1	$3,$4,$0
+	multu1	$4,$3
+	div1	$0,$3,$4
+	div1	$4,$3
+	divu1	$0,$3,$4
+	divu1	$4,$3
 # Nop just to fill out ot a 16byte boundary
 	nop

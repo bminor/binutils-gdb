@@ -35,4 +35,10 @@ Disassembly of section \.text:
 0+0068 <stuff\+(0x|)68> min.s	\$f10,\$f12,\$f14
 0+006c <stuff\+(0x|)6c> mult1	\$v1,\$a0,\$zero
 0+0070 <stuff\+(0x|)70> mult1	\$a0,\$v1
-0+0074 <stuff\+(0x|)74> nop
+0+0074 <stuff\+(0x|)74> multu1	\$v1,\$a0,\$zero
+0+0078 <stuff\+(0x|)78> multu1	\$a0,\$v1
+0+007c <stuff\+(0x|)7c> div1	\$zero,\$v1,\$a0
+0+0080 <stuff\+(0x|)80> div1	\$zero,\$a0,\$v1
+0+0084 <stuff\+(0x|)84> divu1	\$zero,\$v1,\$a0
+0+0088 <stuff\+(0x|)88> divu1	\$zero,\$a0,\$v1
+0+008c <stuff\+(0x|)8c> nop
