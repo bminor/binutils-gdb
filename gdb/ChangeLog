@@ -1,4 +1,14 @@
 start-sanitize-gdbtk
+Thu May 16 19:20:29 1996  Fred Fish  <fnf@fishfood.ninemoons.com>
+
+	* gdbtk.tcl (gdb_prompt): Set this early on.
+	(create_command_window): Use gdb_prompt rather than "(gdb) ".
+	(gdbtk_tcl_preloop): Proc executed just prior to Tk main loop.
+	(tclsh): If an evaluation window already exists, just bring it
+	to the front instead of trying to create another.
+	* gdbtk.c (tk_command_loop): New function.
+	(gdbtk_init): Call tk_command_loop rather than Tk_MainLoop.
+
 Thu May 16 16:16:35 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdbtk.tcl (evaluate_tcl_command, tclsh):  New functions that

@@ -1111,6 +1111,16 @@ gdbtk_call_command (cmdblk, arg, from_tty)
     (*cmdblk->function.cfunc)(arg, from_tty);
 }
 
+/* This function is called instead of gdb's internal command loop.  This is the
+   last chance to do anything before entering the main Tk event loop. */
+
+static void
+tk_command_loop ()
+{
+  Tcl_Eval (interp, "gdbtk_tcl_preloop");
+  Tk_MainLoop ();
+}
+
 static void
 gdbtk_init ()
 {
@@ -1160,7 +1170,7 @@ gdbtk_init ()
   Tcl_CreateCommand (interp, "gdb_get_breakpoint_info", call_wrapper,
 		     gdb_get_breakpoint_info, NULL);
 
-  command_loop_hook = Tk_MainLoop;
+  command_loop_hook = tk_command_loop;
   print_frame_info_listing_hook = null_routine;
   query_hook = gdbtk_query;
   flush_hook = gdbtk_flush;

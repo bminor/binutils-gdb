@@ -28,6 +28,7 @@ set line_numbers 1
 set breakpoint_file(-1) {[garbage]}
 set disassemble_with_source nosource
 set expr_update_list(0) 0
+set gdb_prompt "(gdb) "
 
 set debug_interface 0
 
@@ -2291,6 +2292,7 @@ proc find_completion {cmd completions} {
 proc create_command_window {} {
 	global command_line
 	global saw_tab
+	global gdb_prompt
 
 	set saw_tab 0
 	if {[winfo exists .cmd]} {raise .cmd ; return}
@@ -2340,7 +2342,7 @@ proc create_command_window {} {
 	  # %W insert end $result
 	  set command_line {}
 	  # update_ptr
-	  %W insert end "(gdb) "
+	  %W insert end "$gdb_prompt"
 	  %W see end
 	  break
 	}
@@ -2391,7 +2393,7 @@ proc create_command_window {} {
 	    if {[regexp ".* " $command_line prefix]} {
 	      regsub -all $prefix $choices {} choices
 	    }
-	    %W insert end "\n[join $choices { }]\n(gdb) $command_line"
+	    %W insert end "\n[join $choices { }]\n$gdb_prompt$command_line"
 	    %W see end
 	  }
 	  break
@@ -3128,6 +3130,9 @@ proc evaluate_tcl_command { twidget } {
 proc tclsh {} {
     global tcl_prompt
 
+    # If another evaluation window already exists, just bring it to the front.
+    if {[winfo exists .eval]} {raise .eval ; return}
+
     # Create top level frame with scrollbar and text widget.
     toplevel .eval
     wm title .eval "Tcl Evaluation"
@@ -3154,6 +3159,14 @@ proc tclsh {} {
 	}
     }
     bindtags .eval.text {.eval.text Text all}
+}
+
+# This proc is executed just prior to falling into the Tk main event loop.
+proc gdbtk_tcl_preloop {} {
+    global gdb_prompt
+    .cmd.text insert end "$gdb_prompt"
+    .cmd.text see end
+    update
 }
 
 # FIXME need to handle mono here.  In Tk4 that is more complicated.
