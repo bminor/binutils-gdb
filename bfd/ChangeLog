@@ -1,3 +1,8 @@
+Fri Apr 28 21:34:44 2000  Clinton Popetz  <cpopetz@cygnus.com>
+
+	* coffcode.h Copy changes mistakenly done to libcoff.h in
+	4/24/2000 patch.  	
+
 2000-04-29  Andreas Jaeger  <aj@suse.de>
 
 	* libbfd-in.h: Correctly check GCC version.
