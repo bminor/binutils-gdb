@@ -1,3 +1,8 @@
+Tue Dec 17 11:09:36 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf.c (bfd_elf_print_symbol): Print the st_other field if it is
+	not zero.
+
 Mon Dec 16 14:38:39 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf.c (bfd_section_from_shdr): Don't check for reloc sections

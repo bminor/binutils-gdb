@@ -536,6 +536,11 @@ bfd_elf_print_symbol (ignore_abfd, filep, symbol, how)
 		     (bfd_is_com_section (symbol->section)
 		      ? ((elf_symbol_type *) symbol)->internal_elf_sym.st_value
 		      : ((elf_symbol_type *) symbol)->internal_elf_sym.st_size));
+	/* If the st_other field is not zero, print it.  */
+	if (((elf_symbol_type *) symbol)->internal_elf_sym.st_other != 0)
+	  fprintf (file, " 0x%02x",
+		   ((unsigned int)
+		    ((elf_symbol_type *) symbol)->internal_elf_sym.st_other));
 	fprintf (file, " %s", symbol->name);
       }
       break;
