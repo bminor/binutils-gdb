@@ -1927,11 +1927,11 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     (PTR) 0,
     { 0, 0, { 0 } }
   },
-/* dmov @$dir10,-$R15 */
+/* dmov @$dir10,@-$R15 */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_DMOV2R15PD, "dmov2r15pd", "dmov",
-    { { MNEM, ' ', '@', OP (DIR10), ',', '-', OP (R15), 0 } },
+    { { MNEM, ' ', '@', OP (DIR10), ',', '@', '-', OP (R15), 0 } },
     { 16, 16, 0xff00 }, 0xb00,
     (PTR) 0,
     { 0, 0, { 0 } }
