@@ -1,5 +1,37 @@
 2001-11-14  Andrew Cagney  <ac131313@redhat.com>
 
+	* remote.c (struct remote_state): Declare.
+	(get_remote_state): New function.
+	(init_remote_state): New function.
+	(remote_gdbarch_data_handle): New global.
+	(build_remote_packet_sizes): Delete function, moved to
+	init_remote_state.
+	(register_remote_packet_sizes): Delete function.
+	(actual_register_packet_size, remote_packet_size): Moved to
+	``struct remote_state''.
+	(PBUFSIZE): Delete. Replaced by rs->remote_packet_size.
+	(free_remote_state): New function.
+	(get_memory_packet_size, get_memory_read_packet_size)
+	(set_thread, remote_unpack_thread_info_response)
+	(remote_get_threadinfo, parse_threadlist_response)
+	(remote_get_threadlist, remote_current_thread)
+	(remote_threads_info, remote_threads_extra_info)
+	(extended_remote_restart, get_offsets)
+	(get_offsets, remote_check_symbols, remote_open_1)
+	(remote_async_open_1, remote_detach, remote_async_detach)
+	(remote_resume, remote_async_resume, remote_wait)
+	(remote_async_wait, remote_fetch_registers)
+	(store_register_using_P, remote_store_registers)
+	(check_binary_download, putpkt_binary)
+	(remote_insert_breakpoint, remote_remove_breakpoint)
+	(remote_insert_watchpoint, remote_remove_watchpoint)
+	(remote_insert_hw_breakpoint, remote_remove_hw_breakpoint)
+	(compare_sections_command, remote_query)
+	(remote_rcmd, remote_rcmd, packet_command)
+	(remote_info_process): Update.
+
+2001-11-14  Andrew Cagney  <ac131313@redhat.com>
+
 	* remote.c: Include "gdb_assert.h".
 	(tty_input): Wire buffer to 400 bytes.
 	(readsocket): Check tty_input doesn't overflow.
