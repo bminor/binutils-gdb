@@ -809,7 +809,7 @@ init_simd_type (char *name,
   t = init_type (TYPE_CODE_STRUCT, n * TYPE_LENGTH (elt_type), 0, 0, 0);
   t->nfields = 1;
   t->fields = f;
-  t->tag_name = name;
+  TYPE_TAG_NAME (t) = name;
 
   return t;
 }
