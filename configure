@@ -468,7 +468,10 @@ for subdir in . ${subdirs} ; do
 		makesrcdir=`echo ${srcdir}/${subdir} | sed -e 's|/\.$||'`
 		;;
 	*) # otherwise relative
-		makesrcdir=../${srcdir}/${subdir}
+		case "${subdir}" in
+		.) makesrcdir=${srcdir} ;;
+		*) makesrcdir=../${srcdir}/${subdir} ;;
+		esac
 		;;
     esac
 
