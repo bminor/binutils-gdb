@@ -1,8 +1,8 @@
 /* Everything about breakpoints, for GDB.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
-   Free Software Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -243,6 +243,16 @@ static int overlay_events_enabled;
 	for (B = bp_location_chain;	\
 	     B ? (TMP=B->next, 1): 0;	\
 	     B = TMP)
+
+/* True if SHIFT_INST_REGS defined, false otherwise.  */
+
+int must_shift_inst_regs =
+#if defined(SHIFT_INST_REGS)
+1
+#else
+0
+#endif
+ ;
 
 /* True if breakpoint hit counts should be displayed in breakpoint info.  */
 
@@ -1982,6 +1992,7 @@ bpstat_do_actions (bpstat *bsp)
 {
   bpstat bs;
   struct cleanup *old_chain;
+  struct command_line *cmd;
 
   /* Avoid endless recursion if a `source' command is contained
      in bs->commands.  */
@@ -2006,23 +2017,7 @@ top:
   breakpoint_proceeded = 0;
   for (; bs != NULL; bs = bs->next)
     {
-      struct command_line *cmd;
-      struct cleanup *this_cmd_tree_chain;
-
-      /* Take ownership of the BSP's command tree, if it has one.
-
-         The command tree could legitimately contain commands like
-         'step' and 'next', which call clear_proceed_status, which
-         frees stop_bpstat's command tree.  To make sure this doesn't
-         free the tree we're executing out from under us, we need to
-         take ownership of the tree ourselves.  Since a given bpstat's
-         commands are only executed once, we don't need to copy it; we
-         can clear the pointer in the bpstat, and make sure we free
-         the tree when we're done.  */
       cmd = bs->commands;
-      bs->commands = 0;
-      this_cmd_tree_chain = make_cleanup_free_command_lines (&cmd);
-
       while (cmd != NULL)
 	{
 	  execute_control_command (cmd);
@@ -2032,16 +2027,14 @@ top:
 	  else
 	    cmd = cmd->next;
 	}
-
-      /* We can free this command tree now.  */
-      do_cleanups (this_cmd_tree_chain);
-
       if (breakpoint_proceeded)
 	/* The inferior is proceeded by the command; bomb out now.
 	   The bpstat chain has been blown away by wait_for_inferior.
 	   But since execution has stopped again, there is a new bpstat
 	   to look at, so start over.  */
 	goto top;
+      else
+	free_command_lines (&bs->commands);
     }
   do_cleanups (old_chain);
 }
@@ -2612,7 +2605,7 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
 
     if (b->type == bp_hardware_breakpoint)
       {
-	if (b->loc->address != *pc)
+	if (b->loc->address != (*pc - DECR_PC_AFTER_HW_BREAK))
 	  continue;
 	if (overlay_debugging		/* unmapped overlay section */
 	    && section_is_overlay (b->loc->section) 
@@ -2872,12 +2865,24 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
 
   if (real_breakpoint && bs)
     {
-      if (bs->breakpoint_at->type != bp_hardware_breakpoint)
+      if (bs->breakpoint_at->type == bp_hardware_breakpoint)
 	{
-	  if (DECR_PC_AFTER_BREAK != 0)
+	  if (DECR_PC_AFTER_HW_BREAK != 0)
+	    {
+	      *pc = *pc - DECR_PC_AFTER_HW_BREAK;
+	      write_pc (*pc);
+	    }
+	}
+      else
+	{
+	  if (DECR_PC_AFTER_BREAK != 0 || must_shift_inst_regs)
 	    {
 	      *pc = bp_addr;
+#if defined (SHIFT_INST_REGS)
+	      SHIFT_INST_REGS ();
+#else /* No SHIFT_INST_REGS.  */
 	      write_pc (bp_addr);
+#endif /* No SHIFT_INST_REGS.  */
 	    }
 	}
     }

@@ -22,7 +22,7 @@ extern PTR	memcpy PARAMS ((PTR, const PTR, size_t));
 
 char *
 strdup(s)
-     const char *s;
+     char *s;
 {
   size_t len = strlen (s) + 1;
   char *result = (char*) malloc (len);

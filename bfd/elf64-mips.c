@@ -2015,7 +2015,7 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
   arelent *relent;
   bfd_vma i;
   int entsize;
-  bfd_boolean rela_p;
+  reloc_howto_type *howto_table;
 
   allocated = bfd_malloc (rel_hdr->sh_size);
   if (allocated == NULL)
@@ -2033,9 +2033,9 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
 	      || entsize == sizeof (Elf64_Mips_External_Rela));
 
   if (entsize == sizeof (Elf64_Mips_External_Rel))
-    rela_p = FALSE;
+    howto_table = mips_elf64_howto_table_rel;
   else
-    rela_p = TRUE;
+    howto_table = mips_elf64_howto_table_rela;
 
   for (i = 0, relent = relents;
        i < reloc_count;
@@ -2148,7 +2148,7 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
 
 	  relent->addend = rela.r_addend;
 
-	  relent->howto = mips_elf64_rtype_to_howto (type, rela_p);
+	  relent->howto = &howto_table[(int) type];
 
 	  ++relent;
 	}
@@ -2676,6 +2676,11 @@ const struct elf_size_info mips_elf64_size_info =
 #define ELF_ARCH			bfd_arch_mips
 #define ELF_MACHINE_CODE		EM_MIPS
 
+/* The SVR4 MIPS ABI says that this should be 0x10000, but Irix 5 uses
+   a value of 0x1000, and we are compatible.
+   FIXME: How does this affect NewABI?  */
+#define ELF_MAXPAGESIZE			0x1000
+
 #define elf_backend_collect		TRUE
 #define elf_backend_type_change_ok	TRUE
 #define elf_backend_can_gc_sections	TRUE
@@ -2786,12 +2791,9 @@ extern bfd_boolean bfd_elf64_archive_write_armap
 #define TARGET_BIG_SYM			bfd_elf64_bigmips_vec
 #define TARGET_BIG_NAME			"elf64-bigmips"
 
-/* The SVR4 MIPS ABI says that this should be 0x10000, but Irix 5 uses
-   a value of 0x1000, and we are compatible.
-   FIXME: How does this affect NewABI?  */
-#define ELF_MAXPAGESIZE			0x1000
-
 #include "elf64-target.h"
+
+#define INCLUDED_TARGET_FILE            /* More a type of flag.  */
 
 /* The SYSV-style 'traditional' (n)64 NewABI.  */
 #undef TARGET_LITTLE_SYM
@@ -2799,17 +2801,10 @@ extern bfd_boolean bfd_elf64_archive_write_armap
 #undef TARGET_BIG_SYM
 #undef TARGET_BIG_NAME
 
-#undef ELF_MAXPAGESIZE
-
 #define TARGET_LITTLE_SYM               bfd_elf64_tradlittlemips_vec
 #define TARGET_LITTLE_NAME              "elf64-tradlittlemips"
 #define TARGET_BIG_SYM                  bfd_elf64_tradbigmips_vec
 #define TARGET_BIG_NAME                 "elf64-tradbigmips"
-
-/* The SVR4 MIPS ABI says that this should be 0x10000, and Linux uses
-   page sizes of up to that limit, so we need to respect it.  */
-#define ELF_MAXPAGESIZE			0x10000
-#define elf64_bed			elf64_tradbed
 
 /* Include the target file again for this target.  */
 #include "elf64-target.h"
