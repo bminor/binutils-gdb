@@ -1,25 +1,108 @@
 \input texinfo    @c -*-para-*-
+@c %**start of header
 @setfilename configure.info
 @settitle Cygnus Configure
+@c %**end of header
+@c @setchapternewpage odd
 
-@node top, What Configure Does, (dir), (dir)
+@titlepage
+@sp 10
+@title{Cygnus Configure}
+@author{K. Richard Pixley}
+@page
+@vskip 0pt plus 1filll
+Copyright @copyright{} 1991 Cygnus Support
+@end titlepage
+
+@ifinfo
+This document attempts to describe the configuration system used and
+distributed by Cygnus Support.
+
+Copyright @copyright{} 1991 Cygnus Support
+@end ifinfo
+
+@ifinfo
+@node top, Invoking, (dir), (dir)
+@top top
 
 This file documents the configuration system used and distributed by
 Cygnus Support.
 
+NOTE: support for a Cygnus experimental option, @code{-subdirs} is at
+least temporarily suspended.  Most of the code is still in configure but
+the option is disabled.  This document describes that feature, but those
+parts are prominently marked with NOTE's like this one. FIXME-soon
+
 @menu
-* What Configure Does::		What Configure Does
 * Invoking::			Invoking
-* How It Does It::		How It Does It
-* Canonical Triples And Config.Subr::  Canonical Triples And Config.Subr
+* Using Configure::		Using Configure
+* What Configure Does::		What Configure Does
+* Porting::			Porting with Configure
+* Known Bugs::			Known Bugs
+* Variables Index::		Variable Index
+* Concept Index::		Concept Index
+
+ --- The Detailed Node Listing ---
+
+Using Configure
+
+* Install Locations::		Where to install things once they are built
+* Build Directories::		Where to build object files
+* Host::			Telling @code{configure} what will source will
+			  be built
+* Target::			Telling @code{configure} what the source will
+			  target
+* Local Conventions::		Adding information about local conventions
+
+Install Locations
+
+* prefix::			Changing the default install directory
+* datadir::			How to separate host independent files
+			  from host dependent files when
+			  installing for multiple hosts
+* Install Details::		Full descriptions of all installation
+			  subdirectories
+
+Porting with Configure
+
 * Native Ports::		Native Ports
 * Adding Hosts Or Targets::	Adding Hosts Or Targets
-* Adding Configure To Existing Programs::  Adding Configure To Existing Programs
-* Makefile Support::		Makefile Support
-* Known Bugs::			Known Bugs
-@end menu
+* Reference::			Reference
 
-@node What Configure Does, Invoking, top, top
+Native Ports
+
+* Add A Host::			Add A Host
+* Port An Existing Target::	Port An Existing Target
+* Add A Target::		Add A Target
+* Build Host & Target::		Build Host & Target
+* Build New Target On Some Other Host::	 Build New Target On Some Other Host
+
+Adding Hosts Or Targets
+
+* Add Canonical Triple To Config.Subr (Cf Config.Subr)::  Add Canonical Triple To Config.Subr (Cf Config.Subr)
+* (Optional) Add Alias (Cf Config.Subr)::  
+* Monte Carlo - Configure ; Make::  Monte Carlo - Configure ; Make
+* Remedies::			Remedies
+* Adding Configure To Existing Programs::  Adding Configure To Existing Programs
+
+Remedies
+
+* Automagic Config::		Automagic Config
+* Symlinked Files::		Symlinked Files
+* Makefile Fragments (Cf Configure.In)::  Makefile Fragments (Cf Configure.In)
+
+Adding Configure To Existing Programs
+
+* Makefile Support::		Makefile Support
+* Add Standard Macros (Template Follows)::  Add Standard Macros (Template Follows)
+
+Adding Configure To Existing Programs
+
+* Makefile Host Support - Move It To Host Fragments::  Makefile Host Support - Move It To Host Fragments
+@end menu
+@end ifinfo
+
+@node Invoking, Using Configure, top, top
 @chapter Invoking
 
 The usual way to invoke @code{configure} is as follows:
@@ -31,6 +114,7 @@ This asks @code{configure} to prepare the source to be compiled in a
 @file{/usr/local}.
 
 NOTE: support for multiple hosts is at least temporarily suspended.
+FIXME-soon
 
 If more than one host is specified on the command line, then
 configurations are created for each and @code{-subdirs} is assumed.
@@ -53,14 +137,15 @@ all specified hosts.
 Displays a quick summary of how to invoke @code{configure}.
 
 @item -host=@var{host}
-FIXME: I don't think this option should be documented.
+FIXME-soon: I don't think this option should be documented.
+
+NOTE: support for this @code{-namesubdir=} is at least temporary
+suspended. FIXME-soon
 
 @item -namesubdir=@var{name}
 Asks that any subdirectories created by the @code{-subdirs} option be
 named @var{name}.  Note that using multiple hosts with
 @code{-namesubdir=} isn't terribly useful.
-
-NOTE: support for this option is at least temporary suspended.
 
 @item -nfp
 Notifies @code{configure} that all of the specified hosts have @emph{no
@@ -70,14 +155,10 @@ floating point} units.
 Asks @code{configure} to configure only this directory.  Any
 subdirectories are ignored.  This is used by the executable shell script
 @file{config.status} to reconfigure the current directory.
-(@xref{FIXME:config.status}.
+(@xref{FIXME-now:config.status}.
 
 @item -objdir=@var{dir}
-Asks @code{configure} to create the build tree in @var{dir}.  The
-default is to use the source tree as the build tree.  The source
-directory is assumed to be @file{.}.
-
-NOTE: support for this option is at least temporary suspended.
+This option is no longer supported.  Use @code{-srcdir=} instead.
 
 @item -prefix=@var{dir}
 This option requests that the source be configured so that programs and
@@ -98,11 +179,14 @@ create one.
 
 @item -site=@var{site}
 Asks that Makefiles be generated using site specific Makefiles for
-@var{site}.  (@xref{FIXME: site specific Makefiles}.)
+@var{site}.  (@xref{FIXME-now: site specific Makefiles}.)
 
 @item -srcdir=@var{_dir}
 Tells @code{configure} that the sources are located in @var{dir}.  The
 build directory is assumed to be @file{.}.
+
+NOTE: support for this @code{-subdirs} is at least temporary suspended.
+FIXME-soon
 
 @item -subdirs
 Asks that configurations be placed in subdirectories named
@@ -110,15 +194,14 @@ Asks that configurations be placed in subdirectories named
 If this configuration is not native, (@var{host} is not @var{target}),
 then he subdir will be named @file{X-@var{host}-@var{target}} instead.
 
-NOTE: support for this option is at least temporary suspended.
+NOTE: support for multiple targets is at least temporarily suspended.
+FIXME-soon
 
 @item -target=@var{target}
 Requests that the sources be configured to target the @var{target}
 machine.  If no targets are specified explicitly, the target is assumed
 to be the same as the host.  If multiple targets are specified,
 configurations for each are created and @code{-subdirs} is assumed.
-
-NOTE: support for multiple targets is at least temporarily suspended.
 
 @item -tmpdir=@var{tmpdir}
 Sets the directory in which @code{configure} creates temporary files to
@@ -137,7 +220,7 @@ available.
 
 @end table
 
-@node Using Configure, Canonical Triples And Config.Subr, Invoking, top
+@node Using Configure, What Configure Does, Invoking, top
 @chapter Using Configure
 
 Configure prepares source directories in anticipation of building.
@@ -149,12 +232,14 @@ available include:
 @menu
 * Install Locations::		Where to install things once they are built
 * Build Directories::		Where to build object files
-* Host::			Host
-* Target::			Target
-* Local Conventions::		Local Conventions
+* Host::			Telling @code{configure} what will source will
+			  be built
+* Target::			Telling @code{configure} what the source will
+			  target
+* Local Conventions::		Adding information about local conventions
 @end menu
 
-@node Install Locations, Build Directories, What Configure Does, What Configure Does
+@node Install Locations, Build Directories, Using Configure, Using Configure
 @section Install Locations
 
 @cindex Where to install
@@ -166,11 +251,11 @@ default value of @code{$(prefix)} is @file{/usr/local}.  This is
 probably correct for native tools installed on only one host.
 
 @menu
-* prefix::		Changing the default install directory
-* datadir::		How to separate host independent files
+* prefix::			Changing the default install directory
+* datadir::			How to separate host independent files
 			  from host dependent files when
 			  installing for multiple hosts
-* Install Details::	Full descriptions of all installation
+* Install Details::		Full descriptions of all installation
 			  subdirectories
 @end menu
 
@@ -178,7 +263,7 @@ probably correct for native tools installed on only one host.
 @subsection Changing the default install directory
 
 @cindex Changing the default install directory
-@cindex The prefix directory
+@cindex Prefix directory
 
 In the default configuration, all files are installed in subdirectories
 of @file{/usr/local}.  The actual location is determined by the value of
@@ -242,6 +327,14 @@ independent files will be installed @emph{on top of} the host
 independent files installed for @var{host1}.  This results in a single
 copy of the host independent files suitable for use by both hosts.
 
+NOTE: support for -subdirsa and multiple hosts is at least temporarily
+suspended. FIXME-soon
+
+Previously this was:
+
+@example
+configure @var{host1} @var{host2} -prefix=/usr/gnu
+@end example
 
 @node Install Details,  , datadir, Install Locations
 @subsection Full descriptions of all installation subdirectories
@@ -254,7 +347,8 @@ standard directories or the Makefile variables, please refer to
 @cite{standards.text}.
 
 Note that @code{configure} does not create @code{srcdir} at any time.
-This is not an installation directory.  (@xref{}.)
+The directory @code{srcdir} is not an installation directory.
+(@xref{FIXME-now}.)
 
 All makefile variables can be overridden on the command line to
 @code{make}.  (See @xref{Overriding, Overriding Variables, Overriding
@@ -263,7 +357,7 @@ value precisely the same way for each invocation of @code{make} or you
 risk ending up with a broken installation.  This is because many
 programs have the locations of other programs or files compiled into
 them.  If you find yourself overriding any of the variables frequently,
-you should consider site depedent Makefile fragments.  (See @xref{}.)
+you should consider site depedent Makefile fragments.  (See @xref{FIXME-now}.)
 
 During @code{make install}, the following standard directories will be
 created and populated:
@@ -331,7 +425,7 @@ only indirectly through @code{prefix}.  The default value for
 The makefile variable manext is not supported by the @code{configure}.
 The @sc{gnu} coding standards do not call for @code{man1ext},
 @code{man2ext}, so the intended use for @code{manext} is not clear.
-(See also @xref{FIXME:extensions}.)
+(See also @xref{FIXME-now:extensions}.)
 @end defvr
 
 @vindex infodir
@@ -351,7 +445,7 @@ The default value for @code{docdir} depends on @code{prefix} so
 @code{docdir} is normally changed only indirectly through @code{prefix}.
 The default value for @code{docdir} is @code{datadir}@file{/doc}.  Note
 that this variable is an extension to the @sc{gnu} coding standards.
-(See also @xref{FIXME:extensions}.)
+(See also @xref{FIXME-now:extensions}.)
 @end defvr
 
 @vindex includedir
@@ -364,180 +458,246 @@ The default value for @code{includedir} depends on @code{prefix} so
 @end defvr
 
 
-@node Build Directories, Host, Install Locations, What Configure Does
+@node Build Directories, Host, Install Locations, Using Configure
 @section Build Directories
 
+@cindex Build directories
+@cindex objdir
+@cindex Object directories
+@cindex subdirs
+@cindex Building for multiple hosts
+@cindex Building for multiple targets
 
-@node Host, Target, Build Directories, What Configure Does
+Normally, @code{configure} builds @file{Makefile}'s and symbolic links
+in the same directory as the source files.  This is the typical
+@sc{un*x} way to build programs but it has limitations.  For instance,
+using this approach, you can only build for one host at a time.
+
+We refer to the directories in which @code{configure} builds
+@file{Makefile}'s as the @emph{build directories} or sometimes as
+@emph{objdir} because these are the directories in which @code{make}
+will build object files, among other things.
+
+The default build directory is the same as the source directory.
+
+You can change the build directory with a sequence like the following:
+
+@example
+mkdir @var{builddir}
+cd @var{builddir}
+configure @var{host} -srcdir=@var{sourcedirectory}
+@example
+
+where @var{builddir} is the directory in which you wish to build,
+@var{host} is the host for which you want to build, and
+@var{sourcedirectory} is the directory containing the source files.
+
+If you were to do this twice with different values for @var{builddir}
+and @vr{host}, then you could @code{make} for both at the same time.
+
+NOTE: The rest of this section describes the @code{-subdirs} feature for
+which support is at least temporarily suspended.  FIXME-soon.
+
+Another way to specify the build directory is with the @code{-subdirs}
+option.  For example:
+
+@example
+configure @var{host} -subdirs
+@end example
+
+Using this option, @code{configure} will create a subdirectory named
+@file{H-@var{host}} to act as the build directory for each source
+directory.
+
+Since building for multiple hosts is so common, @code{configure}
+recognizes this situation as special.  For example:
+
+@example
+configure @var{host1} @var{host2}
+@end example
+
+is precisely the same as:
+
+@example
+configure @var{host1} -subdirs
+configure @var{host2} -subdirs
+#end example
+
+That is, when configuring for multiple hosts or multiple targets,
+@code{-subdir} is assumed.
+
+When configuring for cross tools, that is, the host is not the target,
+as in:
+
+@example
+configure @var{host} +target=@var{targ} -subdirs
+@end example
+
+the subdirectories are named @file{X-@var{host}-@var{targ}}.  This is
+especially useful when configuring for multiple targets.
+
+If both @code{-subdirs} and @code{-srcdir=} are given, a tree that
+parallels the source directory structure is created in the current
+directory, except that the current directory represents the source
+directory itself, and the subdirectories are created in this directory
+tree rather than in the source directories.
+
+NOTE: previously, -subdirs built two level subdirectories as
+./H-host/T-target, created ./H-host/Makefile for building across all
+targets, ./Makefile for building across all hosts, and ./config.status
+and ./H-host/config.status for rebuilding these Makefiles.
+
+@node Host, Target, Build Directories, Using Configure
 @section Host
 
+NOTE: support for multiple hosts is at least temporarily suspended.
+FIXME-soon.
 
-@node Target, Local Conventions, Host, What Configure Does
+The arguments to @code{configure} are @emph{hosts}.  By @emph{host} we
+mean the environment in which the source will be compiled.  This need
+not necessarily be the same as the actual physical machine involved,
+although it usually is.
+
+For example, if some obscure machine running an operating system other
+than @sc{un*x} actually had the @sc{gnu} @sc{posix} emulation libraries
+available, it would be possible to configure most @sc{gnu} source for a
+@sc{posix} system and build it on the obscure host.
+
+For more on this topic, see @xref{Host Environments, , cfg-paper, On
+Configuring Development Tools}.
+
+@node Target, Local Conventions, Host, Using Configure
 @section Target
 
+For building native development tools, or most of the other tools in the
+@sc{gnu} collection, you need not worry about the target.  The
+@emph{target} of a configuration defaults to the same as the
+@emph{host}.
 
-@node Local Conventions,  , Target, What Configure Does
+For building cross development tools, please see @xref{Building
+Development Environments, , cfg-paper, On Configuring Development
+Tools}.
+
+@node Local Conventions,  , Target, Using Configure
 @section Local Conventions
 
+If you find that a tool does not get configured to your liking or that
+@code{configure}'s conventions are not your local conventions, you
+should probably consider site specific Makefile fragments.  (see
+@xref{FIXME-now: site specific makefile fragments})
+
+These are probably not the right choice for options that can be set from
+the @code{configure} command line or for differences that are host or
+target dependent.
 
 
-@node How It Does It, How It Does It, What Configure Does, top
-@chapter How It Does It
+@node What Configure Does, Porting, Using Configure, top
+@chapter What Configure Does
 
-When configure runs, it does the following things.
+When configure runs, it does the following things for each source
+directory for each host and target combination.
+
+NOTE: support for multiple hosts and targets is at least temporarily
+suspended.
 
 @itemize @bullet
 
-@item Create Directories
-When configure is run with either of the 
+@item Create Build Directories
+(see @xref{Build Directories}) When @code{configure} is run with the
+@code{-srcdir=} option, a directory tree is created that parallels the
+directory structure of the source directory except that the current
+directory is treated as the build directory for the source directory
+proper.  (see @xref{Invoking}).
 
-@itemize @minus
-@item 		Parallels Source Tree (If -Srcdir)
-@item 		Adds Subdirs (If -Subdir)
+NOTE: support for @code{-subdirs} is at least temporarily suspended.
+
+When @code{configure} is run with the @code{-subdirs} option, a build
+directory is created in each source directory.
+
+If both @code{-subdirs} and @code{-srcdir=} are given, a tree that
+parallels the source directory structure is created in the current
+directory, except that the current directory represents the source
+directory itself, and the subdirectories are created in this directory
+tree rather than in the source directories.
+
+@item Generate Makefiles
+A makefile template, usually called @file{Makefile.in} from the source
+directory is copied to an output file in the build directory.  The
+output file is usually named @file{Makefile}.  A number of makefile
+macros are prepended to the output file.  If @code{-prefix=} or
+@code{-datadir=} were specified on the @code{configure} command line,
+then the makefile variables are set accordingly.  If host, target, or
+site, specific makefile fragments exist, they are inserted into the
+output file.  (see @xref{Makefiles, , , make, Makefiles})
+
+@item Generate .gdbinit
+If the source directory contains a .gdbinit file and the build directory
+is different from the source directory, a .gdbinit file is created in
+the build directory.  (see @xref{Command Files, , , gdb, Command Files})
+
+@item Make Symbolic Links
+Most directories have some symbolic links with generic names built
+pointing to specific files in the source directory.  If the system on
+which @code{configure} is run cannot support symbolic links, then hard
+links are used instead.
+
+@item Miscellaneous
+If the source directory has special needs, they are handled.  Usually
+there are none, but sometimes they involve changes to the output
+makefile.
+
+@item Generate config.status
+A shell script named @file{config.status} is created in the build
+directory.  This shell script, when run from the build directory, will
+reconfigure the build directory except that subdirectories are not
+reconfigured.  This is most often used by @code{make} to rebuild the
+output makefile.  (see @xref{Top, , , bash})
+
+@item Recursion
+If the source directory has subdirectories that should also be
+configured, then @code{configure} is called for each.
+
 @end itemize
 
-@item Generates Makefiles
-@item Generates .Gdbinit
-@item Makes Symlinks
-@item Misc (Usually File Editting)
-@item generates config.status
-@end itemize
+@node Porting, Known Bugs, What Configure Does, top
+@chapter Porting with Configure
 
-@node Canonical Triples And Config.Subr, Native Ports, How It Does It, top
-@chapter Canonical Triples And Config.Subr
-
+This section explains briefly how to port configure for:
 
 @menu
-* Config.Subr Calling Convention::  Config.Subr Calling Convention
-* Definition Of Canonical Triples::  Definition Of Canonical Triples
-* Maps Aliases To Canonical Triples::  Maps Aliases To Canonical Triples
-* Validates Canonical Triples::	 Validates Canonical Triples
+* Programs::	Adding configure to existing programs
+* Hosts::	Adding new hosts to existing programs
+* Targets::	Adding new targets to existing programs
+* Reference::	Reference
 @end menu
 
-@node Config.Subr Calling Convention, Definition Of Canonical Triples, Canonical Triples And Config.Subr, Canonical Triples And Config.Subr
-@section Config.Subr Calling Convention
-
-
-@node Definition Of Canonical Triples, Maps Aliases To Canonical Triples, Config.Subr Calling Convention, Canonical Triples And Config.Subr
-@section Definition Of Canonical Triples
-
-
-@node Maps Aliases To Canonical Triples, Validates Canonical Triples, Definition Of Canonical Triples, Canonical Triples And Config.Subr
-@section Maps Aliases To Canonical Triples
-
-
-@node Validates Canonical Triples,  , Maps Aliases To Canonical Triples, Canonical Triples And Config.Subr
-@section Validates Canonical Triples
-
-
-
-@node Native Ports, Adding Hosts Or Targets, Canonical Triples And Config.Subr, top
-@chapter Native Ports
-
-
-
-@menu
-* Add A Host::			Add A Host
-* Port An Existing Target::	Port An Existing Target
-* Add A Target::		Add A Target
-* Build Host & Target::		Build Host & Target
-* Build New Target On Some Other Host::	 Build New Target On Some Other Host
-@end menu
-
-@node Add A Host, Port An Existing Target, Native Ports, Native Ports
-@section Add A Host
-
-
-@node Port An Existing Target, Add A Target, Add A Host, Native Ports
-@section Port An Existing Target
-
-
-@node Add A Target, Build Host & Target, Port An Existing Target, Native Ports
-@section Add A Target
-
-
-@node Build Host & Target, Build New Target On Some Other Host, Add A Target, Native Ports
-@section Build Host & Target
-
-
-@node Build New Target On Some Other Host,  , Build Host & Target, Native Ports
-@section Build New Target On Some Other Host
-
-
-
-@node Adding Hosts Or Targets, Adding Configure To Existing Programs, Native Ports, top
-@chapter Adding Hosts Or Targets
-
-
-
-@menu
-* Add Canonical Triple To Config.Subr (Cf Config.Subr)::	Add Canonical Triple To Config.Subr (Cf Config.Subr)
-* (Optional) Add Alias (Cf Config.Subr)::  
-* Monte Carlo - Configure ; Make::  Monte Carlo - Configure ; Make
-* Remedies::			Remedies
-@end menu
-
-@node Add Canonical Triple To Config.Subr (Cf Config.Subr), (Optional) Add Alias (Cf Config.Subr), Adding Hosts Or Targets, Adding Hosts Or Targets
-@section Add Canonical Triple To Config.Subr (Cf Config.Subr)
-
-
-@node (Optional) Add Alias (Cf Config.Subr), Monte Carlo - Configure ; Make, Add Canonical Triple To Config.Subr (Cf Config.Subr), Adding Hosts Or Targets
-@section (Optional) Add Alias (Cf Config.Subr)
-
-
-@node Monte Carlo - Configure ; Make, Remedies, (Optional) Add Alias (Cf Config.Subr), Adding Hosts Or Targets
-@section Monte Carlo - Configure ; Make
-
-
-@node Remedies,  , Monte Carlo - Configure ; Make, Adding Hosts Or Targets
-@section Remedies
-
-
-@menu
-* Automagic Config::		Automagic Config
-* Symlinked Files::		Symlinked Files
-* Makefile Fragments (Cf Configure.In)::  Makefile Fragments (Cf Configure.In)
-@end menu
-
-@node Automagic Config, Symlinked Files, Remedies, Remedies
-@subsection Automagic Config
-
-
-@node Symlinked Files, Makefile Fragments (Cf Configure.In), Automagic Config, Remedies
-@subsection Symlinked Files
-
-
-@node Makefile Fragments (Cf Configure.In),  , Symlinked Files, Remedies
-@subsection Makefile Fragments (Cf Configure.In)
-
-@node Adding Configure To Existing Programs, Known Bugs, Adding Hosts Or Targets, top
-@chapter Adding Configure To Existing Programs
-
+@node Programs,  , Remedies, Adding Hosts Or Targets
+@subsection Adding Configure To Existing Programs
 
 If you are writing a new program, don't worry about porting issues or
 configure until it is running reasonably on some host.  Then refer
 back to this section.
 
+If your 
+
+@c marker
+
 @menu
 * Makefile Support::		Makefile Support
-* Automagic Configuration::	Automagic Configuration
+* Add Standard Macros (Template Follows)::  Add Standard Macros (Template Follows)
 @end menu
 
-@node Makefile Support, Automagic Configuration, Adding Configure To Existing Programs, Adding Configure To Existing Programs
-@section Makefile Support
+@node Makefile Support, Add Standard Macros (Template Follows), Adding Configure To Existing Programs, Adding Configure To Existing Programs
+@subsubsection Makefile Support
 
 
 @menu
 * Makefile Host Support - Move It To Host Fragments::  Makefile Host Support - Move It To Host Fragments
-* Add Standard Macros (Template Follows)::  Add Standard Macros (Template Follows)
 @end menu
 
-@node Makefile Host Support - Move It To Host Fragments, Add Standard Macros (Template Follows), Makefile Support, Makefile Support
-@subsection Makefile Host Support - Move It To Host Fragments
 
-
-@node Add Standard Macros (Template Follows),  , Makefile Host Support - Move It To Host Fragments, Makefile Support
-@subsection Add Standard Macros (Template Follows)
+@node Add Standard Macros (Template Follows),  , Makefile Support, Adding Configure To Existing Programs
+@subsubsection Add Standard Macros (Template Follows)
 
 @itemize @bullet
 @item as defined in standards.text
@@ -846,20 +1006,76 @@ links pointing to the second word of files, and so on.
 @end itemize
 @end itemize
 
-@node Automagic Configuration,  , Makefile Support, Adding Configure To Existing Programs
-@section Automagic Configuration
+@node Native Ports, Adding Hosts Or Targets, Porting, Porting
+@section Native Ports
+
+To port a GNU tool that uses the Cygnus Configure system, do the
+following.
+
+@itemize @asis
+
+@item Add A Host
+@item Port An Existing Target
+@item Add A Target
+@item Build Host & Target
+@item Build New Target On Some Other Host
+
+@end table
+
+@node Adding Hosts Or Targets, Reference, Native Ports, Porting
+@section Adding Hosts Or Targets
+
 
 
 @menu
-* Should Be Used If Prep'D Files Don'T Exist::	Should Be Used If Prep'D Files Don'T Exist
+* Add Canonical Triple To Config.Subr (Cf Config.Subr)::  Add Canonical Triple To Config.Subr (Cf Config.Subr)
+* (Optional) Add Alias (Cf Config.Subr)::  
+* Monte Carlo - Configure ; Make::  Monte Carlo - Configure ; Make
+* Remedies::			Remedies
+* Adding Configure To Existing Programs::  Adding Configure To Existing Programs
 @end menu
 
-@node Should Be Used If Prep'D Files Don'T Exist,  , Automagic Configuration, Automagic Configuration
-@subsection Should Be Used If Prep'D Files Don'T Exist
+@node Add Canonical Triple To Config.Subr (Cf Config.Subr), (Optional) Add Alias (Cf Config.Subr), Adding Hosts Or Targets, Adding Hosts Or Targets
+@subsection Add Canonical Triple To Config.Subr (Cf Config.Subr)
+
+
+@node (Optional) Add Alias (Cf Config.Subr), Monte Carlo - Configure ; Make, Add Canonical Triple To Config.Subr (Cf Config.Subr), Adding Hosts Or Targets
+@subsection (Optional) Add Alias (Cf Config.Subr)
+
+
+@node Monte Carlo - Configure ; Make, Remedies, (Optional) Add Alias (Cf Config.Subr), Adding Hosts Or Targets
+@subsection Monte Carlo - Configure ; Make
+
+
+@node Remedies, Adding Configure To Existing Programs, Monte Carlo - Configure ; Make, Adding Hosts Or Targets
+@subsection Remedies
+
+
+@menu
+* Automagic Config::		Automagic Config
+* Symlinked Files::		Symlinked Files
+* Makefile Fragments (Cf Configure.In)::  Makefile Fragments (Cf Configure.In)
+@end menu
+
+@node Automagic Config, Symlinked Files, Remedies, Remedies
+@subsubsection Automagic Config
+
+
+@node Symlinked Files, Makefile Fragments (Cf Configure.In), Automagic Config, Remedies
+@subsubsection Symlinked Files
+
+
+@node Makefile Fragments (Cf Configure.In),  , Symlinked Files, Remedies
+@subsubsection Makefile Fragments (Cf Configure.In)
+
+@node Reference,  , Adding Hosts Or Targets, Porting
+@section Reference
 
 
 
-@node Known Bugs, Variables Index, Adding Configure To Existing Programs, top
+Automagic Configuration Should Be Used If Prep'D Files Don'T Exist.
+
+@node Known Bugs, Variables Index, Porting, top
 @chapter Known Bugs
 
 The following bugs are known to exist.
@@ -877,16 +1093,14 @@ not available.
 @end itemize
 
 @node Variables Index, Concept Index, Known Bugs, top
-@unnumbered Variable Index
+@appendix Variable Index
 
 @printindex vr
 
 @node     Concept Index,  , Variables Index, top
-@unnumbered Concept Index
+@appendix Concept Index
 
 @printindex cp
-
-@summarycontents
 @contents
 @bye
 
