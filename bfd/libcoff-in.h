@@ -163,10 +163,10 @@ struct xcoff_tdata
   short cputype;
 
   /* maxdata from optional header.  */
-  bfd_size_type maxdata;
+  bfd_vma maxdata;
 
   /* maxstack from optional header.  */
-  bfd_size_type maxstack;
+  bfd_vma maxstack;
 
   /* Used by the XCOFF backend linker.  */
   asection **csects;

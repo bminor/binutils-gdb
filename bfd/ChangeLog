@@ -1,3 +1,52 @@
+2001-05-24  Tom Rix <trix@redhat.com>
+
+        * Makefile.am coff-pmac bfd now defined in coff-rs6000.c
+	xcoff-target.h not used to define rs6000 or ppc bfd.
+	* Makefile.in same
+
+	* bfd-in.h : (struct lineno_cache_entry) promote element "offset"
+	to 64 bit.
+
+	* coff-rs6000.c : Many changes for 64 bit support.  Move common
+	32/64 code to xcofflink.c.  Explictly define the rs6000coff_vec
+	and pmac_xcoff_vec
+
+	* coff64-rs6000.c : Many changes for 64 bit support.  64 bit
+	linker now supported.  Explictly define the rs6000coff64_vec.
+
+	* coffcode.h : (coff_set_arch_mach_hook) xcoff 64 bit support
+	(coff_print_aux) same 
+	(coff_write_object_contents) same
+	(coff_slurp_line_table) same
+
+	* coffgen.c : (coff_fix_symbol_name) formatting
+	(coff_mangle_symbols) xcoff 64 bit support
+	(coff_write_symbol) same
+	(coff_write_alien_symbol) same
+	(coff_write_native_symbol) same
+	(coff_write_symbols) same
+	(coff_get_symbol_info) same
+	(bfd_coff_get_syment) same
+	(coff_print_symbol) same
+
+	* config.bfd : add powerpc64-*-aix* target
+
+	* libcoff-in.h : formatting
+
+	* libcoff.h : move xcoff extern declarations to libxcoff.h
+
+	* libxcoff.h : New file
+
+	* xcofflink.c : Many changes for xcoff64 support.  Move common 
+	structures to include/coff/xcoff.h.  Move specific structure to 
+	backends coff-rs6000.c and coff64-rs6000.c.   Use new backend
+	functions, defined in libxcoff.h, to isolate 32/64 dependencies.
+	
+	(bfd_xcoff_size_dynamic_sections) : special __rtinit symbol for 
+	aix4.2+ -binitfini.
+
+	(xcoff_build_ldsyms) : handle special __rtinit symbol.
+
 2001-05-23  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf64-sparc.c (sparc64_elf_slurp_reloc_table): Fix typo

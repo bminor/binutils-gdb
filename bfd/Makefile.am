@@ -501,7 +501,7 @@ SOURCE_HFILES = \
 	elfcode.h elfcore.h elflink.h freebsd.h genlink.h go32stub.h \
 	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h \
 	libieee.h libnlm.h liboasys.h libpei.h netbsd.h nlm-target.h \
-	nlmcode.h nlmswap.h ns32k.h peicode.h som.h vms.h xcoff-target.h
+	nlmcode.h nlmswap.h ns32k.h peicode.h som.h vms.h libxcoff.h xcoff.h
 
 ## ... and all .h files which are in the build tree.
 BUILD_HFILES = \
@@ -914,9 +914,12 @@ coff-mips.lo: coff-mips.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h \
   $(INCDIR)/coff/ecoff.h $(INCDIR)/coff/mips.h libcoff.h \
   libecoff.h coffswap.h ecoffswap.h
-coff-pmac.lo: coff-pmac.c $(INCDIR)/filenames.h $(INCDIR)/coff/internal.h \
-  $(INCDIR)/coff/rs6000.h libcoff.h $(INCDIR)/bfdlink.h \
-  xcoff-target.h coffcode.h coffswap.h
+coff-rs6000.lo: coff64-rs6000.c coff-rs6000.c xcofflink.c \
+  $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/xcoff.h \
+  $(INCDIR)/coff/rs6000.h libcoff.h libxcoff.h coffcode.h coffswap.h
+coff64-rs6000.lo: coff64-rs6000.c coff-rs6000.c xcofflink.c \
+  $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/xcoff.h \
+  $(INCDIR)/coff/rs6k64.h libcoff.h libxcoff.h coffcode.h coffswap.h
 coff-rs6000.lo: coff-rs6000.c $(INCDIR)/filenames.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/rs6000.h libcoff.h \
   $(INCDIR)/bfdlink.h xcoff-target.h coffcode.h coffswap.h

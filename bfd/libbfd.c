@@ -232,6 +232,7 @@ real_read (where, a,b, file)
   if (a == 0 || b == 0)
     return 0;
 
+
 #if defined (__VAX) && defined (VMS)
   /* Apparently fread on Vax VMS does not keep the record length
      information.  */
@@ -747,7 +748,6 @@ bfd_seek (abfd, position, direction)
     file_position += abfd->origin;
 
   result = fseek (f, file_position, direction);
-
   if (result != 0)
     {
       int hold_errno = errno;

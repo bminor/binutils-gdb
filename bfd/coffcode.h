@@ -2053,21 +2053,8 @@ coff_set_arch_mach_hook (abfd, filehdr)
 	  {
 	  default:
 	  case 0:
-#ifdef POWERMAC
-	    /* PowerPC Macs use the same magic numbers as RS/6000
-	       (because that's how they were bootstrapped originally),
-	       but they are always PowerPC architecture.  */
-	    arch = bfd_arch_powerpc;
-	    machine = bfd_mach_ppc;
-#else
-#ifdef XCOFF64
-	    arch = bfd_arch_powerpc;
-	    machine = bfd_mach_ppc_620;
-#else
-	    arch = bfd_arch_rs6000;
-	    machine = bfd_mach_rs6k;
-#endif
-#endif /* POWERMAC */
+	    arch = bfd_xcoff_architecture (abfd);
+	    machine = bfd_xcoff_machine (abfd);
 	    break;
 
 	  case 1:
@@ -2338,13 +2325,21 @@ coff_print_aux (abfd, file, table_base, symbol, aux, indaux)
       if (SMTYP_SMTYP (aux->u.auxent.x_csect.x_smtyp) != XTY_LD)
 	{
 	  BFD_ASSERT (! aux->fix_scnlen);
-	  fprintf (file, "val %5ld", aux->u.auxent.x_csect.x_scnlen.l);
+#ifdef XCOFF64 
+	  fprintf (file, "val %5lld", aux->u.auxent.x_csect.x_scnlen.l);
+#else
+	  fprintf (file, "val %5ld", (long) aux->u.auxent.x_csect.x_scnlen.l);
+#endif
 	}
       else
 	{
 	  fprintf (file, "indx ");
 	  if (! aux->fix_scnlen)
-	    fprintf (file, "%4ld", aux->u.auxent.x_csect.x_scnlen.l);
+#ifdef XCOFF64
+	    fprintf (file, "%4lld", aux->u.auxent.x_csect.x_scnlen.l);
+#else
+	    fprintf (file, "%4ld", (long) aux->u.auxent.x_csect.x_scnlen.l);
+#endif
 	  else
 	    fprintf (file, "%4ld",
 		     (long) (aux->u.auxent.x_csect.x_scnlen.p - table_base));
@@ -3370,10 +3365,12 @@ coff_write_object_contents (abfd)
     {
       scn_base = bfd_coff_filhsz (abfd);
 #ifdef RS6000COFF_C
+#ifndef XCOFF64	  
       if (xcoff_data (abfd)->full_aouthdr)
 	scn_base += bfd_coff_aoutsz (abfd);
       else
 	scn_base += SMALL_AOUTSZ;
+#endif	  
 #endif
     }
 
@@ -3625,6 +3622,7 @@ coff_write_object_contents (abfd)
     }
 
 #ifdef RS6000COFF_C
+#ifndef XCOFF64  
   /* XCOFF handles overflows in the reloc and line number count fields
      by creating a new section header to hold the correct values.  */
   for (current = abfd->sections; current != NULL; current = current->next)
@@ -3652,6 +3650,7 @@ coff_write_object_contents (abfd)
 	}
     }
 #endif
+#endif
 
   /* OK, now set up the filehdr...  */
 
@@ -3673,10 +3672,12 @@ coff_write_object_contents (abfd)
     {
       internal_f.f_opthdr = 0;
 #ifdef RS6000COFF_C
+#ifndef XCOFF64	  
       if (xcoff_data (abfd)->full_aouthdr)
 	internal_f.f_opthdr = bfd_coff_aoutsz (abfd);
       else
 	internal_f.f_opthdr = SMALL_AOUTSZ;
+#endif	  
 #endif
     }
 
@@ -4239,13 +4240,13 @@ coff_slurp_line_table (abfd, asect)
 	  if (cache_ptr->line_number == 0)
 	    {
 	      boolean warned;
-	      long symndx;
+	      bfd_signed_vma symndx;
 	      coff_symbol_type *sym;
 
 	      warned = false;
 	      symndx = dst.l_addr.l_symndx;
 	      if (symndx < 0
-		  || (unsigned long) symndx >= obj_raw_syment_count (abfd))
+		  || (bfd_vma) symndx >= obj_raw_syment_count (abfd))
 		{
 		  (*_bfd_error_handler)
 		    (_("%s: warning: illegal symbol index %ld in line numbers"),

@@ -47,13 +47,13 @@ static void coff_fix_symbol_name
   PARAMS ((bfd *, asymbol *, combined_entry_type *, bfd_size_type *,
 	   asection **, bfd_size_type *));
 static boolean coff_write_symbol
-  PARAMS ((bfd *, asymbol *, combined_entry_type *, unsigned int *,
+  PARAMS ((bfd *, asymbol *, combined_entry_type *, bfd_vma *,
 	   bfd_size_type *, asection **, bfd_size_type *));
 static boolean coff_write_alien_symbol
-  PARAMS ((bfd *, asymbol *, unsigned int *, bfd_size_type *,
+  PARAMS ((bfd *, asymbol *, bfd_vma *, bfd_size_type *,
 	   asection **, bfd_size_type *));
 static boolean coff_write_native_symbol
-  PARAMS ((bfd *, coff_symbol_type *, unsigned int *, bfd_size_type *,
+  PARAMS ((bfd *, coff_symbol_type *, bfd_vma *, bfd_size_type *,
 	   asection **, bfd_size_type *));
 static void coff_pointerize_aux
   PARAMS ((bfd *, combined_entry_type *, combined_entry_type *,
@@ -749,8 +749,9 @@ coff_mangle_symbols (bfd_ptr)
 	  if (s->fix_value)
 	    {
 	      /* FIXME: We should use a union here.  */
-	      s->u.syment.n_value =
-		((combined_entry_type *) s->u.syment.n_value)->offset;
+	      s->u.syment.n_value = 
+		(bfd_vma)((combined_entry_type *) 
+			  ((unsigned long) s->u.syment.n_value))->offset;
 	      s->fix_value = 0;
 	    }
 	  if (s->fix_line)
@@ -921,7 +922,7 @@ coff_write_symbol (abfd, symbol, native, written, string_size_p,
      bfd *abfd;
      asymbol *symbol;
      combined_entry_type *native;
-     unsigned int *written;
+     bfd_vma *written;
      bfd_size_type *string_size_p;
      asection **debug_string_section_p;
      bfd_size_type *debug_string_size_p;
@@ -1006,7 +1007,7 @@ coff_write_alien_symbol (abfd, symbol, written, string_size_p,
 			 debug_string_section_p, debug_string_size_p)
      bfd *abfd;
      asymbol *symbol;
-     unsigned int *written;
+     bfd_vma *written;
      bfd_size_type *string_size_p;
      asection **debug_string_section_p;
      bfd_size_type *debug_string_size_p;
@@ -1074,7 +1075,7 @@ coff_write_native_symbol (abfd, symbol, written, string_size_p,
 			  debug_string_section_p, debug_string_size_p)
      bfd *abfd;
      coff_symbol_type *symbol;
-     unsigned int *written;
+     bfd_vma *written;
      bfd_size_type *string_size_p;
      asection **debug_string_section_p;
      bfd_size_type *debug_string_size_p;
@@ -1147,7 +1148,7 @@ coff_write_symbols (abfd)
   bfd_size_type debug_string_size;
   unsigned int i;
   unsigned int limit = bfd_get_symcount (abfd);
-  unsigned int written = 0;
+  bfd_signed_vma written = 0;
   asymbol **p;
 
   string_size = 0;
@@ -1917,11 +1918,8 @@ coff_get_symbol_info (abfd, symbol, ret)
   if (coffsymbol (symbol)->native != NULL
       && coffsymbol (symbol)->native->fix_value)
     {
-      combined_entry_type *psym;
-
-      psym = ((combined_entry_type *)
-	      coffsymbol (symbol)->native->u.syment.n_value);
-      ret->value = (bfd_vma) (psym - obj_raw_syments (abfd));
+      ret->value = coffsymbol (symbol)->native->u.syment.n_value -
+	(unsigned long) obj_raw_syments (abfd);
     }
 }
 
@@ -1945,8 +1943,8 @@ bfd_coff_get_syment (abfd, symbol, psyment)
   *psyment = csym->native->u.syment;
 
   if (csym->native->fix_value)
-    psyment->n_value = ((combined_entry_type *) psyment->n_value
-			- obj_raw_syments (abfd));
+    psyment->n_value = psyment->n_value - 
+      (unsigned long) obj_raw_syments (abfd);
 
   /* FIXME: We should handle fix_line here.  */
 
@@ -2023,7 +2021,7 @@ coff_print_symbol (abfd, filep, symbol, how)
     case bfd_print_symbol_all:
       if (coffsymbol (symbol)->native)
 	{
-	  unsigned long val;
+	  bfd_vma val;
 	  unsigned int aux;
 	  combined_entry_type *combined = coffsymbol (symbol)->native;
 	  combined_entry_type *root = obj_raw_syments (abfd);
@@ -2032,12 +2030,11 @@ coff_print_symbol (abfd, filep, symbol, how)
 	  fprintf (file, "[%3ld]", (long) (combined - root));
 
 	  if (! combined->fix_value)
-	    val = (unsigned long) combined->u.syment.n_value;
+	    val = (bfd_vma) combined->u.syment.n_value;
 	  else
-	    val = ((unsigned long)
-		   ((combined_entry_type *) combined->u.syment.n_value
-		    - root));
+	    val = combined->u.syment.n_value - (unsigned long) root;
 
+#ifndef XCOFF64
 	  fprintf (file,
 		   "(sec %2d)(fl 0x%02x)(ty %3x)(scl %3d) (nx %d) 0x%08lx %s",
 		   combined->u.syment.n_scnum,
@@ -2045,8 +2042,20 @@ coff_print_symbol (abfd, filep, symbol, how)
 		   combined->u.syment.n_type,
 		   combined->u.syment.n_sclass,
 		   combined->u.syment.n_numaux,
+		   (unsigned long) val,
+		   symbol->name);
+#else
+	  /* Print out the wide, 64 bit, symbol value */
+	  fprintf (file,
+		   "(sec %2d)(fl 0x%02x)(ty %3x)(scl %3d) (nx %d) 0x%016llx %s",
+		   combined->u.syment.n_scnum,
+		   combined->u.syment.n_flags,
+		   combined->u.syment.n_type,
+		   combined->u.syment.n_sclass,
+		   combined->u.syment.n_numaux,
 		   val,
 		   symbol->name);
+#endif
 
 	  for (aux = 0; aux < combined->u.syment.n_numaux; aux++)
 	    {

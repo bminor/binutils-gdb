@@ -286,6 +286,7 @@ coff_swap_filehdr_in (abfd, src, dst)
 {
   FILHDR *filehdr_src = (FILHDR *) src;
   struct internal_filehdr *filehdr_dst = (struct internal_filehdr *) dst;
+
 #ifdef COFF_ADJUST_FILEHDR_IN_PRE
   COFF_ADJUST_FILEHDR_IN_PRE (abfd, src, dst);
 #endif

@@ -725,6 +725,10 @@ case "${targ}" in
     targ_defvec=rs6000coff_vec
     targ_selvecs="rs6000coff64_vec"
     ;;
+  powerpc64-*-aix*)
+    targ_defvec=rs6000coff64_vec
+    targ_selvecs="rs6000coff_vec"
+    ;;
   powerpc-*-*bsd* | powerpc-*-elf* | powerpc-*-sysv4* | powerpc-*-eabi* | \
   powerpc-*-solaris2* | powerpc-*-linux-gnu* | powerpc-*-rtems* | \
   powerpc-*-chorus* | powerpc-*-vxworks*)
