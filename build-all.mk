@@ -62,7 +62,7 @@ endif
 
 ifeq ($(canonhost),mips-sgi-irix4)
 TARGETS	= $(NATIVE) m68k-vxworks a29k-amd-udi
-CC = cc -cckr -Wf,-XNg1500 -Wf,-XNk1000 -Wf,-XNh1100
+CC = cc -cckr -Wf,-XNg1500 -Wf,-XNk1000 -Wf,-XNh1500
 all: all-cygnus
 endif
 

@@ -1,5 +1,8 @@
 Wed Mar 31 12:31:56 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* build-all.mk, config/mh-irix4: Bump -XNh value to 1500 to match
+	gcc requirements.
+
 	* Makefile.in: Complete overhaul to merge many almost identical
 	targets.
 
