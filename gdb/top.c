@@ -1500,9 +1500,13 @@ extern void serial_log_command (const char *);
 	  *(p + 1) = '\0';
 	}
 
-      /* If this command has been hooked, run the hook first. */
-      if (c->hook)
-	execute_user_command (c->hook, (char *) 0);
+      /* If this command has been pre-hooked, run the hook first. */
+      if ((c->hook_pre) && (!c->hook_in))
+      {
+        c->hook_in = 1; /* Prevent recursive hooking */
+        execute_user_command (c->hook_pre, (char *) 0);
+        c->hook_in = 0; /* Allow hook to work again once it is complete */
+      }
 
       if (c->flags & DEPRECATED_WARN_USER)
 	deprecated_cmd_warning (&line);
@@ -1517,6 +1521,15 @@ extern void serial_log_command (const char *);
 	call_command_hook (c, arg, from_tty & caution);
       else
 	(*c->function.cfunc) (arg, from_tty & caution);
+       
+      /* If this command has been post-hooked, run the hook last. */
+      if ((c->hook_post) && (!c->hook_in))
+      {
+        c->hook_in = 1; /* Prevent recursive hooking */
+        execute_user_command (c->hook_post, (char *) 0);
+        c->hook_in = 0; /* allow hook to work again once it is complete */
+      }
+
     }
 
   /* Tell the user if the language has changed (except first time).  */
@@ -2988,12 +3001,25 @@ user_defined_command (char *ignore, int from_tty)
 static void
 define_command (char *comname, int from_tty)
 {
+#define MAX_TMPBUF 128   
+  enum cmd_hook_type
+    {
+      CMD_NO_HOOK = 0,
+      CMD_PRE_HOOK,
+      CMD_POST_HOOK
+    };
   register struct command_line *cmds;
-  register struct cmd_list_element *c, *newc, *hookc = 0;
+  register struct cmd_list_element *c, *newc, *oldc, *hookc = 0;
   char *tem = comname;
-  char tmpbuf[128];
+  char *tem2; 
+  char tmpbuf[MAX_TMPBUF];
+  int  hook_type      = CMD_NO_HOOK;
+  int  hook_name_size = 0;
+   
 #define	HOOK_STRING	"hook-"
 #define	HOOK_LEN 5
+#define HOOK_POST_STRING "hookpost-"
+#define HOOK_POST_LEN    9
 
   validate_comname (comname);
 
@@ -3018,10 +3044,21 @@ define_command (char *comname, int from_tty)
 
   if (!strncmp (comname, HOOK_STRING, HOOK_LEN))
     {
+       hook_type      = CMD_PRE_HOOK;
+       hook_name_size = HOOK_LEN;
+    }
+  else if (!strncmp (comname, HOOK_POST_STRING, HOOK_POST_LEN))
+    {
+      hook_type      = CMD_POST_HOOK;
+      hook_name_size = HOOK_POST_LEN;
+    }
+   
+  if (hook_type != CMD_NO_HOOK)
+    {
       /* Look up cmd it hooks, and verify that we got an exact match.  */
-      tem = comname + HOOK_LEN;
+      tem = comname + hook_name_size;
       hookc = lookup_cmd (&tem, cmdlist, "", -1, 0);
-      if (hookc && !STREQ (comname + HOOK_LEN, hookc->name))
+      if (hookc && !STREQ (comname + hook_name_size, hookc->name))
 	hookc = 0;
       if (!hookc)
 	{
@@ -3055,8 +3092,19 @@ define_command (char *comname, int from_tty)
      tied.  */
   if (hookc)
     {
-      hookc->hook = newc;	/* Target gets hooked.  */
-      newc->hookee = hookc;	/* We are marked as hooking target cmd.  */
+      switch (hook_type)
+        {
+        case CMD_PRE_HOOK:
+          hookc->hook_pre  = newc;  /* Target gets hooked.  */
+          newc->hookee_pre = hookc; /* We are marked as hooking target cmd. */
+          break;
+        case CMD_POST_HOOK:
+          hookc->hook_pre  = newc;  /* Target gets hooked.  */
+          newc->hookee_pre = hookc; /* We are marked as hooking target cmd. */
+          break;
+        default:
+          /* Should never come here as hookc would be 0. */
+        }
     }
 }
 

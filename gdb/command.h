@@ -165,7 +165,14 @@ struct cmd_list_element
     char *replacement;
 
     /* Hook for another command to be executed before this command.  */
-    struct cmd_list_element *hook;
+    struct cmd_list_element *hook_pre;
+
+    /* Hook for another command to be executed after this command.  */
+    struct cmd_list_element *hook_post;
+
+    /* Flag that specifies if this command is already running it's hook. */
+    /* Prevents the possibility of hook recursion. */
+    int hook_in;
 
     /* Nonzero identifies a prefix command.  For them, the address
        of the variable containing the list of subcommands.  */
@@ -220,9 +227,13 @@ struct cmd_list_element
     /* Pointer to command strings of user-defined commands */
     struct command_line *user_commands;
 
-    /* Pointer to command that is hooked by this one,
+    /* Pointer to command that is hooked by this one, (by hook_pre)
        so the hook can be removed when this one is deleted.  */
-    struct cmd_list_element *hookee;
+    struct cmd_list_element *hookee_pre;
+
+    /* Pointer to command that is hooked by this one, (by hook_post)
+       so the hook can be removed when this one is deleted.  */
+    struct cmd_list_element *hookee_post;
 
     /* Pointer to command that is aliased by this one, so the
        aliased command can be located in case it has been hooked.  */

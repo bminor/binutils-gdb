@@ -1,3 +1,25 @@
+2000-11-06  Fernando Nasser  <fnasser@cygnus.com>
+
+	From  Steven Johnson  <sbjohnson@ozemail.com.au>:
+
+        This set of changes add "hookpost-" as an expansion on the original
+	hooking of commands to GDB. A Hook may now be run "AFTER" execution of
+	a command as well as before.
+
+	* command.h (struct cmd_list_element): Changed elements hook and hookee
+	to hook_pre and hookee_pre respectively. Added hook_post and hookee_post
+	for the post hook command operation. Added hook_in so that an executing
+	hook can be flagged to prevent recursion.
+	* command.c (add_cmd): Changed initilization of cmd_list_element to
+	reflect above changes.
+	(delete_cmd): Remove both pre and post hooks.
+	(help_cmd): Notify that the command has pre and/or post hooks.
+	* infrun.c (normal_stop): Change references to hook_pre from hook.
+	* top.c (execute_command): Run both pre and post hooks.
+	(define_command): Allow definition of both pre and post hooks.
+	The definition of pre-hooks is done as before, with the "hook-"
+	prefix for backward compatibility.
+
 2000-11-06  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* stack.c (return_command):  Pop dummy frame if we just returned from

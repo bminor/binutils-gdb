@@ -3446,9 +3446,9 @@ and/or watchpoints.\n");
 
   /* Look up the hook_stop and run it if it exists.  */
 
-  if (stop_command && stop_command->hook)
+  if (stop_command && stop_command->hook_pre)
     {
-      catch_errors (hook_stop_stub, stop_command->hook,
+      catch_errors (hook_stop_stub, stop_command->hook_pre,
 		    "Error while running hook_stop:\n", RETURN_MASK_ALL);
     }
 

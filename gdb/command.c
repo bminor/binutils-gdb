@@ -112,7 +112,9 @@ add_cmd (char *name, enum command_class class, void (*fun) (char *, int),
   c->doc = doc;
   c->flags = 0;
   c->replacement = NULL;
-  c->hook = NULL;
+  c->hook_pre  = NULL;
+  c->hook_post = NULL;
+  c->hook_in = 0;
   c->prefixlist = NULL;
   c->prefixname = NULL;
   c->allow_unknown = 0;
@@ -123,7 +125,8 @@ add_cmd (char *name, enum command_class class, void (*fun) (char *, int),
   c->var_type = var_boolean;
   c->enums = NULL;
   c->user_commands = NULL;
-  c->hookee = NULL;
+  c->hookee_pre = NULL;
+  c->hookee_post = NULL;
   c->cmd_pointer = NULL;
 
   return c;
@@ -366,8 +369,10 @@ delete_cmd (char *name, struct cmd_list_element **list)
 
   while (*list && STREQ ((*list)->name, name))
     {
-      if ((*list)->hookee)
-	(*list)->hookee->hook = 0;	/* Hook slips out of its mouth */
+      if ((*list)->hookee_pre)
+      (*list)->hookee_pre->hook_pre = 0;   /* Hook slips out of its mouth */
+      if ((*list)->hookee_post)
+      (*list)->hookee_post->hook_post = 0; /* Hook slips out of its bottom  */
       p = (*list)->next;
       free ((PTR) * list);
       *list = p;
@@ -378,8 +383,11 @@ delete_cmd (char *name, struct cmd_list_element **list)
       {
 	if (STREQ (c->next->name, name))
 	  {
-	    if (c->next->hookee)
-	      c->next->hookee->hook = 0;	/* hooked cmd gets away.  */
+          if (c->next->hookee_pre)
+            c->next->hookee_pre->hook_pre = 0; /* hooked cmd gets away.  */
+          if (c->next->hookee_post)
+            c->next->hookee_post->hook_post = 0; /* remove post hook */
+                                               /* :( no fishing metaphore */
 	    p = c->next->next;
 	    free ((PTR) c->next);
 	    c->next = p;
@@ -531,9 +539,18 @@ help_cmd (char *command, struct ui_file *stream)
   if (c->function.cfunc == NULL)
     help_list (cmdlist, "", c->class, stream);
 
-  if (c->hook)
-    fprintf_filtered (stream, "\nThis command has a hook defined: %s\n",
-		      c->hook->name);
+  if (c->hook_pre || c->hook_post)
+    fprintf_filtered (stream,
+                      "\nThis command has a hook (or hooks) defined:\n");
+
+  if (c->hook_pre)
+    fprintf_filtered (stream, 
+                      "\tThis command is run after  : %s (pre hook)\n",
+                    c->hook_pre->name);
+  if (c->hook_post)
+    fprintf_filtered (stream, 
+                      "\tThis command is run before : %s (post hook)\n",
+                    c->hook_post->name);
 }
 
 /*
