@@ -1,5 +1,7 @@
 2000-05-12  Alan Modra  <alan@linuxcare.com.au>
 
+	* targets.c (bfd_target_vector): #ifdef BFD64 rs6000coff64_vec
+
 	* peigen.c (pe_print_idata): Look for .idata section and print
 	info even if data directory has zero entries.  Read idata section
 	starting from dataoff, and adjust all data offsets to suit.  Cast

@@ -866,7 +866,9 @@ const bfd_target * const bfd_target_vector[] = {
 	&pmac_xcoff_vec,
 #endif
 	&rs6000coff_vec,
+#ifdef BFD64
 	&rs6000coff64_vec,
+#endif
 	&ppcboot_vec,
 	&shcoff_vec,
 	&shlcoff_vec,
