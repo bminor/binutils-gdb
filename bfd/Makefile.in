@@ -891,6 +891,8 @@ clean-generic maintainer-clean-generic clean mostlyclean distclean \
 maintainer-clean
 
 
+diststuff: info
+
 stamp-ofiles: Makefile
 	rm -f tofiles
 	f=""; \

@@ -399,6 +399,8 @@ HFILES = \
 	libnlm.h liboasys.h netbsd.h nlm-target.h nlmcode.h ns32k.h som.h \
 	targmatch.h
 
+diststuff: info
+
 # Various kinds of .o files to put in libbfd.a:
 # BFD_BACKENDS	Routines the configured targets need.
 # BFD_MACHINES	Architecture-specific routines the configured targets need.
