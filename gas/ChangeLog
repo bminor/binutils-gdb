@@ -1,5 +1,16 @@
 Wed Jan 18 13:49:26 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* atof-generic.c (flonum_print) [TRACE]: New function.
+	(atof_generic) [TRACE]: Print multiplier before multiplication,
+	and print multiplication result before and after copy.
+
+	* flonum-mult.c (flonum_multip): Avoid sign extension problems
+	around multiplication operation.
+
+	* atof-generic.c (ASSUME_DECIMAL_MARK_IS_DOT): Define.
+	(atof_generic) [ASSUME_DECIMAL_MARK_IS_DOT]: Check for '.'
+	explicitly instead of calling strchr.
+
 	* config/tc-sparc.c (sparc_ip): When scanning successive opcode
 	table entries, check names for pointer equality before doing
 	string comparisons.
