@@ -3146,4 +3146,6 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
 #define elf_backend_relocate_section	      elf_i386_relocate_section
 #define elf_backend_size_dynamic_sections     elf_i386_size_dynamic_sections
 
+#ifndef ELF32_I386_C_INCLUDED
 #include "elf32-target.h"
+#endif

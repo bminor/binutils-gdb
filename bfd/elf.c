@@ -3477,8 +3477,9 @@ assign_file_positions_for_segments (abfd)
 
 	      if (p->p_vaddr < (bfd_vma) off)
 		{
-		  _bfd_error_handler (_("%s: Not enough room for program headers, try linking with -N"),
-				      bfd_get_filename (abfd));
+		  (*_bfd_error_handler)
+		    (_("%s: Not enough room for program headers, try linking with -N"),
+		     bfd_get_filename (abfd));
 		  bfd_set_error (bfd_error_bad_value);
 		  return false;
 		}
@@ -3715,6 +3716,11 @@ Error: First section in segment (%s) starts at 0x%x whereas the segment starts a
 	    }
 	}
     }
+
+  /* If additional nonloadable filepos adjustments are required,
+     do them now. */
+  if (bed->set_nonloadable_filepos)
+    (*bed->set_nonloadable_filepos) (abfd, phdrs);
 
   /* Clear out any program headers we allocated but did not use.  */
   for (; count < alloc; count++, p++)
@@ -4274,6 +4280,7 @@ copy_private_bfd_data (ibfd, obfd)
   bfd_vma                   maxpagesize;
   struct elf_segment_map *  phdr_adjust_seg = NULL;
   unsigned int              phdr_adjust_num = 0;
+  struct elf_backend_data * bed;
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
@@ -4282,6 +4289,7 @@ copy_private_bfd_data (ibfd, obfd)
   if (elf_tdata (ibfd)->phdr == NULL)
     return true;
 
+  bed = get_elf_backend_data (ibfd);
   iehdr = elf_elfheader (ibfd);
 
   map_first = NULL;
@@ -4308,6 +4316,13 @@ copy_private_bfd_data (ibfd, obfd)
     (section->lma >= base				\
      && (section->lma + section->_raw_size)		\
      <= SEGMENT_END (segment, base))
+
+  /* Returns true if the given section is contained within the
+     given segment.  Filepos addresses are compared in an elf
+     backend function. */
+#define IS_CONTAINED_BY_FILEPOS(sec, seg, bed)		\
+  (bed->is_contained_by_filepos		  		\
+   && (*bed->is_contained_by_filepos) (sec, seg))
 
   /* Special case: corefile "NOTE" section containing regs, prpsinfo etc.  */
 #define IS_COREFILE_NOTE(p, s)                          \
@@ -4337,13 +4352,15 @@ copy_private_bfd_data (ibfd, obfd)
        2. It is an allocated segment,
        3. There is an output section associated with it,
        4. The section has not already been allocated to a previous segment.  */
-#define INCLUDE_SECTION_IN_SEGMENT(section, segment)			\
+#define INCLUDE_SECTION_IN_SEGMENT(section, segment, bed)		\
   (((((segment->p_paddr							\
        ? IS_CONTAINED_BY_LMA (section, segment, segment->p_paddr)	\
        : IS_CONTAINED_BY_VMA (section, segment))			\
       || IS_SOLARIS_PT_INTERP (segment, section))			\
      && (section->flags & SEC_ALLOC) != 0)				\
-    || IS_COREFILE_NOTE (segment, section))				\
+    || IS_COREFILE_NOTE (segment, section)				\
+    || (IS_CONTAINED_BY_FILEPOS (section, segment, bed)			\
+        && (section->flags & SEC_ALLOC) == 0))				\
    && section->output_section != NULL					\
    && section->segment_mark == false)
 
@@ -4443,7 +4460,7 @@ copy_private_bfd_data (ibfd, obfd)
       /* Compute how many sections might be placed into this segment.  */
       section_count = 0;
       for (section = ibfd->sections; section != NULL; section = section->next)
-	if (INCLUDE_SECTION_IN_SEGMENT (section, segment))
+	if (INCLUDE_SECTION_IN_SEGMENT (section, segment, bed))
 	  ++section_count;
 
       /* Allocate a segment map big enough to contain all of the
@@ -4488,9 +4505,9 @@ copy_private_bfd_data (ibfd, obfd)
 	     no sections, but ordinary, loadable segments should contain
 	     something.  */
 	  if (segment->p_type == PT_LOAD)
-	      _bfd_error_handler
-		(_("%s: warning: Empty loadable segment detected\n"),
-		 bfd_archive_filename (ibfd));
+	    (*_bfd_error_handler)
+	      (_("%s: warning: Empty loadable segment detected\n"),
+	       bfd_archive_filename (ibfd));
 
 	  map->count = 0;
 	  *pointer_to_map = map;
@@ -4546,7 +4563,7 @@ copy_private_bfd_data (ibfd, obfd)
 	   section != NULL;
 	   section = section->next)
 	{
-	  if (INCLUDE_SECTION_IN_SEGMENT (section, segment))
+	  if (INCLUDE_SECTION_IN_SEGMENT (section, segment, bed))
 	    {
 	      output_section = section->output_section;
 
@@ -4572,6 +4589,7 @@ copy_private_bfd_data (ibfd, obfd)
 	      /* Match up the physical address of the segment with the
 		 LMA address of the output section.  */
 	      if (IS_CONTAINED_BY_LMA (output_section, segment, map->p_paddr)
+		  || IS_CONTAINED_BY_FILEPOS (section, segment, bed)
 		  || IS_COREFILE_NOTE (segment, section))
 		{
 		  if (matching_lma == 0)
@@ -4641,7 +4659,7 @@ copy_private_bfd_data (ibfd, obfd)
 	}
 
       /* Step Three: Loop over the sections again, this time assigning
-	 those that fit to the current segment and remvoing them from the
+	 those that fit to the current segment and removing them from the
 	 sections array; but making sure not to leave large gaps.  Once all
 	 possible sections have been assigned to the current segment it is
 	 added to the list of built segments and if sections still remain
@@ -4692,7 +4710,7 @@ copy_private_bfd_data (ibfd, obfd)
 			 maxpagesize then we need to start a new segment.  */
 		      if ((BFD_ALIGN (prev_sec->lma + prev_sec->_raw_size,
 				      maxpagesize)
-			  < BFD_ALIGN (output_section->lma, maxpagesize))
+			   < BFD_ALIGN (output_section->lma, maxpagesize))
 			  || ((prev_sec->lma + prev_sec->_raw_size)
 			      > output_section->lma))
 			{
@@ -4805,6 +4823,7 @@ copy_private_bfd_data (ibfd, obfd)
 #undef SEGMENT_END
 #undef IS_CONTAINED_BY_VMA
 #undef IS_CONTAINED_BY_LMA
+#undef IS_CONTAINED_BY_FILEPOS
 #undef IS_COREFILE_NOTE
 #undef IS_SOLARIS_PT_INTERP
 #undef INCLUDE_SECTION_IN_SEGMENT
@@ -4824,6 +4843,7 @@ _bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec)
      asection *osec;
 {
   Elf_Internal_Shdr *ihdr, *ohdr;
+  const struct elf_backend_data *bed = get_elf_backend_data (ibfd);
 
   if (ibfd->xvec->flavour != bfd_target_elf_flavour
       || obfd->xvec->flavour != bfd_target_elf_flavour)
@@ -4833,24 +4853,31 @@ _bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec)
      This must be done here, rather than in the copy_private_bfd_data
      entry point, because the latter is called after the section
      contents have been set, which means that the program headers have
-     already been worked out.  */
-  if (elf_tdata (obfd)->segment_map == NULL
-      && elf_tdata (ibfd)->phdr != NULL)
+     already been worked out.  The backend function provides a way to 
+     override the test conditions and code path for the call to 
+     copy_private_bfd_data.  */
+  if (bed->copy_private_bfd_data_p)
     {
-      asection *s;
+      if ((*bed->copy_private_bfd_data_p) (ibfd, isec, obfd, osec))
+        if (! copy_private_bfd_data (ibfd, obfd))
+          return false;
+    } 
+  else if (elf_tdata (obfd)->segment_map == NULL && elf_tdata (ibfd)->phdr != NULL)
+    {
+	asection *s;
 
-      /* Only set up the segments if there are no more SEC_ALLOC
-         sections.  FIXME: This won't do the right thing if objcopy is
-         used to remove the last SEC_ALLOC section, since objcopy
-         won't call this routine in that case.  */
-      for (s = isec->next; s != NULL; s = s->next)
-	if ((s->flags & SEC_ALLOC) != 0)
-	  break;
-      if (s == NULL)
-	{
-	  if (! copy_private_bfd_data (ibfd, obfd))
-	    return false;
-	}
+	/* Only set up the segments if there are no more SEC_ALLOC
+	   sections.  FIXME: This won't do the right thing if objcopy is
+	   used to remove the last SEC_ALLOC section, since objcopy
+	   won't call this routine in that case.  */
+	for (s = isec->next; s != NULL; s = s->next)
+	  if ((s->flags & SEC_ALLOC) != 0)
+	    break;
+	if (s == NULL)
+	  {
+	    if (! copy_private_bfd_data (ibfd, obfd))
+	      return false;
+	  }
     }
 
   ihdr = &elf_section_data (isec)->this_hdr;

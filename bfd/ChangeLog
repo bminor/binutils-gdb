@@ -1,3 +1,30 @@
+2002-05-31  Graeme Peterson  <gp@qnx.com>
+
+	* Makefile.am (BFD32_BACKENDS): Add elf32-i386qnx.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-i386qnx.c.
+	Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* config.bfd: Add i[3456]86-*-nto-qnx* support.
+	* configure.in: Add bfd_elf32_i386qnx_vec support.
+	* configure: Regenerate.
+	* elf-bfd.h (struct elf_backend_data): Add set_nonloadable_filepos,
+	is_contained_by_filepos, and copy_private_bfd_data_p.
+	* elf.c (assign_file_positions_for_segments): Call backend
+	set_nonloadable_filepos.  Fix non-K&R call to _bfd_error_handler.
+	(IS_CONTAINED_BY_FILEPOS): Define.
+	(INCLUDE_SECTION_IN_SEGMENT): Also test IS_CONTAINED_BY_FILEPOS.
+	(copy_private_bfd_data): Use IS_CONTAINED_BY_FILEPOS.  Typo fix.
+	Fix non-K&R call to _bfd_error_handler.
+	(_bfd_elf_copy_private_section_data): Use backend
+	copy_private_bfd_data_p.
+	* elf32-i386.c: Don't include elfxx-target.h when
+	ELF32_I386_C_INCLUDED is defined.
+	* elf32-i386qnx.c: New QNX elf backend file.
+	* elfxx-target.h: Add elf_backend_set_nonloadable_filepos,
+	elf_backend_is_contained_by_filepos, and
+	elf_backend_do_copy_private_bfd_data.
+	* targets.c: Add bfd_target bfd_elf32_i386qnx_vec.
+
 2002-05-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* elfarm-oabi.c (bfd_elf32_arm_add_glue_sections_to_bfd): Define.

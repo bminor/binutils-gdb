@@ -207,6 +207,7 @@ BFD32_BACKENDS = \
 	elf32-hppa.lo \
 	elf32-i370.lo \
 	elf32-i386.lo \
+	elf32-i386qnx.lo \
 	elf32-i860.lo \
 	elf32-i960.lo \
 	elf32-ia64.lo \
@@ -358,6 +359,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-hppa.c \
 	elf32-i370.c \
 	elf32-i386.c \
+	elf32-i386qnx.c \
 	elf32-i860.c \
 	elf32-i960.c \
 	elf32-m32r.c \
@@ -873,7 +875,7 @@ cpu-avr.lo: cpu-avr.c $(INCDIR)/filenames.h
 cpu-cris.lo: cpu-cris.c $(INCDIR)/filenames.h
 cpu-d10v.lo: cpu-d10v.c $(INCDIR)/filenames.h
 cpu-d30v.lo: cpu-d30v.c $(INCDIR)/filenames.h
-cpu-dlx.lo: cpu-d30v.c $(INCDIR)/filenames.h
+cpu-dlx.lo: cpu-dlx.c $(INCDIR)/filenames.h
 cpu-fr30.lo: cpu-fr30.c $(INCDIR)/filenames.h
 cpu-h8300.lo: cpu-h8300.c $(INCDIR)/filenames.h
 cpu-h8500.lo: cpu-h8500.c $(INCDIR)/filenames.h
@@ -1116,6 +1118,10 @@ elf32-i386.lo: elf32-i386.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/i386.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
+elf32-i386qnx.lo: elf32-i386qnx.c elf32-i386.c $(INCDIR)/filenames.h \
+  $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/i386.h \
+  $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-i860.lo: elf32-i860.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/i860.h $(INCDIR)/elf/reloc-macros.h \
@@ -1215,7 +1221,7 @@ elf32-v850.lo: elf32-v850.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
 elf32-vax.lo: elf32-vax.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/vax.h $(INCDIR)/elf/reloc-macros.h \
-  $(INCDIR)/libiberty.h elf32-target.h
+  elf32-target.h
 elf32-xstormy16.lo: elf32-xstormy16.c $(INCDIR)/filenames.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/xstormy16.h \
