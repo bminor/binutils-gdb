@@ -1,3 +1,7 @@
+Tue Nov 17 10:25:26 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* Makefile.in: Regenerate.
+
 Mon Nov 16 19:17:23 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* po/binutils.pot: Regenerate.
