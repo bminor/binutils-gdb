@@ -1,5 +1,7 @@
 Thu Jun  3 14:09:59 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
+	* Makefile.in (VERSION): Jump to 2.1.4.
+
 	* config/ho-hppabsd.h: New file, from Peter Hoogenboom.
 
 	* config/tc-mips.c (md_assemble): Call bfd_set_gp_size only for
