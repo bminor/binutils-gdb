@@ -212,7 +212,6 @@ struct gdbarch
   gdbarch_deprecated_frame_init_saved_regs_ftype *deprecated_frame_init_saved_regs;
   gdbarch_deprecated_init_extra_frame_info_ftype *deprecated_init_extra_frame_info;
   gdbarch_skip_prologue_ftype *skip_prologue;
-  gdbarch_prologue_frameless_p_ftype *prologue_frameless_p;
   gdbarch_inner_than_ftype *inner_than;
   gdbarch_breakpoint_from_pc_ftype *breakpoint_from_pc;
   gdbarch_adjust_breakpoint_address_ftype *adjust_breakpoint_address;
@@ -383,7 +382,6 @@ struct gdbarch startup_gdbarch =
   0,  /* deprecated_frame_init_saved_regs */
   0,  /* deprecated_init_extra_frame_info */
   0,  /* skip_prologue */
-  0,  /* prologue_frameless_p */
   0,  /* inner_than */
   0,  /* breakpoint_from_pc */
   0,  /* adjust_breakpoint_address */
@@ -519,7 +517,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->extract_return_value = legacy_extract_return_value;
   current_gdbarch->store_return_value = legacy_store_return_value;
   current_gdbarch->use_struct_convention = generic_use_struct_convention;
-  current_gdbarch->prologue_frameless_p = generic_prologue_frameless_p;
   current_gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
   current_gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
   current_gdbarch->remote_translate_xfer_address = generic_remote_translate_xfer_address;
@@ -691,7 +688,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (current_gdbarch->skip_prologue == 0))
     fprintf_unfiltered (log, "\n\tskip_prologue");
-  /* Skip verify of prologue_frameless_p, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (current_gdbarch->inner_than == 0))
     fprintf_unfiltered (log, "\n\tinner_than");
@@ -2020,16 +2016,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: print_vector_info = 0x%08lx\n",
                       (long) current_gdbarch->print_vector_info);
-#ifdef PROLOGUE_FRAMELESS_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "PROLOGUE_FRAMELESS_P(ip)",
-                      XSTRING (PROLOGUE_FRAMELESS_P (ip)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: PROLOGUE_FRAMELESS_P = <0x%08lx>\n",
-                      (long) current_gdbarch->prologue_frameless_p
-                      /*PROLOGUE_FRAMELESS_P ()*/);
-#endif
 #ifdef PS_REGNUM
   fprintf_unfiltered (file,
                       "gdbarch_dump: PS_REGNUM # %s\n",
@@ -4429,23 +4415,6 @@ set_gdbarch_skip_prologue (struct gdbarch *gdbarch,
                            gdbarch_skip_prologue_ftype skip_prologue)
 {
   gdbarch->skip_prologue = skip_prologue;
-}
-
-int
-gdbarch_prologue_frameless_p (struct gdbarch *gdbarch, CORE_ADDR ip)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->prologue_frameless_p != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_prologue_frameless_p called\n");
-  return gdbarch->prologue_frameless_p (ip);
-}
-
-void
-set_gdbarch_prologue_frameless_p (struct gdbarch *gdbarch,
-                                  gdbarch_prologue_frameless_p_ftype prologue_frameless_p)
-{
-  gdbarch->prologue_frameless_p = prologue_frameless_p;
 }
 
 int

@@ -143,12 +143,6 @@ generic_remote_translate_xfer_address (struct gdbarch *gdbarch,
   *rem_len = gdb_len;
 }
 
-int
-generic_prologue_frameless_p (CORE_ADDR ip)
-{
-  return ip == SKIP_PROLOGUE (ip);
-}
-
 /* Helper functions for INNER_THAN */
 
 int

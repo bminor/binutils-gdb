@@ -1,3 +1,12 @@
+2004-02-12  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (PROLOGUE_FRAMELESS_P): Delete.
+	gdbarch.h, gdbarch.c: Re-generate.
+	* cris-tdep.c (cris_gdbarch_init): Do not set prologue_frameless_p
+	to generic_prologue_frameless_p.
+	* arch-utils.h (generic_prologue_frameless_p): Delete declaration.
+	* arch-utils.c (generic_prologue_frameless_p): Delete function.
+
 2004-02-11  Daniel Jacobowitz  <drow@mvista.com>
 
 	* mips-linux-tdep.c: Include "frame.h".

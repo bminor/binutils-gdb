@@ -1612,16 +1612,6 @@ extern void set_gdbarch_skip_prologue (struct gdbarch *gdbarch, gdbarch_skip_pro
 #define SKIP_PROLOGUE(ip) (gdbarch_skip_prologue (current_gdbarch, ip))
 #endif
 
-typedef int (gdbarch_prologue_frameless_p_ftype) (CORE_ADDR ip);
-extern int gdbarch_prologue_frameless_p (struct gdbarch *gdbarch, CORE_ADDR ip);
-extern void set_gdbarch_prologue_frameless_p (struct gdbarch *gdbarch, gdbarch_prologue_frameless_p_ftype *prologue_frameless_p);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (PROLOGUE_FRAMELESS_P)
-#error "Non multi-arch definition of PROLOGUE_FRAMELESS_P"
-#endif
-#if !defined (PROLOGUE_FRAMELESS_P)
-#define PROLOGUE_FRAMELESS_P(ip) (gdbarch_prologue_frameless_p (current_gdbarch, ip))
-#endif
-
 typedef int (gdbarch_inner_than_ftype) (CORE_ADDR lhs, CORE_ADDR rhs);
 extern int gdbarch_inner_than (struct gdbarch *gdbarch, CORE_ADDR lhs, CORE_ADDR rhs);
 extern void set_gdbarch_inner_than (struct gdbarch *gdbarch, gdbarch_inner_than_ftype *inner_than);

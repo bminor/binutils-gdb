@@ -4259,7 +4259,6 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, cris_frame_init_saved_regs);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, cris_init_extra_frame_info);
   set_gdbarch_skip_prologue (gdbarch, cris_skip_prologue);
-  set_gdbarch_prologue_frameless_p (gdbarch, generic_prologue_frameless_p);
   
   /* The stack grows downward.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

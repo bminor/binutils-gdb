@@ -199,9 +199,16 @@ frameless_look_for_prologue (struct frame_info *frame)
   if (func_start)
     {
       func_start += FUNCTION_START_OFFSET;
-      /* This is faster, since only care whether there *is* a
-         prologue, not how long it is.  */
-      return PROLOGUE_FRAMELESS_P (func_start);
+      /* NOTE: cagney/2004-02-09: Eliminated per-architecture
+         PROLOGUE_FRAMELESS_P call as architectures with custom
+         implementations had all been deleted.  Eventually even this
+         function can go - GDB no longer tries to differentiate
+         between framed, frameless and stackless functions.  They are
+         all now considered equally evil :-^.  */
+      /* If skipping the prologue ends up skips nothing, there must be
+         no prologue and hence no code creating a frame.  There for
+         the function is "frameless" :-/.  */
+      return func_start == SKIP_PROLOGUE (func_start);
     }
   else if (get_frame_pc (frame) == 0)
     /* A frame with a zero PC is usually created by dereferencing a
