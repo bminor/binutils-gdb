@@ -1,5 +1,9 @@
 2005-03-31  Jerome Guitton  <guitton@gnat.com>
 
+	* config.in: Regenerate.
+
+2005-03-31  Jerome Guitton  <guitton@gnat.com>
+
 	* bfd/config.in (HAVE_DECL_BASENAME): New configure macro.
 	* bfd/configure.in: Check for basename.
 	* bfd/configure: Regenerate.
