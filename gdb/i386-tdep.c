@@ -1305,9 +1305,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
-      if (gdbarch_tdep (current_gdbarch)->os_ident != os_ident)
-        continue;
-      return arches->gdbarch;
+      tdep = gdbarch_tdep (arches->gdbarch);
+      if (tdep && tdep->os_ident == os_ident)
+        return arches->gdbarch;
     }
 
   /* Allocate space for the new architecture.  */

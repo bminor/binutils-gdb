@@ -1,3 +1,8 @@
+2002-02-19  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* i386-tdep.c (i386_gdbarch_init): Eliminate incorrect use
+        of ``current_gdbarch''.
+
 2002-02-19  Richard Earnshaw  <rearnsha@arm.com>
 
 	* armnbsd-nat.c : ANSIfy all function declarations.
