@@ -1,3 +1,23 @@
+2000-08-04  Kevin Buettner  <kevinb@redhat.com>
+
+	* dwarf2read.c (struct comp_unit_head): Add fields offset_size
+	and initial_length_size.  Change type of ``length'' field to long.
+	(read_initial_length, read_offset): New functions.
+	(dwarf2_build_psymtabs_easy): Call read_initial_length() instead
+	of just reading 4 bytes.
+	(read_comp_unit_head): Likewise; also, call read_offset() to
+	fetch the offset instead of just reading 4 bytes.
+	(dwarf_decode_lines): Likewise.
+	(read_comp_unit_head): Fix internal error message so it
+	accurately reflects the function in which the error occurred.
+	(dwarf2_build_psymtabs_hard): Properly account for size of the
+	initial length field in the section.
+	(read_attribute, dwarf2_get_ref_die_offset): Add a case for
+	DW_ORM_ref8.
+	(dwarf2_build_psymtabs_hard, psymtabs_to_symtab_1): Don't
+	assume that the .text section will have index 0 in the
+	section_offsets table.
+
 Fri Aug  4 18:00:41 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote.c (enum Z_packet_type): Define.
