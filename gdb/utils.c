@@ -62,7 +62,6 @@
 #include "mmalloc.h"
 #endif
 
-#ifndef MALLOC_INCOMPATIBLE
 #ifdef NEED_DECLARATION_MALLOC
 extern PTR malloc ();
 #endif
@@ -71,7 +70,6 @@ extern PTR realloc ();
 #endif
 #ifdef NEED_DECLARATION_FREE
 extern void free ();
-#endif
 #endif
 
 #undef XMALLOC

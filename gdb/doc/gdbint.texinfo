@@ -2206,10 +2206,6 @@ This macro is used as the argument to @code{lseek} (or, most commonly,
 @code{bfd_seek}).  FIXME, should be replaced by SEEK_SET instead,
 which is the POSIX equivalent.
 
-@item MALLOC_INCOMPATIBLE
-Define this if the system's prototype for @code{malloc} differs from the
-@sc{ansi} definition.
-
 @item MMAP_BASE_ADDRESS
 When using HAVE_MMAP, the first mapping should go at this address.
 

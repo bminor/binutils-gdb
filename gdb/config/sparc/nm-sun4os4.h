@@ -36,3 +36,7 @@
 
 #define KERNEL_U_SIZE kernel_u_size()
 extern int kernel_u_size (void);
+
+/* SunOS 4.x uses nonstandard "char *" as type of third argument to ptrace() */
+
+#define PTRACE_ARG3_TYPE char*

@@ -1,5 +1,13 @@
 2002-01-19  Andrew Cagney  <ac131313@redhat.com>
 
+	* utils.c: Remove #ifndef MALLOC_INCOMPATIBLE.
+	* config/sparc/xm-sun4os4.h (PTRACE_ARG3_TYPE): Move macro ....
+	* config/sparc/nm-sun4os4.h (PTRACE_ARG3_TYPE): ... to here.
+	* config/sparc/xm-sun4os4.h: Delete file.
+	* config/sparc/sun4os4.mh (XM_FILE): Delete makefile variable.
+	
+2002-01-19  Andrew Cagney  <ac131313@redhat.com>
+
 	* config/sparc/sparclynx.mh (XM_FILE): Delete.
 	* config/rs6000/rs6000lynx.mh (XM_FILE): Delete.
 	* config/m68k/m68klynx.mh (XM_FILE): Delete.
