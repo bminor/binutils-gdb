@@ -1,5 +1,11 @@
 Sun Aug  1 22:58:18 1993  Stu Grossman  (grossman at cygnus.com)
 
+	* config/i386/i386lynx.mh (NATDEPFILES):  Drop coredep (for now).
+	* config/i386/nm-i386bsd.h:  Protect from multiple inclusion.
+	* config/i386/nm-i386lynx.h:  Lotsa new host porting stuff.
+	* config/i386/tm-i386lynx.h:  Define SAVED_PC_AFTER_CALL and
+	target_pid_to_str.
+
 	* Makefile.in (CLIBS):  Reorder to make Lynx ld happy.
 	* (HFILES):  New file thread.h.
 	* (OBS):  New file thread.c.

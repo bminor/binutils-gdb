@@ -1,4 +1,4 @@
-/* Native-dependent definitions for Intel 386 running BSD Unix, for GDB.
+/* Native-dependent definitions for Intel 386 running Lynx, for GDB.
    Copyright 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -17,6 +17,19 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#ifndef NM_I386LYNX_H
+#define NM_I386LYNX_H
+
+#include <sys/kernel.h>
+#include <sys/mem.h>
+#include <sys/signal.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <sys/itimer.h>
+#include <sys/file.h>
+#include <sys/proc.h>
+#include "thread.h"
+
 /* This is the amount to subtract from u.u_ar0
    to get the offset in the core file of the register values.  */
 
@@ -31,3 +44,15 @@ extern int
 i386_register_u_addr PARAMS ((int, int));
 
 #define PTRACE_ARG3_TYPE char*
+
+/* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
+#define FETCH_INFERIOR_REGISTERS
+
+/* Thread ID of stopped thread */
+
+#define WIFTID(x) (((union wait *)&x)->w_tid)
+
+#define CHILD_WAIT
+extern int child_wait PARAMS ((int *status));
+
+#endif /* NM_I386LYNX_H */
