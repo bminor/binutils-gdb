@@ -25,7 +25,7 @@
 #include "value.h"
 #include "solib-svr4.h"
 
-#include "sh-nbsd-tdep.h"
+#include "shnbsd-tdep.h"
 
 /* Convert an r0-r15 register number into an offset into a ptrace
    register structure.  */

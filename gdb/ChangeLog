@@ -1,3 +1,14 @@
+2002-05-08  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* sh-nbsd-nat.c: Rename to...
+	* shnbsd-nat.c: ...this.
+	* sh-nbsd-tdep.c: Rename to...
+	* shnbsd-tdep.c: ...this.
+	* sh-nbsd-tdep.h: Rename to...
+	* shnbsd-tdep.h: ...this.
+	* config/sh/nbsd.mh: Use shnbsd-nat.o.
+	* config/sh/nbsd.mt: Use shnbsd-tdep.o.
+
 2002-05-08  Richard Earnshaw  <rearnsha@arm.com>
 
 	* remote-rdi.c (_initializie_remote_rdi): Use ANSI-style string

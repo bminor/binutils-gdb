@@ -26,7 +26,7 @@
 #include "defs.h"
 #include "inferior.h"
 
-#include "sh-nbsd-tdep.h"
+#include "shnbsd-tdep.h"
 
 /* Determine if PT_GETREGS fetches this register. */
 #define GETREGS_SUPPLIES(regno) \
