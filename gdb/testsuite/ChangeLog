@@ -1,3 +1,9 @@
+Tue Dec 13 11:26:00 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.chill/Makefile.in: Put all rule before rules for pr-4975.o
+	and pr-5646.o, so "make" is the same as "make all, not "make
+	pr-4975.o".
+
 Wed Dec  7 19:02:02 1994  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.base/list.exp: Adjust expectations to reflect changes in
