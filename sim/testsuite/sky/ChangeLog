@@ -1,3 +1,7 @@
+Mon Mar  2 18:54:26 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* t-pke3.trc: Added FLUSH* / PKEMS* tests.
+
 Fri Feb 27 16:53:29 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* Makefile.in (*): Changes now allow test case srcdir != objdir.
