@@ -123,7 +123,7 @@ breakpoint.  Depending on the particular situation, this may be the only
 way for @value{GDBN} to get control.  For instance, if your target
 machine has some sort of interrupt button, you won't need to call this;
 pressing the interrupt button will transfer control to
-@code{handle_exception}---in efect, to @value{GDBN}.  On some machines,
+@code{handle_exception}---in effect, to @value{GDBN}.  On some machines,
 simply receiving characters on the serial port may also trigger a trap;
 again, in that situation, you don't need to call @code{breakpoint} from
 your own program---simply running @samp{target remote} from the host
@@ -209,17 +209,17 @@ breakpoint();
 
 @item
 For the 680x0 stub only, you need to provide a variable called
-exceptionHook.  Normally you just use
+@code{exceptionHook}.  Normally you just use
 
 @example
 void (*exceptionHook)() = 0;
 @end example
 
-but if you, before calling @code{set_debug_traps}, set it to point to
-a function, that function will be called when the debugger continues
-from a trap (for example, bus error) which causes the debugger to be
-entered.  It is passed one parameter---an @code{int} which is the
-exception number.
+but if before calling @code{set_debug_traps}, you set it to point to a
+function in your program, that function is called when
+@code{@value{GDBN}} continues after stopping on a trap (for example, bus
+error).  The function indicated by @code{exceptionHook} is called with
+one parameter: an @code{int} which is the exception number.
 
 @item
 Compile and link together: your program, the @value{GDBN} debugging stub for
@@ -503,15 +503,18 @@ to its pathname.
 @end table
 
 @node EB29K Remote
-@subsection @value{GDBN} with a remote EB29K
+@subsection @value{GDBN} and the EBMON protocol for AMD29K
 
 @cindex EB29K board
 @cindex running 29K programs
 
-To use @value{GDBN} from a Unix system to run programs on AMD's EB29K
-board in a PC, you must first connect a serial cable between the PC
-and a serial port on the Unix system.  In the following, we assume
-you've hooked the cable between the PC's @file{COM1} port and
+AMD distributes a 29K development board meant to fit in a PC, together
+with a DOS-hosted monitor program called @code{EBMON}.  As a shorthand
+term, this development system is called the ``EB29K''.  To use
+@value{GDBN} from a Unix system to run programs on the EB29K board, you
+must first connect a serial cable between the PC (which hosts the EB29K
+board) and a serial port on the Unix system.  In the following, we
+assume you've hooked the cable between the PC's @file{COM1} port and
 @file{/dev/ttya} on the Unix system.
 
 @menu
@@ -742,7 +745,9 @@ sequences will get you back to the @value{GDBN} command prompt:
 VxWorks targets from a Unix host.  Already-running tasks spawned from
 the VxWorks shell can also be debugged.  @value{GDBN} uses code that runs on
 both the UNIX host and on the VxWorks target.  The program
-@code{@value{GDBP}} is installed and executed on the UNIX host.
+@code{gdb} is installed and executed on the UNIX host.  (It may be
+installed with the name @code{vxgdb}, to distinguish it from a
+@value{GDBN} for debugging programs on the host itself.)
 
 The following information on connecting to VxWorks was current when
 this manual was produced; newer releases of VxWorks may use revised
@@ -763,16 +768,13 @@ VxWorks, see the manufacturer's manual.
 
 Once you have included the RDB interface in your VxWorks system image
 and set your Unix execution search path to find @value{GDBN}, you are ready
-to run @value{GDBN}.  From your UNIX host, type:
+to run @value{GDBN}.  From your UNIX host, run @code{gdb} (or
+@code{vxgdb}, depending on your installation).
+
+@value{GDBN} comes up showing the prompt:
 
 @example
-% @value{GDBP}
-@end example
-
-@value{GDBN} will come up showing the prompt:
-
-@example
-(@value{GDBP})
+(vxgdb)
 @end example
 
 @menu
@@ -788,58 +790,62 @@ The @value{GDBN} command @code{target} lets you connect to a VxWorks target on t
 network.  To connect to a target whose host name is ``@code{tt}'', type:
 
 @example
-(@value{GDBP}) target vxworks tt
+(vxgdb) target vxworks tt
 @end example
 
-@value{GDBN} will display a message similar to the following:
+@value{GDBN} displays messages like these:
 
 @smallexample
-Attaching remote machine across net... Success!
+Attaching remote machine across net... 
+Connected to tt.
 @end smallexample
 
-@value{GDBN} will then attempt to read the symbol tables of any object modules
+@value{GDBN} then attempts to read the symbol tables of any object modules
 loaded into the VxWorks target since it was last booted.  @value{GDBN} locates
 these files by searching the directories listed in the command search
 path (@pxref{Environment, ,Your program's environment}); if it fails
-to find an object file, it will display a message such as:
+to find an object file, it displays a message such as:
 
 @example
 prog.o: No such file or directory.
 @end example
 
-This will cause the @code{target} command to abort.  When this happens,
-you should add the appropriate directory to the search path, with the
-@value{GDBN} command @code{path}, and execute the @code{target} command
-again.
+When this happens, add the appropriate directory to the search path with
+the @value{GDBN} command @code{path}, and execute the @code{target}
+command again.
 
 @node VxWorks Download
 @subsubsection VxWorks download
 
 @cindex download to VxWorks
 If you have connected to the VxWorks target and you want to debug an
-object that has not yet been loaded, you can use the @value{GDBN} @code{load}
-command to download a file from UNIX to VxWorks incrementally.  The
-object file given as an argument to the @code{load} command is actually
-opened twice: first by the VxWorks target in order to download the code,
-then by @value{GDBN} in order to read the symbol table.  This can lead to
-problems if the current working directories on the two systems differ.
-It is simplest to set the working directory on both systems to the
-directory in which the object file resides, and then to reference the
-file by its name, without any path.  Thus, to load a program
-@file{prog.o}, residing in @file{wherever/vw/demo/rdb}, on VxWorks type:
+object that has not yet been loaded, you can use the @value{GDBN}
+@code{load} command to download a file from UNIX to VxWorks
+incrementally.  The object file given as an argument to the @code{load}
+command is actually opened twice: first by the VxWorks target in order
+to download the code, then by @value{GDBN} in order to read the symbol
+table.  This can lead to problems if the current working directories on
+the two systems differ.  If both systems have NFS mounted the same
+filesystems, you can avoid these problems by using absolute paths.
+Otherwise, it is simplest to set the working directory on both systems
+to the directory in which the object file resides, and then to reference
+the file by its name, without any path.  For instance, a program
+@file{prog.o} may reside in @file{@var{vxpath}/vw/demo/rdb} in VxWorks
+and in @file{@var{hostpath}/vw/demo/rdb} on the host.  To load this
+program, type this on VxWorks:
 
 @example
--> cd "wherever/vw/demo/rdb"
+-> cd "@var{vxpath}/vw/demo/rdb"
 @end example
 
-On @value{GDBN} type:
+Then, in @value{GDBN}, type:
 
 @example
-(@value{GDBP}) cd wherever/vw/demo/rdb 
-(@value{GDBP}) load prog.o
+(vxgdb) cd @var{hostpath}/vw/demo/rdb 
+(vxgdb) load prog.o
 @end example
 
-@value{GDBN} will display a response similar to the following:
+@value{GDBN} displays a response similar to this:
 
 @smallexample
 Reading symbol data from wherever/vw/demo/rdb/prog.o... done.
@@ -861,7 +867,7 @@ You can also attach to an existing task using the @code{attach} command as
 follows:
 
 @example
-(@value{GDBP}) attach @var{task}
+(vxgdb) attach @var{task}
 @end example
 
 @noindent

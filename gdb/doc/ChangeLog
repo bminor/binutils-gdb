@@ -1,3 +1,14 @@
+Tue Jun 15 18:11:39 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* gdb.texinfo (Copying): delete this node and references to it;
+	RMS says this manual need not carry GPL. (passim): Improvements
+	from last round at FSF, largely due to Ian Taylor review, and
+	minor formatting improvements.
+
+	* gdbinv-s.texi (passim): Improvements from last round at FSF,
+	largely due to Ian Taylor review. (Debug Session): minor edits to
+	new text.
+
 Sun Jun 13 12:52:39 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* Makefile.in (realclean): Remove info and dvi files too.
