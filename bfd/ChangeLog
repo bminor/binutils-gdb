@@ -1,3 +1,15 @@
+Mon Apr 19 18:52:52 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* aoutx.h (translate_from_native_sym_flags): Check that the
+	symbol's section does get set.
+	(slurp_symbol_table): Zero index means null-string name.
+
+	* aoutx.h (struct stringtab_entry, struct stringtab_data): New
+	data structures.
+	(hash, stringtab_init, add_to_stringtab, emit_strtab, compare):
+	New functions.
+	(write_syms): Use them, to reduce string table size.
+
 Mon Apr 19 16:45:12 1993  Fred Fish  (fnf@cygnus.com)
 
 	* trad-core.c (trad_core_vec):  Add 6 new initializers to match

@@ -120,6 +120,7 @@ DESCRIPTION
 #define KEEPIT flags
 #define KEEPITTYPE int
 
+#include <assert.h>
 #include <string.h>		/* For strchr and friends */
 #include "bfd.h"
 #include <sysdep.h>
@@ -1016,6 +1017,7 @@ DEFUN (translate_from_native_sym_flags, (sym_pointer, cache_ptr, abfd, statep),
        bfd * abfd AND
        int *statep)
 {
+  cache_ptr->symbol.section = 0;
   if (*statep)
     {
       /* This is an indirect symbol  */
@@ -1108,10 +1110,10 @@ DEFUN (translate_from_native_sym_flags, (sym_pointer, cache_ptr, abfd, statep),
 	  if ((cache_ptr->type | N_EXT) == (N_INDR | N_EXT))
 	    {
 	      /* Two symbols in a row for an INDR message. The first symbol
-	       contains the name we will match, the second symbol contains the
-	       name the first name is translated into. It is supplied to us
-	       undefined. This is good, since we want to pull in any files which
-	       define it */
+		 contains the name we will match, the second symbol contains
+		 the name the first name is translated into. It is supplied to
+		 us undefined. This is good, since we want to pull in any files
+		 which define it */
 	      cache_ptr->symbol.flags = BSF_DEBUGGING | BSF_INDIRECT;
 	      cache_ptr->symbol.value = (bfd_vma) ((cache_ptr + 1));
 	      cache_ptr->symbol.section = &bfd_ind_section;
@@ -1202,6 +1204,8 @@ DEFUN (translate_from_native_sym_flags, (sym_pointer, cache_ptr, abfd, statep),
 	    }
 	}
     }
+  if (cache_ptr->symbol.section == 0)
+    abort ();
 }
 
 
@@ -1304,20 +1308,21 @@ DEFUN(NAME(aout,slurp_symbol_table),(abfd),
   struct external_nlist *syms;
   char *strings;
   aout_symbol_type *cached;
-    
+
   /* If there's no work to be done, don't do any */
   if (obj_aout_symbols (abfd) != (aout_symbol_type *)NULL) return true;
   symbol_size = exec_hdr(abfd)->a_syms;
-  if (symbol_size == 0) {
-    bfd_error = no_symbols;
-    return false;
-  }
-    
+  if (symbol_size == 0)
+    {
+      bfd_error = no_symbols;
+      return false;
+    }
+
   bfd_seek (abfd, obj_str_filepos (abfd), SEEK_SET);
   if (bfd_read ((PTR)string_chars, BYTES_IN_WORD, 1, abfd) != BYTES_IN_WORD)
     return false;
   string_size = GET_WORD (abfd, string_chars);
-    
+
   strings =(char *) bfd_alloc(abfd, string_size + 1);
   cached = (aout_symbol_type *)
     bfd_zalloc(abfd, (bfd_size_type)(bfd_get_symcount (abfd) * sizeof(aout_symbol_type)));
@@ -1326,122 +1331,503 @@ DEFUN(NAME(aout,slurp_symbol_table),(abfd),
      might want to allocate onto the bfd's obstack  */
   syms = (struct external_nlist *) bfd_xmalloc(symbol_size);
   bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET);
-  if (bfd_read ((PTR)syms, 1, symbol_size, abfd) != symbol_size) {
-  bailout:
-    if (syms) 	free (syms);
-    if (cached)	bfd_release (abfd, cached);
-    if (strings)bfd_release (abfd, strings);
-    return false;
-  }
-    
-  bfd_seek (abfd, obj_str_filepos (abfd), SEEK_SET);
-  if (bfd_read ((PTR)strings, 1, string_size, abfd) != string_size) {
-    goto bailout;
-  }
-  strings[string_size] = 0; /* Just in case. */
-    
-  /* OK, now walk the new symtable, cacheing symbol properties */
+  if (bfd_read ((PTR)syms, 1, symbol_size, abfd) != symbol_size)
     {
-      register struct external_nlist *sym_pointer;
-      int state = 0;
-      register struct external_nlist *sym_end = syms + bfd_get_symcount (abfd);
-      register aout_symbol_type *cache_ptr = cached;
-	
-      /* Run through table and copy values */
-      for (sym_pointer = syms, cache_ptr = cached;
-	   sym_pointer < sym_end; sym_pointer ++, cache_ptr++) 
-	  {
-	    long x = GET_WORD(abfd, sym_pointer->e_strx);
-	    cache_ptr->symbol.the_bfd = abfd;
-	    if (x >= 0 && x < string_size)
-	      cache_ptr->symbol.name = x + strings;
-	    else
-	      goto bailout;
-	      
-	    cache_ptr->symbol.value = GET_SWORD(abfd,  sym_pointer->e_value);
-	    cache_ptr->desc = bfd_h_get_16(abfd, sym_pointer->e_desc);
-	    cache_ptr->other = bfd_h_get_8(abfd, sym_pointer->e_other);
-	    cache_ptr->type = bfd_h_get_8(abfd,  sym_pointer->e_type);
-	    cache_ptr->symbol.udata = 0;
-	    translate_from_native_sym_flags (sym_pointer, cache_ptr,	
-				     abfd, &state);
-	  }
+    bailout:
+      if (syms)
+ 	free (syms);
+      if (cached)
+	bfd_release (abfd, cached);
+      if (strings)
+	bfd_release (abfd, strings);
+      return false;
     }
-    
+
+  bfd_seek (abfd, obj_str_filepos (abfd), SEEK_SET);
+  if (bfd_read ((PTR)strings, 1, string_size, abfd) != string_size)
+    {
+      goto bailout;
+    }
+  strings[string_size] = 0; /* Just in case. */
+
+  /* OK, now walk the new symtable, cacheing symbol properties */
+  {
+    register struct external_nlist *sym_pointer;
+    int state = 0;
+    register struct external_nlist *sym_end = syms + bfd_get_symcount (abfd);
+    register aout_symbol_type *cache_ptr = cached;
+
+    /* Run through table and copy values */
+    for (sym_pointer = syms, cache_ptr = cached;
+	 sym_pointer < sym_end; sym_pointer ++, cache_ptr++) 
+      {
+	long x = GET_WORD(abfd, sym_pointer->e_strx);
+	cache_ptr->symbol.the_bfd = abfd;
+	if (x == 0)
+	  cache_ptr->symbol.name = "";
+	else if (x >= 0 && x < string_size)
+	  cache_ptr->symbol.name = x + strings;
+	else
+	  goto bailout;
+
+	cache_ptr->symbol.value = GET_SWORD(abfd,  sym_pointer->e_value);
+	cache_ptr->desc = bfd_h_get_16(abfd, sym_pointer->e_desc);
+	cache_ptr->other = bfd_h_get_8(abfd, sym_pointer->e_other);
+	cache_ptr->type = bfd_h_get_8(abfd,  sym_pointer->e_type);
+	cache_ptr->symbol.udata = 0;
+	translate_from_native_sym_flags (sym_pointer, cache_ptr,	
+					 abfd, &state);
+      }
+  }
+
   obj_aout_symbols (abfd) =  cached;
   free((PTR)syms);
-    
+
   return true;
 }
 
+
+/* Possible improvements:
+   + look for strings matching trailing substrings of other strings
+   + better data structures?  balanced trees?
+   + smaller per-string or per-symbol data?  re-use some of the symbol's
+     data fields?
+   + also look at reducing memory use elsewhere -- maybe if we didn't have to
+     construct the entire symbol table at once, we could get by with smaller
+     amounts of VM?  (What effect does that have on the string table
+     reductions?)
+   + rip this out of here, put it into its own file in bfd or libiberty, so
+     coff and elf can use it too.  I'll work on this soon, but have more
+     pressing tasks right now.
+
+   A hash table might(?) be more efficient for handling exactly the cases that
+   are handled now, but for trailing substring matches, I think we want to
+   examine the `nearest' values (reverse-)lexically, not merely impose a strict
+   order, nor look only for exact-match or not-match.  I don't think a hash
+   table would be very useful for that, and I don't feel like fleshing out two
+   completely different implementations.  [raeburn:930419.0331EDT] */
+
+#if __GNUC__ >= 2
+#define INLINE __inline__
+#else
+#define INLINE
+#endif
+
+struct stringtab_entry {
+  /* Hash value for this string.  Only useful so long as we aren't doing
+     substring matches.  */
+  int hash;
+
+  /* Next node to look at, depending on whether the hash value of the string
+     being searched for is less than or greater than the hash value of the
+     current node.  For now, `equal to' is lumped in with `greater than', for
+     space efficiency.  It's not a common enough case to warrant another field
+     to be used for all nodes.  */
+  struct stringtab_entry *less;
+  struct stringtab_entry *greater;
+
+  /* The string itself.  */
+  CONST char *string;
+
+  /* The index allocated for this string.  */
+  bfd_size_type index;
+
+#ifdef GATHER_STATISTICS
+  /* How many references have there been to this string?  (Not currently used;
+     could be dumped out for anaylsis, if anyone's interested.)  */
+  unsigned long count;
+#endif
+
+  /* Next node in linked list, in suggested output order.  */
+  struct stringtab_entry *next_to_output;
+};
+
+struct stringtab_data {
+  /* Tree of string table entries.  */
+  struct stringtab_entry *strings;
+
+  /* Fudge factor used to center top node of tree.  */
+  int hash_zero;
+
+  /* Next index value to issue.  */
+  bfd_size_type index;
+
+  /* Index used for empty strings.  Cached here because checking for them
+     is really easy, and we can avoid searching the tree.  */
+  bfd_size_type empty_string_index;
+
+  /* These fields indicate the two ends of a singly-linked list that indicates
+     the order strings should be written out in.  Use this order, and no
+     seeking will need to be done, so output efficiency should be maximized. */
+  struct stringtab_entry **end;
+  struct stringtab_entry *output_order;
+
+#ifdef GATHER_STATISTICS
+  /* Number of strings which duplicate strings already in the table.  */
+  unsigned long duplicates;
+
+  /* Number of bytes saved by not having to write all the duplicate strings. */
+  unsigned long bytes_saved;
+
+  /* Number of zero-length strings.  Currently, these all turn into
+     references to the null byte at the end of the first string.  In some
+     cases (possibly not all?  explore this...), it should be possible to
+     simply write out a zero index value.  */
+  unsigned long empty_strings;
+
+  /* Number of times the hash values matched but the strings were different.
+     Note that this includes the number of times the other string(s) occurs, so
+     there may only be two strings hashing to the same value, even if this
+     number is very large.  */
+  unsigned long bad_hash_matches;
+
+  /* Null strings aren't counted in this one.
+     This will probably only be nonzero if we've got an input file
+     which was produced by `ld -r' (i.e., it's already been processed
+     through this code).  Under some operating systems, native tools
+     may make all empty strings have the same index; but the pointer
+     check won't catch those, because to get to that stage we'd already
+     have to compute the checksum, which requires reading the string,
+     so we short-circuit that case with empty_string_index above.  */
+  unsigned long pointer_matches;
+
+  /* Number of comparisons done.  I figure with the algorithms in use below,
+     the average number of comparisons done (per symbol) should be roughly
+     log-base-2 of the number of unique strings.  */
+  unsigned long n_compares;
+#endif
+};
+
+/* Some utility functions for the string table code.  */
+
+static INLINE int
+hash (string)
+     char *string;
+{
+  unsigned int sum = 0;
+  while (*string)
+    {
+#if 0
+      /* This expression borrowed from some code in gnu make.  */
+      sum += *string++, sum = (sum << 7) + (sum >> 20);
+#endif
+      /* This appears to get a better distribution, at least for my one
+	 test case.  Do some analysis on this later, get a real hash
+	 algorithm.  */
+      sum ^= sum >> 20;
+      sum ^= sum << 7;
+      sum += *string++;
+    }
+  return sum;
+}
+
+static INLINE void
+stringtab_init (tab)
+     struct stringtab_data *tab;
+{
+  tab->strings = 0;
+  tab->output_order = 0;
+  tab->end = &tab->output_order;
+
+  /* Initial string table length includes size of length field.  */
+  tab->index = BYTES_IN_WORD;
+  tab->empty_string_index = -1;
+#ifdef GATHER_STATISTICS
+  tab->duplicates = 0;
+  tab->empty_strings = 0;
+  tab->bad_hash_matches = 0;
+  tab->pointer_matches = 0;
+  tab->bytes_saved = 0;
+  tab->n_compares = 0;
+#endif
+}
+
+static INLINE int
+compare (entry, str, hash)
+     struct stringtab_entry *entry;
+     CONST char *str;
+     int hash;
+{
+  if (hash == entry->hash)
+    return 0;
+  if (hash > entry->hash)
+    return 1;
+  if (hash < entry->hash)
+    return -1;
+  abort ();
+}
+
+#ifdef GATHER_STATISTICS
+/* Don't want to have to link in math library with all bfd applications...  */
+static INLINE double
+log2 (num)
+     int num;
+{
+  double d = num;
+#if defined (__i386__) && __GNUC__ >= 2
+  asm ("fyl2x" : "=t" (d) : "0" (d), "u" (1.0));
+  return d;
+#else
+  int n = 0;
+  while (d >= 2.0)
+    n++, d /= 2.0;
+  return ((d > 1.41) ? 0.5 : 0) + n;
+#endif
+}
+#endif
+
+/* Main string table routines.  */
+/* Returns index in string table.  Whether or not this actually adds an
+   entry into the string table should be irrelevant -- it just has to
+   return a valid index.  */
+static bfd_size_type
+add_to_stringtab (abfd, str, tab, check)
+     bfd *abfd;
+     CONST char *str;
+     struct stringtab_data *tab;
+     int check;
+{
+  struct stringtab_entry **ep;
+  struct stringtab_entry *entry;
+  int hashval, len;
+
+  if (str[0] == 0)
+    {
+      bfd_size_type index;
+      CONST bfd_size_type minus_one = -1;
+
+#ifdef GATHER_STATISTICS
+      tab->empty_strings++;
+#endif
+      index = tab->empty_string_index;
+      if (index != minus_one)
+	{
+	got_empty:
+#ifdef GATHER_STATISTICS
+	  tab->bytes_saved++;
+	  tab->duplicates++;
+#endif
+	  return index;
+	}
+
+      /* Need to find it.  */
+      entry = tab->strings;
+      if (entry)
+	{
+	  index = entry->index + strlen (entry->string);
+	  tab->empty_string_index = index;
+	  goto got_empty;
+	}
+      len = 0;
+    }
+  else
+    len = strlen (str);
+
+  /* The hash_zero value is chosen such that the first symbol gets a value of
+     zero.  With a balanced tree, this wouldn't be very useful, but without it,
+     we might get a more even split at the top level, instead of skewing it
+     badly should hash("/usr/lib/crt0.o") (or whatever) be far from zero. */
+  hashval = hash (str) ^ tab->hash_zero;
+  ep = &tab->strings;
+  if (!*ep)
+    {
+      tab->hash_zero = hashval;
+      hashval = 0;
+      goto add_it;
+    }
+
+  while (*ep)
+    {
+      int cmp;
+      entry = *ep;
+#ifdef GATHER_STATISTICS
+      tab->n_compares++;
+#endif
+      cmp = compare (entry, str, hashval);
+      if (cmp == 0)
+	{
+	  if (entry->string == str)
+	    {
+#ifdef GATHER_STATISTICS
+	      tab->pointer_matches++;
+#endif
+	      goto match;
+	    }
+	  if (!strcmp (entry->string, str))
+	    {
+	    match:
+#ifdef GATHER_STATISTICS
+	      entry->count++;
+	      tab->bytes_saved += len + 1;
+	      tab->duplicates++;
+#endif
+	      /* If we're in the linker, and the new string is from a new
+		 input file which might have already had these reductions
+		 run over it, we want to keep the new string pointer.  I
+		 don't think we're likely to see any (or nearly as many,
+		 at least) cases where a later string is in the same location
+		 as an earlier one rather than this one.  */
+	      entry->string = str;
+	      return entry->index;
+	    }
+#ifdef GATHER_STATISTICS
+	  tab->bad_hash_matches++;
+#endif
+	  ep = &entry->greater;
+	}
+      else if (cmp > 0)
+	ep = &entry->greater;
+      else
+	/* cmp < 0 */
+	ep = &entry->less;
+    }
+
+  /* If we get here, nothing that's in the table already matched.
+     EP points to the `next' field at the end of the chain; stick a
+     new entry on here.  */
+ add_it:
+  entry = (struct stringtab_entry *) bfd_alloc_by_size_t (abfd,
+							  sizeof (struct stringtab_entry));
+
+  entry->less = entry->greater = 0;
+  entry->hash = hashval;
+  entry->index = tab->index;
+  entry->string = str;
+  entry->next_to_output = 0;
+#ifdef GATHER_STATISTICS
+  entry->count = 1;
+#endif
+
+  assert (*tab->end == 0);
+  *(tab->end) = entry;
+  tab->end = &entry->next_to_output;
+  assert (*tab->end == 0);
+
+  {
+    tab->index += len + 1;
+    if (len == 0)
+      tab->empty_string_index = entry->index;
+  }
+  assert (*ep == 0);
+  *ep = entry;
+  return entry->index;
+}
+
+static void
+emit_strtab (abfd, tab)
+     bfd *abfd;
+     struct stringtab_data *tab;
+{
+  struct stringtab_entry *entry;
+#ifdef GATHER_STATISTICS
+  int count = 0;
+#endif
+
+  /* Be sure to put string length into correct byte ordering before writing
+     it out.  */
+  char buffer[BYTES_IN_WORD];
+
+  PUT_WORD (abfd, tab->index, (unsigned char *) buffer);
+  bfd_write ((PTR) buffer, 1, BYTES_IN_WORD, abfd);
+
+  for (entry = tab->output_order; entry; entry = entry->next_to_output)
+    {
+      bfd_write ((PTR) entry->string, 1, strlen (entry->string) + 1, abfd);
+#ifdef GATHER_STATISTICS
+      count++;
+#endif
+    }
+
+#ifdef GATHER_STATISTICS
+  /* Short form only, for now.
+     To do:  Specify output file.  Conditionalize on environment?  Detailed
+     analysis if desired.  */
+  {
+    int n_syms = bfd_get_symcount (abfd);
+
+    fprintf (stderr, "String table data for output file:\n");
+    fprintf (stderr, "  %8d symbols output\n", n_syms);
+    fprintf (stderr, "  %8d duplicate strings\n", tab->duplicates);
+    fprintf (stderr, "  %8d empty strings\n", tab->empty_strings);
+    fprintf (stderr, "  %8d unique strings output\n", count);
+    fprintf (stderr, "  %8d pointer matches\n", tab->pointer_matches);
+    fprintf (stderr, "  %8d bytes saved\n", tab->bytes_saved);
+    fprintf (stderr, "  %8d bad hash matches\n", tab->bad_hash_matches);
+    fprintf (stderr, "  %8d hash-val comparisons\n", tab->n_compares);
+    if (n_syms)
+      {
+	double n_compares = tab->n_compares;
+	double avg_compares = n_compares / n_syms;
+	/* The second value here should usually be near one.  */
+	fprintf (stderr, "\t    average %f per symbol (%f * log2 nstrings)\n",
+		 avg_compares, avg_compares / log2 (count));
+      }
+  }
+#endif
+
+/* Old code:
+  unsigned int count;
+  generic = bfd_get_outsymbols(abfd);
+  for (count = 0; count < bfd_get_symcount(abfd); count++)
+    {
+      asymbol *g = *(generic++);
+
+      if (g->name)
+	{
+	  size_t length = strlen(g->name)+1;
+	  bfd_write((PTR)g->name, 1, length, abfd);
+	}
+      g->KEEPIT = (KEEPITTYPE) count;
+    } */
+}
 
 void
 DEFUN(NAME(aout,write_syms),(abfd),
       bfd *abfd)
-  {
-    unsigned int count ;
-    asymbol **generic = bfd_get_outsymbols (abfd);
-    
-    bfd_size_type stindex = BYTES_IN_WORD; /* initial string length */
-    
-    for (count = 0; count < bfd_get_symcount (abfd); count++) {
+{
+  unsigned int count ;
+  asymbol **generic = bfd_get_outsymbols (abfd);
+  struct stringtab_data strtab;
+
+  stringtab_init (&strtab);
+
+  for (count = 0; count < bfd_get_symcount (abfd); count++)
+    {
       asymbol *g = generic[count];
       struct external_nlist nsp;
 
-
-      if (g->name) {
-	unsigned int length = strlen(g->name) +1;
-	PUT_WORD  (abfd, stindex, (unsigned char *)nsp.e_strx);
-	stindex += length;
-      }
-      else 
-
-      {
-	PUT_WORD  (abfd, 0, (unsigned char *)nsp.e_strx);
-      }
-      
-      if (bfd_asymbol_flavour(g) == abfd->xvec->flavour) 
-	  {
-	    bfd_h_put_16(abfd, aout_symbol(g)->desc,  nsp.e_desc);
-	    bfd_h_put_8(abfd, aout_symbol(g)->other,  nsp.e_other);
-	    bfd_h_put_8(abfd, aout_symbol(g)->type,  nsp.e_type);
-	  }
+      if (g->name)
+	PUT_WORD (abfd, add_to_stringtab (abfd, g->name, &strtab),
+		  (unsigned char *) nsp.e_strx);
       else
-	  {
-	    bfd_h_put_16(abfd,0, nsp.e_desc);
-	    bfd_h_put_8(abfd, 0,  nsp.e_other);
-	    bfd_h_put_8(abfd, 0,  nsp.e_type);
-	  }
+	PUT_WORD (abfd, 0, (unsigned char *)nsp.e_strx);
+
+      if (bfd_asymbol_flavour(g) == abfd->xvec->flavour)
+	{
+	  bfd_h_put_16(abfd, aout_symbol(g)->desc,  nsp.e_desc);
+	  bfd_h_put_8(abfd, aout_symbol(g)->other,  nsp.e_other);
+	  bfd_h_put_8(abfd, aout_symbol(g)->type,  nsp.e_type);
+	}
+      else
+	{
+	  bfd_h_put_16(abfd,0, nsp.e_desc);
+	  bfd_h_put_8(abfd, 0, nsp.e_other);
+	  bfd_h_put_8(abfd, 0, nsp.e_type);
+	}
 
       translate_to_native_sym_flags (&nsp, g, abfd);
 
       bfd_write((PTR)&nsp,1,EXTERNAL_NLIST_SIZE, abfd);
+
+      /* NB: `KEEPIT' currently overlays `flags', so set this only
+	 here, at the end.  */
+      g->KEEPIT = count;
     }
-    
-    /* Now output the strings.  Be sure to put string length into correct
-       byte ordering before writing it.  */
-      {
-	char buffer[BYTES_IN_WORD];
-	PUT_WORD  (abfd, stindex, (unsigned char *)buffer);
-    
-	bfd_write((PTR)buffer, 1, BYTES_IN_WORD, abfd);
-      }
-    generic = bfd_get_outsymbols(abfd);
-    for (count = 0; count < bfd_get_symcount(abfd); count++) 
-	{
-	  asymbol *g = *(generic++);
-	  
-	  if (g->name)
-	      {
-		size_t length = strlen(g->name)+1;
-		bfd_write((PTR)g->name, 1, length, abfd);
-	      }
-	    g->KEEPIT = (KEEPITTYPE) count;
-	}
-  }
 
+  emit_strtab (abfd, &strtab);
+}
 
-
+
 unsigned int
 DEFUN(NAME(aout,get_symtab),(abfd, location),
       bfd *abfd AND
@@ -1585,7 +1971,7 @@ DEFUN(NAME(aout,swap_ext_reloc_out),(abfd, g, natptr),
      
   if (bfd_is_com_section (output_section)
       || output_section == &bfd_abs_section
-      || output_section == &bfd_und_section) 
+      || output_section == &bfd_und_section)
   {
     if (bfd_abs_section.symbol == sym)
     {
