@@ -1,3 +1,7 @@
+Thu Oct 23 14:57:58 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* v850-dis.c (disassemble): Replace // with /* ... */
+
 Wed Oct 22 17:33:21 1997  Richard Henderson  <rth@cygnus.com>
 
 	* sparc-opc.c: Add wr & rd for v9a asr's.
