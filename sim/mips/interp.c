@@ -263,10 +263,12 @@ static void device_init(SIM_DESC sd) {
 }
 
 /* start-sanitize-sky */
+#ifdef TARGET_SKY
 static struct {
   short i[16];
   int f[NUM_VU_REGS - 16];
 } vu_regs[2];
+#endif
 /* end-sanitize-sky */
 
 /*---------------------------------------------------------------------------*/
