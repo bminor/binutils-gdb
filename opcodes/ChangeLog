@@ -1,3 +1,8 @@
+Mon Mar 28 13:00:15 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* configure.in: Change error message to refer to bfd/config.bfd
+	rather than bfd/configure.in.
+
 Mon Mar 28 12:28:30 1994  David Edelsohn  (edelsohn@npac.syr.edu)
 
 	* ppc-opc.c: Define POWER2 as short alias flag.
