@@ -10,31 +10,37 @@
 
 /********************** FILE HEADER **********************/
 
-struct internal_filehdr
+/* extra stuff in a PE header. */
+
+struct internal_extra_pe_filehdr
 {
   /* DOS header data follows for PE stuff */
-  unsigned short e_magic;      /* Magic number, 0x5a4d */
-  unsigned short e_cblp;       /* Bytes on last page of file, 0x90 */
-  unsigned short e_cp;         /* Pages in file, 0x3 */
-  unsigned short e_crlc;       /* Relocations, 0x0 */
-  unsigned short e_cparhdr;    /* Size of header in paragraphs, 0x4 */
-  unsigned short e_minalloc;   /* Minimum extra paragraphs needed, 0x0 */
-  unsigned short e_maxalloc;   /* Maximum extra paragraphs needed, 0xFFFF */
-  unsigned short e_ss;         /* Initial (relative) SS value, 0x0 */
-  unsigned short e_sp;         /* Initial SP value, 0xb8 */
-  unsigned short e_csum;       /* Checksum, 0x0 */
-  unsigned short e_ip;         /* Initial IP value, 0x0 */
-  unsigned short e_cs;         /* Initial (relative) CS value, 0x0 */
-  unsigned short e_lfarlc;     /* File address of relocation table, 0x40 */
-  unsigned short e_ovno;       /* Overlay number, 0x0 */
-  unsigned short e_res[4];     /* Reserved words, all 0x0 */
-  unsigned short e_oemid;      /* OEM identifier (for e_oeminfo), 0x0 */
-  unsigned short e_oeminfo;    /* OEM information; e_oemid specific, 0x0 */
-  unsigned short e_res2[10];   /* Reserved words, all 0x0 */
-  bfd_vma  e_lfanew;           /* File address of new exe header, 0x80 */
+  unsigned short e_magic;	/* Magic number, 0x5a4d */
+  unsigned short e_cblp;	/* Bytes on last page of file, 0x90 */
+  unsigned short e_cp;		/* Pages in file, 0x3 */
+  unsigned short e_crlc;	/* Relocations, 0x0 */
+  unsigned short e_cparhdr;	/* Size of header in paragraphs, 0x4 */
+  unsigned short e_minalloc;	/* Minimum extra paragraphs needed, 0x0 */
+  unsigned short e_maxalloc;	/* Maximum extra paragraphs needed, 0xFFFF */
+  unsigned short e_ss;		/* Initial (relative) SS value, 0x0 */
+  unsigned short e_sp;		/* Initial SP value, 0xb8 */
+  unsigned short e_csum;	/* Checksum, 0x0 */
+  unsigned short e_ip;		/* Initial IP value, 0x0 */
+  unsigned short e_cs;		/* Initial (relative) CS value, 0x0 */
+  unsigned short e_lfarlc;	/* File address of relocation table, 0x40 */
+  unsigned short e_ovno;	/* Overlay number, 0x0 */
+  unsigned short e_res[4];	/* Reserved words, all 0x0 */
+  unsigned short e_oemid;	/* OEM identifier (for e_oeminfo), 0x0 */
+  unsigned short e_oeminfo;	/* OEM information; e_oemid specific, 0x0 */
+  unsigned short e_res2[10];	/* Reserved words, all 0x0 */
+  bfd_vma  e_lfanew;		/* File address of new exe header, 0x80 */
   unsigned long dos_message[16]; /* text which always follows dos header */
   bfd_vma  nt_signature;   	/* required NT signature, 0x4550 */ 
+};
 
+struct internal_filehdr
+{
+  struct internal_extra_pe_filehdr pe;
 
   /* standard coff  internal info */
   unsigned short f_magic;	/* magic number			*/
@@ -57,6 +63,7 @@ struct internal_filehdr
  *	F_AR32W		file is 32-bit big-endian
  *	F_DYNLOAD	rs/6000 aix: dynamically loadable w/imports & exports
  *	F_SHROBJ	rs/6000 aix: file is a shared object
+ *      F_DLL           PE format DLL
  */
 
 #define	F_RELFLG	(0x0001)
@@ -68,6 +75,7 @@ struct internal_filehdr
 #define	F_AR32W     	(0x0200)
 #define	F_DYNLOAD	(0x1000)
 #define	F_SHROBJ	(0x2000)
+#define F_DLL           (0x2000)
 
 /* extra structure which is used in the optional header */
 typedef struct _IMAGE_DATA_DIRECTORY 
@@ -78,8 +86,51 @@ typedef struct _IMAGE_DATA_DIRECTORY
 #define IMAGE_NUMBEROF_DIRECTORY_ENTRIES  16
 
 /* default image base for NT */
-#define NT_IMAGE_BASE 0x400000
+#define NT_EXE_IMAGE_BASE 0x400000
+#define NT_DLL_IMAGE_BASE 0x10000000
 
+/* Extra stuff in a PE aouthdr */
+
+#define PE_DEF_SECTION_ALIGNMENT 0x1000
+#define PE_DEF_FILE_ALIGNMENT 0x200
+
+struct internal_extra_pe_aouthdr 
+{
+  /* PE stuff  */
+  bfd_vma ImageBase;		/* address of specific location in memory that
+				   file is located, NT default 0x10000 */
+
+  bfd_vma SectionAlignment;	/* section alignment default 0x1000 */
+  bfd_vma FileAlignment;	/* file alignment default 0x200 */
+  short   MajorOperatingSystemVersion; /* minimum version of the operating */
+  short   MinorOperatingSystemVersion; /* system req'd for exe, default to 1*/
+  short   MajorImageVersion;	/* user defineable field to store version of */
+  short   MinorImageVersion;	/* exe or dll being created, default to 0 */ 
+  short   MajorSubsystemVersion; /* minimum subsystem version required to */
+  short   MinorSubsystemVersion; /* run exe; default to 3.1 */
+  long    Reserved1;		/* seems to be 0 */
+  long    SizeOfImage;		/* size of memory to allocate for prog */
+  long    SizeOfHeaders;	/* size of PE header and section table */
+  long    CheckSum;		/* set to 0 */
+  short   Subsystem;	
+
+  /* type of subsystem exe uses for user interface,
+     possible values:
+     1 - NATIVE   Doesn't require a subsystem
+     2 - WINDOWS_GUI runs in Windows GUI subsystem
+     3 - WINDOWS_CUI runs in Windows char sub. (console app)
+     5 - OS2_CUI runs in OS/2 character subsystem
+     7 - POSIX_CUI runs in Posix character subsystem */
+  short   DllCharacteristics;	/* flags for DLL init, use 0 */
+  bfd_vma SizeOfStackReserve;	/* amount of memory to reserve  */
+  bfd_vma SizeOfStackCommit;	/* amount of memory initially committed for 
+				   initial thread's stack, default is 0x1000 */
+  bfd_vma SizeOfHeapReserve;	/* amount of virtual memory to reserve and */
+  bfd_vma SizeOfHeapCommit;	/* commit, don't know what to defaut it to */
+  long    LoaderFlags;		/* can probably set to 0 */
+  long    NumberOfRvaAndSizes;	/* number of entries in next entry, 16 */
+  IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
+};
 
 /********************** AOUT "OPTIONAL HEADER" **********************/
 struct internal_aouthdr
@@ -108,6 +159,7 @@ struct internal_aouthdr
   short o_algndata;		/* max alignment for data	*/
   short o_modtype;		/* Module type field, 1R,RE,RO	*/
   unsigned long o_maxstack;	/* max stack size allowed.	*/
+  unsigned long o_maxdata;	/* max data size allowed.	*/
 
   /* ECOFF stuff */
   bfd_vma bss_start;		/* Base of bss section.		*/
@@ -122,41 +174,9 @@ struct internal_aouthdr
   long vid[2];			/* Version id */
 
 
-  /* PE stuff  */
-  bfd_vma ImageBase;          /* address of specific location in memory that
-                                 file is located, NT default 0x10000 */
-  bfd_vma SectionAlignment;   /* section alignment default 0x1000 */
-  bfd_vma FileAlignment;      /* file alignment default 0x200 */
-  short   MajorOperatingSystemVersion;  /* minimum version of the operating */
-  short   MinorOperatingSystemVersion;  /* system req'd for exe, default to 1*/
-  short   MajorImageVersion;  /* user defineable field to store version of */
-  short   MinorImageVersion;  /* exe or dll being created, default to 0 */ 
-  short   MajorSubsystemVersion; /* minimum subsystem version required to */
-  short   MinorSubsystemVersion; /* run exe; default to 3.1 */
-  long    Reserved1;  /* seems to be 0 */
-  long    SizeOfImage; /* size of region from image base to end last section */
-  long    SizeOfHeaders; /* size of PE header and section table */
-  long    CheckSum;  /* set to 0 */
-  short   Subsystem; /* type of subsystem exe uses for user interface,
-                        possible values:
-                        1 - NATIVE   Doesn't require a subsystem
-                        2 - WINDOWS_GUI runs in Windows GUI subsystem
-                        3 - WINDOWS_CUI runs in Windows char sub. (console app)
-                        5 - OS2_CUI runs in OS/2 character subsystem
-                        7 - POSIX_CUI runs in Posix character subsystem */
-  short   DllCharacteristics; /* flags for DLL init, use 0 */
-  bfd_vma SizeOfStackReserve; /* amount of memory to reserve, def. 0x100000 */
-  bfd_vma SizeOfStackCommit; /* amount of memory initially committed for 
-                                initial thread's stack, default is 0x1000 */
-  bfd_vma SizeOfHeapReserve; /* amount of virtual memory to reserve and */
-  bfd_vma SizeOfHeapCommit;  /* commit, don't know what to defaut it to */
-  long    LoaderFlags; /* can probably set to 0 */
-  long    NumberOfRvaAndSizes; /* number of entries in next entry, 16 */
-  IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
-
+  struct internal_extra_pe_aouthdr pe;
 
 };
-
 
 /********************** STORAGE CLASSES **********************/
 
@@ -319,8 +339,8 @@ struct internal_syment
   short n_scnum;		/* section number		*/
   unsigned short n_flags;	/* copy of flags from filhdr	*/
   unsigned short n_type;	/* type and derived type	*/
-  unsigned char n_sclass;		/* storage class		*/
-  char n_numaux;		/* number of aux. entries	*/
+  unsigned char n_sclass;	/* storage class		*/
+  unsigned char n_numaux;	/* number of aux. entries	*/
 };
 
 #define n_name		_n._n_name
@@ -539,7 +559,7 @@ struct internal_reloc
 #define	R_PCLONG	020
 #define R_RELBYTE	017
 #define R_RELWORD	020
-
+#define R_IMAGEBASE     07
 
 
 #define R_PCR16L 128
@@ -597,30 +617,6 @@ struct internal_reloc
 #define R_H8500_IMM24	6		/* 24 bit immediate */
 #define R_H8500_IMM32   8               /* 32 bit immediate */
 #define R_H8500_HIGH16  9		/* high 16 bits of 32 bit immediate */
-
-/* SH modes */
-
-#define R_SH_PCREL8 	3		/*  8 bit pcrel 	*/
-#define R_SH_PCREL16 	4		/* 16 bit pcrel 	*/
-#define R_SH_HIGH8  	5		/* high 8 bits of 24 bit address */
-#define R_SH_LOW16 	7		/* low 16 bits of 24 bit immediate */
-#define R_SH_IMM24	6		/* 24 bit immediate */
-#define R_SH_PCDISP8BY4	9  		/* PC rel 8 bits *4 +ve */
-#define R_SH_PCDISP8BY2	10  		/* PC rel 8 bits *2 +ve */
-#define R_SH_PCDISP8    11  		/* 8 bit branch */
-#define R_SH_PCDISP     12  		/* 12 bit branch */
-#define R_SH_IMM32      14    		/* 32 bit immediate */
-#define R_SH_IMM8   	16
-#define R_SH_IMM8BY2    17
-#define R_SH_IMM8BY4    18
-#define R_SH_IMM4   	19
-#define R_SH_IMM4BY2    20
-#define R_SH_IMM4BY4    21
-#define R_SH_PCRELIMM8BY2   22
-#define R_SH_PCRELIMM8BY4   23
-#define R_SH_IMM16      24    		/* 16 bit immediate */
-
-
 
 /* W65 modes */
 
