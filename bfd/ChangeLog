@@ -1,11 +1,9 @@
 Thu Feb 15 11:29:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 
-	* configure.in: Call AC_PROG_CC before configure.host.  Don't
-	substitute CFLAGS.
+	* configure.in: Call AC_PROG_CC before configure.host.
 	* configure: Rebuild.
 	* configure.host: Don't set information which autoconf should
 	figure out, namely CC, CFLAGS, LDFLAGS, AR, and RANLIB.
-	* Makefile.in (CFLAGS): Set to -g, not @CFLAGS@.
 
 	* configure.host: Remove go32 and win32 host information, since it
 	should no longer be needed.
