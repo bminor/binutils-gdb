@@ -1,3 +1,9 @@
+2004-01-12  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/fileio.exp: Update copyright year.  On GNU/Linux, for
+	"Renaming a directory to a non-empty directory returns ENOTEMPTY
+	or EEXIST", treat EBUSY as an XFAIL.
+
 2004-01-11  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.base/scope.exp: Remove obsolete setup_xfail for
