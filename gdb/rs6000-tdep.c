@@ -1488,41 +1488,22 @@ frame_initial_stack_address (struct frame_info *fi)
       return fi->extra_info->initial_sp;
     }
 
-  /* This function has an alloca register. If this is the top-most frame
-     (with the lowest address), the value in alloca register is good. */
-
-  if (!fi->next)
-    return fi->extra_info->initial_sp = read_register (fdata.alloca_reg);
-
-  /* Otherwise, this is a caller frame. Callee has usually already saved
-     registers, but there are exceptions (such as when the callee
-     has no parameters). Find the address in which caller's alloca
-     register is saved. */
-
-  for (callee_fi = fi->next; callee_fi; callee_fi = callee_fi->next)
-    {
-
-      if (!callee_fi->saved_regs)
-	frame_get_saved_regs (callee_fi, NULL);
-
-      /* this is the address in which alloca register is saved. */
-
-      tmpaddr = callee_fi->saved_regs[fdata.alloca_reg];
-      if (tmpaddr)
-	{
-	  fi->extra_info->initial_sp =
-	    read_memory_addr (tmpaddr, TDEP->wordsize);
-	  return fi->extra_info->initial_sp;
-	}
-
-      /* Go look into deeper levels of the frame chain to see if any one of
-         the callees has saved alloca register. */
-    }
-
-  /* If alloca register was not saved, by the callee (or any of its callees)
-     then the value in the register is still good. */
-
-  fi->extra_info->initial_sp = read_register (fdata.alloca_reg);
+  /* There is an alloca register, use its value, in the current frame,
+     as the initial stack pointer.  */
+  {
+    char *tmpbuf = alloca (MAX_REGISTER_RAW_SIZE);
+    if (frame_register_read (fi, fdata.alloca_reg, tmpbuf))
+      {
+	fi->extra_info->initial_sp
+	  = extract_unsigned_integer (tmpbuf,
+				      REGISTER_RAW_SIZE (fdata.alloca_reg));
+      }
+    else
+      /* NOTE: cagney/2002-04-17: At present the only time
+         frame_register_read will fail is when the register isn't
+         available.  If that does happen, use the frame.  */
+      fi->extra_info->initial_sp = fi->frame;
+  }
   return fi->extra_info->initial_sp;
 }
 

@@ -1,5 +1,10 @@
 2002-04-17  Andrew Cagney  <ac131313@redhat.com>
 
+	* rs6000-tdep.c (frame_initial_stack_address): Use
+	frame_register_read to read the alloca_reg.
+
+2002-04-17  Andrew Cagney  <ac131313@redhat.com>
+
 	* frame.c (find_saved_register): Find saved registers in the next
 	not prev frame.
 	Fix PR gdb/365.
