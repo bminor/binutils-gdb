@@ -1145,15 +1145,27 @@ resolve_reference (p)
     return sym;
 }
 
+
+#define MAX_CHUNK_REFS 100	
+#define REF_CHUNK_SIZE \
+    MAX_CHUNK_REFS * sizeof (struct ref_map_s)
+#define REF_MAP_SIZE(ref_chunk) \
+    ref_chunk * REF_CHUNK_SIZE
+
 /* Structure for storing pointers to reference definitions for fast lookup 
    during "process_later". */
-#define MAX_REFS 100	/* FIXME!  Change to use heap. */
 static struct ref_map_s
 {
   char *stabs;
   CORE_ADDR value;
   struct symbol *sym;
-} ref_map[MAX_REFS];	
+} *ref_map;	
+
+/* Ptr to free cell in chunk's linked list. */
+static int ref_count = 0;	
+
+/* Number of chunks malloced. */
+static int ref_chunk = 0;
 
 /* Initialize our list of references.
    This should be called before any symbol table is read.
@@ -1161,12 +1173,12 @@ static struct ref_map_s
    need to add something to disambiguate the refids.  Or, it might be OK to 
    leave as is, as long as we read and process an object's symbol table all 
    at once.  */
-static int ref_count = 0;	/* Ptr to free cell in linked list. */
+
 static void 
 ref_init ()
 {
   ref_count = 0;
-  memset (ref_map, 0, MAX_REFS * sizeof (struct ref_map_s));
+  ref_chunk = 0;
 }
 
 /* Create array of pointers mapping refids to symbols and stab strings.
@@ -1184,8 +1196,16 @@ ref_add (refnum, sym, stabs, value)
     ref_init ();
   if (refnum >= ref_count)
     ref_count = refnum + 1;
-  if (ref_count > MAX_REFS)
-    error ("no more free slots in chain\n");
+  if (ref_count > ref_chunk * MAX_CHUNK_REFS)
+    {
+      int new_slots = ref_count - ref_chunk * MAX_CHUNK_REFS; 
+      int new_chunks = new_slots / MAX_CHUNK_REFS + 1;
+      ref_map = realloc (ref_map, REF_MAP_SIZE(ref_chunk + new_chunks));
+      if (!ref_map) 
+	error ("no more free slots in chain\n");
+      memset (ref_map + REF_MAP_SIZE(ref_chunk), 0, new_chunks * REF_CHUNK_SIZE);
+      ref_chunk += new_chunks;
+    }
   ref_map[refnum].stabs = stabs;
   ref_map[refnum].sym = sym;
   ref_map[refnum].value = value;

@@ -1,3 +1,7 @@
+Tue Oct 14 22:13:27 1997  Dawn Perchik  <dawn@cygnus.com>
+
+	* stabsread.c: Make ref_map entries dynamically allocated.
+
 Thu Oct  9 12:37:57 1997  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* printcmd.c (print_address_symbolic, address_info): Mask
