@@ -1,3 +1,9 @@
+Sun Apr  7 13:21:51 1996  Fred Fish  <fnf@cygnus.com>
+
+	From: Robert Lipe <robertl@dgii.com>
+	* configure.in: SCO OpenServer 5 (a.k.a 3.2v5*) is more like
+	SCO 3.2v4 than 3.2v2.
+
 Wed Jan  3 18:22:10 1996  steve chamberlain  <sac@slash.cygnus.com>
 
 	* readline.c, display.c, complete.c: Add _MSC_VER to list of
