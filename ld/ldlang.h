@@ -361,6 +361,14 @@ struct unique_sections {
   const char *name;
 };
 
+/* This structure records symbols for which we need to keep track of
+   definedness for use in the DEFINED () test.  */
+
+struct lang_definedness_hash_entry {
+  struct bfd_hash_entry root;
+  int iteration;
+};
+
 extern struct unique_sections *unique_section_list;
 
 extern lang_output_section_statement_type *abs_output_section;
@@ -374,6 +382,8 @@ extern struct bfd_sym_chain entry_symbol;
 extern const char *entry_section;
 extern bfd_boolean entry_from_cmdline;
 extern lang_statement_list_type file_chain;
+
+extern int lang_statement_iteration;
 
 extern void lang_init
   (void);
@@ -517,5 +527,9 @@ extern void lang_add_unique
   (const char *);
 extern const char *lang_get_output_target
   (void);
+extern void lang_track_definedness (const char *);
+extern int lang_symbol_definition_iteration (const char *);
+extern void lang_update_definedness
+  (const char *, struct bfd_link_hash_entry *);
 
 #endif

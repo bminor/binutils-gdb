@@ -60,6 +60,7 @@ static const char *current_target;
 static const char *output_target;
 static lang_statement_list_type statement_list;
 static struct lang_phdr *lang_phdr_list;
+static struct bfd_hash_table lang_definedness_table;
 
 /* Forward declarations.  */
 static void exp_init_os (etree_type *);
@@ -67,6 +68,8 @@ static bfd_boolean wildcardp (const char *);
 static lang_input_statement_type *lookup_name (const char *);
 static bfd_boolean load_symbols (lang_input_statement_type *,
 				 lang_statement_list_type *);
+static struct bfd_hash_entry *lang_definedness_newfunc
+ (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
 static void insert_undefined (const char *);
 static void print_statement (lang_statement_union_type *,
 			     lang_output_section_statement_type *);
@@ -95,6 +98,7 @@ bfd_boolean delete_output_file_on_failure = FALSE;
 struct lang_nocrossrefs *nocrossref_list;
 struct unique_sections *unique_section_list;
 static bfd_boolean ldlang_sysrooted_script = FALSE;
+int lang_statement_iteration = 0;
 
 etree_type *base; /* Relocation base - or null */
 
@@ -477,6 +481,19 @@ lang_init (void)
     lang_output_section_statement_lookup (BFD_ABS_SECTION_NAME);
 
   abs_output_section->bfd_section = bfd_abs_section_ptr;
+
+  /* The value "3" is ad-hoc, somewhat related to the expected number of
+     DEFINED expressions in a linker script.  For most default linker
+     scripts, there are none.  Why a hash table then?  Well, it's somewhat
+     simpler to re-use working machinery than using a linked list in terms
+     of code-complexity here in ld, besides the initialization which just
+     looks like other code here.  */
+  if (bfd_hash_table_init_n (&lang_definedness_table,
+			     lang_definedness_newfunc, 3) != TRUE)
+    einfo (_("%P%F: out of memory during initialization"));
+
+  /* Callers of exp_fold_tree need to increment this.  */
+  lang_statement_iteration = 0;
 }
 
 /*----------------------------------------------------------------------
@@ -1867,6 +1884,85 @@ lang_reasonable_defaults (void)
 #endif
 }
 
+/* Add a symbol to a hash of symbols used in DEFINED (NAME) expressions.  */
+
+void
+lang_track_definedness (const char *name)
+{
+  if (bfd_hash_lookup (&lang_definedness_table, name, TRUE, FALSE) == NULL)
+    einfo (_("%P%F: bfd_hash_lookup failed creating symbol %s\n"), name);
+}
+
+/* New-function for the definedness hash table.  */
+
+static struct bfd_hash_entry *
+lang_definedness_newfunc (struct bfd_hash_entry *entry,
+			  struct bfd_hash_table *table ATTRIBUTE_UNUSED,
+			  const char *name ATTRIBUTE_UNUSED)
+{
+  struct lang_definedness_hash_entry *ret
+    = (struct lang_definedness_hash_entry *) entry;
+
+  if (ret == NULL)
+    ret = (struct lang_definedness_hash_entry *)
+      bfd_hash_allocate (table, sizeof (struct lang_definedness_hash_entry));
+
+  if (ret == NULL)
+    einfo (_("%P%F: bfd_hash_allocate failed creating symbol %s\n"), name);
+
+  ret->iteration = -1;
+  return &ret->root;
+}
+
+/* Return the iteration when the definition of NAME was last updated.  A
+   value of -1 means that the symbol is not defined in the linker script
+   or the command line, but may be defined in the linker symbol table.  */
+
+int
+lang_symbol_definition_iteration (const char *name)
+{
+  struct lang_definedness_hash_entry *defentry
+    = (struct lang_definedness_hash_entry *)
+    bfd_hash_lookup (&lang_definedness_table, name, FALSE, FALSE);
+
+  /* We've already created this one on the presence of DEFINED in the
+     script, so it can't be NULL unless something is borked elsewhere in
+     the code.  */
+  if (defentry == NULL)
+    FAIL ();
+
+  return defentry->iteration;
+}
+
+/* Update the definedness state of NAME.  */
+
+void
+lang_update_definedness (const char *name, struct bfd_link_hash_entry *h)
+{
+  struct lang_definedness_hash_entry *defentry
+    = (struct lang_definedness_hash_entry *)
+    bfd_hash_lookup (&lang_definedness_table, name, FALSE, FALSE);
+
+  /* We don't keep track of symbols not tested with DEFINED.  */
+  if (defentry == NULL)
+    return;
+
+  /* If the symbol was already defined, and not from an earlier statement
+     iteration, don't update the definedness iteration, because that'd
+     make the symbol seem defined in the linker script at this point, and
+     it wasn't; it was defined in some object.  If we do anyway, DEFINED
+     would start to yield false before this point and the construct "sym =
+     DEFINED (sym) ? sym : X;" would change sym to X despite being defined
+     in an object.  */
+  if (h->type != bfd_link_hash_undefined
+      && h->type != bfd_link_hash_common
+      && h->type != bfd_link_hash_new
+      && defentry->iteration == -1)
+    return;
+
+  defentry->iteration = lang_statement_iteration;
+}
+
 /* Add the supplied name to the symbol table as an undefined reference.
    This is a two step process as the symbol table doesn't even exist at
    the time the ld command line is processed.  First we put the name
@@ -3132,6 +3228,9 @@ lang_size_sections
 {
   bfd_vma result;
 
+  /* Callers of exp_fold_tree need to increment this.  */
+  lang_statement_iteration++;
+
   exp_data_seg.phase = exp_dataseg_none;
   result = lang_size_sections_1 (s, output_section_statement, prev, fill,
 				 dot, relax, check_regions);
@@ -3157,8 +3256,10 @@ lang_size_sections
   return result;
 }
 
-bfd_vma
-lang_do_assignments
+/* Worker function for lang_do_assignments.  Recursiveness goes here.  */
+
+static bfd_vma
+lang_do_assignments_1
   (lang_statement_union_type *s,
    lang_output_section_statement_type *output_section_statement,
    fill_type *fill,
@@ -3172,10 +3273,10 @@ lang_do_assignments
       switch (s->header.type)
 	{
 	case lang_constructors_statement_enum:
-	  dot = lang_do_assignments (constructor_list.head,
-				     output_section_statement,
-				     fill,
-				     dot);
+	  dot = lang_do_assignments_1 (constructor_list.head,
+				       output_section_statement,
+				       fill,
+				       dot);
 	  break;
 
 	case lang_output_section_statement_enum:
@@ -3186,8 +3287,8 @@ lang_do_assignments
 	    if (os->bfd_section != NULL)
 	      {
 		dot = os->bfd_section->vma;
-		(void) lang_do_assignments (os->children.head, os,
-					    os->fill, dot);
+		(void) lang_do_assignments_1 (os->children.head, os,
+					      os->fill, dot);
 		dot = os->bfd_section->vma + os->bfd_section->_raw_size / opb;
 
 	      }
@@ -3206,9 +3307,9 @@ lang_do_assignments
 	  break;
 	case lang_wild_statement_enum:
 
-	  dot = lang_do_assignments (s->wild_statement.children.head,
-				     output_section_statement,
-				     fill, dot);
+	  dot = lang_do_assignments_1 (s->wild_statement.children.head,
+				       output_section_statement,
+				       fill, dot);
 
 	  break;
 
@@ -3301,9 +3402,9 @@ lang_do_assignments
 	  break;
 
 	case lang_group_statement_enum:
-	  dot = lang_do_assignments (s->group_statement.children.head,
-				     output_section_statement,
-				     fill, dot);
+	  dot = lang_do_assignments_1 (s->group_statement.children.head,
+				       output_section_statement,
+				       fill, dot);
 
 	  break;
 
@@ -3316,6 +3417,18 @@ lang_do_assignments
 
     }
   return dot;
+}
+
+bfd_vma
+lang_do_assignments (lang_statement_union_type *s,
+		     lang_output_section_statement_type
+		     *output_section_statement,
+		     fill_type *fill,
+		     bfd_vma dot)
+{
+  /* Callers of exp_fold_tree need to increment this.  */
+  lang_statement_iteration++;
+  lang_do_assignments_1 (s, output_section_statement, fill, dot);
 }
 
 /* Fix any .startof. or .sizeof. symbols.  When the assemblers see the
@@ -3445,6 +3558,8 @@ lang_finish (void)
 	    }
 	}
     }
+
+  bfd_hash_table_free (&lang_definedness_table);
 }
 
 /* This is a small function used when we want to ignore errors from

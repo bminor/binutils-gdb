@@ -485,10 +485,15 @@ fold_name (etree_type *tree,
       break;
     case DEFINED:
       if (allocation_done == lang_first_phase_enum)
-	result.valid_p = FALSE;
+	{
+	  lang_track_definedness (tree->name.name);
+	  result.valid_p = FALSE;
+	}
       else
 	{
 	  struct bfd_link_hash_entry *h;
+	  int def_iteration
+	    = lang_symbol_definition_iteration (tree->name.name);
 
 	  h = bfd_wrapped_link_hash_lookup (output_bfd, &link_info,
 					    tree->name.name,
@@ -496,7 +501,9 @@ fold_name (etree_type *tree,
 	  result.value = (h != NULL
 			  && (h->type == bfd_link_hash_defined
 			      || h->type == bfd_link_hash_defweak
-			      || h->type == bfd_link_hash_common));
+			      || h->type == bfd_link_hash_common)
+			  && (def_iteration == lang_statement_iteration
+			      || def_iteration == -1));
 	  result.section = abs_output_section;
 	  result.valid_p = TRUE;
 	}
@@ -738,6 +745,7 @@ exp_fold_tree (etree_type *tree,
 		{
 		  /* FIXME: Should we worry if the symbol is already
 		     defined?  */
+		  lang_update_definedness (tree->assign.dst, h);
 		  h->type = bfd_link_hash_defined;
 		  h->u.def.value = result.value;
 		  h->u.def.section = result.section->bfd_section;

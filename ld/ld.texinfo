@@ -4452,7 +4452,8 @@ evaluation purposes.
 @kindex DEFINED(@var{symbol})
 @cindex symbol defaults
 Return 1 if @var{symbol} is in the linker global symbol table and is
-defined, otherwise return 0.  You can use this function to provide
+defined before the statement using DEFINED in the script, otherwise
+return 0.  You can use this function to provide
 default values for symbols.  For example, the following script fragment
 shows how to set a global symbol @samp{begin} to the first location in
 the @samp{.text} section---but if a symbol called @samp{begin} already

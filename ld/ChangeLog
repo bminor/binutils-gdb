@@ -1,3 +1,32 @@
+2003-10-11  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld.texinfo (Builtin Functions) <DEFINED>: Say that only symbols
+	defined before the statement using DEFINED yield 1.
+	* ldexp.c (fold_name) <case DEFINED>: In lang_first_phase_enum,
+	call lang_track_definedness on symbol.  In subsequent phases, use
+	lang_symbol_definition_iteration and lang_statement_iteration to
+	check whether the symbol was defined before the current statement.
+	(exp_fold_tree) <case etree_assign et al>: Call
+	lang_update_definedness before updating symbol type when setting
+	symbol.
+	* ldlang.c (lang_definedness_table): New variable.
+	(lang_definedness_newfunc, lang_track_definedness)
+	(lang_symbol_definition_iteration, lang_update_definedness): New
+	functions.
+	(lang_init): Initialize lang_definedness_table and
+	lang_statement_iteration.
+	(lang_finish): Destroy bfd_hash_table_free.
+	(lang_size_sections): Increment lang_statement_iteration.
+	(lang_do_assignments_1): New function with former
+	lang_do_assignments contents.  Change recursive calls to call this
+	function.
+	(lang_do_assignments): Evacuate contents.  Increment
+	lang_statement_iteration, then just call lang_do_assignments_1.
+	* ldlang.h (struct lang_definedness_hash_entry)
+	(lang_statement_iteration, lang_track_definedness)
+	(lang_symbol_definition_iteration, lang_update_definedness):
+	Declare.
+
 2003-10-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* scripttempl/elf.sc (__executable_start): Provide.
