@@ -52,7 +52,7 @@ if ![runto_main] then {
 send_gdb "break marker1\n" ; gdb_expect -re ".*$gdb_prompt $"
     send_gdb "cont\n"
     gdb_expect {
-        -re "Break.* marker1 \\(\\) at .*:$decimal.*$gdb_prompt $" {
+        -re "Break.* marker1(\\(\\)|) \\(\\) at .*:$decimal.*$gdb_prompt $" {
             send_gdb "up\n"
             gdb_expect {
                 -re ".*$gdb_prompt $" { pass "up from marker1" }

@@ -1,5 +1,13 @@
 2001-12-07  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdb.c++/classes.exp, gdb.c++/derivation.exp,
+	gdb.c++/inherit.exp, gdb.c++/method.exp,
+	gdb.c++/namespace.exp, gdb.c++/templates.exp,
+	gdb.c++/userdef.exp, gdb.c++/virtfunc.exp: Updates for v3 demangler
+	and class layout support.
+
+2001-12-07  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdb.c++/classes.exp: Add test for static member function.
 	* gdb.c++/misc.cc: Add class with static member function.
 

@@ -113,6 +113,9 @@ gdb_expect {
    -re "All functions.*File.*namespace.cc:\r\nint AAA::A_xyzq\\(int\\);\r\nint BBB::B_xyzq\\(int\\);\r\nchar AAA::xyzq\\(char\\);\r\nchar BBB::xyzq\\(char\\);\r\nchar BBB::CCC::xyzq\\(char\\);\r\nchar BBB::Class::xyzq\\(char\\);\r\n$gdb_prompt $" {
        pass "info func xyzq"
    }    
+   -re "All functions.*File.*namespace.cc:\r\nint AAA::A_xyzq\\(int\\);\r\nchar AAA::xyzq\\(char\\);\r\nint BBB::B_xyzq\\(int\\);\r\nchar BBB::CCC::xyzq\\(char\\);\r\nchar BBB::Class::xyzq\\(char\\);\r\nchar BBB::xyzq\\(char\\);\r\n$gdb_prompt $" {
+       pass "info func xyzq"
+   }    
    -re ".*$gdb_prompt $" { fail "info func xyzq" }
    timeout { fail "(timeout) info func xyzq" }
 }

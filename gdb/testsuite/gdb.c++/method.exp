@@ -81,7 +81,7 @@ gdb_expect {
 
 send_gdb "continue\n"
 gdb_expect {
-   -re "Continuing\\.\r\n\r\nBreakpoint \[0-9\]*, A::foo \\(this=$hex, arg=13\\) at .*method\\.cc:38\r\n38\[\t \]*x \\+= arg;\r\n$gdb_prompt $" {
+   -re "Continuing\\.\r\n\r\nBreakpoint \[0-9\]*, A::foo(\\(int\\)|) \\(this=$hex, arg=13\\) at .*method\\.cc:38\r\n38\[\t \]*x \\+= arg;\r\n$gdb_prompt $" {
       pass "continued and got breakpoint in A::foo"
    }
    -re ".*$gdb_prompt $" { fail "continuing and breaking in A::foo" }
@@ -124,7 +124,7 @@ gdb_expect {
 
 send_gdb "continue\n"
 gdb_expect {
-   -re "Continuing\\.\r\n\r\nBreakpoint \[0-9\]*, A::bar \\(this=$hex, arg=15\\) at .*method\\.cc:44\r\n44\[\t \]*return arg \\+ 2 \\* x;\r\n$gdb_prompt $" {
+   -re "Continuing\\.\r\n\r\nBreakpoint \[0-9\]*, A::bar(\\(int\\) const|) \\(this=$hex, arg=15\\) at .*method\\.cc:44\r\n44\[\t \]*return arg \\+ 2 \\* x;\r\n$gdb_prompt $" {
       pass "continued and got breakpoint in A::bar"
    }
    -re ".*$gdb_prompt $" { fail "continuing and breaking in A::bar" }
@@ -181,7 +181,7 @@ gdb_expect {
 
 send_gdb "continue\n"
 gdb_expect {
-   -re "Continuing\\.\r\n\r\nBreakpoint \[0-9\]*, funk::getFunky \\(this=$hex, a=1, b=2\\) at .*method\\.cc:20\r\n20\[\t \]*res = a \\+ b - data_;\r\n$gdb_prompt $" {
+   -re "Continuing\\.\r\n\r\nBreakpoint \[0-9\]*, funk::getFunky(\\(int, int\\)|) \\(this=$hex, a=1, b=2\\) at .*method\\.cc:20\r\n20\[\t \]*res = a \\+ b - data_;\r\n$gdb_prompt $" {
       pass "continued and got breakpoint in funk::getfunky"
    }
    -re ".*$gdb_prompt $" { fail "continuing and breaking in funk::getfunky" }
@@ -226,7 +226,7 @@ gdb_expect {
 
 send_gdb "ptype A\n"
 gdb_expect {
-   -re "type = class A \{\r\n\[ \]*public:\r\n\[ \]*int x;\r\n\[ \]*int y;\r\n\r\n\[ \]*A & operator=\\(A const &\\);\r\n\[ \]*A\\(A const &\\);\r\n\[ \]*A\\(void\\);\r\n\[ \]*int foo\\(int\\);\r\n\[ \]*int bar\\(int\\) const;\r\n\[ \]*int baz\\(int, char\\) volatile;\r\n\[ \]*int qux\\(int, float\\) const volatile;\r\n\}\r\n$gdb_prompt $" {
+   -re "type = class A \{\r\n\[ \]*public:\r\n\[ \]*int x;\r\n\[ \]*int y;\r\n\r\n\[ \]*A & operator=\\(A const ?&\\);\r\n\[ \]*A\\(A const ?&\\);\r\n\[ \]*A\\((void|)\\);\r\n\[ \]*int foo\\(int\\);\r\n\[ \]*int bar\\(int\\) const;\r\n\[ \]*int baz\\(int, char\\) volatile;\r\n\[ \]*int qux\\(int, float\\) (const volatile|volatile const);\r\n\}\r\n$gdb_prompt $" {
       pass "ptype A"
    }
    -re "type = class A \{\r\n\[ \]*public:\r\n\[ \]*int x;\r\n\[ \]*int y;\r\n\r\n\[ \]*int foo\\(int\\);\r\n\[ \]*int bar\\(int\\) const;\r\n\[ \]*int baz\\(int, char\\);\r\n\[ \]*int qux\\(int, float\\) const;\r\n\}\r\n$gdb_prompt $" {
