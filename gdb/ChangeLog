@@ -1,3 +1,7 @@
+2004-11-02  Paul Hilfinger  <hilfingr@nile.gnat.com>
+
+	* NEWS: GDB understands GNAT Ada.
+
 2004-11-01  Joseph S. Myers  <joseph@codesourcery.com>
 
 	* Makefile.in (ALLDEPFILES): Add amd64-sol2-tdep.c.

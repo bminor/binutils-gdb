@@ -14,6 +14,12 @@ by GCC with the option -feliminate-dwarf2-dups and also by some
 proprietary compilers.  With GCC, you must use GCC 3.3.4 or later
 to use -feliminate-dwarf2-dups.
 
+* Ada
+
+Initial support for debugging programs compiled with the GNAT 
+implementation of the Ada programming language has been integrated 
+into GDB.  In this release, support is limited to expression evaluation.
+
 *** Changes in GDB 6.2.1:
 
 * MIPS `break main; run' gave an heuristic-fence-post warning
