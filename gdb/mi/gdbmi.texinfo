@@ -3478,7 +3478,7 @@ for pointers, etc.).
 The following is the complete set of @sc{gdb/mi} operations defined to
 access this functionality:
 
-@multitable @columnfractions .3 .6
+@multitable @columnfractions .4 .6
 @item @strong{Operation}
 @tab @strong{Description}
 

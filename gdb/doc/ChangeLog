@@ -1,3 +1,8 @@
+2000-10-16  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdb.texinfo (Contributors, MIPS Embedded): Minor spelling
+	changes from Dmitry Sivachenko <dima@Chg.RU>.
+
 2000-09-26  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdb.texinfo (Hooks): Document the new post-hook functionality.

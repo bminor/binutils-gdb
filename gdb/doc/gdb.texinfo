@@ -325,7 +325,7 @@ Henkel-Wallace, Rich Pixley, Steve Chamberlain, and John Gilmore.
 David Johnson wrote the original COFF support; Pace Willison did
 the original support for encapsulated COFF.
 
-Brent Benson of Harris Computer Systems contributed DWARF 2 support.
+Brent Benson of Harris Computer Systems contributed DWARF2 support.
 
 Adam de Boor and Bradley Davis contributed the ISI Optimum V support.
 Per Bothner, Noboyuki Hikichi, and Alessandro Forin contributed MIPS
@@ -4500,7 +4500,7 @@ different debug info format, if the compiler supports several such
 formats.  For example, @value{NGCC}, the @sc{gnu} C/C++ compiler usually
 supports the @samp{-gstabs} option.  @samp{-gstabs} produces debug info
 in a format that is superior to formats such as COFF.  You may be able
-to use DWARF-2 (@samp{-gdwarf-2}), which is also an effective form for
+to use DWARF2 (@samp{-gdwarf-2}), which is also an effective form for
 debug info.  See @ref{Debugging Options,,Options for Debugging Your
 Program or @sc{gnu} CC, gcc.info, Using @sc{gnu} CC}, for more
 information.
@@ -10869,7 +10869,7 @@ Array Tech LSI33K RAID controller board.
 Use the @code{set processor} command to set the type of MIPS
 processor when you want to access processor-type-specific registers.
 For example, @code{set processor @var{r3041}} tells @value{GDBN}
-to use the CPO registers appropriate for the 3041 chip.
+to use the CPU registers appropriate for the 3041 chip.
 Use the @code{show processor} command to see what MIPS processor @value{GDBN}
 is using.  Use the @code{info reg} command to see what registers
 @value{GDBN} is using.
