@@ -1136,9 +1136,9 @@ it ends in a @code{.exe} suffix.
 @itemx --gc-sections
 Enable garbage collection of unused input sections.  It is ignored on
 targets that do not support this option.  This option is not compatible
-with @samp{-r}, nor should it be used with dynamic linking.  The default
-behaviour (of not performing this garbage collection) can be restored by
-specifying @samp{--no-gc-sections} on the command line.
+with @samp{-r}. The default behaviour (of not performing this garbage
+collection) can be restored by specifying @samp{--no-gc-sections} on
+the command line.
 
 @cindex help
 @cindex usage

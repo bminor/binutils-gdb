@@ -1,3 +1,8 @@
+2004-04-30  Eric Botcazou  <ebotcazou@act-europe.fr>
+
+	* ld.texinfo (--gc-sections): Remove restriction for 
+	dynamic linking.
+
 2004-04-29  Brian Ford  <ford@vss.fsi.com>
 
 	* scripttempl/pe.sc: Handle .debug* and .gnu.linkonce.wi.* sections
