@@ -1,6 +1,6 @@
 # Test linking directly to S-records.
 # By Ian Lance Taylor, Cygnus Support.
-#   Copyright 2001
+#   Copyright 2001, 2002, 2003
 #   Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
@@ -225,7 +225,8 @@ proc run_srec_test { test objs } {
     global sizeof_headers
     global host_triplet
 
-    set flags ""
+    # Tell the ELF linker to not do anything clever with .eh_frame.
+    set flags "--traditional-format"
 
     # If the linker script uses SIZEOF_HEADERS, use a -Ttext argument
     # to force both the normal link and the S-record link to be put in
