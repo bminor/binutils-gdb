@@ -26,6 +26,7 @@
 #include "mi-cmds.h"
 #include "ui-out.h"
 #include "symtab.h"
+#include "gdb-events.h"
 
 /* FIXME: these should go in some .h file but stack.c doesn't have a
    corresponding .h file. These wrappers will be obsolete anyway, once
@@ -294,6 +295,8 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 enum mi_cmd_result
 mi_cmd_stack_select_frame (char *command, char **argv, int argc)
 {
+  int current_level = frame_relative_level (selected_frame);
+
   if (!target_has_stack)
     error ("mi_cmd_stack_select_frame: No stack.");
 
@@ -305,5 +308,9 @@ mi_cmd_stack_select_frame (char *command, char **argv, int argc)
     select_frame_command_wrapper (0, 1 /* not used */ );
   else
     select_frame_command_wrapper (argv[0], 1 /* not used */ );
+
+  if (frame_relative_level (selected_frame) != current_level)
+    selected_frame_level_changed_event (frame_relative_level (selected_frame));
+
   return MI_CMD_DONE;
 }

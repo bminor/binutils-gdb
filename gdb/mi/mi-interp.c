@@ -59,7 +59,6 @@ static char *mi_input (char *);
    so we can report interesting things that happened "behind the mi's
    back" in this command */
 static int mi_interp_query_hook (const char *ctlstr, va_list ap);
-static void mi_interp_stack_changed_hook (void);
 static char *mi_interp_read_one_line_hook (char *prompt, int repeat,
 					   char *anno);
 
@@ -78,7 +77,8 @@ static struct gdb_events mi_event_handlers =
     mi_delete_tracepoint,
     mi_modify_tracepoint,
     mi_architecture_changed,
-    mi_register_update
+    mi_register_update,
+    mi_selected_frame_level_changed
   };
 
 static int
@@ -341,11 +341,6 @@ mi_cmd_interpreter_set (char *command, char **argv, int argc)
 static void
 mi_insert_notify_hooks (void)
 {
-
-  create_breakpoint_hook = mi_interp_create_breakpoint_hook;
-  delete_breakpoint_hook = mi_interp_delete_breakpoint_hook;
-  modify_breakpoint_hook = mi_interp_modify_breakpoint_hook;
-  selected_frame_level_changed_hook = mi_interp_frame_changed_hook;
   context_hook = mi_interp_context_hook;
   query_hook = mi_interp_query_hook;
 }
@@ -353,10 +348,6 @@ mi_insert_notify_hooks (void)
 static void
 mi_remove_notify_hooks ()
 {
-  create_breakpoint_hook = NULL;
-  delete_breakpoint_hook = NULL;
-  modify_breakpoint_hook = NULL;
-  selected_frame_level_changed_hook = NULL;
   context_hook = NULL;
   query_hook = NULL;
 }

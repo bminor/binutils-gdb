@@ -1,3 +1,22 @@
+2002-07-25  Keith Seitz  <keiths@redhat.com>
+
+	* mi-interp.c (mi_event_handlers): Add selected_frame_level_changed
+	handler.
+	(mi_insert_notify_hooks): Remove breakpoint hooks and frame
+	changed hook.
+	(mi_remove_notify_hooks): Likewise.
+	* mi-events.c (mi_selected_frame_level_changed): New function.
+	(mi_interp_frame_changed_hook): Remove.
+	(mi_interp_create_breakpoint_hook): Remove.
+	(mi_interp_modify_breakpoint_hook): Remove.
+	(mi_interp_delete_breakpoint_hook): Remove.
+	* mi.h (mi_selected_frame_level_changed): Add declaration.
+        (mi_interp_create_breakpoint_hook): Remove declaration.
+        (mi_interp_modify_breakpoint_hook): Remove declaration.
+        (mi_interp_delete_breakpoint_hook): Remove declaration.
+	* mi-cmd-stack.c (mi_cmd_stack_select_frame): If the stack level changes,
+	issue a selected_frame_level_changed event.
+
 2002-07-22  Keith Seitz  <keiths@redhat.com>
 
 	* mi-events.c (mi_register_update): New function.

@@ -43,9 +43,6 @@ extern void mi_load_progress (const char *section_name,
 			      unsigned long total_section,
 			      unsigned long total_sent,
 			      unsigned long grand_total);
-extern void mi_interp_create_breakpoint_hook (struct breakpoint *bpt);
-extern void mi_interp_delete_breakpoint_hook (struct breakpoint *bpt);
-extern void mi_interp_modify_breakpoint_hook (struct breakpoint *bpt);
 extern void mi_interp_frame_changed_hook (int new_frame_number);
 extern void mi_interp_context_hook (int thread_id);
 
@@ -57,4 +54,5 @@ extern void mi_modify_tracepoint (int bpnum);
 extern void mi_delete_tracepoint (int bpnum);
 extern void mi_architecture_changed (void);
 extern void mi_register_update(int regno);
+extern void mi_selected_frame_level_changed (int level);
 #endif /* MI_H */
