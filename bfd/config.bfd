@@ -53,6 +53,7 @@ case "${canon}" in
   i[345]86-*-coff)	bfd_name=i386-coff ;;
   i[345]86-*-aix*)	bfd_name=i386-coff ;;
   i[345]86-*-elf)	bfd_name=i386-elf ;;
+  i[345]86-*-freebsd*)	bfd_name=i386-bsd strip_underscore=yes ;;
   i[345]86-*-netbsd*)	bfd_name=i386-nbsd strip_underscore=yes ;;
   i[345]86-*-netware*)	bfd_name=i386-nlm ;;
   i[345]86-*-linux*)	bfd_name=i386-linux strip_underscore=yes ;;

@@ -1,3 +1,8 @@
+Tue Nov 29 14:00:19 1994  J.T. Conklin  <jtc@.rtl.cygnus.com>
+
+	* config.bfd (i[345]86-*-freebsd*): Use i386-bsd as bfd_name.
+	* configure.host (i[345]86-*-freebsd*): Use i386bsd as my_host.
+
 Mon Nov 28 15:36:04 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* config/m68k-nbsd.mt (DEFAULT_VECTOR): set to m68knetbsd_vec.
