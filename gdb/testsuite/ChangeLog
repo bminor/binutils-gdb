@@ -1,3 +1,15 @@
+2004-08-09  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.mi/gdb792.exp, gdb.mi/mi-basics.exp, gdb.mi/mi-break.exp,
+	gdb.mi/mi-console.exp, gdb.mi/mi-disassemble.exp,
+	gdb.mi/mi-eval.exp, gdb.mi/mi-file.exp, gdb.mi/mi-hack-cli.exp,
+	gdb.mi/mi-read-memory.exp, gdb.mi/mi-regs.exp,
+	gdb.mi/mi-return.exp, gdb.mi/mi-simplerun.exp,
+	gdb.mi/mi-stack.exp, gdb.mi/mi-stepi.exp, gdb.mi/mi-until.exp,
+	gdb.mi/mi-var-block.exp, gdb.mi/mi-var-child.exp,
+	gdb.mi/mi-var-cmd.exp, gdb.mi/mi-var-display.exp,
+	gdb.mi/mi-watch.exp: Update copyright years.
+
 2004-08-08  Daniel Jacobowitz  <dan@debian.org>
 
 	PR gdb/1738
