@@ -63,7 +63,7 @@ static int
 block_depth PARAMS ((struct block *));
 
 static void
-print_partial_symbol PARAMS ((struct partial_symbol *, int, char *, GDB_FILE *));
+print_partial_symbols PARAMS ((struct partial_symbol **, int, char *, GDB_FILE *));
 
 struct print_symbol_args {
   struct symbol *symbol;
@@ -151,6 +151,20 @@ free_symtab (s)
 }
 
 #if MAINTENANCE_CMDS
+
+void
+print_symbol_bcache_statistics ()
+{
+  struct objfile *objfile;
+
+  immediate_quit++;
+  ALL_OBJFILES (objfile)
+    {
+      printf_filtered ("Cached obstack statistics for '%s':\n", objfile -> name);
+      print_bcache_statistics (&objfile -> psymbol_cache, "partial symbol obstack");
+    }
+  immediate_quit--;
+}
 
 void
 print_objfile_statistics ()
@@ -373,13 +387,13 @@ dump_psymtab (objfile, psymtab, outfile)
     }
   if (psymtab -> n_global_syms > 0)
     {
-      print_partial_symbol (objfile -> global_psymbols.list
+      print_partial_symbols (objfile -> global_psymbols.list
 			    + psymtab -> globals_offset,
 			    psymtab -> n_global_syms, "Global", outfile);
     }
   if (psymtab -> n_static_syms > 0)
     {
-      print_partial_symbol (objfile -> static_psymbols.list
+      print_partial_symbols (objfile -> static_psymbols.list
 			    + psymtab -> statics_offset,
 			    psymtab -> n_static_syms, "Static", outfile);
     }
@@ -461,7 +475,7 @@ dump_symtab (objfile, symtab, outfile)
 	  s.depth = depth + 1;
 	  s.outfile = outfile;
 	  catch_errors (print_symbol, &s, "Error printing symbol:\n",
-			RETURN_MASK_ERROR);
+			RETURN_MASK_ALL);
 	}
     }
   fprintf_filtered (outfile, "\n");
@@ -730,23 +744,22 @@ maintenance_print_psymbols (args, from_tty)
 }
 
 static void
-print_partial_symbol (p, count, what, outfile)
-     struct partial_symbol *p;
+print_partial_symbols (p, count, what, outfile)
+     struct partial_symbol **p;
      int count;
      char *what;
      GDB_FILE *outfile;
 {
-
   fprintf_filtered (outfile, "  %s partial symbols:\n", what);
   while (count-- > 0)
     {
-      fprintf_filtered (outfile, "    `%s'", SYMBOL_NAME(p));
-      if (SYMBOL_DEMANGLED_NAME (p) != NULL)
+      fprintf_filtered (outfile, "    `%s'", SYMBOL_NAME(*p));
+      if (SYMBOL_DEMANGLED_NAME (*p) != NULL)
 	{
-	  fprintf_filtered (outfile, "  `%s'", SYMBOL_DEMANGLED_NAME (p));
+	  fprintf_filtered (outfile, "  `%s'", SYMBOL_DEMANGLED_NAME (*p));
 	}
       fputs_filtered (", ", outfile);
-      switch (SYMBOL_NAMESPACE (p))
+      switch (SYMBOL_NAMESPACE (*p))
 	{
 	case UNDEF_NAMESPACE:
 	  fputs_filtered ("undefined namespace, ", outfile);
@@ -764,7 +777,7 @@ print_partial_symbol (p, count, what, outfile)
 	  fputs_filtered ("<invalid namespace>, ", outfile);
 	  break;
 	}
-      switch (SYMBOL_CLASS (p))
+      switch (SYMBOL_CLASS (*p))
 	{
 	case LOC_UNDEF:
 	  fputs_filtered ("undefined", outfile);
@@ -822,7 +835,7 @@ print_partial_symbol (p, count, what, outfile)
       /* FIXME-32x64: Need to use SYMBOL_VALUE_ADDRESS, etc.; this
 	 could be 32 bits when some of the other fields in the union
 	 are 64.  */
-      fprintf_filtered (outfile, "0x%lx\n", SYMBOL_VALUE (p));
+      fprintf_filtered (outfile, "0x%lx\n", SYMBOL_VALUE (*p));
       p++;
     }
 }
@@ -901,7 +914,7 @@ maintenance_check_symtabs (ignore, from_tty)
      int from_tty;
 {
   register struct symbol *sym;
-  register struct partial_symbol *psym;
+  register struct partial_symbol **psym;
   register struct symtab *s = NULL;
   register struct partial_symtab *ps;
   struct blockvector *bv;
@@ -920,12 +933,12 @@ maintenance_check_symtabs (ignore, from_tty)
       length = ps->n_static_syms;
       while (length--)
 	{
-	  sym = lookup_block_symbol (b, SYMBOL_NAME (psym),
-				     SYMBOL_NAMESPACE (psym));
+	  sym = lookup_block_symbol (b, SYMBOL_NAME (*psym),
+				     SYMBOL_NAMESPACE (*psym));
 	  if (!sym)
 	    {
 	      printf_filtered ("Static symbol `");
-	      puts_filtered (SYMBOL_NAME (psym));
+	      puts_filtered (SYMBOL_NAME (*psym));
 	      printf_filtered ("' only found in ");
 	      puts_filtered (ps->filename);
 	      printf_filtered (" psymtab\n");
@@ -937,12 +950,12 @@ maintenance_check_symtabs (ignore, from_tty)
       length = ps->n_global_syms;
       while (length--)
 	{
-	  sym = lookup_block_symbol (b, SYMBOL_NAME (psym),
-				     SYMBOL_NAMESPACE (psym));
+	  sym = lookup_block_symbol (b, SYMBOL_NAME (*psym),
+				     SYMBOL_NAMESPACE (*psym));
 	  if (!sym)
 	    {
 	      printf_filtered ("Global symbol `");
-	      puts_filtered (SYMBOL_NAME (psym));
+	      puts_filtered (SYMBOL_NAME (*psym));
 	      printf_filtered ("' only found in ");
 	      puts_filtered (ps->filename);
 	      printf_filtered (" psymtab\n");
@@ -998,7 +1011,7 @@ block_depth (block)
 
 
 /* Increase the space allocated for LISTP, which is probably
-   global_psymbol_list or static_psymbol_list. This space will eventually
+   global_psymbols or static_psymbols. This space will eventually
    be freed in free_objfile().  */
 
 void
@@ -1010,15 +1023,15 @@ extend_psymbol_list (listp, objfile)
   if (listp->size == 0)
     {
       new_size = 255;
-      listp->list = (struct partial_symbol *)
-	xmmalloc (objfile -> md, new_size * sizeof (struct partial_symbol));
+      listp->list = (struct partial_symbol **)
+	xmmalloc (objfile -> md, new_size * sizeof (struct partial_symbol *));
     }
   else
     {
       new_size = listp->size * 2;
-      listp->list = (struct partial_symbol *)
+      listp->list = (struct partial_symbol **)
 	xmrealloc (objfile -> md, (char *) listp->list,
-		   new_size * sizeof (struct partial_symbol));
+		   new_size * sizeof (struct partial_symbol *));
     }
   /* Next assumes we only went one over.  Should be good if
      program works correctly */

@@ -3,6 +3,12 @@
 
 *** Changes since GDB-4.15:
 
+* Memory use reductions and statistics collection
+
+We have begun to implement changes that reduce gdb's memory requirements
+and to report statistics about memory usage.  Try the "maint print statistics"
+command, for example.
+
 * New native configurations
 
 Windows 95, Windows NT				i[345]86-*-win32

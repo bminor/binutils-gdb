@@ -159,6 +159,8 @@ allocate_objfile (abfd, mapped)
 	    objfile -> md = md;
 	    objfile -> mmfd = fd;
 	    /* Update pointers to functions to *our* copies */
+	    obstack_chunkfun (&objfile -> psymbol_cache.cache, xmmalloc);
+	    obstack_freefun (&objfile -> psymbol_cache.cache, mfree);
 	    obstack_chunkfun (&objfile -> psymbol_obstack, xmmalloc);
 	    obstack_freefun (&objfile -> psymbol_obstack, mfree);
 	    obstack_chunkfun (&objfile -> symbol_obstack, xmmalloc);
@@ -186,6 +188,9 @@ allocate_objfile (abfd, mapped)
 	    objfile -> mmfd = fd;
 	    objfile -> flags |= OBJF_MAPPED;
 	    mmalloc_setkey (objfile -> md, 0, objfile);
+	    obstack_specify_allocation_with_arg (&objfile -> psymbol_cache.cache,
+						 0, 0, xmmalloc, mfree,
+						 objfile -> md);
 	    obstack_specify_allocation_with_arg (&objfile -> psymbol_obstack,
 						 0, 0, xmmalloc, mfree,
 						 objfile -> md);
@@ -228,6 +233,8 @@ allocate_objfile (abfd, mapped)
       objfile = (struct objfile *) xmalloc (sizeof (struct objfile));
       memset (objfile, 0, sizeof (struct objfile));
       objfile -> md = NULL;
+      obstack_specify_allocation (&objfile -> psymbol_cache.cache, 0, 0,
+				  xmalloc, free);
       obstack_specify_allocation (&objfile -> psymbol_obstack, 0, 0, xmalloc,
 				  free);
       obstack_specify_allocation (&objfile -> symbol_obstack, 0, 0, xmalloc,
@@ -433,6 +440,7 @@ free_objfile (objfile)
       if (objfile->static_psymbols.list)
 	mfree (objfile->md, objfile->static_psymbols.list);
       /* Free the obstacks for non-reusable objfiles */
+      obstack_free (&objfile -> psymbol_cache.cache, 0);
       obstack_free (&objfile -> psymbol_obstack, 0);
       obstack_free (&objfile -> symbol_obstack, 0);
       obstack_free (&objfile -> type_obstack, 0);
@@ -552,18 +560,18 @@ objfile_relocate (objfile, new_offsets)
   }
 
   {
-    struct partial_symbol *psym;
+    struct partial_symbol **psym;
 
     for (psym = objfile->global_psymbols.list;
 	 psym < objfile->global_psymbols.next;
 	 psym++)
-      if (SYMBOL_SECTION (psym) >= 0)
-	SYMBOL_VALUE_ADDRESS (psym) += ANOFFSET (delta, SYMBOL_SECTION (psym));
+      if (SYMBOL_SECTION (*psym) >= 0)
+	SYMBOL_VALUE_ADDRESS (*psym) += ANOFFSET (delta, SYMBOL_SECTION (*psym));
     for (psym = objfile->static_psymbols.list;
 	 psym < objfile->static_psymbols.next;
 	 psym++)
-      if (SYMBOL_SECTION (psym) >= 0)
-	SYMBOL_VALUE_ADDRESS (psym) += ANOFFSET (delta, SYMBOL_SECTION (psym));
+      if (SYMBOL_SECTION (*psym) >= 0)
+	SYMBOL_VALUE_ADDRESS (*psym) += ANOFFSET (delta, SYMBOL_SECTION (*psym));
   }
 
   {

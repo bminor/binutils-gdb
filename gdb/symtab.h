@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "obstack.h"
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
+#include "bcache.h"
 
 /* Don't do this; it means that if some .o's are compiled with GNU C
    and some are not (easy to do accidentally the way we configure

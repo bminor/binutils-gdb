@@ -1933,7 +1933,7 @@ static unsigned int first_fun_line_offset;
 
 static struct partial_symtab *xcoff_start_psymtab
   PARAMS ((struct objfile *, struct section_offsets *, char *, int,
-	   struct partial_symbol *, struct partial_symbol *));
+	   struct partial_symbol **, struct partial_symbol **));
 
 /* Allocate and partially fill a partial symtab.  It will be
    completely filled at the end of the symbol list.
@@ -1949,8 +1949,8 @@ xcoff_start_psymtab (objfile, section_offsets,
      struct section_offsets *section_offsets;
      char *filename;
      int first_symnum;
-     struct partial_symbol *global_syms;
-     struct partial_symbol *static_syms;
+     struct partial_symbol **global_syms;
+     struct partial_symbol **static_syms;
 {
   struct partial_symtab *result =
     start_psymtab_common (objfile, section_offsets,

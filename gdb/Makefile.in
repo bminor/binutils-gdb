@@ -145,7 +145,6 @@ ENABLE_CFLAGS= @ENABLE_CFLAGS@
 ENABLE_CLIBS= @ENABLE_CLIBS@
 ENABLE_OBS= @ENABLE_OBS@
 
-
 # -I. for config files.
 # -I$(srcdir) for gdb internal headers and possibly for gnu-regex.h also.
 # -I$(srcdir)/config for more generic config files.
@@ -197,10 +196,11 @@ REGEX1 = gnu-regex.o
 # If you have the Cygnus libraries installed,
 # you can use 'CLIBS=$(INSTALLED_LIBS)' 'CDEPS='
 INSTALLED_LIBS=-lbfd -lreadline $(TERMCAP) -lopcodes -lmmalloc \
-	-liberty $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(ENABLE_CLIBS)
+	-liberty $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(ENABLE_CLIBS) \
+	@LIBS@
 CLIBS = $(SIM) $(BFD) $(READLINE) $(OPCODES) $(MMALLOC) $(LIBIBERTY) \
 	$(ENABLE_CLIBS) $(TERMCAP) $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) \
-	$(LIBIBERTY) $(LIBS)
+	$(LIBIBERTY) @LIBS@
 CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 	$(OPCODES) $(MMALLOC) $(LIBIBERTY)
 
@@ -345,10 +345,10 @@ TARGET_FLAGS_TO_PASS = \
 # Links made at configuration time should not be specified here, since
 # SFILES is used in building the distribution archive.
 
-SFILES = blockframe.c breakpoint.c buildsym.c callback.c c-exp.y c-lang.c \
-	c-typeprint.c c-valprint.c ch-exp.c ch-lang.c ch-typeprint.c \
-	ch-valprint.c coffread.c command.c complaints.c corefile.c cp-valprint.c \
-	dbxread.c demangle.c dwarfread.c \
+SFILES = bcache.c blockframe.c breakpoint.c buildsym.c callback.c c-exp.y \
+	c-lang.c c-typeprint.c c-valprint.c ch-exp.c ch-lang.c \
+	ch-typeprint.c ch-valprint.c coffread.c command.c complaints.c \
+	corefile.c cp-valprint.c dbxread.c demangle.c dwarfread.c \
 	elfread.c environ.c eval.c expprint.c \
 	f-exp.y f-lang.c f-typeprint.c f-valprint.c findvar.c \
 	gdbtypes.c infcmd.c inflow.c infrun.c language.c \
@@ -393,7 +393,7 @@ udiheaders = \
 gdbcore_h =	gdbcore.h $(bfd_h)
 
 frame_h =	frame.h
-symtab_h =	symtab.h
+symtab_h =	symtab.h bcache.h
 gdbtypes_h =	gdbtypes.h
 expression_h =	expression.h
 value_h =	value.h $(symtab_h) $(gdbtypes_h) $(expression_h)
@@ -413,8 +413,8 @@ inferior_h =	inferior.h $(breakpoint_h)
 # wrong if TAGS has files twice).  Because this is tricky to get
 # right, it is probably easiest just to list .h files here directly.
 
-HFILES_NO_SRCDIR = buildsym.h call-cmds.h coff-solib.h defs.h dst.h environ.h \
-	$(gdbcmd_h) gdbcore.h \
+HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
+	dst.h environ.h $(gdbcmd_h) gdbcore.h \
 	gdb-stabs.h $(inferior_h) language.h minimon.h monitor.h \
 	objfiles.h parser-defs.h partial-stab.h serial.h signals.h solib.h \
 	symfile.h stabsread.h target.h terminal.h typeprint.h xcoffsolib.h \
@@ -461,7 +461,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	symtab.o symfile.o symmisc.o infcmd.o infrun.o command.o \
 	expprint.o environ.o gdbtypes.o copying.o $(DEPFILES) \
 	mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
-	exec.o objfiles.o minsyms.o maint.o demangle.o \
+	exec.o bcache.o objfiles.o minsyms.o maint.o demangle.o \
 	dbxread.o coffread.o elfread.o \
 	dwarfread.o mipsread.o stabsread.o corefile.o \
 	c-lang.o ch-exp.o ch-lang.o f-lang.o m2-lang.o \
@@ -743,7 +743,7 @@ maintainer-clean realclean: clean
 	rm -f Makefile
 
 diststuff: $(DISTSTUFF)
-	cd doc; $(MAKE) $(MFLAGS) diststuff
+	cd doc; $(MAKE) $(MFLAGS) all-doc
 
 subdir_do: force
 	@for i in $(DODIRS); do \
@@ -997,6 +997,8 @@ altos-xdep.o: altos-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 annotate.o: annotate.c $(defs_h) annotate.h $(value_h) target.h $(gdbtypes_h)
 
 arm-tdep.o: arm-tdep.c $(gdbcmd_h) $(gdbcore_h) $(inferior_h) $(defs_h)
+
+bcache.o: bcache.c bcache.h $(defs_h)
 
 blockframe.o: blockframe.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	objfiles.h symfile.h target.h

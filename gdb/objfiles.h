@@ -252,6 +252,11 @@ struct objfile
   struct obstack symbol_obstack;	/* Full symbols */
   struct obstack type_obstack;		/* Types */
 
+  /* A byte cache where we can stash arbitrary "chunks" of bytes that
+     will not change. */
+
+  struct bcache psymbol_cache;		/* Byte cache for partial syms */
+
   /* Vectors of all partial symbols read in from file.  The actual data
      is stored in the psymbol_obstack. */
 

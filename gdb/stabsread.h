@@ -183,8 +183,8 @@ struct stab_section_list
 
 extern struct partial_symtab *
 start_psymtab PARAMS ((struct objfile *, struct section_offsets *, char *,
-		       CORE_ADDR, int, struct partial_symbol *,
-		       struct partial_symbol *));
+		       CORE_ADDR, int, struct partial_symbol **,
+		       struct partial_symbol **));
 
 extern struct partial_symtab *
 end_psymtab PARAMS ((struct partial_symtab *, char **, int, int, CORE_ADDR,

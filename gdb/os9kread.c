@@ -159,8 +159,8 @@ os9k_process_one_symbol PARAMS ((int, int, CORE_ADDR, char *,
 
 static struct partial_symtab *
 os9k_start_psymtab PARAMS ((struct objfile *, struct section_offsets *, char *,
-                       CORE_ADDR, int, int, struct partial_symbol *,
-                       struct partial_symbol *));
+                       CORE_ADDR, int, int, struct partial_symbol **,
+                       struct partial_symbol **));
 
 static struct partial_symtab *
 os9k_end_psymtab PARAMS ((struct partial_symtab *, char **, int, int, CORE_ADDR,
@@ -972,8 +972,8 @@ os9k_start_psymtab (objfile, section_offsets,
      CORE_ADDR textlow;
      int ldsymoff;
      int ldsymcnt;
-     struct partial_symbol *global_syms;
-     struct partial_symbol *static_syms;
+     struct partial_symbol **global_syms;
+     struct partial_symbol **static_syms;
 {
   struct partial_symtab *result =
       start_psymtab_common(objfile, section_offsets,

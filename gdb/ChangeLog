@@ -1,3 +1,52 @@
+Fri Feb 16 14:00:54 1996  Fred Fish  <fnf@cygnus.com>
+
+	* bcache.c, bcache.h: New files to implement a byte cache.
+	* Makefile.in (SFILES): Add bcache.c.
+	(symtab_h): Add bcache.h.
+	(HFILES_NO_SRCDIR): add bcache.h
+	(COMMON_OBJS): Add bcache.o
+	(bcache.o): New target.
+	* dbxread.c (start_psymtab): Make global_syms & static_syms
+ 	type "partial_symbol **".
+	* hpread.c (hpread_start_symtab):  Ditto.
+	* os9kread.c (os9k_start_psymtab):  Ditto.
+	* stabsread.h (start_psymtab):  Ditto.
+	* {symfile.c, symfile.h} (start_psymtab_common):  Ditto.
+	* maint.c (maintenance_print_statistics): Call
+ 	print_symbol_bcache_statistics.
+	* objfiles.c (allocate_objfile): Initialize psymbol bcache malloc
+	and free pointers.
+	* solib.c (allocate_rt_common_objfile): Ditto.
+	* symfile.c (reread_symbols):  Ditto.
+	(free_objfile): Free psymbol bcache when objfile is freed.	
+	(objfile_relocate): Use new indirect psymbol pointers.
+	* objfiles.h (struct objfile): Add psymbol cache.
+	* symfile.c (compare_psymbols): Now passed pointers to pointers to
+	psymbols.
+	(reread_symbols): Free psymbol bcache when freeing other objfile
+	resources.
+	(add_psymbol_to_list, add_psymbol_addr_to_list): Initialize new
+	psymbol using the psymbol bcache.
+	(init_psymbol_list): Psymbol lists now contain pointers rather than
+	the actual psymbols.
+	* symfile.h (psymbol_allocation_list): Psymbol lists now dynamically
+	grown arrays of pointers.
+	(ADD_PSYMBOL_VT_TO_LIST): Initialize new symbol using the psymbol
+	bcache.
+	* symmisc.c (print_partial_symbols): Now takes pointer to pointer
+	to partial symbol.
+	(print_symbol_bcache_statistics): New function to print per objfile
+ 	bcache statistics.
+	(print_partial_symbol, print_partial_symbols,
+ 	maintenance_check_symtabs, extend_psymbol_list):
+ 	Account for change to pointer to pointer to partial symbol.
+	* symtab.c (find_pc_psymbol, lookup_partial_symbol, decode_line_2,
+	make_symbol_completion_list): 
+ 	Account for change to pointer to pointer to partial symbol.
+	* symtab.h (bcache.h): Include.
+	* xcoffread.c (xcoff_start_psymtab): Make global_syms & static_syms
+ 	type "partial_symbol **".
+
 Fri Feb 16 10:02:34 1996  Fred Fish  <fnf@cygnus.com>
 
 	* dwarfread.c (free_utypes): New function.

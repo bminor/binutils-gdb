@@ -249,7 +249,10 @@ maintenance_print_statistics (args, from_tty)
      char *args;
      int from_tty;
 {
+  int temp;
+
   print_objfile_statistics ();
+  print_symbol_bcache_statistics ();
 }
 
 /* The "maintenance print" command is defined as a prefix, with allow_unknown

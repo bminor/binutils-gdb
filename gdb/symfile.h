@@ -23,10 +23,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* This file requires that you first include "bfd.h".  */
 
+/* Partial symbols are stored in the psymbol_cache and pointers to them
+   are kept in a dynamically grown array that is obtained from malloc and
+   grown as necessary via realloc.  Each objfile typically has two of these,
+   one for global symbols and one for static symbols.  Although this adds
+   a level of indirection for storing or accessing the partial symbols,
+   it allows us to throw away duplicate psymbols and set all pointers
+   to the single saved instance. */
+
 struct psymbol_allocation_list {
-  struct partial_symbol *list;
-  struct partial_symbol *next;
-  int size;
+  struct partial_symbol **list;	/* Pointer to first partial symbol pointer*/
+  struct partial_symbol **next;	/* Pointer to next avail storage for pointer */
+  int size;			/* Number of symbols */
 };
 
 /* Structure to keep track of symbol reading functions for various
@@ -116,21 +124,22 @@ extend_psymbol_list PARAMS ((struct psymbol_allocation_list *,
 #define	ADD_PSYMBOL_VT_TO_LIST(NAME,NAMELENGTH,NAMESPACE,CLASS,LIST,VALUE,VT,LANGUAGE, OBJFILE) \
   do {		        						\
     register struct partial_symbol *psym;				\
+    char *buf = alloca ((NAMELENGTH) + 1);				\
+    struct partial_symbol psymbol;					\
+    memcpy (buf, (NAME), (NAMELENGTH));					\
+    buf[(NAMELENGTH)] = '\0';						\
+    SYMBOL_NAME (&psymbol) = bcache (buf, (NAMELENGTH) + 1, &(OBJFILE)->psymbol_cache); \
+    VT (&psymbol) = (VALUE);						\
+    SYMBOL_SECTION (&psymbol) = 0;					\
+    SYMBOL_LANGUAGE (&psymbol) = (LANGUAGE);				\
+    PSYMBOL_NAMESPACE (&psymbol) = (NAMESPACE);				\
+    PSYMBOL_CLASS (&psymbol) = (CLASS);					\
+    SYMBOL_INIT_LANGUAGE_SPECIFIC (&psymbol, (LANGUAGE));		\
+    psym = bcache (&psymbol, sizeof (struct partial_symbol), &(OBJFILE)->psymbol_cache); \
     if ((LIST).next >= (LIST).list + (LIST).size)			\
-      extend_psymbol_list (&(LIST),(OBJFILE));				\
-    psym = (LIST).next++;						\
-    SYMBOL_NAME (psym) =						\
-      (char *) obstack_alloc (&objfile->psymbol_obstack,		\
-			      (NAMELENGTH) + 1);			\
-    memcpy (SYMBOL_NAME (psym), (NAME), (NAMELENGTH));			\
-    SYMBOL_NAME (psym)[(NAMELENGTH)] = '\0';				\
-    SYMBOL_NAMESPACE (psym) = (NAMESPACE);				\
-    SYMBOL_SECTION (psym) = 0;						\
-    PSYMBOL_CLASS (psym) = (CLASS);					\
-    VT (psym) = (VALUE); 						\
-    SYMBOL_LANGUAGE (psym) = (LANGUAGE);				\
-    SYMBOL_INIT_LANGUAGE_SPECIFIC (psym, LANGUAGE);			\
-    OBJSTAT (objfile, n_psyms++);					\
+      extend_psymbol_list (&(LIST), (OBJFILE));				\
+    *(LIST).next++ = psym;						\
+    OBJSTAT ((OBJFILE), n_psyms++);					\
   } while (0)
 
 /* Add a symbol with an integer value to a psymtab. */
@@ -174,8 +183,8 @@ new_symfile_objfile PARAMS ((struct objfile *, int, int));
 extern struct partial_symtab *
 start_psymtab_common PARAMS ((struct objfile *, struct section_offsets *,
 			      char *, CORE_ADDR,
-			      struct partial_symbol *,
-			      struct partial_symbol *));
+			      struct partial_symbol **,
+			      struct partial_symbol **));
 
 /* Sorting your symbols for fast lookup or alphabetical printing.  */
 
