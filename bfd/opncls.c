@@ -63,7 +63,9 @@ bfd *new_bfd()
   nbfd->sections = (asection *)NULL;
   nbfd->cacheable = false;
   nbfd->flags = NO_FLAGS;
-  nbfd->mtime_set = 0;
+  nbfd->mtime_set = false;
+
+  
   return nbfd;
 }
 
@@ -76,6 +78,7 @@ bfd *obfd;
 	nbfd->xvec = obfd->xvec;
 	nbfd->my_archive = obfd;
 	nbfd->direction = read_direction;
+	nbfd->target_defaulted = obfd->target_defaulted;
 	return nbfd;
 }
 
@@ -189,10 +192,10 @@ DEFUN(bfd_fdopenr,(filename, target, fd),
   }
 
 #ifdef FASCIST_FDOPEN
-  nbfd->iostream = (char *) fdopen (fd, "rb"); 
+  nbfd->iostream = (char *) fdopen (fd, FOPEN_RB); 
 #else
   /* if the fd were open for read only, this still would not hurt: */
-  nbfd->iostream = (char *) fdopen (fd, "r+b"); 
+  nbfd->iostream = (char *) fdopen (fd, FOPEN_RUB); 
 #endif
   if (nbfd->iostream == NULL) {
     (void) obstack_free (&nbfd->memory, (PTR)0);
