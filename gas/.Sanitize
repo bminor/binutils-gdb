@@ -16,9 +16,9 @@
 Do-first:
 
 if ( echo $* | grep keep\-mpw > /dev/null ) ; then
-	keep_these_too="mpw-config.in mpw-build.in mpw-make.in ChangeLog.mpw"
+	keep_these_too="mpw-config.in mpw-make.in ChangeLog.mpw"
 else
-	lose_these_too="mpw-config.in mpw-build.in mpw-make.in ChangeLog.mpw"
+	lose_these_too="mpw-config.in mpw-make.in ChangeLog.mpw"
 fi
 
 if ( echo $* | grep keep\-gm > /dev/null ) ; then
