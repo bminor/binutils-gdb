@@ -40,7 +40,7 @@
 #include "callback.h"
 #include "targ-vals.h"
 
-#ifndef HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -53,6 +53,9 @@ static long os_time PARAMS ((host_callback *, long *));
 static int os_system PARAMS ((host_callback *, const char *));
 static int os_rename PARAMS ((host_callback *, const char *, const char *));
 static int os_write_stdout PARAMS ((host_callback *, const char *, int));
+static void os_flush_stdout PARAMS ((host_callback *));
+static int os_write_stderr PARAMS ((host_callback *, const char *, int));
+static void os_flush_stderr PARAMS ((host_callback *));
 static int os_write PARAMS ((host_callback *, int, const char *, int));
 static int os_read_stdin PARAMS ((host_callback *, char *, int));
 static int os_read PARAMS ((host_callback *, int, char *, int));
@@ -61,6 +64,9 @@ static int os_lseek PARAMS ((host_callback *, int, long, int));
 static int os_isatty PARAMS ((host_callback *, int));
 static int os_get_errno PARAMS ((host_callback *));
 static int os_close PARAMS ((host_callback *, int));
+static void os_vprintf_filtered PARAMS ((host_callback *, const char *, va_list));
+static void os_evprintf_filtered PARAMS ((host_callback *, const char *, va_list));
+static void os_error PARAMS ((host_callback *, const char *, ...));
 static int fdmap PARAMS ((host_callback *, int));
 static int fdbad PARAMS ((host_callback *, int));
 static int wrap PARAMS ((host_callback *, int));
@@ -111,8 +117,51 @@ os_close (p, fd)
   if (result)
     return result;
   result = wrap (p, close (fdmap (p, fd)));
+  if(result == 0 && !p->alwaysopen[fd])
+    p->fdopen[fd] = 0;
+
   return result;
 }
+
+
+/* taken from gdb/util.c - should be in a library */
+
+
+#if defined(__GO32__) || defined (_WIN32)
+int
+os_poll_quit (p)
+     host_callback *p;
+{
+#ifndef _MSC_VER
+  if (kbhit ())
+    {
+      int k = getkey ();
+      if (k == 1)
+	{
+	  return 1;
+	}
+      else if (k == 2)
+	{
+	  return 1;
+	}
+      else 
+	{
+	  p->eprintf (p, "CTRL-A to quit, CTRL-B to quit harder\n");
+	}
+    }
+#else /* !_MSC_VER */
+  /* NB - this will not compile! */
+  int k = win32pollquit();
+  if (k == 1)
+    return 1;
+  else if (k == 2)
+    return 1;
+#endif /* !_MSC_VER */
+  return 0;
+}
+#else
+#define os_poll_quit 0
+#endif /* defined(__GO32__) || defined(_WIN32) */
 
 static int 
 os_get_errno (p)
@@ -133,6 +182,7 @@ os_isatty (p, fd)
   if (result)
     return result;
   result = wrap (p, isatty (fdmap (p, fd)));
+
   return result;
 }
 
@@ -156,14 +206,13 @@ static int
 os_open (p, name, flags)
      host_callback *p;
      const char *name;
-     int flags;
 {
   int i;
   for (i = 0; i < MAX_CALLBACK_FDS; i++)
     {
       if (!p->fdopen[i])
 	{
-	  int f = open (name, target_to_host_open (flags));
+	  int f = open (name, target_to_host_open (flags), 0644);
 	  if (f < 0)
 	    {
 	      p->last_errno = errno;
@@ -225,7 +274,30 @@ os_write_stdout (p, buf, len)
      const char *buf;
      int len;
 {
-  return os_write (p, 1, buf, len);
+  return fwrite(buf, 1, len, stdout);
+}
+
+static void
+os_flush_stdout (p)
+     host_callback *p;
+{
+  fflush (stdout);
+}
+
+static int 
+os_write_stderr (p, buf, len)
+     host_callback *p;
+     const char *buf;
+     int len;
+{
+  return fwrite(buf, 1, len, stderr);
+}
+
+static void
+os_flush_stderr (p)
+     host_callback *p;
+{
+  fflush (stderr);
 }
 
 static int 
@@ -294,6 +366,8 @@ os_init(p)
   return 1;
 }
 
+/* DEPRECIATED */
+
 /* VARARGS */
 static void
 #ifdef ANSI_PROTOTYPES
@@ -314,9 +388,36 @@ os_printf_filtered (p, va_alist)
   format = va_arg (args, char *);
 #endif
 
-  vprintf (format, args);
-
+  vfprintf (stdout, format, args);
   va_end (args);
+}
+
+/* VARARGS */
+static void
+#ifdef ANSI_PROTOTYPES
+os_vprintf_filtered (host_callback *p, const char *format, va_list args)
+#else
+os_vprintf_filtered (p, format, args)
+     host_callback *p;
+     const char *format;
+     va_list args;
+#endif
+{
+  vprintf (format, args);
+}
+
+/* VARARGS */
+static void
+#ifdef ANSI_PROTOTYPES
+os_evprintf_filtered (host_callback *p, const char *format, va_list args)
+#else
+os_evprintf_filtered (p, format, args)
+     host_callback *p;
+     const char *format;
+     va_list args;
+#endif
+{
+  vfprintf (stderr, format, args);
 }
 
 /* VARARGS */
@@ -361,14 +462,28 @@ host_callback default_callback =
   os_unlink,
   os_write,
   os_write_stdout,
+  os_flush_stdout,
+  os_write_stderr,
+  os_flush_stderr,
+
+  os_poll_quit,
 
   os_shutdown,
   os_init,
 
-  os_printf_filtered,
+  os_printf_filtered,  /* depreciated */
+
+  os_vprintf_filtered,
+  os_evprintf_filtered,
   os_error,
 
   0, 		/* last errno */
+
+  { 0, },	/* fdmap */
+  { 0, },	/* fdopen */
+  { 0, },	/* alwaysopen */
+
+  HOST_CALLBACK_MAGIC,
 };
 
 /* FIXME: Need to add hooks so target can tweak as necessary.  */

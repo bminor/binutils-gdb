@@ -1,3 +1,9 @@
+Wed May 14 21:20:38 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* callback.c (os_close): Mark the descriptor as being
+	available if the close succeeded.
+	(os_open): Pass 0644 as the mode of the file being created.
+
 Thu May 15 10:58:52 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-fpu.c (pack_fpu, unpack_fpu): New functions - decode a
