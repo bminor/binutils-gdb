@@ -1,3 +1,12 @@
+Thu Feb  6 15:14:01 1992  Per Bothner  (bothner at cygnus.com)
+
+	* mipsread.c (parse_partial_symbols):  Handle dependencies
+	between partial symbol tables (when not doing stabs-in-ecoff).
+	(This used to be handled by parse_fdr, but parse_fdr was
+	incompatible with handling stabs-in-ecoff, so the code
+	was re-written to not use parse_fdr.  Unfortunately,
+	the logic to handle dependencies was overlooked.)
+
 Thu Feb  6 11:51:39 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* coffread.c (read_enum_type): Use the size of a target int when
