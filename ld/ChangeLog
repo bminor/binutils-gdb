@@ -1,3 +1,10 @@
+2001-08-13  Richard Henderson  <rth@redhat.com>
+
+	* emultempl/needrelax.em: New file.
+	* emulparams/elf64_ia64.sh (EXTRA_EM_FILE): Reference it.
+	* Makefile.am (eelf64_ia64.c): Depend on it.
+	* Makefile.in: Rebuild.
+
 2001-07-30  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* ld.texinfo (Simple Assignments): Fix computation in SECTIONS
@@ -142,15 +149,15 @@
 	* mpw-eppcmac.c: Likewise.
 
 	2001-04-28  Paul Sokolovsky  <Paul.Sokolovsky@technologist.com>
-        * ldlang.c (load_symbols): Give emulation a chance
-        to process unrecognized file before fatal error is
-        reported, not after.
+	* ldlang.c (load_symbols): Give emulation a chance
+	to process unrecognized file before fatal error is
+	reported, not after.
 
 	2001-02-26  H.J. Lu  <hjl@gnu.org>
 	* ldlang.c (open_input_bfds): Set the bfd error handler so
-        that problems can be caught whilst loading symbols.
-        (record_bfd_errors): New function: Report BFD errors and mark
-        the executable output as being invalid.
+	that problems can be caught whilst loading symbols.
+	(record_bfd_errors): New function: Report BFD errors and mark
+	the executable output as being invalid.
 
 2001-04-02  Alan Modra  <alan@linuxcare.com.au>
 
