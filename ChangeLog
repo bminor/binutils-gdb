@@ -1,3 +1,8 @@
+Wed Nov 18 18:09:14 1998  Geoffrey Noer  <noer@cygnus.com>
+
+	* Makefile.in: CC_FOR_TARGET and CXX_FOR_TARGET should also
+	include newlib/libc/sys/cygwin and newlib/libc/sys/cygwin32.
+
 Wed Nov 18 20:13:29 1998  Christopher Faylor <cgf@cygnus.com>
 
 	* configure.in: Add libtermcap to list of cygwin dependencies.
