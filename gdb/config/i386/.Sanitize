@@ -25,6 +25,8 @@ go32.mh
 i386aout.mt
 i386bsd.mh
 i386bsd.mt
+i386lynx.mh
+i386lynx.mt
 i386mach.mh
 i386sco.mh
 i386sco4.mh
@@ -40,6 +42,7 @@ linux.mt
 ncr3000.mh
 ncr3000.mt
 nm-i386bsd.h
+nm-i386lynx.h
 nm-i386mach.h
 nm-i386sco.h
 nm-i386sco4.h
@@ -52,6 +55,7 @@ sun386.mt
 symmetry.mh
 symmetry.mt
 tm-i386bsd.h
+tm-i386lynx.h
 tm-i386v.h
 tm-i386v4.h
 tm-linux.h
@@ -59,6 +63,7 @@ tm-sun386.h
 tm-symmetry.h
 xm-go32.h
 xm-i386bsd.h
+xm-i386lynx.h
 xm-i386mach.h
 xm-i386sco.h
 xm-i386v.h
