@@ -2086,6 +2086,8 @@ not stored in the instruction. */
   BFD_RELOC_SH_CODE,
   BFD_RELOC_SH_DATA,
   BFD_RELOC_SH_LABEL,
+  BFD_RELOC_SH_LOOP_START,
+  BFD_RELOC_SH_LOOP_END,
 
 /* Thumb 23-, 12- and 9-bit pc-relative branches.  The lowest bit must
 be zero and is not stored in the instruction. */

@@ -1,5 +1,5 @@
 /* Disassemble SH instructions.
-   Copyright (C) 1993, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 97, 1998, 2000 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -402,16 +402,20 @@ print_insn_shx (memaddr, info)
 		imm |= ~0xfff;
 	      imm = imm * 2 + 4;
 	      goto ok;
-	    case IMM_4:
+	    case IMM0_4:
+	    case IMM1_4:
 	      imm = nibs[3];
 	      goto ok;
-	    case IMM_4BY2:
+	    case IMM0_4BY2:
+	    case IMM1_4BY2:
 	      imm = nibs[3] <<1;
 	      goto ok;
-	    case IMM_4BY4:
+	    case IMM0_4BY4:
+	    case IMM1_4BY4:
 	      imm = nibs[3] <<2;
 	      goto ok;
-	    case IMM_8:
+	    case IMM0_8:
+	    case IMM1_8:
 	      imm = (nibs[2] << 4) | nibs[3];
 	      goto ok;
 	    case PCRELIMM_8BY2:
@@ -422,17 +426,13 @@ print_insn_shx (memaddr, info)
 	      imm = ((nibs[2] << 4) | nibs[3]) <<2;
 	      relmask = ~ (bfd_vma) 3;
 	      goto ok;
-	    case IMM_8BY2:
+	    case IMM0_8BY2:
+	    case IMM1_8BY2:
 	      imm = ((nibs[2] << 4) | nibs[3]) <<1;
 	      goto ok;
-	    case IMM_8BY4:
+	    case IMM0_8BY4:
+	    case IMM1_8BY4:
 	      imm = ((nibs[2] << 4) | nibs[3]) <<2;
-	      goto ok;
-	    case DISP_8:
-	      imm = (nibs[2] << 4) | (nibs[3]);	  
-	      goto ok;
-	    case DISP_4:
-	      imm = nibs[3];
 	      goto ok;
 	    case REG_N:
 	      rn = nibs[n];
@@ -456,6 +456,7 @@ print_insn_shx (memaddr, info)
 	      rn |= (rn & 2) << 1;
 	      break;
 	    case PPI:
+	    case REPEAT:
 	      goto fail;
 	    default:
 	      abort();

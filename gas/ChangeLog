@@ -1,3 +1,21 @@
+Wed Apr  5 22:07:19 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* config/tc-sh.c (immediate): Delete.
+	(sh_operand_info): Add immediate member.
+	(parse_reg): Use A_PC for pc.
+	(parse_exp): Add second argument 'op'.  All callers changed.
+	(parse_at): Expect pc to be coded as A_PC.
+	Use immediate field in *op.
+	(insert): Add fourth argument 'op'.  All callers changed.
+	(build_relax): Add second argument 'op'.  All callers changed.
+	(insert_loop_bounds): New function.
+	(build_Mytes): Remove DISP_4.
+	Split IMM_[48]{,BY[24]} into IMM[01]_[48]{,BY[24]}.  Add REPEAT.
+	(assemble_ppi): Use immediate field in *operand.
+	(sh_force_relocation): Handle BFD_RELOC_SH_LOOP_{START,END}.
+	(md_apply_fix): Likewise.
+	(tc_gen_reloc): Likewise.  Check for a pcrel BFD_RELOC_SH_LABEL.
+
 Wed Apr  5 06:35:45 2000  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
 
 	* config/tc-sparc.c (sparc_ip): Avoid string pasting.

@@ -244,14 +244,12 @@ static int reg_x, reg_y;
 static int reg_efg;
 static int reg_b;
 
-static expressionS immediate;	/* absolute expression */
-
 typedef struct
   {
     sh_arg_type type;
     int reg;
+    expressionS immediate;
   }
-
 sh_operand_info;
 
 #define IDENT_CHAR(c) (isalnum (c) || (c) == '_')
@@ -466,7 +464,9 @@ parse_reg (src, mode, reg)
     }
   if (src[0] == 'p' && src[1] == 'c' && ! IDENT_CHAR ((unsigned char) src[2]))
     {
-      *mode = A_DISP_PC;
+      /* Don't use A_DISP_PC here - that would accept stuff like 'mova pc,r0'
+         and use an uninitialized immediate.  */
+      *mode = A_PC;
       return 2;
     }
   if (src[0] == 'g' && src[1] == 'b' && src[2] == 'r'
@@ -619,16 +619,17 @@ static symbolS *dot()
 
 static
 char *
-parse_exp (s)
+parse_exp (s, op)
      char *s;
+     sh_operand_info *op;
 {
   char *save;
   char *new;
 
   save = input_line_pointer;
   input_line_pointer = s;
-  expression (&immediate);
-  if (immediate.X_op == O_absent)
+  expression (&op->immediate);
+  if (op->immediate.X_op == O_absent)
     as_bad (_("missing operand"));
   new = input_line_pointer;
   input_line_pointer = save;
@@ -710,7 +711,7 @@ parse_at (src, op)
       else
 	{
 	  /* Must be an @(disp,.. thing) */
-	  src = parse_exp (src);
+	  src = parse_exp (src, op);
 	  if (src[0] == ',')
 	    src++;
 	  /* Now can be rn, gbr or pc */
@@ -725,12 +726,12 @@ parse_at (src, op)
 		{
 		  op->type = A_DISP_GBR;
 		}
-	      else if (mode == A_DISP_PC)
+	      else if (mode == A_PC)
 		{
 		  /* Turn a plain @(4,pc) into @(.+4,pc) */
-		  if (immediate.X_op == O_constant) { 
-		    immediate.X_add_symbol = dot();
-		    immediate.X_op = O_symbol;
+		  if (op->immediate.X_op == O_constant) { 
+		    op->immediate.X_add_symbol = dot();
+		    op->immediate.X_op = O_symbol;
 		  }
 		  op->type = A_DISP_PC;
 		}
@@ -795,7 +796,7 @@ get_operand (ptr, op)
   if (src[0] == '#')
     {
       src++;
-      *ptr = parse_exp (src);
+      *ptr = parse_exp (src, op);
       op->type = A_IMM;
       return;
     }
@@ -815,7 +816,7 @@ get_operand (ptr, op)
   else
     {
       /* Not a reg, the only thing left is a displacement */
-      *ptr = parse_exp (src);
+      *ptr = parse_exp (src, op);
       op->type = A_DISP_PC;
       return;
     }
@@ -1177,22 +1178,24 @@ check (operand, low, high)
 
 
 static void
-insert (where, how, pcrel)
+insert (where, how, pcrel, op)
      char *where;
      int how;
      int pcrel;
+     sh_operand_info *op;
 {
   fix_new_exp (frag_now,
 	       where - frag_now->fr_literal,
 	       2,
-	       &immediate,
+	       &op->immediate,
 	       pcrel,
 	       how);
 }
 
 static void
-build_relax (opcode)
+build_relax (opcode, op)
      sh_opcode_info *opcode;
+     sh_operand_info *op;
 {
   int high_byte = target_big_endian ? 0 : 1;
   char *p;
@@ -1204,8 +1207,8 @@ build_relax (opcode)
 		    md_relax_table[C (what, COND32)].rlx_length,
 		    md_relax_table[C (what, COND8)].rlx_length,
 		    C (what, 0),
-		    immediate.X_add_symbol,
-		    immediate.X_add_number,
+		    op->immediate.X_add_symbol,
+		    op->immediate.X_add_number,
 		    0);
       p[high_byte] = (opcode->nibbles[0] << 4) | (opcode->nibbles[1]);
     }
@@ -1215,12 +1218,61 @@ build_relax (opcode)
 		    md_relax_table[C (UNCOND_JUMP, UNCOND32)].rlx_length,
 		    md_relax_table[C (UNCOND_JUMP, UNCOND12)].rlx_length,
 		    C (UNCOND_JUMP, 0),
-		    immediate.X_add_symbol,
-		    immediate.X_add_number,
+		    op->immediate.X_add_symbol,
+		    op->immediate.X_add_number,
 		    0);
       p[high_byte] = (opcode->nibbles[0] << 4);
     }
 
+}
+
+/* insert ldrs & ldre with fancy relocations that relaxation can recognize.  */
+static char *
+insert_loop_bounds (output, operand)
+     char *output;
+     sh_operand_info *operand;
+{
+  char *name;
+  symbolS *end_sym;
+
+  /* Since the low byte of the opcode will be overwritten by the reloc, we
+     can just stash the high byte into both bytes and ignore endianness.  */
+  output[0] = 0x8c;
+  output[1] = 0x8c;
+  insert (output, BFD_RELOC_SH_LOOP_START, 1, operand);
+  insert (output, BFD_RELOC_SH_LOOP_END, 1, operand + 1);
+
+  if (sh_relax)
+    {
+      static int count = 0;
+
+      /* If the last loop insn is a two-byte-insn, it is in danger of being
+	 swapped with the insn after it.  To prevent this, create a new
+	 symbol - complete with SH_LABEL reloc - after the last loop insn.
+	 If the last loop insn is four bytes long, the symbol will be
+	 right in the middle, but four byte insns are not swapped anyways.  */
+      /* A REPEAT takes 6 bytes.  The SH has a 32 bit address space.
+	 Hence a 9 digit number should be enough to count all REPEATs.  */
+      name = alloca (11);
+      sprintf (name, "_R%x", count++ & 0x3fffffff);
+      end_sym =  symbol_new (name, undefined_section, 0, &zero_address_frag);
+      /* Make this a local symbol.  */
+#ifdef OBJ_COFF
+      SF_SET_LOCAL (end_sym);
+#endif /* OBJ_COFF */
+      symbol_table_insert (end_sym);
+      end_sym->sy_value = operand[1].immediate;
+      end_sym->sy_value.X_add_number += 2;
+      fix_new (frag_now, frag_now_fix (), 2, end_sym, 0, 1, BFD_RELOC_SH_LABEL);
+    }
+
+  output = frag_more (2);
+  output[0] = 0x8e;
+  output[1] = 0x8e;
+  insert (output, BFD_RELOC_SH_LOOP_START, 1, operand);
+  insert (output, BFD_RELOC_SH_LOOP_END, 1, operand + 1);
+
+  return frag_more (2);
 }
 
 /* Now we know what sort of opcodes it is, lets build the bytes -
@@ -1268,32 +1320,52 @@ build_Mytes (opcode, operand)
             case REG_B:
 	      nbuf[index] = reg_b | 0x08;
 	      break;
-	    case DISP_4:
-	      insert (output + low_byte, BFD_RELOC_SH_IMM4, 0);
+	    case IMM0_4BY4:
+	      insert (output + low_byte, BFD_RELOC_SH_IMM4BY4, 0, operand);
 	      break;
-	    case IMM_4BY4:
-	      insert (output + low_byte, BFD_RELOC_SH_IMM4BY4, 0);
+	    case IMM0_4BY2:
+	      insert (output + low_byte, BFD_RELOC_SH_IMM4BY2, 0, operand);
 	      break;
-	    case IMM_4BY2:
-	      insert (output + low_byte, BFD_RELOC_SH_IMM4BY2, 0);
+	    case IMM0_4:
+	      insert (output + low_byte, BFD_RELOC_SH_IMM4, 0, operand);
 	      break;
-	    case IMM_4:
-	      insert (output + low_byte, BFD_RELOC_SH_IMM4, 0);
+	    case IMM1_4BY4:
+	      insert (output + low_byte, BFD_RELOC_SH_IMM4BY4, 0, operand + 1);
 	      break;
-	    case IMM_8BY4:
-	      insert (output + low_byte, BFD_RELOC_SH_IMM8BY4, 0);
+	    case IMM1_4BY2:
+	      insert (output + low_byte, BFD_RELOC_SH_IMM4BY2, 0, operand + 1);
 	      break;
-	    case IMM_8BY2:
-	      insert (output + low_byte, BFD_RELOC_SH_IMM8BY2, 0);
+	    case IMM1_4:
+	      insert (output + low_byte, BFD_RELOC_SH_IMM4, 0, operand + 1);
 	      break;
-	    case IMM_8:
-	      insert (output + low_byte, BFD_RELOC_SH_IMM8, 0);
+	    case IMM0_8BY4:
+	      insert (output + low_byte, BFD_RELOC_SH_IMM8BY4, 0, operand);
+	      break;
+	    case IMM0_8BY2:
+	      insert (output + low_byte, BFD_RELOC_SH_IMM8BY2, 0, operand);
+	      break;
+	    case IMM0_8:
+	      insert (output + low_byte, BFD_RELOC_SH_IMM8, 0, operand);
+	      break;
+	    case IMM1_8BY4:
+	      insert (output + low_byte, BFD_RELOC_SH_IMM8BY4, 0, operand + 1);
+	      break;
+	    case IMM1_8BY2:
+	      insert (output + low_byte, BFD_RELOC_SH_IMM8BY2, 0, operand + 1);
+	      break;
+	    case IMM1_8:
+	      insert (output + low_byte, BFD_RELOC_SH_IMM8, 0, operand + 1);
 	      break;
 	    case PCRELIMM_8BY4:
-	      insert (output, BFD_RELOC_SH_PCRELIMM8BY4, 1);
+	      insert (output, BFD_RELOC_SH_PCRELIMM8BY4, 1, operand);
 	      break;
 	    case PCRELIMM_8BY2:
-	      insert (output, BFD_RELOC_SH_PCRELIMM8BY2, 1);
+	      insert (output, BFD_RELOC_SH_PCRELIMM8BY2, 1, operand);
+	      break;
+	    case REPEAT:
+	      output = insert_loop_bounds (output, operand);
+	      nbuf[index] = opcode->nibbles[3];
+	      operand += 2;
 	      break;
 	    default:
 	      printf (_("failed for %d\n"), i);
@@ -1457,10 +1529,10 @@ assemble_ppi (op_end, opcode)
 	  break;
 
 	case PSH:
-	  if (immediate.X_op != O_constant)
+	  if (operand[0].immediate.X_op != O_constant)
 	    as_bad (_("dsp immediate shift value not constant"));
 	  field_b = ((opcode->nibbles[2] << 12)
-		     | (immediate.X_add_number & 127) << 4
+		     | (operand[0].immediate.X_add_number & 127) << 4
 		     | reg_n);
 	  break;
 	case PPI3:
@@ -1604,8 +1676,8 @@ md_assemble (str)
   if (opcode->arg[0] == A_BDISP12
       || opcode->arg[0] == A_BDISP8)
     {
-      parse_exp (op_end + 1);
-      build_relax (opcode);
+      parse_exp (op_end + 1, &operand[0]);
+      build_relax (opcode, &operand[0]);
     }
   else
     {
@@ -2407,7 +2479,9 @@ sh_force_relocation (fix)
 {
 
   if (fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+      || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY
+      || fix->fx_r_type == BFD_RELOC_SH_LOOP_START
+      || fix->fx_r_type == BFD_RELOC_SH_LOOP_END)
     return 1;
 
   if (! sh_relax)
@@ -2642,6 +2716,9 @@ md_apply_fix (fixP, val)
     case BFD_RELOC_SH_LABEL:
       /* Nothing to do here.  */
       break;
+
+    case BFD_RELOC_SH_LOOP_START:
+    case BFD_RELOC_SH_LOOP_END:
 
     case BFD_RELOC_VTABLE_INHERIT:
     case BFD_RELOC_VTABLE_ENTRY:
@@ -2993,6 +3070,14 @@ tc_gen_reloc (section, fixp)
   else if (r_type == BFD_RELOC_VTABLE_INHERIT
            || r_type == BFD_RELOC_VTABLE_ENTRY)
     rel->addend = fixp->fx_offset;
+  else if (r_type == BFD_RELOC_SH_LOOP_START
+           || r_type == BFD_RELOC_SH_LOOP_END)
+    rel->addend = fixp->fx_offset;
+  else if (r_type == BFD_RELOC_SH_LABEL && fixp->fx_pcrel)
+    {
+      rel->addend = 0;
+      rel->address = rel->addend = fixp->fx_offset;
+    }
   else if (fixp->fx_pcrel)
     rel->addend = fixp->fx_addnumber;
   else

@@ -2293,6 +2293,10 @@ ENUMX
   BFD_RELOC_SH_DATA
 ENUMX
   BFD_RELOC_SH_LABEL
+ENUMX
+  BFD_RELOC_SH_LOOP_START
+ENUMX
+  BFD_RELOC_SH_LOOP_END
 ENUMDOC
   Hitachi SH relocs.  Not all of these appear in object files.
 
