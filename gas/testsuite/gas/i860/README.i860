@@ -19,15 +19,13 @@ way GAS/i860 is tested against a known good assembler.
 TODO:
  - Relocation testing is basically non-existent.
  - pst.d (pixel store) is the only instruction with no testcase.
+ - Some pseudo instructions need testcases (mov, all pfmov, etc.).
  - More tests for dual instruction mode: check that dual mode has a
    proper pair (FLOP/core) of instructions, and other error conditions.
  - Most current testcases use the default AT&T/SVR4 syntax; a few simple
    tests of the Intel syntax should be added to prevent bitrot (including
    relocatable expression syntax, etc).  Test file dual03.s uses Intel
    syntax lightly (i.e., register names without '%' prefix).
- - Currently, .align in a .text section fills with 0x00000000.  This is
-   a defect and it needs to fill with nop (0xa0000000).  Write a testcase
-   for it.
 
 Contact me (Jason Eckhardt, jle@rice.edu) if you'd like to help.
 

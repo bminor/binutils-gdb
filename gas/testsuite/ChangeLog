@@ -1,3 +1,9 @@
+2003-08-16  Jason Eckhardt  <jle@rice.edu>
+
+	* gas/i860/pseudo-ops01.{s,d}: New files.
+	* gas/i860/i860.exp: Execute the new test above.
+	* gas/i860/README.i860: Remove align defect from list.
+
 2003-08-14  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/pic.d: Update regexp for destination address of
