@@ -286,7 +286,7 @@ deffilep.c ldgram.c ldlex.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 SOURCES = $(ld_new_SOURCES) $(EXTRA_ld_new_SOURCES)
 OBJECTS = $(ld_new_OBJECTS)
@@ -1522,6 +1522,9 @@ ez8001.c: $(srcdir)/emulparams/z8001.sh \
 ez8002.c: $(srcdir)/emulparams/z8002.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/z8000.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} z8002 "$(tdir_z8002)"
+ei386nto.c: $(srcdir)/emulparams/i386nto.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} i386nto "$(tdir_i386nto)"
 
 # The generated emulation files mostly have the same dependencies.
 $(EMULATION_OFILES): ../bfd/bfd.h sysdep.h config.h $(INCDIR)/bfdlink.h \

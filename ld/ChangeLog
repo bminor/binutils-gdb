@@ -1,3 +1,11 @@
+2002-05-31  Graeme Peterson  <gp@qnx.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add ei386nto.o.
+	(ei386nto.c): Add rule.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add i[3456]86-*-nto-qnx*.
+	* emulparams/i386nto.sh: New file.
+
 2002-05-29  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* NEWS: Add entry for VAX ELF support.

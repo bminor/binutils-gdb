@@ -208,6 +208,7 @@ ALL_EMULATIONS = \
 	ei386moss.o \
 	ei386msdos.o \
 	ei386nbsd.o \
+	ei386nto.o \
 	ei386nw.o \
 	ei386pe.o \
 	ei386pe_posix.o \
@@ -795,6 +796,9 @@ ei386msdos.c: $(srcdir)/emulparams/i386msdos.sh \
 ei386nbsd.c:	$(srcdir)/emulparams/i386nbsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386nbsd "$(tdir_i386nbsd)"
+ei386nto.c:	$(srcdir)/emulparams/i386nto.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} i386nto "$(tdir_i386nto)"
 ei386nw.c:	$(srcdir)/emulparams/i386nw.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/nw.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386nw "$(tdir_i386nw)"
