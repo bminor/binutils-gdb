@@ -420,7 +420,7 @@ case "${target}" in
     # Can't build gdb for win32 if not native.
     # make/glob's configure uses some AC_TRY_RUN type tests
     target_configdirs="$target_configdirs target-winsup"
-    noconfigdirs="$noconfigdirs gdb tcl tk make"
+    noconfigdirs="$noconfigdirs gdb tcl tk expect make"
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
     ;;    
