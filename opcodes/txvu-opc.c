@@ -47,7 +47,7 @@ static char *scan_symbol PARAMS ((char *));
 
 #define SKIP_BLANKS(var) while (isspace (*(var))) ++(var)
 
-/* ??? One can argue it's preferable to have the PARSE_FN support in tc-vxvu.c
+/* ??? One can argue it's preferable to have the PARSE_FN support in tc-txvu.c
    and the PRINT_FN support in txvu-dis.c.  For this project I like having
    them all in one place.  */
 
@@ -478,7 +478,7 @@ struct txvu_opcode txvu_lower_opcodes[] =
   { "ibne", { SP, LITREG, C, LISREG, C, LPCREL11 }, MLOP7 + MDEST, VLOP7 (0x29) },
   { "ilw", { LDOTDEST1, SP, LITREG, C, LIMM11, '(', LISREG, ')', LDEST1 }, MLOP7, VLOP7 (0x04) },
   { "ilwr", { LDOTDEST1, SP, LITREG, C, '(', LISREG, ')', LDEST1 }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x3fe) },
-  { "ior", { SP, LIDREG, C, LISREG, C, LITREG }, MLOP7 + MDEST + MLOP6, VLOP7 (0x40) + VLOP6 (0x34) },
+  { "ior", { SP, LIDREG, C, LISREG, C, LITREG }, MLOP7 + MDEST + MLOP6, VLOP7 (0x40) + VLOP6 (0x35) },
   { "isub", { SP, LIDREG, C, LISREG, C, LITREG }, MLOP7 + MDEST + MLOP6, VLOP7 (0x40) + VLOP6 (0x31) },
   { "isubiu", { SP, LITREG, C, LISREG, C, LUIMM15 }, MLOP7, VLOP7 (0x09) },
   { "isw", { LDOTDEST1, SP, LITREG, C, LIMM11, '(', LISREG, ')', LDEST1 }, MLOP7, VLOP7 (0x05) },
@@ -1883,7 +1883,13 @@ struct txvu_opcode gpuif_opcodes[] =
 {
   /* Some of these may take optional arguments.
      The way this is handled is to have multiple table entries, those with and
-     those without the optional arguments.  */
+     those without the optional arguments.
+     !!! The order here is important.  The code that scans this table assumes
+     that if it reaches the end of a syntax string there is nothing more to
+     parse.  This means that longer versions of instructions must appear before
+     shorter ones.  Otherwise the text at the "end" of a longer one may be
+     interpreted as junk when the parser is using a shorter version of the
+     syntax string.  */
 
   { "gpuifpacked", { SP, GPUIF_PRIM, C, GPUIF_REGS, C, GPUIF_NLOOP, C, GPUIF_EOP }, 0, 1 },
   { "gpuifpacked", { SP, GPUIF_REGS, C, GPUIF_NLOOP, C, GPUIF_EOP }, 0, 1 },

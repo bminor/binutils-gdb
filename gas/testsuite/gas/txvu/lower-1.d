@@ -89,7 +89,7 @@ Disassembly of section .text:
  13c:	ff 02 00 00 
  140:	fe 23 23 80[ 	]*nop[ 	]*ilwr.w vi03,\(vi04\)w
  144:	ff 02 00 00 
- 148:	74 21 03 80[ 	]*nop[ 	]*ior vi05,vi04,vi03
+ 148:	75 21 03 80[ 	]*nop[ 	]*ior vi05,vi04,vi03
  14c:	ff 02 00 00 
  150:	71 21 03 80[ 	]*nop[ 	]*isub vi05,vi04,vi03
  154:	ff 02 00 00 
