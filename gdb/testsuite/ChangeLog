@@ -1,5 +1,15 @@
 Fri Mar 24 06:11:05 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.base/break.exp (test_next_with_recursion): Accept any line
+	number (we are already testing that the correct source line text
+	gets printed).
+
+	* gdb.base/break.exp: Make one test if $usestubs.  I'm not sure
+	that is what is intended, but something needed to be done to get
+	sunos4 native working again.
+
+	* gdb.c++/misc.cc (main): Fix typo (#iffef -> #ifdef).
+
 	* gdb.base/a1-selftest.exp (test_with_self): Remove comment which
 	apparently went with a (very) old xfail.
 

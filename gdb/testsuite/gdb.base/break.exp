@@ -143,8 +143,10 @@ if !$usestubs then {
   }
 }
 
-gdb_test $cmd "Starting program.*Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:56.*56\[\t \]+if .argc.*" \
+if $usestubs {
+    gdb_test $cmd "Starting program.*Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:56.*56\[\t \]+if .argc.*" \
 	"run until function breakpoint"
+}
 
 #
 # run until the breakpoint at a line number
@@ -321,7 +323,8 @@ proc test_next_with_recursion {} {
 
     delete_breakpoints
 
-    gdb_test next "75\[\t \]+return \\(value\\);.*" "next over recursive call"
+    gdb_test next "\[0-9\]*\[\t \]+return \\(value\\);.*" \
+	"next over recursive call"
 
     # OK, we should be back in the same stack frame we started from.
     # Do a backtrace just to confirm.
