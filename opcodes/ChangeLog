@@ -1,4 +1,9 @@
 start-sanitize-am33
+Fri Jul 10 23:09:56 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* m10300-opc.c (mn10300_opcodes): Fix destination operand for 3 operand
+	instructions.
+
 Wed Jul  8 11:32:44 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* m10300-dis.c (disassemble): When printing RREGs and XRREGs, map
