@@ -1,3 +1,11 @@
+2000-06-06  DJ Delorie  <dj@cygnus.com>
+
+	* Makefile.in: add EXTRA_INCS
+	* configure.in: if with-newlib, point to it for includes
+	rather than using the installed includes, for target builds.
+	If cygwin, override function list only for target builds.
+	* configure: regenerate
+
 Tue May 30 16:45:25 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* floatformat.c: Add name to each floatformat field.

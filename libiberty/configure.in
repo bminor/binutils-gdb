@@ -216,6 +216,11 @@ if test -n "${with_target_subdir}"; then
 
     setobjs=yes
 
+    if test -d ${libiberty_topdir}/newlib
+    then
+      EXTRA_INCS="-I${libiberty_topdir}/newlib/libc/include"
+    fi
+
   fi
 
 else
@@ -225,6 +230,7 @@ else
 
 fi
 
+AC_SUBST(EXTRA_INCS)
 AC_SUBST(CHECK)
 
 if test -z "${setobjs}"; then
@@ -277,10 +283,15 @@ if test -z "${setobjs}"; then
     # provides from our shell variables, so that they appear to be
     # missing.
 
-    funcs="`echo $funcs | sed -e 's/random//'`"
-    LIBOBJS="$LIBOBJS random.o"
-    vars="`echo $vars | sed -e 's/sys_siglist//'`"
-    checkfuncs="`echo $checkfuncs | sed -e 's/strsignal//' -e 's/psignal//'`"
+    # DJ - only if we're *building* cygwin, not just building *with* cygwin
+
+    if test -n "${with_target_subdir}"
+    then
+      funcs="`echo $funcs | sed -e 's/random//'`"
+      LIBOBJS="$LIBOBJS random.o"
+      vars="`echo $vars | sed -e 's/sys_siglist//'`"
+      checkfuncs="`echo $checkfuncs | sed -e 's/strsignal//' -e 's/psignal//'`"
+    fi
     ;;
 
   *-*-mingw32*)
