@@ -1,3 +1,10 @@
+start-sanitize-sky
+Fri Apr  3 12:13:03 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.c (assemble_vif): Put relaxable insns in their
+	own fragment.
+
+end-sanitize-sky
 Fri Apr  3 11:58:19 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* config/tc-i386.h: Reorder operand flags and opcode modifier

@@ -545,6 +545,15 @@ assemble_vif (str)
 	     Do this by putting the mpg insn in a relaxable fragment
 	     with a symbol that marks the beginning of the aligned data.  */
 
+	  /* Ensure relaxable fragments are in their own fragment.
+	     Otherwise there can be two fixups in one fragment
+	     (e.g. a dma tag followed by a `direct' insn) and md_apply_fix3
+	     has trouble determining where to apply the fixup (because
+	     we set fr_opcode for the `direct' insn because it can move
+	     in the fragment).  */
+	  frag_wane (frag_now);
+	  frag_new (0);
+
 	  /* This dance with frag_grow is to ensure the variable part and
 	     fixed part are in the same fragment.  */
 	  frag_grow (8);
@@ -587,6 +596,15 @@ assemble_vif (str)
 	     comes just before that 128 bit boundary).
 	     Do this by putting the direct insn in a relaxable fragment.
 	     with a symbol that marks the beginning of the aligned data.  */
+
+	  /* Ensure relaxable fragments are in their own fragment.
+	     Otherwise there can be two fixups in one fragment
+	     (e.g. a dma tag followed by a `direct' insn) and md_apply_fix3
+	     has trouble determining where to apply the fixup (because
+	     we set fr_opcode for the `direct' insn because it can move
+	     in the fragment).  */
+	  frag_wane (frag_now);
+	  frag_new (0);
 
 	  /* This dance with frag_grow is to ensure the variable part and
 	     fixed part are in the same fragment.  */
@@ -2614,9 +2632,6 @@ s_endunpack (internal_p)
       return;
     }
 
-  /* Round up to next word boundary.  */
-  frag_align (2, 0, 0);
-
   /* Record in the end data symbol the current location.  */
   if (now_seg != S_GET_SEGMENT (vif_data_end))
     as_bad (".endunpack in different section");
@@ -2627,9 +2642,16 @@ s_endunpack (internal_p)
   {
     symbolS *s;
     s = expr_build_binary (O_subtract, vif_data_end, vif_data_start);
+    /* Round up to next quadword boundary.  */
+    /* FIXME: This isn't correct, the size of the input data is not the
+       size of the output data.  Someone else can fix this.  */
+    s = expr_build_binary (O_add, s, expr_build_uconstant (15));
     s = expr_build_binary (O_divide, s, expr_build_uconstant (16));
     unpackloc_sym = expr_build_binary (O_add, unpackloc_sym, s);
   }
+
+  /* Round up to next word boundary.  */
+  frag_align (2, 0, 0);
 
   set_asm_state (ASM_INIT);
 
