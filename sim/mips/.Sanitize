@@ -17,6 +17,13 @@
 
 Do-first:
 
+vr4xxx_files="vr4run.c"
+if ( echo $* | grep keep\-vr4xxx > /dev/null ) ; then
+        keep_these_too="${vr4xxx_files} ${keep_these_too}"
+else
+        lose_these_too="${vr4xxx_files} ${lose_these_too}"
+fi
+
 r5900_files="r5900.igen"
 if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
         keep_these_too="${r5900_files} ${keep_these_too}"
