@@ -1,3 +1,7 @@
+Thu May  7 12:34:50 1992  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* binutils.texi: add doc for ar command language.
+
 Wed May  6 18:05:36 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* arparse.y: make END call ar_end
