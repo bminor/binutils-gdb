@@ -2251,7 +2251,7 @@ xcoff64_generate_rtinit (abfd, init, fini, rtld)
      0x0058 + initsz  fini name */
 
   data_buffer_size = 0x0058 + initsz + finisz;
-  data_buffer_size += (data_buffer_size & 7) ? 8 - (data_buffer_size & 7) : 0;
+  data_buffer_size = (data_buffer_size + 7) &~ (bfd_size_type) 7;
   data_buffer = NULL;
   data_buffer = (bfd_byte *) bfd_zmalloc (data_buffer_size);
   if (data_buffer == NULL)
