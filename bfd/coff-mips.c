@@ -697,6 +697,7 @@ mips_bfd_reloc_type_lookup (abfd, code)
       mips_type = MIPS_R_REFHALF;
       break;
     case BFD_RELOC_32:
+    case BFD_RELOC_CTOR:
       mips_type = MIPS_R_REFWORD;
       break;
     case BFD_RELOC_MIPS_JMP:
@@ -798,7 +799,7 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 				       * sizeof (asection *))));
       if (!symndx_to_section)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
 
@@ -903,7 +904,8 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 
       /* The GPREL reloc uses an addend: the difference in the GP
 	 values.  */
-      if (int_rel.r_type != MIPS_R_GPREL)
+      if (int_rel.r_type != MIPS_R_GPREL
+	  && int_rel.r_type != MIPS_R_LITERAL)
 	addend = 0;
       else
 	{

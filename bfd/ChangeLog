@@ -1,3 +1,48 @@
+Mon Mar 21 12:28:19 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Support for link_order types which generate relocs in order to
+	support -Ur in the linker.
+	* linker.c (generic_link_add_symbol_list): Remove bitsize argument
+	from call to _bfd_generic_link_add_one_symbol.
+	(_bfd_generic_link_add_one_symbol): Remove bitsize argument.
+	Don't pass bitsize to constructor call back.  Pass BFD_RELOC_CTOR
+	instead of bitsize to add_to_set call back.
+	(_bfd_generic_final_link): Account for link_order relocs when
+	allocating space for relocations.  Handle them in link_order loop.
+	(_bfd_generic_reloc_link_order): New function.
+	(_bfd_default_link_order): If a reloc_link_order is seen here,
+	abort.
+	(_bfd_count_link_order_relocs): New function.
+	* libbfd-in.h (_bfd_generic_link_add_one_symbol): Remove bitsize
+	argument from declaration.
+	(_bfd_generic_reloc_link_order): Declare.
+	(_bfd_count_link_order_relocs): Declare.
+	* libbfd.h: Rebuilt.
+	* aoutx.h (aout_link_add_symbols): Remove bitsize argument from
+	call to _bfd_generic_link_add_one_symbol.
+	(NAME(aout,final_link)): Account for link_order relocs when
+	allocating space for relocations.  Handle them after handling all
+	input BFDs.
+	(aout_link_reloc_link_order): New function.
+	* ecoff.c (ecoff_link_add_externals): Remove bitsize argument from
+	call to _bfd_generic_link_add_one_symbol.
+	(ecoff_bfd_final_link): Account for link_order relocs when
+	allocating space for relocations.  Handle them in link_order loop.
+	(ecoff_link_write_external): Set the storage class of a defined
+	linker created symbol based on the section it is in.  Correct
+	bfd_link_hash_weak case to use .sc rather than .st.
+	(ecoff_reloc_link_order): New function.
+	* coff-alpha.c (alpha_bfd_reloc_type_lookup): Handle
+	BFD_RELOC_CTOR.
+	* coff-mips.c (mips_bfd_reloc_type_lookup): Likewise.
+
+	* sunos.c (sunos_read_dynamic_info): Remove unused locals dynsym
+	and buf.
+
+	* cisco-core.c (cisco_core_file_p): Only pass one argument to
+	bfd_zmalloc.  Free a pointer, not a union.
+	(cisco_bfd_is_local_label): Correct cast from asection to asymbol.
+
 Sun Mar 20 09:24:36 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* bfd/som.c (som_begin_writing): Fix thinko (off by one error).

@@ -625,14 +625,6 @@ _bfd_generic_link_add_symbols (abfd, info)
       ret = false;
     }
 
-  /* If we might be using the C based alloca function, make sure we
-     have dumped the symbol tables we just allocated.  */
-#ifndef __GNUC__
-#ifndef alloca
-  alloca (0);
-#endif
-#endif
-
   return ret;
 }
 
@@ -646,12 +638,20 @@ generic_link_add_object_symbols (abfd, info)
   size_t symsize;
   asymbol **symbols;
   bfd_size_type symbol_count;
+  boolean result;
 
   symsize = get_symtab_upper_bound (abfd);
-  symbols = (asymbol **) alloca (symsize);
+  symbols = (asymbol **) malloc (symsize);
+  if (symbols == NULL && symsize != 0)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return false;
+    }
   symbol_count = bfd_canonicalize_symtab (abfd, symbols);
 
-  return generic_link_add_symbol_list (abfd, info, symbol_count, symbols);
+  result = generic_link_add_symbol_list (abfd, info, symbol_count, symbols);
+  free (symbols);
+  return result;
 }
 
 /* We build a hash table of all symbols defined in an archive.  */
@@ -813,8 +813,15 @@ _bfd_generic_link_add_archive_symbols (abfd, info, checkfn)
 
       arh = archive_hash_lookup (&arsym_hash, arsym->name, true, false);
       if (arh == (struct archive_hash_entry *) NULL)
-	return false;
-      l = (struct archive_list *) alloca (sizeof (struct archive_list));
+	goto error_return;
+      l = (struct archive_list *)
+	obstack_alloc (&(&(&arsym_hash)->table)->memory,
+		       sizeof (struct archive_list));
+      if (l == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  goto error_return;
+	}
       l->indx = indx;
       for (pp = &arh->defs;
 	   *pp != (struct archive_list *) NULL;
@@ -875,7 +882,7 @@ _bfd_generic_link_add_archive_symbols (abfd, info, checkfn)
 
 	  element = bfd_get_elt_at_index (abfd, l->indx);
 	  if (element == (bfd *) NULL)
-	    return false;
+	    goto error_return;
 
 	  /* If we've already included this element, or if we've
 	     already checked it on this pass, continue.  */
@@ -893,7 +900,7 @@ _bfd_generic_link_add_archive_symbols (abfd, info, checkfn)
 	  /* CHECKFN will see if this element should be included, and
 	     go ahead and include it if appropriate.  */
 	  if (! (*checkfn) (element, info, &needed))
-	    return false;
+	    goto error_return;
 
 	  if (! needed)
 	    element->archive_pass = pass;
@@ -913,6 +920,10 @@ _bfd_generic_link_add_archive_symbols (abfd, info, checkfn)
   archive_hash_table_free (&arsym_hash);
 
   return true;
+
+ error_return:
+  archive_hash_table_free (&arsym_hash);
+  return false;
 }
 
 /* See if we should include an archive element.  */
@@ -924,14 +935,20 @@ generic_link_check_archive_element (abfd, info, pneeded)
      boolean *pneeded;
 {
   size_t symsize;
-  asymbol **symbols;
+  asymbol **symbols = NULL;
   bfd_size_type symbol_count;
   asymbol **pp, **ppend;
 
   *pneeded = false;
 
   symsize = get_symtab_upper_bound (abfd);
-  symbols = (asymbol **) alloca (symsize);
+  symbols = (asymbol **) malloc (symsize);
+  if (symbols == NULL && symsize != 0)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
+
   symbol_count = bfd_canonicalize_symtab (abfd, symbols);
 
   pp = symbols;
@@ -967,12 +984,12 @@ generic_link_check_archive_element (abfd, info, pneeded)
 	  /* This object file defines this symbol, so pull it in.  */
 	  if (! (*info->callbacks->add_archive_element) (info, abfd,
 							 bfd_asymbol_name (p)))
-	    return false;
+	    goto error_return;
 	  if (! generic_link_add_symbol_list (abfd, info, symbol_count,
 					      symbols))
-	    return false;
+	    goto error_return;
 	  *pneeded = true;
-	  return true;
+	  goto successful_return;
 	}
 
       /* P is a common symbol.  */
@@ -989,9 +1006,9 @@ generic_link_check_archive_element (abfd, info, pneeded)
 		 file.  This is for the -u option in the linker.  */
 	      if (! (*info->callbacks->add_archive_element)
 		  (info, abfd, bfd_asymbol_name (p)))
-		return false;
+		goto error_return;
 	      *pneeded = true;
-	      return true;
+	      goto successful_return;
 	    }
 
 	  /* Turn the symbol into a common symbol but do not link in
@@ -1022,7 +1039,16 @@ generic_link_check_archive_element (abfd, info, pneeded)
     }
 
   /* This archive element is not needed.  */
+
+ successful_return:
+  if (symbols != NULL)
+    free (symbols);
   return true;
+
+ error_return:
+  if (symbols != NULL)
+    free (symbols);
+  return false;
 }
 
 /* Add the symbol from an object file to the global hash table.  */
@@ -1076,12 +1102,10 @@ generic_link_add_symbol_list (abfd, info, symbol_count, symbols)
 	     compatibility.  As backends are converted they can
 	     arrange to pass the right value (the right value is the
 	     size of a function pointer if gcc uses collect2 for the
-	     object file format, zero if it does not).
-	     FIXME: We pass the bitsize as 32, which is just plain
-	     wrong, but actually doesn't matter very much.  */
+	     object file format, zero if it does not).  */
 	  if (! (_bfd_generic_link_add_one_symbol
 		 (info, abfd, name, p->flags, bfd_get_section (p),
-		  p->value, string, false, 0, 32,
+		  p->value, string, false, 0,
 		  (struct bfd_link_hash_entry **) &h)))
 	    return false;
 
@@ -1186,13 +1210,12 @@ static const enum link_action link_action[8][7] =
      allocated memory if they need to be saved.
    CONSTRUCTOR is true if we should automatically collect gcc
      constructor or destructor names.
-   BITSIZE is the number of bits in constructor or set entries.
    HASHP, if not NULL, is a place to store the created hash table
      entry.  */
 
 boolean
 _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
-				  string, copy, constructor, bitsize, hashp)
+				  string, copy, constructor, hashp)
      struct bfd_link_info *info;
      bfd *abfd;
      const char *name;
@@ -1202,7 +1225,6 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
      const char *string;
      boolean copy;
      boolean constructor;
-     unsigned int bitsize;
      struct bfd_link_hash_entry **hashp;
 {
   enum link_row row;
@@ -1314,7 +1336,7 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 		    {
 		      if (! ((*info->callbacks->constructor)
 			     (info,
-			      c == 'I' ? true : false, bitsize,
+			      c == 'I' ? true : false,
 			      name, abfd, section, value)))
 			return false;
 		    }
@@ -1410,8 +1432,8 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	  }
 	  break;
 	case SET:
-	  if (! (*info->callbacks->add_to_set) (info, h, bitsize, abfd,
-						section, value))
+	  if (! (*info->callbacks->add_to_set) (info, h, BFD_RELOC_CTOR,
+						abfd, section, value))
 	    return false;
 	  break;
 	case WARN:
@@ -1504,12 +1526,14 @@ _bfd_generic_final_link (abfd, info)
 	   o != (asection *) NULL;
 	   o = o->next)
 	{
-	  o->reloc_count = 0;
 	  for (p = o->link_order_head;
 	       p != (struct bfd_link_order *) NULL;
 	       p = p->next)
 	    {
-	      if (p->type == bfd_indirect_link_order)
+	      if (p->type == bfd_section_reloc_link_order
+		  || p->type == bfd_symbol_reloc_link_order)
+		++o->reloc_count;
+	      else if (p->type == bfd_indirect_link_order)
 		{
 		  asection *input_section;
 		  bfd *input_bfd;
@@ -1522,7 +1546,7 @@ _bfd_generic_final_link (abfd, info)
 		  relsize = bfd_get_reloc_upper_bound (input_bfd,
 						       input_section);
 		  relocs = (arelent **) malloc ((size_t) relsize);
-		  if (!relocs)
+		  if (!relocs && relsize != 0)
 		    {
 		      bfd_set_error (bfd_error_no_memory);
 		      return false;
@@ -1563,8 +1587,18 @@ _bfd_generic_final_link (abfd, info)
 	   p != (struct bfd_link_order *) NULL;
 	   p = p->next)
 	{
-	  if (! _bfd_default_link_order (abfd, info, o, p))
-	    return false;
+	  switch (p->type)
+	    {
+	    case bfd_section_reloc_link_order:
+	    case bfd_symbol_reloc_link_order:
+	      if (! _bfd_generic_reloc_link_order (abfd, info, o, p))
+		return false;
+	      break;
+	    default:
+	      if (! _bfd_default_link_order (abfd, info, o, p))
+		return false;
+	      break;
+	    }
 	}
     }
 
@@ -1893,6 +1927,116 @@ _bfd_generic_link_write_global_symbol (h, data)
 
   return true;
 }
+
+/* Create a relocation.  */
+
+boolean
+_bfd_generic_reloc_link_order (abfd, info, sec, link_order)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     asection *sec;
+     struct bfd_link_order *link_order;
+{
+  arelent *r;
+
+  if (! info->relocateable)
+    abort ();
+  if (sec->orelocation == (arelent **) NULL)
+    abort ();
+
+  r = (arelent *) bfd_alloc (abfd, sizeof (arelent));
+  if (r == (arelent *) NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return false;
+    }
+      
+  r->address = link_order->offset;
+  r->howto = bfd_reloc_type_lookup (abfd, link_order->u.reloc.p->reloc);
+  if (r->howto == (const reloc_howto_type *) NULL)
+    {
+      bfd_set_error (bfd_error_bad_value);
+      return false;
+    }
+
+  /* Get the symbol to use for the relocation.  */
+  if (link_order->type == bfd_section_reloc_link_order)
+    r->sym_ptr_ptr = link_order->u.reloc.p->u.section->symbol_ptr_ptr;
+  else
+    {
+      struct generic_link_hash_entry *h;
+
+      h = _bfd_generic_link_hash_lookup (_bfd_generic_hash_table (info),
+					 link_order->u.reloc.p->u.name,
+					 false, false, true);
+      if (h == (struct generic_link_hash_entry *) NULL
+	  || ! h->root.written)
+	{
+	  if (! ((*info->callbacks->unattached_reloc)
+		 (info, link_order->u.reloc.p->u.name,
+		  (bfd *) NULL, (asection *) NULL, (bfd_vma) 0)))
+	    return false;
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+      r->sym_ptr_ptr = &h->sym;
+    }
+
+  /* If this is an inplace reloc, write the addend to the object file.
+     Otherwise, store it in the reloc addend.  */
+  if (! r->howto->partial_inplace)
+    r->addend = link_order->u.reloc.p->addend;
+  else
+    {
+      bfd_size_type size;
+      bfd_reloc_status_type rstat;
+      bfd_byte *buf;
+      boolean ok;
+
+      size = bfd_get_reloc_size (r->howto);
+      buf = (bfd_byte *) bfd_zmalloc (size);
+      if (buf == (bfd_byte *) NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
+      rstat = _bfd_relocate_contents (r->howto, abfd,
+				      link_order->u.reloc.p->addend, buf);
+      switch (rstat)
+	{
+	case bfd_reloc_ok:
+	  break;
+	default:
+	case bfd_reloc_outofrange:
+	  abort ();
+	case bfd_reloc_overflow:
+	  if (! ((*info->callbacks->reloc_overflow)
+		 (info,
+		  (link_order->type == bfd_section_reloc_link_order
+		   ? bfd_section_name (abfd, link_order->u.reloc.p->u.section)
+		   : link_order->u.reloc.p->u.name),
+		  r->howto->name, link_order->u.reloc.p->addend,
+		  (bfd *) NULL, (asection *) NULL, (bfd_vma) 0)))
+	    {
+	      free (buf);
+	      return false;
+	    }
+	  break;
+	}
+      ok = bfd_set_section_contents (abfd, sec, (PTR) buf,
+				     (file_ptr) link_order->offset, size);
+      free (buf);
+      if (! ok)
+	return false;
+
+      r->addend = 0;
+    }
+
+  sec->orelocation[sec->reloc_count] = r;
+  ++sec->reloc_count;
+
+  return true;
+}
 
 /* Allocate a new link_order for a section.  */
 
@@ -1925,7 +2069,9 @@ bfd_new_link_order (abfd, section)
   return new;
 }
 
-/* Default link order processing routine.  */
+/* Default link order processing routine.  Note that we can not handle
+   the reloc_link_order types here, since they depend upon the details
+   of how the particular backends generates relocs.  */
 
 boolean
 _bfd_default_link_order (abfd, info, sec, link_order)
@@ -1937,6 +2083,8 @@ _bfd_default_link_order (abfd, info, sec, link_order)
   switch (link_order->type)
     {
     case bfd_undefined_link_order:
+    case bfd_section_reloc_link_order:
+    case bfd_symbol_reloc_link_order:
     default:
       abort ();
     case bfd_indirect_link_order:
@@ -1960,19 +2108,28 @@ default_fill_link_order (abfd, info, sec, link_order)
   char *space;
   size_t i;
   int fill;
+  boolean result;
 
   BFD_ASSERT ((sec->flags & SEC_HAS_CONTENTS) != 0);
 
   size = (size_t) link_order->size;
-  space = (char *) alloca (size);
+  space = (char *) malloc (size);
+  if (space == NULL && size != 0)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return false;
+    }
+
   fill = link_order->u.fill.value;
   for (i = 0; i < size; i += 2)
     space[i] = fill >> 8;
   for (i = 1; i < size; i += 2)
     space[i] = fill;
-  return bfd_set_section_contents (abfd, sec, space,
-				   (file_ptr) link_order->offset,
-				   link_order->size);
+  result = bfd_set_section_contents (abfd, sec, space,
+				     (file_ptr) link_order->offset,
+				     link_order->size);
+  free (space);
+  return result;
 }
 
 /* Default routine to handle a bfd_indirect_link_order.  */
@@ -1986,7 +2143,8 @@ default_indirect_link_order (output_bfd, info, output_section, link_order)
 {
   asection *input_section;
   bfd *input_bfd;
-  bfd_byte *contents;
+  bfd_byte *contents = NULL;
+  bfd_byte *new_contents;
 
   BFD_ASSERT ((output_section->flags & SEC_HAS_CONTENTS) != 0);
 
@@ -2032,17 +2190,51 @@ default_indirect_link_order (output_bfd, info, output_section, link_order)
     }
 
   /* Get and relocate the section contents.  */
-  contents = (bfd_byte *) alloca (bfd_section_size (input_bfd, input_section));
-  contents = (bfd_get_relocated_section_contents
-	      (output_bfd, info, link_order, contents, info->relocateable,
-	       bfd_get_outsymbols (input_bfd)));
-  if (!contents)
-    return false;
+  contents = (bfd_byte *) malloc (bfd_section_size (input_bfd, input_section));
+  if (contents == NULL && bfd_section_size (input_bfd, input_section) != 0)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
+  new_contents = (bfd_get_relocated_section_contents
+		  (output_bfd, info, link_order, contents, info->relocateable,
+		   bfd_get_outsymbols (input_bfd)));
+  if (!new_contents)
+    goto error_return;
 
   /* Output the section contents.  */
-  if (! bfd_set_section_contents (output_bfd, output_section, (PTR) contents,
+  if (! bfd_set_section_contents (output_bfd, output_section,
+				  (PTR) new_contents,
 				  link_order->offset, link_order->size))
-    return false;
+    goto error_return;
 
+  if (contents != NULL)
+    free (contents);
   return true;
+
+ error_return:
+  if (contents != NULL)
+    free (contents);
+  return false;
+}
+
+/* A little routine to count the number of relocs in a link_order
+   list.  */
+
+unsigned int
+_bfd_count_link_order_relocs (link_order)
+     struct bfd_link_order *link_order;
+{
+  register unsigned int c;
+  register struct bfd_link_order *l;
+
+  c = 0;
+  for (l = link_order; l != (struct bfd_link_order *) NULL; l = l->next)
+    {
+      if (l->type == bfd_section_reloc_link_order
+	  || l->type == bfd_symbol_reloc_link_order)
+	++c;
+    }
+
+  return c;
 }

@@ -153,6 +153,10 @@ boolean	bfd_generic_set_section_contents PARAMS ((bfd *abfd, sec_ptr section,
 						  PTR location, file_ptr offset,
 						  bfd_size_type count));
 
+/* Generic routine to determine of the given symbol is a local
+   label.  */
+extern boolean bfd_generic_is_local_label PARAMS ((bfd *, asymbol *));
+
 /* A routine to create entries for a bfd_link_hash_table.  */
 extern struct bfd_hash_entry *_bfd_link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *entry,
@@ -186,17 +190,25 @@ typedef struct bfd_link_hash_entry _bfd_link_hash_entry;
 extern boolean _bfd_generic_link_add_one_symbol
   PARAMS ((struct bfd_link_info *, bfd *, const char *name, flagword,
 	   asection *, bfd_vma, const char *, boolean copy,
-	   boolean constructor, unsigned int bitsize,
-	   struct bfd_link_hash_entry **));
+	   boolean constructor, struct bfd_link_hash_entry **));
 
 /* Generic link routine.  */
 extern boolean _bfd_generic_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
 
+/* Generic reloc_link_order processing routine.  */
+extern boolean _bfd_generic_reloc_link_order
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   struct bfd_link_order *));
+
 /* Default link order processing routine.  */
 extern boolean _bfd_default_link_order
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   struct bfd_link_order *));
+
+/* Count the number of reloc entries in a link order list.  */
+extern unsigned int _bfd_count_link_order_relocs
+  PARAMS ((struct bfd_link_order *));
 
 /* Final link relocation routine.  */
 extern bfd_reloc_status_type _bfd_final_link_relocate
