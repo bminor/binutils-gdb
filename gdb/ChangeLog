@@ -1,3 +1,10 @@
+2000-03-21  Jim Blandy  <jimb@redhat.com>
+
+	* gdbarch.sh: Emit a definition and declaration for gdbarch_free,
+ 	a companion to gdbarch_alloc, which allows a gdbarch init function
+ 	to free partially-built gdbarch structures.
+	* gdbarch.c, gdbarch.h: Regenerated.
+
 2000-03-20  Kevin Buettner  <kevinb@redhat.com>
 
 	* configure.host, configure.tgt (ia64-*-linux*): New entry.
