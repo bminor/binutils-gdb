@@ -47,6 +47,7 @@ bag.c
 bag.h
 communicate.c
 communicate.h
+config.in
 configure
 configure.in
 dbg_conf.h
@@ -58,7 +59,6 @@ gdbhost.h
 kid.c
 main.c
 parent.c
-run.c
 wrapper.c
 
 Things-to-lose:
