@@ -1,5 +1,7 @@
 Wed Mar 13 12:40:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* emultempl/lnk960.em (machine_table): Add jx and hx.
+
 	* genscripts.sh: Don't use ${9:-xx}, since Ultrix /bin/sh doesn't
 	support it.
 
