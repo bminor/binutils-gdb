@@ -37,8 +37,8 @@ go32.mt
 hp300.mh
 hp300bsd.mt
 hp300hpux.mt
-hppaosf.mh
-hppaosf.mt
+hppaelf.mh
+hppaelf.mt
 i386-aout.mt
 i386-bsd.mt
 i386-coff.mt
