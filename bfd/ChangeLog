@@ -1,3 +1,10 @@
+Wed Nov 17 13:56:10 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* i386lynx.c (swap_std_reloc_in, swap_ext_reloc_in): Ignore
+	garbage bits appearing in the upper end of symbolnums.
+
+	* config/sparc-lynx.mt (TDEFINES): Add -DFPRINTF_ALREADY_DECLARED.
+
 Tue Nov 16 17:03:41 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* lynx-core.c (lynx_core_file_p):  Change bfd_zalloc to bfd_alloc.
