@@ -1,3 +1,8 @@
+2000-09-06  Fred Fish  <fnf@cygnus.com>
+
+	* infttrace.c (update_thread_state_after_attach): Pass address
+	of ttstate_t object, not the object itself.
+
 2000-09-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* lin-lwp.c (stop_wait_callback): Remove bogus assertions in the

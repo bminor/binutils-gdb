@@ -4711,7 +4711,7 @@ update_thread_state_after_attach (int pid, attach_continue_t kind_of_go)
       if (NULL == p)		/* ?We just added it! */
 	error ("Internal error adding a thread on attach.");
 
-      copy_ttstate_t (&p->last_stop_state, thread_state);
+      copy_ttstate_t (&p->last_stop_state, &thread_state);
       p->have_state = 1;
 
       if (DO_ATTACH_CONTINUE == kind_of_go)
