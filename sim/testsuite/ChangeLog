@@ -1,3 +1,12 @@
+2004-04-29  Richard Sandiford  <rsandifo@redhat.com>
+
+	* sim/mips/hilo-hazard-[123].s: New files.
+	* sim/mips/basic.exp (run_hilo_test): New procedure.
+	(models): Only list models that are included in the configuration.
+	(submodels): New variable, set to submodels of the above.
+	(mips64vr-*-elf, mips64vrel-*-elf): New configuration stanza.
+	Run hilo-hazard-[123].s.
+
 2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
 
 	* sim/frv/allinsn.exp (all_machs): Add fr405 and fr450.
