@@ -339,10 +339,15 @@ case "${targ}" in
     targ_defvec=bfd_elf32_fr30_vec
     ;;
 
-  frv-*-elf | frv-*-*linux*)
+  frv-*-elf)
     targ_defvec=bfd_elf32_frv_vec
+    targ_selvecs=bfd_elf32_frvfdpic_vec
     ;;
 
+  frv-*-*linux*)
+    targ_defvec=bfd_elf32_frvfdpic_vec
+    targ_selvecs=bfd_elf32_frv_vec
+    ;;
 
   h8300*-*-elf)
     targ_defvec=bfd_elf32_h8300_vec
