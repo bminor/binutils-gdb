@@ -4032,7 +4032,17 @@ md_apply_fix_2 (fixP, val)
     upper_limit = upper_limit * 2 + 1;
 
   if ((unsigned) val > upper_limit && (val > 0 || val < lower_limit))
-    as_bad ("value out of range");
+    as_bad_where (fixP->fx_file, fixP->fx_line, "value out of range");
+
+  /* A one byte PC-relative reloc means a short branch.  We can't use
+     a short branch with a value of 0 or -1, because those indicate
+     different opcodes (branches with longer offsets).  */
+  if (fixP->fx_pcrel
+      && fixP->fx_size == 1
+      && (fixP->fx_addsy == NULL
+	  || S_IS_DEFINED (fixP->fx_addsy))
+      && (val == 0 || val == -1))
+    as_bad_where (fixP->fx_file, fixP->fx_line, "invalid byte branch offset");
 }
 
 #ifdef BFD_ASSEMBLER
