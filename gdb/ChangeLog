@@ -1,5 +1,8 @@
 2002-02-23  Andrew Cagney  <ac131313@redhat.com>
 
+	* Makefile.in (linux-thread.o): Delete target.
+	* linux-thread.c: Delete file.
+
 	* config/djgpp/fnchange.lst: Rename bfd/elf32-sh64.c.  Tweak other
 	renamed SH files to be consistent.
 

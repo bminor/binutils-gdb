@@ -1852,9 +1852,6 @@ sol-thread.o: sol-thread.c $(defs_h) $(gdbthread_h) $(target_h) $(inferior_h) \
 
 linux-proc.o: linux-proc.c $(defs_h)
 
-linux-thread.o: linux-thread.c $(breakpoint_h) $(gdbcmd_h) gdb_wait.h \
-	$(gdbthread_h) $(gdbcore_h) $(inferior_h) $(target_h) $(defs_h)
-
 thread-db.o: thread-db.c $(defs_h) gdb_assert.h gdb_proc_service.h \
 	gdb_thread_db.h $(bfd_h) $(gdbthread_h) $(inferior_h) $(symfile_h) \
 	$(objfiles_h) $(target_h) $(regcache_h)
