@@ -47,6 +47,9 @@ HLDFLAGS=
 # If we have shared libraries, try to set rpath reasonably.
 if test "${shared}" = "true"; then
   case "${host}" in
+  *-*-hpux*)
+    HLDFLAGS='-Wl,+s,+b,$(libdir)'
+    ;;
   *-*-irix5*)
     HLDFLAGS='-Wl,-rpath,$(libdir)'
     ;;
