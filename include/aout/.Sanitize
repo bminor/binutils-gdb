@@ -30,6 +30,7 @@ ChangeLog
 adobe.h
 aout64.h
 ar.h
+dynix3.h
 encap.h
 host.h
 hp.h
