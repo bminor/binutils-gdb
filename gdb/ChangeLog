@@ -1,3 +1,10 @@
+2000-03-29  J.T. Conklin  <jtc@redback.com> 
+ 
+	* i386nbsd-nat.c (fetch_core_registers): Make static. 
+ 
+	* m68knbsd-nat.c (fetch_core_registers): Make static. 
+	(m68knbsd_core_fns, _initialize_m68knbsd_nat): Added. 
+ 
 Wed Mar 29 13:40:40 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO: Update GDB 5 status.

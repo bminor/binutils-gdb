@@ -164,7 +164,7 @@ struct md_core
   struct env387 freg;
 };
 
-void
+static void
 fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
      char *core_reg_sect;
      unsigned core_reg_size;

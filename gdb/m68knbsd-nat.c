@@ -70,7 +70,7 @@ struct md_core
   struct fpreg freg;
 };
 
-void
+static void
 fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
      char *core_reg_sect;
      unsigned core_reg_size;
@@ -85,4 +85,22 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
   /* Floating point registers */
   memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)],
 	  &core_reg->freg, sizeof (struct fpreg));
+}
+
+/* Register that we are able to handle m68knbsd core file formats.
+   FIXME: is this really bfd_target_unknown_flavour? */
+   
+static struct core_fns m68knbsd_core_fns =
+{  
+  bfd_target_unknown_flavour,           /* core_flavour */
+  default_check_format,                 /* check_format */
+  default_core_sniffer,                 /* core_sniffer */
+  fetch_core_registers,                 /* core_read_registers */
+  NULL                                  /* next */
+}; 
+   
+void
+_initialize_m68knbsd_nat ()
+{
+  add_core_fns (&m68knbsd_core_fns);
 }
