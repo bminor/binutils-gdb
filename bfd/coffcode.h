@@ -4022,7 +4022,7 @@ coff_write_object_contents (abfd)
     if (buff == NULL)
       return false;
 
-    coff_swap_filehdr_out (abfd, (PTR) & internal_f, (PTR) buff);
+    bfd_coff_swap_filehdr_out (abfd, (PTR) & internal_f, (PTR) buff);
     amount = bfd_write ((PTR) buff, 1, bfd_coff_filhsz (abfd), abfd);
 
     free (buff);
