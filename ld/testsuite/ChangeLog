@@ -1,3 +1,20 @@
+2002-02-01  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-mmix/bpo-1.d, ld-mmix/bpo-1.s, ld-mmix/bpo-1m.d,
+	ld-mmix/bpo-15.d, ld-mmix/bpo-4.s, ld-mmix/bpo-6.d,
+	ld-mmix/bpo-6.s, ld-mmix/bpo-2.d, ld-mmix/bpo-6m.d,
+	ld-mmix/bpo-12m.d, ld-mmix/bpo-2m.d, ld-mmix/bpo-2.s,
+	ld-mmix/bpo-5.s, ld-mmix/bpo-3.d, ld-mmix/start3.s,
+	ld-mmix/bpo-3m.d, ld-mmix/bpo-9m.d, ld-mmix/bpo-4.d,
+	ld-mmix/bpo-3.s, ld-mmix/bpo-4m.d, ld-mmix/bpo-7.d,
+	ld-mmix/bpo-5.d, ld-mmix/bpo-16.d, ld-mmix/bpo-5m.d,
+	ld-mmix/bpo-7m.d, ld-mmix/bpo-9.d, ld-mmix/bpo-8.d,
+	ld-mmix/start4.s, ld-mmix/bpo-8m.d, ld-mmix/bpo-13m.d,
+	ld-mmix/bpo-15m.d, ld-mmix/bpo-10.d, ld-mmix/bpo-11.d,
+	ld-mmix/bpo-14m.d, ld-mmix/bpo-13.d, ld-mmix/bpo-7.s,
+	ld-mmix/bpo-12.d, ld-mmix/bpo-16m.d, ld-mmix/bpo-14.d,
+	ld-mmix/bpo-8.s, ld-mmix/bpo-17.d, ld-mmix/bpo-17m.d: New tests.
+
 2002-01-31  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/weakref1.d, ld-cris/libdso-1.d, ld-cris/gotrel2.s,
