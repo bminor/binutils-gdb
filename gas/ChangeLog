@@ -1,3 +1,8 @@
+Thu Oct 10 14:31:30 2002  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* config/tc-sh.c (assemble_ppi): Initialize reg_x / reg_y / reg_n
+	inside loop.
+
 2002-10-09  Richard Shann <richard.shann@superh.com>
 	    Stephen Clarke <stephen.clarke@superh.com>
 
