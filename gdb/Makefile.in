@@ -809,7 +809,7 @@ uninstall: force $(CONFIG_UNINSTALL)
 
 # We do this by grepping through sources.  If that turns out to be too slow,
 # maybe we could just require every .o file to have an initialization routine
-# of a given name (remote-udi.o -> _initialize_remote_udi, etc.).
+# of a given name (top.o -> _initialize_top, etc.).
 #
 # Formatting conventions:  The name of the _initialize_* routines must start
 # in column zero, and must not be inside #if.
@@ -1230,8 +1230,8 @@ udi2go32.o: $(srcdir)/29k-share/udi/udi2go32.c $(udiheaders)
 udr.o: $(srcdir)/29k-share/udi/udr.c $(udiheaders) 
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/29k-share/udi/udr.c
 
-a29k-tdep.o: a29k-tdep.c $(gdbcmd_h) $(gdbcore_h) $(inferior_h) $(defs_h) \
-	$(regcache_h)
+# OBSOLETE a29k-tdep.o: a29k-tdep.c $(gdbcmd_h) $(gdbcore_h) $(inferior_h) $(defs_h) \
+# OBSOLETE 	$(regcache_h)
 
 a68v-nat.o: a68v-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(regcache_h)
@@ -1861,8 +1861,8 @@ lin-lwp.o: lin-lwp.c $(defs_h) gdb_assert.h gdb_wait.h $(gdbthread_h) \
 proc-service.o: proc-service.c $(defs_h) $(inferior_h) gdb_proc_service.h \
 	$(symtab_h) $(target_h) gregset.h
 
-remote-adapt.o: remote-adapt.c $(defs_h) $(gdbcore_h) \
-	$(inferior_h) $(target_h) $(terminal_h) $(gdb_string_h) $(regcache_h)
+# OBSOLETE remote-adapt.o: remote-adapt.c $(defs_h) $(gdbcore_h) \
+# OBSOLETE	$(inferior_h) $(target_h) $(terminal_h) $(gdb_string_h) $(regcache_h)
 
 remote-array.o: remote-array.c $(defs_h) $(gdbcore_h) $(target_h) \
       $(gdb_string_h) $(command_h) $(serial_h) $(monitor_h) $(remote_utils_h) \
@@ -1891,9 +1891,9 @@ remote-bug.o: remote-bug.c $(defs_h) $(gdbcore_h) $(serial_h) \
 remote-e7000.o: remote-e7000.c $(defs_h) $(gdbcore_h) $(target_h) \
 	$(serial_h) $(gdb_string_h) $(regcache_h)
 
-remote-eb.o: remote-eb.c $(srcdir)/config/a29k/tm-a29k.h \
-	$(defs_h) $(gdbcore_h) $(inferior_h) $(symfile_h) $(target_h) \
-	$(terminal_h) $(gdb_string_h) $(regcache_h)
+# OBSOLETE remote-eb.o: remote-eb.c $(srcdir)/config/a29k/tm-a29k.h \
+# OBSOLETE 	$(defs_h) $(gdbcore_h) $(inferior_h) $(symfile_h) $(target_h) \
+# OBSOLETE 	$(terminal_h) $(gdb_string_h) $(regcache_h)
 
 remote-es.o: remote-es.c $(bfd_h) $(command_h) $(defs_h) \
 	$(inferior_h) $(remote_utils_h) $(terminal_h) $(gdb_string_h) \
@@ -1909,8 +1909,8 @@ remote-mips.o: remote-mips.c $(defs_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(inferior_h) $(serial_h) $(symfile_h) $(target_h) \
 	$(regcache_h)
 
-remote-mm.o: remote-mm.c $(bfd_h) $(defs_h) $(inferior_h) \
-	minimon.h $(target_h) $(terminal_h) $(gdb_string_h) $(regcache_h)
+# OBSOLETE remote-mm.o: remote-mm.c $(bfd_h) $(defs_h) $(inferior_h) \
+# OBSOLETE	minimon.h $(target_h) $(terminal_h) $(gdb_string_h) $(regcache_h)
 
 remote-nindy.o: remote-nindy.c $(floatformat_h) $(command_h) \
 	$(defs_h) $(gdbcore_h) $(inferior_h) \
@@ -1932,9 +1932,9 @@ remote-sim.o: remote-sim.c $(defs_h) $(gdbcore_h) \
 remote-st.o: remote-st.c $(defs_h) $(gdbcore_h) $(serial_h) \
 	$(target_h) $(gdb_string_h) $(regcache_h)
 
-remote-udi.o: remote-udi.c $(bfd_h) $(defs_h) $(gdbcmd_h) \
-	$(inferior_h) $(target_h) $(terminal_h) $(udiheaders) $(gdb_string_h) \
-	$(regcache_h)
+# OBSOLETE remote-udi.o: remote-udi.c $(bfd_h) $(defs_h) $(gdbcmd_h) \
+# OBSOLETE 	$(inferior_h) $(target_h) $(terminal_h) $(udiheaders) $(gdb_string_h) \
+# OBSOLETE 	$(regcache_h)
 
 remote-vx.o: remote-vx.c $(complaints_h) $(defs_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(inferior_h) $(target_h) vx-share/dbgRpcLib.h \

@@ -1,5 +1,5 @@
-# Target: AMD 29000
-TDEPFILES= a29k-tdep.o remote-eb.o remote-adapt.o
-TM_FILE= tm-a29k.h
-
-MT_CFLAGS = -DNO_HIF_SUPPORT
+# OBSOLETE # Target: AMD 29000
+# OBSOLETE TDEPFILES= a29k-tdep.o remote-eb.o remote-adapt.o
+# OBSOLETE TM_FILE= tm-a29k.h
+# OBSOLETE 
+# OBSOLETE MT_CFLAGS = -DNO_HIF_SUPPORT

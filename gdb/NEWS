@@ -11,6 +11,20 @@ x86 OpenBSD					i[3456]86-*-openbsd*
 
 Sanyo XStormy16					xstormy16-elf
 
+* OBSOLETE configurations and files
+
+Configurations that have been declared obsolete in this release have
+been commented out.  Unless there is activity to revive these
+configurations, the next release of GDB will have their sources
+permanently REMOVED.
+
+AMD 29k family via UDI				a29k-amd-udi, udi29k
+A29K VxWorks					a29k-*-vxworks
+AMD 29000 embedded, using EBMON			a29k-none-none
+AMD 29000 embedded with COFF			a29k-none-coff
+AMD 29000 embedded with a.out			a29k-none-aout
+
+
 * REMOVED configurations and files
 
 TI TMS320C80					tic80-*-*
