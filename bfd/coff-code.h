@@ -40,6 +40,12 @@ You should have received a copy of the GNU General Public License along with
 
 #define sp(x) bfd_h_put_x(abfd, x, &x)
 
+#ifndef I960
+#define GDB_EXPORT static
+#else
+#define GDB_EXPORT  /* nothing */
+#endif
+
 PROTO(static void,force_indices_file_symbol_relative,(bfd *abfd,
 						      struct internal_syment *symtab));
 
@@ -70,9 +76,9 @@ DEFUN(set_index,(symbol, idx),
 */
 
 
-
-static void
-DEFUN(swap_reloc_in,(abfd, reloc_src, reloc_dst),
+GDB_EXPORT
+void
+DEFUN(bfd_swap_reloc_in,(abfd, reloc_src, reloc_dst),
       bfd            *abfd AND
       RELOC *reloc_src AND
       struct internal_reloc *reloc_dst)
@@ -85,8 +91,9 @@ DEFUN(swap_reloc_in,(abfd, reloc_src, reloc_dst),
 #endif
 }
 
-static void
-DEFUN(swap_reloc_out,(abfd, reloc_src, reloc_dst),
+GDB_EXPORT
+ void
+DEFUN(bfd_swap_reloc_out,(abfd, reloc_src, reloc_dst),
       bfd            *abfd AND
       struct internal_reloc *reloc_src AND
       struct external_reloc *reloc_dst)
@@ -100,8 +107,8 @@ DEFUN(swap_reloc_out,(abfd, reloc_src, reloc_dst),
 
 }
 
-static void 
-DEFUN(swap_filehdr_in,(abfd, filehdr_src, filehdr_dst),
+GDB_EXPORT  void 
+DEFUN(bfd_swap_filehdr_in,(abfd, filehdr_src, filehdr_dst),
       bfd            *abfd AND
       FILHDR         *filehdr_src AND
       struct internal_filehdr *filehdr_dst)
@@ -115,8 +122,8 @@ DEFUN(swap_filehdr_in,(abfd, filehdr_src, filehdr_dst),
   filehdr_dst->f_flags = bfd_h_get_x(abfd,filehdr_src-> f_flags);
 }
 
-static void 
-DEFUN(swap_filehdr_out,(abfd, filehdr_in, filehdr_out),
+GDB_EXPORT  void 
+DEFUN(bfd_swap_filehdr_out,(abfd, filehdr_in, filehdr_out),
       bfd            *abfd AND
       struct internal_filehdr *filehdr_in AND
       FILHDR         *filehdr_out)
@@ -131,7 +138,8 @@ DEFUN(swap_filehdr_out,(abfd, filehdr_in, filehdr_out),
 }
 
 
-static void 
+GDB_EXPORT 
+void 
 DEFUN(bfd_coff_swap_sym_in,(abfd, ext, in),
       bfd            *abfd AND
       SYMENT *ext AND
@@ -151,7 +159,7 @@ DEFUN(bfd_coff_swap_sym_in,(abfd, ext, in),
   in->n_numaux = bfd_h_get_x(abfd, ext->e_numaux);
 }
 
-static void 
+GDB_EXPORT void 
 DEFUN(bfd_coff_swap_sym_out,(abfd,in,  ext),
       bfd            *abfd AND
       struct internal_syment      *in AND
@@ -171,7 +179,7 @@ DEFUN(bfd_coff_swap_sym_out,(abfd,in,  ext),
   bfd_h_put_x(abfd,  in->n_numaux , ext->e_numaux);
 }
 
-static void
+GDB_EXPORT void
 DEFUN(bfd_coff_swap_aux_in,(abfd, ext, type, class, in),
       bfd            *abfd AND
       AUXENT    *ext AND
@@ -222,7 +230,7 @@ DEFUN(bfd_coff_swap_aux_in,(abfd, ext, type, class, in),
   }
 }
 
-static void
+GDB_EXPORT void
 DEFUN(bfd_coff_swap_aux_out,(abfd, in, type, class, ext),
   bfd   *abfd AND
   union internal_auxent *in AND
@@ -273,7 +281,7 @@ DEFUN(bfd_coff_swap_aux_out,(abfd, in, type, class, ext),
   }
 }
 
-static void
+GDB_EXPORT void
 DEFUN(bfd_coff_swap_lineno_in,(abfd, ext, in),
       bfd            *abfd AND
       LINENO *ext AND
@@ -283,7 +291,7 @@ DEFUN(bfd_coff_swap_lineno_in,(abfd, ext, in),
     in->l_lnno = bfd_h_get_x(abfd, ext->l_lnno);
 }
 
-static void
+GDB_EXPORT void
 DEFUN(bfd_coff_swap_lineno_out,(abfd, in, ext),
       bfd            *abfd AND
       struct internal_lineno      *in AND
@@ -296,8 +304,8 @@ DEFUN(bfd_coff_swap_lineno_out,(abfd, in, ext),
 
 
 
-static void 
-DEFUN(swap_aouthdr_in,(abfd, aouthdr_ext, aouthdr_int),
+GDB_EXPORT void 
+DEFUN(bfd_swap_aouthdr_in,(abfd, aouthdr_ext, aouthdr_int),
       bfd            *abfd AND
       AOUTHDR        *aouthdr_ext AND
       struct internal_aouthdr *aouthdr_int)
@@ -315,8 +323,8 @@ DEFUN(swap_aouthdr_in,(abfd, aouthdr_ext, aouthdr_int),
 #endif
 }
 
-static void 
-DEFUN(swap_aouthdr_out,(abfd, aouthdr_in, aouthdr_out),
+GDB_EXPORT void 
+DEFUN(bfd_swap_aouthdr_out,(abfd, aouthdr_in, aouthdr_out),
       bfd            *abfd AND
       struct internal_aouthdr *aouthdr_in AND
       AOUTHDR        *aouthdr_out)
@@ -334,8 +342,8 @@ DEFUN(swap_aouthdr_out,(abfd, aouthdr_in, aouthdr_out),
 #endif
 }
 
-static void 
-DEFUN(swap_scnhdr_in,(abfd, scnhdr_ext, scnhdr_int),
+GDB_EXPORT void 
+DEFUN(bfd_coff_swap_scnhdr_in,(abfd, scnhdr_ext, scnhdr_int),
       bfd            *abfd AND
       SCNHDR         *scnhdr_ext AND
       struct internal_scnhdr *scnhdr_int)
@@ -516,7 +524,7 @@ DEFUN(coff_real_object_p,(abfd, nscns, internal_f, internal_a),
     unsigned int    i;
     for (i = 0; i < nscns; i++) {
       struct internal_scnhdr tmp;
-      swap_scnhdr_in(abfd, external_sections + i, &tmp);
+      bfd_coff_swap_scnhdr_in(abfd, external_sections + i, &tmp);
       make_a_section_from_file(abfd,&tmp);
     }
   }
@@ -627,7 +635,7 @@ DEFUN(coff_object_p,(abfd),
     if (bfd_read((PTR) &filehdr, 1, FILHSZ, abfd) != FILHSZ)
       return 0;
     
-    swap_filehdr_in(abfd, &filehdr, &internal_f);
+    bfd_swap_filehdr_in(abfd, &filehdr, &internal_f);
     
     if (BADMAG(internal_f)) {
       bfd_error = wrong_format;
@@ -639,7 +647,7 @@ DEFUN(coff_object_p,(abfd),
       if (bfd_read((PTR) &opthdr, 1,AOUTSZ, abfd) != AOUTSZ) {
 	return 0;
       }
-      swap_aouthdr_in(abfd, &opthdr, &internal_a);
+      bfd_swap_aouthdr_in(abfd, &opthdr, &internal_a);
     }
     
     /* Seek past the opt hdr stuff */
@@ -1164,7 +1172,7 @@ bfd            *abfd;
 #else
 	n.r_type = q->howto->type;
 #endif
-	swap_reloc_out(abfd, &n, &dst);
+	bfd_swap_reloc_out(abfd, &n, &dst);
 	bfd_write((PTR) &n, 1, RELSZ, abfd);
       }
     }
@@ -1652,12 +1660,12 @@ bfd            *abfd)
     return false;
     {
       FILHDR buff;
-      swap_filehdr_out(abfd, &internal_f, &buff);
+      bfd_swap_filehdr_out(abfd, &internal_f, &buff);
       bfd_write((PTR) &buff, 1, FILHSZ, abfd);
     }
   if (abfd->flags & EXEC_P) {
     AOUTHDR buff;
-    swap_aouthdr_out(abfd, &internal_a, &buff);
+    bfd_swap_aouthdr_out(abfd, &internal_a, &buff);
     bfd_write((PTR) &buff, 1, AOUTSZ, abfd);
   }
   return true;
@@ -2347,7 +2355,7 @@ DEFUN(coff_slurp_reloc_table,(abfd, asect, symbols),
 	   src++) {
 	struct internal_reloc dst;
 	asymbol        *ptr;
-	swap_reloc_in(abfd, src, &dst);
+	bfd_swap_reloc_in(abfd, src, &dst);
 	dst.r_symndx += obj_symbol_slew(abfd);
 	cache_ptr->sym_ptr_ptr = symbols + obj_convert(abfd)[dst.r_symndx];
 	
