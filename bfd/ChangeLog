@@ -1,3 +1,11 @@
+2003-02-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c: Formatting.
+	(allocate_dynrelocs): LD and GD relocs against the same sym need
+	separate GOT entries.
+	(ppc_elf_relocate_section): Correct GOT handling for multiple GOT
+	entries per symbol.
+
 2003-02-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-hppa.c (elf32_hppa_gc_sweep_hook): Simplify dynamic reloc
