@@ -1,3 +1,7 @@
+2004-10-31  Andrew Cagney  <cagney@gnu.org>
+
+	* config/mips/tm-mips.h (RA_REGNUM): Delete.
+
 2004-10-31  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386v4-nat.c (supply_gregset, supply_fpregset, fill_gregset)

@@ -39,8 +39,6 @@ extern int mips_step_skips_delay (CORE_ADDR);
 #define STEP_SKIPS_DELAY_P (1)
 #define STEP_SKIPS_DELAY(pc) (mips_step_skips_delay (pc))
 
-#define RA_REGNUM 31		/* Contains return address value */
-
 /* Special symbol found in blocks associated with routines.  We can
    hang mdebug_extra_func_info's off of this.  */
 
