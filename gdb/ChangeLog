@@ -1,3 +1,12 @@
+2004-03-24  Andrew Cagney  <cagney@redhat.com>
+
+	* tramp-frame.h (TRAMP_SENTINEL_INSN): Define, document.
+	* tramp-frame.c: Include "gdb_assert.h".
+	(tramp_frame_start): Use TRAMP_SENTINEL_INSN.  Use ULONGEST and
+	correct sizeof.
+	(tramp_frame_append): Validate the tramp frame's instructions.
+	* Makefile.in (tramp-frame.o): Update dependencies.
+
 2004-03-23  Andrew Cagney  <cagney@redhat.com>
 
 	* trad-frame.h (trad_frame_set_reg_addr): Declare.
