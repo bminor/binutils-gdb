@@ -331,6 +331,7 @@ dump_section_header (bfd *abfd ATTRIBUTE_UNUSED, asection *section,
   if ((section->flags & SEC_LINK_ONCE) != 0)
     {
       const char *ls;
+      struct coff_comdat_info *comdat;
 
       switch (section->flags & SEC_LINK_DUPLICATES)
 	{
@@ -351,9 +352,9 @@ dump_section_header (bfd *abfd ATTRIBUTE_UNUSED, asection *section,
 	}
       printf ("%s%s", comma, ls);
 
-      if (section->comdat != NULL)
-	printf (" (COMDAT %s %ld)", section->comdat->name,
-		section->comdat->symbol);
+      comdat = bfd_coff_get_comdat_section (abfd, section);
+      if (comdat != NULL)
+	printf (" (COMDAT %s %ld)", comdat->name, comdat->symbol);
 
       comma = ", ";
     }

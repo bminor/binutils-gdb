@@ -54,6 +54,7 @@
 #define bfd_pef_bfd_merge_sections                  bfd_generic_merge_sections
 #define bfd_pef_bfd_is_group_section		    bfd_generic_is_group_section
 #define bfd_pef_bfd_discard_group                   bfd_generic_discard_group
+#define bfd_pef_section_already_linked	    _bfd_generic_section_already_linked
 #define bfd_pef_bfd_link_hash_table_create          _bfd_generic_link_hash_table_create
 #define bfd_pef_bfd_link_hash_table_free            _bfd_generic_link_hash_table_free
 #define bfd_pef_bfd_link_add_symbols                _bfd_generic_link_add_symbols

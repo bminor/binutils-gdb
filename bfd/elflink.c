@@ -9154,3 +9154,89 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 
   return ret;
 }
+
+void
+_bfd_elf_section_already_linked (bfd *abfd, struct bfd_section * sec)
+{
+  flagword flags;
+  const char *name;
+  struct bfd_section_already_linked *l;
+  struct bfd_section_already_linked_hash_entry *already_linked_list;
+
+  flags = sec->flags;
+  if ((flags & SEC_LINK_ONCE) == 0)
+    return;
+
+  /* FIXME: When doing a relocatable link, we may have trouble
+     copying relocations in other sections that refer to local symbols
+     in the section being discarded.  Those relocations will have to
+     be converted somehow; as of this writing I'm not sure that any of
+     the backends handle that correctly.
+
+     It is tempting to instead not discard link once sections when
+     doing a relocatable link (technically, they should be discarded
+     whenever we are building constructors).  However, that fails,
+     because the linker winds up combining all the link once sections
+     into a single large link once section, which defeats the purpose
+     of having link once sections in the first place.
+
+     Also, not merging link once sections in a relocatable link
+     causes trouble for MIPS ELF, which relies on link once semantics
+     to handle the .reginfo section correctly.  */
+
+  name = bfd_get_section_name (abfd, sec);
+
+  already_linked_list = bfd_section_already_linked_table_lookup (name);
+
+  for (l = already_linked_list->entry; l != NULL; l = l->next)
+    {
+      /* We may have 3 different sections on the list: group section,
+	 comdat section and linkonce section. SEC may be a linkonce or
+	 group section. We match a group section with a group section,
+	 a linkonce section with a linkonce section, and ignore comdat
+	 section.  */
+      if ((sec->flags & SEC_GROUP) == (l->sec->flags & SEC_GROUP)
+	  && bfd_coff_get_comdat_section (l->sec->owner, l->sec) == NULL)
+	{
+	  /* The section has already been linked.  See if we should
+             issue a warning.  */
+	  switch (flags & SEC_LINK_DUPLICATES)
+	    {
+	    default:
+	      abort ();
+
+	    case SEC_LINK_DUPLICATES_DISCARD:
+	      break;
+
+	    case SEC_LINK_DUPLICATES_ONE_ONLY:
+	      (*_bfd_error_handler)
+		(_("%s: %s: warning: ignoring duplicate section `%s'\n"),
+		 bfd_archive_filename (abfd), name);
+	      break;
+
+	    case SEC_LINK_DUPLICATES_SAME_SIZE:
+	      if (sec->size != l->sec->size)
+		(*_bfd_error_handler)
+		  (_("%s: %s: warning: duplicate section `%s' has different size\n"),
+		   bfd_archive_filename (abfd), name);
+	      break;
+	    }
+
+	  /* Set the output_section field so that lang_add_section
+	     does not create a lang_input_section structure for this
+	     section.  Since there might be a symbol in the section
+	     being discarded, we must retain a pointer to the section
+	     which we are really going to use.  */
+	  sec->output_section = bfd_abs_section_ptr;
+	  sec->kept_section = l->sec;
+	  
+	  if (flags & SEC_GROUP)
+	    bfd_elf_discard_group (abfd, sec);
+
+	  return;
+	}
+    }
+
+  /* This is the first section with this name.  Record it.  */
+  bfd_section_already_linked_table_insert (already_linked_list, sec);
+}

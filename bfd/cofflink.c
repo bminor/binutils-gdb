@@ -435,18 +435,18 @@ coff_link_add_symbols (bfd *abfd,
 	  if (obj_pe (abfd)
 	      && (classification == COFF_SYMBOL_GLOBAL
 		  || classification == COFF_SYMBOL_PE_SECTION)
-	      && section->comdat != NULL
+	      && coff_section_data (abfd, section)->comdat != NULL
 	      && strncmp (name, "??_", 3) == 0
-	      && strcmp (name, section->comdat->name) == 0)
+	      && strcmp (name, coff_section_data (abfd, section)->comdat->name) == 0)
 	    {
 	      if (*sym_hash == NULL)
 		*sym_hash = coff_link_hash_lookup (coff_hash_table (info),
 						   name, FALSE, copy, FALSE);
 	      if (*sym_hash != NULL
 		  && (*sym_hash)->root.type == bfd_link_hash_defined
-		  && (*sym_hash)->root.u.def.section->comdat != NULL
-		  && strcmp ((*sym_hash)->root.u.def.section->comdat->name,
-			     section->comdat->name) == 0)
+		  && coff_section_data (abfd, (*sym_hash)->root.u.def.section)->comdat != NULL
+		  && strcmp (coff_section_data (abfd, (*sym_hash)->root.u.def.section)->comdat->name,
+			     coff_section_data (abfd, section)->comdat->name) == 0)
 		addit = FALSE;
 	    }
 

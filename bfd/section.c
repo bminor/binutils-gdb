@@ -149,23 +149,6 @@ SUBSECTION
 
 CODE_FRAGMENT
 .
-.{* This structure is used for a comdat section, as in PE.  A comdat
-.   section is associated with a particular symbol.  When the linker
-.   sees a comdat section, it keeps only one of the sections with a
-.   given name and associated with a given symbol.  *}
-.
-.struct bfd_comdat_info
-.{
-.  {* The name of the symbol associated with a comdat section.  *}
-.  const char *name;
-.
-.  {* The local symbol table index of the symbol associated with a
-.     comdat section.  This is only meaningful to the object file format
-.     specific code; it is not an index into the list returned by
-.     bfd_canonicalize_symtab.  *}
-.  long symbol;
-.};
-.
 .typedef struct bfd_section
 .{
 .  {* The name of the section; the name isn't a copy, the pointer is
@@ -489,9 +472,6 @@ CODE_FRAGMENT
 .  {* Entity size for merging purposes.  *}
 .  unsigned int entsize;
 .
-.  {* Optional information about a COMDAT entry; NULL if not COMDAT.  *}
-.  struct bfd_comdat_info *comdat;
-.
 .  {* Points to the kept section if this section is a link-once section,
 .     and is discarded.  *}
 .  struct bfd_section *kept_section;
@@ -634,8 +614,8 @@ static const asymbol global_syms[] =
     /* line_filepos, userdata, contents, lineno, lineno_count,       */	\
        0,            NULL,     NULL,     NULL,   0,			\
 									\
-    /* entsize, comdat, kept_section, moving_line_filepos,           */	\
-       0,       NULL,   NULL,	      0,				\
+    /* entsize, kept_section, moving_line_filepos,	           */	\
+       0,       NULL,	      0,					\
 									\
     /* target_index, used_by_bfd, constructor_chain, owner,          */	\
        0,            NULL,        NULL,              NULL,		\

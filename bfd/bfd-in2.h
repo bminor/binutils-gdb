@@ -566,6 +566,9 @@ void bfd_putl16 (bfd_vma, void *);
 
 bfd_uint64_t bfd_get_bits (const void *, int, bfd_boolean);
 void bfd_put_bits (bfd_uint64_t, void *, int, bfd_boolean);
+
+extern bfd_boolean bfd_section_already_linked_table_init (void);
+extern void bfd_section_already_linked_table_free (void);
 
 /* Externally visible ECOFF routines.  */
 
@@ -854,6 +857,26 @@ extern void bfd_elf32_ia64_after_parse
 extern void bfd_elf64_ia64_after_parse
   (int);
 
+/* This structure is used for a comdat section, as in PE.  A comdat
+   section is associated with a particular symbol.  When the linker
+   sees a comdat section, it keeps only one of the sections with a
+   given name and associated with a given symbol.  */
+
+struct coff_comdat_info
+{
+  /* The name of the symbol associated with a comdat section.  */
+  const char *name;
+
+  /* The local symbol table index of the symbol associated with a
+     comdat section.  This is only meaningful to the object file format
+     specific code; it is not an index into the list returned by
+     bfd_canonicalize_symtab.  */
+  long symbol;
+};
+
+extern struct coff_comdat_info *bfd_coff_get_comdat_section
+  (bfd *, struct bfd_section *);
+
 /* Extracted from init.c.  */
 void bfd_init (void);
 
@@ -1019,23 +1042,6 @@ long bfd_get_size (bfd *abfd);
 
 /* Extracted from bfdwin.c.  */
 /* Extracted from section.c.  */
-/* This structure is used for a comdat section, as in PE.  A comdat
-   section is associated with a particular symbol.  When the linker
-   sees a comdat section, it keeps only one of the sections with a
-   given name and associated with a given symbol.  */
-
-struct bfd_comdat_info
-{
-  /* The name of the symbol associated with a comdat section.  */
-  const char *name;
-
-  /* The local symbol table index of the symbol associated with a
-     comdat section.  This is only meaningful to the object file format
-     specific code; it is not an index into the list returned by
-     bfd_canonicalize_symtab.  */
-  long symbol;
-};
-
 typedef struct bfd_section
 {
   /* The name of the section; the name isn't a copy, the pointer is
@@ -1358,9 +1364,6 @@ typedef struct bfd_section
 
   /* Entity size for merging purposes.  */
   unsigned int entsize;
-
-  /* Optional information about a COMDAT entry; NULL if not COMDAT.  */
-  struct bfd_comdat_info *comdat;
 
   /* Points to the kept section if this section is a link-once section,
      and is discarded.  */
@@ -4430,7 +4433,8 @@ typedef struct bfd_target
   NAME##_bfd_gc_sections, \
   NAME##_bfd_merge_sections, \
   NAME##_bfd_is_group_section, \
-  NAME##_bfd_discard_group
+  NAME##_bfd_discard_group, \
+  NAME##_section_already_linked \
 
   int         (*_bfd_sizeof_headers) (bfd *, bfd_boolean);
   bfd_byte *  (*_bfd_get_relocated_section_contents)
@@ -4472,6 +4476,10 @@ typedef struct bfd_target
 
   /* Discard members of a group.  */
   bfd_boolean (*_bfd_discard_group) (bfd *, struct bfd_section *);
+
+  /* Check if SEC has been already linked during a reloceatable or
+     final link.  */
+  void (*_section_already_linked) (bfd *, struct bfd_section *);
 
   /* Routines to handle dynamic symbols and relocs.  */
 #define BFD_JUMP_TABLE_DYNAMIC(NAME) \
@@ -4529,6 +4537,11 @@ bfd_boolean bfd_link_split_section (bfd *abfd, asection *sec);
 
 #define bfd_link_split_section(abfd, sec) \
        BFD_SEND (abfd, _bfd_link_split_section, (abfd, sec))
+
+void bfd_section_already_linked (bfd *abfd, asection *sec);
+
+#define bfd_section_already_linked(abfd, sec) \
+       BFD_SEND (abfd, _section_already_linked, (abfd, sec))
 
 /* Extracted from simple.c.  */
 bfd_byte *bfd_simple_get_relocated_section_contents

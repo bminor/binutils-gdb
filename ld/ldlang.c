@@ -886,44 +886,10 @@ exp_init_os (etree_type *exp)
     }
 }
 
-/* Sections marked with the SEC_LINK_ONCE flag should only be linked
-   once into the output.  This routine checks each section, and
-   arrange to discard it if a section of the same name has already
-   been linked.  If the section has COMDAT information, then it uses
-   that to decide whether the section should be included.  This code
-   assumes that all relevant sections have the SEC_LINK_ONCE flag set;
-   that is, it does not depend solely upon the section name.
-   section_already_linked is called via bfd_map_over_sections.  */
-
-/* This is the shape of the elements inside the already_linked hash
-   table. It maps a name onto a list of already_linked elements with
-   the same name.  It's possible to get more than one element in a
-   list if the COMDAT sections have different names.  */
-
-struct already_linked_hash_entry
-{
-  struct bfd_hash_entry root;
-  struct already_linked *entry;
-};
-
-struct already_linked
-{
-  struct already_linked *next;
-  asection *sec;
-};
-
-/* The hash table.  */
-
-static struct bfd_hash_table already_linked_table;
-
 static void
 section_already_linked (bfd *abfd, asection *sec, void *data)
 {
   lang_input_statement_type *entry = data;
-  flagword flags;
-  const char *name;
-  struct already_linked *l;
-  struct already_linked_hash_entry *already_linked_list;
 
   /* If we are only reading symbols from this object, then we want to
      discard all sections.  */
@@ -933,128 +899,7 @@ section_already_linked (bfd *abfd, asection *sec, void *data)
       return;
     }
 
-  flags = sec->flags;
-  if ((flags & SEC_LINK_ONCE) == 0)
-    return;
-
-  /* FIXME: When doing a relocatable link, we may have trouble
-     copying relocations in other sections that refer to local symbols
-     in the section being discarded.  Those relocations will have to
-     be converted somehow; as of this writing I'm not sure that any of
-     the backends handle that correctly.
-
-     It is tempting to instead not discard link once sections when
-     doing a relocatable link (technically, they should be discarded
-     whenever we are building constructors).  However, that fails,
-     because the linker winds up combining all the link once sections
-     into a single large link once section, which defeats the purpose
-     of having link once sections in the first place.
-
-     Also, not merging link once sections in a relocatable link
-     causes trouble for MIPS ELF, which relies on link once semantics
-     to handle the .reginfo section correctly.  */
-
-  name = bfd_get_section_name (abfd, sec);
-
-  already_linked_list =
-    ((struct already_linked_hash_entry *)
-     bfd_hash_lookup (&already_linked_table, name, TRUE, FALSE));
-
-  for (l = already_linked_list->entry; l != NULL; l = l->next)
-    {
-      if (sec->comdat == NULL
-	  || l->sec->comdat == NULL
-	  || strcmp (sec->comdat->name, l->sec->comdat->name) == 0)
-	{
-	  /* The section has already been linked.  See if we should
-             issue a warning.  */
-	  switch (flags & SEC_LINK_DUPLICATES)
-	    {
-	    default:
-	      abort ();
-
-	    case SEC_LINK_DUPLICATES_DISCARD:
-	      break;
-
-	    case SEC_LINK_DUPLICATES_ONE_ONLY:
-	      if (sec->comdat == NULL)
-		einfo (_("%P: %B: warning: ignoring duplicate section `%s'\n"),
-		       abfd, name);
-	      else
-		einfo (_("%P: %B: warning: ignoring duplicate `%s'"
-			 " section symbol `%s'\n"),
-		       abfd, name, sec->comdat->name);
-	      break;
-
-	    case SEC_LINK_DUPLICATES_SAME_CONTENTS:
-	      /* FIXME: We should really dig out the contents of both
-                 sections and memcmp them.  The COFF/PE spec says that
-                 the Microsoft linker does not implement this
-                 correctly, so I'm not going to bother doing it
-                 either.  */
-	      /* Fall through.  */
-	    case SEC_LINK_DUPLICATES_SAME_SIZE:
-	      if (sec->size != l->sec->size)
-		einfo (_("%P: %B: warning: duplicate section `%s'"
-			 " has different size\n"),
-		       abfd, name);
-	      break;
-	    }
-
-	  /* Set the output_section field so that lang_add_section
-	     does not create a lang_input_section structure for this
-	     section.  Since there might be a symbol in the section
-	     being discarded, we must retain a pointer to the section
-	     which we are really going to use.  */
-	  sec->output_section = bfd_abs_section_ptr;
-	  sec->kept_section = l->sec;
-
-	  if (flags & SEC_GROUP)
-	    bfd_discard_group (abfd, sec);
-
-	  return;
-	}
-    }
-
-  /* This is the first section with this name.  Record it.  Allocate
-     the memory from the same obstack as the hash table is kept in.  */
-
-  l = bfd_hash_allocate (&already_linked_table, sizeof *l);
-
-  l->sec = sec;
-  l->next = already_linked_list->entry;
-  already_linked_list->entry = l;
-}
-
-/* Support routines for the hash table used by section_already_linked,
-   initialize the table, fill in an entry and remove the table.  */
-
-static struct bfd_hash_entry *
-already_linked_newfunc (struct bfd_hash_entry *entry ATTRIBUTE_UNUSED,
-			struct bfd_hash_table *table,
-			const char *string ATTRIBUTE_UNUSED)
-{
-  struct already_linked_hash_entry *ret =
-    bfd_hash_allocate (table, sizeof (struct already_linked_hash_entry));
-
-  ret->entry = NULL;
-
-  return &ret->root;
-}
-
-static void
-already_linked_table_init (void)
-{
-  if (! bfd_hash_table_init_n (&already_linked_table,
-			       already_linked_newfunc,
-			       42))
-    einfo (_("%P%F: Failed to create hash table\n"));
-}
-
-static void
-already_linked_table_free (void)
-{
-  bfd_hash_table_free (&already_linked_table);
+  bfd_section_already_linked (abfd, sec);
 }
 
 /* The wild routines.
@@ -4347,7 +4192,8 @@ lang_process (void)
   /* Add to the hash table all undefineds on the command line.  */
   lang_place_undefineds ();
 
-  already_linked_table_init ();
+  if (!bfd_section_already_linked_table_init ())
+    einfo (_("%P%F: Failed to create hash table\n"));
 
   /* Create a bfd for each input file.  */
   current_target = default_target;
@@ -4359,7 +4205,7 @@ lang_process (void)
 
   ldemul_after_open ();
 
-  already_linked_table_free ();
+  bfd_section_already_linked_table_free ();
 
   /* Make sure that we're not mixing architectures.  We call this
      after all the input files have been opened, but before we do any

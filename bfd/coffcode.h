@@ -965,12 +965,13 @@ handle_COMDAT (abfd, sec_flags, hdr, name, section)
 		   Intel puts the two adjacent, but Alpha (at
 		   least) spreads them out.  */
 
-		amt = sizeof (struct bfd_comdat_info);
-		section->comdat = bfd_alloc (abfd, amt);
-		if (section->comdat == NULL)
+		amt = sizeof (struct coff_comdat_info);
+		coff_section_data (abfd, section)->comdat
+		  = bfd_alloc (abfd, amt);
+		if (coff_section_data (abfd, section)->comdat == NULL)
 		  abort ();
 
-		section->comdat->symbol =
+		coff_section_data (abfd, section)->comdat->symbol =
 		  (esym - esymstart) / bfd_coff_symesz (abfd);
 
 		amt = strlen (symname) + 1;
@@ -979,7 +980,8 @@ handle_COMDAT (abfd, sec_flags, hdr, name, section)
 		  abort ();
 
 		strcpy (newname, symname);
-		section->comdat->name = newname;
+		coff_section_data (abfd, section)->comdat->name
+		  = newname;
 	      }
 
 	      goto breakloop;
@@ -5584,6 +5586,11 @@ static const bfd_coff_backend_data ticoff1_swap_table =
 
 #ifndef coff_bfd_discard_group
 #define coff_bfd_discard_group		    bfd_generic_discard_group
+#endif
+
+#ifndef coff_section_already_linked
+#define coff_section_already_linked \
+  _bfd_generic_section_already_linked
 #endif
 
 #define CREATE_BIG_COFF_TARGET_VEC(VAR, NAME, EXTRA_O_FLAGS, EXTRA_S_FLAGS, UNDER, ALTERNATIVE, SWAP_TABLE)	\

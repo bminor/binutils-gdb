@@ -559,6 +559,9 @@ void bfd_putl16 (bfd_vma, void *);
 
 bfd_uint64_t bfd_get_bits (const void *, int, bfd_boolean);
 void bfd_put_bits (bfd_uint64_t, void *, int, bfd_boolean);
+
+extern bfd_boolean bfd_section_already_linked_table_init (void);
+extern void bfd_section_already_linked_table_free (void);
 
 /* Externally visible ECOFF routines.  */
 
@@ -846,4 +849,24 @@ extern void bfd_elf32_ia64_after_parse
 
 extern void bfd_elf64_ia64_after_parse
   (int);
+
+/* This structure is used for a comdat section, as in PE.  A comdat
+   section is associated with a particular symbol.  When the linker
+   sees a comdat section, it keeps only one of the sections with a
+   given name and associated with a given symbol.  */
+
+struct coff_comdat_info
+{
+  /* The name of the symbol associated with a comdat section.  */
+  const char *name;
+
+  /* The local symbol table index of the symbol associated with a
+     comdat section.  This is only meaningful to the object file format
+     specific code; it is not an index into the list returned by
+     bfd_canonicalize_symtab.  */
+  long symbol;
+};
+
+extern struct coff_comdat_info *bfd_coff_get_comdat_section
+  (bfd *, struct bfd_section *);
 

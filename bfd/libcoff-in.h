@@ -194,6 +194,8 @@ struct coff_section_tdata
   bfd_vma offset;
   unsigned int i;
   const char *function;
+  /* Optional information about a COMDAT entry; NULL if not COMDAT. */
+  struct coff_comdat_info *comdat;
   int line_base;
   /* A pointer used for .stab linking optimizations.  */
   PTR stab_info;

@@ -1,3 +1,9 @@
+2004-07-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objcopy.c (filter_symbols): Use bfd_coff_get_comdat_section
+	to access comdat.
+	* objdump.c (dump_section_header): Likewise.
+
 2004-07-15  Aravinda PR  <aravindapr@rediffmail.com>
 
 	* nlmconv.c (main): Pass map_file argument to link_inputs.

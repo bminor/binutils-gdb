@@ -92,8 +92,8 @@ static asection bfd_debug_section =
      NULL,       NULL,        0,           0,       0,
   /* line_filepos, userdata, contents, lineno, lineno_count,       */
      0,            NULL,     NULL,     NULL,   0,
-  /* entsize, comdat, kept_section, moving_line_filepos,           */
-     0,       NULL,   NULL,         0,
+  /* entsize, kept_section, moving_line_filepos,	           */
+     0,       NULL,         0,
   /* target_index, used_by_bfd, constructor_chain, owner,          */
      0,            NULL,        NULL,              NULL,
   /* symbol,                                                       */

@@ -2739,6 +2739,7 @@ const bfd_target rs6000coff64_vec =
     bfd_generic_merge_sections,
     bfd_generic_is_group_section,
     bfd_generic_discard_group,
+    _bfd_generic_section_already_linked,
 
     /* Dynamic */
     _bfd_xcoff_get_dynamic_symtab_upper_bound,
@@ -2985,6 +2986,7 @@ const bfd_target aix5coff64_vec =
     bfd_generic_merge_sections,
     bfd_generic_is_group_section,
     bfd_generic_discard_group,
+    _bfd_generic_section_already_linked,
 
     /* Dynamic */
     _bfd_xcoff_get_dynamic_symtab_upper_bound,

@@ -2496,3 +2496,12 @@ bfd_coff_set_symbol_class (abfd, symbol, class)
 
   return TRUE;
 }
+
+struct coff_comdat_info *
+bfd_coff_get_comdat_section (bfd *abfd, struct bfd_section *sec)
+{
+  if (bfd_get_flavour (abfd) == bfd_target_coff_flavour)
+    return coff_section_data (abfd, sec)->comdat;
+  else
+    return NULL;
+}

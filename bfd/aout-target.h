@@ -519,6 +519,10 @@ MY_bfd_final_link (abfd, info)
 #ifndef MY_bfd_discard_group
 #define MY_bfd_discard_group bfd_generic_discard_group
 #endif
+#ifndef MY_section_already_linked
+#define MY_section_already_linked \
+  _bfd_generic_section_already_linked
+#endif
 #ifndef MY_bfd_reloc_type_lookup
 #define MY_bfd_reloc_type_lookup NAME(aout,reloc_type_lookup)
 #endif

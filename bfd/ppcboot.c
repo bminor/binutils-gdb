@@ -471,6 +471,8 @@ ppcboot_bfd_print_private_bfd_data (abfd, farg)
 #define ppcboot_bfd_merge_sections bfd_generic_merge_sections
 #define ppcboot_bfd_is_group_section bfd_generic_is_group_section
 #define ppcboot_bfd_discard_group bfd_generic_discard_group
+#define ppcboot_section_already_linked \
+  _bfd_generic_section_already_linked
 #define ppcboot_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define ppcboot_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #define ppcboot_bfd_link_add_symbols _bfd_generic_link_add_symbols

@@ -1,3 +1,78 @@
+2004-07-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* aout-adobe.c (aout_32_section_already_linked): Defined.
+	* aout-target.h (MY_section_already_linked): Likewise.
+	* aout-tic30.c (MY_section_already_linked): Likewise.
+	* binary.c (binary_section_already_linked): Likewise.
+	* bout.c (b_out_section_already_linked): Likewise.
+	* coff-alpha.c (_bfd_ecoff_section_already_linked): Likewise.
+	* coff-mips.c (_bfd_ecoff_section_already_linked): Likewise.
+	* coffcode.h (coff_section_already_linked): Likewise.
+	* i386msdos.c (msdos_section_already_linked): Likewise.
+	* i386os9k.c (os9k_section_already_linked): Likewise.
+	* ieee.c (ieee_section_already_linked): Likewise.
+	* ihex.c (ihex_section_already_linked): Likewise.
+	* mach-o.c (bfd_mach_o_section_already_linked): Likewise.
+	* mmo.c (mmo_section_already_linked): Likewise.
+	* nlm-target.h (nlm_section_already_linked): Likewise.
+	* oasys.c (oasys_section_already_linked): Likewise.
+	* pef.c (bfd_pef_section_already_linked): Likewise.
+	* ppcboot.c (ppcboot_section_already_linked): Likewise.
+	* som.c (som_bfd_discard_group): Likewise.
+	* srec.c (srec_section_already_linked): Likewise.
+	* tekhex.c (tekhex_section_already_linked): Likewise.
+	* versados.c (versados_section_already_linked): Likewise.
+	* vms.c (vms_section_already_linked): Likewise.
+	* coff-target.h (_bfd_xcoff_section_already_linked): Likewise.
+	* xsym.c (bfd_sym_section_already_linked): Likewise.
+
+	* bfd-in.h (bfd_section_already_linked_table_init): New.
+	(bfd_section_already_linked_table_free): Likewise.
+
+	* coff-rs6000.c (rs6000coff_vec): Add
+	_bfd_generic_section_already_linked.
+	(pmac_xcoff_vec): Likewise.
+	* coff64-rs6000.c (rs6000coff64_vec): Likewise.
+	(aix5coff64_vec): Likewise.
+
+	* elf-bfd.h (_bfd_elf_section_already_linked): New prototype.
+	* elflink.c (_bfd_elf_section_already_linked): New function.
+
+	* elfxx-target.h (bfd_elfNN_section_already_linked): Defined.
+
+	* libbfd-in.h (_bfd_nolink_section_already_linked): Defined.
+	(_bfd_generic_section_already_linked): New.
+	(bfd_section_already_linked_hash_entry): Likewise.
+	(bfd_section_already_linked): Likewise.
+	(bfd_section_already_linked_table_lookup): Likewise.
+	(bfd_section_already_linked_table_insert): Likewise.
+
+	* linker.c (bfd_section_already_linked): New.
+	(_bfd_section_already_linked_table): Likewise.
+	(bfd_section_already_linked_table_lookup): Likewise.
+	(bfd_section_already_linked_table_insert): Likewise.
+	(already_linked_newfunc): Likewise.
+	(bfd_section_already_linked_table_init): Likewise.
+	(bfd_section_already_linked_table_free): Likewise.
+	(_bfd_generic_section_already_linked): Likewise.
+
+	* section.c (bfd_section): Remove comdat.
+	(bfd_comdat_info): Moved to ...
+	* bfd-in.h (coff_comdat_info): Here.
+	(bfd_coff_get_comdat_section): New.
+	* coffgen.c (bfd_coff_get_comdat_section): Likewise.
+	* libcoff-in.h (coff_section_tdata): Add comdat.
+	* coffcode.h (handle_COMDAT): Updated.
+	* cofflink.c (coff_link_add_symbols): Likewise.
+	* ecoff.c (bfd_debug_section): Likewise.
+
+	* targets.c (bfd_target): Add _section_already_linked.
+	(BFD_JUMP_TABLE_LINK): Updated.
+
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Likewise.
+	* libcoff.h: Likewise.
+
 2003-07-21  Paul Brook  <paul@codesourcery.com>
 
 	* elflink.c (elf_get_linked_section_vma, compare_link_order,

@@ -1,3 +1,13 @@
+2004-07-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (already_linked_hash_entry): Removed.
+	(already_linked): Likewise.
+	(already_linked_table): Likewise.
+	(section_already_linked): Call bfd_section_already_linked.
+	(lang_process): Replace already_linked_table_init with
+	bfd_section_already_linked_table_init and check return. Replace
+	already_linked_table_free with bfd_section_already_linked_table_free.
+
 2004-07-21  Nick Clifton  <nickc@redhat.com>
 
 	* ldlang.c (init_os): Make sure that the newly allocated userdata

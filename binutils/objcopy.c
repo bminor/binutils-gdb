@@ -891,7 +891,7 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 	keep = (strip_symbols != STRIP_DEBUG
 		&& strip_symbols != STRIP_UNNEEDED
 		&& ! convert_debugging);
-      else if (bfd_get_section (sym)->comdat)
+      else if (bfd_coff_get_comdat_section (abfd, bfd_get_section (sym)))
 	/* COMDAT sections store special information in local
 	   symbols, so we cannot risk stripping any of them.  */
 	keep = 1;

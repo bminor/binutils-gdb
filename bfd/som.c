@@ -6404,6 +6404,8 @@ som_bfd_link_split_section (abfd, sec)
 #define som_bfd_merge_sections		bfd_generic_merge_sections
 #define som_bfd_is_group_section	bfd_generic_is_group_section
 #define som_bfd_discard_group		bfd_generic_discard_group
+#define som_section_already_linked \
+  _bfd_generic_section_already_linked
 
 const bfd_target som_vec = {
   "som",			/* name */

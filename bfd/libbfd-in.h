@@ -375,6 +375,8 @@ extern bfd_boolean _bfd_generic_set_section_contents
   ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) bfd_false)
 #define _bfd_nolink_bfd_link_split_section \
   ((bfd_boolean (*) (bfd *, struct bfd_section *)) bfd_false)
+#define _bfd_nolink_section_already_linked \
+  ((void (*) (bfd *, struct bfd_section *)) bfd_void)
 
 /* Routines to use for BFD_JUMP_TABLE_DYNAMIC for targets which do not
    have dynamic symbols or relocs.  Use BFD_JUMP_TABLE_DYNAMIC
@@ -472,6 +474,9 @@ extern bfd_boolean _bfd_generic_final_link
   (bfd *, struct bfd_link_info *);
 
 extern bfd_boolean _bfd_generic_link_split_section
+  (bfd *, struct bfd_section *);
+
+extern void _bfd_generic_section_already_linked
   (bfd *, struct bfd_section *);
 
 /* Generic reloc_link_order processing routine.  */
@@ -653,3 +658,24 @@ extern bfd_boolean _bfd_sh_align_load_span
    bfd_boolean (*) (bfd *, asection *, void *, bfd_byte *, bfd_vma),
    void *, bfd_vma **, bfd_vma *, bfd_vma, bfd_vma, bfd_boolean *);
 #endif
+
+/* This is the shape of the elements inside the already_linked hash
+   table. It maps a name onto a list of already_linked elements with
+   the same name.  */
+
+struct bfd_section_already_linked_hash_entry
+{
+  struct bfd_hash_entry root;
+  struct bfd_section_already_linked *entry;
+};
+
+struct bfd_section_already_linked
+{
+  struct bfd_section_already_linked *next;
+  asection *sec;
+};
+
+extern struct bfd_section_already_linked_hash_entry *
+  bfd_section_already_linked_table_lookup (const char *);
+extern void bfd_section_already_linked_table_insert
+  (struct bfd_section_already_linked_hash_entry *, asection *);
