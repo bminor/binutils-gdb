@@ -10,6 +10,10 @@ Mon Jul 10 11:09:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 	* cofflink.c (_bfd_coff_generic_relocate_section): Remove unused
 	local i.
 	* coff-arm.c (coff_arm_rtype_to_howto): Don't declare.
+	(PCRELOFFSET): Define if not already defined.
+	* Makefile.in: Rebuild dependencies.
+	(BFD32_BACKENDS): Add coff-arm.o
+	(CFILES): Add coff-arm.c, pe-arm.c, pei-arm.c.
 
 	* aoutx.h (NAME(aout,link_hash_table_create)): Allocate hash table
 	using bfd_alloc, not malloc.
@@ -448,7 +452,7 @@ Wed May 24 10:40:00 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 	Support for ARM-PE.
 
 	* Makefile.in, coffcode.h, config.bfd, configure.in, pe-arm.c,
-	 pei-arm.c, reloc.c, targets.c, config/arm-pe.mt:
+	 pei-arm.c, coff-arm.c, reloc.c, targets.c, config/arm-pe.mt:
 	 Support for ARM COFF/PE.
 
 Tue May 23 19:24:58 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
