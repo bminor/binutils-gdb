@@ -883,11 +883,11 @@ bfd_make_readable PARAMS ((bfd *abfd));
                 BFD_SEND(abfd, bfd_getx_signed_64, (ptr))
 
 #define bfd_get(bits, abfd, ptr)                               \
-                ((bits) == 8 ? bfd_get_8 (abfd, ptr)           \
+                ( (bits) ==  8 ? (bfd_vma) bfd_get_8 (abfd, ptr)        \
                 : (bits) == 16 ? bfd_get_16 (abfd, ptr)        \
                 : (bits) == 32 ? bfd_get_32 (abfd, ptr)        \
                 : (bits) == 64 ? bfd_get_64 (abfd, ptr)        \
-                : (abort (), (bfd_vma) - 1))
+                : (abort (), (bfd_vma) -1))
 
 #define bfd_put(bits, abfd, val, ptr)                          \
                 ((bits) == 8 ? bfd_put_8 (abfd, val, ptr)      \

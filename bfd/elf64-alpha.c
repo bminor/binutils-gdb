@@ -1020,7 +1020,7 @@ elf64_alpha_relax_with_lituse (info, symval, irel, irelend)
     {
       if (ELF64_R_TYPE (urel->r_info) != R_ALPHA_LITUSE)
 	break;
-      if (urel->r_addend >= 0 && urel->r_addend <= 3)
+      if (urel->r_addend <= 3)
 	flags |= 1 << urel->r_addend;
     }
 

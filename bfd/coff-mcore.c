@@ -39,9 +39,10 @@ Boston, MA 02111-1307, USA.  */
    final_link routine once.  */
 extern boolean mcore_bfd_coff_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
-
+#if 0
 static struct bfd_link_hash_table * coff_mcore_link_hash_table_create
   PARAMS ((bfd *));
+#endif
 static bfd_reloc_status_type        mcore_coff_unsupported_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static boolean                      coff_mcore_relocate_section
@@ -55,7 +56,6 @@ static reloc_howto_type *           coff_mcore_rtype_to_howto
 static void mcore_emit_base_file_entry
   PARAMS ((struct bfd_link_info *, bfd *, asection *, bfd_vma));
 static boolean in_reloc_p PARAMS ((bfd *, reloc_howto_type *));
-static struct bfd_link_hash_table * coff_mcore_link_hash_table_create PARAMS ((bfd *));
 
 /* The NT loader points the toc register to &toc + 32768, in order to
    use the complete range of a 16-bit displacement. We have to adjust
@@ -220,6 +220,7 @@ mcore_hash_table;
 #define coff_mcore_hash_table(info) \
   ((mcore_hash_table *) ((info)->hash))
 
+#if 0
 /* Create an MCore coff linker hash table.  */
 
 static struct bfd_link_hash_table *
@@ -247,6 +248,7 @@ coff_mcore_link_hash_table_create (abfd)
 
   return & ret->root.root;
 }
+#endif
 
 /* Add an entry to the base file.  */
 

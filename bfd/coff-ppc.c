@@ -2176,10 +2176,6 @@ ppc_coff_reloc_type_lookup (abfd, code)
 
 #define RTYPE2HOWTO(cache_ptr, dst)  ppc_coff_rtype2howto (cache_ptr, dst)
 
-#ifndef COFF_IMAGE_WITH_PE
-static void ppc_coff_swap_sym_in_hook PARAMS ((bfd *, PTR, PTR));
-#endif
-
 /* We use the special COFF backend linker, with our own special touch.  */
 
 #define coff_bfd_reloc_type_lookup   ppc_coff_reloc_type_lookup
@@ -2189,7 +2185,9 @@ static void ppc_coff_swap_sym_in_hook PARAMS ((bfd *, PTR, PTR));
 
 #ifndef COFF_IMAGE_WITH_PE
 /* FIXME: This no longer works.  */
+#if 0
 #define coff_swap_sym_in_hook        ppc_coff_swap_sym_in_hook
+#endif
 #endif
 
 #define SELECT_RELOC(internal, howto) {internal.r_type=howto->type;}
@@ -2218,6 +2216,8 @@ static void ppc_coff_swap_sym_in_hook PARAMS ((bfd *, PTR, PTR));
 #include "coffcode.h"
 
 #ifndef COFF_IMAGE_WITH_PE
+/* FIXME: This no longer works.  */
+#if 0
 /* FIXME:
    What we're trying to do here is allocate a toc section (early), and attach
    it to the last bfd to be processed. This avoids the problem of having a toc
@@ -2231,6 +2231,7 @@ static void ppc_coff_swap_sym_in_hook PARAMS ((bfd *, PTR, PTR));
    3. Doing it on a "swap in" hook depends on when the "swap in" is called,
       and how often, etc. It's not clear to me that there isn't a hole here.
 */
+static void ppc_coff_swap_sym_in_hook PARAMS ((bfd *, PTR, PTR));
 
 static void
 ppc_coff_swap_sym_in_hook (abfd, ext1, in1)
@@ -2272,6 +2273,7 @@ ppc_coff_swap_sym_in_hook (abfd, ext1, in1)
 
   return;
 }
+#endif
 #endif
 
 #ifndef COFF_IMAGE_WITH_PE

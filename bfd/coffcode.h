@@ -1438,7 +1438,10 @@ coff_set_custom_section_alignment (abfd, section, alignment_table, table_size)
     return;
 
   if (alignment_table[i].default_alignment_max != COFF_ALIGNMENT_FIELD_EMPTY
-      && default_alignment > alignment_table[i].default_alignment_max)
+#if COFF_DEFAULT_SECTION_ALIGNMENT_POWER != 0
+      && default_alignment > alignment_table[i].default_alignment_max
+#endif
+      )
     return;
 
   section->alignment_power = alignment_table[i].alignment_power;

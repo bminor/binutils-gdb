@@ -2772,10 +2772,10 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
 }
 
 static bfd_reloc_status_type
-elfNN_ia64_install_value (abfd, hit_addr, val, r_type)
+elfNN_ia64_install_value (abfd, hit_addr, v, r_type)
      bfd *abfd;
      bfd_byte *hit_addr;
-     bfd_vma val;
+     bfd_vma v;
      unsigned int r_type;
 {
   const struct ia64_operand *op;
@@ -2784,6 +2784,11 @@ elfNN_ia64_install_value (abfd, hit_addr, val, r_type)
   enum ia64_opnd opnd;
   const char *err;
   size_t size = 8;
+#ifdef BFD_HOST_U_64_BIT
+  BFD_HOST_U_64_BIT val = (BFD_HOST_U_64_BIT) v;
+#else
+  bfd_vma val = v;
+#endif
 
   opnd = IA64_OPND_NIL;
   switch (r_type)
@@ -2945,7 +2950,7 @@ elfNN_ia64_install_value (abfd, hit_addr, val, r_type)
       insn = (dword >> shift) & 0x1ffffffffffLL;
 
       op = elf64_ia64_operands + opnd;
-      err = (*op->insert) (op, val, &insn);
+      err = (*op->insert) (op, val, (ia64_insn *)& insn);
       if (err)
 	return bfd_reloc_overflow;
 
