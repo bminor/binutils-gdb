@@ -15,8 +15,8 @@ It should be possible (barring major changes in the layout of
 the armulator) to upgrade the simulator by copying all the files
 out of a release into this directory and renaming the Makefile.
 
-(Except that I changed armos.c to understand our fcntl flags
-and made it possible to set breakpoints simply)
+(Except that I changed armos.c to work more simply with our
+simulator rigs)
 
 Steve
 
