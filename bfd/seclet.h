@@ -1,3 +1,5 @@
+#ifndef _SECLET_H
+#define _SECLET_H
 typedef enum 
 {
   
@@ -29,3 +31,4 @@ struct bfd_seclet_struct
 typedef struct bfd_seclet_struct bfd_seclet_type;
 
 bfd_seclet_type *EXFUN(bfd_new_seclet,(bfd*,asection*));
+#endif

@@ -2657,10 +2657,15 @@ DEFUN(coff_write_object_contents,(abfd),
   internal_a.magic = PAGEMAGICBCS;
 #endif				/* M88 */
 
-#if M68 || I386 || MIPS || WE32K
+#if M68 || MIPS || WE32K
 #define __A_MAGIC_SET__
   /* Never was anything here for the 68k */
-#endif				/* M68 || I386 || MIPS || WE32K */
+#endif				/* M68 || MIPS || WE32K */
+
+#if I386
+# define __A_MAGIC_SET__
+  internal_a.magic = ZMAGIC;
+#endif /* I386 */
 
 #if RS6000COFF_C
 #define __A_MAGIC_SET__
@@ -4162,9 +4167,13 @@ DEFUN(bfd_coff_get_relocated_section_contents,(in_abfd, seclet, data),
 	  dst_address+=2;
 	  src_address+=2;
 	  break;
-	
+#ifdef EXTRA_CASES
+	EXTRA_CASES
+#else
+
 	default:
 	  abort();
+#endif
 	}
       }    
     }

@@ -1,3 +1,18 @@
+Fri Sep 25 11:11:57 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* coff-z8k.c: getting closer
+	* coffcode.h (coff_get_relocated_section_contents): allow
+	EXTRA_CASES hooks for different arches to provide different reloc
+	types.
+	* seclet.h: #ifndef around it to allow multiple inclusion
+	* srec.c: minor doc fix
+	
+	
+
+Mon Sep 21 14:33:58 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* hosts/hp9000.h, hosts/irix3.h: changes from WRS.
+
 Sun Sep 20 08:48:25 1992  Fred Fish  (fnf@cygnus.com)
 
 	* configure.in:  Use i386-elf for all i386/i486 sysv4 hosts, not
