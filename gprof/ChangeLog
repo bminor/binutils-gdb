@@ -1,3 +1,7 @@
+Fri Oct  9 11:25:41 1992  Mark Eichin  (eichin@cygnus.com)
+
+        * gprof.1: updated SYNOPSIS to match actual behavior.
+
 Mon Oct  5 17:50:16 1992  Per Bothner  (bothner@cygnus.com)
 
 	* gen-c-prog.awk:  New awk script, lightly changed from

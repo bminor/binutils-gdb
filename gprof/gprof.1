@@ -21,10 +21,19 @@
 .SH NAME
 gprof \- display call graph profile data
 .SH SYNOPSIS
-.B gprof
-.RB "[\|" a.out "\|]"
-.B
-gmon.out ...
+.B gprof [ \-abcsz ] [ \-e|\-E
+.I name
+.B ] [ \-f|\-F 
+.I name
+.B ] 
+.B [ \-k
+.I fromname toname
+.B ] [ 
+.I a.out
+.B [ 
+.I gmon.out
+.B ] 
+.B ] 
 .SH DESCRIPTION
 .B gprof
 produces an execution profile of C, Pascal, or Fortran77 programs.
