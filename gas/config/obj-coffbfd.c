@@ -492,7 +492,6 @@ DEFUN (fill_section, (abfd, h, file_cursor),
 	      s->s_scnptr = *file_cursor;
 	    }
 	  know (s->s_paddr == paddr);
-	  s->s_vaddr = paddr;
 
 	  s->s_flags = STYP_REG;
 	  if (strcmp (s->s_name, ".text") == 0)
@@ -1861,6 +1860,7 @@ DEFUN_VOID (write_object_file)
       long size;
 
       segment_info[i].scnhdr.s_paddr = addr;
+      segment_info[i].scnhdr.s_vaddr = addr;
 
       if (segment_info[i].scnhdr.s_name[0])
 	{
