@@ -1,5 +1,5 @@
 /* m6811_cpu.c -- 68HC11&68HC12 CPU Emulation
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@nerim.fr)
 
 This file is part of GDB, GAS, and the GNU binutils.
@@ -577,6 +577,15 @@ print_io_byte (SIM_DESC sd, const char *name, io_reg_desc *desc,
 	       uint8 val, uint16 addr)
 {
   sim_io_printf (sd, "  %-9.9s @ 0x%04x 0x%02x ", name, addr, val);
+  if (desc)
+    print_io_reg_desc (sd, desc, val, 0);
+}
+
+void
+print_io_word (SIM_DESC sd, const char *name, io_reg_desc *desc,
+	       uint16 val, uint16 addr)
+{
+  sim_io_printf (sd, "  %-9.9s @ 0x%04x 0x%04x ", name, addr, val);
   if (desc)
     print_io_reg_desc (sd, desc, val, 0);
 }
