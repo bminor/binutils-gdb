@@ -1,3 +1,8 @@
+Tue Oct 17 10:38:53 1995  Jeffrey A Law  (law@cygnus.com)
+
+	* config/pa/hppahpux.mt (XDEPFILES): Remove bogus definition.
+	* config/pa/hppapro.mt (XDEPFILES): Likewise.
+
 Tue Oct 17 08:04:26 1995  Fred Fish  <fnf@rtl.cygnus.com>
 
 	* NEWS: Fix typo.
