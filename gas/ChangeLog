@@ -1,5 +1,11 @@
 2001-05-22  Alan Modra  <amodra@one.net.au>
 
+	* config/tc-m68k.c (relaxable_symbol): Only treat external symbols
+	as relaxable if embedded system, make weak syms non-relaxable.
+	Move definition..
+	(tc_m68k_fix_adjustable): ..so it can be used here.
+	(md_apply_fix_2): Sign extend without conditional.
+
 	* config/tc-v850.c: Update copyright.
 
 2001-05-16  Jeff Johnston  <jjohnstn@redhat.com>

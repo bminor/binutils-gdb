@@ -714,6 +714,19 @@ tc_coff_fix2rtype (fixP)
 
 #ifdef OBJ_ELF
 
+/* Return zero if the reference to SYMBOL from within the same segment may
+   be relaxed.  */
+
+/* On an ELF system, we can't relax an externally visible symbol,
+   because it may be overridden by a shared library.  However, if
+   TARGET_OS is "elf", then we presume that we are assembling for an
+   embedded system, in which case we don't have to worry about shared
+   libraries, and we can relax any external sym.  */
+
+#define relaxable_symbol(symbol) \
+  (!((S_IS_EXTERNAL (symbol) && strcmp (TARGET_OS, "elf") != 0)		\
+     || S_IS_WEAK (symbol)))
+
 /* Compute the relocation code for a fixup of SIZE bytes, using pc
    relative relocation if PCREL is non-zero.  PIC says whether a special
    pic relocation was requested.  */
@@ -832,8 +845,7 @@ tc_m68k_fix_adjustable (fixP)
      fixS *fixP;
 {
   /* Prevent all adjustments to global symbols.  */
-  if (S_IS_EXTERNAL (fixP->fx_addsy)
-      || S_IS_WEAK (fixP->fx_addsy))
+  if (! relaxable_symbol (fixP->fx_addsy))
     return 0;
 
   /* adjust_reloc_syms doesn't know about the GOT */
@@ -865,6 +877,8 @@ tc_m68k_fix_adjustable (fixP)
 #else /* !OBJ_ELF */
 
 #define get_reloc_code(SIZE,PCREL,OTHER) NO_RELOC
+
+#define relaxable_symbol(symbol) 1
 
 #endif /* OBJ_ELF */
 
@@ -982,27 +996,6 @@ tc_gen_reloc (section, fixp)
 }
 
 #endif /* BFD_ASSEMBLER */
-
-/* Return zero if the reference to SYMBOL from within the same segment may
-   be relaxed.  */
-#ifdef OBJ_ELF
-
-/* On an ELF system, we can't relax an externally visible symbol,
-   because it may be overridden by a shared library.  However, if
-   TARGET_OS is "elf", then we presume that we are assembling for an
-   embedded system, in which case we don't have to worry about shared
-   libraries, and we can relax anything.  */
-
-#define relaxable_symbol(symbol)		\
-  (strcmp (TARGET_OS, "elf") == 0		\
-   || (! S_IS_EXTERNAL (symbol)			\
-       && ! S_IS_WEAK (symbol)))
-
-#else
-
-#define relaxable_symbol(symbol) 1
-
-#endif
 
 /* Handle of the OPCODE hash table.  NULL means any use before
    m68k_ip_begin() will crash.  */
@@ -4226,10 +4219,7 @@ md_apply_fix_2 (fixP, val)
   buf += fixP->fx_where;
   /* end ibm compiler workaround */
 
-  if (val & 0x80000000)
-    val |= ~(addressT)0x7fffffff;
-  else
-    val &= 0x7fffffff;
+  val = ((val & 0xffffffff) ^ 0x80000000) - 0x80000000;
 
 #ifdef OBJ_ELF
   if (fixP->fx_addsy)
