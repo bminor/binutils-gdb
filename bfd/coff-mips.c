@@ -1100,7 +1100,6 @@ mips_rello_reloc (abfd,
    requires special handling when relaxing.  We don't want
    bfd_perform_relocation to tamper with it at all.  */
 
-/*ARGSUSED*/
 static bfd_reloc_status_type
 mips_switch_reloc (abfd,
 		   reloc_entry,
@@ -1195,7 +1194,7 @@ mips_relocate_hi (refhi, reflo, input_bfd, input_section, contents, adjust,
 
   if (refhi == NULL)
     return;
-  
+
   insn = bfd_get_32 (input_bfd,
 		     contents + adjust + refhi->r_vaddr - input_section->vma);
   if (reflo == NULL)
@@ -1204,7 +1203,7 @@ mips_relocate_hi (refhi, reflo, input_bfd, input_section, contents, adjust,
     vallo = (bfd_get_32 (input_bfd,
 			 contents + adjust + reflo->r_vaddr - input_section->vma)
 	     & 0xffff);
- 
+
   val = ((insn & 0xffff) << 16) + vallo;
   val += relocation;
 
@@ -1505,7 +1504,7 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 	      memmove (here + PCREL16_EXPANSION_ADJUSTMENT, here,
 		       (size_t) (input_section->_raw_size
 				 - (int_rel.r_vaddr - input_section->vma)));
-		       
+
 	      /* Generate the new instructions.  */
 	      if (! mips_relax_pcrel16 (info, input_bfd, input_section,
 					h, here,
@@ -1626,7 +1625,7 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 			int_rel.r_symndx = RELOC_SECTION_TEXT;
 		      break;
 		    }
-		      
+
 		  if (int_rel.r_symndx == -1)
 		    abort ();
 
@@ -2104,7 +2103,7 @@ mips_relax_section (abfd, sec, info, again)
 	 somebody felt it were important.  Ignoring this reloc will
 	 presumably cause a reloc overflow error later on.  */
       if (bfd_get_32 (abfd, contents + int_rel.r_vaddr - sec->vma)
-	  != 0x0411ffff) /* bgezal $0,. == bal . */
+	  != 0x0411ffff) /* bgezal $0,. == bal .  */
 	continue;
 
       /* Bother.  We need to expand this reloc, and we will need to
@@ -2180,7 +2179,7 @@ mips_relax_section (abfd, sec, info, again)
 	      mips_ecoff_swap_reloc_in (abfd, (PTR) (adj_ext_rel + 1), &rello);
 
 	      BFD_ASSERT (rello.r_type == MIPS_R_RELLO);
-	      
+
 	      addhi = bfd_get_32 (abfd,
 				   contents + adj_int_rel.r_vaddr - sec->vma);
 	      addhi &= 0xffff;
@@ -2643,7 +2642,7 @@ const bfd_target ecoff_little_vec =
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   & ecoff_big_vec,
-  
+
   (PTR) &mips_ecoff_backend_data
 };
 
@@ -2686,7 +2685,7 @@ const bfd_target ecoff_big_vec =
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   & ecoff_little_vec,
-  
+
   (PTR) &mips_ecoff_backend_data
 };
 
@@ -2730,6 +2729,6 @@ const bfd_target ecoff_biglittle_vec =
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   NULL,
-  
+
   (PTR) &mips_ecoff_backend_data
 };

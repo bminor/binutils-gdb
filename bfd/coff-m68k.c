@@ -97,7 +97,7 @@ extern reloc_howto_type m68kcoff_howto_table[];
 #ifdef STATIC_RELOCS
 static
 #endif
-reloc_howto_type m68kcoff_howto_table[] = 
+reloc_howto_type m68kcoff_howto_table[] =
 {
   HOWTO(R_RELBYTE,	       0,  0,  	8,  false, 0, complain_overflow_bitfield, RELOC_SPECIAL_FN, "8",	true, 0x000000ff,0x000000ff, false),
   HOWTO(R_RELWORD,	       0,  1, 	16, false, 0, complain_overflow_bitfield, RELOC_SPECIAL_FN, "16",	true, 0x0000ffff,0x0000ffff, false),
@@ -130,7 +130,7 @@ m68k_rtype2howto(internal, relocentry)
      arelent *internal;
      int relocentry;
 {
-  switch (relocentry) 
+  switch (relocentry)
   {
    case R_RELBYTE:	internal->howto = m68kcoff_howto_table + 0; break;
    case R_RELWORD:	internal->howto = m68kcoff_howto_table + 1; break;
@@ -145,29 +145,29 @@ m68k_rtype2howto(internal, relocentry)
 #ifdef STATIC_RELOCS
 static
 #endif
-int 
+int
 m68k_howto2rtype (internal)
      reloc_howto_type *internal;
 {
-  if (internal->pc_relative) 
+  if (internal->pc_relative)
   {
-    switch (internal->bitsize) 
+    switch (internal->bitsize)
     {
      case 32: return R_PCRLONG;
      case 16: return R_PCRWORD;
      case 8: return R_PCRBYTE;
     }
   }
-  else 
+  else
   {
-    switch (internal->bitsize) 
+    switch (internal->bitsize)
      {
       case 32: return R_RELLONG;
       case 16: return R_RELWORD;
       case 8: return R_RELBYTE;
      }
   }
-  return R_RELLONG;    
+  return R_RELLONG;
 }
 
 #ifdef STATIC_RELOCS
@@ -213,7 +213,6 @@ static reloc_howto_type *m68kcoff_rtype_to_howto
 	   struct coff_link_hash_entry *, struct internal_syment *,
 	   bfd_vma *));
 
-/*ARGSUSED*/
 static reloc_howto_type *
 m68kcoff_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
      bfd *abfd ATTRIBUTE_UNUSED;
@@ -374,7 +373,6 @@ m68kcoff_common_addend_special_fn (abfd, reloc_entry, symbol, data,
 /* coff-m68k.c uses the special COFF backend linker.  We need to
    adjust common symbols.  */
 
-/*ARGSUSED*/
 static reloc_howto_type *
 m68kcoff_common_addend_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
      bfd *abfd ATTRIBUTE_UNUSED;
@@ -484,12 +482,12 @@ bfd_m68k_coff_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
       else
 	{
 	  struct coff_link_hash_entry *h;
-	  
+
 	  h = obj_coff_sym_hashes (abfd)[irel->r_symndx];
 	  if (h == NULL)
 	    {
 	      struct internal_syment isym;
-	      
+
 	      bfd_coff_swap_sym_in (abfd, extsyms + symesz * irel->r_symndx,
 				    &isym);
 	      targetsec = coff_section_from_bfd_index (abfd, isym.n_scnum);
@@ -500,14 +498,14 @@ bfd_m68k_coff_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
 	  else
 	    targetsec = NULL;
 	}
-      
+
       bfd_put_32 (abfd,
 		  (irel->r_vaddr - datasec->vma + datasec->output_offset), p);
       memset (p + 4, 0, 8);
       if (targetsec != NULL)
 	strncpy (p + 4, targetsec->output_section->name, 8);
     }
-  
+
   return true;
 }
 #endif /* neither ONLY_DECLARE_RELOCS not STATIC_RELOCS  */

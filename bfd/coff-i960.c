@@ -578,7 +578,6 @@ coff_i960_relocate_section (output_bfd, info, input_bfd, input_section,
    instead be a reloc against the internal symbol we created specially
    for the section.  */
 
-/*ARGSUSED*/
 static boolean
 coff_i960_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
      bfd *obfd ATTRIBUTE_UNUSED;

@@ -1,3 +1,11 @@
+2000-11-11  Kazu Hirata  <kazu@hxi.com>
+
+	* coff-i960.c: Likewise.
+	* coff-m68k.c: Likewise.
+	* coff-m88k.c: Likewise.
+	* coff-mcore.c: Likewise.
+	* coff-mips.c: Likewise.
+
 2000-11-11  Bernd Schmidt  <bernds@cygnus.co.uk>
 
 	* elf32-sh.c (sh_elf_relocate_section): Ignore R_SH_NONE relocs.
