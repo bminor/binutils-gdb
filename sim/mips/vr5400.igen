@@ -267,7 +267,7 @@
 
 :function:::signed:vr:int fpr, int byte
 {
-  signed8 b = V1_8 (value_fpr (sd, fpr, fmt_long), byte);
+  signed8 b = V1_8 (value_fpr (sd, cia, fpr, fmt_long), byte);
   return b;
 }
 
@@ -343,7 +343,7 @@
   return 0;
 }
 
-:function:::unsigned:select:int i, int sel, int vt
+:function:::unsigned:do_select:int i, int sel, int vt
 {
   if (sel < 8)
     return vr (SD_, vt, sel);
@@ -378,7 +378,7 @@
 {
   int i;
   for (i = 0; i < 8; i++)
-    set_vr (SD_, VD, i, vr (SD_, VS, i) + select (SD_, i, SEL, VT));
+    set_vr (SD_, VD, i, vr (SD_, VS, i) + do_select (SD_, i, SEL, VT));
 }
 
 // Vector Align.
@@ -396,7 +396,7 @@
 {
   int i;
   for (i = 0; i < 8; i++)
-    set_vr (SD_, VD, i, vr (SD_, VS, i) & select (SD_, i, SEL, VT));
+    set_vr (SD_, VD, i, vr (SD_, VS, i) & do_select (SD_, i, SEL, VT));
 }
 
 // Vector Compare Equal.
@@ -406,7 +406,7 @@
 {
   int i;
   for (i = 0; i < 8; i++)
-    set_cc (SD_, i, Compare (SD_, vr (SD_, VS, i), select (SD_, i, SEL, VT)));
+    set_cc (SD_, i, Compare (SD_, vr (SD_, VS, i), do_select (SD_, i, SEL, VT)));
 }
 
 // Vector Compare Less Than or Equal.
@@ -416,7 +416,7 @@
 {
   int i;
   for (i = 0; i < 8; i++)
-    set_cc (SD_, i, Compare (SD_, vr (SD_, VS, i), select (SD_, i, SEL, VT)));
+    set_cc (SD_, i, Compare (SD_, vr (SD_, VS, i), do_select (SD_, i, SEL, VT)));
 }
 
 // Vector Compare Less Than.
@@ -426,7 +426,7 @@
 {
   int i;
   for (i = 0; i < 8; i++)
-    set_cc (SD_, i, Compare (SD_, vr (SD_, VS, i), select (SD_, i, SEL, VT)));
+    set_cc (SD_, i, Compare (SD_, vr (SD_, VS, i), do_select (SD_, i, SEL, VT)));
 }
 
 // Vector Maximum.
@@ -436,7 +436,7 @@
 {
   int i;
   for (i = 0; i < 8; i++)
-    set_vr (SD_, VD, i, Max (SD_, vr (SD_, VS, i), select (SD_, i, SEL, VT)));
+    set_vr (SD_, VD, i, Max (SD_, vr (SD_, VS, i), do_select (SD_, i, SEL, VT)));
 }
 
 // Vector Minimum.
@@ -446,7 +446,7 @@
 {
   int i;
   for (i = 0; i < 8; i++)
-    set_vr (SD_, VD, i, Min (SD_, vr (SD_, VS, i), select (SD_, i, SEL, VT)));
+    set_vr (SD_, VD, i, Min (SD_, vr (SD_, VS, i), do_select (SD_, i, SEL, VT)));
 }
 
 // Vector Multiply.
@@ -456,7 +456,7 @@
 {
   int i;
   for (i = 0; i < 8; i++)
-    set_vr (SD_, VD, i, vr (SD_, VS, i) * select (SD_, i, SEL, VT));
+    set_vr (SD_, VD, i, vr (SD_, VS, i) * do_select (SD_, i, SEL, VT));
 }
 
 // Vector Multiply, Accumulate.
@@ -466,7 +466,7 @@
 {
   int i;
   for (i = 0; i < 8; i++)
-    set_VecAcc (SD_, i, VecAcc (SD_, i) + vr (SD_, VS, i) * select (SD_, i, SEL, VT));
+    set_VecAcc (SD_, i, VecAcc (SD_, i) + vr (SD_, VS, i) * do_select (SD_, i, SEL, VT));
 }
 
 // Vector Multiply, Load Accumulator.
@@ -476,7 +476,7 @@
 {
   int i;
   for (i = 0; i < 8; i++)
-    set_VecAcc (SD_, i, 0 + vr (SD_, VS, i) * select (SD_, i, SEL, VT));
+    set_VecAcc (SD_, i, 0 + vr (SD_, VS, i) * do_select (SD_, i, SEL, VT));
 }
 
 // Vector Multiply, Negate, Accumulate.
@@ -486,7 +486,7 @@
 {
   int i;
   for (i = 0; i < 8; i++)
-    set_VecAcc (SD_, i, VecAcc (SD_, i) - vr (SD_, VS, i) * select (SD_, i, SEL, VT));
+    set_VecAcc (SD_, i, VecAcc (SD_, i) - vr (SD_, VS, i) * do_select (SD_, i, SEL, VT));
 }
 
 // Vector Multiply, Negate, Load Accumulator.
@@ -496,7 +496,7 @@
 {
   int i;
   for (i = 0; i < 8; i++)
-    set_VecAcc (SD_, i, 0 - vr (SD_, VS, i) * select (SD_, i, SEL, VT));
+    set_VecAcc (SD_, i, 0 - vr (SD_, VS, i) * do_select (SD_, i, SEL, VT));
 }
 
 // Vector NOr.
@@ -506,7 +506,7 @@
 {
   int i;
   for (i = 0; i < 8; i++)
-    set_vr (SD_, VD, i, ! (vr (SD_, VS, i) | select (SD_, i, SEL, VT)));
+    set_vr (SD_, VD, i, ! (vr (SD_, VS, i) | do_select (SD_, i, SEL, VT)));
 }
 
 // Vector Or.
@@ -516,7 +516,7 @@
 {
   int i;
   for (i = 0; i < 8; i++)
-    set_vr (SD_, VD, i, vr (SD_, VS, i) | select (SD_, i, SEL, VT));
+    set_vr (SD_, VD, i, vr (SD_, VS, i) | do_select (SD_, i, SEL, VT));
 }
 
 // Vector Pick False.
@@ -526,7 +526,7 @@
 {
   int i;
   for (i = 0; i < 8; i++)
-    set_vr (SD_, VD, i, cc (SD_, i) ? select (SD_, i, SEL, VT) : vr (SD_, VS, i));
+    set_vr (SD_, VD, i, cc (SD_, i) ? do_select (SD_, i, SEL, VT) : vr (SD_, VS, i));
 }
 
 // Vector Pick True.
@@ -536,7 +536,7 @@
 {
   int i;
   for (i = 0; i < 8; i++)
-    set_vr (SD_, VD, i, cc (SD_, i) ? vr (SD_, VS, i) : select (SD_, i, SEL, VT));
+    set_vr (SD_, VD, i, cc (SD_, i) ? vr (SD_, VS, i) : do_select (SD_, i, SEL, VT));
 }
 
 // Vector Read  Accumulator High.
@@ -576,7 +576,7 @@
 {
   int i;
   for (i = 0; i < 8; i++)
-    set_vr (SD_, VD, i, Clamp (SD_, Round (SD_, VecAcc (SD_, i) >> select (SD_, i, SEL, VT))));
+    set_vr (SD_, VD, i, Clamp (SD_, Round (SD_, VecAcc (SD_, i) >> do_select (SD_, i, SEL, VT))));
 }
 
 // Vector Element Shuffle.
@@ -626,7 +626,7 @@
 {
   int i;
   for (i = 0; i < 8; i++)
-    set_vr (SD_, VD, i, vr (SD_, VS, i) << select (SD_, i, SEL, VT));
+    set_vr (SD_, VD, i, vr (SD_, VS, i) << do_select (SD_, i, SEL, VT));
 }
 
 // Vector Shift Right Logical.
@@ -636,7 +636,7 @@
 {
   int i;
   for (i = 0; i < 8; i++)
-    set_vr (SD_, VD, i, vr (SD_, VS, i) >> select (SD_, i, SEL, VT));
+    set_vr (SD_, VD, i, vr (SD_, VS, i) >> do_select (SD_, i, SEL, VT));
 }
 
 // Vector Subtract.
@@ -646,7 +646,7 @@
 {
   int i;
   for (i = 0; i < 8; i++)
-    set_vr (SD_, VD, i, vr (SD_, VS, i) - select (SD_, i, SEL, VT));
+    set_vr (SD_, VD, i, vr (SD_, VS, i) - do_select (SD_, i, SEL, VT));
 }
 
 // Vector Write Accumulator High.
@@ -676,5 +676,5 @@
 {
   int i;
   for (i = 0; i < 8; i++)
-    set_vr (SD_, VD, i, vr (SD_, VS, i) ^ select (SD_, i, SEL, VT));
+    set_vr (SD_, VD, i, vr (SD_, VS, i) ^ do_select (SD_, i, SEL, VT));
 }

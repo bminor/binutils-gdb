@@ -1800,7 +1800,7 @@ build_mips16_operands (bitmap)
 	    {
 	      int j;
 
-	      printf ("((INDELAYSLOT () ? (INJALDELAYSLOT () ? IPC - 4 : IPC - 2) : (have_extendval ? IPC - 2 : IPC)) & ~ (uword64) 1)");
+	      printf ("((INDELAYSLOT () ? (INJALDELAYSLOT () ? cia - 4 : cia - 2) : (have_extendval ? cia - 2 : cia)) & ~ (uword64) 1)");
 	      for (j = 0; j < opindex; j++)
 		if (ops[j]->shift != 0)
 		  printf (" & ~ (uword64) 0x%x", (1 << ops[j]->shift) - 1);

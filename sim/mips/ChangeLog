@@ -1,13 +1,30 @@
 Thu Nov  6 16:36:35 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* gencode.c (build_mips16_operands): Replace IPC with cia.
+
+	* interp.c (sim_monitor, signal_exception, cache_op, store_fpr,
+ 	value_fpr, cop_ld, cop_lw, cop_sw, cop_sd, decode_coproc): Replace
+ 	IPC to `cia'.
+	(UndefinedResult): Replace function with macro/function
+ 	combination.
+	(sim_engine_run): Don't save PC in IPC.
+
+	* sim-main.h (IPC): Delete.
+
+	start-sanitize-vr5400
+	* vr5400.igen (vr): Add missing cia argument to value_fpr.
+	(do_select): Rename function select.
+	end-sanitize-vr5400
+
 	* interp.c (signal_exception, store_word, load_word,
  	address_translation, load_memory, store_memory, cache_op,
  	prefetch, sync_operation, ifetch, value_fpr, store_fpr, convert,
- 	cop_lw, cop_ld, cop_sw, cop_sd, decode_coproc): Add current
- 	instruction address - cia - argument.
+ 	cop_lw, cop_ld, cop_sw, cop_sd, decode_coproc, sim_monitor): Add
+ 	current instruction address - cia - argument.
 	(sim_read, sim_write): Call address_translation directly.
 	(sim_engine_run): Rename variable vaddr to cia.
-
+	(signal_exception): Pass cia to sim_monitor
+	
 	* sim-main.h (SignalException, LoadWord, StoreWord, CacheOp,
  	Prefetch, SyncOperation, ValueFPR, StoreFPR, Convert, COP_LW,
  	COP_LD, COP_SW, COP_SD, DecodeCoproc): Update.

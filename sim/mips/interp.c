@@ -710,8 +710,9 @@ fetch_str (sd, addr)
 
 /* Simple monitor interface (currently setup for the IDT and PMON monitors) */
 static void
-sim_monitor(sd,reason)
+sim_monitor(sd,cia,reason)
      SIM_DESC sd;
+     address_word cia;
      unsigned int reason;
 {
 #ifdef DEBUG
@@ -926,7 +927,7 @@ sim_monitor(sd,reason)
 
     default:
       sim_io_error (sd, "TODO: sim_monitor(%d) : PC = 0x%s\n",
-		    reason, pr_addr(IPC));
+		    reason, pr_addr(cia));
       break;
   }
   return;
@@ -1568,7 +1569,7 @@ signal_exception (SIM_DESC sd,
   int vector;
 
 #ifdef DEBUG
-	sim_io_printf(sd,"DBG: SignalException(%d) IPC = 0x%s\n",exception,pr_addr(IPC));
+  sim_io_printf(sd,"DBG: SignalException(%d) PC = 0x%s\n",exception,pr_addr(cia));
 #endif /* DEBUG */
 
   /* Ensure that any active atomic read/modify/write operation will fail: */
@@ -1580,7 +1581,7 @@ signal_exception (SIM_DESC sd,
        ignore them at run-time.
        Same for SYSCALL */
     case Trap :
-     sim_io_eprintf(sd,"Ignoring instruction TRAP (PC 0x%s)\n",pr_addr(IPC));
+     sim_io_eprintf(sd,"Ignoring instruction TRAP (PC 0x%s)\n",pr_addr(cia));
      break;
 
     case SystemCall :
@@ -1596,7 +1597,7 @@ signal_exception (SIM_DESC sd,
         code = (instruction >> 6) & 0xFFFFF;
         
         sim_io_eprintf(sd,"Ignoring instruction `syscall %d' (PC 0x%s)\n",
-                    code, pr_addr(IPC));
+                    code, pr_addr(cia));
       }
      break;
 
@@ -1608,12 +1609,12 @@ signal_exception (SIM_DESC sd,
               CANCELDELAYSLOT();
               
               Debug |= Debug_DBD;  /* signaled from within in delay slot */
-              DEPC = IPC - 4;      /* reference the branch instruction */
+              DEPC = cia - 4;      /* reference the branch instruction */
             }
           else
             {
               Debug &= ~Debug_DBD; /* not signaled from within a delay slot */
-              DEPC = IPC;
+              DEPC = cia;
             }
         
           Debug |= Debug_DM;            /* in debugging mode */
@@ -1641,7 +1642,7 @@ signal_exception (SIM_DESC sd,
           perform this magic. */
        if ((instruction & RSVD_INSTRUCTION_MASK) == RSVD_INSTRUCTION)
 	 {
-	   sim_monitor(sd, ((instruction >> RSVD_INSTRUCTION_ARG_SHIFT) & RSVD_INSTRUCTION_ARG_MASK) );
+	   sim_monitor(sd, cia, ((instruction >> RSVD_INSTRUCTION_ARG_SHIFT) & RSVD_INSTRUCTION_ARG_MASK) );
 	   /* NOTE: This assumes that a branch-and-link style
 	      instruction was used to enter the vector (which is the
 	      case with the current IDT monitor). */
@@ -1649,7 +1650,7 @@ signal_exception (SIM_DESC sd,
 	 }
        /* Look for the mips16 entry and exit instructions, and
           simulate a handler for them.  */
-       else if ((IPC & 1) != 0
+       else if ((cia & 1) != 0
 		&& (instruction & 0xf81f) == 0xe809
 		&& (instruction & 0x0c0) != 0x0c0)
 	 {
@@ -1657,12 +1658,12 @@ signal_exception (SIM_DESC sd,
 	   sim_engine_restart (sd, NULL, NULL, NULL_CIA);
 	 }
        /* else fall through to normal exception processing */
-       sim_io_eprintf(sd,"ReservedInstruction 0x%08X at IPC = 0x%s\n",instruction,pr_addr(IPC));
+       sim_io_eprintf(sd,"ReservedInstruction 0x%08X at PC = 0x%s\n",instruction,pr_addr(cia));
      }
 
     case BreakPoint:
 #ifdef DEBUG
-	sim_io_printf(sd,"DBG: SignalException(%d) IPC = 0x%s\n",exception,pr_addr(IPC));
+      sim_io_printf(sd,"DBG: SignalException(%d) PC = 0x%s\n",exception,pr_addr(cia));
 #endif /* DEBUG */
       /* Keep a copy of the current A0 in-case this is the program exit
 	 breakpoint:  */
@@ -1679,10 +1680,10 @@ signal_exception (SIM_DESC sd,
 	}
       }
       if (STATE & simDELAYSLOT)
-	PC = IPC - 4; /* reference the branch instruction */
+	PC = cia - 4; /* reference the branch instruction */
       else
-	PC = IPC;
-      sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
+	PC = cia;
+      sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, cia,
 		       sim_stopped, SIGTRAP);
 
     default:
@@ -1700,10 +1701,10 @@ signal_exception (SIM_DESC sd,
 	   {
 	     STATE &= ~simDELAYSLOT;
 	     CAUSE |= cause_BD;
-	     EPC = (IPC - 4); /* reference the branch instruction */
+	     EPC = (cia - 4); /* reference the branch instruction */
 	   }
 	 else
-	   EPC = IPC;
+	   EPC = cia;
 	 /* FIXME: TLB et.al. */
 	 vector = 0x180;
        }
@@ -1794,10 +1795,13 @@ signal_exception (SIM_DESC sd,
    simple, we just don't bother updating the destination register, so
    the overall result will be undefined. If desired we can stop the
    simulator by raising a pseudo-exception. */
+#define UndefinedResult() undefined_result (sd,cia)
 static void
-UndefinedResult()
+undefined_result(sd,cia)
+     SIM_DESC sd;
+     address_word cia;
 {
-  sim_io_eprintf(sd,"UndefinedResult: IPC = 0x%s\n",pr_addr(IPC));
+  sim_io_eprintf(sd,"UndefinedResult: PC = 0x%s\n",pr_addr(cia));
 #if 0 /* Disabled for the moment, since it actually happens a lot at the moment. */
   state |= simSTOP;
 #endif
@@ -1826,7 +1830,7 @@ cache_op(sd,cia,op,pAddr,vAddr,instruction)
      enable bit in the Status Register is clear - a coprocessor
      unusable exception is taken. */
 #if 0
-  sim_io_printf(sd,"TODO: Cache availability checking (PC = 0x%s)\n",pr_addr(IPC));
+  sim_io_printf(sd,"TODO: Cache availability checking (PC = 0x%s)\n",pr_addr(cia));
 #endif
 
   switch (op & 0x3) {
@@ -1969,7 +1973,7 @@ value_fpr(sd,cia,fpr,fmt)
 #endif /* DEBUG */
   }
   if (fmt != FPR_STATE[fpr]) {
-    sim_io_eprintf(sd,"FPR %d (format %s) being accessed with format %s - setting to unknown (PC = 0x%s)\n",fpr,DOFMT(FPR_STATE[fpr]),DOFMT(fmt),pr_addr(IPC));
+    sim_io_eprintf(sd,"FPR %d (format %s) being accessed with format %s - setting to unknown (PC = 0x%s)\n",fpr,DOFMT(FPR_STATE[fpr]),DOFMT(fmt),pr_addr(cia));
     FPR_STATE[fpr] = fmt_unknown;
   }
 
@@ -2040,7 +2044,7 @@ value_fpr(sd,cia,fpr,fmt)
    SignalExceptionSimulatorFault ("Unrecognised FP format in ValueFPR()");
 
 #ifdef DEBUG
-  printf("DBG: ValueFPR: fpr = %d, fmt = %s, value = 0x%s : PC = 0x%s : SizeFGR() = %d\n",fpr,DOFMT(fmt),pr_addr(value),pr_addr(IPC),SizeFGR());
+  printf("DBG: ValueFPR: fpr = %d, fmt = %s, value = 0x%s : PC = 0x%s : SizeFGR() = %d\n",fpr,DOFMT(fmt),pr_addr(value),pr_addr(cia),SizeFGR());
 #endif /* DEBUG */
 
   return(value);
@@ -2057,7 +2061,7 @@ store_fpr(sd,cia,fpr,fmt,value)
   int err = 0;
 
 #ifdef DEBUG
-  printf("DBG: StoreFPR: fpr = %d, fmt = %s, value = 0x%s : PC = 0x%s : SizeFGR() = %d\n",fpr,DOFMT(fmt),pr_addr(value),pr_addr(IPC),SizeFGR());
+  printf("DBG: StoreFPR: fpr = %d, fmt = %s, value = 0x%s : PC = 0x%s : SizeFGR() = %d\n",fpr,DOFMT(fmt),pr_addr(value),pr_addr(cia),SizeFGR());
 #endif /* DEBUG */
 
   if (SizeFGR() == 64) {
@@ -2171,7 +2175,7 @@ Infinity(op,fmt)
   int boolean = 0;
 
 #ifdef DEBUG
-  printf("DBG: Infinity: format %s 0x%s (PC = 0x%s)\n",DOFMT(fmt),pr_addr(op),pr_addr(IPC));
+  printf("DBG: Infinity: format %s 0x%s\n",DOFMT(fmt),pr_addr(op));
 #endif /* DEBUG */
 
   /* Check if (((E - bias) == (E_max + 1)) && (fraction == 0)). We
@@ -2837,7 +2841,7 @@ cop_lw(sd,cia,coproc_num,coproc_reg,memword)
 
     default:
 #if 0 /* this should be controlled by a configuration option */
-     sim_io_printf(sd,"COP_LW(%d,%d,0x%08X) at IPC = 0x%s : TODO (architecture specific)\n",coproc_num,coproc_reg,memword,pr_addr(IPC));
+     sim_io_printf(sd,"COP_LW(%d,%d,0x%08X) at PC = 0x%s : TODO (architecture specific)\n",coproc_num,coproc_reg,memword,pr_addr(cia));
 #endif
      break;
   }
@@ -2861,7 +2865,7 @@ cop_ld(sd,cia,coproc_num,coproc_reg,memword)
 
     default:
 #if 0 /* this message should be controlled by a configuration option */
-     sim_io_printf(sd,"COP_LD(%d,%d,0x%s) at IPC = 0x%s : TODO (architecture specific)\n",coproc_num,coproc_reg,pr_addr(memword),pr_addr(IPC));
+     sim_io_printf(sd,"COP_LD(%d,%d,0x%s) at PC = 0x%s : TODO (architecture specific)\n",coproc_num,coproc_reg,pr_addr(memword),pr_addr(cia));
 #endif
      break;
   }
@@ -2903,7 +2907,7 @@ cop_sw(sd,cia,coproc_num,coproc_reg)
 
     default:
 #if 0 /* should be controlled by configuration option */
-     sim_io_printf(sd,"COP_SW(%d,%d) at IPC = 0x%s : TODO (architecture specific)\n",coproc_num,coproc_reg,pr_addr(IPC));
+     sim_io_printf(sd,"COP_SW(%d,%d) at PC = 0x%s : TODO (architecture specific)\n",coproc_num,coproc_reg,pr_addr(cia));
 #endif
      break;
   }
@@ -2938,7 +2942,7 @@ cop_sd(sd,cia,coproc_num,coproc_reg)
 
     default:
 #if 0 /* should be controlled by configuration option */
-     sim_io_printf(sd,"COP_SD(%d,%d) at IPC = 0x%s : TODO (architecture specific)\n",coproc_num,coproc_reg,pr_addr(IPC));
+     sim_io_printf(sd,"COP_SD(%d,%d) at PC = 0x%s : TODO (architecture specific)\n",coproc_num,coproc_reg,pr_addr(cia));
 #endif
      break;
   }
@@ -3073,7 +3077,7 @@ decode_coproc(sd,cia,instruction)
             DSPC = DEPC;
           }
 	else
-	  sim_io_eprintf(sd,"Unrecognised COP0 instruction 0x%08X at IPC = 0x%s : No handler present\n",instruction,pr_addr(IPC));
+	  sim_io_eprintf(sd,"Unrecognised COP0 instruction 0x%08X at PC = 0x%s : No handler present\n",instruction,pr_addr(cia));
         /* TODO: When executing an ERET or RFE instruction we should
            clear LLBIT, to ensure that any out-standing atomic
            read/modify/write sequence fails. */
@@ -3081,7 +3085,7 @@ decode_coproc(sd,cia,instruction)
     break;
     
     case 2: /* undefined co-processor */
-      sim_io_eprintf(sd,"COP2 instruction 0x%08X at IPC = 0x%s : No handler present\n",instruction,pr_addr(IPC));
+      sim_io_eprintf(sd,"COP2 instruction 0x%08X at PC = 0x%s : No handler present\n",instruction,pr_addr(cia));
       break;
       
     case 1: /* should not occur (FPU co-processor) */
@@ -3191,7 +3195,6 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
     sim_io_printf(sd,"DBG: fetched 0x%08X from PC = 0x%s\n",instruction,pr_addr(PC));
 #endif /* DEBUG */
 
-    IPC = PC; /* copy PC for this instruction */
     /* This is required by exception processing, to ensure that we can
        cope with exceptions in the delay slots of branches that may
        already have changed the PC. */
@@ -3290,7 +3293,7 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
          small. */
       if (ZERO != 0) {
 #if defined(WARN_ZERO)
-        sim_io_eprintf(sd,"The ZERO register has been updated with 0x%s (PC = 0x%s) (reset back to zero)\n",pr_addr(ZERO),pr_addr(IPC));
+        sim_io_eprintf(sd,"The ZERO register has been updated with 0x%s (PC = 0x%s) (reset back to zero)\n",pr_addr(ZERO),pr_addr(cia));
 #endif /* WARN_ZERO */
         ZERO = 0; /* reset back to zero before next instruction */
       }

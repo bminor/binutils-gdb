@@ -296,9 +296,7 @@ struct _sim_cpu {
 
   /* The following are internal simulator state variables: */
 #define CPU_CIA(CPU) (PC)
-  address_word ipc; /* internal Instruction PC */
   address_word dspc;  /* delay-slot PC */
-#define IPC ((STATE_CPU (sd,0))->ipc)
 #define DSPC ((STATE_CPU (sd,0))->dspc)
 
   /* Issue a delay slot instruction immediatly by re-calling
