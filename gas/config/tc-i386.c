@@ -1,5 +1,6 @@
 /* i386.c -- Assemble code for the Intel 80386
-   Copyright (C) 1989, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation.
+   Copyright (C) 1989, 91, 92, 93, 94, 95, 96, 97, 1998
+   Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1542,9 +1543,10 @@ md_assemble (line)
 			exp->X_op_symbol = (symbolS *) 0;
 		      }
 
-		    /* Find the default segment for the memory operand.
-		       Used to optimize out explicit segment specifications.  */
-		    if (i.seg)
+		    /* Find the default segment for the memory
+		       operand.  Used to optimize out explicit segment
+		       specifications.  */
+		    if (i.seg && (t->opcode_modifier & LinearAddress) == 0)
 		      {
 			unsigned int seg_index;
 
@@ -2113,8 +2115,15 @@ i386_operand (operand_string)
       SKIP_WHITESPACE ();
       exp_seg = expression (exp);
       if (*input_line_pointer != '\0')
-	as_bad ("unrecognized characters `%s' in expression",
-		input_line_pointer);
+	{
+	  /* This should be as_bad, but some versions of gcc, up to
+             about 2.8 and egcs 1.01, generate a bogus @GOTOFF(%ebx)
+             in certain cases.  Oddly, the code in question turns out
+             to work correctly anyhow, so we make this just a warning
+             until those versions of gcc are obsolete.  */
+	  as_warn ("warning: unrecognized characters `%s' in expression",
+		   input_line_pointer);
+	}
       input_line_pointer = save_input_line_pointer;
 
       if (exp->X_op == O_absent)

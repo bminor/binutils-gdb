@@ -1,3 +1,9 @@
+Tue Mar 24 18:30:58 1998  H.J. Lu  <hjl@gnu.org>
+
+	* config/tc-i386.h (LinearAddress): Define.
+	* config/tc-i386.c (md_assemble): If LinearAddress is set for the
+	instruction, don't use a default segment.
+
 Mon Mar 23 18:53:40 1998  Joel Sherrill  <joel@OARcorp.com>
 
 	* configure.in: (sh*-*-rtems*): Switched from ELF to COFF.
