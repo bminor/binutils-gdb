@@ -283,7 +283,7 @@ special_address (addr, bits_written, data)
 {
   if ((unsigned) addr >> 24 == 0xf0 && bits_written == 32 && (data & 1) == 0)
     /* This invalidates (if not associative) or might invalidate
-       (if assiciative) an instruction cache line.  This is used for
+       (if associative) an instruction cache line.  This is used for
        trampolines.  Since we don't simulate the cache, this is a no-op
        as far as the simulator is concerned.  */
     return 1;
