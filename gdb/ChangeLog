@@ -1,3 +1,9 @@
+2004-08-09  Robert Millan  <robertmh@gnu.org>
+
+	Committed by Nathanael Nerode.
+	* configure.host: Match kfreebsd*-gnu and knetbsd*-gnu.
+	* configure.tgt: Match kfreebsd*-gnu and knetbsd*-gnu.
+
 2004-08-12  Andrew Cagney  <cagney@gnu.org>
 
 	* NEWS: Mention fixes in GDB 6.2.1.
