@@ -940,66 +940,56 @@ write_contents (abfd, sec, xxx)
       count = f->fr_offset;
       assert (count >= 0);
       if (fill_size && count)
-#ifdef BFD_FAST_SECTION_FILL
 	{
 	  char buf[256];
-	  if (fill_size > sizeof(buf)) {
-	    /* Do it the old way. Can this ever happen? */
-	while (count--)
-	  {
-	    x = bfd_set_section_contents (stdoutput, sec,
-					  fill_literal, (file_ptr) offset,
-					  (bfd_size_type) fill_size);
-	    if (x == false)
-	      {
-		bfd_perror (stdoutput->filename);
-		as_perror ("FATAL: Can't write %s", stdoutput->filename);
-		exit (EXIT_FAILURE);
-	      }
-	    offset += fill_size;
-	  }
-    }
-	  else {
-	    /* Build a buffer full of fill objects and output it as
-	     * often as necessary. This saves on the overhead of potentially
-	     * lots of bfd_set_section_contents calls.
-	     */
-	    int n_per_buf, i;
-	    if (fill_size == 1)
-	      {
-		n_per_buf = sizeof (buf);
-		memset (buf, *fill_literal, n_per_buf);
-	      }
-	    else
-	      {
-		char *bufp;
-		n_per_buf = sizeof(buf)/fill_size;
-		for (i = n_per_buf, bufp = buf; i; i--, bufp += fill_size)
-		  memcpy(bufp, fill_literal, fill_size);
-	      }
-	    for (; count > 0; count -= n_per_buf)
-	      {
-		n_per_buf = n_per_buf > count ? count : n_per_buf;
-		x = bfd_set_section_contents (stdoutput, sec,
-					      buf, (file_ptr) offset,
-					      (bfd_size_type) n_per_buf * fill_size);
-		if (x != true)
-		  as_fatal ("Cannot write to output file.");
-		offset += n_per_buf * fill_size;
-	      }
-	  }
+	  if (fill_size > sizeof(buf))
+	    {
+	      /* Do it the old way. Can this ever happen? */
+	      while (count--)
+		{
+		  x = bfd_set_section_contents (stdoutput, sec,
+						fill_literal,
+						(file_ptr) offset,
+						(bfd_size_type) fill_size);
+		  if (x == false)
+		    {
+		      bfd_perror (stdoutput->filename);
+		      as_perror ("FATAL: Can't write %s", stdoutput->filename);
+		      exit (EXIT_FAILURE);
+		    }
+		  offset += fill_size;
+		}
+	    }
+	  else
+	    {
+	      /* Build a buffer full of fill objects and output it as
+		 often as necessary. This saves on the overhead of
+		 potentially lots of bfd_set_section_contents calls.  */
+	      int n_per_buf, i;
+	      if (fill_size == 1)
+		{
+		  n_per_buf = sizeof (buf);
+		  memset (buf, *fill_literal, n_per_buf);
+		}
+	      else
+		{
+		  char *bufp;
+		  n_per_buf = sizeof(buf)/fill_size;
+		  for (i = n_per_buf, bufp = buf; i; i--, bufp += fill_size)
+		    memcpy(bufp, fill_literal, fill_size);
+		}
+	      for (; count > 0; count -= n_per_buf)
+		{
+		  n_per_buf = n_per_buf > count ? count : n_per_buf;
+		  x = bfd_set_section_contents (stdoutput, sec,
+						buf, (file_ptr) offset,
+						(bfd_size_type) n_per_buf * fill_size);
+		  if (x != true)
+		    as_fatal ("Cannot write to output file.");
+		  offset += n_per_buf * fill_size;
+		}
+	    }
 	}
-#else
-	while (count--)
-	  {
-	    x = bfd_set_section_contents (stdoutput, sec,
-					  fill_literal, (file_ptr) offset,
-					  (bfd_size_type) fill_size);
-	    if (x != true)
-	      as_fatal ("Cannot write to output file.");
-	    offset += fill_size;
-	  }
-#endif
     }
 }
 #endif
@@ -2332,7 +2322,8 @@ fixup_segment (fixP, this_segment_type)
 		  /* Let the target machine make the final determination
 		     as to whether or not a relocation will be needed to
 		     handle this fixup.  */
-		  if (!TC_FORCE_RELOCATION (fixP))
+		  
+		  if (TC_FORCE_RELOCATION (fixP))
 		    {
 		      fixP->fx_addsy = NULL;
 		      add_symbolP = NULL;
