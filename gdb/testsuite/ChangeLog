@@ -1,3 +1,9 @@
+2003-01-16  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/cplusfuncs.exp (print_addr_2_kfail): New procedure.
+	(test_paddr_hairy_functions): Call print_addr_2_kfail for
+	hairyfunc5 through hairyfunc7.  KFAIL for PR c++/19.
+
 2003-01-15  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdb.base/break.exp: Fix change of default location, because of
