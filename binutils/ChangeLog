@@ -1,3 +1,7 @@
+Thu Jun 25 04:52:45 1992  John Gilmore  (gnu at cygnus.com)
+
+	* nm.c (sorters):  Lint.  Remove excess whitespace.
+
 Wed Jun 24 13:48:07 1992  Per Bothner  (bothner@cygnus.com)
 
 	* nm.c (valueof macro):  Add missing parentheses.
