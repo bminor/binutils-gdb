@@ -1,6 +1,9 @@
 start-sanitize-v850
 Thu Jul 31 15:13:43 1997  Jeffrey A Law  (law@cygnus.com)
 
+	* config/tc-v850.c (md_assemble): Ignore the rest of the current
+	line if we encounter an error.
+
 	* config/tc-v850.c (md_assemble): Sign extend constants value
 	for hi and hi0 expressions.
 	(v850_insert_operand): Enable range checking for generic 16bit
