@@ -28,11 +28,11 @@ if [mi_gdb_start] {
     continue
 }
 
-mi_gdb_test "show architecture\n" \
+mi_gdb_test "show architecture" \
 	"&\"show architecture\\\\n\"\r\n~\"The target architecture.*\"\r\n\\^done" \
 	"show architecture"
 
-mi_gdb_test "47show architecture\n" \
+mi_gdb_test "47show architecture" \
 	"&\"show architecture\\\\n\"\r\n~\"The target architecture.*\"\r\n47\\^done" \
 	"47show architecture"
 
