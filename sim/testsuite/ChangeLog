@@ -1,3 +1,9 @@
+start-sanitize-sky
+Thu Jul 2 15:22:29 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
+
+	* sim/sky/pr16213.[dvpasm|c|brn]: Add a PR test case.
+
+end-sanitize-sky
 Wed Jul  1 15:57:54 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* sim/m32r/hw-trap.ms: New testcase.
@@ -29,7 +35,6 @@ Fri Jun 19 17:57:50 1998 Jillian Ye <jillian@cygnus.com>
 	and accurate respectively; also added and moved
 	files for this purpose.
 
-start-sanitize-sky
 Thu Jun 18 23:53:43 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* sim/sky/vureloc{.brn,-main.c,.dvpasm}: New files.
