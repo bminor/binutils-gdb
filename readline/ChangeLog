@@ -1,5 +1,8 @@
 Sun Jan 16 12:33:11 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* complete.c, bind.c: Include <sys/stat.h>.
+	* complete.c: Define X_OK if not defined by a system header.
+
 	* chardefs.h: Don't declare xmalloc.
 
 	* keymaps.h: Include "chardefs.h" not <readline/chardefs.h>.
