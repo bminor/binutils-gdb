@@ -1323,6 +1323,21 @@ _initialize_remote_mips ()
   add_target (&mips_ops);
 
   add_show_from_set (
+    add_set_cmd ("timeout", no_class, var_zinteger,
+		 (char *) &mips_receive_wait,
+		 "Set timeout in seconds for remote MIPS serial I/O.",
+		 &setlist),
+	&showlist);
+
+  add_show_from_set (
+    add_set_cmd ("retransmit-timeout", no_class, var_zinteger,
+		 (char *) &mips_retransmit_wait,
+	 "Set retransmit timeout in seconds for remote MIPS serial I/O.\n\
+This is the number of seconds to wait for an acknowledgement to a packet\n\
+before resending the packet.", &setlist),
+	&showlist);
+
+  add_show_from_set (
     add_set_cmd ("remotedebug", no_class, var_zinteger, (char *) &mips_debug,
 		   "Set debugging of remote MIPS serial I/O.\n\
 When non-zero, each packet sent or received with the remote target\n\

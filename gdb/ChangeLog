@@ -1,3 +1,9 @@
+Wed Jul 28 08:26:58 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* remote-mips.c (_initialize_remote_mips): Added "timeout" and
+	"retransmit-timeout" variables to set mips_receive_wait and
+	mips_retransmit_wait, respectively.
+
 Wed Jul 28 03:58:58 1993  (pes@regent.e-technik.tu-muenchen.de)
 
 	* symmisc.c (dump_msymbols):  Handle new mst_file_* types.
