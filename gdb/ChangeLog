@@ -1,3 +1,7 @@
+2003-05-02  David Carlton  <carlton@bactrian.org>
+
+	* config/djgpp/fnchange.lst: Add testsuite/gdb.c++/rtti files.
+
 2003-04-30  David Carlton  <carlton@bactrian.org>
 
 	* cp-namespace.c (get_namespace_objfile): Copy the namespace

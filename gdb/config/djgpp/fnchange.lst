@@ -261,6 +261,10 @@
 @V@/gdb/testsuite/gdb.c++/psmang2.cc @V@/gdb/testsuite/gdb.cxx/psmang2.cc
 @V@/gdb/testsuite/gdb.c++/ref-types.cc @V@/gdb/testsuite/gdb.cxx/ref-types.cc
 @V@/gdb/testsuite/gdb.c++/ref-types.exp @V@/gdb/testsuite/gdb.cxx/ref-types.exp
+@V@/gdb/testsuite/gdb.c++/rtti1.cc @V@/gdb/testsuite/gdb.cxx/rtti1.cc
+@V@/gdb/testsuite/gdb.c++/rtti2.cc @V@/gdb/testsuite/gdb.cxx/rtti2.cc
+@V@/gdb/testsuite/gdb.c++/rtti.h @V@/gdb/testsuite/gdb.cxx/rtti.h
+@V@/gdb/testsuite/gdb.c++/rtti.exp @V@/gdb/testsuite/gdb.cxx/rtti.exp
 @V@/gdb/testsuite/gdb.c++/templates.cc @V@/gdb/testsuite/gdb.cxx/templates.cc
 @V@/gdb/testsuite/gdb.c++/templates.exp @V@/gdb/testsuite/gdb.cxx/templates.exp
 @V@/gdb/testsuite/gdb.c++/try_catch.cc @V@/gdb/testsuite/gdb.cxx/try_catch.cc
