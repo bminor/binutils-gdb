@@ -36,12 +36,6 @@ put enum constants there.  And dbxread seems to invent a lot of typedefs
 we never see.  Use the new printpsym command to see the partial symbol table
 contents.
 
-FIXME: Change forward declarations of static functions to allow for compilers
-without prototypes.
-
-FIXME: Figure out a better way to tell gdb (all the debug reading routines)
-the names of the gccX_compiled flags.
-
 FIXME: Figure out a better way to tell gdb about the name of the function
 contain the user's entry point (I.E. main())
 
@@ -55,14 +49,11 @@ make this code more flexible and just use shorts, ints, and longs (and their
 sizes) where it seems appropriate.  I.E. we use a short int to hold DWARF
 tags, and assume that the tag size in the file is the same as sizeof(short).
 
-FIXME: Figure out how to get the name of the symbol indicating that a module
-has been compiled with gcc (gcc_compiledXX) in a more portable way than
-hardcoding it into the object file readers.
-
 FIXME: See other FIXME's and "ifdef 0" scattered throughout the code for
 other things to work on, if you get bored. :-)
 
 */
+
 #include <stdio.h>
 #ifdef __STDC__
 #include <stdarg.h>
@@ -77,6 +68,7 @@ other things to work on, if you get bored. :-)
 #include "symfile.h"
 #include "elf/dwarf.h"
 #include "ansidecl.h"
+#include "buildsym.h"
 
 #ifdef MAINTENANCE	/* Define to 1 to compile in some maintenance stuff */
 #define SQUAWK(stuff) dwarfwarn stuff
@@ -90,10 +82,12 @@ other things to work on, if you get bored. :-)
 
 typedef unsigned int DIEREF;	/* Reference to a DIE */
 
-#define GCC_COMPILED_FLAG_SYMBOL "gcc_compiled%"	/* FIXME */
-#define GCC2_COMPILED_FLAG_SYMBOL "gcc2_compiled%"	/* FIXME */
+#ifndef GCC_PRODUCER
+#define GCC_PRODUCER "GNU C "
+#endif
 
 #define STREQ(a,b)		(strcmp(a,b)==0)
+#define STREQN(a,b,n)		(strncmp(a,b,n)==0)
 
 /* The Amiga SVR4 header file <dwarf.h> defines AT_element_list as a
    FORM_BLOCK2, and this is the value emitted by the AT&T compiler.
@@ -233,49 +227,16 @@ struct dwfinfo {
 #define DBLENGTH(p) (((struct dwfinfo *)((p)->read_symtab_private))->dblength)
 #define LNFOFF(p) (((struct dwfinfo *)((p)->read_symtab_private))->lnfoff)
 
-/*  Record the symbols defined for each context in a linked list.  We don't
-    create a struct block for the context until we know how long to make it.
-    Global symbols for each file are maintained in the global_symbols list. */
+/* The generic symbol table building routines have separate lists for
+   file scope symbols and all all other scopes (local scopes).  So
+   we need to select the right one to pass to add_symbol_to_list().
+   We do it by keeping a pointer to the correct list in list_in_scope.
 
-struct pending_symbol {
-  struct pending_symbol *next;		/* Next pending symbol */
-  struct symbol *symbol;		/* The actual symbol */
-};
+   FIXME:  The original dwarf code just treated the file scope as the first
+   local scope, and all other local scopes as nested local scopes, and worked
+   fine.  Check to see if we really need to distinguish these in buildsym.c */
 
-static struct pending_symbol *global_symbols;	/* global funcs and vars */
-static struct block *global_symbol_block;
-
-/*  Line number entries are read into a dynamically expandable vector before
-    being added to the symbol table section.  Once we know how many there are
-    we can add them. */
-
-static struct linetable *line_vector;	/* Vector of line numbers. */
-static int line_vector_index;		/* Index of next entry.  */
-static int line_vector_length;		/* Current allocation limit */
-
-/* Scope information is kept in a scope tree, one node per scope.  Each time
-   a new scope is started, a child node is created under the current node
-   and set to the current scope.  Each time a scope is closed, the current
-   scope moves back up the tree to the parent of the current scope.
-
-   Each scope contains a pointer to the list of symbols defined in the scope,
-   a pointer to the block vector for the scope, a pointer to the symbol
-   that names the scope (if any), and the range of PC values that mark
-   the start and end of the scope.  */
-
-struct scopenode {
-    struct scopenode *parent;
-    struct scopenode *child;
-    struct scopenode *sibling;
-    struct pending_symbol *symbols;
-    struct block *block;
-    struct symbol *namesym;
-    CORE_ADDR lowpc;
-    CORE_ADDR highpc;
-};
-
-static struct scopenode *scopetree;
-static struct scopenode *scope;
+struct pending **list_in_scope;
 
 /* DIES which have user defined types or modified user defined types refer to
    other DIES for the type information.  Thus we need to associate the offset
@@ -317,17 +278,18 @@ EXFUN (scan_partial_symbols, (char *thisdie AND char *enddie));
 
 static void
 EXFUN (scan_compilation_units,
-       (char *filename AND CORE_ADDR addr AND char *thisdie AND char *enddie
+       (char *filename AND char *thisdie AND char *enddie
 	AND unsigned int dbfoff AND unsigned int lnoffset
         AND struct objfile *objfile));
 
 static struct partial_symtab *
-EXFUN(start_psymtab, (struct objfile *objfile AND CORE_ADDR addr
+EXFUN(dwarf_start_psymtab, (struct objfile *objfile AND CORE_ADDR addr
 		      AND char *filename AND CORE_ADDR textlow
 		      AND CORE_ADDR texthigh AND int dbfoff
 		      AND int curoff AND int culength AND int lnfoff
 		      AND struct partial_symbol *global_syms
 		      AND struct partial_symbol *static_syms));
+
 static void
 EXFUN(add_partial_symbol, (struct dieinfo *dip));
 
@@ -365,7 +327,7 @@ static struct type *
 EXFUN(decode_subscr_data, (char *scan AND char *end));
 
 static void
-EXFUN(read_array_type, (struct dieinfo *dip));
+EXFUN(dwarf_read_array_type, (struct dieinfo *dip));
 
 static void
 EXFUN(read_subroutine_type,
@@ -382,32 +344,6 @@ EXFUN(struct_type,
 
 static struct type *
 EXFUN(enum_type, (struct dieinfo *dip));
-
-static void
-EXFUN(start_symtab, (void));
-
-static void
-EXFUN(end_symtab,
-      (char *filename AND long language AND struct objfile *objfile));
-
-static int
-EXFUN(scopecount, (struct scopenode *node));
-
-static void
-EXFUN(openscope,
-      (struct symbol *namesym AND CORE_ADDR lowpc AND CORE_ADDR highpc));
-
-static void
-EXFUN(freescope, (struct scopenode *node));
-
-static struct block *
-EXFUN(buildblock, (struct pending_symbol *syms));
-
-static void
-EXFUN(closescope, (void));
-
-static void
-EXFUN(record_line, (int line AND CORE_ADDR pc));
 
 static void
 EXFUN(decode_line_numbers, (char *linetable));
@@ -430,16 +366,6 @@ EXFUN(decode_fund_type, (unsigned short fundtype));
 
 static char *
 EXFUN(create_name, (char *name AND struct obstack *obstackp));
-
-static void
-EXFUN(add_symbol_to_list,
-      (struct symbol *symbol AND struct pending_symbol **listhead));
-
-static struct block **
-EXFUN(gatherblocks, (struct block **dest AND struct scopenode *node));
-
-static struct blockvector *
-EXFUN(make_blockvector, (void));
 
 static struct type *
 EXFUN(lookup_utype, (DIEREF dieref));
@@ -530,18 +456,22 @@ DEFUN(dwarf_build_psymtabs,
     }
   
   /* From this point on, we don't need to pass mainline around, so zap
-     addr to zero if we don't need relocation. */
+     baseaddr to zero if we don't need relocation. */
 
   if (mainline)
     {
-      addr = 0;
+      baseaddr = 0;
+    }
+  else
+    {
+      baseaddr = addr;
     }
 
   /* Follow the compilation unit sibling chain, building a partial symbol
      table entry for each one.  Save enough information about each compilation
      unit to locate the full DWARF information later. */
   
-  scan_compilation_units (filename, addr, dbbase, dbbase + dbsize,
+  scan_compilation_units (filename, dbbase, dbbase + dbsize,
 			  dbfoff, lnoffset, objfile);
   
   do_cleanups (back_to);
@@ -605,6 +535,7 @@ NOTES
 */
 
 #ifdef __STDC__
+
 static void
 DEFUN(dwarfwarn, (fmt), char *fmt DOTS)
 {
@@ -622,6 +553,7 @@ DEFUN(dwarfwarn, (fmt), char *fmt DOTS)
   fflush (stderr);
   va_end (ap);
 }
+
 #else
 
 static void
@@ -644,7 +576,9 @@ dwarfwarn (va_alist)
   fflush (stderr);
   va_end (ap);
 }
+
 #endif
+
 /*
 
 LOCAL FUNCTION
@@ -717,9 +651,17 @@ DEFUN(read_lexical_block_scope, (dip, thisdie, enddie, objfile),
      char *enddie AND
      struct objfile *objfile)
 {
-  openscope (NULL, dip -> at_low_pc, dip -> at_high_pc);
+  register struct context_stack *new;
+
+  (void) push_context (0, dip -> at_low_pc);
   process_dies (thisdie + dip -> dielength, enddie, objfile);
-  closescope ();
+  new = pop_context ();
+  if (local_symbols != NULL)
+    {
+      finish_block (0, &local_symbols, new -> old_blocks, new -> start_addr,
+		    dip -> at_high_pc);
+    }
+  local_symbols = new -> locals;
 }
 
 /*
@@ -1204,11 +1146,11 @@ DEFUN(decode_subscr_data, (scan, end), char *scan AND char *end)
 
 LOCAL FUNCTION
 
-	read_array_type -- read TAG_array_type DIE
+	dwarf_read_array_type -- read TAG_array_type DIE
 
 SYNOPSIS
 
-	static void read_array_type (struct dieinfo *dip)
+	static void dwarf_read_array_type (struct dieinfo *dip)
 
 DESCRIPTION
 
@@ -1217,7 +1159,7 @@ DESCRIPTION
  */
 
 static void
-DEFUN(read_array_type, (dip), struct dieinfo *dip)
+DEFUN(dwarf_read_array_type, (dip), struct dieinfo *dip)
 {
   struct type *type;
   char *sub;
@@ -1431,7 +1373,7 @@ DEFUN(enum_type, (dip), struct dieinfo *dip)
 	  SYMBOL_CLASS (sym) = LOC_CONST;
 	  SYMBOL_TYPE (sym) = type;
 	  SYMBOL_VALUE (sym) = list -> field.bitpos;
-	  add_symbol_to_list (sym, &scope -> symbols);
+	  add_symbol_to_list (sym, list_in_scope);
 	}
       /* Now create the vector of fields, and record how big it is. This is
 	 where we reverse the order, by pulling the members of the list in
@@ -1481,22 +1423,27 @@ DEFUN(read_func_scope, (dip, thisdie, enddie, objfile),
      char *enddie AND
      struct objfile *objfile)
 {
-  struct symbol *sym;
+  register struct context_stack *new;
   
   if (entry_point >= dip -> at_low_pc && entry_point < dip -> at_high_pc)
     {
       entry_scope_lowpc = dip -> at_low_pc;
       entry_scope_highpc = dip -> at_high_pc;
     }
-  if (strcmp (dip -> at_name, "main") == 0)	/* FIXME: hardwired name */
+  if (STREQ (dip -> at_name, "main"))	/* FIXME: hardwired name */
     {
       main_scope_lowpc = dip -> at_low_pc;
       main_scope_highpc = dip -> at_high_pc;
     }
-  sym = new_symbol (dip);
-  openscope (sym, dip -> at_low_pc, dip -> at_high_pc);
+  new = push_context (0, dip -> at_low_pc);
+  new -> name = new_symbol (dip);
+  list_in_scope = &local_symbols;
   process_dies (thisdie + dip -> dielength, enddie, objfile);
-  closescope ();
+  new = pop_context ();
+  /* Make a block for the local symbols within.  */
+  finish_block (new -> name, &local_symbols, new -> old_blocks,
+		new -> start_addr, dip -> at_high_pc);
+  list_in_scope = &file_symbols;
 }
 
 /*
@@ -1529,56 +1476,42 @@ DEFUN(read_file_scope, (dip, thisdie, enddie, objfile),
      struct objfile *objfile)
 {
   struct cleanup *back_to;
+  struct symtab *symtab;
   
   if (entry_point >= dip -> at_low_pc && entry_point < dip -> at_high_pc)
     {
       startup_file_start = dip -> at_low_pc;
       startup_file_end = dip -> at_high_pc;
     }
+  if (dip -> at_producer != NULL)
+    {
+      processing_gcc_compilation =
+	STREQN (dip -> at_producer, GCC_PRODUCER, strlen (GCC_PRODUCER));
+    }
   numutypes = (enddie - thisdie) / 4;
   utypes = (struct type **) xmalloc (numutypes * sizeof (struct type *));
   back_to = make_cleanup (free, utypes);
   (void) memset (utypes, 0, numutypes * sizeof (struct type *));
-  start_symtab ();
-  openscope (NULL, dip -> at_low_pc, dip -> at_high_pc);
+  start_symtab (dip -> at_name, NULL, dip -> at_low_pc);
   decode_line_numbers (lnbase);
   process_dies (thisdie + dip -> dielength, enddie, objfile);
-  closescope ();
-  end_symtab (dip -> at_name, dip -> at_language, objfile);
+  symtab = end_symtab (dip -> at_high_pc, 0, 0, objfile);
+  /* FIXME:  The following may need to be expanded for other languages */
+  switch (dip -> at_language)
+    {
+      case LANG_C89:
+      case LANG_C:
+	symtab -> language = language_c;
+	break;
+      case LANG_C_PLUS_PLUS:
+	symtab -> language = language_cplus;
+	break;
+      default:
+	;
+    }
   do_cleanups (back_to);
   utypes = NULL;
   numutypes = 0;
-}
-
-/*
-
-LOCAL FUNCTION
-
-	start_symtab -- do initialization for starting new symbol table
-
-SYNOPSIS
-
-	static void start_symtab (void)
-
-DESCRIPTION
-
-	Called whenever we are starting to process dies for a new
-	compilation unit, to perform initializations.  Right now
-	the only thing we really have to do is initialize storage
-	space for the line number vector.
-
- */
-
-static void
-DEFUN_VOID (start_symtab)
-{
-  int nbytes;
-
-  line_vector_index = 0;
-  line_vector_length = 1000;
-  nbytes = sizeof (struct linetable);
-  nbytes += line_vector_length * sizeof (struct linetable_entry);
-  line_vector = (struct linetable *) xmalloc (nbytes);
 }
 
 /*
@@ -1653,7 +1586,7 @@ DEFUN(process_dies, (thisdie, enddie, objfile),
 	      read_subroutine_type (&di, thisdie, nextdie);
 	      break;
 	    case TAG_array_type:
-	      read_array_type (&di);
+	      dwarf_read_array_type (&di);
 	      break;
 	    default:
 	      (void) new_symbol (&di);
@@ -1662,368 +1595,6 @@ DEFUN(process_dies, (thisdie, enddie, objfile),
 	}
       thisdie = nextdie;
     }
-}
-
-/*
-
-LOCAL FUNCTION
-
-	end_symtab -- finish processing for a compilation unit
-
-SYNOPSIS
-
-	static void end_symtab (char *filename, long language)
-
-DESCRIPTION
-
-	Complete the symbol table entry for the current compilation
-	unit.  Make the struct symtab and put it on the list of all
-	such symtabs.
-
- */
-
-static void
-DEFUN(end_symtab, (filename, language, objfile),
-     char *filename AND long language AND struct objfile *objfile)
-{
-  struct symtab *symtab;
-  struct blockvector *blockvector;
-  int nbytes;
-  
-  /* Ignore a file that has no functions with real debugging info.  */
-  if (global_symbols == NULL && scopetree -> block == NULL)
-    {
-      free (line_vector);
-      line_vector = NULL;
-      line_vector_length = -1;
-      freescope (scopetree);
-      scope = scopetree = NULL;
-    }
-  
-  /* Create the blockvector that points to all the file's blocks.  */
-  
-  blockvector = make_blockvector ();
-  
-  /* Now create the symtab object for this source file.  */
-  
-  symtab = allocate_symtab (savestring (filename, strlen (filename)),
-			    objfile);
-  
-  symtab -> free_ptr = 0;
-  
-  /* Fill in its components.  */
-  symtab -> blockvector = blockvector;
-  symtab -> free_code = free_linetable;
-  
-  /* Save the line number information. */
-  
-  line_vector -> nitems = line_vector_index;
-  nbytes = sizeof (struct linetable);
-  if (line_vector_index > 1)
-    {
-      nbytes += (line_vector_index - 1) * sizeof (struct linetable_entry);
-    }
-  symtab -> linetable = (struct linetable *) xrealloc (line_vector, nbytes);
-  
-  /* FIXME:  The following may need to be expanded for other languages */
-  switch (language)
-    {
-      case LANG_C89:
-      case LANG_C:
-	symtab -> language = language_c;
-	break;
-      case LANG_C_PLUS_PLUS:
-	symtab -> language = language_cplus;
-	break;
-      default:
-	;
-    }
-
-  /* Link the new symtab into the list of such.  */
-  symtab -> next = symtab_list;
-  symtab_list = symtab;
-  
-  /* Recursively free the scope tree */
-  freescope (scopetree);
-  scope = scopetree = NULL;
-  
-  /* Reinitialize for beginning of new file. */
-  line_vector = 0;
-  line_vector_length = -1;
-}
-
-/*
-
-LOCAL FUNCTION
-
-	scopecount -- count the number of enclosed scopes
-
-SYNOPSIS
-
-	static int scopecount (struct scopenode *node)
-
-DESCRIPTION
-
-	Given pointer to a node, compute the size of the subtree which is
-	rooted in this node, which also happens to be the number of scopes
-	to the subtree.
- */
-
-static int
-DEFUN(scopecount, (node), struct scopenode *node)
-{
-  int count = 0;
-  
-  if (node != NULL)
-    {
-      count += scopecount (node -> child);
-      count += scopecount (node -> sibling);
-      count++;
-    }
-  return (count);
-}
-
-/*
-
-LOCAL FUNCTION
-
-	openscope -- start a new lexical block scope
-
-SYNOPSIS
-
-	static void openscope (struct symbol *namesym, CORE_ADDR lowpc,
-		CORE_ADDR highpc)
-
-DESCRIPTION
-
-	Start a new scope by allocating a new scopenode, adding it as the
-	next child of the current scope (if any) or as the root of the
-	scope tree, and then making the new node the current scope node.
- */
-
-static void
-DEFUN(openscope, (namesym, lowpc, highpc),
-     struct symbol *namesym AND
-     CORE_ADDR lowpc AND
-     CORE_ADDR highpc)
-{
-  struct scopenode *new;
-  struct scopenode *child;
-  
-  new = (struct scopenode *) xmalloc (sizeof (*new));
-  (void) memset (new, 0, sizeof (*new));
-  new -> namesym = namesym;
-  new -> lowpc = lowpc;
-  new -> highpc = highpc;
-  if (scope == NULL)
-    {
-      scopetree = new;
-    }
-  else if ((child = scope -> child) == NULL)
-    {
-      scope -> child = new;
-      new -> parent = scope;
-    }
-  else
-    {
-    while (child -> sibling != NULL)
-      {
-	child = child -> sibling;
-      }
-    child -> sibling = new;
-    new -> parent = scope;
-  }
-  scope = new;
-}
-
-/*
-
-LOCAL FUNCTION
-
-	freescope -- free a scope tree rooted at the given node
-
-SYNOPSIS
-
-	static void freescope (struct scopenode *node)
-
-DESCRIPTION
-
-	Given a pointer to a node in the scope tree, free the subtree
-	rooted at that node.  First free all the children and sibling
-	nodes, and then the node itself.  Used primarily for cleaning
-	up after ourselves and returning memory to the system.
- */
-
-static void
-DEFUN(freescope, (node), struct scopenode *node)
-{
-  if (node != NULL)
-    {
-      freescope (node -> child);
-      freescope (node -> sibling);
-      free (node);
-    }
-}
-
-/*
-
-LOCAL FUNCTION
-
-	buildblock -- build a new block from pending symbols list
-
-SYNOPSIS
-
-	static struct block *buildblock (struct pending_symbol *syms)
-
-DESCRIPTION
-
-	Given a pointer to a list of symbols, build a new block and free
-	the symbol list structure.  Also check each symbol to see if it
-	is the special symbol that flags that this block was compiled by
-	gcc, and if so, mark the block appropriately.
- */
-
-static struct block *
-DEFUN(buildblock, (syms), struct pending_symbol *syms)
-{
-  struct pending_symbol *next, *next1;
-  int i;
-  struct block *newblock;
-  int nbytes;
-  
-  for (next = syms, i = 0 ; next ; next = next -> next, i++) {;}
-  
-  /* Allocate a new block */
-  
-  nbytes = sizeof (struct block);
-  if (i > 1)
-    {
-      nbytes += (i - 1) * sizeof (struct symbol *);
-    }
-  newblock = (struct block *) obstack_alloc (symbol_obstack, nbytes);
-  (void) memset (newblock, 0, nbytes);
-  
-  /* Copy the symbols into the block.  */
-  
-  BLOCK_NSYMS (newblock) = i;
-  for (next = syms ; next ; next = next -> next)
-    {
-      BLOCK_SYM (newblock, --i) = next -> symbol;
-      if (STREQ (GCC_COMPILED_FLAG_SYMBOL, SYMBOL_NAME (next -> symbol)) ||
-	  STREQ (GCC2_COMPILED_FLAG_SYMBOL, SYMBOL_NAME (next -> symbol)))
-	{
-	  BLOCK_GCC_COMPILED (newblock) = 1;
-	}
-    }    
-  
-  /* Now free the links of the list, and empty the list.  */
-  
-  for (next = syms ; next ; next = next1)
-    {
-      next1 = next -> next;
-      free (next);
-    }
-  
-  return (newblock);
-}
-
-/*
-
-LOCAL FUNCTION
-
-	closescope -- close a lexical block scope
-
-SYNOPSIS
-
-	static void closescope (void)
-
-DESCRIPTION
-
-	Close the current lexical block scope.  Closing the current scope
-	is as simple as moving the current scope pointer up to the parent
-	of the current scope pointer.  But we also take this opportunity
-	to build the block for the current scope first, since we now have
-	all of it's symbols.
- */
-
-static void
-DEFUN_VOID(closescope)
-{
-  struct scopenode *child;
-  
-  if (scope == NULL)
-    {
-      error ("DWARF parse error, too many close scopes");
-    }
-  else
-    {
-      if (scope -> parent == NULL)
-	{
-	  global_symbol_block = buildblock (global_symbols);
-	  global_symbols = NULL;
-	  BLOCK_START (global_symbol_block) = scope -> lowpc + baseaddr;
-	  BLOCK_END (global_symbol_block) = scope -> highpc + baseaddr;
-	}
-      scope -> block = buildblock (scope -> symbols);
-      scope -> symbols = NULL;
-      BLOCK_START (scope -> block) = scope -> lowpc + baseaddr;
-      BLOCK_END (scope -> block) = scope -> highpc + baseaddr;
-    
-      /* Put the local block in as the value of the symbol that names it.  */
-    
-      if (scope -> namesym)
-	{
-	  SYMBOL_BLOCK_VALUE (scope -> namesym) = scope -> block;
-	  BLOCK_FUNCTION (scope -> block) = scope -> namesym;
-	}
-    
-    /*  Install this scope's local block as the superblock of all child
-	scope blocks. */
-    
-    for (child = scope -> child ; child ; child = child -> sibling)
-      {
-	BLOCK_SUPERBLOCK (child -> block) = scope -> block;
-      }
-    
-      scope = scope -> parent;
-    }
-}
-
-/*
-
-LOCAL FUNCTION
-
-	record_line -- record a line number entry in the line vector
-
-SYNOPSIS
-
-	static void record_line (int line, CORE_ADDR pc)
-
-DESCRIPTION
-
-	Given a line number and the corresponding pc value, record
-	this pair in the line number vector, expanding the vector as
-	necessary.
- */
-
-static void
-DEFUN(record_line, (line, pc), int line AND CORE_ADDR pc)
-{
-  struct linetable_entry *e;
-  int nbytes;
-  
-  /* Make sure line vector is big enough.  */
-  
-  if (line_vector_index + 2 >= line_vector_length)
-    {
-      line_vector_length *= 2;
-      nbytes = sizeof (struct linetable);
-      nbytes += (line_vector_length * sizeof (struct linetable_entry));
-      line_vector = (struct linetable *) xrealloc (line_vector, nbytes);
-    }
-  e = line_vector -> item + line_vector_index++;
-  e -> line = line;
-  e -> pc = pc;
 }
 
 /*
@@ -2114,137 +1685,10 @@ DEFUN(decode_line_numbers, (linetable), char *linetable)
 	  pc += base;
 	  if (line > 0)
 	    {
-	      record_line (line, pc);
+	      record_line (current_subfile, line, pc);
 	    }
 	}
     }
-}
-
-/*
-
-LOCAL FUNCTION
-
-	add_symbol_to_list -- add a symbol to head of current symbol list
-
-SYNOPSIS
-
-	static void add_symbol_to_list (struct symbol *symbol, struct
-		pending_symbol **listhead)
-
-DESCRIPTION
-
-	Given a pointer to a symbol and a pointer to a pointer to a
-	list of symbols, add this symbol as the current head of the
-	list.  Typically used for example to add a symbol to the
-	symbol list for the current scope.
-
- */
-
-static void
-DEFUN(add_symbol_to_list, (symbol, listhead),
-     struct symbol *symbol AND struct pending_symbol **listhead)
-{
-  struct pending_symbol *link;
-  
-  if (symbol != NULL)
-    {
-      link = (struct pending_symbol *) xmalloc (sizeof (*link));
-      link -> next = *listhead;
-      link -> symbol = symbol;
-      *listhead = link;
-    }
-}
-
-/*
-
-LOCAL FUNCTION
-
-	gatherblocks -- walk a scope tree and build block vectors
-
-SYNOPSIS
-
-	static struct block **gatherblocks (struct block **dest,
-		struct scopenode *node)
-
-DESCRIPTION
-
-	Recursively walk a scope tree rooted in the given node, adding blocks
-	to the array pointed to by DEST, in preorder.  I.E., first we add the
-	block for the current scope, then all the blocks for child scopes,
-	and finally all the blocks for sibling scopes.
- */
-
-static struct block **
-DEFUN(gatherblocks, (dest, node),
-      struct block **dest AND struct scopenode *node)
-{
-  if (node != NULL)
-    {
-      *dest++ = node -> block;
-      dest = gatherblocks (dest, node -> child);
-      dest = gatherblocks (dest, node -> sibling);
-    }
-  return (dest);
-}
-
-/*
-
-LOCAL FUNCTION
-
-	make_blockvector -- make a block vector from current scope tree
-
-SYNOPSIS
-
-	static struct blockvector *make_blockvector (void)
-
-DESCRIPTION
-
-	Make a blockvector from all the blocks in the current scope tree.
-	The first block is always the global symbol block, followed by the
-	block for the root of the scope tree which is the local symbol block,
-	followed by all the remaining blocks in the scope tree, which are all
-	local scope blocks.
-
-NOTES
-
-	Note that since the root node of the scope tree is created at the time
-	each file scope is entered, there are always at least two blocks,
-	neither of which may have any symbols, but always contribute a block
-	to the block vector.  So the test for number of blocks greater than 1
-	below is unnecessary given bug free code.
-
-	The resulting block structure varies slightly from that produced
-	by dbxread.c, in that block 0 and block 1 are sibling blocks while
-	with dbxread.c, block 1 is a child of block 0.  This does not
-	seem to cause any problems, but probably should be fixed. (FIXME)
- */
-
-static struct blockvector *
-DEFUN_VOID(make_blockvector)
-{
-  struct blockvector *blockvector = NULL;
-  int i;
-  int nbytes;
-  
-  /* Recursively walk down the tree, counting the number of blocks.
-     Then add one to account for the global's symbol block */
-  
-  i = scopecount (scopetree) + 1;
-  nbytes = sizeof (struct blockvector);
-  if (i > 1)
-    {
-      nbytes += (i - 1) * sizeof (struct block *);
-    }
-  blockvector = (struct blockvector *)
-    obstack_alloc (symbol_obstack, nbytes);
-  
-  /* Copy the blocks into the blockvector. */
-  
-  BLOCKVECTOR_NBLOCKS (blockvector) = i;
-  BLOCKVECTOR_BLOCK (blockvector, 0) = global_symbol_block;
-  gatherblocks (&BLOCKVECTOR_BLOCK (blockvector, 1), scopetree);
-  
-  return (blockvector);
 }
 
 /*
@@ -2584,7 +2028,7 @@ DEFUN(init_psymbol_list, (total_symbols), int total_symbols)
 
 LOCAL FUNCTION
 
-	start_psymtab -- allocate and partially fill a partial symtab entry
+	dwarf_start_psymtab -- allocate and fill a partial symtab entry
 
 DESCRIPTION
 
@@ -2603,7 +2047,7 @@ DESCRIPTION
  */
 
 static struct partial_symtab *
-DEFUN(start_psymtab,
+DEFUN(dwarf_start_psymtab,
       (objfile, addr, filename, textlow, texthigh, dbfoff, curoff,
        culength, lnfoff, global_syms, static_syms),
       struct objfile *objfile AND
@@ -2879,9 +2323,8 @@ RETURNS
 
 static void
 DEFUN(scan_compilation_units,
-      (filename, addr, thisdie, enddie, dbfoff, lnoffset, objfile),
+      (filename, thisdie, enddie, dbfoff, lnoffset, objfile),
       char *filename AND
-      CORE_ADDR addr AND
       char *thisdie AND
       char *enddie AND
       unsigned int dbfoff AND
@@ -2920,9 +2363,9 @@ DEFUN(scan_compilation_units,
 	  curoff = thisdie - dbbase;
 	  culength = nextdie - thisdie;
 	  curlnoffset = di.has_at_stmt_list ? lnoffset + di.at_stmt_list : 0;
-	  pst = start_psymtab (objfile, addr, di.at_name,
-				     di.at_low_pc + addr,
-				     di.at_high_pc + addr,
+	  pst = dwarf_start_psymtab (objfile, baseaddr, di.at_name,
+				     di.at_low_pc,
+				     di.at_high_pc,
 				     dbfoff, curoff, culength, curlnoffset,
 				     global_psymbols.next,
 				     static_psymbols.next);
@@ -2982,12 +2425,12 @@ DEFUN(new_symbol, (dip), struct dieinfo *dip)
       switch (dip -> dietag)
 	{
 	case TAG_label:
-	  SYMBOL_VALUE (sym) = dip -> at_low_pc + baseaddr;
+	  SYMBOL_VALUE (sym) = dip -> at_low_pc;
 	  SYMBOL_CLASS (sym) = LOC_LABEL;
 	  break;
 	case TAG_global_subroutine:
 	case TAG_subroutine:
-	  SYMBOL_VALUE (sym) = dip -> at_low_pc + baseaddr;
+	  SYMBOL_VALUE (sym) = dip -> at_low_pc;
 	  SYMBOL_TYPE (sym) = lookup_function_type (SYMBOL_TYPE (sym));
 	  SYMBOL_CLASS (sym) = LOC_BLOCK;
 	  if (dip -> dietag == TAG_global_subroutine)
@@ -2996,7 +2439,7 @@ DEFUN(new_symbol, (dip), struct dieinfo *dip)
 	    }
 	  else
 	    {
-	      add_symbol_to_list (sym, &scope -> symbols);
+	      add_symbol_to_list (sym, list_in_scope);
 	    }
 	  break;
 	case TAG_global_variable:
@@ -3013,8 +2456,8 @@ DEFUN(new_symbol, (dip), struct dieinfo *dip)
 	    }
 	  else
 	    {
-	      add_symbol_to_list (sym, &scope -> symbols);
-	      if (scope -> parent != NULL)
+	      add_symbol_to_list (sym, list_in_scope);
+	      if (context_stack_depth > 0)
 		{
 		  if (isreg)
 		    {
@@ -3037,7 +2480,7 @@ DEFUN(new_symbol, (dip), struct dieinfo *dip)
 	    {
 	      SYMBOL_VALUE (sym) = locval (dip -> at_location);
 	    }
-	  add_symbol_to_list (sym, &scope -> symbols);
+	  add_symbol_to_list (sym, list_in_scope);
 	  if (isreg)
 	    {
 	      SYMBOL_CLASS (sym) = LOC_REGPARM;
@@ -3056,12 +2499,12 @@ DEFUN(new_symbol, (dip), struct dieinfo *dip)
 	case TAG_enumeration_type:
 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
 	  SYMBOL_NAMESPACE (sym) = STRUCT_NAMESPACE;
-	  add_symbol_to_list (sym, &scope -> symbols);
+	  add_symbol_to_list (sym, list_in_scope);
 	  break;
 	case TAG_typedef:
 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
 	  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
-	  add_symbol_to_list (sym, &scope -> symbols);
+	  add_symbol_to_list (sym, list_in_scope);
 	  break;
 	default:
 	  /* Not a tag we recognize.  Hopefully we aren't processing trash
@@ -3533,10 +2976,12 @@ DEFUN(completedieinfo, (dip), struct dieinfo *dip)
 	  break;
 	case AT_low_pc:
 	  (void) memcpy (&dip -> at_low_pc, diep, sizeof (long));
+	  dip -> at_low_pc += baseaddr;
 	  dip -> has_at_low_pc = 1;
 	  break;
 	case AT_high_pc:
 	  (void) memcpy (&dip -> at_high_pc, diep, sizeof (long));
+	  dip -> at_high_pc += baseaddr;
 	  break;
 	case AT_language:
 	  (void) memcpy (&dip -> at_language, diep, sizeof (long));

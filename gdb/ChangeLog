@@ -1,3 +1,25 @@
+Fri Jan 10 13:47:06 1992  Fred Fish  (fnf at cygnus.com)
+
+	* dwarfread.c (start_symtab, end_symtab, scopecount, openscope,
+	freescope, buildblock closescope, record_line, add_symbol_to_list,
+	gatherblocks, make_blockvector):  Extensive changes to switch
+	to generic symbol table building code in buildsym.c.  Remove
+	scope tree structures and functions, symbol table building
+	functions, and lots of other small changes.
+
+	* dwarfread.c:  Add new macros GCC_PRODUCER and STREQN.  Remove
+	GCC_COMPILED_FLAG_SYMBOL and GCC2_COMPILED_FLAG_SYMBOL.
+
+Tue Jan  7 13:09:57 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* buildsym.c (cleanup_undefined_types):  Add support for enums.
+	This fixes the 'GDB internal error.  cleanup_undefined_types with
+	bad type' problem.
+
+Sun Jan  5 09:47:50 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* dbxread.c:  detect gcc2 compilations.
+
 Thu Jan  2 15:07:41 1992  John Gilmore  (gnu at cygnus.com)
 
 	* sparc-pinsn.c:  Rename bitfields that overlap with macro names
