@@ -1,3 +1,7 @@
+2004-02-20  J. brobecker  <brobecker@gnat.com>
+
+	* PROBLEMS: Add description of problem documented under gdb/1560.
+
 2004-02-20  Mark Kettenis  <kettenis@gnu.org>
 
 	* amd64obsd-tdep.c: Include "regset.h" and "i387-tdep.h".  Fix
