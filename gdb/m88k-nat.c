@@ -47,14 +47,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* #include <sys/ptrace.h> */
 
 /* define offsets to the pc instruction offsets in ptrace_user struct */
-#define SXIP_OFFSET (char *)&u.pt_sigframe.sig_sxip - (char *)&u
-#define SNIP_OFFSET (char *)&u.pt_sigframe.sig_snip - (char *)&u
-#define SFIP_OFFSET (char *)&u.pt_sigframe.sig_sfip - (char *)&u
+#define SXIP_OFFSET ((char *)&u.pt_sigframe.sig_sxip - (char *)&u)
+#define SNIP_OFFSET ((char *)&u.pt_sigframe.sig_snip - (char *)&u)
+#define SFIP_OFFSET ((char *)&u.pt_sigframe.sig_sfip - (char *)&u)
 #else
 /* define offsets to the pc instruction offsets in ptrace_user struct */
-#define SXIP_OFFSET (char *)&u.pt_sigframe.dg_sigframe.sc_sxip - (char *)&u
-#define SNIP_OFFSET (char *)&u.pt_sigframe.dg_sigframe.sc_snip - (char *)&u
-#define SFIP_OFFSET (char *)&u.pt_sigframe.dg_sigframe.sc_sfip - (char *)&u
+#define SXIP_OFFSET ((char *)&u.pt_sigframe.dg_sigframe.sc_sxip - (char *)&u)
+#define SNIP_OFFSET ((char *)&u.pt_sigframe.dg_sigframe.sc_snip - (char *)&u)
+#define SFIP_OFFSET ((char *)&u.pt_sigframe.dg_sigframe.sc_sfip - (char *)&u)
 #endif
 
 extern int have_symbol_file_p();

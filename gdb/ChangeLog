@@ -1,5 +1,8 @@
 Thu Mar  4 08:22:55 1993  Fred Fish  (fnf@cygnus.com)
 
+	* m88k-nat-c (SXIP_OFFSET, SNIP_OFFSET, SFIP_OFFSET):  Enclose
+	macro definitions in parenthesis.  Bug reported by karl@hq.ileaf.com.
+
 	* dbxread.c (dbx_symfile_init):  Catch the case where there is
 	no string table, but the only way we find out is by reading zero
 	bytes from EOF.
