@@ -1,5 +1,5 @@
 /* Main program of GNU linker.
-   Copyright (C) 1991, 1993, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94 Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
 This file is part of GLD, the Gnu Linker.
@@ -132,7 +132,26 @@ static struct bfd_link_callbacks link_callbacks =
 
 struct bfd_link_info link_info;
 
-extern int main PARAMS ((int, char **));
+static void
+remove_output ()
+{
+  if (output_filename) 
+    {
+      if (output_bfd && output_bfd->iostream)
+	fclose((FILE *)(output_bfd->iostream));
+      if (delete_output_file_on_failure)
+	unlink (output_filename);
+    }
+}
+
+/* Prevent remove_output from doing anything.
+   Called after a successful link.  */
+
+static void
+preserve_output ()
+{
+  output_filename = NULL;
+}
 
 int
 main (argc, argv)
@@ -145,6 +164,8 @@ main (argc, argv)
   program_name = argv[0];
 
   bfd_init ();
+
+  atexit (remove_output);
 
   /* Initialize the data about options.  */
   trace_files = trace_file_tries = version_printed = false;
@@ -195,7 +216,7 @@ main (argc, argv)
 	{
 	  /* sizeof counts the terminating NUL.  */
 	  size_t size = strlen (s) + sizeof ("-T ");
-	  char *buf = (char *) ldmalloc(size);
+	  char *buf = (char *) xmalloc(size);
 	  sprintf (buf, "-T %s", s);
 	  parse_line (buf, 0);
 	  free (buf);
@@ -213,7 +234,7 @@ main (argc, argv)
   if (lang_has_input_file == false)
     {
       if (version_printed)
-	exit (0);
+	xexit (0);
       einfo ("%P%F: no input files\n");
     }
 
@@ -283,7 +304,7 @@ main (argc, argv)
 	fclose ((FILE *) (output_bfd->iostream));
 
       unlink (output_filename);
-      exit (1);
+      xexit (1);
     }
   else
     {
@@ -302,7 +323,8 @@ main (argc, argv)
 	       (long) (lim - (char *) &environ));
     }
 
-  exit (0);
+  atexit (preserve_output);
+  xexit (0);
   return 0;
 }
 
@@ -376,7 +398,7 @@ check_for_scripts_dir (dir)
 
   dirlen = strlen (dir);
   /* sizeof counts the terminating NUL.  */
-  buf = (char *) ldmalloc (dirlen + sizeof("/ldscripts"));
+  buf = (char *) xmalloc (dirlen + sizeof("/ldscripts"));
   sprintf (buf, "%s/ldscripts", dir);
 
   res = stat (buf, &s) == 0 && S_ISDIR (s.st_mode);
@@ -410,14 +432,14 @@ set_scripts_dir ()
       dirlen = end - program_name;
       /* Make a copy of program_name in dir.
 	 Leave room for later "/../lib".  */
-      dir = (char *) ldmalloc (dirlen + 8);
+      dir = (char *) xmalloc (dirlen + 8);
       strncpy (dir, program_name, dirlen);
       dir[dirlen] = '\0';
     }
   else
     {
       dirlen = 1;
-      dir = (char *) ldmalloc (dirlen + 8);
+      dir = (char *) xmalloc (dirlen + 8);
       strcpy (dir, ".");
     }
 
@@ -439,7 +461,7 @@ add_ysym (name)
   if (link_info.notice_hash == (struct bfd_hash_table *) NULL)
     {
       link_info.notice_hash = ((struct bfd_hash_table *)
-			       ldmalloc (sizeof (struct bfd_hash_table)));
+			       xmalloc (sizeof (struct bfd_hash_table)));
       if (! bfd_hash_table_init_n (link_info.notice_hash,
 				   bfd_hash_newfunc,
 				   61))
@@ -474,12 +496,12 @@ add_keepsyms_file (filename)
     }
 
   link_info.keep_hash = ((struct bfd_hash_table *)
-			 ldmalloc (sizeof (struct bfd_hash_table)));
+			 xmalloc (sizeof (struct bfd_hash_table)));
   if (! bfd_hash_table_init (link_info.keep_hash, bfd_hash_newfunc))
     einfo ("%P%F: bfd_hash_table_init failed: %E\n");
 
   bufsize = 100;
-  buf = (char *) ldmalloc (bufsize);
+  buf = (char *) xmalloc (bufsize);
 
   c = getc (file);
   while (c != EOF)
@@ -498,7 +520,7 @@ add_keepsyms_file (filename)
 	      if (len >= bufsize)
 		{
 		  bufsize *= 2;
-		  buf = ldrealloc (buf, bufsize);
+		  buf = xrealloc (buf, bufsize);
 		}
 	      c = getc (file);
 	    }
@@ -532,7 +554,7 @@ add_archive_element (info, abfd, name)
   lang_input_statement_type *input;
 
   input = ((lang_input_statement_type *)
-	   ldmalloc ((bfd_size_type) sizeof (lang_input_statement_type)));
+	   xmalloc ((bfd_size_type) sizeof (lang_input_statement_type)));
   input->filename = abfd->filename;
   input->local_sym_name = abfd->filename;
   input->the_bfd = abfd;

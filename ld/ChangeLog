@@ -1,3 +1,17 @@
+Fri Feb  4 16:26:08 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* ldmisc.c (ldmalloc, xmalloc, ldrealloc, xrealloc): Functions
+	deleted; will use libiberty versions instead.
+	* ldctor.c ldfile.c ldlang.c ldmain.c ldmisc.c ldmisc.h lexsup.c
+	mri.c Makefile.in: Change callers.
+
+	* ldmisc.c (vfinfo): Remove cleanup code.
+	* ldmain.c (remove_output): Put it here (new function).
+	(preserve_output): New function.
+	(main): Register remove_output and preserve_output with atexit.
+	* ldmain.c ldgram.y: Call xexit instead of exit.
+	* ldmisc.h: Declare xexit.
+
 Fri Feb  4 15:19:01 1994  Steve Chamberlain  (sac@cygnus.com)
 
 	* Makefile.in: Lots of new H8/500 memory models.

@@ -1,5 +1,5 @@
 /* Linker command language support.
-   Copyright 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94 Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
@@ -44,7 +44,7 @@ static lang_statement_union_type *new_statement PARAMS ((enum statement_enum,
 /* LOCALS */
 static struct obstack stat_obstack;
 
-#define obstack_chunk_alloc ldmalloc
+#define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
 static CONST char *startup_file;
 static lang_statement_list_type input_file_chain;
@@ -1777,7 +1777,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	    unsigned int symsize;
 
 	    symsize = get_symtab_upper_bound (i->owner);
-	    is->ifile->asymbols = (asymbol **) ldmalloc (symsize);
+	    is->ifile->asymbols = (asymbol **) xmalloc (symsize);
 	    is->ifile->symbol_count =
 	      bfd_canonicalize_symtab (i->owner, is->ifile->asymbols);
 
