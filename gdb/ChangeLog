@@ -1,5 +1,17 @@
 2004-10-30  Andrew Cagney  <cagney@gnu.org>
 
+	* config/alpha/tm-alpha.h (MDEBUG_EFI_SYMBOL_NAME): Rename
+	MIPS_EFI_SYMBOL_NAME.
+	(mips_extra_func_info_t, mips_extra_func_info): Delete.
+	(struct mdebug_extra_func_info): Replace struct
+	alpha_extra_func_info and alpha_extra_func_info_t.
+	* config/mips/tm-mips.h (MDEBUG_EFI_SYMBOL_NAME): Rename
+	MIPS_EFI_SYMBOL_NAME.
+	(struct mdebug_extra_func_info): Replace struct
+	alpha_extra_func_info and alpha_extra_func_info_t.
+	* objfiles.c, mips-tdep.c, mips-mdebug-tdep.c: Update.
+	* mdebugread.c, alpha-mdebug-tdep.c: 
+
 	Suggested by Mark Kettenis.
 	* config/mips/tm-mips.h (struct mips_extra_func_info): Delete
 	fields frame_adjust and high_addr.

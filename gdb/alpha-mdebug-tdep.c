@@ -108,7 +108,7 @@ find_proc_desc (CORE_ADDR pc)
 	   symbol reading.  */
 	sym = NULL;
       else
-	sym = lookup_symbol (MIPS_EFI_SYMBOL_NAME, b, LABEL_DOMAIN, 0, NULL);
+	sym = lookup_symbol (MDEBUG_EFI_SYMBOL_NAME, b, LABEL_DOMAIN, 0, NULL);
     }
 
   if (sym)

@@ -555,12 +555,13 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 		  SYMBOL_VALUE_ADDRESS (sym) +=
 		    ANOFFSET (delta, SYMBOL_SECTION (sym));
 		}
-#ifdef MIPS_EFI_SYMBOL_NAME
+#ifdef MDEBUG_EFI_SYMBOL_NAME
 	      /* Relocate Extra Function Info for ecoff.  */
 
 	      else if (SYMBOL_CLASS (sym) == LOC_CONST
 		       && SYMBOL_DOMAIN (sym) == LABEL_DOMAIN
-		       && strcmp (DEPRECATED_SYMBOL_NAME (sym), MIPS_EFI_SYMBOL_NAME) == 0)
+		       && strcmp (DEPRECATED_SYMBOL_NAME (sym),
+				  MDEBUG_EFI_SYMBOL_NAME) == 0)
 		ecoff_relocate_efi (sym, ANOFFSET (delta,
 						   s->block_line_section));
 #endif

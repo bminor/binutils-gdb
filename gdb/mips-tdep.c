@@ -88,7 +88,7 @@ static const char *mips_abi_strings[] = {
 
 struct frame_extra_info
 {
-  mips_extra_func_info_t proc_desc;
+  struct mdebug_extra_func_info *proc_desc;
   int num_args;
 };
 
@@ -2204,7 +2204,7 @@ mips_software_single_step (enum target_signal sig, int insert_breakpoints_p)
     target_remove_breakpoint (next_pc, break_mem);
 }
 
-static struct mips_extra_func_info temp_proc_desc;
+static struct mdebug_extra_func_info temp_proc_desc;
 
 /* Test whether the PC points to the return instruction at the
    end of a function. */
@@ -5281,8 +5281,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      MACHINE_CPROC_SP_OFFSET);
 #endif
   fprintf_unfiltered (file, "mips_dump_tdep: MIPS_DEFAULT_ABI = FIXME!\n");
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: MIPS_EFI_SYMBOL_NAME = multi-arch!!\n");
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: MIPS_LAST_ARG_REGNUM = %d (%d regs)\n",
 		      MIPS_LAST_ARG_REGNUM,

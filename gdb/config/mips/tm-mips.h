@@ -45,22 +45,21 @@ extern int mips_step_skips_delay (CORE_ADDR);
 
 #define RA_REGNUM 31		/* Contains return address value */
 
-/* Special symbol found in blocks associated with routines.  We can hang
-   mips_extra_func_info_t's off of this.  */
+/* Special symbol found in blocks associated with routines.  We can
+   hang mdebug_extra_func_info's off of this.  */
 
-#define MIPS_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
+#define MDEBUG_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
 extern void ecoff_relocate_efi (struct symbol *, CORE_ADDR);
 
 /* Specific information about a procedure.
    This overlays the MIPS's PDR records, 
    mipsread.c (ab)uses this to save memory */
 
-typedef struct mips_extra_func_info
-  {
-    long numargs;		/* number of args to procedure (was iopt) */
-    PDR pdr;			/* Procedure descriptor record */
-  }
- *mips_extra_func_info_t;
+struct mdebug_extra_func_info
+{
+  long numargs;		/* number of args to procedure (was iopt) */
+  PDR pdr;			/* Procedure descriptor record */
+};
 
 /* Functions for dealing with MIPS16 call and return stubs.  */
 #define DEPRECATED_IGNORE_HELPER_CALL(pc)			mips_ignore_helper (pc)

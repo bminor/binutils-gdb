@@ -75,11 +75,11 @@ compare_pdr_entries (const void *a, const void *b)
 
 static const struct objfile_data *mips_pdr_data;
 
-static mips_extra_func_info_t
+static struct mdebug_extra_func_info *
 non_heuristic_proc_desc (CORE_ADDR pc, CORE_ADDR *addrptr)
 {
   CORE_ADDR startaddr;
-  mips_extra_func_info_t proc_desc;
+  struct mdebug_extra_func_info *proc_desc;
   struct block *b = block_for_pc (pc);
   struct symbol *sym;
   struct obj_section *sec;
@@ -208,9 +208,9 @@ non_heuristic_proc_desc (CORE_ADDR pc, CORE_ADDR *addrptr)
 		*addrptr = pdr_pc;
 
 	      /* Fill in what we need of the proc_desc.  */
-	      proc_desc = (mips_extra_func_info_t)
+	      proc_desc = (struct mdebug_extra_func_info *)
 		obstack_alloc (&sec->objfile->objfile_obstack,
-			       sizeof (struct mips_extra_func_info));
+			       sizeof (struct mdebug_extra_func_info));
 	      PROC_LOW_ADDR (proc_desc) = pdr_pc;
 
 	      PROC_FRAME_OFFSET (proc_desc)
@@ -245,13 +245,13 @@ non_heuristic_proc_desc (CORE_ADDR pc, CORE_ADDR *addrptr)
       return NULL;
     }
 
-  sym = lookup_symbol (MIPS_EFI_SYMBOL_NAME, b, LABEL_DOMAIN, 0, NULL);
+  sym = lookup_symbol (MDEBUG_EFI_SYMBOL_NAME, b, LABEL_DOMAIN, 0, NULL);
 
   /* If we never found a PDR for this function in symbol reading, then
      examine prologues to find the information.  */
   if (sym)
     {
-      proc_desc = (mips_extra_func_info_t) SYMBOL_VALUE (sym);
+      proc_desc = (struct mdebug_extra_func_info *) SYMBOL_VALUE (sym);
       if (PROC_FRAME_REG (proc_desc) == -1)
 	return NULL;
       else
@@ -271,7 +271,7 @@ static struct mips_frame_cache *
 mips_mdebug_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
   CORE_ADDR startaddr = 0;
-  mips_extra_func_info_t proc_desc;
+  struct mdebug_extra_func_info *proc_desc;
   struct mips_frame_cache *cache;
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -413,7 +413,7 @@ mips_mdebug_frame_sniffer (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
   CORE_ADDR startaddr = 0;
-  mips_extra_func_info_t proc_desc;
+  struct mdebug_extra_func_info *proc_desc;
   int kernel_trap;
 
   /* Don't use this on MIPS16.  */

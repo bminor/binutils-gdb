@@ -34,7 +34,7 @@ struct symbol;
 /* Special symbol found in blocks associated with routines.  We can hang
    alpha_extra_func_info_t's off of this.  */
 
-#define MIPS_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
+#define MDEBUG_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
 extern void ecoff_relocate_efi (struct symbol *, CORE_ADDR);
 
 #define RA_REGNUM 26		/* XXXJRT needed by mdebugread.c */
@@ -43,18 +43,10 @@ extern void ecoff_relocate_efi (struct symbol *, CORE_ADDR);
    This overlays the ALPHA's PDR records, 
    alpharead.c (ab)uses this to save memory */
 
-typedef struct alpha_extra_func_info
-  {
-    long numargs;		/* number of args to procedure (was iopt) */
-    PDR pdr;			/* Procedure descriptor record */
-  }
- *alpha_extra_func_info_t;
-
-/* Define the extra_func_info that mipsread.c needs.
-   FIXME: We should define our own PDR interface, perhaps in a separate
-   header file. This would get rid of the <bfd.h> inclusion in all sources
-   and would abstract the mips/alpha interface from ecoff.  */
-#define mips_extra_func_info alpha_extra_func_info
-#define mips_extra_func_info_t alpha_extra_func_info_t
+struct mdebug_extra_func_info
+{
+  long numargs;		/* number of args to procedure (was iopt) */
+  PDR pdr;			/* Procedure descriptor record */
+};
 
 #endif /* TM_ALPHA_H */

@@ -60,17 +60,16 @@
 /* These are needed if the tm.h file does not contain the necessary
    mips specific definitions.  */
 
-#ifndef MIPS_EFI_SYMBOL_NAME
-#define MIPS_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
+#ifndef MDEBUG_EFI_SYMBOL_NAME
+#define MDEBUG_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
 extern void ecoff_relocate_efi (struct symbol *, CORE_ADDR);
 #include "coff/sym.h"
 #include "coff/symconst.h"
-typedef struct mips_extra_func_info
-  {
-    long numargs;
-    PDR pdr;
-  }
- *mips_extra_func_info_t;
+struct mdebug_extra_func_info
+{
+  long numargs;
+  PDR pdr;
+};
 #ifndef RA_REGNUM
 #define RA_REGNUM 0
 #endif
@@ -1181,7 +1180,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	{
 	  /* Finished with procedure */
 	  struct blockvector *bv = BLOCKVECTOR (top_stack->cur_st);
-	  struct mips_extra_func_info *e;
+	  struct mdebug_extra_func_info *e;
 	  struct block *b = top_stack->cur_block;
 	  struct type *ftype = top_stack->cur_type;
 	  int i;
@@ -1189,14 +1188,14 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  BLOCK_END (top_stack->cur_block) += sh->value;	/* size */
 
 	  /* Make up special symbol to contain procedure specific info */
-	  s = new_symbol (MIPS_EFI_SYMBOL_NAME);
+	  s = new_symbol (MDEBUG_EFI_SYMBOL_NAME);
 	  SYMBOL_DOMAIN (s) = LABEL_DOMAIN;
 	  SYMBOL_CLASS (s) = LOC_CONST;
 	  SYMBOL_TYPE (s) = mdebug_type_void;
-	  e = ((struct mips_extra_func_info *)
+	  e = ((struct mdebug_extra_func_info *)
 	       obstack_alloc (&current_objfile->objfile_obstack,
-			      sizeof (struct mips_extra_func_info)));
-	  memset (e, 0, sizeof (struct mips_extra_func_info));
+			      sizeof (struct mdebug_extra_func_info)));
+	  memset (e, 0, sizeof (struct mdebug_extra_func_info));
 	  SYMBOL_VALUE (s) = (long) e;
 	  e->numargs = top_stack->numargs;
 	  e->pdr.framereg = -1;
@@ -1846,13 +1845,13 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
 
 /* Parse a procedure descriptor record PR.  Note that the procedure is
    parsed _after_ the local symbols, now we just insert the extra
-   information we need into a MIPS_EFI_SYMBOL_NAME symbol that has
+   information we need into a MDEBUG_EFI_SYMBOL_NAME symbol that has
    already been placed in the procedure's main block.  Note also that
    images that have been partially stripped (ld -x) have been deprived
    of local symbols, and we have to cope with them here.  FIRST_OFF is
    the offset of the first procedure for this FDR; we adjust the
    address by this amount, but I don't know why.  SEARCH_SYMTAB is the symtab
-   to look for the function which contains the MIPS_EFI_SYMBOL_NAME symbol
+   to look for the function which contains the MDEBUG_EFI_SYMBOL_NAME symbol
    in question, or NULL to use top_stack->cur_block.  */
 
 static void parse_procedure (PDR *, struct symtab *, struct partial_symtab *);
@@ -1863,7 +1862,7 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
 {
   struct symbol *s, *i;
   struct block *b;
-  struct mips_extra_func_info *e;
+  struct mdebug_extra_func_info *e;
   char *sh_name;
 
   /* Simple rule to find files linked "-x" */
@@ -1959,11 +1958,11 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
 #endif
     }
 
-  i = mylookup_symbol (MIPS_EFI_SYMBOL_NAME, b, LABEL_DOMAIN, LOC_CONST);
+  i = mylookup_symbol (MDEBUG_EFI_SYMBOL_NAME, b, LABEL_DOMAIN, LOC_CONST);
 
   if (i)
     {
-      e = (struct mips_extra_func_info *) SYMBOL_VALUE (i);
+      e = (struct mdebug_extra_func_info *) SYMBOL_VALUE (i);
       e->pdr = *pr;
       e->pdr.isym = (long) s;
 
@@ -2017,9 +2016,9 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
 void
 ecoff_relocate_efi (struct symbol *sym, CORE_ADDR delta)
 {
-  struct mips_extra_func_info *e;
+  struct mdebug_extra_func_info *e;
 
-  e = (struct mips_extra_func_info *) SYMBOL_VALUE (sym);
+  e = (struct mdebug_extra_func_info *) SYMBOL_VALUE (sym);
 
   e->pdr.adr += delta;
 }
@@ -3929,13 +3928,13 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
 		{
 		  /* Make up special symbol to contain
 		     procedure specific info */
-		  struct mips_extra_func_info *e =
-		  ((struct mips_extra_func_info *)
+		  struct mdebug_extra_func_info *e =
+		  ((struct mdebug_extra_func_info *)
 		   obstack_alloc (&current_objfile->objfile_obstack,
-				  sizeof (struct mips_extra_func_info)));
-		  struct symbol *s = new_symbol (MIPS_EFI_SYMBOL_NAME);
+				  sizeof (struct mdebug_extra_func_info)));
+		  struct symbol *s = new_symbol (MDEBUG_EFI_SYMBOL_NAME);
 
-		  memset (e, 0, sizeof (struct mips_extra_func_info));
+		  memset (e, 0, sizeof (struct mdebug_extra_func_info));
 		  SYMBOL_DOMAIN (s) = LABEL_DOMAIN;
 		  SYMBOL_CLASS (s) = LOC_CONST;
 		  SYMBOL_TYPE (s) = mdebug_type_void;
