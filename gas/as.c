@@ -950,9 +950,9 @@ perform_an_assembly_pass (argc, argv)
   bfd_set_section_flags (stdoutput, text_section,
 			 applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC
 				       | SEC_CODE | SEC_READONLY));
-  /* @@ FIXME -- SEC_CODE seems to mean code only, rather than code possibly.*/
   bfd_set_section_flags (stdoutput, data_section,
-			 applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC));
+			 applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC
+				       | SEC_DATA));
   bfd_set_section_flags (stdoutput, bss_section, applicable & SEC_ALLOC);
   seg_info (bss_section)->bss = 1;
   subseg_new (BFD_ABS_SECTION_NAME, 0);
