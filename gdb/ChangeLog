@@ -1,5 +1,9 @@
 2002-06-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-linux-nat.c (OLD_CANNOT_FETCH_REGISTER,
+	OLD_CANNOT_STORE_REGISTER, supply_gregset, fill_gregset): Replace
+	usage of NUM_GREGS with I386_NUM_GREGS.
+
 	* i386-linux-nat.c (fill_gregset): Remove redundant parentheses.
 
 	* i386bsd-nat.c: Include "i386-tdep.h".
