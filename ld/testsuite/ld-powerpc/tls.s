@@ -19,6 +19,9 @@ ie4:	.quad 0x56789abcdef01234
 le4:	.quad 0x6789abcdef012345
 le5:	.quad 0x789abcdef0123456
 
+	.type gd,@tls_object
+	.type ld,@tls_object
+
 	.text
 _start:
 #extern syms

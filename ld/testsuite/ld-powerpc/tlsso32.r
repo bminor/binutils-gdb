@@ -85,12 +85,12 @@ Symbol table '\.dynsym' contains 28 entries:
  +[0-9]+: 0+105f8 +0 SECTION LOCAL +DEFAULT +14 
  +[0-9]+: 0+1064c +0 SECTION LOCAL +DEFAULT +16 
  +[0-9]+: 0+10524 +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
- +[0-9]+: 0+ +0 NOTYPE +GLOBAL DEFAULT +UND gd
+ +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT +UND gd
  +[0-9]+: 0+30 +0 TLS +GLOBAL DEFAULT +8 le0
  +[0-9]+: 0+ +0 NOTYPE +GLOBAL DEFAULT +UND __tls_get_addr
  +[0-9]+: 0+20 +0 TLS +GLOBAL DEFAULT +8 ld0
  +[0-9]+: 0+34 +0 TLS +GLOBAL DEFAULT +8 le1
- +[0-9]+: 0+ +0 NOTYPE +GLOBAL DEFAULT +UND ld
+ +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT +UND ld
  +[0-9]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +6 _start
  +[0-9]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS __end
  +[0-9]+: [0-9a-f]+ +0 OBJECT +GLOBAL DEFAULT +13 _SDA_BASE_
@@ -134,12 +134,12 @@ Symbol table '\.symtab' contains 46 entries:
  +[0-9]+: 0+14 +0 TLS +LOCAL +DEFAULT +7 le4
  +[0-9]+: 0+18 +0 TLS +LOCAL +DEFAULT +7 le5
  +[0-9]+: 0+10524 +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
- +[0-9]+: 0+ +0 NOTYPE +GLOBAL DEFAULT +UND gd
+ +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT +UND gd
  +[0-9]+: 0+30 +0 TLS +GLOBAL DEFAULT +8 le0
  +[0-9]+: 0+ +0 NOTYPE +GLOBAL DEFAULT +UND __tls_get_addr
  +[0-9]+: 0+20 +0 TLS +GLOBAL DEFAULT +8 ld0
  +[0-9]+: 0+34 +0 TLS +GLOBAL DEFAULT +8 le1
- +[0-9]+: 0+ +0 NOTYPE +GLOBAL DEFAULT +UND ld
+ +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT +UND ld
  +[0-9]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +6 _start
  +[0-9]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS __end
  +[0-9]+: [0-9a-f]+ +0 OBJECT +GLOBAL DEFAULT +13 _SDA_BASE_

@@ -1,3 +1,12 @@
+2004-10-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/tls.s (gd, ld): Set tls type for undefined syms.
+	* ld-powerpc/tls32.s (gd, ld): Likewise.
+	* ld-powerpc/tlstoc.s (gd, ld): Likewise.
+	* ld-powerpc/tlsso.r: Update.
+	* ld-powerpc/tlsso32.r: Update.
+	* ld-powerpc/tlstocso.r: Update.
+
 2004-09-30  Paul Brook  <paul@codesourcery.com>
 
 	* ld-arm/arm-elf.exp: Add test for --target2=abs.
