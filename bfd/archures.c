@@ -604,21 +604,9 @@ bfd_default_set_arch_mach (abfd, arch, mach)
      enum bfd_architecture arch;
      unsigned long mach;
 {
-  const bfd_arch_info_type * const *app, *ap;
-
-  for (app = bfd_archures_list; *app != NULL; app++)
-    {
-      for (ap = *app; ap != NULL; ap = ap->next)
-	{
-	  if (ap->arch == arch
-	      && (ap->mach == mach
-		  || (mach == 0 && ap->the_default)))
-	    {
-	      abfd->arch_info = ap;
-	      return true;
-	    }
-	}
-    }
+  abfd->arch_info = bfd_lookup_arch (arch, mach);
+  if (abfd->arch_info != NULL)
+    return true;
 
   abfd->arch_info = &bfd_default_arch_struct;
   bfd_set_error (bfd_error_bad_value);
@@ -985,7 +973,9 @@ DESCRIPTION
 	Look for the architecure info structure which matches the
 	arguments @var{arch} and @var{machine}. A machine of 0 matches the
 	machine/architecture structure which marks itself as the
-	default.
+	default.  gdb relies on the default arch being the first
+	entry for the given ARCH so that all the entries for that
+	arch can be accessed via ap->next.
 */
 
 const bfd_arch_info_type *

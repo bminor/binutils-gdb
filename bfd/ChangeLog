@@ -1,3 +1,10 @@
+2002-04-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* archures.c (bfd_lookup_arch): Add comment on list order.
+	(bfd_default_set_arch_mach): Use bfd_lookup_arch.
+	* cpu-powerpc.c (bfd_powerpc_archs): Re-order so that the default
+	is always at head of list.
+
 2002-04-18  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* coff-arm.c (coff_thumb_pcrel_12, coff_thumb_pcrel_9,
