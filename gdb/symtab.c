@@ -258,13 +258,13 @@ gdb_mangle_name (type, i, j)
   char *field_name = TYPE_FN_FIELDLIST_NAME (type, i);
   char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
   char *newname = type_name_no_tag (type);
-  int is_constructor = newname != NULL && STREQ (field_name, newname);
-  int is_destructor = is_constructor && DESTRUCTOR_PREFIX_P (physname);
+  int is_constructor = (physname[0]=='_' && physname[1]=='_');
+  int is_destructor = DESTRUCTOR_PREFIX_P (physname);
   /* Need a new type prefix.  */
   char *const_prefix = method->is_const ? "C" : "";
   char *volatile_prefix = method->is_volatile ? "V" : "";
   char buf[20];
-#ifndef GCC_MANGLE_BUG
+#ifdef GCC_MANGLE_BUG
   int len = newname == NULL ? 0 : strlen (newname);
 
   if (is_destructor)
@@ -305,9 +305,10 @@ gdb_mangle_name (type, i, j)
   strcat (mangled_name, buf);
   /* If the class doesn't have a name, i.e. newname NULL, then we just
      mangle it using 0 for the length of the class.  Thus it gets mangled
-     as something starting with `::' rather than `classname::'.  */
+     as something starting with `::' rather than `classname::'. */ 
   if (newname != NULL)
     strcat (mangled_name, newname);
+
 #else
   char *opname;
 
