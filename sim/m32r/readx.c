@@ -716,10 +716,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   EXTRACT_FMT_RTE_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_RTE_CODE
       /* Fetch the input operands for the semantic handler.  */
-      OPRND (h_bsm_0) = CPU (h_bsm);
-      OPRND (h_bie_0) = CPU (h_bie);
-      OPRND (h_bcond_0) = CPU (h_bcond);
-      OPRND (h_bpc_0) = CPU (h_bpc);
+      OPRND (h_cr_6) = m32rx_h_cr_get (current_cpu, ((HOSTUINT) 6));
+      OPRND (h_cr_14) = m32rx_h_cr_get (current_cpu, ((HOSTUINT) 14));
+      OPRND (h_bpsw_0) = CPU (h_bpsw);
+      OPRND (h_bbpsw_0) = CPU (h_bbpsw);
 #undef OPRND
     }
     BREAK (read);
@@ -852,7 +852,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   EXTRACT_FMT_TRAP_VARS /* f-op1 f-r1 f-op2 f-uimm4 */
   EXTRACT_FMT_TRAP_CODE
       /* Fetch the input operands for the semantic handler.  */
-      OPRND (h_cr_0) = m32rx_h_cr_get (current_cpu, ((HOSTUINT) 0));
+      OPRND (h_cr_6) = m32rx_h_cr_get (current_cpu, ((HOSTUINT) 6));
+      OPRND (h_bpsw_0) = CPU (h_bpsw);
+      OPRND (h_psw_0) = m32rx_h_psw_get (current_cpu);
       OPRND (pc) = CPU (h_pc);
       OPRND (uimm4) = f_uimm4;
 #undef OPRND

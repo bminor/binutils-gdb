@@ -3047,25 +3047,25 @@ SEM_FN_NAME (m32rx,rte) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
 
 do {
   {
-    UBI opval = OPRND (h_bsm_0);
-    CPU (h_sm) = opval;
-    TRACE_RESULT (current_cpu, "sm-0", 'x', opval);
-  }
-  {
-    UBI opval = OPRND (h_bie_0);
-    CPU (h_ie) = opval;
-    TRACE_RESULT (current_cpu, "ie-0", 'x', opval);
-  }
-  {
-    UBI opval = OPRND (h_bcond_0);
-    CPU (h_cond) = opval;
-    TRACE_RESULT (current_cpu, "condbit", 'x', opval);
-  }
-  {
-    USI opval = ANDSI (OPRND (h_bpc_0), -4);
+    USI opval = ANDSI (OPRND (h_cr_6), -4);
     BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, opval));
     taken_p = 1;
     TRACE_RESULT (current_cpu, "pc", 'x', opval);
+  }
+  {
+    USI opval = OPRND (h_cr_14);
+    m32rx_h_cr_set (current_cpu, ((HOSTUINT) 6), opval);
+    TRACE_RESULT (current_cpu, "cr-6", 'x', opval);
+  }
+  {
+    UQI opval = OPRND (h_bpsw_0);
+    m32rx_h_psw_set (current_cpu, opval);
+    TRACE_RESULT (current_cpu, "psw-0", 'x', opval);
+  }
+  {
+    UQI opval = OPRND (h_bbpsw_0);
+    CPU (h_bpsw) = opval;
+    TRACE_RESULT (current_cpu, "bpsw-0", 'x', opval);
   }
 } while (0);
 
@@ -3843,14 +3843,29 @@ SEM_FN_NAME (m32rx,trap) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
 
 do {
   {
+    USI opval = OPRND (h_cr_6);
+    m32rx_h_cr_set (current_cpu, ((HOSTUINT) 14), opval);
+    TRACE_RESULT (current_cpu, "cr-14", 'x', opval);
+  }
+  {
     USI opval = ADDSI (OPRND (pc), 4);
     m32rx_h_cr_set (current_cpu, ((HOSTUINT) 6), opval);
     TRACE_RESULT (current_cpu, "cr-6", 'x', opval);
   }
   {
-    USI opval = ANDSI (SLLSI (OPRND (h_cr_0), 8), 65408);
-    m32rx_h_cr_set (current_cpu, ((HOSTUINT) 0), opval);
-    TRACE_RESULT (current_cpu, "cr-0", 'x', opval);
+    UQI opval = OPRND (h_bpsw_0);
+    CPU (h_bbpsw) = opval;
+    TRACE_RESULT (current_cpu, "bbpsw-0", 'x', opval);
+  }
+  {
+    UQI opval = OPRND (h_psw_0);
+    CPU (h_bpsw) = opval;
+    TRACE_RESULT (current_cpu, "bpsw-0", 'x', opval);
+  }
+  {
+    UQI opval = ANDQI (OPRND (h_psw_0), 128);
+    m32rx_h_psw_set (current_cpu, opval);
+    TRACE_RESULT (current_cpu, "psw-0", 'x', opval);
   }
   {
     SI opval = m32r_trap (current_cpu, OPRND (pc), OPRND (uimm4));
