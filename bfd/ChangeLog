@@ -1,3 +1,10 @@
+Tue Feb 28 12:53:09 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config.bfd (i[345]86-*-linuxelf*): New target.  Use i386-lelf.
+	(i[345]86-*-gnuelf*): New target.  Use i386-gelf.
+	* config/i386-lelf.mt: New file.
+	* config/i386-gelf.mt: New file.
+
 Mon Feb 27 12:58:25 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* config.bfd: add a29k-*-vxworks configuration.
