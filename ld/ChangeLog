@@ -1,3 +1,10 @@
+Tue Jul 20 12:01:49 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* Makefile.in (ALL_EMULATIONS): Delete em_i386linux.o (for which
+	there's no change log entry yet, tsk tsk) from the list of
+	emulations compiled in until Mark gets around to checking in
+	emulparams/i386linux.sh.
+
 Fri Jul 16 14:14:32 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* ldgram.y (OPTION_Lfile): New token.
