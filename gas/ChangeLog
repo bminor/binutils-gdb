@@ -1,3 +1,8 @@
+Thu Aug 24 20:41:05 2000  Denis Chertykov  <denisc@overta.ru>
+
+	* config/tc-avr.h (TC_IMPLICIT_LCOMM_ALIGNMENT): New macros.
+	Sets `.lcomm' alignment to zero.
+
 2000-08-23  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-i386.h <OBJ_MAYBE_ELF, OBJ_MAYBE_COFF>
