@@ -1,4 +1,9 @@
 start-sanitize-r5900
+Wed Sep 9 11:28:20 1998  Ron Unrau <runrau@cygnus.com>
+
+	* sim-main.h: track COP0 registers
+	* interp.c (sim_{fetch,store}_register): read/write COP0 registers
+
 Fri Sep  4 10:37:57 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* r5900.igen (mtsab): Correct typo in input register.
