@@ -152,7 +152,8 @@ coff_arm_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
   return bfd_reloc_continue;
 }
 
-#define TARGET_UNDERSCORE '_'
+/* #define TARGET_UNDERSCORE '_' */
+#define TARGET_UNDERSCORE '\0'
 
 #ifndef PCRELOFFSET
 #define PCRELOFFSET true
@@ -1748,6 +1749,7 @@ coff_arm_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
   return true;
 }
 
+#ifndef COFF_WITH_PE
 
 /* Called when merging the private data areas of two BFDs.
    This is important as it allows us to detect if we are
@@ -1764,19 +1766,12 @@ coff_arm_bfd_merge_private_bfd_data (ibfd, obfd)
   if (ibfd == obfd)
     return true;
 
-  /* If the two formats are different we cannot merge anything.  */
+  /* If the two formats are different we cannot merge anything.
+     This is not an error, since it is permissable to change the
+     input and output formats.  */
   if (ibfd->xvec != obfd->xvec)
-    {
-      _bfd_error_handler
-	("ERROR: %s is format '%s' whereas %s is format '%s'",
-	 bfd_get_filename (ibfd), bfd_get_target(ibfd), 
-	 bfd_get_filename (obfd), bfd_get_target(obfd)
-	 );
-      
-      bfd_set_error (bfd_error_wrong_format);
-      return false;
-    }
-
+    return true;
+  
   /* Verify that the APCS is the same for the two BFDs */
   if (APCS_SET (ibfd))
     {
@@ -1866,7 +1861,7 @@ coff_arm_bfd_print_private_bfd_data (abfd, ptr)
   
   BFD_ASSERT (abfd != NULL && ptr != NULL)
   
-  fprintf (file, "private flags = %x", coff_data( abfd )->flags);
+  fprintf (file, "private flags = %x", coff_data (abfd)->flags);
   
   if (APCS_SET (abfd))
     fprintf (file, ": [APCS-%d] [floats passed in %s registers] [%s]",
@@ -1977,11 +1972,12 @@ coff_arm_bfd_copy_private_bfd_data (src, dest)
 
   return true;
 }
+#endif /* not COFF_WITH_PE */
 
 /* Note:  the definitions here of LOCAL_LABEL_PREFIX and USER_LABEL_PREIFX
  *must* match the definitions on gcc/config/arm/semi.h.  */
 #define LOCAL_LABEL_PREFIX "."
-#define USER_LABEL_PREFIX "_"
+#define USER_LABEL_PREFIX ""
 
 static boolean
 coff_arm_is_local_label_name (abfd, name)
@@ -2018,11 +2014,13 @@ coff_arm_is_local_label_name (abfd, name)
 
 #define coff_bfd_is_local_label_name 		coff_arm_is_local_label_name
 #define coff_adjust_symndx			coff_arm_adjust_symndx
+#ifndef COFF_WITH_PE
 #define coff_bfd_final_link          		coff_arm_bfd_final_link 
 #define coff_bfd_merge_private_bfd_data		coff_arm_bfd_merge_private_bfd_data
 #define coff_bfd_print_private_bfd_data		coff_arm_bfd_print_private_bfd_data
 #define coff_bfd_set_private_flags              coff_arm_bfd_set_private_flags
 #define coff_bfd_copy_private_bfd_data          coff_arm_bfd_copy_private_bfd_data
+#endif
 
 #include "coffcode.h"
 

@@ -1,5 +1,8 @@
 Wed Nov 26 14:13:34 1997  Nick Clifton  <nickc@cygnus.com>
 
+	* coff-arm.c (TARGET_UNDERSCORE): Changed to match definition in
+	gcc/config/arm/semi.h
+
 	* coffcode.h (coff_slurp_symbol_table): Add ARM and Thumb symbol
 	classes. 
 
