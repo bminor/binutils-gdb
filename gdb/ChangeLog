@@ -1,5 +1,8 @@
 Sun May 28 23:10:07 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* defs.h: Include either varargs.h or stdarg.h (for va_list).
+	Fix stupid thinko in last change ("..." -> "va_list").
+
 	* defs.h (vprintf_filtered declaration): Add PARAMS prototype;
 	gcc-2.5 chokes on format attributes for unprototyped functions.
 	(vfprintf_filtered declaration): Likewise.
