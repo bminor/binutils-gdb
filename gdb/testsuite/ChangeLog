@@ -1,5 +1,7 @@
 Thu Jul  8 14:26:50 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.t06/signals.exp: Remove sparc xfail; bug fixed.
+
 	* gdb.t07/watchpoint.exp: Add xfail for hppa.
 
 	* gdb.t17/{gdbme.c,callfuncs.exp}: Add sum10 function, to test pa bug.
