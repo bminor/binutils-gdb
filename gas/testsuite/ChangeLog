@@ -1,3 +1,8 @@
+2004-11-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/general.s: Add movzb.
+	* gas/i386/general.l: Updated.
+
 2004-11-04  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/all/gas.exp: Exclude float.s for crisv32-*-*.
