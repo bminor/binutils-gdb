@@ -206,7 +206,7 @@ disassembler (abfd)
 #endif
 /* end-sanitize-tic80 */
 /* start-sanitize-sky */
-#ifdef ARCH_txvu_foo
+#ifdef ARCH_txvu
     case bfd_arch_txvu:
       disassemble = print_insn_txvu;
       break;
