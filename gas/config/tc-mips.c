@@ -523,7 +523,7 @@ static struct mips_cl_insn prev_prev_insn;
 
 /* If we don't want information for prev_insn or prev_prev_insn, we
    point the insn_mo field at this dummy integer.  */
-static const struct mips_opcode dummy_opcode = { NULL, NULL, 0, 0, 0, 0 };
+static const struct mips_opcode dummy_opcode = { NULL, NULL, 0, 0, 0, 0, 0 };
 
 /* Non-zero if prev_insn is valid.  */
 static int prev_insn_valid;

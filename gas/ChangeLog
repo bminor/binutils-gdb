@@ -1,3 +1,7 @@
+2005-01-19  Fred Fish  <fnf@specifixinc.com>
+
+	* config/tc-mips.c (dummy_opcode): Add init for new struct member.
+
 2005-01-19  Richard Sandiford  <rsandifo@redhat.com>
 
 	* read.c (convert_to_bignum): New function, split out from...
