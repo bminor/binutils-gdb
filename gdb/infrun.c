@@ -1472,12 +1472,16 @@ handle_inferior_event (struct execution_control_state *ecs)
 
 	/* We need to restart all the threads now,
 	 * unless we're running in scheduler-locked mode. 
-	 * FIXME: shouldn't we look at currently_stepping ()?
+	 * Use currently_stepping to determine whether to 
+	 * step or continue.
 	 */
+
 	if (scheduler_mode == schedlock_on)
-	  target_resume (ecs->ptid, 0, TARGET_SIGNAL_0);
+	  target_resume (ecs->ptid, 
+			 currently_stepping (ecs), TARGET_SIGNAL_0);
 	else
-	  target_resume (RESUME_ALL, 0, TARGET_SIGNAL_0);
+	  target_resume (RESUME_ALL, 
+			 currently_stepping (ecs), TARGET_SIGNAL_0);
 	ecs->infwait_state = infwait_normal_state;
 	prepare_to_wait (ecs);
 	return;
@@ -1879,6 +1883,21 @@ handle_inferior_event (struct execution_control_state *ecs)
 		if (remove_status != 0)
 		  {
 		    write_pc_pid (stop_pc - DECR_PC_AFTER_BREAK + 4, ecs->ptid);
+		    /* We need to restart all the threads now,
+		     * unles we're running in scheduler-locked mode. 
+		     * Use currently_stepping to determine whether to 
+		     * step or continue.
+		     */
+		    if (scheduler_mode == schedlock_on)
+		      target_resume (ecs->ptid, 
+				     currently_stepping (ecs), 
+				     TARGET_SIGNAL_0);
+		    else
+		      target_resume (RESUME_ALL, 
+				     currently_stepping (ecs), 
+				     TARGET_SIGNAL_0);
+		    prepare_to_wait (ecs);
+		    return;
 		  }
 		else
 		  {		/* Single step */
@@ -1892,17 +1911,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 		    prepare_to_wait (ecs);
 		    return;
 		  }
-
-		/* We need to restart all the threads now,
-		 * unles we're running in scheduler-locked mode. 
-		 * FIXME: shouldn't we look at currently_stepping ()?
-		 */
-		if (scheduler_mode == schedlock_on)
-		  target_resume (ecs->ptid, 0, TARGET_SIGNAL_0);
-		else
-		  target_resume (RESUME_ALL, 0, TARGET_SIGNAL_0);
-		prepare_to_wait (ecs);
-		return;
 	      }
 	    else
 	      {
