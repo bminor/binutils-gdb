@@ -1,3 +1,28 @@
+2002-10-11  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* elf32-sh.c (sh_elf_optimized_tls_reloc, sh_elf_mkobject,
+	sh_elf_object_p, dtpoff_base): New functions.
+	(sh_elf_howto_table): Add TLS relocs.
+	(sh_reloc_map): Likewise.
+	(sh_elf_info_to_howto): Support TLS relocs.
+	(elf_sh_link_hash_entry): Add tls_type and tls_tpoff32.
+	(sh_elf_hash_entry, sh_elf_tdata, sh_elf_local_got_tls_type):
+	New macros.
+	(sh_elf_obj_tdata): New.
+	(elf_sh_link_hash_table): Add tls_ldm_got.
+	(sh_elf_link_hash_table_create): Clear refcount of tls_ldm_got.
+	(allocate_dynrelocs): Support TLS relocs.
+	(sh_elf_size_dynamic_sections): Likewise.
+	(sh_elf_relocate_section): Support TLS relocs.  Don't try to find
+	.rela.got section when found already.  Return false after printing
+	error about unresolvable relocation.
+	(sh_elf_gc_sweep_hook): Support TLS relocs.
+	(sh_elf_check_relocs): Likewise.
+	(sh_elf_finish_dynamic_symbol): Likewise.
+	(bfd_elf32_mkobject, elf_backend_object_p): Define for TLS case.
+	* reloc.c: Add SH TLS relocs.
+	* bfd-in2.h, libbfd.h: Regenerate.
+
 2002-10-11  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.am: Run dep-am.

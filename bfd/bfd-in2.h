@@ -2505,6 +2505,14 @@ field in the instruction.  */
   BFD_RELOC_SH_IMM_HI16,
   BFD_RELOC_SH_IMM_HI16_PCREL,
   BFD_RELOC_SH_PT_16,
+  BFD_RELOC_SH_TLS_GD_32,
+  BFD_RELOC_SH_TLS_LD_32,
+  BFD_RELOC_SH_TLS_LDO_32,
+  BFD_RELOC_SH_TLS_IE_32,
+  BFD_RELOC_SH_TLS_LE_32,
+  BFD_RELOC_SH_TLS_DTPMOD32,
+  BFD_RELOC_SH_TLS_DTPOFF32,
+  BFD_RELOC_SH_TLS_TPOFF32,
 
 /* Thumb 23-, 12- and 9-bit pc-relative branches.  The lowest bit must
 be zero and is not stored in the instruction.  */
