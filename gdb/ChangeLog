@@ -1,3 +1,9 @@
+2003-09-25  Daniel Jacobowitz  <drow@mvista.com>
+
+	* stack.c: Include "reggroups.h".
+	(frame_info): Only display registers in all_reggroup.
+	* Makefile.in (stack.o): Update dependencies.
+
 2003-09-25  Jerome Guitton  <guitton@act-europe.fr>
 
 	* arm-tdep.c (arm_skip_prologue): Handle "sub ip, sp #n" and
