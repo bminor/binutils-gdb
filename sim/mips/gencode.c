@@ -639,7 +639,7 @@ static const struct instruction MIPS16_DECODE[] = {
 {"SUBU",    1, "11100xxxyyyddd11",  RRR,     SUB,     WORD | WORD32 },
 {"SW",      1, "11011xxxyyyWWWWW",  RRI,     STORE,   WORD },
 {"SWSP",    1, "11010yyyVVVVVVVVs", RI,      STORE,   WORD },
-{"SWRASP",  1, "01100010VVVVVVVVQs", RI,     STORE,   WORD },
+{"SWRASP",  1, "01100010VVVVVVVVQs", I8,     STORE,   WORD },
 {"XOR",     1, "11101wwwyyy01110",  RR,      XOR,     NONE }
 };
 
@@ -1098,7 +1098,7 @@ build_endian_shift(proc64,datalen,endbit,direction,shift)
      e_endshift direction;
      int shift;
 {
-  if (proc64 && (datalen == 4)) {
+  if (datalen == 4) {
     printf("    if ((vaddr & (1 << %d)) ^ (BigEndianCPU << %d)) {\n",endbit,endbit);
     printf("     memval %s= %d;\n",direction == s_left ? "<<" : ">>",shift);
     printf("    }\n");
@@ -1984,7 +1984,7 @@ build_instruction (doisa, features, mips16, insn)
        printf("     Prefetch(uncached,paddr,vaddr,isDATA,hint);\n");
       else {
 	printf("    {\n");
-	printf("     %s memval;\n",(proc64 ? "uword64" : "unsigned int"));
+	printf("     uword64 memval;\n");
 
 	if ((insn->flags & COPROC) && ((datalen != 4) && (datalen != 8))) {
 	  fprintf(stderr,"Co-processor transfer operation not WORD or DOUBLEWORD in length \"%s\"\n",insn->name);
@@ -2081,7 +2081,7 @@ build_instruction (doisa, features, mips16, insn)
 		  if (proc64 && (datalen == 4))
 		   printf("     GPR[destreg] = SIGNEXTEND(GPR[destreg],32);\n");
 		} else { /* store */
-		  printf("     memval = (op2 << (byte * 8));\n");
+		  printf("     memval = ((uword64) op2 << (byte * 8));\n");
 		  build_endian_shift(proc64,datalen,2,s_left,32);
 		  printf("     StoreMemory(uncached,(%s - byte),memval,paddr,vaddr,isREAL);\n",accesslength);
 		}
@@ -2189,9 +2189,9 @@ build_instruction (doisa, features, mips16, insn)
 
 	      printf("     paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));\n");
 	      printf("     byte = ((vaddr & mask) ^ (bigend << shift));\n");
-	      printf("     memval = (op2 << (8 * byte));\n");
+	      printf("     memval = ((uword64) op2 << (8 * byte));\n");
 	    } else
-	     if (proc64 && (datalen == 4)) { /* proc64 SC and SW */
+	     if (datalen == 4) { /* SC and SW */
 #if 1 /* see the comments attached to LOADDRMASK above */
 	       printf("     uword64 mask = 0x7;\n");
 #else
@@ -2207,11 +2207,14 @@ build_instruction (doisa, features, mips16, insn)
 			: "((instruction >> 26) & 0x3)"),
 		       ((insn->flags & FP) ? "fs" : "destreg"));
 	       else
-		printf("     memval = (op2 << (8 * byte));\n");
-	     } else { /* !proc64 SC and SW, plus proc64 SD and SCD */
+		printf("     memval = ((uword64) op2 << (8 * byte));\n");
+	     } else { /* SD and SCD */
+	       if (!(insn->flags & COPROC) && ((datalen == 8) || ((datalen == 4) & (insn->flags & UNSIGNED))) && !proc64) {
+		 fprintf(stderr,"Operation not available with 32bit wide memory access \"%s\"\n",insn->name);
+		 exit(4);
+	       }
 	       if (insn->flags & COPROC)
-		printf("     memval = (uword64)COP_S%c(%s,%s);\n",
-		       ((datalen == 8) ? 'D' : 'W'),
+		printf("     memval = (uword64)COP_SD(%s,%s);\n",
 		       ((insn->flags & REG)
 			? "1"
 			: "((instruction >> 26) & 0x3)"),

@@ -1,5 +1,11 @@
 Mon Dec 16 14:59:38 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* gencode.c (MIPS16_DECODE): SWRASP is I8, not RI.
+	(build_endian_shift): Don't check proc64.
+	(build_instruction): Always set memval to uword64.  Cast op2 to
+	uword64 when shifting it left in memory instructions.  Always use
+	the same code for stores--don't special case proc64.
+
 	* gencode.c (build_mips16_operands): Fix base PC value for PC
 	relative operands.
 	(build_instruction): Call JALDELAYSLOT rather than DELAYSLOT for a
