@@ -1,3 +1,11 @@
+2004-06-22  Aaron W. LaFramboise <aaron98wiridge9@aaronwl.com>
+
+	* ld/scripttemp/pe.sc (.CRT): Define ___crt_xc_start__,
+	___crt_xc_end__, ___crt_xi_start__, ___crt_xi_end__, ___crt_xl_start__,
+	___crt_xp_start__, ___crt_xp_end__, ___crt_xt_start__ and
+	___crt_xt_end__.
+	(.tls): Define ___tls_start__ and ___tls_end__.
+
 2004-06-21  Alexandre Oliva  <aoliva@redhat.com>
 
 	* emulparams/elf32frvfd.sh (GENERATE_PIE_SCRIPT): Set to yes.

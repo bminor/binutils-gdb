@@ -24,7 +24,11 @@ if test "${RELOCATING}"; then
     SORT(*)(.idata$5)
     SORT(*)(.idata$6)
     SORT(*)(.idata$7)'
-  R_CRT='*(SORT(.CRT$*))'
+  R_CRT_XC='*(SORT(.CRT$XC*))  /* C initialization */'
+  R_CRT_XI='*(SORT(.CRT$XI*))  /* C++ initialization */'
+  R_CRT_XL='*(SORT(.CRT$XL*))  /* TLS callbacks */'
+  R_CRT_XP='*(SORT(.CRT$XP*))  /* Pre-termination */'
+  R_CRT_XT='*(SORT(.CRT$XT*))  /* Termination */'
   R_TLS='
     *(.tls)
     *(.tls$)
@@ -130,12 +134,28 @@ SECTIONS
   }
   .CRT ${RELOCATING+BLOCK(__section_alignment__)} :
   { 					
-    ${R_CRT}
+    ${RELOCATING+___crt_xc_start__ = . ;}
+    ${R_CRT_XC}
+    ${RELOCATING+___crt_xc_end__ = . ;}
+    ${RELOCATING+___crt_xi_start__ = . ;}
+    ${R_CRT_XI}
+    ${RELOCATING+___crt_xi_end__ = . ;}
+    ${RELOCATING+___crt_xl_start__ = . ;}
+    ${R_CRT_XL}
+    /* ___crt_xl_end__ is defined in the TLS Directory support code */
+    ${RELOCATING+___crt_xp_start__ = . ;}
+    ${R_CRT_XP}
+    ${RELOCATING+___crt_xp_end__ = . ;}
+    ${RELOCATING+___crt_xt_start__ = . ;}
+    ${R_CRT_XT}
+    ${RELOCATING+___crt_xt_end__ = . ;}
   }
 
   .tls ${RELOCATING+BLOCK(__section_alignment__)} :
   { 					
+    ${RELOCATING+___tls_start__ = . ;}
     ${R_TLS}
+    ${RELOCATING+___tls_end__ = . ;}
   }
 
   .endjunk ${RELOCATING+BLOCK(__section_alignment__)} :
