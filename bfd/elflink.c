@@ -440,13 +440,15 @@ bfd_elf_record_link_assignment (bfd *output_bfd ATTRIBUTE_UNUSED,
 				bfd_boolean provide)
 {
   struct elf_link_hash_entry *h;
+  struct elf_link_hash_table *htab;
 
   if (!is_elf_hash_table (info->hash))
     return TRUE;
 
-  h = elf_link_hash_lookup (elf_hash_table (info), name, TRUE, TRUE, FALSE);
+  htab = elf_hash_table (info);
+  h = elf_link_hash_lookup (htab, name, !provide, TRUE, FALSE);
   if (h == NULL)
-    return FALSE;
+    return provide;
 
   /* Since we're defining the symbol, don't let it seem to have not
      been defined.  record_dynamic_symbol and size_dynamic_sections
@@ -454,11 +456,9 @@ bfd_elf_record_link_assignment (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (h->root.type == bfd_link_hash_undefweak
       || h->root.type == bfd_link_hash_undefined)
     {
-      struct elf_link_hash_table *htab = elf_hash_table (info);
-
+      h->root.type = bfd_link_hash_new;
       if (h->root.u.undef.next != NULL || htab->root.undefs_tail == &h->root)
 	bfd_link_repair_undef_list (&htab->root);
-      h->root.type = bfd_link_hash_new;
     }
 
   if (h->root.type == bfd_link_hash_new)
@@ -2844,7 +2844,8 @@ elf_smash_syms (struct elf_link_hash_entry *h, void *data)
     case bfd_link_hash_undefined:
       if (h->root.u.undef.abfd != inf->not_needed)
 	return TRUE;
-      if (h->root.u.undef.weak != NULL)
+      if (h->root.u.undef.weak != NULL
+	  && h->root.u.undef.weak != inf->not_needed)
 	{
 	  /* Symbol was undefweak in u.undef.weak bfd, and has become
 	     undefined in as-needed lib.  Restore weak.  */

@@ -1,3 +1,9 @@
+2005-02-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (bfd_elf_record_link_assignment): Do "provide" symbol
+	lookup here.  Set to new before calling bfd_link_repair_undef_list.
+	(elf_smash_syms): Check that u.undef.weak isn't the not_needed bfd.
+
 2005-02-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* linker.c (_bfd_link_hash_newfunc): Set all local fields.

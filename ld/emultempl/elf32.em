@@ -931,16 +931,14 @@ cat >>e${EMULATION_NAME}.c <<EOF
 static void
 gld${EMULATION_NAME}_find_exp_assignment (etree_type *exp)
 {
-  struct bfd_link_hash_entry *h;
+  bfd_boolean provide = FALSE;
 
   switch (exp->type.node_class)
     {
     case etree_provide:
-      h = bfd_link_hash_lookup (link_info.hash, exp->assign.dst,
-				FALSE, FALSE, FALSE);
-      if (h == NULL)
-	break;
-
+      provide = TRUE;
+      /* Fall thru */
+    case etree_assign:
       /* We call record_link_assignment even if the symbol is defined.
 	 This is because if it is defined by a dynamic object, we
 	 actually want to use the value defined by the linker script,
@@ -948,14 +946,10 @@ gld${EMULATION_NAME}_find_exp_assignment (etree_type *exp)
 	 symbols like etext).  If the symbol is defined by a regular
 	 object, then, as it happens, calling record_link_assignment
 	 will do no harm.  */
-
-      /* Fall through.  */
-    case etree_assign:
       if (strcmp (exp->assign.dst, ".") != 0)
 	{
-	  if (! (bfd_elf_record_link_assignment
-		 (output_bfd, &link_info, exp->assign.dst,
-		  exp->type.node_class == etree_provide ? TRUE : FALSE)))
+	  if (!bfd_elf_record_link_assignment (output_bfd, &link_info,
+					       exp->assign.dst, provide))
 	    einfo ("%P%F: failed to record assignment to %s: %E\n",
 		   exp->assign.dst);
 	}
