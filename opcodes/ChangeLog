@@ -1,3 +1,8 @@
+Thu Jan  4 17:21:10 1996  David Edelsohn  <edelsohn@mhpcc.edu>
+
+	* ppc-opc.c (powerpc_opcodes): tlbi POWER opcode form different
+	from tlbie PowerPC opcode.  Add PPC603 tlbld and tlbli.
+
 Thu Dec 28 13:29:19 1995  John Hassey  <hassey@rtp.dg.com>
 
 	* i386-dis.c: Added Pentium Pro instructions.
