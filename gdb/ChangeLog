@@ -1,5 +1,8 @@
 Mon Jul 26 13:17:36 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config/pa/tm-hppa.h (REGISTER_NAMES): Use "fr" rather than "fp"
+	for floating point registers.
+
 	* mipsread.c (parse_symbol): Put stStaticProc symbols in minimal
 	symbols as mst_file_text.
 
