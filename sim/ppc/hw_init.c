@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
     
-    Copyright (C) 1994-1997, Andrew Cagney <cagney@highland.com.au>
+    Copyright 1994, 1997, 2003 Andrew Cagney
     
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -591,16 +591,16 @@ create_ppc_elf_stack_frame(device *me,
 			start_argv, start_envp);
 
   /* set up the registers */
-  psim_write_register(device_system(me), -1,
-		      &top_of_stack, "sp", cooked_transfer);
-  psim_write_register(device_system(me), -1,
-		      &argc, "r3", cooked_transfer);
-  psim_write_register(device_system(me), -1,
-		      &start_argv, "r4", cooked_transfer);
-  psim_write_register(device_system(me), -1,
-		      &start_envp, "r5", cooked_transfer);
-  psim_write_register(device_system(me), -1,
-		      &start_aux, "r6", cooked_transfer);
+  ASSERT (psim_write_register(device_system(me), -1,
+			      &top_of_stack, "sp", cooked_transfer) > 0);
+  ASSERT (psim_write_register(device_system(me), -1,
+			      &argc, "r3", cooked_transfer) > 0);
+  ASSERT (psim_write_register(device_system(me), -1,
+			      &start_argv, "r4", cooked_transfer) > 0);
+  ASSERT (psim_write_register(device_system(me), -1,
+			      &start_envp, "r5", cooked_transfer) > 0);
+  ASSERT (psim_write_register(device_system(me), -1,
+			      &start_aux, "r6", cooked_transfer) > 0);
 }
 
 static void
@@ -619,16 +619,16 @@ create_ppc_aix_stack_frame(device *me,
   create_ppc_elf_stack_frame(me, bottom_of_stack, argv, envp);
   
   /* extract argument addresses from registers */
-  psim_read_register(device_system(me), 0,
-		     &top_of_stack, "r1", cooked_transfer);
-  psim_read_register(device_system(me), 0,
-		     &core_argc, "r3", cooked_transfer);
-  psim_read_register(device_system(me), 0,
-		     &core_argv, "r4", cooked_transfer);
-  psim_read_register(device_system(me), 0,
-		     &core_envp, "r5", cooked_transfer);
-  psim_read_register(device_system(me), 0,
-		     &core_aux, "r6", cooked_transfer);
+  ASSERT (psim_read_register(device_system(me), 0,
+			     &top_of_stack, "r1", cooked_transfer) > 0);
+  ASSERT (psim_read_register(device_system(me), 0,
+			     &core_argc, "r3", cooked_transfer) > 0);
+  ASSERT (psim_read_register(device_system(me), 0,
+			     &core_argv, "r4", cooked_transfer) > 0);
+  ASSERT (psim_read_register(device_system(me), 0,
+			     &core_envp, "r5", cooked_transfer) > 0);
+  ASSERT (psim_read_register(device_system(me), 0,
+			     &core_aux, "r6", cooked_transfer) > 0);
 
   /* extract arguments from registers */
   device_error(me, "Unfinished procedure create_ppc_aix_stack_frame\n");

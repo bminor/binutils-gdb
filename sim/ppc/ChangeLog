@@ -1,3 +1,22 @@
+2003-06-20  Andrew Cagney  <cagney@redhat.com>
+
+	* sim_calls.c (sim_create_inferior): Assert that
+	psim_write_register succeeded.
+	(sim_fetch_register, sim_store_register): Make "regname" constant.
+	Delete Altivec hack.  Return result from psim_read_register /
+	psim_write_register.
+	* psim.h (psim_read_register, psim_write_register): Change return
+	type to int.  Update comments.
+	* psim.c: Update copyright.
+	(psim_stack): Assert that the psim_read_register worked.
+	(psim_read_register, psim_read_register): Return the register's
+	size.  Allocate the cooked buffer dynamically.
+	* hw_register.c: Update copyright.
+	(do_register_init): Check that psim_write_register succeeded.
+	* hw_init.c: Update copyright.
+	(create_ppc_elf_stack_frame, create_ppc_aix_stack_frame): Assert
+	that the register transfer worked.
+
 2003-06-19  Andrew Cagney  <cagney@redhat.com>
 
 	* ld-insn.h: Update copyright.

@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994-1997, Andrew Cagney <cagney@highland.com.au>
+    Copyright 1994, 1995, 1996, 1997, 2003 Andrew Cagney
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -729,7 +729,8 @@ psim_stack(psim *system,
 					  "/openprom/init/stack");
   if (stack_device != (device*)0) {
     unsigned_word stack_pointer;
-    psim_read_register(system, 0, &stack_pointer, "sp", cooked_transfer);
+    ASSERT (psim_read_register(system, 0, &stack_pointer, "sp",
+			       cooked_transfer) > 0);
     device_ioctl(stack_device,
 		 NULL, /*cpu*/
 		 0, /*cia*/
@@ -766,7 +767,7 @@ psim_run(psim *system)
 /* storage manipulation functions */
 
 INLINE_PSIM\
-(void)
+(int)
 psim_read_register(psim *system,
 		   int which_cpu,
 		   void *buf,
@@ -774,7 +775,7 @@ psim_read_register(psim *system,
 		   transfer_mode mode)
 {
   register_descriptions description;
-  char cooked_buf[sizeof(unsigned_8)];
+  char *cooked_buf;
   cpu *processor;
 
   /* find our processor */
@@ -792,7 +793,8 @@ psim_read_register(psim *system,
   /* find the register description */
   description = register_description(reg);
   if (description.type == reg_invalid)
-    error("psim_read_register() invalid register name `%s'\n", reg);
+    return 0;
+  cooked_buf = alloca (description.size);
 
   /* get the cooked value */
   switch (description.type) {
@@ -877,12 +879,13 @@ psim_read_register(psim *system,
     memcpy(buf/*dest*/, cooked_buf/*src*/, description.size);
   }
 
+  return description.size;
 }
 
 
 
 INLINE_PSIM\
-(void)
+(int)
 psim_write_register(psim *system,
 		    int which_cpu,
 		    const void *buf,
@@ -891,7 +894,7 @@ psim_write_register(psim *system,
 {
   cpu *processor;
   register_descriptions description;
-  char cooked_buf[sizeof(unsigned_8)];
+  char *cooked_buf;
 
   /* find our processor */
   if (which_cpu == MAX_NR_PROCESSORS) {
@@ -901,20 +904,22 @@ psim_write_register(psim *system,
     else
       which_cpu = system->last_cpu;
   }
-  if (which_cpu == -1) {
-    int i;
-    for (i = 0; i < system->nr_cpus; i++)
-      psim_write_register(system, i, buf, reg, mode);
-    return;
-  }
-  ASSERT(which_cpu >= 0 && which_cpu < system->nr_cpus);
-
-  processor = system->processors[which_cpu];
 
   /* find the description of the register */
   description = register_description(reg);
   if (description.type == reg_invalid)
-    error("psim_write_register() invalid register name %s\n", reg);
+    return 0;
+  cooked_buf = alloca (description.size);
+
+  if (which_cpu == -1) {
+    int i;
+    for (i = 0; i < system->nr_cpus; i++)
+      psim_write_register(system, i, buf, reg, mode);
+    return description.size;
+  }
+  ASSERT(which_cpu >= 0 && which_cpu < system->nr_cpus);
+
+  processor = system->processors[which_cpu];
 
   /* If the data is comming in raw (target order), need to cook it
      into host order before putting it into PSIM's internal structures */
@@ -981,6 +986,7 @@ psim_write_register(psim *system,
 
   }
 
+  return description.size;
 }
 
 
