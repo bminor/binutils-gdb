@@ -1,0 +1,211 @@
+/* Parameters for execution on a Mitsubishi m32r processor.
+   Copyright 1996
+   Free Software Foundation, Inc. 
+
+This file is part of GDB.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+/* mvs_check TARGET_BYTE_ORDER BIG_ENDIAN */
+#define TARGET_BYTE_ORDER BIG_ENDIAN
+
+/* mvs_check REGISTER_NAMES */
+#define REGISTER_NAMES \
+{ "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", \
+  "r8", "r9", "r10", "r11", "r12", "fp", "lr", "sp", \
+  "psw", "cbr", "spi", "spu", "bpc", "pc", "accl", "acch", \
+    /*  "cond", "sm", "bsm", "ie", "bie", "bcarry",  */ \
+}
+/* mvs_check  NUM_REGS */
+#define NUM_REGS 			24
+
+/* mvs_check  REGISTER_SIZE */
+#define REGISTER_SIZE 			4
+/* mvs_check  MAX_REGISTER_RAW_SIZE */
+#define MAX_REGISTER_RAW_SIZE		4
+
+/* mvs_check  *_REGNUM */
+#define R0_REGNUM	0
+#define ARG0_REGNUM	0
+#define ARGLAST_REGNUM	3
+#define V0_REGNUM	0
+#define V1_REGNUM	1
+#define FP_REGNUM	13
+#define RP_REGNUM	14
+#define SP_REGNUM	15
+#define PSW_REGNUM	16
+#define CBR_REGNUM	17
+#define SPI_REGNUM	18
+#define SPU_REGNUM	19
+#define BPC_REGNUM	20
+#define PC_REGNUM	21
+#define ACCL_REGNUM	22
+#define ACCH_REGNUM	23
+
+/* mvs_check  REGISTER_BYTES */
+#define REGISTER_BYTES			(NUM_REGS * 4)
+
+/* mvs_check  REGISTER_VIRTUAL_TYPE */
+#define REGISTER_VIRTUAL_TYPE(REG)	builtin_type_int
+
+/* mvs_check  REGISTER_BYTE */
+#define REGISTER_BYTE(REG) 		((REG) * 4)
+/* mvs_check  REGISTER_VIRTUAL_SIZE */
+#define REGISTER_VIRTUAL_SIZE(REG) 	4
+/* mvs_check  REGISTER_RAW_SIZE */
+#define REGISTER_RAW_SIZE(REG)     	4
+
+/* mvs_check  MAX_REGISTER_VIRTUAL_SIZE */
+#define MAX_REGISTER_VIRTUAL_SIZE 	4
+
+/* mvs_check  BREAKPOINT */
+#define BREAKPOINT {0x10, 0xf1}
+
+/* mvs_no_check  FUNCTION_START_OFFSET */
+#define FUNCTION_START_OFFSET 0
+
+/* mvs_check  DECR_PC_AFTER_BREAK */
+#define DECR_PC_AFTER_BREAK 0
+
+/* mvs_check  INNER_THAN */
+#define INNER_THAN <
+
+/* mvs_check  SAVED_PC_AFTER_CALL */
+#define SAVED_PC_AFTER_CALL(fi) read_register (RP_REGNUM)
+
+#ifdef __STDC__
+struct frame_info;
+struct frame_saved_regs;
+struct type;
+struct value;
+#endif
+
+/* #define EXTRA_FRAME_INFO struct frame_saved_regs fsr; */
+/* Define other aspects of the stack frame. 
+   we keep a copy of the worked out return pc lying around, since it
+   is a useful bit of info */
+
+/* mvs_check  EXTRA_FRAME_INFO */
+#define EXTRA_FRAME_INFO	struct frame_saved_regs fsr;
+
+extern void m32r_init_extra_frame_info PARAMS ((struct frame_info *fi));
+/* mvs_check  INIT_EXTRA_FRAME_INFO */
+#define INIT_EXTRA_FRAME_INFO(fromleaf, fi) m32r_init_extra_frame_info (fi)
+/* mvs_no_check  INIT_FRAME_PC */
+#define INIT_FRAME_PC		/* Not necessary */
+
+extern void 
+m32r_frame_find_saved_regs PARAMS ((struct frame_info *fi, 
+				    struct frame_saved_regs *regaddr));
+
+/* Put here the code to store, into a struct frame_saved_regs,
+   the addresses of the saved registers of frame described by FRAME_INFO.
+   This includes special registers such as pc and fp saved in special
+   ways in the stack frame.  sp is even more special:
+   the address we return for it IS the sp for the next frame.  */
+
+/* mvs_check  FRAME_FIND_SAVED_REGS */
+#define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs)	    \
+   m32r_frame_find_saved_regs(frame_info, &(frame_saved_regs))
+
+extern CORE_ADDR m32r_frame_chain PARAMS ((struct frame_info *fi));
+/* mvs_check  FRAME_CHAIN */
+#define FRAME_CHAIN(fi) m32r_frame_chain (fi)
+
+extern CORE_ADDR m32r_find_callers_reg PARAMS ((struct frame_info *fi, 
+						int regnum));
+/* mvs_check  FRAME_SAVED_PC */
+#define FRAME_SAVED_PC(fi) (m32r_find_callers_reg (fi, RP_REGNUM))
+
+/* mvs_check  EXTRACT_RETURN_VALUE */
+#define EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
+  memcpy ((VALBUF), \
+	  (char *)(REGBUF) + REGISTER_BYTE (V0_REGNUM) + \
+	  ((TYPE_LENGTH (TYPE) > 4 ? 8 : 4) - TYPE_LENGTH (TYPE)), \
+	  TYPE_LENGTH (TYPE))
+
+/* mvs_check  STORE_RETURN_VALUE */
+#define STORE_RETURN_VALUE(TYPE, VALBUF) \
+  write_register_bytes(REGISTER_BYTE (V0_REGNUM) + \
+		       ((TYPE_LENGTH (TYPE) > 4 ? 8:4) - TYPE_LENGTH (TYPE)),\
+		       (VALBUF), TYPE_LENGTH (TYPE));
+
+/* mvs_check  EXTRACT_STRUCT_VALUE_ADDRESS */
+#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
+  (extract_address (REGBUF + REGISTER_BYTE (V0_REGNUM), \
+		    REGISTER_RAW_SIZE (V0_REGNUM)))
+
+extern CORE_ADDR m32r_skip_prologue PARAMS ((CORE_ADDR pc));
+/* mvs_check  SKIP_PROLOGUE */
+#define SKIP_PROLOGUE(pc) pc = m32r_skip_prologue (pc)
+
+/* mvs_no_check  FRAME_ARGS_SKIP */
+#define FRAME_ARGS_SKIP 0
+
+/* mvs_no_check  FRAME_ARGS_ADDRESS */
+#define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
+/* mvs_no_check  FRAME_LOCALS_ADDRESS */
+#define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
+/* mvs_no_check  FRAME_NUM_ARGS */
+#define FRAME_NUM_ARGS(val, fi) ((val) = -1)
+
+extern struct frame_info *m32r_pop_frame PARAMS ((struct frame_info *frame));
+/* mvs_check  POP_FRAME */
+#define POP_FRAME m32r_pop_frame (get_current_frame ())
+
+/* mvs_no_check  CALL_DUMMY */
+/* #define CALL_DUMMY { 0 } */
+
+/* mvs_no_check  CALL_DUMMY_START_OFFSET */
+#define CALL_DUMMY_START_OFFSET (0)
+
+/* mvs_no_check  CALL_DUMMY_BREAKPOINT_OFFSET */
+#define CALL_DUMMY_BREAKPOINT_OFFSET (0)
+
+extern void m32r_push_dummy_frame PARAMS ((void));
+/* mvs_no_check  PUSH_DUMMY_FRAME */
+#define PUSH_DUMMY_FRAME m32r_push_dummy_frame ()
+
+/* mvs_no_check  FIX_CALL_DUMMY */
+#define FIX_CALL_DUMMY(DUMMY1, START_SP, FUNADDR, NARGS, \
+		       ARGS, VALUE_TYPE, USING_GCC)
+
+/* mvs_no_check  CALL_DUMMY_LOCATION_AT_ENTRY_POINT */
+#define CALL_DUMMY_LOCATION AT_ENTRY_POINT
+
+/* mvs_no_check  STACK_ALIGN */
+#define STACK_ALIGN(x) ((x + 3) & ~3)
+
+extern CORE_ADDR
+m32r_push_arguments PARAMS ((int nargs, struct value **args, CORE_ADDR sp,
+			     unsigned char struct_return,
+			     CORE_ADDR struct_addr));
+/* mvs_no_check  PUSH_ARGUMENTS */
+#define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
+  (SP) = m32r_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
+
+/* mvs_no_check  STORE_STRUCT_RETURN */
+#define STORE_STRUCT_RETURN(STRUCT_ADDR, SP)
+
+/* mvs_no_check  CALL_DUMMY_ADDRESS */
+#define CALL_DUMMY_ADDRESS() (entry_point_address ())
+
+extern int m32r_pc_in_call_dummy PARAMS ((CORE_ADDR pc));
+/* mvs_no_check  PC_IN_CALL_DUMMY */
+#define PC_IN_CALL_DUMMY(PC, SP, FP) m32r_pc_in_call_dummy (PC)
+
+/* mvs_check  USE_STRUCT_CONVENTION */
+#define USE_STRUCT_CONVENTION(GCC_P, TYPE) \
+	(TYPE_LENGTH (TYPE) > 8)

@@ -1,9 +1,17 @@
+start-sanitize-m32r
+Wed Oct 30 18:14:14 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* m32r-tdep.c, m32r-rom.c: New files.
+	* config/m32r/m32r.mt: New file.
+	* config/m32r/tm-m32r.h: New file.
+end-sanitize-m32r
+
 Tue Oct 29 16:56:01 1996  Geoffrey Noer  <noer@cygnus.com>
 
 	* config/i386/xm-cygwin32.h:
 	* config/powerpc/xm-cygwin32.h:
 	add #define LSEEK_NOT_LINEAR so source lines aren't unexpectedly
-	truncated
+	truncated.
 
 Tue Oct 29 18:36:43 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
