@@ -57,16 +57,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 static void gld${EMULATION_NAME}_before_parse PARAMS ((void));
 static int gld${EMULATION_NAME}_parse_args PARAMS ((int, char **));
 static void gld${EMULATION_NAME}_after_open PARAMS ((void));
-static char * choose_target PARAMS ((int, char **));
+static char *choose_target PARAMS ((int, char **));
 static void gld${EMULATION_NAME}_before_allocation PARAMS ((void));
 static void gld${EMULATION_NAME}_read_file PARAMS ((const char *, boolean));
 static void gld${EMULATION_NAME}_free PARAMS ((PTR));
-static void gld${EMULATION_NAME}_find_relocs
-  PARAMS ((lang_statement_union_type *));
+static void gld${EMULATION_NAME}_find_relocs 
+PARAMS ((lang_statement_union_type *));
 static void gld${EMULATION_NAME}_find_exp_assignment PARAMS ((etree_type *));
 static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
 static boolean gld${EMULATION_NAME}_unrecognized_file
   PARAMS ((lang_input_statement_type *));
+static int is_syscall PARAMS ((char *, unsigned int *));
+static int change_symbol_mode PARAMS ((char *));
 
 /* The file alignment required for each section.  */
 static unsigned long file_align;
@@ -167,7 +169,8 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
   bfd_signed_vma val;
   char *end;
 
-  enum {
+  enum 
+  {
     OPTION_IGNORE = 300,
     OPTION_AUTOIMP,
     OPTION_ERNOTOK,
@@ -296,9 +299,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
      changing it to = lets us treat it as a getopt option.  */
   indx = optind;
   if (indx == 0)
-    {
-      indx = 1;
-    }
+    indx = 1;
 
   if (indx < argc && strncmp (argv[indx], "-b", 2) == 0)
     {
@@ -344,8 +345,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 
     case 'H':
       val = strtoul (optarg, &end, 0);
-      if (*end != '\0'
-	  || (val & (val - 1)) != 0)
+      if (*end != '\0' || (val & (val - 1)) != 0)
 	einfo ("%P: warning: ignoring invalid -H number %s\n", optarg);
       else
 	file_align = val;
@@ -399,9 +399,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 	  *t++ = 0;
 
 	if (0 != strlen (i))
-	  {
-	    link_info.init_function = i;
-	  }
+	  link_info.init_function = i;
 
 	f = t;
 	while (*t && ':' != *t)
@@ -409,12 +407,10 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 	*t = 0;
 
 	if (0 != strlen (f))
-	  {
-	    link_info.fini_function = f;
-	  }
+	  link_info.fini_function = f;
       }
-    break;
-
+      break;
+      
     case OPTION_AUTOIMP:
       link_info.static_link = false;
       break;
@@ -461,7 +457,8 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
     case OPTION_MAXSTACK:
       val = strtoull (optarg, &end, 0);
       if (*end != '\0')
-	einfo ("%P: warning: ignoring invalid -bmaxstack number %s\n", optarg);
+	einfo ("%P: warning: ignoring invalid -bmaxstack number %s\n", 
+	       optarg);
       else
 	maxstack = val;
       break;
@@ -505,7 +502,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 				    exp_intop (0xfff)));
 	  t = exp_binop ('&',
 			 exp_binop ('+', t, exp_intop (31)),
-			 exp_intop (~ (bfd_vma) 31));
+			 exp_intop (~(bfd_vma) 31));
 	  lang_section_start (".data", t);
 	}
       break;
@@ -526,7 +523,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 			 exp_nameop (SIZEOF_HEADERS, NULL));
 	  t = exp_binop ('&',
 			 exp_binop ('+', t, exp_intop (31)),
-			 exp_intop (~ (bfd_vma) 31));
+			 exp_intop (~(bfd_vma) 31));
 	  lang_section_start (".text", t);
 	}
       break;
@@ -621,8 +618,8 @@ gld${EMULATION_NAME}_after_open ()
       bfd_size_type size;
 
       /* If the symbol is defined, we may have been invoked from
-	 collect, and the sets may already have been built, so we do
-	 not do anything.  */
+         collect, and the sets may already have been built, so we do
+         not do anything.  */
       if (p->h->type == bfd_link_hash_defined
 	  || p->h->type == bfd_link_hash_defweak)
 	continue;
@@ -634,7 +631,7 @@ gld${EMULATION_NAME}_after_open ()
 	}
 
       size = (p->count + 2) * 4;
-      if (! bfd_xcoff_link_record_set (output_bfd, &link_info, p->h, size))
+      if (!bfd_xcoff_link_record_set (output_bfd, &link_info, p->h, size))
 	einfo ("%F%P: bfd_xcoff_link_record_set failed: %E\n");
     }
 }
@@ -661,7 +658,7 @@ gld${EMULATION_NAME}_before_allocation ()
       h = bfd_link_hash_lookup (link_info.hash, el->name, false, false, false);
       if (h == NULL)
 	einfo ("%P%F: bfd_link_hash_lookup of export symbol failed: %E\n");
-      if (! bfd_xcoff_export_symbol (output_bfd, &link_info, h))
+      if (!bfd_xcoff_export_symbol (output_bfd, &link_info, h))
 	einfo ("%P%F: bfd_xcoff_export_symbol failed: %E\n");
     }
 
@@ -699,14 +696,13 @@ gld${EMULATION_NAME}_before_allocation ()
     }
 
   /* Let the XCOFF backend set up the .loader section.  */
-  if (! bfd_xcoff_size_dynamic_sections (output_bfd, &link_info, libpath,
-					 entry_symbol, file_align,
-					 maxstack, maxdata,
-					 gc && ! unix_ld ? true : false,
-					 modtype,
-					 textro ? true : false,
-					 unix_ld,
-					 special_sections))
+  if (!bfd_xcoff_size_dynamic_sections (output_bfd, &link_info, libpath,
+					entry_symbol, file_align,
+					maxstack, maxdata,
+					gc && !unix_ld ? true : false,
+					modtype,
+					textro ? true : false,
+					unix_ld, special_sections))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
 
   /* Look through the special sections, and put them in the right
@@ -725,21 +721,19 @@ gld${EMULATION_NAME}_before_allocation ()
 	continue;
 
       /* Remove this section from the list of the output section.
-	 This assumes we know what the script looks like.  */
+         This assumes we know what the script looks like.  */
       is = NULL;
       os = lang_output_section_find (sec->output_section->name);
-      if (os == NULL) {
+      if (os == NULL) 
 	einfo ("%P%F: can't find output section %s\n",
 	       sec->output_section->name);
-      }
 
       for (pls = &os->children.head; *pls != NULL; pls = &(*pls)->header.next)
 	{
-
-	  if ((*pls)->header.type == lang_input_section_enum &&
-	      (*pls)->input_section.section == sec)
+	  if ((*pls)->header.type == lang_input_section_enum 
+	      && (*pls)->input_section.section == sec)
 	    {
-	      is = (lang_input_section_type *) *pls;
+	      is = (lang_input_section_type *) * pls;
 	      *pls = (*pls)->header.next;
 	      break;
 	    }
@@ -749,15 +743,13 @@ gld${EMULATION_NAME}_before_allocation ()
 	      lang_statement_union_type **pwls;
 
 	      for (pwls = &(*pls)->wild_statement.children.head;
-		   *pwls != NULL;
-		   pwls = &(*pwls)->header.next)
+		   *pwls != NULL; pwls = &(*pwls)->header.next)
 		{
 
-		  if ((*pwls)->header.type == lang_input_section_enum &&
-		      (*pwls)->input_section.section == sec)
+		  if ((*pwls)->header.type == lang_input_section_enum 
+		      && (*pwls)->input_section.section == sec)
 		    {
-
-		      is = (lang_input_section_type *) *pwls;
+		      is = (lang_input_section_type *) * pwls;
 		      *pwls = (*pwls)->header.next;
 		      break;
 		    }
@@ -778,7 +770,7 @@ gld${EMULATION_NAME}_before_allocation ()
       switch (i)
 	{
 
-	default: /* to avoid warnings */
+	default:		/* to avoid warnings */
 	case XCOFF_SPECIAL_SECTION_TEXT:
 	  /* _text */
 	  oname = ".text";
@@ -836,17 +828,16 @@ choose_target (argc, argv)
   int i, j, jmax;
   static char *from_outside;
   static char *from_inside;
-  static char *argv_to_target[][2] = 
-    { 
-      NULL,   "aixcoff-rs6000",
-      "-b32", "aixcoff-rs6000",
-      "-b64", "aixcoff64-rs6000",
-    };
+  static char *argv_to_target[][2] = { 
+    {NULL,   "${OUTPUT_FORMAT}"},
+    {"-b32", "aixcoff-rs6000"},
+    {"-b64", "aixcoff64-rs6000"},
+  };
 
   jmax = 3;
 
   from_outside = getenv (TARGET_ENVIRON);
-  if (from_outside != (char *)NULL)
+  if (from_outside != (char *) NULL)
     return from_outside;
 
   /* Set to default. */
@@ -859,32 +850,32 @@ choose_target (argc, argv)
 	    from_inside = argv_to_target[j][1];
 	}
     }
-  
+
   return from_inside;
 }
 
-
-static int change_symbol_mode (char *input)
+/* Returns 
+   1 : state changed
+   0 : no change */
+static int 
+change_symbol_mode (input)
+     char *input;
 {
-  /*
-   * 1 : state changed
-   * 0 : no change
-   */
-
   char *symbol_mode_string[] = {
-    "# 32",   /* 0x01 */
-    "# 64",   /* 0x02 */
-    "# no32", /* 0x04 */
-    "# no64", /* 0x08 */
+    "# 32",			/* 0x01 */
+    "# 64",			/* 0x02 */
+    "# no32",			/* 0x04 */
+    "# no64",			/* 0x08 */
     NULL,
   };
+
   unsigned int bit;
   char *string;
 
-  for (bit = 0; ; bit++)
+  for (bit = 0;; bit++)
     {
       string = symbol_mode_string[bit];
-      if (NULL == string)
+      if (string == NULL)
 	return 0;
 
       if (0 == strcmp (input, string))
@@ -897,13 +888,15 @@ static int change_symbol_mode (char *input)
   return 0;
 }
 
-static int is_syscall(char *input, unsigned int *flag)
+/* Returns 
+   1 : yes
+   0 : ignore
+   -1 : error, try something else */
+static int 
+is_syscall (input, flag)
+     char *input;
+     unsigned int *flag;
 {
-  /*
-   * 1 : yes
-   * 0 : ignore
-   * -1 : error, try something else
-   */
   unsigned int bit;
   char *string;
   
@@ -924,22 +917,25 @@ static int is_syscall(char *input, unsigned int *flag)
 
   *flag = 0;
 
-  for (bit = 0; ;bit++) {
-    
-    string = s[bit].syscall_string;
-    if (NULL == string) {
-      return -1;
-    }
+  for (bit = 0;; bit++) 
+    {
+      string = s[bit].syscall_string;
+      if (string == NULL) 
+	return -1;
 
-    if (0 == strcmp(input, string)) {
-      if (1 << bit & syscall_mask) {
-	*flag = s[bit].flag;
-	return 1;
-      } else {
-	return 0;
-      }
+      if (0 == strcmp (input, string)) 
+	{
+	  if (1 << bit & syscall_mask) 
+	    {
+	      *flag = s[bit].flag;
+	      return 1;
+	    } 
+	  else 
+	    {
+	      return 0;
+	    }
+	}
     }
-  }
   /* should not be here */
   return -1;
 }
@@ -1012,7 +1008,7 @@ gld${EMULATION_NAME}_read_file (filename, import)
 	  || *s == '*'
 	  || change_symbol_mode (s)
 	  || (*s == '#' && s[1] == ' ')
-	  || (! import && *s == '#' && s[1] == '!'))
+	  || (!import && *s == '#' && s[1] == '!'))
 	{
 	  obstack_free (o, obstack_base (o));
 	  continue;
@@ -1042,8 +1038,7 @@ gld${EMULATION_NAME}_read_file (filename, import)
 	      keep = true;
 	      imppath = s;
 	      file = NULL;
-	      while (! ISSPACE (*s)
-		     && *s != '(' && *s != '\0')
+	      while (!ISSPACE (*s) && *s != '(' && *s != '\0')
 		{
 		  if (*s == '/')
 		    file = s + 1;
@@ -1099,7 +1094,7 @@ gld${EMULATION_NAME}_read_file (filename, import)
 	  syscall_flag = 0;
 	  address = (bfd_vma) -1;
 
-	  while (! ISSPACE (*s) && *s != '\0')
+	  while (!ISSPACE (*s) && *s != '\0')
 	    ++s;
 	  if (*s != '\0')
 	    {
@@ -1111,7 +1106,7 @@ gld${EMULATION_NAME}_read_file (filename, import)
 		++s;
 
 	      se = s;
-	      while (! ISSPACE (*se) && *se != '\0')
+	      while (!ISSPACE (*se) && *se != '\0')
 		++se;
 	      if (*se != '\0')
 		{
@@ -1128,25 +1123,23 @@ gld${EMULATION_NAME}_read_file (filename, import)
 		  int status;
 		  char *end;
 
-		  status = is_syscall(s, &syscall_flag);
+		  status = is_syscall (s, &syscall_flag);
 	      
-		  if (0 > status) {
-		    /* not a system call, check for address */
-		    address = strtoul (s, &end, 0);
-
-		    /* not a system call, check for address */
-		    address = strtoul (s, &end, 0);
-		    if (*end != '\0')
-		      {
-			einfo ("%s:%d: warning: syntax error in import/export file\n",
-			       filename, lineno);
-			
-		      }
-		  }
+		  if (0 > status) 
+		    {
+		      /* not a system call, check for address */
+		      address = strtoul (s, &end, 0);
+		      if (*end != '\0')
+			{
+			  einfo ("%s:%d: warning: syntax error in import/export file\n",
+				 filename, lineno);
+			  
+			}
+		    }
 		}
 	    }
 
-	  if (! import)
+	  if (!import)
 	    {
 	      struct export_symbol_list *n;
 
@@ -1168,9 +1161,9 @@ gld${EMULATION_NAME}_read_file (filename, import)
 		}
 	      else
 		{
-		  if (! bfd_xcoff_import_symbol (output_bfd, &link_info, h,
-						 address, imppath, impfile,
-						 impmember, syscall_flag))
+		  if (!bfd_xcoff_import_symbol (output_bfd, &link_info, h,
+						address, imppath, impfile,
+						impmember, syscall_flag))
 		    einfo ("%X%s:%d: failed to import symbol %s: %E\n",
 			   filename, lineno, symname);
 		}
@@ -1186,7 +1179,7 @@ gld${EMULATION_NAME}_read_file (filename, import)
       obstack_free (o, obstack_base (o));
     }
 
-  if (! keep)
+  if (!keep)
     {
       obstack_free (o, NULL);
       free (o);
@@ -1217,7 +1210,7 @@ gld${EMULATION_NAME}_find_relocs (s)
       rs = &s->reloc_statement;
       if (rs->name == NULL)
 	einfo ("%F%P: only relocations against symbols are permitted\n");
-      if (! bfd_xcoff_link_count_reloc (output_bfd, &link_info, rs->name))
+      if (!bfd_xcoff_link_count_reloc (output_bfd, &link_info, rs->name))
 	einfo ("%F%P: bfd_xcoff_link_count_reloc failed: %E\n");
     }
 
@@ -1244,8 +1237,8 @@ gld${EMULATION_NAME}_find_exp_assignment (exp)
     case etree_assign:
       if (strcmp (exp->assign.dst, ".") != 0)
 	{
-	  if (! bfd_xcoff_record_link_assignment (output_bfd, &link_info,
-						  exp->assign.dst))
+	  if (!bfd_xcoff_record_link_assignment (output_bfd, &link_info,
+						 exp->assign.dst))
 	    einfo ("%P%F: failed to record assignment to %s: %E\n",
 		   exp->assign.dst);
 	}
@@ -1326,8 +1319,7 @@ fi
 
 cat >>e${EMULATION_NAME}.c <<EOF
 
-struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
-{
+struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = {
   gld${EMULATION_NAME}_before_parse,
   syslib_default,
   hll_default,
@@ -1340,15 +1332,15 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld${EMULATION_NAME}_get_script,
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",
-  0,	/* finish */
-  0,	/* create_output_section_statements */
-  0,	/* open_dynamic_archive */
-  0,	/* place_orphan */
-  0,	/* set_symbols */
+  0,				/* finish */
+  0,				/* create_output_section_statements */
+  0,				/* open_dynamic_archive */
+  0,				/* place_orphan */
+  0,				/* set_symbols */
   gld${EMULATION_NAME}_parse_args,
   gld${EMULATION_NAME}_unrecognized_file,
-  NULL, /* list_options */
-  NULL, /* recognized_file */
-  NULL, /* find potential_libraries */
+  NULL,				/* list_options */
+  NULL,				/* recognized_file */
+  NULL,				/* find potential_libraries */
 };
 EOF

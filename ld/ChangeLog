@@ -1,3 +1,18 @@
+2001-12-04  Tom Rix  <trix@redhat.com>
+
+	* emultempl/aix.em (choose_target): Change default target to 
+	OUTPUT_FORMAT for ppcmacos.  Add braces to remove compiler
+	warning.
+	(gld*_read_file):  Fix typo.
+	(change_symbol_mode): Add prototype.
+	(is_syscall): Same.
+	
+	* emulparams/aixppc.sh (SYSCALL_MASK, SYMBOL_MODE_MASK): Delete.
+	* emulparams/aixrs6.sh : Same.
+	* emulparams/ppcmacos.sh : Same.
+	* emulparams/aixppc64.sh : Delete file.
+	* emultempl/aix.em : Formatting changes.
+
 2001-12-04  Hans-Peter Nilsson  <hp@axis.com>
 
 	* emulparams/criself.sh (NO_SMALL_DATA): Set, to yes.
