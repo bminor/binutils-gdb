@@ -1,3 +1,10 @@
+2001-06-06  Keith Seitz  <keiths@redhat.com>
+
+	* gdb-events.sh: Update copyrights.
+	Change free to xfree.
+	* gdb-events.c: Regenerated.
+	* gdb-events.h: Regenerated.
+
 2001-06-06  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* source.c (mod_path, openp): Use #ifdef HAVE_DOS_BASED_FILE_SYSTEM

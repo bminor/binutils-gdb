@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # User Interface Events.
-# Copyright 1999, 2000 Free Software Foundation, Inc.
+# Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
 #
 # Contributed by Cygnus Solutions.
 #
@@ -109,7 +109,7 @@ copyright ()
 {
   cat <<EOF
 /* User Interface Events.
-   Copyright 1999 Free Software Foundation, Inc.
+   Copyright 1999, 2001 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions.
 
@@ -488,7 +488,7 @@ gdb_events_deliver (struct gdb_events *vector)
     {
       struct event *event = delivering_events;
       delivering_events = event->next;
-      free (event);
+      xfree (event);
     }
   /* Process any pending events.  Because one of the deliveries could
      bail out we move everything off of the pending queue onto an
@@ -523,7 +523,7 @@ done
 cat <<EOF
         }
       delivering_events = event->next;
-      free (event);
+      xfree (event);
     }
 }
 EOF
