@@ -135,26 +135,6 @@ inside_entry_func (struct frame_info *this_frame)
   return (get_frame_func (this_frame) == entry_point_address ());
 }
 
-/* Similar to inside_entry_func, but accomodating legacy frame code.  */
-
-static int
-legacy_inside_entry_func (CORE_ADDR pc)
-{
-  if (symfile_objfile == 0)
-    return 0;
-
-  if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
-    {
-      /* Do not stop backtracing if the program counter is in the call
-         dummy at the entry point.  */
-      if (deprecated_pc_in_call_dummy (pc))
-	return 0;
-    }
-
-  return (symfile_objfile->ei.entry_func_lowpc <= pc
-	  && symfile_objfile->ei.entry_func_highpc > pc);
-}
-
 /* Return nonzero if the function for this frame lacks a prologue.
    Many machines can define DEPRECATED_FRAMELESS_FUNCTION_INVOCATION
    to just call this function.  */
@@ -542,9 +522,11 @@ legacy_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
   if (DEPRECATED_FRAME_CHAIN_VALID_P ())
     return DEPRECATED_FRAME_CHAIN_VALID (fp, fi);
 
-  /* If we're already inside the entry function for the main objfile, then it
-     isn't valid.  */
-  if (legacy_inside_entry_func (get_frame_pc (fi)))
+  /* If we're already inside the entry function for the main objfile,
+     then it isn't valid.  */
+  if (symfile_objfile != NULL
+      && (symfile_objfile->ei.entry_func_lowpc <= get_frame_pc (fi)
+	  && symfile_objfile->ei.entry_func_highpc > get_frame_pc (fi)))
     return 0;
 
   return 1;
