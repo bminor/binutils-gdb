@@ -66,11 +66,11 @@ fi
 
 if test x"$enable_sim_cflags" != x"" -a x"$enable_sim_cflags" != x"no"; then
   if test "$enable_sim_cflags" = "yes"; then
-    enable_sim_cflags="-fomit-frame-pointer -O2"
+    enable_sim_cflags="-fomit-frame-pointer,-O2"
   fi
   mv Makefile Makefile.tem
   echo "Setting SIM_CFLAGS=$enable_sim_cflags"
-  sed -e "s/^SIM_CFLAGS.*=.*\$/SIM_CFLAGS = $enable_sim_cflags/" \
+  sed -e "s/^SIM_CFLAGS.*=.*\$/SIM_CFLAGS = $enable_sim_cflags/" -e "s/,/ /g"\
     < Makefile.tem > Makefile
   rm -f Makefile.tem
 fi
