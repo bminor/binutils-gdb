@@ -85,9 +85,9 @@ Disassembly of section .text:
  12c:	ff 02 00 00 
  130:	ff 23 03 52[ 	]*nop[ 	]*ibne vi03,vi04,2128 <foo\+0x2128>
  134:	ff 02 00 00 
- 138:	ff 23 23 08[ 	]*nop[ 	]*ilw.w vi03,1023(vi04).
+ 138:	ff 23 23 08[ 	]*nop[ 	]*ilw.w vi03,1023\(vi04\)w
  13c:	ff 02 00 00 
- 140:	fe 23 23 80[ 	]*nop[ 	]**unknown*
+ 140:	fe 23 23 80[ 	]*nop[ 	]*ilwr.w vi03,\(vi04\)w
  144:	ff 02 00 00 
  148:	74 21 03 80[ 	]*nop[ 	]*ior vi05,vi04,vi03
  14c:	ff 02 00 00 
@@ -95,19 +95,19 @@ Disassembly of section .text:
  154:	ff 02 00 00 
  158:	ff 27 e3 13[ 	]*nop[ 	]*isubiu vi03,vi04,32767
  15c:	ff 02 00 00 
- 160:	ff 23 23 0a[ 	]*nop[ 	]*isw.w vi03,1023(vi04).
+ 160:	ff 23 23 0a[ 	]*nop[ 	]*isw.w vi03,1023\(vi04\)w
  164:	ff 02 00 00 
- 168:	ff 23 23 80[ 	]*nop[ 	]**unknown*
+ 168:	ff 23 23 80[ 	]*nop[ 	]*iswr.w vi03,\(vi04\)w
  16c:	ff 02 00 00 
  170:	00 20 03 4a[ 	]*nop[ 	]*jalr vi03,vi04
  174:	ff 02 00 00 
  178:	00 20 00 48[ 	]*nop[ 	]*jr vi04
  17c:	ff 02 00 00 
- 180:	ff 23 c1 01[ 	]*nop[ 	]*lq.xyz vf01xyz,1023(vi04)
+ 180:	ff 23 c1 01[ 	]*nop[ 	]*lq.xyz vf01xyz,1023\(vi04\)
  184:	ff 02 00 00 
- 188:	7e 23 c1 81[ 	]*nop[ 	]*lqd.xyz vf01xyz,(--vi04)
+ 188:	7e 23 c1 81[ 	]*nop[ 	]*lqd.xyz vf01xyz,\(--vi04\)
  18c:	ff 02 00 00 
- 190:	7c 23 c1 81[ 	]*nop[ 	]*lqi.xyz vf01xyz,(vi04\+\+)
+ 190:	7c 23 c1 81[ 	]*nop[ 	]*lqi.xyz vf01xyz,\(vi04\+\+\)
  194:	ff 02 00 00 
  198:	fc 23 01 81[ 	]*nop[ 	]*mfir.x vf01x,vi04
  19c:	ff 02 00 00 
@@ -129,11 +129,11 @@ Disassembly of section .text:
  1dc:	ff 02 00 00 
  1e0:	3f 04 20 80[ 	]*nop[ 	]*rxor r,vf00y
  1e4:	ff 02 00 00 
- 1e8:	ff 1b c0 03[ 	]*nop[ 	]*sq.xyz vf00xyz,1023(vi03)
+ 1e8:	ff 1b c0 03[ 	]*nop[ 	]*sq.xyz vf00xyz,1023\(vi03\)
  1ec:	ff 02 00 00 
- 1f0:	7f 1b c0 81[ 	]*nop[ 	]*sqd.xyz vf00xyz,(--vi03)
+ 1f0:	7f 1b c0 81[ 	]*nop[ 	]*sqd.xyz vf00xyz,\(--vi03\)
  1f4:	ff 02 00 00 
- 1f8:	7d 1b c0 81[ 	]*nop[ 	]*sqi.xyz vf00xyz,(vi03\+\+)
+ 1f8:	7d 1b c0 81[ 	]*nop[ 	]*sqi.xyz vf00xyz,\(vi03\+\+\)
  1fc:	ff 02 00 00 
  200:	bd 03 01 81[ 	]*nop[ 	]*sqrt q,vf00x
  204:	ff 02 00 00 
