@@ -1,3 +1,11 @@
+Tue Jun 10 11:13:03 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
+
+	* cpu-arm.c: Add prototypes for compatible and scan.
+	* cofflink.c: Add prototype for mark_relocs.
+
+	* archive.c (bfd_special_undocumented_glue): Change filename to
+	const pointer.  Add prototype.
+
 Mon Jun  9 12:34:21 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* elflink.h (elf_link_add_object_symbols): Ignore relocations of

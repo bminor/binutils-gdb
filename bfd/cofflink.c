@@ -38,6 +38,7 @@ static char *dores_com PARAMS ((char *, bfd *, int));
 static char *get_name PARAMS ((char *, char **));
 static int process_embedded_commands
   PARAMS ((bfd *, struct bfd_link_info *, bfd *));
+static void mark_relocs PARAMS ((struct coff_final_link_info *, bfd *));
 
 /* Create an entry in a COFF linker hash table.  */
 
@@ -373,7 +374,8 @@ coff_link_add_symbols (abfd, info)
 	    {
 	      flags = BSF_EXPORT | BSF_GLOBAL;
 	      section = coff_section_from_bfd_index (abfd, sym.n_scnum);
-	      value -= section->vma;
+	      if (! obj_pe (abfd))
+		value -= section->vma;
 	    }
 
 	  if (! (bfd_coff_link_add_one_symbol
@@ -530,6 +532,7 @@ _bfd_coff_final_link (abfd, info)
   finfo.contents = NULL;
   finfo.external_relocs = NULL;
   finfo.internal_relocs = NULL;
+  finfo.global_to_static = false;
   debug_merge_allocated = false;
 
   coff_data (abfd)->link_info = info;
@@ -1563,9 +1566,10 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 	    {
 	      isym.n_scnum = (*secpp)->output_section->target_index;
 	      isym.n_value += (*secpp)->output_offset;
+	      if (! obj_pe (input_bfd))
+		isym.n_value -= (*secpp)->vma;
 	      if (! obj_pe (finfo->output_bfd))
-		isym.n_value += ((*secpp)->output_section->vma
-				 - (*secpp)->vma);
+		isym.n_value += (*secpp)->output_section->vma;
 	    }
 
 	  /* The value of a C_FILE symbol is the symbol index of the
@@ -2604,7 +2608,7 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
               val = (sec->output_section->vma
 		     + sec->output_offset
 		     + sym->n_value);
-	      if (! obj_pe (output_bfd))
+	      if (! obj_pe (input_bfd))
 		val -= sec->vma;
 	    }
 	}
@@ -2633,19 +2637,26 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
       if (info->base_file)
 	{
 	  /* Emit a reloc if the backend thinks it needs it. */
-	  if (sym && pe_data(output_bfd)->in_reloc_p(output_bfd, howto))
+	  if (sym && pe_data (output_bfd)->in_reloc_p (output_bfd, howto))
 	    {
-	      /* relocation to a symbol in a section which
-		 isn't absolute - we output the address here 
-		 to a file */
-	      bfd_vma addr = rel->r_vaddr 
-		- input_section->vma 
-		+ input_section->output_offset 
-		  + input_section->output_section->vma;
-	      if (coff_data(output_bfd)->pe)
+	      /* Relocation to a symbol in a section which isn't
+		 absolute.  We output the address here to a file.
+		 This file is then read by dlltool when generating the
+		 reloc section.  Note that the base file is not
+		 portable between systems.  We write out a long here,
+		 and dlltool reads in a long.  */
+	      long addr = (rel->r_vaddr 
+			   - input_section->vma 
+			   + input_section->output_offset 
+			   + input_section->output_section->vma);
+	      if (coff_data (output_bfd)->pe)
 		addr -= pe_data(output_bfd)->pe_opthdr.ImageBase;
-	      /* FIXME: Shouldn't 4 be sizeof (addr)?  */
-	      fwrite (&addr, 1,4, (FILE *) info->base_file);
+	      if (fwrite (&addr, 1, sizeof (long), (FILE *) info->base_file)
+		  != sizeof (long))
+		{
+		  bfd_set_error (bfd_error_system_call);
+		  return false;
+		}
 	    }
 	}
   
