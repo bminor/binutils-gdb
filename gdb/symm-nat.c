@@ -100,7 +100,7 @@ fetch_inferior_registers (int regno)
   int i;
   struct pt_regset regs;
 
-  registers_fetched ();
+  deprecated_registers_fetched ();
 
   mptrace (XPT_RREGS, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) & regs, 0);
   *(int *) &registers[REGISTER_BYTE (EAX_REGNUM)] = regs.pr_eax;

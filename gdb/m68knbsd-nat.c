@@ -44,7 +44,7 @@ fetch_inferior_registers (int regno)
   memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
 	  sizeof (inferior_fp_registers));
 
-  registers_fetched ();
+  deprecated_registers_fetched ();
 }
 
 void

@@ -250,7 +250,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       return;
     }
 
-  registers_fetched ();
+  deprecated_registers_fetched ();
 }
 
 /* Register that we are able to handle irix5 core file formats.

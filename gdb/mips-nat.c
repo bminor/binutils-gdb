@@ -76,7 +76,7 @@ fetch_inferior_registers (int regno)
   char buf[MAX_REGISTER_RAW_SIZE];
   register int i;
 
-  registers_fetched ();
+  deprecated_registers_fetched ();
 
   for (regno = 1; regno < NUM_REGS; regno++)
     {

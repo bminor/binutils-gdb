@@ -1,3 +1,22 @@
+2002-11-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* regcache.c (deprecated_registers_fetched): Update.
+	* regcache.h (deprecated_registers_fetched): Rename
+	registers_fetched.
+	* remote-vxsparc.c (vx_read_register): Update.
+	* remote-vxmips.c (vx_read_register): Update.
+	* remote-vx68.c (vx_read_register): Update.
+	* irix5-nat.c (fetch_core_registers): Update.
+	* mipsm3-nat.c (fetch_inferior_registers): Update.
+	* sun3-nat.c (fetch_inferior_registers): Update.
+	* symm-nat.c (fetch_inferior_registers): Update.
+	* ns32knbsd-nat.c (fetch_inferior_registers): Update.
+	(fetch_core_registers): Update.
+	(fetch_kcore_registers): Update.
+	* mips-nat.c (fetch_inferior_registers): Update.
+	* corelow.c (get_core_registers): Update.
+	* a68v-nat.c (fetch_inferior_registers): Update.
+
 2002-11-06  Joel Brobecker  <brobecker@gnat.com>
 
 	Put in place the framework necessary for multiarching the hppa targets.

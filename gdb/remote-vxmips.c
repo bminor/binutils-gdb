@@ -148,7 +148,7 @@ vx_read_register (int regno)
 
   /* Mark the register cache valid.  */
 
-  registers_fetched ();
+  deprecated_registers_fetched ();
 }
 
 /* Store a register or registers into the VxWorks target.

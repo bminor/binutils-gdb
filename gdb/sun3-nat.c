@@ -36,7 +36,7 @@ fetch_inferior_registers (int regno)
   struct regs inferior_registers;
   struct fp_status inferior_fp_registers;
 
-  registers_fetched ();
+  deprecated_registers_fetched ();
 
   ptrace (PTRACE_GETREGS, PIDGET (inferior_ptid),
 	  (PTRACE_ARG3_TYPE) & inferior_registers);

@@ -41,7 +41,7 @@ fetch_inferior_registers (int ignored)
   ptrace_$init_control (&inferior_control_registers);
   inferior_fp_registers.size = sizeof (inferior_fp_registers);
 
-  registers_fetched ();
+  deprecated_registers_fetched ();
 
   ptrace (PTRACE_GETREGS, PIDGET (inferior_ptid),
 	  (PTRACE_ARG3_TYPE) & inferior_registers,

@@ -532,7 +532,7 @@ registers_changed (void)
     registers_changed_hook ();
 }
 
-/* REGISTERS_FETCHED ()
+/* DEPRECATED_REGISTERS_FETCHED ()
 
    Indicate that all registers have been fetched, so mark them all valid.  */
 
@@ -545,7 +545,7 @@ registers_changed (void)
    this function/hack is eliminated.  */
 
 void
-registers_fetched (void)
+deprecated_registers_fetched (void)
 {
   int i;
 

@@ -282,7 +282,7 @@ fetch_inferior_registers (int regno)
     }
 
   /* All registers are valid, if not returned yet */
-  registers_fetched ();
+  deprecated_registers_fetched ();
 }
 
 /* Store gdb's view of registers to the thread.

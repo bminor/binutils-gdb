@@ -193,6 +193,10 @@ extern void deprecated_write_register_gen (int regnum, char *myaddr);
    available.  */
 extern signed char *deprecated_register_valid;
 
+/* NOTE: cagney/2002-11-05: This function, and its co-conspirator
+   deprecated_registers[], have been superseeded by supply_register().  */
+extern void deprecated_registers_fetched (void);
+
 extern int register_cached (int regnum);
 
 extern void set_register_cached (int regnum, int state);
@@ -201,7 +205,6 @@ extern void register_changed (int regnum);
 
 extern void registers_changed (void);
 
-extern void registers_fetched (void);
 
 extern void read_register_bytes (int regbyte, char *myaddr, int len);
 
