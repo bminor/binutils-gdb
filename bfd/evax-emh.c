@@ -1,5 +1,5 @@
 /* evax-emh.c -- BFD back-end for ALPHA EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998 Free Software Foundation, Inc.
 
    EMH record handling functions
    and
@@ -22,7 +22,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include <stdio.h>
 #include <ctype.h>
 
 #include "bfd.h"
@@ -137,7 +136,6 @@ get_vms_time_string ()
 {
   static unsigned char tbuf[18];
 #ifndef VMS
-#include <sys/types.h>
 #include <time.h>
 
   char *pnt;

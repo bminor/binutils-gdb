@@ -1,5 +1,5 @@
 /* evax-misc.c -- Miscellaneous functions for ALPHA EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998 Free Software Foundation, Inc.
 
    Written by Klaus K"ampf (kkaempf@progis.de)
    of proGIS Softwareentwicklung, Aachen, Germany
@@ -22,7 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #if __STDC__
 #include <stdarg.h>
 #endif
-#include <stdio.h>
 
 #include "bfd.h"
 #include "sysdep.h"

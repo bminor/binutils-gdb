@@ -1,5 +1,5 @@
 /* evax-etir.c -- BFD back-end for ALPHA EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998 Free Software Foundation, Inc.
    ETIR record handling functions
 
    go and read the openVMS linker manual (esp. appendix B)
@@ -32,7 +32,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 	qw	quadword (8 byte, 64 bit)
 	da	data stream  */
 
-#include <stdio.h>
 #include <ctype.h>
 
 #include "bfd.h"

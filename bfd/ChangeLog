@@ -1,3 +1,30 @@
+Thu May  7 17:40:56 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* filemode.c: Remove; not used.
+
+	If sysdep.h includes a header file, don't include it again:
+	* aix386-core.c: Don't include <stdio.h>, <stddef.h>, or
+	<errno.h>.
+	* aoutx.h: Don't include <string.h>.  Use "sysdep.h" rather than
+	<sysdep.h>.
+	* archive.c: Don't include <string.h> or <errno.h>.
+	* evax-alpha.c; Don't include <stdio.h>.
+	* evax-egsd.c: Likewise.
+	* evax-etir.c: Likewise.
+	* evax-misc.c: Likewise.
+	* evax-emh.c: Likewise.  Also, don't include <sys/types.h>.
+	* hppabsd-core.c: Don't include <stdio.h>, <sys/types.h>, or
+	<errno.h>.
+	* hpux-core.c: Likewise.
+	* netbsd-core.c: Likewise.
+	* som.c: Likewise.
+	* libbfd.c: Don't include <sys/types.h>.
+	* nlmcode.h: Don't include <string.h>.
+	* osf-core.c: Don't include <string.h> or <stdio.h>.
+	* ptrace-core.c: Don't include <stdio.h>, <sys/types.h>,
+	<errno.h>, or <unistd.h>.
+	* trad-core.c: Don't include <stdio.h> or <sys/types.h>.
+
 Thu May  7 13:12:50 1998  Klaus Kaempf  <kkaempf@progis.de>
 
 	* configure.com: If the version number can not be found in
