@@ -1,5 +1,25 @@
 Fri Apr 11 15:43:24 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* targets.c (netbsd_core_vec): Declare.  From Gordon W. Ross
+	<gwr@mc.com>.
+
+	* libaout.h (struct aout_backend_data): Add entry_is_text_address
+	field.
+	* aout-target.h (SEGMENT_SIZE): Define to TARGET_PAGE_SIZE at the
+	start of the file.  Remove uses later on which switch using
+	ifdef.
+	(MY(callback)): Handle entry_is_text_address.
+	(MY_entry_is_text_address): Define if not defined.
+	(MY(backend_data)): Initialize new field.
+	* aoutf1.h (sunos4_aout_backend): Likewise.
+	* i386aout.c (MY(backend_data)): Likewise.
+	* i386mach3.c (MY(backend_data)): Likewise.
+	* mipsbsd.c (MY(backend_data)): Likewise.
+	* sparclynx.c (sparclynx_aout_backend): Likewise.
+	* netbsd.h (SEGMENT_SIZE): Define if not defined.
+	(MY_entry_is_text_address): Define.
+	* m68knetbsd.c (SEGMENT_SIZE): Define as 0x20000
+
 	* xcofflink.c (bfd_xcoff_import_symbol): Handle importing a symbol
 	whose name starts with `.'.
 
