@@ -78,48 +78,14 @@
 #include <debugapi.h>
 #include <process.h>
 
-/************************************************************************/
-/*****************************************************************************
- *
- *	(C) Copyright 1988-1993 Novell, Inc.
- *	All Rights Reserved.
- *
- *	This program is an unpublished copyrighted work which is proprietary
- *	to Novell, Inc. and contains confidential information that is not
- *	to be reproduced or disclosed to any other person or entity without
- *	prior written consent from Novell, Inc. in each and every instance.
- *
- *	WARNING:  Unauthorized reproduction of this program as well as
- *	unauthorized preparation of derivative works based upon the
- *	program or distribution of copies by sale, rental, lease or
- *	lending are violations of federal copyright laws and state trade
- *	secret laws, punishable by civil and criminal penalties.
- *
- *  $release$
- *  $modname: loadstuff.h$
- *  $version: 1.37$
- *  $date: Fri, Jan 15, 1993$
- *
- ****************************************************************************/
+/****************************************************/
+/* This information is from Novell.  It is not in any of the standard
+   NetWare header files.  */
 
-
-/* WARNING:  THIS IS NOT A COMPLETE OS HEADER FILE - DON'T GET CONFUSED
- ***********************************************************************
- * The information is this file is a subset of the OS LOADER.H.			
- * This file was created to reveal the LoadDefinitionStrucutre and some 
- * associated information to Cygnus Support to assist them in their 		
- * efforts to develop GNU netware utilities.	 Don't confuse this file
- * with LOADER.H or any other actually supported NetWare header.
-
-************************************************************************/
-
-struct LoadDefinitionStructure
+struct DBG_LoadDefinitionStructure
 {
-	struct LoadDefinitionStructure *LDLink;
-	struct LoadDefinitionStructure *LDKillLink;
-	struct LoadDefinitionStructure *LDScanLink;
-	struct ResourceTagStructure	*LDResourceList;
-	LONG LDIdentificationNumber;
+	void *reserved1[4];
+	LONG reserved5;
 	LONG LDCodeImageOffset;
 	LONG LDCodeImageLength;
 	LONG LDDataImageOffset;
@@ -127,124 +93,38 @@ struct LoadDefinitionStructure
 	LONG LDUninitializedDataLength;
 	LONG LDCustomDataOffset;
 	LONG LDCustomDataSize;
-	LONG LDFlags;
-	LONG LDType;
-	LONG (*LDInitializationProcedure)(
-			struct LoadDefinitionStructure *LoadRecord,
-			struct ScreenStruct *screenID,
-			BYTE *CommandLine,
-			BYTE *loadDirectoryPath,
-			LONG uninitializedDataLength,
-			LONG fileHandle,
-			LONG (*ReadRoutine)(
-					LONG fileHandle,
-					LONG offset,
-					void *buffer,
-					LONG numberOfBytes),
-			LONG customDataOffset,
-			LONG customDataSize);
-	void (*LDExitProcedure)(void);
-	LONG (*LDCheckUnloadProcedure)(
-			struct ScreenStruct *screenID);
-	struct ExternalPublicDefinitionStructure *LDPublics;
-	BYTE LDFileName[36];
-	BYTE LDName[128];
-	LONG *LDCLIBLoadStructure;
-	LONG *LDNLMDebugger;
-	LONG LDParentID;
-	LONG LDReservedForCLIB;
-	LONG Reserved0;
-	LONG Reserved1;
-	void *LDModuleObjectHandle;	/* If Instrumented BEW 10/16/90 */
-	LONG LDMajorVersion;
-	LONG LDMinorVersion;
-	LONG LDRevision;
-	LONG LDYear;
-	LONG LDMonth;
-	LONG LDDay;
-	BYTE *LDCopyright;
-	LONG LDAllocAvailBytes;
-	LONG LDAllocFreeCount;
-	LONG LDLastGarbCollect;
-	LONG LDAlloc16Lists[64];
-	LONG LDAlloc256Lists[12];
-	LONG LDAlloc4kList;
-	struct DomainStructure *LDDomainID;	/* This must be non-zero for the Alloc Hunt code to work right. */
-										/* It also points to the domain structure. */
-	struct LoadDefinitionStructure *LDEnvLink;
-	void *LDAllocPagesListHead;
-	struct ExternalPublicDefinitionStructure *LDTempPublicList;
-	LONG LDMessageLanguage; 	/* for enabling */
-	BYTE **LDMessages;			/* for enabling */
-	LONG LDMessageCount;		/* for enabling */
-	BYTE *LDHelpFile;			/* for enabling */
-	LONG LDMessageBufferSize;	/* for enabling */
-	LONG LDHelpBufferSize;		/* for enabling */
-	LONG LDSharedCodeOffset;		/* for protection */
-	LONG LDSharedCodeLength;		/* for protection */
-	LONG LDSharedDataOffset;		/* for protection */
-	LONG LDSharedDataLength;		/* for protection */
-	LONG (*LDSharedInitProcedure)(
-			struct LoadDefinitionStructure *LoadRecord,
-			struct ScreenStruct *screenID,
-			BYTE *CommandLine);
-	void (*LDSharedExitProcedure)(void);
-	LONG LDRPCDataTable;
-	LONG LDRealRPCDataTable;
-	LONG LDRPCDataTableSize;
-	LONG LDNumberOfReferencedPublics;
-	struct ExternalPublicDefinitionStructure **LDReferencedPublics;
-	LONG LDNumberOfReferencedExports;
+	LONG reserved6[2];
+	LONG (*LDInitializationProcedure)(void);
 };
 
-
-/*	define the LDFlags.	*/
-
-#define LDModuleIsReEntrantBit			0x00000001
-#define LDModuleCanBeMultiplyLoadedBit	0x00000002
-#define LDSynchronizeStart					0x00000004
-#define LDPseudoPreemptionBit				0x00000008
-#define LDLoadInOSDomain					0x00000010
-#define LDDontUnloadBit 					0x20000000
-#define LDModuleIsBeingDebugged 			0x40000000
-#define LDMemoryOn4KBoundriesBit			0x80000000
-
-/* LoadModule load options */
-#define LO_NORMAL				0x0000
-#define LO_STARTUP			0x0001
-#define LO_PROTECT			0x0002
-#define LO_DEBUG				0x0004
-#define LO_AUTO_LOAD			0x0008
-#define LO_DONT_PROMPT		0x0010
-#define LO_LOAD_LOW			0x0020
-#define LO_RETURN_HANDLE	0x0040
-#define LO_LOAD_SILENT		0x0080
+#define LO_NORMAL		0x0000
+#define LO_STARTUP		0x0001
+#define LO_PROTECT		0x0002
+#define LO_DEBUG		0x0004
+#define LO_AUTO_LOAD  		0x0008
 
 /* Loader returned error codes */
-#define LOAD_COULD_NOT_FIND_FILE				1
-#define LOAD_ERROR_READING_FILE 				2
-#define LOAD_NOT_NLM_FILE_FORMAT				3
+#define LOAD_COULD_NOT_FIND_FILE			1
+#define LOAD_ERROR_READING_FILE				2
+#define LOAD_NOT_NLM_FILE_FORMAT			3
 #define LOAD_WRONG_NLM_FILE_VERSION			4
 #define LOAD_REENTRANT_INITIALIZE_FAILURE	5
 #define LOAD_CAN_NOT_LOAD_MULTIPLE_COPIES	6
-#define LOAD_ALREADY_IN_PROGRESS				7
+#define LOAD_ALREADY_IN_PROGRESS			7
 #define LOAD_NOT_ENOUGH_MEMORY				8
-#define LOAD_INITIALIZE_FAILURE 				9
+#define LOAD_INITIALIZE_FAILURE				9
 #define LOAD_INCONSISTENT_FILE_FORMAT		10
 #define LOAD_CAN_NOT_LOAD_AT_STARTUP		11
 #define LOAD_AUTO_LOAD_MODULES_NOT_LOADED	12
-#define LOAD_UNRESOLVED_EXTERNAL				13
+#define LOAD_UNRESOLVED_EXTERNAL			13
 #define LOAD_PUBLIC_ALREADY_DEFINED			14
-#define LOAD_XDC_DATA_ERROR					15
-#define LOAD_NOT_OS_DOMAIN						16
-
-/****************************************************************************/
+/****************************************************/
 
 /* The main thread ID.  */
 static int mainthread;
 
 /* The LoadDefinitionStructure of the NLM being debugged.  */
-static struct LoadDefinitionStructure *handle;
+static struct DBG_LoadDefinitionStructure *handle;
 
 /* Whether we have connected to gdb.  */
 static int talking;
@@ -727,7 +607,8 @@ handle_exception (T_StackFrame *old_frame)
   if (frame->ExceptionNumber == START_NLM_EVENT
       && handle == NULL)
     {
-      handle = (struct LoadDefinitionStructure *) frame->ExceptionErrorCode;
+      handle = ((struct DBG_LoadDefinitionStructure *)
+		frame->ExceptionErrorCode);
       first_insn = *(char *) handle->LDInitializationProcedure;
       *(unsigned char *) handle->LDInitializationProcedure = 0xcc;
       return RETURN_TO_PROGRAM;
