@@ -1,3 +1,13 @@
+Wed Mar  3 07:23:03 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in: Changes to build testsuite correctly.
+	(FLAGS_TO_PASS): Added CXX and CXXFLAGS.
+	(CC_FOR_TARGET, CXX, CXX_FOR_TARGET): New variables.
+	(TARGET_FLAGS_TO_PASS): New variable.
+	(SUBDIRS): Added testsuite.
+	(all): Build testsuite using TARGET_FLAGS_TO_PASS, so that
+	testsuite is compiled with CC_FOR_TARGET rather than CC.
+
 Tue Mar  2 17:57:56 1993  Fred Fish  (fnf@cygnus.com)
 
 	* dbxread.c (dbx_symfile_init):  Fix for nonexistant string table,
