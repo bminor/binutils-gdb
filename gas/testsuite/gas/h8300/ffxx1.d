@@ -16,7 +16,8 @@ Disassembly of section .text:
 0+040e <delay> 79 01 00 00       mov.w	#0x0,r1
 0+0412 <deloop> 0b 01             adds	#0x1,er1
 0+0414 <deloop[+]2> 46 00             bne	.0 \(416\)
-		RELOC: 0+0415 DISP8 deloop[+]0xffff+
+		RELOC: 0+0415 DISP8 deloop[+]0x[0f]*ffffffff
 0+0416 <deloop[+]4> 12 88             rotl	r0l
 0+0418 <deloop[+]6> 40 00             bra	.0 \(41a\)
-		RELOC: 0+0419 DISP8 loop[+]0xffff+
+		RELOC: 0+0419 DISP8 loop[+]0x[0f]*ffffffff
+...

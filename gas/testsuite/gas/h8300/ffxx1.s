@@ -17,3 +17,4 @@ deloop: adds.w  #1,r1
 	bne     deloop:8        ;not = 0
 	rotl    r0l
         bra     loop:8
+	.word	0
