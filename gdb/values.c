@@ -1,3 +1,4 @@
+
 /* Low level packing and unpacking of values for GDB.
    Copyright (C) 1986, 1987 Free Software Foundation, Inc.
 
@@ -20,7 +21,6 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 
 #include <stdio.h>
 #include "defs.h"
-#include "initialize.h"
 #include "param.h"
 #include "symtab.h"
 #include "value.h"
@@ -45,7 +45,6 @@ static struct value_history_chunk *value_history_chain;
 
 static int value_history_count;	/* Abs number of last entry stored */
 
-START_FILE
 
 /* List of all value objects currently allocated
    (except for those released by calls to release_value)
@@ -67,6 +66,7 @@ allocate_value (type)
   VALUE_TYPE (val) = type;
   VALUE_LVAL (val) = not_lval;
   VALUE_ADDRESS (val) = 0;
+  VALUE_FRAME (val) = 0;
   VALUE_OFFSET (val) = 0;
   VALUE_BITPOS (val) = 0;
   VALUE_BITSIZE (val) = 0;
@@ -92,6 +92,7 @@ allocate_repeat_value (type, count)
   VALUE_TYPE (val) = type;
   VALUE_LVAL (val) = not_lval;
   VALUE_ADDRESS (val) = 0;
+  VALUE_FRAME (val) = 0;
   VALUE_OFFSET (val) = 0;
   VALUE_BITPOS (val) = 0;
   VALUE_BITSIZE (val) = 0;
@@ -178,11 +179,15 @@ int
 record_latest_value (val)
      value val;
 {
-  register int i;
+  int i;
+  double foo;
 
-  /* Get error now if about to store an invalid float.  */
-  if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_FLT)
-    value_as_double (val);
+  /* Check error now if about to store an invalid float.  We return -1
+     to the caller, but allow them to continue, e.g. to print it as "Nan". */
+  if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_FLT) {
+    foo = unpack_double (VALUE_TYPE (val), VALUE_CONTENTS (val), &i);
+    if (i) return -1;		/* Indicate value not saved in history */
+  }
 
   /* Here we treat value_history_count as origin-zero
      and applying to the value being stored now.  */
@@ -341,7 +346,7 @@ set_internalvar_component (var, offset, bitpos, bitsize, newval)
 {
   register char *addr = VALUE_CONTENTS (var->value) + offset;
   if (bitsize)
-    modify_field (addr, value_as_long (newval),
+    modify_field (addr, (int) value_as_long (newval),
 		  bitpos, bitsize);
   else
     bcopy (VALUE_CONTENTS (newval), addr,
@@ -408,7 +413,7 @@ use \"set\" as in \"set $foo = 5\" to define them.\n");
    floating values to long.
    Does not deallocate the value.  */
 
-long
+LONGEST
 value_as_long (val)
      register value val;
 {
@@ -419,7 +424,13 @@ double
 value_as_double (val)
      register value val;
 {
-  return unpack_double (VALUE_TYPE (val), VALUE_CONTENTS (val));
+  double foo;
+  int inv;
+
+  foo = unpack_double (VALUE_TYPE (val), VALUE_CONTENTS (val), &inv);
+  if (inv)
+	error ("Invalid floating value found in program.");
+  return foo;
 }
 
 /* Unpack raw data (copied from debugee) at VALADDR
@@ -432,7 +443,7 @@ value_as_double (val)
    to member which reaches here is considered to be equivalent
    to an INT (or some size).  After all, it is only an offset.  */
 
-long
+LONGEST
 unpack_long (type, valaddr)
      struct type *type;
      char *valaddr;
@@ -478,6 +489,11 @@ unpack_long (type, valaddr)
 
       if (len == sizeof (long))
 	return * (long *) valaddr;
+
+#ifdef LONG_LONG
+      if (len == sizeof (long long))
+	return * (long long *) valaddr;
+#endif
     }
   else if (code == TYPE_CODE_PTR
 	   || code == TYPE_CODE_REF)
@@ -486,24 +502,33 @@ unpack_long (type, valaddr)
 	return (CORE_ADDR) * (char **) valaddr;
     }
   else if (code == TYPE_CODE_MEMBER)
-    error ("not impelmented: member types in unpack_long");
+    error ("not implemented: member types in unpack_long");
 
   error ("Value not integer or pointer.");
 }
 
+/* Return a double value from the specified type and address.
+ * INVP points to an int which is set to 0 for valid value,
+ * 1 for invalid value (bad float format).  In either case,
+ * the returned double is OK to use.  */
+
 double
-unpack_double (type, valaddr)
+unpack_double (type, valaddr, invp)
      struct type *type;
      char *valaddr;
+     int *invp;
 {
   register enum type_code code = TYPE_CODE (type);
   register int len = TYPE_LENGTH (type);
   register int nosign = TYPE_UNSIGNED (type);
 
+  *invp = 0;		/* Assume valid */
   if (code == TYPE_CODE_FLT)
     {
-      if (INVALID_FLOAT (valaddr, len))
-	error ("Invalid floating value found in program.");
+      if (INVALID_FLOAT (valaddr, len)) {
+	*invp = 1;
+	return 1.234567891011121314;
+      }
 
       if (len == sizeof (float))
 	return * (float *) valaddr;
@@ -530,6 +555,11 @@ unpack_double (type, valaddr)
 
       if (len == sizeof (long))
 	return * (unsigned long *) valaddr;
+
+#ifdef LONG_LONG
+      if (len == sizeof (long long))
+	return * (unsigned long long *) valaddr;
+#endif
     }
   else if (code == TYPE_CODE_INT)
     {
@@ -544,6 +574,11 @@ unpack_double (type, valaddr)
 
       if (len == sizeof (long))
 	return * (long *) valaddr;
+
+#ifdef LONG_LONG
+      if (len == sizeof (long long))
+	return * (long long *) valaddr;
+#endif
     }
 
   error ("Value not floating number.");
@@ -553,7 +588,7 @@ unpack_double (type, valaddr)
    extract and return the value of one of its fields.
    FIELDNO says which field.
 
-   For C++, must also be able to return values from static fields.  */
+   For C++, must also be able to return values from static fields */
 
 value
 value_field (arg1, fieldno)
@@ -570,7 +605,7 @@ value_field (arg1, fieldno)
   if (TYPE_FIELD_BITSIZE (VALUE_TYPE (arg1), fieldno))
     {
       v = value_from_long (type,
-			   unpack_field_as_long (VALUE_TYPE (arg1),
+			   (LONGEST) unpack_field_as_long (VALUE_TYPE (arg1),
 						 VALUE_CONTENTS (arg1),
 						 fieldno));
       VALUE_BITPOS (v) = TYPE_FIELD_BITPOS (VALUE_TYPE (arg1), fieldno) % 8;
@@ -602,7 +637,7 @@ value_fn_field (arg1, fieldno, subfieldno)
   struct symbol *sym;
 
   sym = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, subfieldno),
-		       0, VAR_NAMESPACE);
+		       0, VAR_NAMESPACE, 0);
   if (! sym) error ("Internal error: could not find physical method named %s",
 		    TYPE_FN_FIELD_PHYSNAME (f, subfieldno));
   
@@ -631,7 +666,8 @@ value_virtual_fn_field (arg1, f, j, type)
      should serve just fine as a function type).  Then, index into
      the table, and convert final value to appropriate function type.  */
   value vfn, vtbl;
-  value vi = value_from_long (builtin_type_int, TYPE_FN_FIELD_VOFFSET (f, j));
+  value vi = value_from_long (builtin_type_int, 
+			      (LONGEST) TYPE_FN_FIELD_VOFFSET (f, j));
   VALUE_TYPE (arg1) = TYPE_VPTR_BASETYPE (type);
 
   /* This type may have been defined before its virtual function table
@@ -688,7 +724,7 @@ value_static_field (type, fieldname, fieldno)
 		else
 		  error ("field `%s' is not static");
 	      }
-	  t = TYPE_BASECLASS (t, 1);
+	  t = TYPE_BASECLASSES (t) ? TYPE_BASECLASS (t, 1) : 0;
 	}
 
       t = type;
@@ -707,7 +743,7 @@ value_static_field (type, fieldname, fieldno)
 		  error ("use `info method' command to print value of method \"%s\"", fieldname);
 		}
 	    }
-	  t = TYPE_BASECLASS (t, 1);
+	  t = TYPE_BASECLASSES (t) ? TYPE_BASECLASS (t, 1) : 0;
 	}
       error("there is no field named %s", fieldname);
     }
@@ -715,7 +751,7 @@ value_static_field (type, fieldname, fieldno)
  found:
 
   sym = lookup_symbol (TYPE_FIELD_STATIC_PHYSNAME (type, fieldno),
-		       0, VAR_NAMESPACE);
+		       0, VAR_NAMESPACE, 0);
   if (! sym) error ("Internal error: could not find physical static variable named %s", TYPE_FIELD_BITSIZE (type, fieldno));
 
   type = TYPE_FIELD_TYPE (type, fieldno);
@@ -732,37 +768,34 @@ unpack_field_as_long (type, valaddr, fieldno)
   long val;
   int bitpos = TYPE_FIELD_BITPOS (type, fieldno);
   int bitsize = TYPE_FIELD_BITSIZE (type, fieldno);
-  union { int i; char c; } test;
 
   bcopy (valaddr + bitpos / 8, &val, sizeof val);
 
-  /* Extracting bits depends on endianness of the machine.  */
-  test.i = 1;
-  if (test.c == 1)
-    /* Little-endian.  */
-    val = val >> (bitpos % 8);
-  else
-    val = val >> (sizeof val * 8 - bitpos % 8 - bitsize);
+  /* Extracting bits depends on endianness of the target machine.  */
+#ifdef BITS_BIG_ENDIAN
+  val = val >> (sizeof val * 8 - bitpos % 8 - bitsize);
+#else
+  val = val >> (bitpos % 8);
+#endif
 
   val &= (1 << bitsize) - 1;
   return val;
 }
 
+void
 modify_field (addr, fieldval, bitpos, bitsize)
      char *addr;
      int fieldval;
      int bitpos, bitsize;
 {
   long oword;
-  union { int i; char c; } test;
 
   bcopy (addr, &oword, sizeof oword);
 
-  /* Shifting for bit field depends on endianness of the machine.  */
-  test.c = 1;
-  if (test.i != 1)
-    /* not little-endian: assume big-endian.  */
-    bitpos = sizeof oword * 8 - bitpos - bitsize;
+  /* Shifting for bit field depends on endianness of the target machine.  */
+#ifdef BITS_BIG_ENDIAN
+  bitpos = sizeof oword * 8 - bitpos - bitsize;
+#endif
 
   oword &= ~(((1 << bitsize) - 1) << bitpos);
   oword |= fieldval << bitpos;
@@ -774,7 +807,7 @@ modify_field (addr, fieldval, bitpos, bitsize)
 value
 value_from_long (type, num)
      struct type *type;
-     register long num;
+     register LONGEST num;
 {
   register value val = allocate_value (type);
   register enum type_code code = TYPE_CODE (type);
@@ -790,6 +823,10 @@ value_from_long (type, num)
 	* (int *) VALUE_CONTENTS (val) = num;
       else if (len == sizeof (long))
 	* (long *) VALUE_CONTENTS (val) = num;
+#ifdef LONG_LONG
+      else if (len == sizeof (long long))
+	* (long long *) VALUE_CONTENTS (val) = num;
+#endif
       else
 	error ("Integer type encountered with unexpected data length.");
     }
@@ -831,23 +868,56 @@ value_from_double (type, num)
    of the registers (in raw form).  This is because it is often
    desirable to restore old values to those registers
    after saving the contents of interest, and then call
-   this function using the saved values.  */
+   this function using the saved values.
+   struct_return is non-zero when the function in question is
+   using the structure return conventions on the machine in question;
+   0 when it is using the value returning conventions (this often
+   means returning pointer to where structure is vs. returning value). */
 
 value
-value_being_returned (valtype, retbuf)
+value_being_returned (valtype, retbuf, struct_return)
      register struct type *valtype;
      char retbuf[REGISTER_BYTES];
+     int struct_return;
 {
   register value val;
 
-  if (TYPE_CODE (valtype) == TYPE_CODE_STRUCT
-      || TYPE_CODE (valtype) == TYPE_CODE_UNION)
+  if (struct_return)
     return value_at (valtype, EXTRACT_STRUCT_VALUE_ADDRESS (retbuf));
 
   val = allocate_value (valtype);
   EXTRACT_RETURN_VALUE (valtype, retbuf, VALUE_CONTENTS (val));
 
   return val;
+}
+
+/* Return true if the function specified is using the structure returning
+   convention on this machine to return arguments, or 0 if it is using
+   the value returning convention.  FUNCTION is the value representing
+   the function, FUNCADDR is the address of the function, and VALUE_TYPE
+   is the type returned by the function */
+
+struct block *block_for_pc ();
+
+int
+using_struct_return (function, funcaddr, value_type)
+     value function;
+     CORE_ADDR funcaddr;
+     struct type *value_type;
+{
+  register enum type_code code = TYPE_CODE (value_type);
+
+  if (code == TYPE_CODE_STRUCT ||
+      code == TYPE_CODE_ENUM ||
+      code == TYPE_CODE_ARRAY)
+    {
+      struct block *b = block_for_pc (funcaddr);
+
+      if (!(BLOCK_GCC_COMPILED (b) && TYPE_LENGTH (value_type) < 8))
+	return 1;
+    }
+
+  return 0;
 }
 
 /* Store VAL so it will be returned if a function returns now.
@@ -861,7 +931,7 @@ set_return_value (val)
   register enum type_code code = TYPE_CODE (VALUE_TYPE (val));
   char regbuf[REGISTER_BYTES];
   double dbuf;
-  long lbuf;
+  LONGEST lbuf;
 
   if (code == TYPE_CODE_STRUCT
       || code == TYPE_CODE_UNION)
@@ -880,8 +950,8 @@ set_return_value (val)
     }
 }
 
-static
-initialize ()
+void
+_initialize_values ()
 {
   add_info ("convenience", convenience_info,
 	    "Debugger convenience (\"$foo\") variables.\n\
@@ -895,4 +965,3 @@ A few convenience variables are given values automatically GDB:\n\
 	    "Elements of value history (around item number IDX, or last ten).");
 }
 
-END_FILE

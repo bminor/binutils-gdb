@@ -655,38 +655,38 @@ struct m68k_opcode m68k_opcodes[] =
 {"fatanhx",	two(0xF000, 0x480D),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
 {"fatanhx",	two(0xF000, 0x000D),	two(0xF1C0, 0xE07F),	"IiFt"},
 
-{"fbeq",	one(0xF081),		one(0xF1FF),		"IdBc"},
-{"fbf",		one(0xF080),		one(0xF1FF),		"IdBc"},
-{"fbge",	one(0xF093),		one(0xF1FF),		"IdBc"},
-{"fbgl",	one(0xF096),		one(0xF1FF),		"IdBc"},
-{"fbgle",	one(0xF097),		one(0xF1FF),		"IdBc"},
-{"fbgt",	one(0xF092),		one(0xF1FF),		"IdBc"},
-{"fble",	one(0xF095),		one(0xF1FF),		"IdBc"},
-{"fblt",	one(0xF094),		one(0xF1FF),		"IdBc"},
-{"fbne",	one(0xF08E),		one(0xF1FF),		"IdBc"},
-{"fbnge",	one(0xF09C),		one(0xF1FF),		"IdBc"},
-{"fbngl",	one(0xF099),		one(0xF1FF),		"IdBc"},
-{"fbngle",	one(0xF098),		one(0xF1FF),		"IdBc"},
-{"fbngt",	one(0xF09D),		one(0xF1FF),		"IdBc"},
-{"fbnle",	one(0xF09A),		one(0xF1FF),		"IdBc"},
-{"fbnlt",	one(0xF09B),		one(0xF1FF),		"IdBc"},
-{"fboge",	one(0xF083),		one(0xF1FF),		"IdBc"},
-{"fbogl",	one(0xF086),		one(0xF1FF),		"IdBc"},
-{"fbogt",	one(0xF082),		one(0xF1FF),		"IdBc"},
-{"fbole",	one(0xF085),		one(0xF1FF),		"IdBc"},
-{"fbolt",	one(0xF084),		one(0xF1FF),		"IdBc"},
-{"fbor",	one(0xF087),		one(0xF1FF),		"IdBc"},
-{"fbseq",	one(0xF091),		one(0xF1FF),		"IdBc"},
-{"fbsf",	one(0xF090),		one(0xF1FF),		"IdBc"},
-{"fbsne",	one(0xF09E),		one(0xF1FF),		"IdBc"},
-{"fbst",	one(0xF09F),		one(0xF1FF),		"IdBc"},
-{"fbt",		one(0xF08F),		one(0xF1FF),		"IdBc"},
-{"fbueq",	one(0xF089),		one(0xF1FF),		"IdBc"},
-{"fbuge",	one(0xF08B),		one(0xF1FF),		"IdBc"},
-{"fbugt",	one(0xF08A),		one(0xF1FF),		"IdBc"},
-{"fbule",	one(0xF08D),		one(0xF1FF),		"IdBc"},
-{"fbult",	one(0xF08C),		one(0xF1FF),		"IdBc"},
-{"fbun",	one(0xF088),		one(0xF1FF),		"IdBc"},
+{"fbeq",	one(0xF081),		one(0xF1BF),		"IdBc"},
+{"fbf",		one(0xF080),		one(0xF1BF),		"IdBc"},
+{"fbge",	one(0xF093),		one(0xF1BF),		"IdBc"},
+{"fbgl",	one(0xF096),		one(0xF1BF),		"IdBc"},
+{"fbgle",	one(0xF097),		one(0xF1BF),		"IdBc"},
+{"fbgt",	one(0xF092),		one(0xF1BF),		"IdBc"},
+{"fble",	one(0xF095),		one(0xF1BF),		"IdBc"},
+{"fblt",	one(0xF094),		one(0xF1BF),		"IdBc"},
+{"fbne",	one(0xF08E),		one(0xF1BF),		"IdBc"},
+{"fbnge",	one(0xF09C),		one(0xF1BF),		"IdBc"},
+{"fbngl",	one(0xF099),		one(0xF1BF),		"IdBc"},
+{"fbngle",	one(0xF098),		one(0xF1BF),		"IdBc"},
+{"fbngt",	one(0xF09D),		one(0xF1BF),		"IdBc"},
+{"fbnle",	one(0xF09A),		one(0xF1BF),		"IdBc"},
+{"fbnlt",	one(0xF09B),		one(0xF1BF),		"IdBc"},
+{"fboge",	one(0xF083),		one(0xF1BF),		"IdBc"},
+{"fbogl",	one(0xF086),		one(0xF1BF),		"IdBc"},
+{"fbogt",	one(0xF082),		one(0xF1BF),		"IdBc"},
+{"fbole",	one(0xF085),		one(0xF1BF),		"IdBc"},
+{"fbolt",	one(0xF084),		one(0xF1BF),		"IdBc"},
+{"fbor",	one(0xF087),		one(0xF1BF),		"IdBc"},
+{"fbseq",	one(0xF091),		one(0xF1BF),		"IdBc"},
+{"fbsf",	one(0xF090),		one(0xF1BF),		"IdBc"},
+{"fbsne",	one(0xF09E),		one(0xF1BF),		"IdBc"},
+{"fbst",	one(0xF09F),		one(0xF1BF),		"IdBc"},
+{"fbt",		one(0xF08F),		one(0xF1BF),		"IdBc"},
+{"fbueq",	one(0xF089),		one(0xF1BF),		"IdBc"},
+{"fbuge",	one(0xF08B),		one(0xF1BF),		"IdBc"},
+{"fbugt",	one(0xF08A),		one(0xF1BF),		"IdBc"},
+{"fbule",	one(0xF08D),		one(0xF1BF),		"IdBc"},
+{"fbult",	one(0xF08C),		one(0xF1BF),		"IdBc"},
+{"fbun",	one(0xF088),		one(0xF1BF),		"IdBc"},
 
 {"fcmpb",	two(0xF000, 0x5838),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
 {"fcmpd",	two(0xF000, 0x5438),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
@@ -905,11 +905,11 @@ struct m68k_opcode m68k_opcodes[] =
 {"fmovemx",	two(0xF000, 0xF000),	two(0xF1C0, 0xFF00),	"Id#3&s"},		/* fmovem.x to control,	static and dynamic: */
 {"fmovemx",	two(0xF000, 0xF800),	two(0xF1C0, 0xFF8F),	"IiDk&s"},		/* fmovem.x to control,	static and dynamic: */
 
-{"fmovemx",	two(0xF018, 0xD000),	two(0xF1F8, 0xFF00),	"Id#3+s"},		/* fmovem.x from autoincrement,	static and dynamic: */
-{"fmovemx",	two(0xF018, 0xD800),	two(0xF1F8, 0xFF8F),	"IiDk+s"},		/* fmovem.x from autoincrement,	static and dynamic: */
+{"fmovemx",	two(0xF018, 0xD000),	two(0xF1F8, 0xFF00),	"Id+s#3"},		/* fmovem.x from autoincrement,	static and dynamic: */
+{"fmovemx",	two(0xF018, 0xD800),	two(0xF1F8, 0xFF8F),	"Ii+sDk"},		/* fmovem.x from autoincrement,	static and dynamic: */
   
-{"fmovemx",	two(0xF000, 0xD000),	two(0xF1C0, 0xFF00),	"Id#3&s"},		/* fmovem.x from control,	static and dynamic: */
-{"fmovemx",	two(0xF000, 0xD800),	two(0xF1C0, 0xFF8F),	"IiDk&s"},		/* fmovem.x from control,	static and dynamic: */
+{"fmovemx",	two(0xF000, 0xD000),	two(0xF1C0, 0xFF00),	"Id&s#3"},		/* fmovem.x from control,	static and dynamic: */
+{"fmovemx",	two(0xF000, 0xD800),	two(0xF1C0, 0xFF8F),	"Ii&sDk"},		/* fmovem.x from control,	static and dynamic: */
 
 /* fmoveml and fmovel are the same instruction.   This may cause some
    confusion in the assembler. */
@@ -935,6 +935,8 @@ struct m68k_opcode m68k_opcodes[] =
 {"fnegx",	two(0xF000, 0x001A),	two(0xF1C0, 0xE07F),	"IiF8F7"},
 {"fnegx",	two(0xF000, 0x481A),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
 {"fnegx",	two(0xF000, 0x001A),	two(0xF1C0, 0xE07F),	"IiFt"},
+
+{"fnop",	two(0xF280, 0x0000),	two(0xFFFF, 0xFFFF),	"Ii"},
 
 {"fremb",	two(0xF000, 0x5825),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
 {"fremd",	two(0xF000, 0x5425),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},

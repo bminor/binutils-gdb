@@ -20,7 +20,6 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 
 
 #include "defs.h"
-#include "initialize.h"
 #include "symtab.h"
 
 #include <stdio.h>
@@ -28,7 +27,6 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 
 static void free_symtab ();
 
-START_FILE
 
 /* Free all the symtabs that are currently installed,
    and all storage associated with them.
@@ -329,8 +327,7 @@ relocate_source (sp)
 
   RELOCATE (sp->name);
   for (i = 0; i < nitems; i++)
-    if (sp->contents.item[i] > 0)
-      TEXT_RELOCATE (sp->contents.item[i]);
+    TEXT_RELOCATE (sp->contents.item[i].pc);
 }
 
 /* Read symsegs from file named NAME open on DESC,
@@ -358,9 +355,12 @@ read_symsegs (desc, name)
       len = myread (desc, &root, sizeof root);
       if (len == 0 || root.format == 0)
 	break;
-      if (root.format != 1 ||
+      /* format 1 was ok for the original gdb, but since the size of the
+	 type structure changed when C++ support was added, it can no
+	 longer be used.  Accept only format 2. */
+      if (root.format != 2 ||
 	  root.length < sizeof root)
-	error ("Invalid symbol segment format code");
+	error ("\nInvalid symbol segment format code");
       data = (char *) xmalloc (root.length);
       bcopy (&root, data, sizeof root);
       len = myread (desc, data + sizeof root,
@@ -380,6 +380,7 @@ static int block_depth ();
 static void print_spaces ();
 static void print_symbol ();
 
+void
 print_symtabs (filename)
      char *filename;
 {
@@ -411,12 +412,8 @@ print_symtabs (filename)
       l = LINETABLE (s);
       len = l->nitems;
       for (i = 0; i < len; i++)
-	{
-	  if (l->item[i] < 0)
-	    line = - l->item[i] - 1;
-	  else
-	    fprintf (outfile, " line %d at %x\n", ++line, l->item[i]);
-	}
+	fprintf (outfile, " line %d at %x\n", l->item[i].line,
+		 l->item[i].pc);
       /* Now print the block info.  */
       fprintf (outfile, "\nBlockvector:\n\n");
       bv = BLOCKVECTOR (s);
@@ -522,7 +519,7 @@ print_symbol (symbol, depth, outfile)
 	  break;
 
 	case LOC_REGPARM:
-	  fprintf (outfile, "parmameter register %d,", SYMBOL_VALUE (symbol));
+	  fprintf (outfile, "parameter register %d,", SYMBOL_VALUE (symbol));
 	  break;
 
 	case LOC_LOCAL:
@@ -557,11 +554,24 @@ block_depth (block)
   return i;
 }
 
-static
-initialize ()
+/*
+ * Free all partial_symtab storage.
+ */
+void
+free_all_psymtabs()
 {
+  obstack_free (psymbol_obstack, 0);
+  obstack_init (psymbol_obstack);
+  partial_symtab_list = (struct partial_symtab *) 0;
+}
+
+void
+_initialize_symmisc ()
+{
+  symtab_list = (struct symtab *) 0;
+  partial_symtab_list = (struct partial_symtab *) 0;
+  
   add_com ("printsyms", class_obscure, print_symtabs,
 	   "Print dump of current symbol definitions to file OUTFILE.");
 }
 
-END_FILE

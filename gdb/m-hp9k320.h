@@ -25,14 +25,17 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 /* Set flag to indicate whether HP's assembler is in use. */
 #ifdef __GNU__
 #ifdef __HPUX_ASM__
-#define HPUX_ASM
+#define USG_SGS_ASM
 #endif
 #else
-#define HPUX_ASM
+#define USG_SGS_ASM
 #endif
 
 /* Define this for versions of hp-ux older than 6.0 */
 /* #define HPUX_VERSION_5 */
+
+/* define USG if you are using sys5 /usr/include's */
+#define USG
 
 #define HAVE_TERMIO
 
@@ -107,6 +110,12 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 /* Return 1 if P points to an invalid floating point value.  */
 
 #define INVALID_FLOAT(p, len) 0   /* Just a first guess; not checked */
+
+/* Largest integer type */
+#define LONGEST long
+
+/* Name of the builtin type for the LONGEST type above. */
+#define BUILTIN_TYPE_LONGEST builtin_type_long
 
 /* Say how long (ordinary) registers are.  */
 
@@ -201,6 +210,12 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 #define REGISTER_VIRTUAL_TYPE(N) \
  (((unsigned)(N) - FP0_REGNUM) < 8 ? builtin_type_double : builtin_type_int)
 
+/* Store the address of the place in which to copy the structure the
+   subroutine will return.  This is called from call_function. */
+
+#define STORE_STRUCT_RETURN(ADDR, SP) \
+  { write_register (9, (ADDR)); }
+
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
@@ -228,9 +243,11 @@ read_memory_integer (read_register (SP_REGNUM), 4)
       : (&((struct exception_stack *) (u_ar0))->e_PC)))
 
 #define FP_REGISTER_ADDR(u, regno)					\
-  (((regno) < FPC_REGNUM)						\
-   ? (&u.u_pcb.pcb_mc68881[FMC68881_R0 + (((regno) - FP0_REGNUM) * 3)])	\
-   : (&u.u_pcb.pcb_mc68881[FMC68881_C + ((regno) - FPC_REGNUM)]))
+  (((char *)								\
+    (((regno) < FPC_REGNUM)						\
+     ? (&u.u_pcb.pcb_mc68881[FMC68881_R0 + (((regno) - FP0_REGNUM) * 3)]) \
+     : (&u.u_pcb.pcb_mc68881[FMC68881_C + ((regno) - FPC_REGNUM)])))	\
+   - ((char *) (& u)))
 
 /* It is safe to look for symsegs on a Sun, because Sun's ld
    does not screw up with random garbage at end of file.  */
@@ -253,20 +270,20 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 /* In the case of the Sun, the frame's nominal address
    is the address of a 4-byte word containing the calling frame's address.  */
 
-#define FRAME_CHAIN(thisframe)  (read_memory_integer (thisframe, 4))
+#define FRAME_CHAIN(thisframe)  (read_memory_integer ((thisframe)->frame, 4))
 
 #define FRAME_CHAIN_VALID(chain, thisframe) \
-  (chain != 0 && (FRAME_SAVED_PC (thisframe,0) >= first_object_file_end))
+  (chain != 0 && (FRAME_SAVED_PC (thisframe) >= first_object_file_end))
 
 #define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 
 /* Define other aspects of the stack frame.  */
 
-#define FRAME_SAVED_PC(frame,ignore) (read_memory_integer (frame + 4, 4))
+#define FRAME_SAVED_PC(FRAME) (read_memory_integer ((FRAME)->frame + 4, 4))
 
-#define FRAME_ARGS_ADDRESS(fi) (fi.frame)
+#define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
 
-#define FRAME_LOCALS_ADDRESS(fi) (fi.frame)
+#define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
 
 /* Set VAL to the number of args passed to frame described by FI.
    Can set VAL to -1, meaning no way to tell.  */
@@ -277,7 +294,7 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 
 #if 0
 #define FRAME_NUM_ARGS(val, fi)  \
-{ register CORE_ADDR pc = FRAME_SAVED_PC (fi.frame,0);		\
+{ register CORE_ADDR pc = FRAME_SAVED_PC (fi);		\
   register int insn = 0177777 & read_memory_integer (pc, 2);	\
   val = 0;							\
   if (insn == 0047757 || insn == 0157374)  /* lea W(sp),sp or addaw #W,sp */ \
@@ -307,19 +324,19 @@ read_memory_integer (read_register (SP_REGNUM), 4)
   register CORE_ADDR pc;						\
   int nextinsn;								\
   bzero (&frame_saved_regs, sizeof frame_saved_regs);			\
-  if ((frame_info).pc >= (frame_info).frame - CALL_DUMMY_LENGTH - FP_REGNUM*4 - 8*12 - 4 \
-      && (frame_info).pc <= (frame_info).frame)				\
-    { next_addr = (frame_info).frame;					\
-      pc = (frame_info).frame - CALL_DUMMY_LENGTH - FP_REGNUM * 4 - 8*12 - 4; }\
+  if ((frame_info)->pc >= (frame_info)->frame - CALL_DUMMY_LENGTH - FP_REGNUM*4 - 8*12 - 4 \
+      && (frame_info)->pc <= (frame_info)->frame)			\
+    { next_addr = (frame_info)->frame;					\
+      pc = (frame_info)->frame - CALL_DUMMY_LENGTH - FP_REGNUM * 4 - 8*12 - 4; }\
   else   								\
-    { pc = get_pc_function_start ((frame_info).pc); 			\
+    { pc = get_pc_function_start ((frame_info)->pc); 			\
       /* Verify we have a link a6 instruction next;			\
 	 if not we lose.  If we win, find the address above the saved   \
 	 regs using the amount of storage from the link instruction.  */\
       if (044016 == read_memory_integer (pc, 2))			\
-	next_addr = (frame_info).frame + read_memory_integer (pc += 2, 4), pc+=4; \
+	next_addr = (frame_info)->frame + read_memory_integer (pc += 2, 4), pc+=4; \
       else if (047126 == read_memory_integer (pc, 2))			\
-	next_addr = (frame_info).frame + read_memory_integer (pc += 2, 2), pc+=2; \
+	next_addr = (frame_info)->frame + read_memory_integer (pc += 2, 2), pc+=2; \
       else goto lose;							\
       /* If have an addal #-n, sp next, adjust next_addr.  */		\
       if ((0177777 & read_memory_integer (pc, 2)) == 0157774)		\
@@ -363,9 +380,9 @@ read_memory_integer (read_register (SP_REGNUM), 4)
   if (0x426742e7 == read_memory_integer (pc, 4))			\
     (frame_saved_regs).regs[PS_REGNUM] = (next_addr -= 4);		\
   lose: ;								\
-  (frame_saved_regs).regs[SP_REGNUM] = (frame_info).frame + 8;		\
-  (frame_saved_regs).regs[FP_REGNUM] = (frame_info).frame;		\
-  (frame_saved_regs).regs[PC_REGNUM] = (frame_info).frame + 4;		\
+  (frame_saved_regs).regs[SP_REGNUM] = (frame_info)->frame + 8;		\
+  (frame_saved_regs).regs[FP_REGNUM] = (frame_info)->frame;		\
+  (frame_saved_regs).regs[PC_REGNUM] = (frame_info)->frame + 4;		\
 }
 
 /* Things needed for making the inferior call functions.  */
@@ -391,13 +408,15 @@ read_memory_integer (read_register (SP_REGNUM), 4)
    restoring all saved registers.  */
 
 #define POP_FRAME  \
-{ register CORE_ADDR fp = read_register (FP_REGNUM);		 \
+{ register FRAME frame = get_current_frame ();			 \
+  register CORE_ADDR fp;					 \
   register int regnum;						 \
   struct frame_saved_regs fsr;					 \
-  struct frame_info fi;						 \
+  struct frame_info *fi;					 \
   char raw_buffer[12];						 \
-  fi = get_frame_info (fp);					 \
-  get_frame_saved_regs (&fi, &fsr);				 \
+  fi = get_frame_info (frame);					 \
+  fp = fi->frame;						 \
+  get_frame_saved_regs (fi, &fsr);				 \
   for (regnum = FP0_REGNUM + 7; regnum >= FP0_REGNUM; regnum--)	 \
     if (fsr.regs[regnum])					 \
       { read_memory (fsr.regs[regnum], raw_buffer, 12);		 \
@@ -410,7 +429,9 @@ read_memory_integer (read_register (SP_REGNUM), 4)
   write_register (FP_REGNUM, read_memory_integer (fp, 4));	 \
   write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));   \
   write_register (SP_REGNUM, fp + 8);				 \
-  set_current_frame (read_register (FP_REGNUM)); }
+  flush_cached_frames ();					 \
+  set_current_frame (create_new_frame (read_register (FP_REGNUM),\
+				       read_pc ()));}
 
 /* This sequence of words is the instructions
      fmovem 0xff,-(sp)
@@ -443,7 +464,7 @@ taken for the arguments.  */
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.  */
 
-#define FIX_CALL_DUMMY(dummyname, fun, nargs)     \
+#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, type)     \
 { *(int *)((char *) dummyname + 20) = nargs * 4;  \
   *(int *)((char *) dummyname + 14) = fun; }
 

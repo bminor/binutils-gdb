@@ -175,7 +175,7 @@ union exp_element
 {
   enum exp_opcode opcode;
   struct symbol *symbol;
-  long longconst;
+  LONGEST longconst;
   double doubleconst;
   char string;
   struct type *type;

@@ -212,6 +212,27 @@ _obstack_newchunk (h, length)
   h->next_free = h->object_base + obj_size;
 }
 
+/* Return nonzero if object OBJ has been allocated from obstack H.
+   This is here for debugging.
+   If you use it in a program, you are probably losing.  */
+
+int
+_obstack_allocated_p (h, obj)
+     struct obstack *h;
+     POINTER obj;
+{
+  register struct _obstack_chunk*  lp;	/* below addr of any objects in this chunk */
+  register struct _obstack_chunk*  plp;	/* point to previous chunk if any */
+
+  lp = (h)->chunk;
+  while (lp != 0 && ((POINTER)lp > obj || (POINTER)(lp)->limit < obj))
+    {
+      plp = lp -> prev;
+      lp = plp;
+    }
+  return lp != 0;
+}
+
 /* Free objects in obstack H, including OBJ and everything allocate
    more recently than OBJ.  If OBJ is zero, free everything in H.  */
 

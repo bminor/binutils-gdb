@@ -192,14 +192,14 @@ print_insn (memaddr, stream)
  * Find the number of arguments to a function.
  */
 findarg(frame)
-	struct frame_info frame;
+	struct frame_info *frame;
 {
 	register struct symbol *func;
 	register unsigned pc;
 
 #ifdef notdef
 	/* find starting address of frame function */
-	pc = get_pc_function_start (frame.pc);
+	pc = get_pc_function_start (frame->pc);
 
 	/* find function symbol info */
 	func = find_pc_function (pc);
@@ -220,29 +220,35 @@ findarg(frame)
  *    1.) stored in the code function header xA(Br1).
  *    2.) must be careful of recurssion.
  */
+FRAME_ADDR
 findframe(thisframe)
     FRAME thisframe;
 {
-    register FRAME pointer;
-    struct frame_info frame;
+    register FRAME_ADDR pointer;
+#if 0    
+    struct frame_info *frame;
+    FRAME_ADDR framechain();
 
     /* Setup toplevel frame structure */
-    frame.pc = read_pc();
-    frame.next_frame = 0;
-    frame.frame = read_register (SP_REGNUM);	/* Br2 */
+    frame->pc = read_pc();
+    frame->next_frame = 0;
+    frame->frame = read_register (SP_REGNUM);	/* Br2 */
 
     /* Search for this frame (start at current Br2) */
     do
     {
 	pointer = framechain(frame);
-	frame.next_frame = frame.frame;
-	frame.frame = pointer;
-	frame.pc = FRAME_SAVED_PC(frame.next_frame);
+	frame->next_frame = frame->frame;
+	frame->frame = pointer;
+	frame->pc = FRAME_SAVED_PC(frame);
     }
-    while (frame.next_frame != thisframe);
+    while (frame->next_frame != thisframe);
+#endif
+
+    pointer = framechain (thisframe);
 
     /* stop gap for now, end at __base3 */
-    if (frame.pc == 0)
+    if (thisframe->pc == 0)
 	return 0;
 
     return pointer;
@@ -252,20 +258,21 @@ findframe(thisframe)
  * Gdb front-end and internal framechain routine.
  * Go back up stack one level.  Tricky...
  */
+FRAME_ADDR
 framechain(frame)
-    register struct frame_info frame;
+    register struct frame_info *frame;
 {
     register CORE_ADDR func, prevsp;
     register unsigned value;
 
     /* Get real function start address from internal frame address */
-    func = get_pc_function_start(frame.pc);
+    func = get_pc_function_start(frame->pc);
 
     /* If no stack given, read register Br1 "(sp)" */
-    if (!frame.frame)
+    if (!frame->frame)
 	prevsp = read_register (SP_REGNUM);
     else
-	prevsp = frame.frame;
+	prevsp = frame->frame;
 
     /* Check function header, case #2 */
     value = read_memory_integer (func, 4);

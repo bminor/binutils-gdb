@@ -19,9 +19,8 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 */
 
 #include "defs.h"
-#include "initialize.h"
-#include "symtab.h"
 #include "param.h"
+#include "symtab.h"
 #include "frame.h"
 #include "inferior.h"
 #include "environ.h"
@@ -59,7 +58,7 @@ CORE_ADDR stop_pc;
 
 /* Stack frame when program stopped.  */
 
-FRAME stop_frame;
+FRAME_ADDR stop_frame_address;
 
 /* Number of breakpoint it stopped at, or 0 if none.  */
 
@@ -73,6 +72,11 @@ int stop_step;
 
 int stop_stack_dummy;
 
+/* Nonzero if stopped due to a random (unexpected) signal in inferior
+   process.  */
+
+int stopped_by_random_signal;
+
 /* Range to single step within.
    If this is nonzero, respond to a single-step signal
    by continuing to step if the pc is in this range.  */
@@ -84,7 +88,7 @@ CORE_ADDR step_range_end; /* Exclusive */
    This is how we know when we step into a subroutine call,
    and how to set the frame for the breakpoint used to step out.  */
 
-CORE_ADDR step_frame;
+FRAME_ADDR step_frame_address;
 
 /* 1 means step over all subroutine calls.
    -1 means step over calls to undebuggable functions.  */
@@ -105,7 +109,6 @@ struct environ *inferior_environ;
 CORE_ADDR read_pc ();
 struct command_line *get_breakpoint_commands ();
 
-START_FILE
 
 int
 have_inferior_p ()
@@ -150,11 +153,11 @@ run_command (args, from_tty)
 
   if (inferior_pid)
     {
-      if (query ("The program being debugged has been started already.\n\
+      if (
+	  !query ("The program being debugged has been started already.\n\
 Start it from the beginning? "))
-	kill_inferior ();
-      else
-	error ("Program already started.");
+	error ("Program not restarted.");
+      kill_inferior ();
     }
 
   if (remote_debugging)
@@ -200,7 +203,7 @@ cont_command (proc_count_exp, from_tty)
 
   /* If have argument, set proceed count of breakpoint we stopped at.  */
 
-  if (stop_breakpoint && proc_count_exp)
+  if (stop_breakpoint > 0 && proc_count_exp)
     {
       set_ignore_count (stop_breakpoint,
 			parse_and_eval_address (proc_count_exp) - 1,
@@ -261,21 +264,36 @@ step_1 (skip_subroutines, single_inst, count_string)
     {
       clear_proceed_status ();
 
-      step_frame = get_current_frame ();
+      step_frame_address = FRAME_FP (get_current_frame ());
 
       if (! single_inst)
 	{
 	  find_pc_line_pc_range (stop_pc, &step_range_start, &step_range_end);
 	  if (step_range_end == 0)
 	    {
+	      int misc;
+
+	      misc = find_pc_misc_function (stop_pc);
 	      terminal_ours ();
-	      error ("Current function has no line number information.");
+	      printf ("Current function has no line number information.\n");
+	      fflush (stdout);
+
+	      /* No info or after _etext ("Can't happen") */
+	      if (misc == -1 || misc == misc_function_count - 1)
+		error ("No data available on pc function.");
+
+	      printf ("Single stepping until function exit.\n");
+	      fflush (stdout);
+
+	      step_range_start = misc_function_vector[misc].address;
+	      step_range_end = misc_function_vector[misc + 1].address;
 	    }
 	}
       else
 	{
 	  /* Say we are stepping, but stop after one insn whatever it does.
-	     Don't step through subroutine calls even to undebuggable functions.  */
+	     Don't step through subroutine calls even to undebuggable
+	     functions.  */
 	  step_range_start = step_range_end = 1;
 	  if (!skip_subroutines)
 	    step_over_calls = 0;
@@ -307,7 +325,7 @@ jump_command (arg, from_tty)
   if (!arg)
     error_no_arg ("starting address");
 
-  sals = decode_line_spec (arg, 1);
+  sals = decode_line_spec_1 (arg, 1);
   if (sals.nelts != 1)
     {
       error ("Unreasonable jump request");
@@ -393,20 +411,6 @@ run_stack_dummy (addr, buffer)
      CORE_ADDR addr;
      REGISTER_TYPE *buffer;
 {
-  int saved_pc_changed = pc_changed;
-  int saved_stop_signal = stop_signal;
-  int saved_stop_pc = stop_pc;
-  int saved_stop_frame = stop_frame;
-  int saved_stop_breakpoint = stop_breakpoint;
-  int saved_stop_step = stop_step;
-  int saved_stop_stack_dummy = stop_stack_dummy;
-  FRAME saved_selected_frame;
-  int saved_selected_level;
-  struct command_line *saved_breakpoint_commands
-    = get_breakpoint_commands ();
-
-  record_selected_frame (&saved_selected_frame, &saved_selected_level);
-
   /* Now proceed, having reached the desired place.  */
   clear_proceed_status ();
   if (stack_dummy_testing & 4)
@@ -419,19 +423,84 @@ run_stack_dummy (addr, buffer)
   if (!stop_stack_dummy)
     error ("Cannot continue previously requested operation.");
 
-  set_breakpoint_commands (saved_breakpoint_commands);
-  select_frame (saved_selected_frame, saved_selected_level);
-  stop_signal = saved_stop_signal;
-  stop_pc = saved_stop_pc;
-  stop_frame = saved_stop_frame;
-  stop_breakpoint = saved_stop_breakpoint;
-  stop_step = saved_stop_step;
-  stop_stack_dummy = saved_stop_stack_dummy;
-  pc_changed = saved_pc_changed;
-
   /* On return, the stack dummy has been popped already.  */
 
   bcopy (stop_registers, buffer, sizeof stop_registers);
+}
+
+/* Proceed until we reach the given line as argument or exit the
+   function.  When called with no argument, proceed until we reach a
+   different source line with pc greater than our current one or exit
+   the function.  We skip calls in both cases.
+
+   The effect of this command with an argument is identical to setting
+   a momentary breakpoint at the line specified and executing
+   "finish".
+
+   Note that eventually this command should probably be changed so
+   that only source lines are printed out when we hit the breakpoint
+   we set.  I'm going to postpone this until after a hopeful rewrite
+   of wait_for_inferior and the proceed status code. -- randy */
+
+void
+until_next_command (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  FRAME frame;
+  CORE_ADDR pc;
+  struct symbol *func;
+  struct symtab_and_line sal;
+    
+  clear_proceed_status ();
+
+  frame = get_current_frame ();
+
+  /* Step until either exited from this function or greater
+     than the current line (if in symbolic section) or pc (if
+     not). */
+
+  pc = read_pc ();
+  func = find_pc_function (pc);
+  
+  if (!func)
+    {
+      int misc_func = find_pc_misc_function (pc);
+      
+      if (misc_func != -1)
+	error ("Execution is not within a known function.");
+      
+      step_range_start = misc_function_vector[misc_func].address;
+      step_range_end = pc;
+    }
+  else
+    {
+      sal = find_pc_line (pc, 0);
+      
+      step_range_start = BLOCK_START (SYMBOL_BLOCK_VALUE (func));
+      step_range_end = sal.end;
+    }
+  
+  step_over_calls = 1;
+  step_frame_address = FRAME_FP (frame);
+  
+  step_multi = 0;		/* Only one call to proceed */
+  
+  proceed (-1, -1, 1);
+}
+
+void 
+until_command (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  if (!have_inferior_p ())
+    error ("The program is not being run.");
+
+  if (arg)
+    until_break_command (arg, from_tty);
+  else
+    until_next_command (arg, from_tty);
 }
 
 /* "finish": Set a temporary breakpoint at the place
@@ -444,8 +513,7 @@ finish_command (arg, from_tty)
 {
   struct symtab_and_line sal;
   register FRAME frame;
-  struct frame_info fi;
-
+  struct frame_info *fi;
   register struct symbol *function;
 
   if (!have_inferior_p ())
@@ -460,14 +528,14 @@ finish_command (arg, from_tty)
   clear_proceed_status ();
 
   fi = get_frame_info (frame);
-  sal = find_pc_line (fi.pc, 0);
-  sal.pc = fi.pc;
+  sal = find_pc_line (fi->pc, 0);
+  sal.pc = fi->pc;
   set_momentary_breakpoint (sal, frame);
 
   /* Find the function we will return from.  */
 
-  fi = get_frame_info (fi.next_frame, fi.next_next_frame);
-  function = find_pc_function (fi.pc);
+  fi = get_frame_info (selected_frame);
+  function = find_pc_function (fi->pc);
 
   if (from_tty)
     {
@@ -481,12 +549,22 @@ finish_command (arg, from_tty)
     {
       struct type *value_type;
       register value val;
+      CORE_ADDR funcaddr;
 
       value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
+      if (!value_type)
+	fatal ("internal: finish_command: function has no target type");
+      
       if (TYPE_CODE (value_type) == TYPE_CODE_VOID)
 	return;
 
-      val = value_being_returned (value_type, stop_registers);
+      funcaddr = BLOCK_START (SYMBOL_BLOCK_VALUE (function));
+
+      val = value_being_returned (value_type, stop_registers,
+				  using_struct_return (function,
+						       funcaddr,
+						       value_type));
+
       printf ("Value returned is $%d = ", record_latest_value (val));
       value_print (val, stdout, 0);
       putchar ('\n');
@@ -506,7 +584,7 @@ program_info ()
 	  inferior_pid, stop_pc);
   if (stop_step)
     printf ("It stopped after being stepped.\n");
-  else if (stop_breakpoint)
+  else if (stop_breakpoint > 0)
     printf ("It stopped at breakpoint %d.\n", stop_breakpoint);
   else if (stop_signal)
     printf ("It stopped with signal %d (%s).\n",
@@ -540,30 +618,58 @@ set_environment_command (arg)
      char *arg;
 {
   register char *p, *val, *var;
+  int nullset = 0;
 
   if (arg == 0)
     error_no_arg ("environment variable and value");
 
+  /* Find seperation between variable name and value */
   p = (char *) index (arg, '=');
   val = (char *) index (arg, ' ');
+
   if (p != 0 && val != 0)
-    p = arg + min (p - arg, val - arg);
+    {
+      /* We have both a space and an equals.  If the space is before the
+	 equals and the only thing between the two is more space, use
+	 the equals */
+      if (p > val)
+	while (*val == ' ')
+	  val++;
+
+      /* Take the smaller of the two.  If there was space before the
+	 "=", they will be the same right now. */
+      p = arg + min (p - arg, val - arg);
+    }
   else if (val != 0 && p == 0)
     p = val;
 
-  if (p == 0)
-    error ("Space or \"=\" must separate variable name and its value");
-  if (p[1] == 0)
-    error_no_arg ("value for the variable");
   if (p == arg)
     error_no_arg ("environment variable to set");
 
-  val = p + 1;
-  while (*val == ' ' || *val == '\t') val++;
+  if (p == 0 || p[1] == 0)
+    {
+      nullset = 1;
+      if (p == 0)
+	p = arg + strlen (arg);	/* So that savestring below will work */
+    }
+  else
+    {
+      /* Not setting variable value to null */
+      val = p + 1;
+      while (*val == ' ' || *val == '\t')
+	val++;
+    }
+
   while (p != arg && (p[-1] == ' ' || p[-1] == '\t')) p--;
 
   var = savestring (arg, p - arg);
-  set_in_environ (inferior_environ, var, val);
+  if (nullset)
+    {
+      printf ("Setting environment variable \"%s\" to null value.\n", var);
+      set_in_environ (inferior_environ, var, "");
+    }
+  else
+    set_in_environ (inferior_environ, var, val);
   free (var);
 }
 
@@ -579,6 +685,7 @@ unset_environment_command (var)
 
 /* Read an integer from debugged memory, given address and number of bytes.  */
 
+long
 read_memory_integer (memaddr, len)
      CORE_ADDR memaddr;
      int len;
@@ -617,6 +724,7 @@ read_pc ()
   return (CORE_ADDR) read_register (PC_REGNUM);
 }
 
+void
 write_pc (val)
      CORE_ADDR val;
 {
@@ -634,6 +742,9 @@ registers_info (addr_exp)
 {
   register int i;
   int regnum;
+
+  if (!have_inferior_p () && !have_core_file_p ())
+    error ("No inferior or core file");
 
   if (addr_exp)
     {
@@ -669,7 +780,7 @@ registers_info (addr_exp)
 	{
 	  printf ("--Type Return to print more--");
 	  fflush (stdout);
-	  read_line ();
+	  gdb_read_line (0, 0);
 	}
 
       /* Get the data in raw format, then convert also to virtual format.  */
@@ -681,7 +792,8 @@ registers_info (addr_exp)
       /* If virtual format is floating, print it that way.  */
       if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT
 	  && ! INVALID_FLOAT (virtual_buffer, REGISTER_VIRTUAL_SIZE (i)))
-	val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, stdout, 0, 1);
+	val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0,
+		   stdout, 0, 1);
       /* Else if virtual format is too long for printf,
 	 print in hex a byte at a time.  */
       else if (REGISTER_VIRTUAL_SIZE (i) > sizeof (long))
@@ -824,16 +936,31 @@ detach_command (args, from_tty)
   inferior_pid = 0;
 }
 #endif /* ATTACH_DETACH */
+
+/* ARGUSUED */
+static void
+float_info (addr_exp)
+     char *addr_exp;
+{
+#ifdef FLOAT_INFO
+	FLOAT_INFO;
+#else
+	printf ("No floating point info available for this processor.\n");
+#endif
+}
 
-static
-initialize ()
+extern struct cmd_list_element *setlist, *deletelist;
+
+void
+_initialize_infcmd ()
 {
   add_com ("tty", class_run, tty_command,
 	   "Set terminal for future runs of program being debugged.");
 
-  add_com ("set-args", class_run, set_args_command,
+  add_cmd ("args", class_run, set_args_command,
 	   "Specify arguments to give program being debugged when it is started.\n\
-Follow this command with any number of args, to be passed to the program.");
+Follow this command with any number of args, to be passed to the program.",
+	   &setlist);
 
   add_info ("environment", environment_info,
 	    "The environment to give the program, or one variable's value.\n\
@@ -841,14 +968,17 @@ With an argument VAR, prints the value of environment variable VAR to\n\
 give the program being debugged.  With no arguments, prints the entire\n\
 environment to be given to the program.");
 
-  add_com ("unset-environment", class_run, unset_environment_command,
+  add_cmd ("environment", class_run, unset_environment_command,
 	   "Cancel environment variable VAR for the program.\n\
-This does not affect the program until the next \"run\" command.");
-  add_com ("set-environment", class_run, set_environment_command,
+This does not affect the program until the next \"run\" command.",
+	   &deletelist);
+
+  add_cmd ("environment", class_run, set_environment_command,
 	   "Set environment variable value to give the program.\n\
 Arguments are VAR VALUE where VAR is variable name and VALUE is value.\n\
 VALUES of environment variables are uninterpreted strings.\n\
-This does not affect the program until the next \"run\" command.");
+This does not affect the program until the next \"run\" command.",
+	   &setlist);
  
 #ifdef ATTACH_DETACH
  add_com ("attach", class_run, attach_command,
@@ -892,6 +1022,12 @@ Argument N means do this N times (or till program stops for another reason).");
 Argument N means do this N times (or till program stops for another reason).");
   add_com_alias ("s", "step", class_run, 1);
 
+  add_com ("until", class_run, until_command,
+	   "Execute until the program reaches a source line greater than the current\n\
+or a specified line or address or function (same args as break command).\n\
+Execution will also stop upon exit from the current stack frame.");
+  add_com_alias ("u", "until", class_run, 1);
+  
   add_com ("jump", class_run, jump_command,
 	   "Continue program being debugged at specified line or address.\n\
 Give as argument either LINENUM or *ADDR, where ADDR is an expression\n\
@@ -919,9 +1055,11 @@ Register name as argument means describe only that register.");
   add_info ("program", program_info,
 	    "Execution status of the program.");
 
+  add_info ("float", float_info,
+	    "Print the status of the floating point unit\n");
+
   inferior_args = savestring (" ", 1); /* By default, no args.  */
   inferior_environ = make_environ ();
   init_environ (inferior_environ);
 }
 
-END_FILE

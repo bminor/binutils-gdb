@@ -290,9 +290,10 @@ int obstack_chunk_size (struct obstack *obstack);
 
 #define obstack_blank_fast(h,n) ((h)->next_free += (n))
 
-#ifdef __GNUC__
+#if defined (__GNUC__) && defined (__STDC__)
 
-/* For GNU C we can define these macros to compute all args only once
+/* For GNU C, if not -traditional,
+   we can define these macros to compute all args only once
    without using a global variable.
    Also, we can avoid using the `temp' slot, to make faster code.  */
 
@@ -372,7 +373,7 @@ int obstack_chunk_size (struct obstack *obstack);
      __o->next_free = __o->object_base = __obj;				\
    else (obstack_free) (__o, __obj); })
 
-#else /* not __GNUC__ */
+#else /* not __GNUC__ or not __STDC__ */
 
 /* The non-GNU macros copy the obstack-pointer into this global variable
    to avoid multiple evaluation.  */
@@ -447,7 +448,7 @@ extern struct obstack *_obstack;
    : (int) _obstack_free ((h), (h)->temp + (char *) (h)->chunk)))
 #endif
 
-#endif /* not __GNUC__ */
+#endif /* not __GNUC__ or not __STDC__ */
 
 #endif /* not __OBSTACKS__ */
 

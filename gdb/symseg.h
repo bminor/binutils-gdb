@@ -129,10 +129,10 @@ enum type_code
 
 /* Other flag bits are used with GDB.  */
 
-#define TYPE_FLAG_HAS_CONSTRUCTOR 256
-#define TYPE_FLAG_HAS_DESTRUCTOR 512
-#define TYPE_FLAG_VIA_PUBLIC 1024
-#define TYPE_FLAG_VIA_VIRTUAL 2048
+#define	TYPE_FLAG_HAS_CONSTRUCTOR	256
+#define	TYPE_FLAG_HAS_DESTRUCTOR	512
+#define	TYPE_FLAG_VIA_PUBLIC		1024
+#define	TYPE_FLAG_VIA_VIRTUAL		2048
 
 struct type
 {
@@ -147,6 +147,7 @@ struct type
   /* For a pointer type, describes the type of object pointed to.
      For an array type, describes the type of the elements.
      For a function type, describes the type of the value.
+     For a range type, describes the type of the full range.
      Unused otherwise.  */
   struct type *target_type;
   /* Type that is a pointer to this type.
@@ -163,12 +164,12 @@ struct type
   struct type *function_type;
 
 /* Handling of pointers to members:
-   MAIN_VARIANT is used for pointer and pointer
+   TYPE_MAIN_VARIANT is used for pointer and pointer
    to member types.  Normally it the value of the address of its
    containing type.  However, for pointers to members, we must be
    able to allocate pointer to member types and look them up
    from some place of reference.
-   NEXT_VARIANT is the next element in the chain.  */
+   NEXT_VARIANT is the next element in the chain. */
   struct type *main_variant, *next_variant;
 
   /* Flags about this type.  */
@@ -214,7 +215,7 @@ struct type
 
   /* Number of methods described for this type */
   short nfn_fields;
-  /* Number of base classes this type derives from.  */
+  /* Number of base classes this type derives from. */
   short n_baseclasses;
 
   /* Number of methods described for this type plus all the
@@ -254,6 +255,9 @@ struct type
 
     } *fn_fieldlists;
 
+  unsigned char via_protected;
+  unsigned char via_public;
+
   /* For types with virtual functions, VPTR_BASETYPE is the base class which
      defined the virtual function table pointer.  VPTR_FIELDNO is
      the field number of that pointer in the structure.
@@ -266,7 +270,10 @@ struct type
 
   int vptr_fieldno;
 
-  /* If this type has base classes, put them here.  */
+  /* If this type has a base class, put it here.
+     If this type is a pointer type, the chain of member pointer
+     types goes here.
+     Unused otherwise.  */
   struct type **baseclasses;
 };
 
@@ -328,6 +335,12 @@ struct block
      This is because the compiler ouptuts the special blocks at the
      very end, after the other blocks.   */
   struct block *superblock;
+  /* A flag indicating whether or not the fucntion corresponding
+     to this block was compiled with gcc or not.  If there is no
+     function corresponding to this block, this meaning of this flag
+     is undefined.  (In practice it will be 1 if the block was created
+     while processing a file compiled with gcc and 0 when not). */
+  unsigned char gcc_compile_flag;
   /* Number of local symbols.  */
   int nsyms;
   /* The symbols.  */
@@ -370,7 +383,7 @@ enum address_class
   LOC_STATIC,		/* Value is at fixed address */
   LOC_REGISTER,		/* Value is in register */
   LOC_ARG,		/* Value is at spec'd position in arglist */
-  LOC_REGPARM,		/* Value is at spec'd position in register window */
+  LOC_REGPARM,		/* Value is at spec'd position in  register window */
   LOC_LOCAL,		/* Value is at spec'd pos in stack frame */
   LOC_TYPEDEF,		/* Value not used; definition in SYMBOL_TYPE
 			   Symbols in the namespace STRUCT_NAMESPACE
@@ -406,6 +419,23 @@ struct symbol
     }
   value;
 };
+
+struct partial_symbol
+{
+  /* Symbol name */
+  char *name;
+  /* Name space code.  */
+  enum namespace namespace;
+  /* Address class (for info_symbols) */
+  enum address_class class;
+};
+
+/* 
+ * Vectors of all partial symbols read in from file; actually declared
+ * and used in dbxread.c.
+ */
+extern struct partial_symbol *global_psymbols, *static_psymbols;
+
 
 /* Source-file information.
    This describes the relation between source files and line numbers
@@ -417,21 +447,27 @@ struct sourcevector
   struct source *source[1];	/* Descriptions of the files */
 };
 
-/* Each item is either minus a line number, or a program counter.
-   If it represents a line number, that is the line described by the next
-   program counter value.  If it is positive, it is the program
-   counter at which the code for the next line starts.
+/* Each item represents a line-->pc (or the reverse) mapping.  This is
+   somewhat more wasteful of space than one might wish, but since only
+   the files which are actually debugged are read in to core, we don't
+   waste much space.
 
-   Consecutive lines can be recorded by program counter entries
-   with no line number entries between them.  Line number entries
-   are used when there are lines to skip with no code on them.
-   This is to make the table shorter.  */
+   Each item used to be an int; either minus a line number, or a
+   program counter.  If it represents a line number, that is the line
+   described by the next program counter value.  If it is positive, it
+   is the program counter at which the code for the next line starts.  */
+
+struct linetable_entry
+{
+  int line;
+  CORE_ADDR pc;
+};
 
 struct linetable
-  {
-    int nitems;
-    int item[1];
-  };
+{
+  int nitems;
+  struct linetable_entry item[1];
+};
 
 /* All the information on one source file.  */
 

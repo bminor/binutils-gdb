@@ -1,5 +1,5 @@
 /* Print and select stack frames for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
 
 GDB is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY.  No author or distributor accepts responsibility to anyone
@@ -21,12 +21,12 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include <stdio.h>
 
 #include "defs.h"
-#include "initialize.h"
 #include "param.h"
 #include "symtab.h"
 #include "frame.h"
+#include "inferior.h"
+#include "gdbcore.h"
 
-START_FILE
 
 /* Thie "selected" stack frame is used by default for local and arg access.
    May be zero, for no selected frame.  */
@@ -38,6 +38,9 @@ FRAME selected_frame;
    or -1 for frame specified by address with no defined level.  */
 
 int selected_frame_level;
+
+/* Error message when selected_frame is zero when it's needed */
+char no_sel_frame[] = "There is no current stack frame.";
 
 /* Nonzero means print the full filename and linenumber
    when a frame is printed, and do so in a format programs can parse.  */
@@ -58,17 +61,23 @@ void print_frame_info ();
    If SOURCE is 1, print the source line as well.
    If SOURCE is -1, print ONLY the source line.  */
 
+/* FIXME, the argument "frame" is always "selected_frame".  This is why
+   we can say "No selected frame" if it == 0.  Probably shouldn't be an
+   argument anymore...  */
+
 static void
 print_stack_frame (frame, level, source)
      FRAME frame;
      int level;
      int source;
 {
-  struct frame_info fi;
+  struct frame_info *fi;
 
+  if (frame == 0)
+    error (no_sel_frame);
   fi = get_frame_info (frame);
 
-  print_frame_info (&fi, level, source, 1);
+  print_frame_info (fi, level, source, 1);
 }
 
 void
@@ -78,14 +87,13 @@ print_frame_info (fi, level, source, args)
      int source;
      int args;
 {
-  register FRAME frame = fi->frame;
   struct symtab_and_line sal;
   struct symbol *func;
   register char *funname = 0;
   int numargs;
 
   sal = find_pc_line (fi->pc, fi->next_frame);
-  func = get_frame_function (frame);
+  func = find_pc_function (fi->pc);
   if (func)
     funname = SYMBOL_NAME (func);
   else
@@ -97,10 +105,6 @@ print_frame_info (fi, level, source, args)
 
   if (source >= 0 || !sal.symtab)
     {
-      /* This avoids a bug in cc on the sun.  */
-      struct frame_info tem;
-      tem = *fi;
-
       if (level >= 0)
 	printf ("#%-2d ", level);
       if (fi->pc != sal.pc || !sal.symtab)
@@ -108,8 +112,8 @@ print_frame_info (fi, level, source, args)
       printf ("%s (", funname ? funname : "??");
       if (args)
 	{
-	  FRAME_NUM_ARGS (numargs, tem);
-	  print_frame_args (func, FRAME_ARGS_ADDRESS (tem), numargs, stdout);
+	  FRAME_NUM_ARGS (numargs, fi);
+	  print_frame_args (func, fi, numargs, stdout);
 	}
       printf (")");
       if (sal.symtab)
@@ -149,9 +153,110 @@ print_sel_frame (just_source)
 /* Print info on the selected frame, including level number
    but not source.  */
 
+void
 print_selected_frame ()
 {
   print_stack_frame (selected_frame, selected_frame_level, 0);
+}
+
+void flush_cached_frames ();	/* FIXME, never called! */
+
+#ifdef FRAME_SPECIFICATION_DYADIC
+extern FRAME setup_arbitrary_frame ();
+#endif
+
+/*
+ * Read a frame specification in whatever the appropriate format is.
+ */
+static FRAME
+parse_frame_specification (frame_exp)
+     char *frame_exp;
+{
+  int numargs = 0;
+  int arg1, arg2;
+  
+  if (frame_exp)
+    {
+      char *addr_string, *p;
+      struct cleanup *tmp_cleanup;
+      struct frame_info *fci;
+
+      while (*frame_exp == ' ') frame_exp++;
+      for (p = frame_exp; *p && *p != ' '; p++)
+	;
+
+      if (*frame_exp)
+	{
+	  numargs = 1;
+	  addr_string = savestring(frame_exp, p - frame_exp);
+
+	  {
+	    tmp_cleanup = make_cleanup (free, addr_string);
+	    arg1 = parse_and_eval_address (addr_string);
+	    do_cleanups (tmp_cleanup);
+	  }
+
+	  while (*p == ' ') p++;
+	  
+	  if (*p)
+	    {
+	      numargs = 2;
+	      arg2 = parse_and_eval_address (p);
+	    }
+	}
+    }
+
+  switch (numargs)
+    {
+    case 0:
+      if (selected_frame == 0)
+	error (no_sel_frame);
+      return selected_frame;
+      /* NOTREACHED */
+    case 1:
+      {
+	int level = arg1;
+	FRAME fid = find_relative_frame (get_current_frame (), &level);
+	FRAME tfid;
+
+	if (level == 0)
+	  /* find_relative_frame was successful */
+	  return fid;
+
+	/* If (s)he specifies the frame with an address, he deserves what
+	   (s)he gets.  Still, give the highest one that matches.  */
+
+	for (fid = get_current_frame ();
+	     fid && FRAME_FP (fid) != arg1;
+	     fid = get_prev_frame (fid))
+	  ;
+
+	if (fid)
+	  while ((tfid = get_prev_frame (fid)) &&
+		 (FRAME_FP (tfid) == arg1))
+	    fid = tfid;
+	  
+#ifdef FRAME_SPECIFICATION_DYADIC
+	if (!fid)
+	  error ("Incorrect number of args in frame specification");
+
+	return fid;
+#else
+	return create_new_frame (arg1, 0);
+#endif
+      }
+      /* NOTREACHED */
+    case 2:
+      /* Must be addresses */
+#ifndef FRAME_SPECIFICATION_DYADIC
+      error ("Incorrect number of args in frame specification");
+#else
+      return setup_arbitrary_frame (arg1, arg2);
+#endif
+      /* NOTREACHED */
+    }
+  fatal ("Internal: Error in parsing in parse_frame_specification");
+  /* NOTREACHED */
 }
 
 /* Print verbosely the selected frame or the frame at address ADDR.
@@ -161,8 +266,8 @@ static void
 frame_info (addr_exp)
      char *addr_exp;
 {
-  FRAME frame = addr_exp ? parse_and_eval_address (addr_exp) : selected_frame;
-  struct frame_info fi;
+  FRAME frame;
+  struct frame_info *fi;
   struct frame_saved_regs fsr;
   struct symtab_and_line sal;
   struct symbol *func;
@@ -171,15 +276,17 @@ frame_info (addr_exp)
   char *funname = 0;
   int numargs;
 
+  frame = parse_frame_specification (addr_exp);
+
   fi = get_frame_info (frame);
-  get_frame_saved_regs (&fi, &fsr);
-  sal = find_pc_line (fi.pc, fi.next_frame);
+  get_frame_saved_regs (fi, &fsr);
+  sal = find_pc_line (fi->pc, fi->next_frame);
   func = get_frame_function (frame);
   if (func)
     funname = SYMBOL_NAME (func);
   else
     {
-      register int misc_index = find_pc_misc_function (fi.pc);
+      register int misc_index = find_pc_misc_function (fi->pc);
       if (misc_index >= 0)
 	funname = misc_function_vector[misc_index].name;
     }
@@ -187,23 +294,23 @@ frame_info (addr_exp)
 
   if (!addr_exp && selected_frame_level >= 0)
     printf ("Stack level %d, frame at 0x%x:\n pc = 0x%x",
-	    selected_frame_level, frame, fi.pc);
+	    selected_frame_level, FRAME_FP(frame), fi->pc);
   else
     printf ("Stack frame at 0x%x:\n pc = 0x%x",
-	    frame, fi.pc);
+	    FRAME_FP(frame), fi->pc);
 
   if (funname)
     printf (" in %s", funname);
   if (sal.symtab)
     printf (" (%s line %d)", sal.symtab->filename, sal.line);
-  printf ("; saved pc 0x%x\n", FRAME_SAVED_PC (frame, fi.next_frame));
+  printf ("; saved pc 0x%x\n", FRAME_SAVED_PC (frame));
   if (calling_frame)
-    printf (" called by frame at 0x%x", calling_frame);
-  if (fi.next_frame && calling_frame)
+    printf (" called by frame at 0x%x", FRAME_FP (calling_frame));
+  if (fi->next_frame && calling_frame)
     printf (",");
-  if (fi.next_frame)
-    printf (" caller of frame at 0x%x", fi.next_frame);
-  if (fi.next_frame || calling_frame)
+  if (fi->next_frame)
+    printf (" caller of frame at 0x%x", fi->next_frame);
+  if (fi->next_frame || calling_frame)
     printf ("\n");
   printf (" Arglist at 0x%x,", FRAME_ARGS_ADDRESS (fi));
   FRAME_NUM_ARGS (i, fi);
@@ -217,7 +324,7 @@ frame_info (addr_exp)
     printf (" %d args: ", i);
 
   FRAME_NUM_ARGS (numargs, fi);
-  print_frame_args (func, FRAME_ARGS_ADDRESS (fi), numargs, stdout);
+  print_frame_args (func, fi, numargs, stdout);
   printf ("\n");
   count = 0;
   for (i = 0; i < NUM_REGS; i++)
@@ -238,29 +345,103 @@ frame_info (addr_exp)
     printf ("\n");
 }
 
+#if 0
+/* Set a limit on the number of frames printed by default in a
+   backtrace.  */
+
+static int backtrace_limit;
+
+static void
+set_backtrace_limit_command (count_exp, from_tty)
+     char *count_exp;
+     int from_tty;
+{
+  int count = parse_and_eval_address (count_exp);
+
+  if (count < 0)
+    error ("Negative argument not meaningful as backtrace limit.");
+
+  backtrace_limit = count;
+}
+
+static void
+backtrace_limit_info (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  if (arg)
+    error ("\"Info backtrace-limit\" takes no arguments.");
+
+  printf ("Backtrace limit: %d.\n", backtrace_limit);
+}
+#endif
+
 /* Print briefly all stack frames or just the innermost COUNT frames.  */
 
 static void
 backtrace_command (count_exp)
      char *count_exp;
 {
-  struct frame_info fi;
+  struct frame_info *fi;
   register int count;
   register FRAME frame;
   register int i;
+  register FRAME trailing;
+  register int trailing_level;
 
+  if (have_inferior_p () == 0 && corefile == 0)
+    error ("There is no running program or core file.");
+
+  /* The following code must do two things.  First, it must
+     set the variable TRAILING to the frame from which we should start
+     printing.  Second, it must set the variable count to the number
+     of frames which we should print, or -1 if all of them.  */
+  trailing = get_current_frame ();
+  trailing_level = 0;
   if (count_exp)
-    count = parse_and_eval_address (count_exp);
-  else
-    count = -1;
+    {
+      count = parse_and_eval_address (count_exp);
+      if (count < 0)
+	{
+	  FRAME current;
 
-  for (i = 0, frame = get_current_frame (), fi = get_frame_info (frame);
+	  count = -count;
+
+	  current = trailing;
+	  while (current && count--)
+	    current = get_prev_frame (current);
+	  
+	  /* Will stop when CURRENT reaches the top of the stack.  TRAILING
+	     will be COUNT below it.  */
+	  while (current)
+	    {
+	      trailing = get_prev_frame (trailing);
+	      current = get_prev_frame (current);
+	      trailing_level++;
+	    }
+	  
+	  count = -1;
+	}
+    }
+  else
+#if 0    
+    count = backtrace_limit;
+#else
+    count = -1;
+#endif  
+
+  for (i = 0, frame = trailing;
        frame && count--;
-       i++, fi = get_prev_frame_info (fi.frame), frame = fi.frame)
+       i++, frame = get_prev_frame (frame))
     {
       QUIT;
-      print_frame_info (&fi, i, 0, 1);
+      fi = get_frame_info (frame);
+      print_frame_info (fi, trailing_level + i, 0, 1);
     }
+
+  /* If we've stopped before the end, mention that.  */
+  if (frame)
+    printf ("(More stack frames follow...)\n");
 }
 
 /* Print the local variables of a block B active in FRAME.  */
@@ -305,7 +486,9 @@ print_frame_local_vars (frame, stream)
      register FRAME frame;
      register FILE *stream;
 {
-  register struct block *block = get_frame_block (frame);
+  register struct block *block;
+
+  block = get_frame_block (frame);
   if (block == 0)
     return 0;
   while (block != 0)
@@ -324,6 +507,8 @@ print_frame_local_vars (frame, stream)
 static void
 locals_info ()
 {
+  if (selected_frame == 0)
+    error(no_sel_frame);
   print_frame_local_vars (selected_frame, stdout);
 }
 
@@ -332,12 +517,13 @@ print_frame_arg_vars (frame, stream)
      register FRAME frame;
      register FILE *stream;
 {
-  struct symbol *func = get_frame_function (frame);
+  struct symbol *func;
   register struct block *b;
   int nsyms;
   register int i;
   register struct symbol *sym;
 
+  func = get_frame_function (frame);
   if (func == 0)
     return 0;
 
@@ -362,6 +548,8 @@ print_frame_arg_vars (frame, stream)
 static void
 args_info ()
 {
+  if (selected_frame == 0)
+    error(no_sel_frame);
   print_frame_arg_vars (selected_frame, stdout);
 }
 
@@ -380,11 +568,11 @@ select_frame (frame, level)
 /* Store the selected frame and its level into *FRAMEP and *LEVELP.  */
 
 void
-record_selected_frame (framep, levelp)
-     FRAME *framep;
+record_selected_frame (frameaddrp, levelp)
+     FRAME_ADDR *frameaddrp;
      int *levelp;
 {
-  *framep = selected_frame;
+  *frameaddrp = FRAME_FP (selected_frame);
   *levelp = selected_frame_level;
 }
 
@@ -417,9 +605,10 @@ find_relative_frame (frame, level_offset_ptr)
      register int* level_offset_ptr;
 {
   register FRAME prev;
-  struct frame_info fi;
   register FRAME frame1, frame2;
 
+  if (frame == 0)
+    error (no_sel_frame);
   /* Going up is simple: just do get_prev_frame enough times
      or until initial frame is reached.  */
   while (*level_offset_ptr > 0)
@@ -459,37 +648,33 @@ find_relative_frame (frame, level_offset_ptr)
 }
 
 /* The "frame" command.  With no arg, print selected frame briefly.
-   With arg LEVEL, select the frame at level LEVEL and print it.
-   With arg larger than 100000, use it as address of frame to select.
-   If from command file or user-defined command, don't print anything
-   if we have an argument.  */
+   With arg LEVEL_EXP, select the frame at level LEVEL if it is a
+   valid level.  Otherwise, treat level_exp as an address expression
+   and print it.  See parse_frame_specification for more info on proper
+   frame expressions. */
 
 static void
 frame_command (level_exp, from_tty)
      char *level_exp;
      int from_tty;
 {
-  register int i;
-  register FRAME frame;
-  unsigned int level, level1;
+  register FRAME frame, frame1;
+  unsigned int level = 0;
 
-  if (level_exp)
-    {
-      level1 = level = parse_and_eval_address (level_exp);
-      if (level > 100000)
-	{
-	  select_frame (level, -1);
-	  frame_info (0);
-	  return;
-	}
+  frame = parse_frame_specification (level_exp);
 
-      frame = find_relative_frame (get_current_frame (), &level1);
-      if (level1 != 0)
-	error ("Stack level %d is out of range.", level);
-      select_frame (frame, level);
-      if (! from_tty)
-	return;
-    }
+  for (frame1 = get_prev_frame (0);
+       frame1 && frame1 != frame;
+       frame1 = get_prev_frame (frame1))
+    level++;
+
+  if (!frame1)
+    level = 0;
+
+  select_frame (frame, level);
+
+  if (!from_tty)
+    return;
 
   print_stack_frame (selected_frame, selected_frame_level, 1);
 }
@@ -578,9 +763,15 @@ return_command (retval_exp, from_tty)
     frame_command ("0", 1);
 }
 
-static
-initialize ()
+extern struct cmd_list_element *setlist;
+
+void
+_initialize_stack ()
 {
+#if 0  
+  backtrace_limit = 30;
+#endif
+
   add_com ("return", class_stack, return_command,
 	   "Make selected stack frame return to its caller.\n\
 Control remains in the debugger, but when you continue\n\
@@ -607,7 +798,8 @@ a command file or a user-defined command.");
   add_com_alias ("f", "frame", class_stack, 1);
 
   add_com ("backtrace", class_stack, backtrace_command,
-	   "Print backtrace of all stack frames, or innermost COUNT frames.");
+	   "Print backtrace of all stack frames, or innermost COUNT frames.\n\
+With a negative argument, print outermost -COUNT frames.");
   add_com_alias ("bt", "backtrace", class_stack, 0);
   add_com_alias ("where", "backtrace", class_alias, 0);
   add_info ("stack", backtrace_command,
@@ -620,6 +812,13 @@ a command file or a user-defined command.");
 	    "Local variables of current stack frame.");
   add_info ("args", args_info,
 	    "Argument variables of current stack frame.");
+
+#if 0
+  add_cmd ("backtrace-limit", class_stack, set_backtrace_limit_command, 
+	   "Specify maximum number of frames for \"backtrace\" to print by default.",
+	   &setlist);
+  add_info ("backtrace-limit", backtrace_limit_info,
+	    "The maximum number of frames for \"backtrace\" to print by default.");
+#endif
 }
 
-END_FILE

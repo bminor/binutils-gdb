@@ -20,7 +20,6 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 */
 
 #include "defs.h"
-#include "initialize.h"
 #include "param.h"
 #include "symtab.h"
 #include "frame.h"
@@ -39,7 +38,12 @@ static FRAME current_frame;
 struct block *block_for_pc ();
 CORE_ADDR get_pc_function_start ();
 
-START_FILE
+/*
+ * Cache for frame addresses already read by gdb.  Valid only while
+ * inferior is stopped.  Control variables for the frame cache should
+ * be local to this module.
+ */
+struct obstack frame_cache_obstack;
 
 /* Return the innermost (currently executing) stack frame.  */
 
@@ -59,6 +63,31 @@ set_current_frame (frame)
   current_frame = frame;
 }
 
+FRAME
+create_new_frame (addr, pc)
+     FRAME_ADDR addr;
+     CORE_ADDR pc;
+{
+  struct frame_info *fci;	/* Same type as FRAME */
+
+  fci = (struct frame_info *)
+    obstack_alloc (&frame_cache_obstack,
+		   sizeof (struct frame_info));
+
+  /* Arbitrary frame */
+  fci->next = (struct frame_info *) 0;
+  fci->prev = (struct frame_info *) 0;
+  fci->frame = addr;
+  fci->next_frame = 0;		/* Since arbitrary */
+  fci->pc = pc;
+
+#ifdef INIT_EXTRA_FRAME_INFO
+  INIT_EXTRA_FRAME_INFO (fci);
+#endif
+
+  return fci;
+}
+
 /* Return the frame that called FRAME.
    If FRAME is the original frame (it has no caller), return 0.  */
 
@@ -66,98 +95,154 @@ FRAME
 get_prev_frame (frame)
      FRAME frame;
 {
-  CORE_ADDR pointer;
-  /* The caller of "no frame" is the innermost frame.  */
-  if (frame == 0)
-    return get_current_frame ();
+  /* We're allowed to know that FRAME and "struct frame_info *" are
+     the same */
+  return get_prev_frame_info (frame);
+}
 
-  /* Two macros defined in param.h specify the machine-dependent
-     actions to be performed here.  */
-  /* First, get the frame's chain-pointer.
-     If that is zero, the frame is the outermost frame.  */
-  pointer = FRAME_CHAIN (frame);
-  if (!FRAME_CHAIN_VALID (pointer, frame))
-    return 0;
-  /* If frame has a caller, combine the chain pointer and the frame's own
-     address to get the address of the caller.  */
-  return FRAME_CHAIN_COMBINE (pointer, frame);
+/*
+ * Flush the entire frame cache.
+ */
+void
+flush_cached_frames ()
+{
+  /* Since we can't really be sure what the first object allocated was */
+  obstack_free (&frame_cache_obstack, 0);
+  obstack_init (&frame_cache_obstack);
+  
+  current_frame = (struct frame_info *) 0; /* Invalidate cache */
 }
 
 /* Return a structure containing various interesting information
    about a specified stack frame.  */
+/* How do I justify including this function?  Well, the FRAME
+   identifier format has gone through several changes recently, and
+   it's not completely inconceivable that it could happen again.  If
+   it does, have this routine around will help */
 
-struct frame_info
+struct frame_info *
 get_frame_info (frame)
      FRAME frame;
 {
-  struct frame_info val;
-  FRAME current = get_current_frame ();
-  register FRAME frame1, frame2;
-
-  val.frame = frame;
-
-  if (frame == current)
-    {
-      val.pc = read_pc ();
-      val.next_frame = 0;
-      val.next_next_frame = 0;
-    }
-  else 
-    {
-      for (frame1 = current, frame2 = 0;
-	   frame1;
-	   frame2 = frame1, frame1 = get_prev_frame (frame1))
-	{
-	  QUIT;
-	  if (frame1 == frame)
-	    break;
-
-	  val.pc = FRAME_SAVED_PC (frame1, frame2);
-	  val.next_frame = frame1;
-	  val.next_next_frame = frame2;
-	}
-    }
-
-  return val;
+  return frame;
 }
 
 /* Return a structure containing various interesting information
-   about the frame that called FRAME.
+   about the frame that called NEXT_FRAME.  */
 
-   This is much faster than get_frame_info (get_prev_frame (FRAME))
-   because it does not need to search the entire stack
-   to find the frame called by the one being described -- that is FRAME.  */
-
-struct frame_info
-get_prev_frame_info (next_frame, next_next_frame)
-     FRAME next_frame, next_next_frame;
+struct frame_info *
+get_prev_frame_info (next_frame)
+     FRAME next_frame;
 {
-  struct frame_info val;
-  register FRAME frame = get_prev_frame (next_frame);
+  FRAME_ADDR address;
+  struct frame_info *prev;
+  int fromleaf = 0;
 
-  val.frame = frame;
-  val.next_frame = next_frame;
-  val.next_next_frame = next_next_frame;
+  /* If we are within "start" right now, don't go any higher.  */
+  /* This truncates stack traces of things at sigtramp() though,
+     because sigtramp() doesn't have a normal return PC, it has
+     garbage or a small value (seen: 3) in the return PC slot. 
+     It's VITAL to see where the signal occurred, so punt this. */
+#if 0
+  if (next_frame && next_frame->pc < first_object_file_end)
+    return 0;
+#endif
 
-  if (next_frame == 0)
+  /* If the requested entry is in the cache, return it.
+     Otherwise, figure out what the address should be for the entry
+     we're about to add to the cache. */
+
+  if (!next_frame)
     {
-      val.pc = read_pc ();
+      if (!current_frame)
+	error ("No frame is currently selected.");
+
+      return current_frame;
     }
   else
     {
-      val.pc = FRAME_SAVED_PC (next_frame, next_next_frame);
+      /* If we have the prev one, return it */
+      if (next_frame->prev)
+	return next_frame->prev;
+
+      /* There is a questionable, but probably always correct
+	 assumption being made here.  The assumption is that if
+	 functions on a specific machine has a FUNCTION_START_OFFSET,
+	 then this is used by the function call instruction for some
+	 purpose.  If the function call instruction has this much hair
+	 in it, it probably also sets up the frame pointer
+	 automatically (ie.  we'll never have what I am calling a
+	 "leaf node", one which shares a frame pointer with it's
+	 calling function).  This is true on a vax.  The only other
+	 way to find this out would be to setup a seperate macro
+	 "FUNCTION_HAS_FRAME_POINTER", which would often be equivalent
+	 to SKIP_PROLOGUE modifying a pc value.  */
+
+#if FUNCTION_START_OFFSET == 0
+      if (!(next_frame->next))
+	{
+	  /* Innermost */
+	  CORE_ADDR func_start, after_prologue;
+
+	  func_start = (get_pc_function_start (next_frame->pc) +
+			FUNCTION_START_OFFSET);
+	  after_prologue = func_start;
+	  SKIP_PROLOGUE (after_prologue);
+	  if (after_prologue == func_start)
+	    {
+	      fromleaf = 1;
+	      address = next_frame->frame;
+	    }
+	}
+#endif
+
+      if (!fromleaf)
+	{
+	  /* Two macros defined in param.h specify the machine-dependent
+	     actions to be performed here.  */
+	  /* First, get the frame's chain-pointer.
+	     If that is zero, the frame is the outermost frame.  */
+	  address = FRAME_CHAIN (next_frame);
+	  if (!FRAME_CHAIN_VALID (address, next_frame))
+	    return 0;
+
+	  /* If frame has a caller, combine the chain pointer and
+	     the frame's own address to get the address of the caller.  */
+	  address = FRAME_CHAIN_COMBINE (address, next_frame);
+	}
     }
 
-  return val;
+  prev = (struct frame_info *)
+    obstack_alloc (&frame_cache_obstack,
+		   sizeof (struct frame_info));
+
+  if (next_frame)
+    next_frame->prev = prev;
+  prev->next = next_frame;
+  prev->prev = (struct frame_info *) 0;
+  prev->frame = address;
+  prev->next_frame = prev->next ? prev->next->frame : 0;
+
+#ifdef INIT_EXTRA_FRAME_INFO
+  INIT_EXTRA_FRAME_INFO(prev);
+#endif
+
+  /* This entry is in the frame queue now, which is good since
+     FRAME_SAVED_PC may use that queue to figure out it's value
+     (see m-sparc.h).  We want the pc saved in the inferior frame. */
+  prev->pc = (fromleaf ? SAVED_PC_AFTER_CALL (next_frame) :
+	      next_frame ? FRAME_SAVED_PC (next_frame) : read_pc ());
+
+  return prev;
 }
 
 CORE_ADDR
 get_frame_pc (frame)
      FRAME frame;
 {
-  struct frame_info fi;
+  struct frame_info *fi;
   fi = get_frame_info (frame);
-  return fi.pc;
+  return fi->pc;
 }
 
 /* Find the addresses in which registers are saved in FRAME.  */
@@ -167,7 +252,102 @@ get_frame_saved_regs (frame_info_addr, saved_regs_addr)
      struct frame_info *frame_info_addr;
      struct frame_saved_regs *saved_regs_addr;
 {
-  FRAME_FIND_SAVED_REGS (*frame_info_addr, *saved_regs_addr);
+#if 1
+  FRAME_FIND_SAVED_REGS (frame_info_addr, *saved_regs_addr);
+#else
+  {
+    register int regnum;							
+    register int regmask;							
+    register CORE_ADDR next_addr;						
+    register CORE_ADDR pc;						
+    int nextinsn;								
+    bzero (&*saved_regs_addr, sizeof *saved_regs_addr);			
+    if ((frame_info_addr)->pc >= ((frame_info_addr)->frame
+			     - CALL_DUMMY_LENGTH - FP_REGNUM*4 - 8*12 - 4)
+	&& (frame_info_addr)->pc <= (frame_info_addr)->frame)				
+      {
+	next_addr = (frame_info_addr)->frame;					
+	pc = (frame_info_addr)->frame - CALL_DUMMY_LENGTH - FP_REGNUM * 4 - 8*12 - 4;
+      }
+    else   								
+      {
+	pc = get_pc_function_start ((frame_info_addr)->pc); 			
+	/* Verify we have a link a6 instruction next;			
+	   if not we lose.  If we win, find the address above the saved   
+	   regs using the amount of storage from the link instruction.  */
+	if (044016 == read_memory_integer (pc, 2))			
+	  {
+	    next_addr = (frame_info_addr)->frame + read_memory_integer (pc += 2, 4);
+	    pc += 4;
+	  }
+	else if (047126 == read_memory_integer (pc, 2))
+	  {
+	    next_addr = (frame_info_addr)->frame + read_memory_integer (pc += 2, 2);
+	    pc+=2;
+	  }
+	else goto lose;							
+	
+	/* If have an addal #-n, sp next, adjust next_addr.  */		
+	if ((0177777 & read_memory_integer (pc, 2)) == 0157774)
+	  {
+	    next_addr += read_memory_integer (pc += 2, 4);
+	    pc += 4;
+	  }
+      }									
+    /* next should be a moveml to (sp) or -(sp) or a movl r,-(sp) */	
+    regmask = read_memory_integer (pc + 2, 2);				
+    
+    /* But before that can come an fmovem.  Check for it.  */		
+    nextinsn = 0xffff & read_memory_integer (pc, 2);			
+    if (0xf227 == nextinsn						
+	&& (regmask & 0xff00) == 0xe000)					
+      {
+	pc += 4; /* Regmask's low bit is for register fp7, the first pushed */ 
+	for (regnum = FP0_REGNUM + 7;
+	     regnum >= FP0_REGNUM;
+	     regnum--, regmask >>= 1)		
+	  if (regmask & 1)						
+	    (*saved_regs_addr).regs[regnum] = (next_addr -= 12);		
+	regmask = read_memory_integer (pc + 2, 2);
+      }			
+    if (0044327 == read_memory_integer (pc, 2))				
+      {
+	pc += 4; /* Regmask's low bit is for register 0, the first written */ 
+	for (regnum = 0; regnum < 16; regnum++, regmask >>= 1)		
+	  if (regmask & 1)						
+	    (*saved_regs_addr).regs[regnum] = (next_addr += 4) - 4;
+      }	
+    else if (0044347 == read_memory_integer (pc, 2))			
+      { pc += 4; /* Regmask's low bit is for register 15, the first pushed */ 
+	for (regnum = 15; regnum >= 0; regnum--, regmask >>= 1)		
+	  if (regmask & 1)						
+	    (*saved_regs_addr).regs[regnum] = (next_addr -= 4); }		
+    else if (0x2f00 == (0xfff0 & read_memory_integer (pc, 2)))		
+      { regnum = 0xf & read_memory_integer (pc, 2); pc += 2;		
+	(*saved_regs_addr).regs[regnum] = (next_addr -= 4); }		
+    /* fmovemx to index of sp may follow.  */				
+    regmask = read_memory_integer (pc + 2, 2);				
+    nextinsn = 0xffff & read_memory_integer (pc, 2);			
+    if (0xf236 == nextinsn						
+	&& (regmask & 0xff00) == 0xf000)					
+      {
+	pc += 10; /* Regmask's low bit is for register fp0, the first written */ 
+	for (regnum = FP0_REGNUM + 7;
+	     regnum >= FP0_REGNUM;
+	     regnum--, regmask >>= 1)		
+	  if (regmask & 1)						
+	    (*saved_regs_addr).regs[regnum] = (next_addr += 12) - 12;	
+	regmask = read_memory_integer (pc + 2, 2);
+      }			
+    /* clrw -(sp); movw ccr,-(sp) may follow.  */				
+    if (0x426742e7 == read_memory_integer (pc, 4))			
+      (*saved_regs_addr).regs[PS_REGNUM] = (next_addr -= 4);		
+  lose: ;								
+    (*saved_regs_addr).regs[SP_REGNUM] = (frame_info_addr)->frame + 8;		
+    (*saved_regs_addr).regs[FP_REGNUM] = (frame_info_addr)->frame;		
+    (*saved_regs_addr).regs[PC_REGNUM] = (frame_info_addr)->frame + 4;		
+  }
+#endif
 }
 
 /* Return the innermost lexical block in execution
@@ -177,10 +357,10 @@ struct block *
 get_frame_block (frame)
      FRAME frame;
 {
-  struct frame_info fi;
+  struct frame_info *fi;
 
   fi = get_frame_info (frame);
-  return block_for_pc (fi.pc);
+  return block_for_pc (fi->pc);
 }
 
 struct block *
@@ -195,17 +375,16 @@ get_pc_function_start (pc)
 {
   register struct block *bl = block_for_pc (pc);
   register struct symbol *symbol;
-  if (bl == 0)
+  if (bl == 0 || (symbol = block_function (bl)) == 0)
     {
       register int misc_index = find_pc_misc_function (pc);
       if (misc_index >= 0)
 	return misc_function_vector[misc_index].address;
       return 0;
     }
-  symbol = block_function (bl);
   bl = SYMBOL_BLOCK_VALUE (symbol);
   return BLOCK_START (bl);
-}  
+}
 
 /* Return the symbol for the function executing in frame FRAME.  */
 
@@ -222,6 +401,8 @@ get_frame_function (frame)
 /* Return the innermost lexical block containing the specified pc value,
    or 0 if there is none.  */
 
+extern struct symtab *psymtab_to_symtab ();
+
 struct block *
 block_for_pc (pc)
      register CORE_ADDR pc;
@@ -229,6 +410,7 @@ block_for_pc (pc)
   register struct block *b;
   register int bot, top, half;
   register struct symtab *s;
+  register struct partial_symtab *ps;
   struct blockvector *bl;
 
   /* First search all symtabs for one whose file contains our pc */
@@ -241,6 +423,19 @@ block_for_pc (pc)
 	  && BLOCK_END (b) > pc)
 	break;
     }
+
+  if (s == 0)
+    for (ps = partial_symtab_list; ps; ps = ps->next)
+      {
+	if (ps->textlow <= pc
+	    && ps->texthigh > pc)
+	  {
+	    s = psymtab_to_symtab (ps);
+	    bl = BLOCKVECTOR (s);
+	    b = BLOCKVECTOR_BLOCK (bl, 0);
+	    break;
+	  }
+      }
 
   if (s == 0)
     return 0;
@@ -307,7 +502,7 @@ find_pc_misc_function (pc)
   if (hi < 0) return -1;        /* no misc functions recorded */
 
   /* trivial reject range test */
-  if (pc < misc_function_vector[0].address || 
+  if (pc < misc_function_vector[0].address ||
       pc > misc_function_vector[hi].address)
     return -1;
 
@@ -333,7 +528,7 @@ FRAME
 block_innermost_frame (block)
      struct block *block;
 {
-  struct frame_info fi;
+  struct frame_info *fi;
   register FRAME frame;
   register CORE_ADDR start = BLOCK_START (block);
   register CORE_ADDR end = BLOCK_END (block);
@@ -341,18 +536,17 @@ block_innermost_frame (block)
   frame = 0;
   while (1)
     {
-      fi = get_prev_frame_info (frame);
-      frame = fi.frame;
+      frame = get_prev_frame (frame);
       if (frame == 0)
 	return 0;
-      if (fi.pc >= start && fi.pc < end)
+      fi = get_frame_info (frame);
+      if (fi->pc >= start && fi->pc < end)
 	return frame;
     }
 }
 
-static
-initialize ()
+void
+_initialize_blockframe ()
 {
+  obstack_init (&frame_cache_obstack);
 }
-
-END_FILE

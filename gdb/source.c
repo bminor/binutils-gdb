@@ -18,13 +18,19 @@ In other words, go ahead and share GDB, but don't try to stop
 anyone else from sharing it farther.  Help stamp out software hoarding!
 */
 
+#include "defs.h"
+#include "symtab.h"
+#include "param.h"
+
+#ifdef USG
+#include <sys/types.h>
+#include <fcntl.h>
+#endif
+
 #include <stdio.h>
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/file.h>
-#include "defs.h"
-#include "initialize.h"
-#include "symtab.h"
 
 /* Path of directories to search for source files.
    Same format as the PATH environment variable's value.  */
@@ -48,8 +54,9 @@ static int last_line_listed;
 
 static int first_line_listed;
 
-START_FILE
 
+struct symtab *psymtab_to_symtab ();
+
 /* Set the source file default for the "list" command,
    specifying a symtab.  */
 
@@ -57,26 +64,27 @@ void
 select_source_symtab (s)
      register struct symtab *s;
 {
+  struct symtabs_and_lines sals;
+  struct symtab_and_line sal;
+  struct partial_symtab *ps, *cs_pst;
+  
+  /* Make the default place to list be the function `main'
+     if one exists.  */
+  if (lookup_symbol ("main", 0, VAR_NAMESPACE, 0))
+    {
+      sals = decode_line_spec ("main", 1);
+      sal = sals.sals[0];
+      free (sals.sals);
+      current_source_symtab = sal.symtab;
+      current_source_line = sal.line - 9;
+      return;
+    }
+  
+  /* If there is no `main', use the last symtab in the list,
+     which is actually the first found in the file's symbol table.
+     But ignore .h files.  */
   if (s)
     {
-      struct symtabs_and_lines sals;
-      struct symtab_and_line sal;
-
-      /* Make the default place to list be the function `main'
-	 if one exists.  */
-      if (lookup_symbol ("main", 0, VAR_NAMESPACE))
-	{
-	  sals = decode_line_spec ("main", 1);
-	  sal = sals.sals[0];
-	  free (sals.sals);
-	  current_source_symtab = sal.symtab;
-	  current_source_line = sal.line - 9;
-	  return;
-	}
-
-      /* If there is no `main', use the last symtab in the list,
-	 which is actually the first found in the file's symbol table.
-	 But ignore .h files.  */
       do
 	{
 	  char *name = s->filename;
@@ -86,6 +94,23 @@ select_source_symtab (s)
 	  s = s->next;
 	}
       while (s);
+      current_source_line = 1;
+    }
+  else
+    {
+      ps = partial_symtab_list;
+      while (ps)
+	{
+	  char *name = ps->filename;
+	  int len = strlen (name);
+	  if (! (len > 2 && !strcmp (&name[len - 2], ".h")))
+	    cs_pst = ps;
+	  ps = ps->next;
+	}
+      if (cs_pst)
+	current_source_symtab = psymtab_to_symtab (cs_pst);
+      else
+	current_source_symtab = 0;
       current_source_line = 1;
     }
 }
@@ -488,6 +513,27 @@ print_source_lines (s, line, stopline, noerror)
   fclose (stream);
 }
 
+
+
+/* 
+  C++
+  Print a list of files and line numbers which a user may choose from
+  in order to list a function which was specified ambiguously
+  (as with `list classname::overloadedfuncname', for example).
+  The vector in SALS provides the filenames and line numbers.
+  */
+static void
+ambiguous_line_spec (sals)
+     struct symtabs_and_lines *sals;
+{
+  int i;
+
+  for (i = 0; i < sals->nelts; ++i)
+    printf("file: \"%s\", line number: %d\n",
+	   sals->sals[i].symtab->filename, sals->sals[i].line);
+}
+
+
 static void
 list_command (arg, from_tty)
      char *arg;
@@ -503,8 +549,13 @@ list_command (arg, from_tty)
   int linenum_beg = 0;
   char *p;
 
-  if (symtab_list == 0)
+  if (symtab_list == 0 && partial_symtab_list == 0)
     error ("Listing source lines requires symbols.");
+
+  /* Pull in a current source symtab if necessary */
+  if (current_source_symtab == 0 &&
+      (arg == 0 || arg[0] == '+' || arg[0] == '-'))
+    select_source_symtab (symtab_list);
 
   /* "l" or "l +" lists next ten lines.  */
 
@@ -542,9 +593,11 @@ list_command (arg, from_tty)
       sals = decode_line_1 (&arg1, 0, 0, 0);
 
       if (! sals.nelts) return;  /*  C++  */
-      if (sals.nelts != 1)
+      if (sals.nelts > 1)
 	{
-	  error ("Unreasonable listing request");
+	  ambiguous_line_spec (&sals);
+	  free (sals.sals);
+	  return;
 	}
 
       sal = sals.sals[0];
@@ -572,7 +625,14 @@ list_command (arg, from_tty)
 	    sals_end = decode_line_1 (&arg1, 0, 0, 0);
 	  else
 	    sals_end = decode_line_1 (&arg1, 0, sal.symtab, sal.line);
-	  if (! sals_end.nelts) return;  /* C++ */
+	  if (sals_end.nelts == 0) 
+	    return;
+	  if (sals_end.nelts > 1)
+	    {
+	      ambiguous_line_spec (&sals_end);
+	      free (sals_end.sals);
+	      return;
+	    }
 	  sal_end = sals_end.sals[0];
 	  free (sals_end.sals);
 	}
@@ -628,7 +688,8 @@ list_command (arg, from_tty)
     print_source_lines (sal.symtab, max (sal.line - 5, 1), sal.line + 5, 0);
   else
     print_source_lines (sal.symtab, sal.line,
-			dummy_end ? sal.line + 10 : sal_end.line + 1, 0);
+			dummy_end ? sal.line + 10 : sal_end.line + 1,
+			0);
 }
 
 /* Print info on range of pc's in a specified line.  */
@@ -641,49 +702,54 @@ line_info (arg, from_tty)
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
   int start_pc, end_pc;
+  int i;
 
   if (arg == 0)
     {
       sal.symtab = current_source_symtab;
       sal.line = last_line_listed;
+      sals.nelts = 1;
+      sals.sals = (struct symtab_and_line *)
+	xmalloc (sizeof (struct symtab_and_line));
+      sals.sals[0] = sal;
     }
   else
     {
-      sals = decode_line_spec (arg);
-
-      if (sals.nelts == 0)
-	return;			/* C++ */
-      if (sals.nelts != 1)
-	error ("unreasonable line info request");
+      sals = decode_line_spec_1 (arg, 0);
       
-      sal = sals.sals[0];
-      free (sals.sals);
       /* If this command is repeated with RET,
 	 turn it into the no-arg variant.  */
-
       if (from_tty)
 	*arg = 0;
     }
 
-  if (sal.symtab == 0)
-    error ("No source file specified.");
-  if (sal.line > 0
-      && find_line_pc_range (sal.symtab, sal.line, &start_pc, &end_pc))
+  /* C++  More than one line may have been specified, as when the user
+     specifies an overloaded function name. Print info on them all. */
+  for (i = 0; i < sals.nelts; i++)
     {
-      if (start_pc == end_pc)
-	printf ("Line %d of \"%s\" is at pc 0x%x but contains no code.\n",
-		sal.line, sal.symtab->filename, start_pc);
+      sal = sals.sals[i];
+      
+      if (sal.symtab == 0)
+	error ("No source file specified.");
+
+      if (sal.line > 0
+	  && find_line_pc_range (sal.symtab, sal.line, &start_pc, &end_pc))
+	{
+	  if (start_pc == end_pc)
+	    printf ("Line %d of \"%s\" is at pc 0x%x but contains no code.\n",
+		    sal.line, sal.symtab->filename, start_pc);
+	  else
+	    printf ("Line %d of \"%s\" starts at pc 0x%x and ends at 0x%x.\n",
+		    sal.line, sal.symtab->filename, start_pc, end_pc);
+	  /* x/i should display this line's code.  */
+	  set_next_address (start_pc);
+	  /* Repeating "info line" should do the following line.  */
+	  last_line_listed = sal.line + 1;
+	}
       else
-	printf ("Line %d of \"%s\" starts at pc 0x%x and ends at 0x%x.\n",
-		sal.line, sal.symtab->filename, start_pc, end_pc);
-      /* x/i should display this line's code.  */
-      set_next_address (start_pc);
-      /* Repeating "info line" should do the following line.  */
-      last_line_listed = sal.line + 1;
+	printf ("Line number %d is out of range for \"%s\".\n",
+		sal.line, sal.symtab->filename);
     }
-  else
-    printf ("Line number %d is out of range for \"%s\".\n",
-	    sal.line, sal.symtab->filename);
 }
 
 /* Commands to search the source file for a regexp.  */
@@ -835,8 +901,8 @@ reverse_search_command (regex, from_tty)
   return;
 }
 
-static
-initialize ()
+void
+_initialize_source ()
 {
   current_source_symtab = 0;
   init_source_path ();
@@ -883,4 +949,3 @@ Lines can be specified in these ways:\n\
 With two args if one is empty it stands for ten lines away from the other arg.");
 }
 
-END_FILE

@@ -41,9 +41,8 @@ static int expout_size;
 static int expout_ptr;
 
 static int yylex ();
-static yyerror ();
+static void yyerror ();
 static void write_exp_elt ();
-static void write_exp_elt2 ();
 static void write_exp_string ();
 static void start_arglist ();
 static int end_arglist ();
@@ -54,6 +53,13 @@ static char *copy_name ();
    for symbol names.  */
 
 static struct block *expression_context_block;
+
+/* The innermost context required by the stack and register variables
+   we've encountered so far. */
+struct block *innermost_block;
+
+/* The block in which the most recently discovered symbol was found. */
+struct block *block_found;
 
 /* Number of arguments seen so far in innermost function call.  */
 static int arglist_len;
@@ -156,70 +162,70 @@ start   :	exp1
 /* Expressions, including the comma operator.  */
 exp1	:	exp
 	|	exp1 ',' exp
-			{ write_exp_elt (BINOP_COMMA); }
+			{ write_exp_elt_opcode (BINOP_COMMA); }
 	;
 
 /* Expressions, not including the comma operator.  */
 exp	:	'*' exp    %prec UNARY
-			{ write_exp_elt (UNOP_IND); }
+			{ write_exp_elt_opcode (UNOP_IND); }
 
 exp	:	'&' exp    %prec UNARY
-			{ write_exp_elt (UNOP_ADDR); }
+			{ write_exp_elt_opcode (UNOP_ADDR); }
 
 exp	:	'-' exp    %prec UNARY
-			{ write_exp_elt (UNOP_NEG); }
+			{ write_exp_elt_opcode (UNOP_NEG); }
 	;
 
 exp	:	'!' exp    %prec UNARY
-			{ write_exp_elt (UNOP_ZEROP); }
+			{ write_exp_elt_opcode (UNOP_ZEROP); }
 	;
 
 exp	:	'~' exp    %prec UNARY
-			{ write_exp_elt (UNOP_LOGNOT); }
+			{ write_exp_elt_opcode (UNOP_LOGNOT); }
 	;
 
 exp	:	INCREMENT exp    %prec UNARY
-			{ write_exp_elt (UNOP_PREINCREMENT); }
+			{ write_exp_elt_opcode (UNOP_PREINCREMENT); }
 	;
 
 exp	:	DECREMENT exp    %prec UNARY
-			{ write_exp_elt (UNOP_PREDECREMENT); }
+			{ write_exp_elt_opcode (UNOP_PREDECREMENT); }
 	;
 
 exp	:	exp INCREMENT    %prec UNARY
-			{ write_exp_elt (UNOP_POSTINCREMENT); }
+			{ write_exp_elt_opcode (UNOP_POSTINCREMENT); }
 	;
 
 exp	:	exp DECREMENT    %prec UNARY
-			{ write_exp_elt (UNOP_POSTDECREMENT); }
+			{ write_exp_elt_opcode (UNOP_POSTDECREMENT); }
 	;
 
 exp	:	SIZEOF exp       %prec UNARY
-			{ write_exp_elt (UNOP_SIZEOF); }
+			{ write_exp_elt_opcode (UNOP_SIZEOF); }
 	;
 
 exp	:	exp ARROW name
-			{ write_exp_elt (STRUCTOP_PTR);
+			{ write_exp_elt_opcode (STRUCTOP_PTR);
 			  write_exp_string ($3);
-			  write_exp_elt (STRUCTOP_PTR); }
+			  write_exp_elt_opcode (STRUCTOP_PTR); }
 	;
 
 exp	:	exp ARROW '*' exp
-			{ write_exp_elt (STRUCTOP_MPTR); }
+			{ write_exp_elt_opcode (STRUCTOP_MPTR); }
 	;
 
 exp	:	exp '.' name
-			{ write_exp_elt (STRUCTOP_STRUCT);
+			{ write_exp_elt_opcode (STRUCTOP_STRUCT);
 			  write_exp_string ($3);
-			  write_exp_elt (STRUCTOP_STRUCT); }
+			  write_exp_elt_opcode (STRUCTOP_STRUCT); }
 	;
 
 exp	:	exp '.' '*' exp
-			{ write_exp_elt (STRUCTOP_MEMBER); }
+			{ write_exp_elt_opcode (STRUCTOP_MEMBER); }
 	;
 
 exp	:	exp '[' exp1 ']'
-			{ write_exp_elt (BINOP_SUBSCRIPT); }
+			{ write_exp_elt_opcode (BINOP_SUBSCRIPT); }
 	;
 
 exp	:	exp '(' 
@@ -227,9 +233,9 @@ exp	:	exp '('
 			   being accumulated by an outer function call.  */
 			{ start_arglist (); }
 		arglist ')'
-			{ write_exp_elt (OP_FUNCALL);
-			  write_exp_elt (end_arglist ());
-			  write_exp_elt (OP_FUNCALL); }
+			{ write_exp_elt_opcode (OP_FUNCALL);
+			  write_exp_elt_longcst (end_arglist ());
+			  write_exp_elt_opcode (OP_FUNCALL); }
 	;
 
 arglist	:
@@ -244,15 +250,15 @@ arglist	:	arglist ',' exp   %prec ABOVE_COMMA
 	;
 
 exp	:	'{' type '}' exp  %prec UNARY
-			{ write_exp_elt (UNOP_MEMVAL);
-			  write_exp_elt ($2);
-			  write_exp_elt (UNOP_MEMVAL); }
+			{ write_exp_elt_opcode (UNOP_MEMVAL);
+			  write_exp_elt_type ($2);
+			  write_exp_elt_opcode (UNOP_MEMVAL); }
 	;
 
 exp	:	'(' type ')' exp  %prec UNARY
-			{ write_exp_elt (UNOP_CAST);
-			  write_exp_elt ($2);
-			  write_exp_elt (UNOP_CAST); }
+			{ write_exp_elt_opcode (UNOP_CAST);
+			  write_exp_elt_type ($2);
+			  write_exp_elt_opcode (UNOP_CAST); }
 	;
 
 exp	:	'(' exp1 ')'
@@ -262,154 +268,154 @@ exp	:	'(' exp1 ')'
 /* Binary operators in order of decreasing precedence.  */
 
 exp	:	exp '@' exp
-			{ write_exp_elt (BINOP_REPEAT); }
+			{ write_exp_elt_opcode (BINOP_REPEAT); }
 	;
 
 exp	:	exp '*' exp
-			{ write_exp_elt (BINOP_MUL); }
+			{ write_exp_elt_opcode (BINOP_MUL); }
 	;
 
 exp	:	exp '/' exp
-			{ write_exp_elt (BINOP_DIV); }
+			{ write_exp_elt_opcode (BINOP_DIV); }
 	;
 
 exp	:	exp '%' exp
-			{ write_exp_elt (BINOP_REM); }
+			{ write_exp_elt_opcode (BINOP_REM); }
 	;
 
 exp	:	exp '+' exp
-			{ write_exp_elt (BINOP_ADD); }
+			{ write_exp_elt_opcode (BINOP_ADD); }
 	;
 
 exp	:	exp '-' exp
-			{ write_exp_elt (BINOP_SUB); }
+			{ write_exp_elt_opcode (BINOP_SUB); }
 	;
 
 exp	:	exp LSH exp
-			{ write_exp_elt (BINOP_LSH); }
+			{ write_exp_elt_opcode (BINOP_LSH); }
 	;
 
 exp	:	exp RSH exp
-			{ write_exp_elt (BINOP_RSH); }
+			{ write_exp_elt_opcode (BINOP_RSH); }
 	;
 
 exp	:	exp EQUAL exp
-			{ write_exp_elt (BINOP_EQUAL); }
+			{ write_exp_elt_opcode (BINOP_EQUAL); }
 	;
 
 exp	:	exp NOTEQUAL exp
-			{ write_exp_elt (BINOP_NOTEQUAL); }
+			{ write_exp_elt_opcode (BINOP_NOTEQUAL); }
 	;
 
 exp	:	exp LEQ exp
-			{ write_exp_elt (BINOP_LEQ); }
+			{ write_exp_elt_opcode (BINOP_LEQ); }
 	;
 
 exp	:	exp GEQ exp
-			{ write_exp_elt (BINOP_GEQ); }
+			{ write_exp_elt_opcode (BINOP_GEQ); }
 	;
 
 exp	:	exp '<' exp
-			{ write_exp_elt (BINOP_LESS); }
+			{ write_exp_elt_opcode (BINOP_LESS); }
 	;
 
 exp	:	exp '>' exp
-			{ write_exp_elt (BINOP_GTR); }
+			{ write_exp_elt_opcode (BINOP_GTR); }
 	;
 
 exp	:	exp '&' exp
-			{ write_exp_elt (BINOP_LOGAND); }
+			{ write_exp_elt_opcode (BINOP_LOGAND); }
 	;
 
 exp	:	exp '^' exp
-			{ write_exp_elt (BINOP_LOGXOR); }
+			{ write_exp_elt_opcode (BINOP_LOGXOR); }
 	;
 
 exp	:	exp '|' exp
-			{ write_exp_elt (BINOP_LOGIOR); }
+			{ write_exp_elt_opcode (BINOP_LOGIOR); }
 	;
 
 exp	:	exp AND exp
-			{ write_exp_elt (BINOP_AND); }
+			{ write_exp_elt_opcode (BINOP_AND); }
 	;
 
 exp	:	exp OR exp
-			{ write_exp_elt (BINOP_OR); }
+			{ write_exp_elt_opcode (BINOP_OR); }
 	;
 
 exp	:	exp '?' exp ':' exp
-			{ write_exp_elt (TERNOP_COND); }
+			{ write_exp_elt_opcode (TERNOP_COND); }
 	;
 			  
 exp	:	exp '=' exp
-			{ write_exp_elt (BINOP_ASSIGN); }
+			{ write_exp_elt_opcode (BINOP_ASSIGN); }
 	;
 
 exp	:	exp ASSIGN_MODIFY exp
-			{ write_exp_elt (BINOP_ASSIGN_MODIFY);
-			  write_exp_elt ($2);
-			  write_exp_elt (BINOP_ASSIGN_MODIFY); }
+			{ write_exp_elt_opcode (BINOP_ASSIGN_MODIFY);
+			  write_exp_elt_opcode ($2);
+			  write_exp_elt_opcode (BINOP_ASSIGN_MODIFY); }
 	;
 
 exp	:	INT
-			{ write_exp_elt (OP_LONG);
-			  write_exp_elt (builtin_type_long);
-			  write_exp_elt ($1);
-			  write_exp_elt (OP_LONG); }
+			{ write_exp_elt_opcode (OP_LONG);
+			  write_exp_elt_type (builtin_type_long);
+			  write_exp_elt_longcst ($1);
+			  write_exp_elt_opcode (OP_LONG); }
 	;
 
 exp	:	CHAR
-			{ write_exp_elt (OP_LONG);
-			  write_exp_elt (builtin_type_char);
-			  write_exp_elt ($1);
-			  write_exp_elt (OP_LONG); }
+			{ write_exp_elt_opcode (OP_LONG);
+			  write_exp_elt_type (builtin_type_char);
+			  write_exp_elt_longcst ($1);
+			  write_exp_elt_opcode (OP_LONG); }
 	;
 
 exp	:	FLOAT
-			{ write_exp_elt (OP_DOUBLE);
-			  write_exp_elt (builtin_type_double);
-			  write_exp_elt2 ($1);
-			  write_exp_elt (OP_DOUBLE); }
+			{ write_exp_elt_opcode (OP_DOUBLE);
+			  write_exp_elt_type (builtin_type_double);
+			  write_exp_elt_dblcst ($1);
+			  write_exp_elt_opcode (OP_DOUBLE); }
 	;
 
 exp	:	variable
 	;
 
 exp	:	LAST
-			{ write_exp_elt (OP_LAST);
-			  write_exp_elt ($1);
-			  write_exp_elt (OP_LAST); }
+			{ write_exp_elt_opcode (OP_LAST);
+			  write_exp_elt_longcst ($1);
+			  write_exp_elt_opcode (OP_LAST); }
 	;
 
 exp	:	REGNAME
-			{ write_exp_elt (OP_REGISTER);
-			  write_exp_elt ($1);
-			  write_exp_elt (OP_REGISTER); }
+			{ write_exp_elt_opcode (OP_REGISTER);
+			  write_exp_elt_longcst ($1);
+			  write_exp_elt_opcode (OP_REGISTER); }
 	;
 
 exp	:	VARIABLE
-			{ write_exp_elt (OP_INTERNALVAR);
-			  write_exp_elt ($1);
-			  write_exp_elt (OP_INTERNALVAR); }
+			{ write_exp_elt_opcode (OP_INTERNALVAR);
+			  write_exp_elt_intern ($1);
+			  write_exp_elt_opcode (OP_INTERNALVAR); }
 	;
 
 exp	:	SIZEOF '(' type ')'
-			{ write_exp_elt (OP_LONG);
-			  write_exp_elt (builtin_type_int);
-			  write_exp_elt ((long) TYPE_LENGTH ($3));
-			  write_exp_elt (OP_LONG); }
+			{ write_exp_elt_opcode (OP_LONG);
+			  write_exp_elt_type (builtin_type_int);
+			  write_exp_elt_longcst ((long) TYPE_LENGTH ($3));
+			  write_exp_elt_opcode (OP_LONG); }
 	;
 
 exp	:	STRING
-			{ write_exp_elt (OP_STRING);
+			{ write_exp_elt_opcode (OP_STRING);
 			  write_exp_string ($1);
-			  write_exp_elt (OP_STRING); }
+			  write_exp_elt_opcode (OP_STRING); }
 	;
 
 /* C++.  */
 exp	:	THIS
-			{ write_exp_elt (OP_THIS);
-			  write_exp_elt (OP_THIS); }
+			{ write_exp_elt_opcode (OP_THIS);
+			  write_exp_elt_opcode (OP_THIS); }
 	;
 
 /* end of C++.  */
@@ -425,7 +431,7 @@ block	:	name
 			    {
 			      sym = lookup_symbol (copy_name ($1),
 						   expression_context_block,
-						   VAR_NAMESPACE);
+						   VAR_NAMESPACE, 0);
 			      if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
 				$$ = SYMBOL_BLOCK_VALUE (sym);
 			      else
@@ -436,27 +442,23 @@ block	:	name
 	;
 
 block	:	block COLONCOLON name
-			{
-			  struct symbol *tem
-			    = lookup_symbol (copy_name ($3), $1, VAR_NAMESPACE);
+			{ struct symbol *tem
+			    = lookup_symbol (copy_name ($3), $1, VAR_NAMESPACE, 0);
 			  if (!tem || SYMBOL_CLASS (tem) != LOC_BLOCK)
 			    error ("No function \"%s\" in specified context.",
 				   copy_name ($3));
-			  $$ = SYMBOL_BLOCK_VALUE (tem);
-			}
+			  $$ = SYMBOL_BLOCK_VALUE (tem); }
 	;
 
 variable:	block COLONCOLON name
-			{
-			  struct symbol *sym;
-			  sym = lookup_symbol (copy_name ($3), $1, VAR_NAMESPACE);
+			{ struct symbol *sym;
+			  sym = lookup_symbol (copy_name ($3), $1, VAR_NAMESPACE, 0);
 			  if (sym == 0)
 			    error ("No symbol \"%s\" in specified context.",
 				   copy_name ($3));
-			  write_exp_elt (OP_VAR_VALUE);
-			  write_exp_elt (sym);
-			  write_exp_elt (OP_VAR_VALUE);
-			}
+			  write_exp_elt_opcode (OP_VAR_VALUE);
+			  write_exp_elt_sym (sym);
+			  write_exp_elt_opcode (OP_VAR_VALUE); }
 	;
 
 variable:	typebase COLONCOLON name
@@ -467,10 +469,10 @@ variable:	typebase COLONCOLON name
 			    error ("`%s' is not defined as an aggregate type.",
 				   TYPE_NAME (type));
 
-			  write_exp_elt (OP_SCOPE);
-			  write_exp_elt (type);
+			  write_exp_elt_opcode (OP_SCOPE);
+			  write_exp_elt_type (type);
 			  write_exp_string ($3);
-			  write_exp_elt (OP_SCOPE);
+			  write_exp_elt_opcode (OP_SCOPE);
 			}
 	|	COLONCOLON name
 			{
@@ -478,12 +480,12 @@ variable:	typebase COLONCOLON name
 			  struct symbol *sym;
 			  int i;
 
-			  sym = lookup_symbol_2 (name, 0, VAR_NAMESPACE);
+			  sym = lookup_symbol (name, 0, VAR_NAMESPACE, 0);
 			  if (sym)
 			    {
-			      write_exp_elt (OP_VAR_VALUE);
-			      write_exp_elt (sym);
-			      write_exp_elt (OP_VAR_VALUE);
+			      write_exp_elt_opcode (OP_VAR_VALUE);
+			      write_exp_elt_sym (sym);
+			      write_exp_elt_opcode (OP_VAR_VALUE);
 			      break;
 			    }
 			  for (i = 0; i < misc_function_count; i++)
@@ -492,16 +494,17 @@ variable:	typebase COLONCOLON name
 
 			  if (i < misc_function_count)
 			    {
-			      write_exp_elt (OP_LONG);
-			      write_exp_elt (builtin_type_int);
-			      write_exp_elt (misc_function_vector[i].address);
-			      write_exp_elt (OP_LONG);
-			      write_exp_elt (UNOP_MEMVAL);
-			      write_exp_elt (builtin_type_char);
-			      write_exp_elt (UNOP_MEMVAL);
+			      write_exp_elt_opcode (OP_LONG);
+			      write_exp_elt_type (builtin_type_int);
+			      write_exp_elt_longcst (misc_function_vector[i].address);
+			      write_exp_elt_opcode (OP_LONG);
+			      write_exp_elt_opcode (UNOP_MEMVAL);
+			      write_exp_elt_type (builtin_type_char);
+			      write_exp_elt_opcode (UNOP_MEMVAL);
 			    }
 			  else
-			    if (symtab_list == 0)
+			    if (symtab_list == 0
+				&& partial_symtab_list == 0)
 			      error ("No symbol table is loaded.  Use the \"symbol-file\" command.");
 			    else
 			      error ("No symbol \"%s\" in current context.", name);
@@ -510,65 +513,67 @@ variable:	typebase COLONCOLON name
 
 variable:	NAME
 			{ struct symbol *sym;
-			  sym = lookup_symbol_1 (copy_name ($1),
-						 expression_context_block,
-						 VAR_NAMESPACE);
+			  int is_a_field_of_this;
+
+			  sym = lookup_symbol (copy_name ($1),
+					       expression_context_block,
+					       VAR_NAMESPACE,
+					       &is_a_field_of_this);
 			  if (sym)
 			    {
-			      write_exp_elt (OP_VAR_VALUE);
-			      write_exp_elt (sym);
-			      write_exp_elt (OP_VAR_VALUE);
+			      switch (sym->class)
+				{
+				case LOC_REGISTER:
+				case LOC_ARG:
+				case LOC_LOCAL:
+				  if (innermost_block == 0 ||
+				      contained_in (block_found, 
+						    innermost_block))
+				    innermost_block = block_found;
+				}
+			      write_exp_elt_opcode (OP_VAR_VALUE);
+			      write_exp_elt_sym (sym);
+			      write_exp_elt_opcode (OP_VAR_VALUE);
+			    }
+			  else if (is_a_field_of_this)
+			    {
+			      /* C++: it hangs off of `this'.  Must
+			         not inadvertently convert from a method call
+				 to data ref.  */
+			      if (innermost_block == 0 || 
+				  contained_in (block_found, innermost_block))
+				innermost_block = block_found;
+			      write_exp_elt_opcode (OP_THIS);
+			      write_exp_elt_opcode (OP_THIS);
+			      write_exp_elt_opcode (STRUCTOP_PTR);
+			      write_exp_string ($1);
+			      write_exp_elt_opcode (STRUCTOP_PTR);
 			    }
 			  else
 			    {
-			      register char *arg = copy_name ($1);
 			      register int i;
-			      int v, val;
-			      /* C++: see if it hangs off of `this'.  Must
-			         not inadvertently convert from a method call
-				 to data ref.  */
-			      v = (int)value_of_this (0);
-			      if (v)
-				{
-				  val = check_field (v, arg);
-				  if (val)
-				    {
-				      write_exp_elt (OP_THIS);
-				      write_exp_elt (OP_THIS);
-				      write_exp_elt (STRUCTOP_PTR);
-				      write_exp_string ($1);
-				      write_exp_elt (STRUCTOP_PTR);
-				      break;
-				    }
-				}
-			      sym = lookup_symbol_2 (arg, 0, VAR_NAMESPACE);
-			      if (sym)
-				{
-				  write_exp_elt (OP_VAR_VALUE);
-				  write_exp_elt (sym);
-				  write_exp_elt (OP_VAR_VALUE);
-				  break; /* YACC-dependent */
-				}
+			      register char *arg = copy_name ($1);
+
 			      for (i = 0; i < misc_function_count; i++)
 				if (!strcmp (misc_function_vector[i].name, arg))
 				  break;
 
 			      if (i < misc_function_count)
 				{
-				  write_exp_elt (OP_LONG);
-				  write_exp_elt (builtin_type_int);
-				  write_exp_elt (misc_function_vector[i].address);
-				  write_exp_elt (OP_LONG);
-				  write_exp_elt (UNOP_MEMVAL);
-				  write_exp_elt (builtin_type_char);
-				  write_exp_elt (UNOP_MEMVAL);
+				  write_exp_elt_opcode (OP_LONG);
+				  write_exp_elt_type (builtin_type_int);
+				  write_exp_elt_longcst (misc_function_vector[i].address);
+				  write_exp_elt_opcode (OP_LONG);
+				  write_exp_elt_opcode (UNOP_MEMVAL);
+				  write_exp_elt_type (builtin_type_char);
+				  write_exp_elt_opcode (UNOP_MEMVAL);
 				}
+			      else if (symtab_list == 0
+				       && partial_symtab_list == 0)
+				error ("No symbol table is loaded.  Use the \"symbol-file\" command.");
 			      else
-				if (symtab_list == 0)
-				  error ("No symbol table is loaded.  Use the \"symbol-file\" command.");
-				else
-				  error ("No symbol \"%s\" in current context.",
-					 copy_name ($1));
+				error ("No symbol \"%s\" in current context.",
+				       copy_name ($1));
 			    }
 			}
 	;
@@ -583,9 +588,9 @@ type	:	typebase
 	|	type '(' typebase COLONCOLON '*' ')'
 			{ $$ = lookup_member_type ($1, $3); }
 	|	type '(' typebase COLONCOLON '*' ')' '(' ')'
-			{ $$ = lookup_member_type (lookup_function_type ($1, 0), $3); }
+			{ $$ = lookup_member_type (lookup_function_type ($1)); }
 	|	type '(' typebase COLONCOLON '*' ')' '(' nonempty_typelist ')'
-			{ $$ = lookup_member_type (lookup_function_type ($1, $8), $3);
+			{ $$ = lookup_member_type (lookup_function_type ($1));
 			  free ($8); }
 	;
 
@@ -672,16 +677,13 @@ free_funcalls ()
 
 /* Add one element to the end of the expression.  */
 
-/* To avoid a bug in the Sun 4 compiler, we pass only things that
-   can fit into a single register through here.  */
+/* To avoid a bug in the Sun 4 compiler, we pass things that can fit into
+   a register through here */
+
 static void
 write_exp_elt (expelt)
-     /* union exp_element expelt; */
-     long expelt;
+     union exp_element expelt;
 {
-  union exp_element temp;
-  temp.longconst = expelt;
-
   if (expout_ptr >= expout_size)
     {
       expout_size *= 2;
@@ -689,25 +691,73 @@ write_exp_elt (expelt)
 					       sizeof (struct expression)
 					       + expout_size * sizeof (union exp_element));
     }
-  expout->elts[expout_ptr++] = /* expelt */ temp;
+  expout->elts[expout_ptr++] = expelt;
 }
 
-/* Things that take more space must come through here.  */
 static void
-write_exp_elt2 (expelt)
+write_exp_elt_opcode (expelt)
+     enum exp_opcode expelt;
+{
+  union exp_element tmp;
+
+  tmp.opcode = expelt;
+
+  write_exp_elt (tmp);
+}
+
+static void
+write_exp_elt_sym (expelt)
+     struct symbol *expelt;
+{
+  union exp_element tmp;
+
+  tmp.symbol = expelt;
+
+  write_exp_elt (tmp);
+}
+
+static void
+write_exp_elt_longcst (expelt)
+     LONGEST expelt;
+{
+  union exp_element tmp;
+
+  tmp.longconst = expelt;
+
+  write_exp_elt (tmp);
+}
+
+static void
+write_exp_elt_dblcst (expelt)
      double expelt;
 {
-  union exp_element temp;
-  temp.doubleconst = expelt;
+  union exp_element tmp;
 
-  if (expout_ptr >= expout_size)
-    {
-      expout_size *= 2;
-      expout = (struct expression *) xrealloc (expout,
-					       sizeof (struct expression)
-					       + expout_size * sizeof (union exp_element));
-    }
-  expout->elts[expout_ptr++] = temp;
+  tmp.doubleconst = expelt;
+
+  write_exp_elt (tmp);
+}
+
+static void
+write_exp_elt_type (expelt)
+     struct type *expelt;
+{
+  union exp_element tmp;
+
+  tmp.type = expelt;
+
+  write_exp_elt (tmp);
+}
+
+static void
+write_exp_elt_intern (expelt)
+     struct internalvar *expelt;
+{
+  union exp_element tmp;
+
+  tmp.internalvar = expelt;
+
+  write_exp_elt (tmp);
 }
 
 /* Add a string constant to the end of the expression.
@@ -726,13 +776,13 @@ write_exp_string (str)
   if (expout_ptr >= expout_size)
     {
       expout_size = max (expout_size * 2, expout_ptr + 10);
-      expout = (struct expression *) xrealloc (expout,
-					       sizeof (struct expression)
-					       + expout_size * sizeof (union exp_element));
+      expout = (struct expression *)
+	xrealloc (expout, (sizeof (struct expression)
+			   + (expout_size * sizeof (union exp_element))));
     }
   bcopy (str.ptr, (char *) &expout->elts[expout_ptr - lenelt], len);
   ((char *) &expout->elts[expout_ptr - lenelt])[len] = 0;
-  write_exp_elt (len);
+  write_exp_elt_longcst (len);
 }
 
 /* During parsing of a C expression, the pointer to the next character
@@ -799,12 +849,13 @@ parse_number (olen)
   while (len-- > 0)
     {
       c = *p++;
-      n *= base;
+      if (c >= 'A' && c <= 'Z') c += 'a' - 'A';
+      if (c != 'l')
+	n *= base;
       if (c >= '0' && c <= '9')
 	n += c - '0';
       else
 	{
-	  if (c >= 'A' && c <= 'Z') c += 'a' - 'A';
 	  if (base == 16 && c >= 'a' && c <= 'f')
 	    n += c - 'a' + 10;
 	  else if (len == 0 && c == 'l')
@@ -860,6 +911,29 @@ static struct token tokentab2[] =
     {"<=", LEQ, BINOP_END},
     {">=", GEQ, BINOP_END}
   };
+
+/* assign machine-independent names to certain registers 
+ * (unless overridden by the REGISTER_NAMES table)
+ */
+struct std_regs {
+	char *name;
+	int regnum;
+} std_regs[] = {
+#ifdef PC_REGNUM
+	{ "pc", PC_REGNUM },
+#endif
+#ifdef FP_REGNUM
+	{ "fp", FP_REGNUM },
+#endif
+#ifdef SP_REGNUM
+	{ "sp", SP_REGNUM },
+#endif
+#ifdef PS_REGNUM
+	{ "ps", PS_REGNUM },
+#endif
+};
+
+#define NUM_STD_REGS (sizeof std_regs / sizeof std_regs[0])
 
 /* Read one token, getting characters through lexptr.  */
 
@@ -1044,7 +1118,7 @@ yylex ()
   /* Handle tokens that refer to machine registers:
      $ followed by a register name.  */
 
-  if (*tokstart == '$')
+  if (*tokstart == '$') {
     for (c = 0; c < NUM_REGS; c++)
       if (namelen - 1 == strlen (reg_names[c])
 	  && !strncmp (tokstart + 1, reg_names[c], namelen - 1))
@@ -1052,7 +1126,14 @@ yylex ()
 	  yylval.lval = c;
 	  return REGNAME;
 	}
-
+    for (c = 0; c < NUM_STD_REGS; c++)
+     if (namelen - 1 == strlen (std_regs[c].name)
+	 && !strncmp (tokstart + 1, std_regs[c].name, namelen - 1))
+       {
+	 yylval.lval = std_regs[c].regnum;
+	 return REGNAME;
+       }
+  }
   if (namelen == 6 && !strncmp (tokstart, "struct", 6))
     {
       return STRUCT;
@@ -1070,10 +1151,10 @@ yylex ()
 	{
 	  return ENUM;
 	}
-      if (!strncmp (tokstart, "this", 4))
-	{
-	  return THIS;
-	}
+      if (!strncmp (tokstart, "this", 4)
+	  && lookup_symbol ("$this", expression_context_block,
+			    VAR_NAMESPACE, 0))
+	return THIS;
     }
   if (namelen == 6 && !strncmp (tokstart, "sizeof", 6))
     {
@@ -1102,7 +1183,7 @@ yylex ()
   return NAME;
 }
 
-static
+static void
 yyerror ()
 {
   error ("Invalid syntax in expression.");
@@ -1361,6 +1442,8 @@ parse_c_1 (stringptr, block, comma)
 
   lexptr = *stringptr;
 
+  paren_depth = 0;
+
   comma_terminates = comma;
 
   if (lexptr == 0 || *lexptr == 0)
@@ -1374,8 +1457,9 @@ parse_c_1 (stringptr, block, comma)
   namecopy = (char *) alloca (strlen (lexptr) + 1);
   expout_size = 10;
   expout_ptr = 0;
-  expout = (struct expression *) xmalloc (sizeof (struct expression)
-					  + expout_size * sizeof (union exp_element));
+  expout = (struct expression *)
+    xmalloc (sizeof (struct expression)
+	     + expout_size * sizeof (union exp_element));
   make_cleanup (free_current_contents, &expout);
   if (yyparse ())
     yyerror ();

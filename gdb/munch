@@ -1,0 +1,14 @@
+#! /bin/sh
+
+# create an initialization procedure from a list of .o files
+# Look in object files, find symbols including the string _initialize_,
+# and call each one as a function.
+
+echo '/* Do not modify this file.  It is created automatically by "munch". */'
+echo 'void init_all_files () {'
+
+nm $* | egrep '_initialize_' | \
+  sed -e 's/^.*\(initialize_[a-zA-Z_0-9]*\).*$/    _\1 ();/' | \
+  sort -u
+
+echo '}'

@@ -2,7 +2,7 @@
    Design and support routines derived from dbxread.c, and UMAX COFF
    specific routines written 9/1/87 by David D. Johnson, Brown University.
    Revised 11/27/87 ddj@cs.brown.edu
-   Copyright (C) 1987, 1988 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1988, 1989 Free Software Foundation, Inc.
 
 GDB is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY.  No author or distributor accepts responsibility to anyone
@@ -24,14 +24,21 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include "defs.h"
 #include "param.h"
 #ifdef COFF_FORMAT
-#include "initialize.h"
 #include "symtab.h"
+
+#ifdef USG
+#include <sys/types.h>
+#include <fcntl.h>
+#endif
 
 #include <a.out.h>
 #include <stdio.h>
 #include <obstack.h>
 #include <sys/param.h>
 #include <sys/file.h>
+
+/* Avoid problems with A/UX predefine */
+#undef aux
 
 static void add_symbol_to_list ();
 static void read_coff_symtab ();
@@ -52,8 +59,8 @@ static int init_lineno ();
 static void enter_linenos ();
 
 extern void free_all_symtabs ();
+extern void free_all_psymtabs ();
 
-START_FILE
 
 /* Name of source file whose symbol data we are now processing.
    This comes from a symbol named ".file".  */
@@ -184,12 +191,17 @@ coff_lookup_type (index)
 {
   if (index >= type_vector_length)
     {
+      int old_vector_length = type_vector_length;
+
       type_vector_length *= 2;
+      if (type_vector_length < index) {
+	type_vector_length = index * 2;
+      }
       type_vector = (struct typevector *)
 	xrealloc (type_vector, sizeof (struct typevector)
 				+ type_vector_length * sizeof (struct type *));
-      bzero (&type_vector->type[type_vector_length / 2],
-	     type_vector_length * sizeof (struct type *) / 2);
+      bzero (&type_vector->type[ old_vector_length ],
+	     (type_vector_length - old_vector_length) * sizeof(struct type *));
     }
   return &type_vector->type[index];
 }
@@ -359,6 +371,7 @@ record_line (line, pc)
      int line;
      CORE_ADDR pc;
 {
+  struct linetable_entry *e;
   /* Make sure line vector is big enough.  */
 
   if (line_vector_index + 2 >= line_vector_length)
@@ -366,21 +379,12 @@ record_line (line, pc)
       line_vector_length *= 2;
       line_vector = (struct linetable *)
 	xrealloc (line_vector, sizeof (struct linetable)
-				+ line_vector_length * sizeof (int));
+		  + (line_vector_length
+		     * sizeof (struct linetable_entry)));
     }
 
-  /* If this line is not continguous with previous one recorded,
-     all lines between subsequent line and current one are same pc.
-     Add one item to line vector, and if more than one line skipped, 
-     record a line-number entry for it.  */
-  if (prev_line_number > 0 && line != prev_line_number + 1)
-    line_vector->item[line_vector_index++] = pc;
-  if (prev_line_number < 0 || line > prev_line_number + 2)
-    line_vector->item[line_vector_index++] = - line;
-  prev_line_number = line;
-
-  /* Record the core address of the line.  */
-  line_vector->item[line_vector_index++] = pc;
+  e = line_vector->item + line_vector_index++;
+  e->line = line; e->pc = pc;
 }
 
 /* Start a new symtab for a new source file.
@@ -402,7 +406,8 @@ start_symtab ()
   line_vector_length = 1000;
   prev_line_number = -2;	/* Force first line number to be explicit */
   line_vector = (struct linetable *)
-    xmalloc (sizeof (struct linetable) + line_vector_length * sizeof (int));
+    xmalloc (sizeof (struct linetable)
+	     + line_vector_length * sizeof (struct linetable_entry));
 }
 
 /* Save the vital information for use when closing off the current file.
@@ -438,18 +443,31 @@ end_symtab ()
   if (context_stack)
     {
       cstk = context_stack;
+      context_stack = 0;
       /* Make a block for the local symbols within.  */
       finish_block (cstk->name, &local_symbols, cstk->old_blocks,
 		    cstk->start_addr, cur_src_end_addr);
       free (cstk);
     }
 
+  /* Ignore a file that has no functions with real debugging info.  */
+  if (pending_blocks == 0 && file_symbols == 0 && global_symbols == 0)
+    {
+      free (line_vector);
+      line_vector = 0;
+      line_vector_length = -1;
+      last_source_file = 0;
+      return;
+    }
+
+  /* Create the two top-level blocks for this file.  */
   finish_block (0, &file_symbols, 0, cur_src_start_addr, cur_src_end_addr);
   finish_block (0, &global_symbols, 0, cur_src_start_addr, cur_src_end_addr);
+
+  /* Create the blockvector that points to all the file's blocks.  */
   blockvector = make_blockvector ();
 
-  /* Now create the symtab object this source file.  */
-
+  /* Now create the symtab object for this source file.  */
   symtab = (struct symtab *) xmalloc (sizeof (struct symtab));
   symtab->free_ptr = 0;
 
@@ -460,7 +478,8 @@ end_symtab ()
   lv = line_vector;
   lv->nitems = line_vector_index;
   symtab->linetable = (struct linetable *)
-    xrealloc (lv, sizeof (struct linetable) + lv->nitems * sizeof (int));
+    xrealloc (lv, (sizeof (struct linetable)
+		   + lv->nitems * sizeof (struct linetable_entry)));
   symtab->nlines = 0;
   symtab->line_charpos = 0;
 
@@ -468,6 +487,7 @@ end_symtab ()
   symtab->next = symtab_list;
   symtab_list = symtab;
 
+  /* Reinitialize for beginning of new file. */
   line_vector = 0;
   line_vector_length = -1;
   last_source_file = 0;
@@ -524,6 +544,21 @@ record_misc_function (name, address)
   misc_bunch_index++;
   misc_count++;
 }
+
+/* if we see a function symbol, we do record_misc_function.
+ * however, if it turns out the next symbol is '.bf', then
+ * we call here to undo the misc definition
+ */
+static void
+unrecord_misc_function ()
+{
+  if (misc_bunch_index == 0)
+    error ("Internal error processing symbol table, at symbol %d.",
+	   symnum);
+  misc_bunch_index--;
+  misc_count--;
+}
+
 
 static int
 compare_misc_functions (fn1, fn2)
@@ -621,8 +656,9 @@ sort_syms ()
       for (i = 0; i < nbl; i++)
 	{
 	  b = BLOCKVECTOR_BLOCK (bv, i);
-	  qsort (&BLOCK_SYM (b, 0), BLOCK_NSYMS (b),
-		 sizeof (struct symbol *), compare_symbols);
+	  if (BLOCK_SHOULD_SORT (b))
+		  qsort (&BLOCK_SYM (b, 0), BLOCK_NSYMS (b),
+			 sizeof (struct symbol *), compare_symbols);
 	}
     }
 }
@@ -648,6 +684,9 @@ symbol_file_command (name)
     {
       if (symtab_list && !query ("Discard symbol table? ", 0))
 	error ("Not confirmed.");
+      if (symfile)
+	free (symfile);
+      symfile = 0;
       free_all_symtabs ();
       return;
     }
@@ -689,6 +728,8 @@ symbol_file_command (name)
   /* Throw away the old symbol table.  */
 
   free_all_symtabs ();
+  free_all_psymtabs ();		/* Make sure that partial_symtab_list */
+				/* is 0 also. */
 
   num_sections = file_hdr.f_nscns;
   symtab_offset = file_hdr.f_symptr;
@@ -783,23 +824,35 @@ read_coff_symtab (desc, nsyms)
      int desc;
      int nsyms;
 {
-  FILE *stream = fdopen (desc, "r");
+  int newfd;			/* Avoid multiple closes on same desc */
+  FILE *stream; 
   register struct context_stack *new;
   struct coff_symbol coff_symbol;
   register struct coff_symbol *cs = &coff_symbol;
   static SYMENT main_sym;
   static AUXENT main_aux;
+  struct coff_symbol fcn_cs_saved;
+  static SYMENT fcn_sym_saved;
+  static AUXENT fcn_aux_saved;
 
   int num_object_files = 0;
-  int next_file_symnum;
+  int next_file_symnum = -1;
   char *filestring;
   int depth;
   int fcn_first_line;
   int fcn_last_line;
+  int fcn_start_addr;
   long fcn_line_ptr;
   struct cleanup *old_chain;
+  int fclose();
+
+  newfd = dup (desc);
+  if (newfd == -1)
+    fatal ("Too many open files");
+  stream = fdopen (newfd, "r");
 
   old_chain = make_cleanup (free_all_symtabs, 0);
+  make_cleanup (fclose, stream);
   nlist_stream_global = stream;
   nlist_nsyms_global = nsyms;
   last_source_file = 0;
@@ -835,26 +888,19 @@ read_coff_symtab (desc, nsyms)
       if (!last_source_file && cs->c_type != T_NULL && cs->c_secnum == N_DEBUG)
 	complete_symtab (filestring, 0, 0);
 
-      if (ISFCN (cs->c_type))
+      /* Typedefs should not be treated as symbol definitions.  */
+      if (ISFCN (cs->c_type) && cs->c_sclass != C_TPDEF)
 	{
-	  /*
-	   * gdb expects all functions to also be in misc_function
-	   * list -- why not...
+	  /* record as misc function.  if we get '.bf' next,
+	   * then we undo this step
 	   */
 	  record_misc_function (cs->c_name, cs->c_value);
 
 	  fcn_line_ptr = main_aux.x_sym.x_fcnary.x_fcn.x_lnnoptr;
-	  within_function = 1;
-
-	  new = (struct context_stack *)
-		    xmalloc (sizeof (struct context_stack));
-	  new->depth = depth = 0;
-	  new->next = 0;
-	  context_stack = new;
-	  new->locals = 0;
-	  new->old_blocks = pending_blocks;
-	  new->start_addr = cs->c_value;
-	  new->name = process_coff_symbol (cs, &main_aux);
+	  fcn_start_addr = cs->c_value;
+	  fcn_cs_saved = *cs;
+	  fcn_sym_saved = main_sym;
+	  fcn_aux_saved = main_aux;
 	  continue;
 	}
 
@@ -889,79 +935,84 @@ read_coff_symtab (desc, nsyms)
 	    num_object_files++;
 	    break;
 
+          case C_STAT:
+	    if (cs->c_name[0] == '.') {
+		    if (strcmp (cs->c_name, _TEXT) == 0) {
+			    if (num_object_files == 1) {
+				    /* last address of startup file */
+				    first_object_file_end = cs->c_value +
+					    main_aux.x_scn.x_scnlen;
+			    }
+			    /* for some reason the old code didn't do
+			     * this if this section entry had
+			     * main_aux.x_scn.x_nlinno equal to 0
+			     */
+			    complete_symtab (filestring, cs->c_value,
+					     main_aux.x_scn.x_scnlen);
+		    }
+		    /* flush rest of '.' symbols */
+		    break;
+	    }
+	    /* fall in for static symbols that don't start with '.' */
 	  case C_EXT:
-	    if (cs->c_secnum == N_ABS && strcmp (cs->c_name, _ETEXT) == 0)
-	      {
-		end_of_text_addr = cs->c_value;
-	      }
-	    if (cs->c_type == T_NULL)
-	      {
-		if (cs->c_secnum <= 1)	/* text or abs */
-		  {
-		    record_misc_function (cs->c_name, cs->c_value);
-		    break;
-		  }
-		else
-		  cs->c_type = T_INT;
-	      }
-	    (void) process_coff_symbol (cs, &main_aux);
-	    break;
-
-	  case C_STAT:
-	    if (cs->c_type == T_NULL && cs->c_secnum > N_UNDEF)
-	      {
-		if (strcmp (cs->c_name, _TEXT) == 0)
-		  {
-		    if (num_object_files == 1)
-		      {
-			/* Record end address of first file, crt0.s */
-			first_object_file_end =
-			    cs->c_value + main_aux.x_scn.x_scnlen;
-		      }
-		    /*
-		     * Fill in missing information for debugged 
-		     * object file only if we have line number info.
-		     */
-		    if (main_aux.x_scn.x_nlinno > 0)
-		      {
-			complete_symtab (filestring, cs->c_value,
-					  main_aux.x_scn.x_scnlen);
-		      }
-		    break;
-		  }
-		else if (strcmp (cs->c_name, _DATA) == 0)
-		  break;
-		else if (strcmp (cs->c_name, _BSS) == 0)
-		  break;
-
-		/* get rid of assembly labels here */
-		/* record_misc_function (cs->c_name, cs->c_value); */
-		break;
-	      }
+	    if (cs->c_sclass == C_EXT &&
+		cs->c_secnum == N_ABS &&
+		strcmp (cs->c_name, _ETEXT) == 0)
+		    end_of_text_addr = cs->c_value;
+	    if (cs->c_type == T_NULL) {
+		    if (cs->c_secnum <= 1) {	/* text or abs */
+			    record_misc_function (cs->c_name, cs->c_value);
+			    break;
+		    } else {
+			    cs->c_type = T_INT;
+		    }
+	    }
 	    (void) process_coff_symbol (cs, &main_aux);
 	    break;
 
 	  case C_FCN:
 	    if (strcmp (cs->c_name, ".bf") == 0)
 	      {
+		unrecord_misc_function ();
+
+		within_function = 1;
+
 		/* value contains address of first non-init type code */
 		/* main_aux.x_sym.x_misc.x_lnsz.x_lnno
 			    contains line number of '{' } */
 		fcn_first_line = main_aux.x_sym.x_misc.x_lnsz.x_lnno;
+
+		new = (struct context_stack *)
+		  xmalloc (sizeof (struct context_stack));
+		new->depth = depth = 0;
+		new->next = 0;
+		context_stack = new;
+		new->locals = 0;
+		new->old_blocks = pending_blocks;
+		new->start_addr = fcn_start_addr;
+		fcn_cs_saved.c_name = getsymname (&fcn_sym_saved);
+		new->name = process_coff_symbol (&fcn_cs_saved,
+						 &fcn_aux_saved);
 	      }
 	    else if (strcmp (cs->c_name, ".ef") == 0)
 	      {
-		/* value contains address of exit/return from function */
-			/* round it up to next multiple of 16 */
-		cs->c_value = (cs->c_value + 15) & -16;
+		      /* the value of .ef is the address of epilogue code;
+		       * not useful for gdb
+		       */
 		/* { main_aux.x_sym.x_misc.x_lnsz.x_lnno
 			    contains number of lines to '}' */
 		fcn_last_line = main_aux.x_sym.x_misc.x_lnsz.x_lnno;
 		enter_linenos (fcn_line_ptr, fcn_first_line, fcn_last_line);
-
 		new = context_stack;
+
+		if (new == 0)
+		  error ("Invalid symbol data; .bf/.ef/.bb/.eb symbol mismatch, at symbol %d.",
+			 symnum);
+		
 		finish_block (new->name, &local_symbols, new->old_blocks,
-			      new->start_addr, cs->c_value);
+			      new->start_addr,
+			      fcn_cs_saved.c_value +
+			          fcn_aux_saved.x_sym.x_misc.x_fsize);
 		context_stack = 0;
 		within_function = 0;
 		free (new);
@@ -987,7 +1038,8 @@ read_coff_symtab (desc, nsyms)
 	      {
 		new = context_stack;
 		if (new == 0 || depth != new->depth)
-		  error ("Invalid symbol data: .bb/.eb symbol mismatch.");
+		  error ("Invalid symbol data: .bb/.eb symbol mismatch at symbol %d.",
+			 symnum);
 		if (local_symbols && context_stack->next)
 		  {
 		    /* Make a block for the local symbols within.  */
@@ -1027,12 +1079,25 @@ read_file_hdr (chan, file_hdr)
 
   switch (file_hdr->f_magic)
     {
+#ifdef NS32GMAGIC
       case NS32GMAGIC:
       case NS32SMAGIC:
+#endif
+#ifdef I386MAGIC
+    case I386MAGIC:
+#endif
 	return file_hdr->f_nsyms;
 
+
       default:
+#ifdef BADMAG
+	if (BADMAG(file_hdr))
+	    return -1;
+	else
+	    return file_hdr->f_nsyms;
+#else
 	return -1;
+#endif
     }
 }
 
@@ -1107,15 +1172,22 @@ init_stringtab (chan, offset)
   long buffer;
   int val;
 
+  if (stringtab)
+    {
+      free (stringtab);
+      stringtab = NULL;
+    }
+
   if (lseek (chan, offset, 0) < 0)
     return -1;
 
   val = myread (chan, (char *)&buffer, sizeof buffer);
-  if (val != sizeof buffer)
-    return -1;
 
-  if (stringtab)
-    free (stringtab);
+  /* If no string table is needed, then the file may end immediately
+     after the symbols.  Just return with `stringtab' set to null. */
+  if (val != sizeof buffer || buffer == 0)
+    return 0;
+
   stringtab = (char *) xmalloc (buffer);
   if (stringtab == NULL)
     return -1;
@@ -1166,9 +1238,11 @@ getfilename (aux_entry)
   char *result;
   extern char *rindex ();
 
+#ifndef COFF_NO_LONG_FILE_NAMES
   if (aux_entry->x_file.x_foff != 0)
     strcpy (buffer, stringtab + aux_entry->x_file.x_foff);
   else
+#endif
     {
       strncpy (buffer, aux_entry->x_file.x_fname, FILNMLEN);
       buffer[FILNMLEN] = '\0';
@@ -1365,8 +1439,8 @@ process_coff_symbol (cs, aux)
 
   if (ISFCN (cs->c_type))
     {
-      SYMBOL_TYPE (sym) 
-	= lookup_function_type (decode_function_type (cs, cs->c_type, aux));
+      SYMBOL_TYPE (sym) = 
+	lookup_function_type (decode_function_type (cs, cs->c_type, aux));
       SYMBOL_CLASS (sym) = LOC_BLOCK;
       if (cs->c_sclass == C_STAT)
 	add_symbol_to_list (sym, &file_symbols);
@@ -1571,8 +1645,8 @@ decode_base_type (cs, c_type, aux)
   switch (c_type)
     {
       case T_NULL:
-	/* shouldn't show up here */
-	break;
+        /* shows up with "void (*foo)();" structure members */
+	return builtin_type_void;
 
       case T_ARG:
 	/* shouldn't show up here */
@@ -1691,12 +1765,13 @@ read_struct_type (index, length, lastsym)
   register struct coff_symbol *ms = &member_sym;
   SYMENT sub_sym;
   AUXENT sub_aux;
+  int done = 0;
 
   type = coff_alloc_type (index);
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
   TYPE_LENGTH (type) = length;
 
-  while (symnum < lastsym && symnum < nlist_nsyms_global)
+  while (!done && symnum < lastsym && symnum < nlist_nsyms_global)
     {
       read_one_sym (ms, &sub_sym, &sub_aux);
       name = ms->c_name;
@@ -1736,6 +1811,7 @@ read_struct_type (index, length, lastsym)
 	    break;
 
 	  case C_EOS:
+	    done = 1;
 	    break;
 	}
     }
@@ -1829,23 +1905,48 @@ read_enum_type (index, length, lastsym)
     {
       SYMBOL_TYPE (syms->symbol) = type;
       TYPE_FIELD_NAME (type, --n) = SYMBOL_NAME (syms->symbol);
-      TYPE_FIELD_VALUE (type, n) = SYMBOL_VALUE (syms->symbol);
-      TYPE_FIELD_BITPOS (type, n) = 0;
+      TYPE_FIELD_VALUE (type, n) = 0;
+      TYPE_FIELD_BITPOS (type, n) = SYMBOL_VALUE (syms->symbol);
       TYPE_FIELD_BITSIZE (type, n) = 0;
     }
   return type;
 }
 
-static
-initialize ()
+/* This function is really horrible, but to avoid it, there would need
+   to be more filling in of forward references.  THIS SHOULD BE MOVED
+   OUT OF COFFREAD.C AND DBXREAD.C TO SOME PLACE WHERE IT CAN BE SHARED. */
+int
+fill_in_vptr_fieldno (type)
+     struct type *type;
+{
+  if (TYPE_VPTR_FIELDNO (type) < 0)
+    TYPE_VPTR_FIELDNO (type) =
+      fill_in_vptr_fieldno (TYPE_BASECLASS (type, 1));
+  return TYPE_VPTR_FIELDNO (type);
+}
+
+/* partial symbol tables are not implemented in coff, therefore
+   block_for_pc() (and others) will never decide to call this. */
+
+extern struct symtab *
+psymtab_to_symtab ()
+{
+  fatal ("error: Someone called psymtab_to_symtab\n");
+}
+
+/* These will stay zero all the time */
+struct partial_symbol *global_psymbols, *static_psymbols;
+
+_initialize_coff ()
 {
   symfile = 0;
+
+  static_psymbols = global_psymbols = (struct partial_symbol *) 0;
 
   add_com ("symbol-file", class_files, symbol_file_command,
 	   "Load symbol table (in coff format) from executable file FILE.");
 }
 
-END_FILE
 
 #endif /* COFF_FORMAT */
 

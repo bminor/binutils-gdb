@@ -21,6 +21,7 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include <stdio.h>
 #include <signal.h>
 #include <sys/ioctl.h>
+#include <sys/param.h>
 #include "defs.h"
 #include "param.h"
 #ifdef HAVE_TERMIO
@@ -95,6 +96,24 @@ discard_cleanups (old_chain)
       cleanup_chain = ptr->next;
       free (ptr);
     }
+}
+
+/* Set the cleanup_chain to 0, and return the old cleanup chain.  */
+struct cleanup *
+save_cleanups ()
+{
+  struct cleanup *old_chain = cleanup_chain;
+
+  cleanup_chain = 0;
+  return old_chain;
+}
+
+/* Restore the cleanup chain from a previously saved chain.  */
+void
+restore_cleanups (chain)
+     struct cleanup *chain;
+{
+  cleanup_chain = chain;
 }
 
 /* This function is useful for cleanups.
@@ -201,6 +220,7 @@ quit ()
 #else /* not HAVE_TERMIO */
   ioctl (fileno (stdout), TIOCFLUSH, 0);
 #endif /* not HAVE_TERMIO */
+
 #ifdef TIOCGPGRP
   error ("Quit");
 #else
@@ -214,6 +234,12 @@ void
 request_quit ()
 {
   quit_flag = 1;
+
+#ifdef USG
+  /* Restore the signal handler */
+  signal(SIGINT, request_quit);
+#endif
+
   if (immediate_quit)
     quit ();
 }
@@ -435,3 +461,196 @@ printchar (ch, stream, quoter)
       fputc (c, stream);
     }
 }
+
+
+#ifdef USG
+bcopy (from, to, count)
+char *from, *to;
+{
+	memcpy (to, from, count);
+}
+
+bcmp (from, to, count)
+{
+	return (memcmp (to, from, count));
+}
+
+bzero (to, count)
+char *to;
+{
+	while (count--)
+		*to++ = 0;
+}
+
+getwd (buf)
+char *buf;
+{
+  getcwd (buf, MAXPATHLEN);
+}
+
+char *
+index (s, c)
+     char *s;
+{
+  char *strchr ();
+  return strchr (s, c);
+}
+
+char *
+rindex (s, c)
+     char *s;
+{
+  char *strrchr ();
+  return strrchr (s, c);
+}
+
+/* Queue routines */
+
+struct queue {
+	struct queue *forw;
+	struct queue *back;
+};
+
+insque (item, after)
+struct queue *item;
+struct queue *after;
+{
+	item->forw = after->forw;
+	after->forw->back = item;
+
+	item->back = after;
+	after->forw = item;
+}
+
+remque (item)
+struct queue *item;
+{
+	item->forw->back = item->back;
+	item->back->forw = item->forw;
+}
+
+
+/*
+ * There is too much variation in Sys V signal numbers and names, so
+ * we must initialize them at runtime.  If C provided a way to initialize
+ * an array based on subscript and value, this would not be necessary.
+ */
+static char undoc[] = "(undocumented)";
+
+char *sys_siglist[NSIG];
+
+_initialize_utils()
+{
+	int i;
+	
+	for (i = 0; i < NSIG; i++)
+		sys_siglist[i] = undoc;
+
+#ifdef SIGHUP
+	sys_siglist[SIGHUP	] = "SIGHUP";
+#endif
+#ifdef SIGINT
+	sys_siglist[SIGINT	] = "SIGINT";
+#endif
+#ifdef SIGQUIT
+	sys_siglist[SIGQUIT	] = "SIGQUIT";
+#endif
+#ifdef SIGILL
+	sys_siglist[SIGILL	] = "SIGILL";
+#endif
+#ifdef SIGTRAP
+	sys_siglist[SIGTRAP	] = "SIGTRAP";
+#endif
+#ifdef SIGIOT
+	sys_siglist[SIGIOT	] = "SIGIOT";
+#endif
+#ifdef SIGEMT
+	sys_siglist[SIGEMT	] = "SIGEMT";
+#endif
+#ifdef SIGFPE
+	sys_siglist[SIGFPE	] = "SIGFPE";
+#endif
+#ifdef SIGKILL
+	sys_siglist[SIGKILL	] = "SIGKILL";
+#endif
+#ifdef SIGBUS
+	sys_siglist[SIGBUS	] = "SIGBUS";
+#endif
+#ifdef SIGSEGV
+	sys_siglist[SIGSEGV	] = "SIGSEGV";
+#endif
+#ifdef SIGSYS
+	sys_siglist[SIGSYS	] = "SIGSYS";
+#endif
+#ifdef SIGPIPE
+	sys_siglist[SIGPIPE	] = "SIGPIPE";
+#endif
+#ifdef SIGALRM
+	sys_siglist[SIGALRM	] = "SIGALRM";
+#endif
+#ifdef SIGTERM
+	sys_siglist[SIGTERM	] = "SIGTERM";
+#endif
+#ifdef SIGUSR1
+	sys_siglist[SIGUSR1	] = "SIGUSR1";
+#endif
+#ifdef SIGUSR2
+	sys_siglist[SIGUSR2	] = "SIGUSR2";
+#endif
+#ifdef SIGCLD
+	sys_siglist[SIGCLD	] = "SIGCLD";
+#endif
+#ifdef SIGCHLD
+	sys_siglist[SIGCHLD	] = "SIGCHLD";
+#endif
+#ifdef SIGPWR
+	sys_siglist[SIGPWR	] = "SIGPWR";
+#endif
+#ifdef SIGTSTP
+	sys_siglist[SIGTSTP	] = "SIGTSTP";
+#endif
+#ifdef SIGTTIN
+	sys_siglist[SIGTTIN	] = "SIGTTIN";
+#endif
+#ifdef SIGTTOU
+	sys_siglist[SIGTTOU	] = "SIGTTOU";
+#endif
+#ifdef SIGSTOP
+	sys_siglist[SIGSTOP	] = "SIGSTOP";
+#endif
+#ifdef SIGXCPU
+	sys_siglist[SIGXCPU	] = "SIGXCPU";
+#endif
+#ifdef SIGXFSZ
+	sys_siglist[SIGXFSZ	] = "SIGXFSZ";
+#endif
+#ifdef SIGVTALRM
+	sys_siglist[SIGVTALRM	] = "SIGVTALRM";
+#endif
+#ifdef SIGPROF
+	sys_siglist[SIGPROF	] = "SIGPROF";
+#endif
+#ifdef SIGWINCH
+	sys_siglist[SIGWINCH	] = "SIGWINCH";
+#endif
+#ifdef SIGCONT
+	sys_siglist[SIGCONT	] = "SIGCONT";
+#endif
+#ifdef SIGURG
+	sys_siglist[SIGURG	] = "SIGURG";
+#endif
+#ifdef SIGIO
+	sys_siglist[SIGIO	] = "SIGIO";
+#endif
+#ifdef SIGWIND
+	sys_siglist[SIGWIND	] = "SIGWIND";
+#endif
+#ifdef SIGPHONE
+	sys_siglist[SIGPHONE	] = "SIGPHONE";
+#endif
+#ifdef SIGPOLL
+	sys_siglist[SIGPOLL	] = "SIGPOLL";
+#endif
+}
+#endif /* USG */
+

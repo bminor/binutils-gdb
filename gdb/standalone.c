@@ -31,14 +31,12 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #endif /* SIGTSTP and SIGIO defined (must be 4.2) */
 
 #include "defs.h"
-#include "initialize.h"
 #include "param.h"
 #include "symtab.h"
 #include "frame.h"
 #include "inferior.h"
 #include "wait.h"
 
-START_FILE
 
 /* Random system calls, mostly no-ops to prevent link problems  */
 
@@ -582,8 +580,7 @@ char heap[HEAP_SIZE] = {0};
 int kdb_stack_beg[STACK_SIZE / sizeof (int)];
 int kdb_stack_end;
 
-static
-initialize ()
+_initialize_standalone ()
 {
   register char *next;
 
@@ -603,4 +600,3 @@ initialize ()
   memory_limit = heap + sizeof heap;
 }
 
-END_FILE

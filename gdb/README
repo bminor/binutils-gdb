@@ -1,15 +1,10 @@
 This is GDB, a source-level debugger intended for GNU,
 presently running under un*x.
 
-Before compiling GDB, you must set up links to four files according to
+Before compiling GDB, you must set up links to five files according to
 the kind of machine you are running on.  To do this, type `config.gdb
 machine', where machine is something like `vax' or `sun2'.  This
-creates links named `param.h', `m-init.h', `opcode.h', and `pinsn.c'.
-(Note: we lack information on certain machines.)
-
-Also, `Makefile' must be changed to say `OBSTACK = obstack.o' instead
-of `OBSTACK=-lobstack' (unless you want to install obstack.o as
-/lib/libobstack.a).
+creates links named `param.h', `opcode.h', `pinsn.c', and `infdep.c'.
 
 Once these files are set up, just `make' will do everything,
 producing an executable `gdb' in this directory.
@@ -21,12 +16,52 @@ m-<machine>.h
 This file contains macro definitions that express information
 about the machine's registers, stack frame format and instructions.
 
-m-<machine>init.h
-
-This file defines one macro, which says how to round up from the
-address of the end of the text of one .o file to the beginning of
-the text of the next .o file.
-
 <machine>-opcode.h, <machine>-pinsn.c
 These files contain the information necessary to print instructions
 for your cpu type.
+
+<machine>-dep.c
+Those routines which provide a low level interface to ptrace and which
+tend to be machine-dependent.  (The machine-independent routines are in
+`infrun.c' and `inflow.c')
+
+About debugging gdb with itself...
+
+You probably want to do a "make TAGS" after you configure your
+distribution; this will put the machine dependent routines for your
+local machine where they will be accessed first by a M-period .
+
+Also, you want to make sure that gdb is not compiled with shared
+libraries on the Sun 4.  And you want to make sure that you've
+compiled gdb with your local cc or taken appropriate precautions
+regarding ansification of include files.  See the Makefile for more
+information. 
+
+The "info" command, when executed without a subcommand in a gdb being
+debugged by gdb, will pop you back up to the top level gdb.  See
+.gdbinit for more details.
+
+About languages other than C...
+
+C++ support has been integrated into gdb; it works, but somewhat
+buggily.  Pascal support has not yet been integrated in gdb; the work
+is being done.
+
+About reporting bugs...
+
+The correct address for reporting bugs found with gdb is
+"bug-gdb@prep.ai.mit.edu".  Please send all bugs to that address.
+
+About xgdb...
+
+xgdb.c was provided to us by the user community; it is not an integral
+part of the gdb distribution.  The problem of providing visual
+debugging support on top of gdb is peripheral to the GNU project and
+(at least right now) we can't afford to put time into it.  So while we
+will be happy to incorporate user fixes to xgdb.c, we do not guarantee
+that it will work and we will not fix bugs reported in it.
+
+For those intersted in auto display of source and the availability of
+an editor while debugging I suggest trying gdb-mode in gnu-emacs.
+Comments on this mode are welcome.
+

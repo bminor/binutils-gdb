@@ -17,24 +17,35 @@ notice and this notice must be preserved on all copies.
 In other words, go ahead and share GDB, but don't try to stop
 anyone else from sharing it farther.  Help stamp out software hoarding!
 */
+#include "defs.h"
+#include "command.h"
+#include "param.h"
+
+#ifdef USG
+#include <sys/types.h>
+#include <unistd.h>
+#endif
 
 #include <sys/file.h>
 #include <stdio.h>
 #include <setjmp.h>
 #include <signal.h>
 #include <sys/param.h>
-#include "defs.h"
-#include "command.h"
-#include "param.h"
 
 #ifdef SET_STACK_LIMIT_HUGE
 #include <sys/time.h>
 #include <sys/resource.h>
+
+int original_stack_limit;
 #endif
 
 /* Version number of GDB, as a string.  */
 
 extern char *version;
+
+/*
+ * Declare all cmd_list_element's
+ */
 
 /* Chain containing all defined commands.  */
 
@@ -43,6 +54,26 @@ struct cmd_list_element *cmdlist;
 /* Chain containing all defined info subcommands.  */
 
 struct cmd_list_element *infolist;
+
+/* Chain containing all defined enable subcommands. */
+
+struct cmd_list_element *enablelist;
+
+/* Chain containing all defined disable subcommands. */
+
+struct cmd_list_element *disablelist;
+
+/* Chain containing all defined delete subcommands. */
+
+struct cmd_list_element *deletelist;
+
+/* Chain containing all defined "enable breakpoint" subcommands. */
+
+struct cmd_list_element *enablebreaklist;
+
+/* Chain containing all defined set subcommands */
+
+struct cmd_list_element *setlist;
 
 /* stdio stream that command input is being read from.  */
 
@@ -59,12 +90,6 @@ static char dirbuf[MAXPATHLEN];
 
 int inhibit_windows = 0;
 
-/* Hook for window manager argument parsing.  */
-
-int *win_argc;
-char **win_argv;
-char *win_prgm;
-
 /* Function to call before reading a command, if nonzero.
    The function receives two args: an input stream,
    and a prompt string.  */
@@ -74,11 +99,12 @@ void (*window_hook) ();
 extern int frame_file_full_name;
 
 void free_command_lines ();
-char *read_line ();
-static void initialize_main ();
+char *gdb_read_line ();
+static void init_main ();
+static void init_cmd_lists ();
 void command_loop ();
 static void source_command ();
-void print_gdb_version ();
+static void print_gdb_version ();
 
 /* gdb prints this when reading a command interactively */
 static char *prompt;
@@ -93,6 +119,7 @@ int linesize;
 
 jmp_buf to_top_level;
 
+void
 return_to_top_level ()
 {
   quit_flag = 0;
@@ -117,6 +144,9 @@ catch_errors (func, arg, errstring)
 {
   jmp_buf saved;
   int val;
+  struct cleanup *saved_cleanup_chain;
+
+  saved_cleanup_chain = save_cleanups ();
 
   bcopy (to_top_level, saved, sizeof (jmp_buf));
 
@@ -127,6 +157,8 @@ catch_errors (func, arg, errstring)
       fprintf (stderr, "%s\n", errstring);
       val = 0;
     }
+
+  restore_cleanups (saved_cleanup_chain);
 
   bcopy (saved, to_top_level, sizeof (jmp_buf));
   return val;
@@ -142,6 +174,23 @@ disconnect ()
   kill (getpid (), SIGHUP);
 }
 
+/* Clean up on error during a "source" command (or execution of a
+   user-defined command).
+   Close the file opened by the command
+   and restore the previous input stream.  */
+
+static void
+source_cleanup (stream)
+     FILE *stream;
+{
+  /* Instream may be 0; set to it when executing user-defined command. */
+  if (instream)
+    fclose (instream);
+  instream = stream;
+}
+
+
+int
 main (argc, argv, envp)
      int argc;
      char **argv;
@@ -162,10 +211,6 @@ main (argc, argv, envp)
   getwd (dirbuf);
   current_directory = dirbuf;
 
-  win_argc = &argc;
-  win_argv = argv;
-  win_prgm = argv[0];
-
 #ifdef SET_STACK_LIMIT_HUGE
   {
     struct rlimit rlim;
@@ -173,6 +218,7 @@ main (argc, argv, envp)
     /* Set the stack limit huge so that alloca (particularly stringtab
      * in dbxread.c) does not fail. */
     getrlimit (RLIMIT_STACK, &rlim);
+    original_stack_limit = rlim.rlim_cur;
     rlim.rlim_cur = rlim.rlim_max;
     setrlimit (RLIMIT_STACK, &rlim);
   }
@@ -198,8 +244,9 @@ main (argc, argv, envp)
 
   /* Run the init function of each source file */
 
-  initialize_all_files ();
-  initialize_main ();		/* But that omits this file!  Do it now */
+  init_cmd_lists ();	/* This needs to be done first */
+  init_all_files ();
+  init_main ();		/* But that omits this file!  Do it now */
 
   signal (SIGINT, request_quit);
   signal (SIGQUIT, SIG_IGN);
@@ -351,17 +398,25 @@ execute_command (p, from_tty)
 	error ("That is not a command, just a help topic.");
       else if (c->class == (int) class_user)
 	{
+	  struct cleanup *old_chain;
+	  
 	  if (*p)
 	    error ("User-defined commands cannot take arguments.");
 	  cmdlines = (struct command_line *) c->function;
 	  if (cmdlines == (struct command_line *) 0)
 	    /* Null command */
 	    return;
+
+	  /* Set the instream to 0, indicating execution of a
+	     user-defined function.  */
+	  old_chain =  make_cleanup (source_cleanup, instream);
+	  instream = (FILE *) 0;
 	  while (cmdlines)
 	    {
 	      execute_command (cmdlines->line, 0);
 	      cmdlines = cmdlines->next;
 	    }
+	  do_cleanups (old_chain);
 	}
       else
 	/* Pass null arg rather than an empty one.  */
@@ -382,16 +437,14 @@ command_loop ()
   struct cleanup *old_chain;
   while (!feof (instream))
     {
-      if (instream == stdin)
-	printf ("%s", prompt);
-      fflush (stdout);
-
       if (window_hook && instream == stdin)
 	(*window_hook) (instream, prompt);
 
       quit_flag = 0;
       old_chain = make_cleanup (do_nothing, 0);
-      execute_command (read_line (instream == stdin), instream == stdin);
+      execute_command (gdb_read_line (instream == stdin ? prompt : 0,
+				      instream == stdin),
+		       instream == stdin);
       /* Do any commands attached to breakpoint we stopped at.  */
       do_breakpoint_commands ();
       do_cleanups (old_chain);
@@ -428,7 +481,8 @@ dont_repeat ()
    Returns the address of the start of the line.  */
 
 char *
-read_line (repeat)
+gdb_read_line (prompt, repeat)
+     char *prompt;
      int repeat;
 {
   register char *p = line;
@@ -443,6 +497,12 @@ read_line (repeat)
   signal (SIGTSTP, stop_sig);
 #endif
 
+  if (prompt)
+    {
+      printf (prompt);
+      fflush (stdout);
+    }
+  
   while (1)
     {
       c = fgetc (instream);
@@ -504,7 +564,7 @@ read_command_lines ()
   while (1)
     {
       dont_repeat ();
-      p = read_line (1);
+      p = gdb_read_line (0, 1);
       /* Remove leading and trailing blanks.  */
       while (*p == ' ' || *p == '\t') p++;
       p1 = p + strlen (p);
@@ -568,7 +628,7 @@ add_info (name, fun, doc)
      void (*fun) ();
      char *doc;
 {
-  add_cmd (name, 0, fun, doc, &infolist);
+  add_cmd (name, no_class, fun, doc, &infolist);
 }
 
 /* Add an alias to the list of info subcommands.  */
@@ -589,7 +649,7 @@ static void
 info_command ()
 {
   printf ("\"info\" must be followed by the name of an info command.\n");
-  help_cmd (0, infolist, "info ", -1, stdout);
+  help_list (infolist, "info ", -1, stdout);
 }
 
 /* Add an element to the list of commands.  */
@@ -628,7 +688,7 @@ help_command (command, from_tty)
      char *command;
      int from_tty; /* Ignored */
 {
-  help_cmd (command, cmdlist, "", -2, stdout);
+  help_cmd (command, stdout);
 }
 
 static void
@@ -675,9 +735,11 @@ define_command (comname, from_tty)
     }
 
   if (from_tty)
-    printf ("Type commands for definition of \"%s\".\n\
+    {
+      printf ("Type commands for definition of \"%s\".\n\
 End with a line saying just \"end\".\n", comname);
-
+      fflush (stdout);
+    }
   comname = savestring (comname, strlen (comname));
 
   cmds = read_command_lines ();
@@ -760,7 +822,7 @@ if you want it, that you can change GDB or use pieces of it in new\n\
 free programs, and that you know you can do these things.\n\
 --Type Return to print more--");
   fflush (stdout);
-  read_line ();
+  gdb_read_line (0, 0);
 
   printf ("\
   To make sure that everyone has such rights, we have to forbid you to\n\
@@ -780,7 +842,7 @@ Inc.) make the following terms which say what you must do to be\n\
 allowed to distribute or change GDB.\n\
 --Type Return to print more--");
   fflush (stdout);
-  read_line ();
+  gdb_read_line (0, 0);
 
   printf ("\
 			COPYING POLICIES\n\
@@ -803,7 +865,7 @@ Paragraph 1 above, provided that you also do the following:\n\
     that you changed the files and the date of any change; and\n\
 --Type Return to print more--");
   fflush (stdout);
-  read_line ();
+  gdb_read_line (0, 0);
 
   printf ("\
     b) cause the whole of any work that you distribute or publish,\n\
@@ -832,7 +894,7 @@ derivative) on a volume of a storage or distribution medium does not bring\n\
 the other program under the scope of these terms.\n\
 --Type Return to print more--");
   fflush (stdout);
-  read_line ();
+  gdb_read_line (0, 0);
 
   printf ("\
   3. You may copy and distribute GDB (or a portion or derivative of it,\n\
@@ -861,7 +923,7 @@ source code for modules which are standard libraries that accompany the\n\
 operating system on which the executable file runs.\n\
 --Type Return to print more--");
   fflush (stdout);
-  read_line ();
+  gdb_read_line (0, 0);
 
   printf ("\
   4. You may not copy, sublicense, distribute or transfer GDB\n\
@@ -872,6 +934,8 @@ automatically terminated.  However, parties who have received computer\n\
 software programs from you with this License Agreement will not have\n\
 their licenses terminated so long as such parties remain in full compliance.\n\
 \n\
+");
+  printf ("\
   5. If you wish to incorporate parts of GDB into other free\n\
 programs whose distribution conditions are different, write to the Free\n\
 Software Foundation at 675 Mass Ave, Cambridge, MA 02139.  We have not yet\n\
@@ -1079,18 +1143,6 @@ cd_command (dir, from_tty)
     pwd_command ((char *) 0, 1);
 }
 
-/* Clean up on error during a "source" command.
-   Close the file opened by the command
-   and restore the previous input stream.  */
-
-static void
-source_cleanup (stream)
-     FILE *stream;
-{
-  fclose (instream);
-  instream = stream;
-}
-
 static void
 source_command (file)
      char *file;
@@ -1151,9 +1203,21 @@ dump_me_command ()
 }
 
 static void
-initialize_main ()
+init_cmd_lists ()
 {
-  prompt = savestring ("(gdb+) ", 7);
+  cmdlist = (struct cmd_list_element *) 0;
+  infolist = (struct cmd_list_element *) 0;
+  enablelist = (struct cmd_list_element *) 0;
+  disablelist = (struct cmd_list_element *) 0;
+  deletelist = (struct cmd_list_element *) 0;
+  enablebreaklist = (struct cmd_list_element *) 0;
+  setlist = (struct cmd_list_element *) 0;
+}
+
+static void
+init_main ()
+{
+  prompt = savestring ("(gdb) ", 6);
 
   /* Define the classes of commands.
      They will appear in the help list in the reverse of this order.  */
@@ -1185,8 +1249,9 @@ The commands below can be used to select other frames by number or address.",
 The change does not take effect for the program being debugged\n\
 until the next time it is started.");
 
-  add_com ("set-prompt", class_support, set_prompt_command,
-	   "Change gdb's prompt from the default of \"(gdb)\"");
+  add_cmd ("prompt", class_support, set_prompt_command,
+	   "Change gdb's prompt from the default of \"(gdb)\"",
+	   &setlist);
   add_com ("echo", class_support, echo_command,
 	   "Print a constant string.  Give string as argument.\n\
 C escape sequences may be used in the argument.\n\

@@ -1,0 +1,201 @@
+/* Table of DBX symbol codes for the GNU system.
+   Copyright (C) 1988 Free Software Foundation, Inc.
+
+		       NO WARRANTY
+
+  BECAUSE THIS PROGRAM IS LICENSED FREE OF CHARGE, WE PROVIDE ABSOLUTELY
+NO WARRANTY, TO THE EXTENT PERMITTED BY APPLICABLE STATE LAW.  EXCEPT
+WHEN OTHERWISE STATED IN WRITING, FREE SOFTWARE FOUNDATION, INC,
+RICHARD M. STALLMAN AND/OR OTHER PARTIES PROVIDE THIS PROGRAM "AS IS"
+WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY
+AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD THE PROGRAM PROVE
+DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR
+CORRECTION.
+
+ IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW WILL RICHARD M.
+STALLMAN, THE FREE SOFTWARE FOUNDATION, INC., AND/OR ANY OTHER PARTY
+WHO MAY MODIFY AND REDISTRIBUTE THIS PROGRAM AS PERMITTED BELOW, BE
+LIABLE TO YOU FOR DAMAGES, INCLUDING ANY LOST PROFITS, LOST MONIES, OR
+OTHER SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE
+USE OR INABILITY TO USE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR
+DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY THIRD PARTIES OR
+A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS) THIS
+PROGRAM, EVEN IF YOU HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGES, OR FOR ANY CLAIM BY ANY OTHER PARTY.
+
+		GENERAL PUBLIC LICENSE TO COPY
+
+  1. You may copy and distribute verbatim copies of this source file
+as you receive it, in any medium, provided that you conspicuously and
+appropriately publish on each copy a valid copyright notice "Copyright
+ (C) 1988 Free Software Foundation, Inc."; and include following the
+copyright notice a verbatim copy of the above disclaimer of warranty
+and of this License.  You may charge a distribution fee for the
+physical act of transferring a copy.
+
+  2. You may modify your copy or copies of this source file or
+any portion of it, and copy and distribute such modifications under
+the terms of Paragraph 1 above, provided that you also do the following:
+
+    a) cause the modified files to carry prominent notices stating
+    that you changed the files and the date of any change; and
+
+    b) cause the whole of any work that you distribute or publish,
+    that in whole or in part contains or is a derivative of this
+    program or any part thereof, to be licensed at no charge to all
+    third parties on terms identical to those contained in this
+    License Agreement (except that you may choose to grant more extensive
+    warranty protection to some or all third parties, at your option).
+
+    c) You may charge a distribution fee for the physical act of
+    transferring a copy, and you may at your option offer warranty
+    protection in exchange for a fee.
+
+Mere aggregation of another unrelated program with this program (or its
+derivative) on a volume of a storage or distribution medium does not bring
+the other program under the scope of these terms.
+
+  3. You may copy and distribute this program or any portion of it in
+compiled, executable or object code form under the terms of Paragraphs
+1 and 2 above provided that you do the following:
+
+    a) accompany it with the complete corresponding machine-readable
+    source code, which must be distributed under the terms of
+    Paragraphs 1 and 2 above; or,
+
+    b) accompany it with a written offer, valid for at least three
+    years, to give any third party free (except for a nominal
+    shipping charge) a complete machine-readable copy of the
+    corresponding source code, to be distributed under the terms of
+    Paragraphs 1 and 2 above; or,
+
+    c) accompany it with the information you received as to where the
+    corresponding source code may be obtained.  (This alternative is
+    allowed only for noncommercial distribution and only if you
+    received the program in object code or executable form alone.)
+
+For an executable file, complete source code means all the source code for
+all modules it contains; but, as a special exception, it need not include
+source code for modules which are standard libraries that accompany the
+operating system on which the executable file runs.
+
+  4. You may not copy, sublicense, distribute or transfer this program
+except as expressly provided under this License Agreement.  Any attempt
+otherwise to copy, sublicense, distribute or transfer this program is void and
+your rights to use the program under this License agreement shall be
+automatically terminated.  However, parties who have received computer
+software programs from you with this License Agreement will not have
+their licenses terminated so long as such parties remain in full compliance.
+
+  5. If you wish to incorporate parts of this program into other free
+programs whose distribution conditions are different, write to the Free
+Software Foundation at 675 Mass Ave, Cambridge, MA 02139.  We have not yet
+worked out a simple rule that can be stated here, but we will often permit
+this.  We will be guided by the two goals of preserving the free status of
+all derivatives our free software and of promoting the sharing and reuse of
+software.
+
+
+In other words, you are welcome to use, share and improve this program.
+You are forbidden to forbid anyone else to use, share and improve
+what you give them.   Help stamp out software-hoarding!  */
+
+/* Global variable.  Only the name is significant.
+   To find the address, look in the corresponding external symbol.  */
+__define_stab (N_GSYM, 0x20, "GSYM")
+
+/* Function name for BSD Fortran.  Only the name is significant.
+   To find the address, look in the corresponding external symbol.  */
+__define_stab (N_FNAME, 0x22, "FNAME")
+
+/* Function name or text-segment variable for C.  Value is its address.
+   Desc is supposedly starting line number, but GCC doesn't set it
+   and DBX seems not to miss it.  */
+__define_stab (N_FUN, 0x24, "FUN")
+
+/* Data-segment variable with internal linkage.  Value is its address.  */
+__define_stab (N_STSYM, 0x26, "STSYM")
+
+/* BSS-segment variable with internal linkage.  Value is its address.  */
+__define_stab (N_LCSYM, 0x28, "LCSYM")
+
+/* Name of main routine.  Only the name is significant.
+   This is not used in C.  */
+__define_stab (N_MAIN, 0x2a, "MAIN")
+
+/* Register variable.  Value is number of register.  */
+__define_stab (N_RSYM, 0x40, "RSYM")
+
+/* Structure or union element.  Value is offset in the structure.  */
+__define_stab (N_SSYM, 0x60, "SSYM")
+
+/* Parameter variable.  Value is offset from argument pointer.
+   (On most machines the argument pointer is the same as the frame pointer.  */
+__define_stab (N_PSYM, 0xa0, "PSYM")
+
+/* Automatic variable in the stack.  Value is offset from frame pointer.  */
+__define_stab (N_LSYM, 0x80, "LSYM")
+
+/* Alternate entry point.  Value is its address.  */
+__define_stab (N_ENTRY, 0xa4, "ENTRY")
+
+/* Name of main source file.
+   Value is starting text address of the compilation.  */
+__define_stab (N_SO, 0x64, "SO")
+
+/* Name of sub-source file.
+   Value is starting text address of the compilation.  */
+__define_stab (N_SOL, 0x84, "SOL")
+
+/* Line number in text segment.  Desc is the line number;
+   value is corresponding address.  */
+__define_stab (N_SLINE, 0x44, "SLINE")
+/* Similar, for data segment.  */
+__define_stab (N_DSLINE, 0x46, "DSLINE")
+/* Similar, for bss segment.  */
+__define_stab (N_BSLINE, 0x48, "BSLINE")
+
+/* Beginning of an include file.  Only Sun uses this.
+   In an object file, only the name is significant.
+   The Sun linker puts data into some of the other fields.  */
+__define_stab (N_BINCL, 0x82, "BINCL")
+/* End of an include file.  No name.
+   These two act as brackets around the file's output.
+   In an object file, there is no significant data in this entry.
+   The Sun linker puts data into some of the fields.  */
+__define_stab (N_EINCL, 0xa2, "EINCL")
+/* Place holder for deleted include file.
+   This appears only in output from the Sun linker.  */
+__define_stab (N_EXCL, 0xc2, "EXCL")
+
+/* Beginning of lexical block.
+   The desc is the nesting level in lexical blocks.
+   The value is the address of the start of the text for the block.
+   The variables declared inside the block *precede* the N_LBRAC symbol.  */
+__define_stab (N_LBRAC, 0xc0, "LBRAC")
+/* End of a lexical block.  Desc matches the N_LBRAC's desc.
+   The value is the address of the end of the text for the block.  */
+__define_stab (N_RBRAC, 0xe0, "RBRAC")
+
+/* Begin named common block.  Only the name is significant.  */
+__define_stab (N_BCOMM, 0xe2, "BCOMM")
+/* Begin named common block.  Only the name is significant
+   (and it should match the N_BCOMM).  */
+__define_stab (N_ECOMM, 0xe4, "ECOMM")
+/* End common (local name): value is address.
+   I'm not sure how this is used.  */
+__define_stab (N_ECOML, 0xe8, "ECOML")
+/* Second symbol entry containing a length-value for the preceding entry.
+   The value is the length.  */
+__define_stab (N_LENG, 0xfe, "LENG")
+
+/* Global symbol in Pascal.
+   Supposedly the value is its line number; I'm skeptical.  */
+__define_stab (N_PC, 0x30, "PC")
+
+/* Modula-2 compilation unit.  Can someone say what info it contains?  */
+__define_stab (N_M2C, 0x42, "M2C")
+/* Modula-2 scope information.  Can someone say what info it contains?  */
+__define_stab (N_SCOPE, 0xc4, "SCOPE")

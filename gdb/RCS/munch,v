@@ -1,0 +1,75 @@
+head     1.3;
+access   ;
+symbols  ;
+locks    ; strict;
+comment  @# @;
+
+
+1.3
+date     89.03.27.21.15.45;  author gnu;  state Exp;
+branches ;
+next     1.2;
+
+1.2
+date     89.03.27.20.18.28;  author gnu;  state Exp;
+branches ;
+next     1.1;
+
+1.1
+date     89.03.20.18.58.17;  author gnu;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+1.3
+log
+@Fix up "munch" so it generates a name that doesn't match its own
+"grep" conventions.  Change main so that it calls the new name,
+and also doesn't use the conventions for functions that should NOT
+be called by init.c.
+@
+text
+@#! /bin/sh
+
+# create an initialization procedure from a list of .o files
+# Look in object files, find symbols including the string _initialize_,
+# and call each one as a function.
+
+echo '/* Do not modify this file.  It is created automatically by "munch". */'
+echo 'void init_all_files () {'
+
+nm $* | egrep '_initialize_' | \
+  sed -e 's/^.*\(initialize_[a-zA-Z_0-9]*\).*$/    _\1 ();/' | \
+  sort -u
+
+echo '}'
+@
+
+
+1.2
+log
+@Generic change:  make it not care much about the output format of "nm".
+Now as long as _initialize_foo is not touching any other
+symbol or alphanumeric, we'll find it and use it.
+@
+text
+@d8 1
+a8 1
+echo 'void initialize_all_files () {'
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d4 2
+d10 3
+a12 1
+nm -p $* | egrep 'T *__?initialize_' | sed -e 's/^.*T *_*\(.*\)/    _\1 ();/'
+@

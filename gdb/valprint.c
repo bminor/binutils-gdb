@@ -20,7 +20,6 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 
 #include <stdio.h>
 #include "defs.h"
-#include "initialize.h"
 #include "param.h"
 #include "symtab.h"
 #include "value.h"
@@ -35,7 +34,6 @@ static void type_print_varspec_prefix ();
 static void type_print_base ();
 static void type_print_method_args ();
 
-START_FILE
 
 char **unsigned_type_table;
 char **signed_type_table;
@@ -46,6 +44,7 @@ char **float_type_table;
    If the object printed is a string pointer, returns
    the number of string bytes printed.  */
 
+int
 value_print (val, stream, format)
      value val;
      FILE *stream;
@@ -83,21 +82,22 @@ value_print (val, stream, format)
 	      if (i)
 		fprintf (stream, ", ");
 	      val_print (VALUE_TYPE (val), VALUE_CONTENTS (val) + typelen * i,
-			 VALUE_ADDRESS (val) + typelen * i, stream, format, 1);
+			 VALUE_ADDRESS (val) + typelen * i,
+			 stream, format, 1);
 	    }
 	  if (i < n)
 	    fprintf (stream, "...");
 	}
       fputc ('}', stream);
+      return n * typelen;
     }
   else
     {
-      /* A simple (nonrepeated) value */
       /* If it is a pointer, indicate what it points to.
 
-         C++: print type also if it is a reference.
+	 Print type also if it is a reference.
 
-	 If it is a member pointer, we will take care
+         C++: if it is a member pointer, we will take care
 	 of that when we print it.  */
       if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_PTR
 	  || TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_REF)
@@ -119,8 +119,8 @@ value_print (val, stream, format)
    If the data are a string pointer, returns the number of
    sting characters printed.
 
-   If DEREF_REF is nonzero, then dereference references,
-   otherwise just print them like pointers.  */
+   if DEREF_REF is nonzero, then dereference references,
+   otherwise just print them like pointers. */
 
 int
 val_print (type, valaddr, address, stream, format, deref_ref)
@@ -135,7 +135,7 @@ val_print (type, valaddr, address, stream, format, deref_ref)
   int len, n_baseclasses;
   struct type *elttype;
   int eltlen;
-  int val;
+  LONGEST val;
   unsigned char c;
 
   QUIT;
@@ -217,7 +217,7 @@ val_print (type, valaddr, address, stream, format, deref_ref)
 		}
 	      else
 		{
-		  struct symbol *sym = find_pc_function (val);
+		  struct symbol *sym = find_pc_function ((CORE_ADDR) val);
 		  if (sym == 0)
 		    error ("invalid pointer to member function");
 		  len = TYPE_NFN_FIELDS (domain);
@@ -302,31 +302,63 @@ val_print (type, valaddr, address, stream, format, deref_ref)
 	  fprintf (stream, "0x%x", * (int *) valaddr);
 	  /* For a pointer to char or unsigned char,
 	     also print the string pointed to, unless pointer is null.  */
-
+	  
 	  /* For an array of chars, print with string syntax.  */
 	  elttype = TYPE_TARGET_TYPE (type);
-	  if (TYPE_LENGTH (elttype) == 1 && TYPE_CODE (elttype) == TYPE_CODE_INT
+	  i = 0;		/* Number of characters printed.  */
+	  if (TYPE_LENGTH (elttype) == 1 
+	      && TYPE_CODE (elttype) == TYPE_CODE_INT
 	      && format == 0
-	      && unpack_long (type, valaddr) != 0)
+	      /* Convex needs this typecast to a long */
+	      && (long) unpack_long (type, valaddr) != 0
+	      && print_max)
 	    {
 	      fputc (' ', stream);
-	      fputc ('"', stream);
-	      for (i = 0; i < print_max; i++)
+
+	      /* Get first character.  */
+	      if (read_memory ( (CORE_ADDR) unpack_long (type, valaddr),
+			       &c, 1))
 		{
-		  QUIT;
-		  read_memory (unpack_long (type, valaddr) + i, &c, 1);
-		  if (c == 0)
-		    break;
-		  printchar (c, stream, '"');
+		  /* First address out of bounds.  */
+		  fprintf (stream, "<Address 0x%x out of bounds>",
+			   (* (int *) valaddr));
+		  break;
 		}
-	      fputc ('"', stream);
-	      if (i == print_max)
-		fprintf (stream, "...");
+	      else
+		{
+		  /* A real string.  */
+		  int out_of_bounds = 0;
+		  
+		  fputc ('"', stream);
+		  while (c)
+		    {
+		      QUIT;
+		      printchar (c, stream, '"');
+		      if (++i >= print_max)
+			break;
+		      if (read_memory ((CORE_ADDR) unpack_long (type, valaddr)
+				       + i, &c, 1))
+			{
+			  /* This address was out of bounds.  */
+			  fprintf (stream,
+				   "\"*** <Address 0x%x out of bounds>",
+				   (* (int *) valaddr) + i);
+			  out_of_bounds = 1;
+			  break;
+			}
+		    }
+		  if (!out_of_bounds)
+		    {
+		      fputc ('"', stream);
+		      if (i == print_max)
+			fprintf (stream, "...");
+		    }
+		}
 	      fflush (stream);
-	      /* Return number of characters printed, plus one for the
-		 terminating null if we have "reached the end".  */
-	      return i + (i != print_max);
 	    }
+	  /* Return number of characters printed, plus one for the
+	     terminating null if we have "reached the end".  */
+	  return i + (print_max && i != print_max);
 	}
       break;
 
@@ -335,18 +367,19 @@ val_print (type, valaddr, address, stream, format, deref_ref)
       break;
 
     case TYPE_CODE_REF:
-      fprintf (stream, "0x%x", * (int *) valaddr);
+      fprintf (stream, "(0x%x &) = ", * (int *) valaddr);
       /* De-reference the reference.  */
       if (deref_ref)
-	if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_UNDEF)
-	  {
-	    value val = value_at (TYPE_TARGET_TYPE (type), * (int *)valaddr);
-	    fprintf (stream, " = ");
-	    val_print (VALUE_TYPE (val), VALUE_CONTENTS (val),
-		       VALUE_ADDRESS (val), stream, format, deref_ref);
-	  }
-	else
-	  fprintf (stream, " = ???");
+	{
+	  if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_UNDEF)
+	    {
+	      value val = value_at (TYPE_TARGET_TYPE (type), * (int *) valaddr);
+	      val_print (VALUE_TYPE (val), VALUE_CONTENTS (val),
+			 VALUE_ADDRESS (val), stream, format, deref_ref);
+	    }
+	  else
+	    fprintf (stream, "???");
+	}
       break;
 
     case TYPE_CODE_STRUCT:
@@ -378,12 +411,15 @@ val_print (type, valaddr, address, stream, format, deref_ref)
 	  else if (TYPE_FIELD_PACKED (type, i))
 	    {
 	      val = unpack_field_as_long (type, valaddr, i);
-	      val_print (TYPE_FIELD_TYPE (type, i), &val, 0, stream, format, deref_ref);
+	      val_print (TYPE_FIELD_TYPE (type, i), &val, 0,
+			 stream, format, deref_ref);
 	    }
 	  else
-	    val_print (TYPE_FIELD_TYPE (type, i), 
-		       valaddr + TYPE_FIELD_BITPOS (type, i) / 8,
-		       0, stream, format, deref_ref);
+	    {
+	      val_print (TYPE_FIELD_TYPE (type, i), 
+			 valaddr + TYPE_FIELD_BITPOS (type, i) / 8,
+			 0, stream, format, deref_ref);
+	    }
 	}
       fprintf (stream, "}");
       break;
@@ -395,11 +431,11 @@ val_print (type, valaddr, address, stream, format, deref_ref)
 	  break;
 	}
       len = TYPE_NFIELDS (type);
-      val = unpack_long (builtin_type_int, valaddr);
+      val = (long) unpack_long (builtin_type_int, valaddr);
       for (i = 0; i < len; i++)
 	{
 	  QUIT;
-	  if (val == TYPE_FIELD_VALUE (type, i))
+	  if (val == TYPE_FIELD_BITPOS (type, i))
 	    break;
 	}
       if (i < len)
@@ -432,7 +468,8 @@ val_print (type, valaddr, address, stream, format, deref_ref)
       if (TYPE_LENGTH (type) == 1)
 	{
 	  fprintf (stream, " '");
-	  printchar (unpack_long (type, valaddr), stream, '\'');
+	  printchar ((unsigned char) unpack_long (type, valaddr), 
+		     stream, '\'');
 	  fputc ('\'', stream);
 	}
       break;
@@ -443,14 +480,25 @@ val_print (type, valaddr, address, stream, format, deref_ref)
 	  print_scalar_formatted (valaddr, type, format, 0, stream);
 	  break;
 	}
+      /* FIXME:  When printing NaNs or invalid floats, print them
+	 in raw hex in addition to the message. */
 #ifdef IEEE_FLOAT
-      if (is_nan (unpack_double (type, valaddr)))
+      if (is_nan ((void *)valaddr, TYPE_LENGTH(type)))
 	{
-	  fprintf (stream, "Nan");
+	  fprintf (stream, "NaN");
 	  break;
 	}
 #endif
-      fprintf (stream, "%g", unpack_double (type, valaddr));
+      {
+	double doub;
+	int inv;
+
+	doub = unpack_double (type, valaddr, &inv);
+	if (inv)
+	  fprintf (stream, "Invalid float value");
+	else
+	  fprintf (stream, TYPE_LENGTH (type) <= 4? "%.6g": "%.16g", doub);
+      }
       break;
 
     case TYPE_CODE_VOID:
@@ -465,28 +513,38 @@ val_print (type, valaddr, address, stream, format, deref_ref)
 
 #ifdef IEEE_FLOAT
 
-union ieee {
-  int i[2];
-  double d;
-};
-
 /* Nonzero if ARG (a double) is a NAN.  */
 
 int
-is_nan (arg)
-     union ieee arg;
+is_nan (fp, len)
+  void *fp;
+  int len;
 {
   int lowhalf, highhalf;
-  union { int i; char c; } test;
+  union ieee {
+    long i[2];		/* ASSUMED 32 BITS */
+    float f;		/* ASSUMED 32 BITS */
+    double d;		/* ASSUMED 64 BITS */
+  } *arg;
+
+  arg = (union ieee *)fp;
+
+  /*
+   * Single precision float.
+   */
+  if (len == sizeof(long)) {
+	highhalf = arg->i[0];
+	return ((((highhalf >> 23) & 0xFF) == 0xFF) 
+		&& 0 != (highhalf & 0x7FFFFF));
+  }
 
   /* Separate the high and low words of the double.
      Distinguish big and little-endian machines.  */
-  test.i = 1;
-  if (test.c != 1)
-    /* Big-endian machine */
-    lowhalf = arg.i[1], highhalf = arg.i[0];
-  else
-    lowhalf = arg.i[0], highhalf = arg.i[1];
+#ifdef WORDS_BIG_ENDIAN
+    lowhalf = arg->i[1], highhalf = arg->i[0];
+#else
+    lowhalf = arg->i[0], highhalf = arg->i[1];
+#endif
 
   /* Nan: exponent is the maximum possible, and fraction is nonzero.  */
   return (((highhalf>>20) & 0x7ff) == 0x7ff
@@ -502,6 +560,7 @@ is_nan (arg)
    of structure even if there is a type name that could be used instead.
    If SHOW is negative, we never show the details of elements' types.  */
 
+void
 type_print (type, varstring, stream, show)
      struct type *type;
      char *varstring;
@@ -513,6 +572,7 @@ type_print (type, varstring, stream, show)
 
 /* LEVEL is the depth to indent lines by.  */
 
+void
 type_print_1 (type, varstring, stream, show, level)
      struct type *type;
      char *varstring;
@@ -569,7 +629,7 @@ type_print_method_args (args, prefix, varstring, stream)
     }
   fprintf (stream, ")");
 }
-
+  
 /* If TYPE is a derived type, then print out derivation
    information.  Print out all layers of the type heirarchy
    until we encounter one with multiple inheritance.
@@ -665,11 +725,15 @@ type_print_varspec_prefix (type, stream, show, passed_a_ptr)
       break;
 
     case TYPE_CODE_FUNC:
-    case TYPE_CODE_ARRAY:
-      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
+      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0,
+				 passed_a_ptr);
       if (passed_a_ptr)
 	fputc ('(', stream);
       break;
+
+    case TYPE_CODE_ARRAY:
+      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0,
+				 passed_a_ptr);
     }
 }
 
@@ -695,11 +759,11 @@ type_print_varspec_suffix (type, stream, show, passed_a_ptr)
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
-      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0);
-      if (passed_a_ptr)
-	fprintf (stream, ")");
+      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
+				 passed_a_ptr);
       fprintf (stream, "[");
-      if (TYPE_LENGTH (type) >= 0)
+      if (TYPE_LENGTH (type) >= 0
+	  && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
 	fprintf (stream, "%d",
 		 TYPE_LENGTH (type) / TYPE_LENGTH (TYPE_TARGET_TYPE (type)));
       fprintf (stream, "]");
@@ -717,7 +781,8 @@ type_print_varspec_suffix (type, stream, show, passed_a_ptr)
       break;
 
     case TYPE_CODE_FUNC:
-      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0);
+      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
+				 passed_a_ptr);
       if (passed_a_ptr)
 	fprintf (stream, ")");
       fprintf (stream, "()");
@@ -793,12 +858,14 @@ type_print_base (type, stream, show, level)
 	  int i;
 
 	  type_print_derivation_info (stream, type);
-
+	  
 	  fprintf (stream, "{");
 	  len = TYPE_NFIELDS (type);
 	  if (len) fprintf (stream, "\n");
 	  else fprintf (stream, "<no data fields>\n");
 
+	  /* If there is a base class for this type,
+	     do not print the field that it occupies.  */
 	  for (i = TYPE_N_BASECLASSES (type); i < len; i++)
 	    {
 	      QUIT;
@@ -808,28 +875,6 @@ type_print_base (type, stream, show, level)
 		continue;
 
 	      print_spaces (level + 4, stream);
-
-	      /* If this is a bit-field and there is a gap before it,
-		 print a nameless field to account for the gap.  */
-
-	      if (TYPE_FIELD_PACKED (type, i))
-		{
-		  int gap = (TYPE_FIELD_BITPOS (type, i)
-			     - (i > 0
-				? (TYPE_FIELD_BITPOS (type, i - 1)
-				   + (TYPE_FIELD_PACKED (type, i - 1)
-				      ? TYPE_FIELD_BITSIZE (type, i - 1)
-				      : TYPE_LENGTH (TYPE_FIELD_TYPE (type, i - 1)) * 8))
-				: 0));
-		  if (gap != 0)
-		    {
-		      fprintf (stream, "int : %d;\n", gap);
-		      print_spaces (level + 4, stream);
-		    }
-		}
-
-	      /* Print the declaration of this field.  */
-
 	      if (TYPE_FIELD_STATIC (type, i))
 		{
 		  fprintf (stream, "static ");
@@ -837,12 +882,11 @@ type_print_base (type, stream, show, level)
 	      type_print_1 (TYPE_FIELD_TYPE (type, i),
 			    TYPE_FIELD_NAME (type, i),
 			    stream, show - 1, level + 4);
-
-	      /* Print the field width.  */
-
-	      if (TYPE_FIELD_PACKED (type, i))
-		fprintf (stream, " : %d", TYPE_FIELD_BITSIZE (type, i));
-
+	      if (!TYPE_FIELD_STATIC (type, i)
+		  && TYPE_FIELD_PACKED (type, i))
+		{
+		  /* ??? don't know what to put here ??? */;
+		}
 	      fprintf (stream, ";\n");
 	    }
 
@@ -901,10 +945,10 @@ type_print_base (type, stream, show, level)
 	      QUIT;
 	      if (i) fprintf (stream, ", ");
 	      fprintf (stream, "%s", TYPE_FIELD_NAME (type, i));
-	      if (lastval != TYPE_FIELD_VALUE (type, i))
+	      if (lastval != TYPE_FIELD_BITPOS (type, i))
 		{
-		  fprintf (stream, " : %d", TYPE_FIELD_VALUE (type, i));
-		  lastval = TYPE_FIELD_VALUE (type, i);
+		  fprintf (stream, " : %d", TYPE_FIELD_BITPOS (type, i));
+		  lastval = TYPE_FIELD_BITPOS (type, i);
 		}
 	      lastval++;
 	    }
@@ -946,29 +990,38 @@ set_maximum_command (arg)
   print_max = atoi (arg);
 }
 
-static
-initialize ()
+extern struct cmd_list_element *setlist;
+
+void
+_initialize_valprint ()
 {
-  add_com ("set-maximum", class_vars, set_maximum_command,
-	   "Set NUMBER as limit on string chars or array elements to print.");
+  add_cmd ("array-max", class_vars, set_maximum_command,
+	   "Set NUMBER as limit on string chars or array elements to print.",
+	   &setlist);
 
   print_max = 200;
 
   unsigned_type_table
-    = (char **) xmalloc ((1 + sizeof (unsigned long)) * sizeof (char *));
-  bzero (unsigned_type_table, (1 + sizeof (unsigned long)));
+    = (char **) xmalloc ((1 + sizeof (unsigned LONGEST)) * sizeof (char *));
+  bzero (unsigned_type_table, (1 + sizeof (unsigned LONGEST)));
   unsigned_type_table[sizeof (unsigned char)] = "unsigned char";
   unsigned_type_table[sizeof (unsigned short)] = "unsigned short";
   unsigned_type_table[sizeof (unsigned long)] = "unsigned long";
   unsigned_type_table[sizeof (unsigned int)] = "unsigned int";
+#ifdef LONG_LONG
+  unsigned_type_table[sizeof (unsigned long long)] = "unsigned long long";
+#endif
 
   signed_type_table
-    = (char **) xmalloc ((1 + sizeof (long)) * sizeof (char *));
-  bzero (signed_type_table, (1 + sizeof (long)));
+    = (char **) xmalloc ((1 + sizeof (LONGEST)) * sizeof (char *));
+  bzero (signed_type_table, (1 + sizeof (LONGEST)));
   signed_type_table[sizeof (char)] = "char";
   signed_type_table[sizeof (short)] = "short";
   signed_type_table[sizeof (long)] = "long";
   signed_type_table[sizeof (int)] = "int";
+#ifdef LONG_LONG
+  signed_type_table[sizeof (long long)] = "long long";
+#endif
 
   float_type_table
     = (char **) xmalloc ((1 + sizeof (double)) * sizeof (char *));
@@ -977,4 +1030,3 @@ initialize ()
   float_type_table[sizeof (double)] = "double";
 }
 
-END_FILE

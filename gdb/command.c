@@ -104,6 +104,7 @@ what you give them.   Help stamp out software-hoarding!  */
 
 
 #include "command.h"
+#include "defs.h"
 #include <stdio.h>
 
 #ifdef sparc
@@ -111,8 +112,6 @@ what you give them.   Help stamp out software-hoarding!  */
 #endif
 
 extern char *xmalloc ();
-
-static char *savestring ();
 
 /* Add element named NAME to command list *LIST.
    FUN should be the function to execute the command;
@@ -149,6 +148,33 @@ add_cmd (name, class, fun, doc, list)
   return c;
 }
 
+/* Same as above, except that the abbrev_flag is set. */
+
+struct cmd_list_element *
+add_abbrev_cmd (name, class, fun, doc, list)
+     char *name;
+     int class;
+     void (*fun) ();
+     char *doc;
+     struct cmd_list_element **list;
+{
+  register struct cmd_list_element *c
+    = (struct cmd_list_element *) xmalloc (sizeof (struct cmd_list_element));
+
+  delete_cmd (name, list);
+  c->next = *list;
+  c->name = savestring (name, strlen (name));
+  c->class = class;
+  c->function = fun;
+  c->doc = doc;
+  c->prefixlist = 0;
+  c->allow_unknown = 0;
+  c->abbrev_flag = 1;
+  c->aux = 0;
+  *list = c;
+  return c;
+}
+
 struct cmd_list_element *
 add_alias_cmd (name, oldname, class, abbrev_flag, list)
      char *name;
@@ -180,7 +206,7 @@ add_alias_cmd (name, oldname, class, abbrev_flag, list)
   return c;
 }
 
-/* Like add_prefix_cmd but adds an element for a command prefix:
+/* Like add_cmd but adds an element for a command prefix:
    a name that should be followed by a subcommand to be looked up
    in another command list.  PREFIXLIST should be the address
    of the variable containing that list.  */
@@ -201,6 +227,28 @@ add_prefix_cmd (name, class, fun, doc, prefixlist, prefixname,
   c->prefixlist = prefixlist;
   c->prefixname = prefixname;
   c->allow_unknown = allow_unknown;
+  return c;
+}
+
+/* Like add_prefix_cmd butsets the abbrev_flag on the new command. */
+   
+struct cmd_list_element *
+add_abbrev_prefix_cmd (name, class, fun, doc, prefixlist, prefixname,
+		allow_unknown, list)
+     char *name;
+     int class;
+     void (*fun) ();
+     char *doc;
+     struct cmd_list_element **prefixlist;
+     char *prefixname;
+     int allow_unknown;
+     struct cmd_list_element **list;
+{
+  register struct cmd_list_element *c = add_cmd (name, class, fun, doc, list);
+  c->prefixlist = prefixlist;
+  c->prefixname = prefixname;
+  c->allow_unknown = allow_unknown;
+  c->abbrev_flag = 1;
   return c;
 }
 
@@ -228,65 +276,86 @@ delete_cmd (name, list)
       }
 }
 
-/* Implement a help command on command list LIST.
-   COMMAND is the argument given (a command from the list to document)
-   or zero for no arg (describe briefly all the commands in the list).
-   CMDTYPE is a string to use in the error message if command COMMAND
-   is not found in the list.  */
+void help_cmd (), help_list (), help_cmd_list ();
 
-/* CLASS should be -1 to list all commands in LIST,
-   or a nonnegative class number value to list just commands in that class,
-   or -2 to list the classes themselves.  */
+/* This command really has to deal with two things:
+ *     1) I want documentation on *this string* (usually called by
+ * "help commandname").
+ *     2) I want documentation on *this list* (usually called by
+ * giving a command that requires subcommands.  Also called by saying
+ * just "help".)
+ *
+ *   I am going to split this into two seperate comamnds, help_cmd and
+ * help_list. 
+ */
 
 void
-help_cmd (command, list, cmdtype, class, stream)
+help_cmd (command, stream)
      char *command;
+     FILE *stream;
+{
+  struct cmd_list_element *c;
+  extern struct cmd_list_element *cmdlist;
+
+  if (!command)
+    {
+      help_list (cmdlist, "", -2, stream);
+      return;
+    }
+
+  c = lookup_cmd (&command, cmdlist, "", 0);
+
+  if (c == 0)
+    return;
+
+  /* There are three cases here.
+     If c->prefixlist is nonzer, we have a prefix command.
+     Print its documentation, then list its subcommands.
+     
+     If c->function is nonzero, we really have a command.
+     Print its documentation and return.
+     
+     If c->function is zero, we have a class name.
+     Print its documentation (as if it were a command)
+     and then set class to he number of this class
+     so that the commands in the class will be listed.  */
+
+  fprintf (stream, "%s\n", c->doc);
+  if (c->prefixlist == 0 && c->function != 0)
+    return;
+  fputc ('\n', stream);
+
+  /* If this is a prefix command, print it's subcommands */
+  if (c->prefixlist)
+    help_list (*c->prefixlist, c->prefixname, -1, stream);
+
+  /* If this is a class name, print all of the commands in the class */
+  if (c->function == 0)
+    help_list (cmdlist, "", c->class, stream);
+}
+
+/*
+ * Get a specific kind of help on a command list.
+ *
+ * LIST is the list.
+ * CMDTYPE is the prefix to use in the title string.
+ * CLASS is the class with which to list the nodes of this list (see
+ * documentation for help_cmd_list below),  As usual, -1 for
+ * everything, -2 for just classes, and non-negative for only things
+ * in a specific class.
+ * and STREAM is the output stream on which to print things.
+ * If you call this routine with a class >= 0, it recurses.
+ */
+void
+help_list (list, cmdtype, class, stream)
      struct cmd_list_element *list;
      char *cmdtype;
      int class;
      FILE *stream;
 {
-  register struct cmd_list_element *c;
-  register char *p;
-  register int ncmds;
-  struct cmdvec { struct cmd_list_element *cmd; int class; };
-  register struct cmdvec *cmdvec;
-  char *cmdtype1, *cmdtype2;
   int len;
-
-  if (command)
-    {
-      c = lookup_cmd (&command, list, cmdtype, 0);
-      if (c == 0)
-	return;
-
-      /* There are three cases here.
-	 If c->prefixlist is nonzer, we have a prefix command.
-	 Print its documentation, then list its subcommands.
-
-	 If c->function is nonzero, we really have a command.
-	 Print its documentation and return.
-
-	 If c->function is zero, we have a class name.
-	 Print its documentation (as if it were a command)
-	 and then set class to he number of this class
-	 so that the commands in the class will be listed.  */
-
-      p = c->doc;
-      fprintf (stream, "%s\n", p);
-      if (c->function != 0 && c->prefixlist == 0)
-	return;
-      fputc ('\n', stream);
-      if (c->prefixlist)
-	{
-	  list = *c->prefixlist;
-	  class = 0;
-	  cmdtype = c->prefixname;
-	}
-      else
-	class = c->class;
-    }
-
+  char *cmdtype1, *cmdtype2;
+  
   /* If CMDTYPE is "foo ", CMDTYPE1 gets " foo" and CMDTYPE2 gets "foo sub"  */
   len = strlen (cmdtype);
   cmdtype1 = (char *) alloca (len + 1);
@@ -307,21 +376,7 @@ help_cmd (command, list, cmdtype, class, stream)
   else
     fprintf (stream, "List of %scommands:\n\n", cmdtype2);
 
-  for (c = list; c; c = c->next)
-    {
-      if (c->abbrev_flag == 0
-	  && (class == -1	/* Listing all */
-	      || (c->class == class && c->function != 0) /* Listing one class */
-	      || (class == -2 && c->function == 0)))	/* Listing the classes */
-	{
-	  fprintf (stream, "%s -- ", c->name);
-	  /* Print just first line of documentation.  */
-	  p = c->doc;
-	  while (*p && *p != '\n') p++;
-	  fwrite (c->doc, 1, p - c->doc, stream);
-	  fputc ('\n', stream);
-	}
-    }
+  help_cmd_list (list, class, cmdtype, (class >= 0), stream);
 
   if (class == -2)
     fprintf (stream, "\n\
@@ -332,6 +387,55 @@ Type \"help%s\" followed by a class name for a list of commands in that class.",
 Type \"help%s\" followed by %scommand name for full documentation.\n\
 Command name abbreviations are allowed if unambiguous.\n",
 	   cmdtype1, cmdtype2);
+}
+     
+
+/*
+ * Implement a help command on command list LIST.
+ * RECURSE should be non-zero if this should be done recursively on
+ * all sublists of LIST.
+ * PREFIX is the prefix to print before each command name.
+ * STREAM is the stream upon which the output should be written.
+ * CLASS should be:
+ *	A non-negative class number to list only commands in that
+ * class.
+ *	-1 to list all commands in list.
+ *	-2 to list all classes in list.
+ *
+ *   Note that RECURSE will be active on *all* sublists, not just the
+ * ones seclected by the criteria above (ie. the selection mechanism
+ * is at the low level, not the high-level).
+ */
+void
+help_cmd_list (list, class, prefix, recurse, stream)
+     struct cmd_list_element *list;
+     int class;
+     char *prefix;
+     int recurse;
+     FILE *stream;
+{
+  register struct cmd_list_element *c;
+  register char *p;
+
+  for (c = list; c; c = c->next)
+    {
+      if (c->abbrev_flag == 0 &&
+	  (class == -1
+	  || (class == -2 && c->function == 0)
+	  || (class == c->class && c->function != 0)))
+	{
+	  fprintf (stream, "%s%s -- ", prefix, c->name);
+	  /* Print just the first line */
+	  p = c->doc;
+	  while (*p && *p != '\n') p++;
+	  fwrite (c->doc, 1, p - c->doc, stream);
+	  fputc('\n', stream);
+	}
+      if (recurse
+	  && c->prefixlist != 0
+	  && c->abbrev_flag == 0)
+	help_cmd_list (*c->prefixlist, class, c->prefixname, 1, stream);
+    }
 }
 
 /* Look up the contents of *LINE as a command in the command list LIST.
@@ -355,6 +459,8 @@ lookup_cmd (line, list, cmdtype, allow_unknown)
   register struct cmd_list_element *c, *found;
   int nfound;
   char ambbuf[100];
+  char *processed_cmd;
+  int i, cmd_len;
 
   /* Skip leading whitespace.  */
 
@@ -371,29 +477,53 @@ lookup_cmd (line, list, cmdtype, allow_unknown)
   /* Find end of command name.  */
 
   p = *line;
-  while (*p == '-'
-	 || (*p >= 'a' && *p <= 'z')
-	 || (*p >= 'A' && *p <= 'Z')
-	 || (*p >= '0' && *p <= '9'))
-    {
-      if (*p >= 'A' && *p <= 'Z')
-	*p += 'a' - 'A';
-      p++;
-    }
+  if (*p == '!')
+    p++;
+  else while (*p == '-'
+	      || (*p >= 'a' && *p <= 'z')
+	      || (*p >= 'A' && *p <= 'Z')
+	      || (*p >= '0' && *p <= '9'))
+    p++;
 
   /* Look up the command name.
      If exact match, keep that.
-     Otherwise, take command abbreviated, if unique.  */
+     Otherwise, take command abbreviated, if unique.  Note that (in my
+     opinion) a null string does *not* indicate ambiguity; simply the
+     end of the argument.  */
 
+  if (p == *line)
+    {
+      if (!allow_unknown)
+	error ("Lack of needed %scommand", cmdtype);
+      return 0;
+    }
+  
+  /* Copy over to a local buffer, converting to lowercase on the way.
+     This is in case the command being parsed is a subcommand which
+     doesn't match anything, and that's ok.  We want the original
+     untouched for the routine of the original command.  */
+  
+  processed_cmd = (char *) alloca (p - *line + 1);
+  for (cmd_len = 0; cmd_len < p - *line; cmd_len++)
+    {
+      char x = (*line)[cmd_len];
+      if (x >= 'A' && x <= 'Z')
+	processed_cmd[cmd_len] = x - 'A' + 'a';
+      else
+	processed_cmd[cmd_len] = x;
+    }
+  processed_cmd[cmd_len] = '\0';
+
+  /* Check all possibilities in the current command list.  */
   found = 0;
   nfound = 0;
   for (c = list; c; c = c->next)
     {
-      if (!strncmp (*line, c->name, p - *line))
+      if (!strncmp (processed_cmd, c->name, cmd_len))
 	{
 	  found = c;
 	  nfound++;
-	  if (c->name[p - *line] == 0)
+	  if (c->name[cmd_len] == 0)
 	    {
 	      nfound = 1;
 	      break;
@@ -407,10 +537,9 @@ lookup_cmd (line, list, cmdtype, allow_unknown)
     {
       if (nfound > 1 && allow_unknown >= 0)
 	{
-	  *p = 0;
 	  ambbuf[0] = 0;
 	  for (c = list; c; c = c->next)
-	    if (!strncmp (*line, c->name, p - *line))
+	    if (!strncmp (processed_cmd, c->name, cmd_len))
 	      {
 		if (strlen (ambbuf) + strlen (c->name) + 6 < sizeof ambbuf)
 		  {
@@ -424,13 +553,11 @@ lookup_cmd (line, list, cmdtype, allow_unknown)
 		    break;
 		  }
 	      }
-	  error ("Ambiguous %scommand \"%s\": %s.", cmdtype, *line, ambbuf);
+	  error ("Ambiguous %scommand \"%s\": %s.", cmdtype,
+		 processed_cmd, ambbuf);
 	}
       else if (!allow_unknown)
-	{
-	  *p = 0;
-	  error ("Undefined %scommand: \"%s\".", cmdtype, *line);
-	}
+	error ("Undefined %scommand: \"%s\".", cmdtype, processed_cmd);
       return 0;
     }
 
@@ -450,17 +577,48 @@ lookup_cmd (line, list, cmdtype, allow_unknown)
   return found;
 }
 
-/* Make a copy of the string at PTR with SIZE characters
-   (and add a null character at the end in the copy).
-   Uses malloc to get the space.  Returns the address of the copy.  */
-
-static char *
-savestring (ptr, size)
-     char *ptr;
-     int size;
+static void
+shell_escape (arg, from_tty)
+     char *arg;
+     int from_tty;
 {
-  register char *p = (char *) xmalloc (size + 1);
-  bcopy (ptr, p, size);
-  p[size] = 0;
-  return p;
+  int rc, status, pid;
+  char *p, *user_shell;
+  extern char *rindex ();
+
+  if ((user_shell = (char *) getenv ("SHELL")) == NULL)
+    user_shell = "/bin/sh";
+
+  /* Get the name of the shell for arg0 */
+  if ((p = rindex (user_shell, '/')) == NULL)
+    p = user_shell;
+  else
+    p++;			/* Get past '/' */
+
+  if ((pid = fork()) == 0)
+    {
+      if (!arg)
+	execl (user_shell, p, 0);
+      else
+	execl (user_shell, p, "-c", arg, 0);
+
+      fprintf (stderr, "Exec of shell failed\n");
+      exit (0);
+    }
+
+  if (pid != -1)
+    while ((rc = wait (&status)) != pid && rc != -1)
+      ;
+  else
+    error ("Fork failed");
+}
+
+void
+_initialize_command ()
+{
+  add_com ("shell", class_support, shell_escape,
+	   "Execute the rest of the line as a shell command.  \n\
+With no arguments, run an inferior shell.");
+
+  add_com_alias ("!", "shell", class_support, 1);
 }

@@ -19,6 +19,40 @@ In other words, go ahead and share GDB, but don't try to stop
 anyone else from sharing it farther.  Help stamp out software hoarding!
 */
 
+/*
+ * Structure in which to save the status of the inferior.  Save
+ * through "save_inferior_status", restore through
+ * "restore_inferior_status".
+ * This pair of routines should be called around any transfer of
+ * control to the inferior which you don't want showing up in your
+ * control variables.
+ */
+struct inferior_status {
+  int pc_changed;
+  int stop_signal;
+  int stop_pc;
+  int stop_frame_address;
+  int stop_breakpoint;
+  int stop_step;
+  int stop_stack_dummy;
+  int stopped_by_random_signal;
+  int trap_expected;
+  CORE_ADDR step_range_start;
+  CORE_ADDR step_range_end;
+  FRAME_ADDR step_frame_address;
+  int step_over_calls;
+  CORE_ADDR step_resume_break_address;
+  int stop_after_trap;
+  int stop_after_attach;
+  FRAME_ADDR selected_frame_address;
+  int selected_level;
+  struct command_line *breakpoint_commands;
+  char stop_registers[REGISTER_BYTES];
+  int restore_stack_info;
+};
+
+void save_inferior_status (), restore_inferior_status ();
+
 /* File name for default use for standard in/out in the inferior.  */
 
 extern char *inferior_io_terminal;
@@ -41,7 +75,7 @@ extern CORE_ADDR stop_pc;
 
 /* Stack frame when program stopped.  */
 
-extern FRAME stop_frame;
+extern FRAME_ADDR stop_frame_address;
 
 /* Number of breakpoint it stopped at, or 0 if none.  */
 
@@ -55,6 +89,11 @@ extern int stop_step;
 
 extern int stop_stack_dummy;
 
+/* Nonzero if program stopped due to a random (unexpected) signal in
+   inferior process.  */
+
+extern int stopped_by_random_signal;
+
 /* Range to single step within.
    If this is nonzero, respond to a single-step signal
    by continuing to step if the pc is in this range.  */
@@ -66,7 +105,7 @@ extern CORE_ADDR step_range_end; /* Exclusive */
    This is how we know when we step into a subroutine call,
    and how to set the frame for the breakpoint used to step out.  */
 
-extern CORE_ADDR step_frame;
+extern FRAME_ADDR step_frame_address;
 
 /* 1 means step over all subroutine calls.
    -1 means step over calls to undebuggable functions.  */
@@ -87,3 +126,6 @@ extern char stop_registers[REGISTER_BYTES];
    since the inferior stopped.  */
 
 extern int pc_changed;
+
+
+long read_memory_integer ();

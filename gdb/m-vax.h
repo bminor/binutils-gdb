@@ -43,10 +43,25 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-#define SKIP_PROLOGUE(pc)   \
-{ register int op = read_memory_integer (pc, 1);	\
-  if (op == 0x11) pc += 2;  /* skip brb */		\
-  if (op == 0x31) pc += 3;  /* skip brw */		\
+#define SKIP_PROLOGUE(pc)	\
+{ register int op = (unsigned char) read_memory_integer (pc, 1);  \
+  if (op == 0x11) pc += 2;  /* skip brb */			  \
+  if (op == 0x31) pc += 3;  /* skip brw */			  \
+  if (op == 0xC2 &&						  \
+      ((unsigned char) read_memory_integer (pc+2, 1)) == 0x5E)	  \
+    pc += 3;  /* skip subl2 */					  \
+  if (op == 0x9E &&						  \
+      ((unsigned char) read_memory_integer (pc+1, 1)) == 0xAE &&  \
+      ((unsigned char) read_memory_integer(pc+3, 1)) == 0x5E)	  \
+     pc += 4;  /* skip movab */					  \
+  if (op == 0x9E &&						  \
+      ((unsigned char) read_memory_integer (pc+1, 1)) == 0xCE &&  \
+      ((unsigned char) read_memory_integer(pc+4, 1)) == 0x5E)	  \
+    pc += 5;  /* skip movab */					  \
+  if (op == 0x9E &&						  \
+      ((unsigned char) read_memory_integer (pc+1, 1)) == 0xEE &&  \
+      ((unsigned char) read_memory_integer(pc+6, 1)) == 0x5E)	  \
+    pc += 7;  /* skip movab */					  \
 }
 
 /* Immediately after a function call, return the saved pc.
@@ -54,7 +69,7 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
    the new frame is not set up until the new function executes
    some instructions.  */
 
-#define SAVED_PC_AFTER_CALL(frame) FRAME_SAVED_PC(frame,0)
+#define SAVED_PC_AFTER_CALL(frame) FRAME_SAVED_PC(frame)
 
 /* This is the amount to subtract from u.u_ar0
    to get the offset in the core file of the register values.  */
@@ -87,6 +102,12 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
    LEN is the length in bytes -- not relevant on the Vax.  */
 
 #define INVALID_FLOAT(p, len) ((*(short *) p & 0xff80) == 0x8000)
+
+/* Largest integer type */
+#define LONGEST long
+
+/* Name of the builtin type for the LONGEST type above. */
+#define BUILTIN_TYPE_LONGEST builtin_type_long
 
 /* Say how long (ordinary) registers are.  */
 
@@ -171,6 +192,12 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 
 #define REGISTER_VIRTUAL_TYPE(N) builtin_type_int
 
+/* Store the address of the place in which to copy the structure the
+   subroutine will return.  This is called from call_function. */
+
+#define STORE_STRUCT_RETURN(ADDR, SP) \
+  { write_register (1, (ADDR)); }
+
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
@@ -190,8 +217,8 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(int *)(REGBUF))
 
-/* Compensate for lack of `vprintf' function.  */ 
-#define vprintf(format, ap) _doprnt (format, ap, stdout) 
+/* Compensate for lack of `vprintf' function.  */
+#define vprintf(format, ap) _doprnt (format, ap, stdout)
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
@@ -209,26 +236,26 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 /* In the case of the Vax, the frame's nominal address is the FP value,
    and 12 bytes later comes the saved previous FP value as a 4-byte word.  */
 
-#define FRAME_CHAIN(thisframe)  (read_memory_integer (thisframe + 12, 4))
+#define FRAME_CHAIN(thisframe)  (read_memory_integer ((thisframe)->frame + 12, 4))
 
 #define FRAME_CHAIN_VALID(chain, thisframe) \
-  (chain != 0 && (FRAME_SAVED_PC (thisframe,ignore) >= first_object_file_end))
+  (chain != 0 && (FRAME_SAVED_PC (thisframe) >= first_object_file_end))
 
 #define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 
 /* Define other aspects of the stack frame.  */
 
-#define FRAME_SAVED_PC(frame, ignore) (read_memory_integer (frame + 16, 4), 0)
+#define FRAME_SAVED_PC(FRAME) (read_memory_integer ((FRAME)->frame + 16, 4))
 
 /* Cannot find the AP register value directly from the FP value.
    Must find it saved in the frame called by this one, or in the AP register
    for the innermost frame.  */
 #define FRAME_ARGS_ADDRESS(fi) \
- (((fi).next_frame                                  \
-   ? read_memory_integer ((fi).next_frame + 8, 4)   \
+ (((fi)->next_frame                                  \
+   ? read_memory_integer ((fi)->next_frame + 8, 4)   \
    : read_register (AP_REGNUM)))
 
-#define FRAME_LOCALS_ADDRESS(fi) (fi).frame
+#define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
 
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
@@ -248,21 +275,21 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
 { register int regnum;     \
-  register int regmask = read_memory_integer ((frame_info).frame+4, 4) >> 16; \
+  register int regmask = read_memory_integer ((frame_info)->frame+4, 4) >> 16; \
   register CORE_ADDR next_addr;     \
   bzero (&frame_saved_regs, sizeof frame_saved_regs);     \
-  next_addr = (frame_info).frame + 16;     \
+  next_addr = (frame_info)->frame + 16;     \
   /* Regmask's low bit is for register 0,     \
      which is the first one that would be pushed.  */     \
   for (regnum = 0; regnum < 12; regnum++, regmask >>= 1)  \
     (frame_saved_regs).regs[regnum] = (regmask & 1) ? (next_addr += 4) : 0;  \
   (frame_saved_regs).regs[SP_REGNUM] = next_addr + 4;  \
-  if (read_memory_integer ((frame_info).frame + 4, 4) & 0x20000000)   \
+  if (read_memory_integer ((frame_info)->frame + 4, 4) & 0x20000000)   \
     (frame_saved_regs).regs[SP_REGNUM] += 4 + 4 * read_memory_integer (next_addr + 4, 4);  \
-  (frame_saved_regs).regs[PC_REGNUM] = (frame_info).frame + 16;  \
-  (frame_saved_regs).regs[FP_REGNUM] = (frame_info).frame + 12;  \
-  (frame_saved_regs).regs[AP_REGNUM] = (frame_info).frame + 8;  \
-  (frame_saved_regs).regs[PS_REGNUM] = (frame_info).frame + 4;  \
+  (frame_saved_regs).regs[PC_REGNUM] = (frame_info)->frame + 16;  \
+  (frame_saved_regs).regs[FP_REGNUM] = (frame_info)->frame + 12;  \
+  (frame_saved_regs).regs[AP_REGNUM] = (frame_info)->frame + 8;  \
+  (frame_saved_regs).regs[PS_REGNUM] = (frame_info)->frame + 4;  \
 }
 
 /* Things needed for making the inferior call functions.  */
@@ -306,7 +333,9 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
     { regnum = read_memory_integer (fp, 4);			 \
       fp += (regnum + 1) * 4; }					 \
   write_register (SP_REGNUM, fp);				 \
-  set_current_frame (read_register (FP_REGNUM)); }
+  flush_cached_frames ();					 \
+  set_current_frame (create_new_frame (read_register (FP_REGNUM),\
+					read_pc ())); }
 
 /* This sequence of words is the instructions
      calls #69, @#32323232
@@ -320,7 +349,7 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.  */
 
-#define FIX_CALL_DUMMY(dummyname, fun, nargs)   \
+#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, type)   \
 { *((char *) dummyname + 1) = nargs;		\
   *(int *)((char *) dummyname + 3) = fun; }
 

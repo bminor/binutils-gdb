@@ -19,7 +19,6 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 */
 
 #include "defs.h"
-#include "initialize.h"
 #include "param.h"
 #include "symtab.h"
 #include "frame.h"
@@ -32,9 +31,15 @@ static char break_insn[] = BREAKPOINT;
 
 /* States of enablement of breakpoint.
    `temporary' means disable when hit.
-   `once' means delete when hit.  */
+   `delete' means delete when hit.  */
 
 enum enable { disabled, enabled, temporary, delete};
+
+/* Not that the ->silent field is not currently used by any commands
+   (though the code is in there if it was to be and set_raw_breakpoint
+   does set it to 0).  I implemented it because I thought it would be
+   useful for a hack I had to put in; I'm going to leave it in because
+   I can see how there might be times when it would indeed be useful */
 
 struct breakpoint
 {
@@ -49,6 +54,9 @@ struct breakpoint
   struct symtab *symtab;
   /* Zero means disabled; remember the info but don't break here.  */
   enum enable enable;
+  /* Non-zero means a silent breakpoint (don't print frame info
+     if we stop here). */
+  unsigned char silent;
   /* Number of stops at this breakpoint that should
      be continued automatically before really stopping.  */
   int ignore_count;
@@ -62,8 +70,9 @@ struct breakpoint
   char duplicate;
   /* Chain of command lines to execute when this breakpoint is hit.  */
   struct command_line *commands;
-  /* Stack depth (frame).  If nonzero, break only if fp equals this.  */
-  FRAME frame;
+  /* Stack depth (address of frame).  If nonzero, break only if fp
+     equals this.  */
+  FRAME_ADDR frame;
   /* Conditional.  Break only if this expression's value is nonzero.  */
   struct expression *cond;
 };
@@ -94,10 +103,6 @@ int default_breakpoint_line;
    of last breakpoint hit.  */
 
 struct command_line *breakpoint_commands;
-
-START_FILE
-
-extern char *read_line ();
 
 static void delete_breakpoint ();
 void clear_momentary_breakpoints ();
@@ -161,9 +166,6 @@ commands_command (arg)
   register int bnum;
   struct command_line *l;
 
-  if (arg == 0)
-    error_no_arg ("breakpoint number");
-
   /* If we allowed this, we would have problems with when to
      free the storage, if we change the commands currently
      being read from.  */
@@ -171,15 +173,21 @@ commands_command (arg)
   if (breakpoint_commands)
     error ("Can't use the \"commands\" command among a breakpoint's commands.");
 
-  p = arg;
-  if (! (*p >= '0' && *p <= '9'))
-    error ("Argument must be integer (a breakpoint number).");
-
-  while (*p >= '0' && *p <= '9') p++;
-  if (*p)
-    error ("Unexpected extra arguments following breakpoint number.");
-
-  bnum = atoi (arg);
+  /* Allow commands by itself to refer to the last breakpoint.  */
+  if (arg == 0)
+    bnum = breakpoint_count;
+  else
+    {
+      p = arg;
+      if (! (*p >= '0' && *p <= '9'))
+	error ("Argument must be integer (a breakpoint number).");
+      
+      while (*p >= '0' && *p <= '9') p++;
+      if (*p)
+	error ("Unexpected extra arguments following breakpoint number.");
+      
+      bnum = atoi (arg);
+    }
 
   ALL_BREAKPOINTS (b)
     if (b->number == bnum)
@@ -254,7 +262,10 @@ insert_breakpoints ()
   register struct breakpoint *b;
   int val;
 
-/*   printf ("Inserting breakpoints.\n"); */
+#ifdef BREAKPOINT_DEBUG
+  printf ("Inserting breakpoints.\n");
+#endif /* BREAKPOINT_DEBUG */
+
   ALL_BREAKPOINTS (b)
     if (b->enable != disabled && ! b->inserted && ! b->duplicate)
       {
@@ -262,8 +273,10 @@ insert_breakpoints ()
 	val = write_memory (b->address, break_insn, sizeof break_insn);
 	if (val)
 	  return val;
-/*	printf ("Inserted breakpoint at 0x%x, shadow 0x%x, 0x%x.\n",
-		b->address, b->shadow_contents[0], b->shadow_contents[1]); */
+#ifdef BREAKPOINT_DEBUG
+	printf ("Inserted breakpoint at 0x%x, shadow 0x%x, 0x%x.\n",
+		b->address, b->shadow_contents[0], b->shadow_contents[1]);
+#endif /* BREAKPOINT_DEBUG */
 	b->inserted = 1;
       }
   return 0;
@@ -275,7 +288,10 @@ remove_breakpoints ()
   register struct breakpoint *b;
   int val;
 
-/*   printf ("Removing breakpoints.\n"); */
+#ifdef BREAKPOINT_DEBUG
+  printf ("Removing breakpoints.\n");
+#endif /* BREAKPOINT_DEBUG */
+
   ALL_BREAKPOINTS (b)
     if (b->inserted)
       {
@@ -283,8 +299,10 @@ remove_breakpoints ()
 	if (val)
 	  return val;
 	b->inserted = 0;
-/*	printf ("Removed breakpoint at 0x%x, shadow 0x%x, 0x%x.\n",
-		b->address, b->shadow_contents[0], b->shadow_contents[1]); */
+#ifdef BREAKPOINT_DEBUG
+	printf ("Removed breakpoint at 0x%x, shadow 0x%x, 0x%x.\n",
+		b->address, b->shadow_contents[0], b->shadow_contents[1]);
+#endif /* BREAKPOINT_DEBUG */
       }
 
   return 0;
@@ -293,7 +311,7 @@ remove_breakpoints ()
 /* Clear the "inserted" flag in all breakpoints.
    This is done when the inferior is loaded.  */
 
-int
+void
 mark_breakpoints_out ()
 {
   register struct breakpoint *b;
@@ -334,12 +352,13 @@ breakpoint_cond_eval (exp)
    or -2 if breakpoint says it has deleted itself and don't stop,
    or -3 if hit a breakpoint number -3 (delete when program stops),
    or else the number of the breakpoint,
-   with 0x1000000 added for a silent breakpoint.  */
+   with 0x1000000 added (or subtracted, for a negative return value) for
+   a silent breakpoint.  */
 
 int
-breakpoint_stop_status (pc, frame)
+breakpoint_stop_status (pc, frame_address)
      CORE_ADDR pc;
-     FRAME frame;
+     FRAME_ADDR frame_address;
 {
   register struct breakpoint *b;
   register int cont = 0;
@@ -350,7 +369,7 @@ breakpoint_stop_status (pc, frame)
   ALL_BREAKPOINTS (b)
     if (b->enable != disabled && b->address == pc)
       {
-	if (b->frame && b->frame != frame)
+	if (b->frame && b->frame != frame_address)
 	  cont = -1;
 	else
 	  {
@@ -376,11 +395,15 @@ breakpoint_stop_status (pc, frame)
 		if (b->enable == temporary)
 		  b->enable = disabled;
 		breakpoint_commands = b->commands;
-		if (breakpoint_commands
-		    && !strcmp ("silent", breakpoint_commands->line))
+		if (b->silent
+		    || (breakpoint_commands
+			&& !strcmp ("silent", breakpoint_commands->line)))
 		  {
-		    breakpoint_commands = breakpoint_commands->next;
-		    return 0x1000000 + b->number;
+		    if (breakpoint_commands)
+		      breakpoint_commands = breakpoint_commands->next;
+		    return (b->number > 0 ?
+			    0x1000000 + b->number :
+			    b->number - 0x1000000);
 		  }
 		return b->number;
 	      }
@@ -538,6 +561,7 @@ set_raw_breakpoint (sal)
   b->line_number = sal.line;
   b->enable = enabled;
   b->next = 0;
+  b->silent = 0;
 
   /* Add this breakpoint to the end of the chain
      so that a list of breakpoints will come out in order
@@ -571,7 +595,7 @@ set_momentary_breakpoint (sal, frame)
   b = set_raw_breakpoint (sal);
   b->number = -3;
   b->enable = delete;
-  b->frame = frame;
+  b->frame = (frame ? FRAME_FP (frame) : 0);
 }
 
 void
@@ -622,14 +646,12 @@ set_breakpoint (s, line, tempflag)
 }
 
 /* Set a breakpoint according to ARG (function, linenum or *address)
-   and make it temporary if TEMPFLAG is nonzero.
-
-   LINE_NUM is for C++.  */
+   and make it temporary if TEMPFLAG is nonzero. */
 
 static void
-break_command_1 (arg, tempflag, from_tty, line_num)
+break_command_1 (arg, tempflag, from_tty)
      char *arg;
-     int tempflag, from_tty, line_num;
+     int tempflag, from_tty;
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
@@ -637,6 +659,7 @@ break_command_1 (arg, tempflag, from_tty, line_num)
   register struct breakpoint *b;
   char *save_arg;
   int i;
+  CORE_ADDR pc;
 
   sals.sals = NULL;
   sals.nelts = 0;
@@ -644,58 +667,64 @@ break_command_1 (arg, tempflag, from_tty, line_num)
   sal.line = sal.pc = sal.end = 0;
   sal.symtab = 0;
 
-  if (arg)
-    {
-      CORE_ADDR pc;
-      sals = decode_line_1 (&arg, 1, 0, 0);
+  /* If no arg given, or if first arg is 'if ', use the default breakpoint. */
 
-      if (! sals.nelts) return;
-      save_arg = arg;
-      for (i = 0; i < sals.nelts; i++)
+  if (!arg || (arg[0] == 'i' && arg[1] == 'f' 
+	       && (arg[2] == ' ' || arg[2] == '\t')))
+    {
+      if (default_breakpoint_valid)
 	{
-	  sal = sals.sals[i];
-	  if (sal.pc == 0 && sal.symtab != 0)
-	    {
-	      pc = find_line_pc (sal.symtab, sal.line);
-	      if (pc == 0)
-		error ("No line %d in file \"%s\".",
-		       sal.line, sal.symtab->filename);
-	    }
-	  else pc = sal.pc;
-
-	  while (*arg)
-	    {
-	      if (arg[0] == 'i' && arg[1] == 'f'
-		  && (arg[2] == ' ' || arg[2] == '\t'))
-		cond = (struct expression *) parse_c_1 ((arg += 2, &arg),
-							block_for_pc (pc), 0);
-	      else
-		error ("Junk at end of arguments.");
-	    }
-	  arg = save_arg;
-	  sals.sals[i].pc = pc;
+	  sals.sals = (struct symtab_and_line *) 
+	    malloc (sizeof (struct symtab_and_line));
+	  sal.pc = default_breakpoint_address;
+	  sal.line = default_breakpoint_line;
+	  sal.symtab = default_breakpoint_symtab;
+	  sals.sals[0] = sal;
+	  sals.nelts = 1;
 	}
-    }
-  else if (default_breakpoint_valid)
-    {
-      sals.sals = (struct symtab_and_line *) malloc (sizeof (struct symtab_and_line));
-      sal.pc = default_breakpoint_address;
-      sal.line = default_breakpoint_line;
-      sal.symtab = default_breakpoint_symtab;
-      sals.sals[0] = sal;
-      sals.nelts = 1;
+      else
+	error ("No default breakpoint address now.");
     }
   else
-    error ("No default breakpoint address now.");
+    if (default_breakpoint_valid)
+      sals = decode_line_1 (&arg, 1, default_breakpoint_symtab,
+			    default_breakpoint_line);
+    else
+      sals = decode_line_1 (&arg, 1, 0, 0);
+  
+  if (! sals.nelts) 
+    return;
+
+  save_arg = arg;
+  for (i = 0; i < sals.nelts; i++)
+    {
+      sal = sals.sals[i];
+      if (sal.pc == 0 && sal.symtab != 0)
+	{
+	  pc = find_line_pc (sal.symtab, sal.line);
+	  if (pc == 0)
+	    error ("No line %d in file \"%s\".",
+		   sal.line, sal.symtab->filename);
+	}
+      else 
+	pc = sal.pc;
+      
+      while (arg && *arg)
+	{
+	  if (arg[0] == 'i' && arg[1] == 'f'
+	      && (arg[2] == ' ' || arg[2] == '\t'))
+	    cond = (struct expression *) parse_c_1 ((arg += 2, &arg),
+						    block_for_pc (pc), 0);
+	  else
+	    error ("Junk at end of arguments.");
+	}
+      arg = save_arg;
+      sals.sals[i].pc = pc;
+    }
 
   for (i = 0; i < sals.nelts; i++)
     {
       sal = sals.sals[i];
-      sal.line += line_num;  /** C++  **/
-      if (line_num != 0)
-	{			/* get the pc for a particular line  */
-	  sal.pc = find_line_pc (sal.symtab, sal.line);
-	}
 
       if (from_tty)
 	describe_other_breakpoints (sal.pc);
@@ -711,6 +740,12 @@ break_command_1 (arg, tempflag, from_tty, line_num)
 	printf (": file %s, line %d.", b->symtab->filename, b->line_number);
       printf ("\n");
     }
+
+  if (sals.nelts > 1)
+    {
+      printf ("Multiple breakpoints were set.\n");
+      printf ("Use the \"delete\" command to delete unwanted breakpoints.\n");
+    }
   free (sals.sals);
 }
 
@@ -719,7 +754,7 @@ break_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
-  break_command_1 (arg, 0, from_tty, 0);
+  break_command_1 (arg, 0, from_tty);
 }
 
 static void
@@ -727,7 +762,62 @@ tbreak_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
-  break_command_1 (arg, 1, from_tty, 0);
+  break_command_1 (arg, 1, from_tty);
+}
+
+/*
+ * Helper routine for the until_command routine in infcmd.c.  Here
+ * because it uses the mechanisms of breakpoints.
+ */
+void
+until_break_command(arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  struct symtabs_and_lines sals;
+  struct symtab_and_line sal;
+  FRAME frame = get_current_frame ();
+  FRAME prev_frame = get_prev_frame (frame);
+
+  /* Set a breakpoint where the user wants it and at return from
+     this function */
+  
+  if (default_breakpoint_valid)
+    sals = decode_line_1 (&arg, 1, default_breakpoint_symtab,
+			  default_breakpoint_line);
+  else
+    sals = decode_line_1 (&arg, 1, 0, 0);
+  
+  if (sals.nelts != 1)
+    error ("Couldn't get information on specified line.");
+  
+  sal = sals.sals[0];
+  free (sals.sals);		/* malloc'd, so freed */
+  
+  if (*arg)
+    error ("Junk at end of arguments.");
+  
+  if (sal.pc == 0 && sal.symtab != 0)
+    sal.pc = find_line_pc (sal.symtab, sal.line);
+  
+  if (sal.pc == 0)
+    error ("No line %d in file \"%s\".", sal.line, sal.symtab->filename);
+  
+  set_momentary_breakpoint (sal, 0);
+  
+  /* Keep within the current frame */
+  
+  if (prev_frame)
+    {
+      struct frame_info *fi;
+      
+      fi = get_frame_info (prev_frame);
+      sal = find_pc_line (fi->pc, 0);
+      sal.pc = fi->pc;
+      set_momentary_breakpoint (sal, prev_frame);
+    }
+  
+  proceed (-1, -1, 0);
 }
 
 static void
@@ -742,7 +832,9 @@ clear_command (arg, from_tty)
   int i;
 
   if (arg)
-    sals = decode_line_spec (arg, 1);
+    {
+      sals = decode_line_spec (arg, 1);
+    }
   else
     {
       sals.sals = (struct symtab_and_line *) malloc (sizeof (struct symtab_and_line));
@@ -801,7 +893,7 @@ clear_command (arg, from_tty)
     }
   free (sals.sals);
 }
-
+
 /* Delete breakpoint number BNUM if it is a `delete' breakpoint.
    This is called after breakpoint BNUM has been hit.
    Also delete any breakpoint numbered -3 unless there are breakpoint
@@ -851,7 +943,7 @@ delete_breakpoint (bpt)
   free (bpt);
 }
 
-void map_breakpoint_numbers ();
+static void map_breakpoint_numbers ();
 
 static void
 delete_command (arg, from_tty)
@@ -1048,19 +1140,41 @@ enable_delete_command (args)
   map_breakpoint_numbers (args, enable_delete_breakpoint);
 }
 
+/*
+ * Use default_breakpoint_'s, or nothing if they aren't valid.
+ */
+struct symtabs_and_lines
+decode_line_spec_1 (string, funfirstline)
+     char *string;
+     int funfirstline;
+{
+  struct symtabs_and_lines sals;
+  if (string == 0)
+    error ("Empty line specification.");
+  if (default_breakpoint_valid)
+    sals = decode_line_1 (&string, funfirstline,
+			  default_breakpoint_symtab, default_breakpoint_line);
+  else
+    sals = decode_line_1 (&string, funfirstline, 0, 0);
+  if (*string)
+    error ("Junk at end of line specification: %s", string);
+  return sals;
+}
+
 
 /* Chain containing all defined enable commands.  */
 
-struct cmd_list_element *enablelist;
+extern struct cmd_list_element 
+  *enablelist, *disablelist,
+  *deletelist, *enablebreaklist;
 
 extern struct cmd_list_element *cmdlist;
 
-static
-initialize ()
+void
+_initialize_breakpoint ()
 {
   breakpoint_chain = 0;
   breakpoint_count = 0;
-  enablelist = 0;
 
   add_com ("ignore", class_breakpoint, ignore_command,
 	   "Set ignore-count of breakpoint number N to COUNT.");
@@ -1068,6 +1182,7 @@ initialize ()
   add_com ("commands", class_breakpoint, commands_command,
 	   "Set commands to be executed when a breakpoint is hit.\n\
 Give breakpoint number as argument after \"commands\".\n\
+With no argument, the targeted breakpoint is the last one set.\n\
 The commands themselves follow starting on the next line.\n\
 Type a line containing \"end\" to indicate the end of them.\n\
 Give \"silent\" as the first line to make the breakpoint silent;\n\
@@ -1085,35 +1200,80 @@ so it will be disabled when hit.  Equivalent to \"break\" followed\n\
 by using \"enable once\" on the breakpoint number.");
 
   add_prefix_cmd ("enable", class_breakpoint, enable_command,
-		  "Enable some breakpoints.  Give breakpoint numbers as arguments.\n\
+		  "Enable some breakpoints or auto-display expressions.\n\
+Give breakpoint numbers (separated by spaces) as arguments.\n\
 With no subcommand, breakpoints are enabled until you command otherwise.\n\
 This is used to cancel the effect of the \"disable\" command.\n\
-With a subcommand you can enable temporarily.",
+With a subcommand you can enable temporarily.\n\
+\n\
+The \"display\" subcommand applies to auto-displays instead of breakpoints.",
 		  &enablelist, "enable ", 1, &cmdlist);
 
-  add_cmd ("delete", 0, enable_delete_command,
+  add_abbrev_prefix_cmd ("breakpoints", class_breakpoint, enable_command,
+		  "Enable some breakpoints or auto-display expressions.\n\
+Give breakpoint numbers (separated by spaces) as arguments.\n\
+With no subcommand, breakpoints are enabled until you command otherwise.\n\
+This is used to cancel the effect of the \"disable\" command.\n\
+May be abbreviates to simply \"enable\".\n\
+With a subcommand you can enable temporarily.",
+		  &enablebreaklist, "enable breakpoints ", 1, &enablelist);
+
+  add_cmd ("once", no_class, enable_once_command,
+	   "Enable breakpoints for one hit.  Give breakpoint numbers.\n\
+If a breakpoint is hit while enabled in this fashion, it becomes disabled.\n\
+See the \"tbreak\" command which sets a breakpoint and enables it once.",
+	   &enablebreaklist);
+
+  add_cmd ("delete", no_class, enable_delete_command,
+	   "Enable breakpoints and delete when hit.  Give breakpoint numbers.\n\
+If a breakpoint is hit while enabled in this fashion, it is deleted.",
+	   &enablebreaklist);
+
+  add_cmd ("delete", no_class, enable_delete_command,
 	   "Enable breakpoints and delete when hit.  Give breakpoint numbers.\n\
 If a breakpoint is hit while enabled in this fashion, it is deleted.",
 	   &enablelist);
 
-  add_cmd ("once", 0, enable_once_command,
+  add_cmd ("once", no_class, enable_once_command,
 	   "Enable breakpoints for one hit.  Give breakpoint numbers.\n\
 If a breakpoint is hit while enabled in this fashion, it becomes disabled.\n\
 See the \"tbreak\" command which sets a breakpoint and enables it once.",
 	   &enablelist);
 
-  add_com ("disable", class_breakpoint, disable_command,
-	   "Disable some breakpoints.  Give breakpoint numbers as arguments.\n\
-With no arguments, disable all breakpoints.\n\
-A disabled breakpoint is not forgotten,\n\
-but it has no effect until enabled again.");
+  add_prefix_cmd ("disable", class_breakpoint, disable_command,
+	   "Disable some breakpoints or auto-display expressions.\n\
+Arguments are breakpoint numbers with spaces in between.\n\
+To disable all breakpoints, give no argument.\n\
+A disabled breakpoint is not forgotten, but has no effect until reenabled.\n\
+\n\
+The \"display\" subcommand applies to auto-displays instead of breakpoints.",
+		  &disablelist, "disable ", 1, &cmdlist);
   add_com_alias ("dis", "disable", class_breakpoint, 1);
 
-  add_com ("delete", class_breakpoint, delete_command,
-	   "Delete breakpoints, specifying breakpoint numbers; or all breakpoints.\n\
+  add_abbrev_cmd ("breakpoints", class_breakpoint, disable_command,
+	   "Disable some breakpoints or auto-display expressions.\n\
 Arguments are breakpoint numbers with spaces in between.\n\
-To delete all breakpoints, give no argument.");
+To disable all breakpoints, give no argument.\n\
+A disabled breakpoint is not forgotten, but has no effect until reenabled.\n\
+This command may be abbreviated \"disable\".",
+	   &disablelist);
+
+  add_prefix_cmd ("delete", class_breakpoint, delete_command,
+	   "Delete some breakpoints or auto-display expressions.\n\
+Arguments are breakpoint numbers with spaces in between.\n\
+To delete all breakpoints, give no argument.\n\
+\n\
+The \"display\" subcommand applies to auto-displays instead of breakpoints.",
+		  &deletelist, "delete ", 1, &cmdlist);
   add_com_alias ("d", "delete", class_breakpoint, 1);
+  add_com_alias ("unset", "delete", class_breakpoint, 1);
+
+  add_abbrev_cmd ("breakpoints", class_breakpoint, delete_command,
+	   "Delete some breakpoints or auto-display expressions.\n\
+Arguments are breakpoint numbers with spaces in between.\n\
+To delete all breakpoints, give no argument.\n\
+This command may be abbreviated \"delete\".",
+	   &deletelist);
 
   add_com ("clear", class_breakpoint, clear_command,
 	   "Clear breakpoint at specified line or function.\n\
@@ -1152,4 +1312,3 @@ Convenience variable \"$_\" and default examine address for \"x\"\n\
 are set to the address of the last breakpoint listed.");
 }
 
-END_FILE

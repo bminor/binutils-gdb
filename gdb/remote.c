@@ -62,18 +62,21 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 	kill req	k
 */
 
-#include <stdio.h>
-#include <signal.h>
-
 #include "defs.h"
-#include "initialize.h"
 #include "param.h"
 #include "frame.h"
 #include "inferior.h"
 
 #include "wait.h"
+
+#ifdef USG
+#include <sys/types.h>
+#include <fcntl.h>
+#endif
+
+#include <stdio.h>
+#include <signal.h>
 #include <sys/ioctl.h>
-#include <a.out.h>
 #include <sys/file.h>
 
 #ifdef HAVE_TERMIO
@@ -97,14 +100,13 @@ int icache;
 /* Descriptor for I/O to remote machine.  */
 int remote_desc;
 
-#define	PBUFSIZ	300
+#define	PBUFSIZ	400
 
 static void remote_send ();
 static void putpkt ();
 static void getpkt ();
 static void dcache_flush ();
 
-START_FILE
 
 /* Open a connection to a remote debugger.
    NAME is the filename used for communication.  */
@@ -239,8 +241,8 @@ remote_store_registers (regs)
   p = buf + 1;
   for (i = 0; i < REGISTER_BYTES; i++)
     {
-      *p++ = (regs[i] > 4) & 0xf;
-      *p++ = regs[i] & 0xf;
+      *p++ = tohex ((regs[i] >> 4) & 0xf);
+      *p++ = tohex (regs[i] & 0xf);
     }
 
   remote_send (buf);
@@ -305,8 +307,8 @@ remote_write_bytes (memaddr, myaddr, len)
   p = buf + strlen (buf);
   for (i = 0; i < len; i++)
     {
-      *p++ = (myaddr[i] > 4) & 0xf;
-      *p++ = myaddr[i] & 0xf;
+      *p++ = tohex ((myaddr[i] >> 4) & 0xf);
+      *p++ = tohex (myaddr[i] & 0xf);
     }
 
   remote_send (buf);
@@ -338,7 +340,7 @@ remote_read_bytes (memaddr, myaddr, len)
      each byte encoded as two hex characters.  */
 
   p = buf;
-  for (i = 0; i < REGISTER_BYTES; i++)
+  for (i = 0; i < len; i++)
     {
       if (p[0] == 0 || p[1] == 0)
 	error ("Remote reply is too short: %s", buf);
@@ -440,12 +442,15 @@ getpkt (buf)
      char *buf;
 {
   char *bp;
-  char csum = 0;
-  int c, c1, c2;
+  unsigned char csum;
+  unsigned int c, c1, c2;
   extern kiodebug;
 
   while (1)
     {
+      /* Force csum to be zero here because of possible error retry.  */
+      csum = 0;
+      
       while ((c = readchar()) != '$');
 
       bp = buf;
@@ -616,8 +621,3 @@ dcache_init ()
     insque (db, &dcache_free);
 }
 
-static initialize ()
-{
-}
-
-END_FILE

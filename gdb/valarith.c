@@ -19,13 +19,11 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 */
 
 #include "defs.h"
-#include "initialize.h"
 #include "param.h"
 #include "symtab.h"
 #include "value.h"
 #include "expression.h"
 
-START_FILE
 
 value value_x_binop ();
 
@@ -332,7 +330,7 @@ value_binop (arg1, arg2, op)
     }
   else
     {
-      long v1, v2, v;
+      LONGEST v1, v2, v;
       v1 = value_as_long (arg1);
       v2 = value_as_long (arg2);
 
@@ -398,8 +396,8 @@ value_binop (arg1, arg2, op)
 	  error ("Invalid binary operation on numbers.");
 	}
 
-      val = allocate_value (builtin_type_long);
-      *(long *) VALUE_CONTENTS (val) = v;
+      val = allocate_value (BUILTIN_TYPE_LONGEST);
+      *(LONGEST *) VALUE_CONTENTS (val) = v;
     }
 
   return val;
@@ -532,9 +530,3 @@ value_lognot (arg1)
   return value_from_long (VALUE_TYPE (arg1), ~ value_as_long (arg1));
 }
 
-static
-initialize ()
-{
-}
-
-END_FILE

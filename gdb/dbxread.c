@@ -1,6 +1,5 @@
 /* Read dbx symbol tables and convert to internal format, for GDB.
-   Copyright (C) 1986, 1987, 1988 Free Software Foundation, Inc.
-   Hacked by Michael Tiemann (tiemann@mcc.com)
+   Copyright (C) 1986, 1987, 1988, 1989 Free Software Foundation, Inc.
 
 GDB is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY.  No author or distributor accepts responsibility to anyone
@@ -23,24 +22,113 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 
 #ifdef READ_DBX_FORMAT
 
+#ifdef USG
+#include <sys/types.h>
+#include <fcntl.h>
+#define L_SET 0
+#define L_INCR 1
+#endif
+
+#ifdef COFF_ENCAPSULATE
+#include "a.out.encap.h"
+#include "stab.gnu.h"
+#else
 #include <a.out.h>
 #include <stab.h>
+#endif
+
+/*
+ * Define specifically gnu symbols here.
+ */
+
+/* The following type indicates the definition of a symbol as being
+   an indirect reference to another symbol.  The other symbol
+   appears as an undefined reference, immediately following this symbol.
+
+   Indirection is asymmetrical.  The other symbol's value will be used
+   to satisfy requests for the indirect symbol, but not vice versa.
+   If the other symbol does not have a definition, libraries will
+   be searched to find a definition.  */
+#ifndef N_INDR
+#define N_INDR 0xa
+#endif
+
+/* The following symbols refer to set elements.
+   All the N_SET[ATDB] symbols with the same name form one set.
+   Space is allocated for the set in the text section, and each set
+   element's value is stored into one word of the space.
+   The first word of the space is the length of the set (number of elements).
+
+   The address of the set is made into an N_SETV symbol
+   whose name is the same as the name of the set.
+   This symbol acts like a N_DATA global symbol
+   in that it can satisfy undefined external references.  */
+
+#ifndef N_SETA
+#define	N_SETA	0x14		/* Absolute set element symbol */
+#endif				/* This is input to LD, in a .o file.  */
+
+#ifndef N_SETT
+#define	N_SETT	0x16		/* Text set element symbol */
+#endif				/* This is input to LD, in a .o file.  */
+
+#ifndef N_SETD
+#define	N_SETD	0x18		/* Data set element symbol */
+#endif				/* This is input to LD, in a .o file.  */
+
+#ifndef N_SETB
+#define	N_SETB	0x1A		/* Bss set element symbol */
+#endif				/* This is input to LD, in a .o file.  */
+
+/* Macros dealing with the set element symbols defined in a.out.h */
+#define	SET_ELEMENT_P(x)	((x)>=N_SETA&&(x)<=(N_SETB|N_EXT))
+#define TYPE_OF_SET_ELEMENT(x)	((x)-N_SETA+N_ABS)
+
+#ifndef N_SETV
+#define N_SETV	0x1C		/* Pointer to set vector in data area.  */
+#endif				/* This is output from LD.  */
+
+#ifndef N_WARNING
+#define N_WARNING 0x1E		/* Warning message to print if file included */
+#endif				/* This is input to ld */
+
+#ifndef __GNU_STAB__
+
+/* Line number for the data section.  This is to be used to describe
+   the source location of a variable declaration.  */
+#ifndef N_DSLINE
+#define N_DSLINE (N_SLINE+N_DATA-N_TEXT)
+#endif
+
+/* Line number for the bss section.  This is to be used to describe
+   the source location of a variable declaration.  */
+#ifndef N_BSLINE
+#define N_BSLINE (N_SLINE+N_BSS-N_TEXT)
+#endif
+
+#endif /* not __GNU_STAB__ */
+
 #include <stdio.h>
 #include <obstack.h>
 #include <sys/param.h>
 #include <sys/file.h>
 #include <sys/stat.h>
 #include "defs.h"
-#include "initialize.h"
 #include "symtab.h"
+
+#ifndef COFF_FORMAT
+#define AOUTHDR		struct exec
+#endif
 
 static void add_symbol_to_list ();
 static void read_dbx_symtab ();
 static void process_one_symbol ();
+static void free_all_psymbols ();
 static struct type *read_type ();
 static struct type *read_range_type ();
 static struct type *read_enum_type ();
 static struct type *read_struct_type ();
+static struct type *read_array_type ();
 static long read_number ();
 static void finish_block ();
 static struct blockvector *make_blockvector ();
@@ -51,14 +139,36 @@ static void hash_symsegs ();
 
 extern struct symtab *read_symsegs ();
 extern void free_all_symtabs ();
+extern void free_all_psymtabs ();
+extern void free_inclink_symtabs ();
 
 /* C++ */
-static struct type **read_args ();
+static struct type **read_args();
+
+/* Macro to determine which symbols to ignore when reading the first symbol
+   of a file.  Some machines override this definition. */
+#ifdef N_NSYMS
+#ifndef IGNORE_SYMBOL
+/* This code is used on Ultrix systems.  Ignore it */
+#define IGNORE_SYMBOL(type)  (type == N_NSYMS)
+#endif
+#else
+#ifndef IGNORE_SYMBOL
+/* Don't ignore any symbols. */
+#define IGNORE_SYMBOL(type) (0)
+#endif
+#endif /* not N_NSYMS */
 
 /* Macro for number of symbol table entries (in usual a.out format).
    Some machines override this definition.  */
 #ifndef NUMBER_OF_SYMBOLS
+#ifdef COFF_HEADER
+#define NUMBER_OF_SYMBOLS \
+  ((COFF_HEADER(hdr) ? hdr.coffhdr.filehdr.f_nsyms : hdr.a_syms) /	\
+   sizeof (struct nlist))
+#else
 #define NUMBER_OF_SYMBOLS (hdr.a_syms / sizeof (struct nlist))
+#endif
 #endif
 
 /* Macro for file-offset of symbol table (in usual a.out format).  */
@@ -80,21 +190,38 @@ static struct type **read_args ();
 
 /* Macro to declare variables to hold the file's header data.  */
 #ifndef DECLARE_FILE_HEADERS
-#define DECLARE_FILE_HEADERS  struct exec hdr
+#define DECLARE_FILE_HEADERS  AOUTHDR hdr
 #endif
 
 /* Macro to read the header data from descriptor DESC and validate it.
    NAME is the file name, for error messages.  */
 #ifndef READ_FILE_HEADERS
+#ifdef HEADER_SEEK_FD
+#define READ_FILE_HEADERS(DESC, NAME)		\
+{ HEADER_SEEK_FD (DESC);			\
+  val = myread (DESC, &hdr, sizeof hdr);	\
+  if (val < 0) perror_with_name (NAME);		\
+  if (N_BADMAG (hdr))				\
+    error ("File \"%s\" not in executable format.", NAME); }
+#else
 #define READ_FILE_HEADERS(DESC, NAME)		\
 { val = myread (DESC, &hdr, sizeof hdr);	\
   if (val < 0) perror_with_name (NAME);		\
   if (N_BADMAG (hdr))				\
     error ("File \"%s\" not in executable format.", NAME); }
 #endif
-
-START_FILE
+#endif
 
+/* Macro for size of text segment */
+#ifndef SIZE_OF_TEXT_SEGMENT
+#define SIZE_OF_TEXT_SEGMENT hdr.a_text
+#endif
+
+/* Macro for name of symbol to indicate a file compiled with gcc. */
+#ifndef GCC_COMPILED_FLAG_SYMBOL
+#define GCC_COMPILED_FLAG_SYMBOL "gcc_compiled."
+#endif
+
 /* Chain of symtabs made from reading the file's symsegs.
    These symtabs do not go into symtab_list themselves,
    but the information is copied from them when appropriate
@@ -247,6 +374,26 @@ extern CORE_ADDR first_object_file_end;	/* From blockframe.c */
 
 static char *symfile;
 
+/* Low and high symbol values (inclusive) for the global variable
+   entries in the symbol file. */
+
+static int first_global_sym, last_global_sym;
+
+/* Partial symbol list for all of the global and static symbols found
+   in a file */
+
+struct partial_symbol *global_psymbols, *static_psymbols;
+int global_psymbols_allocated, static_psymbols_allocated;
+
+/* Position for next psymbol to be added */
+
+struct partial_symbol *next_ps_global, *next_ps_static;
+
+/* Global variable which, when set, indicates that we are processing a
+   .o file compiled with gcc */
+
+static unsigned char processing_gcc_compilation;
+
 static int
 xxmalloc (n)
 {
@@ -331,6 +478,23 @@ static int n_header_files;
 
 static int n_allocated_header_files;
 
+/* During initial symbol readin, we need to have a structure to keep
+   track of which psymtabs have which bincls in them.  This structure
+   is used during readin to setup the list of dependencies within each
+   partial symbol table. */
+ 
+struct header_file_location
+{
+  char *name;			/* Name of header file */
+  int instance;			/* See above */
+  struct partial_symtab *pst;	/* Partial symtab that has the
+				   BINCL/EINCL defs for this file */
+};
+
+/* The actual list and controling variables */
+static struct header_file_location *bincl_list, *next_bincl;
+static int bincls_allocated;
+  
 /* Within each object file, various header files are assigned numbers.
    A type is defined or referred to with a pair of numbers
    (FILENUM,TYPENUM) where FILENUM is the number of the header file
@@ -375,8 +539,9 @@ free_header_files ()
   register int i;
   for (i = 0; i < n_header_files; i++)
     free (header_files[i].name);
-  free (header_files);
-  free (this_object_header_files);
+  if (header_files) free (header_files);
+  if (this_object_header_files)
+    free (this_object_header_files);
 }
 
 /* Called at the start of each object file's symbols.
@@ -476,14 +641,16 @@ add_new_header_file (name, instance)
   if (n_header_files == n_allocated_header_files)
     {
       n_allocated_header_files *= 2;
-      header_files
-	= (struct header_file *) xrealloc (header_files, n_allocated_header_files * sizeof (struct header_file));
+      header_files = (struct header_file *)
+	xrealloc (header_files,
+		  (n_allocated_header_files
+		   * sizeof (struct header_file)));
     }
 
   /* Create an entry for this header file.  */
 
   i = n_header_files++;
-  header_files[i].name = name;
+  header_files[i].name = savestring (name, strlen(name));
   header_files[i].instance = instance;
   header_files[i].length = 10;
   header_files[i].vector
@@ -518,7 +685,9 @@ dbx_lookup_type (typenums)
 	{
 	  type_vector_length *= 2;
 	  type_vector = (struct typevector *)
-	    xrealloc (type_vector, sizeof (struct typevector) + type_vector_length * sizeof (struct type *));
+	    xrealloc (type_vector,
+		      (sizeof (struct typevector)
+		       + type_vector_length * sizeof (struct type *)));
 	  bzero (&type_vector->type[type_vector_length / 2],
 		 type_vector_length * sizeof (struct type *) / 2);
 	}
@@ -566,7 +735,6 @@ dbx_alloc_type (typenums)
 					    sizeof (struct type));
       bzero (type, sizeof (struct type));
       TYPE_VPTR_FIELDNO (type) = -1;
-      TYPE_MAIN_VARIANT (type) = type;
       *type_addr = type;
     }
   return type;
@@ -677,7 +845,9 @@ finish_block (symbol, listhead, old_blocks, start, end)
   for (next = *listhead, i = 0; next; i += next->nsyms, next = next->next);
 
   block = (struct block *) obstack_alloc (symbol_obstack,
-					  sizeof (struct block) + (i - 1) * sizeof (struct symbol *));
+					  (sizeof (struct block)
+					   + ((i - 1)
+					      * sizeof (struct symbol *))));
 
   /* Copy the symbols into the block.  */
 
@@ -692,6 +862,7 @@ finish_block (symbol, listhead, old_blocks, start, end)
   BLOCK_START (block) = start;
   BLOCK_END (block) = end;
   BLOCK_SUPERBLOCK (block) = 0;	/* Filled in when containing block is made */
+  BLOCK_GCC_COMPILED (block) = processing_gcc_compilation;
 
   /* Put the block in as the value of the symbol that names it.  */
 
@@ -731,8 +902,9 @@ finish_block (symbol, listhead, old_blocks, start, end)
 
   /* Allocate in the symbol_obstack to save time.
      It wastes a little space.  */
-  pblock = (struct pending_block *) obstack_alloc (symbol_obstack,
-						   sizeof (struct pending_block));
+  pblock = (struct pending_block *)
+    obstack_alloc (symbol_obstack,
+		   sizeof (struct pending_block));
   pblock->block = block;
   if (opblock)
     {
@@ -757,7 +929,10 @@ make_blockvector ()
 
   for (next = pending_blocks, i = 0; next; next = next->next, i++);
 
-  blockvector = (struct blockvector *) obstack_alloc (symbol_obstack, sizeof (struct blockvector) + (i - 1) * sizeof (struct block *));
+  blockvector = (struct blockvector *)
+    obstack_alloc (symbol_obstack,
+		   (sizeof (struct blockvector)
+		    + (i - 1) * sizeof (struct block *)));
 
   /* Copy the blocks into the blockvector.
      This is done in reverse order, which happens to put
@@ -785,11 +960,12 @@ make_blockvector ()
 
 /* Manage the vector of line numbers.  */
 
-static
+static void
 record_line (line, pc)
      int line;
      CORE_ADDR pc;
 {
+  struct linetable_entry *e;
   /* Ignore the dummy line number in libg.o */
 
   if (line == 0xffff)
@@ -802,18 +978,13 @@ record_line (line, pc)
       line_vector_length *= 2;
       line_vector = (struct linetable *)
 	xrealloc (line_vector,
-		  sizeof (struct linetable) + line_vector_length * sizeof (int));
+		  (sizeof (struct linetable)
+		   + line_vector_length * sizeof (struct linetable_entry)));
       current_subfile->line_vector = line_vector;
     }
 
-  /* If this line is not continguous with previous one recorded,
-     record a line-number entry for it.  */
-  if (line != prev_line_number + 1)
-    line_vector->item[line_vector_index++] = - line;
-  prev_line_number = line;
-
-  /* Record the core address of the line.  */
-  line_vector->item[line_vector_index++] = pc;
+  e = line_vector->item + line_vector_index++;
+  e->line = line; e->pc = pc;
 }
 
 /* Start a new symtab for a new source file.
@@ -849,7 +1020,9 @@ start_symtab (name, start_addr)
     return;
 
   type_vector_length = 160;
-  type_vector = (struct typevector *) xxmalloc (sizeof (struct typevector) + type_vector_length * sizeof (struct type *));
+  type_vector = (struct typevector *)
+    xxmalloc (sizeof (struct typevector)
+	      + type_vector_length * sizeof (struct type *));
   bzero (type_vector->type, type_vector_length * sizeof (struct type *));
 
   /* Initialize the list of sub source files with one entry
@@ -858,6 +1031,11 @@ start_symtab (name, start_addr)
   subfiles = 0;
   current_subfile = 0;
   start_subfile (name);
+
+  /* Set default for compiler to pcc; assume that we aren't processing
+     a gcc compiled file until proved otherwise.  */
+
+  processing_gcc_compilation = 0;
 }
 
 /* Handle an N_SOL symbol, which indicates the start of
@@ -901,7 +1079,8 @@ start_subfile (name)
   line_vector_length = 1000;
   prev_line_number = -2;	/* Force first line number to be explicit */
   line_vector = (struct linetable *)
-    xxmalloc (sizeof (struct linetable) + line_vector_length * sizeof (int));
+    xxmalloc (sizeof (struct linetable)
+	      + line_vector_length * sizeof (struct linetable_entry));
 
   /* Make an entry for this subfile in the list of all subfiles
      of the current main source file.  */
@@ -978,7 +1157,8 @@ end_symtab (end_addr)
       lv = subfile->line_vector;
       lv->nitems = subfile->line_vector_index;
       symtab->linetable = (struct linetable *)
-	xrealloc (lv, sizeof (struct linetable) + lv->nitems * sizeof (int));
+	xrealloc (lv, (sizeof (struct linetable)
+		       + lv->nitems * sizeof (struct linetable_entry)));
       symtab->nlines = 0;
       symtab->line_charpos = 0;
 
@@ -1123,8 +1303,12 @@ discard_misc_bunches ()
     }
 }
 
+/* INCLINK nonzero means bunches are from an incrementally-linked file.
+   Add them to the existing bunches.
+   Otherwise INCLINK is zero, and we start from scratch. */
 static void
-condense_misc_bunches ()
+condense_misc_bunches (inclink)
+     int inclink;
 {
   register int i, j;
   register struct misc_bunch *bunch;
@@ -1134,11 +1318,22 @@ condense_misc_bunches ()
   int offset = 0;
 #endif
 
-  misc_function_vector
-    = (struct misc_function *)
-      xxmalloc (misc_count * sizeof (struct misc_function));
-
-  j = 0;
+  if (inclink)
+    {
+      misc_function_vector
+	= (struct misc_function *)
+	  xrealloc (misc_function_vector, (misc_count + misc_function_count)
+		    * sizeof (struct misc_function));
+      j = misc_function_count;
+    }
+  else
+    {
+      misc_function_vector
+	= (struct misc_function *)
+	  xxmalloc (misc_count * sizeof (struct misc_function));
+      j = 0;
+    }
+  
   bunch = misc_bunch;
   while (bunch)
     {
@@ -1155,11 +1350,15 @@ condense_misc_bunches ()
       misc_bunch_index = MISC_BUNCH_SIZE;
     }
 
-  misc_function_count = j;
+  if (inclink)
+    misc_function_count += misc_count;
+  else
+    misc_function_count = j;
 
   /* Sort the misc functions by address.  */
 
-  qsort (misc_function_vector, j, sizeof (struct misc_function),
+  qsort (misc_function_vector, misc_function_count, 
+	 sizeof (struct misc_function),
 	 compare_misc_functions);
 }
 
@@ -1185,42 +1384,51 @@ compare_symbols (s1, s2)
 	  - (SYMBOL_CLASS (*s1) == LOC_REGISTER));
 }
 
+static void sort_symtab_syms ();
+
 static void
 sort_syms ()
 {
   register struct symtab *s;
-  int i, nbl;
-  register struct blockvector *bv;
-  register struct block *b;
 
   for (s = symtab_list; s; s = s->next)
+    sort_symtab_syms (s);
+}
+
+static void
+sort_symtab_syms (s)
+     register struct symtab *s;
+{
+  register struct blockvector *bv = BLOCKVECTOR (s);
+  int nbl = BLOCKVECTOR_NBLOCKS (bv);
+  int i;
+  register struct block *b;
+
+  /* Note that in the following sort, we always make sure that
+     register debug symbol declarations always come before regular
+     debug symbol declarations (as might happen when parameters are
+     then put into registers by the compiler).  We do this by a
+     correct compare in compare_symbols, and by the reversal of the
+     symbols if we don't sort.  This works as long as a register debug
+     symbol always comes after a parameter debug symbol. */
+
+  /* This is no longer necessary; lookup_block_symbol now always
+     prefers some other declaration over a parameter declaration.  We
+     still sort the thing (that is necessary), but we don't reverse it
+     if we shouldn't sort it.  */
+
+  for (i = 0; i < nbl; i++)
     {
-      bv = BLOCKVECTOR (s);
-      nbl = BLOCKVECTOR_NBLOCKS (bv);
-      for (i = 0; i < nbl; i++)
-	{
-	  b = BLOCKVECTOR_BLOCK (bv, i);
-	  if (BLOCK_SHOULD_SORT (b))
-	    qsort (&BLOCK_SYM (b, 0), BLOCK_NSYMS (b),
-		   sizeof (struct symbol *), compare_symbols);
-#if 0
-	  else
-	    {
-	      int lastindex = BLOCK_NSYMS (b) - 1;
-	      register int j;
-	      for (j = (lastindex - 1) / 2; j >= 0; j--)
-		{
-		  register struct symbol *sym;
-		  sym = BLOCK_SYM (b, j);
-		  BLOCK_SYM (b, j) = BLOCK_SYM (b, lastindex - j);
-		  BLOCK_SYM (b, lastindex - j) = sym;
-		}
-	    }
-#endif
-	}
+      b = BLOCKVECTOR_BLOCK (bv, i);
+      if (BLOCK_SHOULD_SORT (b))
+	qsort (&BLOCK_SYM (b, 0), BLOCK_NSYMS (b),
+	       sizeof (struct symbol *), compare_symbols);
     }
 }
+  
 
+extern struct symtab *psymtab_to_symtab ();
+
 /* This is the symbol-file command.  Read the file, analyze its symbols,
    and add a struct symtab to symtab_list.  */
 
@@ -1243,13 +1451,19 @@ symbol_file_command (name)
 
   if (name == 0)
     {
-      if (symtab_list && !query ("Discard symbol table? ", 0))
+      if ((symtab_list || partial_symtab_list)
+	  && !query ("Discard symbol table? ", 0))
 	error ("Not confirmed.");
+      if (symfile)
+	free (symfile);
+      symfile = 0;
       free_all_symtabs ();
+      free_all_psymtabs ();
       return;
     }
 
-  if (symtab_list && !query ("Load new symbol table from \"%s\"? ", name))
+  if ((symtab_list || partial_symtab_list)
+      && !query ("Load new symbol table from \"%s\"? ", name))
     error ("Not confirmed.");
 
   {
@@ -1272,8 +1486,10 @@ symbol_file_command (name)
 	free (symfile);
       symfile = 0;
       free_all_symtabs ();
+      free_all_psymtabs ();
       printf ("%s has no symbol-table; symbols discarded.\n", name);
       fflush (stdout);
+      do_cleanups (old_chain);
       return;
     }
 
@@ -1304,6 +1520,7 @@ symbol_file_command (name)
     free (symfile);
   symfile = 0;
   free_all_symtabs ();
+  free_all_psymtabs ();
 
   /* Empty the hash table of global syms looking for values.  */
   bzero (global_sym_chain, sizeof global_sym_chain);
@@ -1349,10 +1566,15 @@ symbol_file_command (name)
   if (val < 0)
     perror_with_name (name);
 
+  /* Don't put these on the cleanup chain; they need to stick around
+     until the next call to symbol_file_command.  *Then* we'll free
+     them. */
+  free_header_files ();
+  init_header_files ();
+
   init_misc_functions ();
   make_cleanup (discard_misc_bunches, 0);
-  init_header_files ();
-  make_cleanup (free_header_files, 0);
+
   free_pendings = 0;
   pending_blocks = 0;
   file_symbols = 0;
@@ -1362,16 +1584,11 @@ symbol_file_command (name)
   /* Now that the symbol table data of the executable file are all in core,
      process them and define symbols accordingly.  Closes desc.  */
 
-  read_dbx_symtab (desc, stringtab, NUMBER_OF_SYMBOLS);
-  close (desc);
-
-  /* Sort symbols alphabetically within each block.  */
-
-  sort_syms ();
+  read_dbx_symtab (desc, stringtab, NUMBER_OF_SYMBOLS, 0, 0, 0);
 
   /* Go over the misc functions and install them in vector.  */
 
-  condense_misc_bunches ();
+  condense_misc_bunches (0);
 
   /* Don't allow char * to have a typename (else would get caddr_t.)  */
 
@@ -1379,11 +1596,13 @@ symbol_file_command (name)
 
   /* Make a default for file to list.  */
 
-  select_source_symtab (symtab_list);
-
   symfile = savestring (name, strlen (name));
 
-  do_cleanups (old_chain);
+  /* Call to select_source_symtab used to be here; it was using too
+     much time.  I'll make sure that list_sources can handle the lack
+     of current_source_symtab */
+
+  do_cleanups (old_chain);	/* Descriptor closed here */
 
   /* Free the symtabs made by read_symsegs, but not their contents,
      which have been copied into symtabs on symtab_list.  */
@@ -1393,6 +1612,9 @@ symbol_file_command (name)
       free (symseg_chain);
       symseg_chain = s;
     }
+
+  if (!partial_symtab_list)
+    printf ("\n(no debugging symbols found)...");
 
   printf ("done.\n");
   fflush (stdout);
@@ -1407,7 +1629,7 @@ get_sym_file ()
 }
 
 /* Buffer for reading the symbol table entries.  */
-static struct nlist symbuf[2048];
+static struct nlist symbuf[4096];
 static int symbuf_idx;
 static int symbuf_end;
 
@@ -1449,152 +1671,1038 @@ next_symbol_text ()
   return symbuf[symbuf_idx++].n_un.n_strx + stringtab_global;
 }
 
-/* Given pointers to a a.out symbol table in core containing  dbx style data,
-   analyze them and create struct symtab's describing the symbols.
-   NLISTLEN is the number of symbols in the symbol table.
-   We read them one at a time using stdio.
-   All symbol names are given as offsets relative to STRINGTAB.  */
+/*
+ * Initializes storage for all of the partial symbols that will be
+ * created by read_dbx_symtab and subsidiaries.
+ */
+void 
+init_psymbol_list (total_symbols)
+     int total_symbols;
+{
+  /* Current best guess is that there are approximately a twentieth
+     of the total symbols (in a debugging file) are global or static
+     oriented symbols */
+  global_psymbols_allocated = total_symbols / 10;
+  static_psymbols_allocated = total_symbols / 10;
+  next_ps_global = global_psymbols = (struct partial_symbol *)
+    xmalloc (global_psymbols_allocated * sizeof (struct partial_symbol));
+  next_ps_static = static_psymbols = (struct partial_symbol *)
+    xmalloc (static_psymbols_allocated * sizeof (struct partial_symbol));
+}
+
+/*
+ * Initialize the list of bincls to contain none and have some
+ * allocated.
+ */
+static void
+init_bincl_list (number)
+     int number;
+{
+  bincls_allocated = number;
+  next_bincl = bincl_list = (struct header_file_location *)
+      xmalloc (bincls_allocated * sizeof(struct header_file_location));
+}
+
+/*
+ * Add a bincl to the list.
+ */
+static void
+add_bincl_to_list (pst, name, instance)
+     struct partial_symtab *pst;
+     char *name;
+     int instance;
+{
+  if (next_bincl >= bincl_list + bincls_allocated)
+    {
+      int offset = next_bincl - bincl_list;
+      bincls_allocated *= 2;
+      bincl_list = (struct header_file_location *)
+	xrealloc (bincl_list,
+		  bincls_allocated * sizeof (struct header_file_location));
+      next_bincl = bincl_list + offset;
+    }
+  next_bincl->pst = pst;
+  next_bincl->instance = instance;
+  next_bincl++->name = name;
+}
+
+/*
+ * Given a name, value pair, find the corresponding
+ * bincl in the list.  Return the partial symtab associated
+ * with that header_file_location.
+ */
+struct partial_symtab *
+find_corresponding_bincl_psymtab (name, instance)
+     char *name;
+     int instance;
+{
+  struct header_file_location *bincl;
+
+  for (bincl = bincl_list; bincl < next_bincl; bincl++)
+    if (bincl->instance == instance
+	&& !strcmp (name, bincl->name))
+      return bincl->pst;
+
+  return (struct partial_symtab *) 0;
+}
+
+/*
+ * Free the storage allocated for the bincl list.
+ */
+static void
+free_bincl_list ()
+{
+  free (bincl_list);
+  bincls_allocated = 0;
+}
+
+static struct partial_symtab *start_psymtab ();
+static void add_psymtab_dependency ();
+static void end_psymtab();
+
+/* Given pointers to an a.out symbol table in core containing dbx
+   style data, setup partial_symtab's describing each source file for
+   which debugging information is available.  NLISTLEN is the number
+   of symbols in the symbol table.  All symbol names are given as
+   offsets relative to STRINGTAB.
+
+   I have no idea whether or not this routine should be setup to deal
+   with inclinks.  It seems reasonable to me that they be dealt with
+   standardly, so I am not going to make a strong effort to deal with
+   them here.
+   */
+
+static void process_symbol_for_psymtab ();
 
 static void
-read_dbx_symtab (desc, stringtab, nlistlen)
+read_dbx_symtab (desc, stringtab, nlistlen, inclink, text_addr, text_size)
      int desc;
      register char *stringtab;
      register int nlistlen;
+     int inclink;
+     unsigned text_addr;
+     int text_size;
 {
   register char *namestring;
   register struct symbol *sym, *prev;
   int hash;
   int num_object_files = 0;
+  int past_first_source_file = 0;
   struct cleanup *old_chain;
+  int current_text_start, current_file_symbol_start;
+  struct pending *global_symbols, *static_symbols;
+  int nsl;			/* Length of namestring, when needed */
 
-#ifdef N_BINCL
-  subfile_stack = 0;
+  /* Current partial symtab */
+  struct partial_symtab *pst;
+
+  /* List of current psymtab's include files */
+  char **psymtab_include_list;
+  int includes_allocated;
+  int includes_used;
+
+  /* Index within current psymtab dependency list */
+  struct partial_symtab **dependency_list;
+  int dependencies_used, dependencies_allocated;
+
+  /* Setup a define to deal cleanly with the underscore problem */
+  
+#ifdef NAMES_HAVE_UNDERSCORE
+#define HASH_OFFSET 1
+#else
+#define HASH_OFFSET 0
 #endif
 
-  old_chain = make_cleanup (free_all_symtabs, 0);
-  stringtab_global = stringtab;
-  last_source_file = 0;
+  global_symbols = static_symbols =
+    (struct pending *) 0;
+  pst = (struct partial_symtab *) 0;
 
+  includes_allocated = 30;
+  includes_used = 0;
+  psymtab_include_list = (char **) alloca (includes_allocated *
+					   sizeof (char *));
+
+  dependencies_allocated = 30;
+  dependencies_used = 0;
+  dependency_list =
+    (struct partial_symtab **) alloca (dependencies_allocated *
+				       sizeof (struct partial_symtab *));
+
+  old_chain = make_cleanup (free_all_psymtabs, 0);
+
+  /* Init bincl list */
+  init_bincl_list (20);
+  make_cleanup (free_bincl_list, 0);
+
+  /* Setup global partial symbol list */
+  init_psymbol_list (nlistlen);
+
+  last_source_file = 0;
+  
 #ifdef END_OF_TEXT_DEFAULT
   end_of_text_addr = END_OF_TEXT_DEFAULT;
 #endif
-
-  symtab_input_desc = desc;
+  
+  symtab_input_desc = desc;	/* This is needed for fill_symbuf below */
   symbuf_end = symbuf_idx = 0;
-
+  
   for (symnum = 0; symnum < nlistlen; symnum++)
     {
       struct nlist *bufp;
-      int type;
-
+      unsigned char type;
+      
+      /* Get the symbol for this run and pull out some info */
       QUIT;	/* allow this to be interruptable */
       if (symbuf_idx == symbuf_end)
 	fill_symbuf ();
       bufp = &symbuf[symbuf_idx++];
       type = bufp->n_type;
+
+      /*
+       * Special cases to speed up readin.
+       */
+      if (type == N_SLINE) continue;
+      
+      namestring = bufp->n_un.n_strx ? bufp->n_un.n_strx + stringtab : "";
+
+      switch (type)
+	{
+	  /*
+	   * Standard, non-debugger, symbols
+	   */
+
+	case N_TEXT | N_EXT:
+	  /* Catch etext */
+
+	  if (!strcmp (namestring, "_etext"))
+	    end_of_text_addr = bufp->n_value;
+	  /* Fall through */
+
+#ifdef N_NBTEXT
+	case N_NBTEXT | N_EXT:
+#endif
+#ifdef N_NBDATA
+	case N_NBDATA | N_EXT:
+#endif
+#ifdef N_NBBSS
+	case N_NBBSS | N_EXT:
+#endif
+	case N_ABS | N_EXT:
+	case N_DATA | N_EXT:
+	case N_BSS | N_EXT:
+	  /* Figure out beginning and end of global linker symbol
+	     section and put non-debugger specified symbols on
+	     tmp_symchain */
+	  
+	  last_global_sym = symnum;
+	  if (!first_global_sym) first_global_sym = symnum;
+	  
+	  record_misc_function (namestring, bufp->n_value); /* Always */
+
+	  continue;
+
+#ifdef N_NBTEXT
+	case N_NBTEXT:
+#endif
+	case N_TEXT:
+	  if (!strcmp (namestring + strlen (namestring) - 2, ".o")
+	      || !strncmp (namestring, "-l", 2))
+	    {
+	      if (num_object_files++ == 1)
+		first_object_file_end = bufp->n_value;
+	      if (past_first_source_file && pst)
+		{
+		  end_psymtab (pst, psymtab_include_list, includes_used,
+			       symnum * sizeof (struct nlist), bufp->n_value,
+			       dependency_list, dependencies_used,
+			       next_ps_global, next_ps_static);
+		  pst = (struct partial_symtab *) 0;
+		  includes_used = 0;
+		  dependencies_used = 0;
+		}
+	      else
+		past_first_source_file = 1;
+	    }
+	  continue;
+	      
+	case N_UNDF:
+	case N_UNDF | N_EXT:
+	case N_ABS:
+	case N_DATA:
+	case N_BSS:
+#ifdef N_NBDATA
+	case N_NBDATA:
+#endif
+#ifdef N_NBBSS
+	case N_NBBSS:
+#endif
+	case N_FN:
+	  /* Keep going . . .*/
+	  
+	  /*
+	   * Special symbol types for GNU
+	   */
+#ifdef N_INDR
+	case N_INDR:
+	case N_INDR | N_EXT:
+#endif
+#ifdef N_SETA
+	case N_SETA:
+	case N_SETA | N_EXT:
+	case N_SETT:
+	case N_SETT | N_EXT:
+	case N_SETD:
+	case N_SETD | N_EXT:
+	case N_SETB:
+	case N_SETB | N_EXT:
+	case N_SETV:
+	case N_SETV | N_EXT:
+#endif
+	  continue;
+	  
+	  /*
+	   * Debugger symbols
+	   */
+
+	case N_SO:
+	  /* End the current partial symtab and start a new one */
+
+	  if (past_first_source_file && pst)
+	    {
+	      end_psymtab (pst, psymtab_include_list, includes_used,
+			   symnum * sizeof (struct nlist), bufp->n_value,
+			   dependency_list, dependencies_used,
+			   next_ps_global, next_ps_static);
+	      pst = (struct partial_symtab *) 0;
+	      includes_used = 0;
+	      dependencies_used = 0;
+	    }
+	  else
+	    past_first_source_file = 1;
+	  
+	  pst = start_psymtab (namestring, bufp->n_value,
+			       symnum * sizeof (struct nlist),
+			       next_ps_global, next_ps_static);
+	  
+	  continue;
+
+#ifdef N_BINCL
+	case N_BINCL:
+	  /* Add this bincl to the bincl_list for future EXCLs.  No
+	     need to save the string; it'll be around until
+	     read_dbx_symtab function return */
+	  add_bincl_to_list (pst, namestring, bufp->n_value);
+
+	  /* Fall through */
+#endif
+
+	case N_SOL:
+	  /* Mark down an include file in the current psymtab */
+
+	  psymtab_include_list[includes_used++] = namestring;
+	  if (includes_used >= includes_allocated)
+	    {
+	      char **orig = psymtab_include_list;
+
+	      psymtab_include_list = (char **)
+		alloca ((includes_allocated *= 2) *
+			sizeof (char *));
+	      bcopy (orig, psymtab_include_list,
+		     includes_used * sizeof (char *));
+#ifdef DEBUG_INFO
+	      fprintf (stderr, "Had to realloc includes.  New size: %d\n",
+		       includes_allocated);
+#endif	      
+	    }
+	  continue;
+
+	case N_FUN:
+	case N_SSYM:
+	case N_GSYM:
+	case N_LSYM:
+	case N_STSYM:
+	case N_LCSYM:
+	case N_ENTRY:
+#ifdef N_MAIN
+	case N_MAIN:
+#endif
+#ifdef N_BSLINE
+	case N_BSLINE:
+#endif
+	case N_PC:
+#ifdef N_M2C
+	case N_M2C:
+	case N_SCOPE:
+#endif
+	  /* Process a symbol as appropriate for the type (this
+	     information is contained in the name of the symbol) */
+
+	  if (namestring[0] != '\0')
+#if 1	    
+	    process_symbol_for_psymtab (namestring);
+#else
+	    process_symbol_for_psymtab (namestring, tmp_symchain);
+#endif	  
+	  continue;
+
+#ifdef N_BINCL
+	case N_EXCL:
+	  /* Find the corresponding bincl and mark that psymtab on the
+	     psymtab dependency list */
+	  {
+	    struct partial_symtab *needed_pst =
+	      find_corresponding_bincl_psymtab (namestring, bufp->n_value);
+
+	    /* If this include file was defined earlier in this file,
+	       leave it alone.  */
+	    if (needed_pst == pst) continue;
+
+	    if (needed_pst)
+	      {
+		int i;
+		int found = 0;
+		
+		for (i = 0; i < dependencies_used; i++)
+		  if (dependency_list[i] == needed_pst)
+		    {
+		      found = 1;
+		      break;
+		    }
+
+		/* If it's already in the list, skip the rest.  */
+		if (found) continue;
+		
+		dependency_list[dependencies_used++] = needed_pst;
+		if (dependencies_used >= dependencies_allocated)
+		  {
+		    struct partial_symtab **orig = dependency_list;
+		    dependency_list =
+		      (struct partial_symtab **)
+			alloca ((dependencies_allocated *= 2)
+				* sizeof (struct partial_symtab *));
+		    bcopy (orig, dependency_list,
+			   (dependencies_used
+			    * sizeof (struct partial_symtab *)));
+#ifdef DEBUG_INFO
+		    fprintf (stderr, "Had to reallocate dependency list.\n");
+		    fprintf (stderr, "New dependencies allocated: %d\n",
+			     dependencies_allocated);
+#endif
+		  }
+	      }
+	    else
+	      error ("Invalid symbol data: \"repeated\" header file not previously seen, at symtab pos %d.",
+		     symnum);
+	  }
+	  continue;
+	  
+	case N_EINCL:
+#endif
+#ifdef N_DSLINE
+	case N_DSLINE:
+#endif
+	case N_LENG:
+	case N_BCOMM:
+	case N_ECOMM:
+	case N_ECOML:
+	case N_FNAME:
+	case N_SLINE:
+	case N_RSYM:
+	case N_PSYM:
+	case N_LBRAC:
+	case N_RBRAC:
+	  /* These symbols aren't interesting; don't worry about them */
+
+	  continue;
+
+	default:
+	  /* If we haven't found it yet, we've got problems */
+
+	  if (IGNORE_SYMBOL (type))
+	    continue;
+
+	  fatal ("Bad symbol type 0x%x encountered in gdb scan", type);
+	}
+    }
+      
+  if (last_source_file)
+    {
+      end_psymtab (pst, psymtab_include_list, includes_used,
+		   symnum * sizeof (struct nlist), end_of_text_addr,
+		   dependency_list, dependencies_used,
+		   next_ps_global, next_ps_static);
+      includes_used = 0;
+      dependencies_used = 0;
+      pst = (struct partial_symtab *) 0;
+    }
+  
+  free_bincl_list ();
+  discard_cleanups (old_chain);
+}
+
+/*
+ * Take a single symbol (name: NAME) and process it (add it to the
+ * app psymbol list or not).
+ */
+static void
+process_symbol_for_psymtab (name)
+     char *name;
+{
+  char *p = (char *) index(name, ':') + 1;
+  int deftype;
+  struct partial_symbol *sym;
+  enum { T_IGNORE, T_STATIC, T_GLOBAL } symbol_type;
+  enum namespace ns = UNDEF_NAMESPACE;
+  enum address_class class;
+  int hash;
+
+  if (p == (char *) 0x1)
+    /* No ":" ; I guess it's not a debuggging symbol */
+    return;
+
+  if ((*p >= '0' && *p <= '9') || *p == '(')
+    deftype = 'l';
+  else
+    deftype = *p;
+  
+  /* Figure out how to handle this symbol */
+  switch (deftype)
+    {
+      /* T is a struct/union/enum, t is a typedef */
+    case 'T':
+      symbol_type = T_STATIC;
+      ns = STRUCT_NAMESPACE;
+      class = LOC_TYPEDEF;
+      break;
+    case 't':
+      symbol_type = T_STATIC;
+      ns = VAR_NAMESPACE;
+      class = LOC_TYPEDEF;
+      break;
+    case 'c':
+      symbol_type = T_STATIC;
+      ns = VAR_NAMESPACE;
+      class = LOC_CONST;
+      break;
+    case 'S':
+      symbol_type = T_STATIC;
+      ns = VAR_NAMESPACE;
+      class = LOC_STATIC;
+      break;
+    case 'f':
+      symbol_type = T_STATIC;
+      ns = VAR_NAMESPACE;
+      class = LOC_BLOCK;
+      break;
+    case 'F':
+      symbol_type = T_GLOBAL;
+      ns = VAR_NAMESPACE;
+      class = LOC_BLOCK;
+      break;
+    case 'G':
+      symbol_type = T_GLOBAL;
+      ns = VAR_NAMESPACE;
+      class = LOC_STATIC;
+      break;
+    default:
+      return;
+    }
+  
+  /* Create the symbol and store it on the list */
+  /* There's a better algorithm possible for the allocation; figure
+     out how far through the symbol table we are and do a reestimate */
+  if (symbol_type == T_STATIC)
+    {
+      if (next_ps_static >= static_psymbols + static_psymbols_allocated)
+	{
+	  static_psymbols = (struct partial_symbol *)
+	    xrealloc (static_psymbols,
+		      (static_psymbols_allocated * 2
+		       * sizeof (struct partial_symbol)));
+	  /* Next assumes we only went one over.  Should be good if
+	     program works correctly */
+	  next_ps_static = static_psymbols + static_psymbols_allocated;
+	  static_psymbols_allocated *= 2;
+#ifdef DEBUGINFO
+	  fprintf(stderr, "debuginfo: Had to realloc statics\n");
+#endif
+	}
+      sym = next_ps_static++;
+    }
+  else
+    {
+      if (next_ps_global >= global_psymbols + global_psymbols_allocated)
+	{
+	  global_psymbols = (struct partial_symbol *)
+	    xrealloc (global_psymbols,
+		      (global_psymbols_allocated * 2
+		       * sizeof (struct partial_symbol)));
+	  next_ps_global = global_psymbols + global_psymbols_allocated;
+	  global_psymbols_allocated *= 2;
+#ifdef DEBUGINFO
+	  fprintf(stderr, "debuginfo: Had to realloc globals\n");
+#endif
+	}
+      sym = next_ps_global++;
+    }
+
+  SYMBOL_NAME(sym) = (char *) obstack_alloc (psymbol_obstack,
+					     p - name);
+  strncpy(SYMBOL_NAME(sym), name, p - name - 1);
+  SYMBOL_NAME(sym)[p - name - 1] = '\0';
+  SYMBOL_NAMESPACE(sym) = ns;
+  SYMBOL_CLASS(sym) = class;
+}
+#undef HASH_OFFSET
+
+/*
+ * Allocate and partially fill a partial symtab.  It will be
+ * completely filled at the end of the symbol list.
+ */
+static struct partial_symtab *
+start_psymtab (filename, textlow, ldsymoff, global_syms, static_syms)
+     char *filename;
+     int textlow;
+     int ldsymoff;
+     struct partial_symbol *global_syms;
+     struct partial_symbol *static_syms;
+{
+  struct partial_symtab *result =
+    (struct partial_symtab *) obstack_alloc (psymbol_obstack,
+					     sizeof (struct partial_symtab));
+  
+  result->filename =
+    (char *) obstack_alloc (psymbol_obstack,
+			    strlen (filename) + 1);
+  strcpy (result->filename, filename);
+	      
+  result->textlow = textlow;
+  result->ldsymoff = ldsymoff;
+
+  result->readin = 0;
+
+  result->globals_offset = global_syms - global_psymbols;
+  result->statics_offset = static_syms - static_psymbols;
+
+  result->n_global_syms = 0;
+  result->n_static_syms = 0;
+
+  return result;
+}
+
+static int
+compare_psymbols (s1, s2)
+     register struct partial_symbol *s1, *s2;
+{
+  register char
+    *st1 = SYMBOL_NAME (s1),
+    *st2 = SYMBOL_NAME (s2);
+
+  return (st1[0] - st2[0] ? st1[0] - st2[0] :
+	  strcmp (st1 + 1, st2 + 1));
+}
+
+  
+/* Close off the current usage of a partial_symbol table entry.  This
+   involves setting the correct number of includes (with a realloc),
+   setting the high text mark, setting the symbol length in the
+   executable, and setting the length of the global and static lists
+   of psymbols.
+
+   The global symbols and static symbols are then seperately sorted.
+
+   Then the partial symtab is put on the global list.
+   *** List variables and peculiarities of same. ***
+   */
+static void
+end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
+	     capping_text, dependency_list, number_dependencies,
+	     capping_global, capping_static)
+     struct partial_symtab *pst;
+     char **include_list;
+     int num_includes;
+     int capping_symbol_offset;
+     int capping_text;
+     struct partial_symtab **dependency_list;
+     int number_dependencies;
+     struct partial_symbol *capping_global, *capping_static;
+{
+  int i;
+
+  pst->ldsymlen = capping_symbol_offset - pst->ldsymoff;
+  pst->texthigh = capping_text;
+
+  pst->n_global_syms =
+    capping_global - (global_psymbols + pst->globals_offset);
+  pst->n_static_syms =
+    capping_static - (static_psymbols + pst->statics_offset);
+
+  pst->dependencies = (struct partial_symtab **)
+    obstack_alloc (psymbol_obstack,
+		   number_dependencies * sizeof (struct partial_symtab *));
+  bcopy (dependency_list, pst->dependencies,
+	 number_dependencies * sizeof (struct partial_symtab *));
+  pst->number_of_dependencies = number_dependencies;
+
+  for (i = 0; i < num_includes; i++)
+    {
+      /* Eventually, put this on obstack */
+      struct partial_symtab *subpst =
+	(struct partial_symtab *)
+	  obstack_alloc (psymbol_obstack,
+			 sizeof (struct partial_symtab));
+
+      subpst->filename =
+	(char *) obstack_alloc (psymbol_obstack,
+				strlen (include_list[i]) + 1);
+      strcpy (subpst->filename, include_list[i]);
+
+      subpst->ldsymoff =
+	subpst->ldsymlen =
+	  subpst->textlow =
+	    subpst->texthigh = 0;
+      subpst->readin = 0;
+
+      subpst->dependencies = (struct partial_symtab **)
+	obstack_alloc (psymbol_obstack,
+		       sizeof (struct partial_symtab *));
+      subpst->dependencies[0] = pst;
+      subpst->number_of_dependencies = 1;
+
+      subpst->globals_offset =
+	subpst->n_global_syms =
+	  subpst->statics_offset =
+	    subpst->n_static_syms = 0;
+
+      subpst->next = partial_symtab_list;
+      partial_symtab_list = subpst;
+    }
+  
+  /* Sort the global list; don't sort the static list */
+  qsort (global_psymbols + pst->globals_offset, pst->n_global_syms,
+	 sizeof (struct partial_symbol), compare_psymbols);
+
+  /* Put the psymtab on the psymtab list */
+  pst->next = partial_symtab_list;
+  partial_symtab_list = pst;
+}
+
+/*
+ * Read in all of the symbols for a given psymtab for real.  Return
+ * the value of the symtab you create.  Do not free the storage
+ * allocated to the psymtab; it may have pointers to it.
+ */
+static void scan_file_globals ();
+static void read_ofile_symtab ();
+
+struct symtab *
+psymtab_to_symtab(pst)
+     struct partial_symtab *pst;
+{
+  int desc;
+  DECLARE_FILE_HEADERS;
+  char *stringtab;
+  struct partial_symtab **list_patch;
+  int stsize, val;
+  struct stat statbuf;
+  struct cleanup *old_chain;
+  extern void close ();
+  int i;
+  struct symtab *result;
+  char *name = symfile;		/* Some of the macros require the */
+				/* variable "name" to be defined in */
+				/* the context in which they execute */
+				/* (Yech!)  */
+
+  if (!pst)
+    return 0;
+
+  if (pst->readin)
+    {
+      fprintf (stderr, "Psymtab for %s already read in.  Shouldn't happen.\n",
+	       pst->filename);
+      return 0;
+    }
+  
+  if (!name)
+    error("No symbol file currently specified; use command symbol-file");
+
+  /* Read in all partial symbtabs on which this one is dependent */
+  for (i = 0; i < pst->number_of_dependencies; i++)
+    if (!pst->dependencies[i]->readin)
+      psymtab_to_symtab (pst->dependencies[i]);
+
+  if (pst->ldsymlen)		/* Otherwise it's a dummy */
+    {
+      /* Open symbol file and read in string table */
+      stat (name, &statbuf);
+      desc = open(name, O_RDONLY, 0); /* symbol_file_command
+					 guarrantees that the symbol file name
+					 will be absolute, so there is no
+					 need for openp */
+      
+      old_chain = make_cleanup (close, desc);
+      
+      if (desc < 0)
+	error("Symbol file not readable");
+      
+      READ_FILE_HEADERS (desc, name);
+      
+      /* Read in the string table */
+      lseek (desc, STRING_TABLE_OFFSET, L_SET);
+      READ_STRING_TABLE_SIZE (stsize);
+      if (stsize >= 0 && stsize < statbuf.st_size)
+	stringtab = (char *) alloca (stsize);
+      else
+	stringtab = NULL;
+      if (stringtab == NULL)
+	error ("ridiculous string table size: %d bytes", name, stsize);
+      
+      bcopy (&stsize, stringtab, sizeof stsize);
+      val = myread (desc, stringtab + sizeof stsize, stsize - sizeof stsize);
+      if (val < 0)
+	perror_with_name (name);
+      
+      /* Init stuff necessary for reading in symbols */
+      free_pendings = 0;
+      pending_blocks = 0;
+      file_symbols = 0;
+      global_symbols = 0;
+      make_cleanup (really_free_pendings, 0);
+      
+      /* Read in this files symbols */
+      lseek (desc, SYMBOL_TABLE_OFFSET, L_SET);
+      read_ofile_symtab (desc, stringtab, pst->ldsymoff,
+			 pst->ldsymlen, pst->textlow,
+			 pst->texthigh - pst->textlow, 0);
+      sort_symtab_syms (symtab_list); /* At beginning since just added */
+      
+      /* Match with global symbols */
+      lseek (desc, SYMBOL_TABLE_OFFSET, L_SET);
+      scan_file_globals (desc, stringtab,
+			 first_global_sym * sizeof(struct nlist),
+			 last_global_sym - first_global_sym + 1);
+      
+      do_cleanups (old_chain);
+    }
+
+  /* Find pst in list, prune it, and free it's storage */
+  for (list_patch = &partial_symtab_list;
+       *list_patch && *list_patch != pst;
+       list_patch = &((*list_patch)->next))
+    ;
+
+  if (!(*list_patch))		/* pst not in list.  Don't worry about it? */
+    fatal ("internal: psymtab_to_symtab called with non-listed pst");
+
+  *list_patch = (*list_patch)->next; /* Prune */
+
+  pst->readin = 1;		/* Mark as read in */
+
+  /* It's the last one if we actually read something in */
+  if (pst->ldsymlen)
+    return symtab_list;
+  else
+    /* Search through list for correct name. */
+    for (result = symtab_list; result; result = result->next)
+      if (!strcmp (result->filename, pst->filename))
+	return result;
+
+  return 0;
+}
+
+/*
+ * Scan through all of the global symbols defined in the object file,
+ * assigning values to the debugging symbols that need to be assigned
+ * to.
+ *
+ * DESC is the file descriptor of the symbol file, with the seek
+ * pointer pointing at the beginning of the symbol table.
+ * STRINGTAB is the file's string table, already read in.
+ * OFFSET is the offset (in bytes) of the beginning of the global
+ * symbols from the beginning of the symbol table.
+ * NUMSYMS is the number of symbols that have to be checked.
+ */
+static void
+scan_file_globals (desc, stringtab, offset, numsyms)
+     int desc;
+     char *stringtab;
+     int offset;
+     int numsyms;
+{
+  int hash;
+
+  lseek(desc, offset, L_INCR);
+  symtab_input_desc = desc;
+  symbuf_end = symbuf_idx = 0;
+
+  for (symnum = 0; symnum < numsyms; symnum++)
+    {
+      struct nlist *bufp;
+      unsigned char type;
+      char *namestring;
+
+      QUIT;
+      if (symbuf_idx == symbuf_end)
+	fill_symbuf ();
+
+      bufp = &symbuf[symbuf_idx++];
+      type = bufp->n_type;
+
+      if (type & N_EXT && type != N_EXT)
+	{
+	  struct symbol *sym, *prev;
+	  
+	  namestring = bufp->n_un.n_strx ?
+	    bufp->n_un.n_strx + stringtab : "";
+	  prev = (struct symbol *) 0;
+
+	  /* Get the hash index and check all the symbols
+	     under that hash index. */
+	  
+#ifdef NAMES_HAVE_UNDERSCORE
+	  hash = hashname (namestring + 1);
+#else /* ! NAMES_HAVE_UNDERSCORE */
+	  hash = hashname (namestring);
+#endif /* ! NAMES_HAVE_UNDERSCORE */
+	  for (sym = global_sym_chain[hash]; sym;)
+	    {
+	      if (
+#ifdef NAMES_HAVE_UNDERSCORE
+		  *namestring == '_'
+		  && namestring[1] == SYMBOL_NAME (sym)[0]
+		  && !strcmp(namestring + 2, SYMBOL_NAME (sym) + 1)
+#else /* ! NAMES_HAVE_UNDERSCORE */
+		  namestring[0] == SYMBOL_NAME (sym) [0]
+		  && !strcmp(namestring + 1, SYMBOL_NAME(sym) + 1)
+#endif /* ! NAMES_HAVE_UNDERSCORE */
+		  )
+		{
+		  /* Splice this symbol out of the hash chain and
+		     assign the value we have to it. */
+		  if (prev)
+		    SYMBOL_VALUE (prev) = SYMBOL_VALUE (sym);
+		  else
+		    global_sym_chain[hash]
+		      = (struct symbol *) SYMBOL_VALUE (sym);
+		  SYMBOL_VALUE (sym) = bufp->n_value;
+		  if (prev)
+		    sym = (struct symbol *) SYMBOL_VALUE (prev);
+		  else
+		    sym = global_sym_chain[hash];
+		  break;	/* Only one reference per file */
+		}
+	      else
+		{
+		  prev = sym;
+		  sym = (struct symbol *) SYMBOL_VALUE (sym);
+		}
+	    }
+	}
+    }
+  /* There shouldn't be anything left on the hash list at this point.
+     If there is, we have done something wrong.  For right now it's
+     worth checking, until I get the bugs out. */
+  /* Sigh.  Unfortunately, the above is not true.  If an extern
+     variable is mentioned in an include file (or a program) and the
+     variable is never either referenced or defined, there will be a
+     debugger symbol with no "real" symbol.  Oh well. */
+}
+	      
+/*
+ * Read in a defined section of a specific object file's symbols.
+ *
+ * DESC is the file descriptor for the file, positioned at the
+ * beginning of the symtab
+ * STRINGTAB is a pointer to the files string
+ * table, already read in
+ * SYM_OFFSET is the offset within the file of
+ * the beginning of the symbols we want to read, NUM_SUMBOLS is the
+ * number of symbols to read
+ * TEXT_OFFSET is the offset to be added to
+ * all values of symbols coming in and
+ * TEXT_SIZE is the size of the text segment read in.
+ * OFFSET is a flag which indicates that the value of all of the
+ * symbols should be offset by TEXT_OFFSET (for the purposes of
+ * incremental linking). 
+ */
+    
+static void
+read_ofile_symtab (desc, stringtab, sym_offset,
+		   sym_size, text_offset, text_size, offset)
+     int desc;
+     register char *stringtab;
+     int sym_offset;
+     int sym_size;
+     int text_offset;
+     int text_size;
+     int offset;
+{
+  register char *namestring;
+  register struct symbol *sym, *prev;
+  int hash;
+  struct cleanup *old_chain;
+  struct nlist *bufp;
+  unsigned char type;
+#ifdef N_BINCL
+  subfile_stack = 0;
+#endif
+
+  stringtab_global = stringtab;
+  last_source_file = 0;
+
+  symtab_input_desc = desc;
+  symbuf_end = symbuf_idx = 0;
+  lseek(desc, sym_offset, L_INCR);
+
+  fill_symbuf();
+  bufp = &symbuf[symbuf_idx];
+  if ((unsigned char) bufp->n_type != N_SO)
+    fatal("First symbol in segment of executable not a source symbol");
+
+  for (symnum = 0;
+       symnum < sym_size / sizeof(struct nlist);
+       symnum++)
+    {
+      QUIT;			/* Allow this to be interruptable */
+      if (symbuf_idx == symbuf_end)
+	fill_symbuf();
+      bufp = &symbuf[symbuf_idx++];
+      type = bufp->n_type;
+
+      if (offset &&
+	  (type == N_TEXT || type == N_DATA || type == N_BSS))
+	bufp->n_value += text_offset;
+
       namestring = bufp->n_un.n_strx ? bufp->n_un.n_strx + stringtab : "";
 
       if (type & N_STAB)
-	process_one_symbol (type, bufp->n_desc,
-			    bufp->n_value, namestring);
-      /* A static text symbol whose name ends in ".o"
-	 or begins with "-l" means the start of another object file.
-	 So end the symtab of the source file we have been processing.
-	 This is how we avoid counting the libraries as part
-	 or the last source file.
-	 Also this way we find end of first object file (crt0).  */
-      else if (
-#ifdef N_NBTEXT
-	       (type == N_NBTEXT)
-#else
-	       (type == N_TEXT)
-#endif
-	       && (!strcmp (namestring + strlen (namestring) - 2, ".o")
-	       ||  !strncmp (namestring, "-l", 2)))
-	{
-	  if (num_object_files++ == 1)
-	    first_object_file_end = bufp->n_value;
-	  if (last_source_file)
-	    end_symtab (bufp->n_value);
-	}
+	process_one_symbol(type, bufp->n_desc,
+			   bufp->n_value, namestring);
+      /* We skip checking for a new .o or -l file; that should never
+         happen in this routine. */
+      else if (type == N_TEXT
+	       && !strcmp (namestring, GCC_COMPILED_FLAG_SYMBOL))
+	processing_gcc_compilation = 1;
       else if (type & N_EXT || type == N_TEXT
 #ifdef N_NBTEXT
 	       || type == N_NBTEXT
 #endif
 	       )
-	{
-	  int used_up = 0;
-
-	  /* Record the location of _etext.  */
-	  if (type == (N_TEXT | N_EXT)
-	      && !strcmp (namestring, "_etext"))
-	    end_of_text_addr = bufp->n_value;
-
-	  /* Global symbol: see if we came across a dbx definition
-	     for a corresponding symbol.  If so, store the value.
-	     Remove syms from the chain when their values are stored,
-	     but search the whole chain, as there may be several syms
-	     from different files with the same name.  */
-	  if (type & N_EXT)
-	    {
-	      prev = 0;
-#ifdef NAMES_HAVE_UNDERSCORE
-	      hash = hashname (namestring + 1);
-#else /* not NAMES_HAVE_UNDERSCORE */
-	      hash = hashname (namestring);
-#endif /* not NAMES_HAVE_UNDERSCORE */
-	      for (sym = global_sym_chain[hash];
-		   sym;)
-		{
-		  if (
-#ifdef NAMES_HAVE_UNDERSCORE
-		      *namestring == '_'
-		      && namestring[1] == SYMBOL_NAME (sym)[0]
-		      &&
-		      !strcmp (namestring + 2, SYMBOL_NAME (sym) + 1)
-#else /* NAMES_HAVE_UNDERSCORE */
-		      namestring[0] == SYMBOL_NAME (sym)[0]
-		      &&
-		      !strcmp (namestring + 1, SYMBOL_NAME (sym) + 1)
-#endif /* NAMES_HAVE_UNDERSCORE */
-		      )
-		    {
-		      if (prev)
-			SYMBOL_VALUE (prev) = SYMBOL_VALUE (sym);
-		      else
-			global_sym_chain[hash]
-			  = (struct symbol *) SYMBOL_VALUE (sym);
-		      SYMBOL_VALUE (sym) = bufp->n_value;
-		      if (prev)
-			sym = (struct symbol *) SYMBOL_VALUE (prev);
-		      else
-			sym = global_sym_chain[hash];
-
-		      used_up = 1;
-		    }
-		  else
-		    {
-		      prev = sym;
-		      sym = (struct symbol *) SYMBOL_VALUE (sym);
-		    }
-		}
-	    }
-
-	  /* Defined global or text symbol: record as a misc function
-	     if it didn't give its address to a debugger symbol above.  */
-	  if (type <= (N_TYPE | N_EXT)
-	      && type != N_EXT
-	      && ! used_up)
-	    record_misc_function (namestring, bufp->n_value);
-	}
+	  /* Global symbol: see if we came across a dbx defintion for
+	     a corresponding symbol.  If so, store the value.  Remove
+	     syms from the chain when their values are stored, but
+	     search the whole chain, as there may be several syms from
+	     different files with the same name. */
+	  /* This is probably not true.  Since the files will be read
+	     in one at a time, each reference to a global symbol will
+	     be satisfied in each file as it appears. So we skip this
+	     section. */
+	&stringtab_global;	/* For debugger; am I right? */
     }
-
-  if (last_source_file)
-    end_symtab (end_of_text_addr);
-
-  discard_cleanups (old_chain);
+  end_symtab (text_offset + text_size);
 }
-
+
 static int
 hashname (name)
      char *name;
@@ -1666,23 +2774,12 @@ process_one_symbol (type, desc, value, name)
 
   if (last_source_file == 0 && type != N_SO)
     {
-#ifdef N_NSYMS
-      /* This code is used on Ultrix; ignore this sym.  */
-      if (type == N_NSYMS)
-	return;
-#endif
-
-      if (type == N_ENTRY)
-	/* This code appears in libraries on Gould machines.  */
+      /* Currently this ignores N_ENTRY on Gould machines, N_NSYM on machines
+	 where that code is defined, and all symbols on the Convex. */
+      if (IGNORE_SYMBOL (type))
 	return;
 
-      if (type == N_SLINE && desc == -1)
-	/* This code is used by the Sun4 coimpiler; ignore it.  */
-	return;
-
-      /* This should give an aborting error.  */
-      printf ("Invalid symbol data: does not start by identifying a source file.\ntype == %d\n\n", type);
-      return;
+      error ("Invalid symbol data: does not start by identifying a source file.");
     }
 
   switch (type)
@@ -1693,7 +2790,7 @@ process_one_symbol (type, desc, value, name)
 	 a new function.  We must process its "name" normally for dbx,
 	 but also record the start of a new lexical context, and possibly
 	 also the end of the lexical context for the previous function.  */
-
+      
       within_function = 1;
       if (context_stack_depth > 0)
 	{
@@ -1721,10 +2818,10 @@ process_one_symbol (type, desc, value, name)
       if (context_stack_depth == context_stack_size)
 	{
 	  context_stack_size *= 2;
-	  context_stack
-	    = (struct context_stack *) xrealloc (context_stack,
-						 context_stack_size
-						 * sizeof (struct context_stack));
+	  context_stack = (struct context_stack *)
+	    xrealloc (context_stack,
+		      (context_stack_size
+		       * sizeof (struct context_stack)));
 	}
 
       new = &context_stack[context_stack_depth++];
@@ -1821,8 +2918,53 @@ process_one_symbol (type, desc, value, name)
     }
 }
 
-/************************ READ_ADDL_SYM() ***********************************/
+/* This function was added for C++ functionality.  I presume that it
+   condenses the bunches formed by reading in an additional .o file
+   (incremental linking). */
 
+static void
+condense_addl_misc_bunches ()
+{ 
+  register int i, j;
+  register struct misc_bunch *bunch;
+#ifdef NAMES_HAVE_UNDERSCORE
+  int offset = 1;
+#else
+  int offset = 0;
+#endif
+
+  misc_function_vector
+    = (struct misc_function *)  xrealloc (misc_function_vector,
+					  (misc_count + misc_function_count) * sizeof (struct misc_function));
+
+  j = misc_function_count;
+  bunch = misc_bunch;
+  while (bunch)
+    {
+      for (i = 0; i < misc_bunch_index; i++)
+	{
+	  misc_function_vector[j] = bunch->contents[i];
+	  misc_function_vector[j].name
+	    = concat (misc_function_vector[j].name
+		      + (misc_function_vector[j].name[0] == '_' ? offset : 0),
+		      "", "");
+	  j++;
+	}
+      bunch = bunch->next;
+      misc_bunch_index = MISC_BUNCH_SIZE;
+    }
+
+  misc_function_count += misc_count;
+
+  /* Sort the misc functions by address.  */
+
+  qsort (misc_function_vector, misc_function_count,
+	 sizeof (struct misc_function),  compare_misc_functions);
+}
+
+
+/* Read in another .o file and create a symtab entry for it.*/
+ 
 static void
 read_addl_syms (desc, stringtab, nlistlen, text_addr, text_size)
      int desc;
@@ -1850,7 +2992,7 @@ read_addl_syms (desc, stringtab, nlistlen, text_addr, text_size)
   for (symnum = 0; symnum < nlistlen; symnum++)
     {
       struct nlist *bufp;
-      int type;
+      unsigned char type;
 
       QUIT;	/* allow this to be interruptable */
       if (symbuf_idx == symbuf_end)
@@ -1968,66 +3110,29 @@ read_addl_syms (desc, stringtab, nlistlen, text_addr, text_size)
   fclose (stream);
 }
 
-/***************************** CONDENSE_ADDL_MISC_BUNCHES *******************/
-
-static void
-condense_addl_misc_bunches ()
-{ 
-  register int i, j;
-  register struct misc_bunch *bunch;
-#ifdef NAMES_HAVE_UNDERSCORE
-  int offset = 1;
-#else
-  int offset = 0;
-#endif
-
-  misc_function_vector
-    = (struct misc_function *)  xrealloc (misc_function_vector,
-					  (misc_count + misc_function_count) * sizeof (struct misc_function));
-
-  j = misc_function_count;
-  bunch = misc_bunch;
-  while (bunch)
-    {
-      for (i = 0; i < misc_bunch_index; i++)
-	{
-	  misc_function_vector[j] = bunch->contents[i];
-	  misc_function_vector[j].name
-	    = concat (misc_function_vector[j].name
-		      + (misc_function_vector[j].name[0] == '_' ? offset : 0),
-		      "", "");
-	  j++;
-	}
-      bunch = bunch->next;
-      misc_bunch_index = MISC_BUNCH_SIZE;
-    }
-
-  misc_function_count += misc_count;
-
-  /* Sort the misc functions by address.  */
-
-  qsort (misc_function_vector, misc_function_count,
-	 sizeof (struct misc_function),  compare_misc_functions);
-}
-
-/**************************** ADD_FILE_COMMAND() ****************************/
-/* This function allows the addition of incrementally linked object files.  */
+/* C++:
+   This function allows the addition of incrementally linked object files.
+   Since this has a fair amount of code in common with symbol_file_command,
+   it might be worthwhile to consolidate things, as was done with 
+   read_dbx_symtab and condense_misc_bunches. */
 
 void
 add_file_command (arg_string)
      char* arg_string;
 { 
   register int desc;
-  struct exec hdr;
+  DECLARE_FILE_HEADERS;
   struct nlist *nlist;
   char *stringtab;
   long buffer;
   register int val;
   extern void close ();
   struct cleanup *old_chain;
-  char* name;
+  struct symtab *symseg;
+  struct stat statbuf;
+  char *name;
   unsigned text_addr;
-
+  
   if (arg_string == 0)
     error ("add-file takes a file name and an address");
 
@@ -2043,92 +3148,132 @@ add_file_command (arg_string)
 
   dont_repeat ();
 
-  if (query ("add symbol table from filename \"%s\" at text_addr = 0x%x\n", name, text_addr))
+  if (!query ("add symbol table from filename \"%s\" at text_addr = 0x%x\n", 
+	      name, text_addr))
+    error ("Not confirmed.");
+
+  desc = open (name, O_RDONLY);
+  if (desc < 0)
+    perror_with_name (name);
+  
+  old_chain = make_cleanup (close, desc);
+  make_cleanup (free_current_contents, &name);
+  
+  READ_FILE_HEADERS (desc, name);
+  
+  if (NUMBER_OF_SYMBOLS == 0)
     {
-      desc = open (name, O_RDONLY);
-      if (desc < 0)
-	perror_with_name (name);
-
-      old_chain = make_cleanup (close, desc);
-      make_cleanup (free_current_contents, &name);
-
-      val = myread (desc, &hdr, sizeof hdr);
-      if (val < 0)
-	perror_with_name (name);
-
-      if (N_BADMAG (hdr))
-	error ("File \"%s\" has a bad header.", name);
-
-      if (hdr.a_syms == 0)
-	{
-	  printf ("%s does not have a symbol-table.\n", name);
-	  fflush (stdout);
-	  return;
-	}
-
-      /* Now read the string table, all at once.  */
-      val = lseek (desc, N_SYMOFF (hdr) + hdr.a_syms, 0);
-      if (val < 0)
-	perror_with_name (name);
-      val = myread (desc, &buffer, sizeof buffer);
-      if (val < 0)
-	perror_with_name (name);
-      stringtab = (char *) alloca (buffer);
-      bcopy (&buffer, stringtab, sizeof buffer);
-      val = myread (desc, stringtab + sizeof buffer, buffer - sizeof buffer);
-      if (val < 0)
-	perror_with_name (name);
-
-      /* That puts us at the symsegs.  Read them. ########## Also need other
-	 changes if they exist. */
-
-      /* Position to read the symbol table.  Do not read it all at once. */
-      val = lseek (desc, N_SYMOFF (hdr), 0);
-      if (val < 0)
-	perror_with_name (name);
-
-      printf ("Reading symbol data from %s...", name);
+      printf ("%s does not have a symbol-table.\n", name);
       fflush (stdout);
-
-      init_misc_functions ();
-      make_cleanup (discard_misc_bunches, 0);
-      init_header_files ();
-      make_cleanup (free_header_files, 0);
-
-      read_addl_syms (desc, stringtab, hdr.a_syms / sizeof(struct nlist),
-		      text_addr, hdr.a_text) ;
-
-      /* Sort symbols alphabetically within each block.  */
-
-      sort_syms ();
-
-      /* Go over the all misc functions and install them in vector.  */
-
-      condense_addl_misc_bunches ();
-
-      /* Don't allow char * to have a typename (else would get caddr_t.)  */
-
-      TYPE_NAME (lookup_pointer_type (builtin_type_char)) = 0;
-
-      /* Make a default for file to list.  */
-
-      select_source_symtab (symtab_list);
-
-      do_cleanups (old_chain);
-
-      /* Free the symtabs made by read_symsegs, but not their contents,
-	 which have been copied into symtabs on symtab_list.  */
-      while (symseg_chain)
-	{
-	  register struct symtab *s = symseg_chain->next;
-	  free (symseg_chain);
-	  symseg_chain = s;
-	}
-
-      printf ("done.\n");
-      fflush (stdout);
+      return;
     }
-  else error ("Not confirmed.");
+  
+  printf ("Reading symbol data from %s...", name);
+  fflush (stdout);
+  
+  /* Now read the string table, all at once.  */
+  val = lseek (desc, STRING_TABLE_OFFSET, 0);
+  if (val < 0)
+    perror_with_name (name);
+  stat (name, &statbuf);
+  READ_STRING_TABLE_SIZE (buffer);
+  if (buffer >= 0 && buffer < statbuf.st_size)
+    stringtab = (char *) alloca (buffer);
+  else
+    stringtab = NULL;
+  if (stringtab == NULL)
+    error ("ridiculous string table size: %d bytes", name, buffer);
+  
+  bcopy (&buffer, stringtab, sizeof buffer);
+  val = myread (desc, stringtab + sizeof buffer, buffer - sizeof buffer);
+  if (val < 0)
+    perror_with_name (name);
+  
+#ifdef READ_GDB_SYMSEGS
+  /* That puts us at the symsegs.  Read them.  */
+  symseg_chain = read_symsegs (desc, name);
+  hash_symsegs ();
+
+  /* Free the symtabs made by read_symsegs, but not their contents,
+     which have been copied into symtabs on symtab_list.  */
+  for (symseg = symseg_chain; symseg; symseg = symseg->next)
+    {
+      int i;
+      struct sourcevector *sv = (struct sourcevector *) symseg->linetable;
+
+      for (i = 0; i < sv->length; i++)
+	{
+	  int j;
+	  struct source *source = sv->source[i];
+	  struct symtab *sp1
+	    = (struct symtab *) xxmalloc (sizeof (struct symtab));
+
+	  bcopy (symseg, sp1, sizeof (struct symtab));
+	  sp1->filename = savestring (source->name, strlen (source->name));
+	  sp1->linetable = &source->contents;
+	  sp1->free_code = free_nothing;
+	  sp1->free_ptr = (i == 0) ? (char *) symseg : 0;
+
+	  sp1->next = symtab_list;
+	  symtab_list = sp1;
+	}
+    }
+#else
+  /* Where people are using the 4.2 ld program, must not check for
+     symsegs, because that ld puts randonm garbage at the end of
+     the output file and that would trigger an error message.  */
+  symseg_chain = 0;
+#endif
+  
+  /* Position to read the symbol table.  Do not read it all at once. */
+  val = lseek (desc, SYMBOL_TABLE_OFFSET, 0);
+  if (val < 0)
+    perror_with_name (name);
+  
+  init_misc_functions ();
+  make_cleanup (discard_misc_bunches, 0);
+  init_header_files ();
+  make_cleanup (free_header_files, 0);
+  free_pendings = 0;
+  pending_blocks = 0;
+  file_symbols = 0;
+  global_symbols = 0;
+  make_cleanup (really_free_pendings, 0);
+
+  read_addl_syms (desc, stringtab, NUMBER_OF_SYMBOLS, text_addr,
+		  SIZE_OF_TEXT_SEGMENT);
+		  
+  
+  /* Sort symbols alphabetically within each block.  */
+  
+  sort_syms ();
+  
+  /* Go over the misc functions and install them in vector.  */
+  
+  condense_addl_misc_bunches (1);
+  
+  /* Don't allow char * to have a typename (else would get caddr_t.)  */
+  
+  TYPE_NAME (lookup_pointer_type (builtin_type_char)) = 0;
+  
+  /* Make a default for file to list.  */
+  /* Hmmm.  I'd say we don't want this in add_file_command, but . . . */
+  
+  select_source_symtab (symtab_list);
+  
+  do_cleanups (old_chain);
+  
+  /* Free the symtabs made by read_symsegs, but not their contents,
+     which have been copied into symtabs on symtab_list.  */
+  while (symseg_chain)
+    {
+      register struct symtab *s = symseg_chain->next;
+      free (symseg_chain);
+      symseg_chain = s;
+    }
+  
+  printf ("done.\n");
+  fflush (stdout);
 }
 
 static struct symbol *
@@ -2213,11 +3358,11 @@ define_symbol (value, string, desc)
       SYMBOL_TYPE (sym)
 	= lookup_pointer_type (lookup_function_type (read_type (&p)));
     }
-  else
+  else 
     {
       struct type *type = read_type (&p);
-
-      if ((deftype == 'F' || deftype == 'f')
+      
+      if ((deftype == 'F' || deftype == 'f') 
 	  && TYPE_CODE (type) != TYPE_CODE_FUNC)
 	SYMBOL_TYPE (sym) = lookup_function_type (type);
       else
@@ -2311,20 +3456,21 @@ define_symbol (value, string, desc)
 	TYPE_NAME (SYMBOL_TYPE (sym)) =
 	  obsavestring (SYMBOL_NAME (sym),
 			strlen (SYMBOL_NAME (sym)));
-      /* C++ vagaries: we may have a type which is derived from
-	 a base type which did not have its name defined when the
-	 derived class was output.  We fill in the derived class's
-	 base part member's name here in that case.  */
-      else if ((TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT
-		|| TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION)
-	       && TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)))
-	{
-	  int i;
-	  for (i = TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)); i > 0; i--)
-	    if (TYPE_FIELD_NAME (SYMBOL_TYPE (sym), i-1) == 0)
-	      TYPE_FIELD_NAME (SYMBOL_TYPE (sym), i-1) = TYPE_NAME (TYPE_BASECLASS (SYMBOL_TYPE (sym), i));
-	}
-
+       /* C++ vagaries: we may have a type which is derived from
+ 	 a base type which did not have its name defined when the
+ 	 derived class was output.  We fill in the derived class's
+ 	 base part member's name here in that case.  */
+       else if ((TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT
+		 || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION)
+		&& TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)))
+	 {
+	   int i;
+	   for (i = TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)); i > 0; i--)
+	     if (TYPE_FIELD_NAME (SYMBOL_TYPE (sym), i - 1) == 0)
+	       TYPE_FIELD_NAME (SYMBOL_TYPE (sym), i - 1) =
+		 TYPE_NAME (TYPE_BASECLASS (SYMBOL_TYPE (sym), i));
+	 }
+      
       add_symbol_to_list (sym, &file_symbols);
       break;
 
@@ -2432,7 +3578,7 @@ read_type (pp)
 	 has not yet been seen.  In this case, we skip to the comma,
 	 which will mark the end of the base class name.  (The ':'
 	 at the end of the base class name will be skipped as well.)  */
-      *pp = (char *) index (*pp, ':') + 1;
+      *pp = (char *) index (*pp, ',');
       /* Just allocate the type and leave it zero if nothing known */
       return dbx_alloc_type (typenums);
 
@@ -2456,8 +3602,17 @@ read_type (pp)
       break;
       
     case '*':
-      type = dbx_alloc_type (typenums);
-      smash_to_pointer_type (type, read_type (pp));
+      type1 = read_type (pp);
+      if (TYPE_POINTER_TYPE (type1))
+	{
+	  type = TYPE_POINTER_TYPE (type1);
+	  *dbx_lookup_type (typenums) = type;
+	}
+      else
+	{
+	  type = dbx_alloc_type (typenums);
+	  smash_to_pointer_type (type, type1);
+	}
       break;
 
     case '@':
@@ -2477,13 +3632,31 @@ read_type (pp)
       break;
 
     case '&':
-      type = dbx_alloc_type (typenums);
-      smash_to_reference_type (type, read_type (pp));
+      type1 = read_type (pp);
+      if (TYPE_REFERENCE_TYPE (type1))
+	{
+	  type = TYPE_REFERENCE_TYPE (type1);
+	  *dbx_lookup_type (typenums) = type;
+	}
+      else
+	{
+	  type = dbx_alloc_type (typenums);
+	  smash_to_reference_type (type, type1);
+	}
       break;
 
     case 'f':
-      type = dbx_alloc_type (typenums);
-      smash_to_function_type (type, read_type (pp));
+      type1 = read_type (pp);
+      if (TYPE_FUNCTION_TYPE (type1))
+	{
+	  type = TYPE_FUNCTION_TYPE (type1);
+	  *dbx_lookup_type (typenums) = type;
+	}
+      else
+	{
+	  type = dbx_alloc_type (typenums);
+	  smash_to_function_type (type, type1);
+	}
       break;
 
     case 'r':
@@ -2509,8 +3682,18 @@ read_type (pp)
       break;
 
     case 'a':
-      /* Define an array type.  */
+      if (*(*pp)++ != 'r')
+	error ("Invalid symbol data: unrecognized type-code `a%c' %s %d.",
+	       (*pp)[-1], "at symtab position", symnum);
+      
       type = dbx_alloc_type (typenums);
+      type = read_array_type (pp, type);
+      break;
+
+#if 0
+      /* Format of an array type:
+	 "ar<index type>;lower;upper;<array_contents_type>".  Put code
+	 in to handle this.  */
 
       /* dbx expresses array types in terms of a range type for the index,
 	 and that range type is specified right inside the array type spec
@@ -2537,6 +3720,7 @@ read_type (pp)
       TYPE_TARGET_TYPE (type) = read_type (pp);
       TYPE_LENGTH (type) = TYPE_LENGTH (TYPE_TARGET_TYPE (type)) * n;
       break;
+#endif
 
     default:
       error ("Invalid symbol data: unrecognized type-code `%c' at symtab pos %d.",
@@ -2614,22 +3798,26 @@ read_struct_type (pp, type)
      will be a '!', followed by the number of base classes derived from.
      Each element in the list contains visibility information,
      the offset of this base class in the derived structure,
-     and then the base type.  */
+     and then the base type. */
   if (**pp == '!')
     {
       int i, n_baseclasses, offset;
       struct type **baseclass_vec;
       struct type *baseclass;
       int via_public, via_virtual;
+      
       *pp += 1;
 
       n_baseclasses = read_number (pp, ',');
       baseclass_vec = (struct type **)
 	obstack_alloc (symbol_obstack,
 		       (n_baseclasses) * sizeof (struct type **)) - 1;
+
       for (i = 1; i <= n_baseclasses; i++)
 	{
-	  if (**pp == '\\') *pp = next_symbol_text ();
+	  if (**pp == '\\')
+	    *pp = next_symbol_text ();
+
 	  switch (*(*pp)++)
 	    {
 	    case '0':
@@ -2639,9 +3827,10 @@ read_struct_type (pp, type)
 	      via_virtual = 1;
 	      break;
 	    default:
-	      error ("Invalid symbol data: bad visibility format at symtab pos %d.",
+	      error ("Invalid symbol data: bad visibility format at symtab pos %d",
 		     symnum);
 	    }
+
 	  switch (*(*pp)++)
 	    {
 	    case '0':
@@ -2699,13 +3888,13 @@ read_struct_type (pp, type)
       while (*p != ':') p++;
       list->field.name = obsavestring (*pp, p - *pp);
 
-      /* C++: Check to see if we have hit the methods yet.  */
+      /* C++: Check to see if we have hit the methods yet. */
       if (p[1] == ':')
 	break;
 
       *pp = p + 1;
 
-      /* This means we have a visibility for a field coming.  */
+      /* This means we have a visibility for a field coming. */
       if (**pp == '/')
 	{
 	  switch (*++*pp)
@@ -2715,33 +3904,32 @@ read_struct_type (pp, type)
 	      *pp += 1;
 	      break;
 
-	    case '1':
-	      visibility = 1;
-	      *pp += 1;
-	      break;
-
-	    case '2':
-	      visibility = 2;
-	      *pp += 1;
-	      break;
-	    }
-	}
-      /* else normal dbx-style format.  */
+ 	    case '1':
+ 	      visibility = 1;
+ 	      *pp += 1;
+ 	      break;
+ 
+ 	    case '2':
+ 	      visibility = 2;
+ 	      *pp += 1;
+ 	      break;
+ 	    }
+ 	}
+       /* else normal dbx-style format.  */
 
       list->field.type = read_type (pp);
       if (**pp == ':')
-	{
-	  /* read a static member.  */
-	  list->field.bitpos = (long)-1;
-	  p = ++(*pp);
-	  while (*p != ';') p++;
-	  list->field.bitsize = (long) savestring (*pp, p - *pp);
-	  *pp = p + 1;
-	  nfields++;
-	  continue;
-	}
-      else if (**pp != ',')
-	error ("Invalid symbol data: bad structure-type format at symtab pos %d.",
+ 	{
+ 	  list->field.bitpos = (long)-1;
+ 	  p = ++(*pp);
+ 	  while (*p != ';') p++;
+ 	  list->field.bitsize = (long) savestring (*pp, p - *pp);
+ 	  *pp = p + 1;
+ 	  nfields++;
+ 	  continue;
+ 	}
+       else if (**pp != ',')
+	 error ("Invalid symbol data: bad structure-type format at symtab pos %d.",
 	       symnum);
       (*pp)++;			/* Skip the comma.  */
       list->field.bitpos = read_number (pp, ',');
@@ -2872,6 +4060,7 @@ read_struct_type (pp, type)
 	}
       while (**pp != ';');
     }
+
   *pp += 1;
 
   /* Now create the vector of fields, and record how big it is.  */
@@ -2976,6 +4165,60 @@ read_struct_type (pp, type)
   return type;
 }
 
+/* Read a definition of an enumberation type,
+   and create and return a suitable type object.
+   Also creates a range type which represents the bounds of that
+   array.  */
+static struct type *
+read_array_type (pp, type)
+     register char **pp;
+     register struct type *type;
+{
+  struct type *index_type, *element_type, *range_type;
+  int lower, upper;
+  
+  /* Format of an array type:
+     "ar<index type>;lower;upper;<array_contents_type>".  Put code in
+     to handle this.  */
+
+  index_type = read_type (pp);
+  if (*(*pp)++ != ';')
+    error ("Invalid symbol data; improper format of array type decl.");
+  lower = read_number (pp, ';');
+  upper = read_number (pp, ';');
+  element_type = read_type (pp);
+
+  {
+    /* Create range type.  */
+    range_type = (struct type *) obstack_alloc (symbol_obstack,
+						sizeof (struct type));
+    TYPE_CODE (range_type) = TYPE_CODE_RANGE;
+    TYPE_TARGET_TYPE (range_type) = index_type;
+
+    /* This should never be needed.  */
+    TYPE_LENGTH (range_type) = sizeof (int);
+
+    TYPE_NFIELDS (range_type) = 2;
+    TYPE_FIELDS (range_type) =
+      (struct field *) obstack_alloc (symbol_obstack,
+				      2 * sizeof (struct field));
+    TYPE_FIELD_BITPOS (range_type, 0) = lower;
+    TYPE_FIELD_BITPOS (range_type, 1) = upper;
+  }
+
+  TYPE_CODE (type) = TYPE_CODE_ARRAY;
+  TYPE_TARGET_TYPE (type) = element_type;
+  TYPE_LENGTH (type) = (upper - lower + 1) * TYPE_LENGTH (element_type);
+  TYPE_NFIELDS (type) = 1;
+  TYPE_FIELDS (type) =
+    (struct field *) obstack_alloc (symbol_obstack,
+				    sizeof (struct field));
+  TYPE_FIELD_TYPE (type, 0) = range_type;
+
+  return type;
+}
+
+
 /* Read a definition of an enumeration type,
    and create and return a suitable type object.
    Also defines the symbols that represent the values of the type.  */
@@ -3007,7 +4250,7 @@ read_enum_type (pp, type)
   while (**pp && **pp != ';')
     {
       /* Check for and handle cretinous dbx symbol name continuation!  */
-      if (**pp == '\\') *pp = next_symbol_text ();
+      if (**pp == '\\')	*pp = next_symbol_text ();
 
       p = *pp;
       while (*p != ':') p++;
@@ -3049,8 +4292,8 @@ read_enum_type (pp, type)
 	  struct symbol *sym = syms->symbol[j];
 	  SYMBOL_TYPE (sym) = type;
 	  TYPE_FIELD_NAME (type, --n) = SYMBOL_NAME (sym);
-	  TYPE_FIELD_VALUE (type, n) = SYMBOL_VALUE (sym);
-	  TYPE_FIELD_BITPOS (type, n) = 0;
+	  TYPE_FIELD_VALUE (type, n) = 0;
+	  TYPE_FIELD_BITPOS (type, n) = SYMBOL_VALUE (sym);
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
 	}
       if (syms == osyms)
@@ -3060,6 +4303,9 @@ read_enum_type (pp, type)
   return type;
 }
   
+#define	MAX_OF_TYPE(t)	((1 << (sizeof (t) - 1)) - 1)
+#define MIN_OF_TYPE(t)	(-(1 << (sizeof (t) - 1)))
+
 static struct type *
 read_range_type (pp, typenums)
      char **pp;
@@ -3067,12 +4313,15 @@ read_range_type (pp, typenums)
 {
   char *errp = *pp;
   int rangenums[2];
-  int n1, n2, n3;
+  int n2, n3;
+  int self_subrange;
+  struct type *result_type;
 
   /* First comes a type we are a subrange of.
-     In practice it is usually 0, 1 or the type being defined.  */
+     In C it is usually 0, 1 or the type being defined.  */
   read_type_number (pp, rangenums);
-  n1 = rangenums[1];
+  self_subrange = (rangenums[0] == typenums[0] &&
+		   rangenums[1] == typenums[1]);
 
   /* A semicolon should now follow; skip it.  */
   if (**pp == ';')
@@ -3084,8 +4333,7 @@ read_range_type (pp, typenums)
   n3 = read_number (pp, ';');
 
   /* A type defined as a subrange of itself, with bounds both 0, is void.  */
-  if (rangenums[0] == typenums[0] && rangenums[1] == typenums[1]
-      && n2 == 0 && n3 == 0)
+  if (self_subrange && n2 == 0 && n3 == 0)
     return builtin_type_void;
 
   /* If n3 is zero and n2 is not, we want a floating type,
@@ -3114,12 +4362,16 @@ read_range_type (pp, typenums)
 	return builtin_type_unsigned_long;
     }
 
-  /* Detect unsigned subranges of int.  Int is normally 1.
-     Note that `char' is usually given bounds of 0 to 127,
-     and would therefore appear unsigned; but it is described
-     as a subrange of itself, so we reject it here.  */
+  /* Special case: char is defined (Who knows why) as a subrange of
+     itself with range 0-127.  */
+  else if (self_subrange && n2 == 0 && n3 == 127)
+    return builtin_type_char;
 
-  else if (n2 == 0 && n1 == 1)
+  /* Assumptions made here: Subrange of self is equivalent to subrange
+     of int.  */
+  else if (n2 == 0
+	   && (self_subrange ||
+	       *dbx_lookup_type (rangenums) == builtin_type_int))
     {
       /* an unsigned type */
       if (n3 == (1 << (8 * sizeof (int))) - 1)
@@ -3129,7 +4381,7 @@ read_range_type (pp, typenums)
       if (n3 == (1 << (8 * sizeof (char))) - 1)
 	return builtin_type_unsigned_char;
     }
-  else
+  else if (n2 == -n3 -1)
     {
       /* a signed type */
       if (n3 == (1 << (8 * sizeof (int) - 1)) - 1)
@@ -3141,8 +4393,49 @@ read_range_type (pp, typenums)
       if (n3 == (1 << (8 * sizeof (char) - 1)) - 1)
 	return builtin_type_char;
     }
-  error ("Invalid symbol data: range type spec %s at symtab pos %d.",
-	 errp - 1, symnum);
+
+  /* We have a real range type on our hands.  Allocate space and
+     return a real pointer.  */
+
+  /* At this point I don't have the faintest idea how to deal with
+     a self_subrange type; I'm going to assume that this is used
+     as an idiom, and that all of them are special cases.  So . . .  */
+  if (self_subrange)
+    error ("Type defined as subrange of itself.");
+  
+  result_type = (struct type *) obstack_alloc (symbol_obstack,
+					       sizeof (struct type));
+  bzero (result_type, sizeof (struct type));
+
+  TYPE_TARGET_TYPE (result_type) = (self_subrange ?
+				    builtin_type_int :
+				    *dbx_lookup_type(rangenums));
+
+  /* We have to figure out how many bytes it takes to hold this
+     range type.  I'm going to assume that anything that is pushing
+     the bounds of a long was taken care of above.  */
+  if (n2 >= MIN_OF_TYPE(char) && n3 <= MAX_OF_TYPE(char))
+    TYPE_LENGTH (result_type) = 1;
+  else if (n2 >= MIN_OF_TYPE(short) && n3 <= MAX_OF_TYPE(short))
+    TYPE_LENGTH (result_type) = sizeof (short);
+  else if (n2 >= MIN_OF_TYPE(int) && n3 <= MAX_OF_TYPE(int))
+    TYPE_LENGTH (result_type) = sizeof (int);
+  else if (n2 >= MIN_OF_TYPE(long) && n3 <= MAX_OF_TYPE(long))
+    TYPE_LENGTH (result_type) = sizeof (long);
+  else
+    error ("Ranged type doesn't fit within known sizes.");
+
+  TYPE_LENGTH (result_type) = TYPE_LENGTH (TYPE_TARGET_TYPE (result_type));
+  TYPE_CODE (result_type) = TYPE_CODE_RANGE;
+  TYPE_NFIELDS (result_type) = 2;
+  TYPE_FIELDS (result_type) =
+    (struct field *) obstack_alloc (symbol_obstack,
+				    2 * sizeof (struct field));
+  bzero (TYPE_FIELDS (result_type), 2 * sizeof (struct field));
+  TYPE_FIELD_BITPOS (result_type, 0) = n2;
+  TYPE_FIELD_BITPOS (result_type, 1) = n3;
+    
+  return result_type;
 }
 
 /* Read a number from the string pointed to by *PP.
@@ -3179,7 +4472,7 @@ read_number (pp, end)
     }
   if (end)
     {
-      if (c != end)
+      if (c && c != end)
 	error ("Invalid symbol data: invalid character \\%03o at symbol pos %d.", c, symnum);
     }
   else
@@ -3204,7 +4497,8 @@ read_args (pp, end)
       if (**pp != ',')
 	error ("Invalid argument list: no ',', at symtab pos %d", symnum);
       *pp += 1;
-      /* Check for and handle cretinous dbx symbol name continuation!  */
+
+      /* Check for and handle cretinous dbx symbol name continuation! */
       if (**pp == '\\')
 	*pp = next_symbol_text ();
       
@@ -3230,28 +4524,30 @@ read_args (pp, end)
 }
 
 /* This function is really horrible, but to avoid it, there would need
-   to be more filling in of forward references.  */
+   to be more filling in of forward references.  THIS SHOULD BE MOVED OUT 
+   OF COFFREAD.C AND DBXREAD.C TO SOME PLACE WHERE IT CAN BE SHARED */
 int
 fill_in_vptr_fieldno (type)
      struct type *type;
 {
   if (TYPE_VPTR_FIELDNO (type) < 0)
-    TYPE_VPTR_FIELDNO (type) = fill_in_vptr_fieldno (TYPE_BASECLASS (type, 1));
+    TYPE_VPTR_FIELDNO (type) =
+      fill_in_vptr_fieldno (TYPE_BASECLASS (type, 1));
   return TYPE_VPTR_FIELDNO (type);
 }
 
-static
-initialize ()
+void
+_initialize_dbxread ()
 {
   symfile = 0;
+  header_files = (struct header_file *) 0;
+  this_object_header_files = (int *) 0;
 
   add_com ("symbol-file", class_files, symbol_file_command,
 	   "Load symbol table (in dbx format) from executable file FILE.");
 
   add_com ("add-file", class_files, add_file_command,
-           "Load the symbols from FILE, assuming its codes is at TEXT_START.") ;
+           "Load the symbols from FILE, assuming its code is at TEXT_START.") ;
 }
-
-END_FILE
 
 #endif /* READ_DBX_FORMAT */

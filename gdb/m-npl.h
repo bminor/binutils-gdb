@@ -17,8 +17,8 @@ notice and this notice must be preserved on all copies.
 In other words, go ahead and share GDB, but don't try to stop
 anyone else from sharing it farther.  Help stamp out software hoarding! */
 
-/* Read file headers properly in core.c */
-#define gould
+/* This code appears in libraries on Gould machines.  Ignore it. */
+#define IGNORE_SYMBOL(type) (type == N_ENTRY)
 
 /* Macro for text-offset and data info (in NPL a.out format).  */
 #define	TEXTINFO						\
@@ -169,7 +169,7 @@ anyone else from sharing it farther.  Help stamp out software hoarding! */
    the new frame is not set up until the new function executes
    some instructions.  True on NPL! Return address is in R1.
    The true return address is REALLY 4 past that location! */
-#define SAVED_PC_AFTER_CALL(frame) \
+`#define SAVED_PC_AFTER_CALL(frame) \
 	(read_register(R1_REGNUM) + 4)
 
 /* Address of U in kernel space */
@@ -194,6 +194,12 @@ anyone else from sharing it farther.  Help stamp out software hoarding! */
 
 /* Return 1 if P points to an invalid floating point value.  */
 #define INVALID_FLOAT(p, len) 	((*(short *)p & 0xff80) == 0x8000)
+
+/* Largest integer type */
+#define LONGEST long
+
+/* Name of the builtin type for the LONGEST type above. */
+#define BUILTIN_TYPE_LONGEST builtin_type_long
 
 /* Say how long (ordinary) registers are.  */
 #define REGISTER_TYPE 		long
@@ -296,6 +302,14 @@ anyone else from sharing it farther.  Help stamp out software hoarding! */
    of data in register N.  */
 #define REGISTER_VIRTUAL_TYPE(N)	(builtin_type_int)
 
+/* Store the address of the place in which to copy the structure the
+   subroutine will return.  This is called from call_function.
+
+   On this machine this is a no-op, because gcc isn't used on it
+   yet.  So this calling convention is not used. */
+
+#define STORE_STRUCT_RETURN(ADDR, SP)
+
 /* Extract from an arrary REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF. */
@@ -335,21 +349,21 @@ anyone else from sharing it farther.  Help stamp out software hoarding! */
 #define FRAME_CHAIN(thisframe)		(findframe(thisframe))
 
 #define FRAME_CHAIN_VALID(chain, thisframe) \
-        (chain != 0 && chain != thisframe)
+        (chain != 0 && chain != (thisframe)->frame)
 
 #define FRAME_CHAIN_COMBINE(chain, thisframe) \
 	(chain)
 
 /* Define other aspects of the stack frame on NPL.  */
-#define FRAME_SAVED_PC(frame,ignore) \
-	(read_memory_integer (frame + 8, 4))
+#define FRAME_SAVED_PC(FRAME) \
+	(read_memory_integer ((FRAME)->frame + 8, 4))
 
 #define FRAME_ARGS_ADDRESS(fi) \
-	((fi).next_frame ? \
-	 read_memory_integer ((fi).frame + 12, 4) : \
+	((fi)->next_frame ? \
+	 read_memory_integer ((fi)->frame + 12, 4) : \
 	 read_register (AP_REGNUM))
 
-#define FRAME_LOCALS_ADDRESS(fi)	((fi).frame + 80)
+#define FRAME_LOCALS_ADDRESS(fi)	((fi)->frame + 80)
 
 /* Set VAL to the number of args passed to frame described by FI.
    Can set VAL to -1, meaning no way to tell.  */
@@ -370,11 +384,11 @@ anyone else from sharing it farther.  Help stamp out software hoarding! */
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs)		\
 {                                                                       \
   bzero (&frame_saved_regs, sizeof frame_saved_regs);			\
-  (frame_saved_regs).regs[PC_REGNUM] = (frame_info).frame + 8;		\
-  (frame_saved_regs).regs[R4_REGNUM] = (frame_info).frame + 0x30;	\
-  (frame_saved_regs).regs[R5_REGNUM] = (frame_info).frame + 0x34;	\
-  (frame_saved_regs).regs[R6_REGNUM] = (frame_info).frame + 0x38;	\
-  (frame_saved_regs).regs[R7_REGNUM] = (frame_info).frame + 0x3C;	\
+  (frame_saved_regs).regs[PC_REGNUM] = (frame_info)->frame + 8;		\
+  (frame_saved_regs).regs[R4_REGNUM] = (frame_info)->frame + 0x30;	\
+  (frame_saved_regs).regs[R5_REGNUM] = (frame_info)->frame + 0x34;	\
+  (frame_saved_regs).regs[R6_REGNUM] = (frame_info)->frame + 0x38;	\
+  (frame_saved_regs).regs[R7_REGNUM] = (frame_info)->frame + 0x3C;	\
 }
 
 /* Things needed for making the inferior call functions.  */
@@ -396,12 +410,14 @@ anyone else from sharing it farther.  Help stamp out software hoarding! */
    restoring all saved registers.  */
 
 #define POP_FRAME  \
-{ register CORE_ADDR fp = read_register (FP_REGNUM);		 \
+{ register FRAME frame = get_current_frame ();			 \
+  register CORE_ADDR fp;					 \
   register int regnum;						 \
   struct frame_saved_regs fsr;					 \
-  struct frame_info fi;						 \
-  fi = get_frame_info (fp);					 \
-  get_frame_saved_regs (&fi, &fsr);				 \
+  struct frame_info *fi;					 \
+  fi = get_frame_info (frame);					 \
+  fp = fi->frame;						 \
+  get_frame_saved_regs (fi, &fsr);				 \
   for (regnum = FP_REGNUM - 1; regnum >= 0; regnum--)		 \
     if (fsr.regs[regnum])					 \
       write_register (regnum, read_memory_integer (fsr.regs[regnum], 4)); \
@@ -410,7 +426,9 @@ anyone else from sharing it farther.  Help stamp out software hoarding! */
   write_register (FP_REGNUM, read_memory_integer (fp, 4));	 \
   write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));   \
   write_register (SP_REGNUM, fp + 8);				 \
-  set_current_frame (read_register (FP_REGNUM)); }
+  flush_cached_frames ();					 \
+  set_current_frame ( create_new_frame (read_register (FP_REGNUM),\
+					read_pc ())); }
 
 /* This sequence of words is the instructions:
      halt
@@ -443,7 +461,7 @@ anyone else from sharing it farther.  Help stamp out software hoarding! */
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.  */
 
-#define FIX_CALL_DUMMY(dummyname, fun, nargs)     \
+#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, type)     \
 { *(int *)((char *) dummyname + 20) = nargs * 4;  \
   *(int *)((char *) dummyname + 14) = fun; }
 

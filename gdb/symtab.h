@@ -18,12 +18,15 @@ In other words, go ahead and share GDB, but don't try to stop
 anyone else from sharing it farther.  Help stamp out software hoarding!
 */
 
+#include <obstack.h>
+
 /* An obstack to hold objects that should be freed
    when we load a new symbol table.
    This includes the symbols made by dbxread
    and the types that are not permanent.  */
 
 extern struct obstack *symbol_obstack;
+extern struct obstack *psymbol_obstack;
 
 /* Some definitions and declarations to go with use of obstacks.  */
 #define obstack_chunk_alloc xmalloc
@@ -38,12 +41,15 @@ extern void free ();
 
 /* In addition, gdb can record any number of miscellaneous undebuggable
    functions' addresses.  In a system that appends _ to function names,
-   the _'s are removed from the names stored in this table.  */
+   the _'s are removed from the names stored in this table.  The type is
+   used when sorting so that find_pc_misc_function will pick a global name
+   over a local name for the same address. */
 
 struct misc_function
 {
   char *name;
   CORE_ADDR address;
+  unsigned char type; 
 };
 
 /* Address and length of the vector recording all misc function names/addresses.  */
@@ -53,8 +59,8 @@ int misc_function_count;
 
 #include "symseg.h"
 
-/* Each source file is represented by a struct symtab.
-   These objects are chained through the `next' field.  */
+/* Each source file is represented by a struct symtab.  */
+/* These objects are chained through the `next' field.  */
 
 struct symtab
   {
@@ -95,9 +101,59 @@ struct symtab
     char *fullname;
   };
 
+/*
+ * Each source file that has not been fully read in is represented by
+ * a partial_symtab.  This contains the information on where in the
+ * executable the debugging symbols for a specific file are, and a
+ * list of names of global symbols which are located in this file.
+ */
+struct partial_symtab
+{
+  /* Chain of all existing partial symtabs.  */
+  struct partial_symtab *next;
+  /* Name of the source file which this partial_symtab defines */
+  char *filename;
+  /* Offset within loader symbol table of first local symbol for this
+     file and length (in bytes) of the section of the symbol table
+     devoted to this file's symbols (actually, the section bracketed
+     may contain more than just this files symbols
+     If ldsymlen is 0, the only reason for this things existence is
+     the dependency list below.  Nothing else will happen when it is
+     read in.  */
+  int ldsymoff, ldsymlen;
+  /* Range of text addresses covered by this file; texthigh is the
+     beginning of the next section. */
+  int textlow, texthigh;
+  /* Non-zero if the symtab corresponding to this psymtab has been
+     readin */
+  unsigned char readin;
+  /* Array of pointers to all of the partial_symtab s which this one
+     depends one.  Since this array can only be set to previous or
+     the current (?) psymtab, this dependency tree is guarranteed not
+     to have any loops. */
+  struct partial_symtab **dependencies;
+  int number_of_dependencies;
+  /* Global symbol list.  This list will be sorted after readin to
+     improve access.  Binary search will be the usual method of
+     finding a symbol within it. globals_offset is an integer offset
+     within ps_globals */
+  int globals_offset, n_global_syms;
+  /* Static symbol list.  This list will *not* be sorted after readin;
+     to find a symbol in it, exhaustive search must be used.  This is
+     reasonable because searches through this list will eventually
+     lead to either the read in of a files symbols for real (assumed
+     to take a *lot* of time; check) or an error (and we don't care
+     how long errors take). */
+  int statics_offset, n_static_syms;
+};
+
 /* This is the list of struct symtab's that gdb considers current.  */
 
 struct symtab *symtab_list;
+
+/* This is the list of struct partial_symtab's that gdb may need to access */
+
+struct partial_symtab *partial_symtab_list;
 
 /* This symtab variable specifies the current file for printing source lines */
 
@@ -131,6 +187,7 @@ int current_source_line;
 #define BLOCK_SYM(bl, n) (bl)->sym[n]
 #define BLOCK_FUNCTION(bl) (bl)->function
 #define BLOCK_SUPERBLOCK(bl) (bl)->superblock
+#define BLOCK_GCC_COMPILED(bl) (bl)->gcc_compile_flag
 
 /* Nonzero if symbols of block BL should be sorted alphabetically.  */
 #define BLOCK_SHOULD_SORT(bl) ((bl)->nsyms >= 40)
@@ -225,7 +282,6 @@ int current_source_line;
 
 extern struct symtab *lookup_symtab ();
 extern struct symbol *lookup_symbol ();
-extern struct symbol *lookup_symbol_1 (), *lookup_symbol_2 ();
 extern struct type *lookup_typename ();
 extern struct type *lookup_unsigned_typename ();
 extern struct type *lookup_struct ();
@@ -255,6 +311,10 @@ extern struct type *builtin_type_unsigned_int;
 extern struct type *builtin_type_unsigned_long;
 extern struct type *builtin_type_float;
 extern struct type *builtin_type_double;
+#ifdef LONG_LONG
+extern struct type *builtin_type_long_long;
+extern struct type *builtin_type_unsigned_long_long;
+#endif
 
 struct symtab_and_line
 {
@@ -280,4 +340,5 @@ struct symtab_and_line find_pc_line ();
    For commands like "list" and "breakpoint".  */
 
 struct symtabs_and_lines decode_line_spec ();
+struct symtabs_and_lines decode_line_spec_1 ();
 struct symtabs_and_lines decode_line_1 ();

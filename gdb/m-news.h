@@ -1,14 +1,17 @@
 /* Parameters for execution on a Sony/NEWS, for GDB, the GNU debugger.
+   Probably ths parameters is match as news800, news700 and news900.
 
-Here is an m-news800.h file for gdb version 2.1.  It supports the reading
-the 68881 registers, but the kernel doesn't know how to write them
-and probably cannot write the frame pointer register either.
+Here is an m-news800.h file for gdb version 2.6.  It supports the 68881
+registers.
 
-Now(9/2 '87) NEWS's printf has a bug. 
-And support Sun assembly format instead of Motorola one.
-Probably not well support floating registers from core file rarely that
+(hikichi@srava.sra.junet or hikichi%srava.sra.junet%kddlabs@uunet.uu.net
+ and now hikichi@wheaties.ai.mit.edu)
+* Now(9/2 '87) NEWS's printf has a bug. 
+* And support Sun assembly format instead of Motorola one.
+* Probably not well support floating registers from core file rarely that
 I do not know detail.
-(hikichi@srava.sra.junet or hikichi%srava.sra.junet%kddlabs%seismo.CSS.GOV) 
+* Ptrace for handling floating register has a bug(7/3 '87), but not fixed
+yet. We cannot write floating register.
 
    Copyright (C) 1987 Free Software Foundation, Inc.
 
@@ -34,6 +37,7 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #define news800
 #endif
 
+/* Use GNU assembler instead of standard assembler */
 #define USE_GAS
 
 /* Motorola assembly format */
@@ -41,16 +45,12 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #define MOTOROLA
 #endif
 
-/* bug when printf special number; NAN */
-#define PRINTF_BUG
-
 /* Define this if the C compiler puts an underscore at the front
    of external names before giving them to the linker.  */
 
 #define NAMES_HAVE_UNDERSCORE
 
-/* Debugger info will be in DBX format. */
-
+/* Symbols on this machine are in DBX format. */
 #define READ_DBX_FORMAT
 
 /* Offset from address of function to start of its code.
@@ -108,6 +108,12 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 /* Return 1 if P points to an invalid floating point value.  */
 
 #define INVALID_FLOAT(p, len) 0   /* Just a first guess; not checked */
+
+/* Largest integer type */
+#define LONGEST long
+
+/* Name of the builtin type for the LONGEST type above. */
+#define BUILTIN_TYPE_LONGEST builtin_type_long
 
 /* Say how long registers are.  */
 
@@ -215,27 +221,24 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 #define REGISTER_VIRTUAL_TYPE(N) \
  (((unsigned)(N) - FP0_REGNUM) < 8 ? builtin_type_double : builtin_type_int)
 
+/* Store the address of the place in which to copy the structure the
+   subroutine will return.  This is called from call_function. */
+
+#define STORE_STRUCT_RETURN(ADDR, SP) \
+  { write_register (9, (ADDR)); }
+
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  { if (TYPE_CODE (TYPE) != TYPE_CODE_FLT) \
-      bcopy (REGBUF, VALBUF, TYPE_LENGTH (TYPE)); \
-    else \
-      convert_from_68881 (REGBUF + REGISTER_BYTE (FP0_REGNUM), VALBUF); }
+  bcopy (REGBUF, VALBUF, TYPE_LENGTH (TYPE))
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */
 
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  { if (TYPE_CODE (TYPE) != TYPE_CODE_FLT) \
-      write_register_bytes (0, VALBUF, TYPE_LENGTH (TYPE)); \
-    else \
-      { \
-	char raw_buffer[12]; \
-	convert_to_68881 (VALBUF, raw_buffer); \
-	write_register_bytes (REGISTER_BYTE(FP0_REGNUM), raw_buffer, 12); }}
+  write_register_bytes (0, VALBUF, TYPE_LENGTH (TYPE))
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
@@ -262,26 +265,26 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 /* In the case of the NEWS, the frame's nominal address
    is the address of a 4-byte word containing the calling frame's address.  */
 
-#define FRAME_CHAIN(thisframe)  (read_memory_integer (thisframe, 4))
+#define FRAME_CHAIN(thisframe)  (read_memory_integer ((thisframe)->frame, 4))
 
 #define FRAME_CHAIN_VALID(chain, thisframe) \
-  (chain != 0 && (FRAME_SAVED_PC (thisframe,0) >= first_object_file_end))
+  (chain != 0 && (FRAME_SAVED_PC (thisframe) >= first_object_file_end))
 
 #define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 
 /* Define other aspects of the stack frame.  */
 
-#define FRAME_SAVED_PC(frame,ignore) (read_memory_integer (frame + 4, 4))
+#define FRAME_SAVED_PC(FRAME) (read_memory_integer ((FRAME)->frame + 4, 4))
 
-#define FRAME_ARGS_ADDRESS(fi) (fi.frame)
+#define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
 
-#define FRAME_LOCALS_ADDRESS(fi) (fi.frame)
+#define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
 
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
 #define FRAME_NUM_ARGS(val, fi)  \
-{ register CORE_ADDR pc = FRAME_SAVED_PC (fi.frame,0);		\
+{ register CORE_ADDR pc = FRAME_SAVED_PC (fi);			\
   register int insn = 0177777 & read_memory_integer (pc, 2);	\
   val = 0;							\
   if (insn == 0047757 || insn == 0157374)  /* lea W(sp),sp or addaw #W,sp */ \
@@ -311,12 +314,12 @@ read_memory_integer (read_register (SP_REGNUM), 4)
   register int insn;							\
   register int offset;							\
   bzero (&frame_saved_regs, sizeof frame_saved_regs);			\
-  if ((frame_info).pc >= (frame_info).frame - CALL_DUMMY_LENGTH - FP_REGNUM*4 - 8*12 - 4 \
-      && (frame_info).pc <= (frame_info).frame)				\
-    { next_addr = (frame_info).frame;					\
-      pc = (frame_info).frame - CALL_DUMMY_LENGTH - FP_REGNUM * 4 - 8*12 - 4; }\
+  if ((frame_info)->pc >= (frame_info)->frame - CALL_DUMMY_LENGTH - FP_REGNUM*4 - 8*12 - 4 \
+      && (frame_info)->pc <= (frame_info)->frame)				\
+    { next_addr = (frame_info)->frame;					\
+      pc = (frame_info)->frame - CALL_DUMMY_LENGTH - FP_REGNUM * 4 - 8*12 - 4; }\
   else   								\
-    { pc = get_pc_function_start ((frame_info).pc); 			\
+    { pc = get_pc_function_start ((frame_info)->pc); 			\
       /* Verify we have a link a6 instruction next,			\
 	 or a branch followed by a link a6 instruction;			\
 	 if not we lose.  If we win, find the address above the saved   \
@@ -324,9 +327,9 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 retry:									\
       insn = read_memory_integer (pc, 2);				\
       if (insn == 044016)						\
-	next_addr = (frame_info).frame - read_memory_integer (pc += 2, 4), pc+=4; \
+	next_addr = (frame_info)->frame - read_memory_integer (pc += 2, 4), pc+=4; \
       else if (insn == 047126)						\
-	next_addr = (frame_info).frame - read_memory_integer (pc += 2, 2), pc+=2; \
+	next_addr = (frame_info)->frame - read_memory_integer (pc += 2, 2), pc+=2; \
       else if ((insn & 0177400) == 060000)	/* bra insn */		\
 	{ offset = insn & 0377;						\
           pc += 2;				/* advance past bra */	\
@@ -366,15 +369,15 @@ retry:									\
       && read_memory_integer (pc+2, 2) == 042347)			\
     (frame_saved_regs).regs[PS_REGNUM] = (next_addr -= 4);		\
   lose: ;								\
-  (frame_saved_regs).regs[SP_REGNUM] = (frame_info).frame + 8;		\
-  (frame_saved_regs).regs[FP_REGNUM] = (frame_info).frame;		\
-  (frame_saved_regs).regs[PC_REGNUM] = (frame_info).frame + 4;		\
+  (frame_saved_regs).regs[SP_REGNUM] = (frame_info)->frame + 8;		\
+  (frame_saved_regs).regs[FP_REGNUM] = (frame_info)->frame;		\
+  (frame_saved_regs).regs[PC_REGNUM] = (frame_info)->frame + 4;		\
 }
 
 /* Things needed for making the inferior call functions.  */
 
 /* Push an empty stack frame, to record the current PC, etc.  */
-
+#if 0 /* now these define is not used */
 #define PUSH_DUMMY_FRAME \
 { register CORE_ADDR sp = read_register (SP_REGNUM);			\
   register int regnum;							\
@@ -393,13 +396,15 @@ retry:									\
 /* Discard from the stack the innermost frame, restoring all registers.  */
 
 #define POP_FRAME  \
-{ register CORE_ADDR fp = read_register (FP_REGNUM);			\
+{ register FRAME frame = get_current_frame ();			 	\
+  register CORE_ADDR fp;					 	\
   register int regnum;							\
   struct frame_saved_regs fsr;						\
-  struct frame_info fi;							\
+  struct frame_info *fi;						\
   char raw_buffer[12];							\
-  fi = get_frame_info (fp);						\
-  get_frame_saved_regs (&fi, &fsr);					\
+  fi = get_frame_info (frame);					 	\
+  fp = fi->frame;						 	\
+  get_frame_saved_regs (fi, &fsr);					\
   for (regnum = FP0_REGNUM + 7; regnum >= FP0_REGNUM; regnum--)		\
     if (fsr.regs[regnum])						\
       { read_memory (fsr.regs[regnum], raw_buffer, 12);			\
@@ -412,8 +417,44 @@ retry:									\
   write_register (FP_REGNUM, read_memory_integer (fp, 4));		\
   write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));  	\
   write_register (SP_REGNUM, fp + 8);					\
-}
+  flush_cached_frames ();					 	\
+  set_current_frame (create_new_frame (read_register (FP_REGNUM),	\
+				       read_pc ())); }
+#else /* now ptrace has a bug to write floating register */
+#define PUSH_DUMMY_FRAME \
+{ register CORE_ADDR sp = read_register (SP_REGNUM);			\
+  register int regnum;							\
+  sp = push_word (sp, read_register (PC_REGNUM));			\
+  sp = push_word (sp, read_register (FP_REGNUM));			\
+  write_register (FP_REGNUM, sp);					\
+  for (regnum = FP_REGNUM - 1; regnum >= 0; regnum--)			\
+    sp = push_word (sp, read_register (regnum));			\
+  sp = push_word (sp, read_register (PS_REGNUM));			\
+  write_register (SP_REGNUM, sp);  }
 
+/* Discard from the stack the innermost frame, restoring all registers.  */
+
+#define POP_FRAME  \
+{ register FRAME frame = get_current_frame ();			 	\
+  register CORE_ADDR fp;					 	\
+  register int regnum;							\
+  struct frame_saved_regs fsr;						\
+  struct frame_info *fi;						\
+  fi = get_frame_info (frame);					 	\
+  fp = fi->frame;						 	\
+  get_frame_saved_regs (fi, &fsr);					\
+  for (regnum = FP_REGNUM - 1; regnum >= 0; regnum--)			\
+    if (fsr.regs[regnum])						\
+      write_register (regnum, read_memory_integer (fsr.regs[regnum], 4)); \
+  if (fsr.regs[PS_REGNUM])						\
+    write_register (PS_REGNUM, read_memory_integer (fsr.regs[PS_REGNUM], 4)); \
+  write_register (FP_REGNUM, read_memory_integer (fp, 4));		\
+  write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));  	\
+  write_register (SP_REGNUM, fp + 8);					\
+  flush_cached_frames ();					 	\
+  set_current_frame (create_new_frame (read_register (FP_REGNUM),	\
+				       read_pc ())); }
+#endif
 /* This sequence of words is the instructions
      fmove.m #<f0-f7>,-(sp)
      movem.l 0xfffc,-(sp)
@@ -445,7 +486,7 @@ taken for the arguments.  */
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.  */
 
-#define FIX_CALL_DUMMY(dummyname, fun, nargs)     \
+#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, type)     \
 { *(int *)((char *) dummyname + 20) = nargs * 4;  \
   *(int *)((char *) dummyname + 14) = fun; }
 

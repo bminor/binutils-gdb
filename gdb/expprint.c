@@ -20,6 +20,7 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 
 #include "defs.h"
 #include "symtab.h"
+#include "param.h"
 #include "expression.h"
 
 #include <stdio.h>
@@ -79,7 +80,9 @@ static struct op_print op_print_tab[] =
     {"&", UNOP_ADDR, PREC_PREFIX, 0},
     {"sizeof ", UNOP_SIZEOF, PREC_PREFIX, 0},
     {"++", UNOP_PREINCREMENT, PREC_PREFIX, 0},
-    {"--", UNOP_PREDECREMENT, PREC_PREFIX, 0}
+    {"--", UNOP_PREDECREMENT, PREC_PREFIX, 0},
+    /* C++  */
+    {"::", BINOP_SCOPE, PREC_PREFIX, 0},
   };
 
 static void print_subexp ();
@@ -119,6 +122,18 @@ print_subexp (exp, pos, stream, prec)
   opcode = exp->elts[pc].opcode;
   switch (opcode)
     {
+    case OP_SCOPE:
+      myprec = PREC_PREFIX;
+      assoc = 0;
+      (*pos) += 2;
+      print_subexp (exp, pos, stream, (int) myprec + assoc);
+      fprintf (stream, " :: ");
+      nargs = strlen (&exp->elts[pc + 2].string);
+      (*pos) += 1 + (nargs + sizeof (union exp_element)) / sizeof (union exp_element);
+
+      fprintf (stream, &exp->elts[pc + 2].string);
+      return;
+
     case OP_LONG:
       (*pos) += 3;
       value_print (value_from_long (exp->elts[pc + 1].type,

@@ -33,101 +33,6 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
    on STREAM.  Returns length of the instruction, in bytes, which
    is always 4.  */
 
-struct op1_fmt
-{
-  unsigned op1 : 2;
-  unsigned dummy : 30;
-};
-
-struct op2_fmt
-{
-  unsigned dummy1 : 7;
-  unsigned op2 : 3;
-  unsigned dummy2 : 22;
-};
-
-struct op3_fmt
-{
-  unsigned dummy1 : 7;
-  unsigned op3 : 6;
-  unsigned dummy2 : 19;
-};
-
-struct call_fmt
-{
-  unsigned op : 2;
-  unsigned disp : 30;
-};
-
-struct sethi_fmt
-{
-  unsigned op : 2;
-  unsigned rd : 5;
-  unsigned op2 : 3;
-  unsigned imm : 22;
-};
-
-struct branch_fmt
-{
-  unsigned op : 2;
-  unsigned a : 1;
-  unsigned cond : 4;
-  unsigned op2 : 3;
-  unsigned disp : 22;		/* this should really be signed.  */
-};
-
-struct ldst_fmt
-{
-  unsigned op : 2;
-  unsigned rd : 5;
-  unsigned op3 : 6;
-  unsigned rs1 : 5;
-  unsigned i : 1;
-  unsigned asi : 8;
-  unsigned rs2 : 5;
-};
-
-struct arith_imm_fmt
-{
-  unsigned op : 2;
-  unsigned rd : 5;
-  unsigned op3 : 6;
-  unsigned rs1 : 5;
-  unsigned i : 1;
-  unsigned simm : 13;
-};
-
-struct arith_fmt
-{
-  unsigned op : 2;
-  unsigned rd : 5;
-  unsigned op3 : 6;
-  unsigned rs1 : 5;
-  unsigned i : 1;
-  unsigned opf : 8;
-  unsigned rs2 : 5;
-};
-
-union insn_fmt
-{
-  struct op1_fmt op1;
-  struct op2_fmt op2;
-  struct op3_fmt op3;
-  struct call_fmt call;
-  struct sethi_fmt sethi;
-  struct branch_fmt branch;
-  struct ldst_fmt ldst;
-  struct arith_imm_fmt arith_imm;
-  struct arith_fmt arith;
-  int intval;
-  float floatval;		/* ?? */
-};
-
-typedef enum
-{
-  Error, not_branch, bicc, bicca, ba, baa, ticc, ta,
-} branch_type;
-
 static char *icc_name[] =
 { "~", "eq", "le", "lt", "leu", "ltu", "neg", "vs",
   "", "ne", "gt", "ge", "gtu", "geu", "pos", "vc"};
@@ -256,12 +161,16 @@ print_insn (memaddr, stream)
 	      }
 	    else if (insn.arith.i)
 	      {
+		/* With explicit sign extension.  */
 		fprintf (stream, "%s%s %s,0x%x,%s",
-			 name, tmp, rs1, insn.arith_imm.simm, rd);
+			 name, tmp, rs1,
+			 (int) (insn.arith_imm.simm << 19) >> 19,
+			 rd);
 		if (last_sethi_target == insn.arith.rd)
 		  {
 		    fprintf (stream, "\t! ");
-		    print_address (sethi_value + insn.arith_imm.simm);
+		    print_address (sethi_value +
+				   (int) (insn.arith_imm.simm << 19) >> 19);
 		  }
 	      }
 	    else
@@ -287,7 +196,7 @@ print_insn (memaddr, stream)
 		/* tagged add/sub insns and shift insns.  */
 		if (insn.arith.i)
 		  {
-		    int i = insn.arith_imm.simm;
+		    int i = (int) (insn.arith_imm.simm << 19) >> 19;
 		    if (op > 4)
 		      /* Its a shift insn.  */
 		      i &= 31;
@@ -363,7 +272,7 @@ print_insn (memaddr, stream)
 		  {
 		    fprintf (stream, "%s %s,0x%x,%s",
 			     rndop_ptr, rs1,
-			     ((insn.arith_imm.simm << 19) >> 19), rd);
+			     ((int) (insn.arith_imm.simm << 19) >> 19), rd);
 		  }
 		else
 		  {
@@ -437,7 +346,9 @@ fprint_addr1 (stream, name, insn)
   if (insn.arith.i)
     {
       fprintf (stream, "%s %s,0x%x,%s",
-	       name, rs1, insn.arith_imm.simm, rd);
+	       name, rs1,
+	       (int) (insn.arith_imm.simm << 19) >> 19,
+	       rd);
     }
   else
     {
@@ -730,82 +641,3 @@ fprint_fpop (stream, insn, op, opcode)
   fprintf (stream, "0x%08x (unimplemented fpop insn)", insn.intval);
 }
 
-/* Set *target if we find a branch */
-branch_type
-isabranch (addr,  target)
-     CORE_ADDR addr, *target;
-{
-  union insn_fmt instr;
-  branch_type val = not_branch;
-  long offset; /* Must be signed for sign-extend */
-
-  *target = 0;
-  instr.intval = read_memory_integer (addr, 4);
-  /* printf("intval = %x\n",instr.intval); */
-  switch (instr.op1.op1)
-    {
-    case 0:			/* Format 2 */
-      switch(instr.op2.op2)
-	{
-	case 2: case 6:		/* BICC & FBCC */
-	  if (instr.branch.cond == 8)
-	    val = instr.branch.a ? baa : ba;
-	  else
-	    val = instr.branch.a ? bicca : bicc;
-	  /* 22 bits, sign extended */
-	  offset = ((instr.branch.disp << 10) >> 10);
-	  *target = addr + offset;
-	  break;
-	}
-      break;
-    }
-  /*printf("isabranch ret: %d\n",val); */
-  return val;
-}
-
-CORE_ADDR skip_prologue (pc)
-     CORE_ADDR pc;
-{
-  union
-    {
-      struct insn_fmt insn;
-      int i;
-    } x;
-  int dest = -1;
-
-  x.i = read_memory_integer (pc, 4);
-  if (x.insn.sethi.op == 0 && x.insn.sethi.op2 == 4)
-    {
-      dest = x.insn.sethi.rd;
-      pc += 4;
-      x.i = read_memory_integer (pc, 4);
-    }
-  if (x.insn.arith_imm.op == 2 && x.insn.arith_imm.i == 1
-      && (x.insn.arith_imm.rd == 1 || x.insn.arith_imm.rd == dest))
-    {
-      pc += 4;
-      x.i = read_memory_integer (pc, 4);
-    }
-  if (x.insn.arith.op == 2 && (x.insn.arith.op3 ^ 32) == 28)
-    {
-      pc += 4;
-    }
-  return pc;
-}
-
-CORE_ADDR
-frame_saved_pc (frame, next_frame)
-     CORE_ADDR frame;
-     CORE_ADDR next_frame;
-{
-  CORE_ADDR prev_pc;
-
-  if (next_frame)
-    prev_pc = GET_RWINDOW_REG (next_frame, rw_in[7]);
-  else if (frame)
-    prev_pc = GET_RWINDOW_REG (read_register (SP_REGNUM), rw_in[7]);
-  else
-    error ("frame_saved_pc called without a frame");
-
-  return PC_ADJUST (prev_pc);
-}

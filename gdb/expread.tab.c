@@ -13,9 +13,8 @@ static int expout_size;
 static int expout_ptr;
 
 static int yylex ();
-static yyerror ();
+static void yyerror ();
 static void write_exp_elt ();
-static void write_exp_elt2 ();
 static void write_exp_string ();
 static void start_arglist ();
 static int end_arglist ();
@@ -26,6 +25,13 @@ static char *copy_name ();
    for symbol names.  */
 
 static struct block *expression_context_block;
+
+/* The innermost context required by the stack and register variables
+   we've encountered so far. */
+struct block *innermost_block;
+
+/* The block in which the most recently discovered symbol was found. */
+struct block *block_found;
 
 /* Number of arguments seen so far in innermost function call.  */
 static int arglist_len;
@@ -50,7 +56,7 @@ struct stoken
     int length;
   };
 
-# line 86 "expread.y"
+# line 92 "expread.y"
 typedef union 
   {
     long lval;
@@ -106,7 +112,7 @@ extern short yyerrflag;
 YYSTYPE yylval, yyval;
 # define YYERRCODE 256
 
-# line 625 "expread.y"
+# line 630 "expread.y"
 
 
 /* Begin counting arguments for a function call,
@@ -157,16 +163,13 @@ free_funcalls ()
 
 /* Add one element to the end of the expression.  */
 
-/* To avoid a bug in the Sun 4 compiler, we pass only things that
-   can fit into a single register through here.  */
+/* To avoid a bug in the Sun 4 compiler, we pass things that can fit into
+   a register through here */
+
 static void
 write_exp_elt (expelt)
-     /* union exp_element expelt; */
-     long expelt;
+     union exp_element expelt;
 {
-  union exp_element temp;
-  temp.longconst = expelt;
-
   if (expout_ptr >= expout_size)
     {
       expout_size *= 2;
@@ -174,25 +177,73 @@ write_exp_elt (expelt)
 					       sizeof (struct expression)
 					       + expout_size * sizeof (union exp_element));
     }
-  expout->elts[expout_ptr++] = /* expelt */ temp;
+  expout->elts[expout_ptr++] = expelt;
 }
 
-/* Things that take more space must come through here.  */
 static void
-write_exp_elt2 (expelt)
+write_exp_elt_opcode (expelt)
+     enum exp_opcode expelt;
+{
+  union exp_element tmp;
+
+  tmp.opcode = expelt;
+
+  write_exp_elt (tmp);
+}
+
+static void
+write_exp_elt_sym (expelt)
+     struct symbol *expelt;
+{
+  union exp_element tmp;
+
+  tmp.symbol = expelt;
+
+  write_exp_elt (tmp);
+}
+
+static void
+write_exp_elt_longcst (expelt)
+     LONGEST expelt;
+{
+  union exp_element tmp;
+
+  tmp.longconst = expelt;
+
+  write_exp_elt (tmp);
+}
+
+static void
+write_exp_elt_dblcst (expelt)
      double expelt;
 {
-  union exp_element temp;
-  temp.doubleconst = expelt;
+  union exp_element tmp;
 
-  if (expout_ptr >= expout_size)
-    {
-      expout_size *= 2;
-      expout = (struct expression *) xrealloc (expout,
-					       sizeof (struct expression)
-					       + expout_size * sizeof (union exp_element));
-    }
-  expout->elts[expout_ptr++] = temp;
+  tmp.doubleconst = expelt;
+
+  write_exp_elt (tmp);
+}
+
+static void
+write_exp_elt_type (expelt)
+     struct type *expelt;
+{
+  union exp_element tmp;
+
+  tmp.type = expelt;
+
+  write_exp_elt (tmp);
+}
+
+static void
+write_exp_elt_intern (expelt)
+     struct internalvar *expelt;
+{
+  union exp_element tmp;
+
+  tmp.internalvar = expelt;
+
+  write_exp_elt (tmp);
 }
 
 /* Add a string constant to the end of the expression.
@@ -211,13 +262,13 @@ write_exp_string (str)
   if (expout_ptr >= expout_size)
     {
       expout_size = max (expout_size * 2, expout_ptr + 10);
-      expout = (struct expression *) xrealloc (expout,
-					       sizeof (struct expression)
-					       + expout_size * sizeof (union exp_element));
+      expout = (struct expression *)
+	xrealloc (expout, (sizeof (struct expression)
+			   + (expout_size * sizeof (union exp_element))));
     }
   bcopy (str.ptr, (char *) &expout->elts[expout_ptr - lenelt], len);
   ((char *) &expout->elts[expout_ptr - lenelt])[len] = 0;
-  write_exp_elt (len);
+  write_exp_elt_longcst (len);
 }
 
 /* During parsing of a C expression, the pointer to the next character
@@ -284,12 +335,13 @@ parse_number (olen)
   while (len-- > 0)
     {
       c = *p++;
-      n *= base;
+      if (c >= 'A' && c <= 'Z') c += 'a' - 'A';
+      if (c != 'l')
+	n *= base;
       if (c >= '0' && c <= '9')
 	n += c - '0';
       else
 	{
-	  if (c >= 'A' && c <= 'Z') c += 'a' - 'A';
 	  if (base == 16 && c >= 'a' && c <= 'f')
 	    n += c - 'a' + 10;
 	  else if (len == 0 && c == 'l')
@@ -345,6 +397,29 @@ static struct token tokentab2[] =
     {"<=", LEQ, BINOP_END},
     {">=", GEQ, BINOP_END}
   };
+
+/* assign machine-independent names to certain registers 
+ * (unless overridden by the REGISTER_NAMES table)
+ */
+struct std_regs {
+	char *name;
+	int regnum;
+} std_regs[] = {
+#ifdef PC_REGNUM
+	{ "pc", PC_REGNUM },
+#endif
+#ifdef FP_REGNUM
+	{ "fp", FP_REGNUM },
+#endif
+#ifdef SP_REGNUM
+	{ "sp", SP_REGNUM },
+#endif
+#ifdef PS_REGNUM
+	{ "ps", PS_REGNUM },
+#endif
+};
+
+#define NUM_STD_REGS (sizeof std_regs / sizeof std_regs[0])
 
 /* Read one token, getting characters through lexptr.  */
 
@@ -529,7 +604,7 @@ yylex ()
   /* Handle tokens that refer to machine registers:
      $ followed by a register name.  */
 
-  if (*tokstart == '$')
+  if (*tokstart == '$') {
     for (c = 0; c < NUM_REGS; c++)
       if (namelen - 1 == strlen (reg_names[c])
 	  && !strncmp (tokstart + 1, reg_names[c], namelen - 1))
@@ -537,7 +612,14 @@ yylex ()
 	  yylval.lval = c;
 	  return REGNAME;
 	}
-
+    for (c = 0; c < NUM_STD_REGS; c++)
+     if (namelen - 1 == strlen (std_regs[c].name)
+	 && !strncmp (tokstart + 1, std_regs[c].name, namelen - 1))
+       {
+	 yylval.lval = std_regs[c].regnum;
+	 return REGNAME;
+       }
+  }
   if (namelen == 6 && !strncmp (tokstart, "struct", 6))
     {
       return STRUCT;
@@ -555,10 +637,10 @@ yylex ()
 	{
 	  return ENUM;
 	}
-      if (!strncmp (tokstart, "this", 4))
-	{
-	  return THIS;
-	}
+      if (!strncmp (tokstart, "this", 4)
+	  && lookup_symbol ("$this", expression_context_block,
+			    VAR_NAMESPACE, 0))
+	return THIS;
     }
   if (namelen == 6 && !strncmp (tokstart, "sizeof", 6))
     {
@@ -587,7 +669,7 @@ yylex ()
   return NAME;
 }
 
-static
+static void
 yyerror ()
 {
   error ("Invalid syntax in expression.");
@@ -846,6 +928,8 @@ parse_c_1 (stringptr, block, comma)
 
   lexptr = *stringptr;
 
+  paren_depth = 0;
+
   comma_terminates = comma;
 
   if (lexptr == 0 || *lexptr == 0)
@@ -859,8 +943,9 @@ parse_c_1 (stringptr, block, comma)
   namecopy = (char *) alloca (strlen (lexptr) + 1);
   expout_size = 10;
   expout_ptr = 0;
-  expout = (struct expression *) xmalloc (sizeof (struct expression)
-					  + expout_size * sizeof (union exp_element));
+  expout = (struct expression *)
+    xmalloc (sizeof (struct expression)
+	     + expout_size * sizeof (union exp_element));
   make_cleanup (free_current_contents, &expout);
   if (yyparse ())
     yyerror ();
@@ -1054,7 +1139,7 @@ short yydef[]={
    0,  23,   0,  69,   0,  70,   0,  77,  71,   0,
   78 };
 #ifndef lint
-static	char yaccpar_sccsid[] = "@(#)yaccpar 1.6 88/02/08 SMI"; /* from UCB 4.1 83/02/11 */
+static	char yaccpar_sccsid[] = "@(#)yaccpar 1.5 86/08/27 SMI"; /* from UCB 4.1 83/02/11 */
 #endif
 
 #
@@ -1203,202 +1288,202 @@ yyparse() {
 		switch(yym){
 			
 case 3:
-# line 159 "expread.y"
-{ write_exp_elt (BINOP_COMMA); } break;
+# line 165 "expread.y"
+{ write_exp_elt_opcode (BINOP_COMMA); } break;
 case 4:
-# line 164 "expread.y"
-{ write_exp_elt (UNOP_IND); } break;
-case 5:
-# line 167 "expread.y"
-{ write_exp_elt (UNOP_ADDR); } break;
-case 6:
 # line 170 "expread.y"
-{ write_exp_elt (UNOP_NEG); } break;
+{ write_exp_elt_opcode (UNOP_IND); } break;
+case 5:
+# line 173 "expread.y"
+{ write_exp_elt_opcode (UNOP_ADDR); } break;
+case 6:
+# line 176 "expread.y"
+{ write_exp_elt_opcode (UNOP_NEG); } break;
 case 7:
-# line 174 "expread.y"
-{ write_exp_elt (UNOP_ZEROP); } break;
+# line 180 "expread.y"
+{ write_exp_elt_opcode (UNOP_ZEROP); } break;
 case 8:
-# line 178 "expread.y"
-{ write_exp_elt (UNOP_LOGNOT); } break;
+# line 184 "expread.y"
+{ write_exp_elt_opcode (UNOP_LOGNOT); } break;
 case 9:
-# line 182 "expread.y"
-{ write_exp_elt (UNOP_PREINCREMENT); } break;
+# line 188 "expread.y"
+{ write_exp_elt_opcode (UNOP_PREINCREMENT); } break;
 case 10:
-# line 186 "expread.y"
-{ write_exp_elt (UNOP_PREDECREMENT); } break;
+# line 192 "expread.y"
+{ write_exp_elt_opcode (UNOP_PREDECREMENT); } break;
 case 11:
-# line 190 "expread.y"
-{ write_exp_elt (UNOP_POSTINCREMENT); } break;
+# line 196 "expread.y"
+{ write_exp_elt_opcode (UNOP_POSTINCREMENT); } break;
 case 12:
-# line 194 "expread.y"
-{ write_exp_elt (UNOP_POSTDECREMENT); } break;
+# line 200 "expread.y"
+{ write_exp_elt_opcode (UNOP_POSTDECREMENT); } break;
 case 13:
-# line 198 "expread.y"
-{ write_exp_elt (UNOP_SIZEOF); } break;
+# line 204 "expread.y"
+{ write_exp_elt_opcode (UNOP_SIZEOF); } break;
 case 14:
-# line 202 "expread.y"
-{ write_exp_elt (STRUCTOP_PTR);
-			  write_exp_string (yypvt[-0].sval);
-			  write_exp_elt (STRUCTOP_PTR); } break;
-case 15:
 # line 208 "expread.y"
-{ write_exp_elt (STRUCTOP_MPTR); } break;
-case 16:
-# line 212 "expread.y"
-{ write_exp_elt (STRUCTOP_STRUCT);
+{ write_exp_elt_opcode (STRUCTOP_PTR);
 			  write_exp_string (yypvt[-0].sval);
-			  write_exp_elt (STRUCTOP_STRUCT); } break;
-case 17:
+			  write_exp_elt_opcode (STRUCTOP_PTR); } break;
+case 15:
+# line 214 "expread.y"
+{ write_exp_elt_opcode (STRUCTOP_MPTR); } break;
+case 16:
 # line 218 "expread.y"
-{ write_exp_elt (STRUCTOP_MEMBER); } break;
+{ write_exp_elt_opcode (STRUCTOP_STRUCT);
+			  write_exp_string (yypvt[-0].sval);
+			  write_exp_elt_opcode (STRUCTOP_STRUCT); } break;
+case 17:
+# line 224 "expread.y"
+{ write_exp_elt_opcode (STRUCTOP_MEMBER); } break;
 case 18:
-# line 222 "expread.y"
-{ write_exp_elt (BINOP_SUBSCRIPT); } break;
-case 19:
 # line 228 "expread.y"
+{ write_exp_elt_opcode (BINOP_SUBSCRIPT); } break;
+case 19:
+# line 234 "expread.y"
 { start_arglist (); } break;
 case 20:
-# line 230 "expread.y"
-{ write_exp_elt (OP_FUNCALL);
-			  write_exp_elt (end_arglist ());
-			  write_exp_elt (OP_FUNCALL); } break;
+# line 236 "expread.y"
+{ write_exp_elt_opcode (OP_FUNCALL);
+			  write_exp_elt_longcst (end_arglist ());
+			  write_exp_elt_opcode (OP_FUNCALL); } break;
 case 22:
-# line 239 "expread.y"
+# line 245 "expread.y"
 { arglist_len = 1; } break;
 case 23:
-# line 243 "expread.y"
+# line 249 "expread.y"
 { arglist_len++; } break;
 case 24:
-# line 247 "expread.y"
-{ write_exp_elt (UNOP_MEMVAL);
-			  write_exp_elt (yypvt[-2].tval);
-			  write_exp_elt (UNOP_MEMVAL); } break;
-case 25:
 # line 253 "expread.y"
-{ write_exp_elt (UNOP_CAST);
-			  write_exp_elt (yypvt[-2].tval);
-			  write_exp_elt (UNOP_CAST); } break;
-case 26:
+{ write_exp_elt_opcode (UNOP_MEMVAL);
+			  write_exp_elt_type (yypvt[-2].tval);
+			  write_exp_elt_opcode (UNOP_MEMVAL); } break;
+case 25:
 # line 259 "expread.y"
+{ write_exp_elt_opcode (UNOP_CAST);
+			  write_exp_elt_type (yypvt[-2].tval);
+			  write_exp_elt_opcode (UNOP_CAST); } break;
+case 26:
+# line 265 "expread.y"
 { } break;
 case 27:
-# line 265 "expread.y"
-{ write_exp_elt (BINOP_REPEAT); } break;
+# line 271 "expread.y"
+{ write_exp_elt_opcode (BINOP_REPEAT); } break;
 case 28:
-# line 269 "expread.y"
-{ write_exp_elt (BINOP_MUL); } break;
+# line 275 "expread.y"
+{ write_exp_elt_opcode (BINOP_MUL); } break;
 case 29:
-# line 273 "expread.y"
-{ write_exp_elt (BINOP_DIV); } break;
+# line 279 "expread.y"
+{ write_exp_elt_opcode (BINOP_DIV); } break;
 case 30:
-# line 277 "expread.y"
-{ write_exp_elt (BINOP_REM); } break;
+# line 283 "expread.y"
+{ write_exp_elt_opcode (BINOP_REM); } break;
 case 31:
-# line 281 "expread.y"
-{ write_exp_elt (BINOP_ADD); } break;
+# line 287 "expread.y"
+{ write_exp_elt_opcode (BINOP_ADD); } break;
 case 32:
-# line 285 "expread.y"
-{ write_exp_elt (BINOP_SUB); } break;
+# line 291 "expread.y"
+{ write_exp_elt_opcode (BINOP_SUB); } break;
 case 33:
-# line 289 "expread.y"
-{ write_exp_elt (BINOP_LSH); } break;
+# line 295 "expread.y"
+{ write_exp_elt_opcode (BINOP_LSH); } break;
 case 34:
-# line 293 "expread.y"
-{ write_exp_elt (BINOP_RSH); } break;
+# line 299 "expread.y"
+{ write_exp_elt_opcode (BINOP_RSH); } break;
 case 35:
-# line 297 "expread.y"
-{ write_exp_elt (BINOP_EQUAL); } break;
+# line 303 "expread.y"
+{ write_exp_elt_opcode (BINOP_EQUAL); } break;
 case 36:
-# line 301 "expread.y"
-{ write_exp_elt (BINOP_NOTEQUAL); } break;
+# line 307 "expread.y"
+{ write_exp_elt_opcode (BINOP_NOTEQUAL); } break;
 case 37:
-# line 305 "expread.y"
-{ write_exp_elt (BINOP_LEQ); } break;
+# line 311 "expread.y"
+{ write_exp_elt_opcode (BINOP_LEQ); } break;
 case 38:
-# line 309 "expread.y"
-{ write_exp_elt (BINOP_GEQ); } break;
+# line 315 "expread.y"
+{ write_exp_elt_opcode (BINOP_GEQ); } break;
 case 39:
-# line 313 "expread.y"
-{ write_exp_elt (BINOP_LESS); } break;
+# line 319 "expread.y"
+{ write_exp_elt_opcode (BINOP_LESS); } break;
 case 40:
-# line 317 "expread.y"
-{ write_exp_elt (BINOP_GTR); } break;
+# line 323 "expread.y"
+{ write_exp_elt_opcode (BINOP_GTR); } break;
 case 41:
-# line 321 "expread.y"
-{ write_exp_elt (BINOP_LOGAND); } break;
+# line 327 "expread.y"
+{ write_exp_elt_opcode (BINOP_LOGAND); } break;
 case 42:
-# line 325 "expread.y"
-{ write_exp_elt (BINOP_LOGXOR); } break;
+# line 331 "expread.y"
+{ write_exp_elt_opcode (BINOP_LOGXOR); } break;
 case 43:
-# line 329 "expread.y"
-{ write_exp_elt (BINOP_LOGIOR); } break;
+# line 335 "expread.y"
+{ write_exp_elt_opcode (BINOP_LOGIOR); } break;
 case 44:
-# line 333 "expread.y"
-{ write_exp_elt (BINOP_AND); } break;
+# line 339 "expread.y"
+{ write_exp_elt_opcode (BINOP_AND); } break;
 case 45:
-# line 337 "expread.y"
-{ write_exp_elt (BINOP_OR); } break;
+# line 343 "expread.y"
+{ write_exp_elt_opcode (BINOP_OR); } break;
 case 46:
-# line 341 "expread.y"
-{ write_exp_elt (TERNOP_COND); } break;
+# line 347 "expread.y"
+{ write_exp_elt_opcode (TERNOP_COND); } break;
 case 47:
-# line 345 "expread.y"
-{ write_exp_elt (BINOP_ASSIGN); } break;
+# line 351 "expread.y"
+{ write_exp_elt_opcode (BINOP_ASSIGN); } break;
 case 48:
-# line 349 "expread.y"
-{ write_exp_elt (BINOP_ASSIGN_MODIFY);
-			  write_exp_elt (yypvt[-1].opcode);
-			  write_exp_elt (BINOP_ASSIGN_MODIFY); } break;
-case 49:
 # line 355 "expread.y"
-{ write_exp_elt (OP_LONG);
-			  write_exp_elt (builtin_type_long);
-			  write_exp_elt (yypvt[-0].lval);
-			  write_exp_elt (OP_LONG); } break;
+{ write_exp_elt_opcode (BINOP_ASSIGN_MODIFY);
+			  write_exp_elt_opcode (yypvt[-1].opcode);
+			  write_exp_elt_opcode (BINOP_ASSIGN_MODIFY); } break;
+case 49:
+# line 361 "expread.y"
+{ write_exp_elt_opcode (OP_LONG);
+			  write_exp_elt_type (builtin_type_long);
+			  write_exp_elt_longcst (yypvt[-0].lval);
+			  write_exp_elt_opcode (OP_LONG); } break;
 case 50:
-# line 362 "expread.y"
-{ write_exp_elt (OP_LONG);
-			  write_exp_elt (builtin_type_char);
-			  write_exp_elt (yypvt[-0].lval);
-			  write_exp_elt (OP_LONG); } break;
+# line 368 "expread.y"
+{ write_exp_elt_opcode (OP_LONG);
+			  write_exp_elt_type (builtin_type_char);
+			  write_exp_elt_longcst (yypvt[-0].lval);
+			  write_exp_elt_opcode (OP_LONG); } break;
 case 51:
-# line 369 "expread.y"
-{ write_exp_elt (OP_DOUBLE);
-			  write_exp_elt (builtin_type_double);
-			  write_exp_elt2 (yypvt[-0].dval);
-			  write_exp_elt (OP_DOUBLE); } break;
+# line 375 "expread.y"
+{ write_exp_elt_opcode (OP_DOUBLE);
+			  write_exp_elt_type (builtin_type_double);
+			  write_exp_elt_dblcst (yypvt[-0].dval);
+			  write_exp_elt_opcode (OP_DOUBLE); } break;
 case 53:
-# line 379 "expread.y"
-{ write_exp_elt (OP_LAST);
-			  write_exp_elt (yypvt[-0].lval);
-			  write_exp_elt (OP_LAST); } break;
-case 54:
 # line 385 "expread.y"
-{ write_exp_elt (OP_REGISTER);
-			  write_exp_elt (yypvt[-0].lval);
-			  write_exp_elt (OP_REGISTER); } break;
-case 55:
+{ write_exp_elt_opcode (OP_LAST);
+			  write_exp_elt_longcst (yypvt[-0].lval);
+			  write_exp_elt_opcode (OP_LAST); } break;
+case 54:
 # line 391 "expread.y"
-{ write_exp_elt (OP_INTERNALVAR);
-			  write_exp_elt (yypvt[-0].ivar);
-			  write_exp_elt (OP_INTERNALVAR); } break;
-case 56:
+{ write_exp_elt_opcode (OP_REGISTER);
+			  write_exp_elt_longcst (yypvt[-0].lval);
+			  write_exp_elt_opcode (OP_REGISTER); } break;
+case 55:
 # line 397 "expread.y"
-{ write_exp_elt (OP_LONG);
-			  write_exp_elt (builtin_type_int);
-			  write_exp_elt ((long) TYPE_LENGTH (yypvt[-1].tval));
-			  write_exp_elt (OP_LONG); } break;
+{ write_exp_elt_opcode (OP_INTERNALVAR);
+			  write_exp_elt_intern (yypvt[-0].ivar);
+			  write_exp_elt_opcode (OP_INTERNALVAR); } break;
+case 56:
+# line 403 "expread.y"
+{ write_exp_elt_opcode (OP_LONG);
+			  write_exp_elt_type (builtin_type_int);
+			  write_exp_elt_longcst ((long) TYPE_LENGTH (yypvt[-1].tval));
+			  write_exp_elt_opcode (OP_LONG); } break;
 case 57:
-# line 404 "expread.y"
-{ write_exp_elt (OP_STRING);
+# line 410 "expread.y"
+{ write_exp_elt_opcode (OP_STRING);
 			  write_exp_string (yypvt[-0].sval);
-			  write_exp_elt (OP_STRING); } break;
+			  write_exp_elt_opcode (OP_STRING); } break;
 case 58:
-# line 411 "expread.y"
-{ write_exp_elt (OP_THIS);
-			  write_exp_elt (OP_THIS); } break;
+# line 417 "expread.y"
+{ write_exp_elt_opcode (OP_THIS);
+			  write_exp_elt_opcode (OP_THIS); } break;
 case 59:
-# line 418 "expread.y"
+# line 424 "expread.y"
 {
 			  struct symtab *tem = lookup_symtab (copy_name (yypvt[-0].sval));
 			  struct symbol *sym;
@@ -1409,7 +1494,7 @@ case 59:
 			    {
 			      sym = lookup_symbol (copy_name (yypvt[-0].sval),
 						   expression_context_block,
-						   VAR_NAMESPACE);
+						   VAR_NAMESPACE, 0);
 			      if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
 				yyval.bval = SYMBOL_BLOCK_VALUE (sym);
 			      else
@@ -1418,29 +1503,25 @@ case 59:
 			    }
 			} break;
 case 60:
-# line 439 "expread.y"
-{
-			  struct symbol *tem
-			    = lookup_symbol (copy_name (yypvt[-0].sval), yypvt[-2].bval, VAR_NAMESPACE);
+# line 445 "expread.y"
+{ struct symbol *tem
+			    = lookup_symbol (copy_name (yypvt[-0].sval), yypvt[-2].bval, VAR_NAMESPACE, 0);
 			  if (!tem || SYMBOL_CLASS (tem) != LOC_BLOCK)
 			    error ("No function \"%s\" in specified context.",
 				   copy_name (yypvt[-0].sval));
-			  yyval.bval = SYMBOL_BLOCK_VALUE (tem);
-			} break;
+			  yyval.bval = SYMBOL_BLOCK_VALUE (tem); } break;
 case 61:
-# line 450 "expread.y"
-{
-			  struct symbol *sym;
-			  sym = lookup_symbol (copy_name (yypvt[-0].sval), yypvt[-2].bval, VAR_NAMESPACE);
+# line 454 "expread.y"
+{ struct symbol *sym;
+			  sym = lookup_symbol (copy_name (yypvt[-0].sval), yypvt[-2].bval, VAR_NAMESPACE, 0);
 			  if (sym == 0)
 			    error ("No symbol \"%s\" in specified context.",
 				   copy_name (yypvt[-0].sval));
-			  write_exp_elt (OP_VAR_VALUE);
-			  write_exp_elt (sym);
-			  write_exp_elt (OP_VAR_VALUE);
-			} break;
+			  write_exp_elt_opcode (OP_VAR_VALUE);
+			  write_exp_elt_sym (sym);
+			  write_exp_elt_opcode (OP_VAR_VALUE); } break;
 case 62:
-# line 463 "expread.y"
+# line 465 "expread.y"
 {
 			  struct type *type = yypvt[-2].tval;
 			  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
@@ -1448,24 +1529,24 @@ case 62:
 			    error ("`%s' is not defined as an aggregate type.",
 				   TYPE_NAME (type));
 
-			  write_exp_elt (OP_SCOPE);
-			  write_exp_elt (type);
+			  write_exp_elt_opcode (OP_SCOPE);
+			  write_exp_elt_type (type);
 			  write_exp_string (yypvt[-0].sval);
-			  write_exp_elt (OP_SCOPE);
+			  write_exp_elt_opcode (OP_SCOPE);
 			} break;
 case 63:
-# line 476 "expread.y"
+# line 478 "expread.y"
 {
 			  char *name = copy_name (yypvt[-0].sval);
 			  struct symbol *sym;
 			  int i;
 
-			  sym = lookup_symbol_2 (name, 0, VAR_NAMESPACE);
+			  sym = lookup_symbol (name, 0, VAR_NAMESPACE, 0);
 			  if (sym)
 			    {
-			      write_exp_elt (OP_VAR_VALUE);
-			      write_exp_elt (sym);
-			      write_exp_elt (OP_VAR_VALUE);
+			      write_exp_elt_opcode (OP_VAR_VALUE);
+			      write_exp_elt_sym (sym);
+			      write_exp_elt_opcode (OP_VAR_VALUE);
 			      break;
 			    }
 			  for (i = 0; i < misc_function_count; i++)
@@ -1474,130 +1555,133 @@ case 63:
 
 			  if (i < misc_function_count)
 			    {
-			      write_exp_elt (OP_LONG);
-			      write_exp_elt (builtin_type_int);
-			      write_exp_elt (misc_function_vector[i].address);
-			      write_exp_elt (OP_LONG);
-			      write_exp_elt (UNOP_MEMVAL);
-			      write_exp_elt (builtin_type_char);
-			      write_exp_elt (UNOP_MEMVAL);
+			      write_exp_elt_opcode (OP_LONG);
+			      write_exp_elt_type (builtin_type_int);
+			      write_exp_elt_longcst (misc_function_vector[i].address);
+			      write_exp_elt_opcode (OP_LONG);
+			      write_exp_elt_opcode (UNOP_MEMVAL);
+			      write_exp_elt_type (builtin_type_char);
+			      write_exp_elt_opcode (UNOP_MEMVAL);
 			    }
 			  else
-			    if (symtab_list == 0)
+			    if (symtab_list == 0
+				&& partial_symtab_list == 0)
 			      error ("No symbol table is loaded.  Use the \"symbol-file\" command.");
 			    else
 			      error ("No symbol \"%s\" in current context.", name);
 			} break;
 case 64:
-# line 512 "expread.y"
+# line 515 "expread.y"
 { struct symbol *sym;
-			  sym = lookup_symbol_1 (copy_name (yypvt[-0].sval),
-						 expression_context_block,
-						 VAR_NAMESPACE);
+			  int is_a_field_of_this;
+
+			  sym = lookup_symbol (copy_name (yypvt[-0].sval),
+					       expression_context_block,
+					       VAR_NAMESPACE,
+					       &is_a_field_of_this);
 			  if (sym)
 			    {
-			      write_exp_elt (OP_VAR_VALUE);
-			      write_exp_elt (sym);
-			      write_exp_elt (OP_VAR_VALUE);
+			      switch (sym->class)
+				{
+				case LOC_REGISTER:
+				case LOC_ARG:
+				case LOC_LOCAL:
+				  if (innermost_block == 0 ||
+				      contained_in (block_found, 
+						    innermost_block))
+				    innermost_block = block_found;
+				}
+			      write_exp_elt_opcode (OP_VAR_VALUE);
+			      write_exp_elt_sym (sym);
+			      write_exp_elt_opcode (OP_VAR_VALUE);
+			    }
+			  else if (is_a_field_of_this)
+			    {
+			      /* C++: it hangs off of `this'.  Must
+			         not inadvertently convert from a method call
+				 to data ref.  */
+			      if (innermost_block == 0 || 
+				  contained_in (block_found, innermost_block))
+				innermost_block = block_found;
+			      write_exp_elt_opcode (OP_THIS);
+			      write_exp_elt_opcode (OP_THIS);
+			      write_exp_elt_opcode (STRUCTOP_PTR);
+			      write_exp_string (yypvt[-0].sval);
+			      write_exp_elt_opcode (STRUCTOP_PTR);
 			    }
 			  else
 			    {
-			      register char *arg = copy_name (yypvt[-0].sval);
 			      register int i;
-			      int v, val;
-			      /* C++: see if it hangs off of `this'.  Must
-			         not inadvertently convert from a method call
-				 to data ref.  */
-			      v = (int)value_of_this (0);
-			      if (v)
-				{
-				  val = check_field (v, arg);
-				  if (val)
-				    {
-				      write_exp_elt (OP_THIS);
-				      write_exp_elt (OP_THIS);
-				      write_exp_elt (STRUCTOP_PTR);
-				      write_exp_string (yypvt[-0].sval);
-				      write_exp_elt (STRUCTOP_PTR);
-				      break;
-				    }
-				}
-			      sym = lookup_symbol_2 (arg, 0, VAR_NAMESPACE);
-			      if (sym)
-				{
-				  write_exp_elt (OP_VAR_VALUE);
-				  write_exp_elt (sym);
-				  write_exp_elt (OP_VAR_VALUE);
-				  break; /* YACC-dependent */
-				}
+			      register char *arg = copy_name (yypvt[-0].sval);
+
 			      for (i = 0; i < misc_function_count; i++)
 				if (!strcmp (misc_function_vector[i].name, arg))
 				  break;
 
 			      if (i < misc_function_count)
 				{
-				  write_exp_elt (OP_LONG);
-				  write_exp_elt (builtin_type_int);
-				  write_exp_elt (misc_function_vector[i].address);
-				  write_exp_elt (OP_LONG);
-				  write_exp_elt (UNOP_MEMVAL);
-				  write_exp_elt (builtin_type_char);
-				  write_exp_elt (UNOP_MEMVAL);
+				  write_exp_elt_opcode (OP_LONG);
+				  write_exp_elt_type (builtin_type_int);
+				  write_exp_elt_longcst (misc_function_vector[i].address);
+				  write_exp_elt_opcode (OP_LONG);
+				  write_exp_elt_opcode (UNOP_MEMVAL);
+				  write_exp_elt_type (builtin_type_char);
+				  write_exp_elt_opcode (UNOP_MEMVAL);
 				}
+			      else if (symtab_list == 0
+				       && partial_symtab_list == 0)
+				error ("No symbol table is loaded.  Use the \"symbol-file\" command.");
 			      else
-				if (symtab_list == 0)
-				  error ("No symbol table is loaded.  Use the \"symbol-file\" command.");
-				else
-				  error ("No symbol \"%s\" in current context.",
-					 copy_name (yypvt[-0].sval));
+				error ("No symbol \"%s\" in current context.",
+				       copy_name (yypvt[-0].sval));
 			    }
 			} break;
 case 66:
-# line 578 "expread.y"
+# line 583 "expread.y"
 { yyval.tval = lookup_pointer_type (yypvt[-1].tval); } break;
 case 67:
-# line 580 "expread.y"
+# line 585 "expread.y"
 { yyval.tval = lookup_reference_type (yypvt[-1].tval); } break;
 case 68:
-# line 582 "expread.y"
+# line 587 "expread.y"
 { yyval.tval = lookup_member_type (builtin_type_int, yypvt[-2].tval); } break;
 case 69:
-# line 584 "expread.y"
+# line 589 "expread.y"
 { yyval.tval = lookup_member_type (yypvt[-5].tval, yypvt[-3].tval); } break;
 case 70:
-# line 586 "expread.y"
-{ yyval.tval = lookup_member_type (lookup_function_type (yypvt[-7].tval, 0), yypvt[-5].tval); } break;
+# line 591 "expread.y"
+{ yyval.tval = lookup_member_type (lookup_function_type (yypvt[-7].tval)); } break;
 case 71:
-# line 588 "expread.y"
-{ yyval.tval = lookup_member_type (lookup_function_type (yypvt[-8].tval, yypvt[-1].tvec), yypvt[-6].tval);
+# line 593 "expread.y"
+{ yyval.tval = lookup_member_type (lookup_function_type (yypvt[-8].tval));
 			  free (yypvt[-1].tvec); } break;
 case 72:
-# line 594 "expread.y"
+# line 599 "expread.y"
 { yyval.tval = lookup_typename (copy_name (yypvt[-0].sval),
 						expression_context_block, 0); } break;
 case 73:
-# line 597 "expread.y"
+# line 602 "expread.y"
 { yyval.tval = lookup_struct (copy_name (yypvt[-0].sval),
 					      expression_context_block); } break;
 case 74:
-# line 600 "expread.y"
+# line 605 "expread.y"
 { yyval.tval = lookup_union (copy_name (yypvt[-0].sval),
 					     expression_context_block); } break;
 case 75:
-# line 603 "expread.y"
+# line 608 "expread.y"
 { yyval.tval = lookup_enum (copy_name (yypvt[-0].sval),
 					    expression_context_block); } break;
 case 76:
-# line 606 "expread.y"
+# line 611 "expread.y"
 { yyval.tval = lookup_unsigned_typename (copy_name (yypvt[-0].sval)); } break;
 case 77:
-# line 611 "expread.y"
+# line 616 "expread.y"
 { yyval.tvec = (struct type **)xmalloc (sizeof (struct type *) * 2);
 		  yyval.tvec[0] = (struct type *)0;
 		  yyval.tvec[1] = yypvt[-0].tval;
 		} break;
 case 78:
-# line 616 "expread.y"
+# line 621 "expread.y"
 { int len = sizeof (struct type *) * ++(yypvt[-2].ivec[0]);
 		  yyval.tvec = (struct type **)xrealloc (yypvt[-2].tvec, len);
 		  yyval.tvec[yyval.ivec[0]] = yypvt[-0].tval;

@@ -26,6 +26,7 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 extern char *savestring ();
 extern char *concat ();
 extern char *xmalloc (), *xrealloc ();
+extern char *alloca ();
 extern int parse_escape ();
 extern char *reg_names[];
 
@@ -37,8 +38,9 @@ extern int immediate_quit;
 
 enum command_class
 {
-  class_run, class_vars, class_stack, class_files, class_support, class_info,
-  class_breakpoint, class_alias, class_obscure, class_user,
+  no_class = -1, class_run = 0, class_vars, class_stack,
+  class_files, class_support, class_info, class_breakpoint,
+  class_alias, class_obscure, class_user,
 };
 
 /* the cleanup list records things that have to be undone
@@ -61,6 +63,8 @@ struct cleanup
 extern void do_cleanups ();
 extern void discard_cleanups ();
 extern struct cleanup *make_cleanup ();
+extern struct cleanup *save_cleanups ();
+extern void restore_cleanups ();
 extern void free_current_contents ();
 
 /* Structure for saved commands lines
@@ -81,3 +85,4 @@ char *current_directory;
 #ifdef sparc
 #include <alloca.h>
 #endif
+

@@ -103,6 +103,12 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 		NaF (*(float *) p) :	\
 		NaD (*(double *) p))
 
+/* Largest integer type */
+#define LONGEST long
+
+/* Name of the builtin type for the LONGEST type above. */
+#define BUILTIN_TYPE_LONGEST builtin_type_long
+
 /* Say how long (ordinary) registers are.  */
 
 #define REGISTER_TYPE long
@@ -228,6 +234,14 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 				builtin_type_int :	\
 				builtin_type_double)
 
+/* Store the address of the place in which to copy the structure the
+   subroutine will return.  This is called from call_function.
+
+   On this machine this is a no-op, because gcc isn't used on it
+   yet.  So this calling convention is not used. */
+
+#define STORE_STRUCT_RETURN(ADDR, SP)
+
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
@@ -263,24 +277,24 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 /* In the case of the ns32000 series, the frame's nominal address is the FP
    value, and at that address is saved previous FP value as a 4-byte word.  */
 
-#define FRAME_CHAIN(thisframe)  (read_memory_integer (thisframe, 4))
+#define FRAME_CHAIN(thisframe)  (read_memory_integer ((thisframe)->frame, 4))
 
 #define FRAME_CHAIN_VALID(chain, thisframe) \
-  (chain != 0 && (FRAME_SAVED_PC (thisframe,0) >= first_object_file_end))
+  (chain != 0 && (FRAME_SAVED_PC (thisframe) >= first_object_file_end))
 
 #define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 
 /* Define other aspects of the stack frame.  */
 
-#define FRAME_SAVED_PC(frame,ignore) (read_memory_integer (frame + 4, 4))
+#define FRAME_SAVED_PC(FRAME) (read_memory_integer ((FRAME)->frame + 4, 4))
 
 /* Compute base of arguments. */
 
 #define FRAME_ARGS_ADDRESS(fi)	\
-  ((ns32k_get_enter_addr (fi.pc) > 1) ? \
-	((fi).frame) : (read_register (SP_REGNUM) - 4))
+  ((ns32k_get_enter_addr ((fi)->pc) > 1) ? \
+	((fi)->frame) : (read_register (SP_REGNUM) - 4))
 
-#define FRAME_LOCALS_ADDRESS(fi) ((fi).frame)
+#define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
 
 /* Get the address of the enter opcode for this function, if it is active.
    Returns positive address > 1 if pc is between enter/exit,
@@ -306,12 +320,12 @@ extern CORE_ADDR ns32k_get_enter_addr ();
   int width;						\
 							\
   numargs = -1;						\
-  enter_addr = ns32k_get_enter_addr (fi.pc);		\
+  enter_addr = ns32k_get_enter_addr ((fi)->pc);		\
   if (enter_addr > 0)					\
     {							\
       pc = (enter_addr == 1) ?				\
-	SAVED_PC_AFTER_CALL () :			\
-	FRAME_SAVED_PC (fi.frame,0);			\
+	SAVED_PC_AFTER_CALL (fi) :			\
+	FRAME_SAVED_PC (fi);				\
       insn = read_memory_integer (pc,2);		\
       addr_mode = (insn >> 11) & 0x1f;			\
       insn = insn & 0x7ff;				\
@@ -350,19 +364,19 @@ extern CORE_ADDR ns32k_get_enter_addr ();
   register CORE_ADDR	next_addr;				\
 								\
   bzero (&(frame_saved_regs), sizeof (frame_saved_regs));	\
-  enter_addr = ns32k_get_enter_addr ((frame_info).pc);		\
+  enter_addr = ns32k_get_enter_addr ((frame_info)->pc);		\
   if (enter_addr > 1)						\
     {								\
       regmask = read_memory_integer (enter_addr+1, 1) & 0xff;	\
       localcount = ns32k_localcount (enter_addr);		\
-      next_addr = (frame_info).frame + localcount;		\
+      next_addr = (frame_info)->frame + localcount;		\
       for (regnum = 0; regnum < 8; regnum++, regmask >>= 1)	\
 	(frame_saved_regs).regs[regnum] = (regmask & 1) ?	\
 					  (next_addr -= 4) : 0;	\
-      (frame_saved_regs).regs[SP_REGNUM] = (frame_info).frame + 4;\
-      (frame_saved_regs).regs[PC_REGNUM] = (frame_info).frame + 4;\
+      (frame_saved_regs).regs[SP_REGNUM] = (frame_info)->frame + 4;\
+      (frame_saved_regs).regs[PC_REGNUM] = (frame_info)->frame + 4;\
       (frame_saved_regs).regs[FP_REGNUM] =			\
-		  (read_memory_integer ((frame_info).frame, 4));\
+		  (read_memory_integer ((frame_info)->frame, 4));\
     }								\
   else if (enter_addr == 1)					\
     {								\
@@ -393,19 +407,23 @@ extern CORE_ADDR ns32k_get_enter_addr ();
 /* Discard from the stack the innermost frame, restoring all registers.  */
 
 #define POP_FRAME  \
-{ register CORE_ADDR fp = read_register (FP_REGNUM);		 \
+{ register FRAME frame = get_current_frame ();			 \
+  register CORE_ADDR fp;					 \
   register int regnum;						 \
   struct frame_saved_regs fsr;					 \
-  struct frame_info fi;						 \
-  fi = get_frame_info (fp);					 \
-  get_frame_saved_regs (&fi, &fsr);				 \
+  struct frame_info *fi;						 \
+  fi = get_frame_info (frame);					 \
+  fp = fi->frame;						 \
+  get_frame_saved_regs (fi, &fsr);				 \
   for (regnum = 0; regnum < 8; regnum++)			 \
     if (fsr.regs[regnum])					 \
       write_register (regnum, read_memory_integer (fsr.regs[regnum], 4)); \
   write_register (FP_REGNUM, read_memory_integer (fp, 4));	 \
   write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));   \
   write_register (SP_REGNUM, fp + 8);				 \
-}
+  flush_cached_frames ();					 \
+  set_current_frame (create_new_frame (read_register (FP_REGNUM),\
+				       read_pc ())); }
 
 /* This sequence of words is the instructions
      enter	0xff,0		82 ff 00
@@ -424,7 +442,7 @@ extern CORE_ADDR ns32k_get_enter_addr ();
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.  */
 
-#define FIX_CALL_DUMMY(dummyname, fun, nargs)   		\
+#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, type)   		\
 {								\
 	int	flipped;					\
 	flipped = fun | 0xc0000000;				\

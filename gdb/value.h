@@ -18,25 +18,73 @@ In other words, go ahead and share GDB, but don't try to stop
 anyone else from sharing it farther.  Help stamp out software hoarding!
 */
 
-enum lval_type { not_lval, lval_memory, lval_register, lval_internalvar,
-		 lval_internalvar_component };
+/*
+ * The structure which defines the type of a value.  It should never
+ * be possible for a program lval value to survive over a call to the inferior
+ * (ie to be put into the history list or an internal variable).
+ */
+enum lval_type {
+  /* Not an lval.  */
+  not_lval,
+  /* In memory.  Could be a saved register.  */
+  lval_memory,
+  /* In a register.  */
+  lval_register,
+  /* In a gdb internal variable.  */
+  lval_internalvar,
+  /* Part of a gdb internal variable (structure field).  */
+  lval_internalvar_component,
+  /* In a register series in a frame not the current one, which may have been
+     partially saved or saved in different places (otherwise would be
+     lval_register or lval_memory).  */
+  lval_reg_frame_relative,
+};
 
 struct value
   {
+    /* Type of value; either not an lval, or one of the various
+       different possible kinds of lval.  */
     enum lval_type lval;
+    /* Location of value (if lval).  */
     union
       {
+	/* Address in inferior or byte of registers structure.  */
 	CORE_ADDR address;
+	/* Pointer to interrnal variable.  */
 	struct internalvar *internalvar;
+	/* Number of register.  Only used with
+	   lval_reg_frame_relative.  */
+	int regnum;
       } location;
-    int offset;
+    /* Describes offset of a value within lval a structure in bytes.  */
+    int offset;	
+    /* Only used for bitfields; number of bits contained in them.  */
     int bitsize;
+    /* Only used for bitfields; position of start of field.  */
     int bitpos;
+    /* Frame value is relative to.  In practice, this address is only
+       used if the value is stored in several registers in other than
+       the current frame, and these registers have not all been saved
+       at the same place in memory.  This will be described in the
+       lval enum above as "lval_reg_frame_relative".  */
+    CORE_ADDR frame_addr;
+    /* Type of the value.  */
     struct type *type;
+    /* Values are stored in a chain, so that they can be deleted
+       easily over calls to the inferior.  Values assigned to internal
+       variables or put into the value history are taken off this
+       list.  */
     struct value *next;
+    /* If an lval is forced to repeat, a new value is created with
+       these fields set.  The new value is not an lval.  */
     short repeated;
     short repetitions;
+    /* Register number if the value is from a register.  Is not kept
+       if you take a field of a structure that is stored in a
+       register.  Shouldn't it be?  */
     short regno;
+    /* Actual contents of the value.  For use of this value; setting
+       it uses the stuff above.  */
     long contents[1];
   };
 
@@ -47,6 +95,8 @@ typedef struct value *value;
 #define VALUE_LVAL(val) (val)->lval
 #define VALUE_ADDRESS(val) (val)->location.address
 #define VALUE_INTERNALVAR(val) (val)->location.internalvar
+#define VALUE_FRAME_REGNUM(val) ((val)->location.regnum)
+#define VALUE_FRAME(val) ((val)->frame_addr)
 #define VALUE_OFFSET(val) (val)->offset
 #define VALUE_BITSIZE(val) (val)->bitsize
 #define VALUE_BITPOS(val) (val)->bitpos
@@ -61,7 +111,7 @@ typedef struct value *value;
    References are dereferenced.  */
 
 #define COERCE_ARRAY(arg)    \
-{ if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_REF)			\
+{ if (TYPE_CODE ( VALUE_TYPE (arg)) == TYPE_CODE_REF)			\
     arg = value_ind (arg);						\
   if (VALUE_REPEATED (arg)						\
       || TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ARRAY)		\
@@ -73,7 +123,7 @@ typedef struct value *value;
 /* If ARG is an enum, convert it to an integer.  */
 
 #define COERCE_ENUM(arg)    \
-{ if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_REF)			\
+{ if (TYPE_CODE ( VALUE_TYPE (arg)) == TYPE_CODE_REF)			\
     arg = value_ind (arg);						\
   if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ENUM)			\
     arg = value_cast (builtin_type_unsigned_int, arg);			\
@@ -89,14 +139,15 @@ struct internalvar
   value value;
 };
 
-long value_as_long ();
+LONGEST value_as_long ();
 double value_as_double ();
-long unpack_long ();
+LONGEST unpack_long ();
 double unpack_double ();
 long unpack_field_as_long ();
 value value_from_long ();
 value value_from_double ();
 value value_at ();
+value value_from_register ();
 value value_of_variable ();
 value value_of_register ();
 value read_var_value ();
@@ -122,6 +173,7 @@ value value_subscript ();
 
 value call_function ();
 value value_being_returned ();
+int using_struct_return ();
 
 value evaluate_expression ();
 value evaluate_type ();
@@ -143,3 +195,8 @@ value value_x_binop ();
 value value_x_unop ();
 int binop_user_defined_p ();
 int unop_user_defined_p ();
+
+void read_register_bytes ();
+void modify_field ();
+void type_print ();
+void type_print_1 ();
