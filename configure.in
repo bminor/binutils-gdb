@@ -359,6 +359,9 @@ case "${target}" in
   *-*-linux-gnu)
     target_makefile_frag="${target_makefile_frag} config/mt-linux"
     ;;
+  *-cygwin*)
+    target_makefile_frag="${target_makefile_frag} config/mt-cygwin"
+    ;;
 esac
 
 # If --enable-target-optspace always use -Os instead of -O2 to build
@@ -713,8 +716,8 @@ case "${target}" in
     esac
     ;;    
   *-*-cygwin*)
-    target_configdirs="$target_configdirs target-winsup"
-    noconfigdirs="$noconfigdirs target-gperf target-libgloss"
+    target_configdirs="$target_configdirs target-libtermcap target-winsup"
+    noconfigdirs="$noconfigdirs target-libgloss"
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
 

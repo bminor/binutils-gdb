@@ -1,9 +1,11 @@
-start-sanitize-tinyj
-1998-12-17  Anthony Green  <green@cygnus.com>
+Wed Dec 30 01:13:03 1998  Christopher Faylor <cgf@cygnus.com>
 
-	* config.sub, configure.in: Add tiny2j-*-* target.
+	* configure.in: libtermcap.a should be built when cygwin is the
+	target as well as the host.
+	* config.guess: Allow mixed case in cygwin uname output.
+	* Makefile.in: Add libtermcap target.
+	* config/mt-cygwin: New file.  libtermcap target info.
 
-end-sanitize-tinyj
 Tue Dec 15 17:02:58 1998  Bob Manson  <manson@charmed.cygnus.com>
 
 	* configure.in: Add cygmon for x86-coff and x86-elf. Configure
