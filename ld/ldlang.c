@@ -890,15 +890,27 @@ section_already_linked (abfd, sec, data)
       return;
     }
 
-  /* If we aren't building constructors, don't discard link once
-     sections.  Otherwise we can get confused when generating relocs.  */
-  if (! config.build_constructors)
-    return;
-
   flags = bfd_get_section_flags (abfd, sec);
 
   if ((flags & SEC_LINK_ONCE) == 0)
     return;
+
+  /* FIXME: When doing a relocateable link, we may have trouble
+     copying relocations in other sections that refer to local symbols
+     in the section being discarded.  Those relocations will have to
+     be converted somehow; as of this writing I'm not sure that any of
+     the backends handle that correctly.
+
+     It is tempting to instead not discard link once sections when
+     doing a relocateable link (technically, they should be discarded
+     whenever we are building constructors).  However, that fails,
+     because the linker winds up combining all the link once sections
+     into a single large link once section, which defeats the purpose
+     of having link once sections in the first place.
+
+     Also, not merging link once sections in a relocateable link
+     causes trouble for MIPS ELF, which relies in link once semantics
+     to handle the .reginfo section correctly.  */
 
   name = bfd_get_section_name (abfd, sec);
 
