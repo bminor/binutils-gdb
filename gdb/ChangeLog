@@ -1,3 +1,20 @@
+2001-08-15  Keith Seitz  <keiths@redhat.com>
+
+	* Makefile.in (GDBTK_VERSION): Set a version number.
+	(GDBTK_LIBRARY): New variable to point to location where
+	gdbtk will install its tcl library. Changed all refereneces
+	to $(datadir)/insight1.0 to $(GDBTK_LIBRARY).
+	(SUBDIR_GDBTK_ALL): Remove "all-gdbtk". No longer needed.
+	(SUBDIR_GDBTK_CLEAN): Remove "clean-gdbtk". No longer needed.
+	(all-gdbtk): Remove.
+	(install-gdbtk): Remove.
+	(gdbtk.o): Pass srcdir to file when compiling.
+
+2001-08-15  Ian Roxborough  <irox@redhat.com>
+
+	* Makefile.in: Changed all references to the install directory
+	"gdbtcl" to read "insight1.0".
+
 2001-08-15  Corinna Vinschen  <vinschen@redhat.com>
 
 	* arch-utils.c (generic_skip_trampoline_code): New function.

@@ -265,6 +265,11 @@ LIBGUI = @LIBGUI@
 GUI_CFLAGS_X = @GUI_CFLAGS_X@
 IDE_CFLAGS=$(GUI_CFLAGS_X) $(IDE_CFLAGS_X)
 
+# The version of gdbtk we're building. This should be kept
+# in sync with GDBTK_VERSION and friends in gdbtk.h.
+GDBTK_VERSION = 1.0
+GDBTK_LIBRARY = $(datadir)/insight$(GDBTK_VERSION)
+
 SUBDIR_GDBTK_OBS = \
 	gdbtk.o gdbtk-bp.o gdbtk-cmds.o gdbtk-hooks.o \
 	gdbtk-register.o gdbtk-stack.o gdbtk-varobj.o gdbtk-wrapper.o
@@ -278,8 +283,8 @@ SUBDIR_GDBTK_DEPS = \
 SUBDIR_GDBTK_INITS = gdbtk/generic/gdbtk.c
 SUBDIR_GDBTK_LDFLAGS=
 SUBDIR_GDBTK_CFLAGS= -DGDBTK
-SUBDIR_GDBTK_ALL= all-gdbtk
-SUBDIR_GDBTK_CLEAN= clean-gdbtk
+SUBDIR_GDBTK_ALL=
+SUBDIR_GDBTK_CLEAN=
 SUBDIR_GDBTK_INSTALL= install-gdbtk
 SUBDIR_GDBTK_UNINSTALL= 
 
@@ -774,7 +779,7 @@ uninstall: force $(CONFIG_UNINSTALL)
 		  true ; \
 		fi ; \
 		rm -f $(bindir)/$$transformed_name$(EXEEXT) $(man1dir)/$$transformed_name.1
-	rm -rf $(datadir)/gdbtcl
+	rm -rf $(GDBTK_LIBRARY)
 	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
 # We do this by grepping through sources.  If that turns out to be too slow,
@@ -1364,39 +1369,18 @@ regcache.o: regcache.c $(defs_h) $(inferior_h) $(target_h) $(regcache_h)
 fork-child.o: fork-child.c gdb_wait.h $(defs_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) terminal.h $(gdbthread_h) $(gdb_string_h)
 
-# FIXME: cagney/2000-03-27: Post 5.0 this link code can be removed.
-# It should now be possible to run GDBtk from the build directory
-# without the link in place.
-all-gdbtk:
-	@if test ! -d gdbtcl/images ; then \
-	  if test "$(LN_S)" = "ln -s" ; then \
-	    echo linking ${srcdir}/gdbtk/library to gdbtcl ; \
-	    rm -f gdbtcl ; \
-	    test ! -r gdbtcl || exit 1 ; \
-	    $(LN_S) ${srcdir}/gdbtk/library gdbtcl ; \
-	  else \
-	    echo "Warning:" ; \
-	    echo "Unable to link ${srcdir}/gdbtk/library to gdbtcl." ; \
-	    echo "You will need to do a \`make install' before you are" ; \
-	    echo "able to run the GUI." ; \
-	  fi ; \
-	else true ; fi
-
-clean-gdbtk:
-	rm -f gdbtcl
-
 install-gdbtk:
-	$(SHELL) $(srcdir)/../mkinstalldirs $(datadir)/gdbtcl ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs $(GDBTK_LIBRARY) ; \
 	$(SHELL) $(srcdir)/../mkinstalldirs \
-		$(datadir)/gdbtcl/images \
-		$(datadir)/gdbtcl/images2 ; \
-	$(SHELL) $(srcdir)/../mkinstalldirs $(datadir)/gdbtcl/help \
-		$(datadir)/gdbtcl/help/images \
-		$(datadir)/gdbtcl/help/trace ; \
+		$(GDBTK_LIBRARY)/images \
+		$(GDBTK_LIBRARY)/images2 ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs $(GDBTK_LIBRARY)/help \
+		$(GDBTK_LIBRARY)/help/images \
+		$(GDBTK_LIBRARY)/help/trace ; \
 	cd $(srcdir)/gdbtk/library ; \
 	for i in *.tcl *.itcl *.ith *.itb images/*.gif images2/*.gif images/icons.txt images2/icons.txt tclIndex help/*.html  help/trace/*.html help/trace/index.toc help/images/*.gif; \
 	  do \
-		$(INSTALL_DATA) $$i $(datadir)/gdbtcl/$$i ; \
+		$(INSTALL_DATA) $$i $(GDBTK_LIBRARY)/$$i ; \
 	  done ;
 
 gdbres.o: $(srcdir)/gdbtk/gdb.rc $(srcdir)/gdbtk/gdbtool.ico
@@ -1410,7 +1394,8 @@ gdbtk.o: $(srcdir)/gdbtk/generic/gdbtk.c \
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
         $(ITK_CFLAGS) $(TIX_CFLAGS) \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
-		$(srcdir)/gdbtk/generic/gdbtk.c -DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
+		$(srcdir)/gdbtk/generic/gdbtk.c \
+		-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\" -DSRC_DIR=\"$(srcdir)\"
 
 gdbtk-bp.o: $(srcdir)/gdbtk/generic/gdbtk-bp.c \
 	$(srcdir)/gdbtk/generic/gdbtk.h $(srcdir)/gdbtk/generic/gdbtk-cmds.h \
@@ -1418,7 +1403,7 @@ gdbtk-bp.o: $(srcdir)/gdbtk/generic/gdbtk-bp.c \
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
 	$(TIX_CFLAGS) $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS)   \
 	$(GDBTK_CFLAGS) $(srcdir)/gdbtk/generic/gdbtk-bp.c \
-	-DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
+	-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
 
 gdbtk-cmds.o: $(srcdir)/gdbtk/generic/gdbtk-cmds.c \
 	$(srcdir)/gdbtk/generic/gdbtk.h $(srcdir)/gdbtk/generic/gdbtk-cmds.h \
@@ -1428,7 +1413,7 @@ gdbtk-cmds.o: $(srcdir)/gdbtk/generic/gdbtk-cmds.c \
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS)	\
 	$(TIX_CFLAGS) $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS)		\
 	$(GDBTK_CFLAGS) $(srcdir)/gdbtk/generic/gdbtk-cmds.c		\
-	-DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
+	-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
 
 gdbtk-hooks.o: $(srcdir)/gdbtk/generic/gdbtk-hooks.c \
 	$(srcdir)/gdbtk/generic/gdbtk.h $(defs_h) \
@@ -1436,7 +1421,7 @@ gdbtk-hooks.o: $(srcdir)/gdbtk/generic/gdbtk-hooks.c \
 	$(bfd_h) $(symfile_h) objfiles.h $(target_h) $(gdb_string_h) $(tracepoint_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
-		$(srcdir)/gdbtk/generic/gdbtk-hooks.c -DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
+		$(srcdir)/gdbtk/generic/gdbtk-hooks.c -DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
 
 gdbtk-register.o: $(srcdir)/gdbtk/generic/gdbtk-register.c \
 	$(srcdir)/gdbtk/generic/gdbtk.h $(srcdir)/gdbtk/generic/gdbtk-cmds.h \
@@ -1444,7 +1429,7 @@ gdbtk-register.o: $(srcdir)/gdbtk/generic/gdbtk-register.c \
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
 	$(TIX_CFLAGS) $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS)   \
 	$(GDBTK_CFLAGS) $(srcdir)/gdbtk/generic/gdbtk-register.c \
-	-DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
+	-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
 
 gdbtk-stack.o: $(srcdir)/gdbtk/generic/gdbtk-stack.c \
 	$(srcdir)/gdbtk/generic/gdbtk.h $(srcdir)/gdbtk/generic/gdbtk-cmds.h \
@@ -1454,7 +1439,7 @@ gdbtk-stack.o: $(srcdir)/gdbtk/generic/gdbtk-stack.c \
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
 	$(TIX_CFLAGS) $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS)   \
 	$(GDBTK_CFLAGS) $(srcdir)/gdbtk/generic/gdbtk-stack.c \
-	-DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
+	-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
 
 gdbtk-varobj.o: $(srcdir)/gdbtk/generic/gdbtk-varobj.c \
 	$(srcdir)/gdbtk/generic/gdbtk.h \
