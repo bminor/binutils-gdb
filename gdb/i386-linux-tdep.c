@@ -1,6 +1,6 @@
-/* Target-dependent code for GNU/Linux running on i386's, for GDB.
+/* Target-dependent code for GNU/Linux i386.
 
-   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,13 +27,13 @@
 #include "inferior.h"
 #include "osabi.h"
 #include "reggroups.h"
-#include "solib-svr4.h"
 
 #include "gdb_string.h"
 
 #include "i386-tdep.h"
 #include "i386-linux-tdep.h"
 #include "glibc-tdep.h"
+#include "solib-svr4.h"
 
 /* Return the name of register REG.  */
 
@@ -306,47 +306,6 @@ i386_linux_write_pc (CORE_ADDR pc, ptid_t ptid)
   write_register_pid (I386_LINUX_ORIG_EAX_REGNUM, -1, ptid);
 }
 
-/* Fetch (and possibly build) an appropriate link_map_offsets
-   structure for native GNU/Linux x86 targets using the struct offsets
-   defined in link.h (but without actual reference to that file).
-
-   This makes it possible to access GNU/Linux x86 shared libraries
-   from a GDB that was not built on an GNU/Linux x86 host (for cross
-   debugging).  */
-
-static struct link_map_offsets *
-i386_linux_svr4_fetch_link_map_offsets (void)
-{
-  static struct link_map_offsets lmo;
-  static struct link_map_offsets *lmp = NULL;
-
-  if (lmp == NULL)
-    {
-      lmp = &lmo;
-
-      lmo.r_debug_size = 8;	/* The actual size is 20 bytes, but
-				   this is all we need.  */
-      lmo.r_map_offset = 4;
-      lmo.r_map_size   = 4;
-
-      lmo.link_map_size = 20;	/* The actual size is 552 bytes, but
-				   this is all we need.  */
-      lmo.l_addr_offset = 0;
-      lmo.l_addr_size   = 4;
-
-      lmo.l_name_offset = 4;
-      lmo.l_name_size   = 4;
-
-      lmo.l_next_offset = 12;
-      lmo.l_next_size   = 4;
-
-      lmo.l_prev_offset = 16;
-      lmo.l_prev_size   = 4;
-    }
-
-  return lmp;
-}
-
 
 /* The register sets used in GNU/Linux ELF core-dumps are identical to
    the register sets in `struct user' that are used for a.out
@@ -445,9 +404,12 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      to support backtracing through calls to signal handlers.  */
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_linux_pc_in_sigtramp);
 
+  /* GNU/Linux uses SVR4-style shared libraries.  */
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+
+  /* GNU/Linux uses the dynamic linker included in the GNU C Library.  */
   set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
-  set_solib_svr4_fetch_link_map_offsets (gdbarch,
-				       i386_linux_svr4_fetch_link_map_offsets);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

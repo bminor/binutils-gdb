@@ -1,3 +1,11 @@
+2004-03-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-tdep.c: Update copyright year.
+	(i386_linux_svr4_fetch_link_map_offsets): Remove function.
+	(i386_linux_init_abi): Set solib_svr4_fetch_link_maop_offsets to
+	svr4_ilp32_link_map_offsets instead of
+	i386_linux_svr4_fetch_link_map_offsets.
+
 2004-03-15  David Carlton  <carlton@kealia.com>
 
 	Fix for PR c++/1553:
