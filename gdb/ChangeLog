@@ -1,3 +1,10 @@
+2002-10-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* mips-linux-nat.c (mips_linux_cannot_fetch_register): Don't fetch
+	registers without a name.
+	(mips_linux_cannot_store_register): Don't store registers without
+	a name.
+
 2002-10-28  David Carlton  <carlton@math.stanford.edu>
 
 	* symtab.c (find_addr_symbol): Delete.  (It was already commented
