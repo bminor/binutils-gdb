@@ -1,3 +1,16 @@
+2000-08-22  H.J. Lu  <hjl@gnu.org>
+
+	* config.in (STRICTCOFF): New for strict COFF.
+
+	* configure.in: Define STRICTCOFF for i386-*-msdosdjgpp*,
+	i386-*-go32* and i386-go32-rtems*.
+	* configure: Rebuilt.
+
+	* config/obj-coff.c (obj_coff_endef): Follow the historical
+	behavior if STRICTCOFF is not defined.
+
+	* doc/internals.texi: Document STRICTCOFF.
+
 2000-08-22  Alexandre Oliva  <aoliva@redhat.com>
 
 	* write.c (TC_FIX_ADJUSTABLE): Define to 1, if not defined.

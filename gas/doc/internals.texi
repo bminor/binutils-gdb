@@ -773,6 +773,12 @@ variable.  Normally the default value of @samp{generic} is fine.  The
 configuration process will create a file named @file{targ-env.h} in the build
 directory which includes @file{te-@var{em}.h}.
 
+There is a special case for COFF. For historical reason, the GNU COFF
+assembler doesn't follow the documented behavior on certain debug symbols for
+the compatibility with other COFF assemblers. A port can define
+@code{STRICTCOFF} in the configure script to make the GNU COFF assembler
+to follow the documented behavior.
+
 Porting GAS to a new CPU requires writing the @file{tc-@var{CPU}} files.
 Porting GAS to a new object file format requires writing the
 @file{obj-@var{fmt}} files.  There is sometimes some interaction between these

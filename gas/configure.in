@@ -251,7 +251,9 @@ changequote([,])dnl
       i386-*-sco3.2*)       fmt=coff ;;
       i386-*-vsta)          fmt=aout ;;
       i386-*-msdosdjgpp* | i386-*-go32* | i386-go32-rtems*)
-			    fmt=coff em=go32;;
+			    fmt=coff em=go32
+			    AC_DEFINE(STRICTCOFF, 1, [Using strict COFF?])
+			    ;;
       i386-*-rtemself*)     fmt=elf ;;
       i386-*-rtems*)        fmt=coff ;;
       i386-*-gnu*)          fmt=elf ;;

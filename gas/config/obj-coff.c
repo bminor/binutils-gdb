@@ -732,13 +732,49 @@ obj_coff_endef (ignore)
     case C_ARG:
     case C_REGPARM:
     case C_FIELD:
+
+    /* According to the COFF documentation:
+
+       http://osr5doc.sco.com:1996/topics/COFF_SectNumFld.html
+
+       A special section number (-2) marks symbolic debugging symbols,
+       including structure/union/enumeration tag names, typedefs, and
+       the name of the file. A section number of -1 indicates that the 
+       symbol has a value but is not relocatable. Examples of
+       absolute-valued symbols include automatic and register variables, 
+       function arguments, and .eos symbols. 
+
+       But from Ian Lance Taylor:
+
+       http://sources.redhat.com/ml/binutils/2000-08/msg00202.html
+
+       the actual tools all marked them as section -1. So the GNU COFF
+       assembler follows historical COFF assemblers.
+
+       However, it causes problems for djgpp
+
+       http://sources.redhat.com/ml/binutils/2000-08/msg00210.html
+
+       By defining STRICTCOFF, a COFF port can make the assembler to
+       follow the documented behavior. */
+#ifdef STRICTCOFF
     case C_MOS:
     case C_MOE:
     case C_MOU:
     case C_EOS:
+#endif
       SF_SET_DEBUG (def_symbol_in_progress);
       S_SET_SEGMENT (def_symbol_in_progress, absolute_section);
       break;
+
+#ifndef STRICTCOFF
+    case C_MOS:
+    case C_MOE:
+    case C_MOU:
+    case C_EOS:
+      S_SET_SEGMENT (def_symbol_in_progress, absolute_section);
+      break;
+#endif
 
     case C_EXT:
     case C_WEAKEXT:

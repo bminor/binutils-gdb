@@ -166,6 +166,9 @@
 /* Using cgen code? */
 #undef USING_CGEN
 
+/* Using strict COFF? */
+#undef STRICTCOFF
+
 /* Using i386 COFF? */
 #undef I386COFF
 
