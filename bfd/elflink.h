@@ -5042,7 +5042,7 @@ elf_link_input_bfd (finfo, input_bfd)
 			      /* Try to preserve debug information.  */
 			      if ((o->flags & SEC_DEBUGGING) != 0
 				  && sec->kept_section != NULL
-				  && sec->_cooked_size == sec->kept_section->_cooked_size)
+				  && sec->_raw_size == sec->kept_section->_raw_size)
 				h->root.u.def.section
 				  = sec->kept_section;
 			      else
@@ -5071,7 +5071,7 @@ elf_link_input_bfd (finfo, input_bfd)
 			      /* Try to preserve debug information.  */
 			      if ((o->flags & SEC_DEBUGGING) != 0
 				  && sec->kept_section != NULL
-				  && sec->_cooked_size == sec->kept_section->_cooked_size)
+				  && sec->_raw_size == sec->kept_section->_raw_size)
 				finfo->sections[r_symndx]
 				  = sec->kept_section;
 			      else
