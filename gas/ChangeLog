@@ -1,6 +1,6 @@
 2000-07-07  Kazu Hirata <kazu@hxi.com>
 
-	* config/tc-sh.c: Fix formatting.
+	* config/tc-sh.c: Fix comments.
 
 2000-07-06  Mark Elbrecht  <snowball3@bigfoot.com>
 
@@ -26,7 +26,7 @@ Tue Jul  4 14:08:28 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	messages produced when combining EITHER_BUT_PREFER_MU attributed
 	opcodes.
 
-2000-06-05  DJ Delorie  <dj@redhat.com>
+2000-07-05  DJ Delorie  <dj@redhat.com>
 
 	* MAINTAINERS: new
 
