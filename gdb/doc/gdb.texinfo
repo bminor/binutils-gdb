@@ -2202,7 +2202,7 @@ have this support.  The main purpose of this is EPROM/ROM code
 debugging, so you can set a breakpoint at an instruction without 
 changing the instruction.  This can be used with the new trap-generation 
 provided by SPARClite DSU.  DSU will generate traps when a program accesses
-some date or instruction address that is assigned to the debug registers.  
+some data or instruction address that is assigned to the debug registers.  
 However the hardware breakpoint registers can only take two data breakpoints,
 and @value{GDBN} will reject this command if more than two are used.  
 Delete or disable usused hardware breakpoints before setting
@@ -2356,7 +2356,7 @@ Set a watchpoint for an expression.  @value{GDBN} will break when @var{expr}
 is written into by the program and its value changes.
 This can be used with the new trap-generation provided by 
 SPARClite DSU.  DSU will generate traps when a program accesses
-some date or instruction address that is assigned to the debug registers.  
+some data or instruction address that is assigned to the debug registers.  
 For the data addresses, DSU facilitates the @code{watch} command.
 However the hardware breakpoint registers can only take two data watchpoints,
 and both watchpoints must be the same kind.  For example, you can set two

@@ -1,3 +1,7 @@
+Mon Apr 13 14:05:00 1998  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.texinfo (hbreak, watch): Fix typo, "date" -> "data".
+
 Thu Apr  2 16:52:44 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
         * LRS: Reformat a bit to keep text under 80 columns.
