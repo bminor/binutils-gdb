@@ -1,3 +1,9 @@
+Mon Sep 19 07:48:36 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* dbxread.c (read_dbx_dynamic_symtab): Cast bfd_asymbol_name to
+	char * (from const char *) before assigning.  Don't save string we
+	pass to record_minimal_symbol (it already saves it).
+
 Sat Sep 17 17:05:14 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* gdbtk.tcl:  Let ^U delete lines in the command window.
