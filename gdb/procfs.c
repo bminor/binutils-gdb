@@ -65,8 +65,11 @@ CORE_ADDR kernel_u_addr;
 /*  All access to the inferior, either one started by gdb or one that has
     been attached to, is controlled by an instance of a procinfo structure,
     defined below.  Since gdb currently only handles one inferior at a time,
-    the procinfo structure is statically allocated and only one exists at
-    any given time. */
+    the procinfo structure for the inferior is statically allocated and
+    only one exists at any given time.  There is a separate procinfo
+    structure for use by the "info proc" command, so that we can print
+    useful information about any random process without interfering with
+    the inferior's procinfo information. */
 
 struct procinfo {
   int valid;			/* Nonzero if pid, fd, & pathname are valid */
@@ -82,7 +85,9 @@ struct procinfo {
   sigset_t trace;		/* Current traced signal set */
   sysset_t exitset;		/* Current traced system call exit set */
   sysset_t entryset;		/* Current traced system call entry set */
-} pi;
+};
+
+static struct procinfo pi;	/* Inferior's process information */
 
 /* Forward declarations of static functions so we don't have to worry
    about ordering within this file.  The EXFUN macro may be slightly
@@ -91,8 +96,8 @@ struct procinfo {
    definitions. */
 
 static void EXFUN(proc_init_failed, (char *why));
-static int EXFUN(open_proc_file, (int pid));
-static void EXFUN(close_proc_file, (void));
+static int EXFUN(open_proc_file, (int pid, struct procinfo *pip));
+static void EXFUN(close_proc_file, (struct procinfo *pip));
 static void EXFUN(unconditionally_kill_inferior, (void));
 
 /*
@@ -220,7 +225,7 @@ DEFUN_VOID(unconditionally_kill_inferior)
   
   signo = SIGKILL;
   (void) ioctl (pi.fd, PIOCKILL, &signo);
-  close_proc_file ();
+  close_proc_file (&pi);
   wait ((int *) 0);
 }
 
@@ -374,7 +379,7 @@ void
 DEFUN(inferior_proc_init, (int pid),
       int pid)
 {
-  if (!open_proc_file (pid))
+  if (!open_proc_file (pid, &pi))
     {
       proc_init_failed ("can't open process file");
     }
@@ -455,6 +460,52 @@ DEFUN_VOID(proc_set_exec_trap)
 
 GLOBAL FUNCTION
 
+	proc_iterate_over_mappings -- call function for every mapped space
+
+SYNOPSIS
+
+	int proc_iterate_over_mappings (int (*func)())
+
+DESCRIPTION
+
+	Given a pointer to a function, call that function for every
+	mapped address space, passing it an open file descriptor for
+	the file corresponding to that mapped address space (if any)
+	and the base address of the mapped space.  Quit when we hit
+	the end of the mappings or the function returns nonzero.
+ */
+
+int
+DEFUN(proc_iterate_over_mappings, (func),
+      int (*func)())
+{
+  int nmap;
+  int fd;
+  int funcstat = 0;
+  struct prmap *prmaps;
+  struct prmap *prmap;
+  CORE_ADDR baseaddr = 0;
+
+  if (pi.valid && (ioctl (pi.fd, PIOCNMAP, &nmap) == 0))
+    {
+      prmaps = alloca ((nmap + 1) * sizeof (*prmaps));
+      if (ioctl (pi.fd, PIOCMAP, prmaps) == 0)
+	{
+	  for (prmap = prmaps; prmap -> pr_size && funcstat == 0; ++prmap)
+	    {
+	      fd = proc_address_to_fd (prmap -> pr_vaddr, 0);
+	      funcstat = (*func) (fd, prmap -> pr_vaddr);
+	      close (fd);
+	    }
+	}
+    }
+  return (funcstat);
+}
+
+/*
+
+GLOBAL FUNCTION
+
 	proc_base_address -- find base address for segment containing address
 
 SYNOPSIS
@@ -482,7 +533,7 @@ DEFUN(proc_base_address, (addr),
   struct prmap *prmap;
   CORE_ADDR baseaddr = 0;
 
-  if (ioctl (pi.fd, PIOCNMAP, &nmap) == 0)
+  if (pi.valid && (ioctl (pi.fd, PIOCNMAP, &nmap) == 0))
     {
       prmaps = alloca ((nmap + 1) * sizeof (*prmaps));
       if (ioctl (pi.fd, PIOCMAP, prmaps) == 0)
@@ -509,7 +560,7 @@ GLOBAL_FUNCTION
 
 SYNOPSIS
 
-	int proc_address_to_fd (CORE_ADDR addr)
+	int proc_address_to_fd (CORE_ADDR addr, complain)
 
 DESCRIPTION
 
@@ -522,8 +573,9 @@ DESCRIPTION
 */
 
 int
-DEFUN(proc_address_to_fd, (addr),
-      CORE_ADDR addr)
+DEFUN(proc_address_to_fd, (addr, complain),
+      CORE_ADDR addr AND
+      int complain)
 {
   int fd = -1;
 
@@ -531,8 +583,11 @@ DEFUN(proc_address_to_fd, (addr),
     {
       if ((fd = ioctl (pi.fd, PIOCOPENM, (caddr_t *) &addr)) < 0)
 	{
-	  print_sys_errmsg (pi.pathname, errno);
-	  warning ("can't find mapped file for address 0x%x", addr);
+	  if (complain)
+	    {
+	      print_sys_errmsg (pi.pathname, errno);
+	      warning ("can't find mapped file for address 0x%x", addr);
+	    }
 	}
     }
   return (fd);
@@ -569,7 +624,7 @@ int
 DEFUN(attach, (pid),
       int pid)
 {
-  if (!open_proc_file (pid))
+  if (!open_proc_file (pid, &pi))
     {
       perror_with_name (pi.pathname);
       /* NOTREACHED */
@@ -582,7 +637,7 @@ DEFUN(attach, (pid),
   if (ioctl (pi.fd, PIOCSTATUS, &pi.prstatus) < 0)
     {
       print_sys_errmsg (pi.pathname, errno);
-      close_proc_file ();
+      close_proc_file (&pi);
       error ("PIOCSTATUS failed");
     }
   if (pi.prstatus.pr_flags & (PR_STOPPED | PR_ISTOP))
@@ -597,7 +652,7 @@ DEFUN(attach, (pid),
 	  if (ioctl (pi.fd, PIOCSTOP, &pi.prstatus) < 0)
 	    {
 	      print_sys_errmsg (pi.pathname, errno);
-	      close_proc_file ();
+	      close_proc_file (&pi);
 	      error ("PIOCSTOP failed");
 	    }
 	}
@@ -716,7 +771,7 @@ DEFUN(detach, (signal),
 	    }
 	}
     }
-  close_proc_file ();
+  close_proc_file (&pi);
   attach_flag = 0;
 }
 
@@ -1046,7 +1101,7 @@ DEFUN(proc_init_failed, (why),
 {
   print_sys_errmsg (pi.pathname, errno);
   (void) kill (pi.pid, SIGKILL);
-  close_proc_file ();
+  close_proc_file (&pi);
   error (why);
   /* NOTREACHED */
 }
@@ -1059,7 +1114,7 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	static void close_proc_file (void)
+	static void close_proc_file (struct procinfo *pip)
 
 DESCRIPTION
 
@@ -1071,20 +1126,21 @@ DESCRIPTION
  */
 
 static void
-DEFUN_VOID(close_proc_file)
+DEFUN(close_proc_file, (pip),
+      struct procinfo *pip)
 {
-  pi.pid = 0;
-  if (pi.valid)
+  pip -> pid = 0;
+  if (pip -> valid)
     {
-      (void) close (pi.fd);
+      (void) close (pip -> fd);
     }
-  pi.fd = -1;
-  if (pi.pathname)
+  pip -> fd = -1;
+  if (pip -> pathname)
     {
-      free (pi.pathname);
-      pi.pathname = NULL;
+      free (pip -> pathname);
+      pip -> pathname = NULL;
     }
-  pi.valid = 0;
+  pip -> valid = 0;
 }
 
 /*
@@ -1095,7 +1151,7 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	static int open_proc_file (pid)
+	static int open_proc_file (pid, struct procinfo *pip)
 
 DESCRIPTION
 
@@ -1111,25 +1167,212 @@ DESCRIPTION
  */
 
 static int
-DEFUN(open_proc_file, (pid),
-      int pid)
+DEFUN(open_proc_file, (pid, pip),
+      int pid AND
+      struct procinfo *pip)
 {
-  pi.valid = 0;
-  if (pi.valid)
+  pip -> valid = 0;
+  if (pip -> valid)
     {
-      (void) close (pi.fd);
+      (void) close (pip -> fd);
     }
-  if (pi.pathname == NULL)
+  if (pip -> pathname == NULL)
     {
-      pi.pathname = xmalloc (32);
+      pip -> pathname = xmalloc (32);
     }
-  sprintf (pi.pathname, PROC_NAME_FMT, pid);
-  if ((pi.fd = open (pi.pathname, O_RDWR)) >= 0)
+  sprintf (pip -> pathname, PROC_NAME_FMT, pid);
+  if ((pip -> fd = open (pip -> pathname, O_RDWR)) >= 0)
     {
-      pi.valid = 1;
-      pi.pid = pid;
+      pip -> valid = 1;
+      pip -> pid = pid;
     }
-  return (pi.valid);
+  return (pip -> valid);
+}
+
+char *mappingflags (flags)
+long flags;
+{
+  static char asciiflags[7];
+  
+  strcpy (asciiflags, "------");
+  if (flags & MA_STACK)  asciiflags[0] = 's';
+  if (flags & MA_BREAK)  asciiflags[1] = 'b';
+  if (flags & MA_SHARED) asciiflags[2] = 's';
+  if (flags & MA_READ)   asciiflags[3] = 'r';
+  if (flags & MA_WRITE)  asciiflags[4] = 'w';
+  if (flags & MA_EXEC)   asciiflags[5] = 'x';
+  return (asciiflags);
+}
+
+static void
+DEFUN(proc_info_address_map, (pip, verbose),
+      struct procinfo *pip AND
+      int verbose)
+{
+  int nmap;
+  struct prmap *prmaps;
+  struct prmap *prmap;
+
+  printf_filtered ("Mapped address spaces:\n\n");
+  printf_filtered ("\t%10s %10s %10s %10s %6s\n",
+		   "Start Addr",
+		   "  End Addr",
+		   "      Size",
+		   "    Offset",
+		   "Flags");
+  if (ioctl (pip -> fd, PIOCNMAP, &nmap) == 0)
+    {
+      prmaps = alloca ((nmap + 1) * sizeof (*prmaps));
+      if (ioctl (pip -> fd, PIOCMAP, prmaps) == 0)
+	{
+	  for (prmap = prmaps; prmap -> pr_size; ++prmap)
+	    {
+	      printf_filtered ("\t%#10x %#10x %#10x %#10x %6s\n",
+			       prmap -> pr_vaddr,
+			       prmap -> pr_vaddr + prmap -> pr_size - 1,
+			       prmap -> pr_size,
+			       prmap -> pr_off,
+			       mappingflags (prmap -> pr_mflags));
+	    }
+	}
+    }
+  printf_filtered ("\n\n");
+}
+
+/*
+
+LOCAL FUNCTION
+
+	proc_info -- implement the "info proc" command
+
+SYNOPSIS
+
+	void proc_info (char *args, int from_tty)
+
+DESCRIPTION
+
+	Implement gdb's "info proc" command by using the /proc interface
+	to print status information about any currently running process.
+
+	Examples of the use of "info proc" are:
+
+	info proc		Print short info about current inferior.
+	info proc verbose	Print verbose info about current inferior.
+	info proc 123		Print short info about process pid 123.
+	info proc 123 verbose	Print verbose info about process pid 123.
+
+ */
+
+static void
+DEFUN(proc_info, (args, from_tty),
+      char *args AND
+      int from_tty)
+{
+  int verbose = 0;
+  int pid;
+  struct procinfo pii;
+  struct procinfo *pip;
+  struct cleanup *old_chain;
+  char *nexttok;
+  extern char *strtok ();
+
+  old_chain = make_cleanup (null_cleanup, 0);
+
+  /* Default to using the current inferior if no pid specified */
+
+  pip = &pi;
+
+  /* Parse the args string, looking for "verbose" (or any abbrev) and
+     for a specific pid.  If a specific pid is found, the process
+     file is opened. */
+  
+  if (args != NULL)
+    {
+      while ((nexttok = strtok (args, " \t")) != NULL)
+	{
+	  args = NULL;
+	  if (strncmp (nexttok, "verbose", strlen (nexttok)) == 0)
+	    {
+	      verbose++;
+	    }
+	  else if ((pii.pid = atoi (nexttok)) > 0)
+	    {
+	      pid = pii.pid;
+	      pip = &pii;
+	      (void) memset (&pii, 0, sizeof (pii));
+	      if (!open_proc_file (pid, pip))
+		{
+		  perror_with_name (pip -> pathname);
+		  /* NOTREACHED */
+		}
+	      make_cleanup (close_proc_file, pip);
+	    }
+	}
+    }
+
+  /* If we don't have a valid open process at this point, then we have no
+     inferior or didn't specify a specific pid. */
+
+  if (!pip -> valid)
+    {
+      error ("No process.  Run an inferior or specify an explicit pid.");
+    }
+  if (ioctl (pip -> fd, PIOCSTATUS, &(pip -> prstatus)) < 0)
+    {
+      print_sys_errmsg (pip -> pathname, errno);
+      error ("PIOCSTATUS failed");
+    }
+
+  printf_filtered ("\nStatus information for %s:\n\n", pip -> pathname);
+  proc_info_address_map (pip, verbose);
+#if 0
+  proc_info_flags (pip, verbose);
+  proc_info_why (pip, verbose);
+  proc_info_what (pip, verbose);
+  proc_info_info (pip, verbose);
+  proc_info_cursig (pip, verbose);
+  proc_info_sigpend (pip, verbose);
+  proc_info_sighold (pip, verbose);
+  proc_info_altstack (pip, verbose);
+  proc_info_action (pip, verbose);
+  proc_info_id (pip, verbose);
+  proc_info_times (pip, verbose);
+  proc_info_clname (pip,verbose);
+  proc_info_instr (pip, verbose);
+  proc_info_reg (pip, verbose);
+#endif  
+
+  /* All done, deal with closing any temporary process info structure,
+     freeing temporary memory , etc. */
+
+  do_cleanups (old_chain);
+}
+
+/*
+
+GLOBAL FUNCTION
+
+	_initialize_proc_fs -- initialize the process file system stuff
+
+SYNOPSIS
+
+	void _initialize_proc_fs (void)
+
+DESCRIPTION
+
+	Do required initializations during gdb startup for using the
+	/proc file system interface.
+
+*/
+
+static char *proc_desc =
+"Show current process status information using /proc entry.\n\
+With no arguments, prints short form.  With 'verbose' prints long form.";
+
+void
+_initialize_proc_fs ()
+{
+  add_info ("proc", proc_info, proc_desc);
 }
 
 #endif	/* USE_PROC_FS */

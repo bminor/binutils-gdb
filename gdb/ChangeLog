@@ -1,3 +1,24 @@
+Fri Dec 27 22:21:30 1991  Fred Fish  (fnf at cygnus.com)
+
+	* defs.h:  Add definition of null_cleanup()
+
+	* procfs.c:  Many small changes to add base support for a new
+	"info proc" command (currently only printing of the address
+	space mapping is implemented) and allow iteration over the
+	address space mapping, calling an arbitrary function for each
+	mapping (used for shared library support).
+
+	* solib.c:  Change all ifdefs that checked for "sun" to check
+	for "!SVR4_SHARED_LIBS" instead.  Rewrite lookup_base() to
+	handle locating the debug base address even when not currently
+	stopped at the dynamic linker entry point.
+
+	* utils.c:  Add null_cleanup() as a known function that does
+	nothing to serve as a base for possibly long cleanup chains
+	with no specific "first cleanup" to serve as an anchor.
+
+	* xm-sysv4.h:  Add define of SVR4_SHARED_LIBS
+
 Fri Dec 27 10:11:33 1991  Per Bothner  (bothner at cygnus.com)
 
 	* arm-opcode.h, m88k-opcode.h, pn-opcode.h, np1-opcode.h,
