@@ -1,5 +1,14 @@
 2003-02-12  Andrew Cagney  <ac131313@redhat.com>
 
+	* event-top.c (cli_command_loop): Delete declaration.
+	(_initialize_event_loop): Delete function setting event_loop_hook.
+	* event-top.h (cli_command_loop): Declare.  Update copyright.
+	(EVENT_TOP_H): Define.  Wrap header in #ifdef EVENT_TOP_H.
+	* interps.c (current_interp_command_loop): When event_loop_p, call
+	cli_command_loop.
+
+2003-02-12  Andrew Cagney  <ac131313@redhat.com>
+
 	* interps.h (interp_command_loop_ftype): Change return type to
 	void.
 
