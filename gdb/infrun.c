@@ -1245,8 +1245,9 @@ wait_for_inferior ()
 		 step_range_start and step_range_end, and just continue. */
 	      sal = find_pc_line(stop_pc, 0);
 	      
-	      if (current_line != sal.line
-		  && stop_pc == sal.pc) {
+	      if (sal.line == 0 || /* Stop now if no line # info */
+		  (current_line != sal.line
+		   && stop_pc == sal.pc)) {
 		stop_step = 1;
 		break;
 	      } else {
