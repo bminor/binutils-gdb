@@ -43,7 +43,7 @@ CVS_TAG :=
 CVS_MODULE := latest
 
 ### Historically, this was identical to CVS_TAG.  This is changing.
-RELEASE_TAG := latest-930121
+RELEASE_TAG := latest-930202
 
 ### Historically, binaries were installed here.  This is changing.
 release_root := $(ROOTING)/$(RELEASE_TAG)
@@ -418,10 +418,10 @@ endif
 
 ### solaris 2 -- don't use /usr/ucb/cc
 ifeq (sparc-sun-solaris2,$(host))
-PARTIAL_HOLE_DIRS := /opt/cygnus/bin
-CC_HOLE	:= cc
-else
-CC_HOLE :=
+SET_HOLES	:= SHELL=sh ; PATH=/opt/SUNWspro/bin:`pwd`/$(HOLESDIR) ; export PATH ; export SHELL ;
+HOLE_DIRS := /usr/ccs/bin
+PARTIAL_HOLE_DIRS := /opt/SUNWspro/bin
+CC_HOLE := 
 endif
 
 ### rs6000 as is busted.  We cache a patched version in unsupported.
@@ -445,7 +445,6 @@ HOLE_DIRS := \
 	/bin \
 	/usr/bin \
 	/usr/ucb \
-	/usr/ccs/bin \
 	/usr/unsupported/bin
 
 ### look in these directories for alternate versions of some tools.
