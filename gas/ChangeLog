@@ -1,5 +1,22 @@
 2002-08-28  Alan Modra  <amodra@bigpond.net.au>
 
+	* write.c (BFD_FAST_SECTION_FILL): Remove unused macro.
+	(TC_ADJUST_RELOC_COUNT): Tweak param name.
+	(TC_FORCE_RELOCATION, TC_FORCE_RELOCATION_SECTION): Likewise.
+	(TC_FIX_ADJUSTABLE, MD_PCREL_FROM_SECTION): Likewise.
+	(RELOC_ENUM): Define.
+	(fix_new_internal): Use RELOC_ENUM.
+	(fix_new, fix_new_exp): Likewise.
+	(adjust_reloc_syms): Comment.  Remove unnecessary tests on sym != NULL.
+	Replace gotos with continue.
+	(write_relocs): Formatting.  Avoid symbol loops in
+	RELOC_EXPANSION_POSSIBLE case too.  Report bfd_reloc_outofrange
+	errors, and error number in other cases.
+	(fixup_segment): Remove param names from prototype.  Rename
+	"this_segment_type" to "this_segment".  Update linkrelax comment.
+	Remove "size, "place" and "where" local vars.  Formatting.  Update
+	"no symbol" comment.  Remove #if 0 and #if 1.
+
 	* app.c (do_scrub_chars): Don't test IGNORE_NONSTANDARD_ESCAPES.  Tidy.
 
 2002-08-27  Alan Modra  <amodra@bigpond.net.au>
