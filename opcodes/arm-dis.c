@@ -635,13 +635,6 @@ static const struct thumb_opcode thumb_opcodes[] =
 {
   /* Thumb instructions.  */
 
-  /* ARM V6K no-argument instructions.  */
-  {ARM_EXT_V6K, 0xbf00, 0xffff, "nop"},
-  {ARM_EXT_V6K, 0xbf10, 0xffff, "yield"},
-  {ARM_EXT_V6K, 0xbf20, 0xffff, "wfe"},
-  {ARM_EXT_V6K, 0xbf30, 0xffff, "wfi"},
-  {ARM_EXT_V6K, 0xbf40, 0xffff, "sev"},
-
   /* ARM V6.  */
   {ARM_EXT_V6, 0xb660, 0xfff8, "cpsie\t%2'a%1'i%0'f"},
   {ARM_EXT_V6, 0xb670, 0xfff8, "cpsid\t%2'a%1'i%0'f"},
