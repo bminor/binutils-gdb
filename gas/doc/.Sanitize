@@ -33,6 +33,18 @@ h8.texi
 
 Things-to-lose:
 
+a29k-coff.m4
+a29k.m4
+gen.m4
+i80386.m4
+i960.m4
+m680x0.m4
+none.m4
+sparc.m4
+vax.m4
+vintage.m4
+z8000.m4
+
 Do-last:
 
 # End of file.
