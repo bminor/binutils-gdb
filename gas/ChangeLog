@@ -1,3 +1,14 @@
+Wed Jun  3 18:21:56 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (SCALE1_WHEN_NO_INDEX): Define.
+	(ebp, esp): Remove static variables.
+	(MATCH): Remove test for InOutPortReg.
+	(i386_operand): Properly handle InOutPortReg here instead.
+	Disallows `inb (%dx,2)', `inb %es:(%dx)' and `mov (%dx),%ax'
+	(md_assemble): Simplify and correct modrm and sib generation.
+	(i386_operand): Add warning for scale without index.
+	Rewrite checks for valid base/index combinations.
+
 Wed Jun  3 15:09:10 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Recognize m5200 as a cpu_type of m68k.

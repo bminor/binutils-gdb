@@ -38,6 +38,14 @@
 #define TC_RELOC(X,Y) (Y)
 #endif
 
+#ifndef SCALE1_WHEN_NO_INDEX
+/* Specifying a scale factor besides 1 when there is no index is
+   futile.  eg. `mov (%ebx,2),%al' does exactly the same as
+   `mov (%ebx),%al'.  To slavishly follow what the programmer
+   specified, set SCALE1_WHEN_NO_INDEX to 0.  */
+#define SCALE1_WHEN_NO_INDEX 1
+#endif
+
 static unsigned long mode_from_disp_size PARAMS ((unsigned long));
 static int fits_in_signed_byte PARAMS ((long));
 static int fits_in_unsigned_byte PARAMS ((long));
@@ -102,10 +110,9 @@ struct _i386_insn
     const seg_entry *seg[2];	/* segments for memory operands (if given) */
 
     /* PREFIX holds all the given prefix opcodes (usually null).
-       PREFIXES is the size of PREFIX. */
-    /* richfix: really unsigned? */
-    unsigned char prefix[MAX_PREFIXES];
+       PREFIXES is the number of prefix opcodes.  */
     unsigned int prefixes;
+    unsigned char prefix[MAX_PREFIXES];
 
     /* Wait prefix needs to come before any other prefixes, so handle
        it specially.  wait_prefix will hold the opcode modifier flag
@@ -188,9 +195,6 @@ static templates *current_templates;
 
 /* Per instruction expressionS buffers: 2 displacements & 2 immediate max. */
 static expressionS disp_expressions[2], im_expressions[2];
-
-/* Pointers to ebp & esp entries in reg_hash hash table.  */
-static reg_entry *ebp, *esp;
 
 static int this_operand;	/* current operand we are working on */
 
@@ -609,9 +613,6 @@ md_begin ()
       }
   }
 
-  esp = (reg_entry *) hash_find (reg_hash, "esp");
-  ebp = (reg_entry *) hash_find (reg_hash, "ebp");
-
   /* initialize reg_hash hash table */
   prefix_hash = hash_new ();
   {
@@ -967,7 +968,6 @@ md_assemble (line)
 	else
 	  {
 	    /* This opcode's got a prefix.  */
-	    unsigned int q;
 	    prefix_entry *prefix;
 
 	    if (l == token_start)
@@ -1143,11 +1143,9 @@ md_assemble (line)
      with the template operand types. */
 
 #define MATCH(overlap,given_type) \
-	(overlap && \
-	 (((overlap & (JumpAbsolute|BaseIndex|Mem8)) \
-	   == (given_type & (JumpAbsolute|BaseIndex|Mem8))) \
-	  || (overlap == InOutPortReg)))
-
+	(overlap \
+	 && ((overlap & (JumpAbsolute|BaseIndex|Mem8)) \
+	     == (given_type & (JumpAbsolute|BaseIndex|Mem8))))
 
   /* If m0 and m1 are register matches they must be consistent
      with the expected operand types t0 and t1.
@@ -1524,85 +1522,72 @@ md_assemble (line)
 				       ? 0
 				       : (i.types[1] & Mem) ? 1 : 2);
 
-		    /* Encode memory operand into modrm byte and base index
-		       byte. */
+		    default_seg = &ds;
 
-		    if (i.base_reg == esp && !i.index_reg)
+		    if (! i.base_reg)
 		      {
-			/* <disp>(%esp) becomes two byte modrm with no index
-			   register. */
-			i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
-			i.rm.mode = mode_from_disp_size (i.types[op]);
-			i.bi.base = ESP_REG_NUM;
-			i.bi.index = NO_INDEX_REGISTER;
-			i.bi.scale = 0;	/* Must be zero! */
-		      }
-		    else if (i.base_reg == ebp && !i.index_reg)
-		      {
-			if (!(i.types[op] & Disp))
+			i.rm.mode = 0;
+			if (! i.disp_operands)
+			  fake_zero_displacement = 1;
+			if (! i.index_reg)
 			  {
-			    /* Must fake a zero byte displacement.  There is
-			       no direct way to code '(%ebp)' directly. */
-			    fake_zero_displacement = 1;
-			    /* fake_zero_displacement code does not set this. */
-			    i.types[op] |= Disp8;
-			  }
-			i.rm.mode = mode_from_disp_size (i.types[op]);
-			i.rm.regmem = EBP_REG_NUM;
-		      }
-		    else if (!i.base_reg && (i.types[op] & BaseIndex))
-		      {
-			/* There are three cases here.
-			   Case 1:  '<32bit disp>(,1)' -- indirect absolute.
-			   (Same as cases 2 & 3 with NO index register)
-			   Case 2:  <32bit disp> (,<index>) -- no base register with disp
-			   Case 3:  (, <index>)       --- no base register;
-			   no disp (must add 32bit 0 disp). */
-			i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
-			i.rm.mode = 0;	/* 32bit mode */
-			i.bi.base = NO_BASE_REGISTER;
-			i.types[op] &= ~Disp;
-			i.types[op] |= Disp32;	/* Must be 32bit! */
-			if (i.index_reg)
-			  {	/* case 2 or case 3 */
-			    i.bi.index = i.index_reg->reg_num;
-			    i.bi.scale = i.log2_scale_factor;
-			    if (i.disp_operands == 0)
-			      fake_zero_displacement = 1;	/* case 3 */
+			    /* Operand is just <disp> */
+			    i.rm.regmem = NO_BASE_REGISTER;
+			    i.types[op] &= ~Disp;
+			    i.types[op] |= Disp32;
 			  }
 			else
 			  {
-			    i.bi.index = NO_INDEX_REGISTER;
-			    i.bi.scale = 0;
+			    i.bi.index = i.index_reg->reg_num;
+			    i.bi.base = NO_BASE_REGISTER;
+			    i.bi.scale = i.log2_scale_factor;
+			    i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
+			    i.types[op] &= ~Disp;
+			    i.types[op] |= Disp32;	/* Must be 32 bit */
 			  }
 		      }
-		    else if (i.disp_operands && !i.base_reg && !i.index_reg)
+		    else /* i.base_reg */
 		      {
-			/* Operand is just <32bit disp> */
-			i.rm.regmem = EBP_REG_NUM;
-			i.rm.mode = 0;
-			i.types[op] &= ~Disp;
-			i.types[op] |= Disp32;
-		      }
-		    else
-		      {
-			/* It's not a special case; rev'em up. */
 			i.rm.regmem = i.base_reg->reg_num;
-			i.rm.mode = mode_from_disp_size (i.types[op]);
-			if (i.index_reg)
+			i.bi.base = i.base_reg->reg_num;
+			if (i.base_reg->reg_num == EBP_REG_NUM)
 			  {
-			    i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
-			    i.bi.base = i.base_reg->reg_num;
-			    i.bi.index = i.index_reg->reg_num;
-			    i.bi.scale = i.log2_scale_factor;
-			    if (i.base_reg == ebp && i.disp_operands == 0)
-			      {	/* pace */
+			    default_seg = &ss;
+			    if (i.disp_operands == 0)
+			      {
 				fake_zero_displacement = 1;
 				i.types[op] |= Disp8;
-				i.rm.mode = mode_from_disp_size (i.types[op]);
 			      }
 			  }
+			else if (i.base_reg->reg_num == ESP_REG_NUM)
+			  {
+			    default_seg = &ss;
+			  }
+			i.bi.scale = i.log2_scale_factor;
+			if (! i.index_reg)
+			  {
+			    /* <disp>(%esp) becomes two byte modrm
+			       with no index register.  We've already
+			       stored the code for esp in i.rm.regmem
+			       ie. ESCAPE_TO_TWO_BYTE_ADDRESSING.  Any
+			       base register besides %esp will not use
+			       the extra modrm byte.  */
+			    i.bi.index = NO_INDEX_REGISTER;
+#if ! SCALE1_WHEN_NO_INDEX
+			    /* Another case where we force the second
+			       modrm byte.  */
+			    if (i.log2_scale_factor)
+			      i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
+#endif
+			  }
+			else
+			  {
+			    i.bi.index = i.index_reg->reg_num;
+			    i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
+			  }
+			i.rm.mode = mode_from_disp_size (i.types[op]);
 		      }
+
 		    if (fake_zero_displacement)
 		      {
 			/* Fakes a zero displacement assuming that i.types[op]
@@ -1613,24 +1598,6 @@ md_assemble (line)
 			exp->X_add_number = 0;
 			exp->X_add_symbol = (symbolS *) 0;
 			exp->X_op_symbol = (symbolS *) 0;
-		      }
-
-		    /* Find the default segment for the memory operand.
-		       Used to optimize out explicit segment specifications.  */
-		    if (i.seg[0])
-		      {
-			unsigned int seg_index;
-
-			if (i.rm.regmem == ESCAPE_TO_TWO_BYTE_ADDRESSING)
-			  {
-			    seg_index = (i.rm.mode << 3) | i.bi.base;
-			    default_seg = two_byte_segment_defaults[seg_index];
-			  }
-			else
-			  {
-			    seg_index = (i.rm.mode << 3) | i.rm.regmem;
-			    default_seg = one_byte_segment_defaults[seg_index];
-			  }
 		      }
 		  }
 
@@ -1984,7 +1951,8 @@ md_assemble (line)
 				1);
 	    /* If i.rm.regmem == ESP (4) && i.rm.mode != Mode 3 (Register mode)
 				   ==> need second modrm byte. */
-	    if (i.rm.regmem == ESCAPE_TO_TWO_BYTE_ADDRESSING && i.rm.mode != 3)
+	    if (i.rm.regmem == ESCAPE_TO_TWO_BYTE_ADDRESSING
+		&& i.rm.mode != 3)
 	      {
 		p = frag_more (1);
 		insn_size += 1;
@@ -2202,7 +2170,7 @@ i386_operand (operand_string)
 	    }
 	  goto do_memory_reference;
 	}
-      i.types[this_operand] |= r->reg_type;
+      i.types[this_operand] |= r->reg_type & ~BaseIndex;
       i.regs[this_operand] = r;
       i.reg_operands++;
     }
@@ -2292,7 +2260,7 @@ i386_operand (operand_string)
     {
       /* This is a memory reference of some sort. */
       register char *base_string;
-      unsigned int found_base_index_form;
+      int found_base_index_form;
 
     do_memory_reference:
       if ((i.mem_operands == 1
@@ -2303,7 +2271,6 @@ i386_operand (operand_string)
 		  current_templates->start->name);
 	  return 0;
 	}
-      i.mem_operands++;
 
       /* Determine type of memory operand from opcode_suffix;
 	 no opcode suffix implies general memory references. */
@@ -2453,6 +2420,14 @@ i386_operand (operand_string)
 		  as_bad (_("expecting scale factor of 1, 2, 4, 8; got %d"), num);
 		  return 0;
 		}
+	      if (num != 1 && ! i.index_reg)
+		{
+		  as_warn (_("scale factor of %d without an index register"),
+			   num);
+#if SCALE1_WHEN_NO_INDEX
+		  i.log2_scale_factor = 0;
+#endif
+		}
 	    }
 	  else
 	    {
@@ -2588,35 +2563,28 @@ i386_operand (operand_string)
 	    }
 	}
 
-      /* Make sure the memory operand we've been dealt is valid. */
-      if (i.base_reg && i.index_reg &&
-	  !(i.base_reg->reg_type & i.index_reg->reg_type & Reg))
+      /* Special case for (%dx) while doing input/output op.  */
+      if (i.base_reg &&
+	  i.base_reg->reg_type == (Reg16 | InOutPortReg) &&
+	  i.index_reg == 0 &&
+	  i.log2_scale_factor == 0 &&
+	  i.seg[i.mem_operands] == 0)
 	{
-	  as_bad (_("register size mismatch in (base,index,scale) expression"));
-	  return 0;
-	}
-      /*
-       * special case for (%dx) while doing input/output op
-       */
-      if ((i.base_reg &&
-	   (i.base_reg->reg_type == (Reg16 | InOutPortReg)) &&
-	   (i.index_reg == 0)))
-	{
-	  i.types[this_operand] |= InOutPortReg;
+	  i.types[this_operand] = InOutPortReg;
 	  return 1;
 	}
-      if ((i.base_reg && (i.base_reg->reg_type & Reg32) == 0) ||
-	  (i.index_reg && (i.index_reg->reg_type & Reg32) == 0))
+      /* Make sure the memory operand we've been dealt is valid. */
+      if ((i.base_reg && (i.base_reg->reg_type & BaseIndex) == 0)
+	  || (i.index_reg && ((i.index_reg->reg_type & BaseIndex) == 0
+			      || i.index_reg->reg_num == ESP_REG_NUM))
+	  || (i.base_reg && i.index_reg
+	      && (i.base_reg->reg_type & i.index_reg->reg_type & Reg) == 0))
 	{
-	  as_bad (_("base/index register must be 32 bit register"));
+	  as_bad (_("`%s' is not a valid base/index expression"),
+		  operand_string);
 	  return 0;
 	}
-      if (i.index_reg && i.index_reg == esp)
-	{
-	  as_bad (_("`%%s' may not be used as an index register"),
-		  esp->reg_name);
-	  return 0;
-	}
+      i.mem_operands++;
     }
   else
     {				/* it's not a memory operand; argh! */
@@ -2867,7 +2835,11 @@ md_apply_fix3 (fixP, valp, seg)
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
       if (OUTPUT_FLAVOR == bfd_target_elf_flavour
 	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg
-	      || (fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) != 0))
+	      || (fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) != 0)
+	  && ! S_IS_EXTERNAL (fixP->fx_addsy)
+	  && ! S_IS_WEAK (fixP->fx_addsy)
+	  && S_IS_DEFINED (fixP->fx_addsy)
+	  && ! S_IS_COMMON (fixP->fx_addsy))
 	{
 	  /* Yes, we add the values in twice.  This is because
 	     bfd_perform_relocation subtracts them out again.  I think
