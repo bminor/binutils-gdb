@@ -40,7 +40,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define bfd_elfNN_minisymbol_to_symbol	_bfd_elf_minisymbol_to_symbol
 #define bfd_elfNN_get_dynamic_symtab_upper_bound _bfd_elf_get_dynamic_symtab_upper_bound
 #define bfd_elfNN_get_lineno		_bfd_elf_get_lineno
+#ifndef bfd_elfNN_get_reloc_upper_bound
 #define bfd_elfNN_get_reloc_upper_bound _bfd_elf_get_reloc_upper_bound
+#endif
 #define bfd_elfNN_get_symbol_info	_bfd_elf_get_symbol_info
 #define bfd_elfNN_get_symtab		_bfd_elf_get_symtab
 #define bfd_elfNN_get_symtab_upper_bound _bfd_elf_get_symtab_upper_bound
@@ -78,7 +80,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
  bfd_generic_get_relocated_section_contents
 #endif
 
+#ifndef bfd_elfNN_bfd_relax_section
 #define bfd_elfNN_bfd_relax_section bfd_generic_relax_section
+#endif
+
 #define bfd_elfNN_bfd_make_debug_symbol \
   ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
 
@@ -113,11 +118,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifndef bfd_elfNN_get_dynamic_reloc_upper_bound
 #define bfd_elfNN_get_dynamic_reloc_upper_bound \
-  _bfd_nodynamic_get_dynamic_reloc_upper_bound
+  _bfd_elf_get_dynamic_reloc_upper_bound
 #endif
 #ifndef bfd_elfNN_canonicalize_dynamic_reloc
 #define bfd_elfNN_canonicalize_dynamic_reloc \
-  _bfd_nodynamic_canonicalize_dynamic_reloc
+  _bfd_elf_canonicalize_dynamic_reloc
 #endif
 
 #ifdef elf_backend_relocate_section
@@ -139,6 +144,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif /* ! defined (elf_backend_relocate_section) */
 #ifndef bfd_elfNN_bfd_link_split_section
 #define bfd_elfNN_bfd_link_split_section _bfd_generic_link_split_section
+#endif
+
+#ifndef bfd_elfNN_archive_p
+#define bfd_elfNN_archive_p bfd_generic_archive_p
+#endif
+
+#ifndef bfd_elfNN_write_archive_contents
+#define bfd_elfNN_write_archive_contents _bfd_write_archive_contents
+#endif
+
+#ifndef bfd_elfNN_mkarchive
+#define bfd_elfNN_mkarchive _bfd_generic_mkarchive
 #endif
 
 #ifndef elf_symbol_leading_char
@@ -340,28 +357,32 @@ const bfd_target TARGET_BIG_SYM =
   /* bfd_check_format: check the format of a file being read */
   { _bfd_dummy_target,		/* unknown format */
     bfd_elfNN_object_p,		/* assembler/linker output (object file) */
-    bfd_generic_archive_p,	/* an archive */
+    bfd_elfNN_archive_p,	/* an archive */
     bfd_elfNN_core_file_p	/* a core file */
   },
 
   /* bfd_set_format: set the format of a file being written */
   { bfd_false,
     bfd_elf_mkobject,
-    _bfd_generic_mkarchive,
+    bfd_elfNN_mkarchive,
     bfd_false
   },
 
   /* bfd_write_contents: write cached information into a file being written */
   { bfd_false,
     bfd_elfNN_write_object_contents,
-    _bfd_write_archive_contents,
+    bfd_elfNN_write_archive_contents,
     bfd_false
   },
 
       BFD_JUMP_TABLE_GENERIC (bfd_elfNN),
       BFD_JUMP_TABLE_COPY (bfd_elfNN),
       BFD_JUMP_TABLE_CORE (bfd_elfNN),
+#ifdef bfd_elfNN_archive_functions
+      BFD_JUMP_TABLE_ARCHIVE (bfd_elfNN_archive),
+#else
       BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
+#endif
       BFD_JUMP_TABLE_SYMBOLS (bfd_elfNN),
       BFD_JUMP_TABLE_RELOCS (bfd_elfNN),
       BFD_JUMP_TABLE_WRITE (bfd_elfNN),
@@ -424,28 +445,32 @@ const bfd_target TARGET_LITTLE_SYM =
   /* bfd_check_format: check the format of a file being read */
   { _bfd_dummy_target,		/* unknown format */
     bfd_elfNN_object_p,		/* assembler/linker output (object file) */
-    bfd_generic_archive_p,	/* an archive */
+    bfd_elfNN_archive_p,	/* an archive */
     bfd_elfNN_core_file_p	/* a core file */
   },
 
   /* bfd_set_format: set the format of a file being written */
   { bfd_false,
     bfd_elf_mkobject,
-    _bfd_generic_mkarchive,
+    bfd_elfNN_mkarchive,
     bfd_false
   },
 
   /* bfd_write_contents: write cached information into a file being written */
   { bfd_false,
     bfd_elfNN_write_object_contents,
-    _bfd_write_archive_contents,
+    bfd_elfNN_write_archive_contents,
     bfd_false
   },
 
       BFD_JUMP_TABLE_GENERIC (bfd_elfNN),
       BFD_JUMP_TABLE_COPY (bfd_elfNN),
       BFD_JUMP_TABLE_CORE (bfd_elfNN),
+#ifdef bfd_elfNN_archive_functions
+      BFD_JUMP_TABLE_ARCHIVE (bfd_elfNN_archive),
+#else
       BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
+#endif
       BFD_JUMP_TABLE_SYMBOLS (bfd_elfNN),
       BFD_JUMP_TABLE_RELOCS (bfd_elfNN),
       BFD_JUMP_TABLE_WRITE (bfd_elfNN),

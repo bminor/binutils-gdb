@@ -154,20 +154,12 @@ static void elf_swap_shdr_out
 
 #define elf_stringtab_init _bfd_elf_stringtab_init
 
-extern struct bfd_strtab_hash *_bfd_elf_stringtab_init PARAMS ((void));
 #define section_from_elf_index bfd_section_from_elf_index
-extern boolean bfd_section_from_phdr PARAMS ((bfd *, Elf_Internal_Phdr *,
-					      int));
 
-static boolean elf_slurp_reloc_table PARAMS ((bfd *, asection *, asymbol **));
+static boolean elf_slurp_reloc_table
+  PARAMS ((bfd *, asection *, asymbol **, boolean));
 
- int _bfd_elf_symbol_from_bfd_symbol PARAMS ((bfd *,
-					     struct symbol_cache_entry **));
-
-static boolean validate_reloc PARAMS ((bfd *, arelent *));
 static void write_relocs PARAMS ((bfd *, asection *, PTR));
-
- boolean bfd_section_from_shdr PARAMS ((bfd *, unsigned int shindex));
 
 #ifdef DEBUG
 static void elf_debug_section PARAMS ((int, Elf_Internal_Shdr *));
@@ -594,6 +586,15 @@ elf_object_p (abfd)
 	goto got_no_match;
       elf_swap_shdr_in (abfd, &x_shdr, i_shdrp + shindex);
       elf_elfsections (abfd)[shindex] = i_shdrp + shindex;
+
+      /* If the section is loaded, but not page aligned, clear
+         D_PAGED.  */
+      if ((i_shdrp[shindex].sh_flags & SHF_ALLOC) != 0
+	  && i_shdrp[shindex].sh_type != SHT_NOBITS
+	  && (((i_shdrp[shindex].sh_addr - i_shdrp[shindex].sh_offset)
+	       % ebd->maxpagesize)
+	      != 0))
+	abfd->flags &= ~D_PAGED;
     }
   if (i_ehdrp->e_shstrndx)
     {
@@ -676,104 +677,6 @@ got_no_match:
 
 /* ELF .o/exec file writing */
 
-/* Try to convert a non-ELF reloc into an ELF one.  */
-
-static boolean
-validate_reloc (abfd, areloc)
-     bfd *abfd;
-     arelent *areloc;
-{
-  /* Check whether we really have an ELF howto. */
-
-  if ((*areloc->sym_ptr_ptr)->the_bfd->xvec != abfd->xvec) 
-    {
-      bfd_reloc_code_real_type code;
-      reloc_howto_type *howto;
-      
-      /* Alien reloc: Try to determine its type to replace it with an
-	 equivalent ELF reloc. */
-
-      if (areloc->howto->pc_relative)
-	{
-	  switch (areloc->howto->bitsize)
-	    {
-	    case 8:
-	      code = BFD_RELOC_8_PCREL; 
-	      break;
-	    case 12:
-	      code = BFD_RELOC_12_PCREL; 
-	      break;
-	    case 16:
-	      code = BFD_RELOC_16_PCREL; 
-	      break;
-	    case 24:
-	      code = BFD_RELOC_24_PCREL; 
-	      break;
-	    case 32:
-	      code = BFD_RELOC_32_PCREL; 
-	      break;
-	    case 64:
-	      code = BFD_RELOC_64_PCREL; 
-	      break;
-	    default:
-	      goto fail;
-	    }
-
-	  howto = bfd_reloc_type_lookup (abfd, code);
-
-	  if (areloc->howto->pcrel_offset != howto->pcrel_offset)
-	    {
-	      if (howto->pcrel_offset)
-		areloc->addend += areloc->address;
-	      else
-		areloc->addend -= areloc->address; /* addend is unsigned!! */
-	    }
-	}
-      else
-	{
-	  switch (areloc->howto->bitsize)
-	    {
-	    case 8:
-	      code = BFD_RELOC_8; 
-	      break;
-	    case 14:
-	      code = BFD_RELOC_14; 
-	      break;
-	    case 16:
-	      code = BFD_RELOC_16; 
-	      break;
-	    case 26:
-	      code = BFD_RELOC_26; 
-	      break;
-	    case 32:
-	      code = BFD_RELOC_32; 
-	      break;
-	    case 64:
-	      code = BFD_RELOC_64; 
-	      break;
-	    default:
-	      goto fail;
-	    }
-
-	  howto = bfd_reloc_type_lookup (abfd, code);
-	}
-
-      if (howto)
-	areloc->howto = howto;
-      else
-	goto fail;
-    }
-
-  return true;
-
- fail:
-  (*_bfd_error_handler)
-    ("%s: unsupported relocation type %s",
-     bfd_get_filename (abfd), areloc->howto->name);
-  bfd_set_error (bfd_error_bad_value);
-  return false;
-}
-
 /* Write out the relocs.  */
 
 static void
@@ -842,6 +745,8 @@ write_relocs (abfd, sec, data)
 	  sym = *ptr->sym_ptr_ptr;
 	  if (sym == last_sym)
 	    n = last_sym_idx;
+	  else if (bfd_is_abs_section (sym->section) && sym->value == 0)
+	    n = STN_UNDEF;
 	  else
 	    {
 	      last_sym = sym;
@@ -854,8 +759,9 @@ write_relocs (abfd, sec, data)
 	      last_sym_idx = n;
 	    }
 
-	  if ((*ptr->sym_ptr_ptr)->the_bfd->xvec != abfd->xvec
-	      && ! validate_reloc (abfd, ptr))
+	  if ((*ptr->sym_ptr_ptr)->the_bfd != NULL
+	      && (*ptr->sym_ptr_ptr)->the_bfd->xvec != abfd->xvec
+	      && ! _bfd_elf_validate_reloc (abfd, ptr))
 	    {
 	      *failedp = true;
 	      return;
@@ -907,7 +813,7 @@ write_relocs (abfd, sec, data)
 	    }
 
 	  if ((*ptr->sym_ptr_ptr)->the_bfd->xvec != abfd->xvec
-	      && ! validate_reloc (abfd, ptr))
+	      && ! _bfd_elf_validate_reloc (abfd, ptr))
 	    {
 	      *failedp = true;
 	      return;
@@ -1177,13 +1083,16 @@ error_return:
 /* Read in and swap the external relocs.  */
 
 static boolean
-elf_slurp_reloc_table (abfd, asect, symbols)
+elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
      bfd *abfd;
      asection *asect;
      asymbol **symbols;
+     boolean dynamic;
 {
   struct elf_backend_data * const ebd = get_elf_backend_data (abfd);
   struct bfd_elf_section_data * const d = elf_section_data (asect);
+  Elf_Internal_Shdr *rel_hdr;
+  bfd_size_type reloc_count;
   PTR allocated = NULL;
   bfd_byte *native_relocs;
   arelent *relents;
@@ -1191,37 +1100,51 @@ elf_slurp_reloc_table (abfd, asect, symbols)
   unsigned int i;
   int entsize;
 
-  if (asect->relocation != NULL
-      || (asect->flags & SEC_RELOC) == 0
-      || asect->reloc_count == 0)
+  if (asect->relocation != NULL)
     return true;
 
-  BFD_ASSERT (asect->rel_filepos == d->rel_hdr.sh_offset
-	      && (asect->reloc_count
-		  == d->rel_hdr.sh_size / d->rel_hdr.sh_entsize));
+  if (! dynamic)
+    {
+      if ((asect->flags & SEC_RELOC) == 0
+	  || asect->reloc_count == 0)
+	return true;
 
-  allocated = (PTR) bfd_malloc ((size_t) d->rel_hdr.sh_size);
+      rel_hdr = &d->rel_hdr;
+      reloc_count = asect->reloc_count;
+
+      BFD_ASSERT (asect->rel_filepos == rel_hdr->sh_offset
+		  && reloc_count == rel_hdr->sh_size / rel_hdr->sh_entsize);
+    }
+  else
+    {
+      if (asect->_raw_size == 0)
+	return true;
+
+      rel_hdr = &d->this_hdr;
+      reloc_count = rel_hdr->sh_size / rel_hdr->sh_entsize;
+    }
+
+  allocated = (PTR) bfd_malloc ((size_t) rel_hdr->sh_size);
   if (allocated == NULL)
     goto error_return;
 
-  if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0
-      || (bfd_read (allocated, 1, d->rel_hdr.sh_size, abfd)
-	  != d->rel_hdr.sh_size))
+  if (bfd_seek (abfd, rel_hdr->sh_offset, SEEK_SET) != 0
+      || (bfd_read (allocated, 1, rel_hdr->sh_size, abfd)
+	  != rel_hdr->sh_size))
     goto error_return;
 
   native_relocs = (bfd_byte *) allocated;
 
-  relents = ((arelent *)
-	     bfd_alloc (abfd, asect->reloc_count * sizeof (arelent)));
+  relents = (arelent *) bfd_alloc (abfd, reloc_count * sizeof (arelent));
   if (relents == NULL)
     goto error_return;
 
-  entsize = d->rel_hdr.sh_entsize;
+  entsize = rel_hdr->sh_entsize;
   BFD_ASSERT (entsize == sizeof (Elf_External_Rel)
 	      || entsize == sizeof (Elf_External_Rela));
 
   for (i = 0, relent = relents;
-       i < asect->reloc_count;
+       i < reloc_count;
        i++, relent++, native_relocs += entsize)
     {
       Elf_Internal_Rela rela;
@@ -1239,8 +1162,9 @@ elf_slurp_reloc_table (abfd, asect, symbols)
 
       /* The address of an ELF reloc is section relative for an object
 	 file, and absolute for an executable file or shared library.
-	 The address of a BFD reloc is always section relative.  */
-      if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0)
+	 The address of a normal BFD reloc is always section relative,
+	 and the address of a dynamic reloc is absolute..  */
+      if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0 || dynamic)
 	relent->address = rela.r_offset;
       else
 	relent->address = rela.r_offset - asect->vma;

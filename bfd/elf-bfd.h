@@ -110,6 +110,9 @@ struct elf_link_hash_entry
   /* Symbol type (STT_NOTYPE, STT_OBJECT, etc.).  */
   char type;
 
+  /* Symbol st_other value.  */
+  unsigned char other;
+
   /* Some flags; legal values follow.  */
   unsigned char elf_link_hash_flags;
   /* Symbol is referenced by a non-shared object.  */
@@ -193,7 +196,8 @@ struct elf_size_info {
   boolean (*write_shdrs_and_ehdr) PARAMS ((bfd *));
   void (*write_relocs) PARAMS ((bfd *, asection *, PTR));
   void (*swap_symbol_out) PARAMS ((bfd *, const Elf_Internal_Sym *, PTR));
-  boolean (*slurp_reloc_table) PARAMS ((bfd *, asection *, asymbol **));
+  boolean (*slurp_reloc_table)
+    PARAMS ((bfd *, asection *, asymbol **, boolean));
   long (*slurp_symbol_table) PARAMS ((bfd *, asymbol **, boolean));
   void (*swap_dyn_in) PARAMS ((bfd *, const PTR, Elf_Internal_Dyn *));
 };
@@ -698,6 +702,9 @@ extern long _bfd_elf_canonicalize_dynamic_symtab PARAMS ((bfd *, asymbol **));
 extern long _bfd_elf_get_reloc_upper_bound PARAMS ((bfd *, sec_ptr));
 extern long _bfd_elf_canonicalize_reloc PARAMS ((bfd *, sec_ptr,
 						  arelent **, asymbol **));
+extern long _bfd_elf_get_dynamic_reloc_upper_bound PARAMS ((bfd *));
+extern long _bfd_elf_canonicalize_dynamic_reloc PARAMS ((bfd *, arelent **,
+							 asymbol **));
 extern asymbol *_bfd_elf_make_empty_symbol PARAMS ((bfd *));
 extern void _bfd_elf_get_symbol_info PARAMS ((bfd *, asymbol *,
 					       symbol_info *));
@@ -719,6 +726,7 @@ extern void _bfd_elf_no_info_to_howto PARAMS ((bfd *, arelent *,
 					       Elf_Internal_Rela *));
 
 extern boolean bfd_section_from_shdr PARAMS ((bfd *, unsigned int shindex));
+extern boolean bfd_section_from_phdr PARAMS ((bfd *, Elf_Internal_Phdr *, int));
 
 extern int _bfd_elf_symbol_from_bfd_symbol PARAMS ((bfd *, asymbol **));
 
@@ -835,6 +843,8 @@ extern boolean bfd_elf32_add_dynamic_entry
   PARAMS ((struct bfd_link_info *, bfd_vma, bfd_vma));
 extern boolean bfd_elf32_link_create_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
+extern Elf_Internal_Rela *_bfd_elf32_link_read_relocs
+  PARAMS ((bfd *, asection *, PTR, Elf_Internal_Rela *, boolean));
 
 extern const bfd_target *bfd_elf64_object_p PARAMS ((bfd *));
 extern const bfd_target *bfd_elf64_core_file_p PARAMS ((bfd *));
@@ -876,6 +886,8 @@ extern boolean bfd_elf64_add_dynamic_entry
   PARAMS ((struct bfd_link_info *, bfd_vma, bfd_vma));
 extern boolean bfd_elf64_link_create_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
+extern Elf_Internal_Rela *_bfd_elf64_link_read_relocs
+  PARAMS ((bfd *, asection *, PTR, Elf_Internal_Rela *, boolean));
 
 #define bfd_elf32_link_record_dynamic_symbol _bfd_elf_link_record_dynamic_symbol
 #define bfd_elf64_link_record_dynamic_symbol _bfd_elf_link_record_dynamic_symbol
@@ -895,5 +907,23 @@ extern void _bfd_mips_elf_symbol_processing PARAMS ((bfd *, asymbol *));
 extern boolean _bfd_mips_elf_read_ecoff_info
   PARAMS ((bfd *, asection *, struct ecoff_debug_info *));
 extern void _bfd_mips_elf_final_write_processing PARAMS ((bfd *, boolean));
+extern bfd_reloc_status_type _bfd_mips_elf_hi16_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+extern bfd_reloc_status_type _bfd_mips_elf_lo16_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+extern bfd_reloc_status_type _bfd_mips_elf_gprel16_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+extern bfd_reloc_status_type _bfd_mips_elf_got16_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+extern bfd_reloc_status_type _bfd_mips_elf_gprel32_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+extern boolean _bfd_mips_elf_set_private_flags PARAMS ((bfd *, flagword));
+extern boolean _bfd_mips_elf_copy_private_bfd_data PARAMS ((bfd *, bfd *));
+extern boolean _bfd_mips_elf_merge_private_bfd_data PARAMS ((bfd *, bfd *));
+extern boolean _bfd_mips_elf_find_nearest_line
+  PARAMS ((bfd *, asection *, asymbol **, bfd_vma, const char **,
+	   const char **, unsigned int *));
+extern boolean _bfd_mips_elf_set_section_contents
+  PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
 
 #endif /* _LIBELF_H_ */

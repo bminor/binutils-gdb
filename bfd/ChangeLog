@@ -1,3 +1,18 @@
+Sun Dec 15 14:46:06 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elfcode.h (elf_slurp_reloc_table): Add dynamic parameter.
+	* elf.c (_bfd_elf_canonicalize_reloc): Pass new argument to
+	slurp_reloc_table.
+	(_bfd_elf_get_dynamic_reloc_upper_bound): New function.
+	(_bfd_elf_canonicalize_dynamic_reloc): New function.
+	* elf-bfd.h (struct elf_size_info): Update declaration of
+	slurp_reloc_table.
+	(_bfd_elf_get_dynamic_reloc_upper_bound): Declare.
+	(_bfd_elf_canonicalize_dynamic_reloc): Declare.
+	* elfxx-target.h: Use new dynamic reloc routines by default.
+	* elf64-mips.c (mips_elf64_slurp_reloc_table): Add dynamic
+	parameter.
+
 Fri Dec 13 13:18:49 1996  Dan Wilder  <dan@gasboy.com>
 
 	* coffcode.h (coff_set_flags): Use MC68KBCSMAGIC for bfd_arch_m68k

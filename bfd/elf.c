@@ -868,6 +868,7 @@ bfd_section_from_shdr (abfd, shindex)
 	    if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
 	      return false;
 	    if (hdr->bfd_section != NULL
+		&& hdr->sh_info > 0
 		&& bfd_section_from_shdr (abfd, hdr->sh_info))
 	      {
 		target_sect = bfd_section_from_elf_index (abfd, hdr->sh_info);
@@ -3249,7 +3250,10 @@ _bfd_elf_canonicalize_reloc (abfd, section, relptr, symbols)
   arelent *tblptr;
   unsigned int i;
 
-  if (! get_elf_backend_data (abfd)->s->slurp_reloc_table (abfd, section, symbols))
+  if (! get_elf_backend_data (abfd)->s->slurp_reloc_table (abfd,
+							   section,
+							   symbols,
+							   false))
     return -1;
 
   tblptr = section->relocation;
@@ -3279,6 +3283,86 @@ _bfd_elf_canonicalize_dynamic_symtab (abfd, alocation)
      asymbol **alocation;
 {
   return get_elf_backend_data (abfd)->s->slurp_symbol_table (abfd, alocation, true);
+}
+
+/* Return the size required for the dynamic reloc entries.  Any
+   section that was actually installed in the BFD, and has type
+   SHT_REL or SHT_RELA, and uses the dynamic symbol table, is
+   considered to be a dynamic reloc section.  */
+
+long
+_bfd_elf_get_dynamic_reloc_upper_bound (abfd)
+     bfd *abfd;
+{
+  long ret;
+  asection *s;
+
+  if (elf_dynsymtab (abfd) == 0)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return -1;
+    }
+
+  ret = sizeof (arelent *);
+  for (s = abfd->sections; s != NULL; s = s->next)
+    if (elf_section_data (s)->this_hdr.sh_link == elf_dynsymtab (abfd)
+	&& (elf_section_data (s)->this_hdr.sh_type == SHT_REL
+	    || elf_section_data (s)->this_hdr.sh_type == SHT_RELA))
+      ret += ((s->_raw_size / elf_section_data (s)->this_hdr.sh_entsize)
+	      * sizeof (arelent *));
+
+  return ret;
+}
+
+/* Canonicalize the dynamic relocation entries.  Note that we return
+   the dynamic relocations as a single block, although they are
+   actually associated with particular sections; the interface, which
+   was designed for SunOS style shared libraries, expects that there
+   is only one set of dynamic relocs.  Any section that was actually
+   installed in the BFD, and has type SHT_REL or SHT_RELA, and uses
+   the dynamic symbol table, is considered to be a dynamic reloc
+   section.  */
+
+long
+_bfd_elf_canonicalize_dynamic_reloc (abfd, storage, syms)
+     bfd *abfd;
+     arelent **storage;
+     asymbol **syms;
+{
+  boolean (*slurp_relocs) PARAMS ((bfd *, asection *, asymbol **, boolean));
+  asection *s;
+  long ret;
+
+  if (elf_dynsymtab (abfd) == 0)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return -1;
+    }
+
+  slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
+  ret = 0;
+  for (s = abfd->sections; s != NULL; s = s->next)
+    {
+      if (elf_section_data (s)->this_hdr.sh_link == elf_dynsymtab (abfd)
+	  && (elf_section_data (s)->this_hdr.sh_type == SHT_REL
+	      || elf_section_data (s)->this_hdr.sh_type == SHT_RELA))
+	{
+	  arelent *p;
+	  long count, i;
+
+	  if (! (*slurp_relocs) (abfd, s, syms, true))
+	    return -1;
+	  count = s->_raw_size / elf_section_data (s)->this_hdr.sh_entsize;
+	  p = s->relocation;
+	  for (i = 0; i < count; i++)
+	    *storage++ = p++;
+	  ret += count;
+	}
+    }
+
+  *storage = NULL;
+
+  return ret;
 }
 
 asymbol *
