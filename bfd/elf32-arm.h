@@ -1038,6 +1038,18 @@ elf32_arm_to_thumb_stub (info, name, input_bfd, output_bfd, input_section,
   return TRUE;
 }
 
+/* This is the condition under which elf32_arm_finish_dynamic_symbol
+   will be called from elflink.h.  If elflink.h doesn't call our
+   finish_dynamic_symbol routine, we'll need to do something about
+   initializing any .plt and .got entries in elf32_arm_relocate_section
+   and elf32_arm_final_link_relocate.  */
+#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, SHARED, H)			\
+  ((DYN)								\
+   && ((SHARED)							 	\
+       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)	\
+   && ((H)->dynindx != -1						\
+       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
+
 /* Perform a relocation as part of a final link.  */
 
 static bfd_reloc_status_type
@@ -1605,13 +1617,16 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
       if (h != NULL)
 	{
 	  bfd_vma off;
+	  bfd_boolean dyn = elf_hash_table (info)->dynamic_sections_created;
 
 	  off = h->got.offset;
 	  BFD_ASSERT (off != (bfd_vma) -1);
 
-	  if (!elf_hash_table (info)->dynamic_sections_created ||
-	      (info->shared && (info->symbolic || h->dynindx == -1)
-	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+	  if (!WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
+	      || (info->shared
+		  && (info->symbolic || h->dynindx == -1
+		      || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL))
+		  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
 	    {
 	      /* This is actually a static link, or it is a -Bsymbolic link
 		 and the symbol is defined locally.  We must initialize this
@@ -1991,12 +2006,13 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 		  break;
 
 	        case R_ARM_GOT32:
-	          if (elf_hash_table(info)->dynamic_sections_created
-	              && (!info->shared
+	          if ((WILL_CALL_FINISH_DYNAMIC_SYMBOL
+		       (elf_hash_table(info)->dynamic_sections_created,
+			info->shared, h))
+		      && (!info->shared
 	                  || (!info->symbolic && h->dynindx != -1)
-	                  || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
-			  )
-		      )
+	                  || (h->elf_link_hash_flags
+			      & ELF_LINK_HASH_DEF_REGULAR) == 0))
 	            relocation_needed = 0;
 		  break;
 
