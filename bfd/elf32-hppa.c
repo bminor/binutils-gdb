@@ -45,156 +45,157 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 */
 
 #include "elf32-hppa.h"
-/*#include "libhppa.h"*/
-#define BYTES_IN_WORD 4
+#include "libhppa.h"
 #include "aout/aout64.h"
+#include "hppa_stubs.h"
 
 /* ELF/PA relocation howto entries */
 
 static bfd_reloc_status_type hppa_elf_reloc ();
 
-reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
+static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
 {
 /*  'bitpos' and 'abs' are obsolete */
 /* type			rs sz bsz pcrel  bpos abs    ovrf  sf		   name */
 /* 9.3.4. Address relocation types */
-  {R_HPPA_NONE, 0, 3, 19, false, 0, false, true, hppa_elf_reloc, "R_HPPA_NONE"},
-  {R_HPPA_32, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_32"},
-  {R_HPPA_11, 0, 3, 11, false, 0, false, true, hppa_elf_reloc, "R_HPPA_11"},
-  {R_HPPA_14, 0, 3, 14, false, 0, false, true, hppa_elf_reloc, "R_HPPA_14"},
-  {R_HPPA_17, 0, 3, 17, false, 0, false, true, hppa_elf_reloc, "R_HPPA_17"},
-{R_HPPA_L21, 0, 3, 21, false, 0, false, true, hppa_elf_reloc, "R_HPPA_L21"},
-{R_HPPA_R11, 0, 3, 11, false, 0, false, true, hppa_elf_reloc, "R_HPPA_R11"},
-{R_HPPA_R14, 0, 3, 14, false, 0, false, true, hppa_elf_reloc, "R_HPPA_R14"},
-{R_HPPA_R17, 0, 3, 17, false, 0, false, true, hppa_elf_reloc, "R_HPPA_R17"},
-  {R_HPPA_LS21, 0, 3, 21, false, 0, false, true, hppa_elf_reloc, "R_HPPA_LS21"},
-  {R_HPPA_RS11, 0, 3, 11, false, 0, false, true, hppa_elf_reloc, "R_HPPA_RS11"},
-  {R_HPPA_RS14, 0, 3, 14, false, 0, false, true, hppa_elf_reloc, "R_HPPA_RS14"},
-  {R_HPPA_RS17, 0, 3, 17, false, 0, false, true, hppa_elf_reloc, "R_HPPA_RS17"},
-  {R_HPPA_LD21, 0, 3, 21, false, 0, false, true, hppa_elf_reloc, "R_HPPA_LD21"},
-  {R_HPPA_RD11, 0, 3, 11, false, 0, false, true, hppa_elf_reloc, "R_HPPA_RD11"},
-  {R_HPPA_RD14, 0, 3, 14, false, 0, false, true, hppa_elf_reloc, "R_HPPA_RD14"},
-  {R_HPPA_RD17, 0, 3, 17, false, 0, false, true, hppa_elf_reloc, "R_HPPA_RD17"},
-  {R_HPPA_LR21, 0, 3, 21, false, 0, false, true, hppa_elf_reloc, "R_HPPA_LR21"},
-  {R_HPPA_RR14, 0, 3, 14, false, 0, false, true, hppa_elf_reloc, "R_HPPA_RR14"},
-  {R_HPPA_RR17, 0, 3, 17, false, 0, false, true, hppa_elf_reloc, "R_HPPA_RR17"},
+  {R_HPPA_NONE, 0, 3, 19, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_NONE"},
+  {R_HPPA_32, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_32"},
+  {R_HPPA_11, 0, 3, 11, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_11"},
+  {R_HPPA_14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_14"},
+  {R_HPPA_17, 0, 3, 17, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_17"},
+{R_HPPA_L21, 0, 3, 21, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_L21"},
+{R_HPPA_R11, 0, 3, 11, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_R11"},
+{R_HPPA_R14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_R14"},
+{R_HPPA_R17, 0, 3, 17, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_R17"},
+  {R_HPPA_LS21, 0, 3, 21, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_LS21"},
+  {R_HPPA_RS11, 0, 3, 11, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_RS11"},
+  {R_HPPA_RS14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_RS14"},
+  {R_HPPA_RS17, 0, 3, 17, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_RS17"},
+  {R_HPPA_LD21, 0, 3, 21, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_LD21"},
+  {R_HPPA_RD11, 0, 3, 11, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_RD11"},
+  {R_HPPA_RD14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_RD14"},
+  {R_HPPA_RD17, 0, 3, 17, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_RD17"},
+  {R_HPPA_LR21, 0, 3, 21, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_LR21"},
+  {R_HPPA_RR14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_RR14"},
+  {R_HPPA_RR17, 0, 3, 17, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_RR17"},
 /* 9.3.5. GOTOFF address relocation types		*/
-  {R_HPPA_GOTOFF_11, 0, 3, 11, false, 0, false, true, hppa_elf_reloc, "R_HPPA_GOTOFF_11"},
-  {R_HPPA_GOTOFF_14, 0, 3, 14, false, 0, false, true, hppa_elf_reloc, "R_HPPA_GOTOFF_14"},
-  {R_HPPA_GOTOFF_L21, 0, 3, 21, false, 0, false, true, hppa_elf_reloc, "R_HPPA_GOTOFF_L21"},
-  {R_HPPA_GOTOFF_R11, 0, 3, 11, false, 0, false, true, hppa_elf_reloc, "R_HPPA_GOTOFF_R11"},
-  {R_HPPA_GOTOFF_R14, 0, 3, 14, false, 0, false, true, hppa_elf_reloc, "R_HPPA_GOTOFF_R14"},
-  {R_HPPA_GOTOFF_LS21, 0, 3, 21, false, 0, false, true, hppa_elf_reloc, "R_HPPA_GOTOFF_LS21"},
-  {R_HPPA_GOTOFF_RS11, 0, 3, 11, false, 0, false, true, hppa_elf_reloc, "R_HPPA_GOTOFF_RS11"},
-  {R_HPPA_GOTOFF_RS14, 0, 3, 14, false, 0, false, true, hppa_elf_reloc, "R_HPPA_GOTOFF_RS14"},
-  {R_HPPA_GOTOFF_LD21, 0, 3, 21, false, 0, false, true, hppa_elf_reloc, "R_HPPA_GOTOFF_LD21"},
-  {R_HPPA_GOTOFF_RD11, 0, 3, 11, false, 0, false, true, hppa_elf_reloc, "R_HPPA_GOTOFF_RD11"},
-  {R_HPPA_GOTOFF_RD14, 0, 3, 14, false, 0, false, true, hppa_elf_reloc, "R_HPPA_GOTOFF_RD14"},
-  {R_HPPA_GOTOFF_LR21, 0, 3, 21, false, 0, false, true, hppa_elf_reloc, "R_HPPA_GOTOFF_LR21"},
-  {R_HPPA_GOTOFF_RR14, 0, 3, 14, false, 0, false, true, hppa_elf_reloc, "R_HPPA_GOTOFF_RR14"},
+  {R_HPPA_GOTOFF_11, 0, 3, 11, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_GOTOFF_11"},
+  {R_HPPA_GOTOFF_14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_GOTOFF_14"},
+  {R_HPPA_GOTOFF_L21, 0, 3, 21, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_GOTOFF_L21"},
+  {R_HPPA_GOTOFF_R11, 0, 3, 11, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_GOTOFF_R11"},
+  {R_HPPA_GOTOFF_R14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_GOTOFF_R14"},
+  {R_HPPA_GOTOFF_LS21, 0, 3, 21, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_GOTOFF_LS21"},
+  {R_HPPA_GOTOFF_RS11, 0, 3, 11, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_GOTOFF_RS11"},
+  {R_HPPA_GOTOFF_RS14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_GOTOFF_RS14"},
+  {R_HPPA_GOTOFF_LD21, 0, 3, 21, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_GOTOFF_LD21"},
+  {R_HPPA_GOTOFF_RD11, 0, 3, 11, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_GOTOFF_RD11"},
+  {R_HPPA_GOTOFF_RD14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_GOTOFF_RD14"},
+  {R_HPPA_GOTOFF_LR21, 0, 3, 21, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_GOTOFF_LR21"},
+  {R_HPPA_GOTOFF_RR14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_GOTOFF_RR14"},
 /* 9.3.6. Absolute call relocation types	*/
-  {R_HPPA_ABS_CALL_11, 0, 3, 11, false, 0, false, true, hppa_elf_reloc, "R_HPPA_ABS_CALL_11"},
-  {R_HPPA_ABS_CALL_14, 0, 3, 14, false, 0, false, true, hppa_elf_reloc, "R_HPPA_ABS_CALL_14"},
-  {R_HPPA_ABS_CALL_17, 0, 3, 17, false, 0, false, true, hppa_elf_reloc, "R_HPPA_ABS_CALL_17"},
-  {R_HPPA_ABS_CALL_L21, 0, 3, 21, false, 0, false, true, hppa_elf_reloc, "R_HPPA_ABS_CALL_L21"},
-  {R_HPPA_ABS_CALL_R11, 0, 3, 11, false, 0, false, true, hppa_elf_reloc, "R_HPPA_ABS_CALL_R11"},
-  {R_HPPA_ABS_CALL_R14, 0, 3, 14, false, 0, false, true, hppa_elf_reloc, "R_HPPA_ABS_CALL_R14"},
-  {R_HPPA_ABS_CALL_R17, 0, 3, 17, false, 0, false, true, hppa_elf_reloc, "R_HPPA_ABS_CALL_R17"},
-  {R_HPPA_ABS_CALL_LS21, 0, 3, 21, false, 0, false, true, hppa_elf_reloc, "R_HPPA_ABS_CALL_LS21"},
-  {R_HPPA_ABS_CALL_RS11, 0, 3, 11, false, 0, false, true, hppa_elf_reloc, "R_HPPA_ABS_CALL_RS11"},
-  {R_HPPA_ABS_CALL_RS14, 0, 3, 14, false, 0, false, true, hppa_elf_reloc, "R_HPPA_ABS_CALL_RS14"},
-  {R_HPPA_ABS_CALL_RS17, 0, 3, 17, false, 0, false, true, hppa_elf_reloc, "R_HPPA_ABS_CALL_RS17"},
-  {R_HPPA_ABS_CALL_LD21, 0, 3, 21, false, 0, false, true, hppa_elf_reloc, "R_HPPA_ABS_CALL_LD21"},
-  {R_HPPA_ABS_CALL_RD11, 0, 3, 11, false, 0, false, true, hppa_elf_reloc, "R_HPPA_ABS_CALL_RD11"},
-  {R_HPPA_ABS_CALL_RD14, 0, 3, 14, false, 0, false, true, hppa_elf_reloc, "R_HPPA_ABS_CALL_RD14"},
-  {R_HPPA_ABS_CALL_RD17, 0, 3, 17, false, 0, false, true, hppa_elf_reloc, "R_HPPA_ABS_CALL_RD17"},
-  {R_HPPA_ABS_CALL_LR21, 0, 3, 21, false, 0, false, true, hppa_elf_reloc, "R_HPPA_ABS_CALL_LR21"},
-  {R_HPPA_ABS_CALL_RR14, 0, 3, 14, false, 0, false, true, hppa_elf_reloc, "R_HPPA_ABS_CALL_RR14"},
-  {R_HPPA_ABS_CALL_RR17, 0, 3, 17, false, 0, false, true, hppa_elf_reloc, "R_HPPA_ABS_CALL_RR17"},
+  {R_HPPA_ABS_CALL_11, 0, 3, 11, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_11"},
+  {R_HPPA_ABS_CALL_14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_14"},
+  {R_HPPA_ABS_CALL_17, 0, 3, 17, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_17"},
+  {R_HPPA_ABS_CALL_L21, 0, 3, 21, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_L21"},
+  {R_HPPA_ABS_CALL_R11, 0, 3, 11, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_R11"},
+  {R_HPPA_ABS_CALL_R14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_R14"},
+  {R_HPPA_ABS_CALL_R17, 0, 3, 17, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_R17"},
+  {R_HPPA_ABS_CALL_LS21, 0, 3, 21, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_LS21"},
+  {R_HPPA_ABS_CALL_RS11, 0, 3, 11, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_RS11"},
+  {R_HPPA_ABS_CALL_RS14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_RS14"},
+  {R_HPPA_ABS_CALL_RS17, 0, 3, 17, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_RS17"},
+  {R_HPPA_ABS_CALL_LD21, 0, 3, 21, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_LD21"},
+  {R_HPPA_ABS_CALL_RD11, 0, 3, 11, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_RD11"},
+  {R_HPPA_ABS_CALL_RD14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_RD14"},
+  {R_HPPA_ABS_CALL_RD17, 0, 3, 17, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_RD17"},
+  {R_HPPA_ABS_CALL_LR21, 0, 3, 21, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_LR21"},
+  {R_HPPA_ABS_CALL_RR14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_RR14"},
+  {R_HPPA_ABS_CALL_RR17, 0, 3, 17, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_RR17"},
 /* 9.3.7. PC-relative call relocation types	*/
-  {R_HPPA_PCREL_CALL_11, 0, 3, 11, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PCREL_CALL_11"},
-  {R_HPPA_PCREL_CALL_14, 0, 3, 14, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PCREL_CALL_14"},
-  {R_HPPA_PCREL_CALL_17, 0, 3, 17, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PCREL_CALL_17"},
-  {R_HPPA_PCREL_CALL_12, 0, 3, 12, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PCREL_CALL_12"},
-  {R_HPPA_PCREL_CALL_L21, 0, 3, 21, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PCREL_CALL_L21"},
-  {R_HPPA_PCREL_CALL_R11, 0, 3, 11, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PCREL_CALL_R11"},
-  {R_HPPA_PCREL_CALL_R14, 0, 3, 14, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PCREL_CALL_R14"},
-  {R_HPPA_PCREL_CALL_R17, 0, 3, 17, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PCREL_CALL_R17"},
-  {R_HPPA_PCREL_CALL_LS21, 0, 3, 21, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PCREL_CALL_LS21"},
-  {R_HPPA_PCREL_CALL_RS11, 0, 3, 11, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PCREL_CALL_RS11"},
-  {R_HPPA_PCREL_CALL_RS14, 0, 3, 14, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PCREL_CALL_RS14"},
-  {R_HPPA_PCREL_CALL_RS17, 0, 3, 17, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PCREL_CALL_RS17"},
-  {R_HPPA_PCREL_CALL_LD21, 0, 3, 21, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PCREL_CALL_LD21"},
-  {R_HPPA_PCREL_CALL_RD11, 0, 3, 11, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PCREL_CALL_RD11"},
-  {R_HPPA_PCREL_CALL_RD14, 0, 3, 14, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PCREL_CALL_RD14"},
-  {R_HPPA_PCREL_CALL_RD17, 0, 3, 17, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PCREL_CALL_RD17"},
-  {R_HPPA_PCREL_CALL_LR21, 0, 3, 21, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PCREL_CALL_LR21"},
-  {R_HPPA_PCREL_CALL_RR14, 0, 3, 14, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PCREL_CALL_RR14"},
-  {R_HPPA_PCREL_CALL_RR17, 0, 3, 17, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PCREL_CALL_RR17"},
+  {R_HPPA_PCREL_CALL_11, 0, 3, 11, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_11"},
+  {R_HPPA_PCREL_CALL_14, 0, 3, 14, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_14"},
+  {R_HPPA_PCREL_CALL_17, 0, 3, 17, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_17"},
+  {R_HPPA_PCREL_CALL_12, 0, 3, 12, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_12"},
+  {R_HPPA_PCREL_CALL_L21, 0, 3, 21, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_L21"},
+  {R_HPPA_PCREL_CALL_R11, 0, 3, 11, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_R11"},
+  {R_HPPA_PCREL_CALL_R14, 0, 3, 14, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_R14"},
+  {R_HPPA_PCREL_CALL_R17, 0, 3, 17, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_R17"},
+  {R_HPPA_PCREL_CALL_LS21, 0, 3, 21, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_LS21"},
+  {R_HPPA_PCREL_CALL_RS11, 0, 3, 11, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_RS11"},
+  {R_HPPA_PCREL_CALL_RS14, 0, 3, 14, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_RS14"},
+  {R_HPPA_PCREL_CALL_RS17, 0, 3, 17, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_RS17"},
+  {R_HPPA_PCREL_CALL_LD21, 0, 3, 21, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_LD21"},
+  {R_HPPA_PCREL_CALL_RD11, 0, 3, 11, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_RD11"},
+  {R_HPPA_PCREL_CALL_RD14, 0, 3, 14, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_RD14"},
+  {R_HPPA_PCREL_CALL_RD17, 0, 3, 17, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_RD17"},
+  {R_HPPA_PCREL_CALL_LR21, 0, 3, 21, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_LR21"},
+  {R_HPPA_PCREL_CALL_RR14, 0, 3, 14, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_RR14"},
+  {R_HPPA_PCREL_CALL_RR17, 0, 3, 17, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_RR17"},
 
 /* 9.3.8. Plabel relocation types */
-  {R_HPPA_PLABEL_32, 0, 3, 32, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PLABEL_32"},
-  {R_HPPA_PLABEL_11, 0, 3, 11, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PLABEL_11"},
-  {R_HPPA_PLABEL_14, 0, 3, 14, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PLABEL_14"},
-  {R_HPPA_PLABEL_L21, 0, 3, 21, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PLABEL_L21"},
-  {R_HPPA_PLABEL_R11, 0, 3, 11, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PLABEL_R11"},
-  {R_HPPA_PLABEL_R14, 0, 3, 14, true, 0, false, true, hppa_elf_reloc, "R_HPPA_PLABEL_R14"},
+  {R_HPPA_PLABEL_32, 0, 3, 32, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PLABEL_32"},
+  {R_HPPA_PLABEL_11, 0, 3, 11, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PLABEL_11"},
+  {R_HPPA_PLABEL_14, 0, 3, 14, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PLABEL_14"},
+  {R_HPPA_PLABEL_L21, 0, 3, 21, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PLABEL_L21"},
+  {R_HPPA_PLABEL_R11, 0, 3, 11, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PLABEL_R11"},
+  {R_HPPA_PLABEL_R14, 0, 3, 14, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PLABEL_R14"},
 
 /* 9.3.9. Data linkage table (DLT) relocation types	*/
-  {R_HPPA_DLT_32, 0, 3, 32, true, 0, false, true, hppa_elf_reloc, "R_HPPA_DLT_32"},
-  {R_HPPA_DLT_11, 0, 3, 11, true, 0, false, true, hppa_elf_reloc, "R_HPPA_DLT_11"},
-  {R_HPPA_DLT_14, 0, 3, 14, true, 0, false, true, hppa_elf_reloc, "R_HPPA_DLT_14"},
-  {R_HPPA_DLT_L21, 0, 3, 21, true, 0, false, true, hppa_elf_reloc, "R_HPPA_DLT_L21"},
-  {R_HPPA_DLT_R11, 0, 3, 11, true, 0, false, true, hppa_elf_reloc, "R_HPPA_DLT_R11"},
-  {R_HPPA_DLT_R14, 0, 3, 14, true, 0, false, true, hppa_elf_reloc, "R_HPPA_DLT_R14"},
+  {R_HPPA_DLT_32, 0, 3, 32, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_DLT_32"},
+  {R_HPPA_DLT_11, 0, 3, 11, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_DLT_11"},
+  {R_HPPA_DLT_14, 0, 3, 14, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_DLT_14"},
+  {R_HPPA_DLT_L21, 0, 3, 21, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_DLT_L21"},
+  {R_HPPA_DLT_R11, 0, 3, 11, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_DLT_R11"},
+  {R_HPPA_DLT_R14, 0, 3, 14, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_DLT_R14"},
 
 /* 9.3.10. Relocations for unwinder tables	*/
-  {R_HPPA_UNWIND_ENTRY, 0, 3, 32, true, 0, false, true, hppa_elf_reloc, "R_HPPA_UNWIND_ENTRY"},
-  {R_HPPA_UNWIND_ENTRIES, 0, 3, 32, true, 0, false, true, hppa_elf_reloc, "R_HPPA_UNWIND_ENTRIES"},
+  {R_HPPA_UNWIND_ENTRY, 0, 3, 32, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_UNWIND_ENTRY"},
+  {R_HPPA_UNWIND_ENTRIES, 0, 3, 32, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_UNWIND_ENTRIES"},
 
 /*  9.3.11. Relocation types for complex expressions	*/
-  {R_HPPA_PUSH_CONST, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_PUSH_CONST"},
-  {R_HPPA_PUSH_PC, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_PUSH_PC"},
-  {R_HPPA_PUSH_SYM, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_PUSH_SYM"},
-  {R_HPPA_PUSH_GOTOFF, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_PUSH_GOTOFF"},
-  {R_HPPA_PUSH_ABS_CALL, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_PUSH_ABS_CALL"},
-  {R_HPPA_PUSH_PCREL_CALL, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_PUSH_PCREL_CALL"},
-  {R_HPPA_PUSH_PLABEL, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_PUSH_PLABEL"},
-{R_HPPA_MAX, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_MAX"},
-{R_HPPA_MIN, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_MIN"},
-{R_HPPA_ADD, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_ADD"},
-{R_HPPA_SUB, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_SUB"},
-  {R_HPPA_MULT, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_MULT"},
-{R_HPPA_DIV, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_DIV"},
-{R_HPPA_MOD, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_MOD"},
-{R_HPPA_AND, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_AND"},
-  {R_HPPA_OR, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_OR"},
-{R_HPPA_XOR, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_XOR"},
-{R_HPPA_NOT, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_NOT"},
-  {R_HPPA_LSHIFT, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_LSHIFT"},
-  {R_HPPA_ARITH_RSHIFT, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_ARITH_RSHIFT"},
-  {R_HPPA_LOGIC_RSHIFT, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_LOGIC_RSHIFT"},
-{R_HPPA_EXPR_F, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_L"},
-  {R_HPPA_EXPR_L, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_EXPR_L"},
-  {R_HPPA_EXPR_R, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_EXPR_R"},
-  {R_HPPA_EXPR_LS, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_EXPR_LS"},
-  {R_HPPA_EXPR_RS, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_EXPR_RS"},
-  {R_HPPA_EXPR_LD, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_EXPR_LD"},
-  {R_HPPA_EXPR_RD, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_EXPR_RD"},
-  {R_HPPA_EXPR_LR, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_EXPR_LR"},
-  {R_HPPA_EXPR_RR, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_EXPR_RR"},
+  {R_HPPA_PUSH_CONST, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_PUSH_CONST"},
+  {R_HPPA_PUSH_PC, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_PUSH_PC"},
+  {R_HPPA_PUSH_SYM, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_PUSH_SYM"},
+  {R_HPPA_PUSH_GOTOFF, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_PUSH_GOTOFF"},
+  {R_HPPA_PUSH_ABS_CALL, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_PUSH_ABS_CALL"},
+  {R_HPPA_PUSH_PCREL_CALL, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_PUSH_PCREL_CALL"},
+  {R_HPPA_PUSH_PLABEL, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_PUSH_PLABEL"},
+{R_HPPA_MAX, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_MAX"},
+{R_HPPA_MIN, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_MIN"},
+{R_HPPA_ADD, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ADD"},
+{R_HPPA_SUB, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_SUB"},
+  {R_HPPA_MULT, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_MULT"},
+{R_HPPA_DIV, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_DIV"},
+{R_HPPA_MOD, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_MOD"},
+{R_HPPA_AND, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_AND"},
+  {R_HPPA_OR, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_OR"},
+{R_HPPA_XOR, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_XOR"},
+{R_HPPA_NOT, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_NOT"},
+  {R_HPPA_LSHIFT, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_LSHIFT"},
+  {R_HPPA_ARITH_RSHIFT, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ARITH_RSHIFT"},
+  {R_HPPA_LOGIC_RSHIFT, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_LOGIC_RSHIFT"},
+{R_HPPA_EXPR_F, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_L"},
+  {R_HPPA_EXPR_L, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_EXPR_L"},
+  {R_HPPA_EXPR_R, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_EXPR_R"},
+  {R_HPPA_EXPR_LS, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_EXPR_LS"},
+  {R_HPPA_EXPR_RS, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_EXPR_RS"},
+  {R_HPPA_EXPR_LD, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_EXPR_LD"},
+  {R_HPPA_EXPR_RD, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_EXPR_RD"},
+  {R_HPPA_EXPR_LR, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_EXPR_LR"},
+  {R_HPPA_EXPR_RR, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_EXPR_RR"},
 
-  {R_HPPA_EXPR_32, 0, 3, 32, false, 0, false, true, hppa_elf_reloc, "R_HPPA_EXPR_32"},
-  {R_HPPA_EXPR_21, 0, 3, 21, false, 0, false, true, hppa_elf_reloc, "R_HPPA_EXPR_21"},
-  {R_HPPA_EXPR_11, 0, 3, 11, false, 0, false, true, hppa_elf_reloc, "R_HPPA_EXPR_11"},
-  {R_HPPA_EXPR_14, 0, 3, 14, false, 0, false, true, hppa_elf_reloc, "R_HPPA_EXPR_14"},
-  {R_HPPA_EXPR_17, 0, 3, 17, false, 0, false, true, hppa_elf_reloc, "R_HPPA_EXPR_17"},
-  {R_HPPA_EXPR_12, 0, 3, 12, false, 0, false, true, hppa_elf_reloc, "R_HPPA_EXPR_12"},
-  {R_HPPA_UNIMPLEMENTED, 0, 0, 0, false, 0, false, false, NULL, "R_HPPA_UNIMPLEMENTED"},
+  {R_HPPA_EXPR_32, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_EXPR_32"},
+  {R_HPPA_EXPR_21, 0, 3, 21, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_EXPR_21"},
+  {R_HPPA_EXPR_11, 0, 3, 11, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_EXPR_11"},
+  {R_HPPA_EXPR_14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_EXPR_14"},
+  {R_HPPA_EXPR_17, 0, 3, 17, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_EXPR_17"},
+  {R_HPPA_EXPR_12, 0, 3, 12, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_EXPR_12"},
+  {R_HPPA_STUB_CALL_17, 0, 3, 17, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_STUB_CALL_17"},
+  {R_HPPA_UNIMPLEMENTED, 0, 0, 0, false, 0, complain_overflow_dont, NULL, "R_HPPA_UNIMPLEMENTED"},
 };
 
-static symext_chainS *symext_rootP = NULL;
-static symext_chainS *symext_lastP = NULL;
+static symext_chainS *symext_rootP;
+static symext_chainS *symext_lastP;
 
 static unsigned long
 DEFUN (hppa_elf_rebuild_insn, (abfd, insn, value, r_type, r_field, r_format),
@@ -301,7 +302,7 @@ DEFUN (hppa_elf_relocate_insn,
       if (pcrel)
 	sym_value -= address;
       sym_value = hppa_field_adjust (sym_value, constant_value, r_field);
-      return hppa_elf_rebuild_insn (abfd, insn, sym_value, r_type, r_format, r_format);
+      return hppa_elf_rebuild_insn (abfd, insn, sym_value, r_type, r_field, r_format);
 
     case COMICLR:
     case SUBI:			/* case SUBIO: */
@@ -407,32 +408,23 @@ DEFUN (hppa_elf_relocate_unwind_table,
     case R_HPPA_UNWIND_ENTRIES:
       for (i = 0; i < r_addend; i++, hit_data += 3 * sizeof (unsigned long))
 	{
-	  unsigned int fsize;
+	  unsigned int adjustment;
 	  start_offset = bfd_get_32 (abfd, hit_data);
 	  /* Stuff the symbol value into the first word */
 	  /* of the  unwind descriptor */
 	  bfd_put_32 (abfd, sym_value, hit_data);
+	  adjustment = sym_value - start_offset;
 
 	  hit_data += sizeof (unsigned long);
-	  end_offset = bfd_get_32 (abfd, hit_data);
-	  /* We could also compute the ending offset for */
-	  /* the 2nd word of the unwind entry by */
-	  /* retrieving the st_size field of the Elf_Sym */
-	  /* structure stored with this symbol.  We can */
-	  /* get it with: 	*/
-	  /* 	e = (elf_symbol_type *)symp	*/
-	  /*	fsize = e->internal_elf_sym.st_size */
-
-	  fsize = end_offset - start_offset;
-	  relocated_value = hppa_field_adjust (sym_value, fsize, r_field);
-	  bfd_put_32 (abfd, relocated_value, hit_data);
+	  end_offset = adjustment + bfd_get_32 (abfd, hit_data);
+	  bfd_put_32 (abfd, end_offset, hit_data);
 
 	  /* If this is not the last unwind entry, */
 	  /* adjust the symbol value. */
 	  if (i + 1 < r_addend)
 	    {
 	      start_offset = bfd_get_32 (abfd, hit_data + 3 * sizeof (unsigned long));
-	      sym_value += fsize + start_offset - end_offset;
+              sym_value = start_offset + adjustment;
 	    }
 	}
       break;
@@ -495,7 +487,7 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
      int format;
      int field;
 {
-#define UNDEFINED	hppa_elf_gen_reloc_error(base_type,format,field);
+#define UNDEFINED	hppa_elf_gen_reloc_error(base_type,format,field)
 
   elf32_hppa_reloc_type *finaltype;
   elf32_hppa_reloc_type **final_types;
@@ -1178,13 +1170,13 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 
 #undef final_type
 
-/* 12.4.4. Derive format from instruction	*/
+/* 12.4.4. Derive format from instruction
 
-/*	Given a machine instruction, this function determines its format.	*/
-/*	The format can be determined solely from looking at the first six	*/
-/*	bits (the major opcode) of the instruction.  Several major opcodes	*/
-/*	map to the same format.  Opcodes which do not map to a known format	*/
-/*	should probably be reported as an error.				*/
+	Given a machine instruction, this function determines its format.
+	The format can be determined solely from looking at the first six
+	bits (the major opcode) of the instruction.  Several major opcodes
+	map to the same format.  Opcodes which do not map to a known format
+	should probably be reported as an error.  */
 
 unsigned char
 hppa_elf_insn2fmt (type, insn)
@@ -1249,9 +1241,10 @@ hppa_elf_insn2fmt (type, insn)
 }
 
 /* this function is in charge of performing all the HP PA relocations */
-static long global_value = 0;
-static long GOT_value = 0;	/* XXX:  need to calculate this! For HPUX, GOT == DP */
-static asymbol *global_symbol = (asymbol *) NULL;
+static long global_value;
+static long GOT_value;	/* XXX:  need to calculate this! For HPUX, GOT == DP */
+static asymbol *global_symbol;
+static int global_sym_defined;
 
 static bfd_reloc_status_type
 DEFUN (hppa_elf_reloc, (abfd, reloc_entry, symbol_in, data, input_section, output_bfd),
@@ -1293,20 +1286,15 @@ DEFUN (hppa_elf_reloc, (abfd, reloc_entry, symbol_in, data, input_section, outpu
 
   /* compute value of $global$ if it is there. */
 
-  if (global_symbol == (asymbol *) NULL)
+  if (!global_sym_defined)
     {
-      struct elf_backend_data *bed
-      = (struct elf_backend_data *) abfd->xvec->backend_data;
-
-      if (bed && bed->global_sym)
+      if (global_symbol)
 	{
-	  asymbol *gsym = &bed->global_sym->symbol;
-	  global_value
-	    = gsym->value
-	    + gsym->section->output_section->vma
-	    + gsym->section->output_offset;
+	  global_value = (global_symbol->value
+			  + global_symbol->section->output_section->vma
+			  + global_symbol->section->output_offset);
 	  GOT_value = global_value;	/* XXX: For HP-UX, GOT==DP */
-	  global_symbol = gsym;
+	  global_sym_defined++;
 	}
     }
 
@@ -1618,6 +1606,21 @@ DEFUN (hppa_elf_reloc, (abfd, reloc_entry, symbol_in, data, input_section, outpu
       fprintf (stderr, "Unimplemented reloc type %d, in module %s\n",
 	       r_type, abfd->filename);
       return (bfd_reloc_notsupported);
+    case R_HPPA_STUB_CALL_17:
+      /* yes, a branch to a long branch stub. Change instruction to a BLE */
+      /* or BLE,N */
+      if ( *(unsigned *)hit_data & 2 )
+	insn = BLE_N_XXX_0_0;
+      else
+	insn = BLE_XXX_0_0;
+      bfd_put_32 (abfd, insn, hit_data);
+      r_type = R_HPPA_ABS_CALL_17;
+      r_pcrel = 0;
+      insn = hppa_elf_relocate_insn (abfd, input_section, insn, addr,
+				     symbol_in, sym_value, r_addend,
+				     r_type, r_format, r_field, r_pcrel);
+      break;
+      
     default:
       fprintf (stderr, "Relocation problem : ");
       fprintf (stderr, "Unrecognized reloc type %d, in module %s\n",
@@ -1632,107 +1635,11 @@ DEFUN (hppa_elf_reloc, (abfd, reloc_entry, symbol_in, data, input_section, outpu
 
 }
 
-struct elf_reloc_map
-  {
-    unsigned char bfd_reloc_val;
-    unsigned char elf_reloc_val;
-  };
-
-static CONST struct elf_reloc_map elf_hppa_reloc_map[] =
-{
-  {BFD_RELOC_NONE, R_HPPA_NONE,},
-  {BFD_RELOC_HPPA_32, R_HPPA_32,},
-  {BFD_RELOC_HPPA_11, R_HPPA_11,},
-  {BFD_RELOC_HPPA_14, R_HPPA_14,},
-  {BFD_RELOC_HPPA_17, R_HPPA_17,},
-  {BFD_RELOC_HPPA_L21, R_HPPA_L21,},
-  {BFD_RELOC_HPPA_R11, R_HPPA_R11,},
-  {BFD_RELOC_HPPA_R14, R_HPPA_R14,},
-  {BFD_RELOC_HPPA_R17, R_HPPA_R17,},
-  {BFD_RELOC_HPPA_LS21, R_HPPA_LS21,},
-  {BFD_RELOC_HPPA_RS11, R_HPPA_RS11,},
-  {BFD_RELOC_HPPA_RS14, R_HPPA_RS14,},
-  {BFD_RELOC_HPPA_RS17, R_HPPA_RS17,},
-  {BFD_RELOC_HPPA_LD21, R_HPPA_LD21,},
-  {BFD_RELOC_HPPA_RD11, R_HPPA_RD11,},
-  {BFD_RELOC_HPPA_RD14, R_HPPA_RD14,},
-  {BFD_RELOC_HPPA_RD17, R_HPPA_RD17,},
-  {BFD_RELOC_HPPA_LR21, R_HPPA_LR21,},
-  {BFD_RELOC_HPPA_RR14, R_HPPA_RR14,},
-  {BFD_RELOC_HPPA_RR17, R_HPPA_RR17,},
-  {BFD_RELOC_HPPA_GOTOFF_11, R_HPPA_GOTOFF_11,},
-  {BFD_RELOC_HPPA_GOTOFF_14, R_HPPA_GOTOFF_14,},
-  {BFD_RELOC_HPPA_GOTOFF_L21, R_HPPA_GOTOFF_L21,},
-  {BFD_RELOC_HPPA_GOTOFF_R11, R_HPPA_GOTOFF_R11,},
-  {BFD_RELOC_HPPA_GOTOFF_R14, R_HPPA_GOTOFF_R14,},
-  {BFD_RELOC_HPPA_GOTOFF_LS21, R_HPPA_GOTOFF_LS21,},
-  {BFD_RELOC_HPPA_GOTOFF_RS11, R_HPPA_GOTOFF_RS11,},
-  {BFD_RELOC_HPPA_GOTOFF_RS14, R_HPPA_GOTOFF_RS14,},
-  {BFD_RELOC_HPPA_GOTOFF_LD21, R_HPPA_GOTOFF_LD21,},
-  {BFD_RELOC_HPPA_GOTOFF_RD11, R_HPPA_GOTOFF_RD11,},
-  {BFD_RELOC_HPPA_GOTOFF_RD14, R_HPPA_GOTOFF_RD14,},
-  {BFD_RELOC_HPPA_GOTOFF_LR21, R_HPPA_GOTOFF_LR21,},
-  {BFD_RELOC_HPPA_GOTOFF_RR14, R_HPPA_GOTOFF_RR14,},
-  {BFD_RELOC_HPPA_ABS_CALL_11, R_HPPA_ABS_CALL_11,},
-  {BFD_RELOC_HPPA_ABS_CALL_14, R_HPPA_ABS_CALL_14,},
-  {BFD_RELOC_HPPA_ABS_CALL_17, R_HPPA_ABS_CALL_17,},
-  {BFD_RELOC_HPPA_ABS_CALL_L21, R_HPPA_ABS_CALL_L21,},
-  {BFD_RELOC_HPPA_ABS_CALL_R11, R_HPPA_ABS_CALL_R11,},
-  {BFD_RELOC_HPPA_ABS_CALL_R14, R_HPPA_ABS_CALL_R14,},
-  {BFD_RELOC_HPPA_ABS_CALL_R17, R_HPPA_ABS_CALL_R17,},
-  {BFD_RELOC_HPPA_ABS_CALL_LS21, R_HPPA_ABS_CALL_LS21,},
-  {BFD_RELOC_HPPA_ABS_CALL_RS11, R_HPPA_ABS_CALL_RS11,},
-  {BFD_RELOC_HPPA_ABS_CALL_RS14, R_HPPA_ABS_CALL_RS14,},
-  {BFD_RELOC_HPPA_ABS_CALL_RS17, R_HPPA_ABS_CALL_RS17,},
-  {BFD_RELOC_HPPA_ABS_CALL_LD21, R_HPPA_ABS_CALL_LD21,},
-  {BFD_RELOC_HPPA_ABS_CALL_RD11, R_HPPA_ABS_CALL_RD11,},
-  {BFD_RELOC_HPPA_ABS_CALL_RD14, R_HPPA_ABS_CALL_RD14,},
-  {BFD_RELOC_HPPA_ABS_CALL_RD17, R_HPPA_ABS_CALL_RD17,},
-  {BFD_RELOC_HPPA_ABS_CALL_LR21, R_HPPA_ABS_CALL_LR21,},
-  {BFD_RELOC_HPPA_ABS_CALL_RR14, R_HPPA_ABS_CALL_RR14,},
-  {BFD_RELOC_HPPA_ABS_CALL_RR17, R_HPPA_ABS_CALL_RR17,},
-  {BFD_RELOC_HPPA_PCREL_CALL_11, R_HPPA_PCREL_CALL_11,},
-  {BFD_RELOC_HPPA_PCREL_CALL_14, R_HPPA_PCREL_CALL_14,},
-  {BFD_RELOC_HPPA_PCREL_CALL_17, R_HPPA_PCREL_CALL_17,},
-  {BFD_RELOC_HPPA_PCREL_CALL_12, R_HPPA_PCREL_CALL_12,},
-  {BFD_RELOC_HPPA_PCREL_CALL_L21, R_HPPA_PCREL_CALL_L21,},
-  {BFD_RELOC_HPPA_PCREL_CALL_R11, R_HPPA_PCREL_CALL_R11,},
-  {BFD_RELOC_HPPA_PCREL_CALL_R14, R_HPPA_PCREL_CALL_R14,},
-  {BFD_RELOC_HPPA_PCREL_CALL_R17, R_HPPA_PCREL_CALL_R17,},
-  {BFD_RELOC_HPPA_PCREL_CALL_LS21, R_HPPA_PCREL_CALL_LS21,},
-  {BFD_RELOC_HPPA_PCREL_CALL_RS11, R_HPPA_PCREL_CALL_RS11,},
-  {BFD_RELOC_HPPA_PCREL_CALL_RS14, R_HPPA_PCREL_CALL_RS14,},
-  {BFD_RELOC_HPPA_PCREL_CALL_RS17, R_HPPA_PCREL_CALL_RS17,},
-  {BFD_RELOC_HPPA_PCREL_CALL_LD21, R_HPPA_PCREL_CALL_LD21,},
-  {BFD_RELOC_HPPA_PCREL_CALL_RD11, R_HPPA_PCREL_CALL_RD11,},
-  {BFD_RELOC_HPPA_PCREL_CALL_RD14, R_HPPA_PCREL_CALL_RD14,},
-  {BFD_RELOC_HPPA_PCREL_CALL_RD17, R_HPPA_PCREL_CALL_RD17,},
-  {BFD_RELOC_HPPA_PCREL_CALL_LR21, R_HPPA_PCREL_CALL_LR21,},
-  {BFD_RELOC_HPPA_PCREL_CALL_RR14, R_HPPA_PCREL_CALL_RR14,},
-  {BFD_RELOC_HPPA_PCREL_CALL_RR17, R_HPPA_PCREL_CALL_RR17,},
-  {BFD_RELOC_HPPA_PLABEL_32, R_HPPA_PLABEL_32,},
-  {BFD_RELOC_HPPA_PLABEL_11, R_HPPA_PLABEL_11,},
-  {BFD_RELOC_HPPA_PLABEL_14, R_HPPA_PLABEL_14,},
-  {BFD_RELOC_HPPA_PLABEL_L21, R_HPPA_PLABEL_L21,},
-  {BFD_RELOC_HPPA_PLABEL_R11, R_HPPA_PLABEL_R11,},
-  {BFD_RELOC_HPPA_PLABEL_R14, R_HPPA_PLABEL_R14,},
-  {BFD_RELOC_HPPA_DLT_32, R_HPPA_DLT_32,},
-  {BFD_RELOC_HPPA_DLT_11, R_HPPA_DLT_11,},
-  {BFD_RELOC_HPPA_DLT_14, R_HPPA_DLT_14,},
-  {BFD_RELOC_HPPA_DLT_L21, R_HPPA_DLT_L21,},
-  {BFD_RELOC_HPPA_DLT_R11, R_HPPA_DLT_R11,},
-  {BFD_RELOC_HPPA_DLT_R14, R_HPPA_DLT_R14,},
-  {BFD_RELOC_HPPA_UNWIND_ENTRY, R_HPPA_UNWIND_ENTRY,},
-  {BFD_RELOC_HPPA_UNWIND_ENTRIES, R_HPPA_UNWIND_ENTRIES,},
-};
-
 static reloc_howto_type *
 elf_hppa_reloc_type_lookup (arch, code)
      bfd_arch_info_type *arch;
      bfd_reloc_code_real_type code;
 {
-  int i;
-
   if ((int) code < (int) R_HPPA_UNIMPLEMENTED)
     {
       BFD_ASSERT ((int) elf_hppa_howto_table[(int) code].type == (int) code);
@@ -1783,8 +1690,14 @@ DEFUN (elf_hppa_tc_symbol, (abfd, symbolP, sym_idx),
     }
 }
 
-static symext_entryS *symextn_contents = NULL;
-static unsigned int symextn_contents_real_size = 0;
+/* Accessor function for the list of symbol extension records. */
+symext_chainS *elf32_hppa_get_symextn_chain()
+{
+  return symext_rootP;
+}
+
+static symext_entryS *symextn_contents;
+static unsigned int symextn_contents_real_size;
 
 void
 DEFUN (elf_hppa_tc_make_sections, (abfd, ignored),
@@ -1792,11 +1705,9 @@ DEFUN (elf_hppa_tc_make_sections, (abfd, ignored),
        PTR ignored)
 {
   symext_chainS *symextP;
-  symext_entryS *outbound_symexts;
   int size;
   int n;
   int i;
-  extern char *stub_section_contents;	/* forward declaration */
   void hppa_elf_stub_finish ();	/* forward declaration */
   asection *symextn_sec;
 
@@ -1894,6 +1805,9 @@ elf32_hppa_get_sym_extn (abfd, sym, type)
 	retval = (symext_entryS) esymP->tc_data.hppa_arg_reloc;
 	break;
       }
+    /* This should never happen.  */
+    default:
+      abort();
     }
   return retval;
 }
@@ -1919,7 +1833,7 @@ typedef struct Elf32_hppa_Stub_list_struct
     struct Elf32_hppa_Stub_list_struct *next;
   } Elf32_hppa_Stub_list;
 
-static Elf32_hppa_Stub_list *elf_hppa_stub_rootP = NULL;
+static Elf32_hppa_Stub_list *elf_hppa_stub_rootP;
 
 /* Locate the stub section information for the given bfd. */
 static Elf32_hppa_Stub_description *
@@ -1995,8 +1909,12 @@ add_stub (stub)
 
 #define	NO_ARG_RELOC	0
 #define R_TO_FR		1
-#define FR_TO_R		2
-#define	ARG_RELOC_ERR	3
+#define R01_TO_FR	2
+#define R23_TO_FR	3
+#define FR_TO_R		4
+#define FR_TO_R01	5
+#define FR_TO_R23	6
+#define	ARG_RELOC_ERR	7
 
 #define ARG0	0
 #define ARG1	1
@@ -2008,34 +1926,55 @@ add_stub (stub)
 #define AR_GR	1
 #define AR_FR	2
 #define AR_FU	3
+/* FP register in arg0/arg1.  This value can only appear in the arg0 location. */
+#define AR_DBL01	4
+/* FP register in arg2/arg3.  This value can only appear in the arg2 location. */
+#define AR_DBL23	5
+
+#define AR_WARN(type,loc) \
+  fprintf(stderr,"WARNING:  Illegal argument relocation: %s for %s\n", \
+	  reloc_type_strings[type],reloc_loc_strings[loc])
 
 static CONST char *CONST reloc_type_strings[] =
 {
-  "NONE", "GR->FR", "FR->GR", "ERROR"
+  "NONE", "GR->FR", "GR0,GR1->FR1", "GR2,GR3->FR3", "FR->GR", "FR->GR0,GR1", "FR->GR2,GR3", "ERROR"
 };
 
-static CONST char mismatches[4][4] =
-{				/* 	CALLEE NONE	CALLEE GR	CALLEE FR	CALLEE FU	*/
-  /* CALLER NONE	*/
- {NO_ARG_RELOC, NO_ARG_RELOC, NO_ARG_RELOC, NO_ARG_RELOC},
- /* CALLER GR	*/
- {NO_ARG_RELOC, NO_ARG_RELOC, R_TO_FR, R_TO_FR},
- /* CALLER FR	*/
- {NO_ARG_RELOC, FR_TO_R, NO_ARG_RELOC, NO_ARG_RELOC},
- /* CALLER FU	*/
- {NO_ARG_RELOC, FR_TO_R, NO_ARG_RELOC, NO_ARG_RELOC},
+static CONST char *CONST reloc_loc_strings[] =
+{
+  "ARG0", "ARG1", "ARG2", "ARG3", "RETVAL"
 };
 
-static CONST char retval_mismatches[4][4] =
-{				/* 	CALLEE NONE	CALLEE GR	CALLEE FR	CALLEE FU	*/
+static CONST char mismatches[6][6] =
+{				/* 	CALLEE NONE	CALLEE GR	CALLEE FR	CALLEE FU	CALLEE DBL01	CALLEE DBL23	*/
   /* CALLER NONE	*/
- {NO_ARG_RELOC, NO_ARG_RELOC, NO_ARG_RELOC, NO_ARG_RELOC},
+ {NO_ARG_RELOC, NO_ARG_RELOC, NO_ARG_RELOC, ARG_RELOC_ERR, NO_ARG_RELOC, NO_ARG_RELOC},
  /* CALLER GR	*/
- {NO_ARG_RELOC, NO_ARG_RELOC, R_TO_FR, R_TO_FR},
+ {NO_ARG_RELOC, NO_ARG_RELOC, R_TO_FR, ARG_RELOC_ERR, R01_TO_FR, ARG_RELOC_ERR},
  /* CALLER FR	*/
- {NO_ARG_RELOC, FR_TO_R, NO_ARG_RELOC, NO_ARG_RELOC},
+ {NO_ARG_RELOC, FR_TO_R, NO_ARG_RELOC, ARG_RELOC_ERR, ARG_RELOC_ERR},
  /* CALLER FU	*/
- {NO_ARG_RELOC, FR_TO_R, NO_ARG_RELOC, NO_ARG_RELOC},
+ {ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR},
+ /* CALLER DBL01	*/
+ {NO_ARG_RELOC, FR_TO_R01, NO_ARG_RELOC, ARG_RELOC_ERR, NO_ARG_RELOC, ARG_RELOC_ERR},
+ /* CALLER DBL23	*/
+ {NO_ARG_RELOC, FR_TO_R23, NO_ARG_RELOC, ARG_RELOC_ERR, ARG_RELOC_ERR, NO_ARG_RELOC},
+};
+
+static CONST char retval_mismatches[6][6] =
+{				/* 	CALLEE NONE	CALLEE GR	CALLEE FR	CALLEE FU	CALLEE DBL01	CALLEE DBL23	*/
+  /* CALLER NONE	*/
+ {NO_ARG_RELOC, NO_ARG_RELOC, NO_ARG_RELOC, ARG_RELOC_ERR, NO_ARG_RELOC, NO_ARG_RELOC},
+ /* CALLER GR	*/
+ {NO_ARG_RELOC, NO_ARG_RELOC, R_TO_FR, ARG_RELOC_ERR, R01_TO_FR, ARG_RELOC_ERR},
+ /* CALLER FR	*/
+ {NO_ARG_RELOC, FR_TO_R, NO_ARG_RELOC, ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR},
+ /* CALLER FU	*/
+ {ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR},
+ /* CALLER DBL01	*/
+ {NO_ARG_RELOC, FR_TO_R01, NO_ARG_RELOC, ARG_RELOC_ERR, NO_ARG_RELOC, ARG_RELOC_ERR},
+ /* CALLER DBL23	*/
+ {NO_ARG_RELOC, FR_TO_R23, NO_ARG_RELOC, ARG_RELOC_ERR, ARG_RELOC_ERR, NO_ARG_RELOC},
 };
 
 static int
@@ -2057,12 +1996,15 @@ type_of_mismatch (caller_bits, callee_bits, type)
 
 #define EXTRACT_ARBITS(ar,which)	((ar) >> (8-(which*2))) & 3
 
-#include "hppa_stubs.h"
-
 #define NEW_INSTRUCTION(desc,insn)	\
     *((desc)->stub_secp)++ = (insn);	\
     (desc)->real_size += sizeof(int);	\
     bfd_set_section_size((desc)->this_bfd,(desc)->stub_sec,(desc)->real_size);
+
+#define CURRENT_STUB_OFFSET(desc)	\
+  ((int)(desc)->stub_secp - (int)(desc)->stub_contents - 4)
+
+static boolean stubs_finished = false;
 
 void
 hppa_elf_stub_finish (output_bfd)
@@ -2072,6 +2014,9 @@ hppa_elf_stub_finish (output_bfd)
   Elf32_hppa_Stub_list *stub_list = elf_hppa_stub_rootP;
   /* All the stubs have been built.  Finish up building	*/
   /* stub section.  Apply relocations to the section.	*/
+
+  if ( stubs_finished )
+    return;
 
   for (; stub_list; stub_list = stub_list->next)
     {
@@ -2140,16 +2085,17 @@ hppa_elf_stub_finish (output_bfd)
 	  free (reloc_vector);
 	}
     }
+  stubs_finished = true;
 }
 
 void
 hppa_elf_stub_branch_reloc (stub_desc,	/* the bfd */
 			    output_bfd,	/* the output bfd */
-			    stub_sym,	/* the stub symbol */
+			    target_sym,	/* the target symbol */
 			    offset)	/* the offset within the stub buffer (pre-calculated) */
      Elf32_hppa_Stub_description *stub_desc;
      bfd *output_bfd;
-     asymbol *stub_sym;
+     asymbol *target_sym;
      int offset;
 {
   /* Allocate a new relocation entry. */
@@ -2179,8 +2125,61 @@ hppa_elf_stub_branch_reloc (stub_desc,	/* the bfd */
   relent.sym_ptr_ptr = (asymbol **) bfd_zalloc (stub_desc->this_bfd, sizeof (asymbol *));
   BFD_ASSERT (relent.sym_ptr_ptr);
 
-  relent.sym_ptr_ptr[0] = stub_sym;
-  relent.howto = bfd_reloc_type_lookup (stub_desc->this_bfd, R_HPPA_ABS_CALL_17);
+  relent.sym_ptr_ptr[0] = target_sym;
+  relent.howto = bfd_reloc_type_lookup (stub_desc->this_bfd, R_HPPA_PCREL_CALL_17);
+
+  /* Save it in the array of relocations for the stub section. */
+
+  memcpy (&stub_desc->stub_sec->relocation[stub_desc->stub_sec->reloc_count++],
+	  &relent,
+	  sizeof (arelent));
+}
+
+void
+hppa_elf_stub_reloc (stub_desc,	/* the bfd */
+		     output_bfd,	/* the output bfd */
+		     target_sym,	/* the target symbol */
+		     offset,	/* the offset within the stub buffer (pre-calculated) */
+		     type)
+Elf32_hppa_Stub_description *stub_desc;
+bfd *output_bfd;
+asymbol *target_sym;
+int offset;
+elf32_hppa_reloc_type type;
+{
+  /* Allocate a new relocation entry. */
+  arelent relent;
+  int size;
+  Elf_Internal_Shdr *rela_hdr;
+
+  if (stub_desc->relocs_allocated_cnt == stub_desc->stub_sec->reloc_count)
+    {
+      if (stub_desc->stub_sec->relocation == NULL)
+	{
+	  stub_desc->relocs_allocated_cnt = STUB_RELOC_INCR;
+	  size = sizeof (arelent) * stub_desc->relocs_allocated_cnt;
+	  stub_desc->stub_sec->relocation = (arelent *) zalloc (size);
+	}
+      else
+	{
+	  stub_desc->relocs_allocated_cnt += STUB_RELOC_INCR;
+	  size = sizeof (arelent) * stub_desc->relocs_allocated_cnt;
+	  stub_desc->stub_sec->relocation = (arelent *) realloc (stub_desc->stub_sec->relocation,
+								 size);
+	}
+    }
+
+  rela_hdr = &elf_section_data(stub_desc->stub_sec)->rel_hdr;
+  rela_hdr->sh_size += sizeof(Elf32_External_Rela);
+
+  /* Fill in the details. */
+  relent.address = offset;
+  relent.addend = 0;
+  relent.sym_ptr_ptr = (asymbol **) bfd_zalloc (stub_desc->this_bfd, sizeof (asymbol *));
+  BFD_ASSERT (relent.sym_ptr_ptr);
+
+  relent.sym_ptr_ptr[0] = target_sym;
+  relent.howto = bfd_reloc_type_lookup (stub_desc->this_bfd, type);
 
   /* Save it in the array of relocations for the stub section. */
 
@@ -2199,6 +2198,7 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, reloc_entry, stub_types)
   asection *stub_sec = bfd_get_section_by_name (abfd, ".hppa_linker_stubs");
   Elf32_hppa_Stub_description *stub_desc = find_stubs (abfd, stub_sec);
   asymbol *stub_sym = NULL;
+  asymbol *target_sym = reloc_entry->sym_ptr_ptr[0];
   asection *output_text_section = bfd_get_section_by_name (output_bfd, ".text");
   int i;
   char stub_sym_name[128];
@@ -2207,12 +2207,12 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, reloc_entry, stub_types)
     {
       BFD_ASSERT (stub_desc == NULL);
       stub_sec = bfd_make_section (abfd, ".hppa_linker_stubs");
-      bfd_set_section_flags (output_bfd,
+      bfd_set_section_flags (abfd,
 			     stub_sec,
 			     SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_CODE | SEC_READONLY);
       stub_sec->output_section = output_text_section->output_section;
       stub_sec->output_offset = 0;
-      bfd_set_section_alignment (output_bfd, stub_sec, 2);
+      bfd_set_section_alignment (abfd, stub_sec, 2);
       stub_desc = new_stub (abfd, stub_sec);
       add_stub (stub_desc);
     }
@@ -2247,7 +2247,7 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, reloc_entry, stub_types)
 	   "_stub_%s_%02d_%02d_%02d_%02d_%02d\000",
 	   reloc_entry->sym_ptr_ptr[0]->name,
   stub_types[0], stub_types[1], stub_types[2], stub_types[3], stub_types[4]);
-  stub_sym->name = bfd_zalloc (output_bfd, strlen (stub_sym_name) + 1);
+  stub_sym->name = bfd_zalloc (abfd, strlen (stub_sym_name) + 1);
   strcpy ((char *) stub_sym->name, stub_sym_name);
   stub_sym->value = (int) stub_desc->stub_secp - (int) stub_desc->stub_contents;
   stub_sym->section = stub_sec;
@@ -2275,62 +2275,128 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, reloc_entry, stub_types)
 	      switch (i)
 		{
 		case ARG0:
-		  NEW_INSTRUCTION (stub_desc, LDWS_M8SP_ARG0);
-		  NEW_INSTRUCTION (stub_desc, FSTWS_FARG0_M8SP);
+		  NEW_INSTRUCTION (stub_desc, STWS_ARG0_M8SP);
+		  NEW_INSTRUCTION (stub_desc, FLDWS_M8SP_FARG0);
 		  break;
 		case ARG1:
-		  NEW_INSTRUCTION (stub_desc, LDWS_M8SP_ARG1);
-		  NEW_INSTRUCTION (stub_desc, FSTWS_FARG1_M8SP);
+		  NEW_INSTRUCTION (stub_desc, STWS_ARG1_M8SP);
+		  NEW_INSTRUCTION (stub_desc, FLDWS_M8SP_FARG1);
 		  break;
 		case ARG2:
-		  NEW_INSTRUCTION (stub_desc, LDWS_M8SP_ARG1);
-		  NEW_INSTRUCTION (stub_desc, FSTWS_FARG1_M8SP);
+		  NEW_INSTRUCTION (stub_desc, STWS_ARG2_M8SP);
+		  NEW_INSTRUCTION (stub_desc, FLDWS_M8SP_FARG2);
 		  break;
 		case ARG3:
-		  NEW_INSTRUCTION (stub_desc, LDWS_M8SP_ARG1);
-		  NEW_INSTRUCTION (stub_desc, FSTWS_FARG1_M8SP);
+		  NEW_INSTRUCTION (stub_desc, STWS_ARG3_M8SP);
+		  NEW_INSTRUCTION (stub_desc, FLDWS_M8SP_FARG3);
 		  break;
 		}
+	      continue;
+
+	    case R01_TO_FR:
+	      switch (i)
+		{
+		case ARG0:
+		  NEW_INSTRUCTION(stub_desc, STWS_ARG0_M4SP);
+		  NEW_INSTRUCTION(stub_desc, STWS_ARG1_M8SP);
+		  NEW_INSTRUCTION(stub_desc, FLDDS_M8SP_FARG1);
 	      break;
+		default:
+		  AR_WARN(stub_types[i],i);
+		  break;
+		}
+	      continue;
+
+	    case R23_TO_FR:
+	      switch (i)
+		{
+		case ARG2:
+		  NEW_INSTRUCTION(stub_desc, STWS_ARG2_M4SP);
+		  NEW_INSTRUCTION(stub_desc, STWS_ARG3_M8SP);
+		  NEW_INSTRUCTION(stub_desc, FLDDS_M8SP_FARG3);
+		  break;
+		default:
+		  AR_WARN(stub_types[i],i);
+		  break;
+		}
+	      continue;
 
 	    case FR_TO_R:
 	      switch (i)
 		{
 		case ARG0:
-		  NEW_INSTRUCTION (stub_desc, FLDWS_M8SP_FARG0);
-		  NEW_INSTRUCTION (stub_desc, STWS_ARG0_M8SP);
+		  NEW_INSTRUCTION (stub_desc, FSTWS_FARG0_M8SP);
+		  NEW_INSTRUCTION (stub_desc, LDWS_M4SP_ARG0);
 		  break;
 		case ARG1:
-		  NEW_INSTRUCTION (stub_desc, FLDWS_M8SP_FARG1);
-		  NEW_INSTRUCTION (stub_desc, STWS_ARG1_M8SP);
+		  NEW_INSTRUCTION (stub_desc, FSTWS_FARG1_M8SP);
+		  NEW_INSTRUCTION (stub_desc, LDWS_M4SP_ARG1);
 		  break;
 		case ARG2:
-		  NEW_INSTRUCTION (stub_desc, FLDWS_M8SP_FARG1);
-		  NEW_INSTRUCTION (stub_desc, STWS_ARG1_M8SP);
+		  NEW_INSTRUCTION (stub_desc, FSTWS_FARG2_M8SP);
+		  NEW_INSTRUCTION (stub_desc, LDWS_M4SP_ARG2);
 		  break;
 		case ARG3:
-		  NEW_INSTRUCTION (stub_desc, FLDWS_M8SP_FARG1);
-		  NEW_INSTRUCTION (stub_desc, STWS_ARG1_M8SP);
+		  NEW_INSTRUCTION (stub_desc, FSTWS_FARG3_M8SP);
+		  NEW_INSTRUCTION (stub_desc, LDWS_M4SP_ARG3);
 		  break;
 		}
-	      break;
+	      continue;
 
+	    case FR_TO_R01:
+	      switch (i)
+		{
+		case ARG0:
+		  NEW_INSTRUCTION(stub_desc, FSTDS_FARG1_M8SP);
+		  NEW_INSTRUCTION(stub_desc, LDWS_M4SP_ARG0);
+		  NEW_INSTRUCTION(stub_desc, LDWS_M8SP_ARG1);
+	      break;
+		default:
+		  AR_WARN(stub_types[i],i);
+		  break;
+		}
+	      continue;
+
+	    case FR_TO_R23:
+	      switch (i)
+		{
+		case ARG2:
+		  NEW_INSTRUCTION(stub_desc, FSTDS_FARG3_M8SP);
+		  NEW_INSTRUCTION(stub_desc, LDWS_M4SP_ARG2);
+		  NEW_INSTRUCTION(stub_desc, LDWS_M8SP_ARG3);
+		  break;
+		default:
+		  AR_WARN(stub_types[i],i);
+		  break;
 	    }
+	      continue;
+	      
 	}
     }
+    }
+
+  NEW_INSTRUCTION (stub_desc, ADDI_M8_SP);
 
   /* generate the branch to the target routine */
   NEW_INSTRUCTION (stub_desc, STW_RP_M8SP);	/* First, save the return address */
-  NEW_INSTRUCTION (stub_desc, BL_XXX_RP);	/* set up a branch to the function */
 
-  /* Fix the branch to the function.  We can do this with a relocation. */
-
-  hppa_elf_stub_branch_reloc (stub_desc,
-			      output_bfd,	/* the output bfd */
-			      stub_sym,	/* the stub symbol */
-	   (int) stub_desc->stub_secp - (int) stub_desc->stub_contents - 4);	/* the offset within the stub buffer */
-
-  NEW_INSTRUCTION (stub_desc, NOP);
+  /* Branch to the target function. */
+  /* (Make it a long call, so we do not */
+  /* have to worry about generating a */
+  /* long call stub.)	*/
+  NEW_INSTRUCTION(stub_desc, LDIL_XXX_31);
+  hppa_elf_stub_reloc (stub_desc,
+		       abfd,	/* the output bfd */
+		       target_sym,	/* the target symbol */
+		       CURRENT_STUB_OFFSET(stub_desc),	/* offset in stub buffer */
+		       R_HPPA_L21);
+  NEW_INSTRUCTION(stub_desc,BLE_XXX_0_31);
+  hppa_elf_stub_reloc (stub_desc,
+		       abfd,	/* the output bfd */
+		       target_sym,	/* the target symbol */
+		       CURRENT_STUB_OFFSET(stub_desc),	/* offset in stub buffer */
+		       R_HPPA_ABS_CALL_R17);
+  NEW_INSTRUCTION(stub_desc,COPY_31_2);
 
   /* generate the code to move the return value around */
   i = RETVAL;
@@ -2340,13 +2406,13 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, reloc_entry, stub_types)
       switch (stub_types[i])
 	{
 	case R_TO_FR:
-	  NEW_INSTRUCTION (stub_desc, LDWS_M8SP_RET0);
-	  NEW_INSTRUCTION (stub_desc, FSTWS_FRET0_M8SP);
+	  NEW_INSTRUCTION (stub_desc, STWS_RET0_M8SP);
+	  NEW_INSTRUCTION (stub_desc, FLDWS_M8SP_FRET0);
 	  break;
 
 	case FR_TO_R:
-	  NEW_INSTRUCTION (stub_desc, FLDWS_M8SP_FRET0);
-	  NEW_INSTRUCTION (stub_desc, STWS_RET0_M8SP);
+	  NEW_INSTRUCTION (stub_desc, FSTWS_FRET0_M8SP);
+	  NEW_INSTRUCTION (stub_desc, LDWS_M4SP_RET0);
 	  break;
 	}
     }
@@ -2354,7 +2420,6 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, reloc_entry, stub_types)
   /* generate the ending common section for all stubs */
 
   NEW_INSTRUCTION (stub_desc, LDW_M8SP_RP);	/* restore return address */
-  NEW_INSTRUCTION (stub_desc, SUBI_8_SP);
 
   /* XXX: can we assume this is a save return? */
   NEW_INSTRUCTION (stub_desc, BV_N_0RP);
@@ -2368,7 +2433,6 @@ hppa_elf_arg_reloc_needed_p (abfd, reloc_entry, stub_types)
      arelent *reloc_entry;
      int stub_types[5];
 {
-  int i;
   /* If the symbol is still undefined, there is	*/
   /* no way to know if a stub is required.	*/
 
@@ -2407,22 +2471,22 @@ hppa_elf_arg_reloc_needed_p (abfd, reloc_entry, stub_types)
 
 	  if (caller_loc[ARG0] == AR_FU || caller_loc[ARG1] == AR_FU)
 	    {
-	      caller_loc[ARG0] = AR_FU;
+	      caller_loc[ARG0] = AR_DBL01;
 	      caller_loc[ARG1] = AR_NO;
 	    }
 	  if (caller_loc[ARG2] == AR_FU || caller_loc[ARG3] == AR_FU)
 	    {
-	      caller_loc[ARG2] = AR_FU;
+	      caller_loc[ARG2] = AR_DBL23;
 	      caller_loc[ARG3] = AR_NO;
 	    }
 	  if (callee_loc[ARG0] == AR_FU || callee_loc[ARG1] == AR_FU)
 	    {
-	      callee_loc[ARG0] = AR_FU;
+	      callee_loc[ARG0] = AR_DBL01;
 	      callee_loc[ARG1] = AR_NO;
 	    }
 	  if (callee_loc[ARG2] == AR_FU || callee_loc[ARG3] == AR_FU)
 	    {
-	      callee_loc[ARG2] = AR_FU;
+	      callee_loc[ARG2] = AR_DBL23;
 	      callee_loc[ARG3] = AR_NO;
 	    }
 
@@ -2432,10 +2496,7 @@ hppa_elf_arg_reloc_needed_p (abfd, reloc_entry, stub_types)
 	  stub_types[ARG3] = type_of_mismatch (caller_loc[ARG3], callee_loc[ARG3], ARGUMENTS);
 	  stub_types[RETVAL] = type_of_mismatch (caller_loc[RETVAL], callee_loc[RETVAL], RETURN_VALUE);
 
-	  /* XXX for now, just report a */
-	  /* warning */
-
-	  /* But, when we start building stubs, here are the steps involved: */
+	  /* Steps involved in building stubs: */
 	  /* 1. Determine what argument registers need to relocated.  This */
 	  /* 	step is already done here. */
 	  /* 2. Build the appropriate stub in the .hppa_linker_stubs section. */
@@ -2448,7 +2509,7 @@ hppa_elf_arg_reloc_needed_p (abfd, reloc_entry, stub_types)
 	  /* 4. Change the instruction of the original branch into a branch to */
 	  /* 	the stub routine. */
 	  /* 5. Build a relocation entry for the instruction of the original */
-	  /*	branch to be R_HPPA_ABS_CALL to the stub routine. */
+	  /*	branch to be R_HPPA_PCREL_CALL to the stub routine. */
 
 
 	  if (stub_types[0]
@@ -2483,10 +2544,243 @@ hppa_elf_arg_reloc_needed_p (abfd, reloc_entry, stub_types)
 }
 
 asymbol *
-hppa_elf_stub_check (abfd, output_bfd, reloc_entry)
+hppa_elf_build_long_branch_stub (abfd, output_bfd, reloc_entry, symbol, data)
      bfd *abfd;
      bfd *output_bfd;
      arelent *reloc_entry;
+     asymbol *symbol;
+     unsigned *data;
+{
+  asection *stub_sec = bfd_get_section_by_name (abfd, ".hppa_linker_stubs");
+  Elf32_hppa_Stub_description *stub_desc = find_stubs (abfd, stub_sec);
+  asymbol *stub_sym = NULL;
+  asymbol *target_sym = reloc_entry->sym_ptr_ptr[0];
+  asymbol *return_sym = NULL;
+  asection *output_text_section = bfd_get_section_by_name (output_bfd, ".text");
+  char stub_sym_name[128];
+  int milli = false;
+
+  if (!stub_sec)
+    {
+      BFD_ASSERT (stub_desc == NULL);
+      stub_sec = bfd_make_section (abfd, ".hppa_linker_stubs");
+      bfd_set_section_flags (abfd,
+			     stub_sec,
+			     SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_CODE | SEC_READONLY);
+      stub_sec->output_section = output_text_section->output_section;
+      stub_sec->output_offset = 0;
+      /* set up the ELF section header for this new section. */
+      /* This is basically the same processing as elf_make_sections() */
+      /* (elf_make_sections() is static so it is not accessible from */
+      /* here.) */
+
+      {
+	Elf_Internal_Shdr *this_hdr;
+	this_hdr = &elf_section_data (stub_sec)->this_hdr;
+
+	this_hdr->sh_addr = stub_sec->vma;
+	this_hdr->sh_size = stub_sec->_raw_size;
+	/* contents already set by elf_set_section_contents */
+
+	if (stub_sec->flags & SEC_RELOC)
+	  {
+	    /* emit a reloc section, and thus strtab and symtab... */
+	    Elf_Internal_Shdr *rela_hdr;
+	    int use_rela_p = get_elf_backend_data (abfd)->use_rela_p;
+
+	    rela_hdr = &elf_section_data (stub_sec)->rel_hdr;
+
+	    /* orelocation has the data, reloc_count has the count... */
+	    if (use_rela_p)
+	      {
+		rela_hdr->sh_type = SHT_RELA;
+		rela_hdr->sh_entsize = sizeof (Elf32_External_Rela);
+	      }
+	    else
+	      /* REL relocations */
+	      {
+		rela_hdr->sh_type = SHT_REL;
+		rela_hdr->sh_entsize = sizeof (Elf32_External_Rel);
+	      }
+	    rela_hdr->sh_flags = 0;
+	    rela_hdr->sh_addr = 0;
+	    rela_hdr->sh_offset = 0;
+	    rela_hdr->sh_addralign = 0;
+	    rela_hdr->size = 0;
+	  }
+	if (stub_sec->flags & SEC_ALLOC)
+	  {
+	    this_hdr->sh_flags |= SHF_ALLOC;
+	    if (stub_sec->flags & SEC_LOAD)
+	      {
+		/* @@ Do something with sh_type? */
+	      }
+	  }
+	if (!(stub_sec->flags & SEC_READONLY))
+	  this_hdr->sh_flags |= SHF_WRITE;
+
+	if (stub_sec->flags & SEC_CODE)
+	  this_hdr->sh_flags |= SHF_EXECINSTR;
+      }
+
+      bfd_set_section_alignment (abfd, stub_sec, 2);
+      stub_desc = new_stub (abfd, stub_sec);
+      add_stub (stub_desc);
+    }
+
+  if (!stub_desc)
+    {
+      stub_desc = new_stub (abfd, stub_sec);
+      add_stub (stub_desc);
+    }
+
+  /* allocate some space to write the stub */
+
+  if (!stub_desc->stub_contents)
+    {
+      stub_desc->allocated_size = STUB_BUFFER_INCR;
+      stub_desc->stub_contents = (char *) malloc (STUB_BUFFER_INCR);
+    }
+  else if ((stub_desc->allocated_size - stub_desc->real_size) < STUB_MAX_SIZE)
+    {
+      stub_desc->allocated_size = stub_desc->allocated_size + STUB_BUFFER_INCR;
+      stub_desc->stub_contents = (char *) realloc (stub_desc->stub_contents,
+						 stub_desc->allocated_size);
+    }
+
+  stub_desc->stub_secp = (int *) (stub_desc->stub_contents + stub_desc->real_size);
+
+  /* create a symbol to point to this stub */
+  stub_sym = bfd_make_empty_symbol (abfd);
+  sprintf (stub_sym_name,
+	   "_lb_stub_%s\000", reloc_entry->sym_ptr_ptr[0]->name);
+  stub_sym->name = bfd_zalloc (abfd, strlen (stub_sym_name) + 1);
+  strcpy ((char *) stub_sym->name, stub_sym_name);
+  stub_sym->value = (int) stub_desc->stub_secp - (int) stub_desc->stub_contents;
+  stub_sym->section = stub_sec;
+  stub_sym->flags = BSF_LOCAL | BSF_FUNCTION;
+
+  /* create a symbol to point to the return location */
+  return_sym = bfd_make_empty_symbol (abfd);
+  sprintf (stub_sym_name,
+	   "_lb_rtn_%s\000", reloc_entry->sym_ptr_ptr[0]->name);
+  return_sym->name = bfd_zalloc (abfd, strlen (stub_sym_name) + 1);
+  strcpy ((char *) return_sym->name, stub_sym_name);
+  return_sym->value = reloc_entry->address + 8;
+  return_sym->section = stub_sec;
+  return_sym->flags = BSF_LOCAL | BSF_FUNCTION;
+
+  /* redirect the original relocation from the old symbol (a function) */
+  /* to the stub (the stub calls the function).	*/
+  /* XXX do we need to change the relocation type? */
+  reloc_entry->sym_ptr_ptr = (asymbol **) bfd_zalloc (stub_desc->this_bfd, sizeof (asymbol *));
+  reloc_entry->sym_ptr_ptr[0] = stub_sym;
+  reloc_entry->howto = bfd_reloc_type_lookup (abfd, R_HPPA_STUB_CALL_17);
+
+  /* Build the stub */
+
+  /* A millicode call? */
+  /* If so, the return address comes in on r31 rather than r2 (rp) so a	*/	
+  /* slightly different code sequence is needed.	*/
+  if ( ((*data & 0x03e00000) >> 21) == 31 )
+    milli = true;
+
+  /* 1. initialization for the call. */
+
+  NEW_INSTRUCTION(stub_desc, LDSID_31_RP);
+  NEW_INSTRUCTION(stub_desc, MTSP_RP_SR0);
+  if ( !milli )
+    {
+      NEW_INSTRUCTION(stub_desc, COPY_31_2);
+
+      NEW_INSTRUCTION(stub_desc, LDIL_XXX_31);
+      hppa_elf_stub_reloc (stub_desc,
+			   abfd,	/* the output bfd */
+			   target_sym,	/* the target symbol */
+			   CURRENT_STUB_OFFSET(stub_desc),	/* offset in stub buffer */
+			   R_HPPA_L21);
+
+      /* 2. Make the call. */
+
+      NEW_INSTRUCTION(stub_desc,BE_N_XXX_0_31);
+      hppa_elf_stub_reloc (stub_desc,
+			   abfd,	/* the output bfd */
+			   target_sym,	/* the target symbol */
+			   CURRENT_STUB_OFFSET(stub_desc),	/* offset in stub buffer */
+			   R_HPPA_ABS_CALL_R17);
+      /* 3. Branch back to the original location.		*/
+      /*    (accomplished with the COPY_31_2 instruction)	*/
+    }
+  else
+    {
+      NEW_INSTRUCTION(stub_desc, STW_31_M24SP);
+      NEW_INSTRUCTION(stub_desc, LDIL_XXX_RP);
+      hppa_elf_stub_reloc (stub_desc,
+			   abfd,	/* the output bfd */
+			   target_sym,	/* the target symbol */
+			   CURRENT_STUB_OFFSET(stub_desc),	/* offset in stub buffer */
+			   R_HPPA_L21);
+
+      /* 2. Make the call. */
+
+      NEW_INSTRUCTION(stub_desc,BLE_XXX_0_RP);
+      hppa_elf_stub_reloc (stub_desc,
+			   abfd,	/* the output bfd */
+			   target_sym,	/* the target symbol */
+			   CURRENT_STUB_OFFSET(stub_desc),	/* offset in stub buffer */
+			   R_HPPA_ABS_CALL_R17);
+      NEW_INSTRUCTION(stub_desc,COPY_31_2);
+
+      /* 3. Branch back to the original location.		*/
+      NEW_INSTRUCTION(stub_desc, LDW_M24SP_RP);
+      NEW_INSTRUCTION(stub_desc, BV_N_0RP);
+    }
+
+  return stub_sym;
+}
+
+int
+hppa_elf_long_branch_needed_p (abfd, asec, reloc_entry, symbol, insn)
+     bfd *abfd;
+     asection *asec;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     unsigned insn;
+{
+  long sym_value = get_symbol_value(symbol);
+  int fmt = reloc_entry->howto->bitsize;
+  unsigned char op = get_opcode(insn);
+  unsigned raddr;
+
+#define too_far(val,num_bits)	((int)(val) > (1<<(num_bits))-1) || ((int)(val) < (-1<<(num_bits)))
+
+  BFD_ASSERT(fmt == hppa_elf_insn2fmt(reloc_entry->howto->type,insn));
+
+  switch (op)
+    {
+    case BL:
+      raddr =
+	reloc_entry->address + asec->output_offset + asec->output_section->vma;
+      if ( too_far(sym_value - raddr,fmt+1) )
+	{
+#ifdef DETECT_STUBS
+	  fprintf(stderr,"long_branch needed on BL insn: abfd=%s,sym=%s,distance=0x%x\n",abfd->filename,symbol->name,sym_value - reloc_entry->address);
+#endif
+	  return 1;
+	}
+      break;
+    }  
+  return 0;
+}
+
+asymbol *
+hppa_elf_stub_check (abfd, output_bfd, input_section, reloc_entry, symbol, hit_data)
+     bfd *abfd;
+     bfd *output_bfd;
+     asection *input_section;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     bfd_byte *hit_data;
 {
   int stub_types[5];
 
@@ -2533,7 +2827,15 @@ hppa_elf_stub_check (abfd, output_bfd, reloc_entry)
       if (hppa_elf_arg_reloc_needed_p (abfd, reloc_entry, stub_types))
 	{
 	  /* generate a stub */
-	  return hppa_elf_build_arg_reloc_stub (abfd, output_bfd, reloc_entry, stub_types);
+	  return hppa_elf_build_arg_reloc_stub (abfd, output_bfd, reloc_entry,
+						stub_types);
+	}
+      if (hppa_elf_long_branch_needed_p (abfd, input_section, reloc_entry, symbol,*(unsigned *)hit_data))
+	{
+	  /* generate a stub */
+	  return hppa_elf_build_long_branch_stub (abfd, output_bfd,
+						  reloc_entry, symbol,
+						  (unsigned *)hit_data);
 	}
       break;
 
@@ -2547,7 +2849,8 @@ hppa_elf_stub_check (abfd, output_bfd, reloc_entry)
 #define STUB_SYM_BUFFER_INC	5
 
 asymbol *
-hppa_look_for_stubs_in_section (abfd, output_bfd, asec, syms, new_sym_cnt)
+hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec, syms, new_sym_cnt)
+     bfd *stub_bfd;
      bfd *abfd;
      bfd *output_bfd;
      asection *asec;
@@ -2628,13 +2931,44 @@ hppa_look_for_stubs_in_section (abfd, output_bfd, asec, syms, new_sym_cnt)
 		{
 		  /* generate a stub */
 		  /* keep track of the new symbol */
+
+		  asymbol *r;
+
 		  if (new_cnt == new_max)
 		    {
 		      new_max += STUB_SYM_BUFFER_INC;
 		      new_syms = (asymbol *) realloc (new_syms, new_max * sizeof (asymbol));
 		    }
-		  new_syms[new_cnt++] = *(hppa_elf_build_arg_reloc_stub (abfd, output_bfd, rle, stub_types));
+		  r = hppa_elf_build_arg_reloc_stub (stub_bfd, output_bfd, rle,
+						     stub_types);
+		  new_syms[new_cnt++] = *r;
 		}
+	      /* We need to retrieve the section contents to check for */
+	      /* long branch stubs. */
+	      {
+		unsigned insn;
+
+		bfd_get_section_contents(abfd, asec, &insn, rle->address, sizeof(insn));
+		if (hppa_elf_long_branch_needed_p (abfd, asec, rle, rle->sym_ptr_ptr[0], insn))
+		  {
+		    /* generate a stub */
+		    /* keep track of the new symbol */
+
+		    asymbol *r;
+
+		    if (new_cnt == new_max)
+		      {
+			new_max += STUB_SYM_BUFFER_INC;
+			new_syms = (asymbol *) realloc (new_syms, new_max * sizeof (asymbol));
+		      }
+		    r = hppa_elf_build_long_branch_stub (stub_bfd,
+							 output_bfd,
+							 rle,
+							 rle->sym_ptr_ptr[0],
+							 &insn);
+		    new_syms[new_cnt++] = *r;
+		  }
+	      }
 	      break;
 
 	    default:
@@ -2647,12 +2981,37 @@ hppa_look_for_stubs_in_section (abfd, output_bfd, asec, syms, new_sym_cnt)
   return new_syms;
 }
 
-int
-hppa_look_for_stubs (abfd, output_bfd)
-     bfd *abfd;
-     bfd *output_bfd;
+
+char *linker_stubs = NULL;
+int linker_stubs_size = 0;
+int linker_stubs_max_size = 0;
+#define STUB_ALLOC_INCR	100
+
+boolean
+DEFUN (hppa_elf_set_section_contents, (abfd, section, location, offset, count),
+       bfd * abfd AND
+       sec_ptr section AND
+       PTR location AND
+       file_ptr offset AND
+       bfd_size_type count)
 {
-  /* bfd_map_over_sections(abfd,hppa_look_for_stubs_in_section,(PTR)output_bfd,NULL); */
+  if ( strcmp(section->name, ".hppa_linker_stubs") == 0 )
+    {
+      if ( linker_stubs_max_size < offset + count )
+	{
+	  linker_stubs_max_size = offset + count + STUB_ALLOC_INCR;
+	  linker_stubs = (char *)realloc(linker_stubs, linker_stubs_max_size);
+	}
+
+      if ( offset + count > linker_stubs_size )
+	linker_stubs_size = offset + count;
+
+      memcpy(linker_stubs + offset,location,count);
+      return (true);
+    }
+  else
+    return bfd_elf32_set_section_contents (abfd, section, location,
+					   offset, count);
 }
 
 boolean
@@ -2703,8 +3062,280 @@ DEFUN (elf_info_to_howto, (abfd, cache_ptr, dst),
        arelent * cache_ptr AND
        Elf32_Internal_Rela * dst)
 {
-  abort ();
+  BFD_ASSERT (ELF32_R_TYPE(dst->r_info) < (unsigned int) R_HPPA_UNIMPLEMENTED);
+  cache_ptr->howto = &elf_hppa_howto_table[ELF32_R_TYPE(dst->r_info)];
 }
+
+static void
+DEFUN (elf32_hppa_backend_symbol_processing, (abfd, sym),
+       bfd * abfd AND
+       asymbol * sym)
+{
+  /* Is this a definition of $global$?  If so, keep it because it will be
+    needed if any relocations are performed.  */
+
+  if (!strcmp (sym->name, "$global$")
+      && sym->section != &bfd_und_section)
+    {
+      global_symbol = sym;
+    }
+}
+
+#define elf_backend_symbol_processing	elf32_hppa_backend_symbol_processing
+
+struct elf32_hppa_symextn_map_struct
+{
+  int old_index;
+  bfd *bfd;
+  asymbol *sym;
+  int new_index;
+};
+
+static struct elf32_hppa_symextn_map_struct *elf32_hppa_symextn_map;
+static int elf32_hppa_symextn_map_size;
+
+static boolean
+DEFUN (elf32_hppa_backend_symbol_table_processing, (abfd, esyms,symcnt),
+       bfd 		* abfd AND
+       elf32_symbol_type *esyms AND
+       int		symcnt)
+{
+  Elf32_Internal_Shdr *symextn_hdr = bfd_elf_find_section (abfd, SYMEXTN_SECTION_NAME);
+  int i;
+  int current_sym_idx = 0;
+
+  /* If the symbol extension section does not exist, all the symbol */
+  /* all the symbol extension information is assumed to be zero.	*/
+
+  if ( symextn_hdr == NULL )
+    {
+      for ( i = 0; i < symcnt; i++ )
+	{
+	  esyms[i].tc_data.hppa_arg_reloc = 0;
+	}
+      return (true);
+    }
+
+  /* allocate a buffer of the appropriate size for the symextn section */
+
+  symextn_hdr->contents = bfd_zalloc(abfd,symextn_hdr->sh_size);
+  symextn_hdr->size = symextn_hdr->sh_size;
+	
+  /* read in the symextn section */
+
+  if (bfd_seek (abfd, symextn_hdr->sh_offset, SEEK_SET) == -1)
+    {
+      bfd_error = system_call_error;
+      return (false);
+    }
+  if (bfd_read ((PTR) symextn_hdr->contents, 1, symextn_hdr->size, abfd) 
+      != symextn_hdr->size)
+    {
+      free ((PTR)symextn_hdr->contents);
+      bfd_error = system_call_error;
+      return (false);
+    }	
+
+  /* parse the entries, updating the symtab entries as we go */
+
+  for ( i = 0; i < symextn_hdr->size / sizeof(symext_entryS); i++ )
+    {
+      symext_entryS *seP = ((symext_entryS *)symextn_hdr->contents) + i;
+      int se_value = ELF32_HPPA_SX_VAL(*seP);
+      int se_type = ELF32_HPPA_SX_TYPE(*seP);
+
+      switch ( se_type )
+	{
+	case HPPA_SXT_NULL:
+	  break;
+
+	case HPPA_SXT_SYMNDX:
+	  if ( se_value >= symcnt )
+	    {
+	      bfd_error = bad_value;
+	      bfd_perror("elf32_hppa_backend_symbol_table_processing -- symbol index");
+	      return (false);
+	    }
+	  current_sym_idx = se_value - 1;
+	  break;
+
+	case HPPA_SXT_ARG_RELOC:
+	  esyms[current_sym_idx].tc_data.hppa_arg_reloc = se_value;
+	  break;
+
+	default:
+	  bfd_error = bad_value;
+	  bfd_perror("elf32_hppa_backend_symbol_table_processing");
+	  return (false);
+	}
+    }
+  return (true);
+}
+
+#define elf_backend_symbol_table_processing	elf32_hppa_backend_symbol_table_processing
+
+static boolean
+DEFUN (elf32_hppa_backend_section_processing, (abfd, secthdr),
+       bfd 		* abfd AND
+       Elf32_Internal_Shdr *secthdr)
+{
+  int i,j,k;
+
+  if ( secthdr->sh_type == SHT_HPPA_SYMEXTN )
+    {
+      for ( i = 0; i < secthdr->size / sizeof(symext_entryS); i++ )
+	{
+	  symext_entryS *seP = ((symext_entryS *)secthdr->contents) + i;
+	  int se_value = ELF32_HPPA_SX_VAL(*seP);
+	  int se_type = ELF32_HPPA_SX_TYPE(*seP);
+	  
+	  switch ( se_type )
+	    {
+	    case HPPA_SXT_NULL:
+	      break;
+	      
+	    case HPPA_SXT_SYMNDX:
+	      for ( j = 0; j < abfd->symcount; j++ )
+		{
+		  /* locate the map entry for this symbol, if there is one. */
+		  /* modify the symbol extension section symbol index entry */
+		  /* to reflect the new symbol table index */
+		  
+		  for ( k = 0; k < elf32_hppa_symextn_map_size; k++ )
+		    {
+		      if ( elf32_hppa_symextn_map[k].old_index == se_value
+			  && elf32_hppa_symextn_map[k].bfd == abfd->outsymbols[j]->the_bfd
+			  && elf32_hppa_symextn_map[k].sym == abfd->outsymbols[j] )
+			{
+			  bfd_put_32(abfd,
+				     ELF32_HPPA_SX_WORD (HPPA_SXT_SYMNDX, j),
+				     (char *)seP);
+			}
+		    }
+		}
+	      break;
+	      
+	    case HPPA_SXT_ARG_RELOC:
+	      break;
+	      
+	    default:
+	      bfd_error = bad_value;
+	      bfd_perror("elf32_hppa_backend_section_processing");
+	      return (false);
+	    }
+	}
+    }
+  return true;
+}
+
+#define elf_backend_section_processing	elf32_hppa_backend_section_processing
+
+static boolean
+DEFUN (elf32_hppa_backend_section_from_shdr, (abfd, hdr, name),
+       bfd 		* abfd AND
+       Elf32_Internal_Shdr *hdr AND
+       char		* name)
+{
+  asection *newsect;
+
+  if ( hdr->sh_type == SHT_HPPA_SYMEXTN )
+    {
+      BFD_ASSERT ( strcmp(name,".hppa_symextn") == 0 );
+
+      /* Bits that get saved. This one is real. */
+      if (!hdr->rawdata)
+	{
+	  newsect = bfd_make_section (abfd, name);
+	  if (newsect != NULL)
+	    {
+	      newsect->vma = hdr->sh_addr;
+	      newsect->_raw_size = hdr->sh_size;
+	      newsect->filepos = hdr->sh_offset;	/* so we can read back the bits */
+	      newsect->flags |= SEC_HAS_CONTENTS;
+	      newsect->alignment_power = hdr->sh_addralign;
+
+	      if (hdr->sh_flags & SHF_ALLOC)
+		{
+		  newsect->flags |= SEC_ALLOC;
+		  newsect->flags |= SEC_LOAD;
+		}
+
+	      if (!(hdr->sh_flags & SHF_WRITE))
+		newsect->flags |= SEC_READONLY;
+
+	      if (hdr->sh_flags & SHF_EXECINSTR)
+		newsect->flags |= SEC_CODE;	/* FIXME: may only contain SOME code */
+	      else
+		newsect->flags |= SEC_DATA;
+
+	      hdr->rawdata = (void *) newsect;
+	    }
+	}
+      return true;
+    }
+  return false;
+}
+
+#define elf_backend_section_from_shdr	elf32_hppa_backend_section_from_shdr
+
+static boolean
+DEFUN (elf32_hppa_backend_fake_sections, (abfd, secthdr, asect),
+       bfd 		* abfd AND
+       Elf_Internal_Shdr *secthdr AND
+       asection		*asect)
+{
+
+  if ( strcmp(asect->name, ".hppa_symextn") == 0 )
+    {
+      secthdr->sh_type = SHT_HPPA_SYMEXTN;
+      secthdr->sh_flags = 0;
+      secthdr->sh_info = elf_section_data(asect)->rel_hdr.sh_link;
+      secthdr->sh_link = elf_onesymtab(abfd);
+      return true;
+    }
+
+  if (!strcmp (asect->name, ".hppa_unwind"))
+    {
+      secthdr->sh_type = SHT_PROGBITS;
+      /* Unwind descriptors are not part of the program memory image.  */
+      secthdr->sh_flags = 0;
+      secthdr->sh_info = 0;
+      secthdr->sh_link = 0;
+      secthdr->sh_entsize = 16;
+      return true;
+    }
+
+  return false;
+}
+
+#define elf_backend_fake_sections	elf32_hppa_backend_fake_sections
+
+static boolean
+DEFUN (elf32_hppa_backend_section_from_bfd_section, (abfd, hdr, asect),
+       bfd 			*abfd AND
+       Elf32_Internal_Shdr	*hdr AND
+       asection			*asect)
+{
+
+  if ( hdr->sh_type == SHT_HPPA_SYMEXTN )
+    {
+      if (hdr->rawdata)
+	{
+	  if (((struct sec *) (hdr->rawdata)) == asect)
+	    {
+	      BFD_ASSERT( strcmp(asect->name, ".hppa_symextn") == 0 );
+	      return true;
+	    }
+	}
+    }
+
+  return false;
+}
+
+#define elf_backend_section_from_bfd_section	elf32_hppa_backend_section_from_bfd_section
+
+#define bfd_generic_get_section_contents	hppa_elf_get_section_contents
+#define bfd_elf32_set_section_contents		hppa_elf_set_section_contents
 
 #define TARGET_BIG_SYM		bfd_elf32_hppa_vec
 #define TARGET_BIG_NAME		"elf32-hppa"

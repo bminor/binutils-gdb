@@ -51,6 +51,10 @@ for targ in $target $canon_targets
 do
     bfd_target=`$srcdir/config.bfd $targ`
 
+    case "$targ" in
+	netbsd386)	bfd_target=i386-netbsd ;;
+    esac
+
     if [ "x$bfd_target" = "xall" ]; then
         all_targets=true
     else
@@ -171,9 +175,10 @@ if [ x${all_targets} = xfalse ]; then
 	host_aout_vec)		tb="$tb host-aout.o aout32.o stab-syms.o" ;;
 	hp300bsd_vec)		tb="$tb hp300bsd.o aout32.o stab-syms.o" ;;
 	hp300hpux_vec)		tb="$tb hp300hpux.o aout32.o stab-syms.o" ;;
-	hppa_vec)		tb="$tb hppa.o" ;;
+	hppa_vec)		tb="$tb som.o" ;;
 	i386aout_vec)		tb="$tb i386aout.o aout32.o stab-syms.o" ;;
 	i386bsd_vec)		tb="$tb i386bsd.o aout32.o stab-syms.o" ;;
+	netbsd386_vec)		tb="$tb netbsd386.o aout32.o stab-syms.o" ;;
 	i386coff_vec)		tb="$tb coff-i386.o" ;;
 	i386linux_vec)		tb="$tb i386linux.o aout32.o stab-syms.o" ;;
 	i386lynx_vec)		tb="$tb i386lynx.o aout32.o stab-syms.o" ;;

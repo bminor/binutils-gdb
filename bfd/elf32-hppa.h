@@ -288,6 +288,7 @@ typedef enum
     R_HPPA_EXPR_14,		/*	pop				-   14	*/
     R_HPPA_EXPR_17,		/*	pop				-   17	*/
     R_HPPA_EXPR_12,		/*	pop				-   12	*/
+    R_HPPA_STUB_CALL_17,	/*	Symbol + Addend			17	*/
     R_HPPA_UNIMPLEMENTED	/*	N/A					*/
   } elf32_hppa_reloc_type;
 
@@ -307,50 +308,6 @@ typedef enum
 #define	R_HPPA_COMPLEX_PCREL_CALL	R_HPPA_PUSH_CONST + 1
 #define	R_HPPA_COMPLEX_ABS_CALL		R_HPPA_PUSH_CONST + 2
 
-
-enum hppa_reloc_field_selector_type
-{
-  R_HPPA_FSEL = 0x0,
-  R_HPPA_LSSEL = 0x1,
-  R_HPPA_RSSEL = 0x2,
-  R_HPPA_LSEL = 0x3,
-  R_HPPA_RSEL = 0x4,
-  R_HPPA_LDSEL = 0x5,
-  R_HPPA_RDSEL = 0x6,
-  R_HPPA_LRSEL = 0x7,
-  R_HPPA_RRSEL = 0x8,
-  R_HPPA_PSEL = 0x9,		/* P'	: procedure address for shlib's	*/
-  R_HPPA_LPSEL = 0xa,		/* LP'	: L' for procedure addresses	*/
-  R_HPPA_RPSEL = 0xb,		/* RP'	: R' for procedure addresses	*/
-
-  R_HPPA_TSEL = 0xc,		/* T'	: DLT-relative offset for shlib's	*/
-  R_HPPA_LTSEL = 0xd,		/* LT'	: L' for DLT-relative offsets	*/
-  R_HPPA_RTSEL = 0xe		/* RT'	: R' for DLT-relative offsets	*/
-
-};
-
-#define N_HPPA_FIELD_SELECTORS 15
-
-/* for compatibility */
-enum hppa_reloc_field_selector_type_alt
-{
-  e_fsel = R_HPPA_FSEL,
-  e_lssel = R_HPPA_LSSEL,
-  e_rssel = R_HPPA_RSSEL,
-  e_lsel = R_HPPA_LSEL,
-  e_rsel = R_HPPA_RSEL,
-  e_ldsel = R_HPPA_LDSEL,
-  e_rdsel = R_HPPA_RDSEL,
-  e_lrsel = R_HPPA_LRSEL,
-  e_rrsel = R_HPPA_RRSEL,
-  e_psel = R_HPPA_PSEL,		/* P'	: procedure address for shlib's	*/
-  e_lpsel = R_HPPA_LPSEL,	/* LP'	: L' for procedure addresses	*/
-  e_rpsel = R_HPPA_RPSEL,	/* RP'	: R' for procedure addresses	*/
-
-  e_tsel = R_HPPA_TSEL,		/* T'	: DLT-relative offset for shlib's	*/
-  e_ltsel = R_HPPA_LTSEL,	/* LT'	: L' for DLT-relative offsets	*/
-  e_rtsel = R_HPPA_RTSEL	/* RT'	: R' for DLT-relative offsets	*/
-};
 
 /* PA-RISC OPCODES */
 
@@ -445,8 +402,8 @@ elf32_hppa_reloc_type **hppa_elf_gen_reloc_type ();
 #define ELF_TC_FAKE_SECTIONS 1	/* # of "hand_made" tc-specific sections */
 #define SYMEXTN_SECTION_NAME ".hppa_symextn"
 
-extern void EXFUN (elf_hppa_tc_symbol, (bfd *, elf32_symbol_type *, int));
-extern void EXFUN (elf_hppa_tc_make_sections, (bfd *, PTR));
+extern void elf_hppa_tc_symbol PARAMS ((bfd *, elf32_symbol_type *, int));
+extern void elf_hppa_tc_make_sections PARAMS ((bfd *, PTR));
 
 typedef Elf32_Word symext_entryS;
 
@@ -457,8 +414,5 @@ struct symext_chain
 };
 
 typedef struct symext_chain symext_chainS;
-
-extern symext_chainS *symext_rootP;
-extern symext_chainS *symext_lastP;
 
 #endif /* _ELF32_HPPA_H */
