@@ -2193,8 +2193,8 @@ mips_push_arguments (int nargs,
          don't use float registers for arguments.  This duplication of
          arguments in general registers can't hurt non-MIPS16 functions
          because those registers are normally skipped.  */
-      /* MIPS_EABI squeeses a struct that contains a single floating
-         point value into an FP register instead of pusing it onto the
+      /* MIPS_EABI squeezes a struct that contains a single floating
+         point value into an FP register instead of pushing it onto the
          stack. */
       if (fp_register_arg_p (typecode, arg_type)
 	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM)
@@ -3279,7 +3279,6 @@ set_mips_command (char *args, int from_tty)
 static void
 show_mipsfpu_command (char *args, int from_tty)
 {
-  char *msg;
   char *fpu;
   switch (MIPS_FPU_TYPE)
     {
@@ -3387,7 +3386,7 @@ mips_show_processor_type_command (char *args, int from_tty)
 int
 mips_set_processor_type (char *str)
 {
-  int i, j;
+  int i;
 
   if (str == NULL)
     return 0;
@@ -3493,16 +3492,17 @@ mips_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
     {
       if (pc_is_mips16 (*pcptr))
 	{
-	  static char mips16_big_breakpoint[] = MIPS16_BIG_BREAKPOINT;
+	  static unsigned char mips16_big_breakpoint[] =
+	    MIPS16_BIG_BREAKPOINT;
 	  *pcptr = UNMAKE_MIPS16_ADDR (*pcptr);
 	  *lenptr = sizeof (mips16_big_breakpoint);
 	  return mips16_big_breakpoint;
 	}
       else
 	{
-	  static char big_breakpoint[] = BIG_BREAKPOINT;
-	  static char pmon_big_breakpoint[] = PMON_BIG_BREAKPOINT;
-	  static char idt_big_breakpoint[] = IDT_BIG_BREAKPOINT;
+	  static unsigned char big_breakpoint[] = BIG_BREAKPOINT;
+	  static unsigned char pmon_big_breakpoint[] = PMON_BIG_BREAKPOINT;
+	  static unsigned char idt_big_breakpoint[] = IDT_BIG_BREAKPOINT;
 
 	  *lenptr = sizeof (big_breakpoint);
 
@@ -3520,16 +3520,19 @@ mips_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
     {
       if (pc_is_mips16 (*pcptr))
 	{
-	  static char mips16_little_breakpoint[] = MIPS16_LITTLE_BREAKPOINT;
+	  static unsigned char mips16_little_breakpoint[] =
+	    MIPS16_LITTLE_BREAKPOINT;
 	  *pcptr = UNMAKE_MIPS16_ADDR (*pcptr);
 	  *lenptr = sizeof (mips16_little_breakpoint);
 	  return mips16_little_breakpoint;
 	}
       else
 	{
-	  static char little_breakpoint[] = LITTLE_BREAKPOINT;
-	  static char pmon_little_breakpoint[] = PMON_LITTLE_BREAKPOINT;
-	  static char idt_little_breakpoint[] = IDT_LITTLE_BREAKPOINT;
+	  static unsigned char little_breakpoint[] = LITTLE_BREAKPOINT;
+	  static unsigned char pmon_little_breakpoint[] =
+	    PMON_LITTLE_BREAKPOINT;
+	  static unsigned char idt_little_breakpoint[] =
+	    IDT_LITTLE_BREAKPOINT;
 
 	  *lenptr = sizeof (little_breakpoint);
 
