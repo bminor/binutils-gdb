@@ -3929,9 +3929,12 @@ do_t_bkpt (str)
     str ++;
 
   memset (& expr, '\0', sizeof (expr));
-  if (my_get_expression (& expr, & str) || (expr.X_op != O_constant))
+  if (my_get_expression (& expr, & str)
+      || (expr.X_op != O_constant
+	  /* As a convenience we allow 'bkpt' without an operand.  */
+	  && expr.X_op != O_absent))
     {
-      inst.error = _("bad or missing expression");
+      inst.error = _("bad expression");
       return;
     }
 
@@ -4111,9 +4114,12 @@ do_bkpt (str)
 
   memset (& expr, '\0', sizeof (expr));
 
-  if (my_get_expression (& expr, & str) || (expr.X_op != O_constant))
+  if (my_get_expression (& expr, & str)
+      || (expr.X_op != O_constant
+	  /* As a convenience we allow 'bkpt' without an operand.  */
+	  && expr.X_op != O_absent))
     {
-      inst.error = _("bad or missing expression");
+      inst.error = _("bad expression");
       return;
     }
 
