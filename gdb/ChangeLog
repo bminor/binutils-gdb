@@ -1,3 +1,9 @@
+2003-06-05  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* thread-db.c (check_event): For create/death event breakpoints,
+	loop through all messages to ensure that we read the message
+	corresponding to the breakpoint we are at.
+
 2003-06-04  Michael Snyder  <msnyder@redhat.com>
 
 	* h8300-tdep.c (h8300_gdbarch_init): Add h8300hn, h8300sn.

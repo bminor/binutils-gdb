@@ -775,64 +775,73 @@ check_event (ptid_t ptid)
   td_thrinfo_t ti;
   td_err_e err;
   CORE_ADDR stop_pc;
+  int loop = 0;
 
   /* Bail out early if we're not at a thread event breakpoint.  */
   stop_pc = read_pc_pid (ptid) - DECR_PC_AFTER_BREAK;
   if (stop_pc != td_create_bp_addr && stop_pc != td_death_bp_addr)
     return;
 
-  err = td_ta_event_getmsg_p (thread_agent, &msg);
-  if (err != TD_OK)
+  /* If we are at a create breakpoint, we do not know what new lwp
+     was created and cannot specifically locate the event message for it.
+     We have to call td_ta_event_getmsg() to get
+     the latest message.  Since we have no way of correlating whether
+     the event message we get back corresponds to our breakpoint, we must 
+     loop and read all event messages, processing them appropriately.
+     This guarantees we will process the correct message before continuing 
+     from the breakpoint.  
+
+     Currently, death events are not enabled.  If they are enabled,
+     the death event can use the td_thr_event_getmsg() interface to
+     get the message specifically for that lwp and avoid looping
+     below.  */
+
+  loop = 1;
+
+  do
     {
-      if (err == TD_NOMSG)
-	return;
+      err = td_ta_event_getmsg_p (thread_agent, &msg);
+      if (err != TD_OK)
+	{
+	  if (err == TD_NOMSG)
+	    return;
 
-      error ("Cannot get thread event message: %s", thread_db_err_str (err));
+	  error ("Cannot get thread event message: %s",
+		 thread_db_err_str (err));
+	}
+
+      err = td_thr_get_info_p (msg.th_p, &ti);
+      if (err != TD_OK)
+	error ("Cannot get thread info: %s", thread_db_err_str (err));
+
+      ptid = BUILD_THREAD (ti.ti_tid, GET_PID (ptid));
+
+      switch (msg.event)
+	{
+	case TD_CREATE:
+
+	  /* We may already know about this thread, for instance when the
+	     user has issued the `info threads' command before the SIGTRAP
+	     for hitting the thread creation breakpoint was reported.  */
+	  if (!in_thread_list (ptid))
+	    attach_thread (ptid, msg.th_p, &ti, 1);
+
+	  break;
+
+	case TD_DEATH:
+
+	  if (!in_thread_list (ptid))
+	    error ("Spurious thread death event.");
+
+	  detach_thread (ptid, 1);
+
+	  break;
+
+	default:
+	  error ("Spurious thread event.");
+	}
     }
-
-  err = td_thr_get_info_p (msg.th_p, &ti);
-  if (err != TD_OK)
-    error ("check_event: cannot get thread info: %s",
-	   thread_db_err_str (err));
-
-  ptid = BUILD_THREAD (ti.ti_tid, GET_PID (ptid));
-
-  switch (msg.event)
-    {
-    case TD_CREATE:
-#if 0
-      /* FIXME: kettenis/2000-08-26: Since we use td_ta_event_getmsg,
-         there is no guarantee that the breakpoint will match the
-         event.  Should we use td_thr_event_getmsg instead?  */
-
-      if (stop_pc != td_create_bp_addr)
-	error ("Thread creation event doesn't match breakpoint.");
-#endif
-
-      /* We may already know about this thread, for instance when the
-         user has issued the `info threads' command before the SIGTRAP
-         for hitting the thread creation breakpoint was reported.  */
-      if (!in_thread_list (ptid))
-	attach_thread (ptid, msg.th_p, &ti, 1);
-      return;
-
-    case TD_DEATH:
-#if 0
-      /* FIXME: See TD_CREATE.  */
-
-      if (stop_pc != td_death_bp_addr)
-	error ("Thread death event doesn't match breakpoint.");
-#endif
-
-      if (!in_thread_list (ptid))
-	error ("Spurious thread death event.");
-
-      detach_thread (ptid, 1);
-      return;
-
-    default:
-      error ("Spurious thread event.");
-    }
+  while (loop);
 }
 
 static ptid_t
