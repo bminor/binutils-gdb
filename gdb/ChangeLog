@@ -1,3 +1,15 @@
+Fri Jan 27 17:08:06 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* arm-tdep.c: Make it compile.
+	(exec_file_command, xfer_core_file): Comment out.
+	(arm_print_insn): Remove, now in libopcodes.
+	(skip_prologue): Comment out most of body.
+	(arm_frame_find_saved_regs): Move here from tm-arm.h.
+	(_initialize_arm_tdep): Set tm_print_insn.
+	* config/arm/tm-arm.h: Remove old refs to first_object_file_end.
+	(XFER_CORE_FILE): Remove.
+	(FRAME_FIND_SAVED_REGS): Call arm_frame_find_saved_regs.
+	
 Fri Jan 27 08:48:28 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in (CHILL_LIB): Define as in testsuite/Makefile.in.
