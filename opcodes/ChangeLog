@@ -1,3 +1,12 @@
+Mon Jul 13 14:53:59 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386-dis.c (ckprefix): Handle fwait specially only when it isn't
+	the first prefix.
+	(dofloat): Correct test for fnstsw.  Print `fnstsw %ax' rather
+	than `fnstsw %eax'.
+	(OP_J): Remove unnecessary subtraction when 16-bit displacement
+	will be masked later.
+
 start-sanitize-am33
 Fri Jul 10 23:09:56 1998  Jeffrey A Law  (law@cygnus.com)
 
