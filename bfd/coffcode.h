@@ -1,4 +1,4 @@
-/* Support for Intel 960 COFF and Motorola 88k BCS COFF (and maybe others)
+/* Support for the generic parts of most COFF variants, for BFD.
    Copyright (C) 1990-1991 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -252,6 +252,7 @@ $ } coff_symbol_type;
 
 #define PUTWORD bfd_h_put_32
 #define PUTHALF bfd_h_put_16
+#define	PUTBYTE bfd_h_put_8
 
 #ifndef GET_FCN_LNNOPTR
 #define GET_FCN_LNNOPTR(abfd, ext)  bfd_h_get_32(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_fcn.x_lnnoptr)
@@ -525,10 +526,12 @@ DEFUN(coff_swap_aux_in,(abfd, ext1, type, class, in1),
   AUXENT    *ext = (AUXENT *)ext1;
   union internal_auxent  *in = (union internal_auxent *)in1;
   switch (class) {
+
   case C_FILE:
     if (ext->x_file.x_fname[0] == 0) {
       in->x_file.x_n.x_zeroes = 0;
-      in->x_file.x_n.x_offset  = bfd_h_get_32(abfd, (bfd_byte *) ext->x_file.x_n.x_offset);
+      in->x_file.x_n.x_offset = 
+	bfd_h_get_32(abfd, (bfd_byte *) ext->x_file.x_n.x_offset);
     } else {
 #if FILNMLEN != E_FILNMLEN
    -> Error, we need to cope with truncating or extending FILNMLEN!;
@@ -536,8 +539,24 @@ DEFUN(coff_swap_aux_in,(abfd, ext1, type, class, in1),
       memcpy (in->x_file.x_fname, ext->x_file.x_fname, FILNMLEN);
 #endif
     }
-
     break;
+
+  /* RS/6000 "csect" auxents */
+#ifdef RS6000COFF_C
+  case C_EXT:
+  case C_HIDEXT:
+    in->x_csect.x_scnlen   = bfd_h_get_32 (abfd, (bfd_byte *) ext->x_csect.x_scnlen);
+    in->x_csect.x_parmhash = bfd_h_get_32 (abfd, (bfd_byte *) ext->x_csect.x_parmhash);
+    in->x_csect.x_snhash   = bfd_h_get_16 (abfd, (bfd_byte *) ext->x_csect.x_snhash);
+    /* We don't have to hack bitfields in x_smtyp because it's defined by
+       shifts-and-ands, which are equivalent on all byte orders.  */
+    in->x_csect.x_smtyp    = bfd_h_get_8  (abfd, (bfd_byte *) ext->x_csect.x_smtyp);
+    in->x_csect.x_smclas   = bfd_h_get_8  (abfd, (bfd_byte *) ext->x_csect.x_smclas);
+    in->x_csect.x_stab     = bfd_h_get_32 (abfd, (bfd_byte *) ext->x_csect.x_stab);
+    in->x_csect.x_snstab   = bfd_h_get_16 (abfd, (bfd_byte *) ext->x_csect.x_snstab);
+    break;
+#endif
+
   case C_STAT:
 #ifdef C_LEAFSTAT
   case C_LEAFSTAT:
@@ -589,6 +608,7 @@ DEFUN(coff_swap_aux_out,(abfd, inp, type, class, extp),
   union internal_auxent *in = (union internal_auxent *)inp;
   AUXENT *ext = (AUXENT *)extp;
   switch (class) {
+
   case C_FILE:
     if (in->x_file.x_fname[0] == 0) {
       PUTWORD(abfd, 0, (bfd_byte *) ext->x_file.x_n.x_zeroes);
@@ -604,13 +624,29 @@ DEFUN(coff_swap_aux_out,(abfd, inp, type, class, extp),
 #endif
     }
     break;
+
+#ifdef RS6000COFF_C
+  /* RS/6000 "csect" auxents */
+  case C_EXT:
+  case C_HIDEXT:
+    PUTWORD (abfd, in->x_csect.x_scnlen,	ext->x_csect.x_scnlen);
+    PUTWORD (abfd, in->x_csect.x_parmhash,	ext->x_csect.x_parmhash);
+    PUTHALF (abfd, in->x_csect.x_snhash,	ext->x_csect.x_snhash);
+    /* We don't have to hack bitfields in x_smtyp because it's defined by
+       shifts-and-ands, which are equivalent on all byte orders.  */
+    PUTBYTE (abfd, in->x_csect.x_smtyp,		ext->x_csect.x_smtyp);
+    PUTBYTE (abfd, in->x_csect.x_smclas,	ext->x_csect.x_smclas);
+    PUTWORD (abfd, in->x_csect.x_stab,		ext->x_csect.x_stab);
+    PUTHALF (abfd, in->x_csect.x_snstab,	ext->x_csect.x_snstab);
+    break;
+#endif
+
   case C_STAT:
 #ifdef C_LEAFSTAT
   case C_LEAFSTAT:
 #endif
   case C_HIDDEN:
     if (type == T_NULL) {
-
       PUT_SCN_SCNLEN(abfd, in->x_scn.x_scnlen, ext);
       PUT_SCN_NRELOC(abfd, in->x_scn.x_nreloc, ext);
       PUT_SCN_NLINNO(abfd, in->x_scn.x_nlinno, ext);
