@@ -1,5 +1,11 @@
 Sat Dec  7 18:13:11 1991  Fred Fish  (fnf at cygnus.com)
 
+	* i386-tdep.c:  Fix a problem on i386 systems where buffered code
+	stream access was failing to take into account the minimum size
+	granularity of the code section.  For now, the buffering is simply
+	disabled.  There is a similar problem in the i386 disassember code
+	that has not yet been fixed (FIXME).
+
 	* gmalloc.c:  Use macros to hide some of the ugly casting required
 	in the previously applied fix for pointers with high bits set.
 
