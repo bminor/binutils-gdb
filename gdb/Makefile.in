@@ -1,4 +1,4 @@
-#Copyright 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+#Copyright 1989, 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -183,7 +183,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 4.11.2
+VERSION = 4.11.4
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -316,7 +316,8 @@ SFILES = blockframe.c breakpoint.c buildsym.c c-exp.y c-lang.c \
 # gdb-$(VERSION).tar.Z.
 
 NONSRC = Makefile.in configure.in ChangeLog ChangeLog-9091 \
-	ChangeLog-92 ChangeLog-3.x gdb.1 refcard.ps README TODO TAGS NEWS \
+	ChangeLog-92 ChangeLog-93 ChangeLog-3.x \
+	gdb.1 refcard.ps README TODO TAGS NEWS \
 	Projects .gdbinit COPYING $(YYFILES) copying.c copying.awk \
 	saber.suppress standalone.c stuff.c kdb-start.c gcc.patch \
 	nindy-share/Makefile nindy-share/VERSION nindy-share/README \
@@ -958,7 +959,8 @@ ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
 	config/mips/xm-irix3.h \
 	config/mips/xm-irix4.h config/mips/xm-makeva.h config/mips/xm-mips.h \
 	config/mips/xm-mipsm3.h \
-	config/mips/xm-riscos.h config/mips/xm-news-mips.h config/nm-sysv4.h \
+	config/mips/xm-riscos.h config/mips/xm-news-mips.h \
+	config/nm-lynx.h config/nm-sysv4.h \
 	config/none/nm-none.h config/none/tm-none.h config/none/xm-none.h \
 	config/ns32k/nm-umax.h \
 	config/ns32k/tm-ns32km3.h \
