@@ -1,3 +1,8 @@
+2000-07-11  Jakub Jelinek  <jakub@redhat.com>
+
+	* sparc-opc.c (sparc_opcodes): popc has 0 in rs1, not rs2.
+	Reported by Bill Clarke <llib@computer.org>.
+
 2000-07-09  Geoffrey Keating  <geoffk@cygnus.com>
 
 	* ppc-opc.c (powerpc_opcodes): Correct suffix for vslw.
