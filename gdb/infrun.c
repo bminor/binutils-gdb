@@ -725,7 +725,9 @@ wait_for_inferior ()
       /* Handle cases caused by hitting a breakpoint.  */
       {
 	CORE_ADDR jmp_buf_pc;
-	struct bpstat_what what = bpstat_what (stop_bpstat);
+	struct bpstat_what what;
+
+	what = bpstat_what (stop_bpstat);
 
 	switch (what.main_action)
 	  {
