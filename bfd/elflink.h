@@ -2897,7 +2897,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
     {
       struct elf_info_failed eif;
       struct elf_link_hash_entry *h;
-      bfd_size_type strsize;
+      asection *dynstr;
 
       *sinterpptr = bfd_get_section_by_name (dynobj, ".interp");
       BFD_ASSERT (*sinterpptr != NULL || info->shared);
@@ -3026,14 +3026,24 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	    return false;
 	}
 
-      strsize = _bfd_stringtab_size (elf_hash_table (info)->dynstr);
-      if (! elf_add_dynamic_entry (info, DT_HASH, 0)
-	  || ! elf_add_dynamic_entry (info, DT_STRTAB, 0)
-	  || ! elf_add_dynamic_entry (info, DT_SYMTAB, 0)
-	  || ! elf_add_dynamic_entry (info, DT_STRSZ, strsize)
-	  || ! elf_add_dynamic_entry (info, DT_SYMENT,
-				      sizeof (Elf_External_Sym)))
-	return false;
+      dynstr = bfd_get_section_by_name (dynobj, ".dynstr");
+      /* If .dynstr is excluded from the link, we don't want any of
+	 these tags.  Strictly, we should be checking each section
+	 individually;  This quick check covers for the case where
+	 someone does a /DISCARD/ : { *(*) }.  */
+      if (dynstr != NULL && dynstr->output_section != bfd_abs_section_ptr)
+	{
+	  bfd_size_type strsize;
+
+	  strsize = _bfd_stringtab_size (elf_hash_table (info)->dynstr);
+	  if (! elf_add_dynamic_entry (info, DT_HASH, 0)
+	      || ! elf_add_dynamic_entry (info, DT_STRTAB, 0)
+	      || ! elf_add_dynamic_entry (info, DT_SYMTAB, 0)
+	      || ! elf_add_dynamic_entry (info, DT_STRSZ, strsize)
+	      || ! elf_add_dynamic_entry (info, DT_SYMENT,
+					  sizeof (Elf_External_Sym)))
+	    return false;
+	}
     }
 
   /* The backend must work out the sizes of all the other dynamic
@@ -3047,7 +3057,6 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       size_t dynsymcount;
       asection *s;
       size_t bucketcount = 0;
-      Elf_Internal_Sym isym;
       size_t hash_entry_size;
 
       /* Set up the version definition section.  */
@@ -3384,15 +3393,20 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       if (s->contents == NULL && s->_raw_size != 0)
 	return false;
 
-      /* The first entry in .dynsym is a dummy symbol.  */
-      isym.st_value = 0;
-      isym.st_size = 0;
-      isym.st_name = 0;
-      isym.st_info = 0;
-      isym.st_other = 0;
-      isym.st_shndx = 0;
-      elf_swap_symbol_out (output_bfd, &isym,
-			   (PTR) (Elf_External_Sym *) s->contents);
+      if (dynsymcount != 0)
+	{
+	  Elf_Internal_Sym isym;
+
+	  /* The first entry in .dynsym is a dummy symbol.  */
+	  isym.st_value = 0;
+	  isym.st_size = 0;
+	  isym.st_name = 0;
+	  isym.st_info = 0;
+	  isym.st_other = 0;
+	  isym.st_shndx = 0;
+	  elf_swap_symbol_out (output_bfd, &isym,
+			       (PTR) (Elf_External_Sym *) s->contents);
+	}
 
       /* Compute the size of the hashing table.  As a side effect this
 	 computes the hash values for all the names we export.  */
@@ -4602,7 +4616,8 @@ elf_bfd_final_link (abfd, info)
   /* The sh_info field records the index of the first non local symbol.  */
   symtab_hdr->sh_info = bfd_get_symcount (abfd);
 
-  if (dynamic)
+  if (dynamic
+      && finfo.dynsym_sec->output_section != bfd_abs_section_ptr)
     {
       Elf_Internal_Sym sym;
       Elf_External_Sym *dynsym =
@@ -4867,7 +4882,8 @@ elf_bfd_final_link (abfd, info)
       for (o = dynobj->sections; o != NULL; o = o->next)
 	{
 	  if ((o->flags & SEC_HAS_CONTENTS) == 0
-	      || o->_raw_size == 0)
+	      || o->_raw_size == 0
+	      || o->output_section == bfd_abs_section_ptr)
 	    continue;
 	  if ((o->flags & SEC_LINKER_CREATED) == 0)
 	    {

@@ -1,5 +1,12 @@
 2000-10-07  Alan Modra  <alan@linuxcare.com.au>
 
+	* elflink.h (size_dynamic_sections): Don't create various tags if
+	.dynstr is excluded from the link.  Don't set first dynsym entry
+	if dynsymcount is zero.
+	(elf_bfd_final_link): Don't try to swap out dynamic syms if
+	.dynsym excluded from the link.  Don't try to write any dynamic
+	sections excluded from the link.
+
 	* elf.c (swap_out_syms): Handle global section symbols.
 
 2000-10-05  DJ Delorie  <dj@redhat.com>
