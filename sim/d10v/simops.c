@@ -132,7 +132,7 @@ trace_input_func (name, in1, in2, in3)
 	  filename = (const char *)0;
 	  functionname = (const char *)0;
 	  linenumber = 0;
-	  if (bfd_find_nearest_line (exec_bfd, text, (struct symbol_cache_entry **)0, byte_pc - text_start,
+	  if (bfd_find_nearest_line (prog_bfd, text, (struct symbol_cache_entry **)0, byte_pc - text_start,
 				     &filename, &functionname, &linenumber))
 	    {
 	      p = buf;
@@ -1179,12 +1179,6 @@ void
 OP_6401 ()
 {
   trace_input ("ld", OP_REG_OUTPUT, OP_POSTDEC, OP_VOID);
-  if ( OP[1] == 15 )
-    {
-      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: cannot post-decrement register r15 (SP).\n");
-      State.exception = SIGILL;
-      return;
-    }
   State.regs[OP[0]] = RW (State.regs[OP[1]]);
   INC_ADDR(State.regs[OP[1]],-2);
   trace_output (OP_REG);
@@ -1226,12 +1220,6 @@ OP_6601 ()
 {
   uint16 addr = State.regs[OP[1]];
   trace_input ("ld2w", OP_REG_OUTPUT, OP_POSTDEC, OP_VOID);
-  if ( OP[1] == 15 )
-    {
-      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: cannot post-decrement register r15 (SP).\n");
-      State.exception = SIGILL;
-      return;
-    }
   State.regs[OP[0]] = RW (addr);
   State.regs[OP[0]+1] = RW (addr+2);
   INC_ADDR(State.regs[OP[1]],-4);
@@ -1949,9 +1937,9 @@ OP_4201 ()
   trace_input ("rachi", OP_REG_OUTPUT, OP_ACCUM, OP_CONSTANT3);
   State.F1 = State.F0;
   if (shift >=0)
-    tmp = SEXT44 (State.a[1]) << shift;
+    tmp = SEXT44 (State.a[OP[1]]) << shift;
   else
-    tmp = SEXT44 (State.a[1]) >> -shift;
+    tmp = SEXT44 (State.a[OP[1]]) >> -shift;
   tmp += 0x8000;
 
   if (tmp > MAX32)
