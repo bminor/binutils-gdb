@@ -1,3 +1,8 @@
+Thu Jul 20 00:06:39 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf.c (bfd_section_from_phdr): Set lma based on p_paddr.
+	(elf_fake_sections): Set sh_addr based on lma, not vma.
+
 Wed Jul 19 15:52:01 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* coff-arm.c (TARGET_LITTLE_SYM, TARGET_BIG_SYM): Replaces TARGET_SYM.
