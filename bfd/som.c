@@ -4069,7 +4069,8 @@ som_bfd_derive_misc_symbol_info (abfd, sym, info)
      of common symbols was handled earlier!  */
   if (bfd_is_und_section (sym->section))
     info->symbol_scope = SS_UNSAT;
-  else if (sym->flags & BSF_EXPORT && ! bfd_is_com_section (sym->section))
+  else if (sym->flags & (BSF_EXPORT | BSF_WEAK)
+	   && ! bfd_is_com_section (sym->section))
     info->symbol_scope = SS_UNIVERSAL;
   /* Anything else which is not in the common section has scope
      SS_LOCAL.  */

@@ -1,3 +1,8 @@
+2000-09-26  Steve Ellcey <sje@cup.hp.com>
+
+	* som.c (som_bfd_derive_misc_symbol_info): Make weak symbols
+	global by default.
+
 2000-09-21  Alan Modra  <alan@linuxcare.com.au>
 
 	* elf32-hppa.c (elf32_hppa_check_relocs): Fix weak sym handling in
