@@ -183,68 +183,6 @@ struct frame_extra_info
   CORE_ADDR initial_sp;		/* initial stack pointer. */
 };
 
-void
-rs6000_init_extra_frame_info (int fromleaf, struct frame_info *fi)
-{
-  struct frame_extra_info *extra_info =
-    frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
-  extra_info->initial_sp = 0;
-  if (get_next_frame (fi) != NULL
-      && get_frame_pc (fi) < TEXT_SEGMENT_BASE)
-    /* We're in get_prev_frame */
-    /* and this is a special signal frame.  */
-    /* (fi->pc will be some low address in the kernel, */
-    /*  to which the signal handler returns).  */
-    deprecated_set_frame_type (fi, SIGTRAMP_FRAME);
-}
-
-/* Put here the code to store, into a struct frame_saved_regs,
-   the addresses of the saved registers of frame described by FRAME_INFO.
-   This includes special registers such as pc and fp saved in special
-   ways in the stack frame.  sp is even more special:
-   the address we return for it IS the sp for the next frame.  */
-
-/* In this implementation for RS/6000, we do *not* save sp. I am
-   not sure if it will be needed. The following function takes care of gpr's
-   and fpr's only. */
-
-void
-rs6000_frame_init_saved_regs (struct frame_info *fi)
-{
-  frame_get_saved_regs (fi, NULL);
-}
-
-static CORE_ADDR
-rs6000_init_frame_pc_first (int fromleaf, struct frame_info *prev)
-{
-  return (fromleaf
-	  ? DEPRECATED_SAVED_PC_AFTER_CALL (get_next_frame (prev))
-	  : frame_relative_level (prev) > 0
-	  ? DEPRECATED_FRAME_SAVED_PC (get_next_frame (prev))
-	  : read_pc ());
-}
-
-static CORE_ADDR
-rs6000_frame_args_address (struct frame_info *fi)
-{
-  struct frame_extra_info *extra_info = get_frame_extra_info (fi);
-  if (extra_info->initial_sp != 0)
-    return extra_info->initial_sp;
-  else
-    return frame_initial_stack_address (fi);
-}
-
-/* Immediately after a function call, return the saved pc.
-   Can't go through the frames for this because on some machines
-   the new frame is not set up until the new function executes
-   some instructions.  */
-
-static CORE_ADDR
-rs6000_saved_pc_after_call (struct frame_info *fi)
-{
-  return read_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum);
-}
-
 /* Get the ith function argument for the current function.  */
 static CORE_ADDR
 rs6000_fetch_pointer_argument (struct frame_info *frame, int argi, 
@@ -1038,79 +976,6 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 *************************************************************************/
 
 
-/* Pop the innermost frame, go back to the caller.  */
-
-static void
-rs6000_pop_frame (void)
-{
-  CORE_ADDR pc, lr, sp, prev_sp, addr;	/* %pc, %lr, %sp */
-  struct rs6000_framedata fdata;
-  struct frame_info *frame = get_current_frame ();
-  int ii, wordsize;
-
-  pc = read_pc ();
-  sp = get_frame_base (frame);
-
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
-				   get_frame_base (frame),
-				   get_frame_base (frame)))
-    {
-      generic_pop_dummy_frame ();
-      flush_cached_frames ();
-      return;
-    }
-
-  /* Make sure that all registers are valid.  */
-  deprecated_read_register_bytes (0, NULL, DEPRECATED_REGISTER_BYTES);
-
-  /* Figure out previous %pc value.  If the function is frameless, it is 
-     still in the link register, otherwise walk the frames and retrieve the
-     saved %pc value in the previous frame.  */
-
-  addr = get_frame_func (frame);
-  (void) skip_prologue (addr, get_frame_pc (frame), &fdata);
-
-  wordsize = gdbarch_tdep (current_gdbarch)->wordsize;
-  if (fdata.frameless)
-    prev_sp = sp;
-  else
-    prev_sp = read_memory_addr (sp, wordsize);
-  if (fdata.lr_offset == 0)
-     lr = read_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum);
-  else
-    lr = read_memory_addr (prev_sp + fdata.lr_offset, wordsize);
-
-  /* reset %pc value. */
-  write_register (PC_REGNUM, lr);
-
-  /* reset register values if any was saved earlier.  */
-
-  if (fdata.saved_gpr != -1)
-    {
-      addr = prev_sp + fdata.gpr_offset;
-      for (ii = fdata.saved_gpr; ii <= 31; ++ii)
-	{
-	  read_memory (addr, &deprecated_registers[DEPRECATED_REGISTER_BYTE (ii)],
-		       wordsize);
-	  addr += wordsize;
-	}
-    }
-
-  if (fdata.saved_fpr != -1)
-    {
-      addr = prev_sp + fdata.fpr_offset;
-      for (ii = fdata.saved_fpr; ii <= 31; ++ii)
-	{
-	  read_memory (addr, &deprecated_registers[DEPRECATED_REGISTER_BYTE (ii + FP0_REGNUM)], 8);
-	  addr += 8;
-	}
-    }
-
-  write_register (SP_REGNUM, prev_sp);
-  target_store_registers (-1);
-  flush_cached_frames ();
-}
-
 /* All the ABI's require 16 byte alignment.  */
 static CORE_ADDR
 rs6000_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
@@ -1510,99 +1375,6 @@ rs6000_skip_trampoline_code (CORE_ADDR pc)
   return pc;
 }
 
-/* Determines whether the function FI has a frame on the stack or not.  */
-
-int
-rs6000_frameless_function_invocation (struct frame_info *fi)
-{
-  CORE_ADDR func_start;
-  struct rs6000_framedata fdata;
-
-  /* Don't even think about framelessness except on the innermost frame
-     or if the function was interrupted by a signal.  */
-  if (get_next_frame (fi) != NULL
-      && !(get_frame_type (get_next_frame (fi)) == SIGTRAMP_FRAME))
-    return 0;
-
-  func_start = get_frame_func (fi);
-
-  /* If we failed to find the start of the function, it is a mistake
-     to inspect the instructions.  */
-
-  if (!func_start)
-    {
-      /* A frame with a zero PC is usually created by dereferencing a NULL
-         function pointer, normally causing an immediate core dump of the
-         inferior.  Mark function as frameless, as the inferior has no chance
-         of setting up a stack frame.  */
-      if (get_frame_pc (fi) == 0)
-	return 1;
-      else
-	return 0;
-    }
-
-  (void) skip_prologue (func_start, get_frame_pc (fi), &fdata);
-  return fdata.frameless;
-}
-
-/* Return the PC saved in a frame.  */
-
-CORE_ADDR
-rs6000_frame_saved_pc (struct frame_info *fi)
-{
-  CORE_ADDR func_start;
-  struct rs6000_framedata fdata;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  int wordsize = tdep->wordsize;
-
-  if ((get_frame_type (fi) == SIGTRAMP_FRAME))
-    return read_memory_addr (get_frame_base (fi) + SIG_FRAME_PC_OFFSET,
-			     wordsize);
-
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi),
-				   get_frame_base (fi),
-				   get_frame_base (fi)))
-    return deprecated_read_register_dummy (get_frame_pc (fi),
-					   get_frame_base (fi), PC_REGNUM);
-
-  func_start = get_frame_func (fi);
-
-  /* If we failed to find the start of the function, it is a mistake
-     to inspect the instructions.  */
-  if (!func_start)
-    return 0;
-
-  (void) skip_prologue (func_start, get_frame_pc (fi), &fdata);
-
-  if (fdata.lr_offset == 0 && get_next_frame (fi) != NULL)
-    {
-      if ((get_frame_type (get_next_frame (fi)) == SIGTRAMP_FRAME))
-	return read_memory_addr ((get_frame_base (get_next_frame (fi))
-				  + SIG_FRAME_LR_OFFSET),
-				 wordsize);
-      else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (get_next_frame (fi)), 0, 0))
-	/* The link register wasn't saved by this frame and the next
-           (inner, newer) frame is a dummy.  Get the link register
-           value by unwinding it from that [dummy] frame.  */
-	{
-	  ULONGEST lr;
-	  frame_unwind_unsigned_register (get_next_frame (fi),
-					  tdep->ppc_lr_regnum, &lr);
-	  return lr;
-	}
-      else
-	return read_memory_addr (DEPRECATED_FRAME_CHAIN (fi)
-				 + tdep->lr_frame_offset,
-				 wordsize);
-    }
-
-  if (fdata.lr_offset == 0)
-    return read_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum);
-
-  return read_memory_addr (DEPRECATED_FRAME_CHAIN (fi) + fdata.lr_offset,
-			   wordsize);
-}
-
 /* If saved registers of frame FI are not known yet, read and cache them.
    &FDATAP contains rs6000_framedata; TDATAP can be NULL,
    in which case the framedata are read.  */
@@ -1778,47 +1550,6 @@ frame_initial_stack_address (struct frame_info *fi)
       get_frame_extra_info (fi)->initial_sp = get_frame_base (fi);
   }
   return get_frame_extra_info (fi)->initial_sp;
-}
-
-/* Describe the pointer in each stack frame to the previous stack frame
-   (its caller).  */
-
-/* DEPRECATED_FRAME_CHAIN takes a frame's nominal address and produces
-   the frame's chain-pointer.  */
-
-/* In the case of the RS/6000, the frame's nominal address
-   is the address of a 4-byte word containing the calling frame's address.  */
-
-CORE_ADDR
-rs6000_frame_chain (struct frame_info *thisframe)
-{
-  CORE_ADDR fp, fpp, lr;
-  int wordsize = gdbarch_tdep (current_gdbarch)->wordsize;
-
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (thisframe),
-				   get_frame_base (thisframe),
-				   get_frame_base (thisframe)))
-    /* A dummy frame always correctly chains back to the previous
-       frame.  */
-    return read_memory_addr (get_frame_base (thisframe), wordsize);
-
-  if (deprecated_inside_entry_file (get_frame_pc (thisframe))
-      || get_frame_pc (thisframe) == entry_point_address ())
-    return 0;
-
-  if ((get_frame_type (thisframe) == SIGTRAMP_FRAME))
-    fp = read_memory_addr (get_frame_base (thisframe) + SIG_FRAME_FP_OFFSET,
-			   wordsize);
-  else if (get_next_frame (thisframe) != NULL
-	   && (get_frame_type (get_next_frame (thisframe)) == SIGTRAMP_FRAME)
-	   && (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P ()
-	       && DEPRECATED_FRAMELESS_FUNCTION_INVOCATION (thisframe)))
-    /* A frameless function interrupted by a signal did not change the
-       frame pointer.  */
-    fp = get_frame_base (thisframe);
-  else
-    fp = read_memory_addr (get_frame_base (thisframe), wordsize);
-  return fp;
 }
 
 /* Return the size of register REG when words are WORDSIZE bytes long.  If REG
@@ -3179,16 +2910,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     default:
       set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
       set_gdbarch_believe_pcc_promotion (gdbarch, 1);
-      set_gdbarch_deprecated_pop_frame (gdbarch, rs6000_pop_frame);
-      set_gdbarch_deprecated_frame_args_address (gdbarch, rs6000_frame_args_address);
-      set_gdbarch_deprecated_frame_locals_address (gdbarch, rs6000_frame_args_address);
-      set_gdbarch_deprecated_saved_pc_after_call (gdbarch, rs6000_saved_pc_after_call);
-      set_gdbarch_deprecated_frameless_function_invocation (gdbarch, rs6000_frameless_function_invocation);
-      set_gdbarch_deprecated_frame_chain (gdbarch, rs6000_frame_chain);
-      set_gdbarch_deprecated_frame_saved_pc (gdbarch, rs6000_frame_saved_pc);
-      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, rs6000_frame_init_saved_regs);
-      set_gdbarch_deprecated_init_extra_frame_info (gdbarch, rs6000_init_extra_frame_info);
-      set_gdbarch_deprecated_init_frame_pc_first (gdbarch, rs6000_init_frame_pc_first);
+
+      set_gdbarch_unwind_pc (gdbarch, rs6000_unwind_pc);
+      frame_unwind_append_sniffer (gdbarch, rs6000_frame_sniffer);
+      set_gdbarch_unwind_dummy_id (gdbarch, rs6000_unwind_dummy_id);
+      frame_base_append_sniffer (gdbarch, rs6000_frame_base_sniffer);
     }
 
   if (from_xcoff_exec)

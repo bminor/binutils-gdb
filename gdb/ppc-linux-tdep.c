@@ -340,111 +340,6 @@ ppc_linux_skip_trampoline_code (CORE_ADDR pc)
   return SYMBOL_VALUE_ADDRESS (msymbol);
 }
 
-/* The rs6000 version of FRAME_SAVED_PC will almost work for us.  The
-   signal handler details are different, so we'll handle those here
-   and call the rs6000 version to do the rest. */
-CORE_ADDR
-ppc_linux_frame_saved_pc (struct frame_info *fi)
-{
-  if ((get_frame_type (fi) == SIGTRAMP_FRAME))
-    {
-      CORE_ADDR regs_addr =
-	read_memory_integer (get_frame_base (fi)
-			     + PPC_LINUX_REGS_PTR_OFFSET, 4);
-      /* return the NIP in the regs array */
-      return read_memory_integer (regs_addr + 4 * PPC_LINUX_PT_NIP, 4);
-    }
-  else if (get_next_frame (fi)
-	   && (get_frame_type (get_next_frame (fi)) == SIGTRAMP_FRAME))
-    {
-      CORE_ADDR regs_addr =
-	read_memory_integer (get_frame_base (get_next_frame (fi))
-			     + PPC_LINUX_REGS_PTR_OFFSET, 4);
-      /* return LNK in the regs array */
-      return read_memory_integer (regs_addr + 4 * PPC_LINUX_PT_LNK, 4);
-    }
-  else
-    return rs6000_frame_saved_pc (fi);
-}
-
-void
-ppc_linux_init_extra_frame_info (int fromleaf, struct frame_info *fi)
-{
-  rs6000_init_extra_frame_info (fromleaf, fi);
-
-  if (get_next_frame (fi) != 0)
-    {
-      /* We're called from get_prev_frame_info; check to see if
-         this is a signal frame by looking to see if the pc points
-         at trampoline code */
-      if (ppc_linux_at_sigtramp_return_path (get_frame_pc (fi)))
-	deprecated_set_frame_type (fi, SIGTRAMP_FRAME);
-      else
-	/* FIXME: cagney/2002-11-10: Is this double bogus?  What
-           happens if the frame has previously been marked as a dummy?  */
-	deprecated_set_frame_type (fi, NORMAL_FRAME);
-    }
-}
-
-int
-ppc_linux_frameless_function_invocation (struct frame_info *fi)
-{
-  /* We'll find the wrong thing if we let 
-     rs6000_frameless_function_invocation () search for a signal trampoline */
-  if (ppc_linux_at_sigtramp_return_path (get_frame_pc (fi)))
-    return 0;
-  else
-    return rs6000_frameless_function_invocation (fi);
-}
-
-void
-ppc_linux_frame_init_saved_regs (struct frame_info *fi)
-{
-  if ((get_frame_type (fi) == SIGTRAMP_FRAME))
-    {
-      CORE_ADDR regs_addr;
-      int i;
-      if (deprecated_get_frame_saved_regs (fi))
-	return;
-
-      frame_saved_regs_zalloc (fi);
-
-      regs_addr =
-	read_memory_integer (get_frame_base (fi)
-			     + PPC_LINUX_REGS_PTR_OFFSET, 4);
-      deprecated_get_frame_saved_regs (fi)[PC_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_NIP;
-      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_ps_regnum] =
-        regs_addr + 4 * PPC_LINUX_PT_MSR;
-      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_cr_regnum] =
-        regs_addr + 4 * PPC_LINUX_PT_CCR;
-      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_lr_regnum] =
-        regs_addr + 4 * PPC_LINUX_PT_LNK;
-      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_ctr_regnum] =
-        regs_addr + 4 * PPC_LINUX_PT_CTR;
-      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_xer_regnum] =
-        regs_addr + 4 * PPC_LINUX_PT_XER;
-      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_mq_regnum] =
-	regs_addr + 4 * PPC_LINUX_PT_MQ;
-      for (i = 0; i < 32; i++)
-	deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + i] =
-	  regs_addr + 4 * PPC_LINUX_PT_R0 + 4 * i;
-      for (i = 0; i < 32; i++)
-	deprecated_get_frame_saved_regs (fi)[FP0_REGNUM + i] = regs_addr + 4 * PPC_LINUX_PT_FPR0 + 8 * i;
-    }
-  else
-    rs6000_frame_init_saved_regs (fi);
-}
-
-CORE_ADDR
-ppc_linux_frame_chain (struct frame_info *thisframe)
-{
-  /* Kernel properly constructs the frame chain for the handler */
-  if ((get_frame_type (thisframe) == SIGTRAMP_FRAME))
-    return read_memory_integer (get_frame_base (thisframe), 4);
-  else
-    return rs6000_frame_chain (thisframe);
-}
-
 /* ppc_linux_memory_remove_breakpoints attempts to remove a breakpoint
    in much the same fashion as memory_remove_breakpoint in mem-break.c,
    but is careful not to write back the previous contents if the code
@@ -1189,19 +1084,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
 	 wasn't fixed for GNU/Linux native platform.  Use the
 	 PowerOpen struct convention.  */
       set_gdbarch_return_value (gdbarch, ppc_linux_return_value);
-
-#if 0
-      /* Note: kevinb/2002-04-12: See note in rs6000_gdbarch_init regarding
-	 *_push_arguments().  The same remarks hold for the methods below.  */
-      set_gdbarch_deprecated_frameless_function_invocation (gdbarch, ppc_linux_frameless_function_invocation);
-      set_gdbarch_deprecated_frame_chain (gdbarch, ppc_linux_frame_chain);
-      set_gdbarch_deprecated_frame_saved_pc (gdbarch, ppc_linux_frame_saved_pc);
-
-      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch,
-                                         ppc_linux_frame_init_saved_regs);
-      set_gdbarch_deprecated_init_extra_frame_info (gdbarch,
-                                         ppc_linux_init_extra_frame_info);
-#endif
 
       set_gdbarch_memory_remove_breakpoint (gdbarch,
                                             ppc_linux_memory_remove_breakpoint);

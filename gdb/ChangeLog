@@ -1,3 +1,27 @@
+2004-03-19  Kevin Buettner  <kevinb@redhat.com>
+
+	* ppc_tdep.h (ppc_linux_frame_saved_pc)
+	(ppc_linux_init_extra_frame_info)
+	(ppc_linux_frameless_function_invocation)
+	(ppc_linux_frame_init_saved_regs, ppc_linux_frame_chain)
+	(rs6000_frame_saved_pc, rs6000_init_extra_frame_info)
+	(rs6000_frameless_function_invocation, rs6000_frame_init_saved_regs)
+	(rs6000_frame_chain): Delete declarations.
+	* ppc-linux-tdep.c (ppc_linux_frame_saved_pc)
+	(ppc_linux_init_extra_frame_info)
+	(ppc_linux_frameless_function_invocation)
+	(ppc_linux_frame_init_saved_regs, ppc_linux_frame_chain): Delete.
+	(ppc_linux_init_abi): Remove registration of above deleted functions.
+	* rs6000-tdep.c (rs6000_init_extra_frame_info)
+	(rs6000_frame_init_saved_regs, rs6000_init_frame_pc_first)
+	(rs6000_frame_args_address, rs6000_saved_pc_after_call)
+	(rs6000_pop_frame, rs6000_frameless_function_invocation)
+	(rs6000_frame_saved_pc, rs6000_frame_chain): Delete.
+	(rs6000_gdbarch_init): Remove registration of above deleted functions.
+	Use rs6000_unwind_pc(), rs6000_frame_sniffer(),
+	rs6000_unwind_dummy_id(), and rs6000_frame_base_sniffer() for
+	frame management for all OSABIs.
+
 2004-03-19  Andrew Cagney  <cagney@redhat.com>
 
 	Committed by Kevin Buettner <kevinb@redhat.com>.

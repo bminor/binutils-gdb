@@ -30,11 +30,6 @@ struct regcache;
 struct type;
 
 /* From ppc-linux-tdep.c... */
-CORE_ADDR ppc_linux_frame_saved_pc (struct frame_info *fi);
-void ppc_linux_init_extra_frame_info (int fromleaf, struct frame_info *);
-int ppc_linux_frameless_function_invocation (struct frame_info *);
-void ppc_linux_frame_init_saved_regs (struct frame_info *);
-CORE_ADDR ppc_linux_frame_chain (struct frame_info *);
 enum return_value_convention ppc_sysv_abi_return_value (struct gdbarch *gdbarch,
 							struct type *valtype,
 							struct regcache *regcache,
@@ -77,11 +72,6 @@ enum return_value_convention ppc64_sysv_abi_return_value (struct gdbarch *gdbarc
 							  const void *writebuf);
 
 /* From rs6000-tdep.c... */
-CORE_ADDR rs6000_frame_saved_pc (struct frame_info *fi);
-void rs6000_init_extra_frame_info (int fromleaf, struct frame_info *);
-int rs6000_frameless_function_invocation (struct frame_info *);
-void rs6000_frame_init_saved_regs (struct frame_info *);
-CORE_ADDR rs6000_frame_chain (struct frame_info *);
 int altivec_register_p (int regno);
 
 
