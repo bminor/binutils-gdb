@@ -1,3 +1,13 @@
+1999-06-22  Ian Lance Taylor  <ian@zembu.com>
+
+	From Franz Sirl <Franz.Sirl-kernel@lauterbach.com>:
+	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Set unused dynindx
+	field to 0, not -1.
+	(ppc_elf_finish_dynamic_sections): Check for positive section
+	dynindx field, rather than comparing against -1.
+	(ppc_elf_relocate_section): Only return false if undefined_symbol
+	or reloc_overflow fail, not always upon encountering an error.
+
 1999-06-22  Mark Mitchell  <mark@codesourcery.com>
 
 	* elflink.h (link_read_relocs): Explicitly cast external_relocs to

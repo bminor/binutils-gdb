@@ -2102,7 +2102,7 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
 	  if ((s->flags & SEC_LINKER_CREATED) != 0
 	      || (s->flags & SEC_ALLOC) == 0)
 	    {
-	      elf_section_data (s)->dynindx = -1;
+	      elf_section_data (s)->dynindx = 0;
 	      continue;
 	    }
 
@@ -2949,7 +2949,7 @@ ppc_elf_finish_dynamic_sections (output_bfd, info)
 
 	  indx = elf_section_data (s)->this_idx;
 	  dindx = elf_section_data (s)->dynindx;
-	  if (dindx != -1)
+	  if (dindx > 0)
 	    {
 	      BFD_ASSERT(indx > 0);
 	      BFD_ASSERT(dindx > 0);
@@ -3200,12 +3200,13 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    relocation = 0;
 	  else
 	    {
-	      (*info->callbacks->undefined_symbol)(info,
-						   h->root.root.string,
-						   input_bfd,
-						   input_section,
-						   rel->r_offset);
-	      ret = false;
+	      if (! (*info->callbacks->undefined_symbol)(info,
+							 h->root.root.string,
+							 input_bfd,
+							 input_section,
+							 rel->r_offset))
+		return false;
+	      relocation = 0;
 	      continue;
 	    }
 	}
@@ -3230,12 +3231,12 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  || h->root.type == bfd_link_hash_defweak)
 	      && sec->output_section == NULL)
 	    {
-	      (*info->callbacks->undefined_symbol) (info,
-						    h->root.root.string,
-						    input_bfd,
-						    input_section,
-						    rel->r_offset);
-	      ret = false;
+	      if (! (*info->callbacks->undefined_symbol) (info,
+							  h->root.root.string,
+							  input_bfd,
+							  input_section,
+							  rel->r_offset))
+		return false;
 	      continue;
 	    }
 	  break;
@@ -3784,14 +3785,14 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		name = bfd_section_name (input_bfd, sec);
 	    }
 
-	  (*info->callbacks->reloc_overflow)(info,
-					     name,
-					     howto->name,
-					     (bfd_vma) 0,
-					     input_bfd,
-					     input_section,
-					     offset);
-	  ret = false;
+	  if (! (*info->callbacks->reloc_overflow)(info,
+						   name,
+						   howto->name,
+						   (bfd_vma) 0,
+						   input_bfd,
+						   input_section,
+						   offset))
+	    return false;
 	}
       else
 	ret = false;
