@@ -1,3 +1,15 @@
+Mon Aug 19 15:21:38 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc-dis.c (print_insn_sparc): Handle little endian sparcs.
+
+start-sanitize-d10v
+Thu Aug 15 13:14:43 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d10v-opc.c: Add additional information to the opcode
+	table to help determinine which instructions can be done
+	in parallel.
+
+end-sanitize-d10v
 Thu Aug 15 13:11:13 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed: Update editing of include pathnames to be
