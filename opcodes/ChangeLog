@@ -1,3 +1,19 @@
+Tue Jun 10 11:26:47 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
+
+	* arm-dis.c: Add prototypes for arm_decode_shift and
+	print_insn_arm.
+
+Mon Jun  2 11:39:04 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* mips-opc.c: Add r3900 insns.
+
+Tue May 27 15:55:44 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* sh-dis.c (print_insn_shx): Change relmask to bfd_vma.  Don't
+	print delay slot instructions on the same line.  When using a PC
+	relative load, add a comment with the value being loaded if it can
+	be obtained.
+
 Tue May 27 11:02:08 1997  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* i386-dis.c (dis386[], dis386_twobyte[]): change pushl/popl
