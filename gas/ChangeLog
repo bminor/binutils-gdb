@@ -1,3 +1,8 @@
+Mon Nov  9 14:25:06 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d30v.c: Change default behaviour to ignore potential
+	conflicts between register name and symbol names.
+
 start-sanitize-fr30
 Wed Nov  4 18:42:00 1998  Dave Brolley  <brolley@cygnus.com>
 
