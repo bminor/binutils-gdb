@@ -2152,7 +2152,7 @@ static struct sym_fns xcoff_sym_fns =
      file with coffread.c.  For example, the extra storage classes
      used for stabs could presumably be recognized in any COFF file.  */
 
-  (bfd_flavour)-1,
+  (enum bfd_flavour)-1,
 
   xcoff_new_init,	/* sym_new_init: init anything gbl to entire symtab */
   xcoff_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
