@@ -1,5 +1,15 @@
 2001-08-20  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldlang.c (insert_pad): Fix typos in last patch.
+
+	* ldlang.c: When traversing lang_statement_union_type lists,
+	consistently use "header.next" rather than "next".
+	* mpw-eppcmac.c: Likewise.
+	* emultempl/beos.em: Likewise.
+	* emultempl/hppaelf.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* ldlang.h (union lang_statement_union): Remove "next" field.
+
 	* ldlang.c (insert_pad): Use offsetof macro.
 	(lang_size_sections): Always neuter padding statements.
 	* emultempl/hppaelf.em (hppaelf_delete_padding_statements): Delete.

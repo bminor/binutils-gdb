@@ -2637,9 +2637,9 @@ insert_pad (ptr, fill, alignment_needed, output_section, dot)
   lang_statement_union_type *pad;
 
   pad = ((lang_statement_union_type *)
-	 ((char *) ptr - offsetof (lang_statement_union_type *, header.next)));
+	 ((char *) ptr - offsetof (lang_statement_union_type, header.next)));
   if (ptr != &statement_list.head
-      && pad->header.type == lang_padding_statement_enum)
+      && pad->header.type == lang_padding_statement_enum
       && pad->padding_statement.output_section == output_section)
     {
       /* Use the existing pad statement.  The above test on output
