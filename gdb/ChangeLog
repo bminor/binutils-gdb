@@ -1,5 +1,7 @@
 Sat Apr 20 21:42:47 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
+	* i386-tdep.c: Remove unnecessary #includes.
+
 	* symtab.c (various): Change error return of find_line_common to -1.
 
 	* coffread.c (find_linenos): Use LINESZ not sizeof (struct lineno).
