@@ -420,9 +420,9 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @ifset XTENSA
 
 @emph{Target Xtensa options:}
- [@b{--[no-]density}] [@b{--[no-]relax}] [@b{--[no-]generics}]
- [@b{--[no-]text-section-literals}]
+ [@b{--[no-]text-section-literals}] [@b{--[no-]absolute-literals}]
  [@b{--[no-]target-align}] [@b{--[no-]longcalls}]
+ [@b{--[no-]transform}]
 @end ifset
 @c man end
 @end smallexample
@@ -1061,28 +1061,19 @@ The following options are available when @value{AS} is configured for
 an Xtensa processor.
 
 @table @gcctabopt
-@item --density | --no-density
-Enable or disable use of instructions from the Xtensa code density
-option.  This is enabled by default when the Xtensa processor supports
-the code density option.
-
-@item --relax | --no-relax
-Enable or disable instruction relaxation.  This is enabled by default.
-Note: In the current implementation, these options also control whether
-assembler optimizations are performed, making these options equivalent
-to @option{--generics} and @option{--no-generics}.
-
-@item --generics | --no-generics
-Enable or disable all assembler transformations of Xtensa instructions.
-The default is @option{--generics};
-@option{--no-generics} should be used only in the rare cases when the
-instructions must be exactly as specified in the assembly source.
-
 @item --text-section-literals | --no-text-section-literals
 With @option{--text-@-section-@-literals}, literal pools are interspersed
 in the text section.  The default is
 @option{--no-@-text-@-section-@-literals}, which places literals in a
-separate section in the output file.
+separate section in the output file.  These options only affect literals
+referenced via PC-relative @code{L32R} instructions; literals for
+absolute mode @code{L32R} instructions are handled separately.
+
+@item --absolute-literals | --no-absolute-literals
+Indicate to the assembler whether @code{L32R} instructions use absolute
+or PC-relative addressing.  The default is to assume absolute addressing
+if the Xtensa processor includes the absolute @code{L32R} addressing
+option.  Otherwise, only the PC-relative @code{L32R} mode can be used.
 
 @item --target-align | --no-target-align
 Enable or disable automatic alignment to reduce branch penalties at the
@@ -1092,6 +1083,12 @@ expense of some code density.  The default is @option{--target-@-align}.
 Enable or disable transformation of call instructions to allow calls
 across a greater range of addresses.  The default is
 @option{--no-@-longcalls}.
+
+@item --transform | --no-transform
+Enable or disable all assembler transformations of Xtensa instructions.
+The default is @option{--transform};
+@option{--no-transform} should be used only in the rare cases when the
+instructions must be exactly as specified in the assembly source.
 @end table
 @end ifset
 

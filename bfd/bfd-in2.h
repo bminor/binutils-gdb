@@ -3621,9 +3621,56 @@ to one of its own internal functions or data structures.  */
 PLT entries.  Otherwise, this is just a generic 32-bit relocation.  */
   BFD_RELOC_XTENSA_PLT,
 
-/* Generic Xtensa relocations.  Only the operand number is encoded
-in the relocation.  The details are determined by extracting the
-instruction opcode.  */
+/* Xtensa relocations to mark the difference of two local symbols.
+These are only needed to support linker relaxation and can be ignored
+when not relaxing.  The field is set to the value of the difference
+assuming no relaxation.  The relocation encodes the position of the
+first symbol so the linker can determine whether to adjust the field
+value.  */
+  BFD_RELOC_XTENSA_DIFF8,
+  BFD_RELOC_XTENSA_DIFF16,
+  BFD_RELOC_XTENSA_DIFF32,
+
+/* Generic Xtensa relocations for instruction operands.  Only the slot
+number is encoded in the relocation.  The relocation applies to the
+last PC-relative immediate operand, or if there are no PC-relative
+immediates, to the last immediate operand.  */
+  BFD_RELOC_XTENSA_SLOT0_OP,
+  BFD_RELOC_XTENSA_SLOT1_OP,
+  BFD_RELOC_XTENSA_SLOT2_OP,
+  BFD_RELOC_XTENSA_SLOT3_OP,
+  BFD_RELOC_XTENSA_SLOT4_OP,
+  BFD_RELOC_XTENSA_SLOT5_OP,
+  BFD_RELOC_XTENSA_SLOT6_OP,
+  BFD_RELOC_XTENSA_SLOT7_OP,
+  BFD_RELOC_XTENSA_SLOT8_OP,
+  BFD_RELOC_XTENSA_SLOT9_OP,
+  BFD_RELOC_XTENSA_SLOT10_OP,
+  BFD_RELOC_XTENSA_SLOT11_OP,
+  BFD_RELOC_XTENSA_SLOT12_OP,
+  BFD_RELOC_XTENSA_SLOT13_OP,
+  BFD_RELOC_XTENSA_SLOT14_OP,
+
+/* Alternate Xtensa relocations.  Only the slot is encoded in the
+relocation.  The meaning of these relocations is opcode-specific.  */
+  BFD_RELOC_XTENSA_SLOT0_ALT,
+  BFD_RELOC_XTENSA_SLOT1_ALT,
+  BFD_RELOC_XTENSA_SLOT2_ALT,
+  BFD_RELOC_XTENSA_SLOT3_ALT,
+  BFD_RELOC_XTENSA_SLOT4_ALT,
+  BFD_RELOC_XTENSA_SLOT5_ALT,
+  BFD_RELOC_XTENSA_SLOT6_ALT,
+  BFD_RELOC_XTENSA_SLOT7_ALT,
+  BFD_RELOC_XTENSA_SLOT8_ALT,
+  BFD_RELOC_XTENSA_SLOT9_ALT,
+  BFD_RELOC_XTENSA_SLOT10_ALT,
+  BFD_RELOC_XTENSA_SLOT11_ALT,
+  BFD_RELOC_XTENSA_SLOT12_ALT,
+  BFD_RELOC_XTENSA_SLOT13_ALT,
+  BFD_RELOC_XTENSA_SLOT14_ALT,
+
+/* Xtensa relocations for backward compatibility.  These have all been
+replaced by BFD_RELOC_XTENSA_SLOT0_OP.  */
   BFD_RELOC_XTENSA_OP0,
   BFD_RELOC_XTENSA_OP1,
   BFD_RELOC_XTENSA_OP2,

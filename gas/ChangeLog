@@ -1,3 +1,433 @@
+2004-10-07  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (absolute_literals_supported): New global flag.
+	(UNREACHABLE_MAX_WIDTH): Define.
+	(XTENSA_FETCH_WIDTH): Delete.
+	(cur_vinsn, xtensa_fetch_width, xt_saved_debug_type, past_xtensa_end,
+	prefer_const16, prefer_l32r): New global variables.
+	(LIT4_SECTION_NAME): Define.
+	(lit4_state struct): Add lit4_seg_name and lit4_seg fields.
+	(XTENSA_PROP_*, GET_XTENSA_PROP_*, SET_XTENSA_PROP_*): Define.
+	(frag_flags struct): New.
+	(xtensa_block_info struct): Move from tc-xtensa.h.  Add flags field. 
+	(subseg_map struct): Add cur_total_freq and cur_target_freq fields.
+	(bitfield, bit_is_set, set_bit, clear_bit): Define.
+	(MAX_FORMATS): Define.
+	(op_placement_info struct, op_placement_table): New.
+	(O_pltrel, O_hi16, O_lo16): Define.
+	(directiveE enum): Rename directive_generics to directive_transform.
+	Delete directive_relax.  Add directive_schedule,
+	directive_absolute_literals, and directive_last_directive.
+	(directive_info): Rename "generics" to "transform".  Delete "relax".
+	Add "schedule" and "absolute-literals".
+	(directive_state): Adjust entries to match changes in directive_info.
+	(xtensa_relax_statesE, RELAX_IMMED_MAXSTEPS): Move to tc-xtensa.h.
+	(xtensa_const16_opcode, xtensa_movi_opcode, xtensa_movi_n_opcode,
+	xtensa_l32r_opcode, xtensa_nop_opcode, xtensa_rsr_lcount_opcode): New.
+	(xtensa_j_opcode, xtensa_rsr_opcode): Delete.
+	(align_only_targets, software_a0_b_retw_interlock,
+	software_avoid_b_j_loop_end, maybe_has_b_j_loop_end,
+	software_avoid_short_loop, software_avoid_close_loop_end,
+	software_avoid_all_short_loops, specific_opcode): Delete.
+	(warn_unaligned_branch_targets): New.
+	(workaround_a0_b_retw, workaround_b_j_loop_end, workaround_short_loop,
+	workaround_close_loop_end, workaround_all_short_loops): Default FALSE.
+	(option_[no_]link_relax, option_[no_]transform,
+	option_[no_]absolute_literals, option_warn_unaligned_targets,
+	option_prefer_l32r, option_prefer_const16, option_target_hardware):
+	New enum values.
+	(option_[no_]align_only_targets, option_literal_section_name,
+	option_text_section_name, option_data_section_name,
+	option_bss_section_name, option_eb, option_el): Delete.
+	(md_longopts): Add entries for: [no-]transform, [no-]absolute-literals,
+	warn-unaligned-targets, prefer-l32r, prefer-const16, [no-]link-relax,
+	and target-hardware.  Delete entries for [no-]target-align-only,
+	literal-section-name, text-section-name, data-section-name, and
+	bss-section-name.
+	(md_parse_option): Handle new options and remove old ones.  Accept but
+	ignore [no-]density options.  Warn for [no-]generics and [no-]relax
+	and treat them as [no-]transform.
+	(md_show_usage): Add new options and remove old ones.
+	(xtensa_setup_hw_workarounds): New.
+	(md_pseudo_table): Change "word" entry to use xtensa_elf_cons.  Add
+	"long", "short", "loc" and "frequency" entries.
+	(use_generics): Rename to ...
+	(use_transform): ... this function.  Add past_xtensa_end check.
+	(use_longcalls): Add past_xtensa_end check.
+	(code_density_available, can_relax): Delete.
+	(do_align_targets): New.
+	(get_directive): Accept dashes in directive names.  Warn about
+	[no-]generics and [no-]relax directives and treat them as
+	[no-]transform. 
+	(xtensa_begin_directive): Call md_flush_pending_output only for some
+	directives.  Check for directives inside instruction bundles.  Warn
+	about deprecated ".begin literal" usage.  Warn and ignore [no-]density
+	directives.  Handle new directives.  Check generating_literals flag
+	for literal_prefix.
+	(xtensa_end_directive): Check for directives inside instruction
+	bundles.  Warn and ignore [no-]density directives.  Handle new
+	directives.  Call xtensa_set_frag_assembly_state.
+	(xtensa_loc_directive_seen, xtensa_dwarf2_directive_loc,
+	xtensa_dwarf2_emit_insn): New.
+	(xtensa_literal_position): Call md_flush_pending_output.  Do not check
+	use_literal_section flag.
+	(xtensa_literal_pseudo): Call md_flush_pending_output.  Handle absolute
+	literals.  Use xtensa_elf_cons to parse the expression.
+	(xtensa_literal_prefix): Do not check use_literal_section.  Support
+	".lit4" sections for absolute literals.  Change prefix convention to
+	replace ".text" (or ".t" in a linkonce section).  No need to call
+	subseg_set.
+	(xtensa_frequency_pseudo, xtensa_elf_cons, xtensa_elf_suffix): New.
+	(expression_end): Handle closing braces and colons.
+	(PLT_SUFFIX, plt_suffix): Delete.
+	(expression_maybe_register): Use new xtensa-isa.h functions.  Use
+	xtensa_elf_suffix instead of checking for plt suffix, and handle O_lo16
+	and O_hi16 expressions as well.
+	(tokenize_arguments): Handle closing braces and colons.
+	(parse_arguments): Use new xtensa-isa.h functions.  Handle "invisible"
+	operands and paired register syntax.
+	(get_invisible_operands): New.
+	(xg_translate_sysreg_op): Handle new Xtensa LX RSR/WSR/XSR syntax.  Use
+	new xtensa-isa.h functions.
+	(xtensa_translate_old_userreg_ops, xtensa_translate_zero_immed): New.
+	(xg_translate_idioms): Check if inside bundle.  Use use_transform.
+	Handle new Xtensa LX RSR/WSR/XSR syntax.  Remove code to widen density
+	instructions.  Use xtensa_translate_zero_immed.
+	(operand_is_immed, operand_is_pcrel_label): Delete.
+	(get_relaxable_immed): Use new xtensa-isa.h functions.
+	(get_opcode_from_buf): Add slot parameter.  Use new xtensa-isa.h
+	functions.
+	(xtensa_print_insn_table, print_vliw_insn): New.
+	(is_direct_call_opcode): Use new xtensa-isa.h functions.
+	(is_call_opcode, is_loop_opcode, is_conditional_branch_opcode,
+	is_branch_or_jump_opcode): Delete.
+	(is_movi_opcode, decode_reloc, encode_reloc, encode_alt_reloc): New.
+	(opnum_to_reloc, reloc_to_opnum): Delete.
+	(xtensa_insnbuf_set_operand, xtensa_insnbuf_get_operand): Use new
+	xtensa-isa.h functions.  Operate on one slot of an instruction.
+	(xtensa_insnbuf_set_immediate_field, is_negatable_branch,
+	xg_get_insn_size): Delete.
+	(xg_get_build_instr_size): Use xg_get_single_size.
+	(xg_is_narrow_insn, xg_is_single_relaxable_insn): Update calls to
+	xg_build_widen_table.  Use xg_get_single_size.
+	(xg_get_max_narrow_insn_size): Delete.
+	(xg_get_max_insn_widen_size, xg_get_max_insn_widen_literal_size,
+	xg_is_relaxable_insn): Update calls to xg_build_widen_table.  Use
+	xg_get_single_size.
+	(xg_build_to_insn): Record the loc field.  Handle OP_OPERAND_HI16U and
+	OP_OPERAND_LOW16U.  Check xg_valid_literal_expression.
+	(xg_expand_to_stack, xg_expand_narrow): Update calls to
+	xg_build_widen_table.  Use xg_get_single_size.
+	(xg_immeds_fit): Use new xtensa-isa.h functions.  Update call to
+	xg_check_operand.
+	(xg_symbolic_immeds_fit): Likewise.  Also handle O_lo16 and O_hi16, and
+	treat weak symbols conservatively.
+	(xg_check_operand): Use new xtensa-isa.h functions.
+	(is_dnrange): Delete.
+	(xg_assembly_relax): Inline previous calls to tinsn_copy.
+	(xg_finish_frag): Specify separate relax states for the frag and slot0.
+	(is_branch_jmp_to_next, xg_add_branch_and_loop_targets): Use new
+	xtensa-isa.h functions.
+	(xg_instruction_matches_option_term, xg_instruction_matches_or_options,
+	xg_instruction_matches_options): New.
+	(xg_instruction_matches_rule): Handle O_register expressions.  Call
+	xg_instruction_matches_options.
+	(transition_rule_cmp): New.
+	(xg_instruction_match): Update call to xg_build_simplify_table.
+	(xg_build_token_insn): Record loc fields.
+	(xg_simplify_insn): Check is_specific_opcode field and
+	density_supported flag.
+	(xg_expand_assembly_insn): Skip checking code_density_available.  Use
+	new xtensa-isa.h functions.  Call use_transform instead of can_relax.
+	(xg_assemble_literal): Add error handling for O_big.  Call
+	record_alignment.  Handle O_pltrel.
+	(xg_valid_literal_expression): New.
+	(xg_assemble_literal_space): Add slot parameter.  Remove call to
+	set_expr_symbol_offset.  Add call to record_alignment.  Update call to
+	xg_finish_frag.
+	(xg_emit_insn): Delete.
+	(xg_emit_insn_to_buf): Add format parameter.  Update calls to
+	xg_add_opcode_fix and xtensa_insnbuf_to_chars.
+	(xg_add_opcode_fix): Change opcode parameter to tinsn and add format
+	and slot parameters.  Handle new "alternate" relocations for absolute
+	literals and CONST16 instructions.  Check for bad uses of O_lo16 and
+	O_hi16.  Use new xtensa-isa.h functions.
+	(xg_assemble_tokens): Delete.
+	(is_register_writer): Use new xtensa-isa.h functions.
+	(is_bad_loopend_opcode): Check for xtensa_rsr_lcount_opcode instead of
+	old-style RSR from LCOUNT.
+	(next_frag_opcode): Delete.
+	(next_frag_opcode_is_loop, next_frag_format_size, frag_format_size,
+	update_next_frag_state): New.
+	(update_next_frag_nop_state): Delete.
+	(next_frag_pre_opcode_bytes): Use next_frag_opcode_is_loop.
+	(xtensa_mark_literal_pool_location): Check use_literal_section flag and
+	the state of the absolute-literals directive.  Add calls to
+	record_alignment and xtensa_set_frag_assembly_state.  Call
+	xtensa_switch_to_non_abs_literal_fragment instead of
+	xtensa_switch_to_literal_fragment.
+	(build_nop): New.
+	(assemble_nop): Use build_nop.  Update call to xtensa_insnbuf_to_chars.
+	(get_expanded_loop_offset): Change check for undefined opcode to an
+	assertion.
+	(xtensa_set_frag_assembly_state, relaxable_section,
+	xtensa_find_unmarked_state_frags, xtensa_find_unaligned_branch_targets,
+	xtensa_find_unaligned_loops, xg_apply_tentative_value): New.
+	(md_begin): Update call to xtensa_isa_init.  Initialize linkrelax to 1.
+	Set lit4_seg_name.  Call xg_init_vinsn.  Initialize new global opcodes.
+	Call init_op_placement_info_table and xtensa_set_frag_assembly_state.
+	(xtensa_init_fix_data): New.
+	(xtensa_frob_label): Reset label symbol to the current frag.  Check
+	do_align_targets and generating_literals flag.  Propagate frequency
+	info to new alignment frag.  Call xtensa_set_frag_assembly_state.
+	(xtensa_unrecognized_line): New.
+	(xtensa_flush_pending_output): Check if inside a bundle.  Add a call
+	to xtensa_set_frag_assembly_state.
+	(error_reset_cur_vinsn): New.
+	(md_assemble): Remove check for literal frag.  Remove call to
+	istack_init.  Call use_transform instead of use_generics.  Parse
+	explicit instruction format specifiers.  Move code for
+	a0_b_retw_interlock workaround to xg_assemble_vliw_tokens.  Call
+	error_reset_cur_vinsn on errors.  Add call to get_invisible_operands.
+	Add dwarf2_where call.  Remote automatic alignment for ENTRY
+	instructions.  Move call to xtensa_clear_insn_labels to the end.
+	Rearrange to handle bundles.
+	(xtensa_cons_fix_new): Delete.
+	(xtensa_handle_align): New.
+	(xtensa_frag_init): Call xtensa_set_frag_assembly_state.  Remove
+	assignment to is_no_density field.
+	(md_pcrel_from): Use new xtensa-isa.h functions.  Use decode_reloc
+	instead of reloc_to_opnum.  Handle "alternate" relocations.
+	(xtensa_force_relocation, xtensa_check_inside_bundle,
+	xtensa_elf_section_change_hook): New.
+	(xtensa_symbol_new_hook): Delete.
+	(xtensa_fix_adjustable): Check for difference of symbols with an
+	offset.  Check for external and weak symbols.
+	(md_apply_fix3): Remove cases for XTENSA_OP{0,1,2} relocs.
+	(md_estimate_size_before_relax): Return expansion for the first slot.
+	(tc_gen_reloc): Handle difference of symbols by producing
+	XTENSA_DIFF{8,16,32} relocs and by writing the value of the difference
+	into the output.  Handle new XTENSA_SLOT*_OP relocs by storing the
+	tentative values into the output when linkrelax is set.
+	(XTENSA_PROP_SEC_NAME): Define.
+	(xtensa_post_relax_hook): Call xtensa_find_unmarked_state_frags.
+	Create literal tables only if using literal sections.  Create new
+	property tables instead of old instruction tables.  Check for unaligned
+	branch targets and loops.
+	(finish_vinsn, find_vinsn_conflicts, check_t1_t2_reads_and_writes,
+	new_resource_table, clear_resource_table, resize_resource_table,
+	resources_available, reserve_resources, release_resources,
+	opcode_funcUnit_use_unit, opcode_funcUnit_use_stage,
+	resources_conflict, xg_find_narrowest_format, relaxation_requirements,
+	bundle_single_op, emit_single_op, xg_assemble_vliw_tokens): New.
+	(xtensa_end): Call xtensa_flush_pending_output.  Set past_xtensa_end
+	flag.  Update checks for workaround options.  Call
+	xtensa_mark_narrow_branches and xtensa_mark_zcl_first_insns.
+	(xtensa_cleanup_align_frags): Add special case for branch targets.
+	Check for and mark unreachable frags.
+	(xtensa_fix_target_frags): Remove use of align_only_targets flag.
+	Use RELAX_LOOP_END_BYTES in special case for negatable branch at the
+	end of a zero-overhead loop body.
+	(frag_can_negate_branch): Handle instructions with multiple slots.
+	Use new xtensa-isa.h functions
+	(xtensa_mark_narrow_branches, is_narrow_branch_guaranteed_in_range,
+	xtensa_mark_zcl_first_insns): New.
+	(xtensa_fix_a0_b_retw_frags, xtensa_fix_b_j_loop_end_frags): Error if
+	transformations are disabled.
+	(next_instrs_are_b_retw): Use new xtensa-isa.h functions.  Handle
+	multislot instructions.
+	(xtensa_fix_close_loop_end_frags, xtensa_fix_short_loop_frags):
+	Likewise.  Also error if transformations are disabled.
+	(unrelaxed_frag_max_size): New.
+	(unrelaxed_frag_min_insn_count, unrelax_frag_has_b_j): Use new
+	xtensa-isa.h functions.
+	(xtensa_sanity_check, is_empty_loop, is_local_forward_loop): Use
+	xtensa_opcode_is_loop instead of is_loop_opcode.
+	(get_text_align_power): Replace as_fatal with assertion.
+	(get_text_align_fill_size): Iterate instead of using modulus when
+	use_nops is false.
+	(get_noop_aligned_address): Assert that this is for a machine-dependent
+	RELAX_ALIGN_NEXT_OPCODE frag.  Use next_frag_opcode_is_loop,
+	xg_get_single_size, and frag_format_size.
+	(get_widen_aligned_address): Rename to ...
+	(get_aligned_diff): ... this function.  Add max_diff parameter.
+	Remove handling of rs_align/rs_align_code frags.  Use
+	next_frag_format_size, get_text_align_power, get_text_align_fill_size,
+	next_frag_opcode_is_loop, and xg_get_single_size.  Compute max_diff
+	and pass it back to caller.
+	(xtensa_relax_frag): Use relax_frag_loop_align.  Add code for new
+	RELAX_SLOTS, RELAX_MAYBE_UNREACHABLE, RELAX_MAYBE_DESIRE_ALIGN,
+	RELAX_FILL_NOP, and RELAX_UNREACHABLE frag types.  Check relax_seen.
+	(relax_frag_text_align): Rename to ...
+	(relax_frag_loop_align): ... this function.  Assume loops can only be
+	in the first slot of an instruction.
+	(relax_frag_add_nop): Use assemble_nop instead of constructing an OR
+	instruction.  Remove call to frag_wane.
+	(relax_frag_narrow): Rename to ...
+	(relax_frag_for_align): ... this function.  Extend to handle
+	RELAX_FILL_NOP and RELAX_UNREACHABLE, as well as RELAX_SLOTS with
+	RELAX_NARROW for the first slot.
+	(find_address_of_next_align_frag, bytes_to_stretch): New.
+	(future_alignment_required): Use find_address_of_next_align_frag and
+	bytes_to_stretch.  Look ahead to subsequent frags to make smarter
+	alignment decisions.
+	(relax_frag_immed): Add format, slot, and estimate_only parameters.
+	Check if transformations are enabled for b_j_loop_end workaround.
+	Use new xtensa-isa.h functions and handle multislot instructions.
+	Update call to xg_assembly_relax.
+	(md_convert_frag): Handle new RELAX_SLOTS, RELAX_UNREACHABLE,
+	RELAX_MAYBE_UNREACHABLE, RELAX_MAYBE_DESIRE_ALIGN, and RELAX_FILL_NOP
+	frag types.
+	(convert_frag_narrow): Add segP, format and slot parameters.  Call
+	convert_frag_immed for branch instructions.  Adjust calls to
+	tinsn_from_chars, tinsn_immed_from_frag, and xg_emit_insn_to_buf.  Use
+	xg_get_single_size and xg_get_single_format.
+	(convert_frag_fill_nop): New.
+	(convert_frag_immed): Add format and slot parameters.  Handle multislot
+	instructions and use new xtensa-isa.h functions.  Update calls to
+	tinsn_immed_from_frag and xg_assembly_relax.  Check if transformations
+	enabled for b_j_loop_end workaround.  Use build_nop instead of
+	assemble_nop.  Check is_specific_opcode flag.  Check for unreachable
+	frags.  Use xg_get_single_size.  Handle O_pltrel.
+	(fix_new_exp_in_seg): Remove check for old plt flag.
+	(convert_frag_immed_finish_loop): Update calls to tinsn_from_chars and
+	xtensa_insnbuf_to_chars.  Call tinsn_immed_from_frag.  Change check
+	for loop opcode to an assertion.  Mark all frags up to the end of the
+	loop as not transformable.
+	(get_last_insn_flags, set_last_insn_flags): Use get_subseg_info.
+	(get_subseg_info): New.
+	(xtensa_move_literals): Call xtensa_set_frag_assembly_state.  Add null
+	check for dest_seg.
+	(xtensa_switch_to_literal_fragment): Rewrite to handle absolute
+	literals and use xtensa_switch_to_non_abs_literal_fragment otherwise.
+	(xtensa_switch_to_non_abs_literal_fragment): New.
+	(cache_literal_section): Add is_code parameter and pass it through to
+	retrieve_literal_seg.
+	(retrieve_literal_seg): Add is_code parameter and use it to set the
+	flags on the literal section.  Handle case where head parameter is 0.
+	(get_frag_is_no_transform, set_frag_is_specific_opcode,
+	set_frag_is_no_transform): New.
+	(xtensa_create_property_segments): Add end_property_function parameter
+	and pass it through to add_xt_block_frags.  Call bfd_get_section_flags
+	and skip SEC_DEBUGGING and !SEC_ALLOC sections.
+	(xtensa_create_xproperty_segments, section_has_xproperty): New.
+	(add_xt_block_frags): Add end_property_function parameter and call it
+	if it is non-zero.  Call xtensa_frag_flags_init.
+	(xtensa_frag_flags_is_empty, xtensa_frag_flags_init,
+	get_frag_property_flags, frag_flags_to_number,
+	xtensa_frag_flags_combinable, xt_block_aligned_size,
+	xtensa_xt_block_combine, add_xt_prop_frags,
+	init_op_placement_info_table, opcode_fits_format_slot,
+	xg_get_single_size, xg_get_single_format): New.
+	(istack_push): Inline call to tinsn_copy.
+	(tinsn_copy): Delete.
+	(tinsn_has_invalid_symbolic_operands): Handle O_hi16 and O_lo16 and
+	CONST16 opcodes.  Handle O_big, O_illegal, and O_absent.
+	(tinsn_has_complex_operands): Handle O_hi16 and O_lo16.
+	(tinsn_to_insnbuf): Use xg_get_single_format and new xtensa-isa.h
+	functions.  Handle invisible operands.
+	(tinsn_to_slotbuf): New.
+	(tinsn_check_arguments): Use new xtensa-isa.h functions.
+	(tinsn_from_chars): Add slot parameter.  Rewrite using xg_init_vinsn,
+	vinsn_from_chars, and xg_free_vinsn.
+	(tinsn_from_insnbuf): New.
+	(tinsn_immed_from_frag): Add slot parameter and handle multislot
+	instructions.  Handle symbol differences.
+	(get_num_stack_text_bytes): Use xg_get_single_size.
+	(xg_init_vinsn, xg_clear_vinsn, vinsn_has_specific_opcodes,
+	xg_free_vinsn, vinsn_to_insnbuf, vinsn_from_chars, expr_is_register,
+	get_expr_register, set_expr_symbol_offset_diff): New.
+	* config/tc-xtensa.h (MAX_SLOTS): Define.
+	(xtensa_relax_statesE): Move from tc-xtensa.c. Add
+	RELAX_CHECK_ALIGN_NEXT_OPCODE, RELAX_MAYBE_DESIRE_ALIGN, RELAX_SLOTS,
+	RELAX_FILL_NOP, RELAX_UNREACHABLE, RELAX_MAYBE_UNREACHABLE, and
+	RELAX_NONE types.
+	(RELAX_IMMED_MAXSTEPS): Move from tc-xtensa.c.
+	(xtensa_frag_type struct): Add is_assembly_state_set,
+	use_absolute_literals, relax_seen, is_unreachable, is_specific_opcode,
+	is_align, is_text_align, alignment, and is_first_loop_insn fields.
+	Replace is_generics and is_relax fields by is_no_transform field.
+	Delete is_text and is_longcalls fields.  Change text_expansion and
+	literal_expansion to arrays of MAX_SLOTS entries.  Add arrays of
+	per-slot information: literal_frags, slot_subtypes, slot_symbols,
+	slot_sub_symbols, and slot_offsets.  Add fr_prev field.
+	(xtensa_fix_data struct): New.
+	(xtensa_symfield_type struct): Delete plt field.
+	(xtensa_block_info struct): Move definition to tc-xtensa.h.  Add
+	forward declaration here.
+	(xt_section_type enum): Delete xt_insn_sec.  Add xt_prop_sec.
+	(XTENSA_SECTION_RENAME): Undefine.
+	(TC_FIX_TYPE, TC_INIT_FIX_DATA, TC_FORCE_RELOCATION, NO_PSEUDO_DOT,
+	tc_unrecognized_line, md_do_align, md_elf_section_change_hook,
+	HANDLE_ALIGN, TC_LINKRELAX_FIXUP, SUB_SEGMENT_ALIGN): Define.
+	(TC_CONS_FIX_NEW, tc_symbol_new_hook): Delete.
+	(unit_num_copies_func, opcode_num_units_func,
+	opcode_funcUnit_use_unit_func, opcode_funcUnit_use_stage_func): New.
+	(resource_table struct): New.
+	* config/xtensa-istack.h (MAX_INSN_ARGS): Increase from 6 to 10.
+	(TInsn struct): Add keep_wide, loc, fixup, record_fix, subtype,
+	literal_space, symbol, sub_symbol, offset, and literal_frag fields.
+	(tinsn_copy): Delete prototype.
+	(vliw_insn struct): New.
+	* config/xtensa-relax.c (insn_pattern_struct): Add options field.
+	(widen_spec_list): Add option conditions for density and boolean
+	instructions.  Add expansions using CONST16 and conditions for using
+	CONST16 vs. L32R.  Use new Xtensa LX RSR/WSR syntax.  Add entries for
+	predicted branches.
+	(simplify_spec_list): Add option conditions for density instructions.
+	Add entry for NOP instruction.
+	(append_transition): Add cmp function pointer parameter and use it to
+	insert the new entry in order.
+	(operand_function_LOW16U, operand_function_HI16U): New.
+	(xg_has_userdef_op_fn, xg_apply_userdef_op_fn): Handle
+	OP_OPERAND_LOW16U and OP_OPERAND_HI16U.
+	(enter_opname, split_string): Use xstrdup instead of strdup.
+	(init_insn_pattern): Initialize new options field.
+	(clear_req_or_option_list, clear_req_option_list,
+	clone_req_or_option_list, clone_req_option_list, parse_option_cond):
+	New.
+	(parse_insn_pattern): Parse option conditions.
+	(transition_applies): New.
+	(build_transition): Use new xtensa-isa.h functions.  Fix incorrectly
+	swapped last arguments in calls to append_constant_value_condition.
+	Call clone_req_option_list.  Add warning about invalid opcode.
+	Handle LOW16U and HI16U function names.
+	(build_transition_table): Add cmp parameter and use it in calls to
+	append_transition.  Use new xtensa-isa.h functions.  Check
+	transition_applies before adding entries.
+	(xg_build_widen_table, xg_build_simplify_table): Add cmp parameter and
+	pass it through to build_transition_table.
+	* config/xtensa-relax.h (ReqOrOptionList, ReqOrOption, ReqOptionList,
+	ReqOption, transition_cmp_fn): New types.
+	(OpType enum): Add OP_OPERAND_LOW16U and OP_OPERAND_HI16U.
+	(transition_rule struct): Add options field.
+	* doc/as.texinfo (Overview): Update Xtensa options.
+	* doc/c-xtensa.texi (Xtensa Options): Delete --[no-]density,
+	--[no-]relax, and --[no-]generics options.  Update descriptions of
+	--text-section-literals and --[no-]longcalls.  Add
+	--[no-]absolute-literals and --[no-]transform.
+	(Xtensa Syntax): Add description of syntax for FLIX instructions.
+	Remove use of "generic" and "specific" terminology for opcodes.
+	(Xtensa Registers): Generalize the syntax description to include
+	user-defined register files.
+	(Xtensa Automatic Alignment): Update.
+	(Xtensa Branch Relaxation): Mention limitation of unconditional jumps.
+	(Xtensa Call Relaxation): Linker can now remove most of the overhead.
+	(Xtensa Directives): Remove confusing rules about precedence.
+	(Density Directive, Relax Directive): Delete.
+	(Schedule Directive): New.
+	(Generics Directive): Rename to ...
+	(Transform Directive): ... this node.
+	(Literal Directive): Update for absolute literals.  Missing
+	literal_position directive is now an error.
+	(Literal Position Directive): Update for absolute literals.
+	(Freeregs Directive): Delete.
+	(Absolute Literals Directive): New.
+	(Frame Directive): Minor editing.
+	* Makefile.am (DEPTC_xtensa_elf, DEPOBJ_xtensa_elf, DEP_xtensa_elf):
+	Update dependencies.
+	* Makefile.in: Regenerate.
+
 2004-10-07  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-mips.c (append_insn): Use fix_new rather than fix_new_exp

@@ -609,8 +609,9 @@ eelf32vax.c: $(srcdir)/emulparams/elf32vax.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32vax "$(tdir_elf32vax)"
 eelf32xtensa.c: $(srcdir)/emulparams/elf32xtensa.sh \
-  $(srcdir)/emulparams/xtensa-config.sh \
-  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/xtensaelf.em \
+  $(srcdir)/emulparams/xtensa-config.sh $(srcdir)/emultempl/elf32.em \
+  $(srcdir)/emultempl/xtensaelf.em $(INCDIR)/xtensa-config.h \
+  $(BFDDIR)/elf-bfd.h $(BFDDIR)/libbfd.h $(INCDIR)/elf/xtensa.h \
   $(srcdir)/scripttempl/elfxtensa.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32xtensa "$(tdir_elf32xtensa)"
 eelf32fr30.c: $(srcdir)/emulparams/elf32fr30.sh \

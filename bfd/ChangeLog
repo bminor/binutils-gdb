@@ -1,3 +1,276 @@
+2004-10-07  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (elf32xtensa_size_opt): New global variable.
+	(xtensa_default_isa): Global variable moved here from xtensa-isa.c.
+	(elf32xtensa_no_literal_movement): New global variable.
+	(elf_howto_table): Add entries for new relocations.
+	(elf_xtensa_reloc_type_lookup): Handle new relocations.
+	(property_table_compare): When addresses are equal, compare sizes and
+	various property flags.
+	(property_table_matches): New.
+	(xtensa_read_table_entries): Extend to read new property tables.  Add
+	output_addr parameter to indicate that output addresses should be used.
+	Use bfd_get_section_limit.
+	(elf_xtensa_find_property_entry): New.
+	(elf_xtensa_in_literal_pool): Use elf_xtensa_find_property_entry.
+	(elf_xtensa_check_relocs): Handle new relocations.
+	(elf_xtensa_do_reloc): Use bfd_get_section_limit.  Handle new
+	relocations.  Use new xtensa-isa.h functions.
+	(build_encoding_error_message): Remove encode_result parameter.  Add
+	new target_address parameter used to detect alignment errors.
+	(elf_xtensa_relocate_section): Use bfd_get_section_limit.  Clean up
+	error handling.  Use new is_operand_relocation function.
+	(elf_xtensa_combine_prop_entries, elf_xtensa_merge_private_bfd_data):
+	Use underbar macro for error messages.  Formatting.
+	(get_const16_opcode): New.
+	(get_l32r_opcode): Add a separate flag for initialization.
+	(get_relocation_opnd): Operand number is no longer explicit in the
+	relocation.  Change to decode the opcode and analyze its operands.
+	(get_relocation_slot): New.
+	(get_relocation_opcode): Add bfd parameter.  Use bfd_get_section_limit.
+	Use new xtensa-isa.h functions to handle multislot instructions.
+	(is_l32r_relocation): Add bfd parameter.  Use is_operand_relocation.
+	(get_asm_simplify_size, is_alt_relocation, is_operand_relocation,
+	insn_decode_len, insn_decode_opcode, check_branch_target_aligned,
+	check_loop_aligned, check_branch_target_aligned_address, narrowable,
+	widenable, narrow_instruction, widen_instruction, op_single_fmt_table,
+	get_single_format, init_op_single_format_table): New.
+	(elf_xtensa_do_asm_simplify): Add error_message parameter and use it
+	instead of calling _bfd_error_handler.  Use new xtensa-isa.h functions.
+	(contract_asm_expansion): Add error_message parameter and pass it to
+	elf_xtensa_do_asm_simplify.  Replace use of R_XTENSA_OP0 relocation
+	with R_XTENSA_SLOT0_OP.
+	(get_expanded_call_opcode): Extend to handle either L32R or CONST16
+	instructions.  Use new xtensa-isa.h functions.
+	(r_reloc struct): Add new virtual_offset field.
+	(r_reloc_init): Add contents and content_length parameters.  Set
+	virtual_offset field to zero.  Add contents to target_offset field for
+	partial_inplace relocations.
+	(r_reloc_is_defined): Check for null.
+	(print_r_reloc): New debug function.
+	(source_reloc struct): Replace xtensa_operand field with pair of the
+	opcode and the operand position.  Add is_abs_literal field.
+	(init_source_reloc): Specify operand by opcode/position pair.  Set
+	is_abs_literal field.
+	(source_reloc_compare): When target_offsets are equal, compare other
+	fields to make sorting predictable.
+	(literal_value struct): Add is_abs_literal field.
+	(value_map_hash_table struct): Add has_last_loc and last_loc fields.
+	(init_literal_value): New.
+	(is_same_value): Replace with ...
+	(literal_value_equal): ... this function.  Add comparisons of
+	virtual_offset and is_abs_literal fields.
+	(value_map_hash_table_init): Use bfd_zmalloc.  Check for allocation
+	failure.  Initialize has_last_loc field.
+	(value_map_hash_table_delete): New.
+	(hash_literal_value): Rename to ...
+	(literal_value_hash): ... this.  Include is_abs_literal flag and
+	virtual_offset field in the hash value.
+	(get_cached_value): Rename to ...
+	(value_map_get_cached_value): ... this.  Update calls to
+	literal_value_hash and literal_value_equal.
+	(add_value_map): Check for allocation failure.  Update calls to
+	value_map_get_cached_value and literal_value_hash.
+	(text_action, text_action_list, text_action_t): New types.
+	(find_fill_action, compute_removed_action_diff, adjust_fill_action,
+	text_action_add, text_action_add_literal, offset_with_removed_text,
+	offset_with_removed_text_before_fill, find_insn_action,
+	print_action_list, print_removed_literals): New.
+	(offset_with_removed_literals): Delete.
+	(xtensa_relax_info struct): Add is_relaxable_asm_section, action_list,
+	fix_array, fix_array_count, allocated_relocs, relocs_count, and
+	allocated_relocs_count fields.
+	(init_xtensa_relax_info): Initialize new fields.
+	(reloc_bfd_fix struct): Add new translated field.
+	(reloc_bfd_fix_init): Add translated parameter and use it to set the
+	translated field.
+	(fix_compare, cache_fix_array): New.
+	(get_bfd_fix): Remove fix_list parameter and get all relax_info for the
+	section via get_xtensa_relax_info.  Use cache_fix_array to set up
+	sorted fix_array and use bsearch instead of linear search.
+	(section_cache_t): New struct.
+	(init_section_cache, section_cache_section, clear_section_cache): New.
+	(ebb_t, ebb_target_enum, proposed_action, ebb_constraint): New types.
+	(init_ebb_constraint, free_ebb_constraint, init_ebb, extend_ebb_bounds,
+	extend_ebb_bounds_forward, extend_ebb_bounds_backward,
+	insn_block_decodable_len, ebb_propose_action, ebb_add_proposed_action):
+	New.
+	(retrieve_contents): Use bfd_get_section_limit.
+	(elf_xtensa_relax_section): Add relocations_analyzed flag.  Update call
+	to compute_removed_literals.  Free value_map_hash_table when no longer
+	needed.
+	(analyze_relocations): Check is_relaxable_asm_section flag.  Call
+	compute_text_actions for all sections.
+	(find_relaxable_sections): Mark sections as relaxable if they contain
+	ASM_EXPAND relocations that can be optimized.  Adjust r_reloc_init
+	call.  Increment relax_info src_count field only for appropriate
+	relocation types.  Remove is_literal_section check.
+	(collect_source_relocs): Use bfd_get_section_limit.  Adjust calls to
+	r_reloc_init and find_associated_l32r_irel.  Check
+	is_relaxable_asm_section flag.  Handle L32R instructions with absolute
+	literals.  Pass is_abs_literal flag to init_source_reloc.
+	(is_resolvable_asm_expansion): Use bfd_get_section_limit.  Check for
+	CONST16 instructions.  Adjust calls to r_reloc_init and
+	pcrel_reloc_fits.  Handle weak symbols conservatively.  
+	(find_associated_l32r_irel): Add bfd parameter and pass it to
+	is_l32r_relocation.
+	(compute_text_actions, compute_ebb_proposed_actions,
+	compute_ebb_actions, check_section_ebb_pcrels_fit,
+	check_section_ebb_reduces, text_action_add_proposed,
+	compute_fill_extra_space): New.
+	(remove_literals): Replace with ...
+	(compute_removed_literals): ... this function.  Call
+	init_section_cache.  Use bfd_get_section_limit.  Sort internal_relocs.
+	Call xtensa_read_table_entries to get the property table.  Skip
+	relocations other than R_XTENSA_32 and R_XTENSA_PLT.  Use new
+	is_removable_literal, remove_dead_literal, and
+	identify_literal_placement functions. 
+	(get_irel_at_offset): Rewrite to use bsearch on sorted relocations
+	instead of linear search.
+	(is_removable_literal, remove_dead_literal,
+	identify_literal_placement): New.
+	(relocations_reach): Update check for literal not referenced by any
+	PC-relative relocations.  Adjust call to pcrel_reloc_fits.
+	(coalesce_shared_literal, move_shared_literal): New.
+	(relax_section): Use bfd_get_section_limit.  Call
+	translate_section_fixes.  Update calls to r_reloc_init and
+	offset_with_removed_text.  Check new is_relaxable_asm_section flag.
+	Add call to pin_internal_relocs.  Add special handling for
+	R_XTENSA_ASM_SIMPLIFY and R_XTENSA_DIFF* relocs.  Use virtual_offset
+	info to calculate new addend_displacement variable.  Replace code for
+	deleting literals with more general code to perform the actions
+	determined by the action_list for the section.
+	(translate_section_fixes, translate_reloc_bfd_fix): New.
+	(translate_reloc): Check new is_relaxable_asm_section flag.  Call
+	find_removed_literal only if is_operand_relocation.  Update call to
+	offset_with_removed_text.  Use new target_offset and removed_bytes
+	variables.
+	(move_literal): New.
+	(relax_property_section):  Use bfd_get_section_limit.  Set new
+	is_full_prop_section flag and handle new property tables.  Update calls
+	to r_reloc_init and offset_with_removed_text.  Check
+	is_relaxable_asm_section flag.  Handle expansion of zero-sized
+	unreachable entries, with use of offset_with_removed_text_before_fill.
+	For relocatable links, combine entries only for literal tables.
+	(relax_section_symbols): Check is_relaxable_asm_section flag.  Update
+	calls to offset_with_removed_text.  Translate st_size field for
+	function symbols.
+	(do_fix_for_relocatable_link): Change to return bfd_boolean to indicate
+	failure.  Add contents parameter.  Update call to get_bfd_fix.  Update
+	call to r_reloc_init.  Call _bfd_error_handler and return FALSE for
+	R_XTENSA_ASM_EXPAND relocs.
+	(do_fix_for_final_link): Add input_bfd and contents parameters.  Update
+	call to get_bfd_fix.  Include offset from contents for partial_inplace
+	relocations.
+	(is_reloc_sym_weak): New.
+	(pcrel_reloc_fits): Use new xtensa-isa.h functions.
+	(prop_sec_len): New.
+	(xtensa_is_property_section): Handle new property sections.
+	(is_literal_section): Delete.
+	(internal_reloc_compare): When r_offset matches, compare r_info and
+	r_addend to make sorting predictable.
+	(internal_reloc_matches): New.
+	(xtensa_get_property_section_name): Handle new property sections.
+	(xtensa_get_property_predef_flags): New.
+	(xtensa_callback_required_dependence): Use bfd_get_section_limit.
+	Update calls to xtensa_isa_init, is_l32r_relocation, and r_reloc_init.
+	* xtensa-isa.c (xtensa_default_isa): Moved to elf32-xtensa.c.
+	(xtisa_errno, xtisa_error_msg): New variables.
+	(xtensa_isa_errno, xtensa_isa_error_msg): New.
+	(xtensa_insnbuf_alloc): Add error handling.
+	(xtensa_insnbuf_to_chars): Add num_chars parameter.  Update to
+	use xtensa_format_decode.  Add error handling.
+	(xtensa_insnbuf_from_chars): Add num_chars parameter.  Decode the
+	instruction length to find the number of bytes to copy.
+	(xtensa_isa_init): Add error handling.  Replace calls to
+	xtensa_load_isa and xtensa_extend_isa with code to initialize lookup
+	tables in the xtensa_modules structure.
+	(xtensa_check_isa_config, xtensa_add_isa, xtensa_load_isa,
+	xtensa_extend_isa): Delete.
+	(xtensa_isa_free): Change to only free lookup tables.
+	(opname_lookup_compare): Replace with ...
+	(xtensa_isa_name_compare): ... this function.  Use strcasecmp.
+	(xtensa_insn_maxlength): Rename to ...
+	(xtensa_isa_maxlength): ... this.
+	(xtensa_insn_length): Delete.
+	(xtensa_insn_length_from_first_byte): Replace with ...
+	(xtensa_isa_length_from_chars): ... this function.
+	(xtensa_num_opcodes): Rename to ...
+	(xtensa_isa_num_opcodes): ... this.
+	(xtensa_isa_num_pipe_stages, xtensa_isa_num_formats,
+	xtensa_isa_num_regfiles, xtensa_isa_num_stages,
+	xtensa_isa_num_sysregs, xtensa_isa_num_interfaces,
+	xtensa_isa_num_funcUnits, xtensa_format_name, xtensa_format_lookup,
+	xtensa_format_decode, xtensa_format_encode, xtensa_format_length,
+	xtensa_format_num_slots, xtensa_format_slot_nop_opcode,
+	xtensa_format_get_slot, xtensa_format_set_slot): New functions.
+	(xtensa_opcode_lookup): Add error handling.
+	(xtensa_decode_insn): Replace with ...
+	(xtensa_opcode_decode): ... this function, with new format and
+	slot parameters.  Add error handling.
+	(xtensa_encode_insn): Replace with ...
+	(xtensa_opcode_encode): ... this function, which does the encoding via
+	one of the entries in the "encode_fns" array.  Add error handling.
+	(xtensa_opcode_name): Add error handling.
+	(xtensa_opcode_is_branch, xtensa_opcode_is_jump, xtensa_opcode_is_loop,
+	xtensa_opcode_is_call): New.
+	(xtensa_num_operands): Replace with ...
+	(xtensa_opcode_num_operands): ... this function.  Add error handling.
+	(xtensa_opcode_num_stateOperands,
+	xtensa_opcode_num_interfaceOperands, xtensa_opcode_num_funcUnit_uses,
+	xtensa_opcode_funcUnit_use, xtensa_operand_name,
+	xtensa_operand_is_visible): New.
+	(xtensa_get_operand, xtensa_operand_kind): Delete.
+	(xtensa_operand_inout): Add error handling and special-case for
+	"sout" operands.
+	(xtensa_operand_get_field, xtensa_operand_set_field): Rewritten to
+	operate on one slot of an instruction.  Added error handling.
+	(xtensa_operand_encode): Handle default operands with no encoding
+	functions.  Check for success by comparing against decoded value.
+	Add error handling.
+	(xtensa_operand_decode): Handle default operands.  Return decoded value
+	through argument pointer.  Add error handling.
+	(xtensa_operand_is_register, xtensa_operand_regfile,
+	xtensa_operand_num_regs, xtensa_operand_is_known_reg): New.
+	(xtensa_operand_isPCRelative): Rename to ...
+	(xtensa_operand_is_PCrelative): ... this.  Add error handling.
+	(xtensa_operand_do_reloc, xtensa_operand_undo_reloc): Return value
+	through argument pointer.  Add error handling.
+	(xtensa_stateOperand_state, xtensa_stateOperand_inout,
+	xtensa_interfaceOperand_interface, xtensa_regfile_lookup,
+	xtensa_regfile_lookup_shortname, xtensa_regfile_name,
+	xtensa_regfile_shortname, xtensa_regfile_view_parent,
+	xtensa_regfile_num_bits, xtensa_regfile_num_entries,
+	xtensa_state_lookup, xtensa_state_name, xtensa_state_num_bits,
+	xtensa_state_is_exported, xtensa_sysreg_lookup,
+	xtensa_sysreg_lookup_name, xtensa_sysreg_name, xtensa_sysreg_number,
+	xtensa_sysreg_is_user, xtensa_interface_lookup, xtensa_interface_name,
+	xtensa_interface_num_bits, xtensa_interface_inout,
+	xtensa_interface_has_side_effect, xtensa_funcUnit_lookup,
+	xtensa_funcUnit_name, xtensa_funcUnit_num_copies): New.
+	* xtensa-modules.c: Rewrite to use new data structures.
+	* reloc.c (BFD_RELOC_XTENSA_DIFF8, BFD_RELOC_XTENSA_DIFF16,
+	BFD_RELOC_XTENSA_DIFF32, BFD_RELOC_XTENSA_SLOT0_OP,
+	BFD_RELOC_XTENSA_SLOT1_OP, BFD_RELOC_XTENSA_SLOT2_OP,
+	BFD_RELOC_XTENSA_SLOT3_OP, BFD_RELOC_XTENSA_SLOT4_OP,
+	BFD_RELOC_XTENSA_SLOT5_OP, BFD_RELOC_XTENSA_SLOT6_OP,
+	BFD_RELOC_XTENSA_SLOT7_OP, BFD_RELOC_XTENSA_SLOT8_OP,
+	BFD_RELOC_XTENSA_SLOT9_OP, BFD_RELOC_XTENSA_SLOT10_OP,
+	BFD_RELOC_XTENSA_SLOT11_OP, BFD_RELOC_XTENSA_SLOT12_OP,
+	BFD_RELOC_XTENSA_SLOT13_OP, BFD_RELOC_XTENSA_SLOT14_OP,
+	BFD_RELOC_XTENSA_SLOT0_ALT, BFD_RELOC_XTENSA_SLOT1_ALT,
+	BFD_RELOC_XTENSA_SLOT2_ALT, BFD_RELOC_XTENSA_SLOT3_ALT,
+	BFD_RELOC_XTENSA_SLOT4_ALT, BFD_RELOC_XTENSA_SLOT5_ALT,
+	BFD_RELOC_XTENSA_SLOT6_ALT, BFD_RELOC_XTENSA_SLOT7_ALT,
+	BFD_RELOC_XTENSA_SLOT8_ALT, BFD_RELOC_XTENSA_SLOT9_ALT,
+	BFD_RELOC_XTENSA_SLOT10_ALT, BFD_RELOC_XTENSA_SLOT11_ALT,
+	BFD_RELOC_XTENSA_SLOT12_ALT, BFD_RELOC_XTENSA_SLOT13_ALT,
+	BFD_RELOC_XTENSA_SLOT14_ALT): Add new relocations.
+	* Makefile.am (xtensa-isa.lo, xtensa-modules.lo): Update dependencies.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Likewise.
+	* libbfd.h: Likewise.
+
 2004-10-07  Richard Sandiford  <rsandifo@redhat.com>
 
 	* elf64-mips.c (mips_elf64_write_rel): Use STN_UNDEF for relocs

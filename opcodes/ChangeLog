@@ -1,3 +1,12 @@
+2004-10-07  Bob Wilson  <bob.wilson@acm.org>
+
+	* xtensa-dis.c (state_names): Delete.
+	(fetch_data): Use xtensa_isa_maxlength.
+	(print_xtensa_operand): Replace operand parameter with opcode/operand
+	pair.  Remove print_sr_name parameter.  Use new xtensa-isa.h functions.
+	(print_insn_xtensa): Use new xtensa-isa.h functions.  Handle multislot
+	instruction bundles.  Use xmalloc instead of malloc.
+
 2004-10-07  David Gibson  <david@gibson.dropbear.id.au>
 
 	* ppc-opc.c: Replace literal "0"s with NULLs in pointer

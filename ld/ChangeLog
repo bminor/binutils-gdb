@@ -1,3 +1,24 @@
+2004-10-07  Bob Wilson  <bob.wilson@acm.org>
+
+	* ld.texinfo (Xtensa): Describe new linker relaxation to optimize
+	assembler-generated longcall sequences.  Describe new --size-opt
+	option.
+	* emulparams/elf32xtensa.sh (OTHER_SECTIONS): Add .xt.prop section.
+	* emultempl/xtensaelf.em (remove_section,
+	replace_insn_sec_with_prop_sec, replace_instruction_table_sections,
+	elf_xtensa_after_open): New.
+	(OPTION_OPT_SIZEOPT, OPTION_LITERAL_MOVEMENT,
+	OPTION_NO_LITERAL_MOVEMENT): Define.
+	(elf32xtensa_size_opt, elf32xtensa_no_literal_movement): New globals.
+	(PARSE_AND_LIST_LONGOPTS): Add size-opt and [no-]literal-movement.
+	(PARSE_AND_LIST_OPTIONS): Add --size-opt.
+	(PARSE_AND_LIST_ARGS_CASES): Handle OPTION_OPT_SIZEOPT,
+	OPTION_LITERAL_MOVEMENT, and OPTION_NO_LITERAL_MOVEMENT.
+	(LDEMUL_AFTER_OPEN): Set to elf_xtensa_after_open.
+	* scripttempl/elfxtensa.sc: Update with changes from elf.sc.
+	* Makefile.am (eelf32xtensa.c): Update dependencies.
+	* Makefile.in: Regenerate.
+
 2004-10-07  Jeff Baker  <jbaker@qnx.com>
 	
 	* lexsup.c: Handle --warn-shared-textrel option.

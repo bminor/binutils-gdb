@@ -1,3 +1,10 @@
+2004-10-07  Bob Wilson  <bob.wilson@acm.org>
+
+	* gas/xtensa/all.exp: Adjust expected error message for j_too_far.
+	Change entry_align test to expect an error.
+	* gas/xtensa/entry_misalign2.s: Use no-transform instead of
+	no-generics directives.
+
 2004-10-07  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/mips/elf-rel{23,24}.[sd]: New tests.

@@ -1,3 +1,9 @@
+2004-10-07  Bob Wilson  <bob.wilson@acm.org>
+
+	* ld-xtensa/lcall1.s: Use .literal directive.
+	* ld-xtensa/lcall2.s: Align function entry.
+	* ld-xtensa/coalesce2.s: Likewise.
+
 2004-10-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-scripts/sort.exp: New file for section sorting tests.

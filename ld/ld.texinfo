@@ -5552,34 +5552,53 @@ interleaving might place the @code{.literal} sections from an initial
 group of files followed by the @code{.text} sections of that group of
 files.  Then, the @code{.literal} sections from the rest of the files
 and the @code{.text} sections from the rest of the files would follow.
-The non-interleaved order can still be specified as:
 
-@smallexample
-SECTIONS
-@{
-  .text : @{
-    *(.literal) *(.text)
-  @}
-@}
-@end smallexample
-
-@cindex @code{--relax} on Xtensa
+@cindex @option{--relax} on Xtensa
 @cindex relaxing on Xtensa
-@kindex --no-relax
-The Xtensa version of @command{ld} enables the @option{--relax} option by
-default to attempt to reduce space in the output image by combining
-literals with identical values.  It also provides the
-@option{--no-relax} option to disable this optimization.  When enabled,
-the relaxation algorithm ensures that a literal will only be merged with
-another literal when the new merged literal location is within the
-offset range of all of its uses.
+Relaxation is enabled by default for the Xtensa version of @command{ld} and
+provides two important link-time optimizations.  The first optimization
+is to combine identical literal values to reduce code size.  A redundant
+literal will be removed and all the @code{L32R} instructions that use it
+will be changed to reference an identical literal, as long as the
+location of the replacement literal is within the offset range of all
+the @code{L32R} instructions.  The second optimization is to remove
+unnecessary overhead from assembler-generated ``longcall'' sequences of
+@code{L32R}/@code{CALLX@var{n}} when the target functions are within
+range of direct @code{CALL@var{n}} instructions.
 
-The relaxation mechanism will also attempt to optimize
-assembler-generated ``longcall'' sequences of
-@code{L32R}/@code{CALLX@var{n}} when the target is known to fit into a
-@code{CALL@var{n}} instruction encoding.  The current optimization
-converts the sequence into @code{NOP}/@code{CALL@var{n}} and removes the
-literal referenced by the @code{L32R} instruction.
+For each of these cases where an indirect call sequence can be optimized
+to a direct call, the linker will change the @code{CALLX@var{n}}
+instruction to a @code{CALL@var{n}} instruction, remove the @code{L32R}
+instruction, and remove the literal referenced by the @code{L32R}
+instruction if it is not used for anything else.  Removing the
+@code{L32R} instruction always reduces code size but can potentially
+hurt performance by changing the alignment of subsequent branch targets.
+By default, the linker will always preserve alignments, either by
+switching some instructions between 24-bit encodings and the equivalent
+density instructions or by inserting a no-op in place of the @code{L32R}
+instruction that was removed.  If code size is more important than
+performance, the @option{--size-opt} option can be used to prevent the
+linker from widening density instructions or inserting no-ops, except in
+a few cases where no-ops are required for correctness.
+
+The following Xtensa-specific command-line options can be used to
+control the linker:
+
+@cindex Xtensa options
+@table @option
+@kindex --no-relax
+@item --no-relax
+Since the Xtensa version of @code{ld} enables the @option{--relax} option
+by default, the @option{--no-relax} option is provided to disable
+relaxation.
+
+@item --size-opt
+When optimizing indirect calls to direct calls, optimize for code size
+more than performance.  With this option, the linker will not insert
+no-ops or widen density instructions to preserve branch target
+alignment.  There may still be some cases where no-ops are required to
+preserve the correctness of the code.
+@end table
 
 @ifclear GENERIC
 @lowersections
