@@ -43,7 +43,6 @@ a68v-nat.c
 alldeps.mak
 alloca.c
 altos-xdep.c
-am29k-opcode.h
 am29k-pinsn.c
 am29k-tdep.c
 arm-convert.s
@@ -71,7 +70,6 @@ configure.in
 convex-pinsn.c
 convex-tdep.c
 convex-xdep.c
-convx-opcode.h
 copying.awk
 copying.c
 core.c
@@ -191,7 +189,6 @@ ns32k-opcode.h
 ns32k-pinsn.c
 objfiles.c
 objfiles.h
-os68k-xdep.c
 paread.c
 parse.c
 parser-defs.h

@@ -1,3 +1,13 @@
+Tue Feb 16 00:53:20 1993  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (VERSION):  Roll to 4.7.6.
+	(SFILES_SUBDIR):  Add 29k-share/udi_soc.
+	(SFILES_SUBSUBDIR):  Move 29k-share/udi files to this macro.
+	(HFILES):  Remove all nm-* except nm-trash.h.  Add ns32k-opcode.h.
+	(depend):  Fix bug where nm-files in config files weren't noticed.
+	(make-proto-gdb-1):  Avoid changing directories while building new
+	prototype.  Build SFILES_SUBSUBDIR with longer symlinks.
+
 Mon Feb 15 20:48:09 1993  John Gilmore  (gnu@cygnus.com)
 
 	* remote.c:  Improve error recovery.  Allow user to break out
