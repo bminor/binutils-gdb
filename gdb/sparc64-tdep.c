@@ -911,10 +911,11 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
                  undefined."  Even though the psABI says that "the
                  left half is undefined", set it to zero here.  */
 	      memset (buf, 0, 4);
-	      valbuf = memcpy (buf + 4, valbuf, 4);
+	      memcpy (buf + 4, valbuf, 4);
+	      valbuf = buf;
 	      len = 8;
 	      if (element < 16)
-		regnum = SPARC64_D0_REGNUM;
+		regnum = SPARC64_D0_REGNUM + element;
 	    }
 	}
       else
