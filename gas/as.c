@@ -43,7 +43,6 @@
 #define COMMON
 
 #include "as.h"
-#include "config.h"
 #include "subsegs.h"
 #include "output-file.h"
 
@@ -98,6 +97,7 @@ main (argc, argv)
   char **work_argv;		/* variable copy of argv */
   char *arg;			/* an arg to program */
   char a;			/* an arg flag (after -) */
+  int keep_it;
 
 #if 0 /* do we need any of this?? */
   {
@@ -336,26 +336,32 @@ main (argc, argv)
   brtab_emit ();
 #endif
 
+  if (seen_at_least_1_file ()
+      && !((had_warnings () && flag_always_generate_output)
+	   || had_errors () > 0))
+    keep_it = 1;
+  else
+    keep_it = 0;
+
+  if (keep_it)
+    write_object_file ();
+
 #ifndef NO_LISTING
   listing_print ("");
 #endif
 
-  if (seen_at_least_1_file ()
-      && !((had_warnings () && flag_always_generate_output)
-	   || had_errors () > 0))
-    {
-      write_object_file ();	/* relax() addresses then emit object file */
-    }				/* we also check in write_object_file() just before emit. */
-#ifdef BFD_ASSEMBLER
-  else
-    {
-      output_file_close (out_file_name);
-      unlink (out_file_name);
-    }
+#ifndef BFD_ASSEMBLER
+  if (keep_it)
 #endif
+    output_file_close (out_file_name);
+
+  if (!keep_it)
+    unlink (out_file_name);
 
   input_scrub_end ();
-  md_end ();			/* MACHINE.c */
+#ifdef md_end
+  md_end ();
+#endif
 
   if ((had_warnings () && flagseen['Z'])
       || had_errors () > 0)
