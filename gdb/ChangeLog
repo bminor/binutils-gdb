@@ -1,3 +1,12 @@
+2003-01-12  Andrew Cagney  <ac131313@redhat.com>
+
+	* d10v-tdep.c: Include "gdb_assert.h".
+	(d10v_store_return_value): Rewrite to match current interface.
+	(d10v_extract_struct_value_address): Ditto.
+	(d10v_extract_return_value): Ditto.
+	(d10v_gdbarch_init): Set store_restore_value,
+	extract_struct_value_address and extract_return_value.
+
 2003-01-12  J. Brobecker  <brobecker@gnat.com>
 
 	* hpread.c (set_namestring): New procedure replacing the

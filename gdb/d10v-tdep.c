@@ -42,6 +42,8 @@
 #include "gdb/sim-d10v.h"
 #include "sim-regno.h"
 
+#include "gdb_assert.h"
+
 struct frame_extra_info
   {
     CORE_ADDR return_pc;
@@ -472,22 +474,36 @@ d10v_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
    Things always get returned in RET1_REGNUM, RET2_REGNUM, ... */
 
 static void
-d10v_store_return_value (struct type *type, char *valbuf)
+d10v_store_return_value (struct type *type, struct regcache *regcache,
+			 const void *valbuf)
 {
-  char tmp = 0;
-  /* Only char return values need to be shifted right within R0.  */
+  /* Only char return values need to be shifted right within the first
+     regnum.  */
   if (TYPE_LENGTH (type) == 1
       && TYPE_CODE (type) == TYPE_CODE_INT)
     {
-      /* zero the high byte */
-      deprecated_write_register_bytes (REGISTER_BYTE (RET1_REGNUM), &tmp, 1);
-      /* copy the low byte */
-      deprecated_write_register_bytes (REGISTER_BYTE (RET1_REGNUM) + 1,
-				       valbuf, 1);
+      bfd_byte tmp[2];
+      tmp[1] = *(bfd_byte *)valbuf;
+      regcache_cooked_write (regcache, RET1_REGNUM, tmp);
     }
   else
-    deprecated_write_register_bytes (REGISTER_BYTE (RET1_REGNUM),
-				     valbuf, TYPE_LENGTH (type));
+    {
+      int reg;
+      /* A structure is never more than 8 bytes long.  See
+         use_struct_convention().  */
+      gdb_assert (TYPE_LENGTH (type) <= 8);
+      /* Write out most registers, stop loop before trying to write
+         out any dangling byte at the end of the buffer.  */
+      for (reg = 0; (reg * 2) + 1 < TYPE_LENGTH (type); reg++)
+	{
+	  regcache_cooked_write (regcache, RET1_REGNUM + reg,
+				 (bfd_byte *) valbuf + reg * 2);
+	}
+      /* Write out any dangling byte at the end of the buffer.  */
+      if ((reg * 2) + 1 == TYPE_LENGTH (type))
+	regcache_cooked_write_part (regcache, reg, 0, 1,
+				    (bfd_byte *) valbuf + reg * 2);
+    }
 }
 
 /* Extract from an array REGBUF containing the (raw) register state
@@ -495,11 +511,11 @@ d10v_store_return_value (struct type *type, char *valbuf)
    as a CORE_ADDR (or an expression that can be used as one).  */
 
 static CORE_ADDR
-d10v_extract_struct_value_address (char *regbuf)
+d10v_extract_struct_value_address (struct regcache *regcache)
 {
-  return (extract_address ((regbuf) + REGISTER_BYTE (ARG1_REGNUM),
-			   REGISTER_RAW_SIZE (ARG1_REGNUM))
-	  | DMEM_START);
+  ULONGEST addr;
+  regcache_cooked_read_unsigned (regcache, ARG1_REGNUM, &addr);
+  return (addr | DMEM_START);
 }
 
 static CORE_ADDR
@@ -1149,8 +1165,8 @@ d10v_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
    extract and copy its value into `valbuf'.  */
 
 static void
-d10v_extract_return_value (struct type *type, char regbuf[REGISTER_BYTES],
-			   char *valbuf)
+d10v_extract_return_value (struct type *type, struct regcache *regcache,
+			   void *valbuf)
 {
   int len;
 #if 0
@@ -1159,25 +1175,34 @@ d10v_extract_return_value (struct type *type, char regbuf[REGISTER_BYTES],
 	 (int) extract_unsigned_integer (regbuf + REGISTER_BYTE(RET1_REGNUM), 
 					 REGISTER_RAW_SIZE (RET1_REGNUM)));
 #endif
-  len = TYPE_LENGTH (type);
-  if (len == 1)
+  if (TYPE_LENGTH (type) == 1)
     {
-      unsigned short c;
-
-      c = extract_unsigned_integer (regbuf + REGISTER_BYTE (RET1_REGNUM), 
-				    REGISTER_RAW_SIZE (RET1_REGNUM));
+      ULONGEST c;
+      regcache_cooked_read_unsigned (regcache, RET1_REGNUM, &c);
       store_unsigned_integer (valbuf, 1, c);
     }
-  else if ((len & 1) == 0)
-    memcpy (valbuf, regbuf + REGISTER_BYTE (RET1_REGNUM), len);
   else
     {
       /* For return values of odd size, the first byte is in the
 	 least significant part of the first register.  The
-	 remaining bytes in remaining registers. Interestingly,
-	 when such values are passed in, the last byte is in the
-	 most significant byte of that same register - wierd. */
-      memcpy (valbuf, regbuf + REGISTER_BYTE (RET1_REGNUM) + 1, len);
+	 remaining bytes in remaining registers. Interestingly, when
+	 such values are passed in, the last byte is in the most
+	 significant byte of that same register - wierd. */
+      int reg = RET1_REGNUM;
+      int off = 0;
+      if (TYPE_LENGTH (type) & 1)
+	{
+	  regcache_cooked_read_part (regcache, RET1_REGNUM, 1, 1,
+				     (bfd_byte *)valbuf + off);
+	  off++;
+	  reg++;
+	}
+      /* Transfer the remaining registers.  */
+      for (; off < TYPE_LENGTH (type); reg++, off += 2)
+	{
+	  regcache_cooked_read (regcache, RET1_REGNUM + reg,
+				(bfd_byte *) valbuf + off);
+	}
     }
 }
 
@@ -1604,14 +1629,14 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
-  set_gdbarch_deprecated_extract_return_value (gdbarch, d10v_extract_return_value);
+  set_gdbarch_extract_return_value (gdbarch, d10v_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, d10v_push_arguments);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, d10v_push_return_address);
 
   set_gdbarch_store_struct_return (gdbarch, d10v_store_struct_return);
-  set_gdbarch_deprecated_store_return_value (gdbarch, d10v_store_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, d10v_extract_struct_value_address);
+  set_gdbarch_store_return_value (gdbarch, d10v_store_return_value);
+  set_gdbarch_extract_struct_value_address (gdbarch, d10v_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, d10v_use_struct_convention);
 
   set_gdbarch_frame_init_saved_regs (gdbarch, d10v_frame_init_saved_regs);
