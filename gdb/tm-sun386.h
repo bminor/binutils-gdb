@@ -22,6 +22,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef sun386
 #define sun386
 #endif
+#define GDB_TARGET_IS_SUN386 1
 #define SUNOS4
 #define USE_MACHINE_REG_H
 
@@ -33,8 +34,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Avoid conflicts between "a.out.gnu.h" and <sys/exec.h> */
 #define _EXEC_
 #endif
-
-#define BROKEN_LARGE_ALLOCA
 
 /* sun386 ptrace seems unable to change the frame pointer */
 #define PTRACE_FP_BUG
