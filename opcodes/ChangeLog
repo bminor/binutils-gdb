@@ -1,3 +1,8 @@
+Thu Sep 14 11:58:22 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc-opc.c (sparc_opcodes): Mark all insns that reference
+	%psr, %wim, %tbr as F_NOTV9.
+
 Fri Sep  8 01:07:38 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (Makefile): Just rebuild Makefile when running
