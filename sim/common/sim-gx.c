@@ -7,7 +7,7 @@
 #include "sim-gx.h"
 
 #include "config.h"
-#include "cconfig.h"
+/* #include "cconfig.h" */
 
 /* shared object functions */
 #ifdef HAVE_DLFCN_H
