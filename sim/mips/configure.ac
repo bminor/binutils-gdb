@@ -1,9 +1,9 @@
 dnl Process this file with autoconf to produce a configure script.
-sinclude(../common/aclocal.m4)
 AC_PREREQ(2.59)dnl
 AC_INIT(Makefile.in)
 
-SIM_AC_COMMON
+sinclude(../common/common.m4)
+sinclude(../common/aclocal.m4)
 
 dnl Options available in this module
 SIM_AC_OPTION_INLINE()
