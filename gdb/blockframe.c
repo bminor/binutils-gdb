@@ -227,9 +227,8 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
   find_pc_partial_function (pc, &name, (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
   fi->signal_handler_caller = IN_SIGTRAMP (fi->pc, name);
 
-#ifdef INIT_EXTRA_FRAME_INFO
-  INIT_EXTRA_FRAME_INFO (0, fi);
-#endif
+  if (INIT_EXTRA_FRAME_INFO_P ())
+    INIT_EXTRA_FRAME_INFO (0, fi);
 
   return fi;
 }

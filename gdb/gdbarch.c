@@ -694,9 +694,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->frame_init_saved_regs == 0))
     fprintf_unfiltered (log, "\n\tframe_init_saved_regs");
-  if ((GDB_MULTI_ARCH >= 2)
-      && (gdbarch->init_extra_frame_info == 0))
-    fprintf_unfiltered (log, "\n\tinit_extra_frame_info");
+  /* Skip verify of init_extra_frame_info, has predicate */
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->skip_prologue == 0))
     fprintf_unfiltered (log, "\n\tskip_prologue");
@@ -3613,6 +3611,12 @@ set_gdbarch_frame_init_saved_regs (struct gdbarch *gdbarch,
                                    gdbarch_frame_init_saved_regs_ftype frame_init_saved_regs)
 {
   gdbarch->frame_init_saved_regs = frame_init_saved_regs;
+}
+
+int
+gdbarch_init_extra_frame_info_p (struct gdbarch *gdbarch)
+{
+  return gdbarch->init_extra_frame_info != 0;
 }
 
 void

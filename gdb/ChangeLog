@@ -1,5 +1,14 @@
 2001-11-05  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbarch.sh (init_extra_frame_info): Change to a function with
+	pedicate.
+	* gdbarch.h, gdbarch.c: Re-generate.	
+	* blockframe.c (create_new_frame): Replace #ifdef
+	INIT_EXTRA_FRAME_INFO with run-time test of
+	INIT_EXTRA_FRAME_INFO_P.
+
+2001-11-05  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbarch.sh (verify_gdbarch): Use a mem_file to accumulate all
 	error messages.  Print in a single batch.
 	* gdbarch.c: Re-generate.

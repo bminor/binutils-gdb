@@ -1441,6 +1441,31 @@ extern void set_gdbarch_frame_init_saved_regs (struct gdbarch *gdbarch, gdbarch_
 #endif
 #endif
 
+#if defined (INIT_EXTRA_FRAME_INFO)
+/* Legacy for systems yet to multi-arch INIT_EXTRA_FRAME_INFO */
+#if !defined (INIT_EXTRA_FRAME_INFO_P)
+#define INIT_EXTRA_FRAME_INFO_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (INIT_EXTRA_FRAME_INFO_P)
+#define INIT_EXTRA_FRAME_INFO_P() (0)
+#endif
+
+extern int gdbarch_init_extra_frame_info_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (INIT_EXTRA_FRAME_INFO_P)
+#error "Non multi-arch definition of INIT_EXTRA_FRAME_INFO"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (INIT_EXTRA_FRAME_INFO_P)
+#define INIT_EXTRA_FRAME_INFO_P() (gdbarch_init_extra_frame_info_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (INIT_EXTRA_FRAME_INFO)
+#define INIT_EXTRA_FRAME_INFO(fromleaf, frame) (internal_error (__FILE__, __LINE__, "INIT_EXTRA_FRAME_INFO"), 0)
+#endif
+
 typedef void (gdbarch_init_extra_frame_info_ftype) (int fromleaf, struct frame_info *frame);
 extern void gdbarch_init_extra_frame_info (struct gdbarch *gdbarch, int fromleaf, struct frame_info *frame);
 extern void set_gdbarch_init_extra_frame_info (struct gdbarch *gdbarch, gdbarch_init_extra_frame_info_ftype *init_extra_frame_info);
