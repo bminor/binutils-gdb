@@ -1,3 +1,8 @@
+Fri Apr 3 15:41:07 1998  Jillian Ye <jillian@cygnus.com>
+
+	* c_gen.pl: Added subroutin process_data_reg64.
+	* ChangeLog: Added this entry.
+
 Fri Mar 27 19:31:36 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* Makefile.in: Removed t-pke1 testcase.  Remove previous "make -k"

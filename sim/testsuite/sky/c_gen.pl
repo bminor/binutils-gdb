@@ -14,10 +14,11 @@
 #       -------------  ---------------  -------------- -------------
 #         n (for data)   0xH_H_H_H         0xH           4-CHARs   
 #         ? (for test)   0xH  (addr)       0xH  (value)  0xH (mask)
-#         ! (reg wrt)    0xH  (addr)       0xH  (data) 
+#         ! (reg wrt 32) 0xH  (addr)       0xH  (data) 
+#         ~ (reg wrt 64) 0xH  (addr)       0xHigh_Low (data) 
 #         # comment line
 #       Note: n can be 0 (for VU1), 1 (for VU2), or 2 (for GIF).
-#             H is hex data in the format of FFFFFFFF
+#             H, High, or Low is hex data in the format of FFFFFFFF
 #         
 #
 #    Result output:
@@ -81,9 +82,13 @@ while( $inputline = <INFILE> )
   {
       &process_data;
   }
-  elsif ( $inputline =~ /^\!/ )      # This is a different type of data line
+  elsif ( $inputline =~ /^\!/ )      # This is a 32-bit register write
   {
-      &process_data2;
+      &process_data_reg32;
+  }
+  elsif ( $inputline =~ /^\~/ )      # This is a 64-bit register write
+  {
+      &process_data_reg64;
   }  
   else   # ignore this input
   {
@@ -190,14 +195,14 @@ sub process_data {
 }
 
 
-sub process_data2 {
+sub process_data_reg32 {
   print OUTFILE ("\n");
   print OUTFILE ("/******************************************************************/\n");
   print OUTFILE ("/*Writing the specified data into the specified address:          */\n\n");
   
   @columns = split ( /[\s]+/, $inputline );
  
-  #column[1] is the address, column[2] is the value, both in the format of oxH;
+  #column[1] is the address, column[2] is the value, both in the format of 0xH;
   
   print OUTFILE ("\n{\n");
   print OUTFILE ("  volatile unsigned* addr_ptr = \(unsigned *\)".$columns[1].";\n");
@@ -206,6 +211,26 @@ sub process_data2 {
   print OUTFILE ("}\n");
   
 }
+
+sub process_data_reg64 {
+  print OUTFILE ("\n");
+  print OUTFILE ("/******************************************************************/\n");
+  print OUTFILE ("/*Writing the specified 64-bit data into the specified address:   */\n\n");
+  
+  @columns = split ( /[\s]+/, $inputline );
+ 
+  #column[1] is the address, in the format of 0xH;
+  #column[2] is the value, in the format of 0xH_H;
+  @llword = split ("_", $columns[2]);
+  
+  print OUTFILE ("\n{\n");
+  print OUTFILE ("  volatile long long int* reg64_ptr = \(long long int *\)".$columns[1].";\n");
+  print OUTFILE ("  *reg64_ptr = \(long long\)".$llword[0]." \<\< 32 \| \(long long\)0x".$llword[1].";\n");
+  print OUTFILE ("  num_w_written ++;\n");
+  print OUTFILE ("}\n");
+  
+}
+
 
 
 
