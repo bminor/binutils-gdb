@@ -209,6 +209,8 @@ ALL_EMULATIONS = \
 	eelf32_sparc.o \
 	eelf32b4300.o \
 	eelf32bmip.o \
+	eelf32ebmip.o \
+	eelf32elmip.o \
 	eelf32l4300.o \
 	eelf32lmip.o \
 	eelf32lppc.o \
@@ -392,6 +394,12 @@ eelf32b4300.c: $(srcdir)/emulparams/elf32b4300.sh \
 eelf32bmip.c: $(srcdir)/emulparams/elf32bmip.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfmips.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32bmip "$(tdir_elf32bmip)"
+eelf32ebmip.c: $(srcdir)/emulparams/elf32ebmip.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfmips.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32ebmip "$(tdir_elf32ebmip)"
+eelf32elmip.c: $(srcdir)/emulparams/elf32elmip.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfmips.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32elmip "$(tdir_elf32elmip)"
 eelf32l4300.c: $(srcdir)/emulparams/elf32l4300.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32l4300 "$(tdir_elf32l4300)"

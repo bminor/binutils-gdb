@@ -126,8 +126,8 @@ mips*vr4300el-*-elf*)	targ_emul=elf32l4300 ;;
 mips*vr4300-*-elf*)	targ_emul=elf32b4300 ;;
 mips*vr4100el-*-elf*)	targ_emul=elf32l4300 ;;
 mips*vr4100-*-elf*)	targ_emul=elf32b4300 ;;
-mips*el-*-elf*)		targ_emul=elf32lmip ;;
-mips*-*-elf*)		targ_emul=elf32bmip ;;
+mips*el-*-elf*)		targ_emul=elf32elmip ;;
+mips*-*-elf*)		targ_emul=elf32ebmip ;;
 alpha-*-linuxecoff*)	targ_emul=alpha targ_extra_emuls=elf64alpha
 			tdir_elf64alpha=`echo ${targ_alias} | sed -e 's/ecoff//'`
 			;;

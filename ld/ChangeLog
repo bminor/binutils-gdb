@@ -1,3 +1,18 @@
+Tue Jul  9 12:09:02 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.tgt (mips*el-*-elf*): Use elf32elmip.
+	(mips*-*-elf*): Use elf32ebmip.
+	* emulparams/elf32bmip.sh (EMBEDDED): Don't define.
+	* emulparams/elf32lmip.sh (EMBEDDED): Don't define.
+	* emulparams/elf32elmip.sh: New file; copy of elf32lmip.sh with
+	EMBEDDED defined.
+	* emulparams/elf32ebmip.sh: New file; copy of elf32bmip.sh with
+	EMBEDDED defined.
+	* emulparams/elf32b4300.sh (EMBEDDED): Define.
+	* emulparams/elf32l4300.sh (EMBEDDED): Define.
+	* Makefile.in (ALL_EMULATIONS): Add eelf32ebmip.o eelf32elmip.o.
+	(eelf32ebmip.c, eelf32elmip.c): New targets.
+
 Thu Jul  4 12:01:03 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldver.c (ldversion): Set version to cygnus-2.7.1.
