@@ -1,3 +1,9 @@
+Fri Aug 14 18:31:14 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* config/tc-m68k.c (m68k_ip): If instruction is invalid for the
+	selected architecture, print a message saying so and listing what
+	processors support it, rather than saying "operands mismatch".
+
 Thu Aug 13 13:53:19 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* as.h [BROKEN_ASSERT]: If defined, turn off all assertion checks.
