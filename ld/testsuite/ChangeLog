@@ -1,3 +1,26 @@
+2003-01-21  Richard Henderson  <rth@redhat.com>
+
+	* ld-alpha/alpha.exp: New.
+	* ld-alpha/align.s: New.
+	* ld-alpha/tlsbin.dd: New.
+	* ld-alpha/tlsbin.rd: New.
+	* ld-alpha/tlsbin.s: New.
+	* ld-alpha/tlsbin.sd: New.
+	* ld-alpha/tlsbin.td: New.
+	* ld-alpha/tlsbinpic.s: New.
+	* ld-alpha/tlsbinr.dd: New.
+	* ld-alpha/tlsbinr.rd: New.
+	* ld-alpha/tlsbinr.sd: New.
+	* ld-alpha/tlsg.s: New.
+	* ld-alpha/tlsg.sd: New.
+	* ld-alpha/tlslib.s: New.
+	* ld-alpha/tlspic.dd: New.
+	* ld-alpha/tlspic.rd: New.
+	* ld-alpha/tlspic.sd: New.
+	* ld-alpha/tlspic.td: New.
+	* ld-alpha/tlspic1.s: New.
+	* ld-alpha/tlspic2.s: New.
+
 2003-01-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-srec/srec.exp (run_srec_test): Pass --traditional-format to ld.
