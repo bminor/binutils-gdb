@@ -1,3 +1,8 @@
+Wed Jan 24 20:40:26 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Fix typo in eabi
+	relocations.
+
 Wed Jan 24 10:38:34 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* elf32-sparc.c (elf32_sparc_merge_private_bfd_data): Delete checking

@@ -138,6 +138,14 @@ static boolean ppc_elf_relocate_section PARAMS ((bfd *,
 						 Elf_Internal_Sym *local_syms,
 						 asection **));
 
+static boolean ppc_elf_add_symbol_hook  PARAMS ((bfd *,
+						 struct bfd_link_info *,
+						 const Elf_Internal_Sym *,
+						 const char **,
+						 flagword *,
+						 asection **,
+						 bfd_vma *));
+
 static boolean ppc_elf_finish_dynamic_symbol PARAMS ((bfd *,
 						      struct bfd_link_info *,
 						      struct elf_link_hash_entry *,
@@ -1740,6 +1748,37 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 }
 
 
+/* Hook called by the linker routine which adds symbols from an object
+   file.  We use it to put .comm items in .sbss, and not .bss.  */
+
+/*ARGSUSED*/
+static boolean
+ppc_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     const Elf_Internal_Sym *sym;
+     const char **namep;
+     flagword *flagsp;
+     asection **secp;
+     bfd_vma *valp;
+{
+  if (sym->st_shndx == SHN_COMMON && sym->st_size <= 8)
+    {
+      /* Common symbols less than or equal to 8 bytes are automatically
+	 put into .sdata.  */
+      bfd *dynobj = elf_hash_table (info)->dynobj;
+      elf_linker_section_t *sdata = elf_linker_section (dynobj, LINKER_SECTION_SDATA);
+      if (!sdata->bss_section)
+	sdata->bss_section = bfd_make_section (dynobj, sdata->bss_name);
+      *secp = sdata->bss_section;
+      (*secp)->flags |= SEC_IS_COMMON;
+      *valp = sym->st_size;
+    }
+
+  return true;
+}
+
+
 /* Finish up dynamic symbol handling.  We set the contents of various
    dynamic sections here.  */
 
@@ -2227,8 +2266,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      ret = false;
 	      continue;
 	    }
-	  addend -= sdata->sym_hash->root.u.def.value;
-	  relocation = sdata->sym_hash->root.u.def.section->output_section->vma - relocation;
+	  addend -= (sdata->sym_hash->root.u.def.value
+		     + sdata->sym_hash->root.u.def.section->output_section->vma);
 	  break;
 
 
@@ -2247,8 +2286,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      ret = false;
 	      continue;
 	    }
-	  addend -= sdata2->sym_hash->root.u.def.value;
-	  relocation = sdata2->sym_hash->root.u.def.section->output_section->vma - relocation;
+	  addend -= (sdata2->sym_hash->root.u.def.value
+		     + sdata2->sym_hash->root.u.def.section->output_section->vma);
 	  break;
 
 
@@ -2263,15 +2302,15 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    if (strcmp (name, ".sdata") == 0 || strcmp (name, ".sbss") == 0)
 	      {
 		reg = 13;
-		addend -= sdata->sym_hash->root.u.def.value;
-		relocation = sdata->sym_hash->root.u.def.section->output_section->vma - relocation;
+		addend -= (sdata->sym_hash->root.u.def.value
+			   + sdata->sym_hash->root.u.def.section->output_section->vma);
 	      }
 
 	    else if (strcmp (name, ".sdata2") == 0 || strcmp (name, ".sbss2") == 0)
 	      {
 		reg = 2;
-		addend -= sdata2->sym_hash->root.u.def.value;
-		relocation = sdata2->sym_hash->root.u.def.section->output_section->vma - relocation;
+		addend -= (sdata2->sym_hash->root.u.def.value
+			   + sdata2->sym_hash->root.u.def.section->output_section->vma);
 	      }
 
 	    else if (strcmp (name, ".PPC.EMB.sdata0") == 0 || strcmp (name, ".PPC.EMB.sbss0") == 0)
@@ -2429,6 +2468,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 #define elf_backend_create_dynamic_sections	_bfd_elf_create_dynamic_sections
 #define elf_backend_check_relocs		ppc_elf_check_relocs
 #define elf_backend_adjust_dynamic_symbol	ppc_elf_adjust_dynamic_symbol
+#define elf_backend_add_symbol_hook		ppc_elf_add_symbol_hook
 #define elf_backend_size_dynamic_sections	ppc_elf_size_dynamic_sections
 #define elf_backend_finish_dynamic_symbol	ppc_elf_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections	ppc_elf_finish_dynamic_sections
