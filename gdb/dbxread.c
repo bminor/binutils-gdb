@@ -212,9 +212,6 @@ free_header_files PARAMS ((void));
 static void
 init_header_files PARAMS ((void));
 
-static struct pending *
-copy_pending PARAMS ((struct pending *, int, struct pending *));
-
 static void
 read_ofile_symtab PARAMS ((struct partial_symtab *));
 
@@ -1547,7 +1544,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 
   /* If this is nonzero, we've seen a non-gcc N_OPT symbol for this source
      file.  Used to detect the SunPRO solaris compiler.  */
-  int n_opt_found;
+  static int n_opt_found;
 
   /* The stab type used for the definition of the last function.
      N_STSYM or N_GSYM for SunOS4 acc; N_FUN for other compilers.  */
@@ -1763,52 +1760,12 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
       break;
 
     case N_BCOMM:
-      if (common_block)
-	{
-	  /* Note: this does not detect nesting if the previous N_BCOMM
-	     was at the beginning of a scope (and thus common_block was
-	     NULL).  Not necessarily worth worrying about unless we run
-	     into a compiler which actually has this bug.  */
-	  static struct complaint msg = {
-	    "Invalid symbol data: common within common at symtab pos %d",
-	    0, 0};
-	  complain (&msg, symnum);
-	}
-      common_block = local_symbols;
-      common_block_i = local_symbols ? local_symbols->nsyms : 0;
+      common_block_start (name, objfile);
       break;
 
     case N_ECOMM:
-
-      /* Symbols declared since the BCOMM are to have the common block
-	 start address added in when we know it.  common_block and
-	 common_block_i point to the first symbol after the BCOMM in
-	 the local_symbols list; copy the list and hang it off the
-	 symbol for the common block name for later fixup.  */
-
-      /* If there is a N_ECOMM unmatched by a N_BCOMM, we treat all
-	 the local_symbols as part of the common block.  It might be
-	 better to just ignore the N_ECOMM, but then we'd need to
-	 distinguish between a N_BCOMM at the start of a scope, or no
-	 N_BCOMM at all (currently they both have common_block NULL).
-	 Not necessarily worth worrying about unless we run into a
-	 compiler which actually has this bug.  */
-
-      {
-	int i;
-	struct symbol *sym =
-	  (struct symbol *) xmmalloc (objfile -> md, sizeof (struct symbol));
-	memset (sym, 0, sizeof *sym);
-	SYMBOL_NAME (sym) = savestring (name, strlen (name));
-	SYMBOL_CLASS (sym) = LOC_BLOCK;
-	SYMBOL_NAMESPACE (sym) = (enum namespace)((long)
-	  copy_pending (local_symbols, common_block_i, common_block));
-	i = hashname (SYMBOL_NAME (sym));
-	SYMBOL_VALUE_CHAIN (sym) = global_sym_chain[i];
-	global_sym_chain[i] = sym;
-	common_block = 0;
-	break;
-      }
+      common_block_end (objfile);
+      break;
 
     /* The following symbol types need to have the appropriate offset added
        to their value; then we process symbol definitions in the name.  */
@@ -1816,28 +1773,23 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
     case N_STSYM:		/* Static symbol in data seg */
     case N_LCSYM:		/* Static symbol in BSS seg */
     case N_ROSYM:		/* Static symbol in Read-only data seg */
-     /* HORRID HACK DEPT.  However, it's Sun's furgin' fault.  FIXME.
-	Solaris2's stabs-in-coff makes *most* symbols relative
-	but leaves a few absolute.  N_STSYM and friends sit on the fence.
+     /* HORRID HACK DEPT.  However, it's Sun's furgin' fault.
+	Solaris2's stabs-in-elf makes *most* symbols relative
+	but leaves a few absolute (at least for Solaris 2.1 and version
+	2.0.1 of the SunPRO compiler).  N_STSYM and friends sit on the fence.
 	.stab "foo:S...",N_STSYM 	is absolute (ld relocates it)
 	.stab "foo:V...",N_STSYM	is relative (section base subtracted).
 	This leaves us no choice but to search for the 'S' or 'V'...
 	(or pass the whole section_offsets stuff down ONE MORE function
-	call level, which we really don't want to do).
-
-	The above is indeed true for Solaris 2.1.  I'm not sure what
-	happens in Solaris 2.3, in which ld stops relocating stabs.  */
+	call level, which we really don't want to do).  */
       {
 	char *p;
 	p = strchr (name, ':');
 	if (p != 0 && p[1] == 'S')
 	  {
-	    /* FIXME!  We relocate it by the TEXT offset, in case the
-	       whole module moved in memory.  But this is wrong, since
-	       the sections can side around independently.  (I suspect that
-	       the text offset is always zero anyway--elfread.c doesn't
-	       process (and Sun cc doesn't produce) Ttext.text symbols).  */
-	    valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	    /* The linker relocated it.  There used to be a kludge here
+	       to add the text offset, but that will break if we ever
+	       start using the text offset (currently it is always zero).  */
 	    goto define_a_symbol;
 	  }
 	/* Since it's not the kludge case, re-dispatch to the right handler. */
@@ -2024,36 +1976,6 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
     }
 
   previous_stab_code = type;
-}
-
-/* Copy a pending list, used to record the contents of a common
-   block for later fixup.  We copy the symbols starting with all
-   symbols in BEG, and ending with the symbols which are in 
-   END at index ENDI.  */
-static struct pending *
-copy_pending (beg, endi, end)
-    struct pending *beg;
-    int endi;
-    struct pending *end;
-{
-  struct pending *new = 0;
-  struct pending *next;
-  int j;
-
-  /* Copy all the struct pendings before end.  */
-  for (next = beg; next != NULL && next != end; next = next->next)
-    {
-      for (j = 0; j < next->nsyms; j++)
-	add_symbol_to_list (next->symbol[j], &new);
-    }
-
-  /* Copy however much of END we need.  If END is NULL, it means copy
-     all the local symbols (which we already did above).  */
-  if (end != NULL)
-    for (j = endi; j < end->nsyms; j++)
-      add_symbol_to_list (end->symbol[j], &new);
-
-  return new;
 }
 
 /* FIXME: The only difference between this and elfstab_build_psymtabs is
@@ -2253,11 +2175,12 @@ dbx_symfile_offsets (objfile, addr)
 {
   struct section_offsets *section_offsets;
   int i;
- 
+
+  objfile->num_sections = SECT_OFF_MAX;
   section_offsets = (struct section_offsets *)
     obstack_alloc (&objfile -> psymbol_obstack,
-		   sizeof (struct section_offsets) +
-		          sizeof (section_offsets->offsets) * (SECT_OFF_MAX-1));
+		   sizeof (struct section_offsets)
+		   + sizeof (section_offsets->offsets) * (SECT_OFF_MAX-1));
 
   for (i = 0; i < SECT_OFF_MAX; i++)
     ANOFFSET (section_offsets, i) = addr;

@@ -357,14 +357,13 @@ extern struct objfile *object_files;
 
 /* Declarations for functions defined in objfiles.c */
 
-extern struct objfile *
-allocate_objfile PARAMS ((bfd *, int));
+extern struct objfile *allocate_objfile PARAMS ((bfd *, int));
 
-extern void
-unlink_objfile PARAMS ((struct objfile *));
+int build_objfile_section_table PARAMS ((struct objfile *));
 
-extern void
-free_objfile PARAMS ((struct objfile *));
+extern void unlink_objfile PARAMS ((struct objfile *));
+
+extern void free_objfile PARAMS ((struct objfile *));
 
 extern void
 free_all_objfiles PARAMS ((void));

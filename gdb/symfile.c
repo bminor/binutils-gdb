@@ -32,6 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "language.h"
 #include "complaints.h"
 #include "demangle.h"
+#include "inferior.h" /* for write_pc */
 
 #include <obstack.h>
 #include <assert.h>
@@ -214,21 +215,6 @@ sort_symtab_syms (s)
     }
 }
 
-void
-sort_all_symtab_syms ()
-{
-  register struct symtab *s;
-  register struct objfile *objfile;
-
-  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
-    {
-      for (s = objfile -> symtabs; s != NULL; s = s -> next)
-	{
-	  sort_symtab_syms (s);
-	}
-    }
-}
-
 /* Make a copy of the string at PTR with SIZE characters in the symbol obstack
    (and add a null character at the end in the copy).
    Returns the address of the copy.  */
@@ -315,6 +301,14 @@ init_entry_point_info (objfile)
       objfile -> ei.entry_file_lowpc = 0;
       objfile -> ei.entry_file_highpc = 0;
     }
+}
+
+/* Get current entry point address.  */
+
+CORE_ADDR
+entry_point_address()
+{
+  return symfile_objfile ? symfile_objfile->ei.entry_point : 0;
 }
 
 /* Remember the lowest-addressed loadable section we've seen.  
@@ -410,10 +404,10 @@ syms_from_objfile (objfile, addr, mainline, verbo)
       else if (0 == bfd_get_section_name (objfile->obfd, lowest_sect)
 	       || !STREQ (".text",
 			      bfd_get_section_name (objfile->obfd, lowest_sect)))
-	warning ("Lowest section in %s is %s at 0x%x",
+	warning ("Lowest section in %s is %s at 0x%lx",
 		 objfile->name,
 		 bfd_section_name (objfile->obfd, lowest_sect),
-		 bfd_section_vma (objfile->obfd, lowest_sect));
+		 (unsigned long) bfd_section_vma (objfile->obfd, lowest_sect));
 
       if (lowest_sect)
 	addr -= bfd_section_vma (objfile->obfd, lowest_sect);
@@ -426,9 +420,6 @@ syms_from_objfile (objfile, addr, mainline, verbo)
   (*objfile -> sf -> sym_init) (objfile);
   clear_complaints (1, verbo);
 
-  /* If objfile->sf->sym_offsets doesn't set this, we don't care
-     (currently).  */
-  objfile->num_sections = 0;  /* krp-FIXME: why zero? */
   section_offsets = (*objfile -> sf -> sym_offsets) (objfile, addr);
   objfile->section_offsets = section_offsets;
 
@@ -468,8 +459,10 @@ syms_from_objfile (objfile, addr, mainline, verbo)
 
   (*objfile -> sf -> sym_read) (objfile, section_offsets, mainline);
 
-  /* Don't allow char * to have a typename (else would get caddr_t.)  */
-  /* Ditto void *.  FIXME should do this for all the builtin types.  */
+  /* Don't allow char * to have a typename (else would get caddr_t).
+     Ditto void *.  FIXME: Check whether this is now done by all the
+     symbol readers themselves (many of them now do), and if so remove
+     it from here.  */
 
   TYPE_NAME (lookup_pointer_type (builtin_type_char)) = 0;
   TYPE_NAME (lookup_pointer_type (builtin_type_void)) = 0;
@@ -871,9 +864,9 @@ generic_load (filename, from_tty)
 
 	      /* Is this really necessary?  I guess it gives the user something
 		 to look at during a long download.  */
-	      printf_filtered ("Loading section %s, size 0x%x vma 0x%x\n",
+	      printf_filtered ("Loading section %s, size 0x%lx vma 0x%lx\n",
 			       bfd_get_section_name (loadfile_bfd, s),
-			       size, vma);
+			       (unsigned long) size, (unsigned long) vma);
 
 	      bfd_get_section_contents (loadfile_bfd, s, buffer, 0, size);
 
@@ -967,7 +960,7 @@ add_symbol_file_command (args, from_tty)
   text_addr = parse_and_eval_address (args);
 
   if (!query ("add symbol table from file \"%s\" at text_addr = %s?\n",
-	      name, local_hex_string (text_addr)))
+	      name, local_hex_string ((unsigned long)text_addr)))
     error ("Not confirmed.");
 
   symbol_file_add (name, 0, text_addr, 0, mapped, readnow);
@@ -989,7 +982,6 @@ reread_symbols ()
      This routine should then walk down each partial symbol table
      and see if the symbol table that it originates from has been changed */
 
-the_big_top:
   for (objfile = object_files; objfile; objfile = objfile->next) {
     if (objfile->obfd) {
 #ifdef IBM6000_TARGET
@@ -1008,24 +1000,142 @@ the_big_top:
 	continue;
       }
       new_modtime = new_statbuf.st_mtime;
-      if (new_modtime != objfile->mtime) {
-	printf_filtered ("`%s' has changed; re-reading symbols.\n",
-			 objfile->name);
-	/* FIXME, this should use a different command...that would only
- 	   affect this objfile's symbols, and would reset objfile->mtime.
-                (objfile->mtime = new_modtime;)
- 	   HOWEVER, that command isn't written yet -- so call symbol_file_
-	   command, and restart the scan from the top, because it munges
-	   the object_files list.  */
-	symbol_file_command (objfile->name, 0);
-	reread_one = 1;
-	goto the_big_top;	/* Start over.  */
-      }
+      if (new_modtime != objfile->mtime)
+	{
+	  struct cleanup *old_cleanups;
+	  struct section_offsets *offsets;
+	  int num_offsets;
+	  int section_offsets_size;
+
+	  printf_filtered ("`%s' has changed; re-reading symbols.\n",
+			   objfile->name);
+
+	  /* There are various functions like symbol_file_add,
+	     symfile_bfd_open, syms_from_objfile, etc., which might
+	     appear to do what we want.  But they have various other
+	     effects which we *don't* want.  So we just do stuff
+	     ourselves.  We don't worry about mapped files (for one thing,
+	     any mapped file will be out of date).  */
+
+	  /* If we get an error, blow away this objfile (not sure if
+	     that is the correct response for things like shared
+	     libraries).  */
+	  old_cleanups = make_cleanup (free_objfile, objfile);
+	  /* We need to do this whenever any symbols go away.  */
+	  make_cleanup (clear_symtab_users, 0);
+
+	  /* Clean up any state BFD has sitting around.  We don't need
+	     to close the descriptor but BFD lacks a way of closing the
+	     BFD without closing the descriptor.  */
+	  if (!bfd_close (objfile->obfd))
+	    error ("Can't close BFD for %s.", objfile->name);
+	  objfile->obfd = bfd_openr (objfile->name, gnutarget);
+	  if (objfile->obfd == NULL)
+	    error ("Can't open %s to read symbols.", objfile->name);
+	  /* bfd_openr sets cacheable to true, which is what we want.  */
+	  if (!bfd_check_format (objfile->obfd, bfd_object))
+	    error ("Can't read symbols from %s: %s.", objfile->name,
+		   bfd_errmsg (bfd_error));
+
+	  /* Save the offsets, we will nuke them with the rest of the
+	     psymbol_obstack.  */
+	  num_offsets = objfile->num_sections;
+	  section_offsets_size =
+	    sizeof (struct section_offsets)
+	      + sizeof (objfile->section_offsets->offsets) * num_offsets;
+	  offsets = (struct section_offsets *) alloca (section_offsets_size);
+	  memcpy (offsets, objfile->section_offsets, section_offsets_size);
+
+	  /* Nuke all the state that we will re-read.  Much of the following
+	     code which sets things to NULL really is necessary to tell
+	     other parts of GDB that there is nothing currently there.  */
+
+	  /* FIXME: Do we have to free a whole linked list, or is this
+	     enough?  */
+	  if (objfile->global_psymbols.list)
+	    mfree (objfile->md, objfile->global_psymbols.list);
+	  objfile->global_psymbols.list = NULL;
+	  objfile->global_psymbols.size = 0;
+	  if (objfile->static_psymbols.list)
+	    mfree (objfile->md, objfile->static_psymbols.list);
+	  objfile->static_psymbols.list = NULL;
+	  objfile->static_psymbols.size = 0;
+
+	  /* Free the obstacks for non-reusable objfiles */
+	  obstack_free (&objfile -> psymbol_obstack, 0);
+	  obstack_free (&objfile -> symbol_obstack, 0);
+	  obstack_free (&objfile -> type_obstack, 0);
+	  objfile->sections = NULL;
+	  objfile->symtabs = NULL;
+	  objfile->psymtabs = NULL;
+	  objfile->free_psymtabs = NULL;
+	  objfile->msymbols = NULL;
+	  objfile->minimal_symbol_count= 0;
+	  objfile->fundamental_types = NULL;
+	  if (objfile -> sf != NULL)
+	    {
+	      (*objfile -> sf -> sym_finish) (objfile);
+	    }
+
+	  /* We never make this a mapped file.  */
+	  objfile -> md = NULL;
+	  /* obstack_specify_allocation also initializes the obstack so
+	     it is empty.  */
+	  obstack_specify_allocation (&objfile -> psymbol_obstack, 0, 0,
+				      xmalloc, free);
+	  obstack_specify_allocation (&objfile -> symbol_obstack, 0, 0,
+				      xmalloc, free);
+	  obstack_specify_allocation (&objfile -> type_obstack, 0, 0,
+				      xmalloc, free);
+	  if (build_objfile_section_table (objfile))
+	    {
+	      error ("Can't find the file sections in `%s': %s", 
+		     objfile -> name, bfd_errmsg (bfd_error));
+	    }
+
+	  /* We use the same section offsets as from last time.  I'm not
+	     sure whether that is always correct for shared libraries.  */
+	  objfile->section_offsets = (struct section_offsets *)
+	    obstack_alloc (&objfile -> psymbol_obstack, section_offsets_size);
+	  memcpy (objfile->section_offsets, offsets, section_offsets_size);
+	  objfile->num_sections = num_offsets;
+
+	  /* What the hell is sym_new_init for, anyway?  The concept of
+	     distinguishing between the main file and additional files
+	     in this way seems rather dubious.  */
+	  if (objfile == symfile_objfile)
+	    (*objfile->sf->sym_new_init) (objfile);
+
+	  (*objfile->sf->sym_init) (objfile);
+	  clear_complaints (1, 1);
+	  /* The "mainline" parameter is a hideous hack; I think leaving it
+	     zero is OK since dbxread.c also does what it needs to do if
+	     objfile->global_psymbols.size is 0.  */
+	  (*objfile->sf->sym_read) (objfile, objfile->section_offsets, 0);
+	  objfile -> flags |= OBJF_SYMS;
+
+	  /* We're done reading the symbol file; finish off complaints.  */
+	  clear_complaints (0, 1);
+
+	  /* Getting new symbols may change our opinion about what is
+	     frameless.  */
+
+	  reinit_frame_cache ();
+
+	  /* Discard cleanups as symbol reading was successful.  */
+	  discard_cleanups (old_cleanups);
+
+	  /* If the mtime has changed between the time we set new_modtime
+	     and now, we *want* this to be out of date, so don't call stat
+	     again now.  */
+	  objfile->mtime = new_modtime;
+	  reread_one = 1;
+	}
     }
   }
 
   if (reread_one)
-    breakpoint_re_set ();
+    clear_symtab_users ();
 }
 
 
@@ -1039,13 +1149,13 @@ deduce_language_from_filename (filename)
     ; /* Get default */
   else if (0 == (c = strrchr (filename, '.')))
     ; /* Get default. */
-  else if(STREQ(c,".mod"))
+  else if (STREQ(c,".mod"))
     return language_m2;
-  else if(STREQ(c,".c"))
+  else if (STREQ(c,".c"))
     return language_c;
-  else if(STREQ(c,".cc") || STREQ(c,".C"))
+  else if (STREQ (c,".cc") || STREQ (c,".C") || STREQ (c, ".cxx"))
     return language_cplus;
-  else if(STREQ(c,".ch") || STREQ(c,".c186") || STREQ(c,".c286"))
+  else if (STREQ (c,".ch") || STREQ (c,".c186") || STREQ (c,".c286"))
     return language_chill;
 
   return language_unknown;		/* default */
@@ -1141,6 +1251,7 @@ clear_symtab_users ()
   set_default_breakpoint (0, 0, 0, 0);
   current_source_symtab = 0;
   current_source_line = 0;
+  clear_pc_function_cache ();
 }
 
 /* clear_symtab_users_once:

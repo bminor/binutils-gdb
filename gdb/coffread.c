@@ -28,6 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "objfiles.h"
 #include "buildsym.h"
 #include "gdb-stabs.h"
+#include "stabsread.h"
 #include "complaints.h"
 #include <obstack.h>
 
@@ -2044,11 +2045,12 @@ coff_symfile_offsets (objfile, addr)
 {
   struct section_offsets *section_offsets;
   int i;
- 
+
+  objfile->num_sections = SECT_OFF_MAX;
   section_offsets = (struct section_offsets *)
     obstack_alloc (&objfile -> psymbol_obstack,
-		   sizeof (struct section_offsets) +
-		          sizeof (section_offsets->offsets) * (SECT_OFF_MAX-1));
+		   sizeof (struct section_offsets)
+		   + sizeof (section_offsets->offsets) * (SECT_OFF_MAX-1));
 
   for (i = 0; i < SECT_OFF_MAX; i++)
     ANOFFSET (section_offsets, i) = addr;

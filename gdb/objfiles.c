@@ -92,9 +92,10 @@ add_to_objfile_sections (abfd, asect, objfile_p_char)
 }
 
 /* Builds a section table for OBJFILE.
-   Returns 0 if OK, 1 on error.  */
+   Returns 0 if OK, 1 on error (in which case bfd_error contains the
+   error).  */
 
-static int
+int
 build_objfile_section_table (objfile)
      struct objfile *objfile;
 {
@@ -356,6 +357,8 @@ free_objfile (objfile)
       (t->to_detach) (NULL, 0);
   }
 #endif
+  /* I *think* all our callers call clear_symtab_users.  If so, no need
+     to call this here.  */
   clear_pc_function_cache ();
 
   /* The last thing we do is free the objfile struct itself for the

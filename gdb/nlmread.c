@@ -266,7 +266,8 @@ nlm_symfile_offsets (objfile, addr)
 {
   struct section_offsets *section_offsets;
   int i;
- 
+
+  objfile->num_sections = SECT_OFF_MAX;
   section_offsets = (struct section_offsets *)
     obstack_alloc (&objfile -> psymbol_obstack,
 		   sizeof (struct section_offsets) +
@@ -281,7 +282,7 @@ nlm_symfile_offsets (objfile, addr)
 }
 
 
-/*  Register that we are able to handle NLM file format. */
+/* Register that we are able to handle NLM file format. */
 
 static struct sym_fns nlm_sym_fns =
 {

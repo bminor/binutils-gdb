@@ -228,7 +228,12 @@ int icache;
    starts.  */
 serial_t remote_desc = NULL;
 
-#define	PBUFSIZ	1024
+/* Having this larger than 400 causes us to be incompatible with m68k-stub.c
+   and i386-stub.c.  Normally, no one would notice because it only matters
+   for writing large chunks of memory (e.g. in downloads).  Also, this needs
+   to be more than 400 if required to hold the registers (see below, where
+   we round it up based on REGISTER_BYTES).  */
+#define	PBUFSIZ	400
 
 /* Maximum number of bytes to read/write at once.  The value here
    is chosen to fill up a packet (the headers account for the 32).  */
@@ -560,12 +565,6 @@ remote_wait (pid, status)
 		 stuff.  (Just what does "text" as seen by the stub
 		 mean, anyway?).  */
 
-	      /* FIXME: Why don't the various symfile_offsets routines
-		 in the sym_fns vectors set this?
-		 (no good reason -kingdon).  */
-	      if (symfile_objfile->num_sections == 0)
-		symfile_objfile->num_sections = SECT_OFF_MAX;
-
 	      offs = ((struct section_offsets *)
 		      alloca (sizeof (struct section_offsets)
 			      + (symfile_objfile->num_sections
@@ -797,9 +796,6 @@ remote_write_bytes (memaddr, myaddr, len)
   char buf[PBUFSIZ];
   int i;
   char *p;
-
-  if (len > PBUFSIZ / 2 - 20)
-    abort ();
 
   sprintf (buf, "M%x,%x:", memaddr, len);
 

@@ -183,9 +183,6 @@ struct complaint unknown_type_qual_complaint =
 struct complaint array_index_type_complaint =
 {"illegal array index type for %s, assuming int", 0, 0};
 
-struct complaint array_bitsize_complaint =
-{"size of array target type for %s not known, assuming %d bits", 0, 0};
-
 struct complaint bad_tag_guess_complaint =
 {"guessed tag type of %s incorrectly", 0, 0};
 
@@ -590,7 +587,15 @@ static struct parse_stack
   struct parse_stack *next, *prev;
   struct symtab *cur_st;	/* Current symtab. */
   struct block *cur_block;	/* Block in it. */
-  int blocktype;		/* What are we parsing. */
+
+  /* What are we parsing.  stFile, or stBlock are for files and
+     blocks.  stProc or stStaticProc means we have seen the start of a
+     procedure, but not the start of the block within in.  When we see
+     the start of that block, we change it to stNil, without pushing a
+     new block, i.e. stNil means both a procedure and a block.  */
+
+  int blocktype;
+
   int maxsyms;			/* Max symbols in this block. */
   struct type *cur_type;	/* Type we parse fields for. */
   int cur_field;		/* Field number in cur_type. */
@@ -1134,6 +1139,17 @@ parse_symbol (sh, ax, ext_sh, bigend)
       /* beginnning of (code) block. Value of symbol
 	 is the displacement from procedure start */
       push_parse_stack ();
+
+      /* Do not start a new block if this is the outermost block of a
+	 procedure.  This allows the LOC_BLOCK symbol to point to the
+	 block with the local variables, so funcname::var works.  */
+      if (top_stack->blocktype == stProc
+	  || top_stack->blocktype == stStaticProc)
+	{
+	  top_stack->blocktype = stNil;
+	  break;
+	}
+
       top_stack->blocktype = stBlock;
       b = new_block (top_stack->maxsyms);
       BLOCK_START (b) = sh->value + top_stack->procadr;
@@ -1196,6 +1212,12 @@ parse_symbol (sh, ax, ext_sh, bigend)
 	     end of this block. */
 	  BLOCK_END (top_stack->cur_block) = sh->value + top_stack->procadr;
 	  shrink_block (top_stack->cur_block, top_stack->cur_st);
+	}
+      else if (sh->sc == scText && top_stack->blocktype == stNil)
+	{
+	  /* End of outermost block.  Pop parse stack and ignore.  The
+	     following stEnd of stProc will take care of the block.  */
+	  ;
 	}
       else if (sh->sc == scText && top_stack->blocktype == stFile)
 	{
@@ -1676,20 +1698,19 @@ upgrade_type (fd, tpp, tq, ax, bigend, sym_name)
 
       t = create_array_type ((struct type *) NULL, *tpp, range);
 
-      /* Check whether supplied array element bit size matches
-	 the known size of the element type.  If this complaint
-	 ends up not happening, we can remove this code.  It's
-	 here because we aren't sure we understand this *&%&$
-	 symbol format.  */
-      id = TYPE_LENGTH (TYPE_TARGET_TYPE (t)) << 3;	/* bitsize */
-      if (id == 0)
-	{
-	  /* Most likely an undefined type */
-	  id = rf;
-	  TYPE_LENGTH (TYPE_TARGET_TYPE (t)) = id >> 3;
-	}
-      if (id != rf)
-	complain (&array_bitsize_complaint, sym_name, rf);
+      /* We used to fill in the supplied array element bitsize
+	 here if the TYPE_LENGTH of the target type was zero.
+	 This happens for a `pointer to an array of anonymous structs',
+	 but in this case the array element bitsize is also zero,
+	 so nothing is gained.
+	 And we used to check the TYPE_LENGTH of the target type against
+	 the supplied array element bitsize.
+	 gcc causes a mismatch for `pointer to array of object',
+	 since the sdb directives it uses do not have a way of
+	 specifying the bitsize, but it does no harm (the
+	 TYPE_LENGTH should be correct) and we should be able to
+	 ignore the erroneous bitsize from the auxiliary entry safely.
+	 dbx seems to ignore it too.  */
 
       *tpp = t;
       return 4 + off;
@@ -3595,6 +3616,7 @@ mipscoff_symfile_offsets (objfile, addr)
   struct section_offsets *section_offsets;
   int i;
 
+  objfile->num_sections = SECT_OFF_MAX;
   section_offsets = ((struct section_offsets *)
 		     obstack_alloc (&objfile->psymbol_obstack,
 				    (sizeof (struct section_offsets)

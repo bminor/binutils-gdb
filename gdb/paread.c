@@ -487,22 +487,22 @@ pa_symfile_offsets (objfile, addr)
 {
   struct section_offsets *section_offsets;
   int i;
- 
+
+  objfile->num_sections = SECT_OFF_MAX;
   section_offsets = (struct section_offsets *)
     obstack_alloc (&objfile -> psymbol_obstack,
-		   sizeof (struct section_offsets) +
-		          sizeof (section_offsets->offsets) * (SECT_OFF_MAX-1));
+		   sizeof (struct section_offsets)
+		   + sizeof (section_offsets->offsets) * (SECT_OFF_MAX-1));
 
   for (i = 0; i < SECT_OFF_MAX; i++)
     ANOFFSET (section_offsets, i) = addr;
-  
+
   return section_offsets;
 }
 
-/*  Register that we are able to handle PA object file formats. */
+/* Register that we are able to handle SOM object file formats (does this
+   work for hp300, or just PA?  I suspect the latter).  */
 
-/* This is probably a mistake.  FIXME.  Why can't the HP's use an ordinary
-   file format name with an -hppa suffix?  */
 static struct sym_fns pa_sym_fns =
 {
   "som",		/* sym_name: name or name prefix of BFD target type */

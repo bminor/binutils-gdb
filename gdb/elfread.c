@@ -615,15 +615,16 @@ elf_symfile_offsets (objfile, addr)
 {
   struct section_offsets *section_offsets;
   int i;
- 
+
+  objfile->num_sections = SECT_OFF_MAX;
   section_offsets = (struct section_offsets *)
     obstack_alloc (&objfile -> psymbol_obstack,
-		   sizeof (struct section_offsets) +
-		          sizeof (section_offsets->offsets) * (SECT_OFF_MAX-1));
+		   sizeof (struct section_offsets)
+		   + sizeof (section_offsets->offsets) * (SECT_OFF_MAX-1));
 
   for (i = 0; i < SECT_OFF_MAX; i++)
     ANOFFSET (section_offsets, i) = addr;
-  
+
   return section_offsets;
 }
 
@@ -694,21 +695,7 @@ elfstab_offset_sections (objfile, pst)
     complain (&stab_info_mismatch_complaint, filename);
 }
 
-/*  Register that we are able to handle ELF object file formats and DWARF
-    debugging formats.
-
-    Unlike other object file formats, where the debugging information format
-    is implied by the object file format, the ELF object file format and the
-    DWARF debugging information format are two distinct, and potentially
-    separate entities.  I.E. it is perfectly possible to have ELF objects
-    with debugging formats other than DWARF.  And it is conceivable that the
-    DWARF debugging format might be used with another object file format,
-    like COFF, by simply using COFF's custom section feature.
-
-    GDB, and to a lesser extent BFD, should support the notion of separate
-    object file formats and debugging information formats.  For now, we just
-    use "elf" in the same sense as "a.out" or "coff", to imply both the ELF
-    object file format and the DWARF debugging format. */
+/* Register that we are able to handle ELF object file formats.  */
 
 static struct sym_fns elf_sym_fns =
 {

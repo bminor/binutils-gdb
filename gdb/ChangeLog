@@ -1,3 +1,25 @@
+Sat Oct 30 08:32:53 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* symfile.c (reread_symbols): When re-reading symbols, do all the
+	right operations ourself, rather than calling symbol_file_command.
+	If we re-read something, call clear_symtab_users not just
+	breakpoint_re_set.
+	* objfiles.h, objfiles.c (build_objfile_section_table): No longer
+	static.
+	* symfile.c (clear_symtab_users): Call clear_pc_function_cache.
+	* coffread.c, dbxread.c, elfread.c, mipsread.c, nlmread.c, paread.c
+	(*_symfile_offsets): Set objfile->num_sections.
+	* remote.c (remote_wait), symfile.c (syms_from_objfile):
+	Don't muck with objfile->num_sections now that all the symbol
+	readers set it.
+	* elfread.c: Clean up obsolete comment about handling only DWARF.
+	* paread.c: Remove comment about how we should use an "ordinary"
+	file format with an hppa suffix.  There is nothing ordinary about SOM.
+
+	* config/i386/{i386m3.mh,i386mk.mh}, config/mips/mipsm3.mh,
+	config/ns32k/ns32km3.mh: Change MMALLOC_LIB to MMALLOC.
+	* TODO: Update Mach stuff.
+
 Fri Oct 29 16:30:36 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 
 	LynxOS support:
