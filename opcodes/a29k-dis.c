@@ -188,7 +188,7 @@ print_insn (memaddr, info)
 		  break;
 
 		case 'x':
-		  (*info->fprintf_func) (info->stream, "%d", (insn16 << 8) + insn0);
+		  (*info->fprintf_func) (info->stream, "0x%x", (insn16 << 8) + insn0);
 		  break;
 
 		case 'h':
