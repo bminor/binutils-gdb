@@ -1,3 +1,8 @@
+Sat Nov  5 15:44:00 1994  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* configure.in (target_libs):  Include libstdc++ again.
+	* config.guess:  Update from FSF (for FreeBSD).
+
 Thu Nov  3 16:32:30 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* Makefile.in (DEVO_SUPPORT): Include configure.bat and
