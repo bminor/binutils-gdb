@@ -1,3 +1,8 @@
+Tue Feb 23 19:00:50 1993  Mike Werner  (mtw@poseidon.cygnus.com)
+
+	* configure.in: added testsuite to configdirs.
+	* Makefile.in: added support for building testsuite.
+
 Mon Feb 22 22:52:10 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* objdump.c (disassemble_data):  Print function names when
