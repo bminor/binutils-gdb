@@ -1,3 +1,8 @@
+2002-04-02  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.c++/classes.exp ("calling method for small class"): Match
+	updated register output.
+
 2002-03-30  Daniel Jacobowitz  <drow@mvista.com>
 
 	Fix PR gdb/452
