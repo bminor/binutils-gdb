@@ -41,7 +41,8 @@ man9dir = $(mandir)/man9
 infodir = @infodir@
 includedir = @includedir@
 
-SHELL = /bin/sh
+SHELL = @SHELL@
+EXEEXT = @EXEEXT@
 
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -571,7 +572,7 @@ install-only:
 		else \
 		  true ; \
 		fi ; \
-		$(INSTALL_PROGRAM) gdb $(bindir)/$$transformed_name ; \
+		$(INSTALL_PROGRAM) gdb$(EXEEXT) $(bindir)/$$transformed_name$(EXEEXT) ; \
 		$(INSTALL_DATA) $(srcdir)/gdb.1 $(man1dir)/$$transformed_name.1
 	# start-sanitize-gdbtk
 	if [ x"$(ENABLE_GDBTK)" != x ] ; then \
@@ -653,8 +654,8 @@ init.c: $(OBS) $(TSOBS)
 
 # Removing the old gdb first works better if it is running, at least on SunOS.
 gdb: $(OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
-	rm -f gdb
-	$(HLDENV) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) -o gdb \
+	rm -f gdb$(EXEEXT)
+	$(HLDENV) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) -o gdb$(EXEEXT) \
 	  init.o $(OBS) $(TSOBS) $(ADD_FILES) $(CLIBS) $(LOADLIBES)
 
 nlm:	force
@@ -705,8 +706,8 @@ stop-gdb: stop-gdb.o
 # Removing gdb1 before the copy is the right thing if gdb1 is open
 # in another process.
 gdb1: gdb
-	rm -f gdb1
-	cp gdb gdb1
+	rm -f gdb1$(EXEEXT)
+	cp gdb$(EXEEXT) gdb1$(EXEEXT)
 
 ### fixme - this can't be right.
 # This checks the configure.in file versus the config/ directory.

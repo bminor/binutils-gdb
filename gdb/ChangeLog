@@ -1,3 +1,11 @@
+Thu Nov 20 04:11:27 1997  Geoffrey Noer  <noer@cygnus.com>
+
+        * aclocal.m4: add EXEEXT setting rule
+        * configure.in: call it
+        * configure: regenerate
+        * Makefile.in: pepper with EXEEXTs in appropriate places,
+	set SHELL = @SHELL@ for those lame hosts that don't have a /bin/sh
+
 Mon Nov 17 15:35:06 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* Makefile.in (remote-sim.o): Depend on $(INCLUDE_DIR)/callback.h.
