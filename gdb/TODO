@@ -498,6 +498,11 @@ SIM_SIGBREAK and have GDB pass back sim_resume (..., SIGBREAK).
 
 --
 
+Move remote_remove_hw_breakpoint, remote_insert_hw_breakpoint,
+remote_remove_watchpoint, remote_insert_watchpoint into target vector.
+
+--
+
 			New Features and Fixes
 			======================
 
@@ -751,7 +756,7 @@ ignored and a timeout is required before GDB retries.  A pre-cursor to
 fixing this this is making GDB's remote protocol packet more robust.
 
 While downloading to a remote protocol target, gdb ignores packet
-errors in so far as it will continue to edownload with chunk N+1 even
+errors in so far as it will continue to download with chunk N+1 even
 if chunk N was not correctly sent.  This causes gdb.base/remote.exp to
 take a painfully long time to run.  As a PS that test needs to be
 fixed so that it builds on 16 bit machines.
@@ -773,11 +778,6 @@ on the fly - should it be returned in the ``T'' packet?
 
 Underlying problem is that the register file is target endian.  If the
 target endianess changes gdb doesn't know.
-
---
-
-Use the recently added add_set_auto_boolean_cmd() function to
-implement the X-packet commands.
 
 --
 

@@ -1,3 +1,41 @@
+Fri Aug  4 18:00:41 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (enum Z_packet_type): Define.
+	(remote_protocol_Z): Change to an array of size NR_Z_PACKET_TYPES.
+	(remote_insert_watchpoint): Check watchpoint type.
+	(watchpoint_to_Z_packet): New function.
+	(enum packet_result): Define.
+	(packet_ok): New function. Return enum packet_result.
+	(init_all_packet_configs): New function.
+	(remote_open_1, remote_async_open_1, remote_cisco_open): Use
+ 	init_all_packet_configs instead of initializing remote_protocol_P,
+ 	remote_protocol_Z, remote_protocol_binary_download separatly.
+	(remote_remove_hw_breakpoint, remote_insert_hw_breakpoint,
+ 	remote_remove_watchpoint, remote_insert_watchpoint): Use
+ 	watchpoint_to_Z_packet and packet_ok.  Remove #ifdef
+ 	TARGET_HAS_HARDWARE_WATCHPOINTS.
+	(set_remote_protocol_Z_software_bp_packet_cmd,
+ 	show_remote_protocol_Z_software_bp_packet_cmd,
+ 	set_remote_protocol_Z_hardware_bp_packet_cmd,
+ 	show_remote_protocol_Z_hardware_bp_packet_cmd,
+ 	set_remote_protocol_Z_write_wp_packet_cmd,
+ 	show_remote_protocol_Z_write_wp_packet_cmd,
+ 	set_remote_protocol_Z_read_wp_packet_cmd,
+ 	show_remote_protocol_Z_read_wp_packet_cmd,
+ 	set_remote_protocol_Z_access_wp_packet_cmd,
+ 	show_remote_protocol_Z_access_wp_packet_cmd): New functions.
+	(remote_Z_packet_packet_detect): New variable.
+	(show_remote_protocol_Z_packet_cmd,
+ 	set_remote_protocol_Z_packet_cmd): Iterate over all ``Z'' packet
+ 	variants.
+	(add_packet_config_cmd): Add argument legacy.  Change syntax to
+ 	``set/show remote FULL_NAME-packet ...'' command.  Add ``set/show
+ 	remote XXX-packet ...'' command using add_alias_cmd when legacy.
+	(set_packet_config_cmd): Delete.
+	(show_remote_cmd): New function.
+  	
+	* TODO: Update.
+
 Fri Aug  4 14:05:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (infodir, SER_HARDWIRE): Fix merge problems from
