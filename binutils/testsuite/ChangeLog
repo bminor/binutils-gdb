@@ -1,5 +1,9 @@
 2002-04-09  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* binutils-all/windres/escapex.rc: New test case for hex constants
+	in strings.
+	* binutils-all/windres/escapex.rsd: Expected output
+
 	* binutils-all/windres/quoteclass.rc: New test case for quoted
 	CLASS definitions in DIALOG resources.
 

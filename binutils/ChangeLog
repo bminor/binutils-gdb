@@ -2,7 +2,9 @@
 
 	* rcparse.y: CLASS definitions in DIALOG resources 
 	are quoted.
-	Fix typo in BEDIT warning
+	Fix typo in BEDIT warning.
+
+	* rclex.l: "\xhex" encoding in strings corrected.
 
 2002-04-09  Gunnar Degnbol <degnbol@danbbs.dk>
 
