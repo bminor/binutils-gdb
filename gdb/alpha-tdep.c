@@ -401,7 +401,7 @@ alpha_find_saved_regs (struct frame_info *frame)
       return;
     }
 
-  proc_desc = frame->extra_info->proc_desc;
+  proc_desc = get_frame_extra_info (frame)->proc_desc;
   if (proc_desc == NULL)
     /* I'm not sure how/whether this can happen.  Normally when we can't
        find a proc_desc, we "synthesize" one using heuristic_proc_desc
@@ -488,11 +488,12 @@ read_next_frame_reg (struct frame_info *fi, int regno)
 static CORE_ADDR
 alpha_frame_saved_pc (struct frame_info *frame)
 {
-  alpha_extra_func_info_t proc_desc = frame->extra_info->proc_desc;
+  alpha_extra_func_info_t proc_desc = get_frame_extra_info (frame)->proc_desc;
   /* We have to get the saved pc from the sigcontext
      if it is a signal handler frame.  */
-  int pcreg = (get_frame_type (frame) == SIGTRAMP_FRAME) ? PC_REGNUM
-                                           : frame->extra_info->pc_reg;
+  int pcreg = ((get_frame_type (frame) == SIGTRAMP_FRAME)
+	       ? PC_REGNUM
+	       : get_frame_extra_info (frame)->pc_reg);
 
   if (proc_desc && PROC_DESC_IS_DUMMY (proc_desc))
     return read_memory_integer  (get_frame_base (frame) - 8, 8);
@@ -967,12 +968,12 @@ void
 alpha_print_extra_frame_info (struct frame_info *fi)
 {
   if (fi
-      && fi->extra_info
-      && fi->extra_info->proc_desc
-      && fi->extra_info->proc_desc->pdr.framereg < NUM_REGS)
+      && get_frame_extra_info (fi)
+      && get_frame_extra_info (fi)->proc_desc
+      && get_frame_extra_info (fi)->proc_desc->pdr.framereg < NUM_REGS)
     printf_filtered (" frame pointer is at %s+%s\n",
-		     REGISTER_NAME (fi->extra_info->proc_desc->pdr.framereg),
-		     paddr_d (fi->extra_info->proc_desc->pdr.frameoffset));
+		     REGISTER_NAME (get_frame_extra_info (fi)->proc_desc->pdr.framereg),
+		     paddr_d (get_frame_extra_info (fi)->proc_desc->pdr.frameoffset));
 }
 
 static void
@@ -989,16 +990,16 @@ alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
   /* NOTE: cagney/2003-01-03: No need to set saved_regs to NULL,
      always NULL by default.  */
   /* frame->saved_regs = NULL; */
-  frame->extra_info->localoff = 0;
-  frame->extra_info->pc_reg = ALPHA_RA_REGNUM;
-  frame->extra_info->proc_desc = proc_desc == &temp_proc_desc ? 0 : proc_desc;
+  get_frame_extra_info (frame)->localoff = 0;
+  get_frame_extra_info (frame)->pc_reg = ALPHA_RA_REGNUM;
+  get_frame_extra_info (frame)->proc_desc = proc_desc == &temp_proc_desc ? 0 : proc_desc;
   if (proc_desc)
     {
       /* Get the locals offset and the saved pc register from the
          procedure descriptor, they are valid even if we are in the
          middle of the prologue.  */
-      frame->extra_info->localoff = PROC_LOCALOFF (proc_desc);
-      frame->extra_info->pc_reg = PROC_PC_REG (proc_desc);
+      get_frame_extra_info (frame)->localoff = PROC_LOCALOFF (proc_desc);
+      get_frame_extra_info (frame)->pc_reg = PROC_PC_REG (proc_desc);
 
       /* Fixup frame-pointer - only needed for top frame */
 
@@ -1045,7 +1046,7 @@ alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 static CORE_ADDR
 alpha_frame_locals_address (struct frame_info *fi)
 {
-  return (get_frame_base (fi) - fi->extra_info->localoff);
+  return (get_frame_base (fi) - get_frame_extra_info (fi)->localoff);
 }
 
 static CORE_ADDR
@@ -1293,7 +1294,7 @@ alpha_pop_frame (void)
   struct frame_info *frame = get_current_frame ();
   CORE_ADDR new_sp = get_frame_base (frame);
 
-  alpha_extra_func_info_t proc_desc = frame->extra_info->proc_desc;
+  alpha_extra_func_info_t proc_desc = get_frame_extra_info (frame)->proc_desc;
 
   /* we need proc_desc to know how to restore the registers;
      if it is NULL, construct (a temporary) one */

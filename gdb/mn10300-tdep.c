@@ -163,8 +163,8 @@ analyze_dummy_frame (CORE_ADDR pc, CORE_ADDR frame)
   deprecated_set_frame_prev_hack (dummy, NULL);
   deprecated_update_frame_pc_hack (dummy, pc);
   deprecated_update_frame_base_hack (dummy, frame);
-  dummy->extra_info->status = 0;
-  dummy->extra_info->stack_size = 0;
+  get_frame_extra_info (dummy)->status = 0;
+  get_frame_extra_info (dummy)->stack_size = 0;
   memset (get_frame_saved_regs (dummy), '\000', SIZEOF_FRAME_SAVED_REGS);
   mn10300_analyze_prologue (dummy, 0);
   return dummy;
@@ -209,9 +209,9 @@ fix_frame_pointer (struct frame_info *fi, int stack_size)
 {
   if (fi && get_next_frame (fi) == NULL)
     {
-      if (fi->extra_info->status & MY_FRAME_IN_SP)
+      if (get_frame_extra_info (fi)->status & MY_FRAME_IN_SP)
 	deprecated_update_frame_base_hack (fi, read_sp () - stack_size);
-      else if (fi->extra_info->status & MY_FRAME_IN_FP)
+      else if (get_frame_extra_info (fi)->status & MY_FRAME_IN_FP)
 	deprecated_update_frame_base_hack (fi, read_register (A3_REGNUM));
     }
 }
@@ -415,13 +415,13 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
   if (strcmp (name, "start") == 0)
     {
       if (fi != NULL)
-	fi->extra_info->status = NO_MORE_FRAMES;
+	get_frame_extra_info (fi)->status = NO_MORE_FRAMES;
       return pc;
     }
 
   /* At the start of a function our frame is in the stack pointer.  */
   if (fi)
-    fi->extra_info->status = MY_FRAME_IN_SP;
+    get_frame_extra_info (fi)->status = MY_FRAME_IN_SP;
 
   /* Get the next two bytes into buf, we need two because rets is a two
      byte insn and the first isn't enough to uniquely identify it.  */
@@ -473,7 +473,7 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
   if (buf[0] == 0xf2 && (buf[1] & 0xf3) == 0xf0)
     {
       if (fi)
-	fi->extra_info->status = NO_MORE_FRAMES;
+	get_frame_extra_info (fi)->status = NO_MORE_FRAMES;
       return addr;
     }
 
@@ -524,8 +524,8 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
       /* The frame pointer is now valid.  */
       if (fi)
 	{
-	  fi->extra_info->status |= MY_FRAME_IN_FP;
-	  fi->extra_info->status &= ~MY_FRAME_IN_SP;
+	  get_frame_extra_info (fi)->status |= MY_FRAME_IN_FP;
+	  get_frame_extra_info (fi)->status &= ~MY_FRAME_IN_SP;
 	}
 
       /* Quit now if we're beyond the stop point.  */
@@ -599,7 +599,7 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
       /* Note the size of the stack in the frame info structure.  */
       stack_size = extract_signed_integer (buf, imm_size);
       if (fi)
-	fi->extra_info->stack_size = stack_size;
+	get_frame_extra_info (fi)->stack_size = stack_size;
 
       /* We just consumed 2 + imm_size bytes.  */
       addr += 2 + imm_size;
@@ -662,11 +662,11 @@ mn10300_frame_chain (struct frame_info *fi)
   struct frame_info *dummy;
   /* Walk through the prologue to determine the stack size,
      location of saved registers, end of the prologue, etc.  */
-  if (fi->extra_info->status == 0)
+  if (get_frame_extra_info (fi)->status == 0)
     mn10300_analyze_prologue (fi, (CORE_ADDR) 0);
 
   /* Quit now if mn10300_analyze_prologue set NO_MORE_FRAMES.  */
-  if (fi->extra_info->status & NO_MORE_FRAMES)
+  if (get_frame_extra_info (fi)->status & NO_MORE_FRAMES)
     return 0;
 
   /* Now that we've analyzed our prologue, determine the frame
@@ -688,7 +688,7 @@ mn10300_frame_chain (struct frame_info *fi)
      find stuff for us.  */
   dummy = analyze_dummy_frame (FRAME_SAVED_PC (fi), get_frame_base (fi));
 
-  if (dummy->extra_info->status & MY_FRAME_IN_FP)
+  if (get_frame_extra_info (dummy)->status & MY_FRAME_IN_FP)
     {
       /* Our caller has a frame pointer.  So find the frame in $a3 or
          in the stack.  */
@@ -704,7 +704,7 @@ mn10300_frame_chain (struct frame_info *fi)
       /* Our caller does not have a frame pointer.  So his frame starts
          at the base of our frame (fi->frame) + register save space
          + <his size>.  */
-      return get_frame_base (fi) + adjust + -dummy->extra_info->stack_size;
+      return get_frame_base (fi) + adjust + -get_frame_extra_info (dummy)->stack_size;
     }
 }
 
@@ -903,8 +903,8 @@ mn10300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   frame_saved_regs_zalloc (fi);
   frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
 
-  fi->extra_info->status = 0;
-  fi->extra_info->stack_size = 0;
+  get_frame_extra_info (fi)->status = 0;
+  get_frame_extra_info (fi)->stack_size = 0;
 
   mn10300_analyze_prologue (fi, 0);
 }
@@ -931,10 +931,10 @@ mn10300_virtual_frame_pointer (CORE_ADDR pc,
   /* Set up a dummy frame_info, Analyze the prolog and fill in the
      extra info.  */
   /* Results will tell us which type of frame it uses.  */
-  if (dummy->extra_info->status & MY_FRAME_IN_SP)
+  if (get_frame_extra_info (dummy)->status & MY_FRAME_IN_SP)
     {
       *reg = SP_REGNUM;
-      *offset = -(dummy->extra_info->stack_size);
+      *offset = -(get_frame_extra_info (dummy)->stack_size);
     }
   else
     {

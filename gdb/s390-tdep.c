@@ -317,18 +317,18 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
 	{
 	  good_prologue = 1;
 	  if (saved_regs && fextra_info && get_next_frame (fi)
-	      && get_next_frame (fi)->extra_info
-	      && get_next_frame (fi)->extra_info->sigcontext)
+	      && get_frame_extra_info (get_next_frame (fi))
+	      && get_frame_extra_info (get_next_frame (fi))->sigcontext)
 	    {
 	      /* We are backtracing from a signal handler */
-	      save_reg_addr = get_next_frame (fi)->extra_info->sigcontext +
+	      save_reg_addr = get_frame_extra_info (get_next_frame (fi))->sigcontext +
 		REGISTER_BYTE (S390_GP0_REGNUM);
 	      for (regidx = 0; regidx < S390_NUM_GPRS; regidx++)
 		{
 		  saved_regs[S390_GP0_REGNUM + regidx] = save_reg_addr;
 		  save_reg_addr += S390_GPR_SIZE;
 		}
-	      save_reg_addr = get_next_frame (fi)->extra_info->sigcontext +
+	      save_reg_addr = get_frame_extra_info (get_next_frame (fi))->sigcontext +
 		(GDB_TARGET_IS_ESAME ? S390X_SIGREGS_FP0_OFFSET :
 		 S390_SIGREGS_FP0_OFFSET);
 	      for (regidx = 0; regidx < S390_NUM_FPRS; regidx++)
@@ -772,8 +772,8 @@ s390_function_start (struct frame_info *fi)
 {
   CORE_ADDR function_start = 0;
 
-  if (fi->extra_info && fi->extra_info->initialised)
-    function_start = fi->extra_info->function_start;
+  if (get_frame_extra_info (fi) && get_frame_extra_info (fi)->initialised)
+    function_start = get_frame_extra_info (fi)->function_start;
   else if (get_frame_pc (fi))
     function_start = get_pc_function_start (get_frame_pc (fi));
   return function_start;
@@ -790,8 +790,8 @@ s390_frameless_function_invocation (struct frame_info *fi)
 
   if (get_next_frame (fi) == NULL)		/* no may be frameless */
     {
-      if (fi->extra_info)
-	fextra_info_ptr = fi->extra_info;
+      if (get_frame_extra_info (fi))
+	fextra_info_ptr = get_frame_extra_info (fi);
       else
 	{
 	  fextra_info_ptr = &fextra_info;
@@ -907,9 +907,9 @@ s390_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
   if (get_frame_pc (fi))
     s390_get_frame_info (s390_sniff_pc_function_start (get_frame_pc (fi), fi),
-			 fi->extra_info, fi, 1);
+			 get_frame_extra_info (fi), fi, 1);
   else
-    s390_memset_extra_info (fi->extra_info);
+    s390_memset_extra_info (get_frame_extra_info (fi));
 }
 
 /* If saved registers of frame FI are not known yet, read and cache them.
@@ -928,11 +928,13 @@ s390_frame_init_saved_regs (struct frame_info *fi)
       frame_saved_regs_zalloc (fi);
       if (get_frame_pc (fi))
 	{
-	  quick = (fi->extra_info && fi->extra_info->initialised
-		   && fi->extra_info->good_prologue);
-	  s390_get_frame_info (quick ? fi->extra_info->function_start :
-			       s390_sniff_pc_function_start (get_frame_pc (fi), fi),
-			       fi->extra_info, fi, !quick);
+	  quick = (get_frame_extra_info (fi)
+		   && get_frame_extra_info (fi)->initialised
+		   && get_frame_extra_info (fi)->good_prologue);
+	  s390_get_frame_info (quick
+			       ? get_frame_extra_info (fi)->function_start
+			       : s390_sniff_pc_function_start (get_frame_pc (fi), fi),
+			       get_frame_extra_info (fi), fi, !quick);
 	}
     }
 }
@@ -951,8 +953,8 @@ s390_frame_args_address (struct frame_info *fi)
 static CORE_ADDR
 s390_frame_saved_pc_nofix (struct frame_info *fi)
 {
-  if (fi->extra_info && fi->extra_info->saved_pc_valid)
-    return fi->extra_info->saved_pc;
+  if (get_frame_extra_info (fi) && get_frame_extra_info (fi)->saved_pc_valid)
+    return get_frame_extra_info (fi)->saved_pc;
 
   if (deprecated_generic_find_dummy_frame (get_frame_pc (fi),
 					   get_frame_base (fi)))
@@ -960,19 +962,19 @@ s390_frame_saved_pc_nofix (struct frame_info *fi)
 					   get_frame_base (fi), S390_PC_REGNUM);
 
   s390_frame_init_saved_regs (fi);
-  if (fi->extra_info)
+  if (get_frame_extra_info (fi))
     {
-      fi->extra_info->saved_pc_valid = 1;
-      if (fi->extra_info->good_prologue
+      get_frame_extra_info (fi)->saved_pc_valid = 1;
+      if (get_frame_extra_info (fi)->good_prologue
           && get_frame_saved_regs (fi)[S390_RETADDR_REGNUM])
-        fi->extra_info->saved_pc
+        get_frame_extra_info (fi)->saved_pc
           = ADDR_BITS_REMOVE (read_memory_integer
                               (get_frame_saved_regs (fi)[S390_RETADDR_REGNUM],
                                S390_GPR_SIZE));
       else
-        fi->extra_info->saved_pc
+        get_frame_extra_info (fi)->saved_pc
           = ADDR_BITS_REMOVE (read_register (S390_RETADDR_REGNUM));
-      return fi->extra_info->saved_pc;
+      return get_frame_extra_info (fi)->saved_pc;
     }
   return 0;
 }
@@ -982,19 +984,20 @@ s390_frame_saved_pc (struct frame_info *fi)
 {
   CORE_ADDR saved_pc = 0, sig_pc;
 
-  if (fi->extra_info && fi->extra_info->sig_fixed_saved_pc_valid)
-    return fi->extra_info->sig_fixed_saved_pc;
+  if (get_frame_extra_info (fi)
+      && get_frame_extra_info (fi)->sig_fixed_saved_pc_valid)
+    return get_frame_extra_info (fi)->sig_fixed_saved_pc;
   saved_pc = s390_frame_saved_pc_nofix (fi);
 
-  if (fi->extra_info)
+  if (get_frame_extra_info (fi))
     {
-      fi->extra_info->sig_fixed_saved_pc_valid = 1;
+      get_frame_extra_info (fi)->sig_fixed_saved_pc_valid = 1;
       if (saved_pc)
 	{
 	  if (s390_is_sigreturn (saved_pc, fi, NULL, &sig_pc))
 	    saved_pc = sig_pc;
 	}
-      fi->extra_info->sig_fixed_saved_pc = saved_pc;
+      get_frame_extra_info (fi)->sig_fixed_saved_pc = saved_pc;
     }
   return saved_pc;
 }
@@ -1046,7 +1049,7 @@ s390_frame_chain (struct frame_info *thisframe)
 							 frame_pointer_saved_pc
 							 ? 11 : 15)),
 					 S390_GPR_SIZE);
-	  thisframe->extra_info->sigcontext = sregs;
+	  get_frame_extra_info (thisframe)->sigcontext = sregs;
 	}
       else
 	{

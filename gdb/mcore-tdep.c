@@ -300,8 +300,8 @@ analyze_dummy_frame (CORE_ADDR pc, CORE_ADDR frame)
   deprecated_set_frame_prev_hack (dummy, NULL);
   deprecated_update_frame_pc_hack (dummy, pc);
   deprecated_update_frame_base_hack (dummy, frame);
-  dummy->extra_info->status = 0;
-  dummy->extra_info->framesize = 0;
+  get_frame_extra_info (dummy)->status = 0;
+  get_frame_extra_info (dummy)->framesize = 0;
   memset (get_frame_saved_regs (dummy), '\000', SIZEOF_FRAME_SAVED_REGS);
   mcore_analyze_prologue (dummy, 0, 0);
   return dummy;
@@ -360,7 +360,7 @@ mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue)
   if (func_addr == entry_point_address ())
     {
       if (fi != NULL)
-	fi->extra_info->status |= NO_MORE_FRAMES;
+	get_frame_extra_info (fi)->status |= NO_MORE_FRAMES;
       return pc;
     }
 
@@ -606,16 +606,16 @@ mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue)
   /* Save everything we have learned about this frame into FI. */
   if (fi != NULL)
     {
-      fi->extra_info->framesize = framesize;
-      fi->extra_info->fp_regnum = fp_regnum;
-      fi->extra_info->status = flags;
+      get_frame_extra_info (fi)->framesize = framesize;
+      get_frame_extra_info (fi)->fp_regnum = fp_regnum;
+      get_frame_extra_info (fi)->status = flags;
 
       /* Fix the frame pointer. When gcc uses r8 as a frame pointer,
          it is really an arg ptr. We adjust fi->frame to be a "real"
          frame pointer. */
       if (get_next_frame (fi) == NULL)
 	{
-	  if (fi->extra_info->status & MY_FRAME_IN_SP)
+	  if (get_frame_extra_info (fi)->status & MY_FRAME_IN_SP)
 	    deprecated_update_frame_base_hack (fi, read_sp () + framesize);
 	  else
 	    deprecated_update_frame_base_hack (fi, read_register (fp_regnum) + framesize);
@@ -651,11 +651,11 @@ mcore_frame_chain (struct frame_info * fi)
   CORE_ADDR callers_addr;
 
   /* Analyze the prologue of this function. */
-  if (fi->extra_info->status == 0)
+  if (get_frame_extra_info (fi)->status == 0)
     mcore_analyze_prologue (fi, 0, 0);
 
   /* If mcore_analyze_prologue set NO_MORE_FRAMES, quit now. */
-  if (fi->extra_info->status & NO_MORE_FRAMES)
+  if (get_frame_extra_info (fi)->status & NO_MORE_FRAMES)
     return 0;
 
   /* Now that we've analyzed our prologue, we can start to ask
@@ -671,9 +671,9 @@ mcore_frame_chain (struct frame_info * fi)
      is <our base> + -<caller's frame size>. */
   dummy = analyze_dummy_frame (FRAME_SAVED_PC (fi), get_frame_base (fi));
 
-  if (dummy->extra_info->status & MY_FRAME_IN_FP)
+  if (get_frame_extra_info (dummy)->status & MY_FRAME_IN_FP)
     {
-      int fp = dummy->extra_info->fp_regnum;
+      int fp = get_frame_extra_info (dummy)->fp_regnum;
 
       /* Our caller has a frame pointer. */
       if (get_frame_saved_regs (fi)[fp] != 0)
@@ -681,19 +681,19 @@ mcore_frame_chain (struct frame_info * fi)
 	  /* The "FP" was saved on the stack.  Don't forget to adjust
 	     the "FP" with the framesize to get a real FP. */
 	  callers_addr = read_memory_integer (get_frame_saved_regs (fi)[fp], REGISTER_SIZE)
-	    + dummy->extra_info->framesize;
+	    + get_frame_extra_info (dummy)->framesize;
 	}
       else
 	{
 	  /* It's still in the register.  Don't forget to adjust
 	     the "FP" with the framesize to get a real FP. */
-	  callers_addr = read_register (fp) + dummy->extra_info->framesize;
+	  callers_addr = read_register (fp) + get_frame_extra_info (dummy)->framesize;
 	}
     }
   else
     {
       /* Our caller does not have a frame pointer. */
-      callers_addr = get_frame_base (fi) + dummy->extra_info->framesize;
+      callers_addr = get_frame_base (fi) + get_frame_extra_info (dummy)->framesize;
     }
 
   return callers_addr;
@@ -724,13 +724,13 @@ mcore_skip_prologue (CORE_ADDR pc)
 CORE_ADDR
 mcore_frame_args_address (struct frame_info * fi)
 {
-  return get_frame_base (fi) - fi->extra_info->framesize;
+  return get_frame_base (fi) - get_frame_extra_info (fi)->framesize;
 }
 
 CORE_ADDR
 mcore_frame_locals_address (struct frame_info * fi)
 {
-  return get_frame_base (fi) - fi->extra_info->framesize;
+  return get_frame_base (fi) - get_frame_extra_info (fi)->framesize;
 }
 
 /* Return the frame pointer in use at address PC. */
@@ -739,14 +739,14 @@ void
 mcore_virtual_frame_pointer (CORE_ADDR pc, int *reg, LONGEST *offset)
 {
   struct frame_info *dummy = analyze_dummy_frame (pc, 0);
-  if (dummy->extra_info->status & MY_FRAME_IN_SP)
+  if (get_frame_extra_info (dummy)->status & MY_FRAME_IN_SP)
     {
       *reg = SP_REGNUM;
       *offset = 0;
     }
   else
     {
-      *reg = dummy->extra_info->fp_regnum;
+      *reg = get_frame_extra_info (dummy)->fp_regnum;
       *offset = 0;
     }
 }
@@ -1050,8 +1050,8 @@ mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   frame_saved_regs_zalloc (fi);
 
   frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
-  fi->extra_info->status = 0;
-  fi->extra_info->framesize = 0;
+  get_frame_extra_info (fi)->status = 0;
+  get_frame_extra_info (fi)->framesize = 0;
 
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
 				   get_frame_base (fi)))

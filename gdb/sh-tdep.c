@@ -934,7 +934,8 @@ sh_frame_chain (struct frame_info *frame)
 				   get_frame_base (frame)))
     return get_frame_base (frame);	/* dummy frame same as caller's frame */
   if (get_frame_pc (frame) && !inside_entry_file (get_frame_pc (frame)))
-    return read_memory_integer (get_frame_base (frame) + frame->extra_info->f_offset, 4);
+    return read_memory_integer (get_frame_base (frame)
+				+ get_frame_extra_info (frame)->f_offset, 4);
   else
     return 0;
 }
@@ -981,7 +982,9 @@ sh64_frame_chain (struct frame_info *frame)
 	size = 4;
       else
 	size = REGISTER_RAW_SIZE (translate_insn_rn (FP_REGNUM, media_mode));
-      return read_memory_integer (get_frame_base (frame) + frame->extra_info->f_offset, size);
+      return read_memory_integer (get_frame_base (frame)
+				  + get_frame_extra_info (frame)->f_offset,
+				  size);
     }
   else
     return 0;
@@ -1079,8 +1082,8 @@ sh_nofp_frame_init_saved_regs (struct frame_info *fi)
       return;
     }
 
-  fi->extra_info->leaf_function = 1;
-  fi->extra_info->f_offset = 0;
+  get_frame_extra_info (fi)->leaf_function = 1;
+  get_frame_extra_info (fi)->f_offset = 0;
 
   for (rn = 0; rn < NUM_REGS + NUM_PSEUDO_REGS; rn++)
     where[rn] = -1;
@@ -1112,7 +1115,7 @@ sh_nofp_frame_init_saved_regs (struct frame_info *fi)
 	{
 	  where[gdbarch_tdep (current_gdbarch)->PR_REGNUM] = depth;
 	  /* If we're storing the pr then this isn't a leaf */
-	  fi->extra_info->leaf_function = 0;
+	  get_frame_extra_info (fi)->leaf_function = 0;
 	  depth += 4;
 	}
       else if (IS_MOV_R3 (insn))
@@ -1167,7 +1170,7 @@ sh_nofp_frame_init_saved_regs (struct frame_info *fi)
       get_frame_saved_regs (fi)[SP_REGNUM] = get_frame_base (fi) - 4;
     }
 
-  fi->extra_info->f_offset = depth - where[FP_REGNUM] - 4;
+  get_frame_extra_info (fi)->f_offset = depth - where[FP_REGNUM] - 4;
   /* Work out the return pc - either from the saved pr or the pr
      value */
 }
@@ -1419,8 +1422,8 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
       return;
     }
 
-  fi->extra_info->leaf_function = 1;
-  fi->extra_info->f_offset = 0;
+  get_frame_extra_info (fi)->leaf_function = 1;
+  get_frame_extra_info (fi)->f_offset = 0;
 
   for (rn = 0; rn < NUM_REGS + NUM_PSEUDO_REGS; rn++)
     where[rn] = -1;
@@ -1470,7 +1473,7 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
 		  int reg_nr = tdep->PR_C_REGNUM;
 
 		  where[reg_nr] = depth - ((((next_insn & 0xf) ^ 0x8) - 0x8) << 2);
-		  fi->extra_info->leaf_function = 0;
+		  get_frame_extra_info (fi)->leaf_function = 0;
 		  pc += insn_size;
 		}
 	    }
@@ -1498,7 +1501,7 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
 	      int reg_nr = tdep->PR_C_REGNUM;
 	      where[reg_nr] = depth - (r0_val - 4);
 	      r0_val -= 4;
-	      fi->extra_info->leaf_function = 0;
+	      get_frame_extra_info (fi)->leaf_function = 0;
 	    }
 	  else if (IS_MOV_R14_R0 (insn))
 	    {
@@ -1526,14 +1529,14 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
 	    {
 	      where[tdep->PR_REGNUM] = 
 		depth - (sign_extend ((insn & 0xffc00) >> 10, 9) << 3);
-	      fi->extra_info->leaf_function = 0;
+	      get_frame_extra_info (fi)->leaf_function = 0;
 	    }
 
 	  else if (IS_STL_R18_R15 (insn))
 	    {
 	      where[tdep->PR_REGNUM] = 
 		depth - (sign_extend ((insn & 0xffc00) >> 10, 9) << 2);
-	      fi->extra_info->leaf_function = 0;
+	      get_frame_extra_info (fi)->leaf_function = 0;
 	    }
 
 	  else if (IS_STQ_R14_R15 (insn))
@@ -1589,7 +1592,7 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
   else
     get_frame_saved_regs (fi)[sp_regnum] = get_frame_base (fi);
 
-  fi->extra_info->f_offset = depth - where[fp_regnum]; 
+  get_frame_extra_info (fi)->f_offset = depth - where[fp_regnum]; 
 }
 
 static void
@@ -1620,8 +1623,8 @@ sh_fp_frame_init_saved_regs (struct frame_info *fi)
       return;
     }
 
-  fi->extra_info->leaf_function = 1;
-  fi->extra_info->f_offset = 0;
+  get_frame_extra_info (fi)->leaf_function = 1;
+  get_frame_extra_info (fi)->f_offset = 0;
 
   for (rn = 0; rn < NUM_REGS + NUM_PSEUDO_REGS; rn++)
     where[rn] = -1;
@@ -1653,7 +1656,7 @@ sh_fp_frame_init_saved_regs (struct frame_info *fi)
 	{
 	  where[tdep->PR_REGNUM] = depth;
 	  /* If we're storing the pr then this isn't a leaf */
-	  fi->extra_info->leaf_function = 0;
+	  get_frame_extra_info (fi)->leaf_function = 0;
 	  depth += 4;
 	}
       else if (IS_MOV_R3 (insn))
@@ -1720,7 +1723,7 @@ sh_fp_frame_init_saved_regs (struct frame_info *fi)
       get_frame_saved_regs (fi)[SP_REGNUM] = get_frame_base (fi) - 4;
     }
 
-  fi->extra_info->f_offset = depth - where[FP_REGNUM] - 4;
+  get_frame_extra_info (fi)->f_offset = depth - where[FP_REGNUM] - 4;
   /* Work out the return pc - either from the saved pr or the pr
      value */
 }
@@ -1742,17 +1745,17 @@ sh_init_extra_frame_info (int fromleaf, struct frame_info *fi)
          by assuming it's always FP.  */
       deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), get_frame_base (fi),
 									     SP_REGNUM));
-      fi->extra_info->return_pc = deprecated_read_register_dummy (get_frame_pc (fi),
+      get_frame_extra_info (fi)->return_pc = deprecated_read_register_dummy (get_frame_pc (fi),
 								  get_frame_base (fi),
 								  PC_REGNUM);
-      fi->extra_info->f_offset = -(CALL_DUMMY_LENGTH + 4);
-      fi->extra_info->leaf_function = 0;
+      get_frame_extra_info (fi)->f_offset = -(CALL_DUMMY_LENGTH + 4);
+      get_frame_extra_info (fi)->leaf_function = 0;
       return;
     }
   else
     {
       FRAME_INIT_SAVED_REGS (fi);
-      fi->extra_info->return_pc = 
+      get_frame_extra_info (fi)->return_pc = 
 	sh_find_callers_reg (fi, gdbarch_tdep (current_gdbarch)->PR_REGNUM);
     }
 }
@@ -1773,17 +1776,17 @@ sh64_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
       deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), get_frame_base (fi), SP_REGNUM));
-      fi->extra_info->return_pc = 
+      get_frame_extra_info (fi)->return_pc = 
 	deprecated_read_register_dummy (get_frame_pc (fi),
 					get_frame_base (fi), PC_REGNUM);
-      fi->extra_info->f_offset = -(CALL_DUMMY_LENGTH + 4);
-      fi->extra_info->leaf_function = 0;
+      get_frame_extra_info (fi)->f_offset = -(CALL_DUMMY_LENGTH + 4);
+      get_frame_extra_info (fi)->leaf_function = 0;
       return;
     }
   else
     {
       FRAME_INIT_SAVED_REGS (fi);
-      fi->extra_info->return_pc =
+      get_frame_extra_info (fi)->return_pc =
 	sh64_get_saved_pr (fi, gdbarch_tdep (current_gdbarch)->PR_REGNUM);
     }
 }
@@ -1909,7 +1912,7 @@ sh64_extract_struct_value_address (char *regbuf)
 static CORE_ADDR
 sh_frame_saved_pc (struct frame_info *frame)
 {
-  return ((frame)->extra_info->return_pc);
+  return (get_frame_extra_info (frame)->return_pc);
 }
 
 /* Discard from the stack the innermost frame,
@@ -1936,7 +1939,7 @@ sh_pop_frame (void)
 	  write_register (regnum,
 			  read_memory_integer (get_frame_saved_regs (frame)[regnum], 4));
 
-      write_register (PC_REGNUM, frame->extra_info->return_pc);
+      write_register (PC_REGNUM, get_frame_extra_info (frame)->return_pc);
       write_register (SP_REGNUM, fp + 4);
     }
   flush_cached_frames ();
@@ -1979,7 +1982,7 @@ sh64_pop_frame (void)
 						 size));
 	  }
 
-      write_register (PC_REGNUM, frame->extra_info->return_pc);
+      write_register (PC_REGNUM, get_frame_extra_info (frame)->return_pc);
       write_register (SP_REGNUM, fp + 8);
     }
   flush_cached_frames ();

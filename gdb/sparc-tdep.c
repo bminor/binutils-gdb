@@ -295,10 +295,10 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
   frame_saved_regs_zalloc (fi);
 
-  fi->extra_info->bottom =
+  get_frame_extra_info (fi)->bottom =
     (get_next_frame (fi)
      ? (get_frame_base (fi) == get_frame_base (get_next_frame (fi))
-	? get_next_frame (fi)->extra_info->bottom
+	? get_frame_extra_info (get_next_frame (fi))->bottom
 	: get_frame_base (get_next_frame (fi)))
      : read_sp ());
 
@@ -320,7 +320,8 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	  /* A frameless function interrupted by a signal did not change
 	     the frame pointer, fix up frame pointer accordingly.  */
 	  deprecated_update_frame_base_hack (fi, get_frame_base (get_next_frame (fi)));
-	  fi->extra_info->bottom = get_next_frame (fi)->extra_info->bottom;
+	  get_frame_extra_info (fi)->bottom =
+	    get_frame_extra_info (get_next_frame (fi))->bottom;
 	}
       else
 	{
@@ -335,8 +336,8 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
   /* Decide whether this is a function with a ``flat register window''
      frame.  For such functions, the frame pointer is actually in %i7.  */
-  fi->extra_info->flat = 0;
-  fi->extra_info->in_prologue = 0;
+  get_frame_extra_info (fi)->flat = 0;
+  get_frame_extra_info (fi)->in_prologue = 0;
   if (find_pc_partial_function (get_frame_pc (fi), &name, &prologue_start, &prologue_end))
     {
       /* See if the function starts with an add (which will be of a
@@ -361,9 +362,9 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	      buf = alloca (MAX_REGISTER_RAW_SIZE);
 
 	      /* We definitely have a flat frame now.  */
-	      fi->extra_info->flat = 1;
+	      get_frame_extra_info (fi)->flat = 1;
 
-	      fi->extra_info->sp_offset = offset;
+	      get_frame_extra_info (fi)->sp_offset = offset;
 
 	      /* Overwrite the frame's address with the value in %i7.  */
 	      get_saved_register (buf, 0, 0, fi, I7_REGNUM, 0);
@@ -373,18 +374,18 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 		deprecated_update_frame_base_hack (fi, get_frame_base (fi) + 2047);
 
 	      /* Record where the fp got saved.  */
-	      fi->extra_info->fp_addr = 
-		get_frame_base (fi) + fi->extra_info->sp_offset + X_SIMM13 (insn);
+	      get_frame_extra_info (fi)->fp_addr = 
+		get_frame_base (fi) + get_frame_extra_info (fi)->sp_offset + X_SIMM13 (insn);
 
 	      /* Also try to collect where the pc got saved to.  */
-	      fi->extra_info->pc_addr = 0;
+	      get_frame_extra_info (fi)->pc_addr = 0;
 	      insn = fetch_instruction (prologue_start + 12);
 	      if (X_OP (insn) == 3
 		  && X_RD (insn) == 15
 		  && X_OP3 (insn) == 4
 		  && X_RS1 (insn) == 14)
-		fi->extra_info->pc_addr = 
-		  get_frame_base (fi) + fi->extra_info->sp_offset + X_SIMM13 (insn);
+		get_frame_extra_info (fi)->pc_addr = 
+		  get_frame_base (fi) + get_frame_extra_info (fi)->sp_offset + X_SIMM13 (insn);
 	    }
 	}
       else
@@ -411,7 +412,7 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 		}
 	      if (addr >= get_frame_pc (fi))
 		{
-		  fi->extra_info->in_prologue = 1;
+		  get_frame_extra_info (fi)->in_prologue = 1;
 		  deprecated_update_frame_base_hack (fi, read_register (SP_REGNUM));
 		}
 	    }
@@ -484,7 +485,7 @@ sparc_frame_saved_pc (struct frame_info *frame)
 			  scbuf, sizeof (scbuf));
       return extract_address (scbuf, sizeof (scbuf));
     }
-  else if (frame->extra_info->in_prologue ||
+  else if (get_frame_extra_info (frame)->in_prologue ||
 	   (get_next_frame (frame) != NULL &&
 	    ((get_frame_type (get_next_frame (frame)) == SIGTRAMP_FRAME) ||
 	     deprecated_frame_in_dummy (get_next_frame (frame))) &&
@@ -496,10 +497,10 @@ sparc_frame_saved_pc (struct frame_info *frame)
 			  frame, O7_REGNUM, (enum lval_type *) NULL);
       return PC_ADJUST (extract_address (buf, SPARC_INTREG_SIZE));
     }
-  if (frame->extra_info->flat)
-    addr = frame->extra_info->pc_addr;
+  if (get_frame_extra_info (frame)->flat)
+    addr = get_frame_extra_info (frame)->pc_addr;
   else
-    addr = frame->extra_info->bottom + FRAME_SAVED_I0 +
+    addr = get_frame_extra_info (frame)->bottom + FRAME_SAVED_I0 +
       SPARC_INTREG_SIZE * (I7_REGNUM - I0_REGNUM);
 
   if (addr == 0)
@@ -533,7 +534,7 @@ setup_arbitrary_frame (int argc, CORE_ADDR *argv)
     internal_error (__FILE__, __LINE__,
 		    "create_new_frame returned invalid frame");
 
-  frame->extra_info->bottom = argv[1];
+  get_frame_extra_info (frame)->bottom = argv[1];
   deprecated_update_frame_pc_hack (frame, FRAME_SAVED_PC (frame));
   return frame;
 }
@@ -675,7 +676,7 @@ examine_prologue (CORE_ADDR start_pc, int frameless_p, struct frame_info *fi,
 	{
 	  if (saved_regs && X_I (insn))
 	    saved_regs[X_RD (insn)] =
-	      get_frame_base (fi) + fi->extra_info->sp_offset + X_SIMM13 (insn);
+	      get_frame_base (fi) + get_frame_extra_info (fi)->sp_offset + X_SIMM13 (insn);
 	}
       else
 	break;
@@ -845,8 +846,9 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
     {
       /* FIXME MVS: wrong test for dummy frame at entry.  */
 
-      if (get_frame_pc (frame1) >= (frame1->extra_info->bottom ? 
-			 frame1->extra_info->bottom : read_sp ())
+      if (get_frame_pc (frame1) >= (get_frame_extra_info (frame1)->bottom
+				    ? get_frame_extra_info (frame1)->bottom
+				    : read_sp ())
 	  && get_frame_pc (frame1) <= get_frame_base (frame1))
 	{
 	  /* Dummy frame.  All but the window regs are in there somewhere.
@@ -861,7 +863,7 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
                This is because frame1 is initialized to frame->next
                (frame1->prev == frame) and is then advanced towards
                the innermost (next) frame.  */
-	    addr = (get_prev_frame (frame1)->extra_info->bottom
+	    addr = (get_frame_extra_info (get_prev_frame (frame1))->bottom
 		    + (regnum - I0_REGNUM) * SPARC_INTREG_SIZE
 		    + FRAME_SAVED_I0);
 	  else if (regnum >= L0_REGNUM && regnum < L0_REGNUM + 8)
@@ -870,7 +872,7 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
                This is because frame1 is initialized to frame->next
                (frame1->prev == frame) and is then advanced towards
                the innermost (next) frame.  */
-	    addr = (get_prev_frame (frame1)->extra_info->bottom
+	    addr = (get_frame_extra_info (get_prev_frame (frame1))->bottom
 		    + (regnum - L0_REGNUM) * SPARC_INTREG_SIZE
 		    + FRAME_SAVED_L0);
 	  else if (regnum >= O0_REGNUM && regnum < O0_REGNUM + 8)
@@ -888,13 +890,13 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	    addr = get_frame_base (frame1) + (regnum - Y_REGNUM) * SPARC_INTREG_SIZE
 	      - (FP_REGISTER_BYTES + 24 * SPARC_INTREG_SIZE);
 	}
-      else if (frame1->extra_info->flat)
+      else if (get_frame_extra_info (frame1)->flat)
 	{
 
 	  if (regnum == RP_REGNUM)
-	    addr = frame1->extra_info->pc_addr;
+	    addr = get_frame_extra_info (frame1)->pc_addr;
 	  else if (regnum == I7_REGNUM)
-	    addr = frame1->extra_info->fp_addr;
+	    addr = get_frame_extra_info (frame1)->fp_addr;
 	  else
 	    {
 	      CORE_ADDR func_start;
@@ -912,11 +914,11 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	{
 	  /* Normal frame.  Local and In registers are saved on stack.  */
 	  if (regnum >= I0_REGNUM && regnum < I0_REGNUM + 8)
-	    addr = (get_prev_frame (frame1)->extra_info->bottom
+	    addr = (get_frame_extra_info (get_prev_frame (frame1))->bottom
 		    + (regnum - I0_REGNUM) * SPARC_INTREG_SIZE
 		    + FRAME_SAVED_I0);
 	  else if (regnum >= L0_REGNUM && regnum < L0_REGNUM + 8)
-	    addr = (get_prev_frame (frame1)->extra_info->bottom
+	    addr = (get_frame_extra_info (get_prev_frame (frame1))->bottom
 		    + (regnum - L0_REGNUM) * SPARC_INTREG_SIZE
 		    + FRAME_SAVED_L0);
 	  else if (regnum >= O0_REGNUM && regnum < O0_REGNUM + 8)
@@ -1119,8 +1121,9 @@ sparc_frame_find_saved_regs (struct frame_info *fi, CORE_ADDR *saved_regs_addr)
 
   memset (saved_regs_addr, 0, NUM_REGS * sizeof (CORE_ADDR));
 
-  if (get_frame_pc (fi) >= (fi->extra_info->bottom ? 
-		 fi->extra_info->bottom : read_sp ())
+  if (get_frame_pc (fi) >= (get_frame_extra_info (fi)->bottom
+			    ? get_frame_extra_info (fi)->bottom
+			    : read_sp ())
       && get_frame_pc (fi) <= get_frame_base (fi))
     {
       /* Dummy frame.  All but the window regs are in there somewhere. */
@@ -1156,24 +1159,26 @@ sparc_frame_find_saved_regs (struct frame_info *fi, CORE_ADDR *saved_regs_addr)
 	    frame_addr + (regnum - Y_REGNUM) * SPARC_INTREG_SIZE
 	    - DUMMY_STACK_REG_BUF_SIZE;
 
-      frame_addr = fi->extra_info->bottom ?
-	fi->extra_info->bottom : read_sp ();
+      frame_addr = (get_frame_extra_info (fi)->bottom
+		    ? get_frame_extra_info (fi)->bottom
+		    : read_sp ());
     }
-  else if (fi->extra_info->flat)
+  else if (get_frame_extra_info (fi)->flat)
     {
       CORE_ADDR func_start;
       find_pc_partial_function (get_frame_pc (fi), NULL, &func_start, NULL);
       examine_prologue (func_start, 0, fi, saved_regs_addr);
 
       /* Flat register window frame.  */
-      saved_regs_addr[RP_REGNUM] = fi->extra_info->pc_addr;
-      saved_regs_addr[I7_REGNUM] = fi->extra_info->fp_addr;
+      saved_regs_addr[RP_REGNUM] = get_frame_extra_info (fi)->pc_addr;
+      saved_regs_addr[I7_REGNUM] = get_frame_extra_info (fi)->fp_addr;
     }
   else
     {
       /* Normal frame.  Just Local and In registers */
-      frame_addr = fi->extra_info->bottom ?
-	fi->extra_info->bottom : read_sp ();
+      frame_addr = (get_frame_extra_info (fi)->bottom
+		    ? get_frame_extra_info (fi)->bottom
+		    : read_sp ());
       for (regnum = L0_REGNUM; regnum < L0_REGNUM + 8; regnum++)
 	saved_regs_addr[regnum] =
 	  (frame_addr + (regnum - L0_REGNUM) * SPARC_INTREG_SIZE
@@ -1185,16 +1190,17 @@ sparc_frame_find_saved_regs (struct frame_info *fi, CORE_ADDR *saved_regs_addr)
     }
   if (get_next_frame (fi))
     {
-      if (fi->extra_info->flat)
+      if (get_frame_extra_info (fi)->flat)
 	{
-	  saved_regs_addr[O7_REGNUM] = fi->extra_info->pc_addr;
+	  saved_regs_addr[O7_REGNUM] = get_frame_extra_info (fi)->pc_addr;
 	}
       else
 	{
 	  /* Pull off either the next frame pointer or the stack pointer */
 	  CORE_ADDR next_next_frame_addr =
-	  (get_next_frame (fi)->extra_info->bottom ?
-	   get_next_frame (fi)->extra_info->bottom : read_sp ());
+	  (get_frame_extra_info (get_next_frame (fi))->bottom
+	   ? get_frame_extra_info (get_next_frame (fi))->bottom
+	   : read_sp ());
 	  for (regnum = O0_REGNUM; regnum < O0_REGNUM + 8; regnum++)
 	    saved_regs_addr[regnum] =
 	      (next_next_frame_addr
@@ -1263,7 +1269,7 @@ sparc_pop_frame (void)
 				       7 * SPARC_INTREG_SIZE);
     }
 
-  if (frame->extra_info->flat)
+  if (get_frame_extra_info (frame)->flat)
     {
       /* Each register might or might not have been saved, need to test
          individually.  */
@@ -1340,11 +1346,11 @@ sparc_pop_frame (void)
 			read_memory_integer (fsr[NPC_REGNUM],
 					     REGISTER_RAW_SIZE (NPC_REGNUM)));
     }
-  else if (frame->extra_info->flat)
+  else if (get_frame_extra_info (frame)->flat)
     {
-      if (frame->extra_info->pc_addr)
+      if (get_frame_extra_info (frame)->pc_addr)
 	pc = PC_ADJUST ((CORE_ADDR)
-			read_memory_integer (frame->extra_info->pc_addr,
+			read_memory_integer (get_frame_extra_info (frame)->pc_addr,
 					     REGISTER_RAW_SIZE (PC_REGNUM)));
       else
 	{
@@ -2685,10 +2691,10 @@ sparc64_stack_align (CORE_ADDR addr)
 extern void
 sparc_print_extra_frame_info (struct frame_info *fi)
 {
-  if (fi && fi->extra_info && fi->extra_info->flat)
+  if (fi && get_frame_extra_info (fi) && get_frame_extra_info (fi)->flat)
     printf_filtered (" flat, pc saved at 0x%s, fp saved at 0x%s\n",
-		     paddr_nz (fi->extra_info->pc_addr), 
-		     paddr_nz (fi->extra_info->fp_addr));
+		     paddr_nz (get_frame_extra_info (fi)->pc_addr), 
+		     paddr_nz (get_frame_extra_info (fi)->fp_addr));
 }
 
 /* MULTI_ARCH support */

@@ -512,7 +512,7 @@ d10v_frame_saved_pc (struct frame_info *frame)
 							    get_frame_base (frame), 
 							    PC_REGNUM));
   else
-    return ((frame)->extra_info->return_pc);
+    return (get_frame_extra_info (frame)->return_pc);
 }
 
 /* Immediately after a function call, return the saved pc.  We can't
@@ -570,7 +570,7 @@ do_d10v_pop_frame (struct frame_info *fi)
     }
 
   write_register (PC_REGNUM, read_register (LR_REGNUM));
-  write_register (SP_REGNUM, fp + fi->extra_info->size);
+  write_register (SP_REGNUM, fp + get_frame_extra_info (fi)->size);
   target_store_registers (-1);
   flush_cached_frames ();
 }
@@ -690,12 +690,12 @@ d10v_frame_chain (struct frame_info *fi)
   d10v_frame_init_saved_regs (fi);
 
   
-  if (fi->extra_info->return_pc == IMEM_START
-      || inside_entry_file (fi->extra_info->return_pc))
+  if (get_frame_extra_info (fi)->return_pc == IMEM_START
+      || inside_entry_file (get_frame_extra_info (fi)->return_pc))
     {
       /* This is meant to halt the backtrace at "_start".
 	 Make sure we don't halt it at a generic dummy frame. */
-      if (!DEPRECATED_PC_IN_CALL_DUMMY (fi->extra_info->return_pc, 0, 0))
+      if (!DEPRECATED_PC_IN_CALL_DUMMY (get_frame_extra_info (fi)->return_pc, 0, 0))
 	return (CORE_ADDR) 0;
     }
 
@@ -854,7 +854,7 @@ d10v_frame_init_saved_regs (struct frame_info *fi)
       pc += 4;
     }
 
-  fi->extra_info->size = -next_addr;
+  get_frame_extra_info (fi)->size = -next_addr;
 
   if (!(fp & 0xffff))
     fp = d10v_read_sp ();
@@ -870,11 +870,11 @@ d10v_frame_init_saved_regs (struct frame_info *fi)
       CORE_ADDR return_pc 
 	= read_memory_unsigned_integer (get_frame_saved_regs (fi)[LR_REGNUM], 
 					REGISTER_RAW_SIZE (LR_REGNUM));
-      fi->extra_info->return_pc = d10v_make_iaddr (return_pc);
+      get_frame_extra_info (fi)->return_pc = d10v_make_iaddr (return_pc);
     }
   else
     {
-      fi->extra_info->return_pc = d10v_make_iaddr (read_register (LR_REGNUM));
+      get_frame_extra_info (fi)->return_pc = d10v_make_iaddr (read_register (LR_REGNUM));
     }
 
   /* The SP is not normally (ever?) saved, but check anyway */
@@ -884,11 +884,11 @@ d10v_frame_init_saved_regs (struct frame_info *fi)
       /* otherwise, it isn't being used, so we use the SP instead */
       if (uses_frame)
 	get_frame_saved_regs (fi)[SP_REGNUM] 
-	  = d10v_read_fp () + fi->extra_info->size;
+	  = d10v_read_fp () + get_frame_extra_info (fi)->size;
       else
 	{
-	  get_frame_saved_regs (fi)[SP_REGNUM] = fp + fi->extra_info->size;
-	  fi->extra_info->frameless = 1;
+	  get_frame_saved_regs (fi)[SP_REGNUM] = fp + get_frame_extra_info (fi)->size;
+	  get_frame_extra_info (fi)->frameless = 1;
 	  get_frame_saved_regs (fi)[FP_REGNUM] = 0;
 	}
     }
@@ -900,9 +900,9 @@ d10v_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
   frame_saved_regs_zalloc (fi);
 
-  fi->extra_info->frameless = 0;
-  fi->extra_info->size = 0;
-  fi->extra_info->return_pc = 0;
+  get_frame_extra_info (fi)->frameless = 0;
+  get_frame_extra_info (fi)->size = 0;
+  get_frame_extra_info (fi)->return_pc = 0;
 
   /* If get_frame_pc (fi) is zero, but this is not the outermost frame, 
      then let's snatch the return_pc from the callee, so that

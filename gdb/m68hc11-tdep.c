@@ -401,7 +401,7 @@ m68hc11_saved_pc_after_call (struct frame_info *frame)
 static CORE_ADDR
 m68hc11_frame_saved_pc (struct frame_info *frame)
 {
-  return frame->extra_info->return_pc;
+  return get_frame_extra_info (frame)->return_pc;
 }
 
 static CORE_ADDR
@@ -409,10 +409,10 @@ m68hc11_frame_args_address (struct frame_info *frame)
 {
   CORE_ADDR addr;
 
-  addr = get_frame_base (frame) + frame->extra_info->size + STACK_CORRECTION + 2;
-  if (frame->extra_info->return_kind == RETURN_RTC)
+  addr = get_frame_base (frame) + get_frame_extra_info (frame)->size + STACK_CORRECTION + 2;
+  if (get_frame_extra_info (frame)->return_kind == RETURN_RTC)
     addr += 1;
-  else if (frame->extra_info->return_kind == RETURN_RTI)
+  else if (get_frame_extra_info (frame)->return_kind == RETURN_RTI)
     addr += 7;
 
   return addr;
@@ -449,8 +449,8 @@ m68hc11_pop_frame (void)
 	  write_register (regnum,
                           read_memory_integer (get_frame_saved_regs (frame)[regnum], 2));
 
-      write_register (HARD_PC_REGNUM, frame->extra_info->return_pc);
-      sp = (fp + frame->extra_info->size + 2) & 0x0ffff;
+      write_register (HARD_PC_REGNUM, get_frame_extra_info (frame)->return_pc);
+      sp = (fp + get_frame_extra_info (frame)->size + 2) & 0x0ffff;
       write_register (HARD_SP_REGNUM, sp);
     }
   flush_cached_frames ();
@@ -819,8 +819,8 @@ m68hc11_frame_chain (struct frame_info *frame)
 				   get_frame_base (frame)))
     return get_frame_base (frame);	/* dummy frame same as caller's frame */
 
-  if (frame->extra_info->return_pc == 0
-      || inside_entry_file (frame->extra_info->return_pc))
+  if (get_frame_extra_info (frame)->return_pc == 0
+      || inside_entry_file (get_frame_extra_info (frame)->return_pc))
     return (CORE_ADDR) 0;
 
   if (get_frame_base (frame) == 0)
@@ -828,7 +828,7 @@ m68hc11_frame_chain (struct frame_info *frame)
       return (CORE_ADDR) 0;
     }
 
-  addr = get_frame_base (frame) + frame->extra_info->size + STACK_CORRECTION - 2;
+  addr = get_frame_base (frame) + get_frame_extra_info (frame)->size + STACK_CORRECTION - 2;
   addr = read_memory_unsigned_integer (addr, 2) & 0x0FFFF;
   return addr;
 }  
@@ -850,21 +850,22 @@ m68hc11_frame_init_saved_regs (struct frame_info *fi)
     memset (get_frame_saved_regs (fi), 0, SIZEOF_FRAME_SAVED_REGS);
 
   pc = get_frame_pc (fi);
-  fi->extra_info->return_kind = m68hc11_get_return_insn (pc);
-  m68hc11_guess_from_prologue (pc, get_frame_base (fi), &pc, &fi->extra_info->size,
+  get_frame_extra_info (fi)->return_kind = m68hc11_get_return_insn (pc);
+  m68hc11_guess_from_prologue (pc, get_frame_base (fi), &pc,
+			       &get_frame_extra_info (fi)->size,
                                get_frame_saved_regs (fi));
 
-  addr = get_frame_base (fi) + fi->extra_info->size + STACK_CORRECTION;
+  addr = get_frame_base (fi) + get_frame_extra_info (fi)->size + STACK_CORRECTION;
   if (soft_regs[SOFT_FP_REGNUM].name)
     get_frame_saved_regs (fi)[SOFT_FP_REGNUM] = addr - 2;
 
   /* Take into account how the function was called/returns.  */
-  if (fi->extra_info->return_kind == RETURN_RTC)
+  if (get_frame_extra_info (fi)->return_kind == RETURN_RTC)
     {
       get_frame_saved_regs (fi)[HARD_PAGE_REGNUM] = addr;
       addr++;
     }
-  else if (fi->extra_info->return_kind == RETURN_RTI)
+  else if (get_frame_extra_info (fi)->return_kind == RETURN_RTI)
     {
       get_frame_saved_regs (fi)[HARD_CCR_REGNUM] = addr;
       get_frame_saved_regs (fi)[HARD_D_REGNUM] = addr + 1;
@@ -890,8 +891,8 @@ m68hc11_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
   if (fromleaf)
     {
-      fi->extra_info->return_kind = m68hc11_get_return_insn (get_frame_pc (fi));
-      fi->extra_info->return_pc = m68hc11_saved_pc_after_call (fi);
+      get_frame_extra_info (fi)->return_kind = m68hc11_get_return_insn (get_frame_pc (fi));
+      get_frame_extra_info (fi)->return_pc = m68hc11_saved_pc_after_call (fi);
     }
   else
     {
@@ -899,7 +900,7 @@ m68hc11_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       addr = read_memory_unsigned_integer (addr, 2) & 0x0ffff;
 
       /* Take into account the 68HC12 specific call (PC + page).  */
-      if (fi->extra_info->return_kind == RETURN_RTC
+      if (get_frame_extra_info (fi)->return_kind == RETURN_RTC
           && addr >= 0x08000 && addr < 0x0c000
           && USE_PAGE_REGISTER)
         {
@@ -910,7 +911,7 @@ m68hc11_init_extra_frame_info (int fromleaf, struct frame_info *fi)
           addr += ((page & 0x0ff) << 14);
           addr += 0x1000000;
         }
-      fi->extra_info->return_pc = addr;
+      get_frame_extra_info (fi)->return_pc = addr;
     }
 }
 

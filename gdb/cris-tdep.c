@@ -488,7 +488,7 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
   short source_register; 
 
   /* This frame is with respect to a leaf until a push srp is found.  */
-  fi->extra_info->leaf_function = 1;
+  get_frame_extra_info (fi)->leaf_function = 1;
 
   /* This frame is without the FP until a push fp is found.  */
   have_fp = 0;
@@ -527,7 +527,7 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
                 {
                   return ip;
                 }
-              fi->extra_info->leaf_function = 0;
+              get_frame_extra_info (fi)->leaf_function = 0;
             }
           else if (regno == FP_REGNUM)
             {
@@ -689,7 +689,7 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
           get_frame_saved_regs (fi)[regno] = get_frame_base (fi) - val;
           val -= 4;
         }
-      if (fi->extra_info->leaf_function)
+      if (get_frame_extra_info (fi)->leaf_function)
         {
           /* Set the register SP to contain the stack pointer of 
              the caller.  */
@@ -1209,8 +1209,8 @@ cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
  
   frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
  
-  fi->extra_info->return_pc = 0;
-  fi->extra_info->leaf_function = 0;
+  get_frame_extra_info (fi)->return_pc = 0;
+  get_frame_extra_info (fi)->leaf_function = 0;
 
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi),
 				   get_frame_base (fi),
@@ -1219,12 +1219,12 @@ cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
       deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), get_frame_base (fi), SP_REGNUM));
-      fi->extra_info->return_pc = 
+      get_frame_extra_info (fi)->return_pc = 
         deprecated_read_register_dummy (get_frame_pc (fi),
 					get_frame_base (fi), PC_REGNUM);
 
       /* FIXME: Is this necessarily true?  */
-      fi->extra_info->leaf_function = 0;
+      get_frame_extra_info (fi)->leaf_function = 0;
     }
   else
     {
@@ -1235,16 +1235,16 @@ cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       if (get_frame_saved_regs (fi)[SRP_REGNUM] != 0)
         {
           /* SRP was saved on the stack; non-leaf function.  */
-          fi->extra_info->return_pc =
+          get_frame_extra_info (fi)->return_pc =
             read_memory_integer (get_frame_saved_regs (fi)[SRP_REGNUM], 
                                  REGISTER_RAW_SIZE (SRP_REGNUM));
         }
       else
         {
           /* SRP is still in a register; leaf function.  */
-          fi->extra_info->return_pc = read_register (SRP_REGNUM);
+          get_frame_extra_info (fi)->return_pc = read_register (SRP_REGNUM);
           /* FIXME: Should leaf_function be set to 1 here?  */
-          fi->extra_info->leaf_function = 1;
+          get_frame_extra_info (fi)->leaf_function = 1;
         }
     }
 }
@@ -1276,7 +1276,7 @@ cris_frame_chain (struct frame_info *fi)
 CORE_ADDR
 cris_frame_saved_pc (struct frame_info *fi)
 {
-  return fi->extra_info->return_pc;
+  return get_frame_extra_info (fi)->return_pc;
 }
 
 /* Setup the function arguments for calling a function in the inferior.  */
@@ -1570,7 +1570,7 @@ cris_pop_frame (void)
         }
     
       /* Restore the PC.  */
-      write_register (PC_REGNUM, fi->extra_info->return_pc);
+      write_register (PC_REGNUM, get_frame_extra_info (fi)->return_pc);
     }
   flush_cached_frames ();
 }

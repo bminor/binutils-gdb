@@ -492,12 +492,12 @@ void
 mips_print_extra_frame_info (struct frame_info *fi)
 {
   if (fi
-      && fi->extra_info
-      && fi->extra_info->proc_desc
-      && fi->extra_info->proc_desc->pdr.framereg < NUM_REGS)
+      && get_frame_extra_info (fi)
+      && get_frame_extra_info (fi)->proc_desc
+      && get_frame_extra_info (fi)->proc_desc->pdr.framereg < NUM_REGS)
     printf_filtered (" frame pointer is at %s+%s\n",
-		     REGISTER_NAME (fi->extra_info->proc_desc->pdr.framereg),
-		     paddr_d (fi->extra_info->proc_desc->pdr.frameoffset));
+		     REGISTER_NAME (get_frame_extra_info (fi)->proc_desc->pdr.framereg),
+		     paddr_d (get_frame_extra_info (fi)->proc_desc->pdr.frameoffset));
 }
 
 /* Number of bytes of storage in the actual machine representation for
@@ -1434,7 +1434,7 @@ mips_find_saved_regs (struct frame_info *fci)
       return;
     }
 
-  proc_desc = fci->extra_info->proc_desc;
+  proc_desc = get_frame_extra_info (fci)->proc_desc;
   if (proc_desc == NULL)
     /* I'm not sure how/whether this can happen.  Normally when we can't
        find a proc_desc, we "synthesize" one using heuristic_proc_desc
@@ -1695,7 +1695,7 @@ static CORE_ADDR
 mips_frame_saved_pc (struct frame_info *frame)
 {
   CORE_ADDR saved_pc;
-  mips_extra_func_info_t proc_desc = frame->extra_info->proc_desc;
+  mips_extra_func_info_t proc_desc = get_frame_extra_info (frame)->proc_desc;
   /* We have to get the saved pc from the sigcontext
      if it is a signal handler frame.  */
   int pcreg = (get_frame_type (frame) == SIGTRAMP_FRAME) ? PC_REGNUM
@@ -2477,7 +2477,7 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
   frame_extra_info_zalloc (fci, sizeof (struct frame_extra_info));
 
   fci->saved_regs = NULL;
-  fci->extra_info->proc_desc =
+  get_frame_extra_info (fci)->proc_desc =
     proc_desc == &temp_proc_desc ? 0 : proc_desc;
   if (proc_desc)
     {
@@ -2529,12 +2529,12 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
 
       /* hack: if argument regs are saved, guess these contain args */
       /* assume we can't tell how many args for now */
-      fci->extra_info->num_args = -1;
+      get_frame_extra_info (fci)->num_args = -1;
       for (regnum = MIPS_LAST_ARG_REGNUM; regnum >= A0_REGNUM; regnum--)
 	{
 	  if (PROC_REG_MASK (proc_desc) & (1 << regnum))
 	    {
-	      fci->extra_info->num_args = regnum - A0_REGNUM + 1;
+	      get_frame_extra_info (fci)->num_args = regnum - A0_REGNUM + 1;
 	      break;
 	    }
 	}
@@ -3816,7 +3816,7 @@ mips_pop_frame (void)
   register int regnum;
   struct frame_info *frame = get_current_frame ();
   CORE_ADDR new_sp = get_frame_base (frame);
-  mips_extra_func_info_t proc_desc = frame->extra_info->proc_desc;
+  mips_extra_func_info_t proc_desc = get_frame_extra_info (frame)->proc_desc;
 
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), 0, 0))
     {

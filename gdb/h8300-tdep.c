@@ -440,11 +440,11 @@ h8300_examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
     }
 
   /* The args are always reffed based from the stack pointer */
-  fi->extra_info->args_pointer = after_prolog_fp;
+  get_frame_extra_info (fi)->args_pointer = after_prolog_fp;
   /* Locals are always reffed based from the fp */
-  fi->extra_info->locals_pointer = after_prolog_fp;
+  get_frame_extra_info (fi)->locals_pointer = after_prolog_fp;
   /* The PC is at a known place */
-  fi->extra_info->from_pc =
+  get_frame_extra_info (fi)->from_pc =
     read_memory_unsigned_integer (after_prolog_fp + BINWORD, BINWORD);
 
   /* Rememeber any others too */
@@ -498,7 +498,7 @@ h8300_frame_chain (struct frame_info *thisframe)
 				   get_frame_base (thisframe),
 				   get_frame_base (thisframe)))
     {				/* initialize the from_pc now */
-      thisframe->extra_info->from_pc =
+      get_frame_extra_info (thisframe)->from_pc =
 	deprecated_read_register_dummy (get_frame_pc (thisframe),
 					get_frame_base (thisframe),
 					E_PC_REGNUM);
@@ -522,18 +522,18 @@ h8300_frame_saved_pc (struct frame_info *frame)
 					   get_frame_base (frame),
 					   E_PC_REGNUM);
   else
-    return frame->extra_info->from_pc;
+    return get_frame_extra_info (frame)->from_pc;
 }
 
 static void
 h8300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
-  if (!fi->extra_info)
+  if (!get_frame_extra_info (fi))
     {
       frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
-      fi->extra_info->from_pc = 0;
-      fi->extra_info->args_pointer = 0;		/* Unknown */
-      fi->extra_info->locals_pointer = 0;	/* Unknown */
+      get_frame_extra_info (fi)->from_pc = 0;
+      get_frame_extra_info (fi)->args_pointer = 0;		/* Unknown */
+      get_frame_extra_info (fi)->locals_pointer = 0;	/* Unknown */
       
       if (!get_frame_pc (fi))
         {
@@ -550,7 +550,7 @@ h8300_frame_locals_address (struct frame_info *fi)
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
 				   get_frame_base (fi)))
     return (CORE_ADDR) 0;	/* Not sure what else to do... */
-  return fi->extra_info->locals_pointer;
+  return get_frame_extra_info (fi)->locals_pointer;
 }
 
 /* Return the address of the argument block for the frame
@@ -562,7 +562,7 @@ h8300_frame_args_address (struct frame_info *fi)
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
 				   get_frame_base (fi)))
     return (CORE_ADDR) 0;	/* Not sure what else to do... */
-  return fi->extra_info->args_pointer;
+  return get_frame_extra_info (fi)->args_pointer;
 }
 
 /* Round N up or down to the nearest multiple of UNIT.
@@ -776,7 +776,7 @@ h8300_pop_frame (void)
 	}
 
       /* Don't forget to update the PC too!  */
-      write_register (E_PC_REGNUM, frame->extra_info->from_pc);
+      write_register (E_PC_REGNUM, get_frame_extra_info (frame)->from_pc);
     }
   flush_cached_frames ();
 }

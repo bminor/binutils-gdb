@@ -716,7 +716,7 @@ ia64_frame_chain (struct frame_info *frame)
 	return read_memory_integer (get_frame_saved_regs (frame)[IA64_VFP_REGNUM], 8);
       else
 	return (get_frame_base (frame)
-		+ frame->extra_info->mem_stack_frame_size);
+		+ get_frame_extra_info (frame)->mem_stack_frame_size);
     }
 }
 
@@ -847,9 +847,9 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
 
   if (frame 
       && !do_fsr_stuff
-      && frame->extra_info->after_prologue != 0
-      && frame->extra_info->after_prologue <= lim_pc)
-    return frame->extra_info->after_prologue;
+      && get_frame_extra_info (frame)->after_prologue != 0
+      && get_frame_extra_info (frame)->after_prologue <= lim_pc)
+    return get_frame_extra_info (frame)->after_prologue;
 
   lim_pc = refine_prologue_limit (pc, lim_pc, &trust_limit);
 
@@ -1123,11 +1123,11 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
     /* Extract the size of the rotating portion of the stack
        frame and the register rename base from the current
        frame marker. */
-    sor = ((frame->extra_info->cfm >> 14) & 0xf) * 8;
-    rrb_gr = (frame->extra_info->cfm >> 18) & 0x7f;
+    sor = ((get_frame_extra_info (frame)->cfm >> 14) & 0xf) * 8;
+    rrb_gr = (get_frame_extra_info (frame)->cfm >> 18) & 0x7f;
 
-    for (i = 0, addr = frame->extra_info->bsp;
-	 i < frame->extra_info->sof;
+    for (i = 0, addr = get_frame_extra_info (frame)->bsp;
+	 i < get_frame_extra_info (frame)->sof;
 	 i++, addr += 8)
       {
 	if (IS_NaT_COLLECTION_ADDR (addr))
@@ -1149,11 +1149,12 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
       }
   }
 
-  if (frame && frame->extra_info) {
-    frame->extra_info->after_prologue = last_prologue_pc;
-    frame->extra_info->mem_stack_frame_size = mem_stack_frame_size;
-    frame->extra_info->fp_reg = fp_reg;
-  }
+  if (frame && get_frame_extra_info (frame))
+    {
+      get_frame_extra_info (frame)->after_prologue = last_prologue_pc;
+      get_frame_extra_info (frame)->mem_stack_frame_size = mem_stack_frame_size;
+      get_frame_extra_info (frame)->fp_reg = fp_reg;
+    }
 
   return last_prologue_pc;
 }
@@ -1253,7 +1254,7 @@ ia64_get_saved_register (char *raw_buffer,
   else if (regnum == IA64_BSP_REGNUM)
     {
       store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), 
-                     frame->extra_info->bsp);
+                     get_frame_extra_info (frame)->bsp);
     }
   else if (regnum == IA64_VFP_REGNUM)
     {
@@ -1262,7 +1263,7 @@ ia64_get_saved_register (char *raw_buffer,
 	 above.  If the function lacks one of these frame pointers, we can
 	 still provide a value since we know the size of the frame */
       CORE_ADDR vfp = (get_frame_base (frame)
-		       + frame->extra_info->mem_stack_frame_size);
+		       + get_frame_extra_info (frame)->mem_stack_frame_size);
       store_address (raw_buffer, REGISTER_RAW_SIZE (IA64_VFP_REGNUM), vfp);
     }
   else if (IA64_PR0_REGNUM <= regnum && regnum <= IA64_PR63_REGNUM)
@@ -1278,7 +1279,7 @@ ia64_get_saved_register (char *raw_buffer,
 	{
 	  /* Fetch predicate register rename base from current frame
 	     marker for this frame. */
-	  int rrb_pr = (frame->extra_info->cfm >> 32) & 0x3f;
+	  int rrb_pr = (get_frame_extra_info (frame)->cfm >> 32) & 0x3f;
 
 	  /* Adjust the register number to account for register rotation. */
 	  regnum = IA64_PR16_REGNUM 
@@ -1378,7 +1379,7 @@ ia64_get_saved_register (char *raw_buffer,
 	{
 	  /* Fetch floating point register rename base from current
 	     frame marker for this frame. */
-	  int rrb_fr = (frame->extra_info->cfm >> 25) & 0x7f;
+	  int rrb_fr = (get_frame_extra_info (frame)->cfm >> 25) & 0x7f;
 
 	  /* Adjust the floating point register number to account for
 	     register rotation. */
@@ -1462,7 +1463,7 @@ int
 ia64_frameless_function_invocation (struct frame_info *frame)
 {
   FRAME_INIT_SAVED_REGS (frame);
-  return (frame->extra_info->mem_stack_frame_size == 0);
+  return (get_frame_extra_info (frame)->mem_stack_frame_size == 0);
 }
 
 CORE_ADDR
@@ -1538,21 +1539,23 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
       else
 	cfm = read_register (IA64_PFS_REGNUM);
 
-      bsp = frn->extra_info->bsp;
+      bsp = get_frame_extra_info (frn)->bsp;
     }
-  frame->extra_info->cfm = cfm;
-  frame->extra_info->sof = cfm & 0x7f;
-  frame->extra_info->sol = (cfm >> 7) & 0x7f;
+  get_frame_extra_info (frame)->cfm = cfm;
+  get_frame_extra_info (frame)->sof = cfm & 0x7f;
+  get_frame_extra_info (frame)->sol = (cfm >> 7) & 0x7f;
   if (get_next_frame (frame) == 0 
       || (get_frame_type (get_next_frame (frame)) == SIGTRAMP_FRAME) 
       || next_frame_is_call_dummy)
-    frame->extra_info->bsp = rse_address_add (bsp, -frame->extra_info->sof);
+    get_frame_extra_info (frame)->bsp =
+      rse_address_add (bsp, -get_frame_extra_info (frame)->sof);
   else
-    frame->extra_info->bsp = rse_address_add (bsp, -frame->extra_info->sol);
+    get_frame_extra_info (frame)->bsp =
+      rse_address_add (bsp, -get_frame_extra_info (frame)->sol);
 
-  frame->extra_info->after_prologue = 0;
-  frame->extra_info->mem_stack_frame_size = -1;		/* Not yet determined */
-  frame->extra_info->fp_reg = 0;
+  get_frame_extra_info (frame)->after_prologue = 0;
+  get_frame_extra_info (frame)->mem_stack_frame_size = -1;		/* Not yet determined */
+  get_frame_extra_info (frame)->fp_reg = 0;
 }
 
 static int
@@ -2027,7 +2030,7 @@ ia64_pop_frame_regular (struct frame_info *frame)
      wants bsp to be set at the end of all used registers.  It's
      likely that this code will need to be revised to accomodate
      other operating systems. */
-  bsp = rse_address_add (frame->extra_info->bsp,
+  bsp = rse_address_add (get_frame_extra_info (frame)->bsp,
                          (pfs & 0x7f) - ((pfs >> 7) & 0x7f));
   write_register (IA64_BSP_REGNUM, bsp);
 

@@ -478,7 +478,7 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
       fp = xstormy16_frame_saved_register (fi, E_FP_REGNUM);
 
       /* Initialize framesize with size of PC put on stack by CALLF inst. */
-      fi->extra_info->framesize = xstormy16_pc_size;
+      get_frame_extra_info (fi)->framesize = xstormy16_pc_size;
     }
   for (next_addr = start_addr;
        next_addr < end_addr; next_addr += xstormy16_inst_size)
@@ -492,8 +492,8 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
 	  if (fi)
 	    {
 	      regnum = inst & 0x000f;
-	      get_frame_saved_regs (fi)[regnum] = fi->extra_info->framesize;
-	      fi->extra_info->framesize += xstormy16_reg_size;
+	      get_frame_saved_regs (fi)[regnum] = get_frame_extra_info (fi)->framesize;
+	      get_frame_extra_info (fi)->framesize += xstormy16_reg_size;
 	    }
 	}
 
@@ -501,28 +501,28 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
       else if (inst == 0x301f || inst == 0x303f)	/* inc r15, #0x1/#0x3 */
 	{
 	  if (fi)		/* Record the frame size. */
-	    fi->extra_info->framesize += ((inst & 0x0030) >> 4) + 1;
+	    get_frame_extra_info (fi)->framesize += ((inst & 0x0030) >> 4) + 1;
 	}
 
       /* optional stack allocation for args and local vars > 4 && < 16 byte */
       else if ((inst & 0xff0f) == 0x510f)	/* 51Hf   add r15, #0xH */
 	{
 	  if (fi)		/* Record the frame size. */
-	    fi->extra_info->framesize += (inst & 0x00f0) >> 4;
+	    get_frame_extra_info (fi)->framesize += (inst & 0x00f0) >> 4;
 	}
 
       /* optional stack allocation for args and local vars >= 16 byte */
       else if (inst == 0x314f && inst2 >= 0x0010)	/* 314f HHHH  add r15, #0xH */
 	{
 	  if (fi)		/* Record the frame size. */
-	    fi->extra_info->framesize += inst2;
+	    get_frame_extra_info (fi)->framesize += inst2;
 	  next_addr += xstormy16_inst_size;
 	}
 
       else if (inst == 0x46fd)	/* mov r13, r15 */
 	{
 	  if (fi)		/* Record that the frame pointer is in use. */
-	    fi->extra_info->frameless_p = 0;
+	    get_frame_extra_info (fi)->frameless_p = 0;
 	  if (frameless)
 	    *frameless = 0;
 	}
@@ -548,7 +548,7 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
 	      if (offset & 0x0800)
 		offset -= 0x1000;
 
-	      get_frame_saved_regs (fi)[regnum] = fi->extra_info->framesize + offset;
+	      get_frame_saved_regs (fi)[regnum] = get_frame_extra_info (fi)->framesize + offset;
 	    }
 	  next_addr += xstormy16_inst_size;
 	}
@@ -593,14 +593,14 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
          by convention what we put here is simply the previous 
          _value_ of the SP (as opposed to an address where the
          previous value would have been pushed).  */
-      if (fi->extra_info->frameless_p)
+      if (get_frame_extra_info (fi)->frameless_p)
 	{
-	  get_frame_saved_regs (fi)[E_SP_REGNUM] = sp - fi->extra_info->framesize;
+	  get_frame_saved_regs (fi)[E_SP_REGNUM] = sp - get_frame_extra_info (fi)->framesize;
 	  deprecated_update_frame_base_hack (fi, sp);
 	}
       else
 	{
-	  get_frame_saved_regs (fi)[E_SP_REGNUM] = fp - fi->extra_info->framesize;
+	  get_frame_saved_regs (fi)[E_SP_REGNUM] = fp - get_frame_extra_info (fi)->framesize;
 	  deprecated_update_frame_base_hack (fi, fp);
 	}
 
@@ -783,11 +783,11 @@ xstormy16_frame_saved_pc (struct frame_info *fi)
 static void
 xstormy16_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
-  if (!fi->extra_info)
+  if (!get_frame_extra_info (fi))
     {
       frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
-      fi->extra_info->framesize = 0;
-      fi->extra_info->frameless_p = 1;	/* Default frameless, detect framed */
+      get_frame_extra_info (fi)->framesize = 0;
+      get_frame_extra_info (fi)->frameless_p = 1;	/* Default frameless, detect framed */
 
       /* By default, the fi->frame is set to the value of the FP reg by gdb.
          This may not always be right; we may be in a frameless function,
@@ -829,7 +829,7 @@ xstormy16_frame_chain (struct frame_info *fi)
   else
     {
       /* Return computed offset from this frame's fp. */
-      return get_frame_base (fi) - fi->extra_info->framesize;
+      return get_frame_base (fi) - get_frame_extra_info (fi)->framesize;
     }
 }
 
@@ -837,8 +837,8 @@ static int
 xstormy16_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
 {
   return chain < 0x8000 && FRAME_SAVED_PC (thisframe) >= 0x8000 &&
-    (thisframe->extra_info->frameless_p ||
-     get_frame_base (thisframe) - thisframe->extra_info->framesize == chain);
+    (get_frame_extra_info (thisframe)->frameless_p ||
+     get_frame_base (thisframe) - get_frame_extra_info (thisframe)->framesize == chain);
 }
 
 /* Function: xstormy16_saved_pc_after_call

@@ -469,7 +469,7 @@ avr_scan_prologue (struct frame_info *fi)
   unsigned char prologue[AVR_MAX_PROLOGUE_SIZE];
   int vpc = 0;
 
-  fi->extra_info->framereg = AVR_SP_REGNUM;
+  get_frame_extra_info (fi)->framereg = AVR_SP_REGNUM;
 
   if (find_pc_partial_function
       (get_frame_pc (fi), &name, &prologue_start, &prologue_end))
@@ -491,7 +491,7 @@ avr_scan_prologue (struct frame_info *fi)
   /* Search the prologue looking for instructions that set up the
      frame pointer, adjust the stack pointer, and save registers.  */
 
-  fi->extra_info->framesize = 0;
+  get_frame_extra_info (fi)->framesize = 0;
   prologue_len = prologue_end - prologue_start;
   read_memory (prologue_start, prologue, prologue_len);
 
@@ -509,7 +509,7 @@ avr_scan_prologue (struct frame_info *fi)
 	0xcd, 0xbf		/* out __SP_L__,r28 */
       };
 
-      fi->extra_info->framereg = AVR_FP_REGNUM;
+      get_frame_extra_info (fi)->framereg = AVR_FP_REGNUM;
       insn = EXTRACT_INSN (&prologue[vpc]);
       /* ldi r28,lo8(<RAM_ADDR> - <LOCALS_SIZE>) */
       if ((insn & 0xf0f0) == 0xe0c0)
@@ -524,7 +524,7 @@ avr_scan_prologue (struct frame_info *fi)
 		{
 		  deprecated_update_frame_base_hack (fi, locals);
 
-		  fi->extra_info->is_main = 1;
+		  get_frame_extra_info (fi)->is_main = 1;
 		  return;
 		}
 	    }
@@ -601,9 +601,9 @@ avr_scan_prologue (struct frame_info *fi)
 	       from <= AVR_LAST_PUSHED_REGNUM; ++from)
 	    get_frame_saved_regs (fi)[from] = ++i;
 	}
-      fi->extra_info->locals_size = loc_size;
-      fi->extra_info->framesize = loc_size + num_pushes;
-      fi->extra_info->framereg = AVR_FP_REGNUM;
+      get_frame_extra_info (fi)->locals_size = loc_size;
+      get_frame_extra_info (fi)->framesize = loc_size + num_pushes;
+      get_frame_extra_info (fi)->framereg = AVR_FP_REGNUM;
       return;
     }
 
@@ -624,14 +624,14 @@ avr_scan_prologue (struct frame_info *fi)
 	  vpc += sizeof (img);
 	  get_frame_saved_regs (fi)[0] = 2;
 	  get_frame_saved_regs (fi)[1] = 1;
-	  fi->extra_info->framesize += 3;
+	  get_frame_extra_info (fi)->framesize += 3;
 	}
       else if (memcmp (img + 1, prologue, sizeof (img) - 1) == 0)
 	{
 	  vpc += sizeof (img) - 1;
 	  get_frame_saved_regs (fi)[0] = 2;
 	  get_frame_saved_regs (fi)[1] = 1;
-	  fi->extra_info->framesize += 3;
+	  get_frame_extra_info (fi)->framesize += 3;
 	}
     }
 
@@ -645,8 +645,8 @@ avr_scan_prologue (struct frame_info *fi)
 	{
 	  /* Bits 4-9 contain a mask for registers R0-R32. */
 	  regno = (insn & 0x1f0) >> 4;
-	  ++fi->extra_info->framesize;
-	  get_frame_saved_regs (fi)[regno] = fi->extra_info->framesize;
+	  ++get_frame_extra_info (fi)->framesize;
+	  get_frame_saved_regs (fi)[regno] = get_frame_extra_info (fi)->framesize;
 	  scan_stage = 1;
 	}
       else
@@ -669,7 +669,7 @@ avr_scan_prologue (struct frame_info *fi)
       if (memcmp (prologue + vpc, img, sizeof (img)) == 0)
 	{
 	  vpc += 4;
-	  fi->extra_info->framereg = AVR_FP_REGNUM;
+	  get_frame_extra_info (fi)->framereg = AVR_FP_REGNUM;
 	  scan_stage = 2;
 	}
     }
@@ -718,8 +718,8 @@ avr_scan_prologue (struct frame_info *fi)
 	}
       else
 	return;
-      fi->extra_info->locals_size = locals_size;
-      fi->extra_info->framesize += locals_size;
+      get_frame_extra_info (fi)->locals_size = locals_size;
+      get_frame_extra_info (fi)->framesize += locals_size;
     }
 }
 
@@ -740,12 +740,12 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
   frame_saved_regs_zalloc (fi);
 
-  fi->extra_info->return_pc = 0;
-  fi->extra_info->args_pointer = 0;
-  fi->extra_info->locals_size = 0;
-  fi->extra_info->framereg = 0;
-  fi->extra_info->framesize = 0;
-  fi->extra_info->is_main = 0;
+  get_frame_extra_info (fi)->return_pc = 0;
+  get_frame_extra_info (fi)->args_pointer = 0;
+  get_frame_extra_info (fi)->locals_size = 0;
+  get_frame_extra_info (fi)->framereg = 0;
+  get_frame_extra_info (fi)->framesize = 0;
+  get_frame_extra_info (fi)->is_main = 0;
 
   avr_scan_prologue (fi);
 
@@ -757,14 +757,18 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), get_frame_base (fi),
 									     AVR_PC_REGNUM));
     }
-  else if (!get_next_frame (fi))		/* this is the innermost frame? */
-    deprecated_update_frame_base_hack (fi, read_register (fi->extra_info->framereg));
-  else if (fi->extra_info->is_main != 1)	/* not the innermost frame, not `main' */
+  else if (!get_next_frame (fi))
+    /* this is the innermost frame? */
+    deprecated_update_frame_base_hack (fi, read_register (get_frame_extra_info (fi)->framereg));
+  else if (get_frame_extra_info (fi)->is_main != 1)
+    /* not the innermost frame, not `main' */
     /* If we have an next frame,  the callee saved it. */
     {
       struct frame_info *next_fi = get_next_frame (fi);
-      if (fi->extra_info->framereg == AVR_SP_REGNUM)
-	deprecated_update_frame_base_hack (fi, get_frame_base (next_fi) + 2 /* ret addr */ + next_fi->extra_info->framesize);
+      if (get_frame_extra_info (fi)->framereg == AVR_SP_REGNUM)
+	deprecated_update_frame_base_hack (fi, (get_frame_base (next_fi)
+						+ 2 /* ret addr */
+						+ get_frame_extra_info (next_fi)->framesize));
       /* FIXME: I don't analyse va_args functions  */
       else
 	{
@@ -794,23 +798,24 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   /* TRoth: Do we want to do this if we are in main? I don't think we should
      since return_pc makes no sense when we are in main. */
 
-  if ((get_frame_pc (fi)) && (fi->extra_info->is_main == 0))	/* We are not in CALL_DUMMY */
+  if ((get_frame_pc (fi)) && (get_frame_extra_info (fi)->is_main == 0))
+    /* We are not in CALL_DUMMY */
     {
       CORE_ADDR addr;
       int i;
 
-      addr = get_frame_base (fi) + fi->extra_info->framesize + 1;
+      addr = get_frame_base (fi) + get_frame_extra_info (fi)->framesize + 1;
 
       /* Return address in stack in different endianness */
 
-      fi->extra_info->return_pc =
+      get_frame_extra_info (fi)->return_pc =
 	read_memory_unsigned_integer (avr_make_saddr (addr), 1) << 8;
-      fi->extra_info->return_pc |=
+      get_frame_extra_info (fi)->return_pc |=
 	read_memory_unsigned_integer (avr_make_saddr (addr + 1), 1);
 
       /* This return address in words,
          must be converted to the bytes address */
-      fi->extra_info->return_pc *= 2;
+      get_frame_extra_info (fi)->return_pc *= 2;
 
       /* Resolve a pushed registers addresses */
       for (i = 0; i < NUM_REGS; i++)
@@ -857,7 +862,7 @@ avr_pop_frame (void)
 	}
 
       /* Don't forget the update the PC too!  */
-      write_pc (frame->extra_info->return_pc);
+      write_pc (get_frame_extra_info (frame)->return_pc);
     }
   flush_cached_frames ();
 }
@@ -874,7 +879,7 @@ avr_frame_saved_pc (struct frame_info *frame)
 					   get_frame_base (frame),
 					   AVR_PC_REGNUM);
   else
-    return frame->extra_info->return_pc;
+    return get_frame_extra_info (frame)->return_pc;
 }
 
 static CORE_ADDR
@@ -1040,14 +1045,14 @@ avr_frame_chain (struct frame_info *frame)
 				   get_frame_base (frame)))
     {
       /* initialize the return_pc now */
-      frame->extra_info->return_pc
+      get_frame_extra_info (frame)->return_pc
 	= deprecated_read_register_dummy (get_frame_pc (frame),
 					  get_frame_base (frame),
 					  AVR_PC_REGNUM);
       return get_frame_base (frame);
     }
-  return (frame->extra_info->is_main ? 0
-	  : get_frame_base (frame) + frame->extra_info->framesize + 2 /* ret addr */ );
+  return (get_frame_extra_info (frame)->is_main ? 0
+	  : get_frame_base (frame) + get_frame_extra_info (frame)->framesize + 2 /* ret addr */ );
 }
 
 /* Store the address of the place in which to copy the structure the
