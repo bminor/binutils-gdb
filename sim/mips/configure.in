@@ -17,6 +17,13 @@ AR=${AR-ar}
 AC_SUBST(AR)
 AC_PROG_RANLIB
 
+# Ensure a reasonable default simulator is constructed:
+case "${target}" in
+  mips64*-*-*)          SIMCONF="-mips0 --warnings";;
+  mips*-*-*)            SIMCONF="-mips2 --warnings";;
+  *)                    SIMCONF="-mips0 --warnings";;
+esac
+
 # Put a plausible default for CC_FOR_BUILD in Makefile.
 AC_C_CROSS
 if test "x$cross_compiling" = "xno"; then
@@ -29,6 +36,8 @@ AC_SUBST(CC_FOR_BUILD)
 AC_CHECK_HEADERS(string.h strings.h stdlib.h)
 AC_CHECK_LIB(m, fabs)
 AC_CHECK_FUNCS(aint anint)
+
+AC_SUBST(SIMCONF)
 
 AC_OUTPUT(Makefile,
 [case x$CONFIG_HEADERS in xconfig.h:config.in) echo > stamp-h ;; esac])

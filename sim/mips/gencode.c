@@ -766,7 +766,13 @@ process_instructions(doarch,features)
   printf("#define MIPSISA (%d)\n",doisa);
   if (proc64)
    printf("#define PROCESSOR_64BIT (1 == 1)\n");
+  else
+   printf("#define PROCESSOR_64BIT (1 == 0)\n");
+#if 1 /* cheat: We only have a 64bit LoadMemory and StoreMemory routines at the moment */
+  printf("#define LOADDRMASK (0x%08X)\n",0x7);
+#else
   printf("#define LOADDRMASK (0x%08X)\n",(proc64 ? 0x7 : 0x3));
+#endif
   /* The FP registers are the same width as the CPU registers: */
   printf("#define GPRLEN (%d)\n",gprlen);
   printf("typedef %s t_reg;\n",((gprlen == 64) ? "word64" : "int"));
@@ -849,7 +855,7 @@ process_instructions(doarch,features)
      unsigned int flags = convert_bitmap(MIPS_DECODE[loop].bitmap,&onemask,&zeromask,&dontmask);
      char *regtype = ((gprlen == 64) ? "uword64" : "unsigned int");
 
-     if ((GETDATASIZE() == DOUBLEWORD) && !proc64) {
+     if (!(MIPS_DECODE[loop].flags & COPROC) && ((GETDATASIZE() == DOUBLEWORD) && !proc64)) {
        fprintf(stderr,"DOUBLEWORD width specified for non 64-bit processor for instruction \"%s\"\n",MIPS_DECODE[loop].name);
        exit(4);
      }
@@ -1531,7 +1537,7 @@ process_instructions(doarch,features)
                exit(6);
              }
            } else { /* normal memory transfer */
-             if (((datalen == 8) || ((datalen == 4) & (MIPS_DECODE[loop].flags & UNSIGNED))) && !proc64) {
+             if (!(MIPS_DECODE[loop].flags & COPROC) && ((datalen == 8) || ((datalen == 4) & (MIPS_DECODE[loop].flags & UNSIGNED))) && !proc64) {
                fprintf(stderr,"Operation not available with 32bit wide memory access \"%s\"\n",MIPS_DECODE[loop].name);
                exit(4);
                /* TODO: The R4000 documentation states that a LWU
@@ -1542,12 +1548,17 @@ process_instructions(doarch,features)
              }
 
              if (isload) {
+#if 1 /* see the comments attached to LOADDRMASK above */
+               printf("     uword64 mask = 0x7;\n");
+#else
                printf("     uword64 mask = %d;\n",(proc64 ? 0x7 : 0x3));
+#endif
                printf("     unsigned int shift = %d;\n",(datalen >> 1));
                printf("     unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);\n");
                printf("     unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);\n");
                printf("     unsigned int byte;\n");
 
+/* TODO: This should really also check for 32bit world performing 32bit access */
                if (datalen != 8) /* not for DOUBLEWORD */
                 printf("     paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));\n");
 
@@ -1603,7 +1614,11 @@ process_instructions(doarch,features)
              } else { /* store operation */
                if ((datalen == 1) || (datalen == 2)) {
                  /* SH and SB */
+#if 1 /* see the comments attached to LOADDRMASK above */
+                 printf("     uword64 mask = 0x7;\n");
+#else
                  printf("     uword64 mask = %d;\n",(proc64 ? 0x7 : 0x3));
+#endif
                  printf("     unsigned int shift = %d;\n",(datalen >> 1));
                  printf("     unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);\n");
                  printf("     unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);\n");
@@ -1614,9 +1629,14 @@ process_instructions(doarch,features)
                  printf("     memval = (op2 << (8 * byte));\n");
                } else
                 if (proc64 && (datalen == 4)) { /* proc64 SC and SW */
+#if 1 /* see the comments attached to LOADDRMASK above */
+                  printf("     uword64 mask = 0x7;\n");
+#else
+                  printf("     uword64 mask = %d;\n",(proc64 ? 0x7 : 0x3));
+#endif
                   printf("     unsigned int byte;\n");
-                  printf("     paddr = ((paddr & ~0x7) | ((paddr & 0x7) ^ (ReverseEndian << 2)));\n");
-                  printf("     byte = ((vaddr & 0x7) ^ (BigEndianCPU << 2));\n");
+                  printf("     paddr = ((paddr & ~mask) | ((paddr & mask) ^ (ReverseEndian << 2)));\n");
+                  printf("     byte = ((vaddr & mask) ^ (BigEndianCPU << 2));\n");
                   if (MIPS_DECODE[loop].flags & COPROC)
                    printf("     memval = (((uword64)COP_SW(((instruction >> 26) & 0x3),%s)) << (8 * byte));\n",((MIPS_DECODE[loop].flags & FP) ? "fs" : "destreg"));
                   else
