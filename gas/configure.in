@@ -43,6 +43,9 @@ AM_CONFIG_HEADER(config.h:config.in)
 
 te_file=generic
 
+# Makefile target for installing gas in $(tooldir)/bin.
+install_tooldir=install-exec-tooldir
+
 canon_targets=""
 if test -n "$enable_targets" ; then
   for t in `echo $enable_targets | sed 's/,/ /g'`; do
@@ -136,11 +139,16 @@ changequote([,])dnl
       arm-*-riscix*)	    fmt=aout em=riscix ;;
       arm-*-aout)	    fmt=aout ;;
       arm-*-coff | thumb-*-coff)           fmt=coff ;;
+      arm-*-elf | thumb-*-elf)              fmt=elf ;;
       arm-*-riscix*)        fmt=aout ;;
       arm-*-pe | thumb-*-pe)               fmt=coff em=pe ;;
 
       d10v-*-*)		    fmt=elf bfd_gas=yes ;;
       d30v-*-*)		    fmt=elf bfd_gas=yes ;;
+
+# start-sanitize-sky
+      dvp-*-*)		    fmt=elf bfd_gas=yes install_tooldir= ;;
+# end-sanitize-sky
 
       hppa-*-*elf*)         fmt=elf em=hppa ;;
       hppa-*-lites*)        fmt=elf em=hppa ;;
@@ -296,10 +304,6 @@ dnl end-sanitize-beos
 # start-sanitize-tic80
       tic80-*-*)	    fmt=coff ;;
 # end-sanitize-tic80
-
-# start-sanitize-sky
-      dvp-*-*)		    fmt=elf bfd_gas=yes ;;
-# end-sanitize-sky
 
       v850-*-*)		    fmt=elf bfd_gas=yes ;;
 
@@ -601,6 +605,7 @@ esac
 AC_SUBST(target_cpu_type)
 AC_SUBST(obj_format)
 AC_SUBST(te_file)
+AC_SUBST(install_tooldir)
 AC_SUBST(atof)
 dnl AC_SUBST(emulation)
 

@@ -21,12 +21,11 @@ Thu Aug 20 23:17:04 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 	* config/tc-i386.c (md_assemble): Only warn for address/data size
 	prefixes.
 
-start-sanitize-armelf
 Thu Aug 20 14:45:08 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (arm_fix_adjustable): Do not adjust relocations
 	against Thumb function names, as the linker needs this information.
-end-sanitize-armelf
+
 1998-08-20  Vladimir N. Makarov  <vmakarov@cygnus.com>
 
 	* expr.c (operand): Check also that there is no advance in operand
@@ -39,13 +38,11 @@ Wed Aug 19 09:30:16 1998  Nick Clifton  <nickc@cygnus.com>
 	command line options with a single dash.
 	* doc/c-m32r.texi: Replace double dash prefix with a single dash.
 
-start-sanitize-armelf
 Tue Aug 18 11:59:43 1998  Catherine Moore  <clm@cygnus.com>
 
        * tc-arm.h: Define obj_fix_adjustable for OBJ_ELF.
        * tc-arm.c (arm_fix_adjustable): New routine.
 
-end-sanitize-armelf
 1998-08-13  Vladimir N. Makarov  <vmakarov@cygnus.com>
 
 	* read.c (s_align, s_comm, s_mri_common, s_fail, s_globl, s_space,
@@ -94,7 +91,6 @@ Mon Aug 10 17:48:09 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 	config/tc-i386.c (i386_operand): Size immediate constants by
 	suffix (erroneously removed as part of July 7 change).
 
-start-sanitize-armelf
 Sun Aug  9 20:45:32 1998  Catherine Moore  <clm@cygnus.com>
 
         * config/obj-elf.h:  Check for redefinition of obj_frob_symbol.
@@ -102,18 +98,15 @@ Sun Aug  9 20:45:32 1998  Catherine Moore  <clm@cygnus.com>
         (armelf_frob_symbol):  New Routine.
         * config/tc-arm.h:  Define obj_frob_symbol if OBJ_ELF.
 
-end-sanitize-armelf
 Sat Aug  8 15:21:28 1998  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-alpha.c (alpha_fix_adjustable): Don't adjust weak syms.
 
-start-sanitize-armelf
 Wed Aug  5 15:54:14 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (md_begin): Set BFD private flags depending upon
 	command line switches passed to assembler.
 
-end-sanitize-armelf
 Mon Aug  3 14:02:52 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen.h (GAS_CGEN_MAX_FIXUPS): GAS_ prepended, all uses updated.
@@ -167,7 +160,6 @@ Fri Jul 31 16:45:54 1998  Ron Unrau <runrau@cygnus.com>
 	* config/tc-mips.c (s_ent): set BSF_FUNCTION
 	* stabs.c (s_stab_generic): flush frag
 
-start-sanitize-armelf
 Fri Jul 31 16:14:45 1998  Catherine Moore  <clm@cygnus.com>
 
         * configure.in: (arm-*-elf):  Handle.
@@ -181,7 +173,6 @@ Fri Jul 31 16:14:45 1998  Catherine Moore  <clm@cygnus.com>
         (tc_gen_reloc):  Always set the reloc addend to fixp->fx_offset
         for OBJ_ELF.
 
-end-sanitize-armelf
 Thu Jul 30 21:38:43 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* config/tc-d30v.c ({cur,prev}_left_kills_right_p): New variables.
