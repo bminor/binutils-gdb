@@ -1,5 +1,5 @@
 /* Symbol table lookup for the GNU debugger, GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996
+   Copyright 1986, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 1997
              Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -471,6 +471,9 @@ fixup_symbol_section (sym, objfile)
      struct objfile *objfile;
 {
   struct minimal_symbol *msym;
+
+  if (!sym)
+    return NULL;
 
   if (SYMBOL_BFD_SECTION (sym))
     return sym;
@@ -1196,15 +1199,15 @@ find_pc_line (pc, notcurrent)
      But what we want is the statement containing the instruction.
      Fudge the pc to make sure we get that.  */
 
-  if (notcurrent) pc -= 1;
+  INIT_SAL (&val);	/* initialize to zeroes */
+
+  if (notcurrent) 
+    pc -= 1;
 
   s = find_pc_symtab (pc);
   if (!s)
     {
-      val.symtab = 0;
-      val.line = 0;
       val.pc = pc;
-      val.end = 0;
       return val;
     }
 
@@ -1274,11 +1277,8 @@ find_pc_line (pc, notcurrent)
     {
       if (!alt_symtab)
 	{			/* If we didn't find any line # info, just
-				 return zeros.  */
-	  val.symtab = 0;
-	  val.line = 0;
+				   return zeros.  */
 	  val.pc = pc;
-	  val.end = 0;
 	}
       else
 	{
@@ -1921,6 +1921,8 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
   char *saved_arg = *argptr;
   extern char *gdb_completer_quote_characters;
   
+  INIT_SAL (&val);	/* initialize to zeroes */
+
   /* Defaults have defaults.  */
 
   if (default_symtab == 0)
@@ -2340,15 +2342,14 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
   msymbol = lookup_minimal_symbol (copy, NULL, NULL);
   if (msymbol != NULL)
     {
-      val.symtab = 0;
-      val.line = 0;
       val.pc = SYMBOL_VALUE_ADDRESS (msymbol);
       if (funfirstline)
 	{
 	  val.pc += FUNCTION_START_OFFSET;
 	  SKIP_PROLOGUE (val.pc);
 	}
-      values.sals = (struct symtab_and_line *)xmalloc (sizeof (struct symtab_and_line));
+      values.sals = (struct symtab_and_line *)
+	xmalloc (sizeof (struct symtab_and_line));
       values.sals[0] = val;
       values.nelts = 1;
       return values;
@@ -2414,6 +2415,8 @@ decode_line_2 (sym_arr, nelts, funfirstline, canonical)
   printf_unfiltered("[0] cancel\n[1] all\n");
   while (i < nelts)
     {
+      INIT_SAL (&return_values.sals[i]);	/* initialize to zeroes */
+      INIT_SAL (&values.sals[i]);
       if (sym_arr[i] && SYMBOL_CLASS (sym_arr[i]) == LOC_BLOCK)
 	{
 	  values.sals[i] = find_function_start_sal (sym_arr[i], funfirstline);
@@ -2474,7 +2477,7 @@ decode_line_2 (sym_arr, nelts, funfirstline, canonical)
 	  return return_values;
 	}
 
-      if (num > nelts + 2)
+      if (num >= nelts + 2)
 	{
 	  printf_unfiltered ("No choice number %d.\n", num);
 	}

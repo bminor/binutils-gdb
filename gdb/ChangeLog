@@ -1,3 +1,8 @@
+Sat Mar 22 02:48:11 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* c-exp.y (yylex):  Handle nested template parameter lists.
+	* symtab.c (decode_line_2):  Fix test for valid choice number.
+
 Fri Mar 21 19:10:05 1997  Mark Alexander  <marka@cygnus.com>
 
 	* mips-tdep.c (mips_push_arguments): On non-EABI architectures,

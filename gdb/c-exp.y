@@ -1,5 +1,5 @@
 /* YACC parser for C expressions, for GDB.
-   Copyright (C) 1986, 1989, 1990, 1991, 1993, 1994, 1996
+   Copyright (C) 1986, 1989, 1990, 1991, 1993, 1994, 1996, 1997
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -1409,15 +1409,30 @@ yylex ()
        (c == '_' || c == '$' || (c >= '0' && c <= '9')
 	|| (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '<');)
     {
-       if (c == '<')
-	 {
-	   int i = namelen;
-	   while (tokstart[++i] && tokstart[i] != '>');
-	   if (tokstart[i] == '>')
-	     namelen = i;
-	  }
-       c = tokstart[++namelen];
-     }
+      /* Template parameter lists are part of the name.
+	 FIXME: This mishandles `print $a<4&&$a>3'.  */
+
+      if (c == '<')
+	{
+	  int i = namelen;
+	  int nesting_level = 1;
+	  while (tokstart[++i])
+	    {
+	      if (tokstart[i] == '<')
+		nesting_level++;
+	      else if (tokstart[i] == '>')
+		{
+		  if (--nesting_level == 0)
+		    break;
+		}
+	    }
+	  if (tokstart[i] == '>')
+	    namelen = i;
+	  else
+	    break;
+	}
+      c = tokstart[++namelen];
+    }
 
   /* The token "if" terminates the expression and is NOT 
      removed from the input stream.  */
