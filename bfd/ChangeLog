@@ -1,3 +1,8 @@
+Sat Jan 28 00:16:01 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elfcode.h (elf_link_add_object_symbols): Use *sym_hash instead
+	of h if we might not be doing an ELF link.
+
 Fri Jan 27 16:13:42 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-mips.c (mips_elf_final_link): If the size of an input

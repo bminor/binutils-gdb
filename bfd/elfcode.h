@@ -4362,8 +4362,8 @@ elf_link_add_object_symbols (abfd, info)
 
       /* Get the alignment of a common symbol.  */
       if (sym.st_shndx == SHN_COMMON
-	  && h->root.type == bfd_link_hash_common)
-	h->root.u.c.alignment_power = bfd_log2 (sym.st_value);
+	  && (*sym_hash)->root.type == bfd_link_hash_common)
+	(*sym_hash)->root.u.c.alignment_power = bfd_log2 (sym.st_value);
 
       if (info->hash->creator->flavour == bfd_target_elf_flavour)
 	{
