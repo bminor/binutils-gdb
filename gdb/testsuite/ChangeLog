@@ -1,3 +1,11 @@
+Fri Sep  1 13:42:01 1995  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/funcargs.exp (float_and_integral_args):  Remove
+	sparc-sun-solaris2* xfail for "print f1 after run to call2a".
+	* gdb.c++/Makefile.in (SUFFIXES): Add .SUFFIXES and ".cc" suffix.
+	* gdb.base/signals.exp: Remove duplicate "handle all print" test
+	that accidentally got checked in.
+
 Sun Aug 27 23:35:35 1995  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/callfuncs.exp (do_function_calls):  Add alpha-dec-osf2* 
@@ -210,7 +218,7 @@ Fri Aug 11 13:36:20 1995  Jeff Law  (law@snake.cs.utah.edu)
 	failure (opcode table has been fixed to match reality).
 
 end-sanitize-sh3e
-Mon Aug 14 09:01:59 1995  Fred Fish  <fnf@rtl.cygnus.com>
+Mon Aug 14 09:01:59 1995  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/callfuncs.exp: Add rs6000-*-* xfails for
 	"call inferior func with struct - returns char",
@@ -420,7 +428,7 @@ Mon Jul 17 10:12:27 1995  Jeff Law  (law@snake.cs.utah.edu)
 	* gdb.base/a1-selftest.exp: Fix unmatched quotes in many timeout
 	cases.
 
-Wed Jul 12 10:20:08 1995  Fred Fish  (fnf@rtl.cygnus.com)
+Wed Jul 12 10:20:08 1995  Fred Fish  (fnf@cygnus.com)
 
 	* configure.in (configdirs):  Remove gdb.chill from default list
 	of subdirs and then add it back in only if doing a native build.

@@ -292,7 +292,6 @@ gdb_start
 # TARGET_SIGNAL_UNKNOWN are skipped.
 setup_xfail "i*86-unknown-bsdi2.0"
 gdb_test "handle all print" "Signal        Stop	Print	Pass to program	Description\r\nSIGHUP        Yes	Yes	Yes		Hangup.*SIG63         Yes	Yes	Yes		Real-time event 63"
-gdb_test "handle all print" "Signal        Stop	Print	Pass to program	Description\r\nSIGHUP        Yes	Yes	Yes		Hangup.*SIG63         Yes	Yes	Yes		Real-time event 63"
 
 gdb_exit
 gdb_start
