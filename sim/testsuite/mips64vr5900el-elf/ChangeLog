@@ -1,3 +1,7 @@
+Wed Sep  3 14:32:42 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (.o.run): Replace .tx59 with .run.
+
 Mon Sep  1 16:58:13 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (TESTS): Add t-psrlvw, t-pabsh, t-pabsw.

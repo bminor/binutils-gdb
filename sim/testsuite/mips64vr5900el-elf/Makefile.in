@@ -157,20 +157,20 @@ sanity:
 
 # Rules for running the tests
 
-.SUFFIXES: .u .uue .ok .ok .tx59 .hi .ko .ko
-.tx59.ok:
+.SUFFIXES: .u .uue .ok .ok .run .hi .ko .ko
+.run.ok:
 	rm -f tmp-$* $*.hi
-	ulimit -t 5 ; $(RUN_FOR_TARGET) $*.tx59 > tmp-$*
+	ulimit -t 5 ; $(RUN_FOR_TARGET) $*.run > tmp-$*
 	mv tmp-$* $*.ok
-.tx59.hi:
+.run.hi:
 	rm -f tmp-$* $*.hi diff-$*
-	ulimit -t 5 ; $(RUN_FOR_TARGET) $*.tx59 > tmp-$*
+	ulimit -t 5 ; $(RUN_FOR_TARGET) $*.run > tmp-$*
 	echo "Hello World" | diff - tmp-$* > diff-$*
 	cat tmp-$* diff-$* > $*.hi
-.tx59.ko:
+.run.ko:
 	rm -f tmp-$* $*.ko
 	set +e ; \
-	ulimit -t 5 ; $(RUN_FOR_TARGET) $*.tx59 > tmp-$* ; \
+	ulimit -t 5 ; $(RUN_FOR_TARGET) $*.run > tmp-$* ; \
 	if [ $$? -eq 47 ] ; then \
 	  exit 0 ; \
 	else \
@@ -182,13 +182,13 @@ sanity:
 # Rules for building all the tests and packing them into
 # uuencoded files.
 
-.tx59.u:
-	uuencode < $*.tx59 $*.tx59 > $*.u
+.run.u:
+	uuencode < $*.run $*.run > $*.u
 	@echo "Move $*.u $*.uue"
-.uue.tx59:
+.uue.run:
 	uudecode $(srcdir)/$*.uue
-.o.tx59:
-	$(LD_FOR_TARGET) -Ttext 0xa0020000 -o $*.tx59 $*.o
+.o.run:
+	$(LD_FOR_TARGET) -Ttext 0xa0020000 -o $*.run $*.o
 .s.o:
 	$(AS_FOR_TARGET) -I $(srcdir) $(srcdir)/$*.s -o $*.o
 
