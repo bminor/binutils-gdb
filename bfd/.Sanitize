@@ -68,6 +68,7 @@ cpu-vax.c
 cpu-h8300.c
 cpu-i960.c
 cpu-m88k.c
+cpu-rs6000.c
 init.c
 cpu-sparc.c
 libbfd.c
@@ -82,6 +83,7 @@ newsos3.c
 oasys.c
 opncls.c
 reloc.c
+rs6000coff.c
 section.c
 srec.c
 sunos.c
@@ -113,7 +115,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.25  1991/10/15 07:29:13  bothner
+# Revision 1.26  1991/10/25 07:16:59  gnu
+# RS/6000 support
+#
+# Revision 1.25  1991/10/15  07:29:13  bothner
 # Add hosts directory.
 #
 # Revision 1.24  1991/10/08  22:31:51  gnu

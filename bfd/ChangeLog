@@ -1,7 +1,7 @@
 Thu Oct 24 22:40:07 1991  John Gilmore  (gnu at cygnus.com)
 
 	RS/6000 support, by Metin G. Ozisik, Mimi Phûông-Thåo Võ, and
-	John Gilmore.
+	John Gilmore.  Archive support from Damon A. Permezel.
 
 	* Makefile.in:  Add cpu-rs6000.c and rs6000coff.c.
 	* configure.in:  Add rs6000 case.
@@ -25,6 +25,8 @@ Thu Oct 24 22:40:07 1991  John Gilmore  (gnu at cygnus.com)
 	(coff_slurp_symbol_table):  Handle rs6000-specific storage classes.
 	* aoutx.h (translate_from_native_sym_flags, N_SET*):  Check for
 	existing section before making one.
+	* cpu-rs6000.c:  New file.
+	* rs6000coff.c:  New file.
 
 Thu Oct 24 02:03:24 1991  Fred Fish  (fnf at cygnus.com)
 
