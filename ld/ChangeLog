@@ -1,3 +1,10 @@
+2004-03-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/elf32.em: Update new bfd_elf_discard_info name.
+	* emultempl/hppaelf.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/sh64elf.em: Likewise.
+
 2004-03-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation): Update

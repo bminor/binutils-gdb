@@ -1407,7 +1407,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 static void
 gld${EMULATION_NAME}_finish (void)
 {
-  if (bfd_elf${ELFSIZE}_discard_info (output_bfd, &link_info))
+  if (bfd_elf_discard_info (output_bfd, &link_info))
     {
       lang_reset_memory_regions ();
 
