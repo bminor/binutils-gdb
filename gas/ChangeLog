@@ -1,5 +1,11 @@
 2004-12-15 Jan Beulich  <jbeulich@novell.com>
 
+	* config/obj-elf.c (obj_elf_change_section): Only set type and
+	attributes on new sections. Emit warning when type of re-declared
+	section doesn't match.
+
+2004-12-15 Jan Beulich  <jbeulich@novell.com>
+
 	* dw2gencfi.c (dot.cfi.startproc): Clear cur_cfa_offset so
 	'.cfi_startproc simple' doesn't inherit the old value.
 

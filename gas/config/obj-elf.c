@@ -622,11 +622,6 @@ obj_elf_change_section (const char *name,
 	attr |= ssect->attr;
     }
 
-  if (type != SHT_NULL)
-    elf_section_type (sec) = type;
-  if (attr != 0)
-    elf_section_flags (sec) = attr;
-
   /* Convert ELF type and flags to BFD flags.  */
   flags = (SEC_RELOC
 	   | ((attr & SHF_WRITE) ? 0 : SEC_READONLY)
@@ -647,6 +642,9 @@ obj_elf_change_section (const char *name,
     {
       symbolS *secsym;
 
+      elf_section_type (sec) = type;
+      elf_section_flags (sec) = attr;
+
       /* Prevent SEC_HAS_CONTENTS from being inadvertently set.  */
       if (type == SHT_NOBITS)
 	seg_info (sec)->bss = 1;
@@ -663,19 +661,26 @@ obj_elf_change_section (const char *name,
       else
 	symbol_table_insert (section_symbol (sec));
     }
-  else if (attr != 0)
+  else
     {
-      /* If section attributes are specified the second time we see a
-	 particular section, then check that they are the same as we
-	 saw the first time.  */
-      if (((old_sec->flags ^ flags)
-	   & (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
-	      | SEC_EXCLUDE | SEC_SORT_ENTRIES | SEC_MERGE | SEC_STRINGS
-	      | SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD
-	      | SEC_THREAD_LOCAL)))
-	as_warn (_("ignoring changed section attributes for %s"), name);
-      if ((flags & SEC_MERGE) && old_sec->entsize != (unsigned) entsize)
-	as_warn (_("ignoring changed section entity size for %s"), name);
+      if (type != SHT_NULL
+	  && (unsigned) type != elf_section_type (old_sec))
+	as_warn (_("ignoring changed section type for %s"), name);
+
+      if (attr != 0)
+	{
+	  /* If section attributes are specified the second time we see a
+	     particular section, then check that they are the same as we
+	     saw the first time.  */
+	  if (((old_sec->flags ^ flags)
+	       & (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
+		  | SEC_EXCLUDE | SEC_SORT_ENTRIES | SEC_MERGE | SEC_STRINGS
+		  | SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD
+		  | SEC_THREAD_LOCAL)))
+	    as_warn (_("ignoring changed section attributes for %s"), name);
+	  if ((flags & SEC_MERGE) && old_sec->entsize != (unsigned) entsize)
+	    as_warn (_("ignoring changed section entity size for %s"), name);
+	}
     }
 
 #ifdef md_elf_section_change_hook
