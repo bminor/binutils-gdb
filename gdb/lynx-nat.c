@@ -649,13 +649,16 @@ child_wait (pid, ourstatus)
 
 	  if (realsig == SIGNEWTHREAD)
 	    {
-	      /* Simply ignore new thread notification, as we can't do anything
-		 useful with such threads.  All ptrace calls at this point just
-		 fail for no apparent reason.  The thread will eventually get a
-		 real signal when it becomes real.  */
-	      child_resume (pid, 0, TARGET_SIGNAL_0);
-	      continue;
+	      /* It's a new thread notification.  Nothing to do here since
+		 the machine independent code in wait_for_inferior will
+		 add the thread to the thread list and restart the thread
+		 when pid != inferior_pid and pid is not in the thread
+		 list.   We don't even want to much with realsig -- the
+		 code in wait_for_inferior expects SIGTRAP.  */
+	      ;
 	    }
+	  else
+	    error ("Signal for unknown thread was not SIGNEWTHREAD");
 	}
 
 #ifdef SPARC

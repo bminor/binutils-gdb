@@ -1,3 +1,9 @@
+Sat Jun 24 19:27:37 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* lynx-nat.c (child_wait): Don't restart new threads and loop
+	to the top of child_wait; let the machine independent code in
+	wait_for_inferior deal with new thread notifications.
+
 Fri Jun 23 11:51:58 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* remote-nindy (nindy_load): Put in target specific load, it's 
