@@ -1705,9 +1705,10 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 static bfd_boolean
 elf32_mn10300_finish_hash_table_entry (gen_entry, in_args)
      struct bfd_hash_entry *gen_entry;
-     PTR in_args ATTRIBUTE_UNUSED;
+     PTR in_args;
 {
   struct elf32_mn10300_link_hash_entry *entry;
+  struct bfd_link_info *link_info = (struct bfd_link_info *)in_args;
   unsigned int byte_count = 0;
 
   entry = (struct elf32_mn10300_link_hash_entry *) gen_entry;
@@ -1721,11 +1722,16 @@ elf32_mn10300_finish_hash_table_entry (gen_entry, in_args)
     return TRUE;
 
   /* If there are no named calls to this symbol, or there's nothing we
-     can move from the function itself into the "call" instruction, then
-     note that all "call" instructions should be converted into "calls"
-     instructions and return.  */
+     can move from the function itself into the "call" instruction,
+     then note that all "call" instructions should be converted into
+     "calls" instructions and return.  If a symbol is available for
+     dynamic symbol resolution (overridable or overriding), avoid
+     custom calling conventions.  */
   if (entry->direct_calls == 0
-      || (entry->stack_size == 0 && entry->movm_args == 0))
+      || (entry->stack_size == 0 && entry->movm_args == 0)
+      || (elf_hash_table (link_info)->dynamic_sections_created
+	  && ELF_ST_VISIBILITY (entry->root.other) != STV_INTERNAL
+	  && ELF_ST_VISIBILITY (entry->root.other) != STV_HIDDEN))
     {
       /* Make a note that we should convert "call" instructions to "calls"
 	 instructions for calls to this symbol.  */
@@ -2000,6 +2006,11 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		  sec_shndx = _bfd_elf_section_from_bfd_section (input_bfd,
 								 section);
 
+		  symcount = (symtab_hdr->sh_size / sizeof (Elf32_External_Sym)
+			      - symtab_hdr->sh_info);
+		  hashes = elf_sym_hashes (input_bfd);
+		  end_hashes = hashes + symcount;
+
 		  /* Look at each function defined in this section and
 		     update info for that function.  */
 		  isymend = isymbuf + symtab_hdr->sh_info;
@@ -2010,6 +2021,22 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 			{
 			  struct elf_link_hash_table *elftab;
 			  bfd_size_type amt;
+			  struct elf_link_hash_entry **lhashes = hashes;
+
+			  /* Skip a local symbol if it aliases a
+			     global one.  */
+			  for (; lhashes < end_hashes; lhashes++)
+			    {
+			      hash = (struct elf32_mn10300_link_hash_entry *) *lhashes;
+			      if ((hash->root.root.type == bfd_link_hash_defined
+				   || hash->root.root.type == bfd_link_hash_defweak)
+				  && hash->root.root.u.def.section == section
+				  && hash->root.type == STT_FUNC
+				  && hash->root.root.u.def.value == isym->st_value)
+				break;
+			    }
+			  if (lhashes != end_hashes)
+			    continue;
 
 			  if (isym->st_shndx == SHN_UNDEF)
 			    sym_sec = bfd_und_section_ptr;
@@ -2047,10 +2074,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 			}
 		    }
 
-		  symcount = (symtab_hdr->sh_size / sizeof (Elf32_External_Sym)
-			      - symtab_hdr->sh_info);
-		  hashes = elf_sym_hashes (input_bfd);
-		  end_hashes = hashes + symcount;
 		  for (; hashes < end_hashes; hashes++)
 		    {
 		      hash = (struct elf32_mn10300_link_hash_entry *) *hashes;
@@ -2104,10 +2127,10 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	 the final initialization steps on each.  */
       elf32_mn10300_link_hash_traverse (hash_table,
 					elf32_mn10300_finish_hash_table_entry,
-					NULL);
+					link_info);
       elf32_mn10300_link_hash_traverse (hash_table->static_hash_table,
 					elf32_mn10300_finish_hash_table_entry,
-					NULL);
+					link_info);
 
       /* All entries in the hash table are fully initialized.  */
       hash_table->flags |= MN10300_HASH_ENTRIES_INITIALIZED;

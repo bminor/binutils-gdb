@@ -1,3 +1,10 @@
+2004-05-27  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf-m10300.c (elf32_mn10300_finish_hash_table_entry): Avoid
+	custom calling conventions for dynamic symbols.
+	(mn10300_elf_relax_section): Avoid relaxing a function as a local
+	symbol if it's an alias to a global one.
+
 2004-05-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (_bfd_elf_make_section_from_shdr): Undo the last
