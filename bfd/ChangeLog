@@ -1,3 +1,9 @@
+2003-05-02  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-xstormy16.c (xstormy16_elf_howto_table): Make the
+	R_XSTORMY16_8 and R_XSTORMY16_16 relocs detect and complain about
+	unsigned overflow.
+
 2003-05-02  Andreas Jaeger  <aj@suse.de>
 
 	* elf64-x86-64.c (elf_x86_64_copy_indirect_symbol): Don't copy
