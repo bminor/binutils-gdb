@@ -1908,6 +1908,8 @@ assign_file_positions_for_segments (abfd)
 
       if (m->p_flags_valid)
 	p->p_flags = m->p_flags;
+      else
+	p->p_flags = 0;
 
       if (p->p_type == PT_LOAD && m->count > 0)
 	off += (m->sections[0]->vma - off) % bed->maxpagesize;
@@ -1937,6 +1939,8 @@ assign_file_positions_for_segments (abfd)
 
       if (m->includes_filehdr)
 	{
+	  if (! m->p_flags_valid)
+	    p->p_flags |= PF_R;
 	  p->p_offset = 0;
 	  p->p_filesz = bed->s->sizeof_ehdr;
 	  p->p_memsz = bed->s->sizeof_ehdr;
@@ -1956,6 +1960,8 @@ assign_file_positions_for_segments (abfd)
 
       if (m->includes_phdrs)
 	{
+	  if (! m->p_flags_valid)
+	    p->p_flags |= PF_R;
 	  if (m->includes_filehdr)
 	    {
 	      if (p->p_type == PT_LOAD)
@@ -1998,8 +2004,6 @@ assign_file_positions_for_segments (abfd)
 	    }
 	}
 
-      if (! m->p_flags_valid)
-	p->p_flags = PF_R;
       for (i = 0, secpp = m->sections; i < m->count; i++, secpp++)
 	{
 	  asection *sec;
@@ -2043,6 +2047,7 @@ assign_file_positions_for_segments (abfd)
 
 	  if (! m->p_flags_valid)
 	    {
+	      p->p_flags |= PF_R;
 	      if ((flags & SEC_CODE) != 0)
 		p->p_flags |= PF_X;
 	      if ((flags & SEC_READONLY) == 0)
