@@ -1,3 +1,8 @@
+Wed Aug 19 14:59:07 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in: always create installation directories, use full
+	file name for install target.
+
 Wed Aug 12 15:50:57 1992  John Gilmore  (gnu@cygnus.com)
 
 	* readline.c (last_readline_init_file):  Fix typo made by Steve
