@@ -1,3 +1,40 @@
+Thu Apr 20 09:07:39 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* linker.c (link_action): Do the right thing when a undefined
+	strong symbol appears after an undefined weak symbol.
+
+Fri Apr 14 16:51:17 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): New function to relocate
+	a whole section for the linker, bypassing bfd_perform_relocation.
+	(ppc_elf_reloc_type_lookup): New function to map the BFD
+	enumeration code into a howto structure.
+	(ppc_elf_howto_raw): Rename from ppc_elf_howto_table.
+	(ppc_elf_howto_table): New array that maps PowerPC relocation
+	numbers to howto structures without a linear search.  Change from
+	using bfd_elf_generic_reloc to use ppc_elf_std_reloc.
+	(ppc_elf_howto_init): Initialize ppc_elf_howto_table from
+	ppc_elf_howto_raw.
+	(ppc_elf_reloc_type_lookup): Use a case statement instead of a
+	loop.
+	(ppc_elf_std_reloc): Replacement for bfd_elf_generic_reloc.
+	(ppc_elf_unsupported_reloc): Print a real error message, instead
+	of calling abort.
+	(ppc_elf_addr16_ha_inner): Abstract getting adjustment from
+	ppc_elf_addr16_ha_reloc, so ppc_elf_relocate_section can use it
+	too.
+	(ppc_elf_addr16_ha_reloc): Call it.
+	(ppc_elf_got16_inner): Abstract getting adjustment from
+	ppc_elf_got16_reloc, so ppc_elf_relocate_section can use it too.
+	(ppc_elf_got16_reloc): Call it.
+	(ppc_elf_info_to_howto): Rename from powerpc_info_to_howto.
+
+	* elfcode.h (elf_symbol_from_bfd_symbol): Omit space in debugging
+	output.
+	(elf_symbol_flags): Add debug function to decode flags so that
+	defining DEBUG to be 4 will compile again.
+	(elf_debug_section): Fix typo in debug output.
+
 Fri Apr 14 16:03:04 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config.bfd: Add m68*-*-elf*.
