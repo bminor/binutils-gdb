@@ -1322,7 +1322,7 @@ all-hello: all-libiberty
 all-indent:
 all-inet: all-tcl all-send-pr all-perl
 all-ispell: all-emacs19
-all-tcl: all-tcl all-tk
+all-itcl: all-tcl all-tk
 all-ld: all-libiberty all-bfd all-opcodes all-byacc all-flex
 configure-target-libg++: $(ALL_GCC) configure-target-librx
 all-target-libg++: configure-target-libg++ all-gas all-ld all-gcc all-target-libiberty all-target-newlib all-target-libio all-target-librx all-target-libstdc++
