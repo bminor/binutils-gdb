@@ -1,3 +1,12 @@
+Fri Jul 22 11:07:14 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* aoutx.h (NAME(aout,some_aout_object_p)): Just check
+	STAT_FOR_EXEC, don't check MACH.
+	* m88kmach3.c (MACH): Don't define.
+	* config/i386-mach3.mt (TDEFINES): Define STAT_FOR_EXEC.
+	* config/m88k-mach3.mt (TDEFINES): Likewise.
+	* config/mips-mach3.mt (TDEFINES): Likewise.
+
 Thu Jul 21 17:24:31 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* i386mach3.c: Reverted to version from before Jul 5 1994 changes.

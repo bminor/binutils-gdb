@@ -562,7 +562,7 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
 
   result = (*callback_to_real_object_p)(abfd);
 
-#if defined(MACH) || defined(STAT_FOR_EXEC)
+#ifdef STAT_FOR_EXEC
   /* The original heuristic doesn't work in some important cases. The
    * a.out file has no information about the text start address. For
    * files (like kernels) linked to non-standard addresses (ld -Ttext
@@ -578,7 +578,7 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
 	&& ((stat_buf.st_mode & 0111) != 0))
       abfd->flags |= EXEC_P;
   }
-#else /* ! MACH */
+#else /* ! defined (STAT_FOR_EXEC) */
   /* Now that the segment addresses have been worked out, take a better
      guess at whether the file is executable.  If the entry point
      is within the text segment, assume it is.  (This makes files
@@ -590,7 +590,7 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
   if ((execp->a_entry >= obj_textsec(abfd)->vma) &&
       (execp->a_entry < obj_textsec(abfd)->vma + obj_textsec(abfd)->_raw_size))
     abfd->flags |= EXEC_P;
-#endif /* MACH */
+#endif /* ! defined (STAT_FOR_EXEC) */
   if (result)
     {
 #if 0 /* These should be set correctly anyways.  */
