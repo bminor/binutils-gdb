@@ -1,3 +1,10 @@
+Mon Feb  1 11:33:56 1999  Catherine Moore  <clm@cygnus.com>
+
+        * arm.h:  Renumber relocs to conform to standard.
+        (EF_NEW_ABI):  Define.
+        (EF_OLD_ABI):  Define.
+        * arm-oabi.h:  New file.
+
 1999-01-28  Nick Clifton  <nickc@cygnus.com>
 
 	* fr30.h: Add R_FR30_GNU_VT{INHERIT,ENTRY} relocs.
