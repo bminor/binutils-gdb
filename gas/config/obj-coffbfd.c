@@ -1522,7 +1522,8 @@ DEFUN(do_linenos_for,(abfd, file_cursor),
   
   for (idx = SEG_E0;  idx < SEG_E9; idx++) 
   {
-    segment_info_type *s =   segment_info + idx;    
+    segment_info_type *s = segment_info + idx;    
+
 
     if (s->scnhdr.s_nlnno != 0) 
     {
@@ -1532,22 +1533,30 @@ DEFUN(do_linenos_for,(abfd, file_cursor),
        (struct external_lineno *)xmalloc(s->scnhdr.s_nlnno * LINESZ);
 
       struct external_lineno *dst= buffer;
-  
+
       /* Run through the table we've built and turn it into its external
-	 form */
+	 form, take this chance to remove duplicates */
 
       for (line_ptr = s->lineno_list_head;
 	   line_ptr != (struct lineno_list *)NULL;
 	   line_ptr = line_ptr->next) 
       {
+
 	if (line_ptr->line.l_lnno == 0) 
 	{
 	  /* Turn a pointer to a symbol into the symbols' index */
 	  line_ptr->line.l_addr.l_symndx =
 	   ( (symbolS *)line_ptr->line.l_addr.l_symndx)->sy_number;
 	}	  
+	else 
+	{
+	  line_ptr->line.l_addr.l_paddr += ((struct frag * )(line_ptr->frag))->fr_address;
+	}
+
+	  
 	(void)  bfd_coff_swap_lineno_out(abfd, &(line_ptr->line), dst);
 	dst++;
+	
       }
 
       s->scnhdr.s_lnnoptr = *file_cursor;
@@ -1810,6 +1819,7 @@ DEFUN(c_line_new,(symbol, paddr, line_number, frag),
     
   segment_info_type *s =   segment_info + now_seg;
   new_line->line.l_lnno = line_number;
+
   if (line_number == 0) 
   {
     new_line->line.l_addr.l_symndx = (long)symbol;
@@ -1832,7 +1842,7 @@ DEFUN(c_line_new,(symbol, paddr, line_number, frag),
     s->lineno_list_tail->next = new_line;
   }
   s->lineno_list_tail = new_line;
-  return LINESZ *     s->scnhdr.s_nlnno ++;
+  return LINESZ * s->scnhdr.s_nlnno ++;
 }
 
 void c_dot_file_symbol(filename)
