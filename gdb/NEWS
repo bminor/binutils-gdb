@@ -3,6 +3,11 @@
 
 *** Changes in GDB 6.0:
 
+* Objective-C
+
+Support for debugging the Objective-C programming language has been
+integrated into GDB.
+
 * New backtrace mechanism (includes DWARF 2 Call Frame Information).
 
 DWARF 2's Call Frame Information makes available compiler generated
