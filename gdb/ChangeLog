@@ -1,3 +1,109 @@
+2003-08-27  Jeff Johnston  <jjohnstn@redhat.com>
+
+	Sync ia64-tdep.c with mainline.
+	
+	2003-08-26  Jeff Johnston  <jjohnstn@redhat.com>
+	* ia64-tdep.c (examine_prologue): Only stop at predicated insns if
+	we are frameless or the return address register is already known. 
+
+	2003-08-26  Jeff Johnston  <jjohnstn@redhat.com>
+	* ia64-tdep.c (ia64_convert_from_func_addr): New function.
+	(ia64_gdbarch_init): Call set_gdbarch_convert_from_func_addr(). 
+
+	2003-08-25  Jeff Johnston  <jjohnstn@redhat.com>
+	* ia64-tdep.c (pseudo_regs): New enum that lists gr32-gr127, p0-p63, 
+	bof, and nat0-nat127 as pseudo-registers.
+	(ia64_frame_cache): New struct used to cache frame info.
+	(ia64_register_reggroup_p): New routine used to override default
+	register grouping so registers without names are still saved and 
+	restored.
+	(ia64_dwarf_reg_to_regnum): New routine to map gr32-gr127 to their 
+	pseudo values.
+	(ia64_pseudo_register_read): New routine to read pseudo-registers.
+	(ia64_pseudo_register_write): New routine to write pseudo-registers.
+	(ia64_alloc_frame_cache): New routine to create a new 
+	ia64_frame_cache.
+	(examine_prologue): Change prototype to add next_frame pointer.
+	Assume frameless until otherwise proven.  Verify that the cfm for
+	current frame matches the cfm that should occur for the prologues 
+	alloc insn and if equal, mark as not frameless.  At end of routine,
+	if not frameless, calculate registers for the previous frame and store
+	in the cache, if a cache is provided.
+	(ia64_skip_prologue):  Use new prototype when calling examine_prologue
+	and pass 0 for next_frame.
+	(ia64_store_return_value): Change to use convert_typed_floating()
+	instead of calling ia64_convert_to_raw().
+	(ia64_extract_return_value): Change to use convert_typed_floating()
+	instead of calling ia64_convert_to_virtual().
+	(ia64_frame_cache): New routine to support new frame model.
+	(ia64_frame_this_id, ia64_frame_prev_register): Ditto.
+	(ia64_frame_sniffer): Ditto.
+	(ia64_sigtramp_frame_init_saved_regs): Ditto.
+	(ia64_sigtramp_frame_cache, ia64_sigtramp_frame_this_id): Ditto.
+	(ia64_sigtramp_frame_prev_register): Ditto.
+	(ia64_sigtramp_frame_sniffer): Ditto.
+	(ia64_frame_base_address): Ditto.
+	(ia64_extract_struct_value_address): Change to issue error message.
+	(ia64_frame_align): New routine to align sp.
+	(ia64_push_dummy_call): New routine based on ia64_push_arguments().
+	(ia64_push_arguments): Removed.  Logic moved to 
+	ia64_push_dummy_call().
+	(ia64_push_return_address): Ditto.
+	(ia64_unwind_dummy_id): New function.
+	(ia64_unwind_pc): Ditto.
+	(ia64_convert_register_p): Ditto.
+	(ia64_register_to_value): Ditto.
+	(ia64_value_to_register): Ditto.
+	(ia64_pop_frame, ia64_pop_frame_regular): Removed.
+	(ia64_register_byte, ia64_register_raw_size): Ditto.
+	(ia64_register_virtual_size, ia64_register_virtual_byte): Ditto.
+	(ia64_saved_pc_after_call): Ditto.
+	(ia64_frame_chain, ia64_frame_saved_pc): Ditto.
+	(ia64_frame_init_saved_regs, ia64_get_saved_register): Ditto.
+	(ia64_register_convertible, ia64_register_convert_to_virtual): Ditto.
+	(ia64_register_convert_to_raw): Ditto.
+	(ia64_store_struct_return, ia64_call_dummy_words): Ditto.
+	(ia64_init_extra_frame_info): Ditto.
+	(ia64_frame_args_address, ia64_frame_locals_address): Ditto.
+	(ia64_gdbarch_init): Remove registering of deprecated functions that
+	are no longer used.  Add registration of new gdbarch functions.
+	Remove registering deprecated_write_sp.  Replace
+	set_gdbarch_register_virtual_type() with set_gdbarch_register_type().
+	Delete set_gdbarch_deprecated_register_convertible(),
+	set_gdbarch_deprecated_register_convert_to_virtual(), and
+	set_gdbarch_deprecated_register_convert_to_raw() calls.  Remove
+	set_gdbarch_deprecated_register_size(),
+	set_gdbarch_deprecated_register_bytes(),
+	set_gdbarch_pcregnum(),
+	set_gdbarch_deprecated_register_byte(),
+	set_gdbarch_deprecated_register_raw_size(),
+	set_gdbarch_deprecated_max_register_raw_size(),
+	set_gdbarch_deprecated_register_virtual_size(),
+	and set_gdbarch_deprecated_max_register_virtual_size() calls.
+	Replace set_gdbarch_deprecated_extract_return_value() with
+	set_gdbarch_extract_return_value().  Remove calls to:
+	set_gdbarch_deprecated_saved_pc_after_call();
+	set_gdbarch_deprecated_frame_chain(),
+	set_gdbarch_deprecated_frame_saved_pc(),
+	set_gdbarch_deprecated_frame_init_saved_regs(),
+	set_gdbarch_deprecated_get_saved_register(),
+	set_gdbarch_deprecated_call_dummy_words(),
+	set_gdbarch_deprecated_sizeof_call_dummy_words(),
+	set_gdbarch_deprecated_init_extra_frame_info(),
+	set_gdbarch_deprecated_frame_args_address(),
+	set_gdbarch_deprecated_frame_locals_address(),
+	and set_gdbarch_deprecated_dummy_write_sp().
+	Add set_gdbarch_convert_register_p(),
+	set_gdbarch_register_to_value(),
+	set_gdbarch_value_to_register(),
+	set_gdbarch_push_dummy_call(),
+	set_gdbarch_frame_align(),
+	set_gdbarch_unwind_dummy_id(),
+	set_gdbarch_unwind_pc(),
+	frame_unwind_append_sniffer(),
+	frame_unwind_append_sniffer(),
+	and frame_base_set_default().
+
 2003-08-26  Andrew Cagney  <cagney@redhat.com>
 
 	* i386-linux-nat.c (ps_get_thread_area): Make "desc" four "int"s
