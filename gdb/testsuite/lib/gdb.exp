@@ -233,9 +233,10 @@ proc runto_main {} {
     send "step\n"
     # if use stubs step out of the breakpoint() function.
     expect {
-	-re "* at .*$prompt $" {}
+	-re "main.* at .*$prompt $" {}
 	timeout { fail "single step at breakpoint() (timeout)" ; return 0 }
     }
+    return 1
 }
 
 #

@@ -1,3 +1,7 @@
+Wed Mar 29 12:29:34 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* lib/gdb.exp (runto_main): Fix regular expression bug, add return 1.
+
 Tue Mar 28 08:46:45 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.base/recurse.exp: Make test names unique.  Change \\(+ to \\(.
