@@ -1,3 +1,8 @@
+2004-01-05  Jakub Jelinek  <jakub@redhat.com>
+
+	* emulparams/elf_s390.sh (NO_SMALL_DATA): Set to yes.
+	* emulparams/elf64_s390.sh (NO_SMALL_DATA): Set to yes.
+
 2004-01-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldexp.c (align_n): Make static.

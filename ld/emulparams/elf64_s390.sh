@@ -10,6 +10,7 @@ NOP=0x07070707
 TEMPLATE_NAME=elf32
 GENERATE_SHLIB_SCRIPT=yes 
 GENERATE_PIE_SCRIPT=yes
+NO_SMALL_DATA=yes
 
 # Treat a host that matches the target with the possible exception of "x"
 # in the name as if it were native.
