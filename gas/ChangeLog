@@ -1,5 +1,9 @@
 2002-06-08  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* doc/as.texinfo: Update MIPS documentation.
+
+2002-06-08  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* config/tc-mips.c: Add define for $zero register.
 	(md_begin): Add $zero as alias name for $0.
 	(insn_uses_reg): Use ZERO define.
