@@ -2331,7 +2331,8 @@ printf_command (arg, from_tty)
 
 	      /* Copy the string contents into a string inside GDB.  */
 	      str = (char *) alloca (j + 1);
-	      read_memory (tem, str, j);
+	      if (j != 0)
+		read_memory (tem, str, j);
 	      str[j] = 0;
 
 	      printf_filtered (current_substring, str);
