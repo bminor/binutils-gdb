@@ -27,7 +27,7 @@ Things-to-keep:
 ChangeLog
 alpha.h
 a29k.h
-ecoff-ext.h
+ecoff.h
 h8300.h
 h8500.h
 i386.h

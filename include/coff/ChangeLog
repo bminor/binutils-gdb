@@ -1,3 +1,14 @@
+Tue Aug  3 11:17:53 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ecoff.h: New file.
+	* alpha.h, mips.h: Moved common information into ecoff.h.  Moved
+	external structure definitions in from ecoff-ext.h.
+	* ecoff-ext.h: Removed; information now in alpha.h and mips.h.
+
+Sun Jul 18 21:43:59 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
+
+	* i386.h: Recognize I386PTXMAGIC.
+
 Fri Jul 16 09:54:35 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* mips.h (MIPS_AOUT_{OZ}MAGIC): Renamed from {OZ}MAGIC.
