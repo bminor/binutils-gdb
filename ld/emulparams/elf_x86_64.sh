@@ -24,7 +24,7 @@ fi
 case "$target" in
   x86_64*-linux*)
     case "$EMULATION_NAME" in
-      *64*) LIBPATH_SUFFIX=$suffix ;;
+      *64*) LIBPATH_SUFFIX=64 ;;
     esac
     ;;
 esac

@@ -1,3 +1,9 @@
+2003-02-06  Jakub Jelinek  <jakub@redhat.com>
+
+	* emulparams/elf64_s390.sh (LIBPATH_SUFFIX): Set to 64.
+	* emulparams/elf_x86_64.sh (LIBPATH_SUFFIX): Likewise.
+	* emulparams/elf64_sparc.sh (LIBPATH_SUFFIX): Set instead of suffix.
+
 2003-02-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/ppc64elf.em (ppc_before_allocation): Size sections then

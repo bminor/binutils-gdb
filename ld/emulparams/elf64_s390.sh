@@ -26,7 +26,7 @@ case "$target" in
   s390*-linux*)
     case "$EMULATION_NAME" in
       *64*)
-	LIBPATH_SUFFIX=$suffix ;;
+	LIBPATH_SUFFIX=64 ;;
     esac
     ;;
 esac

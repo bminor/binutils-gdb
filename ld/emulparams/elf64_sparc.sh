@@ -42,9 +42,9 @@ case "$EMULATION_NAME" in
   *64*)
     case "$target" in
       sparc*-linux*)
-	suffix=64 ;;
+	LIBPATH_SUFFIX=64 ;;
       sparc*-solaris*)
-	suffix=/sparcv9 ;;
+	LIBPATH_SUFFIX=/sparcv9 ;;
     esac
     ;;
 esac
