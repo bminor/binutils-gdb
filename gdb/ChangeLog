@@ -1,5 +1,11 @@
 2001-12-08  Fred Fish  <fnf@redhat.com>
 
+	* c-lang.c (c_create_fundamental_type): For FT_CHAR, pass
+	TYPE_FLAG_NOSIGN to init_type() rather than setting it after the
+	type is created.
+
+2001-12-08  Fred Fish  <fnf@redhat.com>
+
 	* dwarf2read.c (TYPE_FLAG_VARARGS): Remove from here.
 	* gdbtypes.h (TYPE_FLAG_VARARGS): Add here and change value to
 	not collide with other flag bits.

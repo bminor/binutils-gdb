@@ -240,13 +240,11 @@ c_create_fundamental_type (struct objfile *objfile, int typeid)
       type = init_type (TYPE_CODE_BOOL,
 			TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 			0, "bool", objfile);
-
       break;
     case FT_CHAR:
       type = init_type (TYPE_CODE_INT,
 			TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-			0, "char", objfile);
-      TYPE_FLAGS (type) |= TYPE_FLAG_NOSIGN;
+			TYPE_FLAG_NOSIGN, "char", objfile);
       break;
     case FT_SIGNED_CHAR:
       type = init_type (TYPE_CODE_INT,
@@ -337,7 +335,6 @@ c_create_fundamental_type (struct objfile *objfile, int typeid)
       type = init_type (TYPE_CODE_TEMPLATE_ARG,
 			0,
 			0, "<template arg>", objfile);
-
       break;
     }
   return (type);
