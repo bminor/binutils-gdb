@@ -36,6 +36,7 @@ if { ([istarget "*-*-elf*"]
     # The vtable entry results are different on Rel and Rela targets.
     if {[istarget "i*86-*-*"] 
 	|| [istarget "mips*-*-*"] 
+	|| [istarget "strongarm*-*-*"] 
 	|| [istarget "arm*-*-*"]} then {
 
 	run_dump_test "entry0"
