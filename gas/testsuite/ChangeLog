@@ -1,3 +1,12 @@
+2004-12-10  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* gas/mips/elf-rel23a.d: New test.
+	* gas/mips/elf-rel23b.d: New test.
+	* gas/mips/elf-rel25.s: New test.
+	* gas/mips/elf-rel25.d: New test.
+	* gas/mips/elf-rel25a.d: New test.
+	* gas/mips/mips.exp: Run new tests.
+
 2004-12-09  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/unwind.d: Expect R_ARM_PREL31 relocations.

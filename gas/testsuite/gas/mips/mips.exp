@@ -666,8 +666,13 @@ if { [istarget mips*-*-*] } then {
 	    run_dump_test "elf-rel21"
 	    run_dump_test "elf-rel22"
 	    run_dump_test "elf-rel23"
+	    run_dump_test "elf-rel23a"
+	    run_dump_test "elf-rel23b"
 	    run_dump_test "elf-rel24"
 	}
+
+	run_dump_test "elf-rel25"
+	run_dump_test "elf-rel25a"
 
 	if { !$no_mips16 } {
 	    run_dump_test "${tmips}mips${el}16-e"
