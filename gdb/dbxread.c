@@ -1545,7 +1545,8 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
      since it would be silly to do things differently from Solaris), and
      false for SunOS4 and other a.out file formats.  */
   block_address_function_relative =
-    0 == strncmp (bfd_get_target (objfile->obfd), "elf", 3);
+    (0 == strncmp (bfd_get_target (objfile->obfd), "elf", 3))
+     || (0 == strncmp (bfd_get_target (objfile->obfd), "som", 3));
 
   if (!block_address_function_relative)
     /* N_LBRAC, N_RBRAC and N_SLINE entries are not relative to the
@@ -1634,33 +1635,38 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
       if (!VARIABLES_INSIDE_BLOCK(desc, processing_gcc_compilation))
 	local_symbols = new->locals;
 
-      /* If this is not the outermost LBRAC...RBRAC pair in the
-	 function, its local symbols preceded it, and are the ones
-	 just recovered from the context stack.  Defined the block for them.
-
-	 If this is the outermost LBRAC...RBRAC pair, there is no
-	 need to do anything; leave the symbols that preceded it
-	 to be attached to the function's own block.  However, if
-	 it is so, we need to indicate that we just moved outside
-	 of the function.  */
-      if (local_symbols
-	  && (context_stack_depth
-	      > !VARIABLES_INSIDE_BLOCK(desc, processing_gcc_compilation)))
+      if (context_stack_depth
+	  > !VARIABLES_INSIDE_BLOCK(desc, processing_gcc_compilation))
 	{
-	  /* FIXME Muzzle a compiler bug that makes end < start.  */
-	  if (new->start_addr > valu)
+	  /* This is not the outermost LBRAC...RBRAC pair in the function,
+	     its local symbols preceded it, and are the ones just recovered
+	     from the context stack.  Define the block for them (but don't
+	     bother if the block contains no symbols.  Should we complain
+	     on blocks without symbols?  I can't think of any useful purpose
+	     for them).  */
+	  if (local_symbols != NULL)
 	    {
-	      complain (&lbrac_rbrac_complaint);
-	      new->start_addr = valu;
+	      /* Muzzle a compiler bug that makes end < start.  (which
+		 compilers?  Is this ever harmful?).  */
+	      if (new->start_addr > valu)
+		{
+		  complain (&lbrac_rbrac_complaint);
+		  new->start_addr = valu;
+		}
+	      /* Make a block for the local symbols within.  */
+	      finish_block (0, &local_symbols, new->old_blocks,
+			    new->start_addr, valu, objfile);
 	    }
-	  /* Make a block for the local symbols within.  */
-	  finish_block (0, &local_symbols, new->old_blocks,
-			new->start_addr, valu, objfile);
 	}
       else
 	{
+	  /* This is the outermost LBRAC...RBRAC pair.  There is no
+	     need to do anything; leave the symbols that preceded it
+	     to be attached to the function's own block.  We need to
+	     indicate that we just moved outside of the function.  */
 	  within_function = 0;
 	}
+
       if (VARIABLES_INSIDE_BLOCK(desc, processing_gcc_compilation))
 	/* Now pop locals of block just finished.  */
 	local_symbols = new->locals;
@@ -2156,6 +2162,9 @@ pastab_build_psymtabs (objfile, section_offsets, mainline)
 {
   free_header_files ();
   init_header_files ();
+
+  /* This is needed to debug objects assembled with gas2.  */
+  processing_acc_compilation = 1;
 
   /* In a PA file, we've already installed the minimal symbols that came
      from the PA (non-stab) symbol table, so always act like an

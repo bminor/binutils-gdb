@@ -580,12 +580,12 @@ frame_chain (frame)
      several areas on the stack.
 
      Walk from the current frame to the innermost frame examining 
-     unwind descriptors to determine if %r4 ever gets saved into the
+     unwind descriptors to determine if %r3 ever gets saved into the
      stack.  If so return whatever value got saved into the stack.
-     If it was never saved in the stack, then the value in %r4 is still
+     If it was never saved in the stack, then the value in %r3 is still
      valid, so use it. 
 
-     We use information from unwind descriptors to determine if %r4
+     We use information from unwind descriptors to determine if %r3
      is saved into the stack (Entry_GR field has this information).  */
 
   while (frame)
@@ -603,8 +603,8 @@ frame_chain (frame)
 	}
 
       /* Entry_GR specifies the number of callee-saved general registers
-	 saved in the stack.  It starts at %r3, so %r4 would be 2.  */
-      if (u->Entry_GR >= 2 || u->Save_SP)
+	 saved in the stack.  It starts at %r3, so %r3 would be 1.  */
+      if (u->Entry_GR >= 1 || u->Save_SP)
 	break;
       else
 	frame = frame->next;
@@ -616,15 +616,15 @@ frame_chain (frame)
 	 pointer.  */
       if (u->Save_SP)
 	return read_memory_integer (frame->frame, 4);
-      /* %r4 was saved somewhere in the stack.  Dig it out.  */
+      /* %r3 was saved somewhere in the stack.  Dig it out.  */
       else 
 	return dig_fp_from_stack (frame, u);
     }
   else
     {
-      /* The value in %r4 was never saved into the stack (thus %r4 still
+      /* The value in %r3 was never saved into the stack (thus %r3 still
 	 holds the value of the previous frame pointer).  */
-      return read_register (4);
+      return read_register (FP_REGNUM);
     }
 }
 
@@ -639,14 +639,14 @@ dig_fp_from_stack (frame, u)
 {
   CORE_ADDR pc = u->region_start;
 
-  /* Search the function for the save of %r4.  */
+  /* Search the function for the save of %r3.  */
   while (pc != u->region_end)
     {
       char buf[4];
       unsigned long inst;
       int status;
 
-      /* We need only look for the standard stw %r4,X(%sp) instruction,
+      /* We need only look for the standard stw %r3,X(%sp) instruction,
 	 the other variants (eg stwm) are only used on the first register
 	 save (eg %r3).  */
       status = target_read_memory (pc, buf, 4);
@@ -655,10 +655,10 @@ dig_fp_from_stack (frame, u)
       if (status != 0)
 	memory_error (status, pc);
 
-      /* Check for stw %r4,X(%sp).  */
-      if ((inst & 0xffffc000) == 0x6bc40000)
+      /* Check for stw %r3,X(%sp).  */
+      if ((inst & 0xffffc000) == 0x6bc30000)
 	{
-	  /* Found the instruction which saves %r4.  The offset (relative
+	  /* Found the instruction which saves %r3.  The offset (relative
 	     to this frame) is framesize + immed14 (derived from the 
 	     store instruction).  */
 	  int offset = (u->Total_frame_size << 3) + extract_14 (inst);
@@ -670,7 +670,7 @@ dig_fp_from_stack (frame, u)
       pc += 4;
     }
 
-  warning ("Unable to find %%r4 in stack.\n");
+  warning ("Unable to find %%r3 in stack.\n");
   return 0;
 }
 
@@ -1223,14 +1223,14 @@ skip_prologue(pc)
 
   if (inst == 0x6BC23FD9)	/* stw rp,-20(sp) */
     {
-      if (read_memory_integer (pc + 4, 4) == 0x8040241)	/* copy r4,r1 */
+      if (read_memory_integer (pc + 4, 4) == 0x8030241)	/* copy r3,r1 */
 	pc += 16;
-      else if ((read_memory_integer (pc + 4, 4) & ~MASK_14) == 0x68810000) /* stw r1,(r4) */
+      else if ((read_memory_integer (pc + 4, 4) & ~MASK_14) == 0x68710000) /* stw r1,(r3) */
 	pc += 8;
     }
-  else if (read_memory_integer (pc, 4) == 0x8040241) /* copy r4,r1 */
+  else if (read_memory_integer (pc, 4) == 0x8030241) /* copy r3,r1 */
     pc += 12;
-  else if ((read_memory_integer (pc, 4) & ~MASK_14) == 0x68810000) /* stw r1,(r4) */
+  else if ((read_memory_integer (pc, 4) & ~MASK_14) == 0x68710000) /* stw r1,(r3) */
     pc += 4;
 
   return pc;

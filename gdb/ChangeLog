@@ -1,3 +1,18 @@
+Sun Dec 26 20:44:02 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* dbxread.c (process_one_symbol): Handle stabs-in-som just like
+	stabs-in-elf.
+	(pastab_build_psymtabs): Likewise.
+
+	* hppa-tdep.c: Change all comments to reference %r3 or frame
+	pointer rather than %r4.
+	(frame_chain, skip_prologue, dig_rp_from_stack): Handle %r3 as the
+	frame pointer.
+
+	* config/pa/tm-hppa.h (FP_REGNUM): Define as %r3.
+	(FIND_FRAME_SAVED_REGS): Handle %r3 as frame pointer.
+	(CALL_DUMMY): Likewise.
+
 Sun Dec 26 16:59:39 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* exec.c (exec_file_command): If error occurs after we have opened
