@@ -21,5 +21,5 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "mips/tm-mips.h"
 
-#undef  USE_STRUCT_CONVENTION
-#define USE_STRUCT_CONVENTION(gcc_p, type) (TYPE_LENGTH (type) > 8)
+#undef DEFAULT_MIPS_TYPE
+#define DEFAULT_MIPS_TYPE "r3900"
