@@ -556,6 +556,8 @@ filter_symbols (abfd, obfd, osyms, isyms, symcount)
 {
   register asymbol **from = isyms, **to = osyms;
   long src_count = 0, dst_count = 0;
+  int relocatable = (abfd->flags & (HAS_RELOC | EXEC_P | DYNAMIC))
+		    == HAS_RELOC;
 
   for (; src_count < symcount; src_count++)
     {
@@ -609,6 +611,9 @@ filter_symbols (abfd, obfd, osyms, isyms, symcount)
 	       || ((flags & BSF_SECTION_SYM) != 0
 		   && ((*bfd_get_section (sym)->symbol_ptr_ptr)->flags
 		       & BSF_KEEP) != 0))
+	keep = 1;
+      else if (relocatable			/* Relocatable file. */
+	       && (flags & (BSF_GLOBAL | BSF_WEAK)) != 0)
 	keep = 1;
       else if ((flags & BSF_GLOBAL) != 0	/* Global symbol.  */
 	       || (flags & BSF_WEAK) != 0

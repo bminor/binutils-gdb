@@ -1,3 +1,8 @@
+2000-05-14  H.J. Lu  (hjl@gnu.org)
+
+	* objcopy.c (filter_symbols): Don't strip global symbols in
+	relocatable object files.
+
 2000-05-14  Alan Modra  <alan@linuxcare.com.au>
 
 	* size.c (usage): Associate short options with corresponding long
