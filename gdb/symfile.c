@@ -350,7 +350,7 @@ entry_point_address()
    If the vmas and sizes are equal, the last section is considered the
    lowest-addressed loadable section.  */
 
-static void
+void
 find_lowest_section (abfd, sect, obj)
      bfd *abfd;
      asection *sect;

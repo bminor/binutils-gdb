@@ -1,3 +1,15 @@
+Tue Feb 20 23:59:19 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* solib.c (solib_break_names): Define for Solaris and Linux.
+	(enable_break): For SVR4 systems, first try to use the debugger
+	interfaces in the dynamic linker to track shared library events
+	as they happen, then fall back to BKPT_AT_SYMBOL code.  Convert
+	BKPT_AT_SYMBOL code to use shared library event breakpoints.
+	(solib_create_inferior_hook): Simplify BKPT_AT_SYMBOL code,
+	it no longer needs to restart/wait on the inferior.
+	* symfile.c (find_lowest_section): No longer static.
+	* symfile.h (find_lowest_section): Corresponding changes.
+
 Tue Feb 20 18:54:08 1996  Fred Fish  <fnf@rtl.cygnus.com>
 
 	* valops.c (COERCE_FLOAT_TO_DOUBLE): Define default value.

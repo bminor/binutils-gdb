@@ -1,5 +1,5 @@
 /* Handle SunOS and SVR4 shared libraries for GDB, the GNU Debugger.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996
    Free Software Foundation, Inc.
    
 This file is part of GDB.
@@ -45,7 +45,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "command.h"
 #include "target.h"
 #include "frame.h"
-#include "regex.h"
+#include "gnu-regex.h"
 #include "inferior.h"
 #include "environ.h"
 #include "language.h"
@@ -53,15 +53,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define MAX_PATH_SIZE 512		/* FIXME: Should be dynamic */
 
-/* On SVR4 systems, for the initial implementation, use some runtime startup
-   symbol as the "startup mapping complete" breakpoint address.  The models
-   for SunOS and SVR4 dynamic linking debugger support are different in that
-   SunOS hits one breakpoint when all mapping is complete while using the SVR4
-   debugger support takes two breakpoint hits for each file mapped, and
-   there is no way to know when the "last" one is hit.  Both these
-   mechanisms should be tied to a "breakpoint service routine" that
-   gets automatically executed whenever one of the breakpoints indicating
-   a change in mapping is hit.  This is a future enhancement.  (FIXME) */
+/* On SVR4 systems, a list of symbols in the dynamic linker where
+   GDB can try to place a breakpoint to monitor shared library
+   events.
+
+   If none of these symbols are found, or other errors occur, then
+   SVR4 systems will fall back to using a symbol as the "startup
+   mapping complete" breakpoint address.  */
+
+#ifdef SVR4_SHARED_LIBS
+static char *solib_break_names[] = {
+  "r_debug_state",
+  "_dl_debug_state",
+  NULL
+};
+#endif
 
 #define BKPT_AT_SYMBOL 1
 
@@ -92,17 +98,6 @@ static char *main_name_list[] = {
 };
 
 /* local data declarations */
-
-/* If true, then shared library symbols will be added automatically
-   when the inferior is created.  This is almost always what users
-   will want to have happen; but for very large programs, the startup
-   time will be excessive, and so if this is a problem, the user can
-   clear this flag and then add the shared library symbols as needed.
-   Note that there is a potential for confusion, since if the shared
-   library symbols are not loaded, commands like "info fun" will *not*
-   report all the functions that are actually present.  */
-   
-int auto_solib_add_at_startup = 1;
 
 #ifndef SVR4_SHARED_LIBS
 
@@ -312,6 +307,8 @@ allocate_rt_common_objfile ()
   objfile = (struct objfile *) xmalloc (sizeof (struct objfile));
   memset (objfile, 0, sizeof (struct objfile));
   objfile -> md = NULL;
+  obstack_specify_allocation (&objfile -> psymbol_cache.cache, 0, 0,
+			      xmalloc, free);
   obstack_specify_allocation (&objfile -> psymbol_obstack, 0, 0, xmalloc,
 			      free);
   obstack_specify_allocation (&objfile -> symbol_obstack, 0, 0, xmalloc,
@@ -1013,6 +1010,13 @@ solib_add (arg_string, from_tty, target)
       
       if (count)
 	{
+	  int update_coreops;
+
+	  /* We must update the to_sections field in the core_ops structure
+	     here, otherwise we dereference a potential dangling pointer
+	     for each call to target_read/write_memory within this routine.  */
+	  update_coreops = core_ops.to_sections == target->to_sections;
+	     
 	  /* Reallocate the target's section table including the new size.  */
 	  if (target -> to_sections)
 	    {
@@ -1029,6 +1033,14 @@ solib_add (arg_string, from_tty, target)
 	    }
 	  target -> to_sections_end = target -> to_sections + (count + old);
 	  
+	  /* Update the to_sections field in the core_ops structure
+	     if needed.  */
+	  if (update_coreops)
+	    {
+	      core_ops.to_sections = target->to_sections;
+	      core_ops.to_sections_end = target->to_sections_end;
+	    }
+
 	  /* Add these section table entries to the target's table.  */
 	  while ((so = find_solib (so)) != NULL)
 	    {
@@ -1143,7 +1155,7 @@ GLOBAL FUNCTION
 
 SYNOPSIS
 
-	int solib_address (CORE_ADDR address)
+	char * solib_address (CORE_ADDR address)
 
 DESCRIPTION
 
@@ -1159,7 +1171,7 @@ DESCRIPTION
 	mapped in.
  */
 
-int
+char *
 solib_address (address)
      CORE_ADDR address;
 {
@@ -1171,9 +1183,7 @@ solib_address (address)
 	{
 	  if ((address >= (CORE_ADDR) LM_ADDR (so)) &&
 	      (address < (CORE_ADDR) so -> lmend))
-	    {
-	      return (1);
-	    }
+	    return (so->so_name);
 	}
     }
   return (0);
@@ -1361,8 +1371,105 @@ enable_break ()
 #ifdef BKPT_AT_SYMBOL
 
   struct minimal_symbol *msymbol;
+  struct objfile *objfile;
   char **bkpt_namep;
   CORE_ADDR bkpt_addr;
+  asection *interp_sect;
+
+  /* First, remove all the solib event breakpoints.  Their addresses
+     may have changed since the last time we ran the program.  */
+  remove_solib_event_breakpoints ();
+
+#ifdef SVR4_SHARED_LIBS
+  /* Find the .interp section; if not found, warn the user and drop
+     into the old breakpoint at symbol code.  */
+  interp_sect = bfd_get_section_by_name (exec_bfd, ".interp");
+  if (interp_sect)
+    {
+      unsigned int interp_sect_size;
+      char *buf;
+      CORE_ADDR load_addr;
+      bfd *tmp_bfd;
+      asection *lowest_sect;
+
+      /* Read the contents of the .interp section into a local buffer;
+	 the contents specify the dynamic linker this program uses.  */
+      interp_sect_size = bfd_section_size (exec_bfd, interp_sect);
+      buf = alloca (interp_sect_size);
+      bfd_get_section_contents (exec_bfd, interp_sect,
+				buf, 0, interp_sect_size);
+
+      /* Now we need to figure out where the dynamic linker was
+	 loaded so that we can load its symbols and place a breakpoint
+	 in the dynamic linker itself.
+
+	 This address is stored on the stack.  However, I've been unable
+	 to find any magic formula to find it for Solaris (appears to
+	 be trivial on Linux).  Therefore, we have to try an alternate
+	 mechanism to find the dynamic linker's base address.  */
+      tmp_bfd = bfd_openr (buf, gnutarget);
+      if (tmp_bfd == NULL)
+	goto bkpt_at_symbol;
+
+      /* Make sure the dynamic linker's really a useful object.  */
+      if (!bfd_check_format (tmp_bfd, bfd_object))
+	{
+	  warning ("Unable to grok dynamic linker %s as an object file", buf);
+	  bfd_close (tmp_bfd);
+	  goto bkpt_at_symbol;
+	}
+
+      /* We find the dynamic linker's base address by examining the
+	 current pc (which point at the entry point for the dynamic
+	 linker) and subtracting the offset of the entry point.  */
+      load_addr = read_pc () - tmp_bfd->start_address;
+
+      /* load_addr now has the base address of the dynamic linker;
+	 however, due to severe braindamage in syms_from_objfile
+	 we need to add the address of the .text section, or the
+	 lowest section of .text doesn't exist to work around the
+	 braindamage.  Gross.  */
+      lowest_sect = bfd_get_section_by_name (tmp_bfd, ".text");
+      if (lowest_sect == NULL)
+        bfd_map_over_sections (tmp_bfd, find_lowest_section,
+                               (PTR) &lowest_sect);
+
+      if (lowest_sect == NULL)
+	{
+	  warning ("Unable to find base address for dynamic linker %s\n", buf);
+	  bfd_close (tmp_bfd);
+	  goto bkpt_at_symbol;
+	}
+
+      load_addr += bfd_section_vma (tmp_bfd, lowest_sect);
+
+      /* We're done with the temporary bfd.  */
+      bfd_close (tmp_bfd);
+
+      /* Now make GDB aware of the symbols in the dynamic linker.  Some
+	 might complain about namespace pollution, but as a developer I've
+	 often wanted these symbols available from within the debugger.  */
+      objfile = symbol_file_add (buf, 0, load_addr, 0, 0, 1);
+
+      /* Now try to set a breakpoint in the dynamic linker.  */
+      for (bkpt_namep = solib_break_names; *bkpt_namep != NULL; bkpt_namep++)
+	{
+	  msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, objfile);
+	  if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
+	    {
+	      create_solib_event_breakpoint (SYMBOL_VALUE_ADDRESS (msymbol));
+	      return 1;
+	    }
+	}
+
+      /* For whatever reason we couldn't set a breakpoint in the dynamic
+	 linker.  Warn and drop into the old code.  */
+bkpt_at_symbol:
+      warning ("Unable to find dynamic linker breakpoint function.");
+      warning ("GDB will be unable to debug shared library initializers");
+      warning ("and track explicitly loaded dynamic code.");
+    }
+#endif
 
   /* Scan through the list of symbols, trying to look up the symbol and
      set a breakpoint there.  Terminate loop when we/if we succeed. */
@@ -1373,31 +1480,13 @@ enable_break ()
       msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, symfile_objfile);
       if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
 	{
-	  bkpt_addr = SYMBOL_VALUE_ADDRESS (msymbol);
-	  if (target_insert_breakpoint (bkpt_addr, shadow_contents) == 0)
-	    {
-	      breakpoint_addr = bkpt_addr;
-	      success = 1;
-	      break;
-	    }
+	  create_solib_event_breakpoint (SYMBOL_VALUE_ADDRESS (msymbol));
+	  return 1;
 	}
     }
 
-#else	/* !BKPT_AT_SYMBOL */
-
-  struct symtab_and_line sal;
-
-  /* Read the debugger interface structure directly. */
-
-  read_memory (debug_base, (char *) &debug_copy, sizeof (debug_copy));
-
-  /* Set breakpoint at the debugger interface stub routine that will
-     be called just prior to each mapping change and again after the
-     mapping change is complete.  Set up the (nonexistent) handler to
-     deal with hitting these breakpoints.  (FIXME). */
-
-  warning ("'%s': line %d: missing SVR4 support code", __FILE__, __LINE__);
-  success = 1;
+  /* Nothing good happened.  */
+  return 0;
 
 #endif	/* BKPT_AT_SYMBOL */
 
@@ -1479,7 +1568,12 @@ solib_create_inferior_hook()
       return;
     }
 
-  /* Now run the target.  It will eventually hit the breakpoint, at
+#ifndef BKPT_AT_SYMBOL
+  /* Only SunOS needs the loop below, other systems should be using the
+     special shared library breakpoints and the shared library breakpoint
+     service routine.
+
+     Now run the target.  It will eventually hit the breakpoint, at
      which point all of the libraries will have been mapped in and we
      can go groveling around in the dynamic linker structures to find
      out what we need to know about them. */
@@ -1511,8 +1605,9 @@ solib_create_inferior_hook()
       warning ("shared library handler failed to disable breakpoint");
     }
 
-  if (auto_solib_add_at_startup)
+  if (auto_solib_add)
     solib_add ((char *) 0, 0, (struct target_ops *) 0);
+#endif
 }
 
 /*
@@ -1617,10 +1712,11 @@ _initialize_solib()
 
   add_show_from_set
     (add_set_cmd ("auto-solib-add", class_support, var_zinteger,
-		  (char *) &auto_solib_add_at_startup,
-		  "Set autoloading of shared library symbols at startup.\n\
+		  (char *) &auto_solib_add,
+		  "Set autoloading of shared library symbols.\n\
 If nonzero, symbols from all shared object libraries will be loaded\n\
-automatically when the inferior begins execution.  Otherwise, symbols\n\
+automatically when the inferior begins execution or when the dynamic linker\n\
+informs gdb that a new library has been loaded.  Otherwise, symbols\n\
 must be loaded manually, using `sharedlibrary'.",
 		  &setlist),
      &showlist);
