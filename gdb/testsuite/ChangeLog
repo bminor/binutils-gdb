@@ -1,3 +1,7 @@
+2003-01-15  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.base/args.exp: Fix foobar with GDBFLAGS global.
+
 2003-01-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/default.exp: Adapt "info float" test for recent changes
