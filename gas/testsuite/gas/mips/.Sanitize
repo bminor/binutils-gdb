@@ -47,6 +47,7 @@ dli.d
 dli.s
 itbl
 itbl.s
+itbl-test.c
 jal-empic.d
 jal-svr4pic.d
 jal-svr4pic.s
