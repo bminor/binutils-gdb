@@ -118,7 +118,7 @@ print_insn_alpha (memaddr, info)
   opcode_end = opcode_index[op + 1];
   for (opcode = opcode_index[op]; opcode < opcode_end; ++opcode)
     {
-      if ((insn & opcode->mask) != opcode->opcode)
+      if ((insn ^ opcode->opcode) & opcode->mask)
 	continue;
 
       if (!(opcode->flags & isa_mask))

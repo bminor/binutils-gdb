@@ -1,3 +1,8 @@
+2002-01-22  Richard Henderson  <rth@redhat.com>
+
+	* alpha-dis.c (print_insn_alpha): Also mask the base opcode for
+	comparison.
+
 2002-01-19  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-opc.h (arm_opcodes): Use generic rule %5?hb instead of %h.
