@@ -1,3 +1,8 @@
+2001-08-21  Andrew Cagney  <ac131313@redhat.com>
+
+	* doublest.h (HOST_FLOAT_FORMAT): Delete macro.
+	(HOST_DOUBLE_FORMAT): Delete macro.
+
 2001-08-24  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/xm-lynx.h, config/xm-nbsd.h, config/xm-sysv4.h,

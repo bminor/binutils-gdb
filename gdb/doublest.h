@@ -37,22 +37,6 @@
 
 extern const struct floatformat floatformat_unknown;
 
-#if HOST_BYTE_ORDER == BIG_ENDIAN
-#ifndef HOST_FLOAT_FORMAT
-#define HOST_FLOAT_FORMAT &floatformat_ieee_single_big
-#endif
-#ifndef HOST_DOUBLE_FORMAT
-#define HOST_DOUBLE_FORMAT &floatformat_ieee_double_big
-#endif
-#else /* LITTLE_ENDIAN */
-#ifndef HOST_FLOAT_FORMAT
-#define HOST_FLOAT_FORMAT &floatformat_ieee_single_little
-#endif
-#ifndef HOST_DOUBLE_FORMAT
-#define HOST_DOUBLE_FORMAT &floatformat_ieee_double_little
-#endif
-#endif
-
 /* Use `long double' if the host compiler supports it.  (Note that this is not
    necessarily any longer than `double'.  On SunOS/gcc, it's the same as
    double.)  This is necessary because GDB internally converts all floating
