@@ -341,7 +341,10 @@ extern int myread (int, char *, int);
 extern int query (char *, ...) ATTR_FORMAT (printf, 1, 2);
 
 #if !defined (USE_MMALLOC)
-extern PTR mcalloc (void *, size_t, size_t);
+/* NOTE: cagney/2000-03-04: The mmalloc functions need to use PTR
+   rather than void* so that they are consistent with
+   ../mmalloc/mmalloc.h. */
+extern PTR mcalloc (PTR, size_t, size_t);
 extern PTR mmalloc (PTR, size_t);
 extern PTR mrealloc (PTR, PTR, size_t);
 extern void mfree (PTR, PTR);

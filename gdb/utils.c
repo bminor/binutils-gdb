@@ -919,8 +919,8 @@ request_quit (signo)
 
 #if !defined (USE_MMALLOC)
 
-void *
-mcalloc (void *md, size_t number, size_t size)
+PTR
+mcalloc (PTR md, size_t number, size_t size)
 {
   return calloc (number, size);
 }
@@ -958,8 +958,7 @@ mfree (md, ptr)
 #if !defined (USE_MMALLOC) || defined (NO_MMCHECK)
 
 void
-init_malloc (md)
-     PTR md;
+init_malloc (void *md)
 {
 }
 
@@ -991,8 +990,7 @@ malloc_botch ()
 #endif
 
 void
-init_malloc (md)
-     PTR md;
+init_malloc (void *md)
 {
   if (!mmcheckf (md, malloc_botch, MMCHECK_FORCE))
     {
@@ -1149,10 +1147,7 @@ savestring (ptr, size)
 }
 
 char *
-msavestring (md, ptr, size)
-     PTR md;
-     const char *ptr;
-     int size;
+msavestring (void *md, const char *ptr, int size)
 {
   register char *p = (char *) xmmalloc (md, size + 1);
   memcpy (p, ptr, size);
@@ -1171,9 +1166,7 @@ strsave (ptr)
 }
 
 char *
-mstrsave (md, ptr)
-     PTR md;
-     const char *ptr;
+mstrsave (void *md, const char *ptr)
 {
   return (msavestring (md, ptr, strlen (ptr)));
 }
