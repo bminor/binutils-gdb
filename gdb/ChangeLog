@@ -7,6 +7,8 @@ end-sanitize-gdbtk
 
 Wed May 15 08:25:12 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* top.c (read_next_line): Fix thinkos.  From Don Seeley.
+
 	* coffread.c (coff_symtab_read): Handle C_LABEL symbols like
 	C_STAT symbols.
 	* h8300-tdep.c (h8300_pop_frame): Reset $sp and $pc correctly.

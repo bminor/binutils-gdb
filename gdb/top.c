@@ -2183,7 +2183,7 @@ read_next_line (command)
     *command = build_command_line (while_control, p + 6);
   else if (p1 - p > 2 && !strncmp (p, "if", 2))
     *command = build_command_line (if_control, p + 3);
-  else if (p1 - p == 5 && !strncmp (p, "loop_break", 5))
+  else if (p1 - p == 10 && !strncmp (p, "loop_break", 10))
     {
       *command = (struct command_line *)
 	xmalloc (sizeof (struct command_line));
@@ -2193,7 +2193,7 @@ read_next_line (command)
       (*command)->body_count = 0;
       (*command)->body_list = NULL;
     }
-  else if (p1 - p == 8 && !strncmp (p, "loop_continue", 8))
+  else if (p1 - p == 13 && !strncmp (p, "loop_continue", 13))
     {
       *command = (struct command_line *)
 	xmalloc (sizeof (struct command_line));
