@@ -43,6 +43,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "../bfd/libbfd.h"
 
 
+#define MIN(a,b) ((a) < (b)? (a) : (b))
 /* This vector is used to turn an internal segment into a section #
    suitable for insertion into a coff symbol table 
  */
@@ -1997,6 +1998,8 @@ static void DEFUN_VOID(obj_coff_lcomm)
     char c;
     int temp;
     char *p;
+    unsigned long vma;
+
     symbolS *symbolP;
     name = input_line_pointer;
 
@@ -2023,9 +2026,11 @@ static void DEFUN_VOID(obj_coff_lcomm)
 	}
     *p = 0;
     symbolP = symbol_find_or_make(name);
-    S_SET_VALUE(symbolP, segment_info[SEG_E2].scnhdr.s_size);
+    vma = segment_info[SEG_E2].scnhdr.s_size;
+    vma += relax_align(vma, MIN(8, temp));
+    S_SET_VALUE(symbolP,vma);
     S_SET_SEGMENT(symbolP, SEG_E2);
-    segment_info[SEG_E2].scnhdr.s_size += temp;
+    segment_info[SEG_E2].scnhdr.s_size = vma + temp;
     S_SET_STORAGE_CLASS(symbolP, C_STAT);
     demand_empty_rest_of_line();
 }
