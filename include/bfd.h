@@ -1,11 +1,21 @@
- 	  /* A -*- C -*- header file for the bfd library */
+/* bfd.h -- The only header file required by users of the bfd library 
 
-/* bfd.h -- The only header file required by users of the bfd library
-   */
-
-/* WARNING:
 This file is generated from various .c files, if you change it, your
-bits may be lost
+bits may be lost.
+
+All the prototypes and definitions following the comment " THE
+FOLLOWING IS EXTRACTED FROM THE SOURCE" is extracted from the source.
+If you change it someone oneday will extract from the source again,
+and your changes will be lost. To save yourself from this bind, change
+the definitions in the source in the bfd directory. Type make docs and
+then make headers in that directory, and magically this file will
+change to reflect your changes.
+
+If you don't have the tools to perform the extraction then you are
+safe from someone on your system trampling over your header files.
+You should still maintain the equivalence between the source and this
+file though; every change you make to the .c file should be reflected
+here.
 */
 
 /* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
@@ -1068,7 +1078,9 @@ PROTO(symindex, bfd_get_next_mapent, (bfd *, symindex, carsym **));
 contained in an archive to @var{new_head}. (see chapter on archives)
 */
 PROTO(boolean, bfd_set_archive_head, (bfd *output, bfd *new_head));
-/* *;PROTO(bfd *, bfd_get_elt_at_index, (bfd *, int));*/
+
+PROTO(bfd *, bfd_get_elt_at_index, (bfd *, int));
+
 
 /* Initially provided a bfd containing an archive and NULL, opens a bfd
 on the first contained element and returns that. Subsequent calls to
