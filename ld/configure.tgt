@@ -76,7 +76,6 @@ sparc*-*-linux-gnu*)	targ_emul=elf32_sparc
 			tdir_elf64_sparc=`echo ${targ_alias} | sed -e 's/32//'`
 			tdir_sun4=sparc-sun-sunos4
 			;;
-sparc*-*-lynxos*)	targ_emul=sparclynx ;;
 sparc64-*-netbsd* | sparc64-*-openbsd*)
 			targ_emul=elf64_sparc
 			targ_extra_emuls="elf32_sparc"
@@ -379,7 +378,6 @@ m68k-*-linux-gnu*)	targ_emul=m68kelf
 			;;
 m68k-*-uclinux*)	targ_emul=m68kelf ;;
 m68*-*-gnu*)		targ_emul=m68kelf ;;
-m68*-*-lynxos*)		targ_emul=m68klynx ;;
 m68*-*-netbsd*4k*)	targ_emul=m68k4knbsd
 			targ_extra_emuls="m68knbsd m68kelfnbsd" ;;
 m68*-*-netbsdelf*)	targ_emul=m68kelfnbsd

@@ -31,9 +31,6 @@ targ_underscore=no
 
 # Catch obsolete configurations.
 case $targ in
- m68*-*-lynxos* | \
- sparc-*-lynxos* | \
- vax-*-vms* | \
  null)
     if test "x$enable_obsolete" != xyes; then
       echo "*** Configuration $targ is obsolete." >&2
@@ -45,6 +42,9 @@ case $targ in
 esac
 
 case $targ in
+ m68*-*-lynxos* | \
+ sparc-*-lynxos* | \
+ vax-*-vms* | \
  arm-*-oabi | \
  thumb-*-oabi | \
  null)
