@@ -104,7 +104,7 @@ else
 	done
 fi
 
-sh3_files="ChangeLog sh3-opc.h"
+sh3_files="ChangeLog sh-opc.h"
 if ( echo $* | grep keep\-sh3 > /dev/null ) ; then
 	if [ -n "${verbose}" ] ; then
 		echo Keeping sh3 stuff in $sh3_files.
