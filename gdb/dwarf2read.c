@@ -3721,6 +3721,9 @@ set_cu_language (unsigned int lang)
     case DW_LANG_Mips_Assembler:
       cu_language = language_asm;
       break;
+    case DW_LANG_Java:
+      cu_language = language_java;
+      break;
     case DW_LANG_Ada83:
     case DW_LANG_Cobol74:
     case DW_LANG_Cobol85:

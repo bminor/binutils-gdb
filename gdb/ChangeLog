@@ -1,3 +1,7 @@
+2001-06-08  Per Bothner  <per@bothner.com>
+
+	* dwarf2read.c (set_cu_language):  Handle DW_LANG_Java.
+
 2001-06-07  Keith Seitz  <keiths@redhat.com>
 
 	* tracepoint.c (tracepoint_opertation): Add ui event
