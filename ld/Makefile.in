@@ -96,7 +96,7 @@ ldgramtb.o ldgramtb.h:ldgram.y
 #	(cd ../bfd; make)
 
 $(LD_PROG): $(OFILES) $(BFDLIB) $(LIBIBERTY)
-	$(CC) $(CFLAGS) -o $(LD_PROG) $(OFILES) $(BFDLIB) $(LIBIBERTY)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(LD_PROG) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(LOADLIBES)
 
 #	(cd ../bfd; make)
 #	LDEMULATION=gld; export LDEMULATION;  GNUTARGET=a.out-sunos-big;./ldok -format a.out-sunos-big  -o ld /lib/crt0.o   $(OFILES) $(BFDLIB) $(LIBIBERTY) -lc /usr/local/lib/gcc/sparc/1.91/gnulib
@@ -121,8 +121,8 @@ mkscript: mkscript.c
 
 ldgld.o: $(PROCESSED_SCRIPTS) ldgld.c 
 
-ldlex.c: ldlex.l ldgram.tab.h
-ldlex.o: ldlex.c ldgram.tab.h
+ldlex.c: ldlex.l ldgramtb.h
+ldlex.o: ldlex.c ldgramtb.h
 
 ldgld68k.x :ldgld68k.script 
 ldgld68kUr.x :ldgld68kUr.script 
