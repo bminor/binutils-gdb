@@ -56,10 +56,15 @@ perror_memory (status, memaddr, info)
     /* Can't happen.  */
     info->fprintf_func (info->stream, _("Unknown error %d\n"), status);
   else
-    /* Actually, address between memaddr and memaddr + len was
-       out of bounds.  */
-    info->fprintf_func (info->stream,
-			_("Address 0x%x is out of bounds.\n"), memaddr);
+    {
+      char buf[30];
+
+      /* Actually, address between memaddr and memaddr + len was
+	 out of bounds.  */
+      sprintf_vma (buf, memaddr);
+      info->fprintf_func (info->stream,
+			  _("Address 0x%s is out of bounds.\n"), buf);
+    }
 }
 
 /* This could be in a separate file, to save miniscule amounts of space

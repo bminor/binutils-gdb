@@ -1,3 +1,8 @@
+2005-02-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dis-buf.c (perror_memory): Use sprintf_vma to print out
+	address.
+
 2005-02-11  Nick Clifton  <nickc@redhat.com>
 
 	* iq2000-asm.c: Regenerate.
