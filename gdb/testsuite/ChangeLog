@@ -1,3 +1,7 @@
+Sun Mar 26 13:19:32 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/commands.exp (breakpoint_command_test): New tests.
+
 Sat Mar 25 15:38:06 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.c++/*.exp: Warn if executable does not exist.  The original
