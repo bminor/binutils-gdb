@@ -1,5 +1,26 @@
 Tue Dec  8 13:30:58 1992  Fred Fish  (fnf@cygnus.com)
 
+	* c-exp.y, m2-exp.y:  Migrate code that has nothing to do with
+	expression parsing into c-lang.c and m2-lang.c respectively.
+	* c-lang.c, m2-lang.c:  New files, code migrated from c-exp.y and
+	m2-exp.y respectively.
+	* c-lang.h, m2-lang.h:  New files, internal interfaces between c-*
+	and m2-* files respectively.
+	* Makefile.in (SFILES_MAINDIR):  Add c-lang.c, m2-lang.c.
+	* Makefile.in (HFILES):  Add c-lang.h, m2-lang.h.
+	* Makefile.in (OBS):  Add c-lang.o, m2-lang.o.
+	* expression.h (struct block):  Forward declaration for prototypes.
+	* language.h (struct objfile):  Forward declaration for prototypes.
+	**** start-sanitize-chill ****
+	* Makefile.in (SFILES_MAINDIR):  Add ch-lang.c.
+	* Makefile.in (HFILES):  Add ch-lang.h.
+	* Makefile.in (OBS):  Add ch-lang.o.
+	* ch-exp.y:  Migrate code that has nothing to do with expression
+	parsing into ch-lang.c.
+	* ch-lang.c:  New file, code migrated from c-exp.y.
+	* ch-lang.h:  New file, internal interface between ch-* files.
+	**** end-sanitize-chill ****
+
 	Changes for Amiga Unix from rhealey@ub.d.umn.edu.
 	* config/amix.mh (NAT_FILE):  Add, set to nm-sysv4.h.
 	* config/amix.mh (NATDEPFILES):  Add.

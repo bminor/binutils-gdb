@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #ifdef __STDC__		/* Forward decls for prototypes */
 struct value;
+struct objfile;
 /* enum exp_opcode;	ANSI's `wisdom' didn't include forward enum decls. */
 #endif
 

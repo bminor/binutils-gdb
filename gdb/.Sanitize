@@ -16,7 +16,7 @@
 Do-first:
 
 if ( echo $* | grep keep\-chill > /dev/null ) ; then
-	keep_these_too="ch-exp.y"
+	keep_these_too="ch-exp.y ch-lang.c ch-lang.h"
 fi
 
 # All files listed between the "Things-to-keep:" line and the
@@ -55,6 +55,8 @@ breakpoint.h
 buildsym.c
 buildsym.h
 c-exp.y
+c-lang.c
+c-lang.h
 call-cmds.h
 coffread.c
 command.c
@@ -129,6 +131,8 @@ kdb-start.c
 language.c
 language.h
 m2-exp.y
+m2-lang.c
+m2-lang.h
 m68k-pinsn.c
 m68k-stub.c
 m68k-tdep.c
@@ -391,6 +395,9 @@ else
 	    -e 's/ch-exp.y//g' \
 	    -e 's/ch-exp.tab.c//g' \
 	    -e 's/ch-exp.tab.o//g' \
+	    -e 's/ch-lang.h//g' \
+	    -e 's/ch-lang.c//g' \
+	    -e 's/ch-lang.o//g' \
 	    < Makefile.in > new
 	if [ -n "${safe}" -a ! -f .Recover/Makefile.in ] ; then
 		echo Caching Makefile.in in .Recover...
