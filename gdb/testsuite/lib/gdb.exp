@@ -23,10 +23,12 @@
 # need to be modified for any target, it can be done with a variable
 # or by passing arguments.
 
-# dejagnu latest-931018 doesn't like "transform gdb".
-#if ![info exists GDB] then {
-#    set GDB [transform gdb]
-#}
+global GDB
+if ![info exists GDB] then {
+    set GDB [transform gdb]
+}
+
+global GDBFLAGS
 if ![info exists GDBFLAGS] then {
     set GDBFLAGS ""
 }
@@ -56,16 +58,16 @@ proc gdb_unload {} {
     global prompt
     send "file\n"
     expect {
-	-re "No exec file now\.\r" { continue -expect }
-	-re "No symbol file now\.\r" { continue -expect }
-	-re "A program is being debugged already..*Kill it\? \(y or n\) $"\
+	-re "No exec file now.*\r" { exp_continue }
+	-re "No symbol file now.*\r" { exp_continue }
+	-re "A program is being debugged already..*Kill it.*y or n. $"\
 	    { send "y\n"
 		verbose "\t\tKilling previous program being debugged"
-	    continue -expect
+	    exp_continue
 	}
-	-re "Discard symbol table from .*\? \(y or n\) $" {
+	-re "Discard symbol table from .*y or n. $" {
 	    send "y\n"
-	    continue -expect
+	    exp_continue
 	}
 	-re "$prompt $" {}
 	timeout {
@@ -86,19 +88,19 @@ proc delete_breakpoints {} {
 
     send "delete breakpoints\n"
     expect {
-	-re "Delete all breakpoints\? \(y or n\) $" {
+	-re "Delete all breakpoints.*y or n. $" {
 	    send "y\n"
-	    continue -expect
+	    exp_continue
 	}
 	-re "y\r\n$prompt $" {}
-	-re ".*$prompt $" { fail "Delete all breakpoints" ; return }
-	timeout { fail "Delete all breakpoints (timeout)" ; return }
+	-re ".*$prompt $" { perror "Delete all breakpoints" ; return }
+	timeout { error "Delete all breakpoints (timeout)" ; return }
     }
     send "info breakpoints\n"
     expect {
 	-re "No breakpoints or watchpoints..*$prompt $" {}
-	-re ".*$prompt $" { fail "breakpoints not deleted" ; return }
-	timeout { fail "info breakpoints (timeout)" ; return }
+	-re ".*$prompt $" { perror "breakpoints not deleted" ; return }
+	timeout { error "info breakpoints (timeout)" ; return }
     }
 }
 
@@ -117,7 +119,7 @@ proc runto { function } {
 
     send "delete\n"
     expect {
-	-re "Delete all breakpoints\? \(y or n\) $" {
+	-re "delete.*Delete all breakpoints.*y or n. $" {
 	    send "y\n"
 	    expect {
 		-re "$prompt $" {}
@@ -141,9 +143,9 @@ proc runto { function } {
     # the "at foo.c:36" output we get with -g.
     # the "in func" output we get without -g.
     expect {
-	-re "The program .* has been started already.* \(y or n\) $" {
+	-re "The program .* has been started already.*y or n. $" {
 	    send "y\n"
-	    continue -expect
+	    exp_continue
 	}
 	-re "Starting.*Break.* at .*:$decimal.*$prompt $" { return 1 }
 	-re "Breakpoint \[0-9\]*, \[0-9xa-f\]* in $function.*$prompt $" { 
@@ -191,7 +193,7 @@ proc gdb_test { args } {
     set errmess ""
     # trap the send so any problems don't crash things
     catch "send \"$command\n\"" errmess
-    if [string match "write\(spawn_id=\[0-9\]+\):" $errmess] then {
+    if [string match "write.spawn_id=\[0-9\]+.:" $errmess] then {
 	perror "sent \"$command\" got expect error \"$errmess\""
 	catch "close"
 	gdb_start
@@ -231,7 +233,7 @@ proc gdb_test { args } {
 	    send "\n"
 	    perror "Window too small."
 	}
-	-re "\(y or n\) " {
+	-re "\[(\]+y or n\[)\]+ " {
 	    send "n\n"
 	    perror "Got interactive prompt."
 	}
@@ -310,7 +312,7 @@ proc default_gdb_exit {} {
 	    timeout { 
 		verbose "Got TIMEOUT from $GDB" 2
 	    }
-	    -re "The program is running.  Quit anyway.*(y or n) $" {
+	    -re "The program is running.  Quit anyway.*y or n. $" {
 		send "y\n"
 		verbose "Killing program being debugged" 2
 	    }
@@ -334,6 +336,7 @@ proc gdb_file_cmd { arg } {
     global loadfile
     global GDB
     global prompt
+    global spawn_id
 
     send "file $arg\n"
     expect {
@@ -345,12 +348,12 @@ proc gdb_file_cmd { arg } {
             perror "$arg wasn't compiled with \"-g\""
             return -1
         }
-        -re "A program is being debugged already..*Kill it\? \(y or n\) $" {
+        -re "A program is being debugged already.*Kill it.*y or n. $" {
             send "y\n"
                 verbose "\t\tKilling previous program being debugged"
-            continue -expect
+            exp_continue
         }
-        -re "Load new symbol table from.*\? \(y or n\) $" {
+        -re "Load new symbol table from \".*\".*y or n. $" {
             send "y\n"
             expect {
                 -re "Reading symbols from.*done.*$prompt $" {
@@ -373,7 +376,7 @@ oaded."
             return -1
             }
         timeout {
-            error "couldn't load $arg into $GDB (timed out)."
+            perror "couldn't load $arg into $GDB (timed out)."
             return -1
         }
         eof {
@@ -386,5 +389,15 @@ oaded."
     }
 }
 
+#
+# FIXME: this is a copy of the new library procedure, but it's here too
+# till the new dejagnu gets installed everywhere. I'd hate to break the
+# gdb tests suite.
+#
+if [string match "" [info proc exp_continue]] {
+    proc exp_continue { } {
+	continue -expect
+    }
+}
 
 
