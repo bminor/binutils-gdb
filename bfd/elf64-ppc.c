@@ -2541,6 +2541,12 @@ struct plt_entry
    && (RTYPE) != R_PPC64_REL64			\
    && (RTYPE) != R_PPC64_REL30)
 
+/* If ELIMINATE_COPY_RELOCS is non-zero, the linker will try to avoid
+   copying dynamic variables from a shared lib into an app's dynbss
+   section, and instead use a dynamic relocation to point into the
+   shared lib.  */
+#define ELIMINATE_COPY_RELOCS 1
+
 /* Section name for stubs is the associated section name plus this
    string.  */
 #define STUB_SUFFIX ".stub"
@@ -3875,6 +3881,10 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	  if (NO_OPD_RELOCS && opd_sym_map != NULL)
 	    break;
 
+	  /* Don't propagate relocs that the dynamic linker won't relocate.  */
+	  if ((sec->flags & SEC_ALLOC) == 0)
+	    break;
+
 	  /* If we are creating a shared library, and this is a reloc
 	     against a global symbol, or a non PC relative reloc
 	     against a local symbol, then we need to copy the reloc
@@ -3887,7 +3897,7 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	     later (it is never cleared).  In case of a weak definition,
 	     DEF_REGULAR may be cleared later by a strong definition in
 	     a shared library.  We account for that possibility below by
-	     storing information in the relocs_copied field of the hash
+	     storing information in the dyn_relocs field of the hash
 	     table entry.  A similar situation occurs when creating
 	     shared libraries and symbol visibility changes render the
 	     symbol local.
@@ -3898,15 +3908,14 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	     symbol.  */
 	dodyn:
 	  if ((info->shared
-	       && (sec->flags & SEC_ALLOC) != 0
 	       && (MUST_BE_DYN_RELOC (r_type)
 		   || (h != NULL
 		       && (! info->symbolic
 			   || h->root.type == bfd_link_hash_defweak
 			   || (h->elf_link_hash_flags
 			       & ELF_LINK_HASH_DEF_REGULAR) == 0))))
-	      || (!info->shared
-		  && (sec->flags & SEC_ALLOC) != 0
+	      || (ELIMINATE_COPY_RELOCS
+		  && !info->shared
 		  && h != NULL
 		  && (h->root.type == bfd_link_hash_defweak
 		      || (h->elf_link_hash_flags
@@ -4470,8 +4479,6 @@ ppc64_elf_adjust_dynamic_symbol (info, h)
      struct elf_link_hash_entry *h;
 {
   struct ppc_link_hash_table *htab;
-  struct ppc_link_hash_entry * eh;
-  struct ppc_dyn_relocs *p;
   asection *s;
   unsigned int power_of_two;
 
@@ -4529,20 +4536,26 @@ ppc64_elf_adjust_dynamic_symbol (info, h)
   if ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0)
     return TRUE;
 
-  eh = (struct ppc_link_hash_entry *) h;
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+  if (ELIMINATE_COPY_RELOCS)
     {
-      s = p->sec->output_section;
-      if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	break;
-    }
+      struct ppc_link_hash_entry * eh;
+      struct ppc_dyn_relocs *p;
 
-  /* If we didn't find any dynamic relocs in read-only sections, then
-     we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
-  if (p == NULL)
-    {
-      h->elf_link_hash_flags &= ~ELF_LINK_NON_GOT_REF;
-      return TRUE;
+      eh = (struct ppc_link_hash_entry *) h;
+      for (p = eh->dyn_relocs; p != NULL; p = p->next)
+	{
+	  s = p->sec->output_section;
+	  if (s != NULL && (s->flags & SEC_READONLY) != 0)
+	    break;
+	}
+
+      /* If we didn't find any dynamic relocs in read-only sections, then
+	 we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
+      if (p == NULL)
+	{
+	  h->elf_link_hash_flags &= ~ELF_LINK_NON_GOT_REF;
+	  return TRUE;
+	}
     }
 
   /* We must allocate the symbol in our .dynbss section, which will
@@ -5438,9 +5451,9 @@ ppc64_elf_tls_optimize (obfd, info)
    will be called from elflink.h.  If elflink.h doesn't call our
    finish_dynamic_symbol routine, we'll need to do something about
    initializing any .plt and .got entries in ppc64_elf_relocate_section.  */
-#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, INFO, H) \
+#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, SHARED, H) \
   ((DYN)								\
-   && ((INFO)->shared							\
+   && ((SHARED)								\
        || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)	\
    && ((H)->dynindx != -1						\
        || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
@@ -5471,7 +5484,7 @@ allocate_dynrelocs (h, inf)
 
   if (htab->elf.dynamic_sections_created
       && h->dynindx != -1
-      && WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, h))
+      && WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info->shared, h))
     {
       struct plt_entry *pent;
       bfd_boolean doneone = FALSE;
@@ -5571,7 +5584,8 @@ allocate_dynrelocs (h, inf)
 	s->_raw_size
 	  += (gent->tls_type & eh->tls_mask & (TLS_GD | TLS_LD)) ? 16 : 8;
 	dyn = htab->elf.dynamic_sections_created;
-	if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h))
+	if (info->shared
+	    || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h))
 	  htab->srelgot->_raw_size
 	    += (gent->tls_type & eh->tls_mask & TLS_GD
 		? 2 * sizeof (Elf64_External_Rela)
@@ -5608,7 +5622,7 @@ allocate_dynrelocs (h, inf)
 	    }
 	}
     }
-  else
+  else if (ELIMINATE_COPY_RELOCS)
     {
       /* For the non-shared case, discard space for relocs against
 	 symbols which turn out to need copy relocs or are not
@@ -7565,7 +7579,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		if (h != NULL)
 		  {
 		    bfd_boolean dyn = htab->elf.dynamic_sections_created;
-		    if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h)
+		    if (!WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
 			|| (info->shared
 			    && (info->symbolic
 				|| h->dynindx == -1
@@ -7834,7 +7848,8 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		       && (! info->symbolic
 			   || (h->elf_link_hash_flags
 			       & ELF_LINK_HASH_DEF_REGULAR) == 0))))
-	      || (!info->shared
+	      || (ELIMINATE_COPY_RELOCS
+		  && !info->shared
 		  && h != NULL
 		  && h->dynindx != -1
 		  && (h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0

@@ -1,5 +1,14 @@
 2003-02-19  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (ELIMINATE_COPY_RELOCS): Define.
+	(ppc64_elf_check_relocs): Use it.  Correct comment.  Move SEC_ALLOC
+	test.
+	(ppc64_elf_adjust_dynamic_symbol): Use ELIMINATE_COPY_RELOCS.
+	(WILL_CALL_FINISH_DYNAMIC_SYMBOL): Pass SHARED instead of INFO.
+	(allocate_dynrelocs): Adjust WILL_CALL_FINISH_DYNAMIC_SYMBOL uses,
+	and optimize.  Use ELIMINATE_COPY_RELOCS.
+	(ppc64_elf_relocate_section): Likewise.
+
 	* elf32-ppc.c (struct ppc_elf_dyn_relocs): Add pc_count field.
 	(ppc_elf_copy_indirect_symbol): Copy pc_count field.
 	(ELIMINATE_COPY_RELOCS): Define.
