@@ -338,10 +338,14 @@ allocate_objfile (bfd *abfd, int flags)
   /* Initialize the section indexes for this objfile, so that we can
      later detect if they are used w/o being properly assigned to. */
 
-    objfile->sect_index_text = -1;
-    objfile->sect_index_data = -1;
-    objfile->sect_index_bss = -1;
-    objfile->sect_index_rodata = -1;
+  objfile->sect_index_text = -1;
+  objfile->sect_index_data = -1;
+  objfile->sect_index_bss = -1;
+  objfile->sect_index_rodata = -1;
+
+  /* We don't yet have a C++-specific namespace symtab.  */
+
+  objfile->cp_namespace_symtab = NULL;
 
   /* Add this file onto the tail of the linked list of other such files. */
 

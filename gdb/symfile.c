@@ -2632,9 +2632,21 @@ start_psymtab_common (struct objfile *objfile,
 }
 
 /* Add a symbol with a long value to a psymtab.
-   Since one arg is a struct, we pass in a ptr and deref it (sigh).  */
+   Since one arg is a struct, we pass in a ptr and deref it (sigh).  
+   Return the partial symbol that has been added.  */
 
-void
+/* NOTE: carlton/2003-09-11: The reason why we return the partial
+   symbol is so that callers can get access to the symbol's demangled
+   name, which they don't have any cheap way to determine otherwise.
+   (Currenly, dwarf2read.c is the only file who uses that information,
+   though it's possible that other readers might in the future.)
+   Elena wasn't thrilled about that, and I don't blame her, but we
+   couldn't come up with a better way to get that information.  If
+   it's needed in other situations, we could consider breaking up
+   SYMBOL_SET_NAMES to provide access to the demangled name lookup
+   cache.  */
+
+const struct partial_symbol *
 add_psymbol_to_list (char *name, int namelength, domain_enum domain,
 		     enum address_class class,
 		     struct psymbol_allocation_list *list, long val,	/* Value as a long */
@@ -2677,6 +2689,8 @@ add_psymbol_to_list (char *name, int namelength, domain_enum domain,
     }
   *list->next++ = psym;
   OBJSTAT (objfile, n_psyms++);
+
+  return psym;
 }
 
 /* Add a symbol with a long value to a psymtab. This differs from

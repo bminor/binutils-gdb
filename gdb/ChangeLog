@@ -1,3 +1,51 @@
+2003-09-11  David Carlton  <carlton@kealia.com>
+
+	* gdbtypes.h: Add TYPE_CODE_NAMESPACE.
+	* gdbtypes.c (init_type): Handle TYPE_CODE_NAMESPACE.
+	(recursive_dump_type): Ditto.
+	* printcmd.c (print_formatted): Ditto.
+	* typeprint.c (print_type_scalar): Ditto.
+	* c-typeprint.c (c_type_print_varspec_prefix): Ditto.
+	(c_type_print_varspec_suffix, c_type_print_base): Ditto.
+	* cp-support.h: Declare cp_check_possible_namespace_symbols,
+	maint_cplus_cmd_list.
+	* cp-support.c: Make maint_cplus_cmd_list extern.
+	* cp-namespace.c: Include objfiles.h, gdbtypes.h, dictionary.h,
+	command.h.
+	(lookup_symbol_file): Look in possible namespace blocks when
+	appropriate.
+	(initialize_namespace_symtab): New.
+	(get_possible_namespace_block, free_namespace_block)
+	(check_possible_namespace_symbols)
+	(check_possible_namespace_symbols_loop)
+	(check_one_possible_namespace_symbol)
+	(lookup_possible_namespace_symbol, maintenance_cplus_namespace)
+	(_initialize_cp_namespace): Ditto.
+	* block.h: Declare allocate_block.
+	* block.c (allocate_block): New.
+	* jv-lang.c (get_java_class_symtab): Allocate blocks via
+	allocate_block.
+	* symfile.h: Update declaration of add_psymbol_to_list.
+	* symfile.c (add_psymbol_to_list): Return the partial symbol in
+	question.
+	* dwarf2read.c (dwarf2_build_psymtabs_hard): Add argument to
+	scan_partial_symbols_call.
+	(scan_partial_symbols): Add NAMESPACE argument; update calls to
+	helper functions.
+	(add_partial_symbol): If necessary, scan mangled names for names
+	of namespaces.
+	(add_partial_namespace): Add NAMESPACE argument; generate partial
+	symbols associated  to namespaces.
+	(add_partial_enumeration): Add NAMESPACE argument.
+	(new_symbol): Allow namespace syms.
+	(read_namespace): Generate namespace syms.
+	* objfiles.h: Add opaque declaration of struct symtab.
+	(struct objfile): Add cp_namespace_symtab member.
+	* objfiles.c (allocate_objfile): Set
+	objfile->cp_namespace_symtab.
+	* Makefile.in (cp-namespace.o): Depend on objfiles_h, gdbtypes_h,
+	dictionary_h, command_h.
+
 2003-09-11  Andrew Cagney  <cagney@redhat.com>
 
 	* rs6000-tdep.c (rs6000_push_dummy_call): Use

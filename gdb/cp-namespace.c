@@ -27,6 +27,10 @@
 #include "symfile.h"
 #include "gdb_assert.h"
 #include "block.h"
+#include "objfiles.h"
+#include "gdbtypes.h"
+#include "dictionary.h"
+#include "command.h"
 
 /* When set, the file that we're processing seems to have debugging
    info for C++ namespaces, so cp-namespace.c shouldn't try to guess
@@ -69,6 +73,26 @@ static struct symbol *lookup_symbol_file (const char *name,
 					  const domain_enum domain,
 					  struct symtab **symtab,
 					  int anonymous_namespace);
+
+static void initialize_namespace_symtab (struct objfile *objfile);
+
+static struct block *get_possible_namespace_block (struct objfile *objfile);
+
+static void free_namespace_block (struct symtab *symtab);
+
+static int check_possible_namespace_symbols_loop (const char *name,
+						  int len,
+						  struct objfile *objfile);
+
+static int check_one_possible_namespace_symbol (const char *name,
+						int len,
+						struct objfile *objfile);
+
+static
+struct symbol *lookup_possible_namespace_symbol (const char *name,
+						 struct symtab **symtab);
+
+static void maintenance_cplus_namespace (char *args, int from_tty);
 
 /* Set up support for dealing with C++ namespace info in the current
    symtab.  */
@@ -453,13 +477,277 @@ lookup_symbol_file (const char *name,
       const struct block *global_block = block_global_block (block);
       
       if (global_block != NULL)
-	return lookup_symbol_aux_block (name, linkage_name, global_block,
-					domain, symtab);
-      else
-	return NULL;
+	sym = lookup_symbol_aux_block (name, linkage_name, global_block,
+				       domain, symtab);
     }
   else
     {
-      return lookup_symbol_global (name, linkage_name, domain, symtab);
+      sym = lookup_symbol_global (name, linkage_name, domain, symtab);
     }
+
+  if (sym != NULL)
+    return sym;
+
+  /* Now call "lookup_possible_namespace_symbol".  Symbols in here
+     claim to be associated to namespaces, but this claim might be
+     incorrect: the names in question might actually correspond to
+     classes instead of namespaces.  But if they correspond to
+     classes, then we should have found a match for them above.  So if
+     we find them now, they should be genuine.  */
+
+  /* FIXME: carlton/2003-06-12: This is a hack and should eventually
+     be deleted: see comments below.  */
+
+  if (domain == VAR_DOMAIN)
+    {
+      sym = lookup_possible_namespace_symbol (name, symtab);
+      if (sym != NULL)
+	return sym;
+    }
+
+  return NULL;
+}
+
+/* Now come functions for dealing with symbols associated to
+   namespaces.  (They're used to store the namespaces themselves, not
+   objects that live in the namespaces.)  These symbols come in two
+   varieties: if we run into a DW_TAG_namespace DIE, then we know that
+   we have a namespace, so dwarf2read.c creates a symbol for it just
+   like normal.  But, unfortunately, versions of GCC through at least
+   3.3 don't generate those DIE's.  Our solution is to try to guess
+   their existence by looking at demangled names.  This might cause us
+   to misidentify classes as namespaces, however.  So we put those
+   symbols in a special block (one per objfile), and we only search
+   that block as a last resort.  */
+
+/* FIXME: carlton/2003-06-12: Once versions of GCC that generate
+   DW_TAG_namespace have been out for a year or two, we should get rid
+   of all of this "possible namespace" nonsense.  */
+
+/* Allocate everything necessary for the possible namespace block
+   associated to OBJFILE.  */
+
+static void
+initialize_namespace_symtab (struct objfile *objfile)
+{
+  struct symtab *namespace_symtab;
+  struct blockvector *bv;
+  struct block *bl;
+
+  namespace_symtab = allocate_symtab ("<<C++-namespaces>>", objfile);
+  namespace_symtab->language = language_cplus;
+  namespace_symtab->free_code = free_nothing;
+  namespace_symtab->dirname = NULL;
+
+  bv = obstack_alloc (&objfile->symbol_obstack,
+		      sizeof (struct blockvector)
+		      + FIRST_LOCAL_BLOCK * sizeof (struct block *));
+  BLOCKVECTOR_NBLOCKS (bv) = FIRST_LOCAL_BLOCK + 1;
+  BLOCKVECTOR (namespace_symtab) = bv;
+  
+  /* Allocate empty GLOBAL_BLOCK and STATIC_BLOCK. */
+
+  bl = allocate_block (&objfile->symbol_obstack);
+  BLOCK_DICT (bl) = dict_create_linear (&objfile->symbol_obstack,
+					NULL);
+  BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = bl;
+  bl = allocate_block (&objfile->symbol_obstack);
+  BLOCK_DICT (bl) = dict_create_linear (&objfile->symbol_obstack,
+					NULL);
+  BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK) = bl;
+
+  /* Allocate the possible namespace block; we put it where the first
+     local block will live, though I don't think there's any need to
+     pretend that it's actually a local block (e.g. by setting
+     BLOCK_SUPERBLOCK appropriately).  We don't use the global or
+     static block because we don't want it searched during the normal
+     search of all global/static blocks in lookup_symbol: we only want
+     it used as a last resort.  */
+
+  /* NOTE: carlton/2003-09-11: I considered not associating the fake
+     symbols to a block/symtab at all.  But that would cause problems
+     with lookup_symbol's SYMTAB argument and with block_found, so
+     having a symtab/block for this purpose seems like the best
+     solution for now.  */
+
+  bl = allocate_block (&objfile->symbol_obstack);
+  BLOCK_DICT (bl) = dict_create_hashed_expandable ();
+  BLOCKVECTOR_BLOCK (bv, FIRST_LOCAL_BLOCK) = bl;
+
+  namespace_symtab->free_func = free_namespace_block;
+
+  objfile->cp_namespace_symtab = namespace_symtab;
+}
+
+/* Locate the possible namespace block associated to OBJFILE,
+   allocating it if necessary.  */
+
+static struct block *
+get_possible_namespace_block (struct objfile *objfile)
+{
+  if (objfile->cp_namespace_symtab == NULL)
+    initialize_namespace_symtab (objfile);
+
+  return BLOCKVECTOR_BLOCK (BLOCKVECTOR (objfile->cp_namespace_symtab),
+			    FIRST_LOCAL_BLOCK);
+}
+
+/* Free the dictionary associated to the possible namespace block.  */
+
+static void
+free_namespace_block (struct symtab *symtab)
+{
+  struct block *possible_namespace_block;
+
+  possible_namespace_block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab),
+						FIRST_LOCAL_BLOCK);
+  gdb_assert (possible_namespace_block != NULL);
+  dict_free (BLOCK_DICT (possible_namespace_block));
+}
+
+/* Ensure that there are symbols in the possible namespace block
+   associated to OBJFILE for all initial substrings of NAME that look
+   like namespaces or classes.  NAME should end in a member variable:
+   it shouldn't consist solely of namespaces.  */
+
+void
+cp_check_possible_namespace_symbols (const char *name, struct objfile *objfile)
+{
+  check_possible_namespace_symbols_loop (name,
+					 cp_find_first_component (name),
+					 objfile);
+}
+
+/* This is a helper loop for cp_check_possible_namespace_symbols; it
+   ensures that there are symbols in the possible namespace block
+   associated to OBJFILE for all namespaces that are initial
+   substrings of NAME of length at least LEN.  It returns 1 if a
+   previous loop had already created the shortest such symbol and 0
+   otherwise.
+
+   This function assumes that if there is already a symbol associated
+   to a substring of NAME of a given length, then there are already
+   symbols associated to all substrings of NAME whose length is less
+   than that length.  So if cp_check_possible_namespace_symbols has
+   been called once with argument "A::B::C::member", then that will
+   create symbols "A", "A::B", and "A::B::C".  If it is then later
+   called with argument "A::B::D::member", then the new call will
+   generate a new symbol for "A::B::D", but once it sees that "A::B"
+   has already been created, it doesn't bother checking to see if "A"
+   has also been created.  */
+
+static int
+check_possible_namespace_symbols_loop (const char *name, int len,
+				       struct objfile *objfile)
+{
+  if (name[len] == ':')
+    {
+      int done;
+      int next_len = len + 2;
+
+      next_len += cp_find_first_component (name + next_len);
+      done = check_possible_namespace_symbols_loop (name, next_len,
+						    objfile);
+
+      if (!done)
+	done = check_one_possible_namespace_symbol (name, len, objfile);
+
+      return done;
+    }
+  else
+    return 0;
+}
+
+/* Check to see if there's already a possible namespace symbol in
+   OBJFILE whose name is the initial substring of NAME of length LEN.
+   If not, create one and return 0; otherwise, return 1.  */
+
+static int
+check_one_possible_namespace_symbol (const char *name, int len,
+				     struct objfile *objfile)
+{
+  struct block *block = get_possible_namespace_block (objfile);
+  char *name_copy = obsavestring (name, len, &objfile->symbol_obstack);
+  struct symbol *sym = lookup_block_symbol (block, name_copy, NULL,
+					    VAR_DOMAIN);
+
+  if (sym == NULL)
+    {
+      struct type *type = init_type (TYPE_CODE_NAMESPACE, 0, 0,
+				     name_copy, objfile);
+      TYPE_TAG_NAME (type) = TYPE_NAME (type);
+
+      sym = obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
+      memset (sym, 0, sizeof (struct symbol));
+      SYMBOL_LANGUAGE (sym) = language_cplus;
+      SYMBOL_SET_NAMES (sym, name_copy, len, objfile);
+      SYMBOL_CLASS (sym) = LOC_TYPEDEF;
+      SYMBOL_TYPE (sym) = type;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+
+      dict_add_symbol (BLOCK_DICT (block), sym);
+
+      return 0;
+    }
+  else
+    {
+      obstack_free (&objfile->symbol_obstack, name_copy);
+
+      return 1;
+    }
+}
+
+/* Look for a symbol named NAME in all the possible namespace blocks.
+   If one is found, return it; if SYMTAB is non-NULL, set *SYMTAB to
+   equal the symtab where it was found.  */
+
+static struct symbol *
+lookup_possible_namespace_symbol (const char *name, struct symtab **symtab)
+{
+  struct objfile *objfile;
+
+  ALL_OBJFILES (objfile)
+    {
+      struct symbol *sym;
+
+      sym = lookup_block_symbol (get_possible_namespace_block (objfile),
+				 name, NULL, VAR_DOMAIN);
+
+      if (sym != NULL)
+	{
+	  if (symtab != NULL)
+	    *symtab = objfile->cp_namespace_symtab;
+
+	  return sym;
+	}
+    }
+
+  return NULL;
+}
+
+/* Print out all the possible namespace symbols.  */
+
+static void
+maintenance_cplus_namespace (char *args, int from_tty)
+{
+  struct objfile *objfile;
+  printf_unfiltered ("Possible namespaces:\n");
+  ALL_OBJFILES (objfile)
+    {
+      struct dict_iterator iter;
+      struct symbol *sym;
+
+      ALL_BLOCK_SYMBOLS (get_possible_namespace_block (objfile), iter, sym)
+	{
+	  printf_unfiltered ("%s\n", SYMBOL_PRINT_NAME (sym));
+	}
+    }
+}
+
+void
+_initialize_cp_namespace (void)
+{
+  add_cmd ("namespace", class_maintenance, maintenance_cplus_namespace,
+	   "Print the list of possible C++ namespaces.",
+	   &maint_cplus_cmd_list);
 }

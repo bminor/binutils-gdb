@@ -96,4 +96,11 @@ extern struct symbol *cp_lookup_symbol_namespace (const char *namespace,
 						  const domain_enum domain,
 						  struct symtab **symtab);
 
+extern void cp_check_possible_namespace_symbols (const char *name,
+						 struct objfile *objfile);
+
+/* The list of "maint cplus" commands.  */
+
+extern struct cmd_list_element *maint_cplus_cmd_list;
+
 #endif /* CP_SUPPORT_H */

@@ -28,6 +28,7 @@
 
 struct bcache;
 struct htab;
+struct symtab;
 
 /* This structure maintains information on a per-objfile basis about the
    "entry point" of the objfile, and the scope within which the entry point
@@ -443,6 +444,13 @@ struct objfile
     
     /* Place to stash various statistics about this objfile */
       OBJSTATS;
+
+    /* A symtab that the C++ code uses to stash special symbols
+       associated to namespaces.  */
+
+    /* FIXME/carlton-2003-06-27: Delete this in a few years once
+       "possible namespace symbols" go away.  */
+    struct symtab *cp_namespace_symtab;
   };
 
 /* Defines for the objfile flag word. */

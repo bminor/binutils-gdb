@@ -171,4 +171,6 @@ extern const struct block *block_static_block (const struct block *block);
 
 extern const struct block *block_global_block (const struct block *block);
 
+extern struct block *allocate_block (struct obstack *obstack);
+
 #endif /* BLOCK_H */

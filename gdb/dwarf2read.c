@@ -672,21 +672,25 @@ static void dwarf2_build_psymtabs_hard (struct objfile *, int);
 
 static char *scan_partial_symbols (char *, struct objfile *,
 				   CORE_ADDR *, CORE_ADDR *,
-				   const struct comp_unit_head *);
+				   const struct comp_unit_head *,
+				   const char *namespace);
 
 static void add_partial_symbol (struct partial_die_info *, struct objfile *,
-				const struct comp_unit_head *);
+				const struct comp_unit_head *,
+				const char *namespace);
 
 static char *add_partial_namespace (struct partial_die_info *pdi,
 				    char *info_ptr,
 				    struct objfile *objfile,
 				    CORE_ADDR *lowpc, CORE_ADDR *highpc,
-				    const struct comp_unit_head *cu_header);
+				    const struct comp_unit_head *cu_header,
+				    const char *namespace);
 
 static char *add_partial_enumeration (struct partial_die_info *enum_pdi,
 				      char *info_ptr,
 				      struct objfile *objfile,
-				      const struct comp_unit_head *cu_header);
+				      const struct comp_unit_head *cu_header,
+				      const char *namespace);
 
 static char *locate_pdi_sibling (struct partial_die_info *orig_pdi,
 				 char *info_ptr,
@@ -1341,7 +1345,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 	  highpc = ((CORE_ADDR) 0);
 
 	  info_ptr = scan_partial_symbols (info_ptr, objfile, &lowpc, &highpc,
-					   &cu_header);
+					   &cu_header, NULL);
 
 	  /* If we didn't find a lowpc, set it to highpc to avoid
 	     complaints from `maint check'.  */
@@ -1377,12 +1381,17 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 }
 
 /* Read in all interesting dies to the end of the compilation unit or
-   to the end of the current namespace.  */
+   to the end of the current namespace.  NAMESPACE is NULL if we
+   haven't yet encountered any DW_TAG_namespace entries; otherwise,
+   it's the name of the current namespace.  In particular, it's the
+   empty string if we're currently in the global namespace but have
+   previously encountered a DW_TAG_namespace.  */
 
 static char *
 scan_partial_symbols (char *info_ptr, struct objfile *objfile,
 		      CORE_ADDR *lowpc, CORE_ADDR *highpc,
-		      const struct comp_unit_head *cu_header)
+		      const struct comp_unit_head *cu_header,
+		      const char *namespace)
 {
   bfd *abfd = objfile->obfd;
   struct partial_die_info pdi;
@@ -1421,7 +1430,7 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
 		    }
 		  if (!pdi.is_declaration)
 		    {
-		      add_partial_symbol (&pdi, objfile, cu_header);
+		      add_partial_symbol (&pdi, objfile, cu_header, namespace);
 		    }
 		}
 	      break;
@@ -1432,25 +1441,32 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
 	    case DW_TAG_structure_type:
 	      if (!pdi.is_declaration)
 		{
-		  add_partial_symbol (&pdi, objfile, cu_header);
+		  add_partial_symbol (&pdi, objfile, cu_header, namespace);
 		}
 	      break;
 	    case DW_TAG_enumeration_type:
 	      if (!pdi.is_declaration)
 		{
 		  info_ptr = add_partial_enumeration (&pdi, info_ptr,
-						      objfile, cu_header);
+						      objfile, cu_header,
+						      namespace);
 		  info_ptr_updated = 1;
 		}
 	      break;
 	    case DW_TAG_base_type:
 	      /* File scope base type definitions are added to the partial
 	         symbol table.  */
-	      add_partial_symbol (&pdi, objfile, cu_header);
+	      add_partial_symbol (&pdi, objfile, cu_header, namespace);
 	      break;
 	    case DW_TAG_namespace:
+	      /* We've hit a DW_TAG_namespace entry, so we know this
+		 file has been compiled using a compiler that
+		 generates them; update NAMESPACE to reflect that.  */
+	      if (namespace == NULL)
+		namespace = "";
 	      info_ptr = add_partial_namespace (&pdi, info_ptr, objfile,
-						lowpc, highpc, cu_header);
+						lowpc, highpc, cu_header,
+						namespace);
 	      info_ptr_updated = 1;
 	      break;
 	    default:
@@ -1478,9 +1494,11 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
 
 static void
 add_partial_symbol (struct partial_die_info *pdi, struct objfile *objfile,
-		    const struct comp_unit_head *cu_header)
+		    const struct comp_unit_head *cu_header,
+		    const char *namespace)
 {
   CORE_ADDR addr = 0;
+  const struct partial_symbol *psym = NULL;
 
   switch (pdi->tag)
     {
@@ -1489,19 +1507,21 @@ add_partial_symbol (struct partial_die_info *pdi, struct objfile *objfile,
 	{
 	  /*prim_record_minimal_symbol (pdi->name, pdi->lowpc + baseaddr,
 	     mst_text, objfile); */
-	  add_psymbol_to_list (pdi->name, strlen (pdi->name),
-			       VAR_DOMAIN, LOC_BLOCK,
-			       &objfile->global_psymbols,
-			    0, pdi->lowpc + baseaddr, cu_language, objfile);
+	  psym = add_psymbol_to_list (pdi->name, strlen (pdi->name),
+				      VAR_DOMAIN, LOC_BLOCK,
+				      &objfile->global_psymbols,
+				      0, pdi->lowpc + baseaddr,
+				      cu_language, objfile);
 	}
       else
 	{
 	  /*prim_record_minimal_symbol (pdi->name, pdi->lowpc + baseaddr,
 	     mst_file_text, objfile); */
-	  add_psymbol_to_list (pdi->name, strlen (pdi->name),
-			       VAR_DOMAIN, LOC_BLOCK,
-			       &objfile->static_psymbols,
-			    0, pdi->lowpc + baseaddr, cu_language, objfile);
+	  psym = add_psymbol_to_list (pdi->name, strlen (pdi->name),
+				      VAR_DOMAIN, LOC_BLOCK,
+				      &objfile->static_psymbols,
+				      0, pdi->lowpc + baseaddr,
+				      cu_language, objfile);
 	}
       break;
     case DW_TAG_variable:
@@ -1523,10 +1543,11 @@ add_partial_symbol (struct partial_die_info *pdi, struct objfile *objfile,
 	  if (pdi->locdesc)
 	    addr = decode_locdesc (pdi->locdesc, objfile, cu_header);
 	  if (pdi->locdesc || pdi->has_type)
-	    add_psymbol_to_list (pdi->name, strlen (pdi->name),
-				 VAR_DOMAIN, LOC_STATIC,
-				 &objfile->global_psymbols,
-				 0, addr + baseaddr, cu_language, objfile);
+	    psym = add_psymbol_to_list (pdi->name, strlen (pdi->name),
+					VAR_DOMAIN, LOC_STATIC,
+					&objfile->global_psymbols,
+					0, addr + baseaddr,
+					cu_language, objfile);
 	}
       else
 	{
@@ -1536,10 +1557,11 @@ add_partial_symbol (struct partial_die_info *pdi, struct objfile *objfile,
 	  addr = decode_locdesc (pdi->locdesc, objfile, cu_header);
 	  /*prim_record_minimal_symbol (pdi->name, addr + baseaddr,
 	     mst_file_data, objfile); */
-	  add_psymbol_to_list (pdi->name, strlen (pdi->name),
-			       VAR_DOMAIN, LOC_STATIC,
-			       &objfile->static_psymbols,
-			       0, addr + baseaddr, cu_language, objfile);
+	  psym = add_psymbol_to_list (pdi->name, strlen (pdi->name),
+				      VAR_DOMAIN, LOC_STATIC,
+				      &objfile->static_psymbols,
+				      0, addr + baseaddr,
+				      cu_language, objfile);
 	}
       break;
     case DW_TAG_typedef:
@@ -1580,22 +1602,60 @@ add_partial_symbol (struct partial_die_info *pdi, struct objfile *objfile,
     default:
       break;
     }
+
+  /* Check to see if we should scan the name for possible namespace
+     info.  Only do this if this is C++, if we don't have namespace
+     debugging info in the file, if the psym is of an appropriate type
+     (otherwise we'll have psym == NULL), and if we actually had a
+     mangled name to begin with.  */
+
+  if (cu_language == language_cplus
+      && namespace == NULL
+      && psym != NULL
+      && SYMBOL_CPLUS_DEMANGLED_NAME (psym) != NULL)
+    cp_check_possible_namespace_symbols (SYMBOL_CPLUS_DEMANGLED_NAME (psym),
+					 objfile);
 }
 
-/* Read a partial die corresponding to a namespace.  For now, we don't
-   do anything with the fact that we're in a namespace; we just read
-   the symbols inside of it.  */
+/* Read a partial die corresponding to a namespace; also, add a symbol
+   corresponding to that namespace to the symbol table.  NAMESPACE is
+   the name of the enclosing namespace.  */
 
 static char *
 add_partial_namespace (struct partial_die_info *pdi, char *info_ptr,
 		       struct objfile *objfile,
 		       CORE_ADDR *lowpc, CORE_ADDR *highpc,
-		       const struct comp_unit_head *cu_header)
+		       const struct comp_unit_head *cu_header,
+		       const char *namespace)
 {
+  /* Calculate the full name of the namespace that we just entered.  */
+
+  const char *new_name = pdi->name;
+  char *full_name;
+
+  if (new_name == NULL)
+    new_name = "(anonymous namespace)";
+  full_name = alloca (strlen (namespace) + 2 + strlen (new_name) + 1);
+  strcpy (full_name, namespace);
+  if (*namespace != '\0')
+    strcat (full_name, "::");
+  strcat (full_name, new_name);
+
+  /* FIXME: carlton/2003-06-27: Once we build qualified names for more
+     symbols than just namespaces, we should replace this by a call to
+     add_partial_symbol.  */
+
+  add_psymbol_to_list (full_name, strlen (full_name),
+		       VAR_DOMAIN, LOC_TYPEDEF,
+		       &objfile->global_psymbols,
+		       0, 0, cu_language, objfile);
+
+  /* Now scan partial symbols in that namespace.  */
+
   if (pdi->has_children)
     info_ptr = scan_partial_symbols (info_ptr, objfile,
 				     lowpc, highpc,
-				     cu_header);
+				     cu_header, full_name);
 
   return info_ptr;
 }
@@ -1605,13 +1665,14 @@ add_partial_namespace (struct partial_die_info *pdi, char *info_ptr,
 static char *
 add_partial_enumeration (struct partial_die_info *enum_pdi, char *info_ptr,
 			 struct objfile *objfile,
-			 const struct comp_unit_head *cu_header)
+			 const struct comp_unit_head *cu_header,
+			 const char *namespace)
 {
   bfd *abfd = objfile->obfd;
   struct partial_die_info pdi;
 
   if (enum_pdi->name != NULL)
-    add_partial_symbol (enum_pdi, objfile, cu_header);
+    add_partial_symbol (enum_pdi, objfile, cu_header, namespace);
   
   while (1)
     {
@@ -1621,7 +1682,7 @@ add_partial_enumeration (struct partial_die_info *enum_pdi, char *info_ptr,
       if (pdi.tag != DW_TAG_enumerator || pdi.name == NULL)
 	complaint (&symfile_complaints, "malformed enumerator DIE ignored");
       else
-	add_partial_symbol (&pdi, objfile, cu_header);
+	add_partial_symbol (&pdi, objfile, cu_header, namespace);
     }
 
   return info_ptr;
@@ -3314,13 +3375,28 @@ read_namespace (struct die_info *die, struct objfile *objfile,
       processing_current_namespace = temp_name;
     }
 
-  /* If it's an anonymous namespace that we're seeing for the first
-     time, add a using directive.  */
+  /* Add a symbol associated to this if we haven't seen the namespace
+     before.  Also, add a using directive if it's an anonymous
+     namespace.  */
 
-  if (is_anonymous && dwarf_attr (die, DW_AT_extension) == NULL)
-    cp_add_using_directive (processing_current_namespace,
-			    strlen (previous_namespace),
-			    strlen (processing_current_namespace));
+  if (dwarf2_extension (die) == NULL)
+    {
+      struct type *type;
+
+      /* FIXME: carlton/2003-06-27: Once GDB is more const-correct,
+	 this cast will hopefully become unnecessary.  */
+      type = init_type (TYPE_CODE_NAMESPACE, 0, 0,
+			(char *) processing_current_namespace,
+			objfile);
+      TYPE_TAG_NAME (type) = TYPE_NAME (type);
+
+      new_symbol (die, type, objfile, cu_header);
+
+      if (is_anonymous)
+	cp_add_using_directive (processing_current_namespace,
+				strlen (previous_namespace),
+				strlen (processing_current_namespace));
+    }
 
   if (die->has_children)
     {
@@ -5175,7 +5251,11 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
   struct attribute *attr2 = NULL;
   CORE_ADDR addr = 0;
 
-  name = dwarf2_linkage_name (die);
+  if (die->tag != DW_TAG_namespace)
+    name = dwarf2_linkage_name (die);
+  else
+    name = TYPE_NAME (type);
+
   if (name)
     {
       sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
@@ -5331,6 +5411,10 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 	      dwarf2_const_value (attr, sym, objfile, cu_header);
 	    }
 	  add_symbol_to_list (sym, list_in_scope);
+	  break;
+	case DW_TAG_namespace:
+	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
+	  add_symbol_to_list (sym, &global_symbols);
 	  break;
 	default:
 	  /* Not a tag we recognize.  Hopefully we aren't processing

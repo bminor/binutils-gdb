@@ -1,3 +1,9 @@
+2003-09-11  David Carlton  <carlton@kealia.com>
+
+	* gdb.c++/namespace.exp: Add tests for namespace types.
+	* gdb.c++/maint.exp (test_help): Test 'help maint cp namespace'.
+	(test_namespace): New.
+
 2003-09-11  Elena Zannoni  <ezannoni@redhat.com>
 
         * gdb.base/relocate.exp: Handle new gdb output at startup.

@@ -208,6 +208,8 @@ gdb_test "print cd" "\\$\[0-9\].* = 3"
 gdb_test "print 'E::cde'" "\\$\[0-9\].* = 5"
 gdb_test "print shadow" "\\$\[0-9\].* = 13"
 gdb_test "print cOtherFile" "\\$\[0-9\].* = 316"
+gdb_test "ptype C" "type = namespace C::C"
+gdb_test "ptype E" "type = namespace C::D::E"
 
 # Some anonymous namespace tests.
 

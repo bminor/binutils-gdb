@@ -55,7 +55,7 @@ static void overload_list_add_symbol (struct symbol *sym, char *oload_name);
 
 /* The list of "maint cplus" commands.  */
 
-static struct cmd_list_element *maint_cplus_cmd_list = NULL;
+struct cmd_list_element *maint_cplus_cmd_list = NULL;
 
 /* The actual commands.  */
 
