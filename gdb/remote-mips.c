@@ -498,11 +498,17 @@ mips_receive_header (hdr, pgarbage, ch, timeout)
 		 we can't deal with a QUIT out of target_wait.  */
 	      if (! mips_initializing || remote_debug > 0)
 		{
-		  if (ch < 0x20 && ch != '\n')
+		  /* Note that the host's idea of newline may not
+		     correspond to the target's idea, so recognize
+		     newline by its actual ASCII code, but write it
+		     out using the \n notation.  */
+		  if (ch < 0x20 && ch != '\012')
 		    {
 		      putchar_unfiltered ('^');
 		      putchar_unfiltered (ch + 0x40);
 		    }
+		  else if (ch == '\012')
+		    putchar_unfiltered ('\n');
 		  else
 		    putchar_unfiltered (ch);
 		  gdb_flush (gdb_stdout);

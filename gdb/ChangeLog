@@ -1,3 +1,9 @@
+Mon Jan  8 13:29:34 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* remote-mips.c (mips_receive_header): Recognize \012 instead
+	of \n, but write \n when program sends a \012.
+	* ser-mac.c (mac_input_buffer): Increase size of buffer.
+
 Mon Jan  8 12:00:40 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* infptrace.c (initialize_infptrace): Move function out of

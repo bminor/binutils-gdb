@@ -60,7 +60,7 @@ mac_open (scb, name)
   /* Alloc buffer space first - that way any allocation failures are
      intercepted before the serial driver gets involved. */
   if (mac_input_buffer == NULL)
-    mac_input_buffer = (char *) xmalloc (256);
+    mac_input_buffer = (char *) xmalloc (4096);
   /* Match on a name and open a port. */
   if (strcmp (name, "modem") == 0)
     {
@@ -101,7 +101,7 @@ mac_open (scb, name)
     }
   /* We got something open. */
   if (1 /* using custom buffer */)
-    SerSetBuf (input_refnum, mac_input_buffer, 256);
+    SerSetBuf (input_refnum, mac_input_buffer, 4096);
   /* Set to a GDB-preferred state. */
   SerReset (input_refnum,  stop10|noParity|data8|baud9600);
   SerReset (output_refnum, stop10|noParity|data8|baud9600);
