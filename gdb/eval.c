@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <stdio.h>
 #include "defs.h"
 #include "param.h"
 #include "symtab.h"
@@ -160,8 +161,11 @@ evaluate_subexp (expect_type, exp, pos, noside)
       tem = strlen (&exp->elts[pc + 2].string);
       (*pos) += 3 + ((tem + sizeof (union exp_element))
 		     / sizeof (union exp_element));
-      return value_static_field (exp->elts[pc + 1].type,
+      arg1 = value_static_field (exp->elts[pc + 1].type,
 				 &exp->elts[pc + 2].string, -1);
+      if (arg1 == NULL)
+	error ("There is no field named %s", &exp->elts[pc + 2].string);
+      return arg1;
 
     case OP_LONG:
       (*pos) += 3;
@@ -272,6 +276,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	  arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
 
 	  fnptr = (int) value_as_long (arg1);
+	  /* FIXME-tiemann: this is way obsolete.  */
 	  if (fnptr < 128)
 	    {
 	      struct type *basetype;
@@ -291,8 +296,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 			  struct type *fntype = lookup_pointer_type (TYPE_FN_FIELD_TYPE (f, j));
 
 			  if (TYPE_VPTR_FIELDNO (basetype) < 0)
-			    TYPE_VPTR_FIELDNO (basetype)
-			      = fill_in_vptr_fieldno (basetype);
+			    fill_in_vptr_fieldno (basetype);
 
 			  VALUE_TYPE (base) = basetype;
 			  vtbl = value_field (base, TYPE_VPTR_FIELDNO (basetype));
@@ -413,7 +417,8 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	goto nosideret;
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	return value_zero (lookup_struct_elt_type (VALUE_TYPE (arg1),
-						   &exp->elts[pc + 1].string),
+						   &exp->elts[pc + 1].string,
+						   1),
 			   lval_memory);
       else
 	{
@@ -431,7 +436,8 @@ evaluate_subexp (expect_type, exp, pos, noside)
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	return value_zero (lookup_struct_elt_type (TYPE_TARGET_TYPE
 						   (VALUE_TYPE (arg1)),
-						   &exp->elts[pc + 1].string),
+						   &exp->elts[pc + 1].string,
+						   1),
 			   lval_memory);
       else
 	{
@@ -725,11 +731,18 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	return value_neg (arg1);
 
     case UNOP_LOGNOT:
+      /* C++: check for and handle destructor names.  */
+      op = exp->elts[*pos].opcode;
+
+      /* FIXME-tiemann: this is a cop-out.  */
+      if (op == OP_SCOPE)
+	error ("destructor in eval");
+
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      if (unop_user_defined_p (op, arg1))
-	return value_x_unop (arg1, op);
+      if (unop_user_defined_p (UNOP_LOGNOT, arg1))
+	return value_x_unop (arg1, UNOP_LOGNOT);
       else
 	return value_lognot (arg1);
 
