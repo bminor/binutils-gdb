@@ -587,7 +587,7 @@ install-only:
 				$(datadir)/gdbtcl/images \
 				$(datadir)/gdbtcl/images2 ; \
 		    cd $(srcdir)/gdbtcl2 ; \
-		    for i in *.tcl images/*.gif images2/*.gif; \
+		    for i in *.tcl images/*.gif images2/*.gif tclIndex; \
 		      do \
 			$(INSTALL_DATA) $$i $(datadir)/gdbtcl/$$i ; \
 		      done ; \
