@@ -1,3 +1,7 @@
+2004-06-11  Andrew Cagney  <cagney@gnu.org>
+
+	* NEWS: Mention ISO-C fixes.
+
 2004-06-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* NEWS: Mention fix for PR gdb/1628.

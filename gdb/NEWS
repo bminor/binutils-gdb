@@ -3,6 +3,12 @@
 
 *** Changes in GDB 6.1.1:
 
+* Fixed ISO-C build problems
+
+The files bfd/elf-bfd.h, gdb/dictionary.c and gdb/types.c contained
+non ISO-C code that stopped them being built using a more strict ISO-C
+compiler (e.g., IBM's C compiler).
+
 * Fixed build problem on IRIX 5
 
 Due to header problems with <sys/proc.h>, the file gdb/proc-api.c
