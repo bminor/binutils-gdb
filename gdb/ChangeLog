@@ -1,5 +1,8 @@
 2004-01-18  Andrew Cagney  <cagney@redhat.com>
 
+	* mn10300-tdep.c (_initialize_mn10300_tdep): Call gdbarch_register
+	instead of register_gdbarch_init.
+
 	* remote-sds.c (tohex): Delete unused function.  Update copyright.
 	* xstormy16-tdep.c (xstormy16_register_virtual_size): Ditto.
 	* v850-tdep.c (v850_register_virtual_size): Ditto.

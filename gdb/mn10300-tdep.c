@@ -1208,6 +1208,5 @@ void
 _initialize_mn10300_tdep (void)
 {
 /*  printf("_initialize_mn10300_tdep\n"); */
-
-  register_gdbarch_init (bfd_arch_mn10300, mn10300_gdbarch_init);
+  gdbarch_register (bfd_arch_mn10300, mn10300_gdbarch_init, mn10300_dump_tdep);
 }
