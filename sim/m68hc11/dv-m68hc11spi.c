@@ -1,6 +1,6 @@
 /*  dv-m68hc11spi.c -- Simulation of the 68HC11 SPI
-    Copyright (C) 2000, 2002 Free Software Foundation, Inc.
-    Written by Stephane Carrez (stcarrez@worldnet.fr)
+    Copyright (C) 2000, 2002, 2003 Free Software Foundation, Inc.
+    Written by Stephane Carrez (stcarrez@nerim.fr)
     (From a driver model Contributed by Cygnus Solutions.)
 
     This file is part of the program GDB, the GNU debugger.
@@ -358,11 +358,11 @@ m68hc11spi_info (struct hw *me)
                      controller->tx_bit + 1);
       t = hw_event_remain_time (me, controller->spi_event);
       sim_io_printf (sd, "  SPI current bit-cycle finished in %s\n",
-		     cycle_to_string (cpu, t));
+		     cycle_to_string (cpu, t, PRINT_TIME | PRINT_CYCLE));
 
       t += (controller->tx_bit + 1) * 2 * controller->clock;
       sim_io_printf (sd, "  SPI operation finished in %s\n",
-		     cycle_to_string (cpu, t));
+		     cycle_to_string (cpu, t, PRINT_TIME | PRINT_CYCLE));
     }
 }
 

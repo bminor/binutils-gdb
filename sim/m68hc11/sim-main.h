@@ -200,6 +200,7 @@ struct _sim_cpu {
 
   /* The mode in which the CPU is configured (MODA and MODB pins).  */
   unsigned int          cpu_mode;
+  const char*           cpu_start_mode;
 
   /* The cpu being configured.  */
   enum cpu_type         cpu_type;
@@ -591,7 +592,9 @@ extern void sim_set_profile (int n);
 extern void sim_set_profile_size (int n);
 extern void sim_board_reset (SIM_DESC sd);
 
-extern const char *cycle_to_string (sim_cpu *cpu, signed64 t);
+#define PRINT_TIME  0x01
+#define PRINT_CYCLE 0x02
+extern const char *cycle_to_string (sim_cpu *cpu, signed64 t, int flags);
 
 #endif
 

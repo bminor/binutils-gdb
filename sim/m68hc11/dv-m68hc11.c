@@ -808,13 +808,15 @@ m68hc11_option_handler (SIM_DESC sd, sim_cpu *cpu,
                                "      %d       %d    %35.35s\n",
                                osc->name, freq,
                                cur_value, next_value,
-                               cycle_to_string (cpu, t));
+                               cycle_to_string (cpu, t,
+                                                PRINT_TIME | PRINT_CYCLE));
               else
                 sim_io_printf (sd, " %4.4s  %8.8s hz "
                                "      %d       %d    %35.35s\n",
                                osc->name, freq,
                                cur_value, next_value,
-                               cycle_to_string (cpu, t));
+                               cycle_to_string (cpu, t,
+                                                PRINT_TIME | PRINT_CYCLE));
             }
         }
       break;      
