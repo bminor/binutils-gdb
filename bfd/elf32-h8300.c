@@ -1010,6 +1010,7 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 	    if (value >= 0xffffff00u)
 	      {
 		unsigned char code;
+		unsigned char temp_code;
 
 		/* Note that we've changed the relocs, section contents,
 		   etc.  */
@@ -1024,18 +1025,29 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 		if (code != 0x6a)
 		  abort ();
 
-		code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
+		temp_code = code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
+		if ((temp_code & 0x10) != 0x10)
+		  temp_code &= 0xf0;
 
-		if ((code & 0xf0) == 0x00)
-		  bfd_put_8 (abfd,
-			     (code & 0xf) | 0x20,
-			     contents + irel->r_offset - 2);
-		else if ((code & 0xf0) == 0x80)
-		  bfd_put_8 (abfd,
-			     (code & 0xf) | 0x30,
-			     contents + irel->r_offset - 2);
-		else
-		  abort ();
+		switch (temp_code)
+		  {
+		  case 0x00:
+		    bfd_put_8 (abfd, (code & 0xf) | 0x20,
+			       contents + irel->r_offset - 2);
+		    break;
+		  case 0x80:
+		    bfd_put_8 (abfd, (code & 0xf) | 0x30,
+			       contents + irel->r_offset - 2);
+		    break;
+		  case 0x18:
+		    bfd_put_8 (abfd, 0x7f, contents + irel->r_offset - 2);
+		    break;
+		  case 0x10:
+		    bfd_put_8 (abfd, 0x7e, contents + irel->r_offset - 2);
+		    break;
+		  default:
+		    abort ();
+		  }
 
 		/* Fix the relocation's type.  */
 		irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
@@ -1066,6 +1078,7 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 	    if (value >= 0xffffff00u)
 	      {
 		unsigned char code;
+		unsigned char temp_code;
 
 		/* Note that we've changed the relocs, section contents,
 		   etc.  */
@@ -1080,9 +1093,12 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 		if (code != 0x6a)
 		  abort ();
 
-		code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
+		temp_code = code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
 
-		switch (code & 0xf0)
+		if ((temp_code & 0x30) != 0x30)
+		  temp_code &= 0xf0;
+
+		switch (temp_code)
 		  {
 		  case 0x20:
 		    bfd_put_8 (abfd, (code & 0xf) | 0x20,
@@ -1092,8 +1108,14 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 		    bfd_put_8 (abfd, (code & 0xf) | 0x30,
 			       contents + irel->r_offset - 2);
 		    break;
+		  case 0x38:
+		    bfd_put_8 (abfd, 0x7f, contents + irel->r_offset - 2);
+		    break;
+		  case 0x30:
+		    bfd_put_8 (abfd, 0x7e, contents + irel->r_offset - 2);
+		    break;
 		  default:
-		    abort ();
+		    abort();
 		  }
 
 		/* Fix the relocation's type.  */
@@ -1113,7 +1135,7 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 	      }
 	  }
 
-	/* FALLTHRU */
+	/* Fall through.  */
 
 	/* This is a 24/32bit absolute address in a "mov" insn, which may
 	   become a 16-bit absolute address if it is in the right range.  */

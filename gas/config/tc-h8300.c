@@ -1,6 +1,6 @@
 /* tc-h8300.c -- Assemble code for the Renesas H8/300
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000,
-   2001, 2002, 2003 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1578,9 +1578,23 @@ build_bytes (const struct h8_instruction *this_try, struct h8_op *operand)
   for (i = 0; i < this_try->length; i++)
     output[i] = (asnibbles[i * 2] << 4) | asnibbles[i * 2 + 1];
 
-  /* Note if this is a movb instruction -- there's a special relaxation
-     which only applies to them.  */
-  if (this_try->opcode->how == O (O_MOV, SB))
+  /* Note if this is a movb or a bit manipulation instruction
+     there is a special relaxation which only applies.  */
+  if (   this_try->opcode->how == O (O_MOV,   SB)
+      || this_try->opcode->how == O (O_BCLR,  SB)
+      || this_try->opcode->how == O (O_BAND,  SB)
+      || this_try->opcode->how == O (O_BIAND, SB)
+      || this_try->opcode->how == O (O_BILD,  SB)
+      || this_try->opcode->how == O (O_BIOR,  SB)
+      || this_try->opcode->how == O (O_BIST,  SB)
+      || this_try->opcode->how == O (O_BIXOR, SB)
+      || this_try->opcode->how == O (O_BLD,   SB)
+      || this_try->opcode->how == O (O_BNOT,  SB)
+      || this_try->opcode->how == O (O_BOR,   SB)
+      || this_try->opcode->how == O (O_BSET,  SB)
+      || this_try->opcode->how == O (O_BST,   SB)
+      || this_try->opcode->how == O (O_BTST,  SB)
+      || this_try->opcode->how == O (O_BXOR,  SB))
     movb = 1;
 
   /* Output any fixes.  */
