@@ -1,3 +1,19 @@
+Fri Jun  6 23:47:42 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* scripttempl/pe.sc: Add zeroes after .idata$3 to mark the end of
+	the import list.
+
+Thu May 29 13:13:22 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_section): Don't
+	crash if an output section has no BFD section.
+
+Fri May 23 15:23:25 1997  Fred Fish  <fnf@cygnus.com>
+
+	* lexsup.c (ld_options): Add entry for the new "task-link" option.
+	(parse_args): Handle the "task-link" option.
+	(OPTION_TASK_LINK): Add define.
+
 Wed May 21 17:44:15 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldmain.c (main): Correct check of fclose return value when
@@ -5,7 +21,7 @@ Wed May 21 17:44:15 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 Thu May 15 11:35:29 1997  Nick Clifton  <nickc@cygnus.com>
 
-	*  ldlang.c (lang_check):  Add test of the return value from the
+	* ldlang.c (lang_check): Add test of the return value from the
 	call to bfd_merge_private_bfd_data().
 
 Mon May 12 23:22:58 1997  Ian Lance Taylor  <ian@cygnus.com>
