@@ -484,6 +484,7 @@ static int pa_parse_nonneg_add_cmpltr PARAMS ((char **, int));
 static void pa_align PARAMS ((int));
 static void pa_block PARAMS ((int));
 static void pa_brtab PARAMS ((int));
+static void pa_try PARAMS ((int));
 static void pa_call PARAMS ((int));
 static void pa_call_args PARAMS ((struct call_desc *));
 static void pa_callinfo PARAMS ((int));
@@ -593,6 +594,7 @@ const pseudo_typeS md_pseudo_table[] =
      not the log2 of the requested alignment.  */
   {"align", pa_align, 8},
   {"begin_brtab", pa_brtab, 1},
+  {"begin_try", pa_try, 1},
   {"block", pa_block, 1},
   {"blockz", pa_block, 0},
   {"byte", pa_cons, 1},
@@ -605,6 +607,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"double", pa_float_cons, 'd'},
   {"end", pa_end, 0},
   {"end_brtab", pa_brtab, 0},
+  {"end_try", pa_try, 0},
   {"enter", pa_enter, 0},
   {"entry", pa_entry, 0},
   {"equ", pa_equ, 0},
@@ -964,6 +967,7 @@ static const struct fp_cond_map fp_cond_map[] =
 
 static const struct selector_entry selector_table[] =
 {
+  {"e", e_esel},
   {"f", e_fsel},
   {"l", e_lsel},
   {"ld", e_ldsel},
@@ -1257,7 +1261,8 @@ cons_fix_new_hppa (frag, where, size, exp)
   else
     rel_type = R_HPPA;
 
-  if (hppa_field_selector != e_psel && hppa_field_selector != e_fsel)
+  if (hppa_field_selector != e_psel && hppa_field_selector != e_fsel
+      && hppa_field_selector != e_esel)
     as_warn ("Invalid field selector.  Assuming F%%.");
 
   fix_new_hppa (frag, where, size,
@@ -2709,30 +2714,47 @@ tc_gen_reloc (section, fixp)
 	{
 	case R_COMP2:
 	  /* The only time we ever use a R_COMP2 fixup is for the difference
-	     of two symbols.  With that in mind we fill in all four
-	     relocs now and break out of the loop.  */
-	  assert (i == 1);
-	  relocs[0]->sym_ptr_ptr = &bfd_abs_symbol;
-	  relocs[0]->howto = bfd_reloc_type_lookup (stdoutput, *codes[0]);
-	  relocs[0]->address = fixp->fx_frag->fr_address + fixp->fx_where;
-	  relocs[0]->addend = 0;
-	  relocs[1]->sym_ptr_ptr = &fixp->fx_addsy->bsym;
-	  relocs[1]->howto = bfd_reloc_type_lookup (stdoutput, *codes[1]);
-	  relocs[1]->address = fixp->fx_frag->fr_address + fixp->fx_where;
-	  relocs[1]->addend = 0;
-	  relocs[2]->sym_ptr_ptr = &fixp->fx_subsy->bsym;
-	  relocs[2]->howto = bfd_reloc_type_lookup (stdoutput, *codes[2]);
-	  relocs[2]->address = fixp->fx_frag->fr_address + fixp->fx_where;
-	  relocs[2]->addend = 0;
-	  relocs[3]->sym_ptr_ptr = &bfd_abs_symbol;
-	  relocs[3]->howto = bfd_reloc_type_lookup (stdoutput, *codes[3]);
-	  relocs[3]->address = fixp->fx_frag->fr_address + fixp->fx_where;
-	  relocs[3]->addend = 0;
-	  relocs[4]->sym_ptr_ptr = &bfd_abs_symbol;
-	  relocs[4]->howto = bfd_reloc_type_lookup (stdoutput, *codes[4]);
-	  relocs[4]->address = fixp->fx_frag->fr_address + fixp->fx_where;
-	  relocs[4]->addend = 0;
-	  goto done;
+	     of two symbols, or for an E% selector in exception handling
+	     tables.  With that in mind we fill in all relocs here and break
+	     out of the loop.  */
+	  if (fixp->fx_subsy != NULL)
+	    {
+	      assert (i == 1);
+	      relocs[0]->sym_ptr_ptr = &bfd_abs_symbol;
+	      relocs[0]->howto = bfd_reloc_type_lookup (stdoutput, *codes[0]);
+	      relocs[0]->address = fixp->fx_frag->fr_address + fixp->fx_where;
+	      relocs[0]->addend = 0;
+	      relocs[1]->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+	      relocs[1]->howto = bfd_reloc_type_lookup (stdoutput, *codes[1]);
+	      relocs[1]->address = fixp->fx_frag->fr_address + fixp->fx_where;
+	      relocs[1]->addend = 0;
+	      relocs[2]->sym_ptr_ptr = &fixp->fx_subsy->bsym;
+	      relocs[2]->howto = bfd_reloc_type_lookup (stdoutput, *codes[2]);
+	      relocs[2]->address = fixp->fx_frag->fr_address + fixp->fx_where;
+	      relocs[2]->addend = 0;
+	      relocs[3]->sym_ptr_ptr = &bfd_abs_symbol;
+	      relocs[3]->howto = bfd_reloc_type_lookup (stdoutput, *codes[3]);
+	      relocs[3]->address = fixp->fx_frag->fr_address + fixp->fx_where;
+	      relocs[3]->addend = 0;
+	      relocs[4]->sym_ptr_ptr = &bfd_abs_symbol;
+	      relocs[4]->howto = bfd_reloc_type_lookup (stdoutput, *codes[4]);
+	      relocs[4]->address = fixp->fx_frag->fr_address + fixp->fx_where;
+	      relocs[4]->addend = 0;
+	      goto done;
+	    }
+	  else
+	    {
+	      assert (i == 0);
+	      relocs[0]->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+	      relocs[0]->howto = bfd_reloc_type_lookup (stdoutput, *codes[0]);
+	      relocs[0]->address = fixp->fx_frag->fr_address + fixp->fx_where;
+	      relocs[0]->addend = 0;
+	      relocs[1]->sym_ptr_ptr = &bfd_abs_symbol;
+	      relocs[1]->howto = bfd_reloc_type_lookup (stdoutput, *codes[1]);
+	      relocs[1]->address = fixp->fx_frag->fr_address + fixp->fx_where;
+	      relocs[1]->addend = 0;
+	      goto done;
+	    }
 	case R_PCREL_CALL:
 	case R_ABS_CALL:
 	  relocs[i]->addend = HPPA_R_ADDEND (hppa_fixp->fx_arg_reloc, 0);
@@ -2762,6 +2784,7 @@ tc_gen_reloc (section, fixp)
 	case R_RSEL:
 	case R_BEGIN_BRTAB:
 	case R_END_BRTAB:
+	case R_BEGIN_TRY:
 	case R_N0SEL:
 	case R_N1SEL:
 	  /* There is no symbol or addend associated with these fixups.  */
@@ -2769,6 +2792,7 @@ tc_gen_reloc (section, fixp)
 	  relocs[i]->addend = 0;
 	  break;
 
+	case R_END_TRY:
 	case R_ENTRY:
 	case R_EXIT:
 	  /* There is no symbol associated with these fixups.  */
@@ -2922,8 +2946,18 @@ md_apply_fix (fixP, valp)
   if (fixP->fx_r_type == R_HPPA_ENTRY
       || fixP->fx_r_type == R_HPPA_EXIT
       || fixP->fx_r_type == R_HPPA_BEGIN_BRTAB
-      || fixP->fx_r_type == R_HPPA_END_BRTAB)
+      || fixP->fx_r_type == R_HPPA_END_BRTAB
+      || fixP->fx_r_type == R_HPPA_BEGIN_TRY)
     return 1;
+
+  /* Disgusting.  We must set fx_offset ourselves -- R_HPPA_END_TRY
+     fixups are considered not adjustable, which in turn causes
+     adjust_reloc_syms to not set fx_offset.  Ugh.  */
+  if (fixP->fx_r_type == R_HPPA_END_TRY)
+    {
+      fixP->fx_offset = *valp;
+      return 1;
+    }
 #endif
 
   /* There should have been an HPPA specific fixup associated
@@ -2947,6 +2981,7 @@ md_apply_fix (fixP, valp)
 	  || hppa_fixP->fx_r_field == e_tsel
 	  || hppa_fixP->fx_r_field == e_rtsel
 	  || hppa_fixP->fx_r_field == e_ltsel
+	  || hppa_fixP->fx_r_field == e_esel
 #endif
 	  )
 	new_val = ((fmt == 12 || fmt == 17) ? 8 : 0);
@@ -4064,6 +4099,31 @@ pa_brtab (begin)
   fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
 		NULL, (offsetT) 0, NULL,
 		0, begin ? R_HPPA_BEGIN_BRTAB : R_HPPA_END_BRTAB,
+		e_fsel, 0, 0, NULL);
+#endif
+
+  demand_empty_rest_of_line ();
+}
+
+/* Handle a .begin_try and .end_try pseudo-op.  */
+
+static void
+pa_try (begin)
+     int begin;
+{
+#ifdef OBJ_SOM
+  expressionS exp;
+  char *where = frag_more (0);
+
+  if (! begin)
+    expression (&exp);
+
+  /* The TRY relocations are only availble in SOM (to denote
+     the beginning and end of exception handling regions).  */
+
+  fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
+		NULL, (offsetT) 0, begin ? NULL : &exp,
+		0, begin ? R_HPPA_BEGIN_TRY : R_HPPA_END_TRY,
 		e_fsel, 0, 0, NULL);
 #endif
 
@@ -6368,6 +6428,7 @@ hppa_fix_adjustable (fixp)
       || hppa_fix->fx_r_field == e_ltsel
       || hppa_fix->fx_r_field == e_rtsel
       || hppa_fix->fx_r_field == e_psel
+      || hppa_fix->fx_r_field == e_esel
       || hppa_fix->fx_r_field == e_rpsel
       || hppa_fix->fx_r_field == e_lpsel)
     return 0;
@@ -6399,6 +6460,8 @@ hppa_force_relocation (fixp)
   if (fixp->fx_r_type == R_HPPA_ENTRY || fixp->fx_r_type == R_HPPA_EXIT
       || fixp->fx_r_type == R_HPPA_BEGIN_BRTAB
       || fixp->fx_r_type == R_HPPA_END_BRTAB
+      || fixp->fx_r_type == R_HPPA_BEGIN_TRY
+      || fixp->fx_r_type == R_HPPA_END_TRY
       || (fixp->fx_addsy != NULL && fixp->fx_subsy != NULL
 	  && (hppa_fixp->segment->flags & SEC_CODE) != 0))
     return 1;

@@ -1,3 +1,14 @@
+Tue Jul 30 14:28:23 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (selector_table): Add 'E' selector.
+	(cons_fix_new_hppa): Don't coke on e_esel.
+	(tc_gen_reloc, SOM version): Handle R_COMP2 when used
+	to help generate exception handling tables.
+	(md_apply_fix): Don't try to apply fixups with an e_esel
+	selector.
+	(hppa_fix_adjustable): Fixups with e_esel selectors
+	are not adjustable.
+
 Tue Jul 30 15:51:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-sparc.c (md_pseudo_table): Add 2byte, 4byte, and 8byte
