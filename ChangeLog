@@ -1,3 +1,15 @@
+Thu Oct 20 19:26:56 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* configure: Since the "trap 0" handler will override the exit
+	status on many systems, only use it for "exit 1", and make it set
+	a non-zero exit status; reset it before "exit 0".  Also, check
+	exit status of config.sub, and error out if it failed.
+
+Wed Oct 19 18:49:55 1994  Rob Savoye  (rob@cygnus.com)
+
+	* Makefile.in: (ALL_TARGET_MODULES,INSTALL_TARGET_MODULES) Build
+	and install libgloss.
+
 Tue Oct 18 15:25:24 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* Makefile.in (all-binutils): Depend upon all-byacc.
