@@ -1,5 +1,5 @@
 /* Support for the generic parts of most COFF variants, for BFD.
-   Copyright 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
