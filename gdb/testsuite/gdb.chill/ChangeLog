@@ -1,3 +1,10 @@
+Sat Dec 30 15:31:59 1995  Fred Fish  <fnf@cygnus.com>
+
+	* tests2.exp: Setup_xfail "i*86-*-linux" and 
+	"mips-sgi-irix*" for "real write 4" and "real write 8".
+	Conditionalize both tests for system specific value
+	of "infinity" string.
+
 Fri Dec 29 10:46:09 1995  Fred Fish  <fnf@cygnus.com>
 
 	* builtins.exp (test_size):  Alpha seems to have long builtins.
