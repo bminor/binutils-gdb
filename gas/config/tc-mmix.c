@@ -67,7 +67,6 @@ static void mmix_handle_rest_of_empty_line PARAMS ((void));
 static void mmix_discard_rest_of_line PARAMS ((void));
 static void mmix_byte PARAMS ((void));
 static void mmix_cons PARAMS ((int));
-static void mmix_frob_local_reloc PARAMS ((bfd *, asection *, PTR));
 
 /* Continue the tradition of symbols.c; use control characters to enforce
    magic.  These are used when replacing e.g. 8F and 8B so we can handle
@@ -3757,50 +3756,6 @@ mmix_parse_predefined_name (name, expP)
   expP->X_op_symbol = NULL;
 
   return 1;
-}
-
-/* Worker for mmix_frob_file_before_adjust.  */
-
-static void
-mmix_frob_local_reloc (abfd, sec, xxx)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *sec;
-     PTR xxx ATTRIBUTE_UNUSED;
-{
-  segment_info_type *seginfo = seg_info (sec);
-  fixS *fixp;
-
-  if (seginfo == NULL)
-    return;
-
-  for (fixp = seginfo->fix_root; fixp; fixp = fixp->fx_next)
-    if (! fixp->fx_done && fixp->fx_addsy != NULL)
-      {
-	symbolS *sym = fixp->fx_addsy;
-	asection *section = S_GET_SEGMENT (sym);
-
-	if (section == reg_section
-	    && fixp->fx_r_type == BFD_RELOC_MMIX_LOCAL)
-	  {
-	    /* If the register is marked global, we don't need to replace
-	       with the *real* register section since that will be done
-	       when the symbol is changed.  */
-	    if (! S_IS_EXTERNAL (sym))
-	      /* If it's a local symbol, we replace it with an anonymous
-		 one with the same constant value.  */
-	      fixp->fx_addsy = expr_build_uconstant (S_GET_VALUE (sym));
-	  }
-      }
-}
-
-/* Change fixups for register symbols for BFD_MMIX_LOCAL to be for an
-   absolute symbol.  */
-
-void
-mmix_frob_file_before_adjust ()
-{
-  return;
-  bfd_map_over_sections (stdoutput, mmix_frob_local_reloc, (char *) 0);
 }
 
 /* Just check that we don't have a BSPEC/ESPEC pair active when changing

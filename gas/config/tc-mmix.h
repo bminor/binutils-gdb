@@ -199,9 +199,6 @@ extern void mmix_frob_file PARAMS ((void));
 struct mmix_symbol_gregs;
 #define TC_SYMFIELD_TYPE struct mmix_symbol_gregs *
 
-extern void mmix_frob_file_before_adjust PARAMS ((void));
-#define tc_frob_file_before_adjust mmix_frob_file_before_adjust
-
 extern void mmix_md_elf_section_change_hook PARAMS ((void));
 #define md_elf_section_change_hook mmix_md_elf_section_change_hook
 

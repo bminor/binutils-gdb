@@ -1,3 +1,11 @@
+2002-10-23  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* config/tc-mmix.h (tc_frob_file_before_adjust): Don't declare.
+	(tc_frob_file_before_adjust): Don't define.
+	* config/tc-mmix.c (mmix_frob_local_reloc): Remove unused
+	function.
+	(mmix_frob_file_before_adjust): Remove ineffective function.
+
 2002-10-23  Hans-Peter Nilsson  <hp@axis.com>
 
 	* config/tc-cris.c (SIMPLE_EXPR): New macro.
