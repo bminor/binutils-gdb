@@ -79,6 +79,14 @@ extern void dwarf2_frame_set_init_reg (struct gdbarch *gdbarch,
 				       void (*init_reg) (struct gdbarch *, int,
 					     struct dwarf2_frame_state_reg *));
 
+/* Set the architecture-specific signal trampoline recognition
+   function for GDBARCH to SIGNAL_FRAME_P.  */
+
+extern void
+  dwarf2_frame_set_signal_frame_p (struct gdbarch *gdbarch,
+				   int (*signal_frame_p) (struct gdbarch *,
+							  struct frame_info *));
+
 /* Return the frame unwind methods for the function that contains PC,
    or NULL if it can't be handled by DWARF CFI frame unwinder.  */
 

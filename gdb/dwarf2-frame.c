@@ -471,6 +471,10 @@ struct dwarf2_frame_ops
 {
   /* Pre-initialize the register state REG for register REGNUM.  */
   void (*init_reg) (struct gdbarch *, int, struct dwarf2_frame_state_reg *);
+
+  /* Check whether the frame preceding NEXT_FRAME will be a signal
+     trampoline.  */
+  int (*signal_frame_p) (struct gdbarch *, struct frame_info *);
 };
 
 /* Default architecture-specific register state initialization
@@ -546,6 +550,33 @@ dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
   struct dwarf2_frame_ops *ops = gdbarch_data (gdbarch, dwarf2_frame_data);
 
   ops->init_reg (gdbarch, regnum, reg);
+}
+
+/* Set the architecture-specific signal trampoline recognition
+   function for GDBARCH to SIGNAL_FRAME_P.  */
+
+void
+dwarf2_frame_set_signal_frame_p (struct gdbarch *gdbarch,
+				 int (*signal_frame_p) (struct gdbarch *,
+							struct frame_info *))
+{
+  struct dwarf2_frame_ops *ops = gdbarch_data (gdbarch, dwarf2_frame_data);
+
+  ops->signal_frame_p = signal_frame_p;
+}
+
+/* Query the architecture-specific signal frame recognizer for
+   NEXT_FRAME.  */
+
+static int
+dwarf2_frame_signal_frame_p (struct gdbarch *gdbarch,
+			     struct frame_info *next_frame)
+{
+  struct dwarf2_frame_ops *ops = gdbarch_data (gdbarch, dwarf2_frame_data);
+
+  if (ops->signal_frame_p == NULL)
+    return 0;
+  return ops->signal_frame_p (gdbarch, next_frame);
 }
 
 
@@ -845,6 +876,13 @@ static const struct frame_unwind dwarf2_frame_unwind =
   dwarf2_frame_prev_register
 };
 
+static const struct frame_unwind dwarf2_signal_frame_unwind =
+{
+  SIGTRAMP_FRAME,
+  dwarf2_frame_this_id,
+  dwarf2_frame_prev_register
+};
+
 const struct frame_unwind *
 dwarf2_frame_sniffer (struct frame_info *next_frame)
 {
@@ -852,10 +890,18 @@ dwarf2_frame_sniffer (struct frame_info *next_frame)
      function.  frame_pc_unwind(), for a no-return next function, can
      end up returning something past the end of this function's body.  */
   CORE_ADDR block_addr = frame_unwind_address_in_block (next_frame);
-  if (dwarf2_frame_find_fde (&block_addr))
-    return &dwarf2_frame_unwind;
+  if (!dwarf2_frame_find_fde (&block_addr))
+    return NULL;
 
-  return NULL;
+  /* On some targets, signal trampolines may have unwind information.
+     We need to recognize them so that we set the frame type
+     correctly.  */
+
+  if (dwarf2_frame_signal_frame_p (get_frame_arch (next_frame),
+				   next_frame))
+    return &dwarf2_signal_frame_unwind;
+
+  return &dwarf2_frame_unwind;
 }
 
 

@@ -1,3 +1,11 @@
+2004-11-07  Daniel Jacobowitz  <dan@debian.org>
+
+	* dwarf2-frame.c (struct dwarf2_frame_ops): Add signal_frame_p.
+	(dwarf2_frame_set_signal_frame_p, dwarf2_frame_signal_frame_p)
+	(dwarf2_signal_frame_unwind): New.
+	(dwarf2_frame_sniffer): Use dwarf2_frame_signal_frame_p.
+	* dwarf2-frame.h (dwarf2_frame_set_signal_frame_p): New prototype.
+
 2004-11-07  Mark Kettenis  <kettenis@gnu.org>
 
 	* Makefile.in (mips64obsd-tdep.o): Fix typo.
