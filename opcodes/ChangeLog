@@ -1,3 +1,10 @@
+start-sanitize-v850e
+Thu Oct  2 13:36:45 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* v850-dis.c (v850_sreg_names): Use symbolic names for higher
+	system registers.
+
+start-sanitize-v850e
 Wed Oct  1 16:58:54 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850-opc.c: Fix typo in comment.
