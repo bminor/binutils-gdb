@@ -119,6 +119,7 @@ lb.d
 lb.s
 ld-empic.d
 ld-ilocks.d
+ld-ilocks-addr32.d
 ld-pic.s
 ld-svr4pic.d
 ld-xgot.d
