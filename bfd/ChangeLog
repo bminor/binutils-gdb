@@ -1,3 +1,11 @@
+Fri Jun 19 19:00:45 1992  John Gilmore  (gnu at cygnus.com)
+
+	* elf.c (bfd_elf_find_section):  Mark as INTERNAL_FUNCTION so
+	its prototype will be included in libbfd.h.  Change result type
+	to struct * (rather than equivalent typedef) so it can be used in
+	the prototype, where they typedef won't be known.
+	* libbfd.h:  Updated version.
+
 Fri Jun 19 15:21:56 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in, archures.c, configure.in, cpu-hppa.c, hppa.c, libhppa.h,

@@ -327,10 +327,23 @@ static boolean EXFUN(elf_slurp_symbol_table, (bfd *, Elf_Internal_Shdr*));
 static void EXFUN(elf_info_to_howto, (bfd *, arelent *, Elf_Internal_Rela *));
 static char *EXFUN(elf_get_str_section, (bfd *, unsigned int));
      
-/* Helper functions for GDB to locate the string tables.  */
+/* 
+INTERNAL_FUNCTION
+	bfd_elf_find_section
 
-Elf_Internal_Shdr *
-DEFUN(bfd_elf_find_section, (abfd, name),	/* .stabstr offset */
+SYNOPSIS
+	struct elf_internal_shdr *bfd_elf_find_section (bfd *abfd, char *name);
+
+DESCRIPTION
+	Helper functions for GDB to locate the string tables.
+	Since BFD hides string tables from callers, GDB needs to use an
+	internal hook to find them.  Sun's .stabstr, in particular,
+	isn't even pointed to by the .stab section, so ordinary
+	mechanisms wouldn't work to find it, even if we had some.
+*/
+
+struct elf_internal_shdr *
+DEFUN(bfd_elf_find_section, (abfd, name),
       bfd		*abfd AND
       char		*name)
 {

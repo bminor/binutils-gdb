@@ -219,7 +219,8 @@ boolean EXFUN(bfd_generic_relax_section
     asymbol **symbols));
 bfd_byte *
 EXFUN(bfd_generic_get_relocated_section_contents, (bfd *abfd,
-    struct bfd_seclet_struct  *seclet)
+    struct bfd_seclet_struct  *seclet,
+    bfd_byte *data)
     
     );
 extern bfd_arch_info_type bfd_default_arch_struct;
@@ -232,3 +233,4 @@ CONST bfd_arch_info_type *EXFUN(bfd_default_compatible
     , (CONST bfd_arch_info_type *a,
     CONST bfd_arch_info_type *b));
 boolean EXFUN(bfd_default_scan, (CONST struct bfd_arch_info *, CONST char *));
+struct elf_internal_shdr *EXFUN(bfd_elf_find_section , (bfd *abfd, char *name));
