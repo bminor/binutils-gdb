@@ -1,3 +1,9 @@
+start-sanitize-beos
+Tue Jul 14 15:32:56 1998  Richard Henderson  <rth@cygnus.com>
+
+	* configure.in (i386-*-beos{pe,elf,}*): Recognize.
+
+end-sanitize-beos
 Tue Jul 14 12:33:44 1998  Chris Torek  <torek@bsdi.com>
 
 	* config/tc-sparc.c (log2): New static function.
