@@ -1,3 +1,16 @@
+Fri May 30 12:46:27 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* cofflink.c (coff_link_add_symbols): If PE file, don't subtract
+	section VMA.
+	(_bfd_coff_link_input_bfd): Separate section VMA handling for
+	input and output files.
+	(_bfd_coff_generic_relocate_section): Check whether input file,
+	not output file, is a PE file.
+
+Wed May 28 15:48:43 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* coff-arm.c: (coff_arm_bfd_set_private_flags): Make static.
+
 Wed May 28 16:16:04 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-i386.c (coff_i386_reloc): Don't just exit if we see an
