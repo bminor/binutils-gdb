@@ -19,9 +19,7 @@ SECTIONS
     *(.data)
     ${CONSTRUCTING+CONSTRUCTORS}
     ${RELOCATING+_edata  =  .;}
-  }
-  .bss ${RELOCATING+SIZEOF(.data) + ADDR(.data)} :
-  {
+
     ${RELOCATING+ __bss_start = .};
    *(.bss)
    *(COMMON)

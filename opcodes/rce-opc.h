@@ -28,7 +28,6 @@ rce_opcode_info rce_table[]={
 *****/
 { "tstne",	O1,	0x0080 },
 { "tstgt",	O1,	0x0090 },
-{ "tstlt",	O1,	0x00A0 },
 { "tstnbz",	O1,	0x00B0 },
 { "inct",	O1,	0x00C0 },
 { "incf",	O1,	0x00D0 },
