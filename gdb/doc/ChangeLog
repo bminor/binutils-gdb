@@ -1,3 +1,10 @@
+Mon Jan  3 17:23:07 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (String Field): Talk about defining several type
+	numbers at once.
+	Fix lint regarding changing node ELF Transformations to
+	ELF and SOM Transformations.
+
 Fri Dec 31 00:42:43 1993  John Gilmore  (gnu@cygnus.com)
 
 	* stabs.texinfo:  Insert Peter Kessler's name as inventor (I think).

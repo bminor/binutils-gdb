@@ -226,7 +226,9 @@ reference, referring directly to a type that has already been defined.
 The @samp{@var{type-number}=} form is a type definition, where the
 number represents a new type which is about to be defined.  The type
 definition may refer to other types by number, and those type numbers
-may be followed by @samp{=} and nested definitions.
+may be followed by @samp{=} and nested definitions.  Also, the Lucid
+compiler will repeat @samp{@var{type-number}=} more than once if it
+wants to define several type numbers at once.
 
 In a type definition, if the character that follows the equals sign is
 non-numeric then it is a @var{type-descriptor}, and tells what kind of
@@ -2135,7 +2137,7 @@ relocatable address and the linker turns it into an absolute address.
 @menu
 * Transformations On Static Variables::
 * Transformations On Global Variables::
-* ELF Transformations::	       In ELF, things are a bit different.
+* ELF and SOM Transformations::	       In ELF, things are a bit different.
 @end menu
 
 @node Transformations On Static Variables
@@ -3885,7 +3887,7 @@ correctly without having to touch the stabs section.  They are named
 @code{Bbss.bss} for the bss section, @code{Ddata.data} for the data
 section, and @code{Drodata.rodata} for the rodata section.  For the text
 section, there is no such symbol (but there should be, see below).  For
-an example of how these symbols work, @xref{ELF Transformations}.  GCC
+an example of how these symbols work, @xref{ELF and SOM Transformations}.  GCC
 does not provide these symbols; it instead relies on the stabs getting
 relocated.  Thus addresses which would normally be relative to
 @code{Bbss.bss}, etc., are already relocated.  The Sun linker provided
