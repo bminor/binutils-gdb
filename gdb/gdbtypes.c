@@ -78,6 +78,7 @@ struct type *builtin_type_v4_int32;
 struct type *builtin_type_v8_int16;
 struct type *builtin_type_v16_int8;
 /* 64 bit long vector types */
+struct type *builtin_type_v2_float;
 struct type *builtin_type_v2_int32;
 struct type *builtin_type_v4_int16;
 struct type *builtin_type_v8_int8;
@@ -3317,6 +3318,7 @@ build_gdbtypes (void)
   builtin_type_v8_int16 = init_vector_type (builtin_type_int16, 8);
   builtin_type_v16_int8 = init_vector_type (builtin_type_int8, 16);
   /* 64 bit vectors.  */
+  builtin_type_v2_float = init_vector_type (builtin_type_float, 2);
   builtin_type_v2_int32 = init_vector_type (builtin_type_int32, 2);
   builtin_type_v4_int16 = init_vector_type (builtin_type_int16, 4);
   builtin_type_v8_int8 = init_vector_type (builtin_type_int8, 8);
@@ -3415,6 +3417,7 @@ _initialize_gdbtypes (void)
   register_gdbarch_swap (&builtin_type_v4_int32, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v8_int16, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v16_int8, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v2_float, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v2_int32, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v8_int8, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v4_int16, sizeof (struct type *), NULL);
