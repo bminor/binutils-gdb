@@ -2,6 +2,23 @@ Tue Jul 12 21:27:05 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* config/ho-sysv.h (realloc): Declare.
 
+	* symbols.c (symbol_create): New function, most of the guts of the
+	old symbol_new function.
+	(symbol_new): Now just checks symbol_table_frozen, calls
+	symbol_create, and enters the symbol into the symbol table.
+	* subsegs.c (section_symbol): If EMIT_SECTION_SYMBOLS is not true,
+	and the symbol table is frozen, call symbol_create instead of
+	symbol_new.
+	* symbols.h (symbol_create, symbol_table_frozen): Declare.
+
+	* symbols.c (symbol_clear_list_pointers): Always a function now.
+	* struc-symbol.h (symbol_clear_list_pointers): Deleted macro
+	version.
+
+	* symbols.c (debug_verify_symchain): New macro, defined to be
+	verify_symbol_chain or a cast to void, depending on DEBUG_SYMS.
+	(many functions): Invoke debug_verify_symchain unconditionally.
+
 Tue Jul 12 12:06:42 1994  Kung Hsu  (kung@x1.cygnus.com)
 
 	* config/obj-ecoff.h: change calling interface of

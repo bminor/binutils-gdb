@@ -145,8 +145,7 @@ subseg_change (seg, subseg)
     if (! seginfo)
       {
 	seginfo = (segment_info_type *) xmalloc (sizeof (*seginfo));
-	if (! seginfo)
-	  abort ();
+	memset ((PTR) seginfo, 0, sizeof (*seginfo));
 	seginfo->fix_root = NULL;
 	seginfo->fix_tail = NULL;
 	seginfo->bfd_section = seg;
@@ -420,7 +419,7 @@ subseg_get (segname, force_new)
       if (secptr->output_section != secptr)
 	secptr->output_section = secptr;
       seginfo = (segment_info_type *) xmalloc (sizeof (*seginfo));
-      memset ((char *) seginfo, 0, sizeof(seginfo));
+      memset ((PTR) seginfo, 0, sizeof (*seginfo));
       seginfo->fix_root = NULL;
       seginfo->fix_tail = NULL;
       seginfo->bfd_section = secptr;
@@ -513,7 +512,18 @@ section_symbol (sec)
   s = symbol_find (sec->name);
   if (!s)
     {
-      s = symbol_new (sec->name, sec, 0, &zero_address_frag);
+#ifndef EMIT_SECTION_SYMBOLS
+#define EMIT_SECTION_SYMBOLS 1
+#endif
+
+      if (EMIT_SECTION_SYMBOLS
+#ifdef BFD_ASSEMBLER
+	  && symbol_table_frozen
+#endif
+	  )
+	s = symbol_new (sec->name, sec, 0, &zero_address_frag);
+      else
+	s = symbol_create (sec->name, sec, 0, &zero_address_frag);
       S_CLEAR_EXTERNAL (s);
 
       /* Use the BFD section symbol, if possible.  */
