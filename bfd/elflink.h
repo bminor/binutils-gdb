@@ -666,8 +666,13 @@ elf_link_add_object_symbols (abfd, info)
 	  if (dynamic && definition)
 	    {
 	      if (h->root.type == bfd_link_hash_defined
-		  || h->root.type == bfd_link_hash_defweak)
-		sec = bfd_und_section_ptr;
+		  || h->root.type == bfd_link_hash_defweak
+		  || (h->root.type == bfd_link_hash_common
+		      && bind == STB_WEAK))
+		{
+		  sec = bfd_und_section_ptr;
+		  definition = false;
+		}
 	    }
 
 	  /* Similarly, if we are not looking at a dynamic object, and
@@ -742,16 +747,27 @@ elf_link_add_object_symbols (abfd, info)
 	  int new_flag;
 
 	  /* Remember the symbol size and type.  */
-	  if (sym.st_size != 0)
+	  if (sym.st_size != 0
+	      && (definition || h->size == 0))
 	    {
-	      /* FIXME: We should probably somehow give a warning if
-		 the symbol size changes.  */
+	      if (h->size != 0 && h->size != sym.st_size)
+		(*_bfd_error_handler)
+		  ("Warning: size of symbol `%s' changed from %lu to %lu in %s",
+		   name, (unsigned long) h->size, (unsigned long) sym.st_size,
+		   bfd_get_filename (abfd));
+
 	      h->size = sym.st_size;
 	    }
-	  if (ELF_ST_TYPE (sym.st_info) != STT_NOTYPE)
+	  if (ELF_ST_TYPE (sym.st_info) != STT_NOTYPE
+	      && (definition || h->type == STT_NOTYPE))
 	    {
-	      /* FIXME: We should probably somehow give a warning if
-		 the symbol type changes.  */
+	      if (h->type != STT_NOTYPE
+		  && h->type != ELF_ST_TYPE (sym.st_info))
+		(*_bfd_error_handler)
+		  ("Warning: type of symbol `%s' changed from %d to %d in %s",
+		   name, h->type, ELF_ST_TYPE (sym.st_info),
+		   bfd_get_filename (abfd));
+
 	      h->type = ELF_ST_TYPE (sym.st_info);
 	    }
 

@@ -1,3 +1,10 @@
+Mon Oct  2 14:08:55 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_link_add_object_symbols): Don't let a weak
+	dynamic symbol override a common symbol.  Don't change the size or
+	type if they have been set and the new symbol is not a definition.
+	Warn if the size or type changes.
+
 Sun Oct  1 01:34:41 1995  Jeff Law  (law@hurl.cygnus.com
 
         * som.c (som_begin_writing): Don't write the symbol table or
