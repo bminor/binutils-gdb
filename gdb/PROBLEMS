@@ -23,6 +23,18 @@ Fortunately the ARM target, in the GDB's mainline sources, has been
 updated so people encountering problems should consider downloading a
 more current GDB (http://www.gnu.org/software/gdb/current).
 
+gdb/1516: [regression] local classes, gcc 2.95.3, dwarf-2
+
+With gcc 2.95.3 and the dwarf-2 debugging format, classes which are
+defined locally to a function include the demangled name of the function
+as part of their name.  For example, if a function "foobar" contains a
+local class definition "Local", gdb will say that the name of the class
+type is "foobar__Fi.0:Local".
+
+This applies only to classes where the class type is defined inside a
+function, not to variables defined with types that are defined somewhere
+outside any function (which most types are).
+
 gdb/1091: Constructor breakpoints ignored
 gdb/1193: g++ 3.3 creates multiple constructors: gdb 5.3 can't set breakpoints
 
