@@ -62,10 +62,10 @@ proc do_ble_relocation_test {} {
 }
 
 proc do_relocation_reduction_tests {} {
-    set testname "relocreduce.s: Test relocation reductions (part 2)"
+    set testname "reduce.s: Test relocation reductions (part 2)"
     set x 0
 
-    if [gas_test_old "relocreduce.s" "" "Relocation reductions (part1)"] then {
+    if [gas_test_old "reduce.s" "" "Relocation reductions (part1)"] then {
 	objdump_start_no_subdir "a.out" "-r"
 
 	# Check to make sure relocations involving procedure labels 
@@ -76,6 +76,38 @@ proc do_relocation_reduction_tests {} {
 		-re "^00000004\[^\n\]*PLABEL\[^\n\]*foo\[^\n\]*\n"
 		    { set x [expr $x+1] }
 		-re "^00000014\[^\n\]*PCREL\[^\n\]*foo\[^\n\]*\n"
+		    { set x [expr $x+1] }
+		-re "\[^\n\]*\n"		{ }
+		timeout				{ perror "timeout\n"; break }
+		eof				{ break }
+            }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    objdump_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==2] then { pass $testname } else { fail $testname }
+
+    set testname "reduce2.s: More relocation reduction tests (part 2)"
+    set x 0
+
+    if [gas_test_old "reduce2.s" "" "More relocatoin  reductions (part1)"] then {
+	objdump_start_no_subdir "a.out" "-r"
+
+	# Check to make sure DLT relative relocs are not reduced to sym+addend
+	# Doing so doesn't work as one might expect
+	while 1 {
+	    expect {
+		-re "^00000004\[^\n\]*DLT\[^\n\]*L.C0000\[^\n\]*\n"
+		    { set x [expr $x+1] }
+		-re "^0000001c\[^\n\]*DLT\[^\n\]*L.C0000\[^\n\]*\n"
+		    { set x [expr $x+1] }
+		-re "^00000030\[^\n\]*DLT\[^\n\]*L.C0001\[^\n\]*\n"
+		    { set x [expr $x+1] }
+		-re "^00000048\[^\n\]*DLT\[^\n\]*L.C0001\[^\n\]*\n"
 		    { set x [expr $x+1] }
 		-re "\[^\n\]*\n"		{ }
 		timeout				{ perror "timeout\n"; break }
@@ -366,8 +398,6 @@ proc do_round_mode_test {} {
 			{ set x [expr $x+1] }
 	            -re "^00000014\[^\n\]*R_R_MODE\[^\n\]*\n" 
 			{ fail $testname }
-	            -re "^00000018\[^\n\]*R_R_MODE\[^\n\]*\n"
-			{ set x [expr $x+1] }
 	            -re "^0000001c\[^\n\]*R_R_MODE\[^\n\]*\n" 
 			{ fail $testname }
 	            -re "\[^\n\]*\n"		{ }
@@ -385,7 +415,7 @@ proc do_round_mode_test {} {
 	if [istarget hppa*-*-*elf*] then {
 	    if [expr $x==8] then { pass $testname } else { fail $testname }
 	} else {
-	    if [expr $x==4] then { pass $testname } else { fail $testname }
+	    if [expr $x==3] then { pass $testname } else { fail $testname }
 	}
     }
 }
@@ -445,6 +475,34 @@ proc do_function_reloc_bug {} {
 
 }
 
+proc do_r_no_reloc {} {
+    set testname "r_no_reloc.s: Test for reloc bug in 4-byte R_NO_RELCOATION fixups (part 2)"
+    set x 0
+
+    if [gas_test_old "r_no_reloc.s" "" "Test for reloc bug in 4-byte R_NO_RELOCATION fixups (part 1)"] {
+	objdump_start_no_subdir "a.out" "-r"
+
+	# Make sure GAS generated a correct relocation for the reference.
+	while 1 {
+	    expect {
+	        -re "^000c0004\[^\n\]*PLABEL\[^\n]*g\[^\n\]*\n" 
+		    { set x [expr $x+1] }
+	        -re "\[^\n\]*\n"		{ }
+	        timeout				{ perror "timeout\n"; break }
+	        eof				{ break }
+            }
+	}
+
+	# This was intended to do any cleanup necessary.  It kinda looks like it
+	# isn't needed, but just in case, please keep it in for now.
+	objdump_finish
+
+	# Did we find what we were looking for?  If not, flunk it.
+	if [expr $x==1] then { pass $testname } else { fail $testname }
+
+    }
+}
+
 if [istarget hppa*-*-*] then {
     # Make sure we put the right relocation entry on a BLE instruction.
     do_ble_relocation_test
@@ -485,4 +543,8 @@ if [istarget hppa*-*-*] then {
     # Test for a bug found when a function was used in a non-branching
     # instruction *without* a plabel (for portable runtime model)
     do_function_reloc_bug
+
+    # Test for an off-by-one bug in the handling of 4-byte R_NO_RELOCATION
+    # fixups.
+    do_r_no_reloc
 }

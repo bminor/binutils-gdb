@@ -1,3 +1,15 @@
+Sun Oct 16 22:25:56 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/reloc/reloc.exp (r_no_reloc): Tweak output to match
+	current reality.
+
+Wed Sep 28 21:21:34 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/reloc/reduce.s: Renamed from relocreduce.s
+	* gas/hppa/reloc/reduce2.s: Renamed from relocreduce2.s
+	* gas/hppa/reloc/r_no_reloc.s: Renamed from r_no_relocbug.s
+	* gas/hppa/reloc/reloc.exp: Changed accordingly.
+
 Wed Sep 28 13:25:10 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* gas/mips/beq.d, gas/mips/beq.s: Test that unconditional branch
