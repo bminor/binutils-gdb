@@ -40,8 +40,8 @@ static void insert_operand_final
 
 static int insert_file PARAMS ((const char *));
 
-static int cur_pke_insn_length PARAMS ((void));
-static void install_pke_length PARAMS ((char *, int));
+static int cur_vif_insn_length PARAMS ((void));
+static void install_vif_length PARAMS ((char *, int));
 
 const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";
@@ -55,7 +55,7 @@ const char FLT_CHARS[] = "dD";
    be provided.  (e.g. mpg is followed by vu insns until a .EndMpg is
    seen).  */
 typedef enum {
-  ASM_INIT, ASM_MPG, ASM_DIRECT, ASM_UNPACK, ASM_GPUIF, ASM_VU
+  ASM_INIT, ASM_MPG, ASM_DIRECT, ASM_UNPACK, ASM_GIF, ASM_VU
 } asm_state;
 static asm_state cur_asm_state = ASM_INIT;
 
@@ -67,14 +67,14 @@ static char *cur_varlen_insn;
 /* The length value specified in the insn, or -1 if '*'.  */
 static int cur_varlen_value;
 
-/* Non-zero if packing pke instructions in dma tags.  */
-static int dma_pack_pke_p;
+/* Non-zero if packing vif instructions in dma tags.  */
+static int dma_pack_vif_p;
 
 /* Non-zero if dma insns are to be included in the output.
    This is the default, but writing "if (! no_dma)" is klunky.  */
 static int output_dma = 1;
-/* Non-zero if pke insns are to be included in the output.  */
-static int output_pke = 1;
+/* Non-zero if vif insns are to be included in the output.  */
+static int output_vif = 1;
 
 const char *md_shortopts = "";
 
@@ -82,8 +82,8 @@ struct option md_longopts[] =
 {
 #define OPTION_NO_DMA (OPTION_MD_BASE + 1)
   { "no-dma", no_argument, NULL, OPTION_NO_DMA },
-#define OPTION_NO_DMA_PKE (OPTION_NO_DMA + 1)
-  { "no-dma-pke", no_argument, NULL, OPTION_NO_DMA_PKE },
+#define OPTION_NO_DMA_VIF (OPTION_NO_DMA + 1)
+  { "no-dma-vif", no_argument, NULL, OPTION_NO_DMA_VIF },
 
   {NULL, no_argument, NULL, 0}
 };
@@ -99,9 +99,9 @@ md_parse_option (c, arg)
     case OPTION_NO_DMA :
       output_dma = 0;
       break;
-    case OPTION_NO_DMA_PKE :
+    case OPTION_NO_DMA_VIF :
       output_dma = 0;
-      output_pke = 0;
+      output_vif = 0;
       break;
     default :
       return 0;
@@ -116,7 +116,7 @@ md_show_usage (stream)
   fprintf (stream, "\
 DVP options:\n\
 -no-dma			do not include DMA instructions in the output\n\
--no-dma-pke		do not include DMA or PKE instructions in the output\n\
+-no-dma-vif		do not include DMA or VIF instructions in the output\n\
 ");
 } 
 
@@ -127,9 +127,9 @@ static segT prev_seg;
 static void s_dmadata PARAMS ((int));
 static void s_dmadata_implied PARAMS ((int));
 static void s_enddmadata PARAMS ((int));
-static void s_dmapackpke PARAMS ((int));
+static void s_dmapackvif PARAMS ((int));
 static void s_enddirect PARAMS ((int));
-static void s_endgpuif PARAMS ((int));
+static void s_endgif PARAMS ((int));
 static void s_endmpg PARAMS ((int));
 static void s_endunpack PARAMS ((int));
 static void s_state PARAMS ((int));
@@ -138,15 +138,15 @@ static void s_state PARAMS ((int));
 const pseudo_typeS md_pseudo_table[] =
 {
     { "dmadata", s_dmadata, 0 },
-    { "dmapackpke", s_dmapackpke, 0 },
+    { "dmapackvif", s_dmapackvif, 0 },
     { "enddirect", s_enddirect, 0 },
     { "enddmadata", s_enddmadata, 0 },
-    { "endgpuif", s_endgpuif, 0 },
+    { "endgif", s_endgif, 0 },
     { "endmpg", s_endmpg, 0 },
     { "endunpack", s_endunpack, 0 },
-    /* .vu,.gpuif added to simplify debugging */
+    /* .vu,.gif added to simplify debugging */
     { "vu", s_state, ASM_VU },
-    { "gpuif", s_state, ASM_GPUIF },
+    { "gif", s_state, ASM_GIF },
     { NULL, NULL, 0 }
 };
 
@@ -169,7 +169,7 @@ md_begin ()
   dvp_opcode_init_tables (0);
 
   cur_asm_state = ASM_INIT;
-  dma_pack_pke_p = 0;
+  dma_pack_vif_p = 0;
 }
 
 /* We need to keep a list of fixups.  We can't simply generate them as
@@ -198,8 +198,8 @@ static void decode_fixup_reloc_type PARAMS ((int, dvp_cpu *,
 					     const dvp_operand **));
 
 static void assemble_dma PARAMS ((char *));
-static void assemble_gpuif PARAMS ((char *));
-static void assemble_pke PARAMS ((char *));
+static void assemble_gif PARAMS ((char *));
+static void assemble_vif PARAMS ((char *));
 static void assemble_vu PARAMS ((char *));
 static const dvp_opcode * assemble_vu_insn PARAMS ((dvp_cpu,
 						    const dvp_opcode *,
@@ -225,10 +225,10 @@ md_assemble (str)
       if (strncasecmp (str, "dma", 3) == 0)
 	assemble_dma (str);
       else
-	assemble_pke (str);
+	assemble_vif (str);
     }
-  else if (cur_asm_state == ASM_GPUIF)
-    assemble_gpuif (str);
+  else if (cur_asm_state == ASM_GIF)
+    assemble_gif (str);
   else if (cur_asm_state == ASM_VU
 	   || cur_asm_state == ASM_MPG)
     assemble_vu (str);
@@ -249,7 +249,7 @@ assemble_dma (str)
     const dvp_opcode *opcode;
 
     /*
-    Fill the first two words with PKE NOPs.
+    Fill the first two words with VIF NOPs.
     They may be over-written later if DmaPackPke is on.
     initialize the remainder with zeros.
     */
@@ -267,7 +267,7 @@ assemble_dma (str)
     len = 4;
     f = frag_more( len * 4);
 
-    /* Write out the PKE / DMA instructions. */
+    /* Write out the VIF / DMA instructions. */
     for( i = 0; i < len; ++i)
 	md_number_to_chars( f + i * 4, insn_buf[i], 4);
 
@@ -291,8 +291,8 @@ assemble_dma (str)
 
 	op_type = fixups[i].opindex;
 	offset = fixups[i].offset;
-	reloc_type = encode_fixup_reloc_type (DVP_PKE, op_type);
-	operand = &pke_operands[op_type];
+	reloc_type = encode_fixup_reloc_type (DVP_VIF, op_type);
+	operand = &vif_operands[op_type];
 	fix_new_exp (frag_now, f + offset - frag_now->fr_literal, 4,
 		     &fixups[i].exp,
 		     (operand->flags & DVP_OPERAND_RELATIVE_BRANCH) != 0,
@@ -301,10 +301,10 @@ assemble_dma (str)
     }
 }
 
-/* Subroutine of md_assemble to assemble PKE instructions.  */
+/* Subroutine of md_assemble to assemble VIF instructions.  */
 
 static void
-assemble_pke (str)
+assemble_vif (str)
      char *str;
 {
   /* Space for the instruction.
@@ -318,24 +318,24 @@ assemble_pke (str)
   int i;
   const dvp_opcode *opcode;
 
-  opcode = assemble_one_insn (DVP_PKE,
-			      pke_opcode_lookup_asm (str), pke_operands,
+  opcode = assemble_one_insn (DVP_VIF,
+			      vif_opcode_lookup_asm (str), vif_operands,
 			      &str, insn_buf);
   if (opcode == NULL)
     return;
 
-  if (opcode->flags & PKE_OPCODE_LENVAR)
+  if (opcode->flags & VIF_OPCODE_LENVAR)
     len = 1; /* actual data follows later */
-  else if (opcode->flags & PKE_OPCODE_LEN2)
+  else if (opcode->flags & VIF_OPCODE_LEN2)
     len = 2;
-  else if (opcode->flags & PKE_OPCODE_LEN5)
+  else if (opcode->flags & VIF_OPCODE_LEN5)
     len = 5;
   else
     len = 1;
 
   /* We still have to switch modes (if mpg for example) so we can't exit
-     early if -no-pke.  */
-  if (output_pke)
+     early if -no-vif.  */
+  if (output_vif)
     {
       /* Reminder: it is important to fetch enough space in one call to
 	 `frag_more'.  We use (f - frag_now->fr_literal) to compute where
@@ -363,8 +363,8 @@ assemble_pke (str)
 
 	  op_type = fixups[i].opindex;
 	  offset = fixups[i].offset;
-	  reloc_type = encode_fixup_reloc_type (DVP_PKE, op_type);
-	  operand = &pke_operands[op_type];
+	  reloc_type = encode_fixup_reloc_type (DVP_VIF, op_type);
+	  operand = &vif_operands[op_type];
 	  fix_new_exp (frag_now, f + offset - frag_now->fr_literal, 4,
 		       &fixups[i].exp,
 		       (operand->flags & DVP_OPERAND_RELATIVE_BRANCH) != 0,
@@ -374,7 +374,7 @@ assemble_pke (str)
 
   /* Handle variable length insns.  */
 
-  if (opcode->flags & PKE_OPCODE_LENVAR)
+  if (opcode->flags & VIF_OPCODE_LENVAR)
     {
       /* Name of file to read data from.  */
       char *file;
@@ -383,14 +383,14 @@ assemble_pke (str)
 
       file = NULL;
       data_len = 0;
-      pke_get_var_data (&file, &data_len);
+      vif_get_var_data (&file, &data_len);
       if (file)
 	{
 	  int byte_len = insert_file (file);
-	  if (output_pke)
-	    install_pke_length (f, byte_len);
+	  if (output_vif)
+	    install_vif_length (f, byte_len);
 	  /* Update $.MpgLoc.  */
-	  pke_set_mpgloc (pke_get_mpgloc () + byte_len);
+	  vif_set_mpgloc (vif_get_mpgloc () + byte_len);
 	}
       else
 	{
@@ -401,27 +401,27 @@ assemble_pke (str)
 	  cur_varlen_frag = frag_now;
 	  cur_varlen_insn = f;
 	  cur_varlen_value = data_len;
-	  if (opcode->flags & PKE_OPCODE_MPG)
+	  if (opcode->flags & VIF_OPCODE_MPG)
 	    cur_asm_state = ASM_MPG;
-	  else if (opcode->flags & PKE_OPCODE_DIRECT)
+	  else if (opcode->flags & VIF_OPCODE_DIRECT)
 	    cur_asm_state = ASM_DIRECT;
-	  else if (opcode->flags & PKE_OPCODE_UNPACK)
+	  else if (opcode->flags & VIF_OPCODE_UNPACK)
 	    cur_asm_state = ASM_UNPACK;
 	}
     }
 }
 
-/* Subroutine of md_assemble to assemble GPUIF instructions.  */
+/* Subroutine of md_assemble to assemble GIF instructions.  */
 
 static void
-assemble_gpuif (str)
+assemble_gif (str)
      char *str;
 {
   DVP_INSN insn_buf[4];
   const dvp_opcode *opcode;
 
-  opcode = assemble_one_insn (DVP_GPUIF,
-			      gpuif_opcode_lookup_asm (str), gpuif_operands,
+  opcode = assemble_one_insn (DVP_GIF,
+			      gif_opcode_lookup_asm (str), gif_operands,
 			      &str, insn_buf);
   if (opcode == NULL)
     return;
@@ -869,8 +869,8 @@ decode_fixup_reloc_type (fixup_reloc, cpuP, operandP)
     case DVP_VUUP : *operandP = &vu_operands[opnum]; break;
     case DVP_VULO : *operandP = &vu_operands[opnum]; break;
     case DVP_DMA : *operandP = &dma_operands[opnum]; break;
-    case DVP_PKE : *operandP = &pke_operands[opnum]; break;
-    case DVP_GPUIF : *operandP = &gpuif_operands[opnum]; break;
+    case DVP_VIF : *operandP = &vif_operands[opnum]; break;
+    case DVP_GIF : *operandP = &gif_operands[opnum]; break;
     default : as_fatal ("bad fixup encoding");
     }
 }
@@ -1233,11 +1233,11 @@ parse_dma_ptr_autocount( opcode, operand, mods, insn_buf, pstr, errmsg)
     return retval;
 }
 
-/* Return length in bytes of the variable length PKE insn
+/* Return length in bytes of the variable length VIF insn
    currently being assembled.  */
 
 static int
-cur_pke_insn_length ()
+cur_vif_insn_length ()
 {
   int byte_len;
   fragS *f;
@@ -1256,11 +1256,11 @@ cur_pke_insn_length ()
   return byte_len;
 }
 
-/* Install length LEN, in bytes, in the pke insn at BUF.
+/* Install length LEN, in bytes, in the vif insn at BUF.
    The bytes in BUF are in target order.  */
 
 static void
-install_pke_length (buf, len)
+install_vif_length (buf, len)
      char *buf;
      int len;
 {
@@ -1292,7 +1292,7 @@ install_pke_length (buf, len)
       /* FIXME */
     }
   else
-    as_fatal ("bad call to install_pke_length");
+    as_fatal ("bad call to install_vif_length");
 }
 
 /* Insert a file into the output.
@@ -1363,6 +1363,20 @@ insert_operand (cpu, opcode, operand, mods, insn_buf, val, errmsg)
     }
   else
     {
+#if 0 /* FIXME: revisit */
+      /* We currently assume a field does not cross a word boundary.  */
+      int shift = ((mods & DVP_MOD_THIS_WORD)
+		   ? (operand->shift & 31)
+		   : operand->shift);
+      DVP_INSN *p = insn_buf + (shift / 32);
+      if (operand->bits == 32)
+	*p = val;
+      else
+	{
+	  shift = shift % 32;
+	  *p |= ((long) val & ((1 << operand->bits) - 1)) << shift;
+	}
+#else
       /* We currently assume a field does not cross a word boundary.  */
       if (operand->bits == 32)
 	insn_buf[ operand->word] = val;
@@ -1372,6 +1386,7 @@ insert_operand (cpu, opcode, operand, mods, insn_buf, val, errmsg)
 	  insn_buf[ operand->word] |= temp << operand->shift;
 	}
     }
+#endif
 }
 
 /* Insert an operand's final value into an instruction.
@@ -1529,10 +1544,10 @@ s_enddmadata( ignore)
 }
 
 static void
-s_dmapackpke( ignore)
+s_dmapackvif( ignore)
     int ignore;
 {
-    /* Syntax: .dmapackpke 0|1 */
+    /* Syntax: .dmapackvif 0|1 */
     struct symbol *label;		/* Points to symbol */
     char *name;				/* points to name of symbol */
 
@@ -1540,10 +1555,10 @@ s_dmapackpke( ignore)
     switch( *input_line_pointer++ )
     {
     case '0':
-	dma_pack_pke_p = 0;
+	dma_pack_vif_p = 0;
 	break;
     case '1':
-	dma_pack_pke_p = 1;
+	dma_pack_vif_p = 1;
 	break;
     default:
 	as_bad( "illegal argument to `.DmaPackPke'");
@@ -1563,12 +1578,12 @@ s_enddirect (ignore)
       return;
     }
 
-  byte_len = cur_pke_insn_length ();
+  byte_len = cur_vif_insn_length ();
   if (cur_varlen_value != -1
       && cur_varlen_value * 16 != byte_len)
     as_warn ("length in `direct' instruction does not match length of data");
-  if (output_pke)
-    install_pke_length (cur_varlen_insn, byte_len);
+  if (output_vif)
+    install_vif_length (cur_varlen_insn, byte_len);
 
   cur_asm_state = ASM_INIT;
 
@@ -1590,12 +1605,12 @@ s_endmpg (ignore)
       return;
     }
 
-  byte_len = cur_pke_insn_length ();
+  byte_len = cur_vif_insn_length ();
   if (cur_varlen_value != -1
       && cur_varlen_value * 8 != byte_len)
     as_warn ("length in `mpg' instruction does not match length of data");
-  if (output_pke)
-    install_pke_length (cur_varlen_insn, byte_len);
+  if (output_vif)
+    install_vif_length (cur_varlen_insn, byte_len);
 
   cur_asm_state = ASM_INIT;
 
@@ -1605,7 +1620,7 @@ s_endmpg (ignore)
   cur_varlen_value = 0;
 
   /* Update $.MpgLoc.  */
-  pke_set_mpgloc (pke_get_mpgloc () + byte_len);
+  vif_set_mpgloc (vif_get_mpgloc () + byte_len);
 }
 
 static void
@@ -1620,13 +1635,13 @@ s_endunpack (ignore)
       return;
     }
 
-  byte_len = cur_pke_insn_length ();
+  byte_len = cur_vif_insn_length ();
 #if 0 /* unpack doesn't support prespecifying a length */
   if (cur_varlen_value * 16 != bytelen)
     as_warn ("length in `direct' instruction does not match length of data");
 #endif
-  if (output_pke)
-    install_pke_length (cur_varlen_insn, byte_len);
+  if (output_vif)
+    install_vif_length (cur_varlen_insn, byte_len);
 
   cur_asm_state = ASM_INIT;
 
@@ -1636,7 +1651,7 @@ s_endunpack (ignore)
   cur_varlen_value = 0;
 
   /* Update $.UnpackLoc.  */
-  pke_set_unpackloc (pke_get_unpackloc () + byte_len);
+  vif_set_unpackloc (vif_get_unpackloc () + byte_len);
 }
 
 static void
@@ -1647,7 +1662,7 @@ s_state (state)
 }
 
 static void
-s_endgpuif (ignore)
+s_endgif (ignore)
      int ignore;
 {
 }
