@@ -1,4 +1,18 @@
+Wed Jun 21 16:35:55 1995  Fred Fish  <fnf@lisa.cygnus.com>
+
+	* gdb.base/return.exp:  Xfail `return double' test failure
+	on at least Solaris 2.3 and handle future/past versions on
+	a case by case basis as appropriate.  Also update message
+	to include i*86 failures.
+
 Wed May 24 07:10:10 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in: Change variable CFLAGS to TESTSUITE_CFLAGS.
+
+	* lib/gdb.exp: Fix comment which erroneously identified
+	gdb_file_cmd as gdb_load (the 19 May change was in fact to
+	gdb_file_cmd not gdb_load).
+	* config/unix-gdb.exp (gdb_load): Add "upvar timeout timeout".
 
 	* gdb.base/setvar.exp: Make test names consistent between pass and
 	fail cases.  Use gdb_test more.
