@@ -1517,6 +1517,8 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	link_info.combreloc = true;
       else if (strcmp (optarg, "nocombreloc") == 0)
 	link_info.combreloc = false;
+      else if (strcmp (optarg, "nocopyreloc") == 0)
+        link_info.nocopyreloc = true;
       /* What about the other Solaris -z options? FIXME.  */
       break;
 EOF

@@ -1,3 +1,7 @@
+2001-10-03  Vassili Karpov  <malc@pulsesoft.com>
+
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Handle nocopyreloc.
+
 2001-10-03  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* elf64-mips.c (elf_backend_may_use_rela_p): New define.

@@ -1,4 +1,7 @@
 -*- text -*-
+* Support for -z nocopyreloc in the x86 ELF linker, which disables
+  production of copy relocs.  Warning: using this option may result in
+  non-sharable applications.
 
 * Support for -z combreloc in the ELF linker, which puts dynamic
   relocations against the same symbol together, so that dynamic linker
