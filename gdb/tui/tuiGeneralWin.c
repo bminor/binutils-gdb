@@ -118,6 +118,8 @@ boxWin (TuiGenWinInfoPtr winInfo, int highlightFlag)
                tui_border_hline, tui_border_hline,
                tui_border_ulcorner, tui_border_urcorner,
                tui_border_llcorner, tui_border_lrcorner);
+      if (winInfo->title)
+        mvwaddstr (win, 0, 3, winInfo->title);
       wattroff (win, attrs);
     }
 }

@@ -430,19 +430,11 @@ tuiSetHasBreakAt (struct breakpoint *bp, TuiWinInfoPtr winInfo, int hasBreak)
 
       if (winInfo == srcWin)
 	{
-	  char *fileNameDisplayed = (char *) NULL;
+          TuiSourceInfoPtr src = &winInfo->detail.sourceInfo;
 
-	  if (((TuiWinElementPtr)
-	       locator->content[0])->whichElement.locator.fileName !=
-	      (char *) NULL)
-	    fileNameDisplayed = ((TuiWinElementPtr)
-			locator->content[0])->whichElement.locator.fileName;
-	  else if (current_source_symtab != (struct symtab *) NULL)
-	    fileNameDisplayed = current_source_symtab->filename;
-
-	  gotIt = (fileNameDisplayed != (char *) NULL &&
+	  gotIt = (src->filename != (char *) NULL &&
                    bp->source_file != NULL &&
-		   (strcmp (bp->source_file, fileNameDisplayed) == 0) &&
+		   (strcmp (bp->source_file, src->filename) == 0) &&
 		   content[i]->whichElement.source.lineOrAddr.lineNo ==
 		   bp->line_number);
 	}

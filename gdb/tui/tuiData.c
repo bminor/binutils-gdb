@@ -843,9 +843,8 @@ initGenericPart (TuiGenWinInfoPtr win)
   win->content = (OpaquePtr) NULL;
   win->contentInUse =
     win->isVisible = FALSE;
-
-  return;
-}				/* initGenericPart */
+  win->title = 0;
+}
 
 
 /*
@@ -914,6 +913,7 @@ initWinInfo (TuiWinInfoPtr winInfo)
       winInfo->detail.sourceInfo.hasLocator = FALSE;
       winInfo->detail.sourceInfo.horizontalOffset = 0;
       winInfo->detail.sourceInfo.startLineOrAddr.addr = 0;
+      winInfo->detail.sourceInfo.filename = 0;
       break;
     case DATA_WIN:
       winInfo->detail.dataDisplayInfo.dataContent = (TuiWinContent) NULL;
@@ -1040,18 +1040,12 @@ addContentElements (TuiGenWinInfoPtr winInfo, int numElements)
 }				/* addContentElements */
 
 
-/*
-   **  tuiDelWindow().
-   **     Delete all curses windows associated with winInfo, leaving everything
-   **     else in tact.
- */
+/* Delete all curses windows associated with winInfo, leaving everything
+   else intact.  */
 void
 tuiDelWindow (TuiWinInfoPtr winInfo)
 {
-  Opaque detail;
-  int i;
   TuiGenWinInfoPtr genericWin;
-
 
   switch (winInfo->generic.type)
     {
@@ -1064,6 +1058,11 @@ tuiDelWindow (TuiWinInfoPtr winInfo)
 	  genericWin->handle = (WINDOW *) NULL;
 	  genericWin->isVisible = FALSE;
 	}
+      if (winInfo->detail.sourceInfo.filename)
+        {
+          xfree (winInfo->detail.sourceInfo.filename);
+          winInfo->detail.sourceInfo.filename = 0;
+        }
       genericWin = winInfo->detail.sourceInfo.executionInfo;
       if (genericWin != (TuiGenWinInfoPtr) NULL)
 	{
@@ -1075,14 +1074,10 @@ tuiDelWindow (TuiWinInfoPtr winInfo)
     case DATA_WIN:
       if (winInfo->generic.content != (OpaquePtr) NULL)
 	{
-	  int i;
-
-	  tuiDelDataWindows (
-			      winInfo->detail.dataDisplayInfo.regsContent,
-			  winInfo->detail.dataDisplayInfo.regsContentCount);
-	  tuiDelDataWindows (
-			      winInfo->detail.dataDisplayInfo.dataContent,
-			  winInfo->detail.dataDisplayInfo.dataContentCount);
+	  tuiDelDataWindows (winInfo->detail.dataDisplayInfo.regsContent,
+                             winInfo->detail.dataDisplayInfo.regsContentCount);
+	  tuiDelDataWindows (winInfo->detail.dataDisplayInfo.dataContent,
+                             winInfo->detail.dataDisplayInfo.dataContentCount);
 	}
       break;
     default:
@@ -1094,9 +1089,7 @@ tuiDelWindow (TuiWinInfoPtr winInfo)
       winInfo->generic.handle = (WINDOW *) NULL;
       winInfo->generic.isVisible = FALSE;
     }
-
-  return;
-}				/* tuiDelWindow */
+}
 
 
 /*
@@ -1105,10 +1098,7 @@ tuiDelWindow (TuiWinInfoPtr winInfo)
 void
 freeWindow (TuiWinInfoPtr winInfo)
 {
-  Opaque detail;
-  int i;
   TuiGenWinInfoPtr genericWin;
-
 
   switch (winInfo->generic.type)
     {
@@ -1121,6 +1111,11 @@ freeWindow (TuiWinInfoPtr winInfo)
 	  genericWin->handle = (WINDOW *) NULL;
 	}
       freeWinContent (genericWin);
+      if (winInfo->detail.sourceInfo.filename)
+        {
+          xfree (winInfo->detail.sourceInfo.filename);
+          winInfo->detail.sourceInfo.filename = 0;
+        }
       genericWin = winInfo->detail.sourceInfo.executionInfo;
       if (genericWin != (TuiGenWinInfoPtr) NULL)
 	{
@@ -1161,10 +1156,10 @@ freeWindow (TuiWinInfoPtr winInfo)
       winInfo->generic.handle = (WINDOW *) NULL;
       freeWinContent (&winInfo->generic);
     }
+  if (winInfo->generic.title)
+    xfree (winInfo->generic.title);
   xfree (winInfo);
-
-  return;
-}				/* freeWindow */
+}
 
 
 /*

@@ -1,5 +1,18 @@
 2002-08-25  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* tuiSourceWin.c (tuiSetHasBreakAt): Use filename for breakpoint
+	comparison; cleanup.
+	* tuiSource.c (tuiSetSourceContent): Set window title and filename.
+	* tuiGeneralWin.c (boxWin): Print optional title on top of window.
+	* tuiData.h (TuiSourceInfo): Add filename member.
+	(TuiGenWinInfo): Add title member.
+	* tuiData.c (initGenericPart): Clear title.
+	(freeWindow): Free title and filename; remove unused locals.
+	(initWinInfo): Clear filename.
+	(tuiDelWindow): Free it; remove unused locals.
+
+2002-08-25  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tuiStack.h (tuiGetLocatorFilename): Don't declare.
 	(tuiUpdateLocatorDisplay): Likewise.
 	* tuiStack.c (tuiGetLocatorFilename): Remove.
