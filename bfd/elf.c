@@ -1193,7 +1193,7 @@ _bfd_elf_link_hash_copy_indirect (dir, ind)
 	| ELF_LINK_HASH_REF_REGULAR_NONWEAK
 	| ELF_LINK_NON_GOT_REF));
 
-  if (dir == ind->weakdef)
+  if (ind->root.type != bfd_link_hash_indirect)
     return;
 
   /* Copy over the global and procedure linkage table refcount entries.

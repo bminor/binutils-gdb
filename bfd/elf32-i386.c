@@ -644,7 +644,7 @@ elf_i386_copy_indirect_symbol (dir, ind)
 	  struct elf_i386_dyn_relocs **pp;
 	  struct elf_i386_dyn_relocs *p;
 
-	  if (dir != ind->weakdef)
+	  if (ind->root.type == bfd_link_hash_indirect)
 	    abort ();
 
 	  /* Add reloc counts against the weak sym to the strong sym

@@ -1,4 +1,14 @@
 2001-10-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (_bfd_elf_link_hash_copy_indirect): Test ind->root.type
+	rather than ind->weakdef.
+	* elf32-hppa.c (elf32_hppa_copy_indirect_symbol): Likewise.
+	* elf32-i386.c (elf_i386_copy_indirect_symbol): Likewise.
+	* elf32-mips.c (_bfd_mips_elf_copy_indirect_symbol): Likewise.
+	* elf64-ppc.c (ppc64_elf_copy_indirect_symbol): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_hash_copy_indirect): Likewise.
+
+2001-10-15  Alan Modra  <amodra@bigpond.net.au>
 	    H.J. Lu  <hjl@gnu.org>
 
 	* elf32-hppa.c (elf32_hppa_copy_indirect_symbol): Merge dyn_reloc

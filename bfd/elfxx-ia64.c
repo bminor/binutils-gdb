@@ -1524,7 +1524,7 @@ elfNN_ia64_hash_copy_indirect (xdir, xind)
         | ELF_LINK_HASH_REF_REGULAR
         | ELF_LINK_HASH_REF_REGULAR_NONWEAK));
 
-  if (xdir == xind->weakdef)
+  if (ind->root.root.type != bfd_link_hash_indirect)
     return;
 
   /* Copy over the got and plt data.  This would have been done

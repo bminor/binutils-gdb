@@ -8085,7 +8085,7 @@ _bfd_mips_elf_copy_indirect_symbol (dir, ind)
 
   _bfd_elf_link_hash_copy_indirect (dir, ind);
 
-  if (dir == ind->weakdef)
+  if (ind->root.type != bfd_link_hash_indirect)
     return;
 
   dirmips = (struct mips_elf_link_hash_entry *) dir;
