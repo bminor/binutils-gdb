@@ -1,3 +1,12 @@
+Fri Jul 24 13:00:29 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* m32r.c: Include cgen-mem.h.
+	* traps.c (m32r_trap): Tweak for -Wall.
+start-sanitize-m32rx
+	* m32rx.c: Include cgen-mem.h.
+	* semx.c: Regenerate, get -Wall cleanups.
+end-sanitize-m32rx
+
 Tue Jul 21 16:53:10 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cpu.h,extract.c: Regenerate.  pc-rel calcs done on f_dispNN now.
