@@ -1,5 +1,21 @@
 2004-09-30  Mark Kettenis  <kettenis@gnu.org>
 
+	* vaxbsd-nat.c: Include "target,h" and "inf-ptrace.h".
+	(vaxbsd_fetch_inferior_registers): Rename from
+	fetch_inferior_registers.  Make static.
+	(vaxbsd_store_inferior_registers): Rename from
+	store_inferior_registers.  Make static.
+	(_initialize_vaxbsd_nat): Construct and add target vector.
+	* config/vax/nbsdaout.mh (NATDEPFILES): Remove infptrace.o and
+	inftarg.o.  Add inf-child.o and inf-ptrace.o.
+	* config/vax/nbsdelf.mh (NATDEPFILES): Remove infptrace.o and
+	inftarg.o.  Add inf-child.o and inf-ptrace.o.
+	(NAT_FILE): Remove.
+	* config/vax/obsd.mh (NATDEPFILES): Remove infptrace.o and
+	inftarg.o.  Add inf-child.o and inf-ptrace.o.
+	(NAT_FILE): Remove.
+	* Makefile.in (vaxbsd-nat.o): Update dependencies.
+
 	* m88kbsd-nat.c: Include "target.h" and "inf-ptrace.h".
 	(m88kbsd_fetch_inferior_registers): Rename from
 	fetch_inferior_registers.  Make static.
