@@ -1514,12 +1514,6 @@ default_print_registers_info (struct gdbarch *gdbarch,
   const int numregs = NUM_REGS + NUM_PSEUDO_REGS;
   char buffer[MAX_REGISTER_SIZE];
 
-  if (DEPRECATED_DO_REGISTERS_INFO_P ())
-    {
-      DEPRECATED_DO_REGISTERS_INFO (regnum, print_all);
-      return;
-    }
-
   for (i = 0; i < numregs; i++)
     {
       /* Decide between printing all regs, non-float / vector regs, or

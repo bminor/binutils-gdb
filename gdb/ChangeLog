@@ -1,5 +1,21 @@
 2004-08-02  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbarch.sh (deprecated_target_read_fp)
+	(deprecated_frame_locals_address, deprecated_frame_args_address)
+	(deprecated_frame_chain_valid, deprecated_frame_chain)
+	(deprecated_init_extra_frame_info, deprecated_pop_frame)
+	(deprecated_frame_init_saved_regs, deprecated_get_saved_register)
+	(deprecated_do_registers_info, deprecated_init_frame_pc): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* regcache.c (deprecated_read_fp): Do not call
+	DEPRECATED_TARGET_READ_FP_P.
+	* infcmd.c (default_print_registers_info): Do not call
+	DEPRECATED_DO_REGISTERS_INFO.
+	* frame-base.c (default_frame_locals_address): Do not call
+	DEPRECATED_FRAME_LOCALS_ADDRESS.
+	(default_frame_args_address): Do not call
+	DEPRECATED_FRAME_ARGS_ADDRESS.
+
 	* gdbarch.sh (deprecated_register_raw_size)
 	(deprecated_register_virtual_size:int): Delete.
 	* gdbarch.h, gdbarch.c: Re-generate.
@@ -8,8 +24,6 @@
 	* alpha-tdep.c (alpha_register_raw_size)
 	(alpha_register_virtual_size): Delete.
 	(alpha_gdbarch_init): Update.
-
-2004-08-02  Andrew Cagney  <cagney@gnu.org>
 
 	* gdbarch.sh (deprecated_register_virtual_type)
 	(deprecated_save_dummy_frame_tos, deprecated_push_return_address)

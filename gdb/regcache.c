@@ -1166,9 +1166,7 @@ deprecated_write_sp (CORE_ADDR val)
 CORE_ADDR
 deprecated_read_fp (void)
 {
-  if (DEPRECATED_TARGET_READ_FP_P ())
-    return DEPRECATED_TARGET_READ_FP ();
-  else if (DEPRECATED_FP_REGNUM >= 0)
+  if (DEPRECATED_FP_REGNUM >= 0)
     return read_register (DEPRECATED_FP_REGNUM);
   else
     internal_error (__FILE__, __LINE__, "deprecated_read_fp");

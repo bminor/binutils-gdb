@@ -475,9 +475,6 @@ M::struct frame_id:unwind_dummy_id:struct frame_info *info:info
 # Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
 # DEPRECATED_FP_REGNUM.
 v:=:int:deprecated_fp_regnum::::-1:-1::0
-# Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
-# DEPRECATED_TARGET_READ_FP.
-F:=:CORE_ADDR:deprecated_target_read_fp:void
 
 # See gdbint.texinfo.  See infcall.c.  New, all singing all dancing,
 # replacement for DEPRECATED_PUSH_ARGUMENTS.
@@ -489,7 +486,6 @@ v:=:int:deprecated_register_size
 v:=:int:call_dummy_location:::::AT_ENTRY_POINT::0
 M::CORE_ADDR:push_dummy_code:CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr:sp, funaddr, using_gcc, args, nargs, value_type, real_pc, bp_addr
 
-F:=:void:deprecated_do_registers_info:int reg_nr, int fpregs:reg_nr, fpregs
 m::void:print_registers_info:struct ui_file *file, struct frame_info *frame, int regnum, int all:file, frame, regnum, all:::default_print_registers_info::0
 M::void:print_float_info:struct ui_file *file, struct frame_info *frame, const char *args:file, frame, args
 M::void:print_vector_info:struct ui_file *file, struct frame_info *frame, const char *args:file, frame, args
@@ -501,10 +497,8 @@ f:=:int:cannot_fetch_register:int regnum:regnum:::cannot_register_not::0
 f:=:int:cannot_store_register:int regnum:regnum:::cannot_register_not::0
 # setjmp/longjmp support.
 F:=:int:get_longjmp_target:CORE_ADDR *pc:pc
-F:=:CORE_ADDR:deprecated_init_frame_pc:int fromleaf, struct frame_info *prev:fromleaf, prev
 #
 v:=:int:believe_pcc_promotion:::::::
-F:=:void:deprecated_get_saved_register:char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval:raw_buffer, optimized, addrp, frame, regnum, lval
 #
 f:=:int:convert_register_p:int regnum, struct type *type:regnum, type::0:generic_convert_register_p::0
 f:=:void:register_to_value:struct frame_info *frame, int regnum, struct type *type, void *buf:frame, regnum, type, buf::0
@@ -514,7 +508,6 @@ f:=:CORE_ADDR:pointer_to_address:struct type *type, const void *buf:type, buf:::
 f:=:void:address_to_pointer:struct type *type, void *buf, CORE_ADDR addr:type, buf, addr:::unsigned_address_to_pointer::0
 F:=:CORE_ADDR:integer_to_address:struct type *type, void *buf:type, buf
 #
-F:=:void:deprecated_pop_frame:void:-
 # NOTE: cagney/2003-03-24: Replaced by PUSH_ARGUMENTS.
 F:=:void:deprecated_store_struct_return:CORE_ADDR addr, CORE_ADDR sp:addr, sp
 
@@ -560,8 +553,6 @@ f:=:int:deprecated_use_struct_convention:int gcc_p, struct type *value_type:gcc_
 #M::CORE_ADDR:extract_returned_value_address:struct frame_info *caller_frame:caller_frame
 F:=:CORE_ADDR:deprecated_extract_struct_value_address:struct regcache *regcache:regcache
 
-F:=:void:deprecated_frame_init_saved_regs:struct frame_info *frame:frame
-F:=:void:deprecated_init_extra_frame_info:int fromleaf, struct frame_info *frame:fromleaf, frame
 #
 f:=:CORE_ADDR:skip_prologue:CORE_ADDR ip:ip::0:0
 f:=:int:inner_than:CORE_ADDR lhs, CORE_ADDR rhs:lhs, rhs::0:0
@@ -584,20 +575,14 @@ v:=:CORE_ADDR:deprecated_function_start_offset::::0:::0
 m::void:remote_translate_xfer_address:struct regcache *regcache, CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len:regcache, gdb_addr, gdb_len, rem_addr, rem_len:::generic_remote_translate_xfer_address::0
 #
 v:=:CORE_ADDR:frame_args_skip::::0:::0
-F:=:CORE_ADDR:deprecated_frame_chain:struct frame_info *frame:frame
-F:=:int:deprecated_frame_chain_valid:CORE_ADDR chain, struct frame_info *thisframe:chain, thisframe
 # DEPRECATED_FRAME_SAVED_PC has been replaced by UNWIND_PC.  Please
 # note, per UNWIND_PC's doco, that while the two have similar
 # interfaces they have very different underlying implementations.
 F:=:CORE_ADDR:deprecated_frame_saved_pc:struct frame_info *fi:fi
 M::CORE_ADDR:unwind_pc:struct frame_info *next_frame:next_frame
 M::CORE_ADDR:unwind_sp:struct frame_info *next_frame:next_frame
-# DEPRECATED_FRAME_ARGS_ADDRESS as been replaced by the per-frame
-# frame-base.  Enable frame-base before frame-unwind.
-F:=:CORE_ADDR:deprecated_frame_args_address:struct frame_info *fi:fi::get_frame_base:get_frame_base
 # DEPRECATED_FRAME_LOCALS_ADDRESS as been replaced by the per-frame
 # frame-base.  Enable frame-base before frame-unwind.
-F:=:CORE_ADDR:deprecated_frame_locals_address:struct frame_info *fi:fi::get_frame_base:get_frame_base
 F:=:CORE_ADDR:deprecated_saved_pc_after_call:struct frame_info *frame:frame
 F:=:int:frame_num_args:struct frame_info *frame:frame
 #
