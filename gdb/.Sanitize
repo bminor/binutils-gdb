@@ -28,6 +28,7 @@ echo Sanitizing `pwd`...
 Things-to-keep:
 
 .gdbinit
+gdb.1
 COPYING
 ChangeLog
 ChangeLog-3.x
