@@ -228,7 +228,11 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
 	      && phdr->p_paddr != 0
 	      && phdr->p_vaddr != phdr->p_paddr
 	      && phdr->p_vaddr <= hdr->sh_addr
-	      && phdr->p_vaddr + phdr->p_memsz >= hdr->sh_addr + hdr->sh_size)
+	      && phdr->p_vaddr + phdr->p_memsz >= hdr->sh_addr + hdr->sh_size
+	      && ((flags & SEC_LOAD) == 0
+		  || (phdr->p_offset <= hdr->sh_offset
+		      && (phdr->p_offset + phdr->p_filesz
+			  >= hdr->sh_offset + hdr->sh_size))))
 	    {
 	      newsect->lma += phdr->p_paddr - phdr->p_vaddr;
 	      break;

@@ -1,5 +1,9 @@
 Mon Aug  5 13:42:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf.c (_bfd_elf_make_section_from_shdr): For a loadable section,
+	only get the LMA from the phdr if they are in the same part of the
+	file.
+
 	* elf.c (map_sections_to_segments): Rewrite tests for starting a
 	new segment to make them more comprehensible.  If the relationship
 	between the LMA and the VMA changed, start a new segment.  Don't
