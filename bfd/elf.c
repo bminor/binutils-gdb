@@ -6041,7 +6041,7 @@ _bfd_elf_find_nearest_line (abfd, section, symbols, offset,
 					     functionname_ptr, line_ptr,
 					     &elf_tdata (abfd)->line_info))
     return false;
-  if (found)
+  if (found && (*functionname_ptr || *line_ptr))
     return true;
 
   if (symbols == NULL)

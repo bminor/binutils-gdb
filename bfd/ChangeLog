@@ -1,3 +1,8 @@
+2002-09-11  Andrew Haley  <aph@cambridge.redhat.com>
+
+	* elf.c (_bfd_elf_find_nearest_line): Check functionname_ptr and
+	line_ptr before deciding we've found a symbol.
+
 2002-09-11  Nick Clifton  <nickc@redhat.com>
 
 	* po/da.po: New Danish translation file.
