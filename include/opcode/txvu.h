@@ -201,6 +201,10 @@ struct txvu_operand {
 #define TXVU_DEST_Y 4
 #define TXVU_DEST_Z 2
 #define TXVU_DEST_W 1
+#define TXVU_BC_X 0
+#define TXVU_BC_Y 1
+#define TXVU_BC_Z 2
+#define TXVU_BC_W 3
 
 extern const struct txvu_operand txvu_operands[];
 extern const int txvu_operand_count;
