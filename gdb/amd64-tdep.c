@@ -1074,11 +1074,7 @@ amd64_regset_from_core_section (struct gdbarch *gdbarch,
   if (strcmp (sect_name, ".reg2") == 0 && sect_size == tdep->sizeof_fpregset)
     {
       if (tdep->fpregset == NULL)
-	{
-	  tdep->fpregset = XMALLOC (struct regset);
-	  tdep->fpregset->descr = tdep;
-	  tdep->fpregset->supply_regset = amd64_supply_fpregset;
-	}
+        tdep->fpregset = regset_xmalloc (tdep, amd64_supply_fpregset, NULL);
 
       return tdep->fpregset;
     }

@@ -184,9 +184,9 @@ sparc64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  tdep->gregset = XMALLOC (struct regset);
-  tdep->gregset->descr = &sparc64obsd_core_gregset;
-  tdep->gregset->supply_regset = sparc64obsd_supply_gregset;
+  tdep->gregset = regset_xmalloc (&sparc64obsd_core_gregset, 
+                                  sparc64obsd_supply_gregset,
+                                  NULL);
   tdep->sizeof_gregset = 832;
 
   frame_unwind_append_sniffer (gdbarch, sparc64obsd_sigtramp_frame_sniffer);

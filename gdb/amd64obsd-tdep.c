@@ -63,11 +63,7 @@ amd64obsd_regset_from_core_section (struct gdbarch *gdbarch,
       && sect_size >= tdep->sizeof_gregset + I387_SIZEOF_FXSAVE)
     {
       if (tdep->gregset == NULL)
-	{
-	  tdep->gregset = XMALLOC (struct regset);
-	  tdep->gregset->descr = tdep;
-	  tdep->gregset->supply_regset = amd64obsd_supply_regset;
-	}
+        tdep->gregset = regset_xmalloc (tdep, amd64obsd_supply_regset, NULL);
       return tdep->gregset;
     }
 

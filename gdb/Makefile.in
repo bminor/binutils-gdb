@@ -910,7 +910,7 @@ COMMON_OBS = $(DEPFILES) $(YYOBJ) \
 	frame-base.o \
 	gnu-v2-abi.o gnu-v3-abi.o hpacc-abi.o cp-abi.o cp-support.o \
 	cp-namespace.o \
-	reggroups.o \
+	reggroups.o regset.o \
 	trad-frame.o \
 	tramp-frame.o
 
@@ -2197,6 +2197,7 @@ regcache.o: regcache.c $(defs_h) $(inferior_h) $(target_h) $(gdbarch_h) \
 	$(gdb_string_h) $(gdbcmd_h) $(observer_h)
 reggroups.o: reggroups.c $(defs_h) $(reggroups_h) $(gdbtypes_h) \
 	$(gdb_assert_h) $(regcache_h) $(command_h) $(gdbcmd_h)
+regset.o: regset.c $(defs_h) $(regset_h) $(gdb_assert_h)
 remote.o: remote.c $(defs_h) $(gdb_string_h) $(inferior_h) $(bfd_h) \
 	$(symfile_h) $(target_h) $(gdbcmd_h) $(objfiles_h) $(gdb_stabs_h) \
 	$(gdbthread_h) $(remote_h) $(regcache_h) $(value_h) $(gdb_assert_h) \

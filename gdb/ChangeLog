@@ -1,14 +1,28 @@
+2004-05-19  Jim Blandy  <jimb@redhat.com>
+
+	Use a constructor function to create regset structures.
+	* regset.h (supply_regset_ftype, collect_regset_ftype): New typedefs.
+	(struct regset): Use supply_regset_ftype.  Add new
+        'collect_regset' member.
+	(regset_xmalloc): New declaration.
+	* regset.c: New file.
+	* am64-tdep.c (amd64_regset_from_core_section): Use
+	regset_xmalloc to construct regset structures.
+	* amd64obsd-tdep.c (amd64obsd_regset_from_core_section): Same.
+	* i386-tdep.c (i386_regset_from_core_section): Same.
+	* i386nbsd-tdep.c (i386nbsd_aout_regset_from_core_section): Same.
+	* i386obsd-tdep.c (i386obsd_aout_regset_from_core_section): Same.
+	* sparc64fbsd-tdep.c (sparc64fbsd_init_abi): Same.
+	* sparc64nbsd-tdep.c (sparc64nbsd_init_abi): Same.
+	* sparc64obsd-tdep.c (sparc64obsd_init_abi): Same.
+	* sparcnbsd-tdep.c (sparc32nbsd_init_abi): Same.
+	* Makefile.in (COMMON_OBS): Add regset.o.
+	(regset.o): New rule.
+
 2004-05-19  Joel Brobecker  <brobecker@gnat.com>
 
 	* config/djgpp/fnchange.lst: Add entries for pthread_cond_wait.exp
 	and pthread_cond_wait.c.
-
-2004-05-18  Jim Blandy  <jimb@redhat.com>
-
-	* rs6000-tdep.c (rs6000_gdbarch_init): Initialize tdep fields
-	before the mach-specific switch, and then let the individual cases
-	override the defaults, rather than leaving them uninitialized
-	until the switch and then setting them in each case.
 
 2004-05-18  Randolph Chung  <tausq@debian.org>
 

@@ -199,13 +199,11 @@ sparc64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  tdep->gregset = XMALLOC (struct regset);
-  tdep->gregset->descr = &sparc64fbsd_gregset;
-  tdep->gregset->supply_regset = sparc64fbsd_supply_gregset;
+  tdep->gregset
+    = regset_xmalloc (&sparc64fbsd_gregset, sparc64fbsd_supply_gregset, NULL);
   tdep->sizeof_gregset = 256;
 
-  tdep->fpregset = XMALLOC (struct regset);
-  tdep->fpregset->supply_regset = sparc64fbsd_supply_fpregset;
+  tdep->fpregset = regset_xmalloc (NULL, sparc64fbsd_supply_fpregset, NULL);
   tdep->sizeof_fpregset = 272;
 
   frame_unwind_append_sniffer (gdbarch, sparc64fbsd_sigtramp_frame_sniffer);

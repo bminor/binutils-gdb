@@ -1662,11 +1662,7 @@ i386_regset_from_core_section (struct gdbarch *gdbarch,
   if (strcmp (sect_name, ".reg") == 0 && sect_size == tdep->sizeof_gregset)
     {
       if (tdep->gregset == NULL)
-	{
-	  tdep->gregset = XMALLOC (struct regset);
-	  tdep->gregset->descr = tdep;
-	  tdep->gregset->supply_regset = i386_supply_gregset;
-	}
+        tdep->gregset = regset_xmalloc (tdep, i386_supply_gregset, NULL);
       return tdep->gregset;
     }
 
@@ -1675,11 +1671,7 @@ i386_regset_from_core_section (struct gdbarch *gdbarch,
 	  && sect_size == I387_SIZEOF_FXSAVE))
     {
       if (tdep->fpregset == NULL)
-	{
-	  tdep->fpregset = XMALLOC (struct regset);
-	  tdep->fpregset->descr = tdep;
-	  tdep->fpregset->supply_regset = i386_supply_fpregset;
-	}
+        tdep->fpregset = regset_xmalloc (tdep, i386_supply_fpregset, NULL);
       return tdep->fpregset;
     }
 

@@ -26,6 +26,11 @@ struct gdbarch;
 struct regcache;
 
 /* Data structure describing a register set.  */
+typedef void (supply_regset_ftype) (const struct regset *, struct regcache *,
+                                    int, const void *, size_t);
+typedef void (collect_regset_ftype) (const struct regset *, 
+                                     const struct regcache *,
+                                     int, const void *, size_t);
 
 struct regset
 {
@@ -33,9 +38,23 @@ struct regset
      providing some sort of description of the register set.  */
   const void *descr;
 
-  /* Function supplying a register set to a register cache.  */
-  void (*supply_regset) (const struct regset *, struct regcache *,
-			 int, const void *, size_t);
+  /* Function supplying values in a register set to a register cache.  */
+  supply_regset_ftype *supply_regset;
+
+  /* Function collecting values in a register set from a register cache.  */
+  collect_regset_ftype *collect_regset;
 };
+
+
+/* Allocate a fresh 'struct regset' whose descr is DESCR, whose
+   supply_regset function is SUPPLY_REGSET, and whose collect_regset
+   function is COLLECT_REGSET.  If the regset has no collect function,
+   pass NULL for COLLECT_REGSET.
+
+   The object returned is allocated using xmalloc.  */
+extern struct regset *regset_xmalloc (void *descr,
+                                      supply_regset_ftype *supply_regset,
+                                      collect_regset_ftype *collect_regset);
+
 
 #endif /* regset.h */
