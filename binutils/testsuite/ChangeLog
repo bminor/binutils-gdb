@@ -1,3 +1,7 @@
+1999-07-21  H.J. Lu  <hjl@gnu.org>
+
+	* binutils-all/testprog.c: Include <stdio.h>.
+
 1999-06-29  Nick Clifton  <nickc@cygnus.com>
 
 	* binutils-all/objdump.exp: Add fr30 and MCore to expected cpus
