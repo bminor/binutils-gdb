@@ -20,6 +20,7 @@ Fri Sep 25 21:59:27 1992  John Gilmore  (gnu@cygnus.com)
 	* remote-hms.c, remote-adapt.c, remote-mm.c, remote-udi.c: Remove
 	DENTER and DEXIT macros and their calls.  Use a real debugger --
 	like gdb -- to see what functions are being called when.
+	* utils.c (strcmp_iw):  Make nonstatic, for lint.
 
 Fri Sep 25 18:48:20 1992  John Gilmore  (gnu@cygnus.com)
 
