@@ -71,7 +71,11 @@ EXTERN struct subfile *current_subfile;
 
 EXTERN unsigned char processing_gcc_compilation;
 
-/* When set, we are processing a .o file compiled by sun acc */
+/* When set, we are processing a .o file compiled by sun acc.  This is
+   misnamed; it refers to all stabs-in-elf implementations which use
+   N_UNDF the way Sun does, including Solaris gcc.  Hopefully all
+   stabs-in-elf implementations ever invented will choose to be
+   compatible.  */
 
 EXTERN unsigned char processing_acc_compilation;
 

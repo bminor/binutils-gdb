@@ -1,3 +1,7 @@
+Fri Jun 18 12:37:36 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* buildsym.h: Doc fix for processing_acc_compilation.
+
 Thu Jun 17 19:57:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* printcmd.c (print_formatted): Don't use tab in wrap_here arg.
