@@ -324,7 +324,7 @@ if test "${enable_gdbtk}" = "yes"; then
 	   . ${ac_cv_c_tclconfig}/tclConfig.sh
 	   case "${host}" in
 	   *-*-cygwin32*)
-		tixdir=../tix/win/tcl7.6
+		tixdir=../tix/win/tcl8.0
 		;;
 	   *)
 		tixdir=../tix/unix/tk8.0

@@ -1,3 +1,10 @@
+start-sanitize-gdbtk	
+Fri Aug  8 15:19:14 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in (tixdir): Update for cygwin32 case for Tcl 8.0.
+	* configure: Rebuild.
+
+end-sanitize-gdbtk
 Fri Aug  8 13:11:01 1997  Mike Meissner  <meissner@cygnus.com>
 
 	* config/powerpc/ppc{,le}-{eabi,sim}.mt (TDEPFILES): Make sure
@@ -36,8 +43,8 @@ Thu Aug  7 14:08:23 1997  Martin M. Hunt  <hunt@cygnus.com>
 
 	* configure.in: Change required Tix version to 4.1.8.0 .
 	* configure: Rebuilt.
+
 end-sanitize-gdbtk
-	
 Thu Aug  7 13:39:31 1997  Geoffrey Noer  <noer@cygnus.com>
 
 	* ocd.h: add OCD_SET_CONNECTION
