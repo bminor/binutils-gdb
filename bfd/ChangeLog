@@ -1,3 +1,8 @@
+2003-02-10  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf32-s390.c (elf_s390_size_dynamic_sections): Set relocs to TRUE
+	even if there is just non-empty .rela.plt.
+
 2003-02-10  Nick Clifton  <nickc@redhat.com>
 
 	* archures.c (bfd_mach_arm_ep9312): Define.
