@@ -1,3 +1,11 @@
+2003-07-02  Andreas Schwab  <schwab@suse.de>
+
+	* ia64-tdep.c (ia64_push_dummy_call): Define as combination of
+	former ia64_push_arguments and ia64_push_return_address, and use
+	regcache functions instead of read/write_register.
+	(ia64_gdbarch_init): Set push_dummy_call instead of
+	deprecated_push_arguments and deprecated_push_return_address.
+
 2003-07-01  Andrew Cagney  <cagney@redhat.com>
 
 	* trad-frame.h: Update comments, a -1 .addr is reserved.
