@@ -555,6 +555,7 @@ can_make_parallel (a, b)
 }
 
 #ifdef CGEN_INT_INSN
+
 static void
 make_parallel (buffer)
      cgen_insn_t * buffer;
@@ -576,7 +577,9 @@ make_parallel (buffer)
       bfd_putl16 (value, (char *) buffer);
     }
 }
+
 #else
+
 static void
 make_parallel (buffer)
      char * buffer;
@@ -585,8 +588,8 @@ make_parallel (buffer)
 
   buffer [CGEN_CURRENT_ENDIAN == CGEN_ENDIAN_BIG ? 0 : 1] |= 0x80;
 }
-#endif
 
+#endif /* ! CGEN_INT_INSN */
 
 static void
 assemble_parallel_insn (str, str2)
@@ -612,7 +615,15 @@ assemble_parallel_insn (str, str2)
       as_bad (errmsg);
       return;
     }
-  
+
+  if (! enable_m32rx
+      /* FIXME: Need standard macro to perform this test.  */
+      && CGEN_INSN_ATTR (first.insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
+    {
+      as_bad (_("instruction '%s' is for the M32RX only"), str);
+      return;
+    }
+
   /* Check to see if this is an allowable parallel insn.  */
   if (CGEN_INSN_ATTR (first.insn, CGEN_INSN_PIPE) == PIPE_NONE)
     {
@@ -620,53 +631,15 @@ assemble_parallel_insn (str, str2)
       return;
     }
   
-  if (! enable_m32rx
-      && CGEN_INSN_ATTR (first.insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
-    {
-      as_bad (_("instruction '%s' is for the M32RX only"), str);
-      return;
-    }
-  
-  /* Temporary Hack:
-     If the instruciton is relaxable, reparse it looking for a non-relaxable variant.
-     (We do not want to relax instructions inside a parallel construction, and if it
-     turns out that the branch is too far for the displacement field available to the
-     non-relaxed instruction, then this is the programmer's fault.
-     A better solution would be to pass attribute requirements to assemble_insn() so
-     that the relaxable variant would not be accepted as a valid parse of the instruction.  */
-  
-  if (CGEN_INSN_ATTR (first.insn, CGEN_INSN_RELAXABLE) != 0)
-    {
-      char buf[128];
-      char * p;
-      /* Oh dear - the insn is relaxable, so it might be replaced with a longer,
-	 non-parallel version.  Try appending ".s" to the instruction and reparsing it.  */
-
-      p = strchr (str, ' ');
-      if (p == NULL)
-	abort();
-      * p = 0;
-      sprintf (buf, "%s.s %s", str, p + 1);
-      * p = ' ';
-
-      /* Reset fixup list to empty.  */
-      cgen_save_fixups();
-      
-      first.insn = CGEN_SYM (assemble_insn) (buf, & first.fields, first.buffer, & errmsg);
-
-      if (first.insn == NULL)
-	abort();
-    }
-  
   *str2 = '|';       /* Restore the original assembly text, just in case it is needed.  */
   str3  = str;       /* Save the original string pointer.  */
   str   = str2 + 2;  /* Advanced past the parsed string.  */
   str2  = str3;      /* Remember the entire string in case it is needed for error messages.  */
-  
+
   /* Preserve any fixups that have been generated and reset the list to empty.  */
   cgen_save_fixups();
 
-  /* Get the indicies of the operands of the instruction.  */
+  /* Get the indices of the operands of the instruction.  */
   /* FIXME: CGEN_FIELDS is already recorded, but relying on that fact
      doesn't seem right.  Perhaps allow passing fields like we do insn.  */
   /* FIXME: ALIAS insns do not have operands, so we use this function
@@ -676,10 +649,12 @@ assemble_parallel_insn (str, str2)
      version (eg relaxability).  When aliases behave differently this
      may have to change.  */
   first.orig_insn = first.insn;
-  first.insn = m32r_cgen_get_insn_operands (first.insn, bfd_getb16 ((char *) first.buffer), 16,
-					    first.indices);
+  first.insn = m32r_cgen_lookup_get_insn_operands (NULL,
+						   bfd_getb16 ((char *) first.buffer),
+						   16,
+						   first.indices);
   if (first.insn == NULL)
-    as_fatal (_("internal error: m32r_cgen_get_insn_operands failed for first insn"));
+    as_fatal (_("internal error: m32r_cgen_lookup_get_insn_operands failed for first insn"));
 
   /* Parse the second instruction.  */
   if (! (second.insn = CGEN_SYM (assemble_insn)
@@ -696,48 +671,32 @@ assemble_parallel_insn (str, str2)
       as_bad (_("instruction '%s' is for the M32RX only"), str);
       return;
     }
+
+  /* Check to see if this is an allowable parallel insn.  */
+  if (CGEN_INSN_ATTR (second.insn, CGEN_INSN_PIPE) == PIPE_NONE)
+    {
+      as_bad (_("instruction '%s' cannot be executed in parallel."), str);
+      return;
+    }
   
   if (! enable_m32rx)
     {
-      if (   strcmp (first.insn->name, "nop") != 0
-	  && strcmp (second.insn->name, "nop") != 0)
+      if (CGEN_INSN_NUM (first.insn) != M32R_INSN_NOP
+	  && CGEN_INSN_NUM (second.insn) != M32R_INSN_NOP)
 	{
 	  as_bad (_("'%s': only the NOP instruction can be issued in parallel on the m32r"), str2);
 	  return;
 	}
     }
 
-  /* See comment above.  */
-  if (CGEN_INSN_ATTR (second.insn, CGEN_INSN_RELAXABLE) != 0)
-    {
-      char   buf[128];
-      char * p;
-      /* Oh dear - the insn is relaxable, so it might be replaced with a longer,
-	 non-parallel version.  Try appending ".s" to the instruction and reparsing it.  */
-
-      p = strchr (str, ' ');
-      if (p == NULL)
-	abort();
-      * p = 0;
-      sprintf (buf, "%s.s %s", str, p + 1);
-      * p = ' ';
-
-      /* Reset fixup list to empty, preserving saved fixups.  */
-      cgen_restore_fixups();
-      cgen_save_fixups();
-      
-      second.insn = CGEN_SYM (assemble_insn) (buf, & second.fields, second.buffer, & errmsg);
-
-      if (second.insn == NULL)
-	abort();
-    }
-  
-  /* Get the indicies of the operands of the instruction.  */
+  /* Get the indices of the operands of the instruction.  */
   second.orig_insn = second.insn;
-  second.insn = m32r_cgen_get_insn_operands (second.insn, bfd_getb16 ((char *) second.buffer), 16,
-					     second.indices);
+  second.insn = m32r_cgen_lookup_get_insn_operands (NULL,
+						    bfd_getb16 ((char *) second.buffer),
+						    16,
+						    second.indices);
   if (second.insn == NULL)
-    as_fatal (_("internal error: m32r_cgen_get_insn_operands failed for second insn"));
+    as_fatal (_("internal error: m32r_cgen_lookup_get_insn_operands failed for second insn"));
 
   /* We assume that if the first instruction writes to a register that is
      read by the second instruction it is because the programmer intended
@@ -763,7 +722,7 @@ assemble_parallel_insn (str, str2)
 
       /* Write it out.  */
       (void) cgen_asm_finish_insn (first.orig_insn, first.buffer,
-				   CGEN_FIELDS_BITSIZE (& first.fields));
+				   CGEN_FIELDS_BITSIZE (& first.fields), 0);
       
       /* Force the top bit of the second insn to be set.  */
       make_parallel (second.buffer);
@@ -773,14 +732,14 @@ assemble_parallel_insn (str, str2)
 
       /* Write it out.  */
       (void) cgen_asm_finish_insn (second.orig_insn, second.buffer,
-				   CGEN_FIELDS_BITSIZE (& second.fields));
+				   CGEN_FIELDS_BITSIZE (& second.fields), 0);
     }
   /* Try swapping the instructions to see if they work that way.  */
   else if (can_make_parallel (& second, & first) == NULL)
     {
       /* Write out the second instruction first.  */
       (void) cgen_asm_finish_insn (second.orig_insn, second.buffer,
-				   CGEN_FIELDS_BITSIZE (& second.fields));
+				   CGEN_FIELDS_BITSIZE (& second.fields), 0);
       
       /* Force the top bit of the first instruction to be set.  */
       make_parallel (first.buffer);
@@ -790,7 +749,7 @@ assemble_parallel_insn (str, str2)
 
       /* Write out the first instruction.  */
       (void) cgen_asm_finish_insn (first.orig_insn, first.buffer,
-				   CGEN_FIELDS_BITSIZE (& first.fields));
+				   CGEN_FIELDS_BITSIZE (& first.fields), 0);
     }
   else
     {
@@ -801,8 +760,6 @@ assemble_parallel_insn (str, str2)
   /* Set these so m32r_fill_insn can use them.  */
   prev_seg    = now_seg;
   prev_subseg = now_subseg;
-
-  return;
 }
 
 /* end-sanitize-m32rx */
@@ -852,9 +809,10 @@ md_assemble (str)
 	     pig, can we call assemble_nop instead of !seen_relaxable_p?  */
 	  fill_insn (0);
 	}
-      
+
+      /* Doesn't really matter what we pass for RELAX_P here.  */
       (void) cgen_asm_finish_insn (insn.insn, insn.buffer,
-				   CGEN_FIELDS_BITSIZE (& insn.fields));
+				   CGEN_FIELDS_BITSIZE (& insn.fields), 1);
     }
   else
     {
@@ -863,17 +821,24 @@ md_assemble (str)
       int swap = false;
 /* end-sanitize-phase2-m32rx */
 /* end-sanitize-m32rx */
-      
+
       if (CGEN_INSN_BITSIZE (insn.insn) != 16)
 	abort();
-      
-      /* Get the indices of the operands of the instruction.  */
-      insn.insn = m32r_cgen_get_insn_operands (insn.insn,
-					       bfd_getb16 ((char *) insn.buffer),
-					       16,
-					       insn.indices);
-      if (insn.insn == NULL)
-	as_fatal (_("internal error: m32r_cgen_get_insn_operands failed"));
+
+      if (enable_m32rx)
+	{
+	  /* Get the indices of the operands of the instruction.
+	     FIXME: See assemble_parallel for notes on orig_insn.  */
+	  insn.orig_insn = insn.insn;
+	  insn.insn = m32r_cgen_lookup_get_insn_operands (NULL,
+							  bfd_getb16 ((char *) insn.buffer),
+							  16,
+							  insn.indices);
+	  if (insn.insn == NULL)
+	    as_fatal (_("internal error: m32r_cgen_get_insn_operands failed"));
+	}
+      else
+	insn.orig_insn = insn.insn;
 
       /* Keep track of whether we've seen a pair of 16 bit insns.
 	 prev_insn.insn is NULL when we're on a 32 bit boundary.  */
@@ -891,21 +856,21 @@ md_assemble (str)
 	     input to the current instruction then it cannot be combined.
 	     Otherwise call can_make_parallel() with both orderings of the
 	     instructions to see if they can be combined.  */
-	  if (      enable_m32rx
-	      &&    optimize
-	      &&    CGEN_INSN_ATTR (insn.insn, CGEN_INSN_RELAXABLE) == 0
+	  if (     enable_m32rx
+	      &&   optimize
+	      &&   CGEN_INSN_ATTR (insn.orig_insn, CGEN_INSN_RELAXABLE) == 0
 	      && ! writes_to_pc (& prev_insn)
 	      && ! first_writes_to_seconds_operands (& prev_insn, &insn, false)
 		 )
 	    {
 	      if (can_make_parallel (& prev_insn, & insn) == NULL)
 		make_parallel (insn.buffer);
-	      else if (can_make_parallel (& insn, & prev_insn.insn) == NULL)
+	      else if (can_make_parallel (& insn, & prev_insn) == NULL)
 		swap = true;
 	    }
 /* end-sanitize-phase2-m32rx */
 /* end-sanitize-m32rx */
-	  
+
 	  prev_insn.insn = NULL;
 	}
       else
@@ -915,15 +880,16 @@ md_assemble (str)
 
       /* Record the frag that might be used by this insn.  */
       insn.frag = frag_now;
-      insn.addr = cgen_asm_finish_insn (insn.insn, insn.buffer,
-				   CGEN_FIELDS_BITSIZE (& insn.fields));
+      insn.addr = cgen_asm_finish_insn (insn.orig_insn, insn.buffer,
+					CGEN_FIELDS_BITSIZE (& insn.fields),
+					1 /*relax_p*/);
 
 /* start-sanitize-m32rx */
 /* start-sanitize-phase2-m32rx */
       if (swap)
 	{
 	  int tmp;
-	  
+
 #define SWAP_BYTES(a,b) tmp = a; a = b; b = tmp
 
 	  /* Swap the two insns */
@@ -948,13 +914,13 @@ md_assemble (str)
       /* If the insn needs the following one to be on a 32 bit boundary
 	 (e.g. subroutine calls), fill this insn's slot.  */
       if (prev_insn.insn != NULL
-	  && CGEN_INSN_ATTR (insn.insn, CGEN_INSN_FILL_SLOT) != 0)
+	  && CGEN_INSN_ATTR (insn.orig_insn, CGEN_INSN_FILL_SLOT) != 0)
 	fill_insn (0);
 
       /* If this is a relaxable insn (can be replaced with a larger version)
 	 mark the fact so that we can emit an alignment directive for a
 	 following 32 bit insn if we see one.   */
-      if (CGEN_INSN_ATTR (insn.insn, CGEN_INSN_RELAXABLE) != 0)
+      if (CGEN_INSN_ATTR (insn.orig_insn, CGEN_INSN_RELAXABLE) != 0)
 	seen_relaxable_p = 1;
     }
 

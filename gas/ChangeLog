@@ -1,3 +1,14 @@
+Mon Apr 27 12:07:33 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen.c (cgen_asm_finish_insn): New arg relax_p.  All callers updated.
+start-sanitize-m32rx
+	* config/tc-m32r.c (assemble_parallel_insn): No need to try
+	non-relaxable variant any more.  Simplify test for nop insn.
+	(md_assemble): Only scan operands if m32rx.  Set orig_insn in case
+	scan of operands yields an insn different from original (e.g. a macro).
+	Fix call to can_make_parallel.
+end-sanitize-m32rx
+
 Mon Apr 27 15:16:12 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ecoff.h: Change symbolS in function declaration to struct
