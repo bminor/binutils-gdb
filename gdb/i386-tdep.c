@@ -1,7 +1,7 @@
 /* Intel 386 target-dependent stuff.
 
    Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -1223,7 +1223,7 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Push arguments in reverse order.  */
   for (i = nargs - 1; i >= 0; i--)
     {
-      int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (args[i]));
+      int len = TYPE_LENGTH (value_enclosing_type (args[i]));
 
       /* The System V ABI says that:
 

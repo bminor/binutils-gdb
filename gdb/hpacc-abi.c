@@ -206,7 +206,7 @@ hpacc_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
    * we can't do anything. */
   if (!TYPE_HAS_VTABLE (known_type))
     {
-      known_type = VALUE_ENCLOSING_TYPE (v);
+      known_type = value_enclosing_type (v);
       CHECK_TYPEDEF (known_type);
       if ((TYPE_CODE (known_type) != TYPE_CODE_CLASS) ||
           !TYPE_HAS_VTABLE (known_type))
@@ -280,7 +280,7 @@ hpacc_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
           same as the embedded offset */
        ((top_offset == VALUE_EMBEDDED_OFFSET (v)) &&
         !using_enclosing &&
-        TYPE_LENGTH (VALUE_ENCLOSING_TYPE (v)) == TYPE_LENGTH (rtti_type))))
+        TYPE_LENGTH (value_enclosing_type (v)) == TYPE_LENGTH (rtti_type))))
 
     *full = 1;
 

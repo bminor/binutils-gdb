@@ -1,7 +1,7 @@
 /* Abstraction of GNU v3 abi.
    Contributed by Jim Blandy <jimb@redhat.com>
 
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -266,7 +266,7 @@ gnuv3_rtti_type (struct value *value,
 
   if (full_p)
     *full_p = (- offset_to_top == VALUE_EMBEDDED_OFFSET (value)
-               && (TYPE_LENGTH (VALUE_ENCLOSING_TYPE (value))
+               && (TYPE_LENGTH (value_enclosing_type (value))
                    >= TYPE_LENGTH (run_time_type)));
   if (top_p)
     *top_p = - offset_to_top;

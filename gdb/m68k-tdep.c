@@ -1,7 +1,7 @@
 /* Target-dependent code for the Motorola 68000 series.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000,
-   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -417,7 +417,7 @@ m68k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Push arguments in reverse order.  */
   for (i = nargs - 1; i >= 0; i--)
     {
-      struct type *value_type = VALUE_ENCLOSING_TYPE (args[i]);
+      struct type *value_type = value_enclosing_type (args[i]);
       int len = TYPE_LENGTH (value_type);
       int container_len = (len + 3) & ~3;
       int offset;

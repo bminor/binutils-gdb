@@ -1,7 +1,8 @@
 /* Support for printing C values for GDB, the GNU debugger.
 
    Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
+   1997, 1998, 1999, 2000, 2001, 2003, 2005 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -578,17 +579,17 @@ c_value_print (struct value *val, struct ui_file *stream, int format,
 			    TYPE_NAME (real_type),
 			    full ? "" : _(" [incomplete object]"));
 	  /* Print out object: enclosing type is same as real_type if full */
-	  return val_print (VALUE_ENCLOSING_TYPE (val), VALUE_CONTENTS_ALL (val), 0,
+	  return val_print (value_enclosing_type (val), VALUE_CONTENTS_ALL (val), 0,
 			 VALUE_ADDRESS (val), stream, format, 1, 0, pretty);
           /* Note: When we look up RTTI entries, we don't get any information on
              const or volatile attributes */
 	}
-      else if (type != VALUE_ENCLOSING_TYPE (val))
+      else if (type != value_enclosing_type (val))
 	{
 	  /* No RTTI information, so let's do our best */
 	  fprintf_filtered (stream, "(%s ?) ",
-			    TYPE_NAME (VALUE_ENCLOSING_TYPE (val)));
-	  return val_print (VALUE_ENCLOSING_TYPE (val), VALUE_CONTENTS_ALL (val), 0,
+			    TYPE_NAME (value_enclosing_type (val)));
+	  return val_print (value_enclosing_type (val), VALUE_CONTENTS_ALL (val), 0,
 			 VALUE_ADDRESS (val), stream, format, 1, 0, pretty);
 	}
       /* Otherwise, we end up at the return outside this "if" */

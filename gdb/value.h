@@ -1,7 +1,7 @@
 /* Definitions for values of C expressions, for GDB.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -178,7 +178,7 @@ extern int value_bitsize (struct value *);
 extern int value_bitpos (struct value *);
 extern int value_offset (struct value *);
 
-#define VALUE_ENCLOSING_TYPE(val) (val)->enclosing_type
+extern struct type *value_enclosing_type (struct value *);
 #define VALUE_LAZY(val) (val)->lazy
 
 /* VALUE_CONTENTS and value_contents_raw() both return the address of

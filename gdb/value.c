@@ -87,7 +87,7 @@ allocate_value (struct type *type)
   val->next = all_values;
   all_values = val;
   val->type = type;
-  VALUE_ENCLOSING_TYPE (val) = type;
+  val->enclosing_type = type;
   VALUE_LVAL (val) = not_lval;
   VALUE_ADDRESS (val) = 0;
   VALUE_FRAME_ID (val) = null_frame_id;
@@ -157,6 +157,12 @@ bfd_byte *
 value_contents_all_raw (struct value *value)
 {
   return value->aligner.contents;
+}
+
+struct type *
+value_enclosing_type (struct value *value)
+{
+  return value->enclosing_type;
 }
 
 
@@ -252,7 +258,7 @@ value_release_to_mark (struct value *mark)
 struct value *
 value_copy (struct value *arg)
 {
-  struct type *encl_type = VALUE_ENCLOSING_TYPE (arg);
+  struct type *encl_type = value_enclosing_type (arg);
   struct value *val = allocate_value (encl_type);
   val->type = arg->type;
   VALUE_LVAL (val) = VALUE_LVAL (arg);
@@ -270,7 +276,7 @@ value_copy (struct value *arg)
   if (!VALUE_LAZY (val))
     {
       memcpy (value_contents_all_raw (val), value_contents_all_raw (arg),
-	      TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg)));
+	      TYPE_LENGTH (value_enclosing_type (arg)));
 
     }
   return val;
@@ -877,9 +883,9 @@ value_static_field (struct type *type, int fieldno)
 struct value *
 value_change_enclosing_type (struct value *val, struct type *new_encl_type)
 {
-  if (TYPE_LENGTH (new_encl_type) <= TYPE_LENGTH (VALUE_ENCLOSING_TYPE (val))) 
+  if (TYPE_LENGTH (new_encl_type) <= TYPE_LENGTH (value_enclosing_type (val))) 
     {
-      VALUE_ENCLOSING_TYPE (val) = new_encl_type;
+      val->enclosing_type = new_encl_type;
       return val;
     }
   else
@@ -889,7 +895,7 @@ value_change_enclosing_type (struct value *val, struct type *new_encl_type)
       
       new_val = (struct value *) xrealloc (val, sizeof (struct value) + TYPE_LENGTH (new_encl_type));
 
-      VALUE_ENCLOSING_TYPE (new_val) = new_encl_type;
+      new_val->enclosing_type = new_encl_type;
  
       /* We have to make sure this ends up in the same place in the value
 	 chain as the original copy, so it's clean-up behavior is the same. 
@@ -946,13 +952,13 @@ value_primitive_field (struct value *arg1, int offset,
       /* This field is actually a base subobject, so preserve the
          entire object's contents for later references to virtual
          bases, etc.  */
-      v = allocate_value (VALUE_ENCLOSING_TYPE (arg1));
+      v = allocate_value (value_enclosing_type (arg1));
       v->type = type;
       if (VALUE_LAZY (arg1))
 	VALUE_LAZY (v) = 1;
       else
 	memcpy (value_contents_all_raw (v), value_contents_all_raw (arg1),
-		TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg1)));
+		TYPE_LENGTH (value_enclosing_type (arg1)));
       v->offset = value_offset (arg1);
       VALUE_EMBEDDED_OFFSET (v)
 	= offset +

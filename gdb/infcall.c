@@ -571,7 +571,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	      CORE_ADDR addr;
 	      int len;		/*  = TYPE_LENGTH (arg_type); */
 	      int aligned_len;
-	      arg_type = check_typedef (VALUE_ENCLOSING_TYPE (args[i]));
+	      arg_type = check_typedef (value_enclosing_type (args[i]));
 	      len = TYPE_LENGTH (arg_type);
 
 	      aligned_len = len;

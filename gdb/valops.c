@@ -501,7 +501,7 @@ int
 value_fetch_lazy (struct value *val)
 {
   CORE_ADDR addr = VALUE_ADDRESS (val) + value_offset (val);
-  int length = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (val));
+  int length = TYPE_LENGTH (value_enclosing_type (val));
 
   struct type *type = value_type (val);
   if (length)
@@ -544,7 +544,7 @@ value_assign (struct value *toval, struct value *fromval)
     case lval_internalvar:
       set_internalvar (VALUE_INTERNALVAR (toval), fromval);
       val = value_copy (VALUE_INTERNALVAR (toval)->value);
-      val = value_change_enclosing_type (val, VALUE_ENCLOSING_TYPE (fromval));
+      val = value_change_enclosing_type (val, value_enclosing_type (fromval));
       VALUE_EMBEDDED_OFFSET (val) = VALUE_EMBEDDED_OFFSET (fromval);
       VALUE_POINTED_TO_OFFSET (val) = VALUE_POINTED_TO_OFFSET (fromval);
       return val;
@@ -732,7 +732,7 @@ value_assign (struct value *toval, struct value *fromval)
   memcpy (value_contents_raw (val), VALUE_CONTENTS (fromval),
 	  TYPE_LENGTH (type));
   val->type = type;
-  val = value_change_enclosing_type (val, VALUE_ENCLOSING_TYPE (fromval));
+  val = value_change_enclosing_type (val, value_enclosing_type (fromval));
   VALUE_EMBEDDED_OFFSET (val) = VALUE_EMBEDDED_OFFSET (fromval);
   VALUE_POINTED_TO_OFFSET (val) = VALUE_POINTED_TO_OFFSET (fromval);
 
@@ -751,11 +751,11 @@ value_repeat (struct value *arg1, int count)
   if (count < 1)
     error ("Invalid number %d of repetitions.", count);
 
-  val = allocate_repeat_value (VALUE_ENCLOSING_TYPE (arg1), count);
+  val = allocate_repeat_value (value_enclosing_type (arg1), count);
 
   read_memory (VALUE_ADDRESS (arg1) + value_offset (arg1),
 	       value_contents_all_raw (val),
-	       TYPE_LENGTH (VALUE_ENCLOSING_TYPE (val)));
+	       TYPE_LENGTH (value_enclosing_type (val)));
   VALUE_LVAL (val) = lval_memory;
   VALUE_ADDRESS (val) = VALUE_ADDRESS (arg1) + value_offset (arg1);
 
@@ -873,7 +873,7 @@ value_addr (struct value *arg1)
 
   /* This may be a pointer to a base subobject; so remember the
      full derived object's type ... */
-  arg2 = value_change_enclosing_type (arg2, lookup_pointer_type (VALUE_ENCLOSING_TYPE (arg1)));
+  arg2 = value_change_enclosing_type (arg2, lookup_pointer_type (value_enclosing_type (arg1)));
   /* ... and also the relative position of the subobject in the full object */
   VALUE_POINTED_TO_OFFSET (arg2) = VALUE_EMBEDDED_OFFSET (arg1);
   return arg2;
@@ -906,7 +906,7 @@ value_ind (struct value *arg1)
       struct type *enc_type;
       /* We may be pointing to something embedded in a larger object */
       /* Get the real type of the enclosing object */
-      enc_type = check_typedef (VALUE_ENCLOSING_TYPE (arg1));
+      enc_type = check_typedef (value_enclosing_type (arg1));
       enc_type = TYPE_TARGET_TYPE (enc_type);
       /* Retrieve the enclosing object pointed to */
       arg2 = value_at_lazy (enc_type, (value_as_address (arg1)
@@ -1003,10 +1003,10 @@ value_array (int lowbound, int highbound, struct value **elemvec)
     {
       error ("bad array bounds (%d, %d)", lowbound, highbound);
     }
-  typelength = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (elemvec[0]));
+  typelength = TYPE_LENGTH (value_enclosing_type (elemvec[0]));
   for (idx = 1; idx < nelem; idx++)
     {
-      if (TYPE_LENGTH (VALUE_ENCLOSING_TYPE (elemvec[idx])) != typelength)
+      if (TYPE_LENGTH (value_enclosing_type (elemvec[idx])) != typelength)
 	{
 	  error ("array elements must all be the same size");
 	}
@@ -1015,7 +1015,7 @@ value_array (int lowbound, int highbound, struct value **elemvec)
   rangetype = create_range_type ((struct type *) NULL, builtin_type_int,
 				 lowbound, highbound);
   arraytype = create_array_type ((struct type *) NULL,
-			      VALUE_ENCLOSING_TYPE (elemvec[0]), rangetype);
+			      value_enclosing_type (elemvec[0]), rangetype);
 
   if (!current_language->c_style_arrays)
     {
@@ -2600,7 +2600,7 @@ value_full_object (struct value *argp, struct type *rtype, int xfull, int xtop,
     real_type = value_rtti_type (argp, &full, &top, &using_enc);
 
   /* If no RTTI data, or if object is already complete, do nothing */
-  if (!real_type || real_type == VALUE_ENCLOSING_TYPE (argp))
+  if (!real_type || real_type == value_enclosing_type (argp))
     return argp;
 
   /* If we have the full object, but for some reason the enclosing

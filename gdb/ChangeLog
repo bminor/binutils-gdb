@@ -1,3 +1,11 @@
+2005-02-02  Andrew Cagney  <cagney@gnu.org>
+
+	* value.c (value_enclosing_type): New function.
+	* value.h (VALUE_ENCLOSING_TYPE): Delete.
+	(value_enclosing_type): Declare.
+	* xstormy16-tdep.c, vax-tdep.c, m68k-tdep.c, i386-tdep.c: Update.
+	* gnu-v3-abi.c, hpacc-abi.c, infcall.c, valops.c: Update.
+
 2005-02-01  Andrew Cagney  <cagney@gnu.org>
 
 	* value.c (value_contents_all_raw)

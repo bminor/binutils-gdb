@@ -1,7 +1,7 @@
 /* Target-dependent code for the VAX.
 
    Copyright 1986, 1989, 1991, 1992, 1995, 1996, 1998, 1999, 2000,
-   2002, 2003, 2004 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -124,7 +124,7 @@ vax_store_arguments (struct regcache *regcache, int nargs,
   /* Push arguments in reverse order.  */
   for (i = nargs - 1; i >= 0; i--)
     {
-      int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (args[i]));
+      int len = TYPE_LENGTH (value_enclosing_type (args[i]));
 
       sp -= (len + 3) & ~3;
       count += (len + 3) / 4;
