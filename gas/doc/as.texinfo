@@ -45,11 +45,32 @@
 @setchapternewpage odd
 @c %**end of header
 
+@c @smallbook
+@c @set SMALL
+@c WARE! Some of the machine-dependent sections contain tables of machine
+@c instructions.  Except in multi-column format, these tables look silly.
+@c Unfortunately, Texinfo doesn't have a general-purpose multi-col format, so
+@c the multi-col format is faked within @example sections.
+@c 
+@c Again unfortunately, the natural size that fits on a page, for these tables,
+@c is different depending on whether or not smallbook is turned on.
+@c This matters, because of order: text flow switches columns at each page
+@c break.
+@c 
+@c The format faked in this source works reasonably well for smallbook,
+@c not well for the default large-page format.  This manual expects that if you
+@c turn on @smallbook, you will also uncomment the "@set SMALL" to enable the
+@c tables in question.  You can turn on one without the other at your
+@c discretion, of course. 
+@ifinfo
+@set SMALL
+@c the insn tables look just as silly in info files regardless of smallbook,
+@c might as well show 'em anyways.
+@end ifinfo
+
 @ifinfo
 @format
-START-INFO-DIR-ENTRY
-* As: (as).                          The GNU assembler.
-END-INFO-DIR-ENTRY
+START-INFO-DIR-ENTRY As: (as).  The GNU assembler.  END-INFO-DIR-ENTRY
 @end format
 @end ifinfo
 
@@ -3767,7 +3788,7 @@ subject, see the hardware manufacturer's manual.
 * H8/500-Dependent::            Hitachi H8/500 Dependent Features
 @end ifset
 @ifset HPPA
-* HPPA-Dependent::		HPPA Dependent Features
+* HPPA-Dependent::              HPPA Dependent Features
 @end ifset
 @ifset SH
 * SH-Dependent::                Hitachi SH Dependent Features
@@ -3838,30 +3859,30 @@ gives a warning message that the option was ignored and proceeds.
 These options are for compatibility with scripts designed for other
 people's assemblers.
 
-@table @asis
-@item @samp{-D} (Debug)
-@itemx @samp{-S} (Symbol Table)
-@itemx @samp{-T} (Token Trace)
+@table @code
+@item @code{-D} (Debug)
+@itemx @code{-S} (Symbol Table)
+@itemx @code{-T} (Token Trace)
 @cindex @code{-D}, ignored on VAX
 @cindex @code{-S}, ignored on VAX
 @cindex @code{-T}, ignored on VAX
 These are obsolete options used to debug old assemblers.
 
-@item @samp{-d} (Displacement size for JUMPs)
+@item @code{-d} (Displacement size for JUMPs)
 @cindex @code{-d}, VAX option
 This option expects a number following the @samp{-d}.  Like options
 that expect filenames, the number may immediately follow the
 @samp{-d} (old standard) or constitute the whole of the command line
 argument that follows @samp{-d} (GNU standard).
 
-@item @samp{-V} (Virtualize Interpass Temporary File)
+@item @code{-V} (Virtualize Interpass Temporary File)
 @cindex @code{-V}, redundant on VAX
 Some other assemblers use a temporary file.  This option
 commanded them to keep the information in active memory rather
 than in a disk file.  @code{@value{AS}} always does this, so this
 option is redundant.
 
-@item @samp{-J} (JUMPify Longer Branches)
+@item @code{-J} (JUMPify Longer Branches)
 @cindex @code{-J}, ignored on VAX
 Many 32-bit computers permit a variety of branch instructions
 to do the same job.  Some of these instructions are short (and
@@ -3871,7 +3892,7 @@ flavors of branch: short, medium and long.  Some other
 assemblers would emit short and medium branches, unless told by
 this option to emit short and long branches.
 
-@item @samp{-t} (Temporary File Directory)
+@item @code{-t} (Temporary File Directory)
 @cindex @code{-t}, ignored on VAX
 Some other assemblers may use a temporary file, and this option
 takes a filename being the directory to site the temporary
@@ -4484,6 +4505,10 @@ Programming Manual} (Hitachi).
 @code{@value{AS}} implements all the standard H8/300 opcodes.  No additional
 pseudo-instructions are needed on this family.
 
+@ifset SMALL
+@c this table, due to the multi-col faking and hardcoded order, looks silly
+@c except in smallbook.  See comments below "@set SMALL" near top of this file.
+
 The following table summarizes the H8/300 opcodes, and their arguments.
 Entries marked @samp{*} are opcodes used only on the H8/300H.
 
@@ -4637,6 +4662,7 @@ Entries marked @samp{*} are opcodes used only on the H8/300H.
 *  stc  ccr,@@rs               *  xor.l rs,rd
 *  stc  ccr,@@(disp:16,rd)        xorc #imm,ccr
 @end smallexample
+@end ifset
 
 @cindex size suffixes, H8/300
 @cindex H8/300 size suffixes
@@ -4814,6 +4840,10 @@ For detailed information on the H8/500 machine instruction set, see
 @code{@value{AS}} implements all the standard H8/500 opcodes.  No additional
 pseudo-instructions are needed on this family.
 
+@ifset SMALL
+@c this table, due to the multi-col faking and hardcoded order, looks silly
+@c except in smallbook.  See comments below "@set SMALL" near top of this file.
+
 The following table summarizes H8/500 opcodes and their operands:
 
 @c Use @group if it ever works, instead of @page
@@ -4921,7 +4951,7 @@ mov[:f].b rs,@@(disp8,fp)       xorc.b imm8,crb
 mov[:g] sz rs,ea_mem           xorc.w imm16,sr
 mov[:g] sz ea,rd              
 @end smallexample
-
+@end ifset
 @end ifset
 
 @ifset HPPA
@@ -4931,12 +4961,12 @@ mov[:g] sz ea,rd
 
 @cindex  support
 @menu
-* HPPA Notes::		      Notes
+* HPPA Notes::                Notes
 * HPPA Options::              Options
 * HPPA Syntax::               Syntax
 * HPPA Floating Point::       Floating Point
 * HPPA Directives::           HPPA Machine Directives
-* HPPA Opcodes::	      Opcodes
+* HPPA Opcodes::              Opcodes
 @end menu
 
 @node HPPA Notes
@@ -5010,10 +5040,10 @@ briefly.  For detailed information on HPPA-specific assembler directives, see
 described in the HP manual:
 
 @example
-endm           liston  
-enter          locct   
-leave          macro   
-listoff
+.endm           .liston
+.enter          .locct
+.leave          .macro  
+.listoff
 @end example
 
 @cindex @code{.param} on HPPA
@@ -5049,8 +5079,8 @@ subroutines), @samp{no_calls} (proc does not call subroutines), @samp{save_rp}
 routine).
 
 @item .code
-@c ??? Not in HP manual
-Assemble into the code section.
+Assemble into the standard section called @samp{$TEXT$}, subsection
+@samp{$CODE$}.
 
 @ifset SOM
 @item .copyright "@var{string}"
@@ -5108,7 +5138,7 @@ Advance location counter to @var{lc}. Synonym for the @code{@value{as}}
 portable directive @code{.org}.
 
 @item .param @var{name} [ ,@var{typ} ]  [ ,@var{param}=@var{r} ]
-@c Not in HP manual
+@c Not in HP manual; GNU HPPA extension
 Similar to @code{.export}, but used for static procedures.
 
 @item .proc
@@ -5118,7 +5148,7 @@ Use preceding the first statement of a procedure.
 Use following the last statement of a procedure.
 
 @item @var{label} .reg @var{expr}
-@c ?? Not in HP manual
+@c ?? Not in HP manual (Jan 1988 vn)
 Synonym for @code{.equ}; define @var{label} with the absolute expression
 @var{expr} as its value.
 
@@ -5136,19 +5166,17 @@ identified by keywords.  The keywords recognized are @samp{spnum=@var{exp}}
 loadable data), @samp{notdefined} (this section defined elsewhere), and
 @samp{private} (data in this section not available to other programs).
 
-@ignore
-@item .spnum
-@c ?? Not in HP manual
-FIXME--- Comments in source indicate directive not well understood.
-@end ignore
+@item .spnum @var{secnam}
+@c ?? Not in HP manual (Jan 1988)
+Allocate four bytes of storage, and initialize them with the section number of
+the section named @var{secnam}.  (You can define the section number with the
+HPPA @code{.space} directive.)
 
 @item .string "@var{str}"
 @cindex @code{string} directive on HPPA
-Copy the characters in @var{str} to the object file, after converting some
-@samp{\@var{x}} escape sequences to single characters.  Use @samp{\x@var{dd}}
-to refer to a character in hexadecimal.
-@c FIXME! Is that all?  HP manual mentions more, which I don't see in
-@c        pa_stringer. 
+Copy the characters in the string @var{str} to the object file.
+@xref{Strings,,Strings}, for information on escape sequences you can use in
+@code{@value{AS}} strings.
 
 @emph{Warning!} The HPPA version of @code{.string} differs from the
 usual @code{@value{AS}} definition: it does @emph{not} write a zero byte
@@ -5353,6 +5381,10 @@ where other assemblers might require an explicit displacement to
 mov.l  @@(@var{disp}, PC)
 @end example
 
+@ifset SMALL
+@c this table, due to the multi-col faking and hardcoded order, looks silly
+@c except in smallbook.  See comments below "@set SMALL" near top of this file.
+
 Here is a summary of SH opcodes:
 
 @page
@@ -5434,6 +5466,7 @@ sleep                          xor.b #imm,@@(R0,GBR)
 stc GBR,Rn                     xtrct Rm,Rn               
 stc SR,Rn
 @end smallexample
+@end ifset
 
 @ifset Hitachi-all
 @ifclear GENERIC
@@ -5996,6 +6029,7 @@ This directive is identical to a @code{.align 1} directive.
 This directive is identical to a @code{.space} directive.
 @end table
 
+@need 2000
 @node M68K-opcodes
 @section Opcodes
 
@@ -6898,6 +6932,10 @@ synonym for @code{.align 1}
 For detailed information on the Z8000 machine instruction set, see
 @cite{Z8000 Technical Manual}.
 
+@ifset SMALL
+@c this table, due to the multi-col faking and hardcoded order, looks silly
+@c except in smallbook.  See comments below "@set SMALL" near top of this file.
+
 The following table summarizes the opcodes and their arguments:
 @iftex
 @begingroup
@@ -7060,6 +7098,7 @@ set addr(rd),imm4       subl rrd,addr(rs)
 @iftex
 @endgroup
 @end iftex
+@end ifset
 
 @end ifset
 
