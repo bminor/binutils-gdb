@@ -1,3 +1,10 @@
+Tue Aug 22 00:30:37 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gdb.base/funcargs.exp: Avoid ever setting more than 8
+	breakpoints in the inferior at any given time by making
+	two groups of breakpoints for call2*, call6* and call7*
+	tests.
+
 Sun Aug 20 06:58:25 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.base/funcargs.exp:  Fix typos introduced by Aug 15 change.

@@ -171,7 +171,6 @@ proc float_and_integral_args {} {
     send "break call2f\n" ; expect -re ".*$prompt $"
     send "break call2g\n" ; expect -re ".*$prompt $"
     send "break call2h\n" ; expect -re ".*$prompt $"
-    send "break call2i\n" ; expect -re ".*$prompt $"
 
     # Run; should stop at call2a and print actual arguments.
 
@@ -232,6 +231,11 @@ proc float_and_integral_args {} {
     if [gdb_test "cont" ".* call2h \\(d2=5, c=97 'a', f1=4, s=1, d1=5, i=2, f2=4, l=3\\) .*" "continue to call2h"] {
 	return
     }
+
+    # monitor only allows 8 breakpoints; w89k board allows 10, so
+    # break them up into two groups.
+    delete_breakpoints
+    send "break call2i\n" ; expect -re ".*$prompt $"
 
     # Continue; should stop at call2i and print actual arguments.
     if [gdb_test "cont" ".* call2i \\(c1=97 'a', f1=4, c2=97 'a', c3=97 'a', d1=5, c4=97 'a', c5=97 'a', c6=97 'a', f2=4, s=1, c7=97 'a', d2=5\\) .*" "continue to call2i"] {
@@ -395,9 +399,6 @@ proc discard_and_shuffle {} {
     send "break call6f\n" ; expect -re ".*$prompt $"
     send "break call6g\n" ; expect -re ".*$prompt $"
     send "break call6h\n" ; expect -re ".*$prompt $"
-    send "break call6i\n" ; expect -re ".*$prompt $"
-    send "break call6j\n" ; expect -re ".*$prompt $"
-    send "break call6k\n" ; expect -re ".*$prompt $"
 
     # Run; should stop at call6a and print actual arguments.
     # Print backtrace.
@@ -591,6 +592,13 @@ $prompt $" { pass "backtrace from call6h" }
 	timeout { fail "(timeout) backtrace from call6h" ; return }
     }
 
+    # monitor only allows 8 breakpoints; w89k board allows 10, so
+    # break them up into two groups.
+    delete_breakpoints
+    send "break call6i\n" ; expect -re ".*$prompt $"
+    send "break call6j\n" ; expect -re ".*$prompt $"
+    send "break call6k\n" ; expect -re ".*$prompt $"
+
     # Continue; should stop at call6i and print actual arguments.
     # Print backtrace.
 
@@ -704,9 +712,6 @@ proc shuffle_round_robin {} {
     send "break call7f\n" ; expect -re ".*$prompt $"
     send "break call7g\n" ; expect -re ".*$prompt $"
     send "break call7h\n" ; expect -re ".*$prompt $"
-    send "break call7i\n" ; expect -re ".*$prompt $"
-    send "break call7j\n" ; expect -re ".*$prompt $"
-    send "break call7k\n" ; expect -re ".*$prompt $"
 
     # Run; should stop at call7a and print actual arguments.
     # Print backtrace.
@@ -931,6 +936,13 @@ $prompt $" { pass "backtrace from call7i" }
 	-re "$prompt $" { fail "backtrace from call7i" ; return }
 	timeout { fail "(timeout) backtrace from call7i" ; return }
     }
+
+    # monitor only allows 8 breakpoints; w89k board allows 10, so
+    # break them up into two groups.
+    delete_breakpoints
+    send "break call7i\n" ; expect -re ".*$prompt $"
+    send "break call7j\n" ; expect -re ".*$prompt $"
+    send "break call7k\n" ; expect -re ".*$prompt $"
 
     # Continue; should stop at call7j and print actual arguments.
     # Print backtrace.
