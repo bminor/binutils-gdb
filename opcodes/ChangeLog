@@ -1,3 +1,11 @@
+2003-09-14  Andreas Jaeger  <aj@suse.de>
+
+	* i386-dis.c: Convert to ISO C90 prototypes.
+	* i370-dis.c: Likewise.
+	* i370-opc.c: Likewiwse.
+	* i960-dis.c: Likewise.
+	* ia64-opc.c: Likewise.
+
 2003-09-09  Dave Brolley  <brolley@redhat.com>
 
 	* frv-desc.c: Regenerated.
