@@ -1,3 +1,7 @@
+Fri Jul  3 14:39:05 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* coff-sh.c (sh_insn_uses_freg): Ignore lowest bit of register number.
+
 Fri Jul  3 14:35:48 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* coff-sh.c (sh_insns_conflict): Load of fpscr conflicts with
