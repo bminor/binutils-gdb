@@ -1,3 +1,14 @@
+Fri Oct 11 15:43:54 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* frame.h:  Move definition of struct frame_saved_args to before
+	struct frame to make it possible to use frame_saved_args in
+	EXTRA_FRAME_INFO macro.
+
+start-sanitize-v850
+	* v850-tdep.c config/v850/tm-v850.h:  Lotsa new functions and
+	macros to make frame operations (such as backtrace) work.
+
+end-sanitize-v850
 Fri Oct 11 14:23:50 1996  Fred Fish  <fnf@cygnus.com>
 
 	* dbxread.c (process_one_symbol): Check for null string directly

@@ -41,6 +41,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define SP_REGNUM 3
 #define FP_REGNUM 2
+#define V0_REGNUM 10
+#define V1_REGNUM 11
 #define RP_REGNUM 31
 #define PC_REGNUM 64
 
@@ -58,26 +60,49 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define DECR_PC_AFTER_BREAK 0
 
-#define POP_FRAME warning ("POP_FRAME not implemented yet!")
-
 #define INNER_THAN <
-
-#define FRAME_ARGS_SKIP 4
 
 #define SAVED_PC_AFTER_CALL(fi) read_register (RP_REGNUM)
 
-#define FRAME_CHAIN(fi) (read_memory_unsigned_integer ((fi)->frame - 8, 4))
+#ifdef __STDC__
+struct frame_info;
+struct frame_saved_regs;
+struct type;
+#endif
 
-#define FRAME_SAVED_PC(fi) (read_memory_unsigned_integer((fi)->frame - 4, 4))
+#define EXTRA_FRAME_INFO struct frame_saved_regs fsr;
 
+extern void v850_init_extra_frame_info PARAMS ((struct frame_info *fi));
+#define INIT_EXTRA_FRAME_INFO(fromleaf, fi) v850_init_extra_frame_info (fi)
+#define INIT_FRAME_PC		/* Not necessary */
 
-#define SKIP_PROLOGUE(pc) pc+=8
+extern void v850_frame_find_saved_regs PARAMS ((struct frame_info *fi, struct frame_saved_regs *regaddr));
+#define FRAME_FIND_SAVED_REGS(fi, regaddr) regaddr = fi->fsr
+
+extern CORE_ADDR v850_frame_chain PARAMS ((struct frame_info *fi));
+#define FRAME_CHAIN(fi) v850_frame_chain (fi)
+
+extern CORE_ADDR v850_find_callers_reg PARAMS ((struct frame_info *fi, int regnum));
+#define FRAME_SAVED_PC(fi) (v850_find_callers_reg (fi, RP_REGNUM))
+
+#define EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
+  memcpy (VALBUF, REGBUF + REGISTER_BYTE (V0_REGNUM), TYPE_LENGTH (TYPE))
+
+#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
+  (extract_address (REGBUF + REGISTER_BYTE (V0_REGNUM), \
+		    REGISTER_RAW_SIZE (V0_REGNUM)))
+
+#define STORE_RETURN_VALUE(TYPE, VALBUF) \
+  write_register_bytes(REGISTER_BYTE (V0_REGNUM), VALBUF, TYPE_LENGTH (TYPE));
+
+extern CORE_ADDR v850_skip_prologue PARAMS ((CORE_ADDR pc));
+#define SKIP_PROLOGUE(pc) pc = v850_skip_prologue (pc)
+
+#define FRAME_ARGS_SKIP 0
 
 #define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
 #define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
 #define FRAME_NUM_ARGS(val, fi) ((val) = -1)
-#define FRAME_FIND_SAVED_REGS(fi, regaddr) warning ("FRAME_FIND_SAVED_REGS not implemented yet!")
 
-#define EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) warning ("EXTRACT_RETURN_VALUE not implemented yet!")
-#define STORE_RETURN_VALUE(TYPE, VALBUF) warning ("STORE_RETURN_VALUE not implemented yet!")
-
+extern struct frame_info *v850_pop_frame PARAMS ((struct frame_info *frame));
+#define POP_FRAME v850_pop_frame (get_current_frame ())
