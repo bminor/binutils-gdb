@@ -63,13 +63,13 @@ static char *gld${EMULATION_NAME}_choose_target PARAMS ((int, char **));
 static void gld${EMULATION_NAME}_before_allocation PARAMS ((void));
 static void gld${EMULATION_NAME}_read_file PARAMS ((const char *, boolean));
 static void gld${EMULATION_NAME}_free PARAMS ((PTR));
-static void gld${EMULATION_NAME}_find_relocs 
+static void gld${EMULATION_NAME}_find_relocs
 PARAMS ((lang_statement_union_type *));
 static void gld${EMULATION_NAME}_find_exp_assignment PARAMS ((etree_type *));
 static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
 static boolean gld${EMULATION_NAME}_unrecognized_file
   PARAMS ((lang_input_statement_type *));
-static void gld${EMULATION_NAME}_create_output_section_statements 
+static void gld${EMULATION_NAME}_create_output_section_statements
   PARAMS ((void));
 static void gld${EMULATION_NAME}_set_output_arch PARAMS ((void));
 
@@ -135,7 +135,7 @@ static unsigned int syscall_mask = 0x77;
 /* fake file for -binitfini support */
 static lang_input_statement_type *initfini_file;
 
-/* Whether to do run time linking 
+/* Whether to do run time linking
    -brtl enables, -bnortl and -bnortllib disable. */
 static int rtld;
 
@@ -147,12 +147,21 @@ static char *command_line_blibpath = NULL;
 static void
 gld${EMULATION_NAME}_before_parse ()
 {
+  const bfd_arch_info_type *arch = bfd_scan_arch ("${OUTPUT_ARCH}");
+  if (arch)
+    {
+      ldfile_output_architecture = arch->arch;
+      ldfile_output_machine = arch->mach;
+      ldfile_output_machine_name = arch->printable_name;
+    }
+  else
+    ldfile_output_architecture = bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`;
 
   config.has_shared = true;
 
   /* The link_info.[init|fini]_functions are initialized in ld/lexsup.c.
      Override them here so we can use the link_info.init_function as a
-     state flag that lets the backend know that -binitfini has been done.  */ 
+     state flag that lets the backend know that -binitfini has been done.  */
 
   link_info.init_function = NULL;
   link_info.fini_function = NULL;
@@ -173,7 +182,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
   bfd_signed_vma val;
   char *end;
 
-  enum 
+  enum
   {
     OPTION_IGNORE = 300,
     OPTION_AUTOIMP,
@@ -202,7 +211,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
      uses the arguemnts to generate a table of init and fini functions for
      the executable.  The important use for this option is to support aix 4.2+
      c++ constructors and destructors.  This is tied into gcc via collect2.c.
-     
+
      The function table is accessed by the runtime linker/loader by checking if
      the first symbol in the loader symbol table is __rtinit.  The gnu linker
      generates this symbol and makes it the first loader symbol.  */
@@ -333,9 +342,9 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 
     case 'T':
       /* On AIX this is the same as GNU ld -Ttext.  When we see -T
-         number, we assume the AIX option is intended.  Otherwise, we
-         assume the usual GNU ld -T option is intended.  We can't just
-         ignore the AIX option, because gcc passes it to the linker.  */
+	 number, we assume the AIX option is intended.  Otherwise, we
+	 assume the usual GNU ld -T option is intended.  We can't just
+	 ignore the AIX option, because gcc passes it to the linker.  */
       val = strtoull (optarg, &end, 0);
       if (*end != '\0')
 	{
@@ -384,7 +393,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 	  link_info.fini_function = f;
       }
       break;
-      
+
     case OPTION_AUTOIMP:
       link_info.static_link = false;
       break;
@@ -431,7 +440,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
     case OPTION_MAXSTACK:
       val = strtoull (optarg, &end, 0);
       if (*end != '\0')
-	einfo ("%P: warning: ignoring invalid -bmaxstack number %s\n", 
+	einfo ("%P: warning: ignoring invalid -bmaxstack number %s\n",
 	       optarg);
       else
 	maxstack = val;
@@ -459,9 +468,9 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 
     case OPTION_PD:
       /* This sets the page that the .data section is supposed to
-         start on.  The offset within the page should still be the
-         offset within the file, so we need to build an appropriate
-         expression.  */
+	 start on.  The offset within the page should still be the
+	 offset within the file, so we need to build an appropriate
+	 expression.  */
       val = strtoull (optarg, &end, 0);
       if (*end != '\0')
 	einfo ("%P: warning: ignoring invalid -pD number %s\n", optarg);
@@ -483,8 +492,8 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 
     case OPTION_PT:
       /* This set the page that the .text section is supposed to start
-         on.  The offset within the page should still be the offset
-         within the file.  */
+	 on.  The offset within the page should still be the offset
+	 within the file.  */
       val = strtoull (optarg, &end, 0);
       if (*end != '\0')
 	einfo ("%P: warning: ignoring invalid -pT number %s\n", optarg);
@@ -600,8 +609,8 @@ gld${EMULATION_NAME}_after_open ()
       bfd_size_type size;
 
       /* If the symbol is defined, we may have been invoked from
-         collect, and the sets may already have been built, so we do
-         not do anything.  */
+	 collect, and the sets may already have been built, so we do
+	 not do anything.  */
       if (p->h->type == bfd_link_hash_defined
 	  || p->h->type == bfd_link_hash_defweak)
 	continue;
@@ -651,9 +660,9 @@ gld${EMULATION_NAME}_before_allocation ()
   lang_for_each_statement (gld${EMULATION_NAME}_find_relocs);
 
   /* Precedence of LIBPATH
-     -blibpath:  native support always first
-     -rpath:     gnu extension
-     -L          build from command line -L's */
+     -blibpath:	 native support always first
+     -rpath:	 gnu extension
+     -L		 build from command line -L's */
   if (command_line_blibpath != NULL)
     libpath = command_line_blibpath;
   else if (command_line.rpath != NULL)
@@ -681,10 +690,10 @@ gld${EMULATION_NAME}_before_allocation ()
     }
 
   /* Let the XCOFF backend set up the .loader section.  */
-  if (!bfd_xcoff_size_dynamic_sections 
+  if (!bfd_xcoff_size_dynamic_sections
       (output_bfd, &link_info, libpath,	entry_symbol.name, file_align,
        maxstack, maxdata, gc && !unix_ld ? true : false,
-       modtype,	textro ? true : false, unix_ld, special_sections, 
+       modtype,	textro ? true : false, unix_ld, special_sections,
        rtld ? true : false))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
 
@@ -704,16 +713,16 @@ gld${EMULATION_NAME}_before_allocation ()
 	continue;
 
       /* Remove this section from the list of the output section.
-         This assumes we know what the script looks like.  */
+	 This assumes we know what the script looks like.  */
       is = NULL;
       os = lang_output_section_find (sec->output_section->name);
-      if (os == NULL) 
+      if (os == NULL)
 	einfo ("%P%F: can't find output section %s\n",
 	       sec->output_section->name);
 
       for (pls = &os->children.head; *pls != NULL; pls = &(*pls)->header.next)
 	{
-	  if ((*pls)->header.type == lang_input_section_enum 
+	  if ((*pls)->header.type == lang_input_section_enum
 	      && (*pls)->input_section.section == sec)
 	    {
 	      is = (lang_input_section_type *) * pls;
@@ -729,7 +738,7 @@ gld${EMULATION_NAME}_before_allocation ()
 		   *pwls != NULL; pwls = &(*pwls)->header.next)
 		{
 
-		  if ((*pwls)->header.type == lang_input_section_enum 
+		  if ((*pwls)->header.type == lang_input_section_enum
 		      && (*pwls)->input_section.section == sec)
 		    {
 		      is = (lang_input_section_type *) * pwls;
@@ -811,7 +820,7 @@ gld${EMULATION_NAME}_choose_target (argc, argv)
   int i, j, jmax;
   static char *from_outside;
   static char *from_inside;
-  static char *argv_to_target[][2] = { 
+  static char *argv_to_target[][2] = {
     {NULL,   "${OUTPUT_FORMAT}"},
     {"-b32", "${OUTPUT_FORMAT_32BIT}"},
     {"-b64", "${OUTPUT_FORMAT_64BIT}"},
@@ -827,7 +836,7 @@ gld${EMULATION_NAME}_choose_target (argc, argv)
   from_inside = argv_to_target[0][1];
   for (i = 1; i < argc; i++)
     {
-      for (j = 1; j < jmax; j++) 
+      for (j = 1; j < jmax; j++)
 	{
 	  if (0 == strcmp (argv[i], argv_to_target[j][0]))
 	    from_inside = argv_to_target[j][1];
@@ -837,10 +846,10 @@ gld${EMULATION_NAME}_choose_target (argc, argv)
   return from_inside;
 }
 
-/* Returns 
+/* Returns
    1 : state changed
    0 : no change */
-static int 
+static int
 change_symbol_mode (input)
      char *input;
 {
@@ -871,18 +880,18 @@ change_symbol_mode (input)
   return 0;
 }
 
-/* Returns 
+/* Returns
    1 : yes
    0 : ignore
    -1 : error, try something else */
-static int 
+static int
 is_syscall (input, flag)
      char *input;
      unsigned int *flag;
 {
   unsigned int bit;
   char *string;
-  
+
   struct sc {
     char *syscall_string;
     unsigned int flag;
@@ -900,20 +909,20 @@ is_syscall (input, flag)
 
   *flag = 0;
 
-  for (bit = 0;; bit++) 
+  for (bit = 0;; bit++)
     {
       string = s[bit].syscall_string;
-      if (string == NULL) 
+      if (string == NULL)
 	return -1;
 
-      if (0 == strcmp (input, string)) 
+      if (0 == strcmp (input, string))
 	{
-	  if (1 << bit & syscall_mask) 
+	  if (1 << bit & syscall_mask)
 	    {
 	      *flag = s[bit].flag;
 	      return 1;
-	    } 
-	  else 
+	    }
+	  else
 	    {
 	      return 0;
 	    }
@@ -1106,8 +1115,8 @@ gld${EMULATION_NAME}_read_file (filename, import)
 		  char *end;
 
 		  status = is_syscall (s, &syscall_flag);
-	      
-		  if (0 > status) 
+
+		  if (0 > status)
 		    {
 		      /* not a system call, check for address */
 		      address = strtoul (s, &end, 0);
@@ -1115,7 +1124,7 @@ gld${EMULATION_NAME}_read_file (filename, import)
 			{
 			  einfo ("%s:%d: warning: syntax error in import/export file\n",
 				 filename, lineno);
-			  
+
 			}
 		    }
 		}
@@ -1266,16 +1275,16 @@ cat >>e${EMULATION_NAME}.c <<EOF
   if (link_info.relocateable == true && config.build_constructors == true)
     return
 EOF
-sed $sc ldscripts/${EMULATION_NAME}.xu                     >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xu			   >> e${EMULATION_NAME}.c
 echo '  ; else if (link_info.relocateable == true) return' >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xr                     >> e${EMULATION_NAME}.c
-echo '  ; else if (!config.text_read_only) return'         >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xbn                    >> e${EMULATION_NAME}.c
-echo '  ; else if (!config.magic_demand_paged) return'     >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xn                     >> e${EMULATION_NAME}.c
-echo '  ; else return'                                     >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.x                      >> e${EMULATION_NAME}.c
-echo '; }'                                                 >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xr			   >> e${EMULATION_NAME}.c
+echo '  ; else if (!config.text_read_only) return'	   >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xbn			   >> e${EMULATION_NAME}.c
+echo '  ; else if (!config.magic_demand_paged) return'	   >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xn			   >> e${EMULATION_NAME}.c
+echo '  ; else return'					   >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.x			   >> e${EMULATION_NAME}.c
+echo '; }'						   >> e${EMULATION_NAME}.c
 
 else
 # Scripts read from the filesystem.
@@ -1301,19 +1310,19 @@ fi
 
 cat >>e${EMULATION_NAME}.c <<EOF
 
-static void 
+static void
 gld${EMULATION_NAME}_create_output_section_statements ()
 {
   /* __rtinit */
-  if ((bfd_get_flavour (output_bfd) == bfd_target_xcoff_flavour) 
-      && (link_info.init_function != NULL  
+  if ((bfd_get_flavour (output_bfd) == bfd_target_xcoff_flavour)
+      && (link_info.init_function != NULL
 	  || link_info.fini_function != NULL
 	  || rtld == true))
     {
       initfini_file = lang_add_input_file ("initfini",
 					   lang_input_file_is_file_enum,
 					   NULL);
-      
+
       initfini_file->the_bfd = bfd_create ("initfini", output_bfd);
       if (initfini_file->the_bfd == NULL
 	  || ! bfd_set_arch_mach (initfini_file->the_bfd,
@@ -1323,10 +1332,10 @@ gld${EMULATION_NAME}_create_output_section_statements ()
 	  einfo ("%X%P: can not create BFD %E\n");
 	  return;
 	}
-      
+
       /* Call backend to fill in the rest */
-      if (false == bfd_xcoff_link_generate_rtinit (initfini_file->the_bfd, 
-						   link_info.init_function, 
+      if (false == bfd_xcoff_link_generate_rtinit (initfini_file->the_bfd,
+						   link_info.init_function,
 						   link_info.fini_function,
 						   rtld))
 	{
@@ -1335,7 +1344,7 @@ gld${EMULATION_NAME}_create_output_section_statements ()
 	}
 
       /* __rtld defined in /lib/librtl.a */
-      if (true == rtld) 
+      if (true == rtld)
 	lang_add_input_file ("rtl", lang_input_file_is_l_enum, NULL);
     }
 }
