@@ -1,3 +1,86 @@
+Thu Jun  3 14:09:59 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/ho-hppabsd.h: New file, from Peter Hoogenboom.
+
+	* config/tc-mips.c (md_assemble): Call bfd_set_gp_size only for
+	ECOFF format.
+
+Tue Jun  1 15:21:57 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-m68k.c (md_assemble): The 68040 cpu doesn't want a
+	separate '851 mmu.
+
+	* config/obj-elf.c, config/obj-elf.h: Update for new type, macro,
+	and routine names.  Assuming 32 bits for now.
+
+	* config/obj-elf.c (elf_frob_file): Look for macro
+	elf_tc_final_processing_hook, instead of assuming a function
+	always exists.
+	* config/tc-hppa.c (elf_hppa_final_processing_hook): Renamed from
+	tc_final_processing_hook.
+	* config/tc-hppa.h (elf_tc_final_processing_hook): Use it.
+
+	* config/tc-hppa.h (elf_tc_symbol, elf_tc_make_sections): Macros
+	moved here from obj-elf.h.
+	* config/obj-elf.h: Don't include CPU-specific header files.
+
+Sun May 30 16:49:37 1993  Peter Hoogenboom  (hoogen@fast.cs.utah.edu)
+
+	* configure.in: configurations should match on 'hppa*' not 'hppa'.
+
+	* read.c: Add support for HPPA assembly language syntax (denoted
+	with '#ifdef TC_HPPA').
+
+	* symbols.c: Add support for HPPA assembly language syntax (denoted
+	with '#ifdef TC_HPPA').
+
+	* write.c (write_contents):  Add support for HPPA-style
+	relocations.
+
+	* config/obj-elf.c: Stab symbols weren't written properly.
+	(obj_elf_version):
+	(obj_elf_desc):
+	(obj_elf_write_symbol):
+	(obj_elf_write_symbol_p):
+	(obj_elf_frob_symbol):
+	(elf_stab_symbol):
+	(elf_frob_file):
+
+	* config/tc-hppa.c: Support for HPPA symbol extension sections.
+	Remove some unused code.  Support for HPPA assembly language
+	syntax.
+
+	* app.c:
+
+	* symbols.c:
+
+	* config/obj-elf.h:
+	(obj_write_symbol):
+	(obj_frob_file):
+	(elf_tc_symbol):
+	(elf_tc_make_sections):
+
+	* config/tc-hppa.h:
+
+Sun May 30 21:44:45 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* config/obj-ecoff.c (obj_read_begin_hook, add_file): Assume
+	hash_new will have succeeded if it returns.
+	* config/tc-a29k.c (md_begin): Likewise.
+
+	* config/tc-i386.c (tc_aout_fix_to_chars): Now nbytes_r_length is
+	const.
+	(mode_from_disp_size, opcode_suffic_to_type): Now inline under
+	gcc.
+	(fits_in_{signed,unsigned}_{byte,word}): Likewise.
+
+	* expr.c: Delete register declarations; gcc ignores them anyways.
+
+Fri May 28 19:03:32 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* hash.c (hash_new): Use xmalloc, since many callers don't check
+	for failure.
+
 Thu May 27 13:02:15 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* frags.c (zero_address_frag, bss_address_frag): These are
