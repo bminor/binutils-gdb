@@ -1,3 +1,15 @@
+2003-09-03  Dave Brolley  <brolley@redhat.com>
+
+	* frv.opc (parse_A, parse_A0, parse_A1): New parse handlers.
+	* frv.cpu (UNIT): Add IALL, FMALL, FMLOW, STORE, SCAN, DCPL, MDUALACC,
+	MCLRACC-1.
+	(A): Removed operand.
+	(A0,A1): New operands replace operand A.
+	(mnop): Now a real insn
+	(mclracc): Removed insn.
+	(mclracc-0, mclracc-1): New insns replace mclracc.
+	(all insns): Use new UNIT attributes.
+
 2003-08-21  Nick Clifton  <nickc@redhat.com>
 
 	* frv.cpu (mbtoh): Replace input parameter to u-media-dual-expand

@@ -185,7 +185,7 @@ frv_is_media_insn (const CGEN_INSN *insn)
 
 /* This table represents the allowable packing for vliw insns for the fr400.
    The fr400 has only 2 vliw slots. Represent this by not allowing any insns
-   in slots 2 and 3.
+   in the extra slots.
    Subsets of any given row are also allowed.  */
 static VLIW_COMBO fr400_allowed_vliw[] =
 {
@@ -228,15 +228,23 @@ static CGEN_ATTR_VALUE_TYPE fr400_unit_mapping[] =
 /* I0       */     UNIT_I0,
 /* I1       */     UNIT_I1,
 /* I01      */     UNIT_I01, 
+/* IALL     */     UNIT_I01, /* only I0 and I1 units */
 /* FM0      */     UNIT_FM0,
 /* FM1      */     UNIT_FM1,
 /* FM01     */     UNIT_FM01,
+/* FMALL    */     UNIT_FM01,/* Only F0,F1,M0,M1 units */
+/* FMLOW    */     UNIT_FM0, /* Only F0,M0 units */
 /* B0       */     UNIT_B0,  /* branches only in B0 unit.  */
 /* B1       */     UNIT_B0,
 /* B01      */     UNIT_B0,
 /* C        */     UNIT_C,
-/* MULT-DIV */     UNIT_I0,  /* multiply and divide only in I0 unit.  */
-/* LOAD     */     UNIT_I0   /* load                only in I0 unit.  */
+/* MULT-DIV */     UNIT_I0,  /* multiply and divide only in I0  unit.  */
+/* LOAD     */     UNIT_I0,  /* load                only in I0  unit.  */
+/* STORE    */     UNIT_I0,  /* store               only in I0  unit.  */
+/* SCAN     */     UNIT_I0,  /* scan                only in I0  unit.  */
+/* DCPL     */     UNIT_C,   /* dcpl                only in C   unit.  */
+/* MDUALACC */     UNIT_FM0, /* media dual acc insn only in FM0 unit.  */
+/* MCLRACC-1*/     UNIT_FM0  /* mclracc,A==1   insn only in FM0 unit.  */
 };
 
 static CGEN_ATTR_VALUE_TYPE fr500_unit_mapping[] =
@@ -246,15 +254,23 @@ static CGEN_ATTR_VALUE_TYPE fr500_unit_mapping[] =
 /* I0       */     UNIT_I0,
 /* I1       */     UNIT_I1,
 /* I01      */     UNIT_I01, 
+/* IALL     */     UNIT_I01, /* only I0 and I1 units */
 /* FM0      */     UNIT_FM0,
 /* FM1      */     UNIT_FM1,
 /* FM01     */     UNIT_FM01,
+/* FMALL    */     UNIT_FM01,/* Only F0,F1,M0,M1 units */
+/* FMLOW    */     UNIT_FM0, /* Only F0,M0 units */
 /* B0       */     UNIT_B0,
 /* B1       */     UNIT_B1,
 /* B01      */     UNIT_B01,
 /* C        */     UNIT_C,
 /* MULT-DIV */     UNIT_I01, /* multiply and divide in I0 or I1 unit.  */
-/* LOAD     */     UNIT_I01  /* load                in I0 or I1 unit.  */
+/* LOAD     */     UNIT_I01, /* load                in I0 or I1 unit.  */
+/* STORE    */     UNIT_I0,  /* store               only in I0 unit.  */
+/* SCAN     */     UNIT_I01, /* scan                in I0 or I1 unit.  */
+/* DCPL     */     UNIT_C,   /* dcpl                only in C unit.  */
+/* MDUALACC */     UNIT_FM0, /* media dual acc insn only in FM0 unit.  */
+/* MCLRACC-1*/     UNIT_FM01 /* mclracc,A==1 in FM0 or FM1 unit.  */
 };
 
 void
@@ -537,10 +553,15 @@ frv_vliw_add_insn (FRV_VLIW *vliw, const CGEN_INSN *insn)
   if (unit == UNIT_NIL)
     abort (); /* no UNIT specified for this insn in frv.cpu  */
 
-  if (vliw->mach == bfd_mach_fr400)
-    major = CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_FR400_MAJOR);
-  else
-    major = CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_FR500_MAJOR);
+  switch (vliw->mach)
+    {
+    case bfd_mach_fr400:
+      major = CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_FR400_MAJOR);
+      break;
+    default:
+      major = CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_FR500_MAJOR);
+      break;
+    }
 
   if (index <= 0)
     {
@@ -606,6 +627,12 @@ static const char * parse_u12
   PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
 static const char * parse_even_register
   PARAMS ((CGEN_CPU_DESC, const char **, CGEN_KEYWORD *, long *));
+static const char * parse_A0
+  PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
+static const char * parse_A1
+  PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
+static const char * parse_A
+  PARAMS ((CGEN_CPU_DESC, const char **, int, long *, long));
 
 static const char *
 parse_ulo16 (cd, strp, opindex, valuep)
@@ -886,6 +913,49 @@ parse_u12 (cd, strp, opindex, valuep)
         ++*strp;
       return cgen_parse_signed_integer (cd, strp, opindex, valuep);
     }
+}
+
+static const char *
+parse_A (cd, strp, opindex, valuep, A)
+     CGEN_CPU_DESC cd;
+     const char **strp;
+     int opindex;
+     long *valuep;
+     long A;
+{
+  const char *errmsg;
+ 
+  if (**strp == '#')
+    ++*strp;
+
+  errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, valuep);
+  if (errmsg)
+    return errmsg;
+
+  if (*valuep != A)
+    return "Value of A operand must be 0 or 1";
+
+  return NULL;
+}
+
+static const char *
+parse_A0 (cd, strp, opindex, valuep)
+     CGEN_CPU_DESC cd;
+     const char **strp;
+     int opindex;
+     long *valuep;
+{
+  return parse_A (cd, strp, opindex, valuep, 0);
+}
+
+static const char *
+parse_A1 (cd, strp, opindex, valuep)
+     CGEN_CPU_DESC cd;
+     const char **strp;
+     int opindex;
+     long *valuep;
+{
+  return parse_A (cd, strp, opindex, valuep, 1);
 }
 
 static const char *
