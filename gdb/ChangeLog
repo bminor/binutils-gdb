@@ -1,6 +1,9 @@
 Mon Apr 10 16:47:57 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
-	* config/mips/xm-irix5.h: turn on CC_has_LONG_LONG and 
+	* valprint.c (print_longest): Fix a syntax error in #ifdef 
+	PRINTF_HAS_LONG_LONG.
+
+	* config/mips/xm-irix5.h: turn on CC_HAS_LONG_LONG and 
 	PRINTF_HAS_LONG_LONG.
 	* config/mips/tm-irix5.h: turn on FORCE_LONG_LONG.
 
