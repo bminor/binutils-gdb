@@ -1,5 +1,8 @@
 Mon Apr 27 11:56:21 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Change version number to 2.9.4
+	* configure: Rebuild.
+
 	* ld.texinfo (Options) [-rpath-link]: Mention ld.so.conf.
 
 	Based on patch from H.J. Lu <hjl@gnu.org>:
