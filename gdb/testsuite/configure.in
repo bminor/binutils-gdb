@@ -6,9 +6,15 @@
 srctrigger="gdb.t00"
 srcname="DejaGnu"
 
+# Directories to use in all configurations.
 configdirs="gdb.t00 gdb.t01 gdb.t02 gdb.t03 gdb.t04 gdb.t05 gdb.t06 \
 	gdb.t07 gdb.t08 gdb.t09 gdb.t10 gdb.t11 gdb.t12 gdb.t13 gdb.t15 \
-	gdb.t16 gdb.t17 gdb.t20 gdb.t21 gdb.t22 gdb.t23 gdb.t30 gdb.t31"
+	gdb.t16 gdb.t17 gdb.t30 gdb.t31"
+
+# Directories to use for a configuration which uses stabs.  C++ tests
+# are also here because I don't believe they work well for any other
+# debugging format.
+stabsdirs="gdb.stabs gdb.t20 gdb.t21 gdb.t22 gdb.t23"
 
 # per-host:
 
@@ -44,6 +50,16 @@ a29k-isstip-*)		target_abbrev=itip ;
 				target_makefile_frag=config/mt-a29k-isstip ;;
 mips-idt-ecoff)		target_abbrev=mips ;
 				target_makefile_frag=config/mt-mips ;;
+esac
+
+case "${target}" in
+
+rs6000-*-aix*)		configdirs="${configdirs} ${stabsdirs}" ;;
+*-*-bsd*)		configdirs="${configdirs} ${stabsdirs}" ;;
+*-*-go32*)		configdirs="${configdirs} ${stabsdirs}" ;;
+*-*-linux*)		configdirs="${configdirs} ${stabsdirs}" ;;
+*-sun-*)		configdirs="${configdirs} ${stabsdirs}" ;;
+
 esac
 
 	# link in the lib directory if needed
