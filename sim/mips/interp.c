@@ -269,8 +269,8 @@ static void device_init(SIM_DESC sd) {
 /* start-sanitize-sky */
 #ifdef TARGET_SKY
 static struct {
-  short i[16];
-  int f[NUM_VU_REGS - 16];
+  short i[NUM_VU_INTEGER_REGS];
+  int f[NUM_VU_REGS - NUM_VU_INTEGER_REGS];
 } vu_regs[2];
 #endif
 /* end-sanitize-sky */
@@ -390,7 +390,7 @@ sim_open (kind, cb, abfd, argv)
     /* start-sanitize-sky */
 #ifdef TARGET_SKY
     /* Now the VU registers */
-    for( rn = 0; rn < 16; rn++ ) { /* first the integer registers */
+    for( rn = 0; rn < NUM_VU_INTEGER_REGS; rn++ ) { 
       cpu->register_widths[rn + NUM_R5900_REGS] = 16;
       cpu->register_widths[rn + NUM_R5900_REGS + NUM_VU_REGS] = 16;
 
@@ -399,24 +399,25 @@ sim_open (kind, cb, abfd, argv)
       vu_regs[1].i[rn] = rn + 0x200;
     }
 
-    for( rn = 16; rn < NUM_VU_REGS; rn++ ) { /* then the FP registers */
+    for( rn = NUM_VU_INTEGER_REGS; rn < NUM_VU_REGS; rn++ ) { 
       float f;
+      int first_vec_reg = NUM_VU_INTEGER_REGS + 8;
 
       cpu->register_widths[rn + NUM_R5900_REGS] = 32;
       cpu->register_widths[rn + NUM_R5900_REGS + NUM_VU_REGS] = 32;
 
       /* Hack for now - to test gdb interface */
-      if( rn < 24 ) {
-	f = rn - 16 + 100.0;
-	vu_regs[0].f[rn-16] = *((unsigned *) &f);
-	f = rn - 16 + 200.0;
-	vu_regs[1].f[rn-16] = *((unsigned *) &f);
+      if( rn < first_vec_reg ) {
+	f = rn - NUM_VU_INTEGER_REGS + 100.0;
+	vu_regs[0].f[rn-NUM_VU_INTEGER_REGS] = *((unsigned *) &f);
+	f = rn - NUM_VU_INTEGER_REGS + 200.0;
+	vu_regs[1].f[rn-NUM_VU_INTEGER_REGS] = *((unsigned *) &f);
       }
       else {
-	f = (rn - 24)/4 + (rn - 24)%4 + 1000.0;
-	vu_regs[0].f[rn-16] = *((unsigned *) &f);
-	f = (rn - 24)/4 + (rn - 24)%4 + 2000.0;
-	vu_regs[1].f[rn-16] = *((unsigned *) &f);
+	f = (rn - first_vec_reg)/4 + (rn - first_vec_reg)%4 + 1000.0;
+	vu_regs[0].f[rn-NUM_VU_INTEGER_REGS] = *((unsigned *) &f);
+	f = (rn - first_vec_reg)/4 + (rn - first_vec_reg)%4 + 2000.0;
+	vu_regs[1].f[rn-NUM_VU_INTEGER_REGS] = *((unsigned *) &f);
       }
     }
 #endif
@@ -640,24 +641,36 @@ sim_store_register (sd,rn,memory,length)
 
   /* start-sanitize-sky */
 #ifdef TARGET_SKY
-  if (rn > NUM_R5900_REGS) 
+  if (rn >= NUM_R5900_REGS) 
     {
+      int size = 4;	/* Default register size */
+
       rn = rn - NUM_R5900_REGS;
 
-      if( rn < 16 ) 
-	vu_regs[0].i[rn] = T2H_2( *(unsigned short *) memory );
+      if (rn < NUM_VU_INTEGER_REGS)
+	{
+	  vu_regs[0].i[rn] = T2H_2( *(unsigned short *) memory );
+	  size = 2;
+	}
       else if( rn < NUM_VU_REGS )
-	vu_regs[0].f[rn - 16] = T2H_4( *(unsigned int *) memory );
+	vu_regs[0].f[rn - NUM_VU_INTEGER_REGS] 
+	  = T2H_4( *(unsigned int *) memory );
       else {
 	rn = rn - NUM_VU_REGS;
 
-	if( rn < 16 ) 
-	  vu_regs[1].i[rn] = T2H_2( *(unsigned short *) memory );
+	if( rn < NUM_VU_INTEGER_REGS ) 
+	  {
+	    vu_regs[1].i[rn] = T2H_2( *(unsigned short *) memory );
+	    size = 2;
+	  }
 	else if( rn < NUM_VU_REGS )
-	  vu_regs[1].f[rn - 16] = T2H_4( *(unsigned int *) memory );
+	  vu_regs[1].f[rn - NUM_VU_INTEGER_REGS] 
+	    = T2H_4( *(unsigned int *) memory );
 	else
 	  sim_io_eprintf( sd, "Invalid VU register (register store ignored)\n" );
       }
+
+      return size;
     }
 #endif
   /* end-sanitize-sky */
@@ -730,25 +743,37 @@ sim_fetch_register (sd,rn,memory,length)
 
   /* start-sanitize-sky */
 #ifdef TARGET_SKY
-  if( rn > NUM_R5900_REGS ) 
+  if (rn >= NUM_R5900_REGS) 
     {
+      int size = 4; /* default register width */
+
       rn = rn - NUM_R5900_REGS;
 
-      if( rn < 16 ) 
-	*((unsigned short *) memory) = H2T_2( vu_regs[0].i[rn] );
-      else if( rn < NUM_VU_REGS )
-	*((unsigned int *) memory) = H2T_4( vu_regs[0].f[rn - 16] );
-      else {
-	rn = rn - NUM_VU_REGS;
+      if (rn < NUM_VU_INTEGER_REGS)
+	{
+	  *((unsigned short *) memory) = H2T_2( vu_regs[0].i[rn] );
+	  size = 2;
+	}
+      else if (rn < NUM_VU_REGS)
+	*((unsigned int *) memory) 
+	  = H2T_4( vu_regs[0].f[rn - NUM_VU_INTEGER_REGS] );
+      else 
+	{
+	  rn = rn - NUM_VU_REGS;
 	
-	if( rn < 16 ) 
-	  (*(unsigned short *) memory) = H2T_2( vu_regs[1].i[rn] );
-	else if( rn < NUM_VU_REGS )
-	  (*(unsigned int *) memory) = H2T_4( vu_regs[1].f[rn - 16] );
-	else
-	  sim_io_eprintf( sd, "Invalid VU register (register fetch ignored)\n" );
-      }
-      return -1;
+	  if (rn < NUM_VU_INTEGER_REGS) 
+	    {
+	      (*(unsigned short *) memory) = H2T_2( vu_regs[1].i[rn] );
+	      size = 2;
+	    }
+	  else if (rn < NUM_VU_REGS)
+	    (*(unsigned int *) memory) 
+	      = H2T_4( vu_regs[1].f[rn - NUM_VU_INTEGER_REGS] );
+	  else
+	    sim_io_eprintf( sd, "Invalid VU register (register fetch ignored)\n" );
+	}
+
+      return size;
     }
 #endif
   /* end-sanitize-sky */
