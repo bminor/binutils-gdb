@@ -2281,6 +2281,18 @@ ENUM
   BFD_RELOC_V850_22_PCREL
 ENUMDOC
   This is a 22-bit reloc
+ENUM
+  BFD_RELOC_V850_SDA_OFFSET
+ENUMDOC
+  This is an offset from the short data area pointer..
+ENUM
+  BFD_RELOC_V850_ZDA_OFFSET
+ENUMDOC
+  This is an offset from the zero data area pointer..
+ENUM
+  BFD_RELOC_V850_TDA_OFFSET
+ENUMDOC
+  This is an offset from the tiny data area pointer..
 COMMENT
 {* end-sanitize-v850 *}
 

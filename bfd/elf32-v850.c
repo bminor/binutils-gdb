@@ -46,6 +46,9 @@ enum reloc_type
   R_V850_32,
   R_V850_16,
   R_V850_8,
+  R_V850_SDA_OFFSET,
+  R_V850_ZDA_OFFSET,
+  R_V850_TDA_OFFSET,
   R_V850_max
 };
 
@@ -185,6 +188,52 @@ static reloc_howto_type elf_v850_howto_table[] =
          0xff,                /* src_mask */
          0xff,                /* dst_mask */
          false),                /* pcrel_offset */
+
+  /* Offset from the short data area pointer.  */
+  HOWTO (R_V850_SDA_OFFSET,     /* type */
+         0,                     /* rightshift */
+         1,                     /* size (0 = byte, 1 = short, 2 = long) */
+         16,                    /* bitsize */
+         false,                 /* pc_relative */
+         0,                     /* bitpos */
+         complain_overflow_dont,/* complain_on_overflow */
+         bfd_elf_generic_reloc, /* special_function */
+         "R_V850_SDA_OFFSET",   /* name */
+         true,                  /* partial_inplace */
+         0xffff,                /* src_mask */
+         0xffff,                /* dst_mask */
+         false),                /* pcrel_offset */
+
+  /* Offset from the tiny data area pointer.  */
+  HOWTO (R_V850_TDA_OFFSET,     /* type */
+         0,                     /* rightshift */
+         1,                     /* size (0 = byte, 1 = short, 2 = long) */
+         16,                    /* bitsize */
+         false,                 /* pc_relative */
+         0,                     /* bitpos */
+         complain_overflow_dont,/* complain_on_overflow */
+         bfd_elf_generic_reloc, /* special_function */
+         "R_V850_TDA_OFFSET",   /* name */
+         true,                  /* partial_inplace */
+         0xffff,                /* src_mask */
+         0xffff,                /* dst_mask */
+         false),                /* pcrel_offset */
+
+  /* Offset from the zero data area pointer.  */
+  HOWTO (R_V850_ZDA_OFFSET,     /* type */
+         0,                     /* rightshift */
+         1,                     /* size (0 = byte, 1 = short, 2 = long) */
+         16,                    /* bitsize */
+         false,                 /* pc_relative */
+         0,                     /* bitpos */
+         complain_overflow_dont,/* complain_on_overflow */
+         bfd_elf_generic_reloc, /* special_function */
+         "R_V850_ZDA_OFFSET",   /* name */
+         true,                  /* partial_inplace */
+         0xffff,                /* src_mask */
+         0xffff,                /* dst_mask */
+         false),                /* pcrel_offset */
+
 };
 
 /* Map BFD reloc types to V850 ELF reloc types.  */
@@ -206,6 +255,9 @@ static const struct v850_reloc_map v850_reloc_map[] =
   { BFD_RELOC_32, R_V850_32, },
   { BFD_RELOC_16, R_V850_16, },
   { BFD_RELOC_8, R_V850_8, },
+  { BFD_RELOC_V850_TDA_OFFSET, R_V850_TDA_OFFSET, },
+  { BFD_RELOC_V850_SDA_OFFSET, R_V850_SDA_OFFSET, },
+  { BFD_RELOC_V850_ZDA_OFFSET, R_V850_ZDA_OFFSET, },
 };
 
 static reloc_howto_type *

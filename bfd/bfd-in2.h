@@ -1864,6 +1864,15 @@ This is a 24 bit address. */
 
 /* This is a 22-bit reloc */
   BFD_RELOC_V850_22_PCREL,
+
+/* This is an offset from the short data area pointer.. */
+  BFD_RELOC_V850_SDA_OFFSET,
+
+/* This is an offset from the zero data area pointer.. */
+  BFD_RELOC_V850_ZDA_OFFSET,
+
+/* This is an offset from the tiny data area pointer.. */
+  BFD_RELOC_V850_TDA_OFFSET,
 /* end-sanitize-v850 */
 
   BFD_RELOC_UNUSED };

@@ -6,6 +6,14 @@ Wed Oct 16 11:24:35 1996  Jeffrey A Law  (law@cygnus.com)
 	which are being discarded.
 
 start-sanitize-v850
+
+	* elf32-v850.c (enum reloc_type): Add R_V850_SDA_OFFSET,
+	R_V850_TDA_OFFSET and R_V850_ZDA_OFFSET.
+	(elf_v850_howto_table): Corresponding changes.
+	(elf_v850_reloc_map): Corresponding changes.
+	* reloc.c: Add additional V850 relocations.
+	* bfd-in2.h, libbfd.h: Rebuilt.
+
 	* elf32-v850.c (bfd_elf32_v850_reloc): Mask out bits we
 	no longer want in pc-relative relocs.
 
