@@ -25,6 +25,11 @@ if ![is_elf_format] {
     return
 }
 
+# No shared lib support on this target.
+if { [istarget "mcore-*-*"] } {
+    return
+}
+
 set test1	"read-only .eh_frame section"
 set test2	"read-only .gcc_except_table section"
 
