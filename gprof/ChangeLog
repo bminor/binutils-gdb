@@ -1,5 +1,8 @@
 Tue Feb  3 14:25:25 1998  Brent Baccala  <baccala@freesoft.org>
 
+	* gprof.texi: Extensive additions to document all arguments and
+	output formats.
+
 	* symtab.c (symtab_finalize): Prefer function symbols over line
 	symbols.
 	(dbg_sym_lookup): Correct debugging messages.
