@@ -1,3 +1,10 @@
+1999-09-13  Philip Blundell  <pb@nexus.co.uk>
+
+	* elf32-arm.h (elf32_arm_final_link_relocate): Don't range-check
+	PC24 relocs if the target is an undefined weak symbol.
+	(arm_add_to_rel): Fix compiler warning.
+	(elf32_arm_plt0_entry): Correct comments.
+	
 1999-09-13  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* elfcode.h (write_relocs): Check for the_bfd NULL when handling

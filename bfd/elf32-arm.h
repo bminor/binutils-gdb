@@ -81,7 +81,7 @@ static int elf32_thumb_to_arm_stub
 
 /* The first entry in a procedure linkage table looks like
    this.  It is set up so that any shared library function that is
-   called before the relocation has been set up calles the dynamic
+   called before the relocation has been set up calls the dynamic
    linker first */
 
 static const bfd_byte elf32_arm_plt0_entry [PLT_ENTRY_SIZE] =
@@ -89,7 +89,7 @@ static const bfd_byte elf32_arm_plt0_entry [PLT_ENTRY_SIZE] =
   0x04, 0xe0, 0x2d, 0xe5,	/* str   lr, [sp, #-4]!     */
   0x10, 0xe0, 0x9f, 0xe5,	/* ldr   lr, [pc, #16]      */
   0x0e, 0xe0, 0x8f, 0xe0,	/* adr   lr, pc, lr         */
-  0x08, 0xf0, 0xbe, 0xe5	/* ldr   pc, [lr, #-4]      */
+  0x08, 0xf0, 0xbe, 0xe5	/* ldr   pc, [lr, #8]!      */
 };
 
 /* Subsequent entries in a procedure linkage table look like
@@ -1229,13 +1229,20 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 		}
 	    }
 
-	  /* Perform a signed range check.  */
-	  signed_addend = value;
-	  signed_addend >>= howto->rightshift;
-	  if (signed_addend > ((bfd_signed_vma)(howto->dst_mask >> 1))
-	      || signed_addend < - ((bfd_signed_vma) ((howto->dst_mask + 1) >> 1)))
-	    return bfd_reloc_overflow;
-	  
+	  /* It is not an error for an undefined weak reference to be
+	     out of range.  Any program that branches to such a symbol
+	     is going to crash anyway, so there is no point worrying 
+	     about getting the destination exactly right.  */	     
+	  if (! h || h->root.type != bfd_link_hash_undefweak)
+	    {
+	      /* Perform a signed range check.  */
+	      signed_addend = value;
+	      signed_addend >>= howto->rightshift;
+	      if (signed_addend > ((bfd_signed_vma)(howto->dst_mask >> 1))
+		  || signed_addend < - ((bfd_signed_vma) ((howto->dst_mask + 1) >> 1)))
+		return bfd_reloc_overflow;
+	    }
+	      
 	  value = (signed_addend & howto->dst_mask)
 	    | (bfd_get_32 (input_bfd, hit_data) & (~ howto->dst_mask));
 	  break;
@@ -1586,7 +1593,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 static void
 arm_add_to_rel (abfd, address, howto, increment)
      bfd *              abfd;
-     bfd_vma            address;
+     bfd_byte *         address;
      reloc_howto_type * howto;
      bfd_signed_vma     increment;
 {
