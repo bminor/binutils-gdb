@@ -5,7 +5,7 @@
 
 srcdir = .
 ddestdir = /usr/local
-
+idestdir = /usr/local
 INSTALL_PROG = install -c
 INSTALL_FILE = $(INSTALL_PROG)
 
@@ -104,16 +104,14 @@ readline.tar.Z:	readline.tar
 		compress -f readline.tar
 
 install:	includes
-		$(INSTALL_PROG) libreadline.a $(DESTDIR)/libreadline.a.new
-		-mv $(DESTDIR)/libreadline.a.new $(DESTDIR)/libreadline.a
+		$(INSTALL_PROG) libreadline.a $(DESTDIR)/libreadline.an
+		-mv $(DESTDIR)/libreadline.an $(DESTDIR)/libreadline.a
 		$(RANLIB) $(DESTDIR)/libreadline.a
 
 install-info: all-info
 		for i in *.info* ; do \
 			echo Installing $$i... ; \
-			(cp $$i $(idestdir)/info/$$i.new \
-				&& mv -f $(idestdir)/info/$$i.new $(idestdir)/info/$$i) \
-			|| exit 1 ; \
+			cp $$i $(idestdir)/info/$$i ; \
 		done
 
 includes:

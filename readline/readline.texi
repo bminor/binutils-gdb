@@ -103,7 +103,7 @@ to provide a command line interface.
 * Readline Top::	GNU Readline User's Manual
 * Readline Technical::	GNU Readline Programmer's Manual
 @end menu
-@include inc-readline.texinfo
+@include inc-read.texi
 @node Readline Technical, , Top, Top
 @chapter Readline Programmer's Manual
 
