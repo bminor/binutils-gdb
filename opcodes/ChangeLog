@@ -1,3 +1,11 @@
+2004-10-06  Aldy Hernandez  <aldyh@redhat.com>
+
+	* ppc-opc.c (powerpc_opcodes): Add efscfd, efdabs, efdnabs,
+	efdneg, efdadd, efdsub, efdmul, efddiv, efdcmpgt, efdcmplt,
+	efdcmpeq, efdtstgt, efdtstlt, efdtsteq, efdcfsi, efdcfsid,
+	efdcfui, efdcfuid, efdcfsf, efdcfuf, efdctsi, efdctsidz, efdctsiz,
+	efdctui, efdctuidz, efdctuiz, efdctsf, efdctuf, efdctuf, efdcfs.
+
 2004-10-01  Bill Farmer  <Bill@the-farmers.freeserve.co.uk>
 
 	* pdp11-dis.c (print_insn_pdp11): Subtract the SOB's displacement
