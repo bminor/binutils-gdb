@@ -1,3 +1,9 @@
+2002-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+	* po/es.po: Updated Spanish translation.
+	* po/pr_BR.po: Updated Brazilian Portuguese translation.
+
 2002-07-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
@@ -6,9 +12,9 @@
 
 2002-07-23  Nick Clifton  <nickc@redhat.com>
 
-	* po/fr.po: New French translation.
-	* po/pr_BR.po: New Portugese Brazilian translation.
-	* po/id.po: New Indonesian translation.
+	* po/fr.po: Updated French translation.
+	* po/pr_BR.po: New Brazilian Portuguese translation.
+	* po/id.po: Updated Indonesian translation.
 	* configure.in (LINGUAS): Add pr_BR.
 	* configure: Regenerate.
 

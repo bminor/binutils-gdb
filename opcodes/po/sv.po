@@ -1,12 +1,12 @@
 # Swedish messages for opcodes.
-# Copyright (C) 2001 Free Software Foundation, Inc.
-# Christian Rose <menthos@menthos.com>, 2001.
+# Copyright (C) 2001, 2002 Free Software Foundation, Inc.
+# Christian Rose <menthos@menthos.com>, 2001, 2002.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: opcodes 2.11\n"
-"POT-Creation-Date: 2002-01-31 17:10+0000\n"
-"PO-Revision-Date: 2001-10-23 15:35+0200\n"
+"Project-Id-Version: opcodes 2.12.1\n"
+"POT-Creation-Date: 2002-02-08 03:24-0200\n"
+"PO-Revision-Date: 2002-07-23 14:15+0200\n"
 "Last-Translator: Christian Rose <menthos@menthos.com>\n"
 "Language-Team: Swedish <sv@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -62,8 +62,7 @@ msgstr "Internt fel i disassembleraren"
 msgid "unknown constraint `%c'"
 msgstr "okänd begränsning \"%c\""
 
-#: cgen-asm.c:346 fr30-ibld.c:195 m32r-ibld.c:195 openrisc-ibld.c:195
-#: xstormy16-ibld.c:195
+#: cgen-asm.c:346 fr30-ibld.c:195 m32r-ibld.c:195 openrisc-ibld.c:195 xstormy16-ibld.c:195
 #, c-format
 msgid "operand out of range (%ld not between %ld and %ld)"
 msgstr "operanden är utanför intervallet (%ld är inte mellan %ld och %ld)"
@@ -96,14 +95,10 @@ msgstr "Okänt fält %d vid tolkning.\n"
 
 #: fr30-asm.c:373 m32r-asm.c:375 openrisc-asm.c:294 xstormy16-asm.c:281
 msgid "missing mnemonic in syntax string"
-msgstr ""
+msgstr "instruktion saknas i syntaxsträng"
 
 #. We couldn't parse it.
-#: fr30-asm.c:509 fr30-asm.c:513 fr30-asm.c:600 fr30-asm.c:702 m32r-asm.c:511
-#: m32r-asm.c:515 m32r-asm.c:602 m32r-asm.c:704 openrisc-asm.c:430
-#: openrisc-asm.c:434 openrisc-asm.c:521 openrisc-asm.c:623
-#: xstormy16-asm.c:417 xstormy16-asm.c:421 xstormy16-asm.c:508
-#: xstormy16-asm.c:610
+#: fr30-asm.c:509 fr30-asm.c:513 fr30-asm.c:600 fr30-asm.c:702 m32r-asm.c:511 m32r-asm.c:515 m32r-asm.c:602 m32r-asm.c:704 openrisc-asm.c:430 openrisc-asm.c:434 openrisc-asm.c:521 openrisc-asm.c:623 xstormy16-asm.c:417 xstormy16-asm.c:421 xstormy16-asm.c:508 xstormy16-asm.c:610
 msgid "unrecognized instruction"
 msgstr "okänd instruktion"
 
@@ -113,18 +108,17 @@ msgid "syntax error (expected char `%c', found `%c')"
 msgstr "syntaxfel (tecknet \"%c\" förväntades, hittade \"%c\")"
 
 #: fr30-asm.c:566 m32r-asm.c:568 openrisc-asm.c:487 xstormy16-asm.c:474
-#, fuzzy, c-format
+#, c-format
 msgid "syntax error (expected char `%c', found end of instruction)"
-msgstr "syntaxfel (tecknet \"%c\" förväntades, hittade \"%c\")"
+msgstr "syntaxfel (tecknet \"%c\" förväntades, hittade slutet på instruktion)"
 
 #: fr30-asm.c:594 m32r-asm.c:596 openrisc-asm.c:515 xstormy16-asm.c:502
 msgid "junk at end of line"
 msgstr "skräp vid slutet på raden"
 
 #: fr30-asm.c:701 m32r-asm.c:703 openrisc-asm.c:622 xstormy16-asm.c:609
-#, fuzzy
 msgid "unrecognized form of instruction"
-msgstr "okänd instruktion"
+msgstr "okänd instruktionsform"
 
 #: fr30-asm.c:713 m32r-asm.c:715 openrisc-asm.c:634 xstormy16-asm.c:621
 #, c-format
@@ -137,8 +131,7 @@ msgid "bad instruction `%.50s'"
 msgstr "felaktig instruktion \"%.50s\""
 
 #. Default text to print if an instruction isn't recognized.
-#: fr30-dis.c:39 m32r-dis.c:39 mmix-dis.c:282 openrisc-dis.c:39
-#: xstormy16-dis.c:39
+#: fr30-dis.c:39 m32r-dis.c:39 mmix-dis.c:282 openrisc-dis.c:39 xstormy16-dis.c:39
 msgid "*unknown*"
 msgstr "*okänd*"
 
@@ -148,9 +141,9 @@ msgid "Unrecognized field %d while printing insn.\n"
 msgstr "Okänt fält %d vid utskrift av instruktion.\n"
 
 #: fr30-ibld.c:166 m32r-ibld.c:166 openrisc-ibld.c:166 xstormy16-ibld.c:166
-#, fuzzy, c-format
+#, c-format
 msgid "operand out of range (%ld not between %ld and %lu)"
-msgstr "operanden är utanför intervallet (%ld är inte mellan %ld och %ld)"
+msgstr "operanden är utanför intervallet (%ld är inte mellan %ld och %lu)"
 
 #: fr30-ibld.c:179 m32r-ibld.c:179 openrisc-ibld.c:179 xstormy16-ibld.c:179
 #, c-format
@@ -182,8 +175,7 @@ msgstr "Okänt fält %d vid hämtning av vma-operand.\n"
 msgid "Unrecognized field %d while setting int operand.\n"
 msgstr "Okänt fält %d vid inställning av heltalsoperand.\n"
 
-#: fr30-ibld.c:1471 m32r-ibld.c:1176 openrisc-ibld.c:1001
-#: xstormy16-ibld.c:1224
+#: fr30-ibld.c:1471 m32r-ibld.c:1176 openrisc-ibld.c:1001 xstormy16-ibld.c:1224
 #, c-format
 msgid "Unrecognized field %d while setting vma operand.\n"
 msgstr "Okänt fält %d vid inställning av vma-operand.\n"
@@ -249,29 +241,28 @@ msgid "# internal error, undefined modifier(%c)"
 msgstr "# internt fel, okänd modifierare(%c)"
 
 #: mips-dis.c:1154
-#, fuzzy, c-format
+#, c-format
 msgid "# internal disassembler error, unrecognised modifier (%c)"
-msgstr "# internt fel, okänd modifierare(%c)"
+msgstr "# internt disassemblerfel, okänd modifierare (%c)"
 
 #: mmix-dis.c:34
 #, c-format
 msgid "Bad case %d (%s) in %s:%d\n"
-msgstr ""
+msgstr "Felaktigt fall %d (%s) i %s:%d\n"
 
 #: mmix-dis.c:44
 #, c-format
 msgid "Internal: Non-debugged code (test-case missing): %s:%d"
-msgstr ""
+msgstr "Internt: Ej felsökt kod (testfall saknas): %s:%d"
 
 #: mmix-dis.c:53
-#, fuzzy
 msgid "(unknown)"
-msgstr "okänd"
+msgstr "(okänd)"
 
 #: mmix-dis.c:517
-#, fuzzy, c-format
+#, c-format
 msgid "*unknown operands type: %d*"
-msgstr "okänt operandskifte: %x\n"
+msgstr "*okänd operandtyp: %d*"
 
 #. I and Z are output operands and can`t be immediate
 #. * A is an address and we can`t have the address of
@@ -293,15 +284,15 @@ msgstr "försök att ställa in y-biten då modifieraren + eller - användes"
 
 #: ppc-opc.c:832 ppc-opc.c:884
 msgid "offset not a multiple of 4"
-msgstr ""
+msgstr "avståndet är inte en multipel av 4"
 
 #: ppc-opc.c:857
 msgid "offset not between -2048 and 2047"
-msgstr ""
+msgstr "avståndet är inte mellan -2048 och 2047"
 
 #: ppc-opc.c:882
 msgid "offset not between -8192 and 8191"
-msgstr ""
+msgstr "avståndet är inte mellan -8192 och 8191"
 
 #: ppc-opc.c:910
 msgid "ignoring least significant bits in branch offset"
@@ -324,21 +315,21 @@ msgid "invalid register operand when updating"
 msgstr "ogiltig registeroperand vid uppdatering"
 
 #. Mark as non-valid instruction
-#: sparc-dis.c:749
+#: sparc-dis.c:750
 msgid "unknown"
 msgstr "okänd"
 
-#: sparc-dis.c:824
+#: sparc-dis.c:825
 #, c-format
 msgid "Internal error:  bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
 msgstr "Internt fel:  felaktig sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
 
-#: sparc-dis.c:835
+#: sparc-dis.c:836
 #, c-format
 msgid "Internal error: bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
 msgstr "Internt fel: felaktig sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
 
-#: sparc-dis.c:884
+#: sparc-dis.c:885
 #, c-format
 msgid "Internal error: bad sparc-opcode.h: \"%s\" == \"%s\"\n"
 msgstr "Internt fel: felaktig sparc-opcode.h: \"%s\" == \"%s\"\n"
@@ -360,8 +351,7 @@ msgstr "okänt pop-register: %d\n"
 #. specific command line option is given to GAS.
 #: v850-opc.c:68
 msgid "displacement value is not in range and is not aligned"
-msgstr ""
-"förskjutningsvärdet är inte inom intervallet och ligger inte på jämn gräns"
+msgstr "förskjutningsvärdet är inte inom intervallet och ligger inte på jämn gräns"
 
 #: v850-opc.c:69
 msgid "displacement value is out of range"
@@ -404,35 +394,32 @@ msgid "immediate value must be even"
 msgstr "omedelbara värdet måste vara jämnt"
 
 #: xstormy16-asm.c:74
-#, fuzzy
 msgid "Bad register in preincrement"
-msgstr "indexregistret är i inläsningsintervallet"
+msgstr "Felaktigt register i förökning"
 
 #: xstormy16-asm.c:79
-#, fuzzy
 msgid "Bad register in postincrement"
-msgstr "ogiltigt register för stackjustering"
+msgstr "Felaktigt register i efterökning"
 
 #: xstormy16-asm.c:81
-#, fuzzy
 msgid "Bad register name"
-msgstr "indexregistret är i inläsningsintervallet"
+msgstr "Felaktigt registernamn"
 
 #: xstormy16-asm.c:85
 msgid "Label conflicts with register name"
-msgstr ""
+msgstr "Etiketten är i konflikt med registernamn"
 
 #: xstormy16-asm.c:89
 msgid "Label conflicts with `Rx'"
-msgstr ""
+msgstr "Etiketten är i konflikt med \"Rx\""
 
 #: xstormy16-asm.c:91
 msgid "Bad immediate expression"
-msgstr ""
+msgstr "Felaktigt omedelbart uttryck"
 
 #: xstormy16-asm.c:120
 msgid "Small operand was not an immediate number"
-msgstr ""
+msgstr "Liten operand var inte ett omedelbart tal"
 
 #~ msgid "unrecognized keyword/register name"
 #~ msgstr "okänt namn på nyckelord/register"
