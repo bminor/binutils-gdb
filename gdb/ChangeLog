@@ -1,3 +1,10 @@
+2005-04-01  Michael Snyder  <msnyder@redhat.com>
+
+	* mn10300-prologue.c (set_movm_offsets): Don't test variable
+	before setting it.
+	* mn10300-tdep.c (mn10300_skip_prologue): Use analyze_prologue
+	instead of skip_prologue_using_sal.
+	
 2005-03-31  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib-frv.c (struct lm_info): Add new field ``lm_addr''.

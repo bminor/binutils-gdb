@@ -119,10 +119,13 @@ set_movm_offsets (struct frame_info *fi,
   int offset = 0;
   CORE_ADDR base;
 
-  if (cache == NULL || fi == NULL)
+  if (fi == NULL || this_cache == NULL)
     return;
 
   cache = mn10300_frame_unwind_cache (fi, this_cache);
+  if (cache == NULL)
+    return;
+
   base = trad_frame_get_this_base (cache);
   if (movm_args & movm_other_bit)
     {

@@ -295,9 +295,15 @@ mn10300_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
 static CORE_ADDR
 mn10300_skip_prologue (CORE_ADDR pc)
 {
+#if 0
+  CORE_ADDR ret;
   /* FIXME: not implemented.  */
   /* First approximation, try simply using skip_prologue_using_sal.  */
-  return skip_prologue_using_sal (pc);
+  ret = skip_prologue_using_sal (pc);
+  return ret ? ret : pc;
+#else
+  return mn10300_analyze_prologue (NULL, NULL, pc);
+#endif
 }
 
 /* Simple frame_unwind_cache.  
