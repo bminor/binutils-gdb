@@ -19,6 +19,7 @@ all:	 subdirs
 
 .PHONY: check installcheck
 info:
+install-info:
 install:
 installcheck:
 
