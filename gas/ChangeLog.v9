@@ -1,3 +1,9 @@
+Thu Aug  5 13:06:02 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-sparc.c (md_apply_fix, case BFD_RELOC_64): Fill in
+	bytes with real values, not zeros.
+	(md_pseudo_table): Call cons for .uaxword.
+
 Mon Aug  2 11:51:41 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/tc-sparc.c (md_apply_fix, case BFD_RELOC_64): New case,
