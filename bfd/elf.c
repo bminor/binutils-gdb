@@ -2443,7 +2443,20 @@ elf_fake_sections (abfd, asect, failedptrarg)
   if ((asect->flags & SEC_GROUP) == 0 && elf_group_name (asect) != NULL)
     this_hdr->sh_flags |= SHF_GROUP;
   if ((asect->flags & SEC_THREAD_LOCAL) != 0)
-    this_hdr->sh_flags |= SHF_TLS;
+    {
+      this_hdr->sh_flags |= SHF_TLS;
+      if (asect->_raw_size == 0 && (asect->flags & SEC_HAS_CONTENTS) == 0)
+	{
+	  struct bfd_link_order *o;
+                                          
+	  this_hdr->sh_size = 0;
+	  for (o = asect->link_order_head; o != NULL; o = o->next)
+	    if (this_hdr->sh_size < o->offset + o->size)
+	      this_hdr->sh_size = o->offset + o->size;
+	  if (this_hdr->sh_size)
+	    this_hdr->sh_type = SHT_NOBITS;
+	}
+    }
 
   /* Check for processor-specific section types.  */
   if (bed->elf_backend_fake_sections

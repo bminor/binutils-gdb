@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bfd 2.12.91\n"
 "POT-Creation-Date: 2002-07-23 15:55-0400\n"
-"PO-Revision-Date: 2002-07-24 13:04+0200\n"
+"PO-Revision-Date: 2002-07-29 16:34+0200\n"
 "Last-Translator: Christian Rose <menthos@menthos.com>\n"
 "Language-Team: Swedish <sv@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1410,7 +1410,7 @@ msgid ""
 "  Please report this bug."
 msgstr ""
 "Intern inkonsekvens: återstående %u != max %u.\n"
-"  Rapportera detta fel."
+"  Rapportera gärna detta fel."
 
 #: elf64-ppc.c:1669 libbfd.c:1435
 #, c-format
@@ -2555,7 +2555,7 @@ msgstr ""
 
 #: peigen.c:1192 pepigen.c:1192
 msgid "\tvma:  Hint/Ord Member-Name Bound-To\n"
-msgstr "\tvma:  Tips/Vanligt medlemsnamn bundet till\n"
+msgstr "\tvma: Tips/Ordning Medlemsnamn Bundet till\n"
 
 #: peigen.c:1217 pepigen.c:1217
 msgid ""
