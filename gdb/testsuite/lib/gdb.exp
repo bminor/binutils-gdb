@@ -99,7 +99,8 @@ proc delete_breakpoints {} {
 	    exp_continue
 	}
 	-re "y\r\n$prompt $" {}
-	-re ".*$prompt $" { perror "Delete all breakpoints" ; return }
+	-re ".*$prompt $" { # This happens if there were no breakpoints
+	    }
 	timeout { perror "Delete all breakpoints (timeout)" ; return }
     }
     send "info breakpoints\n"
