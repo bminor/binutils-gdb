@@ -1,3 +1,7 @@
+Mon Feb 23 13:19:58 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* syscall.c (cb_syscall): Handle short reads, and EOF.
+
 Tue Feb 24 00:29:57 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-trace.c (print_data): case trace_fmt_fp missing break.  Use

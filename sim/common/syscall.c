@@ -279,6 +279,8 @@ cb_syscall (cb, sc)
 					   ? count : FILE_XFR_SIZE));
 	    if (result == -1)
 	      goto ErrorFinish;
+	    if (result == 0)	/* EOF */
+	      break;
 	    bytes_written = (*sc->write_mem) (cb, sc, addr, buf, result);
 	    if (bytes_written != result)
 	      {
@@ -289,6 +291,9 @@ cb_syscall (cb, sc)
 	    bytes_read += result;
 	    count -= result;
 	    addr += result;
+	    /* If this is a short read, don't go back for more */
+	    if (result != FILE_XFR_SIZE)
+	      break;
 	  }
 	result = bytes_read;
       }
@@ -322,7 +327,7 @@ cb_syscall (cb, sc)
 		result = (int) (*cb->write_stdout) (cb, buf, bytes_read);
 		(*cb->flush_stdout) (cb);
 	      }
-	    if (fd == 2)
+	    else if (fd == 2)
 	      {
 		result = (int) (*cb->write_stderr) (cb, buf, bytes_read);
 		(*cb->flush_stderr) (cb);
