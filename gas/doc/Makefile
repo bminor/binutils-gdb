@@ -16,7 +16,7 @@ srcdir=..
 TEXIDIR = $(srcdir)/../texinfo/fsf
 
 as.info: as-${CONFIG}.texinfo
-	makeinfo as-${CONFIG}.texinfo
+	makeinfo -o as.info as-${CONFIG}.texinfo
 
 # There's no index yet; when there is, add texindex call before tex 2nd pass
 as.dvi:	as-${CONFIG}.texinfo
