@@ -2495,7 +2495,7 @@ fixup_segment (segP, this_segment_type)
 
 	      add_number += S_GET_VALUE (add_symbolP);
 	      add_number -= md_pcrel_from (fixP);
-#ifdef TC_I386
+#if defined (TC_I386) || defined (TE_LYNX)
 	      /* On the 386 we must adjust by the segment
 		 vaddr as well.  Ian Taylor.  */
 	      add_number -= segP->scnhdr.s_vaddr;
@@ -2544,7 +2544,7 @@ fixup_segment (segP, this_segment_type)
 		      continue;
 		    }		/* COBR */
 #endif /* TC_I960 */
-#ifdef TC_I386
+#if defined (TC_I386) || defined (TE_LYNX)
 		  /* 386 COFF uses a peculiar format in
 		     which the value of a common symbol is
 		     stored in the .text segment (I've
@@ -2571,7 +2571,7 @@ fixup_segment (segP, this_segment_type)
 	    {
 	      fixP->fx_addsy = &abs_symbol;
 	    }			/* if there's an add_symbol */
-#ifdef TC_I386
+#if defined (TC_I386) || defined (TE_LYNX)
 	  /* On the 386 we must adjust by the segment vaddr
 	     as well.  Ian Taylor.  */
 	  add_number -= segP->scnhdr.s_vaddr;
