@@ -1,5 +1,9 @@
 2005-02-07  Andrew Cagney  <cagney@gnu.org>
 
+	* value.c (set_value_bitpos, set_value_bitsize): Define.
+	* value.h (set_value_bitpos, set_value_bitsize): Declare.
+	* ada-lang.c, valarith.c: Update.
+
 	* cp-valprint.c, c-valprint.c, infcall.c: Use value_contents or
 	value_contents_writeable, include note that there are problems.
 	* breakpoint.c, infcall.c: Use VALUE_LVAL.

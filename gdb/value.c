@@ -156,11 +156,21 @@ value_bitpos (struct value *value)
 {
   return value->bitpos;
 }
+void
+set_value_bitpos (struct value *value, int bit)
+{
+  value->bitpos = bit;
+}
 
 int
 value_bitsize (struct value *value)
 {
   return value->bitsize;
+}
+void
+set_value_bitsize (struct value *value, int bit)
+{
+  value->bitsize = bit;
 }
 
 bfd_byte *

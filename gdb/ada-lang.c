@@ -448,8 +448,8 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
 
       result = allocate_value (type);
       VALUE_LVAL (result) = VALUE_LVAL (val);
-      result->bitsize = value_bitsize (val);
-      result->bitpos = value_bitpos (val);
+      set_value_bitsize (result, value_bitsize (val));
+      set_value_bitpos (result, value_bitpos (val));
       VALUE_ADDRESS (result) = VALUE_ADDRESS (val) + value_offset (val);
       if (value_lazy (val)
           || TYPE_LENGTH (type) > TYPE_LENGTH (value_type (val)))
@@ -1830,16 +1830,16 @@ ada_value_primitive_packed_val (struct value *obj, const bfd_byte *valaddr,
       if (VALUE_LVAL (obj) == lval_internalvar)
         VALUE_LVAL (v) = lval_internalvar_component;
       VALUE_ADDRESS (v) = VALUE_ADDRESS (obj) + value_offset (obj) + offset;
-      v->bitpos = bit_offset + value_bitpos (obj);
-      v->bitsize = bit_size;
+      set_value_bitpos (v, bit_offset + value_bitpos (obj));
+      set_value_bitsize (v, bit_size);
       if (value_bitpos (v) >= HOST_CHAR_BIT)
         {
           VALUE_ADDRESS (v) += 1;
-          v->bitpos -= HOST_CHAR_BIT;
+          set_value_bitpos (v, value_bitpos (v) - HOST_CHAR_BIT);
         }
     }
   else
-    v->bitsize = bit_size;
+    set_value_bitsize (v, bit_size);
   unpacked = (unsigned char *) value_contents (v);
 
   srcBitsLeft = bit_size;

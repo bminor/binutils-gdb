@@ -233,8 +233,8 @@ value_subscript (struct value *array, struct value *idx)
       bit_index = index % TARGET_CHAR_BIT;
       byte >>= (BITS_BIG_ENDIAN ? TARGET_CHAR_BIT - 1 - bit_index : bit_index);
       v = value_from_longest (LA_BOOL_TYPE, byte & 1);
-      v->bitpos = bit_index;
-      v->bitsize = 1;
+      set_value_bitpos (v, bit_index);
+      set_value_bitsize (v, 1);
       VALUE_LVAL (v) = VALUE_LVAL (array);
       if (VALUE_LVAL (array) == lval_internalvar)
 	VALUE_LVAL (v) = lval_internalvar_component;

@@ -184,7 +184,9 @@ extern struct type *value_type (struct value *);
 extern void deprecated_set_value_type (struct value *value,
 				       struct type *type);
 extern int value_bitsize (struct value *);
+extern void set_value_bitsize (struct value *, int bit);
 extern int value_bitpos (struct value *);
+extern void set_value_bitpos (struct value *, int bit);
 
 extern int value_offset (struct value *);
 extern void set_value_offset (struct value *, int offset);
