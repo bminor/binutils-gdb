@@ -584,6 +584,7 @@ static struct
 
   /* TRUE if processing unwind directives in a prologue region.  */
   int prologue;
+  int prologue_mask;
 } unwind;
 
 typedef void (*vbyte_func) PARAMS ((int, char *, char *));
@@ -2747,7 +2748,8 @@ dot_vframe (dummy)
   if (e.X_op == O_register && reg < 128)
     {
       add_unwind_entry (output_mem_stack_v ());
-      add_unwind_entry (output_psp_gr (reg));
+      if (! (unwind.prologue_mask & 2))
+	add_unwind_entry (output_psp_gr (reg));
     }
   else
     as_bad ("First operand to .vframe must be a general register");
@@ -2830,7 +2832,8 @@ dot_save (dummy)
 		break;
 	      case REG_AR+AR_PFS:
 	        add_unwind_entry (output_pfs_when ());
-	        add_unwind_entry (output_pfs_gr (reg2));
+		if (! (unwind.prologue_mask & 4))
+	          add_unwind_entry (output_pfs_gr (reg2));
 		break;
 	      case REG_AR+AR_LC:
 	        add_unwind_entry (output_lc_when ());
@@ -2838,11 +2841,13 @@ dot_save (dummy)
 		break;
 	      case REG_BR:
 		add_unwind_entry (output_rp_when ());
-		add_unwind_entry (output_rp_gr (reg2));
+		if (! (unwind.prologue_mask & 8))
+		  add_unwind_entry (output_rp_gr (reg2));
 		break;
 	      case REG_PR:
 		add_unwind_entry (output_preds_when ());
-		add_unwind_entry (output_preds_gr (reg2));
+		if (! (unwind.prologue_mask & 1))
+		  add_unwind_entry (output_preds_gr (reg2));
 		break;
 	      case REG_PRIUNAT:
 		add_unwind_entry (output_priunat_when_gr ());
@@ -3509,6 +3514,8 @@ dot_body (dummy)
      int dummy;
 {
   unwind.prologue = 0;
+  unwind.prologue_mask = 0;
+
   add_unwind_entry (output_body ());
   demand_empty_rest_of_line ();
 }
@@ -3518,8 +3525,8 @@ dot_prologue (dummy)
      int dummy;
 {
   unsigned char sep;
+  int mask = 0, grsave;
 
-  unwind.prologue = 1;
   if (!is_it_end_of_statement ())
     {
       expressionS e1, e2;
@@ -3532,20 +3539,26 @@ dot_prologue (dummy)
 
       if (e1.X_op == O_constant)
         {
+	  mask = e1.X_add_number;
+
 	  if (e2.X_op == O_constant)
-	    {
-	      int mask = e1.X_add_number;
-	      int reg = e2.X_add_number;
-	      add_unwind_entry (output_prologue_gr (mask, reg));
-	    }
+	    grsave = e2.X_add_number;
+	  else if (e2.X_op == O_register
+		   && (grsave = e2.X_add_number - REG_GR) < 128)
+	    ;
 	  else
-	    as_bad ("Second operand not a constant");
+	    as_bad ("Second operand not a constant or general register");
+
+	  add_unwind_entry (output_prologue_gr (mask, grsave));
 	}
       else
 	as_bad ("First operand not a constant");
     }
   else
     add_unwind_entry (output_prologue ());
+
+  unwind.prologue = 1;
+  unwind.prologue_mask = mask;
 }
 
 static void
