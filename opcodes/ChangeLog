@@ -1,6 +1,6 @@
 Fri Feb 13 10:21:09 1998  Mark Alexander  <marka@cygnus.com>
 
-	* mn10300-dis.c (print_insn_mn10300): Recognize break instruction.
+	* m10300-dis.c (print_insn_mn10300): Recognize break instruction.
 
 Fri Feb 13 13:12:14 1998  Ian Lance Taylor  <ian@cygnus.com>
 
