@@ -1,5 +1,7 @@
 1999-09-12  Donn Terry  <donn@interix.com>
 
+	* objdump.c (dump_headers): If wide_output, print Flags header.
+
 	* objdump.c (dump_section_header): Print any comdat information.
 
 	* objcopy.c (parse_flags): Handle "noload", "debug", and "share".

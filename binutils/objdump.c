@@ -385,11 +385,17 @@ dump_headers (abfd)
      bfd *abfd;
 {
   printf (_("Sections:\n"));
+
 #ifndef BFD64
-  printf (_("Idx Name          Size      VMA       LMA       File off  Algn\n"));
+  printf (_("Idx Name          Size      VMA       LMA       File off  Algn"));
 #else
-  printf (_("Idx Name          Size      VMA               LMA               File off  Algn\n"));
+  printf (_("Idx Name          Size      VMA               LMA               File off  Algn"));
 #endif
+
+  if (wide_output)
+    printf (_("  Flags"));
+  printf ("\n");
+
   bfd_map_over_sections (abfd, dump_section_header, (PTR) NULL);
 }
 
