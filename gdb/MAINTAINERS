@@ -1,41 +1,82 @@
-hp testsuite (gdb.hp)	Jimmy Guo	 adl-debugger-wdb-merge-guru@cup.hp.com
+
+			Blanket Write Privs
+
+Andrew Cagney			ac131313@cygnus.com
+Stan Shebs			shebs@cygnus.com
+
+
+			Various Maintainers
+
+Note individuals who maintain parts of the debugger need approval to
+check in changes outside of the immediate domain that they maintain.
+
+If there is no maintainer for a given domain then the problem falls to
+the head maintainer.
+
+
+Target/Architecture: Generic ISA - Instruction Set Architecture -
+issues. API variants, CPU variants.  *-tdep.c.
+
 d10v target		Andrew Cagney		cagney@cygnus.com
 d30v target		Andrew Cagney		cagney@cygnus.com
 mips target		Andrew Cagney		cagney@cygnus.com
 mn10300 target		Andrew Cagney		cagney@cygnus.com
-generic arch support	Andrew Cagney		cagney@cygnus.com
-target vector		Andrew Cagney		cagney@cygnus.com
-remote.c		Andrew Cagney		cagney@cygnus.com
+powerpc target		Elena Zannoni		ezannoni@cygnus.com
+arm target		Jim Ingham		jingham@cygnus.com
+m32r target		Michael Snyder		msnyder@cygnus.com
+
+
+Host/Native: Target specific native support - typically shared
+libraries and quirks to procfs/ptrace/...  A native maintainer works
+with the arch and core maintainer when resolving more generic
+problems.
+
+hp testsuite (gdb.hp)	Jimmy Guo	 adl-debugger-wdb-merge-guru@cup.hp.com
 djgpp native		DJ Delorie		dj@cygnus.com
 win32 host & native	Chris Faylor		cgf@cygnus.com
+x86 linux native	Jim Blandy		jimb@cygnus.com
+hurd native		Mark Kettenis		kettenis@wins.va.nl
+macos host & native	Stan Shebs		shebs@apple.com
+hpux, hp pa native	Jeff Law		law@cygnus.com
+
+
+Core: Generic components used by all of GDB
+
+generic arch support	Andrew Cagney		cagney@cygnus.com
+target vector		Andrew Cagney		cagney@cygnus.com
 main (main.c, top.c)	Elena Zannoni		ezannoni@cygnus.com
 readline		Elena Zannoni		ezannoni@cygnus.com
-powerpc target		Elena Zannoni		ezannoni@cygnus.com
-command interpreter	Fernando Nasser		fnasser@cygnus.com
 generic symtabs		Jim Blandy		jimb@cygnus.com
 dwarf readers		Jim Blandy		jimb@cygnus.com
 elf reader		Jim Blandy		jimb@cygnus.com
 stabs reader		Jim Blandy		jimb@cygnus.com
-x86 linux native	Jim Blandy		jimb@cygnus.com
-Scheme support		Jim Blandy		jimb@cygnus.com
-svr4 shlibs (solib.c)	Jim Blandy		jimb@cygnus.com
-arm target		Jim Ingham		jingham@cygnus.com
-gdbtk (c & tcl)		Jim Ingham		jingham@cygnus.com
-libgui (w/foundry, sn)	Jim Ingham		jingham@cygnus.com
-hurd native		Mark Kettenis		kettenis@wins.va.nl
-hpux, hp pa native	Jeff Law		law@cygnus.com
-m32r target		Michael Snyder		msnyder@cygnus.com
 tracing			Michael Snyder		msnyder@cygnus.com
 threads			Michael Snyder		msnyder@cygnus.com
 breakpoint.c		Michael Snyder		msnyder@cygnus.com
-coff reader		Philippe De Muyter	phdm@macqel.be
-macos host & native	Stan Shebs		shebs@cygnus.com
-sds protocol		Stan Shebs		shebs@cygnus.com
-rdi/adp protocol	Stan Shebs		shebs@cygnus.com
-gdbserver		Stan Shebs		shebs@cygnus.com
-documentation	 	Stan Shebs		shebs@cygnus.com
-testsuite	 	Stan Shebs		shebs@cygnus.com
 language support	David Taylor		taylor@cygnus.com
 expression eval		David Taylor		taylor@cygnus.com
 defs.h			David Taylor		taylor@cygnus.com
 utils.c			David Taylor		taylor@cygnus.com
+Scheme support		Jim Blandy		jimb@cygnus.com
+svr4 shlibs (solib.c)	Jim Blandy		jimb@cygnus.com
+coff reader		Philippe De Muyter	phdm@macqel.be
+remote.c		Andrew Cagney		cagney@cygnus.com
+sds protocol		Stan Shebs		shebs@apple.com
+rdi/adp protocol	Stan Shebs		shebs@apple.com
+gdbserver		Stan Shebs		shebs@apple.com
+documentation	 	Stan Shebs		shebs@apple.com
+testsuite	 	Stan Shebs		shebs@apple.com
+
+
+UI: External (user) interfaces.
+
+command interpreter	Fernando Nasser		fnasser@cygnus.com
+gdbtk (c & tcl)		Jim Ingham		jingham@cygnus.com
+libgui (w/foundry, sn)	Jim Ingham		jingham@cygnus.com
+
+
+
+		Write After Approval
+
+* Indicates folks we need to get Kerberos/ssh accounts ready so they
+can write in the source tree
