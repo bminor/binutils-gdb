@@ -1,3 +1,12 @@
+Mon Sep 19 12:12:46 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* as.h: Test NEED_DECLARATION_*, not NEED_*_DECLARATION.
+
+	* configure.in: Test for remove, not delete.  Fix cross-assembler
+	test.
+	* as.h: Test HAVE_REMOVE, not HAVE_DELETE; define unlink to
+	remove, not delete.
+
 Mon Sep 19 12:05:03 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/obj-coff.c (c_dot_file_symbol): Use bfd_abs_section_ptr,
@@ -30,6 +39,11 @@ Tue Sep 13 20:05:47 1994  Jeff Law  (law@snake.cs.utah.edu)
 	rather than &bfd_XXX_section.
 
 Tue Sep 13 21:15:36 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* read.c (pseudo_set, case O_symbol): If
+	OBJ_COPY_SYMBOL_ATTRIBUTES is defined, invoke it.
+	[BFD_ASSEMBLER]: Copy BSF_FUNCTION setting too.
+	* config/obj-elf.h (OBJ_COPY_SYMBOL_ATTRIBUTES): Define.
 
 	* config/tc-i386.c (md_apply_fix_1): For GOTPC relocs, decrement
 	value by one; discard adjustments previously being made.  From
