@@ -624,67 +624,63 @@ init_os (s)
   get_userdata (s->bfd_section) = (PTR) new;
 
 }
+
+/* The wild routines.
 
-/***********************************************************************
-  The wild routines.
+   These expand statements like *(.text) and foo.o to a list of
+   explicit actions, like foo.o(.text), bar.o(.text) and
+   foo.o(.text, .data).  */
 
-  These expand statements like *(.text) and foo.o to a list of
-  explicit actions, like foo.o(.text), bar.o(.text) and
-  foo.o(.text,.data) .
-
-  The toplevel routine, wild, takes a statement, section, file and
-  target. If either the section or file is null it is taken to be the
-  wildcard. Seperate lang_input_section statements are created for
-  each part of the expanstion, and placed after the statement provided.
-
-*/
+/* Add SECTION to the output section OUTPUT.  Do this by creating a
+   lang_input_section statement which is placed at PTR.  FILE is the
+   input file which holds SECTION.  */
 
 void
 wild_doit (ptr, section, output, file)
-     lang_statement_list_type * ptr;
-     asection * section;
-     lang_output_section_statement_type * output;
-     lang_input_statement_type * file;
+     lang_statement_list_type *ptr;
+     asection *section;
+     lang_output_section_statement_type *output;
+     lang_input_statement_type *file;
 {
-  if (output->bfd_section == (asection *) NULL)
+  if (output->bfd_section == NULL)
     init_os (output);
 
-  if (section != (asection *) NULL
-      && section->output_section == (asection *) NULL)
-  {
-    /* Add a section reference to the list */
-    lang_input_section_type *new = new_stat (lang_input_section, ptr);
-
-    new->section = section;
-    new->ifile = file;
-    section->output_section = output->bfd_section;
-
-    /* We don't copy the SEC_NEVER_LOAD flag from an input section to
-       an output section, because we want to be able to include a
-       SEC_NEVER_LOAD section in the middle of an otherwise loaded
-       section (I don't know why we want to do this, but we do).
-       build_link_order in ldwrite.c handles this case by turning the
-       embedded SEC_NEVER_LOAD section into a fill.  */
-    section->output_section->flags |=
-      section->flags & (flagword) (~ SEC_NEVER_LOAD);
-
-    if (!output->loadable) 
+  if (section != NULL && section->output_section == NULL)
     {
-      /* Turn off load flag */
-      output->bfd_section->flags &= ~SEC_LOAD;
-      output->bfd_section->flags |= SEC_NEVER_LOAD;
+      /* Add a section reference to the list */
+      lang_input_section_type *new = new_stat (lang_input_section, ptr);
+
+      new->section = section;
+      new->ifile = file;
+      section->output_section = output->bfd_section;
+
+      /* We don't copy the SEC_NEVER_LOAD flag from an input section
+	 to an output section, because we want to be able to include a
+	 SEC_NEVER_LOAD section in the middle of an otherwise loaded
+	 section (I don't know why we want to do this, but we do).
+	 build_link_order in ldwrite.c handles this case by turning
+	 the embedded SEC_NEVER_LOAD section into a fill.  */
+      section->output_section->flags |=
+	section->flags & (flagword) (~ SEC_NEVER_LOAD);
+
+      if (! output->loadable) 
+	{
+	  /* Turn off load flag */
+	  output->bfd_section->flags &= ~SEC_LOAD;
+	  output->bfd_section->flags |= SEC_NEVER_LOAD;
+	}
+
+      if (section->alignment_power > output->bfd_section->alignment_power)
+	output->bfd_section->alignment_power = section->alignment_power;
+
+      /* If supplied an aligment, then force it */
+      if (output->section_alignment != -1)
+	output->bfd_section->alignment_power = output->section_alignment;
     }
-    if (section->alignment_power > output->bfd_section->alignment_power)
-    {
-      output->bfd_section->alignment_power = section->alignment_power;
-    }
-    /* If supplied an aligmnet, then force it */
-    if (output->section_alignment != -1)
-    {
-      output->bfd_section->alignment_power = output->section_alignment;
-    }
-  }
 }
+
+/* Expand a wild statement for a particular FILE.  SECTION may be
+   NULL, in which case it is a wild card.  */
 
 static void
 wild_section (ptr, section, file, output)
@@ -715,16 +711,13 @@ wild_section (ptr, section, file, output)
     }
 }
 
-/* passed a file name (which must have been seen already and added to
-   the statement tree. We will see if it has been opened already and
-   had its symbols read. If not then we'll read it.
+/* This is passed a file name which must have been seen already and
+   added to the statement tree.  We will see if it has been opened
+   already and had its symbols read.  If not then we'll read it.  */
 
-   Archives are pecuilar here. We may open them once, but if they do
-   not define anything we need at the time, they won't have all their
-   symbols read. If we need them later, we'll have to redo it.  */
 static lang_input_statement_type *
 lookup_name (name)
-     CONST char *name;
+     const char *name;
 {
   lang_input_statement_type *search;
 
@@ -792,10 +785,15 @@ load_symbols (entry, place)
 	       || place == NULL)
 	einfo ("%F%B: file not recognized: %E\n", entry->the_bfd);
 
-      /* Try to interpret the file as a linker script.  */
-
       bfd_close (entry->the_bfd);
       entry->the_bfd = NULL;
+
+      /* See if the emulation has some special knowledge.  */
+
+      if (ldemul_unrecognized_file (entry))
+	return;
+
+      /* Try to interpret the file as a linker script.  */
 
       ldfile_open_command_file (entry->filename);
 
@@ -858,13 +856,18 @@ load_symbols (entry, place)
   entry->loaded = true;
 }
 
+/* Handle a wild statement.  SECTION or FILE or both may be NULL,
+   indicating that it is a wildcard.  Separate lang_input_section
+   statements are created for each part of the expansion; they are
+   added after the wild statement S.  OUTPUT is the output section.  */
+
 static void
 wild (s, section, file, target, output)
-     lang_wild_statement_type * s;
-     CONST char *section;
-     CONST char *file;
-     CONST char *target;
-     lang_output_section_statement_type * output;
+     lang_wild_statement_type *s;
+     const char *section;
+     const char *file;
+     const char *target;
+     lang_output_section_statement_type *output;
 {
   lang_input_statement_type *f;
 
@@ -910,23 +913,22 @@ wild (s, section, file, target, output)
 	    }
 	}
     }
+
   if (section != (char *) NULL
       && strcmp (section, "COMMON") == 0
-   && default_common_section == (lang_output_section_statement_type *) NULL)
+      && default_common_section == NULL)
     {
-      /* Remember the section that common is going to incase we later
-         get something which doesn't know where to put it */
+      /* Remember the section that common is going to in case we later
+         get something which doesn't know where to put it.  */
       default_common_section = output;
     }
 }
 
-/*
-  read in all the files
-  */
+/* Open the output file.  */
 
 static bfd *
 open_output (name)
-     CONST char *name;
+     const char *name;
 {
   bfd *output;
 
