@@ -1,3 +1,8 @@
+2004-11-15  Michael K. Lechner <mike.lechner@gmail.com>
+
+	* iq2000.cpu: Added quotes around macro arguments so that they
+	will work with newer versions of guile.
+
 2004-10-27  Nick Clifton  <nickc@redhat.com>
 
 	* iq2000m.cpu (pkrlr1, pkrlr30, rbr1, rbr30, rxr1, rxr30, wbr1,

@@ -333,10 +333,10 @@
     (name (.sym USES- (.upcase regfield)))
     (comment ("insn accesses register operand " regfield))))
 
-(define-reg-use-attr rd)
-(define-reg-use-attr rs)
-(define-reg-use-attr rt)
-(define-reg-use-attr r31)
+(define-reg-use-attr "rd")
+(define-reg-use-attr "rs")
+(define-reg-use-attr "rt")
+(define-reg-use-attr "r31")
 
 
 ; Operands.
