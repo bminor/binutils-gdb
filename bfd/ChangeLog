@@ -1,3 +1,13 @@
+1999-07-21  Mark Elbrecht  <snowball3@bigfoot.com>
+
+	* coffcode.h (styp_to_sec_flags): If COFF_LONG_SECTION_NAMES and
+	COFF_SUPPORT_GNU_LINKONCE, mark sections whose names begin with
+	.gnu.linkonce with SEC_LINKONCE and SEC_LINK_DUPLICATES_DISCARD.
+	* coff-go32.c: (COFF_LONG_SECTION_NAMES): Define.
+	(COFF_SUPPORT_GNU_LINKONCE): Define.
+	* coff-stgo32.c: (COFF_LONG_SECTION_NAMES): Define.
+	(COFF_SUPPORT_GNU_LINKONCE): Define.
+
 1999-07-21  Ian Lance Taylor  <ian@zembu.com>
 
 	From Mark Elbrecht:

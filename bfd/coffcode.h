@@ -687,6 +687,17 @@ styp_to_sec_flags (abfd, hdr, name)
     }
 #endif
 
+#if defined (COFF_LONG_SECTION_NAMES) && defined (COFF_SUPPORT_GNU_LINKONCE)
+  /* As a GNU extension, if the name begins with .gnu.linkonce, we
+     only link a single copy of the section.  This is used to support
+     g++.  g++ will emit each template expansion in its own section.
+     The symbols will be defined as weak, so that multiple definitions
+     are permitted.  The GNU linker extension is to actually discard
+     all but one of the sections.  */
+  if (strncmp (name, ".gnu.linkonce", sizeof ".gnu.linkonce" - 1) == 0)
+    sec_flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
+#endif
+
   return (sec_flags);
 }
 

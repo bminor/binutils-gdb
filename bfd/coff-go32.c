@@ -21,5 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define TARGET_SYM		go32coff_vec
 #define TARGET_NAME		"coff-go32"
 #define TARGET_UNDERSCORE	'_'
+#define COFF_LONG_SECTION_NAMES
+#define COFF_SUPPORT_GNU_LINKONCE
 
 #include "coff-i386.c"

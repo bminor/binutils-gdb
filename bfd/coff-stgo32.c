@@ -39,6 +39,8 @@
 #define TARGET_NAME		"coff-go32-exe"
 #define TARGET_UNDERSCORE	'_'
 #define COFF_GO32_EXE
+#define COFF_LONG_SECTION_NAMES
+#define COFF_SUPPORT_GNU_LINKONCE
 
 #include "bfd.h"
 
