@@ -51,6 +51,14 @@ usage()
     exit(1);
 }
 
+static
+void            
+strip_usage()
+{
+    fprintf(stderr, "Usage %s [-v] filename ...\n", program_name);
+    exit(1);
+}
+
 
 /* Create a temp file in the same directory as supplied */
 static
@@ -393,6 +401,32 @@ main(argc, argv)
       i = strlen (program_name);
       is_strip = (i >= 5 && strcmp(program_name+i-5,"strip"));
   }
+
+  if (is_strip)
+    {
+      for (i = 1; i < argc; i++) 
+        {
+          if (argv[i][0] != '-')
+	    break;
+	  if (argv[i][1] == '-') {
+	    i++;
+	    break;
+	  }
+	  switch (argv[i][1]) {
+	    case 'v':
+	      verbose = true;
+	      break;
+	    default:
+	      strip_usage();
+	  }
+        }
+      for ( ; i < argc; i++) {
+	    char *tmpname = make_tempname(argv[i]);
+	    copy_file(argv[i], tmpname);
+	    rename(tmpname, argv[i]);
+      }
+      return 0;
+    }
 
   for (i = 1; i < argc; i++) 
     {

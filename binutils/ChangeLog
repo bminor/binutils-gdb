@@ -1,3 +1,18 @@
+Wed Aug  5 11:25:27 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* copy.c:  When is_strip (because it is invoked as the strip
+	program), follow traditional argv processing:
+	'strip file1 file2' now strips file1 and file2, rather
+	than stripping file1 (as input), leaving output in file2.
+
+Mon Jul 27 16:28:08 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* objdump.c (display_info, display_info_table):  Call
+	bfd_set_format() on dummy bfd before using it (twice).
+	* ar.c:  Make sure archive is created on command 'r'
+	even when no elements are inserted.  (Clean up and
+	simplify some non-working related code.)
+
 Mon Jul 20 02:48:38 1992  D. V. Henkel-Wallace  (gumby@cygnus.com)
 
 	* configure.in: hppa support doesn't assume hp OS (from sef).
