@@ -102,6 +102,7 @@ NINDY ROM monitor at the other end of the line.
 
 #include "frame.h"
 #include "inferior.h"
+#include "symfile.h"
 #include "target.h"
 #include "gdbcore.h"
 #include "command.h"
@@ -271,57 +272,8 @@ nindy_files_info ()
          nindy_initial_brk? " with initial break": "");
 }
 
-/******************************************************************************
- * remote_load:
- *	Download an object file to the remote system by invoking the "comm960"
- *	utility.  We look for "comm960" in $G960BIN, $G960BASE/bin, and
- *	DEFAULT_BASE/bin/HOST/bin where
- *		DEFAULT_BASE is defined in env.h, and
- *		HOST must be defined on the compiler invocation line.
- ******************************************************************************/
-
-static void
-nindy_load( filename, from_tty )
-    char *filename;
-    int from_tty;
-{
-  asection *s;
-  /* Can't do unix style forking on a VMS system, so we'll use bfd to do
-     all the work for us 
-     */
-
-  bfd *file = bfd_openr(filename,0);
-  if (!file) 
-  {
-    perror_with_name(filename);
-    return;
-  }
-  
-  if (!bfd_check_format(file, bfd_object)) 
-  {
-    error("can't prove it's an object file\n");
-    return;
-  }
-  
-  for ( s = file->sections; s; s=s->next) 
-  {
-    if (s->flags & SEC_LOAD) 
-    {
-      char *buffer = xmalloc(s->_raw_size);
-      bfd_get_section_contents(file, s, buffer, 0, s->_raw_size);
-      printf("Loading section %s, size %x vma %x\n",
-	     s->name, 
-	     s->_raw_size,
-	     s->vma);
-      ninMemPut(s->vma, buffer, s->_raw_size);
-      free(buffer);
-    }
-  }
-  bfd_close(file);
-}
-
-/* Return the number of characters in the buffer before the first DLE character.
- */
+/* Return the number of characters in the buffer before
+   the first DLE character.  */
 
 static
 int
@@ -955,7 +907,7 @@ specified when you started GDB.",
 	0, 0, /* insert_breakpoint, remove_breakpoint, */
 	0, 0, 0, 0, 0,	/* Terminal crud */
 	nindy_kill,
-	nindy_load,
+	generic_load,
 	0, /* lookup_symbol */
 	nindy_create_inferior,
 	nindy_mourn_inferior,

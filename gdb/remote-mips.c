@@ -21,6 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "inferior.h"
+#include "symfile.h"
 #include "bfd.h"
 #include "wait.h"
 #include "gdbcmd.h"
@@ -1232,74 +1233,6 @@ mips_kill ()
 #endif
 }
 
-/* Load an executable onto the board.  */
-
-static void
-mips_load (args, from_tty)
-     char *args;
-     int from_tty;
-{
-  bfd *abfd;
-  asection *s;
-  int err;
-  CORE_ADDR text;
-
-  abfd = bfd_openr (args, 0);
-  if (abfd == (bfd *) NULL)
-    error ("Unable to open file %s", args);
-
-  if (bfd_check_format (abfd, bfd_object) == 0)
-    error ("%s: Not an object file", args);
-
-  text = UINT_MAX;
-  for (s = abfd->sections; s != (asection *) NULL; s = s->next)
-    {
-      if ((s->flags & SEC_LOAD) != 0)
-	{
-	  bfd_size_type size;
-
-	  size = bfd_get_section_size_before_reloc (s);
-	  if (size > 0)
-	    {
-	      char *buffer;
-	      struct cleanup *old_chain;
-	      bfd_vma vma;
-
-	      buffer = xmalloc (size);
-	      old_chain = make_cleanup (free, buffer);
-
-	      vma = bfd_get_section_vma (abfd, s);
-	      printf_filtered ("Loading section %s, size 0x%x vma 0x%x\n",
-			       bfd_get_section_name (abfd, s), size, vma);
-	      bfd_get_section_contents (abfd, s, buffer, 0, size);
-	      mips_xfer_memory (vma, buffer, size, 1, &mips_ops);
-
-	      do_cleanups (old_chain);
-
-	      if ((bfd_get_section_flags (abfd, s) & SEC_CODE) != 0
-		  && vma < text)
-		text = vma;
-	    }
-	}
-    }
-
-  mips_request ('R', (unsigned int) mips_map_regno (PC_REGNUM),
-		(unsigned int) abfd->start_address,
-		&err);
-  if (err)
-    error ("Can't write PC register: %s", safe_strerror (errno));
-
-  bfd_close (abfd);
-
-  /* FIXME: Should we call symbol_file_add here?  The local variable
-     text exists just for this call.  Making the call seems to confuse
-     gdb if more than one file is loaded in.  Perhaps passing MAINLINE
-     as 1 would fix this, but it's not clear that that is correct
-     either since it is possible to load several files onto the board.
-
-     symbol_file_add (args, from_tty, text, 0, 0, 0);  */
-}
-
 /* Start running on the target board.  */
 
 static void
@@ -1361,7 +1294,7 @@ Specify the serial device it is connected to (e.g., /dev/ttya).",  /* to_doc */
   NULL,				/* to_terminal_ours */
   NULL,				/* to_terminal_info */
   mips_kill,			/* to_kill */
-  mips_load,			/* to_load */
+  generic_load,			/* to_load */
   NULL,				/* to_lookup_symbol */
   mips_create_inferior,		/* to_create_inferior */
   mips_mourn_inferior,		/* to_mourn_inferior */

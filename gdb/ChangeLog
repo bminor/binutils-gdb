@@ -1,3 +1,8 @@
+Tue Jun  8 11:08:29 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* symfile.{c,h} (generic_load): New function.
+	remote{,-nindy,-eb,-mips}.c: Use it.
+
 Mon Jun  7 20:07:30 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* Makefile.in (depend):  More sed gubbish to deal with

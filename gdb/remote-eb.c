@@ -31,6 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "a29k/tm-a29k.h"
 
 #include "inferior.h"
+#include "symfile.h"
 #include "wait.h"
 #include "value.h"
 #include <ctype.h>
@@ -984,7 +985,7 @@ executable as it exists on the remote computer.  For example,\n\
 	0, 0,	/* Breakpoints */
 	0, 0, 0, 0, 0,	/* Terminal handling */
 	eb_kill,
-	0,	/* load */
+	generic_load,	/* load */
 	0, /* lookup_symbol */
 	eb_create_inferior,
 	eb_mourn_inferior,

@@ -76,6 +76,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <fcntl.h>
 #include "frame.h"
 #include "inferior.h"
+#include "symfile.h"
 #include "target.h"
 #include "wait.h"
 #include "terminal.h"
@@ -363,7 +364,7 @@ remote_interrupt_twice (signo)
   signal (signo, ofunc);
   
   target_terminal_ours ();
-  if (query ("Interrupted while waiting for the inferior.\n\
+  if (query ("Interrupted while waiting for the program.\n\
 Give up (and stop debugging it)? "))
     {
       target_mourn_inferior ();
@@ -739,25 +740,41 @@ putpkt (buf)
 
   /* Send it over and over until we get a positive ack.  */
 
-  do {
-    if (kiodebug)
-      {
-	*p = '\0';
-	printf ("Sending packet: %s...", buf2);  fflush(stdout);
-      }
-    SERIAL_WRITE (remote_desc, buf2, p - buf2);
+  while (1)
+    {
+      if (kiodebug)
+	{
+	  *p = '\0';
+	  printf ("Sending packet: %s...", buf2);  fflush(stdout);
+	}
+      if (SERIAL_WRITE (remote_desc, buf2, p - buf2))
+	perror_with_name ("putpkt: write failed");
 
-    /* read until either a timeout occurs (-2) or '+' is read */
-    do {
-      ch = readchar ();
-      if (kiodebug) {
-	if (ch == '+')
-	  printf("Ack\n");
-	else
-	  printf ("%02X%c ", ch&0xFF, ch);
-      }
-    } while ((ch != '+') && (ch != SERIAL_TIMEOUT));
-  } while (ch != '+');
+      /* read until either a timeout occurs (-2) or '+' is read */
+      while (1)
+	{
+	  ch = readchar ();
+
+	  switch (ch)
+	    {
+	    case '+':
+	      if (kiodebug)
+		printf("Ack\n");
+	      return;
+	    case SERIAL_TIMEOUT:
+	      break;		/* Retransmit buffer */
+	    case SERIAL_ERROR:
+	      perror_with_name ("putpkt: couldn't read ACK");
+	    case SERIAL_EOF:
+	      error ("putpkt: EOF while trying to read ACK");
+	    default:
+	      if (kiodebug)
+		printf ("%02X %c ", ch&0xFF, ch);
+	      continue;
+	    }
+	  break;		/* Here to retransmit */
+	}
+    }
 }
 
 /* Read a packet from the remote machine, with error checking,
@@ -782,14 +799,24 @@ getpkt (buf, forever)
       /* This can loop forever if the remote side sends us characters
 	 continuously, but if it pauses, we'll get a zero from readchar
 	 because of timeout.  Then we'll count that as a retry.  */
-      while (c != '$')
-        if ((c = readchar()) == SERIAL_TIMEOUT)
-	  if (!forever) 
-	    {
-	      if (++retries >= MAX_RETRIES)
-		if (kiodebug) puts_filtered ("Timed out.\n");
-		goto out;
-	    }
+
+      c = readchar();
+      if (c > 0 && c != '$')
+	continue;
+
+      if (c == SERIAL_TIMEOUT)
+	{
+	  if (forever)
+	    continue;
+	  if (++retries >= MAX_RETRIES)
+	    if (kiodebug) puts_filtered ("Timed out.\n");
+	  goto out;
+	}
+
+      if (c == SERIAL_EOF)
+	error ("Remote connection closed");
+      if (c == SERIAL_ERROR)
+	perror_with_name ("Remote communication error");
 
       /* Force csum to be zero here because of possible error retry.  */
       csum = 0;
@@ -1050,7 +1077,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
   NULL,				/* to_terminal_ours */
   NULL,				/* to_terminal_info */
   remote_kill,			/* to_kill */
-  NULL,				/* to_load */
+  generic_load,			/* to_load */
   NULL,				/* to_lookup_symbol */
   NULL,				/* to_create_inferior */
   remote_mourn,			/* to_mourn_inferior */
