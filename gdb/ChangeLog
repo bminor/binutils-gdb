@@ -1,5 +1,12 @@
 2002-03-17  Andrew Cagney  <ac131313@redhat.com>
 
+	* cli/cli-decode.c (cmd_type): New function.
+	* command.h (cmd_type): Declare.
+	* infrun.c (set_schedlock_func): Call function cmd_type.
+	* kod.c (kod_set_os): Call cmd_type.
+	* cris-tdep.c (cris_version_update): Use function cmd_type.
+	(cris_mode_update, cris_abi_update): Ditto.
+
 	* command.h: (execute_cmd_post_hook): Declare.
 	(execute_cmd_pre_hook): Declare.
 	* cli/cli-script.c (clear_hook_in_cleanup): New function.

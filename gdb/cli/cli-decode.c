@@ -86,6 +86,12 @@ cmd_cfunc_eq (struct cmd_list_element *cmd,
   return cmd->func == do_cfunc && cmd->function.cfunc == cfunc;
 }
 
+enum cmd_types
+cmd_type (struct cmd_list_element *cmd)
+{
+  return cmd->type;
+}
+
 void
 set_cmd_completer (struct cmd_list_element *cmd,
 		   char **(*completer) (char *text, char *word))
