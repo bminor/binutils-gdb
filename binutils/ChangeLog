@@ -1,5 +1,12 @@
 2004-08-28  Alan Modra  <amodra@bigpond.net.au>
 
+	* nm.c (show_synthetic): New var.
+	(long_options): Add "synthetic".
+	(usage): Here too.
+	(display_rel_file): Handle show_synthetic.
+
+2004-08-28  Alan Modra  <amodra@bigpond.net.au>
+
 	* objdump.c (dump_bfd): Pass both symbol tables to
 	bfd_get_synthetic_symtab.
 

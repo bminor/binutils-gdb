@@ -1,6 +1,6 @@
 /* nm.c -- Describe symbol table of a rel file.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003
+   2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -177,6 +177,7 @@ static int undefined_only = 0;	/* Print undefined symbols only.  */
 static int dynamic = 0;		/* Print dynamic symbols.  */
 static int show_version = 0;	/* Show the version number.  */
 static int show_stats = 0;	/* Show statistics.  */
+static int show_synthetic = 0;	/* Display synthesized symbols too.  */
 static int line_numbers = 0;	/* Print line numbers for symbols.  */
 
 /* When to print the names of files.  Not mutually exclusive in SYSV format.  */
@@ -232,6 +233,7 @@ static struct option long_options[] =
   {"reverse-sort", no_argument, &reverse_sort, 1},
   {"size-sort", no_argument, &sort_by_size, 1},
   {"stats", no_argument, &show_stats, 1},
+  {"synthetic", no_argument, &show_synthetic, 1},
   {"target", required_argument, 0, OPTION_TARGET},
   {"defined-only", no_argument, &defined_only, 1},
   {"undefined-only", no_argument, &undefined_only, 1},
@@ -271,6 +273,7 @@ usage (FILE *stream, int status)
   -S, --print-size       Print size of defined symbols\n\
   -s, --print-armap      Include index for symbols from archive members\n\
       --size-sort        Sort symbols by size\n\
+      --synthetic        Display synthetic symbols as well\n\
   -t, --radix=RADIX      Use RADIX for printing symbol values\n\
       --target=BFDNAME   Specify the target object format as BFDNAME\n\
   -u, --undefined-only   Display only undefined symbols\n\
@@ -956,6 +959,45 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
     {
       non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
       return;
+    }
+
+  if (show_synthetic && size == sizeof (asymbol *))
+    {
+      asymbol *synthsyms;
+      long synth_count;
+      asymbol **static_syms = NULL;
+      asymbol **dyn_syms = NULL;
+      long static_count = 0;
+      long dyn_count = 0;
+
+      if (dynamic)
+	{
+	  dyn_count = symcount;
+	  dyn_syms = minisyms;
+	}
+      else
+	{
+	  static_count = symcount;
+	  static_syms = minisyms;
+	}
+      synth_count = bfd_get_synthetic_symtab (abfd, static_count, static_syms,
+					      dyn_count, dyn_syms, &synthsyms);
+      if (synth_count > 0)
+	{
+	  asymbol **symp;
+	  void *new_mini;
+	  long i;
+
+	  new_mini = xmalloc ((symcount + synth_count + 1) * sizeof (*symp));
+	  symp = new_mini;
+	  memcpy (symp, minisyms, symcount * sizeof (*symp));
+	  symp += symcount;
+	  for (i = 0; i < synth_count; i++)
+	    *symp++ = synthsyms + i;
+	  *symp = 0;
+	  minisyms = new_mini;
+	  symcount += synth_count;
+	}
     }
 
   /* Discard the symbols we don't want to print.
