@@ -1,5 +1,7 @@
 Wed Jul 17 10:52:46 1996  Kim Knuttila  <krk@cygnus.com>
 
+	* emultempl/pe.em (sort_sections): Pay attention to return code.
+
 	* ldmisc.c (demangle): Remove all prefix '.'s from a name.
 
 Mon Jul 15 11:49:49 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
