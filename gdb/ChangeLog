@@ -1,3 +1,22 @@
+Thu Nov 17 17:51:12 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	Support for different MIPS IDT processor models.
+	* mips-tdep.c (mips_processor_type, tmp_mips_processor_type,
+	mips_generic_reg_names, mips_r3041_reg_names,
+	mips_r3051_reg_names, mips_r3081_reg_names,
+	mips_processor_type_table): New	globals.
+	(mips_do_registers_info): Don't display register if name is empty.
+	(mips_set_processor_type_command): New command.
+	(mips_show_processor_type_command): New command.
+	(mips_set_processor_type): New function.
+	(mips_read_processor_type): New function.
+	* config/mips/tm-idt.h (DEFAULT_MIPS_TYPE): New macro.
+	* config/mips/tm-mips.h (DEFAULT_MIPS_TYPE): New macro.
+	(NUM_REGS): Increase to account for all CP0 registers.
+	(REGISTER_NAMES): Add empty names for CP0 registers.
+	(FIRST_EMBED_REGNUM, LAST_EMBED_REGNUM): Adjust.
+	(PRID_REGNUM): New macro.
+
 Wed Nov 16 16:41:52 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* README: Add warning about termcap in Ultrix and OSF/1.

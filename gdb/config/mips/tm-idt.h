@@ -19,3 +19,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define TARGET_BYTE_ORDER_SELECTABLE
 
 #include "mips/tm-bigmips.h"
+
+#undef DEFAULT_MIPS_TYPE
+#define DEFAULT_MIPS_TYPE "r3051"

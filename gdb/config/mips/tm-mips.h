@@ -34,12 +34,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Floating point is IEEE compliant */
 #define IEEE_FLOAT
 
-extern int mips_processor_id;
-
 /* Some MIPS boards are provided both with and without a floating
    point coprocessor; we provide a user settable variable to tell gdb
    whether there is one or not.  */
 extern int mips_fpu;
+
+/* The name of the usual type of MIPS processor that is in the target
+   system.  */
+
+#define DEFAULT_MIPS_TYPE "generic"
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
@@ -105,7 +108,7 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 
 /* Number of machine registers */
 
-#define NUM_REGS 80
+#define NUM_REGS 90
 
 /* Initializer for an array of names of registers.
    There should be NUM_REGS strings in this initializer.  */
@@ -120,8 +123,9 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 	"f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15", \
 	"f16",  "f17",  "f18",  "f19",  "f20",  "f21",  "f22",  "f23",\
 	"f24",  "f25",  "f26",  "f27",  "f28",  "f29",  "f30",  "f31",\
-	"fsr",  "fir",  "fp",   "inx",  "rand", "tlblo","ctxt", "tlbhi",\
-	"epc",  "prid"\
+	"fsr",  "fir",  "fp",	"", \
+	"",	"",	"",	"",	"",	"",	"",	"", \
+	"",	"",	"",	"",	"",	"",	"",	"", \
     }
 
 /* Register numbers of various important registers.
@@ -146,8 +150,9 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 #define FCRCS_REGNUM 70         /* FP control/status */
 #define FCRIR_REGNUM 71         /* FP implementation/revision */
 #define FP_REGNUM 72		/* Pseudo register that contains true address of executing stack frame */
-#define	FIRST_EMBED_REGNUM 73	/* First supervisor register for embedded use */
-#define	LAST_EMBED_REGNUM 79	/* Last one */
+#define	FIRST_EMBED_REGNUM 74	/* First CP0 register for embedded use */
+#define	PRID_REGNUM 89		/* Processor ID */
+#define	LAST_EMBED_REGNUM 89	/* Last one */
 
 /* Define DO_REGISTERS_INFO() to do machine-specific formatting
    of register dumps. */
@@ -156,6 +161,7 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
+
 #define REGISTER_BYTES (NUM_REGS*MIPS_REGSIZE)
 
 /* Index within `registers' of the first byte of the space for
