@@ -1641,6 +1641,8 @@ get_machine_flags (e_flags, e_machine)
         case EM_68K:
           if (e_flags & EF_CPU32)
             strcat (buf, ", cpu32");
+	  if (e_flags & EF_M68000)
+	    strcat (buf, ", m68000");
           break;
 
 	case EM_PPC:

@@ -1,3 +1,8 @@
+2002-02-17  Matt Fredette  <fredette@netbsd.org>
+
+	* elf32-m68k.c (elf32_m68k_print_private_bfd_data): Recognize
+	EF_M68000.
+
 2002-02-13  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* elf.c (_bfd_elf_make_section_from_shdr): Do not insist on
