@@ -2288,6 +2288,23 @@ compute_function_info (abfd, hash, addr, contents)
       /* "other" space.  d0, d1, a0, a1, mdr, lir, lar, 4 byte pad.  */
       if (hash->movm_args & 0x08)
 	hash->movm_stack_size += 8 * 4;
+
+      /* start-sanitize-am33 */
+      if (bfd_get_mach (abfd) == bfd_mach_am33)
+	{
+	  /* "exother" space.  e0, e1, mdrq, mcrh, mcrl, mcvf */
+	  if (hash->movm_args & 0x1)
+	    hash->movm_stack_size += 6 * 4;
+
+	  /* exreg1 space.  e4, e5, e6, e7 */
+	  if (hash->movm_args & 0x2)
+	    hash->movm_stack_size += 4 * 4;
+
+	  /* exreg0 space.  e2, e3  */
+	  if (hash->movm_args & 0x4)
+	    hash->movm_stack_size += 2 * 4;
+	}
+      /* end-sanitize-am33 */
     }
 
   /* Now look for the two stack adjustment variants.  */

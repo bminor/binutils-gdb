@@ -1,5 +1,10 @@
 Thu Jul 23 11:29:43 1998  Jeffrey A Law  (law@cygnus.com)
 
+start-sanitize-am33
+	* elf-m10300.c (compute_function_info): Keep track of stack space
+	needed by am33 movm instruction variant.
+end-sanitize-am33
+
 	* Re-add lost change:
         * elf-m10300.c (elf32_mn10300_link_hash_entry): Add new field
         "movm_stack_size".
