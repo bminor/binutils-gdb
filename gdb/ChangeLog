@@ -1,3 +1,9 @@
+2002-02-08  Christopher Faylor  <cgf@redhat.com>
+
+	* win32-nat.c (cygwin_pid_to_str): Revert 2002-02-08 change xasprintf
+	changes.
+	(_initialize_check_for_gdb_ini): Ditto.
+
 2002-02-08  Martin M. Hunt  <hunt@redhat.com>
 
 	* win32-nat.c (cygwin_pid_to_str): Fix typo.

@@ -1763,9 +1763,9 @@ cygwin_pid_to_str (ptid_t ptid)
   int pid = PIDGET (ptid);
 
   if ((DWORD) pid == current_event.dwProcessId)
-    xasprintf (buf, "process %d", pid);
+    sprintf (buf, "process %d", pid);
   else
-    xasprintf (buf, "thread %ld.0x%x", current_event.dwProcessId, pid);
+    sprintf (buf, "thread %ld.0x%x", current_event.dwProcessId, pid);
   return buf;
 }
 
@@ -2009,7 +2009,7 @@ _initialize_check_for_gdb_ini (void)
 	{
 	  int len = strlen (oldini);
 	  char *newini = alloca (len + 1);
-	  xasprintf (newini, "%.*s.gdbinit", 
+	  sprintf (newini, "%.*s.gdbinit", 
 	    (int) (len - (sizeof ("gdb.ini") - 1)), oldini);
 	  warning ("obsolete '%s' found. Rename to '%s'.", oldini, newini);
 	}
