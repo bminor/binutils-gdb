@@ -1,3 +1,14 @@
+Thu Jun  6 13:56:14 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* README: Add notes on how to build if you don't have ar.
+
+	* Makefile.in: Remove old incorrect setting of CC.
+
+Tue Jun  4 10:52:49 1996  Tom Tromey  <tromey@csk3.cygnus.com>
+
+	* Makefile.in (install): Don't check to see if tooldir exists.
+	Make $(tooldir) and $(tooldir)/bin.
+
 Mon Jun  3 17:40:23 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* strings.c (main): Make main an int function, not void.
