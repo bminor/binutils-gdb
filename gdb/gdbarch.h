@@ -100,10 +100,9 @@ extern struct gdbarch_tdep *gdbarch_tdep PARAMS ((struct gdbarch*));
    INIT takes two parameters: INFO which contains the information
    available to gdbarch about the (possibly new) architecture; ARCHES
    which is a list of the previously created ``struct gdbarch'' for
-   this architecture.  Fields within the structure INFO which have no
-   previous value are set to defaults: BFD_ARCHITECTURE -
-   bfd_arch_unknown; BFD_ARCH_INFO - NULL; BYTE_ORDER - 0; ABFD -
-   NULL;
+   this architecture.  When possible, and when no other value was
+   provided, INFO is initialized using either the ABFD or the current
+   GDBARCH.
 
    The INIT function shall return any of: NULL indicating that it
    doesn't reconize the selected architecture; an existing ``struct
@@ -120,13 +119,23 @@ struct gdbarch_list
 
 struct gdbarch_info
 {
+  /* Default: bfd_arch_unknown. */
   enum bfd_architecture bfd_architecture;
+
+  /* Default: NULL */
   const struct bfd_arch_info *bfd_arch_info;
+
+  /* Default: 0 */
   int byte_order;
+
+  /* Default: NULL */
   bfd *abfd;
+
+  /* Default: NULL */
+  struct gdbarch_tdep_info *tdep_info;
 };
 
-typedef struct gdbarch *(gdbarch_init_ftype) PARAMS ((const struct gdbarch_info *info, struct gdbarch_list *arches));
+typedef struct gdbarch *(gdbarch_init_ftype) PARAMS ((struct gdbarch_info info, struct gdbarch_list *arches));
 
 extern void register_gdbarch_init PARAMS ((enum bfd_architecture, gdbarch_init_ftype *));
 

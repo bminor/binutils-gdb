@@ -1,4 +1,30 @@
 start-sanitize-carp start-sanitize-vr4xxx
+Fri Dec 18 12:56:56 1998  Andrew Cagney  <cagney@chook>
+
+	* gdbarch.h (gdbarch_init_ftype): Pass struct gdbarch_info
+ 	by-value.
+	(struct gdbarch_info): Add struct gdbarch_tdep_info *tdep_info.
+	* gdbarch.c (gdbarch_update): Update.
+	* mips-tdep.c: (mips_gdbarch_init): Update
+
+	* gdbarch.c (gdbarch_update): Add more tracing.
+	
+end-sanitize-carp end-sanitize-vr4xxx
+Thu Dec 17 02:15:40 1998  Andrew Cagney  <cagney@chook.cygnus.com>
+
+	* configure.tgt (gdb_target): Identify mips64*vr4100*-*-elf* as
+ 	vr4100.
+	* config/mips/vr4100.mt, config/mips/tm-vr4100.h: Replace
+ 	vr4xxx.mt and tm-vr4xxx.h.
+start-sanitize-vr4xxx
+	
+	* configure.tgt (gdb_target): Identify mips64*vr4xxx*-*-elf* as
+ 	vr4xxx.
+	* config/mips/vr4xxx.mt, config/mips/tm-vr4xxx.h: New files.
+  	Define GDB_MULTI_ARCH and MIPS_DEFAULT_FPU_TYPE.
+end-sanitize-vr4xxx
+	
+start-sanitize-carp start-sanitize-vr4xxx
 Thu Dec 17 02:06:17 1998  Andrew Cagney  <cagney@chook.cygnus.com>
 
 	* mips-tdep.c (mips_gdbarch_init): New function. Initialize a MIPS

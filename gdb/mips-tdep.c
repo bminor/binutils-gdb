@@ -67,7 +67,7 @@ struct gdbarch_tdep
 #define MIPS_LAST_ARG_REGNUM (gdbarch_tdep (current_gdbarch)->mips_last_arg_regnum)
 #endif
 
-/* end-sanitize-carp start-sanitize-vr4xxx */
+/* end-sanitize-carp end-sanitize-vr4xxx */
 
 #define VM_MIN_ADDRESS (CORE_ADDR)0x400000
 
@@ -3229,23 +3229,26 @@ mips_call_dummy_address ()
 static gdbarch_init_ftype mips_gdbarch_init;
 static struct gdbarch *
 mips_gdbarch_init (info, arches)
-     const struct gdbarch_info *info;
+     struct gdbarch_info info;
      struct gdbarch_list *arches;
 {
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
   int elf_abi;
-  if (info->abfd != NULL)
-    elf_abi = elf_elfheader (info->abfd)->e_flags & EF_MIPS_ABI;
+  char *abi_name;
+
+  /* find a default for ELF_ABI */
+  if (info.abfd != NULL)
+    elf_abi = elf_elfheader (info.abfd)->e_flags & EF_MIPS_ABI;
   else if (gdbarch_bfd_arch_info (current_gdbarch)->arch == bfd_arch_mips)
     elf_abi = gdbarch_tdep (current_gdbarch)->elf_abi;
   else
     elf_abi = 0;
 
   /* try to find a pre-existing architecture */
-  for (arches = gdbarch_list_lookup_by_info (arches, info);
+  for (arches = gdbarch_list_lookup_by_info (arches, &info);
        arches != NULL;
-       arches = gdbarch_list_lookup_by_info (arches->next, info))
+       arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
       /* MIPS needs to be pedantic about which ABI the object is
          using. */
@@ -3256,31 +3259,36 @@ mips_gdbarch_init (info, arches)
 
   /* Need a new architecture. Fill in a target specific vector. */
   tdep = (struct gdbarch_tdep*) xmalloc (sizeof (struct gdbarch_tdep));
-  gdbarch = gdbarch_alloc (info, tdep);
+  gdbarch = gdbarch_alloc (&info, tdep);
   tdep->elf_abi = elf_abi;
   switch (elf_abi)
     {
     case E_MIPS_ABI_O32:
+      abi_name = "o32";
       tdep->mips_eabi = 0;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       break;
     case E_MIPS_ABI_O64:
+      abi_name = "o64";
       tdep->mips_eabi = 0;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       break;
     case E_MIPS_ABI_EABI32:
+      abi_name = "eabi32";
       tdep->mips_eabi = 1;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       break;
     case E_MIPS_ABI_EABI64:
+      abi_name = "eabi64";
       tdep->mips_eabi = 1;
       set_gdbarch_long_bit (gdbarch, 64);
       set_gdbarch_ptr_bit (gdbarch, 64);
       break;
     default:
+      abi_name = "default";
       tdep->mips_eabi = 0;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
@@ -3304,15 +3312,25 @@ mips_gdbarch_init (info, arches)
 
   if (gdbarch_debug)
     {
-      fprintf_unfiltered (stderr, "MIPS_EABI = %d\n", tdep->mips_eabi);
-      fprintf_unfiltered (stderr, "MIPS_LAST_ARG_REGNUM = %d\n", tdep->mips_last_arg_regnum);
-      fprintf_unfiltered (stderr, "MIPS_LAST_FP_ARG_REGNUM = %d (%d)\n", tdep->mips_last_fp_arg_regnum, tdep->mips_last_fp_arg_regnum - FP0_REGNUM);
+      fprintf_unfiltered (stderr,
+			  "mips_gdbarch_init: (info)elf_abi 0x%x (%s)\n",
+			  elf_abi, abi_name);
+      fprintf_unfiltered (stderr,
+			  "mips_gdbarch_init: MIPS_EABI = %d\n",
+			  tdep->mips_eabi);
+      fprintf_unfiltered (stderr,
+			  "mips_gdbarch_init: MIPS_LAST_ARG_REGNUM = %d\n",
+			  tdep->mips_last_arg_regnum);
+      fprintf_unfiltered (stderr,
+			  "mips_gdbarch_init: MIPS_LAST_FP_ARG_REGNUM = %d (%d)\n",
+			  tdep->mips_last_fp_arg_regnum,
+			  tdep->mips_last_fp_arg_regnum - FP0_REGNUM);
     }
 
   return gdbarch;
 }
 
-/* end-sanitize-carp start-sanitize-vr4xxx */
+/* end-sanitize-carp end-sanitize-vr4xxx */
 
 void
 _initialize_mips_tdep ()
@@ -3322,7 +3340,7 @@ _initialize_mips_tdep ()
   /* start-sanitize-carp start-sanitize-vr4xxx */
   if (GDB_MULTI_ARCH)
     register_gdbarch_init (bfd_arch_mips, mips_gdbarch_init);
-  /* end-sanitize-carp start-sanitize-vr4xxx */
+  /* end-sanitize-carp end-sanitize-vr4xxx */
   if (!tm_print_insn) /* Someone may have already set it */
     tm_print_insn = gdb_print_insn_mips;
 
