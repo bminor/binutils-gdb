@@ -78,9 +78,9 @@ if [istarget xtensa*-*-*] then {
     objdump_finish
     if [all_ones $x1] then { pass $testname } else { fail $testname }
 
-
+    run_dump_test "short_branch_offset"
 }
 
 if [info exists errorInfo] then {
     unset errorInfo
-    }
+}

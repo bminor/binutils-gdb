@@ -7242,8 +7242,11 @@ xtensa_mark_narrow_branches (void)
    use for alignment narrow branches that definitely will not expand to a
    jump and a branch.  These functions find and mark these cases.  */
 
-/* the range in bytes of a bnez.n and beqz.n */
-#define MAX_IMMED6 68
+/* The range in bytes of BNEZ.N and BEQZ.N.  The target operand is encoded
+   as PC + 4 + imm6, where imm6 is a 6-bit immediate ranging from 0 to 63.
+   We start counting beginning with the frag after the 2-byte branch, so the
+   maximum offset is (4 - 2) + 63 = 65.  */
+#define MAX_IMMED6 65
 
 static size_t unrelaxed_frag_max_size (fragS *);
 

@@ -1,3 +1,7 @@
+2004-11-11  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (MAX_IMMED6): Change value to 65.
+
 2004-11-10  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (update_next_frag_state): Always add a NOP if
