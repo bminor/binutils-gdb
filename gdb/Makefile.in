@@ -2208,9 +2208,9 @@ sparc-linux-nat.o: sparc-linux-nat.c $(defs_h) $(regcache_h) $(gregset_h)
 sparc-nat.o: sparc-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
 	$(regcache_h) $(gdb_wait_h)
 sparc-stub.o: sparc-stub.c
-sparc-tdep.o: sparc-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
-	$(inferior_h) $(target_h) $(value_h) $(bfd_h) $(gdb_string_h) \
-	$(regcache_h) $(osabi_h) $(gregset_h) $(gdbcore_h) $(symfile_h)
+sparc-tdep.o: sparc-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) $(inferior_h) \
+	$(target_h) $(value_h) $(bfd_h) $(gdb_string_h) $(regcache_h) \
+	$(osabi_h) $(gregset_h) $(gdbcore_h) $(gdb_assert_h) $(symfile_h)
 sparc64nbsd-nat.o: sparc64nbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(sparcnbsd_tdep_h)
 sparcl-stub.o: sparcl-stub.c

@@ -78,8 +78,7 @@ static unsigned extract_5R_store (unsigned int);
 
 static unsigned extract_5r_store (unsigned int);
 
-static void find_dummy_frame_regs (struct frame_info *,
-				   struct frame_saved_regs *);
+static void find_dummy_frame_regs (struct frame_info *, CORE_ADDR *);
 
 static int find_proc_framesize (CORE_ADDR);
 
@@ -103,7 +102,7 @@ static int low_sign_extend (unsigned int, unsigned int);
 
 static int sign_extend (unsigned int, unsigned int);
 
-static int restore_pc_queue (struct frame_saved_regs *);
+static int restore_pc_queue (CORE_ADDR *);
 
 static int hppa_alignof (struct type *);
 
@@ -943,13 +942,13 @@ hppa_frame_saved_pc (struct frame_info *frame)
 	  && ((get_frame_type (frame->next) == SIGTRAMP_FRAME)
 	      || pc_in_interrupt_handler (frame->next->pc)))
 	{
-	  struct frame_saved_regs saved_regs;
-
-	  deprecated_get_frame_saved_regs (frame->next, &saved_regs);
-	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM],
+	  CORE_ADDR *saved_regs;
+	  hppa_frame_init_saved_regs (frame->next);
+	  saved_regs = get_frame_saved_regs (frame->next);
+	  if (read_memory_integer (saved_regs[FLAGS_REGNUM],
 				   TARGET_PTR_BIT / 8) & 0x2)
 	    {
-	      pc = read_memory_integer (saved_regs.regs[31],
+	      pc = read_memory_integer (saved_regs[31],
 					TARGET_PTR_BIT / 8) & ~0x3;
 
 	      /* Syscalls are really two frames.  The syscall stub itself
@@ -957,11 +956,11 @@ hppa_frame_saved_pc (struct frame_info *frame)
 	         a return pointer in %r31.  We return the %rp variant
 	         if %r31 is the same as frame->pc.  */
 	      if (pc == frame->pc)
-		pc = read_memory_integer (saved_regs.regs[RP_REGNUM],
+		pc = read_memory_integer (saved_regs[RP_REGNUM],
 					  TARGET_PTR_BIT / 8) & ~0x3;
 	    }
 	  else
-	    pc = read_memory_integer (saved_regs.regs[RP_REGNUM],
+	    pc = read_memory_integer (saved_regs[RP_REGNUM],
 				      TARGET_PTR_BIT / 8) & ~0x3;
 	}
       else
@@ -983,13 +982,13 @@ hppa_frame_saved_pc (struct frame_info *frame)
 	  && ((get_frame_type (frame->next) == SIGTRAMP_FRAME)
 	      || pc_in_interrupt_handler (frame->next->pc)))
 	{
-	  struct frame_saved_regs saved_regs;
-
-	  deprecated_get_frame_saved_regs (frame->next, &saved_regs);
-	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM],
+	  CORE_ADDR *saved_regs;
+	  hppa_frame_init_saved_regs (frame->next);
+	  saved_regs = get_frame_saved_regs (frame->next);
+	  if (read_memory_integer (saved_regs[FLAGS_REGNUM],
 				   TARGET_PTR_BIT / 8) & 0x2)
 	    {
-	      pc = read_memory_integer (saved_regs.regs[31],
+	      pc = read_memory_integer (saved_regs[31],
 					TARGET_PTR_BIT / 8) & ~0x3;
 
 	      /* Syscalls are really two frames.  The syscall stub itself
@@ -997,11 +996,11 @@ hppa_frame_saved_pc (struct frame_info *frame)
 	         a return pointer in %r31.  We return the %rp variant
 	         if %r31 is the same as frame->pc.  */
 	      if (pc == frame->pc)
-		pc = read_memory_integer (saved_regs.regs[RP_REGNUM],
+		pc = read_memory_integer (saved_regs[RP_REGNUM],
 					  TARGET_PTR_BIT / 8) & ~0x3;
 	    }
 	  else
-	    pc = read_memory_integer (saved_regs.regs[RP_REGNUM],
+	    pc = read_memory_integer (saved_regs[RP_REGNUM],
 				      TARGET_PTR_BIT / 8) & ~0x3;
 	}
       else if (rp_offset == 0)
@@ -1129,9 +1128,9 @@ hppa_frame_chain (struct frame_info *frame)
 
   /* A frame in the current frame list, or zero.  */
   struct frame_info *saved_regs_frame = 0;
-  /* Where the registers were saved in saved_regs_frame.
-     If saved_regs_frame is zero, this is garbage.  */
-  struct frame_saved_regs saved_regs;
+  /* Where the registers were saved in saved_regs_frame.  If
+     saved_regs_frame is zero, this is garbage.  */
+  CORE_ADDR *saved_regs = NULL;
 
   CORE_ADDR caller_pc;
 
@@ -1258,11 +1257,12 @@ hppa_frame_chain (struct frame_info *frame)
 	  /* The unwind entry claims that r3 is saved here.  However,
 	     in optimized code, GCC often doesn't actually save r3.
 	     We'll discover this if we look at the prologue.  */
-	  deprecated_get_frame_saved_regs (tmp_frame, &saved_regs);
+	  hppa_frame_init_saved_regs (tmp_frame);
+	  saved_regs = get_frame_saved_regs (tmp_frame);
 	  saved_regs_frame = tmp_frame;
 
 	  /* If we have an address for r3, that's good.  */
-	  if (saved_regs.regs[FP_REGNUM])
+	  if (saved_regs[FP_REGNUM])
 	    break;
 	}
     }
@@ -1307,21 +1307,24 @@ hppa_frame_chain (struct frame_info *frame)
 	     system call has a variable sized stack frame.  */
 
 	  if (tmp_frame != saved_regs_frame)
-	    deprecated_get_frame_saved_regs (tmp_frame, &saved_regs);
+	    {
+	      hppa_frame_init_saved_regs (tmp_frame);
+	      saved_regs = get_frame_saved_regs (tmp_frame);
+	    }
 
 	  /* Abominable hack.  */
 	  if (current_target.to_has_execution == 0
-	      && ((saved_regs.regs[FLAGS_REGNUM]
-		   && (read_memory_integer (saved_regs.regs[FLAGS_REGNUM],
+	      && ((saved_regs[FLAGS_REGNUM]
+		   && (read_memory_integer (saved_regs[FLAGS_REGNUM],
 					    TARGET_PTR_BIT / 8)
 		       & 0x2))
-		  || (saved_regs.regs[FLAGS_REGNUM] == 0
+		  || (saved_regs[FLAGS_REGNUM] == 0
 		      && read_register (FLAGS_REGNUM) & 0x2)))
 	    {
 	      u = find_unwind_entry (DEPRECATED_FRAME_SAVED_PC (frame));
 	      if (!u)
 		{
-		  return read_memory_integer (saved_regs.regs[FP_REGNUM],
+		  return read_memory_integer (saved_regs[FP_REGNUM],
 					      TARGET_PTR_BIT / 8);
 		}
 	      else
@@ -1330,7 +1333,7 @@ hppa_frame_chain (struct frame_info *frame)
 		}
 	    }
 
-	  return read_memory_integer (saved_regs.regs[FP_REGNUM],
+	  return read_memory_integer (saved_regs[FP_REGNUM],
 				      TARGET_PTR_BIT / 8);
 	}
     }
@@ -1342,21 +1345,24 @@ hppa_frame_chain (struct frame_info *frame)
 	tmp_frame = tmp_frame->next;
 
       if (tmp_frame != saved_regs_frame)
-	deprecated_get_frame_saved_regs (tmp_frame, &saved_regs);
+	{
+	  hppa_frame_init_saved_regs (tmp_frame);
+	  saved_regs = get_frame_saved_regs (tmp_frame);
+	}
 
       /* Abominable hack.  See above.  */
       if (current_target.to_has_execution == 0
-	  && ((saved_regs.regs[FLAGS_REGNUM]
-	       && (read_memory_integer (saved_regs.regs[FLAGS_REGNUM],
+	  && ((saved_regs[FLAGS_REGNUM]
+	       && (read_memory_integer (saved_regs[FLAGS_REGNUM],
 					TARGET_PTR_BIT / 8)
 		   & 0x2))
-	      || (saved_regs.regs[FLAGS_REGNUM] == 0
+	      || (saved_regs[FLAGS_REGNUM] == 0
 		  && read_register (FLAGS_REGNUM) & 0x2)))
 	{
 	  u = find_unwind_entry (DEPRECATED_FRAME_SAVED_PC (frame));
 	  if (!u)
 	    {
-	      return read_memory_integer (saved_regs.regs[FP_REGNUM],
+	      return read_memory_integer (saved_regs[FP_REGNUM],
 					  TARGET_PTR_BIT / 8);
 	    }
 	  else
@@ -1496,26 +1502,26 @@ hppa_push_dummy_frame (void)
 
 static void
 find_dummy_frame_regs (struct frame_info *frame,
-		       struct frame_saved_regs *frame_saved_regs)
+		       CORE_ADDR frame_saved_regs[])
 {
   CORE_ADDR fp = frame->frame;
   int i;
 
   /* The 32bit and 64bit ABIs save RP into different locations.  */
   if (REGISTER_SIZE == 8)
-    frame_saved_regs->regs[RP_REGNUM] = (fp - 16) & ~0x3;
+    frame_saved_regs[RP_REGNUM] = (fp - 16) & ~0x3;
   else
-    frame_saved_regs->regs[RP_REGNUM] = (fp - 20) & ~0x3;
+    frame_saved_regs[RP_REGNUM] = (fp - 20) & ~0x3;
 
-  frame_saved_regs->regs[FP_REGNUM] = fp;
+  frame_saved_regs[FP_REGNUM] = fp;
 
-  frame_saved_regs->regs[1] = fp + (2 * REGISTER_SIZE);
+  frame_saved_regs[1] = fp + (2 * REGISTER_SIZE);
 
   for (fp += 3 * REGISTER_SIZE, i = 3; i < 32; i++)
     {
       if (i != FP_REGNUM)
 	{
-	  frame_saved_regs->regs[i] = fp;
+	  frame_saved_regs[i] = fp;
 	  fp += REGISTER_SIZE;
 	}
     }
@@ -1525,14 +1531,14 @@ find_dummy_frame_regs (struct frame_info *frame,
     fp += 4;
 
   for (i = FP0_REGNUM; i < NUM_REGS; i++, fp += 8)
-    frame_saved_regs->regs[i] = fp;
+    frame_saved_regs[i] = fp;
 
-  frame_saved_regs->regs[IPSW_REGNUM] = fp;
-  frame_saved_regs->regs[SAR_REGNUM] = fp + REGISTER_SIZE;
-  frame_saved_regs->regs[PCOQ_HEAD_REGNUM] = fp + 2 * REGISTER_SIZE;
-  frame_saved_regs->regs[PCSQ_HEAD_REGNUM] = fp + 3 * REGISTER_SIZE;
-  frame_saved_regs->regs[PCOQ_TAIL_REGNUM] = fp + 4 * REGISTER_SIZE;
-  frame_saved_regs->regs[PCSQ_TAIL_REGNUM] = fp + 5 * REGISTER_SIZE;
+  frame_saved_regs[IPSW_REGNUM] = fp;
+  frame_saved_regs[SAR_REGNUM] = fp + REGISTER_SIZE;
+  frame_saved_regs[PCOQ_HEAD_REGNUM] = fp + 2 * REGISTER_SIZE;
+  frame_saved_regs[PCSQ_HEAD_REGNUM] = fp + 3 * REGISTER_SIZE;
+  frame_saved_regs[PCOQ_TAIL_REGNUM] = fp + 4 * REGISTER_SIZE;
+  frame_saved_regs[PCSQ_TAIL_REGNUM] = fp + 5 * REGISTER_SIZE;
 }
 
 void
@@ -1541,44 +1547,45 @@ hppa_pop_frame (void)
   register struct frame_info *frame = get_current_frame ();
   register CORE_ADDR fp, npc, target_pc;
   register int regnum;
-  struct frame_saved_regs fsr;
+  CORE_ADDR *fsr;
   double freg_buffer;
 
   fp = get_frame_base (frame);
-  deprecated_get_frame_saved_regs (frame, &fsr);
+  hppa_frame_init_saved_regs (frame);
+  fsr = get_frame_saved_regs (frame);
 
 #ifndef NO_PC_SPACE_QUEUE_RESTORE
-  if (fsr.regs[IPSW_REGNUM])	/* Restoring a call dummy frame */
-    restore_pc_queue (&fsr);
+  if (fsr[IPSW_REGNUM])	/* Restoring a call dummy frame */
+    restore_pc_queue (fsr);
 #endif
 
   for (regnum = 31; regnum > 0; regnum--)
-    if (fsr.regs[regnum])
-      write_register (regnum, read_memory_integer (fsr.regs[regnum],
+    if (fsr[regnum])
+      write_register (regnum, read_memory_integer (fsr[regnum],
 		      REGISTER_SIZE));
 
   for (regnum = NUM_REGS - 1; regnum >= FP0_REGNUM; regnum--)
-    if (fsr.regs[regnum])
+    if (fsr[regnum])
       {
-	read_memory (fsr.regs[regnum], (char *) &freg_buffer, 8);
+	read_memory (fsr[regnum], (char *) &freg_buffer, 8);
 	deprecated_write_register_bytes (REGISTER_BYTE (regnum),
 					 (char *) &freg_buffer, 8);
       }
 
-  if (fsr.regs[IPSW_REGNUM])
+  if (fsr[IPSW_REGNUM])
     write_register (IPSW_REGNUM,
-		    read_memory_integer (fsr.regs[IPSW_REGNUM],
+		    read_memory_integer (fsr[IPSW_REGNUM],
 					 REGISTER_SIZE));
 
-  if (fsr.regs[SAR_REGNUM])
+  if (fsr[SAR_REGNUM])
     write_register (SAR_REGNUM,
-		    read_memory_integer (fsr.regs[SAR_REGNUM],
+		    read_memory_integer (fsr[SAR_REGNUM],
 					 REGISTER_SIZE));
 
   /* If the PC was explicitly saved, then just restore it.  */
-  if (fsr.regs[PCOQ_TAIL_REGNUM])
+  if (fsr[PCOQ_TAIL_REGNUM])
     {
-      npc = read_memory_integer (fsr.regs[PCOQ_TAIL_REGNUM],
+      npc = read_memory_integer (fsr[PCOQ_TAIL_REGNUM],
 				 REGISTER_SIZE);
       write_register (PCOQ_TAIL_REGNUM, npc);
     }
@@ -1591,7 +1598,7 @@ hppa_pop_frame (void)
 
   write_register (FP_REGNUM, read_memory_integer (fp, REGISTER_SIZE));
 
-  if (fsr.regs[IPSW_REGNUM])	/* call dummy */
+  if (fsr[IPSW_REGNUM])	/* call dummy */
     write_register (SP_REGNUM, fp - 48);
   else
     write_register (SP_REGNUM, fp);
@@ -1604,7 +1611,7 @@ hppa_pop_frame (void)
 
      Don't skip through the trampoline if we're popping a dummy frame.  */
   target_pc = SKIP_TRAMPOLINE_CODE (npc & ~0x3) & ~0x3;
-  if (target_pc && !fsr.regs[IPSW_REGNUM])
+  if (target_pc && !fsr[IPSW_REGNUM])
     {
       struct symtab_and_line sal;
       struct breakpoint *breakpoint;
@@ -1635,10 +1642,10 @@ hppa_pop_frame (void)
    queue space registers. */
 
 static int
-restore_pc_queue (struct frame_saved_regs *fsr)
+restore_pc_queue (CORE_ADDR *fsr)
 {
   CORE_ADDR pc = read_pc ();
-  CORE_ADDR new_pc = read_memory_integer (fsr->regs[PCOQ_HEAD_REGNUM],
+  CORE_ADDR new_pc = read_memory_integer (fsr[PCOQ_HEAD_REGNUM],
 					  TARGET_PTR_BIT / 8);
   struct target_waitstatus w;
   int insn_count;
@@ -1657,7 +1664,7 @@ restore_pc_queue (struct frame_saved_regs *fsr)
      So, load up the registers and single step until we are in the
      right place. */
 
-  write_register (21, read_memory_integer (fsr->regs[PCSQ_HEAD_REGNUM],
+  write_register (21, read_memory_integer (fsr[PCSQ_HEAD_REGNUM],
 					   REGISTER_SIZE));
   write_register (22, new_pc);
 
@@ -3842,15 +3849,15 @@ hppa_skip_prologue (CORE_ADDR pc)
     return (skip_prologue_hard_way (pc));
 }
 
-/* Put here the code to store, into a struct frame_saved_regs,
-   the addresses of the saved registers of frame described by FRAME_INFO.
-   This includes special registers such as pc and fp saved in special
-   ways in the stack frame.  sp is even more special:
-   the address we return for it IS the sp for the next frame.  */
+/* Put here the code to store, into the SAVED_REGS, the addresses of
+   the saved registers of frame described by FRAME_INFO.  This
+   includes special registers such as pc and fp saved in special ways
+   in the stack frame.  sp is even more special: the address we return
+   for it IS the sp for the next frame.  */
 
 void
 hppa_frame_find_saved_regs (struct frame_info *frame_info,
-			    struct frame_saved_regs *frame_saved_regs)
+			    CORE_ADDR frame_saved_regs[])
 {
   CORE_ADDR pc;
   struct unwind_table_entry *u;
@@ -3861,7 +3868,7 @@ hppa_frame_find_saved_regs (struct frame_info *frame_info,
   int final_iteration;
 
   /* Zero out everything.  */
-  memset (frame_saved_regs, '\0', sizeof (struct frame_saved_regs));
+  memset (frame_saved_regs, '\0', SIZEOF_FRAME_SAVED_REGS);
 
   /* Call dummy frames always look the same, so there's no need to
      examine the dummy code to determine locations of saved registers;
@@ -3892,11 +3899,11 @@ hppa_frame_find_saved_regs (struct frame_info *frame_info,
 	{
 	  /* SP is a little special.  */
 	  if (i == SP_REGNUM)
-	    frame_saved_regs->regs[SP_REGNUM]
+	    frame_saved_regs[SP_REGNUM]
 	      = read_memory_integer (frame_info->frame + SP_REGNUM * 4,
 				     TARGET_PTR_BIT / 8);
 	  else
-	    frame_saved_regs->regs[i] = frame_info->frame + i * 4;
+	    frame_saved_regs[i] = frame_info->frame + i * 4;
 	}
       return;
     }
@@ -3945,7 +3952,7 @@ hppa_frame_find_saved_regs (struct frame_info *frame_info,
   /* The frame always represents the value of %sp at entry to the
      current function (and is thus equivalent to the "saved" stack
      pointer.  */
-  frame_saved_regs->regs[SP_REGNUM] = frame_info->frame;
+  frame_saved_regs[SP_REGNUM] = frame_info->frame;
 
   /* Loop until we find everything of interest or hit a branch.
 
@@ -3980,12 +3987,12 @@ hppa_frame_find_saved_regs (struct frame_info *frame_info,
       if (inst == 0x6bc23fd9) /* stw rp,-0x14(sr0,sp) */
 	{
 	  save_rp = 0;
-	  frame_saved_regs->regs[RP_REGNUM] = frame_info->frame - 20;
+	  frame_saved_regs[RP_REGNUM] = frame_info->frame - 20;
 	}
       else if (inst == 0x0fc212c1) /* std rp,-0x10(sr0,sp) */
 	{
 	  save_rp = 0;
-	  frame_saved_regs->regs[RP_REGNUM] = frame_info->frame - 16;
+	  frame_saved_regs[RP_REGNUM] = frame_info->frame - 16;
 	}
 
       /* Note if we saved SP into the stack.  This also happens to indicate
@@ -3993,7 +4000,7 @@ hppa_frame_find_saved_regs (struct frame_info *frame_info,
       if (   (inst & 0xffffc000) == 0x6fc10000  /* stw,ma r1,N(sr0,sp) */
           || (inst & 0xffffc00c) == 0x73c10008) /* std,ma r1,N(sr0,sp) */
 	{
-	  frame_saved_regs->regs[FP_REGNUM] = frame_info->frame;
+	  frame_saved_regs[FP_REGNUM] = frame_info->frame;
 	  save_sp = 0;
 	}
 
@@ -4007,10 +4014,10 @@ hppa_frame_find_saved_regs (struct frame_info *frame_info,
 	  /* stwm with a positive displacement is a *post modify*.  */
 	  if ((inst >> 26) == 0x1b
 	      && extract_14 (inst) >= 0)
-	    frame_saved_regs->regs[reg] = frame_info->frame;
+	    frame_saved_regs[reg] = frame_info->frame;
 	  /* A std has explicit post_modify forms.  */
 	  else if ((inst & 0xfc00000c0) == 0x70000008)
-	    frame_saved_regs->regs[reg] = frame_info->frame;
+	    frame_saved_regs[reg] = frame_info->frame;
 	  else
 	    {
 	      CORE_ADDR offset;
@@ -4024,10 +4031,10 @@ hppa_frame_find_saved_regs (struct frame_info *frame_info,
 
 	      /* Handle code with and without frame pointers.  */
 	      if (u->Save_SP)
-		frame_saved_regs->regs[reg]
+		frame_saved_regs[reg]
 		  = frame_info->frame + offset;
 	      else
-		frame_saved_regs->regs[reg]
+		frame_saved_regs[reg]
 		  = (frame_info->frame + (u->Total_frame_size << 3)
 		     + offset);
 	    }
@@ -4060,12 +4067,12 @@ hppa_frame_find_saved_regs (struct frame_info *frame_info,
 	      /* 1st HP CC FP register store.  After this instruction
 	         we've set enough state that the GCC and HPCC code are
 	         both handled in the same manner.  */
-	      frame_saved_regs->regs[reg + FP4_REGNUM + 4] = frame_info->frame;
+	      frame_saved_regs[reg + FP4_REGNUM + 4] = frame_info->frame;
 	      fp_loc = 8;
 	    }
 	  else
 	    {
-	      frame_saved_regs->regs[reg + FP0_REGNUM + 4]
+	      frame_saved_regs[reg + FP0_REGNUM + 4]
 		= frame_info->frame + fp_loc;
 	      fp_loc += 8;
 	    }
@@ -4085,6 +4092,17 @@ hppa_frame_find_saved_regs (struct frame_info *frame_info,
     }
 }
 
+/* XXX - deprecated.  This is a compatibility function for targets
+   that do not yet implement DEPRECATED_FRAME_INIT_SAVED_REGS.  */
+/* Find the addresses in which registers are saved in FRAME.  */
+
+void
+hppa_frame_init_saved_regs (struct frame_info *frame)
+{
+  if (get_frame_saved_regs (frame) == NULL)
+    frame_saved_regs_zalloc (frame);
+  hppa_frame_find_saved_regs (frame, get_frame_saved_regs (frame));
+}
 
 /* Exception handling support for the HP-UX ANSI C++ compiler.
    The compiler (aCC) provides a callback for exception events;

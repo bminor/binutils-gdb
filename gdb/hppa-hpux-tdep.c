@@ -35,7 +35,7 @@ void hppa_hpux_frame_saved_pc_in_sigtramp (struct frame_info *fi,
 void hppa_hpux_frame_base_before_sigtramp (struct frame_info *fi,
                                            CORE_ADDR *tmp);
 void hppa_hpux_frame_find_saved_regs_in_sigtramp
-      (struct frame_info *fi, struct frame_saved_regs *fsr);
+      (struct frame_info *fi, CORE_ADDR *fsr);
 
 int
 hppa_hpux_pc_in_sigtramp (CORE_ADDR pc, char *name)
@@ -79,7 +79,7 @@ hppa_hpux_frame_base_before_sigtramp (struct frame_info *fi,
 
 void
 hppa_hpux_frame_find_saved_regs_in_sigtramp (struct frame_info *fi,
-                                             struct frame_saved_regs *fsr)
+					     CORE_ADDR *fsr)
 {
   int i;
   const CORE_ADDR tmp = (fi)->frame + (10 * 4);
@@ -87,9 +87,9 @@ hppa_hpux_frame_find_saved_regs_in_sigtramp (struct frame_info *fi,
   for (i = 0; i < NUM_REGS; i++)
     {
       if (i == SP_REGNUM)
-	(fsr)->regs[SP_REGNUM] = read_memory_integer (tmp + SP_REGNUM * 4, 4);
+	fsr[SP_REGNUM] = read_memory_integer (tmp + SP_REGNUM * 4, 4);
       else
-	(fsr)->regs[i] = tmp + i * 4;
+	fsr[i] = tmp + i * 4;
     }
 }
 

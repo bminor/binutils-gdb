@@ -97,10 +97,9 @@ vx_read_register (int regno)
   bcopy (&sparc_greg_packet[SPARC_R_Y],
 	 &deprecated_registers[REGISTER_BYTE (Y_REGNUM)], 6 * SPARC_GREG_SIZE);
 
-  /* Now write the local and in registers to the register window
-     spill area in the frame.  VxWorks does not do this for the
-     active frame automatically; it greatly simplifies debugging
-     (FRAME_FIND_SAVED_REGS, in particular, depends on this).  */
+  /* Now write the local and in registers to the register window spill
+     area in the frame.  VxWorks does not do this for the active frame
+     automatically; it greatly simplifies debugging.  */
 
   sp = extract_address (&deprecated_registers[REGISTER_BYTE (SP_REGNUM)],
 			REGISTER_RAW_SIZE (SP_REGNUM));

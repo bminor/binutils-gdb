@@ -820,12 +820,6 @@ extern struct gdbarch *current_gdbarch;
 /* If any of the following are defined, the target wasn't correctly
    converted. */
 
-#if GDB_MULTI_ARCH
-#if defined (FRAME_FIND_SAVED_REGS)
-#error "FRAME_FIND_SAVED_REGS: replaced by DEPRECATED_FRAME_INIT_SAVED_REGS"
-#endif
-#endif
-
 #if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PURE) && defined (GDB_TM_FILE)
 #error "GDB_TM_FILE: Pure multi-arch targets do not have a tm.h file."
 #endif

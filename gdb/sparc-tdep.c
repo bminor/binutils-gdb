@@ -41,6 +41,7 @@
 #endif
 
 #include "gdbcore.h"
+#include "gdb_assert.h"
 
 #include "symfile.h" 	/* for 'entry_point_address' */
 
@@ -1133,9 +1134,7 @@ sparc_frame_find_saved_regs (struct frame_info *fi, CORE_ADDR *saved_regs_addr)
   register int regnum;
   CORE_ADDR frame_addr = get_frame_base (fi);
 
-  if (!fi)
-    internal_error (__FILE__, __LINE__,
-		    "Bad frame info struct in FRAME_FIND_SAVED_REGS");
+  gdb_assert (fi != NULL);
 
   memset (saved_regs_addr, 0, NUM_REGS * sizeof (CORE_ADDR));
 

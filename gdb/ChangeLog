@@ -1,5 +1,43 @@
 2003-04-05  Andrew Cagney  <cagney@redhat.com>
 
+	Eliminate FRAME_FIND_SAVED_REGS.
+	* config/pa/tm-hppah.h (hppa_hpux_frame_find_saved_regs_in_sigtramp):
+	Change FSR parameter to a pointer.
+	* config/pa/tm-hppa64.h (FRAME_FIND_SAVED_REGS_IN_SIGTRAMP):
+	Assume FSR parameter is a pointer.
+	* hppa-hpux-tdep.c (hppa_hpux_frame_find_saved_regs_in_sigtramp):
+	Make fsr a pointer.
+	* hppa-tdep.c (hppa_frame_find_saved_regs): New function.
+	(hppa_frame_saved_pc): Call hppa_frame_init_saved_regs.  Make
+	saved_regs a pointer.
+	(hppa_frame_saved_pc): Ditto.
+	(find_dummy_frame_regs): Make frame_saved_regs a pointer
+	(hppa_pop_frame): Call hppa_frame_init_saved_regs.  Make fsr a
+	pointer.
+	(restore_pc_queue): Make fsr a pointer.
+	(hppa_frame_find_saved_regs): Make frame_saved_regs a pointer.
+	(hppa_frame_chain): Make saved_regs a pointer, call
+	hppa_frame_init_saved_regs.
+	* sparc-tdep.c: Include "gdb_assert.h".
+	(sparc_frame_find_saved_regs): Replace internal_error with
+	gdb_assert.
+	* remote-vxsparc.c (vx_read_register): Delete reference to
+	FRAME_FIND_SAVED_REGS.
+	* gdbarch.sh: Delete check for FRAME_FIND_SAVED_REGS.
+	* gdbarch.h: Regenerate.
+	* frame.h (DEPRECATED_FRAME_INIT_SAVED_REGS): Delete macro.
+	(deprecated_get_frame_saved_regs): Delete declaration.
+	(struct frame_saved_regs): Delete definition.
+	* frame.c (deprecated_get_frame_saved_regs): Delete function.
+	* config/pa/tm-hppa.h (hppa_frame_init_saved_regs): Declare.
+	(hppa_frame_find_saved_regs): Delete declaration.
+	(FRAME_FIND_SAVED_REGS): Delete macro.
+	(DEPRECATED_FRAME_INIT_SAVED_REGS): Define.
+	* config/i386/tm-ptx.h (FRAME_FIND_SAVED_REGS): Delete
+	FRAME_FIND_SAVED_REGS in comment.
+
+2003-04-05  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.c (frame_func_unwind, get_frame_func): New functions.
 	* frame.h (get_frame_func, frame_func_unwind): Declare.
 	(struct frame_info): Add field "prev_func" for caching the

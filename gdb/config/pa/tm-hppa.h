@@ -441,11 +441,9 @@ extern int hppa_frame_num_args (struct frame_info *frame);
 #define FRAME_ARGS_SKIP 0
 #endif
 
-#define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
-  hppa_frame_find_saved_regs (frame_info, &frame_saved_regs)
-extern void hppa_frame_find_saved_regs (struct frame_info *,
-					struct frame_saved_regs *);
-
+extern void hppa_frame_init_saved_regs (struct frame_info *);
+#define DEPRECATED_FRAME_INIT_SAVED_REGS(FI) \
+  hppa_frame_init_saved_regs (FI)
 
 /* Things needed for making the inferior call functions.  */
 

@@ -324,24 +324,6 @@ extern CORE_ADDR frame_pc_unwind (struct frame_info *frame);
    of the caller.  */
 extern void frame_pop (struct frame_info *frame);
 
-/* Describe the saved registers of a frame.  */
-
-#if defined (FRAME_FIND_SAVED_REGS)
-/* XXXX - deprecated */
-struct frame_saved_regs
-  {
-    /* For each register R (except the SP), regs[R] is the address at
-       which it was saved on entry to the frame, or zero if it was not
-       saved on entry to this frame.  This includes special registers
-       such as pc and fp saved in special ways in the stack frame.
-
-       regs[SP_REGNUM] is different.  It holds the actual SP, not the
-       address at which it was saved.  */
-
-    CORE_ADDR regs[NUM_REGS];
-  };
-#endif
-
 /* We keep a cache of stack frames, each of which is a "struct
    frame_info".  The innermost one gets allocated (in
    wait_for_inferior) each time the inferior stops; current_frame
@@ -479,14 +461,6 @@ extern void *frame_obstack_zalloc (unsigned long size);
 extern int frame_chain_valid (CORE_ADDR, struct frame_info *);
 
 extern void generic_save_dummy_frame_tos (CORE_ADDR sp);
-
-
-#ifdef FRAME_FIND_SAVED_REGS
-/* XXX - deprecated */
-#define DEPRECATED_FRAME_INIT_SAVED_REGS(FI) deprecated_get_frame_saved_regs (FI, NULL)
-extern void deprecated_get_frame_saved_regs (struct frame_info *,
-					     struct frame_saved_regs *);
-#endif
 
 extern struct block *get_frame_block (struct frame_info *,
                                       CORE_ADDR *addr_in_block);

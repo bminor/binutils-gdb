@@ -1776,34 +1776,6 @@ deprecated_set_frame_type (struct frame_info *frame, enum frame_type type)
   frame->type = type;
 }
 
-#ifdef FRAME_FIND_SAVED_REGS
-/* XXX - deprecated.  This is a compatibility function for targets
-   that do not yet implement DEPRECATED_FRAME_INIT_SAVED_REGS.  */
-/* Find the addresses in which registers are saved in FRAME.  */
-
-void
-deprecated_get_frame_saved_regs (struct frame_info *frame,
-				 struct frame_saved_regs *saved_regs_addr)
-{
-  if (frame->saved_regs == NULL)
-    {
-      frame->saved_regs = (CORE_ADDR *)
-	frame_obstack_zalloc (SIZEOF_FRAME_SAVED_REGS);
-    }
-  if (saved_regs_addr == NULL)
-    {
-      struct frame_saved_regs saved_regs;
-      FRAME_FIND_SAVED_REGS (frame, saved_regs);
-      memcpy (frame->saved_regs, &saved_regs, SIZEOF_FRAME_SAVED_REGS);
-    }
-  else
-    {
-      FRAME_FIND_SAVED_REGS (frame, *saved_regs_addr);
-      memcpy (frame->saved_regs, saved_regs_addr, SIZEOF_FRAME_SAVED_REGS);
-    }
-}
-#endif
-
 struct frame_extra_info *
 get_frame_extra_info (struct frame_info *fi)
 {
