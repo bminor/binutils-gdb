@@ -1,0 +1,55 @@
+******** pl6.amp
+!	.ALTERNATE
+!! test of expression operator
+	! test of expression operator
+!define 	MACRO 	val, string
+!	SDATA 	val
+!	SDATA	string
+!	ENDM
+!	define "1","99%of100"	! notice % within string
+!	SDATA 	"1"
+	.byte	34,49,34
+!	SDATA	"99%of100"
+	.byte	34,57,57,37,111,102,49,48,48,34
+!	define 	%1 + 2, "=3"
+!	SDATA 	"3"
+	.byte	34,51,34
+!	SDATA	"=3"
+	.byte	34,61,51,34
+!
+
+!
+
+!	define 	% 1 + 2 %3+4
+!	SDATA 	"3"
+	.byte	34,51,34
+!	SDATA	"7"
+	.byte	34,55,34
+!
+
+!	define	%3*4-2  <=10>
+!	SDATA 	"10"
+	.byte	34,49,48,34
+!	SDATA	"=10"
+	.byte	34,61,49,48,34
+!
+
+!	define	%3*4-2  5
+!	SDATA 	"10"
+	.byte	34,49,48,34
+!	SDATA	5
+	.byte	53
+!
+
+!	define	%1 + 2,<is equal to %1 + 2, right?>
+!	SDATA 	"3"
+	.byte	34,51,34
+!	SDATA	"is equal to %1 + 2, right?"
+	.byte	34,105,115,32,101,113,117,97,108,32,116,111,32,37,49,32,43,32,50,44,32,114,105,103,104,116,63,34
+!
+
+!	! has no effect
+	! has no effect
+!
+
+!	end

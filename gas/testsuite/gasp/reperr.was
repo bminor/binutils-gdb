@@ -1,0 +1,6 @@
+******** reperr.amp
+!
+
+!	.REPEAT	10
+	.REPEAT	10
+!.END missing from end of file.

@@ -3058,4 +3058,4 @@
 !	THERE
 	THERE
 !	bar
-crash.amp:18 Unreasonable expansion (-u turns off check).
+crash.asm:18 Unreasonable expansion (-u turns off check).

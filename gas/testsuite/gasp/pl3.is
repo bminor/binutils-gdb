@@ -1,0 +1,87 @@
+******** pl3.amp
+!	.ALTERNATE
+!
+
+!foo	MACRO	string
+!	LOCAL	lab1, lab2
+!lab1:	DATA.L	lab2
+!lab2:	SDATA	string
+!	ENDM
+!
+
+!	foo	"An example"
+!	LOCAL	lab1, lab2
+!lab1:	DATA.L	lab2
+LL0001:	.long	LL0002
+!lab2:	SDATA	"An example"
+LL0002:	.byte	34,65,110,32,101,120,97,109,112,108,101,34
+!	foo	"using LOCAL"
+!	LOCAL	lab1, lab2
+!lab1:	DATA.L	lab2
+LL0003:	.long	LL0004
+!lab2:	SDATA	"using LOCAL"
+LL0004:	.byte	34,117,115,105,110,103,32,76,79,67,65,76,34
+!
+
+!! test of LOCAL directive
+	! test of LOCAL directive
+!
+
+!chk_err	MACRO	limit
+!	LOCAL		skip !! frob
+!	LOCAL		zap,dog,barf
+!barf:	cmp		ax,limit	!! check value against
+!					!! limit
+!	jle		skip		!! skip call if OK
+!skip:	call	 	error
+!	foo		dog
+!	zap		dog	
+!	nop
+!	ENDM
+!
+
+!	chk_err 5
+!	LOCAL		skip 
+!	LOCAL		zap,dog,barf
+!barf:	cmp		ax,5	
+LL0008:	cmp		ax,5	
+!					
+!	jle		skip		
+	jle		LL0005		
+!skip:	call	 	error
+LL0005:	call	 	error
+!	foo		dog
+!	LOCAL	lab1, lab2
+!lab1:	DATA.L	lab2
+LL0009:	.long	LL000a
+!lab2:	SDATA	dog
+LL000a:	.byte	76,76,48,48,48,55
+!	zap		dog	
+	LL0006		LL0007	
+!	nop
+	nop
+!	chk_err 10
+!	LOCAL		skip 
+!	LOCAL		zap,dog,barf
+!barf:	cmp		ax,10	
+LL000e:	cmp		ax,10	
+!					
+!	jle		skip		
+	jle		LL000b		
+!skip:	call	 	error
+LL000b:	call	 	error
+!	foo		dog
+!	LOCAL	lab1, lab2
+!lab1:	DATA.L	lab2
+LL000f:	.long	LL0010
+!lab2:	SDATA	dog
+LL0010:	.byte	76,76,48,48,48,100
+!	zap		dog	
+	LL000c		LL000d	
+!	nop
+	nop
+!
+
+!
+
+!	END

@@ -26,7 +26,5 @@
 !	.FORM	LIN=123 COL=23
 	.psize 123,23
 !	
-	
 !	.END
 End of file not at start of line.
-.END missing from end of file.

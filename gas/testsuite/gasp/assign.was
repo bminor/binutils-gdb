@@ -20,6 +20,5 @@
 !
 
 !	
-	
 !	.END
-assign.amp:8 Can't find preprocessor variable bar.
+assign.asm:8 Can't find preprocessor variable bar.

@@ -150,8 +150,8 @@
 !	COMM
 !	bar	; this comment will get copied out
 	bar	; this comment will get copied out
-!	foo	
-	foo	
+!	foo	\; this one will get dropped
+	foo	\; this one will get dropped
 !	BACK_SLASH_SET
 !	MOV	#"\",R0 
 	MOV	#"\",R0 
@@ -274,7 +274,6 @@
 !
 
 !	
-	
 !	.MACRO	PUSH Rn
 !	MOV.L	\Rn,@-r15
 !	.ENDM
@@ -297,7 +296,6 @@
 !end_str\@
 !	.ENDM
 !	
-	
 !	RES_STR	"ONE",R0	
 !	MOV.L	#str00018,R0
 	MOV.L	#str00018,R0
@@ -310,7 +308,7 @@ str00018:	.byte	79,78,69
 !	.ALIGN	2
 	.align	2
 !end_str00018
-end_str00018:	
+end_str00018:
 !	RES_STR	"TWO",R1
 !	MOV.L	#str00019,R1
 	MOV.L	#str00019,R1
@@ -323,7 +321,7 @@ str00019:	.byte	84,87,79
 !	.ALIGN	2
 	.align	2
 !end_str00019
-end_str00019:	
+end_str00019:
 !	RES_STR	"THREE",R2
 !	MOV.L	#str00020,R2
 	MOV.L	#str00020,R2
@@ -336,7 +334,7 @@ str00020:	.byte	84,72,82,69,69
 !	.ALIGN	2
 	.align	2
 !end_str00020
-end_str00020:	
+end_str00020:
 !
 
 !
@@ -355,7 +353,7 @@ str00021:	.byte	100,111,110,107,101,121
 !	.ALIGN	2
 	.align	2
 !end_str00021
-end_str00021:	
+end_str00021:
 !	RES_STR donkey,R1
 !	MOV.L	#str00022,R1
 	MOV.L	#str00022,R1
@@ -368,8 +366,8 @@ str00022:	.byte	100,111,110,107,101,121
 !	.ALIGN	2
 	.align	2
 !end_str00022
-end_str00022:	
+end_str00022:
 ! 	RES_STR donkey Rn=R1
 !	.END
-macro.amp:70 Too many positional arguments.
-macro.amp:98 Can't mix positional and keyword arguments.
+macro.asm:70 Too many positional arguments.
+macro.asm:98 Can't mix positional and keyword arguments.

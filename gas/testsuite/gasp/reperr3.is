@@ -2034,9 +2034,9 @@
 !	.AENDR	
 !	.AENDR	
 !	.END
-reperr3.amp:14 AENDR without a AREPEAT.
-reperr3.amp:16 AENDR without a AREPEAT.
-reperr3.amp:17 AENDR without a AREPEAT.
-reperr3.amp:18 AENDR without a AREPEAT.
-reperr3.amp:19 AENDR without a AREPEAT.
-reperr3.amp:20 AENDR without a AREPEAT.
+reperr3.asm:14 AENDR without a AREPEAT.
+reperr3.asm:16 AENDR without a AREPEAT.
+reperr3.asm:17 AENDR without a AREPEAT.
+reperr3.asm:18 AENDR without a AREPEAT.
+reperr3.asm:19 AENDR without a AREPEAT.
+reperr3.asm:20 AENDR without a AREPEAT.
