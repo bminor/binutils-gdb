@@ -1,3 +1,8 @@
+2003-06-13  Jim Blandy  <jimb@redhat.com>
+
+	* solib-svr4.c (solib_break_names): Recognize the 64-bit PowerPC
+	Linux entry point symbols for _dl_debug_state, too.
+
 2003-06-13  Andrew Cagney  <cagney@redhat.com>
 
 	* infcall.c (call_function_by_hand): When UNWIND_DUMMY_ID is
