@@ -54,7 +54,7 @@ const struct v850_operand v850_operands[] = {
 
 /* The DISP16 field in a format 6 insn. */
 #define D16	(D9+1)
-  { 16, 0, 0, 0, V850_OPERAND_SIGNED }, 
+  { 16, 16, 0, 0, V850_OPERAND_SIGNED }, 
 
 /* The DISP22 field in a format 4 insn. */
 #define D22	(D16+1)
