@@ -1,5 +1,29 @@
 Tue Feb  3 14:25:25 1998  Brent Baccala  <baccala@freesoft.org>
 
+	* symtab.c (symtab_finalize): Prefer function symbols over line
+	symbols.
+	(dbg_sym_lookup): Correct debugging messages.
+
+	* gprof.c (main): --sum implies --line.
+
+	* cg_print.c (cg_print): When doing line by line profiling, don't
+	use a non-function as a main listing item.
+
+	* call_graph.c (cg_tally): When using line by line profiling, use
+ 	the function symbol as the child.
+
+	* symtab.h (NBBS): Define.
+	(Sym): Add bb_addr and bb_calls fields.
+	* basic_blocks.c (bb_read_rec): Save multiple basic blocks per
+	symbol.
+	(bb_write_blocks): Adjust for multiple basic blocks per symbol.
+	(print_exec_counts): Don't check whether a symbol is the start of
+	a basic block.  Print all basic blocks for a symbol.
+	(annotate_with_count): Rewrite to print all basic block counts and
+	to pay attention to width argument.
+	(print_annotated_source): Don't check whether symbol is the start
+	of a basic block.
+
 	Make it possible to build a cross gprof, although a few cases are
 	still not handled:
 	* configure.in: Don't set MY_TARGET.

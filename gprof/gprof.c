@@ -419,6 +419,12 @@ This program is free software.  This program has absolutely no warranty.\n");
       done (1);
     }
 
+  /* --sum implies --line, otherwise we'd lose b-b counts in gmon.sum */
+  if (output_style & STYLE_SUMMARY_FILE)
+    {
+      line_granularity = 1;
+    }
+
   /* append value of GPROF_PATH to source search list if set: */
   str = (char *) getenv ("GPROF_PATH");
   if (str)

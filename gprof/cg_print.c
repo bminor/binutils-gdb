@@ -513,7 +513,8 @@ DEFUN (cg_print, (timesortsym), Sym ** timesortsym)
       if ((ignore_zeros && parent->ncalls == 0
 	   && parent->cg.self_calls == 0 && parent->cg.prop.self == 0
 	   && parent->cg.prop.child == 0)
-	  || !parent->cg.print_flag)
+	  || !parent->cg.print_flag
+	  || (line_granularity && ! parent->is_func))
 	{
 	  continue;
 	}
