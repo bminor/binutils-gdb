@@ -113,6 +113,13 @@ int sevenbit_strings = 0;
 /* String to be printed before error messages, if any.  */
 
 char *error_pre_print;
+
+/* String to be printed before quit messages, if any.  */
+
+char *quit_pre_print;
+
+/* String to be printed before warning messages, if any.  */
+
 char *warning_pre_print = "\nwarning: ";
 
 /* Add a new cleanup to the cleanup_chain,
@@ -463,8 +470,8 @@ quit ()
   annotate_error_begin ();
 
   /* Don't use *_filtered; we don't want to prompt the user to continue.  */
-  if (error_pre_print)
-    fprintf_unfiltered (gdb_stderr, error_pre_print);
+  if (quit_pre_print)
+    fprintf_unfiltered (gdb_stderr, quit_pre_print);
 
   if (job_control
       /* If there is no terminal switching for this target, then we can't
@@ -849,13 +856,11 @@ query (va_alist)
   /* Automatically answer "yes" if input is not from a terminal.  */
   if (!input_from_terminal_p ())
     return 1;
-/* start-sanitize-mpw */
 #ifdef MPW
-  /* Automatically answer "yes" if called from MacGDB.  */
+  /* FIXME Automatically answer "yes" if called from MacGDB.  */
   if (mac_app)
     return 1;
 #endif /* MPW */
-/* end-sanitize-mpw */
 
   while (1)
     {
@@ -874,14 +879,13 @@ query (va_alist)
       if (annotation_level > 1)
 	printf_filtered ("\n\032\032query\n");
 
-/* start-sanitize-mpw */
 #ifdef MPW
       /* If not in MacGDB, move to a new line so the entered line doesn't
 	 have a prompt on the front of it. */
       if (!mac_app)
 	fputs_unfiltered ("\n", gdb_stdout);
 #endif /* MPW */
-/* end-sanitize-mpw */
+
       gdb_flush (gdb_stdout);
       answer = fgetc (stdin);
       clearerr (stdin);		/* in case of C-d */
@@ -1760,11 +1764,10 @@ initialize_utils ()
 #else  
   lines_per_page = 24;
   chars_per_line = 80;
-/* start-sanitize-mpw */
+
 #ifndef MPW
   /* No termcap under MPW, although might be cool to do something
      by looking at worksheet or console window sizes. */
-/* end-sanitize-mpw */
   /* Initialize the screen height and width from termcap.  */
   {
     char *termtype = getenv ("TERM");
@@ -1799,9 +1802,7 @@ initialize_utils ()
 	  }
       }
   }
-/* start-sanitize-mpw */
 #endif /* MPW */
-/* end-sanitize-mpw */
 
 #if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
 

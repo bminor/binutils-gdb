@@ -15,20 +15,6 @@
 
 Do-first:
 
-mpw_files="mpw-config.in mpw-make.in ser-mac.c mac-xdep.c mac-defs.h macgdb.r ChangeLog.mpw"
-
-if ( echo $* | grep keep\-mpw > /dev/null ) ; then
-	keep_these_too="${mpw_files} ${keep_these_too}"
-	if [ -n "${verbose}" ] ; then
-		echo Keeping ${mpw_files}
-	fi
-else
-	lose_these_too="${mpw_files} ${lose_these_too}"
-	if [ -n "${verbose}" ] ; then
-		echo Deleting ${mpw_files}
-	fi
-fi
-
 # mswin gdb is not really gdbtk, but is close enough for now.
 
 gdbtk_files="gdbtk.c gdbtk.tcl mswin"
@@ -192,6 +178,9 @@ m68k-stub.c
 m68k-tdep.c
 m88k-nat.c
 m88k-tdep.c
+mac-defs.h
+mac-xdep.c
+macgdb.r
 main.c
 maint.c
 mdebugread.c
@@ -205,6 +194,8 @@ mipsv4-nat.c
 mipsread.c
 monitor.h
 monitor.c
+mpw-config.in
+mpw-make.in
 news-xdep.c
 nindy-share
 nindy-tdep.c
@@ -258,6 +249,7 @@ rom68k-rom.c
 saber.suppress
 ser-e7kpc.c
 ser-go32.c
+ser-mac.c
 ser-tcp.c
 ser-unix.c
 serial.c
@@ -350,31 +342,6 @@ arc-tdep.c
 remote-arc.c
 
 Do-last:
-
-echo Removing traces of \"mpw\"...
-
-# Don't try to clean directories here, as the 'mv' command will fail.
-# Also, grep fails on NFS mounted directories.
-if ( echo $* | grep keep\-mpw > /dev/null ) ; then
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-mpw $i > /dev/null) ; then
-			echo Keeping mpw stuff in $i
-		fi
-	done
-else
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-mpw $i > /dev/null) ; then
-			echo Removing traces of \"mpw\" out of $i...
-			cp $i new
-			sed '/start\-sanitize\-mpw/,/end-\sanitize\-mpw/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				echo Caching $i in .Recover...
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
 
 echo Catering to RMS by removing traces of \"gdbtk\"...
 

@@ -15,20 +15,6 @@
 
 Do-first:
 
-mpw_files="xm-mpw.h tm-mac.h"
-
-if ( echo $* | grep keep\-mpw > /dev/null ) ; then
-	keep_these_too="${mpw_files}"
-	if [ -n "${verbose}" ] ; then
-		echo Keeping ${mpw_files}
-	fi
-else
-	lose_these_too="${mpw_files}"
-	if [ -n "${verbose}" ] ; then
-		echo Deleting ${mpw_files}
-	fi
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -100,6 +86,7 @@ tm-hp300bsd.h
 tm-hp300hpux.h
 tm-isi.h
 tm-m68kv4.h
+tm-mac.h
 tm-monitor.h
 tm-news.h
 tm-os68k.h
@@ -122,6 +109,7 @@ xm-isi.h
 xm-m68k.h
 xm-m68klynx.h
 xm-m68kv4.h
+xm-mpw.h
 xm-news.h
 xm-news1000.h
 xm-sun2.h

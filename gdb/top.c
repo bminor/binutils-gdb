@@ -1300,13 +1300,11 @@ gdb_readline (prrompt)
 	 character position to be off, since the newline we read from
 	 the user is not accounted for.  */
       fputs_unfiltered (prrompt, gdb_stdout);
-/* start-sanitize-mpw */
 #ifdef MPW
       /* Move to a new line so the entered line doesn't have a prompt
 	 on the front of it. */
       fputs_unfiltered ("\n", gdb_stdout);
 #endif /* MPW */
-/* end-sanitize-mpw */
       gdb_flush (gdb_stdout);
     }
 
