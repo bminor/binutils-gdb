@@ -254,14 +254,13 @@ memcpy(&insn,buffer, sizeof (insn));
 		    break;
 
 #ifndef NO_V9
-#if 0
-/* Somebody who know needs to define rs3. */
+/* Somebody who know needs to define rs3.
 		  case 'j':
-		  case 'u':	/* double/even */
-		  case 'U':	/* quad/multiple of 4 */
+		  case 'u':	* double/even *
+		  case 'U':	* quad/multiple of 4 *
 		    freg (insn.rs3);
 		    break;
-#endif
+*/
 #endif				/* NO_V9 */
 
 		  case 'g':
