@@ -80,7 +80,6 @@ HOST_PREFIX	:= $(build)-
 HOST_PREFIX_1	:= $(build)-
 LEX		:= flex
 MAKEINFO	:= makeinfo
-MUNCH_NM	:= $(host)-nm
 NM		:= $(host)-nm
 NM_FOR_TARGET	:= $(target)-nm
 RANLIB		:= $(host)-ranlib
@@ -111,7 +110,6 @@ FLAGS_TO_PASS := \
 	"MAKEINFO=$(MAKEINFO)" \
 	"MAKEINFOFLAGS=$(MAKEINFOFLAGS)" \
 	"MF=$(MF)" \
-	"MUNCH_NM=$(MUNCH_NM)" \
 	"NM=$(NM)" \
 	"NM_FOR_TARGET=$(NM_FOR_TARGET)" \
 	"RANLIB=$(RANLIB)" \
@@ -153,7 +151,7 @@ CC := cc -Xs
 endif
 
 ifeq ($(host),mips-sgi-irix4)
-CC := cc -cckr -Wf,-XNg1500 -Wf,-XNk1000 -Wf,-XNh1500
+CC := cc -cckr -Wf,-XNg1500 -Wf,-XNk1000 -Wf,-XNh2000
 endif
 
 ifeq ($(host),mips-mips-riscos5)
@@ -168,8 +166,32 @@ ifeq ($(host),m68k-sun-sunos4.1.1)
 CC := cc -J
 endif
 
+
+# We want to use stabs for MIPS targets.
+ifeq ($(target),mips-idt-ecoff)
+configargs = -with-stabs
+endif
+
+ifeq ($(target),mips-dec-ultrix)
+configargs = -with-stabs
+endif
+
+ifeq ($(target),mips-sgi-irix4)
+configargs = -with-stabs
+endif
+
+# We must use stabs for SVR4 targets.
+ifeq ($(target),i386-sysv4.2)
+configargs = -with-stabs
+endif
+
 ifneq ($(CC), 'cc')
 FLAGS_TO_PASS := "CC=$(CC)" $(FLAGS_TO_PASS)
+endif
+
+#### and on some, we need CONFIG_SHELL
+ifeq ($(patsubst %-lynxos,lynxos,$(host)),lynxos)
+FLAGS_TO_PASS := "CONFIG_SHELL=$(CONFIG_SHELL)" $(FLAGS_TO_PASS)
 endif
 
 
@@ -358,7 +380,7 @@ $(arch)-stamp-cygnus-installed:  $(HOLESSTAMP) $(arch)-stamp-cygnus-checked
 	$(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) install-info
 	if [ -f VAULT-INSTALL ] ; then \
 	  $(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(MAKE) $(FLAGS_TO_PASS) $(GNUC) vault-install ; \
-	fi
+	else true ; fi
 	touch $@
 
 $(arch)-stamp-cygnus-checked: $(HOLESSTAMP) $(arch)-stamp-cygnus-built
@@ -564,11 +586,15 @@ $(host)-stamp-stage3-installed: $(host)-stamp-stage3-checked
 	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" install-info host=$(host)
 	if [ -f VAULT-INSTALL ] ; then \
 	  $(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(MAKE) $(FLAGS_TO_PASS) $(GNUC) vault-install ; \
-	fi
+	else true ; fi
 	touch $@
 
 $(host)-stamp-stage3-checked: $(host)-stamp-stage3-built
 #	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" check host=$(host)
+	touch $@
+
+$(host)-check-3stage: $(host)-stamp-stage3
+	$(SET_CYGNUS_PATH) cd $(STAGE3DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" check host=$(host)
 	touch $@
 
 $(host)-stamp-stage3-built: $(host)-stamp-stage3-configured
