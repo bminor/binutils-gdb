@@ -39,6 +39,9 @@ Tie together all the interseting blocks
 #include "ldsym.h"
 #include "ldgram.h"
 #include "relax.h"
+
+static void build_it PARAMS ((lang_statement_union_type *));
+
 static void
 build_it (statement)
      lang_statement_union_type * statement;
@@ -57,9 +60,9 @@ build_it (statement)
 	     i += SHORT_SIZE)
 	  {
 	    bfd_set_section_contents (output_bfd,
-				   statement->fill_statement.output_section,
+				      statement->fill_statement.output_section,
 				      play_area,
-				statement->data_statement.output_offset + i,
+				      statement->data_statement.output_offset + i,
 				      SHORT_SIZE);
 
 	  }
@@ -68,9 +71,9 @@ build_it (statement)
 	if (i < statement->fill_statement.size)
 	  {
 	    bfd_set_section_contents (output_bfd,
-				   statement->fill_statement.output_section,
+				      statement->fill_statement.output_section,
 				      play_area,
-				statement->data_statement.output_offset + i,
+				      statement->data_statement.output_offset + i,
 				      1);
 
 	  }
@@ -80,9 +83,7 @@ build_it (statement)
       break;
 #endif
     case lang_data_statement_enum:
-
       {
-
 	bfd_vma value = statement->data_statement.value;
 	bfd_byte play_area[LONG_SIZE];
 	unsigned int size = 0;
@@ -106,18 +107,16 @@ build_it (statement)
 	bfd_set_section_contents (output_section->owner,
 				  statement->data_statement.output_section,
 				  play_area,
-				  statement->data_statement.output_vma,
+				  ((file_ptr)
+				   statement->data_statement.output_vma),
 				  size);
-
-
-
       }
 
       break;
     case lang_input_section_enum:
       {
 	/* Create a new seclet in the output section with this
-	attached */
+	   attached */
 	if (statement->input_section.ifile->just_syms_flag == false)
 	  {
 	    asection *i = statement->input_section.section;
@@ -129,7 +128,7 @@ build_it (statement)
 	    if (i->flags & SEC_NEVER_LOAD)
 	      {
 		/* We've got a never load section inside one which is going
-	      to be output, we'll change it into a fill seclet */
+		   to be output, we'll change it into a fill seclet */
 		seclet->type = bfd_fill_seclet;
 		seclet->u.fill.value = 0;
 	      }
@@ -151,11 +150,11 @@ build_it (statement)
       /* Make a new seclet with the right filler */
       {
 	/* Create a new seclet in the output section with this
-	attached */
+	   attached */
 
 	bfd_seclet_type *seclet =
-	bfd_new_seclet (statement->padding_statement.output_section->owner,
-			statement->padding_statement.output_section);
+	  bfd_new_seclet (statement->padding_statement.output_section->owner,
+			  statement->padding_statement.output_section);
 
 	seclet->type = bfd_fill_seclet;
 	seclet->size = statement->padding_statement.size;
@@ -165,19 +164,11 @@ build_it (statement)
       }
       break;
 
-
-
-      break;
     default:
       /* All the other ones fall through */
       ;
-
     }
-
-
-
 }
-
 
 void
 write_relax (output_bfd, data, relocateable)

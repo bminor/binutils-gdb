@@ -22,10 +22,16 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "../bfd/seclet.h"
 #include "ld.h"
 #include "ldmisc.h"
+#include "lderror.h"
 
 #define MAX_ERRORS_IN_A_ROW 5
 
 extern bfd_error_vector_type bfd_error_vector;
+
+static void ld_undefined_symbol PARAMS ((const arelent *,
+					 const bfd_seclet_type *));
+static void ld_reloc_truncated PARAMS ((const arelent *,
+					bfd_seclet_type *));
 
 /* BFD has failed to link something, give a better error message */
 
@@ -75,6 +81,7 @@ ld_undefined_symbol (relent, seclet)
     einfo("%Xundefined reference to %s\n", (*(relent->sym_ptr_ptr))->name);
   }
 }
+
 static void
 ld_reloc_truncated (relent, seclet)
      CONST arelent *relent;

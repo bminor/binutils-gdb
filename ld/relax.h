@@ -16,5 +16,5 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-void write_relax PARAMS ((bfd *output_bfd, PTR data, boolean relocateable));
+void write_relax PARAMS ((bfd *, PTR data, boolean relocateable));
 boolean relax_section PARAMS ((lang_statement_union_type **this_ptr));

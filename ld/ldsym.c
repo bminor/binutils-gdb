@@ -81,13 +81,19 @@ unsigned int global_symbol_count;
 #define	TABSIZE	1009
 static ldsym_type *global_symbol_hash_table[TABSIZE];
 
-/* Compute the hash code for symbol name KEY.  */
-static
-#ifdef __GNUC__
-  __inline
+#ifndef __GNUC__
+#define __inline
 #endif
 
-int
+static __inline int hash_string PARAMS ((const char *key));
+static __inline ldsym_type *search PARAMS ((const char *key, int hashval));
+static asymbol **process_keepsyms PARAMS ((asymbol **table, int size));
+static void print_file_stuff PARAMS ((lang_input_statement_type * f));
+static asymbol **write_file_locals PARAMS ((asymbol **output_buffer));
+static asymbol **write_file_globals PARAMS ((asymbol **symbol_table));
+
+/* Compute the hash code for symbol name KEY.  */
+static __inline int
 hash_string (key)
      CONST char *key;
 {
@@ -104,11 +110,7 @@ hash_string (key)
   return k;
 }
 
-static
-#ifdef __GNUC__
-  __inline
-#endif
-  ldsym_type *
+static __inline ldsym_type *
 search (key, hashval)
      CONST char *key;
      int hashval;

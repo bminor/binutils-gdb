@@ -115,11 +115,28 @@ unsigned int total_files_seen;
 args_type command_line;
 
 ld_config_type config;
+
+static boolean check_for_scripts_dir PARAMS ((char *dir));
+static void read_entry_symbols
+  PARAMS ((bfd *desc, struct lang_input_statement_struct *entry));
+static void enter_file_symbols PARAMS ((lang_input_statement_type *entry));
+static void search_library PARAMS ((struct lang_input_statement_struct *));
+static lang_input_statement_type *decode_library_subfile
+  PARAMS ((struct lang_input_statement_struct *library_entry,
+	   bfd *subfile_offset));
+static void linear_library PARAMS ((struct lang_input_statement_struct *));
+static void symdef_library PARAMS ((struct lang_input_statement_struct *));
+static void clear_syms PARAMS ((struct lang_input_statement_struct *entry,
+				file_ptr offset));
+static boolean subfile_wanted_p
+  PARAMS ((struct lang_input_statement_struct *));
 
-void
+extern int main PARAMS ((int, char **));
+
+int
 main (argc, argv)
-     char **argv;
      int argc;
+     char **argv;
 {
   char *emulation;
 
@@ -267,6 +284,7 @@ main (argc, argv)
     }
 
   exit (0);
+  return 0;
 }
 
 /* We need to find any explicitly given emulation in order to initialize the
@@ -409,7 +427,7 @@ set_scripts_dir ()
   free (dir);			/* Well, we tried.  */
 }
 
-void
+static void
 read_entry_symbols (desc, entry)
      bfd *desc;
      struct lang_input_statement_struct *entry;
@@ -730,15 +748,12 @@ enter_file_symbols (entry)
 
 /* Searching libraries */
 
-struct lang_input_statement_struct *decode_library_subfile ();
-void linear_library (), symdef_library ();
-
 /* Search the library ENTRY, already open on descriptor DESC.
    This means deciding which library members to load,
    making a chain of `struct lang_input_statement_struct' for those members,
    and entering their global symbols in the hash table.  */
 
-void
+static void
 search_library (entry)
      struct lang_input_statement_struct *entry;
 {
@@ -829,7 +844,7 @@ ldmain_open_file_read_symbol (entry)
    SUBFILE_OFFSET is the byte index in the library of this member's header.
    We store the length of the member into *LENGTH_LOC.  */
 
-lang_input_statement_type *
+static lang_input_statement_type *
 decode_library_subfile (library_entry, subfile_offset)
      struct lang_input_statement_struct *library_entry;
      bfd *subfile_offset;
@@ -869,16 +884,15 @@ decode_library_subfile (library_entry, subfile_offset)
   return subentry;
 }
 
-boolean subfile_wanted_p ();
-void
+static void
 clear_syms (entry, offset)
      struct lang_input_statement_struct *entry;
      file_ptr offset;
 {
   carsym *car;
-  unsigned long indx = bfd_get_next_mapent (entry->the_bfd,
-					    BFD_NO_MORE_SYMBOLS,
-					    &car);
+  symindex indx = bfd_get_next_mapent (entry->the_bfd,
+				       BFD_NO_MORE_SYMBOLS,
+				       &car);
 
   while (indx != BFD_NO_MORE_SYMBOLS)
     {
@@ -893,7 +907,7 @@ clear_syms (entry, offset)
 
 /* Search a library that has a map
  */
-void
+static void
 symdef_library (entry)
      struct lang_input_statement_struct *entry;
 
@@ -907,38 +921,38 @@ symdef_library (entry)
       carsym *exported_library_name;
       bfd *prev_archive_member_bfd = 0;
 
-      int idx = bfd_get_next_mapent (entry->the_bfd,
-				     BFD_NO_MORE_SYMBOLS,
-				     &exported_library_name);
+      symindex idx = bfd_get_next_mapent (entry->the_bfd,
+					  BFD_NO_MORE_SYMBOLS,
+					  &exported_library_name);
 
       not_finished = false;
 
       while (idx != BFD_NO_MORE_SYMBOLS && undefined_global_sym_count)
 	{
-
 	  if (exported_library_name->name)
 	    {
-
 	      ldsym_type *sp = ldsym_get_soft (exported_library_name->name);
 
 	      /* If we find a symbol that appears to be needed, think carefully
-	         about the archive member that the symbol is in.  */
+		 about the archive member that the symbol is in.  */
 	      /* So - if it exists, and is referenced somewhere and is
-	         undefined or */
+		 undefined or */
 	      if (sp && sp->srefs_chain && !sp->sdefs_chain)
 		{
-		  bfd *archive_member_bfd = bfd_get_elt_at_index (entry->the_bfd, idx);
+		  bfd *archive_member_bfd =
+		    bfd_get_elt_at_index (entry->the_bfd, (int) idx);
 		  struct lang_input_statement_struct *archive_member_lang_input_statement_struct;
 
 #ifdef GNU960
-		  if (archive_member_bfd && gnu960_check_format (archive_member_bfd, bfd_object))
+		  if (archive_member_bfd
+		      && gnu960_check_format (archive_member_bfd, bfd_object))
 #else
-		  if (archive_member_bfd && bfd_check_format (archive_member_bfd, bfd_object))
+		  if (archive_member_bfd
+		      && bfd_check_format (archive_member_bfd, bfd_object))
 #endif
 		    {
-
 		      /* Don't think carefully about any archive member
-		         more than once in a given pass.  */
+			 more than once in a given pass.  */
 		      if (prev_archive_member_bfd != archive_member_bfd)
 			{
 
@@ -949,15 +963,17 @@ symdef_library (entry)
 			  if (archive_member_bfd->usrdata != (PTR) NULL)
 			    {
 
-			      archive_member_lang_input_statement_struct = (lang_input_statement_type *) archive_member_bfd->usrdata;
+			      archive_member_lang_input_statement_struct =
+				((lang_input_statement_type *)
+				 archive_member_bfd->usrdata);
 			    }
 			  else
 			    {
-
 			      archive_member_lang_input_statement_struct =
-				decode_library_subfile (entry, archive_member_bfd);
-			      archive_member_bfd->usrdata = (PTR) archive_member_lang_input_statement_struct;
-
+				decode_library_subfile (entry,
+							archive_member_bfd);
+			      archive_member_bfd->usrdata =
+				(PTR) archive_member_lang_input_statement_struct;
 			    }
 
 			  if (archive_member_lang_input_statement_struct == 0)
@@ -968,18 +984,19 @@ symdef_library (entry)
 
 			  if (archive_member_lang_input_statement_struct->loaded == false)
 			    {
+			      read_entry_symbols (archive_member_bfd,
+						  archive_member_lang_input_statement_struct);
 
-			      read_entry_symbols (archive_member_bfd, archive_member_lang_input_statement_struct);
-			      /* Now scan the symbol table and decide whether to load.  */
-
-
-			      if (subfile_wanted_p (archive_member_lang_input_statement_struct) == true)
+			      /* Now scan the symbol table and decide
+				 whether to load.  */
+			      if (subfile_wanted_p (archive_member_lang_input_statement_struct)
+				  == true)
 
 				{
 				  /* This member is needed; load it.
-			             Since we are loading something on this pass,
-			             we must make another pass through the symdef data.  */
-
+				     Since we are loading something on
+				     this pass, we must make another
+				     pass through the symdef data.  */
 				  not_finished = true;
 
 				  enter_file_symbols (archive_member_lang_input_statement_struct);
@@ -993,9 +1010,12 @@ symdef_library (entry)
 				  prev = archive_member_lang_input_statement_struct;
 
 
-				  /* Clear out this member's symbols from the symdef data
-			             so that following passes won't waste time on them.  */
-				  clear_syms (entry, exported_library_name->file_offset);
+				  /* Clear out this member's symbols
+				     from the symdef data so that
+				     following passes won't waste time
+				     on them.  */
+				  clear_syms (entry,
+					      exported_library_name->file_offset);
 				  archive_member_lang_input_statement_struct->loaded = true;
 				}
 			    }
@@ -1003,12 +1023,13 @@ symdef_library (entry)
 		    }
 		}
 	    }
-	  idx = bfd_get_next_mapent (entry->the_bfd, idx, &exported_library_name);
+	  idx = bfd_get_next_mapent (entry->the_bfd, idx,
+				     &exported_library_name);
 	}
     }
 }
 
-void
+static void
 linear_library (entry)
      struct lang_input_statement_struct *entry;
 {
@@ -1087,7 +1108,7 @@ linear_library (entry)
     linker ymbol table
     Return nonzero if we ought to load this file */
 
-boolean
+static boolean
 subfile_wanted_p (entry)
      struct lang_input_statement_struct *entry;
 {

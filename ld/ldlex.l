@@ -33,12 +33,11 @@ This was written by steve chamberlain
 #include "ldexp.h"
 #include "ldlang.h"
 #include "ldfile.h"
+#include "ldlex.h"
 
 int ldgram_in_defsym;
 
 int hex_mode;
-
-char *buystring();
 
 unsigned int lineno = 1;
 int old;
@@ -227,23 +226,23 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 			}
 
 <MRI,EXPRESSION>([0-9A-Fa-f])+(H|X|B|O|D) {
-				   int base ;
+				   int ibase ;
 				   switch (yytext[yyleng-1]) {
 				    case 'X': 
 				    case 'H':
-				     base = 16;
+				     ibase = 16;
 				     break;
 				    case 'O':
-				     base = 8;
+				     ibase = 8;
 				     break;
 				    case 'B':
-				     base = 2;
+				     ibase = 2;
 				     break;
 				    default:
-				     base = 10;
+				     ibase = 10;
 				   }
 				   yylval.integer = bfd_scan_vma (yytext+1, 0,
-								  base);
+								  ibase);
 				   return INT;
 				 }
 <SCRIPT,DEFSYMEXP,MRI,BOTH,EXPRESSION>"$"?"0x"?([0-9A-Fa-f])+(M|K|m|k)? {

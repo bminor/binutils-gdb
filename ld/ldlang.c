@@ -67,6 +67,87 @@ static CONST char *output_target;
 static int longest_section_name = 8;
 static lang_statement_list_type statement_list;
 
+static void print_size PARAMS ((size_t value));
+static void print_alignment PARAMS ((unsigned int value));
+static void print_fill PARAMS ((fill_type value));
+static void print_section PARAMS ((const char *name));
+static void lang_for_each_statement_worker
+  PARAMS ((void (*func) (lang_statement_union_type *),
+	   lang_statement_union_type *s));
+static lang_input_statement_type *new_afile
+  PARAMS ((const char *name, lang_input_file_enum_type file_type,
+	   const char *target));
+static void print_flags PARAMS ((int *ignore_flags));
+static void init_os PARAMS ((lang_output_section_statement_type *s));
+static void wild_doit PARAMS ((lang_statement_list_type *ptr,
+			       asection *section,
+			       lang_output_section_statement_type *output,
+			       lang_input_statement_type *file));
+static asection *our_bfd_get_section_by_name PARAMS ((bfd *abfd,
+						      const char *section));
+static void wild_section PARAMS ((lang_wild_statement_type *ptr,
+				  const char *section,
+				  lang_input_statement_type *file,
+				  lang_output_section_statement_type *output));
+static lang_input_statement_type *lookup_name PARAMS ((const char *name));
+static void wild PARAMS ((lang_wild_statement_type *s,
+			  const char *section, const char *file,
+			  const char *target,
+			  lang_output_section_statement_type *output));
+static bfd *open_output PARAMS ((const char *name));
+static void ldlang_open_output PARAMS ((lang_statement_union_type *statement));
+static void open_input_bfds PARAMS ((lang_statement_union_type *statement));
+static void lang_reasonable_defaults PARAMS ((void));
+static void lang_place_undefineds PARAMS ((void));
+static void lang_create_output_section_statements PARAMS ((void));
+static void lang_init_script_file PARAMS ((void));
+static void map_input_to_output_sections
+  PARAMS ((lang_statement_union_type *s,
+	   const char *target,
+	   lang_output_section_statement_type *output_section_statement));
+static void print_output_section_statement
+  PARAMS ((lang_output_section_statement_type *output_section_statement));
+static void print_assignment
+  PARAMS ((lang_assignment_statement_type *assignment,
+	   lang_output_section_statement_type *output_section));
+static void print_input_statement PARAMS ((lang_input_statement_type *statm));
+static void print_symbol PARAMS ((asymbol *q));
+static void print_input_section PARAMS ((lang_input_section_type *in));
+static void print_fill_statement PARAMS ((lang_fill_statement_type *fill));
+static void print_data_statement PARAMS ((lang_data_statement_type *data));
+static void print_padding_statement PARAMS ((lang_padding_statement_type *s));
+static void print_wild_statement
+  PARAMS ((lang_wild_statement_type *w,
+	   lang_output_section_statement_type *os));
+static void print_statement PARAMS ((lang_statement_union_type *s,
+				     lang_output_section_statement_type *os));
+static void print_statements PARAMS ((void));
+static bfd_vma insert_pad PARAMS ((lang_statement_union_type **this_ptr,
+				   fill_type fill, unsigned int power,
+				   asection *output_section_statement,
+				   bfd_vma dot));
+static bfd_vma size_input_section
+  PARAMS ((lang_statement_union_type **this_ptr,
+	   lang_output_section_statement_type *output_section_statement,
+	   unsigned short fill, bfd_vma dot, boolean relax));
+static bfd_vma lang_size_sections
+  PARAMS ((lang_statement_union_type *s,
+	   lang_output_section_statement_type *output_section_statement,
+	   lang_statement_union_type **prev, unsigned short fill,
+	   bfd_vma dot, boolean relax));
+static bfd_vma lang_do_assignments
+  PARAMS ((lang_statement_union_type * s,
+	   lang_output_section_statement_type *output_section_statement,
+	   unsigned short fill,
+	   bfd_vma dot));
+static void lang_relocate_globals PARAMS ((void));
+static void lang_finish PARAMS ((void));
+static void lang_check PARAMS ((void));
+static void lang_common PARAMS ((void));
+static void lang_place_orphans PARAMS ((void));
+static int topower PARAMS ((int));
+static void reset_memory_regions PARAMS ((void));
+
 /* EXPORTS */
 boolean relaxing;
 lang_output_section_statement_type *abs_output_section;
@@ -97,37 +178,37 @@ etree_type *base; /* Relocation base - or null */
 
 #define outside_symbol_address(q) ((q)->value +   outside_section_address(q->section))
 
-void lang_add_data PARAMS ((int type, union etree_union * exp));
-
 PTR
 stat_alloc (size)
      size_t size;
 {
   return obstack_alloc (&stat_obstack, size);
 }
+
 static void
 print_size (value)
      size_t value;
 {
   fprintf (config.map_file, "%5x", (unsigned) value);
 }
+
 static void
 print_alignment (value)
      unsigned int value;
 {
   fprintf (config.map_file, "2**%1u", value);
 }
+
 static void
-DEFUN (print_fill, (value),
-     fill_type value)
+print_fill (value)
+     fill_type value;
 {
   fprintf (config.map_file, "%04x", (unsigned) value);
 }
 
-
 static void
 print_section (name)
-     CONST char *CONST name;
+     CONST char *name;
 {
   fprintf (config.map_file, "%*s", -longest_section_name, name);
 }
@@ -139,7 +220,7 @@ print_section (name)
 
 static void
 lang_for_each_statement_worker (func, s)
-     void (*func) ();
+     void (*func) (lang_statement_union_type *);
      lang_statement_union_type *s;
 {
   for (; s != (lang_statement_union_type *) NULL; s = s->next)
@@ -180,7 +261,7 @@ lang_for_each_statement_worker (func, s)
 
 void
 lang_for_each_statement (func)
-     void (*func) ();
+     void (*func) (lang_statement_union_type *);
 {
   lang_for_each_statement_worker (func,
 				  statement_list.head);
@@ -230,9 +311,9 @@ new_statement (type, size, list)
  */
 static lang_input_statement_type *
 new_afile (name, file_type, target)
-     CONST char *CONST name;
-     CONST lang_input_file_enum_type file_type;
-     CONST char *CONST target;
+     CONST char *name;
+     lang_input_file_enum_type file_type;
+     CONST char *target;
 {
 
   lang_input_statement_type *p = new_stat (lang_input_statement,
@@ -615,7 +696,8 @@ wild_doit (ptr, section, output, file)
     if ((section->flags & SEC_SHARED_LIBRARY) != 0)
       section->output_section->flags |= section->flags;
     else
-      section->output_section->flags |= section->flags & ~SEC_NEVER_LOAD;
+      section->output_section->flags |=
+	section->flags & (flagword) (~ SEC_NEVER_LOAD);
 
     if (!output->loadable) 
     {
@@ -687,7 +769,7 @@ wild_section (ptr, section, file, output)
 static
 lang_input_statement_type *
 lookup_name (name)
-     CONST char *CONST name;
+     CONST char *name;
 {
   lang_input_statement_type *search;
 
@@ -722,9 +804,9 @@ lookup_name (name)
 static void
 wild (s, section, file, target, output)
      lang_wild_statement_type * s;
-     CONST char *CONST section;
-     CONST char *CONST file;
-     CONST char *CONST target;
+     CONST char *section;
+     CONST char *file;
+     CONST char *target;
      lang_output_section_statement_type * output;
 {
   lang_input_statement_type *f;
@@ -762,7 +844,7 @@ wild (s, section, file, target, output)
 
 static bfd *
 open_output (name)
-     CONST char *CONST name;
+     CONST char *name;
 {
   bfd *output;
 
@@ -862,9 +944,6 @@ open_input_bfds (statement)
 static void
 lang_reasonable_defaults ()
 {
-
-
-
 #if 0
   lang_output_section_statement_lookup (".text");
   lang_output_section_statement_lookup (".data");
@@ -1045,10 +1124,6 @@ map_input_to_output_sections (s, target, output_section_statement)
 	}
     }
 }
-
-
-
-
 
 static void
 print_output_section_statement (output_section_statement)
@@ -1422,12 +1497,12 @@ print_statements ()
 }
 
 static bfd_vma
-DEFUN (insert_pad, (this_ptr, fill, power, output_section_statement, dot),
-     lang_statement_union_type ** this_ptr AND
-     fill_type fill AND
-     unsigned int power AND
-     asection * output_section_statement AND
-     bfd_vma dot)
+insert_pad (this_ptr, fill, power, output_section_statement, dot)
+     lang_statement_union_type ** this_ptr;
+     fill_type fill;
+     unsigned int power;
+     asection * output_section_statement;
+     bfd_vma dot;
 {
   /* Align this section first to the
      input sections requirement, then
@@ -1469,12 +1544,12 @@ DEFUN (insert_pad, (this_ptr, fill, power, output_section_statement, dot),
 
 /* Work out how much this section will move the dot point */
 static bfd_vma
-DEFUN (size_input_section, (this_ptr, output_section_statement, fill, dot, relax),
-     lang_statement_union_type ** this_ptr AND
-     lang_output_section_statement_type * output_section_statement AND
-     unsigned short fill AND
-     bfd_vma dot AND
-     boolean relax)
+size_input_section (this_ptr, output_section_statement, fill, dot, relax)
+     lang_statement_union_type ** this_ptr;
+     lang_output_section_statement_type * output_section_statement;
+     unsigned short fill;
+     bfd_vma dot;
+     boolean relax;
 {
   lang_input_section_type *is = &((*this_ptr)->input_section);
   asection *i = is->section;
@@ -1528,13 +1603,13 @@ DEFUN (size_input_section, (this_ptr, output_section_statement, fill, dot, relax
 static boolean had_relax;
 
 static bfd_vma
-DEFUN (lang_size_sections, (s, output_section_statement, prev, fill, dot, relax),
-     lang_statement_union_type * s AND
-     lang_output_section_statement_type * output_section_statement AND
-     lang_statement_union_type ** prev AND
-     unsigned short fill AND
-     bfd_vma dot AND
-     boolean relax)
+lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
+     lang_statement_union_type * s;
+     lang_output_section_statement_type * output_section_statement;
+     lang_statement_union_type ** prev;
+     unsigned short fill;
+     bfd_vma dot;
+     boolean relax;
 {
   /* Size up the sections from their constituent parts */
   for (; s != (lang_statement_union_type *) NULL; s = s->next)
@@ -1764,13 +1839,12 @@ DEFUN (lang_size_sections, (s, output_section_statement, prev, fill, dot, relax)
 }
 
 static bfd_vma
-DEFUN (lang_do_assignments, (s, output_section_statement, fill, dot),
-     lang_statement_union_type * s AND
-     lang_output_section_statement_type * output_section_statement AND
-     unsigned short fill AND
-     bfd_vma dot)
+lang_do_assignments (s, output_section_statement, fill, dot)
+     lang_statement_union_type * s;
+     lang_output_section_statement_type * output_section_statement;
+     unsigned short fill;
+     bfd_vma dot;
 {
-
   for (; s != (lang_statement_union_type *) NULL; s = s->next)
     {
       switch (s->header.type)
@@ -2273,6 +2347,9 @@ lang_for_each_file (func)
     }
 }
 
+#if 0
+
+/* Not used.  */
 
 void
 lang_for_each_input_section (func)
@@ -2295,7 +2372,7 @@ lang_for_each_input_section (func)
     }
 }
 
-
+#endif
 
 void
 ldlang_add_file (entry)
@@ -2324,7 +2401,7 @@ lang_add_output (name, from_script)
 static lang_output_section_statement_type *current_section;
 
 static int topower(x)
- int x;
+     int x;
 {
   unsigned  int i = 1;
   int l;
@@ -2339,14 +2416,14 @@ static int topower(x)
 void
 lang_enter_output_section_statement (output_section_statement_name,
 				     address_exp, flags, block_value,
-				     align, subalign, base)
+				     align, subalign, ebase)
      const char *output_section_statement_name;
      etree_type * address_exp;
      int flags;
      bfd_vma block_value;
      etree_type *align;
      etree_type *subalign;
-     etree_type *base;
+     etree_type *ebase;
 {
   lang_output_section_statement_type *os;
 
@@ -2383,7 +2460,7 @@ lang_enter_output_section_statement (output_section_statement_name,
    exp_get_value_int(align, -1,
 		     "section alignment", 0));
 
-  os->load_base = base;
+  os->load_base = ebase;
 }
 
 
@@ -2414,10 +2491,10 @@ reset_memory_regions ()
 
 
 asymbol *
-DEFUN (create_symbol, (name, flags, section),
-     CONST char *name AND
-     flagword flags AND
-     asection * section)
+create_symbol (name, flags, section)
+     CONST char *name;
+     flagword flags;
+     asection * section;
 {
   asymbol **def_ptr = (asymbol **) stat_alloc ((bfd_size_type) (sizeof (asymbol **)));
 

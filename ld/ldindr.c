@@ -1,4 +1,3 @@
-
 /* ldindr.c
    Handle indirect symbols.
 
@@ -45,6 +44,9 @@
 #include "ldsym.h"
 #include "ldmain.h"
 #include "ldmisc.h"
+#include "ldindr.h"
+
+static asymbol **move_it PARAMS ((asymbol **, asymbol **));
 
 static asymbol **
 move_it (a_list, b_list)
