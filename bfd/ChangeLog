@@ -1,5 +1,12 @@
 Wed Mar 25 13:59:24 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
+	* aout-tic30.c (NAME): Define this to avoid multiple definitions
+	from aoutx.h.
+	(MY_get_section_contents): Define as aout_32_get_section_contents
+	rather than NAME(aout,get_section_contents).
+
+	* elf-m10300.c (elf32_mn10300_link_hash_table_create): Fix cast.
+
 	* evax-alpha.c (evax_set_arch_mach): Only accept bfd_arch_alpha
 	and call bfd_default_set_arch_mach to do the real work.
 
@@ -10,6 +17,11 @@ Wed Mar 25 10:41:35 1998  Richard Henderson  <rth@cygnus.com>
 	(calljx_callback): Use it.
 
 Wed Mar 25 11:19:28 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf-m10300.c (elf32_mn10300_finish_hash_table_entry): Change
+	byte_count to unsigned int.
+	(mn10300_elf_relax_section): Initialize internal_relocs.  Remove
+	unused local variables.
 
 	* evax-alpha.c (evax_close_and_cleanup): Remove unused local
 	variables er and er1.
