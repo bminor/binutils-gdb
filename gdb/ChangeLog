@@ -1,3 +1,10 @@
+Mon Jan  3 02:47:03 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mdebugread.c (psymtab_to_symtab_1):  Only pass N_STAB symbols
+	to process_one_symbol.
+	* symtab.c (find_pc_psymbol):  Search global_psymbols as well to
+	avoid caching a bad endaddr in find_pc_partial_function.
+
 Sun Jan  2 21:41:17 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/m68k/tm-sun3.h: Don't define BELIEVE_PCC_PROMOTION.

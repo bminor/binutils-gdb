@@ -2705,8 +2705,15 @@ psymtab_to_symtab_1 (pst, filename)
 	  if (ECOFF_IS_STAB (&sh))
 	    {
 	      int type_code = ECOFF_UNMARK_STAB (sh.index);
-	      process_one_symbol (type_code, 0, valu, name,
-				  pst->section_offsets, pst->objfile);
+
+	      /* We should never get non N_STAB symbols here, but they
+		 should be harmless, so keep process_one_symbol from
+		 complaining about them.  */
+	      if (type_code & N_STAB)
+		{
+		  process_one_symbol (type_code, 0, valu, name,
+				      pst->section_offsets, pst->objfile);
+		}
 	      if (type_code == N_FUN)
 		{
 		  /* Make up special symbol to contain
