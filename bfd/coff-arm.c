@@ -2287,21 +2287,16 @@ coff_arm_copy_private_bfd_data (src, dest)
 #define USER_LABEL_PREFIX "_"
 #endif
 
+/* Like _bfd_coff_is_local_label_name, but
+   a) test against USER_LABEL_PREFIX, to avoid stripping labels known to be
+      non-local.
+   b) Allow other prefixes than ".", e.g. an empty prefix would cause all
+      labels of the form Lxxx to be stripped.  */
 static boolean
 coff_arm_is_local_label_name (abfd, name)
      bfd *        abfd ATTRIBUTE_UNUSED;
      const char * name;
 {
-#ifdef LOCAL_LABEL_PREFIX
-  /* If there is a prefix for local labels then look for this.
-     If the prefix exists, but it is empty, then ignore the test. */
-  
-  if (LOCAL_LABEL_PREFIX[0] != 0)
-    {
-      if (strncmp (name, LOCAL_LABEL_PREFIX, strlen (LOCAL_LABEL_PREFIX)) == 0)
-	return true;
-    }
-#endif
 #ifdef USER_LABEL_PREFIX
   if (USER_LABEL_PREFIX[0] != 0)
     {
@@ -2309,18 +2304,24 @@ coff_arm_is_local_label_name (abfd, name)
 	return false;
     }
 #endif
+
+#ifdef LOCAL_LABEL_PREFIX
+  /* If there is a prefix for local labels then look for this.
+     If the prefix exists, but it is empty, then ignore the test. */
   
-  /* devo/gcc/config/dbxcoff.h defines ASM_OUTPUT_SOURCE_LINE to generate
-     local line numbers as .LM<number>, so treat these as local.  */
-  
-  switch (name[0])
+  if (LOCAL_LABEL_PREFIX[0] != 0)
     {
-    case 'L': return true;
-    case '.': return (name[1] == 'L' && name[2] == 'M') ? true : false;
-    default:  return false;     /* Cannot make our minds up - default to
-				   false so that it will not be stripped
-				   by accident.  */ 
+      int len = strlen (LOCAL_LABEL_PREFIX);
+      
+      if (strncmp (name, LOCAL_LABEL_PREFIX, len) != 0)
+	return false;
+      
+      /* Perform the checks below for the rest of the name.  */
+      name += len;
     }
+#endif
+  
+  return name[0] == 'L';
 }
 
 /* This piece of machinery exists only to guarantee that the bfd that holds
