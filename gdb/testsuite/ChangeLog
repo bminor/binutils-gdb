@@ -1,3 +1,8 @@
+2004-02-16  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/bigcore.exp: New file.
+	* gdb.base/bigcore.c: New file.
+
 2004-02-13  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.mi/mi1-basics.exp, gdb.mi/mi1-break.exp: Delete file.
