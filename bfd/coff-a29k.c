@@ -126,7 +126,6 @@ DEFUN(a29k_reloc,(abfd, reloc_entry, symbol_in, data, input_section, output_bfd)
     {				/* Absolute jmp/call */
       insn |= (1<<24);		/* Make it absolute */
       /* FIXME: Should we change r_type to R_IABS */
-      signed_value /= 2;
     } 
     else 
     {
@@ -137,9 +136,8 @@ DEFUN(a29k_reloc,(abfd, reloc_entry, symbol_in, data, input_section, output_bfd)
 	input_section->output_offset;
       if (signed_value>0x1ffff || signed_value<-0x20000) 
        return(bfd_reloc_outofrange);
-
-      signed_value /= 2;
     }
+    signed_value >>= 2;
     insn = INSERT_HWORD(insn, signed_value);
     bfd_put_32(abfd, insn ,hit_data); 
     break;

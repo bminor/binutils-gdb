@@ -1,3 +1,26 @@
+Tue May 12 14:08:59 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* coff-a29k.c (perform_reloc): fix bug in jmp/call evaluation
+	* coff-h8300.c (reloc_processing): all relocs are relative to
+	section start.
+	* opncls.c: don't use fdopen on DOS systems
+
+	short patches from Glenn Kasten (glenn@ready.com)
+	* target.c: enabled oasys support
+	* oasys.c:  Insert . when UNDERSCORE_HACK is enabled, 
+	fix problem where a relocation which crossed a modification byte
+	boundary did not work. Fix problem where a relocation near the end
+	of a data record did not work.
+	
+
+Tue May  5 18:11:25 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* archive.c (bfd_slurp_coff_armap): old versions of BFD wrote
+	archvie header string counts the endian way, this heuristic sees
+	how big an archive string to read by trying it one way and if the
+	string table is unreasonably big, trying it the other. *FIXME*.
+	* opncls.c (bfd_fdopenr): can't do fdopens on VMS
+
 Tue May  5 14:18:24 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* bfd-in.h:  Increase version number to 1.97, for consistency
