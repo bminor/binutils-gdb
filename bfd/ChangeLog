@@ -1,3 +1,8 @@
+Fri Aug  6 12:28:38 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.c (ecoff_slurp_armap): From Arne Henrik Juul
+	<arnej@kari.fm.unit.no>: Handle a COFF style armap.
+
 Fri Aug  6 09:59:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* hpux-core.c: Cast return value from bfd_zalloc.

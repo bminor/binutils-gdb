@@ -3947,6 +3947,14 @@ ecoff_slurp_armap (abfd)
 
   bfd_seek (abfd, (file_ptr) -16, SEEK_CUR);
 
+  /* Irix 4.0.5F apparently can use either an ECOFF armap or a
+     standard COFF armap.  We could move the ECOFF armap stuff into
+     bfd_slurp_armap, but that seems inappropriate since no other
+     target uses this format.  Instead, we check directly for a COFF
+     armap.  */
+  if (strncmp (nextname, "/               ", 16) == 0)
+    return bfd_slurp_armap (abfd);
+
   /* See if the first element is an armap.  */
   if (strncmp (nextname, ecoff_backend (abfd)->armap_start,
 	       ARMAP_START_LENGTH) != 0
