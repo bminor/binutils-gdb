@@ -1,4 +1,4 @@
-Sun Mar 16 13:49:21 1997  Ian Lance Taylor  <ian@cygnus.com>
+Sun Mar 16 13:49:21 1997  Philippe De Muyter <phdm@info.ucl.ac.be>
 
 	* symbols.c (symbol_new): Don't call debug_verify_symchain.
 	(symbol_append): Set sy_next and sy_previous when adding a single
