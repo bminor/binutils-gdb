@@ -35,8 +35,6 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#include <signal.h>
-
 /* readline defines this.  */
 #undef savestring
 

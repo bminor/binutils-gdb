@@ -1,3 +1,7 @@
+2001-02-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* event-top.c: Remove duplicate #include <signal.h>.
+
 2001-02-06  Andrew Cagney  <ac131313@redhat.com>
 
 	* sol-thread.c (restore_inferior_pid): Save the PID in a freshly
