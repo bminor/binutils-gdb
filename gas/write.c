@@ -112,10 +112,10 @@ symbolS *abs_section_sym;
 /* Remember the value of dot when parsing expressions.  */
 addressT dot_value;
 
-void print_fixup PARAMS ((fixS *));
+void print_fixup (fixS *);
 
 #ifdef BFD_ASSEMBLER
-static void renumber_sections PARAMS ((bfd *, asection *, PTR));
+static void renumber_sections (bfd *, asection *, PTR);
 
 /* We generally attach relocs to frag chains.  However, after we have
    chained these all together into a segment, any relocs we add after
@@ -157,48 +157,46 @@ static int n_fixups;
 #define RELOC_ENUM int
 #endif
 
-static fixS *fix_new_internal PARAMS ((fragS *, int where, int size,
-				       symbolS *add, symbolS *sub,
-				       offsetT offset, int pcrel,
-				       RELOC_ENUM r_type));
+static fixS *fix_new_internal (fragS *, int where, int size,
+			       symbolS *add, symbolS *sub,
+			       offsetT offset, int pcrel,
+			       RELOC_ENUM r_type);
 #if defined (BFD_ASSEMBLER) || (!defined (BFD) && !defined (OBJ_VMS))
-static long fixup_segment PARAMS ((fixS *, segT));
+static long fixup_segment (fixS *, segT);
 #endif
-static relax_addressT relax_align PARAMS ((relax_addressT addr, int align));
+static relax_addressT relax_align (relax_addressT addr, int align);
 #if defined (BFD_ASSEMBLER) || ! defined (BFD)
-static fragS *chain_frchains_together_1 PARAMS ((segT, struct frchain *));
+static fragS *chain_frchains_together_1 (segT, struct frchain *);
 #endif
 #ifdef BFD_ASSEMBLER
-static void chain_frchains_together PARAMS ((bfd *, segT, PTR));
-static void cvt_frag_to_fill PARAMS ((segT, fragS *));
-static void adjust_reloc_syms PARAMS ((bfd *, asection *, PTR));
-static void fix_segment PARAMS ((bfd *, asection *, PTR));
-static void write_relocs PARAMS ((bfd *, asection *, PTR));
-static void write_contents PARAMS ((bfd *, asection *, PTR));
-static void set_symtab PARAMS ((void));
+static void chain_frchains_together (bfd *, segT, PTR);
+static void cvt_frag_to_fill (segT, fragS *);
+static void adjust_reloc_syms (bfd *, asection *, PTR);
+static void fix_segment (bfd *, asection *, PTR);
+static void write_relocs (bfd *, asection *, PTR);
+static void write_contents (bfd *, asection *, PTR);
+static void set_symtab (void);
 #endif
 #if defined (BFD_ASSEMBLER) || (! defined (BFD) && ! defined (OBJ_AOUT))
-static void merge_data_into_text PARAMS ((void));
+static void merge_data_into_text (void);
 #endif
 #if ! defined (BFD_ASSEMBLER) && ! defined (BFD)
-static void cvt_frag_to_fill PARAMS ((object_headers *, segT, fragS *));
-static void remove_subsegs PARAMS ((frchainS *, int, fragS **, fragS **));
-static void relax_and_size_all_segments PARAMS ((void));
+static void cvt_frag_to_fill (object_headers *, segT, fragS *);
+static void remove_subsegs (frchainS *, int, fragS **, fragS **);
+static void relax_and_size_all_segments (void);
 #endif
 
 /* Create a fixS in obstack 'notes'.  */
 
 static fixS *
-fix_new_internal (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
-		  r_type)
-     fragS *frag;		/* Which frag?  */
-     int where;			/* Where in that frag?  */
-     int size;			/* 1, 2, or 4 usually.  */
-     symbolS *add_symbol;	/* X_add_symbol.  */
-     symbolS *sub_symbol;	/* X_op_symbol.  */
-     offsetT offset;		/* X_add_number.  */
-     int pcrel;			/* TRUE if PC-relative relocation.  */
-     RELOC_ENUM r_type ATTRIBUTE_UNUSED; /* Relocation type.  */
+fix_new_internal (fragS *frag,		/* Which frag?  */
+		  int where,		/* Where in that frag?  */
+		  int size,		/* 1, 2, or 4 usually.  */
+		  symbolS *add_symbol,	/* X_add_symbol.  */
+		  symbolS *sub_symbol,	/* X_op_symbol.  */
+		  offsetT offset,	/* X_add_number.  */
+		  int pcrel,		/* TRUE if PC-relative relocation.  */
+		  RELOC_ENUM r_type ATTRIBUTE_UNUSED /* Relocation type.  */)
 {
   fixS *fixP;
 
@@ -283,14 +281,13 @@ fix_new_internal (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
 /* Create a fixup relative to a symbol (plus a constant).  */
 
 fixS *
-fix_new (frag, where, size, add_symbol, offset, pcrel, r_type)
-     fragS *frag;		/* Which frag?  */
-     int where;			/* Where in that frag?  */
-     int size;			/* 1, 2, or 4 usually.  */
-     symbolS *add_symbol;	/* X_add_symbol.  */
-     offsetT offset;		/* X_add_number.  */
-     int pcrel;			/* TRUE if PC-relative relocation.  */
-     RELOC_ENUM r_type;		/* Relocation type.  */
+fix_new (fragS *frag,		/* Which frag?  */
+	 int where,			/* Where in that frag?  */
+	 int size,			/* 1, 2, or 4 usually.  */
+	 symbolS *add_symbol,	/* X_add_symbol.  */
+	 offsetT offset,		/* X_add_number.  */
+	 int pcrel,			/* TRUE if PC-relative relocation.  */
+	 RELOC_ENUM r_type		/* Relocation type.  */)
 {
   return fix_new_internal (frag, where, size, add_symbol,
 			   (symbolS *) NULL, offset, pcrel, r_type);
@@ -301,13 +298,12 @@ fix_new (frag, where, size, add_symbol, offset, pcrel, r_type)
    file formats support anyhow.  */
 
 fixS *
-fix_new_exp (frag, where, size, exp, pcrel, r_type)
-     fragS *frag;		/* Which frag?  */
-     int where;			/* Where in that frag?  */
-     int size;			/* 1, 2, or 4 usually.  */
-     expressionS *exp;		/* Expression.  */
-     int pcrel;			/* TRUE if PC-relative relocation.  */
-     RELOC_ENUM r_type;		/* Relocation type.  */
+fix_new_exp (fragS *frag,		/* Which frag?  */
+	     int where,			/* Where in that frag?  */
+	     int size,			/* 1, 2, or 4 usually.  */
+	     expressionS *exp,		/* Expression.  */
+	     int pcrel,			/* TRUE if PC-relative relocation.  */
+	     RELOC_ENUM r_type		/* Relocation type.  */)
 {
   symbolS *add = NULL;
   symbolS *sub = NULL;
@@ -376,8 +372,7 @@ fix_new_exp (frag, where, size, exp, pcrel, r_type)
 
 /* Generic function to determine whether a fixup requires a relocation.  */
 int
-generic_force_reloc (fix)
-     fixS *fix;
+generic_force_reloc (fixS *fix)
 {
 #ifdef BFD_ASSEMBLER
   if (fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
@@ -389,10 +384,7 @@ generic_force_reloc (fix)
 
 /* Append a string onto another string, bumping the pointer along.  */
 void
-append (charPP, fromP, length)
-     char **charPP;
-     char *fromP;
-     unsigned long length;
+append (char **charPP, char *fromP, unsigned long length)
 {
   /* Don't trust memcpy() of 0 chars.  */
   if (length == 0)
@@ -412,12 +404,11 @@ int section_alignment[SEG_MAXIMUM_ORDINAL];
    least one object format really uses this info.  */
 
 void
-record_alignment (seg, align)
-     /* Segment to which alignment pertains.  */
-     segT seg;
-     /* Alignment, as a power of 2 (e.g., 1 => 2-byte boundary, 2 => 4-byte
-	boundary, etc.)  */
-     int align;
+record_alignment (/* Segment to which alignment pertains.  */
+		  segT seg,
+		  /* Alignment, as a power of 2 (e.g., 1 => 2-byte
+		     boundary, 2 => 4-byte boundary, etc.)  */
+		  int align)
 {
   if (seg == absolute_section)
     return;
@@ -431,8 +422,7 @@ record_alignment (seg, align)
 }
 
 int
-get_recorded_alignment (seg)
-     segT seg;
+get_recorded_alignment (segT seg)
 {
   if (seg == absolute_section)
     return 0;
@@ -448,10 +438,7 @@ get_recorded_alignment (seg)
 /* Reset the section indices after removing the gas created sections.  */
 
 static void
-renumber_sections (abfd, sec, countparg)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *sec;
-     PTR countparg;
+renumber_sections (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, PTR countparg)
 {
   int *countp = (int *) countparg;
 
@@ -464,9 +451,7 @@ renumber_sections (abfd, sec, countparg)
 #if defined (BFD_ASSEMBLER) || ! defined (BFD)
 
 static fragS *
-chain_frchains_together_1 (section, frchp)
-     segT section;
-     struct frchain *frchp;
+chain_frchains_together_1 (segT section, struct frchain *frchp)
 {
   fragS dummy, *prev_frag = &dummy;
 #ifdef BFD_ASSEMBLER
@@ -499,10 +484,9 @@ chain_frchains_together_1 (section, frchp)
 #ifdef BFD_ASSEMBLER
 
 static void
-chain_frchains_together (abfd, section, xxx)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     segT section;
-     PTR xxx ATTRIBUTE_UNUSED;
+chain_frchains_together (bfd *abfd ATTRIBUTE_UNUSED,
+			 segT section,
+			 PTR xxx ATTRIBUTE_UNUSED)
 {
   segment_info_type *info;
 
@@ -523,11 +507,7 @@ chain_frchains_together (abfd, section, xxx)
 #if !defined (BFD) && !defined (BFD_ASSEMBLER)
 
 static void
-remove_subsegs (head, seg, root, last)
-     frchainS *head;
-     int seg;
-     fragS **root;
-     fragS **last;
+remove_subsegs (frchainS *head, int seg, fragS **root, fragS **last)
 {
   *root = head->frch_root;
   *last = chain_frchains_together_1 (seg, head);
@@ -539,15 +519,10 @@ remove_subsegs (head, seg, root, last)
 
 #ifdef BFD_ASSEMBLER
 static void
-cvt_frag_to_fill (sec, fragP)
-     segT sec ATTRIBUTE_UNUSED;
-     fragS *fragP;
+cvt_frag_to_fill (segT sec ATTRIBUTE_UNUSED, fragS *fragP)
 #else
 static void
-cvt_frag_to_fill (headersP, sec, fragP)
-     object_headers *headersP;
-     segT sec;
-     fragS *fragP;
+cvt_frag_to_fill (object_headers *headersP, segT sec, fragS *fragP)
 #endif
 {
   switch (fragP->fr_type)
@@ -646,12 +621,10 @@ cvt_frag_to_fill (headersP, sec, fragP)
 #endif /* defined (BFD_ASSEMBLER) || !defined (BFD)  */
 
 #ifdef BFD_ASSEMBLER
-static void relax_seg PARAMS ((bfd *, asection *, PTR));
+static void relax_seg (bfd *, asection *, PTR);
+
 static void
-relax_seg (abfd, sec, xxx)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *sec;
-     PTR xxx;
+relax_seg (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, PTR xxx)
 {
   segment_info_type *seginfo = seg_info (sec);
 
@@ -663,12 +636,10 @@ relax_seg (abfd, sec, xxx)
     }
 }
 
-static void size_seg PARAMS ((bfd *, asection *, PTR));
+static void size_seg (bfd *, asection *, PTR);
+
 static void
-size_seg (abfd, sec, xxx)
-     bfd *abfd;
-     asection *sec;
-     PTR xxx ATTRIBUTE_UNUSED;
+size_seg (bfd *abfd, asection *sec, PTR xxx ATTRIBUTE_UNUSED)
 {
   flagword flags;
   fragS *fragp;
@@ -781,10 +752,9 @@ dump_section_relocs (abfd, sec, stream_)
    section symbols.  */
 
 static void
-adjust_reloc_syms (abfd, sec, xxx)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *sec;
-     PTR xxx ATTRIBUTE_UNUSED;
+adjust_reloc_syms (bfd *abfd ATTRIBUTE_UNUSED,
+		   asection *sec,
+		   PTR xxx ATTRIBUTE_UNUSED)
 {
   segment_info_type *seginfo = seg_info (sec);
   fixS *fixp;
@@ -904,10 +874,9 @@ adjust_reloc_syms (abfd, sec, xxx)
 }
 
 static void
-fix_segment (abfd, sec, xxx)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *sec;
-     PTR xxx ATTRIBUTE_UNUSED;
+fix_segment (bfd *abfd ATTRIBUTE_UNUSED,
+	     asection *sec,
+	     PTR xxx ATTRIBUTE_UNUSED)
 {
   segment_info_type *seginfo = seg_info (sec);
 
@@ -915,10 +884,7 @@ fix_segment (abfd, sec, xxx)
 }
 
 static void
-write_relocs (abfd, sec, xxx)
-     bfd *abfd;
-     asection *sec;
-     PTR xxx ATTRIBUTE_UNUSED;
+write_relocs (bfd *abfd, asection *sec, PTR xxx ATTRIBUTE_UNUSED)
 {
   segment_info_type *seginfo = seg_info (sec);
   unsigned int i;
@@ -1129,10 +1095,9 @@ write_relocs (abfd, sec, xxx)
 }
 
 static void
-write_contents (abfd, sec, xxx)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *sec;
-     PTR xxx ATTRIBUTE_UNUSED;
+write_contents (bfd *abfd ATTRIBUTE_UNUSED,
+		asection *sec,
+		PTR xxx ATTRIBUTE_UNUSED)
 {
   segment_info_type *seginfo = seg_info (sec);
   addressT offset = 0;
@@ -1228,7 +1193,7 @@ write_contents (abfd, sec, xxx)
 
 #if defined(BFD_ASSEMBLER) || (!defined (BFD) && !defined(OBJ_AOUT))
 static void
-merge_data_into_text ()
+merge_data_into_text (void)
 {
 #if defined(BFD_ASSEMBLER) || defined(MANY_SEGMENTS)
   seg_info (text_section)->frchainP->frch_last->fr_next =
@@ -1345,13 +1310,13 @@ relax_and_size_all_segments ()
 
 #ifdef BFD_ASSEMBLER
 static void
-set_symtab ()
+set_symtab (void)
 {
   int nsyms;
   asymbol **asympp;
   symbolS *symp;
   bfd_boolean result;
-  extern PTR bfd_alloc PARAMS ((bfd *, bfd_size_type));
+  extern PTR bfd_alloc (bfd *, bfd_size_type);
 
   /* Count symbols.  We can't rely on a count made by the loop in
      write_object_file, because *_frob_file may add a new symbol or
@@ -1405,7 +1370,7 @@ set_symtab ()
 #endif
 
 void
-subsegs_finish ()
+subsegs_finish (void)
 {
   struct frchain *frchainP;
 
@@ -1458,7 +1423,7 @@ subsegs_finish ()
 /* Write the object file.  */
 
 void
-write_object_file ()
+write_object_file (void)
 {
 #if ! defined (BFD_ASSEMBLER) || ! defined (WORKING_DOT_WORD)
   fragS *fragP;			/* Track along all frags.  */
@@ -2061,10 +2026,7 @@ write_object_file ()
 /* Relax a fragment by scanning TC_GENERIC_RELAX_TABLE.  */
 
 long
-relax_frag (segment, fragP, stretch)
-     segT segment;
-     fragS *fragP;
-     long stretch;
+relax_frag (segT segment, fragS *fragP, long stretch)
 {
   const relax_typeS *this_type;
   const relax_typeS *start_type;
@@ -2171,9 +2133,8 @@ relax_frag (segment, fragP, stretch)
 /* Relax_align. Advance location counter to next address that has 'alignment'
    lowest order bits all 0s, return size of adjustment made.  */
 static relax_addressT
-relax_align (address, alignment)
-     register relax_addressT address;	/* Address now.  */
-     register int alignment;	/* Alignment (binary).  */
+relax_align (register relax_addressT address,	/* Address now.  */
+	     register int alignment	/* Alignment (binary).  */)
 {
   relax_addressT mask;
   relax_addressT new_address;
@@ -2200,9 +2161,7 @@ relax_align (address, alignment)
    addresses.  */
 
 int
-relax_segment (segment_frag_root, segment)
-     struct frag *segment_frag_root;
-     segT segment;
+relax_segment (struct frag *segment_frag_root, segT segment)
 {
   register struct frag *fragP;
   register relax_addressT address;
@@ -2557,9 +2516,7 @@ relax_segment (segment_frag_root, segment)
    These will be output later by emit_relocations().  */
 
 static long
-fixup_segment (fixP, this_segment)
-     fixS *fixP;
-     segT this_segment;
+fixup_segment (fixS *fixP, segT this_segment)
 {
   long seg_reloc_count = 0;
   valueT add_number;
@@ -2799,10 +2756,7 @@ fixup_segment (fixP, this_segment)
 #endif /* defined (BFD_ASSEMBLER) || (!defined (BFD) && !defined (OBJ_VMS)) */
 
 void
-number_to_chars_bigendian (buf, val, n)
-     char *buf;
-     valueT val;
-     int n;
+number_to_chars_bigendian (char *buf, valueT val, int n)
 {
   if (n <= 0)
     abort ();
@@ -2814,10 +2768,7 @@ number_to_chars_bigendian (buf, val, n)
 }
 
 void
-number_to_chars_littleendian (buf, val, n)
-     char *buf;
-     valueT val;
-     int n;
+number_to_chars_littleendian (char *buf, valueT val, int n)
 {
   if (n <= 0)
     abort ();
@@ -2829,8 +2780,7 @@ number_to_chars_littleendian (buf, val, n)
 }
 
 void
-write_print_statistics (file)
-     FILE *file;
+write_print_statistics (FILE *file)
 {
   fprintf (file, "fixups: %d\n", n_fixups);
 }
@@ -2839,8 +2789,7 @@ write_print_statistics (file)
 extern int indent_level;
 
 void
-print_fixup (fixp)
-     fixS *fixp;
+print_fixup (fixS *fixp)
 {
   indent_level = 1;
   fprintf (stderr, "fix %lx %s:%d", (long) fixp, fixp->fx_file, fixp->fx_line);

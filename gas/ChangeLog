@@ -1,3 +1,9 @@
+2003-12-06  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* dwarf2dbg.c: Convert to ISO-C.
+	* write.c: Likewise.
+	* write.h: Likewise.
+
 2003-12-06  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-mips.c (macro): Switch misordered call to frag_grow()

@@ -640,8 +640,7 @@ out_set_addr (segT seg, fragS *frag, addressT ofs)
 static void scale_addr_delta (addressT *);
 
 static void
-scale_addr_delta (addr_delta)
-     addressT *addr_delta;
+scale_addr_delta (addressT *addr_delta)
 {
   static int printed_this = 0;
   if (*addr_delta % DWARF2_LINE_MIN_INSN_LENGTH != 0)
