@@ -323,8 +323,6 @@ kernel_u_size (void)
 /* See i386bsd-tdep.c.  */
 extern int i386bsd_sigcontext_pc_offset;
 
-#include <sys/sysctl.h>
-
 void
 _initialize_i386bsd_nat (void)
 {
@@ -337,27 +335,4 @@ _initialize_i386bsd_nat (void)
   /* Override the default value for the offset of the program counter
      in the sigcontext structure.  */
   i386bsd_sigcontext_pc_offset = offsetof (struct sigcontext, sc_pc);
-
-  /* FreeBSD provides a kern.ps_strings sysctl that we can use to
-     locate the sigtramp.  That way we can still recognize a sigtramp
-     if it's location is changed in a new kernel.  Of course this is
-     still based on the assumption that the sigtramp is placed
-     directly under the location where the program arguments and
-     environment can be found.  */
-#ifdef KERN_PS_STRINGS
-  {
-    int mib[2];
-    int ps_strings;
-    size_t len;
-
-    mib[0] = CTL_KERN;
-    mib[1] = KERN_PS_STRINGS;
-    len = sizeof (ps_strings);
-    if (sysctl (mib, 2, &ps_strings, &len, NULL, 0) == 0)
-      {
-	i386bsd_sigtramp_start = ps_strings - 128;
-	i386bsd_sigtramp_end = ps_strings;
-      }
-  }
-#endif
 }

@@ -1,3 +1,14 @@
+2001-07-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386bsd-nat.c: Do not include <sys/sysctl.h>.
+	(_initialize_i386bsd_nat) [KERN_PS_STRINGS]: Move FreeBSD-specific
+	code to ...
+	* i386fbsd-nat.c: ... here.  New file.
+	* config/i386/fbsd.mh (NATDEPFILES): Add i386-fbsd.o.
+	* config/i386/nm-fbsd.h (CHILD_RESUME): Define.
+	* Makefile.in (ALLDEPFILES): Add i386fbsd-nat.c.
+	(i386fbsd-nat.o): Add dependencies.
+	
 2001-07-19  Daniel Jacobowitz  <drow@mvista.com>
 
 	* signals.c: New file.

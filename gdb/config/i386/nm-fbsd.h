@@ -53,6 +53,9 @@ extern unsigned long i386bsd_dr_get_status (void);
 /* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
 #define FETCH_INFERIOR_REGISTERS
 
+/* Override child_resume in `infptrace.c' to work around a kernel bug.  */
+#define CHILD_RESUME
+
 /* We can attach and detach.  */
 #define ATTACH_DETACH
 
