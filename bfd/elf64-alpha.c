@@ -2184,7 +2184,13 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
 
 	  info.h = NULL;
 	  info.other = isym->st_other;
-	  info.first_gotent = &local_got_entries[r_symndx];
+	  if (local_got_entries)
+	    info.first_gotent = &local_got_entries[r_symndx];
+	  else
+	    {
+	      info.first_gotent = &info.gotent;
+	      info.gotent = NULL;
+	    }
 	}
       else
 	{
