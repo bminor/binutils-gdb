@@ -812,6 +812,11 @@ define_symbol (valu, string, desc, type, objfile)
 #endif
       add_symbol_to_list (sym, &local_symbols);
 
+#if TARGET_BYTE_ORDER == LITTLE_ENDIAN
+      /* On little-endian machines, this crud is never necessary, and,
+	 if the extra bytes contain garbage, is harmful.  */
+      break;
+#else /* Big endian.  */
       /* If it's gcc-compiled, if it says `short', believe it.  */
       if (processing_gcc_compilation || BELIEVE_PCC_PROMOTION)
 	break;
@@ -838,9 +843,7 @@ define_symbol (valu, string, desc, type, objfile)
 	/* This macro is defined on machines (e.g. sparc) where
 	   we should believe the type of a PCC 'short' argument,
 	   but shouldn't believe the address (the address is
-	   the address of the corresponding int).  Note that
-	   this is only different from the BELIEVE_PCC_PROMOTION
-	   case on big-endian machines.
+	   the address of the corresponding int).
 	   
 	   My guess is that this correction, as opposed to changing
 	   the parameter to an 'int' (as done below, for PCC
@@ -850,7 +853,7 @@ define_symbol (valu, string, desc, type, objfile)
 	   the sparc problem doesn't come up because the calling
 	   function has to zero the top bytes (not knowing whether
 	   the called function wants an int or a short), so there
-	   is no practical difference between an int and a short
+	   is little practical difference between an int and a short
 	   (except perhaps what happens when the GDB user types
 	   "print short_arg = 0x10000;"). 
 	   
@@ -892,6 +895,7 @@ define_symbol (valu, string, desc, type, objfile)
 #endif /* no BELIEVE_PCC_PROMOTION_TYPE.  */
       }
 #endif /* !BELIEVE_PCC_PROMOTION.  */
+#endif /* Big endian.  */
 
     case 'P':
       /* acc seems to use P to delare the prototypes of functions that

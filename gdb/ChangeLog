@@ -1,5 +1,8 @@
 Fri Oct 22 07:49:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* stabsread.c (define_symbol): Skip the whole thing about "pcc
+	promotion" on little-endian machines.
+
 	* remote-vx.c: Rename pid parameter to pid_to_wait_for.  Some
 	compilers (legitimately) don't like variables in the function's
 	outermost block whose name is the name as a parameter.
