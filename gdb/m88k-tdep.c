@@ -251,6 +251,32 @@ examine_prologue (ip, limit, frame_sp, fsr, fi)
   bzero (must_adjust, sizeof (must_adjust));
   next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn1, &insn2);
 
+  /* Accept move of incoming registers to other registers, using
+     "or rd,rs,0" or "or.u rd,rs,0" or "or rd,r0,rs" or "or rd,rs,r0".
+     We don't have to worry about walking into the first lines of code,
+     since the first line number will stop us (assuming we have symbols).
+     What we have actually seen is "or r10,r0,r12".  */
+
+#define	OR_MOVE_INSN	0x58000000		/* or/or.u with immed of 0 */
+#define	OR_MOVE_MASK	0xF800FFFF
+#define	OR_REG_MOVE1_INSN	0xF4005800	/* or rd,r0,rs */
+#define	OR_REG_MOVE1_MASK	0xFC1FFFE0
+#define	OR_REG_MOVE2_INSN	0xF4005800	/* or rd,rs,r0 */
+#define	OR_REG_MOVE2_MASK	0xFC00FFFF
+  while (next_ip && 
+	 ((insn1 & OR_MOVE_MASK) == OR_MOVE_INSN ||
+	  (insn1 & OR_REG_MOVE1_MASK) == OR_REG_MOVE1_INSN ||
+	  (insn1 & OR_REG_MOVE2_MASK) == OR_REG_MOVE2_INSN
+	 )
+	)
+    {
+      /* We don't care what moves to where.  The result of the moves 
+ 	 has already been reflected in what the compiler tells us is the
+	 location of these parameters.  */
+      ip = next_ip;
+      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn1, &insn2);
+    }
+
   /* Accept an optional "subu sp,sp,n" to set up the stack pointer.  */
 
 #define	SUBU_SP_INSN	0x67ff0000
