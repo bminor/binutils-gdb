@@ -10045,7 +10045,7 @@ s_change_sec (sec)
 				      | SEC_RELOC
 				      | SEC_DATA));
 	      if (strcmp (TARGET_OS, "elf") != 0)
-		bfd_set_section_alignment (stdoutput, seg, 4);
+		record_alignment (seg, 4);
 	    }
 	  demand_empty_rest_of_line ();
 	}
@@ -10067,7 +10067,7 @@ s_change_sec (sec)
 				     SEC_ALLOC | SEC_LOAD | SEC_RELOC
 				     | SEC_DATA);
 	      if (strcmp (TARGET_OS, "elf") != 0)
-		bfd_set_section_alignment (stdoutput, seg, 4);
+		record_alignment (seg, 4);
 	    }
 	  demand_empty_rest_of_line ();
 	  break;
