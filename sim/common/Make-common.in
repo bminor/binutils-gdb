@@ -191,6 +191,7 @@ sim-n-bits_h = $(srcdir)/../common/sim-n-bits.h
 sim-core_h = $(srcdir)/../common/sim-core.h
 sim-n-core_h = $(srcdir)/../common/sim-n-core.h
 sim-events_h = $(srcdir)/../common/sim-events.h
+sim-fpu_h = $(srcdir)/../common/sim-fpu.h
 sim-io_h = $(srcdir)/../common/sim-io.h
 sim-options_h = $(srcdir)/../common/sim-options.h
 
@@ -241,6 +242,14 @@ sim-endian.c: $(srcdir)/../common/sim-endian.c
 sim-events.o: sim-events.c $(sim-events_h) $(sim-assert_h) \
 	$(SIM_EXTRA_DEPS)
 sim-events.c: $(srcdir)/../common/sim-events.c
+	rm -f $@ tmp-$@
+	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
+	cat $(srcdir)/../common/$@ >> tmp-$@
+	$(srcdir)/../../move-if-change tmp-$@ $@
+
+sim-fpu.o: sim-fpu.c $(sim-fpu_h) $(sim-assert_h) \
+	$(SIM_EXTRA_DEPS)
+sim-fpu.c: $(srcdir)/../common/sim-fpu.c
 	rm -f $@ tmp-$@
 	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
 	cat $(srcdir)/../common/$@ >> tmp-$@
@@ -302,7 +311,7 @@ cgen-trace.o: $(srcdir)/../common/cgen-trace.c $(sim_main_headers) \
 	$(CC) -c $(srcdir)/../common/cgen-trace.c $(ALL_CFLAGS)
 
 cgen-utils.o: $(srcdir)/../common/cgen-utils.c $(sim_main_headers) \
-	  $(SIM_EXTRA_DEPS) cgen-mem.h cgen-sem.h
+	  $(SIM_EXTRA_DEPS) mem-ops.h sem-ops.h
 	$(CC) -c $(srcdir)/../common/cgen-utils.c $(ALL_CFLAGS)
 
 # Support targets.

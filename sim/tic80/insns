@@ -1,3 +1,24 @@
+// Texas Instruments TMS320C80 (MVP) Simulator.
+// Copyright (C) 1997 Free Software Foundation, Inc.
+// Contributed by Cygnus Support.
+// 
+// This file is part of GDB, the GNU debugger.
+// 
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2, or (at your option)
+// any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc.,
+// 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+
 // The following is called when ever an illegal instruction is
 // encountered
 ::internal::illegal
@@ -185,10 +206,50 @@ instruction_address::function::do_bsr:instruction_address nia, signed32 *rLink, 
 
 
 // cmnd
+void::function::do_cmnd:signed32 source
+	int Reset = EXTRACTED32 (source, 31, 31);
+	int Halt = EXTRACTED32 (source, 30, 30);
+	int Unhalt = EXTRACTED32 (source, 29, 29);
+	/* int ICR = EXTRACTED32 (source, 28, 28); */
+	/* int DCR = EXTRACTED32 (source, 27, 27); */
+	int Task = EXTRACTED32 (source, 14, 14);
+	int Msg = EXTRACTED32 (source, 13, 13);
+	int VC = EXTRACTED32 (source, 10, 10);
+	int TC = EXTRACTED32 (source, 9, 9);
+	int MP = EXTRACTED32 (source, 8, 8);
+	int PP = EXTRACTED32 (source, 3, 0);
+	/* what is implemented? */
+	if (PP != 0)
+	  engine_error (SD, CPU, cia, "0x%lx: cmnd - PPs not supported",
+	                (unsigned long) cia.ip);
+	if (VC != 0)
+	  engine_error (SD, CPU, cia, "0x%lx: cmnd - VC not supported",
+	                (unsigned long) cia.ip);
+	if (TC != 0)
+	  engine_error (SD, CPU, cia, "0x%lx: cmnd - TC not supported",
+	                (unsigned long) cia.ip);
+	if (MP)
+	  {
+	    if (Reset || Halt)
+	      engine_halt (SD, CPU, cia, sim_exited, 0);
+	    if (Unhalt)
+	      engine_error (SD, CPU, cia, "0x%lx: cmnd - Can not unhalt the MP",
+	                    (unsigned long) cia.ip);
+	    /* if (ICR || DCR); */
+	    if (Task)
+	      engine_error (SD, CPU, cia, "0x%lx: cmnd - Can not Task the MP",
+	                    (unsigned long) cia.ip);
+	    if (Msg)
+	      engine_error (SD, CPU, cia, "0x%lx: cmnd - Msg to MP not suported",
+	                    (unsigned long) cia.ip);
+	  }
 31./,21.0b0000010,14.UI::::cmnd i
-31./,21.0b110000010,12.0,11./,4.Source1::::cmnd r
+	do_cmnd (_SD, UI);
+31./,21.0b110000010,12.0,11./,4.Source::::cmnd r
+	do_cmnd (_SD, rSource);
 31./,21.0b110000010,12.1,11./::::cmnd l
-
+	long_immediate (LongUnsignedImmediate);
+	do_cmnd (_SD, LongUnsignedImmediate);
 
 // cmp
 unsigned32::function::cmp_vals:signed32 s1, unsigned32 u1, signed32 s2, unsigned32 u2
@@ -281,76 +342,208 @@ void::function::do_dst:int Source, unsigned32 Base, unsigned32 *rBase, int m , i
 // extu - see shift.dz
 
 
+sim_fpu::function::get_fp_reg:int reg, unsigned32 val, int precision
+	switch (precision)
+	  {
+	  case 0: /* single */
+	    if (reg == 0)
+	      return sim_fpu_32to (0);
+	    else
+	      return sim_fpu_32to (val);
+	  case 1: /* double */
+	    if (reg < 0)
+	      return sim_fpu_32to (val);
+	    if (reg & 1)
+	      engine_error (SD, CPU, cia, "DP FP register must be even");
+	    if (reg <= 1)
+	      engine_error (SD, CPU, cia, "DP FP register must be >= 2");
+	    return sim_fpu_64to (INSERTED64 (GPR(reg + 1), 63, 32)
+	                         | INSERTED64 (GPR(reg), 31, 0));
+	  case 2: /* 32 bit signed integer */
+	    if (reg == 0)
+	      return sim_fpu_32to (0);
+	    else	    
+	      return sim_fpu_d2 ((signed32) val);
+	  case 3: /* 32 bit unsigned integer */
+	    if (reg == 0)
+	      return sim_fpu_32to (0);
+	    else	    
+	      return sim_fpu_d2 ((unsigned32) val);
+	  default:
+	    engine_error (SD, CPU, cia, "Unsupported FP precision");
+	  }
+	return sim_fpu_32to (0);
+void::function::set_fp_reg:int Dest, sim_fpu val, int PD
+	switch (PD)
+	  {
+	  case 0: /* single */
+	    {
+	      GPR (Dest) = sim_fpu_to32 (val);
+	      break;
+	    }
+	  case 1: /* double */
+	    {
+	      unsigned64 v = *(unsigned64*) &val;
+	      if (Dest & 1)
+	        engine_error (SD, CPU, cia, "DP FP Dest register must be even");
+	      if (Dest <= 1)
+	        engine_error (SD, CPU, cia, "DP FP Dest register must be >= 2");
+	      GPR (Dest) = EXTRACTED64 (v, 21, 0);
+	      GPR (Dest + 1) = EXTRACTED64 (v, 63, 32);
+	      break;
+	    }
+	  case 2: /* signed */
+	    /* FIXME - rounding */
+	    GPR (Dest) = sim_fpu_2d (val);
+	    break;
+	  case 3: /* unsigned */
+	    /* FIXME - rounding */
+	    GPR (Dest) = sim_fpu_2d (val);
+	    break;
+	  default:
+	    engine_error (SD, CPU, cia, "Unsupported FP precision");
+	  }
+
 // fadd.{s|d}{s|d}{s|d}
-#void::function::do_fadd:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
-#	sim_io_error ("fadd");
+void::function::do_fadd:int Dest, int PD, sim_fpu s1, sim_fpu s2
+	sim_fpu ans = sim_fpu_add (s1, s2);
+	if (TRACE_FPU_P(CPU))
+	  trace_printf (SD, CPU, "0x%lx: fadd - %f + %f = %f\n",
+	                (unsigned long) cia.ip,
+	                sim_fpu_2d (s1), sim_fpu_2d (s2),
+	                sim_fpu_2d (ans));
+	set_fp_reg (_SD, Dest, ans, PD);
 31.Dest,26.Source2,21.0b111110000,12.0,11.r,10.PD,8.P2,6.P1,4.Source1::::fadd r
-#	do_fadd (_SD, rDest, rSource1, rSource2);
+	do_fadd (_SD, Dest, PD,
+	         get_fp_reg (_SD, Source1, rSource1, P1),
+	         get_fp_reg (_SD, Source2, rSource2, P2));
 31.Dest,26.Source2,21.0b111110000,12.1,11.r,10.PD,8.P2,6.P1,4./::::fadd l
-#	do_fadd (_SD, rDest, LongSignedImmediate, rSource2);
+	long_immediate (SinglePrecisionFloatingPoint);
+	do_fadd (_SD, Dest, PD,
+	         get_fp_reg (_SD, -1, SinglePrecisionFloatingPoint, P1),
+	         get_fp_reg (_SD, Source2, rSource2, P2));
 
 
 // fcmp.{s|d}{s|d}{s|d}
-#void::function::do_fcmp:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
-#	sim_io_error ("fcmp");
+void::function::do_fcmp:unsigned32 *rDest, sim_fpu s1, sim_fpu s2
+	*rDest = 0;
+	if (sim_fpu_is_nan (s1) || sim_fpu_is_nan (s2))
+	  *rDest |= BIT32 (30);
+	else
+	  {
+	    *rDest |= BIT32 (31);
+	    if (sim_fpu_cmp (s1, s2) == 0) *rDest |= BIT32(20);
+	    if (sim_fpu_cmp (s1, s2) != 0) *rDest |= BIT32(21);
+	    if (sim_fpu_cmp (s1, s2) >  0) *rDest |= BIT32(22);
+	    if (sim_fpu_cmp (s1, s2) <= 0) *rDest |= BIT32(23);
+	    if (sim_fpu_cmp (s1, s2) <  0) *rDest |= BIT32(24);
+	    if (sim_fpu_cmp (s1, s2) >= 0) *rDest |= BIT32(25);
+	    if (sim_fpu_cmp (s1, sim_fpu_32to (0)) < 0
+	        || sim_fpu_cmp (s1, s2) > 0) *rDest |= BIT32(26);
+	    if (sim_fpu_cmp (sim_fpu_32to (0), s1) < 0
+	        && sim_fpu_cmp (s1, s2) < 0) *rDest |= BIT32(27);
+	    if (sim_fpu_cmp (sim_fpu_32to (0), s1) <= 0
+	        && sim_fpu_cmp (s1, s2) <= 0) *rDest |= BIT32(28);
+	    if (sim_fpu_cmp (s1, sim_fpu_32to (0)) <= 0
+	        || sim_fpu_cmp (s1, s2) >= 0) *rDest |= BIT32(29);
+	  }
+	if (TRACE_FPU_P (CPU))
+	  trace_printf (SD, CPU, "0x%lx: fcmp - %f >=< %f - 0x%08x\n",
+	                (unsigned long) cia.ip,
+	                sim_fpu_2d (s1), sim_fpu_2d (s2),
+	                (unsigned long) *rDest);
 31.Dest,26.Source2,21.0b111110101,12.0,11./,10.0,8.P2,6.P1,4.Source1::::fcmp r
-#	do_fcmp (_SD, rDest, rSource1, rSource2);
+	do_fcmp (_SD, rDest,
+	         get_fp_reg (_SD, Source1, rSource1, P1),
+	         get_fp_reg (_SD, Source2, rSource2, P2));
 31.Dest,26.Source2,21.0b111110101,12.1,11./,10.0,8.P2,6.P1,4./::::fcmp l
-#	do_fcmp (_SD, rDest, LongSignedImmediate, rSource2);
+	long_immediate (SinglePrecisionFloatingPoint);
+	do_fcmp (_SD, rDest,
+	         get_fp_reg (_SD, -1, SinglePrecisionFloatingPoint, P1),
+	         get_fp_reg (_SD, Source2, rSource2, P2));
+
 
 
 // fdiv.{s|d}{s|d}{s|d}
-#void::function::do_fdiv:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
-#	sim_io_error ("fdiv");
+void::function::do_fdiv:int Dest, int PD, sim_fpu s1, sim_fpu s2
+	sim_fpu ans = sim_fpu_div (s1, s2);
+	if (TRACE_FPU_P(CPU))
+	  trace_printf (SD, CPU, "0x%lx: fdiv - %f / %f = %f\n",
+	                (unsigned long) cia.ip,
+	                sim_fpu_2d (s1), sim_fpu_2d (s2),
+	                sim_fpu_2d (ans));
+	set_fp_reg (_SD, Dest, ans, PD);
 31.Dest,26.Source2,21.0b111110011,12.0,11./,10.PD,8.P2,6.P1,4.Source1::::fdiv r
-#	do_fdiv (_SD, rDest, rSource1, rSource2);
+	do_fdiv (_SD, Dest, PD,
+	         get_fp_reg (_SD, Source1, rSource1, P1),
+	         get_fp_reg (_SD, Source2, rSource2, P2));
 31.Dest,26.Source2,21.0b111110011,12.1,11./,10.PD,8.P2,6.P1,4./::::fdiv l
-#	do_fdiv (_SD, rDest, LongSignedImmediate, rSource2);
+	long_immediate (SinglePrecisionFloatingPoint);
+	do_fdiv (_SD, Dest, PD,
+	         get_fp_reg (_SD, -1, SinglePrecisionFloatingPoint, P1),
+	         get_fp_reg (_SD, Source2, rSource2, P2));
 
 
 // fmpy.{s|d|i|u}{s|d|i|u}{s|d|i|u}
-#void::function::do_fmpy:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
-#	sim_io_error ("fmpy");
+void::function::do_fmpy:int Dest, int PD, sim_fpu s1, sim_fpu s2
+	sim_fpu ans = sim_fpu_mul (s1, s2);
+	if (TRACE_FPU_P(CPU))
+	  trace_printf (SD, CPU, "0x%lx: fmpy - %f * %f = %f\n",
+	                (unsigned long) cia.ip,
+	                sim_fpu_2d (s1), sim_fpu_2d (s2),
+	                sim_fpu_2d (ans));
+	set_fp_reg (_SD, Dest, ans, PD);
 31.Dest,26.Source2,21.0b111110010,12.0,11./,10.PD,8.P2,6.P1,4.Source1::::fmpy r
-#	do_fmpy (_SD, rDest, rSource1, rSource2);
+	do_fmpy (_SD, Dest, PD,
+	         get_fp_reg (_SD, Source1, rSource1, P1),
+	         get_fp_reg (_SD, Source2, rSource2, P2));
 31.Dest,26.Source2,21.0b111110010,12.1,11./,10.PD,8.P2,6.P1,4./::::fmpy l
-#	do_fmpy (_SD, rDest, LongSignedImmediate, rSource2);
+	long_immediate (SinglePrecisionFloatingPoint);
+	do_fmpy (_SD, Dest, PD,
+	         get_fp_reg (_SD, -1, SinglePrecisionFloatingPoint, P1),
+	         get_fp_reg (_SD, Source2, rSource2, P2));
 
 
 // frndm.{s|d|i|u}{s|d|i|u}{s|d|i|u}
-#void::function::do_frndm:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
-#	sim_io_error ("frndm");
-31.Dest,26.Source2,21.0b111110100,12.0,11.r,10.PD,8.0b11,6.P1,4.Source1::::frndm r
-#	do_frndm (_SD, rDest, rSource1, rSource2);
+void::function::do_frnd:int Dest, int PD, sim_fpu s1
+	set_fp_reg (_SD, Dest, s1, PD);
+31.Dest,26.Source2,21.0b111110100,12.0,11.r,10.PD,8.0b11,6.P1,4.Source::::frndm r
+	do_frnd (_SD, Dest, PD,
+	         get_fp_reg (_SD, Source, rSource, P1));
 31.Dest,26.Source2,21.0b111110100,12.1,11.r,10.PD,8.0b11,6.P1,4./::::frndm l
-#	do_frndm (_SD, rDest, LongSignedImmediate, rSource2);
+	long_immediate (SinglePrecisionFloatingPoint);
+	do_frnd (_SD, Dest, PD,
+	         get_fp_reg (_SD, -1, SinglePrecisionFloatingPoint, P1));
 
 
 // frndn.{s|d|i|u}{s|d|i|u}{s|d|i|u}
-#void::function::do_frndn:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
-#	sim_io_error ("frndn");
-31.Dest,26.Source2,21.0b111110100,12.0,11.r,10.PD,8.0b00,6.P1,4.Source1::::frndn r
-#	do_frndn (_SD, rDest, rSource1, rSource2);
+31.Dest,26.Source2,21.0b111110100,12.0,11.r,10.PD,8.0b00,6.P1,4.Source::::frndn r
+	do_frnd (_SD, Dest, PD,
+	         get_fp_reg (_SD, Source, rSource, P1));
 31.Dest,26.Source2,21.0b111110100,12.1,11.r,10.PD,8.0b00,6.P1,4./::::frndn l
-#	do_frndn (_SD, rDest, LongSignedImmediate, rSource2);
+	long_immediate (SinglePrecisionFloatingPoint);
+	do_frnd (_SD, Dest, PD,
+	         get_fp_reg (_SD, -1, SinglePrecisionFloatingPoint, P1));
 
 
 // frndp.{s|d|i|u}{s|d|i|u}{s|d|i|u}
-#void::function::do_frndp:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
-#	sim_io_error ("frndp");
-#31.Dest,26.Source2,21.0b111110100,12.0,11.r,10.PD,8.0b10,6.P1,4.Source1::::frndp r
-#	do_frndp (_SD, rDest, rSource1, rSource2);
-#31.Dest,26.Source2,21.0b111110100,12.1,11.r,10.PD,8.0b10,6.P1,4./::::frndp l
-#	do_frndp (_SD, rDest, LongSignedImmediate, rSource2);
+31.Dest,26.Source2,21.0b111110100,12.0,11.r,10.PD,8.0b10,6.P1,4.Source::::frndp r
+	do_frnd (_SD, Dest, PD,
+	         get_fp_reg (_SD, Source, rSource, P1));
+31.Dest,26.Source2,21.0b111110100,12.1,11.r,10.PD,8.0b10,6.P1,4./::::frndp l
+	long_immediate (SinglePrecisionFloatingPoint);
+	do_frnd (_SD, Dest, PD,
+	         get_fp_reg (_SD, -1, SinglePrecisionFloatingPoint, P1));
 
 
 // frndz.{s|d|i|u}{s|d|i|u}{s|d|i|u}
-#void::function::do_frndz:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
-#	sim_io_error ("frndz");
-31.Dest,26.Source2,21.0b111110100,12.0,11.r,10.PD,8.0b01,6.P1,4.Source1::::frndz r
-#	do_frndz (_SD, rDest, rSource1, rSource2);
+31.Dest,26.Source2,21.0b111110100,12.0,11.r,10.PD,8.0b01,6.P1,4.Source::::frndz r
+	do_frnd (_SD, Dest, PD,
+	         get_fp_reg (_SD, Source, rSource, P1));
 31.Dest,26.Source2,21.0b111110100,12.1,11.r,10.PD,8.0b01,6.P1,4./::::frndz l
-#	do_frndz (_SD, rDest, LongSignedImmediate, rSource2);
+	long_immediate (SinglePrecisionFloatingPoint);
+	do_frnd (_SD, Dest, PD,
+	         get_fp_reg (_SD, -1, SinglePrecisionFloatingPoint, P1));
 
 
 // fsqrt.{s|d}{s|d}{s|d}
@@ -363,12 +556,23 @@ void::function::do_dst:int Source, unsigned32 Base, unsigned32 *rBase, int m , i
 
 
 // fsub.{s|d}{s|d}{s|d}
-#void::function::do_fsub:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
-#	sim_io_error ("fsub");
+void::function::do_fsub:int Dest, int PD, sim_fpu s1, sim_fpu s2
+	sim_fpu ans = sim_fpu_sub (s1, s2);
+	if (TRACE_FPU_P(CPU))
+	  trace_printf (SD, CPU, "0x%lx: fsub - %f + %f = %f\n",
+	                (unsigned long) cia.ip,
+	                sim_fpu_2d (s1), sim_fpu_2d (s2),
+	                sim_fpu_2d (ans));
+	set_fp_reg (_SD, Dest, ans, PD);
 31.Dest,26.Source2,21.0b111110001,12.0,11.r,10.PD,8.P2,6.P1,4.Source1::::fsub r
-#	do_fsub (_SD, rDest, rSource1, rSource2);
+	do_fsub (_SD, Dest, PD,
+	         get_fp_reg (_SD, Source1, rSource1, P1),
+	         get_fp_reg (_SD, Source2, rSource2, P2));
 31.Dest,26.Source2,21.0b111110001,12.1,11.r,10.PD,8.P2,6.P1,4./::::fsub l
-#	do_fsub (_SD, rDest, LongSignedImmediate, rSource2);
+	long_immediate (SinglePrecisionFloatingPoint);
+	do_fsub (_SD, Dest, PD,
+	         get_fp_reg (_SD, -1, SinglePrecisionFloatingPoint, P1),
+	         get_fp_reg (_SD, Source2, rSource2, P2));
 
 
 // illop
@@ -390,7 +594,9 @@ instruction_address::function::do_jsr:instruction_address nia, signed32 *rLink, 
 	  *rLink = cia.dp + sizeof (instruction_word);
 	nia.dp = offset + base;
 	if (nia.dp & 0x3)
-	  engine_error (SD, CPU, cia, "destination address 0x%lx misaligned",
+	  engine_error (SD, CPU, cia,
+	                "0x%lx: destination address 0x%lx misaligned",
+	                (unsigned long) cia.ip,
 	                (unsigned long) nia.dp);
 	return nia;
 31.Link,26.Base,21.0b100010,15.A,14.SignedOffset::::jsr i
@@ -752,16 +958,24 @@ void::function::do_trap:unsigned32 trap_number
 	      case 4: /* WRITE */
 	        {
 	          int i;
-	          if (GPR(2) != 1)
+	          if (GPR(2) == 1)
+		    for (i = 0; i < GPR(6); i++)
+	              {
+		        char c;
+		        c = MEM (unsigned, GPR(4) + i, 1);
+	                sim_io_write_stdout (SD, &c, 1);
+	              }
+	          else if (GPR(2) == 2)
+		    for (i = 0; i < GPR(6); i++)
+	              {
+		        char c;
+		        c = MEM (unsigned, GPR(4) + i, 1);
+	                sim_io_write_stderr (SD, &c, 1);
+	              }
+	          else
 	            engine_error (SD, CPU, cia,
 	                          "0x%lx: write to invalid fid %d",
 	                          (unsigned long) cia.ip, GPR(2));
-		  for (i = 0; i < GPR(6); i++)
-	            {
-		      char c;
-		      c = MEM (unsigned, GPR(4) + i, 1);
-	              sim_io_write_stdout (SD, &c, 1);
-	            }
 	          GPR(2) = GPR(6);
 	          break;
 	        }

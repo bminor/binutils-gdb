@@ -23,6 +23,71 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef SIM_TRACE_H
 #define SIM_TRACE_H
 
+/* Maximum number of traceable entities.  */
+#ifndef MAX_TRACE_VALUES
+#define MAX_TRACE_VALUES 12
+#endif
+
+/* Standard traceable entities.  */
+#define TRACE_INSN_IDX 0
+#define TRACE_DECODE_IDX 1
+#define TRACE_EXTRACT_IDX 2
+#define TRACE_LINENUM_IDX 3
+#define TRACE_MEMORY_IDX 4
+#define TRACE_MODEL_IDX 5
+#define TRACE_ALU_IDX 6
+#define TRACE_CORE_IDX 7
+#define TRACE_EVENTS_IDX 8
+#define TRACE_FPU_IDX 9
+#define TRACE_NEXT_IDX 16 /* simulator specific trace bits begin here */
+
+/* Masks so WITH_TRACE can have symbolic values.  */
+#define TRACE_insn 1
+#define TRACE_decode 2
+#define TRACE_extract 4
+#define TRACE_linenum 8
+#define TRACE_memory 16
+#define TRACE_model 32
+#define TRACE_alu 64
+#define TRACE_core 128
+#define TRACE_events 256
+#define TRACE_fpu 512
+
+/* Preprocessor macros to simplify tests of WITH_TRACE.  */
+#define WITH_TRACE_INSN_P (WITH_TRACE & TRACE_insn)
+#define WITH_TRACE_DECODE_P (WITH_TRACE & TRACE_decode)
+#define WITH_TRACE_EXTRACT_P (WITH_TRACE & TRACE_extract)
+#define WITH_TRACE_LINENUM_P (WITH_TRACE & TRACE_linenum)
+#define WITH_TRACE_MEMORY_P (WITH_TRACE & TRACE_memory)
+#define WITH_TRACE_MODEL_P (WITH_TRACE & TRACE_model)
+#define WITH_TRACE_ALU_P (WITH_TRACE & TRACE_alu)
+#define WITH_TRACE_CORE_P (WITH_TRACE & TRACE_core)
+#define WITH_TRACE_EVENTS_P (WITH_TRACE & TRACE_events)
+#define WITH_TRACE_FPU_P (WITH_TRACE & TRACE_fpu)
+
+/* Tracing install handler.  */
+MODULE_INSTALL_FN trace_install;
+
+/* Struct containing all trace data.  */
+
+typedef struct {
+  /* Boolean array of specified tracing flags.  */
+  /* ??? It's not clear that using an array vs a bit mask is faster.
+     Consider the case where one wants to test whether any of several bits
+     are set.  */
+  char trace_flags[MAX_TRACE_VALUES];
+#define TRACE_FLAGS(t) ((t)->trace_flags)
+
+  /* Tracing output goes to this or stderr if NULL.
+     We can't store `stderr' here as stderr goes through a callback.  */
+  FILE *trace_file;
+#define TRACE_FILE(t) ((t)->trace_file)
+} TRACE_DATA;
+
+/* Usage macros.  */
+
+#define CPU_TRACE_FLAGS(cpu) TRACE_FLAGS (CPU_TRACE_DATA (cpu))
+
 /* forward reference */
 struct _sim_cpu;
 
@@ -37,10 +102,14 @@ struct _sim_cpu;
 #define TRACE_INSN_P(cpu) TRACE_P (cpu, TRACE_INSN_IDX)
 /* Non-zero if "--trace-decode" specified for CPU.  */
 #define TRACE_DECODE_P(cpu) TRACE_P (cpu, TRACE_DECODE_IDX)
+/* Non-zero if "--trace-fpu" specified for CPU. */
+#define TRACE_FPU_P(cpu) TRACE_P (cpu, TRACE_FPU_IDX)
 
-extern void trace_printf PARAMS ((struct _sim_cpu *, const char *, ...));
+extern void trace_printf PARAMS ((SIM_DESC, sim_cpu *, const char *, ...));
 
-/* Debug support.  */
+/* Debug support.
+   This is included here because there isn't enough of it to justify
+   a sim-debug.h.  */
 
 /* Return non-zero if debugging of IDX for CPU is enabled.  */
 #define DEBUG_P(cpu, idx) \

@@ -29,3 +29,8 @@ struct _sim_cpu {
 
 #define GPR(N) ((CPU)->reg[N])
 #define ACC(N) ((CPU)->acc[N])
+
+#define SP_FPR(N) (GPR(N))
+#define DP_FPR(N) (*(unsigned64*)&GPR(N))
+#define vSP_FPR(N) (N == 0 ? (unsigned32)0 : GPR(N))
+#define vDP_FPR(N) (*(unsigned64*)&GPR(N))

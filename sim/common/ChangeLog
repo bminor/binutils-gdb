@@ -1,3 +1,13 @@
+Mon May  5 13:19:16 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-trace.h (TRACE_FPU_IDX): Add Floating-point specific
+ 	tracing.
+
+	* sim-fpu.h, sim-fpu.c: New files - prototype for generic target
+ 	fpu support.
+
+	* sim-inline.h, sim-inline.c: Add support for SIM_FPU.
+
 Fri May  2 17:59:42 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-core.c (sim_core_map_to_str): New function ascii equivalent

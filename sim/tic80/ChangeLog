@@ -1,3 +1,16 @@
+Mon May  5 14:10:17 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* insn (cmnd): No-op cache flushes.
+	
+	* insns (do_trap): Allow writes to STDERR.
+
+	* Makefile.in (SIM_OBJS): Link in sim-fpu.o.
+	(SIM_EXTRA_LIBS): Link in the math library.
+
+	* alu.h: Add support for floating point unit using sim-alu.
+	
+	* insns (fadd, fsub, fmpy, fdiv, fcmp, frnd*): Implement.
+
 Fri May  2 14:57:14 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-calls.c: Include sim-utils.h and sim-options.h.

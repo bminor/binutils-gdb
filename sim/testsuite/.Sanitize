@@ -38,6 +38,7 @@ configure.in
 Things-to-lose:
 
 common
+tic80-coff
 
 Do-last:
 

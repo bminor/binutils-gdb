@@ -21,11 +21,15 @@ SIM_OBJS = sim-endian.o sim-bits.o sim-config.o interp.o \
 	sim-module.o \
 	sim-options.o \
 	sim-trace.o \
-	sim-profile.o
+	sim-profile.o \
+	sim-fpu.o
 
 # List of extra dependencies.
 # Generally this consists of simulator specific files included by sim-main.h.
 SIM_EXTRA_DEPS = itable.h idecode.h cpu.h alu.h
+
+# List of extra libraries to link with
+SIM_EXTRA_LIBS = -lm
 
 # List of generators
 SIM_GEN=tmp-igen
@@ -36,6 +40,7 @@ SIM_ENDIAN=@sim_endian@
 SIM_HOSTENDIAN=@sim_hostendian@
 SIM_INLINE=@sim_inline@
 SIM_RESERVED_BITS=@sim_reserved_bits@
+SIM_ALIGNMENT=@sim_alignment@
 
 SIM_EXTRA_CFLAGS = \
 	$(SIM_WARNINGS) \
