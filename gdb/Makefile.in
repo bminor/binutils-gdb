@@ -563,8 +563,22 @@ depend: $(SOURCES) Makefile.in
 	  -e 's; ./xm.h; xm.h config.status;g'  \
 	  -e 's; ./tm.h; tm.h config.status;g'  \
 	  -e 's; ./nm.h; nm.h config.status;g'  \
-	  >depend
-	rm depend.tmp
+	  >depend.tm3;
+# OK, get your sed manual out.  This script makes all the rules in
+# depend explicitly state the rule, rather than relying on VPATH
+# or a .c.o implicit rule.  This is needed for Sun make, and should
+# be portable to any make worthy of the name.  I suspect that we no
+# longer need to set VPATH.
+	<depend.tm3 sed \
+	  -e '/:/h' \
+	  -e '/\\$$/b end' \
+	  -e 'p' \
+	  -e 'g' \
+	  -e 's/.*:\(.*\.c\).*/	$${CC} -c $${INTERNAL_CFLAGS} \1/' \
+	  -e ': end' \
+	  >depend.tm4;
+	mv depend.tm4 depend
+	rm depend.tm?
 
 config.status:
 	@echo "You must configure gdb.  Look at the README file for details."
