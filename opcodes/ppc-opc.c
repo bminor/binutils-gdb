@@ -1,24 +1,24 @@
 /* ppc-opc.c -- PowerPC opcode list
-   Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002
+   Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support
 
-This file is part of GDB, GAS, and the GNU binutils.
+   This file is part of GDB, GAS, and the GNU binutils.
 
-GDB, GAS, and the GNU binutils are free software; you can redistribute
-them and/or modify them under the terms of the GNU General Public
-License as published by the Free Software Foundation; either version
-2, or (at your option) any later version.
+   GDB, GAS, and the GNU binutils are free software; you can redistribute
+   them and/or modify them under the terms of the GNU General Public
+   License as published by the Free Software Foundation; either version
+   2, or (at your option) any later version.
 
-GDB, GAS, and the GNU binutils are distributed in the hope that they
-will be useful, but WITHOUT ANY WARRANTY; without even the implied
-warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
-the GNU General Public License for more details.
+   GDB, GAS, and the GNU binutils are distributed in the hope that they
+   will be useful, but WITHOUT ANY WARRANTY; without even the implied
+   warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
+   the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this file; see the file COPYING.  If not, write to the Free
-Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this file; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 #include <stdio.h>
 #include "sysdep.h"
@@ -497,52 +497,52 @@ const struct powerpc_operand powerpc_operands[] =
 #define UI U + 1
   { 16, 0, 0, 0, 0 },
 
-  /* The VA field in a VA, VX or VXR form instruction. */
+  /* The VA field in a VA, VX or VXR form instruction.  */
 #define VA UI + 1
 #define VA_MASK	(0x1f << 16)
   { 5, 16, 0, 0, PPC_OPERAND_VR },
 
-  /* The VB field in a VA, VX or VXR form instruction. */
+  /* The VB field in a VA, VX or VXR form instruction.  */
 #define VB VA + 1
 #define VB_MASK (0x1f << 11)
   { 5, 11, 0, 0, PPC_OPERAND_VR },
 
-  /* The VC field in a VA form instruction. */
+  /* The VC field in a VA form instruction.  */
 #define VC VB + 1
 #define VC_MASK (0x1f << 6)
   { 5, 6, 0, 0, PPC_OPERAND_VR },
 
-  /* The VD or VS field in a VA, VX, VXR or X form instruction. */
+  /* The VD or VS field in a VA, VX, VXR or X form instruction.  */
 #define VD VC + 1
 #define VS VD
 #define VD_MASK (0x1f << 21)
   { 5, 21, 0, 0, PPC_OPERAND_VR },
 
-  /* The SIMM field in a VX form instruction. */
+  /* The SIMM field in a VX form instruction.  */
 #define SIMM VD + 1
   { 5, 16, 0, 0, PPC_OPERAND_SIGNED},
 
-  /* The UIMM field in a VX form instruction. */
+  /* The UIMM field in a VX form instruction.  */
 #define UIMM SIMM + 1
   { 5, 16, 0, 0, 0 },
 
-  /* The SHB field in a VA form instruction. */
+  /* The SHB field in a VA form instruction.  */
 #define SHB UIMM + 1
   { 4, 6, 0, 0, 0 },
 
-  /* The other UIMM field in a EVX form instruction. */
+  /* The other UIMM field in a EVX form instruction.  */
 #define EVUIMM SHB + 1
   { 5, 11, 0, 0, 0 },
 
-  /* The other UIMM field in a half word EVX form instruction. */
+  /* The other UIMM field in a half word EVX form instruction.  */
 #define EVUIMM_2 EVUIMM + 1
   { 32, 11, insert_ev2, extract_ev2, PPC_OPERAND_PARENS },
 
-  /* The other UIMM field in a word EVX form instruction. */
+  /* The other UIMM field in a word EVX form instruction.  */
 #define EVUIMM_4 EVUIMM_2 + 1
   { 32, 11, insert_ev4, extract_ev4, PPC_OPERAND_PARENS },
 
-  /* The other UIMM field in a double EVX form instruction. */
+  /* The other UIMM field in a double EVX form instruction.  */
 #define EVUIMM_8 EVUIMM_4 + 1
   { 32, 11, insert_ev8, extract_ev8, PPC_OPERAND_PARENS },
 
@@ -1499,22 +1499,22 @@ extract_tbr (insn, dialect, invalid)
 #define SC(op, sa, lk) (OP (op) | ((((unsigned long)(sa)) & 1) << 1) | ((lk) & 1))
 #define SC_MASK (OP_MASK | (((unsigned long)0x3ff) << 16) | (((unsigned long)1) << 1) | 1)
 
-/* An VX form instruction. */
+/* An VX form instruction.  */
 #define VX(op, xop) (OP (op) | (((unsigned long)(xop)) & 0x7ff))
 
-/* The mask for an VX form instruction. */
+/* The mask for an VX form instruction.  */
 #define VX_MASK	VX(0x3f, 0x7ff)
 
-/* An VA form instruction. */
+/* An VA form instruction.  */
 #define VXA(op, xop) (OP (op) | (((unsigned long)(xop)) & 0x03f))
 
-/* The mask for an VA form instruction. */
+/* The mask for an VA form instruction.  */
 #define VXA_MASK VXA(0x3f, 0x3f)
 
-/* An VXR form instruction. */
+/* An VXR form instruction.  */
 #define VXR(op, xop, rc) (OP (op) | (((rc) & 1) << 10) | (((unsigned long)(xop)) & 0x3ff))
 
-/* The mask for a VXR form instruction. */
+/* The mask for a VXR form instruction.  */
 #define VXR_MASK VXR(0x3f, 0x3ff, 1)
 
 /* An X form instruction.  */
@@ -1538,7 +1538,7 @@ extract_tbr (insn, dialect, invalid)
 /* An X_MASK with the RA and RB fields fixed.  */
 #define XRARB_MASK (X_MASK | RA_MASK | RB_MASK)
 
-/* An XRARB_MASK, but with the L bit clear. */
+/* An XRARB_MASK, but with the L bit clear.  */
 #define XRLARB_MASK (XRARB_MASK & ~((unsigned long) 1 << 16))
 
 /* An X_MASK with the RT and RA fields fixed.  */
@@ -2349,34 +2349,34 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "cau",     OP(15),	OP_MASK,	PWRCOM,		{ RT,RA,SISIGNOPT } },
 { "subis",   OP(15),	OP_MASK,	PPCCOM,		{ RT, RA, NSI } },
 
-{ "bdnz-",   BBO(16,BODNZ,0,0), BBOATBI_MASK, PPCCOM,	{ BDM } },
-{ "bdnz+",   BBO(16,BODNZ,0,0), BBOATBI_MASK, PPCCOM,	{ BDP } },
-{ "bdnz",    BBO(16,BODNZ,0,0), BBOATBI_MASK, PPCCOM,	{ BD } },
-{ "bdn",     BBO(16,BODNZ,0,0), BBOATBI_MASK, PWRCOM,	{ BD } },
-{ "bdnzl-",  BBO(16,BODNZ,0,1), BBOATBI_MASK, PPCCOM,	{ BDM } },
-{ "bdnzl+",  BBO(16,BODNZ,0,1), BBOATBI_MASK, PPCCOM,	{ BDP } },
-{ "bdnzl",   BBO(16,BODNZ,0,1), BBOATBI_MASK, PPCCOM,	{ BD } },
-{ "bdnl",    BBO(16,BODNZ,0,1), BBOATBI_MASK, PWRCOM,	{ BD } },
-{ "bdnza-",  BBO(16,BODNZ,1,0), BBOATBI_MASK, PPCCOM,	{ BDMA } },
-{ "bdnza+",  BBO(16,BODNZ,1,0), BBOATBI_MASK, PPCCOM,	{ BDPA } },
-{ "bdnza",   BBO(16,BODNZ,1,0), BBOATBI_MASK, PPCCOM,	{ BDA } },
-{ "bdna",    BBO(16,BODNZ,1,0), BBOATBI_MASK, PWRCOM,	{ BDA } },
-{ "bdnzla-", BBO(16,BODNZ,1,1), BBOATBI_MASK, PPCCOM,	{ BDMA } },
-{ "bdnzla+", BBO(16,BODNZ,1,1), BBOATBI_MASK, PPCCOM,	{ BDPA } },
-{ "bdnzla",  BBO(16,BODNZ,1,1), BBOATBI_MASK, PPCCOM,	{ BDA } },
-{ "bdnla",   BBO(16,BODNZ,1,1), BBOATBI_MASK, PWRCOM,	{ BDA } },
-{ "bdz-",    BBO(16,BODZ,0,0),  BBOATBI_MASK, PPCCOM,	{ BDM } },
-{ "bdz+",    BBO(16,BODZ,0,0),  BBOATBI_MASK, PPCCOM,	{ BDP } },
-{ "bdz",     BBO(16,BODZ,0,0),  BBOATBI_MASK, COM,	{ BD } },
-{ "bdzl-",   BBO(16,BODZ,0,1),  BBOATBI_MASK, PPCCOM,	{ BDM } },
-{ "bdzl+",   BBO(16,BODZ,0,1),  BBOATBI_MASK, PPCCOM,	{ BDP } },
-{ "bdzl",    BBO(16,BODZ,0,1),  BBOATBI_MASK, COM,	{ BD } },
-{ "bdza-",   BBO(16,BODZ,1,0),  BBOATBI_MASK, PPCCOM,	{ BDMA } },
-{ "bdza+",   BBO(16,BODZ,1,0),  BBOATBI_MASK, PPCCOM,	{ BDPA } },
-{ "bdza",    BBO(16,BODZ,1,0),  BBOATBI_MASK, COM,	{ BDA } },
-{ "bdzla-",  BBO(16,BODZ,1,1),  BBOATBI_MASK, PPCCOM,	{ BDMA } },
-{ "bdzla+",  BBO(16,BODZ,1,1),  BBOATBI_MASK, PPCCOM,	{ BDPA } },
-{ "bdzla",   BBO(16,BODZ,1,1),  BBOATBI_MASK, COM,	{ BDA } },
+{ "bdnz-",   BBO(16,BODNZ,0,0),      BBOATBI_MASK, PPCCOM,	{ BDM } },
+{ "bdnz+",   BBO(16,BODNZ,0,0),      BBOATBI_MASK, PPCCOM,	{ BDP } },
+{ "bdnz",    BBO(16,BODNZ,0,0),      BBOATBI_MASK, PPCCOM,	{ BD } },
+{ "bdn",     BBO(16,BODNZ,0,0),      BBOATBI_MASK, PWRCOM,	{ BD } },
+{ "bdnzl-",  BBO(16,BODNZ,0,1),      BBOATBI_MASK, PPCCOM,	{ BDM } },
+{ "bdnzl+",  BBO(16,BODNZ,0,1),      BBOATBI_MASK, PPCCOM,	{ BDP } },
+{ "bdnzl",   BBO(16,BODNZ,0,1),      BBOATBI_MASK, PPCCOM,	{ BD } },
+{ "bdnl",    BBO(16,BODNZ,0,1),      BBOATBI_MASK, PWRCOM,	{ BD } },
+{ "bdnza-",  BBO(16,BODNZ,1,0),      BBOATBI_MASK, PPCCOM,	{ BDMA } },
+{ "bdnza+",  BBO(16,BODNZ,1,0),      BBOATBI_MASK, PPCCOM,	{ BDPA } },
+{ "bdnza",   BBO(16,BODNZ,1,0),      BBOATBI_MASK, PPCCOM,	{ BDA } },
+{ "bdna",    BBO(16,BODNZ,1,0),      BBOATBI_MASK, PWRCOM,	{ BDA } },
+{ "bdnzla-", BBO(16,BODNZ,1,1),      BBOATBI_MASK, PPCCOM,	{ BDMA } },
+{ "bdnzla+", BBO(16,BODNZ,1,1),      BBOATBI_MASK, PPCCOM,	{ BDPA } },
+{ "bdnzla",  BBO(16,BODNZ,1,1),      BBOATBI_MASK, PPCCOM,	{ BDA } },
+{ "bdnla",   BBO(16,BODNZ,1,1),      BBOATBI_MASK, PWRCOM,	{ BDA } },
+{ "bdz-",    BBO(16,BODZ,0,0),       BBOATBI_MASK, PPCCOM,	{ BDM } },
+{ "bdz+",    BBO(16,BODZ,0,0),       BBOATBI_MASK, PPCCOM,	{ BDP } },
+{ "bdz",     BBO(16,BODZ,0,0),       BBOATBI_MASK, COM,		{ BD } },
+{ "bdzl-",   BBO(16,BODZ,0,1),       BBOATBI_MASK, PPCCOM,	{ BDM } },
+{ "bdzl+",   BBO(16,BODZ,0,1),       BBOATBI_MASK, PPCCOM,	{ BDP } },
+{ "bdzl",    BBO(16,BODZ,0,1),       BBOATBI_MASK, COM,		{ BD } },
+{ "bdza-",   BBO(16,BODZ,1,0),       BBOATBI_MASK, PPCCOM,	{ BDMA } },
+{ "bdza+",   BBO(16,BODZ,1,0),       BBOATBI_MASK, PPCCOM,	{ BDPA } },
+{ "bdza",    BBO(16,BODZ,1,0),       BBOATBI_MASK, COM,		{ BDA } },
+{ "bdzla-",  BBO(16,BODZ,1,1),       BBOATBI_MASK, PPCCOM,	{ BDMA } },
+{ "bdzla+",  BBO(16,BODZ,1,1),       BBOATBI_MASK, PPCCOM,	{ BDPA } },
+{ "bdzla",   BBO(16,BODZ,1,1),       BBOATBI_MASK, COM,		{ BDA } },
 { "blt-",    BBOCB(16,BOT,CBLT,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDM } },
 { "blt+",    BBOCB(16,BOT,CBLT,0,0), BBOATCB_MASK, PPCCOM,	{ CR, BDP } },
 { "blt",     BBOCB(16,BOT,CBLT,0,0), BBOATCB_MASK, COM,		{ CR, BD } },
@@ -2625,7 +2625,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "ba",      B(18,1,0),	B_MASK,		COM,		{ LIA } },
 { "bla",     B(18,1,1),	B_MASK,		COM,		{ LIA } },
 
-{ "mcrf",    XL(19,0),	XLBB_MASK|(3<<21)|(3<<16), COM,	{ BF, BFA } },
+{ "mcrf",    XL(19,0),	XLBB_MASK|(3 << 21)|(3 << 16), COM,	{ BF, BFA } },
 
 { "blr",     XLO(19,BOU,16,0), XLBOBIBB_MASK, PPCCOM,	{ 0 } },
 { "br",      XLO(19,BOU,16,0), XLBOBIBB_MASK, PWRCOM,	{ 0 } },
@@ -2854,8 +2854,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "crnot",   XL(19,33), XL_MASK,	PPCCOM,		{ BT, BA, BBA } },
 { "crnor",   XL(19,33),	XL_MASK,	COM,		{ BT, BA, BB } },
-{ "rfmci",    X(19,38),  0xffffffff,	PPCRFMCI,	{ 0 } },
-
+{ "rfmci",    X(19,38), 0xffffffff,	PPCRFMCI,	{ 0 } },
 
 { "rfi",     XL(19,50),	0xffffffff,	COM,		{ 0 } },
 { "rfci",    XL(19,51),	0xffffffff,	PPC403,		{ 0 } },

@@ -1,3 +1,7 @@
+2003-03-17  Nick Clifton  <nickc@redhat.com>
+
+	* ppc-opc.c: Fix formatting.  Update copyright date.
+
 2003-03-14  Daniel Jacobowitz  <drow@mvista.com>
 
 	* ppc-opc.c (powerpc_opcodes): Readd tlbre for PPC403.
