@@ -180,6 +180,9 @@ struct op_print
   enum exp_opcode opcode;
   /* Precedence of operator.  These values are used only by comparisons.  */
   enum precedence precedence;
+
+  /* For a binary operator:  1 iff right associate.
+     For a unary operator:  1 iff postfix. */
   int right_assoc;
 };
 
