@@ -13,7 +13,11 @@
 #define SEEK_SET 0
 #define SEEK_CUR 1
 
+#ifdef __STDC__
 extern void EXFUN(free,(PTR));
+#else /* not __STDC__ */
+extern int EXFUN(free,(PTR));
+#endif /* not __STDC__ */
 extern int  EXFUN(abort,(void));
 extern int  EXFUN(close,(int));
 extern int  EXFUN(fcntl,(int des, int cmd, int e));
