@@ -55,6 +55,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yypgo	c_pgo		
 #define	yyact	c_act		
 #define	yyexca	c_exca
+#define yyerrflag c_errflag
+#define yynerrs	c_nerrs
 
 /* Forward decls */
 void yyerror ();
