@@ -23,7 +23,10 @@ if { [istarget hppa*-*-*] || [istarget *c54x*-*-*] } then {
     gas_test "p1480.s" "" "-a>" "simplifiable double subtraction"
 }
 
-gas_test "float.s" ""   "" "simple FP constants"
+# No floating point support in assembly code for CRIS.
+if ![istarget cris-*-*] then {
+    gas_test "float.s" ""   "" "simple FP constants"
+}
 
 # This test is meaningless for the PA; the difference of two undefined
 # symbols is something that is (and must be) supported on the PA.

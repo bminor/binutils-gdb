@@ -20,7 +20,9 @@ proc dotest {} {
 }
 
 # C54x alignment/addressing is different, so the listing looks different
-# float encoding is tested in c54x-specific tests
-if { ![istarget vax*-*-*] && ![istarget *c54x*-*-*] } then {
+# float encoding is tested in c54x-specific tests.
+# No floating point support in assembly code for CRIS.
+if { ![istarget vax*-*-*] && ![istarget *c54x*-*-*]
+     && ![istarget cris-*-*] } then {
     dotest
 }
