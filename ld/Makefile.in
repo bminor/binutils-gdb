@@ -179,7 +179,7 @@ ALL_EMULATIONS = em_lnk960.o em_sun3.o em_i386aout.o em_go32.o em_vsta.o \
 	em_h8500b.o em_h8500s.o em_h8500c.o em_h8500m.o \
 	em_hppaelf.o em_mipsidtl.o em_sh.o em_elf_i386.o em_alpha.o \
 	em_i386lynx.o em_m68klynx.o em_sparclynx.o em_coff_sparc.o \
-	em_delta68.o em_elf32ppc.o \
+	em_delta68.o em_elf32ppc.o em_i386go32.o \
 	$(OTHER_EMULATIONS)
 
 # This is now set by configure.in.
@@ -281,6 +281,9 @@ em_hppaelf.c: $(srcdir)/emulparams/hppaelf.sh \
 em_i386aout.c: $(srcdir)/emulparams/i386aout.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386aout
+em_i386go32.c: $(srcdir)/emulparams/i386go32.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/i386go32.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} i386go32
 em_i386mach.c: $(srcdir)/emulparams/i386mach.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386mach

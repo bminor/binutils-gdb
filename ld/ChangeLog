@@ -1,3 +1,10 @@
+Wed Apr 27 10:48:03 1994  Steve Chamberlain  (sac@cygnus.com)
+
+	* Makefile.in, configure.in: Support for go32 coff.
+	* config/i386-go32.mt: New file
+	* emulparams/i386go32.sh: New file
+	* scripttempl/i386go32.sc: New file
+
 Tue Apr 26 17:20:03 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* Makefile.in (em_m68klynx.c, em_i386lynx.c, em_sparclynx.c): Use

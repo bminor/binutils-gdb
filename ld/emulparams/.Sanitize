@@ -49,6 +49,7 @@ hppaelf.sh
 i386aout.sh
 i386bsd.sh
 i386coff.sh
+i386go32.sh
 i386linux.sh
 i386lynx.sh
 i386mach.sh

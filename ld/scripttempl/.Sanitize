@@ -39,6 +39,7 @@ h8500m.sc
 h8500s.sc
 hppaelf.sc
 i386coff.sc
+i386go32.sc
 i960.sc
 m68kcoff.sc
 m68klynx.sc
