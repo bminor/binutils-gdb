@@ -580,6 +580,23 @@ struct reloc
 
 #define	R_ABS		(0x00)	/* reference is absolute */
 
+#ifdef TC_I860
+#define RM_DIR32	(0x06)
+#define R_IPAIR		(0x1c)
+#define R_N10PAIR	(0x1d)
+#define R_N10HIGH	(0x1e)
+#define R_N10LOW0	(0x1f)
+#define R_N10LOW1	(0x20)
+#define R_N10LOW2	(0x21)
+#define R_N10LOW3	(0x22)
+#define R_N10LOW4	(0x23)
+#define R_N10SPLIT0	(0x24)
+#define R_N10SPLIT1	(0x25)
+#define R_N10SPLIT2	(0x26)
+#define R_N10HIGHADJ	(0x27)
+#define R_N10BRADDR	(0x28)
+#endif /* TC_I860 */
+
 #ifdef TC_I960
 #define R_RELLONG	(0x11)	/* Direct 32-bit relocation */
 #define R_IPRSHORT	(0x18)
