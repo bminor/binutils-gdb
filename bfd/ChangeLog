@@ -1,3 +1,8 @@
+Thu Jul 13 17:22:03 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.c (hppa_som_gen_reloc_type): Choose a reasonable field
+	selector relocation for the difference of two symbols.
+
 Thu Jul 13 10:33:25 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aoutx.h (NAME(aout,slurp_reloc_table)): Cast argument to size_t
