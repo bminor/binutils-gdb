@@ -1,3 +1,7 @@
+Sat Nov 14 14:36:24 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld.1: Some cleanups from NOKUBI Hirotaka <hnokubi@yyy.or.jp>.
+
 Thu Nov 12 19:21:57 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* po/ld.pot: Regenerated.
