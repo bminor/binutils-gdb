@@ -1,4 +1,9 @@
 2002-05-31  Chris G. Demetriou  <cgd@broadcom.com>
+
+	* mips-opc.c: Clean up a few whitespace issues, and sort a
+	few entries understanding that 'x' follows 'w' in the alphabet.
+	
+2002-05-31  Chris G. Demetriou  <cgd@broadcom.com>
             Ed Satterthwaite  <ehs@broadcom.com>
 
 	* mips-opc.c: Add support for SB-1 MDMX subset and extensions.

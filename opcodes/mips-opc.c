@@ -75,8 +75,8 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 
 #define IS_M    INSN_MULT
 
-#define	WR_MACC	INSN_WRITE_MDMX_ACC
-#define	RD_MACC	INSN_READ_MDMX_ACC
+#define WR_MACC INSN_WRITE_MDMX_ACC
+#define RD_MACC INSN_READ_MDMX_ACC
 
 #define I1	INSN_ISA1
 #define I2	INSN_ISA2
@@ -90,7 +90,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #define M3D     INSN_MIPS3D
 
 /* MIPS64 MDMX ASE support.  */
-#define MX     INSN_MDMX
+#define MX      INSN_MDMX
 
 #define P3	INSN_4650
 #define L1	INSN_4010
@@ -1007,11 +1007,6 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"ush",     "t,A(b)",	0,    (int) M_USH_A,	INSN_MACRO,		I1	},
 {"usw",     "t,o(b)",	0,    (int) M_USW,	INSN_MACRO,		I1	},
 {"usw",     "t,A(b)",	0,    (int) M_USW_A,	INSN_MACRO,		I1	},
-{"xor",     "d,v,t",	0x00000026, 0xfc0007ff,	WR_d|RD_s|RD_t,		I1	},
-{"xor",     "t,r,I",	0,    (int) M_XOR_I,	INSN_MACRO,		I1	},
-{"xor.ob",  "X,Y,Q",	0x7800000d, 0xfc20003f,	WR_D|RD_S|RD_T|FP_D,	MX|SB1	},
-{"xor.qh",  "X,Y,Q",	0x7820000d, 0xfc20003f,	WR_D|RD_S|RD_T|FP_D,	MX	},
-{"xori",    "t,r,i",	0x38000000, 0xfc000000,	WR_t|RD_s,		I1	},
 {"wach.ob", "Y",	0x7a00003e, 0xffff07ff,	WR_MACC|RD_S|FP_D,	MX|SB1	},
 {"wach.qh", "Y",	0x7a20003e, 0xffff07ff,	WR_MACC|RD_S|FP_D,	MX	},
 {"wacl.ob", "Y,Z",	0x7800003e, 0xffe007ff,	WR_MACC|RD_S|RD_T|FP_D,	MX|SB1	},
@@ -1020,6 +1015,11 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"wait",    "J",        0x42000020, 0xfe00003f, TRAP,   		I32     },
 {"waiti",   "",		0x42000020, 0xffffffff,	TRAP,			L1	},
 {"wb", 	    "o(b)",	0xbc040000, 0xfc1f0000, SM|RD_b,		L1	},
+{"xor",     "d,v,t",	0x00000026, 0xfc0007ff,	WR_d|RD_s|RD_t,		I1	},
+{"xor",     "t,r,I",	0,    (int) M_XOR_I,	INSN_MACRO,		I1	},
+{"xor.ob",  "X,Y,Q",	0x7800000d, 0xfc20003f,	WR_D|RD_S|RD_T|FP_D,	MX|SB1	},
+{"xor.qh",  "X,Y,Q",	0x7820000d, 0xfc20003f,	WR_D|RD_S|RD_T|FP_D,	MX	},
+{"xori",    "t,r,i",	0x38000000, 0xfc000000,	WR_t|RD_s,		I1	},
 
 /* No hazard protection on coprocessor instructions--they shouldn't
    change the state of the processor and if they do it's up to the
