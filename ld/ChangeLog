@@ -1,3 +1,14 @@
+2002-05-10  Tom Rix  <trix@redhat.com>
+
+	* emultempl/aix.em: (gld*_set_output_arch): New function. Use 
+	architecture and machine information in the output bfd.
+	(gld*_before_parse): Remove old arch and machine code.
+	(choose_target): Rename to gld*_choose_target.
+	(rtld): Change type to int. 
+	* ldfile.c (ldfile_try_open_bfd): Disable compatiblity check for 
+	objects in XCOFF archives.
+	* ldfile.h: Update copyright date.
+
 2002-05-10  Jakub Jelinek  <jakub@redhat.com>
 
 	* ldmain.c (main): Enable -z combreloc by default.

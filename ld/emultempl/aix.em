@@ -53,11 +53,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "coff/internal.h"
 #include "coff/xcoff.h"
+#include "libcoff.h"
+#include "libxcoff.h"
 
 static void gld${EMULATION_NAME}_before_parse PARAMS ((void));
 static int gld${EMULATION_NAME}_parse_args PARAMS ((int, char **));
 static void gld${EMULATION_NAME}_after_open PARAMS ((void));
-static char *choose_target PARAMS ((int, char **));
+static char *gld${EMULATION_NAME}_choose_target PARAMS ((int, char **));
 static void gld${EMULATION_NAME}_before_allocation PARAMS ((void));
 static void gld${EMULATION_NAME}_read_file PARAMS ((const char *, boolean));
 static void gld${EMULATION_NAME}_free PARAMS ((PTR));
@@ -68,7 +70,9 @@ static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
 static boolean gld${EMULATION_NAME}_unrecognized_file
   PARAMS ((lang_input_statement_type *));
 static void gld${EMULATION_NAME}_create_output_section_statements 
-  PARAMS((void));
+  PARAMS ((void));
+static void gld${EMULATION_NAME}_set_output_arch PARAMS ((void));
+
 static int is_syscall PARAMS ((char *, unsigned int *));
 static int change_symbol_mode PARAMS ((char *));
 
@@ -132,7 +136,7 @@ static unsigned int syscall_mask = 0x77;
 static lang_input_statement_type *initfini_file;
 
 /* Whether to do run time linking */
-static boolean rtld;
+static int rtld;
 
 /* Explicit command line library path, -blibpath */
 static char *command_line_blibpath = NULL;
@@ -142,17 +146,7 @@ static char *command_line_blibpath = NULL;
 static void
 gld${EMULATION_NAME}_before_parse ()
 {
-#ifndef TARGET_			/* I.e., if not generic.  */
-  const bfd_arch_info_type *arch = bfd_scan_arch ("${OUTPUT_ARCH}");
-  if (arch)
-    {
-      ldfile_output_architecture = arch->arch;
-      ldfile_output_machine = arch->mach;
-      ldfile_output_machine_name = arch->printable_name;
-    }
-  else
-    ldfile_output_architecture = bfd_arch_${ARCH};
-#endif /* not TARGET_ */
+
   config.has_shared = true;
 
   /* The link_info.[init|fini]_functions are initialized in ld/lexsup.c.
@@ -687,7 +681,8 @@ gld${EMULATION_NAME}_before_allocation ()
   if (!bfd_xcoff_size_dynamic_sections 
       (output_bfd, &link_info, libpath,	entry_symbol, file_align,
        maxstack, maxdata, gc && !unix_ld ? true : false,
-       modtype,	textro ? true : false, unix_ld, special_sections, rtld))
+       modtype,	textro ? true : false, unix_ld, special_sections, 
+       rtld ? true : false))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
 
   /* Look through the special sections, and put them in the right
@@ -806,7 +801,7 @@ gld${EMULATION_NAME}_before_allocation ()
 }
 
 static char *
-choose_target (argc, argv)
+gld${EMULATION_NAME}_choose_target (argc, argv)
      int argc;
      char **argv;
 {
@@ -1304,7 +1299,7 @@ fi
 cat >>e${EMULATION_NAME}.c <<EOF
 
 static void 
-gld${EMULATION_NAME}_create_output_section_statements()
+gld${EMULATION_NAME}_create_output_section_statements ()
 {
   /* __rtinit */
   if ((bfd_get_flavour (output_bfd) == bfd_target_xcoff_flavour) 
@@ -1342,6 +1337,18 @@ gld${EMULATION_NAME}_create_output_section_statements()
     }
 }
 
+static void
+gld${EMULATION_NAME}_set_output_arch ()
+{
+  bfd_set_arch_mach (output_bfd,
+		     bfd_xcoff_architecture (output_bfd),
+		     bfd_xcoff_machine (output_bfd));
+
+  ldfile_output_architecture = bfd_get_arch (output_bfd);
+  ldfile_output_machine = bfd_get_mach (output_bfd);
+  ldfile_output_machine_name = bfd_printable_name (output_bfd);
+}
+
 struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = {
   gld${EMULATION_NAME}_before_parse,
   syslib_default,
@@ -1349,8 +1356,8 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = {
   after_parse_default,
   gld${EMULATION_NAME}_after_open,
   after_allocation_default,
-  set_output_arch_default,
-  choose_target,
+  gld${EMULATION_NAME}_set_output_arch,
+  gld${EMULATION_NAME}_choose_target,
   gld${EMULATION_NAME}_before_allocation,
   gld${EMULATION_NAME}_get_script,
   "${EMULATION_NAME}",
