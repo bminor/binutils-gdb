@@ -249,37 +249,40 @@ sim_create_inferior (sd, abfd, argv, env)
       break;
     }
 
-  if (mach > 3)
+  if (   mach != bfd_mach_arm_3
+      && mach != bfd_mach_arm_3M
+      && mach != bfd_mach_arm_2
+      && mach != bfd_mach_arm_2a)
     {
       /* Reset mode to ARM.  A gdb user may rerun a program that had entered
 	 THUMB mode from the start and cause the ARM-mode startup code to be
-	 executed in THUMB mode. */
-      ARMul_SetCPSR (state, USER32MODE);
+	 executed in THUMB mode.  */
+      ARMul_SetCPSR (state, SVC32MODE);
     }
   
   if (argv != NULL)
     {
-      /*
-         ** Set up the command line (by laboriously stringing together the
-         ** environment carefully picked apart by our caller...)
-       */
-      /* Free any old stuff */
+      /* Set up the command line by laboriously stringing together
+	 the environment carefully picked apart by our caller.  */
+
+      /* Free any old stuff.  */
       if (state->CommandLine != NULL)
 	{
 	  free (state->CommandLine);
 	  state->CommandLine = NULL;
 	}
 
-      /* See how much we need */
+      /* See how much we need.  */
       for (arg = argv; *arg != NULL; arg++)
 	argvlen += strlen (*arg) + 1;
 
-      /* allocate it... */
+      /* Allocate it.  */
       state->CommandLine = malloc (argvlen + 1);
       if (state->CommandLine != NULL)
 	{
 	  arg = argv;
 	  state->CommandLine[0] = '\0';
+
 	  for (arg = argv; *arg != NULL; arg++)
 	    {
 	      strcat (state->CommandLine, *arg);
@@ -290,14 +293,14 @@ sim_create_inferior (sd, abfd, argv, env)
 
   if (env != NULL)
     {
-      /* Now see if there's a MEMSIZE spec in the environment */
+      /* Now see if there's a MEMSIZE spec in the environment.  */
       while (*env)
 	{
 	  if (strncmp (*env, "MEMSIZE=", sizeof ("MEMSIZE=") - 1) == 0)
 	    {
 	      char *end_of_num;
 
-	      /* Set up memory limit */
+	      /* Set up memory limit.  */
 	      state->MemSize =
 		strtoul (*env + sizeof ("MEMSIZE=") - 1, &end_of_num, 0);
 	    }

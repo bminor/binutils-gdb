@@ -1,3 +1,8 @@
+2001-02-14  Nick Clifton  <nickc@redhat.com>
+
+	* wrapper.c (sim_create_inferior): Reset processor into ARM mode
+	for any machine type except the early ARMs.
+
 2001-02-13  Nick Clifton  <nickc@redhat.com>
 
 	* armos.c (in_SWI_handler): New static variable.
