@@ -1,5 +1,10 @@
 Tue Apr  5 15:16:33 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* gdb.disasm/hppa.exp (fcmp_tests): Break up into two halves
+	to avoid expect lossage.
+	(fmem_LRbug_tests): Likewise.
+	* gdb.disasm/hppa.s: Corresponding changes.
+
 	* gdb.disasm/hppa.exp: Rework escape sequences and end-of-line
 	conditions to work with latest dejagnu/expect.
 
