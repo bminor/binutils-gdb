@@ -1739,6 +1739,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
     case SHT_INIT_ARRAY:	/* .init_array section.  */
     case SHT_FINI_ARRAY:	/* .fini_array section.  */
     case SHT_PREINIT_ARRAY:	/* .preinit_array section.  */
+    case SHT_GNU_LIBLIST:	/* .gnu.liblist section.  */
       return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
 
     case SHT_DYNAMIC:	/* Dynamic linking information.  */
@@ -2132,6 +2133,8 @@ static struct bfd_elf_special_section const special_sections[] =
   { ".rela",           5, -1, SHT_RELA,     0 },
   { ".rel",            4, -1, SHT_REL,      0 },
   { ".stabstr",        5,  3, SHT_STRTAB,   0 },
+  { ".gnu.liblist",   12,  0, SHT_GNU_LIBLIST, SHF_ALLOC },
+  { ".gnu.conflict",  13,  0, SHT_RELA,     SHF_ALLOC },
   { NULL,              0,  0, 0,            0 }
 };
 
@@ -2965,6 +2968,17 @@ assign_section_numbers (bfd *abfd)
 	     used for the dynamic entries, or the symbol table, or the
 	     version strings.  */
 	  s = bfd_get_section_by_name (abfd, ".dynstr");
+	  if (s != NULL)
+	    d->this_hdr.sh_link = elf_section_data (s)->this_idx;
+	  break;
+
+	case SHT_GNU_LIBLIST:
+	  /* sh_link is the section header index of the prelink library
+	     list 
+	     used for the dynamic entries, or the symbol table, or the
+	     version strings.  */
+	  s = bfd_get_section_by_name (abfd, (sec->flags & SEC_ALLOC)
+					     ? ".dynstr" : ".gnu.libstr");
 	  if (s != NULL)
 	    d->this_hdr.sh_link = elf_section_data (s)->this_idx;
 	  break;
