@@ -410,6 +410,7 @@ dump_symtab (struct objfile *objfile, struct symtab *symtab,
   int len, blen;
   register struct linetable *l;
   struct blockvector *bv;
+  struct symbol *sym;
   register struct block *b;
   int depth;
 
@@ -471,11 +472,12 @@ dump_symtab (struct objfile *objfile, struct symtab *symtab,
 	  if (BLOCK_GCC_COMPILED (b))
 	    fprintf_filtered (outfile, ", compiled with gcc%d", BLOCK_GCC_COMPILED (b));
 	  fprintf_filtered (outfile, "\n");
-	  /* Now print each symbol in this block */
-	  for (j = 0; j < blen; j++)
+	  /* Now print each symbol in this block.  */
+	  /* FIXMED: Sort?  */
+	  ALL_BLOCK_SYMBOLS (b, j, sym)
 	    {
 	      struct print_symbol_args s;
-	      s.symbol = BLOCK_SYM (b, j);
+	      s.symbol = sym;
 	      s.depth = depth + 1;
 	      s.outfile = outfile;
 	      catch_errors (print_symbol, &s, "Error printing symbol:\n",

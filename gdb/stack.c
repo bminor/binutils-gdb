@@ -1207,16 +1207,12 @@ static int
 print_block_frame_locals (struct block *b, register struct frame_info *fi,
 			  int num_tabs, register struct ui_file *stream)
 {
-  int nsyms;
   register int i, j;
   register struct symbol *sym;
   register int values_printed = 0;
 
-  nsyms = BLOCK_NSYMS (b);
-
-  for (i = 0; i < nsyms; i++)
+  ALL_BLOCK_SYMBOLS (b, i, sym)
     {
-      sym = BLOCK_SYM (b, i);
       switch (SYMBOL_CLASS (sym))
 	{
 	case LOC_LOCAL:
@@ -1246,16 +1242,12 @@ static int
 print_block_frame_labels (struct block *b, int *have_default,
 			  register struct ui_file *stream)
 {
-  int nsyms;
   register int i;
   register struct symbol *sym;
   register int values_printed = 0;
 
-  nsyms = BLOCK_NSYMS (b);
-
-  for (i = 0; i < nsyms; i++)
+  ALL_BLOCK_SYMBOLS (b, i, sym)
     {
-      sym = BLOCK_SYM (b, i);
       if (STREQ (SYMBOL_NAME (sym), "default"))
 	{
 	  if (*have_default)
@@ -1432,7 +1424,6 @@ print_frame_arg_vars (register struct frame_info *fi,
 {
   struct symbol *func = get_frame_function (fi);
   register struct block *b;
-  int nsyms;
   register int i;
   register struct symbol *sym, *sym2;
   register int values_printed = 0;
@@ -1444,11 +1435,8 @@ print_frame_arg_vars (register struct frame_info *fi,
     }
 
   b = SYMBOL_BLOCK_VALUE (func);
-  nsyms = BLOCK_NSYMS (b);
-
-  for (i = 0; i < nsyms; i++)
+  ALL_BLOCK_SYMBOLS (b, i, sym)
     {
-      sym = BLOCK_SYM (b, i);
       switch (SYMBOL_CLASS (sym))
 	{
 	case LOC_ARG:
@@ -1483,7 +1471,6 @@ print_frame_arg_vars (register struct frame_info *fi,
 	  break;
 	}
     }
-
   if (!values_printed)
     {
       fprintf_filtered (stream, "No arguments.\n");

@@ -467,6 +467,14 @@ struct block
 #define BLOCK_SUPERBLOCK(bl)	(bl)->superblock
 #define BLOCK_GCC_COMPILED(bl)	(bl)->gcc_compile_flag
 
+/* Macro to loop through all symbols in a block BL.
+   i counts which symbol we are looking at, and sym points to the current
+   symbol.  */
+#define ALL_BLOCK_SYMBOLS(bl, i, sym)			\
+	for ((i) = 0, (sym) = BLOCK_SYM ((bl), (i));	\
+	     (i) < BLOCK_NSYMS ((bl));			\
+	     ++(i), (sym) = BLOCK_SYM ((bl), (i)))
+
 /* Nonzero if symbols of block BL should be sorted alphabetically.
    Don't sort a block which corresponds to a function.  If we did the
    sorting would have to preserve the order of the symbols for the

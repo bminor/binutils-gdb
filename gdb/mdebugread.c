@@ -3853,22 +3853,19 @@ static struct symbol *
 mylookup_symbol (char *name, register struct block *block,
 		 namespace_enum namespace, enum address_class class)
 {
-  register int bot, top, inc;
-  register struct symbol *sym;
+  int i, inc;
+  struct symbol *sym;
 
-  bot = 0;
-  top = BLOCK_NSYMS (block);
   inc = name[0];
-  while (bot < top)
+  ALL_BLOCK_SYMBOLS (block, i, sym)
     {
-      sym = BLOCK_SYM (block, bot);
       if (SYMBOL_NAME (sym)[0] == inc
 	  && SYMBOL_NAMESPACE (sym) == namespace
 	  && SYMBOL_CLASS (sym) == class
 	  && strcmp (SYMBOL_NAME (sym), name) == 0)
 	return sym;
-      bot++;
     }
+
   block = BLOCK_SUPERBLOCK (block);
   if (block)
     return mylookup_symbol (name, block, namespace, class);

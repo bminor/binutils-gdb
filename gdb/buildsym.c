@@ -275,9 +275,8 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	     parameter symbols. */
 	  int nparams = 0, iparams;
 	  struct symbol *sym;
-	  for (i = 0; i < BLOCK_NSYMS (block); i++)
+	  ALL_BLOCK_SYMBOLS (block, i, sym)
 	    {
-	      sym = BLOCK_SYM (block, i);
 	      switch (SYMBOL_CLASS (sym))
 		{
 		case LOC_ARG:

@@ -1,5 +1,24 @@
 2001-10-12  Daniel Jacobowitz  <drow@mvista.com>
 
+	* symtab.h (struct block): (ALL_BLOCK_SYMBOLS): New macro.
+
+	* symtab.c (find_pc_sect_symtab): Use ALL_BLOCK_SYMBOLS.
+	(make_symbol_completion_list): Likewise.
+	(make_symbol_overload_list): Likewise.
+	* buildsym.c (finish_block): Likewise.
+	* breakpoint.c (get_catch_sals):  Likewise.
+	* mdebugread.c (mylookup_symbol): Likewise.
+	* objfiles.c (objfile_relocate): Likewise.
+	* printcmd.c (print_frame_args): Likewise.
+	* stack.c (print_block_frame_locals): Likewise.
+	(print_block_frame_labels): Likewise.
+	(print_frame_arg_vars): Likewise.
+	* symmisc.c (dump_symtab): Likewise.
+	* tracepoint.c (add_local_symbols): Likewise.
+	(scope_info): Likewise.
+
+2001-10-12  Daniel Jacobowitz  <drow@mvista.com>
+
 	* minsyms.c (msymbol_hash): Use better hash function.
 	(msymbol_hash_iw): Likewise.  Terminate loop at '(' properly.
 

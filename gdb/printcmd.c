@@ -1783,7 +1783,6 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
 		  struct ui_file *stream)
 {
   struct block *b = NULL;
-  int nsyms = 0;
   int first = 1;
   register int i;
   register struct symbol *sym;
@@ -1806,12 +1805,9 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
   if (func)
     {
       b = SYMBOL_BLOCK_VALUE (func);
-      nsyms = BLOCK_NSYMS (b);
-
-      for (i = 0; i < nsyms; i++)
+      ALL_BLOCK_SYMBOLS (b, i, sym)
         {
 	  QUIT;
-	  sym = BLOCK_SYM (b, i);
 
 	  /* Keep track of the highest stack argument offset seen, and
 	     skip over any kinds of symbols we don't care about.  */

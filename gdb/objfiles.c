@@ -557,16 +557,15 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
       for (i = 0; i < BLOCKVECTOR_NBLOCKS (bv); ++i)
 	{
 	  struct block *b;
+	  struct symbol *sym;
 	  int j;
 
 	  b = BLOCKVECTOR_BLOCK (bv, i);
 	  BLOCK_START (b) += ANOFFSET (delta, s->block_line_section);
 	  BLOCK_END (b) += ANOFFSET (delta, s->block_line_section);
 
-	  for (j = 0; j < BLOCK_NSYMS (b); ++j)
+	  ALL_BLOCK_SYMBOLS (b, j, sym)
 	    {
-	      struct symbol *sym = BLOCK_SYM (b, j);
-
 	      fixup_symbol_section (sym, objfile);
 
 	      /* The RS6000 code from which this was taken skipped

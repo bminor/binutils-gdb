@@ -1296,16 +1296,14 @@ add_local_symbols (struct collection_list *collect, CORE_ADDR pc,
 {
   struct symbol *sym;
   struct block *block;
-  int i, nsyms, count = 0;
+  int i, count = 0;
 
   block = block_for_pc (pc);
   while (block != 0)
     {
       QUIT;			/* allow user to bail out with ^C */
-      nsyms = BLOCK_NSYMS (block);
-      for (i = 0; i < nsyms; i++)
+      ALL_BLOCK_SYMBOLS (block, i, sym)
 	{
-	  sym = BLOCK_SYM (block, i);
 	  switch (SYMBOL_CLASS (sym))
 	    {
 	    default:
@@ -2335,7 +2333,7 @@ scope_info (char *args, int from_tty)
   struct minimal_symbol *msym;
   struct block *block;
   char **canonical, *symname, *save_args = args;
-  int i, j, nsyms, count = 0;
+  int i, j, count = 0;
 
   if (args == 0 || *args == 0)
     error ("requires an argument (function, line or *addr) to define a scope");
@@ -2351,14 +2349,13 @@ scope_info (char *args, int from_tty)
   while (block != 0)
     {
       QUIT;			/* allow user to bail out with ^C */
-      nsyms = BLOCK_NSYMS (block);
-      for (i = 0; i < nsyms; i++)
+      ALL_BLOCK_SYMBOLS (block, i, sym)
 	{
 	  QUIT;			/* allow user to bail out with ^C */
 	  if (count == 0)
 	    printf_filtered ("Scope for %s:\n", save_args);
 	  count++;
-	  sym = BLOCK_SYM (block, i);
+
 	  symname = SYMBOL_NAME (sym);
 	  if (symname == NULL || *symname == '\0')
 	    continue;		/* probably botched, certainly useless */

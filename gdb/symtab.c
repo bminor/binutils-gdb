@@ -2992,9 +2992,8 @@ make_symbol_completion_list (char *text, char *word)
       /* Also catch fields of types defined in this places which match our
          text string.  Only complete on types visible from current context. */
 
-      for (i = 0; i < BLOCK_NSYMS (b); i++)
+      ALL_BLOCK_SYMBOLS (b, i, sym)
 	{
-	  sym = BLOCK_SYM (b, i);
 	  COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
 	  if (SYMBOL_CLASS (sym) == LOC_TYPEDEF)
 	    {
@@ -3023,9 +3022,8 @@ make_symbol_completion_list (char *text, char *word)
   {
     QUIT;
     b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
-    for (i = 0; i < BLOCK_NSYMS (b); i++)
+    ALL_BLOCK_SYMBOLS (b, i, sym)
       {
-	sym = BLOCK_SYM (b, i);
 	COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
       }
   }
@@ -3037,9 +3035,8 @@ make_symbol_completion_list (char *text, char *word)
     /* Don't do this block twice.  */
     if (b == surrounding_static_block)
       continue;
-    for (i = 0; i < BLOCK_NSYMS (b); i++)
+    ALL_BLOCK_SYMBOLS (b, i, sym)
       {
-	sym = BLOCK_SYM (b, i);
 	COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
       }
   }
@@ -3143,16 +3140,14 @@ make_file_symbol_completion_list (char *text, char *word, char *srcfile)
      symbols which match.  */
 
   b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
-  for (i = 0; i < BLOCK_NSYMS (b); i++)
+  ALL_BLOCK_SYMBOLS (b, i, sym)
     {
-      sym = BLOCK_SYM (b, i);
       COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
     }
 
   b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
-  for (i = 0; i < BLOCK_NSYMS (b); i++)
+  ALL_BLOCK_SYMBOLS (b, i, sym)
     {
-      sym = BLOCK_SYM (b, i);
       COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
     }
 
@@ -3530,9 +3525,8 @@ make_symbol_overload_list (struct symbol *fsym)
       /* Also catch fields of types defined in this places which match our
          text string.  Only complete on types visible from current context. */
 
-      for (i = 0; i < BLOCK_NSYMS (b); i++)
+      ALL_BLOCK_SYMBOLS (b, i, sym)
 	{
-	  sym = BLOCK_SYM (b, i);
 	  overload_list_add_symbol (sym, oload_name);
 	}
     }
@@ -3544,9 +3538,8 @@ make_symbol_overload_list (struct symbol *fsym)
   {
     QUIT;
     b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
-    for (i = 0; i < BLOCK_NSYMS (b); i++)
+    ALL_BLOCK_SYMBOLS (b, i, sym)
       {
-	sym = BLOCK_SYM (b, i);
 	overload_list_add_symbol (sym, oload_name);
       }
   }
@@ -3558,9 +3551,8 @@ make_symbol_overload_list (struct symbol *fsym)
     /* Don't do this block twice.  */
     if (b == surrounding_static_block)
       continue;
-    for (i = 0; i < BLOCK_NSYMS (b); i++)
+    ALL_BLOCK_SYMBOLS (b, i, sym)
       {
-	sym = BLOCK_SYM (b, i);
 	overload_list_add_symbol (sym, oload_name);
       }
   }

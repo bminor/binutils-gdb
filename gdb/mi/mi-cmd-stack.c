@@ -25,6 +25,7 @@
 #include "value.h"
 #include "mi-cmds.h"
 #include "ui-out.h"
+#include "symtab.h"
 
 #ifdef UI_OUT
 /* FIXME: these should go in some .h file but stack.c doesn't have a
@@ -226,10 +227,8 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 
   while (block != 0)
     {
-      nsyms = BLOCK_NSYMS (block);
-      for (i = 0; i < nsyms; i++)
+      ALL_BLOCK_SYMBOLS (block, i, sym)
 	{
-	  sym = BLOCK_SYM (block, i);
 	  switch (SYMBOL_CLASS (sym))
 	    {
 	    default:

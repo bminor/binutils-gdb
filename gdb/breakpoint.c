@@ -5871,15 +5871,11 @@ get_catch_sals (int this_level_only)
 	  if (blocks_searched[index] == 0)
 	    {
 	      struct block *b = BLOCKVECTOR_BLOCK (bl, index);
-	      int nsyms;
 	      register int i;
 	      register struct symbol *sym;
 
-	      nsyms = BLOCK_NSYMS (b);
-
-	      for (i = 0; i < nsyms; i++)
+	      ALL_BLOCK_SYMBOLS (b, i, sym)
 		{
-		  sym = BLOCK_SYM (b, i);
 		  if (STREQ (SYMBOL_NAME (sym), "default"))
 		    {
 		      if (have_default)
