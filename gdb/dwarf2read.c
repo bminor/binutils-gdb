@@ -645,30 +645,28 @@ static void dwarf2_build_psymtabs_easy (struct objfile *, int);
 
 static void dwarf2_build_psymtabs_hard (struct objfile *, int);
 
-static char *scan_partial_symbols (char *, CORE_ADDR *, CORE_ADDR *,
-				   struct dwarf2_cu *,
-				   const char *namespace);
+static void scan_partial_symbols (struct partial_die_info *,
+				  CORE_ADDR *, CORE_ADDR *,
+				  struct dwarf2_cu *,
+				  const char *namespace);
 
 static void add_partial_symbol (struct partial_die_info *, struct dwarf2_cu *,
 				const char *namespace);
 
 static int pdi_needs_namespace (enum dwarf_tag tag, const char *namespace);
 
-static char *add_partial_namespace (struct partial_die_info *pdi,
-				    char *info_ptr,
-				    CORE_ADDR *lowpc, CORE_ADDR *highpc,
-				    struct dwarf2_cu *cu,
-				    const char *namespace);
+static void add_partial_namespace (struct partial_die_info *pdi,
+				   CORE_ADDR *lowpc, CORE_ADDR *highpc,
+				   struct dwarf2_cu *cu,
+				   const char *namespace);
 
-static char *add_partial_structure (struct partial_die_info *struct_pdi,
-				    char *info_ptr,
-				    struct dwarf2_cu *cu,
-				    const char *namespace);
+static void add_partial_structure (struct partial_die_info *struct_pdi,
+				   struct dwarf2_cu *cu,
+				   const char *namespace);
 
-static char *add_partial_enumeration (struct partial_die_info *enum_pdi,
-				      char *info_ptr,
-				      struct dwarf2_cu *cu,
-				      const char *namespace);
+static void add_partial_enumeration (struct partial_die_info *enum_pdi,
+				     struct dwarf2_cu *cu,
+				     const char *namespace);
 
 static char *locate_pdi_sibling (struct partial_die_info *orig_pdi,
 				 char *info_ptr,
@@ -690,7 +688,8 @@ static struct abbrev_info *peek_die_abbrev (char *, int *, struct dwarf2_cu *);
 static struct abbrev_info *dwarf2_lookup_abbrev (unsigned int,
 						 struct dwarf2_cu *);
 
-static void load_partial_dies (bfd *, char *, struct dwarf2_cu *);
+static struct partial_die_info *load_partial_dies (bfd *, char *,
+						   struct dwarf2_cu *);
 
 static char *load_partial_die (struct partial_die_info *,
 			       struct abbrev_info *abbrev, unsigned int,
@@ -1354,6 +1353,8 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
          If not, there's no more debug_info for this comp unit. */
       if (comp_unit_die.has_children)
 	{
+	  struct partial_die_info *first_die;
+
 	  lowpc = ((CORE_ADDR) -1);
 	  highpc = ((CORE_ADDR) 0);
 
@@ -1367,10 +1368,9 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 				    hash_obstack_allocate,
 				    splay_tree_obstack_deallocate);
 
-	  load_partial_dies (abfd, info_ptr, &cu);
+	  first_die = load_partial_dies (abfd, info_ptr, &cu);
 
-	  info_ptr = scan_partial_symbols (info_ptr, &lowpc, &highpc,
-					   &cu, NULL);
+	  scan_partial_symbols (first_die, &lowpc, &highpc, &cu, NULL);
 
 	  cu.partial_dies = NULL;
 	  obstack_free (&cu.partial_die_obstack, NULL);
@@ -1417,8 +1417,8 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
    empty string if we're currently in the global namespace but have
    previously encountered a DW_TAG_namespace.  */
 
-static char *
-scan_partial_symbols (char *info_ptr, CORE_ADDR *lowpc,
+static void
+scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 		      CORE_ADDR *highpc, struct dwarf2_cu *cu,
 		      const char *namespace)
 {
@@ -1430,7 +1430,7 @@ scan_partial_symbols (char *info_ptr, CORE_ADDR *lowpc,
      interesting children but skipping the children of the other ones,
      until we reach the end of the compilation unit.  */
 
-  pdi_p = find_partial_die (info_ptr - dwarf_info_buffer, cu);
+  pdi_p = first_die;
 
   while (pdi_p != NULL)
     {
@@ -1474,16 +1474,12 @@ scan_partial_symbols (char *info_ptr, CORE_ADDR *lowpc,
 	    case DW_TAG_structure_type:
 	      if (!pdi_p->is_declaration)
 		{
-		  info_ptr = add_partial_structure (pdi_p, info_ptr, cu,
-						    namespace);
+		  add_partial_structure (pdi_p, cu, namespace);
 		}
 	      break;
 	    case DW_TAG_enumeration_type:
 	      if (!pdi_p->is_declaration)
-		{
-		  info_ptr = add_partial_enumeration (pdi_p, info_ptr, cu,
-						      namespace);
-		}
+		add_partial_enumeration (pdi_p, cu, namespace);
 	      break;
 	    case DW_TAG_base_type:
             case DW_TAG_subrange_type:
@@ -1497,8 +1493,7 @@ scan_partial_symbols (char *info_ptr, CORE_ADDR *lowpc,
 		 generates them; update NAMESPACE to reflect that.  */
 	      if (namespace == NULL)
 		namespace = "";
-	      info_ptr = add_partial_namespace (pdi_p, info_ptr, lowpc, highpc,
-						cu, namespace);
+	      add_partial_namespace (pdi_p, lowpc, highpc, cu, namespace);
 	      break;
 	    default:
 	      break;
@@ -1521,8 +1516,6 @@ scan_partial_symbols (char *info_ptr, CORE_ADDR *lowpc,
       // if (pdi_p)
       // fprintf_unfiltered (gdb_stderr, "scan: Advancing to DIE %x\n", pdi_p->offset);
     }
-
-  return info_ptr;
 }
 
 static void
@@ -1710,8 +1703,8 @@ pdi_needs_namespace (enum dwarf_tag tag, const char *namespace)
    corresponding to that namespace to the symbol table.  NAMESPACE is
    the name of the enclosing namespace.  */
 
-static char *
-add_partial_namespace (struct partial_die_info *pdi, char *info_ptr,
+static void
+add_partial_namespace (struct partial_die_info *pdi,
 		       CORE_ADDR *lowpc, CORE_ADDR *highpc,
 		       struct dwarf2_cu *cu, const char *namespace)
 {
@@ -1742,16 +1735,14 @@ add_partial_namespace (struct partial_die_info *pdi, char *info_ptr,
   /* Now scan partial symbols in that namespace.  */
 
   if (pdi->has_children)
-    info_ptr = scan_partial_symbols (pdi->die_child->offset + dwarf_info_buffer,
-				     lowpc, highpc, cu, full_name);
-
-  return info_ptr;
+    scan_partial_symbols (pdi->die_child,
+			  lowpc, highpc, cu, full_name);
 }
 
 /* Read a partial die corresponding to a class or structure.  */
 
-static char *
-add_partial_structure (struct partial_die_info *struct_pdi, char *info_ptr,
+static void
+add_partial_structure (struct partial_die_info *struct_pdi,
 		       struct dwarf2_cu *cu,
 		       const char *namespace)
 {
@@ -1792,14 +1783,12 @@ add_partial_structure (struct partial_die_info *struct_pdi, char *info_ptr,
 
   add_partial_symbol (struct_pdi, cu, namespace);
   xfree (actual_class_name);
-
-  return (struct_pdi->offset + dwarf_info_buffer);
 }
 
 /* Read a partial die corresponding to an enumeration type.  */
 
-static char *
-add_partial_enumeration (struct partial_die_info *enum_pdi, char *info_ptr,
+static void
+add_partial_enumeration (struct partial_die_info *enum_pdi,
 			 struct dwarf2_cu *cu, const char *namespace)
 {
   struct objfile *objfile = cu->objfile;
@@ -1818,8 +1807,6 @@ add_partial_enumeration (struct partial_die_info *enum_pdi, char *info_ptr,
 	add_partial_symbol (pdi_p, cu, namespace);
       pdi_p = pdi_p->die_sibling;
     }
-
-  return info_ptr;
 }
 
 static struct abbrev_info *
@@ -4534,14 +4521,13 @@ maybe_specification_partial_die (struct partial_die_info *part_die)
 
 /* Load all DIEs that are interesting for partial symbols into memory.  */
 
-static void
+static struct partial_die_info *
 load_partial_dies (bfd *abfd, char *info_ptr, struct dwarf2_cu *cu)
 {
   struct partial_die_info *part_die;
-  struct partial_die_info *parent_die, *last_die;
+  struct partial_die_info *parent_die, *last_die, *first_die = NULL;
   struct abbrev_info *abbrev;
   unsigned int bytes_read;
-  void **slot;
 
   /* FIXME: Obviously we need a nesting level passed in for incremental use.  */
   int nesting_level = 1;
@@ -4563,7 +4549,7 @@ load_partial_dies (bfd *abfd, char *info_ptr, struct dwarf2_cu *cu)
 	    {
 	      /* This was the last thing allocated.  */
 	      obstack_free (&cu->partial_die_obstack, part_die);
-	      return;
+	      return first_die;
 	    }
 	  info_ptr += bytes_read;
 	  last_die = parent_die;
@@ -4600,11 +4586,43 @@ load_partial_dies (bfd *abfd, char *info_ptr, struct dwarf2_cu *cu)
 
       last_die = part_die;
 
-      //      fprintf_unfiltered (gdb_stderr, "Inserting DIE %x\n", part_die->offset);
-      slot = htab_find_slot_with_hash (cu->partial_dies, part_die,
-				       part_die->offset, INSERT);
-      // gdb_assert (*slot == NULL);
-      *slot = part_die;
+      if (first_die == NULL)
+	first_die = part_die;
+
+      /* Maybe add the DIE to the hash table.  Not all DIEs need that
+	 we find interesting need to be in the hash table, because we
+	 also have the parent/sibling/child chains; only those that we
+	 might refer to by offset later during partial symbol
+	 reading.
+
+	 For now this means things that might have be the target of a
+	 DW_AT_specification, DW_AT_abstract_origin, or
+	 DW_AT_extension.  DW_AT_extension will refer only to
+	 namespaces; DW_AT_abstract_origin refers to functions (and
+	 many things under the function DIE, but we do not recurse
+	 into function DIEs during partial symbol reading) and
+	 possibly variables as well; DW_AT_specification refers to
+	 declarations.  Declarations ought to have the DW_AT_declaration
+	 flag.  It happens that GCC forgets to put it in sometimes, but
+	 only for functions, not for types.
+
+	 Adding more things than necessary to the hash table is harmless
+	 except for the performance cost.  Adding too few will result in
+	 explicit internal errors in find_partial_die.  */
+
+      if (abbrev->tag == DW_TAG_subprogram
+	  || abbrev->tag == DW_TAG_variable
+	  || abbrev->tag == DW_TAG_namespace
+	  || part_die->is_declaration)
+	{
+	  void **slot;
+
+	  //      fprintf_unfiltered (gdb_stderr, "Inserting DIE %x\n", part_die->offset);
+	  slot = htab_find_slot_with_hash (cu->partial_dies, part_die,
+					   part_die->offset, INSERT);
+	  // gdb_assert (*slot == NULL);
+	  *slot = part_die;
+	}
 
       part_die = obstack_alloc (&cu->partial_die_obstack,
 				sizeof (struct partial_die_info));

@@ -1,5 +1,16 @@
 2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (scan_partial_symbols): Don't return anything.  Take
+	a DIE argument instead of an info_ptr.
+	(add_partial_namespace, add_partial_structure)
+	add_partial_enumeration): Likewise.
+	(load_partial_dies): Return the first interesting DIE.
+	Do not add DIEs to the hash table if we aren't going to look them
+	up.
+	(dwarf2_build_psymtabs_hard): Adjust call to scan_partial_symbols.
+
+2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (peek_die_abbrev): Add prototype.
 	(load_partial_die): Take an abbrev and its uleb128 length as
 	arguments.
