@@ -1,3 +1,8 @@
+Thu Aug 20 23:17:04 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (md_assemble): Only warn for address/data size
+	prefixes.
+
 start-sanitize-armelf
 Thu Aug 20 14:45:08 1998  Nick Clifton  <nickc@cygnus.com>
 

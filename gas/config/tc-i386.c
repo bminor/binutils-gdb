@@ -48,7 +48,7 @@
 #define SCALE1_WHEN_NO_INDEX 1
 #endif
 
-static unsigned long mode_from_disp_size PARAMS ((unsigned long));
+static unsigned int mode_from_disp_size PARAMS ((unsigned int));
 static int fits_in_signed_byte PARAMS ((long));
 static int fits_in_unsigned_byte PARAMS ((long));
 static int fits_in_unsigned_word PARAMS ((long));
@@ -382,9 +382,9 @@ static void s_bss PARAMS ((int));
 
 symbolS *GOT_symbol;		/* Pre-defined "_GLOBAL_OFFSET_TABLE_" */
 
-static INLINE unsigned long
+static INLINE unsigned int
 mode_from_disp_size (t)
-     unsigned long t;
+     unsigned int t;
 {
   return (t & Disp8) ? 1 : (t & (Disp16|Disp32)) ? 2 : 0;
 }
@@ -941,6 +941,7 @@ md_assemble (line)
 	current_templates = hash_find (op_hash, opcode);
 
 	if (*l != END_OF_INSN
+	    && (! is_space_char (*l) || l[1] != END_OF_INSN)
 	    && current_templates
 	    && (current_templates->start->opcode_modifier & IsPrefix))
 	  {
@@ -1215,6 +1216,13 @@ md_assemble (line)
 	as_bad (_("suffix or operands invalid for `%s'"),
 		current_templates->start->name);
 	return;
+      }
+
+    if ((t->opcode_modifier & (IsPrefix|IgnoreSize)) == (IsPrefix|IgnoreSize))
+      {
+	/* Warn them that a data or address size prefix doesn't affect
+	   assembly of the next line of code.  */
+	as_warn (_("stand-alone `%s' prefix"), t->name);
       }
 
     /* Copy the template we found.  */
@@ -1806,7 +1814,7 @@ md_assemble (line)
     /* Output jumps. */
     if (i.tm.opcode_modifier & Jump)
       {
-	unsigned long n = i.disps[0]->X_add_number;
+	long n = (long) i.disps[0]->X_add_number;
 	int prefix = (i.prefix[DATA_PREFIX] != 0);
 	int code16 = 0;
 
@@ -1892,7 +1900,7 @@ md_assemble (line)
     else if (i.tm.opcode_modifier & (JumpByte | JumpDword))
       {
 	int size = (i.tm.opcode_modifier & JumpByte) ? 1 : 4;
-	unsigned long n = i.disps[0]->X_add_number;
+	long n = (long) i.disps[0]->X_add_number;
 
 	if (size == 1) /* then this is a loop or jecxz type instruction */
 	  {
@@ -1941,7 +1949,7 @@ md_assemble (line)
 	  {
 	    if (size == 1 && !fits_in_signed_byte (n))
 	      {
-		as_bad (_("`%s' only takes byte displacement; %lu shortened to %d"),
+		as_bad (_("`%s' only takes byte displacement; %ld shortened to %d"),
 			i.tm.name, n, *p);
 	      }
 	    else if (size == 2 && !fits_in_signed_word (n))
@@ -1991,7 +1999,8 @@ md_assemble (line)
 	*p++ = i.tm.base_opcode;
 	if (i.imms[1]->X_op == O_constant)
 	  {
-	    unsigned long n = i.imms[1]->X_add_number;
+	    long n = (long) i.imms[1]->X_add_number;
+
 	    if (size == 2 && !fits_in_unsigned_word (n))
 	      {
 		as_bad (_("16-bit jump out of range"));
@@ -2356,6 +2365,17 @@ i386_operand (operand_string)
 	{
 	  i.types[this_operand] |=
 	    smallest_imm_type ((long) exp->X_add_number);
+
+	  /* If a suffix is given, this operand may be shortened.  */
+	  switch (i.suffix)
+	    {
+	    case WORD_OPCODE_SUFFIX:
+	      i.types[this_operand] |= Imm16;
+	      break;
+	    case BYTE_OPCODE_SUFFIX:
+	      i.types[this_operand] |= Imm16 | Imm8 | Imm8S;
+	      break;
+	    }
 	}
 #ifdef OBJ_AOUT
       else if (exp_seg != text_section
@@ -2368,7 +2388,7 @@ i386_operand (operand_string)
 	       )
 	{
 	seg_unimplemented:
-	  as_bad (_("Unimplemented segment type %d in parse_operand"), exp_seg);
+	  as_bad (_("Unimplemented segment type %d in operand"), exp_seg);
 	  return 0;
 	}
 #endif
@@ -2465,12 +2485,11 @@ i386_operand (operand_string)
 		 see it.  */
 	      END_STRING_AND_SAVE (end_of_operand_string);
 	      i.base_reg = parse_register (base_string, &end_op);
-	      if (i.base_reg == NULL)
-		{
-		  RESTORE_END_STRING (end_of_operand_string);
-		  return 0;
-		}
 	      RESTORE_END_STRING (end_of_operand_string);
+
+	      if (i.base_reg == NULL)
+		return 0;
+
 	      base_string = end_op;
 	      if (is_space_char (*base_string))
 		++base_string;
