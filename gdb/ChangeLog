@@ -1,3 +1,10 @@
+Tue May 18 09:03:37 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* findvar.c ({read,write}_register): Use REGISTER_RAW_SIZE
+	not typo RAW_REGISTER_SIZE.
+
+	* frame.h, inferior.h: Doc fixes.
+
 Mon May 17 15:43:03 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* findvar.c (write_register):  Add sanity check for register size.

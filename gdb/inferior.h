@@ -176,9 +176,6 @@ call_ptrace PARAMS ((int, int, PTRACE_ARG3_TYPE, int));
 extern int
 proc_iterate_over_mappings PARAMS ((int (*) (int, CORE_ADDR)));
 
-extern void
-proc_signal_handling_change PARAMS ((void));
-
 /* From fork-child.c */
 
 extern void
@@ -328,8 +325,19 @@ extern CORE_ADDR text_end;
   ((pc) >= text_end   \
    && (pc) <= text_end + CALL_DUMMY_LENGTH + DECR_PC_AFTER_BREAK)
 #else /* On stack.  */
+
+/* This assumes that frame_address is the value of SP_REGNUM before
+   the dummy frame was pushed.  The only known machine for which this
+   isn't true is the 29k, which doesn't use ON_STACK.  Machines for
+   which it isn't true who want to put stack dummies on the stack
+   could provide their own PC_IN_CALL_DUMMY, or perhaps this macro
+   could be re-written to check for the end of the stack instead
+   (using the target_ops->sections).  Are there user programs, libraries,
+   kernel routines, etc. which also execute on the stack?  If so, the
+   latter would be a bad idea.  */
+
 #define PC_IN_CALL_DUMMY(pc, sp, frame_address) \
-  ((sp) INNER_THAN (pc) && (pc) INNER_THAN (frame_address))
+  ((sp) INNER_THAN (pc) && (frame_address != 0) && (pc) INNER_THAN (frame_address))
 #endif /* On stack.  */
 #endif /* Not before text_end.  */
 #endif /* No PC_IN_CALL_DUMMY.  */
