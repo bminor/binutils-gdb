@@ -1,3 +1,11 @@
+Mon Jul 29 15:21:09 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
+
+	* doc/gdb.texinfo:
+	Fixed a variety of small typos that prevented info from formatting
+	cleanly; altered too-long heading for GPL Appendix, as discussed
+	w/RMS; Changed date on cover to July 91.
+
+
 Fri Jul 26 13:20:02 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
 	* doc/gdb.texinfo:
