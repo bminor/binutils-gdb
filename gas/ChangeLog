@@ -1,3 +1,10 @@
+Fri Jul 16 08:56:04 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/obj-ecoff.c (ecoff_build_symbols, ecoff_build_procs,
+	ecoff_frob_files): Consistently use S_GET_VALUE rather than
+	bfd_asymbol_value.  Warn if taking difference of symbols in
+	different segments.
+
 Thu Jul 15 11:51:03 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/obj-ecoff.c (ecoff_frob_file): Discard all open scopes,
