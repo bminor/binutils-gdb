@@ -1,5 +1,6 @@
 /* BFD back-end for TMS320C4X coff binaries.
-   Copyright (C) 1996-99, 2000, 2002 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2002
+   Free Software Foundation, Inc.
    Contributed by Michael Hayes (m.hayes@elec.canterbury.ac.nz)
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -30,9 +31,27 @@
 #undef  F_LSYMS
 #define	F_LSYMS		F_LSYMS_TICOFF
 
+static boolean ticoff0_bad_format_hook
+    PARAMS ((bfd *, PTR ));
+static boolean ticoff1_bad_format_hook
+    PARAMS ((bfd *, PTR ));
+static boolean ticoff_bfd_is_local_label_name
+    PARAMS ((bfd *, const char *));
+static bfd_reloc_status_type tic4x_relocation
+    PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char ** ));
+static reloc_howto_type *tic4x_coff_reloc_type_lookup
+    PARAMS ((bfd *, bfd_reloc_code_real_type ));
+static void tic4x_lookup_howto
+    PARAMS ((arelent *, struct internal_reloc * ));
+static reloc_howto_type *coff_tic4x_rtype_to_howto
+    PARAMS ((bfd *, asection *, struct internal_reloc *, struct coff_link_hash_entry *, struct internal_syment *, bfd_vma * ));
+static void tic4x_reloc_processing
+    PARAMS ((arelent *, struct internal_reloc *, asymbol **, bfd *, asection * ));
+
+
 static boolean
 ticoff0_bad_format_hook (abfd, filehdr)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      PTR filehdr;
 {
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
@@ -69,9 +88,6 @@ ticoff_bfd_is_local_label_name (abfd, name)
 }
 
 #define coff_bfd_is_local_label_name ticoff_bfd_is_local_label_name
-
-static void tic4x_reloc_processing
-  PARAMS ((arelent *, struct internal_reloc *, asymbol **, bfd *, asection *));
 
 #define RELOC_PROCESSING(RELENT,RELOC,SYMS,ABFD,SECT)\
  tic4x_reloc_processing (RELENT,RELOC,SYMS,ABFD,SECT)
