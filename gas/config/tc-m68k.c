@@ -491,7 +491,9 @@ const pseudo_typeS md_pseudo_table[] = {
 	{ "even",	s_even,		0	},
 	{ "skip",	s_space,	0	},
 	{ "proc",	s_proc,		0	},
+#ifdef TE_SUN3
         { "align",      s_align_bytes,  0       },
+#endif
 	{ 0,		0,		0	}
 };
 

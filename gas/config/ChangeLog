@@ -1,3 +1,8 @@
+Mon Aug 10 14:37:08 1992  Per Bothner  (bothner@cygnus.com)
+
+	* tc-m68k.c: ".align N" means align to N-byte boundary *only*
+	if TN_SUN3; otherwise align to 2**N-byte bounary.
+
 Thu Aug  6 12:08:42 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* config/tc-h8300.c: if a :8 is seen after an operand, fill top
