@@ -67,4 +67,5 @@ struct exec
 #define AOUT_MACHTYPE	0x0c
 #define OMAGIC		0x106
     
+#define obj_header_append	hp300_header_append
 #include "config/obj-aout.h"
