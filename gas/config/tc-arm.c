@@ -4243,7 +4243,7 @@ my_get_expression (ep, str)
 /* We handle all bad expressions here, so that we can report the faulty 
    instruction in the error message.  */
 void
-md_operand(expr)
+md_operand (expr)
      expressionS *expr;
 {
   if (in_my_get_expression)
@@ -9293,10 +9293,10 @@ struct option md_longopts[] =
   {"EB", no_argument, NULL, OPTION_EB},
 #define OPTION_EL (OPTION_MD_BASE + 1)
   {"EL", no_argument, NULL, OPTION_EL},
+#endif
 #ifdef OBJ_ELF
 #define OPTION_OABI (OPTION_MD_BASE +2)
   {"oabi", no_argument, NULL, OPTION_OABI},
-#endif
 #endif
   {NULL, no_argument, NULL, 0}
 };

@@ -1,5 +1,10 @@
 2002-01-14  Richard Earnshaw  <rearnsha@arm.com>
 
+	* tc-arm.c (md_longopts): Fix misplaced #endif -- the -oabi option 
+	is not dependent on ARM_BI_ENDIAN.
+
+2002-01-14  Richard Earnshaw  <rearnsha@arm.com>
+
 	* tc-arm.c (all error messages): Normalize capitalization of messages.
 
 	* tc-arm.h (md_operand): Delete define.
