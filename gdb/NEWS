@@ -3,6 +3,11 @@
 
 *** Changes since GDB 5.2:
 
+* New commands "dump", "append", and "restore".
+
+These commands allow data to be copied from target memory
+to a bfd-format or binary file (dump and append), and back
+from a file into memory (restore).
 
 *** Changes in GDB 5.2:
 

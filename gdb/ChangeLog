@@ -5,6 +5,7 @@
 	restore file to memory.
 	* cli/cli-dump.h: New file.
 	* Makefile.in: Add rules, dependencies for cli-dump.o.
+	* NEWS: Mention new commands.
 
 2002-03-28  Michael Snyder  <msnyder@redhat.com>
 
