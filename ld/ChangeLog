@@ -1,3 +1,8 @@
+Wed Jan 28 15:51:58 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* scripttempl/elf.sc: Only include linkonce sections in final
+	sections when relocating.
+
 start-sanitize-sky
 Wed Jan 28 12:19:31 1998  Doug Evans  <devans@canuck.cygnus.com>
 
