@@ -46,20 +46,6 @@ else
 	fi
 fi
 
-gm_files="gmagic.c gmagic.h"
-
-if ( echo $* | grep keep\-gm > /dev/null ) ; then
-	keep_these_too="${gm_files} ${keep_these_too}"
-	if [ -n "${verbose}" ] ; then
-		echo Keeping ${gm_files}
-	fi
-else
-	lose_these_too="${gm_files} ${lose_these_too}"
-	if [ -n "${verbose}" ] ; then
-		echo Deleting ${gm_files}
-	fi
-fi
-
 tic80_files="tic80-tdep.c"
 
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
@@ -472,33 +458,6 @@ else
 			sed -e '/start\-sanitize\-gdbtk/d' -e '/end\-sanitize\-gdbtk/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				echo Caching $i in .Recover...
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
-if ( echo $* | grep keep\-gm > /dev/null ) ; then
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-gm $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping gm stuff in $i
-			fi
-		fi
-	done
-else
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-gm $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"gm\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-gm/,/end-\sanitize\-gm/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
 				mv $i .Recover
 			fi
 			mv new $i

@@ -226,21 +226,6 @@ if test "${enable_netrom}" = "yes"; then
 	CONFIG_OBS="${CONFIG_OBS} remote-nrom.o" 
 fi
 
-# start-sanitize-gm
-ENABLE_GM=
-
-AC_ARG_ENABLE(gm,
-[  --enable-gm ],
-[case "${enableval}" in
-yes)	CONFIG_OBS="${CONFIG_OBS} gmagic.o"
-	ENABLE_CFLAGS=-DGENERAL_MAGIC
-	;;
-no)	;;
-*)	AC_MSG_ERROR(bad value ${enableval} given for gm option) ;;
-esac])
-
-# end-sanitize-gm
-
 # start-sanitize-gdbtk
 ENABLE_IDE=
 AC_ARG_ENABLE(ide, [  --enable-ide            Enable IDE support])

@@ -298,15 +298,6 @@ exp	:	exp '.' name
 			  write_exp_elt_opcode (STRUCTOP_STRUCT); }
 	;
 
-/* start-sanitize-gm
-Need to find a better way to do this...
-exp	:	exp '@' name
-			{ write_exp_elt_opcode (STRUCTOP_FIELD);
-			  write_exp_string ($3);
-			  write_exp_elt_opcode (STRUCTOP_FIELD);
-			}
- end-sanitize-gm */
-
 exp	:	exp '.' qualified_name
 			{ /* exp.type::name becomes exp.*(&type::name) */
 			  /* Note: this doesn't work if name is a

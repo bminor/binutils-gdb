@@ -180,9 +180,6 @@ mips64*el-*-elf*)	gdb_target=embedl64 ;;
 mips64*-*-elf*)		gdb_target=embed64 ;;
 mips*el-*-ecoff*)	gdb_target=embedl ;;
 mips*-*-ecoff*)		gdb_target=embed ;;
-# start-sanitize-gm
-mips*-*-magic*)		gdb_target=embed ;;
-# end-sanitize-gm
 mips*el-*-elf*)		gdb_target=embedl ;;
 mips*-*-elf*)		gdb_target=embed ;;
 mips*-little-*)		gdb_target=littlemips ;;

@@ -14,8 +14,6 @@ ac_default_prefix=/usr/local
 ac_help="$ac_help
   --enable-netrom "
 ac_help="$ac_help
-  --enable-gm "
-ac_help="$ac_help
   --enable-ide            Enable IDE support"
 ac_help="$ac_help
   --enable-gdbtk "
@@ -2411,24 +2409,6 @@ fi
 if test "${enable_netrom}" = "yes"; then
 	CONFIG_OBS="${CONFIG_OBS} remote-nrom.o" 
 fi
-
-# start-sanitize-gm
-ENABLE_GM=
-
-# Check whether --enable-gm or --disable-gm was given.
-if test "${enable_gm+set}" = set; then
-  enableval="$enable_gm"
-  case "${enableval}" in
-yes)	CONFIG_OBS="${CONFIG_OBS} gmagic.o"
-	ENABLE_CFLAGS=-DGENERAL_MAGIC
-	;;
-no)	;;
-*)	{ echo "configure: error: bad value ${enableval} given for gm option" 1>&2; exit 1; } ;;
-esac
-fi
-
-
-# end-sanitize-gm
 
 # start-sanitize-gdbtk
 ENABLE_IDE=

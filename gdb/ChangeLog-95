@@ -113,10 +113,6 @@ Mon Dec 11 18:19:16 1995  Stan Shebs  <shebs@andros.cygnus.com>
 	* mac-gdb.r: Fix version resources to use symbolic version strings.
 	(cfrg): New resource, code fragment for PowerMac.
 
-start-sanitize-gm
-	mpw-config.in (mips-gm-magic): New configuration.
-end-sanitize-gm
-
 Mon Dec 11 14:13:03 1995  Fred Fish  <fnf@amigalib.com>
 
 	* dbxread.c (process_one_symbol): When looking at the next
@@ -372,10 +368,6 @@ Mon Nov 20 14:13:53 1995  Stu Grossman  (grossman@cygnus.com)
 	set a breakpoint within the trampoline where the address will be
 	known, and continue the target.  Once we hit the breakpoint, we
 	break at the callee's address and proceed as usual.
-start-sanitize-gm
-	* config/tm-magic.h:  Define DYNAMIC_TRAMPOLINE_NEXTPC.  Turn off
-	IN_SOLIB_CALL_TRAMPOLINE and IN_SOLIB_RETURN_TRAMPOLINE.
-end-sanitize-gm
 
 Mon Nov 20 11:12:34 1995  Fred Fish  <fnf@cygnus.com>
 
@@ -565,20 +557,6 @@ Sat Nov  4 10:21:58 1995  Stu Grossman  (grossman@cygnus.com)
 	* config/mips/nm-mips.h:  Improve comment at top of file.
 	* config/mips/tm-mips.h (TARGET_MONITOR_PROMPT):  Change
 	definition into a proper string.
-start-sanitize-gm
-	* configure configure.in:  Add support for --enable-gm.
-	(mips*-*-magic*):  Change target from magic to idt.
-	* eval.c expprint.c expression.h parse.c remote-mips.c utils.c:
-	Change GENERAL_MAGIC_HACKS to GENERAL_MAGIC.
-	* magic.c magic.h:  Update files from GM.
-	* config/mips/magic.mt:  Delete.  No longer necessary now that we
-	use --enable mechanism.
-	* config/mips/tm-idt.h:  Add GM stuff needed for remote GM box.
-	* config/mips/tm-irix5.h:  Add GM stuff needed for native Irix box.
-	* config/mips/tm-magic.h:  Move up to config/tm-magic.h.  Move all
-	platform specific stuff into tm-irix.h and tm-idt.h.  Add defs for
-	TARGET_SYMFILE_POSTREAD and TARGET_CREATE_INFERIOR_HOOK.
-end-sanitize-gm
 
 Wed Nov  1 20:18:08 1995  Fred Fish  <fnf@cygnus.com>
 
@@ -869,11 +847,8 @@ Fri Oct 27 09:54:07 1995  Stu Grossman  (grossman@cygnus.com)
 	startup.  Eliminate sleeps.  Clear breakpoints (if using monitor
 	breakpoints).  Re-init frame.
 	* (mips_detach):  Close down target.
-start-sanitize-gm
-	* (mips_resume):  Pass signal down to target.
-	* (mips_create_inferior):  Start target with TARGET_SIGNAL_PWR.
-end-sanitize-gm
-	* (mips_wait):  Handle return status with registers, or breakpoint stuff.
+	* (mips_wait): Handle return status with registers, or breakpoint
+ 	* stuff.
 	* (mips_kill):  Add ^C handling.
 	* (mips_insert_breakpoint mips_remove_breakpoint):  Call new
 	breakpoint stuff if enabled.
@@ -884,25 +859,7 @@ end-sanitize-gm
 	* (mips_load):  Don't use `prompt'.  It's a global variable.
 	* top.c (dont_repeat_command):  New command for use in
 	user-defined commands to suppress auto-repeat (by hittin return key).
-start-sanitize-gm
-	* utils.c (request_quit):  Call target_kill here.  Good idea.
-	Needs a better implementation.
-end-sanitize-gm
 	* valops.c:  Add start of auto function-call abandonment capability.
-
-start-sanitize-gm
-	* c-exp.y:  Add code (currently disabled) to handle GM dynamic
-	structures (it conflicts with @!).
-	* eval.c (evaluate_subexp_standard):  ditto.
-	* expprint.c (print_subexp dump_expression):  ditto.
-	* expression.h (enum exp_opcode):  ditto.
-	* parse.c (length_of_subexp):  ditto.
-	* configure, configure.in:  Add mip*-*-magic* target.
-	* magic.c magic.h:  Special routines to handle GM stuff (like
-	stepping through dispatcher).
-	* config/mips/tm-magic.h config/mips/magic.mt:  New files for
-	magic target support.
-end-sanitize-gm
 
 Thu Oct 26 22:02:27 1995  Stan Shebs  <shebs@andros.cygnus.com>
 

@@ -1523,9 +1523,6 @@ Fri Aug 16 13:52:21 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed: Update for various recent changes, add some
 	comments.
-start-sanitize-gm
-	* mpw-config.in: Fix name of Magic Cap-specific file.
-end-sanitize-gm
 
 Fri Aug 16 15:47:36 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
@@ -5175,9 +5172,6 @@ Tue Jan 16 11:22:58 1996  Stu Grossman  (grossman@cygnus.com)
 
 	* Makefile.in (CLIBS):  Add LIBS to allow libraries to be
 	specified on the make command line (via make LIBS=xxx).
-start-sanitize-gm
-	* configure.in (enable-gm):  magic.o -> gmagic.o.
-end-sanitize-gm
 
 start-sanitize-gdbtk
 Mon Jan 15 09:58:41 1996  Tom Tromey  <tromey@creche.cygnus.com>

@@ -1754,15 +1754,6 @@ mips_resume (pid, step, siggnal)
 {
   int err;
 
-/* start-sanitize-gm */
-#ifndef GENERAL_MAGIC
-  if (siggnal != TARGET_SIGNAL_0)
-    warning
-      ("Can't send signals to a remote system.  Try `handle %s ignore'.",
-       target_signal_to_name (siggnal));
-#endif /* GENERAL_MAGIC */
-/* end-sanitize-gm */
-
   /* LSI PMON requires returns a reply packet "0x1 s 0x0 0x57f" after
      a single step, so we wait for that.  */
   mips_request (step ? 's' : 'c',
@@ -2302,16 +2293,7 @@ Can't pass arguments to remote MIPS board; arguments ignored.");
 
   /* FIXME: Should we set inferior_pid here?  */
 
-/* start-sanitize-gm */
-#ifdef GENERAL_MAGIC
-  magic_create_inferior_hook ();
-  proceed (entry_pt, TARGET_SIGNAL_PWR, 0);
-#else
-/* end-sanitize-gm */
   proceed (entry_pt, TARGET_SIGNAL_DEFAULT, 0);
-/* start-sanitize-gm */
-#endif /* GENERAL_MAGIC */
-/* end-sanitize-gm */
 }
 
 /* Clean up after a process.  Actually nothing to do.  */
