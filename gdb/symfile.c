@@ -2367,12 +2367,16 @@ clear_symtab_users (void)
 {
   /* Someday, we should do better than this, by only blowing away
      the things that really need to be blown.  */
+
+  /* Clear the "current" symtab first, because it is no longer valid.
+     breakpoint_re_set may try to access the current symtab.  */
+  clear_current_source_symtab_and_line ();
+
   clear_value_history ();
   clear_displays ();
   clear_internalvars ();
   breakpoint_re_set ();
   set_default_breakpoint (0, 0, 0, 0);
-  clear_current_source_symtab_and_line ();
   clear_pc_function_cache ();
   if (deprecated_target_new_objfile_hook)
     deprecated_target_new_objfile_hook (NULL);
