@@ -3581,24 +3581,18 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	       the instruction rather than the end.  */
 	    addend -= 4;
 
-	    /* The source and destination gp must be the same.  */
-	    if (h != NULL
+	    /* The source and destination gp must be the same.  Note that
+	       the source will always have an assigned gp, since we forced
+	       one in check_relocs, but that the destination may not, as
+	       it might not have had any relocations at all.  Also take 
+	       care not to crash if H is an undefined symbol.  */
+	    if (h != NULL && sec != NULL
+		&& alpha_elf_tdata (sec->owner)->gotobj
 		&& gotobj != alpha_elf_tdata (sec->owner)->gotobj)
 	      {
-		if (h != NULL)
-		  name = h->root.root.root.string;
-		else
-		  {
-		    name = (bfd_elf_string_from_elf_section
-			    (input_bfd, symtab_hdr->sh_link, sym->st_name));
-		    if (name == NULL)
-		      name = _("<unknown>");
-		    else if (name[0] == 0)
-		      name = bfd_section_name (input_bfd, sec);
-		  }
 		(*_bfd_error_handler)
 		  (_("%s: change in gp: BRSGP %s"),
-		   bfd_archive_filename (input_bfd), name);
+		   bfd_archive_filename (input_bfd), h->root.root.root.string);
 		ret_val = false;
 	      }
 
