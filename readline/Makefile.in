@@ -183,6 +183,7 @@ stamp-h: config.status $(srcdir)/config.h.in
 	CONFIG_FILES= CONFIG_HEADERS=config.h ./config.status
 	echo > $@
 
+# CYGNUS LOCAL: Never run autoconf.
 #$(srcdir)/configure: $(srcdir)/configure.in	 Comment-me-out in distribution
 #	cd $(srcdir) && autoconf	 Comment-me-out in distribution
 

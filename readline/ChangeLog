@@ -1,3 +1,10 @@
+1998-12-24  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* Makefile.in: Add CYGNUS LOCAL comment.
+	* acconfig.h: Add missing defines.
+	* config.h.bot: Add missing content.
+	* configure, config.h.in: Regenerated.
+
 Wed Dec 23 16:21:41 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* Makefile.in: comment out the rule to rebuild configure by 

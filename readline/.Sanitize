@@ -39,6 +39,7 @@ bind.c
 callback.c
 chardefs.h
 complete.c
+config.h.bot
 config.h.in
 configure
 configure.in
