@@ -1,5 +1,10 @@
 2004-06-20  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbarch.sh: Sort by the function, instead of macro name.
+	* gdbarch.c: Re-generate.
+	
+2004-06-20  Andrew Cagney  <cagney@gnu.org>
+
 	* gdbarch.sh: Use the function, instead of macro name in
 	errors and the log file.
 	(return_value): Remove stray ":" in spec.

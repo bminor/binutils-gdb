@@ -1538,7 +1538,7 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       "gdbarch_dump: GDB_MULTI_ARCH = %d\\n",
                       GDB_MULTI_ARCH);
 EOF
-function_list | sort -t: -k 2 | while do_read
+function_list | sort -t: -k 4 | while do_read
 do
     # First the predicate
     if class_is_predicate_p
