@@ -1,3 +1,10 @@
+2000-05-18  J.T. Conklin  <jtc@redback.com>
+
+	* configure.host, configure.tgt (powerpc-*-netbsd*): New entry.
+	* config/powerpc/nbsd.mh, config/powerpc/nbsd.mt,
+ 	config/powerpc/tm-nbsd.h, config/powerpc/nm-nbsd.h,
+ 	config/powerpc/xm-nbsd.h: New files.
+
 2000-05-17  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdb/config/djgpp/README: Fine-tune installation instructions
