@@ -620,7 +620,6 @@ gld${EMULATION_NAME}_after_open ()
 	 their use.  See gld${EMULATION_NAME}_vercheck comment.  */
       for (force = 0; force < 2; force++)
 	{
-	  const char *lib_path;
 	  size_t len;
 	  search_dirs_type *search;
 EOF
@@ -628,6 +627,7 @@ if [ "x${host}" = "x${target}" ] ; then
   case " ${EMULATION_LIBPATH} " in
   *" ${EMULATION_NAME} "*)
 cat >>e${EMULATION_NAME}.c <<EOF
+	  const char *lib_path;
 	  struct bfd_link_needed_list *rp;
 	  int found;
 EOF
@@ -639,6 +639,11 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	  if (gld${EMULATION_NAME}_search_needed (command_line.rpath_link,
 						  l->name, force))
 	    break;
+EOF
+if [ "x${host}" = "x${target}" ] ; then
+  case " ${EMULATION_LIBPATH} " in
+  *" ${EMULATION_NAME} "*)
+cat >>e${EMULATION_NAME}.c <<EOF
 	  if (gld${EMULATION_NAME}_search_needed (command_line.rpath,
 						  l->name, force))
 	    break;
@@ -650,11 +655,6 @@ cat >>e${EMULATION_NAME}.c <<EOF
 						      force))
 		break;
 	    }
-EOF
-if [ "x${host}" = "x${target}" ] ; then
-  case " ${EMULATION_LIBPATH} " in
-  *" ${EMULATION_NAME} "*)
-cat >>e${EMULATION_NAME}.c <<EOF
 	  lib_path = (const char *) getenv ("LD_LIBRARY_PATH");
 	  if (gld${EMULATION_NAME}_search_needed (lib_path, l->name, force))
 	    break;

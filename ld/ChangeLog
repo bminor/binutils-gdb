@@ -1,3 +1,9 @@
+2000-08-25  H.J. Lu  <hjl@gnu.org>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Don't
+	check -rpath nor LD_RUN_PATH for cross link.
+	* ld.texinfo: Document the change.
+
 2000-08-24  Hans-Peter Nilsson  <hp@axis.com>
 
 	* NEWS: Mention support for CRIS.

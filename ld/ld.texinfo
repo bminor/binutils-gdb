@@ -1089,11 +1089,11 @@ Any directories specified by @code{-rpath} options.  The difference
 between @code{-rpath} and @code{-rpath-link} is that directories
 specified by @code{-rpath} options are included in the executable and
 used at runtime, whereas the @code{-rpath-link} option is only effective
-at link time.
+at link time. It is for the native linker only.
 @item
 On an ELF system, if the @code{-rpath} and @code{rpath-link} options
 were not used, search the contents of the environment variable
-@code{LD_RUN_PATH}.
+@code{LD_RUN_PATH}. It is for the native linker only.
 @item
 On SunOS, if the @code{-rpath} option was not used, search any
 directories specified using @code{-L} options.
