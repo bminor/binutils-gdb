@@ -1,3 +1,7 @@
+2004-02-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-arm-low.c (arm_get_pc): Print out stop PC in debug mode.
+
 2004-02-26  Daniel Jacobowitz  <drow@mvista.com>
 
 	* remote-utils.c (write_enn): Use "E01" instead of "ENN" for the
