@@ -44,24 +44,6 @@ extern int baud_rate;
 
 #define ARRAY_PROMPT ">> "
 
-#define SWAP_TARGET_AND_HOST(buffer,len) 				\
-  do									\
-    {									\
-      if (TARGET_BYTE_ORDER != HOST_BYTE_ORDER)				\
-	{								\
-	  char tmp;							\
-	  char *p = (char *)(buffer);					\
-	  char *q = ((char *)(buffer)) + len - 1;		   	\
-	  for (; p < q; p++, q--)				 	\
-	    {								\
-	      tmp = *q;							\
-	      *q = *p;							\
-	      *p = tmp;							\
-	    }								\
-	}								\
-    }									\
-  while (0)
-
 static void debuglogs (int, char *, ...);
 static void array_open ();
 static void array_close ();
@@ -508,22 +490,10 @@ get_hex_word (void)
 
   val = 0;
 
-#if 0
-  if (HOST_BYTE_ORDER == BIG_ENDIAN)
-    {
-#endif
-      for (i = 0; i < 8; i++)
-	val = (val << 4) + get_hex_digit (i == 0);
-#if 0
-    }
-  else
-    {
-      for (i = 7; i >= 0; i--)
-	val = (val << 4) + get_hex_digit (i == 0);
-    }
-#endif
+  for (i = 0; i < 8; i++)
+    val = (val << 4) + get_hex_digit (i == 0);
 
-  debuglogs (4, "get_hex_word() got a 0x%x for a %s host.", val, (HOST_BYTE_ORDER == BIG_ENDIAN) ? "big endian" : "little endian");
+  debuglogs (4, "get_hex_word() got a 0x%x.", val);
 
   return val;
 }
@@ -795,16 +765,14 @@ array_wait (ptid_t ptid, struct target_waitstatus *status)
 static void
 array_fetch_registers (int ignored)
 {
-  int regno, i;
+  char *reg = alloca (MAX_REGISTER_RAW_SIZE);
+  int regno;
   char *p;
-  unsigned char packet[PBUFSIZ];
-  char regs[REGISTER_BYTES];
+  char *packet = alloca (PBUFSIZ);
 
   debuglogs (1, "array_fetch_registers (ignored=%d)\n", ignored);
 
   memset (packet, 0, PBUFSIZ);
-  /* Unimplemented registers read as all bits zero.  */
-  memset (regs, 0, REGISTER_BYTES);
   make_gdb_packet (packet, "g");
   if (array_send_packet (packet) == 0)
     error ("Couldn't transmit packet\n");
@@ -816,10 +784,10 @@ array_fetch_registers (int ignored)
     {
       /* supply register stores in target byte order, so swap here */
       /* FIXME: convert from ASCII hex to raw bytes */
-      i = ascii2hexword (packet + (regno * 8));
+      LONGEST i = ascii2hexword (packet + (regno * 8));
       debuglogs (5, "Adding register %d = %x\n", regno, i);
-      SWAP_TARGET_AND_HOST (&i, 4);
-      supply_register (regno, (char *) &i);
+      store_unsigned_integer (&reg, REGISTER_RAW_SIZE (regno), i);
+      supply_register (regno, (char *) &reg);
     }
 }
 

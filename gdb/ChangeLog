@@ -1,5 +1,13 @@
 2001-06-28  Andrew Cagney  <ac131313@redhat.com>
 
+	* remote-array.c (SWAP_TARGET_AND_HOST): Delete macro.
+	(get_hex_word): Don't use HOST_BYTE_ORDER.
+	(array_fetch_registers): Add variable ``reg''.  Use
+	store_unsigned_integer to byte-swap the register.  Delete unused
+	local ``regs''.
+
+2001-06-28  Andrew Cagney  <ac131313@redhat.com>
+
 	* MAINTAINERS: Add Per Bothner to Java maintainers.
 
 2001-06-28  Andrew Cagney  <ac131313@redhat.com>
