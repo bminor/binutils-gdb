@@ -1,3 +1,8 @@
+2002-02-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (SUBDIR_CLI_INITS): Set to SUBDIR_CLI_SRCS.
+	(SUBDIR_MI_INITS): Set to SUBDIR_MI_SRCS.
+
 2002-02-09  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* xcoffsolib.c (_initialize_xcoffsolib): Renamed from

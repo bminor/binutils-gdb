@@ -142,7 +142,8 @@ SUBDIR_CLI_SRCS = \
 	cli/cli-decode.c cli/cli-script.c cli/cli-cmds.c cli/cli-setshow.c \
 	cli/cli-utils.c
 SUBDIR_CLI_DEPS =
-SUBDIR_CLI_INITS =
+SUBDIR_CLI_INITS = \
+	$(SUBDIR_CLI_SRCS)
 SUBDIR_CLI_LDFLAGS=
 SUBDIR_CLI_CFLAGS=
 SUBDIR_CLI_ALL=
@@ -166,7 +167,7 @@ SUBDIR_MI_SRCS = \
 	mi/mi-main.c mi/mi-parse.c mi/mi-getopt.c
 SUBDIR_MI_DEPS =
 SUBDIR_MI_INITS = \
-	mi/mi-cmds.c mi/mi-parse.c mi/mi-main.c mi/mi-out.c
+	$(SUBDIR_MI_SRCS)
 SUBDIR_MI_LDFLAGS=
 SUBDIR_MI_CFLAGS= \
 	-DMI_OUT=1
