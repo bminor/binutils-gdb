@@ -1,3 +1,12 @@
+Tue Oct 19 11:41:55 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in: Remove -O from CXXFLAGS for consistency with CFLAGS,
+	and gdb/testsuite/Makefile.in.
+
+Sat Oct  9 18:39:07 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* configure.in: recognize mips*- instead of mips-
+
 Fri Oct  8 14:15:39 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* config.sub: Accept linux*coff and linux*elf as operating
