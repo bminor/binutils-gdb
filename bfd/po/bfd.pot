@@ -1,0 +1,632 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Free Software Foundation, Inc.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 1999-04-18 18:26-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+
+#: aout-adobe.c:182
+#, c-format
+msgid "%s: Unknown section type in a.out.adobe file: %x\n"
+msgstr ""
+
+#: aoutx.h:1237 aoutx.h:1651
+#, c-format
+msgid "%s: can not represent section `%s' in a.out object file format"
+msgstr ""
+
+#: aoutx.h:1621
+#, c-format
+msgid ""
+"%s: can not represent section for symbol `%s' in a.out object file format"
+msgstr ""
+
+#: aoutx.h:1623
+msgid "*unknown*"
+msgstr ""
+
+#: aoutx.h:3667
+#, c-format
+msgid "%s: relocateable link from %s to %s not supported"
+msgstr ""
+
+#: archive.c:1716
+msgid "Warning: writing archive was slow: rewriting timestamp\n"
+msgstr ""
+
+#: archive.c:1987
+msgid "Reading archive file mod timestamp"
+msgstr ""
+
+#. FIXME: bfd can't call perror.
+#: archive.c:2011
+msgid "Writing updated armap timestamp"
+msgstr ""
+
+#: bfd.c:274
+msgid "No error"
+msgstr ""
+
+#: bfd.c:275
+msgid "System call error"
+msgstr ""
+
+#: bfd.c:276
+msgid "Invalid bfd target"
+msgstr ""
+
+#: bfd.c:277
+msgid "File in wrong format"
+msgstr ""
+
+#: bfd.c:278
+msgid "Invalid operation"
+msgstr ""
+
+#: bfd.c:279
+msgid "Memory exhausted"
+msgstr ""
+
+#: bfd.c:280
+msgid "No symbols"
+msgstr ""
+
+#: bfd.c:281
+msgid "Archive has no index; run ranlib to add one"
+msgstr ""
+
+#: bfd.c:282
+msgid "No more archived files"
+msgstr ""
+
+#: bfd.c:283
+msgid "Malformed archive"
+msgstr ""
+
+#: bfd.c:284
+msgid "File format not recognized"
+msgstr ""
+
+#: bfd.c:285
+msgid "File format is ambiguous"
+msgstr ""
+
+#: bfd.c:286
+msgid "Section has no contents"
+msgstr ""
+
+#: bfd.c:287
+msgid "Nonrepresentable section on output"
+msgstr ""
+
+#: bfd.c:288
+msgid "Symbol needs debug section which does not exist"
+msgstr ""
+
+#: bfd.c:289
+msgid "Bad value"
+msgstr ""
+
+#: bfd.c:290
+msgid "File truncated"
+msgstr ""
+
+#: bfd.c:291
+msgid "File too big"
+msgstr ""
+
+#: bfd.c:292
+msgid "#<Invalid error code>"
+msgstr ""
+
+#: bfd.c:679
+#, c-format
+msgid "bfd assertion fail %s:%d"
+msgstr ""
+
+#: binary.c:298
+#, c-format
+msgid "Warning: Writing section `%s' to huge (ie negative) file offset 0x%lx."
+msgstr ""
+
+#: coff-a29k.c:121
+msgid "Missing IHCONST"
+msgstr ""
+
+#: coff-a29k.c:181
+msgid "Missing IHIHALF"
+msgstr ""
+
+#: coff-a29k.c:213
+msgid "Unrecognized reloc"
+msgstr ""
+
+#: coff-a29k.c:406
+msgid "missing IHCONST reloc"
+msgstr ""
+
+#: coff-a29k.c:497
+msgid "missing IHIHALF reloc"
+msgstr ""
+
+#: coff-alpha.c:880 coff-alpha.c:917
+msgid "GP relative relocation used when GP not defined"
+msgstr ""
+
+#: coff-alpha.c:1486 elf64-alpha.c:4051
+msgid "using multiple gp values"
+msgstr ""
+
+#: coff-alpha.c:1992 coff-mips.c:1435 elf32-mips.c:5175
+msgid "GP relative relocation when GP not defined"
+msgstr ""
+
+#: coff-arm.c:884
+#, c-format
+msgid "%s: unable to find THUMB glue '%s' for `%s'"
+msgstr ""
+
+#: coff-arm.c:913
+#, c-format
+msgid "%s: unable to find ARM glue '%s' for `%s'"
+msgstr ""
+
+#: coff-arm.c:1192 coff-arm.c:1286
+#, c-format
+msgid "%s(%s): warning: interworking not enabled."
+msgstr ""
+
+#: coff-arm.c:1196
+#, c-format
+msgid "  first occurrence: %s: arm call to thumb"
+msgstr ""
+
+#: coff-arm.c:1290
+#, c-format
+msgid "  first occurrence: %s: thumb call to arm"
+msgstr ""
+
+#: coff-arm.c:1293
+msgid "  consider relinking with --support-old-code enabled"
+msgstr ""
+
+#: coff-arm.c:1581 coff-tic80.c:682 cofflink.c:2722
+#, c-format
+msgid "%s: bad reloc address 0x%lx in section `%s'"
+msgstr ""
+
+#: coff-arm.c:2036
+#, c-format
+msgid "%s: ERROR: compiled for APCS-%d whereas target %s uses APCS-%d"
+msgstr ""
+
+#: coff-arm.c:2051
+#, c-format
+msgid ""
+"%s: ERROR: passes floats in float registers whereas target %s uses integer "
+"registers"
+msgstr ""
+
+#: coff-arm.c:2054
+#, c-format
+msgid ""
+"%s: ERROR: passes floats in integer registers whereas target %s uses float "
+"registers"
+msgstr ""
+
+#: coff-arm.c:2069
+#, c-format
+msgid ""
+"%s: ERROR: compiled as position independent code, whereas target %s is "
+"absolute position"
+msgstr ""
+
+#: coff-arm.c:2072
+#, c-format
+msgid ""
+"%s: ERROR: compiled as absolute position code, whereas target %s is position "
+"independent"
+msgstr ""
+
+#: coff-arm.c:2101
+#, c-format
+msgid "Warning: input file %s supports interworking, whereas %s does not."
+msgstr ""
+
+#: coff-arm.c:2104
+#, c-format
+msgid "Warning: input file %s does not support interworking, whereas %s does."
+msgstr ""
+
+#: coff-arm.c:2132
+#, c-format
+msgid "private flags = %x:"
+msgstr ""
+
+#: coff-arm.c:2140
+msgid " [floats passed in float registers]"
+msgstr ""
+
+#: coff-arm.c:2142
+msgid " [floats passed in integer registers]"
+msgstr ""
+
+#: coff-arm.c:2145
+msgid " [position independent]"
+msgstr ""
+
+#: coff-arm.c:2147
+msgid " [absolute position]"
+msgstr ""
+
+#: coff-arm.c:2151
+msgid " [interworking flag not initialised]"
+msgstr ""
+
+#: coff-arm.c:2153
+msgid " [interworking supported]"
+msgstr ""
+
+#: coff-arm.c:2155
+msgid " [interworking not supported]"
+msgstr ""
+
+#: coff-arm.c:2204
+#, c-format
+msgid ""
+"Warning: Not setting interworking flag of %s, since it has already been "
+"specified as non-interworking"
+msgstr ""
+
+#: coff-arm.c:2208
+#, c-format
+msgid "Warning: Clearing the interworking flag of %s due to outside request"
+msgstr ""
+
+#: coff-i960.c:135 coff-i960.c:484
+msgid "uncertain calling convention for non-COFF symbol"
+msgstr ""
+
+#: coff-mips.c:875 elf32-mips.c:1183
+msgid "GP relative relocation when _gp not defined"
+msgstr ""
+
+#: coff-mips.c:2433
+msgid "unsupported reloc type"
+msgstr ""
+
+#. No other sections should appear in -membedded-pic
+#. code.
+#: coff-mips.c:2470
+msgid "reloc against unsupported section"
+msgstr ""
+
+#: coff-mips.c:2478
+msgid "reloc not properly aligned"
+msgstr ""
+
+#: coff-tic80.c:445
+#, c-format
+msgid "Unrecognized reloc type 0x%x"
+msgstr ""
+
+#: coff-w65.c:383
+#, c-format
+msgid "ignoring reloc %s\n"
+msgstr ""
+
+#: coffcode.h:3413
+#, c-format
+msgid "%s: warning: illegal symbol index %ld in line numbers"
+msgstr ""
+
+#: coffcode.h:3427
+#, c-format
+msgid "%s: warning: duplicate line number information for `%s'"
+msgstr ""
+
+#: coffcode.h:3748
+#, c-format
+msgid "%s: Unrecognized storage class %d for %s symbol `%s'"
+msgstr ""
+
+#: coffcode.h:3932
+#, c-format
+msgid "%s: warning: illegal symbol index %ld in relocs"
+msgstr ""
+
+#: coffcode.h:3970
+#, c-format
+msgid "%s: illegal relocation type %d at address 0x%lx"
+msgstr ""
+
+#: coffgen.c:1607
+#, c-format
+msgid "%s: bad string table size %lu"
+msgstr ""
+
+#: cofflink.c:423
+#, c-format
+msgid "Warning: type of symbol `%s' changed from %d to %d in %s"
+msgstr ""
+
+#: cofflink.c:2093
+#, c-format
+msgid "%s: relocs in section `%s', but it has no contents"
+msgstr ""
+
+#: coffswap.h:879
+#, c-format
+msgid "%s: warning: %s: line number overflow: 0x%lx > 0xffff"
+msgstr ""
+
+#: coffswap.h:892
+#, c-format
+msgid "%s: %s: reloc overflow: 0x%lx > 0xffff"
+msgstr ""
+
+#: dwarf2.c:420
+msgid "Dwarf Error: Can't find .debug_abbrev section."
+msgstr ""
+
+#: dwarf2.c:438
+#, c-format
+msgid "Dwarf Error: Abbrev offset (%u) bigger than abbrev size (%u)."
+msgstr ""
+
+#: dwarf2.c:614
+#, c-format
+msgid "Dwarf Error: Invalid or unhandled FORM value: %d."
+msgstr ""
+
+#: dwarf2.c:720
+msgid "Dwarf Error: Can't find .debug_line section."
+msgstr ""
+
+#: dwarf2.c:881
+msgid "Dwarf Error: mangled line number section."
+msgstr ""
+
+#: dwarf2.c:1054 dwarf2.c:1201
+#, c-format
+msgid "Dwarf Error: Could not find abbrev number %d."
+msgstr ""
+
+#: dwarf2.c:1162
+#, c-format
+msgid ""
+"Dwarf Error: found dwarf version '%hu', this reader only handles version 2 "
+"information."
+msgstr ""
+
+#: dwarf2.c:1169
+#, c-format
+msgid ""
+"Dwarf Error: found address size '%u', this reader can not handle sizes "
+"greater than '%u'."
+msgstr ""
+
+#: dwarf2.c:1192
+#, c-format
+msgid "Dwarf Error: Bad abbrev number: %d."
+msgstr ""
+
+#: ecoff.c:1308
+#, c-format
+msgid "Unknown basic type %d"
+msgstr ""
+
+#: ecoff.c:1580
+#, c-format
+msgid ""
+"\n"
+"      End+1 symbol: %ld"
+msgstr ""
+
+#: ecoff.c:1587 ecoff.c:1590
+#, c-format
+msgid ""
+"\n"
+"      First symbol: %ld"
+msgstr ""
+
+#: ecoff.c:1602
+#, c-format
+msgid ""
+"\n"
+"      End+1 symbol: %-7ld   Type:  %s"
+msgstr ""
+
+#: ecoff.c:1609
+#, c-format
+msgid ""
+"\n"
+"      Local symbol: %ld"
+msgstr ""
+
+#: ecoff.c:1617
+#, c-format
+msgid ""
+"\n"
+"      struct; End+1 symbol: %ld"
+msgstr ""
+
+#: ecoff.c:1622
+#, c-format
+msgid ""
+"\n"
+"      union; End+1 symbol: %ld"
+msgstr ""
+
+#: ecoff.c:1627
+#, c-format
+msgid ""
+"\n"
+"      enum; End+1 symbol: %ld"
+msgstr ""
+
+#: ecoff.c:1633
+#, c-format
+msgid ""
+"\n"
+"      Type: %s"
+msgstr ""
+
+#: elf-m10200.c:455 elf-m10300.c:667 elf32-d10v.c:490 elf32-fr30.c:650
+#: elf32-m32r.c:1157 elf32-v850.c:1674
+msgid "internal error: out of range error"
+msgstr ""
+
+#: elf-m10200.c:459 elf-m10300.c:671 elf32-d10v.c:494 elf32-fr30.c:654
+#: elf32-m32r.c:1161 elf32-v850.c:1678
+msgid "internal error: unsupported relocation error"
+msgstr ""
+
+#: elf-m10200.c:463 elf-m10300.c:675 elf32-d10v.c:498 elf32-m32r.c:1165
+msgid "internal error: dangerous error"
+msgstr ""
+
+#: elf-m10200.c:467 elf-m10300.c:679 elf32-d10v.c:502 elf32-fr30.c:662
+#: elf32-m32r.c:1169 elf32-v850.c:1698
+msgid "internal error: unknown error"
+msgstr ""
+
+#: elf.c:320
+#, c-format
+msgid "%s: invalid string offset %u >= %lu for section `%s'"
+msgstr ""
+
+#: elf.c:543
+msgid ""
+"\n"
+"Program Header:\n"
+msgstr ""
+
+#: elf.c:591
+msgid ""
+"\n"
+"Dynamic Section:\n"
+msgstr ""
+
+#: elf.c:693
+msgid ""
+"\n"
+"Version definitions:\n"
+msgstr ""
+
+#: elf.c:716
+msgid ""
+"\n"
+"Version References:\n"
+msgstr ""
+
+#: elf.c:721
+#, c-format
+msgid "  required from %s:\n"
+msgstr ""
+
+#: elf.c:1882
+#, c-format
+msgid ""
+"creating section symbol, name = %s, value = 0x%.8lx, index = %d, section = "
+"0x%.8lx\n"
+msgstr ""
+
+#: elf.c:2481
+#, c-format
+msgid "%s: Not enough room for program headers (allocated %u, need %u)"
+msgstr ""
+
+#: elf.c:2584
+#, c-format
+msgid "%s: Not enough room for program headers, try linking with -N"
+msgstr ""
+
+#: elf.c:2710
+#, c-format
+msgid "Error: First section in segment (%s) starts at 0x%x"
+msgstr ""
+
+#: elf.c:2713
+#, c-format
+msgid "       whereas segment starts at 0x%x"
+msgstr ""
+
+#: elf.c:2983
+#, c-format
+msgid "%s: warning: allocated section `%s' not in segment"
+msgstr ""
+
+#: elf.c:3350
+#, c-format
+msgid "%s: symbol `%s' required but not present"
+msgstr ""
+
+#: elf.c:3359
+#, c-format
+msgid ""
+"elf_symbol_from_bfd_symbol 0x%.8lx, name = %s, sym num = %d, flags = "
+"0x%.8lx%s\n"
+msgstr ""
+
+#: elf.c:3501
+#, c-format
+msgid "%s: warning: Empty loadable segment detected\n"
+msgstr ""
+
+#: elf.c:4774
+#, c-format
+msgid "%s: unsupported relocation type %s"
+msgstr ""
+
+#: elf32-fr30.c:658 elf32-v850.c:1682
+msgid "internal error: dangerous relocation"
+msgstr ""
+
+#: elf32-hppa.c:1215
+msgid "Unsupported call to hppa_elf_reloc"
+msgstr ""
+
+#: elf32-i386.c:1293
+#, c-format
+msgid ""
+"%s: warning: unresolvable relocation against symbol `%s' from %s section"
+msgstr ""
+
+#: elf32-m32r.c:808
+msgid "SDA relocation when _SDA_BASE_ not defined"
+msgstr ""
+
+#: elf32-m32r.c:892 elf32-ppc.c:3071
+#, c-format
+msgid "%s: unknown relocation type %d"
+msgstr ""
+
+#: elf32-m32r.c:1100
+#, c-format
+msgid "%s: The target (%s) of an %s relocation is in the wrong section (%s)"
+msgstr ""
+
+#: elf32-m32r.c:1906
+#, c-format
+msgid "%s: Instruction set mismatch with previous modules"
+msgstr ""
+
+#: elf32-m32r.c:1929
+#, c-format
+msgid "private flags = %lx"
+msgstr ""
+
+#: elf32-m32r.c:1934
+msgid ": m32r instructions"
+msgstr ""
+

@@ -1,0 +1,242 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Free Software Foundation, Inc.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 1999-04-18 19:01-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+
+#: alpha-opc.c:335
+msgid "branch operand unaligned"
+msgstr ""
+
+#: alpha-opc.c:358 alpha-opc.c:380
+msgid "jump hint unaligned"
+msgstr ""
+
+#: arm-dis.c:388
+msgid "<illegal precision>"
+msgstr ""
+
+#: cgen-asm.c:224
+msgid "unrecognized keyword/register name"
+msgstr ""
+
+#: cgen-asm.c:332 fr30-ibld.c:223 m32r-ibld.c:223
+#, c-format
+msgid "operand out of range (%ld not between %ld and %ld)"
+msgstr ""
+
+#: cgen-asm.c:353
+#, c-format
+msgid "operand out of range (%lu not between %lu and %lu)"
+msgstr ""
+
+#: d30v-dis.c:305
+#, c-format
+msgid "<unknown register %d>"
+msgstr ""
+
+#. Can't happen.
+#: dis-buf.c:50
+#, c-format
+msgid "Unknown error %d\n"
+msgstr ""
+
+#: dis-buf.c:55
+#, c-format
+msgid "Address 0x%x is out of bounds.\n"
+msgstr ""
+
+#: fr30-asm.c:303 m32r-asm.c:319
+#, c-format
+msgid "Unrecognized field %d while parsing.\n"
+msgstr ""
+
+#. We couldn't parse it.
+#: fr30-asm.c:367 fr30-asm.c:436 m32r-asm.c:383 m32r-asm.c:452
+msgid "unrecognized instruction"
+msgstr ""
+
+#. Syntax char didn't match.  Can't be this insn.
+#. FIXME: would like to return something like
+#. "expected char `c'"
+#: fr30-asm.c:404 m32r-asm.c:420
+msgid "syntax error"
+msgstr ""
+
+#: fr30-asm.c:430 m32r-asm.c:446
+msgid "junk at end of line"
+msgstr ""
+
+#: fr30-asm.c:523 m32r-asm.c:539
+#, c-format
+msgid "bad instruction `%.50s...'"
+msgstr ""
+
+#: fr30-asm.c:526 m32r-asm.c:542
+#, c-format
+msgid "bad instruction `%.50s'"
+msgstr ""
+
+#: fr30-dis.c:300 m32r-dis.c:247
+#, c-format
+msgid "Unrecognized field %d while printing insn.\n"
+msgstr ""
+
+#: fr30-ibld.c:210 m32r-ibld.c:210
+#, c-format
+msgid "operand out of range (%lu not between 0 and %lu)"
+msgstr ""
+
+#: fr30-ibld.c:749 m32r-ibld.c:683
+#, c-format
+msgid "Unrecognized field %d while building insn.\n"
+msgstr ""
+
+#: fr30-ibld.c:952 m32r-ibld.c:819
+#, c-format
+msgid "Unrecognized field %d while decoding insn.\n"
+msgstr ""
+
+#: fr30-ibld.c:1096 m32r-ibld.c:932
+#, c-format
+msgid "Unrecognized field %d while getting int operand.\n"
+msgstr ""
+
+#: fr30-ibld.c:1225 m32r-ibld.c:1030
+#, c-format
+msgid "Unrecognized field %d while getting vma operand.\n"
+msgstr ""
+
+#: fr30-ibld.c:1358 m32r-ibld.c:1132
+#, c-format
+msgid "Unrecognized field %d while setting int operand.\n"
+msgstr ""
+
+#: fr30-ibld.c:1484 m32r-ibld.c:1227
+#, c-format
+msgid "Unrecognized field %d while setting vma operand.\n"
+msgstr ""
+
+#: h8300-dis.c:404
+#, c-format
+msgid "Hmmmm %x"
+msgstr ""
+
+#: h8300-dis.c:416
+#, c-format
+msgid "Don't understand %x \n"
+msgstr ""
+
+#: h8500-dis.c:139
+#, c-format
+msgid "can't cope with insert %d\n"
+msgstr ""
+
+#. Couldn't understand anything
+#: h8500-dis.c:344
+#, c-format
+msgid "%02x\t\t*unknown*"
+msgstr ""
+
+#: m10200-dis.c:199
+#, c-format
+msgid "unknown\t0x%02x"
+msgstr ""
+
+#: m10200-dis.c:339
+#, c-format
+msgid "unknown\t0x%04lx"
+msgstr ""
+
+#: m10300-dis.c:706
+#, c-format
+msgid "unknown\t0x%04x"
+msgstr ""
+
+#: m68k-dis.c:410
+#, c-format
+msgid "<internal error in opcode table: %s %s>\n"
+msgstr ""
+
+#: m68k-dis.c:967
+#, c-format
+msgid "<function code %d>"
+msgstr ""
+
+#: m88k-dis.c:273
+#, c-format
+msgid "# <dis error: %08x>"
+msgstr ""
+
+#: mips-dis.c:373
+#, c-format
+msgid "# internal error, undefined modifier(%c)"
+msgstr ""
+
+#. I and Z are output operands and can`t be immediate
+#. * A is an address and we can`t have the address of
+#. * an immediate either. We don't know how much to increase
+#. * aoffsetp by since whatever generated this is broken
+#. * anyway!
+#.
+#: ns32k-dis.c:618
+msgid "$<undefined>"
+msgstr ""
+
+#: ppc-opc.c:586 ppc-opc.c:617
+msgid "invalid conditional option"
+msgstr ""
+
+#: ppc-opc.c:619
+msgid "attempt to set y bit when using + or - modifier"
+msgstr ""
+
+#: ppc-opc.c:674
+msgid "ignoring least significant bits in branch offset"
+msgstr ""
+
+#: ppc-opc.c:709 ppc-opc.c:746
+msgid "illegal bitmask"
+msgstr ""
+
+#: ppc-opc.c:815
+msgid "value out of range"
+msgstr ""
+
+#: ppc-opc.c:889
+msgid "index register in load range"
+msgstr ""
+
+#: ppc-opc.c:904
+msgid "invalid register operand when updating"
+msgstr ""
+
+#. Mark as non-valid instruction
+#: sparc-dis.c:739
+msgid "unknown"
+msgstr ""
+
+#: sparc-dis.c:811
+#, c-format
+msgid "Internal error:  bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
+msgstr ""
+
+#: sparc-dis.c:822
+#, c-format
+msgid "Internal error: bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
+msgstr ""
+
+#: sparc-dis.c:871
+#, c-format
+msgid "Internal error: bad sparc-opcode.h: \"%s\" == \"%s\"\n"
+msgstr ""
