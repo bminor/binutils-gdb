@@ -26,8 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf-bfd.h"
 #include "elf/i860.h"
 
-/* special_function for R_860_PC26 relocation.
-   Derived from bfd_elf_generic_reloc (elf.c) with modifications.  */
+/* special_function for R_860_PC26 relocation.  */
 static bfd_reloc_status_type
 i860_howto_pc26_reloc (bfd *abfd ATTRIBUTE_UNUSED,
                        arelent *reloc_entry,
