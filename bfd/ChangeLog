@@ -1,3 +1,17 @@
+2001-12-19  Steve Ellcey  <sje@cup.hp.com>
+
+	* config.bfd (bfd_elf32_ia64_hpux_big_vec): New vector for
+	ia64*-*-hpux* target.
+	(bfd_elf64_ia64_hpux_big_vec): Likewise.
+	* targets.c: Ditto.
+	* configure.in: Ditto.
+	* configure: Regenerate
+	* elfxx-ia64.c (elfNN_ia64_final_write_processing): Replace use of
+	alloca with bfd_malloc.
+	(get_local_sym_hash): Likewise.
+	(elfNN_hpux_post_process_headers): New function.
+	#include elfNN-target.h again with values for IA64 HP-UX vector.
+
 2001-12-18  H.J. Lu <hjl@gnu.org>
 
 	* elf.c (_bfd_elf_copy_private_bfd_data): Also copy GP.
