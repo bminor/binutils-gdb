@@ -1066,7 +1066,14 @@ generic_link_add_symbol_list (abfd, info, symbol_count, symbols)
 		  || (bfd_get_section (p) != &bfd_und_section
 		      && (! bfd_is_com_section (bfd_get_section (p))
 			  || (bfd_get_section (h->sym) == &bfd_und_section))))
-		h->sym = p;
+		{
+		  h->sym = p;
+		  /* BSF_OLD_COMMON is a hack to support COFF reloc
+		     reading, and it should go away when the COFF
+		     linker is switched to the new version.  */
+		  if (bfd_is_com_section (bfd_get_section (p)))
+		    p->flags |= BSF_OLD_COMMON;
+		}
 	    }
 	}
     }
