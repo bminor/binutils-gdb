@@ -1,3 +1,19 @@
+Thu Jul 28 15:45:37 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/tc-sparc.c (sparc_ip): Check more carefully for
+	conflicting architectures.
+	(md_parse_option) [NO_V9]: Complain if v9 was selected.
+	(md_show_usage): Derive architecture list in usage message from
+	architecture_pname array.
+	(cypress): Macro deleted.
+	(op_hash): Don't initialize.
+	(s_common): Use bfd_und_section_ptr instead of bfd_und_section.
+
+	* config/tc-sparc.c (BSR): New function.
+	(sparc_ip): Use it for right-shift operations of 32 bits or more.
+
+	* config/tc-sparc.c (sparc_ip): Implement new operand type 'x'.
+
 Tue Jul 26 18:21:24 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* config/obj-coff.h: Moved common includes and TARGET_FORMAT

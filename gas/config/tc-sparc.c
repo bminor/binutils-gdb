@@ -17,8 +17,6 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-#define cypress 1234
-
 #include <stdio.h>
 #include <ctype.h>
 
@@ -30,7 +28,11 @@
 
 static void sparc_ip PARAMS ((char *));
 
+#ifdef sparcv9
+static enum sparc_architecture current_architecture = v9;
+#else
 static enum sparc_architecture current_architecture = v6;
+#endif
 static int architecture_requested;
 static int warn_on_bump;
 
@@ -39,7 +41,7 @@ extern int target_big_endian;
 const relax_typeS md_relax_table[1];
 
 /* handle of the OPCODE hash table */
-static struct hash_control *op_hash = NULL;
+static struct hash_control *op_hash;
 
 static void s_data1 PARAMS ((void));
 static void s_seg PARAMS ((int));
@@ -59,14 +61,12 @@ const pseudo_typeS md_pseudo_table[] =
   {"seg", s_seg, 0},
   {"skip", s_space, 0},
   {"word", cons, 4},
-/* start-sanitize-v9 */
 #ifndef NO_V9
   {"xword", cons, 8},
 #ifdef OBJ_ELF
   {"uaxword", cons, 8},
 #endif
 #endif
-/* end-sanitize-v9 */
 #ifdef OBJ_ELF
   /* these are specific to sparc/svr4 */
   {"pushsection", obj_elf_section, 0},
@@ -202,7 +202,7 @@ s_reserve (ignore)
   if (strncmp (input_line_pointer, ",\"bss\"", 6) != 0
       && strncmp (input_line_pointer, ",\".bss\"", 7) != 0)
     {
-      as_bad ("bad .reserve segment -- expected BSS segment", input_line_pointer);
+      as_bad ("bad .reserve segment -- expected BSS segment");
       return;
     }
 
@@ -404,9 +404,12 @@ s_common (ignore)
 	{
 	allocate_common:
 	  S_SET_VALUE (symbolP, (valueT) size);
+#ifdef OBJ_ELF
+	  S_SET_ALIGN (symbolP, temp);
+#endif
 	  S_SET_EXTERNAL (symbolP);
 	  /* should be common, but this is how gas does it for now */
-	  S_SET_SEGMENT (symbolP, &bfd_und_section);
+	  S_SET_SEGMENT (symbolP, bfd_und_section_ptr);
 	}
     }
   else
@@ -500,7 +503,6 @@ s_proc (ignore)
   ++input_line_pointer;
 }
 
-/* start-sanitize-v9 */
 #ifndef NO_V9
 
 struct priv_reg_entry
@@ -540,7 +542,7 @@ struct membar_masks
 
 #define MEMBAR_MASKS_SIZE 7
 
-struct membar_masks membar_masks[MEMBAR_MASKS_SIZE] =
+static const struct membar_masks membar_masks[MEMBAR_MASKS_SIZE] =
 {
   {"Sync", 4, 0x40},
   {"MemIssue", 8, 0x20},
@@ -559,7 +561,6 @@ cmp_reg_entry (p, q)
 }
 
 #endif
-/* end-sanitize-v9 */
 
 /* This function is called once, at assembler startup time.  It should
    set up all the tables, etc. that the MD part of the assembler will need. */
@@ -608,16 +609,10 @@ md_begin ()
   for (i = 'A'; i <= 'F'; ++i)
     toHex[i] = i + 10 - 'A';
 
-  /* start-sanitize-v9 */
 #ifndef NO_V9
-#ifdef sparcv9
-  current_architecture = v9;
-#endif
-
   qsort (priv_reg_table, sizeof (priv_reg_table) / sizeof (priv_reg_table[0]),
 	 sizeof (priv_reg_table[0]), cmp_reg_entry);
 #endif
-  /* end-sanitize-v9 */
 
   target_big_endian = 1;
 }
@@ -705,6 +700,17 @@ md_assemble (str)
     }
 }
 
+/* Implement big shift right.  */
+static bfd_vma
+BSR (val, amount)
+     bfd_vma val;
+     int amount;
+{
+  if (sizeof (bfd_vma) <= 4 && amount >= 32)
+    as_fatal ("Support for 64-bit arithmetic not compiled in.");
+  return val >> amount;
+}
+
 static void
 sparc_ip (str)
      char *str;
@@ -766,8 +772,6 @@ sparc_ip (str)
 	{
 	  switch (*args)
 	    {
-
-	      /* start-sanitize-v9 */
 #ifndef NO_V9
 	    case 'K':
 	      {
@@ -909,7 +913,6 @@ sparc_ip (str)
 		  goto error;
 		}
 #endif
-	      /* end-sanitize-v9 */
 
 	    case 'M':
 	    case 'm':
@@ -945,7 +948,6 @@ sparc_ip (str)
 		}		/* if %asr */
 	      break;
 
-	      /* start-sanitize-v9 */
 #ifndef NO_V9
 	    case 'I':
 	      the_insn.reloc = BFD_RELOC_SPARC_11;
@@ -1071,7 +1073,6 @@ sparc_ip (str)
 		}
 	      break;
 #endif /* NO_V9 */
-	      /* end-sanitize-v9 */
 
 	    case '\0':		/* end of args */
 	      if (*s == '\0')
@@ -1310,7 +1311,6 @@ sparc_ip (str)
 			break;
 		      }		/* register must be multiple of 4 */
 
-/* start-sanitize-v9 */
 #ifndef NO_V9
 		    if (mask >= 64)
 		      {
@@ -1322,15 +1322,12 @@ sparc_ip (str)
 			mask -= 31;
 		      }	/* wrap high bit */
 #else
-/* end-sanitize-v9 */
 		    if (mask >= 32)
 		      {
 			error_message = ": There are only 32 f registers; [0-31]";
 			goto error;
 		      }	/* on error */
-/* start-sanitize-v9 */
 #endif
-/* end-sanitize-v9 */
 		  }
 		else
 		  {
@@ -1411,7 +1408,6 @@ sparc_ip (str)
 		      the_insn.reloc = BFD_RELOC_LO10;
 		      s += 3;
 		    }
-		  /* start-sanitize-v9 */
 #ifndef NO_V9
 		  else if (c == 'u'
 			   && s[2] == 'h'
@@ -1428,7 +1424,6 @@ sparc_ip (str)
 		      s += 4;
 		    }
 #endif /* NO_V9 */
-		  /* end-sanitize-v9 */
 		  else
 		    break;
 		}
@@ -1475,7 +1470,6 @@ sparc_ip (str)
 		  && the_insn.exp.X_add_symbol == 0
 		  && the_insn.exp.X_op_symbol == 0)
 		{
-		  /* start-sanitize-v9 */
 #ifndef NO_V9
 		  /* Handle %uhi/%ulo by moving the upper word to the lower
 		     one and pretending it's %hi/%lo.  We also need to watch
@@ -1485,11 +1479,11 @@ sparc_ip (str)
 		    {
 		    case BFD_RELOC_SPARC_HH22:
 		      the_insn.reloc = BFD_RELOC_HI22;
-		      the_insn.exp.X_add_number >>= 32;
+		      the_insn.exp.X_add_number = BSR (the_insn.exp.X_add_number, 32);
 		      break;
 		    case BFD_RELOC_SPARC_HM10:
 		      the_insn.reloc = BFD_RELOC_LO10;
-		      the_insn.exp.X_add_number >>= 32;
+		      the_insn.exp.X_add_number = BSR (the_insn.exp.X_add_number, 32);
 		      break;
 		    default:
 		      break;
@@ -1499,7 +1493,6 @@ sparc_ip (str)
 		      break;
 		    }
 #endif
-		  /* end-sanitize-v9 */
 		  /* For pc-relative call instructions, we reject
 		     constants to get better code.  */
 		  if (the_insn.pcrel
@@ -1551,9 +1544,7 @@ sparc_ip (str)
 
 	    case 'A':
 	      {
-/* start-sanitize-v9 */
 #ifdef NO_V9
-/* end-sanitize-v9 */
 		char *push = input_line_pointer;
 		expressionS e;
 
@@ -1569,7 +1560,6 @@ sparc_ip (str)
 		  }		/* if absolute */
 
 		break;
-/* start-sanitize-v9 */
 #else
 		int asi = 0;
 
@@ -1617,7 +1607,6 @@ sparc_ip (str)
 		opcode |= ASI (asi);
 		continue;
 #endif
-/* end-sanitize-v9 */
 	      }			/* alternate space */
 
 	    case 'p':
@@ -1657,7 +1646,6 @@ sparc_ip (str)
 		}
 	      break;
 
-	      /* start-sanitize-v9 */
 #ifndef NO_V9
 	    case 'o':
 	      if (strncmp (s, "%asi", 4) != 0)
@@ -1677,7 +1665,6 @@ sparc_ip (str)
 	      s += 4;
 	      continue;
 #endif /* NO_V9 */
-	      /* end-sanitize-v9 */
 
 	    case 't':
 	      if (strncmp (s, "%tbr", 4) != 0)
@@ -1690,6 +1677,30 @@ sparc_ip (str)
 		break;
 	      s += 4;
 	      continue;
+
+#ifndef NO_V9
+	    case 'x':
+	      {
+		char *push = input_line_pointer;
+		expressionS e;
+
+		input_line_pointer = s;
+		expression (&e);
+		if (e.X_op == O_constant)
+		  {
+		    int n = e.X_add_number;
+		    if (n != e.X_add_number || (n & ~0x1ff) != 0)
+		      as_bad ("OPF immediate operand out of range (0-0x1ff)");
+		    else
+		      opcode |= e.X_add_number << 5;
+		  }
+		else
+		  as_bad ("non-immediate OPF operand, ignored");
+		s = input_line_pointer;
+		input_line_pointer = push;
+		continue;
+	      }
+#endif
 
 	    case 'y':
 	      if (strncmp (s, "%y", 2) != 0)
@@ -1721,21 +1732,15 @@ sparc_ip (str)
 	}
       else
 	{
-	  if (insn->architecture > current_architecture)
+	  if (insn->architecture > current_architecture
+	      || (insn->architecture != current_architecture
+		  && current_architecture > v8))
 	    {
 	      if ((!architecture_requested || warn_on_bump)
-		  &&
-	      /* start-sanitize-v9 */
-#ifndef NO_V9
-		  !ARCHITECTURES_CONFLICT_P (current_architecture,
-					     insn->architecture)
-#else
-	      /* end-sanitize-v9 */
-		  1
-	      /* start-sanitize-v9 */
-#endif
-	      /* end-sanitize-v9 */
-		)
+		  && !ARCHITECTURES_CONFLICT_P (current_architecture,
+						insn->architecture)
+		  && !ARCHITECTURES_CONFLICT_P (insn->architecture,
+						current_architecture))
 		{
 		  if (warn_on_bump)
 		    {
@@ -1749,10 +1754,10 @@ sparc_ip (str)
 		}
 	      else
 		{
-		  as_bad ("architecture mismatch on \"%s\" (\"%s\").  current architecture is \"%s\"",
-			  str,
-			  architecture_pname[insn->architecture],
-			  architecture_pname[current_architecture]);
+		  as_bad ("Architecture mismatch on \"%s\".", str);
+		  as_tsktsk (" (Requires %s; current architecture is %s.)",
+			     architecture_pname[insn->architecture],
+			     architecture_pname[current_architecture]);
 		  return;
 		}		/* if bump ok else error */
 	    }			/* if architecture higher */
@@ -1923,17 +1928,19 @@ md_apply_fix (fixP, value)
       buf[3] = val;
       break;
 
-      /* start-sanitize-v9 */
 #ifndef NO_V9
     case BFD_RELOC_64:
-      buf[0] = val >> 56;
-      buf[1] = val >> 48;
-      buf[2] = val >> 40;
-      buf[3] = val >> 32;
-      buf[4] = val >> 24;
-      buf[5] = val >> 16;
-      buf[6] = val >> 8;
-      buf[7] = val;
+      {
+	bfd_vma valh = BSR (val, 32);
+	buf[0] = valh >> 24;
+	buf[1] = valh >> 16;
+	buf[2] = valh >> 8;
+	buf[3] = valh;
+	buf[4] = val >> 24;
+	buf[5] = val >> 16;
+	buf[6] = val >> 8;
+	buf[7] = val;
+      }
       break;
 
     case BFD_RELOC_SPARC_11:
@@ -1985,16 +1992,13 @@ md_apply_fix (fixP, value)
       break;
 
     case BFD_RELOC_SPARC_HH22:
-      val >>= 32;
+      val = BSR (val, 32);
       /* intentional fallthrough */
 #endif /* NO_V9 */
-      /* end-sanitize-v9 */
 
-      /* start-sanitize-v9 */
 #ifndef NO_V9
     case BFD_RELOC_SPARC_LM22:
 #endif
-      /* end-sanitize-v9 */
     case BFD_RELOC_HI22:
       if (!fixP->fx_addsy)
 	{
@@ -2019,13 +2023,11 @@ md_apply_fix (fixP, value)
       buf[3] = val & 0xff;
       break;
 
-      /* start-sanitize-v9 */
 #ifndef NO_V9
     case BFD_RELOC_SPARC_HM10:
-      val >>= 32;
+      val = BSR (val, 32);
       /* intentional fallthrough */
 #endif /* NO_V9 */
-      /* end-sanitize-v9 */
 
     case BFD_RELOC_LO10:
       if (!fixP->fx_addsy)
@@ -2046,7 +2048,7 @@ md_apply_fix (fixP, value)
       break;
 
     case BFD_RELOC_SPARC_WDISP22:
-      val = (val >>= 2) + 1;
+      val = (val >> 2) + 1;
       /* FALLTHROUGH */
     case BFD_RELOC_SPARC_BASE22:
       buf[1] |= (val >> 16) & 0x3f;
@@ -2093,7 +2095,6 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_SPARC13:
     case BFD_RELOC_SPARC_BASE13:
     case BFD_RELOC_SPARC_WDISP22:
-      /* start-sanitize-v9 */
     case BFD_RELOC_64:
     case BFD_RELOC_SPARC_10:
     case BFD_RELOC_SPARC_11:
@@ -2103,7 +2104,6 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_SPARC_PC_HH22:
     case BFD_RELOC_SPARC_PC_HM10:
     case BFD_RELOC_SPARC_PC_LM22:
-      /* end-sanitize-v9 */
       code = fixp->fx_r_type;
       break;
     default:
@@ -2200,7 +2200,7 @@ print_insn (insn)
  *	-bump
  *		Warn on architecture bumps.  See also -A.
  *
- *	-Av6, -Av7, -Av8, -Asparclite
+ *	-Av6, -Av7, -Av8, -Av9, -Asparclite
  *		Select the architecture.  Instructions or features not
  *		supported by the selected architecture cause fatal errors.
  *
@@ -2218,14 +2218,9 @@ print_insn (insn)
  *		architecture starts at the specified level, but bumps are
  *		warnings.
  *
- * start-sanitize-v9
- *	-Av9
- *		Another architecture switch.
- *
  * Note:
  *		Bumping between incompatible architectures is always an
  *		error.  For example, from sparclite to v9.
- * end-sanitize-v9
  */
 
 #ifdef OBJ_ELF
@@ -2271,8 +2266,15 @@ md_parse_option (c, arg)
 	  }
 	else
 	  {
-	    current_architecture = (enum sparc_architecture)
-	      (arch - architecture_pname);
+	    enum sparc_architecture new_arch = arch - architecture_pname;
+#ifdef NO_V9
+	    if (new_arch == v9)
+	      {
+		as_error ("v9 support not compiled in");
+		return 0;
+	      }
+#endif
+	    current_architecture = new_arch;
 	    architecture_requested = 1;
 	  }
       }
@@ -2312,9 +2314,15 @@ void
 md_show_usage (stream)
      FILE *stream;
 {
-  fprintf(stream, "\
-SPARC options:\n\
--Av6 | -Av7 | -Av8 | -Asparclite\n\
+  const char **arch;
+  fprintf(stream, "SPARC options:\n");
+  for (arch = architecture_pname; *arch; arch++)
+    {
+      if (arch != architecture_pname)
+	fprintf (stream, " | ");
+      fprintf (stream, "-A%s", *arch);
+    }
+  fprintf (stream, "\n\
 			specify variant of SPARC architecture\n\
 -bump			warn when assembler switches architectures\n\
 -sparc			ignored\n");
