@@ -36,8 +36,6 @@ suitable for gas to consume.
 #include <stdio.h>
 #include "host.h"
 
-extern char *malloc ();
-
 #define MAX_INCLUDES 30		/* Maximum include depth */
 #define MAX_REASONABLE 1000	/* Maximum number of expansions */
 
