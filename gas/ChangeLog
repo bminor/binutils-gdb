@@ -1,5 +1,16 @@
 Mon Feb  5 16:29:11 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-i960.c (ARCH_HX): Define.
+	(arch_tab): Add HX.
+	(targ_has_sfr): Handle ARCH_HX.
+	(targ_has_iclass): Handle ARCH_HX.
+	(tc_coff_fix2rtype): Add return 0 to avoid warning.
+	(tc_headers_hook): If the architecture was specified explicitly,
+	use it when setting the flags.  Set the extern variable coff_flags
+	rather than headers->filehdr.f_flags, since the latter is set
+	unconditionally in obj-coff.c.
+	(i960_handle_align): Remove unused variable fixp.
+
 	Support for building bfd and opcodes as shared libraries, based on
 	patches from Alan Modra <alan@spri.levels.unisa.edu.au>:
 	* configure.in: Set OPCODES and BFD to search directories.

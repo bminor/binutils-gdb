@@ -446,7 +446,8 @@ static struct hash_control *areg_hash;	/* Abase register hash table */
 #define ARCH_KB		2
 #define ARCH_MC		3
 #define ARCH_CA		4
-#define ARCH_XL		5
+#define ARCH_HX		5
+#define ARCH_XL		6
 int architecture = ARCH_ANY;	/* Architecture requested on invocation line */
 int iclasses_seen;		/* OR of instruction classes (I_* constants)
 				 *    for which we've actually assembled
@@ -938,6 +939,7 @@ static const struct tabentry arch_tab[] =
   {"KC", ARCH_MC},		/* Synonym for MC */
   {"MC", ARCH_MC},
   {"CA", ARCH_CA},
+  {"HX", ARCH_HX},
   {"XL", ARCH_XL},
   {NULL, 0}
 };
@@ -2751,6 +2753,8 @@ targ_has_sfr (n)
     case ARCH_MC:
     case ARCH_XL:
       return 0;
+    case ARCH_HX:
+      return ((0 <= n) && (n <= 4));
     case ARCH_CA:
     default:
       return ((0 <= n) && (n <= 2));
@@ -2766,8 +2770,7 @@ static
 int
 targ_has_iclass (ic)
      /* Instruction class;  one of:
-        I_BASE, I_CX, I_DEC, I_KX, I_FP, I_MIL, I_CASIM
-        or I_XL
+        I_BASE, I_CX, I_DEC, I_KX, I_FP, I_MIL, I_CASIM, I_CX2, I_HX, I_HX2
       */
      int ic;
 {
@@ -2782,8 +2785,10 @@ targ_has_iclass (ic)
       return ic & (I_BASE | I_KX | I_FP | I_DEC | I_MIL);
     case ARCH_CA:
       return ic & (I_BASE | I_CX | I_CX2 | I_CASIM);
+    case ARCH_HX:
+      return ic & (I_BASE | I_CX2 | I_HX | I_HX2);
     case ARCH_XL:
-      return ic & (I_BASE | I_CX2 | I_XL);
+      return ic & (I_BASE | I_CX2 | I_HX2); /* XL */
     default:
       if ((iclasses_seen & (I_KX | I_FP | I_DEC | I_MIL))
 	  && (iclasses_seen & (I_CX | I_CX2)))
@@ -2952,6 +2957,7 @@ tc_coff_fix2rtype (fixP)
     return R_IPRMED;
 
   abort ();
+  return 0;
 }
 
 int
@@ -2974,37 +2980,56 @@ md_section_align (seg, addr)
   return ((addr + (1 << section_alignment[(int) seg]) - 1) & (-1 << section_alignment[(int) seg]));
 }				/* md_section_align() */
 
+extern int coff_flags;
+
 #ifdef OBJ_COFF
 void
 tc_headers_hook (headers)
      object_headers *headers;
 {
-  if (iclasses_seen == I_BASE)
+  switch (architecture)
     {
-      headers->filehdr.f_flags |= F_I960CORE;
+    case ARCH_KA:
+      coff_flags |= F_I960KA;
+      break;
+
+    case ARCH_KB:
+      coff_flags |= F_I960KB;
+      break;
+
+    case ARCH_MC:
+      coff_flags |= F_I960MC;
+      break;
+
+    case ARCH_CA:
+      coff_flags |= F_I960CA;
+      break;
+
+    case ARCH_HX:
+      coff_flags |= F_I960HX;
+      break;
+
+    case ARCH_XL:
+      coff_flags |= F_I960XL;
+      break; /* XL */
+
+    default:
+      if (iclasses_seen == I_BASE)
+	coff_flags |= F_I960CORE;
+      else if (iclasses_seen & I_CX)
+	coff_flags |= F_I960CA;
+      else if (iclasses_seen & (I_HX | I_HX2))
+	coff_flags |= F_I960HX;
+      else if (iclasses_seen & I_CX2)
+	coff_flags |= F_I960CA;
+      else if (iclasses_seen & I_MIL)
+	coff_flags |= F_I960MC;
+      else if (iclasses_seen & (I_DEC | I_FP))
+	coff_flags |= F_I960KB;
+      else
+	coff_flags |= F_I960KA;
+      break;
     }
-  else if (iclasses_seen & I_CX)
-    {
-      headers->filehdr.f_flags |= F_I960CA;
-    }
-  else if (iclasses_seen & I_XL)
-    headers->filehdr.f_flags |= F_I960XL;
-  else if (iclasses_seen & I_CX2)
-    {
-      headers->filehdr.f_flags |= F_I960CA;
-    }
-  else if (iclasses_seen & I_MIL)
-    {
-      headers->filehdr.f_flags |= F_I960MC;
-    }
-  else if (iclasses_seen & (I_DEC | I_FP))
-    {
-      headers->filehdr.f_flags |= F_I960KB;
-    }
-  else
-    {
-      headers->filehdr.f_flags |= F_I960KA;
-    }				/* set arch flag */
 
   if (flag_readonly_data_in_text)
     {
@@ -3171,8 +3196,6 @@ void
 i960_handle_align (fragp)
      fragS *fragp;
 {
-  fixS *fixp;
-
   if (!linkrelax)
     return;
 
@@ -3191,8 +3214,8 @@ i960_handle_align (fragp)
     return;
 
   /* alignment directive */
-  fixp = fix_new (fragp, fragp->fr_fix, fragp->fr_offset, 0, 0, 0,
-		  (int) fragp->fr_type);
+  fix_new (fragp, fragp->fr_fix, fragp->fr_offset, 0, 0, 0,
+	   (int) fragp->fr_type);
 #endif /* OBJ_BOUT */
 }
 
