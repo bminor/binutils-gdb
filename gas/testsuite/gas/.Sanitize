@@ -23,6 +23,12 @@ else
 	lose_these_too="arc ${lose_these_too}"
 fi
 
+if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
+	keep_these_too="tic80 ${keep_these_too}"
+else
+	lose_these_too="tic80 ${lose_these_too}"
+fi
+
 if ( echo $* | grep keep\-v850 > /dev/null ) ; then
 	keep_these_too="v850 ${keep_these_too}"
 else
