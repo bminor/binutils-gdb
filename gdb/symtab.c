@@ -970,7 +970,7 @@ find_pc_symtab (pc)
 {
   register struct block *b;
   struct blockvector *bv;
-  register struct symtab *s = 0;
+  register struct symtab *s = NULL;
   register struct partial_symtab *ps;
   register struct objfile *objfile;
 
@@ -985,6 +985,7 @@ find_pc_symtab (pc)
 	return (s);
     }
 
+  s = NULL;
   ps = find_pc_psymtab (pc);
   if (ps)
     {
@@ -992,6 +993,7 @@ find_pc_symtab (pc)
 	printf_filtered ("(Internal error: pc 0x%x in read in psymtab, but not in symtab.)\n", pc);
       s = PSYMTAB_TO_SYMTAB (ps);
     }
+  return (s);
 }
 
 /* Find the source file and line number for a given PC value.

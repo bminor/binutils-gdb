@@ -1,5 +1,8 @@
 Sun Nov 15 09:22:09 1992  Fred Fish  (fnf@cygnus.com)
 
+	* Makefile.in (VERSION):  Bump to 4.7.2
+	* symtab.c (find_pc_symtab):  Fix return of random value
+	to caller.
 	* Makefile.in (SFILES_MAINDIR):  Add ch-exp.y.
 	* Makefile.in (YYFILES):  Add ch-exp.tab.c.
 	* Makefile.in (YYOBJ):  Add ch-exp.tab.o.
