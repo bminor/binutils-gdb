@@ -1,3 +1,30 @@
+Sat Mar 15 19:00:14 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* obstack.h: Update to current FSF version.
+
+Thu Mar  6 15:46:59 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* callback.h (struct host_callback_struct): Add callbacks -
+ 	flush_stdout, write_stderr, flush_stderr, vprintf_filtered,
+ 	evprintf_filtered.  Delete redundant callbacks - printf_filtered.
+
+Thu Feb 27 23:18:27 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* bfdlink.h (struct bfd_link_info): Remove lprefix and lprefix_len
+	fields.
+
+Tue Feb 25 00:10:49 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* dis-asm.h (INIT_DISASSEMBLE_INFO_NO_ARCH): Initialize
+	bytes_per_chunk and display_endian.
+
+Mon Feb 24 17:47:02 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Eric Youngdale <eric@andante.jic.com>:
+	* bfdlink.h (struct bfd_elf_version_expr): Define.
+	(struct bfd_elf_version_deps): Define.
+	(struct bfd_elf_version_tree): Define.
+
 Thu Feb  6 14:20:01 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* dis-asm.h: (disassemble_info):  Add new fields
