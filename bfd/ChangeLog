@@ -1,3 +1,8 @@
+2002-09-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc_build_one_stub): Don't build glink stubs here.
+	(ppc64_elf_build_stubs): Build them here instead.
+
 2002-09-24  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf32-sparc.c (elf32_sparc_relocate_section): Put R_SPARC_RELATIVE
