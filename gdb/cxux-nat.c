@@ -54,11 +54,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define PSR_OFFSET  (PT_PSR  * sizeof(int))
 #define FPSR_OFFSET (PT_FPSR * sizeof(int))
 #define FPCR_OFFSET (PT_FPCR * sizeof(int))
-#else  /* _CX_UX */
-/* define offsets to the pc instruction offsets in ptrace_user struct */
-#define SXIP_OFFSET ((char *)&u.pt_sigframe.dg_sigframe.sc_sxip - (char *)&u)
-#define SNIP_OFFSET ((char *)&u.pt_sigframe.dg_sigframe.sc_snip - (char *)&u)
-#define SFIP_OFFSET ((char *)&u.pt_sigframe.dg_sigframe.sc_sfip - (char *)&u)
 
 #define XREGADDR(r) (((char *)&u.pt_x0-(char *)&u) + \
                      ((r)-X0_REGNUM)*sizeof(X_REGISTER_RAW_TYPE))
@@ -498,3 +493,29 @@ supply_fpregset (fpregsetp)
 }
 
 #endif /* _ES_MP */
+
+#ifdef _CX_UX
+
+#include <sys/regset.h>
+
+unsigned int m88k_harris_core_register_addr(int regno, int reg_ptr)
+{
+   unsigned int word_offset;
+
+   switch (regno) {
+    case PSR_REGNUM  : word_offset = R_PSR;  break;
+    case FPSR_REGNUM : word_offset = R_FPSR; break;
+    case FPCR_REGNUM : word_offset = R_FPCR; break;
+    case SXIP_REGNUM : word_offset = R_XIP;  break;
+    case SNIP_REGNUM : word_offset = R_NIP;  break;
+    case SFIP_REGNUM : word_offset = R_FIP;  break;
+    default :
+      if (regno <= FP_REGNUM) 
+            word_offset = regno;
+      else 
+            word_offset = ((regno - X0_REGNUM) * 4) + R_X0;
+   }
+   return (word_offset * 4);
+}
+
+#endif /* _CX_UX */

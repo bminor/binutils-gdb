@@ -1,5 +1,9 @@
 Sat Aug 13 08:22:50 1994  Fred Fish  (fnf@cygnus.com)
 
+	Harris CX/UX support, from Bob Rusk (rrusk@mail.csd.harris.com).
+	* cxux-nat.c:  Remove dangling #else block.
+	((m88k_harris_core_register_addr):  New function.
+
 	* environ.c (init_environ):  If no environment, do nothing.
 
 Fri Aug 12 15:52:37 1994  Stu Grossman  (grossman@cygnus.com)
