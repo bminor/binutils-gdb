@@ -1,3 +1,7 @@
+Tue Sep 16 14:16:17 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* v850.h (reloc_type): Add R_V850_TDA_16_16_OFFSET.
+
 Wed Sep  3 15:11:14 1997  Richard Henderson  <rth@cygnus.com>
 
 	* mips.h: Correct typo in comment.

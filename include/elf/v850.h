@@ -69,6 +69,7 @@ enum reloc_type
   R_V850_TDA_6_8_OFFSET,		/* For sst.w, sld.w */
   R_V850_TDA_7_8_OFFSET,		/* For sst.h, sld.h */
   R_V850_TDA_7_7_OFFSET,		/* For sst.b, sld.b */
+  R_V850_TDA_16_16_OFFSET,		/* For set1, clr1, not1, tst1, movea, movhi */
 /* start-sanitize-v850e */
   R_V850_TDA_4_5_OFFSET,		/* For sld.hu */
   R_V850_TDA_4_4_OFFSET,		/* For sld.bu */
