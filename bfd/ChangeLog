@@ -1,3 +1,8 @@
+Sun Aug  1 22:54:08 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* configure.host, configure.in, hosts/i386lynx.h:  Lynx/386
+	host and target info.
+
 Fri Jul 30 18:08:27 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* nlm32-i386.c: New file.  First cut at i386 NLM code.
