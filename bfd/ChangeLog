@@ -1,3 +1,14 @@
+2003-04-04  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* elf32-m68hc11.c (m68hc11_elf_relax_delete_bytes): Also adjust
+	symbols that mark the end of the section.
+	(m68hc11_elf_relax_section): Use R_M68HC11_PCREL_8 relocs when
+	converting to a relative branch so that the offset is computed after
+	the relaxation; also relocate a jsr into a bsr if possible but don't
+	relax them if they are to a far symbol as we need to call the
+	trampoline code.
+	(elf_m68hc11_howto_table): Set pcrel_offset to true.
+
 2003-04-04  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* archures.c: Namespace cleanup. Rename bfd_mach_c3x to

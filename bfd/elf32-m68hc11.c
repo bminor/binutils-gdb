@@ -1,5 +1,5 @@
 /* Motorola 68HC11-specific support for 32-bit ELF
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Contributed by Stephane Carrez (stcarrez@nerim.fr)
    (Heavily copied from the D10V port by Martin Hunt (hunt@cygnus.com))
 
@@ -143,7 +143,7 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
 	 FALSE,			/* partial_inplace */
 	 0x00ff,		/* src_mask */
 	 0x00ff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 TRUE),                 /* pcrel_offset */
 
   /* A 16 bit absolute relocation */
   HOWTO (R_M68HC11_16,		/* type */
@@ -204,7 +204,7 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 TRUE),                 /* pcrel_offset */
 
   /* GNU extension to record C++ vtable hierarchy */
   HOWTO (R_M68HC11_GNU_VTINHERIT,	/* type */
@@ -247,8 +247,8 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M68HC11_24",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
+	 0xffffff,		/* src_mask */
+	 0xffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   /* A 16-bit low relocation */
@@ -444,6 +444,9 @@ elf32_m68hc11_gc_sweep_hook (abfd, info, sec, relocs)
   /* We don't use got and plt entries for 68hc11/68hc12.  */
   return TRUE;
 }
+
+
+/* 68HC11 Linker Relaxation.  */
 
 struct m68hc11_direct_relax
 {
@@ -694,6 +697,7 @@ m68hc11_elf_relax_section (abfd, sec, link_info, again)
       bfd_vma value;
       Elf_Internal_Sym *isym;
       asection *sym_sec;
+      int is_far = 0;
 
       /* If this isn't something that can be relaxed, then ignore
 	 this reloc.  */
@@ -747,7 +751,7 @@ m68hc11_elf_relax_section (abfd, sec, link_info, again)
           prev_insn_group = 0;
 
 	  /* Do nothing if this reloc is the last byte in the section.  */
-	  if (irel->r_offset == sec->_cooked_size)
+	  if (irel->r_offset + 2 >= sec->_cooked_size)
 	    continue;
 
 	  /* See if the next instruction is an unconditional pc-relative
@@ -793,6 +797,7 @@ m68hc11_elf_relax_section (abfd, sec, link_info, again)
 	{
 	  /* A local symbol.  */
 	  isym = isymbuf + ELF32_R_SYM (irel->r_info);
+          is_far = isym->st_other & STO_M68HC12_FAR;
           sym_sec = bfd_section_from_elf_index (abfd, isym->st_shndx);
 	  symval = (isym->st_value
 		    + sym_sec->output_section->vma
@@ -818,6 +823,7 @@ m68hc11_elf_relax_section (abfd, sec, link_info, again)
 	      continue;
 	    }
 
+          is_far = h->other & STO_M68HC12_FAR;
           isym = 0;
           sym_sec = h->root.u.def.section;
 	  symval = (h->root.u.def.value
@@ -891,23 +897,25 @@ m68hc11_elf_relax_section (abfd, sec, link_info, again)
             {
               code = 0x20;
               bfd_put_8 (abfd, code, contents + prev_insn_branch->r_offset);
-              bfd_put_8 (abfd, offset,
+              bfd_put_8 (abfd, 0xff,
                          contents + prev_insn_branch->r_offset + 1);
+              irel->r_offset = prev_insn_branch->r_offset + 1;
               irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
-                                           R_M68HC11_NONE);
+                                           R_M68HC11_PCREL_8);
               m68hc11_elf_relax_delete_bytes (abfd, sec,
-                                              irel->r_offset, 1);
+                                              irel->r_offset + 1, 1);
             }
           else
             {
               code ^= 0x1;
               bfd_put_8 (abfd, code, contents + prev_insn_branch->r_offset);
-              bfd_put_8 (abfd, offset,
+              bfd_put_8 (abfd, 0xff,
                          contents + prev_insn_branch->r_offset + 1);
+              irel->r_offset = prev_insn_branch->r_offset + 1;
               irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
-                                           R_M68HC11_NONE);
+                                           R_M68HC11_PCREL_8);
               m68hc11_elf_relax_delete_bytes (abfd, sec,
-                                              irel->r_offset - 1, 3);
+                                              irel->r_offset + 1, 3);
             }
           prev_insn_branch = 0;
           *again = TRUE;
@@ -991,14 +999,14 @@ m68hc11_elf_relax_section (abfd, sec, link_info, again)
           /* That will change things, so, we should relax again.  */
           *again = TRUE;
         }
-      else if (ELF32_R_TYPE (irel->r_info) == R_M68HC11_16)
+      else if (ELF32_R_TYPE (irel->r_info) == R_M68HC11_16 && !is_far)
         {
           unsigned char code;
           bfd_vma offset;
 
           prev_insn_branch = 0;
           code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
-          if (code == 0x7e)
+          if (code == 0x7e || code == 0xbd)
             {
               offset = value - (irel->r_offset
                                 + sec->output_section->vma
@@ -1021,13 +1029,13 @@ m68hc11_elf_relax_section (abfd, sec, link_info, again)
                   free_extsyms = NULL;
 
                   /* Shrink the branch.  */
-                  code = 0x20;
+                  code = (code == 0x7e) ? 0x20 : 0x8d;
                   bfd_put_8 (abfd, code,
                              contents + irel->r_offset - 1);
-                  bfd_put_8 (abfd, offset,
+                  bfd_put_8 (abfd, 0xff,
                              contents + irel->r_offset);
                   irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
-                                               R_M68HC11_NONE);
+                                               R_M68HC11_PCREL_8);
                   m68hc11_elf_relax_delete_bytes (abfd, sec,
                                                   irel->r_offset + 1, 1);
                   /* That will change things, so, we should relax again.  */
@@ -1220,7 +1228,7 @@ m68hc11_elf_relax_delete_bytes (abfd, sec, addr, count)
     {
       if (isym->st_shndx == sec_shndx
 	  && isym->st_value > addr
-	  && isym->st_value < toaddr)
+	  && isym->st_value <= toaddr)
 	isym->st_value -= count;
     }
 
@@ -1236,7 +1244,7 @@ m68hc11_elf_relax_delete_bytes (abfd, sec, addr, count)
 	   || sym_hash->root.type == bfd_link_hash_defweak)
 	  && sym_hash->root.u.def.section == sec
 	  && sym_hash->root.u.def.value > addr
-	  && sym_hash->root.u.def.value < toaddr)
+	  && sym_hash->root.u.def.value <= toaddr)
 	{
 	  sym_hash->root.u.def.value -= count;
 	}
