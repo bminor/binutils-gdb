@@ -326,13 +326,13 @@ static enum mips_pic_level mips_pic;
 /* Warn about all NOPS that the assembler generates.  */
 static int warn_nops = 0;
 
-/* 1 if we should generate 32 bit offsets from the GP register in
+/* 1 if we should generate 32 bit offsets from the $gp register in
    SVR4_PIC mode.  Currently has no meaning in other modes.  */
-static int mips_big_got;
+static int mips_big_got = 0;
 
 /* 1 if trap instructions should used for overflow rather than break
    instructions.  */
-static int mips_trap;
+static int mips_trap = 0;
 
 /* 1 if double width floating point constants should not be constructed
    by assembling two single width halves into two single width floating
@@ -702,7 +702,7 @@ static void set_at PARAMS ((int *counter, int reg, int unsignedp));
 static void check_absolute_expr PARAMS ((struct mips_cl_insn * ip,
 					 expressionS *));
 static void load_register PARAMS ((int *, int, expressionS *, int));
-static void load_address PARAMS ((int *, int, expressionS *, int, int *));
+static void load_address PARAMS ((int *, int, expressionS *, int *));
 static void move_register PARAMS ((int *, int, int));
 static void macro PARAMS ((struct mips_cl_insn * ip));
 static void mips16_macro PARAMS ((struct mips_cl_insn * ip));
@@ -3660,11 +3660,10 @@ load_register (counter, reg, ep, dbl)
 /* Load an address into a register.  */
 
 static void
-load_address (counter, reg, ep, dbl, used_at)
+load_address (counter, reg, ep, used_at)
      int *counter;
      int reg;
      expressionS *ep;
-     int dbl;
      int *used_at;
 {
   char *p = NULL;
@@ -3678,7 +3677,7 @@ load_address (counter, reg, ep, dbl, used_at)
 
   if (ep->X_op == O_constant)
     {
-      load_register (counter, reg, ep, dbl);
+      load_register (counter, reg, ep, HAVE_64BIT_ADDRESSES);
       return;
     }
 
@@ -3708,7 +3707,7 @@ load_address (counter, reg, ep, dbl, used_at)
 	   dsll		$reg,16
 	   daddiu	$reg,<sym>		(BFD_RELOC_LO16)
        */
-      if (dbl)
+      if (HAVE_64BIT_ADDRESSES)
 	{
 	  /* We don't do GP optimization for now because RELAX_ENCODE can't
 	     hold the data for such large chunks.  */
@@ -3752,8 +3751,8 @@ load_address (counter, reg, ep, dbl, used_at)
 	    {
 	      frag_grow (20);
 	      macro_build ((char *) NULL, counter, ep,
-			   dbl ? "daddiu" : "addiu", "t,r,j", reg, GP,
-			   (int) BFD_RELOC_GPREL16);
+			   HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu", "t,r,j",
+			   reg, mips_gp_register, (int) BFD_RELOC_GPREL16);
 	      p = frag_var (rs_machine_dependent, 8, 0,
 			    RELAX_ENCODE (4, 8, 0, 4, 0,
 					  mips_opts.warn_about_macros),
@@ -3762,7 +3761,8 @@ load_address (counter, reg, ep, dbl, used_at)
 	  macro_build_lui (p, counter, ep, reg);
 	  if (p != NULL)
 	    p += 4;
-	  macro_build (p, counter, ep, dbl ? "daddiu" : "addiu",
+	  macro_build (p, counter, ep,
+		       HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
 		       "t,r,j", reg, reg, (int) BFD_RELOC_LO16);
 	}
     }
@@ -3781,8 +3781,8 @@ load_address (counter, reg, ep, dbl, used_at)
       ep->X_add_number = 0;
       frag_grow (20);
       macro_build ((char *) NULL, counter, ep,
-		   HAVE_32BIT_ADDRESSES ? "lw" : "ld",
-		   "t,o(b)", reg, (int) BFD_RELOC_MIPS_GOT16, GP);
+		   HAVE_32BIT_ADDRESSES ? "lw" : "ld", "t,o(b)",
+		   reg, (int) BFD_RELOC_MIPS_GOT16, mips_gp_register);
       macro_build ((char *) NULL, counter, (expressionS *) NULL, "nop", "");
       p = frag_var (rs_machine_dependent, 4, 0,
 		    RELAX_ENCODE (0, 4, -8, 0, 0, mips_opts.warn_about_macros),
@@ -3861,9 +3861,10 @@ load_address (counter, reg, ep, dbl, used_at)
     {
       /* We always do
 	   addiu	$reg,$gp,<sym>		(BFD_RELOC_GPREL16)
-	 */
-      macro_build ((char *) NULL, counter, ep, dbl ? "daddiu" : "addiu",
-		   "t,r,j", reg, GP, (int) BFD_RELOC_GPREL16);
+       */
+      macro_build ((char *) NULL, counter, ep,
+		   HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
+		   "t,r,j", reg, mips_gp_register, (int) BFD_RELOC_GPREL16);
     }
   else
     abort ();
@@ -4744,7 +4745,8 @@ macro (ip)
 		{
 		  frag_grow (20);
 		  macro_build ((char *) NULL, &icnt, &offset_expr, "addiu",
-			       "t,r,j", tempreg, GP, (int) BFD_RELOC_GPREL16);
+			       "t,r,j", tempreg, mips_gp_register,
+			       (int) BFD_RELOC_GPREL16);
 		  p = frag_var (rs_machine_dependent, 8, 0,
 				RELAX_ENCODE (4, 8, 0, 4, 0,
 					      mips_opts.warn_about_macros),
@@ -4796,7 +4798,7 @@ macro (ip)
 	    lw_reloc_type = (int) BFD_RELOC_MIPS_CALL16;
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       HAVE_32BIT_ADDRESSES ? "lw" : "ld",
-		       "t,o(b)", tempreg, lw_reloc_type, GP);
+		       "t,o(b)", tempreg, lw_reloc_type, mips_gp_register);
 	  if (expr1.X_add_number == 0)
 	    {
 	      int off;
@@ -4950,7 +4952,7 @@ macro (ip)
 		       tempreg, lui_reloc_type);
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		       HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
-		       "d,v,t", tempreg, tempreg, GP);
+		       "d,v,t", tempreg, tempreg, mips_gp_register);
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       HAVE_32BIT_ADDRESSES ? "lw" : "ld",
 		       "t,o(b)", tempreg, lw_reloc_type, tempreg);
@@ -5056,7 +5058,8 @@ macro (ip)
 	    }
 	  macro_build (p, &icnt, &offset_expr,
 		       HAVE_32BIT_ADDRESSES ? "lw" : "ld",
-		       "t,o(b)", tempreg, (int) BFD_RELOC_MIPS_GOT16, GP);
+		       "t,o(b)", tempreg, (int) BFD_RELOC_MIPS_GOT16,
+		       mips_gp_register);
 	  p += 4;
 	  if (expr1.X_add_number >= -0x8000
 	      && expr1.X_add_number < 0x8000)
@@ -5109,8 +5112,8 @@ macro (ip)
 	       addiu	$tempreg,$gp,<sym>	(BFD_RELOC_GPREL16)
 	     */
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
-		       "t,r,j", tempreg, GP, (int) BFD_RELOC_GPREL16);
+		       HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu", "t,r,j",
+		       tempreg, mips_gp_register, (int) BFD_RELOC_GPREL16);
 	}
       else
 	abort ();
@@ -5182,7 +5185,8 @@ macro (ip)
 		  expr1.X_add_number = mips_cprestore_offset;
 		  macro_build ((char *) NULL, &icnt, &expr1,
 			       HAVE_32BIT_ADDRESSES ? "lw" : "ld", "t,o(b)",
-			       GP, (int) BFD_RELOC_LO16, mips_frame_reg);
+			       mips_gp_register, (int) BFD_RELOC_LO16,
+			       mips_frame_reg);
 		}
 	    }
 	}
@@ -5300,7 +5304,8 @@ macro (ip)
 		  expr1.X_add_number = mips_cprestore_offset;
 		  macro_build ((char *) NULL, &icnt, &expr1,
 			       HAVE_32BIT_ADDRESSES ? "lw" : "ld", "t,o(b)",
-			       GP, (int) BFD_RELOC_LO16, mips_frame_reg);
+			       mips_gp_register, (int) BFD_RELOC_LO16,
+			       mips_frame_reg);
 		}
 	    }
 	}
@@ -5663,7 +5668,8 @@ macro (ip)
 		{
 		  frag_grow (20);
 		  macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
-			       treg, (int) BFD_RELOC_GPREL16, GP);
+			       treg, (int) BFD_RELOC_GPREL16,
+			       mips_gp_register);
 		  p = frag_var (rs_machine_dependent, 8, 0,
 				RELAX_ENCODE (4, 8, 0, 4, 0,
 					      (mips_opts.warn_about_macros
@@ -5688,7 +5694,7 @@ macro (ip)
 		  frag_grow (28);
 		  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 			       HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
-			       "d,v,t", tempreg, breg, GP);
+			       "d,v,t", tempreg, breg, mips_gp_register);
 		  macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
 			       treg, (int) BFD_RELOC_GPREL16, tempreg);
 		  p = frag_var (rs_machine_dependent, 12, 0,
@@ -5734,8 +5740,8 @@ macro (ip)
 	    as_bad (_("PIC code offset overflow (max 16 signed bits)"));
 	  frag_grow (20);
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       HAVE_32BIT_ADDRESSES ? "lw" : "ld",
-		       "t,o(b)", tempreg, (int) BFD_RELOC_MIPS_GOT16, GP);
+		       HAVE_32BIT_ADDRESSES ? "lw" : "ld", "t,o(b)", tempreg,
+		       (int) BFD_RELOC_MIPS_GOT16, mips_gp_register);
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "nop", "");
 	  p = frag_var (rs_machine_dependent, 4, 0,
 			RELAX_ENCODE (0, 4, -8, 0, 0, 0),
@@ -5786,7 +5792,7 @@ macro (ip)
 		       tempreg, (int) BFD_RELOC_MIPS_GOT_HI16);
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		       HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
-		       "d,v,t", tempreg, tempreg, GP);
+		       "d,v,t", tempreg, tempreg, mips_gp_register);
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       HAVE_32BIT_ADDRESSES ? "lw" : "ld",
 		       "t,o(b)", tempreg, (int) BFD_RELOC_MIPS_GOT_LO16,
@@ -5801,7 +5807,8 @@ macro (ip)
 	    }
 	  macro_build (p, &icnt, &offset_expr,
 		       HAVE_32BIT_ADDRESSES ? "lw" : "ld",
-		       "t,o(b)", tempreg, (int) BFD_RELOC_MIPS_GOT16, GP);
+		       "t,o(b)", tempreg, (int) BFD_RELOC_MIPS_GOT16,
+		       mips_gp_register);
 	  p += 4;
 	  macro_build (p, &icnt, (expressionS *) NULL, "nop", "");
 	  p += 4;
@@ -5827,14 +5834,14 @@ macro (ip)
 	  if (breg == 0)
 	    {
 	      macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
-			   treg, (int) BFD_RELOC_GPREL16, GP);
+			   treg, (int) BFD_RELOC_GPREL16, mips_gp_register);
 	      used_at = 0;
 	    }
 	  else
 	    {
 	      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 			   HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
-			   "d,v,t", tempreg, breg, GP);
+			   "d,v,t", tempreg, breg, mips_gp_register);
 	      macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
 			   treg, (int) BFD_RELOC_GPREL16, tempreg);
 	    }
@@ -5872,7 +5879,7 @@ macro (ip)
 			     ".lit4") == 0
 		  && offset_expr.X_add_number == 0);
 	  macro_build ((char *) NULL, &icnt, &offset_expr, "lwc1", "T,o(b)",
-		       treg, (int) BFD_RELOC_MIPS_LITERAL, GP);
+		       treg, (int) BFD_RELOC_MIPS_LITERAL, mips_gp_register);
 	  return;
 	}
 
@@ -5926,15 +5933,16 @@ macro (ip)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       HAVE_32BIT_ADDRESSES ? "lw" : "ld",
-		       "t,o(b)", AT, (int) BFD_RELOC_MIPS_GOT16, GP);
+		       "t,o(b)", AT, (int) BFD_RELOC_MIPS_GOT16,
+		       mips_gp_register);
 	}
       else if (mips_pic == EMBEDDED_PIC)
 	{
 	  /* For embedded PIC we pick up the entire address off $gp in
 	     a single instruction.  */
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
-		       "t,r,j", AT, GP, (int) BFD_RELOC_GPREL16);
+		       HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu", "t,r,j", AT,
+		       mips_gp_register, (int) BFD_RELOC_GPREL16);
 	  offset_expr.X_op = O_constant;
 	  offset_expr.X_add_number = 0;
 	}
@@ -6007,10 +6015,11 @@ macro (ip)
 	  if (mips_opts.isa != ISA_MIPS1)
 	    {
 	      macro_build ((char *) NULL, &icnt, &offset_expr, "ldc1",
-			   "T,o(b)", treg, (int) BFD_RELOC_MIPS_LITERAL, GP);
+			   "T,o(b)", treg, (int) BFD_RELOC_MIPS_LITERAL,
+			   mips_gp_register);
 	      return;
 	    }
-	  breg = GP;
+	  breg = mips_gp_register;
 	  r = BFD_RELOC_MIPS_LITERAL;
 	  goto dob;
 	}
@@ -6020,7 +6029,8 @@ macro (ip)
 	  if (mips_pic == SVR4_PIC)
 	    macro_build ((char *) NULL, &icnt, &offset_expr,
 			 HAVE_32BIT_ADDRESSES ? "lw" : "ld",
-			 "t,o(b)", AT, (int) BFD_RELOC_MIPS_GOT16, GP);
+			 "t,o(b)", AT, (int) BFD_RELOC_MIPS_GOT16,
+			 mips_gp_register);
 	  else
 	    {
 	      /* FIXME: This won't work for a 64 bit address.  */
@@ -6195,7 +6205,7 @@ macro (ip)
 	      if (breg == 0)
 		{
 		  frag_grow (28);
-		  tempreg = GP;
+		  tempreg = mips_gp_register;
 		  off = 0;
 		  used_at = 0;
 		}
@@ -6204,7 +6214,7 @@ macro (ip)
 		  frag_grow (36);
 		  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 			       HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
-			       "d,v,t", AT, breg, GP);
+			       "d,v,t", AT, breg, mips_gp_register);
 		  tempreg = AT;
 		  off = 4;
 		  used_at = 1;
@@ -6305,8 +6315,8 @@ macro (ip)
 	    off = 4;
 	  frag_grow (24 + off);
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       HAVE_32BIT_ADDRESSES ? "lw" : "ld",
-		       "t,o(b)", AT, (int) BFD_RELOC_MIPS_GOT16, GP);
+		       HAVE_32BIT_ADDRESSES ? "lw" : "ld", "t,o(b)", AT,
+		       (int) BFD_RELOC_MIPS_GOT16, mips_gp_register);
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "nop", "");
 	  if (breg != 0)
 	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
@@ -6358,7 +6368,7 @@ macro (ip)
 	  if (expr1.X_add_number < -0x8000
 	      || expr1.X_add_number >= 0x8000 - 4)
 	    as_bad (_("PIC code offset overflow (max 16 signed bits)"));
-	  if (reg_needs_delay (GP))
+	  if (reg_needs_delay (mips_gp_register))
 	    gpdel = 4;
 	  else
 	    gpdel = 0;
@@ -6371,7 +6381,7 @@ macro (ip)
 		       AT, (int) BFD_RELOC_MIPS_GOT_HI16);
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		       HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
-		       "d,v,t", AT, AT, GP);
+		       "d,v,t", AT, AT, mips_gp_register);
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       HAVE_32BIT_ADDRESSES ? "lw" : "ld",
 		       "t,o(b)", AT, (int) BFD_RELOC_MIPS_GOT_LO16, AT);
@@ -6408,7 +6418,8 @@ macro (ip)
 	    }
 	  macro_build (p, &icnt, &offset_expr,
 		       HAVE_32BIT_ADDRESSES ? "lw" : "ld",
-		       "t,o(b)", AT, (int) BFD_RELOC_MIPS_GOT16, GP);
+		       "t,o(b)", AT, (int) BFD_RELOC_MIPS_GOT16,
+		       mips_gp_register);
 	  p += 4;
 	  macro_build (p, &icnt, (expressionS *) NULL, "nop", "");
 	  p += 4;
@@ -6448,14 +6459,14 @@ macro (ip)
 	     */
 	  if (breg == 0)
 	    {
-	      tempreg = GP;
+	      tempreg = mips_gp_register;
 	      used_at = 0;
 	    }
 	  else
 	    {
 	      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 			   HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
-			   "d,v,t", AT, breg, GP);
+			   "d,v,t", AT, breg, mips_gp_register);
 	      tempreg = AT;
 	      used_at = 1;
 	    }
@@ -7225,7 +7236,7 @@ macro2 (ip)
       off = 3;
     ulwa:
       used_at = 1;
-      load_address (&icnt, AT, &offset_expr, HAVE_64BIT_ADDRESSES, &used_at);
+      load_address (&icnt, AT, &offset_expr, &used_at);
       if (breg != 0)
 	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		     HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
@@ -7247,7 +7258,7 @@ macro2 (ip)
     case M_ULH_A:
     case M_ULHU_A:
       used_at = 1;
-      load_address (&icnt, AT, &offset_expr, HAVE_64BIT_ADDRESSES, &used_at);
+      load_address (&icnt, AT, &offset_expr, &used_at);
       if (breg != 0)
 	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		     HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
@@ -7321,7 +7332,7 @@ macro2 (ip)
       off = 3;
     uswa:
       used_at = 1;
-      load_address (&icnt, AT, &offset_expr, HAVE_64BIT_ADDRESSES, &used_at);
+      load_address (&icnt, AT, &offset_expr, &used_at);
       if (breg != 0)
 	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		     HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
@@ -7342,7 +7353,7 @@ macro2 (ip)
 
     case M_USH_A:
       used_at = 1;
-      load_address (&icnt, AT, &offset_expr, HAVE_64BIT_ADDRESSES, &used_at);
+      load_address (&icnt, AT, &offset_expr, &used_at);
       if (breg != 0)
 	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		     HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
@@ -10402,7 +10413,7 @@ md_pcrel_from (fixP)
 	return 1;
     }
 
-  /* return the address of the delay slot */
+  /* Return the address of the delay slot.  */
   return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
 }
 
@@ -11568,12 +11579,12 @@ s_cpload (ignore)
   /* In ELF, this symbol is implicitly an STT_OBJECT symbol.  */
   symbol_get_bfdsym (ex.X_add_symbol)->flags |= BSF_OBJECT;
 
-  macro_build_lui (NULL, &icnt, &ex, GP);
-  macro_build ((char *) NULL, &icnt, &ex, "addiu", "t,r,j", GP, GP,
-	       (int) BFD_RELOC_LO16);
+  macro_build_lui (NULL, &icnt, &ex, mips_gp_register);
+  macro_build ((char *) NULL, &icnt, &ex, "addiu", "t,r,j",
+	       mips_gp_register, mips_gp_register, (int) BFD_RELOC_LO16);
 
   macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "addu", "d,v,t",
-	       GP, GP, tc_get_register (0));
+	       mips_gp_register, mips_gp_register, tc_get_register (0));
 
   demand_empty_rest_of_line ();
 }
@@ -11700,7 +11711,7 @@ s_cprestore (ignore)
   int icnt = 0;
 
   /* If we are not generating SVR4 PIC code, or if this is NewABI code,
-   .cprestore is ignored.  */
+     .cprestore is ignored.  */
   if (mips_pic != SVR4_PIC || HAVE_NEWABI)
     {
       s_ignore (0);
@@ -11715,9 +11726,8 @@ s_cprestore (ignore)
   ex.X_op_symbol = NULL;
   ex.X_add_number = mips_cprestore_offset;
 
-  macro_build ((char *) NULL, &icnt, &ex,
-	       HAVE_32BIT_ADDRESSES ? "sw" : "sd",
-	       "t,o(b)", GP, (int) BFD_RELOC_LO16, SP);
+  macro_build ((char *) NULL, &icnt, &ex, HAVE_32BIT_ADDRESSES ? "sw" : "sd",
+	       "t,o(b)", mips_gp_register, (int) BFD_RELOC_LO16, SP);
 
   demand_empty_rest_of_line ();
 }
@@ -11815,7 +11825,7 @@ s_gpword (ignore)
 
   p = frag_more (4);
   md_number_to_chars (p, (valueT) 0, 4);
-  fix_new_exp (frag_now, p - frag_now->fr_literal, 4, &ex, 0,
+  fix_new_exp (frag_now, p - frag_now->fr_literal, 4, &ex, false,
 	       BFD_RELOC_GPREL32);
 
   demand_empty_rest_of_line ();
@@ -11843,7 +11853,7 @@ s_cpadd (ignore)
   reg = tc_get_register (0);
   macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 	       HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
-	       "d,v,t", reg, reg, GP);
+	       "d,v,t", reg, reg, mips_gp_register);
 
   demand_empty_rest_of_line ();
 }
@@ -12021,10 +12031,10 @@ nopic_need_relax (sym, before_relaxing)
       const char *symname;
       int change;
 
-      /* Find out whether this symbol can be referenced off the GP
+      /* Find out whether this symbol can be referenced off the $gp
 	 register.  It can be if it is smaller than the -G size or if
 	 it is in the .sdata or .sbss section.  Certain symbols can
-	 not be referenced off the GP, although it appears as though
+	 not be referenced off the $gp, although it appears as though
 	 they can.  */
       symname = S_GET_NAME (sym);
       if (symname != (const char *) NULL
@@ -12071,7 +12081,7 @@ nopic_need_relax (sym, before_relaxing)
       return change;
     }
   else
-    /* We are not optimizing for the GP register.  */
+    /* We are not optimizing for the $gp register.  */
     return 1;
 }
 
@@ -12914,7 +12924,7 @@ mips_elf_final_processing ()
   else if (file_mips_abi == N32_ABI)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_ABI2;
 
-  /* Nothing to do for "64".  */
+  /* Nothing to do for N64_ABI.  */
 
   if (mips_32bitmode)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_32BITMODE;

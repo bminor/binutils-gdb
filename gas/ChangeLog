@@ -1,3 +1,20 @@
+2002-05-28  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c: Replace GP in comments by $gp.
+	(mips_big_got): Initialize.
+	(mips_trap): Initialize.
+	(load_address): Use mips_gp_register instead of hardcoded value.
+	Remove dbl parameter, use HAVE_32BIT_ADDRESSES instead.
+	(macro): Use mips_gp_register instead of hardcoded value.
+	(macro2): Change load_address calls.
+	(md_pcrel_from): Comment formatting.
+	(s_cpload): Use mips_gp_register instead of hardcoded value.
+	(s_cprestore): Likewise. Comment formatting.
+	(s_gpword): Fix data type.
+	(s_cpadd): Use mips_gp_register instead of hardcoded value.
+	(nopic_need_relax): Replace GP in comments by $gp.
+	(mips_elf_final_processing): Better comment.
+
 2002-05-28  Kuang Hwa Lin <kuang@sbcglobal.net>
 
 	* configure.in: Add DLX configuraton
