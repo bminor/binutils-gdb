@@ -1,3 +1,8 @@
+Wed Sep 30 12:58:57 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* readline.c (rl_complete_internal):  Cast alloca to (char *) to
+	avoid warning.
+
 Fri Sep 25 12:45:05 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* readline.c (clear_to_eol, rl_generic_bind):  Make static.

@@ -3884,7 +3884,7 @@ rl_complete_internal (what_to_do)
 		      /* Found an embedded word break character in a potential
 			 match, so need to prepend a quote character if we are
 			 replacing the completion string. */
-		      replacement = alloca (strlen (matches[0]) + 2);
+		      replacement = (char *)alloca (strlen (matches[0]) + 2);
 		      quote_char = *rl_completer_quote_characters;
 		      *replacement = quote_char;
 		      strcpy (replacement + 1, matches[0]);
