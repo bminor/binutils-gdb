@@ -1,3 +1,8 @@
+2005-03-18  Andreas Schwab  <schwab@suse.de>
+
+	* elfxx-ia64.c (elfNN_ia64_install_value): Change type of insn
+	from bfd_vma to ia64_insn, remove broken cast.
+
 2005-03-18  C Jaiprakash  <cjaiprakash@noida.hcltech.com>
 
 	* elf32-m68k.c (elf_cfv4e_plt0_entry): plt entry for coldfire v4e. 

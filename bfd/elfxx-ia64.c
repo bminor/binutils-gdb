@@ -3119,7 +3119,8 @@ elfNN_ia64_install_value (hit_addr, v, r_type)
 {
   const struct ia64_operand *op;
   int bigendian = 0, shift = 0;
-  bfd_vma t0, t1, insn, dword;
+  bfd_vma t0, t1, dword;
+  ia64_insn insn;
   enum ia64_opnd opnd;
   const char *err;
   size_t size = 8;
@@ -3308,7 +3309,7 @@ elfNN_ia64_install_value (hit_addr, v, r_type)
       insn = (dword >> shift) & 0x1ffffffffffLL;
 
       op = elf64_ia64_operands + opnd;
-      err = (*op->insert) (op, val, (ia64_insn *)& insn);
+      err = (*op->insert) (op, val, &insn);
       if (err)
 	return bfd_reloc_overflow;
 
