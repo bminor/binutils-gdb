@@ -404,7 +404,7 @@ static const CGEN_IFLD fr30_cgen_ifld_table[] =
   { FR30_F_OP2, "f-op2", 0, 16, 4, 4, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
   { FR30_F_OP3, "f-op3", 0, 16, 8, 4, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
   { FR30_F_OP4, "f-op4", 0, 16, 12, 4, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { FR30_F_OP5, "f-op5", 0, 16, 5, 1, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
+  { FR30_F_OP5, "f-op5", 0, 16, 4, 1, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
   { FR30_F_CC, "f-cc", 0, 16, 4, 4, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
   { FR30_F_CCC, "f-ccc", 16, 16, 0, 8, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
   { FR30_F_RJ, "f-Rj", 0, 16, 8, 4, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
@@ -1407,7 +1407,7 @@ static const CGEN_IFMT fmt_callr = {
 };
 
 static const CGEN_IFMT fmt_call = {
-  16, 16, 0xf400, { F (F_OP1), F (F_OP5), F (F_REL12), 0 }
+  16, 16, 0xf800, { F (F_OP1), F (F_OP5), F (F_REL12), 0 }
 };
 
 static const CGEN_IFMT fmt_ret = {
@@ -2350,7 +2350,7 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     { 1, 1, 1, 1 },
     FR30_INSN_CALLD, "calld", "call:d",
     { { MNEM, ' ', OP (LABEL12), 0 } },
-    & fmt_call, { 0xd400 },
+    & fmt_call, { 0xd800 },
     (PTR) & fmt_call_ops[0],
     { 0, 0|A(DELAY_SLOT)|A(UNCOND_CTI), { 0 } }
   },

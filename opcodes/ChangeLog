@@ -1,4 +1,8 @@
 start-sanitize-fr30
+Fri Dec  4 17:45:51 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* fr30-opc.c: Regenerate.
+
 Fri Dec  4 17:08:08 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* fr30-asm.c,fr30-dis.c,fr30-opc.c,fr30-opc.h: Regenerated.
