@@ -1,3 +1,7 @@
+2001-06-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS (Write After Approval): Note the entry criteria.
+
 2001-06-07  Jim Blandy  <jimb@redhat.com>
 
 	* gdbarch.sh: Make sure that '[' doesn't interpret interesting

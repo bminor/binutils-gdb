@@ -314,6 +314,9 @@ readline/		Master version: ftp://ftp.cwru.edu/pub/bash/
 
 		Write After Approval
 
+To get recommended for the Write After Approval list you need a valid
+FSF assignment and have submitted one good patch.
+
 David Anderson					davea@sgi.com
 Jim Kingdon					jkingdon@engr.sgi.com  ++
 Jason Molenda					jsm@cygnus.com
