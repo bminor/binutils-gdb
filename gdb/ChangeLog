@@ -1,3 +1,8 @@
+2004-05-24  Kevin Buettner  <kevinb@redhat.com>
+
+	* symtab.c (fixup_section): Search section table when lookup by
+	name fails.
+
 2004-05-24  Randolph Chung  <tausq@debian.org>
 
 	* hppa-tdep.c: Fix handling of 8-byte structures; they should not 

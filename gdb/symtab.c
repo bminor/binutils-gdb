@@ -876,6 +876,62 @@ fixup_section (struct general_symbol_info *ginfo, struct objfile *objfile)
       ginfo->bfd_section = SYMBOL_BFD_SECTION (msym);
       ginfo->section = SYMBOL_SECTION (msym);
     }
+  else if (objfile)
+    {
+      /* Static, function-local variables do appear in the linker
+	 (minimal) symbols, but are frequently given names that won't
+	 be found via lookup_minimal_symbol().  E.g., it has been
+	 observed in frv-uclinux (ELF) executables that a static,
+	 function-local variable named "foo" might appear in the
+	 linker symbols as "foo.6" or "foo.3".  Thus, there is no
+	 point in attempting to extend the lookup-by-name mechanism to
+	 handle this case due to the fact that there can be multiple
+	 names.
+	 
+	 So, instead, search the section table when lookup by name has
+	 failed.  The ``addr'' and ``endaddr'' fields may have already
+	 been relocated.  If so, the relocation offset (i.e. the
+	 ANOFFSET value) needs to be subtracted from these values when
+	 performing the comparison.  We unconditionally subtract it,
+	 because, when no relocation has been performed, the ANOFFSET
+	 value will simply be zero.
+	 
+	 The address of the symbol whose section we're fixing up HAS
+	 NOT BEEN adjusted (relocated) yet.  It can't have been since
+	 the section isn't yet known and knowing the section is
+	 necessary in order to add the correct relocation value.  In
+	 other words, we wouldn't even be in this function (attempting
+	 to compute the section) if it were already known.
+
+	 Note that it is possible to search the minimal symbols
+	 (subtracting the relocation value if necessary) to find the
+	 matching minimal symbol, but this is overkill and much less
+	 efficient.  It is not necessary to find the matching minimal
+	 symbol, only its section.  
+	 
+	 Note that this technique (of doing a section table search)
+	 can fail when unrelocated section addresses overlap.  For
+	 this reason, we still attempt a lookup by name prior to doing
+	 a search of the section table.  */
+	 
+      CORE_ADDR addr;
+      struct obj_section *s;
+
+      addr = ginfo->value.address;
+
+      ALL_OBJFILE_OSECTIONS (objfile, s)
+	{
+	  int idx = s->the_bfd_section->index;
+	  CORE_ADDR offset = ANOFFSET (objfile->section_offsets, idx);
+
+	  if (s->addr - offset <= addr && addr < s->endaddr - offset)
+	    {
+	      ginfo->bfd_section = s->the_bfd_section;
+	      ginfo->section = idx;
+	      return;
+	    }
+	}
+    }
 }
 
 struct symbol *
