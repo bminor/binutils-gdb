@@ -3596,6 +3596,12 @@ Convert the value of register @var{reg} from its virtual form to its raw
 form.
 @xref{Target Architecture Definition, , Raw and Virtual Register Representations}.
 
+@item const struct regset *regset_from_core_section (struct gdbarch * @var{gdbarch}, const char * @var{sect_name}, size_t @var{sect_size})
+@findex regset_from_core_section
+Return the appropriate register set for a core file section with name
+@var{sect_name} and size @var{sect_size}.
+
+
 @item RETURN_VALUE_ON_STACK(@var{type})
 @findex RETURN_VALUE_ON_STACK
 @cindex returning structures by value

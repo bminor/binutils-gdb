@@ -1,3 +1,7 @@
+2003-10-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbint.texinfo (Target Architecture Definition): Document
+	regset_from_core_section.
 
 2003-10-16  Kei Sakamot Sakamoto  <sakamoto.kei@renesas.com>
 
