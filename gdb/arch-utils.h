@@ -138,4 +138,8 @@ extern int generic_in_solib_call_trampoline (CORE_ADDR pc, char *name);
 
 extern int generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc);
 
+/* Assume all registers are the same size and a size identical to that
+   of the integer type.  */
+extern int generic_register_raw_size (int regnum);
+
 #endif

@@ -175,14 +175,6 @@ extern void mips_do_registers_info (int, int);
 
 #define REGISTER_BYTE(N) ((N) * MIPS_REGSIZE)
 
-/* Number of bytes of storage in the actual machine representation for
-   register N.  NOTE: This indirectly defines the register size
-   transfered by the GDB protocol. */
-
-extern int mips_register_raw_size (int reg_nr);
-#define REGISTER_RAW_SIZE(N) (mips_register_raw_size ((N)))
-
-
 /* Covert between the RAW and VIRTUAL registers.
 
    Some MIPS (SR, FSR, FIR) have a `raw' size of MIPS_REGSIZE but are

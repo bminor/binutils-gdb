@@ -410,8 +410,9 @@ mips_print_extra_frame_info (struct frame_info *fi)
 		     paddr_d (fi->extra_info->proc_desc->pdr.frameoffset));
 }
 
-/* Convert between RAW and VIRTUAL registers.  The RAW register size
-   defines the remote-gdb packet. */
+/* Number of bytes of storage in the actual machine representation for
+   register N.  NOTE: This indirectly defines the register size
+   transfered by the GDB protocol. */
 
 static int mips64_transfers_32bit_regs_p = 0;
 
@@ -428,6 +429,9 @@ mips_register_raw_size (int reg_nr)
   else
     return MIPS_REGSIZE;
 }
+
+/* Convert between RAW and VIRTUAL registers.  The RAW register size
+   defines the remote-gdb packet. */
 
 int
 mips_register_convertible (int reg_nr)
@@ -4075,12 +4079,13 @@ mips_gdbarch_init (struct gdbarch_info info,
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->elf_flags = elf_flags;
 
-  /* Initially set everything according to the ABI. */
+  /* Initially set everything according to the default ABI/ISA. */
   set_gdbarch_short_bit (gdbarch, 16);
   set_gdbarch_int_bit (gdbarch, 32);
   set_gdbarch_float_bit (gdbarch, 32);
   set_gdbarch_double_bit (gdbarch, 64);
   set_gdbarch_long_double_bit (gdbarch, 64);
+  set_gdbarch_register_raw_size (gdbarch, mips_register_raw_size);
   tdep->mips_abi = mips_abi;
 
   switch (mips_abi)

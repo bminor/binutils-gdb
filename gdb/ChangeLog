@@ -1,3 +1,15 @@
+2001-12-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* arch-utils.c (generic_register_raw_size): New function.
+	* gdbarch.sh (REGISTER_RAW_SIZE): Use generic_register_raw_size as
+	the static default.
+	* gdbarch.c: Regenerate.	
+	* arch-utils.h (generic_register_raw_size): Declare.
+
+	* config/mips/tm-mips.h (REGISTER_RAW_SIZE): Delete macro.
+	* mips-tdep.c (mips_register_raw_size): Make function static.
+	(mips_gdbarch_init): Initialize register_raw_size.
+
 2001-12-08  Fred Fish  <fnf@redhat.com>
 
 	* dwarf2read.c (read_typedef):  Replace hand crafted type
