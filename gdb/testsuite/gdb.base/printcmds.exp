@@ -38,7 +38,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 # fails, then we skip the other tests.
 
 proc set_lang_c {} {
-    global prompt
+    global gdb_prompt
 
     if [gdb_test "set language c" "" "set language c"] {
 	return 0
@@ -51,7 +51,7 @@ proc set_lang_c {} {
 }
 
 proc test_integer_literals_accepted {} {
-    global prompt
+    global gdb_prompt
 
     # Test various decimal values.
 
@@ -79,7 +79,7 @@ proc test_integer_literals_accepted {} {
 }
 
 proc test_character_literals_accepted {} {
-    global prompt
+    global gdb_prompt
 
     gdb_test "p 'a'" " = 97 'a'"
     gdb_test "p/c 'a'" " = 97 'a'"
@@ -95,7 +95,7 @@ proc test_character_literals_accepted {} {
 }
 
 proc test_integer_literals_rejected {} {
-    global prompt
+    global gdb_prompt
 
     test_print_reject "p 0x" 
     gdb_test "p ''" "Empty character constant\\."
@@ -129,7 +129,7 @@ proc test_integer_literals_rejected {} {
 }
 
 proc test_print_all_chars {} {
-    global prompt
+    global gdb_prompt
 
     gdb_test "p ctable1\[0\]"   " = 0 '\\\\000'"
     gdb_test "p ctable1\[1\]"   " = 1 '\\\\001'"
@@ -393,7 +393,7 @@ proc test_print_all_chars {} {
 # repeat count, set to the default of 10.
 
 proc test_print_repeats_10 {} {
-    global prompt
+    global gdb_prompt
 
     gdb_test "set print elements 1" ""
     gdb_test "p &ctable2\[0*16\]"  " = \\(unsigned char \\*\\) \"a\"..."
@@ -781,7 +781,7 @@ proc test_print_repeats_10 {} {
 }
 
 proc test_print_strings {} {
-    global prompt
+    global gdb_prompt
 
     # We accept "(unsigned char *) " before the string.  char vs. unsigned char
     # is already tested elsewhere.
@@ -875,7 +875,7 @@ proc test_print_strings {} {
 }
 
 proc test_print_int_arrays {} {
-    global prompt
+    global gdb_prompt
 
     gdb_test "set print elements 24" ""
 
@@ -900,7 +900,7 @@ proc test_artificial_arrays {} {
 }
 
 proc test_print_char_arrays {} {
-    global prompt
+    global gdb_prompt
     global hex
 
     gdb_test "set print elements 24" ""
@@ -925,7 +925,7 @@ proc test_print_char_arrays {} {
 }
 
 proc test_print_string_constants {} {
-    global prompt
+    global gdb_prompt
 
     gdb_test "set print elements 50" ""
 

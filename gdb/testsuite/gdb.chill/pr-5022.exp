@@ -34,7 +34,7 @@ if  { [compile "${srcfile} -g -o ${binfile} ${CHILL_RT0} ${CHILL_LIB}"] != "" } 
 }
 
 proc do_tests {} {
-    global prms_id bug_id subdir objdir srcdir binfile prompt
+    global prms_id bug_id subdir objdir srcdir binfile gdb_prompt
 
     set prms_id 0
     set bug_id 0
@@ -60,7 +60,7 @@ proc do_tests {} {
 }
 
 proc test_pr_5022 {} {
-    global prompt
+    global gdb_prompt
     runto dummy_pr_5022
     gdb_test "p p" " = NULL" "print NULL pointer"
     gdb_test "continue ""

@@ -29,7 +29,7 @@ proc gdb_load { arg } {
     global verbose
     global loadpath
     global loadfile
-    global prompt
+    global gdb_prompt
     global GDB
     set loadfile [file tail $arg]
     set loadpath [file dirname $arg]
@@ -43,7 +43,7 @@ proc gdb_start { } {
     global GDB
     global GDBFLAGS
     global spawn_id
-    global prompt
+    global gdb_prompt
     global verbose
     send_user "Not implememted yet\n" ; return -1
 }

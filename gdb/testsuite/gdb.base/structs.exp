@@ -65,7 +65,7 @@ if [istarget "a29k-*-udi"] then {
 proc do_function_calls {} {
     global prototypes
     global gcc_compiled
-    global prompt
+    global gdb_prompt
 
     # First, call the "fun" functions and examine the value they return.
     gdb_test "p fun1()" " = {a = 49 '1'}"
@@ -129,9 +129,9 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-send_gdb "set print sevenbit-strings\n" ; expect -re "$prompt $"
-send_gdb "set print address off\n" ; expect -re "$prompt $"
-send_gdb "set width 0\n" ; expect -re "$prompt $"
+send_gdb "set print sevenbit-strings\n" ; expect -re "$gdb_prompt $"
+send_gdb "set print address off\n" ; expect -re "$gdb_prompt $"
+send_gdb "set width 0\n" ; expect -re "$gdb_prompt $"
 
 if [runto_main] then {
     do_function_calls

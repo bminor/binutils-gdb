@@ -20,7 +20,7 @@ set bug_id 0
 
 proc do_tests {} {
 	global binfile
-	global prompt
+	global gdb_prompt
 
 	# Mips/alpha targets that use gcc with mips-tfile put out the stabs
 	# assembler directives embedded in comments. If the assembler
@@ -29,10 +29,10 @@ proc do_tests {} {
 	# Skip the rest of the stabs tests for this case.
 	send_gdb "ptype inttype\n"
 	expect {
-		-re "^ptype inttype\r*\ntype = inttype.*$prompt $" {
+		-re "^ptype inttype\r*\ntype = inttype.*$gdb_prompt $" {
 			pass "stabs found"
 		}
-		-re ".*$prompt $" {
+		-re ".*$gdb_prompt $" {
 			setup_xfail "mips-*-*"
 			setup_xfail "alpha-*-*"
 			fail "stabs not found"
@@ -193,16 +193,16 @@ field3 = 0x77888877\}" "print struct constant"
 }
 
 proc print_weird_var { var } {
-	global prompt
+	global gdb_prompt
 
 	# Make sure that the variable gets printed out correctly, without
 	# any sort of warning message.
 	send_gdb "print $var\n"
 	expect {
-		-re "^print $var\r*\n.\[0-9\]* = 42.*$prompt $" {
+		-re "^print $var\r*\n.\[0-9\]* = 42.*$gdb_prompt $" {
 			pass "variable $var printed properly"
 		}
-		-re ".*$prompt $" {
+		-re ".*$gdb_prompt $" {
 			fail "variable $var not printed properly"
 		}
 		timeout { fail "variable $var not printed (timeout)" }
@@ -283,14 +283,14 @@ send_gdb "file $binfile\n"
 # that a filename won't contain a space and a warning message will.
 # But spaces following by backspaces aren't really spaces.
 expect {
-    -re "^file (\[^ \]| +\008)*\r*\nReading symbols from $binfile\.\.\.done\.\r*\n$prompt $" {
+    -re "^file (\[^ \]| +\008)*\r*\nReading symbols from $binfile\.\.\.done\.\r*\n$gdb_prompt $" {
 	pass "weirdx.o read without error"
     }
     -re "A program is being debugged already.  Kill it\? \(y or n\)" {
 	send_gdb "y\n"
 	exp_continue
     }
-    -re ".*$prompt $" {
+    -re ".*$gdb_prompt $" {
 	fail "Errors reading weirdx.o"
     }
     timeout {

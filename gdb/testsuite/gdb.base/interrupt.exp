@@ -82,23 +82,23 @@ if ![file exists $binfile] then {
 
 	send_gdb "\003"
 	expect {
-	    -re "Program received signal SIGINT.*$prompt $" {
+	    -re "Program received signal SIGINT.*$gdb_prompt $" {
 		pass "send_gdb control C"
 	    }
-	    -re ".*$prompt $" { fail "send_gdb control C" }
+	    -re ".*$gdb_prompt $" { fail "send_gdb control C" }
 	    timeout { fail "send_gdb control C (timeout)" }
 	    eof { fail "send_gdb control C (eof)" }
 	}
 
 	send_gdb "p func1 ()\n"
 	expect {
-	    -re " = 4.*$prompt $" { pass "call function when asleep" }
-	    -re ".*Program received signal SIGSEGV.*$prompt $" {
+	    -re " = 4.*$gdb_prompt $" { pass "call function when asleep" }
+	    -re ".*Program received signal SIGSEGV.*$gdb_prompt $" {
 		setup_xfail "i*86-pc-linux*-gnu"
 		fail "child died when we called func1, skipped rest of tests"
 		return
 	    }
-	    -re "$prompt $" { fail "call function when asleep (wrong output)" }
+	    -re "$gdb_prompt $" { fail "call function when asleep (wrong output)" }
 	    default {
 
 		# This fail probably happens whenever we use /proc (we
@@ -137,7 +137,7 @@ if ![file exists $binfile] then {
 	expect {
 	    -re "^continue\r\nContinuing.\r\n(\r\n|)$" { pass "continue" }
 	    -re "^continue\r\n\r\n" { fail "continue (missing Continuing.)" }
-	    -re "$prompt $" { fail "continue" }
+	    -re "$gdb_prompt $" { fail "continue" }
 	    timeout { fail "continue (timeout)" }
 	    eof { fail "continue (eof)" }
 	}
@@ -155,10 +155,10 @@ if ![file exists $binfile] then {
 	setup_xfail "i*86-pc-linux*-gnu"
 	send_gdb "\004"
 	expect {
-	    -re "end of file.*Program exited normally.*$prompt $" {
+	    -re "end of file.*Program exited normally.*$gdb_prompt $" {
 		pass "send_gdb end of file"
 	    }
-	    -re "$prompt $" { fail "send end of file" }
+	    -re "$gdb_prompt $" { fail "send end of file" }
 	    timeout { fail "send end of file (timeout)" }
 	    eof { fail "send end of file (eof)" }
 	}

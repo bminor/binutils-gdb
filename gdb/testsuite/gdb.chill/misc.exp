@@ -39,7 +39,7 @@ if  { [compile "${srcfile} -g -o ${binfile} ${CHILL_RT0} ${CHILL_LIB}"] != "" } 
 # fails, then we skip the other tests.
 
 proc set_lang_chill {} {
-    global prompt
+    global gdb_prompt
     global binfile objdir subdir
 
     verbose "loading file '$binfile'"
@@ -47,7 +47,7 @@ proc set_lang_chill {} {
 
     send_gdb "set language chill\n"
     expect {
-	-re ".*$prompt $" {}
+	-re ".*$gdb_prompt $" {}
 	timeout { fail "set language chill (timeout)" ; return 0 }
     }
 
@@ -94,7 +94,7 @@ if ![set_lang_chill] then {
     gdb_test "print array () ubyte (foo)" { = \[\(0:11\): 0\]}
 	
     send_gdb "set var \$i := foo\n"
-    expect -re ".*$prompt $"
+    expect -re ".*$gdb_prompt $"
     setup_xfail "m68*-*-hpux*"
     gdb_test "print/x array () byte (\$i)" { = \[\(0:11\): H'0\]}
 }

@@ -74,13 +74,13 @@ if [istarget "*-*-vxworks*"] then {
     }
     set timeout 10
     verbose "Timeout is now $timeout seconds" 2
-    expect -re "$prompt $" {}
+    expect -re "$gdb_prompt $" {}
 } else {
     expect {
-	-re ".*usage:  factorial <number>.*Program exited with code 01.*$prompt $" {
+	-re ".*usage:  factorial <number>.*Program exited with code 01.*$gdb_prompt $" {
 	    pass "run \"$testfile\" with no args"
 	}
-	-re ".*$prompt $" {
+	-re ".*$gdb_prompt $" {
 	    fail "run \"$testfile\" with no args"
 	    verbose "expect_out is $expect_out(buffer)" 2
 	}
@@ -108,14 +108,14 @@ if [istarget "*-*-vxworks*"] then {
     }
     set timeout 10
     verbose "Timeout is now $timeout seconds" 2
-    expect -re "$prompt $" {}
+    expect -re "$gdb_prompt $" {}
 } else {
 	setup_xfail "mips-idt-*"
 	gdb_run_cmd 5
 	expect {
-	    -re ".*120.*$prompt $"\
+	    -re ".*120.*$gdb_prompt $"\
 				{ pass "run \"$testfile\" with arg" }
-	    -re ".*$prompt $"	{ fail "run \"$testfile\" with arg" }
+	    -re ".*$gdb_prompt $"	{ fail "run \"$testfile\" with arg" }
 	    timeout		{ fail "(timeout) run \"$testfile\" with arg" }
 	}
 }
@@ -136,12 +136,12 @@ if [istarget "*-*-vxworks*"] then {
     }
     set timeout 10
     verbose "Timeout is now $timeout seconds" 2
-    expect -re "$prompt $" {}
+    expect -re "$gdb_prompt $" {}
 } else {
     expect {
-	    -re ".*120.*$prompt $"\
+	    -re ".*120.*$gdb_prompt $"\
 				{ pass "run \"$testfile\" again with same args" }
-	    -re ".*$prompt $"	{ fail "run \"$testfile\" again with same args" }
+	    -re ".*$gdb_prompt $"	{ fail "run \"$testfile\" again with same args" }
 	    timeout		{ fail "(timeout) run \"$testfile\" again with same args" }
 	}
 }
@@ -152,7 +152,7 @@ if [istarget "*-*-vxworks*"] then {
 } else {
     send_gdb "set args\n"
 }
-expect -re "$prompt $"
+expect -re "$gdb_prompt $"
 
 gdb_run_cmd
 
@@ -172,13 +172,13 @@ if [istarget "*-*-vxworks*"] then {
     }
     set timeout 10
     verbose "Timeout is now $timeout seconds" 2
-    expect -re "$prompt $" {}
+    expect -re "$gdb_prompt $" {}
 } else {
     expect {
-	-re ".*usage:  factorial <number>.*$prompt $" {
+	-re ".*usage:  factorial <number>.*$gdb_prompt $" {
 	    pass "run after setting args to nil"
 	}
-	-re ".*$prompt $" {
+	-re ".*$gdb_prompt $" {
 	    fail "run after setting args to nil"
 	}
 	timeout {
@@ -194,7 +194,7 @@ if [istarget "*-*-vxworks*"] then {
 } else {
 	send_gdb "set args 6\n"
 }
-expect -re "$prompt $"
+expect -re "$gdb_prompt $"
 gdb_run_cmd
 
 if [istarget "*-*-vxworks*"] then {
@@ -213,13 +213,13 @@ if [istarget "*-*-vxworks*"] then {
     }
     set timeout 10
     verbose "Timeout is now $timeout seconds" 2
-    expect -re "$prompt $" {}
+    expect -re "$gdb_prompt $" {}
 } else {
     expect {
-	    -re ".*720.*$prompt $" {
+	    -re ".*720.*$gdb_prompt $" {
 		pass "run \"$testfile\" again after setting args"
 	    }
-	    -re ".*$prompt $" {
+	    -re ".*$gdb_prompt $" {
 		fail "run \"$testfile\" again after setting args"
 	    }
 	    timeout {
@@ -233,10 +233,10 @@ if [istarget "*-*-vxworks*"] then {
 if [isnative] then {
     send_gdb "run `echo 8`\n"
     expect {
-	-re "Starting program.*40320.*$prompt $" {
+	-re "Starting program.*40320.*$gdb_prompt $" {
 	    pass "run \"$testfile\" with shell"
 	}
-	-re ".*$prompt $" {
+	-re ".*$gdb_prompt $" {
 	    fail "run \"$testfile\" with shell"
 	}
 	timeout	{
@@ -248,5 +248,5 @@ if [isnative] then {
 # Reset the default arguments for VxWorks
 if [istarget "*-*-vxworks*"] then {
     send_gdb "set args main\n"
-    expect -re ".*$prompt $" {}
+    expect -re ".*$gdb_prompt $" {}
 }

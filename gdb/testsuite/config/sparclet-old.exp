@@ -24,7 +24,7 @@
 
 load_lib remote.exp
 load_lib gdb.exp
-set prompt "\\(gdbslet\\)"
+set gdb_prompt "\\(gdbslet\\)"
 
 
 #
@@ -37,7 +37,7 @@ set prompt "\\(gdbslet\\)"
 #
 
 proc gdb_run_cmd {} {
-    global prompt
+    global gdb_prompt
     global gdb_spawn_id
 
     set timeout 60
@@ -74,8 +74,8 @@ proc gdb_run_cmd {} {
 	    send_gdb "y\n"
 	    exp_continue
 	}
-	-i $gdb_spawn_id -re "Remote target.*$prompt $" { }
-	-i $gdb_spawn_id -re ".*SPARCLET appears to be alive.*$prompt $" {
+	-i $gdb_spawn_id -re "Remote target.*$gdb_prompt $" { }
+	-i $gdb_spawn_id -re ".*SPARCLET appears to be alive.*$gdb_prompt $" {
 	    if $verbose>1 then {
 		send_user "Set target to $targetname\n"
 	    }
@@ -90,7 +90,7 @@ proc gdb_run_cmd {} {
 
     send_gdb "disable\n";
     expect {
-	-i $gdb_spawn_id -re ".*$prompt $" {
+	-i $gdb_spawn_id -re ".*$gdb_prompt $" {
 	    verbose "Breakpoints disabled" 2
 	}
 	-i $gdb_spawn_id timeout { 
@@ -132,7 +132,7 @@ proc gdb_run_cmd {} {
 	    send_gdb "y\n"
 	    exp_continue
 	}
-	-i $gdb_spawn_id -re ".*$prompt $" { 
+	-i $gdb_spawn_id -re ".*$gdb_prompt $" { 
 	    verbose "interrupting remote stub succeeded"
 	}
 	-i $gdb_spawn_id timeout { 
@@ -151,7 +151,7 @@ proc gdb_run_cmd {} {
 		send_gdb "y\n";
 		exp_continue
 	    }
-	    -i $gdb_spawn_id -re ".*$prompt $"	{
+	    -i $gdb_spawn_id -re ".*$gdb_prompt $"	{
 		verbose "connected to stub at [target_info gdb_serial]" 2
 	    }
 	    -i $gdb_spawn_id timeout { 
@@ -165,7 +165,7 @@ proc gdb_run_cmd {} {
 
     send_gdb "enable\n";
     expect {
-	-i $gdb_spawn_id -re ".*$prompt $" {
+	-i $gdb_spawn_id -re ".*$gdb_prompt $" {
 	    verbose "Breakpoints enabled" 2
 	}
 	-i $gdb_spawn_id timeout { 
@@ -190,7 +190,7 @@ proc gdb_load { arg } {
     global verbose
     global loadpath
     global loadfile
-    global prompt
+    global gdb_prompt
     global GDB
     global expect_out
     global gdb_spawn_id
@@ -215,8 +215,8 @@ proc gdb_load { arg } {
 	    send_gdb "y\n"
 	    exp_continue
 	}
-	-i $gdb_spawn_id -re "Reading symbols from.*done..*$prompt $" {}
-	-i $gdb_spawn_id -re "$prompt $" { perror "GDB couldn't find loader" }
+	-i $gdb_spawn_id -re "Reading symbols from.*done..*$gdb_prompt $" {}
+	-i $gdb_spawn_id -re "$gdb_prompt $" { perror "GDB couldn't find loader" }
 	-i $gdb_spawn_id timeout { 
 	    perror "(timeout) read symbol file" ; 
 	    return -1
@@ -235,8 +235,8 @@ proc gdb_load { arg } {
 	send_gdb "target $protocol udp [target_info netport]\n";
     }
     expect {
-	-i $gdb_spawn_id -re "Remote target.*$prompt $" { }
-	-i $gdb_spawn_id -re ".*SPARCLET appears to be alive.*$prompt $" {
+	-i $gdb_spawn_id -re "Remote target.*$gdb_prompt $" { }
+	-i $gdb_spawn_id -re ".*SPARCLET appears to be alive.*$gdb_prompt $" {
 	    if $verbose>1 then {
 		send_user "Set target to $targetname\n"
 	    }
@@ -280,7 +280,7 @@ proc gdb_load { arg } {
 	    send_gdb "y\n"
 	    exp_continue
 	}
-	-i $gdb_spawn_id -re ".*$prompt $" { 
+	-i $gdb_spawn_id -re ".*$gdb_prompt $" { 
 	    verbose "Running loader succeeded" 
 	}
 	-i $gdb_spawn_id timeout { 
@@ -304,8 +304,8 @@ proc gdb_load { arg } {
 	    send_gdb "y\n"
 	    exp_continue
 	}
-	-i $gdb_spawn_id -re "Reading symbols from.*done..*$prompt $" {}
-	-i $gdb_spawn_id -re "$prompt $" { perror "GDB couldn't read file" }
+	-i $gdb_spawn_id -re "Reading symbols from.*done..*$gdb_prompt $" {}
+	-i $gdb_spawn_id -re "$gdb_prompt $" { perror "GDB couldn't read file" }
 	-i $gdb_spawn_id timeout { 
 	    perror "(timeout) read symbol file" ; 
 	    return -1 
@@ -319,7 +319,7 @@ proc gdb_load { arg } {
 		send_gdb "y\n";
 		exp_continue
 	    }
-	    -i $gdb_spawn_id -re ".*$prompt $"	{
+	    -i $gdb_spawn_id -re ".*$gdb_prompt $"	{
 		verbose "Set remote target to [target_info serial]" 2
 	    }
 	    -i $gdb_spawn_id timeout { 
@@ -340,12 +340,12 @@ proc gdb_load { arg } {
     set timeout 1200
     verbose "Timeout is now $timeout seconds" 2
     expect {
-	-i $gdb_spawn_id -re "Loading.*$prompt $" {
+	-i $gdb_spawn_id -re "Loading.*$gdb_prompt $" {
 	    verbose "Loaded $arg into $GDB" 1
 	    set timeout 60
 	    verbose "Timeout is now $timeout seconds" 2
 	}
-	-i $gdb_spawn_id -re "$prompt $"     {
+	-i $gdb_spawn_id -re "$gdb_prompt $"     {
 	    if $verbose>1 then {
 		perror "GDB couldn't load."
 	    }
@@ -384,8 +384,8 @@ proc gdb_load { arg } {
 	    send_gdb "y\n"
 	    exp_continue
 	}
-	-i $gdb_spawn_id -re "Remote target.*$prompt $" { }
-	-i $gdb_spawn_id -re ".*SPARCLET appears to be alive.*$prompt $" {
+	-i $gdb_spawn_id -re "Remote target.*$gdb_prompt $" { }
+	-i $gdb_spawn_id -re ".*SPARCLET appears to be alive.*$gdb_prompt $" {
 	    if $verbose>1 then {
 		send_user "Set target to $targetname\n"
 	    }
@@ -429,7 +429,7 @@ proc gdb_load { arg } {
 	    send_gdb "y\n"
 	    exp_continue
 	}
-	-i $gdb_spawn_id -re ".*$prompt $" { 
+	-i $gdb_spawn_id -re ".*$gdb_prompt $" { 
 	    verbose "interrupting remote stub succeeded"
 	}
 	-i $gdb_spawn_id timeout { 
@@ -448,7 +448,7 @@ proc gdb_load { arg } {
 		send_gdb "y\n";
 		exp_continue
 	    }
-	    -i $gdb_spawn_id -re ".*$prompt $"	{
+	    -i $gdb_spawn_id -re ".*$gdb_prompt $"	{
 		verbose "connected to stub at [target_info gdb_serial]" 2
 	    }
 	    -i $gdb_spawn_id timeout { 

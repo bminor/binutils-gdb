@@ -61,14 +61,14 @@ expect {
     -i $gdb_spawn_id -re "Delete all breakpoints.*$" {
 	    send_gdb "y\n"
 	    expect {
-		-re "$prompt $" {
+		-re "$gdb_prompt $" {
 		    setup_xfail "i*86-*-sysv4*" "sparc-sun-sunos4*" "alpha-dec-osf*" "mips-dec-ultrix*"
 		    fail "Delete all breakpoints when none (unexpected prompt)"
 		}
 		timeout	{ fail "Delete all breakpoints when none (timeout after unexpected prompt)" }
 	    }
 	}
-    -i $gdb_spawn_id -re ".*$prompt $"       { pass "Delete all breakpoints when none" }
+    -i $gdb_spawn_id -re ".*$gdb_prompt $"       { pass "Delete all breakpoints when none" }
     timeout	            { fail "Delete all breakpoints when none (timeout)" }
 }
 
@@ -151,9 +151,9 @@ if ![target_info exists use_gdb_stub] {
 	send_gdb "y\n"
 	exp_continue
     }
-    -re "Starting program.*Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:60.*60\[\t \]+if .argc.* \{.*$prompt $"\
+    -re "Starting program.*Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:60.*60\[\t \]+if .argc.* \{.*$gdb_prompt $"\
 	                    { pass "run until function breakpoint" }
-    -re ".*$prompt $"       { fail "run until function breakpoint" }
+    -re ".*$gdb_prompt $"       { fail "run until function breakpoint" }
     timeout	            { fail "run until function breakpoint (timeout)" }
   }
 } else {
@@ -204,8 +204,8 @@ gdb_test "tbreak $srcfile:factorial" "Breakpoint.*at.* file .*$srcfile, line.*" 
 #
 send_gdb "tbreak 64\n"
 expect {
-    -re "Breakpoint.*at.* file .*$srcfile, line 64.*$prompt $" { pass "Temporary breakpoint line number" }
-	-re ".*$prompt $"   { pass "Temporary breakpoint line number" }
+    -re "Breakpoint.*at.* file .*$srcfile, line 64.*$gdb_prompt $" { pass "Temporary breakpoint line number" }
+	-re ".*$gdb_prompt $"   { pass "Temporary breakpoint line number" }
 	timeout	    { fail "breakpoint line number (timeout)" }
 }
 
@@ -216,8 +216,8 @@ gdb_test "tbreak 60" "Breakpoint.*at.* file .*$srcfile, line 60.*" "Temporary br
 #
 send_gdb "tbreak $srcfile:70\n"
 expect {
-    -re "Breakpoint.*at.* file .*$srcfile, line 70.*$prompt $" { pass "Temporary breakpoint line number in file" }
-	-re ".*$prompt $"   { pass "Temporary breakpoint line number in file" }
+    -re "Breakpoint.*at.* file .*$srcfile, line 70.*$gdb_prompt $" { pass "Temporary breakpoint line number in file" }
+	-re ".*$gdb_prompt $"   { pass "Temporary breakpoint line number in file" }
 	timeout	    { fail "Temporary breakpoint line number in file (timeout)" }
 }
 
@@ -242,7 +242,7 @@ proc test_clear_command {} {
 #
 
 proc test_next_with_recursion {} { 
-    global prompt
+    global gdb_prompt
     global decimal
     global noresults
     global binfile
@@ -272,7 +272,7 @@ proc test_next_with_recursion {} {
 	gdb_run_cmd
     }
     expect {
-	-re "Break.* factorial .value=6. .*$prompt $" {}
+	-re "Break.* factorial .value=6. .*$gdb_prompt $" {}
 	timeout { fail "run to factorial(6) (timeout)" ; return }
     }
 
@@ -280,7 +280,7 @@ proc test_next_with_recursion {} {
 
     send_gdb "continue\n"
     expect {
-	-re "Continuing.*Break.* factorial .value=5. .*$prompt $" {}
+	-re "Continuing.*Break.* factorial .value=5. .*$gdb_prompt $" {}
 	timeout { fail "continue to factorial(5) (timeout)" ; return }
     }
 
@@ -296,7 +296,7 @@ proc test_next_with_recursion {} {
 
     send_gdb "next\n"
     expect {
-	-re ".* factorial .value - 1.;.*$prompt $" {}
+	-re ".* factorial .value - 1.;.*$gdb_prompt $" {}
 	timeout { fail "next to recursive call (timeout)" ; return }
     }
 
@@ -341,5 +341,5 @@ if [istarget "*-*-vxworks*"] {
     set timeout 10
     verbose "Timeout is now $timeout seconds" 2
     send_gdb "set args main\n"
-    expect -re ".*$prompt $" {}
+    expect -re ".*$gdb_prompt $" {}
 }

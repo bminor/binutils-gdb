@@ -27,7 +27,7 @@ load_lib gdb.exp
 # Set gdb to the desired UDI target
 #
 proc gdb_target_udi { } {
-    global prompt
+    global gdb_prompt
     global verbose
     global exit_status
 
@@ -40,7 +40,7 @@ proc gdb_target_udi { } {
 	-re "target udi $targetname\[\r\n\]+" {
 	    exp_continue
 	}
-	-re "TIP UDI 1.2 Conformant.*$prompt $"	{
+	-re "TIP UDI 1.2 Conformant.*$gdb_prompt $"	{
 	    verbose "Set target to $targetname"
 	}
 	-re "TIP-ipc WARNING,.*failed:" {
@@ -73,7 +73,7 @@ proc gdb_load { arg } {
     global loadpath
     global loadfile
     global GDB
-    global prompt
+    global gdb_prompt
 
     if [gdb_file_cmd $arg] {
 	return -1 

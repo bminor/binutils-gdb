@@ -27,7 +27,7 @@ load_lib gdb.exp
 load_lib vxworks.exp
 
 set shell_prompt "->"
-set prompt "\\(vxgdb\\)"
+set gdb_prompt "\\(vxgdb\\)"
 
 #
 # gdb_version -- extract and print the version number of gcc
@@ -57,7 +57,7 @@ proc gdb_load { arg } {
 # gdb_start -- start gdb running
 #
 proc gdb_start { } {
-    global prompt
+    global gdb_prompt
     global verbose
     global connectmode
     global reboot
@@ -100,7 +100,7 @@ proc gdb_start { } {
 }
 
 proc spawn_vxgdb { } {
-    global prompt
+    global gdb_prompt
     global verbose
 
     default_gdb_start
@@ -108,7 +108,7 @@ proc spawn_vxgdb { } {
     # set the default arguments to "main", so that "run" with no
     # arguments will work correctly.
     send "set args main\n"
-    expect -re ".*$prompt $" {}
+    expect -re ".*$gdb_prompt $" {}
 
     verbose "Setting up target, Please wait..."
     # set targets hostname
@@ -116,7 +116,7 @@ proc spawn_vxgdb { } {
     set timeout 60
     verbose "Timeout is now $timeout seconds" 2
     expect {
-	-re "Done\..*$prompt $"	{
+	-re "Done\..*$gdb_prompt $"	{
 	    verbose "Set target to [target_info netport]" 1
 	}
 	-re "net_connect: RPC: Program not registered.*$" {

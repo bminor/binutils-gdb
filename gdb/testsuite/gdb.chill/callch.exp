@@ -34,7 +34,7 @@ if  { [compile "${srcfile} -g -o ${binfile} ${CHILL_RT0} ${CHILL_LIB}"] != "" } 
 }
 
 proc do_tests {} {
-    global prms_id bug_id subdir objdir srcdir binfile prompt
+    global prms_id bug_id subdir objdir srcdir binfile gdb_prompt
 
     set prms_id 0
     set bug_id 0
@@ -49,7 +49,7 @@ proc do_tests {} {
     send_gdb "set language chill\n" ; 
 
     gdb_test "break callch.ch:48 ""
-    send_gdb "run\n"; expect -re "Breakpoint .*callch.ch:48.*$prompt $"
+    send_gdb "run\n"; expect -re "Breakpoint .*callch.ch:48.*$gdb_prompt $"
     gdb_test {set fred(10, i)} {a is '10'; b is '12'.}
     gdb_test_exact "call klaus()" {here's klaus calling.}
     gdb_test_exact "call fred()" {too few arguments in function call}

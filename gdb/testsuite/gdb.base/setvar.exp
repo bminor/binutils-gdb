@@ -52,7 +52,7 @@ gdb_load $binfile
 #
 # set it up at a breakpoint so we canplay with the variable values
 #
-send_gdb "set print sevenbit-strings\n" ; expect -re "$prompt $"
+send_gdb "set print sevenbit-strings\n" ; expect -re "$gdb_prompt $"
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
@@ -66,19 +66,19 @@ set ulong_minus_1 4294967295
 set ulong_minus_456 4294966840
 send_gdb "print sizeof (unsigned long)\n"
 expect {
-    -re ".\[0-9\]* = 4.*$prompt $" {}
-    -re ".\[0-9\]* = 8.*$prompt $" {
+    -re ".\[0-9\]* = 4.*$gdb_prompt $" {}
+    -re ".\[0-9\]* = 8.*$gdb_prompt $" {
 	set ulong_minus_1 18446744073709551615
 	set ulong_minus_456 18446744073709551160
     }
-    -re ".*$prompt $" {
+    -re ".*$gdb_prompt $" {
 	 fail "getting sizeof unsigned long"
     }
     default	{ fail "(timeout) getting sizeof unsigned long" }
 }
 
 proc test_set { args } {
-    global prompt
+    global gdb_prompt
 
     set length [expr [llength $args] - 3];
     set print_cmd "[lindex $args $length]";

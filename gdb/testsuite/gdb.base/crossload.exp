@@ -65,7 +65,7 @@ if [istarget "a29k-*-*"] then {
 proc bfddefault {} {
     global GDB
     global GDBFLAGS
-    global prompt
+    global gdb_prompt
     global objdir
     global subdir
     global binfile
@@ -80,21 +80,21 @@ proc bfddefault {} {
 	    send_gdb "y\n"
 	    exp_continue
 	}
-	-re "Reading symbols from $objdir/$subdir/$binfile\[.\]+done\..*$prompt $" {
+	-re "Reading symbols from $objdir/$subdir/$binfile\[.\]+done\..*$gdb_prompt $" {
 	    pass "$binfile ($bfdformat) auto format"
 	}
-	-re "Reading symbols from $objdir/$subdir/$binfile\[.\]+.no debugging symbols found.\[.\]+done\..*$prompt $" {
+	-re "Reading symbols from $objdir/$subdir/$binfile\[.\]+.no debugging symbols found.\[.\]+done\..*$gdb_prompt $" {
 	    pass "$binfile ($bfdformat) auto format (but no symbols found)"
 	}
-	-re "File format not recognized.*$prompt $" {
+	-re "File format not recognized.*$gdb_prompt $" {
 	    fail "$binfile ($bfdformat) auto format (format not recognized)"
 	    return
 	}
-	-re "File format is ambiguous.*$prompt $" {
+	-re "File format is ambiguous.*$gdb_prompt $" {
 	    fail "$binfile ($bfdformat) auto format (format is ambiguous)"
 	    return
 	}
-	-re "$prompt $" {
+	-re "$gdb_prompt $" {
 	    fail "$binfile ($bfdformat) auto format"
 	    return
 	}
@@ -117,7 +117,7 @@ proc bfddefault {} {
 proc bfdexplicit {} {
     global GDB
     global GDBFLAGS
-    global prompt
+    global gdb_prompt
     global subdir
     global objdir
     global det_file
@@ -141,14 +141,14 @@ proc bfdexplicit {} {
 	    send_gdb "y\n"
 	    exp_continue
 	}
-	-re "Reading symbols from $objdir/$subdir/$binfile\[.\]+done\..*$prompt $" {
+	-re "Reading symbols from $objdir/$subdir/$binfile\[.\]+done\..*$gdb_prompt $" {
 	    pass "$binfile ($bfdformat) explicit format"
 	}
-	-re "Invalid target.*$prompt $" {
+	-re "Invalid target.*$gdb_prompt $" {
 	    fail "$binfile ($bfdformat) explicit format (invalid target)"
 	    return
 	}
-	-re "$prompt $" {
+	-re "$gdb_prompt $" {
 	    fail "$binfile ($bfdformat) explicit format"
 	    return
 	}
@@ -162,13 +162,13 @@ proc bfdexplicit {} {
 }
 
 proc test_ptype_functions {} {
-    global prompt
+    global gdb_prompt
     global binfile
     global bfdformat
     global det_file
     send_gdb "ptype main\n"
     expect {
-	-re "type = int \[)(\]+\r\n$prompt $" {}
+	-re "type = int \[)(\]+\r\n$gdb_prompt $" {}
 	timeout { fail "(timeout) $binfile ($bfdformat) function main" ; return }
     }
 
@@ -192,7 +192,7 @@ proc test_ptype_functions {} {
 # Note that plain chars can be either signed or unsigned.
 
 proc test_ptype_plain_types {} {
-    global prompt
+    global gdb_prompt
     global binfile
     global bfdformat
 
@@ -217,7 +217,7 @@ proc test_ptype_plain_types {} {
 # defined away and the variables default to plain types.  So accept either.
 
 proc test_ptype_signed_types {} {
-    global prompt
+    global gdb_prompt
     global binfile
     global bfdformat
     global det_file
@@ -241,7 +241,7 @@ proc test_ptype_signed_types {} {
 }
 
 proc test_ptype_unsigned_types {} {
-    global prompt
+    global gdb_prompt
     global binfile
     global bfdformat
     global det_file
@@ -266,7 +266,7 @@ proc test_ptype_unsigned_types {} {
 # Note that plain chars can be either signed or unsigned.
 
 proc test_ptype_array_types {} {
-    global prompt
+    global gdb_prompt
     global binfile
     global bfdformat
     global det_file
@@ -290,7 +290,7 @@ proc test_ptype_array_types {} {
 }
 
 proc test_ptype_pointer_types {} {
-    global prompt
+    global gdb_prompt
     global binfile
     global bfdformat
     global det_file
@@ -316,7 +316,7 @@ proc loadandtest { args } {
     global verbose
     global GDB
     global GDBFLAGS
-    global prompt
+    global gdb_prompt
     global subdir
     global objdir
     global binfile

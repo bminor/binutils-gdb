@@ -22,7 +22,7 @@ load_lib gdb.exp
 # Set gdb to target the monitor
 #
 proc gdb_target_monitor { } {
-    global prompt
+    global gdb_prompt
     global exit_status
     global timeout
 
@@ -89,7 +89,7 @@ proc gdb_load { arg } {
     global loadpath
     global loadfile
     global GDB
-    global prompt
+    global gdb_prompt
     global timeout
 
     if { $arg != "" } {
@@ -108,13 +108,13 @@ proc gdb_load { arg } {
     set timeout 1000
     verbose "Timeout is now $timeout seconds" 2
     expect {
-	-re ".*$prompt $" {
+	-re ".*$gdb_prompt $" {
 	    if { $verbose > 1 } {
 		send_user "Loaded $arg into $GDB\n"
 	    }
 	    return 1
 	}
-	-re "$prompt $"     {
+	-re "$gdb_prompt $"     {
 	    if { $verbose > 1 } {
 		perror "GDB couldn't load."
 	    }

@@ -44,7 +44,7 @@ set thissig "ABRT"
 
 proc test_one_sig {nextsig} {
     global sig_supported
-    global prompt
+    global gdb_prompt
     global thissig
 
     set this_sig_supported $sig_supported
@@ -61,10 +61,10 @@ proc test_one_sig {nextsig} {
 	    setup_xfail "i*86-pc-linuxoldld-gnu" "i*86-pc-linuxaout-gnu"
 	}
 	expect {
-	    -re "Continuing.*Program received signal SIG$thissig.*$prompt $" {
+	    -re "Continuing.*Program received signal SIG$thissig.*$gdb_prompt $" {
 		pass "get signal $thissig"
 	    }
-	    -re ".*$prompt $" {
+	    -re ".*$gdb_prompt $" {
 		fail "get signal $thissig"
 		set need_another_continue 0
 	    }
@@ -95,10 +95,10 @@ proc test_one_sig {nextsig} {
 	    setup_xfail "*-*-*lynx*"
 	}
 	expect {
-	    -re "Breakpoint.*handle_$thissig.*$prompt $" {
+	    -re "Breakpoint.*handle_$thissig.*$gdb_prompt $" {
 		pass "send signal $thissig"
 	    }
-	    -re "Breakpoint.*gen_$nextsig.*kill.*$prompt $" {
+	    -re "Breakpoint.*gen_$nextsig.*kill.*$gdb_prompt $" {
 		fail "missed breakpoint at handle_$thissig"
 		set missed_handler 1
 	    }
@@ -108,15 +108,15 @@ proc test_one_sig {nextsig} {
     if { $missed_handler == "0" } then {
         send_gdb "signal 0\n"
         expect {
-	    -re "Breakpoint.*gen_$nextsig.*kill.*$prompt $" {
+	    -re "Breakpoint.*gen_$nextsig.*kill.*$gdb_prompt $" {
 	        pass "advance to $nextsig"
 	        set sig_supported 1
 	    }
-	    -re "Breakpoint.*gen_$nextsig.*handle.*$prompt $" {
+	    -re "Breakpoint.*gen_$nextsig.*handle.*$gdb_prompt $" {
 	        pass "advance to $nextsig"
 	        set sig_supported 0
 	    }
-	    -re ".*$prompt $" { fail "advance to $nextsig" }
+	    -re ".*$gdb_prompt $" { fail "advance to $nextsig" }
 	    default { fail "advance to $nextsig (eof or timeout)" }
         }
     }

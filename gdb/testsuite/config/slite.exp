@@ -32,7 +32,7 @@
 
 load_lib remote.exp
 load_lib gdb.exp
-set prompt "\\(gdb\\)"
+set gdb_prompt "\\(gdb\\)"
 
 #
 # gdb_load -- load a file into the GDB. 
@@ -43,7 +43,7 @@ proc gdb_load { arg } {
     global verbose
     global loadpath
     global loadfile
-    global prompt
+    global gdb_prompt
     global GDB
     global expect_out
     global gdb_spawn_id
@@ -61,8 +61,8 @@ proc gdb_load { arg } {
 	    send_gdb "y\n"
 	    exp_continue
 	}
-	-i $gdb_spawn_id -re "Reading symbols from.*done..*$prompt $" {}
-	-i $gdb_spawn_id -re "$prompt $" { perror "GDB couldn't read file" }
+	-i $gdb_spawn_id -re "Reading symbols from.*done..*$gdb_prompt $" {}
+	-i $gdb_spawn_id -re "$gdb_prompt $" { perror "GDB couldn't read file" }
 	-i $gdb_spawn_id timeout { perror "(timeout) read symbol file" ; return -1 }
     }
 
@@ -86,8 +86,8 @@ proc gdb_load { arg } {
     set timeout 60
     verbose "Timeout is now $timeout seconds" 2
     expect {
-	-i $gdb_spawn_id -re "Remote target.*$prompt $" { }
-	-i $gdb_spawn_id -re ".*SPARClite appears to be alive.*$prompt $"	{
+	-i $gdb_spawn_id -re "Remote target.*$gdb_prompt $" { }
+	-i $gdb_spawn_id -re ".*SPARClite appears to be alive.*$gdb_prompt $"	{
 	    if $verbose>1 then {
 		send_user "Set target to $targetname\n"
 	    }
@@ -111,12 +111,12 @@ proc gdb_load { arg } {
 	set timeout 2400
 	verbose "Timeout is now $timeout seconds" 2
 	expect {
-	    -i $gdb_spawn_id -re "Loading.*$prompt $" {
+	    -i $gdb_spawn_id -re "Loading.*$gdb_prompt $" {
 		verbose "Loaded $arg into $GDB" 1
 		set timeout 30
 		verbose "Timeout is now $timeout seconds" 2
 	    }
-	    -i $gdb_spawn_id -re "$prompt $"     {
+	    -i $gdb_spawn_id -re "$gdb_prompt $"     {
 		if $verbose>1 then {
 		    perror "GDB couldn't load."
 		}
@@ -134,7 +134,7 @@ proc gdb_load { arg } {
     sleep 2;
     send_gdb "";
     expect {
-	-i $gdb_spawn_id -re ".*$prompt $" { verbose "Run command succeded" }
+	-i $gdb_spawn_id -re ".*$gdb_prompt $" { verbose "Run command succeded" }
 	-i $gdb_spawn_id default {
 	    perror "error sending monitor run command";
 	}
@@ -153,7 +153,7 @@ proc gdb_load { arg } {
 	    send_gdb "y\n";
 	    exp_continue
 	}
-	-i $gdb_spawn_id -re ".*$prompt $"	{
+	-i $gdb_spawn_id -re ".*$gdb_prompt $"	{
 	    verbose "Set remote target to [target_info serial]" 2
 	}
 	-i $gdb_spawn_id timeout {

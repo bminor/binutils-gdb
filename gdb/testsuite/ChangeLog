@@ -1,3 +1,11 @@
+Sat Feb  1 23:51:01 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* gdb.*/*.exp: Replace $prompt with $gdb_prompt.
+	
+	* gdb.base/scope.exp: Use gdb_test.
+	* gdb.c++/classes.exp: Ditto.
+	* gdb.c++/inherit.exp: Ditto.
+
 Fri Jan 31 13:09:12 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* gdb.base/crossload.exp: Don't use execute_anywhere, use

@@ -45,7 +45,7 @@ if [istarget "i*86-*-sysv4*"] then {
 }
 
 proc set_lang_chill {} {
-    global prompt
+    global gdb_prompt
     global binfile objdir subdir
 
     if ![file exists $objdir/$subdir/$binfile] then {
@@ -56,19 +56,19 @@ proc set_lang_chill {} {
 
     send_gdb "set language chill\n"
     expect {
-	-re ".*$prompt $" {}
+	-re ".*$gdb_prompt $" {}
 	timeout { fail "set language chill (timeout)" ; return 0 }
     }
 
     send_gdb "show language\n"
     expect {
-	-re ".* source language is \"chill\".*$prompt $" {
+	-re ".* source language is \"chill\".*$gdb_prompt $" {
 	    pass "set language to \"chill\""
 	    send_gdb "break dummyfunc\n"
 	    expect {
-		-re ".*$prompt $" {
+		-re ".*$gdb_prompt $" {
 		    send_gdb "run\n"
-		    expect -re ".*$prompt $" {}
+		    expect -re ".*$gdb_prompt $" {}
 		    return 1
 		}
 		timeout {
@@ -77,7 +77,7 @@ proc set_lang_chill {} {
 		}
 	    }
 	}
-	-re ".*$prompt $" {
+	-re ".*$gdb_prompt $" {
 	    fail "setting language to \"chill\""
 	    return 0
 	}
@@ -90,7 +90,7 @@ proc set_lang_chill {} {
 
 # checks if structure was accessed correctly
 proc test_write { args } {
-    global prompt
+    global gdb_prompt
 
     if [llength $args]==5 then {
 	set message [lindex $args 4]
@@ -117,7 +117,7 @@ proc test_write { args } {
 
     verbose "setting var $value..."
     send_gdb "set var $location.m$extended := $value\n"
-    expect -re ".*$prompt $" {}
+    expect -re ".*$gdb_prompt $" {}
     gdb_test "print $location" \
       ".*= \[\[\]\\.p1: 2863311530, \\.m: $matchval, \\.p2: 1431655765\[\]\]"\
       "$message"

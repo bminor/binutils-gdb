@@ -46,7 +46,7 @@ if [istarget "m68k*-*-hpux*"] then {
 # to a line that we know is always executed.
 
 proc do_steps_and_nexts {} {
-    global prompt
+    global gdb_prompt
     global srcdir
  
     gdb_reinitialize_dir $srcdir/..
@@ -54,87 +54,87 @@ proc do_steps_and_nexts {} {
     for {set count 0} {$count < 20} {incr count} {
 	send "list\n"
 	expect {
-	    -re ".*symarg = NULL.*$prompt $" {
+	    -re ".*symarg = NULL.*$gdb_prompt $" {
 		set description "step over symarg initialization"
 		set command "step"
 	    }
-	    -re ".*execarg = NULL.*$prompt $" {
+	    -re ".*execarg = NULL.*$gdb_prompt $" {
 		set description "step over execarg initialization"
 		set command "step"
 	    }
-	    -re ".*corearg = NULL.*$prompt $" {
+	    -re ".*corearg = NULL.*$gdb_prompt $" {
 		set description "step over corearg initialization"
 		set command "step"
 	    }
-	    -re ".*cdarg = NULL.*$prompt $" {
+	    -re ".*cdarg = NULL.*$gdb_prompt $" {
 		set description "step over cdarg initialization"
 		set command "step"
 	    }
-	    -re ".*ttyarg = NULL.*$prompt $" {
+	    -re ".*ttyarg = NULL.*$gdb_prompt $" {
 		set description "step over ttyarg initialization"
 		set command "step"
 	    }
-	    -re ".*time_at_startup = get_run_time.*$prompt $" {
+	    -re ".*time_at_startup = get_run_time.*$gdb_prompt $" {
 		set description "next over get_run_time and everything it calls"
 		set command "next"
 	    }
-	    -re ".*START_PROGRESS.*$prompt $" {
+	    -re ".*START_PROGRESS.*$gdb_prompt $" {
 		set description "next over START_PROGRESS and everything it calls"
 		set command "next"
 	    }
-	    -re ".*mac_init.*$prompt $" {
+	    -re ".*mac_init.*$gdb_prompt $" {
 		set description "next over mac_init and everything it calls"
 		set command "next"
 	    }
-	    -re ".*init_malloc.*$prompt $" {
+	    -re ".*init_malloc.*$gdb_prompt $" {
 		set description "next over init_malloc and everything it calls"
 		set command "next"
 	    }
-	    -re ".*count . 0x3.*$prompt $" {
+	    -re ".*count . 0x3.*$gdb_prompt $" {
 		set description "next over conditional stack alignment code 1"
 		set command "next"
 	    }
-	    -re ".*if .i != 0.*$prompt $" {
+	    -re ".*if .i != 0.*$gdb_prompt $" {
 		set description "next over conditional stack alignment code 2"
 		set command "next"
 	    }
-	    -re ".*alloca .i - 4.*$prompt $" {
+	    -re ".*alloca .i - 4.*$gdb_prompt $" {
 		set description "next over conditional stack alignment alloca"
 		set command "next"
 	    }
-	    -re ".*SET_TOP_LEVEL.*$prompt $" {
+	    -re ".*SET_TOP_LEVEL.*$gdb_prompt $" {
 		set description "next over SET_TOP_LEVEL call"
 		set command "next"
 	    }
-	    -re ".*cmdsize = 1.*$prompt $" {
+	    -re ".*cmdsize = 1.*$gdb_prompt $" {
 		set description "step over cmdsize initialization"
 		set command "next"
 	    }
-	    -re ".*cmdarg = .* xmalloc.*$prompt $" {
+	    -re ".*cmdarg = .* xmalloc.*$gdb_prompt $" {
 		set description "next over cmdarg initialization via xmalloc"
 		set command "next"
 	    }
-	    -re ".*ncmd = 0.*$prompt $" {
+	    -re ".*ncmd = 0.*$gdb_prompt $" {
 		set description "next over ncmd initialization"
 		set command "next"
 	    }
-	    -re ".*dirsize = 1.*$prompt $" {
+	    -re ".*dirsize = 1.*$gdb_prompt $" {
 		set description "next over dirsize initialization"
 		set command "next"
 	    }
-	    -re ".*dirarg = .* xmalloc.*$prompt $" {
+	    -re ".*dirarg = .* xmalloc.*$gdb_prompt $" {
 		return
 	    }
-	    -re "\[ \t\]+\{\r\n$prompt $" {
+	    -re "\[ \t\]+\{\r\n$gdb_prompt $" {
 		setup_xfail "mips-*-irix5*"
 		fail "$description ended up at odd location"
 	    }
-	    -re ".*main.c.*No such file or directory.*$prompt $" {
+	    -re ".*main.c.*No such file or directory.*$gdb_prompt $" {
 		setup_xfail "rs6000-*-aix3*"
 		fail "must be able to list source lines"
 		return
 	    }
-	    -re ".*$prompt $" {
+	    -re ".*$gdb_prompt $" {
 		fail "unknown source line after $description"
 		return
 	    }
@@ -145,13 +145,13 @@ proc do_steps_and_nexts {} {
 	}
 	send "$command\n"
 	expect {
-	    -re ".*No such file or directory.\r\n$prompt $" {
+	    -re ".*No such file or directory.\r\n$gdb_prompt $" {
 		fail "$description (no source available)"
 	    }
-	    -re ".*A file or directory .* does not exist..\r\n$prompt $" {
+	    -re ".*A file or directory .* does not exist..\r\n$gdb_prompt $" {
 		fail "$description (no source available)"
 	    }
-	    -re ".*$prompt $" {
+	    -re ".*$gdb_prompt $" {
 		pass "$description"
 	    }
 	    timeout {
@@ -162,7 +162,7 @@ proc do_steps_and_nexts {} {
 }
 
 proc test_with_self { executable } {
-    global prompt
+    global gdb_prompt
     global tool
     global det_file
     global decimal
@@ -221,19 +221,19 @@ proc test_with_self { executable } {
     set description "run until breakpoint at main"
     send "run -nw\n"
     expect {
-	-re "Starting program.*Breakpoint \[0-9\]+,.*main .argc.*argv.* at .*main.c:.*$prompt $" {
+	-re "Starting program.*Breakpoint \[0-9\]+,.*main .argc.*argv.* at .*main.c:.*$gdb_prompt $" {
 	    pass "$description"
 	}
-	-re "Starting program.*Breakpoint \[0-9\]+,.*main .argc.*argv.*$prompt $" {
+	-re "Starting program.*Breakpoint \[0-9\]+,.*main .argc.*argv.*$gdb_prompt $" {
 	    xfail "$description (line numbers scrambled?)"
 	}
-	-re "vfork: No more processes.*$prompt $" {
+	-re "vfork: No more processes.*$gdb_prompt $" {
 	    fail "$description (out of virtual memory)"
 	    set timeout $oldtimeout
 	    verbose "Timeout is now $timeout seconds" 2
 	    return -1
 	}
-	-re ".*$prompt $" {
+	-re ".*$gdb_prompt $" {
 	    fail "$description"
 	    set timeout $oldtimeout
 	    verbose "Timeout is now $timeout seconds" 2
@@ -250,13 +250,13 @@ proc test_with_self { executable } {
     # do we have a version number ?
     send "print version\n"
     expect {
-	-re ".\[0-9\]+ = +0x.*\[0-9.\]+.*$prompt $" {
+	-re ".\[0-9\]+ = +0x.*\[0-9.\]+.*$gdb_prompt $" {
 	    pass "printed version"
 	}
-	-re ".\[0-9\]+ = +.+ +0x.*\[0-9.\]+.*$prompt $" {
+	-re ".\[0-9\]+ = +.+ +0x.*\[0-9.\]+.*$gdb_prompt $" {
 	    pass "printed version with cast"
 	}
-	-re ".*$prompt $"	{ fail "printed version" }
+	-re ".*$gdb_prompt $"	{ fail "printed version" }
 	timeout		{ fail "(timeout) printed version" }
     }
 
@@ -273,16 +273,16 @@ proc test_with_self { executable } {
     set description "step into xmalloc call"
     send "step\n"
     expect {
-	-re "xmalloc.*size=.*at.*utils.c.*$prompt $" {
+	-re "xmalloc.*size=.*at.*utils.c.*$gdb_prompt $" {
 	    pass "$description"
 	}
-	-re ".*No such file or directory.\r\n$prompt $" {
+	-re ".*No such file or directory.\r\n$gdb_prompt $" {
 	    pass "$description (no source available)"
 	}
-	-re "A file or directory .* does not exist..\r\n$prompt $" {
+	-re "A file or directory .* does not exist..\r\n$gdb_prompt $" {
 	    pass "$description (no source available)"
 	}
-	-re ".*$prompt $" {
+	-re ".*$gdb_prompt $" {
 	    fail "$description"
 	}
 	timeout {
@@ -299,14 +299,14 @@ GDB is free software, covered by the GNU General Public License, and you are.*
 welcome to change it and/or distribute copies of it under certain conditions.*
 Type \"show copying\" to see the conditions.*
 There is absolutely no warranty for GDB.  Type \"show warranty\" for details.*
-This GDB was configured as .*$prompt $"\
+This GDB was configured as .*$gdb_prompt $"\
 	    { pass "xgdb is at prompt" }
 	-re "GDB is free software and you are welcome to distribute copies of it.*
  under certain conditions; type \"show copying\" to see the conditions..*
 There is absolutely no warranty for GDB; type \"show warranty\" for details..*
-GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$prompt $"\
+GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$gdb_prompt $"\
 	    { pass "xgdb is at prompt (obsolescent gdb)" }
-	-re ".*$prompt $"       { fail "xgdb is at prompt" }
+	-re ".*$gdb_prompt $"       { fail "xgdb is at prompt" }
 	timeout	            { fail "(timeout) xgdb is at prompt" }
     }
     
@@ -314,7 +314,7 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$prompt $"\
     send "set prompt (xgdb) \n"
     expect {
 	-re "\[(\]xgdb\[)\].*\[(\]xgdb\[)\] $"	{ pass "Set xgdb prompt" }
-	-re ".*$prompt $"		{ fail "Set xgdb prompt" }
+	-re ".*$gdb_prompt $"		{ fail "Set xgdb prompt" }
 	default				{ fail "(timeout) Set xgdb prompt" }
     }
     
@@ -322,10 +322,10 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$prompt $"\
     set description "send ^C to child process"
     send "\003"
     expect {
-	-re "Program received signal SIGINT.*$prompt $" {
+	-re "Program received signal SIGINT.*$gdb_prompt $" {
 	    pass "$description"
 	}
-	-re ".*$prompt $" {
+	-re ".*$gdb_prompt $" {
 	    fail "$description"
 	}
 	timeout {
@@ -336,10 +336,10 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$prompt $"\
     set description "send SIGINT signal to child process"
     send "signal SIGINT\n"
     expect {
-	-re "Continuing with signal SIGINT.*$prompt $" {
+	-re "Continuing with signal SIGINT.*$gdb_prompt $" {
 	    pass "$description"
 	}
-	-re ".*$prompt $" {
+	-re ".*$gdb_prompt $" {
 	    fail "$description"
 	}
 	timeout {
@@ -356,10 +356,10 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$prompt $"\
     set description "backtrace through signal handler"
     send "backtrace\n"
     expect {
-	-re "#0.*read.*in main \\(.*\\) at .*main\\.c.*$prompt $" {
+	-re "#0.*read.*in main \\(.*\\) at .*main\\.c.*$gdb_prompt $" {
 	    pass "$description"
 	}
-	-re ".*$prompt $" {
+	-re ".*$gdb_prompt $" {
 	    # On the alpha, we hit the infamous problem about gdb
 	    # being unable to get the frame pointer (mentioned in
 	    # gdb/README).  As it is intermittent, there is no way to
