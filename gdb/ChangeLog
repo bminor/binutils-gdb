@@ -4,7 +4,7 @@
 	FDOFF_REGNUM): Remove defines.
 	* win32-nat.c (do_child_fetch_inferior_registers): Include
 	"i387-tdep.h".
-	(do_child_fetch_inferior_registers): Use I387_FISEG_ST0_REGNUM and
+	(do_child_fetch_inferior_registers): Use I387_FISEG_REGNUM and
 	I387_FOP_REGNUM instead of FCS_REGNUM and FOP_REGNUM.  Define and
 	undefine I387_ST0_REGNUM.
 
