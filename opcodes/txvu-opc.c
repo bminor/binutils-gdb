@@ -54,6 +54,8 @@ INSERT_FN (dotdest);
 EXTRACT_FN (dotdest);
 PRINT_FN (dotdest);
 
+PARSE_FN (dotsdest);
+
 PARSE_FN (vfreg);
 PRINT_FN (vfreg);
 
@@ -85,6 +87,9 @@ PRINT_FN (vi01);
 INSERT_FN (limm12);
 EXTRACT_FN (limm12);
 
+INSERT_FN (luimm15);
+EXTRACT_FN (luimm15);
+
 /* Various types of TXVU operands, including insn suffixes.
 
    Fields are:
@@ -100,32 +105,37 @@ const struct txvu_operand txvu_operands[] =
 #define UNUSED 128
   { 0 },
 
-  /* Upper word operands.  */
+  /* Operands that exist in the same place for essentially the same purpose
+     in both upper and lower instructions.  */
 
-  /* Destination indicator, with leading '.'.  */
-#define UDOTDEST (UNUSED + 1)
+  /* Destination indicator attached to mnemonic, with leading '.'.
+     After parsing this, the value is stored in global `dest' so that the
+     register parser can verify the same choice of xyzw is used.  */
+#define DOTDEST (UNUSED + 1)
   { 4, TXVU_SHIFT_DEST, TXVU_OPERAND_SUFFIX,
       parse_dotdest, insert_dotdest, extract_dotdest, print_dotdest },
 
-  /* ft reg */
-#define UVFTREG (UDOTDEST + 1)
-  { 5, TXVU_SHIFT_FTREG, 0, parse_vfreg, 0, 0, print_vfreg },
+  /* ft reg, with vector specification same as DOTDEST */
+#define VFTREG (DOTDEST + 1)
+  { 5, TXVU_SHIFT_TREG, 0, parse_vfreg, 0, 0, print_vfreg },
 
-  /* fs reg */
-#define UVFSREG (UVFTREG + 1)
-  { 5, TXVU_SHIFT_FSREG, 0, parse_vfreg, 0, 0, print_vfreg },
+  /* fs reg, with vector specification same as DOTDEST */
+#define VFSREG (VFTREG + 1)
+  { 5, TXVU_SHIFT_SREG, 0, parse_vfreg, 0, 0, print_vfreg },
 
-  /* fd reg */
-#define UVFDREG (UVFSREG + 1)
-  { 5, TXVU_SHIFT_FDREG, 0, parse_vfreg, 0, 0, print_vfreg },
+  /* fd reg, with vector specification same as DOTDEST */
+#define VFDREG (VFSREG + 1)
+  { 5, TXVU_SHIFT_DREG, 0, parse_vfreg, 0, 0, print_vfreg },
+
+  /* Upper word operands.  */
 
   /* broadcast */
-#define UBC (UVFDREG + 1)
+#define UBC (VFDREG + 1)
   { 2, 0, 0, parse_bc, 0, 0, print_bc },
 
   /* ftreg in broadcast case */
 #define UBCFTREG (UBC + 1)
-  { 5, TXVU_SHIFT_FTREG, 0, parse_bcftreg, 0, 0, print_bcftreg },
+  { 5, TXVU_SHIFT_TREG, 0, parse_bcftreg, 0, 0, print_bcftreg },
 
   /* accumulator dest */
 #define UACCDEST (UBCFTREG + 1)
@@ -139,11 +149,23 @@ const struct txvu_operand txvu_operands[] =
   /* Lower word operands.  */
 
   /* 11 bit immediate.  */
-#define LIMM11 (UXYZ + 1)
+#define LIMM5 (UXYZ + 1)
+  { 5, 6, 0, 0, 0, 0, 0 },
+
+  /* 11 bit immediate.  */
+#define LIMM11 (LIMM5 + 1)
   { 11, 0, 0, 0, 0, 0, 0 },
 
+  /* 15 bit unsigned immediate.  */
+#define LUIMM15 (LIMM11 + 1)
+  { 15, 0, TXVU_OPERAND_UNSIGNED, 0, insert_luimm15, extract_luimm15, 0 },
+
+  /* ID register.  */
+#define LIDREG (LUIMM15 + 1)
+  { 5, 6, 0, parse_ireg, 0, 0, print_ireg },
+
   /* IS register.  */
-#define LISREG (LIMM11 + 1)
+#define LISREG (LIDREG + 1)
   { 5, 11, 0, parse_ireg, 0, 0, print_ireg },
 
   /* IT register.  */
@@ -174,6 +196,17 @@ const struct txvu_operand txvu_operands[] =
 #define LIMM12 (LIMM24 + 1)
   { 12, 0, 0, 0, insert_limm12, extract_limm12, 0 },
 
+  /* 11 bit pc-releative immediate.  */
+#define LPCREL11 (LIMM12 + 1)
+  { 11, 0, TXVU_OPERAND_RELATIVE_BRANCH, 0, 0, 0, 0 },
+
+  /* Destination indicator, with leading '.'.  */
+#define LDOTSDEST (DOTDEST + 1)
+  { 4, TXVU_SHIFT_DEST, TXVU_OPERAND_SUFFIX,
+      /* Note that we borrow the insert/extract/print functions from the
+	 vector case.  */
+      parse_dotsdest, insert_dotdest, extract_dotdest, print_dotdest },
+
 /* end of list place holder */
   { 0 }
 };
@@ -184,20 +217,32 @@ const struct txvu_operand txvu_operands[] =
 /* value X, B bits, shift S */
 #define R(x,b,s) (((x) & ((1 << (b)) - 1)) << (s))
 
+/* Field value macros for both upper and lower instructions.
+   These shift a value into the right place in the instruction.  */
+
+/* [FI] T reg field (remember it's V for value, not vector, here).  */
+#define VT(x) R ((x), 5, TXVU_SHIFT_TREG)
+/* [FI] S reg field.  */
+#define VS(x) R ((x), 5, TXVU_SHIFT_SREG)
+/* [FI] D reg field.  */
+#define VD(x) R ((x), 5, TXVU_SHIFT_DREG)
+/* DEST field.  */
+#define VDEST(x) R ((x), 4, 21)
+
+/* Masks for fields in both upper and lower instructions.
+   These mask out all bits but the ones for the field in the instruction.  */
+
+#define MT VT (~0)
+#define MS VS (~0)
+#define MD VD (~0)
+#define MDEST VDEST (~0)
+
 /* Upper instruction Value macros.  */
 
 /* Upper Flag bits.  */
 #define VUF(x) R ((x), 5, 27)
 /* Upper REServed two bits next to flag bits.  */
 #define VURES(x) R ((x), 2, 25)
-/* DEST field.  */
-#define VUDEST(x) R ((x), 4, 21)
-/* FT reg field.  */
-#define VUFT(x) R ((x), 5, TXVU_SHIFT_FTREG)
-/* FS reg field.  */
-#define VUFS(x) R ((x), 5, TXVU_SHIFT_FSREG)
-/* FD reg field.  */
-#define VUFD(x) R ((x), 5, TXVU_SHIFT_FDREG)
 /* 4 bit opcode field.  */
 #define VUOP4(x) R ((x), 4, 2)
 /* 6 bit opcode field.  */
@@ -209,49 +254,13 @@ const struct txvu_operand txvu_operands[] =
 /* BroadCast field.  */
 #define VUBC(x) R ((x), 2, 0)
 
-/* Field masks.  */
+/* Upper instruction field masks.  */
 #define MUUBITS (VUF (~0) + VURES (~0))
 #define MURES VURES (~0)
 #define MUOP4 VUOP4 (~0)
 #define MUOP6 VUOP6 (~0)
 #define MUOP9 VUOP9 (~0)
 #define MUOP11 VUOP11 (~0)
-
-/* Lower instruction Value macros.  */
-
-/* 7 bit opcode.  */
-#define VLOP7(x) R ((x), 7, 25)
-/* 11 bit opcode.  */
-#define VLOP11(x) R ((x), 11, 0)
-/* dest field.  */
-#define VLDEST(x) R ((x), 4, 21)
-/* IT reg.  */
-#define VLIT(x) R ((x), 5, 16)
-/* IS reg.  */
-#define VLIS(x) R ((x), 5, 11)
-/* 11 bit immediate.  */
-#define VLIMM11(x) R ((x), 11, 0)
-/* FTF field.  */
-#define VLFTF(x) R ((x), 2, 23)
-/* FSF field.  */
-#define VLFSF(x) R ((x), 2, 21)
-/* FT reg.  */
-#define VLFT(x) R ((x), 5, 16)
-/* FS reg.  */
-#define VLFS(x) R ((x), 5, 11)
-
-/* Field masks.  */
-#define MLOP7 VLOP7 (~0)
-#define MLOP11 VLOP11 (~0)
-#define MLDEST VLDEST (~0)
-#define MLIT VLIT (~0)
-#define MLIS VLIS (~0)
-#define MLIMM11 VLIMM11 (~0)
-#define MLB24 R (1, 1, 24)
-/* 12 bit immediates are split into two parts, 1 bit and 11 bits.
-   The upper 1 bit is part of the `dest' field.  This mask is for the
-   other 3 bits of the dest field.  */
-#define MLIMM12TOP R (7, 3, 22)
 
 /* A space, separates instruction name (mnemonic + mnemonic operands) from operands.  */
 #define SP ' '
@@ -287,68 +296,94 @@ struct txvu_opcode txvu_upper_opcodes[] = {
   /* FIXME: When close to being finished, clean up by aligning fields.  */
 
   /* The rest of these needn't be sorted, but it helps to find them if they are.  */
-  { "abs", { UDOTDEST, SP, UVFTREG, UVFSREG }, MURES + MUOP11, VUOP11 (0x1fd) },
-  { "add", { UDOTDEST, SP, UVFDREG, UVFSREG, UVFTREG }, MURES + MUOP6, VUOP6 (0x28) },
-  { "addi", { UDOTDEST, SP, UVFDREG, UVFSREG, 'i' }, MURES + VUFT (~0) + MUOP6, VUOP6 (0x22) },
-  { "addq", { UDOTDEST, SP, UVFDREG, UVFSREG, 'q' }, MURES + VUFT (~0) + MUOP6, VUOP6 (0x20) },
-  { "add", { UBC, UDOTDEST, SP, UVFDREG, UVFSREG, UBCFTREG }, MURES + VUOP4 (~0), VUOP4 (0) },
-  { "adda", { UDOTDEST, SP, UACCDEST, UVFSREG, UVFTREG }, MURES + MUOP11, VUOP11 (0x2bc) },
-  { "addai", { UDOTDEST, SP, UACCDEST, UVFSREG, 'i' }, MURES + VUFT (~0) + MUOP11, VUOP11 (0x23e) },
-  { "addaq", { UDOTDEST, SP, UACCDEST, UVFSREG, 'q' }, MURES + VUFT (~0) + MUOP11, VUOP11 (0x23c) },
-  { "adda", { UBC, UDOTDEST, SP, UACCDEST, UVFSREG, UBCFTREG }, MURES + MUOP9, VUOP9 (0xf) },
-  { "clip", { UDOTDEST, SP, UVFSREG }, MURES + VUDEST (~0) + VUFT (~0) + MUOP11, VUDEST (0xf) + VUOP11 (0x1ff) },
-  { "ftoi0", { UDOTDEST, SP, UVFTREG, UVFSREG }, MURES + MUOP11, VUOP11 (0x17c) },
-  { "ftoi4", { UDOTDEST, SP, UVFTREG, UVFSREG }, MURES + MUOP11, VUOP11 (0x17d) },
-  { "ftoi12", { UDOTDEST, SP, UVFTREG, UVFSREG }, MURES + MUOP11, VUOP11 (0x17e) },
-  { "ftoi15", { UDOTDEST, SP, UVFTREG, UVFSREG }, MURES + MUOP11, VUOP11 (0x17f) },
-  { "itof0", { UDOTDEST, SP, UVFTREG, UVFSREG }, MURES + MUOP11, VUOP11 (0x13c) },
-  { "itof4", { UDOTDEST, SP, UVFTREG, UVFSREG }, MURES + MUOP11, VUOP11 (0x13d) },
-  { "itof12", { UDOTDEST, SP, UVFTREG, UVFSREG }, MURES + MUOP11, VUOP11 (0x13e) },
-  { "itof15", { UDOTDEST, SP, UVFTREG, UVFSREG }, MURES + MUOP11, VUOP11 (0x13f) },
-  { "madd", { UDOTDEST, SP, UVFDREG, UVFSREG, UVFTREG }, MURES + MUOP6, VUOP6 (0x29) },
-  { "maddi", { UDOTDEST, SP, UVFDREG, UVFSREG, 'i' }, MURES + VUFT (~0) + MUOP6, VUOP6 (0x23) },
-  { "maddq", { UDOTDEST, SP, UVFDREG, UVFSREG, 'q' }, MURES + VUFT (~0) + MUOP6, VUOP6 (0x21) },
-  { "madd", { UBC, UDOTDEST, SP, UVFDREG, UVFSREG, UBCFTREG }, MURES + MUOP4, VUOP4 (0x2) },
-  { "madda", { UDOTDEST, SP, UACCDEST, UVFSREG, UVFTREG }, MURES + MUOP11, VUOP11 (0x2bd) },
-  { "maddai", { UDOTDEST, SP, UACCDEST, UVFSREG, 'i' }, MURES + VUFT (~0) + MUOP11, VUOP11 (0x23f) },
-  { "maddaq", { UDOTDEST, SP, UACCDEST, UVFSREG, 'q' }, MURES + VUFT (~0) + MUOP11, VUOP11 (0x23d) },
-  { "madda", { UBC, UDOTDEST, SP, UACCDEST, UVFSREG, UBCFTREG }, MURES + MUOP9, VUOP9 (0x2f) },
-  { "max", { UDOTDEST, SP, UVFDREG, UVFSREG, UVFTREG }, MURES + MUOP6, VUOP6 (0x2b) },
-  { "maxi", { UDOTDEST, SP, UVFDREG, UVFSREG, 'i' }, MURES + VUFT (~0) + MUOP6, VUOP6 (0x2d) },
-  { "max", { UBC, UDOTDEST, SP, UVFDREG, UVFSREG, UBCFTREG }, MURES + MUOP4, VUOP4 (0x4) },
+  { "abs", { DOTDEST, SP, VFTREG, VFSREG }, MURES + MUOP11, VUOP11 (0x1fd) },
+  { "add", { DOTDEST, SP, VFDREG, VFSREG, VFTREG }, MURES + MUOP6, VUOP6 (0x28) },
+  { "addi", { DOTDEST, SP, VFDREG, VFSREG, 'i' }, MURES + MT + MUOP6, VUOP6 (0x22) },
+  { "addq", { DOTDEST, SP, VFDREG, VFSREG, 'q' }, MURES + MT + MUOP6, VUOP6 (0x20) },
+  { "add", { UBC, DOTDEST, SP, VFDREG, VFSREG, UBCFTREG }, MURES + VUOP4 (~0), VUOP4 (0) },
+  { "adda", { DOTDEST, SP, UACCDEST, VFSREG, VFTREG }, MURES + MUOP11, VUOP11 (0x2bc) },
+  { "addai", { DOTDEST, SP, UACCDEST, VFSREG, 'i' }, MURES + MT + MUOP11, VUOP11 (0x23e) },
+  { "addaq", { DOTDEST, SP, UACCDEST, VFSREG, 'q' }, MURES + MT + MUOP11, VUOP11 (0x23c) },
+  { "adda", { UBC, DOTDEST, SP, UACCDEST, VFSREG, UBCFTREG }, MURES + MUOP9, VUOP9 (0xf) },
+  { "clip", { DOTDEST, SP, VFSREG }, MURES + MDEST + MT + MUOP11, VDEST (0xf) + VUOP11 (0x1ff) },
+  { "ftoi0", { DOTDEST, SP, VFTREG, VFSREG }, MURES + MUOP11, VUOP11 (0x17c) },
+  { "ftoi4", { DOTDEST, SP, VFTREG, VFSREG }, MURES + MUOP11, VUOP11 (0x17d) },
+  { "ftoi12", { DOTDEST, SP, VFTREG, VFSREG }, MURES + MUOP11, VUOP11 (0x17e) },
+  { "ftoi15", { DOTDEST, SP, VFTREG, VFSREG }, MURES + MUOP11, VUOP11 (0x17f) },
+  { "itof0", { DOTDEST, SP, VFTREG, VFSREG }, MURES + MUOP11, VUOP11 (0x13c) },
+  { "itof4", { DOTDEST, SP, VFTREG, VFSREG }, MURES + MUOP11, VUOP11 (0x13d) },
+  { "itof12", { DOTDEST, SP, VFTREG, VFSREG }, MURES + MUOP11, VUOP11 (0x13e) },
+  { "itof15", { DOTDEST, SP, VFTREG, VFSREG }, MURES + MUOP11, VUOP11 (0x13f) },
+  { "madd", { DOTDEST, SP, VFDREG, VFSREG, VFTREG }, MURES + MUOP6, VUOP6 (0x29) },
+  { "maddi", { DOTDEST, SP, VFDREG, VFSREG, 'i' }, MURES + MT + MUOP6, VUOP6 (0x23) },
+  { "maddq", { DOTDEST, SP, VFDREG, VFSREG, 'q' }, MURES + MT + MUOP6, VUOP6 (0x21) },
+  { "madd", { UBC, DOTDEST, SP, VFDREG, VFSREG, UBCFTREG }, MURES + MUOP4, VUOP4 (0x2) },
+  { "madda", { DOTDEST, SP, UACCDEST, VFSREG, VFTREG }, MURES + MUOP11, VUOP11 (0x2bd) },
+  { "maddai", { DOTDEST, SP, UACCDEST, VFSREG, 'i' }, MURES + MT + MUOP11, VUOP11 (0x23f) },
+  { "maddaq", { DOTDEST, SP, UACCDEST, VFSREG, 'q' }, MURES + MT + MUOP11, VUOP11 (0x23d) },
+  { "madda", { UBC, DOTDEST, SP, UACCDEST, VFSREG, UBCFTREG }, MURES + MUOP9, VUOP9 (0x2f) },
+  { "max", { DOTDEST, SP, VFDREG, VFSREG, VFTREG }, MURES + MUOP6, VUOP6 (0x2b) },
+  { "maxi", { DOTDEST, SP, VFDREG, VFSREG, 'i' }, MURES + MT + MUOP6, VUOP6 (0x2d) },
+  { "max", { UBC, DOTDEST, SP, VFDREG, VFSREG, UBCFTREG }, MURES + MUOP4, VUOP4 (0x4) },
   /* FIXME: mini or min? */
-  { "mini", { UDOTDEST, SP, UVFDREG, UVFSREG, UVFTREG }, MURES + MUOP6, VUOP6 (0x2f) },
-  { "mini", { UDOTDEST, SP, UVFDREG, UVFSREG, 'i' }, MURES + VUFT (~0) + MUOP6, VUOP6 (0x1f) },
-  { "mini", { UBC, UDOTDEST, SP, UVFDREG, UVFSREG, UBCFTREG }, MURES + MUOP4, VUOP4 (0x5) },
-  { "msub", { UDOTDEST, SP, UVFDREG, UVFSREG, UVFTREG }, MURES + MUOP6, VUOP6 (0x2d) },
-  { "msubi", { UDOTDEST, SP, UVFDREG, UVFSREG, 'i' }, MURES + VUFT (~0) + MUOP6, VUOP6 (0x27) },
-  { "msubq", { UDOTDEST, SP, UVFDREG, UVFSREG, 'q' }, MURES + VUFT (~0) + MUOP6, VUOP6 (0x25) },
-  { "msub", { UBC, UDOTDEST, SP, UVFDREG, UVFSREG, UBCFTREG }, MURES + MUOP4, VUOP4 (0x3) },
-  { "msuba", { UDOTDEST, SP, UACCDEST, UVFSREG, UVFTREG }, MURES + MUOP11, VUOP11 (0x2fd) },
-  { "msubai", { UDOTDEST, SP, UACCDEST, UVFSREG, 'i' }, MURES + VUFT (~0) + MUOP11, VUOP11 (0x27f) },
-  { "msubaq", { UDOTDEST, SP, UACCDEST, UVFSREG, 'q' }, MURES + VUFT (~0) + MUOP11, VUOP11 (0x27d) },
-  { "msuba", { UBC, UDOTDEST, SP, UACCDEST, UVFSREG, UBCFTREG }, MURES + MUOP9, VUOP9 (0x3f) },
-  { "mul", { UDOTDEST, SP, UVFDREG, UVFSREG, UVFTREG }, MURES + MUOP6, VUOP6 (0x2a) },
-  { "muli", { UDOTDEST, SP, UVFDREG, UVFSREG, 'i' }, MURES + VUFT (~0) + MUOP6, VUOP6 (0x1e) },
-  { "mulq", { UDOTDEST, SP, UVFDREG, UVFSREG, 'q' }, MURES + VUFT (~0) + MUOP6, VUOP6 (0x1c) },
-  { "mul", { UBC, UDOTDEST, SP, UVFDREG, UVFSREG, UBCFTREG }, MURES + VUOP4 (~0), VUOP4 (6) },
-  { "mula", { UDOTDEST, SP, UACCDEST, UVFSREG, UVFTREG }, MURES + MUOP11, VUOP11 (0x2be) },
-  { "mulai", { UDOTDEST, SP, UACCDEST, UVFSREG, 'i' }, MURES + VUFT (~0) + MUOP11, VUOP11 (0x1fe) },
-  { "mulaq", { UDOTDEST, SP, UACCDEST, UVFSREG, 'q' }, MURES + VUFT (~0) + MUOP11, VUOP11 (0x1fc) },
-  { "mula", { UBC, UDOTDEST, SP, UACCDEST, UVFSREG, UBCFTREG }, MURES + MUOP9, VUOP9 (0x6f) },
-  { "nop", { 0 }, MURES + VUDEST (~0) + VUFT (~0) + VUFS (~0) + MUOP11, VUOP11 (0x2ff) },
-  { "opmula", { UDOTDEST, SP, UACCDEST, UVFSREG, UVFTREG, UXYZ }, MURES + MUOP11, VUOP11 (0x2fe) },
-  { "opmsub", { UDOTDEST, SP, UVFDREG, UVFSREG, UVFTREG, UXYZ }, MURES + MUOP6, VUOP6 (0x2e) },
-  { "sub", { UDOTDEST, SP, UVFDREG, UVFSREG, UVFTREG }, MURES + MUOP6, VUOP6 (0x2c) },
-  { "subi", { UDOTDEST, SP, UVFDREG, UVFSREG, 'i' }, MURES + VUFT (~0) + MUOP6, VUOP6 (0x26) },
-  { "subq", { UDOTDEST, SP, UVFDREG, UVFSREG, 'q' }, MURES + VUFT (~0) + MUOP6, VUOP6 (0x24) },
-  { "sub", { UBC, UDOTDEST, SP, UVFDREG, UVFSREG, UBCFTREG }, MURES + VUOP4 (~0), VUOP4 (1) },
-  { "suba", { UDOTDEST, SP, UACCDEST, UVFSREG, UVFTREG }, MURES + MUOP11, VUOP11 (0x2fc) },
-  { "subai", { UDOTDEST, SP, UACCDEST, UVFSREG, 'i' }, MURES + VUFT (~0) + MUOP11, VUOP11 (0x27e) },
-  { "subaq", { UDOTDEST, SP, UACCDEST, UVFSREG, 'q' }, MURES + VUFT (~0) + MUOP11, VUOP11 (0x27c) },
-  { "suba", { UBC, UDOTDEST, SP, UACCDEST, UVFSREG, UBCFTREG }, MURES + MUOP9, VUOP9 (0x1f) }
+  { "mini", { DOTDEST, SP, VFDREG, VFSREG, VFTREG }, MURES + MUOP6, VUOP6 (0x2f) },
+  { "mini", { DOTDEST, SP, VFDREG, VFSREG, 'i' }, MURES + MT + MUOP6, VUOP6 (0x1f) },
+  { "mini", { UBC, DOTDEST, SP, VFDREG, VFSREG, UBCFTREG }, MURES + MUOP4, VUOP4 (0x5) },
+  { "msub", { DOTDEST, SP, VFDREG, VFSREG, VFTREG }, MURES + MUOP6, VUOP6 (0x2d) },
+  { "msubi", { DOTDEST, SP, VFDREG, VFSREG, 'i' }, MURES + MT + MUOP6, VUOP6 (0x27) },
+  { "msubq", { DOTDEST, SP, VFDREG, VFSREG, 'q' }, MURES + MT + MUOP6, VUOP6 (0x25) },
+  { "msub", { UBC, DOTDEST, SP, VFDREG, VFSREG, UBCFTREG }, MURES + MUOP4, VUOP4 (0x3) },
+  { "msuba", { DOTDEST, SP, UACCDEST, VFSREG, VFTREG }, MURES + MUOP11, VUOP11 (0x2fd) },
+  { "msubai", { DOTDEST, SP, UACCDEST, VFSREG, 'i' }, MURES + MT + MUOP11, VUOP11 (0x27f) },
+  { "msubaq", { DOTDEST, SP, UACCDEST, VFSREG, 'q' }, MURES + MT + MUOP11, VUOP11 (0x27d) },
+  { "msuba", { UBC, DOTDEST, SP, UACCDEST, VFSREG, UBCFTREG }, MURES + MUOP9, VUOP9 (0x3f) },
+  { "mul", { DOTDEST, SP, VFDREG, VFSREG, VFTREG }, MURES + MUOP6, VUOP6 (0x2a) },
+  { "muli", { DOTDEST, SP, VFDREG, VFSREG, 'i' }, MURES + MT + MUOP6, VUOP6 (0x1e) },
+  { "mulq", { DOTDEST, SP, VFDREG, VFSREG, 'q' }, MURES + MT + MUOP6, VUOP6 (0x1c) },
+  { "mul", { UBC, DOTDEST, SP, VFDREG, VFSREG, UBCFTREG }, MURES + VUOP4 (~0), VUOP4 (6) },
+  { "mula", { DOTDEST, SP, UACCDEST, VFSREG, VFTREG }, MURES + MUOP11, VUOP11 (0x2be) },
+  { "mulai", { DOTDEST, SP, UACCDEST, VFSREG, 'i' }, MURES + MT + MUOP11, VUOP11 (0x1fe) },
+  { "mulaq", { DOTDEST, SP, UACCDEST, VFSREG, 'q' }, MURES + MT + MUOP11, VUOP11 (0x1fc) },
+  { "mula", { UBC, DOTDEST, SP, UACCDEST, VFSREG, UBCFTREG }, MURES + MUOP9, VUOP9 (0x6f) },
+  { "nop", { 0 }, MURES + MDEST + MT + MS + MUOP11, VUOP11 (0x2ff) },
+  { "opmula", { DOTDEST, SP, UACCDEST, VFSREG, VFTREG, UXYZ }, MURES + MUOP11, VUOP11 (0x2fe) },
+  { "opmsub", { DOTDEST, SP, VFDREG, VFSREG, VFTREG, UXYZ }, MURES + MUOP6, VUOP6 (0x2e) },
+  { "sub", { DOTDEST, SP, VFDREG, VFSREG, VFTREG }, MURES + MUOP6, VUOP6 (0x2c) },
+  { "subi", { DOTDEST, SP, VFDREG, VFSREG, 'i' }, MURES + MT + MUOP6, VUOP6 (0x26) },
+  { "subq", { DOTDEST, SP, VFDREG, VFSREG, 'q' }, MURES + MT + MUOP6, VUOP6 (0x24) },
+  { "sub", { UBC, DOTDEST, SP, VFDREG, VFSREG, UBCFTREG }, MURES + VUOP4 (~0), VUOP4 (1) },
+  { "suba", { DOTDEST, SP, UACCDEST, VFSREG, VFTREG }, MURES + MUOP11, VUOP11 (0x2fc) },
+  { "subai", { DOTDEST, SP, UACCDEST, VFSREG, 'i' }, MURES + MT + MUOP11, VUOP11 (0x27e) },
+  { "subaq", { DOTDEST, SP, UACCDEST, VFSREG, 'q' }, MURES + MT + MUOP11, VUOP11 (0x27c) },
+  { "suba", { UBC, DOTDEST, SP, UACCDEST, VFSREG, UBCFTREG }, MURES + MUOP9, VUOP9 (0x1f) }
 };
 const int txvu_upper_opcodes_count = sizeof (txvu_upper_opcodes) / sizeof (txvu_opcodes[0]);
+
+/* Lower instruction Value macros.  */
+
+/* 6 bit opcode.  */
+#define VLOP6(x) R ((x), 6, 0)
+/* 7 bit opcode.  */
+#define VLOP7(x) R ((x), 7, 25)
+/* 11 bit opcode.  */
+#define VLOP11(x) R ((x), 11, 0)
+/* 11 bit immediate.  */
+#define VLIMM11(x) R ((x), 11, 0)
+/* FTF field.  */
+#define VLFTF(x) R ((x), 2, 23)
+/* FSF field.  */
+#define VLFSF(x) R ((x), 2, 21)
+
+/* Lower instruction field masks.  */
+#define MLOP6 VLOP6 (~0)
+#define MLOP7 VLOP7 (~0)
+#define MLOP11 VLOP11 (~0)
+#define MLIMM11 VLIMM11 (~0)
+#define MLB24 R (1, 1, 24)
+/* 12 bit immediates are split into two parts, 1 bit and 11 bits.
+   The upper 1 bit is part of the `dest' field.  This mask is for the
+   other 3 bits of the dest field.  */
+#define MLIMM12TOP R (7, 3, 22)
 
 struct txvu_opcode txvu_lower_opcodes[] = {
 
@@ -356,39 +391,82 @@ struct txvu_opcode txvu_lower_opcodes[] = {
   /* ??? Any aliases?  */
 
   /* The rest of these needn't be sorted, but it helps to find them if they are.  */
-  { "b", { SP, LIMM11 }, MLOP7 + MLDEST + MLIT + MLIS, VLOP7 (0x20) },
-  { "bal", { SP, LITREG, LIMM11 }, MLOP7 + MLDEST + MLIS, VLOP7 (0x21) },
-  { "div", { 'q', LFSFFSREG, LFTFFTREG }, MLOP7 + MLOP11, VLOP7 (0x40) + VLOP11 (0x3bc) },
-  { "eatan", { 'p', LFSFFSREG }, MLOP7 + VLFTF (~0) + VLFT (~0) + MLOP11, VLOP7 (0x40) + VLOP11 (0x7fd) },
-  { "eatanxy", { 'p', LFSREG }, MLOP7 + MLDEST + VLFT (~0) + MLOP11, VLOP7 (0x40) + VLDEST (0xf) + VLOP11 (0x77c) },
-  { "eatanxz", { 'p', LFSREG }, MLOP7 + MLDEST + VLFT (~0) + MLOP11, VLOP7 (0x40) + VLDEST (0xf) + VLOP11 (0x77d) },
-  { "eexp", { 'p', LFSFFSREG }, MLOP7 + VLFTF (~0) + VLFT (~0) + MLOP11, VLOP7 (0x40) + VLOP11 (0x7fe) },
-  { "eleng", { 'p', LFSREG }, MLOP7 + MLDEST + VLFT (~0) + MLOP11, VLOP7 (0x40) + VLDEST (0xf) + VLOP11 (0x74e) },
-  { "ercpr", { 'p', LFSFFSREG }, MLOP7 + VLFTF (~0) + VLFT (~0) + MLOP11, VLOP7 (0x40) + VLOP11 (0x7be) },
-  { "erleng", { 'p', LFSREG }, MLOP7 + MLDEST + VLFT (~0) + MLOP11, VLOP7 (0x40) + VLDEST (0xf) + VLOP11 (0x73f) },
-  { "ersadd", { 'p', LFSREG }, MLOP7 + MLDEST + VLFT (~0) + MLOP11, VLOP7 (0x40) + VLDEST (0xf) + VLOP11 (0x73d) },
-  { "ersqrt", { 'p', LFSFFSREG }, MLOP7 + VLFTF (~0) + VLFT (~0) + MLOP11, VLOP7 (0x40) + VLOP11 (0x7bd) },
-  { "esadd", { 'p', LFSREG }, MLOP7 + MLDEST + VLFT (~0) + MLOP11, VLOP7 (0x40) + VLDEST (0xf) + VLOP11 (0x73c) },
-  { "esin", { 'p', LFSFFSREG }, MLOP7 + VLFTF (~0) + VLFT (~0) + MLOP11, VLOP7 (0x40) + VLOP11 (0x7fc) },
-  { "esqrt", { 'p', LFSFFSREG }, MLOP7 + VLFTF (~0) + VLFT (~0) + MLOP11, VLOP7 (0x40) + VLOP11 (0x7bc) },
-  { "esum", { 'p', LFSREG }, MLOP7 + MLDEST + VLFT (~0) + MLOP11, VLOP7 (0x40) + VLDEST (0xf) + VLOP11 (0x77e) },
-  { "fcand", { LVI01, LIMM24 }, MLOP7 + MLB24, VLOP7 (0x12) },
-  { "fceq", { LVI01, LIMM24 }, MLOP7 + MLB24, VLOP7 (0x10) },
-  { "fcget", { LITREG }, MLOP7 + MLDEST + MLIS + MLIMM11, VLOP7 (0x1c) },
-  { "fcor", { LVI01, LIMM24 }, MLOP7 + MLB24, VLOP7 (0x13) },
-  { "fcset", { LVI01, LIMM24 }, MLOP7 + MLB24, VLOP7 (0x11) },
-  { "fmand", { LITREG, LISREG }, MLOP7 + MLDEST + MLIMM11, VLOP7 (0x1a) },
-  { "fmeq", { LITREG, LISREG }, MLOP7 + MLDEST + MLIMM11, VLOP7 (0x18) },
-  { "fmor", { LITREG, LISREG }, MLOP7 + MLDEST + MLIMM11, VLOP7 (0x1b) },
-  { "fsand", { LITREG, LIMM12 }, MLOP7 + MLIMM12TOP + MLIS, VLOP7 (0x16) },
-  { "fseq", { LITREG, LIMM12 }, MLOP7 + MLIMM12TOP + MLIS, VLOP7 (0x14) },
-  { "fsor", { LITREG, LIMM12 }, MLOP7 + MLIMM12TOP + MLIS, VLOP7 (0x17) },
-  { "fsset", { LITREG, LIMM12 }, MLOP7 + MLIMM12TOP + MLIS, VLOP7 (0x15) },
-  { "waitp", { 0 }, 0xffffffff, 0x800007bf },
-  { "waitq", { 0 }, 0xffffffff, 0x800003bf },
+  { "b", { SP, LPCREL11 }, MLOP7 + MDEST + MT + MS, VLOP7 (0x20) },
+  { "bal", { SP, LITREG, LPCREL11 }, MLOP7 + MDEST + MS, VLOP7 (0x21) },
+  { "div", { SP, 'q', LFSFFSREG, LFTFFTREG }, MLOP7 + MLOP11, VLOP7 (0x40) + VLOP11 (0x3bc) },
+  { "eatan", { SP, 'p', LFSFFSREG }, MLOP7 + VLFTF (~0) + MT + MLOP11, VLOP7 (0x40) + VLOP11 (0x7fd) },
+  { "eatanxy", { SP, 'p', LFSREG }, MLOP7 + MDEST + MT + MLOP11, VLOP7 (0x40) + VDEST (0xf) + VLOP11 (0x77c) },
+  { "eatanxz", { SP, 'p', LFSREG }, MLOP7 + MDEST + MT + MLOP11, VLOP7 (0x40) + VDEST (0xf) + VLOP11 (0x77d) },
+  { "eexp", { SP, 'p', LFSFFSREG }, MLOP7 + VLFTF (~0) + MT + MLOP11, VLOP7 (0x40) + VLOP11 (0x7fe) },
+  { "eleng", { SP, 'p', LFSREG }, MLOP7 + MDEST + MT + MLOP11, VLOP7 (0x40) + VDEST (0xf) + VLOP11 (0x74e) },
+  { "ercpr", { SP, 'p', LFSFFSREG }, MLOP7 + VLFTF (~0) + MT + MLOP11, VLOP7 (0x40) + VLOP11 (0x7be) },
+  { "erleng", { SP, 'p', LFSREG }, MLOP7 + MDEST + MT + MLOP11, VLOP7 (0x40) + VDEST (0xf) + VLOP11 (0x73f) },
+  { "ersadd", { SP, 'p', LFSREG }, MLOP7 + MDEST + MT + MLOP11, VLOP7 (0x40) + VDEST (0xf) + VLOP11 (0x73d) },
+  { "ersqrt", { SP, 'p', LFSFFSREG }, MLOP7 + VLFTF (~0) + MT + MLOP11, VLOP7 (0x40) + VLOP11 (0x7bd) },
+  { "esadd", { SP, 'p', LFSREG }, MLOP7 + MDEST + MT + MLOP11, VLOP7 (0x40) + VDEST (0xf) + VLOP11 (0x73c) },
+  { "esin", { SP, 'p', LFSFFSREG }, MLOP7 + VLFTF (~0) + MT + MLOP11, VLOP7 (0x40) + VLOP11 (0x7fc) },
+  { "esqrt", { SP, 'p', LFSFFSREG }, MLOP7 + VLFTF (~0) + MT + MLOP11, VLOP7 (0x40) + VLOP11 (0x7bc) },
+  { "esum", { SP, 'p', LFSREG }, MLOP7 + MDEST + MT + MLOP11, VLOP7 (0x40) + VDEST (0xf) + VLOP11 (0x77e) },
+  { "fcand", { SP, LVI01, LIMM24 }, MLOP7 + MLB24, VLOP7 (0x12) },
+  { "fceq", { SP, LVI01, LIMM24 }, MLOP7 + MLB24, VLOP7 (0x10) },
+  { "fcget", { SP, LITREG }, MLOP7 + MDEST + MS + MLIMM11, VLOP7 (0x1c) },
+  { "fcor", { SP, LVI01, LIMM24 }, MLOP7 + MLB24, VLOP7 (0x13) },
+  { "fcset", { SP, LVI01, LIMM24 }, MLOP7 + MLB24, VLOP7 (0x11) },
+  { "fmand", { SP, LITREG, LISREG }, MLOP7 + MDEST + MLIMM11, VLOP7 (0x1a) },
+  { "fmeq", { SP, LITREG, LISREG }, MLOP7 + MDEST + MLIMM11, VLOP7 (0x18) },
+  { "fmor", { SP, LITREG, LISREG }, MLOP7 + MDEST + MLIMM11, VLOP7 (0x1b) },
+  { "fsand", { SP, LITREG, LIMM12 }, MLOP7 + MLIMM12TOP + MS, VLOP7 (0x16) },
+  { "fseq", { SP, LITREG, LIMM12 }, MLOP7 + MLIMM12TOP + MS, VLOP7 (0x14) },
+  { "fsor", { SP, LITREG, LIMM12 }, MLOP7 + MLIMM12TOP + MS, VLOP7 (0x17) },
+  { "fsset", { SP, LITREG, LIMM12 }, MLOP7 + MLIMM12TOP + MS, VLOP7 (0x15) },
+  { "iadd", { SP, LIDREG, LISREG, LITREG }, MLOP7 + MDEST + MLOP6, VLOP7 (0x40) + VLOP6 (0x30) },
+  { "iaddi", { SP, LITREG, LISREG, LIMM5 }, MLOP7 + MDEST + MLOP6, VLOP7 (0x40) + VLOP6 (0x32) },
+  { "iaddiu", { SP, LITREG, LISREG, LUIMM15 }, MLOP7, VLOP7 (0x08) },
+  { "iand", { SP, LIDREG, LISREG, LITREG }, MLOP7 + MDEST + MLOP6, VLOP7 (0x40) + VLOP6 (0x34) },
+  { "ibeq", { SP, LITREG, LISREG, LPCREL11 }, MLOP7 + MDEST, VLOP7 (0x28) },
+  { "ibgez", { SP, LISREG, LPCREL11 }, MLOP7 + MDEST + MT, VLOP7 (0x2f) },
+  { "iblez", { SP, LISREG, LPCREL11 }, MLOP7 + MDEST + MT, VLOP7 (0x2e) },
+  { "ibltz", { SP, LISREG, LPCREL11 }, MLOP7 + MDEST + MT, VLOP7 (0x2c) },
+  { "ibne", { SP, LITREG, LISREG, LPCREL11 }, MLOP7 + MDEST, VLOP7 (0x29) },
+  /* FIXME: Need to not require commas around parens.  */
+  { "ilw", { LDOTSDEST, SP, LITREG, LIMM11, '(', LISREG, ')' }, MLOP7, VLOP7 (0x04) },
+  { "ilwr", { LDOTSDEST, SP, LITREG, '(', LISREG, ')' }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x3fe) },
+  { "ior", { SP, LIDREG, LISREG, LITREG }, MLOP7 + MDEST + MLOP6, VLOP7 (0x40) + VLOP6 (0x34) },
+  { "isub", { SP, LIDREG, LISREG, LITREG }, MLOP7 + MDEST + MLOP6, VLOP7 (0x40) + VLOP6 (0x31) },
+  { "isubiu", { SP, LITREG, LISREG, LUIMM15 }, MLOP7, VLOP7 (0x09) },
+  { "isw", { LDOTSDEST, SP, LITREG, LIMM11, '(', LISREG, ')' }, MLOP7, VLOP7 (0x05) },
+  { "iswr", { LDOTSDEST, SP, LITREG, '(', LISREG, ')' }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x3ff) },
+  { "jalr", { SP, LITREG, LISREG }, MLOP7 + MDEST + MLIMM11, VLOP7 (0x25) },
+  { "jr", { SP, LISREG }, MLOP7 + MDEST + MT + MLIMM11, VLOP7 (0x24) },
+  { "lq", { DOTDEST, SP, VFTREG, LIMM11, '(', LISREG, ')' }, MLOP7, VLOP7 (0x00) },
+  /* FIXME: No commas around -/+.  */
+  { "lqd", { DOTDEST, SP, VFTREG, LIMM11, '(', '-', '-', LISREG, ')' }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x37e) },
+  { "lqi", { DOTDEST, SP, VFTREG, LIMM11, '(', LISREG, '+', '+', ')' }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x37c) },
+  /* Only a single VF reg is allowed here.  We can use VFTREG because LDOTSDEST
+     handles verifying only a single choice of xyzw is present.  */
+  { "mfir", { LDOTSDEST, SP, VFTREG, LISREG }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x3fc) },
+  { "mfp", { DOTDEST, SP, VFTREG, 'p' }, MLOP7 + MS + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x67c) },
+  { "move", { DOTDEST, SP, VFTREG, VFSREG }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x33c) },
+  { "mr32", { DOTDEST, SP, VFTREG, VFSREG }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x33d) },
+  { "mtir", { LDOTSDEST, SP, LITREG, LFSREG }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x3fd) },
+  { "rget", { DOTDEST, SP, VFTREG, 'r' }, MLOP7 + MS + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x43d) },
+  { "rinit", { SP, 'r', LFSFFSREG }, MLOP7 + VLFTF (~0) + MT + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x43e) },
+  { "rnext", { DOTDEST, SP, VFTREG, 'r' }, MLOP7 + MS + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x43c) },
+  { "rsqrt", { SP, 'q', LFSFFSREG, LFTFFTREG }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x3be) },
+  { "rxor", { 'r', LFSFFSREG }, MLOP7 + VLFTF (~0) + MT + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x43f) },
+  { "sq", { DOTDEST, SP, VFTREG, LIMM11, '(', LISREG, ')' }, MLOP7, VLOP7 (0x01) },
+  /* FIXME: No commas around -/+.  */
+  { "sqd", { DOTDEST, SP, VFTREG, LIMM11, '(', '-', '-', LISREG, ')' }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x37f) },
+  { "sqi", { DOTDEST, SP, VFTREG, LIMM11, '(', LISREG, '+', '+', ')' }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x37d) },
+  { "sqrt", { SP, 'q', LFTFFTREG }, MLOP7 + VLFSF (~0) + MS + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x3bd) },
+  { "waitp", { 0 }, 0xffffffff, VLOP7 (0x40) + VLIMM11 (0x7bf) },
+  { "waitq", { 0 }, 0xffffffff, VLOP7 (0x40) + VLIMM11 (0x3bf) },
+  { "xgkick", { LISREG }, MLOP7 + MDEST + MT + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x6fc) },
+  { "xitop", { LITREG }, MLOP7 + MDEST + MS + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x6bd) },
+  { "xtop", { LITREG }, MLOP7 + MDEST + MS + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x6bc) }
 };
 const int txvu_lower_opcodes_count = sizeof (txvu_lower_opcodes) / sizeof (txvu_opcodes[0]);
-
+
 /* Indexed by first letter of opcode.  Points to chain of opcodes with same
    first letter.  */
 /* ??? One can certainly use a better hash.  Later.  */
@@ -522,7 +600,7 @@ txvu_opcode_init_print ()
   bc = -1;
 }
 
-/* Destination choice support.
+/* Multiple destination choice support.
    The "dest" string selects any combination of x,y,z,w.
    [The letters are ordered that way to follow the manual's style.]  */
 
@@ -572,6 +650,34 @@ parse_dotdest (pstr, errmsg)
     {
       *errmsg = "invalid `dest'";
       return 0;
+    }
+  *errmsg = NULL;
+  return dest;
+}
+
+/* Parse a `dest' spec where only a single letter is allowed.  */
+
+static long
+parse_dotsdest (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+  long dest;
+
+  if (**pstr != '.')
+    {
+      *errmsg = "missing `.'";
+      return 0;
+    }
+
+  ++*pstr;
+  switch (**pstr)
+    {
+    case 'x' : case 'X' : dest = TXVU_BC_X; break;
+    case 'y' : case 'Y' : dest = TXVU_BC_Y; break;
+    case 'z' : case 'Z' : dest = TXVU_BC_Z; break;
+    case 'w' : case 'W' : dest = TXVU_BC_W; break;
+    default : *errmsg = "invalid `dest'"; return 0;
     }
   *errmsg = NULL;
   return dest;
@@ -1057,6 +1163,27 @@ insert_limm12 (insn, operand, mods, value, errmsg)
 
 static long
 extract_limm12 (insn, operand, mods, pinvalid)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     int *pinvalid;
+{
+}
+
+/* Lower instruction 15 bit unsigned immediate.  */
+
+static TXVU_INSN
+insert_luimm15 (insn, operand, mods, value, errmsg)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     long value;
+     const char **errmsg;
+{
+}
+
+static long
+extract_luimm15 (insn, operand, mods, pinvalid)
      TXVU_INSN insn;
      const struct txvu_operand *operand;
      int mods;

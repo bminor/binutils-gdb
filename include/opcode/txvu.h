@@ -22,8 +22,8 @@ Boston, MA 02111-1307, USA.  */
 /* Type to denote a TXVU instruction (at least a 32 bit unsigned int).  */
 typedef unsigned int TXVU_INSN;
 
-/* Maximum number of operands an instruction can have.  */
-#define TXVU_MAX_OPERANDS 8
+/* Maximum number of operands and syntax chars an instruction can have.  */
+#define TXVU_MAX_OPERANDS 16
 
 struct txvu_opcode {
   char *mnemonic;
@@ -94,8 +94,8 @@ struct txvu_operand {
 /* This operand is a long immediate value.  */
 #define TXVU_OPERAND_LIMM 0x10
 
-/* This operand takes signed values.  */
-#define TXVU_OPERAND_SIGNED 0x20
+/* This operand takes unsigned values (default is signed).  */
+#define TXVU_OPERAND_UNSIGNED 0x20
 
 /* This operand takes signed values, but also accepts a full positive
    range of values.  That is, if bits is 16, it takes any value from
@@ -191,12 +191,13 @@ struct txvu_operand {
 /* Given an operand entry, return the table index.  */
 #define TXVU_OPERAND_INDEX(op) ((op) - 128)
 
-/* Positions and masks of various fields.  */
+/* Positions, masks, and values of various fields used in multiple places
+   (the opcode table, the disassembler, GAS).  */
 #define TXVU_SHIFT_DEST 21
-#define TXVU_SHIFT_FTREG 16
-#define TXVU_SHIFT_FSREG 11
-#define TXVU_SHIFT_FDREG 6
-#define TXVU_MASK_VFREG 31
+#define TXVU_SHIFT_TREG 16
+#define TXVU_SHIFT_SREG 11
+#define TXVU_SHIFT_DREG 6
+#define TXVU_MASK_REG 31
 #define TXVU_DEST_X 8
 #define TXVU_DEST_Y 4
 #define TXVU_DEST_Z 2
