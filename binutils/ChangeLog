@@ -1,3 +1,15 @@
+1999-08-31  Scott Bambrough <scottb@netwinder.org>
+
+	* readelf.c (get_note_type): New function:  Decode the e_type
+	value of a note.
+	(process_note): New function: Display the contents of a core note.
+	(process_corefile_note_segment): New function.
+	(process_corefile_note_segments): New function.
+	(process_corefile_contents): New function.
+	(process_arch_specific): Add call to process_corefile_contents.
+	(parse_args): Add parsing of -n/--notes command line switch.
+	(usage): Document new command line switch.
+
 1999-08-31  Ian Lance Taylor  <ian@zembu.com>
 
 	* binutils.texi (Bug Reporting): Clarify that large files should

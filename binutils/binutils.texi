@@ -2360,6 +2360,7 @@ readelf [ -a | --all ]
         [ -S | --section-headers | --sections]
         [ -e | --headers]
         [ -s | --syms | --symbols]
+        [ -n | --notes]
         [ -r | --relocs]
         [ -d | --dynamic]
         [ -V | --version-info]
@@ -2388,7 +2389,8 @@ given.
 @itemx --all
 Equivalent to specifiying @samp{--file-header},
 @samp{--program-headers}, @samp{--sections}, @samp{--symbols},
-@samp{--relocs}, @samp{--dynamic} and @samp{--version-info}.
+@samp{--relocs}, @samp{--dynamic}, @samp{--notes} and
+@samp{--version-info}. 
 
 @item -h
 @itemx --file-header
@@ -2420,6 +2422,11 @@ Displays the entries in symbol table section of the file, if it has one.
 @item -e
 @itemx --headers
 Display all the headers in the file.  Equivalent to @samp{-h -l -S}.
+
+@item -n
+@itemx --notes
+@cindex ELF core notes
+Displays the contents of the NOTE segment, if it exists.
 
 @item -r
 @itemx --relocs

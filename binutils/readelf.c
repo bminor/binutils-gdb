@@ -114,6 +114,7 @@ int                     do_debug_lines;
 int                     do_debug_pubnames;
 int                     do_debug_aranges;
 int                     do_arch;
+int                     do_notes;
 int			is_32bit_elf;
 
 /* A dynamic array of flags indicating which sections require dumping.  */
@@ -193,6 +194,11 @@ static const char *       get_elf_class               PARAMS ((unsigned char));
 static const char *       get_data_encoding           PARAMS ((unsigned char));
 static const char *       get_osabi_name              PARAMS ((unsigned char));
 static int		  guess_is_rela               PARAMS ((unsigned long));
+static char * 		  get_note_type		         PARAMS ((unsigned int));
+static int		  process_note		         PARAMS ((Elf_External_Note *));
+static int		  process_corefile_note_segment  PARAMS ((FILE *, unsigned long, unsigned long));
+static int		  process_corefile_note_segments PARAMS ((FILE *));
+static int 		  process_corefile_contents	 PARAMS ((FILE *));
 
 typedef int Elf32_Word;
 
@@ -1335,6 +1341,7 @@ struct option options [] =
   {"symbols",          no_argument, 0, 's'},
   {"syms",             no_argument, 0, 's'},
   {"relocs",           no_argument, 0, 'r'},
+  {"notes",            no_argument, 0, 'n'},
   {"dynamic",          no_argument, 0, 'd'},
   {"arch-specific",    no_argument, 0, 'A'},
   {"version-info",     no_argument, 0, 'V'},
@@ -1363,6 +1370,7 @@ usage ()
   fprintf (stdout, _("                            Display the sections' header\n"));
   fprintf (stdout, _("  -e or --headers           Equivalent to: -h -l -S\n"));
   fprintf (stdout, _("  -s or --syms or --symbols Display the symbol table\n"));
+  fprintf (stdout, _("  -n or --notes             Display the core notes (if present)\n"));
   fprintf (stdout, _("  -r or --relocs            Display the relocations (if present)\n"));
   fprintf (stdout, _("  -d or --dynamic           Display the dynamic segment (if present)\n"));
   fprintf (stdout, _("  -V or --version-info      Display the version sections (if present)\n"));
@@ -1426,7 +1434,7 @@ parse_args (argc, argv)
     usage ();
 
   while ((c = getopt_long
-	  (argc, argv, "ersahldSDAIw::x:i:vV", options, NULL)) != EOF)
+	  (argc, argv, "ersahnldSDAIw::x:i:vV", options, NULL)) != EOF)
     {
       char *    cp;
       int	section;
@@ -1450,6 +1458,7 @@ parse_args (argc, argv)
 	  do_version ++;
 	  do_histogram ++;
 	  do_arch ++;
+	  do_notes ++;
 	  break;
 	case 'e':
 	  do_header ++;
@@ -1482,6 +1491,9 @@ parse_args (argc, argv)
 	  break;
 	case 'I':
 	  do_histogram ++;
+	  break;
+	case 'n':
+	  do_notes ++;
 	  break;
 	case 'x':
 	  do_dump ++;
@@ -1561,7 +1573,7 @@ parse_args (argc, argv)
 
   if (!do_dynamic && !do_syms && !do_reloc && !do_sections
       && !do_segments && !do_header && !do_dump && !do_version
-      && !do_histogram && !do_debugging && !do_arch)
+      && !do_histogram && !do_debugging && !do_arch && !do_notes)
     usage ();
   else if (argc < 3)
     {
@@ -6349,6 +6361,164 @@ process_mips_specific (file)
   return 1;
 }
 
+static char *
+get_note_type (e_type)
+     unsigned e_type;
+{
+  static char buff[64];
+  
+  switch (e_type)
+    {
+    case NT_PRSTATUS:	return _("NT_PRSTATUS (prstatus structure)");
+    case NT_FPREGSET:	return _("NT_FPREGSET (floating point registers)");
+    case NT_PRPSINFO:   return _("NT_PRPSINFO (prpsinfo structure)");
+    case NT_TASKSTRUCT: return _("NT_TASKSTRUCT (task structure)");
+    case NT_PSTATUS:	return _("NT_PSTATUS (pstatus structure)");
+    case NT_FPREGS:	return _("NT_FPREGS (floating point registers)");
+    case NT_PSINFO:	return _("NT_PSINFO (psinfo structure)");
+    case NT_LWPSTATUS:	return _("NT_LWPSTATUS (lwpstatus_t structure)");
+    case NT_LWPSINFO:	return _("NT_LWPSINFO (lwpsinfo_t structure)");
+    default:
+      sprintf (buff, _("Unknown note type: (0x%08x)"), e_type);
+      return buff;
+    }
+}
+
+static int
+process_note (pnote)
+  Elf_External_Note * pnote;
+{
+  Elf32_Internal_Note * internal;
+  char * pname;
+  
+  internal = (Elf32_Internal_Note *) pnote;
+  pname = malloc (internal->namesz + 1);
+  
+  if (pname == NULL)
+    {
+      error (_("Out of memory\n"));
+      return 0;
+    }
+
+  memcpy (pname, pnote->name, internal->namesz);
+  pname[internal->namesz] = '\0';
+
+  printf ("  %s\t\t0x%08lx\t%s\n", 
+  	  pname, internal->descsz, get_note_type (internal->type));
+  	   
+  free (pname);
+
+  return 1;
+}
+
+static int
+process_corefile_note_segment (file, offset, length)
+     FILE * file;
+     unsigned long offset;
+     unsigned long length;
+{
+  Elf_External_Note *  pnotes;
+  Elf_External_Note *  external;
+  Elf32_Internal_Note* internal;
+  unsigned int	       notesz;
+  unsigned int         nlength;
+  unsigned char *      p;
+  int                  res = 1;
+  
+  if (length <= 0)
+    return 0;
+    
+  GET_DATA_ALLOC (offset, length, pnotes, Elf_External_Note *, "notes");
+
+  external = pnotes; 
+  p = (unsigned char *) pnotes;
+  nlength = length;
+ 
+  printf (_("\nNotes at offset 0x%08lx with length 0x%08lx:\n"), offset, length);
+  printf (_("  Owner\t\tData size\tDescription\n"));
+  
+  while (nlength > 0)
+    {
+      res &= process_note (external);
+      
+      internal = (Elf32_Internal_Note *) p;
+      notesz   = 3 * sizeof(unsigned long) + internal->namesz + internal->descsz;
+      nlength -= notesz;
+      p       += notesz;
+      external = (Elf_External_Note *) p;
+    }
+
+  free (pnotes);
+  
+  return res;
+}
+
+static int
+process_corefile_note_segments (file)
+     FILE * file;
+{
+  Elf_Internal_Phdr * program_headers;
+  Elf_Internal_Phdr * segment;
+  unsigned int	      i;
+  int                 res = 1;
+  
+  program_headers = (Elf_Internal_Phdr *) malloc
+    (elf_header.e_phnum * sizeof (Elf_Internal_Phdr));
+
+  if (program_headers == NULL)
+    {
+      error (_("Out of memory\n"));
+      return 0;
+    }
+
+  if (is_32bit_elf)
+    i = get_32bit_program_headers (file, program_headers);
+  else
+    i = get_64bit_program_headers (file, program_headers);
+
+  if (i == 0)
+    {
+      free (program_headers);
+      return 0;
+    }
+  
+  for (i = 0, segment = program_headers;
+       i < elf_header.e_phnum;
+       i ++, segment ++)
+    {
+      if (segment->p_type == PT_NOTE)
+	res &= process_corefile_note_segment (file, 
+					      (unsigned long)segment->p_offset,
+					      (unsigned long)segment->p_filesz);
+    }
+    
+  free (program_headers);
+
+  return res;
+}
+
+static int
+process_corefile_contents (file)
+     FILE * file;
+{
+  /* If we have not been asked to display the notes then do nothing.  */
+  if (! do_notes)
+    return 1;
+  
+  /* If file is not a core file then exit.  */
+  if (elf_header.e_type != ET_CORE)
+    return 1;
+    
+  /* No program headers means no NOTE segment.  */
+  if (elf_header.e_phnum == 0)
+    {
+      printf (_("No note segments present in the core file.\n"));
+      return 1;
+   }
+
+  return process_corefile_note_segments (file);
+}
+
 static int
 process_arch_specific (file)
      FILE * file;
@@ -6506,7 +6676,9 @@ process_file (file_name)
   process_version_sections (file);
 
   process_section_contents (file);
-
+  
+  process_corefile_contents (file);
+  
   process_arch_specific (file);
 
   fclose (file);
