@@ -874,7 +874,7 @@ do_scrub_chars (get, tostart, tolen)
 		  || (ch != '!' && ch != '*')))
 	    goto de_fault;
 	  if (flag_m68k_mri
-	      && (ch == '!' || ch == '*')
+	      && (ch == '!' || ch == '*' || ch == '#')
 	      && state != 1
 	      && state != 10)
 	    goto de_fault;

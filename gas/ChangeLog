@@ -1,3 +1,8 @@
+Mon Feb 12 15:41:21 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* app.c (do_scrub_chars): In MRI mode, don't treat '#' as a
+	comment character.
+
 Mon Feb 12 15:16:29 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	Support for OBJ_ELF on m68k, mostly inside #ifdef OBJ_ELF:
