@@ -169,7 +169,8 @@ source_cleanup PARAMS ((FILE *));
 #ifndef	GDBINIT_FILENAME
 #define	GDBINIT_FILENAME	".gdbinit"
 #endif
-char gdbinit[] = GDBINIT_FILENAME;
+static char gdbinit[] = GDBINIT_FILENAME;
+static int inhibit_gdbinit = 0;
 
 #define	ALL_CLEANUPS	((struct cleanup *)0)
 
@@ -384,7 +385,8 @@ static void
 disconnect (signo)
 int signo;
 {
-  catch_errors (quit_cover, NULL, "Could not kill inferior process");
+  catch_errors (quit_cover, NULL,
+		"Could not kill the program being debugged");
   signal (SIGHUP, SIG_DFL);
   kill (getpid (), SIGHUP);
 }
@@ -431,7 +433,6 @@ main (argc, argv)
      char **argv;
 {
   int count;
-  static int inhibit_gdbinit = 0;
   static int quiet = 0;
   static int batch = 0;
 
@@ -1454,7 +1455,7 @@ command_line_input (prrompt, repeat)
   }
 
 #ifdef STOP_SIGNAL
-  signal (SIGTSTP, SIG_DFL);
+  signal (STOP_SIGNAL, SIG_DFL);
 #endif
   immediate_quit--;
 
@@ -1893,7 +1894,7 @@ print_gdb_version (stream)
   FILE *stream;
 {
   fprintf_filtered (stream, "\
-GDB %s, Copyright 1992 Free Software Foundation, Inc.",
+GDB %s, Copyright 1993 Free Software Foundation, Inc.",
 	  version);
 }
 
@@ -1926,15 +1927,20 @@ quit_command (args, from_tty)
 {
   if (inferior_pid != 0 && target_has_execution)
     {
-      if (query ("The program is running.  Quit anyway? "))
+      if (attach_flag)
 	{
-	  if (attach_flag)
+	  if (query ("The program is running.  Quit anyway (and detach it)? "))
 	    target_detach (args, from_tty);
 	  else
-	    target_kill ();
+	    error ("Not confirmed.");
 	}
       else
-	error ("Not confirmed.");
+	{
+	  if (query ("The program is running.  Quit anyway (and kill it)? "))
+	    target_kill ();
+	  else
+	    error ("Not confirmed.");
+	}
     }
   /* Save the history information if it is appropriate to do so.  */
   if (write_history_p && history_filename)
@@ -2043,14 +2049,15 @@ source_command (args, from_tty)
   struct cleanup *cleanups;
   char *file = args;
 
-  if (file == 0)
-    /* Let source without arguments read .gdbinit.  */
-    file = gdbinit;
+  if (file == NULL)
+    {
+      error ("source command requires pathname of file to source.");
+    }
 
   file = tilde_expand (file);
   make_cleanup (free, file);
 
-  stream = fopen (file, "r");
+  stream = fopen (file, FOPEN_RT);
   if (stream == 0)
     perror_with_name (file);
 
@@ -2184,13 +2191,13 @@ set_history_size_command (args, from_tty, c)
      int from_tty;
      struct cmd_list_element *c;
 {
-  if (history_size == UINT_MAX)
+  if (history_size == INT_MAX)
     unstifle_history ();
   else if (history_size >= 0)
     stifle_history (history_size);
   else
     {
-      history_size = UINT_MAX;
+      history_size = INT_MAX;
       error ("History size must be non-negative");
     }
 }
@@ -2453,7 +2460,7 @@ Use \"on\" to enable to enable the saving, and \"off\" to disable it.\n\
 Without an argument, saving is enabled.", &sethistlist),
      &showhistlist);
 
-  c = add_set_cmd ("size", no_class, var_uinteger, (char *)&history_size,
+  c = add_set_cmd ("size", no_class, var_integer, (char *)&history_size,
 		   "Set the size of the command history, \n\
 ie. the number of previous commands to keep a record of.", &sethistlist);
   add_show_from_set (c, &showhistlist);

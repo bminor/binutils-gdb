@@ -826,7 +826,7 @@ core_file_command (filename, from_tty)
       make_cleanup (free, filename);
       
       if (have_inferior_p ())
-	error ("To look at a core file, you must kill the inferior with \"kill\".");
+	error ("To look at a core file, you must kill the program with \"kill\".");
       corechan = open (filename, O_RDONLY, 0);
       if (corechan < 0)
 	perror_with_name (filename);

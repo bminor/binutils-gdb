@@ -218,7 +218,7 @@ decode_format (string_ptr, oformat, osize)
     {
       if (*p == 'b' || *p == 'h' || *p == 'w' || *p == 'g')
 	val.size = *p++;
-#ifdef LONG_LONG
+#ifdef CC_HAS_LONG_LONG
       else if (*p == 'l')
 	{
 	  val.size = 'g';
@@ -231,7 +231,7 @@ decode_format (string_ptr, oformat, osize)
 	break;
     }
 
-#ifndef LONG_LONG
+#ifndef CC_HAS_LONG_LONG
   /* Make sure 'g' size is not used on integer types.
      Well, actually, we can handle hex.  */
   if (val.size == 'g' && val.format != 'f' && val.format != 'x')
@@ -398,75 +398,33 @@ print_scalar_formatted (valaddr, type, format, size, stream)
       if (!size)
 	{
 	  /* no size specified, like in print.  Print varying # of digits. */
-#if defined (LONG_LONG)
-	  fprintf_filtered (stream, local_hex_format_custom("ll"), val_long);
-#else /* not LONG_LONG.  */
-	  fprintf_filtered (stream, local_hex_format_custom("l"), val_long);
-#endif /* not LONG_LONG.  */
+	  print_longest (stream, 'x', 1, val_long);
 	}
       else
-#if defined (LONG_LONG)
-      switch (size)
-	{
-	case 'b':
-	  fprintf_filtered (stream, local_hex_format_custom("02ll"), val_long);
-	  break;
-	case 'h':
-	  fprintf_filtered (stream, local_hex_format_custom("04ll"), val_long);
-	  break;
-	case 'w':
-	  fprintf_filtered (stream, local_hex_format_custom("08ll"), val_long);
-	  break;
-	case 'g':
-	  fprintf_filtered (stream, local_hex_format_custom("016ll"), val_long);
-	  break;
-	default:
-	  error ("Undefined output size \"%c\".", size);
-	}
-#else /* not LONG_LONG.  */
-      switch (size)
-	{
-	case 'b':
-	  fprintf_filtered (stream, local_hex_format_custom("02"), val_long);
-	  break;
-	case 'h':
-	  fprintf_filtered (stream, local_hex_format_custom("04"), val_long);
-	  break;
-	case 'w':
-	  fprintf_filtered (stream, local_hex_format_custom("08"), val_long);
-	  break;
-	case 'g':
-	  fprintf_filtered (stream, local_hex_format_custom("016"), val_long);
-	  break;
-	default:
-	  error ("Undefined output size \"%c\".", size);
-	}
-#endif /* not LONG_LONG */
+	switch (size)
+	  {
+	  case 'b':
+	  case 'h':
+	  case 'w':
+	  case 'g':
+	    print_longest (stream, size, 1, val_long);
+	    break;
+	  default:
+	    error ("Undefined output size \"%c\".", size);
+	  }
       break;
 
     case 'd':
-#ifdef LONG_LONG
-      fprintf_filtered (stream, local_decimal_format_custom("ll"), val_long);
-#else
-      fprintf_filtered (stream, local_decimal_format(), val_long);
-#endif
+      print_longest (stream, 'd', 1, val_long);
       break;
 
     case 'u':
-#ifdef LONG_LONG
-      fprintf_filtered (stream, "%llu", val_long);
-#else
-      fprintf_filtered (stream, "%u", val_long);
-#endif
+      print_longest (stream, 'u', 0, val_long);
       break;
 
     case 'o':
       if (val_long)
-#ifdef LONG_LONG
-	fprintf_filtered (stream, local_octal_format_custom("ll"), val_long);
-#else
-	fprintf_filtered (stream, local_octal_format(), val_long);
-#endif
+	print_longest (stream, 'o', 1, val_long);
       else
 	fprintf_filtered (stream, "0");
       break;
@@ -619,7 +577,7 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
   fputs_filtered ("<", stream);
   fputs_filtered (name, stream);
   if (addr != name_location)
-    fprintf_filtered (stream, "+%d>", (int)(addr - name_location));
+    fprintf_filtered (stream, "+%u>", (unsigned int)(addr - name_location));
   else
     fputs_filtered (">", stream);
 }
@@ -695,7 +653,7 @@ do_examine (fmt, addr)
   else if (size == 'w')
     val_type = builtin_type_long;
   else if (size == 'g')
-#ifndef LONG_LONG
+#ifndef CC_HAS_LONG_LONG
     val_type = builtin_type_double;
 #else
     val_type = builtin_type_long_long;
@@ -1553,8 +1511,8 @@ print_frame_args (func, fi, num, stream)
 	 and it is passed as a double and converted to float by
 	 the prologue (in the latter case the type of the LOC_ARG
 	 symbol is double and the type of the LOC_LOCAL symbol is
-	 float).  It's possible this should be dealt with in
-	 symbol reading the way it now is for LOC_REGPARM.  */
+	 float).  There are also LOC_ARG/LOC_REGISTER pairs which
+	 are not combined in symbol-reading.  */
       /* But if the parameter name is null, don't try it.
 	 Null parameter names occur on the RS/6000, for traceback tables.
 	 FIXME, should we even print them?  */
@@ -1835,11 +1793,11 @@ printf_command (arg, from_tty)
 	    argindex += sizeof (double);
 	  }
 	else
-#ifdef LONG_LONG
+#ifdef CC_HAS_LONG_LONG
 	  if (argclass[i] == long_long_arg)
 	    {
-	      *(long long *) &arg_bytes[argindex] = value_as_long (val_args[i]);
-	      argindex += sizeof (long long);
+	      *(LONGEST *) &arg_bytes[argindex] = value_as_long (val_args[i]);
+	      argindex += sizeof (LONGEST);
 	    }
 	  else
 #endif
@@ -2059,7 +2017,7 @@ You can see these environment settings with the \"show\" command.",
 
   /* "call" is the same as "set", but handy for dbx users to call fns. */
   add_com ("call", class_vars, call_command,
-	   "Call a function in the inferior process.\n\
+	   "Call a function in the program.\n\
 The argument is the function name and arguments, in the notation of the\n\
 current working language.  The result is printed and saved in the value\n\
 history, if it is not void.");

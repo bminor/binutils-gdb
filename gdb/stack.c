@@ -388,7 +388,7 @@ frame_info (addr_exp, from_tty)
   enum language funlang = language_unknown;
 
   if (!target_has_stack)
-    error ("No inferior or core file.");
+    error ("No stack.");
 
   frame = parse_frame_specification (addr_exp);
   if (!frame)
@@ -897,8 +897,8 @@ print_frame_arg_vars (frame, stream)
 	     and it is passed as a double and converted to float by
 	     the prologue (in the latter case the type of the LOC_ARG
 	     symbol is double and the type of the LOC_LOCAL symbol is
-	     float).  It's possible this should be dealt with in
-	     symbol reading the way it now is for LOC_REGPARM.  */
+	     float).  There are also LOC_ARG/LOC_REGISTER pairs which
+	     are not combined in symbol-reading.  */
 
 	  sym2 = lookup_symbol (SYMBOL_NAME (sym),
 			b, VAR_NAMESPACE, (int *)NULL, (struct symtab **)NULL);

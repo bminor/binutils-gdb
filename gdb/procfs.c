@@ -2961,7 +2961,8 @@ info_proc (args, from_tty)
 
   if (!pip -> valid)
     {
-      error ("No process.  Run an inferior or specify an explicit pid.");
+      error ("\
+No process.  Start debugging a program or specify an explicit process ID.");
     }
   if (ioctl (pip -> fd, PIOCSTATUS, &(pip -> prstatus)) < 0)
     {

@@ -1,5 +1,10 @@
 Tue May 25 09:36:13 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* Many places: replace "the inferior" in messages with "the program"
+	or "the program being debugged".
+	* inflow.c (try_writing_regs): Revove; it's been #if 0'd forever
+	and I'm getting sick of maintaining it.
+
 	* config/i386/linux.mh: Don't use \ newline; the awk scripts don't
 	support it.
 

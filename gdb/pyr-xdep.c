@@ -49,13 +49,13 @@ fetch_inferior_registers (regno)
     reg_buf[regno] = ptrace (3, inferior_pid, (PTRACE_ARG3_TYPE) regno, 0);
     
 #if defined(PYRAMID_CONTROL_FRAME_DEBUGGING)
-    printf ("Fetching %s from inferior, got %0x\n",
+    printf ("Fetching register %s, got %0x\n",
 	    reg_names[regno],
 	    reg_buf[regno]);
 #endif /* PYRAMID_CONTROL_FRAME_DEBUGGING */
     
     if (reg_buf[regno] == -1 && errno == EIO) {
-      printf("fetch_interior_registers: fetching %s from inferior\n",
+      printf("fetch_interior_registers: fetching register %s\n",
 	     reg_names[regno]);
       errno = 0;
     }
@@ -231,7 +231,7 @@ core_file_command (filename, from_tty)
       make_cleanup (free, filename);
       
       if (have_inferior_p ())
-	error ("To look at a core file, you must kill the inferior with \"kill\".");
+	error ("To look at a core file, you must kill the program with \"kill\".");
       corechan = open (filename, O_RDONLY, 0);
       if (corechan < 0)
 	perror_with_name (filename);
