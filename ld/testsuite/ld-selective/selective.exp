@@ -1,5 +1,6 @@
 # Expect script for LD selective linking tests
-#   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+#   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004
+#   Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -110,15 +111,15 @@ foreach testitem $seltests {
     }
 
     # V850 targets need libgcc.a
-    # FIXME: This does not work with installed toolchains!
     if [istarget v850*-*-elf] {
-	set objfile "$objfile -L ../gcc -lgcc"
+    	catch "exec $CC -print-libgcc-file-name" libgcc
+	set objfile "$objfile $libgcc"
     }
 
     # ARM targets need libgcc.a in THUMB mode so that __call_via_r3 is provided
-    # FIXME: This does not work with installed toolchains!
     if {[istarget arm-*-*] || [istarget xscale-*-*]} {
-	set objfile "$objfile -L ../gcc -lgcc"
+    	catch "exec $CC -print-libgcc-file-name" libgcc
+	set objfile "$objfile $libgcc"
     }
 
     # HPPA linux targets need libgcc.a for millicode routines ($$dyncall).
