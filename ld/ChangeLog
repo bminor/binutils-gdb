@@ -1,3 +1,7 @@
+Fri Jun 21 12:45:46 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldmisc.c (vfinfo): Correct handling of 0 in %W case.
+
 Thu Jun 20 13:55:28 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	Add enough support to understand the gcc svr3.ifile script:
