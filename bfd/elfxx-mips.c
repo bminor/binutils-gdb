@@ -478,6 +478,11 @@ static bfd *reldyn_sorting_bfd;
 #define MIPS_ELF_OPTIONS_SECTION_NAME(abfd) \
   (NEWABI_P (abfd) ? ".MIPS.options" : ".options")
 
+/* True if NAME is the recognized name of any SHT_MIPS_OPTIONS section.
+   Some IRIX system files do not use MIPS_ELF_OPTIONS_SECTION_NAME.  */
+#define MIPS_ELF_OPTIONS_SECTION_NAME_P(NAME) \
+  (strcmp (NAME, ".MIPS.options") == 0 || strcmp (NAME, ".options") == 0)
+
 /* The name of the stub section.  */
 #define MIPS_ELF_STUB_SECTION_NAME(abfd) ".MIPS.stubs"
 
@@ -5122,7 +5127,7 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
 	return FALSE;
       break;
     case SHT_MIPS_OPTIONS:
-      if (strcmp (name, MIPS_ELF_OPTIONS_SECTION_NAME (abfd)) != 0)
+      if (!MIPS_ELF_OPTIONS_SECTION_NAME_P (name))
 	return FALSE;
       break;
     case SHT_MIPS_DWARF:
@@ -5140,7 +5145,7 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
 	return FALSE;
       break;
     default:
-      return FALSE;
+      break;
     }
 
   if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
@@ -5310,7 +5315,7 @@ _bfd_mips_elf_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
       hdr->sh_flags |= SHF_MIPS_NOSTRIP;
       /* The sh_info field is set in final_write_processing.  */
     }
-  else if (strcmp (name, MIPS_ELF_OPTIONS_SECTION_NAME (abfd)) == 0)
+  else if (MIPS_ELF_OPTIONS_SECTION_NAME_P (name))
     {
       hdr->sh_type = SHT_MIPS_OPTIONS;
       hdr->sh_entsize = 1;
@@ -8631,7 +8636,7 @@ _bfd_mips_elf_set_section_contents (bfd *abfd, sec_ptr section,
 				    const void *location,
 				    file_ptr offset, bfd_size_type count)
 {
-  if (strcmp (section->name, MIPS_ELF_OPTIONS_SECTION_NAME (abfd)) == 0)
+  if (MIPS_ELF_OPTIONS_SECTION_NAME_P (section->name))
     {
       bfd_byte *c;
 
