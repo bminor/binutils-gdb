@@ -11,6 +11,6 @@ $ gmake
 $ set def [-.binutils]
 $ gmake
 $ set def [-.gas]
-$ @config-a-gas
+$ @conf-a-gas
 $ gmake
 $ set def [-]

@@ -1,3 +1,7 @@
+Wed Oct  2 15:52:36 1996  Klaus Kaempf  <kkaempf@progis.de>
+
+	* make-all.com: Call conf-a-gas, not config-a-gas.
+
 Tue Oct  1 01:28:41 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* configure.in (noconfigdirs): Don't build libgloss for arm-coff
