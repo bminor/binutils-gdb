@@ -2,6 +2,8 @@
 
 	* elf-mn10300.c: Before include system specific ELF header define
 	START_RELOC_NUMBERS, RELOC_NUMBER, and END_RELOC_NUMBERS.
+	* elf32-mips.c: Likewise.
+	* elf32-ppc.c: Likewise.
 
 Wed Jul 22 13:46:51 1998  Ian Lance Taylor  <ian@cygnus.com>
 

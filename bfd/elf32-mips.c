@@ -30,6 +30,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfdlink.h"
 #include "genlink.h"
 #include "elf-bfd.h"
+
+#define START_RELOC_NUMBERS(name)   enum name {
+#define RELOC_NUMBER(name, number)  name = number ,
+#define END_RELOC_NUMBERS           };
 #include "elf/mips.h"
 
 /* Get the ECOFF swapping routines.  */
@@ -292,50 +296,6 @@ static void bfd_elf32_swap_crinfo_out
   PARAMS ((bfd *, const Elf32_crinfo *, Elf32_External_crinfo *));
 
 #define USE_REL	1		/* MIPS uses REL relocations instead of RELA */
-
-enum reloc_type
-{
-#if 0
-  /* These are now in elf/mips.h.  */
-  R_MIPS_NONE = 0,
-  R_MIPS_16,		R_MIPS_32,
-  R_MIPS_REL32,		R_MIPS_26,
-  R_MIPS_HI16,		R_MIPS_LO16,
-  R_MIPS_GPREL16,	R_MIPS_LITERAL,
-  R_MIPS_GOT16,		R_MIPS_PC16,
-  R_MIPS_CALL16,	R_MIPS_GPREL32,
-#endif
-  /* The remaining relocs are defined on Irix, although they are not
-     in the MIPS ELF ABI.  */
-  R_MIPS_UNUSED1 = 13,	R_MIPS_UNUSED2,
-  R_MIPS_UNUSED3,
-  R_MIPS_SHIFT5,	R_MIPS_SHIFT6,
-  R_MIPS_64,		R_MIPS_GOT_DISP,
-  R_MIPS_GOT_PAGE,	R_MIPS_GOT_OFST,
-  R_MIPS_GOT_HI16,	R_MIPS_GOT_LO16,
-  R_MIPS_SUB,		R_MIPS_INSERT_A,
-  R_MIPS_INSERT_B,	R_MIPS_DELETE,
-  R_MIPS_HIGHER,	R_MIPS_HIGHEST,
-  R_MIPS_CALL_HI16,	R_MIPS_CALL_LO16,
-  /* start-sanitize-r5900 */
-  /* This is used by a mips co-processor instruction.  */
-  R_MIPS15_S3,
-  /* end-sanitize-r5900 */
-  R_MIPS_max,
-  /* These relocs are used for the mips16.  */
-  R_MIPS16_26 = 100,
-  R_MIPS16_GPREL = 101,
-/* start-sanitize-sky */
-  /* These relocs are for the dvp.  */
-  R_MIPS_DVP_11_PCREL = 120,
-  R_MIPS_DVP_27_S4 = 121,
-  R_MIPS_DVP_11_S4 = 122,
-  R_MIPS_DVP_U15_S3 = 123,
-/* end-sanitize-sky */
-  /* These are GNU extensions to enable C++ vtable garbage collection.  */
-  R_MIPS_GNU_VTINHERIT = 253,
-  R_MIPS_GNU_VTENTRY = 254
-};
 
 static reloc_howto_type elf_mips_howto_table[] =
 {
@@ -1748,7 +1708,7 @@ elf_mips_mach (flags)
 
 struct elf_reloc_map {
   bfd_reloc_code_real_type bfd_reloc_val;
-  enum reloc_type elf_reloc_val;
+  enum elf_mips_reloc_type elf_reloc_val;
 };
 
 static CONST struct elf_reloc_map mips_reloc_map[] =
