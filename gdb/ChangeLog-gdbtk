@@ -1,3 +1,15 @@
+1998-09-24  Keith Seitz  <keiths@cygnus.com>
+
+	* gdbtk.c (gdbtk_wait): Don't run the timer for ice targets.
+
+	* v850ice.c (WM_ADDR_TO_SYM): New message.
+	(v850ice_wndproc): Add handler for WM_SOURCE.
+	(v850ice_wait): Call the ui_loop_hook occasionally.
+	(ice_cont): Acknowledge message before doing anything.
+	(ice_stepi): Ack message and let gdbtk do stepping.
+	(ice_nexti): Ack message and let gdbtk do stepping.
+	(view_source): New function ICE calls to display source code.
+
 start-sanitize-ide
 Mon Sep 21 13:33:27 1998  Drew Moseley  <dmoseley@cygnus.com>
 

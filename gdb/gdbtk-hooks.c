@@ -593,7 +593,9 @@ gdbtk_wait (pid, ourstatus)
      int pid;
      struct target_waitstatus *ourstatus;
 {
-  gdbtk_start_timer ();
+  /* Don't run the timer on various targets... */
+  if (!STREQ (target_shortname, "ice"))
+    gdbtk_start_timer ();
   pid = target_wait (pid, ourstatus);
   gdbtk_stop_timer ();
   return pid;

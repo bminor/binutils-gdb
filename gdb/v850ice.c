@@ -56,6 +56,8 @@ extern void continue_command PARAMS ((char *, int));
 
 extern HINSTANCE Tk_GetHINSTANCE PARAMS ((void));
 
+extern void (*ui_loop_hook) PARAMS ((int));
+
 /* Prototypes for local functions */
 static int init_hidden_window PARAMS ((void));
 
@@ -120,6 +122,8 @@ static int ice_nexti PARAMS ((char *));
 
 static void togdb_force_update PARAMS ((void));
 
+static void view_source PARAMS ((CORE_ADDR));
+
 /* Globals */
 static HWND hidden_hwnd;                 /* HWND for messages */
 
@@ -173,6 +177,7 @@ static int SimulateCallback;    /* simulate a callback event */
 #define WM_SYM_TO_ADDR  WM_USER+102
 #define WM_ADDR_TO_SYM  WM_USER+103
 #define WM_DISASSEMBLY  WM_USER+104
+#define WM_SOURCE       WM_USER+105
 
 /* STATE_CHANGE codes */
 #define STATE_CHANGE_REGS   1   /* Register(s) changed */
@@ -252,6 +257,9 @@ v850ice_wndproc (hwnd, message, wParam, lParam)
       break;
     case WM_ADDR_TO_SYM:
       MessageBox (0, "Address resolution\nNot implemented", "GDB", MB_OK);
+      break;
+    case WM_SOURCE:
+      view_source ((CORE_ADDR) lParam);
       break;
     case WM_STATE_CHANGE:
       switch (wParam)
@@ -442,11 +450,19 @@ v850ice_wait (pid, status)
   char buf[256];
   struct MessageIO  iob;
   int done = 0;
+  int count = 0;
+
   iob.size = 0;
   iob.buf  = buf;
   
   do
     {
+      if (count++ % 100000)
+        {
+          ui_loop_hook (-2);
+          count = 0;
+        }
+
       v850_status = ExeAppReq ("GDB", GCHECKSTATUS, NULL, &iob);
 
       switch (v850_status)
@@ -822,6 +838,7 @@ ice_cont (c)
   char *c;
 {
   printf_filtered ("continue (ice)");
+  ReplyMessage ((LRESULT) 1);
   Tcl_Eval (gdbtk_interp, "gdb_immediate continue");
   return 1;
 }
@@ -835,8 +852,8 @@ ice_stepi (c)
 
   sprintf (string, "gdb_immediate stepi %d", count);
   printf_unfiltered ("stepi (ice)\n");
-  Tcl_Eval (gdbtk_interp, string);
   ReplyMessage ((LRESULT) 1);
+  Tcl_Eval (gdbtk_interp, string);
   return 1;
 }
 
@@ -849,6 +866,7 @@ ice_nexti (c)
 
   sprintf (string, "gdb_immediate nexti %d", count);
   printf_unfiltered ("nexti (ice)\n");
+  ReplyMessage ((LRESULT) 1);
   Tcl_Eval (gdbtk_interp, string);
   return 1;
 }
@@ -870,6 +888,16 @@ static void
 togdb_force_update (void)
 {
   Tcl_Eval (gdbtk_interp, "gdbtk_update");
+}
+
+static void
+view_source (addr)
+     CORE_ADDR addr;
+{
+  char c[256];
+
+  sprintf (c, "set src [lindex [manage find src] 0]\n$src location [gdb_loc *0x%x]", addr);
+  Tcl_Eval (gdbtk_interp, c);
 }
 
 /* Define the target subroutine names */
