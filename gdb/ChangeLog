@@ -1,3 +1,24 @@
+Wed Apr  1 16:30:49 1998  Ian Dall  <Ian.Dall@dsto.defence.gov.au>
+
+        * ns32k-tdep.c (flip_bytes, ns32k_localcount,
+        ns32k_get_enter_addr, sign_extend): Restore functions mysteriously
+        deleted.
+
+        * ns32knbsd-nat.c: New (?) file to support fetching and storing
+        registers on NetBSD hosts.
+
+        * nbsd.mh (NATDEPFILES): put ns32knbsd-nat.o instead of
+        ns32k-nat.o
+
+        * ns32km3-nat.c (reg_offset): Get order of floating point
+        registers correct. Add extra 32382 register offsets.
+        (REG_ADDRESS): define to point at correct part of thread
+        state. Use calls to "warning" instead of "message".
+
+        * tm-nbsd.h, tm-ns32km3.h (REGISTER_NAMES, NUM_REGS,
+        REGISTER_BYTES, REGISTER_BYTE): redefine allowing for 32382
+        fpu registers.
+
 Wed Apr  1 13:43:07 1998  Philippe De Muyter  <phdm@macqel.be>
 
         * NEWS: m68k-motorola-sysv host support added.
