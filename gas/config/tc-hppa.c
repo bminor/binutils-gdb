@@ -2613,21 +2613,7 @@ md_number_to_chars (buf, val, n)
      valueT val;
      int n;
 {
-
-  switch (n)
-    {
-    case 4:
-      *buf++ = val >> 24;
-      *buf++ = val >> 16;
-    case 2:
-      *buf++ = val >> 8;
-    case 1:
-      *buf = val;
-      break;
-    default:
-      abort ();
-    }
-  return;
+  number_to_chars_bigendian (buf, val, n);
 }
 
 /* Translate internal representation of relocation info to BFD target

@@ -460,18 +460,7 @@ md_number_to_chars (con, value, nbytes)
      valueT value;		/* The value of the bits. */
      int nbytes;		/* Number of bytes in the output. */
 {
-  int n = nbytes;
-  valueT v = value;
-
-  con += nbytes - 1;		/* Tahoes is (Bleah!) big endian */
-  while (nbytes--)
-    {
-      *con-- = value;		/* Lint wants & MASK_CHAR. */
-      value >>= BITS_PER_CHAR;
-    }
-  /* XXX line number probably botched for this warning message. */
-  if (value != 0 && value != -1)
-    as_warn ("Displacement (%ld) long for instruction field length (%d).", v, n);
+  number_to_chars_bigendian (con, value, nbytes);
 }
 
 #ifdef comment

@@ -945,20 +945,7 @@ md_number_to_chars (buf, val, nbytes)
      valueT val;
      int nbytes;
 {
-  switch (nbytes)
-    {
-    case 4:
-      *buf++ = val >> 24;
-      *buf++ = val >> 16;
-    case 2:
-      *buf++ = val >> 8;
-    case 1:
-      *buf = val;
-      break;
-
-    default:
-      abort ();
-    }
+  number_to_chars_bigendian (buf, val, nbytes);
 }
 
 #if 0

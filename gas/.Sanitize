@@ -124,7 +124,86 @@ fi
 #
 #
 # $Log$
-# Revision 1.22  1993/11/22 06:04:32  law
+# Revision 1.23  1993/12/03 03:06:48  raeburn
+# Lots of changes for:
+#  - sparc[lite]-coff as well as sparc-lynx
+#  - producing coff (including debug info) under BFD_ASSEMBLER option
+#  - cleanup of cpu-specific code in non-cpu-specific files
+#    (especially write.c)
+#  - providing common code to avoid duplication in cpu-specific files
+#    (specifically, md_number_to_chars)
+#  - stylistic changes & misc cleanup
+#
+# ================
+#
+# * config/tc-sparc.c (tc_gen_reloc): Make adjustment to addend be dependent on
+# howto fields, not on format flavour.
+#
+# * struc-symbol.h (struct symbol): New fields sy_obj and sy_tc, defined as types
+# OBJ_SYMFIELD_TYPE and TC_SYMFIELD_TYPE, if those macros are defined.
+# * config/obj-coff.h (TC_SYMFIELD_TYPE, OBJ_SYMFIELD_TYPE): Define.
+# (TARGET_SYMBOL_FIELDS, I960_SYM_FIELDS): Don't define.
+# (sy_tc, sy_obj): Define so that the fields look like they used to, until all
+# references get changed.
+#
+# * write.c (fixup_segment): Lots of variables no longer register.  Reordered
+# some code for easier reading.
+# * config/obj-coff.c (obj_coff_dim): dim_index no longer register.  Deleted
+# superfluous return statement.
+# (obj_coff_line, obj_coff_size, obj_coff_scl, obj_coff_type, obj_coff_val,
+# tag_init, tag_insert): Deleted superfluous return statement.
+# (align, obj_coff_section): Deleted debugging printfs.
+# * config/tc-i386.c (md_assemble): Discard some register decls.  Use assignment
+# rather than memcpy to copy template.
+# (op_hash, reg_hash, prefix_hash): Default C initialization of statics is
+# sufficient.
+# * config/tc-sparc.c (print_insn): Array Reloc is now const, and points to
+# const.
+#
+# * config/obj-coff.h (TARGET_FORMAT): Only use coff-sparc-lynx if TE_LYNX; use
+# coff-sparc otherwise.
+# [USE_NATIVE_HEADERS]: Delete this code; it isn't used.
+#
+# * write.c (fixup_segment): Call TC_VALIDATE_FIX, if defined, before processing
+# a fixup.  Call TC_ADJUST_RELOC_COUNT just before returning.  Remove some
+# i960-coff-specific code.
+# (TC_ADJUST_RELOC_COUNT): Default to doing nothing.
+# * config/tc-i960.h (TC_ADJUST_RELOC_COUNT) [OBJ_COFF]: Define.
+# (i960_validate_fix): Declare.
+# (TC_VALIDATE_FIX): Define.
+# * config/tc-i960.c (i960_validate_fix): New function.
+#
+# * write.c (number_to_chars_littleendian): New function.  Write out bytes in
+# little endian order, doing size and range checking.
+# (number_to_chars_bigendian): New function, similar.
+# * write.h: Declare them.
+# * config/tc-*.c (md_number_to_chars): Use them.
+# * config/tc-vax.c (md_apply_fix): Ditto.
+# * config/tc-i386.c (md_apply_fix): Ditto.
+#
+# * config/obj-coff.c: Rearranged code for handling line number data.
+# (line_fsym): Renamed from function_lineoff in BFD_ASSEMBLER case, since the
+# usage is different from non-BFD_ASSEMBLER case.
+# (in_function, clear_function, set_function): New macros, to combine some of the
+# functionality implemented in differnet ways in BFD_ASSEMBLER and non-... code.
+# Used in other functions that used to check function_lineoff &c.
+# (obj_emit_lineno): Split into two copies, one for BFD_ASSEMBLER, one for not.
+# Non-BFD_ASSEMBLER version now has temporary variable to contain char* pointer
+# pointed to by char** argument.  Always follow CROSS_COMPILE code; easier to
+# read that way.
+# (obj_coff_ln): Don't call add_lineno or c_line_new if appline is set.
+# (obj_coff_endef) [BFD_ASSEMBLER]: Don't do anything special for ".bf", it's
+# been done elsewhere.
+# (coff_frob_symbol): If ilne number data is pending, call add_linesym to flush it.
+# (coff_frob_file): Don't do that here.
+# * config/obj-coff.h (coff_frob_file): Declare.
+# (obj_frob_file): Define, to call it.
+#
+# * config/tc-sparc.h (md_create_short_jump, md_create_long_jump,
+# md_estimate_size_before_relax: Define them as macros calling as_fatal.
+# * config/tc-sparc.c: Don't define them as functions.
+#
+# Revision 1.22  1993/11/22  06:04:32  law
 # Add stabs.c to things-to-keep.
 #
 # Revision 1.21  1993/11/17  23:23:36  ian

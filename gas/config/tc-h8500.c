@@ -1523,25 +1523,12 @@ md_number_to_chars (ptr, use, nbytes)
      valueT use;
      int nbytes;
 {
-  switch (nbytes)
-    {
-    case 4:
-      *ptr++ = (use >> 24) & 0xff;
-    case 3:
-      *ptr++ = (use >> 16) & 0xff;
-    case 2:
-      *ptr++ = (use >> 8) & 0xff;
-    case 1:
-      *ptr++ = (use >> 0) & 0xff;
-      break;
-    default:
-      abort ();
-    }
+  number_to_chars_bigendian (ptr, use, nbytes);
 }
+
 long
 md_pcrel_from (fixP)
      fixS *fixP;
-
 {
   return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
 }
