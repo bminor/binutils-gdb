@@ -290,7 +290,8 @@ som_solib_add_solib_objfile (so, name, from_tty, text_addr)
   struct section_addr_info section_addrs;
 
   memset (&section_addrs, 0, sizeof (section_addrs));
-  section_addrs.text_addr = text_addr;
+  section_addrs.other[0].name = ".text";
+  section_addrs.other[0].addr = text_addr;
   so->objfile = symbol_file_add (name, from_tty, &section_addrs, 0, OBJF_SHARED);
   so->abfd = so->objfile->obfd;
 

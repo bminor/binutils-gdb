@@ -465,6 +465,7 @@ som_symfile_offsets (objfile, addrs)
      struct section_addr_info *addrs;
 {
   int i;
+  CORE_ADDR text_addr;
 
   objfile->num_sections = SECT_OFF_MAX;
   objfile->section_offsets = (struct section_offsets *)
@@ -474,8 +475,13 @@ som_symfile_offsets (objfile, addrs)
      offsets from the library, else get them from addrs.  */
   if (!som_solib_section_offsets (objfile, objfile->section_offsets))
     {
+      for (i = 0; i < SECT_OFF_MAX && addrs->other[i].name; i++)
+	if (strcmp (addrs->other[i].name, ".text") == 0)
+	  break;
+      text_addr = addrs->other[i].addr;
+
       for (i = 0; i < SECT_OFF_MAX; i++)
-	ANOFFSET (objfile->section_offsets, i) = addrs -> text_addr;
+	ANOFFSET (objfile->section_offsets, i) = text_addr;
     }
 }
 

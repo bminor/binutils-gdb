@@ -558,7 +558,8 @@ handle_load_dll (PTR dummy)
      the offset from 0 of the first byte in an image - because
      of the file header and the section alignment. */
 
-  section_addrs.text_addr = (int) event->lpBaseOfDll + 0x1000;
+  section_addrs.other[0].name = ".text";
+  section_addrs.other[0].addr = (int) event->lpBaseOfDll + 0x1000;
   safe_symbol_file_add (dll_name, 0, &section_addrs, 0, OBJF_SHARED);
   printf_unfiltered ("%x:%s\n", event->lpBaseOfDll, dll_name);
 
