@@ -25,6 +25,7 @@ Most of this hacked by Steve Chamberlain, steve@cygnus.com
 
 #include "archures.h"		/* Machine architectures and types */
 
+
 /* SUPPRESS 558 */
 /* SUPPRESS 590 */
 /* SUPPRESS 529 */
@@ -244,7 +245,7 @@ DEFUN(make_a_section_from_file,(abfd, hdr),
 {
     asection       *return_section;
     {
-	char           *name = (PTR) malloc(9);
+	char           *name = bfd_alloc(abfd, 9);
 	if (name == NULL) {
 	    bfd_error = no_memory;
 	    return (BFD_FAILURE);
@@ -299,6 +300,19 @@ DEFUN(make_a_section_from_file,(abfd, hdr),
     return true;
 }
 
+static          boolean
+DEFUN(coff_mkobject,(abfd),
+      bfd            *abfd)
+{
+  coff_data_type *coff;
+  coff_data(abfd) = 
+    (coff_data_type*)bfd_alloc(abfd,sizeof(coff_data_type));
+  coff = coff_data(abfd);
+  coff->relocbase = 0;
+  coff->hdr   = (AOUTHDR*) bfd_alloc(abfd, sizeof(AOUTHDR));
+  return true;
+
+}
 
 static
 bfd_target     *
@@ -307,28 +321,29 @@ DEFUN(coff_real_object_p,(abfd, nscns, opthdr),
     unsigned        nscns AND
     unsigned        opthdr)
 {
-  struct icofdata *tdata;
+  coff_data_type *coff;
   char           *file_info;	/* buffer for all the headers */
   size_t          readsize;	/* length of file_info */
   struct filehdr *filehdr;	/* points into file_info */
   struct scnhdr  *sections;	/* points into file_info */
+
+  /* Build a play area */
+  (void)   coff_mkobject(abfd);
+  coff = coff_data(abfd);
   /*
-     OK, now we know the format, read in the filehdr, soi-disant "optional
-     header", and all the sections.
-     */
+    OK, now we know the format, read in the filehdr, soi-disant "optional
+    header", and all the sections.
+    */
   readsize = sizeof(struct filehdr)
     + opthdr
       + (nscns * sizeof(struct scnhdr));
 
-  file_info = (PTR) malloc(readsize);
-  if (file_info == NULL) {
-    bfd_error = no_memory;
-    return 0;
-  }
+  file_info = (PTR) bfd_alloc(abfd, readsize);
   if (bfd_seek(abfd, 0L, SEEK_SET) < 0)
-    return 0;
+    goto fail;
+
   if (bfd_read((PTR) file_info, 1, readsize, abfd) != readsize)
-    return 0;
+    goto fail;
   filehdr = (struct filehdr *) file_info;
   sections = (struct scnhdr *) (file_info + sizeof(struct filehdr) + opthdr);
 
@@ -336,19 +351,13 @@ DEFUN(coff_real_object_p,(abfd, nscns, opthdr),
   swap_filehdr(abfd, filehdr);
 
   /* Now copy data as required; construct all asections etc */
-  tdata = (struct icofdata *) malloc(sizeof(struct icofdata) +
-				     sizeof(AOUTHDR));
-  if (tdata == NULL) {
-    bfd_error = no_memory;
-    return 0;
-  }
-  tdata->symbol_index_slew = 0;
-  tdata->relocbase =0;
-  tdata->raw_syment_count = 0;
-  tdata->raw_linenos = 0;
-  tdata->raw_syments = 0;
-  tdata->sym_filepos =0;
-  tdata->flags = filehdr->f_flags;
+  coff->symbol_index_slew = 0;
+  coff->relocbase =0;
+  coff->raw_syment_count = 0;
+  coff->raw_linenos = 0;
+  coff->raw_syments = 0;
+  coff->sym_filepos =0;
+  coff->flags = filehdr->f_flags;
   if (nscns != 0) {
     unsigned int    i;
     for (i = 0; i < nscns; i++) {
@@ -369,6 +378,7 @@ DEFUN(coff_real_object_p,(abfd, nscns, opthdr),
 #ifdef MC88MAGIC
   case MC88MAGIC:
   case MC88DMAGIC:
+  case MC88OMAGIC:
     abfd->obj_arch = bfd_arch_m88k;
     abfd->obj_machine = 88100;
     break;
@@ -378,28 +388,28 @@ DEFUN(coff_real_object_p,(abfd, nscns, opthdr),
   case I960RWMAGIC:
     abfd->obj_arch = bfd_arch_i960;
     switch (F_I960TYPE & filehdr->f_flags) 
-      {
-      default:
-      case F_I960CORE:
-	abfd->obj_machine = bfd_mach_i960_core;
-	break;
-      case F_I960KB:
-	abfd->obj_machine = bfd_mach_i960_kb_sb;
-	break;
-      case F_I960MC:
-	abfd->obj_machine = bfd_mach_i960_mc;
-	break;
-      case F_I960XA:
-	abfd->obj_machine = bfd_mach_i960_xa;
-	break;
-      case F_I960CA:
-	abfd->obj_machine = bfd_mach_i960_ca;
-	break;
-      case F_I960KA:
-	abfd->obj_machine = bfd_mach_i960_ka_sa;
-	break;
+	{
+	default:
+	case F_I960CORE:
+	  abfd->obj_machine = bfd_mach_i960_core;
+	  break;
+	case F_I960KB:
+	  abfd->obj_machine = bfd_mach_i960_kb_sb;
+	  break;
+	case F_I960MC:
+	  abfd->obj_machine = bfd_mach_i960_mc;
+	  break;
+	case F_I960XA:
+	  abfd->obj_machine = bfd_mach_i960_xa;
+	  break;
+	case F_I960CA:
+	  abfd->obj_machine = bfd_mach_i960_ca;
+	  break;
+	case F_I960KA:
+	  abfd->obj_machine = bfd_mach_i960_ka_sa;
+	  break;
 
-      }
+	}
     break;
 #endif
 
@@ -417,20 +427,21 @@ DEFUN(coff_real_object_p,(abfd, nscns, opthdr),
   if (!(filehdr->f_flags & F_LSYMS))
     abfd->flags |= HAS_LOCALS;
 
-  abfd->tdata = (PTR) tdata;
+
   bfd_get_symcount(abfd) = filehdr->f_nsyms;
   if (filehdr->f_nsyms)
     abfd->flags |= HAS_SYMS;
 
-  tdata->sym_filepos = filehdr->f_symptr;
-  tdata->hdr = (struct aouthdr *) (file_info + sizeof(struct filehdr));
+  coff->sym_filepos = filehdr->f_symptr;
+  swap_aouthdr(abfd, coff->hdr);
 
-  swap_aouthdr(abfd, tdata->hdr);
-
-  tdata->symbols = (coff_symbol_type *) NULL;
+  coff->symbols = (coff_symbol_type *) NULL;
   bfd_get_start_address(abfd) = opthdr ? exec_hdr(abfd)->entry : 0;
 
   return abfd->xvec;
+ fail:
+  bfd_release(abfd, coff);
+  return (bfd_target *)NULL;
 }
 
 
@@ -496,25 +507,6 @@ DEFUN(coff_object_p,(abfd),
     return coff_real_object_p(abfd, nscns, opthdr);
 }
 
-static          boolean
-DEFUN(coff_mkobject,(abfd),
-      bfd            *abfd)
-{
-    char           *rawptr;
-
-    bfd_error = system_call_error;
-
-    /* Use an intermediate variable for clarity */
-    rawptr = zalloc(sizeof(struct icofdata) + sizeof(AOUTHDR));
-    if (rawptr == NULL) {
-	bfd_error = no_memory;
-	return false;
-    }
-    abfd->tdata = (PTR) ((struct icofdata *) rawptr);
-    exec_hdr(abfd) = (AOUTHDR *) (rawptr + sizeof(struct icofdata));
-    obj_relocbase(abfd) =0;
-    return true;
-}
 
 
 
@@ -941,7 +933,7 @@ coff_write_symbols(abfd)
 	bfd_coff_swap_sym(abfd, native);
 	bfd_write((PTR) native, 1, SYMESZ, abfd);
 	for (j = 0; j != native->n_numaux; j++) {
-	  bfd_coff_swap_aux(abfd, native + j + 1, type, class);
+	  bfd_coff_swap_aux(abfd, (AUXENT *)(native + j + 1), type, class);
 	  bfd_write((PTR) (native + j + 1), 1, AUXESZ, abfd);
 
 	}
@@ -997,7 +989,9 @@ coff_write_relocs(abfd)
 	    arelent        *q = p[i];
 	    memset((PTR)&n, 0, sizeof(n));
 	    n.r_vaddr = q->address + s->vma;
+	    if (q->sym_ptr_ptr) {
 	    n.r_symndx = get_index((*(q->sym_ptr_ptr)));
+	  }
 	    n.r_type = q->howto->type;
 	    swap_reloc(abfd, &n);
 	    bfd_write((PTR) &n, 1, RELSZ, abfd);
@@ -1045,7 +1039,7 @@ static asymbol *
 coff_make_empty_symbol(abfd)
     bfd            *abfd;
 {
-    coff_symbol_type *new = (coff_symbol_type *) malloc(sizeof(coff_symbol_type));
+    coff_symbol_type *new = (coff_symbol_type *) bfd_alloc(abfd, sizeof(coff_symbol_type));
     if (new == NULL) {
 	bfd_error = no_memory;
 	return (NULL);
@@ -1154,7 +1148,7 @@ coff_set_flags(abfd, magicp, flagsp)
 #endif
 #ifdef MC88MAGIC
     case bfd_arch_m88k:
-	*magicp = MC88MAGIC;
+	*magicp = MC88OMAGIC;
 	return true;
 	break;
 #endif
@@ -1547,7 +1541,7 @@ buy_and_read(abfd, where, seek_direction, size)
     int             seek_direction;
     size_t          size;
 {
-    PTR             area = (PTR) malloc(size);
+    PTR             area = (PTR) bfd_alloc(abfd, size);
     if (!area) {
 	bfd_error = no_memory;
 	return (NULL);
@@ -1555,7 +1549,6 @@ buy_and_read(abfd, where, seek_direction, size)
     bfd_seek(abfd, where, seek_direction);
     if (bfd_read(area, 1, size, abfd) != size) {
 	bfd_error = system_call_error;
-	free(area);
 	return (NULL);
     }				/* on error */
     return (area);
@@ -1633,7 +1626,7 @@ swap_raw_symtab(abfd, raw_symtab)
 
 	for (i = raw_symtab->n_numaux; i; --i, ++raw_symtab) {
 	    bfd_coff_swap_aux(abfd,
-			      raw_symtab + 1,
+			      (AUXENT *)(raw_symtab + 1),
 			      raw_symtab->n_type,
 			      raw_symtab->n_sclass);
 	}			/* swap all the aux entries */
@@ -1674,7 +1667,7 @@ get_normalized_symtab(abfd)
        table traversals simple.  To do that, we need to know whether we will
        be prepending the C_FILE symbol before we read the rest of the table.
     */
-    if ((s = (SYMENT *) malloc(sizeof(SYMENT) * 2)) == NULL) {
+    if ((s = (SYMENT *) bfd_alloc(abfd, sizeof(SYMENT) * 2)) == NULL) {
 	bfd_error = no_memory;
 	return (NULL);
     }				/* on error */
@@ -1688,7 +1681,7 @@ get_normalized_symtab(abfd)
     if (s->n_sclass == C_FILE) {
 	obj_symbol_slew(abfd) = 0;
 
-	if ((retval = (SYMENT *) malloc(size)) == NULL) {
+	if ((retval = (SYMENT *) bfd_alloc(abfd, size)) == NULL) {
 	    bfd_error = no_memory;
 	    return (NULL);
 	}			/* on malloc error */
@@ -1698,7 +1691,7 @@ get_normalized_symtab(abfd)
 	CONST char           *filename;
 	obj_symbol_slew(abfd) = 2;
 
-	if ((retval = (SYMENT *) malloc(size
+	if ((retval = (SYMENT *) bfd_alloc(abfd, size
 					+ (obj_symbol_slew(abfd)
 					   * sizeof(SYMENT)))) == NULL) {
 	    bfd_error = no_memory;
@@ -1708,7 +1701,7 @@ get_normalized_symtab(abfd)
 
 #define FILE_ENTRY_NAME	".file"
 
-	if ((retval->n_offset = (int) malloc(strlen(FILE_ENTRY_NAME)
+	if ((retval->n_offset = (int) bfd_alloc(abfd, strlen(FILE_ENTRY_NAME)
 					     + 1)) == NULL) {
 	    bfd_error = no_memory;
 	    return (NULL);
@@ -1729,7 +1722,7 @@ get_normalized_symtab(abfd)
 	}
 	else {
 	    if ((((AUXENT *) (retval + 1))->x_file.x_n.x_offset
-		 = (int) malloc(namelength+1)) == NULL) {
+		 = (int) bfd_alloc(abfd, namelength+1)) == NULL) {
 		bfd_error = no_memory;
 		return (NULL);
 	    }			/* on error */
@@ -1739,7 +1732,7 @@ get_normalized_symtab(abfd)
 	}			/* if "short" name */
     }				/* missing file entry. */
 
-    free(s);
+
 
     if (bfd_seek(abfd, obj_sym_filepos(abfd), SEEK_SET) == -1
 	|| bfd_read(retval + obj_symbol_slew(abfd), size, 1, abfd) != size) {
@@ -1775,7 +1768,7 @@ get_normalized_symtab(abfd)
 		}		/* if end of string */
 	    }			/* possible lengths of this string. */
 
-	    if ((newstring = (PTR) malloc(++i)) == NULL) {
+	    if ((newstring = (PTR) bfd_alloc(abfd, ++i)) == NULL) {
 		bfd_error = no_memory;
 		return (NULL);
 	    }			/* on error */
@@ -1802,7 +1795,7 @@ get_normalized_symtab(abfd)
 		}		/* on error */
 		sp(string_table_size);
 
-		if ((string_table = (PTR) malloc(string_table_size -= 4)) == NULL) {
+		if ((string_table = (PTR) bfd_alloc(abfd, string_table_size -= 4)) == NULL) {
 		    bfd_error = no_memory;
 		    return (NULL);
 		}		/* on mallocation error */
@@ -1868,86 +1861,6 @@ section_from_bfd_index(abfd, index)
     return 0;
 }
 
-static int
-coff_get_symcount_upper_bound(ignore_abfd)
-    bfd            *ignore_abfd;
-{
-    BFD_ASSERT(0);
-    return 0;
-}
-
-static          symindex
-coff_get_first_symbol(ignore_abfd)
-    bfd            *ignore_abfd;
-{
-    return 0;
-}
-
-static          symindex
-coff_get_next_symbol(abfd, oidx)
-    bfd            *abfd;
-    symindex        oidx;
-{
-    if (oidx == BFD_NO_MORE_SYMBOLS)
-	return BFD_NO_MORE_SYMBOLS;
-    return ++oidx >= bfd_get_symcount(abfd) ? BFD_NO_MORE_SYMBOLS : oidx;
-}
-
-static CONST char *
-coff_symbol_name(abfd, idx)
-    bfd            *abfd;
-    symindex        idx;
-{
-    return (obj_symbols(abfd) + idx)->symbol.name;
-}
-
-static long
-coff_symbol_value(abfd, idx)
-    bfd            *abfd;
-    symindex        idx;
-{
-    return (obj_symbols(abfd) + idx)->symbol.value;
-}
-
-static          symclass
-coff_classify_symbol(abfd, idx)
-    bfd            *abfd;
-    symindex        idx;
-{
-    coff_symbol_type *sym = obj_symbols(abfd) + idx;
-    if ((sym->symbol.flags & BSF_FORT_COMM) != 0)
-	return bfd_symclass_fcommon;
-    if ((sym->symbol.flags & BSF_GLOBAL) != 0)
-	return bfd_symclass_global;
-    if ((sym->symbol.flags & BSF_DEBUGGING) != 0)
-	return bfd_symclass_debugger;
-    if ((sym->symbol.flags & BSF_UNDEFINED) != 0)
-	return bfd_symclass_undefined;
-
-    return bfd_symclass_unknown;
-}
-
-static          boolean
-coff_symbol_hasclass(abfd, idx, class)
-    bfd            *abfd;
-    symindex        idx;
-    symclass        class;
-{
-    coff_symbol_type *sym = obj_symbols(abfd) + idx;
-    switch (class) {
-    case bfd_symclass_fcommon:
-	return (sym->symbol.flags & BSF_FORT_COMM) ? true : false;
-    case bfd_symclass_global:
-	return (sym->symbol.flags & BSF_GLOBAL) ? true : false;
-    case bfd_symclass_debugger:
-	return (sym->symbol.flags & BSF_DEBUGGING) ? true : false;;
-    case bfd_symclass_undefined:
-	return (sym->symbol.flags & BSF_UNDEFINED) ? true : false;;
-    default:
-	return false;
-    }
-}
-
 
 
 
@@ -1968,7 +1881,7 @@ coff_slurp_line_table(abfd, asect)
 					   (size_t) (sizeof(struct lineno) *
 						     asect->lineno_count));
     lineno_cache =
-	(alent *) malloc((size_t) ((asect->lineno_count + 1) * sizeof(alent)));
+	(alent *) bfd_alloc(abfd, (size_t) ((asect->lineno_count + 1) * sizeof(alent)));
     if (lineno_cache == NULL) {
 	bfd_error = no_memory;
 	return (BFD_FAILURE);
@@ -2000,7 +1913,6 @@ coff_slurp_line_table(abfd, asect)
 	cache_ptr->line_number = 0;
 
     }
-    free(native_lineno);
     asect->lineno = lineno_cache;
     return true;
 }				/* coff_slurp_line_table() */
@@ -2074,7 +1986,7 @@ coff_slurp_symbol_table(abfd)
     /* Allocate enough room for all the symbols in cached form */
     cached_area =
 	(coff_symbol_type *)
-	malloc((size_t) (bfd_get_symcount(abfd) * sizeof(coff_symbol_type)));
+	bfd_alloc(abfd, (size_t) (bfd_get_symcount(abfd) * sizeof(coff_symbol_type)));
 
     if (cached_area == NULL) {
 	bfd_error = no_memory;
@@ -2082,7 +1994,7 @@ coff_slurp_symbol_table(abfd)
     }				/* on error */
     table_ptr =
 	(unsigned int *)
-	malloc((size_t) (bfd_get_symcount(abfd) * sizeof(unsigned int)));
+	bfd_alloc(abfd, (size_t) (bfd_get_symcount(abfd) * sizeof(unsigned int)));
 
     if (table_ptr == NULL) {
 	bfd_error = no_memory;
@@ -2311,7 +2223,7 @@ coff_slurp_reloc_table(abfd, asect, symbols)
 				  (size_t) (sizeof(struct reloc) *
 					    asect->reloc_count));
   reloc_cache = (arelent *)
-    malloc((size_t) (asect->reloc_count * sizeof(arelent)));
+    bfd_alloc(abfd, (size_t) (asect->reloc_count * sizeof(arelent)));
 
   if (reloc_cache == NULL) {
     bfd_error = no_memory;
@@ -2373,7 +2285,7 @@ coff_slurp_reloc_table(abfd, asect, symbols)
 
   }
 
-  free(native_relocs);
+
   asect->relocation = reloc_cache;
   return true;
 }
@@ -2556,3 +2468,13 @@ return obj_sym_filepos(abfd);
 }
 #endif
 
+
+
+#define coff_core_file_failing_command _bfd_dummy_core_file_failing_command
+#define coff_core_file_failing_signal _bfd_dummy_core_file_failing_signal
+#define coff_core_file_matches_executable_p _bfd_dummy_core_file_matches_executable_p
+#define coff_slurp_armap bfd_slurp_coff_armap
+#define coff_slurp_extended_name_table _bfd_slurp_extended_name_table
+#define coff_truncate_arname bfd_dont_truncate_arname
+#define coff_openr_next_archived_file bfd_generic_openr_next_archived_file
+#define coff_generic_stat_arch_elt bfd_generic_stat_arch_elt

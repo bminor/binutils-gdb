@@ -42,7 +42,13 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$
  * $Log$
- * Revision 1.2  1991/04/03 22:10:51  steve
+ * Revision 1.4  1991/04/23 16:01:02  steve
+ * *** empty log message ***
+ *
+ * Revision 1.3  1991/04/08  23:22:31  steve
+ * *** empty log message ***
+ *
+ * Revision 1.2  1991/04/03  22:10:51  steve
  * Fixed typo
  *
  * Revision 1.1.1.1  1991/03/21  21:11:22  gumby
@@ -408,6 +414,25 @@ bfd *abfd;
 }
 
 /*SUPPRESS 460 */
+#define srec_core_file_failing_command bfd_false
+#define srec_core_file_failing_signal bfd_false
+#define srec_core_file_matches_executable_p bfd_false
+#define srec_slurp_armap bfd_false
+#define srec_slurp_extended_name_table bfd_false
+#define srec_truncate_arname bfd_false
+#define srec_write_armap bfd_false
+#define srec_new_section_hook bfd_false
+#define srec_get_symtab_upper_bound bfd_false
+#define srec_get_symtab bfd_false
+#define srec_get_reloc_upper_bound bfd_false
+#define srec_canonicalize_reloc bfd_false
+#define srec_make_empty_symbol bfd_false
+#define srec_print_symbol bfd_false
+#define srec_get_lineno bfd_false
+#define srec_openr_next_archived_file bfd_false
+#define srec_find_nearest_line bfd_false
+#define srec_generic_stat_arch_elt bfd_false
+
 bfd_target srec_vec =
 {
   "srec",			/* name */
@@ -417,36 +442,10 @@ bfd_target srec_vec =
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
-  (SEC_CODE|SEC_DATA|SEC_ROM
+  (SEC_CODE|SEC_DATA|SEC_ROM|SEC_HAS_CONTENTS
    |SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-  0,				/* valid reloc types */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
-  srec_close_and_cleanup,	/* _close_and_cleanup */
-  srec_set_section_contents,    /* bfd_set_section_contents */
-  srec_get_section_contents,
-  bfd_true,			/*   new_section_hook */
-  0,				/* _core_file_failing_command */
-  0,				/* _core_file_failing_signal */
-  0,				/* _core_file_matches_ex...p */
-
-  bfd_false,			/* bfd_slurp_armap */
-  bfd_false,			/* bfd_slurp_extended_name_table */
-  bfd_void,			/* bfd_truncate_arname */
-  bfd_0u,			/* get_symtab_upper_bound */
-  bfd_0u,			/* canonicalize_symtab */
-  bfd_void,			/* bfd_reclaim_symbol_table */
-  bfd_0u,			/* get_reloc_upper_bound */
-  bfd_0u,			/* bfd_canonicalize_reloc */
-  bfd_void,			/* bfd_reclaim_reloc */
-  bfd_0,			/* bfd_get_symcount_upper_bound */
-  (symindex (*)())bfd_0,	/* bfd_get_first_symbol */
-  (symindex (*)())bfd_0,	/* bfd_get_next_symbol */
-  bfd_false,			/* bfd_classify_symbol */
-  bfd_false,			/* bfd_symbol_hasclass */
-  (char* (*)())bfd_0,		/* bfd_symbol_name */
-  bfd_0,			/* bfd_symbol_value */
-
   _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* data */
   _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* hdrs */
 
@@ -461,11 +460,5 @@ bfd_target srec_vec =
     _bfd_generic_mkarchive,
     bfd_false,
   },
-  (asymbol * (*)())  bfd_nullvoidptr, /* bfd_make_empty_symbol */
-  bfd_void,			/* bfd_prit_symbol */
-  (alent *(*)())bfd_nullvoidptr, /* srec_get_lineno,*/
-  srec_set_arch_mach,		/* bfd_set_arch_mach,*/
-  bfd_false,			/* write_armap*/
-  (bfd *(*)())bfd_nullvoidptr,	/* openr_next_archived_file */
-  bfd_false,			/* bfd_find_nearest_line */
+JUMP_TABLE(srec)
 };

@@ -23,6 +23,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Object file tdata; access macros */
 
 #define obj_icof(bfd)		((struct icofdata *) ((bfd)->tdata))
+#define coff_data(bfd)		((struct icofdata *) ((bfd)->tdata))
 #define exec_hdr(bfd)		(obj_icof(bfd)->hdr)
 #define obj_symbols(bfd)	(obj_icof(bfd)->symbols)
 #define	obj_sym_filepos(bfd)	(obj_icof(bfd)->sym_filepos)
@@ -39,7 +40,8 @@ typedef struct {
   struct lineno_cache_entry *lineno;
 } coff_symbol_type;
 
-struct icofdata {
+typedef struct icofdata 
+{
   struct aouthdr *hdr;		/* exec file header */
   coff_symbol_type  *symbols;	/* symtab for input bfd */
   unsigned int *conversion_table;
@@ -52,10 +54,10 @@ struct icofdata {
   struct lineno *raw_linenos;
   unsigned int raw_syment_count;
   char *string_table;
+  unsigned short flags;
   /* These are only valid once writing has begun */
   long int relocbase;
-
-};
+} coff_data_type;
 
 /* We cast the address of the first element of a asymbol to ensure that the
  * macro is only ever applied to an asymbol.  */

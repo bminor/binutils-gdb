@@ -540,7 +540,7 @@ extract_file(abfd)
 
 /* This is ugly! XXX */
 
-PROTO(struct ar_hdr *, bfd_special_undocumented_glue, (char *filename));
+PROTO(struct ar_hdr *, bfd_special_undocumented_glue, (bfd *abfd, char *filename));
 
 void
 do_quick_append(archive_filename, files_to_append)
@@ -598,7 +598,7 @@ do_quick_append(archive_filename, files_to_append)
     fseek(ofile, 0, 2);
 
     for (; files_to_append && *files_to_append; ++files_to_append) {
-	struct ar_hdr  *hdr = bfd_special_undocumented_glue(*files_to_append);
+	struct ar_hdr  *hdr = bfd_special_undocumented_glue(temp, *files_to_append);
 	if (hdr == NULL) {
 	    bfd_perror(*files_to_append);
 	    exit(1);

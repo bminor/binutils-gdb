@@ -48,6 +48,7 @@ int dump_reloc_info;		/* -r */
 int dump_ar_hdrs;		/* -a */
 int with_line_numbers;          /* -l */
 boolean disassemble;             /* -d */
+boolean info;	             /* -i */
 char *only;
 
 PROTO (void, display_file, (char *filename, char *target));
@@ -75,7 +76,7 @@ void
 usage ()
 {
   fprintf (stderr,
-	   "usage: %s [-ahfdrtxsl] [-m machine] [-j section_name] obj ...\n",
+	   "usage: %s [-ahifdrtxsl] [-m machine] [-j section_name] obj ...\n",
 	   program_name);
   exit (1);
 }
@@ -597,7 +598,65 @@ bfd *abfd;
   }
 }
 
+static void
+DEFUN_VOID(display_info)
+{
+  unsigned int i;
+  extern bfd_target *target_vector[];
 
+  enum	    bfd_architecture j;
+  i = 0;
+  printf("BFD header file version %s\n", BFD_VERSION);
+  while (target_vector[i] != (bfd_target *)NULL) 
+      {
+	bfd_target *p = target_vector[i];
+	bfd *abfd = bfd_openw("##dummy",p->name);
+	printf("%s\n (header %s, data %s)\n", p->name,	
+	       p->header_byteorder_big_p ? "big endian" : "little endian",
+	       p->byteorder_big_p ? "big endian" : "little endian" );
+	  {
+	    enum	    bfd_architecture j;
+	    for (j = bfd_arch_obscure +1; j < bfd_arch_last; j++) 
+		{
+		  if (bfd_set_arch_mach(abfd, j, 0)) 
+		      {
+			printf("  %s\n", bfd_printable_arch_mach(j,0));
+		      }
+		}
+
+	  }
+	i++;
+      }
+  /* Again as a table */
+  printf("%12s"," ");
+  for (i = 0; target_vector[i]; i++) {
+    printf("%s ",target_vector[i]->name);
+  }
+  printf("\n");
+  for (j = bfd_arch_obscure +1; j < bfd_arch_last; j++) {
+    printf("%11s ", bfd_printable_arch_mach(j,0));
+    for (i = 0; target_vector[i]; i++) {
+	{
+	  bfd_target *p = target_vector[i];
+	  bfd *abfd = bfd_openw("##dummy",p->name);
+	  int l = strlen(p->name);
+	  int ok = bfd_set_arch_mach(abfd, j, 0);
+	  if (ok) {
+	    printf("%s ", p->name);
+	  }
+	  else {
+	    while (l--) {
+	      printf("%c",ok?'*':'-');
+	    }
+	    printf(" ");
+	  }
+
+	}
+    }
+
+    printf("\n");
+  }
+}
 /** main and like trivia */
 int
 main (argc, argv)
@@ -613,7 +672,7 @@ main (argc, argv)
 
   program_name = *argv;
 
-  while ((c = getopt_long (argc, argv, "b:m:dlfahrtxsj:", long_options, &ind))
+  while ((c = getopt_long (argc, argv, "ib:m:dlfahrtxsj:", long_options, &ind))
 	 != EOF) {
     seenflag = true;
     switch (c) {
@@ -631,6 +690,9 @@ main (argc, argv)
       break;
     case 'f':
       dump_file_header = true;
+      break;
+    case 'i':
+      info = true;
       break;
     case 'x':
       dump_symtab = 1; 
@@ -654,10 +716,15 @@ main (argc, argv)
   if (seenflag == false)
     usage ();
 
+  if (info) {
+    display_info();
+  }
+  else {
   if (optind == argc)
     display_file ("a.out", target);
   else
     for (; optind < argc;)
       display_file (argv[optind++], target);
+}
   return 0;
 }

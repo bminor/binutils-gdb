@@ -1290,16 +1290,16 @@ DEFUN(ieee_set_arch_mach,(abfd, arch, machine),
 }
 
 
-
 static int 
 DEFUN(comp,(ap, bp),
-      arelent **ap AND
-      arelent **bp)
+      PTR ap AND
+      PTR bp)
 {
-  arelent *a = *ap;
-  arelent *b = *bp;
+  arelent *a = *((arelent **)ap);
+  arelent *b = *((arelent **)bp);
   return a->address - b->address;
 }
+
 /*
 Write the section headers
 */
@@ -1879,7 +1879,7 @@ unsigned int *line_ptr;
 
 
 static int
-ieee_stat_arch_elt(abfd, buf)
+ieee_generic_stat_arch_elt(abfd, buf)
 bfd *abfd;
 struct stat *buf;
 {
@@ -1894,6 +1894,15 @@ struct stat *buf;
   return 0;
   }
 }
+#define ieee_core_file_failing_command bfd_false
+#define ieee_core_file_failing_signal bfd_false
+#define ieee_core_file_matches_executable_p bfd_false
+#define ieee_slurp_armap bfd_true
+#define ieee_slurp_extended_name_table bfd_true
+#define ieee_truncate_arname bfd_false
+#define ieee_write_armap bfd_false
+#define ieee_get_lineno bfd_false
+
 
 /*SUPPRESS 460 */
 bfd_target ieee_vec =
@@ -1907,34 +1916,8 @@ bfd_target ieee_vec =
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
   (SEC_CODE|SEC_DATA|SEC_ROM|SEC_HAS_CONTENTS
    |SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-  0,				/* valid reloc types */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
-  ieee_close_and_cleanup,	/* _close_and_cleanup */
-  ieee_set_section_contents,    /* bfd_set_section_contents */
-  ieee_get_section_contents,
-  ieee_new_section_hook,	/*   new_section_hook */
-  0,				/* _core_file_failing_command */
-  0,				/* _core_file_failing_signal */
-  0,				/* _core_file_matches_ex...p */
-
-  0,				/* bfd_slurp_bsd_armap,		      bfd_slurp_armap */
-  bfd_true,			/* bfd_slurp_extended_name_table */
-  bfd_bsd_truncate_arname,	/* bfd_truncate_arname */
-
-  ieee_get_symtab_upper_bound,	/* get_symtab_upper_bound */
-  ieee_get_symtab,		/* canonicalize_symtab */
-  0,				/* ieee_reclaim_symbol_table,            bfd_reclaim_symbol_table */
-  ieee_get_reloc_upper_bound,	/* get_reloc_upper_bound */
-  ieee_canonicalize_reloc,	/* bfd_canonicalize_reloc */
-  0,				/*  ieee_reclaim_reloc,                   bfd_reclaim_reloc */
-  0,				/* ieee_get_symcount_upper_bound,        bfd_get_symcount_upper_bound */
-  0,				/* ieee_get_first_symbol,                bfd_get_first_symbol */
-  0,				/* ieee_get_next_symbol,                 bfd_get_next_symbol */
-  0,				/* ieee_classify_symbol,                 bfd_classify_symbol */
-  0,				/* ieee_symbol_hasclass,                 bfd_symbol_hasclass */
-  0,				/* ieee_symbol_name,                     bfd_symbol_name */
-  0,				/* ieee_symbol_value,                    bfd_symbol_value */
 
   _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* data */
   _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* hdrs */
@@ -1950,12 +1933,5 @@ bfd_target ieee_vec =
     _bfd_generic_mkarchive,
     bfd_false
     },
-  ieee_make_empty_symbol,
-  ieee_print_symbol,
-  bfd_false,			/*	ieee_get_lineno,*/
-  ieee_set_arch_mach,		/* bfd_set_arch_mach,*/
-  bfd_false,
-  ieee_openr_next_archived_file,
-  ieee_find_nearest_line,	/* bfd_find_nearest_line */
-  ieee_stat_arch_elt
+JUMP_TABLE(ieee)
 };

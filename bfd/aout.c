@@ -226,7 +226,7 @@ sunos4_object_p (abfd)
   }
 
   /* Use an intermediate variable for clarity */
-  rawptr = (PTR) zalloc (sizeof (struct sunexdata) + sizeof (struct exec));
+  rawptr = (PTR) bfd_zalloc (abfd, sizeof (struct sunexdata) + sizeof (struct exec));
 
   if (rawptr == NULL) {
     bfd_error = no_memory;
@@ -340,7 +340,7 @@ sunos4_mkobject (abfd)
   bfd_error = system_call_error;
 
   /* Use an intermediate variable for clarity */
-  rawptr =  zalloc (sizeof (struct sunexdata) + sizeof (struct exec));
+  rawptr =  bfd_zalloc (abfd,sizeof (struct sunexdata) + sizeof (struct exec));
 
   if (rawptr == NULL) {
     bfd_error = no_memory;
@@ -380,30 +380,30 @@ aout_machine_type (arch, machine)
 
   switch (arch) {
   case bfd_arch_sparc:
-	if (machine == 0)	arch_flags = M_SPARC;
-	break;
+    if (machine == 0)	arch_flags = M_SPARC;
+    break;
 
   case bfd_arch_m68k:
-	switch (machine) {
-	case 0:			arch_flags = M_UNKNOWN; break;
-	case 68000:		arch_flags = M_UNKNOWN;	break;
-	case 68010:		arch_flags = M_68010; break;
-	case 68020:		arch_flags = M_68020; break;
-	default:		arch_flags = M_UNKNOWN; break;
-	}
-	break;
+    switch (machine) {
+    case 0:		arch_flags = M_68010; break;
+    case 68000:		arch_flags = M_UNKNOWN;	break;
+    case 68010:		arch_flags = M_68010; break;
+    case 68020:		arch_flags = M_68020; break;
+    default:		arch_flags = M_UNKNOWN; break;
+    }
+    break;
 
   case bfd_arch_i386:
-	if (machine == 0)	arch_flags = M_386;
-	break;
+    if (machine == 0)	arch_flags = M_386;
+    break;
 
   case bfd_arch_a29k:
-	if (machine == 0)	arch_flags = M_29K;
-	break;
+    if (machine == 0)	arch_flags = M_29K;
+    break;
 
   default:
-	arch_flags = M_UNKNOWN;
-	break;
+    arch_flags = M_UNKNOWN;
+    break;
   }
   return arch_flags;
 }
@@ -631,7 +631,7 @@ sunos4_core_file_p (abfd)
 
   if (bfd_seek (abfd, 0L, false) < 0) return 0;
 
-  rawptr = zalloc (core_size + sizeof (struct suncordata));
+  rawptr = bfd_zalloc (abfd, core_size + sizeof (struct suncordata));
   if (rawptr == NULL) {
     bfd_error = no_memory;
     return 0;
@@ -651,26 +651,26 @@ sunos4_core_file_p (abfd)
 
   /* create the sections.  This is raunchy, but bfd_close wants to reclaim
      them */
-  core_stacksec (abfd) = (asection *) zalloc (sizeof (asection));
+  core_stacksec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
   if (core_stacksec (abfd) == NULL) {
 loser:
     bfd_error = no_memory;
     free ((PTR)rawptr);
     return 0;
   }
-  core_datasec (abfd) = (asection *) zalloc (sizeof (asection));
+  core_datasec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
   if (core_datasec (abfd) == NULL) {
 loser1:
     free ((PTR)core_stacksec (abfd));
     goto loser;
   }
-  core_regsec (abfd) = (asection *) zalloc (sizeof (asection));
+  core_regsec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
   if (core_regsec (abfd) == NULL) {
 loser2:
     free ((PTR)core_datasec (abfd));
     goto loser1;
   }
-  core_reg2sec (abfd) = (asection *) zalloc (sizeof (asection));
+  core_reg2sec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
   if (core_reg2sec (abfd) == NULL) {
     free ((PTR)core_regsec (abfd));
     goto loser2;
@@ -923,7 +923,7 @@ translate_from_native_sym_flags (sym_pointer, cache_ptr, abfd)
     {
       asection *section = bfd_make_section(abfd,
 					   cache_ptr->symbol.name);
-      arelent_chain *reloc = (arelent_chain *)malloc(sizeof(arelent_chain));
+      arelent_chain *reloc = (arelent_chain *)bfd_alloc(abfd, sizeof(arelent_chain));
 
       switch ( (cache_ptr->type  & N_TYPE) ) {
       case N_SETA:
@@ -1105,7 +1105,7 @@ sunos4_make_empty_symbol (abfd)
 bfd *abfd;
 {
   aout_symbol_type  *new =
-    (aout_symbol_type *)zalloc (sizeof (aout_symbol_type));
+    (aout_symbol_type *)bfd_zalloc (abfd, sizeof (aout_symbol_type));
   new->symbol.the_bfd = abfd;
 
   return &new->symbol;
@@ -1137,30 +1137,13 @@ DEFUN(sunos4_slurp_symbol_table, (abfd),
 
   symbol_count = symbol_size / sizeof (struct nlist);
 
-  /* Malloc (should alloca) space for native symbols, and
-     malloc space for string table and symbol cache. */
-
-  syms = (struct nlist *) zalloc (symbol_size);
-  if (syms == NULL) {
-    bfd_error = no_memory;
-    return false;
-  }
-
-  cached = (aout_symbol_type *) zalloc ((size_t)(string_size + 1 +
-                               (symbol_count * sizeof (aout_symbol_type))));
-  if (cached == NULL) {
-    bfd_error = no_memory;
-    free ((PTR)syms);
-    return false;
-  }
-
-  strings = ((char *) cached) + (symbol_count * sizeof (aout_symbol_type));
+  strings = bfd_alloc(abfd, string_size + 1);
+  cached = bfd_zalloc(abfd, symbol_count * sizeof(aout_symbol_type));
+  syms = bfd_alloc(abfd, symbol_size);
 
   bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET);
   if (bfd_read ((PTR)syms, 1, symbol_size, abfd) != symbol_size) {
   bailout:
-    free ((PTR)cached);
-    free ((PTR)syms);
     return false;
   }
 
@@ -1170,10 +1153,10 @@ DEFUN(sunos4_slurp_symbol_table, (abfd),
   }
 
   /* OK, now walk the new symtable, cacheing symbol properties */
-  {
-    register struct nlist *sym_pointer;
-    register struct nlist *sym_end = syms + symbol_count;
-    register aout_symbol_type *cache_ptr = cached;
+    {
+      register struct nlist *sym_pointer;
+      register struct nlist *sym_end = syms + symbol_count;
+      register aout_symbol_type *cache_ptr = cached;
 
       /* run through the table and byte swap if needed */
       for (sym_pointer = syms; sym_pointer < sym_end;  sym_pointer++) {
@@ -1190,28 +1173,28 @@ DEFUN(sunos4_slurp_symbol_table, (abfd),
 
       }
 
-    /* Run through table and copy values */
-    for (sym_pointer = syms, cache_ptr = cached;
-	 sym_pointer < sym_end; sym_pointer++, cache_ptr++) 
-      {
-	cache_ptr->symbol.the_bfd = abfd;
-	if (sym_pointer->n_un.n_strx)
-	  cache_ptr->symbol.name = sym_pointer->n_un.n_strx + strings;
-	else
-	  cache_ptr->symbol.name = (char *)NULL;
-	cache_ptr->symbol.value = sym_pointer->n_value;
-	cache_ptr->desc = sym_pointer->n_desc;
-	cache_ptr->other = sym_pointer->n_other;
-	cache_ptr->type = sym_pointer->n_type;
-	cache_ptr->symbol.udata = 0;
-	translate_from_native_sym_flags (sym_pointer, cache_ptr, abfd);
+      /* Run through table and copy values */
+      for (sym_pointer = syms, cache_ptr = cached;
+	   sym_pointer < sym_end; sym_pointer++, cache_ptr++) 
+	  {
+	    cache_ptr->symbol.the_bfd = abfd;
+	    if (sym_pointer->n_un.n_strx)
+	      cache_ptr->symbol.name = sym_pointer->n_un.n_strx + strings;
+	    else
+	      cache_ptr->symbol.name = (char *)NULL;
+	    cache_ptr->symbol.value = sym_pointer->n_value;
+	    cache_ptr->desc = sym_pointer->n_desc;
+	    cache_ptr->other = sym_pointer->n_other;
+	    cache_ptr->type = sym_pointer->n_type;
+	    cache_ptr->symbol.udata = 0;
+	    translate_from_native_sym_flags (sym_pointer, cache_ptr, abfd);
 
-      }
-  }
+	  }
+    }
 
   obj_aout_symbols (abfd) =  cached;
   bfd_get_symcount (abfd) = symbol_count;
-  free ((PTR)syms);
+  bfd_release (abfd, (PTR)syms);
 
   return true;
 }
@@ -1291,22 +1274,7 @@ void
 DEFUN(sunos4_reclaim_symbol_table,(abfd),
      bfd *abfd)
 {
-  asection *section;
 
-  if (!bfd_get_symcount (abfd)) return;
-
-  for (section = abfd->sections;
-       section != (asection *) NULL;
-       section = section->next)
-    if (section->relocation) {
-      free ((PTR)section->relocation);
-      section->relocation = NULL;
-      section->reloc_count = 0;
-    }
-
-  bfd_get_symcount (abfd) = 0;
-  free ((PTR)obj_aout_symbols (abfd));
-  obj_aout_symbols (abfd) = (aout_symbol_type *)NULL;
 }
 
 unsigned int
@@ -1334,88 +1302,6 @@ sunos4_get_symtab (abfd, location)
   return bfd_get_symcount(abfd);
 }
 
-
-/* Obsolete procedural interface; better to look at the cache directly */
-
-/* User should have checked the file flags; perhaps we should return
-   BFD_NO_MORE_SYMBOLS if there are none? */
-
-int
-sunos4_get_symcount_upper_bound (abfd)
-     bfd *abfd;
-{
-  /* In case we're doing an output file or something...?  */
-  if (bfd_get_symcount (abfd)) return bfd_get_symcount (abfd);
-
-  return (exec_hdr (abfd)->a_syms) / (sizeof (struct nlist));
-}
-
-symindex
-sunos4_get_first_symbol (ignore_abfd)
-     bfd * ignore_abfd;
-{
-  return 0;
-}
-
-symindex
-sunos4_get_next_symbol (abfd, oidx)
-     bfd *abfd;
-     symindex oidx;
-{
-  if (oidx == BFD_NO_MORE_SYMBOLS) return BFD_NO_MORE_SYMBOLS;
-  return ++oidx >= bfd_get_symcount (abfd) ? BFD_NO_MORE_SYMBOLS : oidx;
-}
-
-CONST char *
-sunos4_symbol_name (abfd, idx)
-     bfd *abfd;
-     symindex idx;
-{
-  return (obj_aout_symbols (abfd) + idx)->symbol.name;
-}
-
-long
-sunos4_symbol_value (abfd, idx)
-     bfd *abfd;
-     symindex idx;
-{
-  return (obj_aout_symbols (abfd) + idx)->symbol.value;
-}
-
-symclass
-sunos4_classify_symbol (abfd, idx)
-     bfd *abfd;
-     symindex idx;
-{
-  aout_symbol_type *sym = obj_aout_symbols (abfd) + idx;
-
-  if ((sym->symbol.flags & BSF_FORT_COMM) != 0)   return bfd_symclass_fcommon;
-  if ((sym->symbol.flags & BSF_GLOBAL) != 0)    return bfd_symclass_global;
-  if ((sym->symbol.flags & BSF_DEBUGGING) != 0)  return bfd_symclass_debugger;
-  if ((sym->symbol.flags & BSF_UNDEFINED) != 0) return bfd_symclass_undefined;
-
-  return bfd_symclass_unknown;
-}
-
-boolean
-sunos4_symbol_hasclass (abfd, idx, class)
-     bfd *abfd;
-     symindex idx;
-     symclass class;
-{
-  aout_symbol_type *sym = obj_aout_symbols (abfd) + idx;
-  switch (class) {
-  case bfd_symclass_fcommon:
-    return (sym->symbol.flags & BSF_FORT_COMM) ? true :false;
-  case bfd_symclass_global:
-    return (sym->symbol.flags & BSF_GLOBAL) ? true:false;
-  case bfd_symclass_debugger:
-    return (sym->symbol.flags & BSF_DEBUGGING) ? true:false;;
-  case bfd_symclass_undefined:
-    return (sym->symbol.flags & BSF_UNDEFINED) ? true:false;;
-  default: return false;
-  }
-}
 
 /* Standard reloc stuff */
 /* Output standard relocation information to a file in target byte order. */
@@ -1747,22 +1633,13 @@ sunos4_slurp_reloc_table (abfd, asect, symbols)
 
   count = reloc_size / each_size;
 
-  relocs =  (PTR) malloc (reloc_size);
-  if (!relocs) {
-    bfd_error = no_memory;
-    return false;
-  }
-  reloc_cache = (arelent *) zalloc ((size_t)(count * sizeof (arelent)));
-  if (reloc_cache == (arelent *)NULL) {
-    free (relocs);
-    bfd_error = no_memory;
-    return false;
-  }
+
+  reloc_cache = (arelent *) bfd_zalloc (abfd, (size_t)(count * sizeof
+						       (arelent)));
+  relocs =  bfd_alloc (abfd, reloc_size);
 
   if (bfd_read ( relocs, 1, reloc_size, abfd) != reloc_size) {
     bfd_error = system_call_error;
-    free (reloc_cache);
-    free (relocs);
     return false;
   }
 
@@ -1786,7 +1663,7 @@ sunos4_slurp_reloc_table (abfd, asect, symbols)
     }
 
   }
-  free (relocs);
+bfd_release (abfd,relocs);
   asect->relocation = reloc_cache;
   asect->reloc_count = count;
   return true;
@@ -1812,7 +1689,7 @@ sunos4_squirt_out_relocs (abfd, section)
 
   each_size = reloc_size_func(abfd);
   natsize = each_size * count;
-  native = (unsigned char *) zalloc (natsize);
+  native = (unsigned char *) bfd_zalloc (abfd, natsize);
   if (!native) {
     bfd_error = no_memory;
     return false;
@@ -1833,10 +1710,10 @@ sunos4_squirt_out_relocs (abfd, section)
     }
 
   if ( bfd_write ((PTR) native, 1, natsize, abfd) != natsize) {
-    free(native);
+    bfd_release(abfd, native);
     return false;
   }
-  free (native);
+  bfd_release (abfd, native);
 
   return true;
 }
@@ -1909,11 +1786,7 @@ sunos4_reclaim_reloc (ignore_abfd, section)
      bfd *ignore_abfd;
      sec_ptr section;
 {
-  if (section->relocation) {
-    free (section->relocation);
-    section->relocation = NULL;
-    section->reloc_count = 0;
-    }
+
 }
 
 
@@ -1974,13 +1847,6 @@ sunos4_close_and_cleanup (abfd)
     default: bfd_error = invalid_operation; return false;
     }
 
-#define cleaner(ptr) if (abfd->ptr) free (abfd->ptr)
-  cleaner (tdata);
-
-  if (abfd->my_archive)
-    cleaner (filename);
-
-#undef cleaner
   return true;
 }
 
@@ -2066,6 +1932,12 @@ DEFUN(sunos4_find_nearest_line,(abfd,
 
 }
 
+#define sunos4_openr_next_archived_file bfd_generic_openr_next_archived_file
+#define sunos4_generic_stat_arch_elt bfd_generic_stat_arch_elt
+#define sunos4_slurp_armap bfd_slurp_bsd_armap
+#define sunos4_slurp_extended_name_table bfd_true
+#define sunos4_write_armap bsd_write_armap
+#define sunos4_truncate_arname bfd_bsd_truncate_arname
 bfd_target aout_big_vec =
 {
   "a.out-generic-big",		/* name */
@@ -2076,105 +1948,41 @@ bfd_target aout_big_vec =
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-  0,				/* valid reloc types */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
-  sunos4_close_and_cleanup,	/* _close_and_cleanup */
-  sunos4_set_section_contents,	/* bfd_set_section_contents */
-  sunos4_get_section_contents,	/* bfd_get_section_contents */
-  sunos4_new_section_hook,	/* new_section_hook */
-  sunos4_core_file_failing_command, /* _core_file_failing_command */
-  sunos4_core_file_failing_signal, /* _core_file_failing_signal */
-  sunos4_core_file_matches_executable_p, /* _core_file_matches_ex...p */
-
-  bfd_slurp_bsd_armap,		/* bfd_slurp_armap */
-  bfd_true,			/* bfd_slurp_extended_name_table */
-  bfd_bsd_truncate_arname,	/* bfd_truncate_arname */
-
-  sunos4_get_symtab_upper_bound, /* get_symtab_upper_bound */
-  sunos4_get_symtab,		/* canonicalize_symtab */
-  sunos4_reclaim_symbol_table,	/* bfd_reclaim_symbol_table */
-  sunos4_get_reloc_upper_bound,	/* get_reloc_upper_bound */
-  sunos4_canonicalize_reloc,	/* bfd_canonicalize_reloc */
-  sunos4_reclaim_reloc,		/* bfd_reclaim_reloc */
-  sunos4_get_symcount_upper_bound, /* bfd_get_symcount_upper_bound */
-  sunos4_get_first_symbol,	/* bfd_get_first_symbol */
-  sunos4_get_next_symbol,	/* bfd_get_next_symbol */
-  sunos4_classify_symbol,	/* bfd_classify_symbol */
-  sunos4_symbol_hasclass,	/* bfd_symbol_hasclass */
-  sunos4_symbol_name,		/* bfd_symbol_name */
-  sunos4_symbol_value,		/* bfd_symbol_value */
-
   _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* data */
   _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* hdrs */
 
-  {_bfd_dummy_target, sunos4_object_p, /* bfd_check_format */
-     bfd_generic_archive_p, sunos4_core_file_p},
-  {bfd_false, sunos4_mkobject,	/* bfd_zxset_format */
-     _bfd_generic_mkarchive, bfd_false},
-  sunos4_make_empty_symbol,
-  sunos4_print_symbol,
-  sunos4_get_lineno,
-  sunos4_set_arch_mach,
-  bsd_write_armap,
-  bfd_generic_openr_next_archived_file,
-  sunos4_find_nearest_line,	/* bfd_find_nearest_line */
-  bfd_generic_stat_arch_elt /* bfd_stat_arch_elt */
+    {_bfd_dummy_target, sunos4_object_p,
+       bfd_generic_archive_p, sunos4_core_file_p},
+    {bfd_false, sunos4_mkobject,
+       _bfd_generic_mkarchive, bfd_false},
+
+  JUMP_TABLE(sunos4)
   };
+
 
 bfd_target aout_little_vec =
 {
   "a.out-generic-little",		/* name */
   bfd_target_aout_flavour_enum,
-  true,				/* target byte order */
-  true,				/* target headers byte order */
+  false,			/* target byte order */
+  false,			/* target headers byte order */
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-  0,				/* valid reloc types */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
-  sunos4_close_and_cleanup,	/* _close_and_cleanup */
-  sunos4_set_section_contents,	/* bfd_set_section_contents */
-  sunos4_get_section_contents,	/* bfd_get_section_contents */
-  sunos4_new_section_hook,	/* new_section_hook */
-  sunos4_core_file_failing_command, /* _core_file_failing_command */
-  sunos4_core_file_failing_signal, /* _core_file_failing_signal */
-  sunos4_core_file_matches_executable_p, /* _core_file_matches_ex...p */
-
-  bfd_slurp_bsd_armap,		/* bfd_slurp_armap */
-  bfd_true,			/* bfd_slurp_extended_name_table */
-  bfd_bsd_truncate_arname,	/* bfd_truncate_arname */
-
-  sunos4_get_symtab_upper_bound, /* get_symtab_upper_bound */
-  sunos4_get_symtab,		/* canonicalize_symtab */
-  sunos4_reclaim_symbol_table,	/* bfd_reclaim_symbol_table */
-  sunos4_get_reloc_upper_bound,	/* get_reloc_upper_bound */
-  sunos4_canonicalize_reloc,	/* bfd_canonicalize_reloc */
-  sunos4_reclaim_reloc,		/* bfd_reclaim_reloc */
-  sunos4_get_symcount_upper_bound, /* bfd_get_symcount_upper_bound */
-  sunos4_get_first_symbol,	/* bfd_get_first_symbol */
-  sunos4_get_next_symbol,	/* bfd_get_next_symbol */
-  sunos4_classify_symbol,	/* bfd_classify_symbol */
-  sunos4_symbol_hasclass,	/* bfd_symbol_hasclass */
-  sunos4_symbol_name,		/* bfd_symbol_name */
-  sunos4_symbol_value,		/* bfd_symbol_value */
-
   _do_getllong, _do_putllong, _do_getlshort, _do_putlshort, /* data */
   _do_getllong, _do_putllong, _do_getlshort, _do_putlshort, /* hdrs */
 
-  {_bfd_dummy_target, sunos4_object_p, /* bfd_check_format */
-     bfd_generic_archive_p, sunos4_core_file_p},
-  {bfd_false, sunos4_mkobject,	/* bfd_zxset_format */
-     _bfd_generic_mkarchive, bfd_false},
-  sunos4_make_empty_symbol,
-  sunos4_print_symbol,
-  sunos4_get_lineno,
-  sunos4_set_arch_mach,
-  bsd_write_armap,
-  bfd_generic_openr_next_archived_file,
-  sunos4_find_nearest_line,	/* bfd_find_nearest_line */
-  bfd_generic_stat_arch_elt /* bfd_stat_arch_elt */
+
+    {_bfd_dummy_target, sunos4_object_p,
+       bfd_generic_archive_p, sunos4_core_file_p},
+    {bfd_false, sunos4_mkobject,
+       _bfd_generic_mkarchive, bfd_false},
+
+  JUMP_TABLE(sunos4)
   };
 

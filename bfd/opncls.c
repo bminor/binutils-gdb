@@ -25,6 +25,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libbfd.h"
 
 
+
 extern void bfd_cache_init();
 FILE *bfd_open_file();
 
@@ -53,9 +54,17 @@ FILE *bfd_open_file();
    we should use the emacs lock scheme?... */
 
 
+#define obstack_chunk_alloc malloc
+#define obstack_chunk_free free
+
 bfd *new_bfd()
 {
-  bfd *nbfd = (bfd *)zalloc(sizeof(bfd));
+  struct obstack tmp;
+  bfd *nbfd;
+  obstack_init(&tmp);
+  
+  nbfd = (bfd *)obstack_alloc(&tmp,sizeof(bfd));
+  nbfd->memory = tmp;
 
   nbfd->direction = no_direction;
   nbfd->iostream = NULL;
@@ -113,7 +122,7 @@ DEFUN(bfd_openr, (filename, target),
 
   if (bfd_open_file (nbfd) == NULL) {
     bfd_error = system_call_error;	/* File didn't exist, or some such */
-    free (nbfd);
+    bfd_release(nbfd,0);
     return NULL;
   }
   return nbfd;
@@ -255,7 +264,7 @@ bfd_close (abfd)
     stat(abfd->filename, &buf);
     chmod(abfd->filename,buf.st_mode | S_IXUSR | S_IXGRP | S_IXOTH);
   }
-  free (abfd);
+  obstack_free(&abfd->memory, (PTR)0);
   return true;
 }
 /* 
@@ -272,10 +281,53 @@ DEFUN(bfd_create,(filename, template),
     return (bfd *)NULL;
   }
   nbfd->filename = filename;
-  nbfd->xvec = template->xvec;
+  if(template) {
+    nbfd->xvec = template->xvec;
+  }
   nbfd->direction = no_direction;
+  bfd_set_format(nbfd, bfd_object);
   return nbfd;
 
 
 
+}
+
+DEFUN(PTR bfd_alloc, (abfd, size),
+      bfd *abfd AND
+      size_t size)
+{
+  PTR *res = obstack_alloc(&(abfd->memory),size);
+  return res;
+}
+
+DEFUN(PTR bfd_zalloc,(abfd, size),
+      bfd *abfd AND
+      size_t size)
+{
+  PTR res = bfd_alloc(abfd, size);
+  memset(res, 0, size);
+  return res;
+}
+
+DEFUN(PTR bfd_realloc,(abfd, old, size),
+      bfd *abfd AND
+      PTR old AND
+      size_t size)
+{
+  PTR res = bfd_alloc(abfd, size);
+  memcpy(res, old, size);
+  return res;
+}
+
+
+DEFUN(size_t bfd_alloc_size,(abfd),
+      bfd *abfd)
+{
+  struct _obstack_chunk *chunk = abfd->memory.chunk;
+  size_t size = 0;
+  while (chunk) {
+    size += chunk->limit - &(chunk->contents[0]);
+    chunk = chunk->prev;
+  }
+  return size;
 }

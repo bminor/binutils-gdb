@@ -45,6 +45,18 @@ extern bfd_target m88k_bcs_vec;
 #define B_OUT_VEC_BIG_HOST	b_out_vec_big_host
 #endif /* GNU960 */
 
+#ifndef RESTRICTED
+#define ICOFF_LITTLE_VEC	icoff_little_vec
+#define ICOFF_BIG_VEC		icoff_big_vec
+#define B_OUT_VEC_LITTLE_HOST	b_out_vec_little_host
+#define B_OUT_VEC_BIG_HOST	b_out_vec_big_host
+#define AOUT_VEC_LITTLE_HOST	aout_little_vec
+#define AOUT_VEC_BIG_HOST	aout_big_vec
+#define OASYS_VEC		oasys_vec
+#define IEEE_VEC		ieee_vec
+#define M88K_BCS_VEC		m88k_bcs_vec
+#define SREC_VEC		srec_vec
+#endif
 bfd_target *target_vector[] = {
 
 #ifdef DEFAULT_VECTOR
@@ -59,12 +71,12 @@ bfd_target *target_vector[] = {
 	&OASYS_VEC,
 #endif /* OASYS_VEC */
 
-#ifdef AOUT_LITTLE_VEC
-	&AOUT_LITTLE_VEC,
+#ifdef AOUT_VEC_LITTLE_HOST
+	&AOUT_VEC_LITTLE_HOST,
 #endif /* AOUT_LITTLE_VEC */
 
-#ifdef AOUT_BIG_VEC
-	&AOUT_BIG_VEC,
+#ifdef AOUT_VEC_BIG_HOST
+	&AOUT_VEC_BIG_HOST,
 #endif /* AOUT_BIG_VEC */
 
 #ifdef M88K_BCS_VEC

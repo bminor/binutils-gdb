@@ -45,7 +45,7 @@ bfd *bfd_last_cache;
 
 
 static void
-close_one()
+DEFUN_VOID(close_one)
 {
     bfd *kill = cache_sentinel;
     if (kill == 0)		/* Nothing in the cache */
@@ -64,8 +64,8 @@ close_one()
 }
 /* Cuts the bfd abfd out of the chain in the cache */
 static void 
-snip (abfd)
-     bfd *abfd;
+DEFUN(snip,(abfd),
+      bfd *abfd)
 {
   abfd->lru_prev->lru_next = abfd->lru_next;
   abfd->lru_next->lru_prev = abfd->lru_prev; 
@@ -73,19 +73,20 @@ snip (abfd)
 }
 
 static void
-bfd_cache_delete (abfd)
-     bfd *abfd;
+DEFUN(bfd_cache_delete,(abfd),
+      bfd *abfd)
 {
   fclose ((FILE *)(abfd->iostream));
   snip (abfd);
   abfd->iostream = NULL;
   open_files--;
+  bfd_last_cache = 0;
 }
   
 static bfd *
-insert(x,y)
-bfd *x;
-bfd *y;
+DEFUN(insert,(x,y),
+      bfd *x AND
+      bfd *y)
 {
   if (y) {
     x->lru_next = y;
@@ -104,15 +105,15 @@ bfd *y;
 
 /* Initialize a BFD by putting it on the cache LRU.  */
 void
-bfd_cache_init(abfd)
-bfd *abfd;
+DEFUN(bfd_cache_init,(abfd),
+      bfd *abfd)
 {
   cache_sentinel = insert(abfd, cache_sentinel);
 }
 
 void
-bfd_cache_close(abfd)
-bfd *abfd;
+DEFUN(bfd_cache_close,(abfd),
+      bfd *abfd)
 {
   /* If this file is open then remove from the chain */
   if (abfd->iostream) 
@@ -126,8 +127,8 @@ bfd *abfd;
    BFD so that future accesses know the file is open.  */
 
 FILE *
-bfd_open_file (abfd)
-     bfd *abfd;
+DEFUN(bfd_open_file, (abfd),
+      bfd *abfd)
 {
     abfd->cacheable = true;	/* Allow it to be closed later. */
     if(open_files >= BFD_CACHE_MAX_OPEN) {
@@ -165,36 +166,36 @@ bfd_open_file (abfd)
    one first, to avoid running out of file descriptors.  */
 
 FILE *
-bfd_cache_lookup_worker (abfd)
-     bfd *abfd;
+DEFUN(bfd_cache_lookup_worker,(abfd),
+      bfd *abfd)
 {
   if (abfd->my_archive) 
-    {
-      abfd = abfd->my_archive;
-    }
+      {
+	abfd = abfd->my_archive;
+      }
   /* Is this file already open .. if so then quick exit */
   if (abfd->iostream) 
-    {
-      if (abfd != cache_sentinel) {
-	/* Place onto head of lru chain */
-	snip (abfd);
-	cache_sentinel = insert(abfd, cache_sentinel);
+      {
+	if (abfd != cache_sentinel) {
+	  /* Place onto head of lru chain */
+	  snip (abfd);
+	  cache_sentinel = insert(abfd, cache_sentinel);
+	}
       }
-    }
   /* This is a bfd without a stream -
      so it must have been closed or never opened.
      find an empty cache entry and use it.  */
   else 
-    {
+      {
 
-      if (open_files >= BFD_CACHE_MAX_OPEN) 
-	{
-	close_one();
-    }
+	if (open_files >= BFD_CACHE_MAX_OPEN) 
+	    {
+	      close_one();
+	    }
 
-      BFD_ASSERT(bfd_open_file (abfd) != (FILE *)NULL) ;
-      fseek((FILE *)(abfd->iostream), abfd->where, false);
-    }
-bfd_last_cache = abfd;
+	BFD_ASSERT(bfd_open_file (abfd) != (FILE *)NULL) ;
+	fseek((FILE *)(abfd->iostream), abfd->where, false);
+      }
+  bfd_last_cache = abfd;
   return (FILE *)(abfd->iostream);
 }

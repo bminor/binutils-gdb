@@ -24,13 +24,7 @@
 
 
 
-#define obstack_chunk_alloc malloc
-#define obstack_chunk_free free
 
-#define oasys_malloc(abfd,size) \
-  obstack_alloc( &( oasys_data(abfd)->oasys_obstack), (size))
-
-typedef void generic_symbol_type;
 
 
 static void 
@@ -87,13 +81,13 @@ DEFUN(oasys_slurp_symbol_table,(abfd),
   }
   /* Buy enough memory for all the symbols and all the names */
   data->symbols = 
-    (asymbol *)oasys_malloc(abfd, sizeof(asymbol) * abfd->symcount);
+    (asymbol *)bfd_alloc(abfd, sizeof(asymbol) * abfd->symcount);
 #ifdef UNDERSCORE_HACK
   /* buy 1 more char for each symbol to keep the underscore in*/
-  data->strings = oasys_malloc(abfd, data->symbol_string_length +
+  data->strings = bfd_alloc(abfd, data->symbol_string_length +
 			       abfd->symcount);
 #else
-  data->strings = oasys_malloc(abfd, data->symbol_string_length);
+  data->strings = bfd_alloc(abfd, data->symbol_string_length);
 #endif
 
   dest_undefined = data->symbols;
@@ -250,12 +244,12 @@ DEFUN(oasys_archive_p,(abfd),
      */
   {
     oasys_ar_data_type *ar =
-      (oasys_ar_data_type*) oasys_malloc(abfd, sizeof(oasys_ar_data_type));
+      (oasys_ar_data_type*) bfd_alloc(abfd, sizeof(oasys_ar_data_type));
 
 
     oasys_module_info_type *module = 
       (oasys_module_info_type*)
-	oasys_malloc(abfd, sizeof(oasys_module_info_type) * header.mod_count);
+	bfd_alloc(abfd, sizeof(oasys_module_info_type) * header.mod_count);
 
     oasys_module_table_type record;
 
@@ -270,7 +264,7 @@ DEFUN(oasys_archive_p,(abfd),
       swap(record.mod_size);
       swap(record.file_offset);
       swap(record.mod_name_length);
-      module[i].name = oasys_malloc(abfd,record.mod_name_length+1);
+      module[i].name = bfd_alloc(abfd,record.mod_name_length+1);
 
       bfd_read(module[i].name, 1, record.mod_name_length +1, abfd);
       /* SKip some stuff */
@@ -289,14 +283,11 @@ static boolean
 DEFUN(oasys_mkobject,(abfd),
       bfd *abfd)
 {
-  struct obstack tmp_obstack;
   oasys_data_type *oasys;
-  obstack_init(&tmp_obstack);
-  BFD_ASSERT(oasys_data(abfd) == 0);
+
   oasys_data(abfd) =
-    (oasys_data_type*)obstack_alloc(&tmp_obstack,sizeof(oasys_data_type));
+    (oasys_data_type*)bfd_alloc(abfd, sizeof(oasys_data_type));
   oasys = oasys_data(abfd);
-  oasys->oasys_obstack = tmp_obstack;
   return true;
 }
 
@@ -347,7 +338,7 @@ DEFUN(oasys_object_p,(abfd),
 	      {
 		goto fail;
 	      }
-	  buffer = oasys_malloc(abfd, 3);
+	  buffer = bfd_alloc(abfd, 3);
 	  section_number= record.section.relb & RELOCATION_SECT_BITS;
 	  sprintf(buffer,"%u", section_number);
 	  s = bfd_make_section(abfd,buffer);
@@ -393,7 +384,7 @@ DEFUN(oasys_object_p,(abfd),
   return abfd->xvec;
 
  fail:
-  (void)  obstack_finish(&oasys->oasys_obstack);
+  (void)  bfd_release(abfd, oasys);
   return (bfd_target *)NULL;
 }
 
@@ -455,7 +446,7 @@ DEFUN(oasys_slurp_section_data,(abfd),
   for (s = abfd->sections; s != (asection *)NULL; s= s->next) {
     per =  oasys_per_section(s);
     if (per->data != (bfd_byte*)NULL) return true;
-    per->data = (bfd_byte *) oasys_malloc(abfd, s->size);
+    per->data = (bfd_byte *) bfd_alloc(abfd, s->size);
     per->reloc_tail_ptr = (oasys_reloc_type **)&(s->relocation);
     per->had_vma = false;
     s->reloc_count = 0;
@@ -531,7 +522,7 @@ DEFUN(oasys_slurp_section_data,(abfd),
 				/* Relocate the item relative to the section */
 				oasys_reloc_type *r =
 				  (oasys_reloc_type *)
-				    oasys_malloc(abfd,
+				    bfd_alloc(abfd,
 						 sizeof(oasys_reloc_type));
 				*(per->reloc_tail_ptr) = r;
 				per->reloc_tail_ptr = &r->next;
@@ -556,7 +547,7 @@ DEFUN(oasys_slurp_section_data,(abfd),
 			      { 
 				oasys_reloc_type *r =
 				  (oasys_reloc_type *)
-				    oasys_malloc(abfd,
+				    bfd_alloc(abfd,
 						 sizeof(oasys_reloc_type));
 				*(per->reloc_tail_ptr) = r;
 				per->reloc_tail_ptr = &r->next;
@@ -608,7 +599,7 @@ DEFUN(oasys_new_section_hook,(abfd, newsect),
       asection *newsect)
 {
   newsect->used_by_bfd = (PTR)
-    oasys_malloc(abfd, sizeof(oasys_per_section_type));
+    bfd_alloc(abfd, sizeof(oasys_per_section_type));
   oasys_per_section( newsect)->data = (bfd_byte *)NULL;
   oasys_per_section(newsect)->section = newsect;
   oasys_per_section(newsect)->offset  = 0;
@@ -846,11 +837,11 @@ DEFUN(oasys_write_end,(abfd),
 
 static int 
 DEFUN(comp,(ap, bp),
-      arelent **ap AND
-      arelent **bp)
+   CONST PTR ap AND
+   CONST PTR bp)
 {
-  arelent *a = *ap;
-  arelent *b = *bp;
+  arelent *a = *((arelent **)ap);
+  arelent *b = *((arelent **)bp);
   return a->address - b->address;
 }
 
@@ -893,7 +884,7 @@ DEFUN(oasys_write_data, (abfd),
 
 
 	  bfd_h_putlong(abfd, s->vma + current_byte_index, processed_data.addr);
-	  if (long_length + current_byte_index > s->size) {
+	  if ((size_t)(long_length + current_byte_index) > (size_t)(s->size)) {
 	    long_length = s->size - current_byte_index;
 	  }
 	  while (long_length  > 0 &&  (dst - (uint8e_type*)&processed_data < 128)) {
@@ -1018,7 +1009,7 @@ DEFUN(oasys_set_section_contents,(abfd, section, location, offset, count),
     if (oasys_per_section(section)->data == (bfd_byte *)NULL ) 
 	{
 	  oasys_per_section(section)->data =
-	    (bfd_byte *)(oasys_malloc(abfd,section->size));    
+	    (bfd_byte *)(bfd_alloc(abfd,section->size));    
 	}
     (void) memcpy(oasys_per_section(section)->data + offset,
 		  location,
@@ -1041,7 +1032,7 @@ DEFUN(oasys_make_empty_symbol,(abfd),
 {
 
   oasys_symbol_type  *new =
-    (oasys_symbol_type *)zalloc (sizeof (oasys_symbol_type));
+    (oasys_symbol_type *)bfd_zalloc (abfd, sizeof (oasys_symbol_type));
   new->symbol.the_bfd = abfd;
   return &new->symbol;
 
@@ -1078,10 +1069,6 @@ bfd *abfd;
     }
 
 
-  if (oasys_data(abfd) != (oasys_data_type *)NULL) {
-    /* It's so easy to throw everything away */
-(void)    obstack_finish(&(oasys_data(abfd)->oasys_obstack));
-  }
 
   return true;
 }
@@ -1140,7 +1127,7 @@ unsigned int *line_ptr;
 }
 
 static int
-oasys_stat_arch_elt(abfd, buf)
+oasys_generic_stat_arch_elt(abfd, buf)
 bfd *abfd;
 struct stat *buf;
 {
@@ -1158,6 +1145,16 @@ struct stat *buf;
 
 }
 
+#define oasys_core_file_failing_command bfd_false
+#define oasys_core_file_failing_signal bfd_false
+#define oasys_core_file_matches_executable_p bfd_false
+#define oasys_slurp_armap bfd_false
+#define oasys_slurp_extended_name_table bfd_false
+#define oasys_truncate_arname bfd_false
+#define oasys_write_armap bfd_false
+#define oasys_get_lineno bfd_false
+
+
 
 /*SUPPRESS 460 */
 bfd_target oasys_vec =
@@ -1171,34 +1168,8 @@ bfd_target oasys_vec =
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
   (SEC_CODE|SEC_DATA|SEC_ROM|SEC_HAS_CONTENTS
    |SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-  0,				/* valid reloc types */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
-  oasys_close_and_cleanup,	/* _close_and_cleanup */
-  oasys_set_section_contents,	/* bfd_set_section_contents */
-  oasys_get_section_contents,
-  oasys_new_section_hook,	/*   new_section_hook */
-  0,				/* _core_file_failing_command */
-  0,				/* _core_file_failing_signal */
-  0,				/* _core_file_matches_ex...p */
-
-  0,				/* bfd_slurp_bsd_armap,		      bfd_slurp_armap */
-  bfd_true,			/* bfd_slurp_extended_name_table */
-  bfd_bsd_truncate_arname,	/* bfd_truncate_arname */
-
-  oasys_get_symtab_upper_bound,	/* get_symtab_upper_bound */
-  oasys_get_symtab,		/* canonicalize_symtab */
-  0,				/* oasys_reclaim_symbol_table,            bfd_reclaim_symbol_table */
-  oasys_get_reloc_upper_bound,	/* get_reloc_upper_bound */
-  oasys_canonicalize_reloc,	/* bfd_canonicalize_reloc */
-  0,				/*  oasys_reclaim_reloc,                   bfd_reclaim_reloc */
-  0,				/* oasys_get_symcount_upper_bound,        bfd_get_symcount_upper_bound */
-  0,				/* oasys_get_first_symbol,                bfd_get_first_symbol */
-  0,				/* oasys_get_next_symbol,                 bfd_get_next_symbol */
-  0,				/* oasys_classify_symbol,                 bfd_classify_symbol */
-  0,				/* oasys_symbol_hasclass,                 bfd_symbol_hasclass */
-  0,				/* oasys_symbol_name,                     bfd_symbol_name */
-  0,				/* oasys_symbol_value,                    bfd_symbol_value */
 
   _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* data */
   _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* hdrs */
@@ -1214,12 +1185,5 @@ bfd_target oasys_vec =
     _bfd_generic_mkarchive,
     bfd_false
     },
-  oasys_make_empty_symbol,
-  oasys_print_symbol,
-  bfd_false,			/*	oasys_get_lineno,*/
-  oasys_set_arch_mach,		/* bfd_set_arch_mach,*/
-  bfd_false,
-  oasys_openr_next_archived_file,
-  oasys_find_nearest_line,	/* bfd_find_nearest_line */
-  oasys_stat_arch_elt,		/* bfd_stat_arch_elt */
+JUMP_TABLE(oasys)
 };

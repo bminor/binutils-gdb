@@ -310,7 +310,7 @@ bfd_set_format (abfd, format)
      bfd *abfd;
      bfd_format format;
 {
-  file_ptr filepos;
+
 
   if (bfd_read_p (abfd) ||
       ((int)abfd->format < (int)bfd_unknown) ||
@@ -324,11 +324,11 @@ bfd_set_format (abfd, format)
   /* presume the answer is yes */
   abfd->format = format;
 
-  filepos = bfd_tell (abfd);
+/*  filepos = bfd_tell (abfd);*/
 
   if (!BFD_SEND_FMT (abfd, _bfd_set_format, (abfd))) {
     abfd->format = bfd_unknown;
-    bfd_seek (abfd, filepos, SEEK_SET);
+/*    bfd_seek (abfd, filepos, SEEK_SET);*/
     return false;
   }
 
@@ -371,7 +371,7 @@ DEFUN(bfd_make_section,(abfd, name),
     sect = sect->next;
   }
 
-  newsect = (asection *) zalloc (sizeof (asection));
+  newsect = (asection *) bfd_zalloc(abfd, sizeof (asection));
   if (newsect == NULL) {
     bfd_error = no_memory;
     return NULL;
@@ -381,13 +381,13 @@ DEFUN(bfd_make_section,(abfd, name),
   newsect->index = abfd->section_count++;
   newsect->flags = SEC_NO_FLAGS;
 
-#if ignore	/* the compiler doesn't know that zalloc clears the storage */
+
   newsect->userdata = 0;
   newsect->next = (asection *)NULL;
   newsect->relocation = (arelent *)NULL;
   newsect->reloc_count = 0;
   newsect->line_filepos =0;
-#endif
+
   if (BFD_SEND (abfd, _new_section_hook, (abfd, newsect)) != true) {
     free (newsect);
     return NULL;
