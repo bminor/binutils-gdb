@@ -114,7 +114,6 @@ m68*-ericsson-ose)	targ_emul=sun3 ;;
 m68*-apple-aux*)	targ_emul=m68kaux ;;
 *-tandem-none)		targ_emul=st2000 ;;
 i370-*-elf* | i370-*-linux-gnu*) targ_emul=elf32i370 ;;
-i370-*-mvs*) 		targ_emul=mvs ;;
 i[3456]86-*-vsta)	targ_emul=vsta ;;
 i[3456]86-go32-rtems*)	targ_emul=i386go32 ;;
 i[3456]86-*-go32)	targ_emul=i386go32 ;;
