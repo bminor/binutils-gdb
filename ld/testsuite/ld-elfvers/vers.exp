@@ -831,3 +831,8 @@ build_vers_lib "vers21" vers21.c vers21 "" vers21.map vers21.ver vers21.dsym ver
 build_vers_lib "vers22a" vers22a.c vers22a "" vers22.map vers22a.ver vers22a.dsym vers22a.sym
 build_vers_lib "vers22b" vers22b.c vers22b "" vers22.map vers22b.ver vers22b.dsym ""
 build_vers_lib "vers22" vers22.c vers22 "vers22a.so vers22b.so" "" vers22.ver vers22.dsym ""
+
+# Test versioned definitions in different files.
+build_vers_lib "vers23a" vers23a.c vers23a "" vers23a.map vers23a.ver vers23a.dsym vers23a.sym
+build_vers_lib "vers23b" vers23b.c vers23b "" vers23b.map vers23b.ver vers23b.dsym ""
+build_exec "vers23" vers23.c vers23 "tmpdir/vers23a.so tmpdir/vers23b.o tmpdir/vers23b.so" "" vers23.ver vers23.dsym ""

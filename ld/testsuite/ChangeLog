@@ -1,3 +1,20 @@
+2002-08-12  H.J. Lu <hjl@gnu.org>
+
+	* ld-elfvers/vers.exp: Add vers23.
+
+	* ld-elfvers/vers23.c: New.
+	* ld-elfvers/vers23.dsym: New.
+	* ld-elfvers/vers23.ver: New.
+	* ld-elfvers/vers23a.c: New.
+	* ld-elfvers/vers23a.dsym: New.
+	* ld-elfvers/vers23a.map: New.
+	* ld-elfvers/vers23a.sym: New.
+	* ld-elfvers/vers23a.ver: New.
+	* ld-elfvers/vers23b.c: New.
+	* ld-elfvers/vers23b.dsym: New.
+	* ld-elfvers/vers23b.map: New.
+	* ld-elfvers/vers23b.ver: New.
+
 2002-08-12  Stephen Clarke <stephen.clarke@superh.com>
 
 	* ld-sh/sh64/abi32.xd: Adjust whitespace in elf32 section
