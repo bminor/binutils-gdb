@@ -4393,6 +4393,7 @@ emit_leb128_expr (exp, sign)
      int sign;
 {
   operatorT op = exp->X_op;
+  int nbytes;
 
   if (op == O_absent || op == O_illegal)
     {
@@ -4411,6 +4412,12 @@ emit_leb128_expr (exp, sign)
       as_warn (_("register value used as expression"));
       op = O_constant;
     }
+
+  /* Let check_eh_frame know that data is being emitted.  nbytes == -1 is
+     a signal that this is leb128 data.  It shouldn't optimize this away.  */
+  nbytes = -1;
+  if (check_eh_frame (exp, &nbytes))
+    abort ();
 
   if (op == O_constant)
     {
