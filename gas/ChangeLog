@@ -1,3 +1,8 @@
+Thu Apr 30 13:09:39 1998  Fred Fish  <fnf@ninemoons.com>
+
+	* read.c (sizeof_leb128): Referenced externally by write.c so
+	don't inline.
+
 Wed Apr 29 15:45:57 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* config/tc-m32r.c ({,expand_}debug_sym): New functions to record
