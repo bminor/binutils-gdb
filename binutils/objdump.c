@@ -1,5 +1,5 @@
 /* objdump.c -- dump information about an object file.
-   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
