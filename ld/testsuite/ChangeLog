@@ -1,3 +1,33 @@
+2003-01-24  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* ld-s390/s390.exp: New file.
+	* ld-s390/tlsbin_64.dd: New file.
+	* ld-s390/tlsbin_64.rd: New file.
+	* ld-s390/tlsbin_64.s: New file.
+	* ld-s390/tlsbin_64.sd: New file.
+	* ld-s390/tlsbin_64.td: New file.
+	* ld-s390/tlsbin.dd: New file.
+	* ld-s390/tlsbinpic_64.s: New file.
+	* ld-s390/tlsbinpic.s: New file.
+	* ld-s390/tlsbin.rd: New file.
+	* ld-s390/tlsbin.s: New file.
+	* ld-s390/tlsbin.sd: New file.
+	* ld-s390/tlsbin.td: New file.
+	* ld-s390/tlslib_64.s: New file.
+	* ld-s390/tlslib.s: New file.
+	* ld-s390/tlspic1_64.s: New file.
+	* ld-s390/tlspic1.s: New file.
+	* ld-s390/tlspic2_64.s: New file.
+	* ld-s390/tlspic2.s: New file.
+	* ld-s390/tlspic_64.dd: New file.
+	* ld-s390/tlspic_64.rd: New file.
+	* ld-s390/tlspic_64.sd: New file.
+	* ld-s390/tlspic_64.td: New file.
+	* ld-s390/tlspic.dd: New file.
+	* ld-s390/tlspic.rd: New file.
+	* ld-s390/tlspic.sd: New file.
+	* ld-s390/tlspic.td: New file.
+
 2003-01-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-alpha/tlsbin.sd: Cope with truncated address in data dumps.
