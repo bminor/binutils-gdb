@@ -118,7 +118,7 @@ zalloc (size)
   char *ptr = (char *) malloc (size);
 
   if ((ptr != NULL) && (size != 0))
-    bzero (ptr, size);
+   memset(ptr,0, size);
 
   return ptr;
 }

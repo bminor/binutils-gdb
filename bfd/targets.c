@@ -47,7 +47,7 @@ bfd_target *target_vector[] =
     &oasys_vec,
     &aout_little_vec,
     &aout_big_vec,
-/*    &m88k_bcs_vec,*/
+    &m88k_bcs_vec,
     &srec_vec,
 #endif /* GNU960 */
     &icoff_little_vec,

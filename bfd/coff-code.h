@@ -2332,15 +2332,20 @@ coff_slurp_reloc_table(abfd, asect, symbols)
       ptr = *(cache_ptr->sym_ptr_ptr);
       cache_ptr->address = src->r_vaddr;
       /*
-	 The symbols definitions that we have read in have been
-	 relocated as if their sections started at 0. But the offsets
-	 refering to the symbols in the raw data have not been
-	 modified, so we have to have a negative addend to compensate.
-	 */
+	The symbols definitions that we have read in have been
+	relocated as if their sections started at 0. But the offsets
+	refering to the symbols in the raw data have not been
+	modified, so we have to have a negative addend to compensate.
+	
+	Note that symbols which used to be common must be left alone
+	*/
 
-      if (ptr->the_bfd == abfd && ptr->section != (asection *) NULL) {
-	cache_ptr->addend = -(ptr->section->vma + ptr->value);
-      }
+      if (ptr->the_bfd == abfd 
+	  && ptr->section != (asection *) NULL 
+	  && ((ptr->flags & BSF_OLD_COMMON)== 0)) 
+	  {
+	    cache_ptr->addend = -(ptr->section->vma + ptr->value);
+	  }
       else {
 	cache_ptr->addend = 0;
       }

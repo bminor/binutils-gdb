@@ -323,7 +323,7 @@ DEFUN(oasys_object_p,(abfd),
   while (loop) {
     oasys_record_union_type record;
     oasys_read_record(abfd, &record);
-    if (record.header.length < sizeof(record.header))
+    if ((size_t)record.header.length < (size_t)sizeof(record.header))
       goto fail;
 
 
@@ -807,7 +807,7 @@ DEFUN(oasys_write_header, (abfd),
   /* Create and write the header */
   oasys_header_record_type r;
   size_t length = strlen(abfd->filename);
-  if (length > sizeof(r.module_name)) {
+  if (length > (size_t)sizeof(r.module_name)) {
     length = sizeof(r.module_name);
   }
 
@@ -881,7 +881,7 @@ DEFUN(oasys_write_data, (abfd),
     current_byte_index = 0;
     processed_data.relb = s->target_index | RELOCATION_TYPE_REL;
 
-    while (current_byte_index < s->size) 
+    while ((size_t)current_byte_index < s->size) 
 	{
 	  /* Scan forwards by eight bytes or however much is left and see if
 	     there are any relocations going on */
