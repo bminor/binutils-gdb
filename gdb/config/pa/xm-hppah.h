@@ -23,6 +23,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Host is big-endian. */
 #define	HOST_BYTE_ORDER	BIG_ENDIAN
 
+#include "pa/xm-pa.h"
+
 /* Avoid "INT_MIN redefined" warnings -- by defining it here, exactly
    the same as in the system <machine/machtypes.h> file.  */
 #undef  INT_MIN

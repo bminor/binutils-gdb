@@ -32,6 +32,7 @@ tm-hppab.h
 tm-hppah.h
 xm-hppab.h
 xm-hppah.h
+xm-pa.h
 
 Things-to-lose:
 
