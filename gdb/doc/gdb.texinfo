@@ -109,8 +109,8 @@ Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
 Free Software Foundation, Inc. 
 @sp 2
 Published by the Free Software Foundation @*
-675 Massachusetts Avenue, @*
-Cambridge, MA 02139 USA @*
+59 Temple Place - Suite 330, @*
+Boston, MA 02111-1307 USA @*
 Printed copies are available for $20 each. @*
 ISBN 1-882114-11-6 @*
                 
@@ -8586,9 +8586,10 @@ As a last resort, send bug reports on paper to:
 
 @example
 @sc{gnu} Debugger Bugs
-Free Software Foundation
-545 Tech Square
-Cambridge, MA 02139
+Free Software Foundation Inc.
+59 Temple Place - Suite 330
+Boston, MA 02111-1307
+USA
 @end example
 
 The fundamental principle of reporting bugs usefully is this:

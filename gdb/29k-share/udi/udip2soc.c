@@ -14,7 +14,7 @@
    
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 static 	char udip2soc_c[]="@(#)udip2soc.c	2.11  Daniel Mann";
 static  char udip2soc_c_AMD[]="@(#)udip2soc.c	2.8, AMD";
