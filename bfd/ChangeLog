@@ -1,3 +1,9 @@
+2001-04-13  H.J. Lu  <hjl@gnu.org>
+
+	* section.c (SEC_MERGE): Define new flag for merging.
+	(SEC_STRINGS): Likewise.
+	(entsize): New field.
+
 2001-04-13  Roger Sayle  <roger@metaphorics.com>
 
 	* coff-i386.c (TARGET_SYM): SEC_READONLY is an applicable section

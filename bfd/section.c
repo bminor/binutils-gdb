@@ -350,6 +350,15 @@ CODE_FRAGMENT
 .     references found to any symbol in the section.  *}
 .#define SEC_CLINK 0x10000000
 .
+.  {* Attempt to merge identical entities in the section.
+.     Entity size is given in the entsize field.  *}
+.#define SEC_MERGE 0x20000000
+.
+.  {* If given with SEC_MERGE, entities to merge are zero terminated
+.     strings where entsize specifies character size instead of fixed
+.     size entries.  *}
+.#define SEC_STRINGS 0x40000000
+.
 .  {*  End of section flags.  *}
 .
 .  {* Some internal packed boolean fields.  *}
@@ -461,6 +470,10 @@ CODE_FRAGMENT
 .  {* Number of line number records.  *}
 .
 .  unsigned int lineno_count;
+.
+.  {* Entity size for merging purposes.  *}
+.
+.  unsigned int entsize;
 .
 .  {* Optional information about a COMDAT entry; NULL if not COMDAT.  *}
 .
