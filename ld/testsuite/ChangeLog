@@ -1,5 +1,10 @@
 2005-02-13  Eric Botcazou  <ebotcazou@libertysurf.fr>
 
+	* ld-sparc/tlssunnopic32.rd: Adjust for .dynsym changes.
+	* ld-sparc/tlssunpic32.rd: Likewise.
+
+2005-02-13  Eric Botcazou  <ebotcazou@libertysurf.fr>
+
 	* ld-elf/warn1.d: Do not run on sparc64-*-solaris2*.
 
 2005-02-11  Paul Brook  <paul@codesourcery.com>

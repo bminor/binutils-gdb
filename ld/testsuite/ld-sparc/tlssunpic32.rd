@@ -52,21 +52,22 @@ Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 14 entries:
 0+12130 +0+4e R_SPARC_TLS_TPOFF32 +0+70
 0+12138 +0+4a R_SPARC_TLS_DTPMOD32 +0+
 0+12140 +0+4e R_SPARC_TLS_TPOFF32 +0+44
-0+12120 +0+a4e R_SPARC_TLS_TPOFF32 +0+10 +sg5 \+ 0
-0+12124 +0+d4a R_SPARC_TLS_DTPMOD32 +0+ +sg1 \+ 0
-0+12128 +0+d4c R_SPARC_TLS_DTPOFF32 +0+ +sg1 \+ 0
-0+12134 +0+104e R_SPARC_TLS_TPOFF32 +0+4 +sg2 \+ 0
+0+12120 +0+b4e R_SPARC_TLS_TPOFF32 +0+10 +sg5 \+ 0
+0+12124 +0+e4a R_SPARC_TLS_DTPMOD32 +0+ +sg1 \+ 0
+0+12128 +0+e4c R_SPARC_TLS_DTPOFF32 +0+ +sg1 \+ 0
+0+12134 +0+114e R_SPARC_TLS_TPOFF32 +0+4 +sg2 \+ 0
 
 Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
  Offset +Info +Type +Sym. Value +Symbol's Name \+ Addend
-0+12174 +0+c15 R_SPARC_JMP_SLOT +0+ +__tls_get_addr \+ 0
+0+12174 +0+d15 R_SPARC_JMP_SLOT +0+ +__tls_get_addr \+ 0
 
-Symbol table '.dynsym' contains 21 entries:
+Symbol table '.dynsym' contains 22 entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
  +0: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +6 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +7 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +8 *
+ +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +10 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +12 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +13 *
  +[0-9]+: 0+1c +0 TLS +GLOBAL DEFAULT +7 sg8
