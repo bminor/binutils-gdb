@@ -94,6 +94,13 @@ struct target_ops
      Returns 0 on success and errno on failure.  */
 
   int (*write_memory) (CORE_ADDR memaddr, char *myaddr, int len);
+
+  /* Query GDB for the values of any symbols we're interested in.
+     This function is called whenever we receive a "qSymbols::"
+     query, which corresponds to every time more symbols (might)
+     become available.  */
+
+  void (*look_up_symbols) (void);
 };
 
 extern struct target_ops *the_target;

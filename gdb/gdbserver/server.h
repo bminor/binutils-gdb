@@ -106,6 +106,7 @@ void decode_M_packet (char *from, CORE_ADDR * mem_addr_ptr,
 int unhexify (char *bin, const char *hex, int count);
 int hexify (char *hex, const char *bin, int count);
 
+int look_up_one_symbol (const char *name, CORE_ADDR *addrp);
 
 /* Functions from ``signals.c''.  */
 enum target_signal target_signal_from_host (int hostsig);

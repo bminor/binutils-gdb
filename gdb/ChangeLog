@@ -1,5 +1,15 @@
 2002-04-09  Daniel Jacobowitz  <drow@mvista.com>
 
+	* linux-low.c (linux_look_up_symbols): New hook.
+	(linux_target_ops): Add linux_look_up_symbols.
+	* remote-utils.c (decode_address): New function.
+	(look_up_one_symbol): New function.
+	* server.c (handle_query): Call target look_up_symbols hook.
+	* server.h (look_up_one_symbol): Add prototype.
+	* target.h (struct target_ops): Add look_up_symbols hook.
+
+2002-04-09  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdbserver/server.h: Include <string.h> if HAVE_STRING_H.
 	* ChangeLog: Correct paths in last ChangeLog entry.
 

@@ -205,6 +205,23 @@ unhexify (char *bin, const char *hex, int count)
   return i;
 }
 
+static void
+decode_address (CORE_ADDR *addrp, const char *start, int len)
+{
+  CORE_ADDR addr;
+  char ch;
+  int i;
+
+  addr = 0;
+  for (i = 0; i < len; i++)
+    {
+      ch = start[i];
+      addr = addr << 4;
+      addr = addr | (fromhex (ch) & 0x0f);
+    }
+  *addrp = addr;
+}
+
 /* Convert number NIB to a hex digit.  */
 
 static int
@@ -581,3 +598,42 @@ decode_M_packet (char *from, CORE_ADDR *mem_addr_ptr, unsigned int *len_ptr,
 
   convert_ascii_to_int (&from[i++], to, *len_ptr);
 }
+
+int
+look_up_one_symbol (const char *name, CORE_ADDR *addrp)
+{
+  char own_buf[266], *p, *q;
+  int len;
+
+  /* Send the request.  */
+  strcpy (own_buf, "qSymbol:");
+  hexify (own_buf + strlen ("qSymbol:"), name, strlen (name));
+  if (putpkt (own_buf) < 0)
+    return -1;
+
+  /* FIXME:  Eventually add buffer overflow checking (to getpkt?)  */
+  len = getpkt (own_buf);
+  if (len < 0)
+    return -1;
+
+  if (strncmp (own_buf, "qSymbol:", strlen ("qSymbol:")) != 0)
+    {
+      /* Malformed response.  */
+      if (remote_debug)
+	fprintf (stderr, "Malformed response to qSymbol, ignoring.\n");
+      return -1;
+    }
+
+  p = own_buf + strlen ("qSymbol:");
+  q = p;
+  while (*q && *q != ':')
+    q++;
+
+  /* Make sure we found a value for the symbol.  */
+  if (p == q || *q == '\0')
+    return 0;
+
+  decode_address (addrp, p, q - p);
+  return 1;
+}
+

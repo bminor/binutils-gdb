@@ -481,6 +481,13 @@ linux_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
 
   return 0;
 }
+
+static void
+linux_look_up_symbols (void)
+{
+  /* Don't need to look up any symbols yet.  */
+}
+
 
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
@@ -493,6 +500,7 @@ static struct target_ops linux_target_ops = {
   linux_store_registers,
   linux_read_memory,
   linux_write_memory,
+  linux_look_up_symbols,
 };
 
 void

@@ -63,13 +63,9 @@ handle_query (char *own_buf)
 {
   if (strcmp ("qSymbol::", own_buf) == 0)
     {
-#if 0
-      strcpy (own_buf, "qSymbol:");
-      hexify (own_buf + strlen ("qSymbol:"), "main", 4);
-      putpkt (own_buf);
-      getpkt (own_buf);
-      fprintf (stderr, "Got %s", own_buf);
-#endif
+      if (the_target->look_up_symbols != NULL)
+	(*the_target->look_up_symbols) ();
+
       strcpy (own_buf, "OK");
       return;
     }
