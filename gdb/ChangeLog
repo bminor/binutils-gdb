@@ -1,3 +1,8 @@
+2004-12-01  Joel Brobecker  <brobecker@gnat.com>
+
+	* alpha-tdep.c (alpha_heuristic_frame_prev_register): Fetch
+	the register value from the correct frame.
+
 2004-11-30  Randolph Chung  <tausq@debian.org>
 
 	* hppa-linux-tdep.c (insns_match_pattern_relaxed): New function.

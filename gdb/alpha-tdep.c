@@ -1190,8 +1190,8 @@ alpha_heuristic_frame_prev_register (struct frame_info *next_frame,
     }
 
   /* Otherwise assume the next frame has the same register value.  */
-  frame_register (next_frame, regnum, optimizedp, lvalp, addrp,
-		  realnump, bufferp);
+  frame_register_unwind (next_frame, regnum, optimizedp, lvalp, addrp,
+                         realnump, bufferp);
 }
 
 static const struct frame_unwind alpha_heuristic_frame_unwind = {
