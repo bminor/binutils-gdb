@@ -1,5 +1,7 @@
 Sun Nov 28 18:06:25 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
+	* gdb.texinfo, remote.texi: formatting improvements
+
 	* gdb.texinfo (New Features): mention threads.
 	(Summary, C): fix xrefs in newly contributed text.
 	(Threads): index entries, clarifications, example

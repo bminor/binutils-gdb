@@ -124,7 +124,6 @@ empty line.
 @node Readline Movement Commands
 @subsection Readline Movement Commands
 
-
 The above table describes the most basic possible keystrokes that you need
 in order to do editing of the input line.  For your convenience, many
 other commands have been added in addition to @key{C-b}, @key{C-f},
@@ -340,8 +339,10 @@ In the above example, @key{C-u} is bound to the function
 * Miscellaneous Commands::	Other miscillaneous commands.
 @end menu
 
+@need 2000
 @node Commands For Moving
 @subsubsection Commands For Moving
+
 @ftable @code
 @item beginning-of-line (@key{C-a})
 Move to the start of the current line.
@@ -366,6 +367,7 @@ Clear the screen leaving the current line at the top of the screen.
 
 @end ftable
 
+@need 2000
 @node Commands For History
 @subsubsection Commands For Manipulating The History
 
@@ -393,10 +395,11 @@ the history as necessary.  This is an incremental search.
 
 @item forward-search-history (@key{C-s})
 Search forward starting at the current line and moving `down' through
-the the history as neccessary.
+the the history as necessary.
 
 @end ftable
 
+@need 2000
 @node Commands For Text
 @subsubsection Commands For Changing Text
 
@@ -443,11 +446,11 @@ negative argument, do the previous word, but do not move point.
 
 @end ftable
 
+@need 2000
 @node Commands For Killing
 @subsubsection Killing And Yanking
 
 @ftable @code
-
 @item kill-line (@key{C-k})
 Kill the text from the current cursor position to the end of the line.
 
@@ -478,8 +481,10 @@ Rotate the kill-ring, and yank the new top.  You can only do this if
 the prior command is yank or yank-pop.
 @end ftable
 
+@need 2000
 @node Numeric Arguments
 @subsubsection Specifying Numeric Arguments
+
 @ftable @code
 
 @item digit-argument (@key{M-0}, @key{M-1}, ... @key{M--})
@@ -491,6 +496,7 @@ Do what @key{C-u} does in emacs.  By default, this is not bound.
 @end ftable
 
 
+@need 2000
 @node Commands For Completion
 @subsubsection Letting Readline Type For You
 
@@ -507,8 +513,10 @@ you can do variable name completion...
 List the possible completions of the text before point.
 @end ftable
 
+@need 2000
 @node Miscellaneous Commands
 @subsubsection Some Miscellaneous Commands
+
 @ftable @code
 
 @item re-read-init-file (@key{C-x} @key{C-r})
@@ -539,6 +547,7 @@ Undo all changes made to this line.  This is like typing the `undo'
 command enough times to get back to the beginning.
 @end ftable
 
+@need 2000
 @node Readline Vi Mode
 @subsection Readline Vi Mode
 

@@ -196,7 +196,7 @@ its meaning is architecture-dependent (for example, different numbers
 might represent divide by zero, misaligned access, etc).  When this
 exception occurs, control should be transferred directly to
 @var{exception_address}, and the processor state (stack, registers,
-etc.) should be just as it is when a processor exception occurs.  So if
+and so on) should be just as it is when a processor exception occurs.  So if
 you want to use a jump instruction to reach @var{exception_address}, it
 should be a simple jump, not a jump to subroutine.
 
@@ -339,7 +339,7 @@ remote} again to connect once more.)  If you type @kbd{n}, @value{GDBN}
 goes back to waiting.
 
 @node Protocol
-@subsubsection Outline of the communication protocol
+@subsubsection Communication protocol
 
 @cindex debugging stub, example
 @cindex remote stub, example
@@ -401,10 +401,12 @@ Read @var{count} bytes at location @var{addr}.
 @item M@var{addr},@var{count}:@dots{}
 Write @var{count} bytes at location @var{addr}.
 
+@need 500
 @item c
 @itemx c@var{addr}
 Resume execution at the current address (or at @var{addr} if supplied).
 
+@need 500
 @item s
 @itemx s@var{addr}
 Step the target program for one instruction, from either the current
@@ -643,7 +645,7 @@ a break is detected.
 
 @ifset AMD29K
 @node UDI29K Remote
-@subsection @value{GDBN} and the UDI protocol for AMD29K
+@subsection The UDI protocol for AMD29K
 
 @cindex UDI
 @cindex AMD29K via UDI
@@ -666,7 +668,7 @@ to its pathname.
 @end table
 
 @node EB29K Remote
-@subsection @value{GDBN} and the EBMON protocol for AMD29K
+@subsection The EBMON protocol for AMD29K
 
 @cindex EB29K board
 @cindex running 29K programs
@@ -810,6 +812,7 @@ cd /usr/joe/work29k
 @value{GDBP} myfoo
 @end example
 
+@need 500
 Now you can use the @code{target} command:
 
 @example
@@ -958,6 +961,7 @@ network.  To connect to a target whose host name is ``@code{tt}'', type:
 (vxgdb) target vxworks tt
 @end example
 
+@need 750
 @value{GDBN} displays messages like these:
 
 @smallexample
@@ -965,6 +969,7 @@ Attaching remote machine across net...
 Connected to tt.
 @end smallexample
 
+@need 1000
 @value{GDBN} then attempts to read the symbol tables of any object modules
 loaded into the VxWorks target since it was last booted.  @value{GDBN} locates
 these files by searching the directories listed in the command search
@@ -1188,7 +1193,7 @@ development board as a ``normal exit'' of your program.
 MIPS board attached to a serial line.  This is available when
 you configure @value{GDBN} with @samp{--target=mips-idt-ecoff}.
 
-@noindent
+@need 1000
 Use these @value{GDBN} commands to specify the connection to your target board:
 
 @table @code

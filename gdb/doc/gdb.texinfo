@@ -29,7 +29,7 @@
 @syncodeindex vr cp
 
 @c !!set GDB manual's edition---not the same as GDB version!
-@set EDITION 4.10
+@set EDITION 4.11
 
 @c !!set GDB manual's revision date
 @set DATE November 1993
@@ -217,16 +217,16 @@ more information, see @ref{C,,C and C++}.
 Support for Modula-2 and Chill is partial.  For information on Modula-2,
 see @ref{Modula-2,,Modula-2}.  There is no further documentation on Chill yet.
 
-Debugging pascal programs which use sets, subranges, file variables, or nested
+Debugging Pascal programs which use sets, subranges, file variables, or nested
 functions does not currently work.  @value{GDBN} does not support
-entering expressions, printing values, etc. using Pascal syntax.
+entering expressions, printing values, or similar features using Pascal syntax.
 @end ifset
 @ifset FORTRAN
 @cindex Fortran
 @value{GDBN} can be used to debug programs written in Fortran, although
-it does not yet support entering expressions, printing values, etc.
-using Fortran syntax.  It may be necessary to refer to some variables
-with a trailing underscore.
+it does not yet support entering expressions, printing values, or
+similar features using Fortran syntax.  It may be necessary to refer to
+some variables with a trailing underscore.
 @end ifset
 @end ifclear
 
@@ -344,7 +344,7 @@ Hitachi America, Ltd. sponsored the support for Hitachi microprocessors.
 @item Targets
 Using the new command @code{target}, you can select at runtime whether
 you are debugging local files, local processes, standalone systems over
-a serial port, realtime systems over a TCP/IP connection, etc.  The
+a serial port, or realtime systems over a TCP/IP connection.  The
 command @code{load} can download programs into a remote system.  Serial
 stubs are available for Motorola 680x0, Intel 80386, and Sparc remote
 systems; GDB also supports debugging realtime processes running under
@@ -791,8 +791,8 @@ in sequential order.  The order makes a difference when the
 * i960-Nindy Remote::		@value{GDBN} with a remote i960 (Nindy)
 @end ifset
 @ifset AMD29K
-* UDI29K Remote::               @value{GDBN} and the UDI protocol for AMD29K
-* EB29K Remote::		@value{GDBN} with a remote EB29K
+* UDI29K Remote::               The UDI protocol for AMD29K
+* EB29K Remote::		The EBMON protocol for AMD29K
 @end ifset
 @ifset VXWORKS
 * VxWorks Remote::		@value{GDBN} and VxWorks
@@ -2177,9 +2177,10 @@ program stops there.  @xref{Disabling, ,Disabling breakpoints}.
 Set breakpoints on all functions matching the regular expression
 @var{regex}.  This command
 sets an unconditional breakpoint on all matches, printing a list of all
-breakpoints it set. Once these breakpoints are set, they are treated
-just like the breakpoints set with the @code{break} command.  They can
-be deleted, disabled, made conditional, etc., in the standard ways.
+breakpoints it set.  Once these breakpoints are set, they are treated
+just like the breakpoints set with the @code{break} command.  You can
+delete them, disable them, or make them conditional the same way as any
+other breakpoint.
 
 @ifclear CONLY
 When debugging C++ programs, @code{rbreak} is useful for setting
@@ -3306,7 +3307,9 @@ frame.  The first line shows the frame number, the function name, the
 arguments, and the source file and line number of execution in that
 frame.  The second line shows the text of that source line.  
 
+@need 1000
 For example:
+
 @smallexample
 @group
 (@value{GDBP}) up
@@ -3621,8 +3624,8 @@ directory, @value{GDBN} will, as a last resort, look in the current
 directory.
 
 Whenever you reset or rearrange the source path, @value{GDBN} will clear out
-any information it has cached about where source files are found, where
-each line is in the file, etc.
+any information it has cached about where source files are found and where
+each line is in the file.
 
 @kindex directory
 When you start @value{GDBN}, its source path is empty.
@@ -7178,7 +7181,7 @@ CPU simulator.  @xref{Simulator,,Simulated CPU Target}.
 @kindex target udi
 Remote AMD29K target, using the AMD UDI protocol.  The @var{keyword}
 argument specifies which 29K board or simulator to use.  @xref{UDI29K
-Remote,,@value{GDBN} and the UDI protocol for AMD29K}.
+Remote,,The UDI protocol for AMD29K}.
 
 @item target amd-eb @var{dev} @var{speed} @var{PROG}
 @kindex target amd-eb
@@ -7187,7 +7190,7 @@ Remote PC-resident AMD EB29K board, attached over serial lines.
 @var{dev} is the serial device, as for @code{target remote};
 @var{speed} allows you to specify the linespeed; and @var{PROG} is the
 name of the program to be debugged, as it appears to DOS on the PC.
-@xref{EB29K Remote, ,@value{GDBN} with a remote EB29K}.
+@xref{EB29K Remote, ,The EBMON protocol for AMD29K}.
 
 @end ifset
 @ifset H8
@@ -7266,8 +7269,8 @@ configuration of GDB; use @code{help targets} to list them.
 * i960-Nindy Remote::		@value{GDBN} with a remote i960 (Nindy)
 @end ifset
 @ifset AMD29K
-* UDI29K Remote::               @value{GDBN} and the UDI protocol for AMD29K
-* EB29K Remote::		@value{GDBN} with a remote EB29K
+* UDI29K Remote::               The UDI protocol for AMD29K
+* EB29K Remote::		The EBMON protocol for AMD29K
 @end ifset
 @ifset VXWORKS
 * VxWorks Remote::		@value{GDBN} and VxWorks
@@ -8277,7 +8280,7 @@ We recommend that you save your time for something else.
 Of course, if you can find a simpler example to report @emph{instead}
 of the original one, that is a convenience for us.  Errors in the
 output will be easier to spot, running under the debugger will take
-less time, etc.
+less time, and so on.
 
 However, simplification is not vital; if you do not want to do this,
 report the bug anyway and send us the entire test case you used.
@@ -8770,6 +8773,8 @@ Display a quick summary of how to invoke @code{configure}.
 Configure the source to install programs and files under directory
 @file{@var{dir}}.
 
+@c avoid splitting the warning from the explanation:
+@need 2000
 @item --srcdir=@var{path}
 @strong{Warning: using this option requires GNU @code{make}, or another
 @code{make} that implements the @code{VPATH} feature.}@*
