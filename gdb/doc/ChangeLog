@@ -1,5 +1,10 @@
 2004-02-16  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbint.texinfo (Target Architecture Definition): Deprecate
+	FRAMELESS_FUNCTION_INVOCATION.
+
+2004-02-16  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbint.texinfo (Coding): Mention -Wunused-function.
 
 2004-02-14  Andrew Cagney  <cagney@redhat.com>

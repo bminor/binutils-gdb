@@ -185,12 +185,12 @@ legacy_inside_entry_func (CORE_ADDR pc)
 	  && symfile_objfile->ei.entry_func_highpc > pc);
 }
 
-/* Return nonzero if the function for this frame lacks a prologue.  Many
-   machines can define FRAMELESS_FUNCTION_INVOCATION to just call this
-   function.  */
+/* Return nonzero if the function for this frame lacks a prologue.
+   Many machines can define DEPRECATED_FRAMELESS_FUNCTION_INVOCATION
+   to just call this function.  */
 
 int
-frameless_look_for_prologue (struct frame_info *frame)
+legacy_frameless_look_for_prologue (struct frame_info *frame)
 {
   CORE_ADDR func_start;
 

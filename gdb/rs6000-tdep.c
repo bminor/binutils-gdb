@@ -1776,7 +1776,8 @@ rs6000_frame_chain (struct frame_info *thisframe)
 			   wordsize);
   else if (get_next_frame (thisframe) != NULL
 	   && (get_frame_type (get_next_frame (thisframe)) == SIGTRAMP_FRAME)
-	   && FRAMELESS_FUNCTION_INVOCATION (thisframe))
+	   && (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P ()
+	       && DEPRECATED_FRAMELESS_FUNCTION_INVOCATION (thisframe)))
     /* A frameless function interrupted by a signal did not change the
        frame pointer.  */
     fp = get_frame_base (thisframe);
@@ -2903,8 +2904,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_use_struct_convention (gdbarch,
 				       rs6000_use_struct_convention);
 
-  set_gdbarch_frameless_function_invocation (gdbarch,
-                                         rs6000_frameless_function_invocation);
+  set_gdbarch_deprecated_frameless_function_invocation (gdbarch, rs6000_frameless_function_invocation);
   set_gdbarch_deprecated_frame_chain (gdbarch, rs6000_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, rs6000_frame_saved_pc);
 

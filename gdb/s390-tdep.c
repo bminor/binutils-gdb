@@ -2589,8 +2589,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* This function that tells us whether the function invocation represented
      by FI does not have a frame on the stack associated with it.  If it
      does not, FRAMELESS is set to 1, else 0.  */
-  set_gdbarch_frameless_function_invocation (gdbarch,
-					     s390_frameless_function_invocation);
+  set_gdbarch_deprecated_frameless_function_invocation (gdbarch, s390_frameless_function_invocation);
   /* Return saved PC from a frame */
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, s390_frame_saved_pc);
   /* DEPRECATED_FRAME_CHAIN takes a frame's nominal address and

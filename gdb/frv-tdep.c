@@ -42,7 +42,6 @@ static gdbarch_register_name_ftype frv_register_name;
 static gdbarch_breakpoint_from_pc_ftype frv_breakpoint_from_pc;
 static gdbarch_adjust_breakpoint_address_ftype frv_gdbarch_adjust_breakpoint_address;
 static gdbarch_skip_prologue_ftype frv_skip_prologue;
-static gdbarch_frameless_function_invocation_ftype frv_frameless_function_invocation;
 
 /* Register numbers.  The order in which these appear define the
    remote protocol, so take care in changing them.  */
@@ -1030,7 +1029,7 @@ frv_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 static int
 frv_frameless_function_invocation (struct frame_info *frame)
 {
-  return frameless_look_for_prologue (frame);
+  return legacy_frameless_look_for_prologue (frame);
 }
 
 static CORE_ADDR
@@ -1391,7 +1390,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_breakpoint_from_pc (gdbarch, frv_breakpoint_from_pc);
   set_gdbarch_adjust_breakpoint_address (gdbarch, frv_gdbarch_adjust_breakpoint_address);
 
-  set_gdbarch_frameless_function_invocation (gdbarch, frv_frameless_function_invocation);
+  set_gdbarch_deprecated_frameless_function_invocation (gdbarch, frv_frameless_function_invocation);
 
   set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
   set_gdbarch_extract_return_value (gdbarch, frv_extract_return_value);

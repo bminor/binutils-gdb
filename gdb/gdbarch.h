@@ -1641,14 +1641,33 @@ extern void set_gdbarch_frame_args_skip (struct gdbarch *gdbarch, CORE_ADDR fram
 #define FRAME_ARGS_SKIP (gdbarch_frame_args_skip (current_gdbarch))
 #endif
 
-typedef int (gdbarch_frameless_function_invocation_ftype) (struct frame_info *fi);
-extern int gdbarch_frameless_function_invocation (struct gdbarch *gdbarch, struct frame_info *fi);
-extern void set_gdbarch_frameless_function_invocation (struct gdbarch *gdbarch, gdbarch_frameless_function_invocation_ftype *frameless_function_invocation);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAMELESS_FUNCTION_INVOCATION)
-#error "Non multi-arch definition of FRAMELESS_FUNCTION_INVOCATION"
+/* DEPRECATED_FRAMELESS_FUNCTION_INVOCATION is not needed.  The new
+   frame code works regardless of the type of frame - frameless,
+   stackless, or normal. */
+
+#if defined (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION)
+/* Legacy for systems yet to multi-arch DEPRECATED_FRAMELESS_FUNCTION_INVOCATION */
+#if !defined (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P)
+#define DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P() (1)
 #endif
-#if !defined (FRAMELESS_FUNCTION_INVOCATION)
-#define FRAMELESS_FUNCTION_INVOCATION(fi) (gdbarch_frameless_function_invocation (current_gdbarch, fi))
+#endif
+
+extern int gdbarch_deprecated_frameless_function_invocation_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P)
+#error "Non multi-arch definition of DEPRECATED_FRAMELESS_FUNCTION_INVOCATION"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P)
+#define DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P() (gdbarch_deprecated_frameless_function_invocation_p (current_gdbarch))
+#endif
+
+typedef int (gdbarch_deprecated_frameless_function_invocation_ftype) (struct frame_info *fi);
+extern int gdbarch_deprecated_frameless_function_invocation (struct gdbarch *gdbarch, struct frame_info *fi);
+extern void set_gdbarch_deprecated_frameless_function_invocation (struct gdbarch *gdbarch, gdbarch_deprecated_frameless_function_invocation_ftype *deprecated_frameless_function_invocation);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION)
+#error "Non multi-arch definition of DEPRECATED_FRAMELESS_FUNCTION_INVOCATION"
+#endif
+#if !defined (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION)
+#define DEPRECATED_FRAMELESS_FUNCTION_INVOCATION(fi) (gdbarch_deprecated_frameless_function_invocation (current_gdbarch, fi))
 #endif
 
 #if defined (DEPRECATED_FRAME_CHAIN)

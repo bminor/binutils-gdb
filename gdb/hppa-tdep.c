@@ -5217,8 +5217,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, hppa_init_extra_frame_info);
   set_gdbarch_deprecated_frame_chain (gdbarch, hppa_frame_chain);
   set_gdbarch_deprecated_frame_chain_valid (gdbarch, hppa_frame_chain_valid);
-  set_gdbarch_frameless_function_invocation
-    (gdbarch, hppa_frameless_function_invocation);
+  set_gdbarch_deprecated_frameless_function_invocation (gdbarch, hppa_frameless_function_invocation);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, hppa_frame_saved_pc);
   set_gdbarch_deprecated_pop_frame (gdbarch, hppa_pop_frame);
 #endif

@@ -43,9 +43,6 @@ extern gdbarch_store_return_value_ftype legacy_store_return_value;
    address passed as an invisible first argument to the function.  */
 extern gdbarch_use_struct_convention_ftype always_use_struct_convention;
 
-/* Frameless functions not identifable. */
-extern gdbarch_frameless_function_invocation_ftype generic_frameless_function_invocation_not;
-
 /* Only structures, unions, and arrays are returned using the struct
    convention.  Note that arrays are never passed by value in the C
    language family, so that case is irrelevant for C.  */

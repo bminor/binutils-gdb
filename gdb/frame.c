@@ -1449,7 +1449,8 @@ legacy_get_prev_frame (struct frame_info *this_frame)
        the frame chain, not just the inner most frame!  The generic,
        per-architecture, frame code should handle this and the below
        should simply be removed.  */
-    fromleaf = FRAMELESS_FUNCTION_INVOCATION (this_frame);
+    fromleaf = (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION_P ()
+		&& DEPRECATED_FRAMELESS_FUNCTION_INVOCATION (this_frame));
   else
     fromleaf = 0;
 

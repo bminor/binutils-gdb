@@ -1053,8 +1053,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
 
       /* Note: kevinb/2002-04-12: See note in rs6000_gdbarch_init regarding
 	 *_push_arguments().  The same remarks hold for the methods below.  */
-      set_gdbarch_frameless_function_invocation (gdbarch,
-        ppc_linux_frameless_function_invocation);
+      set_gdbarch_deprecated_frameless_function_invocation (gdbarch, ppc_linux_frameless_function_invocation);
       set_gdbarch_deprecated_frame_chain (gdbarch, ppc_linux_frame_chain);
       set_gdbarch_deprecated_frame_saved_pc (gdbarch, ppc_linux_frame_saved_pc);
 

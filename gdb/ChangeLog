@@ -1,4 +1,38 @@
-2004-02-16  Andrew Cagney  <cagney@redhat.com>
+2004-02-09  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_FRAMELESS_FUNCTION_INVOCATION): Predicate
+	and function replacing FRAMELESS_FUNCTION_INVOCATION.
+	* blockframe.c (legacy_frameless_look_for_prologue): Rename
+	frameless_look_for_prologue.
+	* frame.h (legacy_frameless_look_for_prologue): Rename
+	frameless_look_for_prologue.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* sh64-tdep.c (sh64_gdbarch_init): Update.
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Update.
+	* m68k-tdep.c (m68k_gdbarch_init): Update.
+	(delta68_frame_args_address): Update.
+	* m32r-tdep.c (m32r_gdbarch_init): Update.
+	* hppa-tdep.c (hppa_gdbarch_init): Update.
+	* h8300-tdep.c (h8300_gdbarch_init): Update.
+	* frv-tdep.c (frv_gdbarch_init): Update.
+	(frv_frameless_function_invocation): Update.
+	* cris-tdep.c (cris_gdbarch_init): Update.
+	(cris_frameless_function_invocation): Update.
+	* avr-tdep.c (avr_gdbarch_init): Update.
+	* arm-tdep.c (arm_gdbarch_init): Update.
+	* stack.c (frame_info): Update, call predicate.
+	* rs6000-tdep.c (rs6000_frame_chain): Update, call predicate..
+	* frame.c (legacy_get_prev_frame): Update, call predicate..
+	* arch-utils.c (generic_frameless_function_invocation_not): Delete.
+	* arch-utils.h (generic_frameless_function_invocation_not): Delete.
+	* alpha-tdep.c (alpha_gdbarch_init): Do not set frameless function
+	invocation.
+	* d10v-tdep.c (d10v_gdbarch_init): Ditto.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Ditto.
+	* vax-tdep.c (vax_gdbarch_init): Ditto.
 
 	* arm-tdep.c (arm_set_call_dummy_breakpoint_offset): Delete unused
 	function.

@@ -85,12 +85,6 @@ legacy_register_sim_regno (int regnum)
 }
 
 int
-generic_frameless_function_invocation_not (struct frame_info *fi)
-{
-  return 0;
-}
-
-int
 generic_return_value_on_stack_not (struct type *type)
 {
   return 0;

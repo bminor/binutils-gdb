@@ -232,7 +232,7 @@ m68k_frameless_function_invocation (struct frame_info *fi)
   if (get_frame_type (fi) == SIGTRAMP_FRAME)
     return 0;
   else
-    return frameless_look_for_prologue (fi);
+    return legacy_frameless_look_for_prologue (fi);
 }
 
 int
@@ -251,7 +251,7 @@ delta68_frame_args_address (struct frame_info *frame_info)
      or other functions who do not put anything on the stack. */
   if (get_frame_type (frame_info) == SIGTRAMP_FRAME)
     return get_frame_base (frame_info) + 12;
-  else if (frameless_look_for_prologue (frame_info))
+  else if (legacy_frameless_look_for_prologue (frame_info))
     {
       /* Check for an interrupted system call */
       if (get_next_frame (frame_info) && (get_frame_type (get_next_frame (frame_info)) == SIGTRAMP_FRAME))
@@ -1073,8 +1073,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, m68k_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, m68k_use_struct_convention);
 
-  set_gdbarch_frameless_function_invocation (gdbarch,
-					     m68k_frameless_function_invocation);
+  set_gdbarch_deprecated_frameless_function_invocation (gdbarch, m68k_frameless_function_invocation);
   set_gdbarch_frame_args_skip (gdbarch, 8);
 
   set_gdbarch_register_type (gdbarch, m68k_register_type);

@@ -2744,8 +2744,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_unwind_pc (gdbarch, arm_unwind_pc);
   set_gdbarch_unwind_sp (gdbarch, arm_unwind_sp);
 
-  set_gdbarch_frameless_function_invocation
-    (gdbarch, arm_frameless_function_invocation);
+  set_gdbarch_deprecated_frameless_function_invocation (gdbarch, arm_frameless_function_invocation);
 
   frame_base_set_default (gdbarch, &arm_normal_base);
 

@@ -1083,7 +1083,7 @@ cris_frameless_function_invocation (struct frame_info *fi)
   if ((get_frame_type (fi) == SIGTRAMP_FRAME))
     return 0;
   else
-    return frameless_look_for_prologue (fi);
+    return legacy_frameless_look_for_prologue (fi);
 }
 
 /* See frame.h.  Determines the address of all registers in the
@@ -4174,8 +4174,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_breakpoint_from_pc (gdbarch, cris_breakpoint_from_pc);
   
-  set_gdbarch_frameless_function_invocation 
-    (gdbarch, cris_frameless_function_invocation);
+  set_gdbarch_deprecated_frameless_function_invocation (gdbarch, cris_frameless_function_invocation);
   set_gdbarch_deprecated_frame_chain (gdbarch, cris_frame_chain);
 
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, cris_frame_saved_pc);

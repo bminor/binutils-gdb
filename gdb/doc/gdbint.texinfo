@@ -3189,8 +3189,8 @@ macro to be the number (greater than or equal to zero) of that register.
 This should only need to be defined if @code{DEPRECATED_TARGET_READ_FP}
 is not defined.
 
-@item FRAMELESS_FUNCTION_INVOCATION(@var{fi})
-@findex FRAMELESS_FUNCTION_INVOCATION
+@item DEPRECATED_FRAMELESS_FUNCTION_INVOCATION(@var{fi})
+@findex DEPRECATED_FRAMELESS_FUNCTION_INVOCATION
 Define this to an expression that returns 1 if the function invocation
 represented by @var{fi} does not have a stack frame associated with it.
 Otherwise return 0.

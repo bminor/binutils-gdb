@@ -556,8 +556,6 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, ns32k_saved_pc_after_call);
 
   set_gdbarch_frame_num_args (gdbarch, umax_frame_num_args);
-  set_gdbarch_frameless_function_invocation (gdbarch,
-                                   generic_frameless_function_invocation_not);
   
   set_gdbarch_deprecated_frame_chain (gdbarch, ns32k_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, ns32k_frame_saved_pc);
