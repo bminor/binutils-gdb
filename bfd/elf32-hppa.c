@@ -938,6 +938,7 @@ hppa_build_one_stub (gen_entry, in_arg)
 
     case hppa_stub_import:
     case hppa_stub_import_shared:
+      BFD_ASSERT (stub_entry->h->elf.plt.offset < (bfd_vma) -2);
       sym_value = (stub_entry->h->elf.plt.offset
 		   + hplink->splt->output_offset
 		   + hplink->splt->output_section->vma

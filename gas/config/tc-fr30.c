@@ -1,5 +1,5 @@
 /* tc-fr30.c -- Assembler for the Fujitsu FR30.
-   Copyright (C) 1998, 1999, 2000 Free Software Foundation.
+   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -208,7 +208,8 @@ const relax_typeS md_relax_table[] =
 };
 
 long
-fr30_relax_frag (fragP, stretch)
+fr30_relax_frag (segment, fragP, stretch)
+     segT    segment;
      fragS * fragP;
      long    stretch;
 {
@@ -235,7 +236,7 @@ fr30_relax_frag (fragP, stretch)
     }
   else
     {
-      growth = relax_frag (fragP, stretch);
+      growth = relax_frag (segment, fragP, stretch);
 
       /* Long jump on odd halfword boundary?  */
       if (fragP->fr_subtype == 2 && (address & 3) != 0)

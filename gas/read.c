@@ -4856,12 +4856,26 @@ equals (sym_name, reassign)
     }
   else
     {
+#ifdef OBJ_COFF
+      int local;
+
+      symbolP = symbol_find (sym_name);
+      local = symbolP == NULL;
+      if (local)
+#endif /* OBJ_COFF */
       symbolP = symbol_find_or_make (sym_name);
       /* Permit register names to be redefined.  */
       if (!reassign
 	  && S_IS_DEFINED (symbolP)
 	  && S_GET_SEGMENT (symbolP) != reg_section)
 	as_bad (_("symbol `%s' already defined"), S_GET_NAME (symbolP));
+
+#ifdef OBJ_COFF
+      /* "set" symbols are local unless otherwise specified.  */
+      if (local)
+	SF_SET_LOCAL (symbolP);
+#endif /* OBJ_COFF */
+
       pseudo_set (symbolP);
     }
 

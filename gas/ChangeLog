@@ -1,3 +1,175 @@
+2001-05-23  Alan Modra  <amodra@one.net.au>
+
+	Merge from mainline.
+	2001-05-22  Alan Modra  <amodra@one.net.au>
+	* config/tc-arc.c (md_assemble): Use is_end_of_line instead of
+	testing for NULs.
+
+	2001-05-16  Alan Modra  <amodra@one.net.au>
+	* config/tc-arc.c (md_assemble): Correct dwarf2_emit_insn param
+	for 8 byte insns.
+	* config/tc-i386.c (md_assemble): Call dwarf2_emit_insn before
+	opcodes are output rather than after.  Delete insn_size.
+	* config/tc-v850.c (md_assemble): Similarly, but delete
+	total_insn_size.  Update copyright.
+
+	2001-05-03  Alan Modra  <amodra@one.net.au>
+	* config/tc-i386.c (i386_displacement): Call as_bad for bad GOTOFF
+	expressions rather than triggering an assert.
+
+	2001-03-30  Alan Modra  <alan@linuxcare.com.au>
+	* config/tc-i386.c (UNCOND_JUMP, COND_JUMP, COND_JUMP86): Decrement.
+	(md_relax_table): Remove first four unused entries.  Increment
+	rlx_length by one throughout table, and update comments to suit.
+	(md_estimate_size_before_relax): Return size of current variable
+	part of frag to reflect reality when relaxing more than once.
+
+	2001-03-25  Alan Modra  <alan@linuxcare.com.au>
+	* config/tc-i386.c (i386_scale): Accept an absolute expression for
+	scale factor, and return the end of the expression.
+	(i386_operand): Modify for above.
+
+	2001-03-13  Alan Modra  <alan@linuxcare.com.au>
+	* config/tc-i386.c (RELOC_ENUM): Define.  Use throughout file.
+	(NUM_FLAG_CODE): Define.
+	(lex_got): New function.
+	(got_reloc): New global var.
+	(x86_cons_fix_new): New function.
+	(x86_cons): New function.
+	(i386_immediate): Use lex_got here, replacing inline code.  Change
+	"ignoring junk.." error message to "junk.."
+	(i386_displacement): Likewise.
+	* config/tc-i386.h (TC_PARSE_CONS_EXPRESSION): Define.
+	(x86_cons): Declare.
+	(TC_CONS_FIX_NEW): Define.
+	(x86_cons_fix_new): Declare.
+
+	2001-03-07  Alan Modra  <alan@linuxcare.com.au>
+	* config/tc-i386.c (struct _i386_insn): Rename disp_reloc to reloc.
+	(md_assemble) <smallest displacement>: Use correct field of i.op[]
+	union.
+	<JumpInterSegment output>: Use correct i.disp_reloc[].
+	<immediate output>: Likewise.
+
+	2001-02-13  Alan Modra  <alan@linuxcare.com.au>
+	* doc/c-i386.texi (i386-Arch): Add "jumps"/"nojumps" blurb.
+	Mention effect of < 386 architectures on jump promotion.
+	(i386-Jumps): xref above.  Don't assume long disp is 32 bits.
+
+	* config/tc-i386.c (no_cond_jump_promotion): New.
+	(set_cpu_arch): Parse "jumps" arch modifier.
+	(insn_size): Modify usage comment.
+	(ENCODE_RELAX_STATE): Reformat and protect macro arg.
+	(SIZE_FROM_RELAX_STATE): Rename to DISP_SIZE_FROM_RELAX_STATE.
+	(TYPE_FROM_RELAX_STATE): New define.
+	(UNCOND_JUMP, COND_JUMP): Renumber.
+	(md_relax_table): Reorder to suit.
+	(COND_JUMP86): New define.
+	(md_relax_table): Handle COND_JUMP86 cases. Add a few comments.
+	(md_assemble): Create frag var for jumps of max size, encode relax
+	state for COND_JUMP86.
+	(md_estimate_size_before_relax): Handle COND_JUMP86 cases, and
+	leave conditional jumps small if no_cond_jump_promotion.
+	(md_convert_frag): Likewise.
+
+	2001-05-10  Alan Modra  <amodra@one.net.au>
+	* config/tc-v850.c (md_estimate_size_before_relax): Rewrite.
+	(md_convert_frag): Don't bother clearing fr_var.
+	(md_pseudo_table): Correct initialization.
+
+	2001-05-12  Peter Targett  <peter.targett@arccores.com>
+	* config/tc-arc.c: Update copyright and tidy source comments.
+	(md_pseudo_table): Add directive .cpu back as an alias for
+	.option.  Add .file and .line for dwarf2 support.
+	(arc_mach_type): Make bfd_mach_arc_6 default.
+	(md_longopts): Add entry 'pre-v6' representing old command line
+	option when assembling for 'arc5' core versions.
+	(md_parse_option): Make OPTION_ARC same as OPTION_ARC6, for new
+	default behaviour.
+	(arc_code_symbol): Make symbol value for @h30 fixup expression
+	equal to O_constant.
+	(md_assemble): Call dwarf2_emit_insn.
+	Include "dwarf2dbg2.h".  Formatting fixes throughout file.
+	* config/tc-arc.h (DWARF2_LINE_MIN_INSN_LENGTH): Define.
+	* doc/c-arc.texi (ARC_CORE_DEFAULT): Update to new default.
+
+	2001-05-15  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-mn10300.c (mn10300_force_relocation): Don't
+	optimize differences between symbols in code sections to
+	constants.
+	(mn10300_fix_adjustable): Don't adjust to section+offset
+	relocations pointing at symbols in code sections.
+
+	2001-05-14  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-mn10300.c (md_assemble): Anchor dwarf2 line info
+	before a relaxable insns.
+
+	2001-05-13  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-mn10300.c (tc_gen_reloc): Don't reject differences
+	between symbols if the base symbol is in the current section;
+	emit a PC-relative relocation instead.
+
+	2001-05-09  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-mn10300.c (md_apply_fix3): Accept PC-relative relocs.
+
+	2001-05-06  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-mn10300.c (md_assemble): Subtract operand->shift
+	from offset in non-pcrel operands too.
+
+	2001-04-14  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-mn10300.c (md_assemble): Simplify offset adjustment of
+	pc-relative relocations not placed at the end of the instruction.
+
+	2001-04-06  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-mn10300.c (xr_registers): Added `pc'.
+
+	2001-03-30  Alan Modra  <alan@linuxcare.com.au>
+	* config/tc-mn10300.c (md_estimate_size_before_relax): Rewrite.
+
+	2001-02-23   Richard Sandiford <rsandifo@redhat.com>
+	* config/tc-mn10300.c (md_apply_fix3): Don't mark a fixup as
+	done if it's against a symbol.
+
+	2001-03-28  H.J. Lu  <hjl@gnu.org>
+	* read.c (equals): Set to local for COFF only if it hasn't been
+	defined before.
+
+	2001-03-27  Nick Papadonis  <nick@coelacanth.com>
+	* read.c (equals): (for COFF) default symbols to being local.
+
+	2001-03-23  Richard Sandiford  <rsandifo@redhat.com>
+	* write.c (fix_new_exp): Print an error if passed a register.
+
+	2001-03-20  Alan Modra  <alan@linuxcare.com.au>
+	* frags.h (struct frag): Add relax_marker.
+	* write.c (is_dnrange): Delete.
+	(relax_frag): Use correct types for `aim', `target', `address'.
+	Delete `offset', `was_address'.  Test `relax_marker' instead of
+	using fragile (and slow) address test.
+	(relax_segment): Init and flip `relax_marker'.
+
+	2001-02-13  Ian Lance Taylor  <ian@zembu.com>
+	* write.c (is_dnrange): Stop as soon as the address becomes
+	larger.
+	(relax_frag): Add segment parameter.  Only call symbol_get_frag
+	once.  Only call is_dnrange if the symbol is in the same segment,
+	and the symbol address is larger.
+	(relax_segment): Pass segment to md_relax_frag and relax_frag.
+	* write.h (relax_frag): Update declaration.
+	* config/tc-fr30.c (fr30_relax_frag): Add segment parameter.  Pass
+	it to relax_frag.
+	* config/tc-m32r.c (m32r_relax_frag): Likewise.
+	* config/tc-m32r.h (md_relax_frag): Add segment parameter.
+	(m32r_relax_frag): Update declaration.
+	* config/tc-mips.h (md_relax_frag): Add segment parameter.
+	* config/tc-tic54x.h (md_relax_frag): Likewise.
+	* doc/internals.texi (CPU backend): Update documentation for
+	md_relax_frag.
+
+	2001-03-15  DJ Delorie  <dj@redhat.com>
+	* stabs.c (s_stab_generic): Don't corrupt the notes obstack by
+	blindly freeing string if it isn't at the top of the obstack.
+
 2001-05-14  Richard Henderson  <rth@redhat.com>
 
 	* ehopt.c (eh_frame_convert_frag): Fix missed subtype adjustment
@@ -143,7 +315,7 @@
 	* config/tc-i386.c (tc_i386_fix_adjustable): Fix GOTPCREL GOT
 	entry.
 
-001-02-18  David O'Brien  <obrien@FreeBSD.org>
+2001-02-18  David O'Brien  <obrien@FreeBSD.org>
 
 	* configure.in (cpu_type, arch): Add a generic FreeBSD specification as
 	all FreeBSD platforms should look the same at this level.

@@ -1,5 +1,6 @@
 /* Linker command language support.
-   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+   2001
    Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
@@ -41,9 +42,8 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include <ctype.h>
 
 /* FORWARDS */
-static lang_statement_union_type *new_statement PARAMS ((enum statement_enum,
-							 size_t,
-							 lang_statement_list_type *));
+static lang_statement_union_type *new_statement
+  PARAMS ((enum statement_enum, size_t, lang_statement_list_type *));
 
 /* LOCALS */
 static struct obstack stat_obstack;
@@ -127,6 +127,7 @@ static bfd_vma size_input_section
 	   fill_type, bfd_vma, boolean));
 static void lang_finish PARAMS ((void));
 static void ignore_bfd_errors PARAMS ((const char *, ...));
+static void record_bfd_errors PARAMS ((const char *, ...));
 static void lang_check PARAMS ((void));
 static void lang_common PARAMS ((void));
 static boolean lang_one_common PARAMS ((struct bfd_link_hash_entry *, PTR));
@@ -190,18 +191,22 @@ struct unique_sections *unique_section_list;
 
 etree_type *base; /* Relocation base - or null */
 
-#if defined(__STDC__) || defined(ALMOST_STDC)
+#if defined (__STDC__) || defined (ALMOST_STDC)
 #define cat(a,b) a##b
 #else
 #define cat(a,b) a/**/b
 #endif
 
-/* Don't beautify the line below with "innocent" whitespace, it breaks the K&R C preprocessor!  */
-#define new_stat(x, y) (cat (x,_type)*) new_statement (cat (x,_enum), sizeof (cat (x,_type)), y)
+/* Don't beautify the line below with "innocent" whitespace, it breaks
+   the K&R C preprocessor!  */
+#define new_stat(x, y) \
+  (cat (x,_type)*) new_statement (cat (x,_enum), sizeof (cat (x,_type)), y)
 
-#define outside_section_address(q) ((q)->output_offset + (q)->output_section->vma)
+#define outside_section_address(q) \
+  ((q)->output_offset + (q)->output_section->vma)
 
-#define outside_symbol_address(q) ((q)->value + outside_section_address (q->section))
+#define outside_symbol_address(q) \
+  ((q)->value + outside_section_address (q->section))
 
 #define SECTION_NAME_MAP_LENGTH (16)
 
@@ -243,14 +248,16 @@ walk_wild_section (ptr, section, file, callback, data)
   if (ptr->exclude_filename_list != NULL)
     {
       struct name_list *list_tmp;
-      for (list_tmp = ptr->exclude_filename_list; list_tmp; list_tmp = list_tmp->next)
+      for (list_tmp = ptr->exclude_filename_list;
+	   list_tmp;
+	   list_tmp = list_tmp->next)
 	{
 	  boolean match;
 
 	  if (wildcardp (list_tmp->name))
-	    match = fnmatch (list_tmp->name, file->filename, 0) == 0 ? true : false;
+	    match = fnmatch (list_tmp->name, file->filename, 0) == 0;
 	  else
-	    match = strcmp (list_tmp->name, file->filename) == 0 ? true : false;
+	    match = strcmp (list_tmp->name, file->filename) == 0;
 
 	  if (match)
 	    return;
@@ -273,9 +280,9 @@ walk_wild_section (ptr, section, file, callback, data)
 	  if (section == NULL)
 	    match = true;
 	  else if (wildcard)
-	    match = fnmatch (section, sname, 0) == 0 ? true : false;
+	    match = fnmatch (section, sname, 0) == 0;
 	  else
-	    match = strcmp (section, sname) == 0 ? true : false;
+	    match = strcmp (section, sname) == 0;
 
 	  /* If this is a wild-card output section statement, exclude
 	     sections that match UNIQUE_SECTION_LIST.  */
@@ -448,7 +455,7 @@ new_statement (type, size, list)
 
    We can be supplied with requests for input files more than once;
    they may, for example be split over serveral lines like foo.o(.text)
-   foo.o(.data) etc, so when asked for a file we check that we havn't
+   foo.o(.data) etc, so when asked for a file we check that we haven't
    got it already so we don't duplicate the bfd.  */
 
 static lang_input_statement_type *
@@ -621,7 +628,7 @@ lang_memory_region_lookup (name)
     lang_memory_region_type *new =
     (lang_memory_region_type *) stat_alloc (sizeof (lang_memory_region_type));
 
-    new->name = buystring (name);
+    new->name = xstrdup (name);
     new->next = (lang_memory_region_type *) NULL;
 
     *lang_memory_region_list_tail = new;
@@ -1134,12 +1141,10 @@ wild_doit (ptr, section, output, file)
       flagword flags;
 
       if (output->bfd_section == NULL)
-	{
-	  init_os (output);
-	  first = true;
-	}
-      else
-	first = false;
+	init_os (output);
+
+      first = ! output->bfd_section->linker_has_input;
+      output->bfd_section->linker_has_input = 1;
 
       /* Add a section reference to the list.  */
       new = new_stat (lang_input_section, ptr);
@@ -1433,6 +1438,11 @@ load_symbols (entry, place)
       lang_statement_list_type *hold;
 
       err = bfd_get_error ();
+
+      /* See if the emulation has some special knowledge.  */
+      if (ldemul_unrecognized_file (entry))
+	return;
+
       if (err == bfd_error_file_ambiguously_recognized)
 	{
 	  char **p;
@@ -1450,13 +1460,7 @@ load_symbols (entry, place)
       bfd_close (entry->the_bfd);
       entry->the_bfd = NULL;
 
-      /* See if the emulation has some special knowledge.  */
-
-      if (ldemul_unrecognized_file (entry))
-	return;
-
       /* Try to interpret the file as a linker script.  */
-
       ldfile_open_command_file (entry->filename);
 
       hold = stat_ptr;
@@ -1675,7 +1679,8 @@ closest_target_match (target, data)
 
   /* Oh dear, we now have two potential candidates for a successful match.
      Compare their names and choose the better one.  */
-  if (name_compare (target->name, original->name) > name_compare (winner->name, original->name))
+  if (name_compare (target->name, original->name)
+      > name_compare (winner->name, original->name))
     winner = target;
 
   /* Keep on searching until wqe have checked them all.  */
@@ -1771,7 +1776,8 @@ open_output (name)
 		  /* Try to find a target as similar as possible to
 		     the default target, but which has the desired
 		     endian characteristic.  */
-		  (void) bfd_search_for_target (closest_target_match, (PTR) target);
+		  (void) bfd_search_for_target (closest_target_match,
+						(PTR) target);
 
 		  /* Oh dear - we could not find any targets that
 		     satisfy our requirements.  */
@@ -1894,6 +1900,7 @@ open_input_bfds (s, force)
 	  if (s->input_statement.real)
 	    {
 	      lang_statement_list_type add;
+	      bfd_error_handler_type pfn;
 
 	      s->input_statement.target = current_target;
 
@@ -1910,7 +1917,14 @@ open_input_bfds (s, force)
 
 	      lang_list_init (&add);
 
+	      /* We need to know if an error occurs whilst loading the
+		 symbols, since this means that a valid executable can
+		 not be produced.  */
+	      pfn = bfd_set_error_handler (record_bfd_errors);
+
 	      load_symbols (&s->input_statement, &add);
+
+	      bfd_set_error_handler (pfn);
 
 	      if (add.head != NULL)
 		{
@@ -1971,7 +1985,7 @@ ldlang_add_undef (name)
   new->next = ldlang_undef_chain_list_head;
   ldlang_undef_chain_list_head = new;
 
-  new->name = buystring (name);
+  new->name = xstrdup (name);
 }
 
 /* Run through the list of undefineds created above and place them
@@ -2664,7 +2678,8 @@ size_input_section (this_ptr, output_section_statement, fill, dot, relax)
 }
 
 #define IGNORE_SECTION(bfd, s) \
-  (((bfd_get_section_flags (bfd, s) & (SEC_ALLOC | SEC_LOAD)) != (SEC_ALLOC | SEC_LOAD)) \
+  (((bfd_get_section_flags (bfd, s) & (SEC_ALLOC | SEC_LOAD))	\
+    != (SEC_ALLOC | SEC_LOAD))					\
    || bfd_section_size (bfd, s) == 0)
 
 /* Check to see if any allocated sections overlap with other allocated
@@ -2787,8 +2802,9 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	case lang_output_section_statement_enum:
 	  {
 	    bfd_vma after;
-	    lang_output_section_statement_type *os = &s->output_section_statement;
+	    lang_output_section_statement_type *os;
 
+	    os = &s->output_section_statement;
 	    if (os->bfd_section == NULL)
 	      /* This section was never actually created.  */
 	      break;
@@ -2843,10 +2859,12 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 			&& ! link_info.relocateable
 			&& strcmp (os->region->name, "*default*") == 0
 			&& lang_memory_region_list != NULL
-			&& (strcmp (lang_memory_region_list->name, "*default*") != 0
+			&& (strcmp (lang_memory_region_list->name,
+				    "*default*") != 0
 			    || lang_memory_region_list->next != NULL))
 		      einfo (_("%P: warning: no memory region specified for section `%s'\n"),
-			     bfd_get_section_name (output_bfd, os->bfd_section));
+			     bfd_get_section_name (output_bfd,
+						   os->bfd_section));
 
 		    dot = os->region->current;
 
@@ -2855,7 +2873,8 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 			bfd_vma olddot;
 
 			olddot = dot;
-			dot = align_power (dot, os->bfd_section->alignment_power);
+			dot = align_power (dot,
+					   os->bfd_section->alignment_power);
 
 			if (dot != olddot && config.warn_section_align)
 			  einfo (_("%P: warning: changing start of section %s by %u bytes\n"),
@@ -3172,9 +3191,9 @@ lang_do_assignments (s, output_section_statement, fill, dot)
 
 	case lang_output_section_statement_enum:
 	  {
-	    lang_output_section_statement_type *os =
-	      &(s->output_section_statement);
+	    lang_output_section_statement_type *os;
 
+	    os = &(s->output_section_statement);
 	    if (os->bfd_section != NULL)
 	      {
 		dot = os->bfd_section->vma;
@@ -3347,8 +3366,10 @@ lang_set_startof ()
       h = bfd_link_hash_lookup (link_info.hash, buf, false, false, true);
       if (h != NULL && h->type == bfd_link_hash_undefined)
 	{
-          unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
-							ldfile_output_machine);
+          unsigned opb;
+
+          opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
+					       ldfile_output_machine);
 	  h->type = bfd_link_hash_defined;
 	  if (s->_cooked_size != 0)
 	    h->u.def.value = s->_cooked_size / opb;
@@ -3434,6 +3455,53 @@ lang_finish ()
 	}
     }
 }
+
+/* This is the routine to handle BFD error messages.  */
+
+#ifdef ANSI_PROTOTYPES
+
+static void
+record_bfd_errors (const char *s, ...)
+{
+  va_list p;
+
+  einfo ("%P: ");
+
+  va_start (p, s);
+
+  vfprintf (stderr, s, p);
+
+  va_end (p);
+
+  fprintf (stderr, "\n");
+
+  einfo ("%X");
+}
+
+#else /* ! defined (ANSI_PROTOTYPES) */
+
+static void
+record_bfd_errors (va_alist)
+     va_dcl
+{
+  va_list p;
+  const char *s;
+
+  einfo ("%P: ");
+
+  va_start (p);
+
+  s = va_arg (p, const char *);
+  vfprintf (stderr, s, p);
+
+  va_end (p);
+
+  fprintf (stderr, "\n");
+
+  einfo ("%X");
+}
+
+#endif /* ! defined (ANSI_PROTOTYPES) */
 
 /* This is a small function used when we want to ignore errors from
    BFD.  */
@@ -4181,8 +4249,9 @@ lang_section_start (name, address)
      const char *name;
      etree_type *address;
 {
-  lang_address_statement_type *ad = new_stat (lang_address_statement, stat_ptr);
+  lang_address_statement_type *ad;
 
+  ad = new_stat (lang_address_statement, stat_ptr);
   ad->section_name = name;
   ad->address = address;
 }
@@ -4575,9 +4644,7 @@ lang_record_phdrs ()
 			  lang_final_phase_enum);
 
       if (! bfd_record_phdr (output_bfd, l->type,
-			     l->flags == NULL ? false : true,
-			     flags,
-			     l->at == NULL ? false : true,
+			     l->flags != NULL, flags, l->at != NULL,
 			     at, l->filehdr, l->phdrs, c, secs))
 	einfo (_("%F%P: bfd_record_phdr failed: %E\n"));
     }

@@ -1,5 +1,5 @@
 /* tc-m32r.c -- Assembler for the Mitsubishi M32R.
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -1384,7 +1384,8 @@ const relax_typeS md_relax_table[] =
 };
 
 long
-m32r_relax_frag (fragP, stretch)
+m32r_relax_frag (segment, fragP, stretch)
+     segT segment;
      fragS *fragP;
      long stretch;
 {
@@ -1411,7 +1412,7 @@ m32r_relax_frag (fragP, stretch)
     }
   else
     {
-      growth = relax_frag (fragP, stretch);
+      growth = relax_frag (segment, fragP, stretch);
 
       /* Long jump on odd halfword boundary?  */
       if (fragP->fr_subtype == 2 && (address & 3) != 0)

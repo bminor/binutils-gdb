@@ -1,3 +1,45 @@
+2001-05-23  Alan Modra  <amodra@one.net.au>
+
+	Merge from mainline.
+	2001-05-17  Alan Modra  <amodra@one.net.au>
+	* elf32-hppa.c (hppa_build_one_stub): Add an assert to check
+	plt.offset.
+
+	2001-05-16  Alan Modra  <amodra@one.net.au>
+	* section.c (asection): Add linker_has_input field.
+	(STD_SECTION): Adjust initialization to suit.
+	* ecoff.c (bfd_debug_section): Likewise.
+	* bfd-in2.h: Regenerate.
+
+	2001-05-07  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+	* ecoff.c (bfd_debug_section): Fix initialization.
+
+	2001-05-12  Peter Targett  <peter.targett@arccores.com>
+	* cpu-arc.c (arch_info_struct): Add entry 'base' representing old
+	name for 'arc5' core versions.
+	(bfd_arc_arch): Make bfd_mach_arc_6 default.
+	* elf32-arc.c (arc_elf_object_p): Make E_ARC_MACH_ARC6 default
+	architecture.
+	(arc_elf_final_write_processing): Make bfd_mach_arc_6 default.
+
+	2001-05-08  Ian Lance Taylor  <ian@zembu.com>
+	* coff-i386.c (coff_i386_reloc): Don't dump core if output_bfd is
+	NULL or is not COFF.
+	(coff_i386_rtype_to_howto): Don't dump core if output section
+	owner is not COFF.
+
+	2001-04-13  Roger Sayle  <roger@metaphorics.com>
+	* coff-i386.c (TARGET_SYM): SEC_READONLY is an applicable section
+	flag on pe-i386 targets.
+
+	2001-04-26  H.J. Lu  <hjl@gnu.org>
+	* elf32-i386.c (elf_i386_check_relocs): Verify if r_symndx is
+	valid.
+
+	2001-04-05  David Mosberger  <davidm@hpl.hp.com>
+	* elf32-i386.c (elf_i386_fake_sections): Treat ".reloc" as an
+	ordinary "progbits" section.
+
 2001-05-04  Richard Henderson  <rth@redhat.com>
 
 	* elf64-alpha.c (SREL16, SREL32, SREL64): Set pcrel_offset true.
