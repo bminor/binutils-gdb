@@ -1,3 +1,10 @@
+Tue Dec 16 20:05:48 1997  Mark Alexander  <marka@cygnus.com>
+
+	* configure.tgt: Change little-endian tx39 target name to tx39l.
+start-sanitize-tx19
+	* configure.tgt: Change little-endian tx19 target name to tx19l.
+end-sanitize-tx19
+
 start-sanitize-gdbtk
 Tue Dec 16 21:16:42 1997  Ian Lance Taylor  <ian@cygnus.com>
 

@@ -176,11 +176,11 @@ mips64*r5900*-*-elf*)	gdb_target=r5900 ;;
 # end-sanitize-r5900
 # start-sanitize-tx19
 mips-tx19*el-* | mips*tx19*el-*-*)
-			gdb_target=tx19el ;;
+			gdb_target=tx19l ;;
 mips-tx19*-* | mips*tx19*-*-*)
 			gdb_target=tx19 ;;
 # end-sanitize-tx19  
-mips*tx39*el*-elf*)	gdb_target=tx39el ;;
+mips*tx39*el*-elf*)	gdb_target=tx39l ;;
 mips*tx39*-elf*)	gdb_target=tx39 ;;
 # start-sanitize-tx49
 mips64*tx49*el-*-elf*)	gdb_target=tx49el ;;
