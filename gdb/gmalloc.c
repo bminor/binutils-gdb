@@ -216,7 +216,7 @@ extern PTR EXFUN(realloc, (PTR, size_t));
 #include <stddef.h>
 #endif
 
-extern PTR EXFUN(memcpy, (PTR, PTR, size_t));
+extern PTR EXFUN(memcpy, (PTR, CONST PTR, size_t));
 extern PTR EXFUN(memset, (PTR, int, size_t));
 #define memmove memcpy
 

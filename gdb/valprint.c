@@ -407,7 +407,7 @@ static int
 is_vtbl_ptr_type(type)
      struct type *type;
 {
-  char *typename = TYPE_NAME(type);
+  char *typename = type_name_no_tag (type);
   static const char vtbl_ptr_name[] =
     { CPLUS_MARKER,'v','t','b','l','_','p','t','r','_','t','y','p','e', 0 };
 

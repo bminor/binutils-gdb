@@ -1,3 +1,36 @@
+Mon Nov  4 10:49:33 1991  Per Bothner  (bothner at cygnus.com)
+
+	* infrun.c:  Fixed typo in comment.
+	* utils.c:  All the v*fprintf emulation is now in libiberty,
+	so we can get rid of some junk.
+	* xm-sun3os4.h, xm-sun4os4.h, xconfig/decstation, xconfig/i386sco,
+	xconfig/sun3os4, xconfig/sun4os4: Don`t need HAVE_STRSTR any more.
+	* m68k-pinsn.c (print_insn_arg):  Support BB/BW/BL
+	type operands, as used by branch instructions.
+	* gmalloc.c: Fix prototype of memcpy.
+	* elfread.c: Comment out register_addr, since it conflicts
+	with the one in coredep.c.
+	* buildsym.h:  Remove extern declarations of two functions
+	that are really static in buildsym.c.
+	* tm-mips.h: Add symbolic names for more registers.
+	* mips-xdep.c (store_inferior_registers): Use new register names.
+	* xm-mips.h: Simplify REGISTER_U_ADDR, since it is now
+	only used for core files, not ptrace.  Therefore,
+	the KERNEL_U_ADDR hack is no longer needed.
+	The mapping to ptrace number is now in in mips-xdep.c.
+	* mips-xdep.c:  Define REGISTER_PTRACE_ADDR (using the
+	mapping from the old REGISTER_U_ADDR), and use it
+	in {fetch,store}_inferior_registers.
+	* mipsread.c: Rename #include ecoff.h to new name coff-mips.h.
+	* mips-tdep.c (mips_push_dummy_frame, mips_pop_frame):
+	Save/restore FP regs correctly (?).
+	* dbxread.c: Remove duplicate define_symbol and type_synonym_name
+	(these had been previously moved to buildsym.c).
+	Hence, define_symbol becomes extern instead of static.
+	* buildsym.c (read_struct_type):  Comment out bogus handling
+	of C++ operator methods.  Minor hacking of reading of class
+	contexts. Make define_symbol non-static, so dbxread.c can call it.
+
 Fri Nov  1 11:05:47 1991  John Gilmore  (gnu at cygnus.com)
 
 	* mipsread.c (read_mips_symtab, read_the_mips_symtab):  Use real

@@ -51,7 +51,7 @@ extern int hashname ();
 extern void patch_block_stabs ();	/* AIX xcoffread.c */
 #define patch_block_stabs abort		/* FIXME scaffolding */
 
-static struct symbol *define_symbol ();
+
 static void cleanup_undefined_types ();
 static void fix_common_block ();
 
@@ -826,7 +826,7 @@ read_type_number (pp, typenums)
 static char *type_synonym_name;
 
 /* ARGSUSED */
-static struct symbol *
+struct symbol *
 define_symbol (valu, string, desc, type)
      unsigned int valu;
      char *string;
@@ -1841,14 +1841,13 @@ read_struct_type (pp, type)
 		}
 	      *pp = p + 1;
 	      context = read_type (pp);
-	      if (type_name_no_tag (context) == 0)
+	      name = type_name_no_tag (context);
+	      if (name == 0)
 		{
-		  if (name == 0)
-		    error ("type name unknown at symtab pos %d.", symnum);
-		  /* FIXME-tiemann: when is `name' ever non-0?  */
-		  TYPE_NAME (context) = obsavestring (name, p - name - 1);
+		  error ("type name unknown at symtab pos %d.", symnum);
+		  TYPE_NAME (context) = name;
 		}
-	      list->field.name = obconcat (prefix, type_name_no_tag (context), "");
+	      list->field.name = obconcat (prefix, name, "");
 	      p = ++(*pp);
 	      if (p[-1] != ':')
 		error ("invalid abbreviation at symtab pos %d.", symnum);
@@ -2034,29 +2033,32 @@ read_struct_type (pp, type)
 
 	  /* read in the name.  */
 	  while (*p != ':') p++;
+#if 0
 	  if ((*pp)[0] == 'o' && (*pp)[1] == 'p' && (*pp)[2] == CPLUS_MARKER)
 	    {
 	      /* This lets the user type "break operator+".
 	         We could just put in "+" as the name, but that wouldn't
 		 work for "*".  */
+	     /* I don't understand what this is trying to do.
+		It seems completely bogus.  -Per Bothner. */
 	      static char opname[32] = {'o', 'p', CPLUS_MARKER};
 	      char *o = opname + 3;
 
 	      /* Skip past '::'.  */
-	      p += 2;
+	      *pp = p + 2;
+	      if (**pp == '\\') *pp = next_symbol_text ();
+	      p = *pp;
 	      while (*p != '.')
 		*o++ = *p++;
-	     main_fn_name = savestring (opname, o - opname);
+	      main_fn_name = savestring (opname, o - opname);
 	      /* Skip past '.'  */
 	      *pp = p + 1;
 	    }
 	  else
-	    {
-	      i = 0;
+#endif
 	      main_fn_name = savestring (*pp, p - *pp);
-	      /* Skip past '::'.  */
-	      *pp = p + 2;
-	    }
+	  /* Skip past '::'.  */
+	  *pp = p + 2;
 	  new_mainlist->fn_fieldlist.name = main_fn_name;
 
 	  do

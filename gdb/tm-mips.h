@@ -120,12 +120,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    to be actual register numbers as far as the user is concerned
    but do serve to get the desired values when passed to read_register.  */
 
+#define ZERO_REGNUM 0		/* read-only register, always 0 */
 #define SP_REGNUM 29		/* Contains address of top of stack */
-#define PC_REGNUM 37		/* Contains program counter */
 #define RA_REGNUM 31		/* Contains return address value */
 #define PS_REGNUM 32		/* Contains processor status */
 #define HI_REGNUM 34            /* Multiple/divide temp */
 #define LO_REGNUM 33            /* ... */
+#define BADVADDR_REGNUM 35	/* bad vaddr for addressing exception */
+#define CAUSE_REGNUM 36		/* describes last exception */
+#define PC_REGNUM 37		/* Contains program counter */
 #define FP0_REGNUM 38           /* Floating point register 0 (single float) */
 #define FCRCS_REGNUM 70         /* FP control/status */
 #define FCRIR_REGNUM 71         /* FP implementation/revision */

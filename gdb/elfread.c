@@ -58,6 +58,7 @@ struct elfinfo {
   unsigned int lnsize;		/* Size of dwarf line number section */
 };
 
+#if 0
 /* FIXME - crude hack to resolve undefined global.  This function is
    part of support for corefiles, which is not yet implemented. */
 
@@ -68,6 +69,7 @@ DEFUN(register_addr, (regno, blockend),
 {
 	error ("Fetching registers from corefiles unimplemented.");
 }
+#endif
 
 /* We are called once per section from elf_symfile_read.  We
    need to examine each section we are passed, check to see

@@ -34,7 +34,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 extern void add_symbol_to_list ();
-extern void process_one_symbol ();
 extern struct type *read_type ();
 extern struct type *read_range_type ();
 extern struct type *read_enum_type ();
@@ -45,7 +44,6 @@ extern struct type **dbx_lookup_type ();
 extern long read_number ();
 extern void finish_block ();
 extern struct blockvector *make_blockvector ();
-extern void add_undefined_type ();
 extern void really_free_pendings ();
 extern void start_subfile ();
 extern struct symtab *end_symtab ();
