@@ -1,3 +1,9 @@
+2002-06-10  Andrey Volkov <avolkov@transas.com>
+
+	* ser-e7kpc.c: Fix duplicated define and call of 
+        _initialize_ser_e7000pc
+	    
+	    
 2002-06-09  Daniel Jacobowitz  <drow@mvista.com>
 
 	* signals/signals.c (target_signal_from_host): Fix #ifdef

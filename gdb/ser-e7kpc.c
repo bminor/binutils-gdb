@@ -423,16 +423,12 @@ static struct serial_ops e7000pc_ops =
   e7000pc_noop,			/* wait for output to drain */
 };
 
+#endif /*_WIN32 or __GO32__*/
+
 void
 _initialize_ser_e7000pc (void)
 {
+#if defined __GO32__ || defined _WIN32
   serial_add_interface (&e7000pc_ops);
+#endif  
 }
-#else
-
-void
-_initialize_ser_e7000pc (void)
-{
-
-}
-#endif
