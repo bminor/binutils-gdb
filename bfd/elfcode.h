@@ -2621,7 +2621,7 @@ DEFUN (elf_slurp_symbol_table, (abfd, symptrs),
       if (bfd_read ((PTR) x_symp, sizeof (Elf_External_Sym), symcount, abfd)
 	  != symcount * sizeof (Elf_External_Sym))
 	{
-	  bfd_error = system_call_error;
+	  bfd_set_error (bfd_error_system_call);
 	  return false;
 	}
       /* Skip first symbol, which is a null dummy.  */
