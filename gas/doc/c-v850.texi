@@ -1,4 +1,4 @@
-@c Copyright (C) 1997 Free Software Foundation, Inc.
+@c Copyright (C) 1997, 1998 Free Software Foundation, Inc.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
 
@@ -53,13 +53,25 @@ the V850E processor.  This allows the linker to detect attempts to link
 such code with code assembled for other processors.
 @c end-sanitize-v850e
 
-@c start-sanitize-v850eq
-@cindex @code{-mv850eq} command line option, V850
-@item -mv850eq
+@c start-sanitize-v850e
+@cindex @code{-mv850ea} command line option, V850
+@item -mv850ea
 Specifies that the assembled code should be marked as being targeted at
-the V850EQ processor.  This allows the linker to detect attempts to link
+the V850EA processor.  This allows the linker to detect attempts to link
 such code with code assembled for other processors.
-@c end-sanitize-v850eq
+
+@cindex @code{-mv850any} command line option, V850
+@item -mv850any
+Specifies that the assembled code should be marked as being targeted at
+the V850 processor but support instructions that are specific to the
+extended variants of the process.  This allows the production of
+binaries that contain target specific code, but which are also intended
+to be used in a generic fashion.  For example libgcc.a contains generic
+routines used by the code produced by GCC for all versions of the v850
+architecture, together with support routines only used by the V850E and
+V850EA architectures.
+
+@c end-sanitize-v850e
 
 @end table
 
@@ -228,13 +240,13 @@ the V850E processor.  This allows the linker to detect attempts to link
 such code with code assembled for other processors.
 @c end-sanitize-v850e
 
-@c start-sanitize-v850eq
-@cindex @code{.v850eq} directive, V850
-@item .v850eq
+@c start-sanitize-v850e
+@cindex @code{.v850ea} directive, V850
+@item .v850ea
 Specifies that the assembled code should be marked as being targeted at
-the V850EQ processor.  This allows the linker to detect attempts to link
+the V850EA processor.  This allows the linker to detect attempts to link
 such code with code assembled for other processors.
-@c end-sanitize-v850eq
+@c end-sanitize-v850e
 
 @end table
 
