@@ -242,6 +242,7 @@ linux-i386-low.o: linux-i386-low.c $(linux_low_h) $(server_h)
 linux-ia64-low.o: linux-ia64-low.c $(linux_low_h) $(server_h)
 linux-mips-low.o: linux-mips-low.c $(linux_low_h) $(server_h)
 linux-ppc-low.o: linux-ppc-low.c $(linux_low_h) $(server_h)
+linux-s390-low.o: linux-s390-low.c $(linux_low_h) $(server_h)
 linux-sh-low.o: linux-sh-low.c $(linux_low_h) $(server_h)
 linux-x86-64-low.o: linux-x86-64-low.c $(linux_low_h) $(server_h)
 
@@ -274,6 +275,12 @@ reg-mips.c : $(srcdir)/../regformats/reg-mips.dat $(regdat_sh)
 reg-ppc.o : reg-ppc.c $(regdef_h)
 reg-ppc.c : $(srcdir)/../regformats/reg-ppc.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-ppc.dat reg-ppc.c
+reg-s390.o : reg-s390.c $(regdef_h)
+reg-s390.c : $(srcdir)/../regformats/reg-s390.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/reg-s390.dat reg-s390.c
+reg-s390x.o : reg-s390x.c $(regdef_h)
+reg-s390x.c : $(srcdir)/../regformats/reg-s390x.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/reg-s390x.dat reg-s390x.c
 reg-sh.o : reg-sh.c $(regdef_h)
 reg-sh.c : $(srcdir)/../regformats/reg-sh.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-sh.dat reg-sh.c

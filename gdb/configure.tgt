@@ -241,8 +241,12 @@ rs6000-*-lynxos*)	gdb_target=rs6000lynx ;;
 rs6000-*-aix4*)		gdb_target=aix4 ;;
 rs6000-*-*)		gdb_target=rs6000 ;;
 
-s390-*-*)		gdb_target=s390 ;;
-s390x-*-*)		gdb_target=s390x ;;
+s390-*-*)		gdb_target=s390
+			build_gdbserver=yes
+			;;
+s390x-*-*)		gdb_target=s390x
+			build_gdbserver=yes
+			;;
 
 sh*-*-pe)		gdb_target=wince ;;
 sh-*-hms)		gdb_target=embed ;;

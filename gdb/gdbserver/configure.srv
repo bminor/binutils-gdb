@@ -43,6 +43,14 @@ case "${target}" in
 			srv_tgtobj="linux-low.o linux-ppc-low.o"
 			srv_linux_usrregs=yes
 			;;
+  s390-*-linux*)	srv_regobj=reg-s390.o
+			srv_tgtobj="linux-low.o linux-s390-low.o"
+			srv_linux_usrregs=yes
+			;;
+  s390x-*-linux*)	srv_regobj=reg-s390x.o
+			srv_tgtobj="linux-low.o linux-s390-low.o"
+			srv_linux_usrregs=yes
+			;;
   sh*-*-linux*)		srv_regobj=reg-sh.o
 			srv_tgtobj="linux-low.o linux-sh-low.o"
 			srv_linux_usrregs=yes

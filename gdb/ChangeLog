@@ -1,3 +1,12 @@
+2002-02-27  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbserver/linux-s390-low.c: New file.
+	* regformats/reg-s390.dat: New file.
+	* regformats/reg-s390x.dat: New file.
+	* gdbserver/configure.srv: Add S/390.
+	* gdbserver/Makefile.in: Add S/390.
+	* configure.tgt: Enable gdbserver for S/390.
+
 2002-02-28  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* go32-nat.c (_initialize_go32_nat): Don't use periods in the
