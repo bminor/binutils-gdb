@@ -11,6 +11,13 @@ Fri Sep 20 16:10:52 1991  John Gilmore  (gnu at cygnus.com)
 	* language.c (set_language_command):  Handle errors by restoring
 	the language string to its current state (fix from A. Beers).
 
+Fri Sep 20 17:39:14 1991  Roland H. Pesch  (pesch at cygnus.com)
+
+	* doc/gdb.texinfo: Updates from ChangeLog.  set/show write, 
+	autoloading shared libs, copyright etc on GDB startup, clean up $_
+	and $__ index refs, set/show listsize and related updates to list
+	cmd.  New host/target configs.
+
 Fri Sep 20 15:46:00 1991  Roland H. Pesch  (pesch at cygnus.com)
 
 	* doc/Makefile: generate aux version-no file doc/gdbVN.m4
