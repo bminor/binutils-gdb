@@ -1,4 +1,11 @@
+Tue Mar 26 18:14:49 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldmain.c (main): Call bfd_set_error_program_name.
+
 Thu Mar 21 13:17:34 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld.texinfo: Fix a couple of indexing entries.  Mention that
+	--verbose displays builtin linker scripts.
 
 	* ldmisc.c (vfinfo): case 'I': If the file is not in an archive,
 	and the local symbol name does not match the filename, print the

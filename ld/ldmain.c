@@ -162,6 +162,8 @@ main (argc, argv)
 
   bfd_init ();
 
+  bfd_set_error_program_name (program_name);
+
   xatexit (remove_output);
 
   /* Initialize the data about options.  */
@@ -512,6 +514,25 @@ add_ysym (name)
 
   if (bfd_hash_lookup (link_info.notice_hash, name, true, true)
       == (struct bfd_hash_entry *) NULL)
+    einfo ("%P%F: bfd_hash_lookup failed: %E\n");
+}
+
+/* Record a symbol to be wrapped, from the --wrap option.  */
+
+void
+add_wrap (name)
+     const char *name;
+{
+  if (link_info.wrap_hash == NULL)
+    {
+      link_info.wrap_hash = ((struct bfd_hash_table *)
+			     xmalloc (sizeof (struct bfd_hash_table)));
+      if (! bfd_hash_table_init_n (link_info.wrap_hash,
+				   bfd_hash_newfunc,
+				   61))
+	einfo ("%P%F: bfd_hash_table_init failed: %E\n");
+    }
+  if (bfd_hash_lookup (link_info.wrap_hash, name, true, true) == NULL)
     einfo ("%P%F: bfd_hash_lookup failed: %E\n");
 }
 
