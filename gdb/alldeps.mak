@@ -36,8 +36,6 @@ i386mach-nat.c\
 i386v-nat.c\
 i386v4-nat.c\
 i387-tdep.c\
-i860-pinsn.c\
-i860-tdep.c\
 i960-pinsn.c\
 i960-tdep.c\
 infptrace.c\
@@ -139,8 +137,6 @@ ALLPARAM=\
 ./config/i386/xm-linux.h\
 ./config/i386/xm-sun386.h\
 ./config/i386/xm-symmetry.h\
-./config/i860/tm-stratus.h\
-./config/i860/xm-stratus.h\
 ./config/i960/tm-nindy960.h\
 ./config/i960/tm-vx960.h\
 ./config/m68k/nm-apollo68b.h\
@@ -266,8 +262,6 @@ ALLCONFIG=\
 ./config/i386/sun386.mt\
 ./config/i386/symmetry.mh\
 ./config/i386/symmetry.mt\
-./config/i860/stratus.mh\
-./config/i860/stratus.mt\
 ./config/i960/nindy960.mt\
 ./config/i960/vxworks960.mt\
 ./config/m68k/3b1.mh\

@@ -47,8 +47,6 @@ i[34]86-*-sysv32)	gdb_host=i386v32 ;;
 i[34]86-*-sysv4*)	gdb_host=i386v4 ;;
 i[34]86-*-sysv*)	gdb_host=i386v ;;
 
-i860-*-*)		gdb_host=stratus ;;
-
 m680[01]0-sun-sunos3*)	gdb_host=sun2os3 ;;
 m680[01]0-sun-sunos4*)	gdb_host=sun2os4 ;;
 m68030-sony-*)		gdb_host=news1000 ;;
@@ -168,8 +166,6 @@ i[34]86-*-sysv4*)	gdb_target=i386v4 ;;
 i[34]86-*-sco*)		gdb_target=i386v ;;
 i[34]86-*-sysv*)	gdb_target=i386v ;;
 i[34]86-*-linux)	gdb_target=linux ;;
-
-i860-*-*)		gdb_target=stratus ;;
 
 i960-*-bout)		gdb_target=vxworks960 ;;
 i960-*-coff)		gdb_target=nindy960 ;;
