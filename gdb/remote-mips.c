@@ -1383,8 +1383,10 @@ struct target_ops mips_ops =
 {
   "mips",			/* to_shortname */
   "Remote MIPS debugging over serial line",	/* to_longname */
-  "Debug a board using the MIPS remote debugging protocol over a serial line.\n\
-Specify the serial device it is connected to (e.g., /dev/ttya).",  /* to_doc */
+  "\
+Debug a board using the MIPS remote debugging protocol over a serial line.\n\
+The argument is the device it is connected to or, if it contains a colon,\n\
+HOST:PORT to access a board over a network",  /* to_doc */
   mips_open,			/* to_open */
   mips_close,			/* to_close */
   NULL,				/* to_attach */
