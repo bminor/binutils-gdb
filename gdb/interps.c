@@ -653,6 +653,7 @@ _initialize_interpreter (void)
 		   var_string,
 		   &interpreter_p, "Set the interpreter for gdb.", &setlist);
   set_cmd_sfunc (c, set_interpreter_cmd);
+  set_cmd_completer (c, interpreter_completer);
   add_show_from_set (c, &showlist);
 
   add_cmd ("interpreters", class_support,
