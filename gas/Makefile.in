@@ -59,7 +59,7 @@ CCLIBFLAGS = -O
 # Version of ar to use when compiling gnulib. 
 OLDAR = ar
 
-version=`awk '{print substr ($$4, 2, length ($$4) - 3); }' $(srcdir)/../gcc/version.c`
+version=`awk '{print substr ($$4, 2, length ($$4) - 3); }' $(unsubdir)/../gcc/version.c`
 
 # Directory where sources are, from where we are.
 srcdir = .
@@ -244,7 +244,7 @@ HOST_LIBDEPS= $(HOST_PREFIX)$(OBSTACK) $(HOST_PREFIX)$(ALLOCA) $(HOST_PREFIX)$(M
 
 # How to link with both our special library facilities
 # and the system's installed libraries.
-LIBS = $(CLIB) $(srcdir)/../libiberty`if [ -d $(srcdir)/libiberty.$(target) ] ; then echo .$(target) ; fi`$(subdir)/libiberty.a
+LIBS = $(CLIB) $(unsubdir)/../libiberty`if [ -d $(unsubdir)/libiberty.$(target) ] ; then echo .$(target) ; fi`$(subdir)/libiberty.a
 
 # Likewise, for use in the tools that must run on this machine
 # even if we are cross-building GCC.
