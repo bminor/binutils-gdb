@@ -1,3 +1,10 @@
+Fri Nov 12 11:00:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* trad-core.c (trad_unix_core_file_p): If new hook
+	TRAD_CORE_ALLOW_ANY_EXTRA_SIZE defined, then skip the check for the
+	corefile being too big.
+	* hosts/i386sco.h: Define it.
+
 Thu Nov 11 15:16:28 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* bfd.c (struct _bfd): Add hppabsd_core_data.
