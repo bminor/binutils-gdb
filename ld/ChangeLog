@@ -1,5 +1,10 @@
 2001-03-17  Ulrich Drepper  <drepper@redhat.com>
 
+	* emultmpl/elf32.em (gld${EMULATION_NAME}_search_needed): If NAME
+	is an absolute path look only for this file and not along the path.
+
+2001-03-17  Ulrich Drepper  <drepper@redhat.com>
+
 	* emultempl/elf32.em (OPTION_GROUP): New macro.
 	Add new option Bgroup to longopts.
 	(gld*_parse_args): Handle GROUP_OPTION and recognize -z defs.
