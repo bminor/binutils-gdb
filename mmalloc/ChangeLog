@@ -1,3 +1,8 @@
+Tue Apr  7 22:16:09 1992  Fred Fish  (fnf@cygnus.com)
+
+	* mmalloc.h (size_t, CHAR_BIT):  Only redefine if not already
+	defined.
+
 Mon Apr  6 20:49:33 1992  Fred Fish  (fnf@cygnus.com)
 
 	* mmalloc.h:  Remove include of <stdlib.h>.  This also gets rid

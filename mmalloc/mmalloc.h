@@ -36,12 +36,15 @@ Cambridge, MA 02139, USA.
 #    define NULL (void *) 0
 #  endif
 #else
-#  undef size_t
-#  define size_t unsigned int
-#  define CHAR_BIT 8
 #  define PTR char *
 #  define CONST /* nothing */
 #  define PARAMS(paramlist) ()
+#  ifndef size_t
+#    define size_t unsigned int
+#  endif
+#  ifndef CHAR_BIT
+#    define CHAR_BIT 8
+#  endif
 #  ifndef NULL
 #    define NULL 0
 #  endif
