@@ -1,3 +1,8 @@
+Mon Mar  4 20:50:57 1996  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* configure.in (i386-*-cygwin32): Don't use bfd_gas.
+	* configure: Regenerated.
+
 Mon Mar  4 10:13:06 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c: Add default definitions for R_N0SEL and
