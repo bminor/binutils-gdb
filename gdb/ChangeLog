@@ -1,5 +1,7 @@
 Fri Nov 12 16:22:39 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* c-exp.y (yylex): Call lookup_symtab not lookup_partial_symtab.
+
 	* partial-stab.h: Ignore ':' symbol descriptors.  Same case as
 	Kung's stabsread.c change.
 

@@ -1462,8 +1462,11 @@ yylex ()
 			 current_language->la_language == language_cplus
 			 ? &is_a_field_of_this : (int *) NULL,
 			 (struct symtab **) NULL);
+    /* Call lookup_symtab, not lookup_partial_symtab, in case there are
+       no psymtabs (coff, xcoff, or some future change to blow away the
+       psymtabs once once symbols are read).  */
     if ((sym && SYMBOL_CLASS (sym) == LOC_BLOCK) ||
-        lookup_partial_symtab (tmp))
+        lookup_symtab (tmp))
       {
 	yylval.ssym.sym = sym;
 	yylval.ssym.is_a_field_of_this = is_a_field_of_this;
