@@ -1,5 +1,5 @@
 /* debug.c -- Handle generic debugging information.
-   Copyright 1995, 1996, 1997, 1998, 2000, 2002 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 2000, 2002, 2003 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -1191,11 +1191,9 @@ debug_record_variable (handle, name, type, kind, val)
   else
     {
       if (info->current_block == NULL)
-	{
-	  debug_error (_("debug_record_variable: no current block"));
-	  return FALSE;
-	}
-      nsp = &info->current_block->locals;
+	nsp = &info->current_file->globals;
+      else
+	nsp = &info->current_block->locals;
       linkage = DEBUG_LINKAGE_AUTOMATIC;
     }
 
@@ -2286,9 +2284,11 @@ debug_get_return_type (handle, type)
 {
   if (type == NULL)
     return DEBUG_TYPE_NULL;
+
   type = debug_get_real_type (handle, type, NULL);
   if (type == NULL)
     return DEBUG_TYPE_NULL;
+
   switch (type->kind)
     {
     default:
@@ -2312,9 +2312,11 @@ debug_get_parameter_types (handle, type, pvarargs)
 {
   if (type == NULL)
     return NULL;
+
   type = debug_get_real_type (handle, type, NULL);
   if (type == NULL)
     return NULL;
+
   switch (type->kind)
     {
     default:
@@ -2338,9 +2340,11 @@ debug_get_target_type (handle, type)
 {
   if (type == NULL)
     return NULL;
+
   type = debug_get_real_type (handle, type, NULL);
   if (type == NULL)
     return NULL;
+
   switch (type->kind)
     {
     default:
@@ -2367,9 +2371,11 @@ debug_get_fields (handle, type)
 {
   if (type == NULL)
     return NULL;
+
   type = debug_get_real_type (handle, type, NULL);
   if (type == NULL)
     return NULL;
+
   switch (type->kind)
     {
     default:
@@ -2500,20 +2506,13 @@ debug_write (handle, fns, fhandle)
 
 	  if (first_file)
 	    first_file = FALSE;
-	  else
-	    {
-	      if (! (*fns->start_source) (fhandle, f->filename))
-		return FALSE;
-	    }
+	  else if (! (*fns->start_source) (fhandle, f->filename))
+	    return FALSE;
 
 	  if (f->globals != NULL)
-	    {
-	      for (n = f->globals->list; n != NULL; n = n->next)
-		{
-		  if (! debug_write_name (info, fns, fhandle, n))
-		    return FALSE;
-		}
-	    }
+	    for (n = f->globals->list; n != NULL; n = n->next)
+	      if (! debug_write_name (info, fns, fhandle, n))
+		return FALSE;
 	}
 
       /* Output any line number information which hasn't already been

@@ -6,6 +6,8 @@
 
 	* readelf.c (parse_args): Include 'H' option in call to getopt_long.
 
+	* debug.c (debug_record_variable): Handle global register variables.
+
 2003-02-10  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (decode_ARM_machine_flags): Handle the
