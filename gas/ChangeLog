@@ -1,3 +1,8 @@
+2001-08-21  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (md_parse_option): #ifdef the
+	traditional/non-traditional names as it is done in mips_target_format.
+
 2001-08-20  Richard Henderson  <rth@redhat.com>
 
 	* config/tc-alpha.h (MD_APPLY_FIX3): Define.
