@@ -1,3 +1,7 @@
+Fri Dec 20 11:34:18 1991  Fred Fish  (fnf at cygnus.com)
+
+	* configure.in:  Changed svr4 references to sysv4.
+
 Thu Dec 19 15:54:29 1991  K. Richard Pixley  (rich at cygnus.com)
 
 	* configure: added -V for version number option.
