@@ -19,9 +19,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
+#include "bucomm.h"
 #include "getopt.h"
 #include "aout/stab_gnu.h"
-#include <ranlib.h>
+#include "aout/ranlib.h"
 
 
 
@@ -247,7 +248,7 @@ do_one_rel_file (abfd)
 }
 
 /* Symbol-sorting predicates */
-#define valueof(x)  ((x)->section ? (x)->section->vma + (x)->value : (x)->value)
+#define valueof(x) (x)->section->vma + (x)->value 
 int
 numeric_forward (x, y)
      char *x;
@@ -336,7 +337,6 @@ print_symbols (abfd, syms, symcount)
      unsigned long symcount;
 {
   asymbol **sym = syms, **end = syms + symcount;
-  char class;
 
   for (; sym < end; ++sym) {
     if (file_on_each_line) printf("%s:", bfd_get_filename(abfd));

@@ -1,12 +1,11 @@
-/*** objdump.c -- dump information about an object file. */
-
-/* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+/* objdump.c -- dump information about an object file.
+   Copyright (C) 1990, 1991 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Diddler.
 
 BFD is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 BFD is distributed in the hope that it will be useful,
@@ -26,8 +25,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  * the system 5 program's reference manual
  */
 
-#include "sysdep.h"
 #include "bfd.h"
+#include "sysdep.h"
 #include "getopt.h"
 #include <stdio.h>
 #include <ctype.h>
@@ -106,7 +105,7 @@ bfd *abfd;
 	printf("SECTION %d [%s]\t: size %08x",
 	       section->index,
 	       section->name,
-	       (unsigned)     section->size);
+	       (unsigned)     bfd_get_section_size_before_reloc(section));
 	printf(" vma ");
 	printf_vma(section->vma);
 	printf(" align 2**%u\n ",
@@ -129,25 +128,26 @@ bfd *abfd;
 }
 
 static asymbol **
-slurp_symtab(abfd)
-bfd *abfd;
+DEFUN(slurp_symtab,(abfd),
+      bfd *abfd)
 {
-  asymbol **sy;
-  if (!(bfd_get_file_flags (abfd) & HAS_SYMS)) {
-    (void) printf ("No symbols in \"%s\".\n", bfd_get_filename (abfd));
-    return(NULL);
-  }
+    asymbol **sy = (asymbol **)NULL;
+    
+    if (!(bfd_get_file_flags (abfd) & HAS_SYMS)) {
+	    (void) printf ("No symbols in \"%s\".\n", bfd_get_filename (abfd));
+	    return(NULL);
+	}
 
-  storage = get_symtab_upper_bound (abfd);
-  if (storage) {
-    sy = (asymbol **) malloc (storage);
-    if (sy == NULL) {
-      fprintf (stderr, "%s: out of memory.\n", program_name);
-      exit (1);
-    }
-  }
-  symcount = bfd_canonicalize_symtab (abfd, sy);
-  return sy;
+    storage = get_symtab_upper_bound (abfd);
+    if (storage) {
+	    sy = (asymbol **) malloc (storage);
+	    if (sy == NULL) {
+		    fprintf (stderr, "%s: out of memory.\n", program_name);
+		    exit (1);
+		}
+	}
+    symcount = bfd_canonicalize_symtab (abfd, sy);
+    return sy;
 }
 /* Sort symbols into value order */
 static int comp(ap,bp)
@@ -221,12 +221,12 @@ FILE *stream;
 	  match_name = syms[thisplace+1]->name;
 	/* Totally awesome! the exact right symbol */
 	fprintf_vma(stream, vma);
-	fprintf(stream," (%s)", syms[thisplace]->name);
+	fprintf(stream," (%s+)0000", syms[thisplace]->name);
 	return;
       }
     }
-    /* We've run out of places to look, print the symbol before this one */
-    /* see if this or the symbol before describes this location the best */
+    /* We've run out of places to look, print the symbol before this one
+       see if this or the symbol before describes this location the best */
 
     if (thisplace != 0) {
       if (syms[thisplace-1]->value - vma >
@@ -235,16 +235,16 @@ FILE *stream;
 	thisplace --;
       }
     }
-    
+
     fprintf_vma(stream, vma);
     if (syms[thisplace]->value > vma) {
       fprintf(stream," (%s-)", syms[thisplace]->name);
-      fprintf_vma(stream,  syms[thisplace]->value - vma);
+      fprintf(stream,"%04x",  syms[thisplace]->value - vma);
 
     }
     else {
       fprintf(stream," (%s+)", syms[thisplace]->name);
-      fprintf_vma(stream, vma -  syms[thisplace]->value);
+      fprintf(stream, "%04x", vma -  syms[thisplace]->value);
 
 
     }
@@ -259,22 +259,20 @@ bfd *abfd;
   bfd_arch_info_type *info ;
   bfd_size_type datasize = 0;
   bfd_size_type i;
-  unsigned int (*print)() ;
+  unsigned int (*print)()  =0;
   unsigned int print_insn_m68k();
   unsigned int print_insn_a29k();
   unsigned int print_insn_i960();
   unsigned int print_insn_sparc();
   unsigned int print_insn_h8300();
   enum bfd_architecture a;
-  unsigned long m;
+
   asection *section;
   /* Replace symbol section relative values with abs values */
   boolean done_dot = false;
   
   for (i = 0; i < symcount; i++) {
-    if (syms[i]->section != (asection *)NULL) {
       syms[i]->value += syms[i]->section->vma;
-    }
   }
 
   /* We keep a copy of the symbols in the original order */
@@ -343,21 +341,21 @@ bfd *abfd;
     if (only == (char *)NULL || strcmp(only,section->name) == 0){
       printf("Disassembly of section %s:\n", section->name);
 
-      if (section->size == 0) continue;
+      if (bfd_get_section_size_before_reloc(section) == 0) continue;
 
-      data = (bfd_byte *)malloc(section->size);
+      data = (bfd_byte *)malloc(bfd_get_section_size_before_reloc(section));
 
       if (data == (bfd_byte *)NULL) {
 	fprintf (stderr, "%s: memory exhausted.\n", program_name);
 	exit (1);
       }
-      datasize = section->size;
+      datasize = bfd_get_section_size_before_reloc(section);
 
 
-      bfd_get_section_contents (abfd, section, data, 0, section->size);
+      bfd_get_section_contents (abfd, section, data, 0, bfd_get_section_size_before_reloc(section));
 
       i = 0;
-      while (i <section->size) {
+      while (i <bfd_get_section_size_before_reloc(section)) {
 	if (data[i] ==0 && data[i+1] == 0 && data[i+2] == 0 &&
 	    data[i+3] == 0) {
 	  if (done_dot == false) {
@@ -501,7 +499,7 @@ dump_data (abfd)
      bfd *abfd;
 {
   asection *section;
-  bfd_byte  *data ;
+  bfd_byte  *data  = 0;
   bfd_size_type datasize = 0;
   bfd_size_type i;
 
@@ -516,22 +514,22 @@ dump_data (abfd)
 
       printf("Contents of section %s:\n", section->name);
 
-      if (section->size == 0) continue;
-      data = (bfd_byte *)malloc(section->size);
+      if (bfd_get_section_size_before_reloc(section) == 0) continue;
+      data = (bfd_byte *)malloc(bfd_get_section_size_before_reloc(section));
       if (data == (bfd_byte *)NULL) {
 	fprintf (stderr, "%s: memory exhausted.\n", program_name);
 	exit (1);
       }
-      datasize = section->size;
+      datasize = bfd_get_section_size_before_reloc(section);
 
 
-      bfd_get_section_contents (abfd, section, (PTR)data, 0, section->size);
+      bfd_get_section_contents (abfd, section, (PTR)data, 0, bfd_get_section_size_before_reloc(section));
 
-      for (i= 0; i < section->size; i += onaline) {
+      for (i= 0; i < bfd_get_section_size_before_reloc(section); i += onaline) {
 	bfd_size_type j;
 	printf(" %04lx ", (unsigned long int)(i + section->vma));
 	for (j = i; j < i+ onaline; j++) {
-	  if (j < section->size)
+	  if (j < bfd_get_section_size_before_reloc(section))
 	    printf("%02x", (unsigned)(data[j]));
 	  else 
 	    printf("  ");
@@ -540,7 +538,7 @@ dump_data (abfd)
 
 	printf(" ");
 	for (j = i; j < i+onaline ; j++) {
-	  if (j >= section->size)
+	  if (j >= bfd_get_section_size_before_reloc(section))
 	    printf(" ");
 	  else
 	    printf("%c", isprint(data[j]) ?data[j] : '.');
@@ -590,59 +588,65 @@ bfd *abfd;
   unsigned int relcount;
   asection *a;
   for (a = abfd->sections; a != (asection *)NULL; a = a->next) {
-    printf("RELOCATION RECORDS FOR [%s]:",a->name);
+      if (a == &bfd_abs_section) continue;
+      if (a == &bfd_und_section) continue;
+      if (a == &bfd_com_section) continue;
+      
+      printf("RELOCATION RECORDS FOR [%s]:",a->name);
     
-    if (get_reloc_upper_bound(abfd, a) == 0) {
-      printf(" (none)\n\n");
-    }
-    else {
-      arelent **p;
-
-      relpp = (arelent **) xmalloc( get_reloc_upper_bound(abfd,a) );
-      relcount = bfd_canonicalize_reloc(abfd,a,relpp, syms);
-      if (relcount == 0) {
-	printf(" (none)\n\n");
-      }
-      else {
-	printf("\n");
-	printf("OFFSET   TYPE      VALUE \n");
-
-	for (p =relpp; relcount && *p != (arelent *)NULL; p++,
-	     relcount --) {
-	  arelent *q = *p;
-	  CONST char *sym_name;
-	  CONST char *section_name =	    q->section == (asection *)NULL ? "*abs" :
-	  q->section->name;
-	  if (q->sym_ptr_ptr && *q->sym_ptr_ptr) {
-	    sym_name =  (*(q->sym_ptr_ptr))->name ;
-	  }
-	  else {
-	    sym_name = 0;
-	  }
-	  if (sym_name) {
-	    printf_vma(q->address);
-	    printf(" %-8s  %s",
-		   q->howto->name,
-		   sym_name);
-	  }
-	  else {
-	    printf_vma(q->address);
-	    printf(" %-8s  [%s]",
-		   q->howto->name,
-		   section_name);
-	  }
-	  if (q->addend) {
-	    printf("+0x");
-	    printf_vma(q->addend);
-	  }
-	  printf("\n");
+      if (bfd_get_reloc_upper_bound(abfd, a) == 0) {
+	  printf(" (none)\n\n");
 	}
-	printf("\n\n");
-	free(relpp);
-      }
-    }
+      else {
+	  arelent **p;
 
-  }
+	  relpp = (arelent **) xmalloc( bfd_get_reloc_upper_bound(abfd,a) );
+	  relcount = bfd_canonicalize_reloc(abfd,a,relpp, syms);
+	  if (relcount == 0) {
+	      printf(" (none)\n\n");
+	    }
+	  else {
+	      printf("\n");
+	      printf("OFFSET   TYPE      VALUE \n");
+
+	      for (p =relpp; relcount && *p != (arelent *)NULL; p++,
+		   relcount --) {
+		  arelent *q = *p;
+		  CONST char *sym_name;
+		  /*	  CONST char *section_name =	    q->section == (asection *)NULL ? "*abs" :*/
+		  /*	  q->section->name;*/
+		  CONST char *section_name = (*( q->sym_ptr_ptr))->section->name;
+	  
+		  if (q->sym_ptr_ptr && *q->sym_ptr_ptr) {
+		      sym_name =  (*(q->sym_ptr_ptr))->name ;
+		    }
+		  else {
+		      sym_name = 0;
+		    }
+		  if (sym_name) {
+		      printf_vma(q->address);
+		      printf(" %-8s  %s",
+			     q->howto->name,
+			     sym_name);
+		    }
+		  else {
+		      printf_vma(q->address);
+		      printf(" %-8s  [%s]",
+			     q->howto->name,
+			     section_name);
+		    }
+		  if (q->addend) {
+		      printf("+0x");
+		      printf_vma(q->addend);
+		    }
+		  printf("\n");
+		}
+	      printf("\n\n");
+	      free(relpp);
+	    }
+	}
+
+    }
 }
 
 static void

@@ -344,7 +344,7 @@ copy_sections(ibfd, isection, obfd)
   osection = bfd_get_section_by_name(obfd,
 				     bfd_section_name(ibfd, isection));
 
-  size = isection->size;
+  size = bfd_get_section_size_before_reloc(isection);
 
   if (size == 0)
     return;
@@ -360,6 +360,9 @@ copy_sections(ibfd, isection, obfd)
       bfd_set_reloc(obfd, osection, relpp, relcount);
     }
 
+  isection->_cooked_size = isection->_raw_size;
+  isection->reloc_done =true;
+  
 
   if (bfd_get_section_flags(ibfd, isection) & SEC_HAS_CONTENTS) 
     {
