@@ -40,8 +40,11 @@ extern int  EXFUN(bcmp,(char *, char *, int));
 extern void EXFUN(bzero,(char *, int));
 extern void EXFUN(perror,(CONST char *));
 extern PTR  EXFUN(memchr,(const void *, int, unsigned ));
+#if 0
+/* Conflicts with system headers on SVR4.  */
 extern unsigned short EXFUN(getuid,(void));
 extern unsigned short EXFUN(getgid,(void));
+#endif
 
 extern char * strchr();
 
