@@ -3340,7 +3340,7 @@ gen_model_c(insn_table *table, lf *file)
   if (models) {
     lf_printf(file, "  model_enum model;\n");
     lf_printf(file, "  for(model = MODEL_%s; model < nr_models; model++) {\n", models->name);
-    lf_printf(file, "    if(strcasecmp(name, model_name[model]) == 0) {\n");
+    lf_printf(file, "    if(strcmp(name, model_name[model]) == 0) {\n");
     lf_printf(file, "      current_model = model;\n");
     lf_printf(file, "      return;\n");
     lf_printf(file, "    }\n");

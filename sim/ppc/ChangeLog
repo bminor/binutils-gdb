@@ -1,9 +1,12 @@
 Tue Nov 14 04:47:25 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
-	* Makefile.in (devices.o): Update dependency.
+	* Makefile.in (devices.o, main.o): Update dependency.
 
 	* igen.c (gen_model_h): Use correct variable in loop.
+	(gen_model_c): Use strcmp, strcasecmp.
 	(lf_print_c_semantic_function_header): Delete unused function.
+
+	* main.c (cpu.h): Include cpu.h to get model.h.
 
 Mon Nov 13 09:14:13 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
