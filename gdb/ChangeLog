@@ -1,5 +1,9 @@
 2005-01-16  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.ac: Provide prerequisite headers when checking
+	<term.h>.
+	* configure: Regenerate.
+
 	* amd64fbsd-tdep.c: Update copyright year.  Include "gdb_assert.h"
 	and "bsd-uthread.h".
 	(amd64fbsd_jmp_buf_reg_offset): New variable.

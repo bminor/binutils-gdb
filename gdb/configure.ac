@@ -409,7 +409,12 @@ case $host_os in
     fi ;;
 esac
 AC_CHECK_HEADERS(curses.h cursesX.h ncurses.h ncurses/ncurses.h)
-AC_CHECK_HEADERS(ncurses/term.h term.h)
+AC_CHECK_HEADERS(ncurses/term.h)
+AC_CHECK_HEADERS(term.h, [], [],
+[#if HAVE_CURSES_H
+# include <curses.h>
+#endif
+])
 
 # FIXME: kettenis/20030102: In most cases we include these
 # unconditionally, so what's the point in checking these?
