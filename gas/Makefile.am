@@ -54,6 +54,7 @@ CPU_TYPES = \
 	tahoe \
 	vax \
 	w65 \
+	v850 \
 	z8k
 
 # Object format types.  This is only used for dependency information.
@@ -198,6 +199,7 @@ TARGET_CPU_CFILES = \
 	config/tc-tahoe.c \
 	config/tc-vax.c \
 	config/tc-w65.c \
+	config/tc-v850.c \
 	config/tc-z8k.c
 
 TARGET_CPU_HFILES = \
@@ -224,6 +226,7 @@ TARGET_CPU_HFILES = \
 	config/tc-tahoe.h \
 	config/tc-vax.h \
 	config/tc-w65.h \
+	config/tc-v850.h \
 	config/tc-z8k.h
 
 # OBJ files in config
@@ -391,13 +394,13 @@ check-DEJAGNU: site.exp
 	cp site.exp testsuite/site.exp
 	rootme=`pwd`; export rootme; \
 	srcdir=`cd ${srcdir}; pwd` ; export srcdir ; \
-	cd testsuite; \
 	EXPECT=${EXPECT} ; export EXPECT ; \
 	if [ -f $(top_builddir)/../expect/expect ]; then \
 	  TCL_LIBRARY=`cd $(top_srcdir)/../tcl/library && pwd`; \
 	  export TCL_LIBRARY; \
 	fi; \
 	runtest=$(RUNTEST); \
+	cd testsuite; \
 	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \
 	  $$runtest --tool $(DEJATOOL) --srcdir $${srcdir}/testsuite \
 		$(RUNTESTFLAGS); \
@@ -498,9 +501,11 @@ cgen.o: cgen.c cgen-opc.h subsegs.h \
 
 MOSTLYCLEANFILES = $(STAGESTUFF) core stamp-mk.com \
 	testsuite/*.o testsuite/*.out testsuite/gas.log testsuite/gas.sum \
-	testsuite/site.exp
+	testsuite/site.exp site.bak site.exp stage stage1 stage2
 
 CLEANFILES = dep.sed .tcdep .objdep .dep2 .dep1 .depa .dep .depdir
+
+DISTCLEANFILES = targ-cpu.h obj-format.h targ-env.h itbl-cpu.h cgen-opc.h
 
 .PHONY: install-exec-local install-data-local
 
@@ -780,10 +785,6 @@ dep-am: .dep
 
 .PHONY: dep dep-in dep-am
 
-# start-sanitize-arc
-TCDEP_arc_elf = $(INCDIR)/opcode/arc.h
-# end-sanitize-arc
-
 # DO NOT DELETE THIS LINE -- mkdep uses it.
 # DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
 
@@ -1042,6 +1043,10 @@ TCDEP_w65_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-w65.h subsegs.h \
   $(INCDIR)/obstack.h $(srcdir)/../opcodes/w65-opc.h
+TCDEP_v850_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-v850.h subsegs.h \
+  $(INCDIR)/obstack.h 
 TCDEP_z8k_coff = $(srcdir)/../opcodes/z8k-opc.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-z8k.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/z8k.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
@@ -1266,6 +1271,10 @@ OBJDEP_w65_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-w65.h subsegs.h \
   $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+OBJDEP_v850_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-v850.h subsegs.h \
+  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
 OBJDEP_z8k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-z8k.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/z8k.h $(BFDDIR)/libcoff.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
@@ -1437,6 +1446,9 @@ DEP_w65_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-w65.h \
 DEP_w65_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-w65.h
+DEP_v850_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-v850.h
 DEP_z8k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-z8k.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/z8k.h $(BFDDIR)/libcoff.h \
   $(INCDIR)/bfdlink.h

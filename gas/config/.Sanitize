@@ -31,22 +31,6 @@ else
 	lose_these_too="${d30v_files} ${lose_these_too}"
 fi
 
-v850_files="tc-v850.c tc-v850.h"
-
-if ( echo $* | grep keep\-v850 > /dev/null ) ; then
-	keep_these_too="${v850_files} ${keep_these_too}"
-else
- if ( echo $* | grep keep\-v850e > /dev/null ) ; then
-	keep_these_too="${v850_files} ${keep_these_too}"
- else
-  if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
-	keep_these_too="${v850_files} ${keep_these_too}"
-  else
-	lose_these_too="${v850_files} ${lose_these_too}"
-  fi
- fi
-fi
-
 tic80_files="tc-tic80.c tc-tic80.h"
 
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
@@ -149,6 +133,8 @@ tc-vax.c
 tc-vax.h
 tc-w65.c
 tc-w65.h
+tc-v850.c
+tc-v850.h
 tc-z8k.c
 tc-z8k.h
 te-386bsd.h

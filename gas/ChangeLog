@@ -26,7 +26,6 @@ Tue Sep  2 15:40:56 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 	* config/tc-v850.c (md_assemble): Use opcode->name instead of
  	opcode->opcode as the sentinal. Zero is a valid opcode.
 
-start-sanitize-v850
 Tue Aug 26 16:51:14 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* doc/as.texinfo (Machine Dependencies): Add v850 to menu.
@@ -37,7 +36,6 @@ Tue Aug 26 09:46:22 1997  Nick Clifton  <nickc@cygnus.com>
 	* doc/c-v850.texi (V850 Opcodes): Correct name for tiny data area
 	pointer. 
 
-end-sanitize-v850
 Tue Aug 26 12:23:25 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* expr.c (integer_constant): If BFD64, don't make a bignum if the
@@ -56,14 +54,12 @@ Tue Aug 26 12:23:25 1997  Ian Lance Taylor  <ian@cygnus.com>
 	for a WORD_PREFIX_OPCODE, change it to ADDR_PREFIX_OPCODE if this
 	is jcxz or a loop instruction.
 
-start-sanitize-v850
 Mon Aug 25 16:04:14 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c (pre_defined_registers): Add 'hp' as alias for
 	r2.
 	(md_begin): Set up machine architecture and type.
 
-end-sanitize-v850
 Mon Aug 25 14:25:48 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* symbols.c (resolve_symbol_value): Store the value back into the
@@ -76,7 +72,6 @@ Mon Aug 25 14:25:48 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* subsegs.c (subseg_set_rest): Change 5000 to chunksize when
 	calling obstack_begin.
 
-start-sanitize-v850
 Mon Aug 25 11:21:48 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c (md_assemble): Restore input_line_pointer upon
@@ -106,20 +101,17 @@ Fri Aug 22 10:45:33 1997  Nick Clifton  <nickc@cygnus.com>
 	* config/tc-v850.c (parse_register_list): Add support for curly
 	brace syntax.
 	(cc_names): Add "e" and "ne" conditions.
-end-sanitize-v850
 
 Thu Aug 21 11:00:36 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* app.c (do_scrub_chars): Support a double dash as starting a
 	comment that extends to end of line.
 
-start-sanitize-v850
 Thu Aug 21 10:54:27 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c (v850_section, v850_bss, v850_offset): New
 	functions.
 	(md_pseudo_table): New pseudo ops: .bss, .offset, .section
-end-sanitize-v850
 
 Thu Aug 21 00:59:53 1997  Doug Evans  <dje@canuck.cygnus.com>
 
@@ -233,7 +225,6 @@ Fri Aug 15 14:00:13 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* ecoff.h (ecoff_generate_asm_line_stab): Don't declare.
 	* doc/as.texinfo, doc/as.1: Document --gstabs.
 
-start-sanitize-v850
 Wed Aug 13 18:58:56 1997  Nick Clifton  <nickc@cygnus.com>
 
 start-sanitize-v850e
@@ -258,7 +249,6 @@ start-sanitize-v850e
 	
 	* config/tc-v850.c (md_assemble): Fix error recovery to reload
 	text of entire opcode. 
-end-sanitize-v850
 
 Tue Aug 12 10:27:34 1997  Richard Henderson  <rth@cygnus.com>
 
@@ -352,7 +342,6 @@ Sun Aug  3 23:23:59 1997  Richard Henderson  <rth@cygnus.com>
         * config/tc-alpha.c (s_alpha_ucons): New function.
         (md_pseudo_table): Add unaligned data pseudos for DWARF.
 
-start-sanitize-v850
 Thu Jul 31 15:13:43 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-v850.c (md_assemble): Ignore the rest of the current
@@ -368,7 +357,6 @@ Tue Jul 29 14:20:43 1997  Jeffrey A Law  (law@cygnus.com)
 	* config/tc-v850.c (md_assemble): Turn on fx_no_overflow for
 	LO16, HI16 and HI16_S relocs.
 
-end-sanitize-v850
 Mon Jul 28 18:41:41 1997  Rob Savoye  <rob@chinadoll.cygnus.com>
 
         * configure.in: Use CYGWIN and EXEEXT autoconf macro to look for
@@ -421,12 +409,10 @@ Tue Jul 22 13:25:13 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* config/tc-m68k.c (md_apply_fix_2): Check for PC relative reloc
 	code if BFD_ASSEMBLER.
 
-start-sanitize-v850
 Mon Jul 21 08:57:17 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-v850.c (system_registers): Fix ordering of registers.
 
-end-sanitize-v850
 start-sanitize-tic80
 Tue Jul 15 16:29:54 1997  Fred Fish  <fnf@cygnus.com>
 
@@ -2273,14 +2259,12 @@ Thu Jan  2 13:37:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 	(mips_elf_final_processing): Likewise.
 	(ELF_TC_SPECIAL_SECTIONS): Likewise.
 
-start-sanitize-v850
 Tue Dec 31 15:12:35 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-v850.c (md_assemble): If this is sst.{h,w} or
 	sld.{h,w} and the operand is relocatable, adjust the adend by
 	shifting it right one bit.
 
-end-sanitize-v850
 Tue Dec 31 12:56:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* read.c (read_a_source_file): Check mri_pending_align after
@@ -2743,7 +2727,6 @@ Wed Oct 30 20:15:35 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* doc/internals.texi: Rewrite, and add a lot of documentation.
 	* doc/Makefile.in (internals.info): New target.
 
-start-sanitize-v850
 Wed Oct 30 14:55:57 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-v850.h (tc_fix_adjustable): Don't adjust relocs
@@ -2770,7 +2753,6 @@ Tue Oct 29 12:28:16 1996  Jeffrey A Law  (law@cygnus.com)
 	operand.  If it does, allocate frag with frag_var and don't
 	do any fixups.
 
-end-sanitize-v850
 Mon Oct 28 10:48:40 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.h (md_cleanup): New function.  This is needed to
@@ -2785,7 +2767,6 @@ Fri Oct 25 00:01:00 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* write.c (fix_new_exp): Use make_expr_symbol to build an
 	expression symbol for a complex fixup.
 
-start-sanitize-v850
 Thu Oct 24 14:31:04 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-v850.c (v850_reloc_prefix): Several disgusting
@@ -2805,13 +2786,11 @@ Thu Oct 24 14:31:04 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-v850.h (tc_fix_adjustable): Don't adjust TDA relocs.
 
-end-sanitize-v850
 Wed Oct 23 18:20:29 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-ppc.c (md_apply_fix3): Give a better warning message
 	for an unknown relocation type.
 
-start-sanitize-v850
 Wed Oct 23 16:21:28 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-v850.c (md_pseudo_table): Add .word; allocates
@@ -2822,7 +2801,6 @@ Tue Oct 22 22:01:25 1996  Jeffrey A Law  (law@cygnus.com)
 	* config/tc-v850.c (md_assemble): Handle TDAOFF relocs
 	differently for movea & sst/sld insns.
 
-end-sanitize-v850
 Tue Oct 22 17:09:32 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-d10v.c (parallel_ok): Don't allow illegal combinations
@@ -2865,7 +2843,6 @@ Thu Oct 17 17:55:17 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in ($(OBJS)): Depend upon libiberty.h.
 
-start-sanitize-v850
 Wed Oct 16 11:28:31 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-v850.c (v850_reloc_prefix): Recognize zdaoff, tdaoff
@@ -2886,7 +2863,6 @@ Tue Oct 15 23:19:00 1996  Jeffrey A Law  (law@cygnus.com)
 	(md_pcrel_from_section): New function.
 	* config/tc-v850.h (MD_PCREL_FROM_SECTION): Define.
 
-end-sanitize-v850
 Mon Oct 14 13:59:12 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (load_register): Add cast to offsetT when using
@@ -3039,13 +3015,11 @@ Tue Oct  1 12:37:48 1996  Ian Lance Taylor  <ian@cygnus.com>
  	(alpha_macros): Move to top of file.  Make static.
 	(alpha_num_macros): Move to top of file.
 
-start-sanitize-v850
 Tue Oct  1 09:36:19 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* tc-v850.h:  Define LOCAL_LABEL to recognise _.L_* symbols
 	generated by DWARF.
 
-end-sanitize-v850
 Sat Sep 28 03:38:08 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* listing.c (list_symbol_table): Remove bogus code in BFD64 case,
@@ -3183,7 +3157,6 @@ Tue Sep  3 13:52:56 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* config/tc-d10v.c: Added changes to support function
 	pointers and "@word" syntax.
 
-start-sanitize-v850
 Tue Sep  3 11:57:18 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-v850.c: Remove commented out and #if 0'd code.
@@ -3220,7 +3193,6 @@ Fri Aug 30 18:35:26 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 	(md_apply_fix3): handle fixups/relocs.
 	* config/tc-v850.h (MD_PCREL_FROM_SECTION): Removed definition.
 	
-end-sanitize-v850
 Fri Aug 30 18:12:00 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	Add SH ELF support.
@@ -3274,7 +3246,6 @@ Fri Aug 30 14:47:38 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* config/tc-d10v.c (find_opcode): Fix problem with calculating 
 	branch sizes in across sections.
 
-start-sanitize-v850
 Fri Aug 30 00:44:13 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-850.c (md_assemble): Handle hi() correctly.  Handle
@@ -3285,7 +3256,6 @@ Wed Aug 28 23:11:08 1996  Jeffrey A Law  (law@cygnus.com)
 	* config/tc-v850.c (md_begin): Deal with end of opcode
 	table marker.
 
-end-sanitize-v850
 Wed Aug 28 19:20:04 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c (find_opcode): Fix a bug which could generate
@@ -3335,7 +3305,6 @@ Fri Aug 23 11:40:47 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* doc/c-d10v.texi: Fix typo. 
 
-start-sanitize-v850
 Fri Aug 23 10:41:32 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-v850.c (md_assemble): Correct bit masking for
@@ -3364,7 +3333,6 @@ Fri Aug 23 10:41:32 1996  Jeffrey A Law  (law@cygnus.com)
 	opcode doesn't want a register, then we don't have a match.
 	(md_assemble): Get size of the instruction from the opcode table.
 
-end-sanitize-v850
 Thu Aug 22 10:20:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Set and substitute HLDENV.
@@ -3380,7 +3348,6 @@ Thu Aug 22 10:50:00 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* config/tc-d10v.c: Fix a reloc bug caused by my last change. 
 	* doc/c-d10v.texi: Cleanup.
 	
-start-sanitize-v850
 Tue Aug 20 15:15:16 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 
 	* config/tc-v850.c: New file.
@@ -3388,7 +3355,6 @@ Tue Aug 20 15:15:16 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 	* configure (v850-*-elf): New target.
 	* configure.in (v850-*-elf): New target.
 	
-end-sanitize-v850
 Wed Aug 21 15:50:54 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* doc/c-d10v.texi: New file.
