@@ -45,9 +45,10 @@ create_mem_region (CORE_ADDR lo, CORE_ADDR hi,
 {
   struct mem_region *n, *new;
 
-  if (lo > hi)
+  /* lo == hi is a useless empty region */
+  if (lo >= hi)
     {
-      printf_unfiltered ("invalid memory region\n");
+      printf_unfiltered ("invalid memory region: low >= high\n");
       return NULL;
     }
 
@@ -55,8 +56,8 @@ create_mem_region (CORE_ADDR lo, CORE_ADDR hi,
   while (n)
     {
       /* overlapping node */
-      if ((lo >= n->lo && lo <= n->hi) ||
-	  (hi >= n->lo && hi <= n->hi))
+      if ((lo >= n->lo && lo < n->hi) ||
+	  (hi > n->lo && hi <= n->hi))
 	{
 	  printf_unfiltered ("overlapping memory region\n");
 	  return NULL;
