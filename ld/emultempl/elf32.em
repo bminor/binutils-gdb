@@ -65,8 +65,7 @@ static void gld${EMULATION_NAME}_find_statement_assignment
 static void gld${EMULATION_NAME}_find_exp_assignment PARAMS ((etree_type *));
 static boolean gld${EMULATION_NAME}_place_orphan
   PARAMS ((lang_input_statement_type *, asection *));
-static void gld${EMULATION_NAME}_place_section
-  PARAMS ((lang_statement_union_type *));
+static lang_output_section_statement_type *output_rel_find PARAMS ((void));
 static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
 
 static void
@@ -865,21 +864,12 @@ gld${EMULATION_NAME}_find_exp_assignment (exp)
 /* Place an orphan section.  We use this to put random SHF_ALLOC
    sections in the right segment.  */
 
-static asection *hold_section;
-static lang_output_section_statement_type *hold_use;
-
 struct orphan_save
 {
   lang_output_section_statement_type *os;
   asection **section;
   lang_statement_union_type **stmt;
 };
-static struct orphan_save hold_text;
-static struct orphan_save hold_rodata;
-static struct orphan_save hold_data;
-static struct orphan_save hold_bss;
-static struct orphan_save hold_rel;
-static struct orphan_save hold_interp;
 
 /*ARGSUSED*/
 static boolean
@@ -887,6 +877,12 @@ gld${EMULATION_NAME}_place_orphan (file, s)
      lang_input_statement_type *file;
      asection *s;
 {
+  static struct orphan_save hold_text;
+  static struct orphan_save hold_rodata;
+  static struct orphan_save hold_data;
+  static struct orphan_save hold_bss;
+  static struct orphan_save hold_rel;
+  static struct orphan_save hold_interp;
   struct orphan_save *place;
   lang_statement_list_type *old;
   lang_statement_list_type add;
@@ -895,19 +891,22 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   const char *outsecname;
   lang_output_section_statement_type *os;
 
-  /* Look through the script to see where to place this section.  */
-  hold_section = s;
-  hold_use = NULL;
-  lang_for_each_statement (gld${EMULATION_NAME}_place_section);
+  secname = bfd_get_section_name (s->owner, s);
 
-  if (hold_use != NULL)
+  /* Look through the script to see where to place this section.  */
+  os = lang_output_section_find (secname);
+
+  if (os != NULL
+      && os->bfd_section != NULL
+      && ((s->flags ^ os->bfd_section->flags) & (SEC_LOAD | SEC_ALLOC)) == 0)
     {
       /* We have already placed a section with this name.  */
-      wild_doit (&hold_use->children, s, hold_use, file);
+      wild_doit (&os->children, s, os, file);
       return true;
     }
 
-  secname = bfd_get_section_name (s->owner, s);
+  if (hold_text.os == NULL)
+    hold_text.os = lang_output_section_find (".text");
 
   /* If this is a final link, then always put .gnu.warning.SYMBOL
      sections into the .text section to get them out of the way.  */
@@ -925,32 +924,38 @@ gld${EMULATION_NAME}_place_orphan (file, s)
      right after the .interp section, so that the PT_NOTE segment is
      stored right after the program headers where the OS can read it
      in the first page.  */
+#define HAVE_SECTION(hold, name) \
+(hold.os != NULL || (hold.os = lang_output_section_find (name)) != NULL)
+
   if (s->flags & SEC_EXCLUDE)
     return false;
   else if ((s->flags & SEC_ALLOC) == 0)
     place = NULL;
   else if ((s->flags & SEC_LOAD) != 0
 	   && strncmp (secname, ".note", 4) == 0
-	   && hold_interp.os != NULL)
+	   && HAVE_SECTION (hold_interp, ".interp"))
     place = &hold_interp;
   else if ((s->flags & SEC_HAS_CONTENTS) == 0
-	   && hold_bss.os != NULL)
+	   && HAVE_SECTION (hold_bss, ".bss"))
     place = &hold_bss;
   else if ((s->flags & SEC_READONLY) == 0
-	   && hold_data.os != NULL)
+	   && HAVE_SECTION (hold_data, ".data"))
     place = &hold_data;
   else if (strncmp (secname, ".rel", 4) == 0
-	   && hold_rel.os != NULL)
+	   && (hold_rel.os != NULL
+	       || (hold_rel.os = output_rel_find ()) != NULL))
     place = &hold_rel;
   else if ((s->flags & SEC_CODE) == 0
 	   && (s->flags & SEC_READONLY) != 0
-	   && hold_rodata.os != NULL)
+	   && HAVE_SECTION (hold_rodata, ".rodata"))
     place = &hold_rodata;
   else if ((s->flags & SEC_READONLY) != 0
 	   && hold_text.os != NULL)
     place = &hold_text;
   else
     place = NULL;
+
+#undef HAVE_SECTION
 
   /* Choose a unique name for the section.  This will be needed if the
      same section name appears in the input file with different
@@ -1006,13 +1011,12 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   else
     address = NULL;
 
-  lang_enter_output_section_statement (outsecname, address, 0,
-				       (bfd_vma) 0,
-				       (etree_type *) NULL,
-				       (etree_type *) NULL,
-				       (etree_type *) NULL);
+  os = lang_enter_output_section_statement (outsecname, address, 0,
+					    (bfd_vma) 0,
+					    (etree_type *) NULL,
+					    (etree_type *) NULL,
+					    (etree_type *) NULL);
 
-  os = lang_output_section_statement_lookup (outsecname);
   wild_doit (&os->children, s, os, file);
 
   lang_leave_output_section_statement
@@ -1086,38 +1090,26 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   return true;
 }
 
-static void
-gld${EMULATION_NAME}_place_section (s)
-     lang_statement_union_type *s;
+/* A variant of lang_output_section_find.  */
+static lang_output_section_statement_type *
+output_rel_find ()
 {
-  lang_output_section_statement_type *os;
+  lang_statement_union_type *u;
+  lang_output_section_statement_type *lookup;
 
-  if (s->header.type != lang_output_section_statement_enum)
-    return;
-
-  os = &s->output_section_statement;
-
-  if (strcmp (os->name, hold_section->name) == 0
-      && os->bfd_section != NULL
-      && ((hold_section->flags & (SEC_LOAD | SEC_ALLOC))
-	  == (os->bfd_section->flags & (SEC_LOAD | SEC_ALLOC))))
-    hold_use = os;
-
-  if (strcmp (os->name, ".text") == 0)
-    hold_text.os = os;
-  else if (strcmp (os->name, ".rodata") == 0)
-    hold_rodata.os = os;
-  else if (strcmp (os->name, ".data") == 0)
-    hold_data.os = os;
-  else if (strcmp (os->name, ".bss") == 0)
-    hold_bss.os = os;
-  else if (hold_rel.os == NULL
-	   && os->bfd_section != NULL
-	   && (os->bfd_section->flags & SEC_ALLOC) != 0
-	   && strncmp (os->name, ".rel", 4) == 0)
-    hold_rel.os = os;
-  else if (strcmp (os->name, ".interp") == 0)
-    hold_interp.os = os;
+  for (u = lang_output_section_statement.head;
+       u != (lang_statement_union_type *) NULL;
+       u = lookup->next)
+    {
+      lookup = &u->output_section_statement;
+      if (strncmp (".rel", lookup->name, 4) == 0
+	  && lookup->bfd_section != NULL
+	  && (lookup->bfd_section->flags & SEC_ALLOC) != 0)
+	{
+	  return lookup;
+	}
+    }
+  return (lang_output_section_statement_type *) NULL;
 }
 
 static char *

@@ -102,8 +102,6 @@ static void gld_${EMULATION_NAME}_after_parse PARAMS ((void));
 static void gld_${EMULATION_NAME}_before_allocation PARAMS ((void));
 static boolean gld_${EMULATION_NAME}_place_orphan
   PARAMS ((lang_input_statement_type *, asection *));
-static void gld${EMULATION_NAME}_place_section
-  PARAMS ((lang_statement_union_type *));
 static char *gld_${EMULATION_NAME}_get_script PARAMS ((int *));
 static int gld_${EMULATION_NAME}_parse_args PARAMS ((int, char **));
 static void gld_${EMULATION_NAME}_finish PARAMS ((void));
@@ -1074,23 +1072,12 @@ gld_${EMULATION_NAME}_finish ()
    default linker script using wildcards, and are sorted by
    sort_sections.  */
 
-static asection *hold_section;
-static char *hold_section_name;
-static lang_output_section_statement_type *hold_use;
-
 struct orphan_save
 {
   lang_output_section_statement_type *os;
   asection **section;
   lang_statement_union_type **stmt;
 };
-static struct orphan_save hold_text;
-static struct orphan_save hold_rdata;
-static struct orphan_save hold_data;
-static struct orphan_save hold_bss;
-
-/* Place an orphan section.  We use this to put random SHF_ALLOC
-   sections in the right segment.  */
 
 /*ARGSUSED*/
 static boolean
@@ -1099,14 +1086,14 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
      asection *s;
 {
   const char *secname;
+  char *hold_section_name;
   char *dollar = NULL;
+  lang_output_section_statement_type *os;
   lang_statement_list_type add_child;
 
   secname = bfd_get_section_name (s->owner, s);
 
   /* Look through the script to see where to place this section.  */
-
-  hold_section = s;
 
   hold_section_name = xstrdup (secname);
   if (!link_info.relocateable)
@@ -1116,18 +1103,23 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 	*dollar = '\0';
     }
 
-  hold_use = NULL;
-  lang_for_each_statement (gld${EMULATION_NAME}_place_section);
+  os = lang_output_section_find (hold_section_name);
 
   lang_list_init (&add_child);
 
-  if (hold_use != NULL)
+  if (os != NULL
+      && os->bfd_section != NULL
+      && ((s->flags ^ os->bfd_section->flags) & (SEC_LOAD | SEC_ALLOC)) == 0)
     {
-      wild_doit (&add_child, s, hold_use, file);
+      wild_doit (&add_child, s, os, file);
     }
   else
     {
       struct orphan_save *place;
+      static struct orphan_save hold_text;
+      static struct orphan_save hold_rdata;
+      static struct orphan_save hold_data;
+      static struct orphan_save hold_bss;
       char *outsecname;
       lang_statement_list_type *old;
       lang_statement_list_type add;
@@ -1135,22 +1127,27 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 
       /* Try to put the new output section in a reasonable place based
 	 on the section name and section flags.  */
+#define HAVE_SECTION(hold, name) \
+(hold.os != NULL || (hold.os = lang_output_section_find (name)) != NULL)
+
       place = NULL;
       if ((s->flags & SEC_ALLOC) == 0)
 	;
       else if ((s->flags & SEC_HAS_CONTENTS) == 0
-	       && hold_bss.os != NULL)
+	       && HAVE_SECTION (hold_bss, ".bss"))
 	place = &hold_bss;
       else if ((s->flags & SEC_READONLY) == 0
-	       && hold_data.os != NULL)
+	       && HAVE_SECTION (hold_data, ".data"))
 	place = &hold_data;
       else if ((s->flags & SEC_CODE) == 0
 	       && (s->flags & SEC_READONLY) != 0
-	       && hold_rdata.os != NULL)
+	       && HAVE_SECTION (hold_rdata, ".rdata"))
 	place = &hold_rdata;
       else if ((s->flags & SEC_READONLY) != 0
-	       && hold_text.os != NULL)
+	       && HAVE_SECTION (hold_text, ".text"))
 	place = &hold_text;
+
+#undef HAVE_SECTION
 
       /* Choose a unique name for the section.  This will be needed if
 	 the same section name appears in the input file with
@@ -1192,19 +1189,17 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 			      exp_nameop (NAME, "__section_alignment__"));
 	}
 
-      lang_enter_output_section_statement (outsecname, address, 0,
-					   (bfd_vma) 0,
-					   (etree_type *) NULL,
-					   (etree_type *) NULL,
-					   (etree_type *) NULL);
+      os = lang_enter_output_section_statement (outsecname, address, 0,
+						(bfd_vma) 0,
+						(etree_type *) NULL,
+						(etree_type *) NULL,
+						(etree_type *) NULL);
 
-      hold_use = lang_output_section_statement_lookup (outsecname);
-      wild_doit (&add_child, s, hold_use, file);
+      wild_doit (&add_child, s, os, file);
 
       lang_leave_output_section_statement
 	((bfd_vma) 0, "*default*",
-	 (struct lang_output_section_phdr_list *) NULL,
-	"*default*");
+	 (struct lang_output_section_phdr_list *) NULL, "*default*");
 
       stat_ptr = old;
 
@@ -1212,7 +1207,7 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 	{
 	  asection *snew, **pps;
 
-	  snew = hold_use->bfd_section;
+	  snew = os->bfd_section;
 	  if (place->os->bfd_section != NULL || place->section != NULL)
 	    {
 	      /* Shuffle the section to make the output file look neater.  */
@@ -1261,7 +1256,7 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
     }
 
   {
-    lang_statement_union_type **pl = &hold_use->children.head;
+    lang_statement_union_type **pl = &os->children.head;
 
     if (dollar != NULL)
       {
@@ -1306,33 +1301,6 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
   free (hold_section_name);
 
   return true;
-}
-
-static void
-gld${EMULATION_NAME}_place_section (s)
-     lang_statement_union_type *s;
-{
-  lang_output_section_statement_type *os;
-
-  if (s->header.type != lang_output_section_statement_enum)
-    return;
-
-  os = &s->output_section_statement;
-
-  if (strcmp (os->name, hold_section_name) == 0
-      && os->bfd_section != NULL
-      && ((hold_section->flags & (SEC_LOAD | SEC_ALLOC))
-	  == (os->bfd_section->flags & (SEC_LOAD | SEC_ALLOC))))
-    hold_use = os;
-
-  if (strcmp (os->name, ".text") == 0)
-    hold_text.os = os;
-  else if (strcmp (os->name, ".rdata") == 0)
-    hold_rdata.os = os;
-  else if (strcmp (os->name, ".data") == 0)
-    hold_data.os = os;
-  else if (strcmp (os->name, ".bss") == 0)
-    hold_bss.os = os;
 }
 
 static int
