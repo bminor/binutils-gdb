@@ -1,3 +1,8 @@
+Thu Aug  8 14:29:32 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lib/ld.exp: Use verbose -log instead of calling both verbose and
+	send_log.
+
 Wed Aug  7 18:00:58 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-scripts/phdrs.exp: New test.
