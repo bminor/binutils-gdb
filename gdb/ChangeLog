@@ -1,3 +1,7 @@
+2001-03-27  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* TODO (Cleanups): Remove the item about converting docs to GFDL.
+
 2001-03-26  Kevin Buettner  <kevinb@redhat.com>
 
 	* ia64-tdep.c (slotN_contents, replace_slotN_contents): Change
