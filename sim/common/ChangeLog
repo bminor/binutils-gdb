@@ -1,3 +1,9 @@
+2002-06-17  Andrew Cagney  <cagney@redhat.com>
+
+	* sim-memopt.c: Include <unistd.h>.
+	(do_memopt_add): Fix printf format.
+	* sim-events.c (sim_events_schedule): Initialize ``dummy''.
+
 2002-06-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* aclocal.m4 (SIM_AC_OPTION_WARNINGS): Update to match GDB's
