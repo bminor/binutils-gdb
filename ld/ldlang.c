@@ -800,6 +800,8 @@ lookup_name (name)
   else
     einfo ("%F%B: file not recognized: %E\n", search->the_bfd);
 
+  bfd_set_gp_size (search->the_bfd, g_switch_value);
+
   if (bfd_link_add_symbols (search->the_bfd, &link_info) == false)
     einfo ("%F%B: could not read symbols: %E\n", search->the_bfd);
 

@@ -1,5 +1,8 @@
 Mon Jan 24 12:56:37 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* ldlang.c (lookup_name): Set BFD GP size to -G argument value
+	after opening BFD.
+
 	* ldlang.c (relaxing): Removed global variable.
 	(lang_size_sections): If the canonical symbols have not already
 	been read in, read them in before relaxing.
