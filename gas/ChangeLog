@@ -24,7 +24,7 @@ Thu Sep 22 13:39:10 1994  Kung Hsu  (kung@x1.cygnus.com)
 
 	* ecoff.c (ecoff_generate_asm_lineno): check if
 	current_stabs_filename is NULL before strcmp.
-	* read.c (read_a_source_file): fxi a bug in generate_asm_lineno
+	* read.c (read_a_source_file): fix a bug in generate_asm_lineno
 	checking.
 
 Wed Sep 21 18:17:35 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
@@ -47,7 +47,7 @@ Wed Sep 21 18:17:35 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	md_create_short_jump, md_create_long_jump.
 	(brtab_emit): Use data_section, not SEG_DATA.
 
-	Mon Aug 19 17:14:44 1994  Pat Rankin  (rankin@eql.caltech.edu)
+	Mon Sep 19 17:14:44 1994  Pat Rankin  (rankin@eql.caltech.edu)
 
 	* config/vms-conf.h: new file, manually derived from conf.in.
 	* config-gas.com: use it, and eliminate obsolete "host.h".
