@@ -1,3 +1,8 @@
+Fri Jan  2 16:08:54 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-i386.c (i386_operand): Give an error if there are
+	unrecognized characters after an expression.
+
 Wed Dec 31 12:29:47 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10200.c (md_relax_table): Correct branch ranges.

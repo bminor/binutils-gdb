@@ -302,18 +302,18 @@ i386_align_code (fragP, count)
     {0xeb,0x0d,0x90,0x90,0x90,0x90,0x90,	/* jmp .+15; lotsa nops	*/
      0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90};
   static const char f16_4[] =
-    {0x8d,0xb6,0x00,0x00};			/* lea 0w(%si),%si	*/
+    {0x8d,0xb4,0x00,0x00};			/* lea 0w(%si),%si	*/
   static const char f16_5[] =
     {0x90,					/* nop			*/
-     0x8d,0xb6,0x00,0x00};			/* lea 0w(%si),%si	*/
+     0x8d,0xb4,0x00,0x00};			/* lea 0w(%si),%si	*/
   static const char f16_6[] =
     {0x89,0xf6,					/* mov %si,%si		*/
      0x8d,0xbd,0x00,0x00};			/* lea 0w(%di),%di	*/
   static const char f16_7[] =
-    {0x8d,0x76,0x00,				/* lea 0(%si),%si	*/
+    {0x8d,0x74,0x00,				/* lea 0(%si),%si	*/
      0x8d,0xbd,0x00,0x00};			/* lea 0w(%di),%di	*/
   static const char f16_8[] =
-    {0x8d,0xb6,0x00,0x00,			/* lea 0w(%si),%si	*/
+    {0x8d,0xb4,0x00,0x00,			/* lea 0w(%si),%si	*/
      0x8d,0xbd,0x00,0x00};			/* lea 0w(%di),%di	*/
   static const char *const f32_patt[] = {
     f32_1, f32_2, f32_3, f32_4, f32_5, f32_6, f32_7, f32_8,
@@ -2112,6 +2112,9 @@ i386_operand (operand_string)
       input_line_pointer = ++op_string;	/* must advance op_string! */
       SKIP_WHITESPACE ();
       exp_seg = expression (exp);
+      if (*input_line_pointer != '\0')
+	as_bad ("unrecognized characters `%s' in expression",
+		input_line_pointer);
       input_line_pointer = save_input_line_pointer;
 
       if (exp->X_op == O_absent)
@@ -2718,6 +2721,9 @@ md_apply_fix3 (fixP, valp, seg)
 {
   register char *p = fixP->fx_where + fixP->fx_frag->fr_literal;
   valueT value = *valp;
+
+  if (fixP->fx_r_type == BFD_RELOC_32 && fixP->fx_pcrel)
+     fixP->fx_r_type = BFD_RELOC_32_PCREL;
 
 #if defined (BFD_ASSEMBLER) && !defined (TE_Mach)
   /*
