@@ -44,6 +44,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "coff/internal.h"
 #include "../bfd/libcoff.h"
 
+#define TARGET_IS_${EMULATION_NAME}
+
 static void gld_${EMULATION_NAME}_before_parse PARAMS ((void));
 static char *gld_${EMULATION_NAME}_get_script PARAMS ((int *isfile));
 
@@ -253,7 +255,7 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
       return 0;
 
     case OPTION_BASE_FILE:
-      link_info.base_file = (PTR) fopen (optarg,"w");
+      link_info.base_file = (PTR) fopen (optarg, FOPEN_WB);
       if (link_info.base_file == NULL)
 	{
 	  fprintf (stderr, "%s: Can't open base file %s\n",
@@ -319,9 +321,10 @@ gld_${EMULATION_NAME}_set_symbols()
       ? NT_DLL_IMAGE_BASE : NT_EXE_IMAGE_BASE;
 
   /* Glue the assignments into the abs section */
-  save=stat_ptr;
+  save = stat_ptr;
 
   stat_ptr = &(abs_output_section->children);
+
   for (j = 0; init[j].ptr; j++)
     {
       long val = init[j].value;
@@ -444,6 +447,20 @@ static void
 gld_${EMULATION_NAME}_before_allocation()
 {
   extern lang_statement_list_type *stat_ptr;
+
+#ifdef TARGET_IS_ppcpe
+  /* Here we rummage through the found bfds to collect toc information */
+  {
+    LANG_FOR_EACH_INPUT_STATEMENT (is)
+      {
+	ppc_process_before_allocation(is->the_bfd, &link_info);
+      }
+  }
+
+  /* We have seen it all. Allocate it, and carry on */
+  ppc_allocate_toc_section (&link_info);
+#endif
+
   sort_sections (*stat_ptr);
 }
 
