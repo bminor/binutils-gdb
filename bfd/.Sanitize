@@ -86,6 +86,7 @@ hppa.c
 i386aout.c
 i386bsd.c
 i386linux.c
+i386lynx.c
 ieee.c
 libaout.h
 libbfd-in.h
