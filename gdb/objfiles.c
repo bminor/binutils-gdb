@@ -898,7 +898,7 @@ map_to_file (fd)
 	{
 	  /* This is a freshly created mapping file. */
 	  mapto = (CORE_ADDR) mmalloc_findbase (20 * 1024 * 1024);
-	  if (mapto != -1)
+	  if (mapto != NULL)
 	    {
 	      /* To avoid reusing the freshly created mapping file, at the 
 		 address selected by mmap, we must truncate it before trying

@@ -1,3 +1,8 @@
+Fri Jul 12 17:59:47 1996  Fred Fish  <fnf@ninemoons.com>
+
+	* objfiles.c (map_to_file): Error return from mmalloc_findbase is
+	a NULL pointer, not a -1.
+
 Fri Jul 12 10:16:24 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* i386-tdep.c (set_assembly_language_command):  New routine to
