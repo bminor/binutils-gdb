@@ -1519,7 +1519,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 		  {
 		    bfd_vma val;
 		    val = bfd_get_32 (input_bfd, contents + rel->r_offset);
-		    val += (sec->output_offset + sym->st_value) >> howto->rightshift;
+		    val += (sec->output_offset + sym->st_value);
 		    bfd_put_32 (input_bfd, val, contents + rel->r_offset);
 		  }
 #else

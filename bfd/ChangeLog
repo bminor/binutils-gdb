@@ -1,3 +1,8 @@
+1999-05-24  Philip Blundell  <pb@nexus.co.uk>
+
+	* elf32-arm.h (elf32_arm_relocate_section): Undo change of
+ 	1999-03-25.
+
 Mon May 17 13:35:35 1999  Stan Cox  <scox@cygnus.com>
 	* coff-arm.c (_bfd_coff_arm_set_private_flags): Changed
 	F_PIC_INT to F_PIC.
