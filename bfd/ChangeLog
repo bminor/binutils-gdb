@@ -1,3 +1,9 @@
+Fri Aug 15 12:01:28 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffgen.c (coff_find_nearest_line): Correctly handle the offset
+	argument as section relative, rather than an absolute address.
+	From Jan Hoogenraad <hoogenrd@natlab.research.philips.com>.
+
 Fri Aug 15 04:58:02 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config.bfd (arc-*-elf*): Add.
