@@ -993,7 +993,7 @@ proc test_print_mvi_classes {} {
 	-re ".* = \{\<vD\> = \{\<vB\> = \{\<vA\> = \{va = 0, vx = 0\}, ${vbptr}vA = $hex, vb = 0, vx = 0\}, \<vC\> = \{${vbptr}vA = $hex, vc = 0, vx = 0\}, ${vbptr}vC = $hex, ${vbptr}vB = $hex, vd = 0, vx = 0\}, ${vbptr}vD = $hex, ve = 27, vx = 28\}$nl$gdb_prompt $" {
 	    pass "print g_vE"
 	}
-	-re ".* = \{\<vD\> = \{\<vB\> = \{\<vA\> = \{va = 0, vx = 0\}, _vptr.vB = $hex, vb = 0, vx = 0\}, \<vC\> = \{_vptr.vC = $hex, vc = 0, vx = 0\}, _vptr.vD = $hex, vd = 0, vx = 0\}, _vptr.vE = $hex, ve = 27, vx = 28\}$nl$gdb_prompt $" {
+	-re ".* = \{\<vD\> = \{\<vB\> = \{\<vA\> = \{va = 0, vx = 0\}, _vptr.vB = $hex *(\<VTT for vD\>)?, vb = 0, vx = 0\}, \<vC\> = \{_vptr.vC = $hex *(\<VTT for vD\>)?, vc = 0, vx = 0\}, _vptr.vD = $hex, vd = 0, vx = 0\}, _vptr.vE = $hex, ve = 27, vx = 28\}$nl$gdb_prompt $" {
 	    pass "print g_vE (FIXME v3 vtbl ptr)"
 	}
 	-re ".*$gdb_prompt $" { fail "print g_vE" }
