@@ -1,3 +1,18 @@
+Sun Mar  8 21:17:48 1992  Fred Fish  (fnf@cygnus.com)
+
+	* symfile.h:  Add prototype for iterate_over_msymbols().
+	* symtab.c (cplus_mangled_symbol):  Add function.
+	* symtab.c (lookup_symbol):  Call cplus_mangled_symbol via
+	iterate_over_msymbols to find demangled C++ symbol.
+	* xcoffexec.c (relocate_minimal_symbol): Return meaningful
+	value to iterate_over_msymbols().
+	* xcoffexec.c (vmap_symtab):  Ignore return from iterate_over_
+	msymbols().
+
+Fri Mar  6 21:59:34 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: added check target.
+
 Thu Mar  5 23:56:01 1992  John Gilmore  (gnu at cygnus.com)
 
 	* ecoff.c:  Move to ../bfd/coff-msym.c.
@@ -11,6 +26,13 @@ Thu Mar  5 23:56:01 1992  John Gilmore  (gnu at cygnus.com)
 	* mipsread.c (fixup_symtab):  Also swap RFD's.
 	(parse_partial_symbols):  Avoid bug on unknown symbol types.
 	* Makefile.in (VERSION):  Roll to 4.4.5.
+	* mips-tdep.c (heuristic_proc_start):  Avoid long delays
+	for remote MIPS by limiting heuristic to 200 byte search.
+	(heuristic_proc_desc):  Byte-swapping.
+	(mips_print_register):  Cope with failure of
+	read_relative_register_raw_bytes.  Byte-swap integers for
+	printing.
+	* mips-pinsn.c (print_insn):  Byte-swap instruction.
 
 Thu Mar  5 12:32:09 1992  Stu Grossman  (grossman at cygnus.com)
 
@@ -31,6 +53,10 @@ Wed Mar  4 11:56:42 1992  Fred Fish  (fnf@cygnus.com)
 	* tm-i386v.h (SP_ARG0):  Define
 	* xm-sysv4.h:  Back out of change for missing prototypes.
 	* i386-tdep.c (get_longjmp_target):  Add function.
+
+Wed Mar  4 05:46:11 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* Makefile.in: install man page too.
 
 Tue Mar  3 15:11:52 1992  Michael Tiemann  (tiemann@cygnus.com)
 
@@ -225,6 +251,12 @@ Thu Feb 27 06:11:05 1992  John Gilmore  (gnu at cygnus.com)
 	* symfile.c (symbol_file_command):  free all objfiles when
 	specifying a new symbol file.
 	(reread_symbols):  Stat the file name, don't fstat the descriptor.
+
+Wed Feb 26 18:04:40 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in, configure.in: removed traces of namesubdir,
+	  -subdirs, $(subdir), $(unsubdir), some rcs triggers.  Forced
+	  copyrights to '92, changed some from Cygnus to FSF.
 
 Tue Feb 25 19:31:19 1992  Stu Grossman  (grossman at cygnus.com)
 

@@ -330,7 +330,7 @@ map_vmap (bfd *bf, bfd *arch)
 
 /* Called via iterate_over_msymbols to relocate minimal symbols */
 
-static void
+static PTR
 relocate_minimal_symbol (objfile, msymbol, arg1, arg2, arg3)
      struct objfile *objfile;
      struct minimal_symbol *msymbol;
@@ -340,6 +340,7 @@ relocate_minimal_symbol (objfile, msymbol, arg1, arg2, arg3)
 {
   if (msymbol->address < TEXT_SEGMENT_BASE)
     msymbol -> address += (int) arg1;
+  return (NULL);
 }
 
 /* true, if symbol table and minimal symbol table are relocated. */
@@ -404,7 +405,7 @@ struct stat *vip;
       }
     }
   if (vp->tstart != old_start) {
-    iterate_over_msymbols (relocate_minimal_symbol,
+    (void) iterate_over_msymbols (relocate_minimal_symbol,
 			   (PTR) (vp->tstart - old_start),
 			   (PTR) NULL, (PTR) NULL);
 
