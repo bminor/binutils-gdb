@@ -115,6 +115,7 @@ WIN32LDFLAGS = @WIN32LDFLAGS@
 WIN32LIBADD = @WIN32LIBADD@
 all_backends = @all_backends@
 bfd_backends = @bfd_backends@
+bfd_default_target_size = @bfd_default_target_size@
 bfd_machines = @bfd_machines@
 l = @l@
 tdefaults = @tdefaults@

@@ -1,5 +1,16 @@
 2001-09-21  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+	* aoutx.h: Formatting fixes.
+	* merge.c (_bfd_merged_section_offset): Break line at 80 chars.
+
+	* linker.c: Replace bfd_get_filename with bfd_archive_filename
+	in error message.
+
+2001-09-21  Alan Modra  <amodra@bigpond.net.au>
+
 	* bfd.c (bfd_archive_filename): New function.
 	* bfd-in2.h: Regenerate.
 	* aout-adobe.c: Replace bfd_get_filename with bfd_archive_filename

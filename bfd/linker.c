@@ -1849,7 +1849,7 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	      {
 		(*_bfd_error_handler)
 		  (_("%s: indirect symbol `%s' to `%s' is a loop"),
-		   bfd_get_filename (abfd), name, string);
+		   bfd_archive_filename (abfd), name, string);
 		bfd_set_error (bfd_error_invalid_operation);
 		return false;
 	      }

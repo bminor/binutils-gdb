@@ -756,12 +756,13 @@ config.status: $(srcdir)/configure $(srcdir)/config.bfd $(srcdir)/configure.host
 # DO NOT DELETE THIS LINE -- mkdep uses it.
 # DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
 archive.lo: archive.c $(INCDIR)/filenames.h $(INCDIR)/aout/ar.h \
-  $(INCDIR)/aout/ranlib.h
-archures.lo: archures.c $(INCDIR)/filenames.h
+  $(INCDIR)/aout/ranlib.h $(INCDIR)/safe-ctype.h
+archures.lo: archures.c $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h
 bfd.lo: bfd.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/sym.h \
-  libcoff.h libecoff.h $(INCDIR)/coff/ecoff.h elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
+  $(INCDIR)/safe-ctype.h $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/sym.h libcoff.h libecoff.h $(INCDIR)/coff/ecoff.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h
 cache.lo: cache.c $(INCDIR)/filenames.h
 coffgen.lo: coffgen.c $(INCDIR)/filenames.h $(INCDIR)/coff/internal.h \
   libcoff.h $(INCDIR)/bfdlink.h
@@ -772,19 +773,21 @@ libbfd.lo: libbfd.c $(INCDIR)/filenames.h
 opncls.lo: opncls.c $(INCDIR)/filenames.h $(INCDIR)/objalloc.h
 reloc.lo: reloc.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h
 section.lo: section.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h
-syms.lo: syms.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def
+syms.lo: syms.c $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def
 targets.lo: targets.c $(INCDIR)/filenames.h $(INCDIR)/fnmatch.h \
   targmatch.h
 hash.lo: hash.c $(INCDIR)/filenames.h $(INCDIR)/objalloc.h
 linker.lo: linker.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   genlink.h
-srec.lo: srec.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h
-binary.lo: binary.c $(INCDIR)/filenames.h
+srec.lo: srec.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/safe-ctype.h
+binary.lo: binary.c $(INCDIR)/safe-ctype.h $(INCDIR)/filenames.h
 tekhex.lo: tekhex.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h
-ihex.lo: ihex.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h
+ihex.lo: ihex.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/safe-ctype.h
 stabs.lo: stabs.c $(INCDIR)/filenames.h $(INCDIR)/aout/stab_gnu.h \
-  $(INCDIR)/aout/stab.def
+  $(INCDIR)/aout/stab.def $(INCDIR)/safe-ctype.h
 stab-syms.lo: stab-syms.c libaout.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab.def
 merge.lo: merge.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
@@ -830,7 +833,7 @@ cpu-sparc.lo: cpu-sparc.c $(INCDIR)/filenames.h
 cpu-tic30.lo: cpu-tic30.c $(INCDIR)/filenames.h
 cpu-tic54x.lo: cpu-tic54x.c $(INCDIR)/filenames.h
 cpu-tic80.lo: cpu-tic80.c $(INCDIR)/filenames.h
-cpu-v850.lo: cpu-v850.c $(INCDIR)/filenames.h
+cpu-v850.lo: cpu-v850.c $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h
 cpu-vax.lo: cpu-vax.c $(INCDIR)/filenames.h
 cpu-we32k.lo: cpu-we32k.c $(INCDIR)/filenames.h
 cpu-w65.lo: cpu-w65.c $(INCDIR)/filenames.h
@@ -840,28 +843,31 @@ aout-adobe.lo: aout-adobe.c $(INCDIR)/filenames.h $(INCDIR)/aout/adobe.h \
   $(INCDIR)/bfdlink.h
 aout-arm.lo: aout-arm.c $(INCDIR)/filenames.h libaout.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h aoutx.h \
-  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h \
-  aout-target.h
+  $(INCDIR)/safe-ctype.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
+  $(INCDIR)/aout/ar.h aout-target.h
 aout-cris.lo: aout-cris.c aout32.c aoutx.h $(INCDIR)/filenames.h \
-  $(INCDIR)/bfdlink.h libaout.h $(INCDIR)/aout/aout64.h \
-  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h \
-  aout-target.h
+  $(INCDIR)/safe-ctype.h $(INCDIR)/bfdlink.h libaout.h \
+  $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
+  $(INCDIR)/aout/ar.h aout-target.h
 aout-ns32k.lo: aout-ns32k.c $(INCDIR)/aout/aout64.h \
-  ns32k.h libaout.h $(INCDIR)/bfdlink.h
+  ns32k.h libaout.h $(INCDIR)/bfdlink.h aoutx.h $(INCDIR)/filenames.h \
+  $(INCDIR)/safe-ctype.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
+  $(INCDIR)/aout/ar.h
 aout-sparcle.lo: aout-sparcle.c $(INCDIR)/bfdlink.h \
   libaout.h aoutf1.h $(INCDIR)/filenames.h $(INCDIR)/aout/sun4.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
   $(INCDIR)/aout/ar.h aout-target.h
 aout-tic30.lo: aout-tic30.c $(INCDIR)/filenames.h libaout.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
-  $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h aoutx.h
+  $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h aoutx.h \
+  $(INCDIR)/safe-ctype.h
 aout0.lo: aout0.c aoutf1.h $(INCDIR)/filenames.h $(INCDIR)/aout/sun4.h \
   libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h \
   aout-target.h
-aout32.lo: aout32.c aoutx.h $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
-  libaout.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
-  $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
+aout32.lo: aout32.c aoutx.h $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h \
+  $(INCDIR)/bfdlink.h libaout.h $(INCDIR)/aout/aout64.h \
+  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 armnetbsd.lo: armnetbsd.c netbsd.h $(INCDIR)/filenames.h \
   libaout.h $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
@@ -1013,10 +1019,10 @@ elf32-fr30.lo: elf32-fr30.c $(INCDIR)/filenames.h elf-bfd.h \
 elf32-gen.lo: elf32-gen.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h elf32-target.h
-elf32-h8300.lo: elf32-h8300.c $(INCDIR)/filenames.h elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/elf/h8.h $(INCDIR)/elf/reloc-macros.h \
-  elf32-target.h
+elf32-h8300.lo: elf32-h8300.c $(INCDIR)/filenames.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/h8.h \
+  $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-hppa.lo: elf32-hppa.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/hppa.h $(INCDIR)/elf/reloc-macros.h \
@@ -1093,10 +1099,10 @@ elf32-sh.lo: elf32-sh.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
-elf32-sh-lin.lo: elf32-sh-lin.c elf32-sh.c $(INCDIR)/filenames.h \
-  $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/sh.h \
-  $(INCDIR)/elf/reloc-macros.h elf32-target.h
+elf32-sh-lin.lo: elf32-sh-lin.c $(INCDIR)/filenames.h \
+  $(INCDIR)/elf/internal.h elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h elf32-sh.c \
+  $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-sparc.lo: elf32-sparc.c $(INCDIR)/filenames.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/sparc.h \
@@ -1125,9 +1131,10 @@ hp300bsd.lo: hp300bsd.c $(INCDIR)/filenames.h libaout.h \
   $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 hp300hpux.lo: hp300hpux.c $(INCDIR)/aout/hp300hpux.h \
-  aoutx.h $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h libaout.h \
-  $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
-  $(INCDIR)/aout/ar.h aout-target.h
+  aoutx.h $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h \
+  $(INCDIR)/bfdlink.h libaout.h $(INCDIR)/aout/aout64.h \
+  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h \
+  aout-target.h
 som.lo: som.c $(INCDIR)/alloca-conf.h $(INCDIR)/filenames.h
 i386aout.lo: i386aout.c $(INCDIR)/filenames.h $(INCDIR)/aout/aout64.h \
   libaout.h $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/stab_gnu.h \
@@ -1136,9 +1143,9 @@ i386bsd.lo: i386bsd.c $(INCDIR)/filenames.h libaout.h \
   $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 i386dynix.lo: i386dynix.c $(INCDIR)/aout/dynix3.h aoutx.h \
-  $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h libaout.h \
-  $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
-  $(INCDIR)/aout/ar.h aout-target.h
+  $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h $(INCDIR)/bfdlink.h \
+  libaout.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
+  $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h aout-target.h
 i386freebsd.lo: i386freebsd.c freebsd.h $(INCDIR)/filenames.h \
   libaout.h $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
@@ -1159,7 +1166,7 @@ i386mach3.lo: i386mach3.c $(INCDIR)/filenames.h $(INCDIR)/aout/aout64.h \
 i386os9k.lo: i386os9k.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   libaout.h $(INCDIR)/os9k.h
 ieee.lo: ieee.c $(INCDIR)/filenames.h $(INCDIR)/ieee.h \
-  libieee.h
+  libieee.h $(INCDIR)/safe-ctype.h
 m68k4knetbsd.lo: m68k4knetbsd.c netbsd.h $(INCDIR)/filenames.h \
   libaout.h $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
@@ -1198,14 +1205,14 @@ nlm32.lo: nlm32.c nlmcode.h $(INCDIR)/filenames.h libnlm.h \
 ns32knetbsd.lo: ns32knetbsd.c netbsd.h $(INCDIR)/filenames.h \
   libaout.h $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
-oasys.lo: oasys.c $(INCDIR)/filenames.h $(INCDIR)/oasys.h \
-  liboasys.h
+oasys.lo: oasys.c $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h \
+  $(INCDIR)/oasys.h liboasys.h
 pc532-mach.lo: pc532-mach.c $(INCDIR)/filenames.h libaout.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h aout-target.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 pdp11.lo: pdp11.c $(INCDIR)/filenames.h libaout.h $(INCDIR)/bfdlink.h \
   aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
-  $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
+  $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h $(INCDIR)/safe-ctype.h
 pe-arm.lo: pe-arm.c $(INCDIR)/filenames.h coff-arm.c \
   $(INCDIR)/coff/arm.h $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h coffcode.h \
@@ -1255,7 +1262,7 @@ pei-mips.lo: pei-mips.c $(INCDIR)/filenames.h pe-mips.c \
   $(INCDIR)/coff/mipspe.h $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h coffcode.h \
   peicode.h libpei.h
-ppcboot.lo: ppcboot.c $(INCDIR)/filenames.h
+ppcboot.lo: ppcboot.c $(INCDIR)/safe-ctype.h $(INCDIR)/filenames.h
 reloc16.lo: reloc16.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   genlink.h $(INCDIR)/coff/internal.h libcoff.h
 riscix.lo: riscix.c $(INCDIR)/filenames.h libaout.h \
@@ -1284,7 +1291,7 @@ vms.lo: vms.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
 vms-gsd.lo: vms-gsd.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   vms.h
 vms-hdr.lo: vms-hdr.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
-  vms.h
+  $(INCDIR)/safe-ctype.h vms.h
 vms-misc.lo: vms-misc.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   vms.h
 vms-tir.lo: vms-tir.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
@@ -1292,9 +1299,9 @@ vms-tir.lo: vms-tir.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
 xcofflink.lo: xcofflink.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/xcoff.h libcoff.h \
   libxcoff.h
-aout64.lo: aout64.c aoutx.h $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
-  libaout.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
-  $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
+aout64.lo: aout64.c aoutx.h $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h \
+  $(INCDIR)/bfdlink.h libaout.h $(INCDIR)/aout/aout64.h \
+  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 coff-alpha.lo: coff-alpha.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h \
   $(INCDIR)/coff/ecoff.h $(INCDIR)/coff/alpha.h $(INCDIR)/aout/ar.h \

@@ -139,7 +139,8 @@ static boolean translate_to_native_sym_flags
 static void adjust_o_magic PARAMS ((bfd *, struct internal_exec *));
 static void adjust_z_magic PARAMS ((bfd *, struct internal_exec *));
 static void adjust_n_magic PARAMS ((bfd *, struct internal_exec *));
-reloc_howto_type * NAME(aout,reloc_type_lookup) PARAMS ((bfd *, bfd_reloc_code_real_type));
+reloc_howto_type * NAME(aout,reloc_type_lookup)
+  PARAMS ((bfd *, bfd_reloc_code_real_type));
 
 /*
 SUBSECTION
@@ -157,9 +158,10 @@ DESCRIPTION
 */
 #ifndef CTOR_TABLE_RELOC_HOWTO
 #define CTOR_TABLE_RELOC_IDX 2
-#define CTOR_TABLE_RELOC_HOWTO(BFD) ((obj_reloc_entry_size(BFD) == RELOC_EXT_SIZE \
-	     ? howto_table_ext : howto_table_std) \
-	    + CTOR_TABLE_RELOC_IDX)
+#define CTOR_TABLE_RELOC_HOWTO(BFD)					\
+  ((obj_reloc_entry_size (BFD) == RELOC_EXT_SIZE			\
+    ? howto_table_ext : howto_table_std)				\
+   + CTOR_TABLE_RELOC_IDX)
 #endif
 
 #ifndef MY_swap_std_reloc_in
@@ -226,29 +228,23 @@ reloc_howto_type howto_table_ext[] =
 
 reloc_howto_type howto_table_std[] = {
   /* type              rs size bsz  pcrel bitpos ovrf                     sf name     part_inpl readmask  setmask    pcdone */
-HOWTO( 0,	       0,  0,  	8,  false, 0, complain_overflow_bitfield,0,"8",		true, 0x000000ff,0x000000ff, false),
-HOWTO( 1,	       0,  1, 	16, false, 0, complain_overflow_bitfield,0,"16",	true, 0x0000ffff,0x0000ffff, false),
-HOWTO( 2,	       0,  2, 	32, false, 0, complain_overflow_bitfield,0,"32",	true, 0xffffffff,0xffffffff, false),
-HOWTO( 3,	       0,  4, 	64, false, 0, complain_overflow_bitfield,0,"64",	true, 0xdeaddead,0xdeaddead, false),
-HOWTO( 4,	       0,  0, 	8,  true,  0, complain_overflow_signed,  0,"DISP8",	true, 0x000000ff,0x000000ff, false),
-HOWTO( 5,	       0,  1, 	16, true,  0, complain_overflow_signed,  0,"DISP16",	true, 0x0000ffff,0x0000ffff, false),
-HOWTO( 6,	       0,  2, 	32, true,  0, complain_overflow_signed,  0,"DISP32",	true, 0xffffffff,0xffffffff, false),
-HOWTO( 7,	       0,  4, 	64, true,  0, complain_overflow_signed,  0,"DISP64",	true, 0xfeedface,0xfeedface, false),
-HOWTO( 8,	       0,  2,    0, false, 0, complain_overflow_bitfield,0,"GOT_REL",	false,         0,0x00000000, false),
-HOWTO( 9,	       0,  1,   16, false, 0, complain_overflow_bitfield,0,"BASE16",	false,0xffffffff,0xffffffff, false),
-HOWTO(10,	       0,  2,   32, false, 0, complain_overflow_bitfield,0,"BASE32",	false,0xffffffff,0xffffffff, false),
+HOWTO ( 0,	       0,  0,  	8,  false, 0, complain_overflow_bitfield,0,"8",		true, 0x000000ff,0x000000ff, false),
+HOWTO ( 1,	       0,  1, 	16, false, 0, complain_overflow_bitfield,0,"16",	true, 0x0000ffff,0x0000ffff, false),
+HOWTO ( 2,	       0,  2, 	32, false, 0, complain_overflow_bitfield,0,"32",	true, 0xffffffff,0xffffffff, false),
+HOWTO ( 3,	       0,  4, 	64, false, 0, complain_overflow_bitfield,0,"64",	true, 0xdeaddead,0xdeaddead, false),
+HOWTO ( 4,	       0,  0, 	8,  true,  0, complain_overflow_signed,  0,"DISP8",	true, 0x000000ff,0x000000ff, false),
+HOWTO ( 5,	       0,  1, 	16, true,  0, complain_overflow_signed,  0,"DISP16",	true, 0x0000ffff,0x0000ffff, false),
+HOWTO ( 6,	       0,  2, 	32, true,  0, complain_overflow_signed,  0,"DISP32",	true, 0xffffffff,0xffffffff, false),
+HOWTO ( 7,	       0,  4, 	64, true,  0, complain_overflow_signed,  0,"DISP64",	true, 0xfeedface,0xfeedface, false),
+HOWTO ( 8,	       0,  2,    0, false, 0, complain_overflow_bitfield,0,"GOT_REL",	false,         0,0x00000000, false),
+HOWTO ( 9,	       0,  1,   16, false, 0, complain_overflow_bitfield,0,"BASE16",	false,0xffffffff,0xffffffff, false),
+HOWTO (10,	       0,  2,   32, false, 0, complain_overflow_bitfield,0,"BASE32",	false,0xffffffff,0xffffffff, false),
 EMPTY_HOWTO (-1),
 EMPTY_HOWTO (-1),
 EMPTY_HOWTO (-1),
 EMPTY_HOWTO (-1),
 EMPTY_HOWTO (-1),
-  HOWTO(16,	       0,  2,	 0, false, 0, complain_overflow_bitfield,0,"JMP_TABLE", false,         0,0x00000000, false),
-EMPTY_HOWTO (-1),
-EMPTY_HOWTO (-1),
-EMPTY_HOWTO (-1),
-EMPTY_HOWTO (-1),
-EMPTY_HOWTO (-1),
-EMPTY_HOWTO (-1),
+  HOWTO (16,	       0,  2,	 0, false, 0, complain_overflow_bitfield,0,"JMP_TABLE", false,         0,0x00000000, false),
 EMPTY_HOWTO (-1),
 EMPTY_HOWTO (-1),
 EMPTY_HOWTO (-1),
@@ -258,7 +254,13 @@ EMPTY_HOWTO (-1),
 EMPTY_HOWTO (-1),
 EMPTY_HOWTO (-1),
 EMPTY_HOWTO (-1),
-  HOWTO(32,	       0,  2,	 0, false, 0, complain_overflow_bitfield,0,"RELATIVE",  false,         0,0x00000000, false),
+EMPTY_HOWTO (-1),
+EMPTY_HOWTO (-1),
+EMPTY_HOWTO (-1),
+EMPTY_HOWTO (-1),
+EMPTY_HOWTO (-1),
+EMPTY_HOWTO (-1),
+  HOWTO (32,	       0,  2,	 0, false, 0, complain_overflow_bitfield,0,"RELATIVE",  false,         0,0x00000000, false),
 EMPTY_HOWTO (-1),
 EMPTY_HOWTO (-1),
 EMPTY_HOWTO (-1),
@@ -266,18 +268,18 @@ EMPTY_HOWTO (-1),
 EMPTY_HOWTO (-1),
 EMPTY_HOWTO (-1),
 EMPTY_HOWTO (-1),
-  HOWTO(40,	       0,  2,	 0, false, 0, complain_overflow_bitfield,0,"BASEREL",   false,         0,0x00000000, false),
+  HOWTO (40,	       0,  2,	 0, false, 0, complain_overflow_bitfield,0,"BASEREL",   false,         0,0x00000000, false),
 };
 
-#define TABLE_SIZE(TABLE)	(sizeof (TABLE)/sizeof (TABLE[0]))
+#define TABLE_SIZE(TABLE)	(sizeof (TABLE) / sizeof (TABLE[0]))
 
 reloc_howto_type *
 NAME(aout,reloc_type_lookup) (abfd,code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
 {
-#define EXT(i,j)	case i: return &howto_table_ext[j]
-#define STD(i,j)	case i: return &howto_table_std[j]
+#define EXT(i, j)	case i: return &howto_table_ext[j]
+#define STD(i, j)	case i: return &howto_table_std[j]
   int ext = obj_reloc_entry_size (abfd) == RELOC_EXT_SIZE;
   if (code == BFD_RELOC_CTOR)
     switch (bfd_get_arch_info (abfd)->bits_per_address)
@@ -482,7 +484,7 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
   /* Setting of EXEC_P has been deferred to the bottom of this function */
   if (execp->a_syms)
     abfd->flags |= HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS;
-  if (N_DYNAMIC(*execp))
+  if (N_DYNAMIC (*execp))
     abfd->flags |= DYNAMIC;
 
   if (N_MAGIC (*execp) == ZMAGIC)
@@ -559,37 +561,38 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
 
   struct exec *execp = exec_hdr (abfd);
 
-  obj_textsec (abfd)->size = N_TXTSIZE(*execp);
-  obj_textsec (abfd)->raw_size = N_TXTSIZE(*execp);
+  obj_textsec (abfd)->size = N_TXTSIZE (*execp);
+  obj_textsec (abfd)->raw_size = N_TXTSIZE (*execp);
   /* data and bss are already filled in since they're so standard */
 
   /* The virtual memory addresses of the sections */
-  obj_textsec (abfd)->vma = N_TXTADDR(*execp);
-  obj_datasec (abfd)->vma = N_DATADDR(*execp);
-  obj_bsssec  (abfd)->vma = N_BSSADDR(*execp);
+  obj_textsec (abfd)->vma = N_TXTADDR (*execp);
+  obj_datasec (abfd)->vma = N_DATADDR (*execp);
+  obj_bsssec  (abfd)->vma = N_BSSADDR (*execp);
 
   /* The file offsets of the sections */
-  obj_textsec (abfd)->filepos = N_TXTOFF(*execp);
-  obj_datasec (abfd)->filepos = N_DATOFF(*execp);
+  obj_textsec (abfd)->filepos = N_TXTOFF (*execp);
+  obj_datasec (abfd)->filepos = N_DATOFF (*execp);
 
   /* The file offsets of the relocation info */
-  obj_textsec (abfd)->rel_filepos = N_TRELOFF(*execp);
-  obj_datasec (abfd)->rel_filepos = N_DRELOFF(*execp);
+  obj_textsec (abfd)->rel_filepos = N_TRELOFF (*execp);
+  obj_datasec (abfd)->rel_filepos = N_DRELOFF (*execp);
 
   /* The file offsets of the string table and symbol table.  */
   obj_str_filepos (abfd) = N_STROFF (*execp);
   obj_sym_filepos (abfd) = N_SYMOFF (*execp);
 
   /* Determine the architecture and machine type of the object file.  */
-  switch (N_MACHTYPE (*exec_hdr (abfd))) {
-  default:
-    abfd->obj_arch = bfd_arch_obscure;
-    break;
-  }
+  switch (N_MACHTYPE (*exec_hdr (abfd)))
+    {
+    default:
+      abfd->obj_arch = bfd_arch_obscure;
+      break;
+    }
 
-  adata(abfd)->page_size = TARGET_PAGE_SIZE;
-  adata(abfd)->segment_size = SEGMENT_SIZE;
-  adata(abfd)->exec_bytes_size = EXEC_BYTES_SIZE;
+  adata (abfd)->page_size = TARGET_PAGE_SIZE;
+  adata (abfd)->segment_size = SEGMENT_SIZE;
+  adata (abfd)->exec_bytes_size = EXEC_BYTES_SIZE;
 
   return abfd->xvec;
 
@@ -621,8 +624,9 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
      sets the entry point, and that is likely to be non-zero for most systems.  */
 
   if (execp->a_entry != 0
-      || (execp->a_entry >= obj_textsec(abfd)->vma
-	  && execp->a_entry < obj_textsec(abfd)->vma + obj_textsec(abfd)->_raw_size))
+      || (execp->a_entry >= obj_textsec (abfd)->vma
+	  && execp->a_entry < (obj_textsec (abfd)->vma
+			       + obj_textsec (abfd)->_raw_size)))
     abfd->flags |= EXEC_P;
 #ifdef STAT_FOR_EXEC
   else
@@ -638,7 +642,7 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
         issue.  Many kernels are loaded at non standard addresses.  */
       if (abfd->iostream != NULL
 	  && (abfd->flags & BFD_IN_MEMORY) == 0
-	  && (fstat(fileno((FILE *) (abfd->iostream)), &stat_buf) == 0)
+	  && (fstat (fileno ((FILE *) (abfd->iostream)), &stat_buf) == 0)
 	  && ((stat_buf.st_mode & 0111) != 0))
 	abfd->flags |= EXEC_P;
     }
@@ -724,94 +728,102 @@ NAME(aout,machine_type) (arch, machine, unknown)
   arch_flags = M_UNKNOWN;
   *unknown = true;
 
-  switch (arch) {
-  case bfd_arch_sparc:
-    if (machine == 0
-	|| machine == bfd_mach_sparc
-	|| machine == bfd_mach_sparc_sparclite
-	|| machine == bfd_mach_sparc_sparclite_le
-	|| machine == bfd_mach_sparc_v9)
-      arch_flags = M_SPARC;
-    else if (machine == bfd_mach_sparc_sparclet)
-      arch_flags = M_SPARCLET;
-    break;
-
-  case bfd_arch_m68k:
-    switch (machine) {
-    case 0:		  arch_flags = M_68010; break;
-    case bfd_mach_m68000: arch_flags = M_UNKNOWN; *unknown = false; break;
-    case bfd_mach_m68010: arch_flags = M_68010; break;
-    case bfd_mach_m68020: arch_flags = M_68020; break;
-    default:		  arch_flags = M_UNKNOWN; break;
-    }
-    break;
-
-  case bfd_arch_i386:
-    if (machine == 0)	arch_flags = M_386;
-    break;
-
-  case bfd_arch_a29k:
-    if (machine == 0)	arch_flags = M_29K;
-    break;
-
-  case bfd_arch_arm:
-    if (machine == 0)	arch_flags = M_ARM;
-    break;
-
-  case bfd_arch_mips:
-    switch (machine) {
-    case 0:
-    case bfd_mach_mips3000:
-    case bfd_mach_mips3900:
-      arch_flags = M_MIPS1;
+  switch (arch)
+    {
+    case bfd_arch_sparc:
+      if (machine == 0
+	  || machine == bfd_mach_sparc
+	  || machine == bfd_mach_sparc_sparclite
+	  || machine == bfd_mach_sparc_sparclite_le
+	  || machine == bfd_mach_sparc_v9)
+	arch_flags = M_SPARC;
+      else if (machine == bfd_mach_sparc_sparclet)
+	arch_flags = M_SPARCLET;
       break;
-    case bfd_mach_mips6000:
-      arch_flags = M_MIPS2;
+
+    case bfd_arch_m68k:
+      switch (machine)
+	{
+	case 0:		      arch_flags = M_68010; break;
+	case bfd_mach_m68000: arch_flags = M_UNKNOWN; *unknown = false; break;
+	case bfd_mach_m68010: arch_flags = M_68010; break;
+	case bfd_mach_m68020: arch_flags = M_68020; break;
+	default:	      arch_flags = M_UNKNOWN; break;
+	}
       break;
-    case bfd_mach_mips4000:
-    case bfd_mach_mips4010:
-    case bfd_mach_mips4100:
-    case bfd_mach_mips4300:
-    case bfd_mach_mips4400:
-    case bfd_mach_mips4600:
-    case bfd_mach_mips4650:
-    case bfd_mach_mips8000:
-    case bfd_mach_mips10000:
-    case bfd_mach_mips12000:
-    case bfd_mach_mips16:
-    case bfd_mach_mipsisa32:
-    case bfd_mach_mips5:
-    case bfd_mach_mipsisa64:
-    case bfd_mach_mips_sb1:
-      /* FIXME: These should be MIPS3, MIPS4, MIPS16, MIPS32, etc.  */
-      arch_flags = M_MIPS2;
+
+    case bfd_arch_i386:
+      if (machine == 0)
+	arch_flags = M_386;
       break;
+
+    case bfd_arch_a29k:
+      if (machine == 0)
+	arch_flags = M_29K;
+      break;
+
+    case bfd_arch_arm:
+      if (machine == 0)
+	arch_flags = M_ARM;
+      break;
+
+    case bfd_arch_mips:
+      switch (machine)
+	{
+	case 0:
+	case bfd_mach_mips3000:
+	case bfd_mach_mips3900:
+	  arch_flags = M_MIPS1;
+	  break;
+	case bfd_mach_mips6000:
+	  arch_flags = M_MIPS2;
+	  break;
+	case bfd_mach_mips4000:
+	case bfd_mach_mips4010:
+	case bfd_mach_mips4100:
+	case bfd_mach_mips4300:
+	case bfd_mach_mips4400:
+	case bfd_mach_mips4600:
+	case bfd_mach_mips4650:
+	case bfd_mach_mips8000:
+	case bfd_mach_mips10000:
+	case bfd_mach_mips12000:
+	case bfd_mach_mips16:
+	case bfd_mach_mipsisa32:
+	case bfd_mach_mips5:
+	case bfd_mach_mipsisa64:
+	case bfd_mach_mips_sb1:
+	  /* FIXME: These should be MIPS3, MIPS4, MIPS16, MIPS32, etc.  */
+	  arch_flags = M_MIPS2;
+	  break;
+	default:
+	  arch_flags = M_UNKNOWN;
+	  break;
+	}
+      break;
+
+    case bfd_arch_ns32k:
+      switch (machine)
+	{
+	case 0:    	arch_flags = M_NS32532; break;
+	case 32032:	arch_flags = M_NS32032; break;
+	case 32532:	arch_flags = M_NS32532; break;
+	default:	arch_flags = M_UNKNOWN; break;
+	}
+      break;
+
+    case bfd_arch_vax:
+      *unknown = false;
+      break;
+
+    case bfd_arch_cris:
+      if (machine == 0 || machine == 255)
+	arch_flags = M_CRIS;
+      break;
+
     default:
       arch_flags = M_UNKNOWN;
-      break;
     }
-    break;
-
-  case bfd_arch_ns32k:
-    switch (machine) {
-    case 0:    		arch_flags = M_NS32532; break;
-    case 32032:		arch_flags = M_NS32032; break;
-    case 32532:		arch_flags = M_NS32532; break;
-    default:		arch_flags = M_UNKNOWN; break;
-    }
-    break;
-
-  case bfd_arch_vax:
-    *unknown = false;
-    break;
-
-  case bfd_arch_cris:
-    if (machine == 0 || machine == 255)	arch_flags = M_CRIS;
-    break;
-
-  default:
-    arch_flags = M_UNKNOWN;
-  }
 
   if (arch_flags != M_UNKNOWN)
     *unknown = false;
@@ -854,18 +866,19 @@ NAME(aout,set_arch_mach) (abfd, arch, machine)
     }
 
   /* Determine the size of a relocation entry */
-  switch (arch) {
-  case bfd_arch_sparc:
-  case bfd_arch_a29k:
-  case bfd_arch_mips:
-    obj_reloc_entry_size (abfd) = RELOC_EXT_SIZE;
-    break;
-  default:
-    obj_reloc_entry_size (abfd) = RELOC_STD_SIZE;
-    break;
-  }
+  switch (arch)
+    {
+    case bfd_arch_sparc:
+    case bfd_arch_a29k:
+    case bfd_arch_mips:
+      obj_reloc_entry_size (abfd) = RELOC_EXT_SIZE;
+      break;
+    default:
+      obj_reloc_entry_size (abfd) = RELOC_STD_SIZE;
+      break;
+    }
 
-  return (*aout_backend_info(abfd)->set_sizes) (abfd);
+  return (*aout_backend_info (abfd)->set_sizes) (abfd);
 }
 
 static void
@@ -878,42 +891,42 @@ adjust_o_magic (abfd, execp)
   int pad = 0;
 
   /* Text.  */
-  obj_textsec(abfd)->filepos = pos;
-  if (!obj_textsec(abfd)->user_set_vma)
-    obj_textsec(abfd)->vma = vma;
+  obj_textsec (abfd)->filepos = pos;
+  if (!obj_textsec (abfd)->user_set_vma)
+    obj_textsec (abfd)->vma = vma;
   else
-    vma = obj_textsec(abfd)->vma;
+    vma = obj_textsec (abfd)->vma;
 
-  pos += obj_textsec(abfd)->_raw_size;
-  vma += obj_textsec(abfd)->_raw_size;
+  pos += obj_textsec (abfd)->_raw_size;
+  vma += obj_textsec (abfd)->_raw_size;
 
   /* Data.  */
-  if (!obj_datasec(abfd)->user_set_vma)
+  if (!obj_datasec (abfd)->user_set_vma)
     {
 #if 0	    /* ?? Does alignment in the file image really matter? */
-      pad = align_power (vma, obj_datasec(abfd)->alignment_power) - vma;
+      pad = align_power (vma, obj_datasec (abfd)->alignment_power) - vma;
 #endif
-      obj_textsec(abfd)->_raw_size += pad;
+      obj_textsec (abfd)->_raw_size += pad;
       pos += pad;
       vma += pad;
-      obj_datasec(abfd)->vma = vma;
+      obj_datasec (abfd)->vma = vma;
     }
   else
-    vma = obj_datasec(abfd)->vma;
-  obj_datasec(abfd)->filepos = pos;
-  pos += obj_datasec(abfd)->_raw_size;
-  vma += obj_datasec(abfd)->_raw_size;
+    vma = obj_datasec (abfd)->vma;
+  obj_datasec (abfd)->filepos = pos;
+  pos += obj_datasec (abfd)->_raw_size;
+  vma += obj_datasec (abfd)->_raw_size;
 
   /* BSS.  */
-  if (!obj_bsssec(abfd)->user_set_vma)
+  if (!obj_bsssec (abfd)->user_set_vma)
     {
 #if 0
-      pad = align_power (vma, obj_bsssec(abfd)->alignment_power) - vma;
+      pad = align_power (vma, obj_bsssec (abfd)->alignment_power) - vma;
 #endif
-      obj_datasec(abfd)->_raw_size += pad;
+      obj_datasec (abfd)->_raw_size += pad;
       pos += pad;
       vma += pad;
-      obj_bsssec(abfd)->vma = vma;
+      obj_bsssec (abfd)->vma = vma;
     }
   else
     {
@@ -927,12 +940,12 @@ adjust_o_magic (abfd, execp)
 	  pos += pad;
 	}
     }
-  obj_bsssec(abfd)->filepos = pos;
+  obj_bsssec (abfd)->filepos = pos;
 
   /* Fix up the exec header.  */
-  execp->a_text = obj_textsec(abfd)->_raw_size;
-  execp->a_data = obj_datasec(abfd)->_raw_size;
-  execp->a_bss = obj_bsssec(abfd)->_raw_size;
+  execp->a_text = obj_textsec (abfd)->_raw_size;
+  execp->a_data = obj_datasec (abfd)->_raw_size;
+  execp->a_bss = obj_bsssec (abfd)->_raw_size;
   N_SET_MAGIC (*execp, OMAGIC);
 }
 
@@ -952,18 +965,18 @@ adjust_z_magic (abfd, execp)
   ztih = (abdp != NULL
 	  && (abdp->text_includes_header
 	      || obj_aout_subformat (abfd) == q_magic_format));
-  obj_textsec(abfd)->filepos = (ztih
-				? adata(abfd).exec_bytes_size
-				: adata(abfd).zmagic_disk_block_size);
-  if (! obj_textsec(abfd)->user_set_vma)
+  obj_textsec (abfd)->filepos = (ztih
+				 ? adata (abfd).exec_bytes_size
+				 : adata (abfd).zmagic_disk_block_size);
+  if (! obj_textsec (abfd)->user_set_vma)
     {
       /* ?? Do we really need to check for relocs here?  */
-      obj_textsec(abfd)->vma = ((abfd->flags & HAS_RELOC)
-				? 0
-				: (ztih
-				   ? (abdp->default_text_vma
-				      + adata(abfd).exec_bytes_size)
-				   : abdp->default_text_vma));
+      obj_textsec (abfd)->vma = ((abfd->flags & HAS_RELOC)
+				 ? 0
+				 : (ztih
+				    ? (abdp->default_text_vma
+				       + adata (abfd).exec_bytes_size)
+				    : abdp->default_text_vma));
       text_pad = 0;
     }
   else
@@ -994,15 +1007,15 @@ adjust_z_magic (abfd, execp)
       text_pad += BFD_ALIGN (text_end, adata (abfd).page_size) - text_end;
       text_end += obj_textsec (abfd)->filepos;
     }
-  obj_textsec(abfd)->_raw_size += text_pad;
+  obj_textsec (abfd)->_raw_size += text_pad;
   text_end += text_pad;
 
   /* Data.  */
-  if (!obj_datasec(abfd)->user_set_vma)
+  if (!obj_datasec (abfd)->user_set_vma)
     {
       bfd_vma vma;
-      vma = obj_textsec(abfd)->vma + obj_textsec(abfd)->_raw_size;
-      obj_datasec(abfd)->vma = BFD_ALIGN (vma, adata(abfd).segment_size);
+      vma = obj_textsec (abfd)->vma + obj_textsec (abfd)->_raw_size;
+      obj_datasec (abfd)->vma = BFD_ALIGN (vma, adata (abfd).segment_size);
     }
   if (abdp && abdp->zmagic_mapped_contiguous)
     {
@@ -1015,30 +1028,30 @@ adjust_z_magic (abfd, execp)
       if (text_pad > 0)
 	text->_raw_size += text_pad;
     }
-  obj_datasec(abfd)->filepos = (obj_textsec(abfd)->filepos
-				+ obj_textsec(abfd)->_raw_size);
+  obj_datasec (abfd)->filepos = (obj_textsec (abfd)->filepos
+				 + obj_textsec (abfd)->_raw_size);
 
   /* Fix up exec header while we're at it.  */
-  execp->a_text = obj_textsec(abfd)->_raw_size;
+  execp->a_text = obj_textsec (abfd)->_raw_size;
   if (ztih && (!abdp || (abdp && !abdp->exec_header_not_counted)))
-    execp->a_text += adata(abfd).exec_bytes_size;
+    execp->a_text += adata (abfd).exec_bytes_size;
   if (obj_aout_subformat (abfd) == q_magic_format)
     N_SET_MAGIC (*execp, QMAGIC);
   else
     N_SET_MAGIC (*execp, ZMAGIC);
 
   /* Spec says data section should be rounded up to page boundary.  */
-  obj_datasec(abfd)->_raw_size
-    = align_power (obj_datasec(abfd)->_raw_size,
-		   obj_bsssec(abfd)->alignment_power);
-  execp->a_data = BFD_ALIGN (obj_datasec(abfd)->_raw_size,
-			     adata(abfd).page_size);
-  data_pad = execp->a_data - obj_datasec(abfd)->_raw_size;
+  obj_datasec (abfd)->_raw_size
+    = align_power (obj_datasec (abfd)->_raw_size,
+		   obj_bsssec (abfd)->alignment_power);
+  execp->a_data = BFD_ALIGN (obj_datasec (abfd)->_raw_size,
+			     adata (abfd).page_size);
+  data_pad = execp->a_data - obj_datasec (abfd)->_raw_size;
 
   /* BSS.  */
-  if (!obj_bsssec(abfd)->user_set_vma)
-    obj_bsssec(abfd)->vma = (obj_datasec(abfd)->vma
-			     + obj_datasec(abfd)->_raw_size);
+  if (!obj_bsssec (abfd)->user_set_vma)
+    obj_bsssec (abfd)->vma = (obj_datasec (abfd)->vma
+			      + obj_datasec (abfd)->_raw_size);
   /* If the BSS immediately follows the data section and extra space
      in the page is left after the data section, fudge data
      in the header so that the bss section looks smaller by that
@@ -1046,12 +1059,12 @@ adjust_z_magic (abfd, execp)
      (Note that a linker script, as well as the above assignment,
      could have explicitly set the BSS vma to immediately follow
      the data section.)  */
-  if (align_power (obj_bsssec(abfd)->vma, obj_bsssec(abfd)->alignment_power)
-      == obj_datasec(abfd)->vma + obj_datasec(abfd)->_raw_size)
-    execp->a_bss = (data_pad > obj_bsssec(abfd)->_raw_size) ? 0 :
-      obj_bsssec(abfd)->_raw_size - data_pad;
+  if (align_power (obj_bsssec (abfd)->vma, obj_bsssec (abfd)->alignment_power)
+      == obj_datasec (abfd)->vma + obj_datasec (abfd)->_raw_size)
+    execp->a_bss = (data_pad > obj_bsssec (abfd)->_raw_size
+		    ? 0 : obj_bsssec (abfd)->_raw_size - data_pad);
   else
-    execp->a_bss = obj_bsssec(abfd)->_raw_size;
+    execp->a_bss = obj_bsssec (abfd)->_raw_size;
 }
 
 static void
@@ -1059,41 +1072,41 @@ adjust_n_magic (abfd, execp)
      bfd *abfd;
      struct internal_exec *execp;
 {
-  file_ptr pos = adata(abfd).exec_bytes_size;
+  file_ptr pos = adata (abfd).exec_bytes_size;
   bfd_vma vma = 0;
   int pad;
 
   /* Text.  */
-  obj_textsec(abfd)->filepos = pos;
-  if (!obj_textsec(abfd)->user_set_vma)
-    obj_textsec(abfd)->vma = vma;
+  obj_textsec (abfd)->filepos = pos;
+  if (!obj_textsec (abfd)->user_set_vma)
+    obj_textsec (abfd)->vma = vma;
   else
-    vma = obj_textsec(abfd)->vma;
-  pos += obj_textsec(abfd)->_raw_size;
-  vma += obj_textsec(abfd)->_raw_size;
+    vma = obj_textsec (abfd)->vma;
+  pos += obj_textsec (abfd)->_raw_size;
+  vma += obj_textsec (abfd)->_raw_size;
 
   /* Data.  */
-  obj_datasec(abfd)->filepos = pos;
-  if (!obj_datasec(abfd)->user_set_vma)
-    obj_datasec(abfd)->vma = BFD_ALIGN (vma, adata(abfd).segment_size);
-  vma = obj_datasec(abfd)->vma;
+  obj_datasec (abfd)->filepos = pos;
+  if (!obj_datasec (abfd)->user_set_vma)
+    obj_datasec (abfd)->vma = BFD_ALIGN (vma, adata (abfd).segment_size);
+  vma = obj_datasec (abfd)->vma;
 
   /* Since BSS follows data immediately, see if it needs alignment.  */
-  vma += obj_datasec(abfd)->_raw_size;
-  pad = align_power (vma, obj_bsssec(abfd)->alignment_power) - vma;
-  obj_datasec(abfd)->_raw_size += pad;
-  pos += obj_datasec(abfd)->_raw_size;
+  vma += obj_datasec (abfd)->_raw_size;
+  pad = align_power (vma, obj_bsssec (abfd)->alignment_power) - vma;
+  obj_datasec (abfd)->_raw_size += pad;
+  pos += obj_datasec (abfd)->_raw_size;
 
   /* BSS.  */
-  if (!obj_bsssec(abfd)->user_set_vma)
-    obj_bsssec(abfd)->vma = vma;
+  if (!obj_bsssec (abfd)->user_set_vma)
+    obj_bsssec (abfd)->vma = vma;
   else
-    vma = obj_bsssec(abfd)->vma;
+    vma = obj_bsssec (abfd)->vma;
 
   /* Fix up exec header.  */
-  execp->a_text = obj_textsec(abfd)->_raw_size;
-  execp->a_data = obj_datasec(abfd)->_raw_size;
-  execp->a_bss = obj_bsssec(abfd)->_raw_size;
+  execp->a_text = obj_textsec (abfd)->_raw_size;
+  execp->a_data = obj_datasec (abfd)->_raw_size;
+  execp->a_bss = obj_bsssec (abfd)->_raw_size;
   N_SET_MAGIC (*execp, NMAGIC);
 }
 
@@ -1108,12 +1121,12 @@ NAME(aout,adjust_sizes_and_vmas) (abfd, text_size, text_end)
   if (! NAME(aout,make_sections) (abfd))
     return false;
 
-  if (adata(abfd).magic != undecided_magic)
+  if (adata (abfd).magic != undecided_magic)
     return true;
 
-  obj_textsec(abfd)->_raw_size =
-    align_power(obj_textsec(abfd)->_raw_size,
-		obj_textsec(abfd)->alignment_power);
+  obj_textsec (abfd)->_raw_size =
+    align_power (obj_textsec (abfd)->_raw_size,
+		 obj_textsec (abfd)->alignment_power);
 
   *text_size = obj_textsec (abfd)->_raw_size;
   /* Rule (heuristic) for when to pad to a new page.  Note that there
@@ -1134,34 +1147,35 @@ NAME(aout,adjust_sizes_and_vmas) (abfd, text_size, text_end)
 
   if (abfd->flags & D_PAGED)
     /* Whether or not WP_TEXT is set -- let D_PAGED override.  */
-    adata(abfd).magic = z_magic;
+    adata (abfd).magic = z_magic;
   else if (abfd->flags & WP_TEXT)
-    adata(abfd).magic = n_magic;
+    adata (abfd).magic = n_magic;
   else
-    adata(abfd).magic = o_magic;
+    adata (abfd).magic = o_magic;
 
 #ifdef BFD_AOUT_DEBUG /* requires gcc2 */
 #if __GNUC__ >= 2
   fprintf (stderr, "%s text=<%x,%x,%x> data=<%x,%x,%x> bss=<%x,%x,%x>\n",
 	   ({ char *str;
-	      switch (adata(abfd).magic) {
-	      case n_magic: str = "NMAGIC"; break;
-	      case o_magic: str = "OMAGIC"; break;
-	      case z_magic: str = "ZMAGIC"; break;
-	      default: abort ();
-	      }
+	      switch (adata (abfd).magic)
+		{
+		case n_magic: str = "NMAGIC"; break;
+		case o_magic: str = "OMAGIC"; break;
+		case z_magic: str = "ZMAGIC"; break;
+		default: abort ();
+		}
 	      str;
 	    }),
-	   obj_textsec(abfd)->vma, obj_textsec(abfd)->_raw_size,
-	   	obj_textsec(abfd)->alignment_power,
-	   obj_datasec(abfd)->vma, obj_datasec(abfd)->_raw_size,
-	   	obj_datasec(abfd)->alignment_power,
-	   obj_bsssec(abfd)->vma, obj_bsssec(abfd)->_raw_size,
-	   	obj_bsssec(abfd)->alignment_power);
+	   obj_textsec (abfd)->vma, obj_textsec (abfd)->_raw_size,
+	   	obj_textsec (abfd)->alignment_power,
+	   obj_datasec (abfd)->vma, obj_datasec (abfd)->_raw_size,
+	   	obj_datasec (abfd)->alignment_power,
+	   obj_bsssec (abfd)->vma, obj_bsssec (abfd)->_raw_size,
+	   	obj_bsssec (abfd)->alignment_power);
 #endif
 #endif
 
-  switch (adata(abfd).magic)
+  switch (adata (abfd).magic)
     {
     case o_magic:
       adjust_o_magic (abfd, execp);
@@ -1178,11 +1192,11 @@ NAME(aout,adjust_sizes_and_vmas) (abfd, text_size, text_end)
 
 #ifdef BFD_AOUT_DEBUG
   fprintf (stderr, "       text=<%x,%x,%x> data=<%x,%x,%x> bss=<%x,%x>\n",
-	   obj_textsec(abfd)->vma, obj_textsec(abfd)->_raw_size,
-	   	obj_textsec(abfd)->filepos,
-	   obj_datasec(abfd)->vma, obj_datasec(abfd)->_raw_size,
-	   	obj_datasec(abfd)->filepos,
-	   obj_bsssec(abfd)->vma, obj_bsssec(abfd)->_raw_size);
+	   obj_textsec (abfd)->vma, obj_textsec (abfd)->_raw_size,
+	   	obj_textsec (abfd)->filepos,
+	   obj_datasec (abfd)->vma, obj_datasec (abfd)->_raw_size,
+	   	obj_datasec (abfd)->filepos,
+	   obj_bsssec (abfd)->vma, obj_bsssec (abfd)->_raw_size);
 #endif
 
   return true;
@@ -1207,24 +1221,27 @@ NAME(aout,new_section_hook) (abfd, newsect)
      asection *newsect;
 {
   /* align to double at least */
-  newsect->alignment_power = bfd_get_arch_info(abfd)->section_align_power;
+  newsect->alignment_power = bfd_get_arch_info (abfd)->section_align_power;
 
   if (bfd_get_format (abfd) == bfd_object)
   {
-    if (obj_textsec(abfd) == NULL && !strcmp(newsect->name, ".text")) {
-	obj_textsec(abfd)= newsect;
+    if (obj_textsec (abfd) == NULL && !strcmp (newsect->name, ".text"))
+      {
+	obj_textsec (abfd)= newsect;
 	newsect->target_index = N_TEXT;
 	return true;
       }
 
-    if (obj_datasec(abfd) == NULL && !strcmp(newsect->name, ".data")) {
-	obj_datasec(abfd) = newsect;
+    if (obj_datasec (abfd) == NULL && !strcmp (newsect->name, ".data"))
+      {
+	obj_datasec (abfd) = newsect;
 	newsect->target_index = N_DATA;
 	return true;
       }
 
-    if (obj_bsssec(abfd) == NULL && !strcmp(newsect->name, ".bss")) {
-	obj_bsssec(abfd) = newsect;
+    if (obj_bsssec (abfd) == NULL && !strcmp (newsect->name, ".bss"))
+      {
+	obj_bsssec (abfd) = newsect;
 	newsect->target_index = N_BSS;
 	return true;
       }
@@ -1552,7 +1569,7 @@ translate_from_native_sym_flags (abfd, cache_ptr)
 	reloc->relent.address = section->_raw_size;
 	section->_raw_size += BYTES_IN_WORD;
 
-	reloc->relent.howto = CTOR_TABLE_RELOC_HOWTO(abfd);
+	reloc->relent.howto = CTOR_TABLE_RELOC_HOWTO (abfd);
 
 #endif /* 0 */
 
@@ -1727,7 +1744,7 @@ translate_to_native_sym_flags (abfd, cache_ptr, sym_pointer)
       sym_pointer->e_type[0] = type;
     }
 
-  PUT_WORD(abfd, value, sym_pointer->e_value);
+  PUT_WORD (abfd, value, sym_pointer->e_value);
 
   return true;
 }
@@ -1952,11 +1969,11 @@ NAME(aout,write_syms) (abfd)
 	goto error_return;
       PUT_WORD (abfd, indx, (bfd_byte *) nsp.e_strx);
 
-      if (bfd_asymbol_flavour(g) == abfd->xvec->flavour)
+      if (bfd_asymbol_flavour (g) == abfd->xvec->flavour)
 	{
-	  H_PUT_16 (abfd, aout_symbol(g)->desc,  nsp.e_desc);
-	  H_PUT_8  (abfd, aout_symbol(g)->other, nsp.e_other);
-	  H_PUT_8  (abfd, aout_symbol(g)->type,  nsp.e_type);
+	  H_PUT_16 (abfd, aout_symbol (g)->desc,  nsp.e_desc);
+	  H_PUT_8  (abfd, aout_symbol (g)->other, nsp.e_other);
+	  H_PUT_8  (abfd, aout_symbol (g)->type,  nsp.e_type);
 	}
       else
 	{
@@ -2000,8 +2017,10 @@ NAME(aout,get_symtab) (abfd, location)
     if (!NAME(aout,slurp_symbol_table) (abfd))
       return -1;
 
-    for (symbase = obj_aout_symbols(abfd); counter++ < bfd_get_symcount (abfd);)
-      *(location++) = (asymbol *) ( symbase++);
+    for (symbase = obj_aout_symbols (abfd);
+	 counter++ < bfd_get_symcount (abfd);
+	 )
+      *(location++) = (asymbol *) (symbase++);
     *location++ =0;
     return bfd_get_symcount (abfd);
 }
@@ -2026,7 +2045,7 @@ NAME(aout,swap_std_reloc_out) (abfd, g, natptr)
   int r_baserel, r_jmptable, r_relative;
   asection *output_section = sym->section->output_section;
 
-  PUT_WORD(abfd, g->address, natptr->r_address);
+  PUT_WORD (abfd, g->address, natptr->r_address);
 
   r_length = g->howto->size ;	/* Size as a power of two */
   r_pcrel  = (int) g->howto->pc_relative; /* Relative to PC? */
@@ -2077,29 +2096,30 @@ NAME(aout,swap_std_reloc_out) (abfd, g, natptr)
     }
 
   /* now the fun stuff */
-  if (bfd_header_big_endian (abfd)) {
+  if (bfd_header_big_endian (abfd))
+    {
       natptr->r_index[0] = r_index >> 16;
       natptr->r_index[1] = r_index >> 8;
       natptr->r_index[2] = r_index;
-      natptr->r_type[0] =
-       (r_extern?    RELOC_STD_BITS_EXTERN_BIG: 0)
-	| (r_pcrel?     RELOC_STD_BITS_PCREL_BIG: 0)
-	 | (r_baserel?   RELOC_STD_BITS_BASEREL_BIG: 0)
-	  | (r_jmptable?  RELOC_STD_BITS_JMPTABLE_BIG: 0)
-	   | (r_relative?  RELOC_STD_BITS_RELATIVE_BIG: 0)
-	    | (r_length <<  RELOC_STD_BITS_LENGTH_SH_BIG);
-    } else {
-	natptr->r_index[2] = r_index >> 16;
-	natptr->r_index[1] = r_index >> 8;
-	natptr->r_index[0] = r_index;
-	natptr->r_type[0] =
-	 (r_extern?    RELOC_STD_BITS_EXTERN_LITTLE: 0)
-	  | (r_pcrel?     RELOC_STD_BITS_PCREL_LITTLE: 0)
-	   | (r_baserel?   RELOC_STD_BITS_BASEREL_LITTLE: 0)
-	    | (r_jmptable?  RELOC_STD_BITS_JMPTABLE_LITTLE: 0)
-	     | (r_relative?  RELOC_STD_BITS_RELATIVE_LITTLE: 0)
-	      | (r_length <<  RELOC_STD_BITS_LENGTH_SH_LITTLE);
-      }
+      natptr->r_type[0] = ((r_extern ? RELOC_STD_BITS_EXTERN_BIG : 0)
+			   | (r_pcrel ? RELOC_STD_BITS_PCREL_BIG : 0)
+			   | (r_baserel ? RELOC_STD_BITS_BASEREL_BIG : 0)
+			   | (r_jmptable ? RELOC_STD_BITS_JMPTABLE_BIG : 0)
+			   | (r_relative ? RELOC_STD_BITS_RELATIVE_BIG : 0)
+			   | (r_length << RELOC_STD_BITS_LENGTH_SH_BIG));
+    }
+  else
+    {
+      natptr->r_index[2] = r_index >> 16;
+      natptr->r_index[1] = r_index >> 8;
+      natptr->r_index[0] = r_index;
+      natptr->r_type[0] = ((r_extern ? RELOC_STD_BITS_EXTERN_LITTLE : 0)
+			   | (r_pcrel ? RELOC_STD_BITS_PCREL_LITTLE : 0)
+			   | (r_baserel ? RELOC_STD_BITS_BASEREL_LITTLE : 0)
+			   | (r_jmptable ? RELOC_STD_BITS_JMPTABLE_LITTLE : 0)
+			   | (r_relative ? RELOC_STD_BITS_RELATIVE_LITTLE : 0)
+			   | (r_length << RELOC_STD_BITS_LENGTH_SH_LITTLE));
+    }
 }
 
 /* Extended stuff */
@@ -2158,21 +2178,22 @@ NAME(aout,swap_ext_reloc_out) (abfd, g, natptr)
     }
 
   /* now the fun stuff */
-  if (bfd_header_big_endian (abfd)) {
-    natptr->r_index[0] = r_index >> 16;
-    natptr->r_index[1] = r_index >> 8;
-    natptr->r_index[2] = r_index;
-    natptr->r_type[0] =
-      ((r_extern? RELOC_EXT_BITS_EXTERN_BIG: 0)
-       | (r_type << RELOC_EXT_BITS_TYPE_SH_BIG));
-  } else {
-    natptr->r_index[2] = r_index >> 16;
-    natptr->r_index[1] = r_index >> 8;
-    natptr->r_index[0] = r_index;
-    natptr->r_type[0] =
-     (r_extern? RELOC_EXT_BITS_EXTERN_LITTLE: 0)
-      | (r_type << RELOC_EXT_BITS_TYPE_SH_LITTLE);
-  }
+  if (bfd_header_big_endian (abfd))
+    {
+      natptr->r_index[0] = r_index >> 16;
+      natptr->r_index[1] = r_index >> 8;
+      natptr->r_index[2] = r_index;
+      natptr->r_type[0] = ((r_extern ? RELOC_EXT_BITS_EXTERN_BIG : 0)
+			   | (r_type << RELOC_EXT_BITS_TYPE_SH_BIG));
+    }
+  else
+    {
+      natptr->r_index[2] = r_index >> 16;
+      natptr->r_index[1] = r_index >> 8;
+      natptr->r_index[0] = r_index;
+      natptr->r_type[0] = ((r_extern ? RELOC_EXT_BITS_EXTERN_LITTLE : 0)
+			   | (r_type << RELOC_EXT_BITS_TYPE_SH_LITTLE));
+    }
 
   PUT_WORD (abfd, r_addend, natptr->r_addend);
 }
@@ -2183,40 +2204,44 @@ NAME(aout,swap_ext_reloc_out) (abfd, g, natptr)
 
    Aout keeps all it's symbols based from zero, so the symbol would
    contain 60. This macro subs the base of each section from the value
-   to give the true offset from the section */
+   to give the true offset from the section.  */
 
-#define MOVE_ADDRESS(ad)       						\
-  if (r_extern) {							\
-   /* undefined symbol */						\
-     cache_ptr->sym_ptr_ptr = symbols + r_index;			\
-     cache_ptr->addend = ad;						\
-     } else {								\
-    /* defined, section relative. replace symbol with pointer to    	\
-       symbol which points to section  */				\
-    switch (r_index) {							\
-    case N_TEXT:							\
-    case N_TEXT | N_EXT:						\
-      cache_ptr->sym_ptr_ptr  = obj_textsec(abfd)->symbol_ptr_ptr;	\
-      cache_ptr->addend = ad  - su->textsec->vma;			\
-      break;								\
-    case N_DATA:							\
-    case N_DATA | N_EXT:						\
-      cache_ptr->sym_ptr_ptr  = obj_datasec(abfd)->symbol_ptr_ptr;	\
-      cache_ptr->addend = ad - su->datasec->vma;			\
-      break;								\
-    case N_BSS:								\
-    case N_BSS | N_EXT:							\
-      cache_ptr->sym_ptr_ptr  = obj_bsssec(abfd)->symbol_ptr_ptr;	\
-      cache_ptr->addend = ad - su->bsssec->vma;				\
-      break;								\
-    default:								\
-    case N_ABS:								\
-    case N_ABS | N_EXT:							\
-     cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;	\
+#define MOVE_ADDRESS(ad)						\
+  if (r_extern)								\
+    {									\
+      /* Undefined symbol.  */						\
+      cache_ptr->sym_ptr_ptr = symbols + r_index;			\
       cache_ptr->addend = ad;						\
-      break;								\
     }									\
-  }     								\
+   else									\
+    {									\
+      /* Defined, section relative.  Replace symbol with pointer to	\
+	 symbol which points to section.  */				\
+      switch (r_index)							\
+	{								\
+	case N_TEXT:							\
+	case N_TEXT | N_EXT:						\
+	  cache_ptr->sym_ptr_ptr = obj_textsec (abfd)->symbol_ptr_ptr;	\
+	  cache_ptr->addend = ad - su->textsec->vma;			\
+	  break;							\
+	case N_DATA:							\
+	case N_DATA | N_EXT:						\
+	  cache_ptr->sym_ptr_ptr = obj_datasec (abfd)->symbol_ptr_ptr;	\
+	  cache_ptr->addend = ad - su->datasec->vma;			\
+	  break;							\
+	case N_BSS:							\
+	case N_BSS | N_EXT:						\
+	  cache_ptr->sym_ptr_ptr = obj_bsssec (abfd)->symbol_ptr_ptr;	\
+	  cache_ptr->addend = ad - su->bsssec->vma;			\
+	  break;							\
+	default:							\
+	case N_ABS:							\
+	case N_ABS | N_EXT:						\
+	  cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;	\
+	  cache_ptr->addend = ad;					\
+	  break;							\
+	}								\
+    }
 
 void
 NAME(aout,swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
@@ -2234,21 +2259,24 @@ NAME(aout,swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
   cache_ptr->address = (GET_SWORD (abfd, bytes->r_address));
 
   /* now the fun stuff */
-  if (bfd_header_big_endian (abfd)) {
-    r_index =  (bytes->r_index[0] << 16)
-	     | (bytes->r_index[1] << 8)
-	     |  bytes->r_index[2];
-    r_extern = (0 != (bytes->r_type[0] & RELOC_EXT_BITS_EXTERN_BIG));
-    r_type   =       (bytes->r_type[0] & RELOC_EXT_BITS_TYPE_BIG)
-				      >> RELOC_EXT_BITS_TYPE_SH_BIG;
-  } else {
-    r_index =  (bytes->r_index[2] << 16)
-	     | (bytes->r_index[1] << 8)
-	     |  bytes->r_index[0];
-    r_extern = (0 != (bytes->r_type[0] & RELOC_EXT_BITS_EXTERN_LITTLE));
-    r_type   =       (bytes->r_type[0] & RELOC_EXT_BITS_TYPE_LITTLE)
-				      >> RELOC_EXT_BITS_TYPE_SH_LITTLE;
-  }
+  if (bfd_header_big_endian (abfd))
+    {
+      r_index = ((bytes->r_index[0] << 16)
+		 | (bytes->r_index[1] << 8)
+		 | bytes->r_index[2]);
+      r_extern = (0 != (bytes->r_type[0] & RELOC_EXT_BITS_EXTERN_BIG));
+      r_type = ((bytes->r_type[0] & RELOC_EXT_BITS_TYPE_BIG)
+		>> RELOC_EXT_BITS_TYPE_SH_BIG);
+    }
+  else
+    {
+      r_index =  ((bytes->r_index[2] << 16)
+		  | (bytes->r_index[1] << 8)
+		  | bytes->r_index[0]);
+      r_extern = (0 != (bytes->r_type[0] & RELOC_EXT_BITS_EXTERN_LITTLE));
+      r_type = ((bytes->r_type[0] & RELOC_EXT_BITS_TYPE_LITTLE)
+		>> RELOC_EXT_BITS_TYPE_SH_LITTLE);
+    }
 
   cache_ptr->howto =  howto_table_ext + r_type;
 
@@ -2268,7 +2296,7 @@ NAME(aout,swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
       r_index = N_ABS;
     }
 
-  MOVE_ADDRESS(GET_SWORD(abfd, bytes->r_addend));
+  MOVE_ADDRESS (GET_SWORD (abfd, bytes->r_addend));
 }
 
 void
@@ -2290,32 +2318,35 @@ NAME(aout,swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
   cache_ptr->address = H_GET_32 (abfd, bytes->r_address);
 
   /* now the fun stuff */
-  if (bfd_header_big_endian (abfd)) {
-    r_index =  (bytes->r_index[0] << 16)
-      | (bytes->r_index[1] << 8)
-	|  bytes->r_index[2];
-    r_extern  = (0 != (bytes->r_type[0] & RELOC_STD_BITS_EXTERN_BIG));
-    r_pcrel   = (0 != (bytes->r_type[0] & RELOC_STD_BITS_PCREL_BIG));
-    r_baserel = (0 != (bytes->r_type[0] & RELOC_STD_BITS_BASEREL_BIG));
-    r_jmptable= (0 != (bytes->r_type[0] & RELOC_STD_BITS_JMPTABLE_BIG));
-    r_relative= (0 != (bytes->r_type[0] & RELOC_STD_BITS_RELATIVE_BIG));
-    r_length  =       (bytes->r_type[0] & RELOC_STD_BITS_LENGTH_BIG)
-      			>> RELOC_STD_BITS_LENGTH_SH_BIG;
-  } else {
-    r_index =  (bytes->r_index[2] << 16)
-      | (bytes->r_index[1] << 8)
-	|  bytes->r_index[0];
-    r_extern  = (0 != (bytes->r_type[0] & RELOC_STD_BITS_EXTERN_LITTLE));
-    r_pcrel   = (0 != (bytes->r_type[0] & RELOC_STD_BITS_PCREL_LITTLE));
-    r_baserel = (0 != (bytes->r_type[0] & RELOC_STD_BITS_BASEREL_LITTLE));
-    r_jmptable= (0 != (bytes->r_type[0] & RELOC_STD_BITS_JMPTABLE_LITTLE));
-    r_relative= (0 != (bytes->r_type[0] & RELOC_STD_BITS_RELATIVE_LITTLE));
-    r_length  =       (bytes->r_type[0] & RELOC_STD_BITS_LENGTH_LITTLE)
-      			>> RELOC_STD_BITS_LENGTH_SH_LITTLE;
-  }
+  if (bfd_header_big_endian (abfd))
+    {
+      r_index = ((bytes->r_index[0] << 16)
+		 | (bytes->r_index[1] << 8)
+		 | bytes->r_index[2]);
+      r_extern  = (0 != (bytes->r_type[0] & RELOC_STD_BITS_EXTERN_BIG));
+      r_pcrel   = (0 != (bytes->r_type[0] & RELOC_STD_BITS_PCREL_BIG));
+      r_baserel = (0 != (bytes->r_type[0] & RELOC_STD_BITS_BASEREL_BIG));
+      r_jmptable= (0 != (bytes->r_type[0] & RELOC_STD_BITS_JMPTABLE_BIG));
+      r_relative= (0 != (bytes->r_type[0] & RELOC_STD_BITS_RELATIVE_BIG));
+      r_length  = ((bytes->r_type[0] & RELOC_STD_BITS_LENGTH_BIG)
+		   >> RELOC_STD_BITS_LENGTH_SH_BIG);
+    }
+  else
+    {
+      r_index = ((bytes->r_index[2] << 16)
+		 | (bytes->r_index[1] << 8)
+		 | bytes->r_index[0]);
+      r_extern  = (0 != (bytes->r_type[0] & RELOC_STD_BITS_EXTERN_LITTLE));
+      r_pcrel   = (0 != (bytes->r_type[0] & RELOC_STD_BITS_PCREL_LITTLE));
+      r_baserel = (0 != (bytes->r_type[0] & RELOC_STD_BITS_BASEREL_LITTLE));
+      r_jmptable= (0 != (bytes->r_type[0] & RELOC_STD_BITS_JMPTABLE_LITTLE));
+      r_relative= (0 != (bytes->r_type[0] & RELOC_STD_BITS_RELATIVE_LITTLE));
+      r_length  = ((bytes->r_type[0] & RELOC_STD_BITS_LENGTH_LITTLE)
+		   >> RELOC_STD_BITS_LENGTH_SH_LITTLE);
+    }
 
-  howto_idx = r_length + 4 * r_pcrel + 8 * r_baserel
-	      + 16 * r_jmptable + 32 * r_relative;
+  howto_idx = (r_length + 4 * r_pcrel + 8 * r_baserel
+	       + 16 * r_jmptable + 32 * r_relative);
   BFD_ASSERT (howto_idx < TABLE_SIZE (howto_table_std));
   cache_ptr->howto =  howto_table_std + howto_idx;
   BFD_ASSERT (cache_ptr->howto->type != (unsigned int) -1);
@@ -2334,7 +2365,7 @@ NAME(aout,swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
       r_index = N_ABS;
     }
 
-  MOVE_ADDRESS(0);
+  MOVE_ADDRESS (0);
 }
 
 /* Read and swap the relocs for a section.  */
@@ -2361,9 +2392,9 @@ NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
     return true;
 
   if (asect == obj_datasec (abfd))
-    reloc_size = exec_hdr(abfd)->a_drsize;
+    reloc_size = exec_hdr (abfd)->a_drsize;
   else if (asect == obj_textsec (abfd))
-    reloc_size = exec_hdr(abfd)->a_trsize;
+    reloc_size = exec_hdr (abfd)->a_trsize;
   else if (asect == obj_bsssec (abfd))
     reloc_size = 0;
   else
@@ -2463,12 +2494,13 @@ NAME(aout,squirt_out_relocs) (abfd, section)
       for (natptr = native;
 	   count != 0;
 	   --count, natptr += each_size, ++generic)
-	MY_swap_std_reloc_out(abfd, *generic, (struct reloc_std_external *)natptr);
+	MY_swap_std_reloc_out (abfd, *generic,
+			       (struct reloc_std_external *) natptr);
     }
 
   if (bfd_bwrite ((PTR) native, natsize, abfd) != natsize)
     {
-      bfd_release(abfd, native);
+      bfd_release (abfd, native);
       return false;
     }
   bfd_release (abfd, native);
@@ -2496,21 +2528,24 @@ NAME(aout,canonicalize_reloc) (abfd, section, relptr, symbols)
   if (!(tblptr || NAME(aout,slurp_reloc_table) (abfd, section, symbols)))
     return -1;
 
-  if (section->flags & SEC_CONSTRUCTOR) {
-    arelent_chain *chain = section->constructor_chain;
-    for (count = 0; count < section->reloc_count; count ++) {
-      *relptr ++ = &chain->relent;
-      chain = chain->next;
+  if (section->flags & SEC_CONSTRUCTOR)
+    {
+      arelent_chain *chain = section->constructor_chain;
+      for (count = 0; count < section->reloc_count; count ++)
+	{
+	  *relptr ++ = &chain->relent;
+	  chain = chain->next;
+	}
     }
-  }
-  else {
-    tblptr = section->relocation;
+  else
+    {
+      tblptr = section->relocation;
 
-    for (count = 0; count++ < section->reloc_count;)
-      {
-	*relptr++ = tblptr++;
-      }
-  }
+      for (count = 0; count++ < section->reloc_count; )
+	{
+	  *relptr++ = tblptr++;
+	}
+    }
   *relptr = 0;
 
   return section->reloc_count;
@@ -2521,22 +2556,24 @@ NAME(aout,get_reloc_upper_bound) (abfd, asect)
      bfd *abfd;
      sec_ptr asect;
 {
-  if (bfd_get_format (abfd) != bfd_object) {
-    bfd_set_error (bfd_error_invalid_operation);
-    return -1;
-  }
-  if (asect->flags & SEC_CONSTRUCTOR) {
-    return (sizeof (arelent *) * (asect->reloc_count+1));
-  }
+  if (bfd_get_format (abfd) != bfd_object)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return -1;
+    }
+  if (asect->flags & SEC_CONSTRUCTOR)
+    {
+      return (sizeof (arelent *) * (asect->reloc_count+1));
+    }
 
   if (asect == obj_datasec (abfd))
     return (sizeof (arelent *)
-	    * ((exec_hdr(abfd)->a_drsize / obj_reloc_entry_size (abfd))
+	    * ((exec_hdr (abfd)->a_drsize / obj_reloc_entry_size (abfd))
 	       + 1));
 
   if (asect == obj_textsec (abfd))
     return (sizeof (arelent *)
-	    * ((exec_hdr(abfd)->a_trsize / obj_reloc_entry_size (abfd))
+	    * ((exec_hdr (abfd)->a_trsize / obj_reloc_entry_size (abfd))
 	       + 1));
 
   if (asect == obj_bsssec (abfd))
@@ -2577,7 +2614,7 @@ NAME(aout,get_symbol_info) (ignore_abfd, symbol, ret)
 
   if (ret->type == '?')
     {
-      int type_code = aout_symbol(symbol)->type & 0xff;
+      int type_code = aout_symbol (symbol)->type & 0xff;
       const char *stab_name = bfd_get_stab_name (type_code);
       static char buf[10];
 
@@ -2588,8 +2625,8 @@ NAME(aout,get_symbol_info) (ignore_abfd, symbol, ret)
 	}
       ret->type = '-';
       ret->stab_type = type_code;
-      ret->stab_other = (unsigned) (aout_symbol(symbol)->other & 0xff);
-      ret->stab_desc = (unsigned) (aout_symbol(symbol)->desc & 0xffff);
+      ret->stab_other = (unsigned) (aout_symbol (symbol)->other & 0xff);
+      ret->stab_desc = (unsigned) (aout_symbol (symbol)->desc & 0xffff);
       ret->stab_name = stab_name;
     }
 }
@@ -2603,32 +2640,34 @@ NAME(aout,print_symbol) (abfd, afile, symbol, how)
 {
   FILE *file = (FILE *)afile;
 
-  switch (how) {
-  case bfd_print_symbol_name:
-    if (symbol->name)
-      fprintf (file,"%s", symbol->name);
-    break;
-  case bfd_print_symbol_more:
-    fprintf (file,"%4x %2x %2x",(unsigned) (aout_symbol(symbol)->desc & 0xffff),
-	    (unsigned) (aout_symbol(symbol)->other & 0xff),
-	    (unsigned) (aout_symbol(symbol)->type));
-    break;
-  case bfd_print_symbol_all:
+  switch (how)
     {
-   const char *section_name = symbol->section->name;
-
-      bfd_print_symbol_vandf (abfd, (PTR)file, symbol);
-
-      fprintf (file," %-5s %04x %02x %02x",
-	      section_name,
-	      (unsigned) (aout_symbol(symbol)->desc & 0xffff),
-	      (unsigned) (aout_symbol(symbol)->other & 0xff),
-	      (unsigned) (aout_symbol(symbol)->type  & 0xff));
+    case bfd_print_symbol_name:
       if (symbol->name)
-        fprintf (file," %s", symbol->name);
+	fprintf (file,"%s", symbol->name);
+      break;
+    case bfd_print_symbol_more:
+      fprintf (file,"%4x %2x %2x",
+	       (unsigned) (aout_symbol (symbol)->desc & 0xffff),
+	       (unsigned) (aout_symbol (symbol)->other & 0xff),
+	       (unsigned) (aout_symbol (symbol)->type));
+      break;
+    case bfd_print_symbol_all:
+      {
+	const char *section_name = symbol->section->name;
+
+	bfd_print_symbol_vandf (abfd, (PTR)file, symbol);
+
+	fprintf (file," %-5s %04x %02x %02x",
+		 section_name,
+		 (unsigned) (aout_symbol (symbol)->desc & 0xffff),
+		 (unsigned) (aout_symbol (symbol)->other & 0xff),
+		 (unsigned) (aout_symbol (symbol)->type & 0xff));
+	if (symbol->name)
+	  fprintf (file," %s", symbol->name);
+      }
+      break;
     }
-    break;
-  }
 }
 
 /* If we don't have to allocate more than 1MB to hold the generic
@@ -2736,103 +2775,106 @@ NAME(aout,find_nearest_line)
   *filename_ptr = abfd->filename;
   *functionname_ptr = 0;
   *line_ptr = 0;
-  if (symbols != (asymbol **)NULL) {
-    for (p = symbols; *p; p++) {
-      aout_symbol_type  *q = (aout_symbol_type *) (*p);
-    next:
-      switch (q->type){
-      case N_TEXT:
-	/* If this looks like a file name symbol, and it comes after
-           the line number we have found so far, but before the
-           offset, then we have probably not found the right line
-           number.  */
-	if (q->symbol.value <= offset
-	    && ((q->symbol.value > low_line_vma
-		 && (line_file_name != NULL
-		     || *line_ptr != 0))
-		|| (q->symbol.value > low_func_vma
-		    && func != NULL)))
-	  {
-	    const char *symname;
-
-	    symname = q->symbol.name;
-	    if (strcmp (symname + strlen (symname) - 2, ".o") == 0)
-	      {
-		if (q->symbol.value > low_line_vma)
-		  {
-		    *line_ptr = 0;
-		    line_file_name = NULL;
-		  }
-		if (q->symbol.value > low_func_vma)
-		  func = NULL;
-	      }
-	  }
-	break;
-
-      case N_SO:
-	/* If this symbol is less than the offset, but greater than
-           the line number we have found so far, then we have not
-           found the right line number.  */
-	if (q->symbol.value <= offset)
-	  {
-	    if (q->symbol.value > low_line_vma)
-	      {
-		*line_ptr = 0;
-		line_file_name = NULL;
-	      }
-	    if (q->symbol.value > low_func_vma)
-	      func = NULL;
-	  }
-
-	main_file_name = current_file_name = q->symbol.name;
-	/* Look ahead to next symbol to check if that too is an N_SO.  */
-	p++;
-	if (*p == NULL)
-	  break;
-	q = (aout_symbol_type *) (*p);
-	if (q->type != (int)N_SO)
-	  goto next;
-
-	/* Found a second N_SO  First is directory; second is filename.  */
-	directory_name = current_file_name;
-	main_file_name = current_file_name = q->symbol.name;
-	if (obj_textsec(abfd) != section)
-	  goto done;
-	break;
-      case N_SOL:
-	current_file_name = q->symbol.name;
-	break;
-
-      case N_SLINE:
-
-      case N_DSLINE:
-      case N_BSLINE:
-	/* We'll keep this if it resolves nearer than the one we have
-           already.  */
-	if (q->symbol.value >= low_line_vma
-	    && q->symbol.value <= offset)
-	  {
-	    *line_ptr = q->desc;
-	    low_line_vma = q->symbol.value;
-	    line_file_name = current_file_name;
-	    line_directory_name = directory_name;
-	  }
-	break;
-      case N_FUN:
+  if (symbols != (asymbol **)NULL)
+    {
+      for (p = symbols; *p; p++)
 	{
-	  /* We'll keep this if it is nearer than the one we have already */
-	  if (q->symbol.value >= low_func_vma &&
-	      q->symbol.value <= offset) {
-	    low_func_vma = q->symbol.value;
-	    func = (asymbol *)q;
-	  }
-	  else if (q->symbol.value > offset)
-	    goto done;
+	  aout_symbol_type  *q = (aout_symbol_type *) (*p);
+	next:
+	  switch (q->type)
+	    {
+	    case N_TEXT:
+	      /* If this looks like a file name symbol, and it comes after
+		 the line number we have found so far, but before the
+		 offset, then we have probably not found the right line
+		 number.  */
+	      if (q->symbol.value <= offset
+		  && ((q->symbol.value > low_line_vma
+		       && (line_file_name != NULL
+			   || *line_ptr != 0))
+		      || (q->symbol.value > low_func_vma
+			  && func != NULL)))
+		{
+		  const char *symname;
+
+		  symname = q->symbol.name;
+		  if (strcmp (symname + strlen (symname) - 2, ".o") == 0)
+		    {
+		      if (q->symbol.value > low_line_vma)
+			{
+			  *line_ptr = 0;
+			  line_file_name = NULL;
+			}
+		      if (q->symbol.value > low_func_vma)
+			func = NULL;
+		    }
+		}
+	      break;
+
+	    case N_SO:
+	      /* If this symbol is less than the offset, but greater than
+		 the line number we have found so far, then we have not
+		 found the right line number.  */
+	      if (q->symbol.value <= offset)
+		{
+		  if (q->symbol.value > low_line_vma)
+		    {
+		      *line_ptr = 0;
+		      line_file_name = NULL;
+		    }
+		  if (q->symbol.value > low_func_vma)
+		    func = NULL;
+		}
+
+	      main_file_name = current_file_name = q->symbol.name;
+	      /* Look ahead to next symbol to check if that too is an N_SO.  */
+	      p++;
+	      if (*p == NULL)
+		break;
+	      q = (aout_symbol_type *) (*p);
+	      if (q->type != (int)N_SO)
+		goto next;
+
+	      /* Found a second N_SO  First is directory; second is filename.  */
+	      directory_name = current_file_name;
+	      main_file_name = current_file_name = q->symbol.name;
+	      if (obj_textsec (abfd) != section)
+		goto done;
+	      break;
+	    case N_SOL:
+	      current_file_name = q->symbol.name;
+	      break;
+
+	    case N_SLINE:
+
+	    case N_DSLINE:
+	    case N_BSLINE:
+	      /* We'll keep this if it resolves nearer than the one we have
+		 already.  */
+	      if (q->symbol.value >= low_line_vma
+		  && q->symbol.value <= offset)
+		{
+		  *line_ptr = q->desc;
+		  low_line_vma = q->symbol.value;
+		  line_file_name = current_file_name;
+		  line_directory_name = directory_name;
+		}
+	      break;
+	    case N_FUN:
+	      {
+		/* We'll keep this if it is nearer than the one we have already */
+		if (q->symbol.value >= low_func_vma &&
+		    q->symbol.value <= offset) {
+		  low_func_vma = q->symbol.value;
+		  func = (asymbol *)q;
+		}
+		else if (q->symbol.value > offset)
+		  goto done;
+	      }
+	      break;
+	    }
 	}
-	break;
-      }
     }
-  }
 
  done:
   if (*line_ptr != 0)
@@ -2906,7 +2948,7 @@ NAME(aout,sizeof_headers) (abfd, execable)
      bfd *abfd;
      boolean execable ATTRIBUTE_UNUSED;
 {
-  return adata(abfd).exec_bytes_size;
+  return adata (abfd).exec_bytes_size;
 }
 
 /* Free all information we have cached for this BFD.  We can always
@@ -3534,8 +3576,8 @@ struct aout_link_includes_entry
 
 /* Look up an entry in an the header file hash table.  */
 
-#define aout_link_includes_lookup(table, string, create, copy) \
-  ((struct aout_link_includes_entry *) \
+#define aout_link_includes_lookup(table, string, create, copy)		\
+  ((struct aout_link_includes_entry *)					\
    bfd_hash_lookup (&(table)->root, (string), (create), (copy)))
 
 /* During the final link step we need to pass around a bunch of
@@ -4803,7 +4845,7 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
       r_addr = GET_SWORD (input_bfd, rel->r_address);
 
 #ifdef MY_reloc_howto
-      howto = MY_reloc_howto(input_bfd, rel, r_index, r_extern, r_pcrel);
+      howto = MY_reloc_howto (input_bfd, rel, r_index, r_extern, r_pcrel);
 #else
       {
 	int r_jmptable;
@@ -5589,8 +5631,8 @@ aout_link_reloc_link_order (finfo, o, p)
   if (obj_reloc_entry_size (finfo->output_bfd) == RELOC_STD_SIZE)
     {
 #ifdef MY_put_reloc
-      MY_put_reloc(finfo->output_bfd, r_extern, r_index, p->offset, howto,
-		   &srel);
+      MY_put_reloc (finfo->output_bfd, r_extern, r_index, p->offset, howto,
+		    &srel);
 #else
       {
 	int r_pcrel;

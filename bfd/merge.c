@@ -887,9 +887,11 @@ _bfd_merged_section_offset (output_bfd, psec, psecinfo, offset, addend)
   if (offset + addend >= sec->_raw_size)
     {
       if (offset + addend > sec->_raw_size)
-	(*_bfd_error_handler) (_("%s: access beyond end of merged section (%ld + %ld)"),
-			       bfd_get_filename (sec->owner), (long)offset,
-			       (long) addend);
+	{
+	  (*_bfd_error_handler)
+	    (_("%s: access beyond end of merged section (%ld + %ld)"),
+	     bfd_get_filename (sec->owner), (long) offset, (long) addend);
+	}
       return (secinfo->first ? sec->_cooked_size : 0);
     }
 
