@@ -197,10 +197,12 @@ static int parse_number (char *, int, int, YYSTYPE *);
 
 %type <comp> exp exp1 type start operator colon_name
 %type <comp> unqualified_name scope_id ext_name colon_ext_name
-%type <comp> template template_arg basic_exp
-%type <comp> builtin_type function_arglist
-%type <comp> typespec abstract_declarator direct_abstract_declarator
-%type <comp> declarator direct_declarator typespec_2
+%type <comp> template template_arg
+%type <comp> builtin_type
+%type <comp> typespec typespec_2 array_indicator
+
+%type <nested> abstract_declarator direct_abstract_declarator
+%type <nested> declarator direct_declarator function_arglist
 
 %type <nested> template_params function_args
 %type <nested> ptr_operator ptr_operator_seq
@@ -268,6 +270,9 @@ static int parse_number (char *, int, int, YYSTYPE *);
 start		:	type
 			{ result = $1; }
 		|	typespec_2 declarator
+			{ result = $2.comp;
+			  *$2.last = $1;
+			}
 		;
 
 operator	:	OPERATOR NEW
@@ -336,11 +341,11 @@ operator	:	OPERATOR NEW
 			{ $$ = d_op_from_string ("->*"); }
 		|	OPERATOR '[' ']'
 			{ $$ = d_op_from_string ("[]"); }
-/* FIXME actions */
 		|	OPERATOR typespec
-			{ $$ = d_make_node (di, D_COMP_CAST, $2, NULL); }
+			{ $$ = d_make_comp (di, D_COMP_CAST, $2, NULL); }
 		|	OPERATOR typespec ptr_operator_seq
-			{ $$ = d_make_node (di, D_COMP_CAST, $2, NULL); }
+			{ *$3.last = $2;
+			  $$ = d_make_comp (di, D_COMP_CAST, $3.comp, NULL); }
 		;
 
 /* D_COMP_NAME */
@@ -413,7 +418,7 @@ template_arg	:	type
 			{ $$ = d_make_comp (di, D_COMP_REFERENCE, $2, NULL); }
 		|	'&' '(' colon_ext_name ')'
 			{ $$ = d_make_comp (di, D_COMP_REFERENCE, $3, NULL); }
-		|	basic_exp
+		|	exp
 		;
 
 function_args	:	type
@@ -445,11 +450,13 @@ function_args	:	type
 		;
 
 function_arglist:	'(' function_args ')' qualifiers_opt
-			{ $$ = d_make_comp (di, D_COMP_FUNCTION_TYPE, NULL, $2.comp);
-			  $$ = d_qualify ($$, $4, 1); }
+			{ $$.comp = d_make_comp (di, D_COMP_FUNCTION_TYPE, NULL, $2.comp);
+			  $$.last = &d_left ($$.comp);
+			  $$.comp = d_qualify ($$.comp, $4, 1); }
 		|	'(' ')' qualifiers_opt
-			{ $$ = d_make_comp (di, D_COMP_FUNCTION_TYPE, NULL, NULL);
-			  $$ = d_qualify ($$, $3, 1); }
+			{ $$.comp = d_make_comp (di, D_COMP_FUNCTION_TYPE, NULL, NULL);
+			  $$.last = &d_left ($$.comp);
+			  $$.comp = d_qualify ($$.comp, $3, 1); }
 		;
 
 /* Should do something about D_COMP_VENDOR_TYPE_QUAL */
@@ -570,6 +577,21 @@ ptr_operator_seq:	ptr_operator
 			  *$1.last = $2.comp; }
 		;
 
+array_indicator	:	'[' ']'
+			{ $$ = d_make_empty (di, D_COMP_ARRAY_TYPE);
+			  d_right ($$) = NULL;
+			}
+		|	'[' INT ']'
+			{ struct d_comp *i;
+			  /* FIXME: Blatant memory leak.  */
+			  char *buf = malloc (24);
+			  sprintf (buf, "%d", (int) $2.val);
+			  i = d_make_name (di, buf, strlen (buf));
+			  i = d_make_comp (di, D_COMP_LITERAL, $2.type, i);
+			  $$ = d_make_empty (di, D_COMP_ARRAY_TYPE);
+			  d_right ($$) = i;
+			}
+
 /* Details of this approach inspired by the G++ < 3.4 parser.  */
 
 typespec	:	builtin_type
@@ -585,16 +607,29 @@ typespec_2	:	typespec qualifiers_opt
 abstract_declarator
 		:	ptr_operator
 		|	ptr_operator abstract_declarator
+			{ $$.comp = $2.comp;
+			  $$.last = $1.last;
+			  *$2.last = $1.comp; }
 		|	direct_abstract_declarator
 		;
 
 direct_abstract_declarator
 		:	'(' abstract_declarator ')'
-		|	direct_abstract_declarator '(' function_arglist ')' qualifiers_opt
-		|	direct_abstract_declarator '[' ']'
-		|	direct_abstract_declarator '[' INT ']'
-		|	'[' ']'
-		|	'[' INT ']'
+			{ $$ = $2; }
+		|	direct_abstract_declarator function_arglist
+			{ $$.comp = $1.comp;
+			  *$1.last = $2.comp;
+			  $$.last = $2.last;
+			}
+		|	direct_abstract_declarator array_indicator
+			{ $$.comp = $1.comp;
+			  *$1.last = $2;
+			  $$.last = &d_left ($2);
+			}
+		|	array_indicator
+			{ $$.comp = $1;
+			  $$.last = &d_left ($1);
+			}
 		/* G++ has the following except for () and (type).  Then
 		   (type) is handled in regcast_or_absdcl and () is handled
 		   in fcast_or_absdcl.  */
@@ -603,26 +638,41 @@ direct_abstract_declarator
 		   We're interested in pointer-to-function types, and in
 		   functions, but not in function types - so leave this
 		   out.  */
-		/* |	'(' function_arglist ')' qualifiers_opt */
+		/* |	function_arglist */
 		;
 
 type		:	typespec_2
 		|	typespec_2 abstract_declarator
+			{ $$ = $2.comp;
+			  *$2.last = $1;
+			}
 		;
 
 declarator	:	ptr_operator declarator
+			{ $$.comp = $2.comp;
+			  $$.last = $1.last;
+			  *$2.last = $1.comp; }
 		|	direct_declarator
 		;
 
 direct_declarator
 		:	'(' declarator ')'
-		|	direct_declarator '(' function_arglist ')' qualifiers_opt
-		|	direct_declarator '[' ']'
-		|	direct_declarator '[' INT ']'
+			{ $$ = $2; }
+		|	direct_declarator function_arglist
+			{ $$.comp = $1.comp;
+			  *$1.last = $2.comp;
+			  $$.last = $2.last;
+			}
+		|	direct_declarator array_indicator
+			{ $$.comp = $1.comp;
+			  *$1.last = $2;
+			  $$.last = &d_left ($2);
+			}
 		|	colon_ext_name
-		;
-
-basic_exp	:	exp
+			{ $$.comp = d_make_empty (di, D_COMP_TYPED_NAME);
+			  d_left ($$.comp) = $1;
+			  $$.last = &d_right ($$.comp);
+			}
 		;
 
 exp	:	'(' exp1 ')'

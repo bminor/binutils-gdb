@@ -1,3 +1,17 @@
+2003-12-18  Daniel Jacobowitz  <drow@mvista.com>
+
+	* cp-names.y (basic_exp): Remove.
+	(function_arglist, declarator, abstract_declarator)
+	(direct_declarator, direct_abstract_declarator): Change type to
+	nested.
+	(array_indicator): New rule.
+	(start): Add actions.
+	(operator): Correct actions for conversion operators.
+	(template_arg): Use exp instead of basic_exp.
+	(abstract_declarator, type, declarator): Add missing actions.
+	(direct_abstract_declarator, direct_declarator): Likewise.
+	Use array_indicator.  Correct use of function_arglist.
+
 2003-12-17  Daniel Jacobowitz  <drow@mvista.com>
 
 	* cp-names.y (ptr_operator_1, ptr_operator_2): Merge back into
