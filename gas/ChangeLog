@@ -1,3 +1,9 @@
+2004-08-18  Mark Mitchell  <mark@codesourcery.com>
+
+	* configure.in (arm*-*-symbianelf*): New target.
+	(arm*-*-eabi*): Likewise.
+	* configure: Regenerated.
+
 2004-08-18  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
 	* config/tc-mips.c (append_insn): Handle delay slots in branch likely
 	correctly.

@@ -206,6 +206,8 @@ changequote([,])dnl
       arm-*-coff | thumb-*-coff)	fmt=coff ;;
       arm-*-rtems* | thumb-*-rtems*)	fmt=elf ;;
       arm-*-elf | thumb-*-elf)		fmt=elf ;;
+      arm*-*-symbianelf* | arm*-*-eabi*) 
+                                        fmt=elf ;;
       arm-*-kaos*)			fmt=elf ;;
       arm*-*-conix*)			fmt=elf ;;
       arm-*-linux*aout*)		fmt=aout em=linux ;;
