@@ -563,8 +563,8 @@ struct sparc_opcode sparc_opcodes[] = {
 
 { "flushw",	F3(2, 0x2b, 0), F3(~2, ~0x2b, ~0)|RD_G0|RS1_G0|ASI_RS2(~0),	"", 0, v9 },
 
-{ "membar",	F3(2, 0x28, 1)|RS1(0xf), F3(~2, ~0x28, ~1)|RD_G0|RS1(~0xf)|SIMM13(~0), "K", 0, v9 },
-{ "stbar",	F3(2, 0x28, 0)|RS1(0xf), F3(~2, ~0x28, ~0)|RD_G0|RS1(~0xf)|SIMM13(~0),	"", 0, v8 },
+{ "membar",	F3(2, 0x28, 1)|RS1(0xf), F3(~2, ~0x28, ~1)|RD_G0|RS1(~0xf)|SIMM13(~127), "K", 0, v9 },
+{ "stbar",	F3(2, 0x28, 0)|RS1(0xf), F3(~2, ~0x28, ~0)|RD_G0|RS1(~0xf)|SIMM13(~0), "", 0, v8 },
 
 { "prefetch",	F3(3, 0x2d, 0), F3(~3, ~0x2d, ~0),		"[1+2],*", 0, v9 },
 { "prefetch",	F3(3, 0x2d, 0), F3(~3, ~0x2d, ~0)|RS2_G0,	"[1],*", 0, v9 }, /* prefetch [rs1+%g0],prefetch_fcn */
@@ -574,10 +574,10 @@ struct sparc_opcode sparc_opcodes[] = {
 { "prefetch",	F3(3, 0x2d, 1), F3(~3, ~0x2d, ~1)|SIMM13(~0),	"[1],*", 0, v9 }, /* prefetch [rs1+0],prefetch_fcn */
 { "prefetcha",	F3(3, 0x3d, 0), F3(~3, ~0x3d, ~0),		"[1+2]A,*", 0, v9 },
 { "prefetcha",	F3(3, 0x3d, 0), F3(~3, ~0x3d, ~0)|RS2_G0,	"[1]A,*", 0, v9 }, /* prefetcha [rs1+%g0],prefetch_fcn */
-{ "prefetcha",	F3(3, 0x3d, 1), F3(~3, ~0x3d, ~1),		"[1+i]o,d", 0, v9 },
-{ "prefetcha",	F3(3, 0x3d, 1), F3(~3, ~0x3d, ~1),		"[i+1]o,d", 0, v9 },
-{ "prefetcha",	F3(3, 0x3d, 1), F3(~3, ~0x3d, ~1)|RS1_G0,	"[i]o,d", 0, v9 },
-{ "prefetcha",	F3(3, 0x3d, 1), F3(~3, ~0x3d, ~1)|SIMM13(~0),	"[1]o,d", 0, v9 }, /* prefetcha [rs1+0],d */
+{ "prefetcha",	F3(3, 0x3d, 1), F3(~3, ~0x3d, ~1),		"[1+i]o,*", 0, v9 },
+{ "prefetcha",	F3(3, 0x3d, 1), F3(~3, ~0x3d, ~1),		"[i+1]o,*", 0, v9 },
+{ "prefetcha",	F3(3, 0x3d, 1), F3(~3, ~0x3d, ~1)|RS1_G0,	"[i]o,*", 0, v9 },
+{ "prefetcha",	F3(3, 0x3d, 1), F3(~3, ~0x3d, ~1)|SIMM13(~0),	"[1]o,*", 0, v9 }, /* prefetcha [rs1+0],d */
 
  /* The 1<<12 is a long story.  It is necessary.  For more info, please contact rich@cygnus.com */
  /* FIXME: 'i' is wrong, need new letter for 5 bit unsigned constants.  */
@@ -1451,13 +1451,49 @@ IMPDEP ("impdep2", 0x37),
 
 const int bfd_sparc_num_opcodes = ((sizeof sparc_opcodes)/(sizeof sparc_opcodes[0]));
 
-/* Handle ASI's.  */
+/* Utilities for argument parsing.  */
 
-static struct asi
+typedef struct
 {
   int value;
   char *name;
-} asi[] =
+} arg;
+
+/* Look up NAME in TABLE.  */
+
+static int
+lookup_name (table, name)
+     arg *table;
+     char *name;
+{
+  arg *p;
+
+  for (p = table; p->name; ++p)
+    if (strcmp (name, p->name) == 0)
+      return p->value;
+
+  return -1;
+}
+
+/* Look up VALUE in TABLE.  */
+
+static char *
+lookup_value (table, value)
+     arg *table;
+     int value;
+{
+  arg *p;
+
+  for (p = table; p->name; ++p)
+    if (value == p->value)
+      return p->name;
+
+  return (char *) 0;
+}
+
+/* Handle ASI's.  */
+
+static arg asi_table[] =
 {
   { 0x10, "#ASI_AIUP" },
   { 0x11, "#ASI_AIUS" },
@@ -1492,13 +1528,7 @@ int
 sparc_encode_asi (name)
      char *name;
 {
-  struct asi *p;
-
-  for (p = &asi[0]; p->name; ++p)
-    if (strcmp (name, p->name) == 0)
-      return p->value;
-
-  return -1;
+  return lookup_name (asi_table, name);
 }
 
 /* Return the name for ASI value VALUE or NULL if not found.  */
@@ -1507,11 +1537,67 @@ char *
 sparc_decode_asi (value)
      int value;
 {
-  struct asi *p;
+  return lookup_value (asi_table, value);
+}
+
+/* Handle membar masks.  */
 
-  for (p = &asi[0]; p->name; ++p)
-    if (value == p->value)
-      return p->name;
+static arg membar_table[] =
+{
+  { 0x40, "#Sync" },
+  { 0x20, "#MemIssue" },
+  { 0x10, "#Lookaside" },
+  { 0x08, "#StoreStore" },
+  { 0x04, "#LoadStore" },
+  { 0x02, "#StoreLoad" },
+  { 0x01, "#LoadLoad" },
+  { 0, 0 }
+};
 
-  return (char *) 0;
+/* Return the value for membar arg NAME, or -1 if not found.  */
+
+int
+sparc_encode_membar (name)
+     char *name;
+{
+  return lookup_name (membar_table, name);
+}
+
+/* Return the name for membar value VALUE or NULL if not found.  */
+
+char *
+sparc_decode_membar (value)
+     int value;
+{
+  return lookup_value (membar_table, value);
+}
+
+/* Handle prefetch args.  */
+
+static arg prefetch_table[] =
+{
+  { 0, "#n_reads" },
+  { 1, "#one_read" },
+  { 2, "#n_writes" },
+  { 3, "#one_write" },
+  { 4, "#page" },
+  { 0, 0 }
+};
+
+/* Return the value for prefetch arg NAME, or -1 if not found.  */
+
+int
+sparc_encode_prefetch (name)
+     char *name;
+{
+  return lookup_name (prefetch_table, name);
+}
+
+/* Return the name for prefetch value VALUE or NULL if not found.  */
+
+char *
+sparc_decode_prefetch (value)
+     int value;
+{
+  return lookup_value (prefetch_table, value);
 }

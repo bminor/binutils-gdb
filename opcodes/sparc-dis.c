@@ -91,6 +91,7 @@ static char *v9_priv_reg_names[] =
 
 #ifndef NO_V9
 #define X_DISP16(i) (((((i) >> 20) & 3) << 14) | (((i) >> 0) & 0x3fff))
+#define X_MEMBAR(i) ((i) & 0x7f)
 #endif
 
 /* Here is the union which was used to extract instruction fields
@@ -427,6 +428,30 @@ print_insn (memaddr, info, sparc64_p)
 		    }
 		    break;
 
+		  case 'K':
+		    {
+		      int mask = X_MEMBAR (insn);
+		      int bit = 0x40, printed_one = 0;
+		      char *name;
+
+		      if (mask == 0)
+			(info->fprintf_func) (stream, "0");
+		      else
+			while (bit)
+			  {
+			    if (mask & bit)
+			      {
+				if (printed_one)
+				  (info->fprintf_func) (stream, "|");
+				name = sparc_decode_membar (bit);
+				(info->fprintf_func) (stream, "%s", name);
+				printed_one = 1;
+			      }
+			    bit >>= 1;
+			  }
+		      break;
+		    }
+
 		  case 'k':
 		    info->target = memaddr + (SEX (X_DISP16 (insn), 16)) * 4;
 		    (*info->print_address_func) (info->target, info);
@@ -489,7 +514,17 @@ print_insn (memaddr, info, sparc64_p)
 		    else
 		      (*info->fprintf_func) (stream, "%%reserved");
 		    break;
-		    break;
+
+		  case '*':
+		    {
+		      char *name = sparc_decode_prefetch (X_RD (insn));
+
+		      if (name)
+			(*info->fprintf_func) (stream, "%s", name);
+		      else
+			(*info->fprintf_func) (stream, "%d", X_RD (insn));
+		      break;
+		    }
 #endif	/* NO_V9 */
 
 		  case 'M':
