@@ -29,6 +29,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #undef  INT_MIN
 #define INT_MIN         0x80000000
 
+/* HPUX 8.0, in its infinite wisdom, has chosen to prototype ptrace
+   with five arguments, so programs written for normal ptrace lose.
+
+   Idiots.
+
+   (They should have just made it varadic).  */
+#define FIVE_ARG_PTRACE
+
 #ifndef hp800
 #define USG
 #endif
