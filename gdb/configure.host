@@ -11,14 +11,13 @@
 case "${host_cpu}" in
 
 alpha*)			gdb_host_cpu=alpha ;;
-arm*)			gdb_host_cpu=arm ;;
-# OBSOLETE c[12])		gdb_host_cpu=convex ;;
+c[12])			gdb_host_cpu=convex ;;
 hppa*)			gdb_host_cpu=pa ;;
 i[3456]86*)		gdb_host_cpu=i386 ;;
 m68*)			gdb_host_cpu=m68k ;;
 m88*)			gdb_host_cpu=m88k ;;
 # OBSOLETE np1)			gdb_host_cpu=gould ;;
-# OBSOLETE pyramid)		gdb_host_cpu=pyr ;;
+pyramid)		gdb_host_cpu=pyr ;;
 powerpc*)		gdb_host_cpu=powerpc ;;
 sparc64)		gdb_host_cpu=sparc ;;
 *)			gdb_host_cpu=$host_cpu ;;
@@ -36,16 +35,14 @@ alpha*-*-osf2*)		gdb_host=alpha-osf2 ;;
 alpha*-*-osf[3456789]*)	gdb_host=alpha-osf3 ;;
 alpha*-*-linux*)	gdb_host=alpha-linux ;;
 
-arm*-*-linux*)		gdb_host=linux ;;
-arm*-*-*)		gdb_host=arm ;;
+arm-*-*)		gdb_host=arm ;;
 
-# OBSOLETE c[12]-*-*)		gdb_host=convex ;;
+c[12]-*-*)		gdb_host=convex ;;
 
 hppa*-*-bsd*)		gdb_host=hppabsd ;;
 hppa*-*-hiux*)		gdb_host=hppahpux ;;
 hppa*-*-hpux10.20)	gdb_host=hpux1020 ;;
-hppa2.0w-*-hpux11*)	gdb_host=hpux11w ;;
-hppa*-*-hpux11*)	gdb_host=hpux11 ;;
+hppa*-*-hpux11.0*)	gdb_host=hpux1100 ;;
 hppa*-*-hpux*)		gdb_host=hppahpux ;;
 hppa*-*-osf*)		gdb_host=hppaosf ;;
 
@@ -59,7 +56,6 @@ i[3456]86-*-dgux*)	gdb_host=i386dgux ;;
 i[3456]86-*-freebsd*)	gdb_host=fbsd ;;
 i[3456]86-*-netbsd*)	gdb_host=nbsd ;;
 i[3456]86-*-go32*)	gdb_host=go32 ;;
-i[3456]86-*-msdosdjgpp*) gdb_host=go32 ;;
 i[3456]86-*-linux*)	gdb_host=linux ;;
 i[3456]86-*-lynxos*)	gdb_host=i386lynx ;;
 i[3456]86-*-mach3*)	gdb_host=i386m3 ;;
@@ -88,7 +84,7 @@ m680[01]0-sun-sunos3*)	gdb_host=sun2os3 ;;
 m680[01]0-sun-sunos4*)	gdb_host=sun2os4 ;;
 m68030-sony-*)		gdb_host=news1000 ;;
 
-# OBSOLETE m68*-altos-*)	gdb_host=altos ;;
+m68*-altos-*)		gdb_host=altos ;;
 m68*-apollo*-sysv*)	gdb_host=apollo68v ;;
 m68*-apollo*-bsd*)	gdb_host=apollo68b ;;
 m68*-att-*)		gdb_host=3b1 ;;
@@ -111,7 +107,7 @@ m88*-motorola-sysv4*)	gdb_host=delta88v4 ;;
 m88*-motorola-sysv*)	gdb_host=delta88 ;;
 m88*-*-*)		gdb_host=m88k ;;
 
-mips-dec-mach3*)	gdb_host=mipsm3 ;;
+mips-dec-mach3*)	gdb_host=mach3 ;;
 mips-dec-*)		gdb_host=decstation ;;
 mips-little-*)		gdb_host=littlemips ;;
 mips-sgi-irix3*)	gdb_host=irix3 ;;
@@ -139,9 +135,9 @@ powerpcle-*-cygwin*)	gdb_host=cygwin ;;
 powerpcle-*-solaris*)	gdb_host=solaris ;;
 powerpc-*-linux*)	gdb_host=linux ;;
 
-# OBSOLETE pn-*-*)		gdb_host=pn ;;
+# OBSOLETE pn-*-*)			gdb_host=pn ;;
 
-# OBSOLETE pyramid-*-*)		gdb_host=pyramid ;;
+pyramid-*-*)		gdb_host=pyramid ;;
 
 romp-*-*)		gdb_host=rtbsd ;;
 
@@ -151,8 +147,6 @@ rs6000-*-*)		gdb_host=rs6000 ;;
 
 sparc-*-linux*)		gdb_host=linux ;;
 sparc-*-lynxos*)	gdb_host=sparclynx ;;
-sparc-*-netbsdelf*)	gdb_host=nbsdelf ;;
-sparc-*-netbsdaout*)	gdb_host=nbsd ;;
 sparc-*-netbsd*)	gdb_host=nbsd ;;
 sparc-*-solaris2*)	gdb_host=sun4sol2 ;;
 sparc-*-sunos4*)	gdb_host=sun4os4 ;;
@@ -162,7 +156,7 @@ sparc64-*-*)		gdb_host=sun4sol2 ;;
 
 strongarm-*-*)		gdb_host=arm ;;
 
-# OBSOLETE tahoe-*-*)		gdb_host=tahoe ;;
+tahoe-*-*)		gdb_host=tahoe ;;
 
 vax-*-bsd*)		gdb_host=vaxbsd ;;
 vax-*-ultrix2*)		gdb_host=vaxult2 ;;
