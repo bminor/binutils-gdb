@@ -891,7 +891,7 @@ ecoff_add_string (ainfo, info, debug, fdr, string)
 
       sh = string_hash_lookup (&ainfo->str_hash, string, true, true);
       if (sh == (struct string_hash_entry *) NULL)
-	return (bfd_size_type) -1;
+	return -1;
       if (sh->val == -1)
 	{
 	  sh->val = symhdr->issMax;

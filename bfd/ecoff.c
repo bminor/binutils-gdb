@@ -2476,11 +2476,11 @@ ecoff_write_object_contents (abfd)
   asection *current;
   unsigned int count;
   bfd_size_type reloc_size;
-  unsigned long text_size;
-  unsigned long text_start;
-  unsigned long data_size;
-  unsigned long data_start;
-  unsigned long bss_size;
+  bfd_size_type text_size;
+  bfd_vma text_start;
+  bfd_size_type data_size;
+  bfd_vma data_start;
+  bfd_size_type bss_size;
   PTR buff;
   struct internal_filehdr internal_f;
   struct internal_aouthdr internal_a;
