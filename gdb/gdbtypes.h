@@ -374,7 +374,7 @@ struct cplus_struct_type
 /* The default value of TYPE_CPLUS_SPECIFIC(T) points to the
    this shared static structure. */
 
-extern struct cplus_struct_type cplus_struct_default;
+extern const struct cplus_struct_type cplus_struct_default;
 
 extern void
 allocate_cplus_struct_type PARAMS ((struct type *));

@@ -1,3 +1,39 @@
+Sat Jan  9 19:59:33 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* blockframe.c (frameless_look_for_prologue):  Correct the
+	comment.
+	* gdbtypes.h, gdbtypes.c:  Use const in decl of
+	cplus_struct_default, now that pa-gas assembler has been fixed.
+	* hppah-nat.c:  Formatting.
+	* hppah-tdep.c:  Remove lots of useless externs for variables we
+	don't use.
+	* (find_unwind_entry):  Speed up by using binary search, and a one
+	entry cache.
+	* (rp_saved):  New routine to see what unwind info says about RP
+	being saved on the stack frame.
+	* (frame_saved_pc):  Look for prologue to see if we need to
+	examine the stack for the saved RP or not.
+	* (init_extra_frame_info):  Check for prologue, instead of
+	framesize to determine if we are frameless or not.
+	* (frame_chain_valid):  Stop backtraces when we run into _start.
+	* (push_dummy_frame):  Reformat to make more readable.
+	* (find_dummy_frame_regs):  ditto.
+	* (hp_pop_frame):  ditto.
+	* (hp_restore_pc_queue):  small cleanup.
+	* (hp_push_arguments):  ditto.
+	* (pa_do_registers_info):  ditto.
+	* (skip_prologue):  New routine created from SKIP_PROLOGUE macro.
+	* tm-hppa.h:  Move contents of SKIP_PROLOGUE into hppah-tdep.c.
+	* Define FRAME_CHAIN_VALID.
+	* Turn on BELIEVE_PCC_PROMOTION so that we can access char args
+	passed to functions.
+
+	* paread.c (pa_symtab_read):  Use new bfd conventions for
+	accessing linker symbol table.
+	* (pa_symfile_init):  Access embedded STAB info via BFD section
+	mechanism and related macros.
+
+
 Sat Jan  9 19:31:43 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* sparc-stub.c:  Use a seperate stack for our traps.

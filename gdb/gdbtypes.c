@@ -879,7 +879,7 @@ check_stub_method (type, i, j)
   TYPE_FN_FIELD_STUB (f, j) = 0;
 }
 
-struct cplus_struct_type cplus_struct_default;
+const struct cplus_struct_type cplus_struct_default;
 
 void
 allocate_cplus_struct_type (type)

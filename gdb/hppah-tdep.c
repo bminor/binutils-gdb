@@ -58,46 +58,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 
 
-/* Last modification time of executable file.
-   Also used in source.c to compare against mtime of a source file.  */
-
-extern int exec_mtime;
-
-/* Virtual addresses of bounds of the two areas of memory in the core file.  */
-
-/* extern CORE_ADDR data_start; */
-extern CORE_ADDR data_end;
-extern CORE_ADDR stack_start;
-extern CORE_ADDR stack_end;
-
-/* Virtual addresses of bounds of two areas of memory in the exec file.
-   Note that the data area in the exec file is used only when there is no core file.  */
-
-extern CORE_ADDR text_start;
-extern CORE_ADDR text_end;
-
-extern CORE_ADDR exec_data_start;
-extern CORE_ADDR exec_data_end;
-
-/* Address in executable file of start of text area data.  */
-
-extern int text_offset;
-
-/* Address in executable file of start of data area data.  */
-
-extern int exec_data_offset;
-
-/* Address in core file of start of data area data.  */
-
-extern int data_offset;
-
-/* Address in core file of start of stack area data.  */
-
-extern int stack_offset;
-
-struct header file_hdr;
-struct som_exec_auxhdr exec_hdr;
-
 /* Routines to extract various sized constants out of hppa 
    instructions. */
 
@@ -120,8 +80,6 @@ low_sign_extend (val, bits)
   return (int)((val & 0x1 ? (-1 << (bits - 1)) : 0) | val >> 1);
 }
 /* extract the immediate field from a ld{bhw}s instruction */
-
-
 
 unsigned
 get_field (val, from, to)
@@ -266,11 +224,10 @@ static struct unwind_table_entry *
 find_unwind_entry(pc)
      CORE_ADDR pc;
 {
-  static struct unwind_table_entry *unwind = NULL, *unwind_end;
-  struct unwind_table_entry *u;
-
-  if (!use_unwind)
-    return NULL;
+  static struct unwind_table_entry *unwind = NULL;
+  static int unwind_last;
+  static int unwind_cache = -1;
+  int first, middle, last;
 
   if (!unwind)
     {
@@ -283,19 +240,33 @@ find_unwind_entry(pc)
 
 	  size = bfd_section_size (exec_bfd, unwind_sec);
 	  unwind = malloc (size);
-	  unwind_end = unwind + size/sizeof (struct unwind_table_entry);
+	  unwind_last = size / sizeof (struct unwind_table_entry) - 1;
 
 	  bfd_get_section_contents (exec_bfd, unwind_sec, unwind, 0, size);
 	}
     }
 
-  for (u = unwind; u < unwind_end; u++)
+  if (unwind_cache > 0
+      && pc >= unwind[unwind_cache].region_start
+      && pc <= unwind[unwind_cache].region_end)
+    return &unwind[unwind_cache];
+
+  first = 0;
+  last = unwind_last;
+
+  while (first <= last)
     {
-      if (pc >= u->region_start
-	  && pc <= u->region_end)
-	return u;
+      middle = (first + last) / 2;
+      if (pc >= unwind[middle].region_start
+	  && pc <= unwind[middle].region_end)
+	return &unwind[middle];
+
+      if (pc < unwind[middle].region_start)
+	last = middle - 1;
+      else
+	first = middle + 1;
     }
-  return NULL;
+    return NULL;
 }
 
 static int
@@ -321,12 +292,31 @@ find_proc_framesize(pc)
 {
   struct unwind_table_entry *u;
 
+  if (!use_unwind)
+    return -1;
+
   u = find_unwind_entry (pc);
 
   if (!u)
     return -1;
 
   return u->Total_frame_size << 3;
+}
+
+int
+rp_saved(pc)
+{
+  struct unwind_table_entry *u;
+
+  u = find_unwind_entry (pc);
+
+  if (!u)
+    return 0;
+
+  if (u->Save_RP)
+    return 1;
+  else
+    return 0;
 }
 
 CORE_ADDR
@@ -344,16 +334,20 @@ CORE_ADDR
 frame_saved_pc (frame)
      FRAME frame;
 {
-  if (!frame->next)
+  CORE_ADDR pc = get_frame_pc (frame);
+
+  if (frameless_look_for_prologue (frame))
     {
-      CORE_ADDR pc = get_frame_pc (frame);
       int ret_regnum;
 
       ret_regnum = find_return_regnum (pc);
 
       return read_register (ret_regnum) & ~0x3;
     }
-  return read_memory_integer (frame->frame - 20, 4) & ~0x3;
+  else if (rp_saved (pc))
+    return read_memory_integer (frame->frame - 20, 4) & ~0x3;
+  else
+    return read_register (RP_REGNUM) & ~0x3;
 }
 
 /* We need to correct the PC and the FP for the outermost frame when we are
@@ -381,8 +375,8 @@ init_extra_frame_info (fromleaf, frame)
   else
     frame->frame = read_register (SP_REGNUM) - framesize;
 
-  if (framesize != 0)		/* Frameless? */
-    return;
+  if (!frameless_look_for_prologue (frame)) /* Frameless? */
+    return;				    /* No, quit now */
 
   /* For frameless functions, we need to look at the caller's frame */
   framesize = find_proc_framesize(FRAME_SAVED_PC(frame));
@@ -407,29 +401,26 @@ frame_chain (frame)
 /* To see if a frame chain is valid, see if the caller looks like it
    was compiled with gcc. */
 
-int frame_chain_valid (chain, thisframe)
+int
+frame_chain_valid (chain, thisframe)
      FRAME_ADDR chain;
      FRAME thisframe;
 {
-  if (chain && (chain > 0x60000000))
-    {
-      CORE_ADDR pc = get_pc_function_start (FRAME_SAVED_PC (thisframe));
-      if (inside_entry_file (pc))
-	return 0;
-      /* look for stw rp, -20(0,sp); copy 4,1; copy sp, 4 */
-      if (read_memory_integer (pc, 4) == 0x6BC23FD9)			
-	pc = pc + 4;							
-      
-      if (read_memory_integer (pc, 4) == 0x8040241 &&
-	  read_memory_integer (pc + 4, 4) == 0x81E0244)			
-	return 1;
-      else
-	return 0;
-    }
-  else
+  struct minimal_symbol *msym;
+
+  if (!chain)
     return 0;
+
+  msym = lookup_minimal_symbol_by_pc (FRAME_SAVED_PC (thisframe));
+
+  if (msym
+      && (strcmp (SYMBOL_NAME (msym), "_start") == 0))
+    return 0;
+  else
+    return 1;
 }
 
+#if 0
 /* Some helper functions. gcc_p returns 1 if the function beginning at 
    pc appears to have been compiled with gcc. hpux_cc_p returns 1 if
    fn was compiled with hpux cc. gcc functions look like :
@@ -451,11 +442,12 @@ gcc_p (pc)
   if (read_memory_integer (pc, 4) == 0x6BC23FD9)			
     pc = pc + 4;							
       
-  if (read_memory_integer (pc, 4) == 0x8040241 &&
-      read_memory_integer (pc + 4, 4) == 0x81E0244)			
+  if (read_memory_integer (pc, 4) == 0x8040241
+      && read_memory_integer (pc + 4, 4) == 0x81E0244)
     return 1;
   return 0;
 }
+#endif
 
 /*
  * These functions deal with saving and restoring register state
@@ -467,25 +459,34 @@ gcc_p (pc)
 int
 push_dummy_frame ()
 {
-  register CORE_ADDR sp = read_register (SP_REGNUM);
+  register CORE_ADDR sp;
   register int regnum;
   int int_buffer;
   double freg_buffer;
+
   /* Space for "arguments"; the RP goes in here. */
-  sp += 48;
+  sp = read_register (SP_REGNUM) + 48;
   int_buffer = read_register (RP_REGNUM) | 0x3;
   write_memory (sp - 20, (char *)&int_buffer, 4);
+
   int_buffer = read_register (FP_REGNUM);
   write_memory (sp, (char *)&int_buffer, 4);
+
   write_register (FP_REGNUM, sp);
+
   sp += 8;
+
   for (regnum = 1; regnum < 32; regnum++)
     if (regnum != RP_REGNUM && regnum != FP_REGNUM)
       sp = push_word (sp, read_register (regnum));
+
   sp += 4;
+
   for (regnum = FP0_REGNUM; regnum < NUM_REGS; regnum++)
-    { read_register_bytes (REGISTER_BYTE (regnum), (char *)&freg_buffer, 8);
-      sp = push_bytes (sp, (char *)&freg_buffer, 8);}
+    {
+      read_register_bytes (REGISTER_BYTE (regnum), (char *)&freg_buffer, 8);
+      sp = push_bytes (sp, (char *)&freg_buffer, 8);
+    }
   sp = push_word (sp, read_register (IPSW_REGNUM));
   sp = push_word (sp, read_register (SAR_REGNUM));
   sp = push_word (sp, read_register (PCOQ_HEAD_REGNUM));
@@ -506,16 +507,24 @@ find_dummy_frame_regs (frame, frame_saved_regs)
   frame_saved_regs->regs[FP_REGNUM] = fp;
   frame_saved_regs->regs[1] = fp + 8;
   frame_saved_regs->regs[3] = fp + 12;
+
   for (fp += 16, i = 5; i < 32; fp += 4, i++)
     frame_saved_regs->regs[i] = fp;
+
   fp += 4;
   for (i = FP0_REGNUM; i < NUM_REGS; i++, fp += 8)
     frame_saved_regs->regs[i] = fp;
-  frame_saved_regs->regs[IPSW_REGNUM] = fp;  fp += 4;
-  frame_saved_regs->regs[SAR_REGNUM] = fp;  fp += 4;
-  frame_saved_regs->regs[PCOQ_HEAD_REGNUM] = fp;  fp +=4;
-  frame_saved_regs->regs[PCSQ_HEAD_REGNUM] = fp;  fp +=4;
-  frame_saved_regs->regs[PCOQ_TAIL_REGNUM] = fp;  fp +=4;
+
+  frame_saved_regs->regs[IPSW_REGNUM] = fp;
+  fp += 4;
+  frame_saved_regs->regs[SAR_REGNUM] = fp;
+  fp += 4;
+  frame_saved_regs->regs[PCOQ_HEAD_REGNUM] = fp;
+  fp +=4;
+  frame_saved_regs->regs[PCSQ_HEAD_REGNUM] = fp;
+  fp +=4;
+  frame_saved_regs->regs[PCOQ_TAIL_REGNUM] = fp;
+  fp +=4;
   frame_saved_regs->regs[PCSQ_TAIL_REGNUM] = fp;
 }
 
@@ -528,33 +537,44 @@ hp_pop_frame ()
   struct frame_saved_regs fsr;
   struct frame_info *fi;
   double freg_buffer;
+
   fi = get_frame_info (frame);
   fp = fi->frame;
   get_frame_saved_regs (fi, &fsr);
+
   if (fsr.regs[IPSW_REGNUM])    /* Restoring a call dummy frame */
     hp_restore_pc_queue (&fsr);
+
   for (regnum = 31; regnum > 0; regnum--)
     if (fsr.regs[regnum])
       write_register (regnum, read_memory_integer (fsr.regs[regnum], 4));
+
   for (regnum = NUM_REGS - 1; regnum >= FP0_REGNUM ; regnum--)
     if (fsr.regs[regnum])
-      { read_memory (fsr.regs[regnum], (char *)&freg_buffer, 8);
+      {
+	read_memory (fsr.regs[regnum], (char *)&freg_buffer, 8);
         write_register_bytes (REGISTER_BYTE (regnum), (char *)&freg_buffer, 8);
       }
+
   if (fsr.regs[IPSW_REGNUM])
     write_register (IPSW_REGNUM,
                     read_memory_integer (fsr.regs[IPSW_REGNUM], 4));
+
   if (fsr.regs[SAR_REGNUM])
     write_register (SAR_REGNUM,
                     read_memory_integer (fsr.regs[SAR_REGNUM], 4));
+
   if (fsr.regs[PCOQ_TAIL_REGNUM])
     write_register (PCOQ_TAIL_REGNUM,
                     read_memory_integer (fsr.regs[PCOQ_TAIL_REGNUM], 4));
+
   write_register (FP_REGNUM, read_memory_integer (fp, 4));
+
   if (fsr.regs[IPSW_REGNUM])    /* call dummy */
     write_register (SP_REGNUM, fp - 48);
   else
     write_register (SP_REGNUM, fp);
+
   flush_cached_frames ();
   set_current_frame (create_new_frame (read_register (FP_REGNUM),
                                        read_pc ()));
@@ -575,8 +595,8 @@ hp_restore_pc_queue (fsr)
   int insn_count;
 
   /* Advance past break instruction in the call dummy. */
-  pc += 4;  write_register (PCOQ_HEAD_REGNUM, pc);
-  pc += 4;  write_register (PCOQ_TAIL_REGNUM, pc);
+  write_register (PCOQ_HEAD_REGNUM, pc + 4);
+  write_register (PCOQ_TAIL_REGNUM, pc + 8);
 
   /*
    * HPUX doesn't let us set the space registers or the space
@@ -628,7 +648,8 @@ hp_push_arguments (nargs, args, sp, struct_return, struct_addr)
   for (i = 0; i < nargs; i++)
     {
       cum += TYPE_LENGTH (VALUE_TYPE (args[i]));
-      /* value must go at proper alignment. Assume alignment is a
+
+    /* value must go at proper alignment. Assume alignment is a
 	 power of two.*/
       alignment = hp_alignof (VALUE_TYPE (args[i]));
       if (cum % alignment)
@@ -636,11 +657,11 @@ hp_push_arguments (nargs, args, sp, struct_return, struct_addr)
       offset[i] = -cum;
     }
   sp += min ((cum + 7) & -8, 16);
+
   for (i = 0; i < nargs; i++)
-    {
-      write_memory (sp + offset[i], VALUE_CONTENTS (args[i]),
-		    TYPE_LENGTH (VALUE_TYPE (args[i])));
-    }
+    write_memory (sp + offset[i], VALUE_CONTENTS (args[i]),
+		  TYPE_LENGTH (VALUE_TYPE (args[i])));
+
   if (struct_return)
     write_register (28, struct_addr);
   return sp + 32;
@@ -694,10 +715,8 @@ pa_do_registers_info (regnum, fpregs)
   if (regnum == -1)
     pa_print_registers (raw_regs, regnum, fpregs);
   else if (regnum < FP0_REGNUM)
-    {
-      printf ("%s %x\n", reg_names[regnum], *(long *)(raw_regs +
-						      REGISTER_BYTE (regnum)));
-    }
+    printf ("%s %x\n", reg_names[regnum], *(long *)(raw_regs +
+						    REGISTER_BYTE (regnum)));
   else
     pa_print_fp_reg (regnum);
 }
@@ -711,14 +730,14 @@ pa_print_registers (raw_regs, regnum, fpregs)
 
   for (i = 0; i < 18; i++)
     printf ("%8.8s: %8x  %8.8s: %8x  %8.8s: %8x  %8.8s: %8x\n",
-		     reg_names[i],
-		     *(int *)(raw_regs + REGISTER_BYTE (i)),
-		     reg_names[i + 18],
-		     *(int *)(raw_regs + REGISTER_BYTE (i + 18)),
-		     reg_names[i + 36],
-		     *(int *)(raw_regs + REGISTER_BYTE (i + 36)),
-		     reg_names[i + 54],
-		     *(int *)(raw_regs + REGISTER_BYTE (i + 54)));
+	    reg_names[i],
+	    *(int *)(raw_regs + REGISTER_BYTE (i)),
+	    reg_names[i + 18],
+	    *(int *)(raw_regs + REGISTER_BYTE (i + 18)),
+	    reg_names[i + 36],
+	    *(int *)(raw_regs + REGISTER_BYTE (i + 36)),
+	    reg_names[i + 54],
+	    *(int *)(raw_regs + REGISTER_BYTE (i + 54)));
 
   if (fpregs)
     for (i = 72; i < NUM_REGS; i++)
@@ -742,7 +761,6 @@ pa_print_fp_reg (i)
   val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, stdout, 0,
 	     1, 0, Val_pretty_default);
   printf_filtered ("\n");
-
 }
 
 /* Function calls that pass into a new compilation unit must pass through a
@@ -784,6 +802,39 @@ skip_trampoline_code (pc, name)
     pc = extract_21 (inst0) + extract_17 (inst1);
   else
     pc = (CORE_ADDR)NULL;
+
+  return pc;
+}
+
+/* Advance PC across any function entry prologue instructions
+   to reach some "real" code.  */
+
+/* skip (stw rp, -20(0,sp)); copy 4,1; copy sp, 4; stwm 1,framesize(sp) 
+   for gcc, or (stw rp, -20(0,sp); stwm 1, framesize(sp) for hcc */
+
+CORE_ADDR
+skip_prologue(pc)
+     CORE_ADDR pc;
+{
+  int inst;
+  int status;
+
+  status = target_read_memory (pc, &inst, 4);
+  SWAP_TARGET_AND_HOST (&inst, sizeof (inst));
+  if (status != 0)
+    return pc;
+
+  if (inst == 0x6BC23FD9)	/* stw rp,-20(sp) */
+    {
+      if (read_memory_integer (pc + 4, 4) == 0x8040241)	/* copy r4,r1 */
+	pc += 16;
+      else if ((read_memory_integer (pc + 4, 4) & ~MASK_14) == 0x68810000) /* stw r1,(r4) */
+	pc += 8;
+    }
+  else if (read_memory_integer (pc, 4) == 0x8040241) /* copy r4,r1 */
+    pc += 12;
+  else if ((read_memory_integer (pc, 4) & ~MASK_14) == 0x68810000) /* stw r1,(r4) */
+    pc += 4;
 
   return pc;
 }

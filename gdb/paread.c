@@ -46,6 +46,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <string.h>
 #include "demangle.h"
 #include <sys/file.h>
+#include "aout/aout64.h"
 
 /* Various things we might complain about... */
 
@@ -116,20 +117,20 @@ pa_symtab_read (abfd, addr, objfile)
   int val;
   char *stringtab;
   struct symbol_dictionary_record *buf, *bufp;
+  CONST int symsize = sizeof (struct symbol_dictionary_record);
 
-  number_of_symbols = obj_hp_sym_count (abfd);
+  number_of_symbols = bfd_get_symcount (abfd);
 
-  buf = alloca (obj_hp_symbol_entry_size (abfd) * number_of_symbols);
-  bfd_seek (abfd, obj_hp_sym_filepos (abfd), L_SET);
-  val = bfd_read (buf, obj_hp_symbol_entry_size (abfd) * number_of_symbols,
-		  1, abfd);
-  if (val != obj_hp_symbol_entry_size (abfd) * number_of_symbols)
+  buf = alloca (symsize * number_of_symbols);
+  bfd_seek (abfd, obj_sym_filepos (abfd), L_SET);
+  val = bfd_read (buf, symsize * number_of_symbols, 1, abfd);
+  if (val != symsize * number_of_symbols)
     error ("Couldn't read symbol dictionary!");
 
-  stringtab = alloca (obj_hp_stringtab_size (abfd));
-  bfd_seek (abfd, obj_hp_str_filepos (abfd), L_SET);
-  val = bfd_read (stringtab, obj_hp_stringtab_size (abfd), 1, abfd);
-  if (val != obj_hp_stringtab_size (abfd))
+  stringtab = alloca (obj_stringtab_size (abfd));
+  bfd_seek (abfd, obj_str_filepos (abfd), L_SET);
+  val = bfd_read (stringtab, obj_stringtab_size (abfd), 1, abfd);
+  if (val != obj_stringtab_size (abfd))
     error ("Can't read in HP string table.");
   
   for (i = 0, bufp = buf; i < number_of_symbols; i++, bufp++)
@@ -161,7 +162,7 @@ pa_symtab_read (abfd, addr, objfile)
           continue;
         }
 
-      if (bufp->name.n_strx > obj_hp_stringtab_size (abfd))
+      if (bufp->name.n_strx > obj_stringtab_size (abfd))
 	error ("Invalid symbol data; bad HP string table offset: %d",
 	       bufp->name.n_strx);
 
@@ -284,22 +285,6 @@ pa_symfile_finish (objfile)
     }
 }
 
-#if 0
-
-
-
-
-
-	  mainline,
-	  stabsect->filepos,				/* .stab offset */
-	  bfd_get_section_size_before_reloc (stabsect),	/* .stab size */
-	  stabstringsect->filepos,			/* .stabstr offset */
-	  bfd_get_section_size_before_reloc (stabstringsect),  /* .stabstr size */
-	  obj_dbx_symbol_entry_size (abfd));
-
-
-#endif
-
 /* PA specific initialization routine for reading symbols.
 
    It is passed a pointer to a struct sym_fns which contains, among other
@@ -317,14 +302,27 @@ pa_symfile_init (objfile)
   int val;
   bfd *sym_bfd = objfile->obfd;
   char *name = bfd_get_filename (sym_bfd);
+  asection *stabsect;		/* Section containing symbol table entries */
+  asection *stringsect;		/* Section containing symbol name strings */
+
+  stabsect = bfd_get_section_by_name (sym_bfd, "$GDB_SYMBOLS$");
+  stringsect = bfd_get_section_by_name (sym_bfd, "$GDB_STRINGS$");
 
   /* Allocate struct to keep track of the symfile */
   objfile->sym_private = (PTR)
     xmmalloc (objfile -> md, sizeof (struct dbx_symfile_info));
 
+  memset ((PTR) objfile->sym_private, 0, sizeof (struct dbx_symfile_info));
+
+  if (!stabsect)
+    return;
+
+  if (!stringsect)
+    error ("Found stabs, but not string section");
+
   /* FIXME POKING INSIDE BFD DATA STRUCTURES */
-#define	STRING_TABLE_OFFSET	(obj_dbx_str_filepos (sym_bfd))
-#define	SYMBOL_TABLE_OFFSET	(obj_dbx_sym_filepos (sym_bfd))
+#define	STRING_TABLE_OFFSET	(stringsect->filepos)
+#define	SYMBOL_TABLE_OFFSET	(stabsect->filepos)
 
   /* FIXME POKING INSIDE BFD DATA STRUCTURES */
 
@@ -333,8 +331,9 @@ pa_symfile_init (objfile)
   if (!DBX_TEXT_SECT (objfile))
     error ("Can't find .text section in symbol file");
 
-  DBX_SYMBOL_SIZE (objfile) = obj_dbx_symbol_entry_size (sym_bfd);
-  DBX_SYMCOUNT (objfile) = obj_dbx_sym_count (sym_bfd);
+  DBX_SYMBOL_SIZE (objfile) = sizeof (struct internal_nlist);
+  DBX_SYMCOUNT (objfile) = bfd_section_size (sym_bfd, stabsect)
+    / DBX_SYMBOL_SIZE (objfile);
   DBX_SYMTAB_OFFSET (objfile) = SYMBOL_TABLE_OFFSET;
 
   /* Read the string table and stash it away in the psymbol_obstack.  It is
@@ -349,7 +348,7 @@ pa_symfile_init (objfile)
      however at least check to see if the size is zero or some negative
      value. */
 
-  DBX_STRINGTAB_SIZE (objfile) = obj_dbx_stringtab_size (sym_bfd);
+  DBX_STRINGTAB_SIZE (objfile) = bfd_section_size (sym_bfd, stringsect);
 
   if (DBX_SYMCOUNT (objfile) == 0
       || DBX_STRINGTAB_SIZE (objfile) == 0)

@@ -248,8 +248,6 @@ fetch_register (regno)
   supply_register (regno, buf);
 }
 
-
-
 /* Resume execution of the inferior process.
    If STEP is nonzero, single-step it.
    If SIGNAL is nonzero, give it that signal.  */

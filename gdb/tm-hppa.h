@@ -61,16 +61,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* skip (stw rp, -20(0,sp)); copy 4,1; copy sp, 4; stwm 1,framesize(sp) 
    for gcc, or (stw rp, -20(0,sp); stwm 1, framesize(sp) for hcc */
 
-#define SKIP_PROLOGUE(pc) \
-{ if (read_memory_integer ((pc), 4) == 0x6BC23FD9)			\
-    { if (read_memory_integer ((pc) + 4, 4) == 0x8040241)		\
-	(pc) += 16;							\
-      else if ((read_memory_integer (pc + 4, 4) & ~MASK_14) == 0x68810000) \
-	(pc) += 8;}							\
-  else if (read_memory_integer ((pc), 4) == 0x8040241)			\
-    (pc) += 12;								\
-  else if ((read_memory_integer (pc, 4) & ~MASK_14) == 0x68810000)	\
-    (pc) += 4;}
+#define SKIP_PROLOGUE(pc) pc = skip_prologue (pc)
 
 /* If PC is in some function-call trampoline code, return the PC
    where the function itself actually starts.  If not, return NULL.  */
@@ -311,10 +302,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define FRAME_CHAIN(thisframe) frame_chain (thisframe)
 
-#if 0
 #define FRAME_CHAIN_VALID(chain, thisframe) \
   frame_chain_valid (chain, thisframe)
-#endif
 
 #define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 
@@ -546,6 +535,8 @@ text_space				; Otherwise, go through _sr4export,
    hackery, which should all go away FIXME FIXME FIXME FIXME now.  */
 
 #define	GDB_TARGET_IS_HPPA
+
+#define BELIEVE_PCC_PROMOTION 1
 
 /*
  * Unwind table and descriptor.
