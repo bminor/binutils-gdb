@@ -54,7 +54,6 @@ BFD_BACKENDS = oasys.o ieee.o srec.o \
 OPTIONAL_BACKENDS = trad-core.o
 
 BFD_H=$(INCDIR)/bfd.h
-SYSDEP_H=$(INCDIR)/sysdep.h
 
 # C source files that correspond to .o's.
 CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c archures.c \
@@ -117,10 +116,14 @@ clean:
 clobber realclean: clean
 	rm -f libbfd.a TAGS
 
-$(BFD_LIBS):  libbfd.h $(BFD_H)
-$(BFD_MACHINES):  libbfd.h $(BFD_H)
-$(BFD_BACKENDS):  libbfd.h $(BFD_H)
-$(OPTIONAL_BACKENDS):  libbfd.h $(BFD_H)
+# Mark everything as depending on config.status, since the timestamp on
+# sysdep.h might actually move backwards if we reconfig and relink it
+# to a different hosts/h-xxx.h file.  This will force a recompile anyway.
+RECONFIG = config.status
+$(BFD_LIBS):  libbfd.h $(BFD_H) $(RECONFIG)
+$(BFD_MACHINES):  libbfd.h $(BFD_H) $(RECONFIG)
+$(BFD_BACKENDS):  libbfd.h $(BFD_H) $(RECONFIG)
+$(OPTIONAL_BACKENDS):  libbfd.h $(BFD_H) $(RECONFIG)
 
 saber:
 	#suppress 65 on bfd_map_over_sections 
@@ -259,15 +262,15 @@ m68kcoff.o : m68kcoff.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/m68kcoff.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
 amdcoff.o : amdcoff.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/amdcoff.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
-format.o : format.c $(INCDIR)/sysdep.h $(INCDIR)/bfd.h \
+format.o : format.c $(INCDIR)/bfd.h \
   $(INCDIR)/obstack.h libbfd.h 
-section.o : section.c $(INCDIR)/sysdep.h $(INCDIR)/bfd.h \
+section.o : section.c $(INCDIR)/bfd.h \
   $(INCDIR)/obstack.h libbfd.h 
-core.o : core.c $(INCDIR)/sysdep.h $(INCDIR)/bfd.h \
+core.o : core.c $(INCDIR)/bfd.h \
   $(INCDIR)/obstack.h libbfd.h 
-syms.o : syms.c $(INCDIR)/sysdep.h $(INCDIR)/bfd.h \
+syms.o : syms.c $(INCDIR)/bfd.h \
   $(INCDIR)/obstack.h libbfd.h 
-reloc.o : reloc.c $(INCDIR)/sysdep.h $(INCDIR)/bfd.h \
+reloc.o : reloc.c $(INCDIR)/bfd.h \
   $(INCDIR)/obstack.h libbfd.h 
 m88k-bcs.o : m88k-bcs.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/m88k-bcs.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 

@@ -7,7 +7,8 @@ Fri Oct 11 03:01:52 1991  John Gilmore  (gnu at cygnus.com)
 	Change some config names to match other dirs.
 	* *.c:  Include bfd.h before sysdep.h, so ansidecl and PROTO()
 	get defined first.
-	* Makefile.in:  Use -I. to get sysdep.h.
+	* Makefile.in:  Use -I. to get sysdep.h.  Remove refs to
+	../include/sysdep.h.
 	* cpu-i960.c:  Strncmp needed a length arg.
 	* ecoff.c:  Don't ever call trad_unix_core_file_p from here.
 	* i386aout.c:  Remove dead N_TXTOFF override.
