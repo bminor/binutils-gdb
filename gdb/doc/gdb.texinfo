@@ -13348,8 +13348,8 @@ The TUI has several configuration variables that control the
 appearance of windows on the terminal.
 
 @table @code
-@item set tui-border-kind @var{kind}
-@kindex set tui-border-kind
+@item set tui border-kind @var{kind}
+@kindex set tui border-kind
 Select the border appearance for the source, assembly and register windows.
 The possible values are the following:
 @table @code
@@ -13365,14 +13365,14 @@ drawn using character line graphics if the terminal supports them.
 
 @end table
 
-@item set tui-active-border-mode @var{mode}
-@kindex set tui-active-border-mode
+@item set tui active-border-mode @var{mode}
+@kindex set tui active-border-mode
 Select the attributes to display the border of the active window.
 The possible values are @code{normal}, @code{standout}, @code{reverse},
 @code{half}, @code{half-standout}, @code{bold} and @code{bold-standout}.
 
-@item set tui-border-mode @var{mode}
-@kindex set tui-border-mode
+@item set tui border-mode @var{mode}
+@kindex set tui border-mode
 Select the attributes to display the border of other windows.
 The @var{mode} can be one of the following:
 @table @code

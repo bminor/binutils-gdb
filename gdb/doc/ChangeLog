@@ -1,3 +1,7 @@
+2001-07-28  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* gdb.texinfo (TUI Configuration): Rename tui configuration variables.
+
 2001-07-25  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (libgdb): Rewrite.
