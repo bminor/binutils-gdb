@@ -1,5 +1,11 @@
 2005-02-21  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am: Run "make dep-am"
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
+2005-02-21  Alan Modra  <amodra@bigpond.net.au>
+
 	* readelf.c (BYTE_GET8): Delete.  Replace uses with BYTE_GET.
 	(byte_get_little_endian): Don't handle size of -8.
 	(byte_get_signed, byte_get_big_endian): Likewise.
