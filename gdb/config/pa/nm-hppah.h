@@ -169,12 +169,6 @@ extern int hppa_can_use_hw_watchpoint (int type, int cnt, int ot);
          ! stepped_after_stopped_by_watchpoint && \
          bpstat_have_active_hw_watchpoints ())
 
-/* When a hardware watchpoint triggers, we'll move the inferior past it
-   by removing all eventpoints; stepping past the instruction that caused
-   the trigger; reinserting eventpoints; and checking whether any watched
-   location changed. */
-#define HAVE_NONSTEPPABLE_WATCHPOINT 1
-
 /* Our implementation of "hardware" watchpoints uses memory page-protection
    faults.  However, HP-UX has unfortunate interactions between these and
    system calls; basically, it's unsafe to have page protections on when a

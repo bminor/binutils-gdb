@@ -18,14 +18,3 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "mips/tm-mips.h"
-
-/* We need to remove watchpoints when stepping, else we hit them again! */
-
-/* FIXME: cagney/2003-08-29: The macros HAVE_STEPPABLE_WATCHPOINT,
-   HAVE_NONSTEPPABLE_WATCHPOINT, and HAVE_CONTINUABLE_WATCHPOINT need
-   to all be folded into the target vector.  Since they are being used
-   as guards for STOPPED_BY_WATCHPOINT, why not have
-   STOPPED_BY_WATCHPOINT return the type of watchpoint that the code
-   is sitting on?  */
-
-#define HAVE_NONSTEPPABLE_WATCHPOINT 1

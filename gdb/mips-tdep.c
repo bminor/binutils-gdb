@@ -6120,6 +6120,14 @@ mips_gdbarch_init (struct gdbarch_info info,
 
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_mips);
 
+  /* FIXME: cagney/2003-08-29: The macros HAVE_STEPPABLE_WATCHPOINT,
+     HAVE_NONSTEPPABLE_WATCHPOINT, and HAVE_CONTINUABLE_WATCHPOINT
+     need to all be folded into the target vector.  Since they are
+     being used as guards for STOPPED_BY_WATCHPOINT, why not have
+     STOPPED_BY_WATCHPOINT return the type of watchpoint that the code
+     is sitting on?  */
+  set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
+
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 
@@ -6300,9 +6308,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: GDB_TARGET_IS_MIPS64 = %d\n",
 		      GDB_TARGET_IS_MIPS64);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: HAVE_NONSTEPPABLE_WATCHPOINT # %s\n",
-		      XSTRING (HAVE_NONSTEPPABLE_WATCHPOINT));
   fprintf_unfiltered (file,
 		      "mips_dump_tdep:  HI_REGNUM = %d\n",
 		      HI_REGNUM);

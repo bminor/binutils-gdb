@@ -5205,6 +5205,12 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_print_insn (gdbarch, print_insn_hppa);
 
+  /* When a hardware watchpoint triggers, we'll move the inferior past
+     it by removing all eventpoints; stepping past the instruction
+     that caused the trigger; reinserting eventpoints; and checking
+     whether any watched location changed.  */
+  set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
+
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 

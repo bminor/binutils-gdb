@@ -1,3 +1,15 @@
+2003-09-04  Andrew Cagney  <cagney@redhat.com>
+
+	* hppa-tdep.c (hppa_gdbarch_init): Set
+	"have_nonsteppable_watchpoint".
+	* config/pa/nm-hppah.h (HAVE_NONSTEPPABLE_WATCHPOINT): Delete.
+	* mips-tdep.c (mips_dump_tdep): Do not print
+	HAVE_NONSTEPPABLE_WATCHPOINT.
+	(mips_gdbarch_init): Set "have_nonsteppable_watchpoint".
+	* config/mips/tm-embed.h (HAVE_NONSTEPPABLE_WATCHPOINT): Delete.
+	* config/mips/nm-irix5.h (HAVE_NONSTEPPABLE_WATCHPOINT): Delete.
+	* config/mips/nm-irix4.h (HAVE_NONSTEPPABLE_WATCHPOINT): Delete.
+
 2003-09-04  Corinna Vinschen  <vinschen@redhat.com>
 
 	* breakpoint.c (watchpoint_check): Remove accidentally checked in
