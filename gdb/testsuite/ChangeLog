@@ -1,3 +1,10 @@
+Sun Jul 30 10:24:20 1995  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/callfuncs.exp: Add tests for passing structs to
+	inferior functions and return various types.
+	* gdb.base/callfuncs.c: Add functions to receive a struct
+	and return a member of the struct, in various types.
+
 Sat Jul 29 14:22:33 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.base/Makefile.in (clean):  Remove callf-info.exp.
