@@ -1,3 +1,7 @@
+2002-09-27  Andrew Cagney  <ac131313@redhat.com>
+
+	* all-cfg.texi: Use @sc for GDB and GCC.  Update copyright.
+
 2002-09-25  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.texinfo: Use GNU/Linux instead of Linux.
