@@ -1,3 +1,11 @@
+2001-12-20  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* configure.tgt (arm-*-netbsdelf*): Add target.
+	(arm-*-netbsd*): Add armelf and armelf_nbsd to targ_extra_emuls.
+	* emulparams/armelf_nbsd.sh: Added.
+	* Makefile.am: Add rules for earmelf_nbsd.
+	* Makefile.in: Regenerate.
+
 2001-12-19  Andreas Jaeger  <aj@suse.de>,
 	    Susanne Oberhauser <froh@suse.de>
 
