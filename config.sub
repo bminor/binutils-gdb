@@ -198,12 +198,11 @@ case $basic_machine in
 		| mips64 | mipsel | mips64el | mips64orion | mips64orionel \
 		| mipstx39 | mipstx39el \
 		| sparc | sparclet | sparclite | sparc64 | sparc86x | v850 \
-		| c4x \
-		| fr30) # CYGNUS LOCAL
+		| c4x)
 		basic_machine=$basic_machine-unknown
 		;;
 	m88110 | m680[012346]0 | m683?2 | m68360 | m5200 | z8k | v70 \
-		| h8500 | w65) # CYGNUS LOCAL
+		| h8500 | w65 | fr30) # CYGNUS LOCAL
 		basic_machine=$basic_machine-unknown
 		;;
 	thumb)

@@ -365,8 +365,8 @@ case "${enable_target_optspace}:${target}" in
   yes:*)
     target_makefile_frag="${target_makefile_frag} config/mt-ospace"
     ;;
-  # CYGNUS LOCAL d10v, d30v
-  :m32r-* | :d10v-* | :d30v-*)
+  # CYGNUS LOCAL d10v, d30v, fr30
+  :m32r-* | :d10v-* | :d30v-* | :fr30-*)
     target_makefile_frag="${target_makefile_frag} config/mt-ospace"
     ;;
   no:* | :*)
