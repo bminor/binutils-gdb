@@ -1,3 +1,8 @@
+2002-09-13  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tuiStack.c (tui_make_status_line): Make sure the local buffer
+	is large enough to hold the complete line.
+
 2002-09-10  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* tui-hooks.c (tui_event_loop): New function.
