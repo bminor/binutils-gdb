@@ -1,7 +1,3 @@
-# Sanitize.in for devo.
-# $Id$
-#
-
 # Each directory to survive it's way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
 # and must exist in the order specified by this file.  Each directory
@@ -17,8 +13,6 @@
 
 Do-first:
 
-echo Sanitizing `pwd`...
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -27,54 +21,99 @@ echo Sanitizing `pwd`...
 
 Things-to-keep:
 
-3b1
-a29k
-a29k-kern
-altos
-altosgas
-amix
-arm
-bigmips
-convex
-decstation
-delta88
-hp300bsd
-hp300hpux
-i386sco
-i386aout
-i386v
-i386v-g
-i386v32
-i386v32-g
-i960
-irix3
-isi
-littlemips
-m88k
-merlin
-news
-news1000
-nindy960
-none
-np1
-pn
-pyramid
-sun2os3
-sun2os4
-sun3
-sun386
-sun3os3
-sun3os4
-sun4
-sun4os3
-sun4os4
-symmetry
-tahoe
-ultra3
-umax
-vax
-vxworks68
-vxworks960
+mh-3b1
+mh-altos
+mh-altosgas
+mh-amix
+mh-arm
+mh-bigmips
+mh-convex
+mh-decstation
+mh-delta88
+mh-hp300bsd
+mh-hp300hpux
+mh-i386mach
+mh-i386sco
+mh-i386v
+mh-i386v-g
+mh-i386v32
+mh-i386v32-g
+mh-irix3
+mh-isi
+mh-littlemips
+mh-m88k
+mh-merlin
+mh-news
+mh-news1000
+mh-none
+mh-np1
+mh-pn
+mh-pyramid
+mh-rs6000
+mh-rtbsd
+mh-sun2os3
+mh-sun2os4
+mh-sun3
+mh-sun386
+mh-sun3os3
+mh-sun3os4
+mh-sun4
+mh-sun4os3
+mh-sun4os4
+mh-symmetry
+mh-tahoe
+mh-ultra3
+mh-umax
+mh-vax
+mt-3b1
+mt-a29k
+mt-a29k-kern
+mt-altos
+mt-altosgas
+mt-amix
+mt-arm
+mt-bigmips
+mt-convex
+mt-decstation
+mt-delta88
+mt-hp300bsd
+mt-hp300hpux
+mt-i386sco
+mt-i386aout
+mt-i386v
+mt-i386v-g
+mt-i386v32
+mt-i386v32-g
+mt-i960
+mt-irix3
+mt-isi
+mt-littlemips
+mt-m88k
+mt-merlin
+mt-news
+mt-news1000
+mt-nindy960
+mt-none
+mt-np1
+mt-pn
+mt-pyramid
+mt-rs6000
+mt-sun2os3
+mt-sun2os4
+mt-sun3
+mt-sun386
+mt-sun3os3
+mt-sun3os4
+mt-sun4
+mt-sun4os3
+mt-sun4os4
+mt-symmetry
+mt-tahoe
+mt-ultra3
+mt-umax
+mt-vax
+mt-vxworks68
+mt-vxworks960
 
 Do-last:
 
