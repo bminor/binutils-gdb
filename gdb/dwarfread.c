@@ -674,11 +674,13 @@ set_cu_language (dip)
       case LANG_MODULA2:
 	cu_language = language_m2;
 	break;
+      case LANG_FORTRAN77:
+      case LANG_FORTRAN90:
+	cu_language = language_fortran;
+	break;
       case LANG_ADA83:
       case LANG_COBOL74:
       case LANG_COBOL85:
-      case LANG_FORTRAN77:
-      case LANG_FORTRAN90:
       case LANG_PASCAL83:
 	/* We don't know anything special about these yet. */
 	cu_language = language_unknown;

@@ -2496,8 +2496,7 @@ read_array_type (die, objfile)
 	  /* Default bounds to an array with unspecified length.  */
 	  low = 0;
 	  high = -1;
-	  if (cu_language == DW_LANG_Fortran77
-	      || cu_language == DW_LANG_Fortran90)
+	  if (cu_language == language_fortran)
 	    {
 	      /* FORTRAN implies a lower bound of 1, if not given.  */
 	      low = 1;
@@ -3689,11 +3688,14 @@ set_cu_language (lang)
     {
     case DW_LANG_C89:
     case DW_LANG_C:
-    case DW_LANG_Fortran77:
       cu_language = language_c;
       break;
     case DW_LANG_C_plus_plus:
       cu_language = language_cplus;
+      break;
+    case DW_LANG_Fortran77:
+    case DW_LANG_Fortran90:
+      cu_language = language_fortran;
       break;
     case DW_LANG_Mips_Assembler:
       cu_language = language_asm;
@@ -3701,10 +3703,6 @@ set_cu_language (lang)
     case DW_LANG_Ada83:
     case DW_LANG_Cobol74:
     case DW_LANG_Cobol85:
-#if 0
-    case DW_LANG_Fortran77:	/* moved up top for now */
-#endif
-    case DW_LANG_Fortran90:
     case DW_LANG_Pascal83:
     case DW_LANG_Modula2:
     default:
