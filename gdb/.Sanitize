@@ -168,8 +168,6 @@ sparc-tdep.c
 sparc-xdep.c
 stack.c
 standalone.c
-state.c
-state.h
 stuff.c
 sun3-xdep.c
 sun386-xdep.c
