@@ -28,6 +28,7 @@
 #include "bfdlink.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
+#include "elf/ppc.h"
 #include "elf/ppc64.h"
 #include "elf64-ppc.h"
 
@@ -90,6 +91,7 @@ static bfd_reloc_status_type ppc64_elf_unhandled_reloc
 #define elf_backend_finish_dynamic_symbol     ppc64_elf_finish_dynamic_symbol
 #define elf_backend_reloc_type_class	      ppc64_elf_reloc_type_class
 #define elf_backend_finish_dynamic_sections   ppc64_elf_finish_dynamic_sections
+#define elf_backend_special_sections	      ppc64_elf_special_sections
 
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
@@ -8759,5 +8761,38 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 
   return TRUE;
 }
+
+/* Add extra PPC sections -- Note, for now, make .sbss2 and
+   .PPC.EMB.sbss0 a normal section, and not a bss section so
+   that the linker doesn't crater when trying to make more than
+   2 sections.  */
+
+static struct bfd_elf_special_section const ppc64_elf_special_sections[]=
+{
+  { ".tags",		0,	NULL,	0,
+    SHT_ORDERED,	SHF_ALLOC },
+  { ".sdata",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
+  { ".sbss",		0,	NULL,	0,
+    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE },
+  { ".sdata2",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC },
+  { ".sbss2",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC },
+  { ".PPC.EMB.apuinfo",	0,	NULL,	0,
+    SHT_NOTE,		0 },
+  { ".PPC.EMB.sdata0",	0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC },
+  { ".PPC.EMB.sbss0",	0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC },
+  { ".plt",		0,	NULL,	0,
+    SHT_NOBITS,		0 },
+  { ".toc",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
+  { ".tocbss",		0,	NULL,	0,
+    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE },
+  { NULL,		0,	NULL,	0,
+    0,			0 }
+};
 
 #include "elf64-target.h"

@@ -87,6 +87,7 @@ static void sh64_find_section_for_address
 	sh64_elf_link_output_symbol_hook
 #define elf_backend_final_write_processing 	sh64_elf_final_write_processing
 #define elf_backend_section_from_shdr		sh64_backend_section_from_shdr
+#define elf_backend_special_sections		sh64_elf_special_sections
 
 #define bfd_elf32_new_section_hook		sh64_elf_new_section_hook
 
@@ -733,6 +734,14 @@ sh64_elf_final_write_processing (bfd *abfd,
 	}
     }
 }
+
+static struct bfd_elf_special_section const sh64_elf_special_sections[]=
+{
+  { ".cranges",		0,	NULL,	0,
+    SHT_PROGBITS,	0 },
+  { NULL,		0,	NULL,	0,
+    0,			0 }
+};
 
 #undef	TARGET_BIG_SYM
 #define	TARGET_BIG_SYM		bfd_elf32_sh64_vec

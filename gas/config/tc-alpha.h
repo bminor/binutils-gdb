@@ -104,10 +104,6 @@ extern void alpha_frob_file_before_adjust PARAMS ((void));
 #define DIFF_EXPR_OK   /* foo-. gets turned into PC relative relocs */
 
 #ifdef OBJ_ELF
-#define ELF_TC_SPECIAL_SECTIONS \
-  { ".sdata",   SHT_PROGBITS,   SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL  }, \
-  { ".sbss",    SHT_NOBITS,     SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL  },
-
 #define md_elf_section_letter		alpha_elf_section_letter
 extern int alpha_elf_section_letter PARAMS ((int, char **));
 #define md_elf_section_flags		alpha_elf_section_flags

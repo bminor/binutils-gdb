@@ -174,9 +174,6 @@ extern void sh64_flush_pending_output PARAMS ((void));
 #define tc_frob_section(sec) shmedia_frob_section_type (sec)
 extern void shmedia_frob_section_type PARAMS ((asection *));
 
-#define ELF_TC_SPECIAL_SECTIONS \
-  { ".cranges",	SHT_PROGBITS,	0 },
-
 /* We need to emit fixups relative to the frag in which the instruction
    resides.  Safest way without calculating max fragment growth or making
    it a fixed number is to provide a pointer to the opcode frag.

@@ -4112,6 +4112,14 @@ sh64_elf64_finish_dynamic_sections (bfd *output_bfd,
   return TRUE;
 }
 
+static struct bfd_elf_special_section const sh64_elf64_special_sections[]=
+{
+  { ".cranges",		0,	NULL,	0,
+    SHT_PROGBITS,	0 },
+  { NULL,		0,	NULL,	0,
+    0,			0 }
+};
+
 #define TARGET_BIG_SYM		bfd_elf64_sh64_vec
 #define TARGET_BIG_NAME		"elf64-sh64"
 #define TARGET_LITTLE_SYM	bfd_elf64_sh64l_vec
@@ -4167,6 +4175,7 @@ sh64_elf64_finish_dynamic_sections (bfd *output_bfd,
 					sh64_elf64_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections \
 					sh64_elf64_finish_dynamic_sections
+#define elf_backend_special_sections	sh64_elf64_special_sections
 
 #define elf_backend_want_got_plt	1
 #define elf_backend_plt_readonly	1

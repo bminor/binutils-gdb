@@ -532,18 +532,18 @@ CODE_FRAGMENT
 .#define BFD_IND_SECTION_NAME "*IND*"
 .
 .{* The absolute section.  *}
-.extern const asection bfd_abs_section;
+.extern asection bfd_abs_section;
 .#define bfd_abs_section_ptr ((asection *) &bfd_abs_section)
 .#define bfd_is_abs_section(sec) ((sec) == bfd_abs_section_ptr)
 .{* Pointer to the undefined section.  *}
-.extern const asection bfd_und_section;
+.extern asection bfd_und_section;
 .#define bfd_und_section_ptr ((asection *) &bfd_und_section)
 .#define bfd_is_und_section(sec) ((sec) == bfd_und_section_ptr)
 .{* Pointer to the common section.  *}
-.extern const asection bfd_com_section;
+.extern asection bfd_com_section;
 .#define bfd_com_section_ptr ((asection *) &bfd_com_section)
 .{* Pointer to the indirect section.  *}
-.extern const asection bfd_ind_section;
+.extern asection bfd_ind_section;
 .#define bfd_ind_section_ptr ((asection *) &bfd_ind_section)
 .#define bfd_is_ind_section(sec) ((sec) == bfd_ind_section_ptr)
 .
@@ -616,7 +616,7 @@ static const asymbol global_syms[] =
 
 #define STD_SECTION(SEC, FLAGS, SYM, NAME, IDX)				\
   const asymbol * const SYM = (asymbol *) &global_syms[IDX]; 		\
-  const asection SEC = 							\
+  asection SEC = 							\
     /* name, id,  index, next, flags, user_set_vma, reloc_done,      */	\
     { NAME,  IDX, 0,     NULL, FLAGS, 0,            0,			\
 									\

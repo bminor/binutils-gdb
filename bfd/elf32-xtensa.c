@@ -5865,6 +5865,21 @@ xtensa_callback_required_dependence (abfd, sec, link_info, callback, closure)
   return ok;
 }
 
+/* The default literal sections should always be marked as "code" (i.e.,
+   SHF_EXECINSTR).  This is particularly important for the Linux kernel
+   module loader so that the literals are not placed after the text.  */
+static struct bfd_elf_special_section const elf_xtensa_special_sections[]=
+{
+  { ".literal",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR },
+  { ".init.literal",	0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR },
+  { ".fini.literal",	0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR },
+  { NULL,		0,	NULL,	0,
+    0,			0 }
+};
+
 
 #ifndef ELF_ARCH
 #define TARGET_LITTLE_SYM		bfd_elf32_xtensa_le_vec
@@ -5925,5 +5940,6 @@ xtensa_callback_required_dependence (abfd, sec, link_info, callback, closure)
 #define elf_backend_reloc_type_class	     elf_xtensa_reloc_type_class
 #define elf_backend_relocate_section	     elf_xtensa_relocate_section
 #define elf_backend_size_dynamic_sections    elf_xtensa_size_dynamic_sections
+#define elf_backend_special_sections	     elf_xtensa_special_sections
 
 #include "elf32-target.h"

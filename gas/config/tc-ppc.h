@@ -222,22 +222,6 @@ extern int ppc_section_flags PARAMS ((int, int, int));
 #define md_elf_section_word(STR, LEN)		ppc_section_word (STR, LEN)
 #define md_elf_section_flags(FLAGS, ATTR, TYPE)	ppc_section_flags (FLAGS, ATTR, TYPE)
 
-/* Add extra PPC sections -- Note, for now, make .sbss2 and .PPC.EMB.sbss0 a
-   normal section, and not a bss section so that the linker doesn't crater
-   when trying to make more than 2 sections.  */
-#define ELF_TC_SPECIAL_SECTIONS \
-  { ".tags",		SHT_ORDERED,	SHF_ALLOC },			\
-  { ".sdata",		SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },	\
-  { ".sbss",		SHT_NOBITS,	SHF_ALLOC + SHF_WRITE },	\
-  { ".sdata2",		SHT_PROGBITS,	SHF_ALLOC },			\
-  { ".sbss2",		SHT_PROGBITS,	SHF_ALLOC },			\
-  { ".PPC.EMB.apuinfo",       SHT_NOTE,       0 }, \
-  { ".PPC.EMB.sdata0",	SHT_PROGBITS,	SHF_ALLOC },			\
-  { ".PPC.EMB.sbss0",	SHT_PROGBITS,	SHF_ALLOC },			\
-  /* Extra sections for 64-bit ELF PPC.  */				\
-  { ".toc",		SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE},		\
-  { ".tocbss",		SHT_NOBITS,	SHF_ALLOC + SHF_WRITE},
-
 #define tc_comment_chars ppc_comment_chars
 extern const char *ppc_comment_chars;
 

@@ -2091,6 +2091,16 @@ m32r_elf_check_relocs (abfd, info, sec, relocs)
 
   return TRUE;
 }
+
+static struct bfd_elf_special_section const m32r_elf_special_sections[]=
+{
+  { ".sdata",	0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
+  { ".sbss",	0,	NULL,	0,
+    SHT_NOBITS,	SHF_ALLOC + SHF_WRITE },
+  { NULL,	0,	NULL,	0,
+    0,		0 }
+};
 
 #define ELF_ARCH		bfd_arch_m32r
 #define ELF_MACHINE_CODE	EM_M32R
@@ -2126,5 +2136,6 @@ m32r_elf_check_relocs (abfd, info, sec, relocs)
 #define bfd_elf32_bfd_merge_private_bfd_data 	m32r_elf_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags		m32r_elf_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data	m32r_elf_print_private_bfd_data
+#define elf_backend_special_sections		m32r_elf_special_sections
 
 #include "elf32-target.h"

@@ -1281,6 +1281,25 @@ m68hc11_elf_relax_delete_bytes (abfd, sec, addr, count)
     }
 }
 
+/* Specific sections:
+   - The .page0 is a data section that is mapped in [0x0000..0x00FF].
+     Page0 accesses are faster on the M68HC11. Soft registers used by GCC-m6811
+     are located in .page0.
+   - The .vectors is the data section that represents the interrupt
+     vectors.  */
+static struct bfd_elf_special_section const elf32_m68hc11_special_sections[]=
+{
+  { ".eeprom",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
+  { ".softregs",	0,	NULL,	0,
+    SHT_NOBITS,	SHF_ALLOC + SHF_WRITE },
+  { ".page0",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
+  { ".vectors",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
+  { NULL,		0,	NULL,	0,
+    0,			0 }
+};
 
 #define ELF_ARCH		bfd_arch_m68hc11
 #define ELF_MACHINE_CODE	EM_68HC11
@@ -1300,6 +1319,7 @@ m68hc11_elf_relax_delete_bytes (abfd, sec, addr, count)
 #define elf_backend_object_p	0
 #define elf_backend_final_write_processing	0
 #define elf_backend_can_gc_sections		1
+#define elf_backend_special_sections elf32_m68hc11_special_sections
 
 #define bfd_elf32_bfd_link_hash_table_create \
                                 m68hc11_elf_bfd_link_hash_table_create

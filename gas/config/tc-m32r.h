@@ -98,11 +98,6 @@ int m32r_fill_insn PARAMS ((int));
 #define md_after_pass_hook()	m32r_fill_insn (1)
 #define TC_START_LABEL(ch, ptr)	(ch == ':' && m32r_fill_insn (0))
 
-/* Add extra M32R sections.  */
-#define ELF_TC_SPECIAL_SECTIONS \
-  { ".sdata",		SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE }, \
-  { ".sbss",		SHT_NOBITS,	SHF_ALLOC + SHF_WRITE },
-
 #define md_cleanup                 m32r_elf_section_change_hook
 #define md_elf_section_change_hook m32r_elf_section_change_hook
 extern void m32r_elf_section_change_hook PARAMS ((void));

@@ -2667,6 +2667,16 @@ elf64_hppa_elf_get_symbol_type (elf_sym, type)
     return type;
 }
 
+static struct bfd_elf_special_section const elf64_hppa_special_sections[]=
+{
+  { ".fini",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
+  { ".init",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
+  { NULL,		0,	NULL,	0,
+    0,			0 }
+};
+
 /* The hash bucket size is the standard one, namely 4.  */
 
 const struct elf_size_info hppa64_elf_size_info =
@@ -2764,6 +2774,7 @@ const struct elf_size_info hppa64_elf_size_info =
 #define elf_backend_get_symbol_type	elf64_hppa_elf_get_symbol_type
 #define elf_backend_reloc_type_class	elf64_hppa_reloc_type_class
 #define elf_backend_rela_normal		1
+#define elf_backend_special_sections	elf64_hppa_special_sections
 
 #include "elf64-target.h"
 
@@ -2771,6 +2782,8 @@ const struct elf_size_info hppa64_elf_size_info =
 #define TARGET_BIG_SYM			bfd_elf64_hppa_linux_vec
 #undef TARGET_BIG_NAME
 #define TARGET_BIG_NAME			"elf64-hppa-linux"
+
+#undef elf_backend_special_sections
 
 #define INCLUDED_TARGET_FILE 1
 #include "elf64-target.h"

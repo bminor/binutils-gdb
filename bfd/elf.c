@@ -741,6 +741,10 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
   if (newsect == NULL)
     return FALSE;
 
+  /* Always use the real type/flags.  */
+  elf_section_type (newsect) = hdr->sh_type;
+  elf_section_flags (newsect) = hdr->sh_flags;
+
   newsect->filepos = hdr->sh_offset;
 
   if (! bfd_set_section_vma (abfd, newsect, hdr->sh_addr)
@@ -2139,12 +2143,145 @@ bfd_section_from_elf_index (abfd, index)
   return elf_elfsections (abfd)[index]->bfd_section;
 }
 
+static struct bfd_elf_special_section const special_sections[] =
+{
+  { ".bss",		0,	NULL,	0,
+    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE },
+  { ".comment",		0,	NULL,	0,
+    SHT_PROGBITS,	0 },
+  { ".data",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
+  { ".data1",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
+  { ".debug",		0,	NULL,	0,
+    SHT_PROGBITS,	0 },
+  { ".fini",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR },
+  { ".init",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR },
+  { ".line",		0,	NULL,	0,
+    SHT_PROGBITS,	0 },
+  { ".rodata",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC },
+  { ".rodata1",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC },
+  { ".tbss",		0,	NULL,	0,
+    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE + SHF_TLS },
+  { ".tdata",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_TLS },
+  { ".text",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR },
+  { ".init_array",	0,	NULL,	0,
+    SHT_INIT_ARRAY,	SHF_ALLOC + SHF_WRITE },
+  { ".fini_array",	0,	NULL,	0,
+    SHT_FINI_ARRAY, SHF_ALLOC + SHF_WRITE },
+  { ".preinit_array",	0,	NULL,	0,
+    SHT_PREINIT_ARRAY, SHF_ALLOC + SHF_WRITE },
+  { ".debug_line",	0,	NULL,	0,
+    SHT_PROGBITS,	0 },
+  { ".debug_info",	0,	NULL,	0,
+    SHT_PROGBITS,	0 },
+  { ".debug_abbrev",	0,	NULL,	0,
+    SHT_PROGBITS,	0 },
+  { ".debug_aranges",	0,	NULL,	0,
+    SHT_PROGBITS,	0 },
+  { ".dynamic",		0,	NULL,	0,
+    SHT_DYNAMIC,	SHF_ALLOC },
+  { ".dynstr",		0,	NULL,	0,
+    SHT_STRTAB,		SHF_ALLOC },
+  { ".dynsym",		0,	NULL,	0,
+    SHT_DYNSYM,		SHF_ALLOC },
+  { ".got",		0,	NULL,	0,
+    SHT_PROGBITS,	0 },
+  { ".hash",		0,	NULL,	0,
+    SHT_HASH,		SHF_ALLOC },
+  { ".interp",		0,	NULL,	0,
+    SHT_PROGBITS,	0 },
+  { ".plt",		0,	NULL,	0,
+    SHT_PROGBITS,	0 },
+  { ".shstrtab",	0,	NULL,	0,
+    SHT_STRTAB,		0 },
+  { ".strtab",		0,	NULL,	0,
+    SHT_STRTAB,		0 },
+  { ".symtab",		0,	NULL,	0,
+    SHT_SYMTAB,		0 },
+  { ".gnu.version",	0,	NULL,	0,
+    SHT_GNU_versym,	0 },
+  { ".gnu.version_d",	0,	NULL,	0,
+    SHT_GNU_verdef,	0 },
+  { ".gnu.version_r",	0,	NULL,	0,
+    SHT_GNU_verneed,	0 },
+  { ".note",		5,	NULL,	0,
+    SHT_NOTE,		0 },
+  { ".rela",		5,	NULL,	0,
+    SHT_RELA,		0 },
+  { ".rel",		4,	NULL,	0,
+    SHT_REL,	0 },
+  { ".stab",		5,	"str",	3,
+    SHT_STRTAB,		0 },
+  { NULL,		0,	NULL,	0,
+    0,		0 }
+};
+
+static const struct bfd_elf_special_section *
+get_special_section (const char *name,
+		     const struct bfd_elf_special_section *special_sections,
+		     unsigned int rela)
+{
+  int i;
+
+  for (i = 0; special_sections[i].prefix != NULL; i++)
+    if (((special_sections[i].prefix_length
+	  && strncmp (name, special_sections[i].prefix,
+		      special_sections[i].prefix_length) == 0
+	  && (! special_sections[i].suffix_length
+	      || strcmp ((name + strlen (name)
+			  - special_sections[i].suffix_length),
+			 special_sections[i].suffix) == 0))
+	 || strcmp (name, special_sections[i].prefix) == 0)
+	&& (rela || special_sections[i].type != SHT_RELA))
+      return &special_sections[i];
+
+  return NULL;
+}
+
+bfd_boolean
+_bfd_elf_get_sec_type_attr (bfd *abfd, const char *name,
+			    int *type, int *attr)
+{
+  bfd_boolean found = FALSE;
+  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
+  /* See if this is one of the special sections.  */
+  if (name)
+    {
+      const struct bfd_elf_special_section *ssect = NULL;
+      unsigned int rela = get_elf_backend_data (abfd)->default_use_rela_p;
+
+      if (bed->special_sections)
+	ssect = get_special_section (name, bed->special_sections, rela);
+
+      if (! ssect)
+	ssect = get_special_section (name, special_sections, rela);
+
+      if (ssect)
+	{
+	  *type = ssect->type;
+	  *attr = ssect->attributes;
+	  found = TRUE;
+	}
+    }
+
+  return found;
+}
+
 bfd_boolean
 _bfd_elf_new_section_hook (abfd, sec)
      bfd *abfd;
      asection *sec;
 {
   struct bfd_elf_section_data *sdata;
+  int type, attr;
 
   sdata = (struct bfd_elf_section_data *) sec->used_by_bfd;
   if (sdata == NULL)
@@ -2154,6 +2291,19 @@ _bfd_elf_new_section_hook (abfd, sec)
       if (sdata == NULL)
 	return FALSE;
       sec->used_by_bfd = (PTR) sdata;
+    }
+
+  if ((sec->flags & SEC_ALLOC) != 0
+      && (((sec->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
+	  || (sec->flags & SEC_NEVER_LOAD) != 0))
+    elf_section_type (sec) = SHT_NOBITS;
+  else
+    elf_section_type (sec) = SHT_PROGBITS;
+  if (sec->name && _bfd_elf_get_sec_type_attr (abfd, sec->name,
+					       &type, &attr))
+    {
+      elf_section_type (sec) = type;
+      elf_section_flags (sec) = attr;
     }
 
   /* Indicate whether or not this section should use RELA relocations.  */
@@ -2394,55 +2544,52 @@ elf_fake_sections (abfd, asect, failedptrarg)
   this_hdr->bfd_section = asect;
   this_hdr->contents = NULL;
 
-  /* FIXME: This should not be based on section names.  */
-  if (strcmp (asect->name, ".dynstr") == 0)
-    this_hdr->sh_type = SHT_STRTAB;
-  else if (strcmp (asect->name, ".hash") == 0)
+  switch (this_hdr->sh_type)
     {
-      this_hdr->sh_type = SHT_HASH;
+    default:
+      (*_bfd_error_handler)
+       (_("%s: Section `%s' has unknown type 0x%0x"),
+	bfd_get_filename (asect->owner), asect->name,
+	this_hdr->sh_type);
+      abort ();
+      break;
+
+    case SHT_STRTAB:
+    case SHT_INIT_ARRAY:
+    case SHT_FINI_ARRAY:
+    case SHT_PREINIT_ARRAY:
+    case SHT_NOTE:
+    case SHT_NOBITS:
+    case SHT_PROGBITS:
+      break;
+
+    case SHT_HASH:
       this_hdr->sh_entsize = bed->s->sizeof_hash_entry;
-    }
-  else if (strcmp (asect->name, ".dynsym") == 0)
-    {
-      this_hdr->sh_type = SHT_DYNSYM;
+      break;
+  
+    case SHT_DYNSYM:
       this_hdr->sh_entsize = bed->s->sizeof_sym;
-    }
-  else if (strcmp (asect->name, ".dynamic") == 0)
-    {
-      this_hdr->sh_type = SHT_DYNAMIC;
+      break;
+
+    case SHT_DYNAMIC:
       this_hdr->sh_entsize = bed->s->sizeof_dyn;
-    }
-  else if (strncmp (asect->name, ".rela", 5) == 0
-	   && get_elf_backend_data (abfd)->may_use_rela_p)
-    {
-      this_hdr->sh_type = SHT_RELA;
-      this_hdr->sh_entsize = bed->s->sizeof_rela;
-    }
-  else if (strncmp (asect->name, ".rel", 4) == 0
-	   && get_elf_backend_data (abfd)->may_use_rel_p)
-    {
-      this_hdr->sh_type = SHT_REL;
-      this_hdr->sh_entsize = bed->s->sizeof_rel;
-    }
-  else if (strcmp (asect->name, ".init_array") == 0)
-    this_hdr->sh_type = SHT_INIT_ARRAY;
-  else if (strcmp (asect->name, ".fini_array") == 0)
-    this_hdr->sh_type = SHT_FINI_ARRAY;
-  else if (strcmp (asect->name, ".preinit_array") == 0)
-    this_hdr->sh_type = SHT_PREINIT_ARRAY;
-  else if (strncmp (asect->name, ".note", 5) == 0)
-    this_hdr->sh_type = SHT_NOTE;
-  else if (strncmp (asect->name, ".stab", 5) == 0
-	   && strcmp (asect->name + strlen (asect->name) - 3, "str") == 0)
-    this_hdr->sh_type = SHT_STRTAB;
-  else if (strcmp (asect->name, ".gnu.version") == 0)
-    {
-      this_hdr->sh_type = SHT_GNU_versym;
+      break;
+
+    case SHT_RELA:
+      if (get_elf_backend_data (abfd)->may_use_rela_p)
+	this_hdr->sh_entsize = bed->s->sizeof_rela;
+      break;
+
+     case SHT_REL:
+      if (get_elf_backend_data (abfd)->may_use_rel_p)
+	this_hdr->sh_entsize = bed->s->sizeof_rel;
+      break;
+
+     case SHT_GNU_versym:
       this_hdr->sh_entsize = sizeof (Elf_External_Versym);
-    }
-  else if (strcmp (asect->name, ".gnu.version_d") == 0)
-    {
-      this_hdr->sh_type = SHT_GNU_verdef;
+      break;
+
+     case SHT_GNU_verdef:
       this_hdr->sh_entsize = 0;
       /* objcopy or strip will copy over sh_info, but may not set
          cverdefs.  The linker will set cverdefs, but sh_info will be
@@ -2452,10 +2599,9 @@ elf_fake_sections (abfd, asect, failedptrarg)
       else
 	BFD_ASSERT (elf_tdata (abfd)->cverdefs == 0
 		    || this_hdr->sh_info == elf_tdata (abfd)->cverdefs);
-    }
-  else if (strcmp (asect->name, ".gnu.version_r") == 0)
-    {
-      this_hdr->sh_type = SHT_GNU_verneed;
+      break;
+
+    case SHT_GNU_verneed:
       this_hdr->sh_entsize = 0;
       /* objcopy or strip will copy over sh_info, but may not set
          cverrefs.  The linker will set cverrefs, but sh_info will be
@@ -2465,18 +2611,12 @@ elf_fake_sections (abfd, asect, failedptrarg)
       else
 	BFD_ASSERT (elf_tdata (abfd)->cverrefs == 0
 		    || this_hdr->sh_info == elf_tdata (abfd)->cverrefs);
-    }
-  else if ((asect->flags & SEC_GROUP) != 0)
-    {
-      this_hdr->sh_type = SHT_GROUP;
+      break;
+
+    case SHT_GROUP:
       this_hdr->sh_entsize = 4;
+      break;
     }
-  else if ((asect->flags & SEC_ALLOC) != 0
-	   && (((asect->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
-	       || (asect->flags & SEC_NEVER_LOAD) != 0))
-    this_hdr->sh_type = SHT_NOBITS;
-  else
-    this_hdr->sh_type = SHT_PROGBITS;
 
   if ((asect->flags & SEC_ALLOC) != 0)
     this_hdr->sh_flags |= SHF_ALLOC;

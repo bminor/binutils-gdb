@@ -510,6 +510,17 @@ typedef enum {
   ict_irix6
 } irix_compat_t;
 
+/* Mapping of ELF section names and types.  */
+struct bfd_elf_special_section
+{
+  const char *prefix;
+  size_t prefix_length;
+  const char *suffix;
+  size_t suffix_length;
+  int type;
+  int attributes;
+};
+
 struct elf_backend_data
 {
   /* The architecture for this backend.  */
@@ -871,6 +882,9 @@ struct elf_backend_data
 
   const struct elf_size_info *s;
 
+  /* An array of target specific special section map.  */
+  const struct bfd_elf_special_section *special_sections;
+
   /* offset of the _GLOBAL_OFFSET_TABLE_ symbol from the start of the
      .got section */
   bfd_vma got_symbol_offset;
@@ -1006,6 +1020,8 @@ struct bfd_elf_section_data
 };
 
 #define elf_section_data(sec)  ((struct bfd_elf_section_data*)sec->used_by_bfd)
+#define elf_section_type(sec)  (elf_section_data(sec)->this_hdr.sh_type)
+#define elf_section_flags(sec) (elf_section_data(sec)->this_hdr.sh_flags)
 #define elf_group_name(sec)    (elf_section_data(sec)->group.name)
 #define elf_group_id(sec)      (elf_section_data(sec)->group.id)
 #define elf_next_in_group(sec) (elf_section_data(sec)->next_in_group)
@@ -1374,6 +1390,8 @@ extern bfd_boolean _bfd_elf_new_section_hook
   PARAMS ((bfd *, asection *));
 extern bfd_boolean _bfd_elf_init_reloc_shdr
   PARAMS ((bfd *, Elf_Internal_Shdr *, asection *, bfd_boolean));
+extern bfd_boolean _bfd_elf_get_sec_type_attr (bfd *, const char *,
+					       int *, int *);
 
 /* If the target doesn't have reloc handling written yet:  */
 extern void _bfd_elf_no_info_to_howto

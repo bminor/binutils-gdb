@@ -1,3 +1,30 @@
+2003-07-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/obj-elf.c (special_sections): Removed.
+	(obj_elf_change_section): Call _bfd_elf_get_sec_type_attr. Set
+	elf_section_type and elf_section_flags.
+	(elf_frob_file): Set SHT_GROUP.
+
+	* config/obj-elf.h (obj_sec_set_private_data): New.
+
+	* config/tc-alpha.h (ELF_TC_SPECIAL_SECTIONS): Removed.
+	* config/tc-ia64.h: Likewise.
+	* config/tc-m32r.h: Likewise.
+	* config/tc-m68hc11.h: Likewise.
+	* config/tc-mcore.h: Likewise.
+	* config/tc-mips.h: Likewise.
+	* config/tc-ppc.h: Likewise.
+	* config/tc-sh64.h: Likewise.
+	* config/tc-v850.h: Likewise.
+	* config/tc-xtensa.h: Likewise.
+
+	* config/tc-v850.h (SHF_V850_GPREL): Removed.
+	(SHF_V850_EPREL): Likewise.
+	(SHF_V850_R0REL): Likewise.
+
+	* subsegs.c (subseg_get): Call obj_sec_set_private_data if it
+	is defined.
+
 2003-07-24  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* config/tc-m68hc11.h (DWARF2_ADDR_SIZE): Use 32-bit address for

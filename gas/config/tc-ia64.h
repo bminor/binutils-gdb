@@ -151,10 +151,6 @@ extern void ia64_check_label PARAMS ((symbolS *));
 
 #define WORKING_DOT_WORD	/* don't do broken word processing for now */
 
-#define ELF_TC_SPECIAL_SECTIONS						   \
-{ ".sbss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_IA_64_SHORT }, \
-{ ".sdata",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_IA_64_SHORT },
-
 #define DWARF2_LINE_MIN_INSN_LENGTH 1	/* so slot-multipliers can be 1 */
 
 /* This is the information required for unwind records in an ia64

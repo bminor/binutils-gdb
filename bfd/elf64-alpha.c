@@ -5465,6 +5465,16 @@ elf64_alpha_reloc_type_class (rela)
     }
 }
 
+static struct bfd_elf_special_section const elf64_alpha_special_sections[]=
+{
+  { ".sdata",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL },
+  { ".sbss",		0,	NULL,	0,
+    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL },
+  { NULL,		0,	NULL,	0,
+    0,			0 }
+};
+
 /* ECOFF swapping routines.  These are used when dealing with the
    .mdebug section, which is in the ECOFF debugging format.  Copied
    from elf32-mips.c.  */
@@ -5602,6 +5612,9 @@ static const struct elf_size_info alpha_elf_size_info =
 
 #define elf_backend_size_info \
   alpha_elf_size_info
+
+#define elf_backend_special_sections \
+  elf64_alpha_special_sections
 
 /* A few constants that determine how the .plt section is set up.  */
 #define elf_backend_want_got_plt 0

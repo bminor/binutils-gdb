@@ -601,63 +601,6 @@ static struct section_stack *section_stack;
    other possibilities, but I don't know what they are.  In any case,
    BFD doesn't really let us set the section type.  */
 
-/* Certain named sections have particular defined types, listed on p.
-   4-19 of the ABI.  */
-struct special_section
-{
-  const char *name;
-  int type;
-  int attributes;
-};
-
-static struct special_section const special_sections[] =
-{
-  { ".bss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE		},
-  { ".comment",	SHT_PROGBITS,	0				},
-  { ".data",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE		},
-  { ".data1",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE		},
-  { ".debug",	SHT_PROGBITS,	0				},
-#if defined (TC_HPPA) && !defined (TE_LINUX) && TARGET_ARCH_SIZE == 64
-  { ".fini",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE		},
-  { ".init",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE		},
-#else
-  { ".fini",	SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR	},
-  { ".init",	SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR	},
-#endif
-  { ".line",	SHT_PROGBITS,	0				},
-  { ".note",	SHT_NOTE,	0				},
-  { ".rodata",	SHT_PROGBITS,	SHF_ALLOC			},
-  { ".rodata1",	SHT_PROGBITS,	SHF_ALLOC			},
-  { ".tbss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_TLS	},
-  { ".tdata",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_TLS	},
-  { ".text",	SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR	},
-  { ".init_array",SHT_INIT_ARRAY, SHF_ALLOC + SHF_WRITE         },
-  { ".fini_array",SHT_FINI_ARRAY, SHF_ALLOC + SHF_WRITE         },
-  { ".preinit_array",SHT_PREINIT_ARRAY, SHF_ALLOC + SHF_WRITE   },
-
-#ifdef ELF_TC_SPECIAL_SECTIONS
-  ELF_TC_SPECIAL_SECTIONS
-#endif
-
-#if 0
-  /* The following section names are special, but they can not
-     reasonably appear in assembler code.  Some of the attributes are
-     processor dependent.  */
-  { ".dynamic",	SHT_DYNAMIC,	SHF_ALLOC /* + SHF_WRITE */ 	},
-  { ".dynstr",	SHT_STRTAB,	SHF_ALLOC			},
-  { ".dynsym",	SHT_DYNSYM,	SHF_ALLOC			},
-  { ".got",	SHT_PROGBITS,	0				},
-  { ".hash",	SHT_HASH,	SHF_ALLOC			},
-  { ".interp",	SHT_PROGBITS,	/* SHF_ALLOC */			},
-  { ".plt",	SHT_PROGBITS,	0				},
-  { ".shstrtab",SHT_STRTAB,	0				},
-  { ".strtab",	SHT_STRTAB,	/* SHF_ALLOC */			},
-  { ".symtab",	SHT_SYMTAB,	/* SHF_ALLOC */			},
-#endif
-
-  { NULL,	0,		0				}
-};
-
 void
 obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push)
      const char *name;
@@ -671,7 +614,8 @@ obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push)
   asection *old_sec;
   segT sec;
   flagword flags;
-  int i;
+  int def_type;
+  int def_attr;
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
@@ -695,48 +639,52 @@ obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push)
   old_sec = bfd_get_section_by_name (stdoutput, name);
   sec = subseg_new (name, 0);
 
-  /* See if this is one of the special sections.  */
-  for (i = 0; special_sections[i].name != NULL; i++)
-    if (strcmp (name, special_sections[i].name) == 0)
-      {
-	if (type == SHT_NULL)
-	  type = special_sections[i].type;
-	else if (type != special_sections[i].type)
-	  {
-	    if (old_sec == NULL
-		/* FIXME: gcc, as of 2002-10-22, will emit
+  if (_bfd_elf_get_sec_type_attr (stdoutput, name, &def_type,
+				  &def_attr))
+    {
+      if (type == SHT_NULL)
+	type = def_type;
+      else if (type != def_type)
+	{
+	  if (old_sec == NULL
+	      /* FIXME: gcc, as of 2002-10-22, will emit
 
-		   .section .init_array,"aw",@progbits
+		 .section .init_array,"aw",@progbits
 
-		   for __attribute__ ((section (".init_array"))).
-		   "@progbits" is incorrect.  */
-		&& special_sections[i].type != SHT_INIT_ARRAY
-		&& special_sections[i].type != SHT_FINI_ARRAY
-		&& special_sections[i].type != SHT_PREINIT_ARRAY)
-	      {
-		as_warn (_("setting incorrect section type for %s"), name);
-	      }
-	    else
-	      {
-		as_warn (_("ignoring incorrect section type for %s"), name);
-		type = special_sections[i].type;
-	      }
-	  }
-	if ((attr &~ special_sections[i].attributes) != 0
-	    && old_sec == NULL)
-	  {
-	    /* As a GNU extension, we permit a .note section to be
-	       allocatable.  If the linker sees an allocateable .note
-	       section, it will create a PT_NOTE segment in the output
-	       file.  */
-	    if (strcmp (name, ".note") != 0
-		|| attr != SHF_ALLOC)
-	      as_warn (_("setting incorrect section attributes for %s"),
+		 for __attribute__ ((section (".init_array"))).
+		 "@progbits" is incorrect.  */
+	      && def_type != SHT_INIT_ARRAY
+	      && def_type != SHT_FINI_ARRAY
+	      && def_type != SHT_PREINIT_ARRAY)
+	    {
+	      /* We allow to specify any type for a .note section.  */
+	      if (def_type != SHT_NOTE)
+		as_warn (_("setting incorrect section type for %s"),
+			 name);
+	    }
+	  else
+	    {
+	      as_warn (_("ignoring incorrect section type for %s"),
 		       name);
-	  }
-	attr |= special_sections[i].attributes;
-	break;
-      }
+	      type = def_type;
+	    }
+	}
+
+      if (old_sec == NULL && (attr &~ def_attr) != 0)
+	{
+	  /* As a GNU extension, we permit a .note section to be
+	     allocatable.  If the linker sees an allocateable .note
+	     section, it will create a PT_NOTE segment in the output
+	     file.  */
+	  if (strcmp (name, ".note") != 0 || attr != SHF_ALLOC)
+	    as_warn (_("setting incorrect section attributes for %s"),
+		     name);
+	}
+      attr |= def_attr;
+
+      elf_section_type (sec) = type;
+      elf_section_flags (sec) = attr;
+    }
 
   /* Convert ELF type and flags to BFD flags.  */
   flags = (SEC_RELOC
@@ -2076,6 +2024,7 @@ elf_frob_file ()
 	  as_fatal (_("can't create group: %s"),
 		    bfd_errmsg (bfd_get_error ()));
 	}
+      elf_section_type (s) = SHT_GROUP;
 
       /* Pass a pointer to the first section in this group.  */
       elf_next_in_group (s) = list.head[i];

@@ -422,6 +422,10 @@ subseg_get (segname, force_new)
   else
     secptr = bfd_make_section_anyway (stdoutput, segname);
 
+#ifdef obj_sec_set_private_data
+  obj_sec_set_private_data (stdoutput, secptr);
+#endif
+
   seginfo = seg_info (secptr);
   if (! seginfo)
     {

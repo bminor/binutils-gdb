@@ -53,18 +53,6 @@ extern int m68hc11_mach PARAMS ((void));
 #define TARGET_FORMAT (m68hc11_arch_format ())
 extern const char *m68hc11_arch_format PARAMS ((void));
 
-/* Specific sections:
-   - The .page0 is a data section that is mapped in [0x0000..0x00FF].
-     Page0 accesses are faster on the M68HC11. Soft registers used by GCC-m6811
-     are located in .page0.
-   - The .vectors is the data section that represents the interrupt
-     vectors.  */
-#define ELF_TC_SPECIAL_SECTIONS \
-  { ".eeprom",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE	}, \
-  { ".softregs",SHT_NOBITS,	SHF_ALLOC + SHF_WRITE	}, \
-  { ".page0",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE	}, \
-  { ".vectors",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE	},
-
 #define LISTING_WORD_SIZE 1	/* A word is 1 bytes */
 #define LISTING_LHS_WIDTH 4	/* One word on the first line */
 #define LISTING_LHS_WIDTH_SECOND 4	/* One word on the second line */

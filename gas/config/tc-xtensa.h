@@ -189,12 +189,4 @@ extern long xtensa_relax_frag
 
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
-/* The default literal sections should always be marked as "code" (i.e.,
-   SHF_EXECINSTR).  This is particularly important for the Linux kernel
-   module loader so that the literals are not placed after the text.  */
-#define ELF_TC_SPECIAL_SECTIONS \
-  { ".literal",		SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR }, \
-  { ".init.literal",	SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR }, \
-  { ".fini.literal",	SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR },
-
 #endif /* TC_XTENSA */

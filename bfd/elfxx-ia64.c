@@ -4773,6 +4773,16 @@ elfNN_ia64_reloc_type_class (rela)
     }
 }
 
+static struct bfd_elf_special_section const elfNN_ia64_special_sections[]=
+{
+  { ".sbss",		0,	NULL,	0,
+    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE + SHF_IA_64_SHORT },
+  { ".sdata",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_IA_64_SHORT },
+  { NULL,		0,	NULL,	0,
+    0,			0 }
+};
+
 static bfd_boolean
 elfNN_ia64_hpux_vec (const bfd_target *vec)
 {
@@ -4880,6 +4890,7 @@ elfNN_hpux_backend_section_from_bfd_section (abfd, sec, retval)
 #define elf_backend_hide_symbol		elfNN_ia64_hash_hide_symbol
 #define elf_backend_reloc_type_class	elfNN_ia64_reloc_type_class
 #define elf_backend_rela_normal		1
+#define elf_backend_special_sections	elfNN_ia64_special_sections
 
 #include "elfNN-target.h"
 

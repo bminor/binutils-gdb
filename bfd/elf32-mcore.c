@@ -681,6 +681,16 @@ mcore_elf_check_relocs (abfd, info, sec, relocs)
   return TRUE;
 }
 
+static struct bfd_elf_special_section const mcore_elf_special_sections[]=
+{
+  { ".ctors",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
+  { ".dtors",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
+  { NULL,		0,	NULL,	0,
+    0,			0 }
+};
+
 #define TARGET_BIG_SYM		bfd_elf32_mcore_big_vec
 #define TARGET_BIG_NAME		"elf32-mcore-big"
 #define TARGET_LITTLE_SYM       bfd_elf32_mcore_little_vec
@@ -699,6 +709,7 @@ mcore_elf_check_relocs (abfd, info, sec, relocs)
 #define elf_backend_gc_mark_hook		mcore_elf_gc_mark_hook
 #define elf_backend_gc_sweep_hook		mcore_elf_gc_sweep_hook
 #define elf_backend_check_relocs                mcore_elf_check_relocs
+#define elf_backend_special_sections		mcore_elf_special_sections
 
 #define elf_backend_can_gc_sections		1
 #define elf_backend_rela_normal			1
