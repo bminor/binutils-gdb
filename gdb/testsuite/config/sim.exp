@@ -71,7 +71,7 @@ proc gdb_load { arg } {
 	    }
 	    set timeout 30
 	    verbose "Timeout is now $timeout seconds" 2
-	    return 1
+	    return 0
 	}
 	-re "$gdb_prompt $"     {
 	    if $verbose>1 then {
@@ -84,4 +84,5 @@ proc gdb_load { arg } {
 	    }
 	}
     }
+    return -1
 }

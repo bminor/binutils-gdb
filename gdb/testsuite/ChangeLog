@@ -1,3 +1,7 @@
+2004-11-28  Richard Earnshaw  <rearnsha@arm.com>
+
+	* config/sim.exp (gdb_load): Return 0 on success, -1 on failure.
+
 2004-11-16  Randolph Chung  <tausq@debian.org>
 
 	* gdb.base/unload.exp: Pass relative path to gdb_get_line_number.
