@@ -1,3 +1,8 @@
+2003-02-13  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-arm.h (elf32_thumb_to_arm_stub): Include section VMAs
+	in computation of offset to insert into BL instruction.
+
 2003-02-11  Uwe Stieber  <uwe@wwws.de>
 
 	* config.bfd: Add support for kaOS as cross build target system.

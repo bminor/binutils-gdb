@@ -929,13 +929,16 @@ elf32_thumb_to_arm_stub (info, name, input_bfd, output_bfd, input_section,
 
   BFD_ASSERT (my_offset <= globals->thumb_glue_size);
 
-  /* Now go back and fix up the original BL insn to point
-     to here.  */
-  ret_offset = (s->output_offset
-		+ my_offset
-		- (input_section->output_offset
-		   + offset + addend)
-		- 8);
+  /* Now go back and fix up the original BL insn to point to here.  */
+  ret_offset =
+    /* Address of where the stub is located.  */
+    (s->output_section->vma + s->output_offset + my_offset)
+     /* Address of where the BL is located.  */
+    - (input_section->output_section->vma + input_section->output_offset + offset)
+    /* Addend in the relocation.  */
+    - addend
+    /* Biassing for PC-relative addressing.  */
+    - 8;
 
   tmp = bfd_get_32 (input_bfd, hit_data
 		    - input_section->vma);
