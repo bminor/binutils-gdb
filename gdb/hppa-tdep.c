@@ -1042,6 +1042,8 @@ static CORE_ADDR
 hppa_target_read_pc (ptid_t ptid)
 {
   int flags = read_register_pid (HPPA_FLAGS_REGNUM, ptid);
+  ULONGEST ipsw = read_register_pid (HPPA_IPSW_REGNUM, ptid);
+  CORE_ADDR pc;
 
   /* The following test does not belong here.  It is OS-specific, and belongs
      in native code.  */
@@ -1049,7 +1051,17 @@ hppa_target_read_pc (ptid_t ptid)
   if (flags & 2)
     return read_register_pid (31, ptid) & ~0x3;
 
-  return read_register_pid (HPPA_PCOQ_HEAD_REGNUM, ptid) & ~0x3;
+  pc = read_register_pid (HPPA_PCOQ_HEAD_REGNUM, ptid) & ~0x3;
+
+  /* If the current instruction is nullified, then we are effectively
+     still executing the previous instruction.  Pretend we are still
+     there.  This is needed when single stepping; if the nullified instruction
+     is on a different line, we don't want gdb to think we've stepped onto
+     that line.  */
+  if (ipsw & 0x00200000)
+    pc -= 4;
+
+  return pc;
 }
 
 /* Write out the PC.  If currently in a syscall, then also write the new
@@ -2185,7 +2197,21 @@ hppa_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 static CORE_ADDR
 hppa_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  return frame_unwind_register_signed (next_frame, HPPA_PCOQ_HEAD_REGNUM) & ~3;
+  ULONGEST ipsw;
+  CORE_ADDR pc;
+
+  ipsw = frame_unwind_register_signed (next_frame, HPPA_IPSW_REGNUM);
+  pc = frame_unwind_register_signed (next_frame, HPPA_PCOQ_HEAD_REGNUM) & ~3;
+
+  /* If the current instruction is nullified, then we are effectively
+     still executing the previous instruction.  Pretend we are still
+     there.  This is needed when single stepping; if the nullified instruction
+     is on a different line, we don't want gdb to think we've stepped onto
+     that line.  */
+  if (ipsw & 0x00200000)
+    pc -= 4;
+
+  return pc;
 }
 
 /* Instead of this nasty cast, add a method pvoid() that prints out a
@@ -2289,22 +2315,6 @@ hppa_pc_requires_run_before_use (CORE_ADDR pc)
      top byte of the address for all 1's.  Sigh.  */
 
   return (!target_has_stack && (pc & 0xFF000000));
-}
-
-static int
-hppa_instruction_nullified (struct gdbarch *gdbarch, struct regcache *regcache)
-{
-  ULONGEST tmp, ipsw, flags;
-
-  regcache_cooked_read (regcache, HPPA_IPSW_REGNUM, &tmp);
-  ipsw = extract_unsigned_integer (&tmp, 
-		  		   register_size (gdbarch, HPPA_IPSW_REGNUM));
-
-  regcache_cooked_read (regcache, HPPA_FLAGS_REGNUM, &tmp);
-  flags = extract_unsigned_integer (&tmp, 
-		  		    register_size (gdbarch, HPPA_FLAGS_REGNUM));
-
-  return ((ipsw & 0x00200000) && !(flags & 0x2));
 }
 
 /* Return the GDB type object for the "standard" data type of data
@@ -2573,7 +2583,6 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       
   set_gdbarch_breakpoint_from_pc (gdbarch, hppa_breakpoint_from_pc);
   set_gdbarch_pseudo_register_read (gdbarch, hppa_pseudo_register_read);
-  set_gdbarch_instruction_nullified (gdbarch, hppa_instruction_nullified);
 
   /* Frame unwind methods.  */
   set_gdbarch_unwind_dummy_id (gdbarch, hppa_unwind_dummy_id);

@@ -870,7 +870,6 @@ enum infwait_states
 {
   infwait_normal_state,
   infwait_thread_hop_state,
-  infwait_nullified_state,
   infwait_nonstep_watch_state
 };
 
@@ -1260,12 +1259,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  TARGET_ENABLE_HW_WATCHPOINTS (PIDGET (inferior_ptid));
 	  ecs->enable_hw_watchpoints_after_wait = 0;
 	}
-      stepped_after_stopped_by_watchpoint = 0;
-      break;
-
-    case infwait_nullified_state:
-      if (debug_infrun)
-        printf_unfiltered ("infrun: infwait_nullified_state\n");
       stepped_after_stopped_by_watchpoint = 0;
       break;
 
@@ -1728,30 +1721,6 @@ handle_inferior_event (struct execution_control_state *ecs)
       /* Pull the single step breakpoints out of the target. */
       SOFTWARE_SINGLE_STEP (0, 0);
       singlestep_breakpoints_inserted_p = 0;
-    }
-
-  /* If PC is pointing at a nullified instruction, then step beyond
-     it before deciding what to do.  This is required when we are stepping
-     through a function where the last instruction is a branch with a
-     nullified instruction in the delay slot that belongs to the next
-     line (which may be in a different function altogether).  */
-
-  if (gdbarch_instruction_nullified (current_gdbarch, current_regcache))
-    {
-      if (debug_infrun)
-	printf_unfiltered ("infrun: instruction nullified\n");
-      registers_changed ();
-      target_resume (ecs->ptid, 1, TARGET_SIGNAL_0);
-
-      /* We may have received a signal that we want to pass to
-         the inferior; therefore, we must not clobber the waitstatus
-         in WS. */
-
-      ecs->infwait_state = infwait_nullified_state;
-      ecs->waiton_ptid = ecs->ptid;
-      ecs->wp = &(ecs->tmpstatus);
-      prepare_to_wait (ecs);
-      return;
     }
 
   /* It may not be necessary to disable the watchpoint to stop over

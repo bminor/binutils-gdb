@@ -1,3 +1,17 @@
+2004-12-03  Randolph Chung  <tausq@debian.org>
+
+	* gdbarch.sh (instruction_nullified): Delete.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* hppa-tdep.c (hppa_target_read_pc): Adjust pc if instruction is
+	nullified.
+	(hppa_unwind_pc): Likewise. 
+	(hppa_instruction_nullified): Delete.
+	(hppa_gdbarch_init): Don't set instruction_nullified method.
+	* infrun.c (infwait_states): Remove infwait_nullified_state.
+	(handle_inferior_event): Remove handling of infwait_nullified_state.
+	Remove handling of nullified instructions.
+
 2004-12-03  Mark Kettenis  <kettenis@gnu.org>
 
 	* inf-ttrace.c: Include <sys/mman.h>.

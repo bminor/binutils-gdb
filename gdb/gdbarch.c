@@ -212,7 +212,6 @@ struct gdbarch
   gdbarch_smash_text_address_ftype *smash_text_address;
   gdbarch_software_single_step_ftype *software_single_step;
   gdbarch_single_step_through_delay_ftype *single_step_through_delay;
-  gdbarch_instruction_nullified_ftype *instruction_nullified;
   gdbarch_print_insn_ftype *print_insn;
   gdbarch_skip_trampoline_code_ftype *skip_trampoline_code;
   gdbarch_skip_solib_resolver_ftype *skip_solib_resolver;
@@ -339,7 +338,6 @@ struct gdbarch startup_gdbarch =
   0,  /* smash_text_address */
   0,  /* software_single_step */
   0,  /* single_step_through_delay */
-  generic_instruction_nullified,  /* instruction_nullified */
   0,  /* print_insn */
   0,  /* skip_trampoline_code */
   generic_skip_solib_resolver,  /* skip_solib_resolver */
@@ -437,7 +435,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->convert_from_func_ptr_addr = convert_from_func_ptr_addr_identity;
   current_gdbarch->addr_bits_remove = core_addr_identity;
   current_gdbarch->smash_text_address = core_addr_identity;
-  current_gdbarch->instruction_nullified = generic_instruction_nullified;
   current_gdbarch->skip_trampoline_code = generic_skip_trampoline_code;
   current_gdbarch->skip_solib_resolver = generic_skip_solib_resolver;
   current_gdbarch->in_solib_return_trampoline = generic_in_solib_return_trampoline;
@@ -594,7 +591,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of smash_text_address, invalid_p == 0 */
   /* Skip verify of software_single_step, has predicate */
   /* Skip verify of single_step_through_delay, has predicate */
-  /* Skip verify of instruction_nullified, invalid_p == 0 */
   if (current_gdbarch->print_insn == 0)
     fprintf_unfiltered (log, "\n\tprint_insn");
   /* Skip verify of skip_trampoline_code, invalid_p == 0 */
@@ -1199,9 +1195,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: inner_than = <0x%lx>\n",
                       (long) current_gdbarch->inner_than);
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: instruction_nullified = <0x%lx>\n",
-                      (long) current_gdbarch->instruction_nullified);
 #ifdef TARGET_INT_BIT
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_INT_BIT # %s\n",
@@ -3370,23 +3363,6 @@ set_gdbarch_single_step_through_delay (struct gdbarch *gdbarch,
                                        gdbarch_single_step_through_delay_ftype single_step_through_delay)
 {
   gdbarch->single_step_through_delay = single_step_through_delay;
-}
-
-int
-gdbarch_instruction_nullified (struct gdbarch *gdbarch, struct regcache *regcache)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->instruction_nullified != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_instruction_nullified called\n");
-  return gdbarch->instruction_nullified (gdbarch, regcache);
-}
-
-void
-set_gdbarch_instruction_nullified (struct gdbarch *gdbarch,
-                                   gdbarch_instruction_nullified_ftype instruction_nullified)
-{
-  gdbarch->instruction_nullified = instruction_nullified;
 }
 
 int

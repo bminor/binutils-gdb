@@ -1,3 +1,8 @@
+2004-12-03  Randolph Chung  <tausq@debian.org>
+
+	* gdb.arch/pa-nullify.exp: New file.
+	* gdb.arch/pa-nullify.s: New file.
+
 2004-11-30  Randolph Chung  <tausq@debian.org>
 
 	* gdb.threads/thread_check.exp: Use ${srcfile} for test program name
