@@ -1,3 +1,9 @@
+Tue Oct 19 06:17:10 1993  Fred Fish  (fnf@cirdan.cygnus.com)
+
+	* README:  Remove comment about SunOS 5.x programs leaving
+	coredumps.  Info from Sun is that this was not in customer
+	releases.
+
 Mon Oct 18 10:28:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* hppa-tdep.c (restore_pc_queue): Call target_terminal_ours after

@@ -464,12 +464,6 @@ Known bugs:
     various BFD modules.  None of them is a cause for alarm, they are actually
     a result of bugs in the DECstation compiler.
 
-  * On Solaris (2.1, at least) using the "run" command when the program
-    is already running restarts the program, but may leave a core dump
-    from the previous execution in the current directory.  Other SVR4
-    based systems don't seem to have this problem, using the same gdb
-    source code.
-
   * Notes for the DEC Alpha using OSF/1:
     The debugging output of native cc has two known problems; we view these
     as compiler bugs.
@@ -484,11 +478,8 @@ Known bugs:
     It has been reported that the Ultrix 4.3A compiler on decstations has the
     same problems.
 
-    If you intend to compile gdb with gcc-2.4.5, be warned that the file
-    bfd/libbfd.c will be miscompiled due to a bug in gcc, you have
-    to compile this file with native cc.  You will get many warnings from
-    gcc while compiling gdb, but these can be ignored for now.  Again, these
-    problems are Alpha-specific.
+    If you compile gdb with gcc-2.4.5, you will get many warnings,
+    but these can be ignored for now.  Again, this problem is Alpha-specific.
 
 GDB can produce warnings about symbols that it does not understand.  By
 default, these warnings are disabled.  You can enable them by executing
