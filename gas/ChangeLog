@@ -1,3 +1,12 @@
+Thu Jun 30 14:36:37 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* config/tc-mips.c (macro): For M_LI_SS, decide how to handle it
+	based on contents of imm_expr and offset_expr, rather than
+	mips_pic.  For M_LI_DD, decide how to handle it based on segment
+	name of offset_expr, rather than mips_pic.
+	(mips_ip): If g_switch_value < 4, use immediate values for 'l'.
+	If g_switch_value < 8, use .rdata rather than .lit for 'L'.
+
 Wed Jun 29 17:30:46 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* as.c (show_usage): Break long string into shorter ones.
