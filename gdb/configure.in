@@ -398,11 +398,13 @@ else
 	links="${links} nm.h"
 fi
 
+# start-sanitize-gdbtk
 # Make it possible to use the GUI without doing a full install
 if [ "${enable_gdbtk}" = "yes" -a ! -f gdbtk.tcl ] ; then
 	files="${files} gdbtk.tcl"
 	links="${links} gdbtk.tcl"
 fi
+# end-sanitize-gdbtk
 
 # post-target:
 
@@ -420,6 +422,7 @@ if [ "${nativefile}" = "" ] ; then
 	mv -f Makefile.tem Makefile
 fi
 
+# start-sanitize-gdbtk
 if [ "${enable_gdbtk}" = "yes" ] ; then
 	sed -e '/# End of host and/i\
 \
@@ -429,6 +432,7 @@ ENABLE_CLIBS = $(TCL) $(TK) -lX11 -lm
 ' < Makefile > Makefile.tem
 	mv -f Makefile.tem Makefile
 fi
+# end-sanitize-gdbtk
 
 sed -e '/^TM_FILE[ 	]*=/s,^TM_FILE[ 	]*=[ 	]*,&config/'"${gdb_target_cpu}"'/,
 /^XM_FILE[ 	]*=/s,^XM_FILE[ 	]*=[ 	]*,&config/'"${gdb_host_cpu}"'/,

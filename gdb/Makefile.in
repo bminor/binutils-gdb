@@ -513,9 +513,11 @@ install-only:
 	fi ; \
 	$(INSTALL_PROGRAM) gdb $(bindir)/$$transformed_name ; \
 	$(INSTALL_DATA) $(srcdir)/gdb.1 $(man1dir)/$$transformed_name.1
+	# start-sanitize-gdbtk
 	if [ x"$(ENABLE_GDBTK)" != x ] ; then \
 		$(INSTALL_DATA) $(srcdir)/gdbtk.tcl $(libdir)/gdbtk.tcl ; \
 	fi
+	# end-sanitize-gdbtk
 	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
 uninstall: force
@@ -1103,10 +1105,12 @@ findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
 fork-child.o: fork-child.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h thread.h
 
+# start-sanitize-gdbtk
 gdbtk.o: gdbtk.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(bfd_h) symfile.h objfiles.h target.h
 	$(CC) -c $(INTERNAL_CFLAGS) $(TCL_CFLAGS) $(TK_CFLAGS) $(srcdir)/gdbtk.c \
 		 -DGDBTK_FILENAME=\"$(libdir)/gdbtk.tcl\"
+# end-sanitize-gdbtk
 
 gdbtypes.o: gdbtypes.c $(bfd_h) complaints.h $(defs_h) $(expression_h) \
 	$(gdbtypes_h) language.h objfiles.h symfile.h $(symtab_h) target.h \
