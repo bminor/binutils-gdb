@@ -481,6 +481,15 @@ demangle_signature (declp, mangled, work)
 	    success = demangle_template (declp, mangled, work);
 	    break;
 
+	  case '_':
+	    /* At the outermost level, we cannot have a return type specified,
+	       so if we run into another '_' at this point we are dealing with
+	       a mangled name that is either bogus, or has been mangled by
+	       some algorithm we don't know how to deal with.  So just
+	       reject the entire demangling. */
+	    success = 0;
+	    break;
+
 	  default:
 #ifdef GNU_DEMANGLING
 	    /* Assume we have stumbled onto the first outermost function
@@ -497,7 +506,7 @@ demangle_signature (declp, mangled, work)
 	    break;
 	}
 #ifdef GNU_DEMANGLING
-      if (expect_func)
+      if (success && expect_func)
 	{
 	  func_done = 1;
 	  success = demangle_args (declp, mangled, work);

@@ -1,3 +1,10 @@
+Mon May 11 13:27:46 1992  Fred Fish  (fnf@cygnus.com)
+
+	* cplus-dem.c (demangle_signature):  Recognize misplaced '_' to
+	avoid infinite loops while demangling bogus mangled names.
+	* valprint.c (type_print_base):  Minor fix for GNU style guide
+	conformance.
+
 Sat May  9 18:02:17 1992  Fred Fish  (fnf at fishpond)
 
 	* Makefile.in (VERSION):  Bump to 4.5.3
