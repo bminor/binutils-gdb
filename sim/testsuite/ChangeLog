@@ -1,3 +1,13 @@
+Fri Feb 20 11:00:02 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* sim/m32r/addv.cgs: Test ADDV instruction.
+	* sim/m32r/addv3.cgs: Test ADDV3 instruction.
+	* sim/m32r/addx.cgs: Test ADDX instruction.
+	* sim/m32r/lock.cgs: Test LOCK instruction.
+	* sim/m32r/neg.cgs: Test NEG instruction.
+	* sim/m32r/not.cgs: Test NOT instruction.
+	* sim/m32r/unlock.cgs: Test UNLOCK instruction.
+
 Thu Feb 19 11:15:45 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* sim/m32r/testutils.inc (mvaddr_h_gr): new macro to load an
