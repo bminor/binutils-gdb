@@ -1627,15 +1627,16 @@ DEFUN_VOID(lang_check)
   bfd * input_bfd;
   unsigned long input_machine;
   enum bfd_architecture input_architecture;
-  char *out_arch, *out_arch2;
+CONST  char *out_arch;
+  char *out_arch2;
 
 
   for (file = file_chain.head;
        file != (lang_statement_union_type *)NULL;
        file=file->input_statement.next) 
       {
-	unsigned long ldfile_new_output_machine;
-	enum bfd_architecture ldfile_new_output_architecture;
+	unsigned long ldfile_new_output_machine = 0;
+	enum bfd_architecture ldfile_new_output_architecture = bfd_arch_unknown;
 
  	input_bfd = file->input_statement.the_bfd;
 
