@@ -1,5 +1,5 @@
 /* Macro definitions for GDB on an Intel i386 running SCO Open Server 5.
-   Copyright 1998 Free Software Foundation, Inc.
+   Copyright 1998, 2002 Free Software Foundation, Inc.
    Written by J. Kean Johnston (jkj@sco.com).
 
    This file is part of GDB.
@@ -20,44 +20,17 @@
    Boston, MA 02111-1307, USA.  */
 
 #ifndef TM_I386SCO5_H
-#define TM_I386SCO5_H 1
+#define TM_I386SCO5_H
 
-/* Pick up most of what we need from the generic i386 target include file. */
+/* Pick up most of what we need from the i386 SVR4 target include file.  */
+#include "i386/tm-i386v4.h"
 
-#include "i386/tm-i386.h"
+/* SCO is unlike other SVR3 targets in that it has SVR4 style shared
+   libs, with a slight twist.  We expect 3 traps (2 for the exec and
+   one for the dynamic loader).  After the third trap we insert the
+   shared library breakpoints, then wait for the 4th trap.  */
 
-/* Pick up more stuff from the generic SYSV and SVR4 host include files. */
-#include "i386/tm-i386v.h"
-#include "config/tm-sysv4.h"
-
-#define KERNEL_U_SIZE kernel_u_size()
-
-/*
- * SCO is unlike other SVR3 targets in that it has SVR4 style shared
- * libs, with a slight twist. We expect 3 traps (2 for the exec and
- * one for the dynamic loader).  After the third trap we insert the
- * SOLIB breakpoints, then wait for the 4th trap.
- */
 #undef START_INFERIOR_TRAPS_EXPECTED
 #define START_INFERIOR_TRAPS_EXPECTED 3
-
-/* We can also do hardware watchpoints */
-#define TARGET_HAS_HARDWARE_WATCHPOINTS
-#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) 1
-
-/* After a watchpoint trap, the PC points to the instruction which
-   caused the trap.  But we can continue over it without disabling the
-   trap. */
-#define HAVE_CONTINUABLE_WATCHPOINT
-#define HAVE_STEPPABLE_WATCHPOINT
-
-#define STOPPED_BY_WATCHPOINT(W)  \
-  i386_stopped_by_watchpoint (PIDGET (inferior_ptid))
-
-#define target_insert_watchpoint(addr, len, type)  \
-  i386_insert_watchpoint (PIDGET (inferior_ptid), addr, len, type)
-
-#define target_remove_watchpoint(addr, len, type)  \
-  i386_remove_watchpoint (PIDGET (inferior_ptid), addr, len)
 
 #endif /* ifndef TM_I386SCO5_H */

@@ -1,5 +1,17 @@
 2002-08-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/tm-i386sco5.h: Include "i386/tm-i386v4.h" instead of
+	"i386/tm-i386.h", "i386/tm-i386v.h" and "config/tm-sysv.h".
+	Adjust a few comments to reflect reality a bit closer.
+	(KERNEL_U_SIZE, TARGET_HAS_HARDWARE_WATCHPOINTS,
+	TARGET_CAN_USE_HARDWARE_WATCHPOINT, HAVE_CONTINUEABLE_WATCHPOINT,
+	HAVE_STEPPABLE_WATCHPOINT, STOPPED_BY_WATCHPOINT,
+	target_insert_watchpoint, target_remove_watchpoint):
+	Move defines to ...
+	* config/i386/nm-i386sco5.h: ... here.
+	(kernel_u_size): Add prototype.  Improve a few comments and add
+	protection against multiple inclusion.
+	
 	* config/i386/nm-i386sco.h (FLOAT_INFO): Remove already commented
 	out define.
 
