@@ -1,3 +1,50 @@
+Sun Aug 27 23:35:35 1995  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/callfuncs.exp (do_function_calls):  Add alpha-dec-osf2* 
+	clear_xfail for "p t_float_values2(3.14159,float_val2)" for gcc
+	compiled test.
+	* gdb.base/opaque.exp (setup_xfail_on_opaque_pointer):
+	Add mips-sgi-irix5* xfail for not gcc compiled.
+	* gdb.base/Makefile.in (nodebug.o):  Also create nodebug.ci.
+	* gdb.base/nodebug.exp: Add mips-sgi-irix5 xfail when not gcc compiled for
+	"p top", "whatis top", "p middle", and "whatis middle".
+	* gdb.base/whatis.exp: Add mips-sgi-irix* xfail for
+	"whatis signed char" for not gcc compiled.
+	* gdb.base/setvar.exp: Add mips-sgi-irix4* xfail (works on irix5) for
+	"set variable signed char=-1 (-1)" and
+	"set variable signed char=0xFF (0xFF)" for not gcc compiled.
+	* gdb.base/funcargs.exp (float_and_integral_args):
+	Add mips-sgi-irix5* xfail for "run to call2a" for not gcc compiled.
+	Add mips-sgi-irix* xfail when not gcc compiled for
+	"continue to call2b".
+	Add mips-sgi-irix4* xfail (works with irix5) when gcc compiled for
+	"continue to call2g".
+	(discard_and_shuffle): Add mips-sgi-irix5* xfail whn not gcc compiled for
+	"backtrace from call6a"
+	(shuffle_round_robin): Add mips-sgi-irix* xfail when not gcc compiled for
+	"backtrace from call7k".
+	Add mips-sgi-irix5* xfail when not gcc compiled for
+	"backtrace from call7a".
+	(localvars_after_alloca):  Fix gdb_test cmds for
+	"print * after runto ...".
+	Remove rs6000-*-* xfails for
+	"print i after runto localvars_after_alloca" and
+	"print l after runto localvars_after_alloca"
+	for all compilers.
+	* gdb.base/exprs.exp: Add mips-sgi-irix4* xfails (works with irix5),
+ 	when not compiled with gcc, for:
+	"print signed char == (minus)",
+	"print signed char != (minus)",
+	"print signed char < (minus)",
+	"print signed char > (minus)".
+	* gdb.base/callfuncs.exp (do_function_calls):
+	Add mips-sgi-irix* xfail, when compiled with native compiler, for
+	"call inferior func with struct - returns char *".
+	* gdb.base/return.exp (return_tests): Change xfail for 
+	"correct value returned double test" to include Solaris 2.4.
+	* gdb.base/funcargs.exp (float_and_integral_args):
+	Add sparc-sun-solaris2* xfail for "print f1 after run to call2a".
+	
 Sat Aug 26 00:26:11 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.base/setvar.c, gdb.base/setvar.exp:  Add new tests for

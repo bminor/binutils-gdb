@@ -15,6 +15,7 @@ if ![file exists $binfile] then {
 } else {
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load $binfile
+    source gdb.base/nodebug.ci
 
     if [runto inner] then {
 
@@ -38,14 +39,18 @@ if ![file exists $binfile] then {
 	# Irix5, even though it is ELF, counts as "ecoff" because it
 	# encapsulates ecoff debugging info in a .mdebug section.
 
+	if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix5*" }
 	gdb_test "p top" \
 	    "{(<(text variable|function), no debug info>|short \\(\\))} \[0-9a-fx]* <top>"
+	if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix5*" }
 	gdb_test "whatis top" \
 	    "(<(text variable|function), no debug info>|short \\(\\))"
 	gdb_test "ptype top" "(short|int) \\((|<non-float parameter>|<non-float parameter>, <non-float parameter>)\\)"
 
+	if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix5*" }
 	gdb_test "p middle" \
 	    "{(<(text variable|function), no debug info>|short \\(\\))} \[0-9a-fx]* <middle>"
+	if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix5*" }
 	gdb_test "whatis middle" \
 	    "(<(text variable|function), no debug info>|short \\(\\))"
 	gdb_test "ptype middle" "(short|int) \\((|<non-float parameter>|<non-float parameter>, <non-float parameter>)\\)"

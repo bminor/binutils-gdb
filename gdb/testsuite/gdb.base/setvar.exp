@@ -338,10 +338,12 @@ expect {
 
 
 gdb_test "set variable v_signed_char=-1" ""
+if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix4*" }
 gdb_test "print v_signed_char" ".\[0-9\]* = -1 \'.377\'" \
     "set variable signed char=-1 (-1)"
 
 gdb_test "set variable v_signed_char=0xFF" ""
+if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix4*" }
 gdb_test "print v_signed_char" ".\[0-9\]* = -1 \'.377\'" \
     "set variable signed char=0xFF (0xFF)"
 

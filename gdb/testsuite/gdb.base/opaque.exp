@@ -70,7 +70,7 @@ proc setup_xfail_on_opaque_pointer {} {
 
 	setup_xfail "a29k-*-udi" "vax-*-*" "i*86-sequent-bsd*"
 	if {!$gcc_compiled} then {
-		setup_xfail "alpha-*-*"
+		setup_xfail "alpha-*-*" "mips-sgi-irix5*"
 	}
 }
 

@@ -178,7 +178,7 @@ proc float_and_integral_args {} {
     # The a29k fails all of these tests, perhaps because the prologue
     # code is broken.
     setup_xfail "a29k-*-udi"
-    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" "mips-sgi-irix5*" }
     gdb_run_cmd
     expect {
 	-re ".* call2a \\(c=97 'a', f1=4, s=1, d1=5, i=2, f2=4, l=3, d2=5\\) .*$prompt $" { pass "run to call2a" }
@@ -188,6 +188,7 @@ proc float_and_integral_args {} {
 
     # Print each arg as a double check to see if we can print
     gdb_test "print c" ".* = 97 'a'" "print c after run to call2a"
+    setup_xfail "sparc-sun-solaris2*"
     gdb_test "print f1" ".* = 4" "print f1 after run to call2a"
     gdb_test "print s" ".* = 1" "print s after run to call2a"
     gdb_test "print d1" ".* = 5" "print d1 after run to call2a"
@@ -197,6 +198,7 @@ proc float_and_integral_args {} {
     gdb_test "print d2" ".* = 5" "print d2 after run to call2a"
 
     setup_xfail "rs6000-*-*"
+    if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix*" }
     # Continue; should stop at call2b and print actual arguments.
     if [gdb_test "cont" ".* call2b \\(f1=4, s=1, d1=5, i=2, f2=4, l=3, d2=5, c=97 'a'\\) .*" "continue to call2b"] {
 	return
@@ -222,6 +224,7 @@ proc float_and_integral_args {} {
 	return
     }
 
+    if {$gcc_compiled} then { setup_xfail "mips-sgi-irix4*" }
     # Continue; should stop at call2g and print actual arguments.
     if [gdb_test "cont" ".* call2g \\(l=3, d2=5, c=97 'a', f1=4, s=1, d1=5, i=2, f2=4\\) .*" "continue to call2g"] {
 	return
@@ -388,6 +391,7 @@ proc discard_and_shuffle {} {
     global hex
     global decimal
     global det_file
+    global gcc_compiled
 
     delete_breakpoints
 
@@ -414,6 +418,7 @@ proc discard_and_shuffle {} {
     }
 
     setup_xfail "rs6000-*-*"
+    if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix5*" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\[\r\n\]+
@@ -729,7 +734,7 @@ proc shuffle_round_robin {} {
     }
 
     setup_xfail "i960-*-*" 1813
-    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" "mips-sgi-irix5*" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\[\r\n\]+
@@ -983,6 +988,7 @@ $prompt $" { pass "backtrace from call7j" }
 	timeout { fail "(timeout) continue to call7k" ; return }
     }
 
+    if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix*" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\[\r\n\]+

@@ -183,6 +183,8 @@ nodebug: nodebug.o
 
 nodebug.o: nodebug.c
 	$(CC) -c $(srcdir)/nodebug.c
+	$(CC) -E $(srcdir)/compiler.c >nodebug.tmp
+	mv nodebug.tmp nodebug.ci
 
 # For VPATH and Sun Make, we have to make explicit dependencies.
 # DEC make doesn't seem to understand the ".u" dependency w/VPATH either.
