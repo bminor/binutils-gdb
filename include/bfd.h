@@ -692,6 +692,7 @@ enum bfd_architecture
   bfd_arch_z8k,        /* Zilog Z8000 */
 #define bfd_mach_z8001		1
 #define bfd_mach_z8002		2
+  bfd_arch_h8500,      /* Hitachi H8/500 */
   bfd_arch_last
   };
 
