@@ -29,7 +29,7 @@ struct rom_cmd_data {
 };
 
 struct monitor_ops {
-  int	type;			/* 1 is ascii, 0 is binary */
+  int	type;			/* 1 is ascii, 0 is GDB remote protocol */
   char  *init;			/* initialize to the monitor */
   char	*execute;		/* execute or usually GO command */
   char	*resume;		/* continue command */
@@ -85,6 +85,7 @@ extern struct monitor_ops        *current_monitor;
 #define push_monitor(x)		current_monitor = x;
 
 #define SREC_SIZE 160
+#define GDBPROTO		((current_monitor->type) ? 0: 1)
 
 extern void debuglogs();
 extern void monitor_open();
@@ -95,6 +96,8 @@ extern void monitor_resume();
 extern int  monitor_wait();
 extern void monitor_fetch_register();
 extern void monitor_store_register();
+extern void monitor_fetch_registers();
+extern void monitor_store_registers();
 extern void monitor_prepare_to_store();
 extern int  monitor_xfer_inferior_memory();
 extern void monitor_files_info();
