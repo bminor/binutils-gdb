@@ -86,7 +86,8 @@ static void wild_section PARAMS ((lang_wild_statement_type *ptr,
 				  const char *section,
 				  lang_input_statement_type *file,
 				  lang_output_section_statement_type *output));
-static lang_input_statement_type *lookup_name PARAMS ((const char *name));
+static lang_input_statement_type *lookup_name PARAMS ((const char *name,
+						       int force_load));
 static void wild PARAMS ((lang_wild_statement_type *s,
 			  const char *section, const char *file,
 			  const char *target,
@@ -107,7 +108,6 @@ static void print_assignment
   PARAMS ((lang_assignment_statement_type *assignment,
 	   lang_output_section_statement_type *output_section));
 static void print_input_statement PARAMS ((lang_input_statement_type *statm));
-static void print_symbol PARAMS ((asymbol *q));
 static void print_input_section PARAMS ((lang_input_section_type *in));
 static void print_fill_statement PARAMS ((lang_fill_statement_type *fill));
 static void print_data_statement PARAMS ((lang_data_statement_type *data));
@@ -750,8 +750,9 @@ wild_section (ptr, section, file, output)
    */
 static
 lang_input_statement_type *
-lookup_name (name)
+lookup_name (name, force_load)
      CONST char *name;
+     int force_load;
 {
   lang_input_statement_type *search;
 
@@ -778,7 +779,7 @@ lookup_name (name)
   /* If we have already added this file, or this file is not real
      (FIXME: can that ever actually happen?) or the name is NULL
      (FIXME: can that ever actually happen?) don't add this file.  */
-  if (search->loaded
+  if ((search->loaded && ! force_load)
       || ! search->real
       || search->filename == (const char *) NULL)
     return search;
@@ -833,7 +834,7 @@ wild (s, section, file, target, output)
   else
     {
       /* Perform the iteration over a single file */
-      wild_section (s, section, lookup_name (file), output);
+      wild_section (s, section, lookup_name (file, 0), output);
     }
   if (section != (char *) NULL
       && strcmp (section, "COMMON") == 0
@@ -936,14 +937,14 @@ open_input_bfds (statement)
       /* Maybe we should load the file's symbols */
       if (statement->wild_statement.filename)
 	{
-	  (void) lookup_name (statement->wild_statement.filename);
+	  (void) lookup_name (statement->wild_statement.filename, 1);
 	}
       break;
     case lang_input_statement_enum:
       if (statement->input_statement.real == true)
 	{
 	  statement->input_statement.target = current_target;
-	  lookup_name (statement->input_statement.filename);
+	  lookup_name (statement->input_statement.filename, 1);
 	}
       break;
     default:
@@ -1253,6 +1254,8 @@ PTR ptr;
 	print_nl ();
       }
     }
+
+  return true;
 }
 
 static void
@@ -1789,8 +1792,11 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	    i->owner->symcount = is->ifile->symbol_count;
 	  }
 
+	bfd_error = no_error;
 	if (bfd_relax_section (i->owner, i, &link_info, is->ifile->asymbols))
 	  had_relax = true;
+	else if (bfd_error != no_error)
+	  einfo ("%P%F: can't relax section: %E");
       }
       else  {
 	(*prev)->input_section.section->_cooked_size = 
