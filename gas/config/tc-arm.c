@@ -5073,7 +5073,7 @@ md_apply_fix3 (fixP, val, seg)
   switch (fixP->fx_r_type)
     {
     case BFD_RELOC_ARM_IMMEDIATE:
-      newimm = (offsetT) validate_immediate (value);
+      newimm = validate_immediate (value);
       temp = md_chars_to_number (buf, INSN_SIZE);
 
       /* If the instruction will fail, see if we can fix things up by
