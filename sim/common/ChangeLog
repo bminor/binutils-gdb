@@ -1,3 +1,13 @@
+Thu Aug 14 12:48:57 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* callback.c (os_poll_quit): Make static.
+	Call sim_cb_eprintf, not p->eprintf.
+	(sim_cb_printf, sim_cb_eprintf): New functions.
+
+Thu Jul 24 08:48:05 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* sim-types.h:  Fix defs of 64 bit data types for MSVC.
+
 Tue Jul 22 10:35:37 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sim-n-core.h (sim_core_write_unaligned_N): Add missing break

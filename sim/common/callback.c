@@ -1,5 +1,5 @@
 /* Host callback routines for GDB.
-   Copyright 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
    This file is part of GDB.
@@ -128,7 +128,7 @@ os_close (p, fd)
 
 
 #if defined(__GO32__) || defined (_WIN32)
-int
+static int
 os_poll_quit (p)
      host_callback *p;
 {
@@ -146,7 +146,7 @@ os_poll_quit (p)
 	}
       else 
 	{
-	  p->eprintf (p, "CTRL-A to quit, CTRL-B to quit harder\n");
+	  sim_cb_eprintf (p, "CTRL-A to quit, CTRL-B to quit harder\n");
 	}
     }
 #else /* !_MSC_VER */
@@ -206,6 +206,7 @@ static int
 os_open (p, name, flags)
      host_callback *p;
      const char *name;
+     int flags;
 {
   int i;
   for (i = 0; i < MAX_CALLBACK_FDS; i++)
@@ -534,6 +535,11 @@ target_to_host_open (target_val)
 	  if ((target_val & (TARGET_O_RDONLY | TARGET_O_WRONLY | TARGET_O_RDWR))
 	      == m->target_val)
 	    host_val |= m->host_val;
+	  /* Handle the host/target differentiating between binary and
+             text mode.  Only one case is of importance */
+#if ! defined (TARGET_O_BINARY) && defined (O_BINARY)
+	  host_val |= O_BINARY;
+#endif
 	  break;
 	default :
 	  if ((m->target_val & target_val) == m->target_val)
@@ -543,4 +549,26 @@ target_to_host_open (target_val)
     }
 
   return host_val;
+}
+
+/* Cover functions to the vfprintf callbacks.  */
+
+void
+sim_cb_printf (host_callback *p, const char *fmt, ...)
+{
+  va_list ap;
+
+  va_start (ap, fmt);
+  p->vprintf_filtered (p, fmt, ap);
+  va_end (ap);
+}
+
+void
+sim_cb_eprintf (host_callback *p, const char *fmt, ...)
+{
+  va_list ap;
+
+  va_start (ap, fmt);
+  p->evprintf_filtered (p, fmt, ap);
+  va_end (ap);
 }
