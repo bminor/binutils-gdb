@@ -207,7 +207,7 @@ bfd_xmalloc PARAMS (( bfd_size_type size));
 void 
 bfd_write_bigendian_4byte_int PARAMS ((bfd *abfd,  int i));
 
-bfd_vma 
+unsigned int 
 bfd_log2 PARAMS ((bfd_vma x));
 
 #define BFD_CACHE_MAX_OPEN 10
@@ -275,6 +275,6 @@ bfd_default_compatible
 boolean 
 bfd_default_scan PARAMS ((CONST struct bfd_arch_info *, CONST char *));
 
-struct elf32_internal_shdr *
+struct elf_internal_shdr *
 bfd_elf32_find_section  PARAMS ((bfd *abfd, char *name));
 
