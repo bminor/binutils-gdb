@@ -111,6 +111,7 @@ RUNTEST = `if [ -f $${srcdir}/../dejagnu/runtest ] ; then \
 	   fi`
 RUNTESTFLAGS=
 
+TARG_CPU = @target_cpu_type@
 TARG_CPU_C = $(srcdir)/config/tc-@target_cpu_type@.c
 TARG_CPU_O = tc-@target_cpu_type@.o
 TARG_CPU_H = $(srcdir)/config/tc-@target_cpu_type@.h
@@ -643,7 +644,9 @@ itbl-test: $(IT_TEST_OBJS) itbl-test.o $(LIBDEPS)
 
 # CGEN interface.
 
-cgen.o: cgen.c cgen-opc.h subsegs.h $(INCDIR)/obstack.h
+cgen.o: cgen.c cgen-opc.h subsegs.h \
+	$(INCDIR)/obstack.h $(INCDIR)/opcode/cgen.h \
+	$(srcdir)/../opcodes/$(TARG_CPU)-opc.h
 
 # Remake the info files.
 
@@ -822,7 +825,6 @@ DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	echo '' > obj-format.h; \
 	echo '' > targ-env.h; \
 	echo '' > itbl-cpu.h; \
-	echo '' > cgen-opc.h; \
 	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep; \
 	$(DEP) -f .dep -DBFD_ASSEMBLER -I. -I.. -I$(srcdir) -I../../bfd $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $?
 	mv -f .depdir/.dep .dep1
@@ -840,7 +842,7 @@ DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	      echo '#include "obj-'"$${o}"'.h"' > obj-format.h; \
 	      echo '#include "te-generic.h"' > targ-env.h; \
 	      echo '' > itbl-cpu.h; \
-	      echo '' > cgen-opc.h; \
+	      echo '#include "opcodes/'"$${c}"'-opc.h"' > cgen-opc.h; \
 	      rm -f dummy.c; \
 	      cp $(srcdir)/config/tc-$${c}.c dummy.c; \
 	      echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep; \
@@ -1110,11 +1112,13 @@ TCDEP_i960_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/opcode/i960.h
 TCDEP_m32r_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-m32r.h \
   $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  subsegs.h $(INCDIR)/obstack.h cgen-opc.h
+  subsegs.h $(INCDIR)/obstack.h cgen-opc.h $(srcdir)/../opcodes/m32r-opc.h \
+  $(INCDIR)/opcode/cgen.h
 TCDEP_m32r_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m32r.h subsegs.h \
-  $(INCDIR)/obstack.h cgen-opc.h
+  $(INCDIR)/obstack.h cgen-opc.h $(srcdir)/../opcodes/m32r-opc.h \
+  $(INCDIR)/opcode/cgen.h
 TCDEP_m68k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-m68k.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h \
   subsegs.h $(INCDIR)/opcode/m68k.h $(srcdir)/config/m68k-parse.h

@@ -1,3 +1,14 @@
+Mon Apr  7 10:54:59 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in: Regenerate dependencies.
+ 	(TARG_CPU): New variable.
+	(cgen.o): Depend on cgen.h, $(TARG_CPU)-opc.h.
+	(.dep1): Delete creating of cgen-opc.h.
+	(.tcdep): Put proper contents in cgen-opc.h.
+	* configure.in (m32r): Delete setting of extra_files, extra_links.
+	(AC_OUTPUT): Create cgen-opc.h.
+	* configure: Regenerated.
+
 Sat Apr  5 13:19:12 1997  Klaus Kaempf  <kkaempf@progis.de>
 
 	* makefile.vms: Update to build gasp.exe.
@@ -25,7 +36,7 @@ Fri Apr  4 16:10:02 1997  Doug Evans  <dje@canuck.cygnus.com>
 	(fr_pcrel_adjust,fr_bsr): Move into union fr_targ.ns32k.
 	* conf.in (USING_CGEN): New macro.
 	* configure.in (m32r-*-*): Add entry for.
-	Add cgen.o to extra_objects.  Create cgen-opc.h symlink.
+	Add cgen.o to extra_objects.
 	* configure: Regenerate.
 	* frags.c (frag_var): fr_pcrel_adjust renamed to
 	fr_targ.ns32k.pcrel_adjust.  fr_bsr renamed to fr_targ.ns32k.bsr.
