@@ -1,3 +1,25 @@
+2000-07-22  Jason Eckhardt  <jle@cygnus.com>
+
+	* i860-dis.c: New file.
+	(print_insn_i860): New function.
+	(print_br_address): New function.
+	(sign_extend): New function.
+	(BITWISE_OP): New macro.
+	(I860_REG_PREFIX): New macro.
+	(grnames, frnames, crnames): New structures.
+
+	* disassemble.c (ARCH_i860): Define.
+	(disassembler): Add check for bfd_arch_i860 to set disassemble
+	function to print_insn_i860.
+
+	* Makefile.in (CFILES): Added i860-dis.c.
+	(ALL_MACHINES): Added i860-dis.lo.
+	(i860-dis.lo): New dependences.
+
+	* configure.in: New bits for bfd_i860_arch.
+
+	* configure: Regenerated.
+
 2000-07-26  Dave Brolley  <brolley@redhat.com>
 
 	* cgen-opc.c (cgen_hw_lookup_by_name): 'i' is now unsigned.
