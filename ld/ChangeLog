@@ -1,3 +1,29 @@
+Mon May 12 23:22:58 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* scripttempl/elfmips.sc: Remove.
+	* scripttempl/elf.sc: Set ENTRY based on target.  Permit
+	TEXT_DYNAMIC to control .dynamic segment.  Permit
+	SHLIB_TEXT_START_ADDR to set start of shared object.  Support
+	INITIAL_READONLY_SECTIONS.  Put .stub in .text.  Only put
+	.gnu.linkonce.t* in .text when relocating.  Support
+	OTHER_TEXT_SECTIONS.  Support SHLIB_DATA_ADDR as well as
+	DATA_ADDR.  Support OTHER_GOT_SYMBOLS and OTHER_GOT_SECTIONS.
+	* emulparams/elf32b4300.sh (SCRIPT_NAME): Set to elf.
+	(DATA_ADDR): Don't set.
+	(INITIAL_READONLY_SECTIONS): Rename from OTHER_READONLY_SECTIONS.
+	(OTHER_TEXT_SECTIONS): Set.
+	(OTHER_GOT_SECTIONS): Rename from OTHER_READWRITE_SECTIONS.
+	(MACHINE): Set to empty string.
+	* emulparams/elf32l4300.sh: Likewise.
+	* emulparams/elf32ebmip.sh: Likewise.
+	* emulparams/elf32elmip.sh: Likewise.
+	* emulparams/elf32bmip.sh: Likewise.  Also:
+	(TEXT_DYNAMIC): Set.
+	* emulparams/elf32lmips.sh: Likewise.
+	* Makefile.in (eelf32bmips.c): Depend upon elf.sc rather than
+	elfmips.sc.
+	(eelf32ebmips.c, eelf32elmips.c, eelf32lmip.c): Likewise.
+
 Mon May 12 11:11:06 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* scripttempl/elf.sc: Don't align the data segment on the next 8
