@@ -136,6 +136,8 @@
 @V@/gdb/i386gnu-tdep.c @V@/gdb/i3gnu-tdep.c
 @V@/gdb/i386nbsd-nat.c @V@/gdb/i3nbsd-nat.c
 @V@/gdb/i386nbsd-tdep.c @V@/gdb/i3nbsd-tdep.c
+@V@/gdb/i386obsd-nat.c @V@/gdb/i3obsd-nat.c
+@V@/gdb/i386obsd-tdep.c @V@/gdb/i3obsd-tdep.c
 @V@/gdb/ia64-aix-nat.c @V@/gdb/ia64aix-nat.c
 @V@/gdb/ia64-linux-nat.c @V@/gdb/ia64linux-nat.c
 @V@/gdb/jv-exp.tab.c @V@/gdb/jv-exp_tab.c
@@ -209,6 +211,11 @@
 @V@/gdb/testsuite/gdb.c++/demangle.exp @V@/gdb/testsuite/gdb.cxx/demangle.exp
 @V@/gdb/testsuite/gdb.c++/derivation.cc @V@/gdb/testsuite/gdb.cxx/derivation.cc
 @V@/gdb/testsuite/gdb.c++/derivation.exp @V@/gdb/testsuite/gdb.cxx/derivation.exp
+@V@/gdb/testsuite/gdb.c++/hang.H @V@/gdb/testsuite/gdb.cxx/hang.h
+@V@/gdb/testsuite/gdb.c++/hang.exp @V@/gdb/testsuite/gdb.cxx/hang.exp
+@V@/gdb/testsuite/gdb.c++/hang1.c @V@/gdb/testsuite/gdb.cxx/hang1.c
+@V@/gdb/testsuite/gdb.c++/hang2.c @V@/gdb/testsuite/gdb.cxx/hang2.c
+@V@/gdb/testsuite/gdb.c++/hang3.c @V@/gdb/testsuite/gdb.cxx/hang3.c
 @V@/gdb/testsuite/gdb.c++/inherit.exp @V@/gdb/testsuite/gdb.cxx/inherit.exp
 @V@/gdb/testsuite/gdb.c++/local.cc @V@/gdb/testsuite/gdb.cxx/local.cc
 @V@/gdb/testsuite/gdb.c++/local.exp @V@/gdb/testsuite/gdb.cxx/local.exp
@@ -220,6 +227,10 @@
 @V@/gdb/testsuite/gdb.c++/member-ptr.exp @V@/gdb/testsuite/gdb.cxx/member-ptr.exp
 @V@/gdb/testsuite/gdb.c++/method.cc @V@/gdb/testsuite/gdb.cxx/method.cc
 @V@/gdb/testsuite/gdb.c++/method.exp @V@/gdb/testsuite/gdb.cxx/method.exp
+@V@/gdb/testsuite/gdb.c++/m-data.cc @V@/gdb/testsuite/gdb.cxx/m-data.cc
+@V@/gdb/testsuite/gdb.c++/m-data.exp @V@/gdb/testsuite/gdb.cxx/m-data.exp
+@V@/gdb/testsuite/gdb.c++/m-static.cc @V@/gdb/testsuite/gdb.cxx/m-static.cc
+@V@/gdb/testsuite/gdb.c++/m-static.exp @V@/gdb/testsuite/gdb.cxx/m-static.exp
 @V@/gdb/testsuite/gdb.c++/misc.cc @V@/gdb/testsuite/gdb.cxx/misc.cc
 @V@/gdb/testsuite/gdb.c++/misc.exp @V@/gdb/testsuite/gdb.cxx/misc.exp
 @V@/gdb/testsuite/gdb.c++/namespace.cc @V@/gdb/testsuite/gdb.cxx/namespace.cc
@@ -232,6 +243,8 @@
 @V@/gdb/testsuite/gdb.c++/ref-types.exp @V@/gdb/testsuite/gdb.cxx/ref-types.exp
 @V@/gdb/testsuite/gdb.c++/templates.cc @V@/gdb/testsuite/gdb.cxx/templates.cc
 @V@/gdb/testsuite/gdb.c++/templates.exp @V@/gdb/testsuite/gdb.cxx/templates.exp
+@V@/gdb/testsuite/gdb.c++/try_catch.cc @V@/gdb/testsuite/gdb.cxx/try_catch.cc
+@V@/gdb/testsuite/gdb.c++/try_catch.exp @V@/gdb/testsuite/gdb.cxx/try_catch.exp
 @V@/gdb/testsuite/gdb.c++/userdef.cc @V@/gdb/testsuite/gdb.cxx/userdef.cc
 @V@/gdb/testsuite/gdb.c++/userdef.exp @V@/gdb/testsuite/gdb.cxx/userdef.exp
 @V@/gdb/testsuite/gdb.c++/virtfunc.cc @V@/gdb/testsuite/gdb.cxx/virtfunc.cc

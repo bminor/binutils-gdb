@@ -1,5 +1,10 @@
 2002-11-08  Andrew Cagney  <ac131313@redhat.com>
 
+	* config/djgpp/fnchange.lst: 8.3 proof i386obsd-nat.c and
+	i386obsd-tdep.c.  Rename to "gdb.cxx", paths containing "gdb.c++".
+
+2002-11-08  Andrew Cagney  <ac131313@redhat.com>
+
 	* i386-linux-tdep.c: Include "reggroups.h".
 	(i386_linux_register_reggroup_p): New function.
 	(i386_linux_init_abi): Set register_reggroup_p to
