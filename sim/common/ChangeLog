@@ -1,3 +1,8 @@
+2000-06-24  Frank Ch. Eigler  <fche@redhat.com>
+
+	From Maciej W. Rozycki <macro@ds2.pg.gda.pl>:
+	* Makefile.in (distclean): Clean cconfig.h also.
+
 Tue May 23 21:39:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
