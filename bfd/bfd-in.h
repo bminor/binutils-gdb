@@ -52,7 +52,7 @@ here.  */
 #	endif
 #endif
 
-#define BFD_VERSION "0.18"
+#define BFD_VERSION "1.96"
 
 /* forward declaration */
 typedef struct _bfd bfd;
@@ -226,7 +226,7 @@ typedef struct bfd_error_vector {
   
 } bfd_error_vector_type;
 
-PROTO (char *, bfd_errmsg, ());
+PROTO (char *, bfd_errmsg, (bfd_ec error_tag));
 PROTO (void, bfd_perror, (CONST char *message));
 
 
@@ -235,7 +235,7 @@ typedef enum bfd_print_symbol
   bfd_print_symbol_name,
   bfd_print_symbol_more,
   bfd_print_symbol_all,
-  bfd_print_symbol_nm, /* Pretty format suitable for nm program. */
+  bfd_print_symbol_nm	/* Pretty format suitable for nm program. */
 } bfd_print_symbol_type;
     
 
@@ -281,7 +281,8 @@ CAT(NAME,_sizeof_headers),\
 CAT(NAME,_bfd_debug_info_start),\
 CAT(NAME,_bfd_debug_info_end),\
 CAT(NAME,_bfd_debug_info_accumulate),\
-CAT(NAME,_bfd_get_relocated_section_contents)
+CAT(NAME,_bfd_get_relocated_section_contents),\
+CAT(NAME,_bfd_relax_section)
 
 #define COFF_SWAP_TABLE \
  coff_swap_aux_in, coff_swap_sym_in, coff_swap_lineno_in, \

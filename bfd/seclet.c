@@ -57,10 +57,11 @@ DEFUN(rel,(abfd, seclet, output_section),
       bfd_seclet_type *seclet AND
       asection *output_section)
 {
-  bfd_byte *data;
+
   if (output_section->flags & SEC_HAS_CONTENTS )
   {
-    data = bfd_get_relocated_section_contents(abfd, seclet);
+    bfd_byte *data = alloca(seclet->size);
+    data = bfd_get_relocated_section_contents(abfd, seclet, data);
     if(bfd_set_section_contents(abfd,
 				output_section,
 				data,
@@ -69,6 +70,7 @@ DEFUN(rel,(abfd, seclet, output_section),
     {
       abort();
     }
+
   }
 }
 

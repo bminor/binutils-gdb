@@ -61,12 +61,13 @@ asymbol *symbol;
 /* this function is in charge of performing all the 29k relocations */
 
 static bfd_reloc_status_type
-DEFUN(a29k_reloc,(abfd, reloc_entry, symbol_in, data, input_section),
+DEFUN(a29k_reloc,(abfd, reloc_entry, symbol_in, data, input_section, output_bfd),
       bfd *abfd AND
       arelent *reloc_entry AND
       asymbol *symbol_in AND
       PTR data AND
-      asection *input_section)
+      asection *input_section AND
+      bfd *output_bfd)
 {
   /* the consth relocation comes in two parts, we have to remember
      the state between calls, in these variables */
@@ -79,12 +80,18 @@ DEFUN(a29k_reloc,(abfd, reloc_entry, symbol_in, data, input_section),
   unsigned short r_type;
   long signed_value;
 
-  unsigned long addr = reloc_entry->address + input_section->vma;
+  unsigned long addr = reloc_entry->address ; /*+ input_section->vma*/
   bfd_byte  *hit_data =addr + (bfd_byte *)(data);
 	
   r_type = reloc_entry->howto->type;
 
-  /* FIXME: Do we need to check for partial linking here */
+  if (output_bfd) {
+    /* Partial linking - do nothing */
+    reloc_entry->address += input_section->output_offset;
+    return bfd_reloc_ok;
+
+  }
+
   if (symbol_in && (symbol_in->section == &bfd_und_section))
   {
     /* Keep the state machine happy in case we're called again */
@@ -191,7 +198,7 @@ DEFUN(a29k_reloc,(abfd, reloc_entry, symbol_in, data, input_section),
       return(bfd_reloc_overflow);
     }
 
-     bfd_put_16(abfd, insn, hit_data); 
+    bfd_put_16(abfd, insn, hit_data); 
     break;
    case R_WORD:
     insn = bfd_get_32(abfd, hit_data); 
