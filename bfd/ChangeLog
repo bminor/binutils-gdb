@@ -1,3 +1,14 @@
+Tue Jun  8 12:08:27 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* bfd-in2.h, archures.c (bfd_mach_h8300[h]): new defines.
+	* coff-h8300.c: More addressing modes.
+	* coffcode.h (coff_set_arch_mach_hook): Cope with H8300 magic
+	number.
+	* cpu-h8300.c: Removed disassemble stuff. (h8300_scan): Recognise
+	H8/300H name. (compatible): New function. 
+	* reloc16.c (bfd_coff_reloc16_get_relocated_sec): Cope with more
+	addressing modes.	
+
 Tue Jun  8 10:30:13 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coff-mips.c (ecoff_compute_section_file_positions,
