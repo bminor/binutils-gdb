@@ -1,3 +1,8 @@
+2003-12-15  Nick Clifton  <nickc@redhat.com>
+
+	* config/obj-aout.c (obj_crawl_symbol_chain): Skip defined
+	symbols which resolve to symbolic values.
+
 2003-12-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/obj-elf.c: Convert to C90, remove unneeded prototypes and
