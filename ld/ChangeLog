@@ -1,3 +1,7 @@
+Tue Sep  7 18:04:54 1993  Jeffrey Osier  (jeffrey@cygnus.com)
+
+	* Makefile.in:  add TEXINPUTS variable and use it in ld.dvi target
+
 Fri Sep  3 16:46:41 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* ld.texinfo: re-enable included config file; conditionalize doc
