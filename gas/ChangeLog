@@ -1,3 +1,8 @@
+2003-05-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (md_show_usage): Mention -a32, -a64, -l, -le, -b,
+	-be and split strings to below 509 bytes in length.
+
 2003-05-01  Christian Groessler <chris@groessler.org>
 
 	* expr.h: Fix comments in operatorT typedef.
