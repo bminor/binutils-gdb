@@ -1,3 +1,8 @@
+2004-04-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_merge_symbol): Treat weak as strong only
+	when it is a definition.
+
 2004-04-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-sparc.c (elf32_sparc_relocate_section): Don't abort

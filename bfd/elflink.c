@@ -887,16 +887,20 @@ _bfd_elf_merge_symbol (bfd *abfd,
   oldweak = (h->root.type == bfd_link_hash_defweak
 	     || h->root.type == bfd_link_hash_undefweak);
 
-  /* If a new weak symbol comes from a regular file and the old symbol
-     comes from a dynamic library, we treat the new one as strong.
-     Similarly, an old weak symbol from a regular file is treated as
-     strong when the new symbol comes from a dynamic library.  Further,
-     an old weak symbol from a dynamic library is treated as strong if
-     the new symbol is from a dynamic library.  This reflects the way
-     glibc's ld.so works.  */
-  if (!newdyn && olddyn)
+  /* If a new weak symbol definition comes from a regular file and the
+     old symbol comes from a dynamic library, we treat the new one as
+     strong.  Similarly, an old weak symbol definition from a regular
+     file is treated as strong when the new symbol comes from a dynamic
+     library.  Further, an old weak symbol from a dynamic library is
+     treated as strong if the new symbol is from a dynamic library.
+     This reflects the way glibc's ld.so works.
+
+     Do this before setting *type_change_ok or *size_change_ok so that
+     we warn properly when dynamic library symbols are overridden.  */
+
+  if (newdef && !newdyn && olddyn)
     newweak = FALSE;
-  if (newdyn)
+  if (olddef && newdyn)
     oldweak = FALSE;
 
   /* It's OK to change the type if either the existing symbol or the
