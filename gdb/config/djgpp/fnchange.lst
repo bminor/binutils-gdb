@@ -261,6 +261,7 @@
 @V@/expect/expect_cf.h.in @V@/expect/expect_cf.h-in
 @V@/expect/example/beer.exp.out @V@/expect/example/beer_exp.out
 @V@/expect/example/chesslib++.c @V@/expect/example/chesslibxx.c
+@V@/expect/example/chesslib.c @V@/expect/example/chesslb.c
 @V@/dejagnu/contrib/test-g++ @V@/dejagnu/contrib/test-gxx
 @V@/dejagnu/doc/.cvsignore @V@/dejagnu/doc/_cvsignore
 @V@/dejagnu/example/calc/calc.h.in @V@/dejagnu/example/calc/calc.h-in
