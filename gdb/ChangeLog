@@ -1,3 +1,9 @@
+2004-02-23  Andrew Cagney  <cagney@redhat.com>
+
+	* infcall.c (legacy_push_dummy_code): Don't call deprecated
+	FIX_CALL_DUMMY when push_dummy_call is available.
+	(call_function_by_hand, push_dummy_code): Ditto.
+
 2004-02-22  Andrew Cagney  <cagney@redhat.com>
 
 	* config/pa/tm-hppa.h (CALL_DUMMY_LOCATION): Delete macro.
