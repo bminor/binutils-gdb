@@ -1,3 +1,70 @@
+2001-05-28  Philip Blundell  <philb@gnu.org>
+
+	From 2001-05-28  Andreas Jaeger  <aj@suse.de>
+	* readelf.c (display_debug_frames): Fix warnings: Remove unused
+	variables, fix format strings.
+
+	From 2001-05-16  Richard Henderson  <rth@redhat.com>
+	* readelf.c (do_debug_frames_interp): New.
+	(byte_get_little_endian): If BFD64, always read entire 8-byte fields.
+	(byte_get_big_endian): Likewise.
+	(parse_args) ['F']: Set do_debug_frames_interp.
+	(Frame_Chunk): Make data_factor signed, add fde_encoding.
+	(frame_display_row): Don't trunc pc_begin to int.
+	(size_of_encoded_value): New.
+	(display_debug_frames): Handle 64-bit targets.  Print raw data
+	unless do_debug_frames_interp.
+	(debug_displays): Remove duplicate .debug_frame.
+
+	From 2001-05-15  Ralf Baechle  <ralf@gnu.org>
+	* readelf.c: Replace uses of EM_MIPS_RS4_BE with EM_MIPS_RS3_LE.
+	The former constant was never in active use and is used otherwise
+	by the ABI.
+
+	From 2001-05-11  Jakub Jelinek  <jakub@redhat.com>
+	* readelf.c (process_unwind): Print all unwind sections, not just
+	one.
+
+	From 2001-05-07  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+	* readelf.c (process_unwind): Remove const specifier.
+
+	From 2001-03-30  H.J. Lu  <hjl@gnu.org>
+	* readelf.c (process_unwind): Just return if do_unwind is 0.
+
+	From 2001-03-29  H.J. Lu  <hjl@gnu.org>
+	* readelf.c (process_unwind): Only do unwind sections for
+	IA64.
+
+	From 2001-02-28  Nick Clifton  <nickc@redhat.com>
+	* readelf.c: (struct unw_aux_info): Remove const modifier for
+	'strtab' field.
+	(process_unwind): Remove non-K&R compliant LHS type cast in call
+	to GET_DATA_ALLOC macro.
+
+	From 2001-02-11  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+	* readelf.c (struct unw_aux_info): Remove const from the info member.
+	(process_unwind): Don't type-cast the third argument to the
+	GET_DATA_ALLOC macro.
+
+	From 2001-02-11  Nick Clifton  <nickc@redhat.com>
+	* readelf.c (dump_relocations): Free corrected allocated
+	array.
+	(process_unwind): Fix compile time warning.
+
+	From 2001-02-07  David Mosberger  <davidm@hpl.hp.com>
+	* readelf.c (process_unwind): New function.
+	(slurp_ia64_unwind_table): Ditto.
+	(dump_ia64_unwind): Ditto.
+	(find_symbol_for_address): Ditto.
+	(slurp_rela_relocs): New function (split off from dump_relocations()).
+	(slurp_rel_relocs): Ditto.
+	(parse_args): Handle '-u' option.
+	* unwind-ia64.c: New file.
+	* unwind-ia64.h: New file.
+	* Makefile.am: Include unwind-ia64.c in readelf build.
+	* Makefile.in: Regenerate.
+	* po/binutils.pot: Regenerate.
+
 2001-04-06  Hans-Peter Nilsson  <hp@axis.com>
 
 	* readelf.c (display_debug_lines): Fix typo for "Prologue".
