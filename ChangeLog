@@ -1,4 +1,12 @@
+Mon May 24 14:18:41 1993  Rob Savoye  (rob at darkstar.cygnus.com)
+
+	* configure: change  so "-exec-prefix" gets passed down rather
+	than "-exec_prefix" so autoconf generated Makefiles get the
+	exec_prefix set right.
+
 Fri May 21 10:42:25 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* config.guess: get the Solaris2 minor version number
 
 	* Makefile.in: add standards.texi and make-stds.texi to ETC_SUPPORT
 
