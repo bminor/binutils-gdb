@@ -1,6 +1,22 @@
+Wed May 22 12:10:49 1996  Rob Savoye  <rob@chinadoll>
+
+	* configure.in: Only built erc32 simulator on Unix hosts as it
+	uses pseudo ttys.
+	* configure: Regenerated with autoconf 2.8.
+
+Sun May 19 20:20:40 1996  Rob Savoye  <rob@chinadoll.cygnus.com>
+
+	* erc32: Sparc simulator from the ESA.
+
+Sun Apr  7 21:00:09 1996  Fred Fish  <fnf@cygnus.com>
+
+	From: Miles Bader  <miles@gnu.ai.mit.edu>
+	* configure.in: Use AC_CHECK_TOOL to find AR & RANLIB.
+	* configure: Regenerate using autoconf.
+
 Thu Feb 22 11:31:50 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
-	* Makefile.in (install): Fix type.
+	* Makefile.in (install): Fix typo.
 
 Wed Feb 21 11:59:57 1996  Ian Lance Taylor  <ian@cygnus.com>
 

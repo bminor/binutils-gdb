@@ -51,7 +51,12 @@ case "${target}" in
   powerpc*-*-eabi*)	if test x"$powerpc_sim" = x"yes"; then sim_target=ppc; fi ;;
   w65-*-*)		sim_target=w65 ;;
   z8k*-*-*)		sim_target=z8k ;;
-  sparc*-*-*)		sim_target=erc32 ;;
+  sparc*-*-*)		case "${host}" in	# don't build for non Unix systems
+			  *-*-go32)	sim_target=none ;;
+			  *-*-winnt)	sim_target=none ;;
+			  *-*-cygwin32)	sim_target=none ;;
+  			  *) 		sim_target=erc32 ;;
+  			esac ;;
   *)			sim_target=none ;;
 esac
 
