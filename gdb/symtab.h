@@ -1233,6 +1233,10 @@ void maintenance_print_msymbols (char *, int);
 
 void maintenance_print_objfiles (char *, int);
 
+void maintenance_list_symtabs (char *, int);
+
+void maintenance_list_psymtabs (char *, int);
+
 void maintenance_check_symtabs (char *, int);
 
 /* maint.c */

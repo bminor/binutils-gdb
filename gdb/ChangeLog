@@ -1,3 +1,18 @@
+2003-04-14  Jim Blandy  <jimb@redhat.com>
+
+	* symmisc.c: #include "gdb_regex.h".
+	(maintenance_list_symtabs, maintenance_list_psymtabs): New
+	functions.
+	* maint.c (maintenance_list_command): New function.
+	(_initialize_maint_cmds): Register the above as commands.
+	* symtab.h (maintenance_list_symtabs,
+	maintenance_list_psymtabs): New declarations.
+	* cli/cli-cmds.c (maintenancelistlist): New variable.
+	(init_cmd_lists): Initialize it.
+	* cli/cli-cmds.h (maintenancelistlist): New declaration.
+	* gdbcmd.h (maintenancelistlist): New declaration.
+	* Makefile.in (symmisc.o): Update dependencies.
+
 2003-04-14  Elena Zannoni  <ezannoni@redhat.com>
 
 	* s390-nat.c: Include asm/types.h for addr_t.

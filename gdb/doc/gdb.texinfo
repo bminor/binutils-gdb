@@ -9033,7 +9033,65 @@ files that @value{GDBN} has skimmed, but not yet read completely.  Finally,
 required for each object file from which @value{GDBN} has read some symbols.
 @xref{Files, ,Commands to specify files}, for a discussion of how
 @value{GDBN} reads symbols (in the description of @code{symbol-file}).
+
+@kindex maint list symtabs
+@kindex maint list psymtabs
+@cindex listing @value{GDBN}'s internal symbol tables
+@cindex symbol tables, listing @value{GDBN}'s internal
+@cindex full symbol tables, listing @value{GDBN}'s internal
+@cindex partial symbol tables, listing @value{GDBN}'s internal
+@item maint list symtabs @r{[} @var{regexp} @r{]}
+@itemx maint list psymtabs @r{[} @var{regexp} @r{]}
+
+List the @code{struct symtab} or @code{struct partial_symtab}
+structures whose names match @var{regexp}.  If @var{regexp} is not
+given, list them all.  The output includes expressions which you can
+copy into a @value{GDBN} debugging this one to examine a particular
+structure in more detail.  For example:
+
+@smallexample
+(@value{GDBP}) maint list psymtabs dwarf2read
+@{ objfile /home/gnu/build/gdb/gdb
+  ((struct objfile *) 0x82e69d0)
+  @{ psymtab /home/gnu/src/gdb/dwarf2read.c 
+    ((struct partial_symtab *) 0x8474b10)
+    readin no
+    fullname (null)
+    text addresses 0x814d3c8 -- 0x8158074
+    globals (* (struct partial_symbol **) 0x8507a08 @@ 9)
+    statics (* (struct partial_symbol **) 0x40e95b78 @@ 2882)
+    dependencies (none)
+  @}
+@}
+(@value{GDBP}) maint list symtabs
+(@value{GDBP})
+@end smallexample
+@noindent
+We see that there is one partial symbol table whose filename contains
+the string @samp{dwarf2read}, belonging to the @samp{gdb} executable;
+and we see that @value{GDBN} has not read in any symtabs yet at all.
+If we set a breakpoint on a function, that will cause @value{GDBN} to
+read the symtab for the compilation unit containing that function:
+
+@smallexample
+(@value{GDBP}) break dwarf2_psymtab_to_symtab
+Breakpoint 1 at 0x814e5da: file /home/gnu/src/gdb/dwarf2read.c,
+line 1574.
+(@value{GDBP}) maint list symtabs
+@{ objfile /home/gnu/build/gdb/gdb 
+  ((struct objfile *) 0x82e69d0)
+  @{ symtab /home/gnu/src/gdb/dwarf2read.c 
+    ((struct symtab *) 0x86c1f38)
+    dirname (null)
+    fullname (null)
+    blockvector ((struct blockvector *) 0x86c1bd0) (primary)
+    debugformat DWARF 2
+  @}
+@}
+(@value{GDBP}) 
+@end smallexample
 @end table
+
 
 @node Altering
 @chapter Altering Execution
