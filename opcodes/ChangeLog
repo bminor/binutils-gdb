@@ -1,3 +1,23 @@
+2001-10-13  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* cgen-ibld.in: Include safe-ctype.h in preference to
+	ctype.h.
+	* cgen-asm.in: Include safe-ctype.h in preference to
+	ctype.h.  Fix formatting.  Use ISSPACE instead of isspace and
+	TOLOWER instead of tolower.
+        (@arch@_cgen_build_insn_regex): Remove duplication of syntax
+	string elements in constructed regular expression.
+	* fr30-asm.c: Regenerate.
+	* fr30-desc.c: Regenerate.
+	* fr30-ibld.c: Regenerate.
+	* m32r-asm.c: Regenerate.
+	* m32r-desc.c: Regenerate.
+	* m32r-ibld.c: Regenerate.
+	* openrisc-asm.c: Regenerate.
+	* openrisc-desc.c: Regenerate.
+	* openrisc-ibld.c: Regenerate.
+	* po/opcodes.pot: Regenerate.
+        
 2001-10-12  matthew green  <mrg@redhat.com>
 
 	* ppc-opc.c (insert_de, extract_de, insert_des, extract_des): New

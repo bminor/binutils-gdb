@@ -26,7 +26,6 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
    Keep that in mind.  */
 
 #include "sysdep.h"
-#include <ctype.h>
 #include <stdio.h>
 #include "ansidecl.h"
 #include "bfd.h"
@@ -36,16 +35,17 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #include "opintl.h"
 #include "xregex.h"
 #include "libiberty.h"
+#include "safe-ctype.h"
 
-#undef min
+#undef  min
 #define min(a,b) ((a) < (b) ? (a) : (b))
-#undef max
+#undef  max
 #define max(a,b) ((a) > (b) ? (a) : (b))
 
 static const char * parse_insn_normal
      PARAMS ((CGEN_CPU_DESC, const CGEN_INSN *, const char **, CGEN_FIELDS *));
 
-/* -- assembler routines inserted here */
+/* -- assembler routines inserted here.  */
 
 /* -- asm.c */
 /* Handle register lists for LDMx and STMx.  */
@@ -345,17 +345,16 @@ fr30_cgen_init_asm (cd)
 
 
 
-/*
-  Regex construction routine.
+/* Regex construction routine.
 
-  This translates an opcode syntax string into a regex string,
-  by replacing any non-character syntax element (such as an
-  opcode) with the pattern '.*'
+   This translates an opcode syntax string into a regex string,
+   by replacing any non-character syntax element (such as an
+   opcode) with the pattern '.*'
 
-  It then compiles the regex and stores it in the opcode, for
-  later use by fr30_cgen_assemble_insn
+   It then compiles the regex and stores it in the opcode, for
+   later use by fr30_cgen_assemble_insn
 
-  Returns NULL for success, an error message for failure.  */
+   Returns NULL for success, an error message for failure.  */
 
 char * 
 fr30_cgen_build_insn_regex (insn)
@@ -363,7 +362,6 @@ fr30_cgen_build_insn_regex (insn)
 {  
   CGEN_OPCODE *opc = (CGEN_OPCODE *) CGEN_INSN_OPCODE (insn);
   const char *mnem = CGEN_INSN_MNEMONIC (insn);
-  int mnem_len;
   char rxbuf[CGEN_MAX_RX_ELEMENTS];
   char *rx = rxbuf;
   const CGEN_SYNTAX_CHAR_TYPE *syn;
@@ -431,9 +429,6 @@ fr30_cgen_build_insn_regex (insn)
 		*rx++ = c;
 	      break;
 	    }
-
-	  /* Insert syntax char into rx.  */
-	  *rx++ = c;
 	}
       else
 	{
@@ -467,7 +462,7 @@ fr30_cgen_build_insn_regex (insn)
       regfree ((regex_t *) CGEN_INSN_RX (insn));
       free (CGEN_INSN_RX (insn));
       (CGEN_INSN_RX (insn)) = NULL;
-    return msg;
+      return msg;
     }
 }
 
@@ -508,14 +503,14 @@ parse_insn_normal (cd, insn, strp, fields)
      GAS's input scrubber will ensure mnemonics are lowercase, but we may
      not be called from GAS.  */
   p = CGEN_INSN_MNEMONIC (insn);
-  while (*p && tolower (*p) == tolower (*str))
+  while (*p && TOLOWER (*p) == TOLOWER (*str))
     ++p, ++str;
 
   if (* p)
     return _("unrecognized instruction");
 
 #ifndef CGEN_MNEMONIC_OPERANDS
-  if (* str && !isspace (* str))
+  if (* str && ! ISSPACE (* str))
     return _("unrecognized instruction");
 #endif
 
@@ -544,7 +539,7 @@ parse_insn_normal (cd, insn, strp, fields)
 	     first char after the mnemonic part is a space.  */
 	  /* FIXME: We also take inappropriate advantage of the fact that
 	     GAS's input scrubber will remove extraneous blanks.  */
-	  if (tolower (*str) == tolower (CGEN_SYNTAX_CHAR (* syn)))
+	  if (TOLOWER (*str) == TOLOWER (CGEN_SYNTAX_CHAR (* syn)))
 	    {
 #ifdef CGEN_MNEMONIC_OPERANDS
 	      if (CGEN_SYNTAX_CHAR(* syn) == ' ')
@@ -593,7 +588,7 @@ parse_insn_normal (cd, insn, strp, fields)
 	 blanks now.  IE: We needn't try again with a longer version of
 	 the insn and it is assumed that longer versions of insns appear
 	 before shorter ones (eg: lsr r2,r3,1 vs lsr r2,r3).  */
-      while (isspace (* str))
+      while (ISSPACE (* str))
 	++ str;
 
       if (* str != '\0')
@@ -642,7 +637,7 @@ fr30_cgen_assemble_insn (cd, str, fields, buf, errmsg)
   int recognized_mnemonic = 0;
 
   /* Skip leading white space.  */
-  while (isspace (* str))
+  while (ISSPACE (* str))
     ++ str;
 
   /* The instructions are stored in hashed lists.

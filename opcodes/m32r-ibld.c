@@ -25,7 +25,6 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
    Keep that in mind.  */
 
 #include "sysdep.h"
-#include <ctype.h>
 #include <stdio.h>
 #include "ansidecl.h"
 #include "dis-asm.h"
@@ -34,6 +33,7 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #include "m32r-desc.h"
 #include "m32r-opc.h"
 #include "opintl.h"
+#include "safe-ctype.h"
 
 #undef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
