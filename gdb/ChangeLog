@@ -1,3 +1,9 @@
+2004-01-31  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-tdep.c (sparc_fetch_wcookie): New function.
+	(sparc32_frame_prev_register): Handle StackGhost.
+	(sparc_supply_rwindow, sparc_collect_rwindow): Likewise.
+
 2004-01-29  Roland McGrath  <roland@redhat.com>
 
 	* configure.in (NEW_PROC_API): Also match solaris2.9 for this test.

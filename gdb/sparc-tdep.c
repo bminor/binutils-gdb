@@ -106,6 +106,48 @@ sparc_fetch_instruction (CORE_ADDR pc)
   return insn;
 }
 
+
+/* OpenBSD/sparc includes StackGhost, which according to the author's
+   website http://stackghost.cerias.purdue.edu "... transparently and
+   automatically protects applications' stack frames; more
+   specifically, it guards the return pointers.  The protection
+   mechanisms require no application source or binary modification and
+   imposes only a negligible performance penalty."
+
+   The same website provides the following description of how
+   StackGhost works:
+
+   "StackGhost interfaces with the kernel trap handler that would
+   normally write out registers to the stack and the handler that
+   would read them back in.  By XORing a cookie into the
+   return-address saved in the user stack when it is actually written
+   to the stack, and then XOR it out when the return-address is pulled
+   from the stack, StackGhost can cause attacker corrupted return
+   pointers to behave in a manner the attacker cannot predict.
+   StackGhost can also use several unused bits in the return pointer
+   to detect a smashed return pointer and abort the process."
+
+   For GDB this means that whenever we're reading %i7 from a stack
+   frame's window save area, we'll have to XOR the cookie.
+
+   More information on StackGuard can be found on in:
+
+   Mike Frantzen and Mike Shuey. "StackGhost: Hardware Facilitated
+   Stack Protection."  2001.  Published in USENIX Security Symposium
+   '01.  */
+
+/* Fetch StackGhost Per-Process XOR cookie.  */
+
+ULONGEST
+sparc_fetch_wcookie (void)
+{
+  /* FIXME: kettenis/20040131: We should fetch the cookie from the
+     target.  For now, return zero, which is right for targets without
+     StackGhost.  */
+  return 0;
+}
+
+
 /* Return the contents if register REGNUM as an address.  */
 
 static CORE_ADDR
@@ -666,6 +708,29 @@ sparc32_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       return;
     }
 
+  /* Handle StackGhost.  */
+  {
+    ULONGEST wcookie = sparc_fetch_wcookie ();
+
+    if (wcookie != 0 && !cache->frameless_p && regnum == SPARC_I7_REGNUM)
+      {
+	*optimizedp = 0;
+	*lvalp = not_lval;
+	*addrp = 0;
+	*realnump = -1;
+	if (valuep)
+	  {
+	    CORE_ADDR addr = cache->base + (regnum - SPARC_L0_REGNUM) * 4;
+	    ULONGEST i6;
+
+	    /* Read the value in from memory.  */
+	    i6 = get_frame_memory_unsigned (next_frame, addr, 4);
+	    store_unsigned_integer (valuep, 4, i6 ^ wcookie);
+	  }
+	return;
+      }
+  }
+
   /* The previous frame's `local' and `in' registers have been saved
      in the register save area.  */
   if (!cache->frameless_p
@@ -1163,6 +1228,16 @@ sparc_supply_rwindow (struct regcache *regcache, CORE_ADDR sp, int regnum)
 	    {
 	      target_read_memory (sp + ((i - SPARC_L0_REGNUM) * 4),
 				  buf + offset, 4);
+
+	      /* Handle StackGhost.  */
+	      if (i == SPARC_I7_REGNUM)
+		{
+		  ULONGEST wcookie = sparc_fetch_wcookie ();
+		  ULONGEST i6 = extract_unsigned_integer (buf + offset, 4);
+
+		  store_unsigned_integer (buf + offset, 4, i6 ^ wcookie);
+		}
+
 	      regcache_raw_supply (regcache, i, buf);
 	    }
 	}
@@ -1206,6 +1281,16 @@ sparc_collect_rwindow (const struct regcache *regcache,
 	  if (regnum == -1 || regnum == SPARC_SP_REGNUM || regnum == i)
 	    {
 	      regcache_raw_collect (regcache, i, buf);
+
+	      /* Handle StackGhost.  */
+	      if (i == SPARC_I7_REGNUM)
+		{
+		  ULONGEST wcookie = sparc_fetch_wcookie ();
+		  ULONGEST i6 = extract_unsigned_integer (buf + offset, 4);
+
+		  store_unsigned_integer (buf + offset, 4, i6 ^ wcookie);
+		}
+
 	      target_write_memory (sp + ((i - SPARC_L0_REGNUM) * 4),
 				   buf + offset, 4);
 	    }
