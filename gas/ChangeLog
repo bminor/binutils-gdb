@@ -1,5 +1,8 @@
 Mon Oct 12 11:07:21 1998  Nick Clifton  <nickc@cygnus.com>
 
+	* config/tc-m32r.c (assemble_parallel_insn): Convert second opcode
+	to lower case before parsing.
+
 	* config/tc-d30v.c (parallel_ok): Ignore conflicts when explicitly
 	parallel insns modift buts in the PSW as a side effect.
 
