@@ -193,6 +193,7 @@ struct ld_emulation_xfer_struct ld_gld960coff_emulation =
   NULL,	/* parse args */
   NULL,	/* unrecognized file */
   NULL,	/* list options */
-  NULL 	/* recognized file */
+  NULL,	/* recognized file */
+  NULL 	/* find_potential_libraries */
 };
 EOF

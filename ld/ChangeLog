@@ -1,3 +1,11 @@
+2000-02-29  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* emultempl/{aix.em, armcoff.em, armelf.em, armelf_oabi.em,
+	beos.em, elf32.em, generic.em, gld960.em, gld960c.em, hppaelf.em,
+	linux.em, lnk960.em, mipsecoff.em, sunos.em, vanilla.em}
+	(ld_emulation_xfer_struct): Add missing NULL initialiser for
+	find_potential_libraries.
+
 2000-02-28  Jim Blandy  <jimb@redhat.com>
 
 	* ldgram.y (exclude_name_list): Don't require a comma to separate

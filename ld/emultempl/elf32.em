@@ -1181,6 +1181,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld_${EMULATION_NAME}_parse_args,
   NULL,		/* unrecognized_file */
   gld_${EMULATION_NAME}_list_options,
-  NULL		/* recognized_file */
+  NULL,		/* recognized_file */
+  NULL		/* find_potential_libraries */
 };
 EOF
