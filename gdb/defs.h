@@ -333,13 +333,13 @@ enum target_signal
     TARGET_SIGNAL_CANCEL = 76,
 
     /* Yes, this pains me, too.  But LynxOS didn't have SIG32, and now
-       Linux does, and we can't disturb the numbering, since it's part
-       of the remote protocol.  Note that in some GDB's
+       GNU/Linux does, and we can't disturb the numbering, since it's
+       part of the remote protocol.  Note that in some GDB's
        TARGET_SIGNAL_REALTIME_32 is number 76.  */
     TARGET_SIGNAL_REALTIME_32,
     /* Yet another pain, IRIX 6 has SIG64. */
     TARGET_SIGNAL_REALTIME_64,
-    /* Yet another pain, Linux/MIPS might go up to 128. */
+    /* Yet another pain, GNU/Linux MIPS might go up to 128. */
     TARGET_SIGNAL_REALTIME_65,
     TARGET_SIGNAL_REALTIME_66,
     TARGET_SIGNAL_REALTIME_67,

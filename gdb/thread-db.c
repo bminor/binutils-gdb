@@ -37,7 +37,8 @@
 #define LIBTHREAD_DB_SO "libthread_db.so.1"
 #endif
 
-/* If we're running on Linux, we must explicitly attach to any new threads.  */
+/* If we're running on GNU/Linux, we must explicitly attach to any new
+   threads.  */
 
 /* FIXME: There is certainly some room for improvements:
    - Cache LWP ids.
@@ -576,7 +577,7 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
   if (ti_p->ti_state == TD_THR_UNKNOWN || ti_p->ti_state == TD_THR_ZOMBIE)
     return;			/* A zombie thread -- do not attach.  */
 
-  /* Under Linux, we have to attach to each and every thread.  */
+  /* Under GNU/Linux, we have to attach to each and every thread.  */
 #ifdef ATTACH_LWP
   ATTACH_LWP (BUILD_LWP (ti_p->ti_lid, GET_PID (ptid)), 0);
 #endif

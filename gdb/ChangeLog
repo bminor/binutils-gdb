@@ -1,3 +1,9 @@
+2002-02-24  Andrew Cagney  <ac131313@redhat.com>
+
+	* lin-lwp.c, thread-db.c, defs.h, cris-tdep.c: Replace ``Linux''
+	with either ``GNU/Linux'' or ``Linux kernel''.
+	Fix PR gdb/378.
+	
 2002-02-23  Andrew Cagney  <ac131313@redhat.com>
 
 	* lin-thread.c: Delete file.

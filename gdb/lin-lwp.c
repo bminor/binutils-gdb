@@ -1,4 +1,4 @@
-/* Multi-threaded debugging support for Linux (LWP layer).
+/* Multi-threaded debugging support for GNU/Linux (LWP layer).
    Copyright 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -35,38 +35,38 @@
 static int debug_lin_lwp;
 extern const char *strsignal (int sig);
 
-/* On Linux there are no real LWP's.  The closest thing to LWP's are
-   processes sharing the same VM space.  A multi-threaded process is
-   basically a group of such processes.  However, such a grouping is
-   almost entirely a user-space issue; the kernel doesn't enforce such
-   a grouping at all (this might change in the future).  In general,
-   we'll rely on the threads library (i.e. the LinuxThreads library)
-   to provide such a grouping.
+/* On GNU/Linux there are no real LWP's.  The closest thing to LWP's
+   are processes sharing the same VM space.  A multi-threaded process
+   is basically a group of such processes.  However, such a grouping
+   is almost entirely a user-space issue; the kernel doesn't enforce
+   such a grouping at all (this might change in the future).  In
+   general, we'll rely on the threads library (i.e. the GNU/Linux
+   Threads library) to provide such a grouping.
 
    It is perfectly well possible to write a multi-threaded application
    without the assistance of a threads library, by using the clone
    system call directly.  This module should be able to give some
    rudimentary support for debugging such applications if developers
    specify the CLONE_PTRACE flag in the clone system call, and are
-   using Linux 2.4 or above.
+   using the Linux kernel 2.4 or above.
 
-   Note that there are some peculiarities in Linux that affect this
-   code:
+   Note that there are some peculiarities in GNU/Linux that affect
+   this code:
 
    - In general one should specify the __WCLONE flag to waitpid in
      order to make it report events for any of the cloned processes
      (and leave it out for the initial process).  However, if a cloned
      process has exited the exit status is only reported if the
-     __WCLONE flag is absent.  Linux 2.4 has a __WALL flag, but we
-     cannot use it since GDB must work on older systems too.
+     __WCLONE flag is absent.  Linux kernel 2.4 has a __WALL flag, but
+     we cannot use it since GDB must work on older systems too.
 
    - When a traced, cloned process exits and is waited for by the
      debugger, the kernel reassigns it to the original parent and
-     keeps it around as a "zombie".  Somehow, the LinuxThreads library
-     doesn't notice this, which leads to the "zombie problem": When
-     debugged a multi-threaded process that spawns a lot of threads
-     will run out of processes, even if the threads exit, because the
-     "zombies" stay around.  */
+     keeps it around as a "zombie".  Somehow, the GNU/Linux Threads
+     library doesn't notice this, which leads to the "zombie problem":
+     When debugged a multi-threaded process that spawns a lot of
+     threads will run out of processes, even if the threads exit,
+     because the "zombies" stay around.  */
 
 /* Structure describing a LWP.  */
 struct lwp_info
@@ -293,7 +293,7 @@ iterate_over_lwps (int (*callback) (struct lwp_info *, void *), void *data)
 }
 
 
-/* Implementation of the PREPARE_TO_PROCEED hook for the Linux LWP
+/* Implementation of the PREPARE_TO_PROCEED hook for the GNU/Linux LWP
    layer.
 
    Note that this implementation is potentially redundant now that
@@ -1476,7 +1476,7 @@ _initialize_lin_lwp (void)
 
   add_show_from_set (add_set_cmd ("lin-lwp", no_class, var_zinteger,
 				  (char *) &debug_lin_lwp, 
-				  "Set debugging of linux lwp module.\n\
+				  "Set debugging of GNU/Linux lwp module.\n\
 Enables printf debugging output.\n",
 				      &setdebuglist),
 		     &showdebuglist);
@@ -1484,7 +1484,8 @@ Enables printf debugging output.\n",
 
 
 /* FIXME: kettenis/2000-08-26: The stuff on this page is specific to
-   the LinuxThreads library and therefore doesn't really belong here.  */
+   the GNU/Linux Threads library and therefore doesn't really belong
+   here.  */
 
 /* Read variable NAME in the target and return its value if found.
    Otherwise return zero.  It is assumed that the type of the variable
@@ -1528,10 +1529,11 @@ lin_thread_get_thread_signals (sigset_t *set)
   sigaddset (set, restart);
   sigaddset (set, cancel);
 
-  /* The LinuxThreads library makes terminating threads send a special
-     "cancel" signal instead of SIGCHLD.  Make sure we catch those (to
-     prevent them from terminating GDB itself, which is likely to be
-     their default action) and treat them the same way as SIGCHLD.  */
+  /* The GNU/Linux Threads library makes terminating threads send a
+     special "cancel" signal instead of SIGCHLD.  Make sure we catch
+     those (to prevent them from terminating GDB itself, which is
+     likely to be their default action) and treat them the same way as
+     SIGCHLD.  */
 
   action.sa_handler = sigchld_handler;
   sigemptyset (&action.sa_mask);

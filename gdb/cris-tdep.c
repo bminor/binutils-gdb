@@ -3625,11 +3625,13 @@ static struct core_fns cris_elf_core_fns =
 };
 
 /* Fetch (and possibly build) an appropriate link_map_offsets
-   structure for native Linux/CRIS targets using the struct offsets
-   defined in link.h (but without actual reference to that file).
+   structure for native GNU/Linux CRIS targets using the struct
+   offsets defined in link.h (but without actual reference to that
+   file).
 
-   This makes it possible to access Linux/CRIS shared libraries from a
-   GDB that was not built on an Linux/CRIS host (for cross debugging).
+   This makes it possible to access GNU/Linux CRIS shared libraries
+   from a GDB that was not built on an GNU/Linux CRIS host (for cross
+   debugging).
 
    See gdb/solib-svr4.h for an explanation of these fields.  */
 
