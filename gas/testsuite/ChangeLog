@@ -1,3 +1,10 @@
+start-sanitize-m32rx
+1999-01-06  Doug Evans  <devans@casey.cygnus.com>
+
+	* gas/m32r/interfere.s: New testcase.
+	* gas/m32r/error.exp: Run it.
+
+end-sanitize-m32rx
 start-sanitize-r5900
 1999-01-06  Frank Ch. Eigler  <fche@cygnus.com>
 
@@ -159,7 +166,7 @@ Tue Jul 28 10:11:22 1998  Doug Evans  <devans@canuck.cygnus.com>
 	* gas/m32r/m32rx.d: Ditto.
 
 end-sanitize-m32rx
-start-sanitize-am33
+start-sanitize-cygnus
 Thu Jul 23 09:22:09 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mn10300/am33_8.s: Test DSP autoincrement memory loads/stores.
@@ -168,19 +175,19 @@ Thu Jul 23 09:22:09 1998  Jeffrey A Law  (law@cygnus.com)
 	* gas/mn10300/am_*.s: Test autoincrement memory loads/stores.
 	* gas/mn10300/basic.exp: Corresponding changes.
 
-end-sanitize-am33
+end-sanitize-cygnus
 Tue Jul 21 12:46:59 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* gas/i386/white.s: Add some more whitespace tests.
 	* gas/i386/white.l: Update accordingly.
 
-start-sanitize-am33
+start-sanitize-cygnus
 Thu Jul 16 18:16:49 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mn10300/am33_5.s: Test 4 operand mul, mulu.
 	* gas/mn10300/basic.exp: Corresponding changes.
 
-end-sanitize-am33
+end-sanitize-cygnus
 Mon Jul 13 18:15:11 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* gas/i386/*: All new i386 testsuite.
@@ -200,7 +207,7 @@ Wed Jul  1 17:31:39 1998  Ian Lance Taylor  <ian@cygnus.com>
 	* gas/ppc/simpshft.d: Change accordingly.  Only dump the .text
 	section.
 
-start-sanitize-am33
+start-sanitize-cygnus
 Fri Jun 26 11:17:46 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mn10300/am33.s: Add .am33 pseudo-op to force am33 mode.
@@ -212,7 +219,7 @@ Wed Jun 24 10:10:52 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mn10300/basic.exp (do_am33_3): Fix typo.
 
-end-sanitize-am33
+end-sanitize-cygnus
 Tue Jun 23 15:14:43 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/v850/hilo2.s: Use r1 as the destination of the movea
@@ -221,7 +228,7 @@ Tue Jun 23 15:14:43 1998  Nick Clifton  <nickc@cygnus.com>
 	* gas/v850/basic.exp: Fix names of special area relocations.
 	Set -mwarn-signed-overflow flag when running range.s test.
 
-start-sanitize-am33
+start-sanitize-cygnus
 Mon Jun 22 13:43:43 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mn10300/am33_6.s: New test.
@@ -229,7 +236,7 @@ Mon Jun 22 13:43:43 1998  Jeffrey A Law  (law@cygnus.com)
 	* gas/mn10300/am33_8.s: Likewise.
 	* gas/mn10300/basic.exp: Run them.
 
-end-sanitize-am33
+end-sanitize-cygnus
 start-sanitize-r5900
 Mon Jun 22 11:08:07 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
@@ -241,7 +248,7 @@ Sun Jun 21 12:44:43 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/d30v/reloc.d: Updated to match latest assembler output.
 
-start-sanitize-am33
+start-sanitize-cygnus
 Fri Jun 19 16:48:14 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mn10300/am33_4.s: New test.
@@ -254,7 +261,7 @@ Fri Jun 19 09:45:17 1998  Jeffrey A Law  (law@cygnus.com)
 	* gas/mn10300/am33_3.s: New test.
 	* gas/mn10300/basic.exp: Run them.
 
-end-sanitize-am33
+end-sanitize-cygnus
 start-sanitize-sky
 Thu Jun 18 23:56:24 1998  Doug Evans  <devans@seba.cygnus.com>
 
@@ -262,13 +269,13 @@ Thu Jun 18 23:56:24 1998  Doug Evans  <devans@seba.cygnus.com>
 	* gas/dvp/dvp.exp: Run it.
 
 end-sanitize-sky
-start-sanitize-am33
+start-sanitize-cygnus
 Wed Jun 17 18:14:33 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mn10300/am33.s: New test.
 	* gas/mn10300/basic.exp: Run it.
 
-end-sanitize-am33
+end-sanitize-cygnus
 Wed Jun 17 14:02:10 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* gas/mips/delay.d: Add -mcpu=NNNN to gas flags to let test case

@@ -120,9 +120,9 @@ size_t md_longopts_size = sizeof(md_longopts);
 const pseudo_typeS md_pseudo_table[] =
 {
   { "am30",	set_arch_mach,		300 },
-  /* start-sanitize-am33 */
+  /* start-sanitize-cygnus */
   { "am33",	set_arch_mach,		330 },
-  /* end-sanitize-am33 */
+  /* end-sanitize-cygnus */
   { "mn10300",	set_arch_mach,		300 },
   {NULL, 0, 0}
 };
@@ -149,7 +149,7 @@ static const struct reg_name address_registers[] =
 };
 #define ADDRESS_REG_NAME_CNT	(sizeof(address_registers) / sizeof(struct reg_name))
 
-/* start-sanitize-am33 */
+/* start-sanitize-cygnus */
 static const struct reg_name r_registers[] =
 {
   { "a0", 8 },
@@ -221,7 +221,7 @@ static const struct reg_name xr_registers[] =
 };
 #define XR_REG_NAME_CNT	(sizeof(xr_registers) / sizeof(struct reg_name))
 
-/* end-sanitize-am33 */
+/* end-sanitize-cygnus */
 
 static const struct reg_name other_registers[] =
 {
@@ -263,7 +263,7 @@ reg_name_search (regs, regcount, name)
 }
 
 
-/* start-sanitize-am33 */
+/* start-sanitize-cygnus */
 /* Summary of register_name().
  *
  * in: Input_line_pointer points to 1st char of operand.
@@ -355,7 +355,7 @@ xr_register_name (expressionP)
       return false;
     }
 }
-/* end-sanitize-am33 */
+/* end-sanitize-cygnus */
 
 /* Summary of register_name().
  *
@@ -1024,7 +1024,7 @@ md_assemble (str)
 	      *input_line_pointer = c;
 	      goto keep_going;
 	    }
-	  /* start-sanitize-am33 */
+	  /* start-sanitize-cygnus */
 	  else if (operand->flags & MN10300_OPERAND_RREG)
 	    {
 	      if (!r_register_name (&ex))
@@ -1129,7 +1129,7 @@ md_assemble (str)
 	      input_line_pointer++;
 	      goto keep_going;
 	    }
-	  /* end-sanitize-am33 */
+	  /* end-sanitize-cygnus */
 	  else if (operand->flags & MN10300_OPERAND_PSW)
 	    {
 	      char *start = input_line_pointer;
@@ -1216,7 +1216,7 @@ md_assemble (str)
 		      value |= 0x08;
 		      *input_line_pointer = c;
 		    }
-		  /* start-sanitize-am33 */
+		  /* start-sanitize-cygnus */
 		  else if (strcasecmp (start, "exreg0") == 0)
 		    {
 		      value |= 0x04;
@@ -1237,7 +1237,7 @@ md_assemble (str)
 		      value |= 0xff;
 		      *input_line_pointer = c;
 		    }
-		  /* end-sanitize-am33 */
+		  /* end-sanitize-cygnus */
 		  else
 		    {
 		      input_line_pointer = hold;
@@ -1269,7 +1269,7 @@ md_assemble (str)
 	      str = hold;
 	      goto error;
 	    }
-	  /* start-sanitize-am33 */
+	  /* start-sanitize-cygnus */
 	  else if (r_register_name (&ex))
 	    {
 	      input_line_pointer = hold;
@@ -1282,7 +1282,7 @@ md_assemble (str)
 	      str = hold;
 	      goto error;
 	    }
-	  /* end-sanitize-am33 */
+	  /* end-sanitize-cygnus */
 	  else if (*str == ')' || *str == '(')
 	    {
 	      input_line_pointer = hold;
@@ -1307,9 +1307,9 @@ md_assemble (str)
 		int mask;
 
 		mask = MN10300_OPERAND_DREG | MN10300_OPERAND_AREG;
-		/* start-sanitize-am33 */
+		/* start-sanitize-cygnus */
 		mask |= MN10300_OPERAND_RREG | MN10300_OPERAND_XRREG;
-		/* end-sanitize-am33 */
+		/* end-sanitize-cygnus */
 		if ((operand->flags & mask) == 0)
 		  {
 		    input_line_pointer = hold;
@@ -1326,12 +1326,12 @@ md_assemble (str)
 			 || opcode->format == FMT_S6
 			 || opcode->format == FMT_D5)
 		  extra_shift = 16;
-		/* start-sanitize-am33 */
+		/* start-sanitize-cygnus */
 		else if (opcode->format == FMT_D7)
 		  extra_shift = 8;
 		else if (opcode->format == FMT_D8 || opcode->format == FMT_D9)
 		  extra_shift = 8;
-		/* end-sanitize-am33 */
+		/* end-sanitize-cygnus */
 		else
 		  extra_shift = 0;
 	      
@@ -1459,7 +1459,7 @@ keep_going:
   if (opcode->format == FMT_S2 || opcode->format == FMT_D1)
     size = 3;
 
-  /* start-sanitize-am33 */
+  /* start-sanitize-cygnus */
   if (opcode->format == FMT_D6)
     size = 3;
 
@@ -1471,7 +1471,7 @@ keep_going:
 
   if (opcode->format == FMT_D9)
     size = 7;
-  /* end-sanitize-am33 */
+  /* end-sanitize-cygnus */
 
   if (opcode->format == FMT_S4)
     size = 5;
@@ -1556,11 +1556,11 @@ keep_going:
       if (opcode->format == FMT_S0
 	  || opcode->format == FMT_S1
 	  || opcode->format == FMT_D0
-	  /* start-sanitize-am33 */
+	  /* start-sanitize-cygnus */
 	  || opcode->format == FMT_D6
 	  || opcode->format == FMT_D7
 	  || opcode->format == FMT_D10
-	  /* end-sanitize-am33 */
+	  /* end-sanitize-cygnus */
 	  || opcode->format == FMT_D1)
 	{
 	  number_to_chars_bigendian (f, insn, size);
@@ -1635,7 +1635,7 @@ keep_going:
 	  number_to_chars_littleendian (f + 2, temp, 4);
 	  number_to_chars_bigendian (f + 6, extension & 0xff, 1);
 	}
-      /* start-sanitize-am33 */
+      /* start-sanitize-cygnus */
       else if (opcode->format == FMT_D8)
 	{
           unsigned long temp = ((insn & 0xff) << 16) | (extension & 0xffff);
@@ -1649,7 +1649,7 @@ keep_going:
           number_to_chars_bigendian (f, (insn >> 8) & 0xffffff, 3);
           number_to_chars_littleendian (f + 3, temp, 4);
 	}
-      /* end-sanitize-am33 */
+      /* end-sanitize-cygnus */
 
       /* Create any fixups.  */
       for (i = 0; i < fc; i++)
@@ -1690,10 +1690,10 @@ keep_going:
 		 implicitly 32bits.  */
 	      if ((operand->flags & MN10300_OPERAND_SPLIT) != 0)
 		reloc_size = 32;
-	      /* start-sanitize-am33 */
+	      /* start-sanitize-cygnus */
 	      else if ((operand->flags & MN10300_OPERAND_24BIT) != 0)
 		reloc_size = 24;
-	      /* end-sanitize-am33 */
+	      /* end-sanitize-cygnus */
 	      else
 		reloc_size = operand->bits;
 
@@ -1901,10 +1901,10 @@ mn10300_insert_operand (insnp, extensionp, operand, val, file, line, shift)
       int bits;
 
       bits = operand->bits;
-      /* start-sanitize-am33 */
+      /* start-sanitize-cygnus */
       if (operand->flags & MN10300_OPERAND_24BIT)
 	bits = 24;
-      /* end-sanitize-am33 */
+      /* end-sanitize-cygnus */
 
       if ((operand->flags & MN10300_OPERAND_SIGNED) != 0)
 	{
@@ -1940,14 +1940,14 @@ mn10300_insert_operand (insnp, extensionp, operand, val, file, line, shift)
       *extensionp |= ((val & ((1 << (32 - operand->bits)) - 1))
 		      << operand->shift);
     }
-  /* start-sanitize-am33 */
+  /* start-sanitize-cygnus */
   else if ((operand->flags & MN10300_OPERAND_24BIT) != 0)
     {
       *insnp |= (val >> (24 - operand->bits)) & ((1 << operand->bits) - 1);
       *extensionp |= ((val & ((1 << (24 - operand->bits)) - 1))
 		      << operand->shift);
     }
-  /* end-sanitize-am33 */
+  /* end-sanitize-cygnus */
   else if ((operand->flags & MN10300_OPERAND_EXTENDED) == 0)
     {
       *insnp |= (((long) val & ((1 << operand->bits) - 1))
@@ -1984,10 +1984,10 @@ check_operand (insn, operand, val)
       int bits;
 
       bits = operand->bits;
-      /* start-sanitize-am33 */
+      /* start-sanitize-cygnus */
       if (operand->flags & MN10300_OPERAND_24BIT)
 	bits = 24;
-      /* end-sanitize-am33 */
+      /* end-sanitize-cygnus */
 
       if ((operand->flags & MN10300_OPERAND_SIGNED) != 0)
 	{

@@ -947,13 +947,13 @@ Tue Jul 21 16:50:52 1998  Doug Evans  <devans@seba.cygnus.com>
 	* cgen.c (cgen_md_apply_fix3): set_operand renamed to set_vma_operand.
 	Update call to insert_operand.
 
-start-sanitize-am33
+start-sanitize-cygnus
 Tue Jul 21 10:58:47 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10300.c (md_assemble): Handle autoincrement addressing
 	modes.
 
-end-sanitize-am33
+end-sanitize-cygnus
 Fri Jul 17 11:42:20 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c (ms_show_usage): Formatting changes.
@@ -1135,13 +1135,13 @@ Wed Jul  1 21:38:56 1998  J"orn Rennecke  <amylaar@cygnus.co.uk>
 	* config/tc-sh (COND_JUMP_DELAY, COND12_DELAY_LENGTH): Define.
 	Changed all users of COND12_DELAY.
 
-start-sanitize-am33
+start-sanitize-cygnus
 Mon Jun 29 14:58:36 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10300.c (r_registers): Fix typo and add some missing
 	registers.
 
-end-sanitize-am33
+end-sanitize-cygnus
 start-sanitize-branchbug4011
 Mon Jun 29 09:36:27 1998  Gavin Koch  <gavin@cygnus.com>
 
@@ -1178,7 +1178,7 @@ Wed Jun 24 11:50:54 1998  Klaus Kaempf  <kkaempf@progis.de>
 
 	* config/obj-vms.c (Create_VMS_Object_File): Force binary file.
 
-start-sanitize-am33
+start-sanitize-cygnus
 Wed Jun 24 09:38:10 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10300.c (r_registers): Add a0-a3,d0-d3 and e0-e7
@@ -1187,7 +1187,7 @@ Wed Jun 24 09:38:10 1998  Jeffrey A Law  (law@cygnus.com)
 	for "xrN" registers.
 	(md_assemble): Fix typo computing the size of relocations.
 
-end-sanitize-am33
+end-sanitize-cygnus
 Tue Jun 23 17:47:31 1998  Jim Wilson  <wilson@cygnus.com>
 
 	* config/tc-h8300.c (do_a_fix_imm, build_bytes): Replace cast to
@@ -1215,12 +1215,12 @@ Mon Jun 22 19:52:42 1998  Ian Lance Taylor  <ian@cygnus.com>
 	* config/obj-coff.c (c_symbol_merge): Fix copying of auxiliary
 	information.
 
-start-sanitize-am33
+start-sanitize-cygnus
 Mon Jun 22 13:45:19 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10300: Handle FMT_D10 instructions.
 
-end-sanitize-am33
+end-sanitize-cygnus
 Mon Jun 22 15:18:58 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-i386.c (i386_operand): Be prepared for a space between
@@ -1252,7 +1252,7 @@ Fri Jun 19 19:56:50 1998  Jeffrey A Law  (law@cygnus.com)
 	mips_cpu == 5900.
 
 end-sanitize-r5900
-start-sanitize-am33
+start-sanitize-cygnus
 Fri Jun 19 16:49:56 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10300.c (md_assemble): Handle FMT_D8 and FMT_D9
@@ -1260,7 +1260,7 @@ Fri Jun 19 16:49:56 1998  Jeffrey A Law  (law@cygnus.com)
 	(mn10300_insert_operand): Likewise.
 	(mn10300_check_operand): Likewise.
 	
-end-sanitize-am33
+end-sanitize-cygnus
 Fri Jun 19 13:57:06 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* write.c (adjust_reloc_syms): Never adjust relocs against weak
@@ -1269,13 +1269,13 @@ Fri Jun 19 13:57:06 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 Fri Jun 19 09:50:17 1998  Jeffrey A Law  (law@cygnus.com)
 
-start-sanitize-am33
+start-sanitize-cygnus
 	* config/tc-mn10300.c (r_registers): Add missing registers.
 	(xr_registers): New set of registers.
 	(xr_register_name): New function.
 	(md_assemble): Handle XRREG and PLUS operands.  Tweak handling of
 	RREG operand insertion.  Handle new D6 and D7 instruction formats.
-end-sanitize-am33
+end-sanitize-cygnus
 	* config/tc-mn10300.c (mn10300_insert_operand): Do not hardcode the
 	shift amount for a repeated operand.  The shift amount for the
 	repeated copy comes from the size of the operand.
@@ -1291,14 +1291,14 @@ Fri Jun 19 00:04:26 1998  Doug Evans  <devans@seba.cygnus.com>
 	BFD_RELOC_MIPS_DVP_11_S4, BFD_RELOC_MIPS_DVP_U15_S3.
 
 end-sanitize-sky
-start-sanitize-am33
+start-sanitize-cygnus
 Wed Jun 17 18:09:03 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10300.c (r_registers): New register table.
 	(r_register_name): New function.
 	(md_assemble): Handle new am33 operand types.
 
-end-sanitize-am33
+end-sanitize-cygnus
 Wed Jun 17 13:07:05 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (md_show_usage): Fix -mipsN usage.

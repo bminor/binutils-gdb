@@ -960,7 +960,7 @@ proc do_udf {} {
     if [expr $x==160] then { pass $testname } else { fail $testname }
 }
 
-# start-sanitize-am33
+# start-sanitize-cygnus
 proc do_am33_1 {} {
     set testname "am33.s: am33 tests part 1"
     set x 0
@@ -1711,7 +1711,7 @@ proc do_am33_8 {} {
     if [expr $x==67] then { pass $testname } else { fail $testname }
 }
 
-# end-sanitize-am33
+# end-sanitize-cygnus
 
 if [istarget mn10300*-*-*] then {
     # Test the basic instruction parser.
@@ -1735,7 +1735,7 @@ if [istarget mn10300*-*-*] then {
     do_shift
     do_sub
     do_udf
-# start-sanitize-am33
+# start-sanitize-cygnus
     do_am33_1
     do_am33_2
     do_am33_3
@@ -1744,5 +1744,5 @@ if [istarget mn10300*-*-*] then {
     do_am33_6
     do_am33_7
     do_am33_8
-# end-sanitize-am33
+# end-sanitize-cygnus
 }
