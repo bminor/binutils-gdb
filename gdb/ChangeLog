@@ -1,3 +1,23 @@
+2003-11-17  Jeff Johnston  <jjohnstn@redhat.com>
+            David Mosberger  <davidm@hpl.hp.com>
+
+	* ia64-tdep.c: Include elf.h.
+	[HAVE_LIBUNWIND_IA64_H]: Include libunwind-frame.h and 
+	libunwind-ia64.h.
+	(ia64_rse_slot_num, ia64_rse_skip_regs): New for libunwind support.
+	(ia64_gdb2uw_regnum, ia64_uw2gdb_regnum): Ditto.
+	(ia64_is_fpreg, ia64_access_reg): Ditto.
+	(ia64_access_fpreg, ia64_access_mem): Ditto.
+	(get_kernel_table): Ditto.
+	(ia64_find_unwind_table): Ditto.
+	(ia64_find_proc_info_x, ia64_put_unwind_info): Ditto.
+	(ia64_get_dyn_info_list, ia64_libunwind_frame_this_id): Ditto.
+	(ia64_libunwind_frame_prev_register): Ditto.
+	(ia64_libunwind_frame_sniffer): Ditto.
+	(ia64_gdbarch_init)[HAVE_LIBUNWIND_IA64_H]: Add libunwind frame
+	sniffer.  Register libunwind functions needed by generic 
+	libunwind frame code using libunwind_frame_set_descr(). 
+
 2003-11-16  Daniel Jacobowitz  <drow@mvista.com>
 
 	* breakpoint.c (re_enable_breakpoints_in_shlibs): Only re-enable a
