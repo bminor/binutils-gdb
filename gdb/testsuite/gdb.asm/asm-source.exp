@@ -103,6 +103,10 @@ switch -glob -- [istarget] {
     "m68k-*-*" {
         set asm-arch m68k
     }
+    "ia64-*-*" {
+        set asm-arch ia64
+        set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    }
 }
 
 if { "${asm-arch}" == "" } {

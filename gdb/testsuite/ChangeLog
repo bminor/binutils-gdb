@@ -1,3 +1,8 @@
+2003-08-25  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.asm/asm-source.exp: Add ia64 support.
+	* gdb.asm/ia64.inc: New file.
+
 2003-08-22  Michael Chastain  <mec@shout.net>
 
 	* gdb.cp: New directory.
