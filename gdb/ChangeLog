@@ -1,3 +1,9 @@
+2003-01-08  Daniel Jacobowitz  <drow@mvista.com>
+
+	* minsyms.c (lookup_minimal_symbol): Update comment.
+	(lookup_minimal_symbol_text): Update comment.  Use the hash table.
+	(lookup_minimal_symbol_solib_trampoline): Likewise.
+
 2003-01-08  Andrew Cagney  <cagney@redhat.com>
 
 	* d10v-tdep.c (d10v_init_extra_frame_info): Use

@@ -1,5 +1,6 @@
 /* GDB routines for manipulating the minimal symbol tables.
-   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+   2002, 2003
    Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -135,14 +136,15 @@ add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
 
 /* Look through all the current minimal symbol tables and find the
    first minimal symbol that matches NAME.  If OBJF is non-NULL, limit
-   the search to that objfile.  If SFILE is non-NULL, limit the search
-   to that source file.  Returns a pointer to the minimal symbol that
+   the search to that objfile.  If SFILE is non-NULL, the only file-scope
+   symbols considered will be from that source file (global symbols are
+   still preferred).  Returns a pointer to the minimal symbol that
    matches, or NULL if no match is found.
 
    Note:  One instance where there may be duplicate minimal symbols with
    the same name is when the symbol tables for a shared library and the
    symbol tables for an executable contain global symbols with the same
-   names (the dynamic linker deals with the duplication). */
+   names (the dynamic linker deals with the duplication).  */
 
 struct minimal_symbol *
 lookup_minimal_symbol (register const char *name, const char *sfile,
@@ -248,12 +250,13 @@ lookup_minimal_symbol (register const char *name, const char *sfile,
 }
 
 /* Look through all the current minimal symbol tables and find the
-   first minimal symbol that matches NAME and of text type.  
-   If OBJF is non-NULL, limit
-   the search to that objfile.  If SFILE is non-NULL, limit the search
-   to that source file.  Returns a pointer to the minimal symbol that
-   matches, or NULL if no match is found.
- */
+   first minimal symbol that matches NAME and has text type.  If OBJF
+   is non-NULL, limit the search to that objfile.  If SFILE is non-NULL,
+   the only file-scope symbols considered will be from that source file
+   (global symbols are still preferred).  Returns a pointer to the minimal
+   symbol that matches, or NULL if no match is found.
+
+   This function only searches the mangled (linkage) names.  */
 
 struct minimal_symbol *
 lookup_minimal_symbol_text (register const char *name, const char *sfile,
@@ -263,6 +266,8 @@ lookup_minimal_symbol_text (register const char *name, const char *sfile,
   struct minimal_symbol *msymbol;
   struct minimal_symbol *found_symbol = NULL;
   struct minimal_symbol *found_file_symbol = NULL;
+
+  unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
 
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
   if (sfile != NULL)
@@ -279,10 +284,9 @@ lookup_minimal_symbol_text (register const char *name, const char *sfile,
     {
       if (objf == NULL || objf == objfile)
 	{
-	  for (msymbol = objfile->msymbols;
-	       msymbol != NULL && SYMBOL_NAME (msymbol) != NULL &&
-	       found_symbol == NULL;
-	       msymbol++)
+	  for (msymbol = objfile->msymbol_hash[hash];
+	       msymbol != NULL && found_symbol == NULL;
+	       msymbol = msymbol->hash_next)
 	    {
 	      if (SYMBOL_MATCHES_NAME (msymbol, name) &&
 		  (MSYMBOL_TYPE (msymbol) == mst_text ||
@@ -323,12 +327,13 @@ lookup_minimal_symbol_text (register const char *name, const char *sfile,
 }
 
 /* Look through all the current minimal symbol tables and find the
-   first minimal symbol that matches NAME and of solib trampoline type.  
-   If OBJF is non-NULL, limit
-   the search to that objfile.  If SFILE is non-NULL, limit the search
-   to that source file.  Returns a pointer to the minimal symbol that
-   matches, or NULL if no match is found.
- */
+   first minimal symbol that matches NAME and is a solib trampoline.  If OBJF
+   is non-NULL, limit the search to that objfile.  If SFILE is non-NULL,
+   the only file-scope symbols considered will be from that source file
+   (global symbols are still preferred).  Returns a pointer to the minimal
+   symbol that matches, or NULL if no match is found.
+
+   This function only searches the mangled (linkage) names.  */
 
 struct minimal_symbol *
 lookup_minimal_symbol_solib_trampoline (register const char *name,
@@ -337,6 +342,8 @@ lookup_minimal_symbol_solib_trampoline (register const char *name,
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
   struct minimal_symbol *found_symbol = NULL;
+
+  unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
 
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
   if (sfile != NULL)
@@ -353,10 +360,9 @@ lookup_minimal_symbol_solib_trampoline (register const char *name,
     {
       if (objf == NULL || objf == objfile)
 	{
-	  for (msymbol = objfile->msymbols;
-	       msymbol != NULL && SYMBOL_NAME (msymbol) != NULL &&
-	       found_symbol == NULL;
-	       msymbol++)
+	  for (msymbol = objfile->msymbol_hash[hash];
+	       msymbol != NULL && found_symbol == NULL;
+	       msymbol = msymbol->hash_next)
 	    {
 	      if (SYMBOL_MATCHES_NAME (msymbol, name) &&
 		  MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
