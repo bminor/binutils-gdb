@@ -6,6 +6,7 @@ Thu Apr  3 12:20:32 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 Wed Apr  2 15:09:05 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in (autoconf-install): New target.
+	(autoconf-changelog): Try different way to obtain user name.
 
 Wed Apr  2 14:25:52 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
