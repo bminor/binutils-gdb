@@ -517,9 +517,9 @@ extern struct type *builtin_type_m2_bool;
    the same as for the type structure. */
 
 #define TYPE_ALLOC(t,size)  \
-   TYPE_OBJFILE (t) != NULL  \
+   (TYPE_OBJFILE (t) != NULL  \
     ? obstack_alloc (&TYPE_OBJFILE (t) -> type_obstack, size) \
-    : xmalloc (size)
+    : xmalloc (size))
 
 extern struct type *
 alloc_type PARAMS ((struct objfile *));
