@@ -1,3 +1,7 @@
+2003-01-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.in: Regenerate.
+
 2002-01-14  Charles Wilson  <cwilson@ece.gatech.edu>
 
 	* ld/ld.texinfo (node WIN32): Some clarifications
