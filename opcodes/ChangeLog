@@ -1,3 +1,8 @@
+2000-07-09  Geoffrey Keating  <geoffk@cygnus.com>
+
+	* ppc-opc.c (powerpc_opcodes): Correct suffix for vslw.
+	Patch by Randall J Fisher <rfisher@ecn.purdue.edu>.
+
 2000-07-09  Alan Modra  <alan@linuxcare.com.au>
 
 	* hppa-dis.c (fput_reg, fput_fp_reg, fput_fp_reg_r, fput_creg,

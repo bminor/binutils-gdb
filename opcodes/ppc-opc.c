@@ -1520,7 +1520,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "vsldoi",    VXA(4,  44), VXA_MASK,	PPCVEC,		{ VD, VA, VB, SHB } },
 { "vslh",      VX(4,  324), VX_MASK,	PPCVEC,		{ VD, VA, VB } },
 { "vslo",      VX(4, 1036), VX_MASK,	PPCVEC,		{ VD, VA, VB } },
-{ "vslw",      VX(4,  338), VX_MASK,	PPCVEC,		{ VD, VA, VB } },
+{ "vslw",      VX(4,  388), VX_MASK,	PPCVEC,		{ VD, VA, VB } },
 { "vspltb",    VX(4,  524), VX_MASK,	PPCVEC,		{ VD, VB, UIMM } },
 { "vsplth",    VX(4,  588), VX_MASK,	PPCVEC,		{ VD, VB, UIMM } },
 { "vspltisb",  VX(4,  780), VX_MASK,	PPCVEC,		{ VD, SIMM } },
