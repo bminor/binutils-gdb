@@ -57,7 +57,7 @@ libg++
 make
 mmalloc
 newlib
-prms
+send_pr
 rcs
 readline
 texinfo
