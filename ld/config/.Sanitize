@@ -61,6 +61,7 @@ mips-big.mt
 mips-idt.mt
 mips-idtl.mt
 mips-lit.mt
+mipsb-elf32.mt
 news.mt
 ose68.mt
 rtbsd.mh
