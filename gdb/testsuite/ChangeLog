@@ -1,3 +1,8 @@
+2002-07-30  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.base/shlib-call.exp (additional_flags): Conditionally
+	set Irix-specific compile and link flags.
+
 2002-07-29  Kevin Buettner  <kevinb@redhat.com>
 
 	* lib/gdb.exp (mips*-*-irix*): Use alternate method for preprocessing

@@ -65,6 +65,9 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}.o" object {debug
 if {$gcc_compiled == 0} {
     if [istarget "hppa*-hp-hpux*"] then {
 	set additional_flags "additional_flags=+z"
+    } elseif { [istarget "mips-sgi-irix*"] } {
+	# Disable SGI compiler's implicit -Dsgi
+	set additional_flags "additional_flags=-Usgi"
     } else {
 	# don't know what the compiler is...
 	set additional_flags ""
@@ -103,6 +106,8 @@ if { ($gcc_compiled
       &&  ([istarget "powerpc*-*-aix*"]
 	|| [istarget "rs6000*-*-aix*"] )) } {
     set additional_flags "additional_flags=-L${objdir}/${subdir}"
+} elseif { [istarget "mips-sgi-irix*"] } {
+    set additional_flags "additional_flags=-rpath ${objdir}/${subdir}"
 } else {
     set additional_flags ""
 }
