@@ -4047,7 +4047,16 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 	    case DT_SYMTAB:
 	      name = ".dynsym";
 	      goto get_vma_if_bpabi;
-	      
+	    case DT_VERSYM:
+	      name = ".gnu.version";
+	      goto get_vma_if_bpabi;
+	    case DT_VERDEF:
+	      name = ".gnu.version_d";
+	      goto get_vma_if_bpabi;
+	    case DT_VERNEED:
+	      name = ".gnu.version_r";
+	      goto get_vma_if_bpabi;
+
 	    case DT_PLTGOT:
 	      name = ".got";
 	      goto get_vma;

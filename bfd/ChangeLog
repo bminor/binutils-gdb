@@ -1,3 +1,8 @@
+2004-10-13  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-arm.h (elf32_arm_finish_dynamic_sections): Use file
+	offsets, not VMAs, for DT_VERSYM, DT_VERDEF, DT_VERNEED.
+
 2004-10-12  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-arm.h (elf32_arm_finish_dynamic_symbol): Make .rel.plt

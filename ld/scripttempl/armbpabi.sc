@@ -205,9 +205,6 @@ SECTIONS
   ${CREATE_SHLIB+${RELOCATING+. = ${SHLIB_TEXT_START_ADDR:-0} + SIZEOF_HEADERS;}}
   ${CREATE_PIE+${RELOCATING+. = ${SHLIB_TEXT_START_ADDR:-0} + SIZEOF_HEADERS;}}
   ${INITIAL_READONLY_SECTIONS}
-  .gnu.version  ${RELOCATING-0} : { *(.gnu.version) }
-  .gnu.version_d ${RELOCATING-0}: { *(.gnu.version_d) }
-  .gnu.version_r ${RELOCATING-0}: { *(.gnu.version_r) }
 
 EOF
 if [ "x$COMBRELOC" = x ]; then
@@ -384,6 +381,9 @@ cat <<EOF
   .hash         0 : { *(.hash) }
   .dynsym       0 : { *(.dynsym) }
   .dynstr       0 : { *(.dynstr) }
+  .gnu.version  0 : { *(.gnu.version) }
+  .gnu.version_d 0: { *(.gnu.version_d) }
+  .gnu.version_r 0: { *(.gnu.version_r) }
   ${CREATE_SHLIB-${INTERP}}
 
   /* Stabs debugging sections.  */
