@@ -1,5 +1,10 @@
 2002-07-08  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
+	* config/tc-mips.c (macro): Shift the 32-bit address range
+	accessible with a lone "lui" down by 32768.
+
+2002-07-08  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
 	* config/tc-mips.c (load_address): Use non-trapping "daddu"
 	instead of "dadd" in address calculations.
 	(macro): Likewise.

@@ -5497,13 +5497,15 @@ macro (ip)
 	     If we have 64-bit addresses, as an optimization, for
 	     addresses which are 32-bit constants (e.g. kseg0/kseg1
 	     addresses) we fall back to the 32-bit address generation
-	     mechanism since it is more efficient.  This code should
+	     mechanism since it is more efficient.  Note that due to
+	     the signed offset used by memory operations, the 32-bit
+	     range is shifted down by 32768 here.  This code should
 	     probably attempt to generate 64-bit constants more
 	     efficiently in general.
 	   */
 	  if (HAVE_64BIT_ADDRESSES
 	      && !(offset_expr.X_op == O_constant
-		   && IS_SEXT_32BIT_NUM (offset_expr.X_add_number)))
+		   && IS_SEXT_32BIT_NUM (offset_expr.X_add_number + 0x8000)))
 	    {
 	      p = NULL;
 
