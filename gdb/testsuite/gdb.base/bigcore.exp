@@ -49,6 +49,13 @@ if { [istarget "*-*-*bsd*"]
     return
 }
 
+# This testcase causes too much stress (in terms of memory usage)
+# on certain systems...
+if { [istarget "*-*-*irix*"] } {
+    untested "Testcase too stressful for this system"
+    return
+}
+
 set testfile "bigcore"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}

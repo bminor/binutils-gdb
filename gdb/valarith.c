@@ -202,7 +202,10 @@ value_subscript (struct value *array, struct value *idx)
 	  LONGEST index = value_as_long (idx);
 	  if (index >= lowerbound && index <= upperbound)
 	    return value_subscripted_rvalue (array, idx, lowerbound);
-	  warning ("array or string index out of range");
+	  /* Emit warning unless we have an array of unknown size.
+	     An array of unknown size has lowerbound 0 and upperbound -1.  */
+	  if (upperbound > -1)
+	    warning ("array or string index out of range");
 	  /* fall doing C stuff */
 	  c_style = 1;
 	}

@@ -30,6 +30,7 @@
 #include "gdbcore.h"
 #include "inf-child.h"
 #include "gdbcmd.h"
+#include "gdb_string.h"
 
 #include <sys/wait.h>
 #include <signal.h>

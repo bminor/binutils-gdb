@@ -2111,7 +2111,7 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
 
 	  /* If the symbol isn't defined in the current module, again
 	     we can't do anything.  */
-	  if (!(h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
+	  if (!h->root.def_regular)
 	    {
 	      /* Except for TLSGD relocs, which can sometimes be
 		 relaxed to GOTTPREL relocs.  */
@@ -2450,7 +2450,7 @@ elf64_alpha_create_dynamic_sections (abfd, info)
 	  get_elf_backend_data (abfd)->collect, &bh)))
     return FALSE;
   h = (struct elf_link_hash_entry *) bh;
-  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
+  h->def_regular = 1;
   h->type = STT_OBJECT;
 
   if (info->shared
@@ -2494,7 +2494,7 @@ elf64_alpha_create_dynamic_sections (abfd, info)
 	 FALSE, get_elf_backend_data (abfd)->collect, &bh)))
     return FALSE;
   h = (struct elf_link_hash_entry *) bh;
-  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
+  h->def_regular = 1;
   h->type = STT_OBJECT;
 
   if (info->shared
@@ -2741,10 +2741,9 @@ elf64_alpha_output_extsym (h, data)
 
   if (h->root.indx == -2)
     strip = FALSE;
-  else if (((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
-	    || (h->root.elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0)
-	   && (h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
-	   && (h->root.elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0)
+  else if ((h->root.def_dynamic || h->root.ref_dynamic)
+	   && !h->root.def_regular
+	   && !h->root.ref_regular)
     strip = TRUE;
   else if (einfo->info->strip == strip_all
 	   || (einfo->info->strip == strip_some
@@ -2831,7 +2830,7 @@ elf64_alpha_output_extsym (h, data)
       else
 	h->esym.asym.value = 0;
     }
-  else if ((h->root.elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
+  else if (h->root.needs_plt)
     {
       /* Set type and value for a symbol with a function stub.  */
       h->esym.asym.st = stProc;
@@ -2998,7 +2997,7 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 		 || h->root.root.type == bfd_link_hash_warning)
 	    h = (struct alpha_elf_link_hash_entry *)h->root.root.u.i.link;
 
-	  h->root.elf_link_hash_flags |= ELF_LINK_HASH_REF_REGULAR;
+	  h->root.ref_regular = 1;
 	}
 
       /* We can only get preliminary data on whether a symbol is
@@ -3008,7 +3007,7 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
       maybe_dynamic = FALSE;
       if (h && ((info->shared
 		 && (!info->symbolic || info->unresolved_syms_in_shared_libs == RM_IGNORE))
-		|| ! (h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
+		|| !h->root.def_regular
 		|| h->root.root.type == bfd_link_hash_defweak))
         maybe_dynamic = TRUE;
 
@@ -3114,9 +3113,9 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 		  /* Make a guess as to whether a .plt entry is needed.  */
 		  if ((gotent_flags & ALPHA_ELF_LINK_HASH_LU_FUNC)
 		      && !(gotent_flags & ~ALPHA_ELF_LINK_HASH_LU_FUNC))
-		    h->root.elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+		    h->root.needs_plt = 1;
 		  else
-		    h->root.elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
+		    h->root.needs_plt = 0;
 	        }
 	    }
 	}
@@ -3240,7 +3239,7 @@ elf64_alpha_adjust_dynamic_symbol (info, h)
 	 somewhere later.  But for now don't bother.  */
       && ah->got_entries)
     {
-      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+      h->needs_plt = 1;
 
       s = bfd_get_section_by_name(dynobj, ".plt");
       if (!s && !elf64_alpha_create_dynamic_sections (dynobj, info))
@@ -3275,17 +3274,17 @@ elf64_alpha_adjust_dynamic_symbol (info, h)
       return TRUE;
     }
   else
-    h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
+    h->needs_plt = 0;
 
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (h->weakdef != NULL)
+  if (h->u.weakdef != NULL)
     {
-      BFD_ASSERT (h->weakdef->root.type == bfd_link_hash_defined
-		  || h->weakdef->root.type == bfd_link_hash_defweak);
-      h->root.u.def.section = h->weakdef->root.u.def.section;
-      h->root.u.def.value = h->weakdef->root.u.def.value;
+      BFD_ASSERT (h->u.weakdef->root.type == bfd_link_hash_defined
+		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
+      h->root.u.def.section = h->u.weakdef->root.u.def.section;
+      h->root.u.def.value = h->u.weakdef->root.u.def.value;
       return TRUE;
     }
 
@@ -3727,7 +3726,7 @@ elf64_alpha_size_plt_section_1 (h, data)
   struct alpha_elf_got_entry *gotent;
 
   /* If we didn't need an entry before, we still don't.  */
-  if (!(h->root.elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT))
+  if (!h->root.needs_plt)
     return TRUE;
 
   /* There must still be a LITERAL got entry for the function.  */
@@ -3747,7 +3746,7 @@ elf64_alpha_size_plt_section_1 (h, data)
     }
   else
     {
-      h->root.elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
+      h->root.needs_plt = 0;
       h->root.plt.offset = -1;
 
       /* Undo the definition frobbing begun in adjust_dynamic_symbol.  */
@@ -3849,15 +3848,13 @@ elf64_alpha_calc_dynrel_sizes (h, info)
      set.  This is done for dynamic symbols in
      elf_adjust_dynamic_symbol but this is not done for non-dynamic
      symbols, somehow.  */
-  if (((h->root.elf_link_hash_flags
-       & (ELF_LINK_HASH_DEF_REGULAR
-	  | ELF_LINK_HASH_REF_REGULAR
-	  | ELF_LINK_HASH_DEF_DYNAMIC))
-       == ELF_LINK_HASH_REF_REGULAR)
+  if (!h->root.def_regular
+      && h->root.ref_regular
+      && !h->root.def_dynamic
       && (h->root.root.type == bfd_link_hash_defined
 	  || h->root.root.type == bfd_link_hash_defweak)
       && !(h->root.root.u.def.section->owner->flags & DYNAMIC))
-    h->root.elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
+    h->root.def_regular = 1;
 
   /* If the symbol is dynamic, we'll need all the relocations in their
      natural form.  If this is a shared object, and it has been forced
@@ -4897,7 +4894,7 @@ elf64_alpha_finish_dynamic_symbol (output_bfd, info, h, sym)
       loc = srel->contents + plt_index * sizeof (Elf64_External_Rela);
       bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
 
-      if (!(h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
+      if (!h->def_regular)
 	{
 	  /* Mark the symbol as undefined, rather than as defined in the
 	     .plt section.  Leave the value alone.  */

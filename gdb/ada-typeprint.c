@@ -149,7 +149,7 @@ print_range (struct type *type, struct ui_file *stream)
     case TYPE_CODE_ENUM:
       break;
     default:
-      target_type = builtin_type_ada_int;
+      target_type = builtin_type_int;
       break;
     }
 

@@ -1,3 +1,258 @@
+2004-09-21  Daniel Jacobowitz  <dan@debian.org>
+
+	* dwarf2read.c (struct dwarf2_per_cu_data): New field type_hash.
+	(struct dwarf2_offset_and_type): New.
+	(set_die_type, reset_die_and_siblings_types, get_die_type)
+	(offset_and_type_hash, offset_and_type_eq): New functions.
+	(read_structure_type, read_enumeration_type, read_array_type)
+	(read_namespace, read_tag_pointer_type, read_tag_ptr_to_member_type)
+	(read_tag_reference_type, read_tag_const_type)
+	(read_tag_volatile_type, read_tag_string_type, read_subroutine_type)
+	(read_typedef, read_base_type, read_subrange_type): Use
+	set_die_type.
+
+2004-09-20  Daniel Jacobowitz  <dan@debian.org>
+
+	* Makefile.in (dwarf2read.o): Update dependencies.
+	* dwarf2read.c: Include "command.h" and "gdbcmd.h".
+	(struct dwarf2_per_objfile): Add all_comp_units, n_comp_units,
+	and read_in_chain.
+	(struct dwarf2_cu): Add read_in_chain, per_cu, last_used,
+	mark, and has_form_ref_addr.
+	(struct dwarf2_per_cu_data): New.
+	(dwarf2_max_cache_age): New.
+	(dwarf2_build_psymtabs_hard): Free cached compilation units
+	after loading.  Create and manage the list of compilation units.
+	Remove unnecessary NULL initialization.  Fix indentation.
+	(psymtab_to_symtab_1): Initialize all of CU.
+	(dwarf2_read_abbrevs): Set has_form_ref_addr.
+	(find_partial_die): Use dwarf2_find_containing_comp_unit
+	and load_comp_unit.
+	(free_stack_comp_unit): Update comments.  Clear the per-cu
+	pointer.  Handle aging.
+	(dwarf2_find_containing_comp_unit, free_cached_comp_units)
+	(age_cached_comp_units, free_one_cached_comp_unit)
+	(dwarf2_mark, dwarf2_clear_marks, create_all_comp_units)
+	(load_comp_unit, dwarf2_find_comp_unit, free_one_comp_unit)
+	(set_dwarf2_cmdlist, show_dwarf2_cmdlist, set_dwarf2_cmd)
+	(show_dwarf2_cmd): New.
+	(_initialize_dwarf2_read): Provide "maint set dwarf2 max-cache-age"
+	and "maint show dwarf2 max-cache-age".
+	* gdbcmd.h (maintenance_set_cmdlist, maintenance_show_cmdlist): New
+	externs.
+	* maint.c (maintenance_set_cmdlist, maintenance_show_cmdlist): Make
+	global.
+
+2004-09-20  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* dwarf2read.c (typename_concat): Change prototype to accept obstack
+	and dwarf2_cu struct pointer as arguments.  Change function to use
+	obstack if provided and use dwarf2_cu to determine language-specific
+	separator.
+	(partial_die_parent_scope): Change comment to include java.  Use
+	new version of typename_concat instead of obconcat.
+	(partial_die_full_name): Use typename_concat.
+	(read_namespace): Ditto.
+	(read_enumeration_type): Use typename_concat instead of obconcat.
+	(new_symbol): Ditto.
+	(add_partial_symbol): Enhance tests for C++ to also test for Java.
+	(guess_structure_name): Ditto.
+	(read_subroutine_type): Ditto.
+	(read_structure_type): Ditto.
+	(is_vtable_name): Add Java support.
+	(determine_class_name): Switch to new typename_concat call.
+	(determine_prefix): Switch to new typename_concat call.
+	* jv-exp.y (FuncStart): New pattern.
+	(MethodInvocation): Add support for simple function calls.  Change
+	warning message for other forms of inferior call currently not
+	supported.
+	* valarith.c (value_subscript): Treat an array with upper-bound
+	of -1 as unknown size.
+
+2004-09-20  Daniel Jacobowitz  <dan@debian.org>
+
+	* symtab.c (lookup_partial_symtab): Use psymtab_to_fullname.
+	(lookup_partial_symtab): Use symtab_to_fullname.
+
+2004-09-19  Jim Blandy  <jimb@redhat.com>
+
+	* minsyms.c (lookup_minimal_symbol): Doc fix.
+
+2004-09-20  Andrew Cagney  <cagney@gnu.org>
+
+	* config/nm-lynx.h (DEPRECATED_CHILD_RESUME): Deprecate
+	CHILD_RESUME.
+	* config/i386/nm-linux.h (DEPRECATED_CHILD_RESUME): Ditto.
+	* config/nm-linux.h (DEPRECATED_KILL_INFERIOR): Deprecate
+	KILL_INFERIOR.
+	* infptrace.c: Update.
+
+2004-09-19  Daniel Jacobowitz  <dan@debian.org>
+
+	* symtab.c (output_source_filename): Mark first argument as const.
+	(sources_info): Use symtab_to_fullname and psymtab_to_fullname
+	for "info sources" output.
+
+2004-09-20  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/nm-fbsd.h, config/i386/nm-obsd.h: Don't include
+	<machine/vmparam.h>.
+	(KERNEL_U_ADDR, REGISTER_U_ADDR): Remove defines.
+	(register_u_addr): Remove prototype.
+
+2004-09-19  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386bsd-nat.c: Include "i386bsd-nat.h" and "inf-ptrace.h".
+	(i386bsd_fetch_inferior_registers): Rename from
+	fetch_inferior_registers.  Make static.
+	(i386bsd_store_inferior_registers): Rename from
+	store_inferior_registers.  Make static.
+	(i386bsd_target): New function.
+	* i386bsd-nat.h: New file.
+	* i386fbsd-nat.c: Include "target.h", "fbsd-nat.h" and
+	"i386bsd-nat.h".
+	(i386fbsd_resume): Rename from child_resume.  Make static.
+	(_initialize_i386fbsd_nat): Construct and add target vector.
+	* i386nbsd-nat.c: Include "target.h" and "i386bsd-nat.h".
+	(_initialize_i386nbsd_nat): Construct and add target vector.
+	* config/i386/nm-fbsd.h: (CHILD_RESUME, CHILD_PID_TO_EXEC_FILE):
+	Remove defines.
+	* config/i386/fbsd.mh (NATDEPFILES): Add inf-child.o, inf-ptrace.o
+	and fbsd-nat.o.  Remove inftarg.o and fbsd-proc.o.
+	* config/i386/nbsdaout.mh (NATDEPFILES): Add inf-child.o,
+	inf-ptrace.o, i386bsd-nat.o and bsd-kvm.o.  Remove inftarg.o.
+	(LOADLIBES): New variable.
+	* config/i386/nbsdelf.mh (NATDEPFILES): Add inf-child.o and
+	inf-ptrace.o.  Remove inftarg.o.
+	* config/i386/obsd.mh (NATDEPFILES): Add inf-child.o and
+	inf-ptrace.o. Remove inftarg.o.
+	* config/i386/obsdaout.mh (NATDEPFILES): Add inf-child.o,
+	inf-ptrace.o, i386nbsd-nat.o and bsd-kvm.o.  Remove inftarg.o.
+	(LOADLIBES): New variable.
+	* Makefile.in (i386bsd_nat_h): New variable.
+	(i386bsd-nat.o, i386fbsd-nat.o, i386nbsd-nat.o): Update
+	dependencies.
+
+	* sparc64nbsd-tdep.c: Include "objfiles.h".
+	(sparc64nbsd_init_abi): Set in_solib_call_trampoline and
+	skip_trampoline_code.  Set solib_svr4_fetch_link_map_offsets to
+	svr4_lp64_fetch_link_map_offsets.
+	* sparc64obsd-tdep.c: Include "objfiles.h".  Don't include
+	"nbsd-tdep.h".
+	(sparc64obsd_init_abi): Set in_solib_call_trampoline and
+	skip_trampoline_code.  Set solib_svr4_fetch_link_map_offsets to
+	svr4_lp64_fetch_link_map_offsets.
+	* Makefile.in (sparc64nbsd-tdep.o, sparc64obsd-tdep.o): Update
+	dependencies.
+
+	* fbsd-nat.c: New files with cleaned up contents of fbsd-proc.c.
+	* fbsd-nat.h: New file.
+	* Makefile.in (ALLDEPFILES): Add fbsd-nat.c.
+	(fbsd_nat_h): New variable.
+	(fbsd-nat.o): New dependency.
+
+	* config/sparc/nbsd64.mt, config/sparc/obsd.mt,
+	config/sparc/obsd64.mt (DEPRECATED_TM_FILE): Set to solib.h.
+
+	* inf-child.c (inf_child_post_wait): Remove stray whitespace in
+	comment.
+
+2004-09-18  Paul N. Hilfinger  <hilfinger@gnat.com>
+	
+	* ada-exp.y (type_int): New function to add layer of abstraction
+	around references to expression types.
+	(type_long): Ditto.
+	(type_long_long): Ditto.
+	(type_float): Ditto.
+	(type_double): Ditto.
+	(type_long_double): Ditto.
+	(type_char): Ditto.
+	(type_system_address): Ditto.
+	(simple_exp): Use type_* functions in place of builtin_* 
+	variables.
+	(exp): Ditto.
+	(write_var_from_name): Ditto.
+	(write_object_renaming): Ditto.
+	* ada-lang.c (ada_create_fundamental_type): Remove redundant
+	declaration.
+	(build_ada_types): Remove, replacing with...
+	(ada_language_arch_info): New function to initialize primitive
+	type vector in language_arch_info.
+	(ada_array_length): Remove use of builtin_type_ada_int.
+	(value_pos_atr): Ditto.
+	(ada_evaluate_subexp): Ditto.
+	(builtin_type_ada_int, builtin_type_ada_short, builtin_type_ada_long,
+	builtin_type_ada_long_long, builtin_type_ada_char, 
+	builtin_type_ada_float, builtin_type_ada_double, 
+	builtin_type_ada_long_double, builtin_type_ada_natural,
+	builtin_type_ada_positive, builtin_type_ada_system_address): Remove.
+	(ada_builtin_types): Remove.
+	(ada_language_defn): Remove entries for la_builtin_type_vector and
+	string_char_type and use ada_language_arch_info.
+	(_initialize_ada_language): Do type-vector initialization along
+	the lines of c-lang.c.
+	(ada_create_fundamental_type): Break up line.
+	(ada_dump_symtab): Remove unused function.
+	(enum ada_primitive_types): Define.
+	* ada-lang.h (builtin_type_ada_int, builtin_type_ada_short, 
+	builtin_type_ada_long,builtin_type_ada_long_long,builtin_type_ada_char, 
+	builtin_type_ada_float, builtin_type_ada_double, 
+	builtin_type_ada_long_double, builtin_type_ada_natural,
+	builtin_type_ada_positive, builtin_type_ada_system_address): Remove.
+	* ada-lex.l: Use type_* functions in place of builtin_* variables.
+	(processInt): Ditto.
+	(processReal): Ditto.
+	(name_lookup): Ditto.
+	* ada-typeprint.c (print_range): Use builtin_type_int, not
+	builtin_type_ada_int.
+	
+2004-09-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_register_name): Rename regno to regnum.
+
+	* config/pa/hpux1020.mh (MH_CFLAGS): Remove -D__HP_CURSES.
+	* config/pa/hpux11.mh (MH_CFLAGS): Likewise.
+	* config/pa/hpux11w.mh (MH_CFLAGS): Likewise.
+	* configure.in: Improve checks for curses library by checking for
+	mvwaddstr instead of initscr.  Drop HP curses in favour of
+	standard curses on HP-UX.
+	* configure: Regenerated.
+
+2004-09-18  Paul N. Hilfinger  <hilfinger@gnat.com>
+
+	* ada-lang.c: (ada_main_name, ada_value_slice_ptr, ada_value_slice,
+	ada_breakpoint_rewrite, ada_template_to_fixed_record_type_1): 
+	Minor formatting changes.
+	(empty_array): Slight rewrite for formatting.
+	(emit_char,parse,ada_language_defn,build_ada_types,
+	ada_is_exception_sym, _initialize_ada_language): Move 
+	definitions around.
+	(ada_dump_symtab): Remove unused definition.
+	(ada_maybe_exception_partial_symbol): Remove unused definition.
+
+2004-09-16  Andrew Cagney  <cagney@gnu.org>
+
+	* inf-child.c: Include "gdb_string.h".
+	(inf_child_core_file_to_sym_file): Delete.
+	(inf_child_target): Set to_fetch_registers and to_store_registers.
+	* inf-ptrace.c: Include "gdb_string.h".
+	* Makefile.in: Update all dependencies.
+
+	* Makefile.in (gnu-v3-abi.o): Add explict rule to avoid -Werror
+	problem.
+
+2004-09-14  Joel Brobecker  <brobecker@gnat.com>
+
+	* mips-tdep.c (mips_insn32_frame_cache): Pass frame cache in
+	call to heuristic_proc_desc. Remove code that became redundant
+	as a consequence.
+	(read_next_frame_reg): Remove special case for SP_REGNUM.
+	(set_reg_offset): Fix small typo.
+	(reset_saved_regs): New procedure.
+	(mips32_heuristic_proc_desc): No longer compute a fake
+	procedure descriptor. Compute the full frame cache instead.
+	Some minor comment reformatting.
+
 2004-09-14  Andrew Cagney  <cagney@gnu.org>
 
 	* MAINTAINERS: Add Michael Chastain as the backup gdb.threads

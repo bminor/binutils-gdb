@@ -681,7 +681,7 @@ elf_xtensa_check_relocs (abfd, info, sec, relocs)
 	    {
 	      if (h->plt.refcount <= 0)
 		{
-		  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+		  h->needs_plt = 1;
 		  h->plt.refcount = 1;
 		}
 	      else
@@ -984,12 +984,12 @@ elf_xtensa_adjust_dynamic_symbol (info, h)
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (h->weakdef != NULL)
+  if (h->u.weakdef != NULL)
     {
-      BFD_ASSERT (h->weakdef->root.type == bfd_link_hash_defined
-		  || h->weakdef->root.type == bfd_link_hash_defweak);
-      h->root.u.def.section = h->weakdef->root.u.def.section;
-      h->root.u.def.value = h->weakdef->root.u.def.value;
+      BFD_ASSERT (h->u.weakdef->root.type == bfd_link_hash_defined
+		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
+      h->root.u.def.section = h->u.weakdef->root.u.def.section;
+      h->root.u.def.value = h->u.weakdef->root.u.def.value;
       return TRUE;
     }
 
@@ -2100,7 +2100,7 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 	 not process them.  */
       if (unresolved_reloc
 	  && !((input_section->flags & SEC_DEBUGGING) != 0
-	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
+	       && h->def_dynamic))
 	(*_bfd_error_handler)
 	  (_("%B(%A+0x%lx): unresolvable relocation against symbol `%s'"),
 	   input_bfd,
@@ -2160,8 +2160,8 @@ elf_xtensa_finish_dynamic_symbol (output_bfd, info, h, sym)
      struct elf_link_hash_entry *h;
      Elf_Internal_Sym *sym;
 {
-  if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0
-      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+  if (h->needs_plt
+      && !h->def_regular)
     {
       /* Mark the symbol as undefined, rather than as defined in
 	 the .plt section.  Leave the value alone.  */

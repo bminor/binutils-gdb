@@ -425,7 +425,7 @@ sh64_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	    }
 
 	  h = (struct elf_link_hash_entry *) bh;
-	  h->elf_link_hash_flags &=~ ELF_LINK_NON_ELF;
+	  h->non_elf = 0;
 	  h->type = STT_DATALABEL;
 	}
       else

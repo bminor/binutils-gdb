@@ -54,12 +54,6 @@ extern unsigned long i386bsd_dr_get_status (void);
 
 /* Get generic BSD native definitions.  */
 #include "config/nm-bsd.h"
-
-/* Override child_resume in `infptrace.c' to work around a kernel bug.  */
-#define CHILD_RESUME
-
-/* Override child_pid_to_exec_file in 'inftarg.c'.  */
-#define CHILD_PID_TO_EXEC_FILE
 
 
 /* Support for the user struct.  */
@@ -68,16 +62,6 @@ extern unsigned long i386bsd_dr_get_status (void);
 
 #define KERNEL_U_SIZE kernel_u_size ()
 extern int kernel_u_size (void);
-
-/* This is the amount to subtract from u.u_ar0
-   to get the offset in the core file of the register values.  */
-
-#include <machine/vmparam.h>
-#define KERNEL_U_ADDR USRSTACK
-
-#define REGISTER_U_ADDR(addr, blockend, regno) \
-  (addr) = register_u_addr ((blockend), (regno))
-extern CORE_ADDR register_u_addr (CORE_ADDR blockend, int regno);
 
 
 /* Shared library support.  */

@@ -821,7 +821,10 @@ extern bfd_boolean bfd_elf32_arm_allocate_interworking_sections
   (struct bfd_link_info *);
 
 extern bfd_boolean bfd_elf32_arm_process_before_allocation
-  (bfd *, struct bfd_link_info *, int, int, int);
+  (bfd *, struct bfd_link_info *, int, int);
+
+void bfd_elf32_arm_set_target_relocs
+  (struct bfd_link_info *, int, char *);
 
 extern bfd_boolean bfd_elf32_arm_get_bfd_for_interworking
   (bfd *, struct bfd_link_info *);
@@ -1484,7 +1487,7 @@ void bfd_map_over_sections
 
 asection *bfd_sections_find_if
    (bfd *abfd,
-    bfd_boolean (*func) (bfd *abfd, asection *sect, void *obj),
+    bfd_boolean (*operation) (bfd *abfd, asection *sect, void *obj),
     void *obj);
 
 bfd_boolean bfd_set_section_size
@@ -2648,6 +2651,14 @@ entries in .init_array sections.  */
 
 /* Data segment base relative address.  */
   BFD_RELOC_ARM_SBREL32,
+
+/* This reloc is used for References to RTTI dta from exception handling
+tables.  The actual definition depends on the target.  It may be a
+pc-relative or some form of GOT-indirect relocation.  */
+  BFD_RELOC_ARM_TARGET2,
+
+/* 31-bit PC relative address.  */
+  BFD_RELOC_ARM_PREL31,
 
 /* Renesas / SuperH SH relocs.  Not all of these appear in object files.  */
   BFD_RELOC_SH_PCDISP8BY2,

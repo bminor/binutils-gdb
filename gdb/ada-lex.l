@@ -144,14 +144,14 @@ static int find_dot_all (const char *);
 		}
 
 <INITIAL>"'"({GRAPHIC}|\")"'" {
-		   yylval.typed_val.type = builtin_type_ada_char;
+		   yylval.typed_val.type = type_char ();
 		   yylval.typed_val.val = yytext[1];
 		   return CHARLIT;
 		}
 
 <INITIAL>"'[\""{HEXDIG}{2}"\"]'"   {
                    int v;
-                   yylval.typed_val.type = builtin_type_ada_char;
+                   yylval.typed_val.type = type_char ();
 		   sscanf (yytext+3, "%2x", &v);
 		   yylval.typed_val.val = v;
 		   return CHARLIT;
@@ -478,9 +478,9 @@ processInt (const char *base0, const char *num0, const char *exp0)
     }
 
   if ((result >> (TARGET_INT_BIT-1)) == 0)
-    yylval.typed_val.type = builtin_type_ada_int;
+    yylval.typed_val.type = type_int ();
   else if ((result >> (TARGET_LONG_BIT-1)) == 0)
-    yylval.typed_val.type = builtin_type_ada_long;
+    yylval.typed_val.type = type_long ();
   else if (((result >> (TARGET_LONG_BIT-1)) >> 1) == 0)
     {
       /* We have a number representable as an unsigned integer quantity.
@@ -500,7 +500,7 @@ processInt (const char *base0, const char *num0, const char *exp0)
       return INT;
     }
   else
-    yylval.typed_val.type = builtin_type_ada_long_long;
+    yylval.typed_val.type = type_long_long ();
 
   yylval.typed_val.val = (LONGEST) result;
   return INT;
@@ -527,11 +527,11 @@ processReal (const char *num0)
       yylval.typed_val_float.dval = temp;
     }
 
-  yylval.typed_val_float.type = builtin_type_ada_float;
+  yylval.typed_val_float.type = type_float ();
   if (sizeof(DOUBLEST) >= TARGET_DOUBLE_BIT / TARGET_CHAR_BIT)
-    yylval.typed_val_float.type = builtin_type_ada_double;
+    yylval.typed_val_float.type = type_double ();
   if (sizeof(DOUBLEST) >= TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT)
-    yylval.typed_val_float.type = builtin_type_ada_long_double;
+    yylval.typed_val_float.type = type_long_double ();
 
   return FLOAT;
 }
@@ -745,7 +745,7 @@ name_lookup (char *name0, char *err_name, int *token_type, int depth)
                                                          current_gdbarch,
                                                          name);
 	  if (type == NULL && strcmp ("system__address", name) == 0)
-	    type = builtin_type_ada_system_address;
+	    type = type_system_address ();
 	  if (type != NULL)
 	    {
 	      /* First check to see if we have a regular definition of this

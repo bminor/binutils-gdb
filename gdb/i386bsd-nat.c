@@ -33,6 +33,8 @@
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
+#include "i386bsd-nat.h"
+#include "inf-ptrace.h"
 
 
 /* In older BSD versions we cannot get at some of the segment
@@ -128,8 +130,8 @@ i386bsd_collect_gregset (const struct regcache *regcache,
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers (including the floating point registers).  */
 
-void
-fetch_inferior_registers (int regnum)
+static void
+i386bsd_fetch_inferior_registers (int regnum)
 {
   if (regnum == -1 || GETREGS_SUPPLIES (regnum))
     {
@@ -178,8 +180,8 @@ fetch_inferior_registers (int regnum)
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
    this for all registers (including the floating point registers).  */
 
-void
-store_inferior_registers (int regnum)
+static void
+i386bsd_store_inferior_registers (int regnum)
 {
   if (regnum == -1 || GETREGS_SUPPLIES (regnum))
     {
@@ -234,6 +236,20 @@ store_inferior_registers (int regnum)
         }
 #endif
     }
+}
+
+/* Create a prototype *BSD/i386 target.  The client can override it
+   with local methods.  */
+
+struct target_ops *
+i386bsd_target (void)
+{
+  struct target_ops *t;
+
+  t = inf_ptrace_target ();
+  t->to_fetch_registers = i386bsd_fetch_inferior_registers;
+  t->to_store_registers = i386bsd_store_inferior_registers;
+  return t;
 }
 
 

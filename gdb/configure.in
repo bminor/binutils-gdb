@@ -195,7 +195,7 @@ AC_ARG_ENABLE(tui,
   esac],enable_tui=yes)
 if test x"$enable_tui" = xyes; then
   if test -d $srcdir/tui; then
-    if test "$ac_cv_search_initscr" != no -a "$ac_cv_search_wborder" != no; then
+    if test "$ac_cv_search_mvwaddstr" != no; then
       CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_TUI_OBS)"
       CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_TUI_DEPS)"
       CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_TUI_SRCS)"
@@ -332,9 +332,24 @@ AC_SEARCH_LIBS(gethostbyname, nsl)
 # Some systems (e.g. Solaris) have `socketpair' in libsocket.
 AC_SEARCH_LIBS(socketpair, socket)
 
-# Since GDB uses Readline, we need termcap functionality, so we need
-# to find a library that provides that.  When GDB is configured with
-# the TUI, we need full curses functionality.
+# For the TUI, we need enhanced curses functionality.
+#
+# FIXME: kettenis/20040905: We prefer ncurses over the vendor-supplied
+# curses library because the latter might not provide all the
+# functionality we need.  However, this leads to problems on systems
+# where the linker searches /usr/local/lib, but the compiler doesn't
+# search /usr/local/include, if ncurses is installed in /usr/local.  A
+# default installation of ncurses on alpha*-dec-osf* will lead to such
+# a situation.
+AC_SEARCH_LIBS(mvwaddstr, [ncurses cursesX curses])
+
+if test "$ac_cv_search_mvwaddstr" = no; then
+  AC_MSG_WARN([no curses library found])
+fi
+
+# Since GDB uses Readline, we need termcap functionality.  In many
+# cases this will be provided by the curses library, but some systems
+# have a seperate termcap library, or no curses library at all.
 
 case $host_os in
   cygwin*)
@@ -345,46 +360,14 @@ case $host_os in
   go32* | *djgpp*)
     ac_cv_search_tgetent="none required"
     ;;
-  aix*)
-    # Readline prefers curses over termcap on AIX.
-    # ??? Why?
-    AC_SEARCH_LIBS(tgetent, [tinfo ncurses curses termcap])
-    ;;
 esac
 
-# Note: We used to check for libtermlib and libterminfo too, but
-# Readline doesn't, so I think we're safe with leaving them out.
-AC_SEARCH_LIBS(tgetent, [termcap tinfo ncurses Hcurses curses])
+# These are the libraries checked by Readline.
+AC_SEARCH_LIBS(tgetent, [termcap tinfo curses ncurses])
 
 if test "$ac_cv_search_tgetent" = no; then
   AC_MSG_ERROR([no termcap library found])
 fi
-
-# FIXME: kettenis/20030102: We seem to prefer HP curses (Hcurses) over
-# Xcurses on HP-UX; see the `-D__HP_CURSES' in the relevant host
-# Makefile fragments.  That's why we need to have `Hcurses' before
-# `curses'.  I don't see why we should use HP curses if a more
-# standard curses is available, except that according to HP's
-# documentation one needs to compile `-D_XOPEN_SOURCE_EXTENDED' on
-# HP-UX 10.10 and 10.20.
-
-# FIXME: ncurses does not work on native alphaev68-dec-osf5.1,
-# and probably other platforms.  AC_SEARCH_LIBS finds the library
-# in a place such as /usr/local/lib/libncurses.a, but does not
-# do anything to look for the matching include files.
-# -- chastain 2004-05-01
-
-AC_SEARCH_LIBS(initscr, [ncurses Hcurses cursesX curses pdcurses], [],
-  [AC_MSG_WARN([no curses library found])])
-
-# Check whether the wborder function is provided by the curses
-# library detected above.  In certain implementations such as
-# the HP/UX Hcurses for instance, this function is provided by an
-# additional library.  So if we did not find this function inside
-# the curses library, try some alternate libraries we know might
-# provide it.
-AC_SEARCH_LIBS(wborder, [cur_colr], [],
-    [AC_MSG_WARN([wborder function not found, tui will be disabled])])
 
 # ------------------------- #
 # Checks for header files.  #

@@ -1391,23 +1391,14 @@ _bfd_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
       /* Set local fields.  */
       ret->indx = -1;
       ret->dynindx = -1;
-      ret->dynstr_index = 0;
-      ret->elf_hash_value = 0;
-      ret->weakdef = NULL;
-      ret->verinfo.verdef = NULL;
-      ret->vtable_entries_size = 0;
-      ret->vtable_entries_used = NULL;
-      ret->vtable_parent = NULL;
-      ret->got = htab->init_refcount;
-      ret->plt = htab->init_refcount;
-      ret->size = 0;
-      ret->type = STT_NOTYPE;
-      ret->other = 0;
+      ret->got = ret->plt = htab->init_refcount;
+      memset (&ret->size, 0, (sizeof (struct elf_link_hash_entry)
+			      - offsetof (struct elf_link_hash_entry, size)));
       /* Assume that we have been called by a non-ELF symbol reader.
          This flag is then reset by the code which reads an ELF input
          file.  This ensures that a symbol created by a non-ELF symbol
          reader will have the flag set correctly.  */
-      ret->elf_link_hash_flags = ELF_LINK_NON_ELF;
+      ret->non_elf = 1;
     }
 
   return entry;
@@ -1427,13 +1418,12 @@ _bfd_elf_link_hash_copy_indirect (const struct elf_backend_data *bed,
   /* Copy down any references that we may have already seen to the
      symbol which just became indirect.  */
 
-  dir->elf_link_hash_flags
-    |= ind->elf_link_hash_flags & (ELF_LINK_HASH_REF_DYNAMIC
-				   | ELF_LINK_HASH_REF_REGULAR
-				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK
-				   | ELF_LINK_NON_GOT_REF
-				   | ELF_LINK_HASH_NEEDS_PLT
-				   | ELF_LINK_POINTER_EQUALITY_NEEDED);
+  dir->ref_dynamic |= ind->ref_dynamic;
+  dir->ref_regular |= ind->ref_regular;
+  dir->ref_regular_nonweak |= ind->ref_regular_nonweak;
+  dir->non_got_ref |= ind->non_got_ref;
+  dir->needs_plt |= ind->needs_plt;
+  dir->pointer_equality_needed |= ind->pointer_equality_needed;
 
   if (ind->root.type != bfd_link_hash_indirect)
     return;
@@ -1475,10 +1465,10 @@ _bfd_elf_link_hash_hide_symbol (struct bfd_link_info *info,
 				bfd_boolean force_local)
 {
   h->plt = elf_hash_table (info)->init_offset;
-  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
+  h->needs_plt = 0;
   if (force_local)
     {
-      h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
+      h->forced_local = 1;
       if (h->dynindx != -1)
 	{
 	  h->dynindx = -1;

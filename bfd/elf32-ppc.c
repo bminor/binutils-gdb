@@ -329,15 +329,16 @@ ppc_elf_copy_indirect_symbol (const struct elf_backend_data *bed,
 
   if (ELIMINATE_COPY_RELOCS
       && ind->root.type != bfd_link_hash_indirect
-      && (dir->elf_link_hash_flags & ELF_LINK_HASH_DYNAMIC_ADJUSTED) != 0)
-    /* If called to transfer flags for a weakdef during processing
-       of elf_adjust_dynamic_symbol, don't copy ELF_LINK_NON_GOT_REF.
-       We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
-    dir->elf_link_hash_flags |=
-      (ind->elf_link_hash_flags & (ELF_LINK_HASH_REF_DYNAMIC
-				   | ELF_LINK_HASH_REF_REGULAR
-				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK
-				   | ELF_LINK_HASH_NEEDS_PLT));
+      && dir->dynamic_adjusted)
+    {
+      /* If called to transfer flags for a weakdef during processing
+	 of elf_adjust_dynamic_symbol, don't copy non_got_ref.
+	 We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
+      dir->ref_dynamic |= ind->ref_dynamic;
+      dir->ref_regular |= ind->ref_regular;
+      dir->ref_regular_nonweak |= ind->ref_regular_nonweak;
+      dir->needs_plt |= ind->needs_plt;
+    }
   else
     _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }
@@ -2526,7 +2527,7 @@ elf_finish_pointer_linker_section (bfd *output_bfd,
       if (! elf_hash_table (info)->dynamic_sections_created
 	  || (info->shared
 	      && info->symbolic
-	      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+	      && h->def_regular))
 	{
 	  /* This is actually a static link, or it is a
 	     -Bsymbolic link and the symbol is defined
@@ -2872,18 +2873,15 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* Make sure we know what is going on here.  */
   htab = ppc_elf_hash_table (info);
   BFD_ASSERT (htab->elf.dynobj != NULL
-	      && ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT)
-		  || h->weakdef != NULL
-		  || ((h->elf_link_hash_flags
-		       & ELF_LINK_HASH_DEF_DYNAMIC) != 0
-		      && (h->elf_link_hash_flags
-			  & ELF_LINK_HASH_REF_REGULAR) != 0
-		      && (h->elf_link_hash_flags
-			  & ELF_LINK_HASH_DEF_REGULAR) == 0)));
+	      && (h->needs_plt
+		  || h->u.weakdef != NULL
+		  || (h->def_dynamic
+		      && h->ref_regular
+		      && !h->def_regular)));
 
   /* Deal with function syms.  */
   if (h->type == STT_FUNC
-      || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
+      || h->needs_plt)
     {
       /* Clear procedure linkage table information for any symbol that
 	 won't need a .plt entry.  */
@@ -2903,7 +2901,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	     3. We know for certain that a call to this symbol
 	     will go to this object, or will remain undefined.  */
 	  h->plt.offset = (bfd_vma) -1;
-	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
+	  h->needs_plt = 0;
 	}
       return TRUE;
     }
@@ -2913,16 +2911,14 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (h->weakdef != NULL)
+  if (h->u.weakdef != NULL)
     {
-      BFD_ASSERT (h->weakdef->root.type == bfd_link_hash_defined
-		  || h->weakdef->root.type == bfd_link_hash_defweak);
-      h->root.u.def.section = h->weakdef->root.u.def.section;
-      h->root.u.def.value = h->weakdef->root.u.def.value;
+      BFD_ASSERT (h->u.weakdef->root.type == bfd_link_hash_defined
+		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
+      h->root.u.def.section = h->u.weakdef->root.u.def.section;
+      h->root.u.def.value = h->u.weakdef->root.u.def.value;
       if (ELIMINATE_COPY_RELOCS)
-	h->elf_link_hash_flags
-	  = ((h->elf_link_hash_flags & ~ELF_LINK_NON_GOT_REF)
-	     | (h->weakdef->elf_link_hash_flags & ELF_LINK_NON_GOT_REF));
+	h->non_got_ref = h->u.weakdef->non_got_ref;
       return TRUE;
     }
 
@@ -2938,7 +2934,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   /* If there are no references to this symbol that do not use the
      GOT, we don't need to generate a copy reloc.  */
-  if ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0)
+  if (!h->non_got_ref)
     return TRUE;
 
   if (ELIMINATE_COPY_RELOCS)
@@ -2955,7 +2951,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	 we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
       if (p == NULL)
 	{
-	  h->elf_link_hash_flags &= ~ELF_LINK_NON_GOT_REF;
+	  h->non_got_ref = 0;
 	  return TRUE;
 	}
     }
@@ -2994,7 +2990,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	srel = htab->relbss;
       BFD_ASSERT (srel != NULL);
       srel->size += sizeof (Elf32_External_Rela);
-      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_COPY;
+      h->needs_copy = 1;
     }
 
   /* We need to figure out the alignment required for this symbol.  I
@@ -3057,7 +3053,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     {
       /* Make sure this symbol is output as a dynamic symbol.  */
       if (h->dynindx == -1
-	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
+	  && !h->forced_local)
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
@@ -3087,7 +3083,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	     function pointers compare as equal between the normal
 	     executable and the shared library.  */
 	  if (! info->shared
-	      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+	      && !h->def_regular)
 	    {
 	      h->root.u.def.section = s;
 	      h->root.u.def.value = h->plt.offset;
@@ -3106,13 +3102,13 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       else
 	{
 	  h->plt.offset = (bfd_vma) -1;
-	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
+	  h->needs_plt = 0;
 	}
     }
   else
     {
       h->plt.offset = (bfd_vma) -1;
-      h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
+      h->needs_plt = 0;
     }
 
   eh = (struct ppc_elf_link_hash_entry *) h;
@@ -3120,14 +3116,14 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     {
       /* Make sure this symbol is output as a dynamic symbol.  */
       if (eh->elf.dynindx == -1
-	  && (eh->elf.elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
+	  && !eh->elf.forced_local)
 	{
 	  if (!bfd_elf_link_record_dynamic_symbol (info, &eh->elf))
 	    return FALSE;
 	}
 
       if (eh->tls_mask == (TLS_TLS | TLS_LD)
-	  && !(eh->elf.elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC))
+	  && !eh->elf.def_dynamic)
 	/* If just an LD reloc, we'll just use htab->tlsld_got.offset.  */
 	eh->elf.got.offset = (bfd_vma) -1;
       else
@@ -3210,7 +3206,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  && eh->dyn_relocs != NULL
 	  && h->dynindx == -1
 	  && h->root.type == bfd_link_hash_undefweak
-	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
+	  && !h->forced_local)
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
@@ -3222,14 +3218,14 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	 symbols which turn out to need copy relocs or are not
 	 dynamic.  */
 
-      if ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+      if (!h->non_got_ref
+	  && h->def_dynamic
+	  && !h->def_regular)
 	{
 	  /* Make sure this symbol is output as a dynamic symbol.
 	     Undefined weak syms won't yet be marked as dynamic.  */
 	  if (h->dynindx == -1
-	      && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
+	      && !h->forced_local)
 	    {
 	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
 		return FALSE;
@@ -3774,7 +3770,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	      return FALSE;
 	    }
 
-	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+	  h->needs_plt = 1;
 	  h->plt.refcount++;
 	  break;
 
@@ -3883,7 +3879,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	      h->plt.refcount++;
 
 	      /* We may need a copy reloc too.  */
-	      h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
+	      h->non_got_ref = 1;
 	    }
 
 	dodyn:
@@ -3913,15 +3909,13 @@ ppc_elf_check_relocs (bfd *abfd,
 		   || (h != NULL
 		       && (! info->symbolic
 			   || h->root.type == bfd_link_hash_defweak
-			   || (h->elf_link_hash_flags
-			       & ELF_LINK_HASH_DEF_REGULAR) == 0))))
+			   || !h->def_regular))))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !info->shared
 		  && (sec->flags & SEC_ALLOC) != 0
 		  && h != NULL
 		  && (h->root.type == bfd_link_hash_defweak
-		      || (h->elf_link_hash_flags
-			  & ELF_LINK_HASH_DEF_REGULAR) == 0)))
+		      || !h->def_regular)))
 	    {
 	      struct ppc_elf_dyn_relocs *p;
 	      struct ppc_elf_dyn_relocs **head;
@@ -4250,7 +4244,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 
 		is_local = FALSE;
 		if (h == NULL
-		    || !(h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC))
+		    || !h->def_dynamic)
 		  is_local = TRUE;
 
 		r_type = ELF32_R_TYPE (rel->r_info);
@@ -4478,7 +4472,7 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 	     + reloc_index * sizeof (Elf32_External_Rela));
       bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
 
-      if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+      if (!h->def_regular)
 	{
 	  /* Mark the symbol as undefined, rather than as defined in
 	     the .plt section.  Leave the value alone.  */
@@ -4487,13 +4481,12 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 	     Otherwise, the PLT entry would provide a definition for
 	     the symbol even if the symbol wasn't defined anywhere,
 	     and so the symbol would never be NULL.  */
-	  if ((h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR_NONWEAK)
-	      == 0)
+	  if (!h->ref_regular_nonweak)
 	    sym->st_value = 0;
 	}
     }
 
-  if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_COPY) != 0)
+  if (h->needs_copy)
     {
       asection *s;
       Elf_Internal_Rela rela;
@@ -5032,7 +5025,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	    indx = 0;
 	    if (tls_type == (TLS_TLS | TLS_LD)
 		&& (h == NULL
-		    || !(h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC)))
+		    || !h->def_dynamic))
 	      offp = &htab->tlsld_got.offset;
 	    else if (h != NULL)
 	      {
@@ -5075,8 +5068,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		if (offp == &htab->tlsld_got.offset)
 		  tls_m = TLS_LD;
 		else if (h == NULL
-			 || !(h->elf_link_hash_flags
-			      & ELF_LINK_HASH_DEF_DYNAMIC))
+			 || !h->def_dynamic)
 		  tls_m &= ~TLS_LD;
 
 		/* We might have multiple got entries for this sym.
@@ -5195,8 +5187,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  {
 		    if ((tls_mask & TLS_LD) != 0
 			&& !(h == NULL
-			     || !(h->elf_link_hash_flags
-				  & ELF_LINK_HASH_DEF_DYNAMIC)))
+			     || !h->def_dynamic))
 		      off += 8;
 		    if (tls_type != (TLS_TLS | TLS_GD))
 		      {
@@ -5321,9 +5312,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  && (input_section->flags & SEC_ALLOC) != 0
 		  && h != NULL
 		  && h->dynindx != -1
-		  && (h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
-		  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
-		  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0))
+		  && !h->non_got_ref
+		  && h->def_dynamic
+		  && !h->def_regular))
 	    {
 	      int skip;
 
@@ -5722,7 +5713,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
       if (unresolved_reloc
 	  && !((input_section->flags & SEC_DEBUGGING) != 0
-	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
+	       && h->def_dynamic))
 	{
 	  (*_bfd_error_handler)
 	    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),

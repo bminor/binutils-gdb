@@ -1,3 +1,12 @@
+2004-09-20  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.java/jprint.exp: New test case for java inferior call.
+	* gdb.java/jprint.java: Ditto.
+
+2004-09-15  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.base/bigcore.exp: Deactivate on IRIX targets.
+
 2004-09-14  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.threads/killed.c: Include <stdlib.h>.

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-03-19 14:59+1030\n"
+"POT-Creation-Date: 2004-09-16 23:00+0930\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -94,14 +94,14 @@ msgstr ""
 msgid "Address 0x%x is out of bounds.\n"
 msgstr ""
 
-#: fr30-asm.c:323 frv-asm.c:967 ip2k-asm.c:574 iq2000-asm.c:460 m32r-asm.c:335
+#: fr30-asm.c:323 frv-asm.c:967 ip2k-asm.c:574 iq2000-asm.c:460 m32r-asm.c:338
 #: openrisc-asm.c:261 xstormy16-asm.c:284
 #, c-format
 msgid "Unrecognized field %d while parsing.\n"
 msgstr ""
 
 #: fr30-asm.c:372 frv-asm.c:1016 ip2k-asm.c:623 iq2000-asm.c:509
-#: m32r-asm.c:384 openrisc-asm.c:310 xstormy16-asm.c:333
+#: m32r-asm.c:387 openrisc-asm.c:310 xstormy16-asm.c:333
 msgid "missing mnemonic in syntax string"
 msgstr ""
 
@@ -109,43 +109,43 @@ msgstr ""
 #: fr30-asm.c:507 fr30-asm.c:511 fr30-asm.c:598 fr30-asm.c:699 frv-asm.c:1151
 #: frv-asm.c:1155 frv-asm.c:1242 frv-asm.c:1343 ip2k-asm.c:758 ip2k-asm.c:762
 #: ip2k-asm.c:849 ip2k-asm.c:950 iq2000-asm.c:644 iq2000-asm.c:648
-#: iq2000-asm.c:735 iq2000-asm.c:836 m32r-asm.c:519 m32r-asm.c:523
-#: m32r-asm.c:610 m32r-asm.c:711 openrisc-asm.c:445 openrisc-asm.c:449
+#: iq2000-asm.c:735 iq2000-asm.c:836 m32r-asm.c:522 m32r-asm.c:526
+#: m32r-asm.c:613 m32r-asm.c:714 openrisc-asm.c:445 openrisc-asm.c:449
 #: openrisc-asm.c:536 openrisc-asm.c:637 xstormy16-asm.c:468
 #: xstormy16-asm.c:472 xstormy16-asm.c:559 xstormy16-asm.c:660
 msgid "unrecognized instruction"
 msgstr ""
 
 #: fr30-asm.c:554 frv-asm.c:1198 ip2k-asm.c:805 iq2000-asm.c:691
-#: m32r-asm.c:566 openrisc-asm.c:492 xstormy16-asm.c:515
+#: m32r-asm.c:569 openrisc-asm.c:492 xstormy16-asm.c:515
 #, c-format
 msgid "syntax error (expected char `%c', found `%c')"
 msgstr ""
 
 #: fr30-asm.c:564 frv-asm.c:1208 ip2k-asm.c:815 iq2000-asm.c:701
-#: m32r-asm.c:576 openrisc-asm.c:502 xstormy16-asm.c:525
+#: m32r-asm.c:579 openrisc-asm.c:502 xstormy16-asm.c:525
 #, c-format
 msgid "syntax error (expected char `%c', found end of instruction)"
 msgstr ""
 
 #: fr30-asm.c:592 frv-asm.c:1236 ip2k-asm.c:843 iq2000-asm.c:729
-#: m32r-asm.c:604 openrisc-asm.c:530 xstormy16-asm.c:553
+#: m32r-asm.c:607 openrisc-asm.c:530 xstormy16-asm.c:553
 msgid "junk at end of line"
 msgstr ""
 
 #: fr30-asm.c:698 frv-asm.c:1342 ip2k-asm.c:949 iq2000-asm.c:835
-#: m32r-asm.c:710 openrisc-asm.c:636 xstormy16-asm.c:659
+#: m32r-asm.c:713 openrisc-asm.c:636 xstormy16-asm.c:659
 msgid "unrecognized form of instruction"
 msgstr ""
 
 #: fr30-asm.c:710 frv-asm.c:1354 ip2k-asm.c:961 iq2000-asm.c:847
-#: m32r-asm.c:722 openrisc-asm.c:648 xstormy16-asm.c:671
+#: m32r-asm.c:725 openrisc-asm.c:648 xstormy16-asm.c:671
 #, c-format
 msgid "bad instruction `%.50s...'"
 msgstr ""
 
 #: fr30-asm.c:713 frv-asm.c:1357 ip2k-asm.c:964 iq2000-asm.c:850
-#: m32r-asm.c:725 openrisc-asm.c:651 xstormy16-asm.c:674
+#: m32r-asm.c:728 openrisc-asm.c:651 xstormy16-asm.c:674
 #, c-format
 msgid "bad instruction `%.50s'"
 msgstr ""
@@ -219,7 +219,7 @@ msgstr ""
 msgid "Hmmmm 0x%x"
 msgstr ""
 
-#: h8300-dis.c:741
+#: h8300-dis.c:744
 #, c-format
 msgid "Don't understand 0x%x \n"
 msgstr ""
@@ -230,12 +230,12 @@ msgid "can't cope with insert %d\n"
 msgstr ""
 
 #. Couldn't understand anything.
-#: h8500-dis.c:350
+#: h8500-dis.c:342
 #, c-format
 msgid "%02x\t\t*unknown*"
 msgstr ""
 
-#: i386-dis.c:1712
+#: i386-dis.c:1720
 msgid "<internal disassembler error>"
 msgstr ""
 
@@ -275,72 +275,72 @@ msgstr ""
 msgid "overlapping field %s->%s\n"
 msgstr ""
 
-#: ia64-gen.c:1236
+#: ia64-gen.c:1242
 #, c-format
 msgid "overwriting note %d with note %d (IC:%s)\n"
 msgstr ""
 
-#: ia64-gen.c:1435
+#: ia64-gen.c:1441
 #, c-format
 msgid "don't know how to specify %% dependency %s\n"
 msgstr ""
 
-#: ia64-gen.c:1457
+#: ia64-gen.c:1463
 #, c-format
 msgid "Don't know how to specify # dependency %s\n"
 msgstr ""
 
-#: ia64-gen.c:1496
+#: ia64-gen.c:1502
 #, c-format
 msgid "IC:%s [%s] has no terminals or sub-classes\n"
 msgstr ""
 
-#: ia64-gen.c:1499
+#: ia64-gen.c:1505
 #, c-format
 msgid "IC:%s has no terminals or sub-classes\n"
 msgstr ""
 
-#: ia64-gen.c:1508
+#: ia64-gen.c:1514
 #, c-format
 msgid "no insns mapped directly to terminal IC %s [%s]"
 msgstr ""
 
-#: ia64-gen.c:1511
+#: ia64-gen.c:1517
 #, c-format
 msgid "no insns mapped directly to terminal IC %s\n"
 msgstr ""
 
-#: ia64-gen.c:1522
+#: ia64-gen.c:1528
 #, c-format
 msgid "class %s is defined but not used\n"
 msgstr ""
 
-#: ia64-gen.c:1533
+#: ia64-gen.c:1539
 #, c-format
 msgid "Warning: rsrc %s (%s) has no chks%s\n"
 msgstr ""
 
-#: ia64-gen.c:1537
+#: ia64-gen.c:1543
 #, c-format
 msgid "rsrc %s (%s) has no regs\n"
 msgstr ""
 
-#: ia64-gen.c:2436
+#: ia64-gen.c:2442
 #, c-format
 msgid "IC note %d in opcode %s (IC:%s) conflicts with resource %s note %d\n"
 msgstr ""
 
-#: ia64-gen.c:2464
+#: ia64-gen.c:2470
 #, c-format
 msgid "IC note %d for opcode %s (IC:%s) conflicts with resource %s note %d\n"
 msgstr ""
 
-#: ia64-gen.c:2478
+#: ia64-gen.c:2484
 #, c-format
 msgid "opcode %s has no class (ops %d %d %d)\n"
 msgstr ""
 
-#: ia64-gen.c:2789
+#: ia64-gen.c:2795
 #, c-format
 msgid "unable to change directory to \"%s\", errno = %s\n"
 msgstr ""
@@ -430,12 +430,12 @@ msgstr ""
 msgid "unknown\t0x%04x"
 msgstr ""
 
-#: m68k-dis.c:432
+#: m68k-dis.c:295
 #, c-format
 msgid "<internal error in opcode table: %s %s>\n"
 msgstr ""
 
-#: m68k-dis.c:1025
+#: m68k-dis.c:1089
 #, c-format
 msgid "<function code %d>"
 msgstr ""
@@ -573,83 +573,87 @@ msgstr ""
 msgid "$<undefined>"
 msgstr ""
 
-#: ppc-opc.c:791 ppc-opc.c:819
+#: ppc-opc.c:794 ppc-opc.c:822
 msgid "invalid conditional option"
 msgstr ""
 
-#: ppc-opc.c:821
+#: ppc-opc.c:824
 msgid "attempt to set y bit when using + or - modifier"
 msgstr ""
 
-#: ppc-opc.c:849
+#: ppc-opc.c:852
 msgid "offset not a multiple of 16"
 msgstr ""
 
-#: ppc-opc.c:868
+#: ppc-opc.c:871
 msgid "offset not a multiple of 2"
 msgstr ""
 
-#: ppc-opc.c:870
+#: ppc-opc.c:873
 msgid "offset greater than 62"
 msgstr ""
 
-#: ppc-opc.c:889 ppc-opc.c:934 ppc-opc.c:978
+#: ppc-opc.c:892 ppc-opc.c:937 ppc-opc.c:981
 msgid "offset not a multiple of 4"
 msgstr ""
 
-#: ppc-opc.c:891
+#: ppc-opc.c:894
 msgid "offset greater than 124"
 msgstr ""
 
-#: ppc-opc.c:910
+#: ppc-opc.c:913
 msgid "offset not a multiple of 8"
 msgstr ""
 
-#: ppc-opc.c:912
+#: ppc-opc.c:915
 msgid "offset greater than 248"
 msgstr ""
 
-#: ppc-opc.c:955
+#: ppc-opc.c:958
 msgid "offset not between -2048 and 2047"
 msgstr ""
 
-#: ppc-opc.c:976
+#: ppc-opc.c:979
 msgid "offset not between -8192 and 8191"
 msgstr ""
 
-#: ppc-opc.c:1014
+#: ppc-opc.c:1007
+msgid "invalid mask field"
+msgstr ""
+
+#: ppc-opc.c:1033
 msgid "ignoring invalid mfcr mask"
 msgstr ""
 
-#: ppc-opc.c:1061
+#: ppc-opc.c:1075
 msgid "ignoring least significant bits in branch offset"
 msgstr ""
 
-#: ppc-opc.c:1091 ppc-opc.c:1126
+#: ppc-opc.c:1105 ppc-opc.c:1140
 msgid "illegal bitmask"
 msgstr ""
 
-#: ppc-opc.c:1191
+#: ppc-opc.c:1205
 msgid "value out of range"
 msgstr ""
 
-#: ppc-opc.c:1259
+#: ppc-opc.c:1273
 msgid "index register in load range"
 msgstr ""
 
-#: ppc-opc.c:1275
+#: ppc-opc.c:1289
 msgid "source and target register operands must be different"
 msgstr ""
 
-#: ppc-opc.c:1290
+#: ppc-opc.c:1304
 msgid "invalid register operand when updating"
 msgstr ""
 
-#: ppc-opc.c:1329
+#: ppc-opc.c:1343
 msgid "target register operand must be even"
 msgstr ""
 
-#: ppc-opc.c:1343
+#: ppc-opc.c:1357
 msgid "source register operand must be even"
 msgstr ""
 

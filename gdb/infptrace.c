@@ -148,7 +148,11 @@ ptrace_wait (ptid_t ptid, int *status)
   return wstate;
 }
 
-#ifndef KILL_INFERIOR
+#ifndef DEPRECATED_KILL_INFERIOR
+/* NOTE: cagney/2004-09-12: Instead of definining this macro, code
+   should call inf_ptrace_target to get a basic ptrace target and then
+   locally update any necessary methods.  See ppcnbsd-nat.c.  */
+
 void
 kill_inferior (void)
 {
@@ -170,9 +174,12 @@ kill_inferior (void)
   ptrace_wait (null_ptid, &status);
   target_mourn_inferior ();
 }
-#endif /* KILL_INFERIOR */
+#endif /* DEPRECATED_KILL_INFERIOR */
 
-#ifndef CHILD_RESUME
+#ifndef DEPRECATED_CHILD_RESUME
+/* NOTE: cagney/2004-09-12: Instead of definining this macro, code
+   should call inf_ptrace_target to get a basic ptrace target and then
+   locally update any necessary methods.  See ppcnbsd-nat.c.  */
 
 /* Resume execution of the inferior process.
    If STEP is nonzero, single-step it.
@@ -211,7 +218,7 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
   if (errno != 0)
     perror_with_name ("ptrace");
 }
-#endif /* CHILD_RESUME */
+#endif /* DEPRECATED_CHILD_RESUME */
 
 
 /* Start debugging the process whose number is PID.  */

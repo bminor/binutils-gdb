@@ -22,19 +22,21 @@
 #include "defs.h"
 #include "inferior.h"
 #include "regcache.h"
+#include "target.h"
 
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <sys/sysctl.h>
 
+#include "fbsd-nat.h"
 #include "i386-tdep.h"
+#include "i386bsd-nat.h"
 
-/* Resume execution of the inferior process.
-   If STEP is nonzero, single-step it.
-   If SIGNAL is nonzero, give it that signal.  */
+/* Resume execution of the inferior process.  If STEP is nonzero,
+   single-step it.  If SIGNAL is nonzero, give it that signal.  */
 
-void
-child_resume (ptid_t ptid, int step, enum target_signal signal)
+static void
+i386fbsd_resume (ptid_t ptid, int step, enum target_signal signal)
 {
   pid_t pid = ptid_get_pid (ptid);
   int request = PT_STEP;
@@ -119,6 +121,16 @@ void _initialize_i386fbsd_nat (void);
 void
 _initialize_i386fbsd_nat (void)
 {
+  struct target_ops *t;
+
+  /* Add some extra features to the common *BSD/i386 target.  */
+  t = i386bsd_target ();
+  t->to_resume = i386fbsd_resume;
+  t->to_pid_to_exec_file = fbsd_pid_to_exec_file;
+  t->to_find_memory_regions = fbsd_find_memory_regions;
+  t->to_make_corefile_notes = fbsd_make_corefile_notes;
+  add_target (t);
+
   /* FreeBSD provides a kern.ps_strings sysctl that we can use to
      locate the sigtramp.  That way we can still recognize a sigtramp
      if its location is changed in a new kernel.  Of course this is

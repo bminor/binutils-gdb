@@ -2060,6 +2060,7 @@ mips_insn32_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   if ((*this_cache) != NULL)
     return (*this_cache);
+
   cache = FRAME_OBSTACK_ZALLOC (struct mips_frame_cache);
   (*this_cache) = cache;
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
@@ -2073,11 +2074,7 @@ mips_insn32_frame_cache (struct frame_info *next_frame, void **this_cache)
     if (start_addr == 0)
       start_addr = heuristic_proc_start (pc);
 
-#ifdef NOT_YET
     proc_desc = heuristic_proc_desc (start_addr, pc, next_frame, *this_cache);
-#else
-    proc_desc = heuristic_proc_desc (start_addr, pc, next_frame, NULL);
-#endif
   }
   
   if (proc_desc == NULL)
@@ -2085,117 +2082,6 @@ mips_insn32_frame_cache (struct frame_info *next_frame, void **this_cache)
        can't find a proc_desc, we "synthesize" one using
        heuristic_proc_desc and set the saved_regs right away.  */
     return cache;
-
-  /* Extract the frame's base.  */
-  cache->base = (frame_unwind_register_signed (next_frame, NUM_REGS + PROC_FRAME_REG (proc_desc))
-		 + PROC_FRAME_OFFSET (proc_desc) - PROC_FRAME_ADJUST (proc_desc));
-
-  kernel_trap = PROC_REG_MASK (proc_desc) & 1;
-  gen_mask = kernel_trap ? 0xFFFFFFFF : PROC_REG_MASK (proc_desc);
-  float_mask = kernel_trap ? 0xFFFFFFFF : PROC_FREG_MASK (proc_desc);
-  
-  /* In any frame other than the innermost or a frame interrupted by a
-     signal, we assume that all registers have been saved.  This
-     assumes that all register saves in a function happen before the
-     first function call.  */
-  if (in_prologue (frame_pc_unwind (next_frame), PROC_LOW_ADDR (proc_desc))
-      /* Not sure exactly what kernel_trap means, but if it means the
-	 kernel saves the registers without a prologue doing it, we
-	 better not examine the prologue to see whether registers
-	 have been saved yet.  */
-      && !kernel_trap)
-    {
-      /* We need to figure out whether the registers that the
-         proc_desc claims are saved have been saved yet.  */
-
-      CORE_ADDR addr;
-
-      /* Bitmasks; set if we have found a save for the register.  */
-      unsigned long gen_save_found = 0;
-      unsigned long float_save_found = 0;
-
-      addr = PROC_LOW_ADDR (proc_desc);
-
-      /* Scan through this function's instructions preceding the
-         current PC, and look for those that save registers.  */
-      while (addr < frame_pc_unwind (next_frame))
-	{
-          mips32_decode_reg_save (mips32_fetch_instruction (addr),
-                                  &gen_save_found, &float_save_found);
-          addr += MIPS_INSTLEN;
-	}
-      gen_mask = gen_save_found;
-      float_mask = float_save_found;
-    }
-
-  /* Fill in the offsets for the registers which gen_mask says were
-     saved.  */
-  {
-    CORE_ADDR reg_position = (cache->base
-			      + PROC_REG_OFFSET (proc_desc));
-    int ireg;
-    for (ireg = MIPS_NUMREGS - 1; gen_mask; --ireg, gen_mask <<= 1)
-      if (gen_mask & 0x80000000)
-	{
-	  cache->saved_regs[NUM_REGS + ireg].addr = reg_position;
-	  reg_position -= mips_abi_regsize (gdbarch);
-	}
-  }
-
-  /* Fill in the offsets for the registers which float_mask says were
-     saved.  */
-  {
-    CORE_ADDR reg_position = (cache->base + PROC_FREG_OFFSET (proc_desc));
-    int ireg;
-
-    /* Fill in the offsets for the float registers which float_mask
-       says were saved.  */
-    for (ireg = MIPS_NUMREGS - 1; float_mask; --ireg, float_mask <<= 1)
-      if (float_mask & 0x80000000)
-	{
-          const int regno =
-            NUM_REGS + mips_regnum (current_gdbarch)->fp0 + ireg;
-
-	  if (mips_abi_regsize (gdbarch) == 4
-	      && TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-	    {
-	      /* On a big endian 32 bit ABI, floating point registers
-	         are paired to form doubles such that the most
-	         significant part is in $f[N+1] and the least
-	         significant in $f[N] vis: $f[N+1] ||| $f[N].  The
-	         registers are also spilled as a pair and stored as a
-	         double.
-
-	         When little-endian the least significant part is
-	         stored first leading to the memory order $f[N] and
-	         then $f[N+1].
-
-	         Unfortunately, when big-endian the most significant
-	         part of the double is stored first, and the least
-	         significant is stored second.  This leads to the
-	         registers being ordered in memory as firt $f[N+1] and
-	         then $f[N].
-
-	         For the big-endian case make certain that the
-	         addresses point at the correct (swapped) locations
-	         $f[N] and $f[N+1] pair (keep in mind that
-	         reg_position is decremented each time through the
-	         loop).  */
-	      if ((ireg & 1))
-		cache->saved_regs[regno].addr =
-                  reg_position - mips_abi_regsize (gdbarch);
-	      else
-		cache->saved_regs[regno].addr =
-                 reg_position + mips_abi_regsize (gdbarch);
-	    }
-	  else
-	    cache->saved_regs[regno].addr = reg_position;
-	  reg_position -= mips_abi_regsize (gdbarch);
-	}
-
-    cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->pc]
-      = cache->saved_regs[NUM_REGS + RA_REGNUM];
-  }
 
   /* SP_REGNUM, contains the value and not the address.  */
   trad_frame_set_value (cache->saved_regs, NUM_REGS + MIPS_SP_REGNUM, cache->base);
@@ -2373,12 +2259,6 @@ read_next_frame_reg (struct frame_info *fi, int regno)
       regcache_cooked_read_signed (current_regcache, regno, &val);
       return val;
     }
-  else if ((regno % NUM_REGS) == MIPS_SP_REGNUM)
-    /* MIPS_SP_REGNUM is special, its value is stored in saved_regs.
-       In fact, it is so special that it can even only be fetched
-       using a raw register number!  Once this code as been converted
-       to frame-unwind the problem goes away.  */
-    return frame_unwind_register_signed (fi, regno % NUM_REGS);
   else
     return frame_unwind_register_signed (fi, regno);
 
@@ -2456,7 +2336,7 @@ set_reg_offset (struct mips_frame_cache *this_cache, int regnum,
 		CORE_ADDR offset)
 {
   if (this_cache != NULL
-      && this_cache->saved_regs[regnum].addr == 0)
+      && this_cache->saved_regs[regnum].addr == -1)
     {
       this_cache->saved_regs[regnum + 0 * NUM_REGS].addr = offset;
       this_cache->saved_regs[regnum + 1 * NUM_REGS].addr = offset;
@@ -2755,6 +2635,26 @@ mips16_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
     }
 }
 
+/* Mark all the registers as unset in the saved_regs array
+   of THIS_CACHE.  Do nothing if THIS_CACHE is null.  */
+
+void
+reset_saved_regs (struct mips_frame_cache *this_cache)
+{
+  if (this_cache == NULL || this_cache->saved_regs == NULL)
+    return;
+
+  {
+    const int num_regs = NUM_REGS;
+    int i;
+
+    for (i = 0; i < num_regs; i++)
+      {
+        this_cache->saved_regs[i].addr = -1;
+      }
+  }
+}
+
 static void
 mips32_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 			    CORE_ADDR sp, struct frame_info *next_frame,
@@ -2762,9 +2662,12 @@ mips32_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 {
   CORE_ADDR cur_pc;
   CORE_ADDR frame_addr = 0;	/* Value of $r30. Used by gcc for frame-pointer */
+  long frame_offset;
+  int  frame_reg = MIPS_SP_REGNUM;
+
 restart:
-  PROC_FRAME_OFFSET (&temp_proc_desc) = 0;
-  PROC_FRAME_ADJUST (&temp_proc_desc) = 0;	/* offset of FP from SP */
+
+  frame_offset = 0;
   for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS_INSTLEN)
     {
       unsigned long inst, high_word, low_word;
@@ -2783,7 +2686,7 @@ restart:
 	  || high_word == 0x67bd)	/* daddiu $sp,$sp,-i */
 	{
 	  if (low_word & 0x8000)	/* negative stack adjustment? */
-	    PROC_FRAME_OFFSET (&temp_proc_desc) += 0x10000 - low_word;
+            frame_offset += 0x10000 - low_word;
 	  else
 	    /* Exit loop if a positive stack adjustment is found, which
 	       usually means that the stack cleanup code in the function
@@ -2792,34 +2695,37 @@ restart:
 	}
       else if ((high_word & 0xFFE0) == 0xafa0)	/* sw reg,offset($sp) */
 	{
-	  PROC_REG_MASK (&temp_proc_desc) |= 1 << reg;
 	  set_reg_offset (this_cache, reg, sp + low_word);
 	}
       else if ((high_word & 0xFFE0) == 0xffa0)	/* sd reg,offset($sp) */
 	{
 	  /* Irix 6.2 N32 ABI uses sd instructions for saving $gp and
 	     $ra.  */
-	  PROC_REG_MASK (&temp_proc_desc) |= 1 << reg;
 	  set_reg_offset (this_cache, reg, sp + low_word);
 	}
       else if (high_word == 0x27be)	/* addiu $30,$sp,size */
 	{
 	  /* Old gcc frame, r30 is virtual frame pointer.  */
-	  if ((long) low_word != PROC_FRAME_OFFSET (&temp_proc_desc))
+	  if ((long) low_word != frame_offset)
 	    frame_addr = sp + low_word;
-	  else if (PROC_FRAME_REG (&temp_proc_desc) == MIPS_SP_REGNUM)
+	  else if (frame_reg == MIPS_SP_REGNUM)
 	    {
 	      unsigned alloca_adjust;
-	      PROC_FRAME_REG (&temp_proc_desc) = 30;
+
+	      frame_reg = 30;
 	      frame_addr = read_next_frame_reg (next_frame, NUM_REGS + 30);
 	      alloca_adjust = (unsigned) (frame_addr - (sp + low_word));
 	      if (alloca_adjust > 0)
 		{
-		  /* FP > SP + frame_size. This may be because
-		   * of an alloca or somethings similar.
-		   * Fix sp to "pre-alloca" value, and try again.
-		   */
+                  /* FP > SP + frame_size. This may be because of
+                     an alloca or somethings similar.  Fix sp to
+                     "pre-alloca" value, and try again.  */
 		  sp += alloca_adjust;
+                  /* Need to reset the status of all registers.  Otherwise,
+                     we will hit a guard that prevents the new address
+                     for each register to be recomputed during the second
+                     pass.  */
+                  reset_saved_regs (this_cache);
 		  goto restart;
 		}
 	    }
@@ -2830,28 +2736,44 @@ restart:
       else if (inst == 0x03A0F021 || inst == 0x03a0f025 || inst == 0x03a0f02d)
 	{
 	  /* New gcc frame, virtual frame pointer is at r30 + frame_size.  */
-	  if (PROC_FRAME_REG (&temp_proc_desc) == MIPS_SP_REGNUM)
+	  if (frame_reg == MIPS_SP_REGNUM)
 	    {
 	      unsigned alloca_adjust;
-	      PROC_FRAME_REG (&temp_proc_desc) = 30;
+
+	      frame_reg = 30;
 	      frame_addr = read_next_frame_reg (next_frame, NUM_REGS + 30);
 	      alloca_adjust = (unsigned) (frame_addr - sp);
 	      if (alloca_adjust > 0)
-		{
-		  /* FP > SP + frame_size. This may be because
-		   * of an alloca or somethings similar.
-		   * Fix sp to "pre-alloca" value, and try again.
-		   */
-		  sp += alloca_adjust;
-		  goto restart;
-		}
+	        {
+                  /* FP > SP + frame_size. This may be because of
+                     an alloca or somethings similar.  Fix sp to
+                     "pre-alloca" value, and try again.  */
+	          sp = frame_addr;
+                  /* Need to reset the status of all registers.  Otherwise,
+                     we will hit a guard that prevents the new address
+                     for each register to be recomputed during the second
+                     pass.  */
+                  reset_saved_regs (this_cache);
+	          goto restart;
+	        }
 	    }
 	}
       else if ((high_word & 0xFFE0) == 0xafc0)	/* sw reg,offset($30) */
 	{
-	  PROC_REG_MASK (&temp_proc_desc) |= 1 << reg;
 	  set_reg_offset (this_cache, reg, frame_addr + low_word);
 	}
+    }
+
+  if (this_cache != NULL)
+    {
+      this_cache->base = 
+        (frame_unwind_register_signed (next_frame, NUM_REGS + frame_reg)
+         + frame_offset);
+      /* FIXME: brobecker/2004-09-15: We should be able to get rid of
+         this assignment below, eventually.  But it's still needed
+         for now.  */
+      this_cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->pc]
+        = this_cache->saved_regs[NUM_REGS + RA_REGNUM];
     }
 }
 

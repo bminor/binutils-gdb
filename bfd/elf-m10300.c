@@ -593,7 +593,7 @@ _bfd_mn10300_elf_create_got_section (abfd, info)
 	      get_elf_backend_data (abfd)->collect, &bh)))
 	return FALSE;
       h = (struct elf_link_hash_entry *) bh;
-      h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
+      h->def_regular = 1;
       h->type = STT_OBJECT;
 
       if (info->shared
@@ -627,7 +627,7 @@ _bfd_mn10300_elf_create_got_section (abfd, info)
 	 bed->collect, &bh)))
     return FALSE;
   h = (struct elf_link_hash_entry *) bh;
-  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
+  h->def_regular = 1;
   h->type = STT_OBJECT;
 
   if (info->shared
@@ -864,7 +864,7 @@ mn10300_elf_check_relocs (abfd, info, sec, relocs)
 	      || ELF_ST_VISIBILITY (h->other) == STV_HIDDEN)
 	    break;
 
-	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+	  h->needs_plt = 1;
 
 	  break;
 
@@ -875,12 +875,12 @@ mn10300_elf_check_relocs (abfd, info, sec, relocs)
 	case R_MN10300_PCREL16:
 	case R_MN10300_PCREL8:
 	  if (h != NULL)
-	    h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
+	    h->non_got_ref = 1;
 	  break;
 
 	case R_MN10300_32:
 	  if (h != NULL)
-	    h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
+	    h->non_got_ref = 1;
 
 	  /* If we are creating a shared library, then we need to copy
 	     the reloc into the shared library.  */
@@ -1470,8 +1470,7 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			     externally in shared libraries.  We can't
 			     do anything with them here.  */
 			  || ((input_section->flags & SEC_DEBUGGING) != 0
-			      && (h->root.elf_link_hash_flags
-				  & ELF_LINK_HASH_DEF_DYNAMIC) != 0)))))
+			      && h->root.def_dynamic)))))
 	    /* In these cases, we don't need the relocation
 	       value.  We check specially because in some
 	       obscure cases sec->output_section will be NULL.  */
@@ -4021,31 +4020,28 @@ _bfd_mn10300_elf_adjust_dynamic_symbol (info, h)
 
   /* Make sure we know what is going on here.  */
   BFD_ASSERT (dynobj != NULL
-	      && ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT)
-		  || h->weakdef != NULL
-		  || ((h->elf_link_hash_flags
-		       & ELF_LINK_HASH_DEF_DYNAMIC) != 0
-		      && (h->elf_link_hash_flags
-			  & ELF_LINK_HASH_REF_REGULAR) != 0
-		      && (h->elf_link_hash_flags
-			  & ELF_LINK_HASH_DEF_REGULAR) == 0)));
+	      && (h->needs_plt
+		  || h->u.weakdef != NULL
+		  || (h->def_dynamic
+		      && h->ref_regular
+		      && !h->def_regular)));
 
   /* If this is a function, put it in the procedure linkage table.  We
      will fill in the contents of the procedure linkage table later,
      when we know the address of the .got section.  */
   if (h->type == STT_FUNC
-      || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
+      || h->needs_plt)
     {
       if (! info->shared
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0)
+	  && !h->def_dynamic
+	  && !h->ref_dynamic)
 	{
 	  /* This case can occur if we saw a PLT reloc in an input
 	     file, but the symbol was never referred to by a dynamic
 	     object.  In such a case, we don't actually need to build
 	     a procedure linkage table, and we can just do a REL32
 	     reloc instead.  */
-	  BFD_ASSERT ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0);
+	  BFD_ASSERT (h->needs_plt);
 	  return TRUE;
 	}
 
@@ -4070,7 +4066,7 @@ _bfd_mn10300_elf_adjust_dynamic_symbol (info, h)
 	 pointers compare as equal between the normal executable and
 	 the shared library.  */
       if (! info->shared
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+	  && !h->def_regular)
 	{
 	  h->root.u.def.section = s;
 	  h->root.u.def.value = s->size;
@@ -4100,12 +4096,12 @@ _bfd_mn10300_elf_adjust_dynamic_symbol (info, h)
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (h->weakdef != NULL)
+  if (h->u.weakdef != NULL)
     {
-      BFD_ASSERT (h->weakdef->root.type == bfd_link_hash_defined
-		  || h->weakdef->root.type == bfd_link_hash_defweak);
-      h->root.u.def.section = h->weakdef->root.u.def.section;
-      h->root.u.def.value = h->weakdef->root.u.def.value;
+      BFD_ASSERT (h->u.weakdef->root.type == bfd_link_hash_defined
+		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
+      h->root.u.def.section = h->u.weakdef->root.u.def.section;
+      h->root.u.def.value = h->u.weakdef->root.u.def.value;
       return TRUE;
     }
 
@@ -4121,7 +4117,7 @@ _bfd_mn10300_elf_adjust_dynamic_symbol (info, h)
 
   /* If there are no references to this symbol that do not use the
      GOT, we don't need to generate a copy reloc.  */
-  if ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0)
+  if (!h->non_got_ref)
     return TRUE;
 
   /* We must allocate the symbol in our .dynbss section, which will
@@ -4148,7 +4144,7 @@ _bfd_mn10300_elf_adjust_dynamic_symbol (info, h)
       srel = bfd_get_section_by_name (dynobj, ".rela.bss");
       BFD_ASSERT (srel != NULL);
       srel->size += sizeof (Elf32_External_Rela);
-      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_COPY;
+      h->needs_copy = 1;
     }
 
   /* We need to figure out the alignment required for this symbol.  I
@@ -4445,7 +4441,7 @@ _bfd_mn10300_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 				 (bfd_byte *) ((Elf32_External_Rela *) srel->contents
 					       + plt_index));
 
-      if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+      if (!h->def_regular)
 	/* Mark the symbol as undefined, rather than as defined in
 	   the .plt section.  Leave the value alone.  */
 	sym->st_shndx = SHN_UNDEF;
@@ -4474,7 +4470,7 @@ _bfd_mn10300_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	 initialized in the relocate_section function.  */
       if (info->shared
 	  && (info->symbolic || h->dynindx == -1)
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
+	  && h->def_regular)
 	{
 	  rel.r_info = ELF32_R_INFO (0, R_MN10300_RELATIVE);
 	  rel.r_addend = (h->root.u.def.value
@@ -4494,7 +4490,7 @@ _bfd_mn10300_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       ++ srel->reloc_count;
     }
 
-  if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_COPY) != 0)
+  if (h->needs_copy)
     {
       asection *        s;
       Elf_Internal_Rela rel;

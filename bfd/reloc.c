@@ -2621,6 +2621,16 @@ ENUM
   BFD_RELOC_ARM_SBREL32
 ENUMDOC
   Data segment base relative address.
+ENUM
+  BFD_RELOC_ARM_TARGET2
+ENUMDOC
+  This reloc is used for References to RTTI dta from exception handling
+  tables.  The actual definition depends on the target.  It may be a
+  pc-relative or some form of GOT-indirect relocation.
+ENUM
+  BFD_RELOC_ARM_PREL31
+ENUMDOC
+  31-bit PC relative address.
 
 ENUM
   BFD_RELOC_SH_PCDISP8BY2
