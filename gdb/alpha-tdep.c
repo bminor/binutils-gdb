@@ -505,9 +505,12 @@ find_proc_desc (pc, next_frame)
 		alpha_extra_func_info_t found_heuristic =
 		  heuristic_proc_desc (PROC_LOW_ADDR (proc_desc),
 				       pc, next_frame);
-		PROC_LOCALOFF (found_heuristic) = PROC_LOCALOFF (proc_desc);
 		if (found_heuristic)
-		  proc_desc = found_heuristic;
+		  {
+		    PROC_LOCALOFF (found_heuristic) =
+		      PROC_LOCALOFF (proc_desc);
+		    proc_desc = found_heuristic;
+		  }
 	      }
 	  }
     }
