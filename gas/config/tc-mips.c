@@ -1864,6 +1864,82 @@ check_absolute_expr (ip, ex)
     as_warn ("Instruction %s requires absolute expression", ip->insn_mo->name);
 }
 
+/* Count the leading zeroes by performing a binary chop. This is a
+   bulky bit of source, but performance is a LOT better for the
+   majority of values than a simple loop to count the bits:
+       for (lcnt = 0; (lcnt < 32); lcnt++)
+         if ((v) & (1 << (31 - lcnt)))
+           break;
+  However it is not code size friendly, and the gain will drop a bit
+  on certain cached systems.
+*/
+#define COUNT_TOP_ZEROES(v)             \
+  (((v) & ~0xffff) == 0                 \
+   ? ((v) & ~0xff) == 0                 \
+     ? ((v) & ~0xf) == 0                \
+       ? ((v) & ~0x3) == 0              \
+         ? ((v) & ~0x1) == 0            \
+           ? !(v)                       \
+             ? 32                       \
+             : 31                       \
+           : 30                         \
+         : ((v) & ~0x7) == 0            \
+           ? 29                         \
+           : 28                         \
+       : ((v) & ~0x3f) == 0             \
+         ? ((v) & ~0x1f) == 0           \
+           ? 27                         \
+           : 26                         \
+         : ((v) & ~0x7f) == 0           \
+           ? 25                         \
+           : 24                         \
+     : ((v) & ~0xfff) == 0              \
+       ? ((v) & ~0x3ff) == 0            \
+         ? ((v) & ~0x1ff) == 0          \
+           ? 23                         \
+           : 22                         \
+         : ((v) & ~0x7ff) == 0          \
+           ? 21                         \
+           : 20                         \
+       : ((v) & ~0x3fff) == 0           \
+         ? ((v) & ~0x1fff) == 0         \
+           ? 19                         \
+           : 18                         \
+         : ((v) & ~0x7fff) == 0         \
+           ? 17                         \
+           : 16                         \
+   : ((v) & ~0xffffff) == 0             \
+     ? ((v) & ~0xfffff) == 0            \
+       ? ((v) & ~0x3ffff) == 0          \
+         ? ((v) & ~0x1ffff) == 0        \
+           ? 15                         \
+           : 14                         \
+         : ((v) & ~0x7ffff) == 0        \
+           ? 13                         \
+           : 12                         \
+       : ((v) & ~0x3fffff) == 0         \
+         ? ((v) & ~0x1fffff) == 0       \
+           ? 11                         \
+           : 10                         \
+         : ((v) & ~0x7fffff) == 0       \
+           ? 9                          \
+           : 8                          \
+     : ((v) & ~0xfffffff) == 0          \
+       ? ((v) & ~0x3ffffff) == 0        \
+         ? ((v) & ~0x1ffffff) == 0      \
+           ? 7                          \
+           : 6                          \
+         : ((v) & ~0x7ffffff) == 0      \
+           ? 5                          \
+           : 4                          \
+       : ((v) & ~0x3fffffff) == 0       \
+         ? ((v) & ~0x1fffffff) == 0     \
+           ? 3                          \
+           : 2                          \
+         : ((v) & ~0x7fffffff) == 0     \
+           ? 1                          \
+           : 0)
+
 /*			load_register()
  *  This routine generates the least number of instructions neccessary to load
  *  an absolute expression value into a register.
@@ -1876,7 +1952,7 @@ load_register (counter, reg, ep, dbl)
      int dbl;
 {
   int shift, freg;
-  expressionS hi32, lo32;
+  expressionS hi32, lo32, tmp;
 
   if (ep->X_op != O_big)
     {
@@ -1910,7 +1986,7 @@ load_register (counter, reg, ep, dbl)
 		    || ! ep->X_unsigned
 		    || sizeof (ep->X_add_number) > 4
 		    || (ep->X_add_number & 0x80000000) == 0))
-	       || (mips_isa < 3
+	       || ((mips_isa < 3 || !dbl)
 		   && (ep->X_add_number &~ 0xffffffff) == 0))
 	{
 	  /* 32 bit values require an lui.  */
@@ -1978,6 +2054,59 @@ load_register (counter, reg, ep, dbl)
               return;
             }
         }
+
+      /* Check for 16bit shifted constant: */
+      shift = 32;
+      tmp.X_add_number = hi32.X_add_number << shift | lo32.X_add_number;
+      /* We know that hi32 is non-zero, so start the mask on the first
+         bit of the hi32 value: */
+      shift = 17;
+      do
+       {
+         if ((tmp.X_add_number & ~((offsetT)0xffff << shift)) == 0)
+          {
+            tmp.X_op = O_constant;
+            tmp.X_add_number >>= shift;
+            macro_build ((char *) NULL, counter, &tmp, "ori", "t,r,i", reg, 0,
+                         (int) BFD_RELOC_LO16);
+            macro_build ((char *) NULL, counter, NULL,
+                         (shift >= 32) ? "dsll32" : "dsll",
+                         "d,w,<", reg, reg, (shift >= 32) ? shift - 32 : shift);
+            return;
+          }
+         shift++;
+       } while (shift <= (64 - 16));
+
+      freg = 0;
+      shift = 32;
+      tmp.X_add_number = hi32.X_add_number << shift | lo32.X_add_number;
+      while ((tmp.X_add_number & 1) == 0)
+        {
+          tmp.X_add_number >>= 1;
+          freg++;
+        }
+      if (((tmp.X_add_number + 1) & tmp.X_add_number) == 0) /* (power-of-2 - 1) */
+        {
+          shift = COUNT_TOP_ZEROES((unsigned int)hi32.X_add_number);
+	  if (shift != 0)
+            {
+              tmp.X_op = O_constant;
+              tmp.X_add_number = (offsetT)-1;
+              macro_build ((char *) NULL, counter, &tmp, "addiu", "t,r,j", reg, 0,
+                           (int) BFD_RELOC_LO16); /* set all ones */
+              if (freg != 0)
+                {
+                  freg += shift;
+                  macro_build ((char *) NULL, counter, NULL,
+                               (freg >= 32) ? "dsll32" : "dsll",
+                               "d,w,<", reg, reg,
+                               (freg >= 32) ? freg - 32 : freg);
+                }
+              macro_build ((char *) NULL, counter, NULL, (shift >= 32) ? "dsrl32" : "dsrl",
+                           "d,w,<", reg, reg, (shift >= 32) ? shift - 32 : shift);
+              return;
+            }
+        }
       load_register (counter, reg, &hi32, 0);
       freg = reg;
     }
@@ -1999,7 +2128,7 @@ load_register (counter, reg, ep, dbl)
 	  macro_build ((char *) NULL, counter, &lo32, "lui", "t,u", reg,
 		       (int) BFD_RELOC_HI16);
           macro_build ((char *) NULL, counter, NULL, "dsrl32", "d,w,<", reg,
-                       reg, 32);
+                       reg, 0);
           return;
         }
 
