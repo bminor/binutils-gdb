@@ -31,7 +31,9 @@
 #include "gdb_assert.h"
 #include <fcntl.h>
 #include <kvm.h>
+#ifdef HAVE_NLIST_H
 #include <nlist.h>
+#endif
 #include "readline/readline.h"
 #include <sys/param.h>
 #include <sys/proc.h>

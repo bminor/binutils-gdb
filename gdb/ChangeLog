@@ -1,3 +1,7 @@
+2004-08-07  Robert Millan  <robertmh@gnu.org>
+
+	* bsd-kvm.c: Check for nlist.h before including it.
+
 2004-08-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386bsd-nat.c (_initialize_i386bsd_nat): Remove `struct
