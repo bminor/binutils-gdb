@@ -614,6 +614,7 @@ regcache_raw_read (struct regcache *regcache, int regnum, void *buf)
 	}
       if (!register_cached (regnum))
 	target_fetch_registers (regnum);
+      gdb_assert (register_cached (regnum));
     }
   /* Copy the value directly into the register cache.  */
   memcpy (buf, register_buffer (regcache, regnum),

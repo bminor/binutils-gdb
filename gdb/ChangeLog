@@ -1,5 +1,8 @@
 2004-08-04  Jim Blandy  <jimb@redhat.com>
 
+	* regcache.c (regcache_raw_read): Assert that, after calling
+        target_fetch_registers, the register we're reading is cached.
+
 	* ppc-linux-nat.c (fetch_register): Replace 'gdb_assert (0)' with
 	a call to 'internal_error', with a more helpful error message.
 	* rs6000-tdep.c (e500_pseudo_register_read,
