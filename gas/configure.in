@@ -197,9 +197,10 @@ changequote([,])dnl
       m68k-motorola-sysv*)  fmt=coff targ=m68kcoff em=delta ;;
       m68k-bull-sysv3*)     fmt=coff targ=m68kcoff em=dpx2 ;;
       m68k-apollo-*)        fmt=coff targ=apollo em=apollo ;;
+      m68k-*-sysv4 | m68k-*-elf) # must be before -sysv*
+			    fmt=elf ;;
       m68k-*-coff | m68k-*-sysv*)
 			    fmt=coff targ=m68kcoff ;;
-      m68k-*-elf)           fmt=elf ;;
       m68k-*-hpux*)         fmt=hp300 em=hp300 ;;
       m68k-*-lynxos*)       fmt=coff targ=m68kcoff
 			     em=lynx ;;
