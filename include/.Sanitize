@@ -15,11 +15,6 @@
 
 Do-first:
 
-if ( echo $* | grep keep\-mpw > /dev/null ) ; then
-	keep_these_too="${keep_these_too} mpw"
-else
-	lose_these_too="${lose_these_too} mpw"
-fi
 
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
@@ -47,6 +42,7 @@ getopt.h
 hp-symtab.h
 ieee.h
 libiberty.h
+mpw
 nlm
 oasys.h
 obstack.h
