@@ -1,3 +1,8 @@
+2001-06-07  Andreas Jaeger  <aj@suse.de>
+
+	* elf_x86_64.sh (NONPAGED_TEXT_START_ADDR): Increase.
+	(TEXT_START_ADDR): Likewise.
+
 2001-06-11  Alan Modra  <amodra@bigpond.net.au>
 
 	Merge from mainline.
