@@ -1,5 +1,7 @@
 Thu Mar  3 12:41:16 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* sparclite/Makefile.in (all install): Build and install aload.
+
 	* configure.in: Accept i[34]86-*-*sysv32 because that is what
 	config.guess and config.sub produce.
 
