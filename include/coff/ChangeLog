@@ -1,3 +1,22 @@
+Tue Oct  5 10:52:53 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* rs6000.h: Change non-ASCII characters in comment to octal
+	escapes.
+
+Tue Sep 28 03:27:04 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* ecoff.h (_FINI, STYP_ECOFF_FINI):  Add to support .fini section.
+
+Fri Sep 24 11:53:53 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips.h (BADMAG): Recognize MIPS_MAGIC_LITTLE3 and MIPS_MAGIC_BIG3.
+	* ecoff.h: Define MIPS_MAGIC_LITTLE3 and MIPS_MAGIC_BIG3.
+
+Thu Sep 23 21:07:14 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* mips.h (BADMAG): Recognize MIPS_MAGIC_LITTLE2 and MIPS_MAGIC_BIG2.
+	* ecoff.h: Define MIPS_MAGIC_LITTLE2 and MIPS_MAGIC_BIG2.
+
 Thu Sep 16 20:27:21 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
 
 	* sym.h, symconst.h: Add comment stating these files are not part
