@@ -1,8 +1,14 @@
 Wed Dec  9 19:53:25 1992  John Gilmore  (gnu@cygnus.com)
 
+	* mipsread.c (parse_symbol): When checking whether a structured
+	type is an enum, check qualifiers of its first member, as well as
+	the base type of the member.  Bug found and fixed by John M.
+	Farrell, <farrell@fjort.reo.dec.com>.
+
 	* vx-share/{reg.h,xdr_regs.h,xdr_regs.c}:  Remove, unused.
 	* remote-vx.c:  Don't include vx-share/reg.h.
 	* vx-share/ptrace.h:  Reproduce from scratch.
+	* config/{vxworks68,vxworks960}:  Don't include xdr_regs.o.
 
 Tue Dec  8 13:30:58 1992  Fred Fish  (fnf@cygnus.com)
 
