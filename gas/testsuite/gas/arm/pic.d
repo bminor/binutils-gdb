@@ -8,7 +8,7 @@
 Disassembly of section .text:
 0x0+0 ebfffffe 	bl	0x0+0
 			0: R_ARM_PC24	foo
-0x0+4 ebfffffe 	bl	0x0+0
+0x0+4 ebfffffe 	bl	0x0+4
 			4: R_ARM_PLT32	foo
 	\.\.\.
 			8: R_ARM_ABS32	sym

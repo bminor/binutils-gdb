@@ -1,3 +1,9 @@
+2003-08-14  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/pic.d: Update regexp for destination address of
+	unrelocated branch instructions so that they point to themselves.
+	* gas/arm/inst.d: Likewise.
+
 2003-08-08  Andreas Schwab  <schwab@suse.de>
 
 	* gas/cfi/cfi-m68k.s, gas/cfi/cfi-m68k.d: New test.
