@@ -1,3 +1,7 @@
+Thu Nov  5 10:37:40 EST 1998  Frank Ch. Eigler <fche@cygnus.com>
+
+	* t-prot3w.s: Correct test of prot3w insn.
+
 Thu Nov  5 20:22:21 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* f-rsqrt.s: Add tests for 0/sqrt(0) etc.
