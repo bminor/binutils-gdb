@@ -1,3 +1,8 @@
+Fri Aug 28 15:38:03 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* Renamed opc-sparc.c to sparc-opc.c for systems with short
+	filename constraints.
+
 Thu Aug 27 17:01:04 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* targets.c, config/i960-bout.mt, hosts/*: added
