@@ -1,5 +1,7 @@
 Tue Mar 30 08:06:24 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* infrun.c (wait_for_inferior): Revise comment.
+
 	* command.c (do_setshow_command): Use %u with var_{u,z}integer.
 
 	* command.{c,h}: New var_type var_integer.
