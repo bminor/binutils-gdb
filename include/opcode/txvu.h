@@ -267,6 +267,24 @@ const struct txvu_opcode *dma_opcode_lookup_dis PARAMS ((unsigned int));
 
 /* GPUIF support.  */
 
+typedef enum {
+  GPUIF_REG_PRIM = 0,
+  GPUIF_REG_RGBAQ = 1,
+  GPUIF_REG_ST = 2,
+  GPUIF_REG_UV = 3,
+  GPUIF_REG_XYZF2 = 4,
+  GPUIF_REG_TEXCLUT_1 = 6,
+  GPUIF_REG_TEXCLUT_2 = 7,
+  GPUIF_REG_TEX0_1 = 8,
+  GPUIF_REG_TEX0_2 = 9,
+  GPUIF_REG_TEX1_1 = 10,
+  GPUIF_REG_TEX1_2 = 11,
+  GPUIF_REG_XYZF3 = 12,
+  GPUIF_REG_PRMODE = 13,
+  GPUIF_REG_A_D = 14,
+  GPUIF_REG_NOP = 15
+} gpuif_reg;
+
 extern const struct txvu_operand gpuif_operands[];
 extern /*const*/ struct txvu_opcode gpuif_opcodes[];
 extern const int gpuif_opcodes_count;
