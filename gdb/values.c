@@ -556,8 +556,7 @@ value_as_long (val)
   /* This coerces arrays and functions, which is necessary (e.g.
      in disassemble_command).  It also dereferences references, which
      I suspect is the most logical thing to do.  */
-  if (TYPE_CODE (VALUE_TYPE (val)) != TYPE_CODE_ENUM)
-    COERCE_ARRAY (val);
+  COERCE_ARRAY (val);
   return unpack_long (VALUE_TYPE (val), VALUE_CONTENTS (val));
 }
 
