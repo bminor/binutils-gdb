@@ -30,6 +30,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf-bfd.h"
 #include "elf/v850.h"
 
+/* sign-extend a 24-bit number */
+#define SEXT24(x)	((((x) & 0xffffff) ^ (~ 0x7fffff)) + 0x800000)
+      
 static reloc_howto_type *v850_elf_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static void v850_elf_info_to_howto_rel
@@ -151,7 +154,7 @@ static reloc_howto_type v850_elf_howto_table[] =
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
-	 bfd_elf_generic_reloc,		/* special_function */
+	 v850_elf_reloc,		/* special_function */
 	 "R_V850_32",			/* name */
 	 true,				/* partial_inplace */
 	 0xffffffff,			/* src_mask */
@@ -498,7 +501,7 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
-  enum reloc_type r_type;
+  enum v850_reloc_type r_type;
   int other = 0;
   const char *common = (const char *)0;
 
@@ -528,7 +531,7 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
       else
 	h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 
-      r_type = (enum reloc_type) ELF32_R_TYPE (rel->r_info);
+      r_type = (enum v850_reloc_type) ELF32_R_TYPE (rel->r_info);
       switch (r_type)
 	{
 	default:
@@ -639,6 +642,222 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
   return ret;
 }
 
+static bfd_reloc_status_type
+v850_elf_store_addend_in_insn (abfd, r_type, addend, address, replace)
+     bfd *      abfd;
+     int        r_type;
+     long       addend;
+     bfd_byte * address;
+     boolean    replace;
+{
+  unsigned long insn;
+  
+  switch (r_type)
+    {
+    default:
+      /* fprintf (stderr, "reloc type %d not SUPPORTED\n", r_type ); */
+      return bfd_reloc_notsupported;
+      
+    case R_V850_32:
+      if (! replace)
+	addend += bfd_get_32 (abfd, address);
+
+      bfd_put_32 (abfd, addend, address);
+      return bfd_reloc_ok;
+      
+    case R_V850_22_PCREL:
+      if (addend > 0x1fffff || addend < -0x200000)
+	return bfd_reloc_overflow;
+      
+      if ((addend % 2) != 0)
+	return bfd_reloc_dangerous;
+      
+      insn  = bfd_get_32 (abfd, address);
+      insn &= ~0xfffe003f;
+      insn |= (((addend & 0xfffe) << 16) | ((addend & 0x3f0000) >> 16));
+      bfd_put_32 (abfd, insn, address);
+      return bfd_reloc_ok;
+      
+    case R_V850_9_PCREL:
+      if (addend > 0xff || addend < -0x100)
+	return bfd_reloc_overflow;
+      
+      if ((addend % 2) != 0)
+	return bfd_reloc_dangerous;
+      
+      insn  = bfd_get_16 (abfd, address);
+      insn &= ~ 0xf870;
+      insn |= ((addend & 0x1f0) << 7) | ((addend & 0x0e) << 3);
+      break;
+      
+    case R_V850_HI16_S:
+      addend += bfd_get_16 (abfd, address);
+      addend = (addend >> 16) + ((addend & 0x8000) != 0);
+      insn = addend;
+      break;
+      
+    case R_V850_HI16:
+      addend += bfd_get_16 (abfd, address);
+      addend = (addend >> 16);
+      insn = addend;
+      break;
+      
+    case R_V850_LO16:
+      addend += (short) bfd_get_16 (abfd, address);
+      /* Do not complain if value has top bit set, as this has been anticipated.  */
+      insn = addend;
+      break;
+
+    case R_V850_16:
+      replace = false;
+      /* drop through */
+            
+/* start-sanitize-v850e */
+    case R_V850_CALLT_16_16_OFFSET:
+/* end-sanitize-v850e */
+    case R_V850_SDA_16_16_OFFSET:
+    case R_V850_ZDA_16_16_OFFSET:
+    case R_V850_TDA_16_16_OFFSET:
+      if (! replace)
+	addend += bfd_get_16 (abfd, address);
+      
+      if (addend > 0x7fff || addend < -0x8000)
+	return bfd_reloc_overflow;
+
+      insn = addend;
+      break;
+      
+    case R_V850_SDA_15_16_OFFSET:
+    case R_V850_ZDA_15_16_OFFSET:
+      insn = bfd_get_16 (abfd, address);
+
+      if (! replace)
+	addend += ((insn & 0xfffe) << 1);
+      
+      if (addend > 0x7ffe || addend < -0x8000)
+	return bfd_reloc_overflow;
+      
+      if (addend & 1)
+	return bfd_reloc_dangerous;
+      
+      insn &= 1;
+      insn |= (addend >> 1) & ~1;
+      break;
+      
+    case R_V850_TDA_6_8_OFFSET:
+      insn = bfd_get_16 (abfd, address);
+
+      if (! replace)
+	addend += ((insn & 0x7e) << 1);
+      
+      if (addend > 0xfc || addend < 0)
+	return bfd_reloc_overflow;
+      
+      if (addend & 3)
+	return bfd_reloc_dangerous;
+      
+      insn &= 0xff81;
+      insn |= (addend >> 1);
+      break;
+      
+    case R_V850_TDA_7_8_OFFSET:
+      insn = bfd_get_16 (abfd, address);
+
+      if (! replace)
+	addend += ((insn & 0x7f) << 1);
+      
+      if (addend > 0xfe || addend < 0)
+	return bfd_reloc_overflow;
+      
+      if (addend & 1)
+	return bfd_reloc_dangerous;
+      
+      insn &= 0xff80;
+      insn |= (addend >> 1);
+      break;
+      
+    case R_V850_TDA_7_7_OFFSET:
+      insn = bfd_get_16 (abfd, address);
+
+      if (! replace)
+	addend += insn & 0x7f;
+	
+      if (addend > 0x7f || addend < 0)
+	return bfd_reloc_overflow;
+      
+      insn &= 0xff80;
+      insn |= addend;
+      break;
+      
+/* start-sanitize-v850e */
+    case R_V850_TDA_4_5_OFFSET:
+      insn = bfd_get_16 (abfd, address);
+
+      if (! replace)
+	addend += ((insn & 0xf) << 1);
+      
+      if (addend > 0x1e || addend < 0)
+	return bfd_reloc_overflow;
+      
+      if (addend & 1)
+	return bfd_reloc_dangerous;
+      
+      insn &= 0xfff0;
+      insn |= (addend >> 1);
+      break;
+      
+    case R_V850_TDA_4_4_OFFSET:
+      insn = bfd_get_16 (abfd, address);
+
+      if (! replace)
+	addend += insn & 0xf;
+      
+      if (addend > 0xf || addend < 0)
+	return bfd_reloc_overflow;
+      
+      insn &= 0xfff0;
+      insn |= addend;
+      break;
+      
+    case R_V850_ZDA_16_16_SPLIT_OFFSET:
+    case R_V850_SDA_16_16_SPLIT_OFFSET:
+      insn = bfd_get_32 (abfd, address);
+
+      if (! replace)
+	addend += ((insn & 0xfffe0000) >> 16) + ((insn & 0x20) >> 5);
+      
+      if (addend > 0xffff || addend < 0)
+	return bfd_reloc_overflow;
+      
+      insn &= 0x0001ffdf;
+      insn |= (addend & 1) << 5;
+      insn |= (addend & ~1) << 16;
+      
+      bfd_put_32 (abfd, insn, address);
+      return bfd_reloc_ok;
+      
+    case R_V850_CALLT_6_7_OFFSET:
+      insn = bfd_get_16 (abfd, address);
+
+      if (! replace)
+        addend += ((insn & 0x3f) << 1);
+      
+      if (addend > 0x7e || addend < 0)
+	return bfd_reloc_overflow;
+      
+      if (addend & 1)
+	return bfd_reloc_dangerous;
+      
+      insn &= 0xff80;
+      insn |= (addend >> 1);
+      break;
+/* end-sanitize-v850e */
+    }
+
+  bfd_put_16 (abfd, insn, address);
+  return bfd_reloc_ok;
+}
+
 
 /* Insert the addend into the instruction.  */
 static bfd_reloc_status_type
@@ -710,189 +929,12 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
       /* Deal with pcrel_offset */
       relocation -= reloc->address;
     }
-  
+
   /* I've got no clue... */
   reloc->addend = 0;	
-  
-  switch (reloc->howto->type)
-    {
-    default:
-      /* fprintf (stderr, "reloc type %d not SUPPORTED\n", reloc->howto->type ); */
-      return bfd_reloc_notsupported;
-      
-    case R_V850_22_PCREL:
-      if (relocation > 0x1fffff || relocation < -0x200000)
-	return bfd_reloc_overflow;
-      
-      if ((relocation % 2) != 0)
-	return bfd_reloc_dangerous;
-      
-      insn = bfd_get_32 (abfd, (bfd_byte *) data + reloc->address);
-      insn &= ~0xfffe003f;
-      insn |= (((relocation & 0xfffe) << 16)
-	       | ((relocation & 0x3f0000) >> 16));
-      bfd_put_32 (abfd, insn, (bfd_byte *)data + reloc->address);
-      return bfd_reloc_ok;
-      
-    case R_V850_9_PCREL:
-      if (relocation > 0xff || relocation < -0x100)
-	return bfd_reloc_overflow;
-      
-      if ((relocation % 2) != 0)
-	return bfd_reloc_dangerous;
-      
-      insn = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-      insn &= ~ 0xf870;
-      insn |= ((relocation & 0x1f0) << 7) | ((relocation & 0x0e) << 3);
-      bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
-      return bfd_reloc_ok;
-      
-    case R_V850_HI16_S:
-      relocation += bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-      relocation = (relocation >> 16) + ((relocation & 0x8000) != 0);
-      bfd_put_16 (abfd, relocation, (bfd_byte *)data + reloc->address);
-      return bfd_reloc_ok;
-      
-    case R_V850_HI16:
-      relocation += bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-      relocation = (relocation >> 16);
-      bfd_put_16 (abfd, relocation, (bfd_byte *)data + reloc->address);
-      return bfd_reloc_ok;
-      
-    case R_V850_LO16:
-      relocation += (short)bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-      /* Do not complain if value has top bit set, as this has been anticipated.  */
-      bfd_put_16 (abfd, relocation, (bfd_byte *)data + reloc->address);
-      return bfd_reloc_ok;
 
-    case R_V850_16:
-      relocation += (short)bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-      /* drop through */
-      
-    case R_V850_SDA_16_16_OFFSET:
-    case R_V850_ZDA_16_16_OFFSET:
-    case R_V850_TDA_16_16_OFFSET:
-      if ((long)relocation > 0x7fff || (long)relocation < -0x8000)
-	return bfd_reloc_overflow;
-      bfd_put_16 (abfd, relocation, (bfd_byte *)data + reloc->address);
-      return bfd_reloc_ok;
-      
-    case R_V850_SDA_15_16_OFFSET:
-    case R_V850_ZDA_15_16_OFFSET:
-      if ((long)relocation > 0x7ffe || (long)relocation < -0x8000)
-	return bfd_reloc_overflow;
-      
-      if (relocation & 1)
-	return bfd_reloc_dangerous;
-      
-      insn  = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-      insn &= 1;
-      insn |= (relocation >> 1) & ~1;
-      
-      bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
-      return bfd_reloc_ok;
-      
-    case R_V850_TDA_6_8_OFFSET:
-      if ((long) relocation > 0xfc || (long) relocation < 0)
-	return bfd_reloc_overflow;
-      
-      if (relocation & 3)
-	return bfd_reloc_dangerous;
-      
-      insn  = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-      insn &= 0xff81;
-      insn |= (relocation >> 1);
-      
-      bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
-      return bfd_reloc_ok;
-      
-    case R_V850_TDA_7_8_OFFSET:
-      if ((long) relocation > 0xfe || (long) relocation < 0)
-	return bfd_reloc_overflow;
-      
-      if (relocation & 1)
-	return bfd_reloc_dangerous;
-      
-      insn  = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-      insn &= 0xff80;
-      insn |= (relocation >> 1);
-      
-      bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
-      return bfd_reloc_ok;
-      
-    case R_V850_TDA_7_7_OFFSET:
-      if ((long) relocation > 0x7f || (long) relocation < 0)
-	return bfd_reloc_overflow;
-      
-      insn  = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-      insn &= 0xff80;
-      insn |= relocation;
-      
-      bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
-      return bfd_reloc_ok;
-      
-/* start-sanitize-v850e */
-    case R_V850_TDA_4_5_OFFSET:
-      if ((long) relocation > 0x1e || (long) relocation < 0)
-	return bfd_reloc_overflow;
-      
-      if (relocation & 1)
-	return bfd_reloc_dangerous;
-      
-      insn  = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-      insn &= 0xfff0;
-      insn |= (relocation >> 1);
-      
-      bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
-      return bfd_reloc_ok;
-      
-    case R_V850_TDA_4_4_OFFSET:
-      if ((long) relocation > 0xf || (long) relocation < 0)
-	return bfd_reloc_overflow;
-      
-      insn  = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-      insn &= 0xfff0;
-      insn |= relocation;
-      
-      bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
-      return bfd_reloc_ok;
-      
-    case R_V850_ZDA_16_16_SPLIT_OFFSET:
-    case R_V850_SDA_16_16_SPLIT_OFFSET:
-      if ((long) relocation > 0xffff || (long) relocation < 0)
-	return bfd_reloc_overflow;
-      
-      insn  = bfd_get_32 (abfd, (bfd_byte *) data + reloc->address);
-      
-      insn &= 0x0001ffdf;
-      insn |= (relocation & 1) << 5;
-      insn |= (relocation & ~1) << 16;
-      
-      bfd_put_32 (abfd, insn, (bfd_byte *)data + reloc->address);
-      return bfd_reloc_ok;
-      
-    case R_V850_CALLT_6_7_OFFSET:
-      if ((long) relocation > 0x7e || (long) relocation < 0)
-	return bfd_reloc_overflow;
-      
-      if (relocation & 1)
-	return bfd_reloc_dangerous;
-      
-      insn  = bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
-      insn &= 0xff80;
-      insn |= (relocation >> 1);
-      
-      bfd_put_16 (abfd, insn, (bfd_byte *)data + reloc->address);
-      return bfd_reloc_ok;
-      
-    case R_V850_CALLT_16_16_OFFSET:
-      bfd_put_16 (abfd, relocation, (bfd_byte *)data + reloc->address);
-      return bfd_reloc_ok;
-      
-/* end-sanitize-v850e */
-    }
-
-  return bfd_reloc_continue;
+  return v850_elf_store_addend_in_insn (abfd, reloc->howto->type, relocation,
+					(bfd_byte *) data + reloc->address, true);
 }
 
 
@@ -902,9 +944,8 @@ v850_elf_is_local_label_name (abfd, name)
      bfd *         abfd;
      const char *  name;
 {
-  return ((name[0] == '.' && (name[1] == 'L' || name[1] == '.'))
-	  || (name[0] == '_' && name[1] == '.' && name[2] == 'L'
-	      && name[3] == '_'));
+  return (   (name[0] == '.' && (name[1] == 'L' || name[1] == '.'))
+	  || (name[0] == '_' &&  name[1] == '.' && name[2] == 'L' && name[3] == '_'));
 }
 
 
@@ -950,9 +991,11 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
     
     case R_V850_22_PCREL:
       value -= (input_section->output_section->vma
-		+ input_section->output_offset);
-      value -= offset;
-    
+		+ input_section->output_offset
+		+ offset);
+
+      value = SEXT24 (value);  /* Only the bottom 24 bits of the PC are valid */
+      
       if ((long)value > 0x1fffff || (long)value < -0x200000)
 	return bfd_reloc_overflow;
 
@@ -1005,7 +1048,7 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
     case R_V850_ZDA_16_16_OFFSET:
       if (sym_sec == NULL)
 	return bfd_reloc_undefined;
-	  
+      
       value -= sym_sec->output_section->vma;
       value += (short) bfd_get_16 (input_bfd, hit_data);
 
@@ -1463,7 +1506,29 @@ v850_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
 		{
 		  sec = local_sections[r_symndx];
+#ifdef USE_REL
+		  /* The Elf_Internal_Rel structure does not have space for the
+		     modified addend value, so we store it in the instruction
+		     instead. */
+
+		  if (sec->output_offset + sym->st_value != 0)
+		    {
+		      if (v850_elf_store_addend_in_insn (input_bfd, r_type,
+							 sec->output_offset +
+							 sym->st_value,
+							 contents + rel->r_offset,
+							 false)
+			  != bfd_reloc_ok)
+			{
+			  info->callbacks->warning
+			    (info,
+			     "Unable to handle relocation during incremental link",
+			     NULL, input_bfd, input_section, rel->r_offset);
+			}
+		    }
+#else
 		  rel->r_addend += sec->output_offset + sym->st_value;
+#endif
 		}
 	    }
 
@@ -1761,6 +1826,239 @@ v850_elf_print_private_bfd_data (abfd, ptr)
   
   return true;
 }
+
+/* V850 ELF uses four common sections.  One is the usual one, and the
+   others are for (small) objects in one of the special data areas:
+   small, tiny and zero.  All the objects are kept together, and then
+   referenced via the gp register, the ep register or the r0 register
+   respectively, which yields smaller, faster assembler code.  This
+   approach is copied from elf32-mips.c.  */
+
+static asection  v850_elf_scom_section;
+static asymbol   v850_elf_scom_symbol;
+static asymbol * v850_elf_scom_symbol_ptr;
+static asection  v850_elf_tcom_section;
+static asymbol   v850_elf_tcom_symbol;
+static asymbol * v850_elf_tcom_symbol_ptr;
+static asection  v850_elf_zcom_section;
+static asymbol   v850_elf_zcom_symbol;
+static asymbol * v850_elf_zcom_symbol_ptr;
+
+
+/* Given a BFD section, try to locate the corresponding ELF section
+   index.  */
+
+static boolean
+v850_elf_section_from_bfd_section (abfd, hdr, sec, retval)
+     bfd *                 abfd;
+     Elf32_Internal_Shdr * hdr;
+     asection *            sec;
+     int *                 retval;
+{
+  if (strcmp (bfd_get_section_name (abfd, sec), ".scommon") == 0)
+    {
+      *retval = SHN_V850_SCOMMON;
+      return true;
+    }
+  if (strcmp (bfd_get_section_name (abfd, sec), ".tcommon") == 0)
+    {
+      *retval = SHN_V850_TCOMMON;
+      return true;
+    }
+  if (strcmp (bfd_get_section_name (abfd, sec), ".zcommon") == 0)
+    {
+      *retval = SHN_V850_ZCOMMON;
+      return true;
+    }
+  return false;
+}
+
+/* Handle the special V850 section numbers that a symbol may use.  */
+
+static void
+v850_elf_symbol_processing (abfd, asym)
+     bfd *     abfd;
+     asymbol * asym;
+{
+  elf_symbol_type * elfsym = (elf_symbol_type *) asym;
+
+  switch (elfsym->internal_elf_sym.st_shndx)
+    {
+    case SHN_V850_SCOMMON:
+      if (v850_elf_scom_section.name == NULL)
+	{
+	  /* Initialize the small common section.  */
+	  v850_elf_scom_section.name           = ".scommon";
+	  v850_elf_scom_section.flags          = SEC_IS_COMMON | SEC_ALLOC | SEC_DATA;
+	  v850_elf_scom_section.output_section = & v850_elf_scom_section;
+	  v850_elf_scom_section.symbol         = & v850_elf_scom_symbol;
+	  v850_elf_scom_section.symbol_ptr_ptr = & v850_elf_scom_symbol_ptr;
+	  v850_elf_scom_symbol.name            = ".scommon";
+	  v850_elf_scom_symbol.flags           = BSF_SECTION_SYM;
+	  v850_elf_scom_symbol.section         = & v850_elf_scom_section;
+	  v850_elf_scom_symbol_ptr             = & v850_elf_scom_symbol;
+	}
+      asym->section = & v850_elf_scom_section;
+      asym->value = elfsym->internal_elf_sym.st_size;
+      break;
+      
+    case SHN_V850_TCOMMON:
+      if (v850_elf_tcom_section.name == NULL)
+	{
+	  /* Initialize the tcommon section.  */
+	  v850_elf_tcom_section.name           = ".tcommon";
+	  v850_elf_tcom_section.flags          = SEC_IS_COMMON;
+	  v850_elf_tcom_section.output_section = & v850_elf_tcom_section;
+	  v850_elf_tcom_section.symbol         = & v850_elf_tcom_symbol;
+	  v850_elf_tcom_section.symbol_ptr_ptr = & v850_elf_tcom_symbol_ptr;
+	  v850_elf_tcom_symbol.name            = ".tcommon";
+	  v850_elf_tcom_symbol.flags           = BSF_SECTION_SYM;
+	  v850_elf_tcom_symbol.section         = & v850_elf_tcom_section;
+	  v850_elf_tcom_symbol_ptr             = & v850_elf_tcom_symbol;
+	}
+      asym->section = & v850_elf_tcom_section;
+      asym->value = elfsym->internal_elf_sym.st_size;
+      break;
+
+    case SHN_V850_ZCOMMON:
+      if (v850_elf_zcom_section.name == NULL)
+	{
+	  /* Initialize the zcommon section.  */
+	  v850_elf_zcom_section.name           = ".zcommon";
+	  v850_elf_zcom_section.flags          = SEC_IS_COMMON;
+	  v850_elf_zcom_section.output_section = & v850_elf_zcom_section;
+	  v850_elf_zcom_section.symbol         = & v850_elf_zcom_symbol;
+	  v850_elf_zcom_section.symbol_ptr_ptr = & v850_elf_zcom_symbol_ptr;
+	  v850_elf_zcom_symbol.name            = ".zcommon";
+	  v850_elf_zcom_symbol.flags           = BSF_SECTION_SYM;
+	  v850_elf_zcom_symbol.section         = & v850_elf_zcom_section;
+	  v850_elf_zcom_symbol_ptr             = & v850_elf_zcom_symbol;
+	}
+      asym->section = & v850_elf_zcom_section;
+      asym->value = elfsym->internal_elf_sym.st_size;
+      break;
+    }
+}
+
+/* Hook called by the linker routine which adds symbols from an object
+   file.  We must handle the special MIPS section numbers here.  */
+
+/*ARGSUSED*/
+static boolean
+v850_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
+     bfd *                    abfd;
+     struct bfd_link_info *   info;
+     const Elf_Internal_Sym * sym;
+     const char **            namep;
+     flagword *               flagsp;
+     asection **              secp;
+     bfd_vma *                valp;
+{
+  switch (sym->st_shndx)
+    {
+    case SHN_V850_SCOMMON:
+      *secp = bfd_make_section_old_way (abfd, ".scommon");
+      (*secp)->flags |= SEC_IS_COMMON;
+      *valp = sym->st_size;
+      break;
+      
+    case SHN_V850_TCOMMON:
+      *secp = bfd_make_section_old_way (abfd, ".tcommon");
+      (*secp)->flags |= SEC_IS_COMMON;
+      *valp = sym->st_size;
+      break;
+      
+    case SHN_V850_ZCOMMON:
+      *secp = bfd_make_section_old_way (abfd, ".zcommon");
+      (*secp)->flags |= SEC_IS_COMMON;
+      *valp = sym->st_size;
+      break;
+    }
+
+  return true;
+}
+
+/*ARGSIGNORED*/
+static boolean
+v850_elf_link_output_symbol_hook (abfd, info, name, sym, input_sec)
+     bfd *                  abfd;
+     struct bfd_link_info * info;
+     const char *           name;
+     Elf_Internal_Sym *     sym;
+     asection *             input_sec;
+{
+  /* If we see a common symbol, which implies a relocatable link, then
+     if a symbol was in a special common section in an input file, mark
+     it as a special common in the output file.  */
+  
+  if (sym->st_shndx == SHN_COMMON)
+    {
+      if (strcmp (input_sec->name, ".scommon") == 0)
+	sym->st_shndx = SHN_V850_SCOMMON;
+      else if (strcmp (input_sec->name, ".tcommon") == 0)
+	sym->st_shndx = SHN_V850_TCOMMON;
+      else if (strcmp (input_sec->name, ".zcommon") == 0)
+	sym->st_shndx = SHN_V850_ZCOMMON;
+    }
+
+  return true;
+}
+
+static boolean
+v850_elf_section_from_shdr (abfd, hdr, name)
+     bfd *               abfd;
+     Elf_Internal_Shdr * hdr;
+     char *              name;
+{
+  /* There ought to be a place to keep ELF backend specific flags, but
+     at the moment there isn't one.  We just keep track of the
+     sections by their name, instead.  */
+
+  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
+    return false;
+
+  switch (hdr->sh_type)
+    {
+    case SHT_V850_SCOMMON:
+    case SHT_V850_TCOMMON:
+    case SHT_V850_ZCOMMON:
+      if (! bfd_set_section_flags (abfd, hdr->bfd_section,
+				   (bfd_get_section_flags (abfd,
+							   hdr->bfd_section)
+				    | SEC_IS_COMMON)))
+	return false;
+    }
+
+  return true;
+}
+
+/* Set the correct type for a V850 ELF section.  We do this by the
+   section name, which is a hack, but ought to work.  */
+static boolean
+v850_elf_fake_sections (abfd, hdr, sec)
+     bfd *                 abfd;
+     Elf32_Internal_Shdr * hdr;
+     asection *            sec;
+{
+  register const char * name;
+
+  name = bfd_get_section_name (abfd, sec);
+
+  if (strcmp (name, ".scommon") == 0)
+    {
+      hdr->sh_type = SHT_V850_SCOMMON;
+    }
+  else if (strcmp (name, ".tcommon") == 0)
+    {
+      hdr->sh_type = SHT_V850_TCOMMON;
+    }
+  else if (strcmp (name, ".zcommon") == 0)
+    hdr->sh_type = SHT_V850_ZCOMMON;
+  
+  return true;
+}
+
+
 
 #define TARGET_LITTLE_SYM			bfd_elf32_v850_vec
 #define TARGET_LITTLE_NAME			"elf32-v850"
@@ -1770,10 +2068,18 @@ v850_elf_print_private_bfd_data (abfd, ptr)
 	
 #define elf_info_to_howto			0
 #define elf_info_to_howto_rel			v850_elf_info_to_howto_rel
+
 #define elf_backend_check_relocs		v850_elf_check_relocs
 #define elf_backend_relocate_section    	v850_elf_relocate_section
 #define elf_backend_object_p			v850_elf_object_p
 #define elf_backend_final_write_processing 	v850_elf_final_write_processing
+#define elf_backend_section_from_bfd_section 	v850_elf_section_from_bfd_section
+#define elf_backend_symbol_processing		v850_elf_symbol_processing
+#define elf_backend_add_symbol_hook		v850_elf_add_symbol_hook
+#define elf_backend_link_output_symbol_hook 	v850_elf_link_output_symbol_hook
+#define elf_backend_section_from_shdr		v850_elf_section_from_shdr
+#define elf_backend_fake_sections		v850_elf_fake_sections
+
 #define bfd_elf32_bfd_is_local_label_name	v850_elf_is_local_label_name
 #define bfd_elf32_bfd_reloc_type_lookup		v850_elf_reloc_type_lookup
 #define bfd_elf32_bfd_copy_private_bfd_data 	v850_elf_copy_private_bfd_data
