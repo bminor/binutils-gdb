@@ -157,6 +157,15 @@ extern int generic_register_size (int regnum);
 /* Prop up old targets that use various IN_SIGTRAMP() macros.  */
 extern int legacy_pc_in_sigtramp (CORE_ADDR pc, char *name);
 
+/* The orginal register_convert*() functions were overloaded.  They
+   were used to both: convert between virtual and raw register formats
+   (something that is discouraged); and to convert a register to the
+   type of a corresponding variable.  These legacy functions preserve
+   that overloaded behavour in existing targets.  */
+extern int legacy_convert_register_p (int regnum);
+extern void legacy_register_to_value (int regnum, struct type *type, char *from, char *to);
+extern void legacy_value_to_register (struct type *type, int regnum, char *from, char *to);
+
 /* Initialize a ``struct info''.  Can't use memset(0) since some
    default values are not zero.  */
 extern void gdbarch_info_init (struct gdbarch_info *info);

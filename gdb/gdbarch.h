@@ -1267,6 +1267,57 @@ extern void set_gdbarch_register_convert_to_raw (struct gdbarch *gdbarch, gdbarc
 #endif
 #endif
 
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (CONVERT_REGISTER_P)
+#define CONVERT_REGISTER_P(regnum) (legacy_convert_register_p (regnum))
+#endif
+
+typedef int (gdbarch_convert_register_p_ftype) (int regnum);
+extern int gdbarch_convert_register_p (struct gdbarch *gdbarch, int regnum);
+extern void set_gdbarch_convert_register_p (struct gdbarch *gdbarch, gdbarch_convert_register_p_ftype *convert_register_p);
+#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (CONVERT_REGISTER_P)
+#error "Non multi-arch definition of CONVERT_REGISTER_P"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) || !defined (CONVERT_REGISTER_P)
+#define CONVERT_REGISTER_P(regnum) (gdbarch_convert_register_p (current_gdbarch, regnum))
+#endif
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_TO_VALUE)
+#define REGISTER_TO_VALUE(regnum, type, from, to) (legacy_register_to_value (regnum, type, from, to))
+#endif
+
+typedef void (gdbarch_register_to_value_ftype) (int regnum, struct type *type, char *from, char *to);
+extern void gdbarch_register_to_value (struct gdbarch *gdbarch, int regnum, struct type *type, char *from, char *to);
+extern void set_gdbarch_register_to_value (struct gdbarch *gdbarch, gdbarch_register_to_value_ftype *register_to_value);
+#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_TO_VALUE)
+#error "Non multi-arch definition of REGISTER_TO_VALUE"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_TO_VALUE)
+#define REGISTER_TO_VALUE(regnum, type, from, to) (gdbarch_register_to_value (current_gdbarch, regnum, type, from, to))
+#endif
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (VALUE_TO_REGISTER)
+#define VALUE_TO_REGISTER(type, regnum, from, to) (legacy_value_to_register (type, regnum, from, to))
+#endif
+
+typedef void (gdbarch_value_to_register_ftype) (struct type *type, int regnum, char *from, char *to);
+extern void gdbarch_value_to_register (struct gdbarch *gdbarch, struct type *type, int regnum, char *from, char *to);
+extern void set_gdbarch_value_to_register (struct gdbarch *gdbarch, gdbarch_value_to_register_ftype *value_to_register);
+#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (VALUE_TO_REGISTER)
+#error "Non multi-arch definition of VALUE_TO_REGISTER"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) || !defined (VALUE_TO_REGISTER)
+#define VALUE_TO_REGISTER(type, regnum, from, to) (gdbarch_value_to_register (current_gdbarch, type, regnum, from, to))
+#endif
+#endif
+
 /* This function is called when the value of a pseudo-register needs to
    be updated.  Typically it will be defined on a per-architecture
    basis. */

@@ -1,3 +1,22 @@
+2002-05-11  Andrew Cagney  <ac131313@redhat.com>
+
+	* arch-utils.h (legacy_register_to_value): Declare.
+	(legacy_value_to_register): Declare.
+	(legacy_convert_register_p): Declare.
+	* arch-utils.c (legacy_register_to_value): New function.
+	(legacy_value_to_register): New function.
+	(legacy_convert_register_p): New function.
+
+	* gdbarch.sh (REGISTER_TO_VALUE): Define.
+	(VALUE_TO_REGISTER): Define.
+	(CONVERT_REGISTER_P): Define.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+	* valops.c (value_assign): Use CONVERT_REGISTER_P and
+	VALUE_TO_REGISTER.
+	* findvar.c (value_from_register): Use REGISTER_TO_VALUE and
+	CONVERT_REGISTER_P.
+
 2005-05-11  Daniel Jacobowitz  <drow@mvista.com>
 	    Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 

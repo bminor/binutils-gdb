@@ -813,12 +813,12 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
   VALUE_LVAL (v) = lval;
   VALUE_ADDRESS (v) = addr;
 
-  /* Convert raw data to virtual format if necessary.  */
+  /* Convert the raw register to the corresponding data value's memory
+     format, if necessary.  */
 
-  if (REGISTER_CONVERTIBLE (regnum))
+  if (CONVERT_REGISTER_P (regnum))
     {
-      REGISTER_CONVERT_TO_VIRTUAL (regnum, type,
-				   raw_buffer, VALUE_CONTENTS_RAW (v));
+      REGISTER_TO_VALUE (regnum, type, raw_buffer, VALUE_CONTENTS_RAW (v));
     }
   else
     {

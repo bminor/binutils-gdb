@@ -563,11 +563,10 @@ value_assign (struct value *toval, struct value *fromval)
   if (VALUE_REGNO (toval) >= 0)
     {
       int regno = VALUE_REGNO (toval);
-      if (REGISTER_CONVERTIBLE (regno))
+      if (CONVERT_REGISTER_P (regno))
 	{
 	  struct type *fromtype = check_typedef (VALUE_TYPE (fromval));
-	  REGISTER_CONVERT_TO_RAW (fromtype, regno,
-				   VALUE_CONTENTS (fromval), raw_buffer);
+	  VALUE_TO_REGISTER (fromtype, regno, VALUE_CONTENTS (fromval), raw_buffer);
 	  use_buffer = REGISTER_RAW_SIZE (regno);
 	}
     }

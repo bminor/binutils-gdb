@@ -429,6 +429,26 @@ legacy_pc_in_sigtramp (CORE_ADDR pc, char *name)
   return IN_SIGTRAMP(pc, name);
 }
 
+int
+legacy_convert_register_p (int regnum)
+{
+  return REGISTER_CONVERTIBLE (regnum);
+}
+
+void
+legacy_register_to_value (int regnum, struct type *type,
+			  char *from, char *to)
+{
+  REGISTER_CONVERT_TO_VIRTUAL (regnum, type, from, to);
+}
+
+void
+legacy_value_to_register (struct type *type, int regnum,
+			  char *from, char *to)
+{
+  REGISTER_CONVERT_TO_RAW (type, regnum, from, to);
+}
+
 
 /* Functions to manipulate the endianness of the target.  */
 
