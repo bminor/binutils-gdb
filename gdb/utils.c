@@ -703,21 +703,32 @@ query (va_alist)
       fflush (stdout);
       va_start (args);
       ctlstr = va_arg (args, char *);
+      energize_query (ctlstr, args);
       vfprintf_filtered (stdout, ctlstr, args);
-      va_end (args);
       printf_filtered ("(y or n) ");
-      fflush (stdout);
-      answer = fgetc (stdin);
-      clearerr (stdin);		/* in case of C-d */
-      if (answer == EOF)	/* C-d */
-        return 1;
-      if (answer != '\n')	/* Eat rest of input line, to EOF or newline */
-	do 
-	  {
-	    ans2 = fgetc (stdin);
-	    clearerr (stdin);
-	  }
-        while (ans2 != EOF && ans2 != '\n');
+      if (energize)
+	{
+	  char *buf;
+
+	  buf = energize_command_line_input(0, 0);
+	  answer = buf ? *buf : 'Y';
+	  energize_acknowledge_query(buf);
+	}
+      else
+	{
+	  fflush (stdout);
+	  answer = fgetc (stdin);
+	  clearerr (stdin);		/* in case of C-d */
+	  if (answer == EOF)	/* C-d */
+	    return 1;
+	  if (answer != '\n')	/* Eat rest of input line, to EOF or newline */
+	    do 
+	      {
+		ans2 = fgetc (stdin);
+		clearerr (stdin);
+	      }
+	  while (ans2 != EOF && ans2 != '\n');
+	}
       if (answer >= 'a')
 	answer -= 040;
       if (answer == 'Y')
@@ -725,6 +736,7 @@ query (va_alist)
       if (answer == 'N')
 	return 0;
       printf_filtered ("Please answer y or n.\n");
+      va_end (args);
     }
 }
 
@@ -991,6 +1003,12 @@ fputs_filtered (linebuffer, stream)
   if (linebuffer == 0)
     return;
   
+  if (energize)
+    {
+      energize_fputs(linebuffer);
+      return;
+    }
+
   /* Don't do any filtering if it is disabled.  */
   if (stream != stdout
    || (lines_per_page == UINT_MAX && chars_per_line == UINT_MAX))
