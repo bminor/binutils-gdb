@@ -1,3 +1,9 @@
+Tue Dec  5 18:08:29 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* monitor.c (monitor_expect_regexp):  Make static, add prototype.
+	* (monitor_read_memory_single):  Call monitor_expect_regexp with
+	pointer to getmem_resp_delim_pattern, not entire struct.
+
 Tue Dec  5 15:51:25 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* c-lang.h (c_op_print_tab): Don't declare, some compilers
