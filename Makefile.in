@@ -1030,7 +1030,8 @@ install-z8ksim: force
 		true ; \
 	fi
 
-### h8300sim: all-bfd 
+### h8300sim:
+all-h8300sim:  all-bfd 
 	@if [ -f ./h8300sim/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./h8300sim; \
