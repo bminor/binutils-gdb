@@ -39,7 +39,6 @@ float.c
 func.c
 help.c
 interf.c
-run.c
 sis.c
 sis.h
 startsim

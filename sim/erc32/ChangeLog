@@ -16,6 +16,7 @@ Wed Nov 20 01:30:12 1996  Doug Evans  <dje@canuck.cygnus.com>
 	* sis.c: #include "config.h".  #include <stdlib.h> if present.
 	(main): Coerce fprintf arg to INIT_DISASSEMBLE_INFO to fprintf_ftype.
 	* sis.h: #include "callback.h".
+	* run.c: Deleted, using one in ../common now.
 
 Thu Oct  3 16:12:03 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
 
