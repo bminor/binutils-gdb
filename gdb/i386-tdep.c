@@ -113,9 +113,7 @@ i386_stab_reg_to_regnum (int reg)
   else if (reg >= 29 && reg <= 36)
     {
       /* MMX registers.  */
-      /* FIXME: kettenis/2001-07-28: Should we have the MMX registers
-         as pseudo-registers?  */
-      return reg - 29 + FP0_REGNUM;
+      return reg - 29 + MM0_REGNUM;
     }
 
   /* This will hopefully provoke a warning.  */

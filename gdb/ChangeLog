@@ -1,3 +1,8 @@
+2002-08-13  Mark Kettenis  <kettenis@elgar.kettenis.dyndns.org>
+
+	* i386-tdep.c (i386_stab_reg_to_regnum): Return correct register
+	numbers for MMX registers.
+
 2002-08-13  Andrew Cagney  <cagney@redhat.com>
 
 	* i386-tdep.c (i386_gdbarch_init): Use
