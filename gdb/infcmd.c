@@ -529,6 +529,8 @@ finish_command (arg, from_tty)
     error ("The \"finish\" command does not take any arguments.");
   if (!target_has_execution)
     error ("The program is not running.");
+  if (selected_frame == NULL)
+    error ("No selected frame.");
 
   frame = get_prev_frame (selected_frame);
   if (frame == 0)

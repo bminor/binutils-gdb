@@ -193,6 +193,8 @@ build_section_table (some_bfd, start, end)
   count = bfd_count_sections (some_bfd);
   if (count == 0)
     abort();	/* return 1? */
+  if (*start)
+    free (*start);
   *start = (struct section_table *) xmalloc (count * sizeof (**start));
   *end = *start;
   bfd_map_over_sections (some_bfd, add_to_section_table, end);

@@ -1537,13 +1537,21 @@ get_catch_sals (this_level_only)
 {
   extern struct blockvector *blockvector_for_pc ();
   register struct blockvector *bl;
-  register struct block *block = get_frame_block (selected_frame);
+  register struct block *block;
   int index, have_default = 0;
-  struct frame_info *fi = get_frame_info (selected_frame);
-  CORE_ADDR pc = fi->pc;
+  struct frame_info *fi;
+  CORE_ADDR pc;
   struct symtabs_and_lines sals;
   struct sal_chain *sal_chain = 0;
   char *blocks_searched;
+
+  /* Not sure whether an error message is always the correct response,
+     but it's better than a core dump.  */
+  if (selected_frame == NULL)
+    error ("No selected frame.");
+  block = get_frame_block (selected_frame);
+  fi = get_frame_info (selected_frame);
+  pc = fi->pc;
 
   sals.nelts = 0;
   sals.sals = NULL;

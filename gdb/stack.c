@@ -221,6 +221,8 @@ extern FRAME setup_arbitrary_frame ();
 
 /*
  * Read a frame specification in whatever the appropriate format is.
+ * Call error() if the specification is in any way invalid (i.e.
+ * this function never returns NULL).
  */
 static FRAME
 parse_frame_specification (frame_exp)
@@ -262,6 +264,8 @@ parse_frame_specification (frame_exp)
   switch (numargs)
     {
     case 0:
+      if (selected_frame == NULL)
+	error ("No selected frame.");
       return selected_frame;
       /* NOTREACHED */
     case 1:
@@ -476,6 +480,9 @@ backtrace_command (count_exp, from_tty)
   register int i;
   register FRAME trailing;
   register int trailing_level;
+
+  if (!target_has_stack)
+    error ("No stack.");
 
   /* The following code must do two things.  First, it must
      set the variable TRAILING to the frame from which we should start
@@ -846,14 +853,15 @@ select_frame (frame, level)
     find_pc_symtab (get_frame_info (frame)->pc);
 }
 
-/* Store the selected frame and its level into *FRAMEP and *LEVELP.  */
+/* Store the selected frame and its level into *FRAMEP and *LEVELP.
+   If there is no selected frame, *FRAMEP is set to NULL.  */
 
 void
 record_selected_frame (frameaddrp, levelp)
      FRAME_ADDR *frameaddrp;
      int *levelp;
 {
-  *frameaddrp = FRAME_FP (selected_frame);
+  *frameaddrp = selected_frame ? FRAME_FP (selected_frame) : NULL;
   *levelp = selected_frame_level;
 }
 
@@ -1028,10 +1036,16 @@ return_command (retval_exp, from_tty)
      char *retval_exp;
      int from_tty;
 {
-  struct symbol *thisfun = get_frame_function (selected_frame);
-  FRAME_ADDR selected_frame_addr = FRAME_FP (selected_frame);
-  CORE_ADDR selected_frame_pc = (get_frame_info (selected_frame))->pc;
+  struct symbol *thisfun;
+  FRAME_ADDR selected_frame_addr;
+  CORE_ADDR selected_frame_pc;
   FRAME frame;
+
+  if (selected_frame == NULL)
+    error ("No selected frame.");
+  thisfun = get_frame_function (selected_frame);
+  selected_frame_addr = FRAME_FP (selected_frame);
+  selected_frame_pc = (get_frame_info (selected_frame))->pc;
 
   /* If interactive, require confirmation.  */
 

@@ -1605,6 +1605,8 @@ restore_inferior_status (inf_status)
       fid = find_relative_frame (get_current_frame (),
 				 &level);
 
+      /* If inf_status->selected_frame_address is NULL, there was no
+	 previously selected frame.  */
       if (fid == 0 ||
 	  FRAME_FP (fid) != inf_status->selected_frame_address ||
 	  level != 0)

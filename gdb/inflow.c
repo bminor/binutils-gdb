@@ -364,6 +364,16 @@ kill_command (arg, from_tty)
   if (!query ("Kill the inferior process? "))
     error ("Not confirmed.");
   target_kill (arg, from_tty);
+
+  /* Killing off the inferior can leave us with a core file.  If so,
+     print the state we are left in.  */
+  if (target_has_stack) {
+    printf_filtered ("In %s,\n", current_target->to_longname);
+    if (selected_frame == NULL)
+      fputs_filtered ("No selected stack frame.\n", stdout);
+    else
+      print_sel_frame (0);
+  }
 }
 
 /* The inferior process has died.  Long live the inferior!  */
@@ -381,13 +391,15 @@ generic_mourn_inferior ()
   CLEAR_DEFERRED_STORES;
 #endif
 
-  select_frame ((FRAME) 0, -1);
   reopen_exec_file ();
-  if (target_has_stack)
+  if (target_has_stack) {
     set_current_frame ( create_new_frame (read_register (FP_REGNUM),
 					  read_pc ()));
-  else
+    select_frame (get_current_frame (), 0);
+  } else {
     set_current_frame (0);
+    select_frame ((FRAME) 0, -1);
+  }
   /* It is confusing to the user for ignore counts to stick around
      from previous runs of the inferior.  So clear them.  */
   breakpoint_clear_ignore_counts ();

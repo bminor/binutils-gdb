@@ -354,7 +354,8 @@ supply_register (regno, val)
 /* Given a struct symbol for a variable,
    and a stack frame id, read the value of the variable
    and return a (pointer to a) struct value containing the value. 
-   If the variable cannot be found, return a zero pointer.  */
+   If the variable cannot be found, return a zero pointer.
+   If FRAME is NULL, use the selected_frame.  */
 
 value
 read_var_value (var, frame)
@@ -411,6 +412,8 @@ read_var_value (var, frame)
 
     case LOC_ARG:
       fi = get_frame_info (frame);
+      if (fi == NULL)
+	return 0;
       addr = FRAME_ARGS_ADDRESS (fi);
       if (!addr) {
 	return 0;
@@ -420,6 +423,8 @@ read_var_value (var, frame)
       
     case LOC_REF_ARG:
       fi = get_frame_info (frame);
+      if (fi == NULL)
+	return 0;
       addr = FRAME_ARGS_ADDRESS (fi);
       if (!addr) {
 	return 0;
@@ -431,6 +436,8 @@ read_var_value (var, frame)
     case LOC_LOCAL:
     case LOC_LOCAL_ARG:
       fi = get_frame_info (frame);
+      if (fi == NULL)
+	return 0;
       addr = SYMBOL_VALUE (var) + FRAME_LOCALS_ADDRESS (fi);
       break;
 
@@ -445,8 +452,12 @@ read_var_value (var, frame)
     case LOC_REGISTER:
     case LOC_REGPARM:
       {
-	struct block *b = get_frame_block (frame);
+	struct block *b;
 
+	if (frame == NULL)
+	  return 0;
+	b = get_frame_block (frame);
+	
 	v = value_from_register (type, SYMBOL_VALUE (var), frame);
 
 	if (REG_STRUCT_HAS_ADDR(b->gcc_compile_flag)
