@@ -1,3 +1,49 @@
+Wed Apr 22 14:28:48 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* configure: Regenerate with autoconf 2.12.1.
+
+Fri Mar 13 09:25:58 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* psim.c (psim_read_register, psim_write_register): Handle updates
+ 	for FPSCR.
+
+	* registers.c (register_description): Reconize "FPSCR".
+
+	* emul_netbsd.c (emul_netbsd_create): When FP available, enable
+ 	MSR FP exception mode. Do not enable FPSCR bits.
+	* emul_unix.c (emul_unix_create): Ditto.
+
+Tue Feb 17 12:48:58 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim_calls.c (sim_store_register, sim_fetch_register): Pass in
+ 	length parameter.  Return -1.
+
+Mon Feb  9 14:13:14 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ppc-instructions (fdiv, fdivs): Check for divide by zero.
+	(is_invalid_zero_divide, invalid_zero_divide_operation): New
+ 	functions.
+	
+Wed Dec 10 17:38:28 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim_calls.c (sim_load): Do not parse PROG using buildargv, use
+ 	raw value instead.
+
+1997-11-05  Felix Lee  <flee@cygnus.com>
+
+	* emul_chirp.c: #ifdef HAVE_UNISTD_H
+
+Wed Oct 15 08:50:54 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* corefile.c (core_attach): Pad out allocated memory regions so
+ 	that they are always correctly aligned.
+	(struct _core_mapping, core_map_attach, core_init,
+ 	new_core_mapping): Change free_buffer to type void*.
+
+Mon Oct  6 18:09:26 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* sim_calls.c (zfree): Call free correctly.
+
 Mon Sep 29 10:05:01 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim_calls.c (zfree): Use free, not mfree.
@@ -6,7 +52,9 @@ Mon Sep 29 10:05:01 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 Fri Sep 26 09:50:29 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	* ppc-instructions:
+	* ppc-instructions (sraw, slw, srw): From Charles Lefurgy, Fix
+ 	mask extracting shift amount. Correctly condition for setting XER
+ 	in sraw.
  	(ldhau): From Johannes Reisinger, update rA after load.
 
 Tue Sep  9 22:13:23 1997  Felix Lee  <flee@cygnus.com>

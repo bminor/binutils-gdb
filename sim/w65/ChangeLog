@@ -1,3 +1,7 @@
+Wed Apr 22 14:29:50 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* configure: Regenerate with autoconf 2.12.1.
+
 Tue Feb 17 12:52:24 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* run.c (main): Pass length into sim_fetch_register.
