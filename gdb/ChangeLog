@@ -1,3 +1,9 @@
+Thu Sep 19 17:41:24 1991  Roland H. Pesch  (pesch at cygnus.com)
+
+	* doc/gdbint.texinfo: Reorder contents; reorganize new-host,
+	new-target, and new-config chapters; fix minor typos; come closer
+	to usual GNU markup conventions for @file @samp @code @var.
+
 Thu Sep 19 17:04:12 1991  Per Bothner  (bothner at cygnus.com)
 
 	Patches from Peter Schauer <pes@regent.e-technik.tu-muenchen.de>:
