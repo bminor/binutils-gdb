@@ -535,7 +535,7 @@ gr_multi_scan (list, passthrough)
   swallowed_p = swallowed = alloca(max_length << 1);
 
   /* and a list of pointers to current scan points. */
-  plist = alloca(string_count * sizeof(*plist));
+  plist = (char **) alloca (string_count * sizeof(*plist));
 
   /* and initialize */
   for (i = 0; i < string_count; ++i)
@@ -579,8 +579,10 @@ gr_multi_scan (list, passthrough)
 	  swallowed_p = swallowed;
 	}
     }
-
+#if 0
+  /* Never reached.  */
   return(-1);
+#endif
 }
 
 /* Get ready to modify the registers array.  On machines which store

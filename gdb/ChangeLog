@@ -1,3 +1,13 @@
+Mon Sep 13 16:06:43 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
+
+	* remote.c: Define remote_debug to 0 and #if 0 baud_rate.  Temporary
+	hack so this file compiles again.
+
+	* remote-utils.c (gr_multi_scan): Cast return value from alloca.
+	(gr_multi_scan): #if 0 never-reached return(-1).
+
+	* remote-udi.c (udi_wait): Return inferior_pid not 0.
+
 Mon Sep 13 14:14:35 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	Collect some remote things into remote-utils.

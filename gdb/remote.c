@@ -220,6 +220,10 @@ static int timeout = 2;
 int icache;
 #endif
 
+/* FIXME: This is a hack which lets this file compile.  It should be getting
+   this setting from remote-utils.c.  */
+#define remote_debug (0)
+
 /* Descriptor for I/O to remote machine.  Initialize it to NULL so that
    remote_open knows that we don't have a file open when the program
    starts.  */
@@ -293,6 +297,8 @@ device is attached to the remote system (e.g. /dev/ttya).");
   if (!remote_desc)
     perror_with_name (name);
 
+#if 0
+  /* FIXME: This should be using remote-utils.c.  */
   if (baud_rate)
     {
       int rate;
@@ -304,6 +310,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
 	    perror_with_name (name);
 	  }
     }
+#endif
 
   SERIAL_RAW (remote_desc);
 
@@ -576,6 +583,9 @@ remote_wait (status)
   return 0;
 }
 
+/* Number of bytes of registers this stub implements.  */
+static int register_bytes_found;
+
 /* Read the remote registers into the block REGS.  */
 /* Currently we just read all the registers, so we don't use regno.  */
 /* ARGSUSED */
@@ -591,6 +601,9 @@ remote_fetch_registers (regno)
   sprintf (buf, "g");
   remote_send (buf);
 
+  /* Unimplemented registers read as all bits zero.  */
+  memset (regs, 0, REGISTER_BYTES);
+
   /* Reply describes registers byte by byte, each byte encoded as two
      hex characters.  Suck them all up, then supply them to the
      register cacheing/storage mechanism.  */
@@ -598,11 +611,29 @@ remote_fetch_registers (regno)
   p = buf;
   for (i = 0; i < REGISTER_BYTES; i++)
     {
-      if (p[0] == 0 || p[1] == 0)
-	error ("Remote reply is too short: %s", buf);
+      if (p[0] == 0)
+	break;
+      if (p[1] == 0)
+	{
+	  warning ("Remote reply is of odd length: %s", buf);
+	  /* Don't change register_bytes_found in this case, and don't
+	     print a second warning.  */
+	  goto supply_them;
+	}
       regs[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
       p += 2;
     }
+
+  if (i != register_bytes_found)
+    {
+      register_bytes_found = i;
+#ifdef REGISTER_BYTES_OK
+      if (!REGISTER_BYTES_OK (i))
+	warning ("Remote reply is too short: %s", buf);
+#endif
+    }
+
+ supply_them:
   for (i = 0; i < NUM_REGS; i++)
     supply_register (i, &regs[REGISTER_BYTE(i)]);
 }
@@ -635,7 +666,8 @@ remote_store_registers (regno)
      each byte encoded as two hex characters.  */
 
   p = buf + 1;
-  for (i = 0; i < REGISTER_BYTES; i++)
+  /* remote_prepare_to_store insures that register_bytes_found gets set.  */
+  for (i = 0; i < register_bytes_found; i++)
     {
       *p++ = tohex ((registers[i] >> 4) & 0xf);
       *p++ = tohex (registers[i] & 0xf);
