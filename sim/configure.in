@@ -1,0 +1,37 @@
+# This file is a shell script that supplies the information necessary
+# to tailor a template configure script into the configure script
+# appropriate for this directory.  For more information, check any
+# existing configure script.
+
+configdirs="h8300 z8k"
+srctrigger=Makefile.in
+srcname="sim"
+target_dependent=true
+
+# per-host:
+
+
+# per-target:
+
+# WHEN ADDING ENTRIES TO THIS MATRIX:
+#  Make sure that the left side always has two dashes.  Otherwise you
+#  can get spurious matches.  Even for unambiguous cases, do this as a
+#  convention, else the table becomes a real mess to understand and maintain.
+
+case "${target}" in
+  h8300-*-*)		sim_target=h8300 ;;
+  z8k*-*-*)		sim_target=z8k ;;
+esac
+
+configdirs=${sim_target}
+
+if [ ! -f ${srcdir}/${sim_target}/${sim_target}.mt ] ; then
+	if [ -n "${sim_target}" ] ; then
+		echo '***' No file ${srcdir}/${sim_target}/${sim_target}.mt 1>&2
+	fi
+	echo '***' The simulator does not support target ${target} 1>&2
+else
+target_makefile_frag=${sim_target}/${sim_target}.mt
+fi
+# post-target:
+

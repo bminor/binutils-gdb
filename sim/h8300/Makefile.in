@@ -53,8 +53,8 @@ BISON = bison
 MAKEINFO = makeinfo
 RANLIB = ranlib
 
-INCDIR = $(srcdir)/../include 
-CSEARCH = -I. -I$(srcdir) -I$(INCDIR) -I$(srcdir)/../bfd
+INCDIR = $(srcdir)/../../include 
+CSEARCH = -I. -I$(srcdir) -I$(INCDIR) -I$(srcdir)/../../bfd
 DEP = mkdep
 
 #### host, target, and site specific Makefile frags come in here.
@@ -62,7 +62,7 @@ DEP = mkdep
 all:	run 
 
 run:	code.o run.o perifs.o
-	$(CC) -o run code.o perifs.o run.o ../bfd/libbfd.a ../libiberty/libiberty.a
+	$(CC) -o run code.o perifs.o run.o ../../bfd/libbfd.a ../../libiberty/libiberty.a
  
 code.c:p1.c p2.c p3.c
 	cat $(VPATH)/p1.c p2.c $(VPATH)/p3.c | cb >code.c

@@ -4,14 +4,14 @@
 # existing configure script.
 
 srctrigger=writecode.c
-srcname="sim"
+srcname="h8300sim"
 
 # per-host:
 
-. ${srcdir}/../bfd/configure.host
+. ${srcdir}/../../bfd/configure.host
 
 # Set up to make a link between the host's include file and "sysdep.h".
-files="../bfd/hosts/${my_host}.h"
+files="../../bfd/hosts/${my_host}.h"
 
 links="sysdep.h"
 
@@ -24,8 +24,8 @@ if [ ! -f ${srcdir}/${files} ] ; then
 fi
 
 host_makefile_frag=
-if [ -f ${srcdir}/../bfd/config/${my_host}.mh ] ; then
-	host_makefile_frag=../bfd/config/${my_host}.mh
+if [ -f ${srcdir}/../../bfd/config/${my_host}.mh ] ; then
+	host_makefile_frag=../../bfd/config/${my_host}.mh
 fi
 
 # per-target:

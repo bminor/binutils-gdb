@@ -1,5 +1,5 @@
 /* code generator for the Hitachi H8/300 architecture simulator.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright (C) 1993 Free Software Foundation, Inc.
    Hacked by Steve Chamberlain of Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -328,7 +328,6 @@ decode (p, fetch, size)
     }
 }
 
-
 static void
 esleep ()
 {
@@ -460,7 +459,7 @@ rte (p, a, s)
   printf ("tmp = reg[7];\n");
   printf ("reg[7]+=2;\n");
   printf ("SET_CCR(tmp);\n");
-  printf("npc = saved_state.mem + (WORD_MEM(tmp)>>1);\n");
+  printf ("npc = saved_state.mem + (WORD_MEM(tmp)>>1);\n");
 }
 
 static void
@@ -648,80 +647,301 @@ struct
 
 table  [] =
 {
-  {    nx, 1, "bld", bit, "dst = srcb; c = (srcb>>srca)&1;", 8  }  ,
-  {    nx, 1, "bild", bit, "dst = srcb; c = !((srcb>>srca)&1);", 8  }  ,
-  {    nx, 1, "band", bit, "dst = srcb; c = C &&((srcb>>srca)&1);", 8  }  ,
-  {    nx, 1, "biand", bit, "dst = srcb; c = C &&(!((srcb>>srca)&1));", 8  }  ,
-  {    nx, 1, "bior", bit, "dst = srcb; c = C ||(!((srcb>>srca)&1));", 8  }  ,
-  {    nx, 1, "bor", bit, "dst = srcb; c = C ||(((srcb>>srca)&1));", 8  }  ,
-  {    nx, 1, "bixor", bit, "dst = srcb; c = C ^(!((srcb>>srca)&1));", 8  }  ,
-  {    nx, 1, "bxor", bit, "dst = srcb; c = C ^(((srcb>>srca)&1));", 8  }  ,
-  {    nx, 1, "bnot", bit, "dst = srcb ^ (1<<srca);", 8  }  ,
-  {    nx, 1, "bclr", bit, "dst = srcb & ~(1<<srca);", 8  }  ,
-  {    nx, 1, "bset", bit, "dst = srcb | (1<<srca);", 8  }  ,
-  {    nx, 1, "bst", bit, "dst = (srcb & ~(1<<srca))| ((C)<<srca);", 8  }  ,
-  {    nx, 1, "bist", bit, "dst = (srcb & ~(1<<srca))| ((!C)<<srca);", 8  }  ,
-  {    nx, 1, "btst", bit, "dst = srcb; z = !((srcb>>srca)&1);", 8  }  ,
-  {    icf, 0, "dec", dec, 0, 0  }  ,
-  {    icf, 0, "inc", inc, 0, 0  }  ,
-  {    saf, 1, "orc", setf, "|", 0  }  ,
-  {    saf, 1, "xorc", setf, "^", 0  }  ,
-  {    saf, 1, "andc", setf, "&", 0  }  ,
-  {    nx, 1, "nop", nop, 0, 0  }  ,
-  {    nx, 1, "bra", bra, "1", 0  }  ,
-  {    nx, 1, "brn", bra, "0", 0  }  ,
-  {    nx, 1, "bhi", bra, "(C||Z)==0", 0  }  ,
-  {    nx, 1, "bls", bra, "(C||Z)==1", 0  }  ,
-  {    nx, 1, "bcs", bra, "C==1", 0  }  ,
-  {    nx, 1, "bcc", bra, "C==0", 0  }  ,
-  {    nx, 1, "bpl", bra, "N==0", 0  }  ,
-  {    nx, 1, "bmi", bra, "N==1", 0  }  ,
-  {    nx, 1, "bvs", bra, "V==1", 0  }  ,
-  {    nx, 1, "bvc", bra, "V==0", 0  }  ,
-  {    nx, 1, "bge", bra, "(N^V)==0", 0  }  ,
-  {    nx, 1, "bgt", bra, "(Z|(N^V))==0", 0  }  ,
-  {    nx, 1, "blt", bra, "(N^V)==1", 0  }  ,
-  {    nx, 1, "ble", bra, "(Z|(N^V))==1", 0  }  ,
-  {    nx, 1, "beq", bra, "Z==1", 0  }  ,
-  {    nx, 1, "bne", bra, "Z==0", 0  }  ,
-  {    nx, 1, "bsr", bsr, "", 0  }  ,
-  {    nx, 1, "jsr", jsr, 0, 0  }  ,
-  {    nx, 1, "jmp", jmp, 0, 0  }  ,
-  {    nx, 0, "rts", rts, 0, 0  }  ,
-  {    nx, 0, "rte", rte, 0, 0  }  ,
-  {    nx, 1, "andc", andc, 0, 0  }  ,
-  {    sf, 1, "shal", shal, 0, 0  }  ,
-  {    sf, 1, "shar", shar, 0, 0  }  ,
-  {    sf, 1, "shll", shll, 0, 0  }  ,
-  {    sf, 1, "shlr", shlr, 0, 0  }  ,
-  {    sf, 1, "rotxl", rotxl, 0, 0  }  ,
-  {    sf, 1, "rotxr", rotxr, 0, 0  }  ,
-  {    sf, 1, "rotl", rotl, 0, 0  }  ,
-  {    sf, 1, "rotr", rotr, 0, 0  }  ,
-  {    lf, 1, "xor", log, "^", 0  }  ,
-  {    lf, 1, "and", log, "&", 0  }  ,
-  {    lf, 1, "or", log, "|", 0  }  ,
-  {    lf, 1, "not", ulog, " ~", 0  }  ,
-  {    lf, 1, "neg", ulog, " - ", 0  }  ,
-  {    nx, 1, "adds", adds, "dst = srca + srcb", 0  }  ,
-  {    nx, 1, "subs", adds, "srca = -srca; dst = srcb + srca", 0  }  ,
-  {    af8, 1, "add.b", add, "dst = srca + srcb", 8  }  ,
-  {    af16, 1, "add.w", add, "dst = srca + srcb", 16  }  ,
-  {    af16, 1, "sub.w", add, "srca = -srca; dst = srcb + srca", 16  }  ,
-  {    af8, 1, "sub.b", add, "srca = -srca; dst = srcb + srca", 8  }  ,
-  {    af8, 1, "addx", addx, 0, 8  }  ,
-  {    af8, 1, "subx", subx, 0, 8  }  ,
-  {    af8, 0, "cmp.b", cmp, 0, 8  }  ,
-  {    af16, 0, "cmp.w", cmp, 0, 16  }  ,
-  {    nx, 1, "sleep", esleep, 0, 0  }  ,
-  {    nx, 0, "bpt", bpt, 0, 8  }  ,
-  {    nx, 0, "divxu", divxu, 0, 0  }  ,
-  {    nx, 0, "mulxu", mulxu, 0, 0  }  ,
-  {    mf8, 1, "mov.b", mov, 0, 8  }  ,
-  {    mf8, 1, "movtpe", mov, 0, 8  }  ,
-  {    mf8, 1, "movfpe", mov, 0, 8  }  ,
-  {    mf16, 1, "mov.w", mov, 0, 16  }  ,
-  {    0  }
+  {
+    nx, 1, "bld", bit, "dst = srcb; c = (srcb>>srca)&1;", 8
+  }
+  ,
+  {
+    nx, 1, "bild", bit, "dst = srcb; c = !((srcb>>srca)&1);", 8
+  }
+  ,
+  {
+    nx, 1, "band", bit, "dst = srcb; c = C &&((srcb>>srca)&1);", 8
+  }
+  ,
+  {
+    nx, 1, "biand", bit, "dst = srcb; c = C &&(!((srcb>>srca)&1));", 8
+  }
+  ,
+  {
+    nx, 1, "bior", bit, "dst = srcb; c = C ||(!((srcb>>srca)&1));", 8
+  }
+  ,
+  {
+    nx, 1, "bor", bit, "dst = srcb; c = C ||(((srcb>>srca)&1));", 8
+  }
+  ,
+  {
+    nx, 1, "bixor", bit, "dst = srcb; c = C ^(!((srcb>>srca)&1));", 8
+  }
+  ,
+  {
+    nx, 1, "bxor", bit, "dst = srcb; c = C ^(((srcb>>srca)&1));", 8
+  }
+  ,
+  {
+    nx, 1, "bnot", bit, "dst = srcb ^ (1<<srca);", 8
+  }
+  ,
+  {
+    nx, 1, "bclr", bit, "dst = srcb & ~(1<<srca);", 8
+  }
+  ,
+  {
+    nx, 1, "bset", bit, "dst = srcb | (1<<srca);", 8
+  }
+  ,
+  {
+    nx, 1, "bst", bit, "dst = (srcb & ~(1<<srca))| ((C)<<srca);", 8
+  }
+  ,
+  {
+    nx, 1, "bist", bit, "dst = (srcb & ~(1<<srca))| ((!C)<<srca);", 8
+  }
+  ,
+  {
+    nx, 1, "btst", bit, "dst = srcb; z = !((srcb>>srca)&1);", 8
+  }
+  ,
+  {
+    icf, 0, "dec", dec, 0, 0
+  }
+  ,
+  {
+    icf, 0, "inc", inc, 0, 0
+  }
+  ,
+  {
+    saf, 1, "orc", setf, "|", 0
+  }
+  ,
+  {
+    saf, 1, "xorc", setf, "^", 0
+  }
+  ,
+  {
+    saf, 1, "andc", setf, "&", 0
+  }
+  ,
+  {
+    nx, 1, "nop", nop, 0, 0
+  }
+  ,
+  {
+    nx, 1, "bra", bra, "1", 0
+  }
+  ,
+  {
+    nx, 1, "brn", bra, "0", 0
+  }
+  ,
+  {
+    nx, 1, "bhi", bra, "(C||Z)==0", 0
+  }
+  ,
+  {
+    nx, 1, "bls", bra, "(C||Z)==1", 0
+  }
+  ,
+  {
+    nx, 1, "bcs", bra, "C==1", 0
+  }
+  ,
+  {
+    nx, 1, "bcc", bra, "C==0", 0
+  }
+  ,
+  {
+    nx, 1, "bpl", bra, "N==0", 0
+  }
+  ,
+  {
+    nx, 1, "bmi", bra, "N==1", 0
+  }
+  ,
+  {
+    nx, 1, "bvs", bra, "V==1", 0
+  }
+  ,
+  {
+    nx, 1, "bvc", bra, "V==0", 0
+  }
+  ,
+  {
+    nx, 1, "bge", bra, "(N^V)==0", 0
+  }
+  ,
+  {
+    nx, 1, "bgt", bra, "(Z|(N^V))==0", 0
+  }
+  ,
+  {
+    nx, 1, "blt", bra, "(N^V)==1", 0
+  }
+  ,
+  {
+    nx, 1, "ble", bra, "(Z|(N^V))==1", 0
+  }
+  ,
+  {
+    nx, 1, "beq", bra, "Z==1", 0
+  }
+  ,
+  {
+    nx, 1, "bne", bra, "Z==0", 0
+  }
+  ,
+  {
+    nx, 1, "bsr", bsr, "", 0
+  }
+  ,
+  {
+    nx, 1, "jsr", jsr, 0, 0
+  }
+  ,
+  {
+    nx, 1, "jmp", jmp, 0, 0
+  }
+  ,
+  {
+    nx, 0, "rts", rts, 0, 0
+  }
+  ,
+  {
+    nx, 0, "rte", rte, 0, 0
+  }
+  ,
+  {
+    nx, 1, "andc", andc, 0, 0
+  }
+  ,
+  {
+    sf, 1, "shal", shal, 0, 0
+  }
+  ,
+  {
+    sf, 1, "shar", shar, 0, 0
+  }
+  ,
+  {
+    sf, 1, "shll", shll, 0, 0
+  }
+  ,
+  {
+    sf, 1, "shlr", shlr, 0, 0
+  }
+  ,
+  {
+    sf, 1, "rotxl", rotxl, 0, 0
+  }
+  ,
+  {
+    sf, 1, "rotxr", rotxr, 0, 0
+  }
+  ,
+  {
+    sf, 1, "rotl", rotl, 0, 0
+  }
+  ,
+  {
+    sf, 1, "rotr", rotr, 0, 0
+  }
+  ,
+  {
+    lf, 1, "xor", log, "^", 0
+  }
+  ,
+  {
+    lf, 1, "and", log, "&", 0
+  }
+  ,
+  {
+    lf, 1, "or", log, "|", 0
+  }
+  ,
+  {
+    lf, 1, "not", ulog, " ~", 0
+  }
+  ,
+  {
+    lf, 1, "neg", ulog, " - ", 0
+  }
+  ,
+  {
+    nx, 1, "adds", adds, "dst = srca + srcb", 0
+  }
+  ,
+  {
+    nx, 1, "subs", adds, "srca = -srca; dst = srcb + srca", 0
+  }
+  ,
+  {
+    af8, 1, "add.b", add, "dst = srca + srcb", 8
+  }
+  ,
+  {
+    af16, 1, "add.w", add, "dst = srca + srcb", 16
+  }
+  ,
+  {
+    af16, 1, "sub.w", add, "srca = -srca; dst = srcb + srca", 16
+  }
+  ,
+  {
+    af8, 1, "sub.b", add, "srca = -srca; dst = srcb + srca", 8
+  }
+  ,
+  {
+    af8, 1, "addx", addx, 0, 8
+  }
+  ,
+  {
+    af8, 1, "subx", subx, 0, 8
+  }
+  ,
+  {
+    af8, 0, "cmp.b", cmp, 0, 8
+  }
+  ,
+  {
+    af16, 0, "cmp.w", cmp, 0, 16
+  }
+  ,
+  {
+    nx, 1, "sleep", esleep, 0, 0
+  }
+  ,
+  {
+    nx, 0, "bpt", bpt, 0, 8
+  }
+  ,
+  {
+    nx, 0, "divxu", divxu, 0, 0
+  }
+  ,
+  {
+    nx, 0, "mulxu", mulxu, 0, 0
+  }
+  ,
+  {
+    mf8, 1, "mov.b", mov, 0, 8
+  }
+  ,
+  {
+    mf8, 1, "movtpe", mov, 0, 8
+  }
+  ,
+  {
+    mf8, 1, "movfpe", mov, 0, 8
+  }
+  ,
+  {
+    mf16, 1, "mov.w", mov, 0, 16
+  }
+  ,
+  {
+    0
+  }
 };
 
 static
@@ -741,7 +961,7 @@ edo (p)
 	  if (table[i].decode)
 	    decode (p, 1, table[i].size);
 	  printf ("cycles += %d;\n", p->time);
-	  printf ("npc = pc + %d;\n", p->length/2);
+	  printf ("npc = pc + %d;\n", p->length / 2);
 	  table[i].func (p, table[i].arg, table[i].size);
 	  if (table[i].decode)
 	    decode (p, 0, table[i].size);
@@ -849,17 +1069,22 @@ owrite (i)
 		  if (mask0[c] | mask1[c])
 		    {
 		      int sh;
+
 		      if (needand)
 			printf ("\n&&");
-		      if (c & 1) sh = 0;else sh = 8;
-		      if (c/2 == 0 && sh == 0)
-		       printf("((b1&0x%x)==0x%x)", mask0[c]| mask1[c],
-			      mask1[c]);
-		      else {
-		      printf ("((pc[%d]&(0x%02x<<%d))==(0x%x<<%d))",
-			      c/2, mask0[c] | mask1[c],sh,
-			      mask1[c],sh);
-		    }
+		      if (c & 1)
+			sh = 0;
+		      else
+			sh = 8;
+		      if (c / 2 == 0 && sh == 0)
+			printf ("((b1&0x%x)==0x%x)", mask0[c] | mask1[c],
+				mask1[c]);
+		      else
+			{
+			  printf ("((pc[%d]&(0x%02x<<%d))==(0x%x<<%d))",
+				  c / 2, mask0[c] | mask1[c], sh,
+				  mask1[c], sh);
+			}
 
 		      needand = 1;
 		    }

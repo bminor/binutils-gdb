@@ -1,5 +1,5 @@
 /* H8/300 simulator
-   Copyright 1992 Free Software Foundation, Inc.
+   Copyright 1993 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
    Written by Steve Chamberlain   (sac@cygnus.com).
