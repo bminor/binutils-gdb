@@ -2,6 +2,10 @@
 
 	* MAINTAINERS: Add myself to "Write After Approval".
 
+	* ax-gdb.c, ax-general.c, bcache.c, bfd-target.c, bsd-kvm.c,
+	* buildsym.c, c-lang.c, c-typeprint.c, c-valprint.c, charset.c,
+	* coff-pe-read.c, coffread.c, complaints.c, copying.c: I18n markup.
+
 2005-01-29  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.ac: Remove extra check for ranlib.

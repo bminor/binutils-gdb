@@ -121,8 +121,8 @@ target_bfd_reopen (struct bfd *bfd)
 {
   struct target_ops *t = XZALLOC (struct target_ops);
   t->to_shortname = "bfd";
-  t->to_longname = "BFD backed target";
-  t->to_doc = "You should never see this";
+  t->to_longname = _("BFD backed target");
+  t->to_doc = _("You should never see this");
   t->to_xfer_partial = target_bfd_xfer_partial;
   t->to_xclose = target_bfd_xclose;
   t->to_data = bfd;

@@ -576,7 +576,7 @@ coff_symfile_read (struct objfile *objfile, int mainline)
       val = init_lineno (abfd, info->min_lineno_offset,
                          info->max_lineno_offset - info->min_lineno_offset);
       if (val < 0)
-        error ("\"%s\": error reading line numbers\n", name);
+        error (_("\"%s\": error reading line numbers\n"), name);
     }
 
   /* Now read the string table, all at once.  */
@@ -584,7 +584,7 @@ coff_symfile_read (struct objfile *objfile, int mainline)
   make_cleanup (free_stringtab_cleanup, 0 /*ignore*/);
   val = init_stringtab (abfd, stringtab_offset);
   if (val < 0)
-    error ("\"%s\": can't get string table", name);
+    error (_("\"%s\": can't get string table"), name);
 
   init_minimal_symbol_collection ();
   cleanup_minimal_symbols = make_cleanup_discard_minimal_symbols ();
@@ -617,9 +617,8 @@ coff_symfile_read (struct objfile *objfile, int mainline)
     {
       if (!info->stabstrsect)
 	{
-	  error (("The debugging information in `%s' is corrupted.\n"
-		  "The file has a `.stabs' section, but no `.stabstr' "
-		  "section."),
+	  error (_("The debugging information in `%s' is corrupted.\n"
+		   "The file has a `.stabs' section, but no `.stabstr' section."),
 		 name);
 	}
 
@@ -783,7 +782,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	case C_LINE:
 	case C_ALIAS:
 	case C_HIDDEN:
-	  complaint (&symfile_complaints, "Bad n_sclass for symbol %s",
+	  complaint (&symfile_complaints, _("Bad n_sclass for symbol %s"),
 		     cs->c_name);
 	  break;
 
@@ -954,7 +953,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	         contains line number of '{' } */
 	      if (cs->c_naux != 1)
 		complaint (&symfile_complaints,
-			   "`.bf' symbol %d has no aux entry", cs->c_symnum);
+			   _("`.bf' symbol %d has no aux entry"), cs->c_symnum);
 	      fcn_first_line = main_aux.x_sym.x_misc.x_lnsz.x_lnno;
 	      fcn_first_line_addr = cs->c_value;
 
@@ -970,7 +969,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	  else if (DEPRECATED_STREQ (cs->c_name, ".ef"))
 	    {
 	      if (!within_function)
-		error ("Bad coff function information\n");
+		error (_("Bad coff function information\n"));
 	      /* the value of .ef is the address of epilogue code;
 	         not useful for gdb.  */
 	      /* { main_aux.x_sym.x_misc.x_lnsz.x_lnno
@@ -979,7 +978,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	      if (context_stack_depth <= 0)
 		{		/* We attempted to pop an empty context stack */
 		  complaint (&symfile_complaints,
-			     "`.ef' symbol without matching `.bf' symbol ignored starting at symnum %d",
+			     _("`.ef' symbol without matching `.bf' symbol ignored starting at symnum %d"),
 			     cs->c_symnum);
 		  within_function = 0;
 		  break;
@@ -990,7 +989,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	      if (context_stack_depth > 0 || new == NULL)
 		{
 		  complaint (&symfile_complaints,
-			     "Unmatched .ef symbol(s) ignored starting at symnum %d",
+			     _("Unmatched .ef symbol(s) ignored starting at symnum %d"),
 			     cs->c_symnum);
 		  within_function = 0;
 		  break;
@@ -998,7 +997,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	      if (cs->c_naux != 1)
 		{
 		  complaint (&symfile_complaints,
-			     "`.ef' symbol %d has no aux entry", cs->c_symnum);
+			     _("`.ef' symbol %d has no aux entry"), cs->c_symnum);
 		  fcn_last_line = 0x7FFFFFFF;
 		}
 	      else
@@ -1054,7 +1053,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	      if (context_stack_depth <= 0)
 		{		/* We attempted to pop an empty context stack */
 		  complaint (&symfile_complaints,
-			     "`.eb' symbol without matching `.bb' symbol ignored starting at symnum %d",
+			     _("`.eb' symbol without matching `.bb' symbol ignored starting at symnum %d"),
 			     cs->c_symnum);
 		  break;
 		}
@@ -1063,7 +1062,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	      if (depth-- != new->depth)
 		{
 		  complaint (&symfile_complaints,
-			     "Mismatched .eb symbol ignored starting at symnum %d",
+			     _("Mismatched .eb symbol ignored starting at symnum %d"),
 			     symnum);
 		  break;
 		}
@@ -1141,7 +1140,7 @@ read_one_sym (struct coff_symbol *cs,
 
 #if 0
   if (cs->c_sclass & 128)
-    printf ("thumb symbol %s, class 0x%x\n", cs->c_name, cs->c_sclass);
+    printf (_("thumb symbol %s, class 0x%x\n"), cs->c_name, cs->c_sclass);
 #endif
 
   symnum += 1 + cs->c_naux;
@@ -1351,7 +1350,7 @@ enter_linenos (long file_offset, int first_line,
   if (file_offset < linetab_offset)
     {
       complaint (&symfile_complaints,
-		 "Line number pointer %ld lower than start of line numbers",
+		 _("Line number pointer %ld lower than start of line numbers"),
 		 file_offset);
       if (file_offset > linetab_size)	/* Too big to be an offset? */
 	return;
@@ -1755,7 +1754,7 @@ decode_type (struct coff_symbol *cs, unsigned int c_type,
       else
 	{
 	  complaint (&symfile_complaints,
-		     "Symbol table entry for %s has bad tagndx value",
+		     _("Symbol table entry for %s has bad tagndx value"),
 		     cs->c_name);
 	  /* And fall through to decode_base_type... */
 	}
@@ -1913,7 +1912,7 @@ decode_base_type (struct coff_symbol *cs, unsigned int c_type,
       else
 	return lookup_fundamental_type (current_objfile, FT_UNSIGNED_LONG);
     }
-  complaint (&symfile_complaints, "Unexpected type for symbol %s", cs->c_name);
+  complaint (&symfile_complaints, _("Unexpected type for symbol %s"), cs->c_name);
   return lookup_fundamental_type (current_objfile, FT_VOID);
 }
 

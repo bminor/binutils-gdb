@@ -373,13 +373,13 @@ finish_block (struct symbol *symbol, struct pending **listhead,
       if (symbol)
 	{
 	  complaint (&symfile_complaints,
-		     "block end address less than block start address in %s (patched it)",
+		     _("block end address less than block start address in %s (patched it)"),
 		     SYMBOL_PRINT_NAME (symbol));
 	}
       else
 	{
 	  complaint (&symfile_complaints,
-		     "block end address 0x%s less than block start address 0x%s (patched it)",
+		     _("block end address 0x%s less than block start address 0x%s (patched it)"),
 		     paddr_nz (BLOCK_END (block)), paddr_nz (BLOCK_START (block)));
 	}
       /* Better than nothing */
@@ -407,13 +407,13 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	      if (symbol)
 		{
 		  complaint (&symfile_complaints,
-			     "inner block not inside outer block in %s",
+			     _("inner block not inside outer block in %s"),
 			     SYMBOL_PRINT_NAME (symbol));
 		}
 	      else
 		{
 		  complaint (&symfile_complaints,
-			     "inner block (0x%s-0x%s) not inside outer block (0x%s-0x%s)",
+			     _("inner block (0x%s-0x%s) not inside outer block (0x%s-0x%s)"),
 			     paddr_nz (BLOCK_START (pblock->block)),
 			     paddr_nz (BLOCK_END (pblock->block)),
 			     paddr_nz (BLOCK_START (block)),
@@ -519,7 +519,7 @@ make_blockvector (struct objfile *objfile)
 	      CORE_ADDR start
 		= BLOCK_START (BLOCKVECTOR_BLOCK (blockvector, i));
 
-	      complaint (&symfile_complaints, "block at %s out of order",
+	      complaint (&symfile_complaints, _("block at %s out of order"),
 			 hex_string ((LONGEST) start));
 	    }
 	}
@@ -674,7 +674,7 @@ push_subfile (void)
   subfile_stack = tem;
   if (current_subfile == NULL || current_subfile->name == NULL)
     {
-      internal_error (__FILE__, __LINE__, "failed internal consistency check");
+      internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
     }
   tem->name = current_subfile->name;
 }
@@ -687,7 +687,7 @@ pop_subfile (void)
 
   if (link == NULL)
     {
-      internal_error (__FILE__, __LINE__, "failed internal consistency check");
+      internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
     }
   name = link->name;
   subfile_stack = link->next;
@@ -838,7 +838,7 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 	     believed to happen in most cases (even for coffread.c);
 	     it used to be an abort().  */
 	  complaint (&symfile_complaints,
-	             "Context stack not empty in end_symtab");
+	             _("Context stack not empty in end_symtab"));
 	  context_stack_depth = 0;
 	}
     }

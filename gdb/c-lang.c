@@ -149,7 +149,7 @@ c_printstr (struct ui_file *stream, const bfd_byte *string,
 	      in_quotes = 0;
 	    }
 	  LA_PRINT_CHAR (current_char, stream);
-	  fprintf_filtered (stream, " <repeats %u times>", reps);
+	  fprintf_filtered (stream, _(" <repeats %u times>"), reps);
 	  i = rep1 - 1;
 	  things_printed += repeat_count_threshold;
 	  need_comma = 1;
@@ -220,7 +220,7 @@ c_create_fundamental_type (struct objfile *objfile, int typeid)
       type = init_type (TYPE_CODE_INT,
 			TARGET_INT_BIT / TARGET_CHAR_BIT,
 			0, "<?type?>", objfile);
-      warning ("internal error: no C/C++ fundamental type %d", typeid);
+      warning (_("internal error: no C/C++ fundamental type %d"), typeid);
       break;
     case FT_VOID:
       type = init_type (TYPE_CODE_VOID,

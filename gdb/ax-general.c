@@ -116,7 +116,7 @@ read_const (struct agent_expr *x, int o, int n)
 
   /* Make sure we're not reading off the end of the expression.  */
   if (o + n > x->len)
-    error ("GDB bug: ax-general.c (read_const): incomplete constant");
+    error (_("GDB bug: ax-general.c (read_const): incomplete constant"));
 
   for (i = 0; i < n; i++)
     accum = (accum << 8) | x->buf[o + i];
@@ -141,10 +141,10 @@ generic_ext (struct agent_expr *x, enum agent_op op, int n)
 {
   /* N must fit in a byte.  */
   if (n < 0 || n > 255)
-    error ("GDB bug: ax-general.c (generic_ext): bit count out of range");
+    error (_("GDB bug: ax-general.c (generic_ext): bit count out of range"));
   /* That had better be enough range.  */
   if (sizeof (LONGEST) * 8 > 255)
-    error ("GDB bug: ax-general.c (generic_ext): opcode has inadequate range");
+    error (_("GDB bug: ax-general.c (generic_ext): opcode has inadequate range"));
 
   grow_expr (x, 2);
   x->buf[x->len++] = op;
@@ -174,7 +174,7 @@ ax_trace_quick (struct agent_expr *x, int n)
 {
   /* N must fit in a byte.  */
   if (n < 0 || n > 255)
-    error ("GDB bug: ax-general.c (ax_trace_quick): size out of range for trace_quick");
+    error (_("GDB bug: ax-general.c (ax_trace_quick): size out of range for trace_quick"));
 
   grow_expr (x, 2);
   x->buf[x->len++] = aop_trace_quick;
@@ -209,7 +209,7 @@ ax_label (struct agent_expr *x, int patch, int target)
   /* Make sure the value is in range.  Don't accept 0xffff as an
      offset; that's our magic sentinel value for unpatched branches.  */
   if (target < 0 || target >= 0xffff)
-    error ("GDB bug: ax-general.c (ax_label): label target out of range");
+    error (_("GDB bug: ax-general.c (ax_label): label target out of range"));
 
   x->buf[patch] = (target >> 8) & 0xff;
   x->buf[patch + 1] = target & 0xff;
@@ -251,7 +251,7 @@ void
 ax_const_d (struct agent_expr *x, LONGEST d)
 {
   /* FIXME: floating-point support not present yet.  */
-  error ("GDB bug: ax-general.c (ax_const_d): floating point not supported yet");
+  error (_("GDB bug: ax-general.c (ax_const_d): floating point not supported yet"));
 }
 
 
@@ -262,7 +262,7 @@ ax_reg (struct agent_expr *x, int reg)
 {
   /* Make sure the register number is in range.  */
   if (reg < 0 || reg > 0xffff)
-    error ("GDB bug: ax-general.c (ax_reg): register number out of range");
+    error (_("GDB bug: ax-general.c (ax_reg): register number out of range"));
   grow_expr (x, 3);
   x->buf[x->len] = aop_reg;
   x->buf[x->len + 1] = (reg >> 8) & 0xff;
@@ -340,7 +340,7 @@ ax_print (struct ui_file *f, struct agent_expr *x)
      the enum, to catch additions that people didn't sync.  */
   if ((sizeof (aop_map) / sizeof (aop_map[0]))
       != aop_last)
-    error ("GDB bug: ax-general.c (ax_print): opcode map out of sync");
+    error (_("GDB bug: ax-general.c (ax_print): opcode map out of sync"));
 
   for (i = 0; i < x->len;)
     {
@@ -349,13 +349,13 @@ ax_print (struct ui_file *f, struct agent_expr *x)
       if (op >= (sizeof (aop_map) / sizeof (aop_map[0]))
 	  || !aop_map[op].name)
 	{
-	  fprintf_filtered (f, "%3d  <bad opcode %02x>\n", i, op);
+	  fprintf_filtered (f, _("%3d  <bad opcode %02x>\n"), i, op);
 	  i++;
 	  continue;
 	}
       if (i + 1 + aop_map[op].op_size > x->len)
 	{
-	  fprintf_filtered (f, "%3d  <incomplete opcode %s>\n",
+	  fprintf_filtered (f, _("%3d  <incomplete opcode %s>\n"),
 			    i, aop_map[op].name);
 	  break;
 	}

@@ -125,7 +125,7 @@ c_val_print (struct type *type, const bfd_byte *valaddr, int embedded_offset,
 	      if (cp_is_vtbl_ptr_type (elttype))
 		{
 		  i = 1;
-		  fprintf_filtered (stream, "%d vtable entries", len - 1);
+		  fprintf_filtered (stream, _("%d vtable entries"), len - 1);
 		}
 	      else
 		{
@@ -251,7 +251,7 @@ c_val_print (struct type *type, const bfd_byte *valaddr, int embedded_offset,
       break;
 
     case TYPE_CODE_MEMBER:
-      error ("not implemented: member type in c_val_print");
+      error (_("not implemented: member type in c_val_print"));
       break;
 
     case TYPE_CODE_REF:
@@ -455,14 +455,14 @@ c_val_print (struct type *type, const bfd_byte *valaddr, int embedded_offset,
       break;
 
     case TYPE_CODE_ERROR:
-      fprintf_filtered (stream, "<error type>");
+      fprintf_filtered (stream, _("<error type>"));
       break;
 
     case TYPE_CODE_UNDEF:
       /* This happens (without TYPE_FLAG_STUB set) on systems which don't use
          dbx xrefs (NO_DBX_XREFS in gcc) if a file has a "struct foo *bar"
          and no complete type for struct foo in that file.  */
-      fprintf_filtered (stream, "<incomplete type>");
+      fprintf_filtered (stream, _("<incomplete type>"));
       break;
 
     case TYPE_CODE_COMPLEX:
@@ -488,7 +488,7 @@ c_val_print (struct type *type, const bfd_byte *valaddr, int embedded_offset,
       break;
 
     default:
-      error ("Invalid C/C++ type code %d in symbol table.", TYPE_CODE (type));
+      error (_("Invalid C/C++ type code %d in symbol table."), TYPE_CODE (type));
     }
   gdb_flush (stream);
   return (0);
@@ -576,7 +576,7 @@ c_value_print (struct value *val, struct ui_file *stream, int format,
 	  val = value_full_object (val, real_type, full, top, using_enc);
 	  fprintf_filtered (stream, "(%s%s) ",
 			    TYPE_NAME (real_type),
-			    full ? "" : " [incomplete object]");
+			    full ? "" : _(" [incomplete object]"));
 	  /* Print out object: enclosing type is same as real_type if full */
 	  return val_print (VALUE_ENCLOSING_TYPE (val), VALUE_CONTENTS_ALL (val), 0,
 			 VALUE_ADDRESS (val), stream, format, 1, 0, pretty);

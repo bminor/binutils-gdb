@@ -309,7 +309,7 @@ read_pe_exported_syms (struct objfile *objfile)
 	+= ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
     }
 
-  printf_filtered ("Minimal symbols from %s...", dll_name);
+  printf_filtered (_("Minimal symbols from %s..."), dll_name);
   wrap_here ("");
 
   /* Truncate name at first dot. Should maybe also convert to all
