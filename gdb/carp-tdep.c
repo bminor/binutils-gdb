@@ -599,18 +599,11 @@ int carp_need_text_start_end;
 
 
 #if 0
-@item NO_SINGLE_STEP
-Define this if the target does not support single-stepping.  If this is
-defined, you must supply, in @code{*-tdep.c}, the function
-@code{single_step}, which takes a target_signal as argument and returns
-nothing.  It must insert breakpoints at each possible destinations of
-the next instruction.  See @code{sparc-tdep.c} and @code{rs6000-tdep.c}
-for examples.
+@item SOFTWARE_SINGLE_STEP_P
+@ttem SOFTWARE_SINGLE_STEP
 #endif
-int one_stepped;
-void single_step (enum target_signal signal) { return; }
-/* #define NO_SINGLE_STEP */
-
+int carp_software_single_step_p;
+void carp_software_single_step (int signal, int bp_p) { return; }
 
 #if 0
 @item NUM_REGS

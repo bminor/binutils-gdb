@@ -1384,12 +1384,14 @@ text section.  (Seems dubious.)
 @item NO_HIF_SUPPORT
 (Specific to the a29k.)
 
-@item NO_SINGLE_STEP
-Define this if the target does not support single-stepping.  If this is
-defined, you must supply, in @code{*-tdep.c}, the function
-@code{single_step}, which takes a target_signal as argument and returns
-nothing.  It must insert breakpoints at each possible destinations of
-the next instruction.  See @code{sparc-tdep.c} and @code{rs6000-tdep.c}
+@item SOFTWARE_SINGLE_STEP_P
+Define this as 1 if the target does not have a hardware single-step
+mechanism. The macro @code{SOFTWARE_SINGLE_STEP} must also be defined.
+
+@item SOFTWARE_SINGLE_STEP(signal,insert_breapoints_p)
+A function that inserts or removes (dependant on
+@var{insert_breapoints_p}) breakpoints at each possible destinations of
+the next instruction. See @code{sparc-tdep.c} and @code{rs6000-tdep.c}
 for examples.
 
 @item PCC_SOL_BROKEN
@@ -1557,6 +1559,12 @@ and write register functions with the relevant @code{_REGNUM} argument.
 These macros are useful when a target keeps one of these registers in a
 hard to get at place; for example, part in a segment register and part
 in an ordinary register.
+
+@item TARGET_VIRTUAL_FRAME_POINTER(pc,regp,offsetp)
+Returns a @code{(register, offset)} pair representing the virtual 
+frame pointer in use at the code address @code{"pc"}.  If virtual 
+frame pointers are not used, a default definition simply returns 
+@code{FP_REGNUM}, with an offset of zero.
 
 @item USE_STRUCT_CONVENTION (gcc_p, type)
 If defined, this must be an expression that is nonzero if a value of the

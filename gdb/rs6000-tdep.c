@@ -32,9 +32,6 @@ extern struct obstack frame_cache_obstack;
 
 extern int errno;
 
-/* Nonzero if we just simulated a single step break. */
-int one_stepped;
-
 /* Breakpoint shadows for the single step instructions will be kept here. */
 
 static struct sstep_breaks {
@@ -157,8 +154,9 @@ rs6000_breakpoint_from_pc (bp_addr, bp_size)
 /* AIX does not support PT_STEP. Simulate it. */
 
 void
-single_step (signal)
+rs6000_software_single_step (signal, insert_breakpoints_p)
      enum target_signal signal;
+     int insert_breakpoints_p;
 {
 #define	INSNLEN(OPCODE)	 4
 
@@ -170,7 +168,8 @@ single_step (signal)
   CORE_ADDR breaks[2];
   int opcode;
 
-  if (!one_stepped) {
+  if (insert_breakpoints_p) {
+
     loc = read_pc ();
 
     insn = read_memory_integer (loc, 4);
@@ -197,7 +196,6 @@ single_step (signal)
       stepBreaks[ii].address = breaks[ii];
     }  
 
-    one_stepped = 1;
   } else {
 
     /* remove step breakpoints. */
@@ -206,7 +204,6 @@ single_step (signal)
         write_memory 
            (stepBreaks[ii].address, stepBreaks[ii].data, 4);
 
-    one_stepped = 0;
   }
   errno = 0;			/* FIXME, don't ignore errors! */
 			/* What errors?  {read,write}_memory call error().  */

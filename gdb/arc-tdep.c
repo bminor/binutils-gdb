@@ -508,12 +508,6 @@ get_insn_type (insn, pc, target)
     }
 }
 
-/* Non-zero if we just simulated a single-step.  This is needed because we
-   cannot remove the breakpoints in the inferior process until after the
-   `wait' in `wait_for_inferior'.  */
-
-int one_stepped;
-
 /* single_step() is called just before we want to resume the inferior, if we
    want to single-step it but there is no hardware or kernel single-step
    support.  We find all the possible targets of the coming instruction and
@@ -523,15 +517,16 @@ int one_stepped;
    set up a simulated single-step, we undo our damage.  */
 
 void
-single_step (ignore)
-     enum target_signal ignore; /* sig, but we don't need it */
+arc_software_single_step (ignore, insert_breakpoints_p)
+     enum target_signal ignore; /* sig but we don't need it */
+     int insert_breakpoints_p;
 {
   static CORE_ADDR next_pc, target;
   static int brktrg_p;
   typedef char binsn_quantum[BREAKPOINT_MAX];
   static binsn_quantum break_mem[2];
 
-  if (!one_stepped)
+  if (insert_breakpoints_p)
     {
       insn_type type;
       CORE_ADDR pc;
@@ -558,8 +553,6 @@ single_step (ignore)
 	  target_insert_breakpoint (target, break_mem[1]);
 	}
 
-      /* We are ready to let it go.  */
-      one_stepped = 1;
     }
   else
     {
@@ -572,8 +565,6 @@ single_step (ignore)
       /* Fix the pc.  */
       stop_pc -= DECR_PC_AFTER_BREAK;
       write_pc (stop_pc);
-
-      one_stepped = 0;
     }
 }
 

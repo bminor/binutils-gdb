@@ -1,3 +1,8 @@
+Fri Nov 27 12:39:45 1998  Andrew Cagney  <cagney@chook>
+
+	* gdbint.texinfo (NO_SINGLE_STEP): Replace with
+ 	SOFTWARE_SINGLE_STEP_P and SOFTWARE_SINGLE_STEP.
+
 Wed Oct 14 10:02:40 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo: Fix minor typos.

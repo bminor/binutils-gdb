@@ -1,6 +1,6 @@
 /* Target-struct-independent code to start (run) and stop an inferior process.
-   Copyright 1986, 1987, 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998 Free Software Foundation, Inc.
+   Copyright 1986, 87, 88, 89, 91, 92, 93, 94, 95, 96, 97, 1998
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -50,6 +50,8 @@ static void resume_cleanups PARAMS ((int));
 static int hook_stop_stub PARAMS ((char *));
 
 static void delete_breakpoint_current_contents PARAMS ((PTR));
+
+void _initialize_infrun PARAMS ((void));
 
 /* GET_LONGJMP_TARGET returns the PC at which longjmp() will resume the
    program.  It needs to examine the jmp_buf argument and extract the PC
@@ -210,6 +212,11 @@ static int breakpoints_failed;
 
 static int stop_print_frame;
 
+/* Non-zero if we just simulating a single-step.  This is needed
+   because we cannot remove the breakpoints in the inferior process
+   until after the `wait' in `wait_for_inferior'.  */
+static int singlestep_breakpoints_inserted_p = 0;
+
 
 /* Things to clean up if we QUIT out of resume ().  */
 /* ARGSUSED */
@@ -233,7 +240,8 @@ resume (step, sig)
      int step;
      enum target_signal sig;
 {
-  struct cleanup *old_cleanups = make_cleanup (resume_cleanups, 0);
+  struct cleanup *old_cleanups = make_cleanup ((make_cleanup_func) 
+                                               resume_cleanups, 0);
   QUIT;
 
 #ifdef CANNOT_STEP_BREAKPOINT
@@ -244,12 +252,16 @@ resume (step, sig)
     step = 0;
 #endif
 
-#ifdef NO_SINGLE_STEP
-  if (step) {
-    single_step(sig);	/* Do it the hard way, w/temp breakpoints */
-    step = 0;		/* ...and don't ask hardware to do it.  */
-  }
-#endif
+  if (SOFTWARE_SINGLE_STEP_P && step)
+    {
+      /* Do it the hard way, w/temp breakpoints */
+      SOFTWARE_SINGLE_STEP (sig, 1 /*insert-breakpoints*/);
+      /* ...and don't ask hardware to do it.  */
+      step = 0;
+      /* and do not pull these breakpoints until after a `wait' in
+         `wait_for_inferior' */
+      singlestep_breakpoints_inserted_p = 1;
+    }
 
   /* Handle any optimized stores to the inferior NOW...  */
 #ifdef DO_DEFERRED_STORES
@@ -318,14 +330,17 @@ proceed (addr, siggnal, step)
       if (read_pc () == stop_pc && breakpoint_here_p (read_pc ()))
 	oneproc = 1;
 
-#ifdef STEP_SKIPS_DELAY
+#ifndef STEP_SKIPS_DELAY
+#define STEP_SKIPS_DELAY(pc) (0)
+#define STEP_SKIPS_DELAY_P (0)
+#endif
       /* Check breakpoint_here_p first, because breakpoint_here_p is fast
 	 (it just checks internal GDB data structures) and STEP_SKIPS_DELAY
 	 is slow (it needs to read memory from the target).  */
-      if (breakpoint_here_p (read_pc () + 4)
+      if (STEP_SKIPS_DELAY_P
+	  && breakpoint_here_p (read_pc () + 4)
 	  && STEP_SKIPS_DELAY (read_pc ()))
 	oneproc = 1;
-#endif /* STEP_SKIPS_DELAY */
     }
   else
     write_pc (addr);
@@ -527,6 +542,7 @@ wait_for_inferior ()
       /* If it's a new process, add it to the thread database */
 
       if (w.kind != TARGET_WAITKIND_EXITED
+	  && w.kind != TARGET_WAITKIND_SIGNALLED
 	  && pid != inferior_pid
 	  && !in_thread_list (pid))
 	{
@@ -600,9 +616,7 @@ wait_for_inferior ()
 					       (LONGEST) w.value.integer));
 	  gdb_flush (gdb_stdout);
 	  target_mourn_inferior ();
-#ifdef NO_SINGLE_STEP
-	  one_stepped = 0;
-#endif
+	  singlestep_breakpoints_inserted_p = 0; /*SOFTWARE_SINGLE_STEP_P*/
 	  stop_print_frame = 0;
 	  goto stop_stepping;
 
@@ -631,9 +645,7 @@ wait_for_inferior ()
 
 	  printf_filtered ("The program no longer exists.\n");
 	  gdb_flush (gdb_stdout);
-#ifdef NO_SINGLE_STEP
-	  one_stepped = 0;
-#endif
+	  singlestep_breakpoints_inserted_p = 0; /*SOFTWARE_SINGLE_STEP_P*/
 	  goto stop_stepping;
 
 	case TARGET_WAITKIND_STOPPED:
@@ -652,11 +664,9 @@ wait_for_inferior ()
 
       if (stop_signal == TARGET_SIGNAL_TRAP)
 	{
-#ifdef NO_SINGLE_STEP
-	  if (one_stepped)
+	  if (SOFTWARE_SINGLE_STEP_P && singlestep_breakpoints_inserted_p)
 	    random_signal = 0;
 	  else
-#endif
 	    if (breakpoints_inserted
 		&& breakpoint_here_p (stop_pc - DECR_PC_AFTER_BREAK))
 	      {
@@ -747,14 +757,20 @@ wait_for_inferior ()
 			     &step_range_start, &step_range_end,
 			     &step_frame_address, &handling_longjmp,
 			     &another_trap);
+
+	  if (context_hook)
+	    context_hook (pid_to_thread_id (pid));
+	  
 	  printf_filtered ("[Switching to %s]\n", target_pid_to_str (pid));
 	  flush_cached_frames ();
 	}
 
-#ifdef NO_SINGLE_STEP
-      if (one_stepped)
-	single_step (0);	/* This actually cleans up the ss */
-#endif /* NO_SINGLE_STEP */
+      if (SOFTWARE_SINGLE_STEP_P && singlestep_breakpoints_inserted_p)
+	{
+	  /* Pull the single step breakpoints out of the target. */
+	  SOFTWARE_SINGLE_STEP (0, 0);
+	  singlestep_breakpoints_inserted_p = 0;
+	}
       
       /* If PC is pointing at a nullified instruction, then step beyond
 	 it so that the user won't be confused when GDB appears to be ready
@@ -1359,7 +1375,7 @@ wait_for_inferior ()
 	if (stop_pc == stop_func_start /* Quick test */
 	    || in_prologue (stop_pc, stop_func_start)
 	    || IN_SOLIB_CALL_TRAMPOLINE (stop_pc, stop_func_name)
-	    || stop_func_start == 0)
+	    || stop_func_name == 0)
 #endif
 
 	{
@@ -1906,7 +1922,7 @@ handle_command (args, from_tty)
     {
       nomem (0);
     }
-  old_chain = make_cleanup (freeargv, (char *) argv);
+  old_chain = make_cleanup ((make_cleanup_func) freeargv, (char *) argv);
 
   /* Walk through the args, looking for signal oursigs, signal names, and
      actions.  Signal numbers and signal names may be interspersed with

@@ -102,8 +102,9 @@ extern CORE_ADDR mips_skip_prologue PARAMS ((CORE_ADDR addr, int lenient));
 
 /* Return non-zero if PC points to an instruction which will cause a step
    to execute both the instruction at PC and an instruction at PC+4.  */
-#define STEP_SKIPS_DELAY(pc) (mips_step_skips_delay (pc))
 extern int mips_step_skips_delay PARAMS ((CORE_ADDR));
+#define STEP_SKIPS_DELAY_P (1)
+#define STEP_SKIPS_DELAY(pc) (mips_step_skips_delay (pc))
 
 /* Immediately after a function call, return the saved pc.
    Can't always go through the frames for this because on some machines

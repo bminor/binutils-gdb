@@ -626,7 +626,9 @@ extern int is_magic_function_pointer PARAMS ((CORE_ADDR));
 
 /* RS6000/AIX does not support PT_STEP.  Has to be simulated.  */
 
-#define NO_SINGLE_STEP
+#define SOFTWARE_SINGLE_STEP_P 1
+extern void rs6000_software_single_step PARAMS ((unsigned int, int));
+#define SOFTWARE_SINGLE_STEP(sig,bp_p) rs6000_software_single_step (sig, bp_p)
 
 /* If the current gcc for for this target does not produce correct debugging
    information for float parameters, both prototyped and unprototyped, then

@@ -62,7 +62,9 @@ extern CORE_ADDR skip_prologue PARAMS ((CORE_ADDR, int));
 
 /* We don't have a reliable single step facility.
    ??? We do have a cycle single step facility, but that won't work.  */
-#define NO_SINGLE_STEP
+#define SOFTWARE_SINGLE_STEP_P 1
+extern void arc_software_single_step PARAMS ((unsigned int, int));
+#define SOFTWARE_SINGLE_STEP(sig,bp_p) arc_software_single_step (sig, bp_p)
 
 /* FIXME: Need to set STEP_SKIPS_DELAY.  */
 

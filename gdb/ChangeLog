@@ -1,3 +1,26 @@
+Fri Nov 27 11:00:25 1998  Andrew Cagney  <cagney@chook>
+
+	* target.h (one_stepped): Move global from here.
+	* infrun.c (singlestep_breakpoints_inserted_p): To here. Rename.
+  	Make static.
+	(wait_for_inferior): Update.
+	(resume): Update. Set variable after call to SOFTWARE_SINGLE_STEP.
+	
+	* target.h (NO_SINGLE_STEP): Replace with SOFTWARE_SINGLE_STEP_P
+ 	and SOFTWARE_SINGLE_STEP.
+	* config/sparc/tm-sparc.h, config/rs6000/tm-rs6000.h,
+ 	config/arc/tm-arc.h: Update.
+	* rs6000-tdep.c (rs6000_software_single_step), sparc-tdep.c
+ 	(sparc_software_single_step), arc-tdep.c (arc_single_step): New
+ 	functions. Replace function single_step.
+	
+	* config/mips/tm-mips.h (STEP_SKIPS_DELAY_P): Define.
+	* infrun.c (proceed): Cleanup.
+start-sanitize-sky
+	* config/mips/tm-txvu.h (STEP_SKIPS_DELAY), txvu-tdep.c
+ 	(txvu_step_skips_delay): Change macro to function.
+end-sanitize-sky
+
 Thu Nov 26 11:19:15 1998  Andrew Cagney  <cagney@amy.cygnus.com>
 
 	* config/alpha/tm-alpha.h (ABOUT_TO_RETURN): Replace macro.

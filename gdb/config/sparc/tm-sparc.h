@@ -527,7 +527,9 @@ void sparc_fix_call_dummy PARAMS ((char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 
 /* Sparc has no reliable single step ptrace call */
 
-#define NO_SINGLE_STEP 1
+#define SOFTWARE_SINGLE_STEP_P 1
+extern void sparc_software_single_step PARAMS ((unsigned int, int));
+#define SOFTWARE_SINGLE_STEP(sig,bp_p) sparc_software_single_step (sig,bp_p)
 
 /* We need more arguments in a frame specification for the
    "frame" or "info frame" command.  */
