@@ -120,31 +120,31 @@
 		array, pointer, function, etc. qualifiers.  The
 		current base types that I have documentation for are:
 
-			btNil		-- undefined 
+			btNil		-- undefined
 			btAdr		-- address - integer same size as ptr
-			btChar		-- character 
-			btUChar		-- unsigned character 
-			btShort		-- short 
-			btUShort	-- unsigned short 
-			btInt		-- int 
-			btUInt		-- unsigned int 
-			btLong		-- long 
-			btULong		-- unsigned long 
-			btFloat		-- float (real) 
-			btDouble	-- Double (real) 
-			btStruct	-- Structure (Record) 
-			btUnion		-- Union (variant) 
-			btEnum		-- Enumerated 
-			btTypedef	-- defined via a typedef isymRef 
-			btRange		-- subrange of int 
-			btSet		-- pascal sets 
-			btComplex	-- fortran complex 
-			btDComplex	-- fortran double complex 
-			btIndirect	-- forward or unnamed typedef 
-			btFixedDec	-- Fixed Decimal 
-			btFloatDec	-- Float Decimal 
-			btString	-- Varying Length Character String 
-			btBit		-- Aligned Bit String 
+			btChar		-- character
+			btUChar		-- unsigned character
+			btShort		-- short
+			btUShort	-- unsigned short
+			btInt		-- int
+			btUInt		-- unsigned int
+			btLong		-- long
+			btULong		-- unsigned long
+			btFloat		-- float (real)
+			btDouble	-- Double (real)
+			btStruct	-- Structure (Record)
+			btUnion		-- Union (variant)
+			btEnum		-- Enumerated
+			btTypedef	-- defined via a typedef isymRef
+			btRange		-- subrange of int
+			btSet		-- pascal sets
+			btComplex	-- fortran complex
+			btDComplex	-- fortran double complex
+			btIndirect	-- forward or unnamed typedef
+			btFixedDec	-- Fixed Decimal
+			btFloatDec	-- Float Decimal
+			btString	-- Varying Length Character String
+			btBit		-- Aligned Bit String
 			btPicture	-- Picture
 			btVoid		-- Void (MIPS cc revision >= 2.00)
 
@@ -152,12 +152,12 @@
 		current type qualifier fields I have documentation for
 		are:
 
-			tqNil		-- no more qualifiers 
-			tqPtr		-- pointer 
-			tqProc		-- procedure 
-			tqArray		-- array 
-			tqFar		-- 8086 far pointers 
-			tqVol		-- volatile 
+			tqNil		-- no more qualifiers
+			tqPtr		-- pointer
+			tqProc		-- procedure
+			tqArray		-- array
+			tqFar		-- 8086 far pointers
+			tqVol		-- volatile
 
 
    The dense number table is used in the front ends, and disappears by
@@ -266,7 +266,7 @@
 	}
 
    Mips-tdump produces the following information:
-   
+
    Global file header:
        magic number             0x162
        # sections               2
@@ -275,12 +275,12 @@
        symbolic header size     96
        optional header          56
        flags                    0x0
-   
+
    Symbolic header, magic number = 0x7009, vstamp = 1.31:
-   
+
        Info                      Offset      Number       Bytes
        ====                      ======      ======      =====
-   
+
        Line numbers                 380           4           4 [13]
        Dense numbers                  0           0           0
        Procedures Tables            384           1          52
@@ -292,14 +292,14 @@
        File Tables                 1008           2         144
        Relative Files                 0           0           0
        External Symbols            1152          20         320
-   
+
    File #0, "hello2.c"
-   
+
        Name index  = 1          Readin      = No
        Merge       = No         Endian      = LITTLE
        Debug level = G2         Language    = C
        Adr         = 0x00000000
-   
+
        Info                       Start      Number        Size      Offset
        ====                       =====      ======        ====      ======
        Local strings                  0          15          15         784
@@ -309,7 +309,7 @@
        Procedures                     0           1          52         384
        Auxiliary symbols              0          14          56         628
        Relative Files                 0           0           0           0
-   
+
     There are 6 local symbols, starting at 436
 
 	Symbol# 0: "hello2.c"
@@ -953,7 +953,7 @@ typedef struct efdr {
 } efdr_t;
 
 /* Pre-initialized extended file structure.  */
-static const efdr_t init_file = 
+static const efdr_t init_file =
 {
   {			/* FDR structure */
     0,			/* adr:		memory address of beginning of file */
@@ -1401,6 +1401,7 @@ static int	debug		= 0; 		/* trace functions */
 #endif
 static int	stabs_seen	= 0;		/* != 0 if stabs have been seen */
 
+static int current_file_idx;
 
 /* Pseudo symbol to use when putting stabs into the symbol table.  */
 #ifndef STABS_SYMBOL
@@ -1462,10 +1463,7 @@ static unsigned long ecoff_build_ss
 static unsigned long ecoff_build_fdr
   PARAMS ((const struct ecoff_debug_swap *backend, char **buf, char **bufend,
 	   unsigned long offset));
-static unsigned long ecoff_build_ext
-  PARAMS ((const struct ecoff_debug_swap *backend, char **buf, char **bufend,
-	   unsigned long offset, varray_t *ext_strings,
-	   struct hash_control *ext_str_hash));
+static void ecoff_setup_ext PARAMS ((void));
 static page_t *allocate_cluster PARAMS ((unsigned long npages));
 static page_t *allocate_page PARAMS ((void));
 static scope_t *allocate_scope PARAMS ((void));
@@ -1936,7 +1934,7 @@ add_aux_sym_tir (t, state, hash_tbl)
   ret = vp->num_allocated++;
 
   /* Add bitfield length if it exists.
-     
+
      NOTE:  Mips documentation claims bitfield goes at the end of the
      AUX record, but the DECstation compiler emits it here.
      (This would only make a difference for enum bitfields.)
@@ -2232,7 +2230,7 @@ add_file (file_name, indx)
 	&file_desc.last->datum->file[file_desc.objects_last_page++];
       *fil_ptr = init_file;
 
-      fil_ptr->file_index = indx;
+      fil_ptr->file_index = current_file_idx++;
       ++file_desc.num_allocated;
 
       /* Allocate the string hash table.  */
@@ -2373,7 +2371,7 @@ ecoff_directive_begin (ignore)
       demand_empty_rest_of_line ();
       return;
     }
-  
+
   name = input_line_pointer;
   name_end = get_symbol_end ();
 
@@ -2951,7 +2949,7 @@ ecoff_directive_end (ignore)
 
   name = input_line_pointer;
   name_end = get_symbol_end ();
-  
+
   ch = *name;
   if (! is_name_beginner (ch))
     {
@@ -3120,7 +3118,13 @@ ecoff_directive_frame (ignore)
 
   cur_proc_ptr->pdr.pcreg = tc_get_register (0);
 
+#if 0 /* Alpha-OSF1 adds "the offset of saved $a0 from $sp", according
+	 to Sandro.  I don't yet know where this value should be stored, if
+	 anywhere.  */
   demand_empty_rest_of_line ();
+#else
+  s_ignore (42);
+#endif
 }
 
 /* Parse .mask directives.  */
@@ -3289,6 +3293,7 @@ ecoff_stab (what, string, type, other, desc)
   st_t st;
   sc_t sc;
   symint_t indx;
+  localsym_t *hold = NULL;
 
   /* We don't handle .stabd.  */
   if (what != 's' && what != 'n')
@@ -3359,7 +3364,7 @@ ecoff_stab (what, string, type, other, desc)
       if (listing && (type == N_SO || type == N_SOL))
 	listing_source_file (string);
 #endif
-      
+
       if (isdigit (*input_line_pointer)
 	  || *input_line_pointer == '-'
 	  || *input_line_pointer == '+')
@@ -3401,7 +3406,16 @@ ecoff_stab (what, string, type, other, desc)
       indx = ECOFF_MARK_STAB (type);
     }
 
+  /* Don't store the stabs symbol we are creating as the type of the
+     ECOFF symbol.  We want to compute the type of the ECOFF symbol
+     independently.  */
+  if (sym != (symbolS *) NULL)
+    hold = sym->ecoff_symbol;
+
   (void) add_ecoff_symbol (string, st, sc, sym, value, indx);
+
+  if (sym != (symbolS *) NULL)
+    sym->ecoff_symbol = hold;
 
   /* Restore normal file type.  */
   cur_file_ptr = save_file_ptr;
@@ -3546,7 +3560,7 @@ ecoff_build_lineno (backend, buf, bufend, offset, linecntptr)
 	    }
 
 	  last = (lineno_list_t *) NULL;
-	}      
+	}
 
       totcount += count;
 
@@ -3778,8 +3792,9 @@ ecoff_build_symbols (backend, buf, bufend, offset)
 			  seg = S_GET_SEGMENT (as_sym);
 			  segname = segment_name (seg);
 
-			  if (S_IS_EXTERNAL (as_sym)
-			      || ! S_IS_DEFINED (as_sym))
+			  if (! ECOFF_IS_STAB (&sym_ptr->ecoff_sym.asym)
+			      && (S_IS_EXTERNAL (as_sym)
+				  || ! S_IS_DEFINED (as_sym)))
 			    st = st_Global;
 			  else if (seg == text_section)
 			    st = st_Label;
@@ -3954,7 +3969,8 @@ ecoff_build_symbols (backend, buf, bufend, offset)
 		  /* Record the local symbol index and file number in
 		     case this is an external symbol.  Note that this
 		     destroys the asym.index field.  */
-		  if (as_sym != (symbolS *) NULL)
+		  if (as_sym != (symbolS *) NULL
+		      && as_sym->ecoff_symbol == sym_ptr)
 		    {
 		      if (sym_ptr->ecoff_sym.asym.st == st_Proc
 			  || sym_ptr->ecoff_sym.asym.st == st_StaticProc)
@@ -3991,7 +4007,7 @@ ecoff_build_procs (backend, buf, bufend, offset)
   vlinks_t *file_link;
 
   pdr_out = *buf + offset;
-  
+
   first_fil = 1;
   iproc = 0;
 
@@ -4082,7 +4098,7 @@ ecoff_build_aux (backend, buf, bufend, offset)
   bigendian = stdoutput->xvec->header_byteorder_big_p;
 
   aux_out = (union aux_ext *) (*buf + offset);
-  
+
   iaux = 0;
 
   /* The aux entries are stored by file.  */
@@ -4308,27 +4324,15 @@ ecoff_build_fdr (backend, buf, bufend, offset)
   return offset + ifile * external_fdr_size;
 }
 
-/* Swap out the external symbols.  These are the symbols that the
-   machine independent code has put in the symtab for the BFD.  */
+/* Set up the external symbols.  These are supposed to be handled by
+   the backend.  This routine just gets the right information and
+   calls a backend function to deal with it.  */
 
-static unsigned long
-ecoff_build_ext (backend, buf, bufend, offset, ext_strings, ext_str_hash)
-     const struct ecoff_debug_swap *backend;
-     char **buf;
-     char **bufend;
-     unsigned long offset;
-     varray_t *ext_strings;
-     struct hash_control *ext_str_hash;
+static void
+ecoff_setup_ext ()
 {
-  const bfd_size_type external_ext_size = backend->external_ext_size;
-  void (* const swap_ext_out) PARAMS ((bfd *, const EXTR *, PTR))
-    = backend->swap_ext_out;
   register symbolS *sym;
-  char *ext_out;
-  long iext;
 
-  ext_out = *buf + offset;
-  iext = 0;
   for (sym = symbol_rootP; sym != (symbolS *) NULL; sym = symbol_next (sym))
     {
       if (sym->ecoff_symbol == NULL)
@@ -4344,20 +4348,8 @@ ecoff_build_ext (backend, buf, bufend, offset, ext_strings, ext_str_hash)
 	  sym->ecoff_symbol->ecoff_sym.asym.index = indexNil;
 	}
 
-      sym->ecoff_symbol->ecoff_sym.asym.iss =
-	add_string (ext_strings, ext_str_hash, S_GET_NAME (sym),
-		    (shash_t **) NULL);
-      if (*bufend - ext_out < external_ext_size)
-	ext_out = ecoff_add_bytes (buf, bufend, ext_out, external_ext_size);
-      (*swap_ext_out) (stdoutput, &sym->ecoff_symbol->ecoff_sym, ext_out);
-#ifdef obj_set_sym_index
-      obj_set_sym_index (as_sym->bsym, iext);
-#endif
-      ext_out += external_ext_size;
-      ++iext;
+      obj_ecoff_set_ext (sym, &sym->ecoff_symbol->ecoff_sym);
     }
-
-  return offset + iext * external_ext_size;
 }
 
 /* Build the ECOFF dbeugging information.  */
@@ -4379,12 +4371,6 @@ ecoff_build_debug (hdr, bufp, backend)
   char *buf;
   char *bufend;
   unsigned long offset;
-  char *extbuf;
-  char *extbufend;
-  unsigned long extoffset;
-  varray_t ext_strings;
-  static varray_t init_ext_strings = INIT_VARRAY (char);
-  struct hash_control *ext_str_hash;
 
   /* Make sure we have a file.  */
   if (first_file == (efdr_t *) NULL)
@@ -4497,24 +4483,6 @@ ecoff_build_debug (hdr, bufp, backend)
   offset = ecoff_build_ss (backend, &buf, &bufend, offset);
   hdr->issMax = offset - hdr->cbSsOffset;
 
-  /* Build the external symbols and external strings.  We build these
-     now because we want to copy out the external strings now.  We
-     copy out the external symbol information down below.  */
-  extbuf = xmalloc (PAGE_SIZE);
-  extbufend = extbuf + PAGE_SIZE;
-  ext_strings = init_ext_strings;
-  ext_str_hash = hash_new ();
-  extoffset = ecoff_build_ext (backend, &extbuf, &extbufend,
-			       (unsigned long) 0, &ext_strings,
-			       ext_str_hash);
-
-  /* Copy out the external strings.  */
-  hdr->cbSsExtOffset = offset;
-  offset += ecoff_build_strings (&buf, &bufend, offset, &ext_strings);
-  offset = ecoff_padding_adjust (backend, &buf, &bufend, offset,
-				 (char **) NULL);
-  hdr->issExtMax = offset - hdr->cbSsExtOffset;
-
   /* We don't use relative file descriptors.  */
   hdr->crfd = 0;
   hdr->cbRfdOffset = 0;
@@ -4524,13 +4492,13 @@ ecoff_build_debug (hdr, bufp, backend)
   offset = ecoff_build_fdr (backend, &buf, &bufend, offset);
   hdr->ifdMax = (offset - hdr->cbFdOffset) / backend->external_fdr_size;
 
-  /* Copy out the external symbols.  */
-  hdr->cbExtOffset = offset;
-  if (bufend - (buf + offset) < extoffset)
-    (void) ecoff_add_bytes (&buf, &bufend, buf + offset, extoffset);
-  memcpy (buf + offset, extbuf, extoffset);
-  offset += extoffset;
-  hdr->iextMax = (offset - hdr->cbExtOffset) / backend->external_ext_size;
+  /* Set up the external symbols, which are handled by the BFD back
+     end.  */
+  hdr->issExtMax = 0;
+  hdr->cbSsExtOffset = 0;
+  hdr->iextMax = 0;
+  hdr->cbExtOffset = 0;
+  ecoff_setup_ext ();
 
   know ((offset & (backend->debug_align - 1)) == 0);
 
@@ -4929,6 +4897,22 @@ allocate_lineno_list ()
   alloc_counts[(int)alloc_type_lineno].total_alloc++;
   *ptr = initial_lineno_list;
   return ptr;
+}
+
+ecoff_set_gp_prolog_size (sz)
+     int sz;
+{
+  if (cur_proc_ptr == 0)
+    abort ();
+
+  cur_proc_ptr->pdr.gp_prologue = sz;
+  if (cur_proc_ptr->pdr.gp_prologue != sz)
+    {
+      as_warn ("GP prologue size exceeds field size, using 0 instead");
+      cur_proc_ptr->pdr.gp_prologue = 0;
+    }
+
+  cur_proc_ptr->pdr.gp_used = 1;
 }
 
 #endif /* ECOFF_DEBUGGING */
