@@ -1,5 +1,11 @@
 Tue Feb 25 00:32:49 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf.c (elf_fake_sections): Use SHT_NOTE for any section whose
+	name begins with ".note".
+	(map_sections_to_segments): Add a PT_NOTE segment for any loadable
+	section whose name begins with ".note".
+	(get_program_header_size): Corresponding change.
+
 	* elf32-mips.c (mips_elf_relocate_section): Check for misaligned
 	jal and for jal overflow.
 
