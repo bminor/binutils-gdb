@@ -371,7 +371,7 @@ bfd_elf_get_elf_syms (ibfd, symtab_hdr, symcount, symoffset,
 {
   Elf_Internal_Shdr *shndx_hdr;
   PTR alloc_ext;
-  const PTR esym;
+  const bfd_byte *esym;
   Elf_External_Sym_Shndx *alloc_extshndx;
   Elf_External_Sym_Shndx *shndx;
   Elf_Internal_Sym *isym;
