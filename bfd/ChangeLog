@@ -1,3 +1,15 @@
+2004-08-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (get_opd_info): New function.
+	(adjust_opd_syms): Use get_opd_info.  Define removed symbols as zero.
+	(ppc64_elf_edit_opd): Use get_opd_info.  Check that sym has a dot
+	before calling get_fdh.  Test fdh rather than h before dereferencing
+	fdh.  Mark removed symbols in opd_adjust.
+	(ppc64_elf_tls_optimize): Don't bother with opd adjustment here.
+	(ppc64_elf_relocate_section): Use get_opd_info, and handle removed
+	opd symbols.
+	(ppc64_elf_output_symbol_hook): Likewise.
+
 2004-08-06  Paul Brook  <paul@codesourcery.com>
 
 	* elfarm-nabi.c (elf32_arm_howto_table): Add new EABI relocations.

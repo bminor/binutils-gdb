@@ -2492,6 +2492,16 @@ ppc64_elf_new_section_hook (bfd *abfd, asection *sec)
 
   return _bfd_elf_new_section_hook (abfd, sec);
 }
+
+static void *
+get_opd_info (asection * sec)
+{
+  if (sec != NULL
+      && ppc64_elf_section_data (sec) != NULL
+      && ppc64_elf_section_data (sec)->opd.adjust != NULL)
+    return ppc64_elf_section_data (sec)->opd.adjust;
+  return NULL;
+}
 
 /* The following functions are specific to the ELF linker, while
    functions above are used generally.  Those named ppc64_elf_* are
@@ -4935,11 +4945,19 @@ adjust_opd_syms (struct elf_link_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
     return TRUE;
 
   sym_sec = eh->elf.root.u.def.section;
-  if (sym_sec != NULL
-      && elf_section_data (sym_sec) != NULL
-      && (opd_adjust = ppc64_elf_section_data (sym_sec)->opd.adjust) != NULL)
+  opd_adjust = get_opd_info (sym_sec);
+  if (opd_adjust != NULL)
     {
       eh->elf.root.u.def.value += opd_adjust[eh->elf.root.u.def.value / 24];
+      long adjust = opd_adjust[eh->elf.root.u.def.value / 24];
+      if (adjust == -1)
+	{
+	  /* This entry has been deleted.  */
+	  eh->elf.root.u.def.value = 0;
+	  eh->elf.root.u.def.section = &bfd_abs_section;
+	}
+      else
+	eh->elf.root.u.def.value += adjust;
       eh->adjust_done = 1;
     }
   return TRUE;
@@ -4966,7 +4984,7 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info)
       struct elf_link_hash_entry **sym_hashes;
       bfd_vma offset;
       bfd_size_type amt;
-      long *adjust;
+      long *opd_adjust;
       bfd_boolean need_edit;
 
       sec = bfd_get_section_by_name (ibfd, ".opd");
@@ -4974,15 +4992,15 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info)
 	continue;
 
       amt = sec->size * sizeof (long) / 24;
-      adjust = ppc64_elf_section_data (sec)->opd.adjust;
-      if (adjust == NULL)
+      opd_adjust = get_opd_info (sec);
+      if (opd_adjust == NULL)
 	{
 	  /* Must be a ld -r link.  ie. check_relocs hasn't been
 	     called.  */
-	  adjust = bfd_zalloc (obfd, amt);
-	  ppc64_elf_section_data (sec)->opd.adjust = adjust;
+	  opd_adjust = bfd_zalloc (obfd, amt);
+	  ppc64_elf_section_data (sec)->opd.adjust = opd_adjust;
 	}
-      memset (adjust, 0, amt);
+      memset (opd_adjust, 0, amt);
 
       if (sec->output_section == bfd_abs_section_ptr)
 	continue;
@@ -5134,7 +5152,8 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info)
 	      if (rel->r_offset == offset)
 		{
 		  struct ppc_link_hash_entry *fdh = NULL;
-		  if (h != NULL)
+		  if (h != NULL
+		      && h->root.root.string[0] == '.')
 		    fdh = get_fdh ((struct ppc_link_hash_entry *) h,
 				   ppc_hash_table (info));
 
@@ -5142,19 +5161,20 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info)
 			  || sym_sec->output_section == bfd_abs_section_ptr);
 		  if (skip)
 		    {
-		      if (h != NULL && sym_sec->owner == ibfd)
+		      if (fdh != NULL && sym_sec->owner == ibfd)
 			{
 			  /* Arrange for the function descriptor sym
 			     to be dropped.  */
 			  fdh->elf.root.u.def.value = 0;
 			  fdh->elf.root.u.def.section = sym_sec;
 			}
+		      opd_adjust[rel->r_offset / 24] = -1;
 		    }
 		  else
 		    {
 		      /* We'll be keeping this opd entry.  */
 
-		      if (h != NULL)
+		      if (fdh != NULL)
 			{
 			  /* Redefine the function descriptor symbol to
 			     this location in the opd section.  It is
@@ -5173,7 +5193,7 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info)
 			 for the function descriptor sym which we
 			 don't have at the moment.  So keep an
 			 array of adjustments.  */
-		      adjust[rel->r_offset / 24] = wptr - rptr;
+		      opd_adjust[rel->r_offset / 24] = wptr - rptr;
 
 		      if (wptr != rptr)
 			memcpy (wptr, rptr, 24);
@@ -5345,17 +5365,9 @@ ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 		    value = h->root.u.def.value;
 		  }
 		else
-		  {
-		    value = sym->st_value;
-
-		    if (elf_section_data (sym_sec) != NULL)
-		      {
-			long *adjust;
-			adjust = ppc64_elf_section_data (sym_sec)->opd.adjust;
-			if (adjust != NULL)
-			  value += adjust[value / 24];
-		      }
-		  }
+		  /* Symbols referenced by TLS relocs must be of type
+		     STT_TLS.  So no need for .opd local sym adjust.  */
+		  value = sym->st_value;
 
 		ok_tprel = FALSE;
 		is_local = FALSE;
@@ -7455,18 +7467,21 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  /* It's a local symbol.  */
+	  long *opd_adjust;
+
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
 	  sym_name = bfd_elf_local_sym_name (input_bfd, sym);
 	  sym_type = ELF64_ST_TYPE (sym->st_info);
 	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
-	  if (elf_section_data (sec) != NULL)
+	  opd_adjust = get_opd_info (sec);
+	  if (opd_adjust != NULL)
 	    {
-	      long *opd_sym_adjust;
-
-	      opd_sym_adjust = ppc64_elf_section_data (sec)->opd.adjust;
-	      if (opd_sym_adjust != NULL)
-		relocation += opd_sym_adjust[sym->st_value / 24];
+	      long adjust = opd_adjust[(sym->st_value + rel->r_addend) / 24];
+	      if (adjust == -1)
+		relocation = 0;
+	      else
+		relocation += adjust;
 	    }
 	}
       else
@@ -8745,20 +8760,25 @@ ppc64_elf_output_symbol_hook (struct bfd_link_info *info,
 			      asection *input_sec,
 			      struct elf_link_hash_entry *h)
 {
-  long *adjust;
+  long *opd_adjust, adjust;
   bfd_vma value;
 
-  if (h != NULL
-      || input_sec == NULL
-      || ppc64_elf_section_data (input_sec) == NULL
-      || (adjust = ppc64_elf_section_data (input_sec)->opd.adjust) == NULL)
+  if (h != NULL)
+    return TRUE;
+
+  opd_adjust = get_opd_info (input_sec);
+  if (opd_adjust == NULL)
     return TRUE;
 
   value = elfsym->st_value - input_sec->output_offset;
   if (!info->relocatable)
     value -= input_sec->output_section->vma;
 
-  elfsym->st_value += adjust[value / 24];
+  adjust = opd_adjust[value / 24];
+  if (adjust == -1)
+    elfsym->st_value = 0;
+  else
+    elfsym->st_value += adjust;
   return TRUE;
 }
 
