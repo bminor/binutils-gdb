@@ -660,6 +660,7 @@ tconfig.h:
 options.o: options.c $(CPU_H) $(OPTIONS_H) $(DEFINES_H) $(BASICS_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC) config.status Makefile
 	$(CC) -c $(STD_CFLAGS) '-DOPCODE_RULES="@sim_opcode@"' '-DIGEN_FLAGS="$(IGEN_FLAGS)"' '-DDGEN_FLAGS="$(DGEN_FLAGS)"' $<
 
+defines.h: tmp-defines; @true
 tmp-defines: config.h Makefile
 	sed -n -e '/^#define HAVE_/s/ 1$$/",/' -e '/^#define HAVE_/s//"HAVE_/p' < config.h > tmp-defines.h
 	$(SHELL) $(srcdir)/../../move-if-change tmp-defines.h defines.h
@@ -787,6 +788,7 @@ misc.o: misc.c $(CONFIG_H) $(MISC_H)
 
 
 # real hardware
+hw.c hw.h: tmp-hw; @true
 tmp-hw: Makefile $(HW_SRC) $(srcdir)/../../move-if-change
 	# The first for loop is to remove duplicates.
 	f=""; \
@@ -838,6 +840,7 @@ hw_vm.o: hw_vm.c $(DEVICE_TABLE_H) $(CPU_H)
 
 
 # real packages
+pk.h: tmp-pk; @true
 tmp-pk: Makefile $(PACKAGE_SRC) $(srcdir)/../../move-if-change
 	# The first for loop is to remove duplicates.
 	f=""; \

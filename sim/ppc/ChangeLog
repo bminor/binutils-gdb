@@ -1,3 +1,9 @@
+2004-11-16  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.in (defines.h): Depend on tmp-defines.
+	(hw.c hw.h): Depend on tmp-hw.
+	(pk.h): Depend on tmp-pk.
+
 2004-11-11  Andreas Schwab  <schwab@suse.de>
 
 	* sim_calls.c: Include "libiberty.h".
