@@ -546,6 +546,31 @@ vmap_ldinfo (ldi)
   } while (ldi->ldinfo_next
 	   && (ldi = (void *) (ldi->ldinfo_next + (char *) ldi)));
 
+  /* If we don't find the symfile_objfile anywhere in the ldinfo, it
+     is unlikely that the symbol file is relocated to the proper
+     address.  And we might have attached to a process which is
+     running a different copy of the same executable.  */
+  for (got_one = 0, vp = vmap; vp != NULL; vp = vp->nxt)
+    {
+      if (symfile_objfile == vp->objfile)
+	{
+	  got_one = 1;
+	  break;
+	}
+    }
+  if (symfile_objfile != NULL && !got_one)
+    {
+      warning_begin ();
+      fputs_unfiltered ("Symbol file ", gdb_stderr);
+      fputs_unfiltered (symfile_objfile->name, gdb_stderr);
+      fputs_unfiltered ("\nis not mapped; discarding it.\n\
+If in fact that file has symbols which the mapped files listed by\n\
+\"info files\" lack, you can load symbols with the \"symbol-file\" or\n\
+\"add-symbol-file\" commands (note that you must take care of relocating\n\
+symbols to the proper address).\n", gdb_stderr);
+      free_objfile (symfile_objfile);
+      symfile_objfile = NULL;
+    }
 }
 
 /* As well as symbol tables, exec_sections need relocation. After

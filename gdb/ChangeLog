@@ -1,3 +1,13 @@
+Tue Apr 11 13:46:25 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
+
+	* utils.c, defs.h (warning_begin): Renamed from warning_setup, for
+	consistency with error_begin.  Also print warning_pre_print.
+	Document it better.
+	* utils.c (warning): Use it.
+	* utils.c (error_begin): Doc fix.
+	* rs6000-nat.c (vmap_ldinfo): If symfile_objfile is not part of
+	any vmap, nuke it.
+
 Tue Apr 11 09:35:20 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* printcmd.c (print_address_numeric): Pass use_local to

@@ -211,11 +211,9 @@ extern void fputs_filtered PARAMS ((const char *, GDB_FILE *));
 
 extern void fputs_unfiltered PARAMS ((const char *, GDB_FILE *));
 
-extern void fputc_unfiltered PARAMS ((int, GDB_FILE *));
+extern int fputc_unfiltered PARAMS ((int c, GDB_FILE *));
 
-extern void putc_unfiltered PARAMS ((int));
-
-#define putchar_unfiltered(C)  putc_unfiltered(C)
+extern int putchar_unfiltered PARAMS ((int c));
 
 extern void puts_filtered PARAMS ((char *));
 
@@ -541,6 +539,10 @@ extern char *reg_names[];
 
 extern char *error_pre_print;
 
+/* Message to be printed before the error message, when an error occurs.  */
+
+extern char *quit_pre_print;
+
 /* Message to be printed before the warning message, when a warning occurs.  */
 
 extern char *warning_pre_print;
@@ -573,7 +575,7 @@ return_to_top_level PARAMS ((enum return_reason)) ATTR_NORETURN;
 extern int
 catch_errors PARAMS ((int (*) (char *), void *, char *, return_mask));
 
-extern void warning_setup PARAMS ((void));
+extern void warning_begin PARAMS ((void));
 
 extern void warning ();
 
@@ -596,7 +598,9 @@ extern void psignal PARAMS ((unsigned, const char *));
 
 extern int fclose ();
 
+#ifndef atof
 extern double atof ();
+#endif
 
 #ifndef MALLOC_INCOMPATIBLE
 
@@ -739,25 +743,6 @@ extern void set_endian_from_file PARAMS ((bfd *));
 
 #endif /* defined (TARGET_BYTE_ORDER_SELECTABLE) */
 #endif /* BITS_BIG_ENDIAN not defined.  */
-
-/* Swap LEN bytes at BUFFER between target and host byte-order.  */
-#define SWAP_TARGET_AND_HOST(buffer,len) \
-  do                                                                    \
-    {                                                                   \
-      if (TARGET_BYTE_ORDER != HOST_BYTE_ORDER)                         \
-        {                                                               \
-          char tmp;                                                     \
-          char *p = (char *)(buffer);                                   \
-          char *q = ((char *)(buffer)) + len - 1;                       \
-          for (; p < q; p++, q--)                                       \
-            {                                                           \
-              tmp = *q;                                                 \
-              *q = *p;                                                  \
-              *p = tmp;                                                 \
-            }                                                           \
-        }                                                               \
-    }                                                                   \
-  while (0)
 
 /* In findvar.c.  */
 

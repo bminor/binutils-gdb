@@ -223,23 +223,30 @@ null_cleanup (arg)
 }
 
 
-/* Provide a hook for modules wishing to print their own warning messages
-   to set up the terminal state in a compatible way, without them having
-   to import all the target_<...> macros. */
+/* Print a warning message.  Way to use this is to call warning_begin,
+   output the warning message (use unfiltered output to gdb_stderr),
+   ending in a newline.  There is not currently a warning_end that you
+   call afterwards, but such a thing might be added if it is useful
+   for a GUI to separate warning messages from other output.
+
+   FIXME: Why do warnings use unfiltered output and errors filtered?
+   Is this anything other than a historical accident?  */
 
 void
-warning_setup ()
+warning_begin ()
 {
   target_terminal_ours ();
   wrap_here("");			/* Force out any buffered output */
   gdb_flush (gdb_stdout);
+  if (warning_pre_print)
+    fprintf_unfiltered (gdb_stderr, warning_pre_print);
 }
 
 /* Print a warning message.
    The first argument STRING is the warning message, used as a fprintf string,
    and the remaining args are passed as arguments to it.
    The primary difference between warnings and errors is that a warning
-   does not force the return to command level. */
+   does not force the return to command level.  */
 
 /* VARARGS */
 void
@@ -250,11 +257,7 @@ warning (va_alist)
   char *string;
 
   va_start (args);
-  target_terminal_ours ();
-  wrap_here("");			/* Force out any buffered output */
-  gdb_flush (gdb_stdout);
-  if (warning_pre_print)
-    fprintf_unfiltered (gdb_stderr, warning_pre_print);
+  warning_begin ();
   string = va_arg (args, char *);
   vfprintf_unfiltered (gdb_stderr, string, args);
   fprintf_unfiltered (gdb_stderr, "\n");
@@ -262,10 +265,12 @@ warning (va_alist)
 }
 
 /* Start the printing of an error message.  Way to use this is to call
-   this, output the error message (use filtered output), and then call
-   return_to_top_level (RETURN_ERROR).  error() provides a convenient way to
-   do this for the special case that the error message can be formatted with
-   a single printf call, but this is more general.  */
+   this, output the error message (use filtered output to gdb_stderr
+   (FIXME: Some callers, like memory_error, use gdb_stdout)), ending
+   in a newline, and then call return_to_top_level (RETURN_ERROR).
+   error() provides a convenient way to do this for the special case
+   that the error message can be formatted with a single printf call,
+   but this is more general.  */
 void
 error_begin ()
 {
