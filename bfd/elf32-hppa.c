@@ -924,7 +924,10 @@ elf32_hppa_object_p (bfd *abfd)
   i_ehdrp = elf_elfheader (abfd);
   if (strcmp (bfd_get_target (abfd), "elf32-hppa-linux") == 0)
     {
-      if (i_ehdrp->e_ident[EI_OSABI] != ELFOSABI_LINUX)
+      /* GCC on hppa-linux produces binaries with OSABI=Linux,
+	 but the kernel produces corefiles with OSABI=SysV.  */
+      if (i_ehdrp->e_ident[EI_OSABI] != ELFOSABI_LINUX &&
+	  i_ehdrp->e_ident[EI_OSABI] != ELFOSABI_NONE) /* aka SYSV */
 	return FALSE;
     }
   else

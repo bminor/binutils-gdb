@@ -1,3 +1,9 @@
+2003-08-21  Randolph Chung  <tausq@debian.org>
+
+	* elf32-hppa.c (elf32_hppa_object_p): For elf32-hppa-linux, objects
+	can have OSABI=Linux or OSABI=SysV.  Check for both.
+	* elf64-hppa.c (elf64_hppa_object_p): Likewise.
+
 2003-08-21  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.
