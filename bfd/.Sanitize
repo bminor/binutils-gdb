@@ -73,9 +73,10 @@ cf-m68klynx.c
 cf-sparclynx.c
 cisco-core.c
 coff-a29k.c
-coff-arm.c
 coff-alpha.c
 coff-apollo.c
+coff-arm.c
+coff-aux.c
 coff-go32.c
 coff-h8300.c
 coff-h8500.c

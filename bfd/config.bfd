@@ -129,7 +129,7 @@ case "${targ}" in
     ;;
 
   i[345]86-*-sysv4* | i[345]86-*-unixware | i[345]86-*-solaris2* | \
-  i[345]86-*-elf)
+  i[345]86-*-elf | i[345]86-*-sco*elf*)
     targ_defvec=bfd_elf32_i386_vec
     targ_selvecs=i386coff_vec
     ;;
@@ -287,6 +287,9 @@ case "${targ}" in
   m68*-cbm-*)
     targ_defvec=bfd_elf32_m68k_vec
     targ_selvecs=m68kcoff_vec
+    ;;
+  m68*-apple-aux*)
+    targ_defvec=m68kaux_coff_vec
     ;;
 
   m88*-harris-cxux* | m88*-*-dgux* | m88*-*-sysv4*)

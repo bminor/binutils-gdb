@@ -166,6 +166,7 @@ BFD32_BACKENDS = \
 	coff-a29k.o \
 	coff-apollo.o \
 	coff-arm.o \
+	coff-aux.o \
 	coff-h8300.o \
 	coff-h8500.o \
 	coff-i386.o \
@@ -252,6 +253,7 @@ BFD32_BACKENDS_CFILES = \
 	coff-a29k.c \
 	coff-apollo.c \
 	coff-arm.c \
+	coff-aux.c \
 	coff-h8300.c \
 	coff-h8500.c \
 	coff-i386.c \
@@ -787,6 +789,9 @@ coff-apollo.o: coff-apollo.c $(INCDIR)/coff/apollo.h \
   coffcode.h coffswap.h
 coff-arm.o: coff-arm.c $(INCDIR)/coff/arm.h $(INCDIR)/coff/internal.h \
   libcoff.h $(INCDIR)/bfdlink.h coffcode.h coffswap.h
+coff-aux.o: coff-aux.c $(INCDIR)/coff/aux.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/m68k.h coff-m68k.c libcoff.h $(INCDIR)/bfdlink.h \
+  coffcode.h coffswap.h
 coff-h8300.o: coff-h8300.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/h8300.h \
   $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
 coff-h8500.o: coff-h8500.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/h8500.h \

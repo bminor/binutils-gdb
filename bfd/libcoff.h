@@ -1,5 +1,5 @@
 /* BFD COFF object file private structure.
-   Copyright (C) 1990, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -696,6 +696,17 @@ typedef struct
        asection *sec,
        struct internal_reloc *reloc,
        boolean *adjustedp));
+ boolean (*_bfd_coff_link_add_one_symbol) PARAMS ((
+       struct bfd_link_info *info,
+       bfd *abfd,
+       const char *name,
+       flagword flags, 
+       asection *section,
+       bfd_vma value,
+       const char *string,
+       boolean copy,
+       boolean collect, 
+       struct bfd_link_hash_entry **hashp));
 
 } bfd_coff_backend_data;
 
@@ -803,4 +814,8 @@ typedef struct
 #define bfd_coff_adjust_symndx(obfd, info, ibfd, sec, rel, adjustedp)\
         ((coff_backend_info (abfd)->_bfd_coff_adjust_symndx)\
          (obfd, info, ibfd, sec, rel, adjustedp))
+#define bfd_coff_link_add_one_symbol(info, abfd, name, flags, section,\
+                                     value, string, cp, coll, hashp)\
+        ((coff_backend_info (abfd)->_bfd_coff_link_add_one_symbol)\
+         (info, abfd, name, flags, section, value, string, cp, coll, hashp))
 

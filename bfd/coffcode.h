@@ -726,6 +726,17 @@ dependent COFF routines:
 .       asection *sec,
 .       struct internal_reloc *reloc,
 .       boolean *adjustedp));
+. boolean (*_bfd_coff_link_add_one_symbol) PARAMS ((
+.       struct bfd_link_info *info,
+.       bfd *abfd,
+.       const char *name,
+.       flagword flags, 
+.       asection *section,
+.       bfd_vma value,
+.       const char *string,
+.       boolean copy,
+.       boolean collect, 
+.       struct bfd_link_hash_entry **hashp));
 .
 .} bfd_coff_backend_data;
 .
@@ -833,6 +844,10 @@ dependent COFF routines:
 .#define bfd_coff_adjust_symndx(obfd, info, ibfd, sec, rel, adjustedp)\
 .        ((coff_backend_info (abfd)->_bfd_coff_adjust_symndx)\
 .         (obfd, info, ibfd, sec, rel, adjustedp))
+.#define bfd_coff_link_add_one_symbol(info, abfd, name, flags, section,\
+.                                     value, string, cp, coll, hashp)\
+.        ((coff_backend_info (abfd)->_bfd_coff_link_add_one_symbol)\
+.         (info, abfd, name, flags, section, value, string, cp, coll, hashp))
 .
 */
 
@@ -1114,16 +1129,8 @@ coff_mkobject_hook (abfd, filehdr, aouthdr)
       xcoff = xcoff_data (abfd);
       xcoff->full_aouthdr = true;
       xcoff->toc = internal_a->o_toc;
-      if (internal_a->o_sntoc == 0)
-	xcoff->toc_section = NULL;
-      else
-	xcoff->toc_section =
-	  coff_section_from_bfd_index (abfd, internal_a->o_sntoc);
-      if (internal_a->o_snentry == 0)
-	xcoff->entry_section = NULL;
-      else
-	xcoff->entry_section =
-	  coff_section_from_bfd_index (abfd, internal_a->o_snentry);
+      xcoff->sntoc = internal_a->o_sntoc;
+      xcoff->snentry = internal_a->o_snentry;
       xcoff->text_align_power = internal_a->o_algntext;
       xcoff->data_align_power = internal_a->o_algndata;
       xcoff->modtype = internal_a->o_modtype;
@@ -1553,18 +1560,50 @@ SUBSUBSECTION
 
 */
 
+#ifdef TARG_AUX
+
+static int compare_arelent_ptr PARAMS ((const PTR, const PTR));
+
+/* AUX's ld wants relocations to be sorted */
+static int
+compare_arelent_ptr (x, y)
+     const PTR x;
+     const PTR y;
+{
+  const arelent **a = (const arelent **) x;
+  const arelent **b = (const arelent **) y;
+  bfd_size_type aadr = (*a)->address;
+  bfd_size_type badr = (*b)->address;
+
+  return (aadr < badr ? -1 : badr < aadr ? 1 : 0);
+}
+
+#endif /* TARG_AUX */
+
 static boolean
 coff_write_relocs (abfd, first_undef)
      bfd * abfd;
      int first_undef;
 {
   asection *s;
+
   for (s = abfd->sections; s != (asection *) NULL; s = s->next)
     {
       unsigned int i;
       struct external_reloc dst;
+      arelent **p;
 
-      arelent **p = s->orelocation;
+#ifndef TARG_AUX
+      p = s->orelocation;
+#else
+      /* sort relocations before we write them out */
+      p = (arelent **) bfd_malloc (s->reloc_count * sizeof (arelent *));
+      if (p == NULL && s->reloc_count > 0)
+	return false;
+      memcpy (p, s->orelocation, s->reloc_count * sizeof (arelent *));
+      qsort (p, s->reloc_count, sizeof (arelent *), compare_arelent_ptr);
+#endif
+
       if (bfd_seek (abfd, s->rel_filepos, SEEK_SET) != 0)
 	return false;
       for (i = 0; i < s->reloc_count; i++)
@@ -1639,6 +1678,11 @@ coff_write_relocs (abfd, first_undef)
 	  if (bfd_write ((PTR) & dst, 1, RELSZ, abfd) != RELSZ)
 	    return false;
 	}
+
+#ifdef TARG_AUX
+      if (p != NULL)
+	free (p);
+#endif
     }
 
   return true;
@@ -2438,9 +2482,15 @@ coff_write_object_contents (abfd)
 #if defined(LYNXOS)
     internal_a.magic = LYNXCOFFMAGIC;
 #else
+#if defined(TARG_AUX)
+    internal_a.magic = (abfd->flags & D_PAGED ? PAGEMAGICPEXECPAGED :
+			abfd->flags & WP_TEXT ? PAGEMAGICPEXECSWAPPED :
+			PAGEMAGICEXECSWAPPED);
+#else
 #if defined (PAGEMAGICPEXECPAGED)
     internal_a.magic = PAGEMAGICPEXECPAGED;
 #endif
+#endif /* TARG_AUX */
 #endif /* LYNXOS */
 #endif /* M68 || WE32K || M68K */
 
@@ -2569,13 +2619,9 @@ coff_write_object_contents (abfd)
 
       internal_a.vstamp = 1;
 
-      if (xcoff_data (abfd)->entry_section != NULL)
-	internal_a.o_snentry = xcoff_data (abfd)->entry_section->target_index;
-      else
-	{
-	  internal_a.o_snentry = 0;
-	  internal_a.entry = (bfd_vma) -1;
-	}
+      internal_a.o_snentry = xcoff_data (abfd)->snentry;
+      if (internal_a.o_snentry == 0)
+	internal_a.entry = (bfd_vma) -1;
 
       if (text_sec != NULL)
 	{
@@ -2609,10 +2655,7 @@ coff_write_object_contents (abfd)
 
       toc = xcoff_data (abfd)->toc;
       internal_a.o_toc = toc;
-      if (xcoff_data (abfd)->toc_section == NULL)
-	internal_a.o_sntoc = 0;
-      else
-	internal_a.o_sntoc = xcoff_data (abfd)->toc_section->target_index;
+      internal_a.o_sntoc = xcoff_data (abfd)->sntoc;
 
       internal_a.o_modtype = xcoff_data (abfd)->modtype;
       if (xcoff_data (abfd)->cputype != -1)
@@ -3489,6 +3532,10 @@ dummy_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 #define coff_adjust_symndx NULL
 #endif
 
+#ifndef coff_link_add_one_symbol
+#define coff_link_add_one_symbol _bfd_generic_link_add_one_symbol
+#endif
+
 static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
 {
   coff_swap_aux_in, coff_swap_sym_in, coff_swap_lineno_in,
@@ -3509,7 +3556,7 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
   coff_print_aux, coff_reloc16_extra_cases, coff_reloc16_estimate,
   coff_sym_is_global, coff_compute_section_file_positions,
   coff_start_final_link, coff_relocate_section, coff_rtype_to_howto,
-  coff_adjust_symndx
+  coff_adjust_symndx, coff_link_add_one_symbol
 };
 
 #define	coff_close_and_cleanup _bfd_generic_close_and_cleanup
