@@ -1,3 +1,10 @@
+start-sanitize-tx19
+Mon Sep 15 17:26:46 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* config/tc-mips.c (mips_1900): Replace with mips_3900 and
+	mips16.
+
+end-sanitize-tx19
 start-sanitize-d30v
 Mon Sep 15 11:28:04 1997  Ken Raeburn  <raeburn@cygnus.com>
 

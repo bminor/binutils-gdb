@@ -1,3 +1,10 @@
+start-sanitize-tx19
+Mon Sep 15 17:29:08 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* gas/mips/mips.exp: Handle r3900 and r1900.
+	* gas/mips/ld-ilocks: New file.
+
+end-sanitize-tx19
 Mon Sep  8 14:21:23 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* gas/m32r/high-1.[ds]: New testcase.
