@@ -1,3 +1,20 @@
+Tue Jan 24 09:40:59 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* common.h (EM_PPC): New macro, PowerPC machine id.
+
+Tue Jan 17 10:51:38 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* mips.h (SHT_MIPS_MSYM, SHT_MIPS_DWARF, SHT_MIPS_EVENTS): Define.
+
+Mon Oct 17 13:43:59 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* internal.h (Elf_Internal_Shdr): Remove rawdata and size fields.
+	Add bfd_section field.
+
+Tue May 24 16:11:50 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips.h (Elf32_External_gptab): Define.
+
 Mon May 16 13:22:04 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* common.h (EM_HPPA): Delete.
