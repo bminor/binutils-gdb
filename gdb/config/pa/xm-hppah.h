@@ -29,11 +29,6 @@
 
 #define USG
 
-#ifndef __STDC__
-/* This define is discussed in decode_line_1 in symtab.c  */
-#define HPPA_COMPILER_BUG
-#endif
-
 #define HAVE_TERMIOS
 
 /* HP defines malloc and realloc as returning void *, even for non-ANSI

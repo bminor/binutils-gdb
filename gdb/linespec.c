@@ -459,36 +459,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 	       int default_line, char ***canonical)
 {
   struct symtabs_and_lines values;
-#ifdef HPPA_COMPILER_BUG
-  /* FIXME: The native HP 9000/700 compiler has a bug which appears
-     when optimizing this file with target i960-vxworks.  I haven't
-     been able to construct a simple test case.  The problem is that
-     in the second call to SKIP_PROLOGUE below, the compiler somehow
-     does not realize that the statement val = find_pc_line (...) will
-     change the values of the fields of val.  It extracts the elements
-     into registers at the top of the block, and does not update the
-     registers after the call to find_pc_line.  You can check this by
-     inserting a printf at the end of find_pc_line to show what values
-     it is returning for val.pc and val.end and another printf after
-     the call to see what values the function actually got (remember,
-     this is compiling with cc -O, with this patch removed).  You can
-     also examine the assembly listing: search for the second call to
-     skip_prologue; the LDO statement before the next call to
-     find_pc_line loads the address of the structure which
-     find_pc_line will return; if there is a LDW just before the LDO,
-     which fetches an element of the structure, then the compiler
-     still has the bug.
-
-     Setting val to volatile avoids the problem.  We must undef
-     volatile, because the HPPA native compiler does not define
-     __STDC__, although it does understand volatile, and so volatile
-     will have been defined away in defs.h.  */
-#undef volatile
-  volatile struct symtab_and_line val;
-#define volatile		/*nothing */
-#else
   struct symtab_and_line val;
-#endif
   register char *p, *p1;
   char *q, *pp, *ii, *p2;
 #if 0

@@ -1,5 +1,13 @@
 2001-03-22  Andrew Cagney  <ac131313@redhat.com>
 
+	* config/pa/xm-hppah.h (HPPA_COMPILER_BUG): Delete. GDB only
+	compiles using an ISO-C compiler.
+	(MALLOC_INCOMPATIBLE): Ditto.
+	* linespec.c (decode_line_1): Delete hack to work around
+	HPPA_COMPILER_BUG.
+
+2001-03-22  Andrew Cagney  <ac131313@redhat.com>
+
 	* exec.c (xfer_memory): Always initialize section.
 	* infrun.c (normal_stop): Always initialize source_flag.
 
