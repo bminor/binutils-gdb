@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <ctype.h>
+
 #include "sysdep.h"
 #include "as.h"
 #include "subsegs.h"
@@ -28,10 +29,21 @@
 #include "opcode/dvp.h"
 #include "elf/mips.h"
 
-static long parse_float PARAMS ((char **, const char **));
+#ifdef USE_STDARG
+#include <stdarg.h>
+#else
+#include <varargs.h>
+#endif
 
+/* Compute DMA operand index number of OP.  */
+#define DMA_OPERAND_INDEX(op) ((op) - dma_operands)
+
+static long parse_float PARAMS ((char **, const char **));
+static struct symbol * create_label PARAMS ((const char *, const char *));
+static struct symbol * create_colon_label PARAMS ((const char *, const char *));
+static long eval_expr PARAMS ((int, int, const char *, ...));
 static long parse_dma_ild_autocount ();
-static long parse_dma_ptr_autocount ();
+static long parse_dma_addr_autocount ();
 
 static void insert_operand 
      PARAMS ((dvp_cpu, const dvp_opcode *, const dvp_operand *, int,
@@ -139,16 +151,17 @@ static void s_state PARAMS ((int));
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
-    { "dmadata", s_dmadata, 0 },
-    { "dmapackvif", s_dmapackvif, 0 },
-    { "enddirect", s_enddirect, 0 },
-    { "enddmadata", s_enddmadata, 0 },
-    { "endgif", s_endgif, 0 },
-    { "endmpg", s_endmpg, 0 },
-    { "endunpack", s_endunpack, 0 },
-    /* .vu added to simplify debugging and creation of input files */
-    { "vu", s_state, ASM_VU },
-    { NULL, NULL, 0 }
+  { "word", cons, 4 },
+  { "dmadata", s_dmadata, 0 },
+  { "dmapackvif", s_dmapackvif, 0 },
+  { "enddirect", s_enddirect, 0 },
+  { "enddmadata", s_enddmadata, 0 },
+  { "endgif", s_endgif, 0 },
+  { "endmpg", s_endmpg, 0 },
+  { "endunpack", s_endunpack, 0 },
+  /* .vu added to simplify debugging and creation of input files */
+  { "vu", s_state, ASM_VU },
+  { NULL, NULL, 0 }
 };
 
 void
@@ -225,7 +238,7 @@ md_assemble (str)
     {
       if (strncasecmp (str, "dma", 3) == 0)
 	assemble_dma (str);
-      if (strncasecmp (str, "gif", 3) == 0)
+      else if (strncasecmp (str, "gif", 3) == 0)
 	assemble_gif (str);
       else
 	assemble_vif (str);
@@ -243,62 +256,64 @@ static void
 assemble_dma (str)
      char *str;
 {
-    DVP_INSN insn_buf[4];
-    int len;				/* Insn's length, in 32 bit words.  */
-    char *f;                            /* Pointer to allocated frag.  */
-    int i;
-    const dvp_opcode *opcode;
+  DVP_INSN insn_buf[4];
+  /* Insn's length, in 32 bit words.  */
+  int len;
+  /* Pointer to allocated frag.  */
+  char *f;
+  int i;
+  const dvp_opcode *opcode;
 
-    /*
-    Fill the first two words with VIF NOPs.
-    They may be over-written later if DmaPackPke is on.
-    initialize the remainder with zeros.
-    */
-    insn_buf[ 0] = 0;
-    insn_buf[ 1] = 0;
-    insn_buf[ 2] = 0;
-    insn_buf[ 3] = 0;
+  /* Fill the first two words with VIF NOPs.
+     They may be over-written later if DmaPackPke is on.
+     initialize the remainder with zeros.  */
+  insn_buf[0] = 0;
+  insn_buf[1] = 0;
+  insn_buf[2] = 0;
+  insn_buf[3] = 0;
 
-    opcode = assemble_one_insn (DVP_DMA,
-        		        dma_opcode_lookup_asm (str), dma_operands,
-			        &str, insn_buf);
-    if( opcode == NULL) return;
-    if( !output_dma) return;
+  opcode = assemble_one_insn (DVP_DMA,
+			      dma_opcode_lookup_asm (str), dma_operands,
+			      &str, insn_buf);
+  if (opcode == NULL)
+    return;
+  if (!output_dma)
+    return;
 
-    len = 4;
-    f = frag_more( len * 4);
+  /* Do an implicit alignment to a 16 byte boundary.  */
+  frag_align (4, 0, 0);
+  record_alignment (now_seg, 4);
 
-    /* Write out the VIF / DMA instructions. */
-    for( i = 0; i < len; ++i)
-	md_number_to_chars( f + i * 4, insn_buf[i], 4);
+  len = 4;
+  f = frag_more (len * 4);
 
-    /* Create any fixups.  */
-    /* FIXME: It might eventually be possible to combine all the various
-       copies of this bit of code.  */
-    for( i = 0; i < fixup_count; ++i)
+  /* Write out the DMA instruction. */
+  for (i = 0; i < len; ++i)
+    md_number_to_chars (f + i * 4, insn_buf[i], 4);
+
+  /* Create any fixups.  */
+  /* FIXME: It might eventually be possible to combine all the various
+     copies of this bit of code.  */
+  for (i = 0; i < fixup_count; ++i)
     {
-	int op_type, reloc_type, offset;
-	const dvp_operand *operand;
+      int op_type, reloc_type, offset;
+      const dvp_operand *operand;
 
-#if 0
-	/*
-	Create a fixup for this operand.
-	At this point we do not use a bfd_reloc_code_real_type for
-	operands residing in the insn, but instead just use the
-	operand index.  This lets us easily handle fixups for any
-	operand type, although that is admittedly not a very exciting
-	feature.  We pick a BFD reloc type in md_apply_fix.
-	*/
+      /* Create a fixup for this operand.
+	 At this point we do not use a bfd_reloc_code_real_type for
+	 operands residing in the insn, but instead just use the
+	 operand index.  This lets us easily handle fixups for any
+	 operand type, although that is admittedly not a very exciting
+	 feature.  We pick a BFD reloc type in md_apply_fix.  */
 
-	op_type = fixups[i].opindex;
-	offset = fixups[i].offset;
-	reloc_type = encode_fixup_reloc_type (DVP_VIF, op_type);
-	operand = &vif_operands[op_type];
-	fix_new_exp (frag_now, f + offset - frag_now->fr_literal, 4,
-		     &fixups[i].exp,
-		     (operand->flags & DVP_OPERAND_RELATIVE_BRANCH) != 0,
-		     (bfd_reloc_code_real_type) reloc_type);
-#endif
+      op_type = fixups[i].opindex;
+      offset = fixups[i].offset;
+      reloc_type = encode_fixup_reloc_type (DVP_DMA, op_type);
+      operand = &dma_operands[op_type];
+      fix_new_exp (frag_now, f + offset - frag_now->fr_literal, 4,
+		   &fixups[i].exp,
+		   (operand->flags & DVP_OPERAND_RELATIVE_BRANCH) != 0,
+		   (bfd_reloc_code_real_type) reloc_type);
     }
 }
 
@@ -715,11 +730,12 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 		  if (errmsg)
 		    break;
 		}
-	      else if (operand->flags & DVP_OPERAND_DMA_PTR_AUTOCOUNT)
+	      else if ((operand->flags & (DVP_OPERAND_DMA_ADDR | DVP_OPERAND_DMA_AUTOCOUNT))
+		       == (DVP_OPERAND_DMA_ADDR | DVP_OPERAND_DMA_AUTOCOUNT))
 		{
 		  errmsg = 0;
-		  value = parse_dma_ptr_autocount (opcode, operand, mods,
-						   insn_buf, &str, &errmsg);
+		  value = parse_dma_addr_autocount (opcode, operand, mods,
+						    insn_buf, &str, &errmsg);
 		  if (errmsg)
 		    break;
 		}
@@ -753,7 +769,15 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 			as_fatal ("too many fixups");
 		      fixups[fixup_count].exp = exp;
 		      fixups[fixup_count].opindex = index;
-		      fixups[fixup_count].offset = (operand->shift / 32) * 4;
+		      /* FIXME: Revisit.  Do we really need operand->word?
+			 The endianness of a 128 bit DMAtag is rather
+			 twisted.  How about defining word 0 as the word with
+			 the lowest address and basing operand-shift off that.
+			 operand->word could then be deleted.  */
+		      if (operand->word != 0)
+			fixups[fixup_count].offset = operand->word * 4;
+		      else
+			fixups[fixup_count].offset = (operand->shift / 32) * 4;
 		      ++fixup_count;
 		      value = 0;
 		    }
@@ -957,7 +981,7 @@ md_apply_fix3 (fixP, valueP, seg)
 	}
     }
 
-  /* Check for dvp operand's.  These are indicated with a reloc value
+  /* Check for dvp operands.  These are indicated with a reloc value
      >= BFD_RELOC_UNUSED.  */
 
   if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
@@ -970,7 +994,9 @@ md_apply_fix3 (fixP, valueP, seg)
 			       & cpu, & operand);
 
       /* Fetch the instruction, insert the fully resolved operand
-	 value, and stuff the instruction back again.  */
+	 value, and stuff the instruction back again.  The fixup is recorded
+	 at the appropriate word so pass DVP_MOD_THIS_WORD so any offset
+	 specified in the tables is ignored.  */
       insn = bfd_getl32 ((unsigned char *) where);
       insert_operand_final (cpu, operand, DVP_MOD_THIS_WORD, &insn,
 			    (offsetT) value, fixP->fx_file, fixP->fx_line);
@@ -987,10 +1013,15 @@ md_apply_fix3 (fixP, valueP, seg)
       /* FIXME: This test is a hack.  */
       if ((operand->flags & DVP_OPERAND_RELATIVE_BRANCH) != 0)
 	{
-	  assert ((operand->flags & DVP_OPERAND_RELATIVE_BRANCH) != 0
-		  && operand->bits == 11
+	  assert (operand->bits == 11
 		  && operand->shift == 0);
 	  fixP->fx_r_type = BFD_RELOC_MIPS_DVP_11_PCREL;
+	}
+      else if ((operand->flags & DVP_OPERAND_DMA_ADDR) != 0)
+	{
+	  assert (operand->bits == 27
+		  && operand->shift == 4);
+	  fixP->fx_r_type = BFD_RELOC_MIPS_DVP_27_S4;
 	}
       else
 	{
@@ -1154,7 +1185,7 @@ parse_float (pstr, errmsg)
 /* Compute the auto-count value for a DMA tag with inline data.  */
 
 static long
-parse_dma_ild_autocount( opcode, operand, mods, insn_buf, pstr, errmsg)
+parse_dma_ild_autocount (opcode, operand, mods, insn_buf, pstr, errmsg)
     const dvp_opcode *opcode;
     const dvp_operand *operand;
     int mods;
@@ -1180,18 +1211,18 @@ parse_dma_ild_autocount( opcode, operand, mods, insn_buf, pstr, errmsg)
 /* Scan a symbol and return a pointer to one past the end. */
 #define issymchar(ch) (isalnum(ch) || ch == '_')
 static char *
-scan_symbol( sym)
+scan_symbol (sym)
     char *sym;
 {
-    while( *sym && issymchar( *sym))
-        ++sym;
-    return sym;
+  while (*sym && issymchar (*sym))
+    ++sym;
+  return sym;
 }
 
 /* Compute the auto-count value for a DMA tag with out-of-line data.  */
 
 static long
-parse_dma_ptr_autocount( opcode, operand, mods, insn_buf, pstr, errmsg)
+parse_dma_addr_autocount (opcode, operand, mods, insn_buf, pstr, errmsg)
     const dvp_opcode *opcode;
     const dvp_operand *operand;
     int mods;
@@ -1199,58 +1230,132 @@ parse_dma_ptr_autocount( opcode, operand, mods, insn_buf, pstr, errmsg)
     char **pstr;
     const char **errmsg;
 {
-    char *start = *pstr;
-    char *end = start;
-    long retval;
+  char *start = *pstr;
+  char *end = start;
+  long retval;
+  /* Data reference must be a .DmaData label.  */
+  struct symbol *label, *label2, *endlabel;
+  const char *name;
+  char *name2;
+  int len;
+  long count;
+  char c;
 
-    /* Data reference must be a .DmaData label. */
-    struct symbol *label, *label2;
-    const char *name;
-    char *name2;
-    int len;
-    long count;
-
-    label = label2 = 0;
-    if( is_name_beginner( *start) )
+  label = label2 = 0;
+  if (! is_name_beginner (*start))
     {
-	char c;
-
-	end = scan_symbol( start);
-	c = *end;
-	*end = 0;
-	label = symbol_find( start);
-	*end = c;
-    }
-    if( label )
-    {
-	name = S_GET_NAME( label);
-	len = strlen( name) + 1;
-	name2 = xmalloc( len + 2);
-	name2[ 0] = '_';
-	name2[ 1] = '$';
-	memcpy( name2+2, name, len);	/* copy original name & \0 */
-	label2 = symbol_find( name2);
-	free( name2);
-    }
-    if( label == 0 || label2 == 0 )
-    {
-	*errmsg = "2nd operand must be a .DmaData label";
-	return 0;
+      *errmsg = "invalid .DmaData label";
+      return 0;
     }
 
-    /* The second operand's value is the value of "symbol". */
-    retval = S_GET_VALUE( label);
+  name = start;
+  end = scan_symbol (name);
+  c = *end;
+  *end = 0;
+  label = symbol_find_or_make (name);
+  *end = c;
 
-    /* The computed count value is val(symbol2) - val(symbol). */
-    count = S_GET_VALUE( label2) - retval;
+  label2 = create_label ("_$", name);
+  /* FIXME: revisit .L. */
+  endlabel = create_label (".L.end.", name);
 
-    /* Store the count field. */
-    count &= 0x0000ffff;
-    insn_buf[ 4] &= 0xffff0000;
-    insn_buf[ 4] |= count & 0x0000ffff;
+  retval = eval_expr (dma_operand_addr, operand->word * 4, name);
+  count = eval_expr (dma_operand_count, (operand->word + 1) * 4,
+		     ".L.end.%s - %s", name, name);
+  /* count is in quadwords */
+  count /= 16;
 
-    *pstr = end;
-    return retval;
+  /* Store the count field. */
+  insn_buf[3] &= 0xffff0000;
+  insn_buf[3] |= count & 0x0000ffff;
+
+  *pstr = end;
+  return retval;
+}
+
+/* Evaluate an expression.
+   The result is the value of the expression if it can be evaluated,
+   or 0 if it cannot (say because some symbols haven't been defined yet)
+   in which case a fixup is queued.  */
+
+static long
+#ifdef USE_STDARG
+eval_expr (int opindex, int offset, const char *fmt, ...)
+#else
+eval_expr (opindex, offset, fmt, va_alist)
+     int opindex,offset;
+     const char *fmt;
+     va_dcl
+#endif
+{
+  long value;
+  va_list ap;
+  char *str,*save_input;
+  expressionS exp;
+
+#ifdef USE_STDARG
+  va_start (ap, fmt);
+#else
+  va_start (ap);
+#endif
+  vasprintf (&str, fmt, ap);
+  va_end (ap);
+
+  save_input = input_line_pointer;
+  input_line_pointer = str;
+  expression (&exp);
+  input_line_pointer = save_input;
+  free (str);
+  if (exp.X_op == O_constant)
+    value = exp.X_add_number;
+  else
+    {
+      fixups[fixup_count].exp = exp;
+      fixups[fixup_count].opindex = opindex;
+      fixups[fixup_count].offset = offset;
+      ++fixup_count;
+      value = 0;
+    }
+  return value;
+}
+
+/* Create a label named by concatenating PREFIX to NAME.  */
+
+static struct symbol *
+create_label (prefix, name)
+     const char *prefix, *name;
+{
+  int namelen = strlen (name);
+  int prefixlen = strlen (prefix);
+  char *fullname;
+  struct symbol *result;
+
+  fullname = xmalloc (prefixlen + namelen + 1);
+  strcpy (fullname, prefix);
+  strcat (fullname, name);
+  result = symbol_find_or_make (fullname);
+  free (fullname);
+  return result;
+}
+
+/* Create a label named by concatenating PREFIX to NAME,
+   and define it as `.'.  */
+
+static struct symbol *
+create_colon_label (prefix, name)
+     const char *prefix, *name;
+{
+  int namelen = strlen (name);
+  int prefixlen = strlen (prefix);
+  char *fullname;
+  struct symbol *result;
+
+  fullname = xmalloc (prefixlen + namelen + 1);
+  strcpy (fullname, prefix);
+  strcat (fullname, name);
+  result = colon (fullname);
+  free (fullname);
+  return result;
 }
 
 /* Return length in bytes of the variable length VIF insn
@@ -1383,11 +1488,12 @@ insert_operand (cpu, opcode, operand, mods, insn_buf, val, errmsg)
     }
   else
     {
-#if 0 /* FIXME: revisit */
       /* We currently assume a field does not cross a word boundary.  */
       int shift = ((mods & DVP_MOD_THIS_WORD)
 		   ? (operand->shift & 31)
 		   : operand->shift);
+      int word = (mods & DVP_MOD_THIS_WORD) ? 0 : operand->word;
+#if 0 /* FIXME: revisit */
       DVP_INSN *p = insn_buf + (shift / 32);
       if (operand->bits == 32)
 	*p = val;
@@ -1397,13 +1503,12 @@ insert_operand (cpu, opcode, operand, mods, insn_buf, val, errmsg)
 	  *p |= ((long) val & ((1 << operand->bits) - 1)) << shift;
 	}
 #else
-      /* We currently assume a field does not cross a word boundary.  */
       if (operand->bits == 32)
-	insn_buf[ operand->word] = val;
+	insn_buf[word] = val;
       else
 	{
 	  long temp = (long) val & ((1 << operand->bits) - 1);
-	  insn_buf[ operand->word] |= temp << operand->shift;
+	  insn_buf[word] |= temp << operand->shift;
 	}
     }
 #endif
@@ -1486,104 +1591,97 @@ static const char *dmadata_name;
 static int implied_dmadata_p = 0;
 
 static void
-s_dmadata_implied( ignore)
+s_dmadata_implied (ignore)
     int ignore;
 {
-    if( dmadata_state != 0 )
+  if (dmadata_state != 0 )
     {
-	as_bad( "DmaData blocks cannot be nested.");
+      as_bad ("DmaData blocks cannot be nested.");
     }
-    dmadata_state = 1;
-    dmadata_name = 0;
+  dmadata_state = 1;
+  dmadata_name = 0;
 }
 
 static void
-s_dmadata( ignore)
+s_dmadata (ignore)
     int ignore;
 {
-    char *name, c;
+  char *name, c;
 
-    dmadata_name = 0;
+  dmadata_name = 0;
 
-    if( dmadata_state != 0 )
+  if (dmadata_state != 0)
     {
-	as_bad( "DmaData blocks cannot be nested.");
-	ignore_rest_of_line();
-	return;
+      as_bad ("DmaData blocks cannot be nested.");
+      ignore_rest_of_line ();
+      return;
     }
-    dmadata_state = 1;
+  dmadata_state = 1;
 
-    SKIP_WHITESPACE();			/* Leading whitespace is part of operand. */
-    name = input_line_pointer;
+  SKIP_WHITESPACE ();		/* Leading whitespace is part of operand. */
+  name = input_line_pointer;
 
-    if( !is_name_beginner( *name) )
+  if (!is_name_beginner (*name))
     {
-	as_bad( "invalid identifier for \".DmaData\"");
-	obstack_1grow( &cond_obstack, 0);  /*FIXME what is this for?*/
-	ignore_rest_of_line();
-	return;
+      as_bad ("invalid identifier for \".DmaData\"");
+      ignore_rest_of_line ();
+      return;
     }
 
-    c = get_symbol_end();
-    line_label = colon( name);	/* user-defined label */
-    dmadata_name = line_label->bsym->name;
-    *input_line_pointer = c;
+  c = get_symbol_end ();
+  line_label = colon (name);	/* user-defined label */
+  dmadata_name = S_GET_NAME (line_label);
+  *input_line_pointer = c;
 
-    demand_empty_rest_of_line();
+  demand_empty_rest_of_line ();
 }
 
 static void
-s_enddmadata( ignore)
+s_enddmadata (ignore)
     int ignore;
 {
-    if( dmadata_state != 1)
+  if (dmadata_state != 1)
     {
-	as_warn( ".EndDmaData encountered outside a DmaData block -- ignored.");
-	ignore_rest_of_line();
-	dmadata_name = 0;
+      as_warn (".EndDmaData encountered outside a DmaData block -- ignored.");
+      ignore_rest_of_line ();
+      dmadata_name = 0;
     }
-    dmadata_state = 0;
-    demand_empty_rest_of_line();
+  dmadata_state = 0;
+  demand_empty_rest_of_line ();
 
-    /*
-    * "label" points to beginning of block
-    * Create a name for the final label like _$<name>
-    */
-    if( dmadata_name) {
-	int temp;
-	char *name;
-
-	temp = strlen( dmadata_name) + 1;
-	name = xmalloc( temp + 2);
-	name[ 0] = '_';
-	name[ 1] = '$';
-	memcpy( name+2, dmadata_name, temp);	/* copy original name & \0 */
-	colon( name);
-	free( name);
+  /* "label" points to beginning of block.
+     Create a name for the final label like _$<name>.  */
+  if (dmadata_name)
+    {
+      /* Fill the data out to a multiple of 16 bytes.  */
+      /* FIXME: Does the fill contents matter?  */
+      frag_align (4, 0, 0);
+      create_colon_label (".L.end.", dmadata_name);
     }
 }
 
 static void
-s_dmapackvif( ignore)
+s_dmapackvif (ignore)
     int ignore;
 {
-    /* Syntax: .dmapackvif 0|1 */
-    struct symbol *label;		/* Points to symbol */
-    char *name;				/* points to name of symbol */
+  /* Syntax: .dmapackvif 0|1 */
+  struct symbol *label;		/* Points to symbol */
+  char *name;			/* points to name of symbol */
 
-    SKIP_WHITESPACE();			/* Leading whitespace is part of operand. */
-    switch( *input_line_pointer++ )
+  /* Leading whitespace is part of operand. */
+  SKIP_WHITESPACE ();
+  switch (*input_line_pointer++)
     {
     case '0':
-	dma_pack_vif_p = 0;
-	break;
+      dma_pack_vif_p = 0;
+      break;
     case '1':
-	dma_pack_vif_p = 1;
-	break;
+      dma_pack_vif_p = 1;
+      break;
     default:
-	as_bad( "illegal argument to `.DmaPackPke'");
+      as_bad ("illegal argument to `.DmaPackPke'");
     }
-    demand_empty_rest_of_line();
+  demand_empty_rest_of_line ();
 }
 
 static void
@@ -1690,57 +1788,57 @@ s_endgif (ignore)
 /* Parse a DMA data spec which can be either of '*' or a quad word count.  */
 
 static int
-parse_dma_count( pstr, errmsg)
-    char **pstr;
-    const char **errmsg;
+parse_dma_count (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
 {
-    char *str = *pstr;
-    long count, value;
-    expressionS exp;
+  char *str = *pstr;
+  long count, value;
+  expressionS exp;
 
-    if( *str == '*' )
+  if (*str == '*')
     {
-	++*pstr;
-	/* -1 is a special marker to caller to tell it the count is to be
-	computed from the data. */
-	return -1;
+      ++*pstr;
+      /* -1 is a special marker to caller to tell it the count is to be
+	 computed from the data. */
+      return -1;
     }
 
-    expression( &exp);
-    if( exp.X_op == O_illegal
-	|| exp.X_op == O_absent )
-	;
-    else if( exp.X_op == O_constant )
-	value = exp.X_add_number;
-    else if( exp.X_op == O_register )
-	as_fatal( "got O_register");
-    else
+  expression (&exp);
+  if (exp.X_op == O_illegal
+      || exp.X_op == O_absent)
+    ;
+  else if (exp.X_op == O_constant)
+    value = exp.X_add_number;
+  else if (exp.X_op == O_register)
+    as_fatal ("got O_register");
+  else
     {
-	/* We need to generate a fixup for this expression.  */
-	if( fixup_count >= MAX_FIXUPS )
-	    as_fatal( "too many fixups");
-	fixups[fixup_count].exp = exp;
-	fixups[fixup_count].opindex = 0 /*FIXME*/;
-	fixups[fixup_count].offset = 0 /*FIXME*/;
-	++fixup_count;
-	value = 0;
+      /* We need to generate a fixup for this expression.  */
+      if (fixup_count >= MAX_FIXUPS )
+	as_fatal ("too many fixups");
+      fixups[fixup_count].exp = exp;
+      fixups[fixup_count].opindex = 0 /*FIXME*/;
+      fixups[fixup_count].offset = 0 /*FIXME*/;
+      ++fixup_count;
+      value = 0;
     }
 
-    if( isdigit( *str) ) /*      ????????needs to accept an expression*/
+  if (isdigit( *str)) /*      ????????needs to accept an expression*/
     {
-	char *start = str;
-	while( *str && *str != ',' )
-	    ++str;
-	if( *str != ',' )
+      char *start = str;
+      while (*str && *str != ',')
+	++str;
+      if (*str != ',')
 	{
-	    *errmsg = "invalid dma count";
-	    return 0;
+	  *errmsg = "invalid dma count";
+	  return 0;
 	}
-	count = atoi (start);
-	*pstr = str;
-	return(count);
+      count = atoi (start);
+      *pstr = str;
+      return (count);
     }
 
-    *errmsg = "invalid dma count";
-    return 0;
+  *errmsg = "invalid dma count";
+  return 0;
 }
