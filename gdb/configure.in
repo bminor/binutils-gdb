@@ -404,7 +404,6 @@ vax-*-*)		gdb_target=vax ;;
 
 w65-*-*)		gdb_target=w65 ;;
 
-z8k-*-sim*)		gdb_target=z8k ;;
 z8k-*-coff*)		gdb_target=z8k ;;
 
 esac
