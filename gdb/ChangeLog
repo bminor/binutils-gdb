@@ -1,3 +1,7 @@
+2003-01-12  Michael Chastain  <mec@shout.net>
+
+	* top.c (print_gdb_version): Bump copyright year to 2003.
+
 2003-01-12  David Carlton  <carlton@bactrian.org>
 
 	* linespec.c (symtab_from_filename): Rename variable 's' to
