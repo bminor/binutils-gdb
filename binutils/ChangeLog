@@ -1,3 +1,20 @@
+2003-03-24  Elias Athanasopoulos  <elathan@phys.uoa.gr>
+
+	* objdump.c (endian_string): Move to bucomm.c.
+	(display_info): Likewise.
+	(display_target_list): Likewise.
+	(display_info_table): Likewise.
+	(display_target_tables): Likewise.
+	(main): Assign the return value of display_info to exit_status.
+	* bucomm.c: Include bfdver.h and libbfd.h
+	(display_target_list): Call bfd_nonfatal instead of nonfatal and
+	return 0 on a non-fatal error, 1 on success.
+	(display_info_table): Likewise.	
+	* bucomm.h (display_info): Provide a prototype.
+	* Makefile.am (bucomm.o): Add dependencies on bfdver.h and
+	libbfd.h.
+	* Makefile.in: Regenerate.
+
 2003-03-22  Danny Smith  <dannysmith@users.sourceforge,net>
 
 	* dlltool.c (gen_def_file): Put demangled name comments on

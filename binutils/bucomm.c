@@ -1,5 +1,5 @@
 /* bucomm.c -- Bin Utils COMmon code.
-   Copyright 1991, 1992, 1993, 1994, 1995, 1997, 1998, 2000, 2001, 2002
+   Copyright 1991, 1992, 1993, 1994, 1995, 1997, 1998, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -23,9 +23,11 @@
    loaded, but for now it's not necessary.  */
 
 #include "bfd.h"
+#include "bfdver.h"
 #include "libiberty.h"
 #include "bucomm.h"
 #include "filenames.h"
+#include "libbfd.h"
 
 #include <sys/stat.h>
 #include <time.h>		/* ctime, maybe time_t */
@@ -35,8 +37,13 @@
 typedef long time_t;
 #endif
 #endif
+
+static const char * endian_string PARAMS ((enum bfd_endian));
+static int display_target_list PARAMS ((void));
+static int display_info_table PARAMS ((int, int));
+static int display_target_tables PARAMS ((void));
 
-/* Error reporting */
+/* Error reporting.  */
 
 char *program_name;
 
@@ -159,6 +166,202 @@ list_supported_architectures (name, f)
   for (arch = bfd_arch_list (); *arch; arch++)
     fprintf (f, " %s", *arch);
   fprintf (f, "\n");
+}
+
+/* The length of the longest architecture name + 1.  */
+#define LONGEST_ARCH sizeof ("powerpc:common")
+
+static const char *
+endian_string (endian)
+     enum bfd_endian endian;
+{
+  switch (endian)
+    {
+    case BFD_ENDIAN_BIG: return "big endian";
+    case BFD_ENDIAN_LITTLE: return "little endian";
+    default: return "endianness unknown";
+    }
+}
+
+/* List the targets that BFD is configured to support, each followed
+   by its endianness and the architectures it supports.  */
+
+static int
+display_target_list ()
+{
+  char *dummy_name;
+  int t;
+  int ret = 1;
+
+  dummy_name = make_temp_file (NULL);
+  for (t = 0; bfd_target_vector[t]; t++)
+    {
+      const bfd_target *p = bfd_target_vector[t];
+      bfd *abfd = bfd_openw (dummy_name, p->name);
+      int a;
+
+      printf ("%s\n (header %s, data %s)\n", p->name,
+	      endian_string (p->header_byteorder),
+	      endian_string (p->byteorder));
+
+      if (abfd == NULL)
+	{
+          bfd_nonfatal (dummy_name);
+          ret = 0;
+	  continue;
+	}
+
+      if (! bfd_set_format (abfd, bfd_object))
+	{
+	  if (bfd_get_error () != bfd_error_invalid_operation)
+            {
+	      bfd_nonfatal (p->name);
+              ret = 0;
+            }
+	  bfd_close_all_done (abfd);
+	  continue;
+	}
+
+      for (a = (int) bfd_arch_obscure + 1; a < (int) bfd_arch_last; a++)
+	if (bfd_set_arch_mach (abfd, (enum bfd_architecture) a, 0))
+	  printf ("  %s\n",
+		  bfd_printable_arch_mach ((enum bfd_architecture) a, 0));
+      bfd_close_all_done (abfd);
+    }
+  unlink (dummy_name);
+  free (dummy_name);
+
+  return ret;
+}
+
+/* Print a table showing which architectures are supported for entries
+   FIRST through LAST-1 of bfd_target_vector (targets across,
+   architectures down).  */
+
+static int
+display_info_table (first, last)
+     int first;
+     int last;
+{
+  int t;
+  int a;
+  int ret = 1;
+  char *dummy_name;
+
+  /* Print heading of target names.  */
+  printf ("\n%*s", (int) LONGEST_ARCH, " ");
+  for (t = first; t < last && bfd_target_vector[t]; t++)
+    printf ("%s ", bfd_target_vector[t]->name);
+  putchar ('\n');
+
+  dummy_name = make_temp_file (NULL);
+  for (a = (int) bfd_arch_obscure + 1; a < (int) bfd_arch_last; a++)
+    if (strcmp (bfd_printable_arch_mach (a, 0), "UNKNOWN!") != 0)
+      {
+	printf ("%*s ", (int) LONGEST_ARCH - 1,
+		bfd_printable_arch_mach (a, 0));
+	for (t = first; t < last && bfd_target_vector[t]; t++)
+	  {
+	    const bfd_target *p = bfd_target_vector[t];
+	    bfd_boolean ok = TRUE;
+	    bfd *abfd = bfd_openw (dummy_name, p->name);
+
+	    if (abfd == NULL)
+	      {
+		bfd_nonfatal (p->name);
+                ret = 0;
+		ok = FALSE;
+	      }
+
+	    if (ok)
+	      {
+		if (! bfd_set_format (abfd, bfd_object))
+		  {
+		    if (bfd_get_error () != bfd_error_invalid_operation)
+                      {
+		        bfd_nonfatal (p->name);
+                        ret = 0;
+                      }
+		    ok = FALSE;
+		  }
+	      }
+
+	    if (ok)
+	      {
+		if (! bfd_set_arch_mach (abfd, a, 0))
+		  ok = FALSE;
+	      }
+
+	    if (ok)
+	      printf ("%s ", p->name);
+	    else
+	      {
+		int l = strlen (p->name);
+		while (l--)
+		  putchar ('-');
+		putchar (' ');
+	      }
+	    if (abfd != NULL)
+	      bfd_close_all_done (abfd);
+	  }
+	putchar ('\n');
+      }
+  unlink (dummy_name);
+  free (dummy_name);
+
+  return ret;
+}
+
+/* Print tables of all the target-architecture combinations that
+   BFD has been configured to support.  */
+
+static int
+display_target_tables ()
+{
+  int t;
+  int columns;
+  int ret = 1;
+  char *colum;
+
+  columns = 0;
+  colum = getenv ("COLUMNS");
+  if (colum != NULL)
+    columns = atoi (colum);
+  if (columns == 0)
+    columns = 80;
+
+  t = 0;
+  while (bfd_target_vector[t] != NULL)
+    {
+      int oldt = t, wid;
+
+      wid = LONGEST_ARCH + strlen (bfd_target_vector[t]->name) + 1;
+      ++t;
+      while (wid < columns && bfd_target_vector[t] != NULL)
+	{
+	  int newwid;
+
+	  newwid = wid + strlen (bfd_target_vector[t]->name) + 1;
+	  if (newwid >= columns)
+	    break;
+	  wid = newwid;
+	  ++t;
+	}
+      if (! display_info_table (oldt, t))
+        ret = 0;
+    }
+
+  return ret;
+}
+
+int
+display_info ()
+{
+  printf (_("BFD header file version %s\n"), BFD_VERSION_STRING);
+  if (! display_target_list () || ! display_target_tables ())
+    return 1;
+  else
+    return 0;
 }
 
 /* Display the archive header for an element as if it were an ls -l listing:
