@@ -1,3 +1,8 @@
+2004-06-04  Roland McGrath  <roland@redhat.com>
+
+	* gdb.base/auxv.exp (fetch_auxv): Consume output fully through
+	next gdb prompt.
+
 2004-06-02  Michael Chastain  <mec.gnu@mindspring.com>
 
 	Fix PR gdb/1636.
@@ -25,7 +30,7 @@
 
 2004-05-20  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
-	* gdb.base/signull.c: Use sigsetjmp/siglongjmp instead of 
+	* gdb.base/signull.c: Use sigsetjmp/siglongjmp instead of
 	setjmp/longjmp.  Use sigaction instead of signal.
 
 2004-05-19  J. Brobecker  <brobecker@gnat.com>
@@ -76,7 +81,7 @@
 
 	* gdb.base/pending.exp: Make sure pending breakpoints
 	preserve the ignore count.
-	
+
 2004-04-27  Jerome Guitton  <guitton@gnat.com>
 
 	* i386-prologue.exp: Add testcase for jump instruction as first
