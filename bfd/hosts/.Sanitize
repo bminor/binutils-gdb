@@ -37,6 +37,7 @@ h-rtbsd.h
 h-sun3.h
 h-sun4.h
 h-tahoebsd.h
+h-ultra3.h
 h-vaxbsd.h
 h-vaxult.h
 h_dos.h
@@ -48,7 +49,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.3  1991/08/22 08:01:20  gnu
+# Revision 1.4  1991/09/13 03:56:25  gnu
+# Ultracomputer
+#
+# Revision 1.3  1991/08/22  08:01:20  gnu
 # Add hp 300 BSD.
 #
 # Revision 1.2  1991/07/24  00:59:57  gnu
