@@ -91,6 +91,7 @@
 
 #include "bucomm.h"
 #include "getopt.h"
+#include "libiberty.h"
 
 char *program_name = "readelf";
 unsigned long dynamic_addr;
@@ -3798,6 +3799,19 @@ process_section_headers (file)
   return 1;
 }
 
+struct
+{
+  const char *name;
+  int reloc;
+  int size;
+  int rela;
+} dynamic_relocations [] =
+{
+    { "REL", DT_REL, DT_RELSZ, FALSE },
+    { "RELA", DT_RELA, DT_RELASZ, TRUE },
+    { "PLT", DT_JMPREL, DT_PLTRELSZ, UNKNOWN }
+};
+
 /* Process the reloc section.  */
 static int
 process_relocs (file)
@@ -3812,53 +3826,49 @@ process_relocs (file)
 
   if (do_using_dynamic)
     {
-      int is_rela = FALSE;
+      int is_rela;
+      const char *name;
+      int has_dynamic_reloc;
+      unsigned int i;
+      
+      has_dynamic_reloc = 0;
 
-      rel_size   = 0;
-      rel_offset = 0;
+      for (i = 0; i < ARRAY_SIZE (dynamic_relocations); i++)
+	{
+	  is_rela = dynamic_relocations [i].rela;
+	  name = dynamic_relocations [i].name;
+	  rel_size = dynamic_info [dynamic_relocations [i].size];
+	  rel_offset = dynamic_info [dynamic_relocations [i].reloc];
 
-      if (dynamic_info[DT_REL])
-	{
-	  rel_offset = dynamic_info[DT_REL];
-	  rel_size   = dynamic_info[DT_RELSZ];
-	  is_rela    = FALSE;
-	}
-      else if (dynamic_info[DT_RELA])
-	{
-	  rel_offset = dynamic_info[DT_RELA];
-	  rel_size   = dynamic_info[DT_RELASZ];
-	  is_rela    = TRUE;
-	}
-      else if (dynamic_info[DT_JMPREL])
-	{
-	  rel_offset = dynamic_info[DT_JMPREL];
-	  rel_size   = dynamic_info[DT_PLTRELSZ];
+	  has_dynamic_reloc |= rel_size;
 
-	  switch (dynamic_info[DT_PLTREL])
+	  if (is_rela == UNKNOWN)
 	    {
-	    case DT_REL:
-	      is_rela = FALSE;
-	      break;
-	    case DT_RELA:
-	      is_rela = TRUE;
-	      break;
-	    default:
-	      is_rela = UNKNOWN;
-	      break;
+	      if (dynamic_relocations [i].reloc == DT_JMPREL)
+		switch (dynamic_info[DT_PLTREL])
+		  {
+		  case DT_REL:
+		    is_rela = FALSE;
+		    break;
+		  case DT_RELA:
+		    is_rela = TRUE;
+		    break;
+		  }
+	    }
+
+	  if (rel_size)
+	    {
+	      printf
+		(_("\n'%s' relocation section at offset 0x%lx contains %ld bytes:\n"),
+		 name, rel_offset, rel_size);
+
+	      dump_relocations (file, rel_offset - loadaddr, rel_size,
+				dynamic_symbols, num_dynamic_syms,
+				dynamic_strings, is_rela);
 	    }
 	}
 
-      if (rel_size)
-	{
-	  printf
-	    (_("\nRelocation section at offset 0x%lx contains %ld bytes:\n"),
-	     rel_offset, rel_size);
-
-	  dump_relocations (file, rel_offset - loadaddr, rel_size,
-			    dynamic_symbols, num_dynamic_syms, dynamic_strings,
-			    is_rela);
-	}
-      else
+      if (! has_dynamic_reloc)
 	printf (_("\nThere are no dynamic relocations in this file.\n"));
     }
   else
@@ -5001,6 +5011,7 @@ process_dynamic_segment (file)
 	  break;
 
 	case DT_PLTREL:
+	  dynamic_info[entry->d_tag] = entry->d_un.d_val;
 	  if (do_dynamic)
 	    puts (get_dynamic_type (entry->d_un.d_val));
 	  break;
@@ -5075,6 +5086,7 @@ process_dynamic_segment (file)
 	case DT_RELAENT	:
 	case DT_SYMENT	:
 	case DT_RELENT	:
+	  dynamic_info[entry->d_tag] = entry->d_un.d_val;
 	case DT_PLTPADSZ:
 	case DT_MOVEENT	:
 	case DT_MOVESZ	:

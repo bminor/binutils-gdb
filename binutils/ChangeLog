@@ -1,3 +1,11 @@
+2003-03-31  H.J. Lu <hjl@gnu.org>
+
+	* readelf.c: Include "libiberty.h".
+	(dynamic_relocations): New.
+	(process_relocs): Properly handle dynamic relocation.
+	(process_dynamic_segment): Fill relocation elements in
+	dynamic_info.
+
 2003-03-31  Kevin Buettner <kevinb@redhat.com>
 
 	* readelf.c (read_and_display_attr, read_and_display_attr_value):
