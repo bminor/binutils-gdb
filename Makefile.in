@@ -508,7 +508,6 @@ ALL_MODULES = \
 	all-textutils \
 	all-tgas \
 	all-time \
-	all-tix \
 	all-uudecode \
 	$(start-sanitize-ide) \
 	all-vmake \
@@ -580,7 +579,6 @@ CROSS_CHECK_MODULES = \
 	check-textutils \
 	check-tgas \
 	check-time \
-	check-tix \
 	check-uudecode \
 	$(start-sanitize-ide) \
 	check-vmake \
@@ -653,7 +651,6 @@ INSTALL_MODULES = \
 	install-textutils \
 	install-tgas \
 	install-time \
-	install-tix \
 	install-uudecode \
 	$(start-sanitize-ide) \
 	install-vmake \
@@ -670,7 +667,8 @@ ALL_X11_MODULES = \
 	all-gash \
 	all-guile \
 	all-tclX \
-	all-tk
+	all-tk \
+	all-tix
 
 # This is a list of the check targets for all of the modules which are
 # compiled using $(X11_FLAGS_TO_PASS).
@@ -680,7 +678,9 @@ CHECK_X11_MODULES = \
 	check-guile \
 	check-expect \
 	check-gash \
-	check-tclX
+	check-tclX \
+	check-tk \
+	check-tix
 
 # This is a list of the install targets for all the modules which are
 # compiled using $(X11_FLAGS_TO_PASS).
@@ -692,7 +692,8 @@ INSTALL_X11_MODULES = \
 	install-expect \
 	install-gash \
 	install-tclX \
-	install-tk
+	install-tk \
+	install-tix
 
 # This is a list of the targets for all of the modules which are compiled
 # using $(TARGET_FLAGS_TO_PASS).
@@ -806,7 +807,6 @@ CLEAN_MODULES = \
 	clean-textutils \
 	clean-tgas \
 	clean-time \
-	clean-tix \
 	clean-uudecode \
 	$(start-sanitize-ide) \
 	clean-vmake \
@@ -835,7 +835,8 @@ CLEAN_X11_MODULES = \
 	clean-gash \
 	clean-guile \
 	clean-tclX \
-	clean-tk
+	clean-tk \
+	clean-tix
 
 # The first rule in the file had better be this one.  Don't put any above it.
 all: all.normal

@@ -1,3 +1,8 @@
+Thu Jul 24 12:57:56 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in: Treat tix like tk, putting it in X11_MODULES.  Add
+	check-tk to CHECK_X11_MODULES.
+
 Wed Jul 23 17:03:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.sub: Merge with FSF.
