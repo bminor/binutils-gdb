@@ -16,6 +16,10 @@ before either tex- or info- formatting: for example,
 will produce (assuming your path finds either GNU or SysV m4; Berkeley
 won't do) a file suitable for formatting.  See the text in "pretex.m4"
 for a fuller explanation (and the macro definitions).
+    To permit maximum flexibility, the full source also does not contain
+any "info" markup that can be generated automatically; you should first
+preprocess it as above, then run it through C-u texinfo-master-menu,
+before actually info-formatting it.
 _1__
 _fi__(0)
 @c
@@ -470,7 +474,7 @@ Add @var{directory} to the path to search for source files.
 
 @table @code
 @item -nx
-Do not execute commands from the init files @file{._GDBP__init}.
+Do not execute commands from the init files @file{_GDBINIT__}.
 Normally, the commands in these files are executed after all the
 command options and arguments have been processed.  @xref{Command
 Files}.
@@ -482,7 +486,7 @@ specified on the _GDBN__ command line.
 
 @item -batch
 Run in batch mode.  Exit with code @code{0} after processing all the command
-files specified with @samp{-x} (and @file{._GDBP__init}, if not inhibited).
+files specified with @samp{-x} (and @file{_GDBINIT__}, if not inhibited).
 Exit with nonzero status if an error occurs in executing the _GDBN__
 commands in the command files.  
 
@@ -758,6 +762,126 @@ of the commands sent to it.  Running @samp{tail -f} on this file in
 another window often helps to debug trouble with @code{EBMON}, or
 unexpected events on the PC side of the connection.
 _fi__(_AMD29K__)
+
+_if__(_VXWORKS__)
+@node VxWorks Remote,,,
+@subsection _GDBN__ and VxWorks
+_GDBN__ enables developers to spawn and debug tasks running on networked
+VxWorks targets from a Unix host.  Already-running tasks spawned from
+the VxWorks shell can also be debugged.  _GDBN__ uses code that runs on
+both the UNIX host and on the VxWorks target.  The program
+@code{_GDBP__} is installed and executed on the UNIX host.  
+
+The remote debugging interface (RDB) routines are installed and executed
+on the VxWorks target.  These routines are included in the VxWorks library
+@code{rdb.a} and are incorporated into the system image when source-level
+debugging is enabled in the VxWorks configuration.
+
+Defining @code{INCLUDE_RDB} in the VxWorks configuration file
+@code{configAll.h} includes the RDB interface routines and spawns the
+source debugging task @code{tRdbTask} when VxWorks is booted.  For more
+information on configuring and remaking VxWorks, @cite{VxWorks
+Programmer's Guide}.
+
+Once you have included the RDB interface in your VxWorks system image
+and set your Unix execution search path to find _GDBN__, you are ready
+to run _GDBN__.  From your UNIX host, type:
+
+@smallexample
+% _GDBP__
+@end smallexample
+
+_GDBN__ will come up showing the prompt:
+
+@smallexample
+(_GDBP__)
+@end smallexample
+
+@node VxWorks connection,,,
+@subsubsection Connecting to a VxWorks Target
+
+The _GDBN__ command @samp{target} lets you connect to a VxWorks target on the
+network.  To connect to a target whose host name is ``@code{tt}'', type:
+
+@smallexample
+(_GDBP__) target vxworks tt
+@end smallexample
+
+_GDBN__ will display a message similar to the following:
+
+@smallexample
+Attaching remote machine across net... Success!
+@end smallexample
+
+_GDBN__ will then attempt to read the symbol tables of any object
+modules loaded into the VxWorks target since it was last booted.
+_GDBN__ will locate the object files by searching the directories listed
+in the source path (@pxref{Source Path}); if it fails to find an object
+file, it will display a message such as:
+
+@smallexample
+prog.o: No such file or directory.
+@end smallexample
+
+This will cause the @samp{target} command to abort.  When this happens, you
+should add the appropriate directory to the source path and execute the
+@samp{target} command again.
+
+@node VxWorks download,,,
+@subsubsection Downloading to a VxWorks Target
+
+If you have connected to the VxWorks target and you want to debug an
+object that has not yet been loaded, you can use the _GDBN__ @samp{load}
+command to download a file from UNIX to VxWorks incrementally.  The
+object file given as an argument to the @samp{load} command is actually
+opened twice: first by the VxWorks target in order to download the code,
+then by _GDBN__ in order to read the symbol table.  This can lead to
+problems if the current working directories on the two systems differ.
+It is simplest to set the working directory on both systems to the
+directory in which the object file resides, and then to reference the
+file by its name, without any path.  Thus, to load a program
+@samp{prog.o}, residing in @code{wherever/vw/demo/rdb}, on VxWorks type:
+
+@smallexample
+-> cd "wherever/vw/demo/rdb"
+@end smallexample
+
+On _GDBN__ type:
+
+@smallexample
+(_GDBP__) cd wherever/vw/demo/rdb 
+(_GDBP__) load prog.o
+@end smallexample
+
+_GDBN__ will display a response similar to the following:
+
+@smallexample
+Reading symbol data from wherever/vw/demo/rdb/prog.o... done.
+@end smallexample
+
+You can also use the @samp{load} command to reload an object module
+after editing and recompiling the corresponding source file.  Note that
+this will cause _GDBN__ to delete all currently-defined breakpoints,
+auto-displays, and convenience variables, and to clear the value
+history.  (This is necessary in order to preserve the integrity of
+debugger data structures that reference the target system's symbol
+table.)
+
+@node VxWorks attach,,,
+@subsubsection Running Tasks
+
+You can also attach to an existing task using the attach command as
+follows:
+
+@smallexample
+(_GDBP__) attach @var{taskId}
+@end smallexample
+
+where @var{taskId} is the VxWorks hexadecimal task ID.  The task can be running
+or suspended when you attach to it.  If running, it will be suspended at
+the time of attachment.
+
+_fi__(_VXWORKS__)
 
 @node Stopping _GDBN__,,,
 @section Stopping _GDBN__
@@ -4355,9 +4479,9 @@ command file does nothing; it does not mean to repeat the last command, as
 it would from the terminal.
 
 @cindex init file
-@cindex @file{._GDBP__init}
+@cindex @file{_GDBINIT__}
 When you start _GDBN__, it first executes commands from its @dfn{init files}.
-These are files named @file{._GDBP__init}.  _GDBN__ reads the init file (if any)
+These are files named @file{_GDBINIT__}.  _GDBN__ reads the init file (if any)
 in your home directory and then the init file (if any) in the current
 working directory.  (The init files are not executed if the @samp{-nx}
 option is given.)  You can also request the execution of a command file
