@@ -1,3 +1,12 @@
+Wed Apr  8 13:18:56 1998  Philippe De Muyter  <phdm@macqel.be>
+
+	* Makefile.in (EXTRA_GCC_FLAGS): XFOO lines shortened.
+
+Thu Apr  2 14:48:44 1998  Geoffrey Noer  <noer@cygnus.com>
+
+	* Makefile.in: add ash make rules
+	* configure.in: add ash to native_only and host_tools lists
+
 start-sanitize-ide
 Tue Mar 31 16:50:42 1998  Ian Lance Taylor  <ian@cygnus.com>
 
