@@ -223,6 +223,8 @@ m68klinux.c
 m68klynx.c
 m68knetbsd.c
 m88kmach3.c
+mach-o.c
+mach-o.h
 merge.c
 mipsbsd.c
 mmo.c
@@ -251,6 +253,9 @@ pe-mcore.c
 pe-mips.c
 pe-ppc.c
 pe-sh.c
+pef-traceback.h
+pef.c
+pef.h
 pei-arm.c
 pei-i386.c
 pei-mcore.c
@@ -291,3 +296,5 @@ vms.c
 vms.h
 xcoff-target.h
 xcofflink.c
+xsym.c
+xsym.h

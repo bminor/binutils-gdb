@@ -1,5 +1,41 @@
 2002-11-12  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf-bfd.h (struct cie_header): Move from elf_eh-frame.c.
+	(struct cie, struct eh_cie_fde, struct eh_frame_sec_info): Likewise.
+	(struct eh_frame_array_ent, struct eh_frame_hdr_info): Likewise.
+	(enum elf_link_info_type): Remove ELF_INFO_TYPE_EH_FRAME_HDR.
+	(struct eh_frame_hdr_info): Add "hdr_sec", remove "split".
+	(struct elf_link_hash_table): Add eh_info.
+	(struct elf_obj_tdata): Change eh_frame_hdr to an asection *.
+	(_bfd_elf_discard_section_eh_frame): Update prototype.
+	(_bfd_elf_discard_section_eh_frame_hdr): Likewise.
+	(_bfd_elf_write_section_eh_frame): Likewise.
+	(_bfd_elf_write_section_eh_frame_hdr): Likewise.
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Remove "ehdrsec"
+	param.  Get "hdr_info" from link hash table.
+	(_bfd_elf_discard_section_eh_frame_hdr): Remove "sec" param.  Get
+	header section from link hash table.  Save header section to elf_tdata.
+	(_bfd_elf_maybe_strip_eh_frame_hdr): Remove local "sec".  Use
+	header section from link hash table.  Don't alloc hdr_info.  Clear
+	hdr_sec instead of setting "strip".
+	(_bfd_elf_eh_frame_section_offset): Formatting.
+	(_bfd_elf_write_section_eh_frame): Remove "ehdrsec", add "info" param.
+	Get header section from link hash table.
+	(_bfd_elf_write_section_eh_frame_hdr): Remove "sec", add "info" param.
+	Get header section from link hash table.
+	* elf.c (map_sections_to_segments): Use cached eh_frame_hdr.
+	(get_program_header_size): Likewise.
+	(_bfd_elf_section_offset): Formatting.
+	* elflink.h (elf_link_create_dynamic_sections): Stash eh frame header
+	section pointer in link hash table.
+	(elf_bfd_final_link): Adjust _bfd_elf_write_section_eh_frame_hdr
+	and _bfd_elf_write_section_eh_frame calls.  Update comment about
+	eh_frame entries.
+	(elf_bfd_discard_info): Adjust _bfd_elf_discard_section_eh_frame and
+	_bfd_elf_discard_section_eh_frame_hdr calls.  Remove "ehdr".
+
+	* po/SRC-POTFILES.in: Regenerate.
+
 	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Don't zero
 	relocs for discarded FDEs.  Remove dead code.
 	(_bfd_elf_write_section_eh_frame_hdr): Remove dead code.

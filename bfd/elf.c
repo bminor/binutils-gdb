@@ -3449,10 +3449,9 @@ map_sections_to_segments (abfd)
 
   /* If there is a .eh_frame_hdr section, throw in a PT_GNU_EH_FRAME
      segment.  */
-  eh_frame_hdr = NULL;
-  if (elf_tdata (abfd)->eh_frame_hdr)
-    eh_frame_hdr = bfd_get_section_by_name (abfd, ".eh_frame_hdr");
-  if (eh_frame_hdr != NULL && (eh_frame_hdr->flags & SEC_LOAD))
+  eh_frame_hdr = elf_tdata (abfd)->eh_frame_hdr;
+  if (eh_frame_hdr != NULL
+      && (eh_frame_hdr->output_section->flags & SEC_LOAD) != 0)
     {
       amt = sizeof (struct elf_segment_map);
       m = (struct elf_segment_map *) bfd_zalloc (abfd, amt);
@@ -3461,7 +3460,7 @@ map_sections_to_segments (abfd)
       m->next = NULL;
       m->p_type = PT_GNU_EH_FRAME;
       m->count = 1;
-      m->sections[0] = eh_frame_hdr;
+      m->sections[0] = eh_frame_hdr->output_section;
 
       *pm = m;
       pm = &m->next;
@@ -4032,8 +4031,7 @@ get_program_header_size (abfd)
       ++segs;
     }
 
-  if (elf_tdata (abfd)->eh_frame_hdr
-      && bfd_get_section_by_name (abfd, ".eh_frame_hdr") != NULL)
+  if (elf_tdata (abfd)->eh_frame_hdr)
     {
       /* We need a PT_GNU_EH_FRAME segment.  */
       ++segs;
@@ -7327,9 +7325,9 @@ _bfd_elf_section_offset (abfd, info, sec, offset)
   switch (sec_data->sec_info_type)
     {
     case ELF_INFO_TYPE_STABS:
-      return _bfd_stab_section_offset
-	(abfd, &elf_hash_table (info)->merge_info, sec, &sec_data->sec_info,
-	 offset);
+      return _bfd_stab_section_offset (abfd,
+				       &elf_hash_table (info)->merge_info,
+				       sec, &sec_data->sec_info, offset);
     case ELF_INFO_TYPE_EH_FRAME:
       return _bfd_elf_eh_frame_section_offset (abfd, sec, offset);
     default:

@@ -235,9 +235,77 @@ enum elf_link_info_type
   ELF_INFO_TYPE_STABS,
   ELF_INFO_TYPE_MERGE,
   ELF_INFO_TYPE_EH_FRAME,
-  ELF_INFO_TYPE_EH_FRAME_HDR,
   ELF_INFO_TYPE_JUST_SYMS,
   ELF_INFO_TYPE_LAST
+};
+
+/* Structures used by the eh_frame optimization code.  */
+struct cie_header
+{
+  unsigned int length;
+  unsigned int id;
+};
+
+struct cie
+{
+  struct cie_header hdr;
+  unsigned char version;
+  unsigned char augmentation[20];
+  unsigned int code_align;
+  int data_align;
+  unsigned int ra_column;
+  unsigned int augmentation_size;
+  struct elf_link_hash_entry *personality;
+  unsigned char per_encoding;
+  unsigned char lsda_encoding;
+  unsigned char fde_encoding;
+  unsigned char initial_insn_length;
+  unsigned char make_relative;
+  unsigned char make_lsda_relative;
+  unsigned char initial_instructions[50];
+};
+
+struct eh_cie_fde
+{
+  unsigned int offset;
+  unsigned int size;
+  asection *sec;
+  unsigned int new_offset;
+  unsigned char fde_encoding;
+  unsigned char lsda_encoding;
+  unsigned char lsda_offset;
+  unsigned char cie : 1;
+  unsigned char removed : 1;
+  unsigned char make_relative : 1;
+  unsigned char make_lsda_relative : 1;
+  unsigned char per_encoding_relative : 1;
+};
+
+struct eh_frame_sec_info
+{
+  unsigned int count;
+  unsigned int alloced;
+  struct eh_cie_fde entry[1];
+};
+
+struct eh_frame_array_ent
+{
+  bfd_vma initial_loc;
+  bfd_vma fde;
+};
+
+struct eh_frame_hdr_info
+{
+  struct cie last_cie;
+  asection *last_cie_sec;
+  asection *hdr_sec;
+  unsigned int last_cie_offset;
+  unsigned int fde_count, array_count;
+  struct eh_frame_array_ent *array;
+  /* TRUE if .eh_frame_hdr should contain the sorted search table.
+     We build it if we successfully read all .eh_frame input sections
+     and recognize them.  */
+  boolean table;
 };
 
 /* Cached start, size and alignment of PT_TLS segment.  */
@@ -293,6 +361,9 @@ struct elf_link_hash_table
 
   /* A pointer to information used to merge SEC_MERGE sections.  */
   PTR merge_info;
+
+  /* Used by eh_frame code when editing .eh_frame.  */
+  struct eh_frame_hdr_info eh_info;
 
   /* A linked list of local symbols to be added to .dynsym.  */
   struct elf_link_local_dynamic_entry *dynlocal;
@@ -1118,12 +1189,12 @@ struct elf_obj_tdata
      include this field for a MIPS ELF target.  */
   asection **local_stubs;
 
-  /* Used to determine if the e_flags field has been initialized */
-  boolean flags_init;
-
   /* Used to determine if PT_GNU_EH_FRAME segment header should be
      created.  */
-  boolean eh_frame_hdr;
+  asection *eh_frame_hdr;
+
+  /* Used to determine if the e_flags field has been initialized */
+  boolean flags_init;
 
   /* Number of symbol version definitions we are about to emit.  */
   unsigned int cverdefs;
@@ -1366,16 +1437,16 @@ extern void _bfd_elf_strtab_finalize
   PARAMS ((struct elf_strtab_hash *));
 
 extern boolean _bfd_elf_discard_section_eh_frame
-  PARAMS ((bfd *, struct bfd_link_info *, asection *, asection *,
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   boolean (*) (bfd_vma, PTR), struct elf_reloc_cookie *));
 extern boolean _bfd_elf_discard_section_eh_frame_hdr
-  PARAMS ((bfd *, struct bfd_link_info *, asection *));
+  PARAMS ((bfd *, struct bfd_link_info *));
 extern bfd_vma _bfd_elf_eh_frame_section_offset
   PARAMS ((bfd *, asection *, bfd_vma));
 extern boolean _bfd_elf_write_section_eh_frame
-  PARAMS ((bfd *, asection *, asection *, bfd_byte *));
+  PARAMS ((bfd *, struct bfd_link_info *, asection *, bfd_byte *));
 extern boolean _bfd_elf_write_section_eh_frame_hdr
-  PARAMS ((bfd *, asection *));
+  PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean _bfd_elf_maybe_strip_eh_frame_hdr
   PARAMS ((struct bfd_link_info *));
 

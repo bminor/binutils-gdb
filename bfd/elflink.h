@@ -2342,6 +2342,7 @@ elf_link_create_dynamic_sections (abfd, info)
 	  || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
 	  || ! bfd_set_section_alignment (abfd, s, 2))
 	return false;
+      elf_hash_table (info)->eh_info.hdr_sec = s;
     }
 
   /* Create sections to hold version informations.  These are removed
@@ -5854,17 +5855,10 @@ elf_bfd_final_link (abfd, info)
 	goto error_return;
     }
 
-  if (info->eh_frame_hdr && elf_hash_table (info)->dynobj)
+  if (info->eh_frame_hdr)
     {
-      o = bfd_get_section_by_name (elf_hash_table (info)->dynobj,
-				   ".eh_frame_hdr");
-      if (o
-	  && (elf_section_data (o)->sec_info_type
-	      == ELF_INFO_TYPE_EH_FRAME_HDR))
-	{
-	  if (! _bfd_elf_write_section_eh_frame_hdr (abfd, o))
-	    goto error_return;
-	}
+      if (! _bfd_elf_write_section_eh_frame_hdr (abfd, info))
+	goto error_return;
     }
 
   if (finfo.symstrtab != NULL)
@@ -6839,12 +6833,7 @@ elf_link_input_bfd (finfo, input_bfd)
 	     from discarded sections and section symbols from
 	     removed link-once sections.  Complain about relocs
 	     against discarded sections.  Zero relocs against removed
-	     link-once sections.  We should really complain if
-	     anything in the final link tries to use it, but
-	     DWARF-based exception handling might have an entry in
-	     .eh_frame to describe a routine in the linkonce section,
-	     and it turns out to be hard to remove the .eh_frame
-	     entry too.  FIXME.  */
+	     link-once sections.  */
 	  if (!finfo->info->relocateable
 	      && !elf_section_ignore_discarded_relocs (o))
 	    {
@@ -7166,19 +7155,14 @@ elf_link_input_bfd (finfo, input_bfd)
 	    return false;
 	  break;
 	case ELF_INFO_TYPE_MERGE:
-	  if (! (_bfd_write_merged_section
-		 (output_bfd, o, elf_section_data (o)->sec_info)))
+	  if (! _bfd_write_merged_section (output_bfd, o,
+					   elf_section_data (o)->sec_info))
 	    return false;
 	  break;
 	case ELF_INFO_TYPE_EH_FRAME:
 	  {
-	    asection *ehdrsec;
-
-	    ehdrsec
-	      = bfd_get_section_by_name (elf_hash_table (finfo->info)->dynobj,
-					 ".eh_frame_hdr");
-	    if (! (_bfd_elf_write_section_eh_frame (output_bfd, o, ehdrsec,
-						    contents)))
+	    if (! _bfd_elf_write_section_eh_frame (output_bfd, finfo->info,
+						   o, contents))
 	      return false;
 	  }
 	  break;
@@ -8409,7 +8393,7 @@ elf_bfd_discard_info (output_bfd, info)
      struct bfd_link_info *info;
 {
   struct elf_reloc_cookie cookie;
-  asection *stab, *eh, *ehdr;
+  asection *stab, *eh;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_backend_data *bed;
   bfd *abfd;
@@ -8422,11 +8406,6 @@ elf_bfd_discard_info (output_bfd, info)
       || ! is_elf_hash_table (info))
     return false;
 
-  ehdr = NULL;
-  if (elf_hash_table (info)->dynobj != NULL)
-    ehdr = bfd_get_section_by_name (elf_hash_table (info)->dynobj,
-				    ".eh_frame_hdr");
-
   for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link_next)
     {
       if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
@@ -8437,15 +8416,11 @@ elf_bfd_discard_info (output_bfd, info)
       if ((abfd->flags & DYNAMIC) != 0)
 	continue;
 
-      eh = NULL;
-      if (ehdr != NULL)
-	{
-	  eh = bfd_get_section_by_name (abfd, ".eh_frame");
-	  if (eh != NULL
-	      && (eh->_raw_size == 0
-		  || bfd_is_abs_section (eh->output_section)))
-	    eh = NULL;
-	}
+      eh = bfd_get_section_by_name (abfd, ".eh_frame");
+      if (eh != NULL
+	  && (eh->_raw_size == 0
+	      || bfd_is_abs_section (eh->output_section)))
+	eh = NULL;
 
       stab = bfd_get_section_by_name (abfd, ".stab");
       if (stab != NULL
@@ -8520,7 +8495,7 @@ elf_bfd_discard_info (output_bfd, info)
 	  if (cookie.rels != NULL)
 	    cookie.relend += count * bed->s->int_rels_per_ext_rel;
 
-	  if (_bfd_elf_discard_section_eh_frame (abfd, info, eh, ehdr,
+	  if (_bfd_elf_discard_section_eh_frame (abfd, info, eh,
 						 elf_reloc_symbol_deleted_p,
 						 &cookie))
 	    ret = true;
@@ -8544,8 +8519,8 @@ elf_bfd_discard_info (output_bfd, info)
 	}
     }
 
-  if (ehdr != NULL
-      && _bfd_elf_discard_section_eh_frame_hdr (output_bfd, info, ehdr))
+  if (info->eh_frame_hdr
+      && _bfd_elf_discard_section_eh_frame_hdr (output_bfd, info))
     ret = true;
 
   return ret;
