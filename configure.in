@@ -164,6 +164,7 @@ if [ x${enable_shared} = xyes ]; then
   case "${host}" in
     hppa*)		waugh=config/mh-papic ;;
     i[345]86-*)		waugh=config/mh-x86pic ;;
+    sparc64-*)		waugh=config/mh-sparcpic ;;
     *)			waugh=config/mh-${host_cpu}pic ;;
   esac
   if [ -f ${srcdir}/${waugh} ]; then

@@ -2,6 +2,8 @@ Mon Feb 26 15:25:19 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* config.sub (sparc*frw*): Delete.  Use -mflat now.
 
+	* configure.in (sparc64-*): Use mh-sparcpic if --enabled-shared.
+
 Mon Feb 26 14:32:44 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Check for bison before byacc.
