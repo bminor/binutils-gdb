@@ -1026,6 +1026,71 @@ find_pc_symtab (pc)
     }
   return (s);
 }
+
+/* Find the closest symbol value (of any sort -- function or variable)
+   for a given address value.  Slow but complete.  */
+
+struct symbol *
+find_addr_symbol (addr)
+     CORE_ADDR addr;
+{
+  struct symtab *symtab;
+  struct objfile *objfile;
+  register int bot, top;
+  register struct symbol *sym;
+  register CORE_ADDR sym_addr;
+  struct block *block;
+  int blocknum;
+
+  /* Info on best symbol seen so far */
+
+  register CORE_ADDR best_sym_addr = 0;
+  struct symbol *best_sym = 0;
+
+  /* FIXME -- we should pull in all the psymtabs, too!  */
+  ALL_SYMTABS (objfile, symtab)
+    {
+      /* Search the global and static blocks in this symtab for
+	 the closest symbol-address to the desired address.  */
+
+      for (blocknum = GLOBAL_BLOCK; blocknum <= STATIC_BLOCK; blocknum++)
+	{
+	  QUIT;
+	  block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), blocknum);
+	  top = BLOCK_NSYMS (block);
+	  for (bot = 0; bot < top; bot++)
+	    {
+	      sym = BLOCK_SYM (block, bot);
+	      switch (SYMBOL_CLASS (sym))
+		{
+		case LOC_STATIC:	
+		case LOC_LABEL:	
+		  sym_addr = SYMBOL_VALUE_ADDRESS (sym);
+		  break;
+
+		case LOC_BLOCK:
+		  sym_addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+		  break;
+
+		default:
+		  continue;
+		}
+
+		if (sym_addr <= addr)
+		  if (sym_addr > best_sym_addr)
+		    {
+		      /* Quit if we found an exact match.  */
+		      if (sym_addr == addr)
+			return sym;
+		      best_sym = sym;
+		      best_sym_addr = sym_addr;
+		    }
+	    }
+	}
+    }
+  return best_sym;
+}
+
 
 /* Find the source file and line number for a given PC value.
    Return a structure containing a symtab pointer, a line number,

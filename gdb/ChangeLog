@@ -1,3 +1,9 @@
+Wed Jan 12 00:16:26 1994  John Gilmore  (gnu@cygnus.com)
+
+	* symtab.c (find_addr_symbol):  New routine that will find the nearest
+	symbol associated with an address.  It does so by exhaustive
+	search of the symtabs, so it's slow but complete.
+
 Tue Jan 11 23:57:30 1994  John Gilmore  (gnu@cygnus.com)
 
 	* coffread.c (read_coff_symtab):  Set PC bounds of _globals_ symtab
