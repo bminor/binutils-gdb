@@ -1021,11 +1021,11 @@ ch-lang.o: ch-lang.c ch-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h parser-defs.h $(symtab_h)
 
 ch-typeprint.o: ch-typeprint.c ch-lang.h $(defs_h) $(expression_h) \
-	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) target.h \
-	$(value_h)
+	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) \
+	target.h $(value_h) typeprint.h
 
 ch-valprint.o: ch-valprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
-	language.h $(symtab_h) valprint.h $(value_h)
+	language.h $(symtab_h) valprint.h $(value_h) c-lang.h
 
 coff-solib.o: coff-solib.c $(defs_h)
 
@@ -1051,12 +1051,12 @@ core-svr4.o: core-svr4.c $(command_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h
 
 core.o: core.c $(dis-asm_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) target.h
+	$(inferior_h) target.h language.h
 
-coredep.o: coredep.c $(defs_h) $(gdbcore_h)
+coredep.o: coredep.c $(defs_h) $(gdbcore_h) $(value_h)
 
 corelow.o: corelow.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
-	target.h
+	target.h thread.h
 
 cp-valprint.o: cp-valprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbtypes_h) $(symtab_h) $(value_h)
@@ -1081,13 +1081,13 @@ dwarfread.o: dwarfread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 elfread.o: elfread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	gdb-stabs.h objfiles.h symfile.h $(symtab_h)
 
-environ.o: environ.c $(defs_h) environ.h
+environ.o: environ.c $(defs_h) environ.h $(gdbcore_h)
 
 eval.o: eval.c $(bfd_h) $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbtypes_h) language.h $(symtab_h) target.h $(value_h)
 
 exec.o: exec.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
-	target.h
+	target.h language.h
 
 expprint.o: expprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h parser-defs.h $(symtab_h) $(value_h)
@@ -1095,7 +1095,7 @@ expprint.o: expprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
 
 fork-child.o: fork-child.c $(wait_h) $(defs_h) $(gdbcore_h) \
-	$(inferior_h) target.h terminal.h
+	$(inferior_h) target.h terminal.h thread.h
 
 gdbtypes.o: gdbtypes.c $(bfd_h) complaints.h $(defs_h) $(expression_h) \
 	$(gdbtypes_h) language.h objfiles.h symfile.h $(symtab_h) target.h \
@@ -1142,18 +1142,18 @@ i960-tdep.o: i960-tdep.c $(ieee-float_h) $(defs_h) $(expression_h) \
 	$(frame_h) $(gdbtypes_h) $(symtab_h) $(value_h)
 
 infcmd.o: infcmd.c $(defs_h) environ.h $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) target.h
+	$(inferior_h) target.h language.h
 
 inflow.o: inflow.c $(bfd_h) $(command_h) $(defs_h) $(inferior_h) \
-	signals.h target.h terminal.h
+	signals.h target.h terminal.h thread.h
 
 infptrace.o: infptrace.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
 
 infrun.o: infrun.c $(wait_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) target.h
+	$(inferior_h) target.h thread.h
 
 inftarg.o: inftarg.c $(wait_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
-	target.h terminal.h
+	target.h terminal.h $(command_h)
 
 irix4-nat.o: irix4-nat.c $(defs_h) $(inferior_h)
 isi-xdep.o: isi-xdep.c
@@ -1183,7 +1183,9 @@ main.o: main.c $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
 	$(remote_utils_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(READLINE_CFLAGS) $(srcdir)/main.c
 
-maint.o: maint.c $(defs_h) $(gdbcmd_h) $(gdbtypes_h) $(symtab_h) 
+maint.o: maint.c $(defs_h) $(gdbcmd_h) $(gdbtypes_h) $(symtab_h) language.h \
+	$(expression_h)
+
 mem-break.o: mem-break.c $(defs_h) 
 
 minsyms.o: minsyms.c $(bfd_h) $(defs_h) objfiles.h symfile.h \
@@ -1414,12 +1416,15 @@ z8k-tdep.o: z8k-tdep.c $(bfd_h) $(dis-asm_h) $(defs_h) $(frame_h) \
 	$(gdbcmd_h) $(gdbtypes_h) $(symtab_h)
 
 c-exp.tab.o: c-exp.tab.c c-lang.h $(defs_h) $(expression_h) \
-	$(gdbtypes_h) language.h parser-defs.h $(symtab_h) $(value_h)
+	$(gdbtypes_h) language.h parser-defs.h $(symtab_h) $(value_h) \
+	$(bfd_h) objfiles.h symfile.h
 
 ch-exp.tab.o: ch-exp.tab.c ch-lang.h $(defs_h) $(expression_h) \
-	$(gdbtypes_h) language.h parser-defs.h $(symtab_h) $(value_h)
+	$(gdbtypes_h) language.h parser-defs.h $(symtab_h) $(value_h) \
+	$(bfd_h) objfiles.h symfile.h
 
 m2-exp.tab.o: m2-exp.tab.c $(defs_h) $(expression_h) $(gdbtypes_h) \
-	language.h m2-lang.h parser-defs.h $(symtab_h) $(value_h)
+	language.h m2-lang.h parser-defs.h $(symtab_h) $(value_h) \
+	$(bfd_h) objfiles.h symfile.h
 
 ### end of the gdb Makefile.in.
