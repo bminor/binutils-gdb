@@ -171,6 +171,7 @@ main (argc, argv)
   Nlm_Internal_Fixed_Header sharedhdr;
   int len;
   char *modname;
+  char **matching;
 
   program_name = argv[0];
 
@@ -296,8 +297,16 @@ main (argc, argv)
   if (inbfd == NULL)
     bfd_fatal (input_file);
 
-  if (! bfd_check_format (inbfd, bfd_object))
-    bfd_fatal (input_file);
+  if (! bfd_check_format_matches (inbfd, bfd_object, &matching))
+    {
+      bfd_nonfatal (input_file);
+      if (bfd_error == file_ambiguously_recognized)
+	{
+	  list_matching_formats (matching);
+	  free (matching);
+	}
+      exit (1);
+    }
 
   if (output_format == NULL)
     output_format = select_output_format (bfd_get_arch (inbfd),
@@ -493,7 +502,7 @@ main (argc, argv)
 			{
 			  newsymalloc += 10;
 			  newsyms = ((asymbol **)
-				     xrealloc (newsyms,
+				     xrealloc ((PTR) newsyms,
 					       (newsymalloc
 						* sizeof (asymbol *))));
 			}

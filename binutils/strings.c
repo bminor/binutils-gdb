@@ -1,5 +1,5 @@
 /* strings -- print the strings of printable characters in files
-   Copyright (C) 1993 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -36,6 +36,9 @@
 
    -o		Like -to.  (Some other implementations have -o like -to,
 		others like -td.  We chose one arbitrarily.)
+
+   --target=BFDNAME
+		Specify a non-default object file format.
 
    --help
    -h		Print the usage message on the standard output.
@@ -84,12 +87,8 @@ static boolean datasection_only;
 /* true if we found an initialized data section in the current file.  */
 static boolean got_a_section;
 
-/* Opened to /dev/null for reading from a BFD.
-   This is a kludge to avoid rewriting print_strings;
-   the way we call print_strings now, it actually only needs
-   to read from either a memory buffer or a stream, never both
-   for a given file.  */
-static FILE *devnull;
+/* The BFD object file format.  */
+static char *target;
 
 extern char *program_version;
 
@@ -99,6 +98,7 @@ static struct option long_options[] =
   {"print-file-name", no_argument, NULL, 'f'},
   {"bytes", required_argument, NULL, 'n'},
   {"radix", required_argument, NULL, 't'},
+  {"target", required_argument, NULL, 'T'},
   {"help", no_argument, NULL, 'h'},
   {"version", no_argument, NULL, 'v'},
   {NULL, 0, NULL, 0}
@@ -125,6 +125,7 @@ main (argc, argv)
   print_addresses = false;
   print_filenames = false;
   datasection_only = true;
+  target = NULL;
 
   while ((optc = getopt_long (argc, argv, "afn:ot:v0123456789",
 			      long_options, (int *) 0)) != EOF)
@@ -180,6 +181,10 @@ main (argc, argv)
 	    }
 	  break;
 
+	case 'T':
+	  target = optarg;
+	  break;
+
 	case 'v':
 	  printf ("GNU %s version %s\n", program_name, program_version);
 	  exit (0);
@@ -200,13 +205,6 @@ main (argc, argv)
     string_min = 4;
 
   bfd_init ();
-  devnull = fopen ("/dev/null", "r");
-  if (devnull == NULL)
-    {
-      fprintf (stderr, "%s: ", program_name);
-      perror ("/dev/null");
-      exit (1);
-    }
 
   for (; optind < argc; ++optind)
     {
@@ -242,7 +240,7 @@ strings_a_section (abfd, sect, file)
       if (bfd_get_section_contents (abfd, sect, mem, (file_ptr) 0, sz))
 	{
 	  got_a_section = true;
-	  print_strings (file, devnull, sect->filepos, 0, sz, mem);
+	  print_strings (file, (FILE *) NULL, sect->filepos, 0, sz, mem);
 	}
       free (mem);
     }
@@ -250,6 +248,7 @@ strings_a_section (abfd, sect, file)
 
 /* Scan all of the sections in FILE, and print the strings
    in the initialized data section(s).
+
    Return true if successful,
    false if not (such as if FILE is not an object file).  */
 
@@ -257,31 +256,29 @@ static boolean
 strings_object_file (file)
      char *file;
 {
-  bfd *abfd = bfd_openr (file, NULL);
+  bfd *abfd = bfd_openr (file, target);
 
   if (abfd == NULL)
     {
-      if (bfd_error != system_call_error)
-	{
-	  /* Out of memory, or an invalid target is specified by the
-	     GNUTARGET environment variable.  */
-	  fprintf (stderr, "%s: ", program_name);
-	  bfd_perror (file);
-	}
+      /* Treat the file as a non-object file.  */
       return false;
     }
 
-  /* For some reason, without this call, the BFD has no sections.
-     This call is only for the side effect of reading in the sections.  */
-  bfd_check_format (abfd, bfd_object);
+  /* This call is mainly for its side effect of reading in the sections.
+     We follow the traditional behavior of `strings' in that we don't
+     complain if we don't recognize a file to be an object file.  */
+  if (bfd_check_format (abfd, bfd_object) == false)
+    {
+      bfd_close (abfd);
+      return false;
+    }
 
   got_a_section = false;
   bfd_map_over_sections (abfd, strings_a_section, file);
 
   if (!bfd_close (abfd))
     {
-      fprintf (stderr, "%s: ", program_name);
-      bfd_perror (file);
+      bfd_nonfatal (file);
       return false;
     }
 
@@ -328,7 +325,8 @@ strings_file (file)
    is at address ADDRESS in the file.
    Stop reading at address STOP_POINT in the file, if nonzero.
 
-   Optionally the caller can supply a buffer of characters
+   If STREAM is NULL, do not read from it.
+   The caller can supply a buffer of characters
    to be processed before the data in STREAM.
    MAGIC is the address of the buffer and
    MAGICCOUNT is how many characters are in it.
@@ -364,6 +362,8 @@ print_strings (filename, stream, address, stop_point, magiccount, magic)
 	    }
 	  else
 	    {
+	      if (stream == NULL)
+		return;
 	      c = getc (stream);
 	      if (c < 0)
 		return;
@@ -391,6 +391,8 @@ print_strings (filename, stream, address, stop_point, magiccount, magic)
 	    }
 	  else
 	    {
+	      if (stream == NULL)
+		return;
 	      c = getc (stream);
 	      if (c < 0)
 		return;
@@ -412,15 +414,15 @@ print_strings (filename, stream, address, stop_point, magiccount, magic)
 	switch (address_radix)
 	  {
 	  case 8:
-	    printf ("%7lo ", address - i - 1);
+	    printf ("%7lo ", (unsigned long) (address - i - 1));
 	    break;
 
 	  case 10:
-	    printf ("%7ld ", address - i - 1);
+	    printf ("%7ld ", (long) (address - i - 1));
 	    break;
 
 	  case 16:
-	    printf ("%7lx ", address - i - 1);
+	    printf ("%7lx ", (unsigned long) (address - i - 1));
 	    break;
 	  }
 
@@ -505,7 +507,7 @@ usage (stream, status)
   fprintf (stream, "\
 Usage: %s [-afov] [-n min-len] [-min-len] [-t {o,x,d}] [-]\n\
        [--all] [--print-file-name] [--bytes=min-len] [--radix={o,x,d}]\n\
-       [--help] [--version] file...\n",
+       [--target=bfdname] [--help] [--version] file...\n",
 	   program_name);
   exit (status);
 }

@@ -502,10 +502,10 @@ print_contents(abfd)
     struct stat     buf;
     long            size;
     if (bfd_stat_arch_elt(abfd, &buf) != 0)
-	fatal("internal stat error on %s", abfd->filename);
+	fatal("internal stat error on %s", bfd_get_filename (abfd));
 
     if (verbose)
-	printf("\n<member %s>\n\n", abfd->filename);
+	printf("\n<member %s>\n\n", bfd_get_filename (abfd));
 
     bfd_seek(abfd, 0, SEEK_SET);
 
@@ -552,20 +552,20 @@ extract_file(abfd)
     long            size;
     struct stat     buf;
     if (bfd_stat_arch_elt(abfd, &buf) != 0)
-	fatal("internal stat error on %s", abfd->filename);
+	fatal("internal stat error on %s", bfd_get_filename (abfd));
     size = buf.st_size;
 
     if (verbose)
-	printf("x - %s\n", abfd->filename);
+	printf("x - %s\n", bfd_get_filename (abfd));
 
     bfd_seek(abfd, 0, SEEK_SET);
 
     ostream = 0;
     if (size == 0) {
       /* Seems like an abstraction violation, eh?  Well it's OK! */
-      ostream = fopen(abfd->filename, FOPEN_WB);
+      ostream = fopen(bfd_get_filename (abfd), FOPEN_WB);
       if (!ostream) {
-	perror(abfd->filename);
+	perror(bfd_get_filename (abfd));
 	exit(1);
       }
     } else
@@ -581,9 +581,9 @@ extract_file(abfd)
 	/* See comment above; this saves disk arm motion */
 	if (!ostream) {
 	    /* Seems like an abstraction violation, eh?  Well it's OK! */
-	    ostream = fopen(abfd->filename, FOPEN_WB);
+	    ostream = fopen(bfd_get_filename (abfd), FOPEN_WB);
 	    if (!ostream) {
-		perror(abfd->filename);
+		perror(bfd_get_filename (abfd));
 		exit(1);
 	    }
 	}
@@ -592,27 +592,27 @@ extract_file(abfd)
     }
 
     fclose(ostream);
-    chmod(abfd->filename, buf.st_mode);
+    chmod(bfd_get_filename (abfd), buf.st_mode);
 
     if (preserve_dates) {
 #ifdef POSIX_UTIME
         struct utimbuf	tb;
 	tb.actime = buf.st_mtime;
 	tb.modtime = buf.st_mtime;
-	utime(abfd->filename, &tb);	/* FIXME check result */
+	utime(bfd_get_filename (abfd), &tb);	/* FIXME check result */
 #else /* ! POSIX_UTIME */
 #ifdef USE_UTIME
 	long            tb[2];
 	tb[0] = buf.st_mtime;
 	tb[1] = buf.st_mtime;
-	utime(abfd->filename, tb);	/* FIXME check result */
+	utime(bfd_get_filename (abfd), tb);	/* FIXME check result */
 #else /* ! USE_UTIME */
 	struct timeval  tv[2];
 	tv[0].tv_sec = buf.st_mtime;
 	tv[0].tv_usec = 0;
 	tv[1].tv_sec = buf.st_mtime;
 	tv[1].tv_usec = 0;
-	utimes(abfd->filename, tv);	/* FIXME check result */
+	utimes(bfd_get_filename (abfd), tv);	/* FIXME check result */
 #endif /* ! USE_UTIME */
 #endif /* ! POSIX_UTIME */
     }

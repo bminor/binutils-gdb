@@ -1,3 +1,36 @@
+Wed Feb  2 13:42:23 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* nlmconv.c (main), objcopy.c (copy_file): Print matching formats
+	if ambiguous match.
+	* nm.c (display_file), size.c (display_bfd): Eliminate gotos.
+	Print matching formats if there is an ambiguous match.  Use
+	bfd_nonfatal instead of hardcoded error message if nothing matches.
+
+	* arsup.c, ar.c, objdump.c: Use bfd_get_filename instead of
+	abfd->filename. 
+
+	* nm.c (display_archive): New function, from code in display_file.
+	(display_rel_file): Renamed from do_one_rel_file.
+
+	* size.c: Indent.
+	(display_archive): New function from code in display_file.
+	(display_file): Check bfd_close error return.
+
+	* strings.c (strings_object_file): Check bfd_check_format
+	error return.
+
+	* strings.c, objdump.c, size.c: Use bfd_nonfatal instead of bfd_perror.
+
+	* bucomm.c: Delete references to exit_handler.  It wasn't set
+	anywhere, and now that we're using the libiberty xmalloc, it
+	wouldn't always get called before exiting.
+	(list_matching_formats): Function moved from objdump.c.
+	* bucomm.h: Declare it.
+
+	* objdump.c (disassemble_data): Move some variable decls closer to
+	their use.  Add some comments.  Replace a nested block with a
+	return. 
+
 Mon Jan 31 18:50:41 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* objdump.c (display_target_list, display_info_table): Check that

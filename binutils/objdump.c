@@ -52,12 +52,13 @@ boolean disassemble;		/* -d */
 boolean formats_info;		/* -i */
 char *only;			/* -j secname */
 
+/* Extra info to pass to the disassembler address printing function.  */
 struct objdump_disasm_info {
   bfd *abfd;
   asection *sec;
 };
 
-/* Architecture to disassemble for.  */
+/* Architecture to disassemble for, or default if NULL.  */
 char *machine = (char *) NULL;
 
 /* The symbol table.  */
@@ -414,13 +415,9 @@ void
 disassemble_data (abfd)
      bfd *abfd;
 {
-  bfd_byte *data = NULL;
-  bfd_arch_info_type *info;
-  bfd_size_type datasize = 0;
   bfd_size_type i;
-  unsigned int (*print) ()= 0; /* Old style */
+  unsigned int (*print) () = 0; /* Old style */
   disassembler_ftype disassemble = 0; /* New style */
-  enum bfd_architecture a;
   struct disassemble_info disasm_info;
   struct objdump_disasm_info aux;
 
@@ -429,14 +426,9 @@ disassemble_data (abfd)
 
   asection *section;
 
-  /* Replace symbol section relative values with abs values */
   boolean done_dot = false;
 
-  INIT_DISASSEMBLE_INFO(disasm_info, stdout);
-  disasm_info.application_data = (PTR) &aux;
-  aux.abfd = abfd;
-  disasm_info.print_address_func = objdump_print_address;
-
+  /* Replace symbol section relative values with abs values.  */
   for (i = 0; i < symcount; i++)
     {
       syms[i]->value += syms[i]->section->vma;
@@ -447,10 +439,15 @@ disassemble_data (abfd)
   /* Sort the symbols into section and symbol order */
   qsort (syms, symcount, sizeof (asymbol *), compare_symbols);
 
+  INIT_DISASSEMBLE_INFO(disasm_info, stdout);
+  disasm_info.application_data = (PTR) &aux;
+  aux.abfd = abfd;
+  disasm_info.print_address_func = objdump_print_address;
+
   if (machine != (char *) NULL)
     {
-      info = bfd_scan_arch (machine);
-      if (info == 0)
+      bfd_arch_info_type *info = bfd_scan_arch (machine);
+      if (info == NULL)
 	{
 	  fprintf (stderr, "%s: Can't use supplied machine %s\n",
 		   program_name,
@@ -460,7 +457,7 @@ disassemble_data (abfd)
       abfd->arch_info = info;
     }
 
-  /* See if we can disassemble using bfd */
+  /* See if we can disassemble using bfd.  */
 
   if (abfd->arch_info->disassemble)
     {
@@ -468,7 +465,7 @@ disassemble_data (abfd)
     }
   else
     {
-      a = bfd_get_arch (abfd);
+      enum bfd_architecture a = bfd_get_arch (abfd);
       switch (a)
 	{
 	  /* If you add a case to this table, also add it to the
@@ -556,7 +553,7 @@ disassemble_data (abfd)
 	default:
 	  fprintf (stderr, "%s: Can't disassemble for architecture %s\n",
 		   program_name,
-		   bfd_printable_arch_mach (bfd_get_arch (abfd), 0));
+		   bfd_printable_arch_mach (a, 0));
 	  exit (1);
 	}
 
@@ -566,91 +563,92 @@ disassemble_data (abfd)
        section != (asection *) NULL;
        section = section->next)
     {
+      bfd_byte *data = NULL;
+      bfd_size_type datasize = 0;
+
+      if (!(section->flags & SEC_LOAD))
+	continue;
+      if (only != (char *) NULL && strcmp (only, section->name) != 0)
+	continue;
+
+      printf ("Disassembly of section %s:\n", section->name);
+
+      datasize = bfd_get_section_size_before_reloc (section);
+      if (datasize == 0)
+	continue;
+
+      data = (bfd_byte *) xmalloc ((size_t) datasize);
+
+      bfd_get_section_contents (abfd, section, data, 0, datasize);
+
       aux.sec = section;
-
-      if ((section->flags & SEC_LOAD)
-	  && (only == (char *) NULL || strcmp (only, section->name) == 0))
+      disasm_info.buffer = data;
+      disasm_info.buffer_vma = section->vma;
+      disasm_info.buffer_length = datasize;
+      i = 0;
+      while (i < disasm_info.buffer_length)
 	{
-	  printf ("Disassembly of section %s:\n", section->name);
-
-	  if (bfd_get_section_size_before_reloc (section) == 0)
-	    continue;
-
-	  data = (bfd_byte *) xmalloc ((size_t) bfd_get_section_size_before_reloc (section));
-
-	  datasize = bfd_get_section_size_before_reloc (section);
-
-	  bfd_get_section_contents (abfd, section, data, 0, bfd_get_section_size_before_reloc (section));
-
-	  disasm_info.buffer = data;
-	  disasm_info.buffer_vma = section->vma;
-	  disasm_info.buffer_length =
-	    bfd_get_section_size_before_reloc (section);
-	  i = 0;
-	  while (i < disasm_info.buffer_length)
+	  if (data[i] == 0 && data[i + 1] == 0 && data[i + 2] == 0 &&
+	      data[i + 3] == 0)
 	    {
-	      if (data[i] == 0 && data[i + 1] == 0 && data[i + 2] == 0 &&
-		  data[i + 3] == 0)
+	      if (done_dot == false)
 		{
-		  if (done_dot == false)
-		    {
-		      printf ("...\n");
-		      done_dot = true;
-		    }
-		  i += 4;
+		  printf ("...\n");
+		  done_dot = true;
 		}
-	      else
+	      i += 4;
+	    }
+	  else
+	    {
+	      done_dot = false;
+	      if (with_line_numbers)
 		{
-		  done_dot = false;
-		  if (with_line_numbers)
-		    {
-		      CONST char *filename;
-		      CONST char *functionname;
-		      unsigned int line;
+		  CONST char *filename;
+		  CONST char *functionname;
+		  unsigned int line;
 
-		      if (bfd_find_nearest_line (abfd,
-						 section,
-						 syms,
-						 section->vma + i,
-						 &filename,
-						 &functionname,
-						 &line))
+		  if (bfd_find_nearest_line (abfd,
+					     section,
+					     syms,
+					     section->vma + i,
+					     &filename,
+					     &functionname,
+					     &line))
+		    {
+		      if (functionname && *functionname
+			  && strcmp(functionname, prev_function))
 			{
-			  if (functionname && *functionname
-			      && strcmp(functionname, prev_function))
-			    {
-			      printf ("%s():\n", functionname);
-			      prev_function = functionname;
-			    }
-			  if (!filename)
-			    filename = "???";
-			  if (line && line != prevline)
-			    {
-			      printf ("%s:%u\n", filename, line);
-			      prevline = line;
-			    }
+			  printf ("%s():\n", functionname);
+			  prev_function = functionname;
+			}
+		      if (!filename)
+			filename = "???";
+		      if (line && line != prevline)
+			{
+			  printf ("%s:%u\n", filename, line);
+			  prevline = line;
 			}
 		    }
-		  objdump_print_address (section->vma + i, &disasm_info);
-		  printf (" ");
-
-		  if (disassemble) /* New style */
-		    {
-		      int bytes = (*disassemble)(section->vma + i,
-						 &disasm_info);
-		      if (bytes < 0)
-			break;
-		      i += bytes;
-		    }
-		  else /* Old style */
-		    i += print (section->vma + i,
-				data + i,
-				stdout);
-		  putchar ('\n');
 		}
+	      objdump_print_address (section->vma + i, &disasm_info);
+	      putchar (' ');
+
+	      if (disassemble) /* New style */
+		{
+		  int bytes = (*disassemble)(section->vma + i,
+					     &disasm_info);
+		  if (bytes < 0)
+		    break;
+		  i += bytes;
+		}
+	      else /* Old style */
+		i += print (section->vma + i,
+			    data + i,
+			    stdout);
+	      putchar ('\n');
 	    }
-	  free (data);
 	}
+      free (data);
     }
 }
 
@@ -745,7 +743,7 @@ dump_stabs_1 (abfd, name1, name2)
   if (is_elf ? (0 == stabstr_hdr) : (0 == stabstrsect))
     {
       fprintf (stderr, "%s: %s has no %s section\n", program_name,
-	       abfd->filename, name2);
+	       bfd_get_filename (abfd), name2);
       return;
     }
  
@@ -763,7 +761,7 @@ dump_stabs_1 (abfd, name1, name2)
 	{
 	  fprintf (stderr, "%s: Reading %s section of %s failed\n",
 		   program_name, name1, 
-		   abfd->filename);
+		   bfd_get_filename (abfd));
 	  return;
 	}
     }
@@ -779,7 +777,7 @@ dump_stabs_1 (abfd, name1, name2)
 	{
 	  fprintf (stderr, "%s: Reading %s section of %s failed\n",
 		   program_name, name2,
-		   abfd->filename);
+		   bfd_get_filename (abfd));
 	  return;
 	}
     }
@@ -873,16 +871,6 @@ dump_bfd_header (abfd)
 }
 
 static void
-list_matching_formats (p)
-     char **p;
-{
-  fprintf(stderr, "%s: Matching formats:", program_name);
-  while (*p)
-    fprintf(stderr, " %s", *p++);
-  fprintf(stderr, "\n");
-}
-
-static void
 display_bfd (abfd)
      bfd *abfd;
 {
@@ -890,8 +878,7 @@ display_bfd (abfd)
 
   if (!bfd_check_format_matches (abfd, bfd_object, &matching))
     {
-      fprintf (stderr, "%s: %s: %s\n", program_name, abfd->filename,
-	       bfd_errmsg (bfd_error));
+      bfd_nonfatal (bfd_get_filename (abfd));
       if (bfd_error == file_ambiguously_recognized)
 	{
 	  list_matching_formats (matching);
@@ -900,7 +887,8 @@ display_bfd (abfd)
       return;
     }
 
-  printf ("\n%s:     file format %s\n", abfd->filename, abfd->xvec->name);
+  printf ("\n%s:     file format %s\n", bfd_get_filename (abfd),
+	  abfd->xvec->name);
   if (dump_ar_hdrs)
     print_arelt_descr (stdout, abfd, true);
   if (dump_file_header)
@@ -936,8 +924,7 @@ display_file (filename, target)
   file = bfd_openr (filename, target);
   if (file == NULL)
     {
-      fprintf (stderr, "%s: ", program_name);
-      bfd_perror (filename);
+      bfd_nonfatal (filename);
       return;
     }
 
@@ -953,8 +940,7 @@ display_file (filename, target)
 	    {
 	      if (bfd_error != no_more_archived_files)
 		{
-		  fprintf (stderr, "%s: ", program_name);
-		  bfd_perror (bfd_get_filename (file));
+		  bfd_nonfatal (bfd_get_filename (file));
 		}
 	      return;
 	    }
@@ -1197,8 +1183,7 @@ display_target_list ()
 	 tragic consequences that would otherwise ensue. */
       if (abfd == NULL)
 	{
-	  fprintf (stderr, "%s: ", program_name);
-	  bfd_perror (_DUMMY_NAME_);
+	  bfd_nonfatal (_DUMMY_NAME_);
 	  return;
 	}
       bfd_set_format (abfd, bfd_object);
@@ -1242,8 +1227,7 @@ display_info_table (first, last)
 	    /* Just in case the open failed somehow. */
 	    if (abfd == NULL)
 	      {
-		fprintf (stderr, "%s: ", program_name);
-		bfd_perror (_DUMMY_NAME_);
+		bfd_nonfatal (_DUMMY_NAME_);
 		return;
 	      }
 	    bfd_set_format (abfd, bfd_object);

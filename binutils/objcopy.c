@@ -390,6 +390,7 @@ copy_file (input_filename, output_filename, input_target, output_target)
      char *output_target;
 {
   bfd *ibfd;
+  char **matching;
 
   /* To allow us to do "strip *" without dying on the first
      non-object file, failures are nonfatal.  */
@@ -400,7 +401,16 @@ copy_file (input_filename, output_filename, input_target, output_target)
       nonfatal (input_filename);
     }
 
-  if (bfd_check_format (ibfd, bfd_object))
+  if (bfd_check_format (ibfd, bfd_archive))
+    {
+      bfd *obfd = bfd_openw (output_filename, output_target);
+      if (obfd == NULL)
+	{
+	  nonfatal (output_filename);
+	}
+      copy_archive (ibfd, obfd, output_target);
+    }
+  else if (bfd_check_format_matches (ibfd, bfd_object, &matching))
     {
       bfd *obfd = bfd_openw (output_filename, output_target);
       if (obfd == NULL)
@@ -420,20 +430,15 @@ copy_file (input_filename, output_filename, input_target, output_target)
 	  nonfatal (input_filename);
 	}
     }
-  else if (bfd_check_format (ibfd, bfd_archive))
-    {
-      bfd *obfd = bfd_openw (output_filename, output_target);
-      if (obfd == NULL)
-	{
-	  nonfatal (output_filename);
-	}
-      copy_archive (ibfd, obfd, output_target);
-    }
   else
     {
-      /* Get the right error message.  */
-      bfd_check_format (ibfd, bfd_object);
-      nonfatal (input_filename);
+      bfd_nonfatal (input_filename);
+      if (bfd_error == file_ambiguously_recognized)
+	{
+	  list_matching_formats (matching);
+	  free (matching);
+	}
+      status = 1;
     }
 }
 
