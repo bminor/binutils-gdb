@@ -1,3 +1,9 @@
+2003-11-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* objdump.c: Wrap long lines, init vars separately from decl.
+	(disassemble_section): Reset require_sec after call to
+	find_symbol_for_address.
+
 2003-11-14  Nick Clifton  <nickc@redhat.com>
 
 	* objdump.c (find_symbol_for_address): Change parameters so
@@ -8,7 +14,7 @@
         (objdump_print_addr): Alter parameters passed to
 	find_symbol_for_address.
         (objdump_symbol_at_address): Likewise.
-        (disassemble_address): Likewise.  Also use symbol_is_valid
+        (disassemble_section): Likewise.  Also use symbol_is_valid
 	function to check the validity of located symbols.
 
 2003-11-13  Tobias Burnus  <tobias.burnus@physik.fu-berlin.de>

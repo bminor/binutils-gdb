@@ -75,7 +75,8 @@ static int exit_status = 0;
 
 static char *default_target = NULL;	/* Default at runtime.  */
 
-/* The following variables are set based on arguments passed on command line.  */
+/* The following variables are set based on arguments passed on the
+   command line.  */
 static int show_version = 0;		/* Show the version number.  */
 static int dump_section_contents;	/* -s */
 static int dump_section_headers;	/* -h */
@@ -116,7 +117,8 @@ static size_t only_used = 0;
 static const char **include_paths;
 static int include_path_count;
 
-/* Extra info to pass to the section disassembler and address printing function.  */
+/* Extra info to pass to the section disassembler and address printing
+   function.  */
 struct objdump_disasm_info
 {
   bfd *              abfd;
@@ -600,9 +602,9 @@ objdump_print_value (bfd_vma vma, struct disassemble_info *info,
 {
   char buf[30];
   char *p;
-  struct objdump_disasm_info *aux
-    = (struct objdump_disasm_info *) info->application_data;
+  struct objdump_disasm_info *aux;
 
+  aux = (struct objdump_disasm_info *) info->application_data;
   bfd_sprintf_vma (aux->abfd, buf, vma);
   if (! skip_zeroes)
     p = buf;
@@ -650,7 +652,9 @@ objdump_print_symname (bfd *abfd, struct disassemble_info *info,
    of the symbol in sorted_syms.  */
 
 static asymbol *
-find_symbol_for_address (bfd_vma vma, struct disassemble_info *info, long *place)
+find_symbol_for_address (bfd_vma vma,
+			 struct disassemble_info *info,
+			 long *place)
 {
   /* @@ Would it speed things up to cache the last two symbols returned,
      and maybe their address ranges?  For many processors, only one memory
@@ -661,13 +665,18 @@ find_symbol_for_address (bfd_vma vma, struct disassemble_info *info, long *place
   long min = 0;
   long max = sorted_symcount;
   long thisplace;
-  struct objdump_disasm_info * aux = (struct objdump_disasm_info *) info->application_data;
-  bfd * abfd = aux->abfd;
-  asection * sec = aux->sec;
-  unsigned int opb = bfd_octets_per_byte (abfd);
+  struct objdump_disasm_info *aux;
+  bfd *abfd;
+  asection *sec;
+  unsigned int opb;
 
   if (sorted_symcount < 1)
     return NULL;
+
+  aux = (struct objdump_disasm_info *) info->application_data;
+  abfd = aux->abfd;
+  sec = aux->sec;
+  opb = bfd_octets_per_byte (abfd);
 
   /* Perform a binary search looking for the closest symbol to the
      required value.  We are searching the range (min, max].  */
@@ -826,10 +835,11 @@ objdump_print_addr_with_sym (bfd *abfd, asection *sec, asymbol *sym,
    If SKIP_ZEROES is TRUE, don't output leading zeroes.  */
 
 static void
-objdump_print_addr (bfd_vma vma, struct disassemble_info *info,
+objdump_print_addr (bfd_vma vma,
+		    struct disassemble_info *info,
 		    bfd_boolean skip_zeroes)
 {
-  struct objdump_disasm_info * aux = (struct objdump_disasm_info *) info->application_data;
+  struct objdump_disasm_info *aux;
   asymbol *sym;
 
   if (sorted_symcount < 1)
@@ -839,6 +849,7 @@ objdump_print_addr (bfd_vma vma, struct disassemble_info *info,
       return;
     }
 
+  aux = (struct objdump_disasm_info *) info->application_data;
   sym = find_symbol_for_address (vma, info, NULL);
   objdump_print_addr_with_sym (aux->abfd, aux->sec, sym, vma, info,
 			       skip_zeroes);
@@ -1552,7 +1563,7 @@ static void
 disassemble_section (bfd *abfd, asection *section, void *info)
 {
   struct disassemble_info *    pinfo = (struct disassemble_info *) info;
-  struct objdump_disasm_info * paux = (struct objdump_disasm_info *) pinfo->application_data;
+  struct objdump_disasm_info * paux;
   unsigned int                 opb = pinfo->octets_per_byte;
   bfd_byte *                   data = NULL;
   bfd_size_type                datasize = 0;
@@ -1581,6 +1592,7 @@ disassemble_section (bfd *abfd, asection *section, void *info)
     return;
 
   /* Decide which set of relocs to use.  Load them if necessary.  */
+  paux = (struct objdump_disasm_info *) pinfo->application_data;
   if (paux->dynrelbuf)
     {
       rel_pp = paux->dynrelbuf;
@@ -1628,7 +1640,6 @@ disassemble_section (bfd *abfd, asection *section, void *info)
   bfd_get_section_contents (abfd, section, data, 0, datasize);
 
   paux->sec = section;
-  paux->require_sec = TRUE;
   pinfo->buffer = data;
   pinfo->buffer_vma = section->vma;
   pinfo->buffer_length = datasize;
@@ -1661,7 +1672,9 @@ disassemble_section (bfd *abfd, asection *section, void *info)
   printf (_("Disassembly of section %s:\n"), section->name);
 
   /* Find the nearest symbol forwards from our current position.  */
+  paux->require_sec = TRUE;
   sym = find_symbol_for_address (section->vma + addr_offset, info, &place);
+  paux->require_sec = FALSE;
 
   /* Disassemble a block of instructions up to the address associated with
      the symbol we have just found.  Then print the symbol and find the
@@ -1861,12 +1874,15 @@ disassemble_data (bfd *abfd)
       if (relsize > 0)
 	{
 	  aux.dynrelbuf = xmalloc (relsize);
-	  aux.dynrelcount = bfd_canonicalize_dynamic_reloc (abfd, aux.dynrelbuf, dynsyms);
+	  aux.dynrelcount = bfd_canonicalize_dynamic_reloc (abfd,
+							    aux.dynrelbuf,
+							    dynsyms);
 	  if (aux.dynrelcount < 0)
 	    bfd_fatal (bfd_get_filename (abfd));
 
 	  /* Sort the relocs by address.  */
-	  qsort (aux.dynrelbuf, aux.dynrelcount, sizeof (arelent *), compare_relocs);
+	  qsort (aux.dynrelbuf, aux.dynrelcount, sizeof (arelent *),
+		 compare_relocs);
 	}
     }
 
@@ -1931,7 +1947,9 @@ read_section_stabs (bfd *abfd, const char *sect_name, bfd_size_type *size_ptr)
    using string table section STRSECT_NAME (in `strtab').  */
 
 static void
-print_section_stabs (bfd *abfd, const char *stabsect_name, unsigned *string_offset_ptr)
+print_section_stabs (bfd *abfd,
+		     const char *stabsect_name,
+		     unsigned *string_offset_ptr)
 {
   int i;
   unsigned file_string_table_offset = 0;
@@ -2404,7 +2422,9 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
 }
 
 static void
-dump_relocs_in_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNUSED)
+dump_relocs_in_section (bfd *abfd,
+			asection *section,
+			void *dummy ATTRIBUTE_UNUSED)
 {
   arelent **relpp;
   long relcount;
@@ -2503,7 +2523,9 @@ add_include_path (const char *path)
 }
 
 static void
-adjust_addresses (bfd *abfd ATTRIBUTE_UNUSED, asection *section, void *dummy ATTRIBUTE_UNUSED)
+adjust_addresses (bfd *abfd ATTRIBUTE_UNUSED,
+		  asection *section,
+		  void *dummy ATTRIBUTE_UNUSED)
 {
   section->vma += adjust_section_vma;
   section->lma += adjust_section_vma;
