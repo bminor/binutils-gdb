@@ -1,3 +1,9 @@
+Thu Jul 2 10:22:00 1998  Dawn Perchik  <dawn@cygnus.com>
+
+	* mdebugread.c (parse_partial_symbols): Go ahead and read the .mdebug
+	section, but just don't add a 2nd minimal symbol if this is an .mdebug 
+	section in an ELF file.
+
 1998-07-01  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	* Makefile.in (ax-general.o): Depend on $(defs_h) too.

@@ -2431,111 +2431,109 @@ parse_partial_symbols (objfile, section_offsets)
      Skip the creation of the minimal symbols based on the ECOFF 
      symbol table. */
 
-  if (ECOFF_IN_ELF(cur_bfd))
-    {
-      /* Pass 2 over external syms: fill in external symbols */
-      ext_in = ext_block;
-      ext_in_end = ext_in + hdr->iextMax;
-      for (; ext_in < ext_in_end; ext_in++)
-	{
-	  enum minimal_symbol_type ms_type = mst_text;
-	  CORE_ADDR svalue = ext_in->asym.value;
+    /* Pass 2 over external syms: fill in external symbols */
+    ext_in = ext_block;
+    ext_in_end = ext_in + hdr->iextMax;
+    for (; ext_in < ext_in_end; ext_in++)
+      {
+	enum minimal_symbol_type ms_type = mst_text;
+	CORE_ADDR svalue = ext_in->asym.value;
 
-	  /* The Irix 5 native tools seem to sometimes generate bogus
-	     external symbols.  */
-	  if (ext_in->ifd < -1 || ext_in->ifd >= hdr->ifdMax)
-	    {
-	      complain (&bad_ext_ifd_complaint, ext_in->ifd, hdr->ifdMax);
-	      continue;
-	    }
-	  if (ext_in->asym.iss < 0 || ext_in->asym.iss >= hdr->issExtMax)
-	    {
-	      complain (&bad_ext_iss_complaint, ext_in->asym.iss,
-			hdr->issExtMax);
-	      continue;
-	    }
-
-	  extern_tab[fdr_to_pst[ext_in->ifd].globals_offset
-		     + fdr_to_pst[ext_in->ifd].n_globals++] = *ext_in;
-
-
-	  if (SC_IS_UNDEF(ext_in->asym.sc) || ext_in->asym.sc == scNil)
+	/* The Irix 5 native tools seem to sometimes generate bogus
+	   external symbols.  */
+	if (ext_in->ifd < -1 || ext_in->ifd >= hdr->ifdMax)
+	  {
+	    complain (&bad_ext_ifd_complaint, ext_in->ifd, hdr->ifdMax);
 	    continue;
+	  }
+	if (ext_in->asym.iss < 0 || ext_in->asym.iss >= hdr->issExtMax)
+	  {
+	    complain (&bad_ext_iss_complaint, ext_in->asym.iss,
+			hdr->issExtMax);
+	    continue;
+	  }
 
-      
-	  /* Pass 3 over files, over local syms: fill in static symbols */
-	  name = debug_info->ssext + ext_in->asym.iss;
+	extern_tab[fdr_to_pst[ext_in->ifd].globals_offset
+		   + fdr_to_pst[ext_in->ifd].n_globals++] = *ext_in;
 
-	  /* Process ECOFF Symbol Types and Storage Classes */
-	  switch (ext_in->asym.st)
-	    {
-	    case stProc:
-	      /* Beginnning of Procedure */
-	      svalue += ANOFFSET (section_offsets, SECT_OFF_TEXT);
-	      break;
-	    case stStaticProc:
-	      /* Load time only static procs */
-	      ms_type = mst_file_text;
-	      svalue += ANOFFSET (section_offsets, SECT_OFF_TEXT);
-	      break;
-	    case stGlobal:
-	      /* External symbol */
-	      if (SC_IS_COMMON (ext_in->asym.sc))
-		{
-		  /* The value of a common symbol is its size, not its address.
-		     Ignore it.  */
-		  continue;
-		}
-	      else if (SC_IS_DATA (ext_in->asym.sc))
-		{
-		  ms_type = mst_data;
-		  svalue += ANOFFSET (section_offsets, SECT_OFF_DATA);
-		}
-	      else if (SC_IS_BSS (ext_in->asym.sc))
-		{
-		  ms_type = mst_bss;
-		  svalue += ANOFFSET (section_offsets, SECT_OFF_BSS);
-		}
-	      else
-		ms_type = mst_abs;
-	      break;
-	    case stLabel:
-	      /* Label */
-	      if (SC_IS_TEXT (ext_in->asym.sc))
-		{
-		  ms_type = mst_file_text;
-		  svalue += ANOFFSET (section_offsets, SECT_OFF_TEXT);
-		}
-	      else if (SC_IS_DATA (ext_in->asym.sc))
-		{
-		  ms_type = mst_file_data;
-		  svalue += ANOFFSET (section_offsets, SECT_OFF_DATA);
-		}
-	      else if (SC_IS_BSS (ext_in->asym.sc))
-		{
-		  ms_type = mst_file_bss;
-		  svalue += ANOFFSET (section_offsets, SECT_OFF_BSS);
-		}
-	      else
-		ms_type = mst_abs;
-	      break;
-	    case stLocal:
-	    case stNil:
-	      /* The alpha has the section start addresses in stLocal symbols
+
+	if (SC_IS_UNDEF(ext_in->asym.sc) || ext_in->asym.sc == scNil)
+	  continue;
+
+    
+	/* Pass 3 over files, over local syms: fill in static symbols */
+	name = debug_info->ssext + ext_in->asym.iss;
+
+	/* Process ECOFF Symbol Types and Storage Classes */
+	switch (ext_in->asym.st)
+	  {
+	  case stProc:
+	    /* Beginnning of Procedure */
+	    svalue += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	    break;
+	  case stStaticProc:
+	    /* Load time only static procs */
+	    ms_type = mst_file_text;
+	    svalue += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	    break;
+	  case stGlobal:
+	    /* External symbol */
+	    if (SC_IS_COMMON (ext_in->asym.sc))
+	      {
+		/* The value of a common symbol is its size, not its address.
+		   Ignore it.  */
+		continue;
+	      }
+	    else if (SC_IS_DATA (ext_in->asym.sc))
+	      {
+		ms_type = mst_data;
+		svalue += ANOFFSET (section_offsets, SECT_OFF_DATA);
+	      }
+	    else if (SC_IS_BSS (ext_in->asym.sc))
+	      {
+		ms_type = mst_bss;
+		svalue += ANOFFSET (section_offsets, SECT_OFF_BSS);
+	      }
+	    else
+	      ms_type = mst_abs;
+	    break;
+	  case stLabel:
+	    /* Label */
+	    if (SC_IS_TEXT (ext_in->asym.sc))
+	      {
+		ms_type = mst_file_text;
+		svalue += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	      }
+	    else if (SC_IS_DATA (ext_in->asym.sc))
+	      {
+		ms_type = mst_file_data;
+		svalue += ANOFFSET (section_offsets, SECT_OFF_DATA);
+	      }
+	    else if (SC_IS_BSS (ext_in->asym.sc))
+	      {
+		ms_type = mst_file_bss;
+		svalue += ANOFFSET (section_offsets, SECT_OFF_BSS);
+	      }
+	    else
+	      ms_type = mst_abs;
+	    break;
+	  case stLocal:
+	  case stNil:
+	    /* The alpha has the section start addresses in stLocal symbols
 		 whose name starts with a `.'. Skip those but complain for all
 		 other stLocal symbols.
 		 Irix6 puts the section start addresses in stNil symbols, skip
-		 those too.  */
-	      if (name[0] == '.')
-		continue;
-	      /* Fall through.  */
-	    default:
-	      ms_type = mst_unknown;
-	      complain (&unknown_ext_complaint, name);
-	    }
+		 those too.*/
+	    if (name[0] == '.')
+	      continue;
+	    /* Fall through.  */
+	  default:
+	    ms_type = mst_unknown;
+	    complain (&unknown_ext_complaint, name);
+	  }
+        if (!ECOFF_IN_ELF(cur_bfd))
 	  prim_record_minimal_symbol (name, svalue, ms_type, objfile);
-	}
-    }
+      }
 
   /* Pass 3 over files, over local syms: fill in static symbols */
   for (f_idx = 0; f_idx < hdr->ifdMax; f_idx++)
