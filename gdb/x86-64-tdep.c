@@ -471,6 +471,8 @@ classify_argument (struct type *type,
 	  return 2;
 	}
       break;
+    case TYPE_CODE_ENUM:
+    case TYPE_CODE_REF:
     case TYPE_CODE_INT:
     case TYPE_CODE_PTR:
       switch (bytes)
@@ -700,11 +702,17 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		  intreg += 2;
 		  break;
 		case X86_64_INTEGERSI_CLASS:
-		  deprecated_write_register_gen (int_parameter_registers[intreg / 2],
-						 VALUE_CONTENTS_ALL (args[i]) + offset);
-		  offset += 8;
-		  intreg++;
-		  break;
+		  {
+		    LONGEST num
+		      = extract_signed_integer (VALUE_CONTENTS_ALL (args[i])
+						+ offset, 4);
+		    regcache_raw_write_signed (current_regcache,
+					       int_parameter_registers[intreg / 2],                                           num);
+
+		    offset += 8;
+		    intreg++;
+		    break;
+		  }
 		case X86_64_SSEDF_CLASS:
 		case X86_64_SSESF_CLASS:
 		case X86_64_SSE_CLASS:
