@@ -1,3 +1,10 @@
+2000-06-16  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-mips.c (md_parse_option): Accept RM5200,RM5230,
+	RM5231, RM5261, RM5721 and RM7000 as r5000 cpu variants.
+
+	* doc/c-mips.texi: Document newly accepted cpu variants.
+
 2000-06-15  Ulf Carlsson  <ulfc@engr.sgi.com>
 
 	* config/tc-mips.h: Remove definition of ONLY_STANDARD_ESCAPES.

@@ -132,7 +132,13 @@ understood.  Valid @var{cpu} value are:
 4600,
 4650,
 5000,
+rm5200,
+rm5230,
+rm5231,
+rm5261,
+rm5721,
 6000,
+rm7000,
 8000,
 10000
 @end quotation

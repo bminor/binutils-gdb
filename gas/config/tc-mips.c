@@ -9041,8 +9041,24 @@ md_parse_option (c, arg)
 		if (strcmp (p, "orion") == 0)
 		  mips_cpu = 4600;
 		break;
-	      }
 
+	      case 'm':
+	      case 'M':
+		switch (atoi (p + 1))
+		  {
+		  case 5200:
+		  case 5230:
+		  case 5231:
+		  case 5261:
+		  case 5721:
+		  case 7000:
+		    mips_cpu = 5000;
+		    break;
+		  default:
+		    break;
+		  }
+	      }
+	    
 	    if (sv
 		&& (mips_cpu != 4300
 		    && mips_cpu != 4100
