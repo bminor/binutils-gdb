@@ -235,16 +235,13 @@ static int mips_4900 = -1;
 /* Whether the processor uses hardware interlocks to protect 
    reads from the HI and LO registers, and thus does not
    require nops to be inserted.  */
-#define hilo_interlocks (mips_4010 || mips_cpu == 4300 || mips_3900 \
+#define hilo_interlocks (mips_4010 ||  mips_3900                    \
                          /* start-sanitize-tx49 */                  \
                          || mips_cpu == 4900 || mips_4900           \
                          /* end-sanitize-tx49 */                    \
 			 /* start-sanitize-vr4320 */		    \
 			 || mips_cpu == 4320			    \
 			 /* end-sanitize-vr4320 */		    \
-			 /* start-sanitize-vr5400 */		    \
-			 || mips_cpu == 5400			    \
-			 /* end-sanitize-vr5400 */		    \
                          )
 
 /* Whether the processor uses hardware interlocks to protect reads
