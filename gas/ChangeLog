@@ -1,3 +1,8 @@
+Sat Jul  9 00:05:12 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.c (ecoff_build_lineno): Handle count correctly for last
+	line number.
+
 Fri Jul  8 15:22:07 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* (process_pseudo_op): Pass right are do do_aif.

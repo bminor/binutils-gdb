@@ -3600,7 +3600,11 @@ ecoff_build_lineno (backend, buf, bufend, offset, linecntptr)
 	 (in words).  Do this first, so that we can skip ahead to the
 	 next useful line number entry.  */
       if (l->next == (lineno_list_t *) NULL)
-	count = 0;
+	{
+	  /* We want a count of zero, but it will be decremented
+	     before it is used.  */
+	  count = 1;
+	}
       else
 	{
 	  count = ((l->next->frag->fr_address + l->next->paddr
