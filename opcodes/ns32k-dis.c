@@ -32,7 +32,7 @@ static disassemble_info *dis_info;
  * Hacks to get it to compile <= READ THESE AS FIXES NEEDED
  */
 #define CORE_ADDR unsigned long
-#define INVALID_FLOAT(val, size) invalid_float(val, size)
+#define INVALID_FLOAT(val, size) invalid_float((char *)val, size)
 
 static long read_memory_integer(addr, nr)
      unsigned char *addr;
@@ -801,20 +801,20 @@ get_displacement (buffer, aoffsetp)
 
 #if 1 /* a version that should work on ns32k f's&d's on any machine */
 int invalid_float(p, len)
-     register union { double d; float f; } *p;
+     register char *p;
      register int len;
 {
   register val;
 
-  if ( len == sizeof (float) )
-    val = (bit_extract(&p.f, 23, 8)/*exponent*/ == 0xff
-	   || (bit_extract(&p, 23, 8)/*exponent*/ == 0 &&
-	       bit_extract(&p, 0, 23)/*mantisa*/ != 0));
-  else if ( len == sizeof (double) )
-    val = (bit_extract(&p.d, 52, 11)/*exponent*/ == 0x7ff
-	   || (bit_extract(&p, 52, 11)/*exponent*/ == 0
-	       && (bit_extract(&p, 0, 32)/*low mantisa*/ != 0
-		   || bit_extract(&p, 32, 20)/*high mantisa*/ != 0)));
+  if ( len == 4 )
+    val = (bit_extract(p, 23, 8)/*exponent*/ == 0xff
+	   || (bit_extract(p, 23, 8)/*exponent*/ == 0 &&
+	       bit_extract(p, 0, 23)/*mantisa*/ != 0));
+  else if ( len == 8 )
+    val = (bit_extract(p, 52, 11)/*exponent*/ == 0x7ff
+	   || (bit_extract(p, 52, 11)/*exponent*/ == 0
+	       && (bit_extract(p, 0, 32)/*low mantisa*/ != 0
+		   || bit_extract(p, 32, 20)/*high mantisa*/ != 0)));
   else
     val = 1;
   return (val);

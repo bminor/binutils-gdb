@@ -2,7 +2,10 @@ Wed Jul 13 18:01:58 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* ns32k-dis.c: Deleted all code in "#ifdef GDB".
 	(invalid_float): Enabled general version, doesn't require running
-	on ns32k host.
+	on ns32k host.  Changed to take char* argument, and test for
+	explicitly specified sizes, instead of using sizeof() on host CPU
+	types.
+	(INVALID_FLOAT): Cast first argument.
 
 Sun Jul 10 00:27:47 1994  Ian Dall  (dall@hfrd.dsto.gov.au)
 
