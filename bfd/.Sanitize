@@ -92,6 +92,7 @@ coffgen.c
 cofflink.c
 coffswap.h
 config.bfd
+config.h-vms
 config.in
 configure
 configure.bat
@@ -147,6 +148,12 @@ elfcode.h
 elfcore.h
 elflink.c
 elflink.h
+evax.h
+evax-alpha.c
+evax-egsd.c
+evax-emh.c
+evax-etir.c
+evax-misc.c
 filemode.c
 format.c
 freebsd.h
@@ -193,6 +200,7 @@ m68klynx.c
 m68knetbsd.c
 m88kmach3.c
 makefile.dos
+makefile.vms
 mipsbsd.c
 mpw-config.in
 mpw-make.sed

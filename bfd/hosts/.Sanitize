@@ -25,6 +25,7 @@ Do-first:
 Things-to-keep:
 
 alphalinux.h
+alphavms.h
 decstation.h
 delta68.h
 dpx2.h

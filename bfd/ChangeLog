@@ -1,3 +1,26 @@
+Tue Jun 18 14:42:58 1996  Klaus Kaempf  <kkaempf@progis.de>
+
+	Added support for Alpha OpenVMS:
+	* evax.h, evax-alpha.c, evax-egsd.c, evax-emh.c: New files.
+	* evax-etir.c, evax-misc.c, hosts/alphavms.h: New files.
+	* config.h-vms, makefile.vms: New files.
+	* config.bfd (alpha-*-*vms*): New target.
+	* configure.in (evax_alpha_vec): New target vector.
+	* configure: Rebuild.
+	* reloc.c (BFD_RELOC_SWREL32, BFD_RELOC_SWREL64): Define.
+	(BFD_RELOC_ALPHA_LINKAGE, BFD_RELOC_ALPHA_BASEREG): Define.
+	* targets.c (bfd_target_evax_flavour): Define.
+	(evax_alpha_vec): Declare.
+	(bfd_target_vector): Add ecoffalpha_little_vec and evax_alpha_vec
+	if BFD64 is defined.
+	* bfd-in2.h, libbfd.h: Rebuild.
+	* Makefile.in: Rebuild dependencies.
+	(BFD64_BACKENDS): Add evax-alpha.o, evax-egsd.o, evax-etir.o,
+	evax-emh.o, and evax-misc.o.
+	(BFD64_BACKENDS_CFILES): Add evax-alpha.c, evax-egsd.c,
+	evax-etir.c, evax-emh.c, and evax-misc.c.
+	(HFILES): Add evax.h.
+
 Tue Jun 18 13:54:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-h8300.c (h8300_reloc16_extra_cases): Make name a const

@@ -125,7 +125,9 @@ typedef long int file_ptr;
 #else
 #ifdef __GNUC__
 #define BFD_HOST_64_BIT long long
-#endif /* defined (__GNUC__) */
+#else /* ! defined (__GNUC__) */
+ #error No 64 bit integer type available
+#endif /* ! defined (__GNUC__) */
 #endif /* ! BFD_HOST_64BIT_LONG */
 #endif /* ! defined (BFD_HOST_64_BIT) */
 
@@ -665,6 +667,18 @@ extern boolean bfd_xcoff_size_dynamic_sections
 	   unsigned long, unsigned long, unsigned long, boolean,
 	   int, boolean, boolean, struct sec **));
 
+/* Externally visible COFF routines.  */
+
+#if defined(__STDC__) || defined(ALMOST_STDC)
+struct internal_syment;
+union internal_auxent;
+#endif
+
+extern boolean bfd_coff_get_syment
+  PARAMS ((bfd *, struct symbol_cache_entry *, struct internal_syment *));
+extern boolean bfd_coff_get_auxent
+  PARAMS ((bfd *, struct symbol_cache_entry *, int, union internal_auxent *));
+
 /* And more from the source.  */
 void 
 bfd_init PARAMS ((void));
@@ -1190,9 +1204,6 @@ enum bfd_architecture
   bfd_arch_arm,        /* Advanced Risc Machines ARM */
   bfd_arch_ns32k,      /* National Semiconductors ns32000 */
   bfd_arch_w65,        /* WDC 65816 */
-  /* start-sanitize-rce */
-  bfd_arch_rce,        /* Motorola RCE */
-  /* end-sanitize-rce */
   /* start-sanitize-arc */
   bfd_arch_arc,        /* Argonaut RISC Core */
 #define bfd_mach_arc_base 0
@@ -1533,6 +1544,11 @@ decided relatively late. */
   BFD_RELOC_GPREL16,
   BFD_RELOC_GPREL32,
 
+/* For openVMS/Alpha systems, these are displacements for switch
+tables. */
+  BFD_RELOC_SWREL32,
+  BFD_RELOC_SWREL64,
+
 /* Reloc types used for i960/b.out. */
   BFD_RELOC_I960_CALLJ,
 
@@ -1616,6 +1632,13 @@ The GNU linker currently doesn't do any of this optimizing. */
 "hint" field of a jmp/jsr/ret instruction, for possible branch-
 prediction logic which may be provided on some processors. */
   BFD_RELOC_ALPHA_HINT,
+
+/* The LINKAGE relocation outputs a special code in the object file,
+the rest is handled by the linker. */
+  BFD_RELOC_ALPHA_LINKAGE,
+
+/* The BASEREG relocation calculates differences to basereg. */
+  BFD_RELOC_ALPHA_BASEREG,
 
 /* Bits 27..2 of the relocation address shifted right 2 bits;
 simple reloc otherwise. */
@@ -2270,7 +2293,8 @@ enum bfd_flavour {
   bfd_target_som_flavour,
   bfd_target_os9k_flavour,
   bfd_target_versados_flavour,
-  bfd_target_msdos_flavour
+  bfd_target_msdos_flavour,
+  bfd_target_evax_flavour
 };
 
 enum bfd_endian { BFD_ENDIAN_BIG, BFD_ENDIAN_LITTLE, BFD_ENDIAN_UNKNOWN };
