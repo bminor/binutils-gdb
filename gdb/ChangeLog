@@ -1,5 +1,23 @@
 Fri Nov 29 16:59:25 1991  Fred Fish  (fnf at cygnus.com)
 
+	* configure.in:  Add SVR4 i386 configurations.
+
+	* config/mh-i386v4, config/mt-i386v4, tm-i386v4.h, xm-i386v4.h:
+	New files for i386/SVR4.
+
+	* tm-i386v.h:  Allow START_INFERIOR_TRAPS_EXPECTED and
+	DECR_PC_AFTER_BREAK to be predefined by files including 
+	tm-i386v.h.
+
+	* i386-tdep.c:  Add supply_gregset(), fill_gregset(),
+	supply_fpregset(), and fill_fpregset() functions, which are
+	target dependent support functions for the SVR4 /proc register
+	interface.
+
+	* dwarfread.c (enum_type, struct_type):  Expand recognized
+	compiler generated tags to include symbols beginning with '.' as
+	well as '~'.
+
 	* symtab.c (sources_info):  Change simple printf of error message
 	to call to error().
 

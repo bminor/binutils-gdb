@@ -1,4 +1,4 @@
-/* Macro defintions for i386.
+/* Macro definitions for i386, Unix System V.
    Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -42,7 +42,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
  * to run an inferior, and when we finally get to 
  * the inferior code.  This is 2 on most implementations.
  */
+#ifndef START_INFERIOR_TRAPS_EXPECTED
 #define START_INFERIOR_TRAPS_EXPECTED 4
+#endif
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
@@ -78,7 +80,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    This is often the number of bytes in BREAKPOINT
    but not always.  */
 
+#ifndef DECR_PC_AFTER_BREAK
 #define DECR_PC_AFTER_BREAK 1
+#endif
 
 /* Nonzero if instruction at PC is a return instruction.  */
 
