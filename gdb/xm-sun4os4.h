@@ -46,7 +46,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define MALLOC_INCOMPATIBLE
 extern char* malloc PARAMS (());
 extern char* realloc PARAMS (());
-extern int free PARAMS (());
+extern void free PARAMS (());
 
 /* SunOS 4.x uses nonstandard "char *" as type of third argument to ptrace() */
 
