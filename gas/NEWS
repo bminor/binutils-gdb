@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Support for the crx-elf target added.
+
+* Support for the sh-symbian-elf target added.
+
 * Added a pseudo-op (.secrel32) to generate 32 bit section relative relocations
   on pe[i]-i386; required for this target's DWARF 2 support.
 

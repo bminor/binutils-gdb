@@ -1756,6 +1756,8 @@ enum bfd_architecture
 #define bfd_mach_avr5          5
   bfd_arch_cr16c,       /* National Semiconductor CompactRISC. */
 #define bfd_mach_cr16c         1
+  bfd_arch_crx,       /*  National Semiconductor CRX. */
+#define bfd_mach_crx           1
   bfd_arch_cris,      /* Axis CRIS */
   bfd_arch_s390,      /* IBM s390 */
 #define bfd_mach_s390_31       31
@@ -3435,6 +3437,25 @@ This is the 5 bits of a value.  */
   BFD_RELOC_16C_IMM24_C,
   BFD_RELOC_16C_IMM32,
   BFD_RELOC_16C_IMM32_C,
+
+/* NS CRX Relocations.  */
+  BFD_RELOC_CRX_REL4,
+  BFD_RELOC_CRX_REL8,
+  BFD_RELOC_CRX_REL8_CMP,
+  BFD_RELOC_CRX_REL16,
+  BFD_RELOC_CRX_REL24,
+  BFD_RELOC_CRX_REL32,
+  BFD_RELOC_CRX_REGREL12,
+  BFD_RELOC_CRX_REGREL22,
+  BFD_RELOC_CRX_REGREL28,
+  BFD_RELOC_CRX_REGREL32,
+  BFD_RELOC_CRX_ABS16,
+  BFD_RELOC_CRX_ABS32,
+  BFD_RELOC_CRX_NUM8,
+  BFD_RELOC_CRX_NUM16,
+  BFD_RELOC_CRX_NUM32,
+  BFD_RELOC_CRX_IMM16,
+  BFD_RELOC_CRX_IMM32,
 
 /* These relocs are only used within the CRIS assembler.  They are not
 (at present) written to any object files.  */

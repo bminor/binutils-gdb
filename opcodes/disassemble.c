@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_arm
 #define ARCH_avr
 #define ARCH_cris
+#define ARCH_crx
 #define ARCH_d10v
 #define ARCH_d30v
 #define ARCH_dlx
@@ -121,6 +122,11 @@ disassembler (abfd)
 #ifdef ARCH_cris
     case bfd_arch_cris:
       disassemble = cris_get_disassembler (abfd);
+      break;
+#endif
+#ifdef ARCH_crx
+    case bfd_arch_crx:
+      disassemble = print_insn_crx;
       break;
 #endif
 #ifdef ARCH_d10v

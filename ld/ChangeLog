@@ -1,3 +1,14 @@
+2004-07-06  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add eelf32crx.o.
+	(eelf32crx.c): New target.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Handle crx-*-elf*.
+	* emulparams/elf32crx.sh: New file.
+	* emultempl/crxelf.em: New file.
+	* scripttempl/elf32crx.sc: New file.
+	* NEWS: Mention new target.
+
 2004-07-06  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.am: Add eshlsymbian.c.

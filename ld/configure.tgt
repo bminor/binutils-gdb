@@ -34,6 +34,7 @@ cris-*-linux-gnu*)	targ_emul=crislinux ;;
 cris-*-*)		targ_emul=criself
 			targ_extra_emuls="crisaout crislinux"
 			targ_extra_libpath=$targ_extra_emuls ;;
+crx-*-elf*)		targ_emul=elf32crx ;;
 d10v-*-*)		targ_emul=d10velf ;;
 d30v-*-*ext*)		targ_emul=d30v_e; targ_extra_emuls="d30velf d30v_o" ;;
 d30v-*-*onchip*)	targ_emul=d30v_o; targ_extra_emuls="d30velf d30v_e" ;;

@@ -46,6 +46,7 @@ CPU_TYPES = \
 	arm \
 	avr \
 	cris \
+	crx \
 	d10v \
 	d30v \
 	dlx \
@@ -242,6 +243,7 @@ TARGET_CPU_CFILES = \
 	config/tc-arm.c \
 	config/tc-avr.c \
 	config/tc-cris.c \
+	config/tc-crx.c \
 	config/tc-d10v.c \
 	config/tc-d30v.c \
 	config/tc-dlx.c \
@@ -294,6 +296,7 @@ TARGET_CPU_HFILES = \
 	config/tc-arm.h \
 	config/tc-avr.h \
 	config/tc-cris.h \
+	config/tc-crx.h \
 	config/tc-d10v.h \
 	config/tc-d30v.h \
 	config/tc-dlx.h \
@@ -1049,6 +1052,11 @@ DEPTC_cris_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-cris.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   $(INCDIR)/opcode/cris.h dwarf2dbg.h
+DEPTC_crx_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-crx.h \
+  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
+  $(INCDIR)/opcode/crx.h dwarf2dbg.h
 DEPTC_d10v_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-d10v.h $(INCDIR)/coff/internal.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h \

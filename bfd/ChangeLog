@@ -1,3 +1,30 @@
+2004-07-07  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* Makefile.am (ALL_MACHINES): Add cpu-crx.lo.
+	(ALL_MACHINES_CFILES): Add cpu-crx.c.
+	(BFD32_BACKENDS): Add elf32-crx.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-crx.c.
+	(cpu-crx.lo): New target.
+	(elf32-crx.lo): New target.
+	* Makefile.in: Regenerate.
+	* archures.c (bfd_architecture): Add bfd_{arch,mach}_crx.
+	(bfd_archures_list): Add bfd_crx_arch.
+	* bfd-in2.h: Regenerate.
+	* config.bfd: Handle crx-*-elf*, crx*.
+	* configure.in: Handle bfd_elf32_crx_vec.
+	* configure: Regenerate.
+	* cpu-crx.c: New file.
+	* elf32-crx.c: Likewise.
+	* libbfd.h: Regenerate.
+	* reloc.c: Add BFD_RELOC_CRX_REL4, BFD_RELOC_CRX_REL8,
+	BFD_RELOC_CRX_REL8_CMP, BFD_RELOC_CRX_REL16, BFD_RELOC_CRX_REL24,
+	BFD_RELOC_CRX_REL32, BFD_RELOC_CRX_REGREL12, BFD_RELOC_CRX_REGREL22,
+	BFD_RELOC_CRX_REGREL28, BFD_RELOC_CRX_REGREL32, BFD_RELOC_CRX_ABS16,
+	BFD_RELOC_CRX_ABS32, BFD_RELOC_CRX_NUM8, BFD_RELOC_CRX_NUM16,
+	BFD_RELOC_CRX_NUM32, BFD_RELOC_CRX_IMM16 and BFD_RELOC_CRX_IMM32
+	* targets.c (bfd_elf32_crx_vec): Declare.
+	(bfd_target_vector): Add bfd_elf32_crx_vec.
+
 2004-07-06  Nick Clifton  <nickc@redhat.com>
 
 	* config.bfd: Add sh-symbian-elf target.
@@ -5,28 +32,28 @@
 	* configure: Regenerate.
 	* elf-bfd.h (struct elf_backend_data): Add new field
 	'check_directives'.
-        * elflink.c (elf_link_add_object_symbols): Invoke the
+	* elflink.c (elf_link_add_object_symbols): Invoke the
 	check_directives function, if defined.
-        * elfxx-target.h: Provide a default, NULL definition for
+	* elfxx-target.h: Provide a default, NULL definition for
 	check_directives.
-        * targets.c: Add bfd_elf32_shl_symbian_vec.
-        * elf32-sh.c (sh_elf_swap_insns): Protect against unnecessary
+	* targets.c: Add bfd_elf32_shl_symbian_vec.
+	* elf32-sh.c (sh_elf_swap_insns): Protect against unnecessary
 	definition.
-        (elf32_shlin_grok_prstatus, elf32_shlib_grok_psinfo,
+	(elf32_shlin_grok_prstatus, elf32_shlib_grok_psinfo,
 	* sh_elf_get_flags_from_mach, sh_elf_find_flags): Likewise.
-        (TARGET_BIG_SYM, TARGET_LITTLE_SYM): Only define if they have
+	(TARGET_BIG_SYM, TARGET_LITTLE_SYM): Only define if they have
 	not already been defined.
-        * elf32-sh64.c: Use SH_TARGET_ALREADY_DEFINED.
-        * sh-symbian.c: New file.  Provide functions to support the
+	* elf32-sh64.c: Use SH_TARGET_ALREADY_DEFINED.
+	* sh-symbian.c: New file.  Provide functions to support the
 	* sh-symbian-elf target.
 	* Makefile.am: Add elf32-sh-symbian.c
 	* Makefile.in: Regenerate.
-        
+
 2004-07-05  Andrew Stubbs <andrew.stubbs@superh.com>
 
-	* elf32-sh.c: Include ../opcodes/sh-opc.h .
-	* Makefile.am: Ran make dep-am .
-	* Makefile.in: Ran make dep-in .
+	* elf32-sh.c: Include ../opcodes/sh-opc.h.
+	* Makefile.am: Ran make dep-am.
+	* Makefile.in: Ran make dep-in.
 
 2004-07-03  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
 
@@ -123,7 +150,7 @@
 2004-06-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* bfd-in.h (bfd_get_section_limit): Define.
-	* reloc.c (bfd_perform_relocation, bfd_install_relocation) 
+	* reloc.c (bfd_perform_relocation, bfd_install_relocation)
 	(_bfd_final_link_relocate): Use bfd_get_section_limit.
 	* aout-tic30.c (tic30_aout_final_link_relocate): Likewise.
 	* coff-arm.c (coff_arm_relocate_section): Likewise.
@@ -132,9 +159,9 @@
 	(bfd_ns32k_final_link_relocate): Likewise.
 	* elf32-d30v.c (bfd_elf_d30v_reloc, bfd_elf_d30v_reloc_21): Likwise.
 	* elf32-dlx.c (_bfd_dlx_elf_hi16_reloc): Likewise.
-	* elf32-i860.c (i860_howto_pc26_reloc, i860_howto_pc16_reloc) 
+	* elf32-i860.c (i860_howto_pc26_reloc, i860_howto_pc16_reloc)
 	(i860_howto_highadj_reloc, i860_howto_splitn_reloc): Likewise.
-	* elf32-m32r.c (m32r_elf_do_10_pcrel_reloc, m32r_elf_hi16_reloc) 
+	* elf32-m32r.c (m32r_elf_do_10_pcrel_reloc, m32r_elf_hi16_reloc)
 	(m32r_elf_generic_reloc, m32r_elf_relocate_section): Likewise.
 	* elf32-m68hc1x.c (m68hc11_elf_special_reloc): Likewise.
 	* elf32-mips.c (gprel32_with_gp, mips16_gprel_reloc): Likewise.
@@ -154,8 +181,8 @@
 	* elf64-s390.c (s390_elf_ldisp_reloc): Likewise.
 	* elf64-sparc.c (init_insn_reloc): Likewise.
 	* elfn32-mips.c (gprel32_with_gp, mips16_gprel_reloc): Likewise.
-	* elfxx-mips.c (_bfd_mips_elf_gprel16_with_gp) 
-	(_bfd_mips_elf_hi16_reloc, _bfd_mips_elf_lo16_reloc) 
+	* elfxx-mips.c (_bfd_mips_elf_gprel16_with_gp)
+	(_bfd_mips_elf_hi16_reloc, _bfd_mips_elf_lo16_reloc)
 	(_bfd_mips_elf_generic_reloc): Likewise.
 	* bfd-in2.h: Regenerate.
 

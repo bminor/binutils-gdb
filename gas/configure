@@ -4202,6 +4202,7 @@ for this_target in $target $canon_targets ; do
       sparc86x*)	cpu_type=sparc arch=sparc86x  ;;
       sparc*)		cpu_type=sparc arch=sparclite ;; # ??? See tc-sparc.c.
       v850*)		cpu_type=v850 ;;
+      crx*)		cpu_type=crx endian=little ;;
       xtensa*)		cpu_type=xtensa arch=xtensa ;;
       m32r)             cpu_type=m32r target_cpu=m32r endian=big ;;
       m32rle)           cpu_type=m32r target_cpu=m32r endian=little ;;
@@ -4262,6 +4263,8 @@ for this_target in $target $canon_targets ; do
 
       cris-*-linux-gnu*)		fmt=multi bfd_gas=yes em=linux ;;
       cris-*-*)				fmt=multi bfd_gas=yes ;;
+
+      crx-*-elf*)	    		fmt=elf ;;
 
       d10v-*-*)				fmt=elf ;;
       d30v-*-*)				fmt=elf ;;

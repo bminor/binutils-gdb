@@ -153,6 +153,7 @@ ALL_EMULATIONS = \
 	eelf32bmip.o \
 	eelf32bmipn32.o \
 	eelf32btsmip.o \
+	eelf32crx.o \
 	eelf32btsmipn32.o \
 	eelf32ltsmip.o \
 	eelf32ltsmipn32.o \
@@ -647,6 +648,10 @@ eelf32btsmip.c: $(srcdir)/emulparams/elf32btsmip.sh \
   $(srcdir)/emulparams/elf32bmip.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32btsmip "$(tdir_elf32btsmip)"
+eelf32crx.c: $(srcdir)/emulparams/elf32crx.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/crxelf.em \
+  $(srcdir)/scripttempl/elf32crx.sc ${GEN_DEPENDS} 
+	${GENSCRIPTS} elf32crx "$(tdir_elf32crx)"
 eelf32btsmipn32.c: $(srcdir)/emulparams/elf32btsmipn32.sh \
   $(srcdir)/emulparams/elf32bmip.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

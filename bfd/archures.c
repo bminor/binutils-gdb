@@ -315,6 +315,8 @@ DESCRIPTION
 .#define bfd_mach_avr5		5
 .  bfd_arch_cr16c,       {* National Semiconductor CompactRISC. *}
 .#define bfd_mach_cr16c		1
+.  bfd_arch_crx,       {*  National Semiconductor CRX.  *}
+.#define bfd_mach_crx		1
 .  bfd_arch_cris,      {* Axis CRIS *}
 .  bfd_arch_s390,      {* IBM s390 *}
 .#define bfd_mach_s390_31       31
@@ -385,6 +387,7 @@ extern const bfd_arch_info_type bfd_arm_arch;
 extern const bfd_arch_info_type bfd_avr_arch;
 extern const bfd_arch_info_type bfd_cr16c_arch;
 extern const bfd_arch_info_type bfd_cris_arch;
+extern const bfd_arch_info_type bfd_crx_arch;
 extern const bfd_arch_info_type bfd_d10v_arch;
 extern const bfd_arch_info_type bfd_d30v_arch;
 extern const bfd_arch_info_type bfd_dlx_arch;
@@ -446,6 +449,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_avr_arch,
     &bfd_cr16c_arch,
     &bfd_cris_arch,
+    &bfd_crx_arch,
     &bfd_d10v_arch,
     &bfd_d30v_arch,
     &bfd_dlx_arch,

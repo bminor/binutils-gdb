@@ -1,3 +1,17 @@
+2004-07-07  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* Makefile.am (CFILES): Add crx-dis.c, crx-opc.c.
+	(ALL_MACHINES): Add crx-dis.lo, crx-opc.lo.
+	(crx-dis.lo): New target.
+	(crx-opc.lo): Likewise.
+	* Makefile.in: Regenerate.
+	* configure.in: Handle bfd_crx_arch.
+	* configure: Regenerate.
+	* crx-dis.c: New file.
+	* crx-opc.c: New file.
+	* disassemble.c (ARCH_crx): Define.
+	(disassembler): Handle ARCH_crx.
+
 2004-06-29  James E Wilson  <wilson@specifixinc.com>
 
 	* ia64-opc-a.c (ia64_opcodes_a): Delete mov immediate pseudo for adds.

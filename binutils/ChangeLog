@@ -1,3 +1,11 @@
+2004-07-07  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* MAINTAINERS: Added myself to the list.
+	* readelf.c: Include "elf/crx.h".
+	(guess_is_rela): Handle EM_CRX.
+	(get_machine_name): Likewise.
+	(dump_relocations): Likewise.
+
 2004-07-03  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
 
 	* doc/binutils.texi (nm): Clarify weak symbol description.

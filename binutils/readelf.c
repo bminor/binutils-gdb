@@ -105,6 +105,7 @@
 #include "elf/vax.h"
 #include "elf/x86-64.h"
 #include "elf/xstormy16.h"
+#include "elf/crx.h"
 #include "elf/iq2000.h"
 #include "elf/xtensa.h"
 
@@ -678,6 +679,7 @@ guess_is_rela (unsigned long e_machine)
     case EM_MSP430:
     case EM_MSP430_OLD:
     case EM_XSTORMY16:
+    case EM_CRX:
     case EM_VAX:
     case EM_IP2K:
     case EM_IP2K_OLD:
@@ -1164,6 +1166,10 @@ dump_relocations (FILE *file,
 
 	case EM_XSTORMY16:
 	  rtype = elf_xstormy16_reloc_type (type);
+	  break;
+
+	case EM_CRX:
+	  rtype = elf_crx_reloc_type (type);
 	  break;
 
 	case EM_VAX:
@@ -1660,6 +1666,7 @@ get_machine_name (unsigned e_machine)
     case EM_XSTORMY16:		return "Sanyo Xstormy16 CPU core";
     case EM_OPENRISC:
     case EM_OR32:		return "OpenRISC";
+    case EM_CRX:		return "National Semiconductor CRX microprocessor";
     case EM_DLX:		return "OpenDLX";
     case EM_IP2K_OLD:
     case EM_IP2K:		return "Ubicom IP2xxx 8-bit microcontrollers";

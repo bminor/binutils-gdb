@@ -62,6 +62,7 @@ responsibility among the other maintainers.
   BUILD SYSTEM	   Ben Elliston <bje@gnu.org>
   BUILD SYSTEM	   Daniel Jacobowitz <dan@debian.org>
   CRIS		   Hans-Peter Nilsson <hp@axis.com>
+  CRX		   Tomer Levi <Tomer.Levi@nsc.com>
   DWARF2	   Jason Merrill <jason@redhat.com>
   FR30		   Dave Brolley <brolley@redhat.com>
   FRV		   Dave Brolley <brolley@redhat.com>
