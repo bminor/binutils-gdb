@@ -180,6 +180,7 @@ ldgram.h ldgram.c: ldgram.y
 	mv -f y.tab.c ldgram.c
 	mv -f y.tab.h ldgram.h
 
+# EMUL is the name of a file in the emulparams subdir, without the .sh.
 DEF_EMUL = ` if [ -z "$(EMUL)" ] ; then \
 	       echo "you must set a default emulation" 1>&2 ; \
 	       exit 1 ; \
@@ -212,99 +213,99 @@ ldlex.c: ldlex.l ldgram.h
 
 # These all start with em_ so 'make clean' can find them.
 
-GENSCRIPTS=sh $(srcdir)/genscripts.sh ${srcdir} ${libdir} ${host_alias} ${target_alias}
+GENSCRIPTS=sh $(srcdir)/genscripts.sh ${srcdir} ${libdir} ${host_alias} ${target_alias} ${EMUL}
 GEN_DEPENDS=$(srcdir)/genscripts.sh
 
 em_sun4.c: $(srcdir)/emulparams/sun4.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} sun4.sh
+	${GENSCRIPTS} sun4
 em_sun3.c: $(srcdir)/emulparams/sun3.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} sun3.sh
+	${GENSCRIPTS} sun3
 em_go32.c: $(srcdir)/emulparams/go32.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} go32.sh
+	${GENSCRIPTS} go32
 em_news.c: $(srcdir)/emulparams/news.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} news.sh
+	${GENSCRIPTS} news
 em_vax.c: $(srcdir)/emulparams/vax.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} vax.sh
+	${GENSCRIPTS} vax
 em_hp300bsd.c: $(srcdir)/emulparams/hp300bsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} hp300bsd.sh
+	${GENSCRIPTS} hp300bsd
 em_hp3hpux.c: $(srcdir)/emulparams/hp3hpux.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} hp3hpux.sh
+	${GENSCRIPTS} hp3hpux
 em_hppaosf.c: $(srcdir)/emulparams/hppaosf.sh \
   $(srcdir)/emultempl/hppaosf.em $(srcdir)/scripttempl/hppaosf.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} hppaosf.sh
+	${GENSCRIPTS} hppaosf
 em_i386aout.c: $(srcdir)/emulparams/i386aout.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} i386aout.sh
+	${GENSCRIPTS} i386aout
 em_ebmon29k.c: $(srcdir)/emulparams/ebmon29k.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/ebmon29k.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} ebmon29k.sh
+	${GENSCRIPTS} ebmon29k
 em_sa29200.c: $(srcdir)/emulparams/sa29200.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sa29200.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} sa29200.sh
+	${GENSCRIPTS} sa29200
 em_a29k.c: $(srcdir)/emulparams/a29k.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/a29k.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} a29k.sh
+	${GENSCRIPTS} a29k
 em_m88kbcs.c: $(srcdir)/emulparams/m88kbcs.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/m88kbcs.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} m88kbcs.sh
+	${GENSCRIPTS} m88kbcs
 em_h8300.c: $(srcdir)/emulparams/h8300.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8300.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} h8300.sh
+	${GENSCRIPTS} h8300
 em_h8300h.c: $(srcdir)/emulparams/h8300h.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8300h.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} h8300h.sh
+	${GENSCRIPTS} h8300h
 em_h8500.c: $(srcdir)/emulparams/h8500.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8500.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} h8500.sh
+	${GENSCRIPTS} h8500
 em_sh.c: $(srcdir)/emulparams/sh.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sh.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} sh.sh
+	${GENSCRIPTS} sh
 em_st2000.c: $(srcdir)/emulparams/st2000.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/st2000.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} st2000.sh
+	${GENSCRIPTS} st2000
 em_z8ksim.c: $(srcdir)/emulparams/z8ksim.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/z8ksim.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} z8ksim.sh
+	${GENSCRIPTS} z8ksim
 em_vanilla.c: $(srcdir)/emulparams/vanilla.sh \
   $(srcdir)/emultempl/vanilla.em $(srcdir)/scripttempl/vanilla.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} vanilla.sh
+	${GENSCRIPTS} vanilla
 em_lnk960.c: $(srcdir)/emulparams/lnk960.sh \
   $(srcdir)/emultempl/lnk960.em $(srcdir)/scripttempl/i960.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} lnk960.sh
+	${GENSCRIPTS} lnk960
 em_gld960.c: $(srcdir)/emulparams/gld960.sh \
   $(srcdir)/emultempl/gld960.em $(srcdir)/scripttempl/i960.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} gld960.sh
+	${GENSCRIPTS} gld960
 em_m68kcoff.c: $(srcdir)/emulparams/m68kcoff.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/m68kcoff.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} m68kcoff.sh
+	${GENSCRIPTS} m68kcoff
 em_i386coff.c: $(srcdir)/emulparams/i386coff.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/i386coff.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} i386coff.sh
+	${GENSCRIPTS} i386coff
 em_mipslit.c:  $(srcdir)/emulparams/mipslit.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} mipslit.sh
+	${GENSCRIPTS} mipslit
 em_i386bsd.c: $(srcdir)/emulparams/i386bsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} i386bsd.sh
+	${GENSCRIPTS} i386bsd
 em_mipsbig.c:  $(srcdir)/emulparams/mipsbig.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} mipsbig.sh
+	${GENSCRIPTS} mipsbig
 em_mipsbsd.c: $(srcdir)/emulparams/mipsbsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} mipsbsd.sh
+	${GENSCRIPTS} mipsbsd
 em_mipsidt.c: $(srcdir)/emulparams/mipsidt.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} mipsidt.sh
+	${GENSCRIPTS} mipsidt
 em_mipsidtl.c: $(srcdir)/emulparams/mipsidtl.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} mipsidtl.sh
+	${GENSCRIPTS} mipsidtl
 
 $(LD_PROG): $(OFILES) $(BFDLIB) $(LIBIBERTY)
 	$(CC) $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $(LDFLAGS) -o $(LD_PROG) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(LOADLIBES) $(CFLAGS)

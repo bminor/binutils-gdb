@@ -1,18 +1,23 @@
-# genscripts.sh
-# This shell script does the work of generating the ld-emulation-target
-# specific information from a specific file of paramaters.
-# Usage: genscripts.sh srcdir libdir host_alias target_alias emulation_name
+#!/bin/sh
+# genscripts.sh - generate the ld-emulation-target specific files
+#
+# Usage: genscripts.sh srcdir libdir host_alias target_alias \
+# default_emulation this_emulation
+#
 # Sample usage:
-# genscripts.sh /offsite/djm/work/devo/ld /usr/local/lib sparc-sun-sunos4.1.3 sparc-sun-sunos4.1.3 sun3.sh
+# genscripts.sh /djm/ld-devo/devo/ld /usr/local/lib sparc-sun-sunos4.1.3 \
+# sparc-sun-sunos4.1.3 sun4 sun3
 # produces sun3.x sun3.xbn sun3.xn sun3.xr sun3.xu em_sun3.c
 
 srcdir=$1
 libdir=$2
 host_alias=$3
 target_alias=$4
+DEFAULT_EMULATION=$5
+EMULATION_NAME=$6
 
 # Include the emulation-specific parameters:
-. ${srcdir}/emulparams/$5
+. ${srcdir}/emulparams/${EMULATION_NAME}.sh
 
 # Set the library search path, for libraries named by -lfoo.
 # If LIB_PATH is defined (e.g., by Makefile) and non-empty, it is used.
@@ -30,7 +35,7 @@ if [ "x${LIB_PATH}" = "x" ] ; then
       fi
    else
       # Cross.
-      LIB_PATH=
+      LIB_PATH=:
    fi
 fi
 LIB_SEARCH_DIRS=`echo ${LIB_PATH} | tr ':' ' ' | sed -e 's/\([^ ][^ ]*\)/SEARCH_DIR(\1);/g'`
@@ -38,6 +43,7 @@ LIB_SEARCH_DIRS=`echo ${LIB_PATH} | tr ':' ' ' | sed -e 's/\([^ ][^ ]*\)/SEARCH_
 # Generate 5 script files from a master script template in
 # ${srcdir}/scripttempl/${SCRIPT_NAME}.sh.  Which one of the 5 script files
 # is actually used depends on command line options given to ld.
+# (SCRIPT_NAME was set in the emulparams_file.)
 #
 # A .x script file is the default script.
 # A .xr script is for linking without relocation (-r flag).
@@ -84,10 +90,6 @@ LD_FLAG=N
 DATA_ALIGNMENT=${DATA_ALIGNMENT_N}
 (. ${srcdir}/scripttempl/${SCRIPT_NAME}.sc) | sed -e '/^ *$/d' > \
   ldscripts/${EMULATION_NAME}.xbn
-
-#sed -e s/"<ldtarget>"/${EMULATION_NAME}/g -e s/"<arch>"/${ARCH}/g \
-# -e s/"<target>"/${EMULATION_NAME}/g -e s/"<target_name>"/${OUTPUT_FORMAT}/g \
-# <${srcdir}/${TEMPLATE_NAME-ldtemplate} >em_${EMULATION_NAME}.c
 
 # Generate em_${EMULATION_NAME}.c.
 . ${srcdir}/emultempl/${TEMPLATE_NAME-generic}.em

@@ -1,25 +1,28 @@
 # This shell script emits a C file. -*- C -*-
 # It does some substitutions.
 cat >em_${EMULATION_NAME}.c <<EOF
-/* An emulation for HP PA-RISC OSF/1 linkers.
-   Copyright (C) 1991 Free Software Foundation, Inc.
-   Written by Steve Chamberlain steve@cygnus.com
+/* Copyright (C) 1991 Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
-This program is free software; you can redistribute it and/or modify
+GLD is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
-This program is distributed in the hope that it will be useful,
+GLD is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with GLD; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+/* 
+ * emulate the Intels port of  gld
+ */
+
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -31,6 +34,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldfile.h"
 #include "ldmisc.h"
 
+
+/* IMPORTS */
+extern char *output_filename;
 extern  boolean lang_float_flag;
 
 
@@ -41,11 +47,13 @@ extern char *ldfile_output_machine_name;
 extern bfd *output_bfd;
 
 
-#ifdef HPPAOSF
 
-static void hppaosf_before_parse()
+#ifdef GNU960
+
+static void
+gld960_before_parse()
 {
-  static char *env_variables[] = { "HPPALIB", "HPPABASE", 0 };
+  static char *env_variables[] = { "G960LIB", "G960BASE", 0 };
   char **p;
   char *env ;
 
@@ -55,34 +63,57 @@ static void hppaosf_before_parse()
       ldfile_add_library_path(concat(env,"/lib/libbout",""));
     }
   }
-  ldfile_output_architecture = bfd_arch_hppa;
+  ldfile_output_architecture = bfd_arch_i960;
 }
-#else
-static void hppaosf_before_parse()
+
+#else	/* not GNU960 */
+
+static void gld960_before_parse()
 {
   char *env ;
-  env =  getenv("HPPALIB");
+  env =  getenv("G960LIB");
   if (env) {
     ldfile_add_library_path(env);
   }
-  env = getenv("HPPABASE");
+  env = getenv("G960BASE");
   if (env) {
     ldfile_add_library_path(concat(env,"/lib",""));
   }
-  ldfile_output_architecture = bfd_arch_hppa;
+  ldfile_output_architecture = bfd_arch_i960;
 }
-#endif /* HPPAOSF */
+
+#endif	/* GNU960 */
+
 
 static void
-hppaosf_set_output_arch()
+gld960_set_output_arch()
 {
-  /* Set the output architecture and machine if possible */
-  unsigned long  machine = 0;
-  bfd_set_arch_mach(output_bfd, ldfile_output_architecture, machine);
+  bfd_set_arch_mach(output_bfd, ldfile_output_architecture, bfd_mach_i960_core);
 }
 
 static char *
-hppaosf_get_script(isfile)
+gld960_choose_target()
+{
+#ifdef GNU960
+
+  output_filename = "b.out";
+  return bfd_make_targ_name(BFD_BOUT_FORMAT, 0);
+
+#else
+
+  char *from_outside = getenv(TARGET_ENVIRON);
+  output_filename = "b.out";
+
+  if (from_outside != (char *)NULL)
+    return from_outside;
+
+  return "b.out.little";
+
+#endif
+}
+
+static char *
+gld960_get_script(isfile)
      int *isfile;
 EOF
 
@@ -142,18 +173,18 @@ fi
 
 cat >>em_${EMULATION_NAME}.c <<EOF
 
-struct ld_emulation_xfer_struct ld_hppaosf_emulation = 
+struct ld_emulation_xfer_struct ld_gld960_emulation = 
 {
-  hppaosf_before_parse,
+  gld960_before_parse,
   syslib_default,
   hll_default,
   after_parse_default,
   after_allocation_default,
-  hppaosf_set_output_arch,
-  ldemul_default_target,
+  gld960_set_output_arch,
+  gld960_choose_target,
   before_allocation_default,
-  hppaosf_get_script,
-  "hppaosf",
-  "elf-big"
+  gld960_get_script,
+  "960",
+  ""
 };
 EOF

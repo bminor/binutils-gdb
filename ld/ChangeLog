@@ -1,3 +1,30 @@
+Wed Jul 21 14:28:42 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* Makefile.in (GENSCRIPTS): Pass the default emulation name to
+	genscripts.sh.  Pass the current emulation name without ".sh" on
+	the end.
+	* genscripts.sh: Take an default emulation arg.
+	Use the emulparams file name as EMULATION_NAME.
+	Make default lib path for cross-compiling ':', not null.
+	* emulparams/*.sh: Don't set EMULATION_NAME.
+	* ldemul.c (ldemul_get_script): Take isfile arg.
+	Pass it to emulation's get_script function.
+	* ldemul.h: Adjust get_script prototypes.
+	* ldfile.c (ldfile_find_command_file): Renamed from find_a_name.
+	No longer static.
+	* ldfile.h: Declare it.
+	* ldgram.y: Accept a script on the command line again,
+	for parsing compiled-in scripts.
+	* ldmain.c (main): If ld script is a file, parse it as a -T
+	option, otherwise parse it directly.
+	* emultempl/*.em (*get_script): Return the scripts themselves if
+	this is the default emulation; otherwise return their file names.
+	* emultempl/m88kbcs.em: New file, to take m88kbcs.em #ifdef out of
+	generic.em.
+	* emulparams/m88kbcs.sh: Use it.
+
+	* ld.h (unix_relocate): Remove unused var.
+
 Tue Jul 20 12:01:49 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* Makefile.in (ALL_EMULATIONS): Delete em_i386linux.o (for which
