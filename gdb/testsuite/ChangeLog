@@ -1,3 +1,7 @@
+Fri Apr 29 14:26:35 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* Makefile.in (RUNTEST): Default to just "runtest".
+
 Tue Apr 26 22:21:40 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gdb.t17/callfuncs.exp: More comments about t_func_values tests.
