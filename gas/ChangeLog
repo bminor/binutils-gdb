@@ -1,5 +1,8 @@
 Fri Mar 21 15:42:37 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* symbols.c (colon): Call obj_frob_label if it is defined.
+	* config/obj-vms.h (obj_frob_label): Rename from tc_frob_label.
+
 	* configure.in: Don't set files and links.  Don't call
 	AC_LINK_FILES.  Substitute te_file.  Create targ-cpu.h,
 	obj-format.h, targ-env.h, and itbl-cpu.h in AC_OUTPUT.
