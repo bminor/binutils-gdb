@@ -28,9 +28,7 @@ Things-to-keep:
 ChangeLog
 COPYING
 Makefile.in
-Makefile.orig
 README.Cygnus
-README.orig
 armcopro.c
 armdefs.h
 armemu.c
