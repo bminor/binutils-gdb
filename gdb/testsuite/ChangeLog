@@ -1,3 +1,7 @@
+2002-12-18  Michael Chastain  <mec@shout.net>
+
+	* gdb.c++/annota2.exp: Add copyright year 2002.
+
 2002-12-17  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/try_catch.cc: Add marker comments.
