@@ -364,6 +364,18 @@ issued unless you specify in advance that you expect to create it, by
 using this modifier.
 
 .TP
+.B f
+Truncate names in the archive.  
+.B ar
+will normally permit file names of any length.  This will cause it to
+create archives which are not compatible with the native 
+.B ar
+program on some systems.  If this is a concern, the 
+.B f
+modifier may be used to truncate file names when putting them in the
+archive.
+
+.TP
 .B i
 Insert new files \c
 .I before\c

@@ -1,5 +1,18 @@
 Tue Jul  4 14:48:42 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ar.c (replace_members): In verbose messages, use 'r' when
+        replacing a member, and 'a' when adding one.
+
+	* ar.c (truncate): New static variable.
+	(normalize): Change return type to const char *.  Add abfd
+	argument.  Change all callers.  If truncate, chop the filename to
+	abfd->ar_max_namelen.
+	(main): For the 'f' modifier, set truncate to true.  Don't change
+	quick_append to replace to truncate is true.
+	(do_quick_append): If truncate, set BFD_TRADITIONAL_FORMAT.
+	(write_archive): Likewise.
+	* binutils.texi, ar.1: Document 'f' modifier.
+
 	* objcopy.c (enum strip_action): Define strip_unneeded.
 	(OPTION_STRIP_UNNEEDED): Define.
 	(strip_options): Add "strip-unneeded".

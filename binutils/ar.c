@@ -61,6 +61,9 @@ struct ar_hdr *
 
 /* Forward declarations */
 
+static const char *
+normalize PARAMS ((const char *, bfd *));
+
 static void
 remove_output PARAMS ((void));
 
@@ -138,6 +141,9 @@ enum pos
   {
     pos_default, pos_before, pos_after, pos_end
   } postype = pos_default;
+
+/* Whether to truncate names of files stored in the archive.  */
+static boolean truncate = false;
 
 int interactive = 0;
 
@@ -231,19 +237,32 @@ Usage: %s [-vV] archive\n", program_name);
 /* Normalize a file name specified on the command line into a file
    name which we will use in an archive.  */
 
-static char *
-normalize (file)
-     char *file;
+static const char *
+normalize (file, abfd)
+     const char *file;
+     bfd *abfd;
 {
-  char *filename = strrchr (file, '/');
+  const char *filename;
+
+  filename = strrchr (file, '/');
   if (filename != (char *) NULL)
-    {
-      filename++;
-    }
+    filename++;
   else
+    filename = file;
+
+  if (truncate
+      && abfd != NULL
+      && strlen (filename) > abfd->xvec->ar_max_namelen)
     {
-      filename = file;
+      char *s;
+
+      /* Space leak.  */
+      s = (char *) xmalloc (abfd->xvec->ar_max_namelen + 1);
+      memcpy (s, filename, abfd->xvec->ar_max_namelen);
+      s[abfd->xvec->ar_max_namelen] = '\0';
+      filename = s;
     }
+
   return filename;
 }
 
@@ -420,11 +439,7 @@ main (argc, argv)
 	  mri_mode = 1;
 	  break;
 	case 'f':
-	  /* On HP/UX 9, the f modifier means to truncate names to 14
-             characters when comparing them to existing names.  We
-             always use an extended name table, so the truncation has
-             no purpose for us.  We ignore the modifier for
-             compatibility with the AR_FLAGS definition in make.  */
+	  truncate = true;
 	  break;
 	default:
 	  fprintf (stderr, "%s: illegal option -- %c\n", program_name, c);
@@ -478,13 +493,13 @@ main (argc, argv)
 	 rebuild the name table.  Unfortunately, at this point we
 	 don't actually know the maximum name length permitted by this
 	 object file format.  So, we guess.  FIXME.  */
-      if (operation == quick_append)
+      if (operation == quick_append && ! truncate)
 	{
 	  char **chk;
 
 	  for (chk = files; chk != NULL && *chk != '\0'; chk++)
 	    {
-	      if (strlen (normalize (*chk)) > 14)
+	      if (strlen (normalize (*chk, (bfd *) NULL)) > 14)
 		{
 		  operation = replace;
 		  break;
@@ -808,6 +823,9 @@ do_quick_append (archive_filename, files_to_append)
 		 program_name, archive_filename);
     }
 
+  if (truncate)
+    temp->flags |= BFD_TRADITIONAL_FORMAT;
+
   /* assume it's an achive, go straight to the end, sans $200 */
   fseek (ofile, 0, 2);
 
@@ -882,6 +900,13 @@ write_archive (iarch)
   /* Request writing the archive symbol table unless we've
      been explicitly requested not to.  */
   obfd->has_armap = write_armap >= 0;
+
+  if (truncate)
+    {
+      /* This should really use bfd_set_file_flags, but that rejects
+         archives.  */
+      obfd->flags |= BFD_TRADITIONAL_FORMAT;
+    }
 
   if (bfd_set_archive_head (obfd, contents_head) != true)
     bfd_fatal (old_name);
@@ -1004,7 +1029,8 @@ move_members (arch, files_to_move)
       while (*current_ptr_ptr)
 	{
 	  bfd *current_ptr = *current_ptr_ptr;
-	  if (strcmp (normalize (*files_to_move), current_ptr->filename) == 0)
+	  if (strcmp (normalize (*files_to_move, arch),
+		      current_ptr->filename) == 0)
 	    {
 	      /* Move this file to the end of the list - first cut from
 		 where it is.  */
@@ -1053,8 +1079,8 @@ replace_members (arch, files_to_move)
 	{
 	  current = *current_ptr;
 
-	  if (!strcmp (normalize (*files_to_move),
-		       normalize (current->filename)))
+	  if (!strcmp (normalize (*files_to_move, arch),
+		       normalize (current->filename, arch)))
 	    {
 	      if (newer_only)
 		{
@@ -1097,8 +1123,7 @@ replace_members (arch, files_to_move)
 
 	      if (verbose)
 		{
-		  printf ("%c - %s\n", (postype == pos_after ? 'r' : 'a'),
-			  *files_to_move);
+		  printf ("r - %s\n", *files_to_move);
 		}
 	      goto next_file;
 	    }
@@ -1116,7 +1141,7 @@ replace_members (arch, files_to_move)
 	}
       if (verbose)
 	{
-	  printf ("c - %s\n", *files_to_move);
+	  printf ("a - %s\n", *files_to_move);
 	}
 
       (*after_bfd)->next = temp;
