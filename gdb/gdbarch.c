@@ -843,6 +843,10 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       GDB_MULTI_ARCH);
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
+                        "gdbarch_dump: gdbarch_frame_align_p() = %d\n",
+                        gdbarch_frame_align_p (current_gdbarch));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
                         "gdbarch_dump: frame_align = 0x%08lx\n",
                         (long) current_gdbarch->frame_align);
   if (GDB_MULTI_ARCH)
@@ -855,16 +859,37 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->register_reggroup_p);
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
+                        "gdbarch_dump: gdbarch_pseudo_register_read_p() = %d\n",
+                        gdbarch_pseudo_register_read_p (current_gdbarch));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
                         "gdbarch_dump: pseudo_register_read = 0x%08lx\n",
                         (long) current_gdbarch->pseudo_register_read);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: gdbarch_pseudo_register_write_p() = %d\n",
+                        gdbarch_pseudo_register_write_p (current_gdbarch));
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
                         "gdbarch_dump: pseudo_register_write = 0x%08lx\n",
                         (long) current_gdbarch->pseudo_register_write);
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
+                        "gdbarch_dump: gdbarch_address_class_name_to_type_flags_p() = %d\n",
+                        gdbarch_address_class_name_to_type_flags_p (current_gdbarch));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
                         "gdbarch_dump: address_class_name_to_type_flags = 0x%08lx\n",
                         (long) current_gdbarch->address_class_name_to_type_flags);
+#ifdef ADDRESS_CLASS_TYPE_FLAGS_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "ADDRESS_CLASS_TYPE_FLAGS_P()",
+                      XSTRING (ADDRESS_CLASS_TYPE_FLAGS_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: ADDRESS_CLASS_TYPE_FLAGS_P() = %d\n",
+                      ADDRESS_CLASS_TYPE_FLAGS_P ());
+#endif
 #ifdef ADDRESS_CLASS_TYPE_FLAGS
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -876,6 +901,10 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->address_class_type_flags
                         /*ADDRESS_CLASS_TYPE_FLAGS ()*/);
 #endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: gdbarch_address_class_type_flags_to_name_p() = %d\n",
+                        gdbarch_address_class_type_flags_to_name_p (current_gdbarch));
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
                         "gdbarch_dump: address_class_type_flags_to_name = 0x%08lx\n",
@@ -1107,6 +1136,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: DECR_PC_AFTER_BREAK = %ld\n",
                       (long) DECR_PC_AFTER_BREAK);
 #endif
+#ifdef DEPRECATED_DO_REGISTERS_INFO_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_DO_REGISTERS_INFO_P()",
+                      XSTRING (DEPRECATED_DO_REGISTERS_INFO_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_DO_REGISTERS_INFO_P() = %d\n",
+                      DEPRECATED_DO_REGISTERS_INFO_P ());
+#endif
 #ifdef DEPRECATED_DO_REGISTERS_INFO
 #if GDB_MULTI_ARCH
   /* Macro might contain `[{}]' when not multi-arch */
@@ -1135,6 +1173,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->deprecated_extract_return_value
                         /*DEPRECATED_EXTRACT_RETURN_VALUE ()*/);
 #endif
+#ifdef DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P()",
+                      XSTRING (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P() = %d\n",
+                      DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ());
+#endif
 #ifdef DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1145,6 +1192,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS = 0x%08lx\n",
                         (long) current_gdbarch->deprecated_extract_struct_value_address
                         /*DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
+#endif
+#ifdef DEPRECATED_PC_IN_CALL_DUMMY_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_PC_IN_CALL_DUMMY_P()",
+                      XSTRING (DEPRECATED_PC_IN_CALL_DUMMY_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_PC_IN_CALL_DUMMY_P() = %d\n",
+                      DEPRECATED_PC_IN_CALL_DUMMY_P ());
 #endif
 #ifdef DEPRECATED_PC_IN_CALL_DUMMY
   fprintf_unfiltered (file,
@@ -1178,6 +1234,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_USE_GENERIC_DUMMY_FRAMES = %d\n",
                       DEPRECATED_USE_GENERIC_DUMMY_FRAMES);
+#endif
+#ifdef DWARF2_BUILD_FRAME_INFO_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DWARF2_BUILD_FRAME_INFO_P()",
+                      XSTRING (DWARF2_BUILD_FRAME_INFO_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DWARF2_BUILD_FRAME_INFO_P() = %d\n",
+                      DWARF2_BUILD_FRAME_INFO_P ());
 #endif
 #ifdef DWARF2_BUILD_FRAME_INFO
 #if GDB_MULTI_ARCH
@@ -1253,6 +1318,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: EXTRACT_RETURN_VALUE = 0x%08lx\n",
                         (long) current_gdbarch->extract_return_value
                         /*EXTRACT_RETURN_VALUE ()*/);
+#endif
+#ifdef EXTRACT_STRUCT_VALUE_ADDRESS_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "EXTRACT_STRUCT_VALUE_ADDRESS_P()",
+                      XSTRING (EXTRACT_STRUCT_VALUE_ADDRESS_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: EXTRACT_STRUCT_VALUE_ADDRESS_P() = %d\n",
+                      EXTRACT_STRUCT_VALUE_ADDRESS_P ());
 #endif
 #ifdef EXTRACT_STRUCT_VALUE_ADDRESS
   fprintf_unfiltered (file,
@@ -1410,6 +1484,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: FUNCTION_START_OFFSET = %ld\n",
                       (long) FUNCTION_START_OFFSET);
 #endif
+#ifdef GET_LONGJMP_TARGET_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "GET_LONGJMP_TARGET_P()",
+                      XSTRING (GET_LONGJMP_TARGET_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: GET_LONGJMP_TARGET_P() = %d\n",
+                      GET_LONGJMP_TARGET_P ());
+#endif
 #ifdef GET_LONGJMP_TARGET
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1420,6 +1503,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: GET_LONGJMP_TARGET = 0x%08lx\n",
                         (long) current_gdbarch->get_longjmp_target
                         /*GET_LONGJMP_TARGET ()*/);
+#endif
+#ifdef GET_SAVED_REGISTER_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "GET_SAVED_REGISTER_P()",
+                      XSTRING (GET_SAVED_REGISTER_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: GET_SAVED_REGISTER_P() = %d\n",
+                      GET_SAVED_REGISTER_P ());
 #endif
 #ifdef GET_SAVED_REGISTER
 #if GDB_MULTI_ARCH
@@ -1442,6 +1534,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: HAVE_NONSTEPPABLE_WATCHPOINT = %d\n",
                       HAVE_NONSTEPPABLE_WATCHPOINT);
+#endif
+#ifdef INIT_EXTRA_FRAME_INFO_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "INIT_EXTRA_FRAME_INFO_P()",
+                      XSTRING (INIT_EXTRA_FRAME_INFO_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: INIT_EXTRA_FRAME_INFO_P() = %d\n",
+                      INIT_EXTRA_FRAME_INFO_P ());
 #endif
 #ifdef INIT_EXTRA_FRAME_INFO
 #if GDB_MULTI_ARCH
@@ -1495,6 +1596,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: INNER_THAN = 0x%08lx\n",
                         (long) current_gdbarch->inner_than
                         /*INNER_THAN ()*/);
+#endif
+#ifdef INTEGER_TO_ADDRESS_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "INTEGER_TO_ADDRESS_P()",
+                      XSTRING (INTEGER_TO_ADDRESS_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: INTEGER_TO_ADDRESS_P() = %d\n",
+                      INTEGER_TO_ADDRESS_P ());
 #endif
 #ifdef INTEGER_TO_ADDRESS
   fprintf_unfiltered (file,
@@ -1664,12 +1774,20 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
 #endif
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
+                        "gdbarch_dump: gdbarch_print_float_info_p() = %d\n",
+                        gdbarch_print_float_info_p (current_gdbarch));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
                         "gdbarch_dump: print_float_info = 0x%08lx\n",
                         (long) current_gdbarch->print_float_info);
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
                         "gdbarch_dump: print_registers_info = 0x%08lx\n",
                         (long) current_gdbarch->print_registers_info);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: gdbarch_print_vector_info_p() = %d\n",
+                        gdbarch_print_vector_info_p (current_gdbarch));
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
                         "gdbarch_dump: print_vector_info = 0x%08lx\n",
@@ -1718,6 +1836,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->push_dummy_frame
                         /*PUSH_DUMMY_FRAME ()*/);
 #endif
+#ifdef PUSH_RETURN_ADDRESS_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "PUSH_RETURN_ADDRESS_P()",
+                      XSTRING (PUSH_RETURN_ADDRESS_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: PUSH_RETURN_ADDRESS_P() = %d\n",
+                      PUSH_RETURN_ADDRESS_P ());
+#endif
 #ifdef PUSH_RETURN_ADDRESS
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1747,6 +1874,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: REGISTER_BYTES = %d\n",
                       REGISTER_BYTES);
+#endif
+#ifdef REGISTER_BYTES_OK_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "REGISTER_BYTES_OK_P()",
+                      XSTRING (REGISTER_BYTES_OK_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: REGISTER_BYTES_OK_P() = %d\n",
+                      REGISTER_BYTES_OK_P ());
 #endif
 #ifdef REGISTER_BYTES_OK
   fprintf_unfiltered (file,
@@ -1875,6 +2011,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->register_virtual_type
                         /*REGISTER_VIRTUAL_TYPE ()*/);
 #endif
+#ifdef REG_STRUCT_HAS_ADDR_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "REG_STRUCT_HAS_ADDR_P()",
+                      XSTRING (REG_STRUCT_HAS_ADDR_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: REG_STRUCT_HAS_ADDR_P() = %d\n",
+                      REG_STRUCT_HAS_ADDR_P ());
+#endif
 #ifdef REG_STRUCT_HAS_ADDR
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1922,6 +2067,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->saved_pc_after_call
                         /*SAVED_PC_AFTER_CALL ()*/);
 #endif
+#ifdef SAVE_DUMMY_FRAME_TOS_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "SAVE_DUMMY_FRAME_TOS_P()",
+                      XSTRING (SAVE_DUMMY_FRAME_TOS_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: SAVE_DUMMY_FRAME_TOS_P() = %d\n",
+                      SAVE_DUMMY_FRAME_TOS_P ());
+#endif
 #ifdef SAVE_DUMMY_FRAME_TOS
 #if GDB_MULTI_ARCH
   /* Macro might contain `[{}]' when not multi-arch */
@@ -1947,6 +2101,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->sdb_reg_to_regnum
                         /*SDB_REG_TO_REGNUM ()*/);
 #endif
+#ifdef SIGTRAMP_END_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "SIGTRAMP_END_P()",
+                      XSTRING (SIGTRAMP_END_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: SIGTRAMP_END_P() = %d\n",
+                      SIGTRAMP_END_P ());
+#endif
 #ifdef SIGTRAMP_END
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1957,6 +2120,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: SIGTRAMP_END = 0x%08lx\n",
                         (long) current_gdbarch->sigtramp_end
                         /*SIGTRAMP_END ()*/);
+#endif
+#ifdef SIGTRAMP_START_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "SIGTRAMP_START_P()",
+                      XSTRING (SIGTRAMP_START_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: SIGTRAMP_START_P() = %d\n",
+                      SIGTRAMP_START_P ());
 #endif
 #ifdef SIGTRAMP_START
   fprintf_unfiltered (file,
@@ -2010,6 +2182,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->smash_text_address
                         /*SMASH_TEXT_ADDRESS ()*/);
 #endif
+#ifdef SOFTWARE_SINGLE_STEP_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "SOFTWARE_SINGLE_STEP_P()",
+                      XSTRING (SOFTWARE_SINGLE_STEP_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: SOFTWARE_SINGLE_STEP_P() = %d\n",
+                      SOFTWARE_SINGLE_STEP_P ());
+#endif
 #ifdef SOFTWARE_SINGLE_STEP
 #if GDB_MULTI_ARCH
   /* Macro might contain `[{}]' when not multi-arch */
@@ -2042,6 +2223,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: STAB_REG_TO_REGNUM = 0x%08lx\n",
                         (long) current_gdbarch->stab_reg_to_regnum
                         /*STAB_REG_TO_REGNUM ()*/);
+#endif
+#ifdef STACK_ALIGN_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "STACK_ALIGN_P()",
+                      XSTRING (STACK_ALIGN_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: STACK_ALIGN_P() = %d\n",
+                      STACK_ALIGN_P ());
 #endif
 #ifdef STACK_ALIGN
   fprintf_unfiltered (file,

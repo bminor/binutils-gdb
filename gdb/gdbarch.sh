@@ -129,7 +129,7 @@ EOF
 		    fi
 		    ;;
 		* )
-		    echo "Predicate function ${function} with invalid_p."
+		    echo "Predicate function ${function} with invalid_p." 1>&2
 		    kill $$
 		    exit 1
 		    ;;
@@ -1572,6 +1572,27 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
 EOF
 function_list | sort -t: -k 3 | while do_read
 do
+    # First the predicate
+    if class_is_predicate_p
+    then
+	if class_is_multiarch_p
+	then
+	    printf "  if (GDB_MULTI_ARCH)\n"
+	    printf "    fprintf_unfiltered (file,\n"
+	    printf "                        \"gdbarch_dump: gdbarch_${function}_p() = %%d\\\\n\",\n"
+	    printf "                        gdbarch_${function}_p (current_gdbarch));\n"
+	else
+	    printf "#ifdef ${macro}_P\n"
+	    printf "  fprintf_unfiltered (file,\n"
+	    printf "                      \"gdbarch_dump: %%s # %%s\\\\n\",\n"
+	    printf "                      \"${macro}_P()\",\n"
+	    printf "                      XSTRING (${macro}_P ()));\n"
+	    printf "  fprintf_unfiltered (file,\n"
+	    printf "                      \"gdbarch_dump: ${macro}_P() = %%d\\\\n\",\n"
+	    printf "                      ${macro}_P ());\n"
+	    printf "#endif\n"
+	fi
+    fi
     # multiarch functions don't have macros.
     if class_is_multiarch_p
     then

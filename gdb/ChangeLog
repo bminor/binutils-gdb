@@ -1,3 +1,9 @@
+2002-12-05  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh: Dump the predicate function and macro values.
+	(read): Print error on standard error.
+	* gdbarch.c: Regenerate.
+	
 2002-12-04  Kevin Buettner  <kevinb@redhat.com>
 
 	* Makefile.in (mips_tdep_h): Define.
