@@ -1,3 +1,7 @@
+2002-10-02  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.c++/casts.cc, gdb.c++/casts.exp: New test.
+
 2002-10-01  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi1-basics.exp: Copy of mi1-basics.exp MIFLAGS set "-i=mi1".
