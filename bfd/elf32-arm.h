@@ -2993,46 +2993,31 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
   return TRUE;
 }
 
-/* Find the nearest line to a particular section and offset, for error
-   reporting.   This code is a duplicate of the code in elf.c, except
-   that it also accepts STT_ARM_TFUNC as a symbol that names a function.  */
+static bfd_boolean
+is_arm_mapping_symbol_name (const char * name)
+{
+  return (name != NULL)
+    && (name[0] == '$')
+    && ((name[1] == 'a') || (name[1] == 't') || (name[1] == 'd'))
+    && (name[2] == 0);
+}
+
+/* This is a copy of elf_find_function() from elf.c except that
+   ARM mapping symbols are ignored when looking for function names
+   and STT_ARM_TFUNC is considered to a function type.  */
 
 static bfd_boolean
-elf32_arm_find_nearest_line (bfd *          abfd,
-			     asection *     section,
-			     asymbol **     symbols,
-			     bfd_vma        offset,
-			     const char **  filename_ptr,
-			     const char **  functionname_ptr,
-			     unsigned int * line_ptr)
+arm_elf_find_function (bfd *         abfd ATTRIBUTE_UNUSED,
+		       asection *    section,
+		       asymbol **    symbols,
+		       bfd_vma       offset,
+		       const char ** filename_ptr,
+		       const char ** functionname_ptr)
 {
-  bfd_boolean found;
-  const char *filename;
-  asymbol *func;
-  bfd_vma low_func;
-  asymbol **p;
-
-  if (_bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
-				     filename_ptr, functionname_ptr,
-				     line_ptr, 0,
-				     &elf_tdata (abfd)->dwarf2_find_line_info))
-    return TRUE;
-
-  if (! _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset,
-					     &found, filename_ptr,
-					     functionname_ptr, line_ptr,
-					     &elf_tdata (abfd)->line_info))
-    return FALSE;
-
-  if (found)
-    return TRUE;
-
-  if (symbols == NULL)
-    return FALSE;
-
-  filename = NULL;
-  func = NULL;
-  low_func = 0;
+  const char * filename = NULL;
+  asymbol * func = NULL;
+  bfd_vma low_func = 0;
+  asymbol ** p;
 
   for (p = symbols; *p != NULL; p++)
     {
@@ -3050,9 +3035,14 @@ elf32_arm_find_nearest_line (bfd *          abfd,
 	case STT_FILE:
 	  filename = bfd_asymbol_name (&q->symbol);
 	  break;
-	case STT_NOTYPE:
 	case STT_FUNC:
 	case STT_ARM_TFUNC:
+	  /* Skip $a and $t symbols.  */
+	  if ((q->symbol.flags & BSF_LOCAL)
+	      && is_arm_mapping_symbol_name (q->symbol.name))
+	    continue;
+	  /* Fall through.  */
+	case STT_NOTYPE:
 	  if (q->symbol.section == section
 	      && q->symbol.value >= low_func
 	      && q->symbol.value <= offset)
@@ -3067,10 +3057,62 @@ elf32_arm_find_nearest_line (bfd *          abfd,
   if (func == NULL)
     return FALSE;
 
-  *filename_ptr = filename;
-  *functionname_ptr = bfd_asymbol_name (func);
-  *line_ptr = 0;
+  if (filename_ptr)
+    *filename_ptr = filename;
+  if (functionname_ptr)
+    *functionname_ptr = bfd_asymbol_name (func);
 
+  return TRUE;
+}  
+
+
+/* Find the nearest line to a particular section and offset, for error
+   reporting.   This code is a duplicate of the code in elf.c, except
+   that it uses arm_elf_find_function.  */
+
+static bfd_boolean
+elf32_arm_find_nearest_line (bfd *          abfd,
+			     asection *     section,
+			     asymbol **     symbols,
+			     bfd_vma        offset,
+			     const char **  filename_ptr,
+			     const char **  functionname_ptr,
+			     unsigned int * line_ptr)
+{
+  bfd_boolean found = FALSE;
+
+  /* We skip _bfd_dwarf1_find_nearest_line since no known ARM toolchain uses it.  */
+
+  if (_bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
+				     filename_ptr, functionname_ptr,
+				     line_ptr, 0,
+				     & elf_tdata (abfd)->dwarf2_find_line_info))
+    {
+      if (!*functionname_ptr)
+	arm_elf_find_function (abfd, section, symbols, offset,
+			       *filename_ptr ? NULL : filename_ptr,
+			       functionname_ptr);
+
+      return TRUE;
+    }
+
+  if (! _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset,
+					     & found, filename_ptr,
+					     functionname_ptr, line_ptr,
+					     & elf_tdata (abfd)->line_info))
+    return FALSE;
+
+  if (found && (*functionname_ptr || *line_ptr))
+    return TRUE;
+
+  if (symbols == NULL)
+    return FALSE;
+
+  if (! arm_elf_find_function (abfd, section, symbols, offset,
+			       filename_ptr, functionname_ptr))
+    return FALSE;
+
+  *line_ptr = 0;
   return TRUE;
 }
 
@@ -3987,11 +4029,7 @@ elf32_arm_output_symbol_hook (struct bfd_link_info *info,
     return TRUE;
 
   /* We only want mapping symbols.  */
-  if (name == NULL
-      || name[0] != '$'
-      || (name[1] != 'a'
-	  && name[1] != 't'
-	  && name[1] != 'd'))
+  if (! is_arm_mapping_symbol_name (name))
     return TRUE;
 
   mapcount = ++(elf32_arm_section_data (input_sec)->mapcount);
@@ -4152,4 +4190,3 @@ elf32_arm_write_section (bfd *output_bfd ATTRIBUTE_UNUSED, asection *sec,
 #define elf_backend_got_header_size	12
 
 #include "elf32-target.h"
-

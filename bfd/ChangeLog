@@ -1,3 +1,14 @@
+2004-08-17  Nick Clifton  <nickc@redhat.com>
+
+	* (is_arm_mapping_symbol_name): New function - return true
+	when a symbol name matches the requirements for an ARM mapping
+	symbol name.
+	(arm_elf_find_function): New function based on
+	elf_find_function in elf.c but skipping ARM mapping symbols
+	and including thumb function symbols.
+	(elf32_arm_find_nearest_line): Use arm_elf_find_function.
+	(elf32_arm_output_symbol_hook): Use is_arm_mapping_symbol_name.
+
 2004-08-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_branch_reloc): New function.
