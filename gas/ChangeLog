@@ -1,3 +1,14 @@
+2000-07-13  Koundinya K  <kk@ddeorg.soft.net>
+
+	* configure.in: Remove the test /usr/dde for mips-*-sysv4*MP*
+	* configure: Regenerate.
+
+2000-07-13  Hans-Peter Nilsson  <hp@axis.com>
+
+	* configure.in (DEFAULT_EMULATION setting): Revert part of
+	2000-07-01 change that set te_multi=multi unless set to tmips.
+	* configure: Regenerate.
+
 2000-07-12  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* config/obj-coff.c (coff_frob_section): Add padding to the last

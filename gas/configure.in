@@ -322,11 +322,7 @@ changequote([,])dnl
       mips-*-irix*)         fmt=ecoff ;;
       mips-*-lnews*)        fmt=ecoff em=lnews ;;
       mips-*-riscos*)       fmt=ecoff ;;
-      mips-*-sysv4*MP*)     if test -d /usr/dde; then 
-			      fmt=elf 
-			      em=tmips 
-			    fi
-			    ;;
+      mips-*-sysv4*MP*)     fmt=elf em=tmips ;;
       mips-*-sysv*)         fmt=ecoff ;;
       mips-*-elf* | mips-*-rtems* | mips-*-linux-gnu* | mips-*-gnu* | mips-*-openbsd*)
 			    fmt=elf ;;
@@ -570,10 +566,7 @@ changequote([,])dnl
 			big)	emulation="mipsbelf mipslelf mipself" ;;
 			*)	emulation="mipslelf mipsbelf mipself" ;;
 			esac ;;
-      mips-*-sysv4*MP*-*) if test -d /usr/dde; then
-				emulation="mipsbelf mipslelf mipself mipsbecoff mipslecoff mipsecoff" 
-			fi
-			;;
+      mips-*-sysv4*MP*-*) emulation="mipsbelf mipslelf mipself mipsbecoff mipslecoff mipsecoff" ;;
       # i386-pc-pe-coff != i386-pc-coff.
       i386-*-pe-coff)	;;
       # Uncommenting the next line will turn on support for i386 AOUT
@@ -735,11 +728,6 @@ if test `set . $emfiles ; shift ; echo $#` -gt 0 ; then
   # USE_EMULATIONS or include any of the e-files as they will only be bloat.
   case "${obj_format}${emfiles}" in
     multi* | *mips*)
-  # if te_file is tmips, that means the target is mips-*-sysv4*MP* and we do
-  # not set it to multi.
-      if [[ $te_file -ne "tmips" ]]; then
-        te_file=multi
-      fi
       extra_objects="$extra_objects $emfiles"
       AC_DEFINE(USE_EMULATIONS, 1, [Use emulation support?]) ;;
   esac
