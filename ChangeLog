@@ -1,3 +1,13 @@
+1998-11-12  Tom Tromey  <tromey@cygnus.com>
+
+	* configure.in (host_tools): Added zip.
+	* Makefile.in (all-target-libjava): Depend on all-zip.
+	(all-zip): New target.
+	(ALL_MODULES): Added all-zip.
+	(NATIVE_CHECK_MODULES): Added check-zip.
+	(INSTALL_MODULES): Added install-zip.
+	(CLEAN_MODULES): Added clean-zip.
+
 Thu Nov 12 17:27:21 1998  Geoffrey Noer  <noer@cygnus.com>
 
 	* Makefile.in: lose "32" from comment about cygwin.

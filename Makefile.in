@@ -587,6 +587,7 @@ ALL_MODULES = \
 	all-vmake \
 	$(end-sanitize-ide) \
 	all-wdiff \
+	all-zip \
 	$(EXTRA_TARGET_HOST_ALL_MODULES)
 
 # This is a list of the check targets for all of the modules which are
@@ -598,7 +599,8 @@ ALL_MODULES = \
 NATIVE_CHECK_MODULES = \
 	check-bison \
 	check-byacc \
-	check-flex
+	check-flex \
+	check-zip
 
 CROSS_CHECK_MODULES = \
 	check-apache \
@@ -767,6 +769,7 @@ INSTALL_MODULES = \
 	install-vmake \
 	$(end-sanitize-ide) \
 	install-wdiff \
+	install-zip \
 	$(EXTRA_TARGET_HOST_INSTALL_MODULES)
 
 # This is a list of the targets for all of the modules which are compiled
@@ -980,7 +983,8 @@ CLEAN_MODULES = \
 	$(start-sanitize-ide) \
 	clean-vmake \
 	$(end-sanitize-ide) \
-	clean-wdiff
+	clean-wdiff \
+	clean-zip
 
 # All of the target modules that can be cleaned
 CLEAN_TARGET_MODULES = \
@@ -1736,7 +1740,7 @@ all-libidetcl: all-tcl all-tk all-itcl all-ilu all-libgui all-libide
 # end-sanitize-ide
 # start-sanitize-java
 configure-target-libjava: $(ALL_GCC) configure-target-boehm-gc configure-target-qthreads
-all-target-libjava: configure-target-libjava all-gcc all-target-newlib all-target-boehm-gc all-target-qthreads
+all-target-libjava: configure-target-libjava all-gcc all-zip all-target-newlib all-target-boehm-gc all-target-qthreads
 # end-sanitize-java
 configure-target-librx: $(ALL_GCC) configure-target-newlib
 all-target-librx: configure-target-librx
@@ -1785,6 +1789,7 @@ all-wdiff:
 all-target-winsup: all-target-newlib all-target-libiberty all-target-libio configure-target-winsup 
 configure-target-winsup: configure-target-newlib
 all-uudecode: all-libiberty
+all-zip:
 configure-target-libiberty: $(ALL_GCC)
 all-target-libiberty: configure-target-libiberty all-gcc all-ld all-target-newlib
 all-target: $(ALL_TARGET_MODULES)
