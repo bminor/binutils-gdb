@@ -1,6 +1,8 @@
 /* Target-machine dependent code for the Intel 960
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000,
+   2001, 2002 Free Software Foundation, Inc.
+
    Contributed by Intel Corporation.
    examine_prologue and other parts contributed by Wind River Systems.
 
@@ -118,6 +120,137 @@ check_host (void)
 	}
 
     }
+}
+
+/* i960_find_saved_register ()
+
+   Return the address in which frame FRAME's value of register REGNUM
+   has been saved in memory.  Or return zero if it has not been saved.
+   If REGNUM specifies the SP, the value we return is actually the SP
+   value, not an address where it was saved.  */
+
+static CORE_ADDR
+i960_find_saved_register (struct frame_info *frame, int regnum)
+{
+  register struct frame_info *frame1 = NULL;
+  register CORE_ADDR addr = 0;
+
+  if (frame == NULL)		/* No regs saved if want current frame */
+    return 0;
+
+  /* We assume that a register in a register window will only be saved
+     in one place (since the name changes and/or disappears as you go
+     towards inner frames), so we only call get_frame_saved_regs on
+     the current frame.  This is directly in contradiction to the
+     usage below, which assumes that registers used in a frame must be
+     saved in a lower (more interior) frame.  This change is a result
+     of working on a register window machine; get_frame_saved_regs
+     always returns the registers saved within a frame, within the
+     context (register namespace) of that frame. */
+
+  /* However, note that we don't want this to return anything if
+     nothing is saved (if there's a frame inside of this one).  Also,
+     callers to this routine asking for the stack pointer want the
+     stack pointer saved for *this* frame; this is returned from the
+     next frame.  */
+
+  if (REGISTER_IN_WINDOW_P (regnum))
+    {
+      frame1 = get_next_frame (frame);
+      if (!frame1)
+	return 0;		/* Registers of this frame are active.  */
+
+      /* Get the SP from the next frame in; it will be this
+         current frame.  */
+      if (regnum != SP_REGNUM)
+	frame1 = frame;
+
+      FRAME_INIT_SAVED_REGS (frame1);
+      return frame1->saved_regs[regnum];	/* ... which might be zero */
+    }
+
+  /* Note that this next routine assumes that registers used in
+     frame x will be saved only in the frame that x calls and
+     frames interior to it.  This is not true on the sparc, but the
+     above macro takes care of it, so we should be all right. */
+  while (1)
+    {
+      QUIT;
+      frame1 = get_next_frame (frame);
+      if (frame1 == 0)
+	break;
+      frame = frame1;
+      FRAME_INIT_SAVED_REGS (frame1);
+      if (frame1->saved_regs[regnum])
+	addr = frame1->saved_regs[regnum];
+    }
+
+  return addr;
+}
+
+/* i960_get_saved_register ()
+
+   Find register number REGNUM relative to FRAME and put its (raw,
+   target format) contents in *RAW_BUFFER.  Set *OPTIMIZED if the
+   variable was optimized out (and thus can't be fetched).  Set *LVAL
+   to lval_memory, lval_register, or not_lval, depending on whether
+   the value was fetched from memory, from a register, or in a strange
+   and non-modifiable way (e.g. a frame pointer which was calculated
+   rather than fetched).  Set *ADDRP to the address, either in memory
+   on as a REGISTER_BYTE offset into the registers array.
+
+   Note that this implementation never sets *LVAL to not_lval.  But it
+   can be replaced by defining GET_SAVED_REGISTER and supplying your
+   own.
+
+   The argument RAW_BUFFER must point to aligned memory.  */
+
+void
+i960_get_saved_register (char *raw_buffer,
+			 int *optimized,
+			 CORE_ADDR *addrp,
+			 struct frame_info *frame,
+			 int regnum,
+			 enum lval_type *lval)
+{
+  CORE_ADDR addr;
+
+  if (!target_has_registers)
+    error ("No registers.");
+
+  /* Normal systems don't optimize out things with register numbers.  */
+  if (optimized != NULL)
+    *optimized = 0;
+  addr = i960_find_saved_register (frame, regnum);
+  if (addr != 0)
+    {
+      if (lval != NULL)
+	*lval = lval_memory;
+      if (regnum == SP_REGNUM)
+	{
+	  if (raw_buffer != NULL)
+	    {
+	      /* Put it back in target format.  */
+	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
+			     (LONGEST) addr);
+	    }
+	  if (addrp != NULL)
+	    *addrp = 0;
+	  return;
+	}
+      if (raw_buffer != NULL)
+	target_read_memory (addr, raw_buffer, REGISTER_RAW_SIZE (regnum));
+    }
+  else
+    {
+      if (lval != NULL)
+	*lval = lval_register;
+      addr = REGISTER_BYTE (regnum);
+      if (raw_buffer != NULL)
+	read_register_gen (regnum, raw_buffer);
+    }
+  if (addrp != NULL)
+    *addrp = addr;
 }
 
 /* Examine an i960 function prologue, recording the addresses at which

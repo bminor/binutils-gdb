@@ -1,3 +1,11 @@
+2002-04-21  Andrew Cagney  <ac131313@redhat.com>
+
+	* i960-tdep.c (i960_find_saved_register): New function.
+	(i960_get_saved_register): New function.
+	* config/i960/tm-i960.h (GET_SAVED_REGISTER): Define.
+	(i960_get_saved_register): Declare.
+	* config/i960/tm-i960.h, i960-tdep.c: Update copyright.
+
 2002-04-20  David S. Miller  <davem@redhat.com>
 
 	* sparc-nat.c (store-inferior_registers): Fix ambiguous else.

@@ -1,6 +1,8 @@
 /* Parameters for target machine Intel 960, for GDB, the GNU debugger.
-   Copyright 1990, 1991, 1993, 1994, 1996, 1998, 1999, 2000
-   Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1993, 1994, 1996, 1998, 1999, 2000, 2002 Free
+   Software Foundation, Inc.
+
    Contributed by Intel Corporation.
    This file is part of GDB.
 
@@ -115,6 +117,18 @@ extern CORE_ADDR saved_pc_after_call ();
 /* The i960 has register windows, sort of.  */
 
 #define HAVE_REGISTER_WINDOWS
+
+extern void i960_get_saved_register (char *raw_buffer,
+				     int *optimized,
+				     CORE_ADDR *addrp,
+				     struct frame_info *frame,
+				     int regnum,
+				     enum lval_type *lval);
+
+#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
+  i960_get_saved_register(raw_buffer, optimized, addrp, frame, regnum, lval)
+
+
 
 /* Is this register part of the register window system?  A yes answer
    implies that 1) The name of this register will not be the same in
