@@ -1,3 +1,12 @@
+Wed Dec  9 10:38:48 1998  David Taylor  <taylor@texas.cygnus.com>
+
+	The following is part of a change made by Edith Epstein
+ 	<eepstein@sophia.cygnus.com> as part of a project to merge in
+ 	changes by HP; HP did not create ChangeLog entries.
+
+	* hppa.h (completer_chars): list of chars to not put a space
+ 	after.
+
 Sun Dec  6 13:21:34 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* i386.h (i386_optab): Permit w suffix on processor control and
