@@ -35,60 +35,63 @@ set asm-arch ""
 set asm-flags ""
 set link-flags ""
 
-if [istarget "*arm-*-*"] then {
-    set asm-arch arm
-}
-if [istarget "xscale-*-*"] then {
-    set asm-arch arm
-}
-if [istarget "d10v-*-*"] then {
-    set asm-arch d10v
-}
-if [istarget "s390-*-*"] then {
-    set asm-arch s390
-}
-if [istarget "x86_64-*-*"] then {
-    set asm-arch x86_64
-    set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
-}
-if [istarget "i\[3456\]86-*-*"] then {
-    set asm-arch i386
-    if [istarget "*-*-cygwin*"] then {
-        set link-flags "--entry _start"
+switch -glob -- [istarget] {
+    "*arm-*-*" {
+        set asm-arch arm
+    }
+    "xscale-*-*" {
+        set asm-arch arm
+    }
+    "d10v-*-*" {
+        set asm-arch d10v
+    }
+    "s390-*-*" {
+        set asm-arch s390
+    }
+    "x86_64-*-*" {
+        set asm-arch x86_64
+        set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    }
+    "i\[3456\]86-*-*" {
+        set asm-arch i386
+        if [istarget "*-*-cygwin*"] then {
+            set link-flags "--entry _start"
+        }
+    }
+    "m32r*-*" {
+        set asm-arch m32r
+    }
+    "m6811-*-*" {
+        set asm-arch m68hc11
+        set asm-flags "-mshort-double -m68hc11 -gdwarf2 --no-warn -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    }
+    "m6812-*-*" {
+        set asm-arch m68hc11
+        set asm-flags "-mshort-double -m68hc12 -gdwarf2 --no-warn -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    }
+    "mips*-*" {
+        set asm-arch mips
+    }
+    "powerpc*-*" {
+        set asm-arch powerpc
+    }
+    "sparc-*-*" {
+        set asm-arch sparc
+    }
+    "sparc64-*-*" {
+        set asm-arch sparc64
+        set asm-flags "-xarch=v9 -gstabs -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    }
+    "xstormy16-*-*" {
+        set asm-arch xstormy16
+        set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    }
+    "v850-*-*" {
+        set asm-arch v850
+        set gdb_wrapper_initialized 1
     }
 }
-if [istarget "m32r*-*"] then {
-    set asm-arch m32r
-}
-if [istarget "m6811-*-*"] then {
-    set asm-arch m68hc11
-    set asm-flags "-mshort-double -m68hc11 -gdwarf2 --no-warn -I${srcdir}/${subdir} -I${objdir}/${subdir}"
-}
-if [istarget "m6812-*-*"] then {
-    set asm-arch m68hc11
-    set asm-flags "-mshort-double -m68hc12 -gdwarf2 --no-warn -I${srcdir}/${subdir} -I${objdir}/${subdir}"
-}
-if [istarget "mips*-*"] then {
-    set asm-arch mips
-}
-if [istarget "powerpc*-*"] then {
-    set asm-arch powerpc
-}
-if [istarget "sparc-*-*"] then {
-    set asm-arch sparc
-}
-if [istarget "sparc64-*-*"] then {
-    set asm-arch sparc64
-    set asm-flags "-xarch=v9 -gstabs -I${srcdir}/${subdir} -I${objdir}/${subdir}"
-}
-if [istarget "xstormy16-*-*"] then {
-    set asm-arch xstormy16
-    set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
-}
-if [istarget "v850-*-*"] then {
-    set asm-arch v850
-    set gdb_wrapper_initialized 1
-}
+
 if { "${asm-arch}" == "" } {
     gdb_suppress_entire_file "Assembly source test -- not implemented for this target."
 }

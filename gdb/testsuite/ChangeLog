@@ -1,3 +1,8 @@
+2003-05-07  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.asm/asm-source.exp: Use a 'switch -glob' statement, not a
+	succession of 'if' statements.
+
 2003-05-05  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.base/maint.exp: Add tests for "maint print dummy-frames".
