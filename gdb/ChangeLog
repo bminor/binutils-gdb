@@ -1,3 +1,10 @@
+2002-09-06  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbarch.sh (SIGTRAMP_START, SIGTRAMP_END): New methods.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* blockframe.c (find_pc_sect_partial_function): Convert to use
+	SIGTRAMP_START_P predicate.
+
 2002-09-05  Michael Snyder  <msnyder@redhat.com>
 
 	* arm-tdep.c (arm_init_extra_frame_info): Distinguish between

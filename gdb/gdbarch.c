@@ -260,6 +260,8 @@ struct gdbarch
   gdbarch_in_solib_call_trampoline_ftype *in_solib_call_trampoline;
   gdbarch_in_solib_return_trampoline_ftype *in_solib_return_trampoline;
   gdbarch_pc_in_sigtramp_ftype *pc_in_sigtramp;
+  gdbarch_sigtramp_start_ftype *sigtramp_start;
+  gdbarch_sigtramp_end_ftype *sigtramp_end;
   gdbarch_in_function_epilogue_p_ftype *in_function_epilogue_p;
   gdbarch_construct_inferior_arguments_ftype *construct_inferior_arguments;
   gdbarch_dwarf2_build_frame_info_ftype *dwarf2_build_frame_info;
@@ -327,6 +329,8 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   default_print_registers_info,
+  0,
+  0,
   0,
   0,
   0,
@@ -786,6 +790,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of in_solib_call_trampoline, invalid_p == 0 */
   /* Skip verify of in_solib_return_trampoline, invalid_p == 0 */
   /* Skip verify of pc_in_sigtramp, invalid_p == 0 */
+  /* Skip verify of sigtramp_start, has predicate */
+  /* Skip verify of sigtramp_end, invalid_p == 0 */
   /* Skip verify of in_function_epilogue_p, invalid_p == 0 */
   /* Skip verify of construct_inferior_arguments, invalid_p == 0 */
   /* Skip verify of dwarf2_build_frame_info, has predicate */
@@ -1861,6 +1867,28 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: SDB_REG_TO_REGNUM = 0x%08lx\n",
                         (long) current_gdbarch->sdb_reg_to_regnum
                         /*SDB_REG_TO_REGNUM ()*/);
+#endif
+#ifdef SIGTRAMP_END
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "SIGTRAMP_END(pc)",
+                      XSTRING (SIGTRAMP_END (pc)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: SIGTRAMP_END = 0x%08lx\n",
+                        (long) current_gdbarch->sigtramp_end
+                        /*SIGTRAMP_END ()*/);
+#endif
+#ifdef SIGTRAMP_START
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "SIGTRAMP_START(pc)",
+                      XSTRING (SIGTRAMP_START (pc)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: SIGTRAMP_START = 0x%08lx\n",
+                        (long) current_gdbarch->sigtramp_start
+                        /*SIGTRAMP_START ()*/);
 #endif
 #ifdef SIZEOF_CALL_DUMMY_WORDS
   fprintf_unfiltered (file,
@@ -4778,6 +4806,51 @@ set_gdbarch_pc_in_sigtramp (struct gdbarch *gdbarch,
                             gdbarch_pc_in_sigtramp_ftype pc_in_sigtramp)
 {
   gdbarch->pc_in_sigtramp = pc_in_sigtramp;
+}
+
+int
+gdbarch_sigtramp_start_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->sigtramp_start != 0;
+}
+
+CORE_ADDR
+gdbarch_sigtramp_start (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->sigtramp_start == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_sigtramp_start invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_sigtramp_start called\n");
+  return gdbarch->sigtramp_start (pc);
+}
+
+void
+set_gdbarch_sigtramp_start (struct gdbarch *gdbarch,
+                            gdbarch_sigtramp_start_ftype sigtramp_start)
+{
+  gdbarch->sigtramp_start = sigtramp_start;
+}
+
+CORE_ADDR
+gdbarch_sigtramp_end (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->sigtramp_end == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_sigtramp_end invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_sigtramp_end called\n");
+  return gdbarch->sigtramp_end (pc);
+}
+
+void
+set_gdbarch_sigtramp_end (struct gdbarch *gdbarch,
+                          gdbarch_sigtramp_end_ftype sigtramp_end)
+{
+  gdbarch->sigtramp_end = sigtramp_end;
 }
 
 int

@@ -2207,7 +2207,7 @@ extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_
 #endif
 #endif
 
-/* It is not at all clear why SMASH_TEXT_ADDRESS is not folded into
+/* It is not at all clear why SMASH_TEXT_ADDRESS is not folded into 
    ADDR_BITS_REMOVE. */
 
 /* Default (function) for non- multi-arch platforms. */
@@ -2382,6 +2382,55 @@ extern void set_gdbarch_pc_in_sigtramp (struct gdbarch *gdbarch, gdbarch_pc_in_s
 #if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (PC_IN_SIGTRAMP)
 #define PC_IN_SIGTRAMP(pc, name) (gdbarch_pc_in_sigtramp (current_gdbarch, pc, name))
+#endif
+#endif
+
+#if defined (SIGTRAMP_START)
+/* Legacy for systems yet to multi-arch SIGTRAMP_START */
+#if !defined (SIGTRAMP_START_P)
+#define SIGTRAMP_START_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (SIGTRAMP_START_P)
+#define SIGTRAMP_START_P() (0)
+#endif
+
+extern int gdbarch_sigtramp_start_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SIGTRAMP_START_P)
+#error "Non multi-arch definition of SIGTRAMP_START"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SIGTRAMP_START_P)
+#define SIGTRAMP_START_P() (gdbarch_sigtramp_start_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (SIGTRAMP_START)
+#define SIGTRAMP_START(pc) (internal_error (__FILE__, __LINE__, "SIGTRAMP_START"), 0)
+#endif
+
+typedef CORE_ADDR (gdbarch_sigtramp_start_ftype) (CORE_ADDR pc);
+extern CORE_ADDR gdbarch_sigtramp_start (struct gdbarch *gdbarch, CORE_ADDR pc);
+extern void set_gdbarch_sigtramp_start (struct gdbarch *gdbarch, gdbarch_sigtramp_start_ftype *sigtramp_start);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SIGTRAMP_START)
+#error "Non multi-arch definition of SIGTRAMP_START"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SIGTRAMP_START)
+#define SIGTRAMP_START(pc) (gdbarch_sigtramp_start (current_gdbarch, pc))
+#endif
+#endif
+
+typedef CORE_ADDR (gdbarch_sigtramp_end_ftype) (CORE_ADDR pc);
+extern CORE_ADDR gdbarch_sigtramp_end (struct gdbarch *gdbarch, CORE_ADDR pc);
+extern void set_gdbarch_sigtramp_end (struct gdbarch *gdbarch, gdbarch_sigtramp_end_ftype *sigtramp_end);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SIGTRAMP_END)
+#error "Non multi-arch definition of SIGTRAMP_END"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SIGTRAMP_END)
+#define SIGTRAMP_END(pc) (gdbarch_sigtramp_end (current_gdbarch, pc))
 #endif
 #endif
 
