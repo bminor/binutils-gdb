@@ -1,3 +1,8 @@
+Thu Feb 24 04:29:19 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* elfcode.h (elf_core_file_p):  Check for core file e_machine match
+	like in elf_object_p.
+
 Wed Feb 23 18:28:37 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* elfcode.h (alloca): Delete declaration.
