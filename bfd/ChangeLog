@@ -1,3 +1,8 @@
+1999-06-07  Richard Henderson  <rth@cygnus.com>
+
+	* section.c (_bfd_strip_section_from_output): Remove output
+	sections with no initial link_order.
+
 1999-06-07  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-m88k.c (ELF_MAXPAGESIZE): Define.

@@ -1046,30 +1046,30 @@ _bfd_strip_section_from_output (s)
   asection **spp, *os;
   struct bfd_link_order *p, *pp;
 
+  /* Excise the input section from the link order.  */
   os = s->output_section;
   for (p = os->link_order_head, pp = NULL; p != NULL; pp = p, p = p->next)
     if (p->type == bfd_indirect_link_order
 	&& p->u.indirect.section == s)
       {
-	/* Excise the input section.  */
 	if (pp)
 	  pp->next = p->next;
 	else
 	  os->link_order_head = p->next;
 	if (!p->next)
 	  os->link_order_tail = pp;
-
-	if (!os->link_order_head)
-	  {
-	    /* Excise the output section.  */
-	    for (spp = &os->owner->sections; *spp; spp = &(*spp)->next)
-	      if (*spp == os)
-		{
-		  *spp = os->next;
-		  os->owner->section_count--;
-		  break;
-		}
-	  }
 	break;
       }
+
+  /* If the output section is empty, remove it too.  */
+  if (!os->link_order_head)
+    {
+      for (spp = &os->owner->sections; *spp; spp = &(*spp)->next)
+	if (*spp == os)
+	  {
+	    *spp = os->next;
+	    os->owner->section_count--;
+	    break;
+	  }
+    }
 }
