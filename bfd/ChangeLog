@@ -1,5 +1,13 @@
 2003-04-21  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* Makefile.am (BFD32_BACKENDS): Add elf32-m68hc1x.lo.
+	(elf32-m68hc1x.lo): Update dependencies
+	* configure.in: Add elf32-m68hc1x.lo.
+	* configure: Rebuild.
+	* Makefile.in: Rebuild.
+
+2003-04-21  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* elf32-m68hc1x.c: New file (from elf32-m68hc11.c and elf32-m68hc12.c)
 	(m68hc11_elf_hash_table_create): New function.
 	(elf32_m68hc11_link_hash_table_free): New function.
