@@ -1,5 +1,10 @@
 2004-08-01  Andrew Cagney  <cagney@gnu.org>
 
+	* sh-tdep.c (sh_gdbarch_init): Disable call to sh64_gdbarch_init.
+	* config/sh/nbsd.mt (TDEPFILES): Remove sh64-tdep.o.
+	* config/sh/linux.mt (TDEPFILES): Remove sh64-tdep.o.
+	* config/sh/embed.mt (TDEPFILES): Remove sh64-tdep.o.
+
 	* infcall.c (call_function_by_hand): Do not use
 	DEPRECATED_PUSH_RETURN_ADDRESS, DEPRECATED_DUMMY_WRITE_SP,
 	DEPRECATED_SAVE_DUMMY_FRAME_TOS, DEPRECATED_TARGET_READ_FP,
