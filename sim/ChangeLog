@@ -1,0 +1,6 @@
+Mon Feb  8 11:46:06 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* Makefile.in, configure.in: if target isn't supported, build a
+	harmless makefile.
+
+

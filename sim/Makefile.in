@@ -61,6 +61,10 @@ DEP = mkdep
 
 SUBDIRS = " this is set by configire, don't change this "
 
+ALL=all-nothing
+CLEAN=clean-nothing
+INSTALL=install-nothing
+
 #### host and target dependent Makefile fragments come in here.
 ###
 
@@ -85,10 +89,23 @@ STAGESTUFF = $(TARGETLIB) $(OFILES)
 
 all:	endian.h $(ALL)
 	
+clean:  $(CLEAN)
 
+install: $(INSTALL)
 
 endian.h: endian
 	./endian > endian.h
+
+
+
+### none
+
+all-nothing: force
+	
+clean-nothing:  force
+
+install-nothing: force
+
 
 ### z8k
 
@@ -108,6 +125,14 @@ install-z8k: force
 		true ; \
 	fi
 
+clean-z8k: force
+	if [ -f ./z8k/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		( cd ./z8k ; $(MAKE) $(FLAGS_TO_PASS) clean) ; \
+	else \
+		true ; \
+	fi
+
 
 ### h8300
 
@@ -123,6 +148,42 @@ install-h8300: force
 	if [ -f ./h8300/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		( cd ./h8300 ; $(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
+clean-h8300: force
+	if [ -f ./h8300/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		( cd ./h8300 ; $(MAKE) $(FLAGS_TO_PASS) clean) ; \
+	else \
+		true ; \
+	fi
+
+###
+
+### h8500
+
+all-h8500: force
+	if [ -f ./h8500/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		( cd ./h8500 ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+install-h8500: force
+	if [ -f ./h8500/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		( cd ./h8500 ; $(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
+clean-h8500: force
+	if [ -f ./h8500/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		( cd ./h8500 ; $(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
