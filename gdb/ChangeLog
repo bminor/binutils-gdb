@@ -1,3 +1,8 @@
+Tue Jan 12 17:00:00 1999  Edith Epstein  <eepstein@sophia.cygnus.com>
+
+	* inftarg.c (child_create_inferior): fixed HPUXHPPA specific
+	  call to fork_inferior. The shell param is now NULL.
+
 1999-01-12  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* monitor.c (init_base_monitor_ops): Whitespace cleanup.
