@@ -1,3 +1,10 @@
+1999-08-09  Ian Lance Taylor  <ian@zembu.com>
+
+	From Wally Iimura <iimura@microunity.com>:
+	* ldlang.c (lang_size_sections): When checking whether an address
+	is within a region, don't get confused by wrapping around at the
+	end of the address space.
+
 1999-08-08  Ian Lance Taylor  <ian@zembu.com>
 
 	* ldlang.c (wild_doit): Update for renaming of SEC_SHORT to

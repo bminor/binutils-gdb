@@ -2740,14 +2740,22 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	       overall size in memory.  */
 	    if (os->region != (lang_memory_region_type *) NULL
 		&& (bfd_get_section_flags (output_bfd, os->bfd_section)
-		& (SEC_ALLOC | SEC_LOAD)))
+		    & (SEC_ALLOC | SEC_LOAD)))
 	      {
 		os->region->current = dot;
 		
-		/* Make sure this isn't silly.  */
-		if (os->region->current < os->region->origin
-		    || (os->region->current - os->region->origin
-			> os->region->length))
+		/* Make sure the new address is within the region.  We
+                   explicitly permit the current address to be at the
+                   exact end of the region when the VMA is non-zero,
+                   in case the region is at the end of addressable
+                   memory and the calculation wraps around.  */
+		if ((os->region->current < os->region->origin
+		     || (os->region->current - os->region->origin
+			 > os->region->length))
+		    && ((os->region->current
+			 != os->region->origin + os->region->length)
+			|| os->bfd_section->vma == 0))
+
 		  {
 		    if (os->addr_tree != (etree_type *) NULL)
 		      {
