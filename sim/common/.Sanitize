@@ -78,6 +78,8 @@ sim-config.c
 sim-config.h
 sim-core.c
 sim-core.h
+sim-cpu.c
+sim-cpu.h
 sim-endian.c
 sim-endian.h
 sim-engine.c
