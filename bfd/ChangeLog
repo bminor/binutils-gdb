@@ -1,3 +1,20 @@
+Thu May 23 12:26:24 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* xcofflink.c (_bfd_ppc_xcoff_relocate_section): Warn about
+	undefined symbols when creating a shared library.
+
+Fri May 17 13:54:15 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-sh.c: Add a bunch of new code and static const arrays to
+	support aligning loads and stores on four byte memory boundaries.
+	Also:
+	(sh_coff_howtos): Add entries for R_SH_CODE, R_SH_DATA and
+	R_SH_LABEL.
+	(sh_relax_section): Look for R_SH_CODE relocs.  If we find one,
+	call sh_align_loads.
+	(sh_relax_delete_bytes): Don't mark R_SH_CODE or R_SH_DATA relocs
+	as unused.
+
 Thu May 16 16:34:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* cache.c (bfd_open_file): Unlink the file before opening it for
