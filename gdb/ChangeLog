@@ -1,3 +1,8 @@
+Sun Mar  3 17:18:57 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* remote-mips.c (common_breakpoint): Explicitly terminate the
+ 	returned buffer.
+
 Wed Feb 28 22:32:18 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	From Wilfried Moser <wilfried.moser@aut.alcatel.at>:

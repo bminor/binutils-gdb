@@ -2297,6 +2297,7 @@ common_breakpoint (cmd, addr, mask, flags)
   mips_send_packet (buf, 1);
 
   len = mips_receive_packet (buf, 1, mips_receive_wait);
+  buf[len] = '\0';
 
   nfields = sscanf (buf, "0x%x %c 0x%x 0x%x", &rpid, &rcmd, &rerrflg, &rresponse);
 
@@ -2683,7 +2684,7 @@ pmon_check_ack()
 {
   int c = SERIAL_READCHAR (mips_desc, 2);
   if ((c == SERIAL_TIMEOUT) || (c != 0x06)) {
-    fprintf_unfiltered (gdb_stderr, "Failed to received valid ACK\n");
+    fprintf_unfiltered (gdb_stderr, "Failed to receive valid ACK\n");
     return(-1); /* terminate the download */
   }
   return(0);
