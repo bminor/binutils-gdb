@@ -1,5 +1,9 @@
 2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdbint.texinfo (Coding): Clarify use of gdb_XXX.h headers.
+
+2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
+
 	* Makefile.in (SFILES_INCLUDED): Add agentexpr.texi.
 	* agentexpr.texi: Retitle section, and change it to an appendix.
 	Comment out texinfo initialization.  Factor a @var{} into two

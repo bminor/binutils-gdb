@@ -5191,7 +5191,11 @@ of @value{GDBN}) must be added to @file{gdb/config/djgpp/fnchange.lst}.
 
 When @value{GDBN} has a local version of a system header file (ex
 @file{string.h}) the file name based on the POSIX header prefixed with
-@file{gdb_} (@file{gdb_string.h}).
+@file{gdb_} (@file{gdb_string.h}).  These headers should be relatively
+independent: they should use only macros defined by @file{configure},
+the compiler, or the host; they should include only system headers; they
+should refer only to system types.  They may be shared between multiple
+programs, e.g.@: @value{GDBN} and @sc{gdbserver}.
 
 For other files @samp{-} is used as the separator.
 
