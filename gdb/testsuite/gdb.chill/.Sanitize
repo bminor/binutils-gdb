@@ -31,6 +31,7 @@ chexp.exp
 chillvars.ch
 chillvars.exp
 configure.in
+func1.ch
 misc.ch
 misc.exp
 pr-4975.ch
@@ -52,6 +53,9 @@ pr-6292.exp
 pr-6632.ch
 pr-6632-grt.ch
 pr-6632.exp
+pr-8134.exp
+pr-8136.ch
+pr-8136.exp
 result.ch
 result.exp
 string.ch
