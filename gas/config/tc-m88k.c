@@ -208,13 +208,13 @@ md_begin ()
     }
 }
 
-void
+int
 md_parse_option (argP, cntP, vecP)
      char **argP;
      int *cntP;
      char ***vecP;
 {
-  as_warn ("unknown option: -%s", *argP);
+  return 0;
 }
 
 void
@@ -924,7 +924,7 @@ getval (param, valp)
 void
 md_number_to_chars (buf, val, nbytes)
      char *buf;
-     int val;
+     valueT val;
      int nbytes;
 {
   switch (nbytes)
@@ -1100,11 +1100,11 @@ int md_short_jump_size = 4;
 void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     long from_addr, to_addr;
+     addressT from_addr, to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {
-  ptr[0] = 0xc0;
+  ptr[0] = (char) 0xc0;
   ptr[1] = 0x00;
   ptr[2] = 0x00;
   ptr[3] = 0x00;
@@ -1123,11 +1123,11 @@ int md_long_jump_size = 4;
 void
 md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     long from_addr, to_addr;
+     addressT from_addr, to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {
-  ptr[0] = 0xc0;
+  ptr[0] = (char) 0xc0;
   ptr[1] = 0x00;
   ptr[2] = 0x00;
   ptr[3] = 0x00;
@@ -1144,20 +1144,13 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
 int
 md_estimate_size_before_relax (fragP, segment_type)
      fragS *fragP;
-     int segment_type;
+     segT segment_type;
 {
   as_fatal ("Relaxation should never occur");
 }
 
 const relax_typeS md_relax_table[] =
 {0};
-
-void
-md_convert_frag (fragP)
-     fragS *fragP;
-{
-  as_fatal ("Relaxation should never occur");
-}
 
 void
 md_end ()
@@ -1228,7 +1221,6 @@ s_bss ()
   char *p;
   int temp, bss_align;
   symbolS *symbolP;
-  extern const char is_end_of_line[256];
 
   name = input_line_pointer;
   c = get_symbol_end ();

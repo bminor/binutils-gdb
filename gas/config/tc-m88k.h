@@ -20,6 +20,8 @@ You should have received a copy of the GNU General Public License
 along with GAS; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#define NEED_FX_R_TYPE
+
 /* different type of relocation available in the m88k */
 
 enum reloc_type
@@ -47,3 +49,9 @@ struct reloc_info_m88k
 
 #define LOCAL_LABEL(name) (name[0] =='@' \
                          && ( name [1] == 'L' || name [1] == '.' ))
+
+#ifndef BFD_ASSEMBLER
+#define md_convert_frag(h,f)		{as_fatal ("m88k convert_frag\n");}
+#else
+#define md_convert_frag(b,s,f)		{as_fatal ("m88k convert_frag\n");}
+#endif
