@@ -161,32 +161,32 @@ sim_core_write_unaligned_4 (STATE_CPU (simulator, 0), \
 
 /* Function declarations.  */
 
-uint32 get_word PARAMS ((uint8 *));
-uint16 get_half PARAMS ((uint8 *));
-uint8 get_byte PARAMS ((uint8 *));
-void put_word PARAMS ((uint8 *, uint32));
-void put_half PARAMS ((uint8 *, uint16));
-void put_byte PARAMS ((uint8 *, uint8));
+uint32 get_word (uint8 *);
+uint16 get_half (uint8 *);
+uint8 get_byte (uint8 *);
+void put_word (uint8 *, uint32);
+void put_half (uint8 *, uint16);
+void put_byte (uint8 *, uint8);
 
-extern uint8 *map PARAMS ((SIM_ADDR addr));
+extern uint8 *map (SIM_ADDR addr);
 
-INLINE_SIM_MAIN (void) genericAdd PARAMS ((unsigned32 source, unsigned32 destReg));
-INLINE_SIM_MAIN (void) genericSub PARAMS ((unsigned32 source, unsigned32 destReg));
-INLINE_SIM_MAIN (void) genericCmp PARAMS ((unsigned32 leftOpnd, unsigned32 rightOpnd));
-INLINE_SIM_MAIN (void) genericOr PARAMS ((unsigned32 source, unsigned32 destReg));
-INLINE_SIM_MAIN (void) genericXor PARAMS ((unsigned32 source, unsigned32 destReg));
-INLINE_SIM_MAIN (void) genericBtst PARAMS ((unsigned32 leftOpnd, unsigned32 rightOpnd));
-INLINE_SIM_MAIN (int) syscall_read_mem PARAMS ((host_callback *cb,
-						struct cb_syscall *sc,
-						unsigned long taddr,
-						char *buf,
-						int bytes)); 
-INLINE_SIM_MAIN (int) syscall_write_mem PARAMS ((host_callback *cb,
-						struct cb_syscall *sc,
-						unsigned long taddr,
-						const char *buf,
-						int bytes)); 
-INLINE_SIM_MAIN (void) do_syscall PARAMS ((void));
+INLINE_SIM_MAIN (void) genericAdd (unsigned32 source, unsigned32 destReg);
+INLINE_SIM_MAIN (void) genericSub (unsigned32 source, unsigned32 destReg);
+INLINE_SIM_MAIN (void) genericCmp (unsigned32 leftOpnd, unsigned32 rightOpnd);
+INLINE_SIM_MAIN (void) genericOr (unsigned32 source, unsigned32 destReg);
+INLINE_SIM_MAIN (void) genericXor (unsigned32 source, unsigned32 destReg);
+INLINE_SIM_MAIN (void) genericBtst (unsigned32 leftOpnd, unsigned32 rightOpnd);
+INLINE_SIM_MAIN (int) syscall_read_mem (host_callback *cb,
+					struct cb_syscall *sc,
+					unsigned long taddr,
+					char *buf,
+					int bytes);
+INLINE_SIM_MAIN (int) syscall_write_mem (host_callback *cb,
+					 struct cb_syscall *sc,
+					 unsigned long taddr,
+					 const char *buf,
+					 int bytes); 
+INLINE_SIM_MAIN (void) do_syscall (void);
 void program_interrupt (SIM_DESC sd, sim_cpu *cpu, sim_cia cia, SIM_SIGNAL sig);
 
 void mn10300_cpu_exception_trigger(SIM_DESC sd, sim_cpu* cpu, address_word pc);

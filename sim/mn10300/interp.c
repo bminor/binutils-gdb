@@ -47,12 +47,11 @@ enum {
 };
 
 static SIM_RC
-mn10300_option_handler (sd, cpu, opt, arg, is_command)
-     SIM_DESC sd;
-     sim_cpu *cpu;
-     int opt;
-     char *arg;
-     int is_command;
+mn10300_option_handler (SIM_DESC sd,
+			sim_cpu *cpu,
+			int opt,
+			char *arg,
+			int is_command)
 {
   int cpu_nr;
   switch (opt)
@@ -88,11 +87,10 @@ SIM_DESC simulator;
 /* These default values correspond to expected usage for the chip.  */
 
 SIM_DESC
-sim_open (kind, cb, abfd, argv)
-     SIM_OPEN_KIND kind;
-     host_callback *cb;
-     struct bfd *abfd;
-     char **argv;
+sim_open (SIM_OPEN_KIND kind,
+	  host_callback *cb,
+	  struct bfd *abfd,
+	  char **argv)
 {
   SIM_DESC sd = sim_state_alloc (kind, cb);
   mn10300_callback = cb;
@@ -304,20 +302,17 @@ sim_open (kind, cb, abfd, argv)
 
 
 void
-sim_close (sd, quitting)
-     SIM_DESC sd;
-     int quitting;
+sim_close (SIM_DESC sd, int quitting)
 {
   sim_module_uninstall (sd);
 }
 
 
 SIM_RC
-sim_create_inferior (sd, prog_bfd, argv, env)
-     SIM_DESC sd;
-     struct bfd *prog_bfd;
-     char **argv;
-     char **env;
+sim_create_inferior (SIM_DESC sd,
+		     struct bfd *prog_bfd,
+		     char **argv,
+		     char **env)
 {
   memset (&State, 0, sizeof (State));
   if (prog_bfd != NULL) {
@@ -331,9 +326,7 @@ sim_create_inferior (sd, prog_bfd, argv, env)
 }
 
 void
-sim_do_command (sd, cmd)
-     SIM_DESC sd;
-     char *cmd;
+sim_do_command (SIM_DESC sd, char *cmd)
 {
   char *mm_cmd = "memory-map";
   char *int_cmd = "interrupt";
@@ -353,41 +346,34 @@ sim_do_command (sd, cmd)
    but need to be changed to use the memory map.  */
 
 uint8
-get_byte (x)
-     uint8 *x;
+get_byte (uint8 *x)
 {
   return *x;
 }
 
 uint16
-get_half (x)
-     uint8 *x;
+get_half (uint8 *x)
 {
   uint8 *a = x;
   return (a[1] << 8) + (a[0]);
 }
 
 uint32
-get_word (x)
-      uint8 *x;
+get_word (uint8 *x)
 {
   uint8 *a = x;
   return (a[3]<<24) + (a[2]<<16) + (a[1]<<8) + (a[0]);
 }
 
 void
-put_byte (addr, data)
-     uint8 *addr;
-     uint8 data;
+put_byte (uint8 *addr, uint8 data)
 {
   uint8 *a = addr;
   a[0] = data;
 }
 
 void
-put_half (addr, data)
-     uint8 *addr;
-     uint16 data;
+put_half (uint8 *addr, uint16 data)
 {
   uint8 *a = addr;
   a[0] = data & 0xff;
@@ -395,9 +381,7 @@ put_half (addr, data)
 }
 
 void
-put_word (addr, data)
-     uint8 *addr;
-     uint32 data;
+put_word (uint8 *addr, uint32 data)
 {
   uint8 *a = addr;
   a[0] = data & 0xff;
@@ -407,22 +391,20 @@ put_word (addr, data)
 }
 
 int
-sim_fetch_register (sd, rn, memory, length)
-     SIM_DESC sd;
-     int rn;
-     unsigned char *memory;
-     int length;
+sim_fetch_register (SIM_DESC sd,
+		    int rn,
+		    unsigned char *memory,
+		    int length)
 {
   put_word (memory, State.regs[rn]);
   return -1;
 }
  
 int
-sim_store_register (sd, rn, memory, length)
-     SIM_DESC sd;
-     int rn;
-     unsigned char *memory;
-     int length;
+sim_store_register (SIM_DESC sd,
+		    int rn,
+		    unsigned char *memory,
+		    int length)
 {
   State.regs[rn] = get_word (memory);
   return -1;
@@ -431,13 +413,13 @@ sim_store_register (sd, rn, memory, length)
 
 void
 mn10300_core_signal (SIM_DESC sd,
-                 sim_cpu *cpu,
-                 sim_cia cia,
-                 unsigned map,
-                 int nr_bytes,
-                 address_word addr,
-                 transfer_type transfer,
-                 sim_core_signals sig)
+		     sim_cpu *cpu,
+		     sim_cia cia,
+		     unsigned map,
+		     int nr_bytes,
+		     address_word addr,
+		     transfer_type transfer,
+		     sim_core_signals sig)
 {
   const char *copy = (transfer == read_transfer ? "read" : "write");
   address_word ip = CIA_ADDR (cia);
