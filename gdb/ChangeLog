@@ -1,3 +1,53 @@
+Sat Oct  8 04:27:21 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	Speed up GDB startup time by not demangling partial symbols.
+	* symfile.h (ADD_PSYMBOL_VT_TO_LIST),
+	symfile.c (add_psymbol_to_list, add_psymbol_addr_to_list):
+	No longer demangle partial symbols.
+	* symtab.c (lookup_symbol, list_symbols): Handle mangled
+	variables, e.g. C++ static members, via the minimal symbols.
+
+	Handle reordered functions in an objfile, for Irix 5.2 shared
+	libraries.
+	* objfiles.h (OBJF_REORDERED):  New bit in the objfile flags,
+	set if the functions in an objfile are reordered.
+	* mdebugread.c (parse_partial_symbols):  Detect reordered
+	functions in an objfile.
+	* symtab.c (find_pc_psymtab, find_pc_symtab):  Use expensive
+	lookup algorithm if the functions in the objfile are reordered.
+
+	* xcoffexec.c (exec_close):  If the current target has a copy
+	of the exec_ops sections, reflect the freeing of the sections
+	in current_target.
+
+	* valops.c (call_function_by_hand):  Use `sizeof dummy1', not
+	`sizeof dummy', for constructing the call dummy code.
+
+	* config/sparc/tm-sparc.h:  Add PARAMS declarations to all
+	function declarations.
+	* sparc-tdep.c (sparc_pop_frame):  Cast result of
+	read_memory_integer to CORE_ADDR when passing it to PC_ADJUST.
+
+	* irix5-nat.c (enable_break):  Set breakpoint at the entry point
+	of the executable, to handle the case where main resides in a
+	shared library.
+	* irix5-nat.c (solib_create_inferior_hook):  Reset stop_soon_quietly
+	after shared library symbol reading, to get rid of a warning from
+	heuristic_proc_start if the startup code has no symbolic debug info.
+
+	* breakpoint.h (struct breakpoint):  Add new fields language
+	and input_radix, to enable breakpoint resetting with the
+	proper language and radix.
+	* breakpoint.c (set_raw_breakpoint):  Initialize them.
+	(breakpoint_re_set_one):  Use them when resetting the breakpoint.
+	(breakpoint_re_set):  Preserve current language and input_radix
+	across breakpoint_re_set_one calls.
+
+	* symtab.c (decode_line_1):  Do not build a canonical line
+	specification for `*expr' line specifications.
+
+	* breakpoint.h (bpstat_stop_status):  Fix prototype declaration.
+
 Fri Oct  7 08:48:18 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	The point of these changes is to avoid reading the frame pointer

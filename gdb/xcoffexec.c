@@ -111,6 +111,16 @@ exec_close (quitting)
 
   if (exec_ops.to_sections)
     {
+      /* Reflect to_sections freeing in current_target if it is
+	 the exec target. Otherwise target_xfer_memory (eventually
+	 called from clear_symtab_users) might access the freed
+	 exec_ops.to_sections via the copy in current_target.  */
+      if (current_target.to_sections == exec_ops.to_sections)
+	{
+	  current_target.to_sections = NULL;
+	  current_target.to_sections_end = NULL;
+	}
+
       free (exec_ops.to_sections);
       exec_ops.to_sections = NULL;
       exec_ops.to_sections_end = NULL;

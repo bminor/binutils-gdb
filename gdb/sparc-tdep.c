@@ -572,7 +572,7 @@ sparc_pop_frame ()
   else if (fsr.regs[I7_REGNUM])
     {
       /* Return address in %i7 -- adjust it, then restore PC and NPC from it */
-      pc = PC_ADJUST (read_memory_integer (fsr.regs[I7_REGNUM], 4));
+      pc = PC_ADJUST ((CORE_ADDR) read_memory_integer (fsr.regs[I7_REGNUM], 4));
       write_register (PC_REGNUM,  pc);
       write_register (NPC_REGNUM, pc + 4);
     }

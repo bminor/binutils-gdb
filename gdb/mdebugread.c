@@ -2793,6 +2793,35 @@ parse_partial_symbols (objfile, section_offsets)
 	  objfile->ei.entry_file_lowpc = save_pst->textlow;
 	  objfile->ei.entry_file_highpc = save_pst->texthigh;
 	}
+
+      /* The objfile has its functions reordered if this partial symbol
+	 table overlaps any other partial symbol table.
+	 We cannot assume a reordered objfile if a partial symbol table
+	 is contained within another partial symbol table, as partial symbol
+	 tables for include files with executable code are contained
+	 within the partial symbol table for the including source file,
+	 and we do not want to flag the objfile reordered for these cases.
+
+	 This strategy works well for Irix-5.2 shared libraries, but we
+	 might have to use a more elaborate (and slower) algorithm for
+	 other cases.  */
+      save_pst = fdr_to_pst[f_idx].pst;
+      if (save_pst != NULL
+	  && save_pst->textlow != 0
+	  && !(objfile->flags & OBJF_REORDERED))
+	{
+	  ALL_OBJFILE_PSYMTABS (objfile, pst)
+	    {
+	      if (save_pst != pst
+		  && save_pst->textlow >= pst->textlow
+		  && save_pst->textlow < pst->texthigh
+		  && save_pst->texthigh > pst->texthigh)
+		{
+		  objfile->flags |= OBJF_REORDERED;
+		  break;
+		}
+	    }
+	}
     }
 
   /* Now scan the FDRs for dependencies */

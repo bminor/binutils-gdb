@@ -620,11 +620,6 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
     }
 
   new_symfile_objfile (objfile, mainline, from_tty);
-      
-  /* Getting new symbols may change our opinion about what is
-     frameless.  */
-
-  reinit_frame_cache ();
 
   return (objfile);
 }
@@ -710,6 +705,11 @@ symbol_file_command (args, from_tty)
               else
                 symbol_file_add (name, from_tty, (CORE_ADDR)text_relocation,
 				 0, mapped, readnow);
+
+	      /* Getting new symbols may change our opinion about what is
+		 frameless.  */
+	      reinit_frame_cache ();
+
               set_initial_language ();
 	    }
 	  argv++;
@@ -1025,6 +1025,10 @@ add_symbol_file_command (args, from_tty)
     error ("Not confirmed.");
 
   symbol_file_add (name, 0, text_addr, 0, mapped, readnow);
+
+  /* Getting new symbols may change our opinion about what is
+     frameless.  */
+  reinit_frame_cache ();
 }
 
 static void
@@ -1079,6 +1083,7 @@ reread_symbols ()
 	  struct section_offsets *offsets;
 	  int num_offsets;
 	  int section_offsets_size;
+	  char *obfd_filename;
 
 	  printf_filtered ("`%s' has changed; re-reading symbols.\n",
 			   objfile->name);
@@ -1100,9 +1105,10 @@ reread_symbols ()
 	  /* Clean up any state BFD has sitting around.  We don't need
 	     to close the descriptor but BFD lacks a way of closing the
 	     BFD without closing the descriptor.  */
+	  obfd_filename = bfd_get_filename (objfile->obfd);
 	  if (!bfd_close (objfile->obfd))
 	    error ("Can't close BFD for %s.", objfile->name);
-	  objfile->obfd = bfd_openr (objfile->name, gnutarget);
+	  objfile->obfd = bfd_openr (obfd_filename, gnutarget);
 	  if (objfile->obfd == NULL)
 	    error ("Can't open %s to read symbols.", objfile->name);
 	  /* bfd_openr sets cacheable to true, which is what we want.  */
@@ -1237,6 +1243,8 @@ deduce_language_from_filename (filename)
     return language_cplus;
   else if (STREQ (c, ".ch") || STREQ (c, ".c186") || STREQ (c, ".c286"))
     return language_chill;
+  else if (STREQ (c, ".f") || STREQ (c, ".F"))
+    return language_fortran;
   else if (STREQ (c, ".mod"))
     return language_m2;
   else if (STREQ (c, ".s") || STREQ (c, ".S"))
@@ -1603,7 +1611,7 @@ add_psymbol_to_list (name, namelength, namespace, class, list, val, language,
   SYMBOL_LANGUAGE (psym) = language;
   PSYMBOL_NAMESPACE (psym) = namespace;
   PSYMBOL_CLASS (psym) = class;
-  SYMBOL_INIT_DEMANGLED_NAME (psym, &objfile->psymbol_obstack);
+  SYMBOL_INIT_LANGUAGE_SPECIFIC (psym, language);
 }
 
 /* Add a symbol with a CORE_ADDR value to a psymtab. */
@@ -1637,7 +1645,7 @@ add_psymbol_addr_to_list (name, namelength, namespace, class, list, val,
   SYMBOL_LANGUAGE (psym) = language;
   PSYMBOL_NAMESPACE (psym) = namespace;
   PSYMBOL_CLASS (psym) = class;
-  SYMBOL_INIT_DEMANGLED_NAME (psym, &objfile->psymbol_obstack);
+  SYMBOL_INIT_LANGUAGE_SPECIFIC (psym, language);
 }
 
 #endif /* !INLINE_ADD_PSYMBOL */

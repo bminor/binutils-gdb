@@ -35,7 +35,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "demangle.h"
 
 #include <obstack.h>
-#include <assert.h>
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -291,7 +290,6 @@ gdb_mangle_name (type, i, j)
   if (!is_destructor)
     is_destructor = (strncmp(physname, "__dt", 4) == 0); 
 
-#ifndef GCC_MANGLE_BUG
   if (is_destructor || is_full_physname_constructor)
     {
       mangled_name = (char*) xmalloc(strlen(physname)+1);
@@ -304,6 +302,13 @@ gdb_mangle_name (type, i, j)
       sprintf (buf, "__%s%s", const_prefix, volatile_prefix);
       if (strcmp(buf, "__") == 0)
 	buf[0] = '\0';
+    }
+  else if (newname != NULL && strchr (newname, '<') != NULL)
+    {
+      /* Template methods are fully mangled.  */
+      sprintf (buf, "__%s%s", const_prefix, volatile_prefix);
+      newname = NULL;
+      len = 0;
     }
   else
     {
@@ -343,51 +348,6 @@ gdb_mangle_name (type, i, j)
   if (newname != NULL)
     strcat (mangled_name, newname);
 
-#else
-
-  if (is_constructor)
-    {
-      buf[0] = '\0';
-    }
-  else
-    {
-      sprintf (buf, "__%s%s", const_prefix, volatile_prefix);
-    }
-
-  mangled_name_len = ((is_constructor ? 0 : strlen (field_name))
-		      + strlen (buf) + strlen (physname) + 1);
-
-  /* Only needed for GNU-mangled names.  ANSI-mangled names
-     work with the normal mechanisms.  */
-  if (OPNAME_PREFIX_P (field_name))
-    {
-      char *opname;
-      opname = cplus_mangle_opname (field_name + 3, 0);
-      if (opname == NULL)
-	{
-	  error ("No mangling for \"%s\"", field_name);
-	}
-      mangled_name_len += strlen (opname);
-      mangled_name = (char *) xmalloc (mangled_name_len);
-
-      strncpy (mangled_name, field_name, 3);
-      strcpy (mangled_name + 3, opname);
-    }
-  else
-    {
-      mangled_name = (char *) xmalloc (mangled_name_len);
-      if (is_constructor)
-	{
-	  mangled_name[0] = '\0';
-	}
-      else
-	{
-	  strcpy (mangled_name, field_name);
-	}
-    }
-  strcat (mangled_name, buf);
-
-#endif
   strcat (mangled_name, physname);
   return (mangled_name);
 }
@@ -405,7 +365,36 @@ find_pc_psymtab (pc)
   ALL_PSYMTABS (objfile, pst)
     {
       if (pc >= pst->textlow && pc < pst->texthigh)
-	return (pst);
+	{
+	  struct minimal_symbol *msymbol;
+	  struct partial_symtab *tpst;
+
+	  /* An objfile that has its functions reordered might have
+	     many partial symbol tables containing the PC, but
+	     we want the partial symbol table that contains the
+	     function containing the PC.  */
+	  if (!(objfile->flags & OBJF_REORDERED))
+	    return (pst);
+
+	  msymbol = lookup_minimal_symbol_by_pc (pc);
+	  if (msymbol == NULL)
+	    return (pst);
+
+	  for (tpst = pst; tpst != NULL; tpst = tpst->next)
+	    {
+	      if (pc >= tpst->textlow && pc < tpst->texthigh)
+		{
+		  struct partial_symbol *p;
+
+		  p = find_pc_psymbol (tpst, pc);
+		  if (p != NULL
+		      && SYMBOL_VALUE_ADDRESS(p)
+			 == SYMBOL_VALUE_ADDRESS (msymbol))
+		    return (tpst);
+		}
+	    }
+	  return (pst);
+	}
     }
   return (NULL);
 }
@@ -590,9 +579,9 @@ found:
 	}
     }
 
-  /* Check for the possibility of the symbol being a global function
-     that is stored in one of the minimal symbol tables.  Eventually, all
-     global symbols might be resolved in this way.  */
+  /* Check for the possibility of the symbol being a function or
+     a mangled variable that is stored in one of the minimal symbol tables.
+     Eventually, all global symbols might be resolved in this way.  */
   
   if (namespace == VAR_NAMESPACE)
     {
@@ -600,10 +589,9 @@ found:
       if (msymbol != NULL)
 	{
 	  s = find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol));
-	  /* If S is NULL, there are no debug symbols for this file.
-	     Skip this stuff and check for matching static symbols below. */
 	  if (s != NULL)
 	    {
+	      /* This is a function which has a symtab for its address.  */
 	      bv = BLOCKVECTOR (s);
 	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 	      sym = lookup_block_symbol (block, SYMBOL_NAME (msymbol),
@@ -633,6 +621,18 @@ found:
 		*symtab = s;
 	      return sym;
 	    }
+	  else if (MSYMBOL_TYPE (msymbol) != mst_text
+		   && MSYMBOL_TYPE (msymbol) != mst_file_text
+		   && !STREQ (name, SYMBOL_NAME (msymbol)))
+	    {
+	      /* This is a mangled variable, look it up by its
+		 mangled name.  */
+	      return lookup_symbol (SYMBOL_NAME (msymbol), block,
+				    namespace, is_a_field_of_this, symtab);
+	    }
+	  /* There are no debug symbols for this file, or we are looking
+	     for an unmangled variable.
+	     Try to find a matching static symbol below. */
 	}
     }
       
@@ -765,7 +765,8 @@ lookup_partial_symbol (pst, name, global, namespace)
       while (top > bottom)
 	{
 	  center = bottom + (top - bottom) / 2;
-	  assert (center < top);
+	  if (!(center < top))
+	    abort ();
 	  if (!do_linear_search && SYMBOL_LANGUAGE (center) == language_cplus)
 	    {
 	      do_linear_search = 1;
@@ -779,7 +780,8 @@ lookup_partial_symbol (pst, name, global, namespace)
 	      bottom = center + 1;
 	    }
 	}
-      assert (top == bottom);
+      if (!(top == bottom))
+	abort ();
       while (STREQ (SYMBOL_NAME (top), name))
 	{
 	  if (SYMBOL_NAMESPACE (top) == namespace)
@@ -1003,8 +1005,15 @@ find_pc_symtab (pc)
      to deal with a case like symtab a is at 0x1000-0x2000 and 0x3000-0x4000
      and symtab b is at 0x2000-0x3000.  So the GLOBAL_BLOCK for a is from
      0x1000-0x4000, but for address 0x2345 we want to return symtab b.
-     This is said to happen for the mips; it might be swifter to create
-     several symtabs with the same name like xcoff does (I'm not sure).  */
+
+     This happens for native ecoff format, where code from included files
+     gets its own symtab. The symtab for the included file should have
+     been read in already via the dependency mechanism.
+     It might be swifter to create several symtabs with the same name
+     like xcoff does (I'm not sure).
+
+     It also happens for objfiles that have their functions reordered.
+     For these, the symtab we are looking for is not necessarily read in.  */
 
   ALL_SYMTABS (objfile, s)
     {
@@ -1015,6 +1024,18 @@ find_pc_symtab (pc)
 	  && (distance == 0
 	      || BLOCK_END (b) - BLOCK_START (b) < distance))
 	{
+	  /* For an objfile that has its functions reordered,
+	     find_pc_psymtab will find the proper partial symbol table
+	     and we simply return its corresponding symtab.  */
+	  if (objfile->flags & OBJF_REORDERED)
+	    {
+	      ps = find_pc_psymtab (pc);
+	      if (ps)
+		s = PSYMTAB_TO_SYMTAB (ps);
+	      else
+	        s = NULL;
+	      return (s);
+	    }
 	  distance = BLOCK_END (b) - BLOCK_START (b);
 	  best_s = s;
 	}
@@ -1500,6 +1521,51 @@ find_pc_line_pc_range (pc, startptr, endptr)
   *endptr = sal.end;
   return sal.symtab != 0;
 }
+
+/* Given a function symbol SYM, find the symtab and line for the start
+   of the function.
+   If the argument FUNFIRSTLINE is nonzero, we want the first line
+   of real code inside the function.  */
+
+static struct symtab_and_line
+find_function_start_sal PARAMS ((struct symbol *sym, int));
+
+static struct symtab_and_line
+find_function_start_sal (sym, funfirstline)
+     struct symbol *sym;
+     int funfirstline;
+{
+  CORE_ADDR pc;
+  struct symtab_and_line sal;
+
+  pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+  if (funfirstline)
+    {
+      pc += FUNCTION_START_OFFSET;
+      SKIP_PROLOGUE (pc);
+    }
+  sal = find_pc_line (pc, 0);
+
+#ifdef PROLOGUE_FIRSTLINE_OVERLAP
+  /* Convex: no need to suppress code on first line, if any */
+  sal.pc = pc;
+#else
+  /* Check if SKIP_PROLOGUE left us in mid-line, and the next
+     line is still part of the same function.  */
+  if (sal.pc != pc
+      && BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) <= sal.end
+      && sal.end < BLOCK_END (SYMBOL_BLOCK_VALUE (sym)))
+    {
+      /* First pc of next line */
+      pc = sal.end;
+      /* Recalculate the line number (might not be N+1).  */
+      sal = find_pc_line (pc, 0);
+    }
+  sal.pc = pc;
+#endif
+
+  return sal;
+}
 
 /* If P is of the form "operator[ \t]+..." where `...' is
    some legitimate operator text, return a pointer to the
@@ -1752,7 +1818,8 @@ build_canonical_line_spec (sal, symname, canonical)
    FUNCTION may be an undebuggable function found in minimal symbol table.
 
    If the argument FUNFIRSTLINE is nonzero, we want the first line
-   of real code inside a function when a function is specified.
+   of real code inside a function when a function is specified, and it is
+   not OK to specify a variable or type to get its line number.
 
    DEFAULT_SYMTAB specifies the file to use if none is specified.
    It defaults to current_source_symtab.
@@ -1846,17 +1913,13 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 
   if (**argptr == '*')
     {
-      if (**argptr == '*')
-	{
-	  (*argptr)++;
-	}
+      (*argptr)++;
       pc = parse_and_eval_address_1 (argptr);
       values.sals = (struct symtab_and_line *)
 	xmalloc (sizeof (struct symtab_and_line));
       values.nelts = 1;
       values.sals[0] = find_pc_line (pc, 0);
       values.sals[0].pc = pc;
-      build_canonical_line_spec (values.sals, NULL, canonical);
       return values;
     }
 
@@ -1871,7 +1934,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
     {
       if (p[0] == '<') 
 	{
-	  while(!++p && *p != '>');
+	  while(++p && *p != '>');
 	  if (!p)
 	    {
 	      error ("non-matching '<' and '>' in command");
@@ -1988,17 +2051,10 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 
 		  if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
 		    {
-		      /* Arg is the name of a function */
-		      pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
-		      if (funfirstline)
-			{
-			  pc += FUNCTION_START_OFFSET;
-			  SKIP_PROLOGUE (pc);
-			}
 		      values.sals = (struct symtab_and_line *)xmalloc (sizeof (struct symtab_and_line));
 		      values.nelts = 1;
-		      values.sals[0] = find_pc_line (pc, 0);
-		      values.sals[0].pc = (values.sals[0].end && values.sals[0].pc != pc) ? values.sals[0].end : pc;
+		      values.sals[0] = find_function_start_sal (sym,
+								funfirstline);
 		    }
 		  else
 		    {
@@ -2185,32 +2241,8 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
       if (SYMBOL_CLASS (sym) == LOC_BLOCK)
 	{
 	  /* Arg is the name of a function */
-	  pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
-	  if (funfirstline)
-	    {
-	      pc += FUNCTION_START_OFFSET;
-	      SKIP_PROLOGUE (pc);
-	    }
-	  val = find_pc_line (pc, 0);
-#ifdef PROLOGUE_FIRSTLINE_OVERLAP
-	  /* Convex: no need to suppress code on first line, if any */
-	  val.pc = pc;
-#else
-	  /* Check if SKIP_PROLOGUE left us in mid-line, and the next
-	     line is still part of the same function.  */
-	  if (val.pc != pc
-	      && BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) <= val.end
-	      && val.end < BLOCK_END (SYMBOL_BLOCK_VALUE (sym)))
-	    {
-	      /* First pc of next line */
-	      pc = val.end;
-	      /* Recalculate the line number (might not be N+1).  */
-	      val = find_pc_line (pc, 0);
-	    }
-	  val.pc = pc;
-#endif
 	  values.sals = (struct symtab_and_line *)xmalloc (sizeof (struct symtab_and_line));
-	  values.sals[0] = val;
+	  values.sals[0] = find_function_start_sal (sym, funfirstline);
 	  values.nelts = 1;
 
 	  /* Don't use the SYMBOL_LINE; if used at all it points to
@@ -2228,23 +2260,29 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 	    }
 	  return values;
 	}
-      else if (SYMBOL_LINE (sym) != 0)
-	{
-	  /* We know its line number.  */
-	  values.sals = (struct symtab_and_line *)
-	    xmalloc (sizeof (struct symtab_and_line));
-	  values.nelts = 1;
-	  memset (&values.sals[0], 0, sizeof (values.sals[0]));
-	  values.sals[0].symtab = sym_symtab;
-	  values.sals[0].line = SYMBOL_LINE (sym);
-	  return values;
-	}
       else
-	/* This can happen if it is compiled with a compiler which doesn't
-	   put out line numbers for variables.  */
-	/* FIXME: Shouldn't we just set .line and .symtab to zero and
-	   return?  For example, "info line foo" could print the address.  */
-	error ("Line number not known for symbol \"%s\"", copy);
+	{
+	  if (funfirstline)
+	    error ("\"%s\" is not a function", copy);
+	  else if (SYMBOL_LINE (sym) != 0)
+	    {
+	      /* We know its line number.  */
+	      values.sals = (struct symtab_and_line *)
+		xmalloc (sizeof (struct symtab_and_line));
+	      values.nelts = 1;
+	      memset (&values.sals[0], 0, sizeof (values.sals[0]));
+	      values.sals[0].symtab = sym_symtab;
+	      values.sals[0].line = SYMBOL_LINE (sym);
+	      return values;
+	    }
+	  else
+	    /* This can happen if it is compiled with a compiler which doesn't
+	       put out line numbers for variables.  */
+	    /* FIXME: Shouldn't we just set .line and .symtab to zero
+	       and return?  For example, "info line foo" could print
+	       the address.  */
+	    error ("Line number not known for symbol \"%s\"", copy);
+	}
     }
 
   msymbol = lookup_minimal_symbol (copy, (struct objfile *) NULL);
@@ -2301,7 +2339,6 @@ decode_line_2 (sym_arr, nelts, funfirstline, canonical)
      char ***canonical;
 {
   struct symtabs_and_lines values, return_values;
-  register CORE_ADDR pc;
   char *args, *arg1;
   int i;
   char *prompt;
@@ -2327,20 +2364,15 @@ decode_line_2 (sym_arr, nelts, funfirstline, canonical)
     {
       if (sym_arr[i] && SYMBOL_CLASS (sym_arr[i]) == LOC_BLOCK)
 	{
-	  /* Arg is the name of a function */
-	  pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym_arr[i]));
-	  if (funfirstline)
-	    {
-	      pc += FUNCTION_START_OFFSET;
-	      SKIP_PROLOGUE (pc);
-	    }
-	  values.sals[i] = find_pc_line (pc, 0);
-	  values.sals[i].pc = (values.sals[i].end && values.sals[i].pc != pc) ?
-			       values.sals[i].end                      :  pc;
-	  printf_unfiltered("[%d] %s at %s:%d\n", (i+2), SYMBOL_SOURCE_NAME (sym_arr[i]),
-		 values.sals[i].symtab->filename, values.sals[i].line);
+	  values.sals[i] = find_function_start_sal (sym_arr[i], funfirstline);
+	  printf_unfiltered ("[%d] %s at %s:%d\n",
+			     (i+2),
+			     SYMBOL_SOURCE_NAME (sym_arr[i]),
+			     values.sals[i].symtab->filename,
+			     values.sals[i].line);
 	}
-      else printf_unfiltered ("?HERE\n");
+      else
+	printf_unfiltered ("?HERE\n");
       i++;
     }
   
@@ -2652,13 +2684,20 @@ list_symbols (regexp, class, bpt, from_tty)
 	}
     }
 
-  /* Here, we search through the minimal symbol tables for functions that
-     match, and call find_pc_symtab on them to force their symbols to
-     be read.  The symbol will then be found during the scan of symtabs
-     below.  If find_pc_symtab fails, set found_misc so that we will
-     rescan to print any matching symbols without debug info.  */
+  /* Here, we search through the minimal symbol tables for functions
+     and variables that match, and force their symbols to be read.
+     This is in particular necessary for demangled variable names,
+     which are no longer put into the partial symbol tables.
+     The symbol will then be found during the scan of symtabs below.
 
-  if (class == 1)
+     For functions, find_pc_symtab should succeed if we have debug info
+     for the function, for variables we have to call lookup_symbol
+     to determine if the variable has debug info.
+     If the lookup fails, set found_misc so that we will rescan to print
+     any matching symbols without debug info.
+  */
+
+  if (class == 0 || class == 1)
     {
       ALL_MSYMBOLS (objfile, msymbol)
 	{
@@ -2671,7 +2710,12 @@ list_symbols (regexp, class, bpt, from_tty)
 		{
 		  if (0 == find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol)))
 		    {
-		      found_misc = 1;
+		      if (class == 1
+			  || lookup_symbol (SYMBOL_NAME (msymbol), 
+					    (struct block *) NULL,
+					    VAR_NAMESPACE,
+					    0, (struct symtab **) NULL) == NULL)
+		        found_misc = 1;
 		    }
 		}
 	    }
@@ -2724,14 +2768,18 @@ list_symbols (regexp, class, bpt, from_tty)
 			       same name but in different files.  In order to
 			       set breakpoints on all of them, we must give
 			       both the file name and the function name to
-			       break_command.  */
+			       break_command.
+			       Quoting the symbol name gets rid of problems
+			       with mangled symbol names that contain
+			       CPLUS_MARKER characters.  */
 			    char *string =
 			      (char *) alloca (strlen (s->filename)
 					       + strlen (SYMBOL_NAME(sym))
-					       + 2);
+					       + 4);
 			    strcpy (string, s->filename);
-			    strcat (string, ":");
+			    strcat (string, ":'");
 			    strcat (string, SYMBOL_NAME(sym));
+			    strcat (string, "'");
 			    break_command (string, from_tty);
 			  }
 		      }

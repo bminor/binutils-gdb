@@ -343,6 +343,14 @@ struct objfile
 
 #define OBJF_SYMS	(1 << 1)	/* Have tried to read symbols */
 
+/* When an object file has its functions reordered (currently Irix-5.2
+   shared libraries exhibit this behaviour), we will need an expensive
+   algorithm to locate a partial symtab or symtab via an address.
+   To avoid this penalty for normal object files, we use this flag,
+   whose setting is determined upon symbol table read in.  */
+
+#define OBJF_REORDERED	(2 << 1)	/* Functions are reordered */
+
 /* The object file that the main symbol table was loaded from (e.g. the
    argument to the "symbol-file" or "file" command).  */
 
