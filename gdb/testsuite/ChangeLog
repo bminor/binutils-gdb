@@ -1,3 +1,8 @@
+Tue Aug 10 09:56:56 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* gdb.stabs/wierd.exp:  Only issue warning for missing wierd.o
+	file if -all option is used.  It's like an unpredictable XFAIL.
+
 Mon Aug  9 10:13:34 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t15/funcargs.exp: Add comments that hppa xfails are only

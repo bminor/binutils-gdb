@@ -211,7 +211,9 @@ gdb_reinitialize_dir $srcdir/$subdir
 set binfile $objdir/$subdir/wierd.o
 
 if ![file exists $binfile] then {
-	warning "$binfile does not exist; tests suppressed"
+	if $all_flag then {
+		warning "$binfile does not exist; tests suppressed"
+	}
 } else {
 	# xcoffread.c wrongly bitches about the lack of a text section.
 	setup_xfail "rs*-*-aix*"
