@@ -1,5 +1,7 @@
-/* A -*- C -*- header file for the bfd library
-   Copyright 1990, 1991 Free Software Foundation, Inc.
+/* Main header file for the bfd library -- portable access to object files.
+   ==> The bfd.h file is generated from bfd-in.h and various .c files; if you
+   ==> change it, your changes will probably be lost.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -20,8 +22,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* bfd.h -- The only header file required by users of the bfd library 
 
-This file is generated from various .c files, if you change it, your
-bits may be lost.
+The bfd.h file is generated from bfd-in.h and various .c files; if you
+change it, your changes will probably be lost.
 
 All the prototypes and definitions following the comment "THE FOLLOWING
 IS EXTRACTED FROM THE SOURCE" are extracted from the source files for
@@ -65,8 +67,15 @@ typedef struct _bfd bfd;
 /* Yup, SVR4 has a "typedef enum boolean" in <sys/types.h>  -fnf */
 typedef enum bfd_boolean {false, true} boolean;
 
-/* Try to avoid breaking stuff */
-typedef  long int file_ptr;
+/* A pointer to a position in a file.  */
+/* FIXME:  This should be using off_t from <sys/types.h>.
+   For now, try to avoid breaking stuff by not including <sys/types.h> here.
+   This will break on systems with 64-bit file offsets (e.g. 4.4BSD).
+   Probably the best long-term answer is to avoid using file_ptr AND off_t 
+   in this header file, and to handle this in the BFD implementation
+   rather than in its interface.  */
+/* typedef off_t	file_ptr; */
+typedef long int file_ptr;
 
 /* Support for different sizes of target format ints and addresses */
 

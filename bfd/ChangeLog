@@ -1,3 +1,11 @@
+Wed Nov  4 22:47:29 1992  John Gilmore  (gnu@cygnus.com)
+
+	* libieee.h:  Add FIXME about removing limit on number of sections.
+	* bfd-in.h:  Improve comments to make it clear that bfd.h is
+	the wrong place to edit this file.
+	* Makefile.in (install):  Install ansidecl.h and obstack.h in the
+	same places where we install bfd.h.
+
 Wed Nov  4 13:40:23 1992  Sean Eric Fagan  (sef@cygnus.com)
 
 	* coffcode.h (coff_swap_aux_out, coff_swap_aux_in):  check for
