@@ -937,7 +937,7 @@ md_assemble (str)
   struct mn10300_opcode *next_opcode;
   const unsigned char *opindex_ptr;
   int next_opindex, relaxable;
-  unsigned long insn, extension, size = 0, real_size;
+  unsigned long insn, extension, size = 0;
   char *f;
   int i;
   int match;
@@ -1513,8 +1513,6 @@ keep_going:
   if (opcode->format == FMT_D4)
     size = 6;
 
-  real_size = size;
-
   if (relaxable && fc > 0)
     {
       int type;
@@ -1729,24 +1727,13 @@ keep_going:
 	      /* Is the reloc pc-relative?  */
 	      pcrel = (operand->flags & MN10300_OPERAND_PCREL) != 0;
 
-	      /* Gross.  This disgusting hack is to make sure we
-		 get the right offset for the 16/32 bit reloc in
-		 "call" instructions.  Basically they're a pain
-		 because the reloc isn't at the end of the instruction.  */
-	      if ((size == 5 || size == 7)
-		  && (((insn >> 24) & 0xff) == 0xcd
-		      || ((insn >> 24) & 0xff) == 0xdd))
-		size -= 2;
-
-	      /* Similarly for certain bit instructions which don't
-		 hav their 32bit reloc at the tail of the instruction.  */
-	      if (size == 7
-		  && (((insn >> 16) & 0xffff) == 0xfe00
-		      || ((insn >> 16) & 0xffff) == 0xfe01
-		      || ((insn >> 16) & 0xffff) == 0xfe02))
-		size -= 1;
-
 	      offset = size - reloc_size / 8;
+
+	      /* If the pcrel relocation isn't at the end of the insn,
+		 we have to adjust the offset for the relocation to be
+		 correct.  */
+	      if (pcrel)
+		offset -= operand->shift / 8;
 
 	      /* Choose a proper BFD relocation type.  */
 	      if (pcrel)
@@ -1791,7 +1778,7 @@ keep_going:
 	}
     }
 
-  dwarf2_emit_insn (real_size);
+  dwarf2_emit_insn (size);
 }
 
 /* If while processing a fixup, a reloc really needs to be created

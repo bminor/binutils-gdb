@@ -1,3 +1,8 @@
+2001-04-14  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-mn10300.c (md_assemble): Simplify offset adjustment of
+	pc-relative relocations not placed at the end of the instruction.
+
 2001-04-13  Jim Wilson  <wilson@redhat.com>
 
 	* tc-ia64.c (is_conditional_branch): Return true for br, brl, and br.
