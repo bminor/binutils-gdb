@@ -355,7 +355,7 @@ void
 ${function}_event (${formal})
 {
   if (gdb_events_debug)
-    fprintf_unfiltered (gdb_stdlog, \"${function}_event\n\");
+    fprintf_unfiltered (gdb_stdlog, "${function}_event\n");
   if (!current_event_hooks->${function})
     return;
   current_event_hooks->${function} (${actual});

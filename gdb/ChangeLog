@@ -1,5 +1,10 @@
 2001-06-07  Keith Seitz  <keiths@redhat.com>
 
+	* gdb-events.sh: Fix quote escaping which was obsoleted
+	by last patch.
+
+2001-06-07  Keith Seitz  <keiths@redhat.com>
+
 	* gdb-events.sh: Make if statements and tests
 	a little more portable.
 	Don't use shell's echo command to put strings containing
