@@ -1,5 +1,14 @@
 2003-02-06  Andrew Cagney  <ac131313@redhat.com>
 
+	* Makefile.in (inflow_h): Define.
+	(procfs.o, inflow.o, procfs.o): Update dependencies.
+	* inftarg.c (child_stop): Delete extern declaration of
+	inferior_process_group.  Include "inflow.h".
+	* procfs.c (procfs_stop): Ditto.  Include "inflow.h".
+	* inflow.c (PROCESS_GROUP_TYPE): Move definitions from here ...
+	* inflow.h (PROCESS_GROUP_TYPE): ... to here.  New file.
+	(our_process_group, inferior_process_group): Extern declarations.
+
 	* procfs.c: Include "gdb_assert.h".
 
 	* linux-proc.c: Include "gdb_stat.h" instead of <sys/stat.h>.

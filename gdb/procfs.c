@@ -43,6 +43,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <signal.h>
 #include <ctype.h>
 #include "gdb_assert.h"
+#include "inflow.h"
 
 /* 
  * PROCFS.C
@@ -4606,8 +4607,6 @@ procfs_can_run (void)
 static void
 procfs_stop (void)
 {
-  extern pid_t inferior_process_group;
-
   kill (-inferior_process_group, SIGINT);
 }
 
