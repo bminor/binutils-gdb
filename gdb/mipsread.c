@@ -1,7 +1,8 @@
 /* Read a symbol table in MIPS' format (Third-Eye).
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
-   Contributed by Alessandro Forin (af@cs.cmu.edu) at CMU.  Major
-   work by Per Bothner and John Gilmore at Cygnus Support.
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993 Free Software
+   Foundation, Inc.
+   Contributed by Alessandro Forin (af@cs.cmu.edu) at CMU.  Major work
+   by Per Bothner, John Gilmore and Ian Lance Taylor at Cygnus Support.
 
 This file is part of GDB.
 
@@ -42,10 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    the most brain-dead adaptation of a file format to byte order.
 
    This module can read all four of the known byte-order combinations,
-   on any type of host.  However, it does make (and check) the assumption
-   that the external form of a symbol table structure (on disk)
-   occupies the same number of bytes as the internal form (in a struct).
-   Fixing this is possible but requires larger structural changes.  */
+   on any type of host.  */
 
 #define	TM_FILE_OVERRIDE
 #include "defs.h"
@@ -73,40 +71,53 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "gdb-stabs.h"
 
+#include "bfd.h"
+
+#include "coff/internal.h"
 #include "coff/mips.h"		/* COFF-like aspects of ecoff files */
 #include "coff/ecoff-ext.h"	/* External forms of ecoff sym structures */
 
-#include "libbfd.h"		/* FIXME Secret internal BFD stuff (bfd_read) */
-#include "libaout.h"		/* FIXME Secret internal BFD stuff for a.out */
+/* FIXME: coff/internal.h and aout/aout64.h both define N_ABS.  We
+   want the definition from aout/aout64.h.  */
+#undef	N_ABS
+/* FIXME: coff/mips.h and aout/aout64.h both define ZMAGIC.  We don't
+   use it.  */
+#undef	ZMAGIC
+
+#include "libaout.h"		/* Private BFD a.out information.  */
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"	/* STABS information */
+
+/* FIXME: libcoff.h and libaout.h both define a couple of macros.  We
+   don't use them.  */
+#undef exec_hdr
+#undef obj_sym_filepos
+
+#include "libcoff.h"		/* Private BFD COFF information.  */
+#include "libecoff.h"		/* Private BFD ECOFF information.  */
+
 #include "expression.h"
 #include "language.h"		/* Needed inside partial-stab.h */
 
-struct coff_exec
-{
-  struct external_filehdr f;
-  struct external_aouthdr a;
-};
+/* Each partial symbol table entry contains a pointer to private data
+   for the read_symtab() function to use when expanding a partial
+   symbol table entry to a full symbol table entry.
 
-/* Each partial symbol table entry contains a pointer to private data for the
-   read_symtab() function to use when expanding a partial symbol table entry
-   to a full symbol table entry.
-
-   For mipsread this structure contains the index of the FDR that this psymtab
-   represents and a pointer to the symbol table header HDRR from the symbol
-   file that the psymtab was created from.  */
+   For mipsread this structure contains the index of the FDR that this
+   psymtab represents and a pointer to the BFD that the psymtab was
+   created from.  */
 
 #define PST_PRIVATE(p) ((struct symloc *)(p)->read_symtab_private)
 #define FDR_IDX(p) (PST_PRIVATE(p)->fdr_idx)
-#define CUR_HDR(p) (PST_PRIVATE(p)->cur_hdr)
+#define CUR_BFD(p) (PST_PRIVATE(p)->cur_bfd)
 
 struct symloc
 {
   int fdr_idx;
-  HDRR *cur_hdr;
-  EXTR **extern_tab;	/* Pointer to external symbols for this file. */
-  int extern_count;	/* Size of extern_tab. */
+  bfd *cur_bfd;
+  EXTR *extern_tab;		/* Pointer to external symbols for this file. */
+  int extern_count;		/* Size of extern_tab. */
+  struct mips_pending **pending_list;
 };
 
 /* Things we import explicitly from other modules */
@@ -181,12 +192,6 @@ struct complaint pdr_static_symbol_complaint =
 #define compare_glevel(a,b)					\
 	(((a) == GLEVEL_3) ? ((b) < GLEVEL_3) :			\
 	 ((b) == GLEVEL_3) ? -1 : (int)((b) - (a)))
-
-/* When looking at .o files, avoid tripping over zero pointers.
-   FIXME; places that use this should be fixed to convert from
-   external to internal format, rather than examining in-place. */
-
-#define	UNSAFE_DATA_ADDR(p)	((p) == 0)
 
 /* Things that really are local to this module */
 
@@ -194,9 +199,9 @@ struct complaint pdr_static_symbol_complaint =
 
 static enum language psymtab_language = language_unknown;
 
-/* MIPS symtab header for the current file */
+/* Current BFD.  */
 
-static HDRR *cur_hdr;
+static bfd *cur_bfd;
 
 /* Pointer to current file decriptor record, and its index */
 
@@ -232,19 +237,16 @@ struct type *builtin_type_string;
 /* Forward declarations */
 
 static void
-fixup_symtab PARAMS ((HDRR *, char *, file_ptr, bfd *));
-
-static void
 read_mips_symtab PARAMS ((struct objfile *, struct section_offsets *));
 
 static void
-read_the_mips_symtab PARAMS ((bfd *, CORE_ADDR *));
+read_the_mips_symtab PARAMS ((bfd *));
 
 static int
 upgrade_type PARAMS ((struct type **, int, union aux_ext *, int));
 
 static void
-parse_partial_symbols PARAMS ((int, struct objfile *,
+parse_partial_symbols PARAMS ((struct objfile *,
 			       struct section_offsets *));
 
 static int
@@ -375,13 +377,7 @@ mipscoff_symfile_finish (objfile)
       mfree (objfile->md, objfile->sym_private);
     }
 
-  /* If we have a file symbol header lying around, blow it away.  */
-
-  if (cur_hdr)
-    {
-      free ((PTR) cur_hdr);
-    }
-  cur_hdr = 0;
+  cur_bfd = 0;
 }
 
 /* Allocate zeroed memory */
@@ -414,8 +410,8 @@ mipscoff_psymtab_to_symtab (pst)
       printf_filtered ("Reading in symbols for %s...", pst->filename);
       fflush (stdout);
     }
-  /* Restore the header and list of pending typedefs */
-  cur_hdr = CUR_HDR (pst);
+  /* Get the BFD and list of pending typedefs */
+  cur_bfd = CUR_BFD (pst);
 
   next_symbol_text_func = mips_next_symbol_text;
 
@@ -443,247 +439,15 @@ in_sigtramp (pc, ignore)
 
 /* File-level interface functions */
 
-/* Read the symtab information from file ABFD into memory.  Also,
-   return address just past end of our text segment in *END_OF_TEXT_SEGP.  */
+/* Read the symtab information from file ABFD into memory.  */
 
 static void
-read_the_mips_symtab (abfd, end_of_text_segp)
-     bfd *abfd;
-     CORE_ADDR *end_of_text_segp;
-{
-  int stsize, st_hdrsize;
-  file_ptr st_filptr;
-  struct hdr_ext hdr_ext;
-  HDRR st_hdr;
-  /* Header for executable/object file we read symbols from */
-  struct coff_exec filhdr;
-  int val;
-
-  /* We need some info from the initial headers */
-  val = bfd_seek (abfd, (file_ptr) 0, L_SET);
-  val = bfd_read ((PTR) & filhdr, sizeof filhdr, 1, abfd);
-
-  if (end_of_text_segp)
-    *end_of_text_segp =
-      bfd_h_get_32 (abfd, filhdr.a.text_start) +
-      bfd_h_get_32 (abfd, filhdr.a.tsize);
-
-  /* Find and read the symbol table header */
-  st_hdrsize = bfd_h_get_32 (abfd, filhdr.f.f_nsyms);
-  st_filptr = bfd_h_get_32 (abfd, filhdr.f.f_symptr);
-  if (st_filptr == 0)
-    return;
-
-  bfd_seek (abfd, st_filptr, L_SET);
-  if (st_hdrsize != sizeof (hdr_ext))
-    {				/* Profanity check */
-      error ("Wrong header size: %d, not %d", st_hdrsize,
-	     sizeof (hdr_ext));
-    }
-  if (bfd_read ((PTR) & hdr_ext, st_hdrsize, 1, abfd) != st_hdrsize)
-    goto readerr;
-  ecoff_swap_hdr_in (abfd, &hdr_ext, &st_hdr);
-
-  /* Find out how large the symbol table is */
-  stsize = ((st_hdr.cbExtOffset - (st_filptr + st_hdrsize))
-	    + st_hdr.iextMax * cbEXTR);
-
-  /* Allocate space for the symbol table.  Read it in.  */
-  cur_hdr = (HDRR *) xmalloc (stsize + st_hdrsize);
-
-  memcpy ((PTR) cur_hdr, (PTR) & hdr_ext, st_hdrsize);
-  if (bfd_read ((char *) cur_hdr + st_hdrsize, stsize, 1, abfd) != stsize)
-    goto readerr;
-
-  /* Fixup file_pointers in it */
-  fixup_symtab (cur_hdr, (char *) cur_hdr + st_hdrsize,
-		st_filptr + st_hdrsize, abfd);
-
-  return;
-readerr:
-  error ("Short read on %s", bfd_get_filename (abfd));
-}
-
-
-/* Turn all file-relative pointers in the symtab described by HDR
-   into memory pointers, given that the symtab itself is located
-   at DATA in memory and F_PTR in the file.
-
-   Byte-swap all the data structures, in place, while we are at it --
-   except AUX entries, which we leave in their original byte order.
-   They will be swapped as they are used instead.  (FIXME:  we ought to
-   do all the data structures that way.)  */
-
-static void
-fixup_symtab (hdr, data, f_ptr, abfd)
-     HDRR *hdr;
-     char *data;
-     file_ptr f_ptr;
+read_the_mips_symtab (abfd)
      bfd *abfd;
 {
-  int f_idx, s_idx, i;
-  FDR *fh;
-  SYMR *sh;
-  PDR *pr;
-  EXTR *esh;
-  struct rfd_ext *rbase;
-
-  /* This function depends on the external and internal forms
-     of the MIPS symbol table taking identical space.  Check this
-     assumption at compile-time.
-     DO NOT DELETE THESE ENTRIES, OR COMMENT THEM OUT, JUST BECAUSE SOME
-     "LINT" OR COMPILER THINKS THEY ARE UNUSED!  Thank you.  */
-  static check_hdr1[1 + sizeof (struct hdr_ext) - sizeof (HDRR)] = {0};
-  static check_hdr2[1 + sizeof (HDRR) - sizeof (struct hdr_ext)] = {0};
-  static check_fdr1[1 + sizeof (struct fdr_ext) - sizeof (FDR)] = {0};
-  static check_fdr2[1 + sizeof (FDR) - sizeof (struct fdr_ext)] = {0};
-  static check_pdr1[1 + sizeof (struct pdr_ext) - sizeof (PDR)] = {0};
-  static check_pdr2[1 + sizeof (PDR) - sizeof (struct pdr_ext)] = {0};
-  static check_sym1[1 + sizeof (struct sym_ext) - sizeof (SYMR)] = {0};
-  static check_sym2[1 + sizeof (SYMR) - sizeof (struct sym_ext)] = {0};
-  static check_ext1[1 + sizeof (struct ext_ext) - sizeof (EXTR)] = {0};
-  static check_ext2[1 + sizeof (EXTR) - sizeof (struct ext_ext)] = {0};
-  static check_rfd1[1 + sizeof (struct rfd_ext) - sizeof (RFDT)] = {0};
-  static check_rfd2[1 + sizeof (RFDT) - sizeof (struct rfd_ext)] = {0};
-
-  /* Swap in the header record.  */
-  ecoff_swap_hdr_in (abfd, hdr, hdr);
-
-  /*
-   * These fields are useless (and empty) by now:
-   *	hdr->cbDnOffset, hdr->cbOptOffset
-   * We use them for other internal purposes.
-   */
-  hdr->cbDnOffset = 0;
-  hdr->cbOptOffset = 0;
-
-#define FIX(off) \
-	if (hdr->off) hdr->off = (unsigned int)data + (hdr->off - f_ptr);
-
-  FIX (cbLineOffset);
-  FIX (cbPdOffset);
-  FIX (cbSymOffset);
-  FIX (cbOptOffset);
-  FIX (cbAuxOffset);
-  FIX (cbSsOffset);
-  FIX (cbSsExtOffset);
-  FIX (cbFdOffset);
-  FIX (cbRfdOffset);
-  FIX (cbExtOffset);
-#undef	FIX
-
-  /* Fix all the RFD's.  */
-  rbase = (struct rfd_ext *) (hdr->cbRfdOffset);
-  for (i = 0; i < hdr->crfd; i++)
-    {
-      ecoff_swap_rfd_in (abfd, rbase + i, (pRFDT) rbase + i);
-    }
-
-  /* Fix all string pointers inside the symtab, and
-     the FDR records.  Also fix other miscellany.  */
-
-  for (f_idx = 0; f_idx < hdr->ifdMax; f_idx++)
-    {
-      register unsigned code_offset;
-
-      /* Header itself, and strings */
-      fh = (FDR *) (hdr->cbFdOffset) + f_idx;
-
-      /* Swap in the FDR */
-      ecoff_swap_fdr_in (abfd, fh, fh);
-
-      fh->issBase += hdr->cbSsOffset;
-      if (fh->rss != -1)
-	fh->rss = (long) fh->rss + fh->issBase;
-
-      /* Local symbols */
-      fh->isymBase = (int) ((SYMR *) (hdr->cbSymOffset) + fh->isymBase);
-
-      /* FIXME! Probably don't want to do this here! */
-      for (s_idx = 0; s_idx < fh->csym; s_idx++)
-	{
-	  sh = (SYMR *) fh->isymBase + s_idx;
-	  ecoff_swap_sym_in (abfd, sh, sh);
-
-	  sh->iss = (long) sh->iss + fh->issBase;
-	  sh->reserved = 0;
-	}
-
-      cur_fd = f_idx;
-
-      /* cannot fix fh->ipdFirst because it is a short */
-#define IPDFIRST(h,fh) \
-      ((long)h->cbPdOffset + fh->ipdFirst * sizeof(PDR))
-
-      /* Optional symbols (actually used for partial_symtabs) */
-      fh->ioptBase = 0;
-      fh->copt = 0;
-
-      /* Aux symbols */
-      if (fh->caux)
-	fh->iauxBase = hdr->cbAuxOffset + fh->iauxBase * sizeof (union aux_ext);
-      /* Relative file descriptor table */
-      fh->rfdBase = hdr->cbRfdOffset + fh->rfdBase * sizeof (RFDT);
-
-      /* Line numbers */
-      if (fh->cbLine)
-	fh->cbLineOffset += hdr->cbLineOffset;
-
-      /* Procedure symbols.  (XXX This should be done later) */
-      code_offset = fh->adr;
-      for (s_idx = 0; s_idx < fh->cpd; s_idx++)
-	{
-	  unsigned name, only_ext;
-
-	  pr = (PDR *) (IPDFIRST (hdr, fh)) + s_idx;
-	  ecoff_swap_pdr_in (abfd, pr, pr);
-
-	  /* Simple rule to find files linked "-x" */
-	  only_ext = fh->rss == -1;
-	  if (only_ext)
-	    {
-	      if (pr->isym == -1)
-		{
-		  /* static function */
-		  sh = (SYMR *) - 1;
-		}
-	      else
-		{
-		  /* external */
-		  name = hdr->cbExtOffset + pr->isym * sizeof (EXTR);
-		  sh = &((EXTR *) name)->asym;
-		}
-	    }
-	  else
-	    {
-	      /* Full symbols */
-	      sh = (SYMR *) fh->isymBase + pr->isym;
-	      /* Included code ? */
-	      if (s_idx == 0 && pr->adr != 0)
-		code_offset -= pr->adr;
-	    }
-
-	  /* Turn index into a pointer */
-	  pr->isym = (long) sh;
-
-	  /* Fix line numbers */
-	  pr->cbLineOffset += fh->cbLineOffset;
-
-	  /* Relocate address */
-	  if (!only_ext)
-	    pr->adr += code_offset;
-	}
-    }
-
-  /* External symbols: swap in, and fix string */
-  for (s_idx = 0; s_idx < hdr->iextMax; s_idx++)
-    {
-      esh = (EXTR *) (hdr->cbExtOffset) + s_idx;
-      ecoff_swap_ext_in (abfd, esh, esh);
-      esh->asym.iss = esh->asym.iss + hdr->cbSsExtOffset;
-    }
+  if (ecoff_slurp_symbolic_info (abfd) == false)
+    error ("Error reading symbol table: %s", bfd_errmsg (bfd_error));
 }
-
 
 /* Find a file descriptor given its index RF relative to a file CF */
 
@@ -691,27 +455,32 @@ static FDR *
 get_rfd (cf, rf)
      int cf, rf;
 {
+  FDR *fdrs;
   register FDR *f;
+  RFDT rfd;
 
-  f = (FDR *) (cur_hdr->cbFdOffset) + cf;
+  fdrs = ecoff_data (cur_bfd)->fdr;
+  f = fdrs + cf;
   /* Object files do not have the RFD table, all refs are absolute */
   if (f->rfdBase == 0)
-    return (FDR *) (cur_hdr->cbFdOffset) + rf;
-  cf = *((pRFDT) f->rfdBase + rf);
-  return (FDR *) (cur_hdr->cbFdOffset) + cf;
+    return fdrs + rf;
+  ecoff_swap_rfd_in (cur_bfd,
+		     ecoff_data (cur_bfd)->external_rfd + f->rfdBase + rf,
+		     &rfd);
+  return fdrs + rfd;
 }
 
 /* Return a safer print NAME for a file descriptor */
 
 static char *
-fdr_name (name)
-     char *name;
+fdr_name (f)
+     FDR *f;
 {
-  if (name == (char *) -1)
+  if (f->rss == -1)
     return "<stripped file>";
-  if (UNSAFE_DATA_ADDR (name))
+  if (f->rss == 0)
     return "<NFY>";
-  return name;
+  return ecoff_data (cur_bfd)->ss + f->issBase + f->rss;
 }
 
 
@@ -723,25 +492,21 @@ read_mips_symtab (objfile, section_offsets)
      struct objfile *objfile;
      struct section_offsets *section_offsets;
 {
-  CORE_ADDR end_of_text_seg;
+  cur_bfd = objfile->obfd;
 
-  read_the_mips_symtab (objfile->obfd, &end_of_text_seg);
+  read_the_mips_symtab (objfile->obfd);
 
-  parse_partial_symbols (end_of_text_seg, objfile, section_offsets);
+  parse_partial_symbols (objfile, section_offsets);
 
 #if 0
-  /*
-   * Check to make sure file was compiled with -g.
-   * If not, warn the user of this limitation.
-   */
+  /* Check to make sure file was compiled with -g.  If not, warn the
+     user of this limitation.  */
   if (compare_glevel (max_glevel, GLEVEL_2) < 0)
     {
       if (max_gdbinfo == 0)
-	printf (
-	       "\n%s not compiled with -g, debugging support is limited.\n",
+	printf ("\n%s not compiled with -g, debugging support is limited.\n",
 		 objfile->name);
-      printf (
-	"You should compile with -g2 or -g3 for best debugging support.\n");
+      printf ("You should compile with -g2 or -g3 for best debugging support.\n");
       fflush (stdout);
     }
 #endif
@@ -775,7 +540,9 @@ static struct parse_stack
   int cur_field;		/* Field number in cur_type. */
   int procadr;			/* Start addres of this procedure */
   int numargs;			/* Its argument count */
-} *top_stack;			/* Top stack ptr */
+}
+
+ *top_stack;			/* Top stack ptr */
 
 
 /* Enter a new lexical context */
@@ -823,7 +590,7 @@ pop_parse_stack ()
 static struct mips_pending
 {
   struct mips_pending *next;	/* link */
-  SYMR *s;			/* the symbol */
+  struct sym_ext *s;		/* the symbol */
   struct type *t;		/* its partial type descriptor */
 } **pending_list;
 
@@ -833,9 +600,9 @@ static struct mips_pending
 static struct mips_pending *
 is_pending_symbol (fh, sh)
      FDR *fh;
-     SYMR *sh;
+     struct sym_ext *sh;
 {
-  int f_idx = fh - (FDR *) cur_hdr->cbFdOffset;
+  int f_idx = fh - ecoff_data (cur_bfd)->fdr;
   register struct mips_pending *p;
 
   /* Linear search is ok, list is typically no more than 10 deep */
@@ -850,10 +617,10 @@ is_pending_symbol (fh, sh)
 static void
 add_pending (fh, sh, t)
      FDR *fh;
-     SYMR *sh;
+     struct sym_ext *sh;
      struct type *t;
 {
-  int f_idx = fh - (FDR *) cur_hdr->cbFdOffset;
+  int f_idx = fh - ecoff_data (cur_bfd)->fdr;
   struct mips_pending *p = is_pending_symbol (fh, sh);
 
   /* Make sure we do not make duplicates */
@@ -865,7 +632,6 @@ add_pending (fh, sh, t)
       p->next = pending_list[f_idx];
       pending_list[f_idx] = p;
     }
-  sh->reserved = 1;		/* for quick check */
 }
 
 /* Throw away undef entries when done with file index F_IDX */
@@ -922,32 +688,40 @@ prepend_tag_kind (tag_name, type_code)
 
 /* Parse a single symbol. Mostly just make up a GDB symbol for it.
    For blocks, procedures and types we open a new lexical context.
-   This is basically just a big switch on the symbol's type.
-   Argument AX is the base pointer of aux symbols for this file (fh->iauxBase).
-   BIGEND says whether aux symbols are big-endian or little-endian.
-   Return count of SYMR's handled (normally one). */
+   This is basically just a big switch on the symbol's type.  Argument
+   AX is the base pointer of aux symbols for this file (fh->iauxBase).
+   EXT_SH points to the unswapped symbol, which is needed for struct,
+   union, etc., types; it is NULL for an EXTR.  BIGEND says whether
+   aux symbols are big-endian or little-endian.  Return count of
+   SYMR's handled (normally one).
+
+   FIXME: This modifies the symbol, but the only way we have to save
+   the modified information is to stuff it back into the BFD data.  */
 
 static int
-parse_symbol (sh, ax, bigend)
+parse_symbol (sh, ax, ext_sh, bigend)
      SYMR *sh;
      union aux_ext *ax;
+     struct sym_ext *ext_sh;
      int bigend;
 {
   char *name;
   struct symbol *s;
   struct block *b;
+  struct mips_pending *pend;
   struct type *t;
   struct field *f;
   int count = 1;
-  /* When a symbol is cross-referenced from other files/symbols
-	   we mark it explicitly */
-  int pend = (sh->reserved == 1);
   enum address_class class;
   TIR tir;
 
+  if (ext_sh == (struct sym_ext *) NULL)
+    name = ecoff_data (cur_bfd)->ssext + sh->iss;
+  else
+    name = ecoff_data (cur_bfd)->ss + cur_fdr->issBase + sh->iss;
+
   switch (sh->st)
     {
-
     case stNil:
       break;
 
@@ -955,14 +729,14 @@ parse_symbol (sh, ax, bigend)
       class = LOC_STATIC;
       b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (top_stack->cur_st),
 			     GLOBAL_BLOCK);
-      s = new_symbol ((char *) sh->iss);
+      s = new_symbol (name);
       SYMBOL_VALUE_ADDRESS (s) = (CORE_ADDR) sh->value;
       goto data;
 
     case stStatic:		/* static data, goes into current block. */
       class = LOC_STATIC;
       b = top_stack->cur_block;
-      s = new_symbol ((char *) sh->iss);
+      s = new_symbol (name);
       SYMBOL_VALUE_ADDRESS (s) = (CORE_ADDR) sh->value;
       goto data;
 
@@ -976,7 +750,7 @@ parse_symbol (sh, ax, bigend)
       else
 	class = LOC_LOCAL;
       b = top_stack->cur_block;
-      s = new_symbol ((char *) sh->iss);
+      s = new_symbol (name);
       SYMBOL_VALUE (s) = sh->value;
 
     data:			/* Common code for symbols describing data */
@@ -997,7 +771,6 @@ parse_symbol (sh, ax, bigend)
       max_gdbinfo++;
       top_stack->numargs++;
 
-      name = (char *) sh->iss;
       /* Special GNU C++ name.  */
       if (name[0] == CPLUS_MARKER && name[1] == 't' && name[2] == 0)
 	name = "this";		/* FIXME, not alloc'd in obstack */
@@ -1024,7 +797,7 @@ parse_symbol (sh, ax, bigend)
       break;
 
     case stLabel:		/* label, goes into current block */
-      s = new_symbol ((char *) sh->iss);
+      s = new_symbol (name);
       SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;	/* so that it can be used */
       SYMBOL_CLASS (s) = LOC_LABEL;	/* but not misused */
       SYMBOL_VALUE_ADDRESS (s) = (CORE_ADDR) sh->value;
@@ -1034,7 +807,7 @@ parse_symbol (sh, ax, bigend)
 
     case stProc:		/* Procedure, usually goes into global block */
     case stStaticProc:		/* Static procedure, goes into current block */
-      s = new_symbol ((char *) sh->iss);
+      s = new_symbol (name);
       SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
       SYMBOL_CLASS (s) = LOC_BLOCK;
       /* Type of the return value */
@@ -1092,7 +865,7 @@ parse_symbol (sh, ax, bigend)
 	       They all share a common set of local variables, defined here.  */
       {
 	enum type_code type_code;
-	SYMR *tsym;
+	struct sym_ext *ext_tsym;
 	int nfields;
 	long max_value;
 	struct field *f;
@@ -1122,7 +895,7 @@ parse_symbol (sh, ax, bigend)
 	push_parse_stack ();
 	top_stack->blocktype = stBlock;
 
-	s = new_symbol ((char *) sh->iss);
+	s = new_symbol (name);
 	SYMBOL_NAMESPACE (s) = STRUCT_NAMESPACE;
 	SYMBOL_CLASS (s) = LOC_TYPEDEF;
 	SYMBOL_VALUE (s) = 0;
@@ -1131,42 +904,57 @@ parse_symbol (sh, ax, bigend)
 	/* First count the number of fields and the highest value. */
 	nfields = 0;
 	max_value = 0;
-	for (tsym = sh + 1; tsym->st != stEnd; tsym++)
+	for (ext_tsym = ext_sh + 1; ; ext_tsym++)
 	  {
-	    if (tsym->st == stMember)
+	    SYMR tsym;
+
+	    ecoff_swap_sym_in (cur_bfd, ext_tsym, &tsym);
+
+	    if (tsym.st == stEnd)
+	      break;
+
+	    if (tsym.st == stMember)
 	      {
 		if (nfields == 0 && type_code == TYPE_CODE_UNDEF)
 		  /* If the type of the member is Nil (or Void),
 		     without qualifiers, assume the tag is an
 		     enumeration. */
-		  if (tsym->index == indexNil)
+		  if (tsym.index == indexNil)
 		    type_code = TYPE_CODE_ENUM;
 		  else
 		    {
 		      ecoff_swap_tir_in (bigend,
-					 &ax[tsym->index].a_ti,
+					 &ax[tsym.index].a_ti,
 					 &tir);
 		      if ((tir.bt == btNil || tir.bt == btVoid)
 			  && tir.tq0 == tqNil)
 			type_code = TYPE_CODE_ENUM;
 		    }
 		nfields++;
-		if (tsym->value > max_value)
-		  max_value = tsym->value;
+		if (tsym.value > max_value)
+		  max_value = tsym.value;
 	      }
-	    else if (tsym->st == stBlock
-		     || tsym->st == stUnion
-		     || tsym->st == stEnum
-		     || tsym->st == stStruct
-		     || tsym->st == stParsed)
+	    else if (tsym.st == stBlock
+		     || tsym.st == stUnion
+		     || tsym.st == stEnum
+		     || tsym.st == stStruct
+		     || tsym.st == stParsed)
 	      {
-		if (tsym->sc == scVariant);	/*UNIMPLEMENTED*/
-		if (tsym->index != 0)
-		  tsym = ((SYMR *) cur_fdr->isymBase)
-		    + tsym->index - 1;
+		if (tsym.sc == scVariant);	/*UNIMPLEMENTED*/
+		if (tsym.index != 0)
+		  {
+		    /* This is something like a struct within a
+		       struct.  Skip over the fields of the inner
+		       struct.  The -1 is because the for loop will
+		       increment ext_tsym.  */
+		    ext_tsym = (ecoff_data (cur_bfd)->external_sym
+				+ cur_fdr->isymBase
+				+ tsym.index
+				- 1);
+		  }
 	      }
 	    else
-	      complain (&block_member_complaint, tsym->st);
+	      complain (&block_member_complaint, tsym.st);
 	  }
 
 	/* In an stBlock, there is no way to distinguish structs,
@@ -1209,27 +997,37 @@ parse_symbol (sh, ax, bigend)
 	    type_code = TYPE_CODE_STRUCT;
 
 	/* If this type was expected, use its partial definition */
-	if (pend)
-	  t = is_pending_symbol (cur_fdr, sh)->t;
+	pend = is_pending_symbol (cur_fdr, ext_sh);
+	if (pend != (struct mips_pending *) NULL)
+	  t = pend->t;
 	else
-	  t = new_type (prepend_tag_kind ((char *) sh->iss,
-					  type_code));
+	  t = new_type (prepend_tag_kind (name, type_code));
 
 	TYPE_CODE (t) = type_code;
 	TYPE_LENGTH (t) = sh->value;
 	TYPE_NFIELDS (t) = nfields;
-	TYPE_FIELDS (t) = f = (struct field *)
-	  TYPE_ALLOC (t, nfields * sizeof (struct field));
+	TYPE_FIELDS (t) = f = ((struct field *)
+			       TYPE_ALLOC (t,
+					   nfields * sizeof (struct field)));
 
 	if (type_code == TYPE_CODE_ENUM)
 	  {
 	    /* This is a non-empty enum. */
-	    for (tsym = sh + 1; tsym->st == stMember; tsym++)
+	    for (ext_tsym = ext_sh + 1; ; ext_tsym++)
 	      {
+		SYMR tsym;
 		struct symbol *enum_sym;
-		f->bitpos = tsym->value;
+
+		ecoff_swap_sym_in (cur_bfd, ext_tsym, &tsym);
+
+		if (tsym.st != stMember)
+		  break;
+
+		f->bitpos = tsym.value;
 		f->type = t;
-		f->name = (char *) tsym->iss;
+		f->name = (ecoff_data (cur_bfd)->ss
+			   + cur_fdr->issBase
+			   + tsym.iss);
 		f->bitsize = 0;
 
 		enum_sym = ((struct symbol *)
@@ -1240,7 +1038,7 @@ parse_symbol (sh, ax, bigend)
 		SYMBOL_CLASS (enum_sym) = LOC_CONST;
 		SYMBOL_TYPE (enum_sym) = t;
 		SYMBOL_NAMESPACE (enum_sym) = VAR_NAMESPACE;
-		SYMBOL_VALUE (enum_sym) = tsym->value;
+		SYMBOL_VALUE (enum_sym) = tsym.value;
 		add_symbol (enum_sym, top_stack->cur_block);
 
 		/* Skip the stMembers that we've handled. */
@@ -1278,9 +1076,9 @@ parse_symbol (sh, ax, bigend)
 	  /* Finished with type */
 	  top_stack->cur_type = 0;
 	}
-      else if (sh->sc == scText
-	       && (top_stack->blocktype == stProc
-		   || top_stack->blocktype == stStaticProc))
+      else if (sh->sc == scText &&
+	       (top_stack->blocktype == stProc ||
+		top_stack->blocktype == stStaticProc))
 	{
 	  /* Finished with procedure */
 	  struct blockvector *bv = BLOCKVECTOR (top_stack->cur_st);
@@ -1306,7 +1104,7 @@ parse_symbol (sh, ax, bigend)
 	  b = shrink_block (top_stack->cur_block, top_stack->cur_st);
 
 	  /* f77 emits proc-level with address bounds==[0,0],
-		       So look for such child blocks, and patch them.  */
+	     So look for such child blocks, and patch them.  */
 	  for (i = 0; i < BLOCKVECTOR_NBLOCKS (bv); i++)
 	    {
 	      struct block *b_bad = BLOCKVECTOR_BLOCK (bv, i);
@@ -1321,16 +1119,16 @@ parse_symbol (sh, ax, bigend)
 	}
       else if (sh->sc == scText && top_stack->blocktype == stBlock)
 	{
-	  /* End of (code) block. The value of the symbol
-			   is the displacement from the procedure`s start
-			   address of the end of this block. */
+	  /* End of (code) block. The value of the symbol is the
+	     displacement from the procedure`s start address of the
+	     end of this block. */
 	  BLOCK_END (top_stack->cur_block) = sh->value + top_stack->procadr;
 	  shrink_block (top_stack->cur_block, top_stack->cur_st);
 	}
       else if (sh->sc == scText && top_stack->blocktype == stFile)
 	{
 	  /* End of file.  Pop parse stack and ignore.  Higher
-			   level code deals with this.  */
+	     level code deals with this.  */
 	  ;
 	}
       else
@@ -1341,14 +1139,14 @@ parse_symbol (sh, ax, bigend)
 
     case stMember:		/* member of struct or union */
       f = &TYPE_FIELDS (top_stack->cur_type)[top_stack->cur_field++];
-      f->name = (char *) sh->iss;
+      f->name = name;
       f->bitpos = sh->value;
       f->bitsize = 0;
       f->type = parse_type (ax + sh->index, &f->bitsize, bigend);
       break;
 
     case stTypedef:		/* type definition */
-      s = new_symbol ((char *) sh->iss);
+      s = new_symbol (name);
       SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
       SYMBOL_CLASS (s) = LOC_TYPEDEF;
       SYMBOL_BLOCK_VALUE (s) = top_stack->cur_block;
@@ -1373,7 +1171,9 @@ parse_symbol (sh, ax, bigend)
       complain (&unknown_mips_symtype_complaint, sh->st);
       break;
     }
+
   sh->st = stParsed;
+
   return count;
 }
 
@@ -1426,7 +1226,7 @@ parse_type (ax, bs, bigend)
   struct type *tp = 0;
   char *fmt;
   union aux_ext *tax;
-  enum type_code type_code;
+  enum type_code type_code = TYPE_CODE_UNDEF;
 
   /* Use aux as a type information record, map its basic type.  */
   tax = ax;
@@ -1486,7 +1286,7 @@ parse_type (ax, bs, bigend)
       do
 	{
 	  ax++;
-	  ecoff_swap_tir_in (bigend, ax, t1);
+	  ecoff_swap_tir_in (bigend, &ax->a_ti, t1);
 	}
       while (t1->continued);
     }
@@ -1516,7 +1316,7 @@ parse_type (ax, bs, bigend)
       /* Try to cross reference this type */
       ax += cross_ref (ax, &tp, type_code, &pn, bigend);
       /* reading .o file ? */
-      if (UNSAFE_DATA_ADDR (tp))
+      if (tp == (struct type *) NULL)
 	tp = init_type (type_code, 0, 0, (char *) NULL,
 			(struct objfile *) NULL);
       /* SOMEONE OUGHT TO FIX DBXREAD TO DROP "STRUCT" */
@@ -1551,7 +1351,7 @@ parse_type (ax, bs, bigend)
     }
 
   /* Parse all the type qualifiers now. If there are more
-	   than 6 the game will continue in the next aux */
+     than 6 the game will continue in the next aux */
 
 #define PARSE_TQ(tq) \
 	if (t->tq != tqNil) ax += upgrade_type(&tp, t->tq, ax, bigend);
@@ -1614,7 +1414,7 @@ upgrade_type (tpp, tq, ax, bigend)
       off = 0;
 
       /* Determine and record the domain type (type of index) */
-      ecoff_swap_rndx_in (bigend, ax, &rndx);
+      ecoff_swap_rndx_in (bigend, &ax->a_rndx, &rndx);
       id = rndx.index;
       rf = rndx.rfd;
       if (rf == 0xfff)
@@ -1625,7 +1425,9 @@ upgrade_type (tpp, tq, ax, bigend)
 	}
       fh = get_rfd (cur_fd, rf);
 
-      indx = parse_type (id + (union aux_ext *) fh->iauxBase,
+      indx = parse_type ((ecoff_data (cur_bfd)->external_aux
+			  + fh->iauxBase
+			  + id),
 			 (int *) NULL, bigend);
 
       /* Get the bounds, and create the array type.  */
@@ -1674,35 +1476,69 @@ upgrade_type (tpp, tq, ax, bigend)
 }
 
 
-/* Parse a procedure descriptor record PR.  Note that the procedure
-   is parsed _after_ the local symbols, now we just insert the extra
-   information we need into a MIPS_EFI_SYMBOL_NAME symbol that has already
-   been placed in the procedure's main block.  Note also that images that
-   have been partially stripped (ld -x) have been deprived
-   of local symbols, and we have to cope with them here.
-   The procedure's code ends at BOUND */
+/* Parse a procedure descriptor record PR.  Note that the procedure is
+   parsed _after_ the local symbols, now we just insert the extra
+   information we need into a MIPS_EFI_SYMBOL_NAME symbol that has
+   already been placed in the procedure's main block.  Note also that
+   images that have been partially stripped (ld -x) have been deprived
+   of local symbols, and we have to cope with them here.  FIRST_OFF is
+   the offset of the first procedure for this FDR; we adjust the
+   address by this amount, but I don't know why.  */
 
 static void
-parse_procedure (pr, bound, have_stabs)
+parse_procedure (pr, have_stabs, first_off)
      PDR *pr;
-     int bound;
      int have_stabs;
+     unsigned long first_off;
 {
   struct symbol *s, *i;
-  SYMR *sh = (SYMR *) pr->isym;
   struct block *b;
   struct mips_extra_func_info *e;
   char *sh_name;
 
-  /* Static procedure at address pr->adr.  Sigh. */
-  if (sh == (SYMR *) - 1)
+  /* Simple rule to find files linked "-x" */
+  if (cur_fdr->rss == -1)
     {
-      complain (&pdr_static_symbol_complaint, pr->adr);
-      return;
+      if (pr->isym == -1)
+	{
+	  /* Static procedure at address pr->adr.  Sigh. */
+	  complain (&pdr_static_symbol_complaint, pr->adr);
+	  return;
+	}
+      else
+	{
+	  /* external */
+	  EXTR she;
+	  
+	  ecoff_swap_ext_in (cur_bfd,
+			     ecoff_data (cur_bfd)->external_ext + pr->isym,
+			     &she);
+	  sh_name = ecoff_data (cur_bfd)->ssext + she.asym.iss;
+	}
     }
-  sh_name = (char *) sh->iss;
+  else
+    {
+      /* Full symbols */
+      SYMR sh;
+
+      ecoff_swap_sym_in (cur_bfd,
+			 (ecoff_data (cur_bfd)->external_sym
+			  + cur_fdr->isymBase
+			  + pr->isym),
+			 &sh);
+      sh_name = ecoff_data (cur_bfd)->ss + cur_fdr->issBase + sh.iss;
+    }
+
   if (have_stabs)
-    s = lookup_symbol (sh_name, NULL, VAR_NAMESPACE, 0, NULL);
+    {
+      /* We have to save the cur_fdr across the call to lookup_symbol.
+	 If the pdr is for a static function and if a global function with
+	 the same name exists, lookup_symbol will eventually read in the symtab
+	 for the global function and clobber cur_fdr.  */
+      FDR *save_cur_fdr = cur_fdr;
+      s = lookup_symbol (sh_name, NULL, VAR_NAMESPACE, 0, NULL);
+      cur_fdr = save_cur_fdr;
+    }
   else
     s = mylookup_symbol (sh_name, top_stack->cur_block,
 			 VAR_NAMESPACE, LOC_BLOCK);
@@ -1729,6 +1565,8 @@ parse_procedure (pr, bound, have_stabs)
       SYMBOL_BLOCK_VALUE (s) = b;
       BLOCK_FUNCTION (b) = s;
       BLOCK_START (b) = pr->adr;
+      /* BOUND used to be the end of procedure's text, but the
+	 argument is no longer passed in.  */
       BLOCK_END (b) = bound;
       BLOCK_SUPERBLOCK (b) = top_stack->cur_block;
       add_block (b, top_stack->cur_st);
@@ -1742,6 +1580,7 @@ parse_procedure (pr, bound, have_stabs)
       e = (struct mips_extra_func_info *) SYMBOL_VALUE (i);
       e->pdr = *pr;
       e->pdr.isym = (long) s;
+      e->pdr.adr += cur_fdr->adr - first_off;
     }
 }
 
@@ -1765,12 +1604,12 @@ parse_external (es, skip_procedures, bigend)
   if (es->ifd != ifdNil)
     {
       cur_fd = es->ifd;
-      cur_fdr = (FDR *) (cur_hdr->cbFdOffset) + cur_fd;
-      ax = (union aux_ext *) cur_fdr->iauxBase;
+      cur_fdr = ecoff_data (cur_bfd)->fdr + cur_fd;
+      ax = ecoff_data (cur_bfd)->external_aux + cur_fdr->iauxBase;
     }
   else
     {
-      cur_fdr = (FDR *) (cur_hdr->cbFdOffset);
+      cur_fdr = ecoff_data (cur_bfd)->fdr;
       ax = 0;
     }
 
@@ -1801,7 +1640,9 @@ parse_external (es, skip_procedures, bigend)
       /* FIXME:  Turn this into a complaint? */
       if (info_verbose)
 	printf_filtered ("Warning: %s `%s' is undefined (in %s)\n",
-		      what, es->asym.iss, fdr_name ((char *) cur_fdr->rss));
+			 what,
+			 ecoff_data (cur_bfd)->ssext + es->asym.iss,
+			 fdr_name (cur_fdr));
       return;
     }
 
@@ -1811,17 +1652,17 @@ parse_external (es, skip_procedures, bigend)
       /* If we have full symbols we do not need more */
       if (skip_procedures)
 	return;
-      if (mylookup_symbol ((char *) es->asym.iss, top_stack->cur_block,
+      if (mylookup_symbol (ecoff_data (cur_bfd)->ssext + es->asym.iss,
+			   top_stack->cur_block,
 			   VAR_NAMESPACE, LOC_BLOCK))
 	break;
       /* fall through */
     case stGlobal:
     case stLabel:
-      /*
-		 * Note that the case of a symbol with indexNil
-		 * must be handled anyways by parse_symbol().
-		 */
-      parse_symbol (&es->asym, ax, bigend);
+      /* Note that the case of a symbol with indexNil must be handled
+	 anyways by parse_symbol().  */
+      parse_symbol (&es->asym, ax, (struct sym_ext *) NULL, bigend);
+      /* Note that parse_symbol changed es->asym.  */
       break;
     default:
       break;
@@ -1835,32 +1676,34 @@ parse_external (es, skip_procedures, bigend)
    with that and do not need to reorder our linetables */
 
 static void
-parse_lines (fh, lt)
+parse_lines (fh, pr, lt)
      FDR *fh;
+     PDR *pr;
      struct linetable *lt;
 {
-  unsigned char *base = (unsigned char *) fh->cbLineOffset;
+  unsigned char *base;
   int j, k;
   int delta, count, lineno = 0;
-  PDR *pr;
+  unsigned long first_off = pr->adr;
 
-  if (base == 0)
+  if (fh->cbLineOffset == 0)
     return;
 
+  base = ecoff_data (cur_bfd)->line + fh->cbLineOffset;
+
   /* Scan by procedure descriptors */
-  j = 0, k = 0;
-  for (pr = (PDR *) IPDFIRST (cur_hdr, fh); j < fh->cpd; j++, pr++)
+  k = 0;
+  for (j = 0; j < fh->cpd; j++, pr++)
     {
       int l, halt;
+      unsigned long adr;
 
       /* No code for this one */
       if (pr->iline == ilineNil ||
 	  pr->lnLow == -1 || pr->lnHigh == -1)
 	continue;
-      /*
-       *	Aurgh! To know where to stop expanding we
-       *	must look-ahead.
-       */
+
+      /* Aurgh! To know where to stop expanding we must look-ahead.  */
       for (l = 1; l < (fh->cpd - j); l++)
 	if (pr[l].iline != -1)
 	  break;
@@ -1868,16 +1711,16 @@ parse_lines (fh, lt)
 	halt = fh->cline;
       else
 	halt = pr[l].iline;
-      /*
-       * When procedures are moved around the linenumbers
-       * are attributed to the next procedure up
-       */
+
+      /* When procedures are moved around the linenumbers are
+	 attributed to the next procedure up.  */
       if (pr->iline >= halt)
 	continue;
 
-      base = (unsigned char *) pr->cbLineOffset;
-      l = pr->adr >> 2;		/* in words */
-      halt += (pr->adr >> 2) - pr->iline;
+      base = ecoff_data (cur_bfd)->line + fh->cbLineOffset + pr->cbLineOffset;
+      adr = fh->adr + pr->adr - first_off;
+      l = adr >> 2;		/* in words */
+      halt += (adr >> 2) - pr->iline;
       for (lineno = pr->lnLow; l < halt;)
 	{
 	  count = *base & 0x0f;
@@ -1899,24 +1742,23 @@ parse_lines (fh, lt)
 }
 
 /* Master parsing procedure for first-pass reading of file symbols
-   into a partial_symtab.
-
-   Parses the symtab described by the global symbolic header CUR_HDR.
-   END_OF_TEXT_SEG gives the address just after the text segment for
-   the symtab we are reading.  */
+   into a partial_symtab.  */
 
 static void
-parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
-     int end_of_text_seg;
+parse_partial_symbols (objfile, section_offsets)
      struct objfile *objfile;
      struct section_offsets *section_offsets;
 {
   int f_idx, s_idx;
-  HDRR *hdr = cur_hdr;
+  HDRR *hdr = &ecoff_data (cur_bfd)->symbolic_header;
   /* Running pointers */
   FDR *fh;
-  register EXTR *esh;
-  register SYMR *sh;
+  struct ext_ext *ext_out;
+  struct ext_ext *ext_out_end;
+  EXTR *ext_block;
+  register EXTR *ext_in;
+  EXTR *ext_in_end;
+  SYMR sh;
   struct partial_symtab *pst;
 
   int past_first_source_file = 0;
@@ -1925,7 +1767,7 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
   char **psymtab_include_list;
   int includes_allocated;
   int includes_used;
-  EXTR **extern_tab;
+  EXTR *extern_tab;
   struct pst_map *fdr_to_pst;
   /* Index within current psymtab dependency list */
   struct partial_symtab **dependency_list;
@@ -1933,8 +1775,8 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
   struct cleanup *old_chain;
   char *name;
 
-  extern_tab = (EXTR **) obstack_alloc (&objfile->psymbol_obstack,
-					sizeof (EXTR *) * hdr->iextMax);
+  extern_tab = (EXTR *) obstack_alloc (&objfile->psymbol_obstack,
+				       sizeof (EXTR) * hdr->iextMax);
 
   includes_allocated = 30;
   includes_used = 0;
@@ -1951,13 +1793,13 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
   last_source_file = NULL;
 
   /*
-     * Big plan:
-     *
-     * Only parse the Local and External symbols, and the Relative FDR.
-     * Fixup enough of the loader symtab to be able to use it.
-     * Allocate space only for the file's portions we need to
-     * look at. (XXX)
-     */
+   * Big plan:
+   *
+   * Only parse the Local and External symbols, and the Relative FDR.
+   * Fixup enough of the loader symtab to be able to use it.
+   * Allocate space only for the file's portions we need to
+   * look at. (XXX)
+   */
 
   max_gdbinfo = 0;
   max_glevel = MIN_GLEVEL;
@@ -1974,12 +1816,21 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
     FDR_IDX (pst) = -1;
   }
 
+  /* Pass 0 over external syms: swap them in.  */
+  ext_block = (EXTR *) xmalloc (hdr->iextMax * sizeof (EXTR));
+  make_cleanup (free, ext_block);
+
+  ext_out = ecoff_data (cur_bfd)->external_ext;
+  ext_out_end = ext_out + hdr->iextMax;
+  ext_in = ext_block;
+  for (; ext_out < ext_out_end; ext_out++, ext_in++)
+    ecoff_swap_ext_in (cur_bfd, ext_out, ext_in);
+
   /* Pass 1 over external syms: Presize and partition the list */
-  for (s_idx = 0; s_idx < hdr->iextMax; s_idx++)
-    {
-      esh = (EXTR *) (hdr->cbExtOffset) + s_idx;
-      fdr_to_pst[esh->ifd].n_globals++;
-    }
+  ext_in = ext_block;
+  ext_in_end = ext_in + hdr->iextMax;
+  for (; ext_in < ext_in_end; ext_in++)
+    fdr_to_pst[ext_in->ifd].n_globals++;
 
   /* Pass 1.5 over files:  partition out global symbol space */
   s_idx = 0;
@@ -1991,18 +1842,20 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
     }
 
   /* Pass 2 over external syms: fill in external symbols */
-  for (s_idx = 0; s_idx < hdr->iextMax; s_idx++)
+  ext_in = ext_block;
+  ext_in_end = ext_in + hdr->iextMax;
+  for (; ext_in < ext_in_end; ext_in++)
     {
       enum minimal_symbol_type ms_type = mst_text;
-      esh = (EXTR *) (hdr->cbExtOffset) + s_idx;
 
-      extern_tab[fdr_to_pst[esh->ifd].globals_offset
-		 + fdr_to_pst[esh->ifd].n_globals++] = esh;
+      extern_tab[fdr_to_pst[ext_in->ifd].globals_offset
+		 + fdr_to_pst[ext_in->ifd].n_globals++] = *ext_in;
 
-      if (esh->asym.sc == scUndefined || esh->asym.sc == scNil)
+      if (ext_in->asym.sc == scUndefined || ext_in->asym.sc == scNil)
 	continue;
 
-      switch (esh->asym.st)
+      name = ecoff_data (cur_bfd)->ssext + ext_in->asym.iss;
+      switch (ext_in->asym.st)
 	{
 	case stProc:
 	  break;
@@ -2013,40 +1866,43 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 	  break;
 	default:
 	  ms_type = mst_unknown;
-	  complain (&unknown_ext_complaint, esh->asym.iss);
+	  complain (&unknown_ext_complaint, name);
 	}
-      name = (char *) esh->asym.iss;
-      prim_record_minimal_symbol (name, esh->asym.value, ms_type);
+      prim_record_minimal_symbol (name, ext_in->asym.value, ms_type);
     }
 
   /* Pass 3 over files, over local syms: fill in static symbols */
   for (f_idx = 0; f_idx < hdr->ifdMax; f_idx++)
     {
       struct partial_symtab *save_pst;
-      EXTR **ext_ptr;
+      EXTR *ext_ptr;
 
-      cur_fdr = fh = f_idx + (FDR *) (cur_hdr->cbFdOffset);
+      cur_fdr = fh = ecoff_data (cur_bfd)->fdr + f_idx;
 
       if (fh->csym == 0)
 	{
 	  fdr_to_pst[f_idx].pst = NULL;
 	  continue;
 	}
-      pst = start_psymtab_common (objfile, section_offsets, (char *) fh->rss,
+      pst = start_psymtab_common (objfile, section_offsets,
+				  fdr_name (fh),
 				  fh->cpd ? fh->adr : 0,
 				  objfile->global_psymbols.next,
 				  objfile->static_psymbols.next);
       pst->read_symtab_private = ((char *)
 				  obstack_alloc (&objfile->psymbol_obstack,
 						 sizeof (struct symloc)));
+      memset ((PTR) pst->read_symtab_private, 0, sizeof (struct symloc));
 
       save_pst = pst;
       /* Make everything point to everything. */
       FDR_IDX (pst) = f_idx;
       fdr_to_pst[f_idx].pst = pst;
+
+      /* FIXME: This tampers with data from BFD.  */
       fh->ioptBase = (int) pst;
 
-      CUR_HDR (pst) = cur_hdr;
+      CUR_BFD (pst) = cur_bfd;
 
       /* The way to turn this into a symtab is to call... */
       pst->read_symtab = mipscoff_psymtab_to_symtab;
@@ -2054,42 +1910,68 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
       pst->texthigh = pst->textlow;
 
       /* For stabs-in-ecoff files, the second symbol must be @stab.
-	 This symbol is emitted by mips-tfile to signal
-	 that the current object file uses encapsulated stabs
-	 instead of mips ecoff for local symbols.
-	 (It is the second symbol because the first symbol is
-	 the stFile used to signal the start of a file). */
-      if (fh->csym >= 2
-	  && STREQ ((char *) (((SYMR *) fh->isymBase)[1].iss), stabs_symbol))
+	 This symbol is emitted by mips-tfile to signal that the
+	 current object file uses encapsulated stabs instead of mips
+	 ecoff for local symbols.  (It is the second symbol because
+	 the first symbol is the stFile used to signal the start of a
+	 file). */
+      processing_gcc_compilation = 0;
+      if (fh->csym >= 2)
 	{
-	  processing_gcc_compilation = 2;
+	  ecoff_swap_sym_in (cur_bfd,
+			     (ecoff_data (cur_bfd)->external_sym
+			      + fh->isymBase
+			      + 1),
+			     &sh);
+	  if (STREQ (ecoff_data (cur_bfd)->ss + fh->issBase + sh.iss,
+		     stabs_symbol))
+	    processing_gcc_compilation = 2;
+	}
+
+      if (processing_gcc_compilation != 0)
+	{
 	  for (cur_sdx = 2; cur_sdx < fh->csym; cur_sdx++)
 	    {
 	      int type_code;
 	      char *namestring;
-	      sh = cur_sdx + (SYMR *) fh->isymBase;
-	      type_code = MIPS_UNMARK_STAB (sh->index);
-	      if (!MIPS_IS_STAB (sh))
+
+	      ecoff_swap_sym_in (cur_bfd,
+				 (ecoff_data (cur_bfd)->external_sym
+				  + fh->isymBase
+				  + cur_sdx),
+				 &sh);
+	      type_code = MIPS_UNMARK_STAB (sh.index);
+	      if (!MIPS_IS_STAB (&sh))
 		{
-		  if (sh->st == stProc || sh->st == stStaticProc)
+		  if (sh.st == stProc || sh.st == stStaticProc)
 		    {
-		      long procaddr = sh->value;
-		      sh = (AUX_GET_ISYM (fh->fBigendian,
-					  (sh->index
-					   + (union aux_ext *) (fh->iauxBase)))
-			    + (SYMR *) fh->isymBase - 1);
-		      if (sh->st == stEnd)
+		      long procaddr = sh.value;
+		      long isym;
+
+
+		      isym = AUX_GET_ISYM (fh->fBigendian,
+					   (ecoff_data (cur_bfd)->external_aux
+					    + fh->iauxBase
+					    + sh.index));
+		      ecoff_swap_sym_in (cur_bfd,
+					 (ecoff_data (cur_bfd)->external_sym
+					  + fh->isymBase
+					  + isym
+					  - 1),
+					 &sh);
+		      if (sh.st == stEnd)
 			{
-			  long high = procaddr + sh->value;
+			  long high = procaddr + sh.value;
 			  if (high > pst->texthigh)
 			    pst->texthigh = high;
 			}
 		    }
 		  continue;
 		}
-#define SET_NAMESTRING() namestring = (char*)sh->iss
+#define SET_NAMESTRING() \
+  namestring = ecoff_data (cur_bfd)->ss + fh->issBase + sh.iss
 #define CUR_SYMBOL_TYPE type_code
-#define CUR_SYMBOL_VALUE sh->value
+#define CUR_SYMBOL_VALUE sh.value
 #define START_PSYMTAB(ofile,secoff,fname,low,symoff,global_syms,static_syms)\
   pst = save_pst
 #define END_PSYMTAB(pst,ilist,ninc,c_off,c_text,dep_list,n_deps) (void)0
@@ -2100,30 +1982,34 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 	}
       else
 	{
-	  processing_gcc_compilation = 0;
 	  for (cur_sdx = 0; cur_sdx < fh->csym;)
 	    {
 	      char *name;
 	      enum address_class class;
-	      sh = cur_sdx + (SYMR *) fh->isymBase;
 
-	      if (MIPS_IS_STAB (sh))
+	      ecoff_swap_sym_in (cur_bfd,
+				 (ecoff_data (cur_bfd)->external_sym
+				  + fh->isymBase
+				  + cur_sdx),
+				 &sh);
+
+	      if (MIPS_IS_STAB (&sh))
 		{
 		  cur_sdx++;
 		  continue;
 		}
 
-	      if (sh->sc == scUndefined || sh->sc == scNil ||
-		  sh->index == 0xfffff)
+	      if (sh.sc == scUndefined || sh.sc == scNil ||
+		  sh.index == 0xfffff)
 		{
 		  /* FIXME, premature? */
 		  cur_sdx++;
 		  continue;
 		}
 
-	      name = (char *) (sh->iss);
+	      name = ecoff_data (cur_bfd)->ss + fh->issBase + sh.iss;
 
-	      switch (sh->st)
+	      switch (sh.st)
 		{
 		  long high;
 		  long procaddr;
@@ -2133,10 +2019,10 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 		case stStaticProc:	/* Function */
 		  ADD_PSYMBOL_TO_LIST (name, strlen (name),
 				       VAR_NAMESPACE, LOC_BLOCK,
-				       objfile->static_psymbols, sh->value,
+				       objfile->static_psymbols, sh.value,
 				       psymtab_language, objfile);
 		  /* Skip over procedure to next one. */
-		  if (sh->index >= hdr->iauxMax)
+		  if (sh.index >= hdr->iauxMax)
 		    {
 		      /* Should not happen, but does when cross-compiling
 			   with the MIPS compiler.  FIXME -- pull later.  */
@@ -2145,8 +2031,10 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 		    }
 		  else
 		    new_sdx = AUX_GET_ISYM (fh->fBigendian,
-				sh->index + (union aux_ext *) fh->iauxBase);
-		  procaddr = sh->value;
+					    (ecoff_data (cur_bfd)->external_aux
+					     + fh->iauxBase
+					     + sh.index));
+		  procaddr = sh.value;
 
 		  if (new_sdx <= cur_sdx)
 		    {
@@ -2156,10 +2044,15 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 		    }
 
 		  cur_sdx = new_sdx;
-		  sh = cur_sdx + (SYMR *) fh->isymBase - 1;
-		  if (sh->st != stEnd)
+		  ecoff_swap_sym_in (cur_bfd,
+				     (ecoff_data (cur_bfd)->external_sym
+				      + fh->isymBase
+				      + cur_sdx
+				      - 1),
+				     &sh);
+		  if (sh.st != stEnd)
 		    continue;
-		  high = procaddr + sh->value;
+		  high = procaddr + sh.value;
 		  if (high > pst->texthigh)
 		    pst->texthigh = high;
 		  continue;
@@ -2180,16 +2073,16 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 		case stStruct:
 		case stEnum:
 		case stBlock:	/* { }, str, un, enum*/
-		  if (sh->sc == scInfo)
+		  if (sh.sc == scInfo)
 		    {
 		      ADD_PSYMBOL_TO_LIST (name, strlen (name),
 					   STRUCT_NAMESPACE, LOC_TYPEDEF,
 					   objfile->static_psymbols,
-					   sh->value,
+					   sh.value,
 					   psymtab_language, objfile);
 		    }
 		  /* Skip over the block */
-		  new_sdx = sh->index;
+		  new_sdx = sh.index;
 		  if (new_sdx <= cur_sdx)
 		    {
 		      /* This happens with the Ultrix kernel. */
@@ -2213,15 +2106,15 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 		default:
 		  /* Both complaints are valid:  one gives symbol name,
 		     the other the offending symbol type.  */
-		  complain (&unknown_sym_complaint, sh->iss);
-		  complain (&unknown_st_complaint, sh->st);
+		  complain (&unknown_sym_complaint, name);
+		  complain (&unknown_st_complaint, sh.st);
 		  cur_sdx++;
 		  continue;
 		}
 	      /* Use this gdb symbol */
 	      ADD_PSYMBOL_TO_LIST (name, strlen (name),
 				   VAR_NAMESPACE, class,
-				   objfile->static_psymbols, sh->value,
+				   objfile->static_psymbols, sh.value,
 				   psymtab_language, objfile);
 	    skip:
 	      cur_sdx++;	/* Go to next file symbol */
@@ -2236,11 +2129,13 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 	    {
 	      register struct partial_symbol *psym;
 	      enum address_class class;
+	      SYMR *psh;
+	      char *name;
 
-	      if ((*ext_ptr)->ifd != f_idx)
+	      if (ext_ptr->ifd != f_idx)
 		abort ();
-	      sh = &(*ext_ptr)->asym;
-	      switch (sh->st)
+	      psh = &ext_ptr->asym;
+	      switch (psh->st)
 		{
 		case stProc:
 		  class = LOC_BLOCK;
@@ -2249,20 +2144,18 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 		  class = LOC_LABEL;
 		  break;
 		default:
-		  complain (&unknown_ext_complaint, sh->iss);
+		  complain (&unknown_ext_complaint,
+			    ecoff_data (cur_bfd)->ssext + psh->iss);
 		  /* Fall through, pretend it's global.  */
 		case stGlobal:
 		  class = LOC_STATIC;
 		  break;
 		}
-	      if (objfile->global_psymbols.next >=
-	      objfile->global_psymbols.list + objfile->global_psymbols.size)
-		extend_psymbol_list (&objfile->global_psymbols, objfile);
-	      psym = objfile->global_psymbols.next++;
-	      SYMBOL_NAME (psym) = (char *) sh->iss;
-	      SYMBOL_NAMESPACE (psym) = VAR_NAMESPACE;
-	      SYMBOL_CLASS (psym) = class;
-	      SYMBOL_VALUE_ADDRESS (psym) = (CORE_ADDR) sh->value;
+	      name = ecoff_data (cur_bfd)->ssext + psh->iss;
+	      ADD_PSYMBOL_ADDR_TO_LIST (name, strlen (name),
+				        VAR_NAMESPACE, class,
+				        objfile->global_psymbols, (CORE_ADDR) psh->value,
+				        psymtab_language, objfile);
 	    }
 	}
 
@@ -2277,14 +2170,11 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 	}
     }
 
-  /* Mark the last code address, and remember it for later */
-  hdr->cbDnOffset = end_of_text_seg;
-
   /* Now scan the FDRs for dependencies */
   for (f_idx = 0; f_idx < hdr->ifdMax; f_idx++)
     {
       int s_id0 = 0;
-      fh = f_idx + (FDR *) (cur_hdr->cbFdOffset);
+      fh = f_idx + ecoff_data (cur_bfd)->fdr;
       pst = fdr_to_pst[f_idx].pst;
 
       /* This should catch stabs-in-ecoff. */
@@ -2292,12 +2182,18 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 	continue;
 
       if (fh->cpd == 0)
-	{			/* If there are no functions defined here ... */
+	{		/* If there are no functions defined here ... */
 	  /* ...then presumably a .h file: drop reverse depends .h->.c */
 	  for (; s_id0 < fh->crfd; s_id0++)
 	    {
-	      RFDT *rh = (RFDT *) (fh->rfdBase) + s_id0;
-	      if (*rh == f_idx)
+	      RFDT rh;
+
+	      ecoff_swap_rfd_in (cur_bfd,
+				 (ecoff_data (cur_bfd)->external_rfd
+				  + fh->rfdBase
+				  + s_id0),
+				 &rh);
+	      if (rh == f_idx)
 		{
 		  s_id0++;	/* Skip self-dependency */
 		  break;
@@ -2312,11 +2208,17 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 			 * sizeof (struct partial_symtab *))));
       for (s_idx = s_id0; s_idx < fh->crfd; s_idx++)
 	{
-	  RFDT *rh = (RFDT *) (fh->rfdBase) + s_idx;
-	  if (*rh < 0 || *rh >= hdr->ifdMax)
-	    complain (&bad_file_number_complaint, *rh);
+	  RFDT rh;
+
+	  ecoff_swap_rfd_in (cur_bfd,
+			     (ecoff_data (cur_bfd)->external_rfd
+			      + fh->rfdBase
+			      + s_idx),
+			     &rh);
+	  if (rh < 0 || rh >= hdr->ifdMax)
+	    complain (&bad_file_number_complaint, rh);
 	  else
-	    pst->dependencies[s_idx - s_id0] = fdr_to_pst[*rh].pst;
+	    pst->dependencies[s_idx - s_id0] = fdr_to_pst[rh].pst;
 	}
     }
   do_cleanups (old_chain);
@@ -2339,7 +2241,7 @@ parse_fdr (f_idx, lev, objfile)
   register struct partial_symtab *pst;
   int s_idx, s_id0;
 
-  fh = (FDR *) (cur_hdr->cbFdOffset) + f_idx;
+  fh = ecoff_data (cur_bfd)->fdr + f_idx;
 
   /* Use this to indicate into which symtab this file was parsed */
   if (fh->ioptBase)
@@ -2350,7 +2252,7 @@ parse_fdr (f_idx, lev, objfile)
     max_glevel = fh->glevel;
 
   /* Make a new partial_symtab */
-  pst = new_psymtab (fh->rss, objfile);
+  pst = new_psymtab (fdr_name (fh), objfile);
   if (fh->cpd == 0)
     {
       pst->textlow = 0;
@@ -2373,12 +2275,18 @@ parse_fdr (f_idx, lev, objfile)
 
   s_id0 = 0;
   if (fh->cpd == 0)
-    {			/* If there are no functions defined here ... */
+    {				/* If there are no functions defined here ... */
       /* ...then presumably a .h file: drop reverse depends .h->.c */
       for (; s_id0 < fh->crfd; s_id0++)
 	{
-	  RFDT *rh = (RFDT *) (fh->rfdBase) + s_id0;
-	  if (*rh == f_idx)
+	  RFDT rh;
+
+	  ecoff_swap_rfd_in (cur_bfd,
+			     (ecoff_data (cur_bfd)->external_rfd
+			      + fh->rfdBase
+			      + s_id0),
+			     &rh);
+	  if (rh == f_idx)
 	    {
 	      s_id0++;		/* Skip self-dependency */
 	      break;
@@ -2392,9 +2300,14 @@ parse_fdr (f_idx, lev, objfile)
 				       * sizeof (struct partial_symtab *))));
   for (s_idx = s_id0; s_idx < fh->crfd; s_idx++)
     {
-      RFDT *rh = (RFDT *) (fh->rfdBase) + s_idx;
+      RFDT rh;
 
-      pst->dependencies[s_idx - s_id0] = parse_fdr (*rh, lev + 1, objfile);
+      ecoff_swap_rfd_in (cur_bfd,
+			 (ecoff_data (cur_bfd)->external_rfd
+			  + fh->rfdBase
+			  + s_idx),
+			 &rh);
+      pst->dependencies[s_idx - s_id0] = parse_fdr (rh, lev + 1, objfile);
     }
 
   return pst;
@@ -2405,8 +2318,15 @@ parse_fdr (f_idx, lev, objfile)
 static char *
 mips_next_symbol_text ()
 {
+  SYMR sh;
+
   cur_sdx++;
-  return (char *) ((SYMR *) cur_fdr->isymBase)[cur_sdx].iss;
+  ecoff_swap_sym_in (cur_bfd,
+		     (ecoff_data (cur_bfd)->external_sym
+		      + cur_fdr->isymBase
+		      + cur_sdx),
+		     &sh);
+  return ecoff_data (cur_bfd)->ss + cur_fdr->issBase + sh.iss;
 }
 
 /* Ancillary function to psymtab_to_symtab().  Does all the work
@@ -2428,7 +2348,6 @@ psymtab_to_symtab_1 (pst, filename)
   struct symtab *st;
   FDR *fh;
   struct linetable *lines;
-  int bound;
 
   if (pst->readin)
     return;
@@ -2462,28 +2381,38 @@ psymtab_to_symtab_1 (pst, filename)
 
   current_objfile = pst->objfile;
   cur_fd = FDR_IDX (pst);
-  fh = (cur_fd == -1) ? 0 : (FDR *) (cur_hdr->cbFdOffset) + FDR_IDX (pst);
+  fh = (cur_fd == -1) ? (FDR *) NULL : ecoff_data (cur_bfd)->fdr + cur_fd;
   cur_fdr = fh;
 
-  /* BOUND is the highest core address of this file's procedures */
-  bound = (cur_fd == cur_hdr->ifdMax - 1) ?
-    cur_hdr->cbDnOffset :
-    fh[1].adr;
-
   /* See comment in parse_partial_symbols about the @stabs sentinel. */
-  if (fh && fh->csym >= 2
-      && STREQ ((char *) (((SYMR *) fh->isymBase)[1].iss), stabs_symbol))
+  processing_gcc_compilation = 0;
+  if (fh != (FDR *) NULL && fh->csym >= 2)
     {
+      SYMR sh;
 
-      /*
-	 * This symbol table contains stabs-in-ecoff entries.
-	 */
+      ecoff_swap_sym_in (cur_bfd,
+			 (ecoff_data (cur_bfd)->external_sym
+			  + fh->isymBase
+			  + 1),
+			 &sh);
+      if (STREQ (ecoff_data (cur_bfd)->ss + fh->issBase + sh.iss,
+		 stabs_symbol))
+	{
+	  /* We indicate that this is a GCC compilation so that certain
+	     features will be enabled in stabsread/dbxread.  */
+	  processing_gcc_compilation = 2;
+	}
+    }
 
-      PDR *pr;
+  if (processing_gcc_compilation != 0)
+    {
+      struct pdr_ext *pdr_ptr;
+      struct pdr_ext *pdr_end;
+      int first_pdr;
+      unsigned long first_off;
 
-      /* We indicate that this is a GCC compilation so that certain features
-	 will be enabled in stabsread/dbxread.  */
-      processing_gcc_compilation = 2;
+      /* This symbol table contains stabs-in-ecoff entries.  */
+
       /* Parse local symbols first */
 
       if (fh->csym <= 2)	/* FIXME, this blows psymtab->symtab ptr */
@@ -2493,12 +2422,20 @@ psymtab_to_symtab_1 (pst, filename)
 	}
       for (cur_sdx = 2; cur_sdx < fh->csym; cur_sdx++)
 	{
-	  register SYMR *sh = cur_sdx + (SYMR *) fh->isymBase;
-	  char *name = (char *) sh->iss;
-	  CORE_ADDR valu = sh->value;
-	  if (MIPS_IS_STAB (sh))
+	  SYMR sh;
+	  char *name;
+	  CORE_ADDR valu;
+
+	  ecoff_swap_sym_in (cur_bfd,
+			     (ecoff_data (cur_bfd)->external_sym
+			      + fh->isymBase
+			      + cur_sdx),
+			     &sh);
+	  name = ecoff_data (cur_bfd)->ss + fh->issBase + sh.iss;
+	  valu = sh.value;
+	  if (MIPS_IS_STAB (&sh))
 	    {
-	      int type_code = MIPS_UNMARK_STAB (sh->index);
+	      int type_code = MIPS_UNMARK_STAB (sh.index);
 	      process_one_symbol (type_code, 0, valu, name,
 				  pst->section_offsets, pst->objfile);
 	      if (type_code == N_FUN)
@@ -2506,9 +2443,9 @@ psymtab_to_symtab_1 (pst, filename)
 		  /* Make up special symbol to contain
 		     procedure specific info */
 		  struct mips_extra_func_info *e =
-		  (struct mips_extra_func_info *)
-		  obstack_alloc (&current_objfile->symbol_obstack,
-				 sizeof (struct mips_extra_func_info));
+		    ((struct mips_extra_func_info *)
+		     obstack_alloc (&current_objfile->symbol_obstack,
+				    sizeof (struct mips_extra_func_info)));
 		  struct symbol *s = new_symbol (MIPS_EFI_SYMBOL_NAME);
 		  SYMBOL_NAMESPACE (s) = LABEL_NAMESPACE;
 		  SYMBOL_CLASS (s) = LOC_CONST;
@@ -2517,13 +2454,13 @@ psymtab_to_symtab_1 (pst, filename)
 		  add_symbol_to_list (s, &local_symbols);
 		}
 	    }
-	  else if (sh->st == stLabel && sh->index != indexNil)
+	  else if (sh.st == stLabel && sh.index != indexNil)
 	    {
 	      /* Handle encoded stab line number. */
-	      record_line (current_subfile, sh->index, valu);
+	      record_line (current_subfile, sh.index, valu);
 	    }
 	  else
-	    complain (&stab_unknown_complaint, sh->iss);
+	    complain (&stab_unknown_complaint, name);
 	}
       st = end_symtab (pst->texthigh, 0, 0, pst->objfile);
       end_stabs ();
@@ -2535,29 +2472,32 @@ psymtab_to_symtab_1 (pst, filename)
       /* This may not be necessary for stabs symtabs.  FIXME.  */
       sort_blocks (st);
 
-      /* Fill in procedure info next.  We need to look-ahead to
-	 find out where each procedure's code ends.  */
-
-      for (i = 0; i <= fh->cpd - 1; i++)
+      /* Fill in procedure info next.  */
+      first_pdr = 1;
+      pdr_ptr = ecoff_data (cur_bfd)->external_pdr + fh->ipdFirst;
+      pdr_end = pdr_ptr + fh->cpd;
+      for (; pdr_ptr < pdr_end; pdr_ptr++)
 	{
-	  pr = (PDR *) (IPDFIRST (cur_hdr, fh)) + i;
-	  parse_procedure (pr, i < fh->cpd - 1 ? pr[1].adr : bound, 1);
+	  PDR pr;
+
+	  ecoff_swap_pdr_in (cur_bfd, pdr_ptr, &pr);
+	  if (first_pdr)
+	    {
+	      first_off = pr.adr;
+	      first_pdr = 0;
+	    }
+	  parse_procedure (&pr, 1, first_off);
 	}
     }
   else
     {
-
-      /*
-       * This symbol table contains ordinary ecoff entries.
-       */
+      /* This symbol table contains ordinary ecoff entries.  */
 
       /* FIXME:  doesn't use pst->section_offsets.  */
 
       int f_max;
       int maxlines;
-      EXTR **ext_ptr;
-
-      processing_gcc_compilation = 0;
+      EXTR *ext_ptr;
 
       /* How many symbols will we need */
       /* FIXME, this does not count enum values. */
@@ -2575,12 +2515,13 @@ psymtab_to_symtab_1 (pst, filename)
 	}
 
       lines = LINETABLE (st);
-      pending_list = (struct mips_pending **) cur_hdr->cbOptOffset;
+      pending_list = PST_PRIVATE (pst)->pending_list;
       if (pending_list == 0)
 	{
-	  pending_list = (struct mips_pending **)
-	    xzalloc (cur_hdr->ifdMax * sizeof (struct mips_pending *));
-	  cur_hdr->cbOptOffset = (int) pending_list;
+	  pending_list = ((struct mips_pending **)
+			  xzalloc (ecoff_data (cur_bfd)->symbolic_header.ifdMax
+				   * sizeof (struct mips_pending *)));
+	  PST_PRIVATE (pst)->pending_list = pending_list;
 	}
 
       /* Get a new lexical context */
@@ -2599,31 +2540,61 @@ psymtab_to_symtab_1 (pst, filename)
 
       if (fh)
 	{
-	  SYMR *sh;
-	  PDR *pr;
+	  struct sym_ext *sym_ptr;
+	  struct sym_ext *sym_end;
 
 	  /* Parse local symbols first */
-
-	  for (cur_sdx = 0; cur_sdx < fh->csym;)
+	  sym_ptr = ecoff_data (cur_bfd)->external_sym + fh->isymBase;
+	  sym_end = sym_ptr + fh->csym;
+	  while (sym_ptr < sym_end)
 	    {
-	      sh = (SYMR *) (fh->isymBase) + cur_sdx;
-	      cur_sdx += parse_symbol (sh, (union aux_ext *) fh->iauxBase,
-				       fh->fBigendian);
+	      SYMR sh;
+	      int c;
+
+	      ecoff_swap_sym_in (cur_bfd, sym_ptr, &sh);
+	      c = parse_symbol (&sh,
+				(ecoff_data (cur_bfd)->external_aux
+				 + fh->iauxBase),
+				sym_ptr, fh->fBigendian);
+	      /* FIXME: We must swap the modified symbol back out,
+		 although we would rather not.  See parse_symbol.  */
+	      ecoff_swap_sym_out (cur_bfd, &sh, sym_ptr);
+	      sym_ptr += c;
 	    }
 
-	  /* Linenumbers.  At the end, check if we can save memory */
-
-	  parse_lines (fh, lines);
-	  if (lines->nitems < fh->cline)
-	    lines = shrink_linetable (lines);
-
-	  /* Fill in procedure info next.  We need to look-ahead to
-	       find out where each procedure's code ends.  */
-
-	  for (i = 0; i <= fh->cpd - 1; i++)
+	  /* Linenumbers.  At the end, check if we can save memory.
+	     parse_lines has to look ahead an arbitrary number of PDR
+	     structures, so we swap them all first.  */
+	  if (fh->cpd > 0)
 	    {
-	      pr = (PDR *) (IPDFIRST (cur_hdr, fh)) + i;
-	      parse_procedure (pr, i < fh->cpd - 1 ? pr[1].adr : bound, 0);
+	      PDR *pr_block;
+	      struct cleanup *old_chain;
+	      struct pdr_ext *pdr_ptr;
+	      struct pdr_ext *pdr_end;
+	      PDR *pdr_in;
+	      PDR *pdr_in_end;
+
+	      pr_block = (PDR *) xmalloc (fh->cpd * sizeof (PDR));
+
+	      old_chain = make_cleanup (free, pr_block);
+
+	      pdr_ptr = ecoff_data (cur_bfd)->external_pdr + fh->ipdFirst;
+	      pdr_end = pdr_ptr + fh->cpd;
+	      pdr_in = pr_block;
+	      for (; pdr_ptr < pdr_end; pdr_ptr++, pdr_in++)
+		ecoff_swap_pdr_in (cur_bfd, pdr_ptr, pdr_in);
+
+	      parse_lines (fh, pr_block, lines);
+	      if (lines->nitems < fh->cline)
+		lines = shrink_linetable (lines);
+
+	      /* Fill in procedure info next.  */
+	      pdr_in = pr_block;
+	      pdr_in_end = pdr_in + fh->cpd;
+	      for (; pdr_in < pdr_in_end; pdr_in++)
+		parse_procedure (pdr_in, 0, pr_block->adr);
+
+	      do_cleanups (old_chain);
 	    }
 	}
 
@@ -2636,12 +2607,13 @@ psymtab_to_symtab_1 (pst, filename)
       top_stack->cur_block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (top_stack->cur_st),
 						GLOBAL_BLOCK);
       top_stack->blocktype = stFile;
-      top_stack->maxsyms =
-	cur_hdr->isymMax + cur_hdr->ipdMax + cur_hdr->iextMax;
+      top_stack->maxsyms = (ecoff_data (cur_bfd)->symbolic_header.isymMax
+			    + ecoff_data (cur_bfd)->symbolic_header.ipdMax
+			    + ecoff_data (cur_bfd)->symbolic_header.iextMax);
 
       ext_ptr = PST_PRIVATE (pst)->extern_tab;
       for (i = PST_PRIVATE (pst)->extern_count; --i >= 0; ext_ptr++)
-	parse_external (*ext_ptr, 1, fh->fBigendian);
+	parse_external (ext_ptr, 1, fh->fBigendian);
 
       /* If there are undefined, tell the user */
       if (n_undef_symbols)
@@ -2686,7 +2658,7 @@ cross_ref (ax, tpp, type_code, pname, bigend)
   unsigned rf;
   int result = 1;
 
-  ecoff_swap_rndx_in (bigend, ax, rn);
+  ecoff_swap_rndx_in (bigend, &ax->a_rndx, rn);
 
   /* Escape index means 'the next one' */
   if (rn->rfd == 0xfff)
@@ -2710,40 +2682,42 @@ cross_ref (ax, tpp, type_code, pname, bigend)
        * Find the relative file descriptor and the symbol in it
        */
       FDR *fh = get_rfd (cur_fd, rf);
-      SYMR *sh;
+      struct sym_ext *esh;
+      SYMR sh;
       struct type *t;
 
-      /*
-       * If we have processed this symbol then we left a forwarding
-       * pointer to the corresponding GDB symbol.  If not, we`ll put
-       * it in a list of pending symbols, to be processed later when
-       * the file f will be.  In any event, we collect the name for
-       * the type here. Which is why we made a first pass at
-       * strings.
-       */
-      sh = (SYMR *) (fh->isymBase) + rn->index;
+      /* If we have processed this symbol then we left a forwarding
+	 pointer to the corresponding GDB symbol.  If not, we`ll put
+	 it in a list of pending symbols, to be processed later when
+	 the file will be.  In any event, we collect the name for the
+	 type here.  Which is why we made a first pass at strings.  */
+
+      esh = ecoff_data (cur_bfd)->external_sym + fh->isymBase + rn->index;
+      ecoff_swap_sym_in (cur_bfd, esh, &sh);
 
       /* Careful, we might be looking at .o files */
-      *pname = (UNSAFE_DATA_ADDR (sh->iss)) ? "<undefined>" :
-	(char *) sh->iss;
+      if (sh.iss == 0)
+	*pname = "<undefined>";
+      else
+	*pname = ecoff_data (cur_bfd)->ss + fh->issBase + sh.iss;
 
       /* Have we parsed it ? */
-      if ((!UNSAFE_DATA_ADDR (sh->value)) && (sh->st == stParsed))
+      if (sh.value != 0 && sh.st == stParsed)
 	{
-	  t = (struct type *) sh->value;
+	  t = (struct type *) sh.value;
 	  *tpp = t;
 	}
       else
 	{
 	  /* Avoid duplicates */
-	  struct mips_pending *p = is_pending_symbol (fh, sh);
+	  struct mips_pending *p = is_pending_symbol (fh, esh);
 	  if (p)
 	    *tpp = p->t;
 	  else
 	    {
 	      *tpp = init_type (type_code, 0, 0, (char *) NULL,
 				(struct objfile *) NULL);
-	      add_pending (fh, sh, *tpp);
+	      add_pending (fh, esh, *tpp);
 	    }
 	}
     }
@@ -2834,9 +2808,9 @@ add_block (b, s)
   struct blockvector *bv = BLOCKVECTOR (s);
 
   bv = (struct blockvector *) xrealloc ((PTR) bv,
-					sizeof (struct blockvector) +
-					BLOCKVECTOR_NBLOCKS (bv)
-					* sizeof (bv->block));
+					(sizeof (struct blockvector)
+					 + BLOCKVECTOR_NBLOCKS (bv)
+					 * sizeof (bv->block)));
   if (bv != BLOCKVECTOR (s))
     BLOCKVECTOR (s) = bv;
 
@@ -2971,16 +2945,15 @@ new_psymtab (name, objfile)
 {
   struct partial_symtab *psymtab;
 
-  /* FIXME -- why (char *) -1 rather than NULL? */
-  psymtab = allocate_psymtab (name == (char *) -1 ? "<no name>" : name,
-			      objfile);
+  psymtab = allocate_psymtab (name, objfile);
 
   /* Keep a backpointer to the file's symbols */
 
   psymtab->read_symtab_private = ((char *)
 				  obstack_alloc (&objfile->psymbol_obstack,
 						 sizeof (struct symloc)));
-  CUR_HDR (psymtab) = cur_hdr;
+  memset ((PTR) psymtab->read_symtab_private, 0, sizeof (struct symloc));
+  CUR_BFD (psymtab) = cur_bfd;
 
   /* The way to turn this into a symtab is to call... */
   psymtab->read_symtab = mipscoff_psymtab_to_symtab;
@@ -3016,8 +2989,9 @@ shrink_linetable (lt)
 {
 
   return (struct linetable *) xrealloc ((PTR) lt,
-					sizeof (struct linetable)
-				    + (lt->nitems - 1) * sizeof (lt->item));
+					(sizeof (struct linetable)
+					 + ((lt->nitems - 1)
+					    * sizeof (lt->item))));
 }
 
 /* Allocate and zero a new blockvector of NBLOCKS blocks. */
@@ -3062,8 +3036,10 @@ shrink_block (b, s)
 
   /* Just reallocate it and fix references to the old one */
 
-  new = (struct block *) xrealloc ((PTR) b, sizeof (struct block) +
-			  (BLOCK_NSYMS (b) - 1) * sizeof (struct symbol *));
+  new = (struct block *) xrealloc ((PTR) b,
+				   (sizeof (struct block)
+				    + ((BLOCK_NSYMS (b) - 1)
+				       * sizeof (struct symbol *))));
 
   /* Should chase pointers to old one.  Fortunately, that`s just
 	   the block`s function and inferior blocks */
@@ -3083,8 +3059,9 @@ static struct symbol *
 new_symbol (name)
      char *name;
 {
-  struct symbol *s = (struct symbol *)
-  obstack_alloc (&current_objfile->symbol_obstack, sizeof (struct symbol));
+  struct symbol *s = ((struct symbol *)
+		      obstack_alloc (&current_objfile->symbol_obstack,
+				     sizeof (struct symbol)));
 
   memset ((PTR) s, 0, sizeof (*s));
   SYMBOL_NAME (s) = name;
@@ -3101,8 +3078,7 @@ new_type (name)
 
   t = alloc_type (current_objfile);
   TYPE_NAME (t) = name;
-  TYPE_CPLUS_SPECIFIC (t) = ((struct cplus_struct_type *)
-			     &cplus_struct_default);
+  TYPE_CPLUS_SPECIFIC (t) = (struct cplus_struct_type *) &cplus_struct_default;
   return t;
 }
 
