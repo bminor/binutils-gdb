@@ -1,3 +1,34 @@
+Wed Jun 21 16:50:29 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* configure: If per-host line isn't found, but AC_OUTPUT is found
+	and a configure script exists, run it instead.
+
+Thu Jun 15 21:09:24 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* config.guess:  Update from FSF, for alpha-dec-winnt3.5 and  Crays.
+
+Mon Jun  5 18:26:36 1995  Jason Merrill  <jason@phydeaux.cygnus.com>
+
+	* Makefile.in (PICFLAG, PICFLAG_FOR_TARGET): New macros.
+	(FLAGS_TO_PASS): Pass them.
+	(EXTRA_TARGET_FLAGS): Ditto.
+
+	* config/m?-*pic: Define PICFLAG* instead of LIB*FLAGS*.
+
+Wed May 31 22:27:42 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* Makefile.in (all-libg++): Depend on all-libstdc++.
+
+Thu May 25 22:40:59 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* configure.in (noconfigdirs): Enable all packages for
+	  i386-unknown-netbsd.
+
+Sat May 20 13:22:31 1995  Angela Marie Thomas  <angela@cirdan.cygnus.com>
+
+	* configure.in (noconfigdirs): Don't configure tk for i386-go32
+	hosted builds (DOS builds)
+
 Thu May 18 18:08:49 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 
 	Changes for ARM based on patches from Richard Earnshaw:

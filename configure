@@ -53,6 +53,8 @@ Makefile=Makefile
 Makefile_in=Makefile.in
 arguments=$*
 build_alias=
+cache_file=
+cache_file_option=
 configdirs=
 exec_prefix=
 exec_prefixoption=
@@ -162,10 +164,7 @@ do
 		esac
 		;;
 	--cache*)
-		case "$option" in
-		*=*) other_options="${other_options} ${option}" ;;
-		*) other_options="${other_options} ${option}=${optarg}" ;;
-		esac
+		cache_file=$optarg
 		;;
 	--disable-*)
 		enableopt=`echo ${option} | sed 's:^--disable-:enable_:;s:-:_:g'`
@@ -471,6 +470,34 @@ esac
 case "`grep '^# per\-host:' ${srcdir}/configure.in`" in
 "")
         echo '***' ${srcdir}/configure.in has no \"per-host:\" line. 1>&2
+	# Check for a directory that's been converted to use autoconf since
+	# it was last configured.
+	if grep AC_OUTPUT ${srcdir}/configure.in >/dev/null ; then
+	  echo '***' Hmm, looks like this directory has been autoconfiscated. 1>&2
+	  if [ -r ${srcdir}/configure ] ; then
+	    echo '***' Running the local configure script. 1>&2
+	    case "${cache_file}" in
+	    "") cache_file_option= ;;
+	    *)  cache_file_option="--cache-file=${cache_file}" ;;
+	    esac
+	    srcdiroption="--srcdir=${srcdir}"
+	    case "${build_alias}" in
+	    "") buildopt= ;;
+	    *)  buildopt="--build=${build_alias}" ;;
+	    esac
+	    eval exec ${config_shell} ${srcdir}/configure ${verbose} \
+		${buildopt} --host=${host_alias} --target=${target_alias} \
+		${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
+		${srcdiroption} \
+		${program_prefixoption} ${program_suffixoption} \
+		${program_transform_nameoption} ${site_option} \
+		${withoptions} ${withoutoptions} \
+		${enableoptions} ${disableoptions} \
+		${cache_file_option} ${removing} ${other_options} ${redirect}
+	  else
+	    echo '***' There is no configure script present though. 1>&2
+	  fi
+	fi
         exit 1
         ;;
 *) ;;
@@ -974,6 +1001,18 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
                                 ;;
                         esac
 
+			# Handle --cache-file=../XXX
+			case "${cache_file}" in
+			"") # empty
+				;;
+			/*) # absolute path
+				cache_file_option="--cache-file=${cache_file}"
+				;;
+			*) # relative path
+				cache_file_option="--cache-file=../${cache_file}"
+				;;
+			esac
+
 ### check for guested configure, otherwise fix possibly relative progname
                         if [ -f ${newsrcdir}/configure ] ; then
                                 recprog=${newsrcdir}/configure
@@ -991,7 +1030,7 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
 			if [ ! -z "${recprog}" ] ; then
 	                        if eval ${config_shell} ${recprog} ${verbose} ${buildopt} --host=${host_alias} --target=${target_alias} \
         	                        ${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
-                	                ${srcdiroption} ${program_prefixoption} ${program_suffixoption} ${program_transform_nameoption} ${site_option} ${withoptions} ${withoutoptions} ${enableoptions} ${disableoptions} ${removing} ${other_options} ${redirect} ; then
+                	                ${srcdiroption} ${program_prefixoption} ${program_suffixoption} ${program_transform_nameoption} ${site_option} ${withoptions} ${withoutoptions} ${enableoptions} ${disableoptions} ${cache_file_option} ${removing} ${other_options} ${redirect} ; then
 	                                true
         	                else
 					echo Configure in `pwd` failed, exiting. 1>&2
