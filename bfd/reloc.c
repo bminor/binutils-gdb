@@ -1962,6 +1962,11 @@ ENUMDOC
   The MIPS16 jump instruction.
 
 ENUM
+  BFD_RELOC_MIPS16_GPREL
+ENUMDOC
+  MIPS16 GP relative reloc.
+
+ENUM
   BFD_RELOC_HI16
 ENUMDOC
   High 16 bits of 32-bit value; simple reloc.

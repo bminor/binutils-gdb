@@ -1681,6 +1681,9 @@ simple reloc otherwise. */
 /* The MIPS16 jump instruction. */
   BFD_RELOC_MIPS16_JMP,
 
+/* MIPS16 GP relative reloc. */
+  BFD_RELOC_MIPS16_GPREL,
+
 /* High 16 bits of 32-bit value; simple reloc. */
   BFD_RELOC_HI16,
 

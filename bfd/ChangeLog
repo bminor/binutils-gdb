@@ -1,3 +1,14 @@
+Tue Feb 11 15:27:32 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-mips.c (reloc_type): Add R_MIPS16_GPREL.
+	(elf_mips16_gprel_howto): New static variable.
+	(mips16_gprel_reloc): New static function.
+	(bfd_elf32_bfd_reloc_type_lookup): Handle BFD_RELOC_MIPS16_GPREL.
+	(mips_info_to_howto_rel): Handle R_MIPS16_GPREL.
+	(mips_elf_relocate_section): Handle R_MIPS16_GPREL.
+	* reloc.c (BFD_RELOC_MIPS16_GPREL): Define.
+	* bfd-in2.h, libbfd.h: Rebuild.
+
 start-sanitize-m32r
 Mon Feb 10 23:25:00 1997  Doug Evans  <dje@seba.ricochet.net>
 
