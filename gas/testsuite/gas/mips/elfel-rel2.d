@@ -1,5 +1,6 @@
 #objdump: -sr -j .text
 #name: MIPS ELF reloc 2
+#source: elf-rel2.s
 
 # Test the GPREL and LITERAL generation.
 # FIXME: really this should check that the contents of .sdata, .lit4,
@@ -21,6 +22,6 @@ OFFSET           TYPE              VALUE
 
 
 Contents of section \.text:
- 0000 d782c000 d782c008 d782c010 c782c000  .*
- 0010 c782c004 c782c008 8f82c000 8f82c004  .*
- 0020 8f82c008 00000000 00000000 00000000  .*
+ 0000 00c082d7 08c082d7 10c082d7 00c082c7  .*
+ 0010 04c082c7 08c082c7 00c0828f 04c0828f  .*
+ 0020 08c0828f 00000000 00000000 00000000  .*

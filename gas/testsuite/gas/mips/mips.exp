@@ -10,9 +10,11 @@ if { [istarget mips*-*-*] } then {
     set gpr_ilocks [expr [istarget mipstx39*-*-*]]
     set addr32 [expr [istarget mipstx39*-*-*]]
 
-
-
-
+    if { [istarget mips*el-*-*] || [istarget "mips*-*-*linux*"] } then {
+	set tmips "t"
+    } else {
+	set tmips ""
+    }
 
     run_dump_test "abs"
     run_dump_test "add"
@@ -103,17 +105,44 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "elf_e_flags3"
 	run_dump_test "elf_e_flags4"
     
-	run_dump_test "elf-rel"
-	if [istarget mips64*-*-*] { 
-	    run_dump_test "elf-rel2" 
+	if [istarget mips*el-*-*] { 
+	    run_dump_test "elfel-rel"
 	} {
-	    run_dump_test "e32-rel2" 
-	} 
-	run_dump_test "empic"
+	    run_dump_test "elf-rel"
+	}
+
+	if [istarget mips64*-*-*] { 
+	    if [istarget mips*el-*-*] { 
+		run_dump_test "elfel-rel2" 
+	    } {
+		run_dump_test "elf-rel2" 
+	    }
+	} {
+	    if [istarget mips*el-*-*] { 
+		run_dump_test "e32el-rel2" 
+	    } {
+		run_dump_test "e32-rel2" 
+	    }
+	}
+
+	if [istarget mips*el-*-*] { 
+	    run_dump_test "${tmips}elempic"
+	} {
+	    run_dump_test "${tmips}empic"
+	}
+
 	if { !$no_mips16 } { 
-	    run_dump_test "mips16-e" 
+	    if [istarget mips*el-*-*] { 
+		run_dump_test "${tmips}mipsel16-e" 
+	    } {
+		run_dump_test "${tmips}mips16-e" 
+	    }
 	    setup_xfail "mips*-*-*"
-	    run_dump_test "mips16-f" 
+	    if [istarget mips*el-*-*] { 
+		run_dump_test "mipsel16-f" 
+	    } {
+		run_dump_test "mips16-f" 
+	    }
 	}
     }
 }

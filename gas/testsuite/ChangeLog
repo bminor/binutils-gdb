@@ -1,3 +1,21 @@
+2001-05-25  H.J. Lu  <hjl@gnu.org>
+
+	* gas/mips/e32el-rel2.d: New for little endian mips.
+	* gas/mips/elfel-rel2.d: Likewise.
+	* gas/mips/elfel-rel.d: Likewise.
+	* gas/mips/mipsel16-f.d: Likewise.
+	* gas/mips/telempic.d: Likewise.
+	* gas/mips/tmipsel16-e.d: Likewise.
+
+	* gas/mips/tempic.d: New for traditional mips.
+	* gas/mips/tmips16-e.d: Likewise.
+
+	* gas/mips/elf-rel.d: Handle alignment padding.
+	* gas/mips/elf-rel2.d: Likewise.
+
+	* gas/mips/mips.exp: Support little endian and traditional
+	mips.
+
 2001-05-24  H.J. Lu  <hjl@gnu.org>
 
 	* gas/m68k/pcrel.d: Support 64bit BFD.
