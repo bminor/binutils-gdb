@@ -1743,7 +1743,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
   fprintf (file, _("  -z nodelete\t\tMark DSO non-deletable at runtime\n"));
   fprintf (file, _("  -z nodlopen\t\tMark DSO not available to dlopen\n"));
   fprintf (file, _("  -z nodump\t\tMark DSO not available to dldump\n"));
-  fprintf (file, _("  -z noexecstack\t\tMark executable as not requiring executable stack\n"));
+  fprintf (file, _("  -z noexecstack\tMark executable as not requiring executable stack\n"));
   fprintf (file, _("  -z now\t\tMark object non-lazy runtime binding\n"));
   fprintf (file, _("  -z origin\t\tMark object requiring immediate \$ORIGIN processing\n\t\t\t  at runtime\n"));
   fprintf (file, _("  -z KEYWORD\t\tIgnored for Solaris compatibility\n"));
