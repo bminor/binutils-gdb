@@ -90,6 +90,7 @@ gdbcmd.h
 gdbcore.h
 gdbtypes.c
 gdbtypes.h
+go32-nat.c
 go32-xdep.c
 gould-pinsn.c
 gould-xdep.c

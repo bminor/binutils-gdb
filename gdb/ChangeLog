@@ -1,5 +1,13 @@
 Fri Oct 16 13:06:08 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	Native separation for go32 (untested).
+
+	* config/go32.mh (NAT_FILE, NATDEPFILES): new macros.
+	* go32-nat.c: new file.
+	* go32-xdep.c (call_ptrace, child_resume,
+	  fetch_inferior_registers, store_inferior_registers,
+	  child_xfer_memory, fetch_core_registers): removed to go32-nat.c.
+
 	Native support for m88k (untested).
 
 	* Makefile.in (HFILES): added nm-m88k.h
