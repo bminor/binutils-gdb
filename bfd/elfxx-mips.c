@@ -6415,6 +6415,70 @@ _bfd_mips_elf_hide_symbol (info, entry, force_local)
   got->_raw_size += MIPS_ELF_GOT_SIZE (dynobj);
 }
 
+#define PDR_SIZE 32
+
+boolean
+_bfd_mips_elf_discard_info (abfd, cookie, info)
+     bfd *abfd;
+     struct elf_reloc_cookie *cookie;
+     struct bfd_link_info *info;
+{
+  asection *o;
+  boolean ret = false;
+  unsigned char *tdata;
+  size_t i, skip;
+
+  o = bfd_get_section_by_name (abfd, ".pdr");
+  if (! o)
+    return false;
+  if (o->_raw_size == 0)
+    return false;
+  if (o->_raw_size % PDR_SIZE != 0)
+    return false;
+  if (o->output_section != NULL
+      && bfd_is_abs_section (o->output_section))
+    return false;
+
+  tdata = bfd_zmalloc (o->_raw_size / PDR_SIZE);
+  if (! tdata)
+    return false;
+
+  cookie->rels = _bfd_elf32_link_read_relocs (abfd, o, (PTR) NULL,
+					      (Elf_Internal_Rela *) NULL,
+					      info->keep_memory);
+  if (!cookie->rels)
+    {
+      free (tdata);
+      return false;
+    }
+
+  cookie->rel = cookie->rels;
+  cookie->relend = cookie->rels + o->reloc_count;
+
+  for (i = 0, skip = 0; i < o->_raw_size; i ++)
+    {
+      if (_bfd_elf32_reloc_symbol_deleted_p (i * PDR_SIZE, cookie))
+	{
+	  tdata[i] = 1;
+	  skip ++;
+	}
+    }
+
+  if (skip != 0)
+    {
+      elf_section_data (o)->tdata = tdata;
+      o->_cooked_size = o->_raw_size - skip * PDR_SIZE;
+      ret = true;
+    }
+  else
+    free (tdata);
+
+  if (! info->keep_memory)
+    free (cookie->rels);
+
+  return ret;
+}
+
 boolean
 _bfd_mips_elf_ignore_discarded_relocs (sec)
      asection *sec;
@@ -6422,6 +6486,39 @@ _bfd_mips_elf_ignore_discarded_relocs (sec)
   if (strcmp (sec->name, ".pdr") == 0)
     return true;
   return false;
+}
+
+boolean
+_bfd_mips_elf_write_section (output_bfd, sec, contents)
+     bfd *output_bfd;
+     asection *sec;
+     bfd_byte *contents;
+{
+  bfd_byte *to, *from, *end;
+  int i;
+
+  if (strcmp (sec->name, ".pdr") != 0)
+    return false;
+
+  if (elf_section_data (sec)->tdata == NULL)
+    return false;
+
+  to = contents;
+  end = contents + sec->_raw_size;
+  for (from = contents, i = 0;
+       from < end;
+       from += PDR_SIZE, i++)
+    {
+      if (((unsigned char *) elf_section_data (sec)->tdata)[i] == 1)
+	continue;
+      if (to != from)
+	memcpy (to, from, PDR_SIZE);
+      to += PDR_SIZE;
+    }
+  bfd_set_section_contents (output_bfd, sec->output_section, contents,
+			    (file_ptr) sec->output_offset,
+			    sec->_cooked_size);
+  return true;
 }
 
 /* MIPS ELF uses a special find_nearest_line routine in order the

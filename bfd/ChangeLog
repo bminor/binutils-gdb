@@ -1,3 +1,15 @@
+2002-07-19  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* elfxx-mips.c (_bfd_mips_elf_discard_info): New function, code from
+	elf32-mips.c.
+	(_bfd_mips_elf_write_section): Likewise.
+	* elfxx-mips.h (_bfd_mips_elf_discard_info): New prototype.
+	(_bfd_mips_elf_write_section): Likewise.
+	* elf32-mips.c (elf32_mips_discard_info): Move to elfxx-mips.c.
+	(elf32_mips_write_section): Likewise.
+	* elf64-mips.c (_bfd_mips_elf_ignore_discarded_relocs): Use it.
+	(_bfd_mips_elf_write_section): Likewise.
+
 2002-07-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* elfxx-ia64.c: (elfNN_ia64_modify_segment_map): Properly scan

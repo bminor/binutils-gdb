@@ -91,6 +91,10 @@ extern boolean _bfd_mips_elf_set_private_flags
   PARAMS ((bfd *, flagword));
 extern boolean _bfd_mips_elf_print_private_bfd_data
   PARAMS ((bfd *, PTR));
+extern boolean _bfd_mips_elf_discard_info
+  PARAMS ((bfd *, struct elf_reloc_cookie *, struct bfd_link_info *));
+extern boolean _bfd_mips_elf_write_section
+  PARAMS ((bfd *, asection *, bfd_byte *));
 
 extern boolean _bfd_mips_elf_read_ecoff_info
   PARAMS ((bfd *, asection *, struct ecoff_debug_info *));
