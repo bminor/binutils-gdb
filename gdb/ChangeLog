@@ -1,5 +1,11 @@
 2002-04-24  Pierre Muller  <ics.u-strasbg.fr>
 
+	* hpread.c (hpread_psymtab_to_symtab_1,
+	hpread_psymtab_to_symtab): Replace fprintf (stderr,...)
+	with fprintf_unfiltered (gdb_stderr,...).
+
+2002-04-24  Pierre Muller  <ics.u-strasbg.fr>
+
 	* remote-array.c (printf_monitor, write_monitor,
 	array_insert_breakpoint, array_remove_breakpoint ): 
 	Replace fprintf (stderr,...

@@ -2693,8 +2693,9 @@ hpread_psymtab_to_symtab_1 (struct partial_symtab *pst)
   /* Complain if we've already read in this symbol table.  */
   if (pst->readin)
     {
-      fprintf (stderr, "Psymtab for %s already read in.  Shouldn't happen.\n",
-	       pst->filename);
+      fprintf_unfiltered (gdb_stderr, "Psymtab for %s already read in."
+			  "  Shouldn't happen.\n",
+			  pst->filename);
       return;
     }
 
@@ -2748,8 +2749,9 @@ hpread_psymtab_to_symtab (struct partial_symtab *pst)
   /* Sanity check.  */
   if (pst->readin)
     {
-      fprintf (stderr, "Psymtab for %s already read in.  Shouldn't happen.\n",
-	       pst->filename);
+      fprintf_unfiltered (gdb_stderr, "Psymtab for %s already read in."
+			  "  Shouldn't happen.\n",
+			  pst->filename);
       return;
     }
 
