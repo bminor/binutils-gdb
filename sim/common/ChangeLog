@@ -1,5 +1,6 @@
 2003-06-23  Michael Snyder  <msnyder@redhat.com>
 
+	* nrun.c (main): Delete h8/300 ifdef (sim now handles signals).
 	* sim-reg.c: Fix cut-and-paste bug in comment.
 
 2003-06-22  Andrew Cagney  <cagney@redhat.com>
