@@ -41,26 +41,23 @@ do
 case "${targ}" in
 
   sparc-sun-sunos4*) 	ld_target=sun4 ;;
-  m68k-sun-sunos[34]*)	ld_target=sun3 ;;
   sparclite*-fujitsu-*) ld_target=sun4 ;;
 # start-sanitize-v9
   sparc64-*-elf*)	ld_target=sparc64-elf ;;
   sparc64*)		ld_target=sun4 ;;
 # end-sanitize-v9
   sparc*-*-aout)	ld_target=sun4 ;;
+  sparc*-*-coff)	ld_target=coff-sparc ;;
   sparc*-*-elf)		ld_target=sun4sol2 ;;
   sparc*-*-lynxos*)	ld_target=sparc-lynx ;;
   sparc*-*-solaris2*)	ld_target=sun4sol2 ;;
+  sparc*-wrs-vxworks*)  ld_target=sun4 ;;
   sparc*-*-netware)	ld_target=sun4sol2 ;;
   i960-wrs-vxworks*)    ld_target=i960 ;;
   i960-intel-nindy)	ld_target=i960 ;;
-  m68k-wrs-vxworks*)    ld_target=vxworks68 ;;
-  m680[01234]0-wrs-vxworks*) ld_target=vxworks68 ;;
-  m683?2-wrs-vxworks*)  ld_target=vxworks68 ;;
-  sparc*-wrs-vxworks*)  ld_target=sun4 ;;
-  m68k-ericsson-ose)	ld_target=ose68 ;;
-  m680[01234]0-ericsson-ose) ld_target=ose68 ;;
-  m683?2-ericsson-ose)	ld_target=ose68 ;;
+  m68*-sun-sunos[34]*)	ld_target=sun3 ;;
+  m68*-wrs-vxworks*)    ld_target=vxworks68 ;;
+  m68*-ericsson-ose)	ld_target=ose68 ;;
   *-tandem-none)	ld_target=st2000 ;; # FIXME needs better name
   i[34]86-*-go32)	ld_target=go32 ;;
   i[34]86-*-aix*)	ld_target=i386-coff ;;
@@ -96,6 +93,7 @@ case "${targ}" in
   hppa*-hp-osf)		ld_target=hppaosf ;;
   vax-dec-ultrix* | vax-dec-bsd*) ld_target=vax ;;
   mips*-dec-ultrix*)	ld_target=mips-lit ;;
+  mips*-sgi-irix5*)	ld_target=mipsb-elf32 ;;
   mips*-sgi-irix*)	ld_target=mips-big ;;
   mips*el-idt-ecoff*)	ld_target=mips-idtl ;;
   mips*-idt-ecoff*)	ld_target=mips-idt ;;

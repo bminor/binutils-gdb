@@ -1,3 +1,16 @@
+Wed Dec  1 14:04:20 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* configure.in: Group targets by CPU.  Merge some m68k target
+	entries with different CPU specs that use the same ld_target
+	values.
+
+	* configure.in: Add sparc*-*-coff.
+	* config/coff-sparc.mt, emulparams/coff_sparc.sh: New files.
+	* Makefile.in (ALL_EMULATIONS): Add em_coff_sparc.o.
+	(em_coff_sparc.c): Add dependencies and build rules.
+
+	* ldmisc.c (errno, sys_nerr, sys_errlist): Don't declare. 
+
 Wed Dec  1 12:19:55 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldgram.y (OPTION_call_shared, OPTION_non_shared): New tokens.
