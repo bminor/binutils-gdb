@@ -242,8 +242,6 @@ extract_17 (word)
 		      (word & 0x1) << 16, 17) << 2;
 }
 
-static int use_unwind = 0;
-
 /* Lookup the unwind (stack backtrace) info for the given PC.  We search all
    of the objfiles seeking the unwind table entry for this PC.  Each objfile
    contains a sorted list of struct unwind_table_entry.  Since we do a binary
@@ -391,9 +389,6 @@ find_proc_framesize(pc)
 {
   struct unwind_table_entry *u;
 
-  if (!use_unwind)
-    return -1;
-
   u = find_unwind_entry (pc);
 
   if (!u)
@@ -443,20 +438,14 @@ int
 frameless_function_invocation (frame)
      FRAME frame;
 {
+  struct unwind_table_entry *u;
 
-  if (use_unwind)
-    {
-      struct unwind_table_entry *u;
+  u = find_unwind_entry (frame->pc);
 
-      u = find_unwind_entry (frame->pc);
-
-      if (u == 0)
-	return 0;
-
-      return (u->Total_frame_size == 0);
-    }
-  else
+  if (u == 0)
     return frameless_look_for_prologue (frame);
+
+  return (u->Total_frame_size == 0);
 }
 
 CORE_ADDR
@@ -556,37 +545,25 @@ frame_chain_valid (chain, thisframe)
   if (!chain)
     return 0;
 
-  if (use_unwind)
-    {
+  struct unwind_table_entry *u;
 
-      struct unwind_table_entry *u;
+  u = find_unwind_entry (thisframe->pc);
 
-      u = find_unwind_entry (thisframe->pc);
+  msym = lookup_minimal_symbol_by_pc (FRAME_SAVED_PC (thisframe));
+  if (msym
+      && (strcmp (SYMBOL_NAME (msym), "_start") == 0))
+    return 0;
 
-      if (u == NULL)
-	/* FIXME, we should probably fall back to some other technique,
-	   if we want to deal gracefully with stripped executables or others
-	   without unwind info.  */
-	return 0;
+  if (u == NULL)
+    return 1;
 
-      if (u->Save_SP || u->Total_frame_size)
-	return 1;
+  if (u->Save_SP || u->Total_frame_size)
+    return 1;
 
-      if (pc_in_linker_stub (thisframe->pc))
-	return 1;
+  if (pc_in_linker_stub (thisframe->pc))
+    return 1;
 
-      return 0;
-    }
-  else
-    {
-      msym = lookup_minimal_symbol_by_pc (FRAME_SAVED_PC (thisframe));
-
-      if (msym
-	  && (strcmp (SYMBOL_NAME (msym), "_start") == 0))
-	return 0;
-      else
-	return 1;
-    }
+  return 0;
 }
 
 /*
@@ -1057,15 +1034,4 @@ unwind_command (exp, from_tty)
 
   printf ("%08x\n%08X\n%08X\n%08X\n", xxx.foo[0], xxx.foo[1], xxx.foo[2],
 	  xxx.foo[3]);
-}
-
-void
-_initialize_hppa_tdep ()
-{
-  add_com ("unwind", class_obscure, unwind_command, "Print unwind info\n");
-  add_show_from_set
-    (add_set_cmd ("use_unwind", class_obscure, var_boolean,
-		  (char *)&use_unwind,
-		  "Set the usage of unwind info", &setlist),
-     &showlist);
 }

@@ -423,19 +423,60 @@ record_minimal_symbol (name, address, type, objfile)
 {
   enum minimal_symbol_type ms_type;
 
-  switch (type &~ N_EXT) {
-    case N_TEXT:  ms_type = mst_text; break;
-    case N_DATA:  ms_type = mst_data; break;
-    case N_BSS:   ms_type = mst_bss;  break;
-    case N_ABS:   ms_type = mst_abs;  break;
+  switch (type)
+    {
+    case N_TEXT | N_EXT:  ms_type = mst_text; break;
+    case N_DATA | N_EXT:  ms_type = mst_data; break;
+    case N_BSS | N_EXT:   ms_type = mst_bss;  break;
+    case N_ABS | N_EXT:   ms_type = mst_abs;  break;
 #ifdef N_SETV
-    case N_SETV:  ms_type = mst_data; break;
+    case N_SETV | N_EXT:  ms_type = mst_data; break;
+    case N_SETV:
+      /* I don't think this type actually exists; since a N_SETV is the result
+	 of going over many .o files, it doesn't make sense to have one
+	 file local.  */
+      ms_type = mst_file_data;
+      break;
 #endif
+    case N_NBTEXT:
+    case N_FN:
+    case N_FN_SEQ:
+    case N_TEXT:
+      ms_type = mst_file_text;
+      break;
+
+    case N_DATA:
+      ms_type = mst_file_data;
+
+      /* Check for __DYNAMIC, which is used by Sun shared libraries. 
+	 Record it as global even if it's local, not global, so
+	 lookup_minimal_symbol can find it.
+	 FIXME:  this might want to check for _DYNAMIC and the current
+	 symbol_leading_char.  */
+      if (name[8] == 'C' && STREQ ("__DYNAMIC", name))
+	ms_type = mst_data;
+
+      /* Same with virtual function tables, both global and static.  */
+      {
+	char *tempstring = name;
+	if (tempstring[0] == bfd_get_symbol_leading_char (objfile->obfd))
+	  ++tempstring;
+	if (VTBL_PREFIX_P ((tempstring)))
+	  ms_type = mst_data;
+      }
+      break;
+
+    case N_BSS:
+      ms_type = mst_file_bss;
+      break;
+
     default:      ms_type = mst_unknown; break;
   }
 
-  prim_record_minimal_symbol (obsavestring (name, strlen (name), &objfile -> symbol_obstack),
-			     address, ms_type);
+  prim_record_minimal_symbol
+    (obsavestring (name, strlen (name), &objfile -> symbol_obstack),
+     address,
+     ms_type);
 }
 
 /* Scan and build partial symbols for a symbol file.
@@ -1486,15 +1527,18 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
      other than Solaris 2, this just holds the SECT_OFF_TEXT value, and is
      used to relocate these symbol types rather than SECTION_OFFSETS.  */
   static CORE_ADDR function_start_offset;
-  char *colon_pos;
 
   /* If this is nonzero, N_LBRAC, N_RBRAC, and N_SLINE entries are relative
      to the function start address.  */
   int block_address_function_relative;
 
   /* If this is nonzero, we've seen a non-gcc N_OPT symbol for this source
-     file.  */
+     file.  Used to detect the SunPRO solaris compiler.  */
   int n_opt_found;
+
+  /* The stab type used for the definition of the last function.
+     N_STSYM or N_GSYM for SunOS4 acc; N_FUN for other compilers.  */
+  static int function_stab_type = 0;
 
   /* This is true for Solaris (and all other stabs-in-elf systems, hopefully,
      since it would be silly to do things differently from Solaris), and
@@ -1523,65 +1567,9 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
     {
     case N_FUN:
     case N_FNAME:
-#if 0
-      /* The Sun acc compiler, under SunOS4, puts out functions with N_GSYM
-	 or N_STSYM.  The problem is that the address of the symbol is no
-	 good (for N_GSYM it doesn't even attept an address; for N_STSYM
-	 it puts out an address but then it gets relocated relative to the
-	 data segment, not the text segment), so we would have to keep track of
-	 where we would use the address (e.g. to close off the block for
-	 the previous function), and patch it later (we already do this for
-	 some symbols, e.g. 'G', but in that case we just need to patch the
-	 symbol, not other data structures).  */
-    case N_GSYM:
-    case N_STSYM:
-#endif /* 0 */
-
       /* Relocate for dynamic loading */
       valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
-
-      /* Either of these types of symbols indicates the start of
-	 a new function.  We must process its "name" normally for dbx,
-	 but also record the start of a new lexical context, and possibly
-	 also the end of the lexical context for the previous function.  */
-      /* This is not always true.  This type of symbol may indicate a
-         text segment variable.  */
-
-      colon_pos = strchr (name, ':');
-      if (!colon_pos++
-	  || (*colon_pos != 'f' && *colon_pos != 'F'))
-	{
-	  define_symbol (valu, name, desc, type, objfile);
-	  break;
-	}
-
-#ifdef SUN_FIXED_LBRAC_BUG
-      last_pc_address = valu;	/* Save for SunOS bug circumcision */
-#endif
-
-      if (block_address_function_relative)
-	/* On Solaris 2.0 compilers, the block addresses and N_SLINE's
-	   are relative to the start of the function.  On normal systems,
-	   and when using gcc on Solaris 2.0, these addresses are just
-	   absolute, or relative to the N_SO, depending on
-	   BLOCK_ADDRESS_ABSOLUTE.  */
-	function_start_offset = valu;	
-
-      within_function = 1;
-      if (context_stack_depth > 0)
-	{
-	  new = pop_context ();
-	  /* Make a block for the local symbols within.  */
-	  finish_block (new->name, &local_symbols, new->old_blocks,
-			new->start_addr, valu, objfile);
-	}
-      /* Stack must be empty now.  */
-      if (context_stack_depth != 0)
-	complain (&lbrac_unmatched_complaint, symnum);
-
-      new = push_context (0, valu);
-      new->name = define_symbol (valu, name, desc, type, objfile);
-      break;
+      goto define_a_symbol;
 
     case N_LBRAC:
       /* This "symbol" just indicates the start of an inner lexical
@@ -1881,18 +1869,83 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
     case N_LENG:		/* Length of preceding symbol type */
       if (name)
 	{
-	  struct symbol *sym;
-	  sym = define_symbol (valu, name, desc, type, objfile);
-	  if (sym != NULL && SYMBOL_CLASS (sym) == LOC_BLOCK)
+	  int deftype;
+	  char *colon_pos = strchr (name, ':');
+	  if (colon_pos == NULL)
+	    deftype = '\0';
+	  else
+	    deftype = colon_pos[1];
+
+	  switch (deftype)
 	    {
-	      /* We're not prepared to deal with this case; we won't
-		 patch up the SYMBOL_BLOCK_VALUE in finish_block.
-		 Setting the class to LOC_STATIC isn't particularly useful,
-		 but at least we won't dump core.  */
-	      static struct complaint msg = {
-		"function encountered with unexpected n_type", 0, 0};
-	      complain (&msg);
-	      SYMBOL_CLASS (sym) = LOC_STATIC;
+	    case 'f':
+	    case 'F':
+	      function_stab_type = type;
+
+	      /* The Sun acc compiler, under SunOS4, puts out
+		 functions with N_GSYM or N_STSYM.  The problem is
+		 that the address of the symbol is no good (for N_GSYM
+		 it doesn't even attept an address; for N_STSYM it
+		 puts out an address but then it gets relocated
+		 relative to the data segment, not the text segment).
+		 Currently we can't fix this up later as we do for
+		 some types of symbol in scan_file_globals.
+		 Fortunately we do have a way of finding the address -
+		 we know that the value in last_pc_address is either
+		 the one we want (if we're dealing with the first
+		 function in an object file), or somewhere in the
+		 previous function. This means that we can use the
+		 minimal symbol table to get the address.  */
+
+	      if (type == N_GSYM || type == N_STSYM)
+		{
+		  struct minimal_symbol *m;
+		  int l = colon_pos - name;
+
+		  m = lookup_minimal_symbol_by_pc (last_pc_address);
+		  if (m && STREQN (SYMBOL_NAME (m), name, l))
+		    /* last_pc_address was in this function */
+		    valu = SYMBOL_VALUE (m);
+		  else if (m && STREQN (SYMBOL_NAME (m+1), name, l))
+		    /* last_pc_address was in last function */
+		    valu = SYMBOL_VALUE (m+1);
+		  else
+		    /* Not found - use last_pc_address (for finish_block) */
+		    valu = last_pc_address;
+		}
+
+#ifdef SUN_FIXED_LBRAC_BUG
+	      last_pc_address = valu;	/* Save for SunOS bug circumcision */
+#endif
+
+	      if (block_address_function_relative)
+		/* For Solaris 2.0 compilers, the block addresses and
+		   N_SLINE's are relative to the start of the
+		   function.  On normal systems, and when using gcc on
+		   Solaris 2.0, these addresses are just absolute, or
+		   relative to the N_SO, depending on
+		   BLOCK_ADDRESS_ABSOLUTE.  */
+		function_start_offset = valu;	
+
+	      within_function = 1;
+	      if (context_stack_depth > 0)
+		{
+		  new = pop_context ();
+		  /* Make a block for the local symbols within.  */
+		  finish_block (new->name, &local_symbols, new->old_blocks,
+				new->start_addr, valu, objfile);
+		}
+	      /* Stack must be empty now.  */
+	      if (context_stack_depth != 0)
+		complain (&lbrac_unmatched_complaint, symnum);
+
+	      new = push_context (0, valu);
+	      new->name = define_symbol (valu, name, desc, type, objfile);
+	      break;
+
+	    default:
+	      define_symbol (valu, name, desc, type, objfile);
+	      break;
 	    }
 	}
       break;

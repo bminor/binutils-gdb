@@ -1,5 +1,13 @@
 Mon Jul 26 13:17:36 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* hppa-tdep.c: Remove all uses of use_unwind and `set use_unwind'
+	command.  Now we use unwind info by default if we can find it.
+
+	* config/sparc: Move VARIABLES_INSIDE_BLOCK and SUN_FIXED_LBRAC_BUG
+	to tm-sparc.h so they are shared between Solaris and SunOS4.
+	* dbxread.c (process_one_symbol): Deal with SunOS4 acc N_STSYM and
+	N_GSYM functions.
+
 	* config/pa/tm-hppa.h (REGISTER_NAMES): Use "fr" rather than "fp"
 	for floating point registers.
 

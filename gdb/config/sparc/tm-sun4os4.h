@@ -20,22 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sparc/tm-sparc.h"
 #include "tm-sunos.h"
 
-/* Do variables in the debug stabs occur after the N_LBRAC or before it?
-   acc: after, gcc: before, SunOS4 /bin/cc: before.  */
-
-#define VARIABLES_INSIDE_BLOCK(desc, gcc_p) (!(gcc_p) && n_opt_found)
-
-/* For acc, there's no need to correct LBRAC entries by guessing how
-   they should work.  In fact, this is harmful because the LBRAC
-   entries now all appear at the end of the function, not intermixed
-   with the SLINE entries.
-
-   For binary from SunOS4 /bin/cc, need to correct LBRAC's.
-
-   For gcc, doesn't matter, attempting the correction is harmless.  */
-
-#define	SUN_FIXED_LBRAC_BUG (n_opt_found)
-
 /* Offsets into jmp_buf.  Not defined by Sun, but at least documented in a
    comment in <machine/setjmp.h>! */
 
