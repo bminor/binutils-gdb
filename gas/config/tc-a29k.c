@@ -792,7 +792,7 @@ md_atof (type, litP, sizeP)
 void
 md_number_to_chars (buf, val, n)
      char *buf;
-     long val;
+     valueT val;
      int n;
 {
 
@@ -947,7 +947,7 @@ tc_coff_fix2rtype (fixP)
 void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     long from_addr, to_addr;
+     addressT from_addr, to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {
@@ -967,8 +967,8 @@ md_convert_frag (headers, fragP)
 void
 md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     long from_addr;
-     long to_addr;
+     addressT from_addr;
+     addressT to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {
@@ -1161,10 +1161,10 @@ md_operand (expressionP)
 }
 
 /* Round up a section size to the appropriate boundary.  */
-long
+valueT
 md_section_align (segment, size)
      segT segment;
-     long size;
+     valueT size;
 {
   return size;			/* Byte alignment is fine */
 }
