@@ -224,9 +224,9 @@ static const bfd_byte elf_m68k_plt_entry[PLT_ENTRY_SIZE] =
 /* Procedure linkage table entries for the cpu32 */
 static const bfd_byte elf_cpu32_plt0_entry[PLT_CPU32_ENTRY_SIZE] =
 {
-  0x20, 0x7b, 0x01, 0x70, /* moveal %pc@(0xc), %a0 */
+  0x21, 0x7b, 0x01, 0x70, /* moveal %pc@(0xc), %a0 */
   0, 0, 0, 0,             /* replaced with offset to .got + 4.  */
-  0x4e, 0xd0,             /* jmp %a0@ */
+  0x4e, 0xd1,             /* jmp %a0@ */
   0, 0, 0, 0,             /* replace with offset to .got +8. */
   0, 0, 0, 0,             /* pad out to 24 bytes.  */
   0, 0, 0, 0,             /* pad out to 24 bytes.  */
@@ -235,9 +235,9 @@ static const bfd_byte elf_cpu32_plt0_entry[PLT_CPU32_ENTRY_SIZE] =
 
 static const bfd_byte elf_cpu32_plt_entry[PLT_CPU32_ENTRY_SIZE] =
 {
-  0x20, 0x7b, 0x01, 0x70,  /* moveal %pc@(0xc), %a0 */
+  0x21, 0x7b, 0x01, 0x70,  /* moveal %pc@(0xc), %a0 */
   0, 0, 0, 0,              /* replaced with offset to symbol's .got entry.  */
-  0x4e, 0xd0,              /* jmp %a0@ */
+  0x4e, 0xd1,              /* jmp %a0@ */
   0x2f, 0x3c,              /* move.l #offset,-(%sp) */
   0, 0, 0, 0,              /* replaced with offset into relocation table.  */
   0x60, 0xff,              /* bra.l .plt */

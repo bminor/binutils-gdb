@@ -1,3 +1,8 @@
+Thu Sep 16 11:21:13 1999  Catherine Moore  <clm@cygnus.com>
+
+	* elf32-m68k.c (elf_cpu32_plt0_entry): Use a1 instead of a0.
+	(elf_cpu32_plt_entry): Likewise.
+
 Thu Sep 16 10:48:17 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* elf-hppa.h (elf_hppa_relocate_section): Allow undefined
