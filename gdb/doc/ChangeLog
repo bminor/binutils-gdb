@@ -1,3 +1,9 @@
+Fri Feb 10 20:20:08 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.texinfo (Setting): Talk about the language of a source file
+	versus the working language.  The old documentation did not match
+	what GDB did.
+
 Wed Feb  1 20:26:36 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (Source Files): Document N_SO used to mark the end

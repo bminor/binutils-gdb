@@ -5032,12 +5032,65 @@ automatically.
 There are two ways to control the working language---either have @value{GDBN}
 set it automatically, or select it manually yourself.  You can use the
 @code{set language} command for either purpose.  On startup, @value{GDBN}
-defaults to setting the language automatically.
+defaults to setting the language automatically.  The working language is
+used to determine how expressions you type are interpreted, how values
+are printed, etc.
+
+In addition to the working language, every source file which
+@value{GDBN} knows about has its own working language.  For some object
+file formats, the compiler might indicate which language a particular
+source file was in, but most of the time @value{GDBN} infers the
+language from the name of the file.  The language of a source file
+controls whether C++ names are demangled---this way @code{backtrace} can
+show each frame appropriately for its own language.  There is no way to
+set the language of a source file from within @value{GDBN}---the most
+common case where this is a problem is if you are using a program, such
+as @code{cfront} or @code{f2c}, which generates C but for which the real
+source code is in fact in another language.  In that case, make the
+program use @code{#line} directives in its C output; that way
+@value{GDBN} will not only know the correct language, it will also be
+able to display the source code of the original program, not the
+generated C code.
 
 @menu
+* Filenames::                   Filename extensions and languages.
 * Manually::                    Setting the working language manually
 * Automatically::               Having @value{GDBN} infer the source language
 @end menu
+
+@node Filenames
+@subsection List of filename extensions and languages
+
+If a source file name ends in one of the following extensions, then
+@value{GDBN} infers that its language is the one indicated.
+
+@table @file
+@ifset MOD2
+@item .mod
+Modula-2 source file
+@end ifset
+
+@item .c
+C source file
+
+@item .C
+@itemx .cc
+@itemx .cxx
+@itemx .cpp
+@itemx .cp
+@itemx .c++
+C++ source file
+
+@item .ch
+@itemx .c186
+@itemx .c286
+CHILL source file.
+
+@item .s
+@itemx .S
+Assembler source file.  This actually behaves almost like C, but
+@value{GDBN} does not skip over function prologues when stepping.
+@end table
 
 @node Manually
 @subsection Setting the working language
@@ -5082,32 +5135,15 @@ printed would be the value of @code{a}.  In Modula-2, this means to compare
 @node Automatically
 @subsection Having @value{GDBN} infer the source language
 
-To have @value{GDBN} set the working language automatically, use @samp{set
-language local} or @samp{set language auto}.  @value{GDBN} then infers the
-language that a program was written in by looking at the name of its
-source files, and examining their extensions:
-
-@table @file
-@ifset MOD2
-@item *.mod
-Modula-2 source file
-@end ifset
-
-@item *.c
-C source file
-
-@item *.C
-@itemx *.cc
-C++ source file
-@end table
-
-This information is recorded for each function or procedure in a source
-file.  When your program stops in a frame (usually by encountering a
-breakpoint), @value{GDBN} sets the working language to the language recorded
-for the function in that frame.  If the language for a frame is unknown
-(that is, if the function or block corresponding to the frame was
-defined in a source file that does not have a recognized extension), the
-current working language is not changed, and @value{GDBN} issues a warning.
+To have @value{GDBN} set the working language automatically, use
+@samp{set language local} or @samp{set language auto}.  @value{GDBN}
+then infers the working language.  That is, when your program stops in a
+frame (usually by encountering a breakpoint), @value{GDBN} sets the
+working language to the language recorded for the function in that
+frame.  If the language for a frame is unknown (that is, if the function
+or block corresponding to the frame was defined in a source file that
+does not have a recognized extension), the current working language is
+not changed, and @value{GDBN} issues a warning.
 
 This may not seem necessary for most programs, which are written
 entirely in one source language.  However, program modules and libraries
