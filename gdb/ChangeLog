@@ -1,3 +1,41 @@
+2003-08-15  J. Brobecker  <brobecker@gnat.com>
+
+	Further multiarching work mostly for hppa64-*-hpux11:
+	* hppa-tdep.h: New file.
+	* hppa-tdep.c: #include hppa-tdep.c.
+	(hppa32_num_regs): Renamed from hppa_num_regs.
+	(hppa64_num_regs): New constant.
+	(hppa64_call_dummy_breakpoint_offset): New constant.
+	(hppa32_call_dummy_length): New constant.
+	(hppa64_call_dummy_length): New constant.
+	(hppa32_stack_align): Make name 32bit explicit.
+	(hppa32_register_virtual_type): Likewise.
+	(hppa32_extract_return_value): Likewise.
+	(hppa32_use_struct_convention): Likewise.
+	(hppa32_store_return_value): Likewise.
+	(hppa64_register_virtual_type): New function.
+	(hppa64_extract_return_value): New function.
+	(hppa64_use_struct_convention): New function.
+	(hppa64_store_return_value): New function.
+	(hppa_frame_locals_address): Remove declaration, function does
+	not exist anymore.
+	(hppa_register_byte): Add support for PA64 ABI.
+	(hppa_gdbarch_init): Add support for PA64 ABI.
+	* hppa-hpux-tdep.c (hppa32_hpux_frame_saved_pc_in_sigtramp):
+	Make name 32bit explicit.
+	(hppa32_hpux_frame_base_before_sigtramp): Likewise.
+	(hppa32_hpux_frame_find_saved_regs_in_sigtramp): Likewise.
+	(hppa64_hpux_frame_saved_pc_in_sigtramp): New function.
+	(hppa64_hpux_frame_base_before_sigtramp): New function.
+	(hppa64_hpux_frame_find_saved_regs_in_sigtramp): New function.
+	* config/pa/tm-hppa64.h: Remove macros that are no longer
+	necessary now that the gdbarch vector is properly setup.
+	Transform some macros into function calls. Some minor cleanup. 
+	* config/pa/tm-hppah.h: Update function calls in macros
+	following the function renaming in hppa-hpux-tdep.c.
+	* Makefile.in (hppa_tdep_h): New variable.
+	(hppa-tdep.o): Add dependency over hppa_tdep_h.
+
 2003-08-14  Michael Snyder  <msnyder@redhat.com>
 
 	* disasm.c (gdb_disassemble_info): Set info->insn_sets to zero.

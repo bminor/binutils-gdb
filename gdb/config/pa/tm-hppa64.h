@@ -21,10 +21,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-struct type;
-struct value;
-struct frame_info;
-
 /* PA 64-bit specific definitions.  Override those which are in
    tm-hppa.h */
 
@@ -43,86 +39,13 @@ struct frame_info;
 
 #include "pa/tm-hppah.h"
 
-/* Say how long (ordinary) registers are.  This is used in
-   push_word and a few other places, but REGISTER_RAW_SIZE is
-   the real way to know how big a register is.  */
-
-#undef DEPRECATED_REGISTER_SIZE
-#define DEPRECATED_REGISTER_SIZE 8
-
-/* Number of bytes of storage in the actual machine representation
-   for register N.  On the PA-RISC 2.0, all regs are 8 bytes, including
-   the FP registers (they're accessed as two 4 byte halves).  */
-
-#undef REGISTER_RAW_SIZE
-#define REGISTER_RAW_SIZE(N) 8
-
-/* Largest value REGISTER_RAW_SIZE can have.  */
-
-#undef DEPRECATED_MAX_REGISTER_RAW_SIZE
-#define DEPRECATED_MAX_REGISTER_RAW_SIZE 8
-
-/* Total amount of space needed to store our copies of the machine's
-   register state, the array `registers'.  */
-
-#undef DEPRECATED_REGISTER_BYTES
-#define DEPRECATED_REGISTER_BYTES (NUM_REGS * 8)
-
-/* Index within `registers' of the first byte of the space for
-   register N.  */
-
-#undef REGISTER_BYTE
-#define REGISTER_BYTE(N) ((N) * 8)
-
-#undef REGISTER_VIRTUAL_TYPE
-#define REGISTER_VIRTUAL_TYPE(N) \
- ((N) < FP4_REGNUM ? builtin_type_unsigned_long_long : builtin_type_double)
-
-
-/* Number of machine registers */
-#undef NUM_REGS
-#define NUM_REGS 96
-
-/* Initializer for an array of names of registers.
-   There should be NUM_REGS strings in this initializer.
-   They are in rows of eight entries  */
-extern const char *hppa64_register_name (int i);
-#define REGISTER_NAME hppa64_register_name
-
-#undef FP0_REGNUM
 #undef FP4_REGNUM
-#define FP0_REGNUM 64		/* floating point reg. 0 (fspr)*/
 #define FP4_REGNUM 68
-
-/* Redefine some target bit sizes from the default.  */
-
-/* Number of bits in a long or unsigned long for the target machine. */
-
-#define TARGET_LONG_BIT 64
-
-/* Number of bits in a long long or unsigned long long for the 
-   target machine.  */
-
-#define TARGET_LONG_LONG_BIT 64
-
-/* Number of bits in a pointer for the target machine */
-
-#define TARGET_PTR_BIT 64
-
-/* Argument Pointer Register */
-#define AP_REGNUM 29
-
+#define AP_REGNUM 29  /* Argument Pointer Register */
 #define DP_REGNUM 27
-
 #define FP5_REGNUM 70
-
 #define SR5_REGNUM 48
 
-/* We access locals from SP. This may not work for frames which call
-   alloca; for those, we may need to consult unwind tables.
-   jimb: FIXME.  */
-#undef DEPRECATED_FRAME_LOCALS_ADDRESS
-#define DEPRECATED_FRAME_LOCALS_ADDRESS(fi) (get_frame_base (fi))
 
 /* For a number of horrible reasons we may have to adjust the location
    of variables on the stack.  Ugh.  jimb: why? */
@@ -179,19 +102,6 @@ call_dummy
                     0xe820f0000fb110d3LL, 0x0001000400151820LL,\
                     0xe6c0000008000240LL}
 
-#define DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET 22 * 4
-
-/* DEPRECATED_CALL_DUMMY_LENGTH is computed based on the size of a
-   word on the target machine, not the size of an instruction.  Since
-   a word on this target holds two instructions we have to divide the
-   instruction size by two to get the word size of the dummy.  */
-#undef DEPRECATED_CALL_DUMMY_LENGTH
-#define DEPRECATED_CALL_DUMMY_LENGTH (INSTRUCTION_SIZE * 26 / 2)
-
-/* The PA64 ABI mandates a 16 byte stack alignment.  */
-#undef STACK_ALIGN
-#define STACK_ALIGN(arg) ( ((arg)%16) ? (((arg)+15)&-16) : (arg))
-
 /* The PA64 ABI reserves 64 bytes of stack space for outgoing register
    parameters.  */
 #undef REG_PARM_STACK_SPACE
@@ -205,115 +115,22 @@ call_dummy
 #undef SR4EXPORT_LDIL_OFFSET
 #undef SR4EXPORT_LDO_OFFSET
 
-#undef REG_STRUCT_HAS_ADDR
-
-#undef DEPRECATED_EXTRACT_RETURN_VALUE
-/* RM: floats are returned in FR4R, doubles in FR4
- *     integral values are in r28, padded on the left 
- *     aggregates less that 65 bits are in r28, right padded 
- *     aggregates upto 128 bits are in r28 and r29, right padded
- */ 
-#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  { \
-    if (TYPE_CODE (TYPE) == TYPE_CODE_FLT) \
-      memcpy ((VALBUF), \
-	      ((char *)(REGBUF)) + REGISTER_BYTE (FP4_REGNUM) + \
-              (DEPRECATED_REGISTER_SIZE - TYPE_LENGTH (TYPE)), \
-	      TYPE_LENGTH (TYPE)); \
-    else if  (is_integral_type(TYPE))   \
-       memcpy ((VALBUF), \
-               (char *)(REGBUF) + REGISTER_BYTE (28) + \
-               (DEPRECATED_REGISTER_SIZE - TYPE_LENGTH (TYPE)), \
-               TYPE_LENGTH (TYPE)); \
-    else if (TYPE_LENGTH (TYPE) <= 8)   \
-       memcpy ((VALBUF), \
-               (char *)(REGBUF) + REGISTER_BYTE (28), \
-               TYPE_LENGTH (TYPE)); \
-    else if (TYPE_LENGTH (TYPE) <= 16)   \
-      { \
-        memcpy ((VALBUF), \
-                (char *)(REGBUF) + REGISTER_BYTE (28), \
-                8); \
-        memcpy (((char *) VALBUF + 8), \
-                (char *)(REGBUF) + REGISTER_BYTE (29), \
-                TYPE_LENGTH (TYPE) - 8); \
-       } \
-  }
-
-/* RM: struct upto 128 bits are returned in registers */
-#undef USE_STRUCT_CONVENTION
-#define USE_STRUCT_CONVENTION(gcc_p, value_type)\
-  (TYPE_LENGTH (value_type) > 16)                
-
-/* RM: for return command */
-#undef DEPRECATED_STORE_RETURN_VALUE
-#define DEPRECATED_STORE_RETURN_VALUE(TYPE,VALBUF) \
-  { \
-    if (TYPE_CODE (TYPE) == TYPE_CODE_FLT) \
-      deprecated_write_register_bytes \
-	      (REGISTER_BYTE (FP4_REGNUM) + \
-              (DEPRECATED_REGISTER_SIZE - TYPE_LENGTH (TYPE)), \
-              (VALBUF), \
-	      TYPE_LENGTH (TYPE)); \
-    else if (is_integral_type(TYPE))   \
-       deprecated_write_register_bytes \
-              (REGISTER_BYTE (28) + \
-                 (DEPRECATED_REGISTER_SIZE - TYPE_LENGTH (TYPE)), \
-               (VALBUF), \
-               TYPE_LENGTH (TYPE)); \
-    else if (TYPE_LENGTH (TYPE) <= 8)   \
-       deprecated_write_register_bytes \
-             ( REGISTER_BYTE (28), \
-               (VALBUF), \
-               TYPE_LENGTH (TYPE)); \
-    else if (TYPE_LENGTH (TYPE) <= 16)   \
-      { \
-        deprecated_write_register_bytes \
-               (REGISTER_BYTE (28), \
-                (VALBUF), \
-                8); \
-        deprecated_write_register_bytes \
-               (REGISTER_BYTE (29), \
-                ((char *) VALBUF + 8), \
-                TYPE_LENGTH (TYPE) - 8); \
-       } \
-  }
-
-/* RM: these are the PA64 equivalents of the macros in tm-hppah.h --
- * see comments there.  For PA64, the save_state structure is at an
- * offset of 24 32-bit words from the sigcontext structure. The 64 bit
- * general registers are at an offset of 640 bytes from the beginning of the
- * save_state structure, and the floating pointer register are at an offset
- * of 256 bytes from the beginning of the save_state structure.
- */
 #undef FRAME_SAVED_PC_IN_SIGTRAMP
+extern void hppa64_hpux_frame_saved_pc_in_sigtramp (struct frame_info *fi,
+                                                    CORE_ADDR *tmp);
 #define FRAME_SAVED_PC_IN_SIGTRAMP(FRAME, TMP) \
-{ \
-  *(TMP) = read_memory_integer (get_frame_base (FRAME) + (24 * 4) + 640 + (33 * 8), 8); \
-}
+  hppa64_hpux_frame_saved_pc_in_sigtramp (FRAME, TMP)
 
 #undef FRAME_BASE_BEFORE_SIGTRAMP
+extern void hppa64_hpux_frame_base_before_sigtramp (struct frame_info *fi,
+                                                    CORE_ADDR *tmp);
 #define FRAME_BASE_BEFORE_SIGTRAMP(FRAME, TMP) \
-{ \
-  *(TMP) = read_memory_integer (get_frame_base (FRAME) + (24 * 4) + 640 + (30 * 8), 8); \
-}
+  hppa64_hpux_frame_base_before_sigtramp (FRAME, TMP)
 
 #undef FRAME_FIND_SAVED_REGS_IN_SIGTRAMP
+extern void hppa64_hpux_frame_find_saved_regs_in_sigtramp
+              (struct frame_info *fi, CORE_ADDR *fsr);
 #define FRAME_FIND_SAVED_REGS_IN_SIGTRAMP(FRAME, FSR) \
-{ \
-  int i; \
-  CORE_ADDR TMP1, TMP2; \
-  TMP1 = get_frame_base (FRAME) + (24 * 4) + 640; \
-  TMP2 = get_frame_base (FRAME) + (24 * 4) + 256; \
-  for (i = 0; i < NUM_REGS; i++) \
-    { \
-      if (i == SP_REGNUM) \
-        (FSR)[SP_REGNUM] = read_memory_integer (TMP1 + SP_REGNUM * 8, 8); \
-      else if (i >= FP0_REGNUM) \
-        (FSR)[i] = TMP2 + (i - FP0_REGNUM) * 8; \
-      else \
-        (FSR)[i] = TMP1 + i * 8; \
-    } \
-}
+  hppa64_hpux_frame_find_saved_regs_in_sigtramp (FRAME, FSR)
 
 /* jimb: omitted purify call support */
