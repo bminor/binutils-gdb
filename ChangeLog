@@ -1,3 +1,7 @@
+Wed Nov 29 12:12:01 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Don't configure gas for alpha-dec-osf*.
+
 Tue Nov 28 17:16:48 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Default to --with-stabs for some targets for which
