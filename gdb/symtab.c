@@ -87,6 +87,9 @@ static struct partial_symbol *
 lookup_partial_symbol PARAMS ((struct partial_symtab *, const char *,
 			       int, namespace_enum));
 
+static struct partial_symbol *
+fixup_psymbol_section PARAMS ((struct partial_symbol *, struct objfile *));
+
 static struct symtab *
 lookup_symtab_1 PARAMS ((char *));
 
@@ -362,10 +365,6 @@ gdb_mangle_name (type, i, j)
 
 
 
-struct partial_symbol * fixup_psymbol_section PARAMS ((struct partial_symbol *,
-						       struct objfile *));
-
-
 /* Find which partial symtab on contains PC and SECTION.  Return 0 if none.  */
 
 struct partial_symtab *
@@ -535,7 +534,7 @@ fixup_symbol_section (sym, objfile)
   return sym;
 }
 
-struct partial_symbol *
+static struct partial_symbol *
 fixup_psymbol_section (psym, objfile)
      struct partial_symbol *psym;
      struct objfile *objfile;
@@ -1338,6 +1337,9 @@ find_pc_sect_line (pc, section, notcurrent)
   s = find_pc_sect_symtab (pc, section);
   if (!s)
     {
+      /* if no symbol information, return previous pc */
+      if (notcurrent)
+	pc++;
       val.pc = pc;
       return val;
     }
