@@ -2970,7 +2970,9 @@ s_space (mult)
 	  bytes = repeat;
 	  if (repeat <= 0)
 	    {
-	      if (repeat < 0)
+	      if (!flag_mri)
+		as_warn (_(".space repeat count is zero, ignored"));
+	      else if (repeat < 0)
 		as_warn (_(".space repeat count is negative, ignored"));
 	      goto getout;
 	    }

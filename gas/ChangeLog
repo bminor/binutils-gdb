@@ -1,3 +1,7 @@
+2003-07-30  Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
+
+	* read.c (s_space): Revert 2003-07-28 change.
+
 2003-07-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/obj-elf.c (obj_elf_change_section): Allow "x" for .note*.
