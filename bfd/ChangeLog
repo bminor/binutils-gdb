@@ -1,3 +1,10 @@
+Mon Jul 14 15:33:55 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf.c (map_sections_to_segments): When checking whether
+	including a section in a segment would force us to skip a page,
+	align the address of the next segment to avoid wraparound
+	problems.
+
 start-sanitize-tic80
 Tue Jul  8 12:11:29 1997  Fred Fish  <fnf@cygnus.com>
 
