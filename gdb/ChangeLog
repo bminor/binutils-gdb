@@ -1,3 +1,8 @@
+Sat Dec 14 09:52:30 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* i386-tdep.c (i386_frame_find_saved_regs):  Handle zero return
+	from get_pc_function_start gracefully.
+
 Sat Dec 14 00:43:57 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* c-exp.y (qualified_name):  Replace explicit check for valid
