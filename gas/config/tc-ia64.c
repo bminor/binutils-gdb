@@ -3165,6 +3165,7 @@ generate_unwind_image (text_name)
 			     SEC_LOAD | SEC_ALLOC | SEC_READONLY);
 
       /* Make sure the section has 8 byte alignment.  */
+      frag_align (3, 0, 0);
       record_alignment (now_seg, 3);
 
       /* Set expression which points to start of unwind descriptor area.  */
