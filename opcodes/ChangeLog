@@ -1,3 +1,16 @@
+2000-07-26  Dave Brolley  <brolley@redhat.com>
+
+	* cgen-opc.c (cgen_hw_lookup_by_name): 'i' is now unsigned.
+	(cgen_hw_lookup_by_num): Ditto.
+	(cgen_operand_lookup_by_name): Ditto.
+	(print_address): Ditto.
+	(print_keyword): Ditto.
+	* cgen-dis.c (hash_insn_array): Mark unused parameters with
+	ATTRIBUTE_UNUSED.
+	* cgen-asm.c (hash_insn_array): Mark unused parameters with
+	ATTRIBUTE_UNUSED.
+	(cgen_parse_keyword): Ditto.
+
 2000-07-20  Hans-Peter Nilsson  <hp@axis.com>
 
 	* Makefile.am (CFILES): Add cris-dis.c and cris-opc.c.

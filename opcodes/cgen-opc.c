@@ -263,7 +263,7 @@ cgen_hw_lookup_by_name (cd, name)
      CGEN_CPU_DESC cd;
      const char *name;
 {
-  int i;
+  unsigned int i;
   const CGEN_HW_ENTRY **hw = cd->hw_table.entries;
 
   for (i = 0; i < cd->hw_table.num_entries; ++i)
@@ -281,9 +281,9 @@ cgen_hw_lookup_by_name (cd, name)
 const CGEN_HW_ENTRY *
 cgen_hw_lookup_by_num (cd, hwnum)
      CGEN_CPU_DESC cd;
-     int hwnum;
+     unsigned int hwnum;
 {
-  int i;
+  unsigned int i;
   const CGEN_HW_ENTRY **hw = cd->hw_table.entries;
 
   /* ??? This can be speeded up.  */
@@ -305,7 +305,7 @@ cgen_operand_lookup_by_name (cd, name)
      CGEN_CPU_DESC cd;
      const char *name;
 {
-  int i;
+  unsigned int i;
   const CGEN_OPERAND **op = cd->operand_table.entries;
 
   for (i = 0; i < cd->operand_table.num_entries; ++i)
