@@ -1,3 +1,16 @@
+Sat Sep 24 01:47:25 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* corelow.c (add_solib_stub):  Remove copying of to_sections,
+	pass current_target to SOLIB_ADD. The Sep 10 change failed
+	if SOLIB_ADD errored out, or if SOLIB_ADD was trying to access
+	target memory.
+	* corelow.c (core_open):  After reading the shared libraries,
+	copy the modified to_sections vector from current_target to
+	core_ops, so that core_close can free it later.
+	* config/rs6000/nm-rs6000.h, rs6000-nat.c (xcoff_relocate_core):
+	Pass down target parameter from SOLIB_ADD and use it instead of
+	directly accessing core_ops.
+
 Fri Sep 23 14:58:49 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
 
 	* solib.c: *BSD systems need <a.out.h> to be included before

@@ -79,12 +79,7 @@ static int
 solib_add_stub (from_ttyp)
      char *from_ttyp;
 {
-  SOLIB_ADD (NULL, *(int *)from_ttyp, &core_ops);
-
-  /* SOLIB_ADD usually modifies core_ops.to_sections, which has to
-     be reflected in current_target.  */
-  current_target.to_sections = core_ops.to_sections;
-  current_target.to_sections_end = core_ops.to_sections_end;
+  SOLIB_ADD (NULL, *(int *)from_ttyp, &current_target);
   return 0;
 }
 #endif /* SOLIB_ADD */
@@ -204,6 +199,11 @@ core_open (filename, from_tty)
 #ifdef SOLIB_ADD
     catch_errors (solib_add_stub, &from_tty, (char *)0,
 		  RETURN_MASK_ALL);
+
+    /* solib_add_stub usually modifies current_target.to_sections, which
+       has to be reflected in core_ops to enable proper freeing of
+       of the to_sections vector in core_close.  */
+    core_ops.to_sections = current_target.to_sections;
 #endif
 
     /* Now, set up the frame cache, and print the top of stack */
