@@ -853,6 +853,7 @@ coff_arm_reloc_type_lookup (abfd, code)
       ASTD (BFD_RELOC_THUMB_PCREL_BRANCH9,  ARM_THUMB9);
       ASTD (BFD_RELOC_THUMB_PCREL_BRANCH12, ARM_THUMB12);
       ASTD (BFD_RELOC_THUMB_PCREL_BRANCH23, ARM_THUMB23);
+      ASTD (BFD_RELOC_THUMB_PCREL_BLX,      ARM_THUMB23);
 #endif
     default: return (CONST struct reloc_howto_struct *) 0;
     }

@@ -1,3 +1,8 @@
+2001-03-06  Nick Clifton  <nickc@redhat.com>
+
+	* coff-arm.c (coff_arm_reloc_type_lookup): Add
+	BFD_RELOC_THUMB_PCREL_BLX.
+
 2001-03-06  Igor Shevlyakov  <igor@windriver.com>
 
 	* archures.c (bfd_default_scan): Add Coldfire CPUs.
