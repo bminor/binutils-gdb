@@ -565,3 +565,18 @@ extern void single_step ();
       print_floating (doublereg, builtin_type_double, stdout);	\
     }					\
   }
+
+/* Optimization for storing registers to the inferior.  The hook
+   DO_DEFERRED_STORES
+   actually executes any deferred stores.  It is called any time
+   we are going to proceed the child, or read its registers.
+   The hook CLEAR_DEFERRED_STORES is called when we want to throw
+   away the inferior process, e.g. when it dies or we kill it.
+   FIXME, this does not handle remote debugging cleanly.  */
+
+extern int deferred_stores;
+#define	DO_DEFERRED_STORES	\
+  if (deferred_stores)		\
+    target_store_registers (-2);
+#define	CLEAR_DEFERRED_STORES	\
+  deferred_stores = 0;

@@ -1,3 +1,8 @@
+Wed Sep 16 23:03:23 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* tm-sparc.h, xm-sparc.h: externs and macros relating to deferred
+	  stores are target dependent and were moved from xm to tm.
+
 Sat Sep 19 03:14:37 1992  John Gilmore  (gnu@cygnus.com)
 
 	* Makefile.in (gdb-all.texi):  Build in objdir, not $srcdir.
