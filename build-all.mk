@@ -387,7 +387,7 @@ endif
 
 all-emacs:
 	@echo build started at `date`
-	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
+	test -d $(INSTALLDIR) || mkdir $(INSTALLDIR)
 	-rm -f $(ROOTING)/$(RELEASE_TAG)
 	ln -s $(INSTALLDIR) $(ROOTING)/$(RELEASE_TAG) 
 	$(MAKE) -f test-build.mk $(FLAGS_TO_PASS) do1 > $(canonhost)-emacs-native-log 2>&1 
@@ -396,7 +396,7 @@ all-emacs:
 
 all-cygnus:
 	@echo build started at `date`
-	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
+	test -d $(INSTALLDIR) || mkdir $(INSTALLDIR)
 	-rm -f $(ROOTING)/$(RELEASE_TAG) && ln -s $(INSTALLDIR) $(ROOTING)/$(RELEASE_TAG) 
 #
 #      The following line to be used during regular progressive builds
@@ -434,7 +434,7 @@ all-cygnus:
 
 native:
 	@echo build started at `date`
-	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
+	test -d $(INSTALLDIR) || mkdir $(INSTALLDIR)
 	-rm -f $(ROOTING)/$(RELEASE_TAG) && ln -s $(INSTALLDIR) $(ROOTING)/$(RELEASE_TAG)
 #	-rm -f $(ROOTING)/progressive-beta && ln -s $(RELEASE_TAG) $(ROOTING)/progressive-beta
 	$(MAKE) -f test-build.mk $(FLAGS_TO_PASS) $(canonhost)-stamp-3stage-done $(log)
@@ -469,7 +469,7 @@ build-latest:
 	@echo done at `date`
 
 all-native:
-	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
+	test -d $(INSTALLDIR) || mkdir $(INSTALLDIR)
 	rm -f $(ROOTING)/$(RELEASE_TAG)
 	ln -s $(INSTALLDIR) $(ROOTING)/$(RELEASE_TAG)
 	@for i in $(TARGETS) ; do \
@@ -479,7 +479,7 @@ all-native:
 	done
 
 all-cross:
-	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
+	test -d $(INSTALLDIR) || mkdir $(INSTALLDIR)
 	rm -f $(ROOTING)/$(RELEASE_TAG)
 	ln -s $(INSTALLDIR) $(ROOTING)/$(RELEASE_TAG)
 	@for i in $(TARGETS) ; do \
