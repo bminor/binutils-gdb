@@ -1,3 +1,12 @@
+Mon Jun  1 17:00:22 1998  Jeffrey A Law  (law@cygnus.com)
+
+start-sanitize-r5900
+	* gas/mips/break5900.d: Update after interlock changes.
+	* gas/mips/mips.exp: The r5900 has ilocks and gpr_ilocks.
+end-sanitize-r5900
+	* gas/mips/div-ilocks.d: Handle both "break" instruction variants.
+	* gas/mips/{div.d, mul-ilocks.d, mul.d}: Likewise.
+	
 start-sanitize-sky
 Mon Jun  1 14:33:43 1998  Doug Evans  <devans@canuck.cygnus.com>
 
