@@ -1587,51 +1587,10 @@ mips_mdebug_frame_cache (struct frame_info *next_frame, void **this_cache)
   gen_mask = kernel_trap ? 0xFFFFFFFF : PROC_REG_MASK (proc_desc);
   float_mask = kernel_trap ? 0xFFFFFFFF : PROC_FREG_MASK (proc_desc);
   
-  /* In any frame other than the innermost or a frame interrupted by a
-     signal, we assume that all registers have been saved.  This
-     assumes that all register saves in a function happen before the
-     first function call.  */
-  if (in_prologue (frame_pc_unwind (next_frame), PROC_LOW_ADDR (proc_desc))
-      /* Not sure exactly what kernel_trap means, but if it means the
-	 kernel saves the registers without a prologue doing it, we
-	 better not examine the prologue to see whether registers
-	 have been saved yet.  */
-      && !kernel_trap)
-    {
-      /* We need to figure out whether the registers that the
-         proc_desc claims are saved have been saved yet.  */
-
-      CORE_ADDR addr;
-
-      /* Bitmasks; set if we have found a save for the register.  */
-      unsigned long gen_save_found = 0;
-      unsigned long float_save_found = 0;
-      int mips16;
-
-      /* If the address is odd, assume this is MIPS16 code.  */
-      addr = PROC_LOW_ADDR (proc_desc);
-      mips16 = pc_is_mips16 (addr);
-
-      /* Scan through this function's instructions preceding the
-         current PC, and look for those that save registers.  */
-      while (addr < frame_pc_unwind (next_frame))
-	{
-	  if (mips16)
-	    {
-	      mips16_decode_reg_save (mips16_fetch_instruction (addr),
-				      &gen_save_found);
-	      addr += MIPS16_INSTLEN;
-	    }
-	  else
-	    {
-	      mips32_decode_reg_save (mips32_fetch_instruction (addr),
-				      &gen_save_found, &float_save_found);
-	      addr += MIPS_INSTLEN;
-	    }
-	}
-      gen_mask = gen_save_found;
-      float_mask = float_save_found;
-    }
+  /* Must be true.  The in_prologue case is left for the heuristic
+     unwinder.  This is always used on kernel traps.  */
+  gdb_assert (!in_prologue (frame_pc_unwind (next_frame), PROC_LOW_ADDR (proc_desc))
+	      || kernel_trap);
 
   /* Fill in the offsets for the registers which gen_mask says were
      saved.  */
