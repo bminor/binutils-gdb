@@ -206,7 +206,7 @@ gr_open(args, from_tty, gr)
       if (baud_rate != -1)
 	printf_filtered (" at baud rate of %d",
 			 baud_rate);
-      print_filtered ("\n");
+      printf_filtered ("\n");
     }
 
   push_target(gr->ops);
