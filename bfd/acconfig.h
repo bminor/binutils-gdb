@@ -30,6 +30,30 @@
 /* Define only if <sys/procfs.h> is available *and* it defines prstatus_t.  */
 #undef HAVE_SYS_PROCFS_H
 
+/* Define if <sys/procfs.h> has prstatus_t */
+#undef HAVE_PRSTATUS_T
+
+/* Define if <sys/procfs.h> has prstatus_t.pr_who */
+#undef HAVE_PRSTATUS_T_PR_WHO
+
+/* Define if <sys/procfs.h> has pstatus_t */
+#undef HAVE_PSTATUS_T
+
+/* Define if <sys/procfs.h> has prpsinfo_t */
+#undef HAVE_PRPSINFO_T
+
+/* Define if <sys/procfs.h> has psinfo_t */
+#undef HAVE_PSINFO_T
+
+/* Define if <sys/procfs.h> has lwpstatus_t */
+#undef HAVE_LWPSTATUS_T
+
+/* Define if <sys/procfs.h> has lwpstatus_t.pr_context */
+#undef HAVE_LWPSTATUS_T_PR_CONTEXT
+
+/* Define if <sys/procfs.h> has lwpstatus_t.pr_reg */
+#undef HAVE_LWPSTATUS_T_PR_REG
+
 /* Do we really want to use mmap if it's available?  */
 #undef USE_MMAP
 

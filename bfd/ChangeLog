@@ -1,3 +1,15 @@
+Mon Oct 19 01:47:21 1998  Felix Lee  <flee@cygnus.com>
+
+	* acinclude.m4, aclocal.m4: move gettext-related fragments from
+ 	aclocal.m4 to acinclude.m4, so they don't get lost.
+	
+	* elfcore.h: rewrite for better corefile support.
+	* elf.c (elfcore_*): new functions.
+	* elf-bfd.h (elf_obj_tdata): new structure members.
+	* acconfig.h, acinclude.m4, configure.in: add feature-tests for
+ 	flavor of procfs.
+	* aclocal.m4, config.in, configure, Makefile.in: regenerated.
+
 Fri Oct 16 14:07:45 1998  Catherine Moore  <clm@cygnus.com>
 
         * elf32-m32r.c:  Add HOWTO entries for R_M32R_GNU_VTINHERIT
