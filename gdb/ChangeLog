@@ -1,5 +1,16 @@
 2003-04-12  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbthread.h (save_infrun_state): Delete parameter
+	"prev_func_start".
+	(struct thread_info): Delete field "prev_func_start".
+	(load_infrun_state): Ditto.
+	* thread.c (load_infrun_state, save_infrun_state): Update.
+	* infrun.c (prev_func_start): Delete variable.
+	(context_switch, init_wait_for_inferior): Update.
+	(stop_stepping, keep_going): Update.
+
+2003-04-12  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh: Add missing opaque declarations.
 	* gdbarch.h: Regnerate.
 	* symtab.h: Add missing opaque declarations.

@@ -791,7 +791,6 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
    to be preserved over calls to it and cleared when the inferior
    is started.  */
 static CORE_ADDR prev_pc;
-static CORE_ADDR prev_func_start;
 static char *prev_func_name;
 
 
@@ -830,7 +829,6 @@ init_wait_for_inferior (void)
 {
   /* These are meaningless until the first time through wait_for_inferior.  */
   prev_pc = 0;
-  prev_func_start = 0;
   prev_func_name = NULL;
 
 #ifdef HP_OS_BUG
@@ -1118,8 +1116,7 @@ context_switch (struct execution_control_state *ecs)
   if (in_thread_list (inferior_ptid) && in_thread_list (ecs->ptid))
     {				/* Perform infrun state context switch: */
       /* Save infrun state for the old thread.  */
-      save_infrun_state (inferior_ptid, prev_pc,
-			 prev_func_start, prev_func_name,
+      save_infrun_state (inferior_ptid, prev_pc, prev_func_name,
 			 trap_expected, step_resume_breakpoint,
 			 through_sigtramp_breakpoint, step_range_start,
 			 step_range_end, &step_frame_id,
@@ -1130,8 +1127,7 @@ context_switch (struct execution_control_state *ecs)
 			 ecs->current_line, ecs->current_symtab, step_sp);
 
       /* Load infrun state for the new thread.  */
-      load_infrun_state (ecs->ptid, &prev_pc,
-			 &prev_func_start, &prev_func_name,
+      load_infrun_state (ecs->ptid, &prev_pc, &prev_func_name,
 			 &trap_expected, &step_resume_breakpoint,
 			 &through_sigtramp_breakpoint, &step_range_start,
 			 &step_range_end, &step_frame_id,
@@ -2737,7 +2733,6 @@ stop_stepping (struct execution_control_state *ecs)
          time, just like we did above if we didn't break out of the
          loop.  */
       prev_pc = read_pc ();
-      prev_func_start = ecs->stop_func_start;
       prev_func_name = ecs->stop_func_name;
     }
 
@@ -2754,11 +2749,6 @@ keep_going (struct execution_control_state *ecs)
 {
   /* Save the pc before execution, to compare with pc after stop.  */
   prev_pc = read_pc ();		/* Might have been DECR_AFTER_BREAK */
-  prev_func_start = ecs->stop_func_start;	/* Ok, since if DECR_PC_AFTER
-						   BREAK is defined, the
-						   original pc would not have
-						   been at the start of a
-						   function. */
   prev_func_name = ecs->stop_func_name;
 
   if (ecs->update_step_sp)
