@@ -1524,7 +1524,8 @@ elfNN_ia64_hash_hide_symbol (info, xh)
   h = (struct elfNN_ia64_link_hash_entry *)xh;
 
   h->root.elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
-  h->root.dynindx = -1;
+  if ((h->root.elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)
+    h->root.dynindx = -1;
 
   for (dyn_i = h->info; dyn_i; dyn_i = dyn_i->next)
     dyn_i->want_plt2 = 0;

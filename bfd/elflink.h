@@ -3541,6 +3541,9 @@ elf_fix_symbol_flags (h, eif)
     {
       struct elf_backend_data *bed;
       bed = get_elf_backend_data (elf_hash_table (eif->info)->dynobj);
+      if (ELF_ST_VISIBILITY (h->other) == STV_INTERNAL
+	  || ELF_ST_VISIBILITY (h->other) == STV_HIDDEN)
+	h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
       (*bed->elf_backend_hide_symbol) (eif->info, h);
     }
 

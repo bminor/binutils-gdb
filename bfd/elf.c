@@ -1014,8 +1014,9 @@ _bfd_elf_link_hash_hide_symbol (info, h)
      struct elf_link_hash_entry *h;
 {
   h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
-  h->dynindx = -1;
   h->plt.offset = (bfd_vma) -1;
+  if ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)
+    h->dynindx = -1;
 }
 
 /* Initialize an ELF linker hash table.  */

@@ -1863,7 +1863,8 @@ elf32_hppa_hide_symbol (info, h)
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
      struct elf_link_hash_entry *h;
 {
-  h->dynindx = -1;
+  if ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)
+    h->dynindx = -1;
   if (! ((struct elf32_hppa_link_hash_entry *) h)->plabel)
     {
       h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;

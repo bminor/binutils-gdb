@@ -1,3 +1,14 @@
+2001-04-30  H.J. Lu  <hjl@gnu.org>
+
+	* elf.c (_bfd_elf_link_hash_hide_symbol): Set dynindx to -1
+	only for ELF_LINK_FORCED_LOCAL.
+	* elf32-hppa.c (elf32_hppa_hide_symbol): Likewise.
+	* elf32-mips.c (_bfd_mips_elf_hide_symbol): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_hash_hide_symbol): Likewise.
+
+	* elflink.h (elf_fix_symbol_flags): Set ELF_LINK_FORCED_LOCAL
+	if the symbol has hidden or internal visibility.
+
 2001-04-30  Alan Modra  <amodra@one.net.au>
 
 	* elf32-hppa.c (final_link_relocate): Branch to .+8 for

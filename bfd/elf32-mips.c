@@ -4002,7 +4002,8 @@ _bfd_mips_elf_hide_symbol (info, h)
 
   h->root.elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
   h->root.plt.offset = (bfd_vma) -1;
-  h->root.dynindx = -1;
+  if ((h->root.elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)
+    h->root.dynindx = -1;
 
   /* FIXME: Do we allocate too much GOT space here?  */
   g->local_gotno++;
