@@ -1,3 +1,9 @@
+2001-07-23  Elena Zannoni  <ezannoni@redhat.com>
+
+	* memattr.c (mem_info_command): Reformat output to look more like
+	'info break' output.
+	(_initialize_mem): Improve help.
+
 2001-07-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.in (AC_CHECK_FUNCS): Add setpggrp.

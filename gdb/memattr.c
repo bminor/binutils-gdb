@@ -229,16 +229,36 @@ mem_info_command (char *args, int from_tty)
       return;
     }
 
-  printf_filtered ("Memory regions now in effect:\n");
+  printf_filtered ("Num ");
+  printf_filtered ("Enb ");
+  printf_filtered ("Low Addr   ");
+  if (TARGET_ADDR_BIT > 32)
+    printf_filtered ("        ");
+  printf_filtered ("High Addr  ");
+  if (TARGET_ADDR_BIT > 32)
+    printf_filtered ("        ");
+  printf_filtered ("Attrs ");
+  printf_filtered ("\n");
+
   for (m = mem_region_chain; m; m = m->next)
     {
-      printf_filtered ("%d: %c\t",
+      char *tmp;
+      printf_filtered ("%-3d %-3c\t",
 		       m->number,
 		       m->status ? 'y' : 'n');
-      printf_filtered ("%s - ",
-		    local_hex_string_custom ((unsigned long) m->lo, "08l"));
-      printf_filtered ("%s\t",
-		    local_hex_string_custom ((unsigned long) m->hi, "08l"));
+      if (TARGET_ADDR_BIT <= 32)
+	tmp = longest_local_hex_string_custom ((unsigned long) m->lo, "08l");
+      else
+	tmp = longest_local_hex_string_custom ((unsigned long) m->lo, "016l");
+      
+      printf_filtered ("%s ", tmp);
+      
+      if (TARGET_ADDR_BIT <= 32)
+	tmp = longest_local_hex_string_custom ((unsigned long) m->hi, "08l");
+      else
+	tmp = longest_local_hex_string_custom ((unsigned long) m->hi, "016l");
+      
+      printf_filtered ("%s ", tmp);
 
       /* Print a token for each attribute.
 
@@ -495,21 +515,25 @@ void
 _initialize_mem ()
 {
   add_com ("mem", class_vars, mem_command,
-	   "Define attributes for memory region.");
+	   "Define attributes for memory region.\n\
+Usage: mem <lo addr> <hi addr> [<mode> <width> <cache>]");
 
   add_cmd ("mem", class_vars, mem_enable_command,
 	   "Enable memory region.\n\
 Arguments are the code numbers of the memory regions to enable.\n\
+Usage: enable mem <code number>\n\
 Do \"info mem\" to see current list of code numbers.", &enablelist);
 
   add_cmd ("mem", class_vars, mem_disable_command,
 	   "Disable memory region.\n\
 Arguments are the code numbers of the memory regions to disable.\n\
+Usage: disable mem <code number>\n\
 Do \"info mem\" to see current list of code numbers.", &disablelist);
 
   add_cmd ("mem", class_vars, mem_delete_command,
 	   "Delete memory region.\n\
 Arguments are the code numbers of the memory regions to delete.\n\
+Usage: delete mem <code number>\n\
 Do \"info mem\" to see current list of code numbers.", &deletelist);
 
   add_info ("mem", mem_info_command,
