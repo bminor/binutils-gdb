@@ -516,8 +516,8 @@ if test x"${no_itcl}" = x ; then
 		`ls -dr ../../itcl[[4-9]]*/itcl 2>/dev/null` \
 		../../../itcl \
 		`ls -dr ../../../itcl[[4-9]]*/itcl 2>/dev/null` ; do
-      if test -f "$i/${configdir}/itclConfig.sh" ; then
-        ac_cv_c_itclconfig=`(cd $i/${configdir}; pwd)`
+      if test -f "$i/itclConfig.sh" ; then
+        ac_cv_c_itclconfig=`(cd $i; pwd)`
 	break
       fi
     done
@@ -536,8 +536,8 @@ if test x"${no_itcl}" = x ; then
     for i in \
 		${srcdir}/../itcl/itcl \
 		`ls -dr ${srcdir}/../itcl[[4-9]]*/itcl 2>/dev/null` ; do
-      if test -f "$i/${configdir}/itclConfig.sh" ; then
-        ac_cv_c_itclconfig=`(cd $i/${configdir}; pwd)`
+      if test -f "$i/itclConfig.sh" ; then
+        ac_cv_c_itclconfig=`(cd $i; pwd)`
 	break
       fi
     done
@@ -642,8 +642,8 @@ if test x"${no_itk}" = x ; then
 		`ls -dr ../../itcl[[4-9]]*/itk 2>/dev/null` \
 		../../../itk \
 		`ls -dr ../../../itcl[[4-9]]*/itk 2>/dev/null` ; do
-      if test -f "$i/${configdir}/itkConfig.sh" ; then
-        ac_cv_c_itkconfig=`(cd $i/${configdir}; pwd)`
+      if test -f "$i/itkConfig.sh" ; then
+        ac_cv_c_itkconfig=`(cd $i; pwd)`
 	break
       fi
     done
@@ -662,8 +662,8 @@ if test x"${no_itk}" = x ; then
     for i in \
 		${srcdir}/../itcl/itk \
 		`ls -dr ${srcdir}/../itcl[[4-9]]*/itk 2>/dev/null` ; do
-      if test -f "$i/${configdir}/itkConfig.sh" ; then
-        ac_cv_c_itkconfig=`(cd $i/${configdir}; pwd)`
+      if test -f "$i/itkConfig.sh" ; then
+        ac_cv_c_itkconfig=`(cd $i; pwd)`
 	break
       fi
     done

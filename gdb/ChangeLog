@@ -1,3 +1,9 @@
+1999-02-10  Syd Polk  <spolk@cygnus.com>
+
+	* acinclude.m4: Fix for new location of itclConfig.sh and itkConfig.sh.
+	* aclocal.m4: Regnerate.
+	* configure: Regenerate.
+
 1999-02-10  Jason Molenda  (jsm@bugshack.cygnus.com)
 
         * demangle.c: Fix comments to mention "set demangle-style"
