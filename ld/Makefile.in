@@ -180,7 +180,7 @@ ALL_EMULATIONS = elnk960.o esun3.o ei386aout.o ego32.o evsta.o \
 	ehppaelf.o emipsidtl.o esh.o eelf_i386.o ealpha.o \
 	ei386lynx.o em68klynx.o esparclynx.o ecoff_sparc.o \
 	eelf32ppc.o ei386go32.o em68kaout.o ei386linux.o \
-	eelf32_sparc.o eelf64_sparc.o
+	eelf32_sparc.o eelf64_sparc.o eriscix.o
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
@@ -371,7 +371,7 @@ eelf_i386.c: $(srcdir)/emulparams/elf_i386.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_i386
 eelf32mipb.c: $(srcdir)/emulparams/elf32mipb.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32mipb
 ealpha.c: $(srcdir)/emulparams/alpha.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/alpha.sc ${GEN_DEPENDS}
@@ -385,6 +385,9 @@ esparclynx.c: $(srcdir)/emulparams/sparclynx.sh \
 eelf32ppc.c: $(srcdir)/emulparams/elf32ppc.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppc
+eriscix.c: $(srcdir)/emulparams/riscix.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} riscix
 em68kaout.c: $(srcdir)/emulparams/m68kaout.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68kaout
@@ -782,57 +785,57 @@ Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 # DO NOT DELETE THIS LINE -- mkdep uses it.
 # DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
 
-ldctor.o : ldctor.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+ldctor.o: ldctor.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/bfdlink.h ld.h ldexp.h ldlang.h ldmisc.h \
   ldgram.h ldmain.h ldctor.h
-ldemul.o : ldemul.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+ldemul.o: ldemul.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
   config.h ld.h ldemul.h ldmisc.h ldexp.h ldlang.h ldfile.h \
   ldmain.h ldemul-list.h
-ldexp.o : ldexp.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+ldexp.o: ldexp.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/bfdlink.h ld.h ldmain.h ldmisc.h ldexp.h \
   ldgram.h ldlang.h
-ldfile.o : ldfile.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+ldfile.o: ldfile.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
   ld.h ldmisc.h ldexp.h ldlang.h ldfile.h ldmain.h ldgram.h \
   ldlex.h ldemul.h
-ldlang.o : ldlang.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+ldlang.o: ldlang.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/libiberty.h $(INCDIR)/bfdlink.h ld.h ldmain.h \
   ldgram.h ldexp.h ldlang.h ldemul.h ldlex.h ldmisc.h \
   ldctor.h ldfile.h
-ldmain.o : ldmain.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+ldmain.o: ldmain.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/libiberty.h $(INCDIR)/bfdlink.h config.h \
   ld.h ldmain.h ldmisc.h ldwrite.h ldgram.h ldexp.h ldlang.h \
   ldemul.h ldlex.h ldfile.h ldctor.h
-ldmisc.o : ldmisc.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+ldmisc.o: ldmisc.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
   ld.h ldmisc.h ldexp.h ldlang.h ldgram.h ldlex.h ldmain.h \
   ldfile.h
-ldver.o : ldver.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+ldver.o: ldver.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
   ld.h ldver.h ldemul.h ldmain.h
-ldwrite.o : ldwrite.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+ldwrite.o: ldwrite.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/bfdlink.h ld.h ldexp.h ldlang.h ldwrite.h \
   ldmisc.h ldgram.h ldmain.h
-lexsup.o : lexsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+lexsup.o: lexsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/getopt.h $(INCDIR)/bfdlink.h config.h ld.h \
   ldmain.h ldmisc.h ldexp.h ldlang.h ldgram.h ldlex.h \
   ldfile.h ldver.h
-mri.o : mri.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/obstack.h \
+mri.o: mri.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/obstack.h \
   ../bfd/sysdep.h $(INCDIR)/fopen-same.h ld.h ldexp.h \
   ldlang.h ldmisc.h mri.h ldgram.h
-ldgram.o : ldgram.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+ldgram.o: ldgram.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/bfdlink.h ld.h ldexp.h ldver.h ldlang.h ldemul.h \
   ldfile.h ldmisc.h ldmain.h mri.h ldlex.h
-ldlex.o : ldlex.c ../bfd/bfd.h $(INCDIR)/obstack.h \
-  ../bfd/sysdep.h $(INCDIR)/fopen-same.h ld.h ldgram.h \
-  ldmisc.h ldexp.h ldlang.h ldfile.h ldlex.h ldmain.h
+ldlex.o: ldlex.c ../bfd/bfd.h $(INCDIR)/obstack.h ../bfd/sysdep.h \
+  $(INCDIR)/fopen-same.h ld.h ldgram.h ldmisc.h ldexp.h \
+  ldlang.h ldfile.h ldlex.h ldmain.h
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY

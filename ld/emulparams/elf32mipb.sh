@@ -19,3 +19,6 @@ OTHER_SECTIONS='
   .gptab.sbss : { *(.gptab.bss) *(.gptab.sbss) }
 '
 ARCH=mips
+TEMPLATE_NAME=elf32
+GENERATE_SHLIB_SCRIPT=yes
+DYNAMIC_LINK=false

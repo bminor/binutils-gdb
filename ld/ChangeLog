@@ -1,3 +1,14 @@
+Thu Sep  8 13:25:24 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* emulparams/elf32mipb.sh (TEMPLATE_NAME): Define as elf32.
+	(GENERATE_SHLIB_SCRIPT): Define as yes.
+	(DYNAMIC_LINK): Define as false.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_parse):
+	Initialize config.dynamic_link to DYNAMIC_LINK if it is defined.
+	(gld${EMULATION_NAME}_place_orphan): Reset stat_ptr at end.
+	* Makefile.in (eelf32mipb.c): Depend upon elf32.em rather than
+	generic.em.
+
 Thu Sep  8 16:30:37 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
         * scripttempl/h8500b.sc: Put rdata stuff into own segment.
