@@ -15,7 +15,7 @@
 
 Do-first:
 
-d30v_files="d30v testsuite"
+d30v_files="d30v"
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
         keep_these_too="${d30v_files} ${keep_these_too}"
 else
@@ -58,6 +58,7 @@ mn10300
 ppc
 sh
 v850
+testsuite
 w65
 z8k
 
