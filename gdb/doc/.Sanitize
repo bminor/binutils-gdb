@@ -32,6 +32,7 @@ ChangeLog
 Makefile.in
 a4rc.sed
 all-cfg.texi
+annotate.texi
 configure.in
 libgdb.texinfo
 gdb.texinfo
