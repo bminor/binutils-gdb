@@ -4566,7 +4566,7 @@ do_t_adr (str)
   while (*str == ' ')
     str++;
 
-  if (reg_required_here (&str, 8) == FAIL
+  if (reg_required_here (&str, 4) == FAIL
       || skip_past_comma (&str) == FAIL
       || my_get_expression (&inst.reloc.exp, &str))
     {
@@ -4945,7 +4945,8 @@ md_apply_fix3 (fixP, val, seg)
      segT seg;
 {
   offsetT value = *val;
-  offsetT newval, temp;
+  offsetT newval;
+  unsigned long temp;
   int sign;
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   arm_fix_data *arm_data = (arm_fix_data *) fixP->tc_fix_data;
@@ -5283,6 +5284,7 @@ md_apply_fix3 (fixP, val, seg)
               as_bad_where (fixP->fx_file, fixP->fx_line,
                             "Invalid immediate for address calculation (value = 0x%08X)", value);
             newval = (rs == REG_PC ? T_OPCODE_ADD_PC : T_OPCODE_ADD_SP);
+            newval |= rd << 8;
             newval |= value >> 2;
           }
         else if (rs == rd)

@@ -1,3 +1,8 @@
+Thu Oct 30 13:46:20 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (md_apply_fix3): Fix thumb ADR pseudo op.  Patch
+	from Tony Thompson at ARM: athompso@arm.com
+
 start-sanitize-d30v
 Thu Oct 30 11:11:26 1997  Michael Meissner  <meissner@cygnus.com>
 
