@@ -1,3 +1,12 @@
+Mon Apr  5 12:07:12 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-i386.c (coff_i386_reloc): New function, to generate
+	relocateable output correctly.
+	(howto_table): Use coff_i386_reloc for all reloc types.
+	(CALC_ADDEND): Use a more efficient hack to get the correct addend
+	for a common symbol.
+	(i386comm_value): Removed; no longer needed.
+
 Sun Apr  4 15:08:48 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* coffcode.h (coff_set_section_contents): Don't write out
