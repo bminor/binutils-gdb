@@ -1,3 +1,8 @@
+2000-06-30  Timothy Wall  <twall@ppc>
+
+	* scripttempl/tic54xcoff.sc: PAGE N is not implemented, so encode
+	the page in the upper octet of the address.
+
 2000-06-26  Marek Michalkiewicz  <marekm@linux.org.pl>
 
 	* emulparams/avrmega161.sh (ARCH): Change to avr:5.

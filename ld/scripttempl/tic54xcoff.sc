@@ -1,5 +1,5 @@
 # default linker script for c54x, TI COFF(1).
-# patterned after description in TI Aseembler Tools PDF, SPRU102C, 7-53
+# patterned after description in TI Assembler Tools PDF, SPRU102C, 7-53
 test -z "$ENTRY" && ENTRY=_c_int00
 
 cat <<EOF
@@ -8,8 +8,8 @@ OUTPUT_ARCH("${OUTPUT_ARCH}")
 
 MEMORY
 {
-	PAGE 0 : prog (RXI) : ORIGIN = 0x000080, LENGTH = 0xFF00
-	PAGE 1 : data (W) : ORIGIN = 0x000080, LENGTH = 0xFF80
+	/*PAGE 0 : */ prog (RXI) : ORIGIN = 0x00000080, LENGTH = 0xFF00
+	/*PAGE 1 : */ data (W) : ORIGIN = 0x01000080, LENGTH = 0xFF80
 }
 
 ENTRY(${ENTRY})
