@@ -1,3 +1,8 @@
+Wed Feb 22 18:29:08 1995  Jim Kingdon  <kingdon@rtl.cygnus.com>
+
+	* gdb.base/term.exp: Do not give a warning if not native, it is
+	not an abnormal condition.
+
 Tue Feb 21 13:08:47 1995  Jim Kingdon  <kingdon@cygnus.com>
 
 	* gdb.base/ptype.exp: Accept char[0] as well as char[] for "ptype
