@@ -55,13 +55,18 @@ extern const char comment_chars[];
 extern const char line_comment_chars[];
 extern const char line_separator_chars[];
 
+/* This flag whether to generate line info for asm file */
+extern int generate_asm_lineno;
+
+unsigned int get_stab_string_offset PARAMS ((const char *string,
+					     const char *stabstr_secname));
+
 char *demand_copy_C_string PARAMS ((int *len_pointer));
 char get_absolute_expression_and_terminator PARAMS ((long *val_pointer));
 offsetT get_absolute_expression PARAMS ((void));
 unsigned int next_char_of_string PARAMS ((void));
 void add_include_dir PARAMS ((char *path));
-void big_cons PARAMS ((int nbytes));
-void cons PARAMS ((unsigned int nbytes));
+void cons PARAMS ((int nbytes));
 void demand_empty_rest_of_line PARAMS ((void));
 void emit_expr PARAMS ((expressionS *exp, unsigned int nbytes));
 void equals PARAMS ((char *sym_name));
@@ -70,31 +75,31 @@ void ignore_rest_of_line PARAMS ((void));
 void pseudo_set PARAMS ((symbolS * symbolP));
 void read_a_source_file PARAMS ((char *name));
 void read_begin PARAMS ((void));
-void s_abort PARAMS ((void));
+void s_abort PARAMS ((int));
 void s_align_bytes PARAMS ((int arg));
-void s_align_ptwo PARAMS ((void));
+void s_align_ptwo PARAMS ((int));
 void s_app_file PARAMS ((int));
-void s_app_line PARAMS ((void));
-void s_comm PARAMS ((void));
-void s_data PARAMS ((void));
-void s_desc PARAMS ((void));
+void s_app_line PARAMS ((int));
+void s_comm PARAMS ((int));
+void s_data PARAMS ((int));
+void s_desc PARAMS ((int));
 void s_else PARAMS ((int arg));
 void s_end PARAMS ((int arg));
 void s_endif PARAMS ((int arg));
-void s_fill PARAMS ((void));
-void s_globl PARAMS ((void));
+void s_fill PARAMS ((int));
+void s_globl PARAMS ((int arg));
 void s_if PARAMS ((int arg));
 void s_ifdef PARAMS ((int arg));
 void s_ifeqs PARAMS ((int arg));
 void s_ignore PARAMS ((int arg));
 void s_include PARAMS ((int arg));
 void s_lcomm PARAMS ((int needs_align));
-void s_lsym PARAMS ((void));
-void s_org PARAMS ((void));
-void s_set PARAMS ((void));
+void s_lsym PARAMS ((int));
+void s_org PARAMS ((int));
+void s_set PARAMS ((int));
 void s_space PARAMS ((int mult));
 void s_stab PARAMS ((int what));
-void s_text PARAMS ((void));
+void s_text PARAMS ((int));
 void stringer PARAMS ((int append_zero));
 void s_xstab PARAMS ((int what));
 

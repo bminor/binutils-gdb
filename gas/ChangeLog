@@ -9,6 +9,7 @@ Thu May  4 19:26:55 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	(s_stab_generic): Test SEPARATE_STAB_SECTIONS at run time.  If
 	it's not set, and OBJ_PROCESS_STAB isn't defined, abort.  Always
 	pass six arguments to OBJ_PROCESS_STAB.
+	* read.h (get_stab_string_offset): Declare unconditionally.
 	* config/obj-aout.h (AOUT_STABS): Define.
 	* config/obj-bout.h (AOUT_STABS): Define.
 	* config/obj-ecoff.h (OBJ_PROCESS_STAB): Add new first argument,
