@@ -61,4 +61,9 @@ extern unsigned long x86_64_linux_dr_get_status (void);
 /* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
 #define FETCH_INFERIOR_REGISTERS
 
+/* `linux-nat.c' and `i386-nat.c' have their own versions of
+   child_post_startup_inferior.  Define this to use the copy in
+   `x86-86-linux-nat.c' instead, which calls both.  */
+#define LINUX_CHILD_POST_STARTUP_INFERIOR
+
 #endif /* NM_X86_64_LINUX_H */
