@@ -1,5 +1,5 @@
 /* interp.c -- Simulator for Motorola 68HC11
-   Copyright (C) 1999, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2001 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@worldnet.fr)
 
 This file is part of GDB, the GNU debugger.
@@ -55,7 +55,7 @@ struct sim_info_list
   const char *device;
 };
 
-struct sim_info_list dev_list[] = {
+struct sim_info_list dev_list_68hc11[] = {
   {"cpu", "/m68hc11"},
   {"timer", "/m68hc11/m68hc11tim"},
   {"sio", "/m68hc11/m68hc11sio"},
@@ -64,17 +64,47 @@ struct sim_info_list dev_list[] = {
   {0, 0}
 };
 
+struct sim_info_list dev_list_68hc12[] = {
+  {"cpu", "/m68hc12"},
+  {"timer", "/m68hc12/m68hc12tim"},
+  {"sio", "/m68hc12/m68hc12sio"},
+  {"spi", "/m68hc12/m68hc12spi"},
+  {"eeprom", "/m68hc12/m68hc12eepr"},
+  {0, 0}
+};
+
+/* Cover function of sim_state_free to free the cpu buffers as well.  */
+
+static void
+free_state (SIM_DESC sd)
+{
+  if (STATE_MODULES (sd) != NULL)
+    sim_module_uninstall (sd);
+
+  sim_state_free (sd);
+}
+
 /* Give some information about the simulator.  */
 static void
 sim_get_info (SIM_DESC sd, char *cmd)
 {
   sim_cpu *cpu;
 
+  cpu = STATE_CPU (sd, 0);
   if (cmd != 0 && (cmd[0] == ' ' || cmd[0] == '-'))
     {
       int i;
       struct hw *hw_dev;
+      struct sim_info_list *dev_list;
+      const struct bfd_arch_info *arch;
+
+      arch = STATE_ARCHITECTURE (sd);
       cmd++;
+
+      if (arch->arch == bfd_arch_m68hc11)
+        dev_list = dev_list_68hc11;
+      else
+        dev_list = dev_list_68hc12;
 
       for (i = 0; dev_list[i].name; i++)
 	if (strcmp (cmd, dev_list[i].name) == 0)
@@ -96,7 +126,6 @@ sim_get_info (SIM_DESC sd, char *cmd)
       return;
     }
 
-  cpu = STATE_CPU (sd, 0);
   cpu_info (sd, cpu);
   interrupts_info (sd, &cpu->cpu_interrupts);
 }
@@ -107,19 +136,172 @@ sim_board_reset (SIM_DESC sd)
 {
   struct hw *hw_cpu;
   sim_cpu *cpu;
+  const struct bfd_arch_info *arch;
+  const char *cpu_type;
 
   cpu = STATE_CPU (sd, 0);
+  arch = STATE_ARCHITECTURE (sd);
+
   /*  hw_cpu = sim_hw_parse (sd, "/"); */
-  hw_cpu = sim_hw_parse (sd, "/m68hc11");
+  if (arch->arch == bfd_arch_m68hc11)
+    {
+      cpu->cpu_type = CPU_M6811;
+      cpu_type = "/m68hc11";
+    }
+  else
+    {
+      cpu->cpu_type = CPU_M6812;
+      cpu_type = "/m68hc12";
+    }
+  
+  hw_cpu = sim_hw_parse (sd, cpu_type);
   if (hw_cpu == 0)
     {
-      sim_io_eprintf (sd, "m68hc11 cpu not found in device tree.");
+      sim_io_eprintf (sd, "%s cpu not found in device tree.", cpu_type);
       return;
     }
 
   cpu_reset (cpu);
   hw_port_event (hw_cpu, 3, 0);
   cpu_restart (cpu);
+}
+
+int
+sim_hw_configure (SIM_DESC sd)
+{
+  const struct bfd_arch_info *arch;
+  struct hw *device_tree;
+  int m6811_mode;
+  sim_cpu *cpu;
+  
+  arch = STATE_ARCHITECTURE (sd);
+  if (arch == 0)
+    return 0;
+
+  cpu = STATE_CPU (sd, 0);
+  cpu->cpu_configured_arch = arch;
+  device_tree = sim_hw_parse (sd, "/");
+  if (arch->arch == bfd_arch_m68hc11)
+    {
+      cpu->cpu_interpretor = cpu_interp_m6811;
+      if (hw_tree_find_property (device_tree, "/m68hc11/reg") == 0)
+	{
+	  /* Allocate core managed memory */
+
+	  /* the monitor  */
+	  sim_do_commandf (sd, "memory region 0x%lx@%d,0x%lx",
+			   /* MONITOR_BASE, MONITOR_SIZE */
+			   0x8000, M6811_RAM_LEVEL, 0x8000);
+	  sim_do_commandf (sd, "memory region 0x000@%d,0x8000",
+			   M6811_RAM_LEVEL);
+	  sim_hw_parse (sd, "/m68hc11/reg 0x1000 0x03F");
+	}
+
+      if (hw_tree_find_property (device_tree, "/m68hc11/m68hc11sio/reg") == 0)
+	{
+	  sim_hw_parse (sd, "/m68hc11/m68hc11sio/reg 0x2b 0x5");
+	  sim_hw_parse (sd, "/m68hc11/m68hc11sio/backend stdio");
+	  sim_hw_parse (sd, "/m68hc11 > cpu-reset reset /m68hc11/m68hc11sio");
+	}
+      if (hw_tree_find_property (device_tree, "/m68hc11/m68hc11tim/reg") == 0)
+	{
+	  /* M68hc11 Timer configuration. */
+	  sim_hw_parse (sd, "/m68hc11/m68hc11tim/reg 0x1b 0x5");
+	  sim_hw_parse (sd, "/m68hc11 > cpu-reset reset /m68hc11/m68hc11tim");
+	}
+
+      /* Create the SPI device.  */
+      if (hw_tree_find_property (device_tree, "/m68hc11/m68hc11spi/reg") == 0)
+	{
+	  sim_hw_parse (sd, "/m68hc11/m68hc11spi/reg 0x28 0x3");
+	  sim_hw_parse (sd, "/m68hc11 > cpu-reset reset /m68hc11/m68hc11spi");
+	}
+      if (hw_tree_find_property (device_tree, "/m68hc11/nvram/reg") == 0)
+	{
+	  /* M68hc11 persistent ram configuration. */
+	  sim_hw_parse (sd, "/m68hc11/nvram/reg 0x0 256");
+	  sim_hw_parse (sd, "/m68hc11/nvram/file m68hc11.ram");
+	  sim_hw_parse (sd, "/m68hc11/nvram/mode save-modified");
+	  /*sim_hw_parse (sd, "/m68hc11 > cpu-reset reset /m68hc11/pram"); */
+	}
+      if (hw_tree_find_property (device_tree, "/m68hc11/m68hc11eepr/reg") == 0)
+	{
+	  sim_hw_parse (sd, "/m68hc11/m68hc11eepr/reg 0xb000 512");
+	  sim_hw_parse (sd, "/m68hc11 > cpu-reset reset /m68hc11/m68hc11eepr");
+	}
+    }
+  else
+    {
+      cpu->cpu_interpretor = cpu_interp_m6812;
+      if (hw_tree_find_property (device_tree, "/m68hc12/reg") == 0)
+	{
+	  /* Allocate core external memory.  */
+	  sim_do_commandf (sd, "memory region 0x%lx@%d,0x%lx",
+			   0x8000, M6811_RAM_LEVEL, 0x8000);
+	  sim_do_commandf (sd, "memory region 0x000@%d,0x8000",
+			   M6811_RAM_LEVEL);
+
+	  sim_hw_parse (sd, "/m68hc12/reg 0x0 0x3FF");
+	}
+
+      if (!hw_tree_find_property (device_tree, "/m68hc12/m68hc12sio@1/reg"))
+	{
+	  sim_hw_parse (sd, "/m68hc12/m68hc12sio@1/reg 0xC0 0x8");
+	  sim_hw_parse (sd, "/m68hc12/m68hc12sio@1/backend stdio");
+	  sim_hw_parse (sd, "/m68hc12 > cpu-reset reset /m68hc12/m68hc12sio@1");
+	}
+      if (!hw_tree_find_property (device_tree, "/m68hc12/m68hc12sio@2/reg"))
+	{
+	  sim_hw_parse (sd, "/m68hc12/m68hc12sio@2/reg 0xC8 0x8");
+	  sim_hw_parse (sd, "/m68hc12/m68hc12sio@2/backend tcp");
+	  sim_hw_parse (sd, "/m68hc12 > cpu-reset reset /m68hc12/m68hc12sio@2");
+	}
+      if (hw_tree_find_property (device_tree, "/m68hc12/m68hc12tim/reg") == 0)
+	{
+	  /* M68hc11 Timer configuration. */
+	  sim_hw_parse (sd, "/m68hc12/m68hc12tim/reg 0x1b 0x5");
+	  sim_hw_parse (sd, "/m68hc12 > cpu-reset reset /m68hc12/m68hc12tim");
+	}
+
+      /* Create the SPI device.  */
+      if (hw_tree_find_property (device_tree, "/m68hc12/m68hc12spi/reg") == 0)
+	{
+	  sim_hw_parse (sd, "/m68hc12/m68hc12spi/reg 0x28 0x3");
+	  sim_hw_parse (sd, "/m68hc12 > cpu-reset reset /m68hc12/m68hc12spi");
+	}
+      if (hw_tree_find_property (device_tree, "/m68hc12/nvram/reg") == 0)
+	{
+	  /* M68hc11 persistent ram configuration. */
+	  sim_hw_parse (sd, "/m68hc12/nvram/reg 0x2000 8192");
+	  sim_hw_parse (sd, "/m68hc12/nvram/file m68hc12.ram");
+	  sim_hw_parse (sd, "/m68hc12/nvram/mode save-modified");
+	}
+      if (hw_tree_find_property (device_tree, "/m68hc12/m68hc12eepr/reg") == 0)
+	{
+	  sim_hw_parse (sd, "/m68hc12/m68hc12eepr/reg 0x0800 2048");
+	  sim_hw_parse (sd, "/m68hc12 > cpu-reset reset /m68hc12/m68hc12eepr");
+	}
+    }
+  return 0;
+}
+
+static int
+sim_prepare_for_program (SIM_DESC sd, struct _bfd* abfd)
+{
+  sim_cpu *cpu;
+
+  cpu = STATE_CPU (sd, 0);
+
+  sim_hw_configure (sd);
+  if (abfd != NULL)
+    {
+      cpu->cpu_elf_start = bfd_get_start_address (abfd);
+    }
+
+  /* reset all state information */
+  sim_board_reset (sd);
+
+  return SIM_RC_OK;
 }
 
 SIM_DESC
@@ -144,7 +326,10 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
 
   cpu->cpu_use_elf_start = 1;
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
-    return 0;
+    {
+      free_state (sd);
+      return 0;
+    }
 
   /* getopt will print the error message so we just have to exit if this fails.
      FIXME: Hmmm...  in the case of gdb we need getopt to call
@@ -153,56 +338,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
     {
       /* Uninstall the modules to avoid memory leaks,
          file descriptor leaks, etc.  */
-      sim_module_uninstall (sd);
+      free_state (sd);
       return 0;
-    }
-
-  device_tree = sim_hw_parse (sd, "/");
-  if (hw_tree_find_property (device_tree, "/m68hc11/reg") == 0)
-    {
-      /* Allocate core managed memory */
-
-      /* the monitor  */
-      sim_do_commandf (sd, "memory region 0x%lx@%d,0x%lx",
-		       /* MONITOR_BASE, MONITOR_SIZE */
-		       0x8000, M6811_RAM_LEVEL, 0x8000);
-      sim_do_commandf (sd, "memory region 0x000@%d,0x8000",
-                       M6811_RAM_LEVEL);
-      sim_hw_parse (sd, "/m68hc11/reg 0x1000 0x03F");
-    }
-
-  if (hw_tree_find_property (device_tree, "/m68hc11/m68hc11sio/reg") == 0)
-    {
-      sim_hw_parse (sd, "/m68hc11/m68hc11sio/reg 0x2b 0x5");
-      sim_hw_parse (sd, "/m68hc11/m68hc11sio/backend stdio");
-      sim_hw_parse (sd, "/m68hc11 > cpu-reset reset /m68hc11/m68hc11sio");
-    }
-  if (hw_tree_find_property (device_tree, "/m68hc11/m68hc11tim/reg") == 0)
-    {
-      /* M68hc11 Timer configuration. */
-      sim_hw_parse (sd, "/m68hc11/m68hc11tim/reg 0x1b 0x5");
-      sim_hw_parse (sd, "/m68hc11 > cpu-reset reset /m68hc11/m68hc11tim");
-    }
-
-  /* Create the SPI device.  */
-  if (hw_tree_find_property (device_tree, "/m68hc11/m68hc11spi/reg") == 0)
-    {
-      sim_hw_parse (sd, "/m68hc11/m68hc11spi/reg 0x28 0x3");
-      sim_hw_parse (sd, "/m68hc11 > cpu-reset reset /m68hc11/m68hc11spi");
-    }
-  if (hw_tree_find_property (device_tree, "/m68hc11/pram/reg") == 0)
-    {
-      /* M68hc11 persistent ram configuration. */
-      sim_hw_parse (sd, "/m68hc11/nvram/reg 0x0 256");
-      sim_hw_parse (sd, "/m68hc11/nvram/file m68hc11.ram");
-      sim_hw_parse (sd, "/m68hc11/nvram/mode save-modified");
-      /*sim_hw_parse (sd, "/m68hc11 > cpu-reset reset /m68hc11/pram"); */
-    }
-  if (hw_tree_find_property (device_tree, "/m68hc11/m68hc11eepr/reg") == 0)
-    {
-      sim_hw_parse (sd, "/m68hc11/m68hc11eepr/reg 0xb000 512");
-      /* Connect the CPU reset to all devices. */
-      sim_hw_parse (sd, "/m68hc11 > cpu-reset reset /m68hc11/m68hc11eepr");
     }
 
   /* Check for/establish the a reference program image.  */
@@ -211,14 +348,14 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
 			    ? *STATE_PROG_ARGV (sd)
 			    : NULL), abfd) != SIM_RC_OK)
     {
-      sim_module_uninstall (sd);
+      free_state (sd);
       return 0;
     }
 
   /* Establish any remaining configuration options.  */
   if (sim_config (sd) != SIM_RC_OK)
     {
-      sim_module_uninstall (sd);
+      free_state (sd);
       return 0;
     }
 
@@ -226,16 +363,11 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
     {
       /* Uninstall the modules to avoid memory leaks,
          file descriptor leaks, etc.  */
-      sim_module_uninstall (sd);
+      free_state (sd);
       return 0;
     }
 
-  if (abfd != NULL)
-    {
-      cpu->cpu_elf_start = bfd_get_start_address (abfd);
-    }
-
-  sim_board_reset (sd);
+  sim_hw_configure (sd);
 
   /* Fudge our descriptor.  */
   return sd;
@@ -253,7 +385,7 @@ sim_close (SIM_DESC sd, int quitting)
   sim_io_shutdown (sd);
 
   /* FIXME - free SD */
-
+  sim_state_free (sd);
   return;
 }
 
@@ -302,8 +434,17 @@ sim_trace (SIM_DESC sd)
 void
 sim_info (SIM_DESC sd, int verbose)
 {
+  const char *cpu_type;
+  const struct bfd_arch_info *arch;
+
+  arch = STATE_ARCHITECTURE (sd);
+  if (arch->arch == bfd_arch_m68hc11)
+    cpu_type = "68HC11";
+  else
+    cpu_type = "68HC12";
+
   sim_io_eprintf (sd, "Simulator info:\n");
-  sim_io_eprintf (sd, "  CPU Motorola 68HC11\n");
+  sim_io_eprintf (sd, "  CPU Motorola %s\n", cpu_type);
   sim_get_info (sd, 0);
   sim_module_info (sd, verbose || STATE_VERBOSE_P (sd));
 }
@@ -312,20 +453,7 @@ SIM_RC
 sim_create_inferior (SIM_DESC sd, struct _bfd *abfd,
                      char **argv, char **env)
 {
-  sim_cpu *cpu;
-  int i;
-
-  cpu = STATE_CPU (sd, 0);
-
-  if (abfd != NULL)
-    {
-      cpu->cpu_elf_start = bfd_get_start_address (abfd);
-    }
-
-  /* reset all state information */
-  sim_board_reset (sd);
-
-  return SIM_RC_OK;
+  return sim_prepare_for_program (sd, abfd);
 }
 
 
@@ -450,7 +578,9 @@ sim_do_command (SIM_DESC sd, char *cmd)
 {
   char *mm_cmd = "memory-map";
   char *int_cmd = "interrupt";
+  sim_cpu *cpu;
 
+  cpu = STATE_CPU (sd, 0);
   /* Commands available from GDB:   */
   if (sim_args_command (sd, cmd) != SIM_RC_OK)
     {
@@ -466,4 +596,8 @@ sim_do_command (SIM_DESC sd, char *cmd)
       else
 	sim_io_eprintf (sd, "Unknown command `%s'\n", cmd);
     }
+
+  /* If the architecture changed, re-configure.  */
+  if (STATE_ARCHITECTURE (sd) != cpu->cpu_configured_arch)
+    sim_hw_configure (sd);
 }

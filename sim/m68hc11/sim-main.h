@@ -1,5 +1,5 @@
-/* sim-main.h -- Simulator for Motorola 68HC11
-   Copyright (C) 1999, 2000 Free Software Foundation, Inc.
+/* sim-main.h -- Simulator for Motorola 68HC11 & 68HC12
+   Copyright (C) 1999, 2000, 2001 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@worldnet.fr)
 
 This file is part of GDB, the GNU debugger.
@@ -65,6 +65,11 @@ enum m68hc11_map_level
   M6811_RAM_LEVEL
 };
 
+enum cpu_type
+{
+  CPU_M6811,
+  CPU_M6812
+};
 
 #define X_REGNUM 	0
 #define D_REGNUM	1
@@ -103,23 +108,45 @@ extern void print_io_byte (SIM_DESC sd, const char *name,
 			   io_reg_desc *desc, uint8 val, uint16 addr);
 
 
-/* List of special 68HC11 instructions that are not handled by the
+/* List of special 68HC11&68HC12 instructions that are not handled by the
    'gencode.c' generator.  These complex instructions are implemented
    by 'cpu_special'.  */
 enum M6811_Special
 {
+  /* 68HC11 instructions.  */
+  M6811_DAA,
+  M6811_EMUL_SYSCALL,
+  M6811_ILLEGAL,
   M6811_RTI,
-  M6811_WAI,
+  M6811_STOP,
   M6811_SWI,
   M6811_TEST,
-  M6811_ILLEGAL,
-  M6811_EMUL_SYSCALL
+  M6811_WAI,
+
+  /* 68HC12 instructions.  */
+  M6812_BGND,
+  M6812_CALL,
+  M6812_IDIVS,
+  M6812_EDIV,
+  M6812_EDIVS,
+  M6812_EMACS,
+  M6812_EMUL,
+  M6812_EMULS,
+  M6812_ETBL,
+  M6812_MEM,
+  M6812_REV,
+  M6812_REVW,
+  M6812_RTC,
+  M6812_RTI,
+  M6812_WAV
 };
 
 #define CPU_POP 1
 #define CPU_PUSH 2
 
-#define MAX_PORTS 0x40
+#define M6811_MAX_PORTS (0x03f+1)
+#define M6812_MAX_PORTS (0x3ff+1)
+#define MAX_PORTS       (M6812_MAX_PORTS)
 
 /* Tentative to keep track of the stack frame.
    The frame is updated each time a call or a return are made.
@@ -141,6 +168,10 @@ struct cpu_frame_list
   struct cpu_frame      *frame;
 };
 
+struct _sim_cpu;
+
+typedef void (* cpu_interp) (struct _sim_cpu*);
+
 struct _sim_cpu {
   /* CPU registers.  */
   struct m6811_regs     cpu_regs;
@@ -152,6 +183,12 @@ struct _sim_cpu {
   struct cpu_frame_list *cpu_current_frame;
   int                   cpu_need_update_frame;
 
+  /* Pointer to the interpretor routine.  */
+  cpu_interp            cpu_interpretor;
+
+  /* Pointer to the architecture currently configured in the simulator.  */
+  const struct bfd_arch_info  *cpu_configured_arch;
+  
   /* CPU absolute cycle time.  The cycle time is updated after
      each instruction, by the number of cycles taken by the instruction.
      It is cleared only when reset occurs.  */
@@ -186,11 +223,14 @@ struct _sim_cpu {
   /* The mode in which the CPU is configured (MODA and MODB pins).  */
   unsigned int          cpu_mode;
 
+  /* The cpu being configured.  */
+  enum cpu_type         cpu_type;
+  
   /* Initial value of the CONFIG register.  */
   uint8                 cpu_config;
   uint8                 cpu_use_local_config;
   
-  uint8 ios[0x3F];
+  uint8                 ios[MAX_PORTS];
   
   /* ... base type ... */
   sim_cpu_base base;
@@ -218,9 +258,17 @@ struct _sim_cpu {
 #define cpu_get_a(PROC)            ((PROC->cpu_regs.d >> 8) & 0x0FF)
 #define cpu_get_b(PROC)            ((PROC->cpu_regs.d) & 0x0FF)
 
+/* 68HC12 specific and Motorola internal registers.  */
+#define cpu_get_tmp3(PROC)         (0)
+#define cpu_get_tmp2(PROC)         (0)
+
 #define cpu_set_d(PROC,VAL)        (((PROC)->cpu_regs.d) = (VAL))
 #define cpu_set_x(PROC,VAL)        (((PROC)->cpu_regs.ix) = (VAL))
 #define cpu_set_y(PROC,VAL)        (((PROC)->cpu_regs.iy) = (VAL))
+
+/* 68HC12 specific and Motorola internal registers.  */
+#define cpu_set_tmp3(PROC,VAL)     (0)
+#define cpu_set_tmp2(PROC,VAL)     (0)
 
 #if 0
 /* This is a function in m68hc11_sim.c to keep track of the frame.  */
@@ -377,9 +425,9 @@ cpu_ccr_update_sub16 (sim_cpu *proc, uint16 r, uint16 a, uint16 b)
   cpu_set_ccr_N (proc, r & 0x8000 ? 1 : 0);
 }
 
-
+/* Push and pop instructions for 68HC11 (next-available stack mode).  */
 inline void
-cpu_push_uint8 (sim_cpu *proc, uint8 val)
+cpu_m68hc11_push_uint8 (sim_cpu *proc, uint8 val)
 {
   uint16 addr = proc->cpu_regs.sp;
 
@@ -389,7 +437,7 @@ cpu_push_uint8 (sim_cpu *proc, uint8 val)
 }
 
 inline void
-cpu_push_uint16 (sim_cpu *proc, uint16 val)
+cpu_m68hc11_push_uint16 (sim_cpu *proc, uint16 val)
 {
   uint16 addr = proc->cpu_regs.sp - 1;
 
@@ -399,7 +447,7 @@ cpu_push_uint16 (sim_cpu *proc, uint16 val)
 }
 
 inline uint8
-cpu_pop_uint8 (sim_cpu *proc)
+cpu_m68hc11_pop_uint8 (sim_cpu *proc)
 {
   uint16 addr = proc->cpu_regs.sp;
   uint8 val;
@@ -411,7 +459,7 @@ cpu_pop_uint8 (sim_cpu *proc)
 }
 
 inline uint16
-cpu_pop_uint16 (sim_cpu *proc)
+cpu_m68hc11_pop_uint16 (sim_cpu *proc)
 {
   uint16 addr = proc->cpu_regs.sp;
   uint16 val;
@@ -422,6 +470,54 @@ cpu_pop_uint16 (sim_cpu *proc)
   return val;
 }
 
+/* Push and pop instructions for 68HC12 (last-used stack mode).  */
+inline void
+cpu_m68hc12_push_uint8 (sim_cpu *proc, uint8 val)
+{
+  uint16 addr = proc->cpu_regs.sp;
+
+  addr --;
+  memory_write8 (proc, addr, val);
+  proc->cpu_regs.sp = addr;
+  proc->cpu_need_update_frame |= CPU_PUSH;
+}
+
+inline void
+cpu_m68hc12_push_uint16 (sim_cpu *proc, uint16 val)
+{
+  uint16 addr = proc->cpu_regs.sp;
+
+  addr -= 2;
+  memory_write16 (proc, addr, val);
+  proc->cpu_regs.sp = addr;
+  proc->cpu_need_update_frame |= CPU_PUSH;
+}
+
+inline uint8
+cpu_m68hc12_pop_uint8 (sim_cpu *proc)
+{
+  uint16 addr = proc->cpu_regs.sp;
+  uint8 val;
+  
+  val = memory_read8 (proc, addr);
+  proc->cpu_regs.sp = addr + 1;
+  proc->cpu_need_update_frame |= CPU_POP;
+  return val;
+}
+
+inline uint16
+cpu_m68hc12_pop_uint16 (sim_cpu *proc)
+{
+  uint16 addr = proc->cpu_regs.sp;
+  uint16 val;
+  
+  val = memory_read16 (proc, addr);
+  proc->cpu_regs.sp = addr + 2;
+  proc->cpu_need_update_frame |= CPU_POP;
+  return val;
+}
+
+/* Fetch a 8/16 bit value and update the PC.  */
 inline uint8
 cpu_fetch8 (sim_cpu *proc)
 {
@@ -445,9 +541,14 @@ cpu_fetch16 (sim_cpu *proc)
 }
 
 extern void cpu_call (sim_cpu* proc, uint16 addr);
+extern void cpu_exg (sim_cpu* proc, uint8 code);
+extern void cpu_dbcc (sim_cpu* proc);
 extern void cpu_special (sim_cpu *proc, enum M6811_Special special);
+extern void cpu_move8 (sim_cpu *proc, uint8 op);
+extern void cpu_move16 (sim_cpu *proc, uint8 op);
 
 extern uint16 cpu_fetch_relbranch (sim_cpu *proc);
+extern uint16 cpu_fetch_relbranch16 (sim_cpu *proc);
 extern void cpu_push_all (sim_cpu *proc);
 extern void cpu_single_step (sim_cpu *proc);
 
@@ -463,7 +564,8 @@ extern int cpu_restart (sim_cpu *cpu);
 extern void sim_memory_error (sim_cpu *cpu, SIM_SIGNAL excep,
                               uint16 addr, const char *message, ...);
 extern void emul_os (int op, sim_cpu *cpu);
-extern void cpu_interp (sim_cpu *cpu);
+extern void cpu_interp_m6811 (sim_cpu *cpu);
+extern void cpu_interp_m6812 (sim_cpu *cpu);
 
 /* The current state of the processor; registers, memory, etc.  */
 

@@ -1,5 +1,5 @@
-/* m6811_cpu.c -- 68HC11 CPU Emulation
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+/* m6811_cpu.c -- 68HC11&68HC12 CPU Emulation
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@worldnet.fr)
 
 This file is part of GDB, GAS, and the GNU binutils.
@@ -305,6 +305,341 @@ cpu_set_sp (sim_cpu *cpu, uint16 val)
   cpu_update_frame (cpu, 0);
 }
 
+uint16
+cpu_get_reg (sim_cpu* cpu, uint8 reg)
+{
+  switch (reg)
+    {
+    case 0:
+      return cpu_get_x (cpu);
+
+    case 1:
+      return cpu_get_y (cpu);
+
+    case 2:
+      return cpu_get_sp (cpu);
+
+    case 3:
+      return cpu_get_pc (cpu);
+
+    default:
+      return 0;
+    }
+}
+
+uint16
+cpu_get_src_reg (sim_cpu* cpu, uint8 reg)
+{
+  switch (reg)
+    {
+    case 0:
+      return cpu_get_a (cpu);
+
+    case 1:
+      return cpu_get_b (cpu);
+
+    case 2:
+      return cpu_get_ccr (cpu);
+
+    case 3:
+      return cpu_get_tmp3 (cpu);
+
+    case 4:
+      return cpu_get_d (cpu);
+
+    case 5:
+      return cpu_get_x (cpu);
+
+    case 6:
+      return cpu_get_y (cpu);
+
+    case 7:
+      return cpu_get_sp (cpu);
+
+    default:
+      return 0;
+    }
+}
+
+void
+cpu_set_dst_reg (sim_cpu* cpu, uint8 reg, uint16 val)
+{
+  switch (reg)
+    {
+    case 0:
+      cpu_set_a (cpu, val);
+      break;
+
+    case 1:
+      cpu_set_b (cpu, val);
+      break;
+
+    case 2:
+      cpu_set_ccr (cpu, val);
+      break;
+
+    case 3:
+      cpu_set_tmp2 (cpu, val);
+      break;
+
+    case 4:
+      cpu_set_d (cpu, val);
+      break;
+
+    case 5:
+      cpu_set_x (cpu, val);
+      break;
+
+    case 6:
+      cpu_set_y (cpu, val);
+      break;
+
+    case 7:
+      cpu_set_sp (cpu, val);
+      break;
+
+    default:
+      break;
+    }
+}
+
+void
+cpu_set_reg (sim_cpu* cpu, uint8 reg, uint16 val)
+{
+  switch (reg)
+    {
+    case 0:
+      cpu_set_x (cpu, val);
+      break;
+      
+    case 1:
+      cpu_set_y (cpu, val);
+      break;
+      
+    case 2:
+      cpu_set_sp (cpu, val);
+      break;
+      
+    case 3:
+      cpu_set_pc (cpu, val);
+      break;
+      
+    default:
+      break;
+    }
+}
+
+/* Returns the address of a 68HC12 indexed operand.
+   Pre and post modifications are handled on the source register.  */
+uint16
+cpu_get_indexed_operand_addr (sim_cpu* cpu, int restrict)
+{
+  uint8 reg;
+  uint16 sval;
+  uint16 addr;
+  uint8 code;
+
+  code = cpu_fetch8 (cpu);
+
+  /* n,r with 5-bit signed constant.  */
+  if ((code & 0x20) == 0)
+    {
+      reg = (code >> 6) & 3;
+      sval = (code & 0x1f);
+      if (code & 0x10)
+	sval |= 0xfff0;
+
+      addr = cpu_get_reg (cpu, reg);
+      addr += sval;
+    }
+
+  /* Auto pre/post increment/decrement.  */
+  else if ((code & 0xc0) != 0xc0)
+    {
+      reg = (code >> 6) & 3;
+      sval = (code & 0x0f);
+      if (sval & 0x8)
+	{
+	  sval |= 0xfff0;
+	}
+      else
+	{
+	  sval = sval + 1;
+	}
+      addr = cpu_get_reg (cpu, reg);
+      cpu_set_reg (cpu, reg, addr + sval);
+      if ((code & 0x10) == 0)
+	{
+	  addr += sval;
+	}
+    }
+
+  /* [n,r] 16-bits offset indexed indirect.  */
+  else if ((code & 0x07) == 3)
+    {
+      if (restrict)
+	{
+	  return 0;
+	}
+      reg = (code >> 3) & 0x03;
+      addr = cpu_get_reg (cpu, reg);
+      addr += cpu_fetch16 (cpu);
+      addr = memory_read16 (cpu, addr);
+      cpu_add_cycles (cpu, 1);
+    }
+  else if ((code & 0x4) == 0)
+    {
+      if (restrict)
+	{
+	  return 0;
+	}
+      reg = (code >> 3) & 0x03;
+      addr = cpu_get_reg (cpu, reg);
+      if (code & 0x2)
+	{
+	  sval = cpu_fetch16 (cpu);
+	  cpu_add_cycles (cpu, 1);
+	}
+      else
+	{
+	  sval = cpu_fetch8 (cpu);
+	  if (code & 0x1)
+	    sval |= 0xff00;
+	  cpu_add_cycles (cpu, 1);
+	}
+      addr += sval;
+    }
+  else
+    {
+      reg = (code >> 3) & 0x03;
+      addr = cpu_get_reg (cpu, reg);
+      switch (code & 3)
+	{
+	case 0:
+	  addr += cpu_get_a (cpu);
+	  break;
+	case 1:
+	  addr += cpu_get_b (cpu);
+	  break;
+	case 2:
+	  addr += cpu_get_d (cpu);
+	  break;
+	case 3:
+	default:
+	  addr += cpu_get_d (cpu);
+	  addr = memory_read16 (cpu, addr);
+	  cpu_add_cycles (cpu, 1);
+	  break;
+	}
+    }
+
+  return addr;
+}
+
+uint8
+cpu_get_indexed_operand8 (sim_cpu* cpu, int restrict)
+{
+  uint16 addr;
+
+  addr = cpu_get_indexed_operand_addr (cpu, restrict);
+  return memory_read8 (cpu, addr);
+}
+
+uint16
+cpu_get_indexed_operand16 (sim_cpu* cpu, int restrict)
+{
+  uint16 addr;
+
+  addr = cpu_get_indexed_operand_addr (cpu, restrict);
+  return memory_read16 (cpu, addr);
+}
+
+void
+cpu_move8 (sim_cpu *cpu, uint8 code)
+{
+  uint8 src;
+  uint16 addr;
+
+  switch (code)
+    {
+    case 0x0b:
+      src = cpu_fetch8 (cpu);
+      addr = cpu_fetch16 (cpu);
+      break;
+
+    case 0x08:
+      addr = cpu_get_indexed_operand_addr (cpu, 1);
+      src = cpu_fetch8 (cpu);
+      break;
+
+    case 0x0c:
+      addr = cpu_fetch16 (cpu);
+      src = memory_read8 (cpu, addr);
+      addr = cpu_fetch16 (cpu);
+      break;
+
+    case 0x09:
+      addr = cpu_get_indexed_operand_addr (cpu, 1);
+      src = memory_read8 (cpu, cpu_fetch16 (cpu));
+      break;
+
+    case 0x0d:
+      src = cpu_get_indexed_operand8 (cpu, 1);
+      addr = cpu_fetch16 (cpu);
+      break;
+
+    case 0x0a:
+      src = cpu_get_indexed_operand8 (cpu, 1);
+      addr = cpu_get_indexed_operand_addr (cpu, 1);
+      break;
+      
+    }
+  memory_write8 (cpu, addr, src);
+}
+
+void
+cpu_move16 (sim_cpu *cpu, uint8 code)
+{
+  uint16 src;
+  uint16 addr;
+
+  switch (code)
+    {
+    case 0x03:
+      src = cpu_fetch16 (cpu);
+      addr = cpu_fetch16 (cpu);
+      break;
+
+    case 0x00:
+      addr = cpu_get_indexed_operand_addr (cpu, 1);
+      src = cpu_fetch16 (cpu);
+      break;
+
+    case 0x04:
+      addr = cpu_fetch16 (cpu);
+      src = memory_read16 (cpu, addr);
+      addr = cpu_fetch16 (cpu);
+      break;
+
+    case 0x01:
+      addr = cpu_get_indexed_operand_addr (cpu, 1);
+      src = memory_read16 (cpu, cpu_fetch16 (cpu));
+      break;
+
+    case 0x05:
+      src = cpu_get_indexed_operand16 (cpu, 1);
+      addr = cpu_fetch16 (cpu);
+      break;
+
+    case 0x02:
+      src = cpu_get_indexed_operand16 (cpu, 1);
+      addr = cpu_get_indexed_operand_addr (cpu, 1);
+      break;
+      
+    }
+  memory_write16 (cpu, addr, src);
+}
+
 int
 cpu_initialize (SIM_DESC sd, sim_cpu *cpu)
 {
@@ -346,7 +681,10 @@ cpu_reset (sim_cpu *cpu)
   /* Initialize the config register.
      It is only initialized at reset time.  */
   memset (cpu->ios, 0, sizeof (cpu->ios));
-  cpu->ios[M6811_INIT] = 0x1;
+  if (cpu->cpu_configured_arch->arch == bfd_arch_m68hc11)
+    cpu->ios[M6811_INIT] = 0x1;
+  else
+    cpu->ios[M6811_INIT] = 0;
 
   /* Output compare registers set to 0xFFFF.  */
   cpu->ios[M6811_TOC1_H] = 0xFF;
@@ -463,18 +801,109 @@ cpu_fetch_relbranch (sim_cpu *cpu)
   return addr;
 }
 
+uint16
+cpu_fetch_relbranch16 (sim_cpu *cpu)
+{
+  uint16 addr = cpu_fetch16 (cpu);
+
+  addr += cpu->cpu_regs.pc;
+  return addr;
+}
 
 /* Push all the CPU registers (when an interruption occurs).  */
 void
 cpu_push_all (sim_cpu *cpu)
 {
-  cpu_push_uint16 (cpu, cpu->cpu_regs.pc);
-  cpu_push_uint16 (cpu, cpu->cpu_regs.iy);
-  cpu_push_uint16 (cpu, cpu->cpu_regs.ix);
-  cpu_push_uint16 (cpu, cpu->cpu_regs.d);
-  cpu_push_uint8 (cpu, cpu->cpu_regs.ccr);
+  if (cpu->cpu_configured_arch->arch == bfd_arch_m68hc11)
+    {
+      cpu_m68hc11_push_uint16 (cpu, cpu->cpu_regs.pc);
+      cpu_m68hc11_push_uint16 (cpu, cpu->cpu_regs.iy);
+      cpu_m68hc11_push_uint16 (cpu, cpu->cpu_regs.ix);
+      cpu_m68hc11_push_uint16 (cpu, cpu->cpu_regs.d);
+      cpu_m68hc11_push_uint8 (cpu, cpu->cpu_regs.ccr);
+    }
+  else
+    {
+      cpu_m68hc12_push_uint16 (cpu, cpu->cpu_regs.pc);
+      cpu_m68hc12_push_uint16 (cpu, cpu->cpu_regs.iy);
+      cpu_m68hc12_push_uint16 (cpu, cpu->cpu_regs.ix);
+      cpu_m68hc12_push_uint16 (cpu, cpu->cpu_regs.d);
+      cpu_m68hc12_push_uint8 (cpu, cpu->cpu_regs.ccr);
+    }
 }
 
+/* Simulation of the dbcc/ibcc/tbcc 68HC12 conditional branch operations.  */
+void
+cpu_dbcc (sim_cpu* cpu)
+{
+  uint8 code;
+  uint16 addr;
+  uint16 inc;
+  uint16 reg;
+  
+  code = cpu_fetch8 (cpu);
+  switch (code & 0xc0)
+    {
+    case 0x80: /* ibcc */
+      inc = 1;
+      break;
+    case 0x40: /* tbcc */
+      inc = 0;
+      break;
+    case 0:    /* dbcc */
+      inc = -1;
+      break;
+    default:
+      abort ();
+      break;
+    }
+
+  addr = cpu_fetch8 (cpu);
+  if (code & 0x10)
+    addr |= 0xff00;
+
+  addr += cpu_get_pc (cpu);
+  reg = cpu_get_src_reg (cpu, code & 0x07);
+  reg += inc;
+
+  /* Branch according to register value.  */
+  if ((reg != 0 && (code & 0x20)) || (reg == 0 && !(code & 0x20)))
+    {
+      cpu_set_pc (cpu, addr);
+    }
+  cpu_set_dst_reg (cpu, code & 0x07, reg);
+}
+
+void
+cpu_exg (sim_cpu* cpu, uint8 code)
+{
+  uint8 r1, r2;
+  uint16 src1;
+  uint16 src2;
+
+  r1 = (code >> 4) & 0x07;
+  r2 = code & 0x07;
+  if (code & 0x80)
+    {
+      src1 = cpu_get_src_reg (cpu, r1);
+      src2 = cpu_get_src_reg (cpu, r2);
+      if (r2 == 1 || r2 == 2)
+        src2 |= 0xff00;
+      
+      cpu_set_dst_reg (cpu, r2, src1);
+      cpu_set_dst_reg (cpu, r1, src2);
+    }
+  else
+    {
+      src1 = cpu_get_src_reg (cpu, r1);
+
+      /* Sign extend the 8-bit registers (A, B, CCR).  */
+      if ((r1 == 0 || r1 == 1 || r1 == 2) && (src1 & 0x80))
+        src1 |= 0xff00;
+
+      cpu_set_dst_reg (cpu, r2, src1);
+    }
+}
 
 /* Handle special instructions.  */
 void
@@ -486,12 +915,26 @@ cpu_special (sim_cpu *cpu, enum M6811_Special special)
       {
         uint8 ccr;
 
-        ccr = cpu_pop_uint8 (cpu);
+        ccr = cpu_m68hc11_pop_uint8 (cpu);
         cpu_set_ccr (cpu, ccr);
-        cpu_set_d (cpu, cpu_pop_uint16 (cpu));
-        cpu_set_x (cpu, cpu_pop_uint16 (cpu));
-        cpu_set_y (cpu, cpu_pop_uint16 (cpu));
-        cpu_set_pc (cpu, cpu_pop_uint16 (cpu));
+        cpu_set_d (cpu, cpu_m68hc11_pop_uint16 (cpu));
+        cpu_set_x (cpu, cpu_m68hc11_pop_uint16 (cpu));
+        cpu_set_y (cpu, cpu_m68hc11_pop_uint16 (cpu));
+        cpu_set_pc (cpu, cpu_m68hc11_pop_uint16 (cpu));
+	cpu_return (cpu);
+        break;
+      }
+
+    case M6812_RTI:
+      {
+        uint8 ccr;
+
+        ccr = cpu_m68hc12_pop_uint8 (cpu);
+        cpu_set_ccr (cpu, ccr);
+        cpu_set_d (cpu, cpu_m68hc12_pop_uint16 (cpu));
+        cpu_set_x (cpu, cpu_m68hc12_pop_uint16 (cpu));
+        cpu_set_y (cpu, cpu_m68hc12_pop_uint16 (cpu));
+        cpu_set_pc (cpu, cpu_m68hc12_pop_uint16 (cpu));
 	cpu_return (cpu);
         break;
       }
@@ -542,6 +985,7 @@ cpu_special (sim_cpu *cpu, enum M6811_Special special)
       break;
 
     case M6811_TEST:
+    case M6812_BGND:
       {
         SIM_DESC sd;
 
@@ -558,6 +1002,115 @@ cpu_special (sim_cpu *cpu, enum M6811_Special special)
         /* else this is a nop but not in test factory mode.  */
         break;
       }
+
+    case M6812_IDIVS:
+      {
+        int32 src1 = (int16) cpu_get_d (cpu);
+        int32 src2 = (int16) cpu_get_x (cpu);
+
+        if (src2 == 0)
+          {
+            cpu_set_ccr_C (cpu, 1);
+          }
+        else
+          {
+            cpu_set_d (cpu, src1 % src2);
+            src1 = src1 / src2;
+            cpu_set_x (cpu, src1);
+            cpu_set_ccr_C (cpu, 0);
+            cpu_set_ccr_Z (cpu, src1 == 0);
+            cpu_set_ccr_N (cpu, src1 & 0x8000);
+            cpu_set_ccr_V (cpu, src1 >= 32768 || src1 < -32768);
+          }
+      }
+      break;
+      
+    case M6812_EDIV:
+      {
+        uint32 src1 = (uint32) cpu_get_x (cpu);
+        uint32 src2 = (uint32) (cpu_get_y (cpu) << 16)
+          | (uint32) (cpu_get_d (cpu));
+
+        if (src1 == 0)
+          {
+            cpu_set_ccr_C (cpu, 1);
+          }
+        else
+          {
+            cpu_set_ccr_C (cpu, 0);
+            cpu_set_d (cpu, src2 % src1);
+            src2 = src2 / src1;
+            cpu_set_y (cpu, src2);
+            cpu_set_ccr_Z (cpu, src2 == 0);
+            cpu_set_ccr_N (cpu, (src2 & 0x8000) != 0);
+            cpu_set_ccr_V (cpu, (src2 & 0xffff0000) != 0);
+          }
+      }
+      break;
+      
+    case M6812_EDIVS:
+      {
+        int32 src1 = (int16) cpu_get_x (cpu);
+        int32 src2 = (uint32) (cpu_get_y (cpu) << 16)
+          | (uint32) (cpu_get_d (cpu));
+
+        if (src1 == 0)
+          {
+            cpu_set_ccr_C (cpu, 1);
+          }
+        else
+          {
+            cpu_set_ccr_C (cpu, 0);
+            cpu_set_d (cpu, src2 % src1);
+            src2 = src2 / src1;
+            cpu_set_y (cpu, src2);
+            cpu_set_ccr_Z (cpu, src2 == 0);
+            cpu_set_ccr_N (cpu, (src2 & 0x8000) != 0);
+            cpu_set_ccr_V (cpu, src2 > 32767 || src2 < -32768);
+          }
+      }
+      break;      
+
+    case M6812_EMULS:
+      {
+        int32 src1, src2;
+
+        src1 = (int16) cpu_get_d (cpu);
+        src2 = (int16) cpu_get_y (cpu);
+        src1 = src1 * src2;
+        cpu_set_d (cpu, src1 & 0x0ffff);
+        cpu_set_y (cpu, src1 >> 16);
+        cpu_set_ccr_Z (cpu, src1 == 0);
+        cpu_set_ccr_N (cpu, (src1 & 0x80000000) != 0);
+        cpu_set_ccr_C (cpu, (src1 & 0x00008000) != 0);
+      }
+      break;
+      
+    case M6812_EMACS:
+      {
+        int32 src1, src2;
+        uint16 addr;
+        
+        addr = cpu_fetch16 (cpu);
+        src1 = (int16) memory_read16 (cpu, cpu_get_x (cpu));
+        src2 = (int16) memory_read16 (cpu, cpu_get_y (cpu));
+        src1 = src1 * src2;
+        src2 = (((uint32) memory_read16 (cpu, addr)) << 16)
+          | (uint32) memory_read16 (cpu, addr + 2);
+
+        memory_write16 (cpu, addr, (src1 + src2) >> 16);
+        memory_write16 (cpu, addr + 2, (src1 + src2));
+
+        
+      }
+      break;
+
+    case M6812_ETBL:
+    default:
+      sim_engine_halt (CPU_STATE (cpu), cpu, NULL,
+                       cpu_get_pc (cpu), sim_stopped,
+                       SIM_SIGILL);
+      break;
     }
 }
 
@@ -577,7 +1130,7 @@ cpu_single_step (sim_cpu *cpu)
     }
   
   /*  printf("PC = 0x%04x\n", cpu_get_pc (cpu));*/
-  cpu_interp (cpu);
+  cpu->cpu_interpretor (cpu);
   cpu->cpu_absolute_cycle += cpu->cpu_current_cycle;
 }
 

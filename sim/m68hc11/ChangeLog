@@ -1,5 +1,64 @@
 2001-05-20  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* Makefile.in (M68HC11_OBJS): Add m68hc12int.o.
+	(m68hc12int.c): Generate using gencode -m6812.
+	(m68hc11int.c): Likewise with -m6811.
+
+	* gencode.c (m6811_opcode_patterns): New patterns for 68HC12.
+	(m6811_page1_opcodes): Remove duplicate entries.
+	(m6811_page2_opcodes): Likewise.
+	(m6811_page3_opcodes): Likewise.
+	(m6811_page4_opcodes): Likewise.
+	(m6812_page1_opcodes): New table for 68HC12 instructions.
+	(m6812_page2_opcodes): Likewise.
+	(gen_fetch_operands): New modes [] and &[] for 68HC12 operands.
+	(gen_save_result): Likewise.
+	(gen_interpreter_for_table): Handle 68HC11 and 68HC12 opcodes.
+	(cmp_opcode): New function for opcode comparision.
+	(prepare_table): Sort the opcodes.
+	(gen_interpreter): Prepare all the tables and generate either
+	a 68HC11 or a 68HC12 simulator.
+	(main): New options -m6811 and -m6812.
+
+	* m68hc11_sim.c (cpu_single_step): Use pointer to cpu interpretor.
+	(cpu_special): Simulation of some 68HC12 instructions.
+	(cpu_exg): New function.
+	(cpu_dbcc): Likewise.
+	(cpu_fetch_relbranch16): Likewise.
+	(cpu_push_all): Push according to 68HC11 or 68HC12.
+	(cpu_move16): Likewise.
+	(cpu_move8): Likewise.
+	(cpu_get_indexed_operand16): Likewise.
+	(cpu_get_indexed_operand8): Likewise.
+	(cpu_get_indexed_operand_addr): Likewise.
+	(cpu_set_reg, cpu_set_dst_reg, cpu_get_src_reg, cpu_get_reg): Likewise.
+	(cpu_reset): Setup INIT register according to architecture.
+	
+	* sim-main.h (M6811_Special): Add 68HC12 specific instructions.
+	(_sim_cpu): Keep track of the cpu being simulated.
+	(cpu_get_tmp3, cpu_get_tmp2, cpu_set_tmp3, cpu_set_tmp2): New.
+	(cpu_m68hc11_push_uintxx): Rename of cpu_push_uintxx.
+	(cpu_m68hc11_pop_uint8): Likewise.
+	(cpu_m68hc12_push_uintxx): New functions for 68HC12.
+	(cpu_m68hc12_pop_uintxx): Likewise.
+	(cpu_exg, cpu_dbcc, cpu_move8, cpu_move16): Likewise,
+	(cpu_fetch_relbranch16): Likewise.
+	(cpu_interp_m6811): Rename of cpu_interp.
+	(cpu_interp_m6812): New function.	
+	* interp.c (free_state): New function.
+	(dev_list_68hc12): New table.
+	(sim_board_reset): Reset depending on the cpu (HC11 or HC12).
+	(sim_hw_configure): New function.
+	(sim_prepare_for_program): New function.
+	(sim_open): Use above new functions.
+	(sim_close): Call free_state().
+	(sim_info): Print info according to cpu.
+	(sim_create_inferior): Use sim_prepare_for_program.
+	(sim_do_command): Configure the hardware after a change of the
+	architecture.
+
+2001-05-20  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* dv-m68hc11sio.c (m68hc11sio_tx_poll): Always check for
 	pending interrupts.
 	* interrupts.c (interrupts_process): Keep track of the last number
