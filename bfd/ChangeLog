@@ -1,3 +1,12 @@
+2002-06-25  Jason Eckhardt  <jle@rice.edu>
+
+	* ecoff.c (ecoff_set_symbol_info): Set BSF_FUNCTION for
+	symbols of type stProc and stStaticProc.
+
+2002-06-25  Nick Clifton  <nickc@redhat.com>
+
+	* ecoff.c: VArious formatting fixes.
+
 2002-06-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* coff-rs6000.c (xcoff_generate_rtinit): Fix typo.
