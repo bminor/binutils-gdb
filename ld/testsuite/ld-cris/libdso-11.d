@@ -13,7 +13,7 @@ DYNAMIC SYMBOL TABLE:
 0+1e0 g    DF \.text	0+ dsofn
 #...
 Contents of section \.rela\.plt:
- 01a0 84220000 0b090000 00000000           .*
+ 01a0 70220000 0b090000 00000000           .*
 Contents of section \.plt:
  01ac 84e20401 7e7a3f7a 04f26ffa bf09b005  .*
  01bc 00000000 00000000 00006f0d 0c000000  .*
@@ -24,4 +24,4 @@ Contents of section \.text:
 Contents of section \.dynamic:
 #...
 Contents of section \.got:
- 2278 00220000 00000000 00000000 d2010000  .*
+ 2264 ec210000 00000000 00000000 d2010000  .*

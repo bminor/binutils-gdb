@@ -1,3 +1,22 @@
+2005-03-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-cris/expdyn5.d: Updated for alignment change in elf.sc.
+	* ld-cris/expdyn6.d: Likewise.
+	* ld-cris/expdyn7.d: Likewise.
+	* ld-cris/gotplt1.d: Likewise.
+	* ld-cris/gotplt2.d: Likewise.
+	* ld-cris/gotplt3.d: Likewise.
+	* ld-cris/libdso-10.d: Likewise.
+	* ld-cris/libdso-11.d: Likewise.
+	* ld-cris/libdso-12.d: Likewise.
+	* ld-cris/libdso-14.d: Likewise.
+	* ld-cris/libdso-2.d: Likewise.
+	* ld-cris/locref1.d: Likewise.
+	* ld-cris/locref2.d: Likewise.
+	* ld-cris/nodyn5.d: Likewise.
+	* ld-cris/pv32-1.d: Likewise.
+	* ld-cris/weakref2.d: Likewise.
+
 2005-03-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elf/tbss.s: Don't start directives in first column.

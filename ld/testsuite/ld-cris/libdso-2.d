@@ -28,7 +28,7 @@ There are 14 section headers.*
 #...
 Relocation section '\.rela\.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
 #...
-00002234  0000000c R_CRIS_RELATIVE                              00000184
+0000222c  0000000c R_CRIS_RELATIVE                              00000184
 #...
 Symbol table '\.dynsym' contains 6 entries:
    Num:    Value  Size Type    Bind   Vis      Ndx Name
@@ -55,10 +55,10 @@ Symbol table '\.symtab' contains 22 entries:
     11: [0-9a-f]+     0 SECTION LOCAL  DEFAULT   11 
     12: [0-9a-f]+     0 SECTION LOCAL  DEFAULT   12 
     13: [0-9a-f]+     0 SECTION LOCAL  DEFAULT   13 
-    14: 0+21a0     0 OBJECT  LOCAL  DEFAULT  ABS _DYNAMIC
-    15: 0+2238     0 NOTYPE  LOCAL  DEFAULT  ABS __bss_start
-    16: 0+2238     0 NOTYPE  LOCAL  DEFAULT  ABS _edata
-    17: 0+2228     0 OBJECT  LOCAL  HIDDEN  ABS _GLOBAL_OFFSET_TABLE_
+    14: 0+2198     0 OBJECT  LOCAL  DEFAULT  ABS _DYNAMIC
+    15: 0+2230     0 NOTYPE  LOCAL  DEFAULT  ABS __bss_start
+    16: 0+2230     0 NOTYPE  LOCAL  DEFAULT  ABS _edata
+    17: 0+2220     0 OBJECT  LOCAL  HIDDEN  ABS _GLOBAL_OFFSET_TABLE_
     18: 0+2240     0 NOTYPE  LOCAL  DEFAULT  ABS _end
     19: 0+184     0 FUNC    LOCAL  DEFAULT    7 dsofn
     20: 0+     0 OBJECT  GLOBAL DEFAULT  ABS TST1

@@ -7,7 +7,7 @@
 # Checking that a bsr to a non-PLT-decorated nonvisible function
 # doesn't make the DSO textrel.
 
-Dynamic section at offset 0x1c0 contains 6 entries:
+Dynamic section at offset 0x1b0 contains 6 entries:
   Tag[ 	]+Type[ 	]+Name/Value
  0x0+4 \(HASH\)[ 	]+0x94
  0x0+5 \(STRTAB\)[ 	]+0x170
