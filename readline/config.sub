@@ -13,6 +13,9 @@
 # a failure to support a valid configuration from a meaningless
 # configuration.
 
+# Please email any bugs, comments, and/or additions to this file to:
+# configure@cygnus.com
+
 # decode aliases into canonical names
 
 case "$1" in
