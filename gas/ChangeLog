@@ -1,5 +1,15 @@
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-d30v.c (md_parse_option <arg>): Add ATTRIBUTE_UNUSED.
+	(md_undefined_symbol <name>): Likewise.
+	(md_convert_frag <all args>): Likewise.
+	(write_long <opcode>): Likewise.
+	(tc_gen_reloc <seg>): Likewise.
+	(md_estimate_size_before_relax <all args>): Likewise.
+	(md_apply_fix3 <seg>): Likewise.
+	(s_d30v_align <ignore>): Likewise.
+	(build_insn): Correct format string.
+	(md_apply_fix3): Likewise.
 	* config/tc-fr30.c (md_parse_option <c,arg>):  Add ATTRIBUTE_UNUSED.
 	(md_undefined_symbol <name>): Likewise.
 	(md_convert_frag <all args>): Likewise.

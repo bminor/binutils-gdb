@@ -296,7 +296,7 @@ md_show_usage (stream)
 int
 md_parse_option (c, arg)
      int c;
-     char *arg;
+     char *arg ATTRIBUTE_UNUSED;
 {
   switch (c)
     {
@@ -332,7 +332,7 @@ md_parse_option (c, arg)
 
 symbolS *
 md_undefined_symbol (name)
-     char *name;
+     char *name ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -382,9 +382,9 @@ md_atof (type, litP, sizeP)
 
 void
 md_convert_frag (abfd, sec, fragP)
-     bfd *abfd;
-     asection *sec;
-     fragS *fragP;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
+     fragS *fragP ATTRIBUTE_UNUSED;
 {
   abort ();
 }
@@ -653,7 +653,7 @@ build_insn (opcode, opers)
 
       /* Truncate to the proper number of bits.  */
       if ((opers[i].X_op == O_constant) && check_range (number, bits, flags))
-	as_bad (_("operand out of range: %d"), number);
+	as_bad (_("operand out of range: %ld"), number);
       if (bits < 31)
 	number &= 0x7FFFFFFF >> (31 - bits);
       if (flags & OPERAND_SHIFT)
@@ -677,7 +677,7 @@ build_insn (opcode, opers)
 
 static void
 write_long (opcode, insn, fx)
-     struct d30v_insn *opcode;
+     struct d30v_insn *opcode ATTRIBUTE_UNUSED;
      long long insn;
      Fixups *fx;
 {
@@ -1792,7 +1792,7 @@ find_format (opcode, myops, fsize, cmp_hack)
 
 arelent *
 tc_gen_reloc (seg, fixp)
-     asection *seg;
+     asection *seg ATTRIBUTE_UNUSED;
      fixS *fixp;
 {
   arelent *reloc;
@@ -1815,8 +1815,8 @@ tc_gen_reloc (seg, fixp)
 
 int
 md_estimate_size_before_relax (fragp, seg)
-     fragS *fragp;
-     asection *seg;
+     fragS *fragp ATTRIBUTE_UNUSED;
+     asection *seg ATTRIBUTE_UNUSED;
 {
   abort ();
   return 0;
@@ -1838,7 +1838,7 @@ void
 md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
      valueT *valP;
-     segT seg;
+     segT seg ATTRIBUTE_UNUSED;
 {
   char *where;
   unsigned long insn, insn2;
@@ -1863,7 +1863,7 @@ md_apply_fix3 (fixP, valP, seg)
 	as_bad (_("line %d: unable to place address of symbol '%s' into a byte"),
 		fixP->fx_line, S_GET_NAME (fixP->fx_addsy));
       else if (((unsigned)value) > 0xff)
-	as_bad (_("line %d: unable to place value %x into a byte"),
+	as_bad (_("line %d: unable to place value %lx into a byte"),
 		fixP->fx_line, value);
       else
 	*(unsigned char *) where = value;
@@ -1874,7 +1874,7 @@ md_apply_fix3 (fixP, valP, seg)
 	as_bad (_("line %d: unable to place address of symbol '%s' into a short"),
 		fixP->fx_line, S_GET_NAME (fixP->fx_addsy));
       else if (((unsigned)value) > 0xffff)
-	as_bad (_("line %d: unable to place value %x into a short"),
+	as_bad (_("line %d: unable to place value %lx into a short"),
 		fixP->fx_line, value);
       else
 	bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
@@ -2184,7 +2184,7 @@ d30v_align (n, pfill, label)
 
 static void
 s_d30v_align (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   int align;
   char fill, *pfill = NULL;
