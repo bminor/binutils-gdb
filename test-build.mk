@@ -43,7 +43,7 @@ CVS_TAG :=
 CVS_MODULE := latest
 
 ### Historically, this was identical to CVS_TAG.  This is changing.
-RELEASE_TAG := latest-930202
+RELEASE_TAG := latest-930211
 
 ### Historically, binaries were installed here.  This is changing.
 release_root := $(ROOTING)/$(RELEASE_TAG)
@@ -64,12 +64,15 @@ override MFLAGS 	:=
 SHELL := /bin/sh
 
 FLAGS_TO_PASS := \
-	"CC=$(CC)" \
 	"GCC=$(GCC)" \
 	"CFLAGS=$(CFLAGS)" \
 	"TIME=$(TIME)" \
 	"MF=$(MF)" \
 	"host=$(host)"
+
+ifneq  '$(CC)' 'cc'
+FLAGS_TO_PASS := "CC=$(CC)" $(FLAGS_TO_PASS)
+endif
 
 
 prefixes	= --prefix=$(release_root) --exec_prefix=$(release_root)/H-$(host)
@@ -84,9 +87,9 @@ STAGE3DIR 	:= $(WORKING_DIR).3
 INPLACEDIR 	:= $(host)-in-place
 HOLESDIR 	:= $(host)-holes
 
-SET_HOLES	:= SHELL=sh ; PATH=`pwd`/$(HOLESDIR) ; export PATH ; export SHELL ;
-SET_CYGNUS_PATH := SHELL=sh ; PATH=$(relbindir):`pwd`/$(HOLESDIR) ; export PATH ; export SHELL ;
-SET_LATEST_PATH := SHELL=sh ; PATH=/usr/latest/bin:`pwd`/$(HOLESDIR) ; export PATH ; export SHELL ;
+SET_NATIVE_HOLES := SHELL=sh ; PATH=`pwd`/$(HOLESDIR) ; export PATH ; export SHELL ;
+SET_CYGNUS_PATH  := SHELL=sh ; PATH=$(relbindir):`pwd`/$(HOLESDIR) ; export PATH ; export SHELL ;
+SET_LATEST_PATH  := SHELL=sh ; PATH=/usr/latest/bin:`pwd`/$(HOLESDIR) ; export PATH ; export SHELL ;
 
 
 
@@ -123,13 +126,13 @@ build-native: $(host)-stamp-holes $(arch)-stamp-native-checked
 config-native: $(host)-stamp-holes $(arch)-stamp-native-configured
 
 $(arch)-stamp-native: $(host)-stamp-holes
-	$(SET_HOLES) $(TIME) $(GNU_MAKE) -f test-build.mk  $(arch)-stamp-native-installed $(FLAGS_TO_PASS) 
+	$(SET_NATIVE_HOLES) $(TIME) $(GNU_MAKE) -f test-build.mk  $(arch)-stamp-native-installed $(FLAGS_TO_PASS) 
 	if [ -f CLEAN_ALL ] ; then rm -rf $(NATIVEDIR) ; else true ; fi
 	touch $(arch)-stamp-native
 
 $(arch)-stamp-native-installed: $(host)-stamp-holes $(arch)-stamp-native-checked
-	$(SET_HOLES) cd $(NATIVEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) install 
-	$(SET_HOLES) cd $(NATIVEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) install-info 
+	$(SET_NATIVE_HOLES) cd $(NATIVEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) install 
+	$(SET_NATIVE_HOLES) cd $(NATIVEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) install-info 
 	touch $@
 
 $(arch)-stamp-native-checked: $(arch)-stamp-native-built
@@ -137,13 +140,13 @@ $(arch)-stamp-native-checked: $(arch)-stamp-native-built
 	touch $@
 
 $(arch)-stamp-native-built: $(host)-stamp-holes $(arch)-stamp-native-configured
-	$(SET_HOLES) cd $(NATIVEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) all 
-	$(SET_HOLES) cd $(NATIVEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) info 
+	$(SET_NATIVE_HOLES) cd $(NATIVEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) all 
+	$(SET_NATIVE_HOLES) cd $(NATIVEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) info 
 	touch $@
 
 $(arch)-stamp-native-configured: $(host)-stamp-holes
 	[ -d $(NATIVEDIR) ] || mkdir $(NATIVEDIR)
-	$(SET_HOLES) cd $(NATIVEDIR) ; $(TIME) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes)
+	$(SET_NATIVE_HOLES) cd $(NATIVEDIR) ; $(TIME) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes)
 	touch $@
 
 
@@ -260,7 +263,7 @@ $(host)-stamp-stage1:
 	else \
 		true ; \
 	fi
-	$(SET_HOLES) $(TIME) $(GNU_MAKE) -f test-build.mk $(FLAGS_TO_PASS) host=$(host) $(host)-stamp-stage1-installed
+	$(SET_NATIVE_HOLES) $(TIME) $(GNU_MAKE) -f test-build.mk $(FLAGS_TO_PASS) host=$(host) $(host)-stamp-stage1-installed
 	touch $@
 	if [ -f CLEAN_ALL ] ; then \
 	  rm -rf $(WORKING_DIR) ; \
@@ -269,25 +272,25 @@ $(host)-stamp-stage1:
 	fi
 
 $(host)-stamp-stage1-installed: $(host)-stamp-stage1-checked
-	$(SET_HOLES) cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) "CFLAGS=$(CFLAGS)" install host=$(host)
-	$(SET_HOLES) cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) "CFLAGS=$(CFLAGS)" install-info host=$(host)
+	$(SET_NATIVE_HOLES) cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) "CFLAGS=$(CFLAGS)" install host=$(host)
+	$(SET_NATIVE_HOLES) cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) "CFLAGS=$(CFLAGS)" install-info host=$(host)
 ifeq ($(host),rs6000-ibm-aix)
 	rm $(relbindir)/make
 endif
 	touch $@
 
 $(host)-stamp-stage1-checked: $(host)-stamp-stage1-built
-#	$(SET_HOLES) cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) "CFLAGS=$(CFLAGS)" check host=$(host)
+#	$(SET_NATIVE_HOLES) cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) "CFLAGS=$(CFLAGS)" check host=$(host)
 	touch $@
 
 $(host)-stamp-stage1-built: $(host)-stamp-stage1-configured
-	$(SET_HOLES) cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) "CFLAGS=$(CFLAGS)" all host=$(host)
-	$(SET_HOLES) cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) "CFLAGS=$(CFLAGS)" info host=$(host)
+	$(SET_NATIVE_HOLES) cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) "CFLAGS=$(CFLAGS)" all host=$(host)
+	$(SET_NATIVE_HOLES) cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) "CFLAGS=$(CFLAGS)" info host=$(host)
 	touch $@
 
 $(host)-stamp-stage1-configured:
 	[ -d $(WORKING_DIR) ] || mkdir $(WORKING_DIR)
-	$(SET_HOLES) cd $(WORKING_DIR) ; \
+	$(SET_NATIVE_HOLES) cd $(WORKING_DIR) ; \
 	  $(TIME) ../$(TREE)/configure $(host) -v --srcdir=../$(TREE) $(prefixes)
 	touch $@
 
@@ -379,6 +382,7 @@ HOLES := \
 	egrep \
 	ex \
 	expr \
+	false \
 	find \
 	grep \
 	head \
@@ -418,9 +422,8 @@ endif
 
 ### solaris 2 -- don't use /usr/ucb/cc
 ifeq (sparc-sun-solaris2,$(host))
-SET_HOLES	:= SHELL=sh ; PATH=/opt/SUNWspro/bin:`pwd`/$(HOLESDIR) ; export PATH ; export SHELL ;
+SET_NATIVE_HOLES := SHELL=sh ; PATH=/opt/SUNWspro/bin:`pwd`/$(HOLESDIR) ; export PATH ; export SHELL ;
 HOLE_DIRS := /usr/ccs/bin
-PARTIAL_HOLE_DIRS := /opt/SUNWspro/bin
 CC_HOLE := 
 endif
 
