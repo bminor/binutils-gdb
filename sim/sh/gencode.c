@@ -195,7 +195,7 @@ op tab[] =
     "SET_SR_T (0);",
   },
 
-  { "", "", "div1 <REG_M>,<REG_N>", "0011nnnnmmmm0100",
+  { "", "nm", "div1 <REG_M>,<REG_N>", "0011nnnnmmmm0100", /* ? MVS */
     "div1 (R, m, n/*, T*/);",
   },
 
@@ -346,7 +346,7 @@ op tab[] =
     "}",
   },
   /* sh2e */
-  { "", "", "fmov.s <FREG_M>,@<REG_N>", "1111nnnnmmmm1010",
+  { "", "n", "fmov.s <FREG_M>,@<REG_N>", "1111nnnnmmmm1010",
     /* sh4 */
     "if (FPSCR_SZ) {",
     "  MA (2);",
@@ -359,7 +359,7 @@ op tab[] =
     "}",
   },
   /* sh2e */
-  { "", "", "fmov.s @<REG_M>,<FREG_N>", "1111nnnnmmmm1000",
+  { "", "m", "fmov.s @<REG_M>,<FREG_N>", "1111nnnnmmmm1000",
     /* sh4 */
     "if (FPSCR_SZ) {",
     "  MA (2);",
@@ -372,7 +372,7 @@ op tab[] =
     "}",
   },
   /* sh2e */
-  { "", "", "fmov.s @<REG_M>+,<FREG_N>", "1111nnnnmmmm1001",
+  { "", "m", "fmov.s @<REG_M>+,<FREG_N>", "1111nnnnmmmm1001",
     /* sh4 */
     "if (FPSCR_SZ) {",
     "  MA (2);",
@@ -387,7 +387,7 @@ op tab[] =
     "}",
   },
   /* sh2e */
-  { "", "", "fmov.s <FREG_M>,@-<REG_N>", "1111nnnnmmmm1011",
+  { "n", "n", "fmov.s <FREG_M>,@-<REG_N>", "1111nnnnmmmm1011",
     /* sh4 */
     "if (FPSCR_SZ) {",
     "  MA (2);",
@@ -402,7 +402,7 @@ op tab[] =
     "}",
   },
   /* sh2e */
-  { "", "", "fmov.s @(R0,<REG_M>),<FREG_N>", "1111nnnnmmmm0110",
+  { "", "0m", "fmov.s @(R0,<REG_M>),<FREG_N>", "1111nnnnmmmm0110",
     /* sh4 */
     "if (FPSCR_SZ) {",
     "  MA (2);",
@@ -415,7 +415,7 @@ op tab[] =
     "}",
   },
   /* sh2e */
-  { "", "", "fmov.s <FREG_M>,@(R0,<REG_N>)", "1111nnnnmmmm0111",
+  { "", "0n", "fmov.s <FREG_M>,@(R0,<REG_N>)", "1111nnnnmmmm0111",
     /* sh4 */
     "if (FPSCR_SZ) {",
     "  MA (2);",
@@ -519,25 +519,25 @@ op tab[] =
     "/* FIXME: user mode */",
   },
 #endif
-  { "", "n", "ldc.l @<REG_N>+,<CREG_M>", "0100nnnnmmmm0111",
+  { "n", "n", "ldc.l @<REG_N>+,<CREG_M>", "0100nnnnmmmm0111",
     "MA (1);",
     "CREG (m) = RLAT (R[n]);",
     "R[n] += 4;",
     "/* FIXME: user mode */",
   },
-  { "", "n", "ldc.l @<REG_N>+,SR", "0100nnnn00000111",
+  { "n", "n", "ldc.l @<REG_N>+,SR", "0100nnnn00000111",
     "MA (1);",
     "SET_SR (RLAT (R[n]));",
     "R[n] += 4;",
     "/* FIXME: user mode */",
   },
-  { "", "n", "ldc.l @<REG_N>+,MOD", "0100nnnn01010111",
+  { "n", "n", "ldc.l @<REG_N>+,MOD", "0100nnnn01010111",
     "MA (1);",
     "SET_MOD (RLAT (R[n]));",
     "R[n] += 4;",
   },
 #if 0
-  { "", "n", "ldc.l @<REG_N>+,DBR", "0100nnnn11110110",
+  { "n", "n", "ldc.l @<REG_N>+,DBR", "0100nnnn11110110",
     "MA (1);",
     "DBR = RLAT (R[n]);",
     "R[n] += 4;",
@@ -556,7 +556,7 @@ op tab[] =
   { "", "n", "lds <REG_N>,<SREG_M>", "0100nnnnssss1010",
     "SREG (m) = R[n];",
   },
-  { "", "n", "lds.l @<REG_N>+,<SREG_M>", "0100nnnnssss0110",
+  { "n", "n", "lds.l @<REG_N>+,<SREG_M>", "0100nnnnssss0110",
     "MA (1);",
     "SREG (m) = RLAT(R[n]);",
     "R[n] += 4;",
@@ -566,7 +566,7 @@ op tab[] =
     "SET_FPSCR(R[n]);",
   },
   /* sh2e / sh-dsp (lds.l @<REG_N>+,DSR) */
-  { "", "n", "lds.l @<REG_N>+,FPSCR", "0100nnnn01100110",
+  { "n", "n", "lds.l @<REG_N>+,FPSCR", "0100nnnn01100110",
     "MA (1);",
     "SET_FPSCR (RLAT(R[n]));",
     "R[n] += 4;",
@@ -576,12 +576,12 @@ op tab[] =
     "/* FIXME: XXX*/ abort();",
   },
 
-  { "", "nm", "mac.l @<REG_M>+,@<REG_N>+", "0000nnnnmmmm1111",
+  { "nm", "nm", "mac.l @<REG_M>+,@<REG_N>+", "0000nnnnmmmm1111",
     "trap (255, R0, PC, memory, maskl, maskw, endianw);",
     "/* FIXME: mac.l support */",
   },
 
-  { "", "nm", "mac.w @<REG_M>+,@<REG_N>+", "0100nnnnmmmm1111",
+  { "nm", "nm", "mac.w @<REG_M>+,@<REG_N>+", "0100nnnnmmmm1111",
     "macw(R0,memory,n,m,endianw);",
   },
 
@@ -607,7 +607,7 @@ op tab[] =
     "R[n] = RSBAT (R0 + R[m]);",
     "L (n);",
   },
-  { "n", "m", "mov.b @<REG_M>+,<REG_N>", "0110nnnnmmmm0100",
+  { "nm", "m", "mov.b @<REG_M>+,<REG_N>", "0110nnnnmmmm0100",
     "MA (1);",
     "R[n] = RSBAT (R[m]);",
     "R[m] += 1;",
@@ -629,7 +629,7 @@ op tab[] =
     "MA (1);",
     "WBAT (R[n] + R0, R[m]);",
   },
-  { "", "nm", "mov.b <REG_M>,@-<REG_N>", "0010nnnnmmmm0100",
+  { "n", "nm", "mov.b <REG_M>,@-<REG_N>", "0010nnnnmmmm0100",
     "MA (1);",
     "R[n] -= 1;",
     "WBAT (R[n], R[m]);",
@@ -683,7 +683,7 @@ op tab[] =
     "MA (1);",
     "WLAT (R0 + R[n], R[m]);",
   },
-  { "", "nm", "mov.l <REG_M>,@-<REG_N>", "0010nnnnmmmm0110",
+  { "n", "nm", "mov.l <REG_M>,@-<REG_N>", "0010nnnnmmmm0110",
     "MA (1) ;",
     "R[n] -= 4;",
     "WLAT (R[n], R[m]);",
@@ -799,14 +799,14 @@ op tab[] =
     "R[n] = ~R[m];",
   },
 
-  { "0", "", "ocbi @<REG_N>", "0000nnnn10010011",
-    "/* FIXME: Not implemented */",
-    "RAISE_EXCEPTION (SIGILL);",
+  { "", "n", "ocbi @<REG_N>", "0000nnnn10010011",
+    "RSBAT (R[n]); /* Take exceptions like byte load.  */",
+    "/* FIXME: Cache not implemented */",
   },
 
-  { "0", "", "ocbp @<REG_N>", "0000nnnn10100011",
-    "/* FIXME: Not implemented */",
-    "RAISE_EXCEPTION (SIGILL);",
+  { "", "n", "ocbp @<REG_N>", "0000nnnn10100011",
+    "RSBAT (R[n]); /* Take exceptions like byte load.  */",
+    "/* FIXME: Cache not implemented */",
   },
 
   { "", "n", "ocbwb @<REG_N>", "0000nnnn10110011",
@@ -881,7 +881,7 @@ op tab[] =
   { "", "n", "setrc <REG_N>", "0100nnnn00010100",
     "SET_RC (R[n]);",
   },
-  { "", "n", "setrc #<imm>", "10000010i8*1....",
+  { "", "", "setrc #<imm>", "10000010i8*1....",
     /* It would be more realistic to let loop_start point to some static
        memory that contains an illegal opcode and then give a bus error when
        the loop is eventually encountered, but it seems not only simpler,
@@ -2138,6 +2138,10 @@ gensim_caselist (p)
 	{
 	  switch (*s)
 	    {
+              fprintf (stderr, "gencode/gensim_caselist: illegal char '%c'\n",
+                       *s);
+              exit (1);
+              break;
 	    case '0':
 	    case '1':
 	      s += 2;
@@ -2331,6 +2335,11 @@ expand_ppi_code (val, i, s)
     {
       switch (s[0])
 	{
+        default:
+          fprintf (stderr, "gencode/expand_ppi_code: Illegal char '%c'\n",
+                   s[0]);
+          exit (2);
+	  break;
 	/* The last eight bits are disregarded for the switch table.  */
 	case 'm':
 	case 'x':

@@ -4,6 +4,10 @@
 
 2003-06-27  Michael Snyder  <msnyder@redhat.com>
 
+	* gencode.c (op tab): Some fix-ups of refs and defs.
+	(ocbi, ocbp): Cache not simulated, but may cause memory fault.
+	(gensym_caselist): Add default case to switch statement.
+	(expand_ppi_code): Add default case to switch statement.
 	* gencode.c (op tab): Implement movca.l.
 	* gencode.c (op movsxy_tab): Fix an error in the bit pattern.
 	* gencode.c (gensim_caselist): The movy instructions use
