@@ -1,3 +1,7 @@
+2001-10-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* thread-db.c: Fix a few formatting mistakes.
+
 2001-10-12  Christopher Faylor  <cgf@redhat.com>
 
 	* win32-nat.c (safe_symbol_file_add_stub): Properly initialize linked

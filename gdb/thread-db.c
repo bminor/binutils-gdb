@@ -123,7 +123,6 @@ static void thread_db_find_new_threads (void);
 
 /* Building process ids.  */
 
-
 #define GET_PID(ptid)		ptid_get_pid (ptid)
 #define GET_LWP(ptid)		ptid_get_lwp (ptid)
 #define GET_THREAD(ptid)	ptid_get_tid (ptid)
@@ -133,7 +132,6 @@ static void thread_db_find_new_threads (void);
 
 #define BUILD_LWP(lwp, pid)	ptid_build (pid, lwp, 0)
 #define BUILD_THREAD(tid, pid)	ptid_build (pid, 0, tid)
-
 
 
 struct private_thread_info
@@ -141,8 +139,8 @@ struct private_thread_info
   /* Cached LWP id.  Must come first, see lin-lwp.c.  */
   lwpid_t lwpid;
 };
-
 
+
 static char *
 thread_db_err_str (td_err_e err)
 {
@@ -257,7 +255,7 @@ lwp_from_thread (ptid_t ptid)
   td_thrhandle_t th;
   td_err_e err;
 
-  if (! is_thread (ptid))
+  if (!is_thread (ptid))
     return ptid;
 
   err = td_ta_map_id2thr_p (thread_agent, GET_THREAD (ptid), &th);
@@ -434,7 +432,7 @@ static void
 check_thread_signals (void)
 {
 #ifdef GET_THREAD_SIGNALS
-  if (! thread_signals)
+  if (!thread_signals)
     {
       sigset_t mask;
       int i;
@@ -573,9 +571,8 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
   tp->private = xmalloc (sizeof (struct private_thread_info));
   tp->private->lwpid = ti_p->ti_lid;
 
-  if (ti_p->ti_state == TD_THR_UNKNOWN ||
-      ti_p->ti_state == TD_THR_ZOMBIE)
-    return;/* A zombie thread -- do not attach. */
+  if (ti_p->ti_state == TD_THR_UNKNOWN || ti_p->ti_state == TD_THR_ZOMBIE)
+    return;			/* A zombie thread -- do not attach.  */
 
   /* Under Linux, we have to attach to each and every thread.  */
 #ifdef ATTACH_LWP
@@ -691,7 +688,7 @@ check_event (ptid_t ptid)
       /* We may already know about this thread, for instance when the
          user has issued the `info threads' command before the SIGTRAP
          for hitting the thread creation breakpoint was reported.  */
-      if (! in_thread_list (ptid))
+      if (!in_thread_list (ptid))
 	attach_thread (ptid, msg.th_p, &ti, 1);
       return;
 
@@ -703,7 +700,7 @@ check_event (ptid_t ptid)
 	error ("Thread death event doesn't match breakpoint.");
 #endif
 
-      if (! in_thread_list (ptid))
+      if (!in_thread_list (ptid))
 	error ("Spurious thread death event.");
 
       detach_thread (ptid, 1);
@@ -756,7 +753,7 @@ thread_db_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
     {
       /* FIXME: This seems to be necessary to make sure breakpoints
          are removed.  */
-      if (! target_thread_alive (inferior_ptid))
+      if (!target_thread_alive (inferior_ptid))
 	inferior_ptid = pid_to_ptid (GET_PID (inferior_ptid));
       else
 	inferior_ptid = lwp_from_thread (inferior_ptid);
@@ -776,7 +773,7 @@ thread_db_fetch_registers (int regno)
   gdb_prfpregset_t fpregset;
   td_err_e err;
 
-  if (! is_thread (inferior_ptid))
+  if (!is_thread (inferior_ptid))
     {
       /* Pass the request to the target beneath us.  */
       target_beneath->to_fetch_registers (regno);
@@ -813,7 +810,7 @@ thread_db_store_registers (int regno)
   gdb_prfpregset_t fpregset;
   td_err_e err;
 
-  if (! is_thread (inferior_ptid))
+  if (!is_thread (inferior_ptid))
     {
       /* Pass the request to the target beneath us.  */
       target_beneath->to_store_registers (regno);
@@ -859,7 +856,7 @@ thread_db_kill (void)
 static void
 thread_db_create_inferior (char *exec_file, char *allargs, char **env)
 {
-  if (! keep_thread_db)
+  if (!keep_thread_db)
     {
       unpush_target (&thread_db_ops);
       using_thread_db = 0;
@@ -879,7 +876,7 @@ thread_db_post_startup_inferior (ptid_t ptid)
 
       /* ...and perform the remaining initialization steps.  */
       enable_thread_event_reporting ();
-      thread_db_find_new_threads();
+      thread_db_find_new_threads ();
     }
 }
 
@@ -899,8 +896,8 @@ static int
 thread_db_thread_alive (ptid_t ptid)
 {
   td_thrhandle_t th;
-  td_thrinfo_t   ti;
-  td_err_e       err;
+  td_thrinfo_t ti;
+  td_err_e err;
 
   if (is_thread (ptid))
     {
@@ -916,9 +913,8 @@ thread_db_thread_alive (ptid_t ptid)
       if (err != TD_OK)
 	return 0;
 
-      if (ti.ti_state == TD_THR_UNKNOWN ||
-	  ti.ti_state == TD_THR_ZOMBIE)
-	return 0;	/* A zombie thread. */
+      if (ti.ti_state == TD_THR_UNKNOWN || ti.ti_state == TD_THR_ZOMBIE)
+	return 0;		/* A zombie thread.  */
 
       return 1;
     }
@@ -940,14 +936,12 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   if (err != TD_OK)
     error ("Cannot get thread info: %s", thread_db_err_str (err));
 
-  if (ti.ti_state == TD_THR_UNKNOWN ||
-      ti.ti_state == TD_THR_ZOMBIE)
-
-    return 0;	/* A zombie -- ignore. */
+  if (ti.ti_state == TD_THR_UNKNOWN || ti.ti_state == TD_THR_ZOMBIE)
+    return 0;			/* A zombie -- ignore.  */
 
   ptid = BUILD_THREAD (ti.ti_tid, GET_PID (inferior_ptid));
 
-  if (! in_thread_list (ptid))
+  if (!in_thread_list (ptid))
     attach_thread (ptid, th_p, &ti, 1);
 
   return 0;
