@@ -4,6 +4,28 @@
 	* mi/mi-main.c (mi_execute_command): Pass result.message directly
 	to fputstr_unfiltered.
 
+2005-01-13  Michael Snyder  <msnyder@redhat.com>
+
+	* stack.c: Whitespace tweaks.
+	* somsolib.[ch]: Whitespace tweaks.
+	* solib-aix.c: Whitespace tweaks.
+	* solib.c: Whitespace tweaks.
+	* solib-frv.c: Whitespace tweaks.
+	* solib.h: Whitespace tweaks.
+	* solib-irix.c: Whitespace tweaks.
+	* solib-som.c: Whitespace tweaks.
+	* solib-sunos.c: Whitespace tweaks.
+	* solib-svr4.[ch]: Whitespace tweaks.
+	* ser-tcp.c: Whitespace tweaks.
+	* ser-unix.c: Whitespace tweaks.
+	* serial.h: Whitespace tweaks.
+	* scm-valprint.c: Whitespace tweaks.
+	* rs6000-tdep.c: Whitespace tweaks.
+	* rs6000-nat.c: Whitespace tweaks.
+	* remote.c: Whitespace tweaks.
+
+2005-01-13  Andrew Cagney  <cagney@gnu.org>
+
 	* defs.h (error_last_message, error_init): Delete declaration.
 	* utils.c (fatal, vfatal): Call throw_vfatal.
 	(error, verror): Call throw_verror;
@@ -24,23 +46,6 @@
 
 2005-01-13  Michael Snyder  <msnyder@redhat.com>
 
-	* stack.c: Whitespace tweaks.
-	* somsolib.[ch]: Whitespace tweaks.
-	* solib-aix.c: Whitespace tweaks.
-	* solib.c: Whitespace tweaks.
-	* solib-frv.c: Whitespace tweaks.
-	* solib.h: Whitespace tweaks.
-	* solib-irix.c: Whitespace tweaks.
-	* solib-som.c: Whitespace tweaks.
-	* solib-sunos.c: Whitespace tweaks.
-	* solib-svr4.[ch]: Whitespace tweaks.
-	* ser-tcp.c: Whitespace tweaks.
-	* ser-unix.c: Whitespace tweaks.
-	* serial.h: Whitespace tweaks.
-	* scm-valprint.c: Whitespace tweaks.
-	* rs6000-tdep.c: Whitespace tweaks.
-	* rs6000-nat.c: Whitespace tweaks.
-	* remote.c: Whitespace tweaks.
 	* remote-st.c: Whitespace tweaks.
 	* remote-sim.c: Whitespace tweaks.
 	* remote-mips.c: Whitespace tweaks.
