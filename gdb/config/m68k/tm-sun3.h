@@ -65,3 +65,6 @@ extern CORE_ADDR m68k_saved_pc_after_call PARAMS ((struct frame_info *));
 
 #define SAVED_PC_AFTER_CALL(frame) \
   m68k_saved_pc_after_call(frame)
+
+/* The code which tries to deal with this bug is never harmful on a sun3.  */
+#define SUN_FIXED_LBRAC_BUG (0)
