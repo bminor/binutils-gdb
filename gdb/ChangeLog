@@ -1,3 +1,8 @@
+2000-11-20  H.J. Lu  <hjl@gnu.org>
+
+	* ia64-tdep.c (gdbarch_tdep): Change reference from
+	ELFOSABI_MONTEREY to ELFOSABI_AIX.
+
 2000-11-20  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* c-valprint.c (print_function_pointer_address):  New function

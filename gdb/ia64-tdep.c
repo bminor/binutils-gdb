@@ -226,7 +226,7 @@ struct frame_extra_info
 struct gdbarch_tdep
   {
     int os_ident;	/* From the ELF header, one of the ELFOSABI_
-                           constants: ELFOSABI_LINUX, ELFOSABI_MONTEREY,
+                           constants: ELFOSABI_LINUX, ELFOSABI_AIX,
 			   etc. */
     CORE_ADDR (*sigcontext_register_address) (CORE_ADDR, int);
     			/* OS specific function which, given a frame address
