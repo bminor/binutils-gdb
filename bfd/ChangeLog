@@ -1,5 +1,10 @@
 Fri Nov 19 14:34:04 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* coff-a29k.c (a29k_reloc): For R_IREL, don't left shift
+	signed_value before sign extending it.  Don't subtract out
+	reloc_entry->address.  This makes it compatible with what gas is
+	generating.
+
 	* elfcode.h (elf_fake_sections): Accept .sbss as the name for a
 	SHT_NOBITS sections.
 	(map_program_segments): Don't leave the loop after the first

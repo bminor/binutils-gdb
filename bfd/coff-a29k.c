@@ -117,8 +117,9 @@ DEFUN(a29k_reloc,(abfd, reloc_entry, symbol_in, data, input_section, output_bfd)
    case R_IREL: 	
     insn = bfd_get_32(abfd, hit_data); 
     /* Take the value in the field and sign extend it */
-    signed_value = EXTRACT_HWORD(insn) << 2;
+    signed_value = EXTRACT_HWORD(insn);
     signed_value = SIGN_EXTEND_HWORD(signed_value);
+    signed_value <<= 2;
     signed_value +=  sym_value + reloc_entry->addend;
     if ((signed_value&~0x3ffff) == 0) 
     {				/* Absolute jmp/call */
@@ -129,9 +130,8 @@ DEFUN(a29k_reloc,(abfd, reloc_entry, symbol_in, data, input_section, output_bfd)
     {
       /* Relative jmp/call, so subtract from the value the
 	 address of the place we're coming from */
-      signed_value -= reloc_entry->address + 
-       input_section->output_section->vma + 
-	input_section->output_offset;
+      signed_value -= (input_section->output_section->vma
+		       + input_section->output_offset);
       if (signed_value>0x1ffff || signed_value<-0x20000) 
        return(bfd_reloc_outofrange);
     }
