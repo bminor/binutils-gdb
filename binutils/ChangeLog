@@ -1,3 +1,7 @@
+2003-01-02  Richard Sandiford  <rsandifo@redhat.com>
+
+	* readelf.c (get_machine_flags): Handle E_MIPS_ARCH_32R2.
+
 2002-12-30  Chris Demetriou  <cgd@broadcom.com>
 
 	* doc/binutils.texi (objdump): Note MIPS HWR (Hardware Register)

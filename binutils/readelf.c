@@ -1,5 +1,5 @@
 /* readelf.c -- display contents of an ELF format file
-   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    Originally developed by Eric Youngdale <eric@andante.jic.com>
    Modifications by Nick Clifton <nickc@redhat.com>
@@ -1994,6 +1994,7 @@ get_machine_flags (e_flags, e_machine)
 	    case E_MIPS_ARCH_4: strcat (buf, ", mips4"); break;
 	    case E_MIPS_ARCH_5: strcat (buf, ", mips5"); break;
 	    case E_MIPS_ARCH_32: strcat (buf, ", mips32"); break;
+	    case E_MIPS_ARCH_32R2: strcat (buf, ", mips32r2"); break;
 	    case E_MIPS_ARCH_64: strcat (buf, ", mips64"); break;
 	    default: strcat (buf, ", unknown ISA"); break;
 	    }
