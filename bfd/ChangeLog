@@ -1,5 +1,10 @@
 2004-10-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* configure.in: (AM_INIT_AUTOMAKE): Set version to 2.15.94.
+	* configure: Regenerate.
+
+2004-10-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR 463
 	* aoutx.h (aout_link_input_section_std): Pass proper hash entry
 	to linker reloc_overflow callback.
