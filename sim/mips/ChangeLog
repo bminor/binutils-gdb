@@ -1,3 +1,16 @@
+start-sanitize-r5900
+Mon Aug 25 19:11:15 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (MAX_REG): Allow up-to 128 registers.
+	(LO1, HI1): Define value that matches REGISTER_NAMES in gdb.
+	(REGISTER_SA): Ditto.
+	(sim_open): Initialize register_widths for r5900 specific
+ 	registers.
+	(sim_fetch_register, sim_store_register): Check for request of
+ 	r5900 specific SA register.  Check for request for hi 64 bits of
+ 	r5900 specific registers.
+	
+end-sanitize-r5900
 Mon Sep 29 14:45:00 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* configure: Regenerated.

@@ -1,3 +1,13 @@
+Tue Sep 30 13:35:54 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+start-sanitize-r5900
+	* config/mips/tm-r5900.h (REGISTER_NAMES): Define.
+	(NUM_REGS): Ditto.
+
+end-sanitize-r5900
+	* config/mips/tm-mips.h (NUM_REGS): Define conditionally.
+	(REGISTER_NAMES): Ditto.
+
 Fri Sep 26 17:32:22 1997  Jason Molenda  (crash@pern.cygnus.com)
 
 	* command.c (add_cmd, add_show_from_set): Insert new commands in

@@ -165,11 +165,14 @@ int mips_about_to_return PARAMS ((CORE_ADDR pc));
 
 /* Number of machine registers */
 
+#ifndef NUM_REGS
 #define NUM_REGS 90
+#endif
 
 /* Initializer for an array of names of registers.
    There should be NUM_REGS strings in this initializer.  */
 
+#ifndef REGISTER_NAMES
 #define REGISTER_NAMES 	\
     {	"zero",	"at",	"v0",	"v1",	"a0",	"a1",	"a2",	"a3", \
 	"t0",	"t1",	"t2",	"t3",	"t4",	"t5",	"t6",	"t7", \
@@ -184,6 +187,7 @@ int mips_about_to_return PARAMS ((CORE_ADDR pc));
 	"",	"",	"",	"",	"",	"",	"",	"", \
 	"",	"",	"",	"",	"",	"",	"",	"", \
     }
+#endif
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
