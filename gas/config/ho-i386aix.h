@@ -19,6 +19,7 @@
 
 #define HO_I386 1
 
-#include "ho-sysv.h"
+#include <sys/types.h>
+#include <stdlib.h>
 
 /* end of ho-i386aix.h */
