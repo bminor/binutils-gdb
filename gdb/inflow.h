@@ -1,6 +1,6 @@
 /* Low level interface to ptrace, for GDB when running under Unix.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,21 +25,10 @@
 #include "terminal.h"		/* For HAVE_TERMIOS et.al.  */
 
 #ifdef HAVE_TERMIOS
-#define PROCESS_GROUP_TYPE pid_t
+# define PROCESS_GROUP_TYPE pid_t
+#elif defined (HAVE_TERMIO) || defined (HAVE_SGTTY)
+# define PROCESS_GROUP_TYPE int
 #endif
-
-#ifdef HAVE_TERMIO
-#define PROCESS_GROUP_TYPE int
-#endif
-
-#ifdef HAVE_SGTTY
-#ifdef SHORT_PGRP
-/* This is only used for the ultra.  Does it have pid_t?  */
-#define PROCESS_GROUP_TYPE short
-#else
-#define PROCESS_GROUP_TYPE int
-#endif
-#endif /* sgtty */
 
 #ifdef PROCESS_GROUP_TYPE
 /* Process group for us and the inferior.  Saved and restored just like
@@ -48,4 +37,4 @@ extern PROCESS_GROUP_TYPE our_process_group;
 extern PROCESS_GROUP_TYPE inferior_process_group;
 #endif
 
-#endif
+#endif /* inflow.h */

@@ -1,5 +1,8 @@
 2005-03-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* inflow.h: Update copyright year.  Remove #ifdef SHORT_PGRP code.
+	Callapse HAVE_TERMIO and HAVE_SGTTY.
+
 	* dwarf2-frame.c (execute_cfa_program): Implement
 	DW_CFA_GNU_window_save.
 
