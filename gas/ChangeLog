@@ -1,3 +1,13 @@
+Sat Jul 15 00:01:35 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* config/tc-ppc.c (ppc_elf_suffix): Add @fixup so that the
+	compiler can mark which relocs not to complain about with
+	-mrelocatable.
+	(ppc_elf_validate_fix): Add .fixup to sections not to complain
+	about, and also don't complain for BFD_RELOC_CTOR relocations in
+	writable non-code segments.
+	(md_apply_fix): Treat BFD_RELOC_CTOR just like BFD_RELOC_32.
+
 Fri Jul 14 19:54:28 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	Add support for SPARC SunOS PIC:
