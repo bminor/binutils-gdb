@@ -1,5 +1,5 @@
-/* Macro definitions for running GDB on Apple 68k-based Macintoshes.
-   Copyright (C) 1994, 1995 Free Software Foundation, Inc.
+/* Macro definitions for running GDB on Apple Power Macintoshes.
+   Copyright (C) 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -18,7 +18,5 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define HOST_BYTE_ORDER BIG_ENDIAN
-
-/* Use angle brackets so that the common xm-mpw.h is found.  */
 
 #include <xm-mpw.h>

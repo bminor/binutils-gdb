@@ -7,7 +7,11 @@ Thu Oct 26 22:02:27 1995  Stan Shebs  <shebs@andros.cygnus.com>
 	(GestaltEqu.h): Include Gestalt.h instead.
 	(do_mouse_down): Comment out control tracking, needs to be
 	updated to use UPP before will work on PowerMac.
-
+	* config/xm-mpw.h: New file, all-Mac host support.
+	* config/m68k/xm-mpw.h: Move most definitions into generic Mac
+	support.
+	* config/powerpc/xm-mpw.h: New file, PowerMac host support.
+	
 Thu Oct 26 15:21:32 1995  Brendan Kehoe  <brendan@lisa.cygnus.com>
 
 	* regex.h: Renamed to gnu-regex.h.
