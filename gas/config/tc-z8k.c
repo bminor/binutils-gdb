@@ -1,5 +1,5 @@
 /* tc-z8k.c -- Assemble code for the Zilog Z800n
-   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 2000, 2001, 2002
+   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -38,28 +38,30 @@ extern int coff_flags;
 int segmented_mode;
 const int md_reloc_size;
 
+/* This is non-zero if target was set from the command line.  */
+static int z8k_target_from_cmdline;
+
 static void s_segm PARAMS ((int));
-static void s_unseg PARAMS ((int));
 static void even PARAMS ((int));
 static int tohex PARAMS ((int));
 static void sval PARAMS ((int));
 
 static void
-s_segm (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_segm (segm)
+     int segm;
 {
+  if (segm)
+    {
   segmented_mode = 1;
   machine = bfd_mach_z8001;
   coff_flags = F_Z8001;
-}
-
-static void
-s_unseg (ignore)
-     int ignore ATTRIBUTE_UNUSED;
-{
+    }
+  else
+    {
   segmented_mode = 0;
   machine = bfd_mach_z8002;
   coff_flags = F_Z8002;
+    }
 }
 
 static void
@@ -123,12 +125,12 @@ const pseudo_typeS md_pseudo_table[] = {
   {"import" , s_ignore        , 0},
   {"page"   , listing_eject   , 0},
   {"program", s_ignore        , 0},
-  {"z8001"  , s_segm          , 0},
-  {"z8002"  , s_unseg         , 0},
+  {"z8001"  , s_segm          , 1},
+  {"z8002"  , s_segm          , 0},
 
-  {"segm"   , s_segm          , 0},
-  {"unsegm" , s_unseg         , 0},
-  {"unseg"  , s_unseg         , 0},
+  {"segm"   , s_segm          , 1},
+  {"unsegm" , s_segm          , 0},
+  {"unseg"  , s_segm          , 0},
   {"name"   , s_app_file      , 0},
   {"global" , s_globl         , 0},
   {"wval"   , cons            , 2},
@@ -169,7 +171,8 @@ md_begin ()
     }
 
   /* Default to z8002.  */
-  s_unseg (0);
+  if (! z8k_target_from_cmdline)
+    s_segm (0);
 
   /* Insert the pseudo ops, too.  */
   for (idx = 0; md_pseudo_table[idx].poc_name; idx++)
@@ -181,8 +184,6 @@ md_begin ()
       fake_opcode->opcode = 250;
       hash_insert (opcode_hash_control, fake_opcode->name, fake_opcode);
     }
-
-  linkrelax = 1;
 }
 
 struct z8k_exp {
@@ -237,7 +238,7 @@ static char *get_operands
 static opcode_entry_type *get_specific
   PARAMS ((opcode_entry_type *, op_type *));
 static void newfix
-  PARAMS ((int, int, expressionS *));
+  PARAMS ((int, int, int, expressionS *));
 static char *apply_fix
   PARAMS ((char *, int, expressionS *, int));
 static void build_bytes
@@ -576,6 +577,8 @@ get_interrupt_operand (ptr, mode, dst)
     fail:
       ;
     }
+  /* No interrupt type specified, opcode won't do anything.  */
+  as_warn (_("opcode has no effect."));
   the_interrupt = 0x0;
   return;
 }
@@ -583,7 +586,6 @@ get_interrupt_operand (ptr, mode, dst)
 struct cc_names {
   int value;
   char *name;
-
 };
 
 struct cc_names table[] = {
@@ -960,9 +962,10 @@ check_operand (operand, width, string)
 static char buffer[20];
 
 static void
-newfix (ptr, type, operand)
+newfix (ptr, type, size, operand)
      int ptr;
      int type;
+     int size;   /* nibbles.  */
      expressionS *operand;
 {
   if (operand->X_add_symbol
@@ -971,7 +974,7 @@ newfix (ptr, type, operand)
     {
       fix_new_exp (frag_now,
 		   ptr,
-		   1,
+		   size / 2,
 		   operand,
 		   0,
 		   type);
@@ -983,11 +986,11 @@ apply_fix (ptr, type, operand, size)
      char *ptr;
      int type;
      expressionS *operand;
-     int size;
+     int size;   /* nibbles.  */
 {
-  int n = operand->X_add_number;
+  long n = operand->X_add_number;
 
-  newfix ((ptr - buffer) / 2, type, operand);
+  newfix ((ptr - buffer) / 2, type, size + 1, operand);
   switch (size)
     {
     case 8:			/* 8 nibbles == 32 bits.  */
@@ -1018,7 +1021,6 @@ build_bytes (this_try, operand)
 {
   char *output_ptr = buffer;
   int c;
-  int nib;
   int nibble;
   unsigned int *class_ptr;
 
@@ -1134,36 +1136,39 @@ build_bytes (this_try, operand)
 
 	case CLASS_IMM:
 	  {
-	    nib = 0;
 	    switch (c & ARG_MASK)
 	      {
 	      case ARG_NIM4:
+                if (imm_operand->X_add_number > 15)
+                  {
+                    as_bad (_("immediate value out of range"));
+                  }
 		imm_operand->X_add_number = -imm_operand->X_add_number;
-		/* Drop through.  */
-	      case ARG_IMM4:
 		output_ptr = apply_fix (output_ptr, R_IMM4L, imm_operand, 1);
 		break;
+              /*case ARG_IMMNMINUS1: not used.  */
 	      case ARG_IMM4M1:
 		imm_operand->X_add_number--;
-		output_ptr = apply_fix (output_ptr, R_IMM4L, imm_operand, 1);
-		break;
-	      case ARG_IMMNMINUS1:
-		imm_operand->X_add_number--;
+                /* Drop through.  */
+	      case ARG_IMM4:
+                if (imm_operand->X_add_number > 15)
+                  {
+                    as_bad (_("immediate value out of range"));
+                  }
 		output_ptr = apply_fix (output_ptr, R_IMM4L, imm_operand, 1);
 		break;
 	      case ARG_NIM8:
 		imm_operand->X_add_number = -imm_operand->X_add_number;
+                /* Drop through.  */
 	      case ARG_IMM8:
 		output_ptr = apply_fix (output_ptr, R_IMM8, imm_operand, 2);
 		break;
 	      case ARG_IMM16:
 		output_ptr = apply_fix (output_ptr, R_IMM16, imm_operand, 4);
 		break;
-
 	      case ARG_IMM32:
 		output_ptr = apply_fix (output_ptr, R_IMM32, imm_operand, 8);
 		break;
-
 	      default:
 		abort ();
 	      }
@@ -1255,7 +1260,7 @@ md_assemble (str)
       new_input_line_pointer = get_operands (opcode, op_end, operand);
       if (new_input_line_pointer)
         input_line_pointer = new_input_line_pointer;
-      prev_opcode = opcode;
+      prev_opcode = opcode; /* XXX is this used ?? */
 
       opcode = get_specific (opcode, operand);
 
@@ -1281,6 +1286,8 @@ tc_crawl_symbol_chain (headers)
 {
   printf (_("call to tc_crawl_symbol_chain \n"));
 }
+
+/* We have no need to default values of symbols.  */
 
 symbolS *
 md_undefined_symbol (name)
@@ -1363,6 +1370,8 @@ const char *md_shortopts = "z:";
 
 struct option md_longopts[] =
   {
+#define OPTION_RELAX  (OPTION_MD_BASE)
+    {"linkrelax", no_argument, NULL, OPTION_RELAX},
     {NULL, no_argument, NULL, 0}
   };
 
@@ -1377,14 +1386,19 @@ md_parse_option (c, arg)
     {
     case 'z':
       if (!strcmp (arg, "8001"))
-	s_segm (0);
+	s_segm (1);
       else if (!strcmp (arg, "8002"))
-	s_unseg (0);
+	s_segm (0);
       else
 	{
 	  as_bad (_("invalid architecture -z%s"), arg);
 	  return 0;
 	}
+      z8k_target_from_cmdline = 1;
+      break;
+
+    case OPTION_RELAX:
+      linkrelax = 1;
       break;
 
     default:
@@ -1399,9 +1413,10 @@ md_show_usage (stream)
      FILE *stream;
 {
   fprintf (stream, _("\
-Z8K options:\n\
--z8001			generate segmented code\n\
--z8002			generate unsegmented code\n"));
+ Z8K options:\n\
+  -z8001                  generate segmented code\n\
+  -z8002                  generate unsegmented code\n\
+  -linkrelax              create linker relaxable code\n"));
 }
 
 void
@@ -1410,7 +1425,7 @@ md_convert_frag (headers, seg, fragP)
      segT seg ATTRIBUTE_UNUSED;
      fragS *fragP ATTRIBUTE_UNUSED;
 {
-  printf (_("call to md_convert_frag \n"));
+  printf (_("call to md_convert_frag\n"));
   abort ();
 }
 
@@ -1435,40 +1450,64 @@ md_apply_fix3 (fixP, valP, segment)
   switch (fixP->fx_r_type)
     {
     case R_IMM4L:
-      buf[0] = (buf[0] & 0xf0) | ((buf[0] + val) & 0xf);
+      buf[0] = (buf[0] & 0xf0) | (val & 0xf);
       break;
 
     case R_JR:
-
+      val = val - fixP->fx_frag->fr_address + fixP->fx_where - fixP->fx_size;
+      if (val & 1)
+        as_bad (_("cannot branch to odd address"));
+      val /= 2;
+      if (val > 127 || val < -128)
+        as_bad (_("relative jump out of range"));
       *buf++ = val;
-#if 0
-      if (val != 0)
-	abort ();
-#endif
+      fixP->fx_no_overflow = 1;
       break;
 
     case R_DISP7:
+      val = val - fixP->fx_frag->fr_address + fixP->fx_where - fixP->fx_size;
+      if (val & 1)
+        as_bad (_("cannot branch to odd address"));
+      val /= 2;
+      if (val > 0 || val < -128)
+        as_bad (_("relative jump out of range"));
+      *buf = (*buf & 0x80) | (val & 0x7f);
+      fixP->fx_no_overflow = 1;
+      break;
 
-      *buf++ += val;
-#if 0
-      if (val != 0)
-	abort ();
-#endif
+    case R_CALLR:
+      if (val > 8191 || val < -8192)
+        as_bad (_("relative call out of range"));
+      val = -val;
+      *buf++ = (buf[0] & 0xf0) | ((val >> 8) & 0xf);
+      *buf++ = val & 0xff;
       break;
 
     case R_IMM8:
-      buf[0] += val;
+      *buf++ = val;
       break;
+
     case R_IMM16:
       *buf++ = (val >> 8);
       *buf++ = val;
       break;
+
     case R_IMM32:
       *buf++ = (val >> 24);
       *buf++ = (val >> 16);
       *buf++ = (val >> 8);
       *buf++ = val;
       break;
+
+    case R_REL16:
+      val = val - fixP->fx_frag->fr_address + fixP->fx_where - fixP->fx_size;
+      if (val > 32767 || val < -32768)
+        as_bad (_("relative address out of range"));
+      *buf++ = (val >> 8);
+      *buf++ = val;
+      fixP->fx_no_overflow = 1;
+      break;
+
 #if 0
     case R_DA | R_SEG:
       *buf++ = (val >> 16);
@@ -1483,6 +1522,7 @@ md_apply_fix3 (fixP, valP, segment)
       break;
 
     default:
+      printf(_("md_apply_fix3: unknown r_type 0x%x\n"), fixP->fx_r_type);
       abort ();
     }
 
@@ -1495,7 +1535,7 @@ md_estimate_size_before_relax (fragP, segment_type)
      register fragS *fragP ATTRIBUTE_UNUSED;
      register segT segment_type ATTRIBUTE_UNUSED;
 {
-  printf (_("call tomd_estimate_size_before_relax\n"));
+  printf (_("call to md_estimate_size_before_relax\n"));
   abort ();
 }
 
