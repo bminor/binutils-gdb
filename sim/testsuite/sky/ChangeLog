@@ -1,3 +1,9 @@
+Fri Apr 17 14:17:17 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* Makefile.in (ULIMIT): New variable.
+	(sce%.ok): Use it.
+	(.run.ok,.run.ko): Ditto.
+
 Fri Apr 17 14:47:53 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* t-cop2b.c: New test for COP2 via inline asm.

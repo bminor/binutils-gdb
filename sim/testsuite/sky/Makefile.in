@@ -87,6 +87,9 @@ GCC_FOR_TARGET = `\
 
 C_GEN = perl $(srcdir)/c_gen.pl
 
+# cpu time limit (in seconds)
+ULIMIT = 30
+
 .SUFFIXES: .trc .c .run .ok \
            .vif0out .vif0ok .vif0expect \
 	   .vif1out .vif1ok .vif1expect \
@@ -171,7 +174,7 @@ sce2_%.vu.o: sce2_%.vuasm
 
 sce%.ok: sce%.exe
 	rm -f sce$*.ok 
-	ulimit -t 30 ; $(RUN_FOR_TARGET) $<  > sce$*_our_gif.dat; \
+	ulimit -t $(ULIMIT) ; $(RUN_FOR_TARGET) $<  > sce$*_our_gif.dat; \
         if [ $$? -ne 0 ];  then \
 	   touch sce$*.ok; \
 	else \
@@ -188,12 +191,12 @@ sce%.ok: sce%.exe
 
 .run.ok:
 	rm -f tmp-$* $*.hi
-	ulimit -t 30 ; $(RUN_FOR_TARGET) $< > tmp-$*
+	ulimit -t $(ULIMIT) ; $(RUN_FOR_TARGET) $< > tmp-$*
 	mv tmp-$* $*.ok
 .run.ko:
 	rm -f tmp-$* $*.ko
 	set +e ; \
-	ulimit -t 30 ; $(RUN_FOR_TARGET) $< > tmp-$* ; \
+	ulimit -t $(ULIMIT) ; $(RUN_FOR_TARGET) $< > tmp-$* ; \
 	if [ $$? -ne 0 ] ; then \
 	  exit 0 ; \
 	else \
