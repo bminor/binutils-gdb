@@ -5,9 +5,13 @@ dnl brackets, be sure changequote invocations surround it.
 dnl
 dnl
 dnl v2.5 needed for --bindir et al
-AC_PREREQ(2.13)
+AC_PREREQ(2.57)
 AC_INIT(as.h)
 
+dnl Autoconf 2.57 will find the aux dir without this.  However, unless
+dnl we specify this explicitly, automake-1.7 will assume that ylwrap is in
+dnl gas/ instead of gas/../.
+AC_CONFIG_AUX_DIR(..)
 AC_CANONICAL_SYSTEM
 AC_ISC_POSIX
 
@@ -70,10 +74,14 @@ AM_CONFIG_HEADER(config.h:config.in)
 
 # If we are on a DOS filesystem, we must use gdb.ini rather than
 # .gdbinit.
-GDBINIT=".gdbinit"
 case "${host}" in
   *-*-msdos* | *-*-go32* | *-*-mingw32* | *-*-windows*)
     GDBINIT="gdb.ini"
+    AC_CONFIG_FILES(gdb.ini:gdbinit.in)
+    ;;
+  *)
+    GDBINIT=".gdbinit"
+    AC_CONFIG_FILES(.gdbinit:gdbinit.in)
     ;;
 esac
 AC_SUBST(GDBINIT)
@@ -1045,7 +1053,8 @@ dnl the build directory which include the right .h file.  Make sure
 dnl the old symlinks don't exist, so that a reconfigure in an existing
 dnl directory behaves reasonably.
 
-AC_OUTPUT(Makefile doc/Makefile ${GDBINIT}:gdbinit.in po/Makefile.in:po/Make-in,
+AC_CONFIG_FILES(Makefile doc/Makefile po/Makefile.in:po/Make-in)
+AC_CONFIG_COMMANDS([default],
 [rm -f targ-cpu.c targ-cpu.h obj-format.h obj-format.c targ-env.h atof-targ.c itbl-cpu.h
  echo '#include "tc-'"${target_cpu_type}"'.h"' > targ-cpu.h
  echo '#include "obj-'"${obj_format}"'.h"' > obj-format.h
@@ -1060,3 +1069,5 @@ AC_OUTPUT(Makefile doc/Makefile ${GDBINIT}:gdbinit.in po/Makefile.in:po/Make-in,
  cgen_cpu_prefix=${cgen_cpu_prefix}
  obj_format=${obj_format}
  te_file=${te_file}])
+
+AC_OUTPUT

@@ -1,3 +1,12 @@
+2003-09-02  Daniel Jacobowitz  <drow@mvista.com>
+
+	* configure.in: Update AC_PREREQ to 2.57.  Use AC_CONFIG_FILES
+	and AC_CONFIG_COMMANDS instead of the three-argument AC_OUTPUT.
+	Specify AC_CONFIG_AUX_DIR.
+	* aclocal.m4: Regenerated with aclocal-1.7.
+	* configure: Regenerated with autoconf 2.57.
+	* Makefile.in, doc/Makefile.in: Regenerated with automake-1.7.
+
 2003-08-29  Jakub Jelinek  <jakub@redhat.com>
 
 	* dw2gencfi.c (cfi_pseudo_table): Add cfi_window_save.
