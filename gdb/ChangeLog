@@ -1,5 +1,11 @@
 2001-04-16  Kevin Buettner  <kevinb@redhat.com>
 
+	* procfs.c (open_with_retry): New function.
+	(open_procinfo_files, load_syscalls, proc_iterate_over_mappings)
+	(proc_get_LDT_entry): Call open_with_retry() instead of open().
+
+2001-04-16  Kevin Buettner  <kevinb@redhat.com>
+
 	* ia64-linux-nat.c (ia64_linux_stopped_by_watchpoint): Adjust
 	comparison against TRAP_HWBKPT constant yet again to account
 	for the various values used by different kernel versions.

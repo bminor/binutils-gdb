@@ -458,6 +458,40 @@ find_procinfo_or_die (int pid, int tid)
   return pi;
 }
 
+/* open_with_retry() is a wrapper for open().  The appropriate
+   open() call is attempted; if unsuccessful, it will be retried as
+   many times as needed for the EAGAIN and EINTR conditions.
+   
+   For other conditions, open_with_retry() will retry the open() a
+   limited number of times.  In addition, a short sleep is imposed
+   prior to retrying the open().  The reason for this sleep is to give
+   the kernel a chance to catch up and create the file in question in
+   the event that GDB "wins" the race to open a file before the kernel
+   has created it.  */
+   
+static int
+open_with_retry (const char *pathname, int flags)
+{
+  int retries_remaining, status;
+
+  retries_remaining = 2;
+
+  while (1)
+    {
+      status = open (pathname, flags);
+
+      if (status >= 0 || retries_remaining == 0)
+	break;
+      else if (errno != EINTR && errno != EAGAIN)
+	{
+	  retries_remaining--;
+	  sleep (1);
+	}
+    }
+
+  return status;
+}
+
 /*
  * Function: open_procinfo_files
  *
@@ -543,7 +577,7 @@ open_procinfo_files (procinfo *pi, int which)
       strcat (tmp, "/lwpctl");
     else
       strcat (tmp, "/ctl");
-    fd = open (tmp, O_WRONLY);
+    fd = open_with_retry (tmp, O_WRONLY);
     if (fd <= 0)
       return 0;		/* fail */
     pi->ctl_fd = fd;
@@ -552,7 +586,7 @@ open_procinfo_files (procinfo *pi, int which)
     if (pi->tid)
       return 0;		/* there is no 'as' file descriptor for an lwp */
     strcat (tmp, "/as");
-    fd = open (tmp, O_RDWR);
+    fd = open_with_retry (tmp, O_RDWR);
     if (fd <= 0)
       return 0;		/* fail */
     pi->as_fd = fd;
@@ -562,7 +596,7 @@ open_procinfo_files (procinfo *pi, int which)
       strcat (tmp, "/lwpstatus");
     else
       strcat (tmp, "/status");
-    fd = open (tmp, O_RDONLY);
+    fd = open_with_retry (tmp, O_RDONLY);
     if (fd <= 0)
       return 0;		/* fail */
     pi->status_fd = fd;
@@ -586,12 +620,13 @@ open_procinfo_files (procinfo *pi, int which)
 
 
 #ifdef PIOCTSTATUS	/* OSF */
-  if ((fd = open (pi->pathname, O_RDWR)) == 0) /* Only one FD; just open it. */
+  /* Only one FD; just open it. */
+  if ((fd = open_with_retry (pi->pathname, O_RDWR)) == 0)
     return 0;
 #else			/* Sol 2.5, Irix, other? */
   if (pi->tid == 0)	/* Master procinfo for the process */
     {
-      fd = open (pi->pathname, O_RDWR);
+      fd = open_with_retry (pi->pathname, O_RDWR);
       if (fd <= 0)
 	return 0;	/* fail */
     }
@@ -843,7 +878,7 @@ load_syscalls (procinfo *pi)
 
   /* Open the file descriptor for the sysent file */
   sprintf (pathname, "/proc/%d/sysent", pi->pid);
-  sysent_fd = open (pathname, O_RDONLY);
+  sysent_fd = open_with_retry (pathname, O_RDONLY);
   if (sysent_fd < 0)
     {
       error ("load_syscalls: Can't open /proc/%d/sysent", pi->pid);
@@ -2874,7 +2909,7 @@ proc_iterate_over_mappings (int (*func) (int, CORE_ADDR))
 #ifdef NEW_PROC_API
   /* Open map fd.  */
   sprintf (pathname, "/proc/%d/map", pi->pid);
-  if ((map_fd = open (pathname, O_RDONLY)) < 0)
+  if ((map_fd = open_with_retry (pathname, O_RDONLY)) < 0)
     proc_error (pi, "proc_iterate_over_mappings (open)", __LINE__);
 
   /* Make sure it gets closed again.  */
@@ -2903,7 +2938,7 @@ proc_iterate_over_mappings (int (*func) (int, CORE_ADDR))
 	{
 	  sprintf (name, "/proc/%d/object/%s", pi->pid, map->pr_mapname);
 	  /* Note: caller's responsibility to close this fd!  */
-	  fd = open (name, O_RDONLY);
+	  fd = open_with_retry (name, O_RDONLY);
 	  /* Note: we don't test the above call for failure;
 	     we just pass the FD on as given.  Sometimes there is 
 	     no file, so the ioctl may return failure, but that's
@@ -2982,7 +3017,7 @@ proc_get_LDT_entry (procinfo *pi, int key)
 
   /* Open the file descriptor for the LDT table.  */
   sprintf (pathname, "/proc/%d/ldt", pi->pid);
-  if ((fd = open (pathname, O_RDONLY)) < 0)
+  if ((fd = open_with_retry (pathname, O_RDONLY)) < 0)
     {
       proc_warn (pi, "proc_get_LDT_entry (open)", __LINE__);
       return NULL;
