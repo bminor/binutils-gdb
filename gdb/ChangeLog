@@ -1,5 +1,13 @@
 Sat Jan 29 07:44:59 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* Makefile.in (TAGS): Just echo one line, rather than the whole thing.
+
+	* Makefile.in: Remove all references to sparcly-nat.c.
+
+	* Makefile.in (HFILES_NO_SRCDIR): Include dcache.h remote-utils.h
+	remote-sim.h directly, rather than via $(remote_utils_h).  This avoids
+	duplicating serial.h and target.h.
+
 	* Makefile.in: Don't set M_INSTALL and M_UNINSTALL.  These variables
 	are not used anywhere (a 5 Oct 1993 change removed the uses).
 
