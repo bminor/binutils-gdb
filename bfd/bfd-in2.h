@@ -490,7 +490,7 @@ bfd_create PARAMS ((CONST char *filename, bfd *templ));
  /* Byte swapping macros for user section data.  */
 
 #define bfd_put_8(abfd, val, ptr) \
-                (*((unsigned char *)(ptr)) = (unsigned char)val)
+                (*((unsigned char *)(ptr)) = (unsigned char)(val))
 #define bfd_put_signed_8 \
 		bfd_put_8
 #define bfd_get_8(abfd, ptr) \
@@ -1001,7 +1001,7 @@ typedef struct reloc_cache_entry
   bfd_vma addend;    
 
         /* Pointer to how to perform the required relocation */
-  CONST struct reloc_howto_struct *howto;
+  const struct reloc_howto_struct *howto;
 
 } arelent;
 enum complain_overflow
@@ -1356,25 +1356,9 @@ typedef enum bfd_reloc_code_real
    /* this must be the highest numeric value */
   BFD_RELOC_UNUSED
  } bfd_reloc_code_real_type;
-CONST struct reloc_howto_struct *
+const struct reloc_howto_struct *
 
 bfd_reloc_type_lookup  PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
-
-unsigned int 
-bfd_get_reloc_upper_bound PARAMS ((bfd *abfd, asection *sect));
-
-unsigned int 
-bfd_canonicalize_reloc
- PARAMS ((bfd *abfd,
-    asection *sec,
-    arelent **loc,
-    asymbol	**syms));
-
-void 
-bfd_set_reloc
- PARAMS ((bfd *abfd, sec_ptr *sec, arelent **rel, unsigned int count)
-    
-    );
 
 
 typedef struct symbol_cache_entry 
@@ -1646,6 +1630,22 @@ struct _bfd
      /* Is this really needed in addition to usrdata?  */
     asymbol **ld_symbols;
 };
+
+unsigned int 
+bfd_get_reloc_upper_bound PARAMS ((bfd *abfd, asection *sect));
+
+unsigned int 
+bfd_canonicalize_reloc
+ PARAMS ((bfd *abfd,
+    asection *sec,
+    arelent **loc,
+    asymbol	**syms));
+
+void 
+bfd_set_reloc
+ PARAMS ((bfd *abfd, asection *sec, arelent **rel, unsigned int count)
+    
+    );
 
 boolean 
 bfd_set_file_flags PARAMS ((bfd *abfd, flagword flags));

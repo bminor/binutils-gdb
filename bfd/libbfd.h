@@ -193,10 +193,10 @@ void
 bfd_check_init PARAMS ((void));
 
 PTR  
-bfd_xmalloc PARAMS (( bfd_size_type size));
+bfd_xmalloc  PARAMS ((bfd_size_type size));
 
 PTR 
-bfd_xmalloc_by_size_t  PARAMS (( size_t size));
+bfd_xmalloc_by_size_t  PARAMS ((size_t size));
 
 void 
 bfd_write_bigendian_4byte_int PARAMS ((bfd *abfd,  int i));
@@ -225,7 +225,7 @@ bfd_constructor_entry PARAMS ((bfd *abfd,
     asymbol **symbol_ptr_ptr,
     CONST char*type));
 
-CONST struct reloc_howto_struct *
+const struct reloc_howto_struct *
 bfd_default_reloc_type_lookup
  PARAMS ((bfd *abfd AND
     bfd_reloc_code_real_type  code));
