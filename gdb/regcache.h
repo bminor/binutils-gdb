@@ -28,7 +28,7 @@
 extern char *registers;
 
 /* Character array containing the current state of each register
-   (unavailable<0, valid=0, invalid>0). */
+   (unavailable<0, invalid=0, valid>0). */
 
 extern signed char *register_valid;
 
