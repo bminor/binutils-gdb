@@ -332,8 +332,12 @@ powerpc-*-macos*)	targ_emul=ppcmacos ;;
 powerpc-*-netware*)	targ_emul=ppcnw ;;
 powerpcle-*-pe)         targ_emul=ppcpe ;;
 powerpcle-*-winnt*)     targ_emul=ppcpe ;;
-powerpcle-*-cygwin*)   targ_emul=ppcpe ;;
-powerpc-*-aix*)		targ_emul=aixppc ;;
+powerpcle-*-cygwin*)    targ_emul=ppcpe ;;
+
+powerpc-*-aix*)		targ_emul=aixppc 
+			targ_extra_emuls="aixppc64"	
+			tdir_aixppc64=${targ_alias}
+			;;
 powerpc-*-beos*)	targ_emul=aixppc ;;
 rs6000-*-aix*)		targ_emul=aixrs6 ;;
 tic30-*-*aout*)		targ_emul=tic30aout ;;

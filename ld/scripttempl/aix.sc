@@ -10,6 +10,8 @@ ENTRY(__start)
 SECTIONS
 {
   .pad 0 : { *(.pad) }
+
+  . = 0x10000000;
   .text ${RELOCATING-0} : {
     ${RELOCATING+PROVIDE (_text = .);}
     *(.text)
@@ -22,11 +24,14 @@ SECTIONS
     *(.tb)
     ${RELOCATING+PROVIDE (_etext = .);}
   }
-  .data 0 : {
+  . = 0x20000000;
+  .data . : {
     ${RELOCATING+PROVIDE (_data = .);}
     *(.data)
     *(.rw)
     *(.sv)
+    *(.sv64)
+    *(.sv3264)
     *(.ua)
     . = ALIGN(4);
     ${CONSTRUCTING+CONSTRUCTORS}
@@ -45,10 +50,12 @@ SECTIONS
     ${RELOCATING+PROVIDE (_end = .);}
     ${RELOCATING+PROVIDE (end = .);}
   }
-  .loader 0 : {
+
+  .loader : {
     *(.loader)
   }
-  .debug 0 : {
+  
+  .debug : {
     *(.debug)
   }
 }

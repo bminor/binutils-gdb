@@ -261,7 +261,8 @@ ALL_64_EMULATIONS = \
 	eelf64bmip.o \
 	eelf64btsmip.o \
 	eelf64ltsmip.o \
-	eelf64hppa.o
+	eelf64hppa.o \
+	eaixppc64.o
 
 ALL_EMUL_EXTRA_OFILES = \
 	deffilep.o \
@@ -324,6 +325,9 @@ GEN_DEPENDS = $(srcdir)/genscripts.sh stringify.sed
 ea29k.c: $(srcdir)/emulparams/a29k.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/a29k.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} a29k "$(tdir_a29k)"
+eaixppc64.c: $(srcdir)/emulparams/aixppc64.sh \
+  $(srcdir)/emultempl/aix.em $(srcdir)/scripttempl/aix.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} aixppc64 "$(tdir_aixppc64)"
 eaixppc.c: $(srcdir)/emulparams/aixppc.sh \
   $(srcdir)/emultempl/aix.em $(srcdir)/scripttempl/aix.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} aixppc "$(tdir_aixppc)"

@@ -387,6 +387,7 @@ HFILES = ld.h ldctor.h ldemul.h ldexp.h ldfile.h \
 	ldlang.h ldlex.h ldmain.h ldmisc.h ldver.h \
 	ldwrite.h mri.h deffile.h pe-dll.h
 
+ALL_64_EMULATIONS =  	eaixppc64.o 	eelf64_aix.o 	eelf64_ia64.o 	eelf_x86_64.o 	eelf64_s390.o 	eelf64_sparc.o 	eelf64alpha.o 	eelf64bmip.o 	eelf64btsmip.o 	eelf64ltsmip.o 	eelf64hppa.o
 
 GENERATED_CFILES = ldgram.c ldlex.c deffilep.c
 GENERATED_HFILES = ldgram.h ldemul-list.h deffilep.h
@@ -1038,6 +1039,9 @@ stringify.sed: ${srcdir}/emultempl/$(STRINGIFY)
 ea29k.c: $(srcdir)/emulparams/a29k.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/a29k.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} a29k "$(tdir_a29k)"
+eaixppc64.c: $(srcdir)/emulparams/aixppc64.sh \
+  $(srcdir)/emultempl/aix.em $(srcdir)/scripttempl/aix.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} aixppc64 "$(tdir_aixppc64)"
 eaixppc.c: $(srcdir)/emulparams/aixppc.sh \
   $(srcdir)/emultempl/aix.em $(srcdir)/scripttempl/aix.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} aixppc "$(tdir_aixppc)"
