@@ -1194,11 +1194,10 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      || h->root.type == bfd_link_hash_defweak)
 	    {
 	      sec = h->root.u.def.section;
-	      if (r_type == R_X86_64_GOTPCREL
-		  || (r_type = R_X86_64_PLT32
-		      && splt != NULL
-		      && h->plt.offset != (bfd_vma) -1)
-		  || (r_type = R_X86_64_GOT32
+	      if ((r_type == R_X86_64_PLT32
+		   && splt != NULL
+		   && h->plt.offset != (bfd_vma) -1)
+		  || ((r_type == R_X86_64_GOT32 || r_type == R_X86_64_GOTPCREL)
 		      && elf_hash_table (info)->dynamic_sections_created
 		      && (!info->shared
 			  || (! info->symbolic && h->dynindx != -1)
@@ -1265,92 +1264,10 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_X86_64_GOT32:
 	  /* Relocation is to the entry for this symbol in the global
 	     offset table.  */
-	  BFD_ASSERT (sgot != NULL);
-
-	  if (h != NULL)
-	    {
-	      bfd_vma off = h->got.offset;
-	      BFD_ASSERT (off != (bfd_vma) -1);
-
-	      if (! elf_hash_table (info)->dynamic_sections_created
-		  || (info->shared
-		      && (info->symbolic || h->dynindx == -1)
-		      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
-		{
-		  /* This is actually a static link, or it is a -Bsymbolic
-		     link and the symbol is defined locally, or the symbol
-		     was forced to be local because of a version file.	We
-		     must initialize this entry in the global offset table.
-		     Since the offset must always be a multiple of 8, we
-		     use the least significant bit to record whether we
-		     have initialized it already.
-
-		     When doing a dynamic link, we create a .rela.got
-		     relocation entry to initialize the value.	This is
-		     done in the finish_dynamic_symbol routine.	 */
-		  if ((off & 1) != 0)
-		    off &= ~1;
-		  else
-		    {
-		      bfd_put_64 (output_bfd, relocation,
-				  sgot->contents + off);
-		      h->got.offset |= 1;
-		    }
-		}
-	      relocation = sgot->output_offset + off;
-	    }
-	  else
-	    {
-	      bfd_vma off;
-
-	      BFD_ASSERT (local_got_offsets != NULL
-			  && local_got_offsets[r_symndx] != (bfd_vma) -1);
-
-	      off = local_got_offsets[r_symndx];
-
-	      /* The offset must always be a multiple of 8.  We use
-		 the least significant bit to record whether we have
-		 already generated the necessary reloc.	 */
-	      if ((off & 1) != 0)
-		off &= ~1;
-	      else
-		{
-		  bfd_put_64 (output_bfd, relocation, sgot->contents + off);
-
-		  if (info->shared)
-		    {
-		      asection *srelgot;
-		      Elf_Internal_Rela outrel;
-
-		      /* We need to generate a R_X86_64_RELATIVE reloc
-			 for the dynamic linker.  */
-		      srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
-		      BFD_ASSERT (srelgot != NULL);
-
-		      outrel.r_offset = (sgot->output_section->vma
-					 + sgot->output_offset
-					 + off);
-		      outrel.r_info = ELF64_R_INFO (0, R_X86_64_RELATIVE);
-		      outrel.r_addend = relocation;
-		      bfd_elf64_swap_reloca_out (output_bfd, &outrel,
-						 (((Elf64_External_Rela *)
-						   srelgot->contents)
-						  + srelgot->reloc_count));
-		      ++srelgot->reloc_count;
-		    }
-
-		  local_got_offsets[r_symndx] |= 1;
-		}
-
-	      relocation = sgot->output_offset + off;
-	    }
-
-	  break;
-
 	case R_X86_64_GOTPCREL:
 	  /* Use global offset table as symbol value.  */
-
 	  BFD_ASSERT (sgot != NULL);
+
 	  if (h != NULL)
 	    {
 	      bfd_vma off = h->got.offset;
@@ -1381,7 +1298,10 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		      h->got.offset |= 1;
 		    }
 		}
-	      relocation = sgot->output_offset + off;
+	      if (r_type == R_X86_64_GOTPCREL)
+		relocation = sgot->output_section->vma + sgot->output_offset + off;
+	      else
+		relocation = sgot->output_offset + off;
 	    }
 	  else
 	    {
@@ -1426,8 +1346,12 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		  local_got_offsets[r_symndx] |= 1;
 		}
 
-	      relocation = sgot->output_section->vma + off;
+	      if (r_type == R_X86_64_GOTPCREL)
+		relocation = sgot->output_section->vma + sgot->output_offset + off;
+	      else
+		relocation = sgot->output_offset + off;
 	    }
+
 	  break;
 
 	case R_X86_64_PLT32:
@@ -1713,6 +1637,52 @@ elf64_x86_64_finish_dynamic_symbol (output_bfd, info, h, sym)
 	}
     }
 
+  if (h->got.offset != (bfd_vma) -1)
+    {
+      asection *sgot;
+      asection *srela;
+      Elf_Internal_Rela rela;
+
+      /* This symbol has an entry in the global offset table.  Set it
+         up.  */
+
+      sgot = bfd_get_section_by_name (dynobj, ".got");
+      srela = bfd_get_section_by_name (dynobj, ".rela.got");
+      BFD_ASSERT (sgot != NULL && srela != NULL);
+
+      rela.r_offset = (sgot->output_section->vma
+		       + sgot->output_offset
+		       + (h->got.offset &~ 1));
+
+      /* If this is a static link, or it is a -Bsymbolic link and the
+	 symbol is defined locally or was forced to be local because
+	 of a version file, we just want to emit a RELATIVE reloc.
+	 The entry in the global offset table will already have been
+	 initialized in the relocate_section function.  */
+      if (! elf_hash_table (info)->dynamic_sections_created
+	  || (info->shared
+	      && (info->symbolic || h->dynindx == -1)
+	      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+	{
+	  rela.r_info = ELF64_R_INFO (0, R_X86_64_RELATIVE);
+	  rela.r_addend = (h->root.u.def.value
+			   + h->root.u.def.section->output_section->vma
+			   + h->root.u.def.section->output_offset);
+	}
+      else
+	{
+	  BFD_ASSERT((h->got.offset & 1) == 0);
+	  bfd_put_64 (output_bfd, (bfd_vma) 0, sgot->contents + h->got.offset);
+	  rela.r_info = ELF64_R_INFO (h->dynindx, R_X86_64_GLOB_DAT);
+	  rela.r_addend = 0;
+	}
+
+      bfd_elf64_swap_reloca_out (output_bfd, &rela,
+				 ((Elf64_External_Rela *) srela->contents
+				  + srela->reloc_count));
+      ++srela->reloc_count;
+    }
+
   if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_COPY) != 0)
     {
       asection *s;
@@ -1784,7 +1754,7 @@ elf64_x86_64_finish_dynamic_sections (output_bfd, info)
 	  switch (dyn.d_tag)
 	    {
 	    default:
-	      break;
+	      continue;
 
 	    case DT_PLTGOT:
 	      name = ".got";
@@ -1822,7 +1792,6 @@ elf64_x86_64_finish_dynamic_sections (output_bfd, info)
 		(s->_cooked_size != 0 ? s->_cooked_size : s->_raw_size);
 	      break;
 	    }
-
 	  bfd_elf64_swap_dyn_out (output_bfd, &dyn, dyncon);
 	}
 

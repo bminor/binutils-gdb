@@ -1,3 +1,17 @@
+2001-04-30  Andreas Jaeger  <aj@suse.de>, Andreas Schwab <schwab@suse.de>
+
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Correct test for
+	R_X86_64_GOTPCREL, don't use assignments instead of comparisons.
+
+2001-04-27  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c (elf64_x86_64_finish_dynamic_sections): Only swap
+	out handled entries.
+	(elf64_x86_64_finish_dynamic_symbol): Set up GOT entries.
+	(elf64_x86_64_relocate_section): Fix GOTPCREL calculation.
+	(elf64_x86_64_relocate_section): Merge entries for GOTPCREL and
+	GOT32.
+
 2001-04-30  Alan Modra  <amodra@one.net.au>
 
 	* elf32-hppa.c (final_link_relocate): Branch to .+8 for
