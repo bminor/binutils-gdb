@@ -296,7 +296,7 @@ new_opcode_bits (opcode_bits *old_bits,
 
 /* Same as strcmp().  */
 static int
-format_name_cmp (const char *l, const char *r)
+name_cmp (const char *l, const char *r)
 {
   if (l == NULL && r == NULL)
     return 0;
@@ -350,19 +350,35 @@ insn_list_insert (insn_list **cur_insn_ptr,
       else if (cmp > 0)
 	continue;
 
-      /* key#4 sort according to the format-name.  If two apparently
-         identical instructions have unique format-names, then the
-         instructions are different.  This is because the
-         format-name's use is overloaded, it not only indicates the
-         format name but also provides a unique semantic name for the
-         function.  */
-      cmp =
-	format_name_cmp (insn->format_name,
-			 (*cur_insn_ptr)->insn->format_name);
-      if (cmp < 0)
-	break;
-      else if (cmp > 0)
-	continue;
+      if (duplicate_action == merge_duplicate_insns)
+	{
+	  /* key#4: If we're going to merge duplicates, also sort
+	     according to the format_name.  Two instructions with
+	     identical decode patterns, but different names, are
+	     considered different when merging.  Duplicates are only
+	     important when creating a decode table (implied by
+	     report_duplicate_insns) as such a table only has the
+	     instruction's bit code as a way of differentiating
+	     between instructions.  */
+	  int cmp = name_cmp (insn->format_name,
+			      (*cur_insn_ptr)->insn->format_name);
+	  if (cmp < 0)
+	    break;
+	  else if (cmp > 0)
+	    continue;
+	}
+
+      if (duplicate_action == merge_duplicate_insns)
+	{
+	  /* key#5: If we're going to merge duplicates, also sort
+	     according to the name.  See comment above for
+	     format_name.  */
+	  int cmp = name_cmp (insn->name, (*cur_insn_ptr)->insn->name);
+	  if (cmp < 0)
+	    break;
+	  else if (cmp > 0)
+	    continue;
+	}
 
       /* duplicate keys, report problem */
       switch (duplicate_action)
@@ -379,6 +395,15 @@ insn_list_insert (insn_list **cur_insn_ptr,
 		 "Location of duplicate instruction\n");
 	case merge_duplicate_insns:
 	  /* Add the opcode path to the instructions list */
+	  if (options.trace.insn_insertion)
+	    {
+	      notify ((*cur_insn_ptr)->insn->line,
+		      "%s.%s: insert merge %s.%s\n",
+		      (*cur_insn_ptr)->insn->format_name,
+		      (*cur_insn_ptr)->insn->name,
+		      insn->format_name,
+		      insn->name);
+	    }
 	  if (opcodes != NULL)
 	    {
 	      insn_opcodes **last = &(*cur_insn_ptr)->opcodes;
@@ -400,6 +425,13 @@ insn_list_insert (insn_list **cur_insn_ptr,
   /* create a new list entry and insert it */
   {
     insn_list *new_insn = ZALLOC (insn_list);
+    if (options.trace.insn_insertion)
+      {
+	notify (insn->line,
+		"%s.%s: insert new\n",
+		insn->format_name,
+		insn->name);
+      }
     new_insn->insn = insn;
     new_insn->expanded_bits = expanded_bits;
     new_insn->next = (*cur_insn_ptr);
