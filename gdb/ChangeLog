@@ -1,10 +1,3 @@
-Tue May 12 12:03:16 1998  James Ingham  <jingham@leda.cygnus.com>
-
-	* gdbtk.c: Add an object call wrapper for the new Tcl_Obj based
-	commands.  This way the obj commands will also go through
-	catch_errors.  This is just a bandaid while I rewrite the
-	string-based commands to use the object format.
-
 Thu May  7 14:49:38 1998  Bob Manson  <manson@charmed.cygnus.com>
 
 	* config/sparc/tm-sp64.h (CALL_DUMMY): Store and retrieve

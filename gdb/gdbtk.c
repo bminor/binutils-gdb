@@ -142,6 +142,10 @@ static int gdb_trace_status PARAMS ((ClientData, Tcl_Interp *, int, char *argv[]
 static int gdb_target_has_execution_command PARAMS ((ClientData, Tcl_Interp *, int, char *argv[]));
 static int gdb_load_info PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 void TclDebug PARAMS ((const char *fmt, ...));
+static int gdb_get_locals_command PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST
+				  objv[]));
+static int gdb_get_args_command PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST
+				  objv[]));
 static int gdb_get_vars_command PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static int gdb_get_function_command PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static int gdb_get_line_command PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
@@ -2261,9 +2265,9 @@ gdbtk_init ( argv0 )
                      gdb_trace_status,
                      NULL, NULL);
   Tcl_CreateObjCommand (interp, "gdb_load_info", call_obj_wrapper, gdb_load_info, NULL);
-  Tcl_CreateObjCommand (interp, "gdb_get_locals", call_obj_wrapper, gdb_get_vars_command, 
+  Tcl_CreateObjCommand (interp, "gdb_get_locals", call_obj_wrapper, gdb_get_locals_command, 
                          NULL);
-  Tcl_CreateObjCommand (interp, "gdb_get_args", call_obj_wrapper, gdb_get_vars_command,
+  Tcl_CreateObjCommand (interp, "gdb_get_args", call_obj_wrapper, gdb_get_args_command,
                          NULL);
   Tcl_CreateObjCommand (interp, "gdb_get_function", call_obj_wrapper, gdb_get_function_command,
                          NULL);
@@ -2539,7 +2543,7 @@ gdbtk_load_hash (section, num)
  */
 
 static int
-gdb_get_locals (clientData, interp, objc, objv)
+gdb_get_locals_command (clientData, interp, objc, objv)
      ClientData clientData;
      Tcl_Interp *interp;
      int objc;
@@ -2551,7 +2555,7 @@ gdb_get_locals (clientData, interp, objc, objv)
 }
 
 static int
-gdb_get_args (clientData, interp, objc, objv)
+gdb_get_args_command (clientData, interp, objc, objv)
      ClientData clientData;
      Tcl_Interp *interp;
      int objc;
