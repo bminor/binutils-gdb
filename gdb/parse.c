@@ -117,15 +117,6 @@ target_map_name_to_register (char *str, int len)
 {
   int i;
 
-  /* First try target specific aliases. We try these first because on some 
-     systems standard names can be context dependent (eg. $pc on a 
-     multiprocessor can be could be any of several PCs).  */
-#ifdef REGISTER_NAME_ALIAS_HOOK
-  i = REGISTER_NAME_ALIAS_HOOK (str, len);
-  if (i >= 0)
-    return i;
-#endif
-
   /* Search architectural register name space. */
   for (i = 0; i < NUM_REGS; i++)
     if (REGISTER_NAME (i) && len == strlen (REGISTER_NAME (i))

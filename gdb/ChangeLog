@@ -1,3 +1,8 @@
+2002-01-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* parse.c (target_map_name_to_register): Delete code wrapped in
+	#ifdef REGISTER_NAME_ALIAS_HOOK.
+
 2002-01-28  Michael Snyder  <msnyder@redhat.com>
 
 	* regcache.c (legacy_read_register_gen): Need to be able to
