@@ -1,3 +1,14 @@
+Tue Feb  3 17:11:23 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen.h (CGEN_INSN_MAX_ATTRS): Renamed from CGEN_MAX_INSN_ATTRS.
+	(CGEN_HW_ENTRY): Move `next' entry to end of struct.
+	(CGEN_KEYWORD_MAX_ATTRS): Renamed from CGEN_MAX_KEYWORD_ATTRS.
+	(CGEN_OPERAND_MAX_ATTRS): Renamed from CGEN_MAX_OPERAND_ATTRS.
+
+Mon Feb  2 19:19:15 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* cgen.h: Correct typo in comment end marker.
+
 Mon Feb  2 17:10:38 1998  Steve Haworth  <steve@pm.cse.rmit.EDU.AU>
 
 	* tic30.h: New file.
