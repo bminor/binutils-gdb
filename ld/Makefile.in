@@ -1333,6 +1333,9 @@ eelf32xstormy16.c: $(srcdir)/emulparams/elf32xstormy16.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/needrelax.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32xstormy16 "$(tdir_xstormy16)"
+eelf32am33lin.c: $(srcdir)/emulparams/elf32am33lin.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32am33lin "$(tdir_mn10300)"
 eelf32vax.c: $(srcdir)/emulparams/elf32vax.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32vax "$(tdir_elf32vax)"

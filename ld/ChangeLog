@@ -1,3 +1,14 @@
+2003-07-10  Alexandre Oliva  <aoliva@redhat.com>
+
+	2001-08-22  Alexandre Oliva  <aoliva@redhat.com>
+	* emulparams/elf32am33lin.sh: Adjust to match kernel parameters.
+	2001-05-09  Alexandre Oliva  <aoliva@redhat.com>
+	* configure.host (am33_2.0-*-linux*): Added.
+	* configure.tgt (am33_2.0-*-linux*): Likewise.
+	* emulparams/elf32am33lin.sh: New.
+	* Makefile.am (eelf32am33lin.c): New rule.
+	* Makefile.in: Rebuilt.
+
 2003-07-09  Alexandre Oliva  <aoliva@redhat.com>
 
 	2001-04-17  Alexandre Oliva  <aoliva@redhat.com>
