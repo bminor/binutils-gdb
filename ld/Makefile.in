@@ -360,7 +360,7 @@ ldint.dvi: $(srcdir)/ldint.texinfo
 
 # info file for online browsing
 ld.info: $(srcdir)/ld.texinfo configdoc.texi
-	$(MAKEINFO) -o ld.info $(srcdir)/ld.texinfo
+	$(MAKEINFO) -I$(srcdir)/../bfd/doc -o ld.info $(srcdir)/ld.texinfo
 
 ldint.info: $(srcdir)/ldint.texinfo
 	$(MAKEINFO) -o ldint.info $(srcdir)/ldint.texinfo
