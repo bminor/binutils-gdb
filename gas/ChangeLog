@@ -1,5 +1,9 @@
 Thu Jan 12 17:56:24 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* app.c (do_scrub_next_char) [__GNUC__ && __OPTIMIZE__]: If `get'
+	function is scrub_from_file, call scrub_from_file directly, and
+	get gcc's inlining capability into the act.
+
 	* Makefile.in (VMS_OTHER_OBJS): Add ../libiberty/hex.o.
 	(OBJS): Delete hex-value.o.
 	(REAL_SOURCES): Delete hex-value.c.
