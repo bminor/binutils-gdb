@@ -1,5 +1,7 @@
 Wed Jul  5 04:16:35 1995  Ken Raeburn  <raeburn@kr-pc.cygnus.com>
 
+	* config/i386aix.mh (HDEFINES): Remove -DFASCIST_FDOPEN.
+
 	Autoconfiscation:
 	* configure.in, Makefile.in, doc/Makefile.in: Switch from Cygnus
 	configure to autoconf ways of processing --enable arguments,
