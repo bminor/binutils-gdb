@@ -1,3 +1,4 @@
+#ifndef hosts_std_host_H
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
@@ -151,3 +152,5 @@ struct  uint64e_struct {
 #endif
 
 #include "fopen-same.h"
+#define hosts_std_host_H
+#endif

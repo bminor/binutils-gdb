@@ -1,3 +1,5 @@
+#ifndef hosts_i386bsd_H
+/* Intel 386 running any BSD Unix */
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
@@ -8,6 +10,7 @@
 #include <string.h>
 #include <sys/file.h>
 #include <machine/param.h>
+#include <machine/vmparam.h>
 
 #ifndef O_ACCMODE
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
@@ -16,17 +19,19 @@
 #define SEEK_SET 0
 #define SEEK_CUR 1
 
-extern PTR  EXFUN(malloc, (unsigned));
-extern PTR  EXFUN(realloc, (PTR, unsigned));
-extern void EXFUN(free, (PTR));
-
-#define	HAVE_STRERROR
-
 #define	HOST_PAGE_SIZE		NBPG
-#define	HOST_SEGMENT_SIZE	NBPG
 #define	HOST_MACHINE_ARCH	bfd_arch_i386
-#define	HOST_TEXT_START_ADDR	0		/* By inspection */
-#define	HOST_STACK_END_ADDR	KERNBASE
+#define	HOST_TEXT_START_ADDR		USRTEXT
+
+#if 0	/* This doesn't work in Jolitz release 0.1 */
+#define	HOST_STACK_END_ADDR		USRSTACK
+#else	/* Found by experimentation. */
+#define	HOST_STACK_END_ADDR		(USRSTACK - MAXSSIZ)
+#endif
+
+#define TRAD_UNIX_CORE_FILE_FAILING_SIGNAL(core_bfd) \
+  ((core_bfd)->tdata.trad_core_data->u.u_sig)
+#define u_comm u_kproc.kp_proc.p_comm
 
 /* EXACT TYPES */
 typedef char int8e_type;
@@ -43,4 +48,7 @@ typedef short int16_type;
 typedef unsigned short uint16_type;
 typedef int int32_type;
 typedef unsigned int uint32_type;
+
 #include "fopen-same.h"
+#define hosts_i386bsd_H
+#endif
