@@ -435,6 +435,15 @@ Instead of @code{N_SO} symbols, XCOFF uses a @code{.file} assembler
 directive which assembles to a standard COFF @code{.file} symbol;
 explaining this in detail is outside the scope of this document.
 
+@c FIXME: Exactly when should the empty N_SO be used?  Why?
+If it is useful to indicate the end of a source file, this is done with
+an @code{N_SO} symbol with an empty string for the name.  The value is
+the address of the end of the text section for the file.  For some
+systems, there is no indication of the end of a source file, and you
+just need to figure it ended when you see an @code{N_SO} for a different
+source file, or a symbol ending in @code{.o} (which at least some
+linkers insert to mark the start of a new @code{.o} file).
+
 @node Include Files
 @section Names of Include Files
 

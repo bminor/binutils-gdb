@@ -1,3 +1,8 @@
+Wed Feb  1 20:26:36 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Source Files): Document N_SO used to mark the end
+	of a source file.
+
 Mon Jan 23 14:23:37 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.texinfo (Processes): New node.
