@@ -1,3 +1,7 @@
+Tue Mar  9 09:23:12 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* rs6000-core.c: Add .ldinfo section.
+
 Fri Mar 12 11:57:52 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in (MAKEOVERRIDES): Define to be empty.
