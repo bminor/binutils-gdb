@@ -20,6 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 #include "bucomm.h"
+#include <getopt.h>
 
 asymbol       **sympp;
 char           *input_target = NULL;
@@ -37,6 +38,63 @@ static boolean verbose;
    -1 means if we should use argv[0] to decide. */
 extern int is_strip;
 
+int		  show_version = 0;
+
+enum strip_action
+{
+  strip_undef,
+  strip_none,			/* don't strip */
+  strip_debug,			/* strip all debugger symbols */
+  strip_all			/* strip all symbols */
+};
+
+/* Which symbols to remove. */
+enum strip_action strip_symbols;
+
+enum locals_action
+{
+  locals_undef,
+  locals_start_L,		/* discard locals starting with L */
+  locals_all			/* discard all locals */
+};
+
+/* Which local symbols to remove. */
+enum locals_action discard_locals;
+
+/* Options to handle if running as "strip". */
+
+struct option strip_options[] = {
+    {"strip-all",	no_argument, 0, 's'},
+    {"strip-debug",	no_argument, 0, 'S'},
+    {"discard-all",	no_argument, 0, 'x'},
+    {"discard-locals",	no_argument, 0, 'X'},
+    {"input-format",	required_argument, 0, 'I'},
+    {"output-format",	required_argument, 0, 'O'},
+    {"format",		required_argument, 0, 'F'},
+    {"target",		required_argument, 0, 'F'},
+
+    {"version",         no_argument, 0, 'V'},
+    {"verbose",         no_argument, 0, 'v'},
+    {0, no_argument, 0, 0}
+};
+
+/* Options to handle if running as "copy". */
+
+struct option copy_options[] = {
+    {"strip-all",	no_argument, 0, 'S'},
+    {"strip-debug",	no_argument, 0, 'g'},
+    {"discard-all",	no_argument, 0, 'x'},
+    {"discard-locals",	no_argument, 0, 'X'},
+    {"input-format",	required_argument, 0, 'I'},
+    {"output-format",	required_argument, 0, 'O'},
+    {"format",		required_argument, 0, 'F'},
+    {"target",		required_argument, 0, 'F'},
+    
+    {"version",         no_argument, 0, 'V'},
+    {"verbose",         no_argument, 0, 'v'},
+    {0,			no_argument, 0, 0}
+};
+
 /* IMPORTS */
 extern char    *program_name;
 extern char    *program_version;
@@ -44,10 +102,10 @@ extern char    *program_version;
 
 static
 void            
-usage()
+copy_usage()
 {
     fprintf(stderr,
-    "Usage %s [-S][-s srcfmt] [-d dtfmt] [-b bothfmts] infile [outfile] [-vV]\n",
+    "Usage %s [-vVSgxX] [-I informat] [-O outformat] infile [outfile]\n",
 	    program_name);
     exit(1);
 }
@@ -56,7 +114,7 @@ static
 void            
 strip_usage()
 {
-    fprintf(stderr, "Usage %s [-vV] filename ...\n", program_name);
+    fprintf(stderr, "Usage %s [-vVsSgxX] [-I informat] [-O outformat] filename ...\n", program_name);
     exit(1);
 }
 
@@ -105,6 +163,46 @@ mangle_sections(ibfd, obfd)
     }
 }
 
+/* Choose which symbol entries to copy;
+   compact them downward to get rid of the rest.
+   Return the number of symbols to be printed.  */
+static unsigned int
+filter_symbols (abfd, syms, symcount)
+     bfd *abfd;
+     asymbol **syms;
+     unsigned long symcount;
+{
+  asymbol **from, **to;
+  unsigned int dst_count = 0;
+  asymbol *sym;
+  char locals_prefix = bfd_get_symbol_leading_char(abfd) == '_' ? 'L' : '.';
+
+  unsigned int src_count;
+  for (from = to = syms, src_count = 0; src_count <symcount; src_count++) {
+    int keep = 0;
+
+    flagword flags = (from[src_count])->flags;
+    sym = from[src_count];
+    if ((flags & BSF_GLOBAL) /* Keep if external */
+	|| (sym->section == &bfd_und_section)
+	||   (sym->section == &bfd_com_section))
+	keep = 1;
+    else if ((flags & BSF_DEBUGGING) != 0) /* debugging symbol */
+	keep = strip_symbols != strip_debug;
+    else /* local symbol */
+	keep = (discard_locals != locals_all)
+                && !(discard_locals == locals_start_L &&
+                     sym->name[0] == locals_prefix);
+
+
+    if (keep) {
+      to[dst_count++] = from[src_count];
+    }
+  }
+
+  return dst_count;
+}
+
 static 
 void
 copy_object(ibfd, obfd)
@@ -148,7 +246,12 @@ bfd *obfd;
     sympp = (asymbol **) xmalloc(get_symtab_upper_bound(ibfd));
     symcount = bfd_canonicalize_symtab(ibfd, sympp);
 
-    bfd_set_symtab(obfd, sympp, is_strip ? 0 : symcount);
+    if (strip_symbols == strip_debug || discard_locals != locals_undef)
+      symcount = filter_symbols (ibfd, sympp, symcount);
+
+
+    bfd_set_symtab(obfd, sympp,
+		   strip_symbols == strip_all ? 0 : symcount);
     
     /*
       bfd mandates that all output sections be created and sizes set before
@@ -358,7 +461,8 @@ copy_sections(ibfd, isection, obfd)
   if (size == 0)
     return;
 
-  if (is_strip || bfd_get_reloc_upper_bound(ibfd, isection) == 0) 
+  if (strip_symbols == strip_all
+      || bfd_get_reloc_upper_bound(ibfd, isection) == 0) 
     {
       bfd_set_reloc(obfd, osection, (arelent **)NULL, 0);
     } 
@@ -393,8 +497,13 @@ main(argc, argv)
     char           *argv[];
 {
   int             i;
-  int		  show_version = 0;
+  int c;			/* sez which option char */
+  int option_index = 0;	/* used by getopt and ignored by us */
+
   program_name = argv[0];
+
+  strip_symbols = strip_undef;	/* default is to strip everything.  */
+  discard_locals = locals_undef;
 
   bfd_init();
 
@@ -403,36 +512,61 @@ main(argc, argv)
       is_strip = (i >= 5 && strcmp(program_name+i-5,"strip"));
   }
 
-  if (is_strip)
-    {
-      for (i = 1; i < argc; i++) 
-        {
-          if (argv[i][0] != '-')
-	    break;
-	  if (argv[i][1] == '-') {
-	    i++;
-	    break;
-	  }
-	  switch (argv[i][1]) {
-	    case 'V':
-	      show_version = true;
+  if (is_strip) {
+    
+      while ((c = getopt_long(argc, argv, "I:O:F:sSgxXVv",
+			      strip_options, &option_index))
+	     != EOF) {
+	  switch (c) {
+	    case 'I':
+	      input_target = optarg;
+	    case 'O':
+	      output_target = optarg;
+	      break;
+	    case 'F':
+	      input_target = output_target = optarg;
+	      break;
+
+	    case 's':
+	      strip_symbols = strip_all;
+	      break;
+	    case 'S':
+	    case 'g':
+	      strip_symbols = strip_debug;
+	      break;
+	    case 'x':
+	      discard_locals = locals_all;
+	      break;
+	    case 'X':
+	      discard_locals = locals_start_L;
 	      break;
 	    case 'v':
 	      verbose = true;
 	      show_version = true;
 	      break;
-
-	      /* undocumented for now */
-	    case 'd':
-	      i++;
-	      output_target = argv[i];
+	    case 'V':
+	      show_version = true;
 	      break;
+	    case  0:
+	      break;		/* we've been given a long option */
 	    default:
-	      strip_usage();
+	      strip_usage ();
 	  }
-        }
+      }
+      
+      i = optind;
+
+      /* Default is to strip all symbols.  */
+      if (strip_symbols == strip_undef && discard_locals == locals_undef)
+	  strip_symbols = strip_all;
+
+      if (output_target == (char *) NULL)
+	  output_target = input_target;
+
       if (show_version)
-	printf ("%s version %s\n", program_name, program_version);
+	  printf ("%s version %s\n", program_name, program_version);
+      else if (i == argc)
+	  strip_usage();
       for ( ; i < argc; i++) {
 	    char *tmpname = make_tempname(argv[i]);
 	    copy_file(argv[i], tmpname);
@@ -441,51 +575,69 @@ main(argc, argv)
       return 0;
     }
 
-  for (i = 1; i < argc; i++) 
-    {
-      if (argv[i][0] == '-') {
-	switch (argv[i][1]) {
+  /* Invoked as "copy", not "strip" */
+
+  while ((c = getopt_long(argc, argv, "I:s:O:d:F:b:SgxXVv",
+			  strip_options, &option_index))
+	 != EOF) {
+      switch (c) {
+	case 'I':
+	case 's': /* "source" - 'I' is preferred */
+	  input_target = optarg;
+	case 'O':
+	case 'd': /* "destination" - 'O' is preferred */
+	  output_target = optarg;
+	  break;
+	case 'F':
+	case 'b': /* "both" - 'F' is preferred */
+	  input_target = output_target = optarg;
+	  break;
+	  
+	case 'S':
+	  strip_symbols = strip_all;
+	  break;
+	case 'g':
+	  strip_symbols = strip_debug;
+	  break;
+	case 'x':
+	  discard_locals = locals_all;
+	  break;
+	case 'X':
+	  discard_locals = locals_start_L;
+	  break;
+	case 'v':
+	  verbose = true;
+	  show_version = true;
+	  break;
 	case 'V':
 	  show_version = true;
 	  break;
-	case 'v':
-	  show_version = true;
-	  verbose = true;
-	  break;
-	case 'b':
-	  i++;
-	  input_target = output_target = argv[i];
-	  break;
-	case 'S':
-	  is_strip = 1;
-	  break;
-	case 's':
-	  i++;
-	  input_target = argv[i];
-	  break;
-	case 'd':
-	  i++;
-	  output_target = argv[i];
-	  break;
+	case  0:
+	  break;		/* we've been given a long option */
 	default:
-	  usage();
-	}
+	  copy_usage ();
       }
-      else {
-	if (input_filename) {
-	  output_filename = argv[i];
-	}
-	else {
-	  input_filename = argv[i];
-	}
-      }
-    }
-
+  }
+      
   if (show_version)
     printf ("%s version %s\n", program_name, program_version);
 
+  if (optind == argc)
+      if (show_version)
+	  exit(0);
+      else
+	  copy_usage();
+
+  input_filename = argv[optind];
+  if (optind + 1 < argc)
+      output_filename = argv[optind+1];
+
+  /* Default is to strip no symbols.  */
+  if (strip_symbols == strip_undef && discard_locals == locals_undef)
+      strip_symbols = strip_none;
+
   if (input_filename == (char *) NULL)
-    usage();
+    copy_usage();
 
   if (output_target == (char *) NULL)
     output_target = input_target;

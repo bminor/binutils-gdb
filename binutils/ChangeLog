@@ -1,3 +1,12 @@
+Wed Oct 14 13:22:14 1992  Per Bothner  (bothner@cygnus.com)
+
+	* copy.c:  Re-do command-line parsing to use getopt_long().
+	Add long option names.  Re-think option letters to be more
+	consistent.
+	* copy.c:  New function filter_symbols() for stripping only
+	debug-symbols and/or local symbols.  Use these to support
+	the previously-missing options of the old FSF strip.
+
 Tue Oct 13 01:24:20 1992  John Gilmore  (gnu@cygnus.com)
 
 	* configure.in (host):  Use ${srcdir}/../bfd/configure.host rather
