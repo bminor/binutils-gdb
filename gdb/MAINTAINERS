@@ -117,7 +117,7 @@ maintainer works with the native maintainer when resolving API issues.
 			Maintenance only
 
 	pa		(--target=hppa1.1-hp-proelf broken)
-			Jeff Law		law@cygnus.com
+			Maintenance only
 
 	powerpc		--target=powerpc-eabi,powerpcle-eabi ,-Werror
 			Kevin Buettner		kevinb@cygnus.com
@@ -196,7 +196,6 @@ GNU/Linux PPC native	Kevin Buettner		kevinb@cygnus.com
 FreeBSD native & host	Mark Kettenis		kettenis@gnu.org
 			David O'Brien		obrien@freebsd.org
 hurd native		Mark Kettenis		kettenis@gnu.org
-hpux, hp pa native	Jeff Law		law@cygnus.com
 NetBSD native & host	J.T. Conklin		jtc@redback.com
 SCO/Unixware		Nick Duffek		nsd@cygnus.com
 			Robert Lipe		rjl@sco.com
@@ -345,6 +344,7 @@ Don Howard					dhoward@redhat.com
 			Past Maintainers
 
 Jimmy Guo (gdb.hp, tui)				guo@cup.hp.com
+Jeff Law (hppa)					law@cygnus.com
 
 
 Folks that have been caught up in a paper trail:
