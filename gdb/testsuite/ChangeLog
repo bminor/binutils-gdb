@@ -1,5 +1,10 @@
 2005-03-09  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.dwarf2/dup-psym.S: New file.
+	* gdb.dwarf2/dup-psym.exp: New testcase.
+
+2005-03-09  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/exec_changed/first.adb: New file.
 	* gdb.ada/exec_changed/second.adb: New file.
 	* gdb.ada/exec_changed.exp: New testcase.
