@@ -30,9 +30,9 @@ host_libs="mmalloc libiberty opcodes bfd readline glob gash tcl tk tclX"
 #
 host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
 	    prms send-pr gprof gdbtest tgas etc expect dejagnu sim
-            m4 autoconf ispell grep diff rcs cvs dosutils fileutils shellutils
+            m4 autoconf ispell grep diff rcs cvs fileutils shellutils
 	    textutils wdiff find emacs uudecode hello tar gzip indent
-	    recode release"
+	    recode release sed utils"
 
 
 # these libraries are built for the target environment, and are built after
@@ -88,10 +88,10 @@ case "${host}" in
   m68k-apollo-bsd*)       host_makefile_frag=config/mh-a68bsd ;;
   m88k-motorola-sysv*)    host_makefile_frag=config/mh-delta88;;
   m88k-dg-dgux*)	  host_makefile_frag=config/mh-dgux ;;
-  mips-dec-ultrix*)       host_makefile_frag=config/mh-decstation ;;
-  mips-sgi-irix4*)        host_makefile_frag=config/mh-irix4 ;;
-  mips-sgi-irix3*)        host_makefile_frag=config/mh-sysv ;;
-  mips-*-sysv*)		  host_makefile_frag=config/mh-riscos ;;
+  mips*-dec-ultrix*)      host_makefile_frag=config/mh-decstation ;;
+  mips*-sgi-irix4*)       host_makefile_frag=config/mh-irix4 ;;
+  mips*-sgi-irix3*)       host_makefile_frag=config/mh-sysv ;;
+  mips*-*-sysv*)	  host_makefile_frag=config/mh-riscos ;;
   i[34]86-ncr-sysv4*)     host_makefile_frag=config/mh-ncr3000 ;;
   i[34]86-*-sco*)         host_makefile_frag=config/mh-sco ;;
   i[34]86-*-isc*)	  host_makefile_frag=config/mh-sysv ;;
