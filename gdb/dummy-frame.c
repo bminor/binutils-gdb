@@ -256,21 +256,6 @@ generic_save_call_dummy_addr (CORE_ADDR lo, CORE_ADDR hi)
   dummy_frame_stack->call_hi = hi;
 }
 
-/* Restore the machine state from either the saved dummy stack or a
-   real stack frame. */
-
-void
-generic_pop_current_frame (void (*popper) (struct frame_info * frame))
-{
-  struct frame_info *frame = get_current_frame ();
-  if (get_frame_type (frame) == DUMMY_FRAME)
-    /* NOTE: cagney/2002-22-23: Does this ever occure?  Surely a dummy
-       frame will have already been poped by the "infrun.c" code.  */
-    generic_pop_dummy_frame ();
-  else
-    (*popper) (frame);
-}
-
 /* Discard the innermost dummy frame from the dummy frame stack
    (passed in as a parameter).  */
 
@@ -284,7 +269,7 @@ discard_innermost_dummy (struct dummy_frame **stack)
 }
 
 void
-generic_pop_dummy_frame (void)
+deprecated_pop_dummy_frame (void)
 {
   struct dummy_frame *dummy_frame = dummy_frame_stack;
 

@@ -1,5 +1,19 @@
 2004-03-22  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.h (generic_pop_current_frame): Delete declaration.
+	(deprecate_pop_dummy_frame): Deprecate
+	generic_pop_dummy_frame.
+	* dummy-frame.c (deprecated_pop_dummy_frame): Update.
+	(generic_pop_current_frame): Delete function.
+	* mn10300-tdep.c (mn10300_pop_frame): Eliminate call to
+	generic_pop_current_frame.
+	* v850-tdep.c (v850_pop_frame): Update.
+	* mcore-tdep.c (mcore_pop_frame): Update.
+	* sh64-tdep.c (sh64_pop_frame): Update.
+	* h8300-tdep.c (h8300_pop_frame): Update.
+
+2004-03-22  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.h (deprecated_pc_in_call_dummy): Rename
 	generic_pc_in_call_dummy.
 	* dummy-frame.h (pc_in_dummy_frame): Delete declaration.

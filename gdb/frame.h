@@ -565,8 +565,7 @@ extern struct frame_info *block_innermost_frame (struct block *);
 extern CORE_ADDR deprecated_read_register_dummy (CORE_ADDR pc,
 						 CORE_ADDR fp, int);
 extern void generic_push_dummy_frame (void);
-extern void generic_pop_current_frame (void (*)(struct frame_info *));
-extern void generic_pop_dummy_frame (void);
+extern void deprecated_pop_dummy_frame (void);
 
 extern int deprecated_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp,
 					CORE_ADDR fp);
