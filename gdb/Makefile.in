@@ -579,13 +579,13 @@ coff_sym_h =	$(INCLUDE_DIR)/coff/sym.h
 coff_symconst_h =	$(INCLUDE_DIR)/coff/symconst.h
 coff_ecoff_h =	$(INCLUDE_DIR)/coff/ecoff.h
 coff_internal_h =	$(INCLUDE_DIR)/coff/internal.h
-cp_demangle_h =	$(INCLUDE_DIR)/cp-demangle.h
 dis_asm_h =	$(INCLUDE_DIR)/dis-asm.h $(bfd_h)
 elf_reloc_macros_h =	$(INCLUDE_DIR)/elf/reloc-macros.h
 elf_sh_h =	$(INCLUDE_DIR)/elf/sh.h
 elf_arm_h =	$(INCLUDE_DIR)/elf/arm.h $(elf_reloc_macros_h)
 elf_bfd_h =	$(BFD_SRC)/elf-bfd.h
 libaout_h =	$(BFD_SRC)/libaout.h
+libiberty_h =	$(INCLUDE_DIR)/libiberty.h
 libbfd_h =	$(BFD_SRC)/libbfd.h
 remote_sim_h =	$(INCLUDE_DIR)/gdb/remote-sim.h
 demangle_h =    $(INCLUDE_DIR)/demangle.h
@@ -1441,9 +1441,9 @@ c-exp.tab.c: c-exp.y
 	-rm c-exp.tmp
 	mv c-exp.new ./c-exp.tab.c
 
-cp-names.tab.o: cp-names.tab.c $(safe_ctype_h) $(cp_demangle_h)
+cp-names.tab.o: cp-names.tab.c $(safe_ctype_h) $(libiberty_h) $(demangle_h)
 
-cp-names-main.tab.o: cp-names.tab.c $(safe_ctype_h) $(cp_demangle_h)
+cp-names-main.tab.o: cp-names.tab.c $(safe_ctype_h) $(libiberty_h) $(demangle_h)
 	$(CC) -c $(INTERNAL_CFLAGS) -DTEST_CPNAMES \
 		-o cp-names-main.tab.o cp-names.tab.c
 test-cpnames: cp-names-main.tab.o $(LIBIBERTY)
@@ -1709,7 +1709,7 @@ cp-namespace.o: cp-namespace.c $(defs_h) $(cp_support_h) $(gdb_obstack_h) \
 cp-support.o: cp-support.c $(defs_h) $(cp_support_h) $(gdb_string_h) \
 	$(demangle_h) $(gdb_assert_h) $(gdbcmd_h) $(dictionary_h) \
 	$(objfiles_h) $(frame_h) $(symtab_h) $(block_h) $(complaints_h) \
-	$(cp_demangle_h)
+	$(demangle_h)
 cpu32bug-rom.o: cpu32bug-rom.c $(defs_h) $(gdbcore_h) $(target_h) \
 	$(monitor_h) $(serial_h) $(regcache_h) $(m68k_tdep_h)
 cp-valprint.o: cp-valprint.c $(defs_h) $(gdb_obstack_h) $(symtab_h) \

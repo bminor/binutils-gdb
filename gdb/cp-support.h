@@ -35,7 +35,7 @@ struct obstack;
 struct block;
 struct objfile;
 struct type;
-struct d_comp;
+struct demangle_component;
 struct d_info;
 
 /* This struct is designed to store data from using directives.  It
@@ -114,15 +114,15 @@ extern void cp_check_possible_namespace_symbols (const char *name,
 
 /* Functions from cp-names.y.  */
 
-extern struct d_comp *demangled_name_to_comp (const char *demangled_name,
-					      struct d_info **di_p);
+extern struct demangle_component *demangled_name_to_comp
+  (const char *demangled_name, void **memory_p);
 
-extern struct d_comp *mangled_name_to_comp (const char *mangled_name,
-					    int options,
-					    struct d_info **di_p,
-					    char **demangled_p);
+extern struct demangle_component *mangled_name_to_comp
+  (const char *mangled_name, int options, void **memory_p,
+   char **demangled_name_p);
 
-extern char *cp_comp_to_string (struct d_comp *result, int estimated_len);
+extern char *cp_comp_to_string (struct demangle_component *result,
+				int estimated_len);
 
 /* The list of "maint cplus" commands.  */
 

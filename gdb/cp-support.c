@@ -35,8 +35,8 @@
 #include "complaints.h"
 #include "gdbtypes.h"
 
-#define IN_GDB
-#include "cp-demangle.h"
+#define d_left(dc) (dc)->u.s_binary.left
+#define d_right(dc) (dc)->u.s_binary.right
 
 /* Functions related to demangled name parsing.  */
 
@@ -75,20 +75,20 @@ static void first_component_command (char *arg, int from_tty);
 char *
 cp_canonicalize_string (const char *string)
 {
-  struct d_info *di;
-  struct d_comp *ret_comp;
+  void *storage;
+  struct demangle_component *ret_comp;
   char *ret;
   int len = strlen (string);
 
   len = len + len / 8;
 
-  ret_comp = demangled_name_to_comp (string, &di);
+  ret_comp = demangled_name_to_comp (string, &storage);
   if (ret_comp == NULL)
     return NULL;
 
   ret = cp_comp_to_string (ret_comp, len);
 
-  xfree (di);
+  xfree (storage);
 
   return ret;
 }
@@ -98,12 +98,13 @@ cp_canonicalize_string (const char *string)
 char *
 class_name_from_physname (const char *physname)
 {
-  struct d_info *di;
+  void *storage;
   char *demangled_name = NULL, *ret;
-  struct d_comp *ret_comp, *prev_comp;
+  struct demangle_component *ret_comp, *prev_comp;
   int done;
 
-  ret_comp = mangled_name_to_comp (physname, DMGL_ANSI, &di, &demangled_name);
+  ret_comp = mangled_name_to_comp (physname, DMGL_ANSI, &storage,
+				   &demangled_name);
   if (ret_comp == NULL)
     return NULL;
 
@@ -112,31 +113,31 @@ class_name_from_physname (const char *physname)
   while (!done)
     switch (ret_comp->type)
       {
-      case D_COMP_TYPED_NAME:
+      case DEMANGLE_COMPONENT_TYPED_NAME:
 	prev_comp = NULL;
         ret_comp = d_right (ret_comp);
         break;
-      case D_COMP_QUAL_NAME:
-      case D_COMP_LOCAL_NAME:
+      case DEMANGLE_COMPONENT_QUAL_NAME:
+      case DEMANGLE_COMPONENT_LOCAL_NAME:
 	prev_comp = ret_comp;
         ret_comp = d_right (ret_comp);
         break;
-      case D_COMP_CONST:
-      case D_COMP_RESTRICT:
-      case D_COMP_VOLATILE:
-      case D_COMP_CONST_THIS:
-      case D_COMP_RESTRICT_THIS:
-      case D_COMP_VOLATILE_THIS:
-      case D_COMP_VENDOR_TYPE_QUAL:
+      case DEMANGLE_COMPONENT_CONST:
+      case DEMANGLE_COMPONENT_RESTRICT:
+      case DEMANGLE_COMPONENT_VOLATILE:
+      case DEMANGLE_COMPONENT_CONST_THIS:
+      case DEMANGLE_COMPONENT_RESTRICT_THIS:
+      case DEMANGLE_COMPONENT_VOLATILE_THIS:
+      case DEMANGLE_COMPONENT_VENDOR_TYPE_QUAL:
 	prev_comp = NULL;
         ret_comp = d_left (ret_comp);
         break;
-      case D_COMP_NAME:
-      case D_COMP_TEMPLATE:
-      case D_COMP_CTOR:
-      case D_COMP_DTOR:
-      case D_COMP_OPERATOR:
-      case D_COMP_EXTENDED_OPERATOR:
+      case DEMANGLE_COMPONENT_NAME:
+      case DEMANGLE_COMPONENT_TEMPLATE:
+      case DEMANGLE_COMPONENT_CTOR:
+      case DEMANGLE_COMPONENT_DTOR:
+      case DEMANGLE_COMPONENT_OPERATOR:
+      case DEMANGLE_COMPONENT_EXTENDED_OPERATOR:
 	done = 1;
 	break;
       default:
@@ -154,7 +155,7 @@ class_name_from_physname (const char *physname)
       ret = cp_comp_to_string (prev_comp, 10);
     }
 
-  xfree (di);
+  xfree (storage);
   if (demangled_name)
     xfree (demangled_name);
   return ret;
@@ -165,12 +166,13 @@ class_name_from_physname (const char *physname)
 char *
 method_name_from_physname (const char *physname)
 {
-  struct d_info *di;
+  void *storage;
   char *demangled_name = NULL, *ret;
-  struct d_comp *ret_comp;
+  struct demangle_component *ret_comp;
   int done;
 
-  ret_comp = mangled_name_to_comp (physname, DMGL_ANSI, &di, &demangled_name);
+  ret_comp = mangled_name_to_comp (physname, DMGL_ANSI, &storage,
+				   &demangled_name);
   if (ret_comp == NULL)
     return NULL;
 
@@ -178,26 +180,26 @@ method_name_from_physname (const char *physname)
   while (!done)
     switch (ret_comp->type)
       {
-      case D_COMP_QUAL_NAME:
-      case D_COMP_LOCAL_NAME:
-      case D_COMP_TYPED_NAME:
+      case DEMANGLE_COMPONENT_QUAL_NAME:
+      case DEMANGLE_COMPONENT_LOCAL_NAME:
+      case DEMANGLE_COMPONENT_TYPED_NAME:
         ret_comp = d_right (ret_comp);
         break;
-      case D_COMP_CONST:
-      case D_COMP_RESTRICT:
-      case D_COMP_VOLATILE:
-      case D_COMP_CONST_THIS:
-      case D_COMP_RESTRICT_THIS:
-      case D_COMP_VOLATILE_THIS:
-      case D_COMP_VENDOR_TYPE_QUAL:
+      case DEMANGLE_COMPONENT_CONST:
+      case DEMANGLE_COMPONENT_RESTRICT:
+      case DEMANGLE_COMPONENT_VOLATILE:
+      case DEMANGLE_COMPONENT_CONST_THIS:
+      case DEMANGLE_COMPONENT_RESTRICT_THIS:
+      case DEMANGLE_COMPONENT_VOLATILE_THIS:
+      case DEMANGLE_COMPONENT_VENDOR_TYPE_QUAL:
         ret_comp = d_left (ret_comp);
         break;
-      case D_COMP_NAME:
-      case D_COMP_TEMPLATE:
-      case D_COMP_CTOR:
-      case D_COMP_DTOR:
-      case D_COMP_OPERATOR:
-      case D_COMP_EXTENDED_OPERATOR:
+      case DEMANGLE_COMPONENT_NAME:
+      case DEMANGLE_COMPONENT_TEMPLATE:
+      case DEMANGLE_COMPONENT_CTOR:
+      case DEMANGLE_COMPONENT_DTOR:
+      case DEMANGLE_COMPONENT_OPERATOR:
+      case DEMANGLE_COMPONENT_EXTENDED_OPERATOR:
 	done = 1;
 	break;
       default:
@@ -211,7 +213,7 @@ method_name_from_physname (const char *physname)
     /* The ten is completely arbitrary; we don't have a good estimate.  */
     ret = cp_comp_to_string (ret_comp, 10);
 
-  xfree (di);
+  xfree (storage);
   if (demangled_name)
     xfree (demangled_name);
   return ret;

@@ -1,3 +1,16 @@
+2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (cp_demangle_h): Remove.
+	(libiberty_h): Add.
+	(cp-names.tab.o, cp-names-main.tab.o, cp-support.o): Update
+	dependencies.
+	* cp-support.c: Don't include "cp-demangle.h".
+	(d_left, d_right): New macros.
+	(cp_canonicalize_string, class_name_from_physname,
+	method_name_from_physname): Fix types and component names.
+	* cp-support.h (demangled_name_to_comp, mangled_name_to_comp)
+	(cp_comp_to_string): Update prototypes.
+
 2004-01-13  Daniel Jacobowitz  <drow@mvista.com>
 
 	* cp-names.y: Don't include "cp-demangle.h".  Convert all references
