@@ -7788,6 +7788,13 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      if ((insn & 1) == 0)
 			can_plt_call = 1;
 		    }
+		  else if (h != NULL
+			   && strcmp (h->root.root.string,
+				      ".__libc_start_main") == 0)
+		    {
+		      /* Allow crt1 branch to go via a toc adjusting stub.  */
+		      can_plt_call = 1;
+		    }
 		  else
 		    {
 		      if (strcmp (input_section->output_section->name,

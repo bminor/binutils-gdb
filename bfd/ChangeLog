@@ -1,6 +1,12 @@
+2003-08-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): Add special case for crt1.o
+	branch to __libc_start_main.
+
 2003-08-08 Dmitry Diky <diwil@mail.ru>
 
-	* archures.c: Add xW42 and xE42 parts. Sort MPU list according to gcc order.
+	* archures.c: Add xW42 and xE42 parts. Sort MPU list according to
+	gcc order.
 	* cpu-msp430.c: Likewise.
 	* elf32-msp430.c: Likewise.
 	* bfd-in2.h: Regenerate.
