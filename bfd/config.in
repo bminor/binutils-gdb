@@ -232,6 +232,9 @@
 /* Define if <sys/procfs.h> has lwpstatus_t.pr_reg. */
 #undef HAVE_LWPSTATUS_T_PR_REG
 
+/* Define if <sys/procfs.h> has win32_pstatus_t. */
+#undef HAVE_WIN32_PSTATUS_T
+
 /* Name of host specific header file to include in trad-core.c. */
 #undef TRAD_HEADER
 

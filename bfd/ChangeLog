@@ -1,3 +1,17 @@
+2000-01-10  Egor Duda  <deo@logos-m.ru>
+
+	* config.bfd: Include elf32_i386 vector to target list for cygwin 
+	and mingw.
+	
+	* config.in: Undefine HAVE_WIN32_PSTATUS_T.
+	* configure.in: Test for structure win32_pstatus_t in
+	<sys/procfs.h>
+	* configure: Regenerate.
+	
+	* elf.c (elfcore_grok_win32pstatus): New function: process
+	win32_pstatus_t notes in elf core file.
+	(elfcore_grok_note): Detect win32_pstatus notes.
+
 2000-01-03  Martin v. Loewis  <loewis@informatik.hu-berlin.de>
 
 	* elflink.c (_bfd_elf_link_record_dynamic_symbol): Process symbol

@@ -5267,6 +5267,14 @@ EOF
   fi
 fi
 
+ if test $bfd_cv_have_sys_procfs_type_lwpstatus_t = yes; then
+   cat >> confdefs.h <<\EOF
+#define HAVE_LWPSTATUS_T 1
+EOF
+
+ fi
+ echo "$ac_t""$bfd_cv_have_sys_procfs_type_lwpstatus_t" 1>&6
+
 
 cat >> confdefs.h <<EOF
 #define TRAD_HEADER $TRAD_HEADER

@@ -5292,7 +5292,83 @@ elfcore_grok_lwpstatus (abfd, note)
 }
 #endif /* defined (HAVE_LWPSTATUS_T) */
 
+#if defined (HAVE_WIN32_PSTATUS_T)
+static boolean
+elfcore_grok_win32pstatus (abfd, note)
+     bfd * abfd;
+     Elf_Internal_Note * note;
+{
+  char buf[30];
+  char * name;
+  asection * sect;
+  win32_pstatus_t pstatus;
 
+  if (note->descsz < sizeof (pstatus))
+    return true;
+
+  memcpy (& pstatus, note->descdata, note->descsz);
+  
+  switch (pstatus.data_type) 
+    {
+    case NOTE_INFO_PROCESS:
+      /* FIXME: need to add ->core_command.  */
+      elf_tdata (abfd)->core_signal = pstatus.data.process_info.signal;
+      elf_tdata (abfd)->core_pid = pstatus.data.process_info.pid;
+      break ;
+
+    case NOTE_INFO_THREAD:
+      /* Make a ".reg/999" section.  */
+      sprintf (buf, ".reg/%d", pstatus.data.thread_info.tid);
+      
+      name = bfd_alloc (abfd, strlen (buf) + 1);
+      if (name == NULL)
+        return false;
+      
+      strcpy (name, buf);
+
+      sect = bfd_make_section (abfd, name);
+      if (sect == NULL)
+        return false;
+      
+      sect->_raw_size = sizeof (pstatus.data.thread_info.thread_context);
+      sect->filepos = note->descpos + offsetof (struct win32_pstatus,
+						data.thread_info.thread_context);
+      sect->flags = SEC_HAS_CONTENTS;
+      sect->alignment_power = 2;
+
+      if (pstatus.data.thread_info.is_active_thread)
+	if (! elfcore_maybe_make_sect (abfd, ".reg", sect))
+	  return false;
+      break;
+
+    case NOTE_INFO_MODULE:
+      /* Make a ".module/xxxxxxxx" section.  */
+      sprintf (buf, ".module/%08x" , pstatus.data.module_info.base_address);
+      
+      name = bfd_alloc (abfd, strlen (buf) + 1);
+      if (name == NULL)
+	return false;
+      
+      strcpy (name, buf);
+
+      sect = bfd_make_section (abfd, name);
+      
+      if (sect == NULL)
+	return false;
+      
+      sect->_raw_size = note->descsz;
+      sect->filepos = note->descpos;
+      sect->flags = SEC_HAS_CONTENTS;
+      sect->alignment_power = 2;
+      break;
+
+    default:
+      return true;
+    }
+
+  return true;
+}
+#endif /* HAVE_WIN32_PSTATUS_T */
 
 static boolean
 elfcore_grok_note (abfd, note)
@@ -5322,7 +5398,12 @@ elfcore_grok_note (abfd, note)
     case NT_FPREGSET:		/* FIXME: rename to NT_PRFPREG */
       return elfcore_grok_prfpreg (abfd, note);
 
-    case NT_PRXFPREG:		/* Linux SSE extension */
+#if defined (HAVE_WIN32_PSTATUS_T)
+    case NT_WIN32PSTATUS:	
+      return elfcore_grok_win32pstatus (abfd, note);
+#endif
+
+  case NT_PRXFPREG:		/* Linux SSE extension */
       if (note->namesz == 5
 	  && ! strcmp (note->namedata, "LINUX"))
 	return elfcore_grok_prxfpreg (abfd, note);

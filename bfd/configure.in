@@ -314,6 +314,7 @@ changequote([,])dnl
     BFD_HAVE_SYS_PROCFS_TYPE(lwpstatus_t)
     BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(lwpstatus_t, pr_context)
     BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(lwpstatus_t, pr_reg)
+    BFD_HAVE_SYS_PROCFS_TYPE(win32_pstatus_t)
   fi
 fi
 AC_SUBST(COREFILE)
