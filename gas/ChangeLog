@@ -1,3 +1,8 @@
+1999-10-27  Scott Bambrough  <scottb@netwinder.org>
+
+	* config/tc-arm.c (reloc_map[]): Fix compiler warning.
+	* config/tc-arm.h: Fix compile time warnings.
+
 Mon Oct 18 18:11:10 MDT 1999	Diego Novillo <dnovillo@cygnus.com>
 
 	* tc_d10v.c (find_opcode): Allow ATSIGN to match expressions of the

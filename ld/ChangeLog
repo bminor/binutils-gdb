@@ -1,3 +1,8 @@
+1999-10-27  Scott Bambrough  <scottb@netwinder.org>
+
+	* emultempl/armelf.em: Include ctype.h to prevent compile time
+	warnings. 
+
 1999-10-26  Nick Clifton  <nickc@cygnus.com>
 
 	* emultempl/armcoff.em (gld{}_finish): Remove extraneous

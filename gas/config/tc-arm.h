@@ -113,8 +113,13 @@
    deliberately not been updated to mark assembler created stabs
    symbols as Thumb.  */
 
+#define TC_FIX_TYPE PTR
+#define TC_INIT_FIX_DATA(FIXP) ((FIXP)->tc_fix_data = NULL)
+
 #ifdef OBJ_ELF
+#include "write.h"        /* For definition of fixS */
 #define obj_fix_adjustable(fixP) arm_fix_adjustable (fixP)
+boolean arm_fix_adjustable PARAMS ((fixS *));
 #else
 #define obj_fix_adjustable(fixP) 0
 #endif
@@ -139,9 +144,6 @@
 #define THUMB_SET_FUNC(s,t)     ((t) ? ARM_SET_FLAG (s, THUMB_FLAG_FUNC)    : ARM_RESET_FLAG (s, THUMB_FLAG_FUNC))
 
 
-#define TC_FIX_TYPE PTR
-#define TC_INIT_FIX_DATA(FIXP) ((FIXP)->tc_fix_data = NULL)
-
 #define TC_START_LABEL(C,STR) \
   (c == ':' || (c == '/' && arm_data_in_code ()))
 int arm_data_in_code PARAMS ((void));
@@ -154,7 +156,8 @@ char * arm_canonicalize_symbol_name PARAMS ((char *));
  extern void arm_adjust_symtab PARAMS ((void));
 
 #ifdef OBJ_ELF
-#define obj_frob_symbol(sym, punt)  armelf_frob_symbol (sym, punt)
+#define obj_frob_symbol(sym, punt)  armelf_frob_symbol ((sym), & (punt))
+void armelf_frob_symbol PARAMS ((symbolS *, int *));
 #endif
 
 #define tc_aout_pre_write_hook(x)	{;}	/* not used */
