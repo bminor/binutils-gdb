@@ -1,5 +1,10 @@
 2002-01-05  Andrew Cagney  <ac131313@redhat.com>
 
+	* rs6000-tdep.c (rs6000_do_registers_info): Replace BIG_ENDIAN
+	with BFD_ENDIAN_BIG.
+
+2002-01-05  Andrew Cagney  <ac131313@redhat.com>
+
 	* configure.in (AC_CHECK_HEADERS): Do not check for <endian.h>.
 	* configure, config.in: Re-generate.
 	* config/vax/xm-vaxbsd.h: Do not include <machine/endian.h>.
