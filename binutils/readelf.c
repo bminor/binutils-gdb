@@ -4034,6 +4034,8 @@ process_section_groups (FILE *file)
 	      group->root = g;
 	    }
 
+	  if (symtab)
+	    free (symtab);
 	  if (strtab)
 	    free (strtab);
 	  if (start)

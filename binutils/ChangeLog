@@ -1,3 +1,7 @@
+2004-10-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (process_section_groups): Free symtab after use.
+
 2004-10-18  Tommy Pettersson <ptp@lysator.liu.se>
 	    Nick Clifton  <nickc@redhat.com>
 
