@@ -1,3 +1,9 @@
+Wed Apr 27 11:25:18 1994  Steve Chamberlain  (sac@cygnus.com)
+
+	* Makefile.in (syslex, sysinfo): Use CC_FOR_BUILD.
+	* coffdump.c, coffgroc.c, coffgrog.h, srconv.c, sysdump.c,
+	sysroff.info: Major changes.
+
 Tue Apr 26 18:18:24 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* objdump.c (print_section_stabs): Indicate the stab header symbol

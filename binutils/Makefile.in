@@ -59,7 +59,7 @@ RANLIB = ranlib
 BISONFLAGS = -d
 TEXI2ROFF=texi2roff
 MAKEOVERRIDES=
-
+CC_FOR_BUILD = $(CC)
 NM_FOR_TARGET = nm
 NM = $(NM_FOR_TARGET)
 SYMLINK = ln -s
@@ -278,7 +278,13 @@ syslex.c : syslex.l
 	mv lex.yy.c syslex.c
 	
 sysinfo: sysinfo.o syslex.o $(ADDL_LIBS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ sysinfo.o syslex.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o $@ sysinfo.o syslex.o 
+
+syslex.o: syslex.c
+	$(CC_FOR_BUILD) -c -I. $(CFLAGS)  syslex.c 
+
+sysinfo.o: sysinfo.c
+	$(CC_FOR_BUILD) -c -I. $(CFLAGS)  sysinfo.c 
 
 srconv: sysroff.c srconv.o sysroff.c  coffgrok.o $(ADDL_LIBS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ srconv.o coffgrok.o $(ADDL_LIBS) $(EXTRALIBS)
@@ -467,6 +473,7 @@ distclean:
 	else true; fi
 	-rm -f Makefile config.status sysdep.h *.o *~ \#* core \
 		binutils.?? binutils.??s binutils.aux binutils.log binutils.toc
+	-rm -f $(PROGS) underscore.c
 realclean: clean distclean
 	-rm -f $(DISTSTUFF) TAGS
 
