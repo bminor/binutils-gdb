@@ -296,29 +296,54 @@ main (argc, argv)
      the -L's in argv have been processed.  */
   set_scripts_dir ();
 
-  if (had_script == false)
+  /* If we have not already opened and parsed a linker script
+     read the emulation's appropriate default script.  */
+  if (saved_script_handle == false)
     {
-      /* Read the emulation's appropriate default script.  */
       int isfile;
-      char *s = ldemul_get_script (&isfile);
+      char *s = ldemul_get_script (& isfile);
 
       if (isfile)
 	ldfile_open_command_file (s);
       else
-	{
-	  if (trace_file_tries)
-	    {
-	      info_msg (_("using internal linker script:\n"));
-	      info_msg ("==================================================\n");
-	      info_msg (s);
-	      info_msg ("\n==================================================\n");
-	    }
+	{	
 	  lex_string = s;
 	  lex_redirect (s);
 	}
       parser_input = input_script;
       yyparse ();
       lex_string = NULL;
+    }
+
+  if (trace_file_tries)
+    {
+      info_msg (_("using %s linker script:\n"),
+		saved_script_handle ? "external" : "internal");
+      info_msg ("==================================================\n");
+
+      if (saved_script_handle)
+	{
+	  const int BSIZE = 8192;
+	  size_t n;
+	  char *buf = xmalloc (BSIZE);
+
+	  rewind (saved_script_handle);
+	  while ((n = fread (buf, 1, BSIZE - 1, saved_script_handle)) > 0)
+	    {
+	      buf [n] = 0;
+	      info_msg (buf);
+	    }
+	  rewind (saved_script_handle);
+	  free (buf);
+	}
+      else
+	{
+	  int isfile;
+
+	  info_msg (ldemul_get_script (& isfile));
+	}
+      
+      info_msg ("\n==================================================\n");
     }
 
   lang_final ();

@@ -1017,11 +1017,11 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
              version information.  Read it, but don't assume that
              we've seen a linker script.  */
 	  {
-	    boolean hold_had_script;
+	    FILE * hold_script_handle;
 
-	    hold_had_script = had_script;
+	    hold_script_handle = saved_script_handle;
 	    ldfile_open_command_file (optarg);
-	    had_script = hold_had_script;
+	    saved_script_handle = hold_script_handle;
 	    parser_input = input_version_script;
 	    yyparse ();
 	  }

@@ -1339,7 +1339,7 @@ for compatibility with other linkers, you may omit the leading
 @itemx --verbose
 Display the version number for @code{ld} and list the linker emulations
 supported.  Display which input files can and cannot be opened.  Display
-the linker script if using a default builtin script.
+the linker script being used by the linker.
 
 @kindex --version-script=@var{version-scriptfile}
 @cindex version script, symbol versions

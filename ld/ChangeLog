@@ -1,3 +1,22 @@
+2001-08-12  H.J. Lu  <hjl@gnu.org>
+            Andrew Haley  <aph@cambridge.redhat.com>
+            Nick Clifton  <nickc@redhat.com>
+
+        * ldgram.y (had_script): Change name to saved_script_handle.
+	Change type to file handle.
+	* ld.h (had_script): Rename and retype.
+	* ldfile.c (ldfile_open_command_file): Save the file handle
+	used in saved_script_handle.
+	* lexsup.c (parse_args): Do not allow -c option to alter
+	saved_script_handle.
+	* ldmain.c (main): Print out the linker script used if
+	--verbose is given.  Check saved_script_handle to obtain the
+	external linker script used, or if NULL, dump the builtin
+	script.
+	* ld.texinfo: Document that --verbose now dumps the linker
+	script used, regardless of whether it was an internal or an
+	external script.
+
 2001-08-10  Andreas Jaeger  <aj@suse.de>
 
 	* configure.in: Add -Wstrict-prototypes and -Wmissing-prototypes

@@ -350,7 +350,8 @@ ldfile_open_command_file (name)
 
   ldfile_input_filename = name;
   lineno = 1;
-  had_script = true;
+  
+  saved_script_handle = ldlex_input_stack;
 }
 
 #ifdef GNU960

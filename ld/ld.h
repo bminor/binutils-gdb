@@ -221,7 +221,7 @@ typedef enum {
   lang_final_phase_enum
 } lang_phase_type;
 
-extern boolean had_script;
+extern FILE * saved_script_handle;
 extern boolean force_make_executable;
 
 /* Non-zero if we are processing a --defsym from the command line.  */
