@@ -5,6 +5,11 @@
 srcdir = .
 destdir = /usr/local
 
+# Distribution version
+VERSION=1.90
+# Distribution name
+DIST_NAME=binutils-beta-${VERSION}
+
 version=`$(unsubdir)/../gcc$(subdir)/gcc -dumpversion`
 prefix = $(destdir)
 bindir = $(prefix)/bin
@@ -98,7 +103,7 @@ $(AR_PROG): $(ADDL_LIBS) ar.o not-ranlib.o $(BFD)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(AR_PROG) ar.o not-ranlib.o $(ADDL_LIBS) $(LOADLIBES)
 
 $(RANLIB_PROG): $(ADDL_LIBS) ar.o is-ranlib.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(AR_PROG) ar.o is-ranlib.o $(ADDL_LIBS) $(LOADLIBES)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(RANLIB_PROG) ar.o is-ranlib.o $(ADDL_LIBS) $(LOADLIBES)
 
 # This rule creates a single binary that switches between ar and ranlib
 # by looking at argv[0].  Use this kludge to save some disk space.
@@ -161,6 +166,13 @@ install: $(PROGS)
 		$(INSTALL_PROGRAM) $$i $(bindir)/$$i ; \
 	done
 
+dist: $(DIST_NAME).tar.Z
+
+$(DIST_NAME).tar.Z: proto-dir
+	ln -s proto-dir $(DIST_NAME)
+	tar chf - $(DIST_NAME) | compress >$(DIST_NAME).tar.Z
+	rm -rf $(DIST_NAME)
+
 bucomm.o: bucomm.c
 version.o: version.c
 size.o: size.c
@@ -175,6 +187,7 @@ ar.o: ar.c
 getopt.o:getopt.c
 getopt1.o:getopt1.c
 filemode.o:filemode.c
+
 #-----------------------------------------------------------------------------
 #		'STANDARD' GNU/960 TARGETS BELOW THIS POINT
 #
