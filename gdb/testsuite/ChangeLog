@@ -1,3 +1,12 @@
+2002-09-27  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.base/annota1.exp (info break): Make directory components of
+	path optional since not all compilers emit this debug information.
+
+ 	* gdb.base/shlib-call.exp (step inside shr2): Don't fail if first
+ 	step ends up stepping out of the function instead of stopping on
+ 	the epilogue.
+
 2002-09-26  Keith Seitz  <keiths@redhat.com>
 
 	* lib/insight-support.exp (gdbtk_start): Figure out where

@@ -239,18 +239,27 @@ gdb_expect {
 
 #step -return
     send_gdb "step\n"
+    # A step at this point will either take us entirely out of
+    # the function or into the function's epilogue.  The exact
+    # behavior will differ depending upon upon whether or not
+    # the compiler emits line number information for the epilogue.
     gdb_expect {
-        -re ".*\\\}.*$gdb_prompt $" { pass "step inside shr2 (shlib func)"}
-        -re ".*$gdb_prompt $" { fail "step inside shr2 (shlib func)" }
-        timeout { fail "step inside shr2 (shlib func) (timeout)" }
-    }
-    
-    send_gdb "step\n"
-    gdb_expect {
-        -re "main \\(\\) at.*g = mainshr1\\(g\\);.*$gdb_prompt $" { pass "step out of shr2 to main"}
-        -re ".*$gdb_prompt $" { fail "step out of shr2 to main" }
+        -re "main \\(\\) at.*g = mainshr1\\(g\\);.*$gdb_prompt $" { 
+	    pass "step out of shr2 to main"
+	}
+        -re ".*\\\}.*$gdb_prompt $" {
+	    pass "step out of shr2 to main (stopped in shr2 epilogue)"
+	    send_gdb "step\n"
+	    gdb_expect {
+		-re "main \\(\\) at.*g = mainshr1\\(g\\);.*$gdb_prompt $" { pass "step out of shr2 epilogue to main"}
+		-re ".*$gdb_prompt $" { fail "step out of shr2 epilogue to main" }
+		timeout { fail "step out of shr2 epilogue to main (timeout)" }
+	    }
+	}
+        -re ".*$gdb_prompt $" { fail "step out of shr2" }
         timeout { fail "step out of shr2 to main (timeout)" }
     }
+    
 
 #print mainshr1(1)
 send_gdb "print mainshr1(1)\n"
