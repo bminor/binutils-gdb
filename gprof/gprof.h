@@ -59,7 +59,7 @@ typedef int	bool;
      */
 long	hz;
 
-typedef	unsigned short UNIT;		/* unit of profiling */
+typedef	unsigned char UNIT[2];		/* unit of profiling */
 char	*a_outname;
 #define	A_OUTNAME		"a.out"
 
@@ -147,6 +147,13 @@ struct hdr {
     int	ncnt;
 };
 
+
+struct rawhdr {
+    char lowpc[4];
+    char highpc[4];
+    char ncnt[4];
+};
+
 struct hdr	h;
 
 int	debug;
@@ -155,7 +162,7 @@ int	debug;
      * Each discretized pc sample has
      * a count of the number of samples in its range
      */
-UNIT	*samples;
+int 	*samples;
 
 unsigned long	s_lowpc;	/* lowpc from the profile file */
 unsigned long	s_highpc;	/* highpc from the profile file */

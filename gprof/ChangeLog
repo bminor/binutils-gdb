@@ -1,3 +1,10 @@
+Wed Jun 16 12:54:53 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+    
+	* gmon.h, gprof.h: structs of chars used to hold external
+	representations.
+	* gprof.c (getpfile, openpfile, readsamples): Swap data in using
+	new structures.
+
 Tue Jun 15 23:09:17 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* Makefile.in (.c.o): Look in ../include, not ../bfd, for bfd.h.

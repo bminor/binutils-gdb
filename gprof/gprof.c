@@ -339,6 +339,7 @@ getpfile(filename)
     FILE		*pfile;
     FILE		*openpfile();
     struct rawarc	arc;
+    struct veryrawarc	rawarc;
 
     pfile = openpfile(filename);
     readsamples(pfile);
@@ -346,10 +347,10 @@ getpfile(filename)
 	 *	the rest of the file consists of
 	 *	a bunch of <from,self,count> tuples.
 	 */
-    while ( fread( &arc , sizeof arc , 1 , pfile ) == 1 ) {
-      arc.raw_frompc = bfd_get_32 (abfd, (bfd_byte *) &arc.raw_frompc);
-      arc.raw_selfpc = bfd_get_32 (abfd, (bfd_byte *) &arc.raw_selfpc);
-      arc.raw_count  = bfd_get_32 (abfd, (bfd_byte *) &arc.raw_count);
+    while ( fread( &rawarc , sizeof rawarc , 1 , pfile ) == 1 ) {
+      arc.raw_frompc = bfd_get_32 (abfd, (bfd_byte *) rawarc.raw_frompc);
+      arc.raw_selfpc = bfd_get_32 (abfd, (bfd_byte *) rawarc.raw_selfpc);
+      arc.raw_count  = bfd_get_32 (abfd, (bfd_byte *) rawarc.raw_count);
 #	ifdef DEBUG
 	    if ( debug & SAMPLEDEBUG ) {
 		printf( "[getpfile] frompc 0x%x selfpc 0x%x count %d\n" ,
@@ -369,16 +370,21 @@ openpfile(filename)
     char *filename;
 {
     struct hdr	tmp;
+    struct rawhdr raw;
     FILE	*pfile;
 
     if((pfile = fopen(filename, "r")) == NULL) {
 	perror(filename);
 	done();
     }
-    fread(&tmp, sizeof(struct hdr), 1, pfile);
-    tmp.lowpc  = (UNIT *)bfd_get_32 (abfd, (bfd_byte *) &tmp.lowpc);
-    tmp.highpc = (UNIT *)bfd_get_32 (abfd, (bfd_byte *) &tmp.highpc);
-    tmp.ncnt   =         bfd_get_32 (abfd, (bfd_byte *) &tmp.ncnt);
+    if (sizeof(struct rawhdr) !=  fread(&raw, 1, sizeof(struct rawhdr), pfile))
+      {
+	fprintf(stderr, "%s: file too short to be a gmon file\n", filename);
+	done();
+      }    
+    tmp.lowpc  = (UNIT *)bfd_get_32 (abfd, (bfd_byte *) &raw.lowpc[0]);
+    tmp.highpc = (UNIT *)bfd_get_32 (abfd, (bfd_byte *) &raw.highpc[0]);
+    tmp.ncnt   =         bfd_get_32 (abfd, (bfd_byte *) &raw.ncnt[0]);
 
     if ( s_highpc != 0 && ( tmp.lowpc != h.lowpc ||
 	 tmp.highpc != h.highpc || tmp.ncnt != h.ncnt ) ) {
@@ -390,7 +396,7 @@ openpfile(filename)
     s_highpc = (unsigned long) h.highpc;
     lowpc = (unsigned long)h.lowpc / sizeof(UNIT);
     highpc = (unsigned long)h.highpc / sizeof(UNIT);
-    sampbytes = h.ncnt - sizeof(struct hdr);
+    sampbytes = h.ncnt - sizeof(struct rawhdr);
     nsamples = sampbytes / sizeof (UNIT);
 #   ifdef DEBUG
 	if ( debug & SAMPLEDEBUG ) {
@@ -497,31 +503,33 @@ valcmp(p1, p2)
 readsamples(pfile)
     FILE	*pfile;
 {
-    register i;
-    UNIT	sample;
+  register i;
+
     
+  if (samples == 0) {
+    samples = (int *) calloc (nsamples, sizeof(int));
     if (samples == 0) {
-	samples = (UNIT *) malloc (sampbytes * sizeof(UNIT));
-	if (samples == 0) {
-	    fprintf( stderr , "%s: No room for %d sample pc's\n", 
-		whoami , sampbytes / sizeof (UNIT));
-	    done();
-	}
-  	memset (samples, 0, sampbytes * sizeof(UNIT));
+      fprintf( stderr , "%s: No room for %d sample pc's\n", 
+	      whoami , nsamples);
+      done();
     }
-    for (i = 0; i < nsamples; i++) {
-	fread(&sample, sizeof (UNIT), 1, pfile);
-	sample = bfd_get_16 (abfd, (bfd_byte *) &sample);
-	if (feof(pfile))
-		break;
-	samples[i] += sample;
-    }
-    if (i != nsamples) {
-	fprintf(stderr,
+  }
+  for (i = 0; i < nsamples; i++) {
+    UNIT	raw;
+    int value;
+      
+    fread(raw, sizeof (raw), 1, pfile);
+    value = bfd_get_16 (abfd, (bfd_byte *) raw);
+    if (feof(pfile))
+      break;
+    samples[i] += value;
+  }
+  if (i != nsamples) {
+    fprintf(stderr,
 	    "%s: unexpected EOF after reading %d/%d samples\n",
-		whoami , --i , nsamples );
-	done();
-    }
+	    whoami , --i , nsamples );
+    done();
+  }
 }
 
 /*
@@ -559,7 +567,7 @@ readsamples(pfile)
 asgnsamples()
 {
     register int	j;
-    UNIT		ccnt;
+    int		ccnt;
     double		time;
     unsigned long	pcl, pch;
     register int	i;

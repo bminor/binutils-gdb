@@ -98,6 +98,12 @@ struct rawarc {
     long		raw_count;
 };
 
+struct veryrawarc {
+    char raw_frompc[4];
+    char raw_selfpc[4];
+    char raw_count[4];
+};
+
     /*
      *	general rounding functions.
      */
