@@ -898,7 +898,7 @@ pke_pc_advance(struct pke_device* me, int num_words)
          if (( me->fifo_trace_file == NULL) &&
              ( me->fifo_trace_file_name != NULL ))
            sky_open_file (&me->fifo_trace_file, me->fifo_trace_file_name,
-                         (char *) NULL);
+                         (char *) NULL, _IOLBF );
 
          /* assert complete classification */
               ASSERT(fq->word_class[3] != wc_unknown);

@@ -338,7 +338,7 @@ do { \
                  ((me)->fifo_trace_file_name != NULL )) \
                sky_open_file (&((me)->fifo_trace_file), \
                               (me)->fifo_trace_file_name, \
-                              (char *) NULL); \
+                              (char *) NULL, _IOLBF ); \
              fprintf (((me)->fifo_trace_file != NULL) ? \
                       (me)->fifo_trace_file : stdout, \
                       "# Reg %s:%s = 0x%x\n", #reg, #flag, (unsigned)(value)); \
@@ -472,7 +472,7 @@ int read_pke_pcx (struct pke_device *device, void *buf);
                  ((me)->fifo_trace_file_name != NULL )) \
                sky_open_file (&((me)->fifo_trace_file), \
                               (me)->fifo_trace_file_name, \
-                              (char *) NULL); \
+                              (char *) NULL, _IOLBF ); \
              fprintf (((me)->fifo_trace_file != NULL) ? \
                       (me)->fifo_trace_file : stdout, \
                       "# Write %2d bytes  to  ", size); \
