@@ -76,7 +76,7 @@ elf32ppc.sh
 elf64_sparc.sh
 elf64alpha.sh
 elf_i386.sh
-fr30.sh
+elf32fr30.sh
 gld960.sh
 gld960coff.sh
 go32.sh
