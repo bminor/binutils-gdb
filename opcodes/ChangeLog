@@ -1,3 +1,9 @@
+2001-08-08  Alan Modra  <amodra@bigpond.net.au>
+
+	1999-10-25  Torbjorn Granlund  <tege@swox.com>
+	* ppc-opc.c: Include "bfd.h".
+	(powerpc_operands): Add new field for reloc type.
+
 2001-07-21  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* mips-dis.c (print_insn_arg): Don't use software integer registers

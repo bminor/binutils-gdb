@@ -24,6 +24,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "sysdep.h"
 #include "opcode/ppc.h"
 #include "opintl.h"
+#include "bfd.h"
 
 /* This file holds the PowerPC opcode table.  The opcode table
    includes almost all of the extended instruction mnemonics.  This
@@ -93,241 +94,247 @@ const struct powerpc_operand powerpc_operands[] =
   /* The zero index is used to indicate the end of the list of
      operands.  */
 #define UNUSED 0
-  { 0, 0, 0, 0, 0 },
+  { 0, 0, 0, 0, 0, 0},
 
   /* The BA field in an XL form instruction.  */
 #define BA UNUSED + 1
 #define BA_MASK (0x1f << 16)
-  { 5, 16, 0, 0, PPC_OPERAND_CR },
+  { 5, 16, 0, 0, PPC_OPERAND_CR, 0 },
 
   /* The BA field in an XL form instruction when it must be the same
      as the BT field in the same instruction.  */
 #define BAT BA + 1
-  { 5, 16, insert_bat, extract_bat, PPC_OPERAND_FAKE },
+  { 5, 16, insert_bat, extract_bat, PPC_OPERAND_FAKE, 0 },
 
   /* The BB field in an XL form instruction.  */
 #define BB BAT + 1
 #define BB_MASK (0x1f << 11)
-  { 5, 11, 0, 0, PPC_OPERAND_CR },
+  { 5, 11, 0, 0, PPC_OPERAND_CR, 0 },
 
   /* The BB field in an XL form instruction when it must be the same
      as the BA field in the same instruction.  */
 #define BBA BB + 1
-  { 5, 11, insert_bba, extract_bba, PPC_OPERAND_FAKE },
+  { 5, 11, insert_bba, extract_bba, PPC_OPERAND_FAKE, 0 },
 
   /* The BD field in a B form instruction.  The lower two bits are
      forced to zero.  */
 #define BD BBA + 1
-  { 16, 0, insert_bd, extract_bd, PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED },
+  { 16, 0, insert_bd, extract_bd, PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED,
+    BFD_RELOC_PPC_B16 },
 
   /* The BD field in a B form instruction when absolute addressing is
      used.  */
 #define BDA BD + 1
-  { 16, 0, insert_bd, extract_bd, PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED },
+  { 16, 0, insert_bd, extract_bd, PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED,
+    BFD_RELOC_PPC_BA16 },
 
   /* The BD field in a B form instruction when the - modifier is used.
      This sets the y bit of the BO field appropriately.  */
 #define BDM BDA + 1
-  { 16, 0, insert_bdm, extract_bdm,
-      PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED },
+  { 16, 0, insert_bdm, extract_bdm, PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED,
+    BFD_RELOC_PPC_B16 },
 
   /* The BD field in a B form instruction when the - modifier is used
      and absolute address is used.  */
 #define BDMA BDM + 1
-  { 16, 0, insert_bdm, extract_bdm,
-      PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED },
+  { 16, 0, insert_bdm, extract_bdm, PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED,
+    BFD_RELOC_PPC_BA16 },
 
   /* The BD field in a B form instruction when the + modifier is used.
      This sets the y bit of the BO field appropriately.  */
 #define BDP BDMA + 1
-  { 16, 0, insert_bdp, extract_bdp,
-      PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED },
+  { 16, 0, insert_bdp, extract_bdp, PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED,
+    BFD_RELOC_PPC_B16 },
 
   /* The BD field in a B form instruction when the + modifier is used
      and absolute addressing is used.  */
 #define BDPA BDP + 1
-  { 16, 0, insert_bdp, extract_bdp,
-      PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED },
+  { 16, 0, insert_bdp, extract_bdp, PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED,
+    BFD_RELOC_PPC_BA16 },
 
   /* The BF field in an X or XL form instruction.  */
 #define BF BDPA + 1
-  { 3, 23, 0, 0, PPC_OPERAND_CR },
+  { 3, 23, 0, 0, PPC_OPERAND_CR, 0 },
 
   /* An optional BF field.  This is used for comparison instructions,
      in which an omitted BF field is taken as zero.  */
 #define OBF BF + 1
-  { 3, 23, 0, 0, PPC_OPERAND_CR | PPC_OPERAND_OPTIONAL },
+  { 3, 23, 0, 0, PPC_OPERAND_CR | PPC_OPERAND_OPTIONAL, 0 },
 
   /* The BFA field in an X or XL form instruction.  */
 #define BFA OBF + 1
-  { 3, 18, 0, 0, PPC_OPERAND_CR },
+  { 3, 18, 0, 0, PPC_OPERAND_CR, 0 },
 
   /* The BI field in a B form or XL form instruction.  */
 #define BI BFA + 1
 #define BI_MASK (0x1f << 16)
-  { 5, 16, 0, 0, PPC_OPERAND_CR },
+  { 5, 16, 0, 0, PPC_OPERAND_CR, 0 },
 
   /* The BO field in a B form instruction.  Certain values are
      illegal.  */
 #define BO BI + 1
 #define BO_MASK (0x1f << 21)
-  { 5, 21, insert_bo, extract_bo, 0 },
+  { 5, 21, insert_bo, extract_bo, 0, 0 },
 
   /* The BO field in a B form instruction when the + or - modifier is
      used.  This is like the BO field, but it must be even.  */
 #define BOE BO + 1
-  { 5, 21, insert_boe, extract_boe, 0 },
+  { 5, 21, insert_boe, extract_boe, 0, 0 },
 
   /* The BT field in an X or XL form instruction.  */
 #define BT BOE + 1
-  { 5, 21, 0, 0, PPC_OPERAND_CR },
+  { 5, 21, 0, 0, PPC_OPERAND_CR, 0 },
 
   /* The condition register number portion of the BI field in a B form
      or XL form instruction.  This is used for the extended
      conditional branch mnemonics, which set the lower two bits of the
      BI field.  This field is optional.  */
 #define CR BT + 1
-  { 3, 18, 0, 0, PPC_OPERAND_CR | PPC_OPERAND_OPTIONAL },
+  { 3, 18, 0, 0, PPC_OPERAND_CR | PPC_OPERAND_OPTIONAL, 0 },
 
   /* The D field in a D form instruction.  This is a displacement off
      a register, and implies that the next operand is a register in
      parentheses.  */
 #define D CR + 1
-  { 16, 0, 0, 0, PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED },
+  { 16, 0, 0, 0, PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED,
+    BFD_RELOC_PPC_TOC16 },
 
   /* The DS field in a DS form instruction.  This is like D, but the
      lower two bits are forced to zero.  */
 #define DS D + 1
-  { 16, 0, insert_ds, extract_ds, PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED },
+  { 16, 0, insert_ds, extract_ds, PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED,
+    BFD_RELOC_PPC_TOC16 },
 
   /* The E field in a wrteei instruction.  */
 #define E DS + 1
-  { 1, 15, 0, 0, 0 },
+  { 1, 15, 0, 0, 0, 0 },
 
   /* The FL1 field in a POWER SC form instruction.  */
 #define FL1 E + 1
-  { 4, 12, 0, 0, 0 },
+  { 4, 12, 0, 0, 0, 0 },
 
   /* The FL2 field in a POWER SC form instruction.  */
 #define FL2 FL1 + 1
-  { 3, 2, 0, 0, 0 },
+  { 3, 2, 0, 0, 0, 0 },
 
   /* The FLM field in an XFL form instruction.  */
 #define FLM FL2 + 1
-  { 8, 17, 0, 0, 0 },
+  { 8, 17, 0, 0, 0, 0 },
 
   /* The FRA field in an X or A form instruction.  */
 #define FRA FLM + 1
 #define FRA_MASK (0x1f << 16)
-  { 5, 16, 0, 0, PPC_OPERAND_FPR },
+  { 5, 16, 0, 0, PPC_OPERAND_FPR, 0 },
 
   /* The FRB field in an X or A form instruction.  */
 #define FRB FRA + 1
 #define FRB_MASK (0x1f << 11)
-  { 5, 11, 0, 0, PPC_OPERAND_FPR },
+  { 5, 11, 0, 0, PPC_OPERAND_FPR, 0 },
 
   /* The FRC field in an A form instruction.  */
 #define FRC FRB + 1
 #define FRC_MASK (0x1f << 6)
-  { 5, 6, 0, 0, PPC_OPERAND_FPR },
+  { 5, 6, 0, 0, PPC_OPERAND_FPR, 0 },
 
   /* The FRS field in an X form instruction or the FRT field in a D, X
      or A form instruction.  */
 #define FRS FRC + 1
 #define FRT FRS
-  { 5, 21, 0, 0, PPC_OPERAND_FPR },
+  { 5, 21, 0, 0, PPC_OPERAND_FPR, 0 },
 
   /* The FXM field in an XFX instruction.  */
 #define FXM FRS + 1
 #define FXM_MASK (0xff << 12)
-  { 8, 12, 0, 0, 0 },
+  { 8, 12, 0, 0, 0, 0 },
 
   /* The L field in a D or X form instruction.  */
 #define L FXM + 1
-  { 1, 21, 0, 0, PPC_OPERAND_OPTIONAL },
+  { 1, 21, 0, 0, PPC_OPERAND_OPTIONAL, 0 },
 
   /* The LEV field in a POWER SC form instruction.  */
 #define LEV L + 1
-  { 7, 5, 0, 0, 0 },
+  { 7, 5, 0, 0, 0, 0 },
 
   /* The LI field in an I form instruction.  The lower two bits are
      forced to zero.  */
 #define LI LEV + 1
-  { 26, 0, insert_li, extract_li, PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED },
+  { 26, 0, insert_li, extract_li, PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED,
+    BFD_RELOC_PPC_B26 },
 
   /* The LI field in an I form instruction when used as an absolute
      address.  */
 #define LIA LI + 1
-  { 26, 0, insert_li, extract_li, PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED },
+  { 26, 0, insert_li, extract_li, PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED,
+    BFD_RELOC_PPC_BA26 },
 
   /* The MB field in an M form instruction.  */
 #define MB LIA + 1
 #define MB_MASK (0x1f << 6)
-  { 5, 6, 0, 0, 0 },
+  { 5, 6, 0, 0, 0, 0 },
 
   /* The ME field in an M form instruction.  */
 #define ME MB + 1
 #define ME_MASK (0x1f << 1)
-  { 5, 1, 0, 0, 0 },
+  { 5, 1, 0, 0, 0, 0 },
 
   /* The MB and ME fields in an M form instruction expressed a single
      operand which is a bitmask indicating which bits to select.  This
      is a two operand form using PPC_OPERAND_NEXT.  See the
      description in opcode/ppc.h for what this means.  */
 #define MBE ME + 1
-  { 5, 6, 0, 0, PPC_OPERAND_OPTIONAL | PPC_OPERAND_NEXT },
-  { 32, 0, insert_mbe, extract_mbe, 0 },
+  { 5, 6, 0, 0, PPC_OPERAND_OPTIONAL | PPC_OPERAND_NEXT, 0 },
+  { 32, 0, insert_mbe, extract_mbe, 0, 0 },
 
   /* The MB or ME field in an MD or MDS form instruction.  The high
      bit is wrapped to the low end.  */
 #define MB6 MBE + 2
 #define ME6 MB6
 #define MB6_MASK (0x3f << 5)
-  { 6, 5, insert_mb6, extract_mb6, 0 },
+  { 6, 5, insert_mb6, extract_mb6, 0, 0 },
 
   /* The NB field in an X form instruction.  The value 32 is stored as
      0.  */
 #define NB MB6 + 1
-  { 6, 11, insert_nb, extract_nb, 0 },
+  { 6, 11, insert_nb, extract_nb, 0, 0 },
 
   /* The NSI field in a D form instruction.  This is the same as the
      SI field, only negated.  */
 #define NSI NB + 1
   { 16, 0, insert_nsi, extract_nsi,
-      PPC_OPERAND_NEGATIVE | PPC_OPERAND_SIGNED },
+      PPC_OPERAND_NEGATIVE | PPC_OPERAND_SIGNED, 0 },
 
   /* The RA field in an D, DS, X, XO, M, or MDS form instruction.  */
 #define RA NSI + 1
 #define RA_MASK (0x1f << 16)
-  { 5, 16, 0, 0, PPC_OPERAND_GPR },
+  { 5, 16, 0, 0, PPC_OPERAND_GPR, 0 },
 
   /* The RA field in a D or X form instruction which is an updating
      load, which means that the RA field may not be zero and may not
      equal the RT field.  */
 #define RAL RA + 1
-  { 5, 16, insert_ral, 0, PPC_OPERAND_GPR },
+  { 5, 16, insert_ral, 0, PPC_OPERAND_GPR, 0 },
 
   /* The RA field in an lmw instruction, which has special value
      restrictions.  */
 #define RAM RAL + 1
-  { 5, 16, insert_ram, 0, PPC_OPERAND_GPR },
+  { 5, 16, insert_ram, 0, PPC_OPERAND_GPR, 0 },
 
   /* The RA field in a D or X form instruction which is an updating
      store or an updating floating point load, which means that the RA
      field may not be zero.  */
 #define RAS RAM + 1
-  { 5, 16, insert_ras, 0, PPC_OPERAND_GPR },
+  { 5, 16, insert_ras, 0, PPC_OPERAND_GPR, 0 },
 
   /* The RB field in an X, XO, M, or MDS form instruction.  */
 #define RB RAS + 1
 #define RB_MASK (0x1f << 11)
-  { 5, 11, 0, 0, PPC_OPERAND_GPR },
+  { 5, 11, 0, 0, PPC_OPERAND_GPR, 0 },
 
   /* The RB field in an X form instruction when it must be the same as
      the RS field in the instruction.  This is used for extended
      mnemonics like mr.  */
 #define RBS RB + 1
-  { 5, 1, insert_rbs, extract_rbs, PPC_OPERAND_FAKE },
+  { 5, 1, insert_rbs, extract_rbs, PPC_OPERAND_FAKE, 0 },
 
   /* The RS field in a D, DS, X, XFX, XS, M, MD or MDS form
      instruction or the RT field in a D, DS, X, XFX or XO form
@@ -335,101 +342,101 @@ const struct powerpc_operand powerpc_operands[] =
 #define RS RBS + 1
 #define RT RS
 #define RT_MASK (0x1f << 21)
-  { 5, 21, 0, 0, PPC_OPERAND_GPR },
+  { 5, 21, 0, 0, PPC_OPERAND_GPR, 0 },
 
   /* The SH field in an X or M form instruction.  */
 #define SH RS + 1
 #define SH_MASK (0x1f << 11)
-  { 5, 11, 0, 0, 0 },
+  { 5, 11, 0, 0, 0, 0 },
 
   /* The SH field in an MD form instruction.  This is split.  */
 #define SH6 SH + 1
 #define SH6_MASK ((0x1f << 11) | (1 << 1))
-  { 6, 1, insert_sh6, extract_sh6, 0 },
+  { 6, 1, insert_sh6, extract_sh6, 0, 0 },
 
   /* The SI field in a D form instruction.  */
 #define SI SH6 + 1
-  { 16, 0, 0, 0, PPC_OPERAND_SIGNED },
+  { 16, 0, 0, 0, PPC_OPERAND_SIGNED, 0 },
 
   /* The SI field in a D form instruction when we accept a wide range
      of positive values.  */
 #define SISIGNOPT SI + 1
-  { 16, 0, 0, 0, PPC_OPERAND_SIGNED | PPC_OPERAND_SIGNOPT },
+  { 16, 0, 0, 0, PPC_OPERAND_SIGNED | PPC_OPERAND_SIGNOPT, 0 },
 
   /* The SPR field in an XFX form instruction.  This is flipped--the
      lower 5 bits are stored in the upper 5 and vice- versa.  */
 #define SPR SISIGNOPT + 1
 #define SPR_MASK (0x3ff << 11)
-  { 10, 11, insert_spr, extract_spr, 0 },
+  { 10, 11, insert_spr, extract_spr, 0, 0 },
 
   /* The BAT index number in an XFX form m[ft]ibat[lu] instruction.  */
 #define SPRBAT SPR + 1
 #define SPRBAT_MASK (0x3 << 17)
-  { 2, 17, 0, 0, 0 },
+  { 2, 17, 0, 0, 0, 0 },
 
   /* The SPRG register number in an XFX form m[ft]sprg instruction.  */
 #define SPRG SPRBAT + 1
 #define SPRG_MASK (0x3 << 16)
-  { 2, 16, 0, 0, 0 },
+  { 2, 16, 0, 0, 0, 0 },
 
   /* The SR field in an X form instruction.  */
 #define SR SPRG + 1
-  { 4, 16, 0, 0, 0 },
+  { 4, 16, 0, 0, 0, 0 },
 
   /* The SV field in a POWER SC form instruction.  */
 #define SV SR + 1
-  { 14, 2, 0, 0, 0 },
+  { 14, 2, 0, 0, 0, 0 },
 
   /* The TBR field in an XFX form instruction.  This is like the SPR
      field, but it is optional.  */
 #define TBR SV + 1
-  { 10, 11, insert_tbr, extract_tbr, PPC_OPERAND_OPTIONAL },
+  { 10, 11, insert_tbr, extract_tbr, PPC_OPERAND_OPTIONAL, 0 },
 
   /* The TO field in a D or X form instruction.  */
 #define TO TBR + 1
 #define TO_MASK (0x1f << 21)
-  { 5, 21, 0, 0, 0 },
+  { 5, 21, 0, 0, 0, 0 },
 
   /* The U field in an X form instruction.  */
 #define U TO + 1
-  { 4, 12, 0, 0, 0 },
+  { 4, 12, 0, 0, 0, 0 },
 
   /* The UI field in a D form instruction.  */
 #define UI U + 1
-  { 16, 0, 0, 0, 0 },
+  { 16, 0, 0, 0, 0, 0 },
 
   /* The VA field in a VA, VX or VXR form instruction. */
 #define VA UI + 1
 #define VA_MASK	(0x1f << 16)
-  {5, 16, 0, 0, PPC_OPERAND_VR},
+  {5, 16, 0, 0, PPC_OPERAND_VR, 0},
 
   /* The VB field in a VA, VX or VXR form instruction. */
 #define VB VA + 1
 #define VB_MASK (0x1f << 11)
-  {5, 11, 0, 0, PPC_OPERAND_VR}, 
+  {5, 11, 0, 0, PPC_OPERAND_VR, 0},
 
   /* The VC field in a VA form instruction. */
 #define VC VB + 1
 #define VC_MASK (0x1f << 6)
-  {5, 6, 0, 0, PPC_OPERAND_VR},
+  {5, 6, 0, 0, PPC_OPERAND_VR, 0},
 
   /* The VD or VS field in a VA, VX, VXR or X form instruction. */
 #define VD VC + 1
 #define VS VD
 #define VD_MASK (0x1f << 21)
-  {5, 21, 0, 0, PPC_OPERAND_VR},
+  {5, 21, 0, 0, PPC_OPERAND_VR, 0},
 
   /* The SIMM field in a VX form instruction. */
 #define SIMM VD + 1
-  { 5, 16, 0, 0, PPC_OPERAND_SIGNED},
+  { 5, 16, 0, 0, PPC_OPERAND_SIGNED, 0},
 
   /* The UIMM field in a VX form instruction. */
 #define UIMM SIMM + 1
-  { 5, 16, 0, 0, 0 },
+  { 5, 16, 0, 0, 0, 0 },
 
   /* The SHB field in a VA form instruction. */
 #define SHB UIMM + 1
-  { 4, 6, 0, 0, 0 },
+  { 4, 6, 0, 0, 0, 0 },
 };
 
 /* The functions used to insert and extract complicated operands.  */
