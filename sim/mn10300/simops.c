@@ -2709,59 +2709,56 @@ void OP_FCFF0000 (insn, extension)
 void OP_DF0000 (insn, extension)
      unsigned long insn, extension;
 {
-  unsigned int sp;
+  unsigned int sp, offset;
   unsigned long mask;
 
   State.regs[REG_SP] += insn & 0xff;
   sp = State.regs[REG_SP];
 
+  offset = -4;
   mask = (insn & 0xff00) >> 8;
 
-  if (mask & 0x8)
+  if (mask & 0x80)
     {
-      sp += 4;
-      State.regs[REG_LAR] = load_word (sp);
-      sp += 4;
-      State.regs[REG_LIR] = load_word (sp);
-      sp += 4;
-      State.regs[REG_MDR] = load_word (sp);
-      sp += 4;
-      State.regs[REG_A0 + 1] = load_word (sp);
-      sp += 4;
-      State.regs[REG_A0] = load_word (sp);
-      sp += 4;
-      State.regs[REG_D0 + 1] = load_word (sp);
-      sp += 4;
-      State.regs[REG_D0] = load_word (sp);
-      sp += 4;
-    }
-
-  if (mask & 0x10)
-    {
-      State.regs[REG_A0 + 3] = load_word (sp);
-      sp += 4;
-    }
-
-  if (mask & 0x20)
-    {
-      State.regs[REG_A0 + 2] = load_word (sp);
-      sp += 4;
+      State.regs[REG_D0 + 2] = load_word (sp + offset);
+      offset -= 4;
     }
 
   if (mask & 0x40)
     {
-      State.regs[REG_D0 + 3] = load_word (sp);
-      sp += 4;
+      State.regs[REG_D0 + 3] = load_word (sp + offset);
+      offset -= 4;
     }
 
-  if (mask & 0x80)
+  if (mask & 0x20)
     {
-      State.regs[REG_D0 + 2] = load_word (sp);
-      sp += 4;
+      State.regs[REG_A0 + 2] = load_word (sp + offset);
+      offset -= 4;
     }
 
-  /* And make sure to update the stack pointer.  */
-  State.regs[REG_SP] = sp;
+  if (mask & 0x10)
+    {
+      State.regs[REG_A0 + 3] = load_word (sp + offset);
+      offset -= 4;
+    }
+
+  if (mask & 0x8)
+    {
+      State.regs[REG_D0] = load_word (sp + offset);
+      offset -= 4;
+      State.regs[REG_D0 + 1] = load_word (sp + offset);
+      offset -= 4;
+      State.regs[REG_A0] = load_word (sp + offset);
+      offset -= 4;
+      State.regs[REG_A0 + 1] = load_word (sp + offset);
+      offset -= 4;
+      State.regs[REG_MDR] = load_word (sp + offset);
+      offset -= 4;
+      State.regs[REG_LIR] = load_word (sp + offset);
+      offset -= 4;
+      State.regs[REG_LAR] = load_word (sp + offset);
+      offset -= 4;
+    }
 
   /* Restore the PC value.  */
   State.regs[REG_PC] = (State.mem[sp] | (State.mem[sp+1] << 8)
@@ -2773,62 +2770,57 @@ void OP_DF0000 (insn, extension)
 void OP_DE0000 (insn, extension)
      unsigned long insn, extension;
 {
-  unsigned int sp;
+  unsigned int sp, offset;
   unsigned long mask;
 
-  sp = State.regs[REG_SP] + (insn & 0xff);
-  State.regs[REG_SP] = sp;
+  State.regs[REG_SP] += (insn & 0xff);
+  sp = State.regs[REG_SP];
   State.regs[REG_PC] = State.regs[REG_MDR] - 3;
 
-  sp = State.regs[REG_SP];
-
+  offset = -4;
   mask = (insn & 0xff00) >> 8;
 
-  if (mask & 0x8)
+  if (mask & 0x80)
     {
-      sp += 4;
-      State.regs[REG_LAR] = load_word (sp);
-      sp += 4;
-      State.regs[REG_LIR] = load_word (sp);
-      sp += 4;
-      State.regs[REG_MDR] = load_word (sp);
-      sp += 4;
-      State.regs[REG_A0 + 1] = load_word (sp);
-      sp += 4;
-      State.regs[REG_A0] = load_word (sp);
-      sp += 4;
-      State.regs[REG_D0 + 1] = load_word (sp);
-      sp += 4;
-      State.regs[REG_D0] = load_word (sp);
-      sp += 4;
-    }
-
-  if (mask & 0x10)
-    {
-      State.regs[REG_A0 + 3] = load_word (sp);
-      sp += 4;
-    }
-
-  if (mask & 0x20)
-    {
-      State.regs[REG_A0 + 2] = load_word (sp);
-      sp += 4;
+      State.regs[REG_D0 + 2] = load_word (sp + offset);
+      offset -= 4;
     }
 
   if (mask & 0x40)
     {
-      State.regs[REG_D0 + 3] = load_word (sp);
-      sp += 4;
+      State.regs[REG_D0 + 3] = load_word (sp + offset);
+      offset -= 4;
     }
 
-  if (mask & 0x80)
+  if (mask & 0x20)
     {
-      State.regs[REG_D0 + 2] = load_word (sp);
-      sp += 4;
+      State.regs[REG_A0 + 2] = load_word (sp + offset);
+      offset -= 4;
     }
 
-  /* And make sure to update the stack pointer.  */
-  State.regs[REG_SP] = sp;
+  if (mask & 0x10)
+    {
+      State.regs[REG_A0 + 3] = load_word (sp + offset);
+      offset -= 4;
+    }
+
+  if (mask & 0x8)
+    {
+      State.regs[REG_D0] = load_word (sp + offset);
+      offset -= 4;
+      State.regs[REG_D0 + 1] = load_word (sp + offset);
+      offset -= 4;
+      State.regs[REG_A0] = load_word (sp + offset);
+      offset -= 4;
+      State.regs[REG_A0 + 1] = load_word (sp + offset);
+      offset -= 4;
+      State.regs[REG_MDR] = load_word (sp + offset);
+      offset -= 4;
+      State.regs[REG_LIR] = load_word (sp + offset);
+      offset -= 4;
+      State.regs[REG_LAR] = load_word (sp + offset);
+      offset -= 4;
+    }
 }
 
 /* rets */
