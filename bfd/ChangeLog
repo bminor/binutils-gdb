@@ -1,3 +1,14 @@
+2001-12-15  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf-bfd.h (_bfd_elf_maybe_strip_eh_frame_hdr): New prototype.
+	* elf-eh-frame.c (struct eh_frame_hdr_info): Add strip.
+	(_bfd_elf_discard_section_eh_frame): Don't create .eh_frame_hdr
+	sec_info here.  Free ehbuf.
+	(_bfd_elf_discard_section_eh_frame_hdr): Don't size the section
+	if hdr_info->strip.
+	(_bfd_elf_maybe_strip_eh_frame_hdr): New.
+	* elflink.h (size_dynamic_sections): Call it.
+
 2001-12-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.h (elf_bfd_discard_info): Fix segfault when dynobj NULL.

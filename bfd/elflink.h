@@ -3002,6 +3002,9 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
   if (dynobj == NULL)
     return true;
 
+  if (! _bfd_elf_maybe_strip_eh_frame_hdr (info))
+    return false;
+
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       struct elf_info_failed eif;

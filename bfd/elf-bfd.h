@@ -1296,6 +1296,8 @@ extern boolean _bfd_elf_write_section_eh_frame
   PARAMS ((bfd *, asection *, asection *, bfd_byte *));
 extern boolean _bfd_elf_write_section_eh_frame_hdr
   PARAMS ((bfd *, asection *));
+extern boolean _bfd_elf_maybe_strip_eh_frame_hdr
+  PARAMS ((struct bfd_link_info *));
 
 extern boolean _bfd_elf_link_record_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));

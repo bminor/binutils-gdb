@@ -86,6 +86,7 @@ struct eh_frame_hdr_info
      We build it if we successfully read all .eh_frame input sections
      and recognize them.  */
   boolean table;
+  boolean strip;
 };
 
 static bfd_vma read_unsigned_leb128
@@ -246,7 +247,7 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
   struct cie_header hdr;
   struct cie cie;
   struct eh_frame_hdr_info *hdr_info;
-  struct eh_frame_sec_info *sec_info;
+  struct eh_frame_sec_info *sec_info = NULL;
   unsigned int leb128_tmp;
   unsigned int cie_usage_count, last_cie_ndx, i, offset, make_relative;
   Elf_Internal_Rela *rel;
@@ -267,23 +268,20 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
       return false;
     }
 
+  BFD_ASSERT (elf_section_data (ehdrsec)->sec_info_type
+	      == ELF_INFO_TYPE_EH_FRAME_HDR);
+  hdr_info = (struct eh_frame_hdr_info *)
+	     elf_section_data (ehdrsec)->sec_info;
+
   /* Read the frame unwind information from abfd.  */
 
   ehbuf = (bfd_byte *) bfd_malloc (sec->_raw_size);
-  if (ehbuf == NULL
-      || ! bfd_get_section_contents (abfd, sec, ehbuf, (bfd_vma) 0,
-				     sec->_raw_size))
-    {
-      if (elf_section_data (ehdrsec)->sec_info_type
-	  != ELF_INFO_TYPE_EH_FRAME_HDR)
-	{
-	  elf_section_data (ehdrsec)->sec_info
-	    = bfd_zmalloc (sizeof (struct eh_frame_hdr_info));
-	  elf_section_data (ehdrsec)->sec_info_type
-	    = ELF_INFO_TYPE_EH_FRAME_HDR;
-	}
-      return false;
-    }
+  if (ehbuf == NULL)
+    goto free_no_table;
+
+  if (! bfd_get_section_contents (abfd, sec, ehbuf, (bfd_vma) 0,
+				  sec->_raw_size))
+    goto free_no_table;
 
   if (sec->_raw_size >= 4
       && bfd_get_32 (abfd, ehbuf) == 0
@@ -294,24 +292,10 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
       return false;
     }
 
-  if (elf_section_data (ehdrsec)->sec_info_type
-      != ELF_INFO_TYPE_EH_FRAME_HDR)
-    {
-      hdr_info = (struct eh_frame_hdr_info *)      
-		 bfd_zmalloc (sizeof (struct eh_frame_hdr_info));
-      hdr_info->table = true;
-      elf_section_data (ehdrsec)->sec_info = hdr_info;
-      elf_section_data (ehdrsec)->sec_info_type
-	= ELF_INFO_TYPE_EH_FRAME_HDR;
-    }
-  else
-    hdr_info = (struct eh_frame_hdr_info *)
-	       elf_section_data (ehdrsec)->sec_info;
-
   /* If .eh_frame section size doesn't fit into int, we cannot handle
      it (it would need to use 64-bit .eh_frame format anyway).  */
   if (sec->_raw_size != (unsigned int) sec->_raw_size)
-    return false;
+    goto free_no_table;
 
   ptr_size = (elf_elfheader (abfd)->e_ident[EI_CLASS]
 	      == ELFCLASS64) ? 8 : 4;
@@ -650,9 +634,12 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
   if (sec->_cooked_size == 0)
     sec->flags |= SEC_EXCLUDE;
 
+  free (ehbuf);
   return new_size != sec->_raw_size;
 
 free_no_table:
+  if (ehbuf)
+    free (ehbuf);
   if (sec_info)
     free (sec_info);
   hdr_info->table = false;
@@ -686,6 +673,8 @@ _bfd_elf_discard_section_eh_frame_hdr (abfd, info, sec)
 
   hdr_info = (struct eh_frame_hdr_info *)
 	     elf_section_data (sec)->sec_info;
+  if (hdr_info->strip)
+    return false;
   sec->_cooked_size = EH_FRAME_HDR_SIZE;
   if (hdr_info->table)
     sec->_cooked_size += 4 + hdr_info->fde_count * 8;
@@ -693,6 +682,52 @@ _bfd_elf_discard_section_eh_frame_hdr (abfd, info, sec)
   /* Request program headers to be recalculated.  */
   elf_tdata (abfd)->program_header_size = 0;
   elf_tdata (abfd)->eh_frame_hdr = true;
+  return true;
+}
+
+/* This function is called from size_dynamic_sections.
+   It needs to decide whether .eh_frame_hdr should be output or not,
+   because later on it is too late for calling _bfd_strip_section_from_output,
+   since dynamic symbol table has been sized.  */
+
+boolean
+_bfd_elf_maybe_strip_eh_frame_hdr (info)
+     struct bfd_link_info *info;
+{
+  asection *sec, *o;
+  bfd *abfd;
+  struct eh_frame_hdr_info *hdr_info;
+
+  sec = bfd_get_section_by_name (elf_hash_table (info)->dynobj, ".eh_frame_hdr");
+  if (sec == NULL)
+    return true;
+
+  hdr_info
+    = bfd_zmalloc (sizeof (struct eh_frame_hdr_info));
+  if (hdr_info == NULL)
+    return false;
+
+  elf_section_data (sec)->sec_info = hdr_info;
+  elf_section_data (sec)->sec_info_type = ELF_INFO_TYPE_EH_FRAME_HDR;
+
+  abfd = NULL;
+  if (info->eh_frame_hdr)
+    for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link_next)
+      {
+	/* Count only sections which have at least a single CIE or FDE.
+	   There cannot be any CIE or FDE <= 8 bytes.  */
+	o = bfd_get_section_by_name (abfd, ".eh_frame");
+	if (o && o->_raw_size > 8)
+	  break;
+      }
+
+  if (abfd == NULL)
+    {
+      _bfd_strip_section_from_output (info, sec);
+      hdr_info->strip = true;
+    }
+  else
+    hdr_info->table = true;
   return true;
 }
 
