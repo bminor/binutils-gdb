@@ -1,3 +1,9 @@
+Tue Apr  7 12:43:37 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	From hjl@lucon.org <H.J. Lu>:
+	* Makefile.am (diststuff): New target.
+	* Makefile.in: Rebuild.
+
 Mon Mar 30 12:47:48 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Set version to 2.9.1.

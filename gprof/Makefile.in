@@ -501,6 +501,8 @@ all installdirs mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 
+diststuff: $(BUILT_SOURCES) info
+
 .m.c:
 	awk -f $(srcdir)/gen-c-prog.awk > ./$*.c \
 	    FUNCTION=`(echo $*|sed -e 's,.*/,,g' -e 's/_bl//')`_blurb \
