@@ -1,3 +1,8 @@
+Wed Feb 18 23:39:46 1998  Richard Henderson  <rth@cygnus.com>
+
+	* Makefile.am (install-exec-local): Install properly when ln
+	fails or tooldir == prefix.
+
 start-sanitize-m32rx
 Wed Feb 18 18:11:42 1998  Nick Clifton  <nickc@cygnus.com>
 
