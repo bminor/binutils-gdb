@@ -2849,25 +2849,23 @@ ppc_stabx (ignore)
 	  
     symbol_get_tc (sym)->within = ppc_current_block;
 
-    /*
-      In this case :
+    /* In this case :
       
-      .bs name
-      .stabx	"z",arrays_,133,0
-      .es
-      
-      .comm arrays_,13768,3
-      
-      resolve_symbol_value will copy the exp's "within" into sym's when the
-      offset is 0.  Since this seems to be corner case problem,
-      only do the correction for storage class C_STSYM.  A better solution
-      would be to have the tc	field updated in ppc_symbol_new_hook.
-      
-    */
-
-    if (exp.X_op == O_symbol) {
-		symbol_get_tc (exp.X_add_symbol)->within = ppc_current_block;
-    }
+       .bs name
+       .stabx	"z",arrays_,133,0
+       .es
+       
+       .comm arrays_,13768,3
+       
+       resolve_symbol_value will copy the exp's "within" into sym's when the
+       offset is 0.  Since this seems to be corner case problem,
+       only do the correction for storage class C_STSYM.  A better solution
+       would be to have the tc	field updated in ppc_symbol_new_hook. */
+    
+    if (exp.X_op == O_symbol) 
+      {
+	symbol_get_tc (exp.X_add_symbol)->within = ppc_current_block;
+      }
   }
   
   if (exp.X_op != O_symbol
