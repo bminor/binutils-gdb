@@ -1,5 +1,8 @@
 Sat Jun 12 16:09:22 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* {all,h8}-config.texi: Rename to *-cfg.texi for 14 char filenames.
+	* Makefile.in: Change accordingly.  gdb-config.texi -> gdb-cfg.texi.
+
 	* stabs.texinfo: Clean up N_{L,R}BRAC.  Discuss what addresses of
 	N_{L,R}BRAC,N_SLINE are relative to.
 

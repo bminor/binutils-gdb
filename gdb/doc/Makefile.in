@@ -56,7 +56,7 @@ TEX = tex
 TEXINDEX = texindex
 
 # Main GDB manual's source files
-SFILES_INCLUDED = gdb-config.texi $(srcdir)/gdbinv-s.texi
+SFILES_INCLUDED = gdb-cfg.texi $(srcdir)/gdbinv-s.texi
 
 SFILES_LOCAL = $(srcdir)/gdb.texinfo GDBvn.texi $(SFILES_INCLUDED)
 
@@ -164,10 +164,10 @@ GDBvn.texi : ${gdbdir}/Makefile.in
 # `configure' script because most users prefer generic version of manual,
 # not one for their binary config---which may not be specifically
 # defined anyways).
-gdb-config.texi: ${srcdir}/${DOC_CONFIG}-config.texi
-	ln -s ${srcdir}/${DOC_CONFIG}-config.texi gdb-config.texi || \
-	ln ${srcdir}/${DOC_CONFIG}-config.texi gdb-config.texi || \
-	cp ${srcdir}/${DOC_CONFIG}-config.texi gdb-config.texi
+gdb-cfg.texi: ${srcdir}/${DOC_CONFIG}-cfg.texi
+	ln -s ${srcdir}/${DOC_CONFIG}-cfg.texi gdb-cfg.texi || \
+	ln ${srcdir}/${DOC_CONFIG}-cfg.texi gdb-cfg.texi || \
+	cp ${srcdir}/${DOC_CONFIG}-cfg.texi gdb-cfg.texi
 
 # GDB MANUAL: texinfo source, using @set/@clear/@value/@ifset/@ifclear
 # If your texinfo or makeinfo don't support these, get a new texinfo release
