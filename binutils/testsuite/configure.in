@@ -20,7 +20,7 @@ case "${target}" in
        m68k-*-*)       target_makefile_frag=config/mt-m68k ;;
        i960-*-nindy)   target_makefile_frag=config/mt-i960-nindy ;;
        a29k-*-udi)     target_makefile_frag=config/mt-a29k-udi ;;
-       sparclite-*-*)  target_makefile_frag=config/mt-slite ;;
+       sparclite*-*-*) target_makefile_frag=config/mt-slite ;;
        sparc-*-aout)   target_makefile_frag=config/mt-sparc-aout ;;
        mips-*-ecoff)   target_makefile_frag=config/mt-mips-ecoff ;;
 esac

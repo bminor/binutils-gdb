@@ -1,3 +1,20 @@
+Tue May 10 11:20:54 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* configure.in (sparclite): Match on sparclite*-*-*.
+
+Wed Apr 13 18:25:19 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/unix.exp: Use nm.new, not nm, from newly built tree.
+
+	* binutils.all/objdump.exp: Add more wildcards to list of
+	single-letter options in pattern for usage message.
+
+	* binutils.all/nm.exp: Deleted debug-symbols test, since it only
+	works for a.out/stabs systems.  Fixed regexps to make underscores
+	optional, since some C compilers don't prepend them.  Deleted
+	check for foo.o symbol, since again some systems don't generate
+	it.
+
 Mon Apr 11 10:31:00 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* Makefile.in (check): Set TCL_LIBRARY for runtest.
