@@ -55,7 +55,7 @@ esac
 case "${targ}" in
 # START OF targmatch.h
 #ifdef BFD64
-  alpha*-*-netbsd*)
+  alpha*-*-netbsd* | alpha*-*-freebsd*)
     targ_defvec=bfd_elf64_alpha_vec
     targ_selvecs=ecoffalpha_little_vec
     ;;
@@ -215,7 +215,7 @@ case "${targ}" in
     targ_selvecs=bfd_elf32_i386_vec
     ;;
   i[3456]86-*-sysv4* | i[3456]86-*-unixware | i[3456]86-*-solaris2* | \
-  i[3456]86-*-elf | i[3456]86-*-sco3.2v5* | i[3456]86-*-freebsdelf* | \
+  i[3456]86-*-elf | i[3456]86-*-sco3.2v5* | \
   i[3456]86-*-dgux* | i[3456]86-*-sysv5*)
     targ_defvec=bfd_elf32_i386_vec
     targ_selvecs=i386coff_vec
@@ -244,10 +244,15 @@ case "${targ}" in
     targ_defvec=i386bsd_vec
     targ_underscore=yes
     ;;
-  i[3456]86-*-freebsd*)
+  i[3456]86-*-freebsdaout* | i[3456]86-*-freebsd[12].* | \
+  i[3456]86-*-freebsd[12])
     targ_defvec=i386freebsd_vec
     targ_selvecs=i386bsd_vec
     targ_underscore=yes
+    ;;
+  i[3456]86-*-freebsd*)
+    targ_defvec=bfd_elf32_i386_vec
+    targ_selvecs=i386coff_vec
     ;;
   i[3456]86-*-netbsd* | i[3456]86-*-openbsd*)
     targ_defvec=i386netbsd_vec

@@ -1,3 +1,8 @@
+1999-06-12  David O'Brien  <obrien@freebsd.org>
+
+	* config.bfd (alpha*-*-freebsd*): New target.
+	(i[3456]86-*-freebsd*): Now defaults to ELF.
+
 1999-06-11  Ian Lance Taylor  <ian@zembu.com>
 
 	* reloc.c (_bfd_relocate_contents): Permit bitfield relocations to
