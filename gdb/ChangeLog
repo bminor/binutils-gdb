@@ -1,3 +1,12 @@
+Thu May 28 17:19:14 1998  Keith Seitz  <keiths@cygnus.com>
+
+	* main.c (main): Check for NULL from getenv on CYGWIN32.
+
+Thu May 28 09:41:44 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* monitor.c (monitor_vsprintf): Handle %%.  Patch courtesy of
+	Felix Lee (flee@cygnus.com)
+
 Thu May 28 00:27:35 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* mips-tdep.c (mips_push_dummy_frame):  Fix calculation of

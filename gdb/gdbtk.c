@@ -3467,6 +3467,9 @@ _initialize_gdbtk ()
       /* Tell the rest of the world that Gdbtk is now set up. */
 
       init_ui_hook = gdbtk_init;
+#ifdef __CYGWIN32__
+      (void) FreeConsole ();
+#endif
     }
 #ifdef __CYGWIN32__
   else

@@ -1,3 +1,12 @@
+Thu May 28 17:19:14 1998  Keith Seitz  <keiths@cygnus.com>
+
+	* gdbtk.c (_initialize_gdbtk): Get rid of the console. Patch from
+	Chris Faylor (cgf@cygnus.com).
+
+	* configure.in: Link cygwin32 with subsystem console.
+
+	* configure: Regenerated
+	
 Sun May 24 14:00:24 1998  Keith Seitz  <keiths@cygnus.com>
 
 	* ser-unix.c (wait_for): Do not reset timeout_remaining for cygwin32 so that
