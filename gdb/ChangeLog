@@ -1,3 +1,8 @@
+Mon Feb  7 08:22:42 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* defs.h [BFD64]: Use BFD_HOST_64_BIT, not nonexistent
+	BFD_HOST_64_TYPE.
+
 Sun Feb  6 06:55:15 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* target.c (target_preopen): If target_kill doesn't remove the
