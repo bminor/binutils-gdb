@@ -1,5 +1,8 @@
 2004-04-18  Mark Kettenis  <kettenis@gnu.org>
 
+	* infcall.c (find_function_addr): Add FUNCTION_START_OFFSET to
+	return value.
+
 	Based on a patch from Brian Ford <ford@vss.fsi.com>:
 	* i386-tdep.c: Correct register numbering scheme comments
 	throughout.
