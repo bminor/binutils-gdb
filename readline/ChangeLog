@@ -1,3 +1,8 @@
+Thu Nov 21 14:40:29 1991  Stu Grossman  (grossman at cygnus.com)
+
+	* emacs_keymap.c, funmap.c, history.c, keymaps.c, vi_keymap.c,
+	vi_mode.c:  move config stuff to sysdep.h, update copyright notices.
+
 Tue Nov 19 15:02:13 1991  Stu Grossman  (grossman at cygnus.com)
 
 	* history.c:  #include "sysdep.h".
