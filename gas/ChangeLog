@@ -1,3 +1,10 @@
+2004-04-07  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 96
+	* config/tc-ppc.c (ppc_elf_suffix): Add valid32 and valid64 fields
+	to struct map_bfd.  Adjust MAP macro, and define MAP32, MAP64.
+	Update "mapping".  Restrict some @ modifiers to 32 bit.
+
 2004-04-01  Asgari Jinia  <asgarij@kpitcummins.com>
 	    Dhananjay Deshpande <dhananjayd@kpitcummins.com>
 
