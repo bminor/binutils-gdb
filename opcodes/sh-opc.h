@@ -282,9 +282,9 @@ sh_opcode_info sh_table[] = {
 
 /* 0100nnnn1xxx0111 ldc.l <REG_N>,Rn_BANK */{"ldc.l",{A_INC_N,A_REG_B},{HEX_4,REG_N,REG_B,HEX_7}, arch_sh3_up},
 
-/* 10001110i8p2.... ldre @(<disp>,PC)	*/{"ldre",{A_BDISP8},{HEX_8,HEX_E,BRANCH_8}, arch_sh_dsp_up},
+/* 10001110i8p2.... ldre @(<disp>,PC)	*/{"ldre",{A_DISP_PC},{HEX_8,HEX_E,PCRELIMM_8BY2}, arch_sh_dsp_up},
 
-/* 10001100i8p2.... ldrs @(<disp>,PC)	*/{"ldrs",{A_BDISP8},{HEX_8,HEX_C,BRANCH_8}, arch_sh_dsp_up},
+/* 10001100i8p2.... ldrs @(<disp>,PC)	*/{"ldrs",{A_DISP_PC},{HEX_8,HEX_C,PCRELIMM_8BY2}, arch_sh_dsp_up},
 
 /* 0100nnnn00001010 lds <REG_N>,MACH    */{"lds",{A_REG_N,A_MACH},{HEX_4,REG_N,HEX_0,HEX_A}, arch_sh1_up},
 
@@ -523,7 +523,7 @@ sh_opcode_info sh_table[] = {
 
 /* 0100nnnn01000011 stc.l SPC,@-<REG_N> */{"stc.l",{A_SPC,A_DEC_N},{HEX_4,REG_N,HEX_4,HEX_3}, arch_sh3_up},
 
-/* 0100nnnn00010011 stc.l GBR,@-<REG_N> */{"stc.l",{A_GBR,A_DEC_N},{HEX_4,REG_N,HEX_1,HEX_3}, arch_sh4_up},
+/* 0100nnnn00010011 stc.l GBR,@-<REG_N> */{"stc.l",{A_GBR,A_DEC_N},{HEX_4,REG_N,HEX_1,HEX_3}, arch_sh1_up},
 
 /* 0100nnnn00110010 stc.l SGR,@-<REG_N> */{"stc.l",{A_SGR,A_DEC_N},{HEX_4,REG_N,HEX_3,HEX_2}, arch_sh4_up},
 
@@ -677,22 +677,22 @@ sh_opcode_info sh_table[] = {
 {"pwad", {DSP_REG_X,DSP_REG_Y,DSP_REG_N},{PPI,PPI3,HEX_B,HEX_4}, arch_sh_dsp_up},
 /* 10001000xxyynnnn pabs <DSP_REG_X>,<DSP_REG_N> */
 {"pabs", {DSP_REG_X,DSP_REG_N},{PPI,PPI3,HEX_8,HEX_8}, arch_sh_dsp_up},
-/* 10011000xxyynnnn prnd <DSP_REG_X>,<DSP_REG_N> */
-{"prnd", {DSP_REG_X,DSP_REG_N},{PPI,PPI3,HEX_9,HEX_8}, arch_sh_dsp_up},
 /* 10101000xxyynnnn pabs <DSP_REG_Y>,<DSP_REG_N> */
 {"pabs", {DSP_REG_Y,DSP_REG_N},{PPI,PPI3,HEX_A,HEX_8}, arch_sh_dsp_up},
+/* 10011000xxyynnnn prnd <DSP_REG_X>,<DSP_REG_N> */
+{"prnd", {DSP_REG_X,DSP_REG_N},{PPI,PPI3,HEX_9,HEX_8}, arch_sh_dsp_up},
 /* 10111000xxyynnnn prnd <DSP_REG_Y>,<DSP_REG_N> */
 {"prnd", {DSP_REG_Y,DSP_REG_N},{PPI,PPI3,HEX_B,HEX_8}, arch_sh_dsp_up},
 
 {"dct",{0},{PPI,PDC,HEX_1}, arch_sh_dsp_up},
 {"dcf",{0},{PPI,PDC,HEX_2}, arch_sh_dsp_up},
 
-/* 00000iiiiiiinnnn pshl #<imm>,<DSP_REG_N> */ {"pshl",{A_IMM,DSP_REG_N},{PPI,PSH,HEX_0}, arch_sh_dsp_up},
 /* 10000001xxyynnnn pshl <DSP_REG_X>,<DSP_REG_Y>,<DSP_REG_N> */
 {"pshl", {DSP_REG_X,DSP_REG_Y,DSP_REG_N},{PPI,PPIC,HEX_8,HEX_1}, arch_sh_dsp_up},
-/* 00010iiiiiiinnnn psha #<imm>,<DSP_REG_N> */ {"psha",{A_IMM,DSP_REG_N},{PPI,PSH,HEX_1}, arch_sh_dsp_up},
+/* 00000iiiiiiinnnn pshl #<imm>,<DSP_REG_N> */ {"pshl",{A_IMM,DSP_REG_N},{PPI,PSH,HEX_0}, arch_sh_dsp_up},
 /* 10010001xxyynnnn psha <DSP_REG_X>,<DSP_REG_Y>,<DSP_REG_N> */
 {"psha", {DSP_REG_X,DSP_REG_Y,DSP_REG_N},{PPI,PPIC,HEX_9,HEX_1}, arch_sh_dsp_up},
+/* 00010iiiiiiinnnn psha #<imm>,<DSP_REG_N> */ {"psha",{A_IMM,DSP_REG_N},{PPI,PSH,HEX_1}, arch_sh_dsp_up},
 /* 10100001xxyynnnn psub <DSP_REG_X>,<DSP_REG_Y>,<DSP_REG_N> */
 {"psub", {DSP_REG_X,DSP_REG_Y,DSP_REG_N},{PPI,PPIC,HEX_A,HEX_1}, arch_sh_dsp_up},
 /* 10110001xxyynnnn padd <DSP_REG_X>,<DSP_REG_Y>,<DSP_REG_N> */
@@ -705,10 +705,10 @@ sh_opcode_info sh_table[] = {
 {"por",  {DSP_REG_X,DSP_REG_Y,DSP_REG_N},{PPI,PPIC,HEX_B,HEX_5}, arch_sh_dsp_up},
 /* 10001001xxyynnnn pdec <DSP_REG_X>,<DSP_REG_N> */
 {"pdec", {DSP_REG_X,DSP_REG_N},{PPI,PPIC,HEX_8,HEX_9}, arch_sh_dsp_up},
-/* 10011001xxyynnnn pinc <DSP_REG_X>,<DSP_REG_N> */
-{"pinc", {DSP_REG_X,DSP_REG_N},{PPI,PPIC,HEX_9,HEX_9}, arch_sh_dsp_up},
 /* 10101001xxyynnnn pdec <DSP_REG_Y>,<DSP_REG_N> */
 {"pdec", {DSP_REG_Y,DSP_REG_N},{PPI,PPIC,HEX_A,HEX_9}, arch_sh_dsp_up},
+/* 10011001xxyynnnn pinc <DSP_REG_X>,<DSP_REG_N> */
+{"pinc", {DSP_REG_X,DSP_REG_N},{PPI,PPIC,HEX_9,HEX_9}, arch_sh_dsp_up},
 /* 10111001xxyynnnn pinc <DSP_REG_Y>,<DSP_REG_N> */
 {"pinc", {DSP_REG_Y,DSP_REG_N},{PPI,PPIC,HEX_B,HEX_9}, arch_sh_dsp_up},
 /* 10001101xxyynnnn pclr <DSP_REG_N> */
@@ -719,10 +719,10 @@ sh_opcode_info sh_table[] = {
 {"pdmsb", {DSP_REG_Y,DSP_REG_N},{PPI,PPIC,HEX_B,HEX_D}, arch_sh_dsp_up},
 /* 11001001xxyynnnn pneg  <DSP_REG_X>,<DSP_REG_N> */
 {"pneg",  {DSP_REG_X,DSP_REG_N},{PPI,PPIC,HEX_C,HEX_9}, arch_sh_dsp_up},
-/* 11011001xxyynnnn pcopy <DSP_REG_X>,<DSP_REG_N> */
-{"pcopy", {DSP_REG_X,DSP_REG_N},{PPI,PPIC,HEX_D,HEX_9}, arch_sh_dsp_up},
 /* 11101001xxyynnnn pneg  <DSP_REG_Y>,<DSP_REG_N> */
 {"pneg",  {DSP_REG_Y,DSP_REG_N},{PPI,PPIC,HEX_E,HEX_9}, arch_sh_dsp_up},
+/* 11011001xxyynnnn pcopy <DSP_REG_X>,<DSP_REG_N> */
+{"pcopy", {DSP_REG_X,DSP_REG_N},{PPI,PPIC,HEX_D,HEX_9}, arch_sh_dsp_up},
 /* 11111001xxyynnnn pcopy <DSP_REG_Y>,<DSP_REG_N> */
 {"pcopy", {DSP_REG_Y,DSP_REG_N},{PPI,PPIC,HEX_F,HEX_9}, arch_sh_dsp_up},
 /* 11001101xxyynnnn psts MACH,<DSP_REG_N> */

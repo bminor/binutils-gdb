@@ -1,3 +1,10 @@
+Wed Apr  5 22:28:18 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* sh-opc.c (sh_table): Use A_DISP_PC / PCRELIMM_8BY2 for ldre & ldrs.
+	stc GBR,@-<REG_N> is available for arch_sh1_up.
+	Group parallel processing insn with identical mnemonics together.
+	Make three-operand psha / pshl come first.
+
 Wed Apr  5 22:05:40 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* sh-opc.h (sh_nibble_type): Remove DISP_8 and DISP_4.

@@ -847,7 +847,13 @@ get_operands (info, args, operand)
 	      ptr++;
 	    }
 	  get_operand (&ptr, operand + 1);
-	  if (info->arg[2])
+	  /* ??? Hack: psha/pshl have a varying operand number depending on
+	     the type of the first operand.  We handle this by having the
+	     three-operand version first and reducing the number of operands
+	     parsed to two if we see that the first operand is an immediate.
+             This works because no insn with three operands has an immediate
+	     as first operand.  */
+	  if (info->arg[2] && operand[0].type != A_IMM)
 	    {
 	      if (*ptr == ',')
 		{

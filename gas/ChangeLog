@@ -1,3 +1,8 @@
+Wed Apr  5 22:26:32 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* config/tc-sh.c (get_operands): There's no third operand if the
+	first operand is an immediate.
+
 Wed Apr  5 22:07:19 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* config/tc-sh.c (immediate): Delete.
