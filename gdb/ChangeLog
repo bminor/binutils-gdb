@@ -1,3 +1,29 @@
+Thu Oct 15 16:55:00 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* command.c: Include "wait.h" after, rather than before, <wait.h>.
+  	"wait.h" was defining all WIF* macro's instead of filling in those
+ 	that <wait.h> missed.
+
+1998-10-14  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* defs.h: Move _initialize_printcmd, _initialize_stack, 
+        _initialize_blockframe out of here and in to their respective .c files.
+	* blockframe.c: Move _initialize_blockframe prototype to here.
+	* printcmd.c: Move _initialize_printcmd prototype to here.
+	* stack.c: Move _initialize_stack prototype to here.
+
+	* source.c, symtab.h: Move _initialize_source prototype to the .c file.
+	* values.c, value.h: Move _initialize_values prototype to the .c file.
+	* gdbthread.h, thread.c: Move _initialize_thread prototype to the .c 
+	file.
+	* breakpoint.c, breakpoint.h: Move _initialize_breakpoint prototype 
+        to the .c file.
+
+	* abug-rom.c alpha-nat.c alpha-tdep.c annotate.c ax-gdb.c bcache.c:
+	Standardize comments for the prototype section of these files.
+
+	* configure.in: Look in libc for wctype before looking for it in libc.
+
 Tue Oct 13 18:56:51 1998  Felix Lee  <flee@cygnus.com>
 
 	* sol-thread.c (ps_pstop, etc): simple test for proc_service.h

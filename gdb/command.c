@@ -19,7 +19,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcmd.h"
 #include "symtab.h"
 #include "value.h"
-#include "wait.h"
 #include <ctype.h>
 #include "gdb_string.h"
 #ifdef HAVE_UNISTD_H
@@ -33,6 +32,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #  include <sys/wait.h>
 # endif
 #endif
+
+#include "wait.h"
 
 /* Prototypes for local functions */
 
