@@ -1,3 +1,8 @@
+Thu Mar 17 11:44:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elfcode.h (NAME(bfd_elf,write_object_contents)): Don't use space
+	after NAME, since SunOS /bin/cc can't handle it.
+
 Wed Mar 16 16:43:33 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* netbsd386.c (N_SET_FLAGS): Don't nuke the machine id field.
