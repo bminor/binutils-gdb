@@ -7512,7 +7512,7 @@ When you start @value{GDBN}, it automatically executes commands from its
 processes command line options and operands, and then reads the init
 file (if any) in the current working directory.  This is so the init
 file in your home directory can set options (such as @code{set
-complaints} which affect the processing of the command line options and
+complaints}) which affect the processing of the command line options and
 operands.  The init files are not executed if you use the @samp{-nx}
 option; @pxref{Mode Options, ,Choosing modes}.
 
