@@ -103,7 +103,6 @@ if [ -f config/mh-${my_host} ] ; then
 	host_makefile_frag=config/mh-${my_host}
 fi
 
-echo ${host_makefile_frag}
 # per-target:
 
 case "${target_vendor}" in
