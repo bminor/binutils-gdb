@@ -1,5 +1,8 @@
 Mon Jan  4 16:54:18 1993  Fred Fish  (fnf@cygnus.com)
 
+	* c-exp.y (yylex):  Make static, to match prototype and other
+	<lang>-exp.y files.
+
 	* expression.h (exp_opcode):  Add BINOP_MOD.
 	* eval.c (evaluate_subexp):  Handle new BINOP_MOD.
 	* expprint.c (dump_expression):  Handle new BINOP_MOD.
