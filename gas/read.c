@@ -2737,6 +2737,15 @@ s_set (equiv)
   name = input_line_pointer;
   delim = get_symbol_end ();
   end_name = input_line_pointer;
+
+  if (name[0] == '\0')
+    {
+      as_bad (_("expected symbol name"));
+      *end_name = delim;
+      discard_rest_of_line ();
+      return;
+    }
+
   *end_name = delim;
   SKIP_WHITESPACE ();
 
