@@ -1008,10 +1008,12 @@ elf_m68k_adjust_dynamic_symbol (info, h)
       /* If this is the first .plt entry, make room for the special
 	 first entry.  */
       if (s->_raw_size == 0)
-        if ( CPU32_FLAG (dynobj))
-          s->_raw_size += PLT_CPU32_ENTRY_SIZE;
-        else
-	  s->_raw_size += PLT_ENTRY_SIZE;
+	{
+	  if (CPU32_FLAG (dynobj))
+	    s->_raw_size += PLT_CPU32_ENTRY_SIZE;
+	  else
+	    s->_raw_size += PLT_ENTRY_SIZE;
+	}
 
       /* If this symbol is not defined in a regular file, and we are
 	 not generating a shared library, then set the symbol to this
