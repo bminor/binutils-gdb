@@ -3219,7 +3219,7 @@ elf64_alpha_calc_dynrel_sizes (h, info)
 
 static boolean
 elf64_alpha_size_dynamic_sections (output_bfd, info)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
 {
   bfd *dynobj;

@@ -6063,7 +6063,7 @@ _bfd_elf_fprintf_vma (abfd, stream, value)
 
 enum elf_reloc_type_class
 _bfd_elf_reloc_type_class (type)
-     int type;
+     int type ATTRIBUTE_UNUSED;
 {
   return reloc_class_normal;
 }

@@ -1,5 +1,5 @@
 /* BFD back-end for VERSAdos-E objects.
-   Copyright 1995, 1996, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
    Versados is a Motorola trademark.
@@ -46,6 +46,18 @@
 static boolean versados_mkobject PARAMS ((bfd *));
 static boolean versados_scan PARAMS ((bfd *));
 static const bfd_target *versados_object_p PARAMS ((bfd *));
+static asymbol *versados_new_symbol PARAMS ((bfd *, int, const char *, bfd_vma, asection *));
+static char *new_symbol_string PARAMS ((bfd *, char *));
+static const bfd_target *versados_object_p PARAMS ((bfd *));
+static boolean versados_pass_2 PARAMS ((bfd *));
+static boolean versados_get_section_contents
+  PARAMS ((bfd *, asection *, void *, file_ptr, bfd_size_type));
+static boolean versados_set_section_contents
+  PARAMS ((bfd *, sec_ptr, void *, file_ptr, bfd_size_type));
+static int versados_sizeof_headers PARAMS ((bfd *, boolean));
+static asymbol *versados_make_empty_symbol PARAMS ((bfd *));
+static long int versados_get_symtab_upper_bound PARAMS ((bfd *));
+static long int versados_get_symtab PARAMS ((bfd *, asymbol **));
 
 #define VHEADER '1'
 #define VESTDEF '2'
@@ -141,6 +153,13 @@ union ext_any
     struct ext_otr otr;
   };
 
+static int get_record PARAMS ((bfd *, union ext_any *));
+static int get_4 PARAMS ((unsigned char **));
+static void get_10 PARAMS ((unsigned char **, char *));
+static void process_esd PARAMS ((bfd *, struct ext_esd *, int));
+static int get_offset PARAMS ((int, unsigned char *));
+static void process_otr PARAMS ((bfd *, struct ext_otr *, int));
+
 /* Initialize by filling in the hex conversion array.  */
 
 /* Set up the tdata information.  */
@@ -195,7 +214,7 @@ get_record (abfd, ptr)
   return 1;
 }
 
-int
+static int
 get_4 (pp)
      unsigned char **pp;
 {
@@ -204,7 +223,7 @@ get_4 (pp)
   return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | (p[3] << 0);
 }
 
-void
+static void
 get_10 (pp, name)
      unsigned char **pp;
      char *name;
@@ -276,7 +295,7 @@ process_esd (abfd, esd, pass)
 		asymbol *s;
 		char *n = new_symbol_string (abfd, name);
 		s = versados_new_symbol (abfd, snum, n, 0,
-					 &bfd_und_section, scn);
+					 &bfd_und_section);
 		esidx = VDATA (abfd)->es_done++;
 		RDATA (abfd, esidx - ES_BASE) = s;
 	      }
@@ -311,7 +330,7 @@ process_esd (abfd, esd, pass)
 	      {
 		asymbol *s;
 		char *n = new_symbol_string (abfd, name);
-		s = versados_new_symbol (abfd, snum + VDATA (abfd)->nrefs, n, val, sec, scn);
+		s = versados_new_symbol (abfd, snum + VDATA (abfd)->nrefs, n, val, sec);
 		s->flags |= BSF_GLOBAL;
 	      }
 	  }

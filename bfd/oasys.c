@@ -1,5 +1,5 @@
 /* BFD back-end for oasys objects.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2001
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support, <sac@cygnus.com>.
 
@@ -38,6 +38,28 @@ static boolean oasys_write_syms PARAMS ((bfd *));
 static boolean oasys_write_header PARAMS ((bfd *));
 static boolean oasys_write_end PARAMS ((bfd *));
 static boolean oasys_write_data PARAMS ((bfd *));
+static size_t oasys_string_length PARAMS ((oasys_record_union_type *));
+static boolean oasys_slurp_symbol_table PARAMS ((bfd *const));
+static long int oasys_get_symtab_upper_bound PARAMS ((bfd *const));
+static const bfd_target *oasys_archive_p PARAMS ((bfd *));
+static boolean oasys_mkobject PARAMS ((bfd *));
+static const bfd_target *oasys_object_p PARAMS ((bfd *));
+static void oasys_get_symbol_info PARAMS ((bfd *, asymbol *, symbol_info *));
+static void oasys_print_symbol PARAMS ((bfd *, void *, asymbol *, bfd_print_symbol_type));
+static boolean oasys_new_section_hook PARAMS ((bfd *, asection *));
+static long int oasys_get_reloc_upper_bound PARAMS ((bfd *, sec_ptr));
+static boolean oasys_get_section_contents
+  PARAMS ((bfd *, sec_ptr, void *, file_ptr, bfd_size_type));
+static int comp PARAMS ((const void *, const void *));
+static boolean oasys_write_object_contents PARAMS ((bfd *));
+static boolean oasys_set_section_contents
+  PARAMS ((bfd *, sec_ptr, void *, file_ptr, bfd_size_type));
+static asymbol *oasys_make_empty_symbol PARAMS ((bfd *));
+static bfd *oasys_openr_next_archived_file PARAMS ((bfd *, bfd *));
+static boolean oasys_find_nearest_line
+  PARAMS ((bfd *, asection *, asymbol **, bfd_vma, char **, char **, unsigned int *));
+static int oasys_generic_stat_arch_elt PARAMS ((bfd *, struct stat *));
+static int oasys_sizeof_headers PARAMS ((bfd *, boolean));
 
 /* Read in all the section data and relocation stuff too */
 PROTO (static boolean, oasys_slurp_section_data, (bfd * CONST abfd));

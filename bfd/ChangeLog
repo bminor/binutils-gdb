@@ -1,3 +1,16 @@
+2001-08-25  Andreas Jaeger  <aj@suse.de>
+
+	* oasys.c: Add missing prototypes.
+
+	* elf64-alpha.c (elf64_alpha_size_dynamic_sections): Add unused
+	attribute for parameter.
+	* elf.c (_bfd_elf_reloc_type_class): Likewise.
+
+	* versados.c (get_4): Make static.
+	(get_10): Make static.
+	Add missing prototypes.
+	(process_esd): Fix call to versados_new_symbol.
+
 2001-08-25  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* coff-a29k.c: Add missing prototypes.
