@@ -17,12 +17,22 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with GLD; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
-#include <varargs.h>
 #include <demangle.h>
+/* this collection of routines wants to use the Unix style varargs
+   use special abbreviated portion of varargs.h */
+#ifdef WINDOWS_NT
+/* Since macro __STDC__ is defined, the compiler will raise and error if
+   VARARGS.H from mstools\h is included.  Since we only need a portion of
+   this header file, it has been incorporated into local header file
+   xvarargs.h */
+#include "xvarargs.h"
+#else
+#include <varargs.h>
+#endif
 
 #include "ld.h"
 #include "ldmisc.h"
@@ -32,6 +42,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldlex.h"
 #include "ldmain.h"
 #include "ldfile.h"
+
 
 /* VARARGS*/
 static void finfo ();
@@ -55,6 +66,7 @@ static const char *demangle PARAMS ((const char *string,
  %R info about a relent
  %s arbitrary string, like printf
  %d integer, like printf
+ %u integer, like printf
 */
 
 static const char *
@@ -189,11 +201,12 @@ vfinfo(fp, fmt, arg)
 
        case 'S':
 	/* print script file and linenumber */
-       {
-	 if (ldfile_input_filename) {
-	   fprintf(fp,"%s:%u", ldfile_input_filename, lineno );
-	 }
-       }
+	if (parsing_defsym)
+	  fprintf (fp, "--defsym %s", lex_string);
+	else if (ldfile_input_filename != NULL)
+	  fprintf (fp, "%s:%u", ldfile_input_filename, lineno);
+	else
+	  fprintf (fp, "built in linker script:%u", lineno);
 	break;
 
        case 'R':
@@ -214,6 +227,7 @@ vfinfo(fp, fmt, arg)
 	   or section name as a last resort.  The arguments are a BFD,
 	   a section, and an offset.  */
 	{
+	  static bfd *last_bfd;
 	  static char *last_file = NULL;
 	  static char *last_function = NULL;
 	  bfd *abfd;
@@ -241,11 +255,11 @@ vfinfo(fp, fmt, arg)
 
 	      symsize = bfd_get_symtab_upper_bound (abfd);
 	      if (symsize < 0)
-		einfo ("%B%F: could not read symbols", abfd);
+		einfo ("%B%F: could not read symbols\n", abfd);
 	      asymbols = (asymbol **) xmalloc (symsize);
 	      symbol_count = bfd_canonicalize_symtab (abfd, asymbols);
 	      if (symbol_count < 0)
-		einfo ("%B%F: could not read symbols", abfd);
+		einfo ("%B%F: could not read symbols\n", abfd);
 	      if (entry != (lang_input_statement_type *) NULL)
 		{
 		  entry->asymbols = asymbols;
@@ -257,18 +271,25 @@ vfinfo(fp, fmt, arg)
 	  if (bfd_find_nearest_line (abfd, section, asymbols, offset,
 				     &filename, &functionname, &linenumber))
 	    {
-	      if (filename == (char *) NULL)
-		filename = abfd->filename;
-
 	      if (functionname != NULL && fmt[-1] == 'C')
 		{
-		  if (last_file == NULL
+		  if (filename == (char *) NULL)
+		    filename = abfd->filename;
+
+		  if (last_bfd == NULL
+		      || last_file == NULL
 		      || last_function == NULL
+		      || last_bfd != abfd
 		      || strcmp (last_file, filename) != 0
 		      || strcmp (last_function, functionname) != 0)
 		    {
-		      fprintf (fp, "%s: In function `%s':\n", filename,
-			       demangle (functionname, 1));
+		      /* We use abfd->filename in this initial line,
+                         in case filename is a .h file or something
+                         similarly unhelpful.  */
+		      finfo (fp, "%B: In function `%s':\n",
+			     abfd, demangle (functionname, 1));
+
+		      last_bfd = abfd;
 		      if (last_file != NULL)
 			free (last_file);
 		      last_file = buystring (filename);
@@ -277,18 +298,30 @@ vfinfo(fp, fmt, arg)
 		      last_function = buystring (functionname);
 		    }
 		  discard_last = false;
-		  fprintf (fp, "%s:%u", filename, linenumber);
+		  if (linenumber != 0)
+		    fprintf (fp, "%s:%u", filename, linenumber);
+		  else
+		    finfo (fp, "%s(%s+0x%v)", filename, section->name, offset);
+		}
+	      else if (filename == NULL
+		       || strcmp (filename, abfd->filename) == 0)
+		{
+		  finfo (fp, "%B(%s+0x%v)", abfd, section->name, offset);
+		  if (linenumber != 0)
+		    finfo (fp, "%u", linenumber);
 		}
 	      else if (linenumber != 0) 
-		fprintf (fp, "%s:%u", filename, linenumber);
+		finfo (fp, "%B:%s:%u", abfd, filename, linenumber);
 	      else
-		finfo (fp, "%s(%s+0x%v)", filename, section->name, offset);
+		finfo (fp, "%B(%s+0x%v):%s", abfd, section->name, offset,
+		       filename);
 	    }
 	  else
-	    finfo (fp, "%s(%s+0x%v)", abfd->filename, section->name, offset);
+	    finfo (fp, "%B(%s+0x%v)", abfd, section->name, offset);
 
 	  if (discard_last)
 	    {
+	      last_bfd = NULL;
 	      if (last_file != NULL)
 		{
 		  free (last_file);
@@ -311,6 +344,11 @@ vfinfo(fp, fmt, arg)
        case 'd':
 	/* integer, like printf */
 	fprintf(fp,"%d", va_arg(arg, int));
+	break;
+
+       case 'u':
+	/* unsigned integer, like printf */
+	fprintf(fp,"%u", va_arg(arg, unsigned int));
 	break;
       }
     }

@@ -1,5 +1,5 @@
 /* Main program of GNU linker.
-   Copyright (C) 1991, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94, 1995 Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
 This file is part of GLD, the Gnu Linker.
@@ -22,11 +22,11 @@ the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307
 #include "bfd.h"
 #include "sysdep.h"
 #include <stdio.h>
+#include <ctype.h>
 #include "libiberty.h"
 #include "progress.h"
 #include "bfdlink.h"
 
-#include "config.h"
 #include "ld.h"
 #include "ldmain.h"
 #include "ldmisc.h"
@@ -45,11 +45,6 @@ the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307
 #endif
 
 #include <string.h>
-
-/* Use sbrk() except on specific OS types */
-#if !defined(__amigados__) && !defined(WINDOWS_NT)
-#define HAVE_SBRK
-#endif
 
 static char *get_emulation PARAMS ((int, char **));
 static void set_scripts_dir PARAMS ((void));
@@ -106,7 +101,9 @@ static boolean constructor_callback PARAMS ((struct bfd_link_info *,
 					     const char *name,
 					     bfd *, asection *, bfd_vma));
 static boolean warning_callback PARAMS ((struct bfd_link_info *,
-					 const char *));
+					 const char *, const char *, bfd *,
+					 asection *, bfd_vma));
+static void warning_find_reloc PARAMS ((bfd *, asection *, PTR));
 static boolean undefined_symbol PARAMS ((struct bfd_link_info *,
 					 const char *, bfd *,
 					 asection *, bfd_vma));
@@ -181,6 +178,7 @@ main (argc, argv)
   link_info.relocateable = false;
   link_info.shared = false;
   link_info.symbolic = false;
+  link_info.static_link = false;
   link_info.strip = strip_none;
   link_info.discard = discard_none;
   link_info.lprefix_len = 1;
@@ -191,15 +189,8 @@ main (argc, argv)
   link_info.hash = NULL;
   link_info.keep_hash = NULL;
   link_info.notice_hash = NULL;
-  link_info.subsystem = console;
-  link_info.stack_heap_parameters.stack_defined = false;
-  link_info.stack_heap_parameters.heap_defined  = false;
-  link_info.stack_heap_parameters.stack_reserve = 0;
-  link_info.stack_heap_parameters.stack_commit  = 0;
-  link_info.stack_heap_parameters.heap_reserve  = 0;
-  link_info.stack_heap_parameters.heap_commit   = 0;
 
-
+  
   ldfile_add_arch ("");
 
   config.make_executable = true;
@@ -215,6 +206,8 @@ main (argc, argv)
   ldemul_before_parse ();
   lang_has_input_file = false;
   parse_args (argc, argv);
+
+  ldemul_set_symbols ();
 
   if (link_info.relocateable)
     {
@@ -255,10 +248,12 @@ main (argc, argv)
 	      info_msg (s);
 	      info_msg ("\n==================================================\n");
 	    }
+	  lex_string = s;
 	  lex_redirect (s);
 	}
       parser_input = input_script;
       yyparse ();
+      lex_string = NULL;
     }
 
   lang_final ();
@@ -475,21 +470,20 @@ set_scripts_dir ()
 
   /* Look for "ldscripts" in the dir where our binary is.  */
   end = strrchr (program_name, '/');
-  if (end)
+
+  if (end == NULL)
     {
-      dirlen = end - program_name;
-      /* Make a copy of program_name in dir.
-	 Leave room for later "/../lib".  */
-      dir = (char *) xmalloc (dirlen + 8);
-      strncpy (dir, program_name, dirlen);
-      dir[dirlen] = '\0';
+      /* Don't look for ldscripts in the current directory.  There is
+         too much potential for confusion.  */
+      return;
     }
-  else
-    {
-      dirlen = 1;
-      dir = (char *) xmalloc (dirlen + 8);
-      strcpy (dir, ".");
-    }
+
+  dirlen = end - program_name;
+  /* Make a copy of program_name in dir.
+     Leave room for later "/../lib".  */
+  dir = (char *) xmalloc (dirlen + 8);
+  strncpy (dir, program_name, dirlen);
+  dir[dirlen] = '\0';
 
   if (check_for_scripts_dir (dir))
     return;			/* Don't free dir.  */
@@ -539,7 +533,7 @@ add_keepsyms_file (filename)
   if (file == (FILE *) NULL)
     {
       bfd_set_error (bfd_error_system_call);
-      einfo ("%X%P: %s: %E", filename);
+      einfo ("%X%P: %s: %E\n", filename);
       return;
     }
 
@@ -577,7 +571,7 @@ add_keepsyms_file (filename)
 
 	  if (bfd_hash_lookup (link_info.keep_hash, buf, true, true)
 	      == (struct bfd_hash_entry *) NULL)
-	    einfo ("%P%F: bfd_hash_lookup for insertion failed: %E");
+	    einfo ("%P%F: bfd_hash_lookup for insertion failed: %E\n");
 	}
     }
 
@@ -602,7 +596,7 @@ add_archive_element (info, abfd, name)
   lang_input_statement_type *input;
 
   input = ((lang_input_statement_type *)
-	   xmalloc ((bfd_size_type) sizeof (lang_input_statement_type)));
+	   xmalloc (sizeof (lang_input_statement_type)));
   input->filename = abfd->filename;
   input->local_sym_name = abfd->filename;
   input->the_bfd = abfd;
@@ -734,6 +728,10 @@ add_to_set (info, h, reloc, abfd, section, value)
      asection *section;
      bfd_vma value;
 {
+  if (config.warn_constructors)
+    einfo ("%P: warning: global constructor %s used\n",
+	   h->root.string);
+
   if (! config.build_constructors)
     return true;
 
@@ -765,9 +763,12 @@ constructor_callback (info, constructor, name, abfd, section, value)
      asection *section;
      bfd_vma value;
 {
-  char *set_name;
   char *s;
   struct bfd_link_hash_entry *h;
+  char set_name[1 + sizeof "__CTOR_LIST__"];
+
+  if (config.warn_constructors)
+    einfo ("%P: warning: global constructor %s used\n", name);
 
   if (! config.build_constructors)
     return true;
@@ -775,9 +776,8 @@ constructor_callback (info, constructor, name, abfd, section, value)
   /* Ensure that BFD_RELOC_CTOR exists now, so that we can give a
      useful error message.  */
   if (bfd_reloc_type_lookup (output_bfd, BFD_RELOC_CTOR) == NULL)
-    einfo ("%P%F: BFD backend error: BFD_RELOC_CTOR unsupported");
+    einfo ("%P%F: BFD backend error: BFD_RELOC_CTOR unsupported\n");
 
-  set_name = (char *) alloca (1 + sizeof "__CTOR_LIST__");
   s = set_name;
   if (bfd_get_symbol_leading_char (abfd) != '\0')
     *s++ = bfd_get_symbol_leading_char (abfd);
@@ -792,7 +792,7 @@ constructor_callback (info, constructor, name, abfd, section, value)
 
   h = bfd_link_hash_lookup (info->hash, set_name, true, true, true);
   if (h == (struct bfd_link_hash_entry *) NULL)
-    einfo ("%P%F: bfd_link_hash_lookup failed: %E");
+    einfo ("%P%F: bfd_link_hash_lookup failed: %E\n");
   if (h->type == bfd_link_hash_new)
     {
       h->type = bfd_link_hash_undefined;
@@ -806,16 +806,128 @@ constructor_callback (info, constructor, name, abfd, section, value)
   return true;
 }
 
+/* A structure used by warning_callback to pass information through
+   bfd_map_over_sections.  */
+
+struct warning_callback_info
+{
+  boolean found;
+  const char *warning;
+  const char *symbol;
+  asymbol **asymbols;
+};
+
 /* This is called when there is a reference to a warning symbol.  */
 
 /*ARGSUSED*/
 static boolean
-warning_callback (info, warning)
+warning_callback (info, warning, symbol, abfd, section, address)
      struct bfd_link_info *info;
      const char *warning;
+     const char *symbol;
+     bfd *abfd;
+     asection *section;
+     bfd_vma address;
 {
-  einfo ("%P: %s\n", warning);
+  if (section != NULL)
+    einfo ("%C: %s\n", abfd, section, address, warning);
+  else if (abfd == NULL)
+    einfo ("%P: %s\n", warning);
+  else if (symbol == NULL)
+    einfo ("%B: %s\n", abfd, warning);
+  else
+    {
+      lang_input_statement_type *entry;
+      asymbol **asymbols;
+      struct warning_callback_info info;
+
+      /* Look through the relocs to see if we can find a plausible
+	 address.  */
+
+      entry = (lang_input_statement_type *) abfd->usrdata;
+      if (entry != NULL && entry->asymbols != NULL)
+	asymbols = entry->asymbols;
+      else
+	{
+	  long symsize;
+	  long symbol_count;
+
+	  symsize = bfd_get_symtab_upper_bound (abfd);
+	  if (symsize < 0)
+	    einfo ("%B%F: could not read symbols: %E\n", abfd);
+	  asymbols = (asymbol **) xmalloc (symsize);
+	  symbol_count = bfd_canonicalize_symtab (abfd, asymbols);
+	  if (symbol_count < 0)
+	    einfo ("%B%F: could not read symbols: %E\n", abfd);
+	  if (entry != NULL)
+	    {
+	      entry->asymbols = asymbols;
+	      entry->symbol_count = symbol_count;
+	    }
+	}
+
+      info.found = false;
+      info.warning = warning;
+      info.symbol = symbol;
+      info.asymbols = asymbols;
+      bfd_map_over_sections (abfd, warning_find_reloc, (PTR) &info);
+
+      if (! info.found)
+	einfo ("%B: %s\n", abfd, warning);
+    }
+
   return true;
+}
+
+/* This is called by warning_callback for each section.  It checks the
+   relocs of the section to see if it can find a reference to the
+   symbol which triggered the warning.  If it can, it uses the reloc
+   to give an error message with a file and line number.  */
+
+static void
+warning_find_reloc (abfd, sec, iarg)
+     bfd *abfd;
+     asection *sec;
+     PTR iarg;
+{
+  struct warning_callback_info *info = (struct warning_callback_info *) iarg;
+  long relsize;
+  arelent **relpp;
+  long relcount;
+  arelent **p, **pend;
+
+  if (info->found)
+    return;
+
+  relsize = bfd_get_reloc_upper_bound (abfd, sec);
+  if (relsize < 0)
+    einfo ("%B%F: could not read relocs: %E\n", abfd);
+  if (relsize == 0)
+    return;
+
+  relpp = (arelent **) xmalloc (relsize);
+  relcount = bfd_canonicalize_reloc (abfd, sec, relpp, info->asymbols);
+  if (relcount < 0)
+    einfo ("%B%F: could not read relocs: %E\n", abfd);
+
+  p = relpp;
+  pend = p + relcount;
+  for (; p < pend && *p != NULL; p++)
+    {
+      arelent *q = *p;
+
+      if (q->sym_ptr_ptr != NULL
+	  && *q->sym_ptr_ptr != NULL
+	  && strcmp (bfd_asymbol_name (*q->sym_ptr_ptr), info->symbol) == 0)
+	{
+	  /* We found a reloc for the symbol we are looking for.  */
+	  einfo ("%C: %s\n", abfd, sec, q->address, info->warning);
+	  info->found = true;
+	  break;
+	}
+    }
+
+  free (relpp);
 }
 
 /* This is called when an undefined symbol is found.  */

@@ -1,5 +1,16 @@
 Wed Oct 25 11:27:25 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* emultempl/aix.em: Add support for various AIX linker options,
+	for AIX import and export files, and for AIX shared objects.
+	* scripttempl/aix.sc: Add .pad.  Put .ds just before the TOC.
+
+	* ldmain.c (main): Initialize new field link_info.static_link.
+
+	* ldmain.c (add_keepsyms_file): Add \n at end of einfo calls.
+	(constructor_callback): Likewise.
+	* ldmisc.c (vfinfo): Likewise.
+	* ldwrite.c (build_link_order): Likewise.
+
 	* ld.texinfo: The MRI ALIGN directive is supported.
 
 Mon Oct 23 11:46:43 1995  James G. Smith  <jsmith@pasanda.cygnus.co.uk>

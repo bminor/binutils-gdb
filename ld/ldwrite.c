@@ -35,6 +35,8 @@ static void print_symbol_table PARAMS ((void));
 static void print_file_stuff PARAMS ((lang_input_statement_type *));
 static boolean print_symbol PARAMS ((struct bfd_link_hash_entry *, PTR));
 
+extern char *strdup();
+
 /* Build link_order structures for the BFD linker.  */
 
 static void
@@ -54,7 +56,7 @@ build_link_order (statement)
 
 	link_order = bfd_new_link_order (output_bfd, output_section);
 	if (link_order == NULL)
-	  einfo ("%P%F: bfd_new_link_order failed");
+	  einfo ("%P%F: bfd_new_link_order failed\n");
 
 	link_order->type = bfd_data_link_order;
 	link_order->offset = statement->data_statement.output_vma;
@@ -100,7 +102,7 @@ build_link_order (statement)
 
 	link_order = bfd_new_link_order (output_bfd, output_section);
 	if (link_order == NULL)
-	  einfo ("%P%F: bfd_new_link_order failed");
+	  einfo ("%P%F: bfd_new_link_order failed\n");
 
 	link_order->offset = rs->output_vma;
 	link_order->size = bfd_get_reloc_size (rs->howto);
@@ -223,7 +225,7 @@ clone_section (abfd, s, count)
      chars of base section name and a digit suffix */
   do
     {
-      int i;
+      unsigned int i;
       char b[6];
       for (i = 0; i < sizeof (b) - 1 && s->name[i]; i++)
 	b[i] = s->name[i];
@@ -253,7 +255,7 @@ clone_section (abfd, s, count)
   n->output_section = n;
   n->orelocation = 0;
   n->reloc_count = 0;
-  n->alignment_power = 1;
+  n->alignment_power = s->alignment_power;
   return n;
 }
 
