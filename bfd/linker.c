@@ -1,5 +1,6 @@
 /* linker.c -- BFD linker routines
-   Copyright (C) 1993, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
    Written by Steve Chamberlain and Ian Lance Taylor, Cygnus Support
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -1748,8 +1749,8 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	case MDEF:
 	  /* Handle a multiple definition.  */
 	  {
-	    asection *msec;
-	    bfd_vma mval;
+	    asection *msec = NULL;
+	    bfd_vma mval = 0;
 
 	    switch (h->type)
 	      {
@@ -2602,7 +2603,7 @@ _bfd_default_link_order (abfd, info, sec, link_order)
 static boolean
 default_fill_link_order (abfd, info, sec, link_order)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      asection *sec;
      struct bfd_link_order *link_order;
 {
@@ -2797,8 +2798,8 @@ DESCRIPTION
 
 boolean
 _bfd_generic_link_split_section (abfd, sec)
-     bfd *abfd;
-     asection *sec;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
 {
   return false;
 }

@@ -1,5 +1,5 @@
 /* BFD semi-generic back-end for a.out binaries.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -228,28 +228,35 @@ HOWTO( 7,	       0,  4, 	64, true,  0, complain_overflow_signed,  0,"DISP64",	tr
 HOWTO( 8,	       0,  2,    0, false, 0, complain_overflow_bitfield,0,"GOT_REL",	false,         0,0x00000000, false),
 HOWTO( 9,	       0,  1,   16, false, 0, complain_overflow_bitfield,0,"BASE16",	false,0xffffffff,0xffffffff, false),
 HOWTO(10,	       0,  2,   32, false, 0, complain_overflow_bitfield,0,"BASE32",	false,0xffffffff,0xffffffff, false),
-{ -1 },
-{ -1 },
-{ -1 },
-{ -1 },
-{ -1 },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
   HOWTO(16,	       0,  2,	 0, false, 0, complain_overflow_bitfield,0,"JMP_TABLE", false,         0,0x00000000, false),
-{ -1 },
-{ -1 },
-{ -1 },
-{ -1 },
-{ -1 },
-{ -1 },
-{ -1 },
-{ -1 }, { -1 }, { -1 }, { -1 }, { -1 }, { -1 }, { -1 }, { -1 },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
   HOWTO(32,	       0,  2,	 0, false, 0, complain_overflow_bitfield,0,"RELATIVE",  false,         0,0x00000000, false),
-{ -1 },
-{ -1 },
-{ -1 },
-{ -1 },
-{ -1 },
-{ -1 },
-{ -1 },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+{ -1, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
   HOWTO(40,	       0,  2,	 0, false, 0, complain_overflow_bitfield,0,"BASEREL",   false,         0,0x00000000, false),
 };
 
@@ -1072,7 +1079,7 @@ boolean
 NAME(aout,adjust_sizes_and_vmas) (abfd, text_size, text_end)
      bfd *abfd;
      bfd_size_type *text_size;
-     file_ptr *text_end;
+     file_ptr *text_end ATTRIBUTE_UNUSED;
 {
   struct internal_exec *execp = exec_hdr (abfd);
 
@@ -2531,16 +2538,16 @@ NAME(aout,get_symtab_upper_bound) (abfd)
 /*ARGSUSED*/
  alent *
 NAME(aout,get_lineno) (ignore_abfd, ignore_symbol)
-     bfd *ignore_abfd;
-     asymbol *ignore_symbol;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
+     asymbol *ignore_symbol ATTRIBUTE_UNUSED;
 {
-return (alent *)NULL;
+  return (alent *)NULL;
 }
 
 /*ARGSUSED*/
 void
 NAME(aout,get_symbol_info) (ignore_abfd, symbol, ret)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      asymbol *symbol;
      symbol_info *ret;
 {
@@ -2568,7 +2575,7 @@ NAME(aout,get_symbol_info) (ignore_abfd, symbol, ret)
 /*ARGSUSED*/
 void
 NAME(aout,print_symbol) (ignore_abfd, afile, symbol, how)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      PTR afile;
      asymbol *symbol;
      bfd_print_symbol_type how;
@@ -2878,7 +2885,7 @@ NAME(aout,find_nearest_line)
 int
 NAME(aout,sizeof_headers) (abfd, execable)
      bfd *abfd;
-     boolean execable;
+     boolean execable ATTRIBUTE_UNUSED;
 {
   return adata(abfd).exec_bytes_size;
 }
@@ -4719,6 +4726,8 @@ aout_reloc_index_to_section (abfd, indx)
     default:
       abort ();
     }
+  /*NOTREACHED*/
+  return NULL;
 }
 
 /* Relocate an a.out section using standard a.out relocs.  */
@@ -5493,7 +5502,7 @@ aout_link_reloc_link_order (finfo, o, p)
   int r_index;
   int r_extern;
   reloc_howto_type *howto;
-  file_ptr *reloff_ptr;
+  file_ptr *reloff_ptr = NULL;
   struct reloc_std_external srel;
   struct reloc_ext_external erel;
   PTR rel_ptr;

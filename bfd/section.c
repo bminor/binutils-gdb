@@ -1,5 +1,5 @@
 /* Object file "section" support for the BFD library.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 1997
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -486,10 +486,14 @@ CODE_FRAGMENT
 static const asymbol global_syms[] =
 {
  /* the_bfd, name, value, attr, section [, udata] */
-  {0, BFD_COM_SECTION_NAME, 0, BSF_SECTION_SYM, (asection *) &bfd_com_section},
-  {0, BFD_UND_SECTION_NAME, 0, BSF_SECTION_SYM, (asection *) &bfd_und_section},
-  {0, BFD_ABS_SECTION_NAME, 0, BSF_SECTION_SYM, (asection *) &bfd_abs_section},
-  {0, BFD_IND_SECTION_NAME, 0, BSF_SECTION_SYM, (asection *) &bfd_ind_section},
+  {0, BFD_COM_SECTION_NAME, 0, BSF_SECTION_SYM,
+   (asection *) &bfd_com_section, { 0 }},
+  {0, BFD_UND_SECTION_NAME, 0, BSF_SECTION_SYM,
+   (asection *) &bfd_und_section, { 0 }},
+  {0, BFD_ABS_SECTION_NAME, 0, BSF_SECTION_SYM,
+   (asection *) &bfd_abs_section, { 0 }},
+  {0, BFD_IND_SECTION_NAME, 0, BSF_SECTION_SYM,
+   (asection *) &bfd_ind_section, { 0 }},
 };
 
 #define STD_SECTION(SEC, FLAGS, SYM, NAME, IDX)	\
@@ -737,7 +741,7 @@ DESCRIPTION
 /*ARGSUSED*/
 boolean
 bfd_set_section_flags (abfd, section, flags)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      sec_ptr section;
      flagword flags;
 {

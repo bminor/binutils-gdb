@@ -505,13 +505,13 @@ bfd_elf_generic_reloc (abfd,
 		       input_section,
 		       output_bfd,
 		       error_message)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc_entry;
      asymbol *symbol;
-     PTR data;
+     PTR data ATTRIBUTE_UNUSED;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
@@ -946,7 +946,7 @@ bfd_elf_set_dt_needed_name (abfd, name)
 
 struct bfd_link_needed_list *
 bfd_elf_get_needed_list (abfd, info)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
 {
   if (info->hash->creator->flavour != bfd_target_elf_flavour)
@@ -4193,7 +4193,7 @@ _bfd_elf_get_dynamic_symtab_upper_bound (abfd)
 
 long
 _bfd_elf_get_reloc_upper_bound (abfd, asect)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      sec_ptr asect;
 {
   return (asect->reloc_count + 1) * sizeof (arelent *);
@@ -4524,7 +4524,7 @@ _bfd_elf_make_empty_symbol (abfd)
 
 void
 _bfd_elf_get_symbol_info (ignore_abfd, symbol, ret)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      asymbol *symbol;
      symbol_info *ret;
 {
@@ -4537,7 +4537,7 @@ _bfd_elf_get_symbol_info (ignore_abfd, symbol, ret)
 
 boolean
 _bfd_elf_is_local_label_name (abfd, name)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      const char *name;
 {
   /* Normal local symbols start with ``.L''.  */
@@ -4563,8 +4563,8 @@ _bfd_elf_is_local_label_name (abfd, name)
 
 alent *
 _bfd_elf_get_lineno (ignore_abfd, symbol)
-     bfd *ignore_abfd;
-     asymbol *symbol;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
+     asymbol *symbol ATTRIBUTE_UNUSED;
 {
   abort ();
   return NULL;
@@ -4714,9 +4714,9 @@ _bfd_elf_set_section_contents (abfd, section, location, offset, count)
 
 void
 _bfd_elf_no_info_to_howto (abfd, cache_ptr, dst)
-     bfd *abfd;
-     arelent *cache_ptr;
-     Elf_Internal_Rela *dst;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *cache_ptr ATTRIBUTE_UNUSED;
+     Elf_Internal_Rela *dst ATTRIBUTE_UNUSED;
 {
   abort ();
 }
@@ -4850,13 +4850,13 @@ _bfd_elf_close_and_cleanup (abfd)
 
 bfd_reloc_status_type
 _bfd_elf_rel_vtable_reloc_fn (abfd, re, symbol, data, is, obfd, errmsg)
-     bfd *abfd;
-     arelent *re;
-     struct symbol_cache_entry *symbol;
-     PTR data;
-     asection *is;
-     bfd *obfd;
-     char **errmsg;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *re ATTRIBUTE_UNUSED;
+     struct symbol_cache_entry *symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *is ATTRIBUTE_UNUSED;
+     bfd *obfd ATTRIBUTE_UNUSED;
+     char **errmsg ATTRIBUTE_UNUSED;
 {
   return bfd_reloc_ok;
 }

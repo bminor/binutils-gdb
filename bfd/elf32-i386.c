@@ -67,15 +67,15 @@ static reloc_howto_type elf_howto_table[]=
   HOWTO(R_386_RELATIVE,  0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_RELATIVE", true,0xffffffff,0xffffffff,false),
   HOWTO(R_386_GOTOFF,    0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_GOTOFF",   true,0xffffffff,0xffffffff,false),
   HOWTO(R_386_GOTPC,     0,2,32,true,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_GOTPC",    true,0xffffffff,0xffffffff,true),
-  { 11 },
-  { 12 },
-  { 13 },
-  { 14 },
-  { 15 },
-  { 16 },
-  { 17 },
-  { 18 },
-  { 19 },
+  { 11, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+  { 12, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+  { 13, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+  { 14, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+  { 15, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+  { 16, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+  { 17, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+  { 18, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
+  { 19, 0, 0, 0, false, 0, complain_overflow_dont, NULL, NULL, false, 0, 0, false },
   /* The remaining relocs are a GNU extension.  */
   HOWTO(R_386_16,	 0,1,16,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_16",	    true,0xffff,0xffff,false),
   HOWTO(R_386_PC16,	 0,1,16,true, 0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_PC16",	    true,0xffff,0xffff,true),
@@ -123,7 +123,7 @@ static reloc_howto_type elf32_i386_vtentry_howto =
 
 static reloc_howto_type *
 elf_i386_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   switch (code)
@@ -211,16 +211,16 @@ elf_i386_reloc_type_lookup (abfd, code)
 
 static void
 elf_i386_info_to_howto (abfd, cache_ptr, dst)
-     bfd		*abfd;
-     arelent		*cache_ptr;
-     Elf32_Internal_Rela *dst;
+     bfd		*abfd ATTRIBUTE_UNUSED;
+     arelent		*cache_ptr ATTRIBUTE_UNUSED;
+     Elf32_Internal_Rela *dst ATTRIBUTE_UNUSED;
 {
   abort ();
 }
 
 static void
 elf_i386_info_to_howto_rel (abfd, cache_ptr, dst)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
      Elf32_Internal_Rel *dst;
 {
@@ -714,7 +714,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 static asection *
 elf_i386_gc_mark_hook (abfd, info, rel, h, sym)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      Elf_Internal_Rela *rel;
      struct elf_link_hash_entry *h;
      Elf_Internal_Sym *sym;
@@ -760,10 +760,10 @@ elf_i386_gc_mark_hook (abfd, info, rel, h, sym)
 
 static boolean
 elf_i386_gc_sweep_hook (abfd, info, sec, relocs)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     asection *sec;
-     const Elf_Internal_Rela *relocs;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
+     const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
 {
   /* ??? It would seem that the existing i386 code does no sort
      of reference counting or whatnot on its GOT and PLT entries,
@@ -1139,7 +1139,7 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 static boolean
 elf_i386_discard_copies (h, ignore)
      struct elf_i386_link_hash_entry *h;
-     PTR ignore;
+     PTR ignore ATTRIBUTE_UNUSED;
 {
   struct elf_i386_pcrel_relocs_copied *s;
 

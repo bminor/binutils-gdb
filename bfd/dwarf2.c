@@ -1,5 +1,5 @@
 /* DWARF 2 support.
-   Copyright 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1994, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
 
    Adapted from gdb/dwarf2read.c by Gavin Koch of Cygnus Solutions
    (gavin@cygnus.com).
@@ -170,7 +170,7 @@ struct comp_unit {
 
 static unsigned int
 read_1_byte (abfd, buf)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      char *buf;
 {
   return bfd_get_8 (abfd, (bfd_byte *) buf);
@@ -178,7 +178,7 @@ read_1_byte (abfd, buf)
 
 static int
 read_1_signed_byte (abfd, buf)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      char *buf;
 {
   return bfd_get_signed_8 (abfd, (bfd_byte *) buf);
@@ -238,9 +238,9 @@ read_8_bytes (abfd, buf)
 
 static char *
 read_n_bytes (abfd, buf, size)
-     bfd * abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      char *buf;
-     unsigned int size;
+     unsigned int size ATTRIBUTE_UNUSED;
 {
   /* If the size of a host char is 8 bits, we can return a pointer
      to the buffer, otherwise we have to copy the data to a buffer
@@ -250,7 +250,7 @@ read_n_bytes (abfd, buf, size)
 
 static char *
 read_string (abfd, buf, bytes_read_ptr)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      char *buf;
      unsigned int *bytes_read_ptr;
 {
@@ -268,7 +268,7 @@ read_string (abfd, buf, bytes_read_ptr)
 
 static unsigned int
 read_unsigned_leb128 (abfd, buf, bytes_read_ptr)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      char *buf;
      unsigned int *bytes_read_ptr;
 {
@@ -298,8 +298,8 @@ read_unsigned_leb128 (abfd, buf, bytes_read_ptr)
 
 static int
 read_signed_leb128 (abfd, buf, bytes_read_ptr)
-     bfd * abfd;
-     char * buf;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     char *buf;
      unsigned int * bytes_read_ptr;
 {
   int           result;
@@ -1236,7 +1236,7 @@ parse_comp_unit (abfd, info_ptr, end_ptr, abbrev_length)
   struct comp_unit* unit;
 
   unsigned short version;
-  unsigned int abbrev_offset;
+  unsigned int abbrev_offset = 0;
   unsigned char addr_size;
   struct abbrev_info** abbrevs;
 
@@ -1457,7 +1457,7 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 			       addr_size)
      bfd *abfd;
      asection *section;
-     asymbol **symbols;
+     asymbol **symbols ATTRIBUTE_UNUSED;
      bfd_vma offset;
      const char **filename_ptr;
      const char **functionname_ptr;

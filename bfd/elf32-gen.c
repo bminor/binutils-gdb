@@ -1,5 +1,5 @@
 /* Generic support for 32-bit ELF
-   Copyright 1993, 1995, 1998 Free Software Foundation, Inc.
+   Copyright 1993, 1995, 1998, 1999 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -42,18 +42,18 @@ static reloc_howto_type dummy =
 
 static void
 elf_generic_info_to_howto (abfd, bfd_reloc, elf_reloc)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *bfd_reloc;
-     Elf32_Internal_Rela *elf_reloc;
+     Elf32_Internal_Rela *elf_reloc ATTRIBUTE_UNUSED;
 {
   bfd_reloc->howto = &dummy;
 }
 
 static void
 elf_generic_info_to_howto_rel (abfd, bfd_reloc, elf_reloc)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *bfd_reloc;
-     Elf32_Internal_Rel *elf_reloc;
+     Elf32_Internal_Rel *elf_reloc ATTRIBUTE_UNUSED;
 {
   bfd_reloc->howto = &dummy;
 }

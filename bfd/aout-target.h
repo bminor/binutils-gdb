@@ -1,5 +1,5 @@
 /* Define a target vector and some small routines for a variant of a.out.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 1997
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -234,9 +234,9 @@ static boolean MY_bfd_copy_private_section_data
 static boolean
 MY_bfd_copy_private_section_data (ibfd, isec, obfd, osec)
      bfd *ibfd;
-     asection *isec;
+     asection *isec ATTRIBUTE_UNUSED;
      bfd *obfd;
-     asection *osec;
+     asection *osec ATTRIBUTE_UNUSED;
 {
   if (bfd_get_flavour (ibfd) == bfd_target_aout_flavour
       && bfd_get_flavour (obfd) == bfd_target_aout_flavour)

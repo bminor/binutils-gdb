@@ -1405,7 +1405,7 @@ _bfd_relocate_contents (howto, input_bfd, relocation, location)
      bfd_byte *location;
 {
   int size;
-  bfd_vma x;
+  bfd_vma x = 0;
   boolean overflow;
   unsigned int rightshift = howto->rightshift;
   unsigned int bitpos = howto->bitpos;
@@ -2701,9 +2701,9 @@ DESCRIPTION
 /*ARGSUSED*/
 boolean
 bfd_generic_relax_section (abfd, section, link_info, again)
-     bfd *abfd;
-     asection *section;
-     struct bfd_link_info *link_info;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *section ATTRIBUTE_UNUSED;
+     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
      boolean *again;
 {
   *again = false;
@@ -2726,8 +2726,8 @@ DESCRIPTION
 /*ARGSUSED*/
 boolean
 bfd_generic_gc_sections (abfd, link_info)
-     bfd *abfd;
-     struct bfd_link_info *link_info;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
 {
   return true;
 }

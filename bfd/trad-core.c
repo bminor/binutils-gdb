@@ -1,5 +1,5 @@
 /* BFD back end for traditional Unix core files (U-area and raw sections)
-   Copyright 1988, 89, 91, 92, 93, 94, 95, 96, 1998
+   Copyright 1988, 89, 91, 92, 93, 94, 95, 96, 98, 1999
    Free Software Foundation, Inc.
    Written by John Gilmore of Cygnus Support.
 
@@ -105,22 +105,24 @@ trad_unix_core_file_p (abfd)
 	bfd_set_error (bfd_error_system_call);
 	return 0;
       }
-    if (NBPG * (UPAGES + u.u_dsize
+    if ((unsigned long) (NBPG * (UPAGES + u.u_dsize
 #ifdef TRAD_CORE_DSIZE_INCLUDES_TSIZE
-		- u.u_tsize
+				 - u.u_tsize
 #endif
-		+ u.u_ssize) > statbuf.st_size)
+				 + u.u_ssize))
+	> (unsigned long) statbuf.st_size)
       {
 	bfd_set_error (bfd_error_file_truncated);
 	return 0;
       }
 #ifndef TRAD_CORE_ALLOW_ANY_EXTRA_SIZE
-    if (NBPG * (UPAGES + u.u_dsize + u.u_ssize)
+    if ((unsigned long) (NBPG * (UPAGES + u.u_dsize + u.u_ssize)
 #ifdef TRAD_CORE_EXTRA_SIZE_ALLOWED
 	/* Some systems write the file too big.  */
-	+ TRAD_CORE_EXTRA_SIZE_ALLOWED
+			 + TRAD_CORE_EXTRA_SIZE_ALLOWED
 #endif
-	< statbuf.st_size)
+			 )
+	< (unsigned long) statbuf.st_size)
       {
 	/* The file is too big.  Maybe it's not a core file
 	   or we otherwise have bad values for u_dsize and u_ssize).  */
@@ -239,7 +241,7 @@ trad_unix_core_file_failing_command (abfd)
 /* ARGSUSED */
 int
 trad_unix_core_file_failing_signal (ignore_abfd)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
 {
 #ifdef TRAD_UNIX_CORE_FILE_FAILING_SIGNAL
   return TRAD_UNIX_CORE_FILE_FAILING_SIGNAL(ignore_abfd);
@@ -251,7 +253,8 @@ trad_unix_core_file_failing_signal (ignore_abfd)
 /* ARGSUSED */
 boolean
 trad_unix_core_file_matches_executable_p  (core_bfd, exec_bfd)
-     bfd *core_bfd, *exec_bfd;
+     bfd *core_bfd ATTRIBUTE_UNUSED;
+     bfd *exec_bfd ATTRIBUTE_UNUSED;
 {
   return true;		/* FIXME, We have no way of telling at this point */
 }

@@ -58,7 +58,7 @@ static int binary_sizeof_headers PARAMS ((bfd *, boolean));
 
 static boolean
 binary_mkobject (abfd)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
 {
   return true;
 }
@@ -112,7 +112,7 @@ binary_object_p (abfd)
 static boolean
 binary_get_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
-     asection *section;
+     asection *section ATTRIBUTE_UNUSED;
      PTR location;
      file_ptr offset;
      bfd_size_type count;
@@ -127,7 +127,7 @@ binary_get_section_contents (abfd, section, location, offset, count)
 
 static long
 binary_get_symtab_upper_bound (abfd)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
 {
   return (BIN_SYMS + 1) * sizeof (asymbol *);
 }
@@ -222,7 +222,7 @@ binary_make_empty_symbol (abfd)
 
 static void
 binary_get_symbol_info (ignore_abfd, symbol, ret)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      asymbol *symbol;
      symbol_info *ret;
 {
@@ -318,8 +318,8 @@ binary_set_section_contents (abfd, sec, data, offset, size)
 
 static int
 binary_sizeof_headers (abfd, exec)
-     bfd *abfd;
-     boolean exec;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     boolean exec ATTRIBUTE_UNUSED;
 {
   return 0;
 }

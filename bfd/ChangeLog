@@ -1,5 +1,11 @@
 1999-07-11  Ian Lance Taylor  <ian@zembu.com>
 
+	* Many files: Changes to avoid gcc warnings: Add ATTRIBUTE_UNUSED
+	as appropriate.  Fill in structure initializations.  Add variable
+	initializations.  Add casts.
+	* dwarf1.c (parse_line_table): Change eachLine to unsigned long.
+	(dwarf1_unit_find_nearest_line): Change i to unsigned long.
+
 	* elf.c (bfd_elf_hash): Change parameter from unsigned char * to
 	char *.
 	* elf-bfd.h (bfd_elf_hash): Update declaration.

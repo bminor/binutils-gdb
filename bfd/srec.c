@@ -1139,8 +1139,8 @@ symbolsrec_write_object_contents (abfd)
 /*ARGSUSED*/
 static int
 srec_sizeof_headers (abfd, exec)
-     bfd *abfd;
-     boolean exec;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     boolean exec ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -1209,7 +1209,7 @@ srec_get_symtab (abfd, alocation)
 /*ARGSUSED*/
 static void
 srec_get_symbol_info (ignore_abfd, symbol, ret)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      asymbol *symbol;
      symbol_info *ret;
 {
@@ -1219,7 +1219,7 @@ srec_get_symbol_info (ignore_abfd, symbol, ret)
 /*ARGSUSED*/
 static void
 srec_print_symbol (ignore_abfd, afile, symbol, how)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      PTR afile;
      asymbol *symbol;
      bfd_print_symbol_type how;

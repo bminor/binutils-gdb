@@ -1,5 +1,6 @@
 /* BFD backend for Extended Tektronix Hex Format  objects.
-   Copyright (C) 1992, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1992, 93, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -599,7 +600,7 @@ move_section_contents (abfd, section, locationp, offset, count, get)
      bfd *abfd;
      asection *section;
      PTR locationp;
-     file_ptr offset;
+     file_ptr offset ATTRIBUTE_UNUSED;
      bfd_size_type count;
      boolean get;
 {
@@ -928,8 +929,8 @@ tekhex_write_object_contents (abfd)
 
 static int
 tekhex_sizeof_headers (abfd, exec)
-     bfd *abfd;
-     boolean exec;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     boolean exec ATTRIBUTE_UNUSED;
 
 {
   return 0;
@@ -951,7 +952,7 @@ tekhex_make_empty_symbol (abfd)
 
 static void
 tekhex_get_symbol_info (ignore_abfd, symbol, ret)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      asymbol *symbol;
      symbol_info *ret;
 {
@@ -960,7 +961,7 @@ tekhex_get_symbol_info (ignore_abfd, symbol, ret)
 
 static void
 tekhex_print_symbol (ignore_abfd, filep, symbol, how)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      PTR filep;
      asymbol *symbol;
      bfd_print_symbol_type how;

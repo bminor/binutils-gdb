@@ -1178,7 +1178,7 @@ normalize (abfd, file)
 #else
 static const char *
 normalize (abfd, file)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      const char *file;
 {
   const char *filename = strrchr (file, '/');

@@ -1,5 +1,5 @@
 /* Support for the generic parts of COFF, for BFD.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -559,7 +559,7 @@ coff_count_linenumbers (abfd)
 /*ARGSUSED*/
 coff_symbol_type *
 coff_symbol_from (ignore_abfd, symbol)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      asymbol *symbol;
 {
   if (bfd_asymbol_flavour (symbol) != bfd_target_coff_flavour)
@@ -1351,7 +1351,7 @@ coff_write_linenumbers (abfd)
 /*ARGSUSED */
 alent *
 coff_get_lineno (ignore_abfd, symbol)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      asymbol *symbol;
 {
   return coffsymbol (symbol)->lineno;
@@ -1857,8 +1857,8 @@ coff_make_empty_symbol (abfd)
 asymbol *
 coff_bfd_make_debug_symbol (abfd, ptr, sz)
      bfd *abfd;
-     PTR ptr;
-     unsigned long sz;
+     PTR ptr ATTRIBUTE_UNUSED;
+     unsigned long sz ATTRIBUTE_UNUSED;
 {
   coff_symbol_type *new = (coff_symbol_type *) bfd_alloc (abfd, sizeof (coff_symbol_type));
   if (new == NULL)
@@ -2105,7 +2105,7 @@ coff_print_symbol (abfd, filep, symbol, how)
 
 boolean
 _bfd_coff_is_local_label_name (abfd, name)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      const char *name;
 {
   return name[0] == '.' && name[1] == 'L';

@@ -2237,7 +2237,7 @@ NAME(_bfd_elf,link_read_relocs) (abfd, o, external_relocs, internal_relocs,
 /*ARGSUSED*/
 boolean
 NAME(bfd_elf,record_link_assignment) (output_bfd, info, name, provide)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
      const char *name;
      boolean provide;
@@ -2356,7 +2356,7 @@ compute_bucket_count (info)
      struct bfd_link_info *info;
 {
   size_t dynsymcount = elf_hash_table (info)->dynsymcount;
-  size_t best_size;
+  size_t best_size = 0;
   unsigned long int *hashcodes;
   unsigned long int *hashcodesp;
   unsigned long int i;
@@ -4849,7 +4849,7 @@ elf_link_output_relocs (output_bfd, input_section, input_rel_hdr,
   Elf_Internal_Rela *irelaend;
   Elf_Internal_Shdr *output_rel_hdr;
   asection *output_section;
-  unsigned int *rel_countp;
+  unsigned int *rel_countp = NULL;
 
   output_section = input_section->output_section;
   output_rel_hdr = NULL;
@@ -6183,8 +6183,8 @@ win:
 
 boolean
 elf_gc_record_vtentry (abfd, sec, h, addend)
-     bfd *abfd;
-     asection *sec;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
      struct elf_link_hash_entry *h;
      bfd_vma addend;
 {

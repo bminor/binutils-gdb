@@ -1,5 +1,6 @@
 /* BFD back-end for linux flavored i386 a.out binaries.
-   Copyright (C) 1992, 93, 94, 95, 96, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1992, 93, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -297,7 +298,7 @@ new_fixup (info, h, value, builtin)
 static boolean
 linux_link_create_dynamic_sections (abfd, info)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
 {
   flagword flags;
   register asection *s;

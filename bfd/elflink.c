@@ -1,5 +1,5 @@
 /* ELF linking support for BFD.
-   Copyright 1995, 1996, 1997, 1999 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -100,7 +100,7 @@ _bfd_elf_create_dynamic_sections (abfd, info)
   flagword flags, pltflags;
   register asection *s;
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  int ptralign;
+  int ptralign = 0;
 
   switch (bed->s->arch_size)
     {

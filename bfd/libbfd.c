@@ -1,5 +1,5 @@
 /* Assorted BFD support routines, only used internally.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -45,7 +45,7 @@ DESCRIPTION
 /*ARGSUSED*/
 boolean
 bfd_false (ignore)
-     bfd *ignore;
+     bfd *ignore ATTRIBUTE_UNUSED;
 {
   bfd_set_error (bfd_error_invalid_operation);
   return false;
@@ -57,7 +57,7 @@ bfd_false (ignore)
 /*ARGSUSED*/
 boolean
 bfd_true (ignore)
-     bfd *ignore;
+     bfd *ignore ATTRIBUTE_UNUSED;
 {
   return true;
 }
@@ -68,7 +68,7 @@ bfd_true (ignore)
 /*ARGSUSED*/
 PTR
 bfd_nullvoidptr (ignore)
-     bfd *ignore;
+     bfd *ignore ATTRIBUTE_UNUSED;
 {
   bfd_set_error (bfd_error_invalid_operation);
   return NULL;
@@ -77,7 +77,7 @@ bfd_nullvoidptr (ignore)
 /*ARGSUSED*/
 int 
 bfd_0 (ignore)
-     bfd *ignore;
+     bfd *ignore ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -85,7 +85,7 @@ bfd_0 (ignore)
 /*ARGSUSED*/
 unsigned int 
 bfd_0u (ignore)
-     bfd *ignore;
+     bfd *ignore ATTRIBUTE_UNUSED;
 {
    return 0;
 }
@@ -93,7 +93,7 @@ bfd_0u (ignore)
 /*ARGUSED*/
 long
 bfd_0l (ignore)
-     bfd *ignore;
+     bfd *ignore ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -104,7 +104,7 @@ bfd_0l (ignore)
 /*ARGSUSED*/
 long
 _bfd_n1 (ignore_abfd)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
 {
   bfd_set_error (bfd_error_invalid_operation);
   return -1;
@@ -113,15 +113,15 @@ _bfd_n1 (ignore_abfd)
 /*ARGSUSED*/
 void 
 bfd_void (ignore)
-     bfd *ignore;
+     bfd *ignore ATTRIBUTE_UNUSED;
 {
 }
 
 /*ARGSUSED*/
 boolean
 _bfd_nocore_core_file_matches_executable_p (ignore_core_bfd, ignore_exec_bfd)
-     bfd *ignore_core_bfd;
-     bfd *ignore_exec_bfd;
+     bfd *ignore_core_bfd ATTRIBUTE_UNUSED;
+     bfd *ignore_exec_bfd ATTRIBUTE_UNUSED;
 {
   bfd_set_error (bfd_error_invalid_operation);
   return false;
@@ -133,7 +133,7 @@ _bfd_nocore_core_file_matches_executable_p (ignore_core_bfd, ignore_exec_bfd)
 /*ARGSUSED*/
 char *
 _bfd_nocore_core_file_failing_command (ignore_abfd)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
 {
   bfd_set_error (bfd_error_invalid_operation);
   return (char *)NULL;
@@ -145,7 +145,7 @@ _bfd_nocore_core_file_failing_command (ignore_abfd)
 /*ARGSUSED*/
 int
 _bfd_nocore_core_file_failing_signal (ignore_abfd)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
 {
   bfd_set_error (bfd_error_invalid_operation);
   return 0;
@@ -154,7 +154,7 @@ _bfd_nocore_core_file_failing_signal (ignore_abfd)
 /*ARGSUSED*/
 const bfd_target *
 _bfd_dummy_target (ignore_abfd)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
 {
   bfd_set_error (bfd_error_wrong_format);
   return 0;
@@ -1003,7 +1003,7 @@ bfd_getl_signed_32 (addr)
 
 bfd_vma
 bfd_getb64 (addr)
-     register const bfd_byte *addr;
+     register const bfd_byte *addr ATTRIBUTE_UNUSED;
 {
 #ifdef BFD64
   bfd_vma low, high;
@@ -1027,7 +1027,7 @@ bfd_getb64 (addr)
 
 bfd_vma
 bfd_getl64 (addr)
-     register const bfd_byte *addr;
+     register const bfd_byte *addr ATTRIBUTE_UNUSED;
 {
 #ifdef BFD64
   bfd_vma low, high;
@@ -1051,7 +1051,7 @@ bfd_getl64 (addr)
 
 bfd_signed_vma
 bfd_getb_signed_64 (addr)
-     register const bfd_byte *addr;
+     register const bfd_byte *addr ATTRIBUTE_UNUSED;
 {
 #ifdef BFD64
   bfd_vma low, high;
@@ -1075,7 +1075,7 @@ bfd_getb_signed_64 (addr)
 
 bfd_signed_vma
 bfd_getl_signed_64 (addr)
-     register const bfd_byte *addr;
+     register const bfd_byte *addr ATTRIBUTE_UNUSED;
 {
 #ifdef BFD64
   bfd_vma low, high;
@@ -1120,8 +1120,8 @@ bfd_putl32 (data, addr)
 
 void
 bfd_putb64 (data, addr)
-     bfd_vma data;
-     register bfd_byte *addr;
+     bfd_vma data ATTRIBUTE_UNUSED;
+     register bfd_byte *addr ATTRIBUTE_UNUSED;
 {
 #ifdef BFD64
   addr[0] = (bfd_byte)(data >> (7*8));
@@ -1139,8 +1139,8 @@ bfd_putb64 (data, addr)
 
 void
 bfd_putl64 (data, addr)
-     bfd_vma data;
-     register bfd_byte *addr;
+     bfd_vma data ATTRIBUTE_UNUSED;
+     register bfd_byte *addr ATTRIBUTE_UNUSED;
 {
 #ifdef BFD64
   addr[7] = (bfd_byte)(data >> (7*8));
@@ -1177,11 +1177,11 @@ _bfd_generic_get_section_contents (abfd, section, location, offset, count)
 
 boolean
 _bfd_generic_get_section_contents_in_window (abfd, section, w, offset, count)
-     bfd *abfd;
-     sec_ptr section;
-     bfd_window *w;
-     file_ptr offset;
-     bfd_size_type count;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     sec_ptr section ATTRIBUTE_UNUSED;
+     bfd_window *w ATTRIBUTE_UNUSED;
+     file_ptr offset ATTRIBUTE_UNUSED;
+     bfd_size_type count ATTRIBUTE_UNUSED;
 {
 #ifdef USE_MMAP
   if (count == 0)
