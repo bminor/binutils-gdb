@@ -33,6 +33,8 @@ prefetch.d
 prefetch.s
 rdpr.d
 rdpr.s
+reloc64.d
+reloc64.s
 set64.d
 set64.s
 splet.d
