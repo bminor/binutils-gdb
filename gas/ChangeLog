@@ -1,27 +1,5 @@
 2002-11-18  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
-	* testsuite/gas/all/gas.exp: Setup for tic4x testcase
-	* testsuite/gas/macros/macros.exp: Ditto
-	* testsuite/gas/tic4x: New tic4x gas testsuite directory
-	* testsuite/gas/tic4x/addressing.s: Create
-	* testsuite/gas/tic4x/addressing_c3x.d: Create
-	* testsuite/gas/tic4x/addressing_c4x.d: Create
-	* testsuite/gas/tic4x/allopcodes.S: Create
-	* testsuite/gas/tic4x/data.d: Create
-	* testsuite/gas/tic4x/data.s: Create
-	* testsuite/gas/tic4x/float.d: Create
-	* testsuite/gas/tic4x/float.s: Create
-	* testsuite/gas/tic4x/opclasses.h: Create
-	* testsuite/gas/tic4x/opcodes.s: Create
-	* testsuite/gas/tic4x/opcodes_c3x.d: Create
-	* testsuite/gas/tic4x/opcodes_c4x.d: Create
-	* testsuite/gas/tic4x/rebuild.sh: Create
-	* testsuite/gas/tic4x/registers.s: Create
-	* testsuite/gas/tic4x/registers_c3x.d: Create
-	* testsuite/gas/tic4x/registers_c4x.d: Create
-	* testsuite/gas/tic4x/tic4x.exp: Create
-	* testsuite/gas/tic4x/zeros.d: Create
-	* testsuite/gas/tic4x/zeros.s: Create 
 	* config/tc-tic4x.c: Fixed proper commandline
 	parameters. Added support for new opcode-list format. General
 	error message fixups.
@@ -41,19 +19,6 @@
 	(md_parse_options): Revised commandprompt swicthes and added new
 	ones.
 	(md_show_usage): Complete rewrite of printout.
-	* testsuite/gas/tic4x/addressing.s: Fix bug in one insn
-	* testsuite/gas/tic4x/addressing_c3x.d: Update thereafter
-	* testsuite/gas/tic4x/addressing_c4x.d: Update thereafter
-	* testsuite/gas/tic4x/allopcodes.S: Add support for new
-	opclass.h changes
-	* testsuite/gas/tic4x/opclasses.h: Added testsuites for
-	the new enhanced opcodes.
-	* testsuite/gas/tic4x/opcodes.s: Regenerate
-	* testsuite/gas/tic4x/opcodes_c3x.d: Update from above
-	* testsuite/gas/tic4x/opcodes_c4x.d: Update from above
-	* testsuite/gas/tic4x/opcodes_new.d: Added new testsuite for
-	the enhanced and special insns.
-	* testsuite/gas/tic4x/tic4x.exp: Added the opcodes_new testsuite
 	
 2002-11-16  Svein E. Seldal  <Svein.Seldal@solidas.com>
 

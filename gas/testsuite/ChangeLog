@@ -1,3 +1,33 @@
+2002-11-18  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* gas/all/gas.exp: Setup for tic4x testcase
+	* gas/macros/macros.exp: Ditto
+	* gas/tic4x: New tic4x gas testsuite directory
+	* gas/tic4x/addressing.s: Create. Fix bug in one insn
+	* gas/tic4x/addressing_c3x.d: Create and update
+	* gas/tic4x/addressing_c4x.d: Create and update
+	* gas/tic4x/allopcodes.S: Create. Add support for new
+	opclass.h changes.
+	* gas/tic4x/data.d: Create
+	* gas/tic4x/data.s: Create
+	* gas/tic4x/float.d: Create
+	* gas/tic4x/float.s: Create
+	* gas/tic4x/opclasses.h: Create. Added testsuites for the
+	new enhanced opcodes.
+	* gas/tic4x/opcodes.s: Create (regenerate).
+	* gas/tic4x/opcodes_c3x.d: Create. Updated from enhanced
+	changes
+	* gas/tic4x/opcodes_c4x.d: Create. Ditto.
+	* gas/tic4x/rebuild.sh: Create
+	* gas/tic4x/registers.s: Create
+	* gas/tic4x/registers_c3x.d: Create
+	* gas/tic4x/registers_c4x.d: Create
+	* gas/tic4x/zeros.d: Create
+	* gas/tic4x/zeros.s: Create 
+	* gas/tic4x/opcodes_new.d: Added new testsuite for
+	the enhanced and special insns.
+	* gas/tic4x/tic4x.exp: Create. Added the opcodes_new testsuite
+
 2002-11-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/ppc/booke.d: Adjust output for corrected condition reg.
