@@ -1,3 +1,8 @@
+Sun Aug  4 16:22:42 1996  Fred Fish  <fnf@cygnus.com>
+
+	* config/powerpc/nm-aix.h (PTRACE_ARG3_TYPE): Define to "int *",
+	which is the documented type under at least AIX 3 and AIX 4.
+	
 Sat Aug  3 04:02:46 1996  Fred Fish  <fnf@cygnus.com>
 
 	* config/alpha/alpha-osf3.mh (XM_FILE): Change from xm-alpha.h to
