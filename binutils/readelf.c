@@ -3390,7 +3390,12 @@ get_symbol_type (type)
     case STT_FILE:     return _("FILE");
     default:
       if (type >= STT_LOPROC && type <= STT_HIPROC)
-	sprintf (buff, _("<processor specific>: %d"), type);
+	{
+	  if (elf_header.e_machine == EM_ARM && type == STT_ARM_TFUNC)
+	    return _("THUMB_FUNC");
+	  
+	  sprintf (buff, _("<processor specific>: %d"), type);
+	}
       else if (type >= STT_LOOS && type <= STT_HIOS)
 	sprintf (buff, _("<OS specific>: %d"), type);
       else
