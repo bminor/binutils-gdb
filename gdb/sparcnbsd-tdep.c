@@ -90,25 +90,88 @@ sparc32nbsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
   return nbsd_pc_in_sigtramp (pc, name);
 }
 
+struct trad_frame_saved_reg *
+sparc32nbsd_sigcontext_saved_regs (struct frame_info *next_frame)
+{
+  struct trad_frame_saved_reg *saved_regs;
+  CORE_ADDR addr, sigcontext_addr;
+  int regnum, delta;
+  ULONGEST psr;
+
+  saved_regs = trad_frame_alloc_saved_regs (next_frame);
+
+  /* We find the appropriate instance of `struct sigcontext' at a
+     fixed offset in the signal frame.  */
+  addr = frame_unwind_register_unsigned (next_frame, SPARC_FP_REGNUM);
+  sigcontext_addr = addr + 64 + 16;
+
+  /* The registers are saved in bits and pieces scattered all over the
+     place.  The code below records their location on the assumption
+     that the part of the signal trampoline that saves the state has
+     been executed.  */
+
+  saved_regs[SPARC_SP_REGNUM].addr = sigcontext_addr + 8;
+  saved_regs[SPARC32_PC_REGNUM].addr = sigcontext_addr + 12;
+  saved_regs[SPARC32_NPC_REGNUM].addr = sigcontext_addr + 16;
+  saved_regs[SPARC32_PSR_REGNUM].addr = sigcontext_addr + 20;
+  saved_regs[SPARC_G1_REGNUM].addr = sigcontext_addr + 24;
+  saved_regs[SPARC_O0_REGNUM].addr = sigcontext_addr + 28;
+
+  /* The remaining `global' registers and %y are saved in the `local'
+     registers.  */
+  delta = SPARC_L0_REGNUM - SPARC_G0_REGNUM;
+  for (regnum = SPARC_G2_REGNUM; regnum <= SPARC_G7_REGNUM; regnum++)
+    saved_regs[regnum].realreg = regnum + delta;
+  saved_regs[SPARC32_Y_REGNUM].realreg = SPARC_L1_REGNUM;
+
+  /* The remaining `out' registers can be found in the current frame's
+     `in' registers.  */
+  delta = SPARC_I0_REGNUM - SPARC_O0_REGNUM;
+  for (regnum = SPARC_O1_REGNUM; regnum <= SPARC_O5_REGNUM; regnum++)
+    saved_regs[regnum].realreg = regnum + delta;
+  saved_regs[SPARC_O7_REGNUM].realreg = SPARC_I7_REGNUM;
+
+  /* The `local' and `in' registers have been saved in the register
+     save area.  */
+  addr = saved_regs[SPARC_SP_REGNUM].addr;
+  addr = get_frame_memory_unsigned (next_frame, addr, 4);
+  for (regnum = SPARC_L0_REGNUM;
+       regnum <= SPARC_I7_REGNUM; regnum++, addr += 4)
+    saved_regs[regnum].addr = addr;
+
+  /* The floating-point registers are only saved if the EF bit in %prs
+     has been set.  */
+
+#define PSR_EF	0x00001000
+
+  addr = saved_regs[SPARC32_PSR_REGNUM].addr;
+  psr = get_frame_memory_unsigned (next_frame, addr, 4);
+  if (psr & PSR_EF)
+    {
+      CORE_ADDR sp;
+
+      sp = frame_unwind_register_unsigned (next_frame, SPARC_SP_REGNUM);
+      saved_regs[SPARC32_FSR_REGNUM].addr = sp + 96;
+      for (regnum = SPARC_F0_REGNUM, addr = sp + 96 + 8;
+	   regnum <= SPARC_F31_REGNUM; regnum++, addr += 4)
+	saved_regs[regnum].addr = addr;
+    }
+
+  return saved_regs;
+}
+
 static struct sparc_frame_cache *
 sparc32nbsd_sigcontext_frame_cache (struct frame_info *next_frame,
 				    void **this_cache)
 {
   struct sparc_frame_cache *cache;
-  CORE_ADDR addr, sigcontext_addr;
-  LONGEST psr;
-  int regnum, delta;
+  CORE_ADDR addr;
 
   if (*this_cache)
     return *this_cache;
 
   cache = sparc_frame_cache (next_frame, this_cache);
   gdb_assert (cache == *this_cache);
-
-  /* The registers are saved in bits and pieces scattered all over the
-     place.  The code below records their location on the assumption
-     that the part of the signal trampoline that saves the state has
-     been executed.  */
 
   /* If we couldn't find the frame's function, we're probably dealing
      with an on-stack signal trampoline.  */
@@ -123,58 +186,7 @@ sparc32nbsd_sigcontext_frame_cache (struct frame_info *next_frame,
       cache->base = addr;
     }
 
-  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
-
-  /* We find the appropriate instance of `struct sigcontext' at a
-     fixed offset in the signal frame.  */
-  sigcontext_addr = cache->base + 64 + 16;
-
-  cache->saved_regs[SPARC_SP_REGNUM].addr = sigcontext_addr + 8;
-  cache->saved_regs[SPARC32_PC_REGNUM].addr = sigcontext_addr + 12;
-  cache->saved_regs[SPARC32_NPC_REGNUM].addr = sigcontext_addr + 16;
-  cache->saved_regs[SPARC32_PSR_REGNUM].addr = sigcontext_addr + 20;
-  cache->saved_regs[SPARC_G1_REGNUM].addr = sigcontext_addr + 24;
-  cache->saved_regs[SPARC_O0_REGNUM].addr = sigcontext_addr + 28;
-
-  /* The remaining `global' registers and %y are saved in the `local'
-     registers.  */
-  delta = SPARC_L0_REGNUM - SPARC_G0_REGNUM;
-  for (regnum = SPARC_G2_REGNUM; regnum <= SPARC_G7_REGNUM; regnum++)
-    cache->saved_regs[regnum].realreg = regnum + delta;
-  cache->saved_regs[SPARC32_Y_REGNUM].realreg = SPARC_L1_REGNUM;
-
-  /* The remaining `out' registers can be found in the current frame's
-     `in' registers.  */
-  delta = SPARC_I0_REGNUM - SPARC_O0_REGNUM;
-  for (regnum = SPARC_O1_REGNUM; regnum <= SPARC_O5_REGNUM; regnum++)
-    cache->saved_regs[regnum].realreg = regnum + delta;
-  cache->saved_regs[SPARC_O7_REGNUM].realreg = SPARC_I7_REGNUM;
-
-  /* The `local' and `in' registers have been saved in the register
-     save area.  */
-  addr = cache->saved_regs[SPARC_SP_REGNUM].addr;
-  addr = get_frame_memory_unsigned (next_frame, addr, 4);
-  for (regnum = SPARC_L0_REGNUM;
-       regnum <= SPARC_I7_REGNUM; regnum++, addr += 4)
-    cache->saved_regs[regnum].addr = addr;
-
-  /* The floating-point registers are only saved if the EF bit in %prs
-     has been set.  */
-
-#define PSR_EF	0x00001000
-
-  addr = cache->saved_regs[SPARC32_PSR_REGNUM].addr;
-  psr = get_frame_memory_unsigned (next_frame, addr, 4);
-  if (psr & PSR_EF)
-    {
-      CORE_ADDR sp;
-
-      sp = frame_unwind_register_unsigned (next_frame, SPARC_SP_REGNUM);
-      cache->saved_regs[SPARC32_FSR_REGNUM].addr = sp + 96;
-      for (regnum = SPARC_F0_REGNUM, addr = sp + 96 + 8;
-	   regnum <= SPARC_F31_REGNUM; regnum++, addr += 4)
-	cache->saved_regs[regnum].addr = addr;
-    }
+  cache->saved_regs = sparc32nbsd_sigcontext_saved_regs (next_frame);
 
   return cache;
 }
@@ -324,7 +336,5 @@ _initialize_sparnbsd_tdep (void)
   gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_NETBSD_AOUT,
 			  sparc32nbsd_aout_init_abi);
   gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_NETBSD_ELF,
-			  sparc32nbsd_elf_init_abi);
-  gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_OPENBSD_ELF,
 			  sparc32nbsd_elf_init_abi);
 }

@@ -1,5 +1,19 @@
 2004-01-25  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.h (sparc32nbsd_sigcontext_saved_regs): New prototype.
+	* sparcnbsd-tdep.c (sparc32nbsd_sigcontext_saved_regs): New
+	function with code split out from
+	sparc32nbsd_sigcontext_frame_cache.
+	(sparc32nbsd_sigcontext_frame_cache): Use
+	sparc32nbsd_sigcontext_saved_regs.
+	(_initialize_sparc32nbsd_tdep): Don't register OS ABI handler for
+	OpenBSD.
+	* sparcobsd-tdep.c: New file.
+	* Makefile.in (ALLDEPFILES): Add sparcobsd-tdep.c.
+	(sparcobsd-tdep.o): New dependency.
+	* configure.tgt (sparc-*-openbsd*): Set gdb_target to obsd.
+	* config/sparc/obsd.mt: New file.
+
 	* sparc-tdep.c (sparc32_gdbarch_init): Don't require
 	TDEP->fpregset to be initialized to enable core file register
 	sets.

@@ -38,8 +38,7 @@ esac
 case "${target}" in
 
 x86_64-*-freebsd*)	gdb_target=fbsd64 ;;
-*-*-freebsd*)		gdb_target=fbsd
-			;;
+*-*-freebsd*)		gdb_target=fbsd	;;
 
 alpha*-*-osf*)		gdb_target=alpha-osf1 ;;
 alpha*-*-linux*)	gdb_target=alpha-linux ;;
@@ -190,7 +189,7 @@ sparc-*-linux*)		gdb_target=linux ;;
 sparc64-*-linux*)	gdb_target=linux64 ;;
 sparc-*-netbsd*)	gdb_target=nbsd ;;
 sparc64-*-netbsd*)	gdb_target=nbsd64 ;;
-sparc-*-openbsd*)	gdb_target=nbsd ;;
+sparc-*-openbsd*)	gdb_target=obsd ;;
 sparc64-*-openbsd*)	gdb_target=obsd64
 			gdb_osabi=GDB_OSABI_OPENBSD_ELF
 			;;
