@@ -38,7 +38,6 @@
 #include "frame-unwind.h"
 #include "command.h"
 #include "gdbcmd.h"
-#include "reggroups.h"
 
 /* Flag to control debugging.  */
 
@@ -186,42 +185,44 @@ frame_pc_unwind (struct frame_info *this_frame)
   return this_frame->pc_unwind_cache;
 }
 
+static int
+do_frame_unwind_register (void *src, int regnum, void *buf)
+{
+  frame_unwind_register (src, regnum, buf);
+  return 1;
+}
+
 void
 frame_pop (struct frame_info *this_frame)
 {
+  struct regcache *scratch_regcache;
+  struct cleanup *cleanups;
+
   if (POP_FRAME_P ())
     {
+      /* A legacy architecture that has implemented a custom pop
+	 function.  All new architectures should instead be using the
+	 generic code below.  */
       POP_FRAME;
     }
   else
     {
-      /* Note, the dummy-frame code does something very similar to
-         this.  Perhaphs a common routine is in order.  */
-      struct regcache *scratch_regcache = regcache_xmalloc (current_gdbarch);
-      struct cleanup *cleanups = make_cleanup_regcache_xfree (scratch_regcache);
-      void *buf = alloca (max_register_size (current_gdbarch));
-      int regnum;
-
-      /* Copy over any registers (identified by their membership in
-	 the save_reggroup) and mark them as valid.  The full [0
-	 .. NUM_REGS+NUM_PSEUDO_REGS) range is checked since some
-	 architectures need to save/restore `cooked' registers that
-	 live in memory.  */
-      for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
-	{
-	  if (gdbarch_register_reggroup_p (current_gdbarch, regnum,
-					   save_reggroup))
-	    {
-	      frame_unwind_register (this_frame, regnum, buf);
-	      regcache_cooked_write (scratch_regcache, regnum, buf);
-	    }
-	}
-
-      /* Now write the unwound registers, en-mass, back into the
-         regcache.  */
-      regcache_cpy (current_regcache, scratch_regcache);
+      /* Make a copy of all the register values unwound from this
+	 frame.  Save them in a scratch buffer so that there isn't a
+	 race betweening trying to extract the old values from the
+	 current_regcache while, at the same time writing new values
+	 into that same cache.  */
+      struct regcache *scratch = regcache_xmalloc (current_gdbarch);
+      struct cleanup *cleanups = make_cleanup_regcache_xfree (scratch);
+      regcache_save (scratch, do_frame_unwind_register, this_frame);
+      /* Now copy those saved registers into the current regcache.
+         Here, regcache_cpy() calls regcache_restore().  */
+      regcache_cpy (current_regcache, scratch);
       do_cleanups (cleanups);
     }
+  /* We've made right mess of GDB's local state, just discard
+     everything.  */
+  target_store_registers (-1);
   flush_cached_frames ();
 }
 
