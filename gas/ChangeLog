@@ -1,3 +1,10 @@
+1999-07-29  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* write.c (fixup_segment): Fix generic error check overflow test.
+
+	* config/tc-i386.c (pe): Change %d to %ld, %x to %lx, and cast
+	X_add_number to long.
+
 Wed Jul 28 02:04:24 1999  "Jerry Quinn" <jquinn@nortelnetworks.com>
 
 	* config/tc-hppa.c (pa_ip):  Add 'J' and 'K' code

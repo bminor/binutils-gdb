@@ -2733,24 +2733,12 @@ fixup_segment (fixP, this_segment_type)
 	{
 	  if ((size_t) size < sizeof (valueT))
 	    {
-	      valueT mask, hibit;
+	      valueT mask;
 
-	      /* set all bits to one */
 	      mask = 0;
-	      mask--;
-	      /* Technically, combining these produces an undefined result
-		 if size is sizeof (valueT), though I think these two
-		 half-way operations should both be defined.  And the
-		 compiler should be able to combine them if it's valid on
-		 the host architecture.  */
-	      mask <<= size * 4;
-	      mask <<= size * 4;
-	      hibit = (valueT) 1 << (size * 8 - 1);
-	      if (((add_number & mask) != 0
-		   || (fixP->fx_signed
-		       && (add_number & hibit) != 0))
-		  && ((add_number & mask) != mask
-		      || (add_number & hibit) == 0))
+	      mask--;		/* set all bits to one */
+	      mask <<= size * 8 - (fixP->fx_signed ? 1 : 0);
+	      if ((add_number & mask) != 0 && (add_number & mask) != mask)
 		{
 		  char buf[50], buf2[50];
 		  sprint_value (buf, fragP->fr_address + where);
