@@ -1,3 +1,8 @@
+1999-06-30  Ian Lance Taylor  <ian@zembu.com>
+
+	* elf32-mips.c (mips_elf_final_link): Don't set CPIC when doing a
+	relocateable link.  From Ralf Baechle <ralf@uni-koblenz.de>.
+
 1999-06-04  Philip Blundell  <philb@gnu.org>
 
 	* elf32-arm.h (elf_backend_got_header_size): Define.

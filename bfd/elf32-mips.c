@@ -4175,11 +4175,12 @@ mips_elf_final_link (abfd, info)
   /* If all the things we linked together were PIC, but we're
      producing an executable (rather than a shared object), then the
      resulting file is CPIC (i.e., it calls PIC code.)  */
-  if (!info->shared && elf_elfheader (abfd)->e_flags & EF_MIPS_PIC)
+  if (!info->shared
+      && !info->relocateable
+      && elf_elfheader (abfd)->e_flags & EF_MIPS_PIC)
     {
       elf_elfheader (abfd)->e_flags &= ~EF_MIPS_PIC;
       elf_elfheader (abfd)->e_flags |= EF_MIPS_CPIC;
-      
     }
 
   /* On IRIX5, we omit the .options section.  On IRIX6, however, we
