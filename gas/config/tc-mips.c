@@ -727,6 +727,7 @@ static int mips16_extended_frag PARAMS ((fragS *, asection *, long));
 static const char *mips_isa_to_str PARAMS ((int));
 static const char *mips_cpu_to_str PARAMS ((int));
 static int validate_mips_insn PARAMS ((const struct mips_opcode *));
+static void show PARAMS ((FILE *, char *, int *, int *));
 
 /* Return values of my_getSmallExpression() */
 

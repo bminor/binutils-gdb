@@ -1,3 +1,7 @@
+2001-08-18  H.J. Lu  <hjl@gnu.org>
+
+	* config/tc-mips.c (show): Add the missing prototype.
+
 2001-08-18  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (S_EX_*): New enum for my_getSmallExpression()
