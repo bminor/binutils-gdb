@@ -1,3 +1,9 @@
+2000-11-25  David O'Brien  <obrien@FreeBSD.org>
+
+	* ld.1: Remove old date so it does not give the impression the manpage
+	is way out of date.
+
+
 2000-11-24  Nick Clifton  <nickc@redhat.com>
 
 	* configure.tgt (xscale-coff): Add target.
