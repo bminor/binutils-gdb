@@ -1,3 +1,7 @@
+Fri Jun 11 10:24:35 1993  Fred Fish  (fnf@cygnus.com)
+
+	* defs.h (INT_MAX):  Cast unsigned shift result to int.
+
 Thu Jun 10 13:26:41 1993  Fred Fish  (fnf@cygnus.com)
 
 	* elfread.c (elf_symtab_read):  Add bfd section address to bfd

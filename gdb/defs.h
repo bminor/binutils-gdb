@@ -40,7 +40,7 @@ typedef unsigned int CORE_ADDR;
 #define STREQ(a,b) (*(a) == *(b) ? !strcmp ((a), (b)) : 0)
 #define STREQN(a,b,c) (*(a) == *(b) ? !strncmp ((a), (b), (c)) : 0)
 
-/* The character C++ uses to build identifiers that must be unique from
+/* The character GNU C++ uses to build identifiers that must be unique from
    the program's identifiers (such as $this and $$vptr).  */
 #define CPLUS_MARKER '$'	/* May be overridden to '.' for SysV */
 
@@ -438,7 +438,7 @@ enum val_prettyprint
 #endif
 
 #if !defined (INT_MAX)
-#define	INT_MAX (UINT_MAX >> 1)			/* 0x7FFFFFFF for 32-bits */
+#define	INT_MAX ((int)(UINT_MAX >> 1))		/* 0x7FFFFFFF for 32-bits */
 #endif
 
 #if !defined (INT_MIN)
