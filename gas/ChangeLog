@@ -1,3 +1,8 @@
+Tue Aug 18 14:59:21 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* config/sparc.mt: New file.  Grab sparc opcode table from bfd
+	library.
+
 Tue Aug 18 14:16:38 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in: always create installation directories.  Removed
