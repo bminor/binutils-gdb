@@ -1,5 +1,8 @@
 Thu Feb  9 12:43:56 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.base/corefile.exp: Give backtrace test unique name.  xfail
+	for hp300.
+
 	* gdb.base/interrupt.exp: Also xfail hpux (for hp300).
 
 	* gdb.base/a1-selftest.exp: Don't run on hp300.
