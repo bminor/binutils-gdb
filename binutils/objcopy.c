@@ -1885,10 +1885,18 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   if (bfd_get_format (obfd) == bfd_core)
     relsize = 0;
   else
-    relsize = bfd_get_reloc_upper_bound (ibfd, isection);
+    {
+      relsize = bfd_get_reloc_upper_bound (ibfd, isection);
 
-  if (relsize < 0)
-    RETURN_NONFATAL (bfd_get_filename (ibfd));
+      if (relsize < 0)
+	{
+	  /* Do not complain if the target does not support relocations.  */
+	  if (relsize == -1 && bfd_get_error () == bfd_error_invalid_operation)
+	    relsize = 0;
+	  else
+	    RETURN_NONFATAL (bfd_get_filename (ibfd));
+	}
+    }
 
   if (relsize == 0)
     bfd_set_reloc (obfd, osection, NULL, 0);
@@ -2030,7 +2038,12 @@ mark_symbols_used_in_relocations (bfd *ibfd, sec_ptr isection, void *symbolsarg)
 
   relsize = bfd_get_reloc_upper_bound (ibfd, isection);
   if (relsize < 0)
-    bfd_fatal (bfd_get_filename (ibfd));
+    {
+      /* Do not complain if the target does not support relocations.  */
+      if (relsize == -1 && bfd_get_error () == bfd_error_invalid_operation)
+	return;
+      bfd_fatal (bfd_get_filename (ibfd));
+    }
 
   if (relsize == 0)
     return;

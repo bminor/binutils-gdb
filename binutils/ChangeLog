@@ -1,3 +1,9 @@
+2003-10-27  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (copy_section): Do not complain when a target does not
+	support relocations.
+	(mark_symbols_used_in_relocations): Likewise.
+
 2003-10-14  Anil Paranjpe  <anilp1@KPITCummins.com>
 
 	* objcopy.c (copy_main): Reads machine flags from arch_info
