@@ -1,3 +1,8 @@
+2004-04-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/tlsexe32.d: Update.
+	* ld-powerpc/tlsso32.d: Update.
+
 2004-04-23  Chris Demetriou  <cgd@broadcom.com>
 
 	* ld-mips-elf/reloc-3-r.d: Remove, as part of MIPS -membedded-pic
