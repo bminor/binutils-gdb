@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcore.h"
 #include "dis-asm.h"
 #include "language.h"
+#include "gdb_stat.h"
 
 extern char registers[];
 
@@ -149,6 +150,24 @@ reopen_exec_file ()
 #if 0 /* FIXME */
   if (exec_bfd)
     bfd_reopen (exec_bfd);
+#else
+  char *filename;
+  int res;
+  struct stat st;
+  long mtime;
+
+  /* Don't do anything if the current target isn't exec. */
+  if (exec_bfd == NULL || strcmp (target_shortname, "exec") != 0)
+    return;
+ 
+  /* If the timestamp of the exec file has changed, reopen it. */
+  filename = strdup (bfd_get_filename (exec_bfd));
+  make_cleanup (free, filename);
+  mtime = bfd_get_mtime(exec_bfd);
+  res = stat (filename, &st);
+
+  if (mtime && mtime != st.st_mtime)
+    exec_file_command (filename, 0);
 #endif
 }
 
