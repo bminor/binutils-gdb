@@ -172,6 +172,9 @@
 /* Generate 64-bit code by default on MIPS targets.  */
 #undef MIPS_DEFAULT_64BIT
 
+/* Choose a default ABI for MIPS targets.  */
+#undef MIPS_DEFAULT_ABI
+
 /* Default architecture. */
 #undef DEFAULT_ARCH
 
