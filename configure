@@ -132,8 +132,10 @@ do
                 next_program_suffix=
         elif [ -n "${next_program_transform_name}" ] ; then
                 # Double any backslashes or dollar signs in the argument
-                program_transform_name="${program_transform_name} -e `echo ${arg} | sed -e 's/\\\\/\\\\\\\\/g' -e 's/\\\$/$$/g'`"
-                program_transform_nameoption="${program_transform_nameoption} -program_transform_name='${arg}'"
+		if [ -n "${arg}" ] ; then
+			program_transform_name="${program_transform_name} -e `echo ${arg} | sed -e 's/\\\\/\\\\\\\\/g' -e 's/\\\$/$$/g'`"
+		fi
+                program_transform_nameoption="${program_transform_nameoption} --program-transform-name='${arg}'"
                 next_program_transform_name=
         elif [ -n "${next_target}" ] ; then
                 next_target=
@@ -206,9 +208,12 @@ do
                         next_program_suffix=yes
                         ;;
                 -program_transform_name=* | --program_transform_name=* | --program_transform_nam=* | --program_transform_na=* | --program_transform_n=* | --program_transform_=* | --program_transform=* | --program_transfor=* | --program_transfo=* | --program_transf=* | --program_trans=* | --program_tran=* | --program_tra=* | --program_tr=* | --program_t=* | -program-transform-name=* | --program-transform-name=* | --program-transform-nam=* | --program-transform-na=* | --program-transform-n=* | --program-transform-=* | --program-transform=* | --program-transfor=* | --program-transfo=* | --program-transf=* | --program-trans=* | --program-tran=* | --program-tra=* | --program-tr=* | --program-t=*)
+			arg=`echo ${arg} | sed -e 's/^[-a-z_]*=//'`
                         # Double any \ or $ in the argument
-                        program_transform_name="${program_transform_name} -e `echo ${arg} | sed -e 's/^[-a-z_]*=//' -e 's/\\\\/\\\\\\\\/g' -e 's/\\\$/$$/g'`"
-                        program_transform_nameoption="${program_transform_nameoption} -program_transform_name='`echo ${arg} | sed 's/^[-a-z_]*=//'`'"
+			if [ -n "${arg}" ] ; then
+	                        program_transform_name="${program_transform_name} -e `echo ${arg} | sed -e 's/\\\\/\\\\\\\\/g' -e 's/\\\$/$$/g'`"
+			fi
+                        program_transform_nameoption="${program_transform_nameoption} --program-transform-name='${arg}'"
                         ;;
                 -program_transform_name | --program_transform_name | --program_transform_nam | --program_transform_na | --program_transform_n | --program_transform_ | --program_transform | --program_transfor | --program_transfo | --program_transf | --program_trans | --program_tran | --program_tra | --program_tr | --program_t | -program-transform-name | --program-transform-name | --program-transform-nam | --program-transform-na | --program-transform-n | --program-transform- | --program-transform | --program-transfor | --program-transfo | --program-transf | --program-trans | --program-tran | --program-tra | --program-tr | --program-t)
                         next_program_transform_name=yes
@@ -324,7 +329,10 @@ case "${fatal}" in
                 if tmp_alias=`${guesssys}` ; then
                         echo "- Looks like this is a ${tmp_alias}" 1>&2
                         host_alias=${tmp_alias}
-                        target_alias=${tmp_alias}
+			case "${target_alias}" in
+			"") target_alias=${tmp_alias} ;;
+			*) ;;
+			esac
 			arguments="--host=${host_alias} ${arguments}"
                 else
                         echo '- Failed to guess the system type.  You need to tell me.' 1>&2
@@ -521,12 +529,12 @@ if [ ! -r ${srcdir}/${srctrigger} ] ; then
         exit 1
 fi
 
-tooldir="\$(libdir)/${target_alias}"
+tooldir="\$(exec_prefix)/${target_alias}"
 
 if [ "${host_alias}" != "${target_alias}" ] ; then
-    if [ "${program_prefix}" = "" ] ; then
-        if [ "${program_suffix}" = "" ] ; then 
-            if [ "${program_transform_name}" = "" ] ; then
+    if [ "${program_prefixoption}" = "" ] ; then
+        if [ "${program_suffixoption}" = "" ] ; then 
+            if [ "${program_transform_nameoption}" = "" ] ; then
                 program_prefix=${target_alias}- ;
             fi
         fi
