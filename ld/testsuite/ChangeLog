@@ -1,3 +1,19 @@
+2003-05-06  H.J. Lu <hjl@gnu.org>
+
+	* ld-elfvers/vers.exp (objdump_versionstuff): Support comment
+	in expected version file.
+
+	* ld-elfvers/vers25b.c: Add a line of comment.
+	* ld-elfvers/vers25b.dsym: Likwise.
+	* ld-elfvers/vers25b.ver: Likwise.
+	* ld-elfvers/vers26b.dsym: Likwise.
+	* ld-elfvers/vers26b.ver: Likwise.
+	* ld-elfvers/vers27b.dsym: Likwise.
+	* ld-elfvers/vers27b.ver: Likwise.
+	* ld-elfvers/vers27c.c: Likwise.
+	* ld-elfvers/vers27c.dsym: Likwise.
+	* ld-elfvers/vers27c.ver: Likwise.
+
 2003-05-04  H.J. Lu <hjl@gnu.org>
 
 	* ld-elfvsb/main.c: Updated.

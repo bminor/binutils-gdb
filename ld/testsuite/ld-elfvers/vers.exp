@@ -457,7 +457,11 @@ proc objdump_versionstuff { objdump object expectfile } {
 
 	set f1 [open $tmpdir/objdump.out r]
 	set f2 [open $expectfile r]
-	gets $f2 l2
+	while { [gets $f2 l2] != -1 } {
+	    if { ![regexp "^#.*$" $l2] } then {
+		break
+	    }
+	} 
 	while { [gets $f1 l1] != -1 } {
 	    if { [string match $l2 $l1] } then {
 		if { [gets $f2 l2] == -1 } then {
