@@ -59,7 +59,7 @@ Things-to-lose:
 
 Do-last:
 
-r5900_files="ChangeLog configure configure.in interp.c gencode.c mips.igen mips.dc m16.igen r5900.igen"
+r5900_files="ChangeLog configure configure.in sim-main.h interp.c gencode.c mips.igen mips.dc m16.igen r5900.igen"
 
 if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
 	for i in $r5900_files ; do
@@ -89,7 +89,7 @@ else
 fi
 
 
-tx19_files="ChangeLog configure configure.in interp.c gencode.c mips.igen mips.dc m16.igen"
+tx19_files="ChangeLog configure configure.in sim-main.h interp.c gencode.c mips.igen mips.dc m16.igen"
 
 if ( echo $* | grep keep\-tx19 > /dev/null ) ; then
 	for i in $tx19_files ; do
@@ -119,7 +119,7 @@ else
 fi
 
 
-vr5400_files="ChangeLog configure configure.in interp.c gencode.c mips.igen mips.dc m16.igen vr5400.igen"
+vr5400_files="ChangeLog configure configure.in sim-main.h interp.c gencode.c mips.igen mips.dc m16.igen vr5400.igen"
 
 if ( echo $* | grep keep\-vr5400 > /dev/null ) ; then
 	for i in $vr5400_files ; do
@@ -170,5 +170,10 @@ never_files="ChangeLog configure configure.in interp.c gencode.c mips.igen mips.
 	done
 
 
+for i in * ; do
+        if test ! -d $i && (grep sanitize $i > /dev/null) ; then
+                echo '***' Some mentions of Sanitize are still left in $i! 1>&2
+        fi
+done 
 
 # End of file.

@@ -1,5 +1,7 @@
 Tue Oct 28 12:29:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* sim-bits.h: Document ROTn macro.
+
 	* sim-endian.h (H2T): Handle 16 byte variables.
 
 	* sim-n-core.h (sim_core_read_unaligned_N): Return a dummy when an

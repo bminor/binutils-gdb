@@ -1,1 +1,680 @@
-// Empty
+
+
+// Integer Instructions
+// --------------------
+//
+// MulAcc is the Multiply Accumulator.
+//     This register is mapped on the the HI and LO registers.
+//     Upper 32 bits of MulAcc is mapped on to lower 32 bits of HI register.
+//     Lower 32 bits of MulAcc is mapped on to lower 32 bits of LO register.
+
+
+:function:::unsigned64:MulAcc:
+{
+  unsigned64 result = U8_4 (HI, LO);
+  return result;
+}
+
+:function:::void:SET_MulAcc:unsigned64 value
+{
+  *AL4_8 (&HI) = VH4_8 (value);
+  *AL4_8 (&LO) = VL4_8 (value);
+}
+
+:function:::signed64:SignedMultiply:signed32 l, signed32 r
+{
+  signed64 result = (signed64) l * (signed64) r;
+  return result;
+}
+
+:function:::unsigned64:UnsignedMultiply:unsigned32 l, unsigned32 r
+{
+  unsigned64 result = (unsigned64) l * (unsigned64) r;
+  return result;
+}
+
+:function:::unsigned64:Low32Bits:unsigned64 value
+{
+  unsigned64 result = VL4_8 (value);
+  return result;
+}
+
+:function:::unsigned64:High32Bits:unsigned64 value
+{
+  unsigned64 result = VH4_8 (value);
+  return result;
+}
+
+
+
+// Multiply and Move LO.
+000000,5.RS,5.RT,5.RD,00001,011000::::MUL
+"mul r<RD>, r<RS>, r<RT>"
+*vr5400:
+{
+  SET_MulAcc (SD_, 0 + SignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = Low32Bits (SD_, MulAcc (SD_));
+}
+
+// Unsigned Multiply and Move Low.
+000000,5.RS,5.RT,5.RD,00001,011001::::MULU
+"mulu r<RD>, r<RS>, r<RT>"
+*vr5400:
+{
+  SET_MulAcc (SD_, 0 + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
+}
+
+// Multiply and Move HI.
+000000,5.RS,5.RT,5.RD,01001,011000::::MULHI
+"mulhi r<RD>, r<RS>, r<RT>"
+*vr5400:
+{
+  SET_MulAcc (SD_, 0 + SignedMultiply   (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = High32Bits (SD_, MulAcc (SD_));
+}
+
+// Unsigned Multiply and Move HI.
+000000,5.RS,5.RT,5.RD,01001,011001::::MULHIU
+"mulhiu r<RD>, r<RS>, r<RT>"
+*vr5400:
+{
+  SET_MulAcc (SD_, 0 + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = High32Bits (SD_, MulAcc (SD_));
+}
+
+
+// Multiply, Negate and Move LO.
+000000,5.RS,5.RT,5.RD,00011,011000::::MULS
+"muls r<RD>, r<RS>, r<RT>"
+*vr5400:
+{
+  SET_MulAcc (SD_, 0 - SignedMultiply   (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
+}
+
+// Unsigned Multiply, Negate and Move LO.
+000000,5.RS,5.RT,5.RD,00011,011001::::MULSU
+"mulsu r<RD>, r<RS>, r<RT>"
+*vr5400:
+{
+  SET_MulAcc (SD_, 0 - UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
+}
+
+// Multiply, Negate and Move HI.
+000000,5.RS,5.RT,5.RD,01011,011000::::MULSHI
+"mulshi r<RD>, r<RS>, r<RT>"
+*vr5400:
+{
+  SET_MulAcc (SD_, 0 - SignedMultiply   (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = High32Bits (SD_, MulAcc (SD_));
+}
+
+// Unsigned Multiply, Negate and Move HI.
+000000,5.RS,5.RT,5.RD,01011,011001::::MULSHIU
+"mulshiu r<RD>, r<RS>, r<RT>"
+*vr5400:
+{
+  SET_MulAcc (SD_, 0 - UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = High32Bits (SD_, MulAcc (SD_));
+}
+
+
+// Multiply, Accumulate and Move LO.
+000000,5.RS,5.RT,5.RD,00101,011000::::MACC
+"macc r<RD>, r<RS>, r<RT>"
+*vr5400:
+{
+  SET_MulAcc (SD_, MulAcc (SD_) + SignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
+}
+
+// Unsigned Multiply, Accumulate and Move LO.
+000000,5.RS,5.RT,5.RD,00101,011001::::MACCU
+"maccu r<RD>, r<RS>, r<RT>"
+*vr5400:
+{
+  SET_MulAcc (SD_, MulAcc (SD_) + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
+}
+
+// Multiply, Accumulate and Move HI.
+000000,5.RS,5.RT,5.RD,01101,011000::::MACCHI
+"macchi r<RD>, r<RS>, r<RT>"
+*vr5400:
+{
+  SET_MulAcc (SD_, MulAcc (SD_) + SignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = High32Bits (SD_, MulAcc (SD_));
+}
+
+// Unsigned Multiply, Accumulate and Move HI.
+000000,5.RS,5.RT,5.RD,01101,011001::::MACCHIU
+"macchiu r<RD>, r<RS>, r<RT>"
+*vr5400:
+{
+  SET_MulAcc (SD_, MulAcc (SD_) + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = High32Bits (SD_, MulAcc (SD_));
+
+}
+
+// Multiply, Negate, Accumulate and Move LO.
+000000,5.RS,5.RT,5.RD,00111,011000::::MSAC
+"msac r<RD>, r<RS>, r<RT>"
+*vr5400:
+{
+  SET_MulAcc (SD_, MulAcc (SD_) - SignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
+}
+
+// Unsigned Multiply, Negate, Accumulate and Move LO.
+000000,5.RS,5.RT,5.RD,00111,011001::::MSACU
+"msacu r<RD>, r<RS>, r<RT>"
+*vr5400:
+{
+  SET_MulAcc (SD_, MulAcc (SD_) - UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
+}
+
+// Multiply, Negate, Accumulate and Move HI.
+000000,5.RS,5.RT,5.RD,01111,011000::::MSACHI
+"msachi r<RD>, r<RS>, r<RT>"
+*vr5400:
+{
+  SET_MulAcc (SD_, MulAcc (SD_) - SignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = High32Bits (SD_, MulAcc (SD_));
+}
+
+// Unsigned Multiply, Negate, Accumulate and Move HI.
+000000,5.RS,5.RT,5.RD,01111,011001::::MSACHIU
+"msachiu r<RD>, r<RS>, r<RT>"
+*vr5400:
+{
+  SET_MulAcc (SD_, MulAcc (SD_) - UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = High32Bits (SD_, MulAcc (SD_));
+}
+
+
+// Rotate Right.
+000000,00001,5.RT,5.RD,5.SHIFT,000010::::ROR
+"ror r<RD>, r<RT>, <SHIFT>"
+*vr5400:
+{
+  int s = SHIFT;
+  GPR[RD] = ROTR32 (GPR[RT], s);
+}
+
+// Rotate Right Variable.
+000000,5.RS,5.RT,5.RD,00001,000110::::RORV
+"rorv r<RD>, r<RT>, <RS>"
+*vr5400:
+{
+  int s = MASKED (GPR[RS], 4, 0);
+  GPR[RD] = ROTR32 (GPR[RT], s);
+}
+
+// Double Rotate Right.
+000000,00001,5.RT,5.RD,5.SHIFT,111010::::DROR
+"dror r<RD>, r<RT>, <SHIFT>"
+*vr5400:
+{
+  int s = SHIFT;
+  GPR[RD] = ROTR64 (GPR[RT], s);
+}
+
+// Double Rotate Right Plus 32.
+000000,00001,5.RT,5.RD,5.SHIFT,111110::::DROR32
+"dror32 r<RD>, r<RT>, <SHIFT>"
+*vr5400:
+{
+  int s = SHIFT + 32;
+  GPR[RD] = ROTR64 (GPR[RT], s);
+}
+
+// Double Rotate Right Variable.
+000000,5.RS,5.RT,5.RD,00001,010110::::DRORV
+"drorv r<RD>, r<RT>, <RS>"
+*vr5400:
+{
+  int s = MASKED (GPR[RS], 5, 0);
+  GPR[RD] = ROTR64 (GPR[RT], s);
+}
+
+
+
+
+// Media Instructions
+// ------------------
+
+// Note:   Vector unit in R5400 supports only octal byte format. 
+// Note:   The sel field is deduced by special handling of the "vt"
+// operand.
+//         If vt is:
+//             of the form $vt[0],        then sel is 0000
+//             of the form $vt[1],        then sel is 0001
+//             of the form $vt[2],        then sel is 0010
+//             of the form $vt[3],        then sel is 0011
+//             of the form $vt[4],        then sel is 0100
+//             of the form $vt[5],        then sel is 0101
+//             of the form $vt[6],        then sel is 0110
+//             of the form $vt[7],        then sel is 0111
+//             Normal register specifier, then sel is 1011
+//             Constant,                  then sel is 1111
+//
+// VecAcc is the Vector Accumulator.
+//     This accumulator is organized as 8X24 bit (192 bit) register.
+//     This accumulator holds only signed values.
+
+:function:::signed:vr:int fpr, int byte
+{
+  signed8 b = V1_8 (value_fpr (sd, fpr, fmt_long), byte);
+  return b;
+}
+
+:function:::void:set_vr:int fpr, int byte, signed value
+{
+  abort ();
+}
+
+:function:::signed:VecAcc:int byte
+{
+  abort ();
+  return 0;
+}
+
+:function:::void:set_VecAcc:int byte, signed value
+{
+  abort ();
+}
+
+:function:::int:cc:int i
+{
+  abort ();
+  return 0;
+}
+
+:function:::void:set_cc:int i, int value
+{
+  abort ();
+}
+
+:function:::signed:Min:signed l, signed r
+{
+  if (l < r)
+    return l;
+  else
+    return r;
+}
+
+:function:::signed:Max:signed l, signed r
+{
+  if (l < r)
+    return r;
+  else
+    return l;
+}
+
+:function:::signed:Compare:signed l, signed r
+{
+  abort ();
+  return 0;
+}
+
+:function:::signed:Clamp:signed l
+{
+  abort ();
+  return 0;
+}
+
+:function:::signed:Round:signed l
+{
+  abort ();
+  return 0;
+}
+
+:function:::void:ByteAlign:int vd, int imm, int vs, int vt
+{
+  abort ();
+}
+
+:function:::signed:One_of:int vs, int vt
+{
+  abort ();
+  return 0;
+}
+
+:function:::unsigned:select:int i, int sel, int vt
+{
+  if (sel < 8)
+    return vr (SD_, vt, sel);
+  else if (sel == 0x13)
+    return vr (SD_, vt, i);
+  else if (sel == 0x1f)
+    return vt;
+  else
+    semantic_illegal (sd, cia);
+  return 0;
+}
+
+:%s::::VT:int sel, int vt
+{
+  static char buf[20];
+  if (sel < 8)
+    sprintf (buf, "v%d[%d]", vt, sel);
+  else if (sel == 0x13)
+    sprintf (buf, "v%d", vt);
+  else if (sel == 0x1f)
+    sprintf (buf, "%d", vt);
+  else
+    sprintf (buf, "(invalid)");
+  return buf;
+}
+
+
+// Vector Add.
+010010,4.SEL,0,5.VT,5.VS,5.VD,001011::::ADD.OB
+"add.ob v<VD>, v<VS>, %s<VT#SEL,VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_vr (SD_, VD, i, vr (SD_, VS, i) + select (SD_, i, SEL, VT));
+}
+
+// Vector Align.
+010010,00,3.IMM,5.VT,5.VS,5.VD,011000::::ALNI.OB
+"alni.ob v<VD>, v<VS>, v<VT>, <IMM>"
+*vr5400:
+{
+  ByteAlign (SD_, VD, IMM, VS, VT);
+}
+
+// Vector And.
+010010,4.SEL,0,5.VT,5.VS,5.VD,001100::::AND.OB
+"and.ob v<VD>, v<VS>, %s<VT#SEL,VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_vr (SD_, VD, i, vr (SD_, VS, i) & select (SD_, i, SEL, VT));
+}
+
+// Vector Compare Equal.
+010010,4.SEL,0,5.VT,5.VS,00000,000001::::C.EQ.OB
+"c.eq.ob v<VS>, %s<VT#SEL,VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_cc (SD_, i, Compare (SD_, vr (SD_, VS, i), select (SD_, i, SEL, VT)));
+}
+
+// Vector Compare Less Than or Equal.
+010010,4.SEL,0,5.VT,5.VS,00000,000101::::C.LE.OB
+"c.le.ob v<VS>, %s<VT#SEL,VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_cc (SD_, i, Compare (SD_, vr (SD_, VS, i), select (SD_, i, SEL, VT)));
+}
+
+// Vector Compare Less Than.
+010010,4.SEL,0,5.VT,5.VS,00000,000100::::C.LT.OB
+"c.lt.ob v<VS>, %s<VT#SEL,VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_cc (SD_, i, Compare (SD_, vr (SD_, VS, i), select (SD_, i, SEL, VT)));
+}
+
+// Vector Maximum.
+010010,4.SEL,0,5.VT,5.VS,5.VD,000111::::MAX.OB
+"max.ob v<VD>, v<VS>, %s<VT#SEL,VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_vr (SD_, VD, i, Max (SD_, vr (SD_, VS, i), select (SD_, i, SEL, VT)));
+}
+
+// Vector Minimum.
+010010,4.SEL,0,5.VT,5.VS,5.VD,000110::::MIN.OB
+"min.ob v<VD>, v<VS>, %s<VT#SEL,VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_vr (SD_, VD, i, Min (SD_, vr (SD_, VS, i), select (SD_, i, SEL, VT)));
+}
+
+// Vector Multiply.
+010010,4.SEL,0,5.VT,5.VS,5.VD,110000::::MUL.OB
+"mul.ob v<VD>, v<VS>, %s<VT#SEL,VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_vr (SD_, VD, i, vr (SD_, VS, i) * select (SD_, i, SEL, VT));
+}
+
+// Vector Multiply, Accumulate.
+010010,4.SEL,0,5.VT,5.VS,00000,110011::::MULA.OB
+"mula.ob v<VS>, %s<VT#SEL,VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_VecAcc (SD_, i, VecAcc (SD_, i) + vr (SD_, VS, i) * select (SD_, i, SEL, VT));
+}
+
+// Vector Multiply, Load Accumulator.
+010010,4.SEL,0,5.VT,5.VS,10000,110011::::MULL.OB
+"mull.ob v<VS>, %s<VT#SEL,VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_VecAcc (SD_, i, 0 + vr (SD_, VS, i) * select (SD_, i, SEL, VT));
+}
+
+// Vector Multiply, Negate, Accumulate.
+010010,4.SEL,0,5.VT,5.VS,00000,110010::::MULS.OB
+"muls.ob v<VS>, %s<VT#SEL,VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_VecAcc (SD_, i, VecAcc (SD_, i) - vr (SD_, VS, i) * select (SD_, i, SEL, VT));
+}
+
+// Vector Multiply, Negate, Load Accumulator.
+010010,4.SEL,0,5.VT,5.VS,10000,110010::::MULSL.OB
+"mulsl.ob v<VS>, %s<VT#SEL,VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_VecAcc (SD_, i, 0 - vr (SD_, VS, i) * select (SD_, i, SEL, VT));
+}
+
+// Vector NOr.
+010010,4.SEL,0,5.VT,5.VS,5.VD,001111::::NOR.OB
+"nor.ob v<VD>, v<VS>, %s<VT#SEL,VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_vr (SD_, VD, i, ! (vr (SD_, VS, i) | select (SD_, i, SEL, VT)));
+}
+
+// Vector Or.
+010010,4.SEL,0,5.VT,5.VS,5.VD,001110::::OR.OB
+"or.ob v<VD>, v<VS>, %s<VT#SEL,VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_vr (SD_, VD, i, vr (SD_, VS, i) | select (SD_, i, SEL, VT));
+}
+
+// Vector Pick False.
+010010,4.SEL,0,5.VT,5.VS,5.VD,000010::::PICKF.OB
+"pickf.ob v<VD>, v<VS>, %s<VT#SEL,VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_vr (SD_, VD, i, cc (SD_, i) ? select (SD_, i, SEL, VT) : vr (SD_, VS, i));
+}
+
+// Vector Pick True.
+010010,4.SEL,0,5.VT,5.VS,5.VD,000011::::PICKT.OB
+"pickt.ob v<VD>, v<VS>, %s<VT#SEL,VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_vr (SD_, VD, i, cc (SD_, i) ? vr (SD_, VS, i) : select (SD_, i, SEL, VT));
+}
+
+// Vector Read  Accumulator High.
+010010,1000,0,00000,00000,5.VD,111111::::RACH.OB
+"rach.ob v<VD>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_vr (SD_, VD, i, EXTRACTED (VecAcc (SD_, i), 23, 16));
+}
+
+// Vector Read  Accumulator Low.
+010010,0000,0,00000,00000,5.VD,111111::::RACL.OB
+"racl.ob v<VD>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_vr (SD_, VD, i, EXTRACTED (VecAcc (SD_, i), 7, 0));
+}
+
+// Vector Read  Accumulator Middle.
+010010,0100,0,00000,00000,5.VD,111111::::RACM.OB
+"racm.ob v<VD>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_vr (SD_, VD, i, EXTRACTED (VecAcc (SD_, i), 15, 8));
+}
+
+// Vector Scale, Round and Clamp Accumulator.
+010010,4.SEL,0,5.VT,00000,5.VD,100000::::RZU.OB
+"rzu.ob v<VD>, %s<VT#SEL,VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_vr (SD_, VD, i, Clamp (SD_, Round (SD_, VecAcc (SD_, i) >> select (SD_, i, SEL, VT))));
+}
+
+// Vector Element Shuffle.
+010010,0110,0,5.VT,5.VS,5.VD,011111::::SHFL.MIXH.OB
+"shfl.mixh.ob v<VD>, v<VS>, <VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_vr (SD_, VD, i, One_of (SD_, VS, VT));
+}
+
+// Vector Element Shuffle.
+010010,0111,0,5.VT,5.VS,5.VD,011111::::SHFL.MIXL.OB
+"shfl.mixl.ob v<VD>, v<VS>, <VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_vr (SD_, VD, i, One_of (SD_, VS, VT));
+}
+
+// Vector Element Shuffle.
+010010,0100,0,5.VT,5.VS,5.VD,011111::::SHFL.PACH.OB
+"shfl.pach.ob v<VD>, v<VS>, <VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_vr (SD_, VD, i, One_of (SD_, VS, VT));
+}
+
+// Vector Element Shuffle.
+010010,0101,0,5.VT,5.VS,5.VD,011111::::SHFL.PACL.OB
+"shfl.pacl.ob v<VD>, v<VS>, <VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_vr (SD_, VD, i, One_of (SD_, VS, VT));
+}
+
+// Vector Shift Left  Logical.
+010010,4.SEL,0,5.VT,5.VS,5.VD,010000::::SLL.OB
+"sll.ob v<VD>, v<VS>, %s<VT#SEL,VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_vr (SD_, VD, i, vr (SD_, VS, i) << select (SD_, i, SEL, VT));
+}
+
+// Vector Shift Right Logical.
+010010,4.SEL,0,5.VT,5.VS,5.VD,010010::::SRL.OB
+"srl.ob v<VD>, v<VS>, %s<VT#SEL,VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_vr (SD_, VD, i, vr (SD_, VS, i) >> select (SD_, i, SEL, VT));
+}
+
+// Vector Subtract.
+010010,4.SEL,0,5.VT,5.VS,5.VD,001010::::SUB.OB
+"sub.ob v<VD>, v<VS>, %s<VT#SEL,VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_vr (SD_, VD, i, vr (SD_, VS, i) - select (SD_, i, SEL, VT));
+}
+
+// Vector Write Accumulator High.
+010010,1000,0,00000,5.VS,00000,111110::::WACH.OB
+"wach.ob v<VS>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    /* High8 */ set_VecAcc (SD_, i, (vr (SD_, VS, i) << 16) | MASKED (VecAcc (SD_, i), 15, 0));
+}
+
+// Vector Write Accumulator Low.
+010010,0000,0,5.VT,5.VS,00000,111110::::WACL.OB
+"wacl.ob v<VS>, <VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_VecAcc (SD_, i, (EXTEND8 (vr (SD_, VS, i)) << 8) | vr (SD_, VT, i));
+}
+
+// Vector XOr.
+010010,4.SEL,0,5.VT,5.VS,5.VD,001101::::XOR.OB
+"xor.ob v<VD>, v<VS>, %s<VT#SEL,VT>"
+*vr5400:
+{
+  int i;
+  for (i = 0; i < 8; i++)
+    set_vr (SD_, VD, i, vr (SD_, VS, i) ^ select (SD_, i, SEL, VT));
+}

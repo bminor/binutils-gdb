@@ -100,7 +100,14 @@ getopt1.o: $(srcdir)/../../libiberty/getopt1.c
 IGEN_TRACE= # -G omit-line-numbers # -G trace-rule-selection -G trace-rule-rejection -G trace-entries
 IGEN_INSN=$(srcdir)/mips.igen
 IGEN_DC=$(srcdir)/mips.dc
-
+IGEN_INCLUDE=\
+	$(start-sanitize-r5900) \
+	$(srcdir)/r5900.igen \
+	$(end-sanitize-r5900) \
+	$(start-sanitize-vr5400) \
+	$(srcdir)/vr5400.igen \
+	$(end-sanitize-vr5400) \
+	$(srcdir)/m16.igen
 
 SIM_IGEN_ALL = tmp-igen
 
@@ -128,7 +135,7 @@ clean-igen:
 	rm -f $(BUILT_SRC_FROM_IGEN)
 	rm -f tmp-igen
 
-tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen
+tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 	cd ../igen && $(MAKE)
 	../igen/igen \
 		$(IGEN_TRACE) \
@@ -200,7 +207,7 @@ clean-m16:
 	rm -f $(BUILT_SRC_FROM_M16)
 	rm -f tmp-m16
 
-tmp-m16: $(IGEN_INSN) $(IGEN_DC) ../igen/igen
+tmp-m16: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 	cd ../igen && $(MAKE)
 	../igen/igen \
 		$(IGEN_TRACE) \

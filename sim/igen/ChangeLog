@@ -1,3 +1,7 @@
+Wed Oct 29 13:17:17 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ld-insn.h: Document mnemonic string format.
+
 Tue Oct 28 10:50:35 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gen-icache.c (print_icache_extraction): Force result of atol to

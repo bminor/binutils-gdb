@@ -503,6 +503,9 @@ struct _sim_cpu {
 #define SA ((STATE_CPU (sd, 0))->sa)
 
   /* end-sanitize-r5900 */
+  /* start-sanitize-vr5400 */
+
+  /* end-sanitize-vr5400 */
 
 
 
