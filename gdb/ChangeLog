@@ -1,3 +1,8 @@
+2002-11-22  Andreas Schwab  <schwab@suse.de>
+
+	* m68k-tdep.c (m68k_register_virtual_type): Return int for SR, FPC
+	and FPS registers.
+
 2002-11-21  Daniel Jacobowitz  <drow@mvista.com>
 
 	* maint.c (_initialize_maint_cmds): Fix typo.  From

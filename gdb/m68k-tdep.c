@@ -148,20 +148,25 @@ m68k_register_virtual_size (int regnum)
   return (((unsigned) (regnum) - FP0_REGNUM) < 8 ? 12 : 4);
 }
 
-/* Return the GDB type object for the "standard" data type of data 
-   in register N.  This should be int for D0-D7, long double for FP0-FP7,
-   and void pointer for all others (A0-A7, PC, SR, FPCONTROL etc).
-   Note, for registers which contain addresses return pointer to void, 
-   not pointer to char, because we don't want to attempt to print 
-   the string after printing the address.  */
+/* Return the GDB type object for the "standard" data type of data in
+   register N.  This should be int for D0-D7, SR, FPCONTROL and
+   FPSTATUS, long double for FP0-FP7, and void pointer for all others
+   (A0-A7, PC, FPIADDR).  Note, for registers which contain
+   addresses return pointer to void, not pointer to char, because we
+   don't want to attempt to print the string after printing the
+   address.  */
 
 static struct type *
 m68k_register_virtual_type (int regnum)
 {
-  if ((unsigned) regnum >= E_FPC_REGNUM)
+  if (regnum == E_FPI_REGNUM)
     return lookup_pointer_type (builtin_type_void);
+  else if ((unsigned) regnum >= E_FPC_REGNUM)
+    return builtin_type_int;
   else if ((unsigned) regnum >= FP0_REGNUM)
     return builtin_type_long_double;
+  else if (regnum == PS_REGNUM)
+    return builtin_type_int;
   else if ((unsigned) regnum >= A0_REGNUM)
     return lookup_pointer_type (builtin_type_void);
   else
