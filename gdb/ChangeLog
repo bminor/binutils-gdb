@@ -1,5 +1,8 @@
 2001-07-30  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/tm-i386sol2.h (STAB_REG_TO_REGNUM): Redefine to call
+	i386_dwarf_reg_to_regnum.
+
 	* i386-tdep.c (i386_register_convert_to_virtual): Replace
 	assertion with a warning if we're asked to convert towards a
 	non-floating-point type.  Zero out the the buffer where the data
