@@ -1,3 +1,14 @@
+1999-08-09  Ian Lance Taylor  <ian@zembu.com>
+
+	* objdump.c (exit_status): New static variable.
+	(nonfatal): New static function.
+	(disassemble_data): Set exit_status on error.
+	(read_section_stabs): Likewise.
+	(display_bfd): Likewise.  Call nonfatal rather than bfd_nonfatal.
+	(display_file): Call nonfatal rather than bfd_nonfatal.
+	(display_target_list, display_info_table): Likewise.
+	(main): Return exit_status rather than 0.
+
 1999-08-08  Ian Lance Taylor  <ian@zembu.com>
 
 	* objdump.c (dump_section_header): Update for renaming of

@@ -44,6 +44,9 @@ Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 extern int fprintf PARAMS ((FILE *, const char *, ...));
 #endif
 
+/* Exit status.  */
+static int exit_status = 0;
+
 static char *default_target = NULL;	/* default at runtime */
 
 static int show_version = 0;		/* show the version number */
@@ -111,6 +114,9 @@ static long dynsymcount = 0;
 
 static void
 usage PARAMS ((FILE *, int));
+
+static void
+nonfatal PARAMS ((const char *));
 
 static void
 display_file PARAMS ((char *filename, char *target));
@@ -286,6 +292,14 @@ static struct option long_options[]=
   {"wide", no_argument, &wide_output, 'w'},
   {0, no_argument, 0, 0}
 };
+
+static void
+nonfatal (msg)
+     const char *msg;
+{
+  bfd_nonfatal (msg);
+  exit_status = 1;
+}
 
 static void
 dump_section_header (abfd, section, ignored)
@@ -1565,6 +1579,7 @@ disassemble_data (abfd)
       fprintf (stderr, _("%s: Can't disassemble for architecture %s\n"),
 	       program_name,
 	       bfd_printable_arch_mach (bfd_get_arch (abfd), 0));
+      exit_status = 1;
       return;
     }
 
@@ -1818,6 +1833,7 @@ read_section_stabs (abfd, stabsect_name, strsect_name)
     {
       fprintf (stderr, _("%s: %s has no %s section\n"), program_name,
 	       bfd_get_filename (abfd), strsect_name);
+      exit_status = 1;
       return false;
     }
  
@@ -1834,6 +1850,7 @@ read_section_stabs (abfd, stabsect_name, strsect_name)
 	       bfd_errmsg (bfd_get_error ()));
       free (stabs);
       free (strtab);
+      exit_status = 1;
       return false;
     }
 
@@ -1845,6 +1862,7 @@ read_section_stabs (abfd, stabsect_name, strsect_name)
 	       bfd_errmsg (bfd_get_error ()));
       free (stabs);
       free (strtab);
+      exit_status = 1;
       return false;
     }
 
@@ -2018,7 +2036,7 @@ display_bfd (abfd)
 
   if (!bfd_check_format_matches (abfd, bfd_object, &matching))
     {
-      bfd_nonfatal (bfd_get_filename (abfd));
+      nonfatal (bfd_get_filename (abfd));
       if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
 	{
 	  list_matching_formats (matching);
@@ -2082,8 +2100,12 @@ display_bfd (abfd)
       if (dhandle != NULL)
 	{
 	  if (! print_debugging_info (stdout, dhandle))
-	    fprintf (stderr, _("%s: printing debugging information failed\n"),
-		     bfd_get_filename (abfd));
+	    {
+	      fprintf (stderr,
+		       _("%s: printing debugging information failed\n"),
+		       bfd_get_filename (abfd));
+	      exit_status = 1;
+	    }
 	}
     }
   if (syms)
@@ -2108,7 +2130,7 @@ display_file (filename, target)
   file = bfd_openr (filename, target);
   if (file == NULL)
     {
-      bfd_nonfatal (filename);
+      nonfatal (filename);
       return;
     }
 
@@ -2125,9 +2147,7 @@ display_file (filename, target)
 	  if (arfile == NULL)
 	    {
 	      if (bfd_get_error () != bfd_error_no_more_archived_files)
-		{
-		  bfd_nonfatal (bfd_get_filename (file));
-		}
+		nonfatal (bfd_get_filename (file));
 	      break;
 	    }
 
@@ -2545,14 +2565,14 @@ display_target_list ()
 
       if (abfd == NULL)
 	{
-	  bfd_nonfatal (dummy_name);
+	  nonfatal (dummy_name);
 	  continue;
 	}
 
       if (! bfd_set_format (abfd, bfd_object))
 	{
 	  if (bfd_get_error () != bfd_error_invalid_operation)
-	    bfd_nonfatal (p->name);
+	    nonfatal (p->name);
 	  continue;
 	}
 
@@ -2598,7 +2618,7 @@ display_info_table (first, last)
 
 	    if (abfd == NULL)
 	      {
-		bfd_nonfatal (p->name);
+		nonfatal (p->name);
 		ok = false;
 	      }
 
@@ -2607,7 +2627,7 @@ display_info_table (first, last)
 		if (! bfd_set_format (abfd, bfd_object))
 		  {
 		    if (bfd_get_error () != bfd_error_invalid_operation)
-		      bfd_nonfatal (p->name);
+		      nonfatal (p->name);
 		    ok = false;
 		  }
 	      }
@@ -2803,7 +2823,8 @@ main (argc, argv)
 	    endian = BFD_ENDIAN_LITTLE;
 	  else
 	    {
-	      fprintf (stderr, _("%s: unrecognized -E option\n"), program_name);
+	      fprintf (stderr, _("%s: unrecognized -E option\n"),
+		       program_name);
 	      usage (stderr, 1);
 	    }
 	  break;
@@ -2845,5 +2866,5 @@ main (argc, argv)
 
   END_PROGRESS (program_name);
 
-  return 0;
+  return exit_status;
 }
