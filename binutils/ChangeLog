@@ -1,3 +1,8 @@
+2000-05-30  Alan Modra  <alan@linuxcare.com.au>
+
+	* objdump.c (display_target_list): Use bfd_close_all_done, not
+	bfd_close to fix crash caused by 2000-05-24 change.
+
 2000-05-26  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* ar.c: Include filenames.h.
