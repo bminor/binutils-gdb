@@ -1,3 +1,11 @@
+Wed Mar 17 11:23:06 1993  Fred Fish  (fnf@cygnus.com)
+
+	* valops.c (value_arg_coerce):  Apply temporary patch to
+	fix problem with coercion of array and function types when
+	passed as arguments to C functions, pending a more complete
+	review of when and how coercion should be done, depending
+	upon context and language.
+
 Wed Mar 17 09:46:31 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* xcoffread.c (MIN_TBTABSIZ): Change to 12.
