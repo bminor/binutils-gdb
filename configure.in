@@ -147,6 +147,8 @@ fi
 #esac
 
 case "${target}" in
+  mips-dec-bsd*)
+    ;;
   mips-*-*)
     configdirs=`echo ${configdirs} | sed -e 's/gas//'`
     ;;

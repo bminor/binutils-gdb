@@ -1,6 +1,7 @@
 Tue Mar  2 09:01:30 1993  Ken Raeburn  (raeburn@cygnus.com)
 
-	* configure.in: For vms target, skip bfd, ld, binutils.
+	* configure.in: For vms target, skip bfd, ld, binutils.  Do build
+	gas for mips-dec-bsd.
 
 Tue Mar  2 08:35:24 1993  Ian Lance Taylor  (ian@cygnus.com)
 
