@@ -109,6 +109,7 @@ mcore_opcode_info mcore_table[] =
   { "asr",	O2,	0,	0x1A00 },
   { "lsl",	O2,	0,	0x1B00 },
   { "addu",	O2,	0,	0x1C00 },
+  { "add",	O2,	0,	0x1C00 }, /* Official alias.  */
   { "ixh",	O2,	0,	0x1D00 },
   { "or",	O2,	0,	0x1E00 },
   { "andn",	O2,	0,	0x1F00 },
