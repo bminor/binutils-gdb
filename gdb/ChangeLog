@@ -1,3 +1,48 @@
+Fri Apr 18 17:25:10 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* Makefile.in (SUBDIRS):  Add mswin so that make cleanup cleans up
+	that directory.
+	* defs.h utils.c (error warning):  Make message be const.
+	* main.c (fputs_unfiltered):  Only send gdb_stdout and gdb_stderr
+	to hook.  Otherwise send it to fputs.
+	* monitor.c monitor.h (monitor_get_dev_name):  New function.  Does
+	the obvious.
+	* remote-e7000.c:  Remove debugify stuff.  Change printf, fprintf
+	to _filtered forms to make output appear in GUIs.  Replace all
+	uses of SERIAL_READCHAR with readchar, which has better error
+	checking.
+	* (e7000_parse_device):  Add prototype.
+	* (readchar):  Improve doc.  Handle random serial errors.
+	* (expect):  Disable notice_quit code.  It's busted.  Remove
+	serial error handling (it's now handled in readchar).  Remove
+	remote_debug echoing.  That's handled in readchar as well.
+	* (e7000_parse_device):  Remove serial_flag arg.  It's not
+	necessary.
+	* (e7000_open):  Split into two pieces.  Second part is
+	e7000_start_remote, and is error protected.  Now, when we connect
+	to the target, we setup the initial frame and registers so that
+	the user gets an immediate indication of where the target is.
+	* (gch):  Remove debug output.  That's handled by readchar.
+	* (e7000_read_inferior_memory):  Handle errors better.
+	* (_initialize_remote_e7000):  Get rid of `<xxx>' things from
+	command names.  They show up when doing completion and confuse
+	things horribly.
+	* ser-e7kpc.c:  Remove the last seven months of brain damage.  Get
+	rid of the DLL's since we can access the device directly from Win32s
+	and Win95.  Get rid of debugify crud.
+	* serial.c:  Remove debugify cruft.
+	* (serial_logchar serial_log_command serial_write serial_readchar
+	serial_send_break serial_close):  Merge common functionality into
+	serial_logchar.  Clean up rest of routines.
+	* sparclet-rom.c:  Disembowel.  Leave only download routine.
+	Download routine now switches to remote target automatically.
+	* top.c (disconnect):  Only define if SIGHUP is defined.  Cleans
+	up MSVC/Win32 problem.
+	* utils.c (gdb_flush):  Don't call hook unless it's for gdb_stdout
+	or gdb_stderr.
+	* config/sh/tm-sh.h:  Define TARGET_SH for WinGDB.
+	* config/sparc/tm-sparclet.h:  Remove override for prompt.
+
 Fri Apr 18 13:38:19 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* remote-sim.c (gdbsim_open): Only pass -E to sim_open if

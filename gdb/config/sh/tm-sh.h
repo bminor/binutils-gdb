@@ -281,3 +281,6 @@ extern CORE_ADDR sh_push_return_address   PARAMS ((CORE_ADDR, CORE_ADDR));
 #define REGISTER_SIZE 4
 
 #define COERCE_FLOAT_TO_DOUBLE 1
+
+/* Need this for WinGDB.  See gdb/mswin/{regdoc.h, gdbwin.c, gui.cpp}.  */
+#define TARGET_SH

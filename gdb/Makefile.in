@@ -490,7 +490,7 @@ NTSOBS = standalone.o
 
 NTSSTART = kdb-start.o
 
-SUBDIRS = doc testsuite nlm
+SUBDIRS = doc testsuite nlm mswin
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = c-exp.tab.c java-exp.tab.c f-exp.tab.c m2-exp.tab.c

@@ -67,8 +67,6 @@ static void init_signals PARAMS ((void));
 static void stop_sig PARAMS ((int));
 #endif
 
-static void disconnect PARAMS ((int));
-
 static char * line_completion_function PARAMS ((char *, int, char *, int));
 
 static char * readline_line_completion_function PARAMS ((char *, int));
@@ -155,9 +153,11 @@ static void complete_command PARAMS ((char *, int));
 
 static void do_nothing PARAMS ((int));
 
+#ifdef SIGHUP
 static int quit_cover PARAMS ((char *));
 
 static void disconnect PARAMS ((int));
+#endif
 
 static void source_cleanup PARAMS ((FILE *));
 
@@ -571,6 +571,7 @@ catch_errors (func, args, errstring, mask)
 
 /* Handler for SIGHUP.  */
 
+#ifdef SIGHUP
 static void
 disconnect (signo)
 int signo;
@@ -592,6 +593,7 @@ char *s;
   quit_command((char *)0, 0);
   return 0;
 }
+#endif /* defined SIGHUP */
 
 /* Line number we are currently in in a file which is being sourced.  */
 static int source_line_number;
@@ -1929,8 +1931,10 @@ init_signals ()
      a handler for SIGQUIT, when we call exec it will set the signal
      to SIG_DFL for us.  */
   signal (SIGQUIT, do_nothing);
+#ifdef SIGHUP
   if (signal (SIGHUP, do_nothing) != SIG_IGN)
     signal (SIGHUP, disconnect);
+#endif
   signal (SIGFPE, float_handler);
 
 #if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)

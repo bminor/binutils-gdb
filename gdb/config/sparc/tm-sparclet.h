@@ -105,10 +105,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #undef PRINT_REGISTER_HOOK
 #define PRINT_REGISTER_HOOK(regno)
 
-/* Override the standard gdb prompt when compiled for this target.  */
-    
-#define DEFAULT_PROMPT  "(gdbslet) "
-
 /* Offsets into jmp_buf.  Not defined by Sun, but at least documented in a
    comment in <machine/setjmp.h>! */
 

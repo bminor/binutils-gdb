@@ -23,10 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdb_string.h"
 #include "gdbcmd.h"
 
-/*#define DEBUGIFY*/
-#include "debugify.h"
-
-
 /* Linked list of serial I/O handlers */
 
 static struct serial_ops *serial_ops_list = NULL;
@@ -46,7 +42,7 @@ static char *serial_logfile = NULL;
 static FILE *serial_logfp = NULL;
 
 static struct serial_ops *serial_interface_lookup PARAMS ((char *));
-static void serial_logchar PARAMS ((int ch, int timeout));
+static void serial_logchar PARAMS ((int chtype, int ch, int timeout));
 static char logbase_hex[] = "hex";
 static char logbase_octal[] = "octal";
 static char logbase_ascii[] = "ascii";
@@ -54,37 +50,26 @@ static char *logbase_enums[] = {logbase_hex, logbase_octal, logbase_ascii, NULL}
 static char *serial_logbase = logbase_ascii;
 
 
-static int serial_reading = 0;
-static int serial_writing = 0;
+static int serial_current_type = 0;
 
-void
-serial_log_command (cmd)
-     const char *cmd;
-{
-  if (!serial_logfp)
-    return;
-
-  if (serial_reading || serial_writing)
-    {
-      fputc_unfiltered ('\n', serial_logfp);
-      serial_reading = 0;
-      serial_writing = 0;
-    }
-  fprintf_unfiltered (serial_logfp, "c %s\n", cmd);
-  /* Make sure that the log file is as up-to-date as possible,
-     in case we are getting ready to dump core or something. */
-  fflush (serial_logfp);
-}
+/* Log char CH of type CHTYPE, with TIMEOUT */
 
 /* Define bogus char to represent a BREAK.  Should be careful to choose a value
    that can't be confused with a normal char, or an error code.  */
 #define SERIAL_BREAK 1235
 
 static void
-serial_logchar (ch, timeout)
+serial_logchar (chtype, ch, timeout)
+     int chtype;
      int ch;
      int timeout;
 {
+  if (chtype != serial_current_type)
+    {
+      fprintf_unfiltered (serial_logfp, "\n%c ", chtype);
+      serial_current_type = chtype;
+    }
+
   if (serial_logbase != logbase_ascii)
     fputc_unfiltered (' ', serial_logfp);
 
@@ -119,7 +104,24 @@ serial_logchar (ch, timeout)
 	  case '\v':	fputs_unfiltered ("\\v", serial_logfp); break;	
 	  default:	fprintf_unfiltered (serial_logfp, isprint (ch) ? "%c" : "\\x%02x", ch & 0xFF); break;
 	  }
-	}
+    }
+}
+
+void
+serial_log_command (cmd)
+     const char *cmd;
+{
+  if (!serial_logfp)
+    return;
+
+  serial_current_type = 'c';
+
+  fputs_unfiltered (serial_logfp, "\nc ");
+  fputs_unfiltered (serial_logfp, cmd);
+
+  /* Make sure that the log file is as up-to-date as possible,
+     in case we are getting ready to dump core or something. */
+  gdb_flush (serial_logfp);
 }
 
 int
@@ -128,28 +130,18 @@ serial_write (scb, str, len)
      const char *str;
      int len;
 {
-  int count;
-
   if (serial_logfp != NULL)
     {
-      if (serial_reading)
-	{
-	  fputc_unfiltered ('\n', serial_logfp);
-	  serial_reading = 0;
-	}
-      if (!serial_writing)
-	{
-	  fputs_unfiltered ("w ", serial_logfp);
-	  serial_writing = 1;
-	}
+      int count;
+
       for (count = 0; count < len; count++)
-	{
-	  serial_logchar (str[count] & 0xff, 0);
-	}
+	serial_logchar ('w', str[count] & 0xff, 0);
+
       /* Make sure that the log file is as up-to-date as possible,
 	 in case we are getting ready to dump core or something. */
-      fflush (serial_logfp);
+      gdb_flush (serial_logfp);
     }
+
   return (scb -> ops -> write (scb, str, len));
 }
 
@@ -163,21 +155,13 @@ serial_readchar (scb, timeout)
   ch = scb -> ops -> readchar (scb, timeout);
   if (serial_logfp != NULL)
     {
-      if (serial_writing)
-	{
-	  fputc_unfiltered ('\n', serial_logfp);
-	  serial_writing = 0;
-	}
-      if (!serial_reading)
-	{
-	  fputs_unfiltered ("r ", serial_logfp);
-	  serial_reading = 1;
-	}
-      serial_logchar (ch, timeout);
+      serial_logchar ('r', ch, timeout);
+
       /* Make sure that the log file is as up-to-date as possible,
 	 in case we are getting ready to dump core or something. */
-      fflush (serial_logfp);
+      gdb_flush (serial_logfp);
     }
+
   return (ch);
 }
 
@@ -186,22 +170,8 @@ serial_send_break (scb)
      serial_t scb;
 {
   if (serial_logfp != NULL)
-    {
-      if (serial_reading)
-	{
-	  fputc_unfiltered ('\n', serial_logfp);
-	  serial_reading = 0;
-	}
-      if (!serial_writing)
-	{
-	  fputs_unfiltered ("w ", serial_logfp);
-	  serial_writing = 1;
-	}
-      serial_logchar (SERIAL_BREAK, 0);
-      /* Make sure that the log file is as up-to-date as possible,
-	 in case we are getting ready to dump core or something. */
-      fflush (serial_logfp);
-    }
+    serial_logchar ('w', SERIAL_BREAK, 0);
+
   return (scb -> ops -> send_break (scb));
 }
 
@@ -210,13 +180,11 @@ serial_interface_lookup (name)
      char *name;
 {
   struct serial_ops *ops;
-  DBG(("serial_interface_lookup(%s)\n",name));
 
   for (ops = serial_ops_list; ops; ops = ops->next)
     if (strcmp (name, ops->name) == 0)
       return ops;
 
-  DBG(("serial_interface_lookup: %s not found!\n",name));
   return NULL;
 }
 
@@ -237,12 +205,10 @@ serial_open (name)
   serial_t scb;
   struct serial_ops *ops;
 
-  DBG(("serial_open\n"));
   for (scb = scb_base; scb; scb = scb->next)
     if (scb->name && strcmp (scb->name, name) == 0)
       {
 	scb->refcnt++;
-        DBG(("serial_open: scb %s found\n", name));
 	return scb;
       }
 
@@ -256,10 +222,7 @@ serial_open (name)
     ops = serial_interface_lookup ("hardwire");
 
   if (!ops)
-  {
-    DBG(("serial_open: !ops; returning NULL\n"));
     return NULL;
-  }
 
   scb = (serial_t)xmalloc (sizeof (struct _serial_t));
 
@@ -271,7 +234,6 @@ serial_open (name)
   if (scb->ops->open(scb, name))
     {
       free (scb);
-      DBG(("serial_open: scb->ops->open failed!\n"));
       return NULL;
     }
 
@@ -284,15 +246,11 @@ serial_open (name)
 
   if (serial_logfile != NULL)
     {
-      serial_logfp = fopen (serial_logfile, "w");
+      serial_logfp = gdb_fopen (serial_logfile, "w");
       if (serial_logfp == NULL)
-	{
-          DBG(("serial_open: unable to open serial logfile %s!\n",serial_logfile));
-	  perror_with_name (serial_logfile);
-	}
+	perror_with_name (serial_logfile);
     }
 
-  DBG(("serial_open: Done! :-)\n"));
   return scb;
 }
 
@@ -302,7 +260,6 @@ serial_fdopen (fd)
 {
   serial_t scb;
   struct serial_ops *ops;
-  DBG(("serial_fdopen\n"));
 
   for (scb = scb_base; scb; scb = scb->next)
     if (scb->fd == fd)
@@ -336,7 +293,7 @@ serial_fdopen (fd)
 }
 
 void
-serial_close(scb, really_close)
+serial_close (scb, really_close)
      serial_t scb;
      int really_close;
 {
@@ -346,13 +303,10 @@ serial_close(scb, really_close)
 
   if (serial_logfp)
     {
-      if (serial_reading || serial_writing)
-	{
-	  fputc_unfiltered ('\n', serial_logfp);
-	  serial_reading = 0;
-	  serial_writing = 0;
-	}
-      fclose (serial_logfp);
+      fputs_unfiltered ("\nEnd of log\n", serial_logfp);
+      serial_current_type = 0;
+
+      fclose (serial_logfp);	/* XXX - What if serial_logfp == stdout or stderr? */
       serial_logfp = NULL;
     }
 
@@ -428,7 +382,6 @@ connect_command (args, fromtty)
   char cur_esc = 0;
   serial_ttystate ttystate;
   serial_t port_desc;		/* TTY port */
-  DBG(("connect_command\n"));
 
   dont_repeat();
 
@@ -546,8 +499,6 @@ serial_printf (va_alist)
 void
 _initialize_serial ()
 {
-  struct cmd_list_element *cmd;
-
 #if 0
   add_com ("connect", class_obscure, connect_command,
 	   "Connect the terminal directly up to the command monitor.\n\

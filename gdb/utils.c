@@ -72,7 +72,8 @@ set_width_command PARAMS ((char *, int, struct cmd_list_element *));
 /* Chain of cleanup actions established with make_cleanup,
    to be executed if an error happens.  */
 
-static struct cleanup *cleanup_chain;
+static struct cleanup *cleanup_chain; /* cleaned up after a failed command */
+static struct cleanup *final_cleanup_chain; /* cleaned up when gdb exits */
 
 /* Nonzero if we have job control. */
 
@@ -134,14 +135,30 @@ make_cleanup (function, arg)
      void (*function) PARAMS ((PTR));
      PTR arg;
 {
+    return make_my_cleanup (&cleanup_chain, function, arg);
+}
+
+struct cleanup *
+make_final_cleanup (function, arg)
+     void (*function) PARAMS ((PTR));
+     PTR arg;
+{
+    return make_my_cleanup (&final_cleanup_chain, function, arg);
+}
+struct cleanup *
+make_my_cleanup (pmy_chain, function, arg)
+     struct cleanup **pmy_chain;
+     void (*function) PARAMS ((PTR));
+     PTR arg;
+{
   register struct cleanup *new
     = (struct cleanup *) xmalloc (sizeof (struct cleanup));
-  register struct cleanup *old_chain = cleanup_chain;
+  register struct cleanup *old_chain = *pmy_chain;
 
-  new->next = cleanup_chain;
+  new->next = *pmy_chain;
   new->function = function;
   new->arg = arg;
-  cleanup_chain = new;
+  *pmy_chain = new;
 
   return old_chain;
 }
@@ -153,10 +170,25 @@ void
 do_cleanups (old_chain)
      register struct cleanup *old_chain;
 {
+    do_my_cleanups (&cleanup_chain, old_chain);
+}
+
+void
+do_final_cleanups (old_chain)
+     register struct cleanup *old_chain;
+{
+    do_my_cleanups (&final_cleanup_chain, old_chain);
+}
+
+void
+do_my_cleanups (pmy_chain, old_chain)
+     register struct cleanup **pmy_chain;
+     register struct cleanup *old_chain;
+{
   register struct cleanup *ptr;
-  while ((ptr = cleanup_chain) != old_chain)
+  while ((ptr = *pmy_chain) != old_chain)
     {
-      cleanup_chain = ptr->next;	/* Do this first incase recursion */
+      *pmy_chain = ptr->next;	/* Do this first incase recursion */
       (*ptr->function) (ptr->arg);
       free (ptr);
     }
@@ -169,10 +201,25 @@ void
 discard_cleanups (old_chain)
      register struct cleanup *old_chain;
 {
+    discard_my_cleanups (&cleanup_chain, old_chain);
+}
+
+void
+discard_final_cleanups (old_chain)
+     register struct cleanup *old_chain;
+{
+    discard_my_cleanups (&final_cleanup_chain, old_chain);
+}
+
+void
+discard_my_cleanups (pmy_chain, old_chain)
+     register struct cleanup **pmy_chain;
+     register struct cleanup *old_chain;
+{
   register struct cleanup *ptr;
-  while ((ptr = cleanup_chain) != old_chain)
+  while ((ptr = *pmy_chain) != old_chain)
     {
-      cleanup_chain = ptr->next;
+      *pmy_chain = ptr->next;
       free ((PTR)ptr);
     }
 }
@@ -181,9 +228,22 @@ discard_cleanups (old_chain)
 struct cleanup *
 save_cleanups ()
 {
-  struct cleanup *old_chain = cleanup_chain;
+    return save_my_cleanups (&cleanup_chain);
+}
 
-  cleanup_chain = 0;
+struct cleanup *
+save_final_cleanups ()
+{
+    return save_my_cleanups (&final_cleanup_chain);
+}
+
+struct cleanup *
+save_my_cleanups (pmy_chain)
+    struct cleanup **pmy_chain;
+{
+  struct cleanup *old_chain = *pmy_chain;
+
+  *pmy_chain = 0;
   return old_chain;
 }
 
@@ -192,7 +252,22 @@ void
 restore_cleanups (chain)
      struct cleanup *chain;
 {
-  cleanup_chain = chain;
+    restore_my_cleanups (&cleanup_chain, chain);
+}
+
+void
+restore_final_cleanups (chain)
+     struct cleanup *chain;
+{
+    restore_my_cleanups (&final_cleanup_chain, chain);
+}
+
+void
+restore_my_cleanups (pmy_chain, chain)
+     struct cleanup **pmy_chain;
+     struct cleanup *chain;
+{
+  *pmy_chain = chain;
 }
 
 /* This function is useful for cleanups.
@@ -253,7 +328,7 @@ warning_begin ()
 /* VARARGS */
 void
 #ifdef ANSI_PROTOTYPES
-warning (char *string, ...)
+warning (const char *string, ...)
 #else
 warning (va_alist)
      va_dcl
@@ -300,7 +375,7 @@ error_begin ()
 
 #ifdef ANSI_PROTOTYPES
 NORETURN void
-error (char *string, ...)
+error (const char *string, ...)
 #else
 void
 error (va_alist)
@@ -394,10 +469,8 @@ fatal_dump_core (va_alist)
   fprintf_unfiltered (gdb_stderr, "\n");
   va_end (args);
 
-#ifndef _WIN32
   signal (SIGQUIT, SIG_DFL);
   kill (getpid (), SIGQUIT);
-#endif
   /* We should never get here, but just in case...  */
   exit (1);
 }
@@ -533,8 +606,9 @@ quit ()
 }
 
 
-#if defined(__GO32__) || defined(_WIN32)
+#if defined(__GO32__) || defined (_WIN32)
 
+#ifndef _MSC_VER
 /* In the absence of signals, poll keyboard for a quit.
    Called from #define QUIT pollquit() in xm-go32.h. */
 
@@ -543,7 +617,6 @@ pollquit()
 {
   if (kbhit ())
     {
-#ifndef _WIN32
       int k = getkey ();
       if (k == 1) {
 	quit_flag = 1;
@@ -556,22 +629,42 @@ pollquit()
       else 
 	{
 	  /* We just ignore it */
+	  /* FIXME!! Don't think this actually works! */
 	  fprintf_unfiltered (gdb_stderr, "CTRL-A to quit, CTRL-B to quit harder\n");
 	}
-#else
-      abort ();
-#endif
     }
 }
+#else /* !_MSC_VER */
+
+/* This above code is not valid for wingdb unless
+ * getkey and kbhit were to be rewritten.
+ * Windows translates all keyboard and mouse events 
+ * into a message which is appended to the message 
+ * queue for the process.
+ */
+void
+pollquit()
+{
+  int k = win32pollquit();
+  if (k == 1)
+  {
+    quit_flag = 1;
+    quit ();
+  }
+  else if (k == 2)
+  {
+    immediate_quit = 1;
+    quit ();
+  }
+}
+#endif /* !_MSC_VER */
 
 
-#endif
-#if defined(__GO32__) || defined(_WIN32)
+#ifndef _MSC_VER
 void notice_quit()
 {
   if (kbhit ())
     {
-#ifndef _WIN32
       int k = getkey ();
       if (k == 1) {
 	quit_flag = 1;
@@ -584,17 +677,27 @@ void notice_quit()
 	{
 	  fprintf_unfiltered (gdb_stderr, "CTRL-A to quit, CTRL-B to quit harder\n");
 	}
-#else
-      abort ();
-#endif
     }
 }
+#else /* !_MSC_VER */
+
+void notice_quit()
+{
+  int k = win32pollquit();
+  if (k == 1)
+    quit_flag = 1;
+  else if (k == 2)
+    immediate_quit = 1;
+}
+#endif /* !_MSC_VER */
+
 #else
 void notice_quit()
 {
   /* Done by signals */
 }
-#endif
+#endif /* defined(__GO32__) || defined(_WIN32) */
+
 /* Control C comes here */
 
 void
@@ -1327,7 +1430,9 @@ void
 gdb_flush (stream)
      FILE *stream;
 {
-  if (flush_hook)
+  if (flush_hook
+      && (stream == gdb_stdout
+	  || stream == gdb_stderr))
     {
       flush_hook (stream);
       return;
@@ -1884,7 +1989,7 @@ initialize_utils ()
   lines_per_page = 24;
   chars_per_line = 80;
 
-#if !defined MPW && !defined _WIN32
+#if !defined (MPW) && !defined (_WIN32)
   /* No termcap under MPW, although might be cool to do something
      by looking at worksheet or console window sizes. */
   /* Initialize the screen height and width from termcap.  */
@@ -2287,18 +2392,20 @@ floatformat_from_doublest (fmt, from, to)
 }
 
 /* temporary storage using circular buffer */
-#define MAXCELLS 16
+#define NUMCELLS 16
 #define CELLSIZE 32
-char* 
+static char*
 get_cell()
 {
-  static char buf[MAXCELLS][CELLSIZE];
+  static char buf[NUMCELLS][CELLSIZE];
   static int cell=0;
-  if (++cell>MAXCELLS) cell=0;
+  if (++cell>=NUMCELLS) cell=0;
   return buf[cell];
 }
 
 /* print routines to handle variable size regs, etc */
+static int thirty_two = 32;	/* eliminate warning from compiler on 32-bit systems */
+
 char* 
 paddr(addr)
   t_addr addr;
@@ -2308,7 +2415,7 @@ paddr(addr)
     {
       case 8:
         sprintf(paddr_str,"%08x%08x",
-		(unsigned long)(addr>>32),(unsigned long)(addr&0xffffffff));
+		(unsigned long)(addr>>thirty_two),(unsigned long)(addr&0xffffffff));
 	break;
       case 4:
         sprintf(paddr_str,"%08x",(unsigned long)addr);
@@ -2331,7 +2438,7 @@ preg(reg)
     {
       case 8:
         sprintf(preg_str,"%08x%08x",
-		(unsigned long)(reg>>32),(unsigned long)(reg&0xffffffff));
+		(unsigned long)(reg>>thirty_two),(unsigned long)(reg&0xffffffff));
 	break;
       case 4:
         sprintf(preg_str,"%08x",(unsigned long)reg);
@@ -2345,3 +2452,60 @@ preg(reg)
   return preg_str;
 }
 
+char*
+paddr_nz(addr)
+  t_addr addr;
+{
+  char *paddr_str=get_cell();
+  switch (sizeof(t_addr))
+    {
+      case 8:
+	{
+	  unsigned long high = (unsigned long)(addr>>thirty_two);
+	  if (high == 0)
+	    sprintf(paddr_str,"%x", (unsigned long)(addr&0xffffffff));
+	  else
+	    sprintf(paddr_str,"%x%08x",
+		    high, (unsigned long)(addr&0xffffffff));
+	  break;
+	}
+      case 4:
+        sprintf(paddr_str,"%x",(unsigned long)addr);
+	break;
+      case 2:
+        sprintf(paddr_str,"%x",(unsigned short)(addr&0xffff));
+	break;
+      default:
+        sprintf(paddr_str,"%x",addr);
+    }
+  return paddr_str;
+}
+
+char*
+preg_nz(reg)
+  t_reg reg;
+{
+  char *preg_str=get_cell();
+  switch (sizeof(t_reg))
+    {
+      case 8:
+	{
+	  unsigned long high = (unsigned long)(reg>>thirty_two);
+	  if (high == 0)
+	    sprintf(preg_str,"%x", (unsigned long)(reg&0xffffffff));
+	  else
+	    sprintf(preg_str,"%x%08x",
+		    high, (unsigned long)(reg&0xffffffff));
+	  break;
+	}
+      case 4:
+        sprintf(preg_str,"%x",(unsigned long)reg);
+	break;
+      case 2:
+        sprintf(preg_str,"%x",(unsigned short)(reg&0xffff));
+	break;
+      default:
+        sprintf(preg_str,"%x",reg);
+    }
+  return preg_str;
+}

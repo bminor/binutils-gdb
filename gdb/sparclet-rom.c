@@ -26,115 +26,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "srec.h"
 #include "symtab.h"
 #include "symfile.h" /* for generic_load */
-
-#if 0	/* Do we really need all this Unix stuff here? */
-#if !defined (HAVE_TERMIOS) && !defined (HAVE_TERMIO) && !defined (HAVE_SGTTY)
-#define HAVE_SGTTY
-#endif
-
-#ifdef HAVE_SGTTY
-#include <sys/ioctl.h>
-#endif
-
-#include <sys/types.h>	/* Needed by file.h on Sys V */
-#include <sys/file.h>
-#include <signal.h>
-#include <sys/stat.h>
-#endif /* Unix stuff */
-
-#define USE_GENERIC_LOAD
-#define USE_SW_BREAKS
+#include <time.h>
 
 static struct target_ops sparclet_ops;
 
 static void sparclet_open PARAMS ((char *args, int from_tty));
-
-#ifdef USE_GENERIC_LOAD
-
-static void
-sparclet_load_gen (filename, from_tty) 
-    char *filename;
-    int from_tty;
-{
-  extern int inferior_pid;
-
-  generic_load (filename, from_tty);
-  /* Finally, make the PC point at the start address */
-  if (exec_bfd)
-    write_pc (bfd_get_start_address (exec_bfd));
-
-  inferior_pid = 0;             /* No process now */
-}
-
-#endif
-
-#ifdef USE_XMODEM_LOAD
-
-static void
-sparclet_xmodem_load (desc, file, hashmark)
-     serial_t desc;
-     char *file;
-     int hashmark;
-{
-  bfd *abfd;
-  asection *s;
-  char *buffer;
-  int i;
-
-  buffer = alloca (XMODEM_PACKETSIZE);
-  abfd = bfd_openr (file, 0);
-  if (!abfd)
-    {
-      printf_filtered ("Unable to open file %s\n", file);
-      return;
-    }
-  if (bfd_check_format (abfd, bfd_object) == 0)
-    {
-      printf_filtered ("File is not an object file\n");
-      return;
-    }
-  for (s = abfd->sections; s; s = s->next)
-    if (s->flags & SEC_LOAD)
-      {
-	bfd_size_type section_size;
-	printf_filtered ("%s\t: 0x%4x .. 0x%4x  ", s->name, s->vma,
-			 s->vma + s->_raw_size);
-	gdb_flush (gdb_stdout);
-	monitor_printf (current_monitor->load, s->vma);
-	if (current_monitor->loadresp)
-	  monitor_expect (current_monitor->loadresp, NULL, 0);
-	xmodem_init_xfer (desc);
-	section_size = bfd_section_size (abfd, s);
-	for (i = 0; i < section_size; i += XMODEM_DATASIZE)
-	  {
-	    int numbytes;
-	    numbytes = min (XMODEM_DATASIZE, section_size - i);
-	    bfd_get_section_contents (abfd, s, buffer + XMODEM_DATAOFFSET, i,
-				      numbytes);
-	    xmodem_send_packet (desc, buffer, numbytes, hashmark);
-	    if (hashmark)
-	      {
-		putchar_unfiltered ('#');
-		gdb_flush (gdb_stdout);
-	      }
-	  }			/* Per-packet (or S-record) loop */
-	xmodem_finish_xfer (desc);
-	monitor_expect_prompt (NULL, 0);
-	putchar_unfiltered ('\n');
-      }				/* Loadable sections */
-  if (hashmark) 
-    putchar_unfiltered ('\n');
-}
-
-static void
-sparclet_load (desc, file, hashmark)
-     serial_t desc;
-     char *file;
-     int hashmark;
-{
-???
-}
-#endif /* USE_XMODEM_LOAD */
 
 /* This array of registers need to match the indexes used by GDB.
    This exists because the various ROM monitors use different strings
@@ -182,7 +78,111 @@ sparclet_supply_register (regname, regnamelen, val, vallen)
   return;
 }
 
+static void
+sparclet_load (desc, file, hashmark)
+     serial_t desc;
+     char *file;
+     int hashmark;
+{
+  bfd *abfd;
+  asection *s;
+  int i;
+  CORE_ADDR load_offset;
+  time_t start_time, end_time;
+  unsigned long data_count = 0;
 
+  /* enable user to specify address for downloading as 2nd arg to load */
+
+  i = sscanf(file, "%*s 0x%lx", &load_offset);
+  if (i >= 1 ) 
+    {
+      char *p;
+
+      for (p = file; *p != '\000' && !isspace (*p); p++);
+
+      *p = '\000';
+    }
+  else
+    load_offset = 0;
+
+  abfd = bfd_openr (file, 0);
+  if (!abfd)
+    {
+      printf_filtered ("Unable to open file %s\n", file);
+      return;
+    }
+
+  if (bfd_check_format (abfd, bfd_object) == 0)
+    {
+      printf_filtered ("File is not an object file\n");
+      return;
+    }
+  
+  start_time = time (NULL);
+
+  for (s = abfd->sections; s; s = s->next)
+    if (s->flags & SEC_LOAD)
+      {
+	bfd_size_type section_size;
+	bfd_vma vma;
+
+	vma = bfd_get_section_vma (abfd, s) + load_offset;
+	section_size = bfd_section_size (abfd, s);
+
+	data_count += section_size;
+
+	printf_filtered ("%s\t: 0x%4x .. 0x%4x  ",
+			 bfd_get_section_name (abfd, s), vma,
+			 vma + section_size);
+	gdb_flush (gdb_stdout);
+
+	monitor_printf ("load c r %x %x\r", vma, section_size);
+
+	monitor_expect ("load: loading ", NULL, 0);
+	monitor_expect ("\r", NULL, 0);
+
+	for (i = 0; i < section_size; i += 2048)
+	  {
+	    int numbytes;
+	    char buf[2048];
+
+	    numbytes = min (sizeof buf, section_size - i);
+
+	    bfd_get_section_contents (abfd, s, buf, i, numbytes);
+
+	    SERIAL_WRITE (desc, buf, numbytes);
+
+	    if (hashmark)
+	      {
+		putchar_unfiltered ('#');
+		gdb_flush (gdb_stdout);
+	      }
+	  }			/* Per-packet (or S-record) loop */
+
+	monitor_expect_prompt (NULL, 0);
+
+	putchar_unfiltered ('\n');
+      }				/* Loadable sections */
+
+  monitor_printf ("reg pc %x\r", bfd_get_start_address (abfd));
+  monitor_expect_prompt (NULL, 0);
+  monitor_printf ("reg npc %x\r", bfd_get_start_address (abfd) + 4);
+  monitor_expect_prompt (NULL, 0);
+
+  monitor_printf ("run\r");
+
+  end_time = time (NULL);
+
+  if (hashmark) 
+    putchar_unfiltered ('\n');
+
+  report_transfer_performance (data_count, start_time, end_time);
+
+  pop_target ();
+  push_remote_target (monitor_get_dev_name (), 1);
+
+  return_to_top_level (RETURN_QUIT);
+}
 
 /* Define the monitor command strings. Since these are passed directly
    through to a printf style function, we may include formatting
@@ -248,16 +248,9 @@ static struct monitor_ops sparclet_cmds =
   "reg\r",			/* dump_registers */
   "\\(\\w+\\)=\\([0-9a-fA-F]+\\)",	/* register_pattern */
   sparclet_supply_register,	/* supply_register */
-#ifdef USE_GENERIC_LOAD
-  NULL,				/* load_routine (defaults to SRECs) */
-  NULL,				/* download command */
+  sparclet_load,		/* load_routine */
+  NULL,				/* download command (srecs on console) */
   NULL,				/* load response */
-#else
-  NULL,				/* load_routine (defaults to SRECs) */
-  /* load [c|a] [s | f | r [addr count]] */
-  "load c s\r",			/* download command (srecs on console) */
-  "load: ",			/* load response */
-#endif
   "monitor>",			/* monitor command prompt */
   /* yikes!  gdb core dumps without this delimitor!! */
   "\r",				/* end-of-command delimitor */
@@ -291,14 +284,9 @@ _initialize_sparclet ()
   init_monitor_ops (&sparclet_ops);
   sparclet_ops.to_shortname = "sparclet"; /* for the target command */
   sparclet_ops.to_longname = "SPARC Sparclet monitor";
-#ifdef USE_GENERIC_LOAD
-  sparclet_ops.to_load = sparclet_load_gen; /* FIXME - should go back and try "do" */
-#endif
-#ifdef USE_SW_BREAKS
   /* use SW breaks; target only supports 2 HW breakpoints */
   sparclet_ops.to_insert_breakpoint = memory_insert_breakpoint; 
   sparclet_ops.to_remove_breakpoint = memory_remove_breakpoint; 
-#endif
 
   sparclet_ops.to_doc = 
     "Use a board running the Sparclet debug monitor.\n\
