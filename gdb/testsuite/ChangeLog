@@ -1,3 +1,8 @@
+2001-07-22  Keith Seitz  <keiths@redhat.com>
+
+	* lib/gdb.exp (_gdbtk_xvfb_init): If GDB_DISPLAY is
+	the empty string, do not run the tests.
+
 2001-07-17  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* gdb.base/long_long.exp: Detect size of pointer.  Take into

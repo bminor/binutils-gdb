@@ -1698,14 +1698,19 @@ proc gdbtk_start {test} {
 
 # Start xvfb when using it.
 # The precedence is:
-#   1. If GDB_DISPLAY is set, use it
+#   1. If GDB_DISPLAY is set (and not ""), use it
 #   2. If Xvfb exists, use it (not on cygwin)
 #   3. Skip tests
 proc _gdbtk_xvfb_init {} {
   global env spawn_id _xvfb_spawn_id _using_windows
 
   if {[info exists env(GDB_DISPLAY)]} {
-    set env(DISPLAY) $env(GDB_DISPLAY)
+    if {$env(GDB_DISPLAY) != ""} {
+      set env(DISPLAY) $env(GDB_DISPLAY)
+    } else {
+      # Suppress tests
+      return 0
+    }
   } elseif {!$_using_windows && [which Xvfb] != 0} {
     set screen ":[getpid]"
     set pid [spawn  Xvfb $screen]
