@@ -719,6 +719,7 @@ dos_setbaudrate (scb, rate)
     if (port->baudrate != rate) 
       {
 	int x;
+	unsigned char cfcr;
 
 	x = dos_baudconv (rate);
 	if (x <= 0)
@@ -729,10 +730,12 @@ dos_setbaudrate (scb, rate)
 	  }
 
 	disable ();
+	cfcr = inb (port, com_cfcr);
+
 	outb(port, com_cfcr, CFCR_DLAB);
 	outb(port, com_dlbl, x & 0xff);
 	outb(port, com_dlbh, x >> 8);
-	outb(port, com_cfcr, CFCR_8BITS);
+	outb(port, com_cfcr, cfcr);
 	port->baudrate = rate;
 	enable ();
       }
@@ -740,6 +743,34 @@ dos_setbaudrate (scb, rate)
     return 0;
 }
 
+static int
+dos_setstopbits (scb, num)
+     serial_t scb;
+     int num;
+{
+    struct dos_ttystate *port = &ports[scb->fd];
+    unsigned char cfcr;
+
+    disable ();
+    cfcr = inb (port, com_cfcr);
+
+    switch (num)
+      {
+      case SERIAL_1_STOPBITS:
+	outb (port, com_cfcr, cfcr & ~CFCR_STOPB);
+	break;
+      case SERIAL_1_AND_A_HALF_STOPBITS:
+      case SERIAL_2_STOPBITS:
+	outb (port, com_cfcr, cfcr | CFCR_STOPB);
+	break;
+      default:
+	enable ();
+	return 1;
+      }
+    enable ();
+
+    return 0;
+}
 
 static int
 dos_write (scb, str, len)
@@ -816,6 +847,7 @@ static struct serial_ops dos_ops =
   dos_print_tty_state,
   dos_noflush_set_tty_state,
   dos_setbaudrate,
+  dos_setstopbits,
 };
 
 

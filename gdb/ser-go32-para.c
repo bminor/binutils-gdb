@@ -230,6 +230,14 @@ go32_setbaudrate (scb, rate)
   return 0;
 }
 
+static int
+go32_setstopbits (scb, num)
+     serial_t scb;
+     int num;
+{
+  return 0;
+}
+
 static void
 go32_close (scb)
      serial_t scb;
@@ -253,6 +261,7 @@ static struct serial_ops go32_ops =
   go32_print_tty_state,
   go32_noflush_set_tty_state,
   go32_setbaudrate,
+  go32_setstopbits,
 };
 
 void

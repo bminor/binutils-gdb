@@ -38,6 +38,7 @@ static void tcp_raw PARAMS ((serial_t scb));
 static int wait_for PARAMS ((serial_t scb, int timeout));
 static int tcp_readchar PARAMS ((serial_t scb, int timeout));
 static int tcp_setbaudrate PARAMS ((serial_t scb, int rate));
+static int tcp_setstopbits PARAMS ((serial_t scb, int num));
 static int tcp_write PARAMS ((serial_t scb, const char *str, int len));
 /* FIXME: static void tcp_restore PARAMS ((serial_t scb)); */
 static void tcp_close PARAMS ((serial_t scb));
@@ -265,6 +266,14 @@ tcp_setbaudrate(scb, rate)
 }
 
 static int
+tcp_setstopbits(scb, num)
+     serial_t scb;
+     int num;
+{
+  return 0;			/* Never fails! */
+}
+
+static int
 tcp_write(scb, str, len)
      serial_t scb;
      const char *str;
@@ -312,6 +321,7 @@ static struct serial_ops tcp_ops =
   tcp_print_tty_state,
   tcp_noflush_set_tty_state,
   tcp_setbaudrate,
+  tcp_setstopbits,
 };
 
 void

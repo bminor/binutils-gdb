@@ -246,6 +246,14 @@ mac_set_baud_rate (scb, rate)
   return 0;
 }
 
+static int
+mac_set_stop_bits (scb, num)
+     serial_t scb;
+     int num;
+{
+  return 0;
+}
+
 int first_mac_write = 0;
 
 static int
@@ -322,6 +330,7 @@ static struct serial_ops mac_ops =
   mac_print_tty_state,
   mac_noflush_set_tty_state,
   mac_set_baud_rate,
+  mac_set_stop_bits,
 };
 
 void

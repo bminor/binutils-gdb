@@ -628,6 +628,51 @@ hardwire_setbaudrate(scb, rate)
 }
 
 static int
+hardwire_setstopbits(scb, num)
+     serial_t scb;
+     int num;
+{
+  struct hardwire_ttystate state;
+  int newbit;
+
+  if (get_tty_state(scb, &state))
+    return -1;
+
+  switch (num)
+    {
+    case SERIAL_1_STOPBITS:
+      newbit = 0;
+      break;
+    case SERIAL_1_AND_A_HALF_STOPBITS:
+    case SERIAL_2_STOPBITS:
+      newbit = 1;
+      break;
+    default:
+      return 1;
+    }
+
+#ifdef HAVE_TERMIOS
+  if (!newbit)
+    state.termios.c_cflag &= ~CSTOPB;
+  else
+    state.termios.c_cflag |= CSTOPB; /* two bits */
+#endif
+
+#ifdef HAVE_TERMIO
+  if (!newbit)
+    state.termio.c_cflag &= ~CSTOPB;
+  else
+    state.termio.c_cflag |= CSTOPB; /* two bits */
+#endif
+
+#ifdef HAVE_SGTTY
+  return 0;			/* sgtty doesn't support this */
+#endif
+
+  return set_tty_state (scb, &state);
+}
+
+static int
 hardwire_write(scb, str, len)
      serial_t scb;
      const char *str;
@@ -675,6 +720,7 @@ static struct serial_ops hardwire_ops =
   hardwire_print_tty_state,
   hardwire_noflush_set_tty_state,
   hardwire_setbaudrate,
+  hardwire_setstopbits,
 };
 
 void

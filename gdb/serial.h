@@ -57,6 +57,7 @@ struct serial_ops {
   int (*noflush_set_tty_state)
     PARAMS ((serial_t, serial_ttystate, serial_ttystate));
   int (*setbaudrate) PARAMS ((serial_t, int rate));
+  int (*setstopbits) PARAMS ((serial_t, int num));
 };
 
 /* Add a new serial interface to the interface list */
@@ -138,6 +139,15 @@ serial_t serial_fdopen PARAMS ((const int fd));
    -1 for failure.  */
 
 #define SERIAL_SETBAUDRATE(SERIAL_T, RATE) ((SERIAL_T)->ops->setbaudrate((SERIAL_T), RATE))
+
+/* Set the number of stop bits to the value specified.  Returns 0 for success,
+   -1 for failure.  */
+
+#define SERIAL_1_STOPBITS 1
+#define SERIAL_1_AND_A_HALF_STOPBITS 2 /* 1.5 bits, snicker... */
+#define SERIAL_2_STOPBITS 3
+
+#define SERIAL_SETSTOPBITS(SERIAL_T, NUM) ((SERIAL_T)->ops->setstopbits((SERIAL_T), NUM))
 
 /* Write LEN chars from STRING to the port SERIAL_T.  Returns 0 for
    success, non-zero for failure.  */
