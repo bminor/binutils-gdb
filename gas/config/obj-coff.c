@@ -60,7 +60,9 @@ static void tag_insert PARAMS ((const char *, symbolS *));
 static symbolS *tag_find PARAMS ((char *));
 static symbolS *tag_find_or_make PARAMS ((char *));
 static void obj_coff_bss PARAMS ((int));
+#ifdef BFD_ASSEMBLER
 static void obj_coff_weak PARAMS ((int));
+#endif
 const char *s_get_name PARAMS ((symbolS * s));
 static void obj_coff_ln PARAMS ((int));
 static void obj_coff_def PARAMS ((int));
@@ -1876,7 +1878,6 @@ size_section (abfd, idx)
      bfd *abfd ATTRIBUTE_UNUSED;
      unsigned int idx;
 {
-
   unsigned int size = 0;
   fragS *frag = segment_info[idx].frchainP->frch_root;
 
@@ -4654,7 +4655,6 @@ const pseudo_typeS coff_pseudo_table[] =
   /* We accept the .bss directive for backward compatibility with
      earlier versions of gas.  */
   {"bss", obj_coff_bss, 0},
-  {"weak", obj_coff_weak, 0},
   {"ident", obj_coff_ident, 0},
 #ifndef BFD_ASSEMBLER
   {"use", obj_coff_section, 0},
@@ -4662,6 +4662,7 @@ const pseudo_typeS coff_pseudo_table[] =
   {"data", obj_coff_data, 0},
   {"lcomm", obj_coff_lcomm, 0},
 #else
+  {"weak", obj_coff_weak, 0},
   {"optim", s_ignore, 0},	/* For sun386i cc (?) */
 #endif
   {"version", s_ignore, 0},

@@ -1,3 +1,8 @@
+2004-07-06  Nick Clifton  <nickc@redhat.com>
+
+	* config/obj-coff.c (coff_pseudo_table): Only define the weak
+	pseudo for BFD based assemblers.
+
 2004-07-05  Andrew Stubbs <andrew.stubbs@superh.com>
 
 	gas:
