@@ -1,3 +1,9 @@
+2004-12-09  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* ld-mips-elf/jalbal.d: New test.
+	* ld-mips-elf/jalbal.s: New test.
+	* ld-mips-elf/mips-elf.exp: Run it.
+
 2004-12-08  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* ld-mips-elf/jaloverflow.d: New test.
