@@ -1,3 +1,17 @@
+Fri Apr  3 11:09:42 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* elf32-m68k.c (elf_m68k_size_dynamic_sections): Generate section
+	symbols when creating a shared library.
+	(elf_m68k_adjust_dynindx): New function, used by above code.
+	(elf_m68k_finish_dynamic_sections): Initialize the section
+	symbols.
+	(elf_m68k_relocate_section): Change abort to BFD_ASSERT.
+
+Wed Apr  1 16:04:02 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* coff-arm.c (in_reloc_p): Use ARM_RVA32 in place of constant
+	value 11.
+
 Wed Apr  1 13:36:58 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* elf32-m68k.c (elf_m68k_relocate_section, case R_68K_PLT*O): Fix
