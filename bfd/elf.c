@@ -761,6 +761,7 @@ bfd_elf_print_symbol (abfd, filep, symbol, how)
 	CONST char *section_name;
 	CONST char *name = NULL;
 	struct elf_backend_data *bed;
+	unsigned char st_other;
 	
 	section_name = symbol->section ? symbol->section->name : "(*none*)";
 
@@ -836,10 +837,19 @@ bfd_elf_print_symbol (abfd, filep, symbol, how)
 	  }
 
 	/* If the st_other field is not zero, print it.  */
-	if (((elf_symbol_type *) symbol)->internal_elf_sym.st_other != 0)
-	  fprintf (file, " 0x%02x",
-		   ((unsigned int)
-		    ((elf_symbol_type *) symbol)->internal_elf_sym.st_other));
+	st_other = ((elf_symbol_type *) symbol)->internal_elf_sym.st_other;
+	
+	switch (st_other)
+	  {
+	  case 0: break;
+	  case STV_INTERNAL:  fprintf (file, " .internal");  break;
+	  case STV_HIDDEN:    fprintf (file, " .hidden");    break;
+	  case STV_PROTECTED: fprintf (file, " .protected"); break;
+	  default:
+	    /* Some other non-defined flags are also present, so print
+	       everything hex.  */
+	    fprintf (file, " 0x%02x", (unsigned int) st_other);
+	  }
 
 	fprintf (file, " %s", name);
       }

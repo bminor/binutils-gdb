@@ -218,6 +218,32 @@ _bfd_elf_link_record_dynamic_symbol (info, h)
       boolean copy;
       bfd_size_type indx;
 
+      /* XXX: The ABI draft says the linker must turn hidden and
+	 internal symbols into STB_LOCAL symbols when producing the
+	 DSO. However, if ld.so honors st_other in the dynamic table,
+	 this would not be necessary.  */
+      switch (ELF_ST_VISIBILITY (h->other))
+	{
+	case STV_INTERNAL:
+	case STV_HIDDEN:
+	  /* This symbol must be defined in the shared object or
+	     executable.  */
+	  if (h->root.type == bfd_link_hash_undefined)
+	    {
+	      bfd * abfd = h->root.u.undef.abfd;
+	      char * name = h->root.root.string;
+	      
+	      (*info->callbacks->undefined_symbol)
+		(info, name, abfd, bfd_und_section_ptr, 0);
+	    }
+	  
+	  h->elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
+	  break;
+	  
+	default:
+	  break;
+	}
+
       h->dynindx = elf_hash_table (info)->dynsymcount;
       ++elf_hash_table (info)->dynsymcount;
 

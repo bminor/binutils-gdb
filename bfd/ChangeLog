@@ -1,3 +1,10 @@
+2000-01-03  Martin v. Loewis  <loewis@informatik.hu-berlin.de>
+
+	* elflink.c (_bfd_elf_link_record_dynamic_symbol): Process symbol
+	visibility.
+	* elflink.h (elf_link_add_object_symbols): Combine visibilities.
+	* elf.c (bfd_elf_print_symbol): Interpret st_other as visibility.
+
 1999-12-29  Richard Henderson  <rth@cygnus.com>
 
 	* elflink.h (bfd_elf,size_dynamic_sections): Don't export all

@@ -1566,9 +1566,24 @@ elf_link_add_object_symbols (abfd, info)
 	      h->type = ELF_ST_TYPE (sym.st_info);
 	    }
 
-	  if (sym.st_other != 0
-	      && (definition || h->other == 0))
-	    h->other = sym.st_other;
+	  /* If st_other has a processor-specific meaning, specific code
+	     might be needed here.  */
+	  if (sym.st_other != 0)
+	    {
+	      /* Combine visibilities, using the most constraining one.  */
+	      unsigned char hvis   = ELF_ST_VISIBILITY (h->other);
+	      unsigned char symvis = ELF_ST_VISIBILITY (sym.st_other);
+	      
+	      if (symvis && (hvis > symvis || hvis == 0))
+		h->other = sym.st_other;
+	      
+	      /* If neither has visibility, use the st_other of the
+	         definition.  This is an arbitrary choice, since the
+	         other bits have no general meaning.  */
+	      if (!symvis && !hvis
+		  && (definition || h->other == 0))
+		h->other = sym.st_other;
+	    }
 
 	  /* Set a flag in the hash table entry indicating the type of
 	     reference or definition we just found.  Keep a count of
