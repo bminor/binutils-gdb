@@ -284,8 +284,9 @@ static int mips_32bitmode = 0;
 #define HAVE_64BIT_ADDRESSES (! HAVE_32BIT_ADDRESSES)
 
 /* Return true if the given CPU supports the MIPS16 ASE.  */
-#define CPU_HAS_MIPS16(cpu)                            \
-   (strncmp (TARGET_CPU, "mips16", sizeof ("mips16") - 1) == 0)
+#define CPU_HAS_MIPS16(cpu)						\
+   (strncmp (TARGET_CPU, "mips16", sizeof ("mips16") - 1) == 0		\
+    || strncmp (TARGET_CANONICAL, "mips-lsi-elf", sizeof ("mips-lsi-elf") - 1) == 0)
 
 /* Return true if the given CPU supports the MIPS3D ASE.  */
 #define CPU_HAS_MIPS3D(cpu)	((cpu) == CPU_SB1      \
@@ -2713,7 +2714,7 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 	  && insn.insn_mo->pinfo != INSN_MACRO
   	  && OPCODE_IS_MEMBER (insn.insn_mo,
   			       (mips_opts.isa
-	      		        | (mips_opts.mips16 ? INSN_MIPS16 : 0)),
+	      		        | (file_ase_mips16 ? INSN_MIPS16 : 0)),
 			       mips_arch)
 	  && (mips_arch != CPU_R4650 || (insn.insn_mo->pinfo & FP_D) == 0))
 	break;
@@ -7809,7 +7810,7 @@ mips_ip (str, ip)
 
       if (OPCODE_IS_MEMBER (insn,
 			    (mips_opts.isa
-			     | (mips_opts.mips16 ? INSN_MIPS16 : 0)
+			     | (file_ase_mips16 ? INSN_MIPS16 : 0)
 	      		     | (mips_opts.ase_mdmx ? INSN_MDMX : 0)
 			     | (mips_opts.ase_mips3d ? INSN_MIPS3D : 0)),
 			    mips_arch))

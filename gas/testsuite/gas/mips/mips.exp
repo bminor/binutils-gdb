@@ -141,7 +141,13 @@ if { [istarget mips*-*-*] } then {
     }
     # The mips16 test can only be run on ELF, because only ELF
     # supports the necessary mips16 reloc.
-    if { $elf && !$no_mips16 } { run_dump_test "mips16" }
+    if { $elf && !$no_mips16 } {
+	run_dump_test "mips16"
+	# Check jalx handling
+	run_dump_test "mips16-jalx"
+	run_dump_test "mips-jalx"
+    }
+    run_list_test "mips-no-jalx" ""
     run_dump_test "delay"
     run_dump_test "nodelay"
     run_dump_test "mips4010"
