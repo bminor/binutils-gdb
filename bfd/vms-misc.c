@@ -18,7 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-
 #if __STDC__
 #include <stdarg.h>
 #endif
@@ -38,7 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    evaluates environment variable VMS_DEBUG for a
    numerical value on the first call
    all error levels below this value are printed
-  
+
    levels:
    1	toplevel bfd calls (functions from the bfd vector)
    2	functions called by bfd calls
@@ -74,10 +73,10 @@ _bfd_vms_debug (int level, char *format, ...)
   if (abslvl > min_level)
     return;
 
-  while(--level>0)
-    fprintf(output, " ");
+  while (--level>0)
+    fprintf (output, " ");
   va_start(args, format);
-  vfprintf(output, format, args);
+  vfprintf (output, format, args);
   fflush(output);
   va_end(args);
 
@@ -112,15 +111,14 @@ _bfd_vms_debug (level, format, a1, a2, a3, a4, a5, a6)
   if (level > min_level)
     return;
 
-  while(--level>0)
-    fprintf(output, " ");
-  fprintf(output, format, a1, a2, a3, a4, a5, a6);
+  while (--level>0)
+    fprintf (output, " ");
+  fprintf (output, format, a1, a2, a3, a4, a5, a6);
   fflush(output);
 
   return;
 }
 #endif /* __STDC__ */
-
 
 /* a debug function
    hex dump 'size' bytes starting at 'ptr'  */
@@ -235,43 +233,41 @@ _bfd_vms_get_header_values (abfd, buf, type, length)
   vms_debug (10, "_bfd_vms_get_header_values type %x, length %x\n", (type?*type:0), (length?*length:0));
 #endif
 
-
   return;
 }
 
-
 /* Get next record from object file to vms_buf
    set PRIV(buf_size) and return it
-  
+
    this is a little tricky since it should be portable.
-  
+
    the openVMS object file has 'variable length' which means that
    read() returns data in chunks of (hopefully) correct and expected
    size. The linker (and other tools on vms) depend on that. Unix doesn't
    know about 'formatted' files, so reading and writing such an object
    file in a unix environment is not trivial.
-  
+
    With the tool 'file' (available on all vms ftp sites), one
    can view and change the attributes of a file. Changing from
    'variable length' to 'fixed length, 512 bytes' reveals the
    record length at the first 2 bytes of every record. The same
    happens during the transfer of object files from vms to unix,
    at least with ucx, dec's implementation of tcp/ip.
-  
+
    The vms format repeats the length at bytes 2 & 3 of every record.
-  
+
    On the first call (file_format == FF_UNKNOWN) we check if
    the first and the third byte pair (!) of the record match.
    If they do it's an object file in an unix environment or with
    wrong attributes (FF_FOREIGN), else we should be in a vms
    environment where read() returns the record size (FF_NATIVE).
-  
+
    reading is always done in 2 steps.
    first just the record header is read and the length extracted
    by get_header_values
    then the read buffer is adjusted and the remaining bytes are
    read in.
-  
+
    all file i/o is always done on even file positions  */
 
 int
@@ -318,12 +314,12 @@ _bfd_vms_get_record (abfd)
       test_len = 6;			/* probe 6 bytes */
       test_start = 2;			/* where the record starts */
       break;
-      
+
     case FF_NATIVE:
       test_len = 4;
       test_start = 0;
       break;
-      
+
     default:
     case FF_VAX:
       test_len = 0;
@@ -437,7 +433,6 @@ _bfd_vms_get_record (abfd)
   return PRIV(rec_length);
 }
 
-
 /* get next vms record from file
    update vms_rec and rec_length to new (remaining) values  */
 
@@ -483,7 +478,6 @@ _bfd_vms_next_record (abfd)
 
   return PRIV(rec_type);
 }
-
 
 
 /* Copy sized string (string with fixed length) to new allocated area
@@ -548,7 +542,6 @@ _bfd_vms_push (abfd, val, psect)
   return;
 }
 
-
 /* Pop value and section index  */
 
 uquad
@@ -610,7 +603,6 @@ add_new_contents (abfd, section)
   return newptr;
 }
 
-
 /* Save section data & offset to an vms_section structure
    vms_section_table[] holds the vms_section chain  */
 
@@ -638,7 +630,6 @@ _bfd_save_vms_section (abfd, section, data, offset, count)
 
   return true;
 }
-
 
 /* Get vms_section pointer to saved contents for section # index  */
 
@@ -694,7 +685,6 @@ _bfd_vms_output_begin (abfd, rectype, rechead)
   return;
 }
 
-
 /* Set record/subrecord alignment  */
 
 void
@@ -710,7 +700,6 @@ _bfd_vms_output_alignment (abfd, alignto)
   return;
 }
 
-
 /* Prepare for subrecord fields  */
 
 void
@@ -725,7 +714,6 @@ _bfd_vms_output_push (abfd)
   PRIV(pushed_size) = PRIV(output_size);
   return;
 }
-
 
 /* End of subrecord fields  */
 
@@ -748,7 +736,6 @@ _bfd_vms_output_pop (abfd)
   PRIV(push_level)--;
   return;
 }
-
 
 /* Flush unwritten output, ends current record  */
 
@@ -779,7 +766,7 @@ _bfd_vms_output_flush (abfd)
   vms_debug (6, "align: adding %d bytes\n", aligncount);
 #endif
 
-  while(aligncount-- > 0)
+  while (aligncount-- > 0)
     {
       PRIV(output_buf)[real_size++] = 0;
 #if 0
@@ -814,7 +801,6 @@ _bfd_vms_output_flush (abfd)
   return;
 }
 
-
 /* End record output  */
 
 void
@@ -829,7 +815,6 @@ _bfd_vms_output_end (abfd)
 
   return;
 }
-
 
 /* check remaining buffer size
 
@@ -847,7 +832,6 @@ _bfd_vms_output_check (abfd, size)
   return (MAX_OUTREC_SIZE - (PRIV(output_size) + size + MIN_OUTREC_LUFT));
 }
 
-
 /* Output byte (8 bit) value  */
 
 void
@@ -863,7 +847,6 @@ _bfd_vms_output_byte (abfd, value)
   PRIV(output_size) += 1;
   return;
 }
-
 
 /* Output short (16 bit) value  */
 
@@ -881,7 +864,6 @@ _bfd_vms_output_short (abfd, value)
   return;
 }
 
-
 /* Output long (32 bit) value  */
 
 void
@@ -898,7 +880,6 @@ _bfd_vms_output_long (abfd, value)
   return;
 }
 
-
 /* Output quad (64 bit) value  */
 
 void
@@ -914,7 +895,6 @@ _bfd_vms_output_quad (abfd, value)
   PRIV(output_size) += 8;
   return;
 }
-
 
 /* Output c-string as counted string  */
 
@@ -944,7 +924,6 @@ int len;
   _bfd_vms_output_dump (abfd, (unsigned char *)value, len);
 }
 
-
 /* Output character area  */
 
 void
@@ -965,7 +944,6 @@ _bfd_vms_output_dump (abfd, data, length)
 
   return;
 }
-
 
 /* Output count bytes of value  */
 
@@ -1075,7 +1053,6 @@ _bfd_vms_length_hash_symbol (abfd, in, maxlen)
   return outbuf;
 }
 
-
 /* Allocate and initialize a new symbol.  */
 
 static asymbol *
@@ -1097,7 +1074,6 @@ new_symbol (abfd, name)
 
   return symbol;
 }
-
 
 /* Allocate and enter a new private symbol.  */
 

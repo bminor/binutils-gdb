@@ -1,3 +1,11 @@
+2000-12-26  Kazu Hirata  <kazu@hxi.com>
+
+	* vaxnetbsd.c: Fix formatting.
+	* versados.c: Likewise.
+	* vms-gsd.c: Likewise.
+	* vms-hdr.c: Likewise.
+	* vms-misc.c: Likewise.
+
 2000-12-25  Alexandre Oliva  <aoliva@redhat.com>
 
 	* archive.c (coff_write_armap): Don't write more than symbol_count
