@@ -1,3 +1,8 @@
+2000-09-25  Kevin Buettner  <kevinb@redhat.com>
+
+	* ns32knbsd-nat.c (fetch_core_registers): Protoize.
+	* ocd.c (ocd_xfer_memory): Protoize.
+
 2000-09-25  Andrew Cagney  <ac131313@cygnus.com>
 
 	* MAINTAINERS: Add Mark Kettenis to ``Blanket Write Privs'' list.

@@ -116,13 +116,10 @@ struct coreregs
   struct fpreg freg;
 };
 
-/* Get registers from a core file. */
+/* Get registers from a core file.  REG_ADDR is unused.  */
 static void
-fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-     unsigned int reg_addr;	/* Unused in this version */
+fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
+		      unsigned int reg_addr)
 {
   struct coreregs *core_reg;
 

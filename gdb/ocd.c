@@ -764,16 +764,13 @@ ocd_read_bytes (CORE_ADDR memaddr, char *myaddr, int len)
 
 /* Read or write LEN bytes from inferior memory at MEMADDR, transferring
    to or from debugger address MYADDR.  Write to inferior if SHOULD_WRITE is
-   nonzero.  Returns length of data written or read; 0 for error.  */
+   nonzero.  Returns length of data written or read; 0 for error.  TARGET
+   is ignored.  */
 
 /* ARGSUSED */
 int
-ocd_xfer_memory (memaddr, myaddr, len, should_write, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int should_write;
-     struct target_ops *target;	/* ignored */
+ocd_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int should_write,
+		 struct target_ops *target)
 {
   return dcache_xfer_memory (ocd_dcache, memaddr, myaddr, len, should_write);
 }
