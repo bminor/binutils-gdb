@@ -1799,7 +1799,7 @@ default.
 @cindex DLLs, linking to
 @kindex --dll-search-prefix
 @item --dll-search-prefix @var{string}
-When linking dynamically to a dll without an import library, i
+When linking dynamically to a dll without an import library,
 search for @code{<string><basename>.dll} in preference to 
 @code{lib<basename>.dll}. This behavior allows easy distinction
 between DLLs built for the various "subplatforms": native, cygwin,

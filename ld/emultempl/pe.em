@@ -9,7 +9,7 @@ rm -f e${EMULATION_NAME}.c
 (echo;echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
 cat >>e${EMULATION_NAME}.c <<EOF
 /* This file is part of GLD, the Gnu Linker.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -357,14 +357,15 @@ gld_${EMULATION_NAME}_list_options (file)
   fprintf (file, _("  --enable-auto-image-base           Automatically choose image base for DLLs\n\
                                        unless user specifies one\n"));
   fprintf (file, _("  --disable-auto-image-base          Do not auto-choose image base. (default)\n"));
-  fprintf (file, _("  --dll-search-prefix=<string>       When linking dynamically to a dll without an\n\
-                                       importlib, use <string><basename>.dll \n\
+  fprintf (file, _("  --dll-search-prefix=<string>       When linking dynamically to a dll without\n\
+                                       an importlib, use <string><basename>.dll\n\
                                        in preference to lib<basename>.dll \n"));
-  fprintf (file, _("  --enable-auto-import               Do sophistcated linking of _sym to \n\
+  fprintf (file, _("  --enable-auto-import               Do sophistcated linking of _sym to\n\
                                        __imp_sym for DATA references\n"));
   fprintf (file, _("  --disable-auto-import              Do not auto-import DATA items from DLLs\n"));
   fprintf (file, _("  --enable-runtime-pseudo-reloc      Work around auto-import limitations by\n\
-                                       adding pseudo-relocations resolved at runtime.\n"));
+                                       adding pseudo-relocations resolved at\n\
+                                       runtime.\n"));
   fprintf (file, _("  --disable-runtime-pseudo-reloc     Do not add runtime pseudo-relocations for\n\
                                        auto-imported DATA.\n"));
   fprintf (file, _("  --enable-extra-pe-debug            Enable verbose debug output when building\n\
