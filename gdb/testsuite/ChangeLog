@@ -1,3 +1,9 @@
+2001-09-18  Keith Seitz  <keiths@redhat.com>
+
+	* lib/insight-support.exp (_gdbtk_export_target_info): Add
+	support for running tests against sid targets.
+	(gdbtk_done): Ditto.
+
 2001-09-18  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.base/ending-run.c (main): Set stdout buffersize

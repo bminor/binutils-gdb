@@ -185,6 +185,9 @@ proc _gdbtk_export_target_info {} {
   } elseif {[string compare [info proc gdb_target_sim] gdb_target_sim] == 0} {
     # Using a simulator target
     set target simulator
+  } elseif {[string compare [info proc gdb_target_sid] gdb_target_sid] == 0} {
+    # Using sid
+    set target sid
   } else {
     # Assume native
     set target native
@@ -234,6 +237,15 @@ proc _gdbtk_export_target_info {} {
       }
 
       set info(target) "target $targetname $serialport"
+      set info(load) "load"
+      set info(run) "continue"
+    }
+
+    sid {
+      # We must start sid first, since Insight won't have a clue
+      # about how to do this.
+      sid_start
+      set info(target) "target [target_info gdb_protocol] [target_info netport]"
       set info(load) "load"
       set info(run) "continue"
     }
@@ -289,5 +301,10 @@ proc gdbtk_done {{results {}}} {
   # Kill off xvfb if using it
   if {[info exists _xvfb_spawn_id]} {
     _gdbtk_xvfb_exit
+  }
+
+  # Yich. If we're using sid, we must kill it
+  if {[string compare [info proc gdb_target_sid] gdb_target_sid] == 0} {
+    sid_exit
   }
 }
