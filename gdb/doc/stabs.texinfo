@@ -1493,11 +1493,12 @@ entry now holds an absolute address.
 * Class instance::
 * Methods:: Method definition
 * Protections::
-* Method Modifiers:: (const, volatile, const volatile)
-* Virtual Methods::
-* Inheritence::
-* Virtual Base Classes::
-* Static Members::
+* Method modifiers:: (const, volatile, const volatile)
+* Virtual methods::
+* Inheritance::
+* Virtual base classes::
+* Static members::
+* Nested types::
 @end menu
 
 
@@ -1516,7 +1517,6 @@ method type (two ## if minimal debug)
 @item xs
 cross-reference
 @end table
-
 
 @node Basic C++ types
 @section Basic types for C++
@@ -1946,8 +1946,8 @@ class.  This is preceeded by `~%' and followed by a final semi-colon.
 .stabs "A:t20=s8Adat:1,0,32;$vf20:21=*22=ar1;0;1;17,32;A_virt::23=##1;:i;2A*-2147483647;20;;;~%20;",128,0,0,0
 @end example
 
-@node Inheritence
-@section Inheritence
+@node Inheritance
+@section Inheritance
 
 Stabs describing C++ derived classes include additional sections that
 describe the inheritence hierarchy of the class.  A derived class stab
@@ -2045,7 +2045,7 @@ the derivation of this class is encoded as follows.
         28;;D_virt::32:i;2A*-2147483646;31;;;~%20;",128,0,0,0
 @end smallexample
 
-@node Virtual Base Classes
+@node Virtual base classes
 @section Virtual Base Classes
 
 A derived class object consists of a concatination in memory of the
@@ -2096,12 +2096,81 @@ at 128, and Ddat at 160.
 @node Static Members
 @section Static Members
 
-The data area for a class is a concatination of the space used by the
+
+<< re-arrange - this has nothing to do with static members >>
+
+The data area for a class is a concatenation of the space used by the
 data members of the class.  If the class has virtual methods a vtable
 pointer follows the class data.  The field offset part of each field
-description in the class stab shows this ordering.  
+description in the class stab shows this ordering.
 
 << how is this reflected in stabs? >>
+
+@node Nested types
+@section Nested types
+
+C++ allows a type to be defined nested "inside" a class.
+Such types follow the same naming rule as class members:
+The name of a nested type is only visible inside the class,
+or when qualified using @code{::} notation.  In that respect,
+a nested type "member" is rather like a static member.
+In fact, the stabs syntax used for nested types is similar to
+that used for static members.
+
+@example
+class ios @{
+  public:
+    enum io_state @{
+	goodbit = 0,
+	eofbit = 1,
+	failbit = 2,
+	badbit = 4 @};
+    io_state state;
+@};
+
+ios::io_state Fail()
+@{
+    return ios::failbit;
+@}
+
+ios my_ios;
+@end example
+
+The relevant part of the assembly code is:
+@example
+.stabs "'ios::io_state':T20=ebadbit:4,failbit:2,eofbit:1,goodbit:0,;",128,0,0,0
+.stabs "'ios::io_state':t20",128,0,0,0
+.stabs "ios:T21=s4state:20,0,32;io_state:/220:!'ios::io_state';;",128,0,0,0
+.stabs "ios:Tt21",128,0,0,0
+.stabs "Fail__Fv:F20",36,0,0,_Fail__Fv
+.stabs "my_ios:G21",32,0,0,0
+        .common _my_ios,4,"bss"
+@end example
+
+The first line declares type 20 to be an enum.  It gives it the
+name @code{ios::io_state}.  Single quotes surround the name,
+because of the embedded @code{::}.  (The name is needed when printing
+the type.)
+
+The second line enters the same name into the typedef name space.
+(This is useless - only @code{ios} is a real global name.)
+
+The third line defined the @code{ios} type.
+The text @code{io_state:/220:!'ios::io_state';} declares that
+@code{io_state} is a type "member".  The @code{/2} specifies
+public visibility, just like a regular member.
+This is followed by the type being defined (type 20), the
+magic characters @code{:!} to indicate that we're declaring a nested
+type, followed by the complete name of the type (again, in single quotes).
+
+Possible optimization:  Replace first 3 lines by:
+@example
+.stabs ":T20=ebadbit:4,failbit:2,eofbit:1,goodbit:0,;",128,0,0,0
+.stabs "ios:T21=s4state:20,0,32;io_state:/220:!'ios::io_state';;",128,0,0,0
+@end example
+This makes type 20 an anonymous type, until the @code{io_state} field
+for type 21 is seen; that allows the debugger to back-patch the name of
+type 20 to @code{ios::io_state}.
 
 @node Example2.c
 @appendix Example2.c - source code for extended example
