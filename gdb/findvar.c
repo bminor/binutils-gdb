@@ -610,22 +610,15 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 
     case LOC_BASEREG:
     case LOC_BASEREG_ARG:
-      {
-	char *buf = (char*) alloca (MAX_REGISTER_RAW_SIZE);
-	get_saved_register (buf, NULL, NULL, frame, SYMBOL_BASEREG (var),
-			    NULL);
-	addr = extract_address (buf, REGISTER_RAW_SIZE (SYMBOL_BASEREG (var)));
-	addr += SYMBOL_VALUE (var);
-	break;
-      }
-
     case LOC_THREAD_LOCAL_STATIC:
       {
-	char *buf = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+	value_ptr regval;
 
-	get_saved_register (buf, NULL, NULL, frame, SYMBOL_BASEREG (var),
-			    NULL);
-	addr = extract_address (buf, REGISTER_RAW_SIZE (SYMBOL_BASEREG (var)));
+	regval = value_from_register (lookup_pointer_type (type),
+				      SYMBOL_BASEREG (var), frame);
+	if (regval == NULL)
+	  error ("Value of base register not available.");
+	addr = value_as_pointer (regval);
 	addr += SYMBOL_VALUE (var);
 	break;
       }
