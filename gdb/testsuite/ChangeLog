@@ -5,6 +5,8 @@
 
 2001-07-02  Michael Snyder  <msnyder@redhat.com>
 
+	* gdb.base/completion.exp: Don't assume that break.c is the only
+	source file that may contain functions named "marker".
 	* gdb.base/corefile.exp: Quote the curly braces in regexp.
 
 2001-06-28  Andrew Cagney  <ac131313@redhat.com>
