@@ -184,6 +184,8 @@ mips*-*-sysv*)		gdb_target=bigmips ;;
 mips*-*-riscos*)	gdb_target=bigmips ;;
 mips*-*-vxworks*)       gdb_target=vxmips ;;
 
+mn10300-*-*)		gdb_target=mn10300 ;;
+
 none-*-*)		gdb_target=none ;;
 
 np1-*-*)		gdb_target=np1 ;;
