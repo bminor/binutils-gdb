@@ -1,5 +1,8 @@
 2003-11-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf-m10300.c (_bfd_mn10300_elf_create_got_section): Fix
+	"dereferencing type-punned pointer" warnings.
+
 	* aout-adobe.c (aout_adobe_set_section_contents): Constify location.
 	* aoutx.h (NAME(aout,set_section_contents)): Ditto.
 	* bfd-in2.h: Regenerate.
@@ -119,7 +122,7 @@
 	* section.c (bfd_set_section_contents): Make the "location" buffer
 	constant.
 	* bfd-in2.h: Re-generate.
-	
+
 2003-10-30  Andrew Cagney  <cagney@redhat.com>
 
 	* syms.c: Replace "struct symbol_cache_entry" with "struct
@@ -200,8 +203,8 @@
 
 2003-10-29  Daniel Jacobowitz  <drow@mvista.com>
 
-        * elf32-arm.h (elf32_arm_final_link_relocate): Move check for
-        SEC_ALLOC.
+	* elf32-arm.h (elf32_arm_final_link_relocate): Move check for
+	SEC_ALLOC.
 
 2003-10-29  Philip Blundell  <philb@gnu.org>
 
@@ -220,7 +223,7 @@
 	(elf32_arm_check_relocs): Likewise.
 	(elf32_arm_adjust_dynamic_symbol): Likewise.
 	(elf32_arm_copy_indirect_symbol): New.
-	(elf32_arm_link_hash_table_create): Initialise new fields. 
+	(elf32_arm_link_hash_table_create): Initialise new fields.
 	(elf32_arm_gc_sweep_hook): Implement.
 	(elf32_arm_discard_copies): Delete.
 	(elf32_arm_finish_dynamic_symbol): Use new PLT code.

@@ -561,6 +561,7 @@ _bfd_mn10300_elf_create_got_section (abfd, info)
   flagword   flags;
   flagword   pltflags;
   asection * s;
+  struct bfd_link_hash_entry * bh;
   struct elf_link_hash_entry * h;
   const struct elf_backend_data * bed = get_elf_backend_data (abfd);
   int ptralign;
@@ -604,13 +605,13 @@ _bfd_mn10300_elf_create_got_section (abfd, info)
     {
       /* Define the symbol _PROCEDURE_LINKAGE_TABLE_ at the start of the
 	 .plt section.  */
-      struct elf_link_hash_entry *h = NULL;
+      bh = NULL;
       if (! (_bfd_generic_link_add_one_symbol
 	     (info, abfd, "_PROCEDURE_LINKAGE_TABLE_", BSF_GLOBAL, s,
 	      (bfd_vma) 0, (const char *) NULL, FALSE,
-	      get_elf_backend_data (abfd)->collect,
-	      (struct bfd_link_hash_entry **) &h)))
+	      get_elf_backend_data (abfd)->collect, &bh)))
 	return FALSE;
+      h = (struct elf_link_hash_entry *) bh;
       h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
       h->type = STT_OBJECT;
 
@@ -638,12 +639,13 @@ _bfd_mn10300_elf_create_got_section (abfd, info)
      (or .got.plt) section.  We don't do this in the linker script
      because we don't want to define the symbol if we are not creating
      a global offset table.  */
-  h = NULL;
+  bh = NULL;
   if (!(_bfd_generic_link_add_one_symbol
 	(info, abfd, "_GLOBAL_OFFSET_TABLE_", BSF_GLOBAL, s,
 	 bed->got_symbol_offset, (const char *) NULL, FALSE,
-	 bed->collect, (struct bfd_link_hash_entry **) &h)))
+	 bed->collect, &bh)))
     return FALSE;
+  h = (struct elf_link_hash_entry *) bh;
   h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
   h->type = STT_OBJECT;
 
