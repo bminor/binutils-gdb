@@ -1,3 +1,8 @@
+2003-09-09  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* ia64-tdep.c (ia64_sigtramp_frame_init_saved_regs):
+	Fix typo for high range of floating registers.
+
 2003-09-09  David Carlton  <carlton@kealia.com>
 
 	* dwarf2read.c (dwarf2_build_psymtabs_hard): Move lowpc and
