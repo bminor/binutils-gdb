@@ -27,7 +27,6 @@ ChangeLog
 Makefile.in
 NEWS
 README
-TODO
 acconfig.h
 aclocal.m4
 addr2line.1
