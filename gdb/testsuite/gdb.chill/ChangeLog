@@ -1,3 +1,9 @@
+Wed Mar  8 13:26:36 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* *.exp: Skip all tests silently if skip_chill_tests returns true.
+
+	* misc.exp: Remove reference to non-existent variable passcount.
+
 Tue Mar  7 19:30:05 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* string.ch, string.exp, Makefile.in:  New test case.

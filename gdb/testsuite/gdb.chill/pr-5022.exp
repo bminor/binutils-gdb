@@ -64,6 +64,8 @@ proc test_pr_5022 {} {
 set binfile "pr-5022.exe"
 set srcfile $binfile.ch
 
+if [skip_chill_tests] then { continue }
+
 if ![file exists $objdir/$subdir/$binfile] then {
     warning "$binfile does not exist; tests suppressed."
 } else {

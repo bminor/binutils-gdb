@@ -55,7 +55,8 @@ proc set_lang_chill {} {
 # Start with a fresh gdb.
 
 set binfile "misc.exe"
-global passcount
+
+if [skip_chill_tests] then { continue }
 
 gdb_exit
 gdb_start
