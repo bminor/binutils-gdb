@@ -40,7 +40,9 @@
 
 /* This is the name of a fake symbol which will never appear in the
    assembler output.  S_IS_LOCAL detects it because of the \001.  */
+#ifndef FAKE_LABEL_NAME
 #define FAKE_LABEL_NAME "L0\001"
+#endif
 
 #include "bit_fix.h"
 

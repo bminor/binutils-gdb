@@ -1,3 +1,8 @@
+2003-05-02  Michael Snyder  <msnyder@redhat.com>
+
+	* write.h (FAKE_LABEL_NAME): Allow override 
+	(for targets that like eg. a leading dot in a local label).
+
 2003-05-02  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-xstormy16.c (xstormy16_md_apply_fix3): Do not bias the
