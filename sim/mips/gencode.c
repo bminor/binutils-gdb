@@ -2532,7 +2532,8 @@ build_instruction (doisa, features, mips16, insn)
      printf("   op1 = WORD64LO(op1);\n");
      printf("   /* NOTE: The jump occurs AFTER the next instruction has been executed */\n");
      printf("   DSPC = op1;\n");
-     if (insn->flags & LINK)
+     if ((insn->flags & LINK)
+         && ! (insn->flags & REG))
        printf("   JALDELAYSLOT();\n");
      else
        printf("   DELAYSLOT();\n");
