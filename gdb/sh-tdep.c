@@ -543,9 +543,7 @@ sh_skip_prologue (CORE_ADDR start_pc)
   return pc;
 }
 
-/* Should call_function allocate stack space for a struct return?
-
-   The ABI says:
+/* The ABI says:
 
    Aggregate types not bigger than 8 bytes that have the same size and
    alignment as one of the integer scalar types are returned in the
@@ -790,7 +788,7 @@ sh_next_flt_argreg (int len)
 
 /* Helper function which figures out, if a type is treated like a float type.
 
-   Second, the FPU ABIs have a special way how to treat types as float types.
+   The FPU ABIs have a special way how to treat types as float types.
    Structures with exactly one member, which is of type float or double, are
    treated exactly as the base types float or double:
 
@@ -909,6 +907,22 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 	      /* Argument goes in a float argument register.  */
 	      reg_size = register_size (gdbarch, flt_argreg);
 	      regval = extract_unsigned_integer (val, reg_size);
+	      /* In little endian mode, float types taking two registers
+	         (doubles on sh4, long doubles on sh2e, sh3e and sh4) must
+		 be stored swapped in the argument registers.  The below
+		 code first writes the first 32 bits in the next but one
+		 register, increments the val and len values accordingly
+		 and then proceeds as normal by writing the second 32 bits
+		 into the next register. */
+	      if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE
+	          && TYPE_LENGTH (type) == 2 * reg_size)
+	        {
+		  regcache_cooked_write_unsigned (regcache, flt_argreg + 1,
+						  regval);
+		  val += reg_size;
+		  len -= reg_size;
+		  regval = extract_unsigned_integer (val, reg_size);
+		}
 	      regcache_cooked_write_unsigned (regcache, flt_argreg++, regval);
 	    }
 	  else if (!treat_as_flt && argreg <= ARGLAST_REGNUM)
@@ -1041,7 +1055,10 @@ sh3e_sh4_extract_return_value (struct type *type, struct regcache *regcache,
       int len = TYPE_LENGTH (type);
       int i, regnum = FP0_REGNUM;
       for (i = 0; i < len; i += 4)
-	regcache_raw_read (regcache, regnum++, (char *) valbuf + i);
+	if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+	  regcache_raw_read (regcache, regnum++, (char *) valbuf + len - 4 - i);
+	else
+	  regcache_raw_read (regcache, regnum++, (char *) valbuf + i);
     }
   else
     sh_default_extract_return_value (type, regcache, valbuf);

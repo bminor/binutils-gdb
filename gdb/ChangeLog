@@ -1,3 +1,10 @@
+2003-10-14  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh-tdep.c: Fix copy/paste hangover in comment.
+	(sh_push_dummy_call_fpu): Accomodate double passing in little endian
+	mode.
+	(sh3e_sh4_extract_return_value): Ditto.
+
 2003-10-13  Richard Henderson  <rth@redhat.com>
 
 	* f-typeprint.c (f_type_print_base): Handle TYPE_CODE_REF.
