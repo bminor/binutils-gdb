@@ -1,3 +1,8 @@
+1999-09-29  Doug Evans  <devans@casey.cygnus.com>
+
+	* armos.c (SWIWrite0): Send output to stdout instead of stderr.
+	(ARMul_OSHandleSWI, case SWI_WriteC,AngelSWI_Reason_WriteC): Ditto.
+
 Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

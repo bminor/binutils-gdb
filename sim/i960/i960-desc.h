@@ -49,6 +49,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
    e.g. In "b,a foo" the ",a" is an operand.  If mnemonics have operands
    we can't hash on everything up to the space.  */
 #define CGEN_MNEMONIC_OPERANDS
+
 /* Maximum number of operands any insn or macro-insn has.  */
 #define CGEN_MAX_INSN_OPERANDS 16
 

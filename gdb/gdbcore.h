@@ -133,11 +133,27 @@ extern void set_gnutarget PARAMS ((char *));
 struct core_fns
   {
 
-    /* BFD flavour that we handle.  Note that bfd_target_unknown_flavour matches
-       anything, and if there is no better match, this function will be called
-       as the default. */
+    /* BFD flavour that a core file handler is prepared to read.  This
+       can be used by the handler's core tasting function as a first
+       level filter to reject BFD's that don't have the right
+       flavour. */
 
     enum bfd_flavour core_flavour;
+
+    /* Core file handler function to call to recognize corefile
+       formats that BFD rejects.  Some core file format just don't fit
+       into the BFD model, or may require other resources to identify
+       them, that simply aren't available to BFD (such as symbols from
+       another file).  Returns nonzero if the handler recognizes the
+       format, zero otherwise. */
+
+    int (*check_format) PARAMS ((bfd *));
+
+    /* Core file handler function to call to ask if it can handle a
+       given core file format or not.  Returns zero if it can't,
+       nonzero otherwise. */
+
+    int (*core_sniffer) PARAMS ((struct core_fns *, bfd *));
 
     /* Extract the register values out of the core file and store them where
        `read_register' will find them.
@@ -167,5 +183,7 @@ struct core_fns
   };
 
 extern void add_core_fns PARAMS ((struct core_fns * cf));
+extern int default_core_sniffer PARAMS ((struct core_fns *cf, bfd *abfd));
+extern int default_check_format PARAMS ((bfd *abfd));
 
 #endif /* !defined (GDBCORE_H) */

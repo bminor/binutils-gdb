@@ -1083,7 +1083,9 @@ symbol_add_stub (arg)
 {
   register struct so_list *so = (struct so_list *) arg;		/* catch_errs bogon */
   CORE_ADDR text_addr = 0;
+  struct section_addr_info section_addrs;
 
+  memset (&section_addrs, 0, sizeof (section_addrs));
   if (so->textsection)
     text_addr = so->textsection->addr;
   else if (so->abfd != NULL)
@@ -1107,10 +1109,11 @@ symbol_add_stub (arg)
     if (strcmp (so->objfile->name, so->so_name) == 0)
       return 1;
   }
+  section_addrs.text_addr = text_addr;
   so->objfile =
     symbol_file_add (so->so_name, so->from_tty,
-		     text_addr,
-		     0, 0, 0, 0, 1);
+		     &section_addrs,
+		     0, 0, 0, 1);
   return (1);
 }
 

@@ -248,6 +248,8 @@ device is attached to the remote system (e.g. /dev/ttya).");
   else if (rslt)
     {
       printf_filtered ("RDI_open: %s\n", rdi_error_message (rslt));
+      Adp_CloseDevice ();
+      error("RID_open failed\n");
     }
 
   rslt = angel_RDI_info (RDIInfo_Target, &arg1, &arg2);

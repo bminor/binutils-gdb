@@ -515,7 +515,7 @@ child_create_inferior (exec_file, allargs, env)
 #endif
   /* We are at the first instruction we care about.  */
   /* Pedal to the metal... */
-  proceed ((CORE_ADDR) - 1, TARGET_SIGNAL_0, 0);
+  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
 }
 
 #if !defined(CHILD_POST_STARTUP_INFERIOR)

@@ -27,6 +27,7 @@
 #include "floatformat.h"
 #include "target.h"
 #include "gdbcore.h"
+#include "inferior.h"
 
 static CORE_ADDR next_insn PARAMS ((CORE_ADDR memaddr,
 				    unsigned int *pword1,
@@ -895,6 +896,7 @@ mon960_frame_chain_valid (chain, curframe)
 
   return (chain != read_memory_integer (a, 4));
 }
+
 
 void
 _initialize_i960_tdep ()

@@ -62,6 +62,10 @@ GDB_FILE *gdb_stderr;
 GDB_FILE *gdb_stdlog;
 GDB_FILE *gdb_stdtarg;
 
+/* Used to initialize error() - defined in utils.c */
+
+extern void error_init (void);
+
 /* Whether to enable writing into executable and core files */
 extern int write_files;
 
@@ -168,6 +172,9 @@ main (argc, argv)
   gdb_stdlog = gdb_stdout;	/* for moment */
   gdb_stdtarg = gdb_stderr;	/* for moment */
 #endif
+
+  /* initialize error() */
+  error_init ();
 
   /* Parse arguments and options.  */
   {

@@ -23,7 +23,6 @@
 #include "top.h"
 #include "event-loop.h"
 #include "event-top.h"
-#include "inferior.h"		/* For fetch_inferior_event. */
 #ifdef HAVE_POLL
 #include <poll.h>
 #else
@@ -230,7 +229,7 @@ static struct
     /* Pointer to first in timer list. */
     struct gdb_timer *first_timer;
 
-    /* Length of timer list. */
+    /* Id of the last timer created. */
     int num_timers;
   }
 timer_list;
@@ -264,7 +263,6 @@ static gdb_event *create_file_event (int fd);
 static int process_event (void);
 static void handle_timer_event (int dummy);
 static void poll_timers (void);
-static int fetch_inferior_event_wrapper (gdb_client_data client_data);
 
 
 /* Insert an event object into the gdb event queue at 
@@ -731,7 +729,7 @@ handle_file_event (int event_file_desc)
 
 	  /* If there was a match, then call the handler. */
 	  if (mask != 0)
-	    (*file_ptr->proc) (file_ptr->error, file_ptr->fd, file_ptr->client_data);
+	    (*file_ptr->proc) (file_ptr->error, file_ptr->client_data);
 	  break;
 	}
     }
@@ -964,42 +962,6 @@ check_async_ready (void)
   return async_handler_ready;
 }
 
-/* FIXME: where does this function belong? */
-/* General function to handle events in the inferior. So far it just
-   takes care of detecting errors reported by select() or poll(),
-   otherwise it assumes that all is OK, and goes on reading data from
-   the fd. This however may not always be what we want to do. */
-void
-inferior_event_handler (int error, gdb_client_data client_data, int fd)
-{
-  if (error == 1)
-    {
-      printf_unfiltered ("error detected on fd %d\n", fd);
-      delete_file_handler (fd);
-      pop_target ();
-      discard_all_continuations ();
-    }
-  else
-    /* Use catch errors for now, until the inner layers of
-       fetch_inferior_event (i.e. readchar) can return meaningful
-       error status.  If an error occurs while getting an event from
-       the target, just get rid of the target. */
-    if (!catch_errors (fetch_inferior_event_wrapper, client_data, "", RETURN_MASK_ALL))
-      {
-	delete_file_handler (fd);
-	discard_all_continuations ();
-	pop_target ();
-	display_gdb_prompt (0);
-      }
-}
-
-static int 
-fetch_inferior_event_wrapper (gdb_client_data client_data)
-{
-  fetch_inferior_event (client_data);
-  return 1;
-}
-
 /* Create a timer that will expire in MILLISECONDS from now. When the
    timer is ready, PROC will be executed. At creation, the timer is
    aded to the timers queue.  This queue is kept sorted in order of
@@ -1145,7 +1107,7 @@ poll_timers (void)
   struct timeval time_now, delta;
   gdb_event *event_ptr;
 
-  if (timer_list.num_timers)
+  if (timer_list.first_timer != NULL)
     {
       gettimeofday (&time_now, NULL);
       delta.tv_sec = timer_list.first_timer->when.tv_sec - time_now.tv_sec;

@@ -144,7 +144,7 @@ _initialize_ser_tcp (void)
   ops->readchar = ser_unix_readchar;
   ops->write = ser_unix_write;
   ops->flush_output = ser_unix_nop_flush_output;
-  ops->flush_input = ser_unix_nop_flush_input;
+  ops->flush_input = ser_unix_flush_input;
   ops->send_break = ser_unix_nop_send_break;
   ops->go_raw = ser_unix_nop_raw;
   ops->get_tty_state = ser_unix_nop_get_tty_state;

@@ -287,8 +287,11 @@ som_solib_add_solib_objfile (so, name, from_tty, text_addr)
      CORE_ADDR text_addr;
 {
   obj_private_data_t *obj_private;
+  struct section_addr_info section_addrs;
 
-  so->objfile = symbol_file_add (name, from_tty, text_addr, 0, 0, 0, 0, 1);
+  memset (&section_addrs, 0, sizeof (section_addrs));
+  section_addrs.text_addr = text_addr;
+  so->objfile = symbol_file_add (name, from_tty, &section_addrs, 0, 0, 0, 1);
   so->abfd = so->objfile->obfd;
 
   /* Mark this as a shared library and save private data.

@@ -128,7 +128,7 @@ if {$hp_aCC_compiler} {
 gdb_test "info break" \
     "Num Type\[ \]+Disp Enb Address\[ \]+What.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$main_line.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in factorial$proto at .*$srcfile:95.*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in factorial$proto at .*$srcfile:96.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:79.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:79.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:85" \
@@ -180,15 +180,27 @@ gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*,
 # Run until the breakpoint set in a function in a file
 #
 for {set i 6} {$i >= 1} {incr i -1} {
-	gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, factorial \\(value=$i\\) at .*$srcfile:95.*95\[\t \]+.*if .value > 1. \{.*" \
+	gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, factorial \\(value=$i\\) at .*$srcfile:96.*96\[\t \]+.*if .value > 1. \{.*" \
 			"run until file:function($i) breakpoint"
 }
 
 #
 # run until the file:function breakpoint at a line number in a file
 #
-gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:85.*85\[\t \]+return 0;" \
+gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:85.*85\[\t \]+argc = \\(argc == 12345\\);.*" \
 		"run until file:linenum breakpoint"
+
+# Test break at offset +1
+
+gdb_test "break +1" \
+    "Breakpoint.*at.* file .*$srcfile, line 86\\." \
+    "breakpoint offset +1"
+
+# Check to see if breakpoint is hit when stepped onto
+
+gdb_test "step" \
+    ".*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:86.*86\[\t \]+return argc;" \
+    "step onto breakpoint"
 
 #
 # delete all breakpoints so we can start over, course this can be a test too
@@ -237,7 +249,7 @@ gdb_test  "tbreak $srcfile:81" "Breakpoint.*at.* file .*$srcfile, line 81.*" "Te
 #
 gdb_test "info break" "Num Type.*Disp Enb Address.*What.*\[\r\n\]
 \[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:$main_line.*\[\r\n\]
-\[0-9\]+\[\t \]+breakpoint     del.*y.*in factorial$proto at .*$srcfile:95.*\[\r\n\]
+\[0-9\]+\[\t \]+breakpoint     del.*y.*in factorial$proto at .*$srcfile:96.*\[\r\n\]
 \[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:79.*\[\r\n\]
 \[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:75.*\[\r\n\]
 \[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:85.*\[\r\n\]

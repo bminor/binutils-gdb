@@ -1146,7 +1146,7 @@ read_next_frame_reg (fi, regno)
 	  if (fi->saved_regs == NULL)
 	    mips_find_saved_regs (fi);
 	  if (fi->saved_regs[regno])
-	    return read_memory_integer (fi->saved_regs[regno], MIPS_SAVED_REGSIZE);
+	    return read_memory_integer (ADDR_BITS_REMOVE (fi->saved_regs[regno]), MIPS_SAVED_REGSIZE);
 	}
     }
   return read_register (regno);
@@ -3562,6 +3562,7 @@ mips_call_dummy_address ()
   else
     return entry_point_address ();
 }
+
 
 
 void

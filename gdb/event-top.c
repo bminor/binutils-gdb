@@ -34,6 +34,8 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+#include <signal.h>
+
 /* readline defines this.  */
 #undef savestring
 
@@ -399,12 +401,12 @@ pop_prompt (void)
    instead of calling gdb_readline2, give gdb a chance to detect
    errors and do something. */
 void
-stdin_event_handler (int error, int fd, gdb_client_data client_data)
+stdin_event_handler (int error, gdb_client_data client_data)
 {
   if (error)
     {
-      printf_unfiltered ("error detected on stdin, fd %d\n", fd);
-      delete_file_handler (fd);
+      printf_unfiltered ("error detected on stdin\n");
+      delete_file_handler (input_fd);
       discard_all_continuations ();
       /* If stdin died, we may as well kill gdb. */
       exit (1);
@@ -443,7 +445,10 @@ async_disable_stdin (void)
      sync/async mode) is refined, the duplicate calls can be
      eliminated (Here or in infcmd.c/infrun.c). */
   target_terminal_inferior ();
-  make_exec_cleanup (async_enable_stdin, NULL);
+  /* Add the reinstate of stdin to the list of cleanups to be done
+     in case the target errors out and dies. These cleanups are also
+     done in case of normal successful termination of the execution
+     command, by complete_execution(). */
   make_exec_error_cleanup (async_enable_stdin, NULL);
 }
 
@@ -1037,7 +1042,15 @@ async_stop_sig (gdb_client_data arg)
   char *prompt = get_prompt ();
 #if STOP_SIGNAL == SIGTSTP
   signal (SIGTSTP, SIG_DFL);
+#if HAVE_SIGPROCMASK
+  {
+    sigset_t zero;
+    sigemptyset (&zero);
+    sigprocmask (SIG_SETMASK, &zero, 0);
+  }
+#else
   sigsetmask (0);
+#endif
   kill (getpid (), SIGTSTP);
   signal (SIGTSTP, handle_stop_sig);
 #else

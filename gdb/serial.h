@@ -55,12 +55,17 @@ extern void serial_un_fdopen (serial_t scb);
 
 /* Read one char from the serial device with TIMEOUT seconds to wait
    or -1 to wait forever.  Use timeout of 0 to effect a poll. Returns
-   char if ok, else one of the following codes.  Note that all error
-   codes are guaranteed to be < 0.  */
+   unsigned char if ok, else one of the following codes.  Note that
+   all error return-codes are guaranteed to be < 0. */
 
-#define SERIAL_ERROR -1		/* General error, see errno for details */
-#define SERIAL_TIMEOUT -2
-#define SERIAL_EOF -3
+enum serial_rc {
+  SERIAL_ERROR = -1,	/* General error. */
+  SERIAL_TIMEOUT = -2,	/* Timeout during read. ui_loop_hook() can,
+			   unfortunatly, force this to be returned. */
+  SERIAL_EOF = -3	/* General end-of-file or remote target
+			   connection closed, indication.  Includes
+			   things like the line dropping dead. */
+};
 
 extern int serial_readchar (serial_t scb, int timeout);
 #define SERIAL_READCHAR(SERIAL_T, TIMEOUT) serial_readchar ((SERIAL_T), (TIMEOUT))
@@ -165,7 +170,7 @@ extern int serial_is_async_p (serial_t scb);
    asynchronous mode.  To disable asynchronous mode, register a NULL
    callback. */
 
-typedef void (serial_event_ftype) (int error, void *context, int fd);
+typedef void (serial_event_ftype) (serial_t scb, void *context);
 extern void serial_async (serial_t scb, serial_event_ftype *handler, void *context);
 #define SERIAL_ASYNC(SERIAL_T, HANDLER, CONTEXT) serial_async ((SERIAL_T), (HANDLER), (CONTEXT)) 
 
@@ -177,6 +182,17 @@ extern void serial_async (serial_t scb, serial_event_ftype *handler, void *conte
 extern int deprecated_serial_fd (serial_t scb);
 #define DEPRECATED_SERIAL_FD(SERIAL_T) deprecated_serial_fd ((SERIAL_T))
 
+/* Trace/debug mechanism.
+
+   SERIAL_DEBUG() enables/disables internal debugging.
+   SERIAL_DEBUG_P() indicates the current debug state. */
+
+extern void serial_debug (serial_t scb, int debug_p);
+#define SERIAL_DEBUG(SERIAL_T, DEBUG_P) serial_debug ((SERIAL_T), (DEBUG_P))
+
+extern int serial_debug_p (serial_t scb);
+#define SERIAL_DEBUG_P(SERIAL_T) serial_debug_p ((SERIAL_T))
+
 
 /* Details of an instance of a serial object */
 
@@ -186,16 +202,20 @@ struct _serial_t
     struct serial_ops *ops;	/* Function vector */
     void *state;       		/* Local context info for open FD */
     serial_ttystate ttystate;	/* Not used (yet) */
-    int bufcnt;			/* Amount of data in receive buffer */
+    int bufcnt;			/* Amount of data remaining in receive
+				   buffer.  -ve for sticky errors. */
     unsigned char *bufp;	/* Current byte */
     unsigned char buf[BUFSIZ];	/* Da buffer itself */
-    int current_timeout;	/* (termio{s} only), last value of VTIME */
-    /* ser-unix.c termio{,s} only, we still need to wait for this many more
-       seconds.  */
-    int timeout_remaining;
+    int current_timeout;	/* (ser-unix.c termio{,s} only), last
+				   value of VTIME */
+    int timeout_remaining;	/* (ser-unix.c termio{,s} only), we
+				   still need to wait for this many
+				   more seconds.  */
     char *name;			/* The name of the device or host */
     struct _serial_t *next;	/* Pointer to the next serial_t */
     int refcnt;			/* Number of pointers to this block */
+    int debug_p;		/* Trace this serial devices operation. */
+    int async_state;		/* Async internal state. */
     void *async_context;	/* Async event thread's context */
     serial_event_ftype *async_handler;/* Async event handler */
   };

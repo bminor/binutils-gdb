@@ -23,12 +23,10 @@
 #include <ctype.h>
 #include "gdb_string.h"
 
-#ifdef HAVE_WAIT_H
-#include <wait.h>
-#else
-#ifdef HAVE_SYS_WAIT_H
+#if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
-#endif
+#elif HAVE_WAIT_H
+#include <wait.h>
 #endif
 
 #include "wait.h"

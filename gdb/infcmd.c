@@ -34,7 +34,6 @@
 #include "language.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "event-loop.h"
 #include "event-top.h"
 #include "parser-defs.h"
 
@@ -392,7 +391,7 @@ continue_command (proc_count_exp, from_tty)
 
   clear_proceed_status ();
 
-  proceed ((CORE_ADDR) - 1, TARGET_SIGNAL_DEFAULT, 0);
+  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
 }
 
 /* Step until outside of current statement.  */
@@ -516,7 +515,7 @@ which has no line number information.\n", name);
 	step_over_calls = 1;
 
       step_multi = (count > 1);
-      proceed ((CORE_ADDR) - 1, TARGET_SIGNAL_DEFAULT, 1);
+      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
       if (!stop_step)
 	break;
 
@@ -684,7 +683,7 @@ signal_command (signum_exp, from_tty)
      FIXME: Neither should "signal foo" but when I tried passing
      (CORE_ADDR)-1 unconditionally I got a testsuite failure which I haven't
      tried to track down yet.  */
-  proceed (oursig == TARGET_SIGNAL_0 ? (CORE_ADDR) - 1 : stop_pc, oursig, 0);
+  proceed (oursig == TARGET_SIGNAL_0 ? (CORE_ADDR) -1 : stop_pc, oursig, 0);
 }
 
 /* Call breakpoint_auto_delete on the current contents of the bpstat
@@ -833,7 +832,7 @@ until_next_command (from_tty)
 
   step_multi = 0;		/* Only one call to proceed */
 
-  proceed ((CORE_ADDR) - 1, TARGET_SIGNAL_DEFAULT, 1);
+  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
 }
 
 static void
@@ -1032,7 +1031,7 @@ finish_command (arg, from_tty)
     }
 
   proceed_to_finish = 1;	/* We want stop_registers, please... */
-  proceed ((CORE_ADDR) - 1, TARGET_SIGNAL_DEFAULT, 0);
+  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
 
   /* Do this only if not running asynchronously or if the target
      cannot do async execution. Otherwise, complete this command when

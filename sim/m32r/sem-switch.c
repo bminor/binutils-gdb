@@ -204,13 +204,15 @@ SWITCH (sem, SEM_ARGBUF (vpc) -> semantic.sem_case)
   vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   {
-#if WITH_SCACHE
-    /* Update the recorded pc in the cpu state struct.  */
+    /* Update the recorded pc in the cpu state struct.
+       Only necessary for WITH_SCACHE case, but to avoid the
+       conditional compilation ....  */
     SET_H_PC (pc);
-#endif
-    sim_engine_invalid_insn (current_cpu, pc);
-    sim_io_error (CPU_STATE (current_cpu), "invalid insn not handled\n");
-    /* NOTREACHED */
+    /* Virtual insns have zero size.  Overwrite vpc with address of next insn
+       using the default-insn-bitsize spec.  When executing insns in parallel
+       we may want to queue the fault and continue execution.  */
+    vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+    vpc = sim_engine_invalid_insn (current_cpu, pc, vpc);
   }
 
 #undef FLD

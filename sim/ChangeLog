@@ -1,3 +1,8 @@
+1999-09-29  Doug Evans  <devans@casey.cygnus.com>
+
+	* configure.in: Configure the testsuite directory for thumb.
+	* configure: Regenerate.
+
 1999-07-16  Ben Elliston  <bje@cygnus.com>
 
 	* configure.in: Configure the testsuite directory for arm.

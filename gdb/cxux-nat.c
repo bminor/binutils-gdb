@@ -368,7 +368,7 @@ add_shared_symbol_files ()
       return;
     }
 
-  objfile = symbol_file_add (LIBC_FILE, 0, 0, 0, 0, 1, 0, 0);
+  objfile = symbol_file_add (LIBC_FILE, 0, NULL, 0, OBJF_READNOW, 0, 0);
   minsym = lookup_minimal_symbol (LINKS_MAP_POINTER, objfile);
 
   ld_map = (struct link_map *)
@@ -384,7 +384,10 @@ add_shared_symbol_files ()
 	  if (target_read_string ((CORE_ADDR) lms.l_name, &path_name,
 				  PATH_MAX, &local_errno))
 	    {
-	      symbol_file_add (path_name, 1, lms.l_addr, 0, 0, 0, 0, 0);
+	      struct section_addr_info section_addrs;
+	      memset (&section_addrs, 0, sizeof (section_addrs));
+	      section_addrs.text_addr = lms.l_addr;
+	      symbol_file_add (path_name, 1, &section_addrs, 0, 0, 0, 0);
 	      free (path_name);
 	    }
 	}

@@ -49,7 +49,7 @@ struct pipe_state
 static int
 pipe_open (serial_t scb, const char *name)
 {
-#if !defined(O_NONBLOCK) || !defined(F_GETFL) || !defined(F_SETFL) || !HAVE_SOCKETPAIR
+#if !HAVE_SOCKETPAIR
   return -1;
 #else
   struct pipe_state *state;
@@ -106,17 +106,6 @@ pipe_open (serial_t scb, const char *name)
   scb->fd = pdes[0];
   scb->state = state;
 
-  /* Make it non-blocking */
-  {
-    int flags = fcntl (scb->fd, F_GETFL, 0);
-    if (fcntl (scb->fd, F_SETFL, flags | O_NONBLOCK) < 0)
-      {
-	perror ("ser-pipe");
-	pipe_close (scb);
-	return -1;
-      }
-  }
-
   /* If we don't do this, GDB simply exits when the remote side dies.  */
   signal (SIGPIPE, SIG_IGN);
   return 0;
@@ -153,7 +142,7 @@ _initialize_ser_pipe (void)
   ops->readchar = ser_unix_readchar;
   ops->write = ser_unix_write;
   ops->flush_output = ser_unix_nop_flush_output;
-  ops->flush_input = ser_unix_nop_flush_input;
+  ops->flush_input = ser_unix_flush_input;
   ops->send_break = ser_unix_nop_send_break;
   ops->go_raw = ser_unix_nop_raw;
   ops->get_tty_state = ser_unix_nop_get_tty_state;

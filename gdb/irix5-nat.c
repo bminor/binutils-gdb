@@ -832,7 +832,9 @@ symbol_add_stub (arg)
 {
   register struct so_list *so = (struct so_list *) arg;		/* catch_errs bogon */
   CORE_ADDR text_addr = 0;
+  struct section_addr_info section_addrs;
 
+  memset (&section_addrs, 0, sizeof (section_addrs));
   if (so->textsection)
     text_addr = so->textsection->addr;
   else if (so->abfd != NULL)
@@ -850,9 +852,10 @@ symbol_add_stub (arg)
 	text_addr = bfd_section_vma (so->abfd, lowest_sect) + LM_OFFSET (so);
     }
 
+  section_addrs.text_addr = text_addr;
   so->objfile = symbol_file_add (so->so_name, so->from_tty,
-				 text_addr,
-				 0, 0, 0, 0, 0);
+				 &section_addrs,
+				 0, 0, 0, 0);
   return (1);
 }
 
@@ -1314,9 +1317,11 @@ must be loaded manually, using `sharedlibrary'.",
 
 static struct core_fns irix5_core_fns =
 {
-  bfd_target_unknown_flavour,
-  fetch_core_registers,
-  NULL
+  bfd_target_unknown_flavour,		/* core_flavour */
+  default_check_format,			/* check_format */
+  default_core_sniffer,			/* core_sniffer */
+  fetch_core_registers,			/* core_read_registers */
+  NULL					/* next */
 };
 
 void

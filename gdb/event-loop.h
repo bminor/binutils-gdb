@@ -59,7 +59,7 @@
 
 typedef PTR gdb_client_data;
 struct async_signal_handler;
-typedef void (handler_func) (int, int, gdb_client_data);
+typedef void (handler_func) (int, gdb_client_data);
 typedef void (sig_handler_func) (gdb_client_data);
 typedef void (timer_handler_func) (gdb_client_data);
 
@@ -91,6 +91,5 @@ extern void mark_async_signal_handler (struct async_signal_handler *async_handle
 extern struct async_signal_handler *
   create_async_signal_handler (sig_handler_func * proc, gdb_client_data client_data);
 extern void delete_async_signal_handler (struct async_signal_handler **async_handler_ptr);
-extern void inferior_event_handler (int error, gdb_client_data client_data, int fd);
 extern int create_timer (int milliseconds, timer_handler_func * proc, gdb_client_data client_data);
 extern void delete_timer (int id);

@@ -27,7 +27,7 @@
 /* Generic UNIX/FD functions */
 
 extern int ser_unix_nop_flush_output (serial_t scb);
-extern int ser_unix_nop_flush_input (serial_t scb);
+extern int ser_unix_flush_input (serial_t scb);
 extern int ser_unix_nop_send_break (serial_t scb);
 extern void ser_unix_nop_raw (serial_t scb);
 extern serial_ttystate ser_unix_nop_get_tty_state (serial_t scb);

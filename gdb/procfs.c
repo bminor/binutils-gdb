@@ -5672,7 +5672,7 @@ procfs_create_inferior (exec_file, allargs, env)
   /* We are at the first instruction we care about.  */
   /* Pedal to the metal... */
 
-  proceed ((CORE_ADDR) - 1, TARGET_SIGNAL_0, 0);
+  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
 }
 
 /* Clean up after the inferior dies.  */

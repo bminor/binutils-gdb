@@ -325,7 +325,9 @@ handle_load_dll (PTR dummy)
   char *p, *dll_name = NULL;
   struct objfile *objfile;
   MEMORY_BASIC_INFORMATION minfo;
+  struct section_addr_info section_addrs;
 
+  memset (&section_addrs, 0, sizeof (section_addrs));
   dll_buf[0] = dll_buf[sizeof (dll_buf) - 1] = '\0';
 
   /* The following code attempts to find the name of the dll by reading the
@@ -417,7 +419,8 @@ handle_load_dll (PTR dummy)
      FIXME: Is this the real reason that we need the 0x1000 ? */
 
   printf_unfiltered ("%x:%s", event->lpBaseOfDll, dll_name);
-  symbol_file_add (dll_name, 0, (int) event->lpBaseOfDll + 0x1000, 0, 0, 0, 0, 1);
+  section_addrs.text_addr = (int) event->lpBaseOfDll + 0x1000;
+  symbol_file_add (dll_name, 0, &section_addrs, 0, 0, 0, 1);
   printf_unfiltered ("\n");
 
   return 1;
@@ -887,7 +890,7 @@ child_create_inferior (exec_file, allargs, env)
   /* Ignore the first trap */
   child_wait (inferior_pid, &dummy);
 
-  proceed ((CORE_ADDR) - 1, TARGET_SIGNAL_0, 0);
+  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
 }
 
 static void

@@ -226,7 +226,9 @@ pa64_solib_add_solib_objfile (so, name, from_tty, text_addr)
   bfd *tmp_bfd;
   asection *sec;
   obj_private_data_t *obj_private;
+  struct section_addr_info section_addrs;
 
+  memset (&section_addrs, 0, sizeof (section_addrs));
   /* We need the BFD so that we can look at its sections.  We open up the
      file temporarily, then close it when we are done.  */
   tmp_bfd = bfd_openr (name, gnutarget);
@@ -270,7 +272,8 @@ pa64_solib_add_solib_objfile (so, name, from_tty, text_addr)
   tmp_bfd = NULL;
 
   /* Now let the generic code load up symbols for this library.  */
-  so->objfile = symbol_file_add (name, from_tty, text_addr, 0, 0, 0, 0, 1);
+  section_addrs.text_addr = text_addr;
+  so->objfile = symbol_file_add (name, from_tty, &section_addrs, 0, 0, 0, 1);
   so->abfd = so->objfile->obfd;
 
   /* Mark this as a shared library and save private data.  */

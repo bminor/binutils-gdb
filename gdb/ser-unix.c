@@ -34,7 +34,6 @@
 #include "gdb_string.h"
 #include "event-loop.h"
 
-
 #ifdef HAVE_TERMIOS
 
 struct hardwire_ttystate
@@ -71,9 +70,10 @@ static int hardwire_open (serial_t scb, const char *name);
 static void hardwire_raw (serial_t scb);
 static int wait_for (serial_t scb, int timeout);
 static int hardwire_readchar (serial_t scb, int timeout);
+static int do_hardwire_readchar (serial_t scb, int timeout);
+static int generic_readchar (serial_t scb, int timeout, int (*do_readchar) (serial_t scb, int timeout));
 static int rate_to_code (int rate);
 static int hardwire_setbaudrate (serial_t scb, int rate);
-static int hardwire_write (serial_t scb, const char *str, int len);
 static void hardwire_close (serial_t scb);
 static int get_tty_state (serial_t scb, struct hardwire_ttystate * state);
 static int set_tty_state (serial_t scb, struct hardwire_ttystate * state);
@@ -87,6 +87,11 @@ static int hardwire_flush_output (serial_t);
 static int hardwire_flush_input (serial_t);
 static int hardwire_send_break (serial_t);
 static int hardwire_setstopbits (serial_t, int);
+
+static int do_unix_readchar (serial_t scb, int timeout);
+static timer_handler_func push_event;
+static handler_func fd_event;
+static void reschedule (serial_t scb);
 
 void _initialize_ser_hardwire (void);
 
@@ -230,9 +235,11 @@ hardwire_print_tty_state (serial_t scb,
 
 #ifdef HAVE_TERMIOS
   fprintf_filtered (stream, "c_iflag = 0x%x, c_oflag = 0x%x,\n",
-		    state->termios.c_iflag, state->termios.c_oflag);
+		    (int) state->termios.c_iflag,
+		    (int) state->termios.c_oflag);
   fprintf_filtered (stream, "c_cflag = 0x%x, c_lflag = 0x%x\n",
-		    state->termios.c_cflag, state->termios.c_lflag);
+		    (int) state->termios.c_cflag,
+		    (int) state->termios.c_lflag);
 #if 0
   /* This not in POSIX, and is not really documented by those systems
      which have it (at least not Sun).  */
@@ -325,8 +332,7 @@ hardwire_flush_output (serial_t scb)
 static int
 hardwire_flush_input (serial_t scb)
 {
-  scb->bufcnt = 0;
-  scb->bufp = scb->buf;
+  ser_unix_flush_input (scb);
 
 #ifdef HAVE_TERMIOS
   return tcflush (scb->fd, TCIFLUSH);
@@ -418,9 +424,14 @@ hardwire_raw (serial_t scb)
    timeout occur in the read() in hardwire_read().
  */
 
-/* FIXME: Don't replace this with the equivalent ser_unix*() until the
-   old TERMIOS/SGTTY/... timer code has been flushed. cagney
-   1999-09-16. */
+/* FIXME: cagney/1999-09-16: Don't replace this with the equivalent
+   ser_unix*() until the old TERMIOS/SGTTY/... timer code has been
+   flushed. . */
+
+/* NOTE: cagney/1999-09-30: Much of the code below is dead.  The only
+   possible values of the TIMEOUT parameter are ONE and ZERO.
+   Consequently all the code that tries to handle the possability of
+   an overflowed timer is unnecessary. */
 
 static int
 wait_for (serial_t scb, int timeout)
@@ -544,13 +555,10 @@ wait_for (serial_t scb, int timeout)
    that. */
 
 static int
-hardwire_readchar (serial_t scb, int timeout)
+do_hardwire_readchar (serial_t scb, int timeout)
 {
   int status, delta;
   int detach = 0;
-
-  if (scb->bufcnt-- > 0)
-    return *scb->bufp++;
 
   if (timeout > 0)
     timeout++;
@@ -583,15 +591,11 @@ hardwire_readchar (serial_t scb, int timeout)
       if (status < 0)
 	return status;
 
-      /* NOTE: cagney/1999-09-17: See ser_unix_readchar() for reason
-         why ASYNC reads are character by character. */
+      status = read (scb->fd, scb->buf, BUFSIZ);
 
-      scb->bufcnt = read (scb->fd, scb->buf,
-			  (SERIAL_IS_ASYNC_P (scb) ? 1 : BUFSIZ));
-
-      if (scb->bufcnt <= 0)
+      if (status <= 0)
 	{
-	  if (scb->bufcnt == 0)
+	  if (status == 0)
 	    {
 	      /* Zero characters means timeout (it could also be EOF, but
 	         we don't (yet at least) distinguish).  */
@@ -611,11 +615,19 @@ hardwire_readchar (serial_t scb, int timeout)
 	    return SERIAL_ERROR;	/* Got an error from read */
 	}
 
+      scb->bufcnt = status;
       scb->bufcnt--;
       scb->bufp = scb->buf;
       return *scb->bufp++;
     }
 }
+
+static int
+hardwire_readchar (serial_t scb, int timeout)
+{
+  return generic_readchar (scb, timeout, do_hardwire_readchar);
+}
+
 
 #ifndef B19200
 #define B19200 EXTA
@@ -812,28 +824,6 @@ hardwire_setstopbits (scb, num)
   return set_tty_state (scb, &state);
 }
 
-/* FIXME: Don't replace this with the equivalent ser_unix*() until the
-   old TERMIOS/SGTTY/... timer code has been flushed. cagney
-   1999-09-16. */
-
-static int
-hardwire_write (serial_t scb, const char *str, int len)
-{
-  int cc;
-
-  while (len > 0)
-    {
-      cc = write (scb->fd, str, len);
-
-      if (cc < 0)
-        return 1;
-      len -= cc;
-      str += cc;
-    }
-  return 0;
-}
-
-
 static void
 hardwire_close (serial_t scb)
 {
@@ -911,14 +901,11 @@ ser_unix_wait_for (serial_t scb, int timeout)
    char if successful.  Returns -2 if timeout expired, EOF if line dropped
    dead, or -3 for any other error (see errno in that case). */
 
-int
-ser_unix_readchar (serial_t scb, int timeout)
+static int
+do_unix_readchar (serial_t scb, int timeout)
 {
   int status;
   int delta;
-
-  if (scb->bufcnt-- > 0)
-    return *scb->bufp++;
 
   /* We have to be able to keep the GUI alive here, so we break the original
      timeout into steps of 1 second, running the "keep the GUI alive" hook 
@@ -969,20 +956,14 @@ ser_unix_readchar (serial_t scb, int timeout)
 
   while (1)
     {
-      /* FIXME: cagney/1999-09-17: ASYNC: The ASYNC serial code needs
-	 to be modified so that it agressivly tries to drain its local
-	 input buffer.  Until this is done, the read() below can only
-	 take in single characters.  This is to ensure that
-	 unprocessed data doesn't end up sitting in the input fifo. */
-      scb->bufcnt = read (scb->fd, scb->buf,
-			  (SERIAL_IS_ASYNC_P (scb) ? 1 : BUFSIZ));
-      if (scb->bufcnt != -1 || errno != EINTR)
+      status = read (scb->fd, scb->buf, BUFSIZ);
+      if (status != -1 || errno != EINTR)
 	break;
     }
 
-  if (scb->bufcnt <= 0)
+  if (status <= 0)
     {
-      if (scb->bufcnt == 0)
+      if (status == 0)
 	return SERIAL_TIMEOUT;	/* 0 chars means timeout [may need to
 				   distinguish between EOF & timeouts
 				   someday] */
@@ -990,9 +971,68 @@ ser_unix_readchar (serial_t scb, int timeout)
 	return SERIAL_ERROR;	/* Got an error from read */
     }
 
+  scb->bufcnt = status;
   scb->bufcnt--;
   scb->bufp = scb->buf;
   return *scb->bufp++;
+}
+
+/* Perform operations common to both old and new readchar. */
+
+/* Return the next character from the input FIFO.  If the FIFO is
+   empty, call the SERIAL specific routine to try and read in more
+   characters.
+
+   Initially data from the input FIFO is returned (fd_event()
+   pre-reads the input into that FIFO.  Once that has been emptied,
+   further data is obtained by polling the input FD using the device
+   specific readchar() function.  Note: reschedule() is called after
+   every read.  This is because there is no guarentee that the lower
+   level fd_event() poll_event() code (which also calls reschedule())
+   will be called. */
+
+static int
+generic_readchar (serial_t scb, int timeout,
+		  int (do_readchar) (serial_t scb, int timeout))
+{
+  int ch;
+  if (scb->bufcnt > 0)
+    {
+      ch = *scb->bufp;
+      scb->bufcnt--;
+      scb->bufp++;
+    }
+  else if (scb->bufcnt < 0)
+    {
+      /* Some errors/eof are are sticky. */
+      ch = scb->bufcnt;
+    }
+  else
+    {
+      ch = do_readchar (scb, timeout);
+      if (ch < 0)
+	{
+	  switch ((enum serial_rc) ch)
+	    {
+	    case SERIAL_EOF:
+	    case SERIAL_ERROR:
+	      /* Make the error/eof stick. */
+	      scb->bufcnt = ch;
+	      break;
+	    case SERIAL_TIMEOUT:
+	      scb->bufcnt = 0;
+	      break;
+	    }
+	}
+    }
+  reschedule (scb);
+  return ch;
+}
+
+int
+ser_unix_readchar (serial_t scb, int timeout)
+{
+  return generic_readchar (scb, timeout, do_unix_readchar);
 }
 
 int
@@ -1048,9 +1088,16 @@ ser_unix_nop_flush_output (serial_t scb)
 }
 
 int
-ser_unix_nop_flush_input (serial_t scb)
+ser_unix_flush_input (serial_t scb)
 {
-  return 0;
+  if (scb->bufcnt >= 0)
+    {
+      scb->bufcnt = 0;
+      scb->bufp = scb->buf;
+      return 0;
+    }
+  else
+    return SERIAL_ERROR;
 }
 
 int
@@ -1065,12 +1112,155 @@ ser_unix_nop_drain_output (serial_t scb)
   return 0;
 }
 
+
+
+/* Event handling for ASYNC serial code.
+
+   At any time the SERIAL device either: has an empty FIFO and is
+   waiting on a FD event; or has a non-empty FIFO/error condition and
+   is constantly scheduling timer events.
+
+   ASYNC only stops pestering its client when it is de-async'ed or it
+   is told to go away. */
+
+/* Value of scb->async_state: */
+enum {
+  /* >= 0 (TIMER_SCHEDULED) */
+  /* The ID of the currently scheduled timer event. This state is
+     rarely encountered.  Timer events are one-off so as soon as the
+     event is delivered the state is shanged to NOTHING_SCHEDULED. */
+  FD_SCHEDULED = -1,
+  /* The fd_event() handler is scheduled.  It is called when ever the
+     file descriptor becomes ready. */
+  NOTHING_SCHEDULED = -2
+  /* Either no task is scheduled (just going into ASYNC mode) or a
+     timer event has just gone off and the current state has been
+     forced into nothing scheduled. */
+};
+
+/* Identify and schedule the next ASYNC task based on scb->async_state
+   and scb->buf* (the input FIFO).  A state machine is used to avoid
+   the need to make redundant calls into the event-loop - the next
+   scheduled task is only changed when needed. */
+
 static void
-ser_unix_event (int error, int fd, gdb_client_data context)
+reschedule (serial_t scb)
+{
+  if (SERIAL_IS_ASYNC_P (scb))
+    {
+      int next_state;
+      switch (scb->async_state)
+	{
+	case FD_SCHEDULED:
+	  if (scb->bufcnt == 0)
+	    next_state = FD_SCHEDULED;
+	  else
+	    {
+	      delete_file_handler (scb->fd);
+	      next_state = create_timer (0, push_event, scb);
+	    }
+	  break;
+	case NOTHING_SCHEDULED:
+	  if (scb->bufcnt == 0)
+	    {
+	      add_file_handler (scb->fd, fd_event, scb);
+	      next_state = FD_SCHEDULED;
+	    }
+	  else
+	    {
+	      next_state = create_timer (0, push_event, scb);
+	    }
+	  break;
+	default: /* TIMER SCHEDULED */
+	  if (scb->bufcnt == 0)
+	    {
+	      delete_timer (scb->async_state);
+	      add_file_handler (scb->fd, fd_event, scb);
+	      next_state = FD_SCHEDULED;
+	    }
+	  else
+	    next_state = scb->async_state;
+	  break;
+	}
+      if (SERIAL_DEBUG_P (scb))
+	{
+	  switch (next_state)
+	    {
+	    case FD_SCHEDULED:
+	      if (scb->async_state != FD_SCHEDULED)
+		fprintf_unfiltered (gdb_stdlog, "[fd%d->fd-scheduled]\n",
+				    scb->fd);
+	      break;
+	    default: /* TIMER SCHEDULED */
+	      if (scb->async_state == FD_SCHEDULED)
+		fprintf_unfiltered (gdb_stdlog, "[fd%d->timer-scheduled]\n",
+				    scb->fd);
+	      break;
+	    }
+	}
+      scb->async_state = next_state;
+    }
+}
+
+/* FD_EVENT: This is scheduled when the input FIFO is empty (and there
+   is no pending error).  As soon as data arrives, it is read into the
+   input FIFO and the client notified.  The client should then drain
+   the FIFO using readchar().  If the FIFO isn't immediatly emptied,
+   push_event() is used to nag the client until it is. */
+
+static void
+fd_event (int error, void *context)
 {
   serial_t scb = context;
-  scb->async_handler (error, scb->async_context, fd);
+  if (error != 0)
+    {
+      scb->bufcnt = SERIAL_ERROR;
+    }
+  else if (scb->bufcnt == 0)
+    {
+      /* Prime the input FIFO.  The readchar() function is used to
+         pull characters out of the buffer.  See also
+         generic_readchar(). */
+      int nr;
+      do
+	{
+	  nr = read (scb->fd, scb->buf, BUFSIZ);
+	}
+      while (nr == -1 && errno == EINTR);
+      if (nr == 0)
+	{
+	  scb->bufcnt = SERIAL_EOF;
+	}
+      else if (nr > 0)
+	{
+	  scb->bufcnt = nr;
+	  scb->bufp = scb->buf;
+	}
+      else
+	{
+	  scb->bufcnt = SERIAL_ERROR;
+	}
+    }
+  scb->async_handler (scb, scb->async_context);
+  reschedule (scb);
 }
+
+/* PUSH_EVENT: The input FIFO is non-empty (or there is a pending
+   error).  Nag the client until all the data has been read.  In the
+   case of errors, the client will need to close or de-async the
+   device before naging stops. */
+
+static void
+push_event (void *context)
+{
+  serial_t scb = context;
+  scb->async_state = NOTHING_SCHEDULED; /* Timers are one-off */
+  scb->async_handler (scb, scb->async_context);
+  /* re-schedule */
+  reschedule (scb);
+}
+
+/* Put the SERIAL device into/out-of ASYNC mode.  */
 
 void
 ser_unix_async (serial_t scb,
@@ -1078,11 +1268,30 @@ ser_unix_async (serial_t scb,
 {
   if (async_p)
     {
-      add_file_handler (scb->fd, ser_unix_event, scb);
+      /* Force a re-schedule. */
+      scb->async_state = NOTHING_SCHEDULED;
+      if (SERIAL_DEBUG_P (scb))
+	fprintf_unfiltered (gdb_stdlog, "[fd%d->asynchronous]\n",
+			    scb->fd);
+      reschedule (scb);
     }
   else
     {
-      delete_file_handler (scb->fd);
+      if (SERIAL_DEBUG_P (scb))
+	fprintf_unfiltered (gdb_stdlog, "[fd%d->synchronous]\n",
+			    scb->fd);
+      /* De-schedule what ever tasks are currently scheduled. */
+      switch (scb->async_state)
+	{
+	case FD_SCHEDULED:
+	  delete_file_handler (scb->fd);
+	  break;
+	NOTHING_SCHEDULED:
+	  break;
+	default: /* TIMER SCHEDULED */
+	  delete_timer (scb->async_state);
+	  break;
+	}
     }
 }
 
@@ -1099,10 +1308,7 @@ _initialize_ser_hardwire (void)
      the old TERMIOS/SGTTY/... timer code has been flushed. cagney
      1999-09-16. */
   ops->readchar = hardwire_readchar;
-  /* FIXME: Don't replace this with the equivalent ser_unix*() until
-     the old TERMIOS/SGTTY/... timer code has been flushed. cagney
-     1999-09-16. */
-  ops->write = hardwire_write;
+  ops->write = ser_unix_write;
   ops->flush_output = hardwire_flush_output;
   ops->flush_input = hardwire_flush_input;
   ops->send_break = hardwire_send_break;

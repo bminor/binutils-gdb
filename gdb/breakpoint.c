@@ -855,7 +855,8 @@ insert_breakpoints ()
 		/* If it's a memory location, then we must watch it.  */
 		if (v->lval == lval_memory)
 		  {
-		    int addr, len, type;
+		    CORE_ADDR addr;
+		    int len, type;
 
 		    addr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
 		    len = TYPE_LENGTH (VALUE_TYPE (v));
@@ -1199,7 +1200,8 @@ remove_breakpoint (b, is)
 	     at that address.  */
 	  if (v->lval == lval_memory)
 	    {
-	      int addr, len, type;
+	      CORE_ADDR addr;
+	      int len, type;
 
 	      addr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
 	      len = TYPE_LENGTH (VALUE_TYPE (v));
@@ -2820,7 +2822,7 @@ breakpoint_1 (bnum, allflag)
   register struct breakpoint *b;
   register struct command_line *l;
   register struct symbol *sym;
-  CORE_ADDR last_addr = (CORE_ADDR) - 1;
+  CORE_ADDR last_addr = (CORE_ADDR) -1;
   int found_a_breakpoint = 0;
   static ep_type_description_t bptypes[] =
   {
@@ -3087,7 +3089,7 @@ breakpoint_1 (bnum, allflag)
   else
     /* Compare against (CORE_ADDR)-1 in case some compiler decides
        that a comparison of an unsigned with -1 is always false.  */
-  if (last_addr != (CORE_ADDR) - 1)
+  if (last_addr != (CORE_ADDR) -1)
     set_next_address (last_addr);
 
   annotate_breakpoints_table_end ();

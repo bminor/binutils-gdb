@@ -24,8 +24,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* The semantic code invokes this for invalid (unrecognized) instructions.  */
 
-void
-sim_engine_invalid_insn (SIM_CPU *current_cpu, IADDR cia)
+SEM_PC
+sim_engine_invalid_insn (SIM_CPU *current_cpu, IADDR cia, SEM_PC vpc)
 {
   SIM_DESC sd = CPU_STATE (current_cpu);
 
@@ -47,6 +47,7 @@ sim_engine_invalid_insn (SIM_CPU *current_cpu, IADDR cia)
   else
 #endif
     sim_engine_halt (sd, current_cpu, NULL, cia, sim_stopped, SIM_SIGILL);
+  return vpc;
 }
 
 /* Process an address exception.  */

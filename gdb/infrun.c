@@ -34,8 +34,7 @@
 #include "symfile.h"		/* for overlay functions */
 #include "top.h"
 #include <signal.h>
-#include "event-loop.h"
-#include "event-top.h"
+#include "inf-loop.h"
 
 /* Prototypes for local functions */
 
@@ -55,8 +54,6 @@ static void delete_breakpoint_current_contents (void *);
 
 static void set_follow_fork_mode_command (char *arg, int from_tty,
 					  struct cmd_list_element * c);
-
-static void complete_execution (void);
 
 static struct inferior_status *xmalloc_inferior_status (void);
 
@@ -963,7 +960,7 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
   if (step < 0)
     stop_after_trap = 1;
 
-  if (addr == (CORE_ADDR) - 1)
+  if (addr == (CORE_ADDR) -1)
     {
       /* If there is a breakpoint at the address we will resume at,
          step one instruction before inserting breakpoints
@@ -1281,7 +1278,7 @@ struct execution_control_state *async_ecs;
 
 void
 fetch_inferior_event (client_data)
-     gdb_client_data client_data;
+     void *client_data;
 {
   static struct cleanup *old_cleanups;
 
@@ -1329,11 +1326,7 @@ fetch_inferior_event (client_data)
 	 if there are any. */
       do_exec_cleanups (old_cleanups);
       normal_stop ();
-      /* Is there anything left to do for the command issued to
-         complete? */
-      do_all_continuations ();
-      /* Reset things after target has stopped for the async commands. */
-      complete_execution ();
+      inferior_event_handler (INF_EXEC_COMPLETE, NULL);
     }
 }
 
@@ -3239,26 +3232,6 @@ stopped_for_internal_shlib_event (bpstat bs)
   return 0;
 }
 
-/* Reset proper settings after an asynchronous command has finished.
-   If the execution command was in synchronous mode, register stdin
-   with the event loop, and reset the prompt. */
-
-static void
-complete_execution (void)
-{
-  target_executing = 0;
-
-  if (sync_execution)
-    {
-      do_exec_error_cleanups (ALL_CLEANUPS);
-      display_gdb_prompt (0);
-    }
-  else
-    {
-      if (exec_done_display_p)
-	printf_unfiltered ("completed.\n");
-    }
-}
 
 /* Here to return control to GDB when the inferior stops for real.
    Print appropriate messages, remove breakpoints, give terminal our modes.

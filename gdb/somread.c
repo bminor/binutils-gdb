@@ -53,7 +53,7 @@ som_symtab_read PARAMS ((bfd *, struct objfile *,
 			 struct section_offsets *));
 
 static void
-som_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
+som_symfile_offsets PARAMS ((struct objfile *, struct section_addr_info *));
 
 /* FIXME: These should really be in a common header somewhere */
 
@@ -460,9 +460,9 @@ som_symfile_init (objfile)
    Plain and simple for now.  */
 
 static void
-som_symfile_offsets (objfile, addr)
+som_symfile_offsets (objfile, addrs)
      struct objfile *objfile;
-     CORE_ADDR addr;
+     struct section_addr_info *addrs;
 {
   int i;
 
@@ -471,11 +471,11 @@ som_symfile_offsets (objfile, addr)
     obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
 
   /* First see if we're a shared library.  If so, get the section
-     offsets from the library, else get them from addr.  */
+     offsets from the library, else get them from addrs.  */
   if (!som_solib_section_offsets (objfile, objfile->section_offsets))
     {
       for (i = 0; i < SECT_OFF_MAX; i++)
-	ANOFFSET (objfile->section_offsets, i) = addr;
+	ANOFFSET (objfile->section_offsets, i) = addrs -> text_addr;
     }
 }
 

@@ -55,13 +55,15 @@ SEM_FN_NAME (i960base,x_invalid) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 0);
 
   {
-#if WITH_SCACHE
-    /* Update the recorded pc in the cpu state struct.  */
+    /* Update the recorded pc in the cpu state struct.
+       Only necessary for WITH_SCACHE case, but to avoid the
+       conditional compilation ....  */
     SET_H_PC (pc);
-#endif
-    sim_engine_invalid_insn (current_cpu, pc);
-    sim_io_error (CPU_STATE (current_cpu), "invalid insn not handled\n");
-    /* NOTREACHED */
+    /* Virtual insns have zero size.  Overwrite vpc with address of next insn
+       using the default-insn-bitsize spec.  When executing insns in parallel
+       we may want to queue the fault and continue execution.  */
+    vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+    vpc = sim_engine_invalid_insn (current_cpu, pc, vpc);
   }
 
   return vpc;
@@ -7577,7 +7579,7 @@ SEM_FN_NAME (i960base,flushreg) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-do { } while (0); /*nop*/
+((void) 0); /*nop*/
 
   return vpc;
 #undef FLD
@@ -7897,7 +7899,9 @@ SEM_FN_NAME (i960base,init_idesc_table) (SIM_CPU *current_cpu)
 
   for (sf = &sem_fns[0]; sf->fn != 0; ++sf)
     {
-      int valid_p = CGEN_INSN_MACH_HAS_P (idesc_table[sf->index].idata, mach_num);
+      const CGEN_INSN *insn = idesc_table[sf->index].idata;
+      int valid_p = (CGEN_INSN_VIRTUAL_P (insn)
+		     || CGEN_INSN_MACH_HAS_P (insn, mach_num));
 #if FAST_P
       if (valid_p)
 	idesc_table[sf->index].sem_fast = sf->fn;

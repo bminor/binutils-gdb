@@ -82,7 +82,8 @@ char *argv[], **envp;
     marker2 (43);
     marker3 ("stack", "trace");
     marker4 (177601976L);
-    return 0;
+    argc = (argc == 12345); /* This is silly, but we can step off of it */
+    return argc;
 }
 
 #ifdef PROTOTYPES

@@ -217,7 +217,7 @@ child_create_inferior (exec_file, allargs, env)
   init_wait_for_inferior ();
   clear_proceed_status ();
 
-/*  proceed ((CORE_ADDR) - 1, TARGET_SIGNAL_0, 0);  */
+/*  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);  */
 }
 
 static void

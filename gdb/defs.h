@@ -420,6 +420,7 @@ extern void *gdb_file_data PARAMS ((struct gdb_file *file));
 extern struct gdb_file *stdio_fileopen PARAMS ((FILE *)); 
 /* #if defined (TUI) */
 extern struct gdb_file *tui_fileopen PARAMS ((FILE *)); 
+extern struct gdb_file *tui_sfileopen PARAMS ((int)); 
 /* #endif */
 
 /* deprecated - use gdb_file_delete */
@@ -823,6 +824,10 @@ extern NORETURN void error PARAMS((const char *, ...)) ATTR_NORETURN;
 extern void error_begin PARAMS ((void));
 
 extern NORETURN void internal_error (char *, ...) ATTR_NORETURN;
+
+extern NORETURN void error_stream PARAMS ((GDB_FILE *)) ATTR_NORETURN;
+
+extern char *error_last_message PARAMS ((void));
 
 extern NORETURN void nomem PARAMS ((long)) ATTR_NORETURN;
 

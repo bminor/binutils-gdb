@@ -89,7 +89,7 @@ AC_HEADER_STAT
 
 AC_C_CONST
 
-AC_CHECK_FUNCS(setpgid sbrk sigaction isascii bzero bcopy btowc poll)
+AC_CHECK_FUNCS(setpgid sbrk sigaction isascii bzero bcopy btowc poll sigprocmask)
 AC_FUNC_ALLOCA
 
 AC_CHECK_LIB(socket, socketpair)
@@ -691,6 +691,7 @@ sed -e '/^TM_FILE[ 	]*=/s,^TM_FILE[ 	]*=[ 	]*,&config/'"${gdb_target_cpu}"'/,
 /^NAT_FILE[ 	]*=/s,^NAT_FILE[ 	]*=[ 	]*,&config/'"${gdb_host_cpu}"'/,' <Makefile >Makefile.tmp
 mv -f Makefile.tmp Makefile
 changequote([,])dnl
+
 
 case x$CONFIG_HEADERS in
 xconfig.h:config.in)

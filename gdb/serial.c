@@ -26,6 +26,10 @@
 
 extern void _initialize_serial (void);
 
+/* Is serial being debugged? */
+
+static int global_serial_debug_p;
+
 /* Linked list of serial I/O handlers */
 
 static struct serial_ops *serial_ops_list = NULL;
@@ -45,7 +49,7 @@ static char *serial_logfile = NULL;
 static GDB_FILE *serial_logfp = NULL;
 
 static struct serial_ops *serial_interface_lookup (char *);
-static void serial_logchar (int, int, int);
+static void serial_logchar (struct gdb_file *stream, int ch_type, int ch, int timeout);
 static char logbase_hex[] = "hex";
 static char logbase_octal[] = "octal";
 static char logbase_ascii[] = "ascii";
@@ -64,62 +68,62 @@ static int serial_current_type = 0;
 #define SERIAL_BREAK 1235
 
 static void
-serial_logchar (int ch_type, int ch, int timeout)
+serial_logchar (struct gdb_file *stream, int ch_type, int ch, int timeout)
 {
   if (ch_type != serial_current_type)
     {
-      fprintf_unfiltered (serial_logfp, "\n%c ", ch_type);
+      fprintf_unfiltered (stream, "\n%c ", ch_type);
       serial_current_type = ch_type;
     }
 
   if (serial_logbase != logbase_ascii)
-    fputc_unfiltered (' ', serial_logfp);
+    fputc_unfiltered (' ', stream);
 
   switch (ch)
     {
     case SERIAL_TIMEOUT:
-      fprintf_unfiltered (serial_logfp, "<Timeout: %d seconds>", timeout);
+      fprintf_unfiltered (stream, "<Timeout: %d seconds>", timeout);
       return;
     case SERIAL_ERROR:
-      fprintf_unfiltered (serial_logfp, "<Error: %s>", safe_strerror (errno));
+      fprintf_unfiltered (stream, "<Error: %s>", safe_strerror (errno));
       return;
     case SERIAL_EOF:
-      fputs_unfiltered ("<Eof>", serial_logfp);
+      fputs_unfiltered ("<Eof>", stream);
       return;
     case SERIAL_BREAK:
-      fputs_unfiltered ("<Break>", serial_logfp);
+      fputs_unfiltered ("<Break>", stream);
       return;
     default:
       if (serial_logbase == logbase_hex)
-	fprintf_unfiltered (serial_logfp, "%02x", ch & 0xff);
+	fprintf_unfiltered (stream, "%02x", ch & 0xff);
       else if (serial_logbase == logbase_octal)
-	fprintf_unfiltered (serial_logfp, "%03o", ch & 0xff);
+	fprintf_unfiltered (stream, "%03o", ch & 0xff);
       else
 	switch (ch)
 	  {
 	  case '\\':
-	    fputs_unfiltered ("\\\\", serial_logfp);
+	    fputs_unfiltered ("\\\\", stream);
 	    break;
 	  case '\b':
-	    fputs_unfiltered ("\\b", serial_logfp);
+	    fputs_unfiltered ("\\b", stream);
 	    break;
 	  case '\f':
-	    fputs_unfiltered ("\\f", serial_logfp);
+	    fputs_unfiltered ("\\f", stream);
 	    break;
 	  case '\n':
-	    fputs_unfiltered ("\\n", serial_logfp);
+	    fputs_unfiltered ("\\n", stream);
 	    break;
 	  case '\r':
-	    fputs_unfiltered ("\\r", serial_logfp);
+	    fputs_unfiltered ("\\r", stream);
 	    break;
 	  case '\t':
-	    fputs_unfiltered ("\\t", serial_logfp);
+	    fputs_unfiltered ("\\t", stream);
 	    break;
 	  case '\v':
-	    fputs_unfiltered ("\\v", serial_logfp);
+	    fputs_unfiltered ("\\v", stream);
 	    break;
 	  default:
-	    fprintf_unfiltered (serial_logfp, isprint (ch) ? "%c" : "\\x%02x", ch & 0xFF);
+	    fprintf_unfiltered (stream, isprint (ch) ? "%c" : "\\x%02x", ch & 0xFF);
 	    break;
 	  }
     }
@@ -212,6 +216,8 @@ serial_open (const char *name)
   scb->name = strsave (name);
   scb->next = scb_base;
   scb->refcnt = 1;
+  scb->debug_p = 0;
+  scb->async_state = 0;
   scb->async_handler = NULL;
   scb->async_context = NULL;
   scb_base = scb;
@@ -258,6 +264,8 @@ serial_fdopen (const int fd)
   scb->name = NULL;
   scb->next = scb_base;
   scb->refcnt = 1;
+  scb->debug_p = 0;
+  scb->async_state = 0;
   scb->async_handler = NULL;
   scb->async_context = NULL;
   scb_base = scb;
@@ -339,11 +347,18 @@ serial_readchar (serial_t scb, int timeout)
   ch = scb->ops->readchar (scb, timeout);
   if (serial_logfp != NULL)
     {
-      serial_logchar ('r', ch, timeout);
+      serial_logchar (serial_logfp, 'r', ch, timeout);
 
       /* Make sure that the log file is as up-to-date as possible,
          in case we are getting ready to dump core or something. */
       gdb_flush (serial_logfp);
+    }
+  if (SERIAL_DEBUG_P (scb))
+    {
+      fprintf_unfiltered (gdb_stdlog, "[");
+      serial_logchar (gdb_stdlog, 'r', ch, timeout);
+      fprintf_unfiltered (gdb_stdlog, "]");
+      gdb_flush (gdb_stdlog);
     }
 
   return (ch);
@@ -357,7 +372,7 @@ serial_write (serial_t scb, const char *str, int len)
       int count;
 
       for (count = 0; count < len; count++)
-	serial_logchar ('w', str[count] & 0xff, 0);
+	serial_logchar (serial_logfp, 'w', str[count] & 0xff, 0);
 
       /* Make sure that the log file is as up-to-date as possible,
          in case we are getting ready to dump core or something. */
@@ -403,7 +418,7 @@ int
 serial_send_break (serial_t scb)
 {
   if (serial_logfp != NULL)
-    serial_logchar ('w', SERIAL_BREAK, 0);
+    serial_logchar (serial_logfp, 'w', SERIAL_BREAK, 0);
 
   return (scb->ops->send_break (scb));
 }
@@ -490,6 +505,19 @@ deprecated_serial_fd (serial_t scb)
     }
   return scb->fd; /* sigh */
 }
+
+void
+serial_debug (serial_t scb, int debug_p)
+{
+  scb->debug_p = debug_p;
+}
+
+int
+serial_debug_p (serial_t scb)
+{
+  return scb->debug_p || global_serial_debug_p;
+}
+
 
 #if 0
 /*
@@ -638,4 +666,12 @@ by gdbserver.",
 		       "Set numerical base for remote session logging",
 		       &setlist),
      &showlist);
+
+  add_show_from_set (add_set_cmd ("serialdebug",
+				  class_maintenance,
+				  var_zinteger,
+				  (char *)&global_serial_debug_p,
+				  "Set serial debugging.\n\
+When non-zero, serial port debugging is enabled.", &setlist),
+		     &showlist);
 }

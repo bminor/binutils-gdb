@@ -115,7 +115,7 @@ typedef enum {
   VIRTUAL_INSN_X_CHAIN= -4, VIRTUAL_INSN_X_CTI_CHAIN = -5
 } CGEN_INSN_VIRTUAL_TYPE;
 
-/* Return non-zero if OPCODE is a virtual insn.  */
+/* Return non-zero if CGEN_INSN* INSN is a virtual insn.  */
 #define CGEN_INSN_VIRTUAL_P(insn) \
   CGEN_INSN_ATTR_VALUE ((insn), CGEN_INSN_VIRTUAL)
 
@@ -177,7 +177,7 @@ extern CPU_INSN_NAME_FN cgen_insn_name;
    language [or suggest a better way].  */
 extern int cgen_cpu_max_extra_bytes (void);
 
-/* Called to process an invalid instruction.  */
-extern void sim_engine_invalid_insn (SIM_CPU *, IADDR);
+/* Target supplied routine to process an invalid instruction.  */
+extern SEM_PC sim_engine_invalid_insn (SIM_CPU *, IADDR, SEM_PC);
 
 #endif /* CGEN_DEFS_H */

@@ -435,6 +435,10 @@ struct objfile
 
 #define OBJF_SHARED     (1 << 3)	/* From a shared library */
 
+/* User requested that this objfile be read in it's entirety. */
+
+#define OBJF_READNOW	(1 << 4)	/* Immediate full read */
+
 /* The object file that the main symbol table was loaded from (e.g. the
    argument to the "symbol-file" or "file" command).  */
 

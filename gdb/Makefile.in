@@ -229,7 +229,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19990928
+VERSION = 19991004
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -385,7 +385,8 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	demangle.c dwarfread.c dwarf2read.c elfread.c environ.c eval.c \
 	event-loop.c event-top.c \
 	expprint.c f-exp.y f-lang.c f-typeprint.c f-valprint.c \
-	findvar.c gdbarch.c gdbtypes.c infcmd.c inflow.c infrun.c language.c \
+	findvar.c gdbarch.c gdbtypes.c \
+	inf-loop.c infcmd.c inflow.c infrun.c language.c \
 	kod.c kod-cisco.c \
 	jv-exp.y jv-lang.c jv-valprint.c jv-typeprint.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c main.c maint.c \
@@ -457,6 +458,7 @@ tracepoint_h =	tracepoint.h
 ax_h = 		ax.h
 event_loop_h =  event-loop.h
 event_top_h = 	event-top.h
+inf_loop_h =  	inf-loop.h
 remote_h =	remote.h
 version_h = 	version.h
 
@@ -515,7 +517,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
 	symtab.o symfile.o symmisc.o infcmd.o infrun.o command.o \
 	expprint.o environ.o \
-	event-loop.o event-top.o \
+	event-loop.o event-top.o inf-loop.o \
 	gdbarch.o gdbtypes.o copying.o $(DEPFILES) \
 	mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
 	kod.o kod-cisco.o \
@@ -1139,6 +1141,9 @@ event-top.o: event-top.c top.h $(readline_headers) \
       $(defs_h) $(inferior_h) $(event_loop_h) $(event_top_h) terminal.h \
 	$(gdbcmd_h)
 
+inf-loop.o: inf-loop.c $(defs_h) $(inferior_h) $(inf_loop_h) $(event_loop_h) \
+	 $(event_top_h)
+
 exec.o: exec.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
 	target.h language.h gdb_string.h
 
@@ -1517,7 +1522,7 @@ remote-utils.o: remote-utils.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 
 remote.o: remote.c $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(remote_utils_h) symfile.h terminal.h gdb_string.h \
-	$(event_loop_h) $(event_top_h) $(remote_h)
+	$(event_loop_h) $(event_top_h) $(remote_h) $(inf_loop_h)
 
 remote-nrom.o: remote-nrom.c $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(remote_utils_h) symfile.h terminal.h

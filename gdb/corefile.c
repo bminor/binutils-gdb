@@ -236,25 +236,27 @@ memory_error (status, memaddr)
      int status;
      CORE_ADDR memaddr;
 {
+  GDB_FILE *tmp_stream = tui_sfileopen (130);
+  make_cleanup ((make_cleanup_func) gdb_file_deallocate, &tmp_stream);
+
+  error_begin ();
+
   if (status == EIO)
     {
       /* Actually, address between memaddr and memaddr + len
          was out of bounds. */
-      error_begin ();
-      printf_filtered ("Cannot access memory at address ");
-      print_address_numeric (memaddr, 1, gdb_stdout);
-      printf_filtered (".\n");
-      return_to_top_level (RETURN_ERROR);
+      fprintf_unfiltered (tmp_stream, "Cannot access memory at address ");
+      print_address_numeric (memaddr, 1, tmp_stream);
     }
   else
     {
-      error_begin ();
-      printf_filtered ("Error accessing memory address ");
-      print_address_numeric (memaddr, 1, gdb_stdout);
-      printf_filtered (": %s.\n",
+      fprintf_filtered (tmp_stream, "Error accessing memory address ");
+      print_address_numeric (memaddr, 1, tmp_stream);
+      fprintf_filtered (tmp_stream, ": %s.",
 		       safe_strerror (status));
-      return_to_top_level (RETURN_ERROR);
     }
+
+  error_stream (tmp_stream);
 }
 
 /* Same as target_read_memory, but report an error if can't read.  */

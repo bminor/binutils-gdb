@@ -253,7 +253,7 @@ cat <<EOF
 	    {
 	      /* ??? Defer signalling to execution.  */
 	      if ((insn & 0x7fff) != 0x7000) /* parallel nops are ok */
-		sim_engine_invalid_insn (current_cpu, pc - 2);
+		sim_engine_invalid_insn (current_cpu, pc - 2, 0);
 	      /* There's no point in processing parallel nops in fast mode.
 		 We might as well do this test since we've already tested
 		 that we have a parallel nop.  */

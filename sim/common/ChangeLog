@@ -1,3 +1,12 @@
+1999-09-29  Doug Evans  <devans@casey.cygnus.com>
+
+	* cgen-defs.h (sim_engine_invalid_insn): New arg `vpc'.
+	Change type of result to SEM_PC.
+
+Wed Sep 29 14:43:57 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* cgen-defs.h (sim_engine_invalid_insn): Now returns PC.
+
 1999-09-25  Doug Evans  <devans@casey.cygnus.com>
 
 	* cgen-ops.h (SUBWORD*): Delete cpu arg.

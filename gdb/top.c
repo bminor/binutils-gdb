@@ -45,7 +45,7 @@
 
 #include <sys/types.h>
 
-#include "event-loop.h"
+
 #include "event-top.h"
 #include "gdb_string.h"
 #include "gdb_stat.h"

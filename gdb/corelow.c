@@ -39,11 +39,20 @@
 
 static struct core_fns *core_file_fns = NULL;
 
+/* The core_fns for a core file handler that is prepared to read the core
+   file currently open on core_bfd. */
+
+static struct core_fns *core_vec = NULL;
+
 static void core_files_info PARAMS ((struct target_ops *));
 
 #ifdef SOLIB_ADD
 static int solib_add_stub PARAMS ((PTR));
 #endif
+
+static struct core_fns *sniff_core_bfd PARAMS ((bfd *));
+
+static boolean gdb_check_format PARAMS ((bfd *));
 
 static void core_open PARAMS ((char *, int));
 
@@ -80,6 +89,87 @@ add_core_fns (cf)
   core_file_fns = cf;
 }
 
+/* The default function that core file handlers can use to examine a
+   core file BFD and decide whether or not to accept the job of
+   reading the core file. */
+
+int
+default_core_sniffer (our_fns, abfd)
+     struct core_fns *our_fns;
+     bfd *abfd;
+{
+  int result;
+
+  result = (bfd_get_flavour (abfd) == our_fns -> core_flavour);
+  return (result);
+}
+
+/* Walk through the list of core functions to find a set that can
+   handle the core file open on ABFD.  Default to the first one in the
+   list of nothing matches.  Returns pointer to set that is
+   selected. */
+
+static struct core_fns *
+sniff_core_bfd (abfd)
+     bfd *abfd;
+{
+  struct core_fns *cf;
+  struct core_fns *yummy = NULL;
+  int matches = 0;;
+
+  for (cf = core_file_fns; cf != NULL; cf = cf->next)
+    {
+      if (cf->core_sniffer (cf, abfd))
+	{
+	  yummy = cf;
+	  matches++;
+	}
+    }
+  if (matches > 1)
+    {
+      warning ("\"%s\": ambiguous core format, %d handlers match",
+	       bfd_get_filename (abfd), matches);
+    }
+  else if (matches == 0)
+    {
+      warning ("\"%s\": no core file handler recognizes format, using default",
+	       bfd_get_filename (abfd));
+    }
+  if (yummy == NULL)
+    {
+      yummy = core_file_fns;
+    }
+  return (yummy);
+}
+
+/* The default is to reject every core file format we see.  Either
+   BFD has to recognize it, or we have to provide a function in the
+   core file handler that recognizes it. */
+
+int
+default_check_format (abfd)
+     bfd *abfd;
+{
+  return (0);
+}
+
+/* Attempt to recognize core file formats that BFD rejects. */
+
+static boolean 
+gdb_check_format (abfd)
+     bfd *abfd;
+{
+  struct core_fns *cf;
+
+  for (cf = core_file_fns; cf != NULL; cf = cf->next)
+    {
+      if (cf->check_format (abfd))
+	{
+	  return (true);
+	}
+    }
+  return (false);
+}
 
 /* Discard all vestiges of any previous core file and mark data and stack
    spaces as empty.  */
@@ -114,6 +204,7 @@ core_close (quitting)
 	  core_ops.to_sections_end = NULL;
 	}
     }
+  core_vec = NULL;
 }
 
 #ifdef SOLIB_ADD
@@ -197,7 +288,8 @@ core_open (filename, from_tty)
   if (temp_bfd == NULL)
     perror_with_name (filename);
 
-  if (!bfd_check_format (temp_bfd, bfd_core))
+  if (!bfd_check_format (temp_bfd, bfd_core) &&
+      !gdb_check_format (temp_bfd))
     {
       /* Do it after the err msg */
       /* FIXME: should be checking for errors from bfd_close (for one thing,
@@ -214,6 +306,9 @@ core_open (filename, from_tty)
   unpush_target (&core_ops);
   core_bfd = temp_bfd;
   old_chain = make_cleanup ((make_cleanup_func) core_close, core_bfd);
+
+  /* Find a suitable core file handler to munch on core_bfd */
+  core_vec = sniff_core_bfd (core_bfd);
 
   validate_files ();
 
@@ -293,10 +388,8 @@ get_core_registers (regno)
   unsigned size;
   char *the_regs;
   char secname[30];
-  enum bfd_flavour our_flavour = bfd_get_flavour (core_bfd);
-  struct core_fns *cf = NULL;
 
-  if (core_file_fns == NULL)
+  if (core_vec == NULL)
     {
       fprintf_filtered (gdb_stderr,
 		     "Can't fetch registers from this type of core file\n");
@@ -319,24 +412,10 @@ get_core_registers (regno)
     goto cant;
   size = bfd_section_size (core_bfd, reg_sec);
   the_regs = alloca (size);
-  /* Look for the core functions that match this flavor.  Default to the
-     first one if nothing matches. */
-  for (cf = core_file_fns; cf != NULL; cf = cf->next)
+  if (bfd_get_section_contents (core_bfd, reg_sec, the_regs, (file_ptr) 0, size) &&
+      core_vec->core_read_registers != NULL)
     {
-      if (our_flavour == cf->core_flavour)
-	{
-	  break;
-	}
-    }
-  if (cf == NULL)
-    {
-      cf = core_file_fns;
-    }
-  if (cf != NULL &&
-      bfd_get_section_contents (core_bfd, reg_sec, the_regs, (file_ptr) 0, size) &&
-      cf->core_read_registers != NULL)
-    {
-      (cf->core_read_registers (the_regs, size, 0,
+      (core_vec->core_read_registers (the_regs, size, 0,
 				(unsigned) bfd_section_vma (abfd, reg_sec)));
     }
   else
@@ -353,11 +432,10 @@ get_core_registers (regno)
     {
       size = bfd_section_size (core_bfd, reg_sec);
       the_regs = alloca (size);
-      if (cf != NULL &&
-	  bfd_get_section_contents (core_bfd, reg_sec, the_regs, (file_ptr) 0, size) &&
-	  cf->core_read_registers != NULL)
+      if (bfd_get_section_contents (core_bfd, reg_sec, the_regs, (file_ptr) 0, size) &&
+	  core_vec->core_read_registers != NULL)
 	{
-	  (cf->core_read_registers (the_regs, size, 2,
+	  (core_vec->core_read_registers (the_regs, size, 2,
 			       (unsigned) bfd_section_vma (abfd, reg_sec)));
 	}
       else

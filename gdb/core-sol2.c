@@ -122,9 +122,11 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 
 static struct core_fns solaris_core_fns =
 {
-  bfd_target_elf_flavour,
-  fetch_core_registers,
-  NULL
+  bfd_target_elf_flavour,		/* core_flavour */
+  default_check_format,			/* check_format */
+  default_core_sniffer,			/* core_sniffer */
+  fetch_core_registers,			/* core_read_registers */
+  NULL					/* next */
 };
 
 void

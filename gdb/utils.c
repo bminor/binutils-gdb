@@ -21,7 +21,6 @@
 #include "defs.h"
 #include <ctype.h>
 #include "gdb_string.h"
-#include "event-loop.h"
 #include "event-top.h"
 
 #ifdef HAVE_CURSES_H
@@ -52,6 +51,10 @@
 #undef savestring
 
 void (*error_begin_hook) PARAMS ((void));
+
+/* Holds the last error message issued by gdb */
+
+static GDB_FILE *gdb_lasterr;
 
 /* Prototypes for local functions */
 
@@ -516,11 +519,37 @@ error (const char *string,...)
       error_begin ();
       vfprintf_filtered (gdb_stderr, string, args);
       fprintf_filtered (gdb_stderr, "\n");
+      /* Save it as the last error as well (no newline) */
+      gdb_file_rewind (gdb_lasterr);
+      vfprintf_filtered (gdb_lasterr, string, args);
       va_end (args);
       return_to_top_level (RETURN_ERROR);
     }
 }
 
+/* Allows the error message to be passed on a stream buffer */
+
+NORETURN void
+error_stream (GDB_FILE *stream)
+{
+  error (gdb_file_get_strbuf (stream));
+}
+
+/* Get the last error message issued by gdb */
+
+char *
+error_last_message (void)
+{
+  return (gdb_file_get_strbuf (gdb_lasterr));
+}
+
+/* This is to be called by main() at the very beginning */
+
+void
+error_init (void)
+{
+  gdb_lasterr = tui_sfileopen (132);
+}
 
 /* Print a message reporting an internal error. Ask the user if they
    want to continue, dump core, or just exit. */
@@ -1770,6 +1799,27 @@ tui_fileopen (stream)
   return file;
 }
 
+struct gdb_file *
+tui_sfileopen (n)
+     int n;
+{
+  struct gdb_file *file = tui_file_new ();
+  struct tui_stream *tmpstream = gdb_file_data (file);
+  tmpstream->ts_streamtype = astring;
+  tmpstream->ts_filestream = NULL;
+  if (n > 0)
+    {
+      tmpstream->ts_strbuf = xmalloc ((n + 1) * sizeof (char));
+      tmpstream->ts_strbuf[0] = '\0';
+    }
+  else
+    /* Do not allocate the buffer now.  The first time something is printed
+       one will be allocated by gdb_file_adjust_strbuf()  */
+    tmpstream->ts_strbuf = NULL;
+  tmpstream->ts_buflen = n;
+  return file;
+}
+
 static int
 tui_file_isatty (file)
      struct gdb_file *file;
@@ -1886,6 +1936,8 @@ tui_file_fputs (linebuffer, file)
 #endif
     }
 }
+
+/* DEPRECATED: Use tui_sfileopen() instead */
 
 GDB_FILE *
 gdb_file_init_astring (n)

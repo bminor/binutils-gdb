@@ -92,10 +92,9 @@ coff_solib_add (arg_string, from_tty, target)
 	  filename = (char *) ent + nameoffset * 4;
 
 	  objfile = symbol_file_add (filename, from_tty,
-				     0,		/* addr */
+				     NULL,	/* no offsets */
 				     0,		/* not mainline */
-				     0,		/* not mapped */
-				     0,		/* Not readnow */
+				     0,		/* flags */
 				     0,		/* Not user loaded */
 				     1);	/* Is a solib */
 

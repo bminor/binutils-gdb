@@ -970,6 +970,7 @@ set_disassembly_flavor ()
     set_architecture_from_arch_mach (bfd_arch_i386, bfd_mach_i386_i386_intel_syntax);
 }
 
+
 void
 _initialize_i386_tdep ()
 {

@@ -1,3 +1,430 @@
+1999-10-04  James Ingham  <jingham@leda.cygnus.com>
+
+	* remote-rdi.c (arm_rdi_open): If the angel_RDI_Open fails, close
+	the serial port and raise an error.  If you try to go on, you will 
+	stall forever down in the rdi-share code.
+
+1999-10-04  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* printcmd.c (output_command): Makes sure result from the output
+	command is printed before the next prompt.
+
+1999-10-04  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* printcmd.c (print_formatted): Add missing stream parameter.
+	(do_examine, print_command_1, output_command, do_one_display):
+	Adjust call to print_formatted().
+
+1999-10-04  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* infcmd.c: Remove include of event-loop.h.
+	* utils.c: Ditto.
+	* top.c: Ditto.
+
+	* infrun.c (fetch_inferior_event): Call inferior_event_handler
+ 	when inferior stops, instead of doing work ourselves.  
+	(fetch_inferior_event): Use void* instead of gdb_client_data.
+	Remove includes of event-top.h and event-loop.h. Add include of
+ 	inf-loop.h.
+	(complete_execution): Move from here.
+
+	* inf-loop.c (complete_execution): To here.
+	(inferior_event_handler): Handle inferior's execution completion
+ 	case as well.
+	* inf-loop.h: Add def of INF_LOOP_H.
+	
+	* event-top.h: Don't use gdb_client_data, use void*, to avoid
+ 	dependency on event-loop.h.
+	
+	* remote.c (remote_async_resume): Set target_executing only after we
+	actually register the inferior with the event loop.
+
+1999-10-04  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* corefile.c (memory_error): Use error_stream() and eliminate call
+	to return_to_top_level().
+
+1999-10-04  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* utils.c (error): Save error message text (w/o new line).
+	(error_last_message): New function. Returns the last message
+	issued by gdb.
+	(error_init): New function. Initializes error handling machinery.
+	(error_stream): New function. Allows the error message to be
+	passed on a stream buffer.
+	* defs.h: Add prototypes for error_stream() and
+	error_last_message().
+	* main.c (main): Add call to error_init().
+
+1999-10-04  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* utils.c (tui_sfileopen): New function.  Replaces
+	gdb_file_init_astring().
+	* defs.h: Add prototype for the above.
+
+Mon Oct  4 19:25:55 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* symfile.c (add_symbol_file_command): Fix -Wformat on query call.
+
+1999-10-01  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* target.c (cleanup_target): Type of to_async param is now
+ 	function with enum inferior_event_type param.
+	
+	* target.h (target_ops): Adjust to_async accordingly. Move enum
+ 	inferior_event_type to this file.  Don't have a typedef for
+ 	inferior_event_type. Add more enumeration constants INF_QUIT_REQ,
+ 	INF_EXEC_COMPLETE. Remove INF_SIGINT_FIRST, INF_SIGINT_SECOND.
+
+	* inf-loop.c (inferior_event_handler): Change first param to tell
+ 	the type of event we are dealing with. Deal with INF_ERROR and
+ 	INF_REG_EVENT, for the moment. 
+	Include target.h.
+
+	* inf-loop.h (inferior_event_handler): Adjust prototype. Remove
+ 	enum inferior_event_type from here.
+	
+	* remote.c (remote_async_serial_handler): Pass INF_REG_EVENT to
+ 	the client callback.
+	(remote_async): Change callback's param type to inferior_event_type.
+	(async_client_callback): Change type as above.
+	
+1999-10-01  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-top.c (stdin_event_handler): Delete fd parameter, use
+ 	input_fd instead.
+	* event-top.h (stdin_event_handler): Delete fd parameter.
+
+	* inf-loop.c (inferior_event_handler): Delete fd parameter.  Use
+ 	target_async() to unregister the inferior fd in case of errors.
+	* inf-loop.h(inferior_event_handler): Delete fd parameter. 
+
+	* ser-unix.c (fd_event): Delete fd parameter. Use scb->fd,
+ 	instead.
+
+	* remote.c (async_client_callback):  Delete fd parameter.
+	(remote_async_serial_handler): Ditto.
+	(remote_async): Adjust to new type of callback function.
+
+	* target.c (cleanup_target): Adjust parameters for to_async
+ 	default case.
+	* target.h (*to_async): Delete fd parameter from cb function.
+
+	* event-loop.h (handler_func): Delete fd parameter.
+	* event-loop.c (handle_file_event): Delete fd param from call to
+ 	proc. Do not include inferior.h.
+	
+1999-10-01  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-loop.c (inferior_event_handler,
+ 	inferior_event_handler_wrapper): Move from here.
+	* inf-loop.c: To here. New file.
+	
+	* event-loop.h (inferior_event_handler): Move from here.
+	* inf-loop.h: To here. New file.
+
+	* remote.c: Include inf-loop.h.
+	(set_extende_protocol): Remove unused prototpye.
+
+	* Makefile.in (SFILES): Add inf-loop.c. 
+	(inf_loop_h): Define.
+	(COMMON_OBS): Add inf-loop.o.
+	(inf-loop.o): Add rule.
+	(remote.o): Add dependency on inf-loop.h.
+
+Fri Oct  1 19:59:31 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ser-unix.c: Add some notes on how the async code works.
+
+Fri Oct  1 01:45:32 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* somread.c (som_symfile_offsets): Fix typo in last change.
+
+1999-09-30  Fred Fish  <fnf@cygnus.com>
+
+	* coff-solib.c (coff_solib_add): Adjust call to symbol_file_add.
+	* cxux-nat.c (add_shared_symbol_files): Ditto.
+	* irix5-nat.c (symbol_add_stub): Ditto.
+	* osfsolib.c (symbol_add_stub): Ditto.
+	* pa64solib.c (pa64_solib_add_solib_objfile): Ditto.
+	* remote-mm.c (mm_load): Ditto.
+	* remote-udi.c (udi_load): Ditto.
+	* remote-vx.c (vx_add_symbols): Ditto.
+	* solib.c (symbol_add_stub): Ditto.
+	* somsolib.c (som_solib_add_solib_objfile): Ditto.
+	* win32-nat.c (handle_load_dll): Ditto.
+
+	* irix5-nat.c (symbol_add_stub): Add section_addrs, zero it.
+	* cxux-nat.c (add_shared_symbol_files): Ditto.
+	* osfsolib.c (symbol_add_stub): Ditto.
+	* pa64solib.c (pa64_solib_add_solib_objfile): Ditto.
+	* solib.c (symbol_add_stub): Ditto.
+	* somsolib.c (som_solib_add_solib_objfile): Ditto.
+	* symfile.c (symbol_file_command): Ditto.
+	* win32-nat.c (handle_load_dll): Ditto.
+
+	* irix5-nat.c (symbol_add_stub): Use section_addrs to pass text addr.
+	* cxux-nat.c (add_shared_symbol_files): Ditto.
+	* osfsolib.c (symbol_add_stub): Ditto.
+	* pa64solib.c (pa64_solib_add_solib_objfile): Ditto.
+	* solib.c (symbol_add_stub): Ditto.
+	* somsolib.c (som_solib_add_solib_objfile): Ditto.
+	* symfile.c (symbol_file_command): Ditto.
+	* win32-nat.c (handle_load_dll): Ditto.
+
+	* coff-solib.c (coff_solib_add): Call symbol_file_add with NULL ptr.
+	* cxux-nat.c (add_shared_symbol_files): Ditto.
+	* remote-udi.c (udi_load): Ditto.
+	* remote-vx.c (vx_add_symbols): Ditto.
+	* symfile.c (symbol_file_command): Ditto.
+
+	* dstread.c (dst_symfile_offsets): Take "section_addr_info *"
+	instead of CORE_ADDR.
+	* somread.c (som_symfile_offsets): Ditto.
+	* symfile.c (default_symfile_offsets): Ditto.
+	* xcoffread.c (xcoff_symfile_offsets): Ditto.
+
+	* symfile.h (default_symfile_offsets): Adjust prototype.
+	(syms_from_objfile): Ditto.
+	* symtab.h (symbol_file_add): Ditto.
+
+	* rs6000-nat.c (objfile_symbol_add): Call syms_from_objfile with NULL.
+	* xcoffsolib.c (solib_add): Ditto.
+	* gdb-stabs.h (SECT_OFF_MAX): Increase from 4 to 16.
+	* symtab.h (MAX_SECTIONS): Define.
+	(struct section_addr_info): New struct for better control over
+	changing load addresses of sections.
+	* objfiles.h (OBJF_READNOW): Add new flag bit.
+	* symfile.h (sym_offsets): Change second param from CORE_ADDR to
+	"section_addr_info *".
+
+	* symfile.c (symbol_file_add): Replace scalar arg "CORE_ADDR addr"
+	with "struct section_addr_info *addrs".
+	(syms_from_objfile): Ditto.
+	(add_symbol_file_command): Remove local variables "readnow" and
+	"mapped".  Replaced with general "flags" variable.
+	(symbol_file_command): Ditto.
+	(add_symbol_file_command): Add local variables i, sec_num, argcnt,
+	expecting_option, option_index, and opt. Rework option parsing code
+	to handle additional options.
+	(_initialize_symfile): Adjust add-symbol-file usage to match new
+	option handling.
+	(symbol_file_add): Remove parameters "mapped" and "readnow",
+	replace with general "flags".
+	(symbol_file_add): In call to allocate_objfile, replace "mapped"
+	with extracted OBJF_MAPPED bit from flags.
+	(symbol_file_add): Use OBJF_READNOW bit from flags, instead of
+	"readnow" variable.
+	(symbol_file_command): Set OBJF_MAPPED and OBJF_READNOW bits
+	from parsed options.  Pass flags to symbol_file_add.
+	(add_symbol_file_command): Ditto.
+	(syms_from_objfile): Add local variables i, sect, lower_sect,
+	lower_offset, and local_addr.  Substitute local_addr for addrs
+	when addrs is NULL.  Find lowest loadable section to be used as
+	starting point for contiguous sections.  Adjust offsets if segments
+	are not contiguous.  Call sym_offsets with section_addr_info
+	instead of single addr.
+	(default_symfile_offsets): Initialize objfile's section_offsets
+	with user specified offsets.
+	(symbol_file_add): Call syms_from_objfile with offsets.
+	(unknown_option_complaint): Add.
+	(add_symbol_file_command): Add "section_addrs", zero it with memset.
+
+1999-09-30  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* configure.in: Call config.sub explicitly instead of misusing the
+	autoconf internal variable $ac_config_sub.
+	* configure: Regenerated.
+
+Thu Sep 30 15:53:59 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (readchar): When EOF mourn the inferior.
+	(getpkt): Try QUIT.  Might not be a watchdog timer timeout.
+	(remote_async_serial_handler): Pass ``-1'' as the dummy FD.  Safer
+ 	than ZERO == STDIN.
+
+	* serial.h (enum serial_rc): Replace #define SERIAL_ERROR,
+ 	SERIAL_TIMEOUT and SERIAL_EOF.
+	(struct _serial_t): Add more notes on termios specific fields.
+
+	* ser-unix.c (generic_readchar): Make SERIAL_ERROR sticky.
+	(do_hardwire_readchar, do_unix_readchar): Don't use bufcnt as a
+ 	tempoary for the return-value from read.
+
+	* serial.c (serial_logchar): Add a stream parameter.
+	(serial_readchar, serial_write, serial_send_break): Update.
+	(serial_readchar): Add serial debug trace.
+
+Thu Sep 30 12:07:03 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* serial.h (struct _serial_t): Add field async_state.  Better
+ 	document field bufcnt.
+	(SERIAL_ERROR): Delete comment about errno.
+	* serial.c (serial_open, serial_fdopen): Initialize async_state.
+
+	* ser-unix.c (push_event, fd_event, reschedule): New functions.
+  	Handle ASYNC serial input.
+	(ser_unix_async): Update.
+	(generic_readchar): New function. Handle event scheduling. Make
+ 	EOF condition sticky.
+	(do_unix_readchar): Rename ser_unix_readchar.
+	(ser_unix_readchar): New function, call do_unix_readchar via
+ 	generic_readchar.
+	(do_hardwire_readchar, hardwire_readchar): Ditto.
+
+	* ser-unix.c (ser_unix_readchar): Delete code working around ASYNC
+ 	fifo bugs.
+	(hardwire_readchar): Delete code working around ASYNC fifo bugs.
+
+Wed Sep 29 21:27:16 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* breakpoint.c (insert_breakpoints): Addresses are CORE_ADDRs,
+	not "int"s.
+	(remove_breakpoint): Likewise.
+
+1999-09-29  Fred Fish  <fnf@cygnus.com>
+
+	* breakpoint.c (breakpoint_1):  Replace cast "(CORE_ADDR) - 1"
+	with the more obviously intended expression "(CORE_ADDR) -1".
+	* dwarf2read.c (scan_partial_symbols, read_file_scope): Ditto.
+	* gnu-nat.c (gnu_create_inferior): Ditto.
+	* go32-nat.c (go32_create_inferior): Ditto.
+	* hppa-tdep.c (hppa_pop_frame): Ditto.
+	* infcmd.c (continue_command, step_1, signal_command): Ditto.
+	(until_next_command, finish_command): Ditto.
+	* infrun.c (proceed): Ditto.
+	* inftarg.c (child_create_inferior): Ditto.
+	* m3-nat.c (m3_create_inferior): Ditto.
+	* mac-nat.c (child_create_inferior): Ditto.
+	* procfs.c (procfs_create_inferior): Ditto.
+	* remote-sim.c (gdbsim_create_inferior): Ditto.
+	* target.c (target_link): Ditto.
+	* win32-nat.c (child_create_inferior): Ditto.
+	* varobj.c (varobj_create, new_root_variable): Ditto.
+
+Thu Sep 30 10:36:19 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ser-unix.c (ser_unix_flush_input): New function.  Discard input
+ 	buffer.
+	(hardwire_flush_input): Use ser_unix_flush_input.
+	(ser_unix_nop_flush_input): Delete.
+	* ser-unix.h (ser_unix_flush_input): Update.
+	ser-tcp.c (_initialize_ser_tcp), ser-pipe.c
+ 	(_initialize_ser_pipe): Update.
+	
+	* ser-unix.c (hardwire_write): Delete.
+	(_initialize_ser_hardwire): Update, use ser_unix_write.
+
+Thu Sep 30 10:16:50 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ser-pipe.c (pipe_open): Don't make the FD non-blocking.  Already
+ 	being handled in ser_unix_wait_for by a select.
+	
+Thu Sep 30 10:00:32 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* serial.h (struct _serial_t): Add field debug_p.
+	(SERIAL_DEBUG, SERIAL_DEBUG_P): Define.
+
+	* serial.c (serial_open, serial_fdopen): Initialize debug_p.
+	(serial_debug, serial_debug_p): New functions.
+	(global_serial_debug_p): New variable.
+	(_initialize_serial): Add ``set serialdebug'' command.
+
+Thu Sep 30 09:09:38 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* serial.h (serial_event_ftype): Replace FD and ERROR args with
+ 	SERRIAL_T arg.
+	* ser-unix.c (ser_unix_event): Update.
+
+	* remote.c (remote_async_serial_handler): New function.  Handle
+ 	serial events.
+	(remote_async): Pass remote_async_serial_handler to SERIAL.
+	(async_client_callback, async_client_context): New variables.
+
+	* remote.c (extended_remote_async_create_inferior): Use
+ 	target_async to register the inferior event handler.
+
+Thu Sep 30 00:02:03 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (AC_CHECK_FUNCS): Test for sigprocmask.
+	* configure, config.in: Re-generate.
+	* event-top.c (async_stop_sig): Use sigprocmask when available.  
+
+1999-09-29  Doug Evans  <devans@casey.cygnus.com>
+
+	* sh-stub.c (handle_exception): Fix typo in patch of 1999-08-26.
+	* m68k-stub.c (handle_exception): Ditto.
+
+1999-09-28  Fred Fish  <fnf@cygnus.com>
+
+	* alpha-nat.c (alpha_osf_core_fns, alpha_elf_core_fns):
+	Add default entries for check_format and core_sniffer.
+	* core-aout.c (aout_core_fns): Ditto.
+	* core-regset.c (regset_core_fns): Ditto.
+	* core-sol2.c (solaris_core_fns): Ditto.
+	* i386aix-nat.c (i386aix_core_fns): Ditto.
+	* i386mach-nat.c (i386mach_core_fns): Ditto.
+	* irix4-nat.c (irix4_core_fns): Ditto.
+	* irix5-nat.c (irix5_core_fns): Ditto.
+	* lynx-nat.c (lynx_core_fns): Ditto.
+	* mips-nat.c (mips_core_fns): Ditto.
+	* ns32knbsd-nat.c (nat_core_fns): Ditto.
+	* rs6000-nat.c (rs6000_core_fns): Ditto.
+	* sparc-nat.c (sparc_core_fns): Ditto.
+	* sun-nat.c (sun3_core_fns): Ditto.
+	* ultra3-nat.c (ultra3_core_fns): Ditto.
+
+	* corelow.c (core_vec): New, for selected core file handler.
+	(sniff_core_bfd): New function.
+	(gdb_check_format): New function.
+	(default_check_format): New function.
+	(default_core_sniffer): New function.
+	(sniff_core_bfd): New function.
+	(core_close): Reset core_vec to NULL.
+	(core_open): Fall back to gdb_check_format if bfd_check_format
+	does not identify the file format.  Call sniff_core_bfd to pick
+	a core file handler.
+	(get_core_registers): Remove code that is now in sniff_core_bfd.
+	Use current core_vec.
+
+	* gdbcore.h (check_format): New core_fns function, points to function
+	to try and identify a core file format.
+	(core_sniffer): New core_fns function, points to function to select
+	a specific handler for the selected core file format.
+	(default_core_sniffer): Add prototype.
+	(default_check_format): Add prototype.
+
+	* i960-tdep.c (inferior.h): Include.
+	* mips-tdep.c (read_next_frame_reg): Use ADDR_BITS_REMOVE
+	on addresses pulled from stack.
+
+1999-09-29  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-loop.c (poll_timers): Check whether the timer list has any
+ 	element on it by looking at the first element pointer, instead of
+ 	num_timers.
+
+Wed Sep 29 18:02:31 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* command.c: Attempt to include POSIX <sys/wait.h> before
+ 	<wait.h>.
+
+	* ser-unix.c (hardwire_print_tty_state): Ditto.
+	* inflow.c (child_terminal_info): Fix printf args.
+
+1999-09-28  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* remote.c (remote_async_resume): Register the inferior with the
+ 	event loop.
+	(remote_async_open_1): Don't put the target in async mode here,
+ 	just do it when executing.
+
+	* infrun.c (complete_execution): Unregister the inferior from the
+ 	event loop.
+
+	* event-top.c (async_disable_stdin): Don't add
+ 	async_enable_stdin() to the exec_cleanups chain.
+
 Tue Sep 28 11:08:34 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* hppa-tdep.c (hppa_fix_call_dummy): Ignore IMPORT_SHLIB stubs
@@ -1157,11 +1584,8 @@ Wed Sep  1 09:22:50 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* dbxread.c (read_dbx_symtab): Use ANOFFSET to access section
 	offsets.
-	* core-cisco.c (get_seg_info): Make static.
 	* coffread.c (enter_linenos): Pass objfile instead of section
 	offsets.
-	* jv-vm.c (jv_vm_internal_lookup_symbol): Call allocate_objfile
-	with the right number of arguments.
 
 	* dbxread.c (dbx_symfile_read): No need to explicitly pass
 	text addr and size.  Let read_dbx_symtab find them.

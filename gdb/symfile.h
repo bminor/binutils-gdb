@@ -99,7 +99,7 @@ struct sym_fns
        a string, where NULL means the default, and others are parsed in a file
        dependent way. */
 
-    void (*sym_offsets) PARAMS ((struct objfile *, CORE_ADDR));
+    void (*sym_offsets) PARAMS ((struct objfile *, struct section_addr_info *));
 
     /* Finds the next struct sym_fns.  They are allocated and initialized
        in whatever module implements the functions pointed to; an 
@@ -113,7 +113,7 @@ struct sym_fns
    do anything special.  */
 
 extern void
-default_symfile_offsets PARAMS ((struct objfile * objfile, CORE_ADDR addr));
+default_symfile_offsets PARAMS ((struct objfile * objfile, struct section_addr_info *));
 
 
 extern void
@@ -158,7 +158,7 @@ extern void
 init_entry_point_info PARAMS ((struct objfile *));
 
 extern void
-syms_from_objfile PARAMS ((struct objfile *, CORE_ADDR, int, int));
+syms_from_objfile PARAMS ((struct objfile *, struct section_addr_info *, int, int));
 
 extern void
 new_symfile_objfile PARAMS ((struct objfile *, int, int));

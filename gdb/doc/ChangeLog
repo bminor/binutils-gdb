@@ -1,3 +1,8 @@
+1999-09-30  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.texinfo:  Document additional forms of specifying section
+	names and addresses for the add-symbol-file command.
+
 1999-09-14  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* gdbint.texinfo: Fix typo, add the word "have".

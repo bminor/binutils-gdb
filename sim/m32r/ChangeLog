@@ -1,3 +1,14 @@
+1999-09-29  Doug Evans  <devans@casey.cygnus.com>
+
+	* mloop.in: Update call to sim_engine_invalid_insn.
+	* sem.c,sem-switch.c: Rebuild.
+	* traps.c (sim_engine_invalid_insn): New arg `vpc'.  Change type of
+	result to SEM_PC.  Return vpc.
+
+Wed Sep 29 14:47:20 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* traps.c (sim_engine_invalid_insn): Return PC.
+
 Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

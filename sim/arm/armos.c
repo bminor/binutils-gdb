@@ -251,7 +251,7 @@ SWIWrite0 (ARMul_State *state, ARMword addr)
   struct OSblock* OSptr = (struct OSblock*) state->OSptr;
 
   while ((temp = ARMul_ReadByte (state, addr++)) != 0)
-    (void) fputc ((char) temp, stderr);
+    (void) fputc ((char) temp, stdout);
 
   OSptr->ErrorNo = errno;
 }
@@ -430,7 +430,7 @@ ARMul_OSHandleSWI (ARMul_State *state, ARMword number)
       }
 
     case SWI_WriteC :
-      (void)fputc((int)state->Reg[0],stderr) ;
+      (void)fputc((int)state->Reg[0],stdout) ;
       OSptr->ErrorNo = errno ;
       return(TRUE) ;
 
@@ -497,7 +497,7 @@ ARMul_OSHandleSWI (ARMul_State *state, ARMword number)
 	  return (TRUE);
 
 	case AngelSWI_Reason_WriteC:
-	  (void) fputc ((int) ARMul_ReadByte (state,addr), stderr);
+	  (void) fputc ((int) ARMul_ReadByte (state,addr), stdout);
 	  OSptr->ErrorNo = errno;
 	  return (TRUE);
 

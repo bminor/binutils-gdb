@@ -224,7 +224,7 @@ static void
 xcoff_symfile_finish PARAMS ((struct objfile *));
 
 static void
-  xcoff_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
+  xcoff_symfile_offsets PARAMS ((struct objfile *, struct section_addr_info *addrs));
 
 static void
 find_linenos PARAMS ((bfd *, sec_ptr, PTR));
@@ -2761,7 +2761,7 @@ xcoff_initial_scan (objfile, mainline)
 static void
 xcoff_symfile_offsets (objfile, addr)
      struct objfile *objfile;
-     CORE_ADDR addr;
+     struct section_addr_info *addrs;
 {
   int i;
 

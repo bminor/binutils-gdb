@@ -1069,7 +1069,7 @@ scan_partial_symbols (info_ptr, objfile, lowpc, highpc)
   int nesting_level = 1;
   int has_pc_info;
 
-  *lowpc = ((CORE_ADDR) - 1);
+  *lowpc = ((CORE_ADDR) -1);
   *highpc = ((CORE_ADDR) 0);
 
   while (nesting_level)
@@ -1149,7 +1149,7 @@ scan_partial_symbols (info_ptr, objfile, lowpc, highpc)
 
   /* If we didn't find a lowpc, set it to highpc to avoid complaints
      from `maint check'.  */
-  if (*lowpc == ((CORE_ADDR) - 1))
+  if (*lowpc == ((CORE_ADDR) -1))
     *lowpc = *highpc;
   return info_ptr;
 }
@@ -1461,7 +1461,7 @@ read_file_scope (die, objfile)
      struct objfile *objfile;
 {
   unsigned int line_offset = 0;
-  CORE_ADDR lowpc = ((CORE_ADDR) - 1);
+  CORE_ADDR lowpc = ((CORE_ADDR) -1);
   CORE_ADDR highpc = ((CORE_ADDR) 0);
   struct attribute *attr;
   char *name = "<unknown>";
@@ -1493,7 +1493,7 @@ read_file_scope (die, objfile)
 
   /* If we didn't find a lowpc, set it to highpc to avoid complaints
      from finish_block.  */
-  if (lowpc == ((CORE_ADDR) - 1))
+  if (lowpc == ((CORE_ADDR) -1))
     lowpc = highpc;
   lowpc += baseaddr;
   highpc += baseaddr;

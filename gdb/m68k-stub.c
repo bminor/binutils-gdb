@@ -791,7 +791,7 @@ void handle_exception(int exceptionVector)
                 mem2hex((char*) registers, remcomOutBuffer, NUMREGBYTES);
                 break;
       case 'G' : /* set the value of the CPU registers - return OK */
-                hex2mem(&ptr, (char*) registers, NUMREGBYTES);
+                hex2mem(ptr, (char*) registers, NUMREGBYTES);
                 strcpy(remcomOutBuffer,"OK");
                 break;
       

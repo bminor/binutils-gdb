@@ -264,6 +264,23 @@ struct target_waitstatus
     value;
   };
 
+/* Possible types of events that the inferior handler will have to
+   deal with. */
+enum inferior_event_type
+  {
+    /* There is a request to quit the inferior, abandon it. */
+    INF_QUIT_REQ,
+    /* Process a normal inferior event which will result in target_wait
+       being called. */
+    INF_REG_EVENT, 
+    /* Deal with an error on the inferior. */
+    INF_ERROR,
+    /* We are called because a timer went off. */
+    INF_TIMER,
+    /* We are called to do stuff after the inferior stops. */
+    INF_EXEC_COMPLETE
+  };
+
 /* Return the string for a signal.  */
 extern char *target_signal_to_string PARAMS ((enum target_signal));
 
@@ -404,7 +421,7 @@ struct target_ops
     /* ASYNC target controls */
     int (*to_can_async_p) (void);
     int (*to_is_async_p) (void);
-    void (*to_async) (void (*cb) (int error, void *context, int fd), void *context);
+    void (*to_async) (void (*cb) (enum inferior_event_type, void *context), void *context);
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related? */
   };

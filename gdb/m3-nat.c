@@ -3980,7 +3980,7 @@ m3_create_inferior (exec_file, allargs, env)
   fork_inferior (exec_file, allargs, env, m3_trace_me, m3_trace_him, NULL, NULL);
   /* We are at the first instruction we care about.  */
   /* Pedal to the metal... */
-  proceed ((CORE_ADDR) - 1, 0, 0);
+  proceed ((CORE_ADDR) -1, 0, 0);
 }
 
 /* Mark our target-struct as eligible for stray "run" and "attach"

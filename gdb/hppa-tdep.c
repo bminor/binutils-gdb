@@ -1624,7 +1624,7 @@ hppa_pop_frame ()
       /* Start up the inferior.  */
       clear_proceed_status ();
       proceed_to_finish = 1;
-      proceed ((CORE_ADDR) - 1, TARGET_SIGNAL_DEFAULT, 0);
+      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
 
       /* Perform our cleanups.  */
       do_cleanups (old_chain);

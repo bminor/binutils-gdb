@@ -462,7 +462,7 @@ gdbsim_create_inferior (exec_file, args, env)
   clear_proceed_status ();
 
   /* NB: Entry point already set by sim_create_inferior. */
-  proceed ((CORE_ADDR) - 1, TARGET_SIGNAL_DEFAULT, 0);
+  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
 }
 
 /* The open routine takes the rest of the parameters from the command,

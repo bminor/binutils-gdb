@@ -1828,8 +1828,9 @@ show_processor (char *arg, int from_tty)
 {
   show_current_variant ();
 }
-
 
+
+
 
 /* Initialization code.  */
 

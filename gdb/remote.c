@@ -48,6 +48,7 @@
 
 #include "event-loop.h"
 #include "event-top.h"
+#include "inf-loop.h"
 
 #include <signal.h>
 #include "serial.h"
@@ -60,8 +61,6 @@ static void handle_remote_sigint PARAMS ((int));
 static void handle_remote_sigint_twice PARAMS ((int));
 static void async_remote_interrupt PARAMS ((gdb_client_data));
 static void async_remote_interrupt_twice PARAMS ((gdb_client_data));
-
-static void set_extended_protocol PARAMS ((struct continuation_arg *));
 
 static void build_remote_gdbarch_data PARAMS ((void));
 
@@ -1904,18 +1903,6 @@ serial device is attached to the remote system (e.g. /dev/ttya).");
       putpkt ("!");
       getpkt (buf, 0);
     }
-
-  /* If running in asynchronous mode, register the target with the
-     event loop.  Set things up so that when there is an event on the
-     file descriptor, the event loop will call fetch_inferior_event,
-     which will do the proper analysis to determine what happened. */
-  /* FIXME: cagney/1999-09-26: We shouldn't just put the target into
-     async mode.  Instead we should leave the target synchronous and
-     then leave it to the client to flip modes. */
-  if (event_loop_p && target_can_async_p ())
-    target_async (inferior_event_handler, 0);
-  if (remote_debug && SERIAL_IS_ASYNC_P (remote_desc))
-    fputs_unfiltered ("Serial put into async mode.\n", gdb_stdlog);
 }
 
 /* This takes a program previously attached to and detaches it.  After
@@ -2059,14 +2046,6 @@ remote_async_resume (pid, step, siggnal)
   if (target_resume_hook)
     (*target_resume_hook) ();
 
-  /* Tell the world that the target is now executing. */
-  /* FIXME: cagney/1999-09-23: Is it the targets responsibility to set
-     this?  Instead, should the client of target just assume (for
-     async targets) that the target is going to start executing?  Is
-     this information already found in the continuation block?  */
-  if (SERIAL_IS_ASYNC_P (remote_desc))
-    target_executing = 1;
-
   if (siggnal != TARGET_SIGNAL_0)
     {
       buf[0] = step ? 'S' : 'C';
@@ -2077,6 +2056,22 @@ remote_async_resume (pid, step, siggnal)
   else
     strcpy (buf, step ? "s" : "c");
 
+  /* We are about to start executing the inferior, let's register it
+     with the event loop. NOTE: this is the one place where all the
+     execution commands end up. We could alternatively do this in each
+     of the execution commands in infcmd.c.*/
+  /* FIXME: ezannoni 1999-09-28: We may need to move this out of here
+     into infcmd.c in order to allow inferior function calls to work
+     NOT asynchronously. */
+  if (event_loop_p && SERIAL_CAN_ASYNC_P (remote_desc))
+    target_async (inferior_event_handler, 0);
+  /* Tell the world that the target is now executing. */
+  /* FIXME: cagney/1999-09-23: Is it the targets responsibility to set
+     this?  Instead, should the client of target just assume (for
+     async targets) that the target is going to start executing?  Is
+     this information already found in the continuation block?  */
+  if (SERIAL_IS_ASYNC_P (remote_desc))
+    target_executing = 1;
   putpkt (buf);
 }
 
@@ -3402,17 +3397,22 @@ readchar (timeout)
 
   ch = SERIAL_READCHAR (remote_desc, timeout);
 
-  switch (ch)
+  if (ch >= 0)
+    return (ch & 0x7f);
+
+  switch ((enum serial_rc) ch)
     {
     case SERIAL_EOF:
+      target_mourn_inferior ();
       error ("Remote connection closed");
+      /* no return */
     case SERIAL_ERROR:
       perror_with_name ("Remote communication error");
+      /* no return */
     case SERIAL_TIMEOUT:
-      return ch;
-    default:
-      return ch & 0x7f;
+      break;
     }
+  return ch;
 }
 
 /* Send the command in BUF to the remote machine, and read the reply
@@ -3723,8 +3723,9 @@ getpkt (buf, forever)
 
 	  if (c == SERIAL_TIMEOUT)
 	    {
-	      if (forever)	/* Watchdog went off.  Kill the target. */
+	      if (forever)	/* Watchdog went off?  Kill the target. */
 		{
+		  QUIT;
 		  target_mourn_inferior ();
 		  error ("Watchdog has expired.  Target detached.\n");
 		}
@@ -3887,8 +3888,8 @@ extended_remote_async_create_inferior (exec_file, args, env)
 
   /* If running asynchronously, register the target file descriptor
      with the event loop. */
-  if (event_loop_p && SERIAL_CAN_ASYNC_P (remote_desc))
-    SERIAL_ASYNC (remote_desc, inferior_event_handler, 0);
+  if (event_loop_p && target_can_async_p ())
+    target_async (inferior_event_handler, 0);
 
   /* Now restart the remote server.  */
   extended_remote_restart ();
@@ -5082,10 +5083,33 @@ remote_is_async_p (void)
   return SERIAL_IS_ASYNC_P (remote_desc);
 }
 
+/* Pass the SERIAL event on and up to the client.  One day this code
+   will be able to delay notifying the client of an event until the
+   point where an entire packet has been received. */
+
+static void (*async_client_callback) (enum inferior_event_type event_type, void *context);
+static void *async_client_context;
+static serial_event_ftype remote_async_serial_handler;
+
 static void
-remote_async (void (*callback) (int error, void *context, int fd), void *context)
+remote_async_serial_handler (serial_t scb, void *context)
 {
-  SERIAL_ASYNC (remote_desc, callback, context);
+  /* Don't propogate error information up to the client.  Instead let
+     the client find out about the error by querying the target.  */
+  async_client_callback (INF_REG_EVENT, async_client_context);
+}
+
+static void
+remote_async (void (*callback) (enum inferior_event_type event_type, void *context), void *context)
+{
+  if (callback != NULL)
+    {
+      SERIAL_ASYNC (remote_desc, remote_async_serial_handler, NULL);
+      async_client_callback = callback;
+      async_client_context = context;
+    }
+  else
+    SERIAL_ASYNC (remote_desc, NULL, NULL);
 }
 
 /* Target async and target extended-async.

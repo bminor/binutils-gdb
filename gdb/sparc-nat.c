@@ -325,9 +325,11 @@ kernel_u_size ()
 
 static struct core_fns sparc_core_fns =
 {
-  bfd_target_unknown_flavour,
-  fetch_core_registers,
-  NULL
+  bfd_target_unknown_flavour,		/* core_flavour */
+  default_check_format,			/* check_format */
+  default_core_sniffer,			/* core_sniffer */
+  fetch_core_registers,			/* core_read_registers */
+  NULL					/* next */
 };
 
 void

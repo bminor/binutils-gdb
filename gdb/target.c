@@ -452,7 +452,7 @@ cleanup_target (t)
   de_fault (to_core_file_to_sym_file, (char *(*)PARAMS ((char *))) return_zero);
   de_fault (to_can_async_p, (int (*) (void)) return_zero);
   de_fault (to_is_async_p, (int (*) (void)) return_zero);
-  de_fault (to_async, (void (*) (void (*) (int, void*, int), void*)) tcomplain);
+  de_fault (to_async, (void (*) (void (*) (enum inferior_event_type, void*), void*)) tcomplain);
 #undef de_fault
 }
 
@@ -1009,7 +1009,7 @@ target_link (modname, t_reloc)
 	error ("Unable to link to %s and get relocation in rombug", modname);
     }
   else
-    *t_reloc = (CORE_ADDR) - 1;
+    *t_reloc = (CORE_ADDR) -1;
 }
 
 /* Look through the list of possible targets for a target that can

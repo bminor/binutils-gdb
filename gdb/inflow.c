@@ -489,7 +489,8 @@ child_terminal_info (args, from_tty)
   }
 
 #ifdef PROCESS_GROUP_TYPE
-  printf_filtered ("Process group = %d\n", inferior_process_group);
+  printf_filtered ("Process group = %d\n",
+		   (int) inferior_process_group);
 #endif
 
   SERIAL_PRINT_TTY_STATE (stdin_serial, inferior_ttystate, gdb_stdout);

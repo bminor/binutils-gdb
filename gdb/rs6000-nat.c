@@ -365,7 +365,7 @@ objfile_symbol_add (arg)
 {
   struct objfile *obj = (struct objfile *) arg;
 
-  syms_from_objfile (obj, 0, 0, 0);
+  syms_from_objfile (obj, NULL, 0, 0);
   new_symfile_objfile (obj, 0, 0);
   return 1;
 }
@@ -814,9 +814,11 @@ find_toc_address (pc)
 
 static struct core_fns rs6000_core_fns =
 {
-  bfd_target_coff_flavour,
-  fetch_core_registers,
-  NULL
+  bfd_target_coff_flavour,		/* core_flavour */
+  default_check_format,			/* check_format */
+  default_core_sniffer,			/* core_sniffer */
+  fetch_core_registers,			/* core_read_registers */
+  NULL					/* next */
 };
 
 void

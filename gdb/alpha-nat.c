@@ -280,16 +280,20 @@ static struct core_fns alpha_osf_core_fns =
 {
   /* This really is bfd_target_unknown_flavour.  */
 
-  bfd_target_unknown_flavour,
-  fetch_osf_core_registers,
-  NULL
+  bfd_target_unknown_flavour,		/* core_flavour */
+  default_check_format,			/* check_format */
+  default_core_sniffer,			/* core_sniffer */
+  fetch_osf_core_registers,		/* core_read_registers */
+  NULL					/* next */
 };
 
 static struct core_fns alpha_elf_core_fns =
 {
-  bfd_target_elf_flavour,
-  fetch_elf_core_registers,
-  NULL
+  bfd_target_elf_flavour,		/* core_flavour */
+  default_check_format,			/* check_format */
+  default_core_sniffer,			/* core_sniffer */
+  fetch_elf_core_registers,		/* core_read_registers */
+  NULL					/* next */
 };
 
 void

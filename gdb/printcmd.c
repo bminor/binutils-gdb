@@ -166,7 +166,7 @@ static void validate_format PARAMS ((struct format_data, char *));
 
 static void do_examine PARAMS ((struct format_data, CORE_ADDR addr, asection * section));
 
-static void print_formatted PARAMS ((value_ptr, int, int));
+static void print_formatted PARAMS ((value_ptr, int, int, GDB_FILE *));
 
 static struct format_data decode_format PARAMS ((char **, int, int));
 
@@ -270,17 +270,18 @@ decode_format (string_ptr, oformat, osize)
   return val;
 }
 
-/* Print value VAL on gdb_stdout according to FORMAT, a letter or 0.
+/* Print value VAL on stream according to FORMAT, a letter or 0.
    Do not end with a newline.
    0 means print VAL according to its own type.
    SIZE is the letter for the size of datum being printed.
    This is used to pad hex numbers so they line up.  */
 
 static void
-print_formatted (val, format, size)
+print_formatted (val, format, size, stream)
      register value_ptr val;
      register int format;
      int size;
+     GDB_FILE *stream;
 {
   struct type *type = check_typedef (VALUE_TYPE (val));
   int len = TYPE_LENGTH (type);
@@ -296,7 +297,7 @@ print_formatted (val, format, size)
     case 's':
       /* FIXME: Need to handle wchar_t's here... */
       next_address = VALUE_ADDRESS (val)
-	+ val_print_string (VALUE_ADDRESS (val), -1, 1, gdb_stdout);
+	+ val_print_string (VALUE_ADDRESS (val), -1, 1, stream);
       next_section = VALUE_BFD_SECTION (val);
       break;
 
@@ -310,7 +311,7 @@ print_formatted (val, format, size)
       /* We often wrap here if there are long symbolic names.  */
       wrap_here ("    ");
       next_address = VALUE_ADDRESS (val)
-	+ print_insn (VALUE_ADDRESS (val), gdb_stdout);
+	+ print_insn (VALUE_ADDRESS (val), stream);
       next_section = VALUE_BFD_SECTION (val);
       break;
 
@@ -325,13 +326,13 @@ print_formatted (val, format, size)
 	 * we have to use language rules to print it as
 	 * a series of scalars.
 	 */
-	value_print (val, gdb_stdout, format, Val_pretty_default);
+	value_print (val, stream, format, Val_pretty_default);
       else
 	/* User specified format, so don't look to the
 	 * the type to tell us what to do.
 	 */
 	print_scalar_formatted (VALUE_CONTENTS (val), type,
-				format, size, gdb_stdout);
+				format, size, stream);
     }
 }
 
@@ -803,7 +804,7 @@ do_examine (fmt, addr, sect)
 	  if (last_examine_value)
 	    release_value (last_examine_value);
 
-	  print_formatted (last_examine_value, format, size);
+	  print_formatted (last_examine_value, format, size, gdb_stdout);
 	}
       printf_filtered ("\n");
       gdb_flush (gdb_stdout);
@@ -909,7 +910,7 @@ print_command_1 (exp, inspect, voidprint)
       if (histindex >= 0)
 	annotate_value_history_value ();
 
-      print_formatted (val, format, fmt.size);
+      print_formatted (val, format, fmt.size, gdb_stdout);
       printf_filtered ("\n");
 
       if (histindex >= 0)
@@ -984,9 +985,12 @@ output_command (exp, from_tty)
 
   annotate_value_begin (VALUE_TYPE (val));
 
-  print_formatted (val, format, fmt.size);
+  print_formatted (val, format, fmt.size, gdb_stdout);
 
   annotate_value_end ();
+
+  wrap_here ("");
+  gdb_flush (gdb_stdout);
 
   do_cleanups (old_chain);
 }
@@ -1578,7 +1582,7 @@ do_one_display (d)
       annotate_display_expression ();
 
       print_formatted (evaluate_expression (d->exp),
-		       d->format.format, d->format.size);
+		       d->format.format, d->format.size, gdb_stdout);
       printf_filtered ("\n");
     }
 
