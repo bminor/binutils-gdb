@@ -1,5 +1,5 @@
         .data
-        .type   x,@object
+        .type   x,%object
         .size   x,4
 x:
         .word 12

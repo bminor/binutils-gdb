@@ -1,5 +1,10 @@
 2003-05-03  H.J. Lu <hjl@gnu.org>
 
+	* gas/elf/symver.s: Use '%' instead of '@' in .type.
+	* gas/elf/type.s: Likewise.
+
+2003-05-03  H.J. Lu <hjl@gnu.org>
+
 	* gas/elf/elf.exp (run_list_test): Support pipe for readelf.
 
 	* gas/elf/type.e-m32r: Removed.
