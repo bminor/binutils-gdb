@@ -448,6 +448,7 @@ static int total_frag_text_expansion (fragS *);
 
 static int get_text_align_power (unsigned);
 static int get_text_align_max_fill_size (int, bfd_boolean, bfd_boolean);
+static int branch_align_power (segT);
 
 /* Helpers for xtensa_relax_frag().  */
 
@@ -4869,15 +4870,16 @@ xtensa_find_unaligned_branch_targets (bfd *abfd ATTRIBUTE_UNUSED,
 	  if (frag->tc_frag_data.is_branch_target)
 	    {
 	      int op_size;
-	      addressT frag_addr;
+	      addressT branch_align, frag_addr;
 	      xtensa_format fmt;
 
 	      xtensa_insnbuf_from_chars
 		(isa, insnbuf, (unsigned char *) frag->fr_literal, 0);
 	      fmt = xtensa_format_decode (isa, insnbuf);
 	      op_size = xtensa_format_length (isa, fmt);
-	      frag_addr = frag->fr_address % xtensa_fetch_width;
-	      if (frag_addr + op_size > xtensa_fetch_width)
+	      branch_align = 1 << branch_align_power (sec);
+	      frag_addr = frag->fr_address % branch_align;
+	      if (frag_addr + op_size > branch_align)
 		as_warn_where (frag->fr_file, frag->fr_line,
 			       _("unaligned branch target: %d bytes at 0x%lx"),
 			       op_size, frag->fr_address);
@@ -8006,6 +8008,27 @@ get_text_align_fill_size (addressT address,
 }
 
 
+static int
+branch_align_power (segT sec)
+{
+  /* If the Xtensa processor has a fetch width of 8 bytes, and the section
+     is aligned to at least an 8-byte boundary, then a branch target need
+     only fit within an 8-byte aligned block of memory to avoid a stall.
+     Otherwise, try to fit branch targets within 4-byte aligned blocks
+     (which may be insufficient, e.g., if the section has no alignment, but
+     it's good enough).  */
+  if (xtensa_fetch_width == 8)
+    {
+      if (get_recorded_alignment (sec) >= 3)
+	return 3;
+    }
+  else
+    assert (xtensa_fetch_width == 4);
+
+  return 2;
+}
+
+
 /* This will assert if it is not possible.  */
 
 static int
@@ -8156,6 +8179,7 @@ get_aligned_diff (fragS *fragP, addressT address, offsetT *max_diff)
   bfd_boolean is_loop;
   int align_power;
   offsetT opt_diff;
+  addressT branch_align;
 
   assert (fragP->fr_type == rs_machine_dependent);
   switch (fragP->fr_subtype)
@@ -8164,13 +8188,13 @@ get_aligned_diff (fragS *fragP, addressT address, offsetT *max_diff)
       target_size = next_frag_format_size (fragP);
       if (target_size == XTENSA_UNDEFINED)
 	target_size = 3;
-      align_power = get_text_align_power (xtensa_fetch_width);
+      align_power = branch_align_power (now_seg);
+      branch_align = 1 << align_power;
       opt_diff = get_text_align_fill_size (address, align_power,
 					   target_size, FALSE, FALSE);
 
-      *max_diff = (opt_diff + xtensa_fetch_width
-		   - (target_size + ((address + opt_diff)
-				     % xtensa_fetch_width)));
+      *max_diff = (opt_diff + branch_align
+		   - (target_size + ((address + opt_diff) % branch_align)));
       assert (*max_diff >= opt_diff);
       return opt_diff;
 
@@ -8583,7 +8607,7 @@ future_alignment_required (fragS *fragP, long stretch ATTRIBUTE_UNUSED)
 	  address = find_address_of_next_align_frag
 	    (&fragP, &glob_widens, &dnn, &dw, &glob_pad);
 	  /* If there is a padable portion, then skip.  */
-	  if (glob_pad || glob_widens >= (int) xtensa_fetch_width)
+	  if (glob_pad || glob_widens >= (1 << branch_align_power (now_seg)))
 	    break;
 
 	  if (address) 
