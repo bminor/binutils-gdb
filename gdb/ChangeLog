@@ -1,3 +1,7 @@
+Tue Nov 15 16:18:52 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* c-exp.y (yylex): Fix a bug in template scanning.
+
 Tue Nov 15 14:25:47 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* i386-stub.c, m68k-stub.c, sparc-stub.c, sparcl-stub.c: Mask out

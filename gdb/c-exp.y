@@ -1366,7 +1366,12 @@ yylex ()
 	|| (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '<');)
     {
        if (c == '<')
-	 while (tokstart[++namelen] != '>');
+	 {
+	   int i = namelen;
+	   while (tokstart[++i] && tokstart[i] != '>');
+	   if (tokstart[i] == '>')
+	     namelen = i;
+	  }
        c = tokstart[++namelen];
      }
 
