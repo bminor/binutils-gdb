@@ -1,6 +1,6 @@
 \input texinfo @c                               -*-Texinfo-*-
 @c  Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-@c  2001, 2002
+@c  2001, 2002, 2003
 @c  Free Software Foundation, Inc.
 @c UPDATE!!  On future updates--
 @c   (1)   check for new machine-dep cmdline options in
@@ -3969,6 +3969,37 @@ undefined.
 @code{.byte} expects zero or more expressions, separated by commas.
 Each expression is assembled into the next byte.
 
+@node Comm
+@section @code{.comm @var{symbol} , @var{length} }
+
+@cindex @code{comm} directive
+@cindex symbol, common
+@code{.comm} declares a common symbol named @var{symbol}.  When linking, a
+common symbol in one object file may be merged with a defined or common symbol
+of the same name in another object file.  If @code{@value{LD}} does not see a
+definition for the symbol--just one or more common symbols--then it will
+allocate @var{length} bytes of uninitialized memory.  @var{length} must be an
+absolute expression.  If @code{@value{LD}} sees multiple common symbols with
+the same name, and they do not all have the same size, it will allocate space
+using the largest size.
+
+@ifset ELF
+When using ELF, the @code{.comm} directive takes an optional third argument.
+This is the desired alignment of the symbol, specified as a byte boundary (for
+example, an alignment of 16 means that the least significant 4 bits of the
+address should be zero).  The alignment must be an absolute expression, and it
+must be a power of two.  If @code{@value{LD}} allocates uninitialized memory
+for the common symbol, it will use the alignment when placing the symbol.  If
+no alignment is specified, @command{@value{AS}} will set the alignment to the
+largest power of two less than or equal to the size of the symbol, up to a
+maximum of 16.
+@end ifset
+
+@ifset HPPA
+The syntax for @code{.comm} differs slightly on the HPPA.  The syntax is
+@samp{@var{symbol} .comm, @var{length}}; @var{symbol} is optional.
+@end ifset
+
 @node CFI directives
 @section @code{.cfi_startproc}
 @cindex @code{cfi_startproc} directive
@@ -4018,34 +4049,6 @@ code it's annotating.
 Allows the user to add arbitrary bytes to the unwind info.  One
 might use this to add OS-specific CFI opcodes, or generic CFI
 opcodes that GAS does not yet support.
-
-@cindex @code{comm} directive
-@cindex symbol, common
-@code{.comm} declares a common symbol named @var{symbol}.  When linking, a
-common symbol in one object file may be merged with a defined or common symbol
-of the same name in another object file.  If @code{@value{LD}} does not see a
-definition for the symbol--just one or more common symbols--then it will
-allocate @var{length} bytes of uninitialized memory.  @var{length} must be an
-absolute expression.  If @code{@value{LD}} sees multiple common symbols with
-the same name, and they do not all have the same size, it will allocate space
-using the largest size.
-
-@ifset ELF
-When using ELF, the @code{.comm} directive takes an optional third argument.
-This is the desired alignment of the symbol, specified as a byte boundary (for
-example, an alignment of 16 means that the least significant 4 bits of the
-address should be zero).  The alignment must be an absolute expression, and it
-must be a power of two.  If @code{@value{LD}} allocates uninitialized memory
-for the common symbol, it will use the alignment when placing the symbol.  If
-no alignment is specified, @command{@value{AS}} will set the alignment to the
-largest power of two less than or equal to the size of the symbol, up to a
-maximum of 16.
-@end ifset
-
-@ifset HPPA
-The syntax for @code{.comm} differs slightly on the HPPA.  The syntax is
-@samp{@var{symbol} .comm, @var{length}}; @var{symbol} is optional.
-@end ifset
 
 @node Data
 @section @code{.data @var{subsection}}
