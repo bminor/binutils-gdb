@@ -1,5 +1,6 @@
 # Simulator main loop for m32rx. -*- C -*-
-# Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
+#
+# Copyright 1996, 1997, 1998, 2004 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Simulators.
 #
@@ -289,15 +290,33 @@ cat <<EOF
 	    {
 	      if ((insn & 0x8000) != 0) /* parallel? */
 		{
-		  /* Yep.  Here's the "interesting" [sic] part.  */
-		  idesc = emit_parallel (current_cpu, pc, insn, sc, 1);
-		  sc += 3;
-		  max_insns -= 3;
+		  int up_count;
+
+		  if (((insn >> 16) & 0xfff0) == 0x10f0)
+		    {
+		      /* FIXME: No need to handle this sequentially if system
+		         calls will be able to execute after second insn in
+		         parallel. ( trap #num || insn ) */
+		      /* insn */
+		      idesc = emit_16 (current_cpu, pc + 2, insn & 0x7fff,
+ 				       sc, 1, 0);
+		      /* trap */
+		      emit_16 (current_cpu, pc, insn >> 16, sc + 1, 1, 0);
+		      up_count = 2;
+		    }
+		  else
+		    {
+		      /* Yep.  Here's the "interesting" [sic] part.  */
+		      idesc = emit_parallel (current_cpu, pc, insn, sc, 1);
+		      up_count = 3;
+		    }
+		  sc += up_count;
+		  max_insns -= up_count;
 		  icount += 2;
 		  pc += 4;
 		  if (IDESC_CTI_P (idesc))
 		    {
-		      SET_CTI_VPC (sc - 3);
+		      SET_CTI_VPC (sc - up_count);
 		      break;
 		    }
 		}
@@ -375,18 +394,51 @@ cat <<EOF
 		     Only emit before/after handlers if necessary.  */
 		  if (trace_p || profile_p)
 		    {
-		      idesc = emit_full_parallel (current_cpu, pc, insn, sc,
-						  trace_p, profile_p);
+		      if (((insn >> 16) & 0xfff0) == 0x10f0)
+			{
+			  /* FIXME: No need to handle this sequentially if
+			     system calls will be able to execute after second
+			     insn in parallel. ( trap #num || insn ) */
+			  /* insn */
+			  idesc = emit_full16 (current_cpu, pc + 2,
+					       insn & 0x7fff, sc, 0, 0);
+			  /* trap */
+			  emit_full16 (current_cpu, pc, insn >> 16, sc + 3,
+				       0, 0);
+			}
+		      else
+			{
+		          idesc = emit_full_parallel (current_cpu, pc, insn,
+						      sc, trace_p, profile_p);
+			}
 		      cti_sc = sc + 1;
 		      sc += 6;
 		      max_insns -= 6;
 		    }
 		  else
 		    {
-		      idesc = emit_parallel (current_cpu, pc, insn, sc, 0);
+		      int up_count;
+
+		      if (((insn >> 16) & 0xfff0) == 0x10f0)
+			{
+                          /* FIXME: No need to handle this sequentially if
+                             system calls will be able to execute after second
+                             insn in parallel. ( trap #num || insn ) */
+                          /* insn */
+                          idesc = emit_16 (current_cpu, pc + 2, insn & 0x7fff,
+                                           sc, 0, 0);
+                          /* trap */
+                          emit_16 (current_cpu, pc, insn >> 16, sc + 1, 0, 0);
+                          up_count = 2;
+			}
+		      else
+			{
+		          idesc = emit_parallel (current_cpu, pc, insn, sc, 0);
+                          up_count = 3;
+			}
 		      cti_sc = sc;
-		      sc += 3;
-		      max_insns -= 3;
+		      sc += up_count;
+		      max_insns -= up_count;
 		    }
 		  icount += 2;
 		  pc += 4;

@@ -1,3 +1,10 @@
+2004-02-04  Andrew Cagney  <cagney@redhat.com>
+
+	Committed by Andrew Cagney.
+	* mloopx.in: Update copyright.
+	(xextract-pbb): Fixed trap for system calls operation in parallel.
+	* mloop2.in (xextract-pbb): Ditto.
+
 2003-12-19  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
         * configure.in: Changed for dummy simulator of m32r-linux.
