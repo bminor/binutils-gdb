@@ -1,5 +1,10 @@
 2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
 
+	* source.c (openp): If the file does not exist don't necessarily
+	search the path.
+
+2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
 	Fix PR gdb/872.
 	* gdbtypes.c (init_type): Mark "char" as TYPE_FLAG_NOSIGN.
 	(integer_types_same_name_p): New function.

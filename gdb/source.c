@@ -674,14 +674,21 @@ openp (const char *path, int try_cwd_first, const char *string,
   mode |= O_BINARY;
 #endif
 
-  if ((try_cwd_first || IS_ABSOLUTE_PATH (string)) && is_regular_file (string))
+  if (try_cwd_first || IS_ABSOLUTE_PATH (string))
     {
       int i;
-      filename = alloca (strlen (string) + 1);
-      strcpy (filename, string);
-      fd = open (filename, mode, prot);
-      if (fd >= 0)
-	goto done;
+
+      if (is_regular_file (string))
+	{
+	  filename = alloca (strlen (string) + 1);
+	  strcpy (filename, string);
+	  fd = open (filename, mode, prot);
+	  if (fd >= 0)
+	    goto done;
+	}
+      else
+	fd = -1;
+
       for (i = 0; string[i]; i++)
 	if (IS_DIR_SEPARATOR (string[i]))
 	  goto done;
