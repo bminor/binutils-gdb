@@ -1,3 +1,9 @@
+Wed Dec  8 16:31:51 1993  Ken Raeburn  (raeburn@rtl.cygnus.com)
+
+	* write.c (number_to_chars_*): Delete bogus range check.
+
+	* output-file.c (TARGET_ARCH): No default.
+
 Tue Dec  7 16:02:53 1993  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* config/tc-sh.c (md_convert_frag): Truncate disps before calling
