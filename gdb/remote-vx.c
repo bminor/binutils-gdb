@@ -1320,6 +1320,7 @@ Specify the name of the machine to connect to.",
 	vx_lookup_symbol,
 	vx_create_inferior, 0,  /* mourn_inferior */
 	0, /* can_run */
+	0, /* notice_signals */
 	core_stratum, 0, /* next */
 	1, 1, 0, 0, 0,	/* all mem, mem, stack, regs, exec */
 	0, 0,			/* Section pointers */
@@ -1343,6 +1344,7 @@ struct target_ops vx_run_ops = {
 	vx_lookup_symbol,
 	0, vx_mourn_inferior,
 	0,  /* can_run */
+	0, /* notice_signals */
 	process_stratum, 0, /* next */
 	0, 1, 1, 1, 1,	/* all mem, mem, stack, regs, exec */
 			/* all_mem is off to avoid spurious msg in "i files" */

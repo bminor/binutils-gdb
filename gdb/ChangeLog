@@ -1,3 +1,36 @@
+Tue Oct  6 14:47:11 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	NOTICE_SIGNAL_HANDLING_CHANGE macro added to the target vector as
+	to_notice_signals.
+
+	* inferior.h (proc_signal_handling_change): prototype removed.
+	* infrun.c (NOTICE_SIGNAL_HANDLING_CHANGE): default removed.
+	(handle_command): now calls target_notice_signals.
+	* procfs.c (proc_signal_handling_change): renamed to
+	  procfs_notice_signals.  Now static.  Add prototype.  All callers
+	  changed.
+	* target.h (struct target_ops): new field, to_notice_signals.
+	(target_notice_signals): new macro to cover new field.
+	* target.c (cleanup_target): default to_notice_signals to ignore.
+	* corelow.c (core_ops),
+	exec.c (exec_ops),
+	inftarg.c (child_ops),
+	procfs.c (procfs_ops),
+	remote-adapt.c (adapt-ops),
+	remote-eb.c (eb_ops),
+	remote-es1800.c (es1800_ops, es1800_child_ops),
+	remote-hms.c (hms_ops),
+	remote-mm.c (mm_ops),
+	remote-nindy.c (nindy_ops),
+	remote-st2000.c (st2000_ops),
+	remote-udi.c (udi_ops),
+	remote-vx.c (vx_ops, vx_run_ops),
+	remote.c (remote_ops),
+	target.c (dummy_target),
+	xcoffexec.c (exec_ops): added static initializer for
+	to_notice_signals.
+	* xm-irix4.h, xm-sysv4.h (NOTICE_SIGNAL_HANDLING_CHANGE): removed.
+
 Tue Oct  6 12:13:08 1992  John Gilmore  (gnu@cygnus.com)
 
 	* main.c (define_command):  Add forgotten initializer.

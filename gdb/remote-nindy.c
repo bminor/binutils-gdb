@@ -942,6 +942,7 @@ specified when you started GDB.",
 	nindy_create_inferior,
 	nindy_mourn_inferior,
   	0,		/* can_run */
+  	0, /* notice_signals */
 	process_stratum, 0, /* next */
 	1, 1, 1, 1, 1,	/* all mem, mem, stack, regs, exec */
 	0, 0,			/* Section pointers */

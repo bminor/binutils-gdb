@@ -1341,6 +1341,7 @@ static struct target_ops udi_ops = {
         udi_create_inferior,
         udi_mourn,		/* mourn_inferior FIXME */
 	0,			/* can_run */
+	0,			/* notice_signals */
         process_stratum,
 	0,			/* next */
         1,			/* has_all_memory */

@@ -257,6 +257,7 @@ struct target_ops core_ops = {
 	0, 0, 0, /* kill, load, lookup sym */
 	find_default_create_inferior, 0, /* mourn_inferior */
 	0, /* can_run */
+	0, /* notice_signals */
 	core_stratum, 0, /* next */
 	0, 1, 1, 1, 0,	/* all mem, mem, stack, regs, exec */
 	0, 0,			/* section pointers */

@@ -109,7 +109,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "breakpoint.h"
 #include "wait.h"
 #include "gdbcore.h"
-#include "command.h"
+#include "gdbcmd.h"
 #include "target.h"
 
 #include <signal.h>
@@ -143,6 +143,9 @@ insert_step_breakpoint PARAMS ((void));
 
 static void
 resume_cleanups PARAMS ((int));
+
+static int
+hook_stop_stub PARAMS ((char *));
 
 /* Sigtramp is a routine that the kernel calls (which then calls the
    signal handler).  On most machines it is a library routine that
@@ -182,12 +185,6 @@ resume_cleanups PARAMS ((int));
 #define IN_SOLIB_TRAMPOLINE(pc,name)	0
 #endif
 
-/* Notify other parts of gdb that might care that signal handling may
-   have changed for one or more signals. */
-#ifndef NOTICE_SIGNAL_HANDLING_CHANGE
-#define NOTICE_SIGNAL_HANDLING_CHANGE	/* No actions */
-#endif
-
 #ifdef TDESC
 #include "tdesc.h"
 int safe_to_init_tdesc_context = 0;
@@ -216,10 +213,14 @@ static unsigned char *signal_program;
 	(flags)[signum] = 0; \
   } while (0)
 
-/* Nonzero if breakpoints are now inserted in the inferior.  */
-/* Nonstatic for initialization during xxx_create_inferior. FIXME. */
 
-/*static*/ int breakpoints_inserted;
+/* Command list pointer for the "stop" placeholder.  */
+
+static struct cmd_list_element *stop_command;
+
+/* Nonzero if breakpoints are now inserted in the inferior.  */
+
+static int breakpoints_inserted;
 
 /* Function inferior was in as of last step command.  */
 
@@ -1196,6 +1197,9 @@ save_pc:
 void
 normal_stop ()
 {
+  char *tem;
+  struct cmd_list_element *c;
+
   /* Make sure that the current_frame's pc is correct.  This
      is a correction for setting up the frame info before doing
      DECR_PC_AFTER_BREAK */
@@ -1240,6 +1244,14 @@ Further execution is probably impossible.\n");
 
   target_terminal_ours ();
 
+  /* Look up the hook_stop and run it if it exists.  */
+
+  if (stop_command->hook)
+    {
+      catch_errors (hook_stop_stub, (char *)stop_command->hook,
+		    "Error while running hook_stop:\n");
+    }
+
   if (!target_has_stack)
     return;
 
@@ -1282,6 +1294,14 @@ Further execution is probably impossible.\n");
       select_frame (get_current_frame (), 0);
     }
 }
+
+static int
+hook_stop_stub (cmd)
+     char *cmd;
+{
+  execute_user_command ((struct cmd_list_element *)cmd, 0);
+}
+
 
 static void
 insert_step_breakpoint ()
@@ -1492,7 +1512,7 @@ handle_command (args, from_tty)
       argv++;
     }
 
-  NOTICE_SIGNAL_HANDLING_CHANGE;
+  target_notice_signals();
 
   if (from_tty)
     {
@@ -1673,6 +1693,11 @@ Print means print a message if this signal happens.\n\
 Pass means let program see this signal; otherwise program doesn't know.\n\
 Ignore is a synonym for nopass and noignore is a synonym for pass.\n\
 Pass and Stop may be combined.");
+
+  stop_command = add_cmd ("stop", class_pseudo, NO_FUNCTION,
+	   "There is no `stop' command, but you can set a hook on `stop'.\n\
+This allows you to set a list of commands to be run each time execution\n\
+of the inferior program stops.", &cmdlist);
 
   numsigs = signo_max () + 1;
   signal_stop    = (unsigned char *)    

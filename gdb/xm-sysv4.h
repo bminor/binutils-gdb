@@ -59,18 +59,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define NEED_POSIX_SETPGID
 
-/* If gdb's signal handling changes (due to a "handle" command), then
-   this macro expands to an action to perform to notify other parts of
-   gdb that might care, that signal handling has changed.  For hosts using
-   the /proc interface, gdb has more control over which signals cause the
-   inferior to stop and which do not.  In some cases, it is desirable to
-   have signals delivered directly to the inferior without involving the
-   debugger at all. */
-
-#ifdef USE_PROC_FS
-#define NOTICE_SIGNAL_HANDLING_CHANGE proc_signal_handling_change()
-#endif
-
 /* We have to include these files now, so that GDB will not make
    competing definitions in defs.h.  */
 #include <limits.h>

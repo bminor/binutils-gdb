@@ -416,6 +416,9 @@ do_detach PARAMS ((int siggnal));
 static void
 procfs_create_inferior PARAMS ((char *, char *, char **));
 
+static void
+procfs_notice_signals PARAMS ((void));
+
 /* External function prototypes that can't be easily included in any
    header file because the args are typedefs in system include files. */
 
@@ -1267,7 +1270,7 @@ procfs_init_inferior (pid)
     {
       memset ((char *) &pi.prrun, 0, sizeof (pi.prrun));
       prfillset (&pi.prrun.pr_trace);
-      proc_signal_handling_change ();
+      procfs_notice_signals ();
       prfillset (&pi.prrun.pr_fault);
       prdelset (&pi.prrun.pr_fault, FLTPAGE);
       if (ioctl (pi.fd, PIOCWSTOP, &pi.prstatus) < 0)
@@ -1285,11 +1288,11 @@ procfs_init_inferior (pid)
 
 GLOBAL FUNCTION
 
-	proc_signal_handling_change
+	procfs_notice_signals
 
 SYNOPSIS
 
-	void proc_signal_handling_change (void);
+	static void procfs_notice_signals (void);
 
 DESCRIPTION
 
@@ -1306,8 +1309,8 @@ DESCRIPTION
 	involved.
  */
 
-void
-proc_signal_handling_change ()
+static void
+procfs_notice_signals ()
 {
   int signo;
 
@@ -1775,7 +1778,7 @@ do_attach (pid)
   
   memset (&pi.prrun, 0, sizeof (pi.prrun));
   prfillset (&pi.prrun.pr_trace);
-  proc_signal_handling_change ();
+  procfs_notice_signals ();
   prfillset (&pi.prrun.pr_fault);
   prdelset (&pi.prrun.pr_fault, FLTPAGE);
   if (ioctl (pi.fd, PIOCSFAULT, &pi.prrun.pr_fault))
@@ -3118,6 +3121,7 @@ struct target_ops procfs_ops = {
   procfs_create_inferior,	/* to_create_inferior */
   procfs_mourn_inferior,	/* to_mourn_inferior */
   procfs_can_run,		/* to_can_run */
+  procfs_notice_signals,	/* to_notice_signals */
   process_stratum,		/* to_stratum */
   0,				/* to_next */
   1,				/* to_has_all_memory */
