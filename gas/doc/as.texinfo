@@ -4838,8 +4838,10 @@ With that definition, @samp{SUM 0,5} is equivalent to this assembly input:
 Begin the definition of a macro called @var{macname}.  If your macro
 definition requires arguments, specify their names after the macro name,
 separated by commas or spaces.  You can supply a default value for any
-macro argument by following the name with @samp{=@var{deflt}}.  For
-example, these are all valid @code{.macro} statements:
+macro argument by following the name with @samp{=@var{deflt}}.  You
+cannot define two macros with the same @var{macname} unless it has been
+subject to the @code{.purgem} directive (@xref{Purgem}.) between the two
+definitions.  For example, these are all valid @code{.macro} statements:
 
 @table @code
 @item .macro comm
