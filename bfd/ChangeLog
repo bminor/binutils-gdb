@@ -1567,7 +1567,7 @@
 	* elf.c (elf_fake_sections): Do not mark the section SHT_NOBITS if
 	is has the SEC_HAS_CONTENTS flag set.
 
-2000-09-28  Vrjan Friberg  <orjanf@axis.com>
+2000-09-28  Örjan Friberg  <orjanf@axis.com>
 	    Hans-Peter Nilsson  <hp@axis.com>
 
 	* aout-cris.c (N_TXTADDR): Define.
@@ -3416,7 +3416,7 @@
 
 	* libhppa.h (HPPA_R_CONSTANT): Cast argument to bfd_signed_vma.
 
-2000-05-03  Martin v. Lvwis  <loewis@informatik.hu-berlin.de>
+2000-05-03  Martin v. Löwis  <loewis@informatik.hu-berlin.de>
 
 	* elflink.h (elf_link_add_object_symbols): Reset dynindx for
 	hidden and internal symbols.
