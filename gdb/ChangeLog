@@ -1,3 +1,12 @@
+2005-02-10  Daniel Jacobowitz  <dan@debian.org>
+
+	From Ramana Radhakrishnan <ramana.radhakrishnan@codito.com>:
+	PR exp/1821
+	* cp-valprint.c: Include "language.h".
+	(cp_print_value_fields): Pass the current language to
+	fprintf_symbol_filtered.
+	* Makefile.in (cp-valprint.o): Update dependencies.
+
 2005-02-10  Andrew Cagney  <cagney@gnu.org>
 
 	* cli/cli-decode.c (add_setshow_enum_cmd, add_setshow_cmd_full)

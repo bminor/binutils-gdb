@@ -36,6 +36,7 @@
 #include "cp-abi.h"
 #include "valprint.h"
 #include "cp-support.h"
+#include "language.h"
 
 int vtblprint;			/* Controls printing of vtbl's */
 int objectprint;		/* Controls looking up an object's derived type
@@ -319,11 +320,11 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	      if (TYPE_FIELD_STATIC (type, i))
 		fputs_filtered ("static ", stream);
 	      fprintf_symbol_filtered (stream, TYPE_FIELD_NAME (type, i),
-				       language_cplus,
+				       current_language->la_language,
 				       DMGL_PARAMS | DMGL_ANSI);
 	      fputs_filtered ("\" \"", stream);
 	      fprintf_symbol_filtered (stream, TYPE_FIELD_NAME (type, i),
-				       language_cplus,
+				       current_language->la_language,
 				       DMGL_PARAMS | DMGL_ANSI);
 	      fputs_filtered ("\") \"", stream);
 	    }
@@ -334,7 +335,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	      if (TYPE_FIELD_STATIC (type, i))
 		fputs_filtered ("static ", stream);
 	      fprintf_symbol_filtered (stream, TYPE_FIELD_NAME (type, i),
-				       language_cplus,
+				       current_language->la_language,
 				       DMGL_PARAMS | DMGL_ANSI);
 	      annotate_field_name_end ();
 	      /* do not print leading '=' in case of anonymous unions */

@@ -1,3 +1,10 @@
+2005-02-10  Daniel Jacobowitz  <dan@debian.org>
+
+	From Ramana Radhakrishnan <ramana.radhakrishnan@codito.com>:
+	PR exp/1821
+	* gdb.base/gdb1821.c: New test file.
+	* gdb.base/gdb1821.exp: New test file.
+
 2005-02-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/start.c: New file.
