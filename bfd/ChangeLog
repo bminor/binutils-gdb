@@ -1,3 +1,15 @@
+Wed Aug  4 16:22:55 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* config/go32.mh: remove HDEFINES; since __MSDOS__ and __GO32__
+	are now predefined by GCC
+
+Wed Aug  4 16:06:29 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* coffgen.c (coff_print_symbol): Add the section offset to the
+	line number address, so it's printed the same way as the function
+	address.  Only showed up for line numbers that aren't in the first
+	section (.text).
+
 Wed Aug  4 08:33:55 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* libnlm.h (nlm_backend_data): Added nlm_mangle_relocs.
