@@ -1,3 +1,12 @@
+Sat Jan 28 01:34:44 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gdb.disasm/Makefile.in (clean): Delete "errs" file.
+	* gdb.stabs/Makefile.in: Likewise.
+
+	* gdb.disasm/hppa.exp (all_fpu_comparison_tests): Revert last
+	change.  Instead split the tests into smaller pieces.
+	* gdb.disasm/hppa.s: Corresponding changes.
+
 Fri Jan 27 09:24:51 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.base/a1-selftest.exp (test_with_self), gdb.base/interrupt.exp:
