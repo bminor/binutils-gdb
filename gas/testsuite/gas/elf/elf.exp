@@ -47,9 +47,6 @@ if { ([istarget "*-*-elf*"]
     if {[istarget m32r*-*-*]} then {
 	set target_machine -m32r
     }
-    if {[istarget xscale*-*-elf]} then {
-	set target_machine -miwmmxt
-    }
     run_dump_test "ehopt0"
     run_dump_test "section0" 
     run_dump_test "section1" 

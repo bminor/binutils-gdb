@@ -1,3 +1,15 @@
+2003-11-06  Pete Gonzalez  <pgonzalez@bluel.com>
+
+	* config/tc-arm.texi (struct reg_entry): Add new field 'builtin'.
+	(rn_table, iwmmxt_table, cp_table, cn_table, fn_table, sn_table,
+	dn_table, mav_mvf_table, mac_mvd_table, mav_mvfx_table,
+	mav_mvax_table, mav_dspc_table): Initialise new field.
+	(insert_reg_alias): Initialise new field.
+	(md_pseudo_table): Add "unreq" entry.
+	(s_unreq): New function: Undo the effects of a previous .req.
+	* doc/c-arm.texi: Document new pseudo op.
+	* NEWS: Mention new feature.
+
 2003-11-06  Bruno Rohee  <bruno@rohee.com>
 
 	* config/obj-vms.c: Fix "the the" typo.

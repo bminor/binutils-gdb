@@ -1,4 +1,4 @@
-#objdump: -dr --prefix-addresses --show-raw-insn
+#objdump: -dr --prefix-addresses --show-raw-insn --architecture=armv5te
 #name: ARM CoProcessor Instructions
 #as: -march=armv5te -EL
 
@@ -37,3 +37,5 @@ Disassembly of section .text:
 0+06c <[^>]*> ec407e05 	mcrr	14, 0, r7, r0, cr5
 0+070 <[^>]*> ec507fff 	mrrc	15, 15, r7, r0, cr15
 0+074 <[^>]*> ec407efe 	mcrr	14, 15, r7, r0, cr14
+0+078 <[^>]*> e1a00000 	nop			\(mov r0,r0\)
+0+07c <[^>]*> e1a00000 	nop			\(mov r0,r0\)

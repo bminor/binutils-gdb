@@ -31,7 +31,7 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
 
     run_dump_test "arm7t"
 
-    if {! [istarget arm*-*-aout]} then {
+    if {! [istarget arm*-*-aout] && ![istarget arm-*-pe]} then {
 	# The arm-aout port does not support Thumb mode.
 	gas_test "thumb.s" "-mcpu=arm7t" $stdoptlist "Thumb instructions"
     }
@@ -61,6 +61,8 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
     run_dump_test "xscale"
 
     run_dump_test "adrl"
+    
+    run_errors_test "req" "-mcpu=arm7m" ".req errors"
 
     run_dump_test "maverick"
     

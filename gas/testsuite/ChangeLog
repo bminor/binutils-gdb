@@ -1,3 +1,16 @@
+2003-11-06  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/req.s: New test file.  Check .req and .unreq psuedo ops.
+	* gas/arm/req.l: Expected error output from req.s test.
+	* gas/arm/copro.d: Set target architecture for objdump so that the
+	test will work on architectures which cannot encode higher arm
+	architecture types in their file headers.
+	* gas/arm/arm.exp: Run new req.s test.
+	Skip thumb instruction test for PE targets which do not support
+	thumb relocations.
+	* gas/elf/elf.exp: Skip special handling of section2 test for
+	XScale targets - it is no longer needed.
+
 2003-11-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/m68k/mcf-mov3q.d: Support 64bit BFD.

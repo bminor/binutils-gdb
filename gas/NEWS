@@ -1,5 +1,8 @@
 -*- text -*-
 
+* On ARM architectures, added a new gas directive ".unreq" that undoes
+  definitions created by ".req".
+
 * Support for Motorola ColdFire MCF528x added.
 
 * Added --gstabs+ switch to enable the generation of STABS debug format

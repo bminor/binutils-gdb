@@ -580,6 +580,7 @@ struct reg_entry
 {
   const char * name;
   int          number;
+  bfd_boolean  builtin;
 };
 
 /* Some well known registers that we refer to directly elsewhere.  */
@@ -591,23 +592,24 @@ struct reg_entry
 #define wc_register(reg)  ((reg ^ WC_PREFIX) >= 0 && (reg ^ WC_PREFIX) <= 15)
 #define wcg_register(reg) ((reg ^ WC_PREFIX) >= 8 && (reg ^ WC_PREFIX) <= 11)
 
-/* These are the standard names.  Users can add aliases with .req.  */
+/* These are the standard names.  Users can add aliases with .req.
+   and delete them with .unreq.  */
+
 /* Integer Register Numbers.  */
 static const struct reg_entry rn_table[] =
 {
-  {"r0",  0},  {"r1",  1},      {"r2",  2},      {"r3",  3},
-  {"r4",  4},  {"r5",  5},      {"r6",  6},      {"r7",  7},
-  {"r8",  8},  {"r9",  9},      {"r10", 10},     {"r11", 11},
-  {"r12", 12}, {"r13", REG_SP}, {"r14", REG_LR}, {"r15", REG_PC},
+  {"r0",  0, TRUE},  {"r1",  1, TRUE},      {"r2",  2, TRUE},      {"r3",  3, TRUE},
+  {"r4",  4, TRUE},  {"r5",  5, TRUE},      {"r6",  6, TRUE},      {"r7",  7, TRUE},
+  {"r8",  8, TRUE},  {"r9",  9, TRUE},      {"r10", 10, TRUE},     {"r11", 11, TRUE},
+  {"r12", 12, TRUE}, {"r13", REG_SP, TRUE}, {"r14", REG_LR, TRUE}, {"r15", REG_PC, TRUE},
   /* ATPCS Synonyms.  */
-  {"a1",  0},  {"a2",  1},      {"a3",  2},      {"a4",  3},
-  {"v1",  4},  {"v2",  5},      {"v3",  6},      {"v4",  7},
-  {"v5",  8},  {"v6",  9},      {"v7",  10},     {"v8",  11},
+  {"a1",  0, TRUE},  {"a2",  1, TRUE},      {"a3",  2, TRUE},      {"a4",  3, TRUE},
+  {"v1",  4, TRUE},  {"v2",  5, TRUE},      {"v3",  6, TRUE},      {"v4",  7, TRUE},
+  {"v5",  8, TRUE},  {"v6",  9, TRUE},      {"v7",  10, TRUE},     {"v8",  11, TRUE},
   /* Well-known aliases.  */
-						 {"wr",  7},
-	       {"sb",  9},      {"sl",  10},     {"fp",  11},
-  {"ip",  12}, {"sp",  REG_SP}, {"lr",  REG_LR}, {"pc",  REG_PC},
-  {NULL, 0}
+  {"wr",  7, TRUE},  {"sb",  9, TRUE},      {"sl",  10, TRUE},     {"fp",  11, TRUE},
+  {"ip",  12, TRUE}, {"sp",  REG_SP, TRUE}, {"lr",  REG_LR, TRUE}, {"pc",  REG_PC, TRUE},
+  {NULL, 0, TRUE}
 };
 
 #define WR_PREFIX 0x200
@@ -616,138 +618,138 @@ static const struct reg_entry rn_table[] =
 static const struct reg_entry iwmmxt_table[] =
 {
   /* Intel Wireless MMX technology register names.  */
-  {  "wr0", 0x0 | WR_PREFIX},   {"wr1", 0x1 | WR_PREFIX},
-  {  "wr2", 0x2 | WR_PREFIX},   {"wr3", 0x3 | WR_PREFIX},
-  {  "wr4", 0x4 | WR_PREFIX},   {"wr5", 0x5 | WR_PREFIX},
-  {  "wr6", 0x6 | WR_PREFIX},   {"wr7", 0x7 | WR_PREFIX},
-  {  "wr8", 0x8 | WR_PREFIX},   {"wr9", 0x9 | WR_PREFIX},
-  { "wr10", 0xa | WR_PREFIX},  {"wr11", 0xb | WR_PREFIX},
-  { "wr12", 0xc | WR_PREFIX},  {"wr13", 0xd | WR_PREFIX},
-  { "wr14", 0xe | WR_PREFIX},  {"wr15", 0xf | WR_PREFIX},
-  { "wcid", 0x0 | WC_PREFIX},  {"wcon", 0x1 | WC_PREFIX},
-  {"wcssf", 0x2 | WC_PREFIX}, {"wcasf", 0x3 | WC_PREFIX},
-  {"wcgr0", 0x8 | WC_PREFIX}, {"wcgr1", 0x9 | WC_PREFIX},
-  {"wcgr2", 0xa | WC_PREFIX}, {"wcgr3", 0xb | WC_PREFIX},
+  {  "wr0", 0x0 | WR_PREFIX, TRUE},   {"wr1", 0x1 | WR_PREFIX, TRUE},
+  {  "wr2", 0x2 | WR_PREFIX, TRUE},   {"wr3", 0x3 | WR_PREFIX, TRUE},
+  {  "wr4", 0x4 | WR_PREFIX, TRUE},   {"wr5", 0x5 | WR_PREFIX, TRUE},
+  {  "wr6", 0x6 | WR_PREFIX, TRUE},   {"wr7", 0x7 | WR_PREFIX, TRUE},
+  {  "wr8", 0x8 | WR_PREFIX, TRUE},   {"wr9", 0x9 | WR_PREFIX, TRUE},
+  { "wr10", 0xa | WR_PREFIX, TRUE},  {"wr11", 0xb | WR_PREFIX, TRUE},
+  { "wr12", 0xc | WR_PREFIX, TRUE},  {"wr13", 0xd | WR_PREFIX, TRUE},
+  { "wr14", 0xe | WR_PREFIX, TRUE},  {"wr15", 0xf | WR_PREFIX, TRUE},
+  { "wcid", 0x0 | WC_PREFIX, TRUE},  {"wcon", 0x1 | WC_PREFIX, TRUE},
+  {"wcssf", 0x2 | WC_PREFIX, TRUE}, {"wcasf", 0x3 | WC_PREFIX, TRUE},
+  {"wcgr0", 0x8 | WC_PREFIX, TRUE}, {"wcgr1", 0x9 | WC_PREFIX, TRUE},
+  {"wcgr2", 0xa | WC_PREFIX, TRUE}, {"wcgr3", 0xb | WC_PREFIX, TRUE},
 
-  {  "wR0", 0x0 | WR_PREFIX},   {"wR1", 0x1 | WR_PREFIX},
-  {  "wR2", 0x2 | WR_PREFIX},   {"wR3", 0x3 | WR_PREFIX},
-  {  "wR4", 0x4 | WR_PREFIX},   {"wR5", 0x5 | WR_PREFIX},
-  {  "wR6", 0x6 | WR_PREFIX},   {"wR7", 0x7 | WR_PREFIX},
-  {  "wR8", 0x8 | WR_PREFIX},   {"wR9", 0x9 | WR_PREFIX},
-  { "wR10", 0xa | WR_PREFIX},  {"wR11", 0xb | WR_PREFIX},
-  { "wR12", 0xc | WR_PREFIX},  {"wR13", 0xd | WR_PREFIX},
-  { "wR14", 0xe | WR_PREFIX},  {"wR15", 0xf | WR_PREFIX},
-  { "wCID", 0x0 | WC_PREFIX},  {"wCon", 0x1 | WC_PREFIX},
-  {"wCSSF", 0x2 | WC_PREFIX}, {"wCASF", 0x3 | WC_PREFIX},
-  {"wCGR0", 0x8 | WC_PREFIX}, {"wCGR1", 0x9 | WC_PREFIX},
-  {"wCGR2", 0xa | WC_PREFIX}, {"wCGR3", 0xb | WC_PREFIX},
-  {NULL, 0}
+  {  "wR0", 0x0 | WR_PREFIX, TRUE},   {"wR1", 0x1 | WR_PREFIX, TRUE},
+  {  "wR2", 0x2 | WR_PREFIX, TRUE},   {"wR3", 0x3 | WR_PREFIX, TRUE},
+  {  "wR4", 0x4 | WR_PREFIX, TRUE},   {"wR5", 0x5 | WR_PREFIX, TRUE},
+  {  "wR6", 0x6 | WR_PREFIX, TRUE},   {"wR7", 0x7 | WR_PREFIX, TRUE},
+  {  "wR8", 0x8 | WR_PREFIX, TRUE},   {"wR9", 0x9 | WR_PREFIX, TRUE},
+  { "wR10", 0xa | WR_PREFIX, TRUE},  {"wR11", 0xb | WR_PREFIX, TRUE},
+  { "wR12", 0xc | WR_PREFIX, TRUE},  {"wR13", 0xd | WR_PREFIX, TRUE},
+  { "wR14", 0xe | WR_PREFIX, TRUE},  {"wR15", 0xf | WR_PREFIX, TRUE},
+  { "wCID", 0x0 | WC_PREFIX, TRUE},  {"wCon", 0x1 | WC_PREFIX, TRUE},
+  {"wCSSF", 0x2 | WC_PREFIX, TRUE}, {"wCASF", 0x3 | WC_PREFIX, TRUE},
+  {"wCGR0", 0x8 | WC_PREFIX, TRUE}, {"wCGR1", 0x9 | WC_PREFIX, TRUE},
+  {"wCGR2", 0xa | WC_PREFIX, TRUE}, {"wCGR3", 0xb | WC_PREFIX, TRUE},
+  {NULL, 0, TRUE}
 };
 
 /* Co-processor Numbers.  */
 static const struct reg_entry cp_table[] =
 {
-  {"p0",  0},  {"p1",  1},  {"p2",  2},  {"p3", 3},
-  {"p4",  4},  {"p5",  5},  {"p6",  6},  {"p7", 7},
-  {"p8",  8},  {"p9",  9},  {"p10", 10}, {"p11", 11},
-  {"p12", 12}, {"p13", 13}, {"p14", 14}, {"p15", 15},
-  {NULL, 0}
+  {"p0",  0, TRUE},  {"p1",  1, TRUE},  {"p2",  2, TRUE},  {"p3", 3, TRUE},
+  {"p4",  4, TRUE},  {"p5",  5, TRUE},  {"p6",  6, TRUE},  {"p7", 7, TRUE},
+  {"p8",  8, TRUE},  {"p9",  9, TRUE},  {"p10", 10, TRUE}, {"p11", 11, TRUE},
+  {"p12", 12, TRUE}, {"p13", 13, TRUE}, {"p14", 14, TRUE}, {"p15", 15, TRUE},
+  {NULL, 0, TRUE}
 };
 
 /* Co-processor Register Numbers.  */
 static const struct reg_entry cn_table[] =
 {
-  {"c0",   0},  {"c1",   1},  {"c2",   2},  {"c3",   3},
-  {"c4",   4},  {"c5",   5},  {"c6",   6},  {"c7",   7},
-  {"c8",   8},  {"c9",   9},  {"c10",  10}, {"c11",  11},
-  {"c12",  12}, {"c13",  13}, {"c14",  14}, {"c15",  15},
+  {"c0",   0, TRUE},  {"c1",   1, TRUE},  {"c2",   2, TRUE},  {"c3",   3, TRUE},
+  {"c4",   4, TRUE},  {"c5",   5, TRUE},  {"c6",   6, TRUE},  {"c7",   7, TRUE},
+  {"c8",   8, TRUE},  {"c9",   9, TRUE},  {"c10",  10, TRUE}, {"c11",  11, TRUE},
+  {"c12",  12, TRUE}, {"c13",  13, TRUE}, {"c14",  14, TRUE}, {"c15",  15, TRUE},
   /* Not really valid, but kept for back-wards compatibility.  */
-  {"cr0",  0},  {"cr1",  1},  {"cr2",  2},  {"cr3",  3},
-  {"cr4",  4},  {"cr5",  5},  {"cr6",  6},  {"cr7",  7},
-  {"cr8",  8},  {"cr9",  9},  {"cr10", 10}, {"cr11", 11},
-  {"cr12", 12}, {"cr13", 13}, {"cr14", 14}, {"cr15", 15},
-  {NULL, 0}
+  {"cr0",  0, TRUE},  {"cr1",  1, TRUE},  {"cr2",  2, TRUE},  {"cr3",  3, TRUE},
+  {"cr4",  4, TRUE},  {"cr5",  5, TRUE},  {"cr6",  6, TRUE},  {"cr7",  7, TRUE},
+  {"cr8",  8, TRUE},  {"cr9",  9, TRUE},  {"cr10", 10, TRUE}, {"cr11", 11, TRUE},
+  {"cr12", 12, TRUE}, {"cr13", 13, TRUE}, {"cr14", 14, TRUE}, {"cr15", 15, TRUE},
+  {NULL, 0, TRUE}
 };
 
 /* FPA Registers.  */
 static const struct reg_entry fn_table[] =
 {
-  {"f0", 0},   {"f1", 1},   {"f2", 2},   {"f3", 3},
-  {"f4", 4},   {"f5", 5},   {"f6", 6},   {"f7", 7},
-  {NULL, 0}
+  {"f0", 0, TRUE},   {"f1", 1, TRUE},   {"f2", 2, TRUE},   {"f3", 3, TRUE},
+  {"f4", 4, TRUE},   {"f5", 5, TRUE},   {"f6", 6, TRUE},   {"f7", 7, TRUE},
+  {NULL, 0, TRUE}
 };
 
 /* VFP SP Registers.  */
 static const struct reg_entry sn_table[] =
 {
-  {"s0",  0},  {"s1",  1},  {"s2",  2},	 {"s3", 3},
-  {"s4",  4},  {"s5",  5},  {"s6",  6},	 {"s7", 7},
-  {"s8",  8},  {"s9",  9},  {"s10", 10}, {"s11", 11},
-  {"s12", 12}, {"s13", 13}, {"s14", 14}, {"s15", 15},
-  {"s16", 16}, {"s17", 17}, {"s18", 18}, {"s19", 19},
-  {"s20", 20}, {"s21", 21}, {"s22", 22}, {"s23", 23},
-  {"s24", 24}, {"s25", 25}, {"s26", 26}, {"s27", 27},
-  {"s28", 28}, {"s29", 29}, {"s30", 30}, {"s31", 31},
-  {NULL, 0}
+  {"s0",  0, TRUE},  {"s1",  1, TRUE},  {"s2",  2, TRUE},  {"s3", 3, TRUE},
+  {"s4",  4, TRUE},  {"s5",  5, TRUE},  {"s6",  6, TRUE},  {"s7", 7, TRUE},
+  {"s8",  8, TRUE},  {"s9",  9, TRUE},  {"s10", 10, TRUE}, {"s11", 11, TRUE},
+  {"s12", 12, TRUE}, {"s13", 13, TRUE}, {"s14", 14, TRUE}, {"s15", 15, TRUE},
+  {"s16", 16, TRUE}, {"s17", 17, TRUE}, {"s18", 18, TRUE}, {"s19", 19, TRUE},
+  {"s20", 20, TRUE}, {"s21", 21, TRUE}, {"s22", 22, TRUE}, {"s23", 23, TRUE},
+  {"s24", 24, TRUE}, {"s25", 25, TRUE}, {"s26", 26, TRUE}, {"s27", 27, TRUE},
+  {"s28", 28, TRUE}, {"s29", 29, TRUE}, {"s30", 30, TRUE}, {"s31", 31, TRUE},
+  {NULL, 0, TRUE}
 };
 
 /* VFP DP Registers.  */
 static const struct reg_entry dn_table[] =
 {
-  {"d0",  0},  {"d1",  1},  {"d2",  2},	 {"d3", 3},
-  {"d4",  4},  {"d5",  5},  {"d6",  6},	 {"d7", 7},
-  {"d8",  8},  {"d9",  9},  {"d10", 10}, {"d11", 11},
-  {"d12", 12}, {"d13", 13}, {"d14", 14}, {"d15", 15},
-  {NULL, 0}
+  {"d0",  0, TRUE},  {"d1",  1, TRUE},  {"d2",  2, TRUE},  {"d3", 3, TRUE},
+  {"d4",  4, TRUE},  {"d5",  5, TRUE},  {"d6",  6, TRUE},  {"d7", 7, TRUE},
+  {"d8",  8, TRUE},  {"d9",  9, TRUE},  {"d10", 10, TRUE}, {"d11", 11, TRUE},
+  {"d12", 12, TRUE}, {"d13", 13, TRUE}, {"d14", 14, TRUE}, {"d15", 15, TRUE},
+  {NULL, 0, TRUE}
 };
 
 /* Maverick DSP coprocessor registers.  */
 static const struct reg_entry mav_mvf_table[] =
 {
-  {"mvf0",  0},  {"mvf1",  1},  {"mvf2",  2},  {"mvf3",  3},
-  {"mvf4",  4},  {"mvf5",  5},  {"mvf6",  6},  {"mvf7",  7},
-  {"mvf8",  8},  {"mvf9",  9},  {"mvf10", 10}, {"mvf11", 11},
-  {"mvf12", 12}, {"mvf13", 13}, {"mvf14", 14}, {"mvf15", 15},
-  {NULL, 0}
+  {"mvf0",  0, TRUE},  {"mvf1",  1, TRUE},  {"mvf2",  2, TRUE},  {"mvf3",  3, TRUE},
+  {"mvf4",  4, TRUE},  {"mvf5",  5, TRUE},  {"mvf6",  6, TRUE},  {"mvf7",  7, TRUE},
+  {"mvf8",  8, TRUE},  {"mvf9",  9, TRUE},  {"mvf10", 10, TRUE}, {"mvf11", 11, TRUE},
+  {"mvf12", 12, TRUE}, {"mvf13", 13, TRUE}, {"mvf14", 14, TRUE}, {"mvf15", 15, TRUE},
+  {NULL, 0, TRUE}
 };
 
 static const struct reg_entry mav_mvd_table[] =
 {
-  {"mvd0",  0},  {"mvd1",  1},  {"mvd2",  2},  {"mvd3",  3},
-  {"mvd4",  4},  {"mvd5",  5},  {"mvd6",  6},  {"mvd7",  7},
-  {"mvd8",  8},  {"mvd9",  9},  {"mvd10", 10}, {"mvd11", 11},
-  {"mvd12", 12}, {"mvd13", 13}, {"mvd14", 14}, {"mvd15", 15},
-  {NULL, 0}
+  {"mvd0",  0, TRUE},  {"mvd1",  1, TRUE},  {"mvd2",  2, TRUE},  {"mvd3",  3, TRUE},
+  {"mvd4",  4, TRUE},  {"mvd5",  5, TRUE},  {"mvd6",  6, TRUE},  {"mvd7",  7, TRUE},
+  {"mvd8",  8, TRUE},  {"mvd9",  9, TRUE},  {"mvd10", 10, TRUE}, {"mvd11", 11, TRUE},
+  {"mvd12", 12, TRUE}, {"mvd13", 13, TRUE}, {"mvd14", 14, TRUE}, {"mvd15", 15, TRUE},
+  {NULL, 0, TRUE}
 };
 
 static const struct reg_entry mav_mvfx_table[] =
 {
-  {"mvfx0",  0},  {"mvfx1",  1},  {"mvfx2",  2},  {"mvfx3",  3},
-  {"mvfx4",  4},  {"mvfx5",  5},  {"mvfx6",  6},  {"mvfx7",  7},
-  {"mvfx8",  8},  {"mvfx9",  9},  {"mvfx10", 10}, {"mvfx11", 11},
-  {"mvfx12", 12}, {"mvfx13", 13}, {"mvfx14", 14}, {"mvfx15", 15},
-  {NULL, 0}
+  {"mvfx0",  0, TRUE},  {"mvfx1",  1, TRUE},  {"mvfx2",  2, TRUE},  {"mvfx3",  3, TRUE},
+  {"mvfx4",  4, TRUE},  {"mvfx5",  5, TRUE},  {"mvfx6",  6, TRUE},  {"mvfx7",  7, TRUE},
+  {"mvfx8",  8, TRUE},  {"mvfx9",  9, TRUE},  {"mvfx10", 10, TRUE}, {"mvfx11", 11, TRUE},
+  {"mvfx12", 12, TRUE}, {"mvfx13", 13, TRUE}, {"mvfx14", 14, TRUE}, {"mvfx15", 15, TRUE},
+  {NULL, 0, TRUE}
 };
 
 static const struct reg_entry mav_mvdx_table[] =
 {
-  {"mvdx0",  0},  {"mvdx1",  1},  {"mvdx2",  2},  {"mvdx3",  3},
-  {"mvdx4",  4},  {"mvdx5",  5},  {"mvdx6",  6},  {"mvdx7",  7},
-  {"mvdx8",  8},  {"mvdx9",  9},  {"mvdx10", 10}, {"mvdx11", 11},
-  {"mvdx12", 12}, {"mvdx13", 13}, {"mvdx14", 14}, {"mvdx15", 15},
-  {NULL, 0}
+  {"mvdx0",  0, TRUE},  {"mvdx1",  1, TRUE},  {"mvdx2",  2, TRUE},  {"mvdx3",  3, TRUE},
+  {"mvdx4",  4, TRUE},  {"mvdx5",  5, TRUE},  {"mvdx6",  6, TRUE},  {"mvdx7",  7, TRUE},
+  {"mvdx8",  8, TRUE},  {"mvdx9",  9, TRUE},  {"mvdx10", 10, TRUE}, {"mvdx11", 11, TRUE},
+  {"mvdx12", 12, TRUE}, {"mvdx13", 13, TRUE}, {"mvdx14", 14, TRUE}, {"mvdx15", 15, TRUE},
+  {NULL, 0, TRUE}
 };
 
 static const struct reg_entry mav_mvax_table[] =
 {
-  {"mvax0", 0}, {"mvax1", 1}, {"mvax2", 2}, {"mvax3", 3},
-  {NULL, 0}
+  {"mvax0", 0, TRUE}, {"mvax1", 1, TRUE}, {"mvax2", 2, TRUE}, {"mvax3", 3, TRUE},
+  {NULL, 0, TRUE}
 };
 
 static const struct reg_entry mav_dspsc_table[] =
 {
-  {"dspsc", 0},
-  {NULL, 0}
+  {"dspsc", 0, TRUE},
+  {NULL, 0, TRUE}
 };
 
 struct reg_map
@@ -2324,6 +2326,7 @@ static struct hash_control * arm_psr_hsh   = NULL;
      Integer arg to pass to the function.  */
 
 static void s_req PARAMS ((int));
+static void s_unreq PARAMS ((int));
 static void s_align PARAMS ((int));
 static void s_bss PARAMS ((int));
 static void s_even PARAMS ((int));
@@ -2342,8 +2345,9 @@ static int my_get_expression PARAMS ((expressionS *, char **));
 
 const pseudo_typeS md_pseudo_table[] =
 {
-  /* Never called becasue '.req' does not start line.  */
+  /* Never called because '.req' does not start a line.  */
   { "req",         s_req,         0 },
+  { "unreq",       s_unreq,       0 },
   { "bss",         s_bss,         0 },
   { "align",       s_align,       0 },
   { "arm",         s_arm,         0 },
@@ -2372,8 +2376,10 @@ static int arm_parse_extension PARAMS ((char *, int *));
 static int arm_parse_cpu PARAMS ((char *));
 static int arm_parse_arch PARAMS ((char *));
 static int arm_parse_fpu PARAMS ((char *));
+#if 0 /* Suppressed - for now.  */
 #if defined OBJ_COFF || defined OBJ_ELF
 static void arm_add_note PARAMS ((const char *, const char *, unsigned int));
+#endif
 #endif
 
 /* Stuff needed to resolve the label ambiguity
@@ -2645,6 +2651,77 @@ s_req (a)
      int a ATTRIBUTE_UNUSED;
 {
   as_bad (_("invalid syntax for .req directive"));
+}
+
+/* The .unreq directive deletes an alias which was previously defined
+   by .req.  For example:
+
+       my_alias .req r11
+       .unreq my_alias    */
+
+static void
+s_unreq (int a ATTRIBUTE_UNUSED)
+{
+  char *name;
+  char saved_char;
+
+  skip_whitespace (input_line_pointer);
+  name = input_line_pointer;
+
+  while (*input_line_pointer != 0
+	 && *input_line_pointer != ' '
+	 && *input_line_pointer != '\n')
+    ++input_line_pointer;
+
+  saved_char = *input_line_pointer;
+  *input_line_pointer = 0;
+
+  if (*name)
+    {
+      enum arm_reg_type req_type = arm_reg_parse_any (name);
+
+      if (req_type != REG_TYPE_MAX)
+	{
+	  char *temp_name = name;
+	  int req_no = arm_reg_parse (&temp_name, all_reg_maps[req_type].htab);
+
+	  if (req_no != FAIL)
+	    {
+	      struct reg_entry *req_entry;
+
+	      /* Check to see if this alias is a builtin one.  */
+	      req_entry = hash_delete (all_reg_maps[req_type].htab, name);
+
+	      if (!req_entry)
+		as_bad (_("unreq: missing hash entry for \"%s\""), name);
+	      else if (req_entry->builtin)
+		/* FIXME: We are deleteing a built in register alias which
+		   points to a const data structure, so we only need to
+		   free up the memory used by the key in the hash table.
+		   Unfortunately we have not recorded this value, so this
+		   is a memory leak.  */
+		  /* FIXME: Should we issue a warning message ?  */
+		;
+	      else
+		{
+		  /* Deleteing a user defined alias.  We need to free the
+		     key and the value, but fortunately the key is the same
+		     as the value->name field.  */
+		  free ((char *) req_entry->name);
+		  free (req_entry);
+		}
+	    }
+          else
+            as_bad (_(".unreq: unrecognized symbol \"%s\""), name);
+	}
+      else
+        as_bad (_(".unreq: unrecognized symbol \"%s\""), name);
+    }
+  else
+    as_bad (_("invalid syntax for .unreq directive"));
+
+  *input_line_pointer = saved_char;
+  demand_empty_rest_of_line ();
 }
 
 static void
@@ -10021,20 +10098,29 @@ insert_reg_alias (str, regnum, htab)
      int regnum;
      struct hash_control *htab;
 {
-  struct reg_entry *new =
-    (struct reg_entry *) xmalloc (sizeof (struct reg_entry));
-  char *name = xmalloc (strlen (str) + 1);
-  strcpy (name, str);
-
+  const char *error;
+  struct reg_entry *new = xmalloc (sizeof (struct reg_entry));
+  const char *name = xmalloc (strlen (str) + 1);
+  
+  strcpy ((char *) name, str);
+  
   new->name = name;
   new->number = regnum;
+  new->builtin = FALSE;
 
-  hash_insert (htab, name, (PTR) new);
+  error = hash_insert (htab, name, (PTR) new);
+  if (error)
+    {
+      as_bad (_("failed to create an alias for %s, reason: %s"),
+	    str, error);
+      free ((char *) name);
+      free (new);
+    }
 }
 
 /* Look for the .req directive.  This is of the form:
 
-   	newname .req existing_name
+   	new_register_name .req existing_register_name
 
    If we find one, or if it looks sufficiently like one that we want to
    handle any error here, return non-zero.  Otherwise return zero.  */
@@ -10114,6 +10200,7 @@ create_register_alias (newname, p)
       *p = c;
       return 1;
     }
+  
   *p = c;
   return 0;
 }
@@ -10176,6 +10263,7 @@ build_arm_ops_hsh ()
     }
 }
 
+#if 0 /* Suppressed - for now.  */
 #if defined OBJ_ELF || defined OBJ_COFF
 
 #ifdef OBJ_ELF
@@ -10222,6 +10310,7 @@ arm_add_note (name, description, type)
   strncpy (p, description, ARM_NOTE_DESCRIPTION_LENGTH);
   frag_align (2, 0, 0);
 }
+#endif
 #endif
 
 void

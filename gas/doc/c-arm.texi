@@ -1,4 +1,4 @@
-@c Copyright 1996, 1997, 1998, 1999, 2000, 2001
+@c Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2003
 @c Free Software Foundation, Inc.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
@@ -302,6 +302,20 @@ example:
 @smallexample
         foo .req r0
 @end smallexample
+
+@cindex @code{unreq} directive, ARM
+@item .unreq @var{alias-name}
+This undefines a register alias which was previously defined using the
+@code{req} directive.  For example:
+
+@smallexample
+        foo .req r0
+        .unreq foo
+@end smallexample
+
+An error occurs if the name is undefined.  Note - this pseudo op can
+be used to delete builtin in register name aliases (eg 'r0').  This
+should only be done if it is really necessary.
 
 @cindex @code{code} directive, ARM
 @item .code @code{[16|32]}
