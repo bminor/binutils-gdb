@@ -27,7 +27,7 @@ if { [istarget powerpc64*-*-*] || [istarget *-*-elf64*]} then {
 if { [istarget powerpc*-*-*] } then {
    run_dump_test "simpshft"
 
-    if { [istarget powerpc-ibm-aix*] } then {
+    if { [istarget powerpc-*-*aix*] } then {
 	run_dump_test "altivec_xcoff"
 	run_dump_test "altivec_xcoff64"
 	run_dump_test "booke_xcoff"
@@ -35,9 +35,6 @@ if { [istarget powerpc*-*-*] } then {
     } else {
 	run_dump_test "altivec"
 	run_dump_test "booke"
+	run_dump_test "e500"
     }
-}
-
-if { [istarget powerpc*-*-*] } then {
-   run_dump_test "e500"
 }

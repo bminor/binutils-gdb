@@ -1,3 +1,8 @@
+2002-08-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/ppc/ppc.exp: Don't run e500 test on xcoff targets.
+	* gas/ppc/astest2.d: Escape dots.
+
 2002-08-20  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/mips/rol.s: Add rotate by zero tests.
