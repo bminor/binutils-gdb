@@ -96,60 +96,60 @@ print_register_list (dis_info, value, offset, load_store)
 
 static void
 print_hi_register_list_ld (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   print_register_list (dis_info, value, 8, 0/*load*/);
 }
 
 static void
 print_low_register_list_ld (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   print_register_list (dis_info, value, 0, 0/*load*/);
 }
 
 static void
 print_hi_register_list_st (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   print_register_list (dis_info, value, 8, 1/*store*/);
 }
 
 static void
 print_low_register_list_st (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   print_register_list (dis_info, value, 0, 1/*store*/);
 }
 
 static void
 print_m4 (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   disassemble_info *info = (disassemble_info *) dis_info;
   (*info->fprintf_func) (info->stream, "%ld", value);
@@ -178,7 +178,7 @@ fr30_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
      int opindex;
      PTR xinfo;
      CGEN_FIELDS *fields;
-     void const *attrs;
+     void const *attrs ATTRIBUTE_UNUSED;
      bfd_vma pc;
      int length;
 {
@@ -458,7 +458,7 @@ print_insn_normal (cd, dis_info, insn, fields, pc, length)
    Returns 0 if all is well, non-zero otherwise.  */
 static int
 read_insn (cd, pc, info, buf, buflen, ex_info, insn_value)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      bfd_vma pc;
      disassemble_info *info;
      char *buf;
@@ -547,9 +547,10 @@ print_insn (cd, pc, info, buf, buflen)
 	     machine insn and extracts the fields.  The second pass prints
 	     them.  */
 
-#if CGEN_INT_INSN_P
-	  /* Make sure the entire insn is loaded into insn_value.  */
-	  if (CGEN_INSN_BITSIZE (insn) > cd->base_insn_bitsize)
+	  /* Make sure the entire insn is loaded into insn_value, if it
+	     can fit.  */
+	  if ((unsigned) CGEN_INSN_BITSIZE (insn) > cd->base_insn_bitsize &&
+	      (unsigned) (CGEN_INSN_BITSIZE (insn) / 8) <= sizeof (unsigned long))
 	    {
 	      unsigned long full_insn_value;
 	      int rc = read_insn (cd, pc, info, buf,
@@ -561,10 +562,9 @@ print_insn (cd, pc, info, buf, buflen)
 		(cd, insn, &ex_info, full_insn_value, &fields, pc);
 	    }
 	  else
-#endif
+	    length = CGEN_EXTRACT_FN (cd, insn)
+	      (cd, insn, &ex_info, insn_value, &fields, pc);
 
-	  length = CGEN_EXTRACT_FN (cd, insn)
-	    (cd, insn, &ex_info, insn_value, &fields, pc);
 	  /* length < 0 -> error */
 	  if (length < 0)
 	    return length;
