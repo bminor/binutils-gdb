@@ -1,5 +1,10 @@
 2005-01-31  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/macros/repeat.[ds]: New.
+	* gas/macros/macros.exp: Run new test.
+
+2005-01-31  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/macros/badarg.[ls]: New.
 	* gas/macros/end.[ls]: New.
 	* gas/macros/redef.[ls]: New.

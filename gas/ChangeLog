@@ -1,5 +1,14 @@
 2005-01-31  Jan Beulich  <jbeulich@novell.com>
 
+	* macro.c (buffer_and_nest): Allow 'from' being NULL; handle anything
+	that can end with .endr in that case. Make requiring/permitting
+	pseudo-ops without leading dot closer to the logic in read.c serving
+	the same purpose.
+	(expand_irp): Don't pass a mnemonic to buffer_and_nest as it will be
+	ignored.
+
+2005-01-31  Jan Beulich  <jbeulich@novell.com>
+
 	* macro.c (do_formals): Adjust to no longer accept empty parameter
 	names.
 	(define_macro): Adjust to no longer accept empty macro name, garbage

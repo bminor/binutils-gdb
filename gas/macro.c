@@ -152,6 +152,7 @@ macro_mri_mode (int mri)
 /* Read input lines till we get to a TO string.
    Increase nesting depth if we get a FROM string.
    Put the results into sb at PTR.
+   FROM may be NULL (or will be ignored) if TO is "ENDR".
    Add a new input line to an sb using GET_LINE.
    Return 1 on success, 0 on unexpected EOF.  */
 
@@ -159,23 +160,31 @@ int
 buffer_and_nest (const char *from, const char *to, sb *ptr,
 		 int (*get_line) (sb *))
 {
-  int from_len = strlen (from);
+  int from_len;
   int to_len = strlen (to);
   int depth = 1;
   int line_start = ptr->len;
 
   int more = get_line (ptr);
 
+  if (to_len == 4 && strcasecmp(to, "ENDR") == 0)
+    {
+      from = NULL;
+      from_len = 0;
+    }
+  else
+    from_len = strlen (from);
+
   while (more)
     {
       /* Try and find the first pseudo op on the line.  */
       int i = line_start;
 
-      if (! macro_alternate && ! macro_mri)
+      if (! NO_PSEUDO_DOT && ! flag_m68k_mri)
 	{
 	  /* With normal syntax we can suck what we want till we get
 	     to the dot.  With the alternate, labels have to start in
-	     the first column, since we cant tell what's a label and
+	     the first column, since we can't tell what's a label and
 	     whats a pseudoop.  */
 
 	  /* Skip leading whitespace.  */
@@ -200,12 +209,22 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
 	i++;
 
       if (i < ptr->len && (ptr->ptr[i] == '.'
-			   || macro_alternate
+			   || NO_PSEUDO_DOT
 			   || macro_mri))
 	{
-	  if (ptr->ptr[i] == '.')
+	  if (! flag_m68k_mri && ptr->ptr[i] == '.')
 	    i++;
-	  if (strncasecmp (ptr->ptr + i, from, from_len) == 0
+	  if (from == NULL
+	     && strncasecmp (ptr->ptr + i, "IRPC", from_len = 4) != 0
+	     && strncasecmp (ptr->ptr + i, "IRP", from_len = 3) != 0
+	     && strncasecmp (ptr->ptr + i, "IREPC", from_len = 5) != 0
+	     && strncasecmp (ptr->ptr + i, "IREP", from_len = 4) != 0
+	     && strncasecmp (ptr->ptr + i, "REPT", from_len = 4) != 0
+	     && strncasecmp (ptr->ptr + i, "REP", from_len = 3) != 0)
+	    from_len = 0;
+	  if ((from != NULL
+	       ? strncasecmp (ptr->ptr + i, from, from_len) == 0
+	       : from_len > 0)
 	      && (ptr->len == (i + from_len)
 		  || ! ISALNUM (ptr->ptr[i + from_len])))
 	    depth++;
@@ -1122,21 +1141,15 @@ delete_macro (const char *name)
 const char *
 expand_irp (int irpc, int idx, sb *in, sb *out, int (*get_line) (sb *))
 {
-  const char *mn;
   sb sub;
   formal_entry f;
   struct hash_control *h;
   const char *err;
 
-  if (irpc)
-    mn = "IRPC";
-  else
-    mn = "IRP";
-
   idx = sb_skip_white (idx, in);
 
   sb_new (&sub);
-  if (! buffer_and_nest (mn, "ENDR", &sub, get_line))
+  if (! buffer_and_nest (NULL, "ENDR", &sub, get_line))
     return _("unexpected end of file in irp or irpc");
 
   sb_new (&f.name);

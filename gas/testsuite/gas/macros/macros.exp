@@ -26,6 +26,7 @@ run_dump_test test3
 if { ![istarget *c54x*-*-*] && ![istarget *c4x*-*-*] } {
     run_dump_test irp
     run_dump_test rept
+    run_dump_test repeat
 }
 
 
