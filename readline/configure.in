@@ -47,6 +47,7 @@ if test "x$cross_compiling" = "xyes"; then
 	    echo "loading cross-build cache file ${cross_cache}"
 	    . ${cross_cache}
 	fi
+	CFLAGS="$CFLAGS -I${srcdir}/../libtermcap"
 	unset cross_cache
 	;;
     *)  echo "configure: cross-compiling for a non-cygwin target is not supported" >&2
