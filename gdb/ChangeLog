@@ -1,3 +1,8 @@
+2003-09-19  Jim Blandy  <jimb@redhat.com>
+
+	* macrotab.c (macro_include): Use the correct comparison to find
+	the appropriate place for this inclusion in the list.
+
 2003-09-19  Andrew Cagney  <cagney@redhat.com>
 
 	* config/pa/nm-hppah.h (NEED_TEXT_START_END): Delete.
