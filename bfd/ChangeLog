@@ -1,3 +1,87 @@
+Mon Jul  4 19:13:32 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.h (R_HPPA_COMPLEX): Define.
+	* elf32-hppa.h (R_HPPA_COMPLEX): Define.
+	(elf32_hppa_reloc_type): Delete R_PARISC_STUB_CALL_17.
+
+Fri Jul  1 12:07:41 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* Support code for enabling the new style linker for PA ELF.
+	* elfcode.h (swap_symbol_in, swap_symbol_out): Externalize.
+	(elf_compute_section_file_positions): Pass link_info to
+	the begin_write_processing hook.
+	(bfd_elf_write_object_contents): Pass NULL for new link_info
+	argument to final_write_processing hook.
+	(elf_link_output_sym): Accept new "input_section" argument for
+	the symbols's input section.  All callers changed.  Call the
+	link_output_symbol_hook if it's defined.
+	(elf_bfd_final_link): Call the final_write_processing hook if
+	it's defined.
+	* libelf.h (elf_backend_link_output_symbol_hook): Declare.
+	(elf_backend_begin_write_processing): Add new "info" argument.
+	(elf_backend_final_write_processing): Likewise.
+	* elf32-target.h (elf_backend_link_output_symbol_hook): Provide
+	a default definition.
+	(elf32_bed): Add elf_backend_link_output_symbol_hook.
+	* elf64-target.h: Likewise.
+	
+	* Major rework of the PA ELF code.  Uses the new style BFD
+	linker, major cleanups.
+	* hppa_stubs.h: Rewrite from scratch.  Much smaller and simpler.
+	* elf32-hppa.h: Delete all symbol extension related code.
+	(hppa_look_for_stubs_in_section): Delete decl.
+	(elf32_hppa_size_stubs, elf32_hppa_build_stubs): New decls.
+	* elf32-hppa.c: Symbol extension stuff moved form elf32-hppa.h
+	into elf32-hppa.c.  Do not include aout64.h.
+	(typdef hppa_stub_type): Delete.
+	(elf32_hppa_stub_name_list_struct): Delete.
+	(elf32_hppa_stub_description_struct): Delete.
+	(arg_reloc_type): Use simpler enumerations.  All references changed.
+	(arg_location, arg_reloc_relocation): Likewise.
+	(elf32_hppa_symextn_map_struct): Delete.
+	(get_symbol_value): Delete.
+	(elf32_hppa_get_sym_extn): Delete.
+	(find_stubs, new_stubs, type_of_mismatch): Delete.
+	(find_stub_by_name, add_stub_by_name): Delete.
+	(hppa_elf_stub_finish, hppa_elf_stub_reloc): Delete.
+	(hppa_elf_arg_reloc_needed): Renamed.  Simplify.
+	(hppa_elf_build_linker_stub, hppa_elf_create_stub_sec): Delete.
+	(hppa_elf_long_branch_needed_p): Delete.
+	(hppa_look_for_stubs_in_section): Delete.
+	(hppa_elf_get_section_contents): Delete.
+	(elf32_hppa_backend_symbol_processing): Delete.
+	(elf32_hppa_backend_section_processing): Delete.
+	(elf32_hppa_backend_section_from_shdr): Delete.
+	(elf32_hppa_backend_fake_sections): Delete.
+	(elf32_hppa_backend_section_from_bfd_section): Delete.
+	(NEW_INSTRUCTION): Delete.
+	(CURRENT_STUB_OFFSET): Delete.
+	(elf32_hppa_relocate_section): New function.
+	(elf32_hppa_bfd_final_link_relocate): New function.
+	(elf32_hppa_size_symext): New function.
+	(elf32_hppa_link_output_symbol_hook): New function.
+	(elf32_hppa_read_symext_info): New function.
+	(elf32_hppa_add_symbol_hook): New function.
+	(elf32_hppa_name_of_stub): New function.
+	(elf32_hppa_size_of_stub): New function.
+	(elf32_hppa_build_one_sub): New function.
+	(elf32_hppa_build_stubs): New function.
+	(elf32_hppa_size_stubs): New function.
+	(linker, stub and argument hash tables): Add appropriate
+	structures, definitions and functions to implement all three
+	hash tables.
+	(hppa_elf_relocate_insn): Don't need argument location information
+	in this function.
+	(add_entry_to_symext_chain): Accept a symbol's argument location
+	information rather than the symbol itself.  All callers changed.
+	(hppa_elf_gen_reloc_type): Simplify.
+	(hppa_elf_set_section_contents): Stub section is no longer special.
+	(hppa_elf_reloc): Greatly simplify.
+	(elf32_hppa_begin_write_processing): Accept link_info argument.
+	Handle being called from the BFD backend linker.
+	(elf32_hppa_final_write_processing): Likewise.
+	(elf_hppa_tc_make_sections): No longer call stub_finish.
+	
 Mon Jun 27 18:07:06 1994  Steve Chamberlain  (sac@cirdan.cygnus.com)
 
 	* section.c (bfd_get_section_contents): Put in parens to get

@@ -199,9 +199,11 @@ struct som_section_data_struct
 #define R_HPPA_NONE			R_NO_RELOCATION
 #define	R_HPPA				R_CODE_ONE_SYMBOL
 #define	R_HPPA_PCREL_CALL		R_PCREL_CALL
+#define R_HPPA_ABS_CALL			R_ABS_CALL
 #define	R_HPPA_GOTOFF			R_DP_RELATIVE
 #define R_HPPA_ENTRY			R_ENTRY
 #define R_HPPA_EXIT			R_EXIT
+#define R_COMPLEX			R_COMP1
 
 /* Exported functions, mostly for use by GAS.  */
 boolean bfd_som_set_section_attributes PARAMS ((asection *, int, int,
