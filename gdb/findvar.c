@@ -544,9 +544,6 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 
     case LOC_THREAD_LOCAL_STATIC:
       {
-        /* We want to let the target / ABI-specific code construct
-           this value for us, so we need to dispose of the value
-           allocated for us above.  */
         if (target_get_thread_local_address_p ())
           addr = target_get_thread_local_address (inferior_ptid,
                                                   SYMBOL_OBJFILE (var),
