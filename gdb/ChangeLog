@@ -1,3 +1,16 @@
+2002-06-18  Keith Seitz  <keiths@redhat.com>
+
+	* breakpoint.c (condition_command): Post breakpoint_modify
+	when a condition is added to an existing breakpoint.
+	(commands_command): Likewise for commands.
+	(set_ignore_count): Likewise for ignore counts.
+	If no tty, do not simply return, still need to send event
+	notification.
+	(ignore_command): Only print a newline if the command came
+	from a tty.
+	Don't call breakpoints_changed, since this is now properly
+	handled by set_ignore_count.
+
 2002-06-18  Andrew Cagney  <cagney@redhat.com>
 
 	* MAINTAINERS: Note that cris-elf target can be compiled with
