@@ -3411,6 +3411,12 @@ process_unwind (file)
   unsigned long i, addr_size;
   struct unw_aux_info aux;
 
+  if (elf_header.e_machine != EM_IA_64)
+    {
+      printf (_("\nThere are no unwind sections in this file.\n"));
+      return 1;
+    }
+
   memset (& aux, 0, sizeof (aux));
 
   addr_size = is_32bit_elf ? 4 : 8;

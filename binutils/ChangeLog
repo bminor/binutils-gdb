@@ -1,3 +1,8 @@
+2001-03-29  H.J. Lu  <hjl@gnu.org>
+
+	* readelf.c (process_unwind): Only do unwind sections for
+	IA64.
+
 2001-03-28  H.J. Lu  <hjl@gnu.org>
 
 	* Makefile.am ($(srcdir)/dlltool.1): Remove the extra target.
