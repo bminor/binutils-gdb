@@ -1,3 +1,7 @@
+Fri Nov 20 13:06:49 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* ldmisc.c (vfinfo): Cope with empty symbol names.
+
 Thu Nov 19 13:31:15 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* scripttempl/pe.sc: Add provision of '_end' symbol.
