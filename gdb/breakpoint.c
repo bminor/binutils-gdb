@@ -2559,8 +2559,9 @@ which its expression is valid.\n");
 }
 
 /* Get a bpstat associated with having just stopped at address
-   BP_ADDR in thread PTID.  STOPPED_BY_WATCHPOINT is true if the
-   target thinks we stopped due to a hardware watchpoint.  */
+   BP_ADDR in thread PTID.  STOPPED_BY_WATCHPOINT is 1 if the
+   target thinks we stopped due to a hardware watchpoint, 0 if we
+   know we did not trigger a hardware watchpoint, and -1 if we do not know.  */
 
 /* Determine whether we stopped at a breakpoint, etc, or whether we
    don't understand this stop.  Result is a chain of bpstat's such that:
@@ -2593,15 +2594,10 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
     if (!breakpoint_enabled (b) && b->enable_state != bp_permanent)
       continue;
 
-    /* Hardware watchpoints are treated as non-existent if the reason we 
-       stopped wasn't a hardware watchpoint (we didn't stop on some data 
-       address).  Otherwise gdb won't stop on a break instruction in the code
-       (not from a breakpoint) when a hardware watchpoint has been defined.  */
     if (b->type != bp_watchpoint
-	&& !((b->type == bp_hardware_watchpoint
-	      || b->type == bp_read_watchpoint
-	      || b->type == bp_access_watchpoint)
-	     && stopped_by_watchpoint)
+	&& b->type != bp_hardware_watchpoint
+	&& b->type != bp_read_watchpoint
+	&& b->type != bp_access_watchpoint
 	&& b->type != bp_hardware_breakpoint
 	&& b->type != bp_catch_fork
 	&& b->type != bp_catch_vfork
@@ -2616,6 +2612,18 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
 	    && !section_is_mapped (b->loc->section))
 	  continue;
       }
+
+    /* Continuable hardware watchpoints are treated as non-existent if the 
+       reason we stopped wasn't a hardware watchpoint (we didn't stop on 
+       some data address).  Otherwise gdb won't stop on a break instruction 
+       in the code (not from a breakpoint) when a hardware watchpoint has 
+       been defined.  */
+
+    if ((b->type == bp_hardware_watchpoint
+	 || b->type == bp_read_watchpoint
+	 || b->type == bp_access_watchpoint)
+	&& !stopped_by_watchpoint)
+      continue;
 
     if (b->type == bp_hardware_breakpoint)
       {

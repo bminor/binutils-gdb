@@ -1252,7 +1252,7 @@ handle_inferior_event (struct execution_control_state *ecs)
      defined in the file "config/pa/nm-hppah.h", accesses the variable
      indirectly.  Mutter something rude about the HP merge.  */
   int sw_single_step_trap_p = 0;
-  int stopped_by_watchpoint = 0;
+  int stopped_by_watchpoint = -1;  /* Mark as unknown.  */
 
   /* Cache the last pid/waitstatus. */
   target_last_wait_ptid = ecs->ptid;

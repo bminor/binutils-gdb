@@ -1,3 +1,11 @@
+2004-06-22  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* infrun.c (handle_inferior_event): Initialize stopped_by_watchpoint
+	to -1.
+	* breakpoint.c (bpstat_stop_status): Move check for ignoring
+	untriggered watchpoints to a separate if clause.  Update function
+	comment regarding STOPPED_BY_WATCHPOINT argument.
+
 2004-06-22  Jim Blandy  <jimb@redhat.com>
 
 	* gdbarch.sh: Doc fix.
@@ -148,6 +156,7 @@
 	* cli/cli-cmds.c (disassemble_command): Update.
 	* vax-tdep.c (vax_gdbarch_init): Update.
 
+>>>>>>> 1.6028
 2004-06-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_collect_fpregset): Fix comment.
