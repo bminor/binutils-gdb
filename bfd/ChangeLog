@@ -1,3 +1,9 @@
+2003-04-23  Alan Modra  <amodra@bigpond.net.au>
+
+	From Julien LEMOINE <speedblue@debian.org>
+	* elf32-i386.c (elf_i386_info_to_howto): Delete.
+	(elf_info_to_howto): Define as elf_i386_info_to_howto_rel.
+
 2003-04-22  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	* archures.c: Replace references to Mitsubishi M32R with references
@@ -47,7 +53,7 @@
 	(elf32_m68hc11_setup_section_lists): Declare.
 	(elf32_m68hc11_size_stubs): Declare.
 	(elf32_m68hc11_build_stubs): Declare.
-	
+
 	* elf32-m68hc11.c (m68hc11_elf_ignore_reloc): Move to elf32-m68hc1x.c.
 	(elf32_m68hc11_gc_mark_hook, elf32_m68hc11_gc_sweep_hook): Likewise.
 	(elf32_m68hc11_check_relocs, elf32_m68hc11_relocate_section): Ditto.
@@ -229,33 +235,33 @@
 
 2003-04-01  Bob Wilson  <bob.wilson@acm.org>
 
-        * Makefile.am (ALL_MACHINES): Add cpu-xtensa.lo.
-        (ALL_MACHINES_CFILES): Add cpu-xtensa.c.
-        (BFD32_BACKENDS): Add elf32-xtensa.lo, xtensa-isa.lo, and
-        xtensa-modules.lo.
-        (BFD32_BACKENDS_CFILES): Add elf32-xtensa.c, xtensa-isa.c, and
-        xtensa-modules.c.
-        (cpu-xtensa.lo): New target.
-        (elf32-xtensa.lo): Likewise.
-        (xtensa-isa.lo): Likewise.
-        (xtensa-modules.lo): Likewise.
-        * Makefile.in: Regenerate.
-        * archures.c (bfd_architecture): Add bfd_{arch,mach}_xtensa.
-        (bfd_archures_list): Add bfd_xtensa_arch.
-        * config.bfd: Handle xtensa-*-*.
-        * configure.in: Handle bfd_elf32_xtensa_{le,be}_vec.
-        * configure: Regenerate.
-        * reloc.c: Add BFD_RELOC_XTENSA_{RTLD,GLOB_DAT,JMP_SLOT,RELATIVE,
-        PLT,OP0,OP1,OP2,ASM_EXPAND,ASM_SIMPLIFY}.
-        * targets.c (bfd_elf32_xtensa_be_vec): Declare.
-        (bfd_elf32_xtensa_le_vec): Likewise.
-        (bfd_target_vector): Add bfd_elf32_xtensa_{be,le}_vec.
-        * cpu-xtensa.c: New file.
-        * elf32-xtensa.c: Likewise.
-        * xtensa-isa.c: Likewise.
-        * xtensa-modules.c: Likewise.
-        * libbfd.h: Regenerate.
-        * bfd-in2.h: Likewise.
+	* Makefile.am (ALL_MACHINES): Add cpu-xtensa.lo.
+	(ALL_MACHINES_CFILES): Add cpu-xtensa.c.
+	(BFD32_BACKENDS): Add elf32-xtensa.lo, xtensa-isa.lo, and
+	xtensa-modules.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-xtensa.c, xtensa-isa.c, and
+	xtensa-modules.c.
+	(cpu-xtensa.lo): New target.
+	(elf32-xtensa.lo): Likewise.
+	(xtensa-isa.lo): Likewise.
+	(xtensa-modules.lo): Likewise.
+	* Makefile.in: Regenerate.
+	* archures.c (bfd_architecture): Add bfd_{arch,mach}_xtensa.
+	(bfd_archures_list): Add bfd_xtensa_arch.
+	* config.bfd: Handle xtensa-*-*.
+	* configure.in: Handle bfd_elf32_xtensa_{le,be}_vec.
+	* configure: Regenerate.
+	* reloc.c: Add BFD_RELOC_XTENSA_{RTLD,GLOB_DAT,JMP_SLOT,RELATIVE,
+	PLT,OP0,OP1,OP2,ASM_EXPAND,ASM_SIMPLIFY}.
+	* targets.c (bfd_elf32_xtensa_be_vec): Declare.
+	(bfd_elf32_xtensa_le_vec): Likewise.
+	(bfd_target_vector): Add bfd_elf32_xtensa_{be,le}_vec.
+	* cpu-xtensa.c: New file.
+	* elf32-xtensa.c: Likewise.
+	* xtensa-isa.c: Likewise.
+	* xtensa-modules.c: Likewise.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Likewise.
 
 2003-04-01  Nick Clifton  <nickc@redhat.com>
 
@@ -280,7 +286,7 @@
 	bfd_arm_get_mach_from_notes.
 	(elf32_arm_merge_private_bfd_data): Use bfd_arm_merge_machines.
 	(elf32_arm_final_write_processing): Use bfd_arm_update_notes.
-	
+
 2003-04-01  Ben Elliston  <bje@wasabisystems.com>
 
 	* dwarf2.c (read_attribute_value): Correct typo in comment.
@@ -332,7 +338,7 @@
 	* linker.c (bfd_generic_final_link): Likewise.
 	* opncls.c (find_separate_debug_info): Likewise.
 	* simple.c (bfd_simple_get_relocated_section_contents): Likewise.
-	
+
 2003-03-28  H.J. Lu <hjl@gnu.org>
 
 	* elflink.h (elf_link_add_object_symbols): Correctly combine
@@ -359,7 +365,7 @@
 
 2003-03-25  Stan Cox   <scox@redhat.com>
 	    Nick Clifton  <nickc@redhat.com>
-	    
+
 	Contribute support for Intel's iWMMXt chip - an	ARM variant:
 
 	* archures.c: Add bfd_mach_arm_iWMMXt.
@@ -414,8 +420,8 @@
 
 2003-03-18  Richard Henderson  <rth@redhat.com>
 
-        * elfxx-ia64.c (get_dyn_sym_info): Return NULL gracefully for
-        local symbols that have no dyninfo.
+	* elfxx-ia64.c (get_dyn_sym_info): Return NULL gracefully for
+	local symbols that have no dyninfo.
 
 2003-03-14  Gene Smith  <gene.smith@siemens.com>
 
@@ -591,7 +597,7 @@
 	(elfNN_ia64_relax_section): Handle LTOFF22X, LDXMOV.
 	(elfNN_ia64_choose_gp): Split out from ...
 	(elfNN_ia64_final_link): ... here.
-	
+
 2003-02-27  Andrew Cagney  <cagney@redhat.com>
 
 	* bfd.c (struct bfd): Rename "struct _bfd".
