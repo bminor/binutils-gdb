@@ -1777,10 +1777,8 @@ mips_frame_saved_pc (struct frame_info *frame)
 
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), 0, 0))
     {
-      LONGEST tmp;
       /* Always unwind the cooked PC register value.  */
-      frame_unwind_signed_register (frame, NUM_REGS + PC_REGNUM, &tmp);
-      saved_pc = tmp;
+      saved_pc = frame_unwind_register_signed (frame, NUM_REGS + PC_REGNUM);
     }
   else
     {

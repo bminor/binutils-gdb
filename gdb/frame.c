@@ -664,15 +664,6 @@ get_frame_register_unsigned (struct frame_info *frame, int regnum)
 }
 
 void
-frame_unwind_signed_register (struct frame_info *frame, int regnum,
-			      LONGEST *val)
-{
-  char buf[MAX_REGISTER_SIZE];
-  frame_unwind_register (frame, regnum, buf);
-  (*val) = extract_signed_integer (buf, DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum));
-}
-
-void
 frame_unwind_unsigned_register (struct frame_info *frame, int regnum,
 				ULONGEST *val)
 {

@@ -1,5 +1,9 @@
 2003-11-23  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (frame_unwind_signed_register): Delete function.
+	* frame.h (frame_unwind_register_signed): Delete declaration.
+	* mips-tdep.c (mips_frame_saved_pc): Use frame_unwind_register_signed.
+
 	* arch-utils.h (generic_cannot_extract_struct_value_address):
 	Delete declaration.
 

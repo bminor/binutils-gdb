@@ -408,10 +408,6 @@ extern ULONGEST get_frame_register_unsigned (struct frame_info *frame,
 
 
 /* Use frame_unwind_register_signed.  */
-extern void frame_unwind_signed_register (struct frame_info *frame,
-					  int regnum, LONGEST *val);
-
-/* Use frame_unwind_register_signed.  */
 extern void frame_unwind_unsigned_register (struct frame_info *frame,
 					    int regnum, ULONGEST *val);
 
@@ -572,9 +568,7 @@ extern void show_frame_info (struct frame_info *, int, int, int);
 
 extern struct frame_info *block_innermost_frame (struct block *);
 
-/* NOTE: cagney/2002-09-13: There is no need for this function.
-   Instead either of frame_unwind_signed_register() or
-   frame_unwind_unsigned_register() can be used.  */
+/* NOTE: cagney/2002-09-13: There is no need for this function.   */
 extern CORE_ADDR deprecated_read_register_dummy (CORE_ADDR pc,
 						 CORE_ADDR fp, int);
 extern void generic_push_dummy_frame (void);
