@@ -9,8 +9,7 @@
 	(FNER_FOR_FR): New maccro.
 	(update_SPR_latency): New function.
 	(vliw_wait_for_SPR): New function.
-	* profile.c (profile-fr550.h): #include it.
-	(update_latencies): Update SPR latencies.
+	* profile.c (update_latencies): Update SPR latencies.
 	(update_target_latencies): Ditto.
 	(update_SPR_latency): New function.
 	(vliw_wait_for_SPR): New function.
