@@ -876,7 +876,7 @@ init.c: $(INIT_FILES)
 	    -e 's|\([^  ][^     ]*\)|$(srcdir)/\1|g' | \
 	while read f; do grep '^_initialize_[a-z_0-9A-Z]* *(' $$f 2>/dev/null; done | \
 	sed -e 's/^.*://' -e 's/^\([a-z_0-9A-Z]*\).*/\1/' | \
-	( echo _initialize_gdbtypes ; grep -v -e '^_initialize_gdbtypes$$' ) > init.l-tmp
+	( echo _initialize_gdbtypes ; grep -v '^_initialize_gdbtypes$$' ) > init.l-tmp
 	@echo '/* Do not modify this file.  */' >>init.c-tmp
 	@echo '/* It is created automatically by the Makefile.  */'>>init.c-tmp
 	@echo '#include "defs.h"' >>init.c-tmp
