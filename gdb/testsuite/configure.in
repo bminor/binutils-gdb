@@ -8,7 +8,7 @@ srcname="DejaGnu"
 
 subdirs="gdb.t00 gdb.t01 gdb.t02 gdb.t03 gdb.t04 gdb.t05 gdb.t06 \
 	gdb.t07 gdb.t08 gdb.t09 gdb.t10 gdb.t11 gdb.t12 gdb.t13 gdb.t15 \
-	gdb.t16 gdb.t17 gdb.t20 gdb.t21 gdb.t22 gdb.t23 gdb.t30 gdb.t31"
+	gdb.t16 gdb.t20 gdb.t21 gdb.t22 gdb.t23 gdb.t30 gdb.t31"
 
 # per-host:
 
@@ -47,22 +47,22 @@ mips-idt-ecoff)		target_abbrev=mips ;
 esac
 
 	# link in the lib directory if needed
-if [ ! -d lib ] ; then
-    files="lib"
-    links="lib"
-fi
+#if [ ! -d lib ] ; then
+#    files="lib"
+#    links="lib"
+#fi
 
 	# make list of files and links based on tool name
 tool_list="${tool_list} gdb"
-for i in ${tool_list};
-do
-    if [ -f ${srcdir}/config/${target_abbrev}-$i.exp ] ; then
-    files="$files config/${target_abbrev}-$i.exp"
-    links="$links $i-init.exp"
-    fi
-done
+#for i in ${tool_list};
+#do
+#    if [ -f ${srcdir}/config/${target_abbrev}-$i.exp ] ; then
+#    files="$files config/${target_abbrev}-$i.exp"
+#    links="$links $i-init.exp"
+#    fi
+#done
 
 # post-target:
 
 	# make local configuration file, using MAKE if one is specified.
-if [ ! -n "$MAKE" ]; then MAKE=make; fi
+#if [ ! -n "$MAKE" ]; then MAKE=make; fi
