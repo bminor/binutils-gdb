@@ -2,7 +2,7 @@
 # It does some substitutions.
 cat >e${EMULATION_NAME}.c <<EOF
 /* intel coff loader emulation specific stuff
-   Copyright 1991, 1992, 1994, 1995, 1996, 1999, 2000, 2001
+   Copyright 1991, 1992, 1994, 1995, 1996, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
@@ -56,7 +56,7 @@ static void lnk960_after_parse PARAMS ((void));
 static void lnk960_before_allocation PARAMS ((void));
 static void lnk960_after_allocation PARAMS ((void));
 static void lnk960_set_output_arch PARAMS ((void));
-static char *lnk960_choose_target PARAMS ((void));
+static char *lnk960_choose_target PARAMS ((int, char **));
 static char *lnk960_get_script PARAMS ((int *));
 
 
@@ -246,7 +246,9 @@ lnk960_set_output_arch()
 }
 
 static char *
-lnk960_choose_target()
+lnk960_choose_target (argc, argv)
+    int argc ATTRIBUTE_UNUSED;
+    char **argv ATTRIBUTE_UNUSED;
 {
 #ifdef GNU960
 
