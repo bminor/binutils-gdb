@@ -1061,12 +1061,21 @@ _bfd_xcoff_bfd_link_add_symbols (abfd, info)
     {
     case bfd_object:
       return xcoff_link_add_object_symbols (abfd, info);
+
     case bfd_archive:
-      /* We need to look through the archive for stripped dynamic
-         objects, because they will not appear in the archive map even
-         though they should, perhaps, be included.  Also, if the
-         linker has no map, we just consider each object file in turn,
-         since that apparently is what the AIX native linker does.  */
+      /* If the archive has a map, do the usual search.  We then need
+         to check the archive for stripped dynamic objects, because
+         they will not appear in the archive map even though they
+         should, perhaps, be included.  If the archive has no map, we
+         just consider each object file in turn, since that apparently
+         is what the AIX native linker does.  */
+      if (bfd_has_map (abfd))
+	{
+	  if (! (_bfd_generic_link_add_archive_symbols
+		 (abfd, info, xcoff_link_check_archive_element)))
+	    return false;
+	}
+
       {
 	bfd *member;
 
@@ -1087,14 +1096,9 @@ _bfd_xcoff_bfd_link_add_symbols (abfd, info)
 	      }
 	    member = bfd_openr_next_archived_file (abfd, member);
 	  }
-
-	if (! bfd_has_map (abfd))
-	  return true;
-
-	/* Now do the usual search.  */
-	return (_bfd_generic_link_add_archive_symbols
-		(abfd, info, xcoff_link_check_archive_element));
       }
+
+      return true;
 
     default:
       bfd_set_error (bfd_error_wrong_format);

@@ -1,3 +1,8 @@
+Tue Jul 30 13:31:27 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* xcofflink.c (_bfd_xcoff_bfd_link_add_symbols): Do the regular
+	archive search before looking for stripped dynamic objects.
+
 Fri Jul 26 17:51:39 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c (xcoff_build_ldsyms): Make exporting an undefined
