@@ -213,9 +213,20 @@ fr30_push_arguments PARAMS ((int nargs, struct value **args, CORE_ADDR sp,
 
 #define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP)
 
-/* always pass struct by value as a pointer */
-/* XXX Z.R. GCC does not do that today */
+/* Fujitsu's ABI requires all structs to be passed using a pointer.
+   That is obviously not very efficient, so I am leaving the definitions
+   to make gdb work with GCC style struct passing, in case we decide
+   to go for better performance, rather than for compatibility with
+   Fujitsu (just change STRUCT_ALWAYS_BY_ADDR to 0) */
+
+#define STRUCT_ALWAYS_BY_ADDR	1
+
+#if(STRUCT_ALWAYS_BY_ADDR)
+#define REG_STRUCT_HAS_ADDR(gcc_p,type)		1
+#else
+/* more standard GCC (optimized) */
 #define REG_STRUCT_HAS_ADDR(gcc_p,type)		\
 		((TYPE_LENGTH(type) > 4) && (TYPE_LENGTH(type) & 0x3))
+#endif
 /* alway return struct by value by input pointer */
 #define USE_STRUCT_CONVENTION(GCC_P, TYPE)	1

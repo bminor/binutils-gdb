@@ -1,3 +1,9 @@
+
+Fri Jan 15 17:11:48 EST 1999  Zdenek Radouch   (radouch@cygnus.com)
+
+	* config/fr30/tm-fr30.h:  Changed ABI to match GCC change
+	  (always use pointer for structs passed by value).
+
 1999-01-15  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	* target.h: added entry for target queries (to_query)
