@@ -586,6 +586,8 @@ Warn when a common symbol is combined with another common symbol or with
 a symbol definition.  Unix linkers allow this somewhat sloppy practice,
 but linkers on some other operating systems do not.  This option allows
 you to find potential problems from combining global symbols.
+Unfortunately, some C libraries use this practice, so you may get some
+warnings about symbols in the libraries as well as in your programs.
 
 There are three kinds of global symbols, illustrated here by C examples:
 
