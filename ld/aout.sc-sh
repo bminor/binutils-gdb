@@ -20,6 +20,7 @@ SECTIONS
   }
   .bss ${RELOCATING+SIZEOF(.data) + ADDR(.data)} :
   {
+    ${RELOCATING+ __bss_start = .};
    *(.bss)
    *(COMMON)
    ${RELOCATING+_end = . };

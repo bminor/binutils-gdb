@@ -29,6 +29,7 @@ SECTIONS
   } ${RELOCATING+ > data}
   .bss   SIZEOF(.data) + ADDR(.data) :
   { 					
+    ${RELOCATING+ __bss_start = .};
    *(.bss)
    *(COMMON)
      ${RELOCATING+ _end = ALIGN(0x8)};

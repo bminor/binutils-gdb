@@ -1,3 +1,8 @@
+Mon Oct  5 14:07:37 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* aout.sc-sh, m68kcoff.sc-sh: set __bss_start to the start of the
+	.bss segment.
+
 Mon Oct  5 08:55:14 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* ldmain.c (linear_library): don't even think about processing 
