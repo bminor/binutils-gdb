@@ -1,3 +1,13 @@
+Tue Jun 23 11:45:01 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* gdb.base/funcargs.exp: simplify expect strings to ease pattern
+	match processing (and eliminate spurious timeouts when running).
+
+Fri Jun 12 17:28:22 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* gdb.base/signals.exp (test_handle_all_print): put back Mach
+	exception test, but conditionalize it on target [mach | gnu].
+
 Wed Jun 10 10:40:03 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* gdb.base/overlays.exp: fixup compile line for linker script.
