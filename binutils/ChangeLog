@@ -10,6 +10,8 @@
 	(parse_args): Add parsing of -n/--notes command line switch.
 	(usage): Document new command line switch.
 
+	* binutils.texi: Documemnt new command line switch to readelf.
+
 1999-08-31  Ian Lance Taylor  <ian@zembu.com>
 
 	* binutils.texi (Bug Reporting): Clarify that large files should
