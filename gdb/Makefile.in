@@ -1163,7 +1163,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	mips-tdep.c mipsm3-nat.c mipsv4-nat.c news-xdep.c \
 	nindy-share/Onindy.c nindy-share/nindy.c \
 	nindy-share/ttyflush.c nindy-tdep.c \
-	ns32k-tdep.c osfsolib.c \
+	ns32k-tdep.c solib-osf.c \
 	somread.c somsolib.c $(HPREAD_SOURCE) \
 	ppc-linux-nat.c ppc-linux-tdep.c \
 	procfs.c \
@@ -1730,8 +1730,8 @@ ns32k-tdep.o: ns32k-tdep.c $(bfd_h) $(dis-asm_h) $(defs_h)
 objfiles.o: objfiles.c $(bfd_h) $(defs_h) objfiles.h symfile.h \
 	$(symtab_h) $(gdb_string_h) $(breakpoint_h)
 
-osfsolib.o: osfsolib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
-	objfiles.h gnu-regex.h symfile.h target.h language.h $(gdb_string_h)
+solib-osf.o: solib-osf.c $(defs_h) $(inferior_h) $(symtab_h) objfiles.h \
+	$(symfile_h) $(target_h) $(gdb_string_h) solist.h
 
 somread.o: somread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	gdb-stabs.h objfiles.h symfile.h $(symtab_h) $(gdb_string_h)

@@ -1,3 +1,14 @@
+2001-05-25  Nick Duffek  <nsd@redhat.com>
+
+	* Makefile.in (osfsolib.c, osfsolib.o): Rename to solib-osf.c and
+	solib-osf.o.
+	* config/alpha/alpha-osf1.mh (NATDEPFILES): Replace osfsolib.o
+	with solib-osf.o and solib.o.
+	* config/alpha/alpha-osf2.mh: Likewise.
+	* config/alpha/alpha-osf3.mh: Likewise.
+	* solib-osf.c: New file, renamed and largely rewritten from
+	osfsolib.c.
+
 2001-05-25  Michael Snyder  <msnyder@redhat.com>
 
 	* remote.c (remote_write_bytes): Update 'p' packet pointer.
