@@ -859,23 +859,14 @@ x86_64_skip_prologue (CORE_ADDR pc)
 
   read_memory (pc, (char *) prolog_buf, PROLOG_BUFSIZE);
 
-  /* First check, whether pc points to pushq %rbp. If not, 
-   * print a recommendation to enable frame pointer.  */
-  if (prolog_expect[0] != prolog_buf[0])
-    {
-      if (!omit_fp_note_printed)
-	{
-	  printf_filtered
-	    ("NOTE: This function doesn't seem to have a valid prologue.\n"
-	     "      Consider adding -fno-omit-frame-pointer to your gcc's CFLAGS.\n");
-	  omit_fp_note_printed++;
-	}
-      return pc;
-    }
-  /* Valid prolog continues with movq %rsp,%rbp.  */
-  for (i = 1; i < PROLOG_BUFSIZE; i++)
+  /* First check, whether pc points to pushq %rbp, movq %rsp,%rbp.  */
+  for (i = 0; i < PROLOG_BUFSIZE; i++)
     if (prolog_expect[i] != prolog_buf[i])
-      return pc + 1;		/* First instruction after pushq %rbp.  */
+      return pc;	/* ... no, it doesn't. Nothing to skip.  */
+
+  /* OK, we have found the prologue and want PC of the first 
+     non-prologue instruction.  */
+  pc += PROLOG_BUFSIZE;
 
   v_function = find_pc_function (pc);
   v_sal = find_pc_line (pc, 0);
