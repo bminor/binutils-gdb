@@ -5065,19 +5065,30 @@ For other files @samp{-} is used as the separator.
 
 @subsection Include Files
 
-All @file{.c} files should include @file{defs.h} first.
+A @file{.c} file should include @file{defs.h} first.
 
-All @file{.c} files should explicitly include the headers for any
-declarations they refer to.  They should not rely on files being
-included indirectly.
+A @file{.c} file should directly include the @code{.h} file of every
+declaration and/or definition it directly refers to.  It cannot rely on
+indirect inclusion.
 
-With the exception of the global definitions supplied by @file{defs.h},
-a header file should explicitly include the header declaring any
-@code{typedefs} et.al.@: it refers to.
+A @file{.h} file should directly include the @code{.h} file of every
+declaration and/or definition it directly refers to.  It cannot rely on
+indirect inclusion.  Exception: The file @file{defs.h} does not need to
+be directly included.
 
-@code{extern} declarations should never appear in @code{.c} files.
+An external declaration should only appear in one include file.
 
-All include files should be wrapped in:
+An external declaration should never appear in a @code{.c} file.
+Exception: a declaration for the @code{_initialize} function that
+pacifies @option{-Wmissing-declaration}.
+
+A @code{typedef} definition should only appear in one include file.
+
+An opaque @code{struct} declaration can appear in multiple @file{.h}
+files.  Where possible, a @file{.h} file should use an opaque
+@code{struct} declaration instead of an include.
+
+All @file{.h} files should be wrapped in:
 
 @smallexample
 #ifndef INCLUDE_FILE_NAME_H
