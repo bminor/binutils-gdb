@@ -3144,7 +3144,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	    return false;
 	}
 
-      if (info->flags_1)
+      if (info->new_dtags && info->flags_1)
 	{
 	  if (! info->shared)
 	    info->flags_1 &= ~ (DF_1_INITFIRST

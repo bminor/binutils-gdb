@@ -1,5 +1,10 @@
 2000-07-20  H.J. Lu  <hjl@gnu.org>
 
+	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Set DT_FLAGS_1
+	only if info->new_dtags is true.
+
+2000-07-20  H.J. Lu  <hjl@gnu.org>
+
 	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Set
 	DT_RUNPATH and DT_FLAGS only if info->new_dtags is true.
 
