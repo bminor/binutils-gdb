@@ -1,7 +1,13 @@
+Fri Jun  7 14:24:49 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* configure.in: Added copyright notice.
+	* move-if-change: Added copyright notice.
+
 Thu Jun  6 16:27:05 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (powerpcle-*-solaris*): Until we get shared
-	libraries working, don't build gdb, sim, make, tcl, or expect.
+	libraries working, don't build gdb, sim, make, tcl, tk, or
+	expect.
 
 Tue Jun  4 20:41:45 1996  Per Bothner  <bothner@deneb.cygnus.com>
 
