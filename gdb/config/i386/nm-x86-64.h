@@ -1,6 +1,5 @@
 /* Native support for Linux/x86-64.
-   Copyright 2001
-   Free Software Foundation, Inc.
+   Copyright 2001, 2002  Free Software Foundation, Inc.
    Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
@@ -85,12 +84,7 @@ extern int kernel_u_size (void);
 /* Override child_resume in `infptrace.c'.  */
 #define CHILD_RESUME
 
-// extern int lin_lwp_prepare_to_proceed (void);
 #undef PREPARE_TO_PROCEED
-// #define PREPARE_TO_PROCEED(select_it) lin_lwp_prepare_to_proceed ()
-
-extern void lin_lwp_attach_lwp (ptid_t pid, int verbose);
-#define ATTACH_LWP(pid, verbose) lin_lwp_attach_lwp ((pid), (verbose))
 
 #include <signal.h>
 

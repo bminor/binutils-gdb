@@ -558,6 +558,29 @@ static long debug_control_mirror;
 /* Record which address associates with which register.  */
 static CORE_ADDR address_lookup[DR_LASTADDR - DR_FIRSTADDR + 1];
 
+/* Return the address of register REGNUM.  BLOCKEND is the value of
+   u.u_ar0, which should point to the registers.  */
+CORE_ADDR
+x86_64_register_u_addr (CORE_ADDR blockend, int regnum)
+{
+  struct user u;
+  CORE_ADDR fpstate;
+  CORE_ADDR ubase;
+  ubase = blockend;
+  if (IS_FP_REGNUM(regnum))
+    {
+      fpstate = ubase + ((char *) &u.i387.st_space - (char *) &u);
+      return (fpstate + 16 * (regnum - FP0_REGNUM));
+    }
+  else if (IS_SSE_REGNUM(regnum))
+    {
+      fpstate = ubase + ((char *) &u.i387.xmm_space - (char *) &u);
+      return (fpstate + 16 * (regnum - XMM0_REGNUM));
+    }
+  else
+    return (ubase + 8 * x86_64_regmap[regnum]);
+}
+
 void
 _initialize_x86_64_linux_nat (void)
 {

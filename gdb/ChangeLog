@@ -3,6 +3,12 @@
 	* configure.host, configure.tgt: Support x86-64.
 	* NEWS: Note new target x86-64.
 
+	* config/i386/x86-64linux.mh (NATDEPFILES): x86-64-nat.o removed.
+	* x86-64-linux-nat.c (x86_64_register_u_addr): New function.
+	* config/i386/nm-x86-64.h (ATTACH_LWP): Removed.
+	* Makefile.in (x86-64-tdep.o, x86-64-linux-tdep.o,
+	x86-64-linux-nat.o): Fix dependencies.
+
 2002-01-19  Andrew Cagney  <ac131313@redhat.com>
 
 	* utils.c: Remove #ifndef MALLOC_INCOMPATIBLE.
