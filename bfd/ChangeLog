@@ -1,3 +1,8 @@
+Mon Oct  5 10:06:22 1998  Catherine Moore  <clm@cygnus.com>
+
+        * elflink.h (elf_gc_sections):  Do not allow garbage
+        collection if dynamic sections have been created.
+
 Mon Oct  5 09:07:37 1998  Catherine Moore  <clm@cygnus.com>
 
         * elf32-v850.c: Add HOWTO entries for R_V850_GNU_VTINHERIT and
