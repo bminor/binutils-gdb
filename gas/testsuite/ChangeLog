@@ -1,3 +1,7 @@
+2002-02-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/elf/elf.exp: Don't special case v850.
+
 2002-02-01  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* gas/mmix/basep-1b.d, gas/mmix/basep-2b.d, gas/mmix/basep-7.d,

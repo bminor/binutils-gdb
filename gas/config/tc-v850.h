@@ -92,6 +92,6 @@ extern const struct relax_type md_relax_table[];
   { ".call_table_text",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_EXECINSTR },
 
 #define MD_PCREL_FROM_SECTION(fixP,section) v850_pcrel_from_section (fixP, section)
-extern long v850_pcrel_from_section ();
+extern long v850_pcrel_from_section PARAMS ((struct fix *, asection *));
 
 #define DWARF2_LINE_MIN_INSN_LENGTH 2

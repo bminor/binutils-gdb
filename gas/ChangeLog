@@ -1,3 +1,29 @@
+2002-02-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-v850.c: Add missing prototypes amd use old-style
+	function definitions.
+	(AREA_ZDA, AREA_SDA, AREA_TDA): Delete.
+	(sdata_section tdata_section, zdata_section, sbss_section,
+	tbss_section, zbss_section, rosdata_section, rozdata_section,
+	scommon_section, tcommon_section, zcommon_section,
+	call_table_data_section, call_table_text_section): Delete.
+	(v850_sdata, v850_tdata, v850_zdata, v850_sbss, v850_tbss,
+	v850_zbss, v850_bss, v850_rosdata, v850_rozdata,
+	v850_call_table_data, v850_call_table_text): Delete.
+	(struct v850_seg_entry): New.
+	(v850_seg_table): New.
+	(SDATA_SECTION TDATA_SECTION, ZDATA_SECTION, SBSS_SECTION,
+	TBSS_SECTION, ZBSS_SECTION, BSS_SECTION, ROSDATA_SECTION,
+	ROZDATA_SECTION, SCOMMON_SECTION, TCOMMON_SECTION, ZCOMMON_SECTION,
+	CALL_TABLE_DATA_SECTION, CALL_TABLE_TEXT_SECTION): Define.
+	(do_v850_seg): New.
+	(v850_seg): New.
+	(v850_comm): Use do_v850_seg and v850_seg_table.  Simplify
+	recording of alignment.
+	(md_pseudo_table): Use v850_seg.
+	(md_begin): Don't init .call_table_data and .call_table_text here.
+	Set v850_seg_table bss entry.
+
 2002-02-01  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	Support on-demand global register allocation by passing on

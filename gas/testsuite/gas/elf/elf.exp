@@ -39,7 +39,7 @@ if { ([istarget "*-*-elf*"]
      && ![istarget *-*-linux*oldld*]
 } then {
     set target_machine ""
-    if {[istarget "mips*-*-*"] || [istarget v850-*-*]} then {
+    if {[istarget "mips*-*-*"]} then {
 	set target_machine -mips
     }
     if {[istarget m32r*-*-*]} then {
