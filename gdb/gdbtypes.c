@@ -1202,9 +1202,14 @@ recursive_dump_type (type, spaces)
 {
   int idx;
 
-  printfi_filtered (spaces, "type node 0x%x\n", type);
-  printfi_filtered (spaces, "name '%s' (0x%x)\n", TYPE_NAME (type),
-		    TYPE_NAME (type) ? TYPE_NAME (type) : "<NULL>");
+  printfi_filtered (spaces, "type node 0x%lx\n", (unsigned long)type);
+  printfi_filtered (spaces, "name '%s' (0x%lx)\n",
+		    TYPE_NAME (type) ? TYPE_NAME (type) : "<NULL>",
+		    (unsigned long)TYPE_NAME (type));
+  if (TYPE_TAG_NAME (type) != NULL)
+    printfi_filtered (spaces, "tagname '%s' (0x%lx)\n",
+		      TYPE_TAG_NAME (type),
+		      (unsigned long)TYPE_TAG_NAME (type));
   printfi_filtered (spaces, "code 0x%x ", TYPE_CODE (type));
   switch (TYPE_CODE (type))
     {

@@ -1,3 +1,19 @@
+Thu Sep 16 00:36:32 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mipsread.c:  Many changes for alpha ecoff format:
+	Correct sizeof(int) == sizeof(long) assumptions.
+	Replace stParsed hack by putting the parsed types on the pending chain.
+	Replace mips specific ecoff mapping by ECOFF_REG_TO_REGNUM macro,
+	provide default for cross debugging.
+	Swapping the symbol back is no longer needed as the symbol is not
+	modified anymore.
+	Add new alpha basic types, handle btTypedef, handle stStaticProc
+	external symbols .
+	Update and clean up cross_ref for alpha cc cross ref variations.
+	Allocate types on the type_obstack to inhibit storage leaks.
+	* config/mips/tm-mips.h (ECOFF_REG_TO_REGNUM):  Define.
+	* gdbtypes.c (recursive_dump_type):  Dump TYPE_TAG_NAME if it is set.
+
 Tue Sep 14 09:12:17 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
 
 	* stabsread.c (read_type): Process "s" (size) type attribute.

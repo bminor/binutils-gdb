@@ -70,9 +70,6 @@ typedef struct mips_extra_func_info {
 #ifndef RA_REGNUM
 #define RA_REGNUM 0
 #endif
-#ifndef FP0_REGNUM
-#define FP0_REGNUM 0
-#endif
 #endif
 
 #ifdef USG
@@ -109,6 +106,11 @@ typedef struct mips_extra_func_info {
 
 #include "expression.h"
 #include "language.h"		/* Needed inside partial-stab.h */
+
+/* Provide a default mapping from a ecoff register number to a gdb REGNUM.  */
+#ifndef ECOFF_REG_TO_REGNUM
+#define ECOFF_REG_TO_REGNUM(num) (num)
+#endif
 
 /* Information is passed among various mipsread routines for accessing
    symbol files.  A pointer to this structure is kept in the sym_private
@@ -214,11 +216,16 @@ struct complaint bad_rfd_entry_complaint =
 struct complaint unexpected_type_code_complaint =
 {"unexpected type code for %s", 0, 0};
 
+struct complaint unable_to_cross_ref_complaint =
+{"unable to cross ref btTypedef for %s", 0, 0};
+
+struct complaint illegal_forward_tq0_complaint =
+{"illegal tq0 in forward typedef for %s", 0, 0};
+
+struct complaint illegal_forward_bt_complaint =
+{"illegal bt %d in forward typedef for %s", 0, 0};
+
 /* Macros and extra defs */
-
-/* Already-parsed symbols are marked specially */
-
-#define stParsed stType
 
 /* Puns: hard to find whether -g was used and how */
 
@@ -277,15 +284,15 @@ static void
 read_the_mips_symtab PARAMS ((bfd *));
 
 static int
-upgrade_type PARAMS ((struct type **, int, union aux_ext *, int));
+upgrade_type PARAMS ((int, struct type **, int, union aux_ext *, int));
 
 static void
 parse_partial_symbols PARAMS ((struct objfile *,
 			       struct section_offsets *));
 
 static int
-cross_ref PARAMS ((union aux_ext *, struct type **, enum type_code, char **,
-		   int, char *));
+cross_ref PARAMS ((int, union aux_ext *, struct type **, enum type_code,
+		   char **, int, char *));
 
 static void
 fixup_sigtramp PARAMS ((void));
@@ -308,8 +315,11 @@ new_linetable PARAMS ((int));
 static struct blockvector *
 new_bvect PARAMS ((int));
 
+static int
+parse_symbol PARAMS ((SYMR *, union aux_ext *, char *, int));
+
 static struct type *
-parse_type PARAMS ((union aux_ext *, int *, int, char *));
+parse_type PARAMS ((int, union aux_ext *, int *, int, char *));
 
 static struct symbol *
 mylookup_symbol PARAMS ((char *, struct block *, enum namespace,
@@ -556,8 +566,8 @@ read_mips_symtab (objfile, section_offsets)
 struct pst_map
 {
   struct partial_symtab *pst;	/* the psymtab proper */
-  int n_globals;		/* exported globals (external symbols) */
-  int globals_offset;		/* cumulative */
+  long n_globals;		/* exported globals (external symbols) */
+  long globals_offset;		/* cumulative */
 };
 
 
@@ -575,7 +585,7 @@ static struct parse_stack
   int maxsyms;			/* Max symbols in this block. */
   struct type *cur_type;	/* Type we parse fields for. */
   int cur_field;		/* Field number in cur_type. */
-  int procadr;			/* Start addres of this procedure */
+  CORE_ADDR procadr;		/* Start addres of this procedure */
   int numargs;			/* Its argument count */
 }
 
@@ -632,7 +642,7 @@ struct mips_pending
 };
 
 
-/* Check whether we already saw symbol SH in file FH as undefined */
+/* Check whether we already saw symbol SH in file FH */
 
 static struct mips_pending *
 is_pending_symbol (fh, sh)
@@ -650,7 +660,7 @@ is_pending_symbol (fh, sh)
   return p;
 }
 
-/* Add a new undef symbol SH of type T */
+/* Add a new symbol SH of type T */
 
 static void
 add_pending (fh, sh, t)
@@ -686,10 +696,7 @@ add_pending (fh, sh, t)
    EXT_SH points to the unswapped symbol, which is needed for struct,
    union, etc., types; it is NULL for an EXTR.  BIGEND says whether
    aux symbols are big-endian or little-endian.  Return count of
-   SYMR's handled (normally one).
-
-   FIXME: This modifies the symbol, but the only way we have to save
-   the modified information is to stuff it back into the BFD data.  */
+   SYMR's handled (normally one).  */
 
 static int
 parse_symbol (sh, ax, ext_sh, bigend)
@@ -711,6 +718,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
   int count = 1;
   enum address_class class;
   TIR tir;
+  long svalue = sh->value;
 
   if (ext_sh == (char *) NULL)
     name = ecoff_data (cur_bfd)->ssext + sh->iss;
@@ -751,14 +759,13 @@ parse_symbol (sh, ax, ext_sh, bigend)
       if (sh->sc == scRegister)
 	{
 	  class = LOC_REGISTER;
-	  if (sh->value > 31)
-	    sh->value += FP0_REGNUM - 32;
+	  svalue = ECOFF_REG_TO_REGNUM (svalue);
 	}
       else
 	class = LOC_LOCAL;
       b = top_stack->cur_block;
       s = new_symbol (name);
-      SYMBOL_VALUE (s) = sh->value;
+      SYMBOL_VALUE (s) = svalue;
 
     data:			/* Common code for symbols describing data */
       SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
@@ -770,7 +777,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
 	  sh->index == 0xfffff)
 	SYMBOL_TYPE (s) = builtin_type_int;	/* undefined? */
       else
-	SYMBOL_TYPE (s) = parse_type (ax + sh->index, 0, bigend, name);
+	SYMBOL_TYPE (s) = parse_type (cur_fd, ax + sh->index, 0, bigend, name);
       /* Value of a data symbol is its memory address */
       break;
 
@@ -789,8 +796,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
 	case scRegister:
 	  /* Pass by value in register.  */
 	  SYMBOL_CLASS(s) = LOC_REGPARM;
-	  if (sh->value > 31)
-	    sh->value += FP0_REGNUM-32;
+	  svalue = ECOFF_REG_TO_REGNUM (svalue);
 	  break;
 	case scVar:
 	  /* Pass by reference on stack.  */
@@ -799,14 +805,15 @@ parse_symbol (sh, ax, ext_sh, bigend)
 	case scVarRegister:
 	  /* Pass by reference in register.  */
 	  SYMBOL_CLASS(s) = LOC_REGPARM_ADDR;
+	  svalue = ECOFF_REG_TO_REGNUM (svalue);
 	  break;
 	default:
 	  /* Pass by value on stack.  */
 	  SYMBOL_CLASS(s) = LOC_ARG;
 	  break;
 	}
-      SYMBOL_VALUE (s) = sh->value;
-      SYMBOL_TYPE (s) = parse_type (ax + sh->index, 0, bigend, name);
+      SYMBOL_VALUE (s) = svalue;
+      SYMBOL_TYPE (s) = parse_type (cur_fd, ax + sh->index, 0, bigend, name);
       add_symbol (s, top_stack->cur_block);
 #if 0
       /* FIXME:  This has not been tested.  See dbxread.c */
@@ -834,7 +841,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
       if (sh->sc == scUndefined || sh->sc == scNil)
 	t = builtin_type_int;
       else
-	t = parse_type (ax + sh->index + 1, 0, bigend, name);
+	t = parse_type (cur_fd, ax + sh->index + 1, 0, bigend, name);
       b = top_stack->cur_block;
       if (sh->st == stProc)
 	{
@@ -877,9 +884,6 @@ parse_symbol (sh, ax, ext_sh, bigend)
       top_stack->cur_field = -1;
       top_stack->procadr = sh->value;
       top_stack->numargs = 0;
-
-      sh->value = (long) SYMBOL_TYPE (s);
-      sh->st = stParsed;
       break;
 
       /* Beginning of code for structure, union, and enum definitions.
@@ -915,12 +919,6 @@ parse_symbol (sh, ax, ext_sh, bigend)
       structured_common:
 	push_parse_stack ();
 	top_stack->blocktype = stBlock;
-
-	s = new_symbol (name);
-	SYMBOL_NAMESPACE (s) = STRUCT_NAMESPACE;
-	SYMBOL_CLASS (s) = LOC_TYPEDEF;
-	SYMBOL_VALUE (s) = 0;
-	add_symbol (s, top_stack->cur_block);
 
 	/* First count the number of fields and the highest value. */
 	nfields = 0;
@@ -963,7 +961,6 @@ parse_symbol (sh, ax, ext_sh, bigend)
 	      case stUnion:
 	      case stEnum:
 	      case stStruct:
-	      case stParsed:
 		{
 #if 0
 		  /* This is a no-op; is it trying to tell us something
@@ -1035,27 +1032,29 @@ parse_symbol (sh, ax, ext_sh, bigend)
 	  else
 	    type_code = TYPE_CODE_STRUCT;
 
-	/* If this type was expected, use its partial definition */
+	/* Create a new type or use the pending type.  */
 	pend = is_pending_symbol (cur_fdr, ext_sh);
-	if (pend != (struct mips_pending *) NULL)
-	  t = pend->t;
+	if (pend == (struct mips_pending *) NULL)
+	  {
+	    t = new_type (NULL);
+	    add_pending (cur_fdr, ext_sh, t);
+	  }
 	else
-	  t = new_type (NULL);
+	  t = pend->t;
 
-	TYPE_TAG_NAME (t) = obconcat (&current_objfile->symbol_obstack,
-				      "", "", name);
+	/* Alpha cc unnamed structs do not get a tag name.  */
+	if (sh->iss == 0)
+	  TYPE_TAG_NAME (t) = NULL;
+	else
+	  TYPE_TAG_NAME (t) = obconcat (&current_objfile->symbol_obstack,
+					"", "", name);
+
 	TYPE_CODE (t) = type_code;
 	TYPE_LENGTH (t) = sh->value;
 	TYPE_NFIELDS (t) = nfields;
 	TYPE_FIELDS (t) = f = ((struct field *)
 			       TYPE_ALLOC (t,
 					   nfields * sizeof (struct field)));
-	/* Handle opaque struct definitions.  */
-	if (TYPE_NFIELDS (t) == 0)
-	  {
-	    TYPE_FLAGS (t) |= TYPE_FLAG_STUB;
-	    SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
-	  }
 
 	if (type_code == TYPE_CODE_ENUM)
 	  {
@@ -1095,13 +1094,26 @@ parse_symbol (sh, ax, ext_sh, bigend)
 		f++;
 	      }
 	  }
-	SYMBOL_TYPE (s) = t;
 	/* make this the current type */
 	top_stack->cur_type = t;
 	top_stack->cur_field = 0;
-	/* Mark that symbol has a type, and say which one */
-	sh->value = (long) t;
-	sh->st = stParsed;
+
+	/* Do not create a symbol for alpha cc unnamed structs.  */
+	if (sh->iss == 0)
+	  break;
+	s = new_symbol (name);
+	SYMBOL_NAMESPACE (s) = STRUCT_NAMESPACE;
+	SYMBOL_CLASS (s) = LOC_TYPEDEF;
+	SYMBOL_VALUE (s) = 0;
+	SYMBOL_TYPE (s) = t;
+
+	/* gcc puts out an empty struct for an opaque struct definitions.  */
+	if (TYPE_NFIELDS (t) == 0)
+	  {
+	    TYPE_FLAGS (t) |= TYPE_FLAG_STUB;
+	    SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
+	  }
+	add_symbol (s, top_stack->cur_block);
 	break;
 
 	/* End of local variables shared by struct, union, enum, and
@@ -1146,7 +1158,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
 	  e = ((struct mips_extra_func_info *)
 	       obstack_alloc (&current_objfile->symbol_obstack,
 			      sizeof (struct mips_extra_func_info)));
-	  SYMBOL_VALUE (s) = (int) e;
+	  SYMBOL_VALUE (s) = (long) e;
 	  e->numargs = top_stack->numargs;
 	  add_symbol (s, top_stack->cur_block);
 
@@ -1192,24 +1204,48 @@ parse_symbol (sh, ax, ext_sh, bigend)
       f->name = name;
       f->bitpos = sh->value;
       f->bitsize = 0;
-      f->type = parse_type (ax + sh->index, &f->bitsize, bigend, name);
+      f->type = parse_type (cur_fd, ax + sh->index, &f->bitsize, bigend, name);
       break;
 
     case stTypedef:		/* type definition */
+      /* Typedefs for forward declarations and opaque structs from alpha cc
+	 are handled by cross_ref, skip them.  */
+      if (sh->iss == 0)
+	break;
+
+      /* Parse the type or use the pending type.  */
+      pend = is_pending_symbol (cur_fdr, ext_sh);
+      if (pend == (struct mips_pending *) NULL)
+	{
+	  t = parse_type (cur_fd, ax + sh->index, (int *)NULL, bigend, name);
+	  add_pending (cur_fdr, ext_sh, t);
+	}
+      else
+	t = pend->t;
+
+      /* mips cc puts out a typedef with the name of the struct for forward
+	 declarations. These should not go into the symbol table and
+	 TYPE_NAME should not be set for them.
+	 They can't be distinguished from an intentional typedef to
+	 the same name however:
+	 x.h:
+		struct x { int ix; int jx; };
+		struct xx;
+	 x.c:
+		typedef struct x x;
+		struct xx {int ixx; int jxx; };
+	 generates a cross referencing stTypedef for x and xx.
+	 The user visible effect of this is that the type of a pointer
+	 to struct foo sometimes is given as `foo *' instead of `struct foo *'.
+	 The problem is fixed with alpha cc.  */
+
       s = new_symbol (name);
       SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
       SYMBOL_CLASS (s) = LOC_TYPEDEF;
       SYMBOL_BLOCK_VALUE (s) = top_stack->cur_block;
+      SYMBOL_TYPE (s) = t;
       add_symbol (s, top_stack->cur_block);
-      SYMBOL_TYPE (s) = parse_type (ax + sh->index, 0, bigend, name);
-      sh->value = (long) SYMBOL_TYPE (s);
-      sh->st = stParsed;
-      if (TYPE_TAG_NAME (SYMBOL_TYPE (s)) != NULL
-          && STREQ (TYPE_TAG_NAME (SYMBOL_TYPE (s)), "<undefined>"))
-	{
-	  /* mips cc puts out a stTypedef for opaque struct definitions.  */
-          TYPE_FLAGS (SYMBOL_TYPE (s)) |= TYPE_FLAG_STUB;
-	}
+
       /* Incomplete definitions of structs should not get a name.  */
       if (TYPE_NAME (SYMBOL_TYPE (s)) == NULL
 	  && (TYPE_NFIELDS (SYMBOL_TYPE (s)) != 0
@@ -1269,7 +1305,8 @@ parse_symbol (sh, ax, ext_sh, bigend)
    they are big-endian or little-endian (from fh->fBigendian).  */
 
 static struct type *
-parse_type (ax, bs, bigend, sym_name)
+parse_type (fd, ax, bs, bigend, sym_name)
+     int fd;
      union aux_ext *ax;
      int *bs;
      int bigend;
@@ -1305,8 +1342,16 @@ parse_type (ax, bs, bigend, sym_name)
     0,				/* btBit */
     0,				/* btPicture */
     &builtin_type_void,		/* btVoid */
-    &builtin_type_long_long,	/* btLongLong */
-    &builtin_type_unsigned_long_long,	/* btULongLong */
+    0,				/* DEC C++:  Pointer to member */
+    0,				/* DEC C++:  Virtual function table */
+    0,				/* DEC C++:  Class (Record) */
+    &builtin_type_long,		/* btLong64  */
+    &builtin_type_unsigned_long, /* btULong64 */
+    &builtin_type_long_long,	/* btLongLong64  */
+    &builtin_type_unsigned_long_long, /* btULongLong64 */
+    &builtin_type_unsigned_long, /* btAdr64 */
+    &builtin_type_long,		/* btInt64  */
+    &builtin_type_unsigned_long, /* btUInt64 */
   };
 
   TIR t[1];
@@ -1351,6 +1396,10 @@ parse_type (ax, bs, bigend, sym_name)
 	  type_code = TYPE_CODE_SET;
 	  break;
 	case btTypedef:
+	  /* alpha cc uses this for typedefs. The true type will be
+	     obtained by crossreferencing below.  */
+	  type_code = TYPE_CODE_ERROR;
+	  break;
 	default:
 	  complain (&basic_type_complaint, t->bt, sym_name);
 	  return builtin_type_int;
@@ -1399,12 +1448,10 @@ parse_type (ax, bs, bigend, sym_name)
     {
       char *name;
 
-      /* Try to cross reference this type */
-      ax += cross_ref (ax, &tp, type_code, &name, bigend, sym_name);
-      /* reading .o file ? */
+      /* Try to cross reference this type, build new type on failure.  */
+      ax += cross_ref (fd, ax, &tp, type_code, &name, bigend, sym_name);
       if (tp == (struct type *) NULL)
-	tp = init_type (type_code, 0, 0, (char *) NULL,
-			(struct objfile *) NULL);
+	tp = init_type (type_code, 0, 0, (char *) NULL, current_objfile);
 
       /* Make sure that TYPE_CODE(tp) has an expected type code.
 	 Any type may be returned from cross_ref if file indirect entries
@@ -1446,12 +1493,10 @@ parse_type (ax, bs, bigend, sym_name)
     {
       char *name;
 
-      /* Try to cross reference this type */
-      ax += cross_ref (ax, &tp, type_code, &name, bigend, sym_name);
-      /* reading .o file ? */
+      /* Try to cross reference this type, build new type on failure.  */
+      ax += cross_ref (fd, ax, &tp, type_code, &name, bigend, sym_name);
       if (tp == (struct type *) NULL)
-	tp = init_type (type_code, 0, 0, (char *) NULL,
-			(struct objfile *) NULL);
+	tp = init_type (type_code, 0, 0, (char *) NULL, current_objfile);
 
       /* Make sure that TYPE_CODE(tp) has an expected type code.
 	 Any type may be returned from cross_ref if file indirect entries
@@ -1472,6 +1517,18 @@ parse_type (ax, bs, bigend, sym_name)
 	  if (TYPE_NAME (tp) == NULL || !STREQ (TYPE_NAME (tp), name))
 	    TYPE_NAME (tp) = obsavestring (name, strlen (name),
 					   &current_objfile->type_obstack);
+	}
+    }
+  if (t->bt == btTypedef)
+    {
+      char *name;
+
+      /* Try to cross reference this type, it should succeed.  */
+      ax += cross_ref (fd, ax, &tp, type_code, &name, bigend, sym_name);
+      if (tp == (struct type *) NULL)
+	{
+	  complain (&unable_to_cross_ref_complaint, sym_name);
+	  tp = builtin_type_int;
 	}
     }
 
@@ -1495,7 +1552,7 @@ parse_type (ax, bs, bigend, sym_name)
      than 6 the game will continue in the next aux */
 
 #define PARSE_TQ(tq) \
-	if (t->tq != tqNil) ax += upgrade_type(&tp, t->tq, ax, bigend);
+	if (t->tq != tqNil) ax += upgrade_type(fd, &tp, t->tq, ax, bigend);
 
 again:PARSE_TQ (tq0);
   PARSE_TQ (tq1);
@@ -1522,7 +1579,8 @@ again:PARSE_TQ (tq0);
    Returns the number of aux symbols we parsed. */
 
 static int
-upgrade_type (tpp, tq, ax, bigend)
+upgrade_type (fd, tpp, tq, ax, bigend)
+     int fd;
      struct type **tpp;
      int tq;
      union aux_ext *ax;
@@ -1564,9 +1622,10 @@ upgrade_type (tpp, tq, ax, bigend)
 	  rf = AUX_GET_ISYM (bigend, ax);
 	  off++;
 	}
-      fh = get_rfd (cur_fd, rf);
+      fh = get_rfd (fd, rf);
 
-      indx = parse_type ((ecoff_data (cur_bfd)->external_aux
+      indx = parse_type (fd,
+			 (ecoff_data (cur_bfd)->external_aux
 			  + fh->iauxBase
 			  + id),
 			 (int *) NULL, bigend, "<array index>");
@@ -1831,7 +1890,6 @@ parse_external (es, skip_procedures, bigend)
       /* Note that the case of a symbol with indexNil must be handled
 	 anyways by parse_symbol().  */
       parse_symbol (&es->asym, ax, (char *) NULL, bigend);
-      /* Note that parse_symbol changed es->asym.  */
       break;
     default:
       break;
@@ -1864,7 +1922,7 @@ parse_lines (fh, pr, lt)
   k = 0;
   for (j = 0; j < fh->cpd; j++, pr++)
     {
-      int l, halt;
+      long l, halt;
       unsigned long adr;
 
       /* No code for this one */
@@ -2046,6 +2104,9 @@ parse_partial_symbols (objfile, section_offsets)
       switch (ext_in->asym.st)
 	{
 	case stProc:
+	  break;
+	case stStaticProc:
+	  ms_type = mst_file_text;
 	  break;
 	case stGlobal:
           if (ext_in->asym.sc == scData
@@ -2369,6 +2430,7 @@ parse_partial_symbols (objfile, section_offsets)
 	      switch (psh->st)
 		{
 		case stProc:
+		case stStaticProc:
 		  class = LOC_BLOCK;
 		  break;
 		case stLabel:
@@ -2489,8 +2551,6 @@ psymtab_to_symtab_1 (pst, filename)
     = ecoff_backend (cur_bfd)->external_pdr_size;
   void (* const swap_sym_in) PARAMS ((bfd *, PTR, SYMR *))
     = ecoff_backend (cur_bfd)->swap_sym_in;
-  void (* const swap_sym_out) PARAMS ((bfd *, const SYMR *, PTR))
-    = ecoff_backend (cur_bfd)->swap_sym_out;
   void (* const swap_pdr_in) PARAMS ((bfd *, PTR, PDR *))
     = ecoff_backend (cur_bfd)->swap_pdr_in;
   int i;
@@ -2604,7 +2664,7 @@ psymtab_to_symtab_1 (pst, filename)
 		  SYMBOL_NAMESPACE (s) = LABEL_NAMESPACE;
 		  SYMBOL_CLASS (s) = LOC_CONST;
 		  SYMBOL_TYPE (s) = builtin_type_void;
-		  SYMBOL_VALUE (s) = (int) e;
+		  SYMBOL_VALUE (s) = (long) e;
 		  add_symbol_to_list (s, &local_symbols);
 		}
 	    }
@@ -2713,9 +2773,6 @@ psymtab_to_symtab_1 (pst, filename)
 				(ecoff_data (cur_bfd)->external_aux
 				 + fh->iauxBase),
 				sym_ptr, fh->fBigendian);
-	      /* FIXME: We must swap the modified symbol back out,
-		 although we would rather not.  See parse_symbol.  */
-	      (*swap_sym_out) (cur_bfd, &sh, sym_ptr);
 	      sym_ptr += c * external_sym_size;
 	    }
 
@@ -2807,7 +2864,8 @@ psymtab_to_symtab_1 (pst, filename)
    Return value says how many aux symbols we ate. */
 
 static int
-cross_ref (ax, tpp, type_code, pname, bigend, sym_name)
+cross_ref (fd, ax, tpp, type_code, pname, bigend, sym_name)
+     int fd;
      union aux_ext *ax;
      struct type **tpp;
      enum type_code type_code;	/* Use to alloc new type if none is found. */
@@ -2818,6 +2876,13 @@ cross_ref (ax, tpp, type_code, pname, bigend, sym_name)
   RNDXR rn[1];
   unsigned int rf;
   int result = 1;
+  FDR *fh;
+  char *esh;
+  SYMR sh;
+  int xref_fd;
+  struct mips_pending *pend;
+
+  *tpp = (struct type *)NULL;
 
   ecoff_swap_rndx_in (bigend, &ax->a_rndx, rn);
 
@@ -2832,88 +2897,149 @@ cross_ref (ax, tpp, type_code, pname, bigend, sym_name)
       rf = rn->rfd;
     }
 
+  /* mips cc uses a rf of -1 for opaque struct definitions.
+     Set TYPE_FLAG_STUB for these types so that check_stub_type will
+     resolve them if the struct gets defined in another compilation unit.  */
   if (rf == -1)
     {
-      /* Ooops */
       *pname = "<undefined>";
+      *tpp = init_type (type_code, 0, 0, (char *) NULL, current_objfile);
+      TYPE_FLAGS (*tpp) |= TYPE_FLAG_STUB;
+      return result;
     }
+
+  /* mips cc uses an escaped rn->index of 0 for struct return types
+     of procedures that were compiled without -g. These will always remain
+     undefined.  */
+  if (rn->rfd == 0xfff && rn->index == 0)
+    {
+      *pname = "<undefined>";
+      return result;
+    }
+
+  /* Find the relative file descriptor and the symbol in it.  */
+  fh = get_rfd (fd, rf);
+  xref_fd = fh - ecoff_data (cur_bfd)->fdr;
+
+  if (rn->index >= fh->csym)
+    {
+      /* File indirect entry is corrupt.  */
+      *pname = "<illegal>";
+      complain (&bad_rfd_entry_complaint,
+		sym_name, xref_fd, rn->index);
+      return result;
+    }
+
+  /* If we have processed this symbol then we left a forwarding
+     pointer to the type in the pending list.  If not, we`ll put
+     it in a list of pending types, to be processed later when
+     the file will be.  In any event, we collect the name for the
+     type here.  */
+
+  esh = ((char *) ecoff_data (cur_bfd)->external_sym
+	 + ((fh->isymBase + rn->index)
+	    * ecoff_backend (cur_bfd)->external_sym_size));
+  (*ecoff_backend (cur_bfd)->swap_sym_in) (cur_bfd, esh, &sh);
+
+  /* Make sure that this type of cross reference can be handled.  */
+  if (sh.sc != scInfo
+      || (sh.st != stBlock && sh.st != stTypedef
+	  && sh.st != stStruct && sh.st != stUnion
+	  && sh.st != stEnum))
+    {
+      /* File indirect entry is corrupt.  */
+      *pname = "<illegal>";
+      complain (&bad_rfd_entry_complaint,
+		sym_name, xref_fd, rn->index);
+      return result;
+    }
+
+  *pname = ecoff_data (cur_bfd)->ss + fh->issBase + sh.iss;
+
+  pend = is_pending_symbol (fh, esh);
+  if (pend)
+    *tpp = pend->t;
   else
     {
-      /*
-       * Find the relative file descriptor and the symbol in it
-       */
-      FDR *fh = get_rfd (cur_fd, rf);
-      char *esh;
-      SYMR sh;
-      struct type *t;
+      /* We have not yet seen this type.  */
 
-      if (rn->index >= fh->csym)
+      if (sh.iss == 0 && sh.st == stTypedef)
 	{
-	  /* File indirect entry is corrupt.  */
-	  *tpp = (struct type *)NULL;
-	  *pname = "<illegal>";
-	  complain (&bad_rfd_entry_complaint,
-		    sym_name, fh - ecoff_data (cur_bfd)->fdr, rn->index);
-	  return result;
-	}
+	  TIR tir;
 
-      /* If we have processed this symbol then we left a forwarding
-	 pointer to the corresponding GDB symbol.  If not, we`ll put
-	 it in a list of pending symbols, to be processed later when
-	 the file will be.  In any event, we collect the name for the
-	 type here.  Which is why we made a first pass at strings.  */
+	  /* alpha cc puts out a stTypedef with a sh.iss of zero for
+	     two cases:
+	     a) forward declarations of structs/unions/enums which are not
+		defined in this compilation unit.
+		For these the type will be void. This is a bad design decision
+		as cross referencing across compilation units is impossible
+		due to the missing name.
+	     b) forward declarations of structs/unions/enums which are defined
+		later in this file or in another file in the same compilation
+		unit.  Simply cross reference those again to get the
+		true type.
+	     The forward references are not entered in the pending list and
+	     in the symbol table.  */
 
-      esh = ((char *) ecoff_data (cur_bfd)->external_sym
-	     + ((fh->isymBase + rn->index)
-		* ecoff_backend (cur_bfd)->external_sym_size));
-      (*ecoff_backend (cur_bfd)->swap_sym_in) (cur_bfd, esh, &sh);
-
-      /* Careful, we might be looking at .o files */
-      if (sh.iss == 0)
-	*pname = "<undefined>";
-      else if (rn->rfd == 0xfff && rn->index == 0)
-	/* For structs, unions and enums, rn->rfd is 0xfff and the index
-	   is a relative symbol number for the type, but an index of 0
-	   seems to mean that we don't know.  This is said to fix a problem
-	   with "info func opendir" on an SGI showing
-	   "struct BSDopendir.c *BSDopendir();".  */
-	{
-	  *tpp = (struct type *)NULL;
-	  *pname = "<unknown>";
-	  return result;
-	}
-      else if ((sh.st != stBlock && sh.st != stTypedef && sh.st != stParsed)
-	       || sh.sc != scInfo)
-	{
-	  /* File indirect entry is corrupt.  */
-	  *tpp = (struct type *)NULL;
-	  *pname = "<illegal>";
-	  complain (&bad_rfd_entry_complaint,
-		    sym_name, fh - ecoff_data (cur_bfd)->fdr, rn->index);
-	  return result;
-	}
-      else
-	*pname = ecoff_data (cur_bfd)->ss + fh->issBase + sh.iss;
-
-      /* Have we parsed it ? */
-      if (sh.value != 0 && sh.st == stParsed)
-	{
-	  t = (struct type *) sh.value;
-	  *tpp = t;
-	}
-      else
-	{
-	  /* Avoid duplicates */
-	  struct mips_pending *p = is_pending_symbol (fh, esh);
-	  if (p)
-	    *tpp = p->t;
-	  else
+	  ecoff_swap_tir_in (bigend,
+			     &(ecoff_data (cur_bfd)->external_aux
+			       + fh->iauxBase + sh.index)->a_ti,
+			     &tir);
+	  if (tir.tq0 != tqNil)
+	    complain (&illegal_forward_tq0_complaint, sym_name);
+	  switch (tir.bt)
 	    {
+	    case btVoid:
 	      *tpp = init_type (type_code, 0, 0, (char *) NULL,
-				(struct objfile *) NULL);
-	      add_pending (fh, esh, *tpp);
+				current_objfile);
+    	      *pname = "<undefined>";
+	      break;
+
+	    case btStruct:
+	    case btUnion:
+	    case btEnum:
+	      cross_ref (xref_fd,
+			 (ecoff_data (cur_bfd)->external_aux
+			  + fh->iauxBase + sh.index + 1),
+			 tpp, type_code, pname,
+			 fh->fBigendian, sym_name);
+	      break;
+
+	    default:
+	      complain (&illegal_forward_bt_complaint, tir.bt, sym_name);
+	      *tpp = init_type (type_code, 0, 0, (char *) NULL,
+				current_objfile);
+	      break;
 	    }
+	  return result;
 	}
+      else if (sh.st == stTypedef)
+	{
+	  /* Parse the type for a normal typedef. This might recursively call
+	     cross_ref till we get a non typedef'ed type.
+	     FIXME: This is not correct behaviour, but gdb currently
+	     cannot handle typedefs without type copying. But type copying is
+	     impossible as we might have mutual forward references between
+	     two files and the copied type would not get filled in when
+	     we later parse its definition.   */
+	  *tpp = parse_type (xref_fd,
+			     (ecoff_data (cur_bfd)->external_aux
+			      + fh->iauxBase + sh.index),
+			     (int *)NULL,
+			     fh->fBigendian,
+			     (ecoff_data (cur_bfd)->ss
+			      + fh->issBase + sh.iss));
+	}
+      else
+	{
+	  /* Cross reference to a struct/union/enum which is defined
+	     in another file in the same compilation unit but that file
+	     has not been parsed yet.
+	     Initialize the type only, it will be filled in when
+	     it's definition is parsed.  */
+	  *tpp = init_type (type_code, 0, 0, (char *) NULL, current_objfile);
+	}
+      add_pending (fh, esh, *tpp);
     }
 
   /* We used one auxent normally, two if we got a "next one" rf. */
@@ -3350,7 +3476,7 @@ fixup_sigtramp ()
   SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
   SYMBOL_CLASS (s) = LOC_BLOCK;
   SYMBOL_TYPE (s) = init_type (TYPE_CODE_FUNC, 4, 0, (char *) NULL,
-			       (struct objfile *) NULL);
+			       st->objfile);
   TYPE_TARGET_TYPE (SYMBOL_TYPE (s)) = builtin_type_void;
 
   /* Need a block to allocate MIPS_EFI_SYMBOL_NAME in */
@@ -3384,7 +3510,7 @@ fixup_sigtramp ()
 
     current_objfile = st->objfile;	/* Keep new_symbol happy */
     s = new_symbol (MIPS_EFI_SYMBOL_NAME);
-    SYMBOL_VALUE (s) = (int) e;
+    SYMBOL_VALUE (s) = (long) e;
     SYMBOL_NAMESPACE (s) = LABEL_NAMESPACE;
     SYMBOL_CLASS (s) = LOC_CONST;
     SYMBOL_TYPE (s) = builtin_type_void;
