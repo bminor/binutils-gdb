@@ -55,4 +55,5 @@ extern void mi_delete_tracepoint (int bpnum);
 extern void mi_architecture_changed (void);
 extern void mi_register_update(int regno);
 extern void mi_selected_frame_level_changed (int level);
+extern void mi_context_changed (int thread_id);
 #endif /* MI_H */

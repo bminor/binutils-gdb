@@ -43,24 +43,6 @@ mi_interp_stack_changed_hook (void)
   uiout = saved_ui_out;
 }
 
-void
-mi_interp_context_hook (int thread_id)
-{
-  struct ui_out *saved_ui_out = uiout;
-  struct mi_out *tmp_mi_out;
-
-  if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI0))
-    uiout = gdb_interpreter_ui_out (mi0_interp);
-  else
-    uiout = gdb_interpreter_ui_out (mi_interp);
-
-  ui_out_list_begin (uiout, "MI_HOOK_RESULT");
-  ui_out_field_string (uiout, "HOOK_TYPE", "thread_changed");
-  ui_out_field_int (uiout, "thread", thread_id);
-  ui_out_list_end (uiout);
-  uiout = saved_ui_out;
-}
-
 static void
 event_notify (const char *string, ...)
 {
@@ -129,4 +111,10 @@ void
 mi_selected_frame_level_changed (int level)
 {
   event_notify ("selected-frame-level-changed,level=\"%d\"", level);
+}
+
+void
+mi_context_changed (int thread_id)
+{
+  event_notify ("context-changed,thread=\"%d\"", thread_id);
 }

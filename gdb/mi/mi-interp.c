@@ -78,7 +78,8 @@ static struct gdb_events mi_event_handlers =
     mi_modify_tracepoint,
     mi_architecture_changed,
     mi_register_update,
-    mi_selected_frame_level_changed
+    mi_selected_frame_level_changed,
+    mi_context_changed
   };
 
 static int
@@ -341,14 +342,12 @@ mi_cmd_interpreter_set (char *command, char **argv, int argc)
 static void
 mi_insert_notify_hooks (void)
 {
-  context_hook = mi_interp_context_hook;
   query_hook = mi_interp_query_hook;
 }
 
 static void
 mi_remove_notify_hooks ()
 {
-  context_hook = NULL;
   query_hook = NULL;
 }
 
@@ -398,6 +397,7 @@ mi1_command_loop (void)
 static void
 mi_command_loop (int mi_version)
 {
+#if 0
   /* HACK: Force stdout/stderr to point at the console.  This avoids
      any potential side effects caused by legacy code that is still
      using the TUI / fputs_unfiltered_hook */
@@ -435,6 +435,7 @@ mi_command_loop (int mi_version)
   error_hook = 0;
   error_begin_hook = 0;
   show_load_progress = mi_load_progress;
+#endif
   /* Turn off 8 bit strings in quoted output.  Any character with the
      high bit set is printed using C's octal format. */
   sevenbit_strings = 1;

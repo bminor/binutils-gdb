@@ -1,3 +1,14 @@
+2002-08-09  Keith Seitz  <keiths@redhat.com>
+
+        * mi-interp.c (mi_event_handlers): Add context_changed event
+        handler.
+	(mi_command_loop): Remove big block of code repeated in 
+	mi_interpreter_resume. I don't think this is needed.
+        (mi_insert_notify_hooks): Remove context_hook.
+        (mi_remove_notify_hooks): Likewise.
+        * mi-events.c (mi_context_changed): New function.
+        * mi.h (mi_context_changed): Add declaration.
+
 2002-07-25  Keith Seitz  <keiths@redhat.com>
 
 	* mi-interp.c (mi_event_handlers): Add selected_frame_level_changed
@@ -82,6 +93,24 @@
 	Update all examples to show breakpoint events and
 	remove redundant breakpoint info on "-break-insert" and "-break-watch".
 	The event now supplies everything that is needed.
+
+2002-05-28  Keith Seitz  <keiths@redhat.com>
+
+	* mi-interp.c:  New file. Almost entirely from Apple's
+	sources. Collected and moved here.
+	* mi-events.c: Ditto.
+	* mi.h: New file.
+	* mi-main.c (captured_execute_command): Use catch_exception
+	instead of catch_errors.
+	(mi_execute_command_wrapper): Remove. Using catch_errors now.
+	(mi_input): Make global.
+	(mi_load_progress): Ditto.
+	Use interpreter functions instead of interpreter_p.
+	(mi_command_loop): Moved to mi-interp.c
+	(mi0_command_loop): Ditto.
+	(mi1_command_loop): Ditto.
+	(mi_init_ui): Remove.
+	(_initialize_mi_main): Remove. No longer needed.
 
 2002-07-29  Andrew Cagney  <ac131313@redhat.com>
 
