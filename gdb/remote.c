@@ -86,7 +86,7 @@ static void remote_resume (ptid_t ptid, int step,
                            enum target_signal siggnal);
 static void remote_async_resume (ptid_t ptid, int step,
 				 enum target_signal siggnal);
-static int remote_start_remote (PTR);
+static int remote_start_remote (void *);
 
 static void remote_open (char *name, int from_tty);
 static void remote_async_open (char *name, int from_tty);
@@ -970,8 +970,8 @@ show_remote_protocol_binary_download_cmd (char *args,
 
 
 /* Tokens for use by the asynchronous signal handlers for SIGINT */
-PTR sigint_remote_twice_token;
-PTR sigint_remote_token;
+static void *sigint_remote_twice_token;
+static void *sigint_remote_token;
 
 /* These are pointers to hook functions that may be set in order to
    modify resume/wait behavior for a particular architecture.  */
@@ -2114,7 +2114,7 @@ remote_start_remote_dummy (void *dummy)
 }
 
 static int
-remote_start_remote (PTR dummy)
+remote_start_remote (void *dummy)
 {
   immediate_quit++;		/* Allow user to interrupt it */
 
