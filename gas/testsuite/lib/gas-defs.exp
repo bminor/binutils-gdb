@@ -324,7 +324,7 @@ proc objdump_finish { } {
 # configurations of dejagnu may override it.
 if {$timeout<120} then { set timeout 120 }
 
-expect_after {
+expect_after -i {
     timeout			{ perror "timeout" }
     "virtual memory exhausted"	{ perror "virtual memory exhausted" }
     buffer_full			{ perror "buffer full" }

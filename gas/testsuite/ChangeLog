@@ -1,3 +1,7 @@
+Thu Dec  8 20:19:09 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* lib/gas-defs.exp: Use -i in expect_after command.
+
 Wed Dec  7 16:49:14 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* gas/mips/mul.d,jal.d: Fix 0-strings to work with 64-bit hosted
