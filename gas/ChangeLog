@@ -1,3 +1,9 @@
+start-sanitize-sky
+Wed May  6 16:26:57 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.c: Delete inclusion of "sysdep.h".
+
+end-sanitize-sky
 Wed May  6 16:29:19 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (md_apply_fix): Slightly rework some code
