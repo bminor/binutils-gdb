@@ -1,3 +1,8 @@
+Mon Oct  5 09:04:25 1998  Catherine Moore  <clm@cygnus.com>
+
+        * elf32-m68k.c (elf_m68k_gc_sweep_hook):  Don't assume
+        that dynobj exists.
+
 Sun Oct  4 23:29:34 1998  David Edelsohn  <edelsohn@mhpcc.edu>
 
 	* rs6000-core.c (rs6000coff_core_file_matches_executable_p):
