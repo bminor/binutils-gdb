@@ -130,7 +130,7 @@ extern void generic_mourn_inferior ();
 extern struct target_ops nindy_ops;
 extern jmp_buf to_top_level;
 extern FILE *instream;
-extern struct ext_format ext_format_i960[];	/* i960-tdep.c */
+extern struct ext_format ext_format_i960;	/* i960-tdep.c */
 
 extern char ninStopWhy ();
 
@@ -495,7 +495,7 @@ nindy_fetch_registers(regno)
 			 &nindy_regs.fp_as_double[8 * (regnum - FP0_REGNUM)],
 			 &inv);
     /* dub now in host byte order */
-    double_to_ieee_extended (ext_format_i960, &dub,
+    double_to_ieee_extended (&ext_format_i960, &dub,
 			     &registers[REGISTER_BYTE (regnum)]);
   }
 
@@ -524,7 +524,7 @@ nindy_store_registers(regno)
   bcopy (&registers[REGISTER_BYTE (TCW_REGNUM)], nindy_regs.tcw,         1*4);
   /* Float regs.  Only works on IEEE_FLOAT hosts.  */
   for (regnum = FP0_REGNUM; regnum < FP0_REGNUM + 4; regnum++) {
-    ieee_extended_to_double (ext_format_i960,
+    ieee_extended_to_double (&ext_format_i960,
 			     &registers[REGISTER_BYTE (regnum)], &dub);
     /* dub now in host byte order */
     /* FIXME-someday, the arguments to unpack_double are backward.

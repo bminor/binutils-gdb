@@ -1,5 +1,5 @@
-/* Parameters for execution on a Hewlett-Packard 9000/300, running bsd.
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+/* Parameters for hosting on a Hewlett-Packard 9000/300, running bsd.
+   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -23,7 +23,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
  * Problems to hpbsd-bugs@cs.utah.edu
  */
 
-#include <machine/endian.h>
+#define	HOST_BYTE_ORDER	BIG_ENDIAN
+
+/* Avoid "INT_MIN redefined" warnings -- by defining it here, exactly
+   the same as in the system <machine/machtypes.h> file.  */
+#undef	INT_MIN
+#define	INT_MIN		0x80000000
 
 /* Get rid of any system-imposed stack limit if possible.  */
 

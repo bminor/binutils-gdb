@@ -20,7 +20,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "ansidecl.h"
-#include <stdlib.h>
 #include "gmalloc.h"
 
 /* Old hook values.  */
@@ -28,14 +27,9 @@ static void EXFUN((*old_free_hook), (PTR ptr));
 static PTR EXFUN((*old_malloc_hook), (size_t size));
 static PTR EXFUN((*old_realloc_hook), (PTR ptr, size_t size));
 
-/* FIXME.  We cannot *declare* abort() as either being void or being
-   int, because if the system declares it as the other, we get a fatal
-   error.  It's senseless to configure the system for whether abort is
-   void or int.  So we simply fail to declare it, which works on all
-   systems, but might produce a warning on yours.  Please ignore the warning
-   and raise your middle finger in the general direction of the ANSI C
-   committee in tribute.  */
+
 /* Function to call when something awful happens. */
+extern void abort();
 static void EXFUN((*abortfunc), (void)) = (void (*)()) abort;
 
 /* Arbitrary magical numbers.  */

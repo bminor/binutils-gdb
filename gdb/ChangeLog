@@ -1,3 +1,22 @@
+Wed Aug 21 18:21:09 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* infptrace.c (KERNEL_U_ADDR_BSD):  Include a.out.gnu.h.
+	* i960-tdep.c, m68k-tdep.c, sparc-tdep.c, tm-i960.h,
+	tm-m68k.h, remote-nindy.c:  Change ext_format_XXX structs
+	to single structures rather than arrays; when passing
+	their address, use &.  This avoids trouble with bdead compilers.
+	* mcheck.c: Don't include <stdlib.h>; just declare "void abort();"
+	instead.  This avoids portability headaches.
+	* mips-tdep.c (mips_do_registers_info):  Only print FP regs if
+	asked to.
+	* source.c (open_source_file):  Avoid ANSI const bdeath by 
+	skipping declaration and then casting result value.
+	* tm-hp300bsd.h:  Clarify comment.
+	* utils.c (strstr):  Result is const char *; ANSI bdeath.
+	* xm-hp300bsd.h:  Define HOST_BYTE_ORDER.  Redefine INT_MIN,
+	since system include file defines it differently from "defs.h",
+	though the two are equivalent for our purposes.
+
 Tue Aug 20 16:01:11 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* tconfig/sun*4:  Remove warnings about system assembler.

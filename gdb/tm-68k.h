@@ -149,7 +149,7 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 
 /* Put the declaration out here because if it's in the macros, PCC
    will complain.  */
-extern struct ext_format ext_format_68881 [];
+extern struct ext_format ext_format_68881;
 
 /* Convert data from raw format for register REGNUM
    to virtual format for register REGNUM.  */
@@ -157,7 +157,7 @@ extern struct ext_format ext_format_68881 [];
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO)	\
 { \
   if ((REGNUM) >= FP0_REGNUM && (REGNUM) < FPC_REGNUM)	\
-    ieee_extended_to_double (ext_format_68881, (FROM), (TO));	\
+    ieee_extended_to_double (&ext_format_68881, (FROM), (double *)(TO)); \
   else					\
     bcopy ((FROM), (TO), 4);	\
 }
@@ -168,7 +168,7 @@ extern struct ext_format ext_format_68881 [];
 #define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)	\
 { \
   if ((REGNUM) >= FP0_REGNUM && (REGNUM) < FPC_REGNUM)	\
-    double_to_ieee_extended (ext_format_68881, (FROM), (TO));	\
+    double_to_ieee_extended (&ext_format_68881, (double *)(FROM), (TO)); \
   else					\
     bcopy ((FROM), (TO), 4);	\
 }
