@@ -176,15 +176,18 @@ extern void m68k_find_saved_regs PARAMS ((struct frame_info *, struct frame_save
   floatformat_from_double (&floatformat_m68881_ext, &dbl_tmp_val, (TO)); \
 }
 
-/* Return the GDB type object for the "standard" data type
-   of data in register N.  */
-/* Note, for registers which contain addresses return
-   pointer to void, not pointer to char, because we don't
-   want to attempt to print the string after printing the address.  */
+/* Return the GDB type object for the "standard" data type of data 
+   in register N.  This should be int for D0-D7, double for FP0-FP7,
+   and void pointer for all others (A0-A7, PC, SR, FPCONTROL etc).
+   Note, for registers which contain addresses return pointer to void, 
+   not pointer to char, because we don't want to attempt to print 
+   the string after printing the address.  */
+
 #define REGISTER_VIRTUAL_TYPE(N) \
- (((unsigned)(N) - FP0_REGNUM) < 8 ? builtin_type_double :           \
-  (N) == PC_REGNUM || (N) == FP_REGNUM || (N) == SP_REGNUM ?         \
-  lookup_pointer_type (builtin_type_void) : builtin_type_int)
+  ((unsigned) (N) >= FPC_REGNUM ? lookup_pointer_type (builtin_type_void) : \
+   (unsigned) (N) >= FP0_REGNUM ? builtin_type_double :                     \
+   (unsigned) (N) >=  A0_REGNUM ? lookup_pointer_type (builtin_type_void) : \
+   builtin_type_int)
 
 /* Initializer for an array of names of registers.
    Entries beyond the first NUM_REGS are ignored.  */

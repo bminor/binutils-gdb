@@ -1,7 +1,10 @@
 Mon Jan 12 11:46:51 1998  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
+	* config/m68k/tm-m68k.h (REGISTER_VIRTUAL_TYPE): make A0 thru A7
+	default to void pointer type (so that their default radix is hex).
+
 	* symtab.c: move rbreak_command from no_class to class_breakpoint
-	  so it will be listed under "help breakpoints".
+	so it will be listed under "help breakpoints".
 
 Sat Jan 10 14:58:04 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
