@@ -1964,18 +1964,23 @@
 
   PC = cia;
   denom = (signed32)State.regs[REG_D0 + DM1];
-  /* still need to check for overflow */
+
+  temp = State.regs[REG_MDR];
+  temp <<= 32;
+  temp |= State.regs[REG_D0 + DN0];
   if ( !(v = (0 == denom)) )
     {
-      temp = State.regs[REG_MDR];
-      temp <<= 32;
-      temp |= State.regs[REG_D0 + DN0];
       State.regs[REG_MDR] = temp % (signed32)State.regs[REG_D0 + DM1];
       temp /= (signed32)State.regs[REG_D0 + DM1];
       State.regs[REG_D0 + DN0] = temp & 0xffffffff;
-      z = (State.regs[REG_D0 + DN0] == 0);
-      n = (State.regs[REG_D0 + DN0] & 0x80000000) != 0;
     }
+  else
+    {
+      State.regs[REG_MDR] = temp;
+      State.regs[REG_D0 + DN0] = 0xff;
+    }
+  z = (State.regs[REG_D0 + DN0] == 0);
+  n = (State.regs[REG_D0 + DN0] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (v ? PSW_V : 0));
 }
@@ -1996,17 +2001,22 @@
 
   PC = cia;
   denom = (unsigned32)State.regs[REG_D0 + DM1];
+  temp = State.regs[REG_MDR];
+  temp <<= 32;
+  temp |= State.regs[REG_D0 + DN0];
   if ( !(v = (0 == denom)) ) 
     {
-      temp = State.regs[REG_MDR];
-      temp <<= 32;
-      temp |= State.regs[REG_D0 + DN0];
       State.regs[REG_MDR] = temp % State.regs[REG_D0 + DM1];
       temp /= State.regs[REG_D0 + DM1];
       State.regs[REG_D0 + DN0] = temp & 0xffffffff;
-      z = (State.regs[REG_D0 + DN0] == 0);
-      n = (State.regs[REG_D0 + DN0] & 0x80000000) != 0;
     }
+  else
+    {
+      State.regs[REG_MDR] = temp;
+      State.regs[REG_D0 + DN0] = 0xff;
+    }
+  z = (State.regs[REG_D0 + DN0] == 0);
+  n = (State.regs[REG_D0 + DN0] & 0x80000000) != 0;
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (v ? PSW_V : 0));
 }
@@ -3334,7 +3344,7 @@
 // end-sanitize-am33
 {
   /* OP_F0F4 (); */
-  PC = load_word (State.regs[REG_A0 + AN0]);
+  PC = State.regs[REG_A0 + AN0];
   nia = PC;
 }
 
@@ -3512,19 +3522,19 @@
 }
 
 
-// 1111 0101 0000  DmDn; udf20 Dm,Dm
-8.0xf5+4.0x0,2.DM1,2.DM0:D0:::putx
+// 1111 0101 0000  DmDn; udf20 Dm,Dn
+8.0xf5+4.0x0,2.DM1,2.DN0:D0:::putx
 "putx"
 *mn10300
 {
   /* OP_F500 (); */
   PC = cia;
-  State.regs[REG_MDRQ] = State.regs[REG_D0 + DM0];
+  State.regs[REG_MDRQ] = State.regs[REG_D0 + DN0];
 }
 
 
-// 1111 0110 1111 DmDn; udf15 Dn,Dn
-8.0xf6+4.0xf,2.DN1,2.DN0:D0:::getx
+// 1111 0110 1111 DmDn; udf15 Dm,Dn
+8.0xf6+4.0xf,2.DM1,2.DN0:D0:::getx
 "getx"
 *mn10300
 // start-sanitize-am33

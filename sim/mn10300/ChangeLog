@@ -1,3 +1,8 @@
+Wed Aug 26 09:29:38 1998  Joyce Janczyn  <janczyn@cygnus.com>
+
+	* mn10300.igen (div,divu): Fix divide instructions so divide by 0
+	behaves like the hardware.
+
 Tue Aug 25 16:46:59 1998  Joyce Janczyn  <janczyn@cygnus.com>
 
 	* mn10300.igen (OP_F0F4): Need to load contents of register AN0
