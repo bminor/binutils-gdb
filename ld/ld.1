@@ -45,6 +45,7 @@ ld \- the GNU linker
 .I entry\c
 \&\|] 
 .RB "[\|" \-embedded\-relocs "\|]"
+.RB "[\|" \-E "\|]" 
 .RB "[\|" \-export\-dynamic "\|]"
 .RB "[\|" \-F "\|]" 
 .RB "[\|" "\-F\ "\c
@@ -463,6 +464,8 @@ create a table which may be used at runtime to relocate any data which
 was statically initialized to pointer values.  See the code in
 testsuite/ld-empic for details.
 
+.TP
+.B \-E
 .TP
 .B \-export\-dynamic
 When creating an ELF file, add all symbols to the dynamic symbol table.

@@ -1,3 +1,7 @@
+Tue Apr  9 12:18:57 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld.texinfo, ld.1: Mention -E as a synonym for -export-dynamic.
+
 Mon Apr  8 11:56:23 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/elf32.em: When checking for a native emulation, check

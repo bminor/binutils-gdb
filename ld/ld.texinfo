@@ -170,8 +170,8 @@ ld [ -o @var{output} ]  @var{objfile}@dots{}
   [ -Bstatic ]  [ -Bdynamic ]  [ -Bsymbolic ]
   [ -c @var{MRI-commandfile} ]  [ -d | -dc | -dp ]  
   [ -defsym @var{symbol}=@var{expression} ]
-  [ -dynamic-linker @var{file} ] [ -embedded-relocs ] [ -export-dynamic ]
-  [ -e @var{entry} ]  [ -F ]  [ -F @var{format} ]
+  [ -dynamic-linker @var{file} ] [ -embedded-relocs ] [ -E ]
+  [ -export-dynamic ] [ -e @var{entry} ]  [ -F ]  [ -F @var{format} ]
   [ -format @var{input-format} ]  [ -g ]  [ -G @var{size} ]
   [ -help ]  [ -i ]  [ -l@var{archive} ]  [ -L@var{searchdir} ]
   [ -M ]  [ -Map @var{mapfile} ]  [ -m @var{emulation} ]
@@ -398,8 +398,10 @@ discussion of defaults and other ways of specifying the
 entry point.
 
 @cindex dynamic symbol table
+@kindex -E
 @kindex -export-dynamic
-@item -export-dynamic
+@item -E
+@itemx -export-dynamic
 When creating an ELF file, add all symbols to the dynamic symbol table.
 Normally, the dynamic symbol table contains only symbols which are used
 by a dynamic object.  This option is needed for some uses of
