@@ -1,5 +1,9 @@
 Fri Mar 18 10:25:55 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* dstread.c (record_minimal_symbol): New arg objfile.  Pass it to
+	prim_record_minimal_symbol.
+	Callers: Pass it.
+
 	* regex.c (EXTEND_BUFFER): Adjust pointers within buffer by
 	computing their offset from the start of the old buffer and adding
 	to the new buffer, rather than by assuming we can add the

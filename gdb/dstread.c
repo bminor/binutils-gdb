@@ -78,7 +78,8 @@ static void
 dst_symfile_finish PARAMS ((struct objfile *));
 
 static void
-record_minimal_symbol PARAMS ((char *, CORE_ADDR, enum minimal_symbol_type));
+record_minimal_symbol PARAMS ((char *, CORE_ADDR, enum minimal_symbol_type,
+			       struct objfile *));
 
 static void
 dst_end_symtab PARAMS ((struct objfile *));
@@ -236,14 +237,16 @@ dst_end_symtab (objfile)
 }
 
 static void
-record_minimal_symbol (name, address, type)
+record_minimal_symbol (name, address, type, objfile)
      char *name;
      CORE_ADDR address;
      enum minimal_symbol_type type;
+     struct objfile *objfile;
 {
   prim_record_minimal_symbol (savestring (name, strlen (name)),
-			     address,
-			     type);
+			      address,
+			      type,
+			      objfile);
 }
 
 /* dst_symfile_init ()
@@ -1475,7 +1478,7 @@ process_dst_block(objfile, entry)
 	case dst_block_function:
 	case dst_block_subroutine:
 	case dst_block_program:
-		record_minimal_symbol(name, address, mst_text);
+		record_minimal_symbol(name, address, mst_text, objfile);
 		function = process_dst_function(
 			objfile,
 			symbol_entry,
@@ -1637,7 +1640,7 @@ read_dst_symtab (objfile)
 	}
 	if (module_num)
 		record_minimal_symbol("<end_of_program>",
-				BLOCK_END(block), mst_text);
+				BLOCK_END(block), mst_text, objfile);
 	/* One more faked symbol to make sure nothing can ever run off the
 	 * end of the symbol table. This one represents the end of the
 	 * text space. It used to be (CORE_ADDR) -1 (effectively the highest
@@ -1648,7 +1651,7 @@ read_dst_symtab (objfile)
 	 */
 	record_minimal_symbol("<end_of_text>",
 				(CORE_ADDR) 0x40000000,
-				mst_text);
+				mst_text, objfile);
 	while (struct_list)
 	{
 		element = struct_list;
