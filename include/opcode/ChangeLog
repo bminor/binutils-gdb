@@ -1,5 +1,8 @@
 Tue Aug 26 12:21:52 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* i386.h: Set ud2 to 0x0f0b.  From Gabriel Paubert
+	<paubert@iram.es>.
+
 	* i386.h: Comment fixes for ficom[p]?{s,l} from Gabriel Paubert
 	<paubert@iram.es>.
 

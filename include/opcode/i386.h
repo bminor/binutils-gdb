@@ -771,7 +771,7 @@ static const template i386_optab[] = {
 /* Pentium Pro extensions */
 {"rdpmc", 0, 0x0f33, _, NoModrm, { 0, 0, 0} },
 
-{"ud2", 0, 0x0fff, _, NoModrm, {0, 0, 0} }, /* official undefined instr. */
+{"ud2", 0, 0x0f0b, _, NoModrm, {0, 0, 0} }, /* official undefined instr. */
 
 {"cmovo",  2, 0x0f40, _, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
 {"cmovno", 2, 0x0f41, _, Modrm|ReverseRegRegmem, { WordReg|WordMem, WordReg, 0} },
