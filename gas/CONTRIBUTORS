@@ -1,0 +1,69 @@
+(This file is under construction.)			-*- text -*-
+
+If you've contributed to gas and your name isn't listed here, it is
+not meant as a slight.  I just don't know about it.  Email me,
+raeburn@cygnus.com and I'll correct the situation.
+
+This file will eventually be deleted: The general info will go into
+the documentation, and info on specific files will go into an AUTHORS
+file, as requested by the FSF.
+
+++++++++++++++++
+
+Dean Elsner wrote the original gas for vax.  [more details?]
+
+Jay Fenlason maintained gas for a while, adding support for
+gdb-specific debug information and the 68k series machines, most of
+the preprocessing pass, and extensive changes in messages.c,
+input-file.c, write.c.
+
+K. Richard Pixley maintained gas for a while, adding various
+enhancements and bug fixes.  [what in particular did Rich do? get
+details from rich and/or changelog]
+
+Ken Raeburn currently maintains gas, and wrote the high-level BFD
+interface code to replace most of the code in format-specific I/O
+modules.
+
+The original VMS support was contributed by David L. Kashtan.  Eric
+Youngdale has done much work with it since.
+
+The Intel 80386 machine description was written by Eliot Dresselhaus.
+
+Minh Tran-Le at IntelliCorp contributed some AIX 386 support.
+
+The Motorola 88k machine description was contributed by Devon Bowen of
+Buffalo University and Torbjorn Granlund of the Swedish Institute of
+Computer Science.
+
+Mark Eichin wrote the original (incomplete) ELF back end.
+
+Keith Knowles at the Open Software Foundation wrote the original MIPS
+back end (tc-mips.c, tc-mips.h), and contributed Rose format support
+that hasn't been merged in yet.  Ralph Campbell worked with the MIPS
+code to support a.out format.
+
+Support for the Zilog Z8k and Hitachi H8/300 and H8/500 processors
+(tc-z8k, tc-h8300, tc-h8500), and IEEE 695 object file format
+(obj-ieee), was written by Steve Chamberlain of Cygnus Support.  Steve
+also modified the COFF back end to use BFD for some low-level
+operations, for use with the H8/300 and AMD 29k targets.
+
+John Gilmore worked on the AMD 29000 support.  [doing what?  any major
+work on other parts?]
+
+Ian Lance Taylor of Cygnus Support merged the Motorola and MIT
+syntaxes for the 68k, completed support for some COFF targets (68k,
+i386 SVR3, and SCO Unix), and made a few other minor patches.
+
+Support for generation of listings was added by Steve Chamberlain.
+
+Several engineers at Cygnus Support have also provided many small bug
+fixes and configuration enhancements.
+
+
+Many others have contributed large or small bugfixes and enhancements,
+including: [review ChangeLog and file comments and sort out
+details...]
+
+Allen Wirfs-Brock, of Instantiations Inc [changed app.c, but how much?]
