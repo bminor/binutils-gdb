@@ -1226,6 +1226,9 @@ enum bfd_architecture
 #define bfd_mach_arc_graphics 2
 #define bfd_mach_arc_audio 3
   /* end-sanitize-arc */
+  /* start-sanitize-m32r */
+  bfd_arch_m32r,       /* Mitsubishi M32R */
+  /* end-sanitize-m32r */
   bfd_arch_last
   };
 
@@ -1829,9 +1832,14 @@ assumed to be 0. */
   BFD_RELOC_D10V_18_PCREL,
 /* end-sanitize-d10v */
 
-/* NEC V850 relocs. */
+/* start-sanitize-v850 */
+
+/* This is a 9-bit reloc */
   BFD_RELOC_V850_9_PCREL,
+
+/* This is a 22-bit reloc */
   BFD_RELOC_V850_22_PCREL,
+/* end-sanitize-v850 */
 
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;

@@ -1,3 +1,9 @@
+start-sanitize-m324
+Mon Sep  9 22:36:01 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* bfd-in2.h: Rebuilt after m32r changes.
+
+end-sanitize-m32r
 Mon Sep  9 12:31:22 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 start-sanitize-m32r
