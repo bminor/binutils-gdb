@@ -173,7 +173,7 @@ mips_saved_regsize (void)
     return 4;
 }
 
-/* Macros for setting and testing a bit in a minimal symbol that
+/* Functions for setting and testing a bit in a minimal symbol that
    marks it as 16-bit function.  The MSB of the minimal symbol's
    "info" field is used for this purpose. This field is already
    being used to store the symbol size, so the assumption is
@@ -187,11 +187,6 @@ mips_saved_regsize (void)
    MSYMBOL_SIZE         returns the size of the minimal symbol, i.e.
    the "info" field with the "special" bit masked out */
 
-#define MSYMBOL_IS_SPECIAL(msym) \
-  (((long) MSYMBOL_INFO (msym) & 0x80000000) != 0)
-#define MSYMBOL_SIZE(msym) \
-  ((long) MSYMBOL_INFO (msym) & 0x7fffffff)
-
 static void
 mips_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
 {
@@ -201,6 +196,18 @@ mips_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
 	(((long) MSYMBOL_INFO (msym)) | 0x80000000); 
       SYMBOL_VALUE_ADDRESS (msym) |= 1; 
     } 
+}
+
+static int
+msymbol_is_special (struct minimal_symbol *msym)
+{
+  return (((long) MSYMBOL_INFO (msym) & 0x80000000) != 0);
+}
+
+static long
+msymbol_size (struct minimal_symbol *msym)
+{
+  return ((long) MSYMBOL_INFO (msym) & 0x7fffffff);
 }
 
 /* XFER a value from the big/little/left end of the register.
@@ -745,7 +752,7 @@ pc_is_mips16 (bfd_vma memaddr)
      MIPS16 or normal MIPS.  */
   sym = lookup_minimal_symbol_by_pc (memaddr);
   if (sym)
-    return MSYMBOL_IS_SPECIAL (sym);
+    return msymbol_is_special (sym);
   else
     return 0;
 }
@@ -6137,9 +6144,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: ECOFF_REG_TO_REGNUM # %s\n",
 		      XSTRING (ECOFF_REG_TO_REGNUM (REGNUM)));
   fprintf_unfiltered (file,
-		      "mips_dump_tdep: ELF_MAKE_MSYMBOL_SPECIAL # %s\n",
-		      XSTRING (ELF_MAKE_MSYMBOL_SPECIAL (SYM, MSYM)));
-  fprintf_unfiltered (file,
 		      "mips_dump_tdep: FCRCS_REGNUM = %d\n",
 		      FCRCS_REGNUM);
   fprintf_unfiltered (file,
@@ -6235,11 +6239,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: MIPS_SAVED_REGSIZE = %d\n",
 		      MIPS_SAVED_REGSIZE);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: MSYMBOL_IS_SPECIAL = function?\n");
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: MSYMBOL_SIZE # %s\n",
-		      XSTRING (MSYMBOL_SIZE (MSYM)));
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: OP_LDFPR = used?\n");
   fprintf_unfiltered (file,
