@@ -1,3 +1,8 @@
+2003-04-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* symfile.c (symfile_relocate_debug_section): Update call to
+	bfd_simple_get_relocated_section_contents.
+
 2003-03-31  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (FIX_CALL_DUMMY): Change to function with predicate.
