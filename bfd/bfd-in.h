@@ -694,6 +694,22 @@ extern long bfd_get_elf_phdr_upper_bound
 extern int bfd_get_elf_phdrs
   PARAMS ((bfd *abfd, void *phdrs));
 
+/* Create a new BFD as if by bfd_openr.  Rather than opening a file,
+   reconstruct an ELF file by reading the segments out of remote memory
+   based on the ELF file header at EHDR_VMA and the ELF program headers it
+   points to.  If not null, *LOADBASEP is filled in with the difference
+   between the VMAs from which the segments were read, and the VMAs the
+   file headers (and hence BFD's idea of each section's VMA) put them at.
+
+   The function TARGET_READ_MEMORY is called to copy LEN bytes from the
+   remote memory at target address VMA into the local buffer at MYADDR; it
+   should return zero on success or an `errno' code on failure.  TEMPL must
+   be a BFD for an ELF target with the word size and byte order found in
+   the remote memory.  */
+extern bfd *bfd_elf_bfd_from_remote_memory
+  PARAMS ((bfd *templ, bfd_vma ehdr_vma, bfd_vma *loadbasep,
+	   int (*target_read_memory) (bfd_vma vma, char *myaddr, int len)));
+
 /* Return the arch_size field of an elf bfd, or -1 if not elf.  */
 extern int bfd_get_arch_size
   PARAMS ((bfd *));
@@ -849,4 +865,3 @@ extern void bfd_ticoff_set_section_load_page
 
 extern int bfd_ticoff_get_section_load_page
   PARAMS ((struct sec *));
-

@@ -875,6 +875,12 @@ struct elf_backend_data
      Used for the MIPS ELF .mdebug section.  */
   const struct ecoff_debug_swap *elf_backend_ecoff_debug_swap;
 
+  /* This function implements `bfd_elf_bfd_from_remote_memory';
+     see elf.c, elfcode.h.  */
+  bfd *(*elf_backend_bfd_from_remote_memory)
+     PARAMS ((bfd *templ, bfd_vma ehdr_vma, bfd_vma *loadbasep,
+	      int (*target_read_memory) (bfd_vma vma, char *myaddr, int len)));
+
   /* Alternate EM_xxxx machine codes for this backend.  */
   int elf_machine_alt1;
   int elf_machine_alt2;
@@ -1749,6 +1755,13 @@ extern char *elfcore_write_prxfpreg
   PARAMS ((bfd *, char *, int *, const PTR, int));
 extern char *elfcore_write_lwpstatus
   PARAMS ((bfd *, char *, int *, long, int, const PTR));
+
+extern bfd *_bfd_elf32_bfd_from_remote_memory
+  PARAMS ((bfd *templ, bfd_vma ehdr_vma, bfd_vma *loadbasep,
+	   int (*target_read_memory) (bfd_vma, char *, int)));
+extern bfd *_bfd_elf64_bfd_from_remote_memory
+  PARAMS ((bfd *templ, bfd_vma ehdr_vma, bfd_vma *loadbasep,
+	   int (*target_read_memory) (bfd_vma, char *, int)));
 
 /* SH ELF specific routine.  */
 
