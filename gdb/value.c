@@ -83,7 +83,7 @@ allocate_value (struct type *type)
   struct value *val;
   struct type *atype = check_typedef (type);
 
-  val = (struct value *) xmalloc (sizeof (struct value) + TYPE_LENGTH (atype));
+  val = (struct value *) xzalloc (sizeof (struct value) + TYPE_LENGTH (atype));
   val->next = all_values;
   all_values = val;
   val->type = type;

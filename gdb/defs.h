@@ -856,10 +856,13 @@ extern char *savestring (const char *, size_t);
    "libiberty.h". */
 extern void xfree (void *);
 
+/* Like xmalloc, but zero the memory.  */
+extern void *xzalloc (size_t);
+
 /* Utility macros to allocate typed memory.  Avoids errors like:
    struct foo *foo = xmalloc (sizeof struct bar); and memset (foo,
    sizeof (struct foo), 0).  */
-#define XZALLOC(TYPE) ((TYPE*) memset (xmalloc (sizeof (TYPE)), 0, sizeof (TYPE)))
+#define XZALLOC(TYPE) ((TYPE*) xzalloc (sizeof (TYPE)))
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 #define XCALLOC(NMEMB, TYPE) ((TYPE*) xcalloc ((NMEMB), sizeof (TYPE)))
 

@@ -297,17 +297,6 @@ static void handle_psymbol_enumerators (struct objfile *, FDR *, int,
 
 static char *mdebug_next_symbol_text (struct objfile *);
 
-/* Allocate zeroed memory */
-
-static void *
-xzalloc (unsigned int size)
-{
-  void *p = xmalloc (size);
-
-  memset (p, 0, size);
-  return p;
-}
-
 /* Exported procedure: Builds a symtab from the PST partial one.
    Restores the environment in effect when PST was created, delegates
    most of the work to an ancillary procedure, and sorts

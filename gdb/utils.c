@@ -947,6 +947,12 @@ xmalloc (size_t size)
   return (val);
 }
 
+void *
+xzalloc (size_t size)
+{
+  return xcalloc (1, size);
+}
+
 PTR				/* OK: PTR */
 xrealloc (PTR ptr, size_t size)	/* OK: PTR */
 {
