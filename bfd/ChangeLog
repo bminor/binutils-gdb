@@ -1,3 +1,17 @@
+2002-03-05  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* elf-hppa.h (elf_hppa_is_dynamic_loader_symbol): New function.
+	(elf_hppa_relocate_section): Ignore undefined dynamic loader symbols.
+	(elf_hppa_final_link_relocate): Correct relocations for indirect
+	references to local data through the DLT.  Fix .opd creation for
+	local symbols using R_PARISC_LTOFF_FPTR32 and R_PARISC_FPTR64
+	relocations.  Use e_lsel selector for R_PARISC_DLTIND21L,
+	R_PARISC_LTOFF_FPTR21L and R_PARISC_LTOFF_TP21L as per
+	"Processor-Specific ELF for PA_RISC, Version 1.43" document.
+	Similarly, use e_rsel for DLT and LTOFF 'R' relocations.
+	* elf32-hppa.c (final_link_relocate): Revise relocation selectors
+	as per "Processor-Specific ELF for PA_RISC, Version 1.43" document.
+
 2002-03-05  Jakub Jelinek  <jakub@redhat.com>
 
 	* merge.c (_bfd_merge_sections): Don't segfault if there

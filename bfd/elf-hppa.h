@@ -75,6 +75,9 @@ static boolean elf_hppa_unmark_useless_dynamic_symbols
 static boolean elf_hppa_remark_useless_dynamic_symbols
   PARAMS ((struct elf_link_hash_entry *, PTR));
 
+static boolean elf_hppa_is_dynamic_loader_symbol
+  PARAMS ((const char *));
+
 static void elf_hppa_record_segment_addrs
   PARAMS ((bfd *, asection *, PTR));
 
@@ -1136,6 +1139,23 @@ elf_hppa_remark_useless_dynamic_symbols (h, data)
   return true;
 }
 
+static boolean
+elf_hppa_is_dynamic_loader_symbol (name)
+     const char * name;
+{
+  return (! strcmp (name, "__CPU_REVISION")
+	  || ! strcmp (name, "__CPU_KEYBITS_1")
+	  || ! strcmp (name, "__SYSTEM_ID_D")
+	  || ! strcmp (name, "__FPU_MODEL")
+	  || ! strcmp (name, "__FPU_REVISION")
+	  || ! strcmp (name, "__ARGC")
+	  || ! strcmp (name, "__ARGV")
+	  || ! strcmp (name, "__ENVP")
+	  || ! strcmp (name, "__TLS_SIZE_D")
+	  || ! strcmp (name, "__LOAD_INFO")
+	  || ! strcmp (name, "__systab"));
+}
+
 /* Record the lowest address for the data and text segments.  */
 static void
 elf_hppa_record_segment_addrs (abfd, section, data)
@@ -1419,11 +1439,17 @@ elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	    relocation = 0;
 	  else
 	    {
-	      if (!((*info->callbacks->undefined_symbol)
-		    (info, h->root.root.string, input_bfd,
-		     input_section, rel->r_offset, true)))
-		return false;
-	      break;
+	      /* Ignore dynamic loader defined symbols.  */
+	      if (elf_hppa_is_dynamic_loader_symbol (h->root.root.string))
+		relocation = 0;
+	      else
+		{
+		  if (!((*info->callbacks->undefined_symbol)
+			(info, h->root.root.string, input_bfd,
+			 input_section, rel->r_offset, true)))
+		    return false;
+		  break;
+		}
 	    }
 	}
 
@@ -1620,11 +1646,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	   a local function which had its address taken.  */
 	if (dyn_h->h == NULL)
 	  {
-	    bfd_put_64 (hppa_info->dlt_sec->owner,
-			value,
-			hppa_info->dlt_sec->contents + dyn_h->dlt_offset);
-
-	    /* Now handle .opd creation if needed.  */
+	    /* Now do .opd creation if needed.  */
 	    if (r_type == R_PARISC_LTOFF_FPTR14R
 		|| r_type == R_PARISC_LTOFF_FPTR14DR
 		|| r_type == R_PARISC_LTOFF_FPTR14WR
@@ -1638,7 +1660,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 			0, 16);
 
 		/* The next word is the address of the function.  */
-		bfd_put_64 (hppa_info->opd_sec->owner, value,
+		bfd_put_64 (hppa_info->opd_sec->owner, value + addend,
 			    (hppa_info->opd_sec->contents
 			     + dyn_h->opd_offset + 16));
 
@@ -1648,7 +1670,17 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 		bfd_put_64 (hppa_info->opd_sec->owner, value,
 			    (hppa_info->opd_sec->contents
 			     + dyn_h->opd_offset + 24));
+
+		/* The DLT value is the address of the .opd entry.  */
+		value = (dyn_h->opd_offset
+			 + hppa_info->opd_sec->output_offset
+			 + hppa_info->opd_sec->output_section->vma);
+		addend = 0;
 	      }
+
+	    bfd_put_64 (hppa_info->dlt_sec->owner,
+			value + addend,
+			hppa_info->dlt_sec->contents + dyn_h->dlt_offset);
 	  }
 
 	/* We want the value of the DLT offset for this symbol, not
@@ -1666,7 +1698,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	if (r_type == R_PARISC_DLTIND21L
 	    || r_type == R_PARISC_LTOFF_FPTR21L
 	    || r_type == R_PARISC_LTOFF_TP21L)
-	  value = hppa_field_adjust (value, addend, e_lrsel);
+	  value = hppa_field_adjust (value, 0, e_lsel);
 	else if (r_type == R_PARISC_DLTIND14F
 		 || r_type == R_PARISC_LTOFF_FPTR16F
 		 || r_type == R_PARISC_LTOFF_FPTR16WF
@@ -1677,9 +1709,9 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 		 || r_type == R_PARISC_LTOFF_TP16F
 		 || r_type == R_PARISC_LTOFF_TP16WF
 		 || r_type == R_PARISC_LTOFF_TP16DF)
-	  value = hppa_field_adjust (value, addend, e_fsel);
+	  value = hppa_field_adjust (value, 0, e_fsel);
 	else
-	  value = hppa_field_adjust (value, addend, e_rrsel);
+	  value = hppa_field_adjust (value, 0, e_rsel);
 
 	insn = elf_hppa_relocate_insn (insn, (int) value, r_type);
 	break;
@@ -1804,7 +1836,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	    memset (hppa_info->opd_sec->contents + dyn_h->opd_offset, 0, 16);
 
 	    /* The next word is the address of the function.  */
-	    bfd_put_64 (hppa_info->opd_sec->owner, value,
+	    bfd_put_64 (hppa_info->opd_sec->owner, value + addend,
 			(hppa_info->opd_sec->contents
 			 + dyn_h->opd_offset + 16));
 
@@ -1813,6 +1845,15 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 		      (hppa_info->opd_sec->output_section->owner);
 	    bfd_put_64 (hppa_info->opd_sec->owner, value,
 			hppa_info->opd_sec->contents + dyn_h->opd_offset + 24);
+
+	    /* The DLT value is the address of the .opd entry.  */
+	    value = (dyn_h->opd_offset
+		     + hppa_info->opd_sec->output_offset
+		     + hppa_info->opd_sec->output_section->vma);
+
+	    bfd_put_64 (hppa_info->dlt_sec->owner,
+			value,
+			hppa_info->dlt_sec->contents + dyn_h->dlt_offset);
 	  }
 
 	/* We want the value of the DLT offset for this symbol, not
@@ -1838,7 +1879,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	    memset (hppa_info->opd_sec->contents + dyn_h->opd_offset, 0, 16);
 
 	    /* The next word is the address of the function.  */
-	    bfd_put_64 (hppa_info->opd_sec->owner, value,
+	    bfd_put_64 (hppa_info->opd_sec->owner, value + addend,
 			(hppa_info->opd_sec->contents
 			 + dyn_h->opd_offset + 16));
 
@@ -1847,6 +1888,15 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 		      (hppa_info->opd_sec->output_section->owner);
 	    bfd_put_64 (hppa_info->opd_sec->owner, value,
 			hppa_info->opd_sec->contents + dyn_h->opd_offset + 24);
+
+	    /* The DLT value is the address of the .opd entry.  */
+	    value = (dyn_h->opd_offset
+		     + hppa_info->opd_sec->output_offset
+		     + hppa_info->opd_sec->output_section->vma);
+
+	    bfd_put_64 (hppa_info->dlt_sec->owner,
+			value,
+			hppa_info->dlt_sec->contents + dyn_h->dlt_offset);
 	  }
 
 	/* We want the value of the DLT offset for this symbol, not
@@ -1938,7 +1988,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	    memset (hppa_info->opd_sec->contents + dyn_h->opd_offset, 0, 16);
 
 	    /* The next word is the address of the function.  */
-	    bfd_put_64 (hppa_info->opd_sec->owner, value,
+	    bfd_put_64 (hppa_info->opd_sec->owner, value + addend,
 			(hppa_info->opd_sec->contents
 			 + dyn_h->opd_offset + 16));
 
@@ -1955,7 +2005,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 		 + hppa_info->opd_sec->output_offset
 		 + hppa_info->opd_sec->output_section->vma);
 
-	bfd_put_64 (input_bfd, value + addend, hit_data);
+	bfd_put_64 (input_bfd, value, hit_data);
 	return bfd_reloc_ok;
       }
 
