@@ -219,7 +219,7 @@ add_to_section_table (abfd, asect, table_pp_char)
   if (0 == bfd_section_size (abfd, asect))
     return;
   (*table_pp)->bfd = abfd;
-  (*table_pp)->sec_ptr = asect;
+  (*table_pp)->the_bfd_section = asect;
   (*table_pp)->addr = bfd_section_vma (abfd, asect);
   (*table_pp)->endaddr = (*table_pp)->addr + bfd_section_size (abfd, asect);
   (*table_pp)++;
@@ -357,7 +357,7 @@ xfer_memory (memaddr, myaddr, len, write, target)
 	if (p->endaddr >= memend)
 	  {
 	    /* Entire transfer is within this section.  */
-	    res = xfer_fn (p->bfd, p->sec_ptr, myaddr, memaddr - p->addr, len);
+	    res = xfer_fn (p->bfd, p->the_bfd_section, myaddr, memaddr - p->addr, len);
 	    return (res != false)? len: 0;
 	  }
 	else if (p->endaddr <= memaddr)
@@ -369,7 +369,7 @@ xfer_memory (memaddr, myaddr, len, write, target)
 	  {
 	    /* This section overlaps the transfer.  Just do half.  */
 	    len = p->endaddr - memaddr;
-	    res = xfer_fn (p->bfd, p->sec_ptr, myaddr, memaddr - p->addr, len);
+	    res = xfer_fn (p->bfd, p->the_bfd_section, myaddr, memaddr - p->addr, len);
 	    return (res != false)? len: 0;
 	  }
       else if (p->addr < nextsectaddr)
@@ -401,8 +401,8 @@ print_section_info (t, abfd)
 		     local_hex_string_custom ((unsigned long) p->endaddr, "08l"));
     if (info_verbose)
       printf_filtered (" @ %s",
-		       local_hex_string_custom ((unsigned long) p->sec_ptr->filepos, "08l"));
-    printf_filtered (" is %s", bfd_section_name (p->bfd, p->sec_ptr));
+		       local_hex_string_custom ((unsigned long) p->the_bfd_section->filepos, "08l"));
+    printf_filtered (" is %s", bfd_section_name (p->bfd, p->the_bfd_section));
     if (p->bfd != abfd) {
       printf_filtered (" in %s", bfd_get_filename (p->bfd));
     }
@@ -511,8 +511,8 @@ set_section_command (args, from_tty)
   secaddr = parse_and_eval_address (args);
 
   for (p = exec_ops.to_sections; p < exec_ops.to_sections_end; p++) {
-    if (!strncmp (secname, bfd_section_name (exec_bfd, p->sec_ptr), seclen)
-	&& bfd_section_name (exec_bfd, p->sec_ptr)[seclen] == '\0') {
+    if (!strncmp (secname, bfd_section_name (exec_bfd, p->the_bfd_section), seclen)
+	&& bfd_section_name (exec_bfd, p->the_bfd_section)[seclen] == '\0') {
       offset = secaddr - p->addr;
       p->addr += offset;
       p->endaddr += offset;

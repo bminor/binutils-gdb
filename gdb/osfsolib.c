@@ -214,7 +214,7 @@ solib_map_sections (so)
       p -> addr += (CORE_ADDR) LM_ADDR (so);
       p -> endaddr += (CORE_ADDR) LM_ADDR (so);
       so -> lmend = (CORE_ADDR) max (p -> endaddr, so -> lmend);
-      if (STREQ (p -> sec_ptr -> name, ".text"))
+      if (STREQ (p -> the_bfd_section -> name, ".text"))
 	{
 	  so -> textsection = p;
 	}

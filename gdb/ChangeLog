@@ -1,3 +1,26 @@
+Sat Mar 19 08:51:12 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (TAGS): Use variables directly, rather than using
+	find, to locate TM_FILE, XM_FILE, and NAT_FILE.  This is faster
+	and means that these filenames no longer need be unique across all
+	the config/* directories.
+	* configure.in: Put the config/*/ into TM_FILE, etc.
+
+	* m68k-stub.c (computeSignal): Return SIGFPE, not SIGURG, for chk
+	and trapv exceptions.
+
+	* target.h (struct section_table), objfiles.h (struct obj_section):
+	Change name of field sec_ptr to the_bfd_section.  More mnemonic
+	and avoids the (sort of, for the ptx compiler) name clash with
+	the name of the typedef.
+	* exec.c, xcoffexec.c, sparc-tdep.c, rs6000-nat.c, osfsolib.c,
+	solib.c, irix5-nat.c, objfiles.c, remote.c: Change users.
+
+	* utils.c: Include readline.h.
+	* Makefile.in (utils.o): Add dependency.
+
+	* remote.c (getpkt): Add support for run-length encoding.
+
 Fri Mar 18 19:11:15 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* utils.c (prompt_for_continue): Call readline, not gdb_readline.

@@ -495,7 +495,8 @@ gdb.z:gdb.1
 # install-only is intended to address that need.
 install: all install-only
 install-only:
-	transformed_name=`echo gdb | sed '$(program_transform_name)'` ; \
+	transformed_name=`t='$(program_transform_name)'; \
+			  echo gdb | sed -e "s/brokensed/brokensed/" $$t` ; \
 	if test "x$$transformed_name" = x; then \
 	  transformed_name=gdb ; \
 	else \
@@ -629,9 +630,9 @@ kdb:	$(NTSSTART) $(OBS) $(NTSOBS) $(ADD_DEPS) $(CDEPS)
 
 TAGS: $(TAGFILES_NO_SRCDIR) $(TAGFILES_WITH_SRCDIR)
 	@echo Making TAGS
-	@etags `find $(srcdir)/config \( -name $(TM_FILE) \
-		-o -name $(XM_FILE) \
-		-o -name $(NAT_FILE) \) -print` \
+	@etags $(srcdir)/$(TM_FILE) \
+	  $(srcdir)/$(XM_FILE) \
+	  $(srcdir)/$(NAT_FILE) \
 	`(for i in $(DEPFILES) $(TAGFILES_NO_SRCDIR); do \
 		echo $(srcdir)/$$i ; \
 	done ; for i in $(TAGFILES_WITH_SRCDIR); do \
@@ -1392,7 +1393,7 @@ remote-z8k.o: remote-z8k.c $(wait_h) $(srcdir)/../sim/z8k/sim.h \
 	$(defs_h) $(gdbcore_h) $(inferior_h) target.h terminal.h
 
 remote-utils.o: remote-utils.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) $(remote_utils_h) 
+	$(inferior_h) $(remote_utils_h)
 
 remote.o: remote.c $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(remote_utils_h) symfile.h terminal.h
@@ -1467,7 +1468,7 @@ ultra3-xdep.o: ultra3-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 umax-xdep.o: umax-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 utils.o: utils.c $(bfd_h) $(defs_h) $(expression_h) $(gdbcmd_h) \
-	language.h signals.h target.h terminal.h
+	language.h signals.h target.h terminal.h $(readline_headers)
 
 valarith.o: valarith.c $(bfd_h) $(defs_h) $(expression_h) \
 	$(gdbtypes_h) language.h $(symtab_h) target.h $(value_h)

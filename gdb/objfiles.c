@@ -83,7 +83,7 @@ add_to_objfile_sections (abfd, asect, objfile_p_char)
     return;
   section.offset = 0;
   section.objfile = objfile;
-  section.sec_ptr = asect;
+  section.the_bfd_section = asect;
   section.addr = bfd_section_vma (abfd, asect);
   section.endaddr = section.addr + bfd_section_size (abfd, asect);
   obstack_grow (&objfile->psymbol_obstack, &section, sizeof(section));

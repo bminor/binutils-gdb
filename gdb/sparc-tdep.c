@@ -1,5 +1,6 @@
 /* Target-dependent code for the SPARC for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -175,6 +176,15 @@ sparc_frame_saved_pc (frame)
 
       CORE_ADDR sigcontext_addr;
       char scbuf[TARGET_PTR_BIT / HOST_CHAR_BIT];
+      int saved_pc_offset = SIGCONTEXT_PC_OFFSET;
+      char *name = NULL;
+
+      /* Solaris2 ucbsigvechandler passes a pointer to a sigcontext
+	 as the third parameter.  The offset to the saved pc is 12.  */
+      find_pc_partial_function (frame->pc, &name,
+				(CORE_ADDR *)NULL,(CORE_ADDR *)NULL);
+      if (name && STREQ (name, "ucbsigvechandler"))
+	saved_pc_offset = 12;
 
       /* The sigcontext address is contained in register O2.  */
       get_saved_register (buf, (int *)NULL, (CORE_ADDR *)NULL,
@@ -183,7 +193,7 @@ sparc_frame_saved_pc (frame)
 
       /* Don't cause a memory_error when accessing sigcontext in case the
 	 stack layout has changed or the stack is corrupt.  */
-      target_read_memory (sigcontext_addr + SIGCONTEXT_PC_OFFSET,
+      target_read_memory (sigcontext_addr + saved_pc_offset,
 			  scbuf, sizeof (scbuf));
       return extract_address (scbuf, sizeof (scbuf));
     }
@@ -788,8 +798,8 @@ in_solib_trampoline(pc, name)
   s = find_pc_section(pc);
   
   retval = (s != NULL
-	    && s->sec_ptr->name != NULL
-	    && STREQ (s->sec_ptr->name, ".plt"));
+	    && s->the_bfd_section->name != NULL
+	    && STREQ (s->the_bfd_section->name, ".plt"));
   return(retval);
 }
 

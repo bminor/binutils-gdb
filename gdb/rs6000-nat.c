@@ -315,17 +315,17 @@ vmap_symtab (vp)
     struct obj_section *s;
     for (s = objfile->sections; s < objfile->sections_end; ++s)
       {
-	if (s->sec_ptr->target_index == textsec->target_index)
+	if (s->the_bfd_section->target_index == textsec->target_index)
 	  {
 	    s->addr += text_delta;
 	    s->endaddr += text_delta;
 	  }
-	else if (s->sec_ptr->target_index == datasec->target_index)
+	else if (s->the_bfd_section->target_index == datasec->target_index)
 	  {
 	    s->addr += data_delta;
 	    s->endaddr += data_delta;
 	  }
-	else if (s->sec_ptr->target_index == bsssec->target_index)
+	else if (s->the_bfd_section->target_index == bsssec->target_index)
 	  {
 	    s->addr += bss_delta;
 	    s->endaddr += bss_delta;
@@ -555,12 +555,12 @@ vmap_exec ()
 
   for (i=0; &exec_ops.to_sections[i] < exec_ops.to_sections_end; i++)
     {
-      if (STREQ(".text", exec_ops.to_sections[i].sec_ptr->name))
+      if (STREQ(".text", exec_ops.to_sections[i].the_bfd_section->name))
 	{
 	  exec_ops.to_sections[i].addr += vmap->tstart;
 	  exec_ops.to_sections[i].endaddr += vmap->tstart;
 	}
-      else if (STREQ(".data", exec_ops.to_sections[i].sec_ptr->name))
+      else if (STREQ(".data", exec_ops.to_sections[i].the_bfd_section->name))
 	{
 	  exec_ops.to_sections[i].addr += vmap->dstart;
 	  exec_ops.to_sections[i].endaddr += vmap->dstart;
@@ -727,15 +727,15 @@ bfd_err:
 	     and if vp->tstart is 0xd0002000, then the first byte of
 	     the text section on disk corresponds to address 0xd0002200.  */
 	  stp->bfd = vp->bfd;
-	  stp->sec_ptr = bfd_get_section_by_name (stp->bfd, ".text");
-	  stp->addr = bfd_section_vma (stp->bfd, stp->sec_ptr) + vp->tstart;
-	  stp->endaddr = bfd_section_vma (stp->bfd, stp->sec_ptr) + vp->tend;
+	  stp->the_bfd_section = bfd_get_section_by_name (stp->bfd, ".text");
+	  stp->addr = bfd_section_vma (stp->bfd, stp->the_bfd_section) + vp->tstart;
+	  stp->endaddr = bfd_section_vma (stp->bfd, stp->the_bfd_section) + vp->tend;
 	  stp++;
 	  
 	  stp->bfd = vp->bfd;
-	  stp->sec_ptr = bfd_get_section_by_name (stp->bfd, ".data");
-	  stp->addr = bfd_section_vma (stp->bfd, stp->sec_ptr) + vp->dstart;
-	  stp->endaddr = bfd_section_vma (stp->bfd, stp->sec_ptr) + vp->dend;
+	  stp->the_bfd_section = bfd_get_section_by_name (stp->bfd, ".data");
+	  stp->addr = bfd_section_vma (stp->bfd, stp->the_bfd_section) + vp->dstart;
+	  stp->endaddr = bfd_section_vma (stp->bfd, stp->the_bfd_section) + vp->dend;
 	}
 
       vmap_symtab (vp);
