@@ -1,31 +1,30 @@
 /* Intel 386 native support for SYSV systems (pre-SVR4).
    Copyright (C) 1988, 89, 91, 92, 94, 96, 1998 Free Software Foundation, Inc.
 
-   This file is part of GDB.
+This file is part of GDB.
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 
 #ifdef HAVE_PTRACE_H
-#include <ptrace.h>
+# include <ptrace.h>
 #else
-#ifdef HAVE_SYS_PTRACE_H
-#include <sys/ptrace.h>
-#endif
+# ifdef HAVE_SYS_PTRACE_H
+#  include <sys/ptrace.h>
+# endif
 #endif
 
 #include "frame.h"
@@ -53,11 +52,11 @@
  */
 
 #ifdef TARGET_HAS_HARDWARE_WATCHPOINTS
-#ifdef HAVE_ASM_DEBUGREG_H
-#include <asm/debugreg.h>
-#else
-#include <sys/debugreg.h>
-#endif
+# ifdef HAVE_ASM_DEBUGREG_H
+#  include <asm/debugreg.h>
+# else
+#  include <sys/debugreg.h>
+# endif
 #endif
 
 #include <sys/file.h>
@@ -70,11 +69,11 @@
 #include "floatformat.h"
 
 #include "target.h"
-
 
+
 /* this table must line up with REGISTER_NAMES in tm-i386v.h */
 /* symbols like 'EAX' come from <sys/reg.h> */
-static int regmap[] =
+static int regmap[] = 
 {
   EAX, ECX, EDX, EBX,
   UESP, EBP, ESI, EDI,
@@ -97,22 +96,22 @@ i386_register_u_addr (blockend, regnum)
 
   ubase = blockend;
   /* FIXME:  Should have better way to test floating point range */
-  if (regnum >= FP0_REGNUM && regnum <= (FP0_REGNUM + 7))
+  if (regnum >= FP0_REGNUM && regnum <= (FP0_REGNUM + 7)) 
     {
-#ifdef KSTKSZ			/* SCO, and others? */
+#ifdef KSTKSZ	/* SCO, and others? */
       ubase += 4 * (SS + 1) - KSTKSZ;
-      fpstate = ubase + ((char *) &u.u_fps.u_fpstate - (char *) &u);
+      fpstate = ubase + ((char *)&u.u_fps.u_fpstate - (char *)&u);
       return (fpstate + 0x1c + 10 * (regnum - FP0_REGNUM));
 #else
-      fpstate = ubase + ((char *) &u.i387.st_space - (char *) &u);
+      fpstate = ubase + ((char *)&u.i387.st_space - (char *)&u);
       return (fpstate + 10 * (regnum - FP0_REGNUM));
 #endif
-    }
+    } 
   else
     {
       return (ubase + 4 * regmap[regnum]);
     }
-
+  
 }
 
 int
@@ -135,7 +134,7 @@ static CORE_ADDR address_lookup[DR_LASTADDR - DR_FIRSTADDR + 1];
 
 static int
 i386_insert_aligned_watchpoint PARAMS ((int, CORE_ADDR, CORE_ADDR, int,
-					int));
+					   int));
 
 static int
 i386_insert_nonaligned_watchpoint PARAMS ((int, CORE_ADDR, CORE_ADDR, int,
@@ -165,7 +164,7 @@ i386_insert_aligned_watchpoint (pid, waddr, addr, len, rw)
   int read_write_bits, len_bits;
   int free_debug_register;
   int register_number;
-
+  
   /* Look for a free debug register.  */
   for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
     {
@@ -196,7 +195,7 @@ i386_insert_aligned_watchpoint (pid, waddr, addr, len, rw)
     }
   else
     return i386_insert_nonaligned_watchpoint (pid, waddr, addr, len, rw);
-
+  
   free_debug_register = i;
   register_number = free_debug_register - DR_FIRSTADDR;
   debug_control_mirror |=
@@ -206,7 +205,7 @@ i386_insert_aligned_watchpoint (pid, waddr, addr, len, rw)
     (1 << (DR_LOCAL_ENABLE_SHIFT + DR_ENABLE_SIZE * register_number));
   debug_control_mirror |= DR_LOCAL_SLOWDOWN;
   debug_control_mirror &= ~DR_CONTROL_RESERVED;
-
+  
   ptrace (6, pid, offsetof (struct user, u_debugreg[DR_CONTROL]),
 	  debug_control_mirror);
   ptrace (6, pid, offsetof (struct user, u_debugreg[free_debug_register]),
@@ -229,12 +228,11 @@ i386_insert_nonaligned_watchpoint (pid, waddr, addr, len, rw)
   int size;
   int rv;
 
-  static int size_try_array[4][4] =
-  {
-    { 1, 1, 1, 1 },		/* trying size one */
-    { 2, 1, 2, 1 },		/* trying size two */
-    { 2, 1, 2, 1 },		/* trying size three */
-    { 4, 1, 2, 1 }		/* trying size four */
+  static int size_try_array[16] = {
+    1, 1, 1, 1,			/* trying size one */
+    2, 1, 2, 1,			/* trying size two */
+    2, 1, 2, 1,			/* trying size three */
+    4, 1, 2, 1			/* trying size four */
   };
 
   rv = 0;
@@ -242,7 +240,8 @@ i386_insert_nonaligned_watchpoint (pid, waddr, addr, len, rw)
     {
       align = addr % 4;
       /* Four is the maximum length for 386.  */
-      size = size_try_array[len > 4 ? 3 : len - 1][align];
+      size = (len > 4) ? 3 : len - 1;
+      size = size_try_array[size * 4 + align];
 
       rv = i386_insert_aligned_watchpoint (pid, waddr, addr, size, rw);
       if (rv)
@@ -288,7 +287,7 @@ i386_remove_watchpoint (pid, addr, len)
 
 CORE_ADDR
 i386_stopped_by_watchpoint (pid)
-     int pid;
+    int pid;
 {
   int i;
   int status;
@@ -306,3 +305,88 @@ i386_stopped_by_watchpoint (pid)
 }
 
 #endif /* TARGET_HAS_HARDWARE_WATCHPOINTS */
+
+#if 0
+/* using FLOAT_INFO as is would be a problem.  FLOAT_INFO is called
+   via a command xxx and eventually calls ptrace without ever having
+   traversed the target vector.  This would be terribly impolite
+   behaviour for a sun4 hosted remote gdb.
+
+   A fix might be to move this code into the "info registers" command.
+   rich@cygnus.com 15 Sept 92. */
+i386_float_info ()
+{
+  struct user u; /* just for address computations */
+  int i;
+  /* fpstate defined in <sys/user.h> */
+  struct fpstate *fpstatep;
+  char buf[sizeof (struct fpstate) + 2 * sizeof (int)];
+  unsigned int uaddr;
+  char fpvalid = 0;
+  unsigned int rounded_addr;
+  unsigned int rounded_size;
+  extern int corechan;
+  int skip;
+  
+  uaddr = (char *)&u.u_fpvalid - (char *)&u;
+  if (target_has_execution)
+    {
+      unsigned int data;
+      unsigned int mask;
+      
+      rounded_addr = uaddr & -sizeof (int);
+      data = ptrace (3, inferior_pid, (PTRACE_ARG3_TYPE) rounded_addr, 0);
+      mask = 0xff << ((uaddr - rounded_addr) * 8);
+      
+      fpvalid = ((data & mask) != 0);
+    } 
+#if 0
+  else 
+    {
+      if (lseek (corechan, uaddr, 0) < 0)
+	perror ("seek on core file");
+      if (myread (corechan, &fpvalid, 1) < 0) 
+	perror ("read on core file");
+      
+    }
+#endif	/* no core support yet */
+  
+  if (fpvalid == 0) 
+    {
+      printf_unfiltered ("no floating point status saved\n");
+      return;
+    }
+  
+  uaddr = (char *)&U_FPSTATE(u) - (char *)&u;
+  if (target_has_execution)
+    {
+      int *ip;
+      
+      rounded_addr = uaddr & -sizeof (int);
+      rounded_size = (((uaddr + sizeof (struct fpstate)) - uaddr) +
+		      sizeof (int) - 1) / sizeof (int);
+      skip = uaddr - rounded_addr;
+      
+      ip = (int *)buf;
+      for (i = 0; i < rounded_size; i++) 
+	{
+	  *ip++ = ptrace (3, inferior_pid, (PTRACE_ARG3_TYPE) rounded_addr, 0);
+	  rounded_addr += sizeof (int);
+	}
+    } 
+#if 0
+  else 
+    {
+      if (lseek (corechan, uaddr, 0) < 0)
+	perror_with_name ("seek on core file");
+      if (myread (corechan, buf, sizeof (struct fpstate)) < 0) 
+	perror_with_name ("read from core file");
+      skip = 0;
+    }
+#endif	/* 0 */ 
+
+  fpstatep = (struct fpstate *)(buf + skip);
+  print_387_status (fpstatep->status, (struct env387 *)fpstatep->state);
+}
+
+#endif /* never */
