@@ -746,7 +746,7 @@ copy_object (ibfd, obfd)
       if (max_gap > 8192)
 	max_gap = 8192;
       buf = (bfd_byte *) xmalloc (max_gap);
-      memset (buf, gap_fill, max_gap);
+      memset (buf, gap_fill, (size_t) max_gap);
 
       c = bfd_count_sections (obfd);
       for (i = 0; i < c; i++)
@@ -1252,6 +1252,9 @@ mark_symbols_used_in_relocations (ibfd, isection, symbolsarg)
   relsize = bfd_get_reloc_upper_bound (ibfd, isection);
   if (relsize < 0)
     bfd_fatal (bfd_get_filename (ibfd));
+
+  if (relsize == 0)
+    return 0;
 
   relpp = (arelent **) xmalloc (relsize);
   relcount = bfd_canonicalize_reloc (ibfd, isection, relpp, symbols);
