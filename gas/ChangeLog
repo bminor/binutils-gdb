@@ -1,3 +1,8 @@
+Fri Jan 31 13:15:05 1997  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (i386_align_code): Add comments explaining the
+	nop instructions.
+
 Fri Jan 31 10:46:14 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* write.c (relax_segment): Give an error if a .space symbol is
