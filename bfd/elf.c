@@ -4231,3 +4231,12 @@ _bfd_elf_validate_reloc (abfd, areloc)
   bfd_set_error (bfd_error_bad_value);
   return false;
 }
+
+boolean
+_bfd_elf_close_and_cleanup (abfd)
+     bfd *abfd;
+{
+  if (elf_shstrtab (abfd))
+    _bfd_stringtab_free (elf_shstrtab (abfd));
+  return _bfd_generic_close_and_cleanup (abfd);
+}

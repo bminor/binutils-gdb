@@ -1,3 +1,32 @@
+Tue Jan 27 21:43:55 1998  Richard Henderson  <rth@cygnus.com>
+
+	Sparc v9 ABI compliant PLT:
+	* elf64-sparc.c (PLT_HEADER_SIZE): V9 ABI uses 4 entries.
+	(plt_templates, sparc64_elf_build_plt_entry): Delete.
+	(LARGE_PLT_THRESHOLD): New define.
+	(GOT_RESERVED_ENTRIES): V9 ABI only uses 1.
+	(sparc64_elf_build_plt): New function.
+	(sparc64_elf_plt_entry_offset): Likewise.
+	(sparc64_elf_plt_ptr_offset): Likewise.
+	(sparc64_elf_adjust_dynamic_symbol): Change h->plt_offset to 
+	contain the index for convenience.  Skip the initial entries 
+	in .rela.plt.
+	(sparc64_elf_size_dynamic_sections): Zero the allocated contents
+	memory for the benefit of .rela.plt.
+	(sparc64_elf_relocate_section): Call sparc64_elf_plt_entry_offset.
+	(sparc64_elf_finish_dynamic_symbol): Kill template stuff.  Use
+	sparc64_elf_plt_entry_offset & sparc64_elf_plt_ptr_offset for reloc.
+	(sparc64_elf_finish_dynamic_sections): DT_PLTGOT points to .plt.
+	Call sparc64_elf_build_plt.
+	(elf_backend_want_got_plt): No.
+	(elf_backend_plt_readonly): No.
+	(elf_backend_plt_alignment): 8.
+
+	* elf.c (_bfd_elf_close_and_cleanup): New function; free the shstrtab.
+	* elf-bfd.h (_bfd_elf_close_and_cleanup): Declare it.
+	* elfxx-target.h (bfd_elfNN_close_and_cleanup): Arrange for it 
+	to be called.
+
 Tue Jan 27 21:45:15 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* archures.c (bfd_mach_mips*): Add definitions for various MIPS
