@@ -1,0 +1,2 @@
+HDEFINES = -DHOST_SYS=DGUX_SYS
+CC = gcc
