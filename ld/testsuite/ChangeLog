@@ -1,3 +1,12 @@
+2002-01-29  Chris Demetriou  <cgd@broadcom.com>
+
+	* ld-mips-elf/emrelocs-eb.d: New file to test --embedded-relocs.
+	* ld-mips-elf/emrelocs-el.d: Likewise. 
+	* ld-mips-elf/emrelocs1.s: Likewise.
+	* ld-mips-elf/emrelocs2.s: Likewise.
+	* ld-mips-elf/emrelocs.ld: Likewise.
+	* ld-mips-elf/mips-elf.exp: Add the above to the list of tests.
+
 2002-01-21  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris: New testsuite directory.

@@ -34,5 +34,9 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "empic2-fwd-1"
 	run_dump_test "empic2-rev-0"
 	run_dump_test "empic2-rev-1"
+
+	# Check generation of embedded relocs section.
+	run_dump_test "emrelocs-eb"
+	run_dump_test "emrelocs-el"
     }
 }
