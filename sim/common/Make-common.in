@@ -424,7 +424,7 @@ sim-inline.c: $(srccom)/sim-inline.c
 	$(SHELL) $(srcdir)/../../move-if-change tmp-$@ $@
 
 sim-io.o: $(srccom)/sim-io.c $(sim_main_headers) $(sim-io_h) \
-	  $(srcroot)/include/remote-sim.h
+	  $(srcroot)/include/remote-sim.h targ-vals.h
 	$(CC) -c $(srccom)/sim-io.c $(ALL_CFLAGS)
 
 sim-memopt.o: $(srccom)/sim-memopt.c $(sim_main_headers) \
