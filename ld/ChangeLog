@@ -1,3 +1,8 @@
+2000-10-16  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/pe.em (_after_open): Add tests of return values from
+	bfd functions.  Emit appropriate error messages if necessary.
+
 2000-10-13  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/pe.em (_after_open): Delete 'is2' and 'nsyms'
