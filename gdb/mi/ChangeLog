@@ -1,5 +1,11 @@
 2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
 
+	* mi-cmd-break.c (mi_cmd_break_insert): Initialize old_hooks.
+	(mi_cmd_break_insert, mi_cmd_break_watch, mi_cmd_break_insert):
+	Increment MI version number.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
 	* mi-interp.c: Increment mi version numbers: 0->1, 1->2,
 	and 2->3. Remove MI0 references.
 	* mi-events.c: Ditto.

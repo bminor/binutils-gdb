@@ -79,7 +79,7 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
   int ignore_count = 0;
   char *condition = NULL;
   enum gdb_rc rc;
-  struct gdb_events *old_hooks;
+  struct gdb_events *old_hooks = NULL;
   enum opt
     {
       HARDWARE_OPT, TEMP_OPT /*, REGEXP_OPT */ , CONDITION_OPT,
@@ -139,9 +139,9 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
      allows us to capture the breakpoint information as the breakpoint
      is created. Unfortunately, it also overrides any existing event
      handlers, so we won't get any event notifications sent out to the
-     client. MI2+ does NOT send breakpoint information with the -break-insert
+     client. MI3+ does NOT send breakpoint information with the -break-insert
      command for this reason. */
-  if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI0)
+  if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI2)
       || gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1))
     old_hooks = set_gdb_event_hooks (&breakpoint_hooks);
 
@@ -172,7 +172,7 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
 		      "mi_cmd_break_insert: Bad switch.");
     }
 
-  if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI0)
+  if (gdb_current_interpreter_is_named (GDB_INTERPRETER_MI2)
       || gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1))
     set_gdb_event_hooks (old_hooks);
 
@@ -253,10 +253,10 @@ mi_cmd_break_watch (char *command, char **argv, int argc)
 
   /* Ugh. This is a hack. mention and print_one_breakpoint in
      breakpoint.c are so overloaded, that watchpoints and breakpoints
-     cannot use the same printing mechanisms. So for MI2+, we simply
+     cannot use the same printing mechanisms. So for MI3+, we simply
      rewind MI's uiout so that we can prevent GDB from printing
      any information about the watchpoint we just inserted. */
-  if (!gdb_current_interpreter_is_named (GDB_INTERPRETER_MI0)
+  if (!gdb_current_interpreter_is_named (GDB_INTERPRETER_MI2)
       && !gdb_current_interpreter_is_named (GDB_INTERPRETER_MI1))
     mi_out_rewind (uiout);
 
