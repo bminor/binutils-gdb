@@ -1148,6 +1148,81 @@ done
 
 . ${srcdir}/configure.srv
 
+if test "${srv_linux_usrregs}" = "yes"; then
+  cat >> confdefs.h <<\EOF
+#define HAVE_LINUX_USRREGS 1
+EOF
+
+fi
+
+if test "${srv_linux_regsets}" = "yes"; then
+  echo $ac_n "checking for PTRACE_GETREGS""... $ac_c" 1>&6
+echo "configure:1161: checking for PTRACE_GETREGS" >&5
+  if eval "test \"`echo '$''{'gdbsrv_cv_have_ptrace_getregs'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1166 "configure"
+#include "confdefs.h"
+#include <sys/ptrace.h>
+int main() {
+PTRACE_GETREGS;
+; return 0; }
+EOF
+if { (eval echo configure:1173: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  gdbsrv_cv_have_ptrace_getregs=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  gdbsrv_cv_have_ptrace_getregs=no
+fi
+rm -f conftest*
+fi
+
+  echo "$ac_t""$gdbsrv_cv_have_ptrace_getregs" 1>&6
+  if test "${gdbsrv_cv_have_ptrace_getregs}" = "yes"; then
+    cat >> confdefs.h <<\EOF
+#define HAVE_LINUX_REGSETS 1
+EOF
+
+  fi
+
+  echo $ac_n "checking for PTRACE_GETFPXREGS""... $ac_c" 1>&6
+echo "configure:1194: checking for PTRACE_GETFPXREGS" >&5
+  if eval "test \"`echo '$''{'gdbsrv_cv_have_ptrace_getfpxregs'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1199 "configure"
+#include "confdefs.h"
+#include <sys/ptrace.h>
+int main() {
+PTRACE_GETFPXREGS;
+; return 0; }
+EOF
+if { (eval echo configure:1206: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  gdbsrv_cv_have_ptrace_getfpxregs=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  gdbsrv_cv_have_ptrace_getfpxregs=no
+fi
+rm -f conftest*
+fi
+
+  echo "$ac_t""$gdbsrv_cv_have_ptrace_getfpxregs" 1>&6
+  if test "${gdbsrv_cv_have_ptrace_getfpxregs}" = "yes"; then
+    cat >> confdefs.h <<\EOF
+#define HAVE_PTRACE_GETFPXREGS 1
+EOF
+
+  fi
+fi
+
 GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj"
 
 

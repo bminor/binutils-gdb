@@ -34,6 +34,34 @@ AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h)
 
 . ${srcdir}/configure.srv
 
+if test "${srv_linux_usrregs}" = "yes"; then
+  AC_DEFINE(HAVE_LINUX_USRREGS)
+fi
+
+if test "${srv_linux_regsets}" = "yes"; then
+  AC_MSG_CHECKING(for PTRACE_GETREGS)
+  AC_CACHE_VAL(gdbsrv_cv_have_ptrace_getregs,
+  [AC_TRY_COMPILE([#include <sys/ptrace.h>],
+		  [PTRACE_GETREGS;],
+		  [gdbsrv_cv_have_ptrace_getregs=yes],
+		  [gdbsrv_cv_have_ptrace_getregs=no])])
+  AC_MSG_RESULT($gdbsrv_cv_have_ptrace_getregs)
+  if test "${gdbsrv_cv_have_ptrace_getregs}" = "yes"; then
+    AC_DEFINE(HAVE_LINUX_REGSETS)
+  fi
+
+  AC_MSG_CHECKING(for PTRACE_GETFPXREGS)
+  AC_CACHE_VAL(gdbsrv_cv_have_ptrace_getfpxregs,
+  [AC_TRY_COMPILE([#include <sys/ptrace.h>],
+		  [PTRACE_GETFPXREGS;],
+		  [gdbsrv_cv_have_ptrace_getfpxregs=yes],
+		  [gdbsrv_cv_have_ptrace_getfpxregs=no])])
+  AC_MSG_RESULT($gdbsrv_cv_have_ptrace_getfpxregs)
+  if test "${gdbsrv_cv_have_ptrace_getfpxregs}" = "yes"; then
+    AC_DEFINE(HAVE_PTRACE_GETFPXREGS)
+  fi
+fi
+
 GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj"
 
 AC_SUBST(GDBSERVER_DEPFILES)

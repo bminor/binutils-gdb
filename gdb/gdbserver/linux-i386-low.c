@@ -20,17 +20,14 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "server.h"
+#include "linux-low.h"
+#include "i387-fp.h"
 
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
 #endif
 
-/* This module only supports access to the general purpose registers.
-   Adjust the relevant constants accordingly.
-
-   FIXME: kettenis/2001-03-28: We should really use PTRACE_GETREGS to
-   get at the registers.  Better yet, we should try to share code with
-   i386-linux-nat.c.  */
+/* This module only supports access to the general purpose registers.  */
 
 int num_regs = 16;
 
@@ -57,3 +54,70 @@ cannot_fetch_register (int regno)
 {
   return (regno >= num_regs);
 }
+
+
+#ifdef HAVE_LINUX_REGSETS
+#include <sys/procfs.h>
+#include <sys/ptrace.h>
+
+static void
+i386_fill_gregset (void *buf)
+{
+  int i;
+
+  for (i = 0; i < num_regs; i++)
+    collect_register (i, ((char *) buf) + regmap[i]);
+
+  collect_register_by_name ("orig_eax", ((char *) buf) + ORIG_EAX * 4);
+}
+
+static void
+i386_store_gregset (void *buf)
+{
+  int i;
+
+  for (i = 0; i < num_regs; i++)
+    supply_register (i, ((char *) buf) + regmap[i]);
+
+  supply_register_by_name ("orig_eax", ((char *) buf) + ORIG_EAX * 4);
+}
+
+static void
+i386_fill_fpregset (void *buf)
+{
+  i387_cache_to_fsave (buf);
+}
+
+static void
+i386_store_fpregset (void *buf)
+{
+  i387_fsave_to_cache (buf);
+}
+
+static void
+i386_fill_fpxregset (void *buf)
+{
+  i387_cache_to_fxsave (buf);
+}
+
+static void
+i386_store_fpxregset (void *buf)
+{
+  i387_fxsave_to_cache (buf);
+}
+
+
+struct regset_info target_regsets[] = {
+  { PTRACE_GETREGS, PTRACE_SETREGS, sizeof (elf_gregset_t),
+    i386_fill_gregset, i386_store_gregset },
+#ifdef HAVE_PTRACE_GETFPXREGS
+  { PTRACE_GETFPXREGS, PTRACE_SETFPXREGS, sizeof (elf_fpxregset_t),
+    i386_fill_fpxregset, i386_store_fpxregset },
+#endif
+  { PTRACE_GETFPREGS, PTRACE_SETFPREGS, sizeof (elf_fpregset_t),
+    i386_fill_fpregset, i386_store_fpregset },
+  { 0, 0, -1, NULL, NULL }
+};
+
+#endif /* HAVE_LINUX_REGSETS */
+

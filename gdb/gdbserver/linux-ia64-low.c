@@ -20,6 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "server.h"
+#include "linux-low.h"
 
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>

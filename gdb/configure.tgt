@@ -290,7 +290,9 @@ v850*-*-*)		gdb_target=v850
 			esac
 			;;
 
-x86_64-*-linux*)	gdb_target=x86-64linux ;;
+x86_64-*-linux*)	gdb_target=x86-64linux
+			build_gdbserver=yes
+			;;
 
 
 z8k-*-coff*)		gdb_target=z8k ;;

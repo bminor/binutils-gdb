@@ -183,7 +183,7 @@ clean:
 	rm -f *.o ${ADD_FILES} *~
 	rm -f gdbserver gdbreplay core make.log
 	rm -f reg-arm.c reg-i386.c reg-ia64.c reg-m68k.c reg-mips.c
-	rm -f reg-ppc.c reg-sh.c reg-i386-linux.c
+	rm -f reg-ppc.c reg-sh.c reg-x86-64.c reg-i386-linux.c
 
 distclean: clean
 	rm -f nm.h tm.h xm.h config.status
@@ -232,13 +232,18 @@ remote-utils.o: remote-utils.c terminal.h $(server_h)
 utils.o: utils.c $(server_h)
 regcache.o: regcache.c $(server_h) $(regdef_h)
 
-linux-low.o: linux-low.c $(server_h)
-linux-arm-low.o: linux-arm-low.c $(server_h)
-linux-i386-low.o: linux-i386-low.c $(server_h)
-linux-ia64-low.o: linux-ia64-low.c $(server_h)
-linux-mips-low.o: linux-mips-low.c $(server_h)
-linux-ppc-low.o: linux-ppc-low.c $(server_h)
-linux-sh-low.o: linux-sh-low.c $(server_h)
+i387-fp.o: i387-fp.c $(server_h)
+
+linux_low_h = $(srcdir)/linux-low.h
+
+linux-low.o: linux-low.c $(linux_low_h) $(server_h)
+linux-arm-low.o: linux-arm-low.c $(linux_low_h) $(server_h)
+linux-i386-low.o: linux-i386-low.c $(linux_low_h) $(server_h)
+linux-ia64-low.o: linux-ia64-low.c $(linux_low_h) $(server_h)
+linux-mips-low.o: linux-mips-low.c $(linux_low_h) $(server_h)
+linux-ppc-low.o: linux-ppc-low.c $(linux_low_h) $(server_h)
+linux-sh-low.o: linux-sh-low.c $(linux_low_h) $(server_h)
+linux-x86-64-low.o: linux-x86-64-low.c $(linux_low_h) $(server_h)
 
 # OBSOLETE TARGETS
 # OBSOLETE # low-lynx.o : ${srcdir}/low-lynx.c ${srcdir}/server.h
@@ -272,5 +277,8 @@ reg-ppc.c : $(srcdir)/../regformats/reg-ppc.dat $(regdat_sh)
 reg-sh.o : reg-sh.c $(regdef_h)
 reg-sh.c : $(srcdir)/../regformats/reg-sh.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-sh.dat reg-sh.c
+reg-x86-64.o : reg-x86-64.c $(regdef_h)
+reg-x86-64.c : $(srcdir)/../regformats/reg-x86-64.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/reg-x86-64.dat reg-x86-64.c
 
 # This is the end of "Makefile.in".

@@ -1,5 +1,5 @@
-/* GNU/Linux/ARM specific low level interface, for the remote server for GDB.
-   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002
+/* i387-specific utility functions, for the remote server for GDB.
+   Copyright 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -19,29 +19,15 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "server.h"
-#include "linux-low.h"
+#ifndef I387_FP_H
+#define I387_FP_H
 
-#ifdef HAVE_SYS_REG_H
-#include <sys/reg.h>
-#endif
+void i387_cache_to_fsave (void *buf);
+void i387_fsave_to_cache (void *buf);
 
-int num_regs = 16;
+void i387_cache_to_fxsave (void *buf);
+void i387_fxsave_to_cache (void *buf);
 
-int regmap[] = {
-  0, 4, 8, 12, 16, 20, 24, 28,
-  32, 36, 40, 44, 48, 52, 56, 60,
-};
+extern int num_xmm_registers;
 
-int
-cannot_store_register (int regno)
-{
-  return (regno >= num_regs);
-}
-
-int
-cannot_fetch_register (int regno)
-{
-  return (regno >= num_regs);
-}
-
+#endif /* I387_FP_H */

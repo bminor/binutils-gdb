@@ -20,8 +20,9 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "server.h"
-#include <sys/wait.h>
+#include "linux-low.h"
 
+#include <sys/wait.h>
 #include <stdio.h>
 #include <sys/param.h>
 #include <sys/dir.h>
@@ -36,6 +37,10 @@
 
 #define PTRACE_ARG3_TYPE long
 #define PTRACE_XFER_TYPE int
+
+#ifdef HAVE_LINUX_REGSETS
+static int use_regsets_p = 1;
+#endif
 
 extern int errno;
 extern int num_regs;
@@ -166,8 +171,11 @@ register_addr (int regnum)
   return addr;
 }
 
-/* Fetch one register.  */
 
+
+#ifdef HAVE_LINUX_USRREGS
+
+/* Fetch one register.  */
 static void
 fetch_register (int regno)
 {
@@ -203,9 +211,8 @@ error_exit:;
 }
 
 /* Fetch all registers, or just one, from the child process.  */
-
-void
-fetch_inferior_registers (int regno)
+static void
+usr_fetch_inferior_registers (int regno)
 {
   if (regno == -1 || regno == 0)
     for (regno = 0; regno < num_regs; regno++)
@@ -217,9 +224,8 @@ fetch_inferior_registers (int regno)
 /* Store our register values back into the inferior.
    If REGNO is -1, do this for all registers.
    Otherwise, REGNO specifies which register (so we can save time).  */
-
-void
-store_inferior_registers (int regno)
+static void
+usr_store_inferior_registers (int regno)
 {
   CORE_ADDR regaddr;
   int i;
@@ -259,6 +265,139 @@ store_inferior_registers (int regno)
     for (regno = 0; regno < num_regs; regno++)
       store_inferior_registers (regno);
 }
+#endif /* HAVE_LINUX_USRREGS */
+
+
+
+#ifdef HAVE_LINUX_REGSETS
+
+static int
+regsets_fetch_inferior_registers (void)
+{
+  struct regset_info *regset;
+
+  regset = target_regsets;
+
+  while (regset->size >= 0)
+    {
+      void *buf;
+      int res;
+
+      if (regset->size == 0)
+	{
+	  regset ++;
+	  continue;
+	}
+
+      buf = malloc (regset->size);
+      res = ptrace (regset->get_request, inferior_pid, 0, (int) buf);
+      if (res < 0)
+	{
+	  if (errno == EIO)
+	    {
+	      /* If we get EIO on the first regset, do not try regsets again.
+		 If we get EIO on a later regset, disable that regset.  */
+	      if (regset == target_regsets)
+		{
+		  use_regsets_p = 0;
+		  return -1;
+		}
+	      else
+		{
+		  regset->size = 0;
+		  continue;
+		}
+	    }
+	  else
+	    {
+	      perror ("Warning: ptrace(regsets_fetch_inferior_registers)");
+	    }
+	}
+      regset->store_function (buf);
+      regset ++;
+    }
+}
+
+static int
+regsets_store_inferior_registers (void)
+{
+  struct regset_info *regset;
+
+  regset = target_regsets;
+
+  while (regset->size >= 0)
+    {
+      void *buf;
+      int res;
+
+      if (regset->size == 0)
+	{
+	  regset ++;
+	  continue;
+	}
+
+      buf = malloc (regset->size);
+      regset->fill_function (buf);
+      res = ptrace (regset->set_request, inferior_pid, 0, (int) buf);
+      if (res < 0)
+	{
+	  if (errno == EIO)
+	    {
+	      /* If we get EIO on the first regset, do not try regsets again.
+		 If we get EIO on a later regset, disable that regset.  */
+	      if (regset == target_regsets)
+		{
+		  use_regsets_p = 0;
+		  return -1;
+		}
+	      else
+		{
+		  regset->size = 0;
+		  continue;
+		}
+	    }
+	  else
+	    {
+	      perror ("Warning: ptrace(regsets_fetch_inferior_registers)");
+	    }
+	}
+      regset ++;
+    }
+}
+
+#endif /* HAVE_LINUX_REGSETS */
+
+
+void
+fetch_inferior_registers (int regno)
+{
+#ifdef HAVE_LINUX_REGSETS
+  if (use_regsets_p)
+    {
+      if (regsets_fetch_inferior_registers () == 0)
+	return;
+    }
+#endif
+#ifdef HAVE_LINUX_USRREGS
+  usr_fetch_inferior_registers (regno);
+#endif
+}
+
+void
+store_inferior_registers (int regno)
+{
+#ifdef HAVE_LINUX_REGSETS
+  if (use_regsets_p)
+    {
+      if (regsets_store_inferior_registers () == 0)
+	return;
+    }
+#endif
+#ifdef HAVE_LINUX_USRREGS
+  usr_store_inferior_registers (regno);
+#endif
+}
+
 
 /* Copy LEN bytes from inferior's memory starting at MEMADDR
    to debugger memory starting at MYADDR.  */

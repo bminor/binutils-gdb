@@ -1,5 +1,34 @@
 2002-02-27  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdbserver/acconfig.h: New file.
+	* gdbserver/i387-fp.c: New file.
+	* gdbserver/i387-fp.h: New file.
+	* gdbserver/linux-x86-64.c: New file.
+	* regformats/reg-x86-64.dat: New file.
+	* configure.tgt: Add x86_64-*-linux* gdbserver support.
+	* gdbserver/configure.srv: Add x86_64-*-linux* and regset support.
+	* gdbserver/configure.in: Add support for regsets.
+	* gdbserver/config.in: Regenerate.
+	* gdbserver/configure: Regenerate.
+	* gdbserver/Makefile.in: Likewise.  Add $(linux_low_h).
+	* gdbserver/linux-low.h: New file.
+	* gdbserver/linux-low.c: Include "linux-low.h".  Add support
+	for regsets.
+	* gdbserver/linux-arm-low.c: Include "linux-low.h".
+	* gdbserver/linux-ia64-low.c: Include "linux-low.h".
+	* gdbserver/linux-m68k-low.c: Include "linux-low.h".
+	* gdbserver/linux-mips-low.c: Include "linux-low.h".
+	* gdbserver/linux-ppc-low.c: Include "linux-low.h".
+	* gdbserver/linux-sh-low.c: Include "linux-low.h".
+	* gdbserver/linux-i386-low.c: Include "linux-low.h".  Include
+	"i387-fp.h".  Add PTRACE_GETREGS and friends.
+	* gdbserver/regcache.c (supply_register): New function.
+	(supply_register_by_name): New function.
+	(collect_register): New function.
+	(collect_register_by_name): New function.
+
+2002-02-27  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdbserver/Makefile.in (INTERNAL_CFLAGS): Remove -DGDBSERVER.
 	(config.status): Add configure.srv dependency.
 	(server_h): Add config.h dependency.

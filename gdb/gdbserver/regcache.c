@@ -122,3 +122,26 @@ register_data (int n)
   return registers + (reg_defs[n].offset / 8);
 }
 
+void
+supply_register (int n, const char *buf)
+{
+  memcpy (register_data (n), buf, register_size (n));
+}
+
+void
+supply_register_by_name (const char *name, const char *buf)
+{
+  supply_register (find_regno (name), buf);
+}
+
+void
+collect_register (int n, char *buf)
+{
+  memcpy (buf, register_data (n), register_size (n));
+}
+
+void
+collect_register_by_name (const char *name, char *buf)
+{
+  collect_register (find_regno (name), buf);
+}

@@ -1,6 +1,5 @@
-/* GNU/Linux/ARM specific low level interface, for the remote server for GDB.
-   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+/* Internal interfaces for the GNU/Linux specific target code for gdbserver.
+   Copyright 2002, Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,29 +18,20 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "server.h"
-#include "linux-low.h"
-
-#ifdef HAVE_SYS_REG_H
-#include <sys/reg.h>
+#ifdef HAVE_LINUX_USR_REGISTERS
+extern int regmap[];
+extern int num_regs;
+int cannot_fetch_register (int regno);
+int cannot_store_register (int regno);
 #endif
 
-int num_regs = 16;
-
-int regmap[] = {
-  0, 4, 8, 12, 16, 20, 24, 28,
-  32, 36, 40, 44, 48, 52, 56, 60,
+#ifdef HAVE_LINUX_REGSETS
+typedef void (*regset_func) (void *);
+struct regset_info
+{
+  int get_request, set_request;
+  int size;
+  regset_func fill_function, store_function;
 };
-
-int
-cannot_store_register (int regno)
-{
-  return (regno >= num_regs);
-}
-
-int
-cannot_fetch_register (int regno)
-{
-  return (regno >= num_regs);
-}
-
+extern struct regset_info target_regsets[];
+#endif
