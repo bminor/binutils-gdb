@@ -2222,10 +2222,7 @@ quit_command (args, from_tty)
      char *args;
      int from_tty;
 {
-  /* kung: inferior_pid may not exist in cross mode debugging, 
-     I commented it out temporarily, if it does not cause other problem,
-     we should take it out permenantly. */
-  if (/*inferior_pid != 0 &&*/ target_has_execution)
+  if (inferior_pid != 0 && target_has_execution)
     {
       if (attach_flag)
 	{

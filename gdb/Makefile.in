@@ -305,8 +305,7 @@ SFILES = blockframe.c breakpoint.c buildsym.c c-exp.y c-lang.c \
 	mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c parse.c \
 	printcmd.c remote.c source.c stabsread.c stack.c symfile.c symmisc.c \
 	symtab.c target.c thread.c typeprint.c utils.c valarith.c valops.c \
-	valprint.c values.c serial.c ser-unix.c mdebugread.c os9kread.c \
-	os9kstab.c
+	valprint.c values.c serial.c ser-unix.c mdebugread.c os9kread.c
 
 # Files that are not source code, but need to go into
 # gdb-$(VERSION).tar.Z.
@@ -443,7 +442,7 @@ OBS =	version.o main.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	dwarfread.o mipsread.o stabsread.o core.o c-lang.o ch-lang.o m2-lang.o \
 	complaints.o typeprint.o c-typeprint.o ch-typeprint.o m2-typeprint.o \
 	c-valprint.o cp-valprint.o ch-valprint.o m2-valprint.o nlmread.o \
-	serial.o mdebugread.o os9kread.o os9kstab.o
+	serial.o mdebugread.o os9kread.o
 
 TSOBS = inflow.o
 
@@ -893,7 +892,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	paread.c procfs.c pyr-pinsn.c pyr-tdep.c pyr-xdep.c \
 	remote-adapt.c remote-bug.c remote-e7000.c remote-eb.c remote-es.c \
 	remote-hms.c remote-mips.c \
-	remote-mm.c remote-mon.c remote-nindy.c remote-sim.c \
+	remote-mm.c remote-mon.c remote-nindy.c remote-os9k.c remote-sim.c \
 	remote-st.c remote-utils.c dcache.c \
 	remote-udi.c remote-vx.c remote-z8k.c rs6000-nat.c rs6000-pinsn.c \
 	rs6000-tdep.c ser-go32.c ser-tcp.c sh-tdep.c solib.c sparc-nat.c \
@@ -1279,10 +1278,6 @@ mdebugread.o: mdebugread.c buildsym.h complaints.h $(bfd_h) $(defs_h) \
 os9kread.o: os9kread.c buildsym.h complaints.h $(bfd_h) $(def_h) \
         $(expression_h) gdb-stabs.h $(gdbcore_h) $(gdbtypes_h) language.h \
         objfiles.h partial-stab.h stabsread.h symfile.h $(symtab_h)
-
-os9kstab.o: os9kstab.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
-	$(INCLUDE_DIR)/aout/stab_gnu.h buildsym.h complaints.h $(defs_h) \
-	$(gdbtypes_h) objfiles.h stabsread.h symfile.h $(symtab_h)
 
 mem-break.o: mem-break.c $(defs_h) 
 

@@ -289,6 +289,9 @@ rombug_create_inferior (execfile, args, env)
 {
   int entry_pt;
 
+  /* Nonzero value indicates that a process really is running.  */
+  inferior_pid = 42;
+
   if (args && *args)
     error("Can't pass arguments to remote ROMBUG process");
 
@@ -471,7 +474,7 @@ rombug_wait (pid, status)
   int old_timeout = timeout;
   struct section_offsets *offs;
   CORE_ADDR addr, pc;
-  struct objfile *obj;
+  struct obj_section *obj_sec;
 
 #ifdef LOG_FILE
   fputs ("\nIn wait ()", log_file);
@@ -489,9 +492,11 @@ rombug_wait (pid, status)
   rombug_fetch_registers();
   pc = read_register(PC_REGNUM);
   addr = read_register(DATABASE_REG);
-  obj = find_pc_objfile(pc);
-  if (obj != NULL)
-    new_symfile_objfile(obj, 1, 0);
+
+  obj_sec = find_pc_section (pc);
+  if (obj_sec != NULL)
+    new_symfile_objfile (obj_sec, 1, 0);
+
   offs = ((struct section_offsets *)
 	 alloca (sizeof (struct section_offsets)
 	 + (symfile_objfile->num_sections * sizeof (offs->offsets))));
@@ -501,7 +506,10 @@ rombug_wait (pid, status)
   ANOFFSET (offs, SECT_OFF_DATA) = addr;
   ANOFFSET (offs, SECT_OFF_BSS) = addr;
 
-  objfile_relocate_data(symfile_objfile, offs);
+  /* Because we only set offsets for DATA and BSS sections, and the other
+     offsets are unchanged from ->section_offsets, the other sections won't
+     get relocated.  */
+  objfile_relocate (symfile_objfile, offs);
 
   return 0;
 }

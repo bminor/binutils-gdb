@@ -198,8 +198,36 @@ static int undef_types_length;
     if (**(pp) == '\\' || (**(pp) == '?' && (*(pp))[1] == '\0')) \
       *(pp) = next_symbol_text ();	\
   } while (0)
-
 
+/* FIXME: These probably should be our own types (like rs6000_builtin_type
+   has its own types) rather than builtin_type_*.  */
+static struct type **os9k_type_vector[] = {
+	0,
+	&builtin_type_int,
+	&builtin_type_char,
+	&builtin_type_long,
+	&builtin_type_short,
+	&builtin_type_unsigned_char,
+	&builtin_type_unsigned_short,
+	&builtin_type_unsigned_long,
+	&builtin_type_unsigned_int,
+	&builtin_type_float,
+	&builtin_type_double,
+	&builtin_type_void,
+	&builtin_type_long_double
+};
+
+static void os9k_init_type_vector PARAMS ((struct type **));
+
+static void
+os9k_init_type_vector(tv)
+    struct type **tv;
+{
+  int i;
+  for (i=0; i<sizeof(os9k_type_vector)/sizeof(struct type **); i++)
+    tv[i] = (os9k_type_vector[i] == 0 ? 0 : *(os9k_type_vector[i]));
+}
+
 /* Look up a dbx type-number pair.  Return the address of the slot
    where the type for that number-pair is stored.
    The number-pair is in TYPENUMS.
@@ -265,6 +293,10 @@ Invalid symbol data: type number (%d,%d) out of range at symtab pos %d.",
 		      (type_vector_length * sizeof (struct type *)));
 	  memset (&type_vector[old_len], 0,
 		  (type_vector_length - old_len) * sizeof (struct type *));
+
+	  if (os9k_stabs)
+	    /* Deal with OS9000 fundamental types.  */
+	    os9k_init_type_vector (type_vector);
 	}
       return (&type_vector[index]);
     }
@@ -1100,7 +1132,10 @@ define_symbol (valu, string, desc, type, objfile)
       SYMBOL_CLASS (sym) = LOC_STATIC;
       SYMBOL_VALUE_ADDRESS (sym) = valu;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
-      add_symbol_to_list (sym, &local_symbols);
+      if (os9k_stabs)
+	add_symbol_to_list (sym, &global_symbols);
+      else
+	add_symbol_to_list (sym, &local_symbols);
       break;
 
     case 'v':
@@ -1482,16 +1517,36 @@ read_type (pp, objfile)
       break;
 
     case 'f':				/* Function returning another type */
+      if (os9k_stabs && **pp == '(')
+	{
+	  /* Function prototype; skip it.
+	     We must conditionalize this on os9k_stabs because otherwise
+	     it could be confused with a Sun-style (1,3) typenumber
+	     (I think).  */
+	  while (**pp != ')')
+	    ++*pp;
+	  ++*pp;
+	}
       type1 = read_type (pp, objfile);
       type = make_function_type (type1, dbx_lookup_type (typenums));
       break;
 
-    case 'k':				/* Const qualifier on some type (Sun) */
+    case 'k':			   /* Const qualifier on some type (Sun) */
+    case 'c':			   /* Const qualifier on some type (OS9000) */
+      /* Because 'c' means other things to AIX and 'k' is perfectly good,
+	 only accept 'c' in the os9k_stabs case.  */
+      if (type_descriptor == 'c' && !os9k_stabs)
+	return error_type (pp);
       type = read_type (pp, objfile);
       /* FIXME! For now, we ignore const and volatile qualifiers.  */
       break;
 
-    case 'B':				/* Volatile qual on some type (Sun) */
+    case 'B':			     /* Volatile qual on some type (Sun) */
+    case 'i':			     /* Volatile qual on some type (OS9000) */
+      /* Because 'i' means other things to AIX and 'B' is perfectly good,
+	 only accept 'i' in the os9k_stabs case.  */
+      if (type_descriptor == 'i' && !os9k_stabs)
+	return error_type (pp);
       type = read_type (pp, objfile);
       /* FIXME! For now, we ignore const and volatile qualifiers.  */
       break;
@@ -1552,10 +1607,17 @@ read_type (pp, objfile)
 	*dbx_lookup_type (typenums) = type;
       break;
 
-    case 'b':				/* Sun ACC builtin int type */
-      type = read_sun_builtin_type (pp, typenums, objfile);
-      if (typenums[0] != -1)
-	*dbx_lookup_type (typenums) = type;
+    case 'b':
+      if (os9k_stabs)
+	/* Const and volatile qualified type.  */
+	type = read_type (pp, objfile);
+      else
+	{
+	  /* Sun ACC builtin int type */
+	  type = read_sun_builtin_type (pp, typenums, objfile);
+	  if (typenums[0] != -1)
+	    *dbx_lookup_type (typenums) = type;
+	}
       break;
 
     case 'R':				/* Sun ACC builtin float type */
@@ -2825,24 +2887,29 @@ read_array_type (pp, type, objfile)
   int nbits;
 
   /* Format of an array type:
-     "ar<index type>;lower;upper;<array_contents_type>".  Put code in
-     to handle this.
+     "ar<index type>;lower;upper;<array_contents_type>".
+     OS9000: "arlower,upper;<array_contents_type>".
 
      Fortran adjustable arrays use Adigits or Tdigits for lower or upper;
      for these, produce a type like float[][].  */
 
-  index_type = read_type (pp, objfile);
-  if (**pp != ';')
-    /* Improper format of array type decl.  */
-    return error_type (pp);
-  ++*pp;
+  if (os9k_stabs)
+    index_type = builtin_type_int;
+  else
+    {
+      index_type = read_type (pp, objfile);
+      if (**pp != ';')
+	/* Improper format of array type decl.  */
+	return error_type (pp);
+      ++*pp;
+    }
 
   if (!(**pp >= '0' && **pp <= '9') && **pp != '-')
     {
       (*pp)++;
       adjustable = 1;
     }
-  lower = read_huge_number (pp, ';', &nbits);
+  lower = read_huge_number (pp, os9k_stabs ? ',' : ';', &nbits);
   if (nbits != 0)
     return error_type (pp);
 
@@ -2902,6 +2969,7 @@ read_enum_type (pp, type, objfile)
   struct pending **symlist;
   struct pending *osyms, *syms;
   int o_nsyms;
+  int nbits;
 
 #if 0
   /* FIXME!  The stabs produced by Sun CC merrily define things that ought
@@ -2915,12 +2983,21 @@ read_enum_type (pp, type, objfile)
   osyms = *symlist;
   o_nsyms = osyms ? osyms->nsyms : 0;
 
+  if (os9k_stabs)
+    {
+      /* Size.  Perhaps this does not have to be conditionalized on
+	 os9k_stabs (assuming the name of an enum constant can't start
+	 with a digit).  */
+      read_huge_number (pp, 0, &nbits);
+      if (nbits != 0)
+	return error_type (pp);
+    }
+
   /* Read the value-names and their values.
      The input syntax is NAME:VALUE,NAME:VALUE, and so on.
      A semicolon or comma instead of a NAME means the end.  */
   while (**pp && **pp != ';' && **pp != ',')
     {
-      int nbits;
       STABS_CONTINUE (pp);
       p = *pp;
       while (*p != ':') p++;
@@ -3766,6 +3843,8 @@ void start_stabs ()
 
   /* FIXME: If common_block_name is not already NULL, we should complain().  */
   common_block_name = NULL;
+
+  os9k_stabs = 0;
 }
 
 /* Call after end_symtab() */

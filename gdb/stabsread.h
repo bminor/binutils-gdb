@@ -163,6 +163,8 @@ end_stabs PARAMS ((void));
 extern void
 finish_global_stabs PARAMS ((struct objfile *objfile));
 
+EXTERN int os9k_stabs;
+
 /* Functions exported by dbxread.c.  These are not in stabsread.h because
    they are only used by some stabs readers.  */
 

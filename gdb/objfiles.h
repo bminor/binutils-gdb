@@ -373,8 +373,6 @@ extern void free_objfile PARAMS ((struct objfile *));
 extern void
 free_all_objfiles PARAMS ((void));
 
-extern struct objfile * find_pc_objfile PARAMS ((CORE_ADDR));
-
 extern void
 objfile_relocate PARAMS ((struct objfile *, struct section_offsets *));
 

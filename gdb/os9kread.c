@@ -63,6 +63,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "language.h"		/* Needed inside partial-stab.h */
 #include "complaints.h"
 #include "os9k.h"
+#include "stabsread.h"
 
 #if !defined (SEEK_SET)
 #define SEEK_SET 0
@@ -129,9 +130,6 @@ static struct complaint lbrac_unmatched_complaint =
 
 static struct complaint lbrac_mismatch_complaint =
   {"IBE/IDE symbol mismatch at symtab pos %d", 0, 0};
-
-extern struct symbol *
-os9k_define_symbol PARAMS ((CORE_ADDR, char *, int, int, struct objfile *));
 
 
 /* Local function prototypes */
@@ -1347,7 +1345,7 @@ os9k_read_ofile_symtab (pst)
       bfd_seek (symfile_bfd, sym_offset, SEEK_CUR);
       processing_gcc_compilation = 0;
     }
-#endif 0
+#endif /* 0 */
 
   fseek(dbg_file, (long)sym_offset, 0);
 /*
@@ -1400,7 +1398,7 @@ os9k_read_ofile_symtab (pst)
 	     section. */
 	  ;
         }
-#endif 0
+#endif /* 0 */
     }
 
   current_objfile = NULL;
@@ -1454,7 +1452,7 @@ os9k_process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	 but this should not be an error ().  */
       return;
     }
-#endif 0
+#endif /* 0 */
 
   switch (type)
     {
@@ -1469,11 +1467,11 @@ os9k_process_one_symbol (type, desc, valu, name, section_offsets, objfile)
       valu += last_source_start_addr;
       new = pop_context();
 
-#if !defined (VARIABLES_INSIDE_BLOCK)
-#define VARIABLES_INSIDE_BLOCK(desc, gcc_p) 1
+#if !defined (OS9K_VARIABLES_INSIDE_BLOCK)
+#define OS9K_VARIABLES_INSIDE_BLOCK(desc, gcc_p) 1
 #endif
 
-      if (!VARIABLES_INSIDE_BLOCK(desc, processing_gcc_compilation))
+      if (!OS9K_VARIABLES_INSIDE_BLOCK(desc, processing_gcc_compilation))
 	local_symbols = new->locals;
 
       if (context_stack_depth > 1)
@@ -1521,7 +1519,7 @@ os9k_process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	    }
 	}
 
-      if (VARIABLES_INSIDE_BLOCK(desc, processing_gcc_compilation))
+      if (OS9K_VARIABLES_INSIDE_BLOCK(desc, processing_gcc_compilation))
 	/* Now pop locals of block just finished.  */
 	local_symbols = new->locals;
       break;
@@ -1571,6 +1569,7 @@ os9k_process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 		  end_stabs ();
 		}
 		start_stabs ();
+		os9k_stabs = 1;
 		start_symtab (n, dirn, valu);
 	      } else {
 		push_subfile();
@@ -1585,17 +1584,17 @@ os9k_process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 
 	      within_function = 1;
 	      new = push_context (0, valu);
-	      new->name = os9k_define_symbol (valu, name, desc, type, objfile);
+	      new->name = define_symbol (valu, name, desc, type, objfile);
 	      break;
 
 	    case 'V':
 	    case 'v':
               valu += ANOFFSET (section_offsets, SECT_OFF_DATA);
-	      os9k_define_symbol (valu, name, desc, type, objfile);
+	      define_symbol (valu, name, desc, type, objfile);
 	      break;
 
 	    default:
-	      os9k_define_symbol (valu, name, desc, type, objfile);
+	      define_symbol (valu, name, desc, type, objfile);
 	      break;
 	    }
 	}

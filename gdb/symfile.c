@@ -48,7 +48,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 /* Global variables owned by this file */
-CORE_ADDR text_relocation = 0;		/* text_relocation */
 int readnow_symbol_files;		/* Read full symbols immediately */
 
 struct complaint oldsyms_complaint = {
@@ -632,6 +631,7 @@ symbol_file_command (args, from_tty)
 {
   char **argv;
   char *name = NULL;
+  CORE_ADDR text_relocation = 0;		/* text_relocation */
   struct cleanup *cleanups;
   int mapped = 0;
   int readnow = 0;
@@ -675,23 +675,7 @@ symbol_file_command (args, from_tty)
 	    }
 	  else
 	    {
-	    char *p;
-
 	      name = *argv;
-
-              /* this is for rombug remote only, to get the text relocation by
-              using link command */
-              p = strrchr(name, '/');
-              if (p != NULL) p++;
-              else p = name;
-
-              target_link(p, &text_relocation);
-
-	      if (text_relocation)  
-	        symbol_file_add (name, from_tty, (CORE_ADDR)text_relocation, 0, mapped, readnow);
-              else 
-	        symbol_file_add (name, from_tty, (CORE_ADDR)0, 1, mapped, readnow);
-	      set_initial_language ();
 	    }
 	  argv++;
 	}
@@ -700,6 +684,25 @@ symbol_file_command (args, from_tty)
 	{
 	  error ("no symbol file name was specified");
 	}
+      else
+	{
+	  char *p;
+
+	  /* If target_link can find out where the file is,
+	     more power to it.  */
+	  p = strrchr (name, '/');
+	  if (p != NULL) p++;
+	  else p = name;
+
+	  target_link (p, &text_relocation);
+	  if (text_relocation == (CORE_ADDR)-1)
+	    text_relocation = 0;
+
+	  symbol_file_add (name, from_tty, text_relocation, 1, mapped,
+			   readnow);
+	  set_initial_language ();
+	}
+
       do_cleanups (cleanups);
     }
 }

@@ -85,3 +85,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
     ? sigtramp_saved_pc (FRAME) \
     : read_memory_integer ((FRAME)->frame + 4, 4)) \
    )
+
+#define BELIEVE_PCC_PROMOTION 1

@@ -421,21 +421,6 @@ free_all_objfiles ()
   clear_symtab_users ();
 }
 
-struct objfile *
-find_pc_objfile(pc)
-     CORE_ADDR pc;
-{
-struct objfile *obj;
-struct obj_section *s;
-
-  ALL_OBJFILES (obj)
-    for (s = obj->sections; s < obj->sections_end; s++)
-      {
-	if (s->addr <= pc && s->endaddr > pc) return obj;
-      }
-  return (struct objfile *)NULL;
-}
-
 /* Relocate OBJFILE to NEW_OFFSETS.  There should be OBJFILE->NUM_SECTIONS
    entries in new_offsets.  */
 void
@@ -552,107 +537,6 @@ objfile_relocate (objfile, new_offsets)
     int i;
     for (i = 0; i < objfile->num_sections; ++i)
       ANOFFSET (objfile->section_offsets, i) = ANOFFSET (new_offsets, i);
-  }
-}
-
-/* Relocate OBJFILE to NEW_OFFSETS.  There should be OBJFILE->NUM_SECTIONS
-   entries in new_offsets.  */
-void
-objfile_relocate_data (objfile, new_offsets)
-     struct objfile *objfile;
-     struct section_offsets *new_offsets;
-{
-  struct section_offsets *delta = (struct section_offsets *) alloca
-    (sizeof (struct section_offsets)
-     + objfile->num_sections * sizeof (delta->offsets));
-
-  {
-    int i;
-    int something_changed = 0;
-    for (i = 0; i < objfile->num_sections; ++i)
-      {
-	if (i != SECT_OFF_DATA && i != SECT_OFF_BSS)
-	  ANOFFSET (delta, i) = 0;
-	else
-	  ANOFFSET (delta, i) = ANOFFSET(new_offsets, i)
-		 - ANOFFSET (objfile->section_offsets, i);
-	if (ANOFFSET (delta, i) != 0)
-	  something_changed = 1;
-      }
-    if (!something_changed)
-      return;
-  }
-
-  /* OK, get all the symtabs.  */
-  {
-    struct symtab *s;
-
-    for (s = objfile->symtabs; s; s = s->next)
-      {
-	struct linetable *l;
-	struct blockvector *bv;
-	int i;
-	
-	/* Don't relocate a shared blockvector more than once.  */
-	if (!s->primary)
-	  continue;
-
-	bv = BLOCKVECTOR (s);
-	for (i = 0; i < BLOCKVECTOR_NBLOCKS (bv); ++i)
-	  {
-	    struct block *b;
-	    int j;
-	    
-	    b = BLOCKVECTOR_BLOCK (bv, i);
-	    BLOCK_START (b) += ANOFFSET (delta, s->block_line_section);
-	    BLOCK_END (b) += ANOFFSET (delta, s->block_line_section);
-
-	    for (j = 0; j < BLOCK_NSYMS (b); ++j)
-	      {
-		struct symbol *sym = BLOCK_SYM (b, j);
-		/* The RS6000 code from which this was taken skipped
-		   any symbols in STRUCT_NAMESPACE or UNDEF_NAMESPACE.
-		   But I'm leaving out that test, on the theory that
-		   they can't possibly pass the tests below.  */
-		if ((SYMBOL_CLASS (sym) == LOC_LABEL
-		     || SYMBOL_CLASS (sym) == LOC_STATIC)
-		    && SYMBOL_SECTION (sym) >= 0)
-		  {
-		    SYMBOL_VALUE_ADDRESS (sym) +=
-		      ANOFFSET (delta, SYMBOL_SECTION (sym));
-		  }
-	      }
-	  }
-      }
-  }
-
-  {
-    struct partial_symbol *psym;
-
-    for (psym = objfile->global_psymbols.list;
-	 psym < objfile->global_psymbols.next;
-	 psym++)
-      if (SYMBOL_SECTION (psym) >= 0)
-	SYMBOL_VALUE_ADDRESS (psym) += ANOFFSET (delta, SYMBOL_SECTION (psym));
-    for (psym = objfile->static_psymbols.list;
-	 psym < objfile->static_psymbols.next;
-	 psym++)
-      if (SYMBOL_SECTION (psym) >= 0)
-	SYMBOL_VALUE_ADDRESS (psym) += ANOFFSET (delta, SYMBOL_SECTION (psym));
-  }
-
-  {
-    struct minimal_symbol *msym;
-    ALL_OBJFILE_MSYMBOLS (objfile, msym)
-      if (SYMBOL_SECTION (msym) >= 0)
-	SYMBOL_VALUE_ADDRESS (msym) += ANOFFSET (delta, SYMBOL_SECTION (msym));
-  }
-
-  {
-    int i;
-    for (i = 0; i < objfile->num_sections; ++i)
-      if (i == SECT_OFF_DATA || i == SECT_OFF_BSS)
-        ANOFFSET (objfile->section_offsets, i) = ANOFFSET (new_offsets, i);
   }
 }
 

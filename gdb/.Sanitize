@@ -186,6 +186,7 @@ ns32k-pinsn.c
 ns32km3-nat.c
 objfiles.c
 objfiles.h
+os9kread.c
 osfsolib.c
 paread.c
 parse.c
@@ -210,6 +211,7 @@ remote-mips.c
 remote-mm.c
 remote-mon.c
 remote-nindy.c
+remote-os9k.c
 remote-sim.c
 remote-sim.h
 remote-st.c

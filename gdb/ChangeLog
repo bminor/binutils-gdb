@@ -1,3 +1,43 @@
+Tue Mar  1 16:22:56 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* os9kread.c (os9k_process_one_symbol): Rename
+	VARIABLES_INSIDE_BLOCK to OS9K_VARIABLES_INSIDE_BLOCK.
+	* symfile.c (symbol_file_command): Check for (CORE_ADDR)-1, not
+	(CORE_ADDR)0, from target_link, since that is what it uses.
+	Process name at end, not during parsing (like we did before Kung's
+	change), so that -readnow and -mapped can appear anywhere.
+	Make text_relocation a local variable.
+	* config/i386/i386os9k.mt: Fix comment.
+	* Makefile.in (ALLDEPFILES): Add remote-os9k.c.
+	* os9kread.c: Put "comments" after #endif inside /* */.
+	* stabsread.h: Add os9k_stabs variable.
+	* stabsread.c (start_stabs), os9kread.c (os9k_process_one_symbol):
+	Set it.
+	* stabsread.c (define_symbol): If os9k_stabs, put a 'V' symbol
+	descriptor in global_symbols not local_symbols.
+	(read_type): If os9k_stabs, accept 'c', 'i', and 'b' type
+	descriptors.
+	(read_type): If os9k_stabs, accept function parameters after 'f'
+	type descriptor.
+	(read_array_type): If os9k_stabs, don't expect index type and
+	expect lower and upper to be separated by ',' not ';'.
+	(read_enum_type): If os9k_stabs, read a number before the first
+	enumeration constant.
+	(os9k_init_type_vector): New function.
+	(dbx_lookup_type): Call it when starting new type vector.
+	* config/i386/tm-i386os9k.h: Define BELIEVE_PCC_PROMOTION.
+	* (os9k_process_one_symbol): Call define_symbol not os9k_define_symbol.
+	* os9kstab.c: Removed.
+	* Makefile.in: Update accordingly.
+	* objfiles.c (objfile_relocate_data): Removed.
+	* remote-os9k.c (rombug_wait): Call objfile_relocate
+	not objfile_relocate_data.
+	* objfiles.h, objfiles.c: Remove find_pc_objfile.
+	* remote-os9k.c (rombug_wait): Call find_pc_section not
+	find_pc_objfile.
+	* main.c (quit_command): Check inferior_pid; revert Kung change.
+	* remote-os9k.c (rombug_create_inferior): Set inferior_pid.
+
 Tue Mar  1 14:56:14 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* os9kread.c: New file to read os9000 style symbo table.
