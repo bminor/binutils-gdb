@@ -1,3 +1,10 @@
+Mon Mar 18 13:47:09 1996  Fred Fish  <fnf@cygnus.com>
+
+	* symfile.c (reread_symbols): Reinitialize bcache struct
+	members to zero using memset.  Also use memset to reinit
+	global_psymbols and static_psymbols, rather than explicitly
+	resetting each structure member.
+
 Sat Mar 16 19:47:36 1996  Fred Fish  <fnf@cygnus.com>
 
 	* configure.in: Add fragment to create stamp-h.
