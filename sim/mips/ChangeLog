@@ -1,3 +1,11 @@
+2002-02-10  Chris Demetriou  cgd@sibyte.com
+
+        * mips.igen (ADDI): Print immediate value.
+        (BREAK): Print code.
+        (DADDIU, DSRAV, DSRLV): Print correct instruction name.
+        (SLL): Print "nop" specially, and don't run the code
+        that does the shift for the "nop" case.
+
 2001-11-17  Fred Fish  <fnf@redhat.com>
 
 	* sim-main.h (float_operation): Move enum declaration outside

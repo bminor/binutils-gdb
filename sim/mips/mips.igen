@@ -245,7 +245,7 @@
 
 
 001000,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::ADDI
-"addi r<RT>, r<RS>, IMMEDIATE"
+"addi r<RT>, r<RS>, <IMMEDIATE>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr4100:
 *vr5000:
@@ -668,7 +668,7 @@
 
 
 000000,20.CODE,001101:SPECIAL:32::BREAK
-"break"
+"break <CODE>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr4100:
 *vr5000:
@@ -747,7 +747,7 @@
 }
 
 011001,5.RS,5.RT,16.IMMEDIATE:NORMAL:64::DADDIU
-"daddu r<RT>, r<RS>, <IMMEDIATE>"
+"daddiu r<RT>, r<RS>, <IMMEDIATE>"
 *mipsIII:
 *mipsIV:
 *vr4100:
@@ -1113,7 +1113,7 @@
 }
 
 000000,5.RS,5.RT,5.RD,00000010111:SPECIAL:64::DSRAV
-"dsra32 r<RT>, r<RD>, r<RS>"
+"dsrav r<RT>, r<RD>, r<RS>"
 *mipsIII:
 *mipsIV:
 *vr4100:
@@ -1160,7 +1160,7 @@
 
 
 000000,5.RS,5.RT,5.RD,00000010110:SPECIAL:64::DSRLV
-"dsrl32 r<RD>, r<RT>, r<RS>"
+"dsrlv r<RD>, r<RT>, r<RS>"
 *mipsIII:
 *mipsIV:
 *vr4100:
@@ -2012,13 +2012,17 @@
 }
 
 00000000000,5.RT,5.RD,5.SHIFT,000000:SPECIAL:32::SLL
+"nop":RD == 0 && RT == 0 && SHIFT == 0
 "sll r<RD>, r<RT>, <SHIFT>"
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr4100:
 *vr5000:
 *r3900:
 {
-  do_sll (SD_, RT, RD, SHIFT);
+  /* Skip shift for NOP, so that there won't be lots of extraneous
+     trace output.  */
+  if (RD != 0 || RT != 0 || SHIFT != 0)
+    do_sll (SD_, RT, RD, SHIFT);
 }
 
 
