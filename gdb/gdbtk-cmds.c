@@ -2789,7 +2789,7 @@ gdb_loadfile (clientData, interp, objc, objv)
       Tcl_DStringAppend (&text_cmd_2, " insert end { \t", -1);
       prefix_len_2 = Tcl_DStringLength(&text_cmd_2);
       
-      while (fgets (line + 1, 980, fp))
+      while (fgets (line + 1, 9980, fp))
         {
           sprintf (line_num_buf, "%d", ln);
           if (ltable[ln >> 3] & (1 << (ln % 8)))
@@ -3229,7 +3229,7 @@ gdb_get_breakpoint_info (clientData, interp, objc, objv)
   Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr, new_obj);
   
   Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr, Tcl_NewIntObj (b->line_number));
-  sprintf_append_element_to_obj (result_ptr->obj_ptr, "0x%lx", b->address);
+  sprintf_append_element_to_obj (result_ptr->obj_ptr, "0x%s", paddr_nz(b->address));
   Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr,
 			    Tcl_NewStringObj (bptypes[b->type], -1));
   Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr, Tcl_NewBooleanObj(b->enable == enabled));

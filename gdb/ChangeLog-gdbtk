@@ -1,5 +1,15 @@
 1999-01-29  Martin Hunt  <hunt@cygnus.com>
 
+	* gdbtk-cmds.c (gdb_get_breakpoint_info): When printing addresses,
+        do not rely on the format string "%lx" -- it does not exist for all
+        hosts. Use paddr instead.
+	(gdb_loadfile): Increase maximum line size to pass testsuite cases.
+
+	* gdbtk-hooks.c (gdbtk_add_hooks): Remove pc_changed_hook and
+        add register_changed_hook and memory_changed_hook.
+        (gdbtk_register_changed): New function.
+        (gdbtk_memory_changed): New function.
+
         * gdbtk.c (gdbtk_init): Create tcl warp_pointer command
         for use with testing.
 

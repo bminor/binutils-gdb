@@ -110,7 +110,8 @@ static void   gdbtk_flush PARAMS ((GDB_FILE *));
 static void gdbtk_pre_add_symbol PARAMS ((char *));
 static void gdbtk_print_frame_info PARAMS ((struct symtab *, int, int, int));
 static void gdbtk_post_add_symbol PARAMS ((void));
-static void pc_changed PARAMS ((void));
+static void gdbtk_register_changed PARAMS ((int regno));
+static void gdbtk_memory_changed PARAMS ((CORE_ADDR addr, int len));
 static void tracepoint_notify PARAMS ((struct tracepoint *, const char *));
 static void gdbtk_selected_frame_changed PARAMS ((int));
 static void gdbtk_context_change PARAMS ((int));
@@ -166,7 +167,8 @@ gdbtk_add_hooks(void)
   trace_find_hook        = gdbtk_trace_find;
   trace_start_stop_hook  = gdbtk_trace_start_stop;
 
-  pc_changed_hook = pc_changed;
+  register_changed_hook = gdbtk_register_changed;
+  memory_changed_hook = gdbtk_memory_changed;
   selected_frame_level_changed_hook = gdbtk_selected_frame_changed;
   context_hook = gdbtk_context_change;
 
@@ -320,9 +322,18 @@ gdbtk_ignorable_warning (warning)
 }
 
 static void
-pc_changed()
+gdbtk_register_changed(regno)
+     int regno;
 {
-  Tcl_Eval (gdbtk_interp, "gdbtk_pc_changed");
+  Tcl_Eval (gdbtk_interp, "gdbtk_register_changed");
+}
+
+static void
+gdbtk_memory_changed(addr, len)
+     CORE_ADDR addr;
+     int len;
+{
+  Tcl_Eval (gdbtk_interp, "gdbtk_memory_changed");
 }
 
 
