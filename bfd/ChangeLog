@@ -1,5 +1,20 @@
 Fri Apr  8 12:22:02 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* aoutx.h (NAME(aout,make_sections)): New function.
+	(NAME(aout,some_aout_object_p)): Call NAME(aout,make_sections)
+	rather than making sections inline.
+	(NAME(aout,mkobject)): Don't make any sections.
+	(NAME(aout,adjust_sizes_and_vmas)): Call NAME(aout,make_sections).
+	(NAME(aout,final_link)): Don't dereference obj_textsec (abfd) or
+	obj_datasec (abfd) if they are NULL.
+	* libaout.h (NAME(aout,make_sections)): Declare.
+	* bout.c (b_out_mkobject): Don't make any sections.
+	(b_out_write_object_contents): Call aout_32_make_sections.
+	(b_out_set_section_contents): Likewise.
+	* i386os9k.c (os9k_mkobject): Don't make any sections.
+	(os9k_write_object_contents): Call aout_32_make_sections.
+	(os9k_set_section_contents): Likewise.
+
 	* aoutx.h (NAME(aout,new_section_hook)): Don't set N_EXT in target
 	index.
 

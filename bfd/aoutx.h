@@ -334,7 +334,23 @@ NAME(aout,swap_exec_header_out) (abfd, execp, raw_bytes)
   PUT_WORD (abfd, execp->a_drsize, bytes->e_drsize);
 }
 
+/* Make all the section for an a.out file.  */
 
+boolean
+NAME(aout,make_sections) (abfd)
+     bfd *abfd;
+{
+  if (obj_textsec (abfd) == (asection *) NULL
+      && bfd_make_section (abfd, ".text") == (asection *) NULL)
+    return false;
+  if (obj_datasec (abfd) == (asection *) NULL
+      && bfd_make_section (abfd, ".data") == (asection *) NULL)
+    return false;
+  if (obj_bsssec (abfd) == (asection *) NULL
+      && bfd_make_section (abfd, ".bss") == (asection *) NULL)
+    return false;
+  return true;
+}
 
 /*
 FUNCTION
@@ -420,18 +436,8 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
   obj_aout_external_strings (abfd) = NULL;
   obj_aout_sym_hashes (abfd) = NULL;
 
-  /* Create the sections.  This is raunchy, but bfd_close wants to reclaim
-     them.  */
-
-  obj_textsec (abfd) = bfd_make_section_old_way (abfd, ".text");
-  obj_datasec (abfd) = bfd_make_section_old_way (abfd, ".data");
-  obj_bsssec (abfd) = bfd_make_section_old_way (abfd, ".bss");
-
-#if 0
-  (void)bfd_make_section (abfd, ".text");
-  (void)bfd_make_section (abfd, ".data");
-  (void)bfd_make_section (abfd, ".bss");
-#endif
+  if (! NAME(aout,make_sections) (abfd))
+    return NULL;
 
   obj_datasec (abfd)->_raw_size = execp->a_data;
   obj_bsssec (abfd)->_raw_size = execp->a_bss;
@@ -565,17 +571,9 @@ NAME(aout,mkobject) (abfd)
   abfd->tdata.aout_data = rawptr;
   exec_hdr (abfd) = &(rawptr->e);
 
-  /* For simplicity's sake we just make all the sections right here. */
-
   obj_textsec (abfd) = (asection *)NULL;
   obj_datasec (abfd) = (asection *)NULL;
   obj_bsssec (abfd) = (asection *)NULL;
-  bfd_make_section (abfd, ".text");
-  bfd_make_section (abfd, ".data");
-  bfd_make_section (abfd, ".bss");
-  bfd_make_section (abfd, BFD_ABS_SECTION_NAME);
-  bfd_make_section (abfd, BFD_UND_SECTION_NAME);
-  bfd_make_section (abfd, BFD_COM_SECTION_NAME);
 
   return true;
 }
@@ -878,11 +876,9 @@ NAME(aout,adjust_sizes_and_vmas) (abfd, text_size, text_end)
 {
   struct internal_exec *execp = exec_hdr (abfd);
 
-  if ((obj_textsec (abfd) == NULL) || (obj_datasec (abfd) == NULL))
-    {
-      bfd_set_error (bfd_error_invalid_operation);
-      return false;
-    }
+  if (! NAME(aout,make_sections) (abfd))
+    return false;
+
   if (adata(abfd).magic != undecided_magic) return true;
 
   obj_textsec(abfd)->_raw_size =
@@ -3381,13 +3377,15 @@ NAME(aout,final_link) (abfd, info, callback)
 	      abort ();
 	    }
 	}
-      trsize += (_bfd_count_link_order_relocs (obj_textsec (abfd)
-					       ->link_order_head)
-		 * obj_reloc_entry_size (abfd));
+      if (obj_textsec (abfd) != (asection *) NULL)
+	trsize += (_bfd_count_link_order_relocs (obj_textsec (abfd)
+						 ->link_order_head)
+		   * obj_reloc_entry_size (abfd));
       exec_hdr (abfd)->a_trsize = trsize;
-      drsize += (_bfd_count_link_order_relocs (obj_datasec (abfd)
-					       ->link_order_head)
-		 * obj_reloc_entry_size (abfd));
+      if (obj_datasec (abfd) != (asection *) NULL)
+	drsize += (_bfd_count_link_order_relocs (obj_datasec (abfd)
+						 ->link_order_head)
+		   * obj_reloc_entry_size (abfd));
       exec_hdr (abfd)->a_drsize = drsize;
     }
 
