@@ -1,5 +1,7 @@
 1999-07-21  Mark Elbrecht  <snowball3@bigfoot.com>
 
+	* scripttempl/i386go32.sc: Add handling of linkonce sections.
+
 	* configure.bat: Remove; obsolete.
 	* emulparams/go32.sh: Remove; obsolete.
 	* scripttempl/go32coff.sc: Remove; obsolete.

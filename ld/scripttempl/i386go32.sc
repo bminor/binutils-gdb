@@ -17,8 +17,10 @@ SECTIONS
 {
   .text ${RELOCATING+ ${TARGET_PAGE_SIZE}+SIZEOF_HEADERS} : {
     *(.text)
+    ${RELOCATING+*(.gnu.linkonce.t*)}
     *(.const*)
     *(.ro*)
+    ${RELOCATING+*(.gnu.linkonce.r*)}
     ${RELOCATING+etext  =  . ; _etext = .};
     ${RELOCATING+. = ALIGN(${SEGMENT_SIZE});}
   }
@@ -30,8 +32,9 @@ SECTIONS
     *(.dtor)
     djgpp_last_dtor = . ;}
     *(.data)
-    ${RELOCATING+ edata  =  . ; _edata = .};
-    ${RELOCATING+ . = ALIGN(${SEGMENT_SIZE});}
+    ${RELOCATING+*(.gnu.linkonce.d*)}
+    ${RELOCATING+edata  =  . ; _edata = .};
+    ${RELOCATING+. = ALIGN(${SEGMENT_SIZE});}
   }
   ${CONSTRUCTING+${RELOCATING-$CTOR}}
   ${CONSTRUCTING+${RELOCATING-$DTOR}}
