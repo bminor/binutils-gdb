@@ -1230,7 +1230,7 @@ do_setshow_command (arg, from_tty, c)
 	    int i;
 	    int len;
 	    int nmatches;
-	    char *match;
+	    char *match = NULL;
 	    char *p;
 
 	    p = strchr (arg, ' ');

@@ -1,3 +1,17 @@
+Mon Feb 10 16:11:57 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* blockframe.c (generic_get_saved_regs): Remove unused variable
+	"addr".
+	* breakpoint.c (frame_in_dummy): Move struct breakpoint *b decl
+	inside #ifdef CALL_DUMMY.
+	(watch_command_1): Initialize target_resources_ok.
+	* command.c (do_setshow_command): Provide dummy initialization
+	for "match".
+	* valops.c (find_function_addr): Move function & prototype inside
+	#ifdef CALL_DUMMY.
+	(value_arg_coerce): Similarly.
+	(value_of_variable): Provide dummy initialization of "frame".
+
 Mon Feb 10 13:50:53 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* gdbtk.c (call_wrapper):  Clear running_now if an error occurs.
