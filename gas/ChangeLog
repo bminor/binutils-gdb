@@ -1,8 +1,7 @@
 2002-02-04  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-sh.c (parse_at): Set arg type of @(expr,pc) to
-	A_DISP_PC only if it's an integral constant, and to
-	A_DISP_PC_ABS otherwise.
+	A_DISP_PC_ABS, and adjust it by -4.
 	(get_specific): Accept A_DISP_PC_ABS where A_DISP_PC is
 	expected.
 	(build_Mytes): Mark PCRELIMM fix-ups as pc-relative only if
