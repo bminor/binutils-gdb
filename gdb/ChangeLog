@@ -1,3 +1,7 @@
+Mon Nov  8 07:57:30 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* configure.in: Remove h8300h, we have multilib now.
+
 Mon Nov  8 06:11:24 1993  D. V. Henkel-Wallace  (gumby@cirdan.cygnus.com)
 
 	* configure.in: Add unixware as a configuration alias for x86
