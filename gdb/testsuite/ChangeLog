@@ -1,5 +1,7 @@
 Mon Jul  5 22:03:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.t07/watchpoint.exp: Comment out xfail for fixed bug 1836.
+
 	* gdb.t07/{gdbme.c,watchpoint.exp}: Add test for 2597.  Also add
 	test_stepping tests.
 
