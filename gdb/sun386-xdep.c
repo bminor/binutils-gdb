@@ -19,6 +19,8 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#if defined (GDB_TARGET_IS_SUN386)
+
 #include <stdio.h>
 #include "defs.h"
 #include "param.h"
@@ -250,3 +252,28 @@ double_to_i387 (from, to)
   asm ("fstpt (%eax)");
   asm ("fwait");
 }
+#else /* Not sun386 target.  */
+
+/* These functions shouldn't be called when we're cross-debugging.  */
+
+void
+fetch_inferior_registers ()
+{
+}
+
+/* ARGSUSED */
+store_inferior_registers (regno)
+     int regno;
+{
+}
+
+/* ARGSUSED */
+void
+fetch_core_registers (core_reg_sect, core_reg_size, which)
+     char *core_reg_sect;
+     unsigned core_reg_size;
+     int which;
+{
+}
+
+#endif /* Not sun386 target.  */
