@@ -1,3 +1,8 @@
+Wed Jul  8 00:01:30 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* config/mh-solaris:  Use -xs when compiling so that Sun-C puts
+	a symbol-table into the executable.
+
 Tue Jul  7 00:24:52 1992  Fred Fish  (fnf@cygnus.com)
 
 	* config.sub:  Add es1800 (m68k-ericsson-es1800).
