@@ -662,12 +662,17 @@ static int EthernetWrite(DriverCall *dc)
 #ifdef DEBUG
             perror("sendto");
 #endif
+
 #ifdef COMPILING_ON_WINDOWS
             panic("ethernet send failure\n");
 #else
             /* might not work for Windows */
             panic("ethernet send failure [%s]\n",
+#ifdef STDC_HEADERS
+		  strerror(errno));
+#else
                   errno < sys_nerr ? sys_errlist[errno] : "unknown errno");
+#endif /* STDC_HEADERS */
 #endif
         }
 #ifdef DEBUG
