@@ -1,3 +1,9 @@
+2003-03-31  J. Brobecker  <brobecker@gnat.com>
+
+	* config/pa/tm-hppa64.h (FRAME_ARGS_ADDRESS): Delete macro, not useful.
+	(INIT_FRAME_AP): Likewise.
+	(EXTRA_FRAME_INFO): Likewise.
+
 2003-03-31  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh: Include "symfile.h".
