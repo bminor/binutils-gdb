@@ -444,29 +444,6 @@ static const struct ld_option ld_options[] =
 
 #define OPTION_COUNT ARRAY_SIZE (ld_options)
 
-/* Test STRING for containing a string of digits that form a number
-   between MIN and MAX.  The return value is the number or ERR.  */
-
-static int
-is_num (const char *string, int min, int max, int err)
-{
-  int result = 0;
-
-  for (; *string; ++string)
-    {
-      if (! ISDIGIT (*string))
-	{
-	  result = err;
-	  break;
-	}
-      result = result * 10 + (*string - '0');
-    }
-  if (result < min || result > max)
-    result = err;
-
-  return result;
-}
-
 void
 parse_args (unsigned argc, char **argv)
 {

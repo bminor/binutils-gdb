@@ -1,3 +1,7 @@
+2003-12-06  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* lexsup.c (is_num): Remove.
+
 2003-12-05  Dmitry Semyonov  <Dmitry.Semyonov@oktet.ru>
 
 	* pe-dll.c (generate_reloc): Remap ARM_26D relocation from 5 to
