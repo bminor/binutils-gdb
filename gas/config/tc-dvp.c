@@ -21,7 +21,6 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "sysdep.h"
 #include "as.h"
 #include "subsegs.h"
 /* Needed by opcode/dvp.h.  */
@@ -52,7 +51,7 @@
 /* Prefix for mips version of labels defined in vu code.
    Note that symbols that begin with '$' are local symbols
    on mips targets, so we can't begin it with '$'.  */
-#define VU_LABEL_PREFIX "._."
+#define VU_LABEL_PREFIX "_$"
 
 static long parse_float PARAMS ((char **, const char **));
 static symbolS * create_label PARAMS ((const char *, const char *));
@@ -290,6 +289,9 @@ md_begin ()
 
   /* Create special symbols.  */
   mpgloc_sym = expr_build_uconstant (0);
+
+  /* Set the type of the output file to r5900.  */
+  bfd_set_arch_mach (stdoutput, bfd_arch_mips, 5900);
 }
 
 /* We need to keep a list of fixups.  We can't simply generate them as
@@ -1484,13 +1486,13 @@ dvp_frob_label (sym)
     S_SET_OTHER (sym, STO_DVP_VU);
 
   /* If inside an mpg, move vu space labels to their own section and create
-     the corresponding ._. version in normal space.  */
+     the corresponding _$ version in normal space.  */
 
   if (CUR_ASM_STATE == ASM_MPG
       /* Only do this special processing for user specified symbols.
 	 Not sure how we can distinguish them other than by some prefix.  */
-      && *name != '.'
-      /* Check for recursive invocation creating the ._.name.  */
+      && *name != '.' && *name != '$'
+      /* Check for recursive invocation creating the _$name.  */
       && strncmp (name, VU_LABEL_PREFIX, sizeof (VU_LABEL_PREFIX) - 1) != 0)
     {
       /* Move this symbol to vu space.  */
@@ -1500,7 +1502,7 @@ dvp_frob_label (sym)
       sym->sy_value = cur_mpgloc->sy_value;
       sym->sy_frag = &zero_address_frag;
 
-      /* Create the ._. symbol in normal space.  */
+      /* Create the _$ symbol in normal space.  */
       create_colon_label (STO_DVP_VU, VU_LABEL_PREFIX, name);
     }
 }

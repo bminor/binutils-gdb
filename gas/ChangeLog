@@ -1,3 +1,9 @@
+start-sanitize-sky
+Mon May 11 12:48:33 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.c (md_begin): Set type of output file to mips:r5900.
+
+end-sanitize-sky
 Sun May 10 22:35:02 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* po/Make-in (install-info): New target.
