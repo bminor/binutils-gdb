@@ -23,7 +23,7 @@ extern char *malloc ();
 extern int free ();
 
 #if !defined(__GNUC__)
-#define know(x)
+#define BROKEN_ASSERT
 #endif /* not gcc */
 
 /* end of ho-decstation.h */
