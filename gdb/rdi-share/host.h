@@ -219,4 +219,12 @@ extern double strtod(const char *str, char **ptr);
 
 #endif
 
+/* If under Cygwin, provide backwards compatibility with older
+   Cygwin compilers that don't define the current cpp define. */
+#ifdef __CYGWIN32__
+#ifndef __CYGWIN__
+#define __CYGWIN__
+#endif
+#endif
+
 /* end of host.h */

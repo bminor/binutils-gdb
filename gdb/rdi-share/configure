@@ -1759,7 +1759,7 @@ else
 #include "confdefs.h"
 
 int main() {
-return __CYGWIN__;
+return __CYGWIN32__;
 ; return 0; }
 EOF
 if { (eval echo configure:1766: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then

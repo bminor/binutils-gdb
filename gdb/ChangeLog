@@ -1,3 +1,10 @@
+Thu Nov 19 15:21:04 1998  Geoffrey Noer  <noer@cygnus.com>
+
+	* rdi-share/host.h: if compiling under Cygwin, make sure new
+	preprocessor define is defined.  Define it if not.
+	* rdi-share/aclocal.m4: regenerate
+	* rdi-share/configure: regenerate
+
 Thu Nov 19 14:43:44 1998  Geoffrey Noer  <noer@cygnus.com>
 
 	* configure.in: switch back to checking __CYGWIN32__
