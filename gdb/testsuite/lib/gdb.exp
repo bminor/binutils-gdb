@@ -959,7 +959,7 @@ proc get_compiler_info {binfile args} {
     global signed_keyword_not_used
     global gcc_compiled
 
-    if {![istarget "hppa*-*-hpux*"]} {
+    if {![istarget "hppa*-*-hpux*"] && ![istarget "mips*-*-irix*"]} {
 	if { [llength $args] > 0 } {
 	    if {$args == "c++"} {
 		if { [gdb_compile "${srcdir}/lib/compiler.cc" "${binfile}.ci" preprocess {}] != "" } {

@@ -1,3 +1,9 @@
+2002-07-29  Kevin Buettner  <kevinb@redhat.com>
+
+	* lib/gdb.exp (mips*-*-irix*): Use alternate method for preprocessing
+	source files.  The ``-o'' option doesn't work with the ``-E'' option
+	when using the Irix compiler.
+
 2002-07-19  Daniel Jacobowitz  <drow@mvista.com>
 
 	* config/gdbserver.exp (gdb_load): Don't use TCL varargs.
