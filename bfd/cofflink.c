@@ -695,15 +695,17 @@ _bfd_coff_final_link (abfd, info)
     {
       unsigned int i;
 
+      /* We use section_count + 1, rather than section_count, because
+         the target_index fields are 1 based.  */
       finfo.section_info = ((struct coff_link_section_info *)
-			    malloc (abfd->section_count
+			    malloc ((abfd->section_count + 1)
 				    * sizeof (struct coff_link_section_info)));
       if (finfo.section_info == NULL)
 	{
 	  bfd_set_error (bfd_error_no_memory);
 	  goto error_return;
 	}
-      for (i = 0; i < abfd->section_count; i++)
+      for (i = 0; i <= abfd->section_count; i++)
 	{
 	  finfo.section_info[i].relocs = NULL;
 	  finfo.section_info[i].rel_hashes = NULL;
@@ -1122,7 +1124,16 @@ coff_link_input_bfd (finfo, input_bfd)
 	 the symbol.  */
       isym = *isymp;
 
-      *secpp = coff_section_from_bfd_index (input_bfd, isym.n_scnum);
+      if (isym.n_scnum != 0)
+	*secpp = coff_section_from_bfd_index (input_bfd, isym.n_scnum);
+      else
+	{
+	  if (isym.n_value == 0)
+	    *secpp = bfd_und_section_ptr;
+	  else
+	    *secpp = bfd_com_section_ptr;
+	}
+
       *indexp = -1;
 
       skip = false;
@@ -1647,7 +1658,8 @@ coff_link_input_bfd (finfo, input_bfd)
 
 	      irel = internal_relocs;
 	      irelend = irel + o->reloc_count;
-	      rel_hash = finfo->section_info[target_index].rel_hashes;
+	      rel_hash = (finfo->section_info[target_index].rel_hashes
+			  + o->output_section->reloc_count);
 	      for (; irel < irelend; irel++, rel_hash++)
 		{
 		  struct coff_link_hash_entry *h;
@@ -1657,6 +1669,9 @@ coff_link_input_bfd (finfo, input_bfd)
 		  /* Adjust the reloc address and symbol index.  */
 
 		  irel->r_vaddr += offset;
+
+		  if (irel->r_symndx == -1)
+		    continue;
 
 		  h = obj_coff_sym_hashes (input_bfd)[irel->r_symndx];
 		  if (h != NULL)
@@ -2001,6 +2016,145 @@ coff_reloc_link_order (output_bfd, finfo, output_section, link_order)
   /* FIXME: What is the right value for r_offset?  Is zero OK?  */
 
   ++output_section->reloc_count;
+
+  return true;
+}
+
+/* A basic reloc handling routine which may be used by processors with
+   simple relocs.  */
+
+boolean
+_bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
+				    input_section, contents, relocs, syms,
+				    sections)
+     bfd *output_bfd;
+     struct bfd_link_info *info;
+     bfd *input_bfd;
+     asection *input_section;
+     bfd_byte *contents;
+     struct internal_reloc *relocs;
+     struct internal_syment *syms;
+     asection **sections;
+{
+  struct internal_reloc *rel;
+  struct internal_reloc *relend;
+
+  rel = relocs;
+  relend = rel + input_section->reloc_count;
+  for (; rel < relend; rel++)
+    {
+      long symndx;
+      struct coff_link_hash_entry *h;
+      struct internal_syment *sym;
+      bfd_vma addend;
+      bfd_vma val;
+      const reloc_howto_type *howto;
+      bfd_reloc_status_type rstat;
+
+      symndx = rel->r_symndx;
+
+      if (symndx == -1)
+	{
+	  h = NULL;
+	  sym = NULL;
+	}
+      else
+	{    
+	  h = obj_coff_sym_hashes (input_bfd)[symndx];
+	  sym = syms + symndx;
+	}
+
+      /* COFF treats common symbols in one of two ways.  Either the
+         size of the symbol is included in the section contents, or it
+         is not.  We assume that the size is not included, and force
+         the rtype_to_howto function to adjust the addend as needed.  */
+      if (sym != NULL && sym->n_scnum != 0)
+	addend = - sym->n_value;
+      else
+	addend = 0;
+
+      howto = bfd_coff_rtype_to_howto (input_bfd, input_section, rel, h,
+				       sym, &addend);
+      if (howto == NULL)
+	return false;
+
+      val = 0;
+
+      if (h == NULL)
+	{
+	  asection *sec;
+
+	  if (symndx == -1)
+	    {
+	      sec = bfd_abs_section_ptr;
+	      val = 0;
+	    }
+	  else
+	    {
+	      sec = sections[symndx];
+	      val = (sec->output_section->vma
+		     + sec->output_offset
+		     + sym->n_value
+		     - sec->vma);
+	    }
+	}
+      else
+	{
+	  if (h->root.type == bfd_link_hash_defined)
+	    {
+	      asection *sec;
+
+	      sec = h->root.u.def.section;
+	      val = (h->root.u.def.value
+		     + sec->output_section->vma
+		     + sec->output_offset);
+	    }
+	  else if (! info->relocateable)
+	    {
+	      if (! ((*info->callbacks->undefined_symbol)
+		     (info, h->root.root.string, input_bfd, input_section,
+		      rel->r_vaddr - input_section->vma)))
+		return false;
+	    }
+	}
+
+      rstat = _bfd_final_link_relocate (howto, input_bfd, input_section,
+					contents,
+					rel->r_vaddr - input_section->vma,
+					val, addend);
+
+      switch (rstat)
+	{
+	default:
+	  abort ();
+	case bfd_reloc_ok:
+	  break;
+	case bfd_reloc_overflow:
+	  {
+	    const char *name;
+	    char buf[SYMNMLEN + 1];
+
+	    if (symndx == -1)
+	      name = "*ABS*";
+	    else if (h != NULL)
+	      name = h->root.root.string;
+	    else if (sym->_n._n_n._n_zeroes == 0
+		     && sym->_n._n_n._n_offset != 0)
+	      name = obj_coff_strings (input_bfd) + sym->_n._n_n._n_offset;
+	    else
+	      {
+		strncpy (buf, sym->_n._n_name, SYMNMLEN);
+		buf[SYMNMLEN] = '\0';
+		name = buf;
+	      }
+
+	    if (! ((*info->callbacks->reloc_overflow)
+		   (info, name, howto->name, (bfd_vma) 0, input_bfd,
+		    input_section, rel->r_vaddr - input_section->vma)))
+	      return false;
+	  }
+	}
+    }
 
   return true;
 }

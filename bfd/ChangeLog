@@ -1,5 +1,17 @@
 Mon Sep 12 11:43:08 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* cofflink.c (coff_link_input_bfd): If r_symndx is -1, don't
+	change it.
+	(_bfd_coff_generic_relocate_section): If r_symndx is -1, it is an
+	absolute reloc.  Don't dump core using r_symndx as an array index.
+	* cf-m68klynx.c (coff_bfd_link_add_symbols): Define.
+	(lynx_link_add_symbols): New static function (copy of function in
+	coff-i386.c).
+	(coff_m68k_lynxrtype_to_howto): sym argument may be NULL.
+	* coff-i386.c (coff_i386_rtype_to_howto): Likewise.
+	* coff-a29k.c (coff_a29k_relocate_section): Handle an r_symndx
+	value of -1, meaning an absolute reloc.
+
 	* ctor.c: Remove; obsolete.
 	* Makefile.in: Rebuild dependencies.
 	(BFD_LIBS): Remove ctor.o.

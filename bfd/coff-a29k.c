@@ -353,7 +353,10 @@ coff_a29k_relocate_section (output_bfd, info, input_bfd, input_section,
       symndx = rel->r_symndx;
       loc = contents + rel->r_vaddr - input_section->vma;
 
-      h = obj_coff_sym_hashes (input_bfd)[symndx];
+      if (symndx == -1)
+	h = NULL;
+      else
+	h = obj_coff_sym_hashes (input_bfd)[symndx];
 
       sym = NULL;
       sec = NULL;
@@ -366,12 +369,17 @@ coff_a29k_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  if (h == NULL)
 	    {
-	      sym = syms + symndx;
-	      sec = sections[symndx];
-	      val = (sec->output_section->vma
-		     + sec->output_offset
-		     + sym->n_value
-		     - sec->vma);
+	      if (symndx == -1)
+		sec = bfd_abs_section_ptr;
+	      else
+		{
+		  sym = syms + symndx;
+		  sec = sections[symndx];
+		  val = (sec->output_section->vma
+			 + sec->output_offset
+			 + sym->n_value
+			 - sec->vma);
+		}
 	    }
 	  else
 	    {
@@ -497,7 +505,9 @@ coff_a29k_relocate_section (output_bfd, info, input_bfd, input_section,
 	  const char *name;
 	  char buf[SYMNMLEN + 1];
 
-	  if (h != NULL)
+	  if (symndx == -1)
+	    name = "*ABS*";
+	  else if (h != NULL)
 	    name = h->root.root.string;
 	  else if (sym == NULL)
 	    name = "*unknown*";
