@@ -215,6 +215,7 @@ tm-i386v4.h
 tm-i960.h
 tm-irix3.h
 tm-isi.h
+tm-linux.h
 tm-merlin.h
 tm-mips.h
 tm-news.h
@@ -278,6 +279,7 @@ xm-i386v32.h
 xm-irix3.h
 xm-irix4.h
 xm-isi.h
+xm-linux.h
 xm-m68k.h
 xm-m88k.h
 xm-merlin.h
