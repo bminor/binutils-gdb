@@ -1,3 +1,32 @@
+2001-08-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* libieee.h (common_header_type): Add last_byte field.
+
+	* ieee.c: Add missing prototypes.  Some format fixes.
+	(struct output_buffer_struct): Move for availability to prototypes.
+	(ieee_part_after): New function.
+	(ieee_slurp_debug): Use it here.
+	(ieee_seek): Pass in ieee_data_struct rather than bfd.  Use
+	ieee_part_after to set last_byte to one past end of current part.
+	Update callers.
+	(ieee_pos): Pass in ieee_data_struct rather than bfd.
+	Update callers.
+	(parse_expression): Don't go beyond the end of the current part.
+	(ieee_slurp_external_symbols): Correct type passed to read_2bytes.
+	(ieee_get_symtab_upper_bound, ieee_get_symtab,
+	ieee_get_symbol_info, ieee_print_symbol, ieee_new_section_hook,
+	ieee_get_reloc_upper_bound, ieee_canonicalize_reloc, block,
+	ieee_set_section_contents, ieee_write_object_contents,
+	ieee_make_empty_symbol): Make static.
+	(ieee_archive_p): Correct comments regarding bfd_read.
+	(ieee_object_p): Similarly.
+	(ieee_mkobject): Move it.  Clear output_ptr_start, output_ptr,
+	output_ptr_end, input_ptr_start, input_ptr, input_ptr_end,
+	input_bfd, output_bfd, output_buffer.
+	(do_as_repeat): Write out ieee_set_current_pc_enum value as for
+	do_with_relocs, ie. as a symbol for relocatable files.
+	(ieee_vec): Add comments showing functions referenced by macros.
+	
 2001-08-14  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* aout-tic30.c: Add missing prototypes.  Fix formatting.

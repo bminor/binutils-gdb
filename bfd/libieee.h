@@ -1,5 +1,6 @@
 /* IEEE-695 object file formats:  definitions internal to BFD.
-   Copyright 1990, 1991, 1992, 1994, 1996 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1994, 1996, 2001
+   Free Software Foundation, Inc.
    Written by Cygnus Support.  Mostly Steve Chamberlain's fault.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -62,8 +63,9 @@ typedef struct ieee_per_section
 #define ieee_per_section(x) ((ieee_per_section_type *)((x)->used_by_bfd))
   
 typedef struct {
-  unsigned  char *input_p;
+  unsigned char *input_p;
   unsigned char *first_byte;
+  unsigned char *last_byte;
   bfd *abfd;
 } common_header_type ;
 
