@@ -24,8 +24,8 @@ This was written by steve chamberlain
 */
 
 
-typedef int bfd_vma;
 #include <ansidecl.h>
+#include "bfd.h"
 #include "ldgram.h"
 
 int ldgram_in_defsym;
@@ -98,12 +98,15 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <DEFSYMEXP>{FILENAMECHAR1}{SYMBOLCHARN}*   { yylval.name = buystring(yytext); return NAME; }
 <DEFSYMEXP>[ \t]                { RTOKEN(DEFSYMEND); }
 <DEFSYMEXP>"="                  { RTOKEN('='); }
+<COMMAND>"--help"		{ return OPTION_help; }
+<COMMAND>"--version"		{ return OPTION_version; }
 <COMMAND>"-defsym"{WHITE}*	{ return OPTION_defsym; }
-<COMMAND>"-noinhibit_exec" 	{ return OPTION_noinhibit_exec; }
-<COMMAND>"-noinhibit-exec"	{ return OPTION_noinhibit_exec; }
-<COMMAND>"-sort_common"		{ return OPTION_sort_common;}
-<COMMAND>"-sort-common"		{ return OPTION_sort_common;}
 <COMMAND>"-format"		{ return OPTION_format; }
+<COMMAND>"-noinhibit-exec"	{ return OPTION_noinhibit_exec; }
+<COMMAND>"-noinhibit_exec" 	{ return OPTION_noinhibit_exec; }
+<COMMAND>"-oformat"		{ return OPTION_oformat; }
+<COMMAND>"-sort-common"		{ return OPTION_sort_common;}
+<COMMAND>"-sort_common"		{ return OPTION_sort_common;}
 <COMMAND>"-n"			{ return OPTION_n; }
 <COMMAND>"-N"			{ return OPTION_N; }
 <COMMAND>"-r"			{ return OPTION_r; }
