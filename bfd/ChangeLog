@@ -1,3 +1,8 @@
+2001-08-22  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* coff-stgo32.c (COFF_SECTION_ALIGNMENT_ENTRIES): Add missing
+	comma.
+
 2001-08-21  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* coff-go32.c: Make DWARF2 sections use an alignment of 0.  Set
