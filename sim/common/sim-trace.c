@@ -438,7 +438,9 @@ print_data (SIM_DESC sd,
 	    trace_printf (sd, cpu, " 0x%08lx", (long) * (unsigned32*) data);
 	    break;
 	  case sizeof (unsigned64):
-	    trace_printf (sd, cpu, " 0x%08lx", (long) * (unsigned64*) data);
+	    trace_printf (sd, cpu, " 0x%08lx%08lx",
+			  (long) ((* (unsigned64*) data) >> 32),
+			  (long) * (unsigned64*) data);
 	    break;
 	  default:
 	    abort ();
@@ -721,6 +723,23 @@ trace_input_word3 (SIM_DESC sd,
 }
 
 void
+trace_input_word4 (SIM_DESC sd,
+		   sim_cpu *cpu,
+		   int trace_idx,
+		   unsigned_word d0,
+		   unsigned_word d1,
+		   unsigned_word d2,
+		   unsigned_word d3)
+{
+  TRACE_DATA *data = CPU_TRACE_DATA (cpu);
+  TRACE_IDX (data) = trace_idx;
+  save_data (sd, data, trace_fmt_word, sizeof (d0), &d0);
+  save_data (sd, data, trace_fmt_word, sizeof (d1), &d1);
+  save_data (sd, data, trace_fmt_word, sizeof (d2), &d2);
+  save_data (sd, data, trace_fmt_word, sizeof (d3), &d3);
+}
+
+void
 trace_input_bool1 (SIM_DESC sd,
 		   sim_cpu *cpu,
 		   int trace_idx,
@@ -841,6 +860,46 @@ trace_result_word1 (SIM_DESC sd,
   /* Append any results to the end of the inputs */
   last_input = TRACE_INPUT_IDX (data);
   save_data (sd, data, trace_fmt_word, sizeof (unsigned_word), &r0);
+
+  trace_results (sd, cpu, trace_idx, last_input);
+}	      
+
+void
+trace_result_word2 (SIM_DESC sd,
+		    sim_cpu *cpu,
+		    int trace_idx,
+		    unsigned_word r0,
+		    unsigned_word r1)
+{
+  TRACE_DATA *data = CPU_TRACE_DATA (cpu);
+  int last_input;
+
+  /* Append any results to the end of the inputs */
+  last_input = TRACE_INPUT_IDX (data);
+  save_data (sd, data, trace_fmt_word, sizeof (r0), &r0);
+  save_data (sd, data, trace_fmt_word, sizeof (r1), &r1);
+
+  trace_results (sd, cpu, trace_idx, last_input);
+}	      
+
+void
+trace_result_word4 (SIM_DESC sd,
+		    sim_cpu *cpu,
+		    int trace_idx,
+		    unsigned_word r0,
+		    unsigned_word r1,
+		    unsigned_word r2,
+		    unsigned_word r3)
+{
+  TRACE_DATA *data = CPU_TRACE_DATA (cpu);
+  int last_input;
+
+  /* Append any results to the end of the inputs */
+  last_input = TRACE_INPUT_IDX (data);
+  save_data (sd, data, trace_fmt_word, sizeof (r0), &r0);
+  save_data (sd, data, trace_fmt_word, sizeof (r1), &r1);
+  save_data (sd, data, trace_fmt_word, sizeof (r2), &r2);
+  save_data (sd, data, trace_fmt_word, sizeof (r3), &r3);
 
   trace_results (sd, cpu, trace_idx, last_input);
 }	      

@@ -1,4 +1,8 @@
 start-sanitize-r5900
+Tue Feb 24 14:44:18 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* r5900.igen: Add tracing to all p* instructions.
+
 Tue Feb 24 02:47:33 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_store_register, sim_fetch_register): Pull swifty

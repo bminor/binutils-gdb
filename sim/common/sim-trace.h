@@ -257,6 +257,19 @@ extern void trace_input_word3 PARAMS ((SIM_DESC sd,
 				       unsigned_word d1,
 				       unsigned_word d2));
 
+extern void trace_input_word4 PARAMS ((SIM_DESC sd,
+				       sim_cpu *cpu,
+				       int trace_idx,
+				       unsigned_word d0,
+				       unsigned_word d1,
+				       unsigned_word d2,
+				       unsigned_word d3));
+
+extern void trace_input_addr1 PARAMS ((SIM_DESC sd,
+				       sim_cpu *cpu,
+				       int trace_idx,
+				       address_word d0));
+
 extern void trace_input_bool1 PARAMS ((SIM_DESC sd,
 				       sim_cpu *cpu,
 				       int trace_idx,
@@ -304,6 +317,20 @@ extern void trace_result_word1 PARAMS ((SIM_DESC sd,
 					sim_cpu *cpu,
 					int trace_idx,
 					unsigned_word r0));
+
+extern void trace_result_word2 PARAMS ((SIM_DESC sd,
+					sim_cpu *cpu,
+					int trace_idx,
+					unsigned_word r0,
+					unsigned_word r1));
+
+extern void trace_result_word4 PARAMS ((SIM_DESC sd,
+					sim_cpu *cpu,
+					int trace_idx,
+					unsigned_word r0,
+					unsigned_word r1,
+					unsigned_word r2,
+					unsigned_word r3));
 
 extern void trace_result_bool1 PARAMS ((SIM_DESC sd,
 					sim_cpu *cpu,
@@ -365,10 +392,30 @@ do { \
     trace_input_word3 (SD, CPU, TRACE_ALU_IDX, (V0), (V1), (V2)); \
 } while (0)
 
-#define TRACE_ALU_RESULT(R0) \
+#define TRACE_ALU_INPUT4(V0,V1,V2,V3) \
+do { \
+  if (TRACE_ALU_P (CPU)) \
+    trace_input_word4 (SD, CPU, TRACE_ALU_IDX, (V0), (V1), (V2), (V3)); \
+} while (0)
+
+#define TRACE_ALU_RESULT(R0) TRACE_ALU_RESULT1(R0)
+
+#define TRACE_ALU_RESULT1(R0) \
 do { \
   if (TRACE_ALU_P (CPU)) \
     trace_result_word1 (SD, CPU, TRACE_ALU_IDX, (R0)); \
+} while (0)
+
+#define TRACE_ALU_RESULT2(R0,R1) \
+do { \
+  if (TRACE_ALU_P (CPU)) \
+    trace_result_word2 (SD, CPU, TRACE_ALU_IDX, (R0), (R1)); \
+} while (0)
+
+#define TRACE_ALU_RESULT4(R0,R1,R2,R3) \
+do { \
+  if (TRACE_ALU_P (CPU)) \
+    trace_result_word4 (SD, CPU, TRACE_ALU_IDX, (R0), (R1), (R2), (R3)); \
 } while (0)
 
 
