@@ -177,6 +177,7 @@ CODE_FRAGMENT
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
+#include "coff/internal.h"
 #include "coff/sym.h"
 #include "libecoff.h"
 
@@ -228,10 +229,11 @@ DEFUN(bfd_nonrepresentable_section,(abfd, name),
          CONST  bfd * CONST abfd AND
          CONST  char * CONST name)
 {
-  printf("bfd error writing file %s, format %s can't represent section %s\n",
-         abfd->filename, 
-         abfd->xvec->name,
-         name);
+  fprintf(stderr,
+	  "bfd error writing file %s, format %s can't represent section %s\n",
+	  abfd->filename, 
+	  abfd->xvec->name,
+	  name);
   exit(1);
 }
 
@@ -243,8 +245,8 @@ DEFUN(bfd_undefined_symbol,(relent, seclet),
       CONST  struct bfd_seclet *seclet)
 {
   asymbol *symbol = *(relent->sym_ptr_ptr);
-  printf("bfd error relocating, symbol %s is undefined\n",
-         symbol->name);
+  fprintf(stderr, "bfd error relocating, symbol %s is undefined\n",
+	  symbol->name);
   exit(1);
 }
 /*ARGSUSED*/
@@ -254,7 +256,7 @@ DEFUN(bfd_reloc_value_truncated,(relent, seclet),
          CONST  arelent *relent AND
       struct bfd_seclet *seclet)
 {
-  printf("bfd error relocating, value truncated\n");
+  fprintf(stderr, "bfd error relocating, value truncated\n");
   exit(1);
 }
 /*ARGSUSED*/
@@ -264,7 +266,7 @@ DEFUN(bfd_reloc_is_dangerous,(relent, seclet),
       CONST  arelent *relent AND
      CONST  struct bfd_seclet *seclet)
 {
-  printf("bfd error relocating, dangerous\n");
+  fprintf(stderr, "bfd error relocating, dangerous\n");
   exit(1);
 }
 
@@ -298,7 +300,7 @@ void
 DEFUN (bfd_default_error_trap, (error_tag),
        bfd_ec error_tag)
 {
-  printf("bfd assert fail (%s)\n", bfd_errmsg(error_tag));
+  fprintf(stderr, "bfd assert fail (%s)\n", bfd_errmsg(error_tag));
 }
 
 void (*bfd_error_trap) PARAMS ((bfd_ec)) = bfd_default_error_trap;
@@ -465,7 +467,7 @@ bfd_assert(file, line)
 char *file;
 int line;
 {
-  printf("bfd assertion fail %s:%d\n",file,line);
+  fprintf(stderr, "bfd assertion fail %s:%d\n",file,line);
 }
 
 

@@ -58,7 +58,6 @@ coff-i960.c
 coff-m68k.c
 coff-m88k.c
 coff-mips.c
-coff-msym.c
 coff-rs6000.c
 coff-sh.c
 coff-u68k.c
@@ -91,6 +90,8 @@ cpu-z8k.c
 ctor.c
 demo64.c
 doc
+ecoff.c
+ecoffswap.h
 elf.c
 elf32-gen.c
 elf32-hppa.c

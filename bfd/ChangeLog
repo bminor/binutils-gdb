@@ -1,3 +1,26 @@
+Tue Aug  3 11:06:28 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ecoff.c: New file for generic ECOFF functions.
+	* ecoffswap.h: New file for ECOFF swapping functions which differ
+	only slightly for different targets.
+	* libecoff.h: Added prototypes for ecoff.c functions.
+	(ecoff_backend_data): New structure.
+	(ecoff_tdata): Added backend_data field.  Changed external data
+	pointers to be PTR rather than to a particular struct.
+	(ecoff_symbol_struct): Moved in from coff-mips.c.
+	* coff-alpha.c, coff-mips.c: Moved common functions into ecoff.c.
+	Added ECOFF backend structures.  Include ecoffswap.h.
+	* coff-msym.c: Removed; superseded by ecoffswap.h.
+	* bfd.c: Include coff/internal.h.
+	* Makefile.in (BFD_LIBS): Removed coff-mips.o and coff-msym.o.
+	Added ecoff.o.
+	(BFD64_BACKENDS): Added coff-alpha.o.
+	(CFILES): Removed coff-msym.c.  Added ecoff.c.
+	(bfd.o): Added dependency on $(INCDIR)/coff/sym.h.
+	(coff-mips.o): Added dependency on ecoffswap.h and coff/ecoff.h.
+	(ecoff.o, coff-alpha.o): New targets.
+	(coff-msym.o): Removed target.
+
 Mon Aug  2 23:33:38 1993  John Gilmore  (gnu@cygnus.com)
 
 	* elf32-hppa.h, hosts/*:  Remove (one more time) all occurrances

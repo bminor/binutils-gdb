@@ -69,13 +69,9 @@ TARGETLIB = libbfd.a
 # bfd.h goes here, for now
 BFD_H = bfd.h
 
-# Some of these files should be in BFD*_BACKENDS below, but gdb
-# won't link without them.  So, in order for some of the minimal-bfd
-# hacks to work, they're also included here for now.
-#	coff-mips.o coff-msym.o
 BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
 	archures.o core.o section.o format.o syms.o reloc.o init.o \
-	ctor.o seclet.o coffgen.o reloc16.o coff-mips.o coff-msym.o
+	ctor.o seclet.o coffgen.o ecoff.o reloc16.o
 
 ALL_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
 	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o cpu-rs6000.o cpu-hppa.o \
@@ -86,21 +82,21 @@ BFD32_BACKENDS = \
 	elf32.o elf32-sparc.o elf32-i386.o elf32-i860.o elf32-m68k.o \
 	elf32-hppa.o elf32-mips.o elf32-m88k.o elf32-gen.o \
 	nlm.o \
-	nlm32.o nlm32-gen.o \
+	nlm32.o nlm32-gen.o nlm32-i386.o \
 	aout32.o sunos.o newsos3.o mipsbsd.o aout-adobe.o \
 	i386aout.o i386bsd.o i386linux.o i386lynx.o \
 	hp300hpux.o bout.o \
 	coff-i960.o coff-a29k.o coff-m68k.o coff-u68k.o \
 	coff-i386.o coff-m88k.o \
 	coff-rs6000.o coff-h8300.o coff-h8500.o coff-z8k.o coff-we32k.o \
-	coff-mips.o coff-msym.o coff-alpha.o coff-sh.o \
+	coff-mips.o coff-sh.o \
 	hppa.o oasys.o ieee.o srec.o \
 	stab-syms.o
 
 BFD64_BACKENDS = \
 	elf64.o elf64-gen.o \
 	nlm64.o nlm64-gen.o \
-	aout64.o demo64.o
+	aout64.o demo64.o coff-alpha.o
 
 OPTIONAL_BACKENDS = trad-core.o sco-core.o aix386-core.o hpux-core.o
 
@@ -139,8 +135,8 @@ FLAGS_TO_PASS = \
 CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 archures.c coff-i386.c aout64.c aout32.c sunos.c demo64.c \
 	 coff-i960.c srec.c tekhex.c oasys.c ieee.c \
-	 coff-m68k.c coff-u68k.c \
-	 coff-a29k.c coff-rs6000.c coff-msym.c coffgen.c format.c \
+	 ecoff.c coff-m68k.c coff-u68k.c \
+	 coff-a29k.c coff-rs6000.c coffgen.c format.c \
 	 section.c core.c syms.c stab-syms.c reloc.c init.c ctor.c \
 	 seclet.c coff-m88k.c coff-mips.c coff-sh.c trad-core.c newsos3.c \
 	 i386aout.c i386linux.c bout.c aout-adobe.c coff-we32k.c \
@@ -151,7 +147,7 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 elf32.c elf32-sparc.c elf32-i386.c elf32-i860.c elf32-m68k.c \
 	 elf32-hppa.c elf32-m88k.c elf32-mips.c elf32-gen.c \
 	 elf64.c elf64-gen.c \
-	 nlm32.c nlm32-gen.c nlm64.c nlm64-gen.c \
+	 nlm32.c nlm32-gen.c nlm32-i386.c nlm64.c nlm64-gen.c \
 	 coff-alpha.c cpu-alpha.c \
 	 hp300hpux.c i386lynx.c
 
@@ -184,7 +180,7 @@ ofiles : Makefile
 	f=""; \
 	for i in $(OFILES) ; do \
 	  case " $$f " in \
-	    "* $$i *") ;; \
+	    *" $$i "*) ;; \
 	    *) f="$$f $$i" ;; \
 	  esac ; \
 	done ; \
@@ -321,8 +317,8 @@ install:
 	@$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 
 
-Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
-	$(SHELL) ./config.status
+Makefile: Makefile.in configure.in $(host_makefile_frag) $(target_makefile_frag)
+	$(SHELL) config.status
 
 dep: $(CFILES)
 	mkdep $(CFLAGS) $?
@@ -377,7 +373,7 @@ bfd.ps:
 libbfd.o : libbfd.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h 
 opncls.o : opncls.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h 
 bfd.o : bfd.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
-  $(INCDIR)/coff/sym.h libecoff.h
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/sym.h libecoff.h
 archive.o : archive.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/aout/ar.h $(INCDIR)/aout/ranlib.h 
 targets.o : targets.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h 
@@ -422,9 +418,17 @@ coff-m68k.o: coff-m68k.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
 coff-m88k.o: coff-m88k.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/coff/m88k.h $(INCDIR)/coff/internal.h libcoff.h coffcode.h \
   coffswap.h seclet.h 
+ecoff.o: ecoff.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/coff/internal.h libecoff.h libcoff.h seclet.h \
+  $(INCDIR)/aout/ar.h $(INCDIR)/aout/ranlib.h libaout.h \
+  $(INCDIR)/aout/aout64.h $(INCDIR)/coff/ecoff.h $(INCDIR)/coff/sym.h \
+  $(INCDIR)/coff/symconst.h
 coff-mips.o: coff-mips.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/coff/mips.h $(INCDIR)/coff/internal.h libcoff.h coffcode.h \
-  coffswap.h seclet.h libecoff.h
+  coffswap.h seclet.h libecoff.h ecoffswap.h $(INCDIR)/coff/ecoff.h
+coff-alpha.o: coff-alpha.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/coff/alpha.h $(INCDIR)/coff/internal.h libcoff.h coffcode.h \
+  coffswap.h seclet.h libecoff.h ecoffswap.h $(INCDIR)/coff/ecoff.h
 coff-rs6000.o: coff-rs6000.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/coff/rs6000.h $(INCDIR)/coff/internal.h libcoff.h coffcode.h \
   coffswap.h seclet.h
@@ -457,9 +461,6 @@ sco-core.o : sco-core.c $(BFD_H) libbfd.h libcoff.h \
 aix386-core.o : aix386-core.c $(BFD_H) libbfd.h libcoff.h \
   $(INCDIR)/obstack.h $(INCDIR)/coff/i386.h $(INCDIR)/coff/internal.h
 hpux-core.o : hpux-core.c $(BFD_H) libbfd.h libhppa.h
-
-coff-msym.o: coff-msym.c $(BFD_H)  $(INCDIR)/coff/ecoff-ext.h \
-  $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h
 
 newsos3.o : newsos3.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
@@ -507,11 +508,13 @@ nlm.o : nlm.c libnlm.h libbfd.h $(BFD_H) $(INCDIR)/obstack.h
 nlm32.o : nlm32.c nlmcode.h libnlm.h libbfd.h $(BFD_H) \
   $(INCDIR)/obstack.h
 nlm32-gen.o : nlm32-gen.c libnlm.h libbfd.h \
-  $(BFD_H) $(INCDIR)/obstack.h
+  $(BFD_H) $(INCDIR)/obstack.h nlm-target.h
+nlm32-i386.o : nlm32-i386.c libnlm.h libbfd.h \
+  $(BFD_H) $(INCDIR)/obstack.h nlm-target.h
 nlm64.o : nlm64.c nlmcode.h libnlm.h libbfd.h $(BFD_H) \
   $(INCDIR)/obstack.h
 nlm64-gen.o : nlm64-gen.c libnlm.h libbfd.h \
-  $(BFD_H) $(INCDIR)/obstack.h
+  $(BFD_H) $(INCDIR)/obstack.h nlm-target.h
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
 
