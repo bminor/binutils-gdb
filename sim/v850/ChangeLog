@@ -1,3 +1,7 @@
+Wed Oct 30 08:49:10 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c (OP_10007E0): Handle SYS_time.
+
 Tue Oct 29 14:22:55 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* simops.c: Include <sys/stat.h>.

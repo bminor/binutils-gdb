@@ -2083,6 +2083,9 @@ OP_10007E0 ()
 	case SYS_chmod:
 	  RETVAL = chmod (MEMPTR (PARM1), PARM2);
 	  break;
+	case SYS_time:
+	  RETVAL = time (MEMPTR (PARM1));
+	  break;
 	case SYS_utime:
 	  /* Cast the second argument to void *, to avoid type mismatch
 	     if a prototype is present.  */
