@@ -24,6 +24,7 @@ Do-first:
 Things-to-keep:
 
 Makefile.in
+configure
 configure.in
 gdbserve.c
 gdbserve.def

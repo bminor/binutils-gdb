@@ -1,5 +1,8 @@
 Wed May 31 12:04:01 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
+	* nlm/{configure.in, Makefile.in}: Converted to use autoconf.
+	* nlm/configure: New file, generated with autoconf 2.3.
+
 	* nlm/configure.in: Use sed instead of awk to get the value of
 	  cpufile.  Awk is not a utility required by the GNU coding
 	  standards.  This change also fixes the rigid whitespace

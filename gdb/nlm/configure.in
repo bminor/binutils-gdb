@@ -1,15 +1,17 @@
-srcname="Remote GDB server for Netware"
-srctrigger=gdbserve.c
+dnl Process this file with autoconf to produce a configure script.
+AC_PREREQ(2.3)dnl
+AC_INIT(gdbserve.c)
 
-# per-host:
+AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../..)
+AC_CANONICAL_SYSTEM
+AC_ARG_PROGRAM
 
-# per-target:
+AC_PROG_INSTALL
 
 # Map target cpu into the config cpu subdirectory name.
 # The default is $target_cpu.
-
+changequote(,)dnl
 case "${target_cpu}" in
-
 alpha)			gdb_target_cpu=alpha ;;
 c[12])			gdb_target_cpu=convex ;;
 hppa*)			gdb_target_cpu=pa ;;
@@ -20,24 +22,25 @@ pn)			gdb_target_cpu=gould ;;
 pyramid)		gdb_target_cpu=pyr ;;
 sparc*)			gdb_target_cpu=sparc ;;
 *)			gdb_target_cpu=$target_cpu ;;
-
 esac
+changequote([,])dnl
 
 target_makefile_frag=${srcdir}/../config/${gdb_target_cpu}/gdbserve.mt
 if [ ! -f ${target_makefile_frag} ]; then
-	echo '***' "GDBSERVE does not support target ${target}" 1>&2
-	exit 1
+	AC_MSG_ERROR("*** GDBSERVE does not support target ${target}")
 fi
+
+dnl We have to assign the same value to other variables because autoconf
+dnl doesn't provide a mechanism to substitute a replacement keyword with
+dnl arbitrary data or pathnames.
+dnl
+target_makefile_frag_path=$target_makefile_frag
+AC_SUBST(target_makefile_frag_path)
+AC_SUBST_FILE(target_makefile_frag)
 
 cpufile=`sed -n '
 s/CPU_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
 ' ${target_makefile_frag}
-
-# If hostfile (XM_FILE) and/or targetfile (TM_FILE) and/or nativefile
-# (NAT_FILE) is not set in the ?config/* file, we don't make the
-# corresponding links.  But we have to remove the xm.h files and tm.h
-# files anyway, e.g. when switching from "configure host" to
-# "configure none".
 
 files=
 links=
@@ -46,3 +49,7 @@ if [ "${cpufile}" != "" ]; then
 	files="${files} ${cpufile}.h"
 	links="${links} cpu.h"
 fi
+
+AC_LINK_FILES($files, $links)
+AC_OUTPUT(Makefile)
+
