@@ -48,25 +48,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf/common.h"
 
 static void gld${EMULATION_NAME}_before_parse PARAMS ((void));
-static boolean gld${EMULATION_NAME}_open_dynamic_archive
-  PARAMS ((const char *, search_dirs_type *, lang_input_statement_type *));
-static void gld${EMULATION_NAME}_after_open PARAMS ((void));
-static void gld${EMULATION_NAME}_check_needed
+static void gld${EMULATION_NAME}_vercheck
   PARAMS ((lang_input_statement_type *));
 static void gld${EMULATION_NAME}_stat_needed
   PARAMS ((lang_input_statement_type *));
+static boolean gld${EMULATION_NAME}_try_needed PARAMS ((const char *, int));
 static boolean gld${EMULATION_NAME}_search_needed
   PARAMS ((const char *, const char *, int));
-static boolean gld${EMULATION_NAME}_try_needed PARAMS ((const char *, int));
-static void gld${EMULATION_NAME}_vercheck
+static void gld${EMULATION_NAME}_check_needed
   PARAMS ((lang_input_statement_type *));
-static void gld${EMULATION_NAME}_before_allocation PARAMS ((void));
+static void gld${EMULATION_NAME}_after_open PARAMS ((void));
+static void gld${EMULATION_NAME}_find_exp_assignment PARAMS ((etree_type *));
 static void gld${EMULATION_NAME}_find_statement_assignment
   PARAMS ((lang_statement_union_type *));
-static void gld${EMULATION_NAME}_find_exp_assignment PARAMS ((etree_type *));
+static void gld${EMULATION_NAME}_before_allocation PARAMS ((void));
+static boolean gld${EMULATION_NAME}_open_dynamic_archive
+  PARAMS ((const char *, search_dirs_type *, lang_input_statement_type *));
+static lang_output_section_statement_type *output_rel_find PARAMS ((void));
 static boolean gld${EMULATION_NAME}_place_orphan
   PARAMS ((lang_input_statement_type *, asection *));
-static lang_output_section_statement_type *output_rel_find PARAMS ((void));
 static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
 
 static void
@@ -77,180 +77,6 @@ gld${EMULATION_NAME}_before_parse()
   config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo true ; else echo false ; fi`;
 }
 
-/* Try to open a dynamic archive.  This is where we know that ELF
-   dynamic libraries have an extension of .so (or .sl on oddball systems
-   like hpux).  */
-
-static boolean
-gld${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
-     const char *arch;
-     search_dirs_type *search;
-     lang_input_statement_type *entry;
-{
-  const char *filename;
-  char *string;
-
-  if (! entry->is_archive)
-    return false;
-
-  filename = entry->filename;
-
-  /* This allocates a few bytes too many when EXTRA_SHLIB_EXTENSION
-     is defined, but it does not seem worth the headache to optimize
-     away those two bytes of space.  */
-  string = (char *) xmalloc (strlen (search->name)
-			     + strlen (filename)
-			     + strlen (arch)
-#ifdef EXTRA_SHLIB_EXTENSION
-			     + strlen (EXTRA_SHLIB_EXTENSION)
-#endif
-			     + sizeof "/lib.so");
-
-  sprintf (string, "%s/lib%s%s.so", search->name, filename, arch);
-
-#ifdef EXTRA_SHLIB_EXTENSION
-  /* Try the .so extension first.  If that fails build a new filename
-     using EXTRA_SHLIB_EXTENSION.  */
-  if (! ldfile_try_open_bfd (string, entry))
-    sprintf (string, "%s/lib%s%s%s", search->name,
-	     filename, arch, EXTRA_SHLIB_EXTENSION);
-#endif
-
-  if (! ldfile_try_open_bfd (string, entry))
-    {
-      free (string);
-      return false;
-    }
-
-  entry->filename = string;
-
-  /* We have found a dynamic object to include in the link.  The ELF
-     backend linker will create a DT_NEEDED entry in the .dynamic
-     section naming this file.  If this file includes a DT_SONAME
-     entry, it will be used.  Otherwise, the ELF linker will just use
-     the name of the file.  For an archive found by searching, like
-     this one, the DT_NEEDED entry should consist of just the name of
-     the file, without the path information used to find it.  Note
-     that we only need to do this if we have a dynamic object; an
-     archive will never be referenced by a DT_NEEDED entry.
-
-     FIXME: This approach--using bfd_elf_set_dt_needed_name--is not
-     very pretty.  I haven't been able to think of anything that is
-     pretty, though.  */
-  if (bfd_check_format (entry->the_bfd, bfd_object)
-      && (entry->the_bfd->flags & DYNAMIC) != 0)
-    {
-      char *needed_name;
-
-      ASSERT (entry->is_archive && entry->search_dirs_flag);
-
-      /* Rather than duplicating the logic above.  Just use the
-	 filename we recorded earlier.
-
-	 First strip off everything before the last '/'.  */
-      filename = strrchr (entry->filename, '/');
-      filename++;
-
-      needed_name = (char *) xmalloc (strlen (filename) + 1);
-      strcpy (needed_name, filename);
-      bfd_elf_set_dt_needed_name (entry->the_bfd, needed_name);
-    }
-
-  return true;
-}
-
-EOF
-if [ "x${host}" = "x${target}" ] ; then
-  case " ${EMULATION_LIBPATH} " in
-  *" ${EMULATION_NAME} "*)
-cat >>e${EMULATION_NAME}.c <<EOF
-
-/* For a native linker, check the file /etc/ld.so.conf for directories
-   in which we may find shared libraries.  /etc/ld.so.conf is really
-   only meaningful on Linux, but we check it on other systems anyhow.  */
-
-static boolean gld${EMULATION_NAME}_check_ld_so_conf
-  PARAMS ((const char *, int));
-
-static boolean
-gld${EMULATION_NAME}_check_ld_so_conf (name, force)
-     const char *name;
-     int force;
-{
-  static boolean initialized;
-  static char *ld_so_conf;
-
-  if (! initialized)
-    {
-      FILE *f;
-
-      f = fopen ("/etc/ld.so.conf", FOPEN_RT);
-      if (f != NULL)
-	{
-	  char *b;
-	  size_t len, alloc;
-	  int c;
-
-	  len = 0;
-	  alloc = 100;
-	  b = (char *) xmalloc (alloc);
-
-	  while ((c = getc (f)) != EOF)
-	    {
-	      if (len + 1 >= alloc)
-		{
-		  alloc *= 2;
-		  b = (char *) xrealloc (b, alloc);
-		}
-	      if (c != ':'
-		  && c != ' '
-		  && c != '\t'
-		  && c != '\n'
-		  && c != ',')
-		{
-		  b[len] = c;
-		  ++len;
-		}
-	      else
-		{
-		  if (len > 0 && b[len - 1] != ':')
-		    {
-		      b[len] = ':';
-		      ++len;
-		    }
-		}
-	    }
-
-	  if (len > 0 && b[len - 1] == ':')
-	    --len;
-
-	  if (len > 0)
-	    b[len] = '\0';
-	  else
-	    {
-	      free (b);
-	      b = NULL;
-	    }
-
-	  fclose (f);
-
-	  ld_so_conf = b;
-	}
-
-      initialized = true;
-    }
-
-  if (ld_so_conf == NULL)
-    return false;
-
-  return gld${EMULATION_NAME}_search_needed (ld_so_conf, name, force);
-}
-
-EOF
-  ;;
-  esac
-fi
-cat >>e${EMULATION_NAME}.c <<EOF
 
 /* These variables are required to pass information back and forth
    between after_open and check_needed and stat_needed and vercheck.  */
@@ -261,171 +87,141 @@ static boolean global_found;
 static struct bfd_link_needed_list *global_vercheck_needed;
 static boolean global_vercheck_failed;
 
-/* This is called after all the input files have been opened.  */
+
+/* On Linux, it's possible to have different versions of the same
+   shared library linked against different versions of libc.  The
+   dynamic linker somehow tags which libc version to use in
+   /etc/ld.so.cache, and, based on the libc that it sees in the
+   executable, chooses which version of the shared library to use.
+
+   We try to do a similar check here by checking whether this shared
+   library needs any other shared libraries which may conflict with
+   libraries we have already included in the link.  If it does, we
+   skip it, and try to find another shared library farther on down the
+   link path.
+
+   This is called via lang_for_each_input_file.
+   GLOBAL_VERCHECK_NEEDED is the list of objects needed by the object
+   which we ar checking.  This sets GLOBAL_VERCHECK_FAILED if we find
+   a conflicting version.  */
 
 static void
-gld${EMULATION_NAME}_after_open ()
+gld${EMULATION_NAME}_vercheck (s)
+     lang_input_statement_type *s;
 {
-  struct bfd_link_needed_list *needed, *l;
+  const char *soname, *f;
+  struct bfd_link_needed_list *l;
 
-  /* We only need to worry about this when doing a final link.  */
-  if (link_info.relocateable || link_info.shared)
+  if (global_vercheck_failed)
+    return;
+  if (s->the_bfd == NULL
+      || (bfd_get_file_flags (s->the_bfd) & DYNAMIC) == 0)
     return;
 
-  /* Get the list of files which appear in DT_NEEDED entries in
-     dynamic objects included in the link (often there will be none).
-     For each such file, we want to track down the corresponding
-     library, and include the symbol table in the link.  This is what
-     the runtime dynamic linker will do.  Tracking the files down here
-     permits one dynamic object to include another without requiring
-     special action by the person doing the link.  Note that the
-     needed list can actually grow while we are stepping through this
-     loop.  */
-  needed = bfd_elf_get_needed_list (output_bfd, &link_info);
-  for (l = needed; l != NULL; l = l->next)
+  soname = bfd_elf_get_dt_soname (s->the_bfd);
+  if (soname == NULL)
+    soname = bfd_get_filename (s->the_bfd);
+
+  f = strrchr (soname, '/');
+  if (f != NULL)
+    ++f;
+  else
+    f = soname;
+
+  for (l = global_vercheck_needed; l != NULL; l = l->next)
     {
-      struct bfd_link_needed_list *ll;
-      int force;
+      const char *suffix;
 
-      /* If we've already seen this file, skip it.  */
-      for (ll = needed; ll != l; ll = ll->next)
-	if (strcmp (ll->name, l->name) == 0)
-	  break;
-      if (ll != l)
-	continue;
-
-      /* See if this file was included in the link explicitly.  */
-      global_needed = l;
-      global_found = false;
-      lang_for_each_input_file (gld${EMULATION_NAME}_check_needed);
-      if (global_found)
-	continue;
-
-      /* We need to find this file and include the symbol table.  We
-	 want to search for the file in the same way that the dynamic
-	 linker will search.  That means that we want to use
-	 rpath_link, rpath, then the environment variable
-	 LD_LIBRARY_PATH (native only), then the linker script
-	 LIB_SEARCH_DIRS.  We do not search using the -L arguments.
-
-	 We search twice.  The first time, we skip objects which may
-	 introduce version mismatches.  The second time, we force
-	 their use.  See gld${EMULATION_NAME}_vercheck comment.  */
-      for (force = 0; force < 2; force++)
+      if (strcmp (f, l->name) == 0)
 	{
-	  const char *lib_path;
-	  size_t len;
-	  search_dirs_type *search;
-
-	  if (gld${EMULATION_NAME}_search_needed (command_line.rpath_link,
-						  l->name, force))
-	    break;
-	  if (gld${EMULATION_NAME}_search_needed (command_line.rpath,
-						  l->name, force))
-	    break;
-	  if (command_line.rpath_link == NULL
-	      && command_line.rpath == NULL)
-	    {
-	      lib_path = (const char *) getenv ("LD_RUN_PATH");
-	      if (gld${EMULATION_NAME}_search_needed (lib_path, l->name,
-						      force))
-		break;
-	    }
-EOF
-if [ "x${host}" = "x${target}" ] ; then
-  case " ${EMULATION_LIBPATH} " in
-  *" ${EMULATION_NAME} "*)
-cat >>e${EMULATION_NAME}.c <<EOF
-	  lib_path = (const char *) getenv ("LD_LIBRARY_PATH");
-	  if (gld${EMULATION_NAME}_search_needed (lib_path, l->name, force))
-	    break;
-EOF
-  ;;
-  esac
-fi
-cat >>e${EMULATION_NAME}.c <<EOF
-	  len = strlen (l->name);
-	  for (search = search_head; search != NULL; search = search->next)
-	    {
-	      char *filename;
-
-	      if (search->cmdline)
-		continue;
-	      filename = (char *) xmalloc (strlen (search->name) + len + 2);
-	      sprintf (filename, "%s/%s", search->name, l->name);
-	      if (gld${EMULATION_NAME}_try_needed (filename, force))
-		break;
-	      free (filename);
-	    }
-	  if (search != NULL)
-	    break;
-EOF
-if [ "x${host}" = "x${target}" ] ; then
-  case " ${EMULATION_LIBPATH} " in
-  *" ${EMULATION_NAME} "*)
-cat >>e${EMULATION_NAME}.c <<EOF
-	  if (gld${EMULATION_NAME}_check_ld_so_conf (l->name, force))
-	    break;
-EOF
-  ;;
-  esac
-fi
-cat >>e${EMULATION_NAME}.c <<EOF
+	  /* Probably can't happen, but it's an easy check.  */
+	  continue;
 	}
 
-      if (force < 2)
+      if (strchr (l->name, '/') != NULL)
 	continue;
 
-      einfo ("%P: warning: %s, needed by %B, not found (try using --rpath)\n",
-	     l->name, l->by);
+      suffix = strstr (l->name, ".so.");
+      if (suffix == NULL)
+	continue;
+
+      suffix += sizeof ".so." - 1;
+
+      if (strncmp (f, l->name, suffix - l->name) == 0)
+	{
+	  /* Here we know that S is a dynamic object FOO.SO.VER1, and
+             the object we are considering needs a dynamic object
+             FOO.SO.VER2, and VER1 and VER2 are different.  This
+             appears to be a version mismatch, so we tell the caller
+             to try a different version of this library.  */
+	  global_vercheck_failed = true;
+	  return;
+	}
     }
 }
 
-/* Search for a needed file in a path.  */
 
-static boolean
-gld${EMULATION_NAME}_search_needed (path, name, force)
-     const char *path;
-     const char *name;
-     int force;
+/* See if an input file matches a DT_NEEDED entry by running stat on
+   the file.  */
+
+static void
+gld${EMULATION_NAME}_stat_needed (s)
+     lang_input_statement_type *s;
 {
-  const char *s;
-  size_t len;
+  struct stat st;
+  const char *suffix;
+  const char *soname;
+  const char *f;
 
-  if (path == NULL || *path == '\0')
-    return false;
-  len = strlen (name);
-  while (1)
+  if (global_found)
+    return;
+  if (s->the_bfd == NULL)
+    return;
+
+  if (bfd_stat (s->the_bfd, &st) != 0)
     {
-      char *filename, *sset;
-
-      s = strchr (path, ':');
-      if (s == NULL)
-	s = path + strlen (path);
-
-      filename = (char *) xmalloc (s - path + len + 2);
-      if (s == path)
-	sset = filename;
-      else
-	{
-	  memcpy (filename, path, s - path);
-	  filename[s - path] = '/';
-	  sset = filename + (s - path) + 1;
-	}
-      strcpy (sset, name);
-
-      if (gld${EMULATION_NAME}_try_needed (filename, force))
-	return true;
-
-      free (filename);
-
-      if (*s == '\0')
-	break;
-      path = s + 1;
+      einfo ("%P:%B: bfd_stat failed: %E\n", s->the_bfd);
+      return;
     }
 
-  return false;
+  if (st.st_dev == global_stat.st_dev
+      && st.st_ino == global_stat.st_ino)
+    {
+      global_found = true;
+      return;
+    }
+
+  /* We issue a warning if it looks like we are including two
+     different versions of the same shared library.  For example,
+     there may be a problem if -lc picks up libc.so.6 but some other
+     shared library has a DT_NEEDED entry of libc.so.5.  This is a
+     hueristic test, and it will only work if the name looks like
+     NAME.so.VERSION.  FIXME: Depending on file names is error-prone.
+     If we really want to issue warnings about mixing version numbers
+     of shared libraries, we need to find a better way.  */
+
+  if (strchr (global_needed->name, '/') != NULL)
+    return;
+  suffix = strstr (global_needed->name, ".so.");
+  if (suffix == NULL)
+    return;
+  suffix += sizeof ".so." - 1;
+
+  soname = bfd_elf_get_dt_soname (s->the_bfd);
+  if (soname == NULL)
+    soname = s->filename;
+
+  f = strrchr (soname, '/');
+  if (f != NULL)
+    ++f;
+  else
+    f = soname;
+
+  if (strncmp (f, global_needed->name, suffix - global_needed->name) == 0)
+    einfo ("%P: warning: %s, needed by %B, may conflict with %s\n",
+	   global_needed->name, global_needed->by, f);
 }
+
 
 /* This function is called for each possible name for a dynamic object
    named by a DT_NEEDED entry.  The FORCE parameter indicates whether
@@ -552,6 +348,146 @@ cat >>e${EMULATION_NAME}.c <<EOF
   return true;
 }
 
+
+/* Search for a needed file in a path.  */
+
+static boolean
+gld${EMULATION_NAME}_search_needed (path, name, force)
+     const char *path;
+     const char *name;
+     int force;
+{
+  const char *s;
+  size_t len;
+
+  if (path == NULL || *path == '\0')
+    return false;
+  len = strlen (name);
+  while (1)
+    {
+      char *filename, *sset;
+
+      s = strchr (path, ':');
+      if (s == NULL)
+	s = path + strlen (path);
+
+      filename = (char *) xmalloc (s - path + len + 2);
+      if (s == path)
+	sset = filename;
+      else
+	{
+	  memcpy (filename, path, s - path);
+	  filename[s - path] = '/';
+	  sset = filename + (s - path) + 1;
+	}
+      strcpy (sset, name);
+
+      if (gld${EMULATION_NAME}_try_needed (filename, force))
+	return true;
+
+      free (filename);
+
+      if (*s == '\0')
+	break;
+      path = s + 1;
+    }
+
+  return false;
+}
+
+EOF
+if [ "x${host}" = "x${target}" ] ; then
+  case " ${EMULATION_LIBPATH} " in
+  *" ${EMULATION_NAME} "*)
+cat >>e${EMULATION_NAME}.c <<EOF
+
+/* For a native linker, check the file /etc/ld.so.conf for directories
+   in which we may find shared libraries.  /etc/ld.so.conf is really
+   only meaningful on Linux, but we check it on other systems anyhow.  */
+
+static boolean gld${EMULATION_NAME}_check_ld_so_conf
+  PARAMS ((const char *, int));
+
+static boolean
+gld${EMULATION_NAME}_check_ld_so_conf (name, force)
+     const char *name;
+     int force;
+{
+  static boolean initialized;
+  static char *ld_so_conf;
+
+  if (! initialized)
+    {
+      FILE *f;
+
+      f = fopen ("/etc/ld.so.conf", FOPEN_RT);
+      if (f != NULL)
+	{
+	  char *b;
+	  size_t len, alloc;
+	  int c;
+
+	  len = 0;
+	  alloc = 100;
+	  b = (char *) xmalloc (alloc);
+
+	  while ((c = getc (f)) != EOF)
+	    {
+	      if (len + 1 >= alloc)
+		{
+		  alloc *= 2;
+		  b = (char *) xrealloc (b, alloc);
+		}
+	      if (c != ':'
+		  && c != ' '
+		  && c != '\t'
+		  && c != '\n'
+		  && c != ',')
+		{
+		  b[len] = c;
+		  ++len;
+		}
+	      else
+		{
+		  if (len > 0 && b[len - 1] != ':')
+		    {
+		      b[len] = ':';
+		      ++len;
+		    }
+		}
+	    }
+
+	  if (len > 0 && b[len - 1] == ':')
+	    --len;
+
+	  if (len > 0)
+	    b[len] = '\0';
+	  else
+	    {
+	      free (b);
+	      b = NULL;
+	    }
+
+	  fclose (f);
+
+	  ld_so_conf = b;
+	}
+
+      initialized = true;
+    }
+
+  if (ld_so_conf == NULL)
+    return false;
+
+  return gld${EMULATION_NAME}_search_needed (ld_so_conf, name, force);
+}
+
+EOF
+  ;;
+  esac
+fi
+cat >>e${EMULATION_NAME}.c <<EOF
+
 /* See if an input file matches a DT_NEEDED entry by name.  */
 
 static void
@@ -597,138 +533,199 @@ gld${EMULATION_NAME}_check_needed (s)
     }
 }
 
-/* See if an input file matches a DT_NEEDED entry by running stat on
-   the file.  */
+
+/* This is called after all the input files have been opened.  */
 
 static void
-gld${EMULATION_NAME}_stat_needed (s)
-     lang_input_statement_type *s;
+gld${EMULATION_NAME}_after_open ()
 {
-  struct stat st;
-  const char *suffix;
-  const char *soname;
-  const char *f;
+  struct bfd_link_needed_list *needed, *l;
 
-  if (global_found)
-    return;
-  if (s->the_bfd == NULL)
+  /* We only need to worry about this when doing a final link.  */
+  if (link_info.relocateable || link_info.shared)
     return;
 
-  if (bfd_stat (s->the_bfd, &st) != 0)
+  /* Get the list of files which appear in DT_NEEDED entries in
+     dynamic objects included in the link (often there will be none).
+     For each such file, we want to track down the corresponding
+     library, and include the symbol table in the link.  This is what
+     the runtime dynamic linker will do.  Tracking the files down here
+     permits one dynamic object to include another without requiring
+     special action by the person doing the link.  Note that the
+     needed list can actually grow while we are stepping through this
+     loop.  */
+  needed = bfd_elf_get_needed_list (output_bfd, &link_info);
+  for (l = needed; l != NULL; l = l->next)
     {
-      einfo ("%P:%B: bfd_stat failed: %E\n", s->the_bfd);
-      return;
+      struct bfd_link_needed_list *ll;
+      int force;
+
+      /* If we've already seen this file, skip it.  */
+      for (ll = needed; ll != l; ll = ll->next)
+	if (strcmp (ll->name, l->name) == 0)
+	  break;
+      if (ll != l)
+	continue;
+
+      /* See if this file was included in the link explicitly.  */
+      global_needed = l;
+      global_found = false;
+      lang_for_each_input_file (gld${EMULATION_NAME}_check_needed);
+      if (global_found)
+	continue;
+
+      /* We need to find this file and include the symbol table.  We
+	 want to search for the file in the same way that the dynamic
+	 linker will search.  That means that we want to use
+	 rpath_link, rpath, then the environment variable
+	 LD_LIBRARY_PATH (native only), then the linker script
+	 LIB_SEARCH_DIRS.  We do not search using the -L arguments.
+
+	 We search twice.  The first time, we skip objects which may
+	 introduce version mismatches.  The second time, we force
+	 their use.  See gld${EMULATION_NAME}_vercheck comment.  */
+      for (force = 0; force < 2; force++)
+	{
+	  const char *lib_path;
+	  size_t len;
+	  search_dirs_type *search;
+
+	  if (gld${EMULATION_NAME}_search_needed (command_line.rpath_link,
+						  l->name, force))
+	    break;
+	  if (gld${EMULATION_NAME}_search_needed (command_line.rpath,
+						  l->name, force))
+	    break;
+	  if (command_line.rpath_link == NULL
+	      && command_line.rpath == NULL)
+	    {
+	      lib_path = (const char *) getenv ("LD_RUN_PATH");
+	      if (gld${EMULATION_NAME}_search_needed (lib_path, l->name,
+						      force))
+		break;
+	    }
+EOF
+if [ "x${host}" = "x${target}" ] ; then
+  case " ${EMULATION_LIBPATH} " in
+  *" ${EMULATION_NAME} "*)
+cat >>e${EMULATION_NAME}.c <<EOF
+	  lib_path = (const char *) getenv ("LD_LIBRARY_PATH");
+	  if (gld${EMULATION_NAME}_search_needed (lib_path, l->name, force))
+	    break;
+EOF
+  ;;
+  esac
+fi
+cat >>e${EMULATION_NAME}.c <<EOF
+	  len = strlen (l->name);
+	  for (search = search_head; search != NULL; search = search->next)
+	    {
+	      char *filename;
+
+	      if (search->cmdline)
+		continue;
+	      filename = (char *) xmalloc (strlen (search->name) + len + 2);
+	      sprintf (filename, "%s/%s", search->name, l->name);
+	      if (gld${EMULATION_NAME}_try_needed (filename, force))
+		break;
+	      free (filename);
+	    }
+	  if (search != NULL)
+	    break;
+EOF
+if [ "x${host}" = "x${target}" ] ; then
+  case " ${EMULATION_LIBPATH} " in
+  *" ${EMULATION_NAME} "*)
+cat >>e${EMULATION_NAME}.c <<EOF
+	  if (gld${EMULATION_NAME}_check_ld_so_conf (l->name, force))
+	    break;
+EOF
+  ;;
+  esac
+fi
+cat >>e${EMULATION_NAME}.c <<EOF
+	}
+
+      if (force < 2)
+	continue;
+
+      einfo ("%P: warning: %s, needed by %B, not found (try using --rpath)\n",
+	     l->name, l->by);
     }
-
-  if (st.st_dev == global_stat.st_dev
-      && st.st_ino == global_stat.st_ino)
-    {
-      global_found = true;
-      return;
-    }
-
-  /* We issue a warning if it looks like we are including two
-     different versions of the same shared library.  For example,
-     there may be a problem if -lc picks up libc.so.6 but some other
-     shared library has a DT_NEEDED entry of libc.so.5.  This is a
-     hueristic test, and it will only work if the name looks like
-     NAME.so.VERSION.  FIXME: Depending on file names is error-prone.
-     If we really want to issue warnings about mixing version numbers
-     of shared libraries, we need to find a better way.  */
-
-  if (strchr (global_needed->name, '/') != NULL)
-    return;
-  suffix = strstr (global_needed->name, ".so.");
-  if (suffix == NULL)
-    return;
-  suffix += sizeof ".so." - 1;
-
-  soname = bfd_elf_get_dt_soname (s->the_bfd);
-  if (soname == NULL)
-    soname = s->filename;
-
-  f = strrchr (soname, '/');
-  if (f != NULL)
-    ++f;
-  else
-    f = soname;
-
-  if (strncmp (f, global_needed->name, suffix - global_needed->name) == 0)
-    einfo ("%P: warning: %s, needed by %B, may conflict with %s\n",
-	   global_needed->name, global_needed->by, f);
 }
 
-/* On Linux, it's possible to have different versions of the same
-   shared library linked against different versions of libc.  The
-   dynamic linker somehow tags which libc version to use in
-   /etc/ld.so.cache, and, based on the libc that it sees in the
-   executable, chooses which version of the shared library to use.
 
-   We try to do a similar check here by checking whether this shared
-   library needs any other shared libraries which may conflict with
-   libraries we have already included in the link.  If it does, we
-   skip it, and try to find another shared library farther on down the
-   link path.
-
-   This is called via lang_for_each_input_file.
-   GLOBAL_VERCHECK_NEEDED is the list of objects needed by the object
-   which we ar checking.  This sets GLOBAL_VERCHECK_FAILED if we find
-   a conflicting version.  */
+/* Look through an expression for an assignment statement.  */
 
 static void
-gld${EMULATION_NAME}_vercheck (s)
-     lang_input_statement_type *s;
+gld${EMULATION_NAME}_find_exp_assignment (exp)
+     etree_type *exp;
 {
-  const char *soname, *f;
-  struct bfd_link_needed_list *l;
+  struct bfd_link_hash_entry *h;
 
-  if (global_vercheck_failed)
-    return;
-  if (s->the_bfd == NULL
-      || (bfd_get_file_flags (s->the_bfd) & DYNAMIC) == 0)
-    return;
-
-  soname = bfd_elf_get_dt_soname (s->the_bfd);
-  if (soname == NULL)
-    soname = bfd_get_filename (s->the_bfd);
-
-  f = strrchr (soname, '/');
-  if (f != NULL)
-    ++f;
-  else
-    f = soname;
-
-  for (l = global_vercheck_needed; l != NULL; l = l->next)
+  switch (exp->type.node_class)
     {
-      const char *suffix;
+    case etree_provide:
+      h = bfd_link_hash_lookup (link_info.hash, exp->assign.dst,
+				false, false, false);
+      if (h == NULL)
+	break;
 
-      if (strcmp (f, l->name) == 0)
+      /* We call record_link_assignment even if the symbol is defined.
+	 This is because if it is defined by a dynamic object, we
+	 actually want to use the value defined by the linker script,
+	 not the value from the dynamic object (because we are setting
+	 symbols like etext).  If the symbol is defined by a regular
+	 object, then, as it happens, calling record_link_assignment
+	 will do no harm.  */
+
+      /* Fall through.  */
+    case etree_assign:
+      if (strcmp (exp->assign.dst, ".") != 0)
 	{
-	  /* Probably can't happen, but it's an easy check.  */
-	  continue;
+	  if (! (bfd_elf${ELFSIZE}_record_link_assignment
+		 (output_bfd, &link_info, exp->assign.dst,
+		  exp->type.node_class == etree_provide ? true : false)))
+	    einfo ("%P%F: failed to record assignment to %s: %E\n",
+		   exp->assign.dst);
 	}
+      gld${EMULATION_NAME}_find_exp_assignment (exp->assign.src);
+      break;
 
-      if (strchr (l->name, '/') != NULL)
-	continue;
+    case etree_binary:
+      gld${EMULATION_NAME}_find_exp_assignment (exp->binary.lhs);
+      gld${EMULATION_NAME}_find_exp_assignment (exp->binary.rhs);
+      break;
 
-      suffix = strstr (l->name, ".so.");
-      if (suffix == NULL)
-	continue;
+    case etree_trinary:
+      gld${EMULATION_NAME}_find_exp_assignment (exp->trinary.cond);
+      gld${EMULATION_NAME}_find_exp_assignment (exp->trinary.lhs);
+      gld${EMULATION_NAME}_find_exp_assignment (exp->trinary.rhs);
+      break;
 
-      suffix += sizeof ".so." - 1;
+    case etree_unary:
+      gld${EMULATION_NAME}_find_exp_assignment (exp->unary.child);
+      break;
 
-      if (strncmp (f, l->name, suffix - l->name) == 0)
-	{
-	  /* Here we know that S is a dynamic object FOO.SO.VER1, and
-             the object we are considering needs a dynamic object
-             FOO.SO.VER2, and VER1 and VER2 are different.  This
-             appears to be a version mismatch, so we tell the caller
-             to try a different version of this library.  */
-	  global_vercheck_failed = true;
-	  return;
-	}
+    default:
+      break;
     }
 }
+
+
+/* This is called by the before_allocation routine via
+   lang_for_each_statement.  It locates any assignment statements, and
+   tells the ELF backend about them, in case they are assignments to
+   symbols which are referred to by dynamic objects.  */
+
+static void
+gld${EMULATION_NAME}_find_statement_assignment (s)
+     lang_statement_union_type *s;
+{
+  if (s->header.type == lang_assignment_statement_enum)
+    gld${EMULATION_NAME}_find_exp_assignment (s->assignment_statement.exp);
+}
+
 
 /* This is called after the sections have been attached to output
    sections, but before any sizes or addresses have been set.  */
@@ -804,75 +801,112 @@ gld${EMULATION_NAME}_before_allocation ()
   }
 }
 
-/* This is called by the before_allocation routine via
-   lang_for_each_statement.  It locates any assignment statements, and
-   tells the ELF backend about them, in case they are assignments to
-   symbols which are referred to by dynamic objects.  */
 
-static void
-gld${EMULATION_NAME}_find_statement_assignment (s)
-     lang_statement_union_type *s;
+/* Try to open a dynamic archive.  This is where we know that ELF
+   dynamic libraries have an extension of .so (or .sl on oddball systems
+   like hpux).  */
+
+static boolean
+gld${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
+     const char *arch;
+     search_dirs_type *search;
+     lang_input_statement_type *entry;
 {
-  if (s->header.type == lang_assignment_statement_enum)
-    gld${EMULATION_NAME}_find_exp_assignment (s->assignment_statement.exp);
-}
+  const char *filename;
+  char *string;
 
-/* Look through an expression for an assignment statement.  */
+  if (! entry->is_archive)
+    return false;
 
-static void
-gld${EMULATION_NAME}_find_exp_assignment (exp)
-     etree_type *exp;
-{
-  struct bfd_link_hash_entry *h;
+  filename = entry->filename;
 
-  switch (exp->type.node_class)
+  /* This allocates a few bytes too many when EXTRA_SHLIB_EXTENSION
+     is defined, but it does not seem worth the headache to optimize
+     away those two bytes of space.  */
+  string = (char *) xmalloc (strlen (search->name)
+			     + strlen (filename)
+			     + strlen (arch)
+#ifdef EXTRA_SHLIB_EXTENSION
+			     + strlen (EXTRA_SHLIB_EXTENSION)
+#endif
+			     + sizeof "/lib.so");
+
+  sprintf (string, "%s/lib%s%s.so", search->name, filename, arch);
+
+#ifdef EXTRA_SHLIB_EXTENSION
+  /* Try the .so extension first.  If that fails build a new filename
+     using EXTRA_SHLIB_EXTENSION.  */
+  if (! ldfile_try_open_bfd (string, entry))
+    sprintf (string, "%s/lib%s%s%s", search->name,
+	     filename, arch, EXTRA_SHLIB_EXTENSION);
+#endif
+
+  if (! ldfile_try_open_bfd (string, entry))
     {
-    case etree_provide:
-      h = bfd_link_hash_lookup (link_info.hash, exp->assign.dst,
-				false, false, false);
-      if (h == NULL)
-	break;
-
-      /* We call record_link_assignment even if the symbol is defined.
-	 This is because if it is defined by a dynamic object, we
-	 actually want to use the value defined by the linker script,
-	 not the value from the dynamic object (because we are setting
-	 symbols like etext).  If the symbol is defined by a regular
-	 object, then, as it happens, calling record_link_assignment
-	 will do no harm.  */
-
-      /* Fall through.  */
-    case etree_assign:
-      if (strcmp (exp->assign.dst, ".") != 0)
-	{
-	  if (! (bfd_elf${ELFSIZE}_record_link_assignment
-		 (output_bfd, &link_info, exp->assign.dst,
-		  exp->type.node_class == etree_provide ? true : false)))
-	    einfo ("%P%F: failed to record assignment to %s: %E\n",
-		   exp->assign.dst);
-	}
-      gld${EMULATION_NAME}_find_exp_assignment (exp->assign.src);
-      break;
-
-    case etree_binary:
-      gld${EMULATION_NAME}_find_exp_assignment (exp->binary.lhs);
-      gld${EMULATION_NAME}_find_exp_assignment (exp->binary.rhs);
-      break;
-
-    case etree_trinary:
-      gld${EMULATION_NAME}_find_exp_assignment (exp->trinary.cond);
-      gld${EMULATION_NAME}_find_exp_assignment (exp->trinary.lhs);
-      gld${EMULATION_NAME}_find_exp_assignment (exp->trinary.rhs);
-      break;
-
-    case etree_unary:
-      gld${EMULATION_NAME}_find_exp_assignment (exp->unary.child);
-      break;
-
-    default:
-      break;
+      free (string);
+      return false;
     }
+
+  entry->filename = string;
+
+  /* We have found a dynamic object to include in the link.  The ELF
+     backend linker will create a DT_NEEDED entry in the .dynamic
+     section naming this file.  If this file includes a DT_SONAME
+     entry, it will be used.  Otherwise, the ELF linker will just use
+     the name of the file.  For an archive found by searching, like
+     this one, the DT_NEEDED entry should consist of just the name of
+     the file, without the path information used to find it.  Note
+     that we only need to do this if we have a dynamic object; an
+     archive will never be referenced by a DT_NEEDED entry.
+
+     FIXME: This approach--using bfd_elf_set_dt_needed_name--is not
+     very pretty.  I haven't been able to think of anything that is
+     pretty, though.  */
+  if (bfd_check_format (entry->the_bfd, bfd_object)
+      && (entry->the_bfd->flags & DYNAMIC) != 0)
+    {
+      char *needed_name;
+
+      ASSERT (entry->is_archive && entry->search_dirs_flag);
+
+      /* Rather than duplicating the logic above.  Just use the
+	 filename we recorded earlier.
+
+	 First strip off everything before the last '/'.  */
+      filename = strrchr (entry->filename, '/');
+      filename++;
+
+      needed_name = (char *) xmalloc (strlen (filename) + 1);
+      strcpy (needed_name, filename);
+      bfd_elf_set_dt_needed_name (entry->the_bfd, needed_name);
+    }
+
+  return true;
 }
+
+
+/* A variant of lang_output_section_find.  */
+static lang_output_section_statement_type *
+output_rel_find ()
+{
+  lang_statement_union_type *u;
+  lang_output_section_statement_type *lookup;
+
+  for (u = lang_output_section_statement.head;
+       u != (lang_statement_union_type *) NULL;
+       u = lookup->next)
+    {
+      lookup = &u->output_section_statement;
+      if (strncmp (".rel", lookup->name, 4) == 0
+	  && lookup->bfd_section != NULL
+	  && (lookup->bfd_section->flags & SEC_ALLOC) != 0)
+	{
+	  return lookup;
+	}
+    }
+  return (lang_output_section_statement_type *) NULL;
+}
+
 
 /* Place an orphan section.  We use this to put random SHF_ALLOC
    sections in the right segment.  */
@@ -1103,27 +1137,6 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   return true;
 }
 
-/* A variant of lang_output_section_find.  */
-static lang_output_section_statement_type *
-output_rel_find ()
-{
-  lang_statement_union_type *u;
-  lang_output_section_statement_type *lookup;
-
-  for (u = lang_output_section_statement.head;
-       u != (lang_statement_union_type *) NULL;
-       u = lookup->next)
-    {
-      lookup = &u->output_section_statement;
-      if (strncmp (".rel", lookup->name, 4) == 0
-	  && lookup->bfd_section != NULL
-	  && (lookup->bfd_section->flags & SEC_ALLOC) != 0)
-	{
-	  return lookup;
-	}
-    }
-  return (lang_output_section_statement_type *) NULL;
-}
 
 static char *
 gld${EMULATION_NAME}_get_script(isfile)
@@ -1243,6 +1256,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
   {NULL, no_argument, NULL, 0}
 };
 
+
 static int
 gld_${EMULATION_NAME}_parse_args (argc, argv)
      int argc;
@@ -1324,6 +1338,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 
   return 1;
 }
+
 
 static void
 gld_${EMULATION_NAME}_list_options (file)

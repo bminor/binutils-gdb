@@ -1,3 +1,7 @@
+2000-07-28  Alan Modra  <alan@linuxcare.com.au>
+
+	* emultempl/elf32.em: Reorganize file.
+
 2000-07-27  Ivan Kokshaysky  <ink@jurassic.park.msu.ru>
 
 	* emulparams/elf64alpha.sh: Implement "-taso" emulation
