@@ -437,7 +437,7 @@ main (argc, argv)
      of object files in the archive (the 64-bit objects
      or the 32-bit objects).  GNU ar always looks at all
      kinds of objects in an archive.  */
-  while (strcmp (argv[1], "-X32_64") == 0)
+  while (argc > 1 && strcmp (argv[1], "-X32_64") == 0)
     {
       argv++;
       argc--;

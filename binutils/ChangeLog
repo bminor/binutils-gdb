@@ -1,3 +1,8 @@
+2000-08-11  Geoff Keating  <geoffk@cygnus.com>
+
+	* ar.c (main): Don't crash if called with no arguments
+	or only '-X32_64' as an argument.
+
 2000-08-05  Jason Eckhardt  <jle@cygnus.com>
 
 	* readelf.c (elf/i860.h): Include.
