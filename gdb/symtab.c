@@ -233,6 +233,7 @@ gdb_mangle_name (type, i, j)
   struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
   struct fn_field *method = &f[j];
   char *field_name = TYPE_FN_FIELDLIST_NAME (type, i);
+  int is_constructor = strcmp(field_name, TYPE_NAME (type)) == 0;
 
   /* Need a new type prefix.  */
   char *strchr ();
@@ -243,7 +244,7 @@ gdb_mangle_name (type, i, j)
   int len = strlen (newname);
 
   sprintf (buf, "__%s%s%d", const_prefix, volatile_prefix, len);
-  mangled_name_len = (strlen (field_name)
+  mangled_name_len = ((is_constructor ? 0 : strlen (field_name))
 			  + strlen (buf) + len
 			  + strlen (TYPE_FN_FIELD_PHYSNAME (f, j))
 			  + 1);
@@ -265,7 +266,10 @@ gdb_mangle_name (type, i, j)
   else
     {
       mangled_name = (char *)xmalloc (mangled_name_len);
-      strcpy (mangled_name, TYPE_FN_FIELDLIST_NAME (type, i));
+      if (is_constructor)
+	mangled_name[0] = '\0';
+      else
+	strcpy (mangled_name, field_name);
     }
   strcat (mangled_name, buf);
   strcat (mangled_name, newname);
@@ -576,6 +580,9 @@ check_stub_method (type, i, j)
   int depth = 0, argcount = 1;
   struct type **argtypes;
   struct type *mtype;
+
+  if (demangled_name == NULL)
+    error ("Internal: Cannot demangle mangled name `%s'.", mangled_name);
 
   /* Now, read in the parameters that define this type.  */
   argtypetext = strchr (demangled_name, '(') + 1;
@@ -1031,7 +1038,7 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
   /* Now search all per-file blocks for static mangled symbols.
      Do the symtabs first, then check the psymtabs.  */
 
-  if (namespace ==  VAR_NAMESPACE)
+  if (namespace == VAR_NAMESPACE)
     {
       for (s = symtab_list; s; s = s->next)
 	{
@@ -2686,7 +2693,7 @@ init_type (code, length, uns, name)
 
   /* C++ fancies.  */
   if (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION)
-    TYPE_CPLUS_SPECIFIC(type) = &cplus_struct_default;
+    INIT_CPLUS_SPECIFIC(type);
   return type;
 }
 
