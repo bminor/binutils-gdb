@@ -1,3 +1,7 @@
+Tue Sep 28 12:05:11 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* utils.c (fprintfi_filtered): Fix comments.
+
 Mon Sep 27 18:10:08 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* coffread.c (read_coff_symtab):  Don't call getfilename if there
