@@ -1,3 +1,7 @@
+1998-07-24  Ulrich Drepper  <drepper@cygnus.com>
+
+	* mips.h: Add MIPS64 relocation names and values.
+
 start-sanitize-r5900
 Thu Jul 23 23:28:08 1998  Jeffrey A Law  (law@cygnus.com)
 
