@@ -1,3 +1,28 @@
+Thu Nov 04 09:09:35 1993  Jeffrey Wheat  (cassidy@cygnus.com)
+
+	*  Makefile.in: Changed RUNTESTFLAGS to RUNTEST_FLAGS
+
+Wed Nov  3 12:16:27 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
+
+	* write.c (fixup_segment): Handle conversion of subtraction to
+	pc-relative addressing even if pc-relative flag is already set.
+
+	* config/tc-m68k.c (m68k_ip_op): Use strchr, not index.  Don't
+	declare either.
+
+	* doc/Makefile.in (distclean): Delete intermediate files from dvi
+	build, but not the dvi or info files.
+	* Makefile.in (clean-here): New target; cleans up current
+	directory only.
+	(distclean): Use it instead of clean.
+
+	* read.c (s_xstab): Don't use alloca.
+
+	* messages.c (identify): New routine; print message identifying
+	following messages as coming from assembler.
+	(as_show_where, as_bad_internal, as_bad_where): Call it.
+	(as_fatal): Don't need to identify program any more.
+
 Tue Nov  2 18:04:11 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* read.c (s_lcomm): Put small objects in .sbss for MIPS ELF as

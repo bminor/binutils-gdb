@@ -1,3 +1,12 @@
+Thu Nov 04 09:09:49 1993  Jeffrey Wheat  (cassidy@cygnus.com)
+
+	* Makefile.in: Changed RUNTESTFLAGS to RUNTEST_FLAGS
+
+Tue Nov  2 22:12:30 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/more.parse/{defbug.s, stdreg.s}: New tests.
+	* gas/hppa/more.parse/parse.exp: Run them.
+
 Mon Nov  1 23:37:58 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/reloc/reloc.exp (reloc_reduce): Correct offsets at
