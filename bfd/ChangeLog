@@ -1,17 +1,14 @@
+Fri Aug 28 16:29:15 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* archive.c (bfd_slurp_bsd_armap): if the symdef_count is too
+	large, assume we're using a swapped byte order and fail with
+	wrong_format rather than dumping core.
+
 Fri Aug 28 15:38:03 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* Renamed opc-sparc.c to sparc-opc.c for systems with short
 	filename constraints.
 	* Makefile.in: Updated to reflect change.
-
-Thu Aug 27 17:01:04 1992  Ian Lance Taylor  (ian@cygnus.com)
-
-	* targets.c, config/i960-bout.mt, hosts/*: added
-	HOST_BIG_ENDIAN_DEFAULT_VECTOR and
-	HOST_LITTLE_ENDIAN_DEFAULT_VECTOR because bout archive format
-	depends on the endianness of the host.  Added #define
-	HOST_BIG_ENDIAN_P and #undef HOST_BIG_ENDIAN_P to a number of
-	configuration files in hosts/ (it was already in some).
 
 Thu Aug 27 13:05:28 1992  Brendan Kehoe  (brendan@cygnus.com)
 
