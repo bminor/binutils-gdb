@@ -1,3 +1,8 @@
+2000-11-07  Nick Clifton  <nickc@redhat.com>
+
+	* stabs.c (generate_asm_file): Increase length of xmalloc'ed
+	buffer in order to avoid buffer overflows.
+
 2000-11-06  Steve Ellcey <sje@cup.hp.com>
 
 	* config/tc-ia64.c (md_shortopts, md_parse_option, md_show_usage):

@@ -497,52 +497,62 @@ generate_asm_file (type, file)
   static char *last_file;
   static int label_count;
   char *hold;
-  char *buf = xmalloc (2 * strlen (file) + 10);
   char sym[30];
-
+  char *buf;
+  char *tmp = file;
+  char *endp = file + strlen (file);
+  char *bufp = buf;
+  
+  if (last_file != NULL
+      && strcmp (last_file, file) == 0)
+    return;
+  
   /* Rather than try to do this in some efficient fashion, we just
      generate a string and then parse it again.  That lets us use the
      existing stabs hook, which expect to see a string, rather than
      inventing new ones.  */
-
   hold = input_line_pointer;
 
-  if (last_file == NULL
-      || strcmp (last_file, file) != 0)
+  sprintf (sym, "%sF%d", FAKE_LABEL_NAME, label_count);
+  ++label_count;
+
+  /* Allocate enough space for the file name (possibly extended with
+     doubled up backslashes), the symbol name, and the other characters
+     that make up a stabs file directive.  */
+  bufp = buf = xmalloc (2 * strlen (file) + strlen (sym) + 12);
+  
+  *bufp++ = '"';
+
+  while (tmp < endp)
     {
-      char *tmp = file;
-      char *endp = file + strlen(file);
-      char *bufp = buf;
+      char *bslash = strchr (tmp, '\\');
+      int len = (bslash ? (bslash - tmp + 1) : strlen (tmp));
+      
+      /* Double all backslashes, since demand_copy_C_string (used by
+	 s_stab to extract the part in quotes) will try to replace them as
+	 escape sequences.  backslash may appear in a filespec.  */
+      strncpy (bufp, tmp, len);
+      
+      tmp += len;
+      bufp += len;
 
-      sprintf (sym, "%sF%d", FAKE_LABEL_NAME, label_count);
-      ++label_count;
-
-      *bufp++ = '"';
-      while (tmp < endp)
-        {
-          char *bslash = strchr (tmp, '\\');
-          int len = (bslash ? (bslash - tmp + 1) : strlen (tmp));
-          /* double all backslashes, since demand_copy_C_string (used by
-             s_stab to extract the part in quotes) will try to replace them as
-             escape sequences.  backslash may appear in a filespec.  */
-          strncpy (bufp, tmp, len);
-          tmp += len;
-          bufp += len;
-          if (bslash != NULL)
-            *bufp++ = '\\';
-        }
-      sprintf (bufp, "\",%d,0,0,%s\n", type, sym);
-      input_line_pointer = buf;
-      s_stab ('s');
-      colon (sym);
-
-      if (last_file != NULL)
-	free (last_file);
-      last_file = xstrdup (file);
+      if (bslash != NULL)
+	*bufp++ = '\\';
     }
 
-  input_line_pointer = hold;
+  sprintf (bufp, "\",%d,0,0,%s\n", type, sym);
+
+  input_line_pointer = buf;
+  s_stab ('s');
+  colon (sym);
+
+  if (last_file != NULL)
+    free (last_file);
+  last_file = xstrdup (file);
+  
   free (buf);
+
+  input_line_pointer = hold;
 }
 
 /* Generate stabs debugging information for the current line.  This is
