@@ -637,6 +637,7 @@ sub_actual (start, in, t, formal_hash, kind, out, copyifnotthere)
     {
       /* Doing this permits people to use & in macro bodies.  */
       sb_add_char (out, '&');
+      sb_add_sb (out, t);
     }
   else if (copyifnotthere)
     {
