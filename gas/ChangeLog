@@ -1,3 +1,8 @@
+2001-02-20  Bo Thorsen  <bo@suse.de>
+
+	* config/tc-i386.c (tc_i386_fix_adjustable): Fix GOTPCREL GOT
+	entry.
+
 001-02-18  David O'Brien  <obrien@FreeBSD.org>
 
 	* configure.in (cpu_type, arch): Add a generic FreeBSD specification as
@@ -100,7 +105,7 @@ Mon Feb 12 17:44:08 CET 2001  Jan Hubicka  <jh@suse.cz>
 2001-02-02  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* config/tc-m68hc11.c (relaxable_symbol): Relax externally visible
-	symbols because there is no support for shared libraries and these 
+	symbols because there is no support for shared libraries and these
 	symbols can't be overridden (unless they are weak).
 
 2001-02-01  Momchil Velikov  <velco@fadata.bg>
@@ -119,7 +124,7 @@ Mon Feb 12 17:44:08 CET 2001  Jan Hubicka  <jh@suse.cz>
 	still set.  Issue an error message instead.
 	(md_estimate_size_before_relax): Delete unused variable
 	'buffer_address'.  Fixup parentheses around if statement.
-	
+
 2001-01-23  Kazu Hirata  <kazu@hxi.com>
 
 	* as.c: Fix formatting.
