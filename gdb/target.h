@@ -43,6 +43,7 @@
 
 #include "bfd.h"
 #include "symtab.h"
+#include "dcache.h"
 
 enum strata
   {
@@ -487,8 +488,11 @@ extern struct target_stack_item *target_stack;
    and (if successful) pushes a new target onto the stack.
    Targets should supply this routine, if only to provide an error message.  */
 
-#define	target_open(name, from_tty)	\
-     (*current_target.to_open) (name, from_tty)
+#define	target_open(name, from_tty)					\
+  do {									\
+    dcache_invalidate (target_dcache);					\
+    (*current_target.to_open) (name, from_tty);				\
+  } while (0)
 
 /* Does whatever cleanup is required for a target that we are no longer
    going to be calling.  Argument says whether we are quitting gdb and
@@ -560,8 +564,11 @@ extern void target_detach (char *, int);
    the target, or TARGET_SIGNAL_0 for no signal.  The caller may not
    pass TARGET_SIGNAL_DEFAULT.  */
 
-#define	target_resume(pid, step, siggnal)	\
-     (*current_target.to_resume) (pid, step, siggnal)
+#define	target_resume(pid, step, siggnal)				\
+  do {									\
+    dcache_invalidate(target_dcache);					\
+    (*current_target.to_resume) (pid, step, siggnal);			\
+  } while (0)
 
 /* Wait for process pid to do something.  Pid = -1 to wait for any pid
    to do something.  Return pid of child, or -1 in case of error;
@@ -608,11 +615,15 @@ extern void target_detach (char *, int);
 #define	target_prepare_to_store()	\
      (*current_target.to_prepare_to_store) ()
 
+extern DCACHE *target_dcache;
+
+extern int do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write);
+
 extern int target_read_string (CORE_ADDR, char **, int, int *);
 
 extern int target_read_memory (CORE_ADDR memaddr, char *myaddr, int len);
 
-extern int target_write_memory (CORE_ADDR, char *, int);
+extern int target_write_memory (CORE_ADDR memaddr, char *myaddr, int len);
 
 extern int xfer_memory (CORE_ADDR, char *, int, int, struct target_ops *);
 

@@ -37,8 +37,6 @@
 #include "gdbthread.h"
 #include "remote.h"
 
-#include "dcache.h"
-
 #include <ctype.h>
 #include <sys/time.h>
 #ifdef USG
@@ -2027,8 +2025,6 @@ extended_remote_async_open (char *name, int from_tty)
 
 /* Generic code for opening a connection to a remote target.  */
 
-static DCACHE *remote_dcache;
-
 static void
 init_all_packet_configs (void)
 {
@@ -2056,11 +2052,6 @@ serial device is attached to the remote system\n\
   target_preopen (from_tty);
 
   unpush_target (target);
-
-  if (!remote_dcache)
-    remote_dcache = dcache_init (remote_read_bytes, remote_write_bytes);
-  else
-    dcache_invd (remote_dcache);
 
   remote_desc = SERIAL_OPEN (name);
   if (!remote_desc)
@@ -2139,8 +2130,6 @@ serial device is attached to the remote system\n\
   target_preopen (from_tty);
 
   unpush_target (target);
-
-  remote_dcache = dcache_init (remote_read_bytes, remote_write_bytes);
 
   remote_desc = SERIAL_OPEN (name);
   if (!remote_desc)
@@ -2309,8 +2298,6 @@ remote_resume (int pid, int step, enum target_signal siggnal)
   else
     set_thread (pid, 0);	/* run this thread */
 
-  dcache_invd (remote_dcache);
-
   last_sent_signal = siggnal;
   last_sent_step = step;
 
@@ -2342,8 +2329,6 @@ remote_async_resume (int pid, int step, enum target_signal siggnal)
     set_thread (0, 0);		/* run any thread */
   else
     set_thread (pid, 0);	/* run this thread */
-
-  dcache_invd (remote_dcache);
 
   last_sent_signal = siggnal;
   last_sent_step = step;
@@ -3555,12 +3540,18 @@ remote_xfer_memory (CORE_ADDR mem_addr, char *buffer, int mem_len,
 {
   CORE_ADDR targ_addr;
   int targ_len;
+  int res;
+
   REMOTE_TRANSLATE_XFER_ADDRESS (mem_addr, mem_len, &targ_addr, &targ_len);
   if (targ_len <= 0)
     return 0;
 
-  return dcache_xfer_memory (remote_dcache, targ_addr, buffer,
-			     targ_len, should_write);
+  if (should_write)
+    res = remote_write_bytes (targ_addr, buffer, targ_len);
+  else
+    res = remote_read_bytes (targ_addr, buffer, targ_len);
+
+  return res;
 }
 
 
@@ -5043,11 +5034,6 @@ device is attached to the remote system (e.g. host:port).");
   target_preopen (from_tty);
 
   unpush_target (&remote_cisco_ops);
-
-  if (!remote_dcache)
-    remote_dcache = dcache_init (remote_read_bytes, remote_write_bytes);
-  else
-    dcache_invd (remote_dcache);
 
   remote_desc = SERIAL_OPEN (name);
   if (!remote_desc)

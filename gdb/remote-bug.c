@@ -119,7 +119,6 @@ bug_load (char *args, int fromtty)
 
   sr_check_open ();
 
-  dcache_invd (gr_get_dcache ());
   inferior_pid = 0;
   abfd = bfd_openr (args, 0);
   if (!abfd)
@@ -198,12 +197,9 @@ get_word (char **p)
 
 static struct gr_settings bug_settings =
 {
-  NULL,				/* dcache */
   "Bug>",			/* prompt */
   &bug_ops,			/* ops */
   bug_clear_breakpoints,	/* clear_all_breakpoints */
-  bug_read_memory,		/* readfunc */
-  bug_write_memory,		/* writefunc */
   gr_generic_checkin,		/* checkin */
 };
 
@@ -242,8 +238,6 @@ bug_open (char *args, int from_tty)
 void
 bug_resume (int pid, int step, enum target_signal sig)
 {
-  dcache_invd (gr_get_dcache ());
-
   if (step)
     {
       sr_write_cr ("t");
@@ -563,10 +557,17 @@ int
 bug_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 		 struct target_ops *target)
 {
+  int res;
+
   if (len <= 0)
     return 0;
 
-  return dcache_xfer_memory (gr_get_dcache (), memaddr, myaddr, len, write);
+  if (write)
+    res = bug_write_memory (memaddr, myaddr, len);
+  else
+    res = bug_read_memory (memaddr, myaddr, len);
+
+  return res;
 }
 
 static void

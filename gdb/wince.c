@@ -54,7 +54,6 @@
 #include "gdbcmd.h"
 #include <sys/param.h>
 #include "wince-stub.h"
-#include "dcache.h"
 #include <time.h>
 
 /* The ui's event loop. */
@@ -88,8 +87,6 @@ extern int (*ui_loop_hook) (int signo);
 #define DEBUG_EXCEPT(x)	if (debug_exceptions)	printf x
 
 static int connection_initialized = 0;	/* True if we've initialized a RAPI session. */
-
-static DCACHE *remote_dcache;
 
 /* The directory where the stub and executable files are uploaded. */
 static const char *remote_directory = "\\gdb";
@@ -1729,10 +1726,6 @@ child_create_inferior (char *exec_file, char *args, char **env)
   flags = DEBUG_PROCESS;
 
   wince_initialize ();		/* Make sure we've got a connection. */
-  if (!remote_dcache)
-    remote_dcache = dcache_init (remote_read_bytes, remote_write_bytes);
-  else
-    dcache_invd (remote_dcache);
 
   exec_file = upload_to_device (exec_file, exec_file);
 
@@ -1798,7 +1791,13 @@ child_xfer_memory (CORE_ADDR memaddr, char *our, int len,
 {
   if (len <= 0)
     return 0;
-  return dcache_xfer_memory (remote_dcache, memaddr, our, len, write);
+
+  if (write)
+    res = remote_write_bytes (memaddr, our, len);
+  else
+    res = remote_read_bytes (memaddr, our, len);
+
+  return res;
 }
 
 /* Terminate the process and wait for child to tell us it has completed. */
@@ -1841,8 +1840,6 @@ child_resume (int pid, int step, enum target_signal sig)
       CHECK (set_thread_context (th->h, &th->context));
       th->context.ContextFlags = 0;
     }
-
-  dcache_invd (remote_dcache);
 
   /* Allow continuing with the same signal that interrupted us.
      Otherwise complain. */

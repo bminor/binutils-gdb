@@ -31,6 +31,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdb_wait.h"
+#include "dcache.h"
 #include <signal.h>
 
 extern int errno;
@@ -177,6 +178,8 @@ static int targetdebug = 0;
 
 static void setup_target_debug (void);
 
+DCACHE *target_dcache;
+
 /* The user just typed 'target' without the name of a target.  */
 
 /* ARGSUSED */
@@ -229,6 +232,7 @@ target_ignore (void)
 void
 target_load (char *arg, int from_tty)
 {
+  dcache_invalidate (target_dcache);
   (*current_target.to_load) (arg, from_tty);
 }
 
@@ -843,11 +847,11 @@ target_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
 
    Result is 0 or errno value.  */
 
-static int
-target_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
+int
+do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
 {
-  int curlen;
   int res;
+  int done = 0;
   struct target_ops *t;
   struct target_stack_item *item;
 
@@ -863,28 +867,55 @@ target_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
   res = current_target.to_xfer_memory
     (memaddr, myaddr, len, write, &current_target);
   if (res == len)
-    return 0;
+    return len;
 
   if (res > 0)
     goto bump;
   /* If res <= 0 then we call it again in the loop.  Ah well.  */
 
-  for (; len > 0;)
+  while (len > 0)
     {
-      curlen = len;		/* Want to do it all */
       for (item = target_stack; item; item = item->next)
 	{
 	  t = item->target_ops;
 	  if (!t->to_has_memory)
 	    continue;
 
-	  res = t->to_xfer_memory (memaddr, myaddr, curlen, write, t);
+	  res = t->to_xfer_memory (memaddr, myaddr, len, write, t);
 	  if (res > 0)
 	    break;		/* Handled all or part of xfer */
 	  if (t->to_has_all_memory)
 	    break;
 	}
 
+      if (res <= 0)
+	{
+	    return -1;
+	}
+    bump:
+      done    += res;
+      memaddr += res;
+      myaddr  += res;
+      len     -= res;
+    }
+  
+  return done;
+}
+
+static int
+target_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
+{
+  int res;
+
+  /* Zero length requests are ok and require no work.  */
+  if (len == 0)
+    {
+      return 0;
+    }
+
+  while (len > 0)
+    {
+      res = dcache_xfer_memory(target_dcache, memaddr, myaddr, len, write);
       if (res <= 0)
 	{
 	  /* If this address is for nonexistent memory,
@@ -896,11 +927,12 @@ target_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
 	  else
 	    return errno;
 	}
-    bump:
+
       memaddr += res;
-      myaddr += res;
-      len -= res;
+      myaddr  += res;
+      len     -= res;
     }
+  
   return 0;			/* We managed to cover it all somehow. */
 }
 
@@ -908,7 +940,7 @@ target_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
 /* Perform a partial memory transfer.  */
 
 static int
-target_xfer_memory_partial (CORE_ADDR memaddr, char *buf, int len,
+target_xfer_memory_partial (CORE_ADDR memaddr, char *myaddr, int len,
 			    int write_p, int *err)
 {
   int res;
@@ -924,42 +956,19 @@ target_xfer_memory_partial (CORE_ADDR memaddr, char *buf, int len,
       return 0;
     }
 
-  /* The quick case is that the top target does it all.  */
-  res = current_target.to_xfer_memory (memaddr, buf, len, write_p, &current_target);
-  if (res > 0)
+  res = dcache_xfer_memory (target_dcache, memaddr, myaddr, len, write_p);
+  if (res <= 0)
     {
-      *err = 0;
-      return res;
+      if (errno != 0)
+	*err = errno;
+      else
+	*err = EIO;
+
+        return -1;
     }
 
-  /* xfer memory doesn't always reliably set errno. */
-  errno = 0;
-
-  /* Try all levels of the target stack to see one can handle it. */
-  for (item = target_stack; item; item = item->next)
-    {
-      t = item->target_ops;
-      if (!t->to_has_memory)
-	continue;
-      res = t->to_xfer_memory (memaddr, buf, len, write_p, t);
-      if (res > 0)
-	{
-	  /* Handled all or part of xfer */
-	  *err = 0;
-	  return res;
-	}
-      if (t->to_has_all_memory)
-	break;
-    }
-
-  /* Total failure.  Return error. */
-  if (errno != 0)
-    {
-      *err = errno;
-      return -1;
-    }
-  *err = EIO;
-  return -1;
+  *err = 0;
+  return 0;
 }
 
 int
@@ -2919,6 +2928,8 @@ When non-zero, target debugging is enabled.", &setdebuglist),
 
   add_com ("monitor", class_obscure, do_monitor_command,
 	   "Send a command to the remote monitor (remote targets only).");
+
+  target_dcache = dcache_init();
 
   if (!STREQ (signals[TARGET_SIGNAL_LAST].string, "TARGET_SIGNAL_MAGIC"))
     abort ();

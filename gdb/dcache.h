@@ -23,22 +23,20 @@
 #ifndef DCACHE_H
 #define DCACHE_H
 
-typedef int (*memxferfunc) (CORE_ADDR memaddr, char *myaddr, int len);
-
 typedef struct dcache_struct DCACHE;
 
 /* Invalidate DCACHE. */
-void dcache_invd (DCACHE * dcache);
+void dcache_invalidate (DCACHE *dcache);
 
 /* Initialize DCACHE. */
-DCACHE *dcache_init (memxferfunc reading, memxferfunc writing);
+DCACHE *dcache_init (void);
 
 /* Free a DCACHE */
 void dcache_free (DCACHE *);
 
 /* Simple to call from <remote>_xfer_memory */
 
-int dcache_xfer_memory (DCACHE * cache, CORE_ADDR mem, char *my, int len,
+int dcache_xfer_memory (DCACHE *cache, CORE_ADDR mem, char *my, int len,
 			int should_write);
 
 /* Turn dcache state on or off */

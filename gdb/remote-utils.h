@@ -24,7 +24,6 @@
 
 #include "serial.h"
 #include "target.h"
-#include "dcache.h"
 
 /* Stuff that should be shared (and handled consistently) among the various
    remote targets.  */
@@ -73,21 +72,13 @@ extern struct _sr_settings sr_settings;
 
 struct gr_settings
   {
-    /* This is our data cache. */
-    DCACHE *dcache;
     char *prompt;
     struct target_ops *ops;
     int (*clear_all_breakpoints) (void);
-    memxferfunc readfunc;
-    memxferfunc writefunc;
     void (*checkin) (void);
   };
 
 extern struct gr_settings *gr_settings;
-
-/* get and set dcache. */
-#define gr_get_dcache()			(gr_settings->dcache)
-#define gr_set_dcache(newval)		(gr_settings->dcache = (newval))
 
 /* get and set prompt. */
 #define gr_get_prompt()			(gr_settings->prompt)

@@ -1,7 +1,5 @@
-/* Caching code.  Typically used by remote back ends for
-   caching remote memory.
-
-   Copyright 1992-1993, 1995, 1998-1999 Free Software Foundation, Inc.
+/* Caching code.
+   Copyright 1992-1993, 1995, 1998-1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,6 +23,7 @@
 #include "gdbcmd.h"
 #include "gdb_string.h"
 #include "gdbcore.h"
+#include "target.h"
 
 /* 
    The data cache could lead to incorrect results because it doesn't know
@@ -126,12 +125,6 @@ struct dcache_block
 
 struct dcache_struct
   {
-    /* Function to actually read the target memory. */
-    memxferfunc read_memory;
-
-    /* Function to actually write the target memory */
-    memxferfunc write_memory;
-
     /* free list */
     struct dcache_block *free_head;
     struct dcache_block *free_tail;
@@ -175,7 +168,7 @@ DCACHE *last_cache;		/* Used by info dcache */
 /* Free all the data cache blocks, thus discarding all cached data.  */
 
 void
-dcache_invd (DCACHE *dcache)
+dcache_invalidate (DCACHE *dcache)
 {
   int i;
   dcache->valid_head = 0;
@@ -250,10 +243,10 @@ dcache_write_line (DCACHE *dcache, register struct dcache_block *db)
 		int done = 0;
 		while (done < len)
 		  {
-		    int t = dcache->write_memory (db->addr + s + done,
-						  db->data + s + done,
-						  len - done);
-		    if (t == 0)
+		    int t = do_xfer_memory (db->addr + s + done,
+					    db->data + s + done,
+					    len - done, 1);
+		    if (t <= 0)
 		      return 0;
 		    done += t;
 		  }
@@ -266,7 +259,6 @@ dcache_write_line (DCACHE *dcache, register struct dcache_block *db)
     }
   return 1;
 }
-
 
 /* Read cache line */
 static int
@@ -291,8 +283,8 @@ dcache_read_line (DCACHE *dcache, struct dcache_block *db)
 
   while (len > 0)
     {
-      res = (*dcache->read_memory) (memaddr, myaddr, len);
-      if (res == 0)
+      res = do_xfer_memory (memaddr, myaddr, len, 0);
+      if (res <= 0)
 	return 0;
 
       memaddr += res;
@@ -420,19 +412,17 @@ dcache_poke_byte (DCACHE *dcache, CORE_ADDR addr, char *ptr)
 
 /* Initialize the data cache.  */
 DCACHE *
-dcache_init (memxferfunc reading, memxferfunc writing)
+dcache_init (void)
 {
   int csize = sizeof (struct dcache_block) * DCACHE_SIZE;
   DCACHE *dcache;
 
   dcache = (DCACHE *) xmalloc (sizeof (*dcache));
-  dcache->read_memory = reading;
-  dcache->write_memory = writing;
 
   dcache->the_cache = (struct dcache_block *) xmalloc (csize);
   memset (dcache->the_cache, 0, csize);
 
-  dcache_invd (dcache);
+  dcache_invalidate (dcache);
 
   last_cache = dcache;
   return dcache;
@@ -481,13 +471,10 @@ dcache_xfer_memory (DCACHE *dcache, CORE_ADDR memaddr, char *myaddr, int len,
     }
   else
     {
-      memxferfunc xfunc;
-      xfunc = should_write ? dcache->write_memory : dcache->read_memory;
-
       if (dcache->cache_has_stuff)
-	dcache_invd (dcache);
+	dcache_invalidate (dcache);
 
-      len = xfunc (memaddr, myaddr, len);
+      len = do_xfer_memory(memaddr, myaddr, len, should_write);
     }
   return len;
 }

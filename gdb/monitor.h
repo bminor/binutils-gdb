@@ -246,4 +246,3 @@ extern int monitor_readchar (void);
 extern char *monitor_get_dev_name (void);
 extern void init_monitor_ops (struct target_ops *);
 extern int monitor_dump_reg_block (char *dump_cmd);
-extern void flush_monitor_dcache (void);

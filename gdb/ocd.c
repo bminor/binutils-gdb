@@ -31,7 +31,6 @@
 #include "gdbcmd.h"
 #include "objfiles.h"
 #include "gdb-stabs.h"
-#include "dcache.h"
 #include <sys/types.h>
 #include <signal.h>
 #include "serial.h"
@@ -273,8 +272,6 @@ ocd_start_remote (PTR dummy)
 /* Open a connection to a remote debugger.
    NAME is the filename used for communication.  */
 
-static DCACHE *ocd_dcache;
-
 void
 ocd_open (char *name, int from_tty, enum ocd_target_type target_type,
 	  struct target_ops *ops)
@@ -291,11 +288,6 @@ device the OCD device is attached to (e.g. /dev/ttya).");
   current_ops = ops;
 
   unpush_target (current_ops);
-
-  if (!ocd_dcache)
-    ocd_dcache = dcache_init (ocd_read_bytes, ocd_write_bytes);
-  else
-    dcache_invd (ocd_dcache);
 
   if (strncmp (name, "wiggler", 7) == 0)
     {
@@ -386,8 +378,6 @@ void
 ocd_resume (int pid, int step, enum target_signal siggnal)
 {
   int pktlen;
-
-  dcache_invd (ocd_dcache);
 
   if (step)
     ocd_do_command (OCD_STEP, &last_run_status, &pktlen);
@@ -772,7 +762,14 @@ int
 ocd_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int should_write,
 		 struct target_ops *target)
 {
-  return dcache_xfer_memory (ocd_dcache, memaddr, myaddr, len, should_write);
+  int res;
+
+  if (should_write)
+    res = ocd_write_bytes (memaddr, myaddr, len);
+  else
+    res = ocd_read_bytes (memaddr, myaddr, len);
+
+  return res;
 }
 
 void
@@ -1315,7 +1312,7 @@ bdm_reset_command (char *args, int from_tty)
     error ("Not connected to OCD device.");
 
   ocd_do_command (OCD_RESET, &status, &pktlen);
-  dcache_invd (ocd_dcache);
+  dcache_invalidate (target_dcache);
   registers_changed ();
 }
 

@@ -51,7 +51,6 @@
 #include "gdbcmd.h"
 #include "inferior.h"
 #include "gdb_regex.h"
-#include "dcache.h"
 #include "srec.h"
 
 static char *dev_name;
@@ -130,7 +129,6 @@ static char getmem_resp_delim_fastmap[256];
 static int dump_reg_flag;	/* Non-zero means do a dump_registers cmd when
 				   monitor_wait wakes up.  */
 
-static DCACHE *remote_dcache;
 static int first_time = 0;	/* is this the first time we're executing after 
 				   gaving created the child proccess? */
 
@@ -838,15 +836,6 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
 
   monitor_printf (current_monitor->line_term);
 
-  if (remote_dcache)
-    dcache_free (remote_dcache);
-
-  if (current_monitor->flags & MO_HAS_BLOCKWRITES)
-    remote_dcache = dcache_init (monitor_read_memory, 
-				 monitor_write_memory_block);
-  else
-    remote_dcache = dcache_init (monitor_read_memory, monitor_write_memory);
-
   start_remote ();
 }
 
@@ -929,12 +918,6 @@ monitor_supply_register (int regno, char *valstr)
 
 /* Tell the remote machine to resume.  */
 
-void
-flush_monitor_dcache (void)
-{
-  dcache_invd (remote_dcache);
-}
-
 static void
 monitor_resume (int pid, int step, enum target_signal sig)
 {
@@ -948,7 +931,6 @@ monitor_resume (int pid, int step, enum target_signal sig)
 	dump_reg_flag = 1;
       return;
     }
-  dcache_invd (remote_dcache);
   if (step)
     monitor_printf (current_monitor->step);
   else
@@ -2008,7 +1990,21 @@ static int
 monitor_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 		     struct target_ops *target)
 {
-  return dcache_xfer_memory (remote_dcache, memaddr, myaddr, len, write);
+  int res;
+
+  if (write)
+    {
+      if (current_monitor->flags & MO_HAS_BLOCKWRITES)
+	res = monitor_write_memory_block(memaddr, myaddr, len);
+      else
+	res = monitor_write_memory(memaddr, myaddr, len);
+    }
+  else
+    {
+      res = monitor_read_memory(memaddr, myaddr, len);
+    }
+
+  return res;
 }
 
 static void
@@ -2145,7 +2141,6 @@ monitor_wait_srec_ack (void)
 static void
 monitor_load (char *file, int from_tty)
 {
-  dcache_invd (remote_dcache);
   monitor_debug ("MON load\n");
 
   if (current_monitor->load_routine)

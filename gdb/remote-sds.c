@@ -37,7 +37,6 @@
 #include "gdb-stabs.h"
 #include "gdbthread.h"
 #include "gdbcore.h"
-#include "dcache.h"
 
 #ifdef USG
 #include <sys/types.h>
@@ -190,8 +189,6 @@ sds_start_remote (PTR dummy)
 /* Open a connection to a remote debugger.
    NAME is the filename used for communication.  */
 
-static DCACHE *sds_dcache;
-
 static void
 sds_open (char *name, int from_tty)
 {
@@ -202,11 +199,6 @@ device is attached to the remote system (e.g. /dev/ttya).");
   target_preopen (from_tty);
 
   unpush_target (&sds_ops);
-
-  if (!sds_dcache)
-    sds_dcache = dcache_init (sds_read_bytes, sds_write_bytes);
-  else
-    dcache_invd (sds_dcache);
 
   sds_desc = SERIAL_OPEN (name);
   if (!sds_desc)
@@ -357,8 +349,6 @@ static void
 sds_resume (int pid, int step, enum target_signal siggnal)
 {
   unsigned char buf[PBUFSIZ];
-
-  dcache_invd (sds_dcache);
 
   last_sent_signal = siggnal;
   last_sent_step = step;
@@ -669,7 +659,14 @@ static int
 sds_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int should_write,
 		 struct target_ops *target)
 {
-  return dcache_xfer_memory (sds_dcache, memaddr, myaddr, len, should_write);
+  int res;
+
+  if (should_write)
+    res = sds_write_bytes (memaddr, myaddr, len);
+  else
+    res = sds_read_bytes (memaddr, myaddr, len);
+  
+  return res;
 }
 
 

@@ -649,6 +649,14 @@ FPU.
 
 --
 
+The "ocd reset" command needs to flush the dcache, which requires breaking
+the abstraction layer between the target independent and target code.  One
+way to address this is provide a generic "reset" command and target vector.
+
+http://sources.redhat.com/ml/gdb-patches/2000-10/msg00011.html
+
+--
+
 			Thread Support
 			==============
 

@@ -1,3 +1,85 @@
+2000-11-01  J.T. Conklin  <jtc@redback.com>
+
+	* TODO: Note abstraction layer violation where "ocd reset" command
+	must invalidate the dcache, and how this might be fixed.
+
+	* monitor.c (#include "dcache.h"): Removed.
+	(remote_dcache): Removed.
+	(monitor_open): Removed code that created local dcache.
+	(flush_monitor_dcache): Removed (unused function).
+	(monitor_resume): Removed call to dcache_invd().
+	(monitor_load): Likewise.
+	(monitor_xfer_memory): Changed to call monitor_write_memory(),
+	monitor_write_memory_block(), and monitor_read_memory() instead
+	of dcache_xfer_memory().
+	* monitor.h (flush_monitor_dcache): Removed (unused function).
+	* ocd.c (#include "dcache.h"): Removed.
+	(ocd_dcache): Removed.
+	(ocd_open): Removed code that created local dcache.
+	(ocd_resume): Removed call to dcache_invd().
+	(ocd_xfer_memory): Changed to call ocd_write_bytes() and 
+	ocd_read_bytes() instead of dcache_xfer_memory().
+	(bdm_reset_command): Invalidate target dcache.
+	* remote-bug.c (bug_load): Remove call to dcache_invd().
+	(bug_resume): Likewise.
+	(bug_settings): Remove dcache, readfunc, and writefunc fields
+	from initializer.
+	(bug_xfer_memory): Changed to call bug_read_memory() and 
+	bug_write_memory() instead of dcache_xfer_memory().
+	* remote-nindy.c (#include "dcache.h"): Removed.
+	(nindy_dcache): Removed.
+	(nindy_open): Removed code that created local dcache.
+	(nindy_resume): Removed call to dcache_invd().
+	(nindy_load): Likewise.
+	(nindy_xfer_inferior_memory): Changed to call ninMemPut() and 
+	ninMemGet() instead of dcache_xfer_memory().
+	* remote-sds.c (#include "dcache.h"): Removed.
+	(sds_dcache): Removed.
+	(sds_open): Removed code that created local dcache.
+	(sds_resume): Removed call to dcache_invd().
+	(sds_xfer_memory): Changed to call sds_write_bytes() and 
+	sds_read_bytes() instead of dcache_xfer_memory().
+	* remote-utils.c (gr_open): Removed code that created local dcache.
+	* remote-utils.h (#include "dcache.h"): Removed.
+	(struct gr_settings): Removed dcache, readfunc, and writefunc fields.
+	(gr_get_dcache, gr_set_dcache): Removed macro definitions.
+	* remote.c (#include "dcache.h"): Removed.
+	(remote_dcache): Removed.
+	(remote_open_1): Removed code that created local dcache.
+	(remote_async_open_1): Likewise.
+	(remote_resume): Removed call to dcache_invd().
+	(remote_async_resume): Likewise.
+	(remote_xfer_memory): Changed to call remote_write_bytes() and
+	remote_read_bytes() instead of dcache_xfer_memory().
+	* wince.c (#include "dcache.h"): Removed.
+	(remote_dcache): Removed.
+	(child_create_inferior): Removed code that created local dcache.
+	(child_xfer_memory): Changed to call remote_write_bytes() and
+	remote_read_bytes() instead of dcache_xfer_memory().
+	(child_resume): Removed call to dcache_invd().
+	
+	* target.c (target_dcache): Added.
+	(target_load): Invalidate target_dcache.
+	(do_xfer_memory): New function.
+	(target_xfer_memory): Reimplement in terms of dcache_xfer_memory().
+	(target_xfer_memory_partial): Likewise.
+	(initialize_targets): Create target_dcache.
+	* target.h (#include "dcache.h"): Added.
+	(target_open): Invalidate target_dcache.
+	(target_resume): Likewise.
+	(do_xfer_memory): New declaration.
+	
+	* dcache.c (dcache_init): Removed reading and writing arguments.
+	(dcache_struct): Removed read_memory and write_memory fields.
+	(dcache_write_line): Call do_xfer_memory.
+	(dcache_read_line): Likewise.
+	(dcache_xfer_memory): Likewise.
+	(dcache_invalidate): Renamed from dcache_invd.
+	(dcache_init): Updated.
+	(dcache_xfer_memory): Updated.
+	* dcache.h (memxferfunc): Removed definition.
+	(dcache_init): Removed reading and writing arguments.
+	
 2000-11-03  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* objfiles.c (objfile_relocate):  Relocate ei.entry_point with

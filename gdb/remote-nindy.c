@@ -115,11 +115,7 @@
 #include "serial.h"
 #include "nindy-share/env.h"
 #include "nindy-share/stop.h"
-
-#include "dcache.h"
 #include "remote-utils.h"
-
-static DCACHE *nindy_dcache;
 
 extern int unlink ();
 extern char *getenv ();
@@ -187,11 +183,6 @@ nindy_open (char *name,		/* "/dev/ttyXX", "ttyXX", or "XX": tty to be opened */
   nindy_close (0);
 
   have_regs = regs_changed = 0;
-
-  if (!nindy_dcache)
-    nindy_dcache = dcache_init (ninMemGet, ninMemPut);
-  else
-    dcache_invd (nindy_dcache);
 
   /* Allow user to interrupt the following -- we could hang if there's
      no NINDY at the other end of the remote tty.  */
@@ -268,7 +259,6 @@ nindy_resume (int pid, int step, enum target_signal siggnal)
   if (siggnal != TARGET_SIGNAL_0 && siggnal != stop_signal)
     warning ("Can't send signals to remote NINDY targets.");
 
-  dcache_invd (nindy_dcache);
   if (regs_changed)
     {
       nindy_store_registers (-1);
@@ -488,10 +478,17 @@ int
 nindy_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len,
 			    int should_write, struct target_ops *target)
 {
+  int res;
+
   if (len <= 0)
     return 0;
-  return dcache_xfer_memory (nindy_dcache, memaddr, myaddr, 
-			     len, should_write);
+
+  if (should_write)
+    res = ninMemPut (memaddr, myaddr, len);
+  else
+    res = ninMemGet (memaddr, myaddr, len);
+
+  return res;
 }
 
 static void
@@ -610,8 +607,6 @@ nindy_load (char *filename, int from_tty)
 	}
     }
   bfd_close (file);
-
-  dcache_invd(nindy_dcache);
 }
 
 static int
