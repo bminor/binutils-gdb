@@ -130,7 +130,7 @@ check:  site.exp
 	if [ -f $${rootme}/../../expect/expect ] ; then  \
 	   TCL_LIBRARY=$${srcdir}/../../tcl/library ; \
 	   export TCL_LIBRARY ; fi ; \
-	$(RUNTEST) $(RUNTESTFLAGS) --tool gas AS=$(AS_FOR_TARGET) ASFLAGS="$(ASFLAGS)"
+	$(RUNTEST) $(RUNTESTFLAGS) --tool gas 
 
 force:
 
