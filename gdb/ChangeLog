@@ -1,5 +1,9 @@
 2003-06-20  Theodore A. Roth  <troth@openavr.org>
 
+	* avr-tdep.c (avr_gdbarch_init): Don't call set_gdbarch_bfd_vma_bit.
+
+2003-06-20  Theodore A. Roth  <troth@openavr.org>
+
 	* avr-tdep.c (avr_read_pc): Use regcache instead of read_register.
 	(avr_read_sp): Ditto.
 
