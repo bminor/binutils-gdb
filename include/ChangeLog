@@ -1,3 +1,11 @@
+Fri Mar 28 15:44:41 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
+
+	* libiberty.h (basename): Add prototype for glibc and linux.
+
+Mon Mar 17 19:22:12 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objalloc.h: New file.
+
 Mon Mar 17 14:57:55 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
 	* remote-sim.h: New file, copied in from gdb/remote-sim.h.  One
@@ -77,12 +85,10 @@ Thu Oct 24 17:10:01 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* dis-asm.h (disassemble_info): Add symbol field.
 	(INIT_DISASSEMBLE_INFO_NO_ARCH): Initialize symbol field.
 
-start-sanitize-m32r
 Thu Oct 17 11:17:40 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* dis-asm.h (print_insn_m32r): Declare.
 
-end-sanitize-m32r
 Mon Oct 14 23:56:52 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* libiberty.h: Declare parameter types for xmalloc and xrealloc.
