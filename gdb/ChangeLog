@@ -1,3 +1,13 @@
+2004-06-02  Paul N. Hilfinger  <hilfinger@gnat.com>
+
+	* ada-exp.y: Synchronize with current ACT sources.
+	* ada-lang.c: Ditto.
+	* ada-lang.h: Ditto.
+	* ada-lex.l: Ditto.
+	* ada-tasks.c: Ditto.
+	* ada-typeprint.c: Ditto.
+	* ada-valprint.c: Ditto.
+	
 2004-06-01  Jim Blandy  <jimb@redhat.com>
 
 	* ppc-tdep.h: Delete unused 'regoff' member.
