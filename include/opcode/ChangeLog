@@ -1,7 +1,7 @@
 Tue Aug 26 12:21:52 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* i386.h (JUMP_ON_CX_ZERO): Uncomment (define again).
-	(JUMP_ON_EXC_ZERO): Remove commented out macro.
+	(JUMP_ON_ECX_ZERO): Remove commented out macro.
 
 Fri Aug 22 10:38:29 1997  Nick Clifton  <nickc@cygnus.com>
 
