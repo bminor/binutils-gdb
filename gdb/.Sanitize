@@ -71,6 +71,8 @@ dbxread.c
 defs.h
 depend
 doc
+dwarfread.c
+elfread.c
 environ.c
 environ.h
 eval.c
@@ -139,6 +141,7 @@ parse.c
 parser-defs.h
 pn-opcode.h
 printcmd.c
+procfs.c
 putenv.c
 pyr-opcode.h
 pyr-pinsn.c
@@ -189,6 +192,7 @@ tm-68k.h
 tm-88k.h
 tm-altos.h
 tm-altosgas.h
+tm-amix.h
 tm-arm.h
 tm-bigmips.h
 tm-convex.h
@@ -214,6 +218,7 @@ tm-sun386.h
 tm-sun3os4.h
 tm-sun4os4.h
 tm-sunos.h
+tm-svr4.h
 tm-symmetry.h
 tm-tahoe.h
 tm-ultra3.h
@@ -236,6 +241,7 @@ xconfig
 xm-3b1.h
 xm-88k.h
 xm-altos.h
+xm-amix.h
 xm-arm.h
 xm-bigmips.h
 xm-convex.h
@@ -247,6 +253,7 @@ xm-i386v.h
 xm-i386v32.h
 xm-irix3.h
 xm-isi.h
+xm-m68k.h
 xm-merlin.h
 xm-mips.h
 xm-news.h
@@ -261,6 +268,7 @@ xm-sun3.h
 xm-sun386.h
 xm-sun3os4.h
 xm-sun4os4.h
+xm-svr4.h
 xm-symmetry.h
 xm-tahoe.h
 xm-ultra3.h
