@@ -1,3 +1,13 @@
+Mon Aug 30 17:55:16 1993  Rob Savoye  (rob@darkstar.cygnus.com)
+
+	* gdb.t01/run.exp: Add match for VxWorks, cause I/O comes out the
+	console, not GDB.
+	* config/mt-*: Added default values for RUNTEST and RUNTESTFLAGS so
+	cross testing works better with "make check"
+	* config/unix-gdb: Use default procedures for exit and version.
+	* config/vx-gdb.exp: Cleaned up and massaged back to working order
+	with the newest VxWorks.
+
 Thu Aug 26 17:50:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t20/classes.exp: For "ptype class Base1", continue to accept
