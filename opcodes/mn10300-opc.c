@@ -417,7 +417,6 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "lls",	0xd7,		0xff,		FMT_S0, {UNUSED}},
 { "lcs",	0xd4,		0xff,		FMT_S0, {UNUSED}},
 { "lra",	0xda,		0xff,		FMT_S0, {UNUSED}},
-{ "lcc",	0xd6,		0xff,		FMT_S0, {UNUSED}},
 { "setlb",	0xdb,		0xff,	 	FMT_S0, {UNUSED}},
 
 { "jmp",	0xf0f4,		0xfffc,		FMT_D0, {PAREN,AN0,PAREN}},
