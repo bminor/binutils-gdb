@@ -1383,7 +1383,7 @@ MAKEDIRS= \
 	$(exec_prefix)
 .PHONY: installdirs
 installdirs: mkinstalldirs
-	$(srcdir)/mkinstalldirs $(MAKEDIRS)
+	$(SHELL) $(srcdir)/mkinstalldirs $(MAKEDIRS)
 
 dir.info: do-install-info
 	if [ -f $(srcdir)/texinfo/gen-info-dir ] ; then \
