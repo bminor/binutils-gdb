@@ -1,5 +1,5 @@
 /* BFD support for handling relocation entries.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 1997, 1998
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 1998
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -411,14 +411,14 @@ FUNCTION
 	bfd_get_reloc_size
 
 SYNOPSIS
-	int bfd_get_reloc_size (reloc_howto_type *);
+	unsigned int bfd_get_reloc_size (reloc_howto_type *);
 
 DESCRIPTION
 	For a reloc_howto_type that operates on a fixed number of bytes,
 	this returns the number of bytes operated on.
  */
 
-int
+unsigned int
 bfd_get_reloc_size (howto)
      reloc_howto_type *howto;
 {
@@ -492,7 +492,8 @@ bfd_check_overflow (how, bitsize, rightshift, relocation)
     case complain_overflow_signed:
       {
 	/* Assumes two's complement.  */
-	bfd_signed_vma reloc_signed_max = (1 << (bitsize - 1)) - 1;
+	bfd_signed_vma reloc_signed_max =
+	  ((bfd_signed_vma) 1 << (bitsize - 1)) - 1;
 	bfd_signed_vma reloc_signed_min = ~reloc_signed_max;
 
 	/* The above right shift is incorrect for a signed value.
@@ -513,7 +514,8 @@ bfd_check_overflow (how, bitsize, rightshift, relocation)
 	/* Assumes two's complement.  This expression avoids
 	   overflow if `bitsize' is the number of bits in
 	   bfd_vma.  */
-	bfd_vma reloc_unsigned_max = (((1 << (bitsize - 1)) - 1) << 1) | 1;
+	bfd_vma reloc_unsigned_max =
+	  ((((bfd_vma) 1 << (bitsize - 1)) - 1) << 1) | 1;
 
 	if ((bfd_vma) check > reloc_unsigned_max)
 	  flag = bfd_reloc_overflow;
@@ -1523,7 +1525,8 @@ _bfd_relocate_contents (howto, input_bfd, relocation, location)
 	case complain_overflow_signed:
 	  {
 	    /* Assumes two's complement.  */
-	    bfd_signed_vma reloc_signed_max = (1 << (howto->bitsize - 1)) - 1;
+	    bfd_signed_vma reloc_signed_max =
+	      ((bfd_signed_vma) 1 << (howto->bitsize - 1)) - 1;
 	    bfd_signed_vma reloc_signed_min = ~reloc_signed_max;
 
 	    if (signed_check > reloc_signed_max
@@ -1537,7 +1540,7 @@ _bfd_relocate_contents (howto, input_bfd, relocation, location)
 	       overflow if howto->bitsize is the number of bits in
 	       bfd_vma.  */
 	    bfd_vma reloc_unsigned_max =
-	    (((1 << (howto->bitsize - 1)) - 1) << 1) | 1;
+	      ((((bfd_vma) 1 << (howto->bitsize - 1)) - 1) << 1) | 1;
 
 	    if (check > reloc_unsigned_max)
 	      overflow = true;
@@ -2007,6 +2010,12 @@ ENUMX
   BFD_RELOC_MIPS_CALL_HI16
 ENUMX
   BFD_RELOC_MIPS_CALL_LO16
+COMMENT
+{* start-sanitize-r5900 *}
+ENUMX
+  BFD_RELOC_MIPS15_S3
+COMMENT
+{* end-sanitize-r5900 *}
 ENUMDOC
   MIPS ELF relocations.
 
@@ -2018,6 +2027,10 @@ ENUMDOC
   MIPS DVP Relocations.
   This is an 11-bit pc relative reloc.  The recorded address is for the
   lower instruction word, and the value is in 128 bit units.
+ENUM
+  BFD_RELOC_MIPS_DVP_27_S4
+ENUMDOC
+  This is a 27 bit address left shifted by 4.
 COMMENT
 {* end-sanitize-sky *}
 

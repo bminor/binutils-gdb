@@ -1,3 +1,11 @@
+Tue May 19 18:41:19 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* bfd-in.h: Move over patch to bfd-in2.h.
+
+	* reloc.c (bfd_check_overflow): Add casts before shifts which may
+ 	not fit in 32 bits.
+	(_bfd_relocate_contents): Likewise.
+
 Mon May 18 14:44:15 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* peicode.h (add_data_entry): If the section has no private data
