@@ -276,3 +276,9 @@ F:
 
 	fmdhreq	d1, r15
 	fmdlreq	d15, r1
+
+	# Add three nop instructions to ensure that the
+	# output is 32-byte aligned as required for arm-aout.
+	nop
+	nop
+	nop

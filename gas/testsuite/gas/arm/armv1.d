@@ -68,3 +68,6 @@ Disassembly of section .text:
 0+e8 <[^>]*> e8100001 ?	ldmda	r0, {r0}
 0+ec <[^>]*> e9100001 ?	ldmdb	r0, {r0}
 0+f0 <[^>]*> e9900001 ?	ldmib	r0, {r0}
+0+f4 <[^>]*> e1a00000 ?	nop[ 	]+\(mov r0,r0\)
+0+f8 <[^>]*> e1a00000 ?	nop[ 	]+\(mov r0,r0\)
+0+fc <[^>]*> e1a00000 ?	nop[ 	]+\(mov r0,r0\)

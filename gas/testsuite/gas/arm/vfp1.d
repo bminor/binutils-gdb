@@ -188,3 +188,6 @@ Disassembly of section .text:
 0+2c8 <[^>]*> 0e1f7b10 	fmrdleq	r7, d15
 0+2cc <[^>]*> 0e21fb10 	fmdhreq	d1, pc
 0+2d0 <[^>]*> 0e0f1b10 	fmdlreq	d15, r1
+0+2d4 <[^>]*> e1a00000 ?	nop[ 	]+\(mov r0,r0\)
+0+2d8 <[^>]*> e1a00000 ?	nop[ 	]+\(mov r0,r0\)
+0+2dc <[^>]*> e1a00000 ?	nop[ 	]+\(mov r0,r0\)

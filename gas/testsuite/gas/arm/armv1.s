@@ -68,3 +68,9 @@ entry:
 	ldmfa	r0, {r0}
 	ldmea	r0, {r0}
 	ldmed	r0, {r0}
+
+	# Add three nop instructions to ensure that the
+	# output is 32-byte aligned as required for arm-aout.
+	nop
+	nop
+	nop

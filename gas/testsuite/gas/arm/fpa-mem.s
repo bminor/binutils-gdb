@@ -24,3 +24,8 @@ F:
 	sfm	f0, 4, [r0]
 	sfmfd	f0, 4, [r0]
 	sfmea	f0, 4, [r0]
+	
+	# Add two nop instructions to ensure that the
+	# output is 32-byte aligned as required for arm-aout.
+	nop
+	nop

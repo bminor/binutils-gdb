@@ -30,3 +30,5 @@ Disassembly of section .text:
 0+4c <[^>]*> ed800200 ?	sfm	f0, 4, \[r0\]
 0+50 <[^>]*> ed00020c ?	sfm	f0, 4, \[r0, -#48\]
 0+54 <[^>]*> ed800200 ?	sfm	f0, 4, \[r0\]
+0+58 <[^>]*> e1a00000 ?	nop[ 	]+\(mov r0,r0\)
+0+5c <[^>]*> e1a00000 ?	nop[ 	]+\(mov r0,r0\)

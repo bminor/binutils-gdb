@@ -1,3 +1,20 @@
+2002-08-22  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/arch5tej.s: Add nops to align output.
+	* gas/arm/arch5tej.d: Expect nops.
+        * gas/arm/arm7t.s: Add nops, remove thumb instructions.
+        * gas/arm/arm7t.d: Expect nops.
+        * gas/arm/armv1.s: Add nops.
+        * gas/arm/armv1.d: Expect nops.
+        * gas/arm/fpa-mem.s: Add nops.
+        * gas/arm/fpa-mem.d: Expext nops.
+        * gas/arm/vfp1.s: Add nops.
+        * gas/arm/vfp1.d: Expect nops.
+        * gas/arm/xscale.s: Add nops.
+        * gas/arm/xscale.d: Expect nops.
+        * gas/arm/arm.exp: Do not run thumb tests for arm-aout
+	toolchain.
+
 2002-08-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/ppc/ppc.exp: Don't run e500 test on xcoff targets.
