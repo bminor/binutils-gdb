@@ -1,5 +1,7 @@
 Tue Jul 12 12:22:32 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
+	* config/mt-i386-netware: New file.
+
 	* gdb.base/interrupt.c: Do not test if errno == EINTR if it's not
 	  defined.
 
