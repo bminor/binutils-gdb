@@ -1,3 +1,10 @@
+2000-05-09  Alan Modra  <alan@linuxcare.com.au>
+
+	* elf.c (bfd_section_from_shdr): Don't set use_rela_p if rela
+	section is empty.
+	(copy_private_bfd_data): Allow for space possibly taken up by elf
+	headers when calculating segment physical address from lma.
+
 2000-05-08  Alan Modra  <alan@linuxcare.com.au>
 
 	* versados.c (versados_scan): Init stringlen and pass_2_done.
