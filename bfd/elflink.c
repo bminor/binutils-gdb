@@ -9366,6 +9366,36 @@ _bfd_elf_section_already_linked (bfd *abfd, struct bfd_section * sec)
 		  (_("%B: duplicate section `%A' has different size\n"),
 		   abfd, sec);
 	      break;
+
+	    case SEC_LINK_DUPLICATES_SAME_CONTENTS:
+	      if (sec->size != l->sec->size)
+		(*_bfd_error_handler)
+		  (_("%B: duplicate section `%A' has different size\n"),
+		   abfd, sec);
+	      else if (sec->size != 0)
+		{
+		  bfd_byte *sec_contents, *l_sec_contents;
+
+		  if (!bfd_malloc_and_get_section (abfd, sec, &sec_contents))
+		    (*_bfd_error_handler)
+		      (_("%B: warning: could not read contents of section `%A'\n"),
+		       abfd, sec);
+		  else if (!bfd_malloc_and_get_section (l->sec->owner, l->sec,
+							&l_sec_contents))
+		    (*_bfd_error_handler)
+		      (_("%B: warning: could not read contents of section `%A'\n"),
+		       l->sec->owner, l->sec);
+		  else if (memcmp (sec_contents, l_sec_contents, sec->size) != 0)
+		    (*_bfd_error_handler)
+		      (_("%B: warning: duplicate section `%A' has different contents\n"),
+		       abfd, sec);
+
+		  if (sec_contents)
+		    free (sec_contents);
+		  if (l_sec_contents)
+		    free (l_sec_contents);
+		}
+	      break;
 	    }
 
 	  /* Set the output_section field so that lang_add_section
