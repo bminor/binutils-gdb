@@ -2579,7 +2579,10 @@ elf_link_read_relocs_from_section (abfd, shdr, external_relocs,
   else if (shdr->sh_entsize == sizeof (Elf_External_Rela))
     swap_in = bed->s->swap_reloca_in;
   else
-    abort ();
+    {
+      bfd_set_error (bfd_error_wrong_format);
+      return FALSE;
+    }
 
   erela = external_relocs;
   erelaend = erela + NUM_SHDR_ENTRIES (shdr) * shdr->sh_entsize;

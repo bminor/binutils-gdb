@@ -3,6 +3,8 @@
 	* elflink.h (elf_bfd_final_link): Apportion reloc counts to rel_hdr
 	and rel_hdr2 when initially counting input relocs rather than after
 	creating output reloc sections.
+	(elf_link_read_relocs_from_section): Don't abort with wrong reloc
+	sizes.
 
 	* Makefile.am: Run "make dep-am".
 	* Makefile.in: Regenerate.
