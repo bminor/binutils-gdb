@@ -1,3 +1,8 @@
+Sat Aug 12 03:18:04 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* rs6000-tdep.c (extract_return_value):  Fix returning of values
+	whose length is less than the register size for big endian targets.
+
 Fri Aug 11 13:04:32 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* symtab.c (list_symbols): if break command set breakpoint on matched

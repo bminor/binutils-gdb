@@ -826,6 +826,7 @@ extract_return_value (valtype, regbuf, valbuf)
   char regbuf[REGISTER_BYTES];
   char *valbuf;
 {
+  int offset = 0;
 
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT) {
 
@@ -843,9 +844,15 @@ extract_return_value (valtype, regbuf, valbuf)
       memcpy (valbuf, &ff, sizeof(float));
     }
   }
-  else
+  else {
     /* return value is copied starting from r3. */
-    memcpy (valbuf, &regbuf[REGISTER_BYTE (3)], TYPE_LENGTH (valtype));
+    if (TARGET_BYTE_ORDER == BIG_ENDIAN
+	&& TYPE_LENGTH (valtype) < REGISTER_RAW_SIZE (3))
+      offset = REGISTER_RAW_SIZE (3) - TYPE_LENGTH (valtype);
+
+    memcpy (valbuf, regbuf + REGISTER_BYTE (3) + offset,
+	    TYPE_LENGTH (valtype));
+  }
 }
 
 
