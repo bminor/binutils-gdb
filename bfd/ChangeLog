@@ -1,5 +1,8 @@
 Mon Mar 24 13:41:00 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config.bfd: Don't set targ_underscore for i[3456]86-*-gnu* or
+	i[3456]86-*-linux*.
+
 	* elf32-sparc.c (elf32_sparc_size_dynamic_sections): Don't
 	count section symbols for sections that were created by the
 	linker, or are not allocatable or not loadable.
