@@ -38,6 +38,8 @@ ac_help="$ac_help
 ac_help="$ac_help
   --enable-sim-smp=n			Specify number of processors to configure for."
 ac_help="$ac_help
+  --enable-sim-xor-endian=n		Specify number bytes involved in PowerPC XOR bi-endian mode (default 8)."
+ac_help="$ac_help
   --enable-sim-bitsize=n		Specify target bitsize (32 or 64)."
 ac_help="$ac_help
   --enable-sim-hostbitsize=32|64	Specify host bitsize (32 or 64)."
@@ -58,11 +60,11 @@ ac_help="$ac_help
 ac_help="$ac_help
   --enable-sim-monitor=mon		Specify whether to enable monitoring events."
 ac_help="$ac_help
-  --enable-sim-function-unit		Specify whether detailed functional unit support is built."
-ac_help="$ac_help
   --enable-sim-model=which		Specify PowerPC to model."
 ac_help="$ac_help
   --enable-sim-default-model=which	Specify default PowerPC to model."
+ac_help="$ac_help
+  --enable-sim-model-issue		Specify whether to simulate model specific actions"
 
 # Initialize some variables set by options.
 # The variables have the same names as the options, with
@@ -470,7 +472,7 @@ fi
 enableval="$enable_sim_warnings"
 if test -n "$enableval"; then
   case "${enableval}" in
-  yes)	sim_warnings="-Wall -Wpointer-arith -Wbad-function-cast -Wmissing-prototypes -Wmissing-declarations";;
+  yes)	sim_warnings="-Werror -Wall -Wpointer-arith -Wmissing-prototypes";;
   no)	sim_warnings="-w";;
   *)	sim_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac
@@ -586,13 +588,21 @@ fi
 # Check whether --enable-sim-icache or --disable-sim-icache was given.
 enableval="$enable_sim_icache"
 if test -n "$enableval"; then
-  case "${enableval}" in
-  yes)	sim_icache="-r 1024";;
-  no)	sim_icache="";;
-  *)	sim_icache="-r ${enableval}";;
+  icache=""
+case "${enableval}" in
+  yes)		sim_icache="-r 1024"; icache="1024";;
+  define)	sim_icache="-r 1024 -R"; icache="1024";;
+  no)		sim_icache="";;
+  *)		sim_icache="-r ${enableval}"; icache="${enableval}";;
 esac
+if test x"$silent" != x"yes" && test x"$icache" != x""; then
+  echo "Setting instruction cache size to $icache"
+fi
 else
   sim_icache="-r 1024"
+if test x"$silent" != x"yes"; then
+  echo "Setting instruction cache size to 1024"
+fi
 fi
 
 # Check whether --enable-sim-inline or --disable-sim-inline was given.
@@ -600,7 +610,7 @@ enableval="$enable_sim_inline"
 if test -n "$enableval"; then
   sim_inline=""
 case "$enableval" in
-  no)		sim_inline="";;
+  no)		sim_inline="-DDEFAULT_INLINE=0 -DINLINE=";;
   0)		sim_inline="-DDEFAULT_INLINE=0";;
   yes | 2)	sim_inline="-DDEFAULT_INLINE=2";;
   1)		sim_inline="-DDEFAULT_INLINE=1";;
@@ -609,13 +619,13 @@ case "$enableval" in
        case "$x" in
 	 *_INLINE=*)	new_flag="-D$x";;
 	 *_INLINE)	new_flag="-D$x=2";;
-	 *=*)		new_flag=`sed -e "s/=/_INLINE=/" -e "s/^/-D/"`;;
+	 *=*)		new_flag=`echo "$x" | sed -e "s/=/_INLINE=/" -e "s/^/-D/"`;;
 	 *)		new_flag="-D$x""_INLINE=2";;
        esac
-       if x"$sim_inline" = x""; then
+       if test x"$sim_inline" = x""; then
 	 sim_inline="$new_flag"
        else
-	 sim_inline="$flags $new_flag"
+	 sim_inline="$sim_inline $new_flag"
        fi
      done;;
 esac
@@ -689,7 +699,7 @@ fi
 enableval="$enable_sim_smp"
 if test -n "$enableval"; then
   case "${enableval}" in
-  yes)	sim_smp="-DWITH_SMP=2";;
+  yes)	sim_smp="-DWITH_SMP=5";;
   no)	sim_smp="-DWITH_SMP=0";;
   *)	sim_smp="-DWITH_SMP=$enableval";;
 esac
@@ -701,6 +711,18 @@ else
 if test x"$silent" != x"yes"; then
   echo "Setting smp flags = $sim_smp" 6>&1
 fi
+fi
+
+# Check whether --enable-sim-xor-endian or --disable-sim-xor-endian was given.
+enableval="$enable_sim_xor_endian"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  yes)	sim_xor_endian="-DWITH_XOR_ENDIAN=8";;
+  no)	sim_xor_endian="-DWITH_XOR_ENDIAN=0";;
+  *)	sim_xor_endian="-DWITH_XOR_ENDIAN=$enableval";;
+esac
+else
+  sim_xor_endian=""
 fi
 
 # Check whether --enable-sim-bitsize or --disable-sim-bitsize was given.
@@ -855,21 +877,6 @@ else
   sim_mon=""
 fi
 
-# Check whether --enable-sim-function-unit or --disable-sim-function-unit was given.
-enableval="$enable_sim_function_unit"
-if test -n "$enableval"; then
-  case "${enableval}" in
-  yes)	sim_func="-DWITH_FUNCTION_UNIT=1";;
-  no)	sim_func="-DWITH_FUNCTION_UNIT=0";;
-  *)	{ echo "configure: error: "--enable-sim-function-unit does not take a value"" 1>&2; exit 1; }; sim_func="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_func" != x""; then
-  echo "Setting function-unit flags = $sim_func" 6>&1
-fi
-else
-  sim_func=""
-fi
-
 # Check whether --enable-sim-model or --disable-sim-model was given.
 enableval="$enable_sim_model"
 if test -n "$enableval"; then
@@ -896,6 +903,21 @@ if test x"$silent" != x"yes" && test x"$sim_default_model" != x""; then
 fi
 else
   sim_model=""
+fi
+
+# Check whether --enable-sim-model-issue or --disable-sim-model-issue was given.
+enableval="$enable_sim_model_issue"
+if test -n "$enableval"; then
+  case "${enableval}" in
+  yes)	sim_model_issue="-DWITH_MODEL_ISSUE=1";;
+  no)	sim_model_issue="-DWITH_MODEL_ISSUE=0";;
+  *)	{ echo "configure: error: "--enable-sim-model-issue does not take a value"" 1>&2; exit 1; }; sim_model_issue="";;
+esac
+if test x"$silent" != x"yes"; then
+  echo "Setting model-issue flags = $sim_model_issue" 6>&1
+fi
+else
+  sim_model_issue=""
 fi
 
 ac_aux_dir=
@@ -1157,6 +1179,7 @@ fi
 
 
 
+
 for ac_func in getrusage
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
@@ -1164,7 +1187,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1168 "configure"
+#line 1191 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1219,7 +1242,7 @@ else
   ac_cv_c_cross=yes
 else
 cat > conftest.$ac_ext <<EOF
-#line 1223 "configure"
+#line 1246 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
@@ -1257,7 +1280,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 1261 "configure"
+#line 1284 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -1271,7 +1294,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 1275 "configure"
+#line 1298 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -1304,7 +1327,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1308 "configure"
+#line 1331 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -1465,6 +1488,7 @@ s%@sim_icache@%$sim_icache%g
 s%@sim_inline@%$sim_inline%g
 s%@sim_bswap@%$sim_bswap%g
 s%@sim_endian@%$sim_endian%g
+s%@sim_xor_endian@%$sim_xor_endian%g
 s%@sim_hostendian@%$sim_hostendian%g
 s%@sim_smp@%$sim_smp%g
 s%@sim_bitsize@%$sim_bitsize%g
@@ -1477,9 +1501,9 @@ s%@sim_trace@%$sim_trace%g
 s%@sim_assert@%$sim_assert%g
 s%@sim_reserved@%$sim_reserved%g
 s%@sim_monitor@%$sim_monitor%g
-s%@sim_func@%$sim_func%g
 s%@sim_model@%$sim_model%g
 s%@sim_default_model@%$sim_default_model%g
+s%@sim_model_issue@%$sim_model_issue%g
 s%@CC_FOR_BUILD@%$CC_FOR_BUILD%g
 s%@CPP@%$CPP%g
 

@@ -35,6 +35,10 @@
 #endif
 #endif
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 
 
 /****************************************************************/
@@ -47,6 +51,7 @@ static int hi_bit_nr = 0;
 static int insn_size = max_insn_size;
 static int idecode_expand_semantics = 0;
 static int idecode_cache = 0;
+static int semantics_use_cache_struct = 0;
 static int number_lines = 1;
 
 
@@ -589,6 +594,14 @@ struct _insn {
   insn_fields *fields;
   insn *next;
 };
+
+typedef struct _insn_undef insn_undef;
+struct _insn_undef {
+  insn_undef *next;
+  char *name;
+};
+
+static insn_undef *first_undef, *last_undef;
 
 typedef struct _model model;
 struct _model {
@@ -1812,6 +1825,24 @@ lf_print_c_extraction(lf *file,
     else
       lf_printf(file, "%d;\n", bits->value);
   }
+  else if (get_value_from_cache && !put_value_in_cache
+	   && semantics_use_cache_struct) {
+    insn_undef *undef = ZALLOC(insn_undef);
+    /* Use #define to reference the cache struct directly, rather than putting
+       them into local variables */
+    lf_indent_suppress(file);
+    lf_printf(file, "#define %s (cache_entry->crack.%s.%s)\n",
+	      field_name,
+	      instruction->file_entry->fields[insn_form],
+	      field_name);
+
+    if (first_undef)
+      last_undef->next = undef;
+    else
+      first_undef = undef;
+    last_undef = undef;;
+    undef->name = field_name;
+  }
   else {
     /* put the field in the local variable */
     table_entry_lf_c_line_nr(file, instruction->file_entry);
@@ -2191,6 +2222,7 @@ lf_print_c_semantic_function(lf *file,
 			     opcode_field *opcodes,
 			     int is_inline_function)
 {
+  insn_undef *undef, *next;
 
   /* build the semantic routine to execute the instruction */
   lf_print_semantic_function_header(file,
@@ -2202,6 +2234,17 @@ lf_print_c_semantic_function(lf *file,
 		      instruction,
 		      expanded_bits,
 		      opcodes);
+
+  /* If we are referencing the cache structure directly instead of putting the values
+     in local variables, undef any defines we created */
+  for(undef = first_undef; undef; undef = next) {
+    next = undef->next;
+    lf_indent_suppress(file);
+    lf_printf(file, "#undef %s\n", undef->name);
+    free((void *)undef);
+  }
+  first_undef = (insn_undef *)0;
+  last_undef = (insn_undef *)0;
 }
 
 
@@ -3329,25 +3372,28 @@ main(int argc,
     printf("  igen <config-opts> ... <input-opts>... <output-opts>...\n");
     printf("Config options:\n");
     printf("  -f <filter-out-flag>  eg -f 64 to skip 64bit instructions\n");
-    printf("  -e    Expand (duplicate) semantic functions\n");
-    printf("  -r <icache-size>  Generate cracking cache version\n");
-    printf("  -l    Supress line numbering in output files\n");
-    printf("  -b <bit-size>  Set the number of bits in an instruction\n");
-    printf("  -h <high-bit>  Set the nr of the high (msb bit)\n");
+    printf("  -e                    Expand (duplicate) semantic functions\n");
+    printf("  -r <icache-size>      Generate cracking cache version\n");
+    printf("  -R                    Use defines to reference cache vars\n");
+    printf("  -l                    Supress line numbering in output files\n");
+    printf("  -b <bit-size>         Set the number of bits in an instruction\n");
+    printf("  -h <high-bit>         Set the nr of the high (msb bit)\n");
+    printf("\n");
     printf("Input options (ucase version also dumps loaded table):\n");
     printf("  -[Oo] <opcode-rules>\n");
     printf("  -[Kk] <cache-rules>\n");
     printf("  -[Ii] <instruction-table>\n");
+    printf("\n");
     printf("Output options:\n");
     printf("  -[Cc] <output-file>  output icache.h(C) invalid(c)\n");
     printf("  -[Dd] <output-file>  output idecode.h(D) idecode.c(d)\n");
     printf("  -[Mm] <output-file>  output model.h(M) model.c(M)\n");
     printf("  -[Ss] <output-file>  output schematic.h(S) schematic.c(s)\n");
-    printf("  -[Tt] <table>      output itable.h(T) itable.c(t)\n");
+    printf("  -[Tt] <table>        output itable.h(T) itable.c(t)\n");
   }
 
   while ((ch = getopt(argc, argv,
-		      "leb:h:r:f:I:i:O:o:K:k:M:m:n:S:s:D:d:T:t:C:")) != -1) {
+		      "leb:h:r:Rf:I:i:O:o:K:k:M:m:n:S:s:D:d:T:t:C:")) != -1) {
     fprintf(stderr, "\t-%c %s\n", ch, (optarg ? optarg : ""));
     switch(ch) {
     case 'l':
@@ -3358,6 +3404,9 @@ main(int argc,
       break;
     case 'r':
       idecode_cache = a2i(optarg);
+      break;
+    case 'R':
+      semantics_use_cache_struct = 1;
       break;
     case 'b':
       insn_size = a2i(optarg);

@@ -43,6 +43,10 @@
 #include <unistd.h>
 #endif
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 #ifdef HAVE_TIME_H
 #include <time.h>
 #endif
@@ -57,12 +61,12 @@ int getrusage();
 #endif
 
 struct _cpu_mon {
-  unsigned issue_count[nr_itable_entries];
-  unsigned read_count;
-  unsigned write_count;
-  unsigned unaligned_read_count;
-  unsigned unaligned_write_count;
-  unsigned event_count[nr_mon_events];
+  count_type issue_count[nr_itable_entries];
+  count_type read_count;
+  count_type write_count;
+  count_type unaligned_read_count;
+  count_type unaligned_write_count;
+  count_type event_count[nr_mon_events];
 };
 
 struct _mon {
@@ -146,20 +150,29 @@ mon_event(mon_events event,
   monitor->event_count[event] += 1;
 }
 
-STATIC_INLINE_MON unsigned
+STATIC_INLINE_MON count_type
 mon_get_number_of_insns(cpu_mon *monitor)
 {
   itable_index index;
-  unsigned total_insns = 0;
+  count_type total_insns = 0;
   for (index = 0; index < nr_itable_entries; index++)
     total_insns += monitor->issue_count[index];
   return total_insns;
 }
 
+static int
+mon_sort_instruction_names(const void *ptr_a, const void *ptr_b)
+{
+  itable_index a = *(const itable_index *)ptr_a;
+  itable_index b = *(const itable_index *)ptr_b;
+
+  return strcmp (itable[a].name, itable[b].name);
+}
+
 STATIC_INLINE_MON char *
 mon_add_commas(char *buf,
 	       int sizeof_buf,
-	       long value)
+	       count_type value)
 {
   int comma = 3;
   char *endbuf = buf + sizeof_buf - 1;
@@ -195,14 +208,14 @@ mon_print_info(psim *system,
   double cpu_time = 0.0;
 
   for (cpu_nr = 0; cpu_nr < monitor->nr_cpus; cpu_nr++) {
-    unsigned num_insns = mon_get_number_of_insns(&monitor->cpu_monitor[cpu_nr]);
+    count_type num_insns = mon_get_number_of_insns(&monitor->cpu_monitor[cpu_nr]);
 
     total_insns += num_insns;
     len = strlen (mon_add_commas(buffer, sizeof(buffer), num_insns));
     if (len_num < len)
       len_num = len;
   }
-  
+
   sprintf (buffer, "%d", (int)monitor->nr_cpus + 1);
   len_cpu = strlen (buffer);
 
@@ -222,18 +235,29 @@ mon_print_info(psim *system,
   for (cpu_nr = 0; cpu_nr < monitor->nr_cpus; cpu_nr++) {
 
     if (verbose > 1) {
+      itable_index sort_insns[nr_itable_entries];
+      int nr_sort_insns = 0;
       itable_index index;
+      int index2;
 
       if (cpu_nr)
 	printf_filtered ("\n");
 
       for (index = 0; index < nr_itable_entries; index++) {
-	if (monitor->cpu_monitor[cpu_nr].issue_count[index])
-	  printf_filtered("CPU #%*d executed %*s %s instruction%s.\n",
-			  len_cpu, cpu_nr+1,
-			  len_num, mon_add_commas(buffer,
-						  sizeof(buffer),
-						  monitor->cpu_monitor[cpu_nr].issue_count[index]),
+	if (monitor->cpu_monitor[cpu_nr].issue_count[index]) {
+	  sort_insns[nr_sort_insns++] = index;
+	}
+      }
+
+      qsort((void *)sort_insns, nr_sort_insns, sizeof(sort_insns[0]), mon_sort_instruction_names);
+
+      for (index2 = 0; index2 < nr_sort_insns; index2++) {
+	index = sort_insns[index2];
+	printf_filtered("CPU #%*d executed %*s %s instruction%s.\n",
+			len_cpu, cpu_nr+1,
+			len_num, mon_add_commas(buffer,
+						sizeof(buffer),
+						monitor->cpu_monitor[cpu_nr].issue_count[index]),
 			  itable[index].name,
 			  (monitor->cpu_monitor[cpu_nr].issue_count[index] == 1) ? "" : "s");
       }

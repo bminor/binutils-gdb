@@ -110,9 +110,10 @@ AC_ARG_ENABLE(sim-icache,
 [  --enable-sim-icache=size		Specify instruction cache size.],
 icache=""
 [case "${enableval}" in
-  yes)	sim_icache="-r 1024"; icache="1024";;
-  no)	sim_icache="";;
-  *)	sim_icache="-r ${enableval}"; icache="${enableval}";;
+  yes)		sim_icache="-r 1024"; icache="1024";;
+  define)	sim_icache="-r 1024 -R"; icache="1024";;
+  no)		sim_icache="";;
+  *)		sim_icache="-r ${enableval}"; icache="${enableval}";;
 esac
 if test x"$silent" != x"yes" && test x"$icache" != x""; then
   echo "Setting instruction cache size to $icache"

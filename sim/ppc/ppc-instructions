@@ -75,40 +75,72 @@
 # Flags for model.h
 ::model-macro:::
 	#define PPC_INSN_INT(OUT_MASK, IN_MASK, RC) \
-		if (WITH_MODEL_ISSUE) \
-		  ppc_insn_int(my_index, processor, cpu_model(processor), OUT_MASK, IN_MASK, (RC) ? (1 << 0) : 0)
+		do { \
+		  if (WITH_MODEL_ISSUE) { \
+		    if (RC) \
+		      ppc_insn_int(my_index, cpu_model(processor), OUT_MASK, IN_MASK); \
+		    else \
+		      ppc_insn_int_cr(my_index, cpu_model(processor), OUT_MASK, IN_MASK, 1 << 0); \
+		  } \
+		} while (0)
 
 	#define PPC_INSN_INT_CR(OUT_MASK, IN_MASK, CR_MASK) \
-		if (WITH_MODEL_ISSUE) \
-		  ppc_insn_int(my_index, processor, cpu_model(processor), OUT_MASK, IN_MASK, CR_MASK)
+		do { \
+		  if (WITH_MODEL_ISSUE) \
+		    ppc_insn_int_cr(my_index, cpu_model(processor), OUT_MASK, IN_MASK, CR_MASK); \
+		} while (0)
 
 	#define PPC_INSN_CR(OUT_MASK, IN_MASK) \
-		if (WITH_MODEL_ISSUE) \
-		  ppc_insn_cr(my_index, processor, cpu_model(processor), OUT_MASK, IN_MASK)
+		do { \
+		  if (WITH_MODEL_ISSUE) \
+		    ppc_insn_cr(my_index, cpu_model(processor), OUT_MASK, IN_MASK); \
+		} while (0)
 
 	#define PPC_INSN_FLOAT(OUT_MASK, IN_MASK, RC) \
-		if (WITH_MODEL_ISSUE) \
-		  ppc_insn_float(my_index, processor, cpu_model(processor), OUT_MASK, IN_MASK, (RC) ? (1 << 1) : 0)
+		do { \
+		  if (WITH_MODEL_ISSUE) { \
+		    if (RC) \
+		      ppc_insn_float(my_index, cpu_model(processor), OUT_MASK, IN_MASK); \
+		    else \
+		      ppc_insn_float_cr(my_index, cpu_model(processor), OUT_MASK, IN_MASK, 1 << 0); \
+		  } \
+		} while (0)
 
 	#define PPC_INSN_FLOAT_CR(OUT_MASK, IN_MASK, CR_MASK) \
-		if (WITH_MODEL_ISSUE) \
-		  ppc_insn_float(my_index, processor, cpu_model(processor), OUT_MASK, IN_MASK, CR_MASK)
+		do { \
+		  if (WITH_MODEL_ISSUE) \
+		    ppc_insn_float_cr(my_index, cpu_model(processor), OUT_MASK, IN_MASK, CR_MASK); \
+		} while (0)
 
 	#define PPC_INSN_INT_FLOAT(OUT_INT_MASK, OUT_FP_MASK, IN_INT_MASK, IN_FP_MASK) \
-		if (WITH_MODEL_ISSUE) \
-		  ppc_insn_int_float(my_index, processor, cpu_model(processor), OUT_INT_MASK, OUT_FP_MASK, IN_INT_MASK, IN_FP_MASK)
+		do { \
+		  if (WITH_MODEL_ISSUE) \
+		    ppc_insn_int_float(my_index, cpu_model(processor), OUT_INT_MASK, OUT_FP_MASK, IN_INT_MASK, IN_FP_MASK); \
+		} while (0)
 
 	#define PPC_INSN_FROM_SPR(INT_MASK, SPR) \
-		if (WITH_MODEL_ISSUE) \
-		  ppc_insn_from_spr(my_index, processor, cpu_model(processor), INT_MASK, SPR)
+		do { \
+		  if (WITH_MODEL_ISSUE) \
+		    ppc_insn_from_spr(my_index, cpu_model(processor), INT_MASK, SPR); \
+		} while (0)
 
 	#define PPC_INSN_TO_SPR(INT_MASK, SPR) \
-		if (WITH_MODEL_ISSUE) \
-		  ppc_insn_to_spr(my_index, processor, cpu_model(processor), INT_MASK, SPR)
+		do { \
+		  if (WITH_MODEL_ISSUE) \
+		    ppc_insn_to_spr(my_index, cpu_model(processor), INT_MASK, SPR); \
+		} while (0)
 
 	#define PPC_INSN_MFCR(INT_MASK) \
-		if (WITH_MODEL_ISSUE) \
-		  ppc_insn_mfcr(my_index, processor, cpu_model(processor), INT_MASK)
+		do { \
+		  if (WITH_MODEL_ISSUE) \
+		    ppc_insn_mfcr(my_index, cpu_model(processor), INT_MASK); \
+		} while (0)
+
+	#define PPC_INSN_MTCR(INT_MASK, FXM) \
+		do { \
+		  if (WITH_MODEL_ISSUE) \
+		    ppc_insn_mtcr(my_index, cpu_model(processor), INT_MASK, FXM); \
+		} while (0)
 
 ::model-data:::
 	typedef enum _ppc_function_unit {
@@ -165,6 +197,7 @@
 	  count_type nr_branch_predict_trues;		/* # branches predicted correctly */
 	  count_type nr_branch_predict_falses;		/* # branches predicted incorrectly */
 	  count_type nr_branch_conditional[32];		/* # of each type of bc */
+	  count_type nr_mtcrf_crs[9];			/* # of CR's moved in a mtcrf instruction */
 	  count_type nr_stalls_data;			/* # of stalls for data */
 	  count_type nr_stalls_unit;			/* # of stalls waiting for a function unit */
 	  count_type nr_stalls_serialize;		/* # of stalls waiting for things to quiet down */
@@ -223,6 +256,17 @@
 	  "branch always (ignored bits 1,4,5 set to 1)",
 	};
 
+	STATIC_MODEL const char *const ppc_nr_mtcrf_crs[9] = {
+	  "mtcrf moving 0 CRs",
+	  "mtcrf moving 1 CR",
+	  "mtcrf moving 2 CRs",
+	  "mtcrf moving 3 CRs",
+	  "mtcrf moving 4 CRs",
+	  "mtcrf moving 5 CRs",
+	  "mtcrf moving 6 CRs",
+	  "mtcrf moving 7 CRs",
+	  "mtcrf moving all CRs",
+	};
 
 # Trace releasing resources
 void::model-static::model_trace_release:model_data *model_ptr, model_busy *busy
@@ -380,13 +424,6 @@ model_busy *::model-internal::model_make_busy:model_data *model_ptr, ppc_functio
 	model_ptr->nr_units[unit]++;
 	return busy;
 
-# Make a given CR register busy
-void::model-internal::model_make_cr_reg_busy:model_data *model_ptr, model_busy *busy_ptr, int regno
-	TRACE(trace_model,("Marking register cr%d as busy\n", regno));
-	busy_ptr->cr_fpscr_busy |= (1 << regno);
-	model_ptr->cr_fpscr_busy |= (1 << regno);
-
-
 # Wait until a function unit is non-busy, and then allocate a busy pointer & return the pointer
 model_busy *::model-internal::model_wait_for_unit:itable_index index, model_data *const model_ptr, const model_time *const time_ptr
 	ppc_function_unit first_unit = time_ptr->first_unit;
@@ -437,108 +474,131 @@ void::model-function::model_wait_for_cr:model_data *model_ptr, unsigned CRBIT
 	  model_new_cycle(model_ptr);
 	}
 
-# Schedule an instruction that takes integer input registers and produces output registers & possibly sets some CR registers
-void::model-function::ppc_insn_int:itable_index index, cpu *processor, model_data *model_ptr, const unsigned32 out_mask, const unsigned32 in_mask, const unsigned32 cr_mask
+# Schedule an instruction that takes integer input registers and produces output registers
+void::model-function::ppc_insn_int:itable_index index, model_data *model_ptr, const unsigned32 out_mask, const unsigned32 in_mask
 	const unsigned32 int_mask = out_mask | in_mask;
 	model_busy *busy_ptr;
 
-	if (!cr_mask) {
-	  if ((model_ptr->int_busy & int_mask) != 0) {
-	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+	if ((model_ptr->int_busy & int_mask) != 0) {
+	  model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
 
-	    while ((model_ptr->int_busy & int_mask) != 0) {
-	      if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, int_mask, 0, 0, PPC_NO_SPR);
+	  while ((model_ptr->int_busy & int_mask) != 0) {
+	    if (WITH_TRACE && ppc_trace[trace_model])
+	      model_trace_busy_p(model_ptr, int_mask, 0, 0, PPC_NO_SPR);
 
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
-	    }
+	    model_ptr->nr_stalls_data++;
+	    model_new_cycle(model_ptr);
 	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_ptr->int_busy |= out_mask;
-	  busy_ptr->int_busy |= out_mask;
-	  if (WITH_TRACE && ppc_trace[trace_model])
-	    model_trace_make_busy(model_ptr, out_mask, 0, 0);
-	  return;
 	}
 
-	else {
-	  if ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
-	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+	busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	model_ptr->int_busy |= out_mask;
+	busy_ptr->int_busy |= out_mask;
+	if (WITH_TRACE && ppc_trace[trace_model])
+	  model_trace_make_busy(model_ptr, out_mask, 0, 0);
 
-	    while ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
-	      if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, int_mask, 0, cr_mask, PPC_NO_SPR);
+# Schedule an instruction that takes integer input registers and produces output registers & sets some CR registers
+void::model-function::ppc_insn_int_cr:itable_index index, model_data *model_ptr, const unsigned32 out_mask, const unsigned32 in_mask, const unsigned32 cr_mask
+	const unsigned32 int_mask = out_mask | in_mask;
+	model_busy *busy_ptr;
 
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
-	    }
+	if ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
+	  model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	  while ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
+	    if (WITH_TRACE && ppc_trace[trace_model])
+	      model_trace_busy_p(model_ptr, int_mask, 0, cr_mask, PPC_NO_SPR);
+
+	    model_ptr->nr_stalls_data++;
+	    model_new_cycle(model_ptr);
 	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_ptr->int_busy |= out_mask;
-	  busy_ptr->int_busy |= out_mask;
-	  model_ptr->cr_fpscr_busy |= cr_mask;
-	  busy_ptr->cr_fpscr_busy |= cr_mask;
-	  if (WITH_TRACE && ppc_trace[trace_model])
-	    model_trace_make_busy(model_ptr, out_mask, 0, cr_mask);
-	  return;
 	}
 
+	busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	model_ptr->int_busy |= out_mask;
+	busy_ptr->int_busy |= out_mask;
+	model_ptr->cr_fpscr_busy |= cr_mask;
+	busy_ptr->cr_fpscr_busy |= cr_mask;
+	if (WITH_TRACE && ppc_trace[trace_model])
+	  model_trace_make_busy(model_ptr, out_mask, 0, cr_mask);
 
-# Schedule an instruction that takes floating point input registers and produces output fp registers & possibly sets some CR regs
-void::model-function::ppc_insn_float:itable_index index, cpu *processor, model_data *model_ptr, const unsigned32 out_mask, const unsigned32 in_mask, const unsigned32 cr_mask
+
+# Schedule an instruction that takes CR input registers and produces output CR registers
+void::model-function::ppc_insn_cr:itable_index index, model_data *model_ptr, const unsigned32 out_mask, const unsigned32 in_mask
+	const unsigned32 cr_mask = out_mask | in_mask;
+	model_busy *busy_ptr;
+
+	if ((model_ptr->cr_fpscr_busy & cr_mask) != 0) {
+	  model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	  while ((model_ptr->cr_fpscr_busy & cr_mask) != 0) {
+	    if (WITH_TRACE && ppc_trace[trace_model])
+	      model_trace_busy_p(model_ptr, 0, 0, cr_mask, PPC_NO_SPR);
+
+	    model_ptr->nr_stalls_data++;
+	    model_new_cycle(model_ptr);
+	  }
+	}
+
+	busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	model_ptr->cr_fpscr_busy |= out_mask;
+	busy_ptr->cr_fpscr_busy |= out_mask;
+	if (WITH_TRACE && ppc_trace[trace_model])
+	  model_trace_make_busy(model_ptr, 0, 0, out_mask);
+
+
+# Schedule an instruction that takes floating point input registers and produces output fp registers
+void::model-function::ppc_insn_float:itable_index index, model_data *model_ptr, const unsigned32 out_mask, const unsigned32 in_mask
 	const unsigned32 fp_mask = out_mask | in_mask;
 	model_busy *busy_ptr;
 
-	if (!cr_mask) {
-	  if ((model_ptr->fp_busy & fp_mask) != 0) {
-	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+	if ((model_ptr->fp_busy & fp_mask) != 0) {
+	  model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
 
-	    while ((model_ptr->fp_busy & fp_mask) != 0) {
-	      if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, 0, fp_mask, 0, PPC_NO_SPR);
+	  while ((model_ptr->fp_busy & fp_mask) != 0) {
+	    if (WITH_TRACE && ppc_trace[trace_model])
+	      model_trace_busy_p(model_ptr, 0, fp_mask, 0, PPC_NO_SPR);
 
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
-	    }
+	    model_ptr->nr_stalls_data++;
+	    model_new_cycle(model_ptr);
 	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_ptr->fp_busy |= out_mask;
-	  busy_ptr->fp_busy |= out_mask;
-	  if (WITH_TRACE && ppc_trace[trace_model])
-	    model_trace_make_busy(model_ptr, 0, out_mask, 0);
-	  return;
 	}
 
-	else {
-	  if ((model_ptr->fp_busy & fp_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
-	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+	busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	model_ptr->fp_busy |= out_mask;
+	busy_ptr->fp_busy |= out_mask;
+	if (WITH_TRACE && ppc_trace[trace_model])
+	  model_trace_make_busy(model_ptr, 0, out_mask, 0);
 
-	    while ((model_ptr->fp_busy & fp_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
-	      if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, 0, fp_mask, cr_mask, PPC_NO_SPR);
 
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
-	    }
+# Schedule an instruction that takes floating point input registers and produces output fp registers & sets some CR regs
+void::model-function::ppc_insn_float_cr:itable_index index, model_data *model_ptr, const unsigned32 out_mask, const unsigned32 in_mask, const unsigned32 cr_mask
+	const unsigned32 fp_mask = out_mask | in_mask;
+	model_busy *busy_ptr;
+
+	if ((model_ptr->fp_busy & fp_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
+	  model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	  while ((model_ptr->fp_busy & fp_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
+	    if (WITH_TRACE && ppc_trace[trace_model])
+	      model_trace_busy_p(model_ptr, 0, fp_mask, cr_mask, PPC_NO_SPR);
+
+	    model_ptr->nr_stalls_data++;
+	    model_new_cycle(model_ptr);
 	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_ptr->fp_busy |= out_mask;
-	  busy_ptr->fp_busy |= out_mask;
-	  model_ptr->cr_fpscr_busy |= cr_mask;
-	  busy_ptr->cr_fpscr_busy |= cr_mask;
-	  if (WITH_TRACE && ppc_trace[trace_model])
-	    model_trace_make_busy(model_ptr, 0, out_mask, cr_mask);
-	  return;
 	}
+
+	busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	model_ptr->fp_busy |= out_mask;
+	busy_ptr->fp_busy |= out_mask;
+	model_ptr->cr_fpscr_busy |= cr_mask;
+	busy_ptr->cr_fpscr_busy |= cr_mask;
+	if (WITH_TRACE && ppc_trace[trace_model])
+	  model_trace_make_busy(model_ptr, 0, out_mask, cr_mask);
 
 
 # Schedule an instruction that takes both int/float input registers and produces output int/float registers
-void::model-function::ppc_insn_int_float:itable_index index, cpu *processor, model_data *model_ptr, const unsigned32 out_int_mask, const unsigned32 out_fp_mask, const unsigned32 in_int_mask, const unsigned32 in_fp_mask
+void::model-function::ppc_insn_int_float:itable_index index, model_data *model_ptr, const unsigned32 out_int_mask, const unsigned32 out_fp_mask, const unsigned32 in_int_mask, const unsigned32 in_fp_mask
 	const unsigned32 int_mask = out_int_mask | in_int_mask;
 	const unsigned32 fp_mask = out_fp_mask | in_fp_mask;
 	model_busy *busy_ptr;
@@ -565,7 +625,7 @@ void::model-function::ppc_insn_int_float:itable_index index, cpu *processor, mod
 	}
 
 # Schedule an MFSPR instruction that takes 1 special purpose register and produces an integer output register
-void::model-function::ppc_insn_from_spr:itable_index index, cpu *processor, model_data *model_ptr, const unsigned32 int_mask, const unsigned nSPR
+void::model-function::ppc_insn_from_spr:itable_index index, model_data *model_ptr, const unsigned32 int_mask, const unsigned nSPR
 	model_busy *busy_ptr;
 
 	while ((model_ptr->int_busy & int_mask) != 0 || model_ptr->spr_busy[nSPR] != 0) {
@@ -583,7 +643,7 @@ void::model-function::ppc_insn_from_spr:itable_index index, cpu *processor, mode
 	  model_trace_make_busy(model_ptr, int_mask, 0, 0);
 
 # Schedule an MTSPR instruction that takes 1 integer register and produces a special purpose output register
-void::model-function::ppc_insn_to_spr:itable_index index, cpu *processor, model_data *model_ptr, const unsigned32 int_mask, const unsigned nSPR
+void::model-function::ppc_insn_to_spr:itable_index index, model_data *model_ptr, const unsigned32 int_mask, const unsigned nSPR
 	model_busy *busy_ptr;
 
 	while ((model_ptr->int_busy & int_mask) != 0 || model_ptr->spr_busy[nSPR] != 0) {
@@ -600,7 +660,7 @@ void::model-function::ppc_insn_to_spr:itable_index index, cpu *processor, model_
 	TRACE(trace_model,("Making register %s busy.\n", spr_name(nSPR)));
 
 # Schedule a MFCR instruction that moves the CR into an integer regsiter
-void::model-function::ppc_insn_mfcr:itable_index index, cpu *processor, model_data *model_ptr, unsigned32 int_mask
+void::model-function::ppc_insn_mfcr:itable_index index, model_data *model_ptr, unsigned32 int_mask
 	const unsigned32 cr_mask = 0xff;
 	model_busy *busy_ptr;
 
@@ -619,94 +679,41 @@ void::model-function::ppc_insn_mfcr:itable_index index, cpu *processor, model_da
 	  model_trace_make_busy(model_ptr, int_mask, 0, 0);
 
 # Schedule a MTCR instruction that moves an integer register into the CR
-void::model-function::ppc_insn_mtcr:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rT, unsigned FXM
-	if (!WITH_MODEL_ISSUE)
-	  return;
+void::model-function::ppc_insn_mtcr:itable_index index, model_data *model_ptr, unsigned32 int_mask, unsigned FXM
+	int f;
+	int nr_crs = 0;
+	unsigned32 cr_mask = 0;
+	const model_time *normal_time = &model_ptr->timing[index];
+	static const model_time ppc604_1bit_time = { PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0 };
+	model_busy *busy_ptr;
 
-	else {
-	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RT = (rT - &cpu_regs->gpr[0]);
-	  const unsigned32 int_mask = (1 << ppc_RT);
-	  const unsigned32 cr_mask = 0xff;
-	  const model_time *normal_time = &model_ptr->timing[index];
-	  static const model_time ppc604_1bit_time = { PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0 };
-	  model_busy *busy_ptr;
-
-	  while (((model_ptr->int_busy & int_mask) | (model_ptr->cr_fpscr_busy & cr_mask)) != 0) {
-	    if (WITH_TRACE && ppc_trace[trace_model])
-	      model_trace_busy_p(model_ptr, int_mask, 0, cr_mask, PPC_NO_SPR);
-
-	    model_ptr->nr_stalls_data++;
-	    model_new_cycle(model_ptr);
+	for (f = 0; f < 8; f++) {
+	  if (FXM & (0x80 >> f)) {
+	    cr_mask |= (1 << f);
+	    nr_crs++;
 	  }
+	}
 
-	  /* If only one bit is being moved, use the SCIU, not the MCIU on the 604 */
-	  if (CURRENT_MODEL == MODEL_ppc604 && (FXM & (FXM-1)) == 0) {
-	    normal_time = &ppc604_1bit_time;
-	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, normal_time);
-	  busy_ptr->cr_fpscr_busy |= cr_mask;
-	  model_ptr->cr_fpscr_busy |= cr_mask;
+	while (((model_ptr->int_busy & int_mask) | (model_ptr->cr_fpscr_busy & cr_mask)) != 0) {
 	  if (WITH_TRACE && ppc_trace[trace_model])
-	    model_trace_make_busy(model_ptr, 0, 0, cr_mask);
+	    model_trace_busy_p(model_ptr, int_mask, 0, cr_mask, PPC_NO_SPR);
+
+	  model_ptr->nr_stalls_data++;
+	  model_new_cycle(model_ptr);
 	}
 
-# Convert a BIT32(x) number back into the original number
-int::model-internal::ppc_undo_bit32:unsigned bitmask
-	unsigned u = 0x80000000;
-	int i = 0;
-	while (u && (u & bitmask) == 0) {
-	  u >>= 1;
-	  i++;
+	/* If only one CR is being moved, use the SCIU, not the MCIU on the 604 */
+	if (CURRENT_MODEL == MODEL_ppc604 && nr_crs == 1) {
+	  normal_time = &ppc604_1bit_time;
 	}
 
-	return i;
-
-# Schedule an instruction that takes 2 CR input registers and produces an output CR register
-void::model-function::ppc_insn_cr2:itable_index index, cpu *processor, model_data *model_ptr, unsigned crD, unsigned crA_bit, unsigned crB_bit
-	if (!WITH_MODEL_ISSUE)
-	  return;
-
-	else {
-	  const unsigned ppc_CRA = ppc_undo_bit32(crA_bit);
-	  const unsigned ppc_CRB = ppc_undo_bit32(crB_bit);
-	  const unsigned32 cr_mask = (1 << ppc_CRA) | (1 << ppc_CRB) | (1 << crD);
-	  model_busy *busy_ptr;
-
-	  while ((model_ptr->cr_fpscr_busy & cr_mask) != 0) {
-	    if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, 0, 0, cr_mask, PPC_NO_SPR);
-
-	    model_ptr->nr_stalls_data++;
-	    model_new_cycle(model_ptr);
-	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_cr_reg_busy(model_ptr, busy_ptr, crD);
-	}
-
-# Schedule an instruction that takes 1 CR input registers and produces an output CR register
-void::model-function::ppc_insn_cr1:itable_index index, cpu *processor, model_data *model_ptr, unsigned crD, unsigned CRA
-	if (!WITH_MODEL_ISSUE)
-	  return;
-
-	else {
-	  const unsigned32 cr_mask = (1 << CRA) | (1 << crD);
-	  model_busy *busy_ptr;
-
-	  while ((model_ptr->cr_fpscr_busy & cr_mask) != 0) {
-	    if (WITH_TRACE && ppc_trace[trace_model])
-		model_trace_busy_p(model_ptr, 0, 0, cr_mask, PPC_NO_SPR);
-
-	    model_ptr->nr_stalls_data++;
-	    model_new_cycle(model_ptr);
-	  }
-
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  model_make_cr_reg_busy(model_ptr, busy_ptr, crD);
-	}
-
+	busy_ptr = model_wait_for_unit(index, model_ptr, normal_time);
+	busy_ptr->cr_fpscr_busy |= cr_mask;
+	model_ptr->cr_fpscr_busy |= cr_mask;
+	model_ptr->nr_mtcrf_crs[nr_crs]++;
+	if (WITH_TRACE && ppc_trace[trace_model])
+	  model_trace_make_busy(model_ptr, 0, 0, cr_mask);
+
 model_data *::model-function::model_create:cpu *processor
 	model_data *model_ptr = ZALLOC(model_data);
 	ASSERT(CURRENT_MODEL > 0 && CURRENT_MODEL < nr_models);
@@ -807,6 +814,17 @@ model_print *::model-function::model_mon_info:model_data *model_ptr
 	    tail->name = ppc_branch_conditional_name[j];
 	    tail->suffix_plural = " conditional branches";
 	    tail->suffix_singular = " conditional branch";
+	  }
+	}
+
+	for (j = 0; j < 9; j++) {
+	  if (model_ptr->nr_mtcrf_crs[j]) {
+	    tail->next = ZALLOC(model_print);
+	    tail = tail->next;
+	    tail->count = model_ptr->nr_mtcrf_crs[j];
+	    tail->name = ppc_nr_mtcrf_crs[j];
+	    tail->suffix_plural = " instructions";
+	    tail->suffix_singular = " instruction";
 	  }
 	}
 
@@ -1437,7 +1455,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, CR{BA} && CR{BB});
-	ppc_insn_cr2(my_index, processor, cpu_model(processor), BT, BIT32_BA, BIT32_BB);
+	PPC_INSN_CR(BT_BITMASK, BA_BITMASK | BB_BITMASK);
 
 0.19,6.BT,11.BA,16.BB,21.449,31./:XL::cror:Condition Register OR
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -1445,7 +1463,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, CR{BA} || CR{BB});
-	ppc_insn_cr2(my_index, processor, cpu_model(processor), BT, BIT32_BA, BIT32_BB);
+	PPC_INSN_CR(BT_BITMASK, BA_BITMASK | BB_BITMASK);
 
 0.19,6.BT,11.BA,16.BB,21.193,31./:XL::crxor:Condition Register XOR
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -1453,7 +1471,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, CR{BA} != CR{BB});
-	ppc_insn_cr2(my_index, processor, cpu_model(processor), BT, BIT32_BA, BIT32_BB);
+	PPC_INSN_CR(BT_BITMASK, BA_BITMASK | BB_BITMASK);
 
 0.19,6.BT,11.BA,16.BB,21.225,31./:XL::crnand:Condition Register NAND
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -1461,7 +1479,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, !(CR{BA} && CR{BB}));
-	ppc_insn_cr2(my_index, processor, cpu_model(processor), BT, BIT32_BA, BIT32_BB);
+	PPC_INSN_CR(BT_BITMASK, BA_BITMASK | BB_BITMASK);
 
 0.19,6.BT,11.BA,16.BB,21.33,31./:XL::crnor:Condition Register NOR
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -1469,7 +1487,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, !(CR{BA} || CR{BB}));
-	ppc_insn_cr2(my_index, processor, cpu_model(processor), BT, BIT32_BA, BIT32_BB);
+	PPC_INSN_CR(BT_BITMASK, BA_BITMASK | BB_BITMASK);
 
 0.19,6.BT,11.BA,16.BB,21.289,31./:XL::creqv:Condition Register Equivalent
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -1477,7 +1495,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, CR{BA} == CR{BB});
-	ppc_insn_cr2(my_index, processor, cpu_model(processor), BT, BIT32_BA, BIT32_BB);
+	PPC_INSN_CR(BT_BITMASK, BA_BITMASK | BB_BITMASK);
 
 0.19,6.BT,11.BA,16.BB,21.129,31./:XL::crandc:Condition Register AND with Complement
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -1485,7 +1503,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, CR{BA} && !CR{BB});
-	ppc_insn_cr2(my_index, processor, cpu_model(processor), BT, BIT32_BA, BIT32_BB);
+	PPC_INSN_CR(BT_BITMASK, BA_BITMASK | BB_BITMASK);
 
 0.19,6.BT,11.BA,16.BB,21.417,31./:XL::crorc:Condition Register OR with Complement
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -1493,7 +1511,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, CR{BA} || !CR{BB});
-	ppc_insn_cr2(my_index, processor, cpu_model(processor), BT, BIT32_BA, BIT32_BB);
+	PPC_INSN_CR(BT_BITMASK, BA_BITMASK | BB_BITMASK);
 
 #
 # I.2.4.4 Condition Register Field Instruction
@@ -1504,7 +1522,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	MBLIT32(CR, 4*BF, 4*BF+3, EXTRACTED32(CR, 4*BFA, 4*BFA+3));
-	ppc_insn_cr1(my_index, processor, cpu_model(processor), BF, BFA);
+	PPC_INSN_CR(BF_BITMASK, 1 << BFA);
 
 
 #
@@ -2962,13 +2980,13 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 # I.3.3.14 Move to/from System Register Instructions
 #
 
-0.31,6.RS,11.spr,21.467,31./:XFX::mtspr %SPR, %RS:Move to Special Purpose Register
+0.31,6.RS,11.SPR,21.467,31./:XFX::mtspr %SPR, %RS:Move to Special Purpose Register
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   2,  2,  0
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   2,  2,  0
 *604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  1,  1,  0
-	int n = (spr{5:9} << 5) | spr{0:4};
-	if (spr{0} && IS_PROBLEM_STATE(processor))
+	int n = (SPR{5:9} << 5) | SPR{0:4};
+	if (SPR{0} && IS_PROBLEM_STATE(processor))
 	  program_interrupt(processor, cia,
 	                    privileged_instruction_program_interrupt);
 	else if (!spr_is_valid(n)
@@ -3006,13 +3024,13 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	}
 	PPC_INSN_TO_SPR(RS_BITMASK, n);
 
-0.31,6.RT,11.spr,21.339,31./:XFX::mfspr %RT, %SPR:Move from Special Purpose Register
+0.31,6.RT,11.SPR,21.339,31./:XFX::mfspr %RT, %SPR:Move from Special Purpose Register
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  3,  3,  0
-	int n = (spr{5:9} << 5) | spr{0:4};
-	if (spr{0} && IS_PROBLEM_STATE(processor))
+	int n = (SPR{5:9} << 5) | SPR{0:4};
+	if (SPR{0} && IS_PROBLEM_STATE(processor))
 	  program_interrupt(processor, cia,
 	                    privileged_instruction_program_interrupt);
 	else if (!spr_is_valid(n))
@@ -3041,7 +3059,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  }
 	  CR = (MASKED(*rS, 32, 63) & mask) | (CR & ~mask);
 	}
-	ppc_insn_mtcr(my_index, processor, cpu_model(processor), rS, FXM);
+	PPC_INSN_MTCR(RS_BITMASK, FXM);
 
 0.31,6.BF,9./,11./,16./,21.512,31./:X:::Move to Condition Register from XER
 
@@ -4370,8 +4388,8 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 # III.3.4.1 Move to/from System Register Instructions
 #
 
-#0.31,6.RS,11.spr,21.467,31./:XFX:::Move To Special Purpose Register
-#0.31,6.RT,11.spr,21.339,31./:XFX:::Move From Special Purpose Register
+#0.31,6.RS,11.SPR,21.467,31./:XFX:::Move To Special Purpose Register
+#0.31,6.RT,11.SPR,21.339,31./:XFX:::Move From Special Purpose Register
 0.31,6.RS,11./,16./,21.146,31./:X:::Move To Machine State Register
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   2,  2,  0

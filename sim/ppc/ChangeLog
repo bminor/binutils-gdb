@@ -25,8 +25,9 @@ Fri Nov 24 11:24:34 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 	(model_mon_info): Return structures counting the # of CRs that the
 	mtcrf instruction used.
 
-	* mon.c (mon_sort_instruction_names): New function to sort
-	instruction names alphabetically.
+	* mon.c (stdlib.h): Include if the system supplies one.
+ 	(mon_sort_instruction_names): New function to sort instruction
+	names alphabetically.
 	(mon_print_info): Call qsort with mon_sort_instruction_names to
 	sort instruction names.
 	
