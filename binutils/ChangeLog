@@ -1,3 +1,7 @@
+Fri Sep 10 08:12:23 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* Makefile.in (install): Don't put strings in tooldir/bin.
+
 Mon Sep  6 15:39:04 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* nlmconv.c (total_bss_size): Removed.
