@@ -1441,6 +1441,7 @@ bpstat_stop_status (pc, not_a_breakpoint)
 	      /* Don't stop.  */
 	      bs->print_it = print_it_noop;
 	      bs->stop = 0;
+	      --(b->hit_count);  /* don't consider this a hit */
 	      continue;
 	    default:
 	      /* Can't happen.  */
@@ -1506,7 +1507,9 @@ bpstat_stop_status (pc, not_a_breakpoint)
       else if (DECR_PC_AFTER_BREAK != 0 || must_shift_inst_regs)
 	real_breakpoint = 1;
 
-      if (b->frame && b->frame != (get_current_frame ())->frame)
+      if (b->frame && b->frame != (get_current_frame ())->frame &&
+          (b->type == bp_step_resume && 
+           (get_current_frame ())->frame INNER_THAN b->frame))
 	bs->stop = 0;
       else
 	{
@@ -2648,7 +2651,20 @@ resolve_sal_pc (sal)
 	  if (sym != NULL)
 	    {
 	      fixup_symbol_section (sym, sal->symtab->objfile);
-	      sal->section = SYMBOL_BFD_SECTION (block_function (b));
+	      sal->section = SYMBOL_BFD_SECTION (sym);
+	    }
+	  else
+	    {
+	      /* It really is worthwhile to have the section, so we'll just
+		 have to look harder. This case can be executed if we have 
+		 line numbers but no functions (as can happen in assembly 
+		 source).  */
+
+	      struct minimal_symbol *msym; 
+
+	      msym = lookup_minimal_symbol_by_pc (sal->pc);
+	      if (msym)
+		sal->section = SYMBOL_BFD_SECTION (msym);
 	    }
 	}
     }

@@ -1,3 +1,8 @@
+Thu Oct  1 15:39:27 EDT 1998 Frank Ch. Eigler <fche@cygnus.com>
+
+	* breakpoint.c (bpstat_stop_status): Do not consider an
+	untripped watchpoint as a "hit".
+
 Thu Oct  1 20:52:39 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* exec.c (exec_file_command), convex-tdep.c (exec_file_command),
