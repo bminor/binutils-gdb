@@ -1,3 +1,7 @@
+Fri Jul  9 00:43:06 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* aoutf1.h: Add definition of MACHTYPE_OK.
+
 Thu Jul  8 13:43:52 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* hosts/i386bsd.h: Conditionalize HOST_STACK_END_ADDR on __bsdi__.
