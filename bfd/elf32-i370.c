@@ -1425,7 +1425,8 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 						   h->root.root.string,
 						   input_bfd,
 						   input_section,
-						   rel->r_offset);
+						   rel->r_offset,
+						   true);
 	      ret = false;
 	      continue;
 	    }

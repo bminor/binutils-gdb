@@ -2874,7 +2874,8 @@ bfd_generic_get_relocated_section_contents (abfd, link_info, link_order, data,
 		case bfd_reloc_undefined:
 		  if (!((*link_info->callbacks->undefined_symbol)
 			(link_info, bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
-			 input_bfd, input_section, (*parent)->address)))
+			 input_bfd, input_section, (*parent)->address,
+			 true)))
 		    goto error_return;
 		  break;
 		case bfd_reloc_dangerous:

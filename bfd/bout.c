@@ -1047,7 +1047,8 @@ get_value (reloc, link_info, input_section)
 	{
 	  if (! ((*link_info->callbacks->undefined_symbol)
 		 (link_info, bfd_asymbol_name (symbol),
-		  input_section->owner, input_section, reloc->address)))
+		  input_section->owner, input_section, reloc->address,
+		  true)))
 	    abort ();
 	  value = 0;
 	}

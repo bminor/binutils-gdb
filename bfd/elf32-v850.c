@@ -1625,7 +1625,7 @@ fprintf (stderr, "undefined: sec: %s, name: %s\n",
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd,
-		      input_section, rel->r_offset)))
+		      input_section, rel->r_offset, true)))
 		return false;
 #if 0
 fprintf (stderr, "unknown: name: %s\n", h->root.root.string);
@@ -1669,7 +1669,7 @@ fprintf (stderr, "unknown: name: %s\n", h->root.root.string);
 	    case bfd_reloc_undefined:
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, name, input_bfd, input_section,
-		      rel->r_offset)))
+		      rel->r_offset, true)))
 		return false;
 	      break;
 

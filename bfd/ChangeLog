@@ -1,3 +1,51 @@
+2000-03-01  H.J. Lu  <hjl@gnu.org>
+
+	* aoutx.h (aout_link_input_section_std): Pass "true" to
+	the undefined_symbol callback.
+	(aout_link_input_section_ext): Likewise.
+	* bout.c (get_value): Likewise.
+	* coff-a29k.c (coff_a29k_relocate_section): Likewise.
+	* coff-alpha.c (alpha_ecoff_get_relocated_section_conten):
+	Likewise.
+	(alpha_relocate_section): Likewise.
+	* coff-arm.c (coff_arm_relocate_section): Likewise.
+	* coff-i960.c (coff_i960_relocate_section): Likewise.
+	* coff-mcore.c (coff_mcore_relocate_section): Likewise.
+	* coff-mips.c (mips_relocate_section): Likewise.
+	* coff-ppc.c (coff_ppc_relocate_section): Likewise.
+	* coff-sh.c (sh_relocate_section): Likewise.
+	* coff-tic80.c (coff_tic80_relocate_section): Likewise.
+	* cofflink.c (_bfd_coff_generic_relocate_section): Likewise.
+	* elf-m10200.c (mn10200_elf_relocate_section): Likewise.
+	* elf-m10300.c (mn10300_elf_relocate_section): Likewise.
+	* elf32-d10v.c (elf32_d10v_relocate_section): Likewise.
+	* elf32-fr30.c (fr30_elf_relocate_section): Likewise.
+	* elf32-hppa.c (elf32_hppa_relocate_section): Likewise.
+	* elf32-i370.c (i370_elf_relocate_section): Likewise.
+	* elf32-m32r.c (m32r_elf_relocate_section): Likewise.
+	* elf32-mcore.c (mcore_elf_relocate_section): Likewise.
+	* elf32-sh.c (sh_elf_relocate_section): Likewise.
+	* elf32-v850.c (v850_elf_relocate_section): Likewise.
+	* elflink.c (_bfd_elf_link_record_dynamic_symbol): Likewise.
+	* elflink.h (elf_link_output_extsym): Likewise.
+	* pe-mips.c (coff_pe_mips_relocate_section): Likewise.
+	* reloc.c (bfd_generic_get_relocated_section_conten): Likewise.
+	* reloc16.c (_bfd_ppc_xcoff_relocate_section): Likewise.
+
+	* elf-hppa.h (elf_hppa_relocate_section): Pass "false" to the
+	undefined_symbol callback when building shared library with
+	-Bsymbolic and undefined symbols are allowed. Otherwise, pass
+	"true".
+	* elf32-arm.h (elf32_arm_relocate_section): Likewise.
+	* elf32-i386.c (elf_i386_relocate_section): Likewise.
+	* elf32-m68k.c (elf_m68k_relocate_section): Likewise.
+	* elf32-mips.c (mips_elf_calculate_relocation): Likewise.
+	(elf32_mips_get_relocated_section_content): Likewise.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
+	* elf64-alpha.c (elf64_alpha_relocate_section): Likewise.
+	* elf64-sparc.c (sparc64_elf_relocate_section): Likewise.
+
 2000-02-28  Nick Clifton  <nickc@cygnus.com>
 
 	* Makefile.am: Add rules to build pe[i]-{sh|mips}.lo objects.

@@ -1133,7 +1133,7 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
 	    case bfd_reloc_undefined:
 	      if (! ((*link_info->callbacks->undefined_symbol)
 		     (link_info, bfd_asymbol_name (*rel->sym_ptr_ptr),
-		      input_bfd, input_section, rel->address)))
+		      input_bfd, input_section, rel->address, true)))
 		goto error_return;
 	      break;
 	    case bfd_reloc_dangerous: 
@@ -1719,7 +1719,7 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 			 relocated.  */
 		      if (! ((*info->callbacks->undefined_symbol)
 			     (info, h->root.root.string, input_bfd,
-			      input_section, (bfd_vma) 0)))
+			      input_section, (bfd_vma) 0, true)))
 			return false;
 		      addend = 0;
 		    }
@@ -1921,7 +1921,7 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		      if (! ((*info->callbacks->undefined_symbol)
 			     (info, h->root.root.string, input_bfd,
 			      input_section,
-			      r_vaddr - input_section->vma)))
+			      r_vaddr - input_section->vma, true)))
 			return false;
 		      relocation = 0;
 		    }

@@ -1018,7 +1018,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		{
 		  if (! ((*info->callbacks->undefined_symbol)
 			 (info, h->root.root.string, input_bfd,
-			  input_section, offset)))
+			  input_section, offset, true)))
 		    return false;
 		  relocation = 0;
 		}
@@ -1149,7 +1149,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    case bfd_reloc_undefined:
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, name, input_bfd, input_section,
-		      offset)))
+		      offset, true)))
 		return false;
 	      break;
 

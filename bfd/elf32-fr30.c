@@ -617,7 +617,7 @@ fr30_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd,
-		      input_section, rel->r_offset)))
+		      input_section, rel->r_offset, true)))
 		return false;
 #if 0
 	      fprintf (stderr, "unknown: name: %s\n", name);
@@ -643,7 +643,8 @@ fr30_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      
 	    case bfd_reloc_undefined:
 	      r = info->callbacks->undefined_symbol
-		(info, name, input_bfd, input_section, rel->r_offset);
+		(info, name, input_bfd, input_section, rel->r_offset,
+		 true);
 	      break;
 	      
 	    case bfd_reloc_outofrange:

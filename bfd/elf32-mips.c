@@ -5835,10 +5835,12 @@ mips_elf_calculate_relocation (abfd,
 	}
       else
 	{
-	  (*info->callbacks->undefined_symbol)
-	    (info, h->root.root.root.string, input_bfd,
-	     input_section, relocation->r_offset);
-	  return bfd_reloc_undefined;
+	  if (! ((*info->callbacks->undefined_symbol)
+		 (info, h->root.root.root.string, input_bfd,
+		  input_section, relocation->r_offset,
+		  (!info->shared || info->no_undefined))))
+	    return bfd_reloc_undefined;
+	  symbol = 0;
 	}
 
       target_is_16_bit_code_p = (h->root.other == STO_MIPS16);
@@ -8715,7 +8717,8 @@ elf32_mips_get_relocated_section_contents (abfd, link_info, link_order, data,
 		case bfd_reloc_undefined:
 		  if (!((*link_info->callbacks->undefined_symbol)
 			(link_info, bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
-			 input_bfd, input_section, (*parent)->address)))
+			 input_bfd, input_section, (*parent)->address,
+			 true)))
 		    goto error_return;
 		  break;
 		case bfd_reloc_dangerous:

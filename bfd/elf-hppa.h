@@ -1079,8 +1079,13 @@ elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 		relocation = 0;
 	    }
 	  /* Allow undefined symbols in shared libraries.  */
-          else if (info->shared && !info->symbolic && !info->no_undefined)
+          else if (info->shared && !info->no_undefined)
 	    {
+	      if (info->symbolic)
+		(*info->callbacks->undefined_symbol)
+		  (info, h->root.root.string, input_bfd,
+		   input_section, rel->r_offset, false);
+
 	      /* If this symbol has an entry in the PA64 dynamic hash
 		 table, then get it.  */
 	      dyn_name = get_dyn_name (input_bfd, h, rel,
@@ -1104,7 +1109,7 @@ elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (!((*info->callbacks->undefined_symbol)
 		    (info, h->root.root.string, input_bfd,
-		     input_section, rel->r_offset)))
+		     input_section, rel->r_offset, true)))
 		return false;
 	      break;
 	    }

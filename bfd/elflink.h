@@ -4395,7 +4395,9 @@ elf_bfd_final_link (abfd, info)
     }
 
   /* That wrote out all the local symbols.  Finish up the symbol table
-     with the global symbols.  */
+     with the global symbols. Even if we want to strip everything we
+     can, we still need to deal with those global symbols that got
+     converted to local in a version script. */
 
   if (info->shared)
     {
@@ -4904,7 +4906,7 @@ elf_link_output_extsym (h, data)
     {
       if (! ((*finfo->info->callbacks->undefined_symbol)
 	     (finfo->info, h->root.root.string, h->root.u.undef.abfd,
-	      (asection *) NULL, 0)))
+	      (asection *) NULL, 0, true)))
 	{
 	  eoinfo->failed = true;
 	  return false;

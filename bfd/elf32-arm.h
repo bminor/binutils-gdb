@@ -1806,7 +1806,8 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (!((*info->callbacks->undefined_symbol)
 		    (info, h->root.root.string, input_bfd,
-		     input_section, rel->r_offset)))
+		     input_section, rel->r_offset,
+		     (!info->shared || info->no_undefined))))
 		return false;
 	      relocation = 0;
 	    }
@@ -1844,7 +1845,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	    case bfd_reloc_undefined:
 	      if (!((*info->callbacks->undefined_symbol)
 		    (info, name, input_bfd, input_section,
-		     rel->r_offset)))
+		     rel->r_offset, true)))
 		return false;
 	      break;
 

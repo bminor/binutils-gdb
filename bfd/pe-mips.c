@@ -777,7 +777,7 @@ coff_pe_mips_relocate_section (output_bfd, info, input_bfd,
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd, input_section,
-		      rel->r_vaddr - input_section->vma)))
+		      rel->r_vaddr - input_section->vma, true)))
 		return false;
 	    }
 	}

@@ -5029,7 +5029,8 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 	      else
 		name = strings + GET_WORD (input_bfd, syms[r_index].e_strx);
 	      if (! ((*finfo->info->callbacks->undefined_symbol)
-		     (finfo->info, name, input_bfd, input_section, r_addr)))
+		     (finfo->info, name, input_bfd, input_section,
+		     r_addr, true)))
 		return false;
 	    }
 
@@ -5431,7 +5432,8 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 	      else
 		name = strings + GET_WORD (input_bfd, syms[r_index].e_strx);
 	      if (! ((*finfo->info->callbacks->undefined_symbol)
-		     (finfo->info, name, input_bfd, input_section, r_addr)))
+		     (finfo->info, name, input_bfd, input_section,
+		     r_addr, true)))
 		return false;
 	    }
 
