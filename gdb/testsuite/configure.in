@@ -50,10 +50,10 @@ case "${target}" in
 				;;
 esac
 
-# Chill currently doesn't link cross targets, so only config and test natives
-if [ "${host}" = "${target}" ] ; then
-	configdirs="${configdirs} gdb.chill"
-fi
+# Only test Chill debugging for particular targets.
+case "${target}" in
+	sparc-*-sunos4*)	configdirs="${configdirs} gdb.chill" ;;
+esac
 
 # link in the lib directory if needed
 #if [ ! -d lib ] ; then
