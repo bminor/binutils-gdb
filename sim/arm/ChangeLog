@@ -1,5 +1,8 @@
 2001-02-14  Nick Clifton  <nickc@redhat.com>
 
+	* armemu.c: Add code to preserve processor mode when a prefetch
+	abort is signalled after processing a breakpoint.
+
 	* wrapper.c (sim_create_inferior): Reset processor into ARM mode
 	for any machine type except the early ARMs.
 

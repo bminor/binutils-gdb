@@ -1340,6 +1340,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 		    {
 		      ARMword value;
 		      extern int SWI_vector_installed;
+		      int in_thumb_mode;
 
 		      /* Hardware is allowed to optionally override this
 			 instruction and treat it as a breakpoint.  Since
@@ -1377,7 +1378,17 @@ ARMul_Emulate26 (register ARMul_State * state)
 			    }
 			}
 
+		      /* We must signal an abort to mark the next instruction as
+			 invalid and in need of refetching.  This is because if this
+			 the instruction was a breakpoint inserted by the debugger,
+			 the instruction could be changed back to its original value.
+			 The abort however, will automatically reset the processor into
+			 ARM mode, so we have to preserve the mode flag and resort it
+			 after singalling the abort.  */
+		      in_thumb_mode = TFLAG;
 		      ARMul_Abort (state, ARMul_PrefetchAbortV);
+		      ASSIGNT (in_thumb_mode);
+		      
 		      break;
 		    }
 		}
