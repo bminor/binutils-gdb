@@ -211,8 +211,13 @@ i386_stab_reg_to_regnum (int reg)
   /* This implements what GCC calls the "default" register map.  */
   if (reg >= 0 && reg <= 7)
     {
-      /* General-purpose registers.  */
-      return reg;
+      /* General-purpose registers.  The debug info calls %ebp
+         register 4, and %esp register 5.  */
+      if (reg == 4)
+        return 5;
+      else if (reg == 5)
+        return 4;
+      else return reg;
     }
   else if (reg >= 12 && reg <= 19)
     {

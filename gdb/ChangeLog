@@ -1,3 +1,8 @@
+2004-04-07  Jim Blandy  <jimb@redhat.com>
+
+	* i386-tdep.c (i386_stab_reg_to_regnum): Correct numbering for
+	%esp and %ebp
+
 2004-04-07  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/sparc/linux.mt (TDEPFILES): Remove solib-legacy.o.
