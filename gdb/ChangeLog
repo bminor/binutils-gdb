@@ -1,3 +1,8 @@
+Tue Sep  9 20:47:23 1997  Felix Lee  <flee@cygnus.com>
+
+	* config/i386/windows.mh (XDEPFILES): reduce to libwingdb.a.
+  	otherwise link command line is too long.
+
 Tue Sep  9 17:41:41 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* symtab.c, dbxread.c, stabsread.c: Fix up ANSI-C isms.  Fix
