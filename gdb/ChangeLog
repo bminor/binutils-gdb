@@ -1,3 +1,10 @@
+2002-08-25  Elena Zannoni  <ezannoni@redhat.com>
+
+        * cli/cli-cmds.c: Include readline/tilde.h.
+        * cli/cli-setshow.c: Ditto.
+        * defs.h: Don't declare tilde_expand anymore, since readline
+        exports it.
+
 2002-08-24  Mark Kettenis  <kettenis@gnu.org>
 
 	* valprint.c (print_longest) [CC_HAS_LONG_LONG &&
