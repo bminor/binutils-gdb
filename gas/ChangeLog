@@ -1,3 +1,11 @@
+start-sanitize-tic80
+Thu Feb 27 15:39:16 1997  Fred Fish  <fnf@cygnus.com>
+
+	* config/tc-tic80 (md_pseudo_table): Add align pseudo op to do
+	byte alignment rather than power-of-two alignment that is the
+	GAS default.
+
+end-sanitize-tic80
 Thu Feb 27 13:29:04 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-m68k.c (md_assemble): Handle a reloc width of 'W'.n

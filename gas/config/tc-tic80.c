@@ -57,7 +57,8 @@ const char FLT_CHARS[] = "fF";
 
 const pseudo_typeS md_pseudo_table[] =
 {
-  { "word",	cons,		4 },				/* FIXME: Should this be machine independent? */
+  { "align",	s_align_bytes,	4 },	/* Do byte alignment, default is a 4 byte boundary */
+  { "word",	cons,		4 },	/* FIXME: Should this be machine independent? */
   { "bss",	s_lcomm,	1 },
   { NULL,	NULL,		0 }
 };
