@@ -1,3 +1,8 @@
+Thu Sep 23 08:27:20 1999  Jerry Quinn <jerry.quinn.adv91@alum.dartmouth.org
+
+	* hppa-dis.c (print_insn_hppa): Replace 'B', 'M', 'g' and 'l' with
+	cleaner code using completer prefixes.  Add 'Y'.
+
 Sun Sep 19 10:41:27 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* hppa-dis.c: (print_insn_hppa): Correct 'cJ', 'cc'.

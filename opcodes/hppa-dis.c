@@ -512,6 +512,15 @@ print_insn_hppa (memaddr, info)
 		      (*info->fprintf_func) (info->stream, "%s ",
 					     short_bytes_compl_names[GET_COMPL (insn)]);
 		      break;
+		    case 'g':
+		      (*info->fprintf_func) (info->stream, ",gate");
+		    case 'p':
+		      (*info->fprintf_func) (info->stream, ",l,push");
+		      break;
+		    case 'P':
+		      (*info->fprintf_func) (info->stream, ",pop");
+		      break;
+		    case 'l':
 		    case 'L':
 		      (*info->fprintf_func) (info->stream, ",l");
 		      break;
@@ -851,6 +860,11 @@ print_insn_hppa (memaddr, info)
 		  /* addil %r1 implicit output.  */
 		  (*info->fprintf_func) (info->stream, "%%r1");
 		  break;
+
+		case 'Y':
+		  /* be,l %sr0,%r31 implicit output.  */
+		  (*info->fprintf_func) (info->stream, "%%sr0,%%r31");
+		  break;
 		  
 		case '.':
 		  (*info->fprintf_func) (info->stream, "%d",
@@ -1067,20 +1081,12 @@ print_insn_hppa (memaddr, info)
 						+ extract_22 (insn)),
 					       info);
 		  break;
-		case 'B':
-		  fputs_filtered (",pop", info);
-		  break;
-		case 'M':
-		  fputs_filtered (",push", info);
+		case 'Y':
+		  /* be,l %sr0,%r31 implicit output.  */
+		  (*info->fprintf_func) (info->stream, "%%sr0,%%r31");
 		  break;
 		case 'L':
 		  fputs_filtered (",%r2", info);
-		  break;
-		case 'g':
-		  fputs_filtered (",gate", info);
-		  break;
-		case 'l':
-		  fputs_filtered (",l", info);
 		  break;
 		default:
 		  (*info->fprintf_func) (info->stream, "%c", *s);
