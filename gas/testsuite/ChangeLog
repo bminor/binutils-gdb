@@ -1,3 +1,8 @@
+2004-01-23  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gas/arm/arm.exp: Add "undefined" test.
+	* gas/arm/undefined.s, gas/arm/undefined.l: New files.
+
 2004-01-23  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/mips/macro-warn-[1234].[sdl]: New tests.
