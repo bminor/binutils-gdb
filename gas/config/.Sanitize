@@ -50,10 +50,11 @@ mh-a29k
 mh-cygnus
 mh-i386
 mt-ebmon29k
-mt-h8300hds
 mt-h8300
+mt-h8300hds
 mt-m68k
 mt-mips
+mt-rs6000
 obj-aout.c
 obj-aout.h
 obj-bfd-sunos.c
@@ -92,19 +93,18 @@ tc-mips.c
 tc-mips.h
 tc-ns32k.c
 tc-ns32k.h
-tc-sparc.h
+tc-rs6000.c
+tc-rs6000.h
 tc-sparc.c
+tc-sparc.h
 tc-vax.c
 tc-vax.h
 te-dpx2.h
 te-generic.h
 te-ic960.h
-te-motor.h
 te-sco386.h
-te-sparc.h
 te-sun3.h
-te-unisoft.h
-tmake-m68k
+te-sysv32.h
 vax-inst.h
 vms
 
@@ -128,7 +128,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.13  1992/02/11 00:51:52  sac
+# Revision 1.14  1992/02/13 10:13:24  rich
+# clean up Sanitize for gas
+#
+# Revision 1.13  1992/02/11  00:51:52  sac
 # New files for MRI syntax assembler
 #
 # Revision 1.12  1991/12/12  03:34:31  sac

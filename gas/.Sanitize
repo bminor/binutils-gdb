@@ -34,6 +34,7 @@ Makefile.in
 NOTES
 NOTES.config
 README
+README-quirks
 README-vms-dbg
 README.coff
 README.rich
@@ -57,12 +58,14 @@ flonum-mult.c
 flonum.h
 frags.c
 frags.h
+gas-format.el
 hash.c
 hash.h
 hex-value.c
 input-file.c
 input-file.h
 input-scrub.c
+link.cmd
 listing.c
 listing.h
 make-gas.com
@@ -70,6 +73,7 @@ makefile.dos
 messages.c
 obj.h
 objdump.c
+obsolete
 output-file.c
 output-file.h
 read.c
@@ -81,6 +85,8 @@ subsegs.h
 symbols.c
 symbols.h
 tc.h
+testscripts
+ver960.c
 version.c
 write.c
 write.h
@@ -94,7 +100,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.6  1992/01/17 20:54:32  rich
+# Revision 1.7  1992/02/13 10:13:19  rich
+# clean up Sanitize for gas
+#
+# Revision 1.6  1992/01/17  20:54:32  rich
 # keep listing*
 #
 # Revision 1.5  1991/12/12  03:28:12  sac
