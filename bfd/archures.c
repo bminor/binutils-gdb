@@ -199,6 +199,7 @@ DESCRIPTION
 .  bfd_arch_fr30,
 .#define bfd_mach_fr30		0x46523330
 .  bfd_arch_mcore,
+.  bfd_arch_ia64,      {* HP/Intel ia64 *}
 .  bfd_arch_pj,
 .  bfd_arch_avr,       {* Atmel AVR microcontrollers *}
 .#define bfd_mach_avr1		1
@@ -279,6 +280,7 @@ extern const bfd_arch_info_type bfd_v850_arch;
 extern const bfd_arch_info_type bfd_fr30_arch;
 extern const bfd_arch_info_type bfd_mcore_arch;
 extern const bfd_arch_info_type bfd_avr_arch;
+extern const bfd_arch_info_type bfd_ia64_arch;
 
 static const bfd_arch_info_type * const bfd_archures_list[] =
 {
@@ -320,6 +322,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
   &bfd_fr30_arch,
   &bfd_mcore_arch,
   &bfd_avr_arch,
+  &bfd_ia64_arch,
 #endif
   0
 };

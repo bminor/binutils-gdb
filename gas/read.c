@@ -105,6 +105,8 @@ die horribly;
 #endif
 
 #ifndef LEX_HASH
+/* The IA-64 assembler uses # as a suffix designating a symbol.  We include
+   it in the symbol and strip it out in tc_canonicalize_symbol_name.  */
 #define LEX_HASH 0
 #endif
 

@@ -481,6 +481,7 @@ readelf.o: readelf.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/elf/sparc.h $(INCDIR)/elf/m32r.h $(INCDIR)/elf/d10v.h \
   $(INCDIR)/elf/d30v.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/mn10200.h \
   $(INCDIR)/elf/mn10300.h $(INCDIR)/elf/hppa.h $(INCDIR)/elf/arc.h \
+  $(INCDIR)/elf/ia64.h \
   $(INCDIR)/elf/fr30.h $(INCDIR)/elf/mcore.h $(INCDIR)/elf/i960.h \
   $(INCDIR)/elf/pj.h $(INCDIR)/elf/avr.h bucomm.h config.h \
   $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h

@@ -1659,6 +1659,7 @@ for this_target in $target $canon_targets ; do
       thumb*)		cpu_type=arm endian=little ;;
       hppa*)		cpu_type=hppa ;;
       i[456]86)		cpu_type=i386 ;;
+      ia64)		cpu_type=ia64 ;;
       m680[012346]0)	cpu_type=m68k ;;
       m68008)		cpu_type=m68k ;;
       m683??)		cpu_type=m68k ;;
@@ -1796,6 +1797,9 @@ EOF
       i960-*-vxworks5.*)    fmt=coff em=ic960 ;;
       i960-*-vxworks*)      fmt=bout ;;
       i960-*-elf*)	    fmt=elf ;;
+
+      ia64-*-elf*)	    fmt=elf ;;
+      ia64-*-linux-gnu*)    fmt=elf em=linux ;;
 
       m32r-*-*)		    fmt=elf bfd_gas=yes ;;
 
@@ -1963,6 +1967,7 @@ EOF
       arm-*)	bfd_gas=yes ;;
     # not yet
     # i386-aout)	bfd_gas=preferred ;;
+      ia64*-*)	bfd_gas=yes ;;
       mips-*)	bfd_gas=yes ;;
       ns32k-*)	bfd_gas=yes ;;
       ppc-*)	bfd_gas=yes ;;

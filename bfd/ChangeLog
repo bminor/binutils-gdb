@@ -1,3 +1,31 @@
+Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
+			  David Mosberger  <davidm@hpl.hp.com>
+			  Timothy Wall <twall@cygnus.com>
+			  Jim Wilson  <wilson@cygnus.com>
+	
+	* Makefile.am (ALL_MACHINES): Add cpu-ia64.lo.
+	(ALL_MACHINES_CFILES): Add cpu-ia64.c.
+	(BFD64_BACKENDS): Add elf64-ia64.lo.
+	(BFD64_BACKENDS_CFILES): Add elf64-ia64.c.
+	(cpu-ia64.lo, elf64-ia64.lo): New rules.
+	* Makefile.in: Rebuild.
+	* archures.c (enum bfd_architecture): Add bfd_arch_ia64.
+	(bfd_ia64_arch): Declare.
+	(bfd_archures_list): Add bfd_ia64_arch.
+	* bfd-in2.h: Rebuild.
+	* config.bfd: (ia64*-*-linux-gnu*, ia64*-*-elf*): New targets.
+	* configure: Rebuild.
+	* configure.host: (ia64-*-linux*): New host.
+	* configure.in (bfd_elf64_ia64_little_vec, bfd_elf64_ia64_big_vec,
+	bfd_efi_app_ia64_vec, bfd_efi_app_ia64_vec): New vectors.
+	* elf.c (prep_headers): Add bfd_arch_ia64.
+	* libbfd.h: Rebuild.
+	* reloc.c: Add IA-64 relocations.
+	* targets.c (bfd_elf64_ia64_little_vec, bfd_elf64_ia64_big_vec):
+	Declare.
+	(bfd_target_vect): Add bfd_elf64_ia64_little_vec.
+	* cpu-ia64-opc.c, cpu-ia64.c, elf64-ia64.c: New files.
+	
 2000-04-21  Richard Henderson  <rth@cygnus.com>
 
 	* elf32-d30v.c (bfd_elf_d30v_reloc): Don't modify section

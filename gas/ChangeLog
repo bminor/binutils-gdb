@@ -1,3 +1,21 @@
+Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
+			  David Mosberger  <davidm@hpl.hp.com>
+			  Timothy Wall <twall@cygnus.com>
+			  Andrew MacLeod  <amacleod@cygnus.com>
+			  Jim Wilson  <wilson@cygnus.com>
+
+	* Makefile.am (CPU_TYPES): Add ia64.
+	(TARGET_CPU_CFILES): Add cofnig/tc-ia64.c.
+	(TARGET_CPU_HFILES): Add config/tc-ia64.h.
+	* Makefile.in: Rebuild.
+	* app.c (do_scrub_chars): Handle DOUBLESLASH_COMMENTS.
+	* configure: Rebuild.
+	* configure.in: Recognize ia64 as cpu type.  Set bfd_gas.
+	(ia64-*-elf*, ia64-*-linux-gnu*): New targets.
+	* expr.c (expr): Handle md_optimize_expr.
+	* read.c (LEX_HASH): Add comment.
+	* config/tc-ia64.c, config/tc-ia64.h: New files.
+	
 2000-04-21  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-d30v.c (write_2_short): Disregard opcode1->ecc when

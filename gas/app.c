@@ -913,6 +913,21 @@ do_scrub_chars (get, tostart, tolen)
 	      ch = ' ';
 	      goto recycle;
 	    }
+#ifdef DOUBLESLASH_LINE_COMMENTS
+	  else if (ch2 == '/')
+	    {
+	      do
+		{
+		  ch = GET ();
+		}
+	      while (ch != EOF && !IS_NEWLINE (ch));
+	      if (ch == EOF)
+		as_warn ("end of file in comment; newline inserted");
+	      state = 0;
+	      PUT ('\n');
+	      break;
+	    }
+#endif
 	  else
 	    {
 	      if (ch2 != EOF)

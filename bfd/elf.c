@@ -3237,6 +3237,9 @@ prep_headers (abfd)
     case bfd_arch_i386:
       i_ehdrp->e_machine = EM_386;
       break;
+    case bfd_arch_ia64:
+      i_ehdrp->e_machine = EM_IA_64;
+      break;
     case bfd_arch_m68k:
       i_ehdrp->e_machine = EM_68K;
       break;

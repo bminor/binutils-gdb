@@ -1,3 +1,11 @@
+Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
+			  David Mosberger  <davidm@hpl.hp.com>
+
+	* Makefile.am (readelf.o): Add elf/ia64.h.
+	* Makefile.in: Rebuild.
+	* readelf.c: Include elf/ia64.h.
+	(guess_is_rela, dump_relocations): Handle EM_IA_64.
+	
 2000-04-17  Timothy Wall  <twall@cygnus.com>
 
 	* objdump.c (disassemble_data): Set octets per byte *after*

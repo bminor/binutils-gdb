@@ -508,6 +508,8 @@ extern const bfd_target b_out_vec_little_host;
 extern const bfd_target bfd_efi_app_ia32_vec;
 extern const bfd_target bfd_efi_app_ia64_vec;
 extern const bfd_target bfd_elf64_alpha_vec;
+extern const bfd_target bfd_elf64_ia64_little_vec;
+extern const bfd_target bfd_elf64_ia64_big_vec;
 extern const bfd_target bfd_elf32_avr_vec;
 extern const bfd_target bfd_elf32_bigarc_vec;
 extern const bfd_target bfd_elf32_bigarm_vec;
@@ -703,6 +705,8 @@ const bfd_target * const bfd_target_vector[] = {
 	&bfd_elf32_big_generic_vec,
 #ifdef BFD64
 	&bfd_elf64_alpha_vec,
+	&bfd_elf64_ia64_little_vec,
+	&bfd_elf64_ia64_big_vec,
 #endif
 	&bfd_elf32_avr_vec,
 	&bfd_elf32_bigarc_vec,

@@ -152,6 +152,7 @@ CPU_TYPES = \
 	h8300 \
 	h8500 \
 	hppa \
+	ia64 \
 	i370 \
 	i386 \
 	i860 \
@@ -328,6 +329,7 @@ TARGET_CPU_CFILES = \
 	config/tc-h8300.c \
 	config/tc-h8500.c \
 	config/tc-hppa.c \
+	config/tc-ia64.c \
 	config/tc-i370.c \
 	config/tc-i386.c \
 	config/tc-i860.c \
@@ -365,6 +367,7 @@ TARGET_CPU_HFILES = \
 	config/tc-h8300.h \
 	config/tc-h8500.h \
 	config/tc-hppa.h \
+	config/tc-ia64.h \
 	config/tc-i370.h \
 	config/tc-i386.h \
 	config/tc-i860.h \

@@ -166,6 +166,7 @@ ALL_MACHINES = \
 	cpu-h8300.lo \
 	cpu-h8500.lo \
 	cpu-hppa.lo \
+	cpu-ia64.lo \
 	cpu-i370.lo \
 	cpu-i386.lo \
 	cpu-i860.lo \
@@ -205,6 +206,7 @@ ALL_MACHINES_CFILES = \
 	cpu-h8300.c \
 	cpu-h8500.c \
 	cpu-hppa.c \
+	cpu-ia64.c \
 	cpu-i370.c \
 	cpu-i386.c \
 	cpu-i860.c \
@@ -507,6 +509,7 @@ BFD64_BACKENDS = \
 	coff-ia64.lo \
 	demo64.lo \
 	elf64-alpha.lo \
+	elf64-ia64.lo \
 	elf64-gen.lo \
 	elf64-mips.lo \
 	elf64-sparc.lo \
@@ -521,6 +524,7 @@ BFD64_BACKENDS_CFILES = \
 	coff-ia64.c \
 	demo64.c \
 	elf64-alpha.c \
+	elf64-ia64.c \
 	elf64-gen.c \
 	elf64-mips.c \
 	elf64-sparc.c \
@@ -1182,6 +1186,11 @@ stmp-lcoff-h: $(LIBCOFF_H_FILES)
 config.status: $(srcdir)/configure $(srcdir)/config.bfd $(srcdir)/configure.host
 	$(SHELL) ./config.status --recheck
 
+cpu-ia64.lo: cpu-ia64.c cpu-ia64-opc.c $(srcdir)/../opcodes/ia64-opc.h
+elf64-ia64.lo: elf64-ia64.c elf-bfd.h $(INCDIR)/opcode/ia64.h \
+  $(INCDIR)/elf/ia64.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/reloc-macros.h \
+  elf64-target.h
 elfarm-oabi.lo: elfarm-oabi.c elf32-arm.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h elf32-target.h

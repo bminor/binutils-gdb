@@ -1744,6 +1744,13 @@ expr (rankarg, resultP)
 	}
 
       /* Optimize common cases.  */
+#ifdef md_optimize_expr
+      if (md_optimize_expr (resultP, op_left, &right))
+	{
+	  /* skip */;
+	}
+      else
+#endif
       if (op_left == O_add && right.X_op == O_constant)
 	{
 	  /* X + constant.  */

@@ -226,6 +226,7 @@ ALL_EMULATIONS = \
 	ez8002.o
 
 ALL_64_EMULATIONS = \
+	eelf64_ia64.o \
 	eelf64_sparc.o \
 	eelf64alpha.o \
 	eelf64bmip.o
@@ -449,6 +450,9 @@ eelf32i370.c: $(srcdir)/emulparams/elf32i370.sh \
 eelf64alpha.c: $(srcdir)/emulparams/elf64alpha.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64alpha "$(tdir_elf64alpha)"
+eelf64_ia64.c: $(srcdir)/emulparams/elf64_ia64.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf64_ia64 "$(tdir_elf64_ia64)"
 eelf64_sparc.c: $(srcdir)/emulparams/elf64_sparc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64_sparc "$(tdir_elf64_sparc)"

@@ -25,6 +25,8 @@ HFILES = \
 	mcore-opc.h \
 	sh-opc.h \
 	sysdep.h \
+	ia64-asmtab.h \
+	ia64-opc.h \
 	w65-opc.h \
 	z8k-opc.h
 
@@ -58,6 +60,16 @@ CFILES = \
 	i370-opc.c \
 	i386-dis.c \
 	i960-dis.c \
+	ia64-dis.c \
+	ia64-opc-a.c \
+	ia64-opc-b.c \
+	ia64-opc-f.c \
+	ia64-opc-i.c \
+	ia64-opc-m.c \
+	ia64-opc-d.c \
+	ia64-opc.c \
+	ia64-gen.c \
+	ia64-asmtab.c \
 	m32r-asm.c \
 	m32r-desc.c \
 	m32r-dis.c \
@@ -120,6 +132,8 @@ ALL_MACHINES = \
 	i370-dis.lo \
 	i370-opc.lo \
 	i960-dis.lo \
+	ia64-dis.lo \
+	ia64-opc.lo \
 	m32r-asm.lo \
 	m32r-desc.lo \
 	m32r-dis.lo \
@@ -202,6 +216,23 @@ CLEANFILES = \
 
 
 
+ia64-ic.tbl: $(srcdir)/ia64-ic.tbl
+	$(LN_S) -f $(srcdir)/ia64-ic.tbl
+ia64-raw.tbl: $(srcdir)/ia64-raw.tbl
+	$(LN_S) -f $(srcdir)/ia64-raw.tbl
+ia64-waw.tbl: $(srcdir)/ia64-waw.tbl
+	$(LN_S) -f $(srcdir)/ia64-waw.tbl
+ia64-war.tbl: $(srcdir)/ia64-war.tbl
+	$(LN_S) -f $(srcdir)/ia64-war.tbl
+
+ia64-gen: ia64-gen.o
+	$(LINK) ia64-gen.o $(LIBIBERTY)
+
+ia64-gen.o: ia64-gen.c ia64-opc.c ia64-opc-a.c ia64-opc-b.c ia64-opc-f.c \
+  ia64-opc-i.c ia64-opc-m.c ia64-opc-d.c ia64-opc.h
+
+ia64-asmtab.c: @MAINT@ ia64-gen ia64-ic.tbl ia64-raw.tbl ia64-waw.tbl ia64-war.tbl
+	./ia64-gen > $(srcdir)/ia64-asmtab.c
 
 # This dependency stuff is copied from BFD.
 
@@ -315,6 +346,9 @@ i386-dis.lo: i386-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h sysdep.h config.h opintl.h
 i960-dis.lo: i960-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H)
+ia64-dis.lo: ia64-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/ia64.h $(BFD_H)
+ia64-opc.lo: $(INCDIR)/opcode/ia64.h $(BFD_H) $(INCDIR)/libiberty.h \
+  $(INCDIR)/ansidecl.h sysdep.h ia64-asmtab.h ia64-asmtab.c
 m32r-asm.lo: m32r-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h m32r-desc.h $(INCDIR)/opcode/cgen.h \
   m32r-opc.h opintl.h

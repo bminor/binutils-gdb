@@ -1,3 +1,11 @@
+Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
+			  David Mosberger  <davidm@hpl.hp.com>
+			  Timothy Wall <twall@cygnus.com>
+			  Jim Wilson  <wilson@cygnus.com>
+
+	* gas/vtable/vtable.exp: Disable for ia64.
+	* gas/testsuite/gas/ia64: New testsuite directory.
+	
 2000-04-03  Alan Modra  <alan@linuxcare.com.au>
 
 	* gas/i386/general.s: Check 16-bit immediates, and move call/jump

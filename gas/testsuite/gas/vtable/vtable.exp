@@ -20,6 +20,10 @@ if { ([istarget "*-*-elf*"]
      && ![istarget *-*-linux*aout*]
      && ![istarget *-*-linux*oldld*] } then {
 
+    if {[istarget "ia64-*"]} then {
+      return
+    }
+  
     # not supported by D30V
     if {[istarget "d30v-*-*"]} {
       return

@@ -5112,6 +5112,13 @@ do
   				target64=true ;;
     bfd_elf64_alpha_vec)	tb="$tb elf64-alpha.lo elf64.lo $elf"
 				target64=true ;;
+    bfd_elf64_ia64_little_vec)	tb="$tb elf64-ia64.lo elf64.lo $elf"
+				target64=true ;;
+    bfd_elf64_ia64_big_vec)	tb="$tb elf64-ia64.lo elf64.lo $elf"
+				target64=true ;;
+    bfd_efi_app_ia32_vec)	tb="$tb efi-app-ia32.lo cofflink.lo" ;;
+    bfd_efi_app_ia64_vec)	tb="$tb efi-app-ia64.lo cofflink.lo"
+				target64=true ;;
     bfd_elf32_avr_vec)		tb="$tb elf32-avr.lo elf32.lo $elf" ;;
     bfd_elf32_littlearc_vec)	tb="$tb elf32-arc.lo elf32.lo $elf" ;;
     bfd_elf32_littlearm_vec)	tb="$tb elfarm-nabi.lo elf32.lo $elf" ;;
