@@ -1,3 +1,8 @@
+Thu Apr 13 16:17:04 1995  Rob Savoye  <rob@darkstar.cygnus.com>
+
+	* remote-array.c: New file for Array Tech LSI33k based controller
+	board.
+
 Thu Apr 13 12:23:31 1995  Kung Hsu  <kung@rtl.cygnus.com>
 
 	* a29k-tdep.c (get_longjmp_target): Replace SWAP_TARGET_AND_HOST with

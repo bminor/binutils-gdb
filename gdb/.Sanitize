@@ -235,6 +235,7 @@ regex.c
 regex.h
 rem-multi.shar
 remote-adapt.c
+remote-array.c
 remote-bug.c
 remote-e7000.c
 remote-eb.c
