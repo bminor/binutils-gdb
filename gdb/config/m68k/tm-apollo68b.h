@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "m68k/tm-m68k.h"
 
-#define FRAME_CHAIN_VALID(chain, thisframe) (chain != 0)
+#define FRAME_CHAIN_VALID(chain, thisframe) nonnull_frame_chain_valid (chain, thisframe)
 
 /* These are the jmp_buf registers I could guess. There are 13 registers
  * in the buffer. There are 8 data registers, 6 general address registers,

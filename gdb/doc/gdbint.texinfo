@@ -1261,18 +1261,15 @@ address and produce the nominal address of the caller's frame.
 Presently only defined for HP PA.
 
 @item FRAME_CHAIN_VALID(chain,thisframe)
-Define this to be an expression that returns zero if the given frame is
-an outermost frame, with no caller, and nonzero otherwise.  The default
-definition is nonzero if the chain pointer is nonzero and given frame's
-PC is not inside the startup file (such as @file{crt0.o}).  The
-alternate default definition (which is used if
-FRAME_CHAIN_VALID_ALTERNATE is defined) is nonzero if the chain pointer
-is nonzero and the given frame's PC is not in @code{main()} or a known
-entry point function (such as @code{_start()}).
 
-@item FRAME_CHAIN_VALID_ALTERNATE
-Define this in order to use the alternate default definition of
-@code{FRAME_CHAIN_VALID}.
+Define this to be an expression that returns zero if the given frame is
+an outermost frame, with no caller, and nonzero otherwise.  Three common
+definitions are available. @code{default_frame_chain_valid} (the
+default) is nonzero if the chain pointer is nonzero and given frame's PC
+is not inside the startup file (such as @file{crt0.o}).
+@code{alternate_frame_chain_valid} is nonzero if the chain pointer is
+nonzero and the given frame's PC is not in @code{main()} or a known
+entry point function (such as @code{_start()}).
 
 @item FRAME_FIND_SAVED_REGS
 stack.c

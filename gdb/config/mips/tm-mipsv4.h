@@ -39,7 +39,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define SIGFRAME_FPREGSAVE_OFF	(SIGFRAME_BASE + 40 + 36 * 4)
 
 /* Use the alternate method of determining valid frame chains. */
-#define FRAME_CHAIN_VALID_ALTERNATE
+#define FRAME_CHAIN_VALID(fp,fi) alternate_frame_chain_valid (fp, fi)
 
 /* Convert a DWARF register number to a gdb REGNUM.  */
 #define DWARF_REG_TO_REGNUM(num) ((num) < 32 ? (num) : (num)+FP0_REGNUM-32)

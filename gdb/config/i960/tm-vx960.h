@@ -36,7 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* We are guaranteed to have a zero frame pointer at bottom of stack, too. */
 
-#define FRAME_CHAIN_VALID(chain, thisframe) (chain != 0)
+#define FRAME_CHAIN_VALID(chain, thisframe) nonnull_frame_chain_valid (chain, thisframe)
 
 /* Breakpoint patching is handled at the target end in VxWorks.  */
 /* #define BREAKPOINT {0x00, 0x3e, 0x00, 0x66} */

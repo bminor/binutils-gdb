@@ -24,6 +24,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "i960/tm-i960.h"
 
+/* forward declarations */
+#ifdef __STDC__
+struct frame_info;
+#endif
+
 /* Override the standard gdb prompt when compiled for this target.  */
 
 #define	DEFAULT_PROMPT	"(gdb960) "
@@ -80,8 +85,8 @@ nindy_before_main_loop();		/* In remote-nindy.c */
    since it differs between NINDY and VxWorks, the two currently supported
    targets types.  */
 
-#define	FRAME_CHAIN_VALID(chain, thisframe) \
-	nindy_frame_chain_valid (chain, thisframe)
+extern int nindy_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
+#define	FRAME_CHAIN_VALID(chain, thisframe) nindy_frame_chain_valid (chain, thisframe)
 
 extern int
 nindy_frame_chain_valid();		/* See nindy-tdep.c */

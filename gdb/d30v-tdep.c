@@ -92,6 +92,19 @@ static void print_flags_command PARAMS ((char *, int));
 #define EXTRACT_IMM26(op)	((((op)&0x0ff00000) >> 2) | ((op)&0x0003ffff))
 #define EXTRACT_IMM32(opl, opr)	((EXTRACT_UIMM6(opl) << 26)|EXTRACT_IMM26(opr))
 
+
+int
+d30v_frame_chain_valid (chain, fi)
+     CORE_ADDR chain;
+     struct frame_info *fi;      /* not used here */
+{
+#if 0
+  return ((chain) != 0 && (fi) != 0 && (fi)->return_pc != 0);
+#else
+  return ((chain) != 0 && (fi) != 0 && (fi)->frame <= chain);
+#endif
+}
+
 /* Discard from the stack the innermost frame, restoring all saved
    registers.  */
 

@@ -1185,7 +1185,7 @@ frame_chain (frame)
    was compiled with gcc. */
 
 int
-frame_chain_valid (chain, thisframe)
+hppa_frame_chain_valid (chain, thisframe)
      CORE_ADDR chain;
      struct frame_info *thisframe;
 {

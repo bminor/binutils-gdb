@@ -33,23 +33,22 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "m68k/tm-m68k.h"
 
-/* We are guaranteed to have a zero frame pointer at bottom of stack, too. */
-#undef	FRAME_CHAIN
-#undef	FRAME_CHAIN_VALID
-
 /* Takes the current frame-struct pointer and returns the chain-pointer
    to get to the calling frame.
 
    If our current frame pointer is zero, we're at the top; else read out
    the saved FP from memory pointed to by the current FP.  */
 
+#undef	FRAME_CHAIN
 #define FRAME_CHAIN(thisframe) ((thisframe)->frame? read_memory_integer ((thisframe)->frame, 4): 0)
 
 /* If the chain pointer is zero (either because the saved value fetched
    by FRAME_CHAIN was zero, or because the current FP was zero so FRAME_CHAIN
    never fetched anything), we are at the top of the stack.  */
+/* We are guaranteed to have a zero frame pointer at bottom of stack, too. */
 
-#define FRAME_CHAIN_VALID(chain, thisframe) (chain != 0)
+#undef	FRAME_CHAIN_VALID
+#define FRAME_CHAIN_VALID(chain, thisframe) nonnull_frame_chain_valid (chain, thisframe)
 
 /* FIXME, Longjmp information stolen from Sun-3 config.  Dunno if right.  */
 /* Offsets (in target ints) into jmp_buf.  Not defined by Sun, but at least

@@ -24,6 +24,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "i960/tm-i960.h"
 
+/* forward declarations */
+#ifdef __STDC__
+struct frame_info;
+#endif
+
 /* redefined from tm-i960.h */
 /* Number of machine registers */
 #undef NUM_REGS 
@@ -51,10 +56,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    since it differs between Nindy, Mon960 and VxWorks, the currently supported
    target types.  */
 
-#define	FRAME_CHAIN_VALID(chain, thisframe) \
-	mon960_frame_chain_valid (chain, thisframe)
-
-extern int mon960_frame_chain_valid();		/* See i960-tdep.c */
+extern int mon960_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
+#define	FRAME_CHAIN_VALID(chain, thisframe) mon960_frame_chain_valid (chain, thisframe)
 
 /* Sequence of bytes for breakpoint instruction */
 

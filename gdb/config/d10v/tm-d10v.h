@@ -213,8 +213,8 @@ extern void d10v_init_extra_frame_info PARAMS (( int fromleaf, struct frame_info
   (FRAMELESS) = frameless_look_for_prologue(FI)
 
 #define FRAME_CHAIN(FRAME)       d10v_frame_chain(FRAME)
-#define FRAME_CHAIN_VALID(chain,frame)	\
-      ((chain) != 0 && (frame) != 0 && (frame)->pc > IMEM_START)
+extern int d10v_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
+#define FRAME_CHAIN_VALID(chain, thisframe) d10v_frame_chain_valid (chain, thisframe)
 #define FRAME_SAVED_PC(FRAME)    ((FRAME)->return_pc)   
 #define FRAME_ARGS_ADDRESS(fi)   (fi)->frame
 #define FRAME_LOCALS_ADDRESS(fi) (fi)->frame

@@ -265,7 +265,7 @@ extern void arc_software_single_step PARAMS ((unsigned int, int));
 
 /* FRAME_CHAIN_VALID returns zero if the given frame is the outermost one
    and has no caller.  */
-#define FRAME_CHAIN_VALID(chain, thisframe) ((chain) != 0)
+#define FRAME_CHAIN_VALID(chain, thisframe) nonnull_frame_chain_valid (chain, thisframe)
 
 /* A macro that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it.  If it

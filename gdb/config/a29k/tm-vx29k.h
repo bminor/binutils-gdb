@@ -209,12 +209,8 @@ extern int get_longjmp_target PARAMS ((CORE_ADDR *));
         val = value_cast (builtin_type_int, val);                       \
   } while (0)
 
-#define SPECIAL_FRAME_CHAIN_FP get_fp_contents
-#undef FRAME_CHAIN_VALID
-#define FRAME_CHAIN_VALID(chain, thisframe) \
-  (SPECIAL_FRAME_CHAIN_FP (chain, thisframe))
-
-extern int SPECIAL_FRAME_CHAIN_FP ();
+extern int vx29k_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
+#define FRAME_CHAIN_VALID(chain, thisframe) vx29k_frame_chain_valid (chain, thisframe)
 
 extern CORE_ADDR frame_saved_call_site ();
 

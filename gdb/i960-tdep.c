@@ -791,7 +791,7 @@ next_insn (memaddr, pword1, pword2)
 
 int
 mon960_frame_chain_valid (chain, curframe)
-    unsigned int chain;
+    CORE_ADDR chain;
     struct frame_info *curframe;
 {
 	struct symbol *sym;

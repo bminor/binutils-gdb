@@ -36,6 +36,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 void d10v_frame_find_saved_regs PARAMS ((struct frame_info *fi,
 					 struct frame_saved_regs *fsr));
 
+int
+d10v_frame_chain_valid (chain, frame)
+     CORE_ADDR chain;
+     struct frame_info *frame;      /* not used here */
+{
+  return ((chain) != 0 && (frame) != 0 && (frame)->pc > IMEM_START);
+}
+
+
 /* Should we use EXTRACT_STRUCT_VALUE_ADDRESS instead of
    EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc
    and TYPE is the type (which is known to be struct, union or array).

@@ -33,6 +33,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Number of elements in the opcode table.  */
 #define NOPCODES (sizeof gld_opcodes / sizeof gld_opcodes[0])
 
+int
+gould_frame_chain_valid (chain, fi)
+     CORE_ADDR chain;
+     struct frame_info *fi;      /* not used here */
+{
+  return (chain != 0 && chain != (thisframe)->frame);
+}
+
 /* Both gcc and cc return small structs in registers (i.e. in GDB
    terminology, small structs don't use the struct return convention).  */
 int

@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Use the alternate method of determining valid frame chains. */
 
-#define FRAME_CHAIN_VALID_ALTERNATE
+#define FRAME_CHAIN_VALID(fp,fi) alternate_frame_chain_valid (fp, fi)
 
 #include "tm-sysv4.h"
 #include "m68k/tm-m68k.h"

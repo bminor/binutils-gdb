@@ -38,7 +38,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define DECR_PC_AFTER_HW_BREAK 4
 
-#define FRAME_CHAIN_VALID_ALTERNATE
+#define FRAME_CHAIN_VALID(fp,fi) alternate_frame_chain_valid (fp, fi)
 
 #undef NUM_REGS 
 #define NUM_REGS 80 

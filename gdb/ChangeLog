@@ -1,3 +1,35 @@
+Mon Nov 30 11:18:48 1998  Andrew Cagney  <cagney@chook>
+
+	* frame.h (FRAME_CHAIN_VALID): Default to
+ 	default_frame_chain_valid.
+	* blockframe.c (default_frame_chain_valid): New function.
+	
+	* frame.h (FRAME_CHAIN_VALID_ALTERNATIVE): Delete references
+	* blockframe.c (alternate_frame_chain_valid): New function.
+	* config/mips/tm-mipsv4.h, config/m88k/tm-delta88v4.h,
+ 	config/m68k/tm-monitor.h, config/m68k/tm-m68kv4.h,
+ 	config/i386/tm-i386v4.h, config/i386/tm-i386nw.h,
+ 	config/h8300/tm-h8300.h: Update.
+
+	* blockframe.c (nonnull_frame_chain_valid): New function.
+	* config/m68k/tm-os68k.h, config/m68k/tm-vx68.h,
+ 	config/m68k/tm-apollo68b.h, config/i960/tm-vx960.h,
+ 	config/arc/tm-arc.h: Update FRAME_CHAIN_VALID.
+
+	* hppa-tdep.c (frame_chain_valid, hppa_frame_chain_valid),
+ 	remote-vx29k.c (get_fp_contents, vx29k_frame_chain_valid),
+ 	arm-tdep.c (frame_chain_valid, arm_frame_chain_valid): Rename
+ 	functions so that they are name space clean.
+	* config/pa/tm-hppa.h, config/a29k/tm-vx29k.h,
+ 	config/arm/tm-arm.h: Update FRAME_CHAIN_VALID.
+	
+	* gould-tdep.c (gould_frame_chain_valid), d30v-tdep.c
+ 	(d30v_frame_chain_valid), d10v-tdep.c (d10v_frame_chain_valid):
+ 	New functions.
+	* config/gould/tm-np1.h, config/gould/tm-pn.h,
+ 	config/d30v/tm-d30v.h, config/d10v/tm-d10v.h: Update
+ 	FRAME_CHAIN_VALID.
+
 Sun Nov 29 11:18:37 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* z8k-tdep.c (z8k_addr_bits_remove), w65-tdep.c
