@@ -620,6 +620,7 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	}
 
     case 0x90:
+    case 0x91:
     case 0x92:
       /* These are used by the FPE code.  */
       return TRUE;
