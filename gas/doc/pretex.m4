@@ -219,4 +219,34 @@ _define__(
 		<<>_dnl__<>>,
 		<_popf__<>_ifelse__(0,_IF_FS__,
 			<_divert__<>_dnl__<>>,<>)>)>)
+
+D. CHAPTER/SECTION MACRO
+In a parametrized manual, the heading level may need to be calculated;
+for example, a manual that has a chapter on machine dependencies
+should be conditionally structured as follows:
+	- IF the manual is configured for a SINGLE machine type,  use
+the chapter heading for that machine type, and run headings down
+from there (top level for a particular machine is chapter, then within
+that we have section, subsection etc);
+	- ELSE, if MANY machine types are described in the chapter,
+use a generic chapter heading such as "@chapter Machine Dependencies",
+use "section" for the top level description of EACH machine, and run
+headings down from there (top level for a particular machine is
+section, then within that we have subsection, subsubsection etc).
+
+The macro <_CS__> is for this purpose: its argument is evaluated (so
+you can construct expressions to express choices such as above), then
+expands as follows:
+   0: @chapter
+   1: @section
+   2: @subsection
+   3: @subsubsection
+ ...and so on.
+
+_define__(<_CS__>,<@_cs__(_eval__($1))>)
+_define__(<_cs__>,<_ifelse__(
+			0, $1, <chapter>,
+			1, $1, <section>,
+				<sub<>_cs__(_eval__($1 - 1))>)>)
+
 _divert__<>_dnl__<>
