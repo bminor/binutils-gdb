@@ -52,6 +52,10 @@
 #define TC_FIX_ADJUSTABLE(fix) 1
 #endif
 
+#ifndef TC_FINALIZE_SYMS_BEFORE_SIZE_SEG
+#define TC_FINALIZE_SYMS_BEFORE_SIZE_SEG 1
+#endif
+
 #ifndef	MD_PCREL_FROM_SECTION
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from(FIXP)
 #endif
@@ -1575,9 +1579,15 @@ write_object_file ()
 	break;
     }
 
-  /* Note - we do not set finalize_syms here because some targets
-     do not finish sizing all of their frags until after size_seg
-     has completed.  */
+  /* Note - Most ports will use the default value of
+     TC_FINALIZE_SYMS_BEFORE_SIZE_SEG, which 1.  This will force
+     local symbols to be resolved, removing their frag information.
+     Some ports however, will not have finished relaxing all of
+     their frags and will still need the local symbol frag
+     information.  These ports can set
+     TC_FINALIZE_SYMS_BEFORE_SIZE_SEG to 0.  */
+  finalize_syms = TC_FINALIZE_SYMS_BEFORE_SIZE_SEG;
+
   bfd_map_over_sections (stdoutput, size_seg, (char *) 0);
 #else
   relax_and_size_all_segments ();
