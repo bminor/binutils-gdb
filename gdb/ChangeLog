@@ -1,3 +1,11 @@
+2003-03-22  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-tdep.c (prologue_cache): Delete.
+	(check_prologue_cache, save_prologue_cache): Delete.
+	(arm_scan_prologue): Don't check or update the prologue_cache.
+	(arm_gdb_arch_init): Don't initialize it.
+	(_initialize_arm_tdep): Likewise.
+
 2003-03-21  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* MAINTAINERS (tui): Maintainer of tui code.

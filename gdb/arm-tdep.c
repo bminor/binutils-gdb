@@ -642,60 +642,6 @@ thumb_scan_prologue (struct frame_info *fi)
     }
 }
 
-/* Check if prologue for this frame's PC has already been scanned.  If
-   it has, copy the relevant information about that prologue and
-   return non-zero.  Otherwise do not copy anything and return zero.
-
-   The information saved in the cache includes:
-   * the frame register number;
-   * the size of the stack frame;
-   * the offsets of saved regs (relative to the old SP); and
-   * the offset from the stack pointer to the frame pointer
-
-   The cache contains only one entry, since this is adequate for the
-   typical sequence of prologue scan requests we get.  When performing
-   a backtrace, GDB will usually ask to scan the same function twice
-   in a row (once to get the frame chain, and once to fill in the
-   extra frame information).  */
-
-static struct frame_info *prologue_cache;
-
-static int
-check_prologue_cache (struct frame_info *fi)
-{
-  int i;
-
-  if (get_frame_pc (fi) == get_frame_pc (prologue_cache))
-    {
-      get_frame_extra_info (fi)->framereg = get_frame_extra_info (prologue_cache)->framereg;
-      get_frame_extra_info (fi)->framesize = get_frame_extra_info (prologue_cache)->framesize;
-      get_frame_extra_info (fi)->frameoffset = get_frame_extra_info (prologue_cache)->frameoffset;
-      for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
-	get_frame_saved_regs (fi)[i] = get_frame_saved_regs (prologue_cache)[i];
-      return 1;
-    }
-  else
-    return 0;
-}
-
-
-/* Copy the prologue information from fi to the prologue cache.  */
-
-static void
-save_prologue_cache (struct frame_info *fi)
-{
-  int i;
-
-  deprecated_update_frame_pc_hack (prologue_cache, get_frame_pc (fi));
-  get_frame_extra_info (prologue_cache)->framereg = get_frame_extra_info (fi)->framereg;
-  get_frame_extra_info (prologue_cache)->framesize = get_frame_extra_info (fi)->framesize;
-  get_frame_extra_info (prologue_cache)->frameoffset = get_frame_extra_info (fi)->frameoffset;
-
-  for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
-    get_frame_saved_regs (prologue_cache)[i] = get_frame_saved_regs (fi)[i];
-}
-
-
 /* This function decodes an ARM function prologue to determine:
    1) the size of the stack frame
    2) which registers are saved on it
@@ -770,10 +716,6 @@ arm_scan_prologue (struct frame_info *fi)
   LONGEST return_value;
   CORE_ADDR prologue_start, prologue_end, current_pc;
 
-  /* Check if this function is already in the cache of frame information.  */
-  if (check_prologue_cache (fi))
-    return;
-
   /* Assume there is no frame until proven otherwise.  */
   get_frame_extra_info (fi)->framereg = ARM_SP_REGNUM;
   get_frame_extra_info (fi)->framesize = 0;
@@ -783,7 +725,6 @@ arm_scan_prologue (struct frame_info *fi)
   if (arm_pc_is_thumb (get_frame_pc (fi)))
     {
       thumb_scan_prologue (fi);
-      save_prologue_cache (fi);
       return;
     }
 
@@ -975,8 +916,6 @@ arm_scan_prologue (struct frame_info *fi)
     get_frame_extra_info (fi)->frameoffset = fp_offset - sp_offset;
   else
     get_frame_extra_info (fi)->frameoffset = 0;
-
-  save_prologue_cache (fi);
 }
 
 /* Find REGNUM on the stack.  Otherwise, it's in an active register.
@@ -3020,22 +2959,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		      "arm_gdbarch_init: bad byte order for float format");
     }
 
-  /* We can't use SIZEOF_FRAME_SAVED_REGS here, since that still
-     references the old architecture vector, not the one we are
-     building here.  */
-  if (get_frame_saved_regs (prologue_cache) != NULL)
-    xfree (get_frame_saved_regs (prologue_cache));
-
-  /* We can't use NUM_REGS nor NUM_PSEUDO_REGS here, since that still
-     references the old architecture vector, not the one we are
-     building here.  */
-  {
-    CORE_ADDR *saved_regs = xcalloc (1, (sizeof (CORE_ADDR)
-					 * (gdbarch_num_regs (gdbarch)
-					    + gdbarch_num_pseudo_regs (gdbarch))));
-    deprecated_set_frame_saved_regs_hack (prologue_cache, saved_regs);
-  }
-
   return gdbarch;
 }
 
@@ -3158,10 +3081,6 @@ The valid values are:\n");
 
   add_com ("othernames", class_obscure, arm_othernames,
 	   "Switch to the next set of register names.");
-
-  /* Allocate the prologue_cache.  */
-  prologue_cache = deprecated_frame_xmalloc ();
-  deprecated_set_frame_extra_info_hack (prologue_cache, xcalloc (1, sizeof (struct frame_extra_info)));
 
   /* Debugging flag.  */
   add_show_from_set (add_set_cmd ("arm", class_maintenance, var_zinteger,
