@@ -5033,6 +5033,14 @@ elf_bfd_final_link (abfd, info)
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Shdr *symstrtab_hdr;
 
+  if (info->shared)
+    {
+      fprintf (stderr,
+	       "Generating ELF shared libraries is not yet supported\n");
+      bfd_set_error (bfd_error_invalid_operation);
+      return false;
+    }
+
   dynobj = elf_hash_table (info)->dynobj;
 
   finfo.info = info;

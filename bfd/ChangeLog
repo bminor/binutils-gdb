@@ -7,6 +7,9 @@ Thu Jun 16 14:25:22 1994  Eric Youngdale  (ericy@cais.cais.com)
 
 Thu Jun 16 14:23:46 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* elfcode.h (elf_bfd_final_link): If trying to generate a shared
+	object, warn and return false.
+
 	* aoutx.h (NAME(aout,some_aout_object_p)): Accept BMAGIC objects
 	and treat them as OMAGIC.
 
