@@ -1474,6 +1474,12 @@ yylex ()
       }
     if (sym && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
         {
+#if 0
+	  /* In "A::x", if x is a member function of A and there happens
+	     to be a type (nested or not, since the stabs don't make that
+	     distinction) named x, then this code incorrectly thinks we
+	     are dealing with nested types rather than a member function.  */
+
 	  char *p;
 	  char *namestart;
 	  struct symbol *best_sym;
@@ -1541,6 +1547,9 @@ yylex ()
 	    }
 
 	  yylval.tsym.type = SYMBOL_TYPE (best_sym);
+#else /* not 0 */
+	  yylval.tsym.type = SYMBOL_TYPE (sym);
+#endif /* not 0 */
 	  return TYPENAME;
         }
     if ((yylval.tsym.type = lookup_primitive_typename (tmp)) != 0)
