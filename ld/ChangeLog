@@ -1,8 +1,36 @@
 Tue Sep 20 14:35:27 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* ld.h (args_type): Add new field endian.
+	* lexsup.c (parse_args): Handle -EB and -EL by setting
+	command_line.endian.
+	* ldgram.y (ifile_p1): Accept OUTPUT_FORMAT with three arguments.
+	* ldlang.c (lang_add_output_format): Add arguments big and little.
+	If command_line.endian is set, use it to select big or little
+	rather than the default.  Changed all callers.
+	* ldlang.h (lang_add_output_format): Update declaration.
+	* emulparams/elf32mipb.sh: Define BIG_OUTPUT_FORMAT and
+	LITTLE_OUTPUT_FORMAT.
+	* emulparams/elf32mipl.sh: Likewise.
+	* emulparams/mipsbig.sh: Likewise.
+	* emulparams/mipsbsd.sh: Likewise.
+	* emulparams/mipsidt.sh: Likewise.
+	* emulparams/mipsidtl.sh: Likewise.
+	* emulparams/mipslit.sh: Likewise.
+	* scripttempl/elf.sc: Define BIG_OUTPUT_FORMAT and
+	LITTLE_OUTPUT_FORMAT if not already defined.  Pass them to
+	OUTPUT_FORMAT.
+	* scripttempl/mips.sc: Pass BIG_OUTPUT_FORMAT and
+	LITTLE_OUTPUT_FORMAT to OUTPUT_FORMAT.
+	* scripttempl/mipsbsd.sc: Likewise.
+
+	* Makefile.in (ldgram.h): Make separate target from ldgram.c,
+	depending upon ldgram.c, so that a parallel make does not try to
+	build both at once.
+
 	* configure.in (mips*el-elf*): New target.
 	* Makefile.in (ALL_EMULATIONS): Add eelf32mipb.o and eelf32mipl.o.
 	(eelf32mipl.c): New target.
+
 	* config/mipsl-elf32.mt: New file.
 	* emulparams/elf32mipl.sh: New file.
 

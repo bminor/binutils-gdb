@@ -186,14 +186,10 @@ parse_args (argc, argv)
 	  command_line.interpreter = optarg;
 	  break;
 	case OPTION_EB:
-	  /* FIXME: This is currently ignored.  It means
-	     ``produce a big-endian object file''.  It could
-	     be used to select an output format.  */
+	  command_line.endian = ENDIAN_BIG;
 	  break;
 	case OPTION_EL:
-	  /* FIXME: This is currently ignored.  It means
-	     ``produce a little-endian object file''.  It could
-	     be used to select an output format.  */
+	  command_line.endian = ENDIAN_LITTLE;
 	  break;
 	case 'e':
 	  lang_add_entry (optarg, 1);
@@ -257,7 +253,7 @@ parse_args (argc, argv)
 	  lang_add_output (optarg, 0); 
 	  break;
 	case OPTION_OFORMAT:
-	  lang_add_output_format (optarg, 0);
+	  lang_add_output_format (optarg, (char *) NULL, (char *) NULL, 0);
 	  break;
 	case 'i':
 	case 'r':
