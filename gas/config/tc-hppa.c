@@ -1460,9 +1460,19 @@ md_assemble (str)
 
 #ifdef OBJ_ELF
   if (debug_type == DEBUG_DWARF2)
-    dwarf2_where (&debug_line);
-#endif
+    {
+      bfd_vma addr;
 
+      /* I haven't got a clue why the -8 is necessary, but this
+	 seems to work.  Someone should really document what all
+	 the frag nonsense does and more precisely what the dwarf2
+	 code needs.  */
+
+      addr = frag_now->fr_address + frag_now_fix () - 8;
+      dwarf2_gen_line_info (addr, &debug_line);
+      dwarf2_where (&debug_line);
+    }
+#endif
 }
 
 /* Do the real work for assembling a single instruction.  Store results
@@ -3376,16 +3386,6 @@ pa_ip (str)
 	}
       break;
     }
-
-#ifdef OBJ_ELF
-  if (debug_type == DEBUG_DWARF2)
-    {
-      bfd_vma addr;
-
-      addr = frag_now->fr_address + frag_now_fix ();
-      dwarf2_gen_line_info (addr, &debug_line);
-    }
-#endif
 
   the_insn.opcode = opcode;
 }

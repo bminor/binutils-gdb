@@ -1,5 +1,8 @@
 Wed Sep 15 05:14:32 1999  Jeffrey A Law  (law@cygnus.com)
 
+	* config/tc-hppa.c (pa_ip): Move dwarf2 stuff from here.
+	(md_assemble): To here.  Tweak address generation.
+
 	* config/tc-hppa.c: Include dwarf2dbg.h if OBJ_ELF.  Declare
 	debug_line.
 	(md_pseudo_table): Add .file and .line pseudo-ops for OBJ_ELF.
