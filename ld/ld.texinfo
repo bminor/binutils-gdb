@@ -1,7 +1,7 @@
 \input texinfo
 @setfilename ld.info
 @syncodeindex ky cp
-@c @smallbook
+@smallbook
 @c @cropmarks
 
 @ifinfo
@@ -15,11 +15,19 @@ END-INFO-DIR-ENTRY
 @ifinfo
 This file documents the GNU linker LD.
 
-Copyright (C) 1991, 1992 Free Software Foundation, Inc.
+Copyright (C) 1991, 1992, 1993 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
 are preserved on all copies.
+
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided also that
+the entire resulting derived work is distributed under the terms of a
+permission notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions.
 
 @ignore
 Permission is granted to process this file through Tex and print the
@@ -28,18 +36,6 @@ notice identical to this one except for the removal of this paragraph
 (this paragraph not being relevant to the printed manual).
 
 @end ignore
-Permission is granted to copy and distribute modified versions of this
-manual under the conditions for verbatim copying, provided also that the
-section entitled ``GNU General Public License'' is included exactly as
-in the original, and provided that the entire resulting derived work is
-distributed under the terms of a permission notice identical to this
-one.
-
-Permission is granted to copy and distribute translations of this manual
-into another language, under the above conditions for modified versions,
-except that the section entitled ``GNU General Public License'' may be
-included in a translation approved by the author instead of in the
-original English.
 @end ifinfo
 @iftex
 @finalout
@@ -50,7 +46,7 @@ original English.
 @subtitle The GNU linker
 @sp 1
 @subtitle @code{ld} version 2
-@subtitle August 1992
+@subtitle March 1993
 @author Steve Chamberlain and Roland Pesch
 @author Cygnus Support
 @page
@@ -66,9 +62,10 @@ original English.
 }
 \global\parindent=0pt % Steve likes it this way.
 @end tex
+Edited by Jeffrey Osier (@code{jeffrey@@cygnus.com}), March 1993.
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991, 1992 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 1992, 1993 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -135,14 +132,6 @@ Machine Dependent Features
 
 * H8/300::                      @code{ld} and the H8/300
 * i960::                        @code{ld} and the Intel 960 family
-* m68k::                        @code{ld} and the Motorola 68000 family
-* m88k::                        @code{ld} and the Motorola 880x0 family
-
-@code{ld} and the Intel 960 family
-
-* i960-arch::                   Linking for a Specific i960 Architecture
-* i960-emulation::              Emulating Other i960 Linkers
-* i960-commands::               Command Language Extensions for i960
 
 BFD
 
@@ -202,14 +191,14 @@ line:
 ld [-o @var{output} ] @var{objfiles}@dots{}
   [ -A@var{architecture} ]  [ -b @var{input-format} ]  [ -Bstatic ]  
   [ -c @var{MRI-commandfile} ]  [ -d | -dc | -dp ]  
-  [ -defsym @var{symbol} = @var{expression} ]
+  [ -defsym @var{symbol}=@var{expression} ]
   [ -e @var{entry} ]  [ -F ]  [ -F @var{format} ]
   [ -format @var{input-format} ]  [ -g ]  [ -i ]
   [ -l@var{ar} ]  [ -L@var{searchdir} ]  [ -M | -m ]  
-  [ -n | -N ]  [ -noinhibit-exec ]  [ -R @var{filename} ]  [ -relax ]
-  [ -r | -Ur ]  [ -S ]  [ -s ]  [ -T @var{commandfile} ]  
+  [ -n | -N ]  [ -noinhibit-exec ]  [ -R @var{filename} ]
+  [ -relax ]  [ -r | -Ur ]  [ -S ]  [ -s ]  [ -T @var{commandfile} ]  
   [ -Ttext @var{textorg} ]  [ -Tdata @var{dataorg} ]  [ -Tbss @var{bssorg} ]
-  [ -t ]  [ -u @var{sym}]  [-v]  [ -X ]  [ -x ] 
+  [ -t ]  [ -u @var{sym}]  [-v]  [ -X ]  [ -x ]  [ -y@var{symbol} ]
   [ @{ @var{script} @} ] 
 @end smallexample
 
@@ -220,12 +209,12 @@ For instance, a frequent use of @code{ld} is to link standard Unix
 object files on a standard, supported Unix system.  On such a system, to
 link a file @code{hello.o}:
 @example
-$ ld -o output /lib/crt0.o hello.o -lc
+$ ld -o @var{output} /lib/crt0.o hello.o -lc
 @end example
-This tells @code{ld} to produce a file called @code{output} as the
+This tells @code{ld} to produce a file called @var{output} as the
 result of linking the file @code{/lib/crt0.o} with @code{hello.o} and
 the library @code{libc.a} which will come from the standard search
-directories.
+directories.  (See the discussion of the @samp{-l} flag below.)
 
 The command-line options to @code{ld} may be specified in any order, and
 may be repeated at will.  For the most part, repeating an option with a
@@ -264,8 +253,8 @@ In the current release of @code{ld}, this option is useful only for the
 Intel 960 family of architectures.  In that @code{ld} configuration, the
 @var{architecture} argument identifies the particular architecture in
 the 960 family, enabling some safeguards and modifying the
-archive-library search path.  @xref{i960-arch,,,Linking for a Specific
-i960 Architecture}, for details.
+archive-library search path.  @xref{i960,,@code{ld} and the Intel 960
+family}, for details.
 
 Future releases of @code{ld} may support similar functionality for
 other architecture families.
@@ -279,8 +268,8 @@ Specify the binary format for input object files that follow this option
 on the command line.  You don't usually need to specify this, as
 @code{ld} is configured to expect as a default input format the most
 usual format on each machine.  @var{input-format} is a text string, the
-name of a particular format supported by the BFD libraries.  @xref{BFD}.
-@code{-format @var{input-format}} has the same effect.@refill
+name of a particular format supported by the BFD libraries.
+@w{@code{-format @var{input-format}}} has the same effect.  @xref{BFD}.
 
 You may want to use this option if you are linking files with an unusual
 binary format.  You can also use @code{-b} to switch formats explicitly (when
@@ -290,7 +279,8 @@ particular format.
 
 The default format is taken from the environment variable
 @code{GNUTARGET}.  @xref{Environment}.  You can also define the input
-format from a script, using the command @code{TARGET}.
+format from a script, using the command @code{TARGET}; see @ref{Other
+Commands}.
 
 @kindex -Bstatic
 @item -Bstatic 
@@ -302,11 +292,9 @@ but has no effect on @code{ld}.
 @item -c @var{MRI-commandfile}
 For compatibility with linkers produced by MRI, @code{ld} accepts script
 files written in an alternate, restricted command language, described in
-@ref{MRI,,MRI Compatible Script Files}.  Introduce such script files
-with the option flag @samp{-c}.
-
-Use the @samp{-T} option to run linker scripts written in the general-purpose
-@code{ld} scripting language.
+@ref{MRI,,MRI Compatible Script Files}.  Introduce MRI script files with
+the option flag @samp{-c}; use the @samp{-T} option to run linker
+scripts written in the general-purpose @code{ld} scripting language.
 
 @cindex common allocation
 @kindex -d
@@ -319,11 +307,12 @@ These three options are equivalent; multiple forms are supported for
 compatibility with other linkers.  Use any of them to make @code{ld}
 assign space to common symbols even if a relocatable output file is
 specified (@code{-r}).  The script command
-@code{FORCE_COMMON_ALLOCATION} has the same effect.
+@code{FORCE_COMMON_ALLOCATION} has the same effect.  @xref{Other
+Commands}.
 
 @cindex symbols, from command line
-@kindex -defsym @var{symbol} = @var{exp}
-@item -defsym @var{symbol} = @var{expression}
+@kindex -defsym @var{symbol}=@var{exp}
+@item -defsym @var{symbol}=@var{expression}
 Create a global symbol in the output file, containing the absolute
 address given by @var{expression}.  You may use this option as many
 times as necessary to define multiple symbols in the command line.  A
@@ -331,7 +320,10 @@ limited form of arithmetic is supported for the @var{expression} in this
 context: you may give a hexadecimal constant or the name of an existing
 symbol, or use @code{+} and @code{-} to add or subtract hexadecimal
 constants or symbols.  If you need more elaborate expressions, consider
-using the linker command language from a script.
+using the linker command language from a script (@pxref{Assignment, ,
+Assignment: Symbol Definitions}).  @emph{Note:}  there should be no
+white space between @var{symbol}, the equals sign (``@key{=}''), and
+@var{expression}.
 
 @cindex entry point, from command line
 @kindex -e @var{entry}
@@ -358,11 +350,12 @@ there is a gap between explicitly specified section addresses
 @itemx -F@var{format}
 Some older linkers used this option throughout a compilation toolchain
 for specifying object-file format for both input and output object
-files.  @code{ld}'s mechanisms (the @code{-b} or @code{-format} options
-for input files, the @code{TARGET} command in linker scripts for output
-files, the @code{GNUTARGET} environment variable) are more flexible, but
-but it accepts (and ignores) the @code{-F} option flag for compatibility
-with scripts written to call the old linker.
+files.  The mechanisms @code{ld} uses for this purpose (the @code{-b} or
+@code{-format} options for input files, the @code{TARGET} command in
+linker scripts for output files, the @code{GNUTARGET} environment
+variable) are more flexible, but @code{ld} accepts (and ignores) the
+@code{-F} option flag for compatibility with scripts written to call the
+old linker.
 
 @kindex -format
 @item -format @var{input-format}
@@ -376,6 +369,7 @@ Accepted, but ignored; provided for compatibility with other tools.
 @cindex incremental link
 @item -i
 Perform an incremental link (same as option @code{-r}).
+
 
 @cindex archive files, from cmd line
 @kindex -l@var{ar}
@@ -411,7 +405,7 @@ common storage allocation.
 @cindex read/write from cmd line
 @kindex OMAGIC
 @item -N 
-specifies readable and writable @code{text} and @code{data} sections. If
+Specifies readable and writable @code{text} and @code{data} sections. If
 the output format supports Unix style magic numbers, the output is
 marked as @code{OMAGIC}.
 
@@ -422,7 +416,7 @@ data segment.
 @kindex -n
 @cindex read-only text
 @kindex NMAGIC
-sets the text segment to be read only, and @code{NMAGIC} is written
+Sets the text segment to be read only, and @code{NMAGIC} is written
 if possible.
 
 @item -noinhibit-exec
@@ -430,7 +424,9 @@ if possible.
 @kindex -noinhibit-exec
 Normally, the linker will not produce an output file if it encounters
 errors during the link process.  With this flag, you can specify that
-you wish the output file retained even after non-fatal errors.
+you wish the output file retained whenever the executable output file is
+still usable.  (Otherwise, @code{ld} exits without writing an output
+file when it issues any error whatsoever.)
 
 @item -o @var{output}
 @kindex -o @var{output}
@@ -495,20 +491,22 @@ You can, if you wish, include a script of linker commands directly in
 the command line instead of referring to it via an input file.  When the
 character @samp{@{} occurs on the command line, the linker switches to
 interpreting the command language until the end of the list of commands
-is reached---flagged with a closing brace @samp{@}}.  Other command-line
-options will not be recognized while parsing the script.
-@xref{Commands} for a description of the command language.
+is reached; the end is indicated with a closing brace @samp{@}}.
+@code{ld} does not recognize other command-line options while parsing
+the script.  @xref{Commands}, for a description of the command language.
 
-@item -Tbss @var{org}
-@kindex -Tbss @var{org}
-@itemx -Tdata @var{org}
-@kindex -Tdata @var{org}
-@itemx -Ttext @var{org}
-@kindex -Ttext @var{org}
+@item -Tbss @var{bssorg}
+@kindex -Tbss @var{bssorg}
+@itemx -Tdata @var{dataorg}
+@kindex -Tdata @var{dataorg}
+@itemx -Ttext @var{textorg}
+@kindex -Ttext @var{textorg}
 @cindex segment origins, cmd line
 Use @var{org} as the starting address for---respectively---the
 @code{bss}, @code{data}, or the @code{text} segment of the output file.
-@var{textorg} must be a hexadecimal integer.
+Any @var{org} value must be a single hexadecimal integer; in this case
+(for compatibility with other linkers), you may omit the leading
+@samp{0x} usually associated with hexadecimal values.
 
 @item -T @var{commandfile}
 @itemx -T@var{commandfile}
@@ -521,7 +519,7 @@ specify everything necessary to describe the target format.
 @xref{Commands}.
 
 You may also include a script of link commands directly in the command
-line by bracketing it between @samp{@{} and @samp{@}} characters.
+line by bracketing it between @samp{@{} and @samp{@}}.
 
 @item -t 
 @kindex -t
@@ -565,6 +563,16 @@ beginning with @samp{L}.
 If @code{-s} or @code{-S} is also specified, delete all local symbols,
 not just those beginning with @samp{L}.
 
+@item -y
+@kindex -y@var{symbol}
+@cindex symbol tracing
+Prints the name of each linked file in which @var{symbol} appears.  The
+option may be given any number of times.  On many systems it is necessary
+to prepend an underscore.
+
+This option is useful when you have an undefined symbol in your link but
+don't know where the reference is coming from.
+
 @ignore
 @c  -z in older GNU linker, not in new
 @item -z
@@ -588,9 +596,12 @@ See description of @code{-N}.
 @node Environment,  , Options, Invocation
 @section Environment Variables
 
-You can change the behavior of @code{ld} with two environment
-variables: @code{GNUTARGET} and @code{LDEMULATION}.  Depending on the
+You can change the behavior of @code{ld} with the environment
+variable @code{GNUTARGET}.  
+@ignore
+ and @code{LDEMULATION}.  Depending on the
 setting of the latter, other environment variables may be used as well.
+@end ignore
 
 @kindex GNUTARGET
 @cindex default input format
@@ -606,6 +617,7 @@ unique.  However, the configuration procedure for BFD on each system
 places the conventional format for that system first in the search-list,
 so ambiguities are resolved in favor of convention.
 
+@ignore
 @kindex LDEMULATION
 @cindex emulation
 @cindex environment vars
@@ -664,6 +676,7 @@ setting makes @code{ld} take the default machine from the BFD
 configuration on your system; @code{a.out-generic-big} is the default
 target.  No other defaults are specified.
 @end table
+@end ignore
 
 @node Commands, Machine Dependent, Invocation, Top
 @chapter Command Language
@@ -982,8 +995,8 @@ Assignment may only be used at the root of an expression;
 @kindex ;
 @cindex semicolon
 @item 
-A trailing semicolon is required at the end of an assignment
-statement. 
+You must place a trailing semicolon (``@key{;}'') at the end of an
+assignment statement.
 @end itemize
 
 Assignment statements may appear:
@@ -1403,12 +1416,12 @@ unallocated input files; its effect is exactly the same as that of
 @samp{* (@var{section}@dots{})}
 
 @item @var{filename}@code{( COMMON )}
-@itemx [ COMMON ]
-@kindex [ COMMON ]
+@itemx ( COMMON )
+@kindex ( COMMON )
 @cindex uninitialized data
 @cindex commons in output
 Specify where in your output file to place uninitialized data
-with this notation.  @code{[COMMON]} by itself refers to all
+with this notation.  @code{*(COMMON)} by itself refers to all
 uninitialized data from all input files (so far as it is not yet
 allocated); @var{filename}@code{(COMMON)} refers to uninitialized data
 from a particular file.  Both are special cases of the general
@@ -1424,9 +1437,9 @@ three consecutive sections, named @code{.text}, @code{.data}, and
 sections of all the input files:
 @example
 SECTIONS @{ 
-  .text: @{ *(.text) @}
-  .data: @{ *(.data) @} 
-  .bss:  @{ *(.bss)  [COMMON] @} 
+  .text : @{ *(.text) @}
+  .data : @{ *(.data) @} 
+  .bss :  @{ *(.bss)  *(COMMON) @} 
 @} 
 @end example
 
@@ -1587,18 +1600,19 @@ fill patterns in different parts of an output section.
 Here is the full syntax of a section definition, including all the
 optional portions:
 
-@example
+@smallexample
 SECTIONS @{
 @dots{}
-@var{secname} @var{start} BLOCK(@var{align}) : @{ @var{contents} @} =@var{fill} >@var{region}
+@var{secname} @var{start} BLOCK(@var{align}) (NOLOAD) : @{ @var{contents} @} =@var{fill} >@var{region}
 @dots{}
 @}
-@end example
+@end smallexample
 
 @var{secname} and @var{contents} are required.  @xref{Section
 Definition}, and @pxref{Section Contents} for details on @var{contents}.
 The remaining elements---@var{start}, @code{BLOCK(@var{align)}},
-@code{=@var{fill}}, and @code{>@var{region}}---are all optional.
+@code{(NOLOAD)} @code{=@var{fill}}, and @code{>@var{region}}---are all
+optional.
 
 @table @code
 @item @var{start} 
@@ -1628,6 +1642,20 @@ You can include @code{BLOCK()} specification to advance the location of
 the location counter @code{.} prior to the beginning of the section, so
 that the section will begin at the specified alignment.  @var{align} is
 an expression.
+
+@item (NOLOAD)
+@kindex NOLOAD
+@cindex prevent unnecessary loading
+Use @samp{(NOLOAD)} to prevent a section from being loaded into memory
+each time it is accessed.  For example, in the script sample below, the
+@code{ROM} segment is addressed at memory location @samp{0} and does not
+need to be loaded into each object file:
+@example
+SECTIONS @{
+        ROM  0  (NOLOAD)  : @{ @dots{} @}
+        @dots{}
+@}
+@end example
 
 @item =@var{fill}
 @kindex =@var{fill}
@@ -1747,12 +1775,12 @@ way are treated identically to object files listed on the command line.
 @item OUTPUT ( @var{filename} )
 @kindex OUTPUT ( @var{filename} )
 @cindex naming the output file
-Name the link output file @var{filename}.  The effect of
-@code{OUTPUT(@var{filename})} is identical to the effect of 
+Use this command to name the link output file @var{filename}.  The
+effect of @code{OUTPUT(@var{filename})} is identical to the effect of
 @w{@code{-o @var{filename}}}, and whichever is encountered last will
 control the name actually used to name the output file.  In particular,
 you can use this command to supply a default output-file name other than
-@code{a.out}. 
+@code{a.out}.
 
 @item OUTPUT_ARCH ( @var{bfdname} )
 @kindex OUTPUT_ARCH ( @var{bfdname} )
@@ -1815,8 +1843,6 @@ functionality are not listed.
 @menu
 * H8/300::                      @code{ld} and the H8/300
 * i960::                        @code{ld} and the Intel 960 family
-* m68k::                        @code{ld} and the Motorola 68000 family
-* m88k::                        @code{ld} and the Motorola 880x0 family
 @end menu
 
 @node H8/300, i960, Machine Dependent, Machine Dependent
@@ -1828,14 +1854,14 @@ you specify the @samp{-relax} command-line option.
 
 @table @emph
 @item relaxing address modes
-@cindex relaxing on i960
+@cindex relaxing on H8/300
 @code{ld} finds all @code{jsr} and @code{jmp} instructions whose
 targets are within eight bits, and turns them into eight-bit
 program-counter relative @code{bsr} and @code{bra} instructions,
 respectively.
 
 @item synthesizing instructions
-@cindex synthesizing on i960
+@cindex synthesizing on H8/300
 @c FIXME: specifically mov.b, or any mov instructions really?
 @code{ld} finds all @code{mov.b} instructions which use the
 sixteen-bit absolute address form, but refer to the top
@@ -1845,10 +1871,12 @@ page of memory, and changes them to use the eight-bit address form.
 top page of memory).
 @end table
 
-@node i960, m68k, H8/300, Machine Dependent
+@node i960, , H8/300, Machine Dependent
 @section @code{ld} and the Intel 960 family
 
 @cindex i960 support
+
+@ignore
 @menu
 * i960-arch::                   Linking for a Specific i960 Architecture
 * i960-emulation::              Emulating Other i960 Linkers
@@ -1857,6 +1885,8 @@ top page of memory).
 
 @node i960-arch, i960-emulation, i960, i960
 @subsection Linking for a Specific i960 Architecture
+@end ignore
+
 You can use the @samp{-A@var{architecture}} command line option to
 specify one of the two-letter names identifying members of the 960
 family; the option specifies the desired output target, and warns of any
@@ -1884,6 +1914,7 @@ the 960 architecture family allows combination of target architectures; each
 use will add another pair of name variants to search for when @w{@code{-l}}
 specifies a library.
 
+@ignore
 @node i960-emulation, i960-commands, i960-arch, i960
 @subsection Emulating Other i960 Linkers
 You can set the @code{LDEMULATION} environment variable
@@ -2021,6 +2052,8 @@ This sets the output format to @code{m88kbcs} and the architecture to
 
 For other settings of @code{LDEMULATION}, consult
 @ref{Environment,,Environment Variables}.
+
+@end ignore
 
 @node BFD, MRI, Machine Dependent, Top
 @chapter BFD
