@@ -1,3 +1,7 @@
+2005-01-14  Andrew Cagney  <cagney@gnu.org>
+
+	* varobj.c (varobj_create): Add missing \n.
+
 2005-01-13  Michael Snyder  <msnyder@redhat.com>
 
 	* cli/cli-decode.h: Whitespace tweaks.

@@ -1,4 +1,5 @@
-# Copyright 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+# Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2004 Free Software
+# Foundation, Inc.
 #
 # This Program Is Free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -148,7 +149,7 @@ mi_gdb_test "-var-create lsimple.integer * lsimple.integer" \
 #    Type names (like int, long, etc..) are all proper expressions to gdb.
 #    make sure variable code does not allow users to create variables, though.
 mi_gdb_test "-var-create int * int" \
-	"&\"Attempt to use a type name as an expression.mi_cmd_var_create: unable to create variable object\\\\n\".*\\^error,msg=\"mi_cmd_var_create: unable to create variable object\"" \
+	"&\"Attempt to use a type name as an expression.\\\\n\".*&\"mi_cmd_var_create: unable to create variable object\\\\n\".*\\^error,msg=\"mi_cmd_var_create: unable to create variable object\"" \
 	"create int"
 
 

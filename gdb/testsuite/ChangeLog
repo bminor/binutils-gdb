@@ -1,3 +1,8 @@
+2005-01-14  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.mi/mi-var-cmd.exp: Adjust "create int" test to match output.
+	* gdb.mi/mi2-var-cmd.exp: Ditto.
+
 2005-01-10  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.base/fileio.c: Include unistd.h as required for lseek(2).

@@ -1,5 +1,6 @@
 /* Implementation of the GDB variable objects API.
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1999, 2000, 2001, 2005 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -472,8 +473,8 @@ varobj_create (char *objname,
       if (var->root->exp->elts[0].opcode == OP_TYPE)
 	{
 	  do_cleanups (old_chain);
-	  fprintf_unfiltered (gdb_stderr,
-			      "Attempt to use a type name as an expression.");
+	  fprintf_unfiltered (gdb_stderr, "Attempt to use a type name"
+			      " as an expression.\n");
 	  return NULL;
 	}
 
