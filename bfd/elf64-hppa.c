@@ -1,5 +1,5 @@
 /* Support for HPPA 64-bit ELF
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -305,13 +305,14 @@ elf64_hppa_new_dyn_hash_entry (entry, table, string)
   if (!ret)
     return 0;
 
-  /* Initialize our local data.  All zeros, and definitely easier
-     than setting 8 bit fields.  */
-  memset (ret, 0, sizeof (*ret));
-
   /* Call the allocation method of the superclass.  */
   ret = ((struct elf64_hppa_dyn_hash_entry *)
 	 bfd_hash_newfunc ((struct bfd_hash_entry *) ret, table, string));
+
+  /* Initialize our local data.  All zeros.  */
+  memset (&ret->dlt_offset, 0,
+	  (sizeof (struct elf64_hppa_dyn_hash_entry)
+	   - offsetof (struct elf64_hppa_dyn_hash_entry, dlt_offset)));
 
   return &ret->root;
 }

@@ -2,6 +2,7 @@
 
 	* elfxx-ia64.c (elfNN_ia64_new_elf_hash_entry): Don't clear
 	everything, just the field specific to ia64.
+	* elf64-hppa.c (elf64_hppa_new_dyn_hash_entry): Likewise.
 
 2005-02-01  Alan Modra  <amodra@bigpond.net.au>
 
