@@ -57,6 +57,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yyexca	c_exca
 
 void yyerror ();
+static int parse_number ();
 
 /* #define	YYDEBUG	1 */
 
@@ -1443,7 +1444,7 @@ struct type *builtin_type_unsigned_long_long;
 struct type *builtin_type_float;
 struct type *builtin_type_double;
 
-struct type **(c_builtin_types[]) = 
+struct type ** const (c_builtin_types[]) = 
 {
   &builtin_type_int,
   &builtin_type_long,
@@ -1463,7 +1464,7 @@ struct type **(c_builtin_types[]) =
 
 /* FIXME:  Eventually do a separate defintion for C++.  */
 
-struct language_defn c_language_defn = {
+const struct language_defn c_language_defn = {
   "c",				/* Language name */
   language_c,
   c_builtin_types,

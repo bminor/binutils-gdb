@@ -57,6 +57,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yyexca	m2_exca
 
 void yyerror ();
+static int yylex ();
 
 /* The sign of the number being parsed. */
 int number_sign = 1;
@@ -726,13 +727,12 @@ parse_number (olen)
      yylval.ulval = n;
      return UINT;
   }
-  else if((unsigned_p && (n<0)))
+  else if((unsigned_p && (n<0))) {
      range_error("Overflow on numeric constant -- number too large.");
-  else
-  {
-     yylval.lval = n;
-     return INT;
+     /* But, this can return if range_check == range_warn.  */
   }
+  yylval.lval = n;
+  return INT;
 }
 
 
@@ -1159,7 +1159,7 @@ struct type *builtin_type_m2_card;
 struct type *builtin_type_m2_real;
 struct type *builtin_type_m2_bool;
 
-struct type **(m2_builtin_types[]) = 
+struct type ** const (m2_builtin_types[]) = 
 {
   &builtin_type_m2_char,
   &builtin_type_m2_int,
@@ -1169,10 +1169,10 @@ struct type **(m2_builtin_types[]) =
   0
 };
 
-struct language_defn m2_language_defn = {
+const struct language_defn m2_language_defn = {
   "modula-2",
   language_m2,
-  &m2_builtin_types[0],
+  m2_builtin_types,
   range_check_on,
   type_check_on,
   m2_parse,			/* parser */
