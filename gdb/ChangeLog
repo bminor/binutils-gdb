@@ -1,3 +1,12 @@
+2003-02-07  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdbtypes.h (struct main_type): Move ``length'' field from here...
+	(struct type): ...to here.
+	(TYPE_LENGTH): Adjust to reflect different location of ``length''
+	field.
+	* gdbtypes.c (make_qualified_type): Set length on newly created type.
+	(replace_type): Set length on all type variants for a given type.
+
 2003-02-07  Andrew Cagney  <ac131313@redhat.com>
 
 	* sol-thread.c, hpux-thread.c: Include "gdb_stat.h" instead of

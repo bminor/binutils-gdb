@@ -297,32 +297,6 @@ struct main_type
 
   char *tag_name;
 
-  /* Length of storage for a value of this type.  This is what
-     sizeof(type) would return; use it for address arithmetic,
-     memory reads and writes, etc.  This size includes padding.  For
-     example, an i386 extended-precision floating point value really
-     only occupies ten bytes, but most ABI's declare its size to be
-     12 bytes, to preserve alignment.  A `struct type' representing
-     such a floating-point type would have a `length' value of 12,
-     even though the last two bytes are unused.
-
-     There's a bit of a host/target mess here, if you're concerned
-     about machines whose bytes aren't eight bits long, or who don't
-     have byte-addressed memory.  Various places pass this to memcpy
-     and such, meaning it must be in units of host bytes.  Various
-     other places expect they can calculate addresses by adding it
-     and such, meaning it must be in units of target bytes.  For
-     some DSP targets, in which HOST_CHAR_BIT will (presumably) be 8
-     and TARGET_CHAR_BIT will be (say) 32, this is a problem.
-
-     One fix would be to make this field in bits (requiring that it
-     always be a multiple of HOST_CHAR_BIT and TARGET_CHAR_BIT) ---
-     the other choice would be to make it consistently in units of
-     HOST_CHAR_BIT.  However, this would still fail to address
-     machines based on a ternary or decimal representation.  */
-  
-  unsigned length;
-
   /* FIXME, these should probably be restricted to a Fortran-specific
      field in some fashion.  */
 #define BOUND_CANNOT_BE_DETERMINED   5
@@ -489,14 +463,41 @@ struct type
   struct type *reference_type;
 
   /* Variant chain.  This points to a type that differs from this one only
-     in qualifiers.  Currently, the possible qualifiers are const, volatile,
-     code-space, and data-space.  The variants are linked in a circular
-     ring and share MAIN_TYPE.  */
+     in qualifiers and length.  Currently, the possible qualifiers are
+     const, volatile, code-space, data-space, and address class.  The
+     length may differ only when one of the address class flags are set.
+     The variants are linked in a circular ring and share MAIN_TYPE.  */
   struct type *chain;
 
   /* Flags specific to this instance of the type, indicating where
      on the ring we are.  */
   int instance_flags;
+
+  /* Length of storage for a value of this type.  This is what
+     sizeof(type) would return; use it for address arithmetic,
+     memory reads and writes, etc.  This size includes padding.  For
+     example, an i386 extended-precision floating point value really
+     only occupies ten bytes, but most ABI's declare its size to be
+     12 bytes, to preserve alignment.  A `struct type' representing
+     such a floating-point type would have a `length' value of 12,
+     even though the last two bytes are unused.
+
+     There's a bit of a host/target mess here, if you're concerned
+     about machines whose bytes aren't eight bits long, or who don't
+     have byte-addressed memory.  Various places pass this to memcpy
+     and such, meaning it must be in units of host bytes.  Various
+     other places expect they can calculate addresses by adding it
+     and such, meaning it must be in units of target bytes.  For
+     some DSP targets, in which HOST_CHAR_BIT will (presumably) be 8
+     and TARGET_CHAR_BIT will be (say) 32, this is a problem.
+
+     One fix would be to make this field in bits (requiring that it
+     always be a multiple of HOST_CHAR_BIT and TARGET_CHAR_BIT) ---
+     the other choice would be to make it consistently in units of
+     HOST_CHAR_BIT.  However, this would still fail to address
+     machines based on a ternary or decimal representation.  */
+  
+  unsigned length;
 
   /* Core type, shared by a group of qualified types.  */
   struct main_type *main_type;
@@ -758,7 +759,7 @@ extern void allocate_cplus_struct_type (struct type *);
    But check_typedef does set the TYPE_LENGTH of the TYPEDEF type,
    so you only have to call check_typedef once.  Since allocate_value
    calls check_typedef, TYPE_LENGTH (VALUE_TYPE (X)) is safe.  */
-#define TYPE_LENGTH(thistype) TYPE_MAIN_TYPE(thistype)->length
+#define TYPE_LENGTH(thistype) (thistype)->length
 #define TYPE_OBJFILE(thistype) TYPE_MAIN_TYPE(thistype)->objfile
 #define TYPE_FLAGS(thistype) TYPE_MAIN_TYPE(thistype)->flags
 /* Note that TYPE_CODE can be TYPE_CODE_TYPEDEF, so if you want the real

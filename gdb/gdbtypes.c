@@ -469,6 +469,9 @@ make_qualified_type (struct type *type, int new_flags,
   /* Now set the instance flags and return the new type.  */
   TYPE_INSTANCE_FLAGS (ntype) = new_flags;
 
+  /* Set length of new type to that of the original type.  */
+  TYPE_LENGTH (ntype) = TYPE_LENGTH (type);
+
   return ntype;
 }
 
@@ -556,9 +559,25 @@ make_cv_type (int cnst, int voltl, struct type *type, struct type **typeptr)
 void
 replace_type (struct type *ntype, struct type *type)
 {
-  struct type *cv_chain, *as_chain, *ptr, *ref;
+  struct type *chain;
 
   *TYPE_MAIN_TYPE (ntype) = *TYPE_MAIN_TYPE (type);
+
+  /* The type length is not a part of the main type.  Update it for each
+     type on the variant chain.  */
+  chain = ntype;
+  do {
+    /* Assert that this element of the chain has no address-class bits
+       set in its flags.  Such type variants might have type lengths
+       which are supposed to be different from the non-address-class
+       variants.  This assertion shouldn't ever be triggered because
+       symbol readers which do construct address-class variants don't
+       call replace_type().  */
+    gdb_assert (TYPE_ADDRESS_CLASS_ALL (chain) == 0);
+
+    TYPE_LENGTH (ntype) = TYPE_LENGTH (type);
+    chain = TYPE_CHAIN (chain);
+  } while (ntype != chain);
 
   /* Assert that the two types have equivalent instance qualifiers.
      This should be true for at least all of our debug readers.  */
