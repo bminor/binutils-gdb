@@ -1456,7 +1456,6 @@ Fri Jun 27 19:19:12 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 	(mips_store_return_value): handle values smaller than MIPS_REGSIZE
 	(including structs, if gdb ever allows it).
 
-start-sanitize-sh4
 Fri Jun 20 17:58:34 1997  Fred Fish  <fnf@cygnus.com>
 
 	* sh-tdep.c (sh_skip_prologue): Also recognize fmov insns.
@@ -1464,7 +1463,6 @@ Fri Jun 20 17:58:34 1997  Fred Fish  <fnf@cygnus.com>
 	stack push count accordingly.
 	* sh-tdep.c (IS_FMOV, FPSCR_SZ): New defines
 
-end-sanitize-sh4
 Thu Jun 19 08:18:48 1997  Mark Alexander  <marka@cygnus.com>
 
 	* utils.c (floatformat_from_doublest): Improve test for infinity.

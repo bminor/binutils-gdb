@@ -1,5 +1,5 @@
 /* Target-dependent code for Hitachi Super-H, for GDB.
-   Copyright (C) 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -34,8 +34,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "dis-asm.h"
 #include "inferior.h"		/* for BEFORE_TEXT_END etc. */
 #include "gdb_string.h"
-
-extern int remote_write_size;	/* in remote.c */
 
 /* A set of original names, to be used when restoring back to generic
    registers from a specific set.  */
@@ -85,9 +83,7 @@ struct {
   { sh_reg_names, bfd_mach_sh },
   { sh3_reg_names, bfd_mach_sh3 },
   { sh3e_reg_names, bfd_mach_sh3e },
-  /* start-sanitize-sh4 */
   { sh3e_reg_names, bfd_mach_sh4 },
-  /* end-sanitize-sh4 */
   { NULL, 0 }
 };
 
@@ -106,10 +102,8 @@ struct {
 #define IS_MOV_R3(x) 		(((x) & 0xff00) == 0x1a00)
 #define IS_SHLL_R3(x)		((x) == 0x4300)
 #define IS_ADD_R3SP(x)		((x) == 0x3f3c)
-/* start-sanitize-sh4 */
 #define IS_FMOV(x)		(((x) & 0xf00f) == 0xf00b)
 #define FPSCR_SZ		(1 << 20)
-/* end-sanitize-sh4 */
 
 /* Skip any prologue before the guts of a function */
 
@@ -121,9 +115,7 @@ sh_skip_prologue (start_pc)
 
   w = read_memory_integer (start_pc, 2);
   while (IS_STS (w)
-	 /* start-sanitize-sh4 */
 	 || IS_FMOV (w)
-	 /* end-sanitize-sh4 */
 	 || IS_PUSH (w)
 	 || IS_MOV_SP_FP (w)
 	 || IS_MOV_R3 (w)
@@ -288,7 +280,6 @@ sh_frame_find_saved_regs (fi, fsr)
 	  depth -= ((insn & 0xff) ^ 0x80) - 0x80;
 	  insn = read_memory_integer (pc, 2);
 	}
-      /* start-sanitize-sh4 */
       else if (IS_FMOV (insn))
 	{
 	  pc += 2;
@@ -302,7 +293,6 @@ sh_frame_find_saved_regs (fi, fsr)
 	      depth += 4;
 	    }
 	}
-      /* end-sanitize-sh4 */
       else
 	break;
     }
@@ -618,11 +608,9 @@ sh_show_regs (args, from_tty)
     cpu = target_architecture->mach;
   else
     cpu = 0;
-  /* start-sanitize-sh4 */
   /* FIXME: sh4 has more registers */
   if (cpu == bfd_mach_sh4)
     cpu = bfd_mach_sh3;
-  /* end-sanitize-sh4 */
 
   printf_filtered ("PC=%08x SR=%08x PR=%08x MACH=%08x MACHL=%08x\n",
 		   read_register (PC_REGNUM),
