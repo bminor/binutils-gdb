@@ -70,9 +70,41 @@ static const int mmx_num_regs = (sizeof (i386_mmx_names)
 #define MM0_REGNUM (NUM_REGS)
 
 static int
-mmx_regnum_p (int reg)
+i386_mmx_regnum_p (int reg)
 {
   return (reg >= MM0_REGNUM && reg < MM0_REGNUM + mmx_num_regs);
+}
+
+/* FP register?  */
+
+int
+i386_fp_regnum_p (int regnum)
+{
+  return (regnum < NUM_REGS
+	  && (FP0_REGNUM && FP0_REGNUM <= (regnum) && (regnum) < FPC_REGNUM));
+}
+
+int
+i386_fpc_regnum_p (int regnum)
+{
+  return (regnum < NUM_REGS
+	  && (FPC_REGNUM <= (regnum) && (regnum) < XMM0_REGNUM));
+}
+
+/* SSE register?  */
+
+int
+i386_sse_regnum_p (int regnum)
+{
+  return (regnum < NUM_REGS
+	  && (XMM0_REGNUM <= (regnum) && (regnum) < MXCSR_REGNUM));
+}
+
+int
+i386_mxcsr_regnum_p (int regnum)
+{
+  return (regnum < NUM_REGS
+	  && (regnum == MXCSR_REGNUM));
 }
 
 /* Return the name of register REG.  */
@@ -82,7 +114,7 @@ i386_register_name (int reg)
 {
   if (reg < 0)
     return NULL;
-  if (mmx_regnum_p (reg))
+  if (i386_mmx_regnum_p (reg))
     return i386_mmx_names[reg - MM0_REGNUM];
   if (reg >= sizeof (i386_register_names) / sizeof (*i386_register_names))
     return NULL;
@@ -1098,13 +1130,13 @@ i386_register_virtual_type (int regnum)
   if (regnum == PC_REGNUM || regnum == FP_REGNUM || regnum == SP_REGNUM)
     return lookup_pointer_type (builtin_type_void);
 
-  if (FP_REGNUM_P (regnum))
+  if (i386_fp_regnum_p (regnum))
     return builtin_type_i387_ext;
 
-  if (SSE_REGNUM_P (regnum))
+  if (i386_sse_regnum_p (regnum))
     return builtin_type_vec128i;
 
-  if (mmx_regnum_p (regnum))
+  if (i386_mmx_regnum_p (regnum))
     return builtin_type_vec64i;
 
   return builtin_type_int;
@@ -1131,7 +1163,7 @@ static void
 i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			   int regnum, void *buf)
 {
-  if (mmx_regnum_p (regnum))
+  if (i386_mmx_regnum_p (regnum))
     {
       char *mmx_buf = alloca (MAX_REGISTER_RAW_SIZE);
       int fpnum = mmx_regnum_to_fp_regnum (regcache, regnum);
@@ -1147,7 +1179,7 @@ static void
 i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 			    int regnum, const void *buf)
 {
-  if (mmx_regnum_p (regnum))
+  if (i386_mmx_regnum_p (regnum))
     {
       char *mmx_buf = alloca (MAX_REGISTER_RAW_SIZE);
       int fpnum = mmx_regnum_to_fp_regnum (regcache, regnum);
@@ -1171,7 +1203,7 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 static int
 i386_register_convertible (int regnum)
 {
-  return FP_REGNUM_P (regnum);
+  return i386_fp_regnum_p (regnum);
 }
 
 /* Convert data from raw format for register REGNUM in buffer FROM to
@@ -1181,7 +1213,7 @@ static void
 i386_register_convert_to_virtual (int regnum, struct type *type,
 				  char *from, char *to)
 {
-  gdb_assert (FP_REGNUM_P (regnum));
+  gdb_assert (i386_fp_regnum_p (regnum));
 
   /* We only support floating-point values.  */
   if (TYPE_CODE (type) != TYPE_CODE_FLT)
@@ -1204,7 +1236,7 @@ static void
 i386_register_convert_to_raw (struct type *type, int regnum,
 			      char *from, char *to)
 {
-  gdb_assert (FP_REGNUM_P (regnum));
+  gdb_assert (i386_fp_regnum_p (regnum));
 
   /* We only support floating-point values.  */
   if (TYPE_CODE (type) != TYPE_CODE_FLT)

@@ -1,3 +1,24 @@
+2002-11-06  Andrew Cagney  <cagney@redhat.com>
+
+	* i386-tdep.c (i386_mmx_regnum_p): Rename mmx_regnum_p.  Update
+	all callers.
+	(i386_fp_regnum_p): New function.  Use instead of FP_REGNUM_P.
+	(i386_fpc_regnum_p): New function.  Use instead of FPC_REGNUM_P.
+	(i386_sse_regnum_p): New function.  Use instead of SSE_REGNUM_P.
+	(i386_mxcsr_regnum_p): new function.  Use instead of
+	MXCSR_REGNUM_P.
+	* i386-tdep.h (SSE_REGNUM_P): Delete macro.
+	(i386_sse_regnum_p): Declare.
+	(i386_mxcsr_regnum_p): Declare.
+	(FP_REGNUM_P, FPC_REGNUM_P): Delete macros.
+	(i386_fp_regnum_p, i386_fpc_regnum_p): Declare.
+	(IS_FP_REGNUM): Update definition.
+	(IS_FPU_CTRL_REGNUM): Update definition..
+	(IS_SSE_REGNUM): Update definition..
+	* i386v-nat.c (register_u_addr): Update.
+	* go32-nat.c (fetch_register): Update.
+	(store_register): Update.
+
 2002-11-07  Joel Brobecker  <brobecker@gnat.com>
 
 	Preparation work to convert the hppa targets to multiarch partial.
