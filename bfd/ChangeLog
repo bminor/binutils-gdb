@@ -1,3 +1,8 @@
+2003-06-12  Daniel Jacobowitz  <drow@mvista.com>
+
+	* configure.in: Bump version to 2.14.
+	* configure: Regenerated.
+
 2003-06-05  Daniel Jacobowitz  <drow@mvista.com>
 
 	* elfcode.h (elf_slurp_reloc_table_from_section): Don't dereference
