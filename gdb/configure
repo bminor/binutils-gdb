@@ -1950,7 +1950,7 @@ else
   echo "$ac_t""no" 1>&6
 fi
 
-    if test $ac_cv_lib_dnet = no; then
+    if test $ac_cv_lib_dnet_dnet_ntoa = no; then
       echo $ac_n "checking for -ldnet_stub""... $ac_c" 1>&6
 ac_lib_var=`echo dnet_stub_dnet_ntoa | tr '.-/+' '___p'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
