@@ -1,3 +1,7 @@
+Mon Jun 21 20:39:48 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
+
+	* Makefile.in (INCLUDES): Don't need ../include any more.
+
 Mon Jun 21 16:38:35 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* .Sanitize (Things-to-keep): Add emulparams, emultempl, scripttempl.
