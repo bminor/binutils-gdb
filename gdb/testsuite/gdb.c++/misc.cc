@@ -427,6 +427,18 @@ void enums1 ()
   obj_with_enum.priv_enum = ClassWithEnum::green;
 }
 
+class ClassParam {
+public:
+  int Aptr_a (A *a) { return a->a; }
+  int Aptr_x (A *a) { return a->x; }
+  int Aref_a (A &a) { return a.a; }
+  int Aref_x (A &a) { return a.x; }
+  int Aval_a (A a) { return a.a; }
+  int Aval_x (A a) { return a.x; }
+};
+
+ClassParam class_param;
+
 class Contains_static_instance
 {
  public:
@@ -514,6 +526,18 @@ void dummy()
   v_bool_array[1] = v_bool;
 }
 
+void use_methods ()
+{
+  /* Refer to methods so that they don't get optimized away. */
+  int i;
+  i = class_param.Aptr_a (&g_A);
+  i = class_param.Aptr_x (&g_A);
+  i = class_param.Aref_a (g_A);
+  i = class_param.Aref_x (g_A);
+  i = class_param.Aval_a (g_A);
+  i = class_param.Aval_x (g_A);
+}
+
 
 int
 main()
@@ -535,6 +559,8 @@ main()
 
   /* Make sure the AIX linker doesn't remove the variable.  */
   v_tagless.one = 5;
+
+  use_methods ();
 
   return foo.*pmi;
 }

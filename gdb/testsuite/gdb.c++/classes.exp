@@ -570,6 +570,30 @@ proc test_nonexistent_members {} {
 }
 
 #
+# Call a method that expects a base class parameter with base, inherited,
+# and unrelated class arguments.
+#
+
+proc test_method_param_class {} {
+    gdb_test "call class_param.Aptr_a (&g_A)" ".* = 1" "base class param->a"
+    gdb_test "call class_param.Aptr_x (&g_A)" ".* = 2" "base class param->x"
+    gdb_test "call class_param.Aptr_a (&g_B)" ".* = 3" "inherited class param->a"
+    gdb_test "call class_param.Aptr_x (&g_B)" ".* = 4" "inherited class param->x"
+    gdb_test "call class_param.Aref_a (g_A)" ".* = 1" "base class (&param)->a"
+    gdb_test "call class_param.Aref_x (g_A)" ".* = 2" "base class (&param)->x"
+    gdb_test "call class_param.Aref_a (g_B)" ".* = 3" "inherited class (&param)->a"
+    gdb_test "call class_param.Aref_x (g_B)" ".* = 4" "inherited class (&param)->x"
+    gdb_test "call class_param.Aval_a (g_A)" ".* = 1" "base class param.a"
+    gdb_test "call class_param.Aval_x (g_A)" ".* = 2" "base class param.x"
+    gdb_test "call class_param.Aval_a (g_B)" ".* = 3" "inherited class param.a"
+    gdb_test "call class_param.Aval_x (g_B)" ".* = 4" "inherited class param.x"
+
+    gdb_test "call class_param.Aptr_a (&foo)" "Cannot resolve .*" "unrelated class *param"
+    gdb_test "call class_param.Aref_a (foo)" "Cannot resolve .*" "unrelated class &param"
+    gdb_test "call class_param.Aval_a (foo)" "Cannot resolve .*" "unrelated class param"
+}
+
+#
 # Examine a class with an enum field.
 #
 
@@ -806,6 +830,7 @@ proc do_tests {} {
 	test_non_inherited_member_access
 	test_wrong_class_members
 	test_nonexistent_members
+	test_method_param_class
     }
 
     gdb_breakpoint enums2

@@ -1,5 +1,13 @@
 2000-07-09  Nick Duffek  <nsd@redhat.com>
 
+	* gdb.c++/misc.cc (class ClassParam, class_param): Define.
+	(use_methods): New function.
+	(main): Call use_methods().
+	* gdb.c++/classes.exp (test_method_param_class): New procedure.
+	(do_tests): Call test_method_param_class.
+
+2000-07-09  Nick Duffek  <nsd@redhat.com>
+
 	* gdb.c++/classes.exp (test_nonexistant_members): Fix name
 	spelling.
 	(test_enums): New procedure.  Move enum tests from end of script
