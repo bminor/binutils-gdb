@@ -1,5 +1,10 @@
 Fri Nov 24 11:24:34 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* lf.h (__attribute__): If not GCC and at least 2.7.0, define as
+	nothing.
+ 	(lf_printf): Add printf __attribute__, so the compiler will
+	automatically check the format string.
+
 	* configure{,.in} (--enable-sim-icache): If argument is define,
 	add -R to flags passed to igen.
 
