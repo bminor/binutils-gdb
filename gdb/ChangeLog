@@ -1,3 +1,11 @@
+2004-05-07  Andrew Cagney  <cagney@redhat.com>
+
+	* observer.c: Include "commands.h" and "gdbcmd.h".
+	(observer_debug, _initialize_observer): Add the
+	command "set/show debug observer".
+	* observer.sh: When observer debugging, log notify calls.
+	* Makefile.in (observer.o): Update dependencies.
+
 2004-05-07  Jason Molenda  (jmolenda@apple.com)
 
 	* cli/cli-decode.c: Fix "SHOW_DOR" comment typeos.

@@ -13404,6 +13404,13 @@ default is off.
 @item show debug frame
 Displays the current state of displaying @value{GDBN} frame debugging
 info.
+@kindex set debug observer
+@item set debug observer
+Turns on or off display of @value{GDBN} observer debugging.  This
+includes info such as the notification of observable events.
+@kindex show debug observer
+@item show debug observer
+Displays the current state of observer debugging.
 @kindex set debug overload
 @item set debug overload
 Turns on or off display of @value{GDBN} C@t{++} overload debugging

@@ -52,6 +52,10 @@
 
 #include "defs.h"
 #include "observer.h"
+#include "command.h"
+#include "gdbcmd.h"
+
+static int observer_debug;
 
 /* The internal generic observer.  */
 
@@ -187,6 +191,20 @@ void
 observer_test_third_notification_function (struct bpstats *bs)
 {
   observer_test_third_observer++;
+}
+
+extern initialize_file_ftype _initialize_observer; /* -Wmissing-prototypes */
+
+void
+_initialize_observer (void)
+{
+  add_setshow_zinteger_cmd ("observer", class_maintenance, &observer_debug, "\
+Set observer debugging.\n\
+When non-zero, observer debugging is enabled.",  "\
+Show observer debugging.\n\
+When non-zero, observer debugging is enabled.",
+			    NULL, NULL,
+			    &setdebuglist, &showdebuglist);
 }
 
 #include "observer.inc"

@@ -2118,7 +2118,8 @@ objfiles.o: objfiles.c $(defs_h) $(bfd_h) $(symtab_h) $(symfile_h) \
 	$(objfiles_h) $(gdb_stabs_h) $(target_h) $(bcache_h) $(gdb_assert_h) \
 	$(gdb_stat_h) $(gdb_obstack_h) $(gdb_string_h) $(hashtab_h) \
 	$(breakpoint_h) $(block_h) $(dictionary_h)
-observer.o: observer.c $(defs_h) $(observer_h) $(observer_inc)
+observer.o: observer.c $(defs_h) $(observer_h) $(observer_inc) \
+	$(command_h) $(gdbcmd_h)
 ocd.o: ocd.c $(defs_h) $(gdbcore_h) $(gdb_string_h) $(frame_h) $(inferior_h) \
 	$(bfd_h) $(symfile_h) $(target_h) $(gdbcmd_h) $(objfiles_h) \
 	$(gdb_stabs_h) $(serial_h) $(ocd_h) $(regcache_h)

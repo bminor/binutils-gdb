@@ -134,6 +134,8 @@ observer_notify_${event} (${formal})
 {
   struct ${event}_args args;
   `echo ${actual} | sed -e 's/\([a-z0-9_][a-z0-9_]*\)/args.\1 = \1/g'`;
+  if (observer_debug)
+    fprintf_unfiltered (gdb_stdlog, "observer_notify_${event}() called\n");
   generic_observer_notify (${event}_subject, &args);
 }
 EOF

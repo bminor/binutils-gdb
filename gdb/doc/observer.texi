@@ -35,6 +35,11 @@ The observer implementation is also currently not reentrant.
 In particular, it is therefore not possible to call the attach
 or detach routines during a notification.
 
+@section Debugging
+Observer notifications can be traced using the command @samp{set debug
+observer 1} (@pxref{Debugging Output, , Optional messages about
+internal happenings, gdb, Debugging with @var{GDBN}}).
+
 @section @code{normal_stop} Notifications
 @cindex @code{normal_stop} observer
 @cindex notification about inferior execution stop
