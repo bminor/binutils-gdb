@@ -1,6 +1,6 @@
 /* libbfd.h -- Declarations used by bfd library *implementation*.
    (This include file is not for users of the library.)
-   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 ** NOTE: libbfd.h is a GENERATED file.  Don't change it; instead,
@@ -21,7 +21,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Align an address upward to a boundary, expressed as a number of bytes.
    E.g. align to an 8-byte boundary with argument of 8.  */
@@ -71,6 +71,8 @@ struct areltdata {
 #define arelt_size(bfd) (((struct areltdata *)((bfd)->arelt_data))->parsed_size)
 
 char *bfd_zmalloc PARAMS ((bfd_size_type size));
+
+extern bfd_error_handler_type _bfd_error_handler;
 
 /* These routines allocate and free things on the BFD's obstack.  Note
    that realloc can never occur in place.  */
@@ -148,8 +150,16 @@ extern boolean _bfd_generic_get_section_contents
 
 #define _bfd_generic_bfd_copy_private_bfd_data \
   ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
+#define _bfd_generic_bfd_merge_private_bfd_data \
+  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
+#define _bfd_generic_bfd_set_private_flags \
+  ((boolean (*) PARAMS ((bfd *, flagword))) bfd_true)
 #define _bfd_generic_bfd_copy_private_section_data \
   ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_true)
+#define _bfd_generic_bfd_copy_private_symbol_data \
+  ((boolean (*) PARAMS ((bfd *, asymbol *, bfd *, asymbol *))) bfd_true)
+#define _bfd_generic_bfd_print_private_bfd_data \
+  ((boolean (*) PARAMS ((bfd *, void  *))) bfd_true)
 
 /* Routines to use for BFD_JUMP_TABLE_CORE when there is no core file
    support.  Use BFD_JUMP_TABLE_CORE (_bfd_nocore).  */
@@ -233,6 +243,11 @@ extern boolean _bfd_archive_coff_construct_extended_name_table
    bfd_false)
 #define _bfd_nosymbols_bfd_make_debug_symbol \
   ((asymbol *(*) PARAMS ((bfd *, PTR, unsigned long))) bfd_nullvoidptr)
+#define _bfd_nosymbols_read_minisymbols \
+  ((long (*) PARAMS ((bfd *, boolean, PTR *, unsigned int *))) _bfd_n1)
+#define _bfd_nosymbols_minisymbol_to_symbol \
+  ((asymbol *(*) PARAMS ((bfd *, boolean, const PTR, asymbol *))) \
+   bfd_nullvoidptr)
 
 /* Routines to use for BFD_JUMP_TABLE_RELOCS when there is no reloc
    support.  Use BFD_JUMP_TABLE_RELOCS (_bfd_norelocs).  */
@@ -281,6 +296,8 @@ extern boolean _bfd_generic_set_section_contents
   ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
 #define _bfd_nolink_bfd_final_link \
   ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
+#define _bfd_nolink_bfd_link_split_section \
+  ((boolean (*) PARAMS ((bfd *, struct sec *))) bfd_false)
 
 /* Routines to use for BFD_JUMP_TABLE_DYNAMIC for targets which do not
    have dynamic symbols or relocs.  Use BFD_JUMP_TABLE_DYNAMIC
@@ -296,6 +313,12 @@ extern boolean _bfd_generic_set_section_contents
 /* Generic routine to determine of the given symbol is a local
    label.  */
 extern boolean bfd_generic_is_local_label PARAMS ((bfd *, asymbol *));
+
+/* Generic minisymbol routines.  */
+extern long _bfd_generic_read_minisymbols
+  PARAMS ((bfd *, boolean, PTR *, unsigned int *));
+extern asymbol *_bfd_generic_minisymbol_to_symbol
+  PARAMS ((bfd *, boolean, const PTR, asymbol *));
 
 /* A routine to create entries for a bfd_link_hash_table.  */
 extern struct bfd_hash_entry *_bfd_link_hash_newfunc
@@ -341,6 +364,9 @@ extern boolean _bfd_generic_link_add_one_symbol
 /* Generic link routine.  */
 extern boolean _bfd_generic_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
+
+extern boolean _bfd_generic_link_split_section
+  PARAMS ((bfd *, struct sec *));
 
 /* Generic reloc_link_order processing routine.  */
 extern boolean _bfd_generic_reloc_link_order
@@ -420,6 +446,19 @@ extern bfd *bfd_last_cache;
 extern const bfd_target * const bfd_target_vector[];
 extern const bfd_target * const bfd_default_vector[];
 
+/* A function shared by the ECOFF and MIPS ELF backends, which have no
+   other common header files.  */
+
+#if defined(__STDC__) || defined(ALMOST_STDC)
+struct ecoff_find_line;
+#endif
+
+extern boolean
+_bfd_ecoff_locate_line
+  PARAMS ((bfd *, asection *, bfd_vma, struct ecoff_debug_info * const,
+	   const struct ecoff_debug_swap * const, struct ecoff_find_line *,
+	   const char **, const char **, unsigned int *));
+
 /* And more follows */
 
 void 
@@ -466,9 +505,25 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_16_PCREL",
   "BFD_RELOC_12_PCREL",
   "BFD_RELOC_8_PCREL",
+  "BFD_RELOC_32_GOT_PCREL",
+  "BFD_RELOC_16_GOT_PCREL",
+  "BFD_RELOC_8_GOT_PCREL",
+  "BFD_RELOC_32_GOTOFF",
+  "BFD_RELOC_16_GOTOFF",
+  "BFD_RELOC_8_GOTOFF",
+  "BFD_RELOC_32_PLT_PCREL",
+  "BFD_RELOC_16_PLT_PCREL",
+  "BFD_RELOC_8_PLT_PCREL",
+  "BFD_RELOC_32_PLTOFF",
+  "BFD_RELOC_16_PLTOFF",
+  "BFD_RELOC_8_PLTOFF",
+  "BFD_RELOC_68K_GLOB_DAT",
+  "BFD_RELOC_68K_JMP_SLOT",
+  "BFD_RELOC_68K_RELATIVE",
   "BFD_RELOC_32_BASEREL",
   "BFD_RELOC_16_BASEREL",
   "BFD_RELOC_8_BASEREL",
+  "BFD_RELOC_RVA",
   "BFD_RELOC_8_FFnn",
   "BFD_RELOC_32_PCREL_S2",
   "BFD_RELOC_16_PCREL_S2",
@@ -553,15 +608,19 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_ARM_SWI",
   "BFD_RELOC_ARM_MULTI",
   "BFD_RELOC_ARM_CP_OFF_IMM",
+  "BFD_RELOC_ARM_ADR_IMM",
+  "BFD_RELOC_ARM_LDR_IMM",
+  "BFD_RELOC_ARM_LITERAL",
+  "BFD_RELOC_ARM_IN_POOL",
 /* start-sanitize-arc */
   "BFD_RELOC_ARC_B22_PCREL",
+  "BFD_RELOC_ARC_B26",
 /* end-sanitize-arc */
-
  "@@overflow: BFD_RELOC_UNUSED@@",
 };
 #endif
 
-const struct reloc_howto_struct *
+reloc_howto_type *
 bfd_default_reloc_type_lookup
  PARAMS ((bfd *abfd, bfd_reloc_code_real_type  code));
 

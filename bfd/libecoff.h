@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfdlink.h"
 
@@ -252,6 +252,9 @@ extern boolean _bfd_ecoff_bfd_copy_private_bfd_data PARAMS ((bfd *, bfd *));
 #define _bfd_ecoff_bfd_copy_private_symbol_data \
   _bfd_generic_bfd_copy_private_symbol_data
 
+#define _bfd_ecoff_bfd_print_private_bfd_data \
+  _bfd_generic_bfd_pritn_private_bfd_data
+
 #define _bfd_ecoff_bfd_merge_private_bfd_data \
   _bfd_generic_bfd_merge_private_bfd_data
 
@@ -283,6 +286,8 @@ extern boolean _bfd_ecoff_find_nearest_line
 	   const char **filename_ptr, const char **fnname_ptr,
 	   unsigned int *retline_ptr));
 #define _bfd_ecoff_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
+#define _bfd_ecoff_read_minisymbols _bfd_generic_read_minisymbols
+#define _bfd_ecoff_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol
 
 #define _bfd_ecoff_get_reloc_upper_bound coff_get_reloc_upper_bound
 extern long _bfd_ecoff_canonicalize_reloc

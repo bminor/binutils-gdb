@@ -15,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* This structure contains everything that BFD knows about a target.
    It includes things like its byte order, name, what routines to call
@@ -36,6 +36,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef bfd_elfNN_find_nearest_line
 #define bfd_elfNN_find_nearest_line	_bfd_elf_find_nearest_line
 #endif
+#define bfd_elfNN_read_minisymbols	_bfd_elf_read_minisymbols
+#define bfd_elfNN_minisymbol_to_symbol	_bfd_elf_minisymbol_to_symbol
 #define bfd_elfNN_get_dynamic_symtab_upper_bound _bfd_elf_get_dynamic_symtab_upper_bound
 #define bfd_elfNN_get_lineno		_bfd_elf_get_lineno
 #define bfd_elfNN_get_reloc_upper_bound _bfd_elf_get_reloc_upper_bound
@@ -88,6 +90,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef bfd_elfNN_bfd_copy_private_bfd_data
 #define bfd_elfNN_bfd_copy_private_bfd_data \
   ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
+#endif
+#ifndef bfd_elfNN_bfd_print_private_bfd_data
+#define bfd_elfNN_bfd_print_private_bfd_data \
+  ((boolean (*) PARAMS ((bfd *, void *))) bfd_true)
 #endif
 #ifndef bfd_elfNN_bfd_merge_private_bfd_data
 #define bfd_elfNN_bfd_merge_private_bfd_data \

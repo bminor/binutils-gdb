@@ -1,3 +1,27 @@
+Thu Aug 31 16:00:53 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* Makefile.in: Update dependencies.
+	* aout-target.h (MY_bfd_print_private_bfd_data): New.
+	* bfd-in.h (PE STUFF): Deleted.
+	* bfd.c (tdata->pe_obj_data): New.
+	(bfd_print_private_bfd_data): New.
+	* coff-i386.c, coff-arm.c (coff_*-rtype_to_howto): Get image base from
+	new place.
+	* libcoff.h, libbfd.h, bfd-in2.h: Rebuilt.
+	* coffcode.h (pe_value): Delete
+	(coff_mkobject, coff_mkobject_hook): Conditionally build.
+	(coff_compute_section_file_positions): Look in new place.
+	(add_data_entry, fill_pe_header_info): Deleted.
+	(coff_write_object_contents): Remove PE stuff.
+	(coff_bfd_print_private_bfd_data): New.
+	* coffswap.h: Remove PE stuff.
+	* elfxx-target.h (bfd_elfNN_bfd_print_private_bfd_data): New.
+	* libbfd-in.h (_bfd_generic_bfd_print_private_bfd_data): New.
+	* libcoff-in.h (pe_data_type): New.
+	* libecoff.h (_bfd_ecoff_bfd_print_private_bfd_data): New.
+	* targets.c (_bfd_print_private_bfd_data): New.
+	* peicode.h: New file.
+
 Thu Aug 31 11:49:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* bfd-in.h: Add extern "C" if __cplusplus.

@@ -449,58 +449,6 @@ extern long bfd_tell PARAMS ((bfd *abfd));
 extern int bfd_flush PARAMS ((bfd *abfd));
 extern int bfd_stat PARAMS ((bfd *abfd, struct stat *));
 
-/* PE STUFF */
-/* Also define some types which are used within bfdlink.h for the
-   bfd_link_info struct.  These are not defined in bfdlink.h for a reason.  
-   When the link_info data is passed to bfd from ld, it is copied into 
-   extern variables defined in internal.h.  The type class for these must
-   be available to any thing that includes internal.h.  When internal.h is
-   included, it is always preceeded by an include on this file.  If I leave the
-   type definitions in bfdlink.h, then I must include that file when ever
-   I include internal.h, and this is not always a good thing */
-
-/* These are the different types of subsystems to be used when linking for
-   Windows NT.  This information is passed in as an input parameter (default
-   is console) and ultimately ends up in the optional header data */
-
-#define BFD_PE_NATIVE  1 	/* image doesn't require a subsystem */
-#define BFD_PE_WINDOWS 2 	/* image runs in the Windows GUI subsystem */
-#define BFD_PE_CONSOLE 3	/* image runs in the Windows CUI subsystem */
-#define BFD_PE_OS2     5	/* image runs in the OS/2 character subsystem */
-#define BFD_PE_POSIX   7	/* image runs in the posix character subsystem */
-
-/* The NT optional header file allows input of the stack and heap reserve
-   and commit size.  This data may be input on the command line and will
-   end up in the optional header.  Default sizes are provided. */
-
-typedef struct 
-{
-  boolean defined;
-  bfd_vma value;
-} bfd_link_pe_info_dval ;
-
-typedef struct _bfd_link_pe_info
-{
-  bfd_link_pe_info_dval dll;
-  bfd_link_pe_info_dval file_alignment;
-  bfd_link_pe_info_dval heap_commit;
-  bfd_link_pe_info_dval heap_reserve;
-  bfd_link_pe_info_dval image_base;
-  bfd_link_pe_info_dval major_image_version;
-  bfd_link_pe_info_dval major_os_version;
-  bfd_link_pe_info_dval major_subsystem_version;
-  bfd_link_pe_info_dval minor_image_version;
-  bfd_link_pe_info_dval minor_os_version;
-  bfd_link_pe_info_dval minor_subsystem_version;
-  bfd_link_pe_info_dval section_alignment;
-  bfd_link_pe_info_dval stack_commit;
-  bfd_link_pe_info_dval stack_reserve;
-  bfd_link_pe_info_dval subsystem;
-}  bfd_link_pe_info;
-
-/* END OF PE STUFF */
-
-
 
 /* Cast from const char * to char * so that caller can assign to
    a char * without a warning.  */

@@ -133,6 +133,7 @@ BFD32_BACKENDS = \
 	cf-sparclynx.o \
 	coff-a29k.o \
 	coff-apollo.o \
+	coff-arm.o \
 	coff-h8300.o \
 	coff-h8500.o \
 	coff-i386.o \
@@ -164,6 +165,7 @@ BFD32_BACKENDS = \
 	elf32-ppc.o \
 	elf32-sparc.o \
 	elf32.o \
+	elflink.o \
 	hp300hpux.o \
 	som.o \
 	i386aout.o \
@@ -280,7 +282,7 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 sparclynx.c cf-sparclynx.c aix386-core.c hpux-core.c \
 	 irix-core.c lynx-core.c osf-core.c hash.c linker.c cofflink.c \
 	 m68knetbsd.c ns32knetbsd.c sparcnetbsd.c pe-i386.c pei-i386.c \
-	 versados.c
+	 versados.c coff-arm.c pe-arm.c pei-arm.c
 
 HFILES = aout-target.h aoutf1.h aoutx.h coffcode.h \
 	 coffswap.h ecoffswap.h elf32-hppa.h elf32-target.h elf64-target.h \
@@ -834,7 +836,15 @@ pe-i386.o: pe-i386.c coff-i386.c $(INCDIR)/coff/i386.h \
   $(INCDIR)/bfdlink.h coffcode.h coffswap.h
 pei-i386.o: pei-i386.c coff-i386.c $(INCDIR)/coff/i386.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h coffswap.h
+  $(INCDIR)/bfdlink.h coffcode.h coffswap.h peicode.h
 versados.o: versados.c $(INCDIR)/libiberty.h
+coff-arm.o: coff-arm.c $(INCDIR)/coff/arm.h $(INCDIR)/coff/internal.h \
+  libcoff.h $(INCDIR)/bfdlink.h coffcode.h coffswap.h
+pe-arm.o: pe-arm.c coff-arm.c $(INCDIR)/coff/arm.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
+  $(INCDIR)/bfdlink.h coffcode.h coffswap.h 
+pei-arm.o: pei-arm.c coff-arm.c $(INCDIR)/coff/arm.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
+  $(INCDIR)/bfdlink.h coffcode.h coffswap.h peicode.h
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
