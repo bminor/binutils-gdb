@@ -186,7 +186,7 @@ pe_export_sort (va, vb)
 
 /* These correspond to the entries in pe_def_file->exports[].  I use
    exported_symbol_sections[i] to tag whether or not the symbol was
-   defined, since we can't export symbols we don't have. */
+   defined, since we can't export symbols we don't have.  */
 
 static bfd_vma *exported_symbol_offsets;
 static struct sec **exported_symbol_sections;
@@ -434,7 +434,7 @@ process_def_file (abfd, info)
 	    exported_symbol_sections[i] = blhe->u.def.section;
 	  else
 	    exported_symbol_sections[i] = blhe->u.c.p->section;
-	  
+
 	  if (pe_def_file->exports[i].ordinal != -1)
 	    {
 	      if (max_ordinal < pe_def_file->exports[i].ordinal)
@@ -541,7 +541,7 @@ generate_edata (abfd, info)
   const char *dlnp;
 
   /* First, we need to know how many exported symbols there are,
-     and what the range of ordinals is. */
+     and what the range of ordinals is.  */
 
   if (pe_def_file->name)
     {
@@ -626,7 +626,7 @@ fill_exported_offsets (abfd, info)
 {
   int i;
   struct bfd_link_hash_entry *blhe;
-  
+
   for (i = 0; i < pe_def_file->num_exports; i++)
     {
       char *name = (char *) xmalloc (strlen (pe_def_file->exports[i].internal_name) + 2);
@@ -806,9 +806,9 @@ generate_reloc (abfd, info)
 			     + sym->section->output_offset
 			     + sym->section->output_section->vma);
 		  reloc_data[total_relocs].vma = sec_vma + relocs[i]->address;
-		  
+
 #define BITS_AND_SHIFT(bits, shift) (bits * 1000 | shift)
-				    
+
 		  switch BITS_AND_SHIFT (relocs[i]->howto->bitsize,
 					 relocs[i]->howto->rightshift)
 		    {
@@ -849,23 +849,23 @@ generate_reloc (abfd, info)
 
   /* At this point, we have total_relocs relocation addresses in
      reloc_addresses, which are all suitable for the .reloc section.
-     We must now create the new sections. */
+     We must now create the new sections.  */
 
   qsort (reloc_data, total_relocs, sizeof (*reloc_data), reloc_sort);
 
   for (i = 0; i < total_relocs; i++)
     {
       unsigned long this_page = (reloc_data[i].vma >> 12);
-      
+
       if (this_page != sec_page)
 	{
 	  reloc_sz = (reloc_sz + 3) & ~3;	/* 4-byte align */
 	  reloc_sz += 8;
 	  sec_page = this_page;
 	}
-      
+
       reloc_sz += 2;
-      
+
       if (reloc_data[i].type == 4)
 	reloc_sz += 2;
     }
@@ -1247,7 +1247,7 @@ make_head (parent)
      it.  We create a four-byte section to mark the beginning of the
      list, and we include an offset of 4 in the section, so that the
      pointer to the list points to the *end* of this section, which is
-     the start of the list of sections from other objects. */
+     the start of the list of sections from other objects.  */
 
   bfd_set_section_size (abfd, id2, 20);
   d2 = (unsigned char *) xmalloc (20);
@@ -1274,7 +1274,7 @@ make_head (parent)
   bfd_set_section_contents (abfd, id2, d2, 0, 20);
   bfd_set_section_contents (abfd, id5, d5, 0, 4);
   bfd_set_section_contents (abfd, id4, d4, 0, 4);
-  
+
   bfd_make_readable (abfd);
   return abfd;
 }
@@ -1451,7 +1451,7 @@ make_one (exp, parent)
   quick_symbol (abfd, U("_head_"), dll_symname, "", UNDSEC, BSF_GLOBAL, 0);
   quick_symbol (abfd, U("_imp__"), exp->internal_name, "", id5, BSF_GLOBAL, 0);
   if (pe_dll_compat_implib)
-    quick_symbol (abfd, U("__imp_"), exp->internal_name, "", 
+    quick_symbol (abfd, U("__imp_"), exp->internal_name, "",
                   id5, BSF_GLOBAL, 0);
 
   bfd_set_section_size (abfd, tx, jmp_byte_count);
@@ -1575,11 +1575,11 @@ pe_dll_generate_implib (def, impfilename)
 
   /* xgettext:c-format */
   einfo (_("Creating library file: %s\n"), impfilename);
-  
+
   bfd_set_format (outarch, bfd_archive);
   outarch->has_armap = 1;
 
-  /* Work out a reasonable size of things to put onto one line. */
+  /* Work out a reasonable size of things to put onto one line.  */
 
   ar_head = make_head (outarch);
 
@@ -1608,7 +1608,7 @@ pe_dll_generate_implib (def, impfilename)
 
   if (! bfd_set_archive_head (outarch, head))
     einfo ("%Xbfd_set_archive_head: %s\n", bfd_errmsg (bfd_get_error ()));
-  
+
   if (! bfd_close (outarch))
     einfo ("%Xbfd_close %s: %s\n", impfilename, bfd_errmsg (bfd_get_error ()));
 
@@ -1772,7 +1772,7 @@ pe_implied_import_dll (filename)
   const char *dll_name;
 
   /* No, I can't use bfd here.  kernel32.dll puts its export table in
-     the middle of the .rdata section. */
+     the middle of the .rdata section.  */
 
   dll = bfd_openr (filename, pe_details->target_name);
   if (!dll)

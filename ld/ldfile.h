@@ -29,7 +29,7 @@ extern const char *ldfile_output_machine_name;
 /* Structure used to hold the list of directories to search for
    libraries.  */
 
-typedef struct search_dirs 
+typedef struct search_dirs
 {
   /* Next directory on list.  */
   struct search_dirs *next;

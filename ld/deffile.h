@@ -1,5 +1,5 @@
 /* deffile.h - header for .DEF file parser
-   Copyright (C) 1998, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1998, 1999, 2000 Free Software Foundation, Inc.
    Written by DJ Delorie dj@cygnus.com
 
    This file is part of GLD, the Gnu Linker.
@@ -25,7 +25,7 @@
 #include "ansidecl.h"
 
 /* DEF storage definitions.  Note that any ordinal may be zero, and
-   any pointer may be NULL, if not defined by the DEF file. */
+   any pointer may be NULL, if not defined by the DEF file.  */
 
 typedef struct def_file_section
   {

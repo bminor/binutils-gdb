@@ -1,5 +1,6 @@
 /* ldexp.h -
-   Copyright 1991, 92, 93, 94, 95, 1998 Free Software Foundation, Inc.
+   Copyright 1991, 92, 93, 94, 95, 98, 2000
+   Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
 
@@ -22,16 +23,14 @@
 #define LDEXP_H
 
 /* The result of an expression tree */
-typedef struct 
+typedef struct
 {
   bfd_vma value;
   struct lang_output_section_statement_struct *section;
   boolean valid_p;
 } etree_value_type;
 
-
-
-typedef struct 
+typedef struct
 {
   int node_code;
   enum { etree_binary,
@@ -47,9 +46,7 @@ typedef struct
 	   etree_rel } node_class;
 } node_type;
 
-
-
-typedef union etree_union 
+typedef union etree_union
 {
   node_type type;
   struct {
@@ -92,7 +89,6 @@ typedef union etree_union
     const char *message;
   } assert_s;
 } etree_type;
-
 
 etree_type *exp_intop PARAMS ((bfd_vma));
 etree_type *exp_relop PARAMS ((asection *, bfd_vma));

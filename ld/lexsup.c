@@ -47,7 +47,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #endif
 #endif
 
-/* Somewhere above, sys/stat.h got included . . . . */
+/* Somewhere above, sys/stat.h got included . . . .  */
 #if !defined(S_ISDIR) && defined(S_IFDIR)
 #define	S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
 #endif
@@ -597,12 +597,12 @@ parse_args (argc, argv)
 	  if (optarg != NULL)
 	    {
 	      enum demangling_styles style;
-	      
+
 	      style = cplus_demangle_name_to_style (optarg);
-	      if (style == unknown_demangling) 
+	      if (style == unknown_demangling)
 		einfo (_("%F%P: unknown demangling style `%s'"),
 		       optarg);
-	      
+
 	      cplus_demangle_set_style (style);
            }
 	  break;
@@ -729,7 +729,7 @@ parse_args (argc, argv)
 	  link_info.optimize = strtoul (optarg, NULL, 0) ? true : false;
 	  break;
 	case 'o':
-	  lang_add_output (optarg, 0); 
+	  lang_add_output (optarg, 0);
 	  break;
 	case OPTION_OFORMAT:
 	  lang_add_output_format (optarg, (char *) NULL, (char *) NULL, 0);
@@ -874,7 +874,7 @@ parse_args (argc, argv)
 	      }
 
 	    optarg2 ++;
-	    
+
 	    /* So far so good.  Are all the args present?  */
 	    if ((*optarg == '\0') || (*optarg2 == '\0'))
 	      {
@@ -945,9 +945,9 @@ This program is free software; you may redistribute it under the terms of\n\
 the GNU General Public License.  This program has absolutely no warranty.\n"));
 	  {
 	    ld_emulation_xfer_type **ptr = ld_emulations;
-    
+
 	    printf (_("  Supported emulations:\n"));
-	    while (*ptr) 
+	    while (*ptr)
 	      {
 		printf ("   %s\n", (*ptr)->emulation_name);
 		ptr++;
@@ -1015,13 +1015,13 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	    config.split_by_reloc = strtoul (optarg, NULL, 0);
 	  else
 	    config.split_by_reloc = 32768;
-	  break; 
+	  break;
 	case OPTION_SPLIT_BY_FILE:
 	  if (optarg != NULL)
 	    config.split_by_file = bfd_scan_vma (optarg, NULL, 0);
 	  else
 	    config.split_by_file = 1;
-	  break; 
+	  break;
 	case OPTION_CHECK_SECTIONS:
 	  command_line.check_section_addresses = true;
 	  break;
@@ -1072,7 +1072,7 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	case OPTION_INIT:
 	  link_info.init_function = optarg;
 	  break;
-	  
+
 	case OPTION_FINI:
 	  link_info.fini_function = optarg;
 	  break;

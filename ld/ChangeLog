@@ -1,11 +1,21 @@
 2000-09-29  Kazu Hirata  <kazu@hxi.com>
 
-	* ldcref.c: Fix formatting.
+	* deffile.h: Fix formatting.
+	* ld.h: Likewise.
+	* ldcref.c: Likewise.
 	* ldctor.c: Likewise.
+	* ldctor.h: Likewise.
 	* ldemul.c: Likewise.
+	* ldemul.h: Likewise.
 	* ldexp.c: Likewise.
+	* ldexp.h: Likewise.
 	* ldfile.c: Likewise.
+	* ldfile.h: Likewise.
 	* ldlang.c: Likewise.
+	* ldlang.h: Likewise.
+	* lexsup.c: Likewise.
+	* mri.c: Likewise.
+	* pe-dll.c: Likewise.
 
 2000-09-28  Paul Sokolovsky  <Paul.Sokolovsky@technologist.com>
 

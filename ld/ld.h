@@ -81,7 +81,6 @@ typedef struct  user_section_struct
   struct lang_input_statement_struct *file;
 } section_userdata_type;
 
-
 #define get_userdata(x) ((x)->userdata)
 
 #define BYTE_SIZE	(1)
@@ -127,7 +126,7 @@ typedef struct
      file.  */
   boolean embedded_relocs;
 
-  /* If true, force generation of a file with a .exe file. */
+  /* If true, force generation of a file with a .exe file.  */
   boolean force_exe_suffix;
 
   /* If true, generate a cross reference report.  */
@@ -155,14 +154,14 @@ typedef struct
   /* If true (the default) check section addresses, once compute,
      fpor overlaps.  */
   boolean check_section_addresses;
-  
+
 } args_type;
 
 extern args_type command_line;
 
 typedef int token_code_type;
 
-typedef struct 
+typedef struct
 {
   bfd_size_type specified_data_size;
   boolean magic_demand_paged;

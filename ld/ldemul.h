@@ -1,5 +1,6 @@
 /* ld-emul.h - Linker emulation header file
-   Copyright 1991, 92, 93, 94, 95, 96, 97, 1998, 2000 Free Software Foundation, Inc.
+   Copyright 1991, 92, 93, 94, 95, 96, 97, 1998, 2000
+   Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
 
@@ -111,12 +112,12 @@ typedef struct ld_emulation_xfer_struct
   boolean (*place_orphan)
     PARAMS ((struct lang_input_statement_struct *, asection *));
 
-  /* Run after assigning parsing with the args, but before 
-     reading the script.  Used to initialize symbols used in the script. */
+  /* Run after assigning parsing with the args, but before
+     reading the script.  Used to initialize symbols used in the script.  */
   void	(*set_symbols) PARAMS ((void));
 
   /* Run to parse args which the base linker doesn't
-     understand. Return non zero on sucess. */
+     understand. Return non zero on sucess.  */
   int (*parse_args) PARAMS ((int, char **));
 
   /* Run to handle files which are not recognized as object files or
@@ -138,10 +139,10 @@ typedef struct ld_emulation_xfer_struct
      (For VMS files matching ":lib*.a" have also been scanned).  */
   int (* find_potential_libraries)
     PARAMS ((char *, struct lang_input_statement_struct *));
-  
+
 } ld_emulation_xfer_type;
 
-typedef enum 
+typedef enum
 {
   intel_ic960_ld_mode_enum,
   default_mode_enum ,
