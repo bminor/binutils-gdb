@@ -1,3 +1,49 @@
+start-sanitize-r5900
+Thu Jul 10 11:58:48 1997  Andrew Cagney  <cagney@critters.cygnus.com>
+
+	* gencode.c (build_instruction): For "ppac5" use unsigned
+ 	arrithmetic so that the sign bit doesn't smear when right shifted.
+	(build_instruction): For "pdiv" perform sign extension when
+ 	storing results in HI and LO.
+	(build_instructions): For "pdiv" and "pdivbw" check for
+ 	divide-by-zero.
+	(build_instruction): For "pmfhl.slw" update hi part of dest
+ 	register as well as low part.
+	(build_instruction): For "pmfhl" portably handle long long values.
+	(build_instruction): For "pmfhl.sh" correctly negative values.
+  	Store half words 2 and three in the correct place.
+	(build_instruction): For "psllvw", sign extend value after shift.
+
+end-sanitize-r5900
+Thu Jun 26 12:13:17 1997  Angela Marie Thomas (angela@cygnus.com)
+
+	* sim/mips/configure: Change default_sim_endian to 0 (bi-endian)
+	* sim/mips/configure.in: Regenerate.
+
+Wed Jul  9 10:29:21 1997  Andrew Cagney  <cagney@critters.cygnus.com>
+
+	* interp.c (SUB_REG_UW, SUB_REG_SW, SUB_REG_*): Use more explicit
+ 	signed8, unsigned8 et.al. types.
+
+start-sanitize-r5900
+	* gencode.c (build_instruction): For PMULTU* do not sign extend
+ 	registers.  Make generated code easier to debug.
+
+end-sanitize-r5900
+	* interp.c (SUB_REG_FETCH): Handle both little and big endian
+ 	hosts when selecting subreg.
+
+start-sanitize-r5900
+Tue Jul  8 18:07:20 1997  Andrew Cagney  <cagney@andros.cygnus.com>
+
+	* gencode.c (type_for_data_len): For 32bit operations concerned
+ 	with overflow, perform op using 64bits.
+	(build_instruction): For PADD, always compute operation using type
+ 	returned by type_for_data_len.
+	(build_instruction): For PSUBU, when overflow, saturate to zero as
+ 	actually underflow.
+
+end-sanitize-r5900
 Wed Jul  2 11:54:10 1997  Jeffrey A Law  (law@cygnus.com)
 
 start-sanitize-r5900
@@ -6,8 +52,8 @@ start-sanitize-r5900
 
 	* gencode.c (build_instruction): Handle "ppac5" according to
 	version 1.95 of the r5900 ISA.
-end-sanitize-r5900
 
+end-sanitize-r5900
 	* interp.c (sim_engine_run): Reset the ZERO register to zero
 	regardless of FEATURE_WARN_ZERO.
 	* gencode.c (FEATURE_WARNINGS): Remove FEATURE_WARN_ZERO.

@@ -1001,20 +1001,21 @@ letter_for_data_len( insn )
   }
 
 static char* 
-type_for_data_len( insn )
+type_for_data_len( insn , is_signed )
      struct instruction* insn;
+     int is_signed;
   {
     if (GETDATASIZEINSN(insn) == BYTE)
-      return "int";
+      return is_signed ? "int" : "unsigned int";
 
     else if (GETDATASIZEINSN(insn) == HALFWORD)
-      return "int";
+      return is_signed ? "int" : "unsigned int";
 
     else if (GETDATASIZEINSN(insn) == WORD)
-      return "long";
+      return is_signed ? "signed64" : "unsigned64";
 
     else if (GETDATASIZEINSN(insn) == DOUBLEWORD)
-      return "long long";
+      return 0;
 
     else if (GETDATASIZEINSN(insn) == QUADWORD)
       return 0;
@@ -3363,48 +3364,55 @@ build_instruction (doisa, features, mips16, insn)
 
        char* tmptype;
        char* maximum;
+       char* maxsat;
        char* minimum;
-       char* signedness;
        char* signletter;
 
        if ( insn->flags & UNSIGNED )
          {
-           tmptype = type_for_data_len( insn );
-           signedness = "unsigned";
+           tmptype = type_for_data_len( insn, 0/*unsigned*/ );
 	   signletter = "U";
            maximum = umax_for_data_len( insn );
+	   maxsat = (insn->flags & SUBTRACT) ? "0" : maximum;
            minimum = 0;
          }
        else if ( insn->flags & SATURATE )
          {
-           tmptype = type_for_data_len( insn );
-           signedness = "";
+           tmptype = type_for_data_len( insn, 1/*signed*/ );
 	   signletter = "S";
            maximum = max_for_data_len( insn );
+	   maxsat = maximum;
            minimum = min_for_data_len( insn );
          }
        else
          {
-           tmptype = type_for_data_len( insn );
-           signedness = "";
+           tmptype = type_for_data_len( insn, 1/*signed*/ );
 	   signletter = "S";
            maximum = 0;
+	   maxsat = 0;
            minimum = 0;
          }
 
-       printf("int i;\n");
-       printf("for(i=0;i<%sS_IN_MMI_REGS;i++)\n", name );
-       printf("     {\n");
-       printf("     %s %s r = RS_%s%s(i) %s RT_%s%s(i);\n", signedness, tmptype, signletter, letter, op, signletter, letter );
+       printf("   int i;\n");
+       printf("   for (i=0; i < %sS_IN_MMI_REGS; i++)\n", name );
+       printf("    {\n");
+       printf("     %s s = RS_%s%s(i);\n", tmptype, signletter, letter);
+       printf("     %s t = RT_%s%s(i);\n", tmptype, signletter, letter);
+       printf("     %s r = s %s t;\n", tmptype, op);
        if ( maximum )
          {
-           printf("     if (r > %s)      GPR_%s%s(destreg,i) = %s;\n", maximum, signletter, letter, maximum );
+           printf("     if (r > %s)\n", maximum);
+           printf("      GPR_%s%s(destreg,i) = %s;\n", signletter, letter, maxsat );
            if ( minimum )
-             printf("     else if (r < %s) GPR_%s%s(destreg,i) = %s;\n", minimum, signletter, letter, minimum );
-           printf("     else             ");
+	     {
+	       printf("     else if (r < %s)\n", minimum);
+	       printf("      GPR_%s%s(destreg,i) = %s;\n", signletter, letter, minimum );
+	     }
+	   printf("     else\n");
+	   printf(" ");
          }
-       printf("GPR_%s%s(destreg,i) = r;\n", signletter, letter );
-       printf("     }\n");
+       printf("     GPR_%s%s(destreg,i) = r;\n", signletter, letter );
+       printf("    }\n");
        break;
      }
 
@@ -3433,61 +3441,74 @@ build_instruction (doisa, features, mips16, insn)
      {
        char* op;
        char* sign  = (insn->flags & UNSIGNED) ? "U" : "S";
-       char* prodtype = (insn->flags & UNSIGNED) ? "uword64" : "word64";
+       char* prodtype = (insn->flags & UNSIGNED) ? "unsigned64" : "signed64";
        char* constructor = (insn->flags & UNSIGNED) ? "UWORD64" : "WORD64";
-
-       printf("%s prod0;\n", prodtype );
-       printf("%s prod1;\n", prodtype );
 
        if ( insn->flags & SUBTRACT )
          {
            op = "-";
-           printf("prod0 = %s( HI_SW(0), LO_SW(0) );\n", constructor );
-           printf("prod1 = %s( HI_SW(2), LO_SW(2) );\n", constructor );
+           printf("   %s sum0 = %s( HI_SW(0), LO_SW(0) );\n", prodtype, constructor );
+           printf("   %s sum1 = %s( HI_SW(2), LO_SW(2) );\n", prodtype, constructor );
          }
        else if ( insn->flags & ADDITION )
          {
            op = "+";
-           printf("prod0 = %s( HI_SW(0), LO_SW(0) );\n", constructor );
-           printf("prod1 = %s( HI_SW(2), LO_SW(2) );\n", constructor );
+           printf("   %s sum0 = %s( HI_SW(0), LO_SW(0) );\n", prodtype, constructor );
+           printf("   %s sum1 = %s( HI_SW(2), LO_SW(2) );\n", prodtype, constructor );
          }
        else
-         op = "";
+	 {
+	   op = "";
+	   printf("   %s sum0 = 0;\n", prodtype );
+	   printf("   %s sum1 = 0;\n", prodtype );
+	 }
+	   
+       printf("   %s prod0 = (%s)RS_%sW(0) * (%s)RT_%sW(0);\n", prodtype, prodtype, sign, prodtype, sign );
+       printf("   %s prod1 = (%s)RS_%sW(2) * (%s)RT_%sW(2);\n", prodtype, prodtype, sign, prodtype, sign );
 
-       printf("prod0 %s= (%s)RS_SW(0) * (%s)RT_SW(0);\n", op, prodtype, prodtype );
-       printf("prod1 %s= (%s)RS_SW(2) * (%s)RT_SW(2);\n", op, prodtype, prodtype );
+       printf("   sum0 %s= prod0;\n", op );
+       printf("   sum1 %s= prod1;\n", op );
 
-       printf("GPR_%sD(destreg,0) = prod0;\n", sign );
-       printf("GPR_%sD(destreg,1) = prod1;\n", sign );
+       printf("   GPR_%sD(destreg,0) = sum0;\n", sign );
+       printf("   GPR_%sD(destreg,1) = sum1;\n", sign );
 
-       printf("LO  = SIGNEXTEND( prod0, 32 );\n");
-       printf("HI  = SIGNEXTEND( WORD64HI(prod0), 32 );\n");
-       printf("LO1 = SIGNEXTEND( prod1, 32 );\n");
-       printf("HI1 = SIGNEXTEND( WORD64HI(prod1), 32 );\n");
+       printf("   LO  = SIGNEXTEND( sum0, 32 );\n");
+       printf("   HI  = SIGNEXTEND( WORD64HI(sum0), 32 );\n");
+       printf("   LO1 = SIGNEXTEND( sum1, 32 );\n");
+       printf("   HI1 = SIGNEXTEND( WORD64HI(sum1), 32 );\n");
        break;
      }
 
     case PDIVW:
-      {
-        char* sign = (insn->flags & UNSIGNED) ? "U" : "S";
-
-        printf("LO  = RS_%sW(0) / RT_%sW(0);\n", sign, sign );
-        printf("HI  = RS_%sW(0) %% RT_%sW(0);\n", sign, sign );
-        printf("LO1 = RS_%sW(2) / RT_%sW(2);\n", sign, sign );
-        printf("HI1 = RS_%sW(2) %% RT_%sW(2);\n", sign, sign );
-        break;
-      }
+     {
+       char* sign = (insn->flags & UNSIGNED) ? "U" : "S";
+       int i;
+       for (i = 0; i < 2; i ++)
+	 {
+	   char hi = (i == 0 ? ' ' : '1');
+	   int d = i * 2;
+	   printf("if (RT_UW(%d) != 0)\n", d );
+	   printf("  {\n");
+	   printf("LO%c = (signed32)(RS_%sW(%d) / RT_%sW(%d));\n", hi, sign, d, sign, d );
+	   printf("HI%c = (signed32)(RS_%sW(%d) %% RT_%sW(%d));\n", hi, sign, d, sign, d );
+	   printf("  }\n");
+	 }
+       break;
+     }
 
     case PDIVBW:
-      printf("int devisor = RT_SH(0);\n");
-      printf("LO_SW(0) = RS_SW(0) / devisor;\n");
-      printf("HI_SW(0) = SIGNEXTEND( (RS_SW(0) %% devisor), 16 );\n");
-      printf("LO_SW(1) = RS_SW(1) / devisor;\n");
-      printf("HI_SW(1) = SIGNEXTEND( (RS_SW(1) %% devisor), 16 );\n");
-      printf("LO_SW(2) = RS_SW(2) / devisor;\n");
-      printf("HI_SW(2) = SIGNEXTEND( (RS_SW(2) %% devisor), 16 );\n");
-      printf("LO_SW(3) = RS_SW(3) / devisor;\n");
-      printf("HI_SW(3) = SIGNEXTEND( (RS_SW(3) %% devisor), 16 );\n");
+      printf("signed32 devisor = RT_SH(0);\n");
+      printf("if (devisor != 0)\n");
+      printf(" {\n");
+      printf("  LO_SW(0) = RS_SW(0) / devisor;\n");
+      printf("  HI_SW(0) = SIGNEXTEND( (RS_SW(0) %% devisor), 16 );\n");
+      printf("  LO_SW(1) = RS_SW(1) / devisor;\n");
+      printf("  HI_SW(1) = SIGNEXTEND( (RS_SW(1) %% devisor), 16 );\n");
+      printf("  LO_SW(2) = RS_SW(2) / devisor;\n");
+      printf("  HI_SW(2) = SIGNEXTEND( (RS_SW(2) %% devisor), 16 );\n");
+      printf("  LO_SW(3) = RS_SW(3) / devisor;\n");
+      printf("  HI_SW(3) = SIGNEXTEND( (RS_SW(3) %% devisor), 16 );\n");
+      printf(" }\n");
       break;
 
     case PADSBH:
@@ -3530,8 +3551,12 @@ build_instruction (doisa, features, mips16, insn)
      }
 
     case PSLLVW:
-     printf("GPR_UD(destreg,0) = RT_UW(0) << (RS_UB(0) & 0x1F);\n");
-     printf("GPR_UD(destreg,1) = RT_UW(2) << (RS_UB(8) & 0x1F);\n");
+     printf("int s0 = (RS_UB(0) & 0x1F);\n");
+     printf("int s1 = (RS_UB(8) & 0x1F);\n");
+     printf("signed32 temp0 = RT_UW(0) << s0;\n");
+     printf("signed32 temp1 = RT_UW(2) << s1;\n");
+     printf("GPR_SD(destreg,0) = (signed64)temp0;\n");
+     printf("GPR_SD(destreg,1) = (signed64)temp1;\n");
      break;
 
     case PSRLVW:
@@ -3876,13 +3901,29 @@ build_instruction (doisa, features, mips16, insn)
      printf("  }\n");
      printf("else if (op1 == 2)\n");
      printf("  {\n");
-     printf("  unsigned long long t = ((uword64)HI_UW(0) << 32) | (uword64)LO_UW(0);\n");
-     printf("  if ( t > 0x7FFFFFFF )\n");
-     printf("    GPR_SD(destreg,0) = 0x7FFFFFFF;\n");
-     printf("  else if ( t > (uword64)0xFFFFFFFF80000000LL )\n");
-     printf("    GPR_SD(destreg,0) = (uword64)0xFFFFFFFF80000000LL;\n");
+     printf("  /* NOTE: This code implements a saturate according to the\n");
+     printf("           figure on page B-115 and not according to the\n");
+     printf("           definition on page B-113 */\n");
+     printf("  signed64 t = ((unsigned64)HI_UW(0) << 32) | (unsigned64)LO_UW(0);\n");
+     printf("  signed64 u = ((unsigned64)HI_UW(2) << 32) | (unsigned64)LO_UW(2);\n");
+     printf("  signed64 x000000007FFFFFFF = LSMASK64 (31);\n");
+     printf("  signed64 xFFFFFFFF80000000 = MSMASK64 (33);\n");
+     printf("  signed64 x7FFFFFFFFFFFFFFF = LSMASK64 (63);\n");
+     printf("  signed64 x8000000000000000 = MSMASK64 (1);\n");
+     printf("  signed64 x0000000080000000 = x000000007FFFFFFF + 1;\n");
+     printf("  signed64 minus0000000080000000 = -x0000000080000000;\n");
+     printf("  if ( t > x000000007FFFFFFF )\n");
+     printf("    GPR_SD(destreg,0) = x000000007FFFFFFF;\n");
+     printf("  else if ( t < minus0000000080000000 )\n");
+     printf("    GPR_SD(destreg,0) = minus0000000080000000;\n");
      printf("  else\n");
-     printf("    GPR_SD(destreg,0) = SIGNEXTEND(t,32);\n");
+     printf("    GPR_SD(destreg,0) = t;\n");
+     printf("  if ( u > x000000007FFFFFFF )\n");
+     printf("    GPR_SD(destreg,1) = x000000007FFFFFFF;\n");
+     printf("  else if ( u < minus0000000080000000 )\n");
+     printf("    GPR_SD(destreg,1) = minus0000000080000000;\n");
+     printf("  else\n");
+     printf("    GPR_SD(destreg,1) = u;\n");
      printf("  }\n");
      printf("else if (op1 == 3)\n");
      printf("  {\n");
@@ -3897,58 +3938,58 @@ build_instruction (doisa, features, mips16, insn)
      printf("  }\n");
      printf("else if (op1 == 4)\n");
      printf("  {\n");
-     printf("  if (LO_UW(0) > 0x00007FFF)\n");
+     printf("  if (LO_SW(0) > 0x7FFF)\n");
      printf("    GPR_UH(destreg,0) = 0x7FFF;\n");
-     printf("  else if (LO_UW(0) >= 0xFFFF8000)\n");
+     printf("  else if (LO_SW(0) < -0x8000)\n");
      printf("    GPR_UH(destreg,0) = 0x8000;\n");
      printf("  else\n");
      printf("    GPR_UH(destreg,0) = LO_UH(0);\n");
 
-     printf("  if (LO_UW(1) > 0x00007FFF)\n");
+     printf("  if (LO_SW(1) > 0x7FFF)\n");
      printf("    GPR_UH(destreg,1) = 0x7FFF;\n");
-     printf("  else if (LO_UW(1) >= 0xFFFF8000)\n");
+     printf("  else if (LO_SW(1) < -0x8000)\n");
      printf("    GPR_UH(destreg,1) = 0x8000;\n");
      printf("  else\n");
      printf("    GPR_UH(destreg,1) = LO_UH(2);\n");
 
-     printf("  if (HI_UW(0) > 0x00007FFF)\n");
-     printf("    GPR_UH(destreg,0) = 0x7FFF;\n");
-     printf("  else if (HI_UW(0) >= 0xFFFF8000)\n");
-     printf("    GPR_UH(destreg,0) = 0x8000;\n");
+     printf("  if (HI_SW(0) > 0x7FFF)\n");
+     printf("    GPR_UH(destreg,2) = 0x7FFF;\n");
+     printf("  else if (HI_SW(0) < -0x8000)\n");
+     printf("    GPR_UH(destreg,2) = 0x8000;\n");
      printf("  else\n");
-     printf("    GPR_UH(destreg,0) = HI_UH(0);\n");
+     printf("    GPR_UH(destreg,2) = HI_UH(0);\n");
 
-     printf("  if (HI_UW(1) > 0x00007FFF)\n");
-     printf("    GPR_UH(destreg,1) = 0x7FFF;\n");
-     printf("  else if (HI_UW(1) >= 0xFFFF8000)\n");
-     printf("    GPR_UH(destreg,1) = 0x8000;\n");
+     printf("  if (HI_SW(1) > 0x7FFF)\n");
+     printf("    GPR_UH(destreg,3) = 0x7FFF;\n");
+     printf("  else if (HI_SW(1) < -0x8000)\n");
+     printf("    GPR_UH(destreg,3) = 0x8000;\n");
      printf("  else\n");
-     printf("    GPR_UH(destreg,1) = HI_UH(2);\n");
+     printf("    GPR_UH(destreg,3) = HI_UH(2);\n");
 
-     printf("  if (LO_UW(2) > 0x00007FFF)\n");
+     printf("  if (LO_SW(2) > 0x7FFF)\n");
      printf("    GPR_UH(destreg,4) = 0x7FFF;\n");
-     printf("  else if (LO_UW(2) >= 0xFFFF8000)\n");
+     printf("  else if (LO_SW(2) < -0x8000)\n");
      printf("    GPR_UH(destreg,4) = 0x8000;\n");
      printf("  else\n");
      printf("    GPR_UH(destreg,4) = LO_UH(4);\n");
 
-     printf("  if (LO_UW(3) > 0x00007FFF)\n");
+     printf("  if (LO_SW(3) > 0x7FFF)\n");
      printf("    GPR_UH(destreg,5) = 0x7FFF;\n");
-     printf("  else if (LO_UW(3) >= 0xFFFF8000)\n");
+     printf("  else if (LO_SW(3) < -0x8000)\n");
      printf("    GPR_UH(destreg,5) = 0x8000;\n");
      printf("  else\n");
      printf("    GPR_UH(destreg,5) = LO_UH(6);\n");
 
-     printf("  if (HI_UW(2) > 0x00007FFF)\n");
+     printf("  if (HI_SW(2) > 0x7FFF)\n");
      printf("    GPR_UH(destreg,6) = 0x7FFF;\n");
-     printf("  else if (HI_UW(2) >= 0xFFFF8000)\n");
+     printf("  else if (HI_SW(2) < -0x8000)\n");
      printf("    GPR_UH(destreg,6) = 0x8000;\n");
      printf("  else\n");
      printf("    GPR_UH(destreg,6) = HI_UH(4);\n");
 
-     printf("  if (HI_UW(3) > 0x00007FFF)\n");
+     printf("  if (HI_SW(3) > 0x7FFF)\n");
      printf("    GPR_UH(destreg,7) = 0x7FFF;\n");
-     printf("  else if (HI_UW(3) >= 0xFFFF8000)\n");
+     printf("  else if (HI_SW(3) < -0x8000)\n");
      printf("    GPR_UH(destreg,7) = 0x8000;\n");
      printf("  else\n");
      printf("    GPR_UH(destreg,7) = HI_UH(6);\n");
@@ -3981,7 +4022,7 @@ build_instruction (doisa, features, mips16, insn)
       printf("int i;\n");
       printf("for(i=0;i<WORDS_IN_MMI_REGS;i++)\n");
       printf("  {\n");
-      printf("  int x = RT_UW(i);\n");
+      printf("  unsigned32 x = RT_UW(i);\n");
       printf("  GPR_UW(destreg,i) = ((x & (1  << 15)) << (31 - 15))  \n");
       printf("                    | ((x & (31 << 10)) << (19 - 10))  \n");
       printf("                    | ((x & (31 << 5))  << (11 - 5))   \n");
@@ -3993,7 +4034,7 @@ build_instruction (doisa, features, mips16, insn)
       printf("int i;\n");
       printf("for(i=0;i<WORDS_IN_MMI_REGS;i++)\n");
       printf("  {\n");
-      printf("  int x = RT_UW(i);\n");
+      printf("  unsigned32 x = RT_UW(i);\n");
       printf("  GPR_UW(destreg,i) = ((x & (1  << 31)) >> (31 - 15))  \n");
       printf("                    | ((x & (31 << 19)) >> (19 - 10))  \n");
       printf("                    | ((x & (31 << 11)) >> (11 - 5))   \n");
