@@ -1,3 +1,10 @@
+2004-07-11  Andreas Schwab  <schwab@suse.de>
+
+	* config/tc-m68k.c: Convert to C90.  Remove redundant
+	declarations.  Indentation fixup.
+	[M68KCOFF]: Include "obj-coff.h" instead of declaring
+	obj_coff_section ourselves.
+	
 2004-07-09  James E Wilson  <wilson@specifixinc.com>
 
 	* config/tc-ia64.c (default_big_endian): New.

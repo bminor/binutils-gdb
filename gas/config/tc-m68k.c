@@ -33,6 +33,10 @@
 #include "elf/m68k.h"
 #endif
 
+#ifdef M68KCOFF
+#include "obj-coff.h"
+#endif
+
 /* This string holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful.  The macro
    tc_comment_chars points to this.  We use this, rather than the
@@ -255,19 +259,12 @@ static struct m68k_it the_ins;	/* The instruction being assembled.  */
 #define offs(ex)	((ex)->exp.X_add_number)
 
 /* Macros for adding things to the m68k_it struct.  */
-#define addword(w)	the_ins.opcode[the_ins.numo++]=(w)
-
-/* Static functions.  */
-static void insop PARAMS ((int, const struct m68k_incant *));
-static void add_fix PARAMS ((int, struct m68k_exp *, int, int));
-static void add_frag PARAMS ((symbolS *, offsetT, int));
+#define addword(w)	(the_ins.opcode[the_ins.numo++] = (w))
 
 /* Like addword, but goes BEFORE general operands.  */
 
 static void
-insop (w, opcode)
-     int w;
-     const struct m68k_incant *opcode;
+insop (int w, const struct m68k_incant *opcode)
 {
   int z;
   for (z = the_ins.numo; z > opcode->m_codenum; --z)
@@ -283,17 +280,13 @@ insop (w, opcode)
 /* The numo+1 kludge is so we can hit the low order byte of the prev word.
    Blecch.  */
 static void
-add_fix (width, exp, pc_rel, pc_fix)
-     int width;
-     struct m68k_exp *exp;
-     int pc_rel;
-     int pc_fix;
+add_fix (int width, struct m68k_exp *exp, int pc_rel, int pc_fix)
 {
-  the_ins.reloc[the_ins.nrel].n = ((width == 'B' || width == '3')
-				   ? (the_ins.numo*2-1)
-				   : (((width)=='b')
-				      ? (the_ins.numo*2+1)
-				      : (the_ins.numo*2)));
+  the_ins.reloc[the_ins.nrel].n = (width == 'B' || width == '3'
+				   ? the_ins.numo * 2 - 1
+				   : (width == 'b'
+				      ? the_ins.numo * 2 + 1
+				      : the_ins.numo * 2));
   the_ins.reloc[the_ins.nrel].exp = exp->exp;
   the_ins.reloc[the_ins.nrel].wid = width;
   the_ins.reloc[the_ins.nrel].pcrel_fix = pc_fix;
@@ -314,10 +307,7 @@ add_fix (width, exp, pc_rel, pc_fix)
 
    ADD becomes the FR_SYMBOL field of the frag, and OFF the FR_OFFSET.  */
 static void
-add_frag (add, off, type)
-     symbolS *add;
-     offsetT off;
-     int type;
+add_frag (symbolS *add, offsetT off, int type)
 {
   the_ins.fragb[the_ins.nfrag].fragoff = the_ins.numo;
   the_ins.fragb[the_ins.nfrag].fadd = add;
@@ -328,40 +318,34 @@ add_frag (add, off, type)
 #define isvar(ex) \
   (op (ex) != O_constant && op (ex) != O_big)
 
-static char *crack_operand PARAMS ((char *str, struct m68k_op *opP));
-static int get_num PARAMS ((struct m68k_exp *exp, int ok));
-static void m68k_ip PARAMS ((char *));
-static void insert_reg PARAMS ((const char *, int));
-static void select_control_regs PARAMS ((void));
-static void init_regtable PARAMS ((void));
-static int reverse_16_bits PARAMS ((int in));
-static int reverse_8_bits PARAMS ((int in));
-static void install_gen_operand PARAMS ((int mode, int val));
-static void install_operand PARAMS ((int mode, int val));
-static void s_bss PARAMS ((int));
-static void s_data1 PARAMS ((int));
-static void s_data2 PARAMS ((int));
-static void s_even PARAMS ((int));
-static void s_proc PARAMS ((int));
-static void mri_chip PARAMS ((void));
-static void s_chip PARAMS ((int));
-static void s_fopt PARAMS ((int));
-static void s_opt PARAMS ((int));
-static void s_reg PARAMS ((int));
-static void s_restore PARAMS ((int));
-static void s_save PARAMS ((int));
-static void s_mri_if PARAMS ((int));
-static void s_mri_else PARAMS ((int));
-static void s_mri_endi PARAMS ((int));
-static void s_mri_break PARAMS ((int));
-static void s_mri_next PARAMS ((int));
-static void s_mri_for PARAMS ((int));
-static void s_mri_endf PARAMS ((int));
-static void s_mri_repeat PARAMS ((int));
-static void s_mri_until PARAMS ((int));
-static void s_mri_while PARAMS ((int));
-static void s_mri_endw PARAMS ((int));
-static void md_convert_frag_1 PARAMS ((fragS *));
+static char *crack_operand (char *str, struct m68k_op *opP);
+static int get_num (struct m68k_exp *exp, int ok);
+static int reverse_16_bits (int in);
+static int reverse_8_bits (int in);
+static void install_gen_operand (int mode, int val);
+static void install_operand (int mode, int val);
+static void s_bss (int);
+static void s_data1 (int);
+static void s_data2 (int);
+static void s_even (int);
+static void s_proc (int);
+static void s_chip (int);
+static void s_fopt (int);
+static void s_opt (int);
+static void s_reg (int);
+static void s_restore (int);
+static void s_save (int);
+static void s_mri_if (int);
+static void s_mri_else (int);
+static void s_mri_endi (int);
+static void s_mri_break (int);
+static void s_mri_next (int);
+static void s_mri_for (int);
+static void s_mri_endf (int);
+static void s_mri_repeat (int);
+static void s_mri_until (int);
+static void s_mri_while (int);
+static void s_mri_endw (int);
 
 static int current_architecture;
 static int current_chip;
@@ -635,12 +619,7 @@ const pseudo_typeS md_pseudo_table[] =
 };
 
 /* The mote pseudo ops are put into the opcode table, since they
-   don't start with a . they look like opcodes to gas.
-   */
-
-#ifdef M68KCOFF
-extern void obj_coff_section PARAMS ((int));
-#endif
+   don't start with a . they look like opcodes to gas.  */
 
 const pseudo_typeS mote_pseudo_table[] =
 {
@@ -668,16 +647,14 @@ const pseudo_typeS mote_pseudo_table[] =
   {0, 0, 0}
 };
 
-#define issbyte(x)	((x)>=-128 && (x)<=127)
-#define isubyte(x)	((x)>=0 && (x)<=255)
-#define issword(x)	((x)>=-32768 && (x)<=32767)
-#define isuword(x)	((x)>=0 && (x)<=65535)
+#define issbyte(x)	((x) >= -128 && (x) <= 127)
+#define isubyte(x)	((x) >= 0 && (x) <= 255)
+#define issword(x)	((x) >= -32768 && (x) <= 32767)
+#define isuword(x)	((x) >= 0 && (x) <= 65535)
 
-#define isbyte(x)	((x)>= -255 && (x)<=255)
-#define isword(x)	((x)>=-65536 && (x)<=65535)
+#define isbyte(x)	((x) >= -255 && (x) <= 255)
+#define isword(x)	((x) >= -65536 && (x) <= 65535)
 #define islong(x)	(1)
-
-extern char *input_line_pointer;
 
 static char notend_table[256];
 static char alt_notend_table[256];
@@ -719,7 +696,7 @@ find_cf_chip (int architecture)
       {
 	if (j)
 	  {
-	    if (((j == n_chips - 1) && !(n_alias > 1))|| ! n_alias)
+	    if ((j == n_chips - 1 && !(n_alias > 1)) || ! n_alias)
 	      {
 		if (n_chips == 2)
 		  {
@@ -759,9 +736,7 @@ find_cf_chip (int architecture)
 #ifdef NO_PCREL_RELOCS
 
 int
-make_pcrel_absolute (fixP, add_number)
-    fixS *fixP;
-    long *add_number;
+make_pcrel_absolute (fixS *fixP, long *add_number)
 {
   register unsigned char *opcode = fixP->fx_frag->fr_opcode;
 
@@ -791,8 +766,7 @@ make_pcrel_absolute (fixP, add_number)
 #endif /* NO_PCREL_RELOCS */
 
 short
-tc_coff_fix2rtype (fixP)
-     fixS *fixP;
+tc_coff_fix2rtype (fixS *fixP)
 {
   if (fixP->fx_tcbit && fixP->fx_size == 4)
     return R_RELLONG_NEG;
@@ -802,13 +776,13 @@ tc_coff_fix2rtype (fixP)
 	  : fixP->fx_size == 2 ? R_DIR16
 	  : R_DIR32);
 #else
-  return (fixP->fx_pcrel ?
-	  (fixP->fx_size == 1 ? R_PCRBYTE :
-	   fixP->fx_size == 2 ? R_PCRWORD :
-	   R_PCRLONG) :
-	  (fixP->fx_size == 1 ? R_RELBYTE :
-	   fixP->fx_size == 2 ? R_RELWORD :
-	   R_RELLONG));
+  return (fixP->fx_pcrel
+	  ? (fixP->fx_size == 1 ? R_PCRBYTE
+	     : fixP->fx_size == 2 ? R_PCRWORD
+	     : R_PCRLONG)
+	  : (fixP->fx_size == 1 ? R_RELBYTE
+	     : fixP->fx_size == 2 ? R_RELWORD
+	     : R_RELLONG));
 #endif
 }
 
@@ -833,14 +807,8 @@ tc_coff_fix2rtype (fixP)
    relative relocation if PCREL is non-zero.  PIC says whether a special
    pic relocation was requested.  */
 
-static bfd_reloc_code_real_type get_reloc_code
-  PARAMS ((int, int, enum pic_relocation));
-
 static bfd_reloc_code_real_type
-get_reloc_code (size, pcrel, pic)
-     int size;
-     int pcrel;
-     enum pic_relocation pic;
+get_reloc_code (int size, int pcrel, enum pic_relocation pic)
 {
   switch (pic)
     {
@@ -943,8 +911,7 @@ get_reloc_code (size, pcrel, pic)
    correctly, so in some cases we force the original symbol to be
    used.  */
 int
-tc_m68k_fix_adjustable (fixP)
-     fixS *fixP;
+tc_m68k_fix_adjustable (fixS *fixP)
 {
   /* Adjust_reloc_syms doesn't know about the GOT.  */
   switch (fixP->fx_r_type)
@@ -983,9 +950,7 @@ tc_m68k_fix_adjustable (fixP)
 #ifdef BFD_ASSEMBLER
 
 arelent *
-tc_gen_reloc (section, fixp)
-     asection *section ATTRIBUTE_UNUSED;
-     fixS *fixp;
+tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 {
   arelent *reloc;
   bfd_reloc_code_real_type code;
@@ -1103,8 +1068,7 @@ static struct hash_control *op_hash;
 /* Assemble an m68k instruction.  */
 
 static void
-m68k_ip (instring)
-     char *instring;
+m68k_ip (char *instring)
 {
   register char *p;
   register struct m68k_op *opP;
@@ -1222,8 +1186,7 @@ m68k_ip (instring)
       for (n = opsfound; n > 0; --n)
 	the_ins.operands[n] = the_ins.operands[n - 1];
 
-      memset ((char *) (&the_ins.operands[0]), '\0',
-	      sizeof (the_ins.operands[0]));
+      memset (&the_ins.operands[0], '\0', sizeof (the_ins.operands[0]));
       the_ins.operands[0].mode = CONTROL;
       the_ins.operands[0].reg = m68k_float_copnum;
       opsfound++;
@@ -1988,8 +1951,8 @@ m68k_ip (instring)
 
 		 case 'y':
 		   if (!(opP->mode == AINDR
-			 || (opP->mode == DISP && !(opP->reg == PC ||
-						    opP->reg == ZPC))))
+			 || (opP->mode == DISP
+			     && !(opP->reg == PC || opP->reg == ZPC))))
 		     losing++;
 		   break;
 
@@ -2020,38 +1983,48 @@ m68k_ip (instring)
 	      char buf[200], *cp;
 
 	      strncpy (buf,
-		      _("invalid instruction for this architecture; needs "), sizeof (buf));
+		       _("invalid instruction for this architecture; needs "),
+		       sizeof (buf));
 	      cp = buf + strlen (buf);
 	      switch (ok_arch)
 		{
 		case mcfisa_a:
-		  strncpy (cp, _("ColdFire ISA_A"), (sizeof (buf) - (cp - buf)));
+		  strncpy (cp, _("ColdFire ISA_A"),
+			   sizeof (buf) - (cp - buf));
 		  cp += strlen (cp);
-		  strncpy (cp, find_cf_chip (ok_arch), (sizeof (buf) - (cp - buf)));
+		  strncpy (cp, find_cf_chip (ok_arch),
+			   sizeof (buf) - (cp - buf));
 		  cp += strlen (cp);
 		  break;
 		case mcfhwdiv:
-		  strncpy (cp, _("ColdFire hardware divide"), (sizeof (buf) - (cp - buf)));
+		  strncpy (cp, _("ColdFire hardware divide"),
+			   sizeof (buf) - (cp - buf));
 		  cp += strlen (cp);
-		  strncpy (cp, find_cf_chip (ok_arch), (sizeof (buf) - (cp - buf)));
+		  strncpy (cp, find_cf_chip (ok_arch),
+			   sizeof (buf) - (cp - buf));
 		  cp += strlen (cp);
 		  break;
 		case mcfisa_aa:
-		  strncpy (cp, _("ColdFire ISA_A+"), (sizeof (buf) - (cp - buf)));
+		  strncpy (cp, _("ColdFire ISA_A+"),
+			   sizeof (buf) - (cp - buf));
 		  cp += strlen (cp);
-		  strncpy (cp, find_cf_chip (ok_arch), (sizeof (buf) - (cp - buf)));
+		  strncpy (cp, find_cf_chip (ok_arch),
+			   sizeof (buf) - (cp - buf));
 		  cp += strlen (cp);
 		  break;
 		case mcfisa_b:
-		  strncpy (cp, _("ColdFire ISA_B"), (sizeof (buf) - (cp - buf)));
+		  strncpy (cp, _("ColdFire ISA_B"),
+			   sizeof (buf) - (cp - buf));
 		  cp += strlen (cp);
-		  strncpy (cp, find_cf_chip (ok_arch), (sizeof (buf) - (cp - buf)));
+		  strncpy (cp, find_cf_chip (ok_arch),
+			   sizeof (buf) - (cp - buf));
 		  cp += strlen (cp);
 		  break;
 		case cfloat:
-		  strncpy (cp, _("ColdFire fpu"), (sizeof (buf) - (cp - buf)));
+		  strncpy (cp, _("ColdFire fpu"), sizeof (buf) - (cp - buf));
 		  cp += strlen (cp);
-		  strncpy (cp, find_cf_chip (ok_arch), (sizeof (buf) - (cp - buf)));
+		  strncpy (cp, find_cf_chip (ok_arch),
+			   sizeof (buf) - (cp - buf));
 		  cp += strlen (cp);
 		  break;
 		case mfloat:
@@ -2112,7 +2085,7 @@ m68k_ip (instring)
   for (s = the_ins.args, opP = &the_ins.operands[0]; *s; s += 2, opP++)
     {
       /* This switch is a doozy.
-       Watch the first step; its a big one! */
+	 Watch the first step; its a big one! */
       switch (s[0])
 	{
 
@@ -3332,8 +3305,7 @@ m68k_ip (instring)
 }
 
 static int
-reverse_16_bits (in)
-     int in;
+reverse_16_bits (int in)
 {
   int out = 0;
   int n;
@@ -3352,8 +3324,7 @@ reverse_16_bits (in)
 }				/* reverse_16_bits() */
 
 static int
-reverse_8_bits (in)
-     int in;
+reverse_8_bits (int in)
 {
   int out = 0;
   int n;
@@ -3382,9 +3353,7 @@ reverse_8_bits (in)
 
    ADD becomes the FR_SYMBOL field of the frag, and OFF the FR_OFFSET.  */
 static void
-install_operand (mode, val)
-     int mode;
-     int val;
+install_operand (int mode, int val)
 {
   switch (mode)
     {
@@ -3513,9 +3482,7 @@ install_operand (mode, val)
 }
 
 static void
-install_gen_operand (mode, val)
-     int mode;
-     int val;
+install_gen_operand (int mode, int val)
 {
   switch (mode)
     {
@@ -3550,9 +3517,7 @@ install_gen_operand (mode, val)
    then deal with the bitfield hack.  */
 
 static char *
-crack_operand (str, opP)
-     register char *str;
-     register struct m68k_op *opP;
+crack_operand (char *str, struct m68k_op *opP)
 {
   register int parens;
   register int c;
@@ -3622,9 +3587,7 @@ crack_operand (str, opP)
    */
 
 static void
-insert_reg (regname, regnum)
-     const char *regname;
-     int regnum;
+insert_reg (const char *regname, int regnum)
 {
   char buf[100];
   int i;
@@ -3890,7 +3853,7 @@ static const struct init_entry init_table[] =
 };
 
 static void
-init_regtable ()
+init_regtable (void)
 {
   int i;
   for (i = 0; init_table[i].name; i++)
@@ -3905,8 +3868,7 @@ int m68k_aout_machtype = 2;
 #endif
 
 void
-md_assemble (str)
-     char *str;
+md_assemble (char *str)
 {
   const char *er;
   short *fromP;
@@ -3951,7 +3913,7 @@ md_assemble (str)
 	}
     }
 
-  memset ((char *) (&the_ins), '\0', sizeof (the_ins));
+  memset (&the_ins, '\0', sizeof (the_ins));
   m68k_ip (str);
   er = the_ins.error;
   if (!er)
@@ -4347,7 +4309,7 @@ md_begin (void)
 }
 
 static void
-select_control_regs ()
+select_control_regs (void)
 {
   /* Note which set of "movec" control registers is available.  */
   switch (current_chip)
@@ -4397,7 +4359,7 @@ select_control_regs ()
 }
 
 void
-m68k_init_after_args ()
+m68k_init_after_args (void)
 {
   if (cpu_of_arch (current_architecture) == 0)
     {
@@ -4467,8 +4429,7 @@ m68k_init_after_args ()
 /* This is called when a label is defined.  */
 
 void
-m68k_frob_label (sym)
-     symbolS *sym;
+m68k_frob_label (symbolS *sym)
 {
   struct label_line *n;
 
@@ -4484,7 +4445,7 @@ m68k_frob_label (sym)
 /* This is called when a value that is not an instruction is emitted.  */
 
 void
-m68k_flush_pending_output ()
+m68k_flush_pending_output (void)
 {
   current_label = NULL;
 }
@@ -4494,8 +4455,7 @@ m68k_flush_pending_output ()
    odd location.  */
 
 void
-m68k_frob_symbol (sym)
-     symbolS *sym;
+m68k_frob_symbol (symbolS *sym)
 {
   if (S_GET_SEGMENT (sym) == reg_section
       && (int) S_GET_VALUE (sym) < 0)
@@ -4525,8 +4485,7 @@ m68k_frob_symbol (sym)
    pseudo-op.  */
 
 void
-m68k_mri_mode_change (on)
-     int on;
+m68k_mri_mode_change (int on)
 {
   if (on)
     {
@@ -4569,10 +4528,7 @@ m68k_mri_mode_change (on)
    returned, or NULL on OK.  */
 
 char *
-md_atof (type, litP, sizeP)
-     char type;
-     char *litP;
-     int *sizeP;
+md_atof (int type, char *litP, int *sizeP)
 {
   int prec;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
@@ -4623,19 +4579,13 @@ md_atof (type, litP, sizeP)
 }
 
 void
-md_number_to_chars (buf, val, n)
-     char *buf;
-     valueT val;
-     int n;
+md_number_to_chars (char *buf, valueT val, int n)
 {
   number_to_chars_bigendian (buf, val, n);
 }
 
 void
-md_apply_fix3 (fixP, valP, seg)
-     fixS *fixP;
-     valueT *valP;
-     segT seg ATTRIBUTE_UNUSED;
+md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   offsetT val = *valP;
   addressT upper_limit;
@@ -4740,8 +4690,7 @@ md_apply_fix3 (fixP, valP, seg)
    MAGIC here. ..
    */
 static void
-md_convert_frag_1 (fragP)
-     register fragS *fragP;
+md_convert_frag_1 (fragS *fragP)
 {
   long disp;
   fixS *fixP;
@@ -4959,10 +4908,9 @@ md_convert_frag_1 (fragP)
 #ifndef BFD_ASSEMBLER
 
 void
-md_convert_frag (headers, sec, fragP)
-     object_headers *headers ATTRIBUTE_UNUSED;
-     segT sec ATTRIBUTE_UNUSED;
-     fragS *fragP;
+md_convert_frag (object_headers *headers ATTRIBUTE_UNUSED,
+		 segT sec ATTRIBUTE_UNUSED,
+		 fragS *fragP)
 {
   md_convert_frag_1 (fragP);
 }
@@ -4970,10 +4918,9 @@ md_convert_frag (headers, sec, fragP)
 #else
 
 void
-md_convert_frag (abfd, sec, fragP)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     segT sec ATTRIBUTE_UNUSED;
-     fragS *fragP;
+md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
+		 segT sec ATTRIBUTE_UNUSED,
+		 fragS *fragP)
 {
   md_convert_frag_1 (fragP);
 }
@@ -4983,9 +4930,7 @@ md_convert_frag (abfd, sec, fragP)
    the frag list to be relaxed
    */
 int
-md_estimate_size_before_relax (fragP, segment)
-     register fragS *fragP;
-     segT segment;
+md_estimate_size_before_relax (fragS *fragP, segT segment)
 {
   /* Handle SZ_UNDEF first, it can be changed to BYTE or SHORT.  */
   switch (fragP->fr_subtype)
@@ -5123,9 +5068,7 @@ md_estimate_size_before_relax (fragP, segment)
    format.  */
 #ifdef comment
 void
-md_ri_to_chars (the_bytes, ri)
-     char *the_bytes;
-     struct reloc_info_generic *ri;
+md_ri_to_chars (char *the_bytes, struct reloc_info_generic *ri)
 {
   /* This is easy.  */
   md_number_to_chars (the_bytes, ri->r_address, 4);
@@ -5133,18 +5076,17 @@ md_ri_to_chars (the_bytes, ri)
   the_bytes[4] = (ri->r_symbolnum >> 16) & 0x0ff;
   the_bytes[5] = (ri->r_symbolnum >>  8) & 0x0ff;
   the_bytes[6] =  ri->r_symbolnum        & 0x0ff;
-  the_bytes[7] = (((ri->r_pcrel << 7) & 0x80) | ((ri->r_length << 5) & 0x60) |
-		  ((ri->r_extern << 4) & 0x10));
+  the_bytes[7] = (((ri->r_pcrel << 7) & 0x80)
+		  | ((ri->r_length << 5) & 0x60)
+		  | ((ri->r_extern << 4) & 0x10));
 }
 
 #endif
 
 #ifndef BFD_ASSEMBLER
 void
-tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
-     char *where;
-     fixS *fixP;
-     relax_addressT segment_address_in_file;
+tc_aout_fix_to_chars (char *where, fixS *fixP,
+		      relax_addressT segment_address_in_file)
 {
   /*
    * In: length of relocation (or of address) in chars: 1, 2 or 4.
@@ -5157,8 +5099,8 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
   know (fixP->fx_addsy != NULL);
 
   md_number_to_chars (where,
-       fixP->fx_frag->fr_address + fixP->fx_where - segment_address_in_file,
-		      4);
+		      (fixP->fx_frag->fr_address
+		       + fixP->fx_where - segment_address_in_file), 4);
 
   r_symbolnum = (S_IS_DEFINED (fixP->fx_addsy)
 		 ? S_GET_TYPE (fixP->fx_addsy)
@@ -5167,8 +5109,9 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
   where[4] = (r_symbolnum >> 16) & 0x0ff;
   where[5] = (r_symbolnum >> 8) & 0x0ff;
   where[6] = r_symbolnum & 0x0ff;
-  where[7] = (((fixP->fx_pcrel << 7) & 0x80) | ((nbytes_r_length[fixP->fx_size] << 5) & 0x60) |
-	      (((!S_IS_DEFINED (fixP->fx_addsy)) << 4) & 0x10));
+  where[7] = (((fixP->fx_pcrel << 7) & 0x80)
+	      | ((nbytes_r_length[fixP->fx_size] << 5) & 0x60)
+	      | ((!S_IS_DEFINED (fixP->fx_addsy) << 4) & 0x10));
 }
 #endif
 
@@ -5179,11 +5122,9 @@ const int md_short_jump_size = 4;
 const int md_long_jump_size = 6;
 
 void
-md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
-     char *ptr;
-     addressT from_addr, to_addr;
-     fragS *frag ATTRIBUTE_UNUSED;
-     symbolS *to_symbol ATTRIBUTE_UNUSED;
+md_create_short_jump (char *ptr, addressT from_addr, addressT to_addr,
+		      fragS *frag ATTRIBUTE_UNUSED,
+		      symbolS *to_symbol ATTRIBUTE_UNUSED)
 {
   valueT offset;
 
@@ -5194,11 +5135,8 @@ md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
 }
 
 void
-md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
-     char *ptr;
-     addressT from_addr, to_addr;
-     fragS *frag;
-     symbolS *to_symbol;
+md_create_long_jump (char *ptr, addressT from_addr, addressT to_addr,
+		     fragS *frag, symbolS *to_symbol)
 {
   valueT offset;
 
@@ -5238,9 +5176,7 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
    90:  No bignums.          */
 
 static int
-get_num (exp, ok)
-     struct m68k_exp *exp;
-     int ok;
+get_num (struct m68k_exp *exp, int ok)
 {
   if (exp->exp.X_op == O_absent)
     {
@@ -5377,24 +5313,21 @@ get_num (exp, ok)
 /* These are the back-ends for the various machine dependent pseudo-ops.  */
 
 static void
-s_data1 (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_data1 (int ignore ATTRIBUTE_UNUSED)
 {
   subseg_set (data_section, 1);
   demand_empty_rest_of_line ();
 }
 
 static void
-s_data2 (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_data2 (int ignore ATTRIBUTE_UNUSED)
 {
   subseg_set (data_section, 2);
   demand_empty_rest_of_line ();
 }
 
 static void
-s_bss (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_bss (int ignore ATTRIBUTE_UNUSED)
 {
   /* We don't support putting frags in the BSS segment, we fake it
      by marking in_bss, then looking at s_skip for clues.  */
@@ -5404,8 +5337,7 @@ s_bss (ignore)
 }
 
 static void
-s_even (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_even (int ignore ATTRIBUTE_UNUSED)
 {
   register int temp;
   register long temp_fill;
@@ -5419,8 +5351,7 @@ s_even (ignore)
 }
 
 static void
-s_proc (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_proc (int ignore ATTRIBUTE_UNUSED)
 {
   demand_empty_rest_of_line ();
 }
@@ -5432,8 +5363,7 @@ s_proc (ignore)
    alignment is needed.  */
 
 int
-m68k_conditional_pseudoop (pop)
-     pseudo_typeS *pop;
+m68k_conditional_pseudoop (pseudo_typeS *pop)
 {
   return (pop->poc_handler == s_mri_if
 	  || pop->poc_handler == s_mri_else);
@@ -5442,7 +5372,7 @@ m68k_conditional_pseudoop (pop)
 /* Handle an MRI style chip specification.  */
 
 static void
-mri_chip ()
+mri_chip (void)
 {
   char *s;
   char c;
@@ -5496,8 +5426,7 @@ mri_chip ()
 /* The MRI CHIP pseudo-op.  */
 
 static void
-s_chip (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_chip (int ignore ATTRIBUTE_UNUSED)
 {
   char *stop = NULL;
   char stopc;
@@ -5513,8 +5442,7 @@ s_chip (ignore)
 /* The MRI FOPT pseudo-op.  */
 
 static void
-s_fopt (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_fopt (int ignore ATTRIBUTE_UNUSED)
 {
   SKIP_WHITESPACE ();
 
@@ -5549,7 +5477,7 @@ struct opt_action
   /* If this is not NULL, just call this function.  The first argument
      is the ARG field of this structure, the second argument is
      whether the option was negated.  */
-  void (*pfn) PARAMS ((int arg, int on));
+  void (*pfn) (int arg, int on);
 
   /* If this is not NULL, and the PFN field is NULL, set the variable
      this points to.  Set it to the ARG field if the option was not
@@ -5567,11 +5495,11 @@ struct opt_action
 
 /* The table used to handle the MRI OPT pseudo-op.  */
 
-static void skip_to_comma PARAMS ((int, int));
-static void opt_nest PARAMS ((int, int));
-static void opt_chip PARAMS ((int, int));
-static void opt_list PARAMS ((int, int));
-static void opt_list_symbols PARAMS ((int, int));
+static void skip_to_comma (int, int);
+static void opt_nest (int, int);
+static void opt_chip (int, int);
+static void opt_list (int, int);
+static void opt_list_symbols (int, int);
 
 static const struct opt_action opt_table[] =
 {
@@ -5623,8 +5551,7 @@ static const struct opt_action opt_table[] =
 /* The MRI OPT pseudo-op.  */
 
 static void
-s_opt (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_opt (int ignore ATTRIBUTE_UNUSED)
 {
   do
     {
@@ -5691,9 +5618,7 @@ s_opt (ignore)
    not support and which take arguments.  */
 
 static void
-skip_to_comma (arg, on)
-     int arg ATTRIBUTE_UNUSED;
-     int on ATTRIBUTE_UNUSED;
+skip_to_comma (int arg ATTRIBUTE_UNUSED, int on ATTRIBUTE_UNUSED)
 {
   while (*input_line_pointer != ','
 	 && ! is_end_of_line[(unsigned char) *input_line_pointer])
@@ -5703,9 +5628,7 @@ skip_to_comma (arg, on)
 /* Handle the OPT NEST=depth option.  */
 
 static void
-opt_nest (arg, on)
-     int arg ATTRIBUTE_UNUSED;
-     int on ATTRIBUTE_UNUSED;
+opt_nest (int arg ATTRIBUTE_UNUSED, int on ATTRIBUTE_UNUSED)
 {
   if (*input_line_pointer != '=')
     {
@@ -5720,9 +5643,7 @@ opt_nest (arg, on)
 /* Handle the OPT P=chip option.  */
 
 static void
-opt_chip (arg, on)
-     int arg ATTRIBUTE_UNUSED;
-     int on ATTRIBUTE_UNUSED;
+opt_chip (int arg ATTRIBUTE_UNUSED, int on ATTRIBUTE_UNUSED)
 {
   if (*input_line_pointer != '=')
     {
@@ -5737,9 +5658,7 @@ opt_chip (arg, on)
 /* Handle the OPT S option.  */
 
 static void
-opt_list (arg, on)
-     int arg ATTRIBUTE_UNUSED;
-     int on;
+opt_list (int arg ATTRIBUTE_UNUSED, int on)
 {
   listing_list (on);
 }
@@ -5747,9 +5666,7 @@ opt_list (arg, on)
 /* Handle the OPT T option.  */
 
 static void
-opt_list_symbols (arg, on)
-     int arg ATTRIBUTE_UNUSED;
-     int on;
+opt_list_symbols (int arg ATTRIBUTE_UNUSED, int on)
 {
   if (on)
     listing |= LISTING_SYMBOLS;
@@ -5760,8 +5677,7 @@ opt_list_symbols (arg, on)
 /* Handle the MRI REG pseudo-op.  */
 
 static void
-s_reg (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_reg (int ignore ATTRIBUTE_UNUSED)
 {
   char *s;
   int c;
@@ -5865,8 +5781,7 @@ static struct save_opts *save_stack;
 /* The MRI SAVE pseudo-op.  */
 
 static void
-s_save (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_save (int ignore ATTRIBUTE_UNUSED)
 {
   struct save_opts *s;
 
@@ -5891,8 +5806,7 @@ s_save (ignore)
 /* The MRI RESTORE pseudo-op.  */
 
 static void
-s_restore (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_restore (int ignore ATTRIBUTE_UNUSED)
 {
   struct save_opts *s;
 
@@ -5970,29 +5884,10 @@ static struct mri_control_info *mri_control_stack;
 
 static int mri_control_index;
 
-/* Some function prototypes.  */
-
-static void mri_assemble PARAMS ((char *));
-static char *mri_control_label PARAMS ((void));
-static struct mri_control_info *push_mri_control
-  PARAMS ((enum mri_control_type));
-static void pop_mri_control PARAMS ((void));
-static int parse_mri_condition PARAMS ((int *));
-static int parse_mri_control_operand
-  PARAMS ((int *, char **, char **, char **, char **));
-static int swap_mri_condition PARAMS ((int));
-static int reverse_mri_condition PARAMS ((int));
-static void build_mri_control_operand
-  PARAMS ((int, int, char *, char *, char *, char *, const char *,
-	   const char *, int));
-static void parse_mri_control_expression
-  PARAMS ((char *, int, const char *, const char *, int));
-
 /* Assemble an instruction for an MRI structured control directive.  */
 
 static void
-mri_assemble (str)
-     char *str;
+mri_assemble (char *str)
 {
   char *s;
 
@@ -6006,7 +5901,7 @@ mri_assemble (str)
 /* Generate a new MRI label structured control directive label name.  */
 
 static char *
-mri_control_label ()
+mri_control_label (void)
 {
   char *n;
 
@@ -6019,8 +5914,7 @@ mri_control_label ()
 /* Create a new MRI structured control directive.  */
 
 static struct mri_control_info *
-push_mri_control (type)
-     enum mri_control_type type;
+push_mri_control (enum mri_control_type type)
 {
   struct mri_control_info *n;
 
@@ -6044,7 +5938,7 @@ push_mri_control (type)
 /* Pop off the stack of MRI structured control directives.  */
 
 static void
-pop_mri_control ()
+pop_mri_control (void)
 {
   struct mri_control_info *n;
 
@@ -6060,8 +5954,7 @@ pop_mri_control ()
 /* Recognize a condition code in an MRI structured control expression.  */
 
 static int
-parse_mri_condition (pcc)
-     int *pcc;
+parse_mri_condition (int *pcc)
 {
   char c1, c2;
 
@@ -6091,12 +5984,8 @@ parse_mri_condition (pcc)
 /* Parse a single operand in an MRI structured control expression.  */
 
 static int
-parse_mri_control_operand (pcc, leftstart, leftstop, rightstart, rightstop)
-     int *pcc;
-     char **leftstart;
-     char **leftstop;
-     char **rightstart;
-     char **rightstop;
+parse_mri_control_operand (int *pcc, char **leftstart, char **leftstop,
+			   char **rightstart, char **rightstop)
 {
   char *s;
 
@@ -6169,8 +6058,7 @@ parse_mri_control_operand (pcc, leftstart, leftstop, rightstart, rightstop)
    it generates the same result when the operands are swapped.  */
 
 static int
-swap_mri_condition (cc)
-     int cc;
+swap_mri_condition (int cc)
 {
   switch (cc)
     {
@@ -6204,8 +6092,7 @@ swap_mri_condition (cc)
 /* Reverse the sense of a condition.  */
 
 static int
-reverse_mri_condition (cc)
-     int cc;
+reverse_mri_condition (int cc)
 {
   switch (cc)
     {
@@ -6239,17 +6126,10 @@ reverse_mri_condition (cc)
    use for the branch.  */
 
 static void
-build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
-			   rightstop, truelab, falselab, extent)
-     int qual;
-     int cc;
-     char *leftstart;
-     char *leftstop;
-     char *rightstart;
-     char *rightstop;
-     const char *truelab;
-     const char *falselab;
-     int extent;
+build_mri_control_operand (int qual, int cc, char *leftstart, char *leftstop,
+			   char *rightstart, char *rightstop,
+			   const char *truelab, const char *falselab,
+			   int extent)
 {
   char *buf;
   char *s;
@@ -6282,20 +6162,20 @@ build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
 	{
 	  char *temp;
 
-     /* Correct conditional handling:
-        if #1 <lt> d0 then  ;means if (1 < d0)
-           ...
-        endi
+	  /* Correct conditional handling:
+	     if #1 <lt> d0 then  ;means if (1 < d0)
+		...
+	     endi
 
-        should assemble to:
+	     should assemble to:
 
-         cmp #1,d0        if we do *not* swap the operands
-         bgt true         we need the swapped condition!
-         ble false
-        true:
-         ...
-        false:
-     */
+		cmp #1,d0        if we do *not* swap the operands
+		bgt true         we need the swapped condition!
+		ble false
+	     true:
+		...
+	     false:
+	  */
 	  temp = leftstart;
 	  leftstart = rightstart;
 	  rightstart = temp;
@@ -6358,12 +6238,8 @@ build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
    expression.  EXTENT is the size to use for the branch.  */
 
 static void
-parse_mri_control_expression (stop, qual, truelab, falselab, extent)
-     char *stop;
-     int qual;
-     const char *truelab;
-     const char *falselab;
-     int extent;
+parse_mri_control_expression (char *stop, int qual, const char *truelab,
+			      const char *falselab, int extent)
 {
   int c;
   int cc;
@@ -6468,8 +6344,7 @@ parse_mri_control_expression (stop, qual, truelab, falselab, extent)
    on its operands.  */
 
 static void
-s_mri_if (qual)
-     int qual;
+s_mri_if (int qual)
 {
   char *s;
   int c;
@@ -6483,12 +6358,12 @@ s_mri_if (qual)
      This is important when assembling:
        if d0 <ne> 12(a0,d0*2) then
        if d0 <ne> #CONST*20   then.  */
-  while ( ! (    is_end_of_line[(unsigned char) *s]
-              || (     flag_mri
-                   && *s == '*'
-                   && (    s == input_line_pointer
-                        || *(s-1) == ' '
-                        || *(s-1) == '\t'))))
+  while (! (is_end_of_line[(unsigned char) *s]
+            || (flag_mri
+                && *s == '*'
+                && (s == input_line_pointer
+                    || *(s-1) == ' '
+                    || *(s-1) == '\t'))))
     ++s;
   --s;
   while (s > input_line_pointer && (*s == ' ' || *s == '\t'))
@@ -6553,8 +6428,7 @@ s_mri_if (qual)
    it is a conditional else.  */
 
 static void
-s_mri_else (qual)
-     int qual;
+s_mri_else (int qual)
 {
   int c;
   char *buf;
@@ -6613,8 +6487,7 @@ s_mri_else (qual)
 /* Handle the MRI ENDI pseudo-op.  */
 
 static void
-s_mri_endi (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_mri_endi (int ignore ATTRIBUTE_UNUSED)
 {
   if (mri_control_stack == NULL
       || mri_control_stack->type != mri_if)
@@ -6645,8 +6518,7 @@ s_mri_endi (ignore)
 /* Handle the MRI BREAK pseudo-op.  */
 
 static void
-s_mri_break (extent)
-     int extent;
+s_mri_break (int extent)
 {
   struct mri_control_info *n;
   char *buf;
@@ -6684,8 +6556,7 @@ s_mri_break (extent)
 /* Handle the MRI NEXT pseudo-op.  */
 
 static void
-s_mri_next (extent)
-     int extent;
+s_mri_next (int extent)
 {
   struct mri_control_info *n;
   char *buf;
@@ -6723,8 +6594,7 @@ s_mri_next (extent)
 /* Handle the MRI FOR pseudo-op.  */
 
 static void
-s_mri_for (qual)
-     int qual;
+s_mri_for (int qual)
 {
   const char *varstart, *varstop;
   const char *initstart, *initstop;
@@ -6955,8 +6825,7 @@ s_mri_for (qual)
 /* Handle the MRI ENDF pseudo-op.  */
 
 static void
-s_mri_endf (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_mri_endf (int ignore ATTRIBUTE_UNUSED)
 {
   if (mri_control_stack == NULL
       || mri_control_stack->type != mri_for)
@@ -6991,8 +6860,7 @@ s_mri_endf (ignore)
 /* Handle the MRI REPEAT pseudo-op.  */
 
 static void
-s_mri_repeat (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_mri_repeat (int ignore ATTRIBUTE_UNUSED)
 {
   struct mri_control_info *n;
 
@@ -7009,8 +6877,7 @@ s_mri_repeat (ignore)
 /* Handle the MRI UNTIL pseudo-op.  */
 
 static void
-s_mri_until (qual)
-     int qual;
+s_mri_until (int qual)
 {
   char *s;
 
@@ -7048,8 +6915,7 @@ s_mri_until (qual)
 /* Handle the MRI WHILE pseudo-op.  */
 
 static void
-s_mri_while (qual)
-     int qual;
+s_mri_while (int qual)
 {
   char *s;
 
@@ -7105,8 +6971,7 @@ s_mri_while (qual)
 /* Handle the MRI ENDW pseudo-op.  */
 
 static void
-s_mri_endw (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_mri_endw (int ignore ATTRIBUTE_UNUSED)
 {
   char *buf;
 
@@ -7136,31 +7001,28 @@ s_mri_endw (ignore)
   demand_empty_rest_of_line ();
 }
 
-/*
- * md_parse_option
- *	Invocation line includes a switch not recognized by the base assembler.
- *	See if it's a processor-specific option.  These are:
- *
- *	-[A]m[c]68000, -[A]m[c]68008, -[A]m[c]68010, -[A]m[c]68020, -[A]m[c]68030, -[A]m[c]68040
- *	-[A]m[c]68881, -[A]m[c]68882, -[A]m[c]68851
- *		Select the architecture.  Instructions or features not
- *		supported by the selected architecture cause fatal
- *		errors.  More than one may be specified.  The default is
- *		-m68020 -m68851 -m68881.  Note that -m68008 is a synonym
- *		for -m68000, and -m68882 is a synonym for -m68881.
- *	-[A]m[c]no-68851, -[A]m[c]no-68881
- *		Don't accept 688?1 instructions.  (The "c" is kind of silly,
- *		so don't use or document it, but that's the way the parsing
- *		works).
- *
- *	-pic	Indicates PIC.
- *	-k	Indicates PIC.  (Sun 3 only.)
- *      --pcrel Never turn PC-relative branches into absolute jumps.
- *
- *	--bitwise-or
- *		Permit `|' to be used in expressions.
- *
- */
+/* md_parse_option
+   Invocation line includes a switch not recognized by the base assembler.
+   See if it's a processor-specific option.  These are:
+
+   -[A]m[c]68000, -[A]m[c]68008, -[A]m[c]68010, -[A]m[c]68020, -[A]m[c]68030, -[A]m[c]68040
+   -[A]m[c]68881, -[A]m[c]68882, -[A]m[c]68851
+	Select the architecture.  Instructions or features not
+	supported by the selected architecture cause fatal
+	errors.  More than one may be specified.  The default is
+	-m68020 -m68851 -m68881.  Note that -m68008 is a synonym
+	for -m68000, and -m68882 is a synonym for -m68881.
+   -[A]m[c]no-68851, -[A]m[c]no-68881
+	Don't accept 688?1 instructions.  (The "c" is kind of silly,
+	so don't use or document it, but that's the way the parsing
+	works).
+
+   -pic	Indicates PIC.
+   -k	Indicates PIC.  (Sun 3 only.)
+   --pcrel
+	Never turn PC-relative branches into absolute jumps.
+   --bitwise-or
+ 	Permit `|' to be used in expressions.  */
 
 #ifdef OBJ_ELF
 const char *md_shortopts = "lSA:m:kQ:V";
@@ -7191,9 +7053,7 @@ struct option md_longopts[] = {
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (c, arg)
-     int c;
-     char *arg;
+md_parse_option (int c, char *arg)
 {
   switch (c)
     {
@@ -7350,8 +7210,7 @@ md_parse_option (c, arg)
 }
 
 void
-md_show_usage (stream)
-     FILE *stream;
+md_show_usage (FILE *stream)
 {
   const char *default_cpu = TARGET_CPU;
   int i;
@@ -7411,7 +7270,7 @@ md_show_usage (stream)
 /* TEST2:  Test md_assemble() */
 /* Warning, this routine probably doesn't work anymore.  */
 int
-main ()
+main (void)
 {
   struct m68k_it the_ins;
   char buf[120];
@@ -7452,21 +7311,27 @@ main ()
 	      printf ("op%d Error %s in %s\n", n, the_ins.operands[n].error, buf);
 	      continue;
 	    }
-	  printf ("mode %d, reg %d, ", the_ins.operands[n].mode, the_ins.operands[n].reg);
+	  printf ("mode %d, reg %d, ", the_ins.operands[n].mode,
+		  the_ins.operands[n].reg);
 	  if (the_ins.operands[n].b_const)
-	    printf ("Constant: '%.*s', ", 1 + the_ins.operands[n].e_const - the_ins.operands[n].b_const, the_ins.operands[n].b_const);
-	  printf ("ireg %d, isiz %d, imul %d, ", the_ins.operands[n].ireg, the_ins.operands[n].isiz, the_ins.operands[n].imul);
+	    printf ("Constant: '%.*s', ",
+		    1 + the_ins.operands[n].e_const - the_ins.operands[n].b_const,
+		    the_ins.operands[n].b_const);
+	  printf ("ireg %d, isiz %d, imul %d, ", the_ins.operands[n].ireg,
+		  the_ins.operands[n].isiz, the_ins.operands[n].imul);
 	  if (the_ins.operands[n].b_iadd)
-	    printf ("Iadd: '%.*s',", 1 + the_ins.operands[n].e_iadd - the_ins.operands[n].b_iadd, the_ins.operands[n].b_iadd);
-	  (void) putchar ('\n');
+	    printf ("Iadd: '%.*s',",
+		    1 + the_ins.operands[n].e_iadd - the_ins.operands[n].b_iadd,
+		    the_ins.operands[n].b_iadd);
+	  putchar ('\n');
 	}
     }
   m68k_ip_end ();
   return 0;
 }
 
-is_label (str)
-     char *str;
+int
+is_label (char *str)
 {
   while (*str == ' ')
     str++;
@@ -7499,17 +7364,14 @@ is_label (str)
 /* We have no need to default values of symbols.  */
 
 symbolS *
-md_undefined_symbol (name)
-     char *name ATTRIBUTE_UNUSED;
+md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 {
   return 0;
 }
 
 /* Round up a section size to the appropriate boundary.  */
 valueT
-md_section_align (segment, size)
-     segT segment ATTRIBUTE_UNUSED;
-     valueT size;
+md_section_align (segT segment ATTRIBUTE_UNUSED, valueT size)
 {
 #ifdef OBJ_AOUT
 #ifdef BFD_ASSEMBLER
@@ -7533,8 +7395,7 @@ md_section_align (segment, size)
    word.  The difference between the addresses of the offset and the
    first extension word is stored in fx_pcrel_adjust.  */
 long
-md_pcrel_from (fixP)
-     fixS *fixP;
+md_pcrel_from (fixS *fixP)
 {
   int adjust;
 
@@ -7550,14 +7411,12 @@ md_pcrel_from (fixP)
 #ifdef OBJ_COFF
 
 void
-tc_coff_symbol_emit_hook (ignore)
-     symbolS *ignore ATTRIBUTE_UNUSED;
+tc_coff_symbol_emit_hook (symbolS *ignore ATTRIBUTE_UNUSED)
 {
 }
 
 int
-tc_coff_sizemachdep (frag)
-     fragS *frag;
+tc_coff_sizemachdep (fragS *frag)
 {
   switch (frag->fr_subtype & 0x3)
     {
@@ -7575,9 +7434,10 @@ tc_coff_sizemachdep (frag)
 
 #endif
 #endif
+
 #ifdef OBJ_ELF
 void
-m68k_elf_final_processing ()
+m68k_elf_final_processing (void)
 {
   /* Set file-specific flags if this is a cpu32 processor.  */
   if (cpu_of_arch (current_architecture) & cpu32)
