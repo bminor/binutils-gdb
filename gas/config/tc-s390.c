@@ -1354,8 +1354,9 @@ s390_insn (ignore)
   expression (&exp);
   if (exp.X_op == O_constant)
     {
-      if (opformat->oplen == 4 ||
-	  (opformat->oplen == 2 && exp.X_op < 0x10000))
+      if ((opformat->oplen == 6 && exp.X_op > 0 && exp.X_op < (1ULL << 48)) ||
+	  (opformat->oplen == 4 && exp.X_op > 0 && exp.X_op < (1ULL << 32)) ||
+	  (opformat->oplen == 2 && exp.X_op > 0 && exp.X_op < (1ULL << 16)))
 	md_number_to_chars (insn, exp.X_add_number, opformat->oplen);
       else
 	as_bad (_("Invalid .insn format\n"));
@@ -1375,12 +1376,14 @@ s390_insn (ignore)
     }
   else
     as_bad (_("second operand of .insn not a constant\n"));
-  if (*input_line_pointer++ != ',')
-    as_bad (_("missing comma after insn constant\n"));
 
+  if (strcmp (opformat->name, "e") != 0 && *input_line_pointer++ != ',')
+    as_bad (_("missing comma after insn constant\n"));
+  
   if ((s = strchr (input_line_pointer, '\n')) != NULL)
     *s = '\0';
-  input_line_pointer = md_gather_operands (input_line_pointer, insn, opformat);
+  input_line_pointer = md_gather_operands (input_line_pointer, insn,
+					   opformat);
   if (s != NULL)
     *s = '\n';
   demand_empty_rest_of_line ();

@@ -1,3 +1,8 @@
+2001-09-18  Martin Schwidefsky <schwidefsky@de.ibm.com>
+
+	* tc-s390.c (s390_insn): Add code to cope with 6 byte O_constants
+	in 64 bit mode and make format "e" work.
+
 2001-09-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* dwarf2dbg.c (dwarf2_directive_file): Avoid signed/unsigned warning.

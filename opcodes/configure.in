@@ -82,6 +82,8 @@ CY_GNU_GETTEXT
 
 . ${srcdir}/../bfd/configure.host
 
+BFD_CC_FOR_BUILD
+
 AC_SUBST(HDEFINES)
 AC_PROG_INSTALL
 

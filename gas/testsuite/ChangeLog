@@ -1,3 +1,20 @@
+2001-09-18  Martin Schwidefsky <schwidefsky@de.ibm.com>
+
+	* gas/s390: New directory.
+	* gas/s390/opcode.d: New file.
+	* gas/s390/opcode.s: New file.
+	* gas/s390/opcode64.d: New file.
+	* gas/s390/opcode64.s: New file.
+	* gas/s390/operands.d: New file.
+	* gas/s390/operands.s: New file.
+	* gas/s390/operands64.d: New file.
+	* gas/s390/operands64.s: New file.
+	* gas/s390/reloc.d: New file.
+	* gas/s390/reloc.s: New file.
+	* gas/s390/reloc64.d: New file.
+	* gas/s390/reloc64.s: New file.
+	* gas/s390/s390.exp: New file.
+
 2001-09-07  Eric Christopher  <echristo@redhat.com>
 
 	* gas/mips/mips64.d: Change to use isa64.

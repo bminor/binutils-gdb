@@ -1,3 +1,13 @@
+2001-09-18  Martin Schwidefsky <schwidefsky@de.ibm.com>
+
+	* Makefile.am: Add rules and dependencies to create the s/390 opcode
+	table out of s390-opc.txt automatically.
+	* configure.in: Add BFD_CC_FOR_BUILD to allow CC_FOR_BUILD to be used.
+	* s390-mkopc.c (dumpTable): Change output to create a complete file.
+	* s390-opc.c: New improved opcode format macros and remove the
+	pregenerated opcode table.
+	* s390-opc.txt: Adapt to new improved opcode format macros.
+
 2001-09-14  David Schleef <ds@schleef.org>
 
 	* ppc-opc.c (VXA, VXA_MASK): Fix mask bits.

@@ -109,6 +109,7 @@ CFILES = \
 	pj-opc.c \
 	ppc-dis.c \
 	ppc-opc.c \
+	s390-mkopc.c \
 	s390-opc.c \
 	s390-dis.c \
 	sh-dis.c \
@@ -304,6 +305,12 @@ ia64-gen.o: ia64-gen.c ia64-opc.c ia64-opc-a.c ia64-opc-b.c ia64-opc-f.c \
 
 ia64-asmtab.c: @MAINT@ ia64-gen ia64-ic.tbl ia64-raw.tbl ia64-waw.tbl ia64-war.tbl
 	here=`pwd`; cd $(srcdir); $$here/ia64-gen > ia64-asmtab.c
+
+s390-mkopc: s390-mkopc.c
+	$(CC_FOR_BUILD) -o s390-mkopc $(srcdir)/s390-mkopc.c
+
+s390-opc.tab: s390-mkopc s390-opc.txt
+	./s390-mkopc < $(srcdir)/s390-opc.txt > s390-opc.tab
 
 # This dependency stuff is copied from BFD.
 
@@ -526,7 +533,8 @@ ppc-dis.lo: ppc-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/ppc.h
 ppc-opc.lo: ppc-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/ppc.h opintl.h
-s390-opc.lo: s390-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/s390.h
+s390-opc.lo: s390-opc.c s390-opc.tab $(INCDIR)/ansidecl.h \
+  $(INCDIR)/opcode/s390.h
 s390-dis.lo: s390-dis.c $(INCDIR)/ansidecl.h sysdep.h \
   config.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/s390.h
 sh-dis.lo: sh-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
