@@ -1,3 +1,13 @@
+Tue Jul 11 20:16:09 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c (mips32_next_pc, mips16_next_pc,
+ 	read_next_frame_reg, mips_push_dummy_frame, mips_skip_stub,
+ 	mips_saved_pc_after_call): Use read_signed_register when
+ 	extracting register value.  Ensures all addresses are sign
+ 	extended.
+	(mips_read_pc): New function.  Return sign extended address.
+	(mips_gdbarch_init): Set gdbarch_read_pc.
+
 Tue Jul 11 19:06:29 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-mips.c (mips_request): Change all arguments to ULONGEST.

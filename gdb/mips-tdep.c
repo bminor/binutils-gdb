@@ -541,6 +541,14 @@ pc_is_mips16 (bfd_vma memaddr)
     return 0;
 }
 
+/* MIPS believes that the PC has a sign extended value.  Perhaphs the
+   all registers should be sign extended for simplicity? */
+
+static CORE_ADDR
+mips_read_pc (int pid)
+{
+  return read_signed_register_pid (PC_REGNUM, pid);
+}
 
 /* This returns the PC of the first inst after the prologue.  If we can't
    find the prologue, then return 0.  */
@@ -737,7 +745,8 @@ mips32_next_pc (CORE_ADDR pc)
 	    {
 	    case 8:		/* JR */
 	    case 9:		/* JALR */
-	      pc = read_register (rtype_rs (inst));	/* Set PC to that address */
+	      /* Set PC to that address */
+	      pc = read_signed_register (rtype_rs (inst));
 	      break;
 	    default:
 	      pc += 4;
@@ -754,7 +763,7 @@ mips32_next_pc (CORE_ADDR pc)
 	      case 16:		/* BLTZALL */
 	      case 18:		/* BLTZALL */
 	      less_branch:
-		if (read_register (itype_rs (inst)) < 0)
+		if (read_signed_register (itype_rs (inst)) < 0)
 		  pc += mips32_relative_offset (inst) + 4;
 		else
 		  pc += 8;	/* after the delay slot */
@@ -764,7 +773,7 @@ mips32_next_pc (CORE_ADDR pc)
 	      case 17:		/* BGEZAL */
 	      case 19:		/* BGEZALL */
 	      greater_equal_branch:
-		if (read_register (itype_rs (inst)) >= 0)
+		if (read_signed_register (itype_rs (inst)) >= 0)
 		  pc += mips32_relative_offset (inst) + 4;
 		else
 		  pc += 8;	/* after the delay slot */
@@ -794,30 +803,30 @@ mips32_next_pc (CORE_ADDR pc)
 	  break;		/* The new PC will be alternate mode */
 	case 4:		/* BEQ , BEQL */
 	equal_branch:
-	  if (read_register (itype_rs (inst)) ==
-	      read_register (itype_rt (inst)))
+	  if (read_signed_register (itype_rs (inst)) ==
+	      read_signed_register (itype_rt (inst)))
 	    pc += mips32_relative_offset (inst) + 4;
 	  else
 	    pc += 8;
 	  break;
 	case 5:		/* BNE , BNEL */
 	neq_branch:
-	  if (read_register (itype_rs (inst)) !=
-	      read_register (itype_rs (inst)))
+	  if (read_signed_register (itype_rs (inst)) !=
+	      read_signed_register (itype_rs (inst)))
 	    pc += mips32_relative_offset (inst) + 4;
 	  else
 	    pc += 8;
 	  break;
 	case 6:		/* BLEZ , BLEZL */
 	less_zero_branch:
-	  if (read_register (itype_rs (inst) <= 0))
+	  if (read_signed_register (itype_rs (inst) <= 0))
 	    pc += mips32_relative_offset (inst) + 4;
 	  else
 	    pc += 8;
 	  break;
 	case 7:
 	greater_branch:	/* BGTZ BGTZL */
-	  if (read_register (itype_rs (inst) > 0))
+	  if (read_signed_register (itype_rs (inst) > 0))
 	    pc += mips32_relative_offset (inst) + 4;
 	  else
 	    pc += 8;
@@ -1066,7 +1075,7 @@ mips16_next_pc (CORE_ADDR pc)
 	case 4:		/* beqz */
 	  upk.fmt = ritype;
 	  unpack_mips16 (pc, &upk);
-	  reg = read_register (upk.regx);
+	  reg = read_signed_register (upk.regx);
 	  if (reg == 0)
 	    pc += (upk.offset << 1) + 2;
 	  else
@@ -1075,7 +1084,7 @@ mips16_next_pc (CORE_ADDR pc)
 	case 5:		/* bnez */
 	  upk.fmt = ritype;
 	  unpack_mips16 (pc, &upk);
-	  reg = read_register (upk.regx);
+	  reg = read_signed_register (upk.regx);
 	  if (reg != 0)
 	    pc += (upk.offset << 1) + 2;
 	  else
@@ -1085,7 +1094,7 @@ mips16_next_pc (CORE_ADDR pc)
 	  upk.fmt = i8type;
 	  unpack_mips16 (pc, &upk);
 	  /* upk.regx contains the opcode */
-	  reg = read_register (24);	/* Test register is 24 */
+	  reg = read_signed_register (24);	/* Test register is 24 */
 	  if (((upk.regx == 0) && (reg == 0))	/* BTEZ */
 	      || ((upk.regx == 1) && (reg != 0)))	/* BTNEZ */
 	    /* pc = add_offset_16(pc,upk.offset) ; */
@@ -1115,7 +1124,7 @@ mips16_next_pc (CORE_ADDR pc)
 		  reg = 31;
 		  break;	/* BOGUS Guess */
 		}
-	      pc = read_register (reg);
+	      pc = read_signed_register (reg);
 	    }
 	  else
 	    pc += 2;
@@ -1344,7 +1353,7 @@ read_next_frame_reg (fi, regno)
 	    return read_memory_integer (ADDR_BITS_REMOVE (fi->saved_regs[regno]), MIPS_SAVED_REGSIZE);
 	}
     }
-  return read_register (regno);
+  return read_signed_register (regno);
 }
 
 /* mips_addr_bits_remove - remove useless address bits  */
@@ -2473,7 +2482,7 @@ mips_push_dummy_frame ()
   struct linked_proc_info *link = (struct linked_proc_info *)
   xmalloc (sizeof (struct linked_proc_info));
   mips_extra_func_info_t proc_desc = &link->info;
-  CORE_ADDR sp = ADDR_BITS_REMOVE (read_register (SP_REGNUM));
+  CORE_ADDR sp = ADDR_BITS_REMOVE (read_signed_register (SP_REGNUM));
   CORE_ADDR old_sp = sp;
   link->next = linked_proc_desc_table;
   linked_proc_desc_table = link;
@@ -3706,14 +3715,14 @@ mips_skip_stub (pc)
      target PC is in $31 ($ra).  */
   if (strcmp (name, "__mips16_ret_sf") == 0
       || strcmp (name, "__mips16_ret_df") == 0)
-    return read_register (RA_REGNUM);
+    return read_signed_register (RA_REGNUM);
 
   if (strncmp (name, "__mips16_call_stub_", 19) == 0)
     {
       /* If the PC is in __mips16_call_stub_{1..10}, this is a call stub
          and the target PC is in $2.  */
       if (name[19] >= '0' && name[19] <= '9')
-	return read_register (2);
+	return read_signed_register (2);
 
       /* If the PC at the start of __mips16_call_stub_{s,d}f_{0..10}, i.e.
          before the jal instruction, this is effectively a call stub
@@ -3735,7 +3744,7 @@ mips_skip_stub (pc)
 	         So scan down to the lui/addi and extract the target
 	         address from those two instructions.  */
 
-	      CORE_ADDR target_pc = read_register (2);
+	      CORE_ADDR target_pc = read_signed_register (2);
 	      t_inst inst;
 	      int i;
 
@@ -3765,7 +3774,7 @@ mips_skip_stub (pc)
 	  else
 	    /* This is the 'return' part of a call stub.  The return
 	       address is in $r18.  */
-	    return read_register (18);
+	    return read_signed_register (18);
 	}
     }
   return 0;			/* not a stub */
@@ -3964,8 +3973,7 @@ mips_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 static CORE_ADDR
 mips_saved_pc_after_call (struct frame_info *frame)
 {
-
-  return read_register (RA_REGNUM);
+  return read_signed_register (RA_REGNUM);
 }
 
 
@@ -4248,7 +4256,7 @@ mips_gdbarch_init (info, arches)
      #undef/#define REGISTER_NAMES and the new REGISTER_NAME(nr).
      Further work on it is required. */
   set_gdbarch_register_name (gdbarch, mips_register_name);
-  set_gdbarch_read_pc (gdbarch, generic_target_read_pc);
+  set_gdbarch_read_pc (gdbarch, mips_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
   set_gdbarch_read_fp (gdbarch, generic_target_read_fp);
   set_gdbarch_write_fp (gdbarch, generic_target_write_fp);
