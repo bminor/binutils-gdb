@@ -1,3 +1,7 @@
+Wed May 15 12:50:25 1996  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* emultempl/pe.em (set_pe_value): Pass 0 not 16 to strtoul call.
+
 Fri May 10 16:28:44 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* scripttempl/elfppc.sc (__stack): Make __stack 0 if it was
