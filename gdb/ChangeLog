@@ -1,3 +1,8 @@
+Wed Aug  9 08:11:45 1995  Stan Shebs  <shebs@cygnus.com>
+
+	* top.c (target_output_hook): Really make it match defs.h (char *
+	is not the same as unsigned char *).
+
 Tue Aug  8 15:13:05 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* Makefile.in (CXX_FOR_TARGET): Don't use ${rootme}/../gcc/xgcc
