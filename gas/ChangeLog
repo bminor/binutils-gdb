@@ -1,3 +1,41 @@
+2000-10-24  Diego Novillo  <dnovillo@cygnus.com>
+
+	* tc-i386.c (i386_operand_modifier): Remove.
+	(build_displacement_string): Remove.
+	(i386_parse_seg): Remove.
+	(i386_intel_memory_operand): Remove.
+	(i386_intel_operand): Re-write using recursive descent parser based
+	on MASM documentation.
+	(struct intel_parser_s): New structure.
+	(intel_parser): New static variable.
+	(struct intel_token): New structure.
+	(cur_token, prev_token): New static variables.
+	(T_NIL): Define.
+	(T_CONST): Define.
+	(T_REG): Define.
+	(T_BYTE): Define.
+	(T_WORD): Define.
+	(T_DWORD): Define.
+	(T_QWORD): Define.
+	(T_XWORD): Define.
+	(T_SHORT): Define.
+	(T_OFFSET): Define.
+	(T_PTR): Define.
+	(T_ID): Define.
+	(intel_match_token): New function.
+	(intel_get_token): New function.
+	(intel_putback_token): New function.
+	(intel_expr): New function.
+	(intel_e05): New function.
+	(intel_e05_1): New function.
+	(intel_e06): New function.
+	(intel_e06_1): New function.
+	(intel_e09): New function.
+	(intel_e09_1): New function.
+	(intel_e10): New function.
+	(intel_e10_1): New function.
+	(intel_e11): New function.
+
 2000-10-20  Jakub Jelinek  <jakub@redhat.com>
 
 	* config/tc-sparc.c (sparc_ip): Fix a bug which caused v9_arg_p

@@ -1,3 +1,7 @@
+2000-10-24  Diego Novillo  <dnovillo@cygnus.com>
+
+	* intel.s, intel.d: Add new tests for intel syntax.
+
 2000-10-19  Alan Modra  <alan@linuxcare.com.au>
 
 	* gas/elf/section0.s: Ensure section sizes are multiples of 16.
