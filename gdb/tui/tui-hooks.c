@@ -167,44 +167,12 @@ tui_register_changed_hook (int regno)
     }
 }
 
-extern struct breakpoint *breakpoint_chain;
-
-/* Find a breakpoint given its number.  Returns null if not found.  */
-static struct breakpoint *
-get_breakpoint (int number)
-{
-  struct breakpoint *bp;
-
-  for (bp = breakpoint_chain; bp; bp = bp->next)
-    {
-      if (bp->number == number)
-        return bp;
-    }
-  return 0;
-}
-
 /* Breakpoint creation hook.
    Update the screen to show the new breakpoint.  */
 static void
 tui_event_create_breakpoint (int number)
 {
-  struct breakpoint *bp;
-
-  bp = get_breakpoint (number);
-  if (bp)
-    {
-      switch (bp->type)
-        {
-        case bp_breakpoint:
-        case bp_hardware_breakpoint:
-          tuiAllSetHasBreakAt (bp, 1);
-          tuiUpdateAllExecInfos ();
-          break;
-
-        default:
-          break;
-        }
-    }
+  tui_update_all_breakpoint_info ();
 }
 
 /* Breakpoint deletion hook.
@@ -212,35 +180,13 @@ tui_event_create_breakpoint (int number)
 static void
 tui_event_delete_breakpoint (int number)
 {
-  struct breakpoint *bp;
-  struct breakpoint *b;
-  int clearIt;
-
-  bp = get_breakpoint (number);
-  if (bp == 0)
-    return;
-
-  /* Before turning off the visuals for the bp, check to see that
-     there are no other bps at the same address. */
-  clearIt = 0;
-  for (b = breakpoint_chain; b; b = b->next)
-    {
-      clearIt = (b == bp || b->address != bp->address);
-      if (!clearIt)
-        break;
-    }
-
-  if (clearIt)
-    {
-      tuiAllSetHasBreakAt (bp, 0);
-      tuiUpdateAllExecInfos ();
-    }
+  tui_update_all_breakpoint_info ();
 }
 
 static void
 tui_event_modify_breakpoint (int number)
 {
-  ;
+  tui_update_all_breakpoint_info ();
 }
 
 static void

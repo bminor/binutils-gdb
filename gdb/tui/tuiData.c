@@ -888,7 +888,8 @@ initContentElement (TuiWinElementPtr element, TuiWinType type)
       element->whichElement.locator.addr = 0;
       break;
     case EXEC_INFO_WIN:
-      element->whichElement.simpleString = blankStr ();
+      memset(element->whichElement.simpleString, ' ',
+             sizeof(element->whichElement.simpleString));
       break;
     default:
       break;

@@ -1,3 +1,32 @@
+2002-08-30  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tuiSourceWin.h (tui_update_all_breakpoint_info): Declare.
+	(tui_update_breakpoint_info): Declare.
+	(tuiSetHasBreakAt, tuiAllSetHasBreakAt): Remove.
+
+	* tuiSourceWin.c (tuiUpdateSourceWindowAsIs): Update breakpoint
+	information using tui_update_breakpoint_info.
+	(tui_update_all_breakpoint_info): New function to refresh all
+	execution windows.
+	(tui_update_breakpoint_info): New function to recompute the status
+	of exec info window from breakpoints.
+	(tuiSetHasBreakAt, tuiAllSetHasBreakAt): Remove.
+	(tuiSetExecInfoContent): Use the exec info flags computed by
+	tui_update_breakpoint_info to display a short status about breakpoints.
+
+	* tuiData.h (TuiExecInfoContent): New for exec info string.
+	(TuiWhichElement): Use it.
+	(TUI_BP_ENABLED, TUI_BP_DISABLED, TUI_BP_HIT): New defines.
+	(TUI_BP_CONDITIONAL, TUI_BP_HARDWARE): New defines.
+	(TUI_BP_HIT_POS, TUI_BP_BREAK_POS, TUI_EXEC_POS): Likewise.
+	(TUI_EXECINFO_SIZE): Likewise.
+	* tuiData.c (initContentElement): Clear exec info string.
+
+	* tui-hooks.c (get_breakpoint): Remove.
+	(tui_event_create_breakpoint): Call tui_update_all_breakpoint_info.
+	(tui_event_delete_breakpoint): Likewise.
+	(tui_event_modify_breakpoint): Likewise.
+
 2002-08-29  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* tui.c (tuiGetLowDisassemblyAddress): Moved from here.

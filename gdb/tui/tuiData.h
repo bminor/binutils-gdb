@@ -200,6 +200,20 @@ typedef struct _TuiLocatorElement
   }
 TuiLocatorElement, *TuiLocatorElementPtr;
 
+/* Flags to tell what kind of breakpoint is at current line.  */
+#define TUI_BP_ENABLED      0x01
+#define TUI_BP_DISABLED     0x02
+#define TUI_BP_HIT          0x04
+#define TUI_BP_CONDITIONAL  0x08
+#define TUI_BP_HARDWARE     0x10
+
+/* Position of breakpoint markers in the exec info string.  */
+#define TUI_BP_HIT_POS      0
+#define TUI_BP_BREAK_POS    1
+#define TUI_EXEC_POS        2
+#define TUI_EXECINFO_SIZE   4
+
+typedef char TuiExecInfoContent[TUI_EXECINFO_SIZE];
 
 /* An content element in a window */
 typedef union
@@ -209,7 +223,7 @@ typedef union
     TuiDataElement data;	/* elements of dataWindow */
     TuiCommandElement command;	/* command elements */
     TuiLocatorElement locator;	/* locator elements */
-    char *simpleString;		/* simple char based elements */
+    TuiExecInfoContent simpleString;	/* simple char based elements */
   }
 TuiWhichElement, *TuiWhichElementPtr;
 

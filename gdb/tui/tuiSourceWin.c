@@ -120,7 +120,7 @@ tuiUpdateSourceWindowAsIs (TuiWinInfoPtr winInfo, struct symtab *s,
     }
   else
     {
-      tuiEraseSourceContent (winInfo, NO_EMPTY_SOURCE_PROMPT);
+      tui_update_breakpoint_info (winInfo, 0);
       tuiShowSourceContent (winInfo);
       tuiUpdateExecInfo (winInfo);
       if (winInfo->generic.type == SRC_WIN)
@@ -398,67 +398,85 @@ tuiSetIsExecPointAt (TuiLineOrAddress l, TuiWinInfoPtr winInfo)
   return;
 }				/* tuiSetIsExecPointAt */
 
-/*
-   ** tuiSetHasBreakAt().
-   **        Set or clear the hasBreak flag in the line whose line is lineNo.
- */
+/* Update the execution windows to show the active breakpoints.
+   This is called whenever a breakpoint is inserted, removed or
+   has its state changed.  */
 void
-tuiSetHasBreakAt (struct breakpoint *bp, TuiWinInfoPtr winInfo, int hasBreak)
+tui_update_all_breakpoint_info ()
 {
+  TuiList* list = sourceWindows ();
   int i;
-  TuiWinContent content = (TuiWinContent) winInfo->generic.content;
 
-  i = 0;
-  while (i < winInfo->generic.contentSize)
+  for (i = 0; i < list->count; i++)
     {
-      int gotIt;
-      TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
+      TuiWinInfoPtr win = (TuiWinInfoPtr) list->list[i];
 
-      if (winInfo == srcWin)
-	{
-          TuiSourceInfoPtr src = &winInfo->detail.sourceInfo;
-
-	  gotIt = (src->filename != (char *) NULL &&
-                   bp->source_file != NULL &&
-		   (strcmp (bp->source_file, src->filename) == 0) &&
-		   content[i]->whichElement.source.lineOrAddr.lineNo ==
-		   bp->line_number);
-	}
-      else
-	gotIt = (content[i]->whichElement.source.lineOrAddr.addr
-		 == bp->address);
-      if (gotIt)
-	{
-	  content[i]->whichElement.source.hasBreak = hasBreak;
-	  break;
-	}
-      i++;
+      if (tui_update_breakpoint_info (win, FALSE))
+        {
+          tuiUpdateExecInfo (win);
+        }
     }
-
-  return;
-}				/* tuiSetHasBreakAt */
+}
 
 
-/*
-   ** tuiAllSetHasBreakAt().
-   **        Set or clear the hasBreak flag in all displayed source windows.
- */
-void
-tuiAllSetHasBreakAt (struct breakpoint *bp, int hasBreak)
+/* Scan the source window and the breakpoints to update the
+   hasBreak information for each line.
+   Returns 1 if something changed and the execution window
+   must be refreshed.  */
+int
+tui_update_breakpoint_info (TuiWinInfoPtr win, int current_only)
 {
   int i;
+  int need_refresh = 0;
+  TuiSourceInfoPtr src = &win->detail.sourceInfo;
 
-  for (i = 0; i < (sourceWindows ())->count; i++)
-    tuiSetHasBreakAt (bp,
-		      (TuiWinInfoPtr) (sourceWindows ())->list[i], hasBreak);
+  for (i = 0; i < win->generic.contentSize; i++)
+    {
+      struct breakpoint *bp;
+      extern struct breakpoint *breakpoint_chain;
+      int mode;
+      TuiSourceElement* line;
 
-  return;
-}				/* tuiAllSetHasBreakAt */
+      line = &((TuiWinElementPtr) win->generic.content[i])->whichElement.source;
+      if (current_only && !line->isExecPoint)
+         continue;
 
+      /* Scan each breakpoint to see if the current line has something to
+         do with it.  Identify enable/disabled breakpoints as well as
+         those that we already hit.  */
+      mode = 0;
+      for (bp = breakpoint_chain;
+           bp != (struct breakpoint *) NULL;
+           bp = bp->next)
+        {
+          if ((win == srcWin
+               && bp->source_file
+               && (strcmp (src->filename, bp->source_file) == 0)
+               && bp->line_number == line->lineOrAddr.lineNo)
+              || (win == disassemWin
+                  && bp->address == line->lineOrAddr.addr))
+            {
+              if (bp->enable_state == bp_disabled)
+                mode |= TUI_BP_DISABLED;
+              else
+                mode |= TUI_BP_ENABLED;
+              if (bp->hit_count)
+                mode |= TUI_BP_HIT;
+              if (bp->cond)
+                mode |= TUI_BP_CONDITIONAL;
+              if (bp->type == bp_hardware_breakpoint)
+                mode |= TUI_BP_HARDWARE;
+            }
+        }
+      if (line->hasBreak != mode)
+        {
+          line->hasBreak = mode;
+          need_refresh = 1;
+        }
+    }
+  return need_refresh;
+}
 
-/*********************************
-** EXECUTION INFO FUNCTIONS        **
-*********************************/
 
 /*
    ** tuiSetExecInfoContent().
@@ -483,56 +501,37 @@ tuiSetExecInfoContent (TuiWinInfoPtr winInfo)
 	{
 	  int i;
 
+          tui_update_breakpoint_info (winInfo, 1);
 	  for (i = 0; i < winInfo->generic.contentSize; i++)
 	    {
 	      TuiWinElementPtr element;
 	      TuiWinElementPtr srcElement;
+              int mode;
 
 	      element = (TuiWinElementPtr) execInfoPtr->content[i];
 	      srcElement = (TuiWinElementPtr) winInfo->generic.content[i];
-	      /*
-	         ** First check to see if we have a breakpoint that is
-	         ** temporary.  If so, and this is our current execution point,
-	         ** then clear the break indicator.
-	       */
-	      if (srcElement->whichElement.source.hasBreak &&
-		  srcElement->whichElement.source.isExecPoint)
-		{
-		  struct breakpoint *bp;
-		  int found = FALSE;
-		  extern struct breakpoint *breakpoint_chain;
 
-		  for (bp = breakpoint_chain;
-		       (bp != (struct breakpoint *) NULL && !found);
-		       bp = bp->next)
-		    {
-		      found =
-			(winInfo == srcWin &&
-			 bp->line_number ==
-		       srcElement->whichElement.source.lineOrAddr.lineNo) ||
-			(winInfo == disassemWin &&
-			 bp->address == (CORE_ADDR)
-			 srcElement->whichElement.source.lineOrAddr.addr);
-		      if (found)
-			srcElement->whichElement.source.hasBreak =
-			  (bp->disposition != disp_del || bp->hit_count <= 0);
-		    }
-		  if (!found)
-		    srcElement->whichElement.source.hasBreak = FALSE;
-		}
-	      /*
-	         ** Now update the exec info content based upon the state
-	         ** of each line as indicated by the source content.
-	       */
-	      if (srcElement->whichElement.source.hasBreak &&
-		  srcElement->whichElement.source.isExecPoint)
-		element->whichElement.simpleString = breakLocationStr ();
-	      else if (srcElement->whichElement.source.hasBreak)
-		element->whichElement.simpleString = breakStr ();
-	      else if (srcElement->whichElement.source.isExecPoint)
-		element->whichElement.simpleString = locationStr ();
-	      else
-		element->whichElement.simpleString = blankStr ();
+              memset(element->whichElement.simpleString, ' ',
+                     sizeof(element->whichElement.simpleString));
+              element->whichElement.simpleString[TUI_EXECINFO_SIZE - 1] = 0;
+
+	      /* Now update the exec info content based upon the state
+                 of each line as indicated by the source content.  */
+              mode = srcElement->whichElement.source.hasBreak;
+              if (mode & TUI_BP_HIT)
+                element->whichElement.simpleString[TUI_BP_HIT_POS] =
+                  (mode & TUI_BP_HARDWARE) ? 'H' : 'B';
+              else if (mode & (TUI_BP_ENABLED | TUI_BP_DISABLED))
+                element->whichElement.simpleString[TUI_BP_HIT_POS] =
+                  (mode & TUI_BP_HARDWARE) ? 'h' : 'b';
+
+              if (mode & TUI_BP_ENABLED)
+                element->whichElement.simpleString[TUI_BP_BREAK_POS] = '+';
+              else if (mode & TUI_BP_DISABLED)
+                element->whichElement.simpleString[TUI_BP_BREAK_POS] = '-';
+
+              if (srcElement->whichElement.source.isExecPoint)
+                element->whichElement.simpleString[TUI_EXEC_POS] = '>';
 	    }
 	  execInfoPtr->contentSize = winInfo->generic.contentSize;
 	}
@@ -541,7 +540,7 @@ tuiSetExecInfoContent (TuiWinInfoPtr winInfo)
     }
 
   return ret;
-}				/* tuiSetExecInfoContent */
+}
 
 
 /*
