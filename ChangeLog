@@ -1,3 +1,7 @@
+Fri Jul 24 17:01:42 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config.guess: Merge with FSF.
+
 Fri Jul 24 08:43:36 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 start-sanitize-sky

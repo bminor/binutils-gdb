@@ -659,7 +659,7 @@ else
 	done
 fi
 
-beos_files="ChangeLog config.guess configure.in"
+beos_files="ChangeLog configure.in"
 if ( echo $* | grep keep\-beos > /dev/null ) ; then
 	for i in $beos_files ; do
 		if test ! -d $i && (grep sanitize-beos $i > /dev/null) ; then
