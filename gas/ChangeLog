@@ -1,3 +1,9 @@
+start-sanitize-arc
+Fri Jul 14 10:26:43 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/tc-arc.c (byte_order): Provide explicit initial value.
+end-sanitize-arc
+
 Thu Jul 13 21:16:43 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.h (UNDEFINED_DIFFERENCE_OK): Define for SOM.
@@ -660,14 +666,6 @@ Tue May 16 16:29:58 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* read.c (s_lcomm): Do ELF/ECOFF test at run time, not compile
 	time.
-
-start-sanitize-arc
-Mon May 15 13:39:45 1995  Doug Evans  <dje@canuck.cygnus.com>
-
-	* config/tc-arc.c (md_longopts): -EB/-EL renamed to
-	-mbig-endian/-mlittle-endian.
-	(md_show_usage): Likewise.
-end-sanitize-arc
 
 Fri May 12 14:17:47 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
