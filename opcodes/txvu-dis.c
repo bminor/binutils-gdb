@@ -162,7 +162,7 @@ print_insn (pc, info, insn, lower_p)
 	  else
 	    {
 	      value = (insn >> operand->shift) & ((1 << operand->bits) - 1);
-	      if ((operand->flags & TXVU_OPERAND_SIGNED)
+	      if ((operand->flags & TXVU_OPERAND_SIGNED) != 0
 		  && (value & (1 << (operand->bits - 1))))
 		value -= 1 << operand->bits;
 	    }

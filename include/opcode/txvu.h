@@ -91,37 +91,30 @@ struct txvu_operand {
    prints these symbolically if possible.  */
 #define TXVU_OPERAND_ADDRESS 8
 
-/* This operand is a long immediate value.  */
-#define TXVU_OPERAND_LIMM 0x10
-
-/* This operand takes unsigned values (default is signed).  */
-#define TXVU_OPERAND_UNSIGNED 0x20
+/* This operand takes signed values (default is unsigned).
+   The default was chosen to be unsigned as most fields are unsigned
+   (e.g. registers).  */
+#define TXVU_OPERAND_SIGNED 0x10
 
 /* This operand takes signed values, but also accepts a full positive
    range of values.  That is, if bits is 16, it takes any value from
    -0x8000 to 0xffff.  */
-#define TXVU_OPERAND_SIGNOPT 0x40
+#define TXVU_OPERAND_SIGNOPT 0x20
 
 /* This operand should be regarded as a negative number for the
    purposes of overflow checking (i.e., the normal most negative
    number is disallowed and one more than the normal most positive
    number is allowed).  This flag will only be set for a signed
    operand.  */
-#define TXVU_OPERAND_NEGATIVE 0x80
+#define TXVU_OPERAND_NEGATIVE 0x40
 
 /* This operand doesn't really exist.  The program uses these operands
    in special ways.  */
-#define TXVU_OPERAND_FAKE 0x100
+#define TXVU_OPERAND_FAKE 0x80
 
 /* Modifier values.  */
 /* A dot is required before a suffix.  Eg: .le  */
 #define TXVU_MOD_DOT 0x1000
-
-/* A normal register is allowed (not used, but here for completeness).  */
-#define TXVU_MOD_REG 0x2000
-
-/* An auxiliary register name is expected.  */
-#define TXVU_MOD_AUXREG 0x4000
 
 /* Sum of all TXVU_MOD_XXX bits.  */
 #define TXVU_MOD_BITS 0x7000
@@ -198,19 +191,23 @@ struct txvu_operand {
 #define TXVU_SHIFT_SREG 11
 #define TXVU_SHIFT_DREG 6
 #define TXVU_MASK_REG 31
+/* Bits for multiple dest choices.  */
 #define TXVU_DEST_X 8
 #define TXVU_DEST_Y 4
 #define TXVU_DEST_Z 2
 #define TXVU_DEST_W 1
-#define TXVU_BC_X 0
-#define TXVU_BC_Y 1
-#define TXVU_BC_Z 2
-#define TXVU_BC_W 3
+/* Values for a single dest choice.  */
+#define TXVU_SDEST_X 0
+#define TXVU_SDEST_Y 1
+#define TXVU_SDEST_Z 2
+#define TXVU_SDEST_W 3
 
 extern const struct txvu_operand txvu_operands[];
 extern const int txvu_operand_count;
-extern /*const*/ struct txvu_opcode txvu_opcodes[];
-extern const int txvu_opcodes_count;
+extern /*const*/ struct txvu_opcode txvu_upper_opcodes[];
+extern /*const*/ struct txvu_opcode txvu_lower_opcodes[];
+extern const int txvu_upper_opcodes_count;
+extern const int txvu_lower_opcodes_count;
 
 /* Utility fns in txvu-opc.c.  */
 void txvu_opcode_init_tables PARAMS ((int));

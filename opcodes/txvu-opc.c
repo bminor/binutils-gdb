@@ -149,17 +149,17 @@ const struct txvu_operand txvu_operands[] =
 
   /* Lower word operands.  */
 
-  /* 11 bit immediate.  */
+  /* 5 bit signed immediate.  */
 #define LIMM5 (UXYZ + 1)
-  { 5, 6, 0, 0, 0, 0, 0 },
+  { 5, 6, TXVU_OPERAND_SIGNED, 0, 0, 0, 0 },
 
-  /* 11 bit immediate.  */
+  /* 11 bit signed immediate.  */
 #define LIMM11 (LIMM5 + 1)
-  { 11, 0, 0, 0, 0, 0, 0 },
+  { 11, 0, TXVU_OPERAND_SIGNED, 0, 0, 0, 0 },
 
   /* 15 bit unsigned immediate.  */
 #define LUIMM15 (LIMM11 + 1)
-  { 15, 0, TXVU_OPERAND_UNSIGNED, 0, insert_luimm15, extract_luimm15, 0 },
+  { 15, 0, 0, 0, insert_luimm15, extract_luimm15, 0 },
 
   /* ID register.  */
 #define LIDREG (LUIMM15 + 1)
@@ -189,12 +189,12 @@ const struct txvu_operand txvu_operands[] =
 #define LVI01 (LFTFFTREG + 1)
   { 0, 0, TXVU_OPERAND_FAKE, parse_vi01, 0, 0, print_vi01 },
 
-  /* 24 bit immediate.  */
-#define LIMM24 (LVI01 + 1)
+  /* 24 bit unsigned immediate.  */
+#define LUIMM24 (LVI01 + 1)
   { 24, 0, 0, 0, 0, 0, 0 },
 
   /* 12 bit unsigned immediate, split into 1 and 11 bit pieces.  */
-#define LUIMM12 (LIMM24 + 1)
+#define LUIMM12 (LUIMM24 + 1)
   { 12, 0, 0, 0, insert_luimm12, extract_luimm12, 0 },
 
   /* 11 bit pc-releative immediate.  */
@@ -358,7 +358,7 @@ struct txvu_opcode txvu_upper_opcodes[] = {
   { "subaq", { DOTDEST, SP, UACCDEST, VFSREG, 'q' }, MURES + MT + MUOP11, VUOP11 (0x27c) },
   { "suba", { UBC, DOTDEST, SP, UACCDEST, VFSREG, UBCFTREG }, MURES + MUOP9, VUOP9 (0x1f) }
 };
-const int txvu_upper_opcodes_count = sizeof (txvu_upper_opcodes) / sizeof (txvu_opcodes[0]);
+const int txvu_upper_opcodes_count = sizeof (txvu_upper_opcodes) / sizeof (txvu_upper_opcodes[0]);
 
 /* Lower instruction Value macros.  */
 
@@ -414,11 +414,11 @@ struct txvu_opcode txvu_lower_opcodes[] = {
   { "esin", { SP, 'p', LFSFFSREG }, MLOP7 + VLFTF (~0) + MT + MLOP11, VLOP7 (0x40) + VLOP11 (0x7fc) },
   { "esqrt", { SP, 'p', LFSFFSREG }, MLOP7 + VLFTF (~0) + MT + MLOP11, VLOP7 (0x40) + VLOP11 (0x7bc) },
   { "esum", { SP, 'p', LFSREG }, MLOP7 + MDEST + MT + MLOP11, VLOP7 (0x40) + VDEST (0xf) + VLOP11 (0x77e) },
-  { "fcand", { SP, LVI01, LIMM24 }, MLOP7 + MLB24, VLOP7 (0x12) },
-  { "fceq", { SP, LVI01, LIMM24 }, MLOP7 + MLB24, VLOP7 (0x10) },
+  { "fcand", { SP, LVI01, LUIMM24 }, MLOP7 + MLB24, VLOP7 (0x12) },
+  { "fceq", { SP, LVI01, LUIMM24 }, MLOP7 + MLB24, VLOP7 (0x10) },
   { "fcget", { SP, LITREG }, MLOP7 + MDEST + MS + MLIMM11, VLOP7 (0x1c) },
-  { "fcor", { SP, LVI01, LIMM24 }, MLOP7 + MLB24, VLOP7 (0x13) },
-  { "fcset", { SP, LVI01, LIMM24 }, MLOP7 + MLB24, VLOP7 (0x11) },
+  { "fcor", { SP, LVI01, LUIMM24 }, MLOP7 + MLB24, VLOP7 (0x13) },
+  { "fcset", { SP, LVI01, LUIMM24 }, MLOP7 + MLB24, VLOP7 (0x11) },
   { "fmand", { SP, LITREG, LISREG }, MLOP7 + MDEST + MLIMM11, VLOP7 (0x1a) },
   { "fmeq", { SP, LITREG, LISREG }, MLOP7 + MDEST + MLIMM11, VLOP7 (0x18) },
   { "fmor", { SP, LITREG, LISREG }, MLOP7 + MDEST + MLIMM11, VLOP7 (0x1b) },
@@ -472,7 +472,7 @@ struct txvu_opcode txvu_lower_opcodes[] = {
   { "xitop", { LITREG }, MLOP7 + MDEST + MS + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x6bd) },
   { "xtop", { LITREG }, MLOP7 + MDEST + MS + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x6bc) }
 };
-const int txvu_lower_opcodes_count = sizeof (txvu_lower_opcodes) / sizeof (txvu_opcodes[0]);
+const int txvu_lower_opcodes_count = sizeof (txvu_lower_opcodes) / sizeof (txvu_lower_opcodes[0]);
 
 /* Indexed by first letter of opcode.  Points to chain of opcodes with same
    first letter.  */
