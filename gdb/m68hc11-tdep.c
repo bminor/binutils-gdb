@@ -1094,72 +1094,81 @@ m68hc11_stack_align (CORE_ADDR addr)
 }
 
 static CORE_ADDR
-m68hc11_push_arguments (int nargs,
-                        struct value **args,
-                        CORE_ADDR sp,
-                        int struct_return,
-                        CORE_ADDR struct_addr)
+m68hc11_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+                         struct regcache *regcache, CORE_ADDR bp_addr,
+                         int nargs, struct value **args, CORE_ADDR sp,
+                         int struct_return, CORE_ADDR struct_addr)
 {
-  int stack_alloc;
   int argnum;
   int first_stack_argnum;
-  int stack_offset;
   struct type *type;
   char *val;
   int len;
+  char buf[2];
   
-  stack_alloc = 0;
   first_stack_argnum = 0;
   if (struct_return)
     {
       /* The struct is allocated on the stack and gdb used the stack
          pointer for the address of that struct.  We must apply the
          stack offset on the address.  */
-      write_register (HARD_D_REGNUM, struct_addr + STACK_CORRECTION);
+      regcache_cooked_write_unsigned (regcache, HARD_D_REGNUM,
+                                      struct_addr + STACK_CORRECTION);
     }
   else if (nargs > 0)
     {
       type = VALUE_TYPE (args[0]);
       len = TYPE_LENGTH (type);
-      
+
       /* First argument is passed in D and X registers.  */
       if (len <= 4)
         {
-          LONGEST v = extract_unsigned_integer (VALUE_CONTENTS (args[0]), len);
+          ULONGEST v;
+
+          v = extract_unsigned_integer (VALUE_CONTENTS (args[0]), len);
           first_stack_argnum = 1;
-          write_register (HARD_D_REGNUM, v);
+
+          regcache_cooked_write_unsigned (regcache, HARD_D_REGNUM, v);
           if (len > 2)
             {
               v >>= 16;
-              write_register (HARD_X_REGNUM, v);
+              regcache_cooked_write_unsigned (regcache, HARD_X_REGNUM, v);
             }
         }
     }
-  for (argnum = first_stack_argnum; argnum < nargs; argnum++)
-    {
-      type = VALUE_TYPE (args[argnum]);
-      stack_alloc += (TYPE_LENGTH (type) + 1) & -2;
-    }
-  sp -= stack_alloc;
 
-  stack_offset = STACK_CORRECTION;
-  for (argnum = first_stack_argnum; argnum < nargs; argnum++)
+  for (argnum = nargs - 1; argnum >= first_stack_argnum; argnum--)
     {
       type = VALUE_TYPE (args[argnum]);
       len = TYPE_LENGTH (type);
 
-      val = (char*) VALUE_CONTENTS (args[argnum]);
-      write_memory (sp + stack_offset, val, len);
-      stack_offset += len;
       if (len & 1)
         {
           static char zero = 0;
 
-          write_memory (sp + stack_offset, &zero, 1);
-          stack_offset++;
+          sp--;
+          write_memory (sp, &zero, 1);
         }
+      val = (char*) VALUE_CONTENTS (args[argnum]);
+      sp -= len;
+      write_memory (sp, val, len);
     }
-  return sp;
+
+  /* Store return address.  */
+  sp -= 2;
+  store_unsigned_integer (buf, 2, bp_addr);
+  write_memory (sp, buf, 2);
+
+  /* Finally, update the stack pointer...  */
+  sp -= STACK_CORRECTION;
+  regcache_cooked_write_unsigned (regcache, HARD_SP_REGNUM, sp);
+
+  /* ...and fake a frame pointer.  */
+  regcache_cooked_write_unsigned (regcache, SOFT_FP_REGNUM, sp);
+
+  /* DWARF2/GCC uses the stack address *before* the function call as a
+     frame's CFA.  */
+  return sp + 2;
 }
 
 
@@ -1289,22 +1298,6 @@ m68hc11_extract_struct_value_address (struct regcache *regcache)
   return extract_unsigned_integer (buf, M68HC11_REG_SIZE);
 }
 
-/* Function: push_return_address (pc)
-   Set up the return address for the inferior function call.
-   Needed for targets where we don't actually execute a JSR/BSR instruction */
-
-static CORE_ADDR
-m68hc11_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
-{
-  char valbuf[2];
-  
-  pc = CALL_DUMMY_ADDRESS ();
-  sp -= 2;
-  store_unsigned_integer (valbuf, 2, pc);
-  write_memory (sp + STACK_CORRECTION, valbuf, 2);
-  return sp;
-}
-
 /* Test whether the ELF symbol corresponds to a function using rtc or
    rti to return.  */
    
@@ -1393,8 +1386,6 @@ static struct gdbarch *
 m68hc11_gdbarch_init (struct gdbarch_info info,
                       struct gdbarch_list *arches)
 {
-  static LONGEST m68hc11_call_dummy_words[] =
-  {0};
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
   int elf_flags;
@@ -1491,12 +1482,8 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_pseudo_register_write (gdbarch, m68hc11_pseudo_register_write);
 
   set_gdbarch_call_dummy_address (gdbarch, m68hc11_call_dummy_address);
-  set_gdbarch_deprecated_call_dummy_words (gdbarch, m68hc11_call_dummy_words);
-  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (m68hc11_call_dummy_words));
   set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
   set_gdbarch_extract_return_value (gdbarch, m68hc11_extract_return_value);
-  set_gdbarch_deprecated_push_arguments (gdbarch, m68hc11_push_arguments);
-  set_gdbarch_deprecated_push_return_address (gdbarch, m68hc11_push_return_address);
   set_gdbarch_return_value_on_stack (gdbarch, m68hc11_return_value_on_stack);
 
   set_gdbarch_deprecated_store_struct_return (gdbarch, m68hc11_store_struct_return);
@@ -1507,6 +1494,8 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, m68hc11_frame_saved_pc);
   set_gdbarch_frame_args_address (gdbarch, m68hc11_frame_args_address);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, m68hc11_saved_pc_after_call);
+
+  set_gdbarch_push_dummy_call (gdbarch, m68hc11_push_dummy_call);
 
   set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
 
@@ -1522,7 +1511,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, m68hc11_breakpoint_from_pc);
   set_gdbarch_stack_align (gdbarch, m68hc11_stack_align);
-  set_gdbarch_deprecated_extra_stack_alignment_needed (gdbarch, 1);
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_m68hc11);
 
   m68hc11_add_reggroups (gdbarch);

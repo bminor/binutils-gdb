@@ -1,3 +1,12 @@
+2003-07-27  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* m68hc11-tdep.c (m68hc11_push_dummy_call): New function adapted
+	from m68hc11_push_arguments.
+	(m68hc11_push_arguments): Remove.
+	(m68hc11_push_return_address): Remove.
+	(m68hc11_gdbarch_init): Install the above; remove above deprecated
+	handlers; remove deprecated_extra_stack_alignment_needed.
+
 2003-07-27  Andrew Cagney  <cagney@redhat.com>
 
 	Sync HP/UX with mainline:
