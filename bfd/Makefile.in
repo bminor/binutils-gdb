@@ -375,7 +375,7 @@ do_clean: do_mostlyclean
 	rm -f libbfd.a TAGS bfd.h stmp-bfd.h ofiles \
 		elf32-target.h elf64-target.h
 do_distclean: do_clean
-	rm -f Makefile config.status config.cache
+	rm -f Makefile config.status config.cache config.h stamp-h
 
 # Should we remove $(srcdir)/libcoff.h $(srcdir)/libbfd.h $(srcdir)/bfd-in2.h?
 # make-stds.texi says it depends on whether they can be regenerated using
@@ -474,7 +474,11 @@ install:
 	fi
 
 Makefile: Makefile.in config.status
-	$(SHELL) config.status
+	CONFIG_FILES=Makefile CONFIG_HEADERS= $(SHELL) ./config.status
+
+config.h: stamp-h ; @true
+stamp-h: config.h.in config.status
+	CONFIG_FILES= CONFIG_HEADERS=config.h $(SHELL) ./config.status
 
 config.status: configure configure.host config.bfd
 	$(SHELL) config.status --recheck

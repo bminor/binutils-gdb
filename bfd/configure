@@ -1706,7 +1706,7 @@ cat >> $CONFIG_STATUS <<\EOF
 fi; done
 
 
-
+case x$CONFIG_HEADERS in xconfig.h) echo > stamp-h ;; esac
 exit 0
 EOF
 chmod +x $CONFIG_STATUS

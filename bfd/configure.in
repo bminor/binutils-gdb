@@ -480,4 +480,5 @@ test -n "${selarchs}" && tdefaults="${tdefaults} -DSELECT_ARCHITECTURES='${selar
 AC_SUBST(tdefaults)
 
 rm -f doc/config.status
-AC_OUTPUT(Makefile doc/Makefile)
+AC_OUTPUT(Makefile doc/Makefile,
+[case x$CONFIG_HEADERS in xconfig.h) echo > stamp-h ;; esac])
