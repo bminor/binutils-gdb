@@ -1,3 +1,7 @@
+2002-05-01  Chris Demetriou  <cgd@broadcom.com>
+
+	* igen.c: Use 'deprecated' rather than 'depreciated.'
+
 2002-03-23  Andrew Cagney  <ac131313@redhat.com>
 
  	* gen.c (format_name_cmp): New function.

@@ -1037,7 +1037,7 @@ main (int argc,
       printf ("Config options:\n");
       printf ("\n");
       printf ("  -B <bit-size>\n");
-      printf ("\t Set the number of bits in an instruction (depreciated).\n");
+      printf ("\t Set the number of bits in an instruction (deprecated).\n");
       printf ("\t This option can now be set directly in the instruction table.\n");
       printf ("\n");
       printf ("  -D <data-structure>\n");
@@ -1049,7 +1049,7 @@ main (int argc,
       printf ("\t a flag not listed in the <filter-list>.\n");
       printf ("\n");
       printf ("  -H <high-bit>\n");
-      printf ("\t Set the number of the high (most significant) instruction bit (depreciated).\n");
+      printf ("\t Set the number of the high (most significant) instruction bit (deprecated).\n");
       printf ("\t This option can now be set directly in the instruction table.\n");
       printf ("\n");
       printf ("  -I <directory>\n");
@@ -1120,7 +1120,7 @@ main (int argc,
       printf ("\t trace-rule-expansion   - report each instruction as it is expanded (before insertion into a decode table)\n");
       printf ("\t trace-all              - enable all trace options\n");
       printf ("\n");
-      printf ("\t field-widths           - instruction formats specify widths (depreciated)\n");
+      printf ("\t field-widths           - instruction formats specify widths (deprecated)\n");
       printf ("\t                          By default, an instruction format specifies bit\n");
       printf ("\t                          positions\n");
       printf ("\t                          This option can now be set directly in the\n");
@@ -1130,7 +1130,7 @@ main (int argc,
       printf ("\n");
       printf ("Input options:\n");
       printf ("\n");
-      printf ("  -k <cache-rules> (depreciated)\n");
+      printf ("  -k <cache-rules> (deprecated)\n");
       printf ("  -o <decode-rules>\n");
       printf ("  -i <instruction-table>\n");
       printf ("\n");

@@ -1,3 +1,7 @@
+2002-05-01  Chris Demetriou  <cgd@broadcom.com>
+
+	* callback.c: Use 'deprecated' rather than 'depreciated.'
+
 2002-02-24  Andrew Cagney  <ac131313@redhat.com>
 
 	From wiz at danbala:

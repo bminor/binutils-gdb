@@ -1,5 +1,10 @@
 2002-05-01  Chris Demetriou  <cgd@broadcom.com>
 
+	* interp.c: Use 'deprecated' rather than 'depreciated.'
+	* sim-main.h: Likewise.
+
+2002-05-01  Chris Demetriou  <cgd@broadcom.com>
+
 	* cp1.c (store_fpr): Remove #ifdef'd out call to UndefinedResult
 	which wouldn't compile anyway.
 	* sim-main.h (unpredictable_action): New function prototype.

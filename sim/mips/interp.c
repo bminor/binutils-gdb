@@ -1238,7 +1238,7 @@ sim_monitor (SIM_DESC sd,
 	sim_write (sd, A0 + 0, (char *)&value, 4);
 	sim_write (sd, A0 + 4, (char *)&zero, 4);
 	sim_write (sd, A0 + 8, (char *)&zero, 4);
-	/* sim_io_eprintf (sd, "sim: get_mem_info() depreciated\n"); */
+	/* sim_io_eprintf (sd, "sim: get_mem_info() deprecated\n"); */
 	break;
       }
     

@@ -43,7 +43,7 @@ typedef address_word sim_cia;
 #include "sim-base.h"
 
 
-/* Depreciated macros and types for manipulating 64bit values.  Use
+/* Deprecated macros and types for manipulating 64bit values.  Use
    ../common/sim-bits.h and ../common/sim-endian.h macros instead. */
 
 typedef signed64 word64;
