@@ -1,3 +1,7 @@
+2003-06-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2cfi.c, dwarf2cfi.h: Remove.
+
 2003-06-07  Adam Fedor  <fedor@gnu.org>
 
 	* gdb/objc-lang.c (FETCH_ARGUMENT): Remove macro.
