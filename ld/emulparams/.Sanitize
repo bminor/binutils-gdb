@@ -91,6 +91,7 @@ m68kaout.sh
 m68kaux.sh
 m68kcoff.sh
 m68kelf.sh
+m68klinux.sh
 m68klynx.sh
 m68knbsd.sh
 m68kpsos.sh

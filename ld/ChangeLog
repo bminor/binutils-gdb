@@ -1,4 +1,18 @@
+Tue Feb 27 15:09:21 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* configure.tgt (m68k-*-linuxaout*, m68k-*-linux*): New targets.
+	* emulparams/m68klinux.sh: New file.
+	* emultempl/linux.em (gld${EMULATION_NAME}_before_allocation):
+	Call bfd_${EMULATION_NAME}_size_dynamic_sections instead of
+	bfd_linux_size_dynamic_sections.
+	* Makefile.in (ALL_EMULATIONS): Add em68klinux.o.
+	(em68klinux.c): New target.
+	* configure.host (m68*-*-linuxaout*, m68*-*-linux*): New hosts.
+
 Tue Feb 27 12:55:46 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (ALL_EMULATIONS): Sort into alphabetical order.
+	Fill in missing entries.
 
 	* lexsup.c (parse_args): Recognize --no-whole-archive.
 	* ldlang.h (lang_input_statement_type): Add whole_archive field.
