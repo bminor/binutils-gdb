@@ -9012,7 +9012,9 @@ elf_mark_used_section (struct elf_link_hash_entry *h,
       || h->root.type == bfd_link_hash_defweak)
     {
       asection *s = h->root.u.def.section;
-      if (s != NULL && s->output_section != NULL && s->output_section != s)
+      if (s != NULL
+	  && s->output_section != NULL
+	  && !bfd_is_const_section (s->output_section))
 	s->output_section->flags |= SEC_KEEP;
     }
 

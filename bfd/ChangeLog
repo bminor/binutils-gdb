@@ -1,3 +1,8 @@
+2005-03-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (elf_mark_used_section): Check bfd_is_const_section
+	for special sections.
+
 2005-03-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (_bfd_elf_link_renumber_dynsyms): Delete.
