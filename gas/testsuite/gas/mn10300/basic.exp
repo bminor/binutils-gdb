@@ -1009,7 +1009,7 @@ proc do_am33_3 {} {
     gas_finish
 
     # Did we find what we were looking for?  If not, flunk it.
-    if [expr $x==36] then { pass $testname } else { fail $testname }
+    if [expr $x==37] then { pass $testname } else { fail $testname }
 }
 
 proc do_am33_4 {} {
