@@ -129,7 +129,7 @@ case ${generic_target} in
   a29k-amd-ebmon)	obj_format=coffbfd gas_target=ebmon29k ;;
   a29k-amd-ebmonold)	obj_format=coff gas_target=ebmon29k ;;
 
-  alpha-*-osf*)		obj_format=ecoff dev=yes ;;
+  alpha-*-osf*)		obj_format=ecoff ;;
 
   hppa-*-osf)		obj_format=elf emulation=hppa ;;
   hppa-*-hpux*)		obj_format=som emulation=hppa ;;
