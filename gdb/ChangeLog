@@ -1,3 +1,18 @@
+2002-12-03  Andrew Cagney  <ac131313@redhat.com>
+
+	* sparc-nat.c (fetch_inferior_registers)
+	(store_inferior_registers): Add comment on problem of LWP vs
+	threads.
+	
+	From 2002-11-21 Daniel Jacobowitz <drow@mvista.com>
+	* lin-lwp.c (lin_lwp_fetch_registers): Remove.
+	(lin_lwp_store_registers): Remove.
+	(init_lin_lwp_ops): Use fetch_inferior_registers
+	and store_inferior_registers directly.
+	* sparc-nat.c (fetch_inferior_registers): Honor LWP ID.
+	(store_inferior_registers): Likewise.
+	Fix PR gdb/725
+
 2002-12-03  Andrew Cagney  <cagney@redhat.com>
 
 	* NEWS: Mention Daniel Jacobowitz's multi-threaded shared library
