@@ -261,6 +261,11 @@ case "${targ}" in
     ;;
 
 
+  h8300*-*-elf)
+    targ_defvec=bfd_elf32_h8300_vec
+    targ_underscore=yes
+    ;;
+
   h8300*-*-*)
     targ_defvec=h8300coff_vec
     targ_underscore=yes

@@ -1,3 +1,16 @@
+Wed Aug 29 02:27:36 2001  J"orn Rennecke <amylaar@redhat.com>
+
+	* Makefile.am (elf32-h8300.lo): New target.
+	* config.bfd (h8300*-*-elf): New case.
+	* configure.in (bfd_elf32_h8300_vec): New case.
+	* elf.c (prep_headers): Add case for bfd_arch_h8300.
+	* reloc.c (BFD_RELOC_H8_DIR16A8): New relocation.
+	(BFD_RELOC_H8_DIR16R8, BFD_RELOC_H8_DIR24A8): Likewise.
+	(BFD_RELOC_H8_DIR24R8, BFD_RELOC_H8_DIR32A16): Likewise.
+	* targets.c (bfd_target bfd_elf32_h8300_vec): New extern declaration.
+	* elf32-h8300.c: New file.
+	* Makefile.in, bfd-in2.h, libbfd.h, configure: Regenerated.
+
 2001-08-28  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* sparclynx.c: Add missing prototypes.

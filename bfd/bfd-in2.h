@@ -2822,6 +2822,13 @@ This is the 3 bits of a value. */
 /* OpenRISC Relocations. */
   BFD_RELOC_OPENRISC_ABS_26,
   BFD_RELOC_OPENRISC_REL_26,
+
+/* H8 elf Relocations. */
+  BFD_RELOC_H8_DIR16A8,
+  BFD_RELOC_H8_DIR16R8,
+  BFD_RELOC_H8_DIR24A8,
+  BFD_RELOC_H8_DIR24R8,
+  BFD_RELOC_H8_DIR32A16,
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 reloc_howto_type *
