@@ -35,7 +35,9 @@ regardless of whether or not the actual target has floating point hardware.
 #include "defs.h"
 
 #include <time.h>
+#ifdef HAVE_SYS_PROCFS_H
 #include <sys/procfs.h>
+#endif
 #include <fcntl.h>
 #include <errno.h>
 #include "gdb_string.h"
@@ -77,6 +79,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      int which;
      unsigned int reg_addr;	/* Unused in this version */
 {
+#if defined (HAVE_GREGSET_T) && defined (HAVE_FPREGSET_T)
   gregset_t gregset;
   fpregset_t fpregset;
 
@@ -106,6 +109,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 #endif
 	}
     }
+#endif	/* defined(HAVE_GREGSET_T) && defined (HAVE_FPREGSET_T) */
 }
 
 

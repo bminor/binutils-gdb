@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#ifdef HAVE_SYS_PROCFS_H
+
 #include "defs.h"
 #include <sys/procfs.h>
 
@@ -63,6 +65,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
     fpregset_t formatted data.
 
  */
+
+#ifdef HAVE_GREGSET_T
 
 /* This is a duplicate of the table in i386-xdep.c. */
 
@@ -118,7 +122,9 @@ fill_gregset (gregsetp, regno)
     }
 }
 
-#if defined (FP0_REGNUM)
+#endif	/* HAVE_GREGSET_T */
+
+#if defined (FP0_REGNUM) && defined (HAVE_FPREGSET_T)
 
 /*  Given a pointer to a floating point register set in /proc format
     (fpregset_t *), unpack the register contents and supply them as gdb's
@@ -151,4 +157,6 @@ fill_fpregset (fpregsetp, regno)
   /* FIXME: see m68k-tdep.c for an example, for the m68k. */
 }
 
-#endif	/* defined (FP0_REGNUM) */
+#endif	/* defined (FP0_REGNUM) && defined (HAVE_FPREGSET_T) */
+
+#endif	/* HAVE_SYS_PROCFS_H */

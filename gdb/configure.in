@@ -36,8 +36,26 @@ AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS(memory.h string.h strings.h unistd.h termios.h termio.h sgtty.h stddef.h)
+AC_CHECK_HEADERS(memory.h string.h strings.h unistd.h termios.h termio.h sgtty.h stddef.h sys/procfs.h)
 AC_HEADER_STAT
+
+AC_MSG_CHECKING([for gregset_t type])
+AC_CACHE_VAL(gdb_have_gregset_t,
+[AC_TRY_LINK([#include <sys/procfs.h>],[gregset_t *gregsetp = 0],
+gdb_have_gregset_t=yes, gdb_have_gregset_t=no)])
+AC_MSG_RESULT($gdb_have_gregset_t)
+if test $gdb_have_gregset_t = yes; then
+  AC_DEFINE(HAVE_GREGSET_T)
+fi
+
+AC_MSG_CHECKING([for fpregset_t type])
+AC_CACHE_VAL(gdb_have_fpregset_t,
+[AC_TRY_LINK([#include <sys/procfs.h>],[fpregset_t *fpregsetp = 0],
+gdb_have_fpregset_t=yes, gdb_have_fpregset_t=no)])
+AC_MSG_RESULT($gdb_have_fpregset_t)
+if test $gdb_have_fpregset_t = yes; then
+  AC_DEFINE(HAVE_FPREGSET_T)
+fi
 
 AC_FUNC_MMAP
 

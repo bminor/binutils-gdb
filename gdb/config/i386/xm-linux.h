@@ -17,6 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#ifndef XM_LINUX_H
+#define XM_LINUX_H
+
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
 
 #define HAVE_TERMIOS
@@ -29,3 +32,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Need R_OK etc, but USG isn't defined.  */
 #include <unistd.h>
+
+
+/*
+ * We define this because with ELF we use SVR4 style shared libraries.
+ */
+
+#include "solib.h"	/* Support for shared libraries. */
+
+#define SVR4_SHARED_LIBS
+
+#endif	/* #ifndef XM_LINUX_H */

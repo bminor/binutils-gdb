@@ -1,3 +1,26 @@
+Sat Jan 27 10:34:05 1996  Fred Fish  <fnf@cygnus.com>
+
+	* configure.in (AC_CHECK_HEADERS): Check for sys/procfs.h.
+	Also check for gregset_t and fpregset_t types.
+	* configure: Regenerate.
+	* core-regset.c (sys/procfs.h): Only include if HAVE_SYS_PROCFS_H
+ 	is defined.
+	(fetch_core_registers): Turn into stub unless both HAVE_GREGSET_T
+ 	and HAVE_FPREGSET_T are defined.  These changes allow systems
+ 	like linux that are migrating to /proc support to use a single
+ 	configuration for both new and old versions.
+
+	* config/i386/linux.mt: Note that this is now for both a.out and
+	ELF systems.
+	* config/i386/linux.mh (NATDEPFILES): Add solib.o, core-regset.o,
+	i386v4-nat.o
+	* config/i386/tm-linux.h (tm-sysv4.h): Include.
+	* config/i386/xm-linux.h (solib.h): Include
+	(SVR4_SHARED_LIBS): Define.
+	* i386v4-nat.c: Only compile if HAVE_SYS_PROCFS_H is defined.
+	(supply_gregset, fill_gregset): Compile if HAVE_GREGSET_T defined.
+	(supply_fpregset, fill_fpregset): Compile if HAVE_FPREGSET_T defined.
+
 Fri Jan 26 13:48:14 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* config/sparc/xm-sparc.h (NEW_SUN_CORE): Remove, never used.
