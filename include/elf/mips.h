@@ -344,6 +344,19 @@ typedef struct
 /* Ignore version incompatibilities at runtime.  */
 #define LL_IGNORE_INT_VER	0x00000002
 
+/* Require matching minor version number.  */
+#define LL_REQUIRE_MINOR	0x00000004
+
+/* ??? */
+#define LL_EXPORTS		0x00000008
+
+/* Delay loading of this library until really needed.  */
+#define LL_DELAY_LOAD		0x00000010
+
+/* ??? Delta C++ stuff ??? */
+#define LL_DELTA		0x00000020
+
+
 /* A section of type SHT_MIPS_CONFLICT is an array of indices into the
    .dynsym section.  Each element has the following type.  */
 typedef unsigned long Elf32_Conflict;
