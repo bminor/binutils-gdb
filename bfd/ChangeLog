@@ -1,3 +1,8 @@
+2004-03-19  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* elf-hppa.h (elf_hppa_reloc_final_type): Handle selectors for
+	R_PARISC_PCREL32 and R_PARISC_PCREL64 relocations.
+
 2004-03-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".

@@ -1,3 +1,8 @@
+2004-03-19  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* tc-hppa.c (cons_fix_new_hppa): Check for PC relative base type.
+	(pa_comm): Set BSF_OBJECT in symbol flags.
+
 2004-03-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".

@@ -1399,6 +1399,8 @@ cons_fix_new_hppa (frag, where, size, exp)
   /* Get a base relocation type.  */
   if (is_DP_relative (*exp))
     rel_type = R_HPPA_GOTOFF;
+  else if (is_PC_relative (*exp))
+    rel_type = R_HPPA_PCREL_CALL;
   else if (is_complex (*exp))
     rel_type = R_HPPA_COMPLEX;
   else
@@ -6386,6 +6388,7 @@ pa_comm (unused)
 
   if (symbol)
     {
+      symbol_get_bfdsym (symbol)->flags |= BSF_OBJECT;
       S_SET_VALUE (symbol, size);
       S_SET_SEGMENT (symbol, bfd_und_section_ptr);
       S_SET_EXTERNAL (symbol);
