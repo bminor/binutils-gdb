@@ -1,3 +1,12 @@
+2004-02-27  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* config/tc-m32r.c (md_longopts): Added -no-bitinst option.
+	(md_parse_option): Ditto.
+	(OPTION_NO_SPECIAL_M32R): Added.
+	(md_show_usage): Document it.
+	(enable_speial_m32r): Changed a default value from 0 to 1.
+	* doc/c-m32r.texi: Document the -no-bitinst option.
+
 2004-02-27  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-sh.c (get_operand): Revert previous delta.
