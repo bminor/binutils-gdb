@@ -2008,6 +2008,12 @@ bits placed non-contigously in the instruction. */
 /* This is a 16 bit offset from the zero data area pointer, with the
 bits placed non-contigously in the instruction. */
   BFD_RELOC_V850_ZDA_16_16_SPLIT_OFFSET,
+
+/* This is a 6 bit offset from the call table base pointer. */
+  BFD_RELOC_V850_CALLT_6_7_OFFSET,
+
+/* This is a 16 bit offset from the call table base pointer. */
+  BFD_RELOC_V850_CALLT_16_16_OFFSET,
 /* end-sanitize-v850e */
 
 

@@ -1,4 +1,13 @@
 Wed Sep 17 09:54:51 1997  Nick Clifton  <nickc@cygnus.com>
+start-sanitize-v850e
+
+	* elf32-v850.c (v850_elf_final_link_relocate, v850_elf_reloc,
+	v850_elf_check_relocs, v850_elf_reloc_map, v850_elf_howto_table):
+	Add support for the CALLT relocs.
+
+	* reloc.c (COMMENT): Add BFD_RELOC_V850_CALLT_6_7_OFFSET and
+	BFD_RELOC_V850_CALLT_16_16_OFFSET. 
+end-sanitize-v850e
 
 	* elf32-v850.c (v850_elf_final_link_relocate): Add checks to catch
 	relocations against non-existant symbols.
