@@ -2,35 +2,40 @@
 
 #$Id$
 
+srcdir = .
+
 ## Configuration options
 # These should be all you need set before compiling
 
+#CC=gcc -Wall
 # these two should be the same program
-AR=ar
-RANLIB=ranlib
+AR_PROG=ar
+RANLIB_PROG=ranlib
 
 # copy and strip should be the same program
-COPY=copy
-STRIP=strip
+COPY_PROG=copy
+STRIP_PROG=strip
 
 # These should all be the same program too.
-SIZE=size
-NM=nm
-OBJDUMP=objdump
+SIZE_PROG=size
+NM_PROG=nm
+OBJDUMP_PROG=objdump
 
-PROGS = $(SIZE) $(COPY) $(OBJDUMP) $(NM) $(AR) $(STRIP) $(RANLIB)
+PROGS = $(SIZE_PROG) $(COPY_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRIP_PROG) $(RANLIB_PROG)
 
-srcdir = .
-BASEDIR = $(srcdir)/../..
-
+#CC = gcc -Wall
+#CC=gcc
+BASEDIR = $(srcdir)/..
 # Let rich do this for now:
-LIBDIR  = $(BASEDIR)/bfd/$(HOST)
+LIBDIR  = $(srcdir)/../bfd
+
+#__dgux__#DEFINES=-DHOST_SYS=DGUX_SYS
 
 #__sun3__#DEFINES=-DHOST_SYS=SUN3_SYS
-#__sun3__#LDFLAGS	= -Bstatic
+#__sun3__#LDFLAGS= -Bstatic
 
 #__sun4__#DEFINES=-DHOST_SYS=SUN4_SYS
-#__sun4__#LDFLAGS	= -Bstatic
+#__sun4__#LDFLAGS= -Bstatic
 
 #__sun386i__#LDFLAGS	= -Bstatic
 
@@ -40,9 +45,13 @@ LIBDIR  = $(BASEDIR)/bfd/$(HOST)
 #__i386v__#ALLOCA = alloca.o
 #__i386v__#DEFINES=-DUSG
 
+
+#### host and target dependant Makefile fragments come in here.
+###
+
 INCDIR = $(BASEDIR)/include-cygnus
 
-CFLAGS  = -g -I$(INCDIR) $(DEFINES) 
+CFLAGS  = -g -I$(INCDIR) $(DEFINES) $(CDEFINES)
 
 
 bindir=$(BASEDIR)/bin
@@ -67,45 +76,46 @@ DISASMS = m68k-pinsn.o i960-pinsn.o sparc-pinsn.o
 GNU_GETOPT = getopt.o $(ALLOCA)
 GNU_GETOPT_LONG = getopt1.o $(GNU_GETOPT)
 
-# This is supposed to become part of the standard GNU libs, whatever
-# that means.
-FILEMODE = filemode.o
 
 
 
 # Code shared by all the binutils.
-BULIBS = bucomm.o version.o
+BULIBS = bucomm.o version.o filemode.o
 
-ADDL_LIBS = $(GNU_GETOPT_LONG) $(MALLOC) $(FILEMODE)  $(BULIBS)
+ADDL_LIBS = $(GNU_GETOPT_LONG) $(MALLOC)   $(BULIBS)
 
 BFD = $(LIBDIR)/libbfd.a
 #
 ## The rules
 
-all: $(ADDL_LIBS) $(PROGS)
+all: $(ADDL_LIBS) $(PROGS) 
 
-$(SIZE): $(ADDL_LIBS) size.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(SIZE) size.o $(ADDL_LIBS) $(BFD)
 
-$(COPY): $(ADDL_LIBS) copy.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(COPY) copy.o $(ADDL_LIBS) $(BFD)
+#$(BFD):$(LIBDIR)/../common/*.c
+#	(cd $(LIBDIR); make)
 
-$(NM): $(ADDL_LIBS) nm.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(NM) nm.o $(MALLOC) $(ADDL_LIBS) $(BFD)
+$(SIZE_PROG): $(ADDL_LIBS) size.o $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(SIZE_PROG) size.o $(ADDL_LIBS) $(BFD)
 
-$(OBJDUMP): $(ADDL_LIBS) size.o objdump.o $(DISASMS) $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJDUMP) objdump.o $(DISASMS) $(ADDL_LIBS) $(BFD)
+$(COPY_PROG): $(ADDL_LIBS) copy.o $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(COPY_PROG) copy.o $(ADDL_LIBS) $(BFD)
 
-$(AR): $(ADDL_LIBS) ar.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(AR) ar.o $(MALLOC) $(ADDL_LIBS) $(BFD)
+$(NM_PROG): $(ADDL_LIBS) nm.o $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(NM_PROG) nm.o $(MALLOC) $(ADDL_LIBS) $(BFD)
 
-$(RANLIB): $(AR) 
-	-rm -f $(RANLIB)
-	-ln $(AR) $(RANLIB)
+$(OBJDUMP_PROG): $(ADDL_LIBS) size.o objdump.o $(DISASMS) $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJDUMP_PROG) objdump.o $(DISASMS) $(ADDL_LIBS) $(BFD)
 
-$(STRIP): $(COPY)
-	-rm -f $(STRIP)
-	-ln $(COPY) $(STRIP)
+$(AR_PROG): $(ADDL_LIBS) ar.o $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(AR_PROG) ar.o $(MALLOC) $(ADDL_LIBS) $(BFD)
+
+$(RANLIB_PROG): $(AR_PROG) 
+	-rm -f $(RANLIB_PROG)
+	-ln $(AR_PROG) $(RANLIB_PROG)
+
+$(STRIP_PROG): $(COPY_PROG)
+	-rm -f $(STRIP_PROG)
+	-ln $(COPY_PROG) $(STRIP_PROG)
 
 clean:
 	-rm -f *.o *~ \#* core $(PROGS) TAGS
@@ -136,9 +146,9 @@ sparc-pinsn.o: sparc-pinsn.c
 sparc-pinsn.o: ./sparc-opcode.h
 nm.o: nm.c
 ar.o: ar.c
-strip.o: strip.c
-
-
+getopt.o:getopt.c
+getopt1.o:getopt1.c
+filemode.o:filemode.c
 #-----------------------------------------------------------------------------
 #		'STANDARD' GNU/960 TARGETS BELOW THIS POINT
 #
