@@ -36,7 +36,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	ONE_PROCESS_WRITETEXT
 
 /* Temporary new watchpoint stuff */
-#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(B) 1
+#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) \
+	((type) == bp_hardware_watchpoint)
 
 /* When a hardware watchpoint fires off the PC will be left at the
    instruction which caused the watchpoint.  It will be necessary for
@@ -48,5 +49,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define HAVE_NONSTEPPABLE_WATCHPOINT
 
 /* Use these macros for watchpoint insertion/deletion.  */
-#define target_insert_watchpoint(addr, len) procfs_set_watchpoint (inferior_pid, addr, len, 2)
-#define target_remove_watchpoint(addr, len) procfs_set_watchpoint (inferior_pid, addr, 0, 0)
+/* type can be 0: write watch, 1: read watch, 2: access watch (read/write) */
+#define target_insert_watchpoint(addr, len, type) procfs_set_watchpoint (inferior_pid, addr, len, 2)
+#define target_remove_watchpoint(addr, len, type) procfs_set_watchpoint (inferior_pid, addr, 0, 0)
