@@ -234,6 +234,7 @@ assemble_insn (str, lower_p, buf)
 	    {
 	      if (operand->insert)
 		{
+		  errmsg = NULL;
 		  insn = (*operand->insert) (insn, operand, mods, 0, &errmsg);
 		  /* If we get an error, go on to try the next insn.  */
 		  if (errmsg)
@@ -768,9 +769,7 @@ txvu_insert_operand (insn, operand, mods, val, file, line)
 
   if (operand->insert)
     {
-      const char *errmsg;
-
-      errmsg = NULL;
+      const char *errmsg = NULL;
       insn = (*operand->insert) (insn, operand, mods, (long) val, &errmsg);
       if (errmsg != (const char *) NULL)
 	as_warn (errmsg);
