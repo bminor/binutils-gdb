@@ -1,3 +1,8 @@
+Tue Nov  7 11:46:11 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@lts.sel.alcatel.de>
+
+	* scripttempl/m88kbcs.sc (.data): Calculate next boundary modulo
+	0x2000 not 0x200.
+
 Mon Nov  6 10:59:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Add test for whether free must be declared.
