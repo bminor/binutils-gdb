@@ -1,3 +1,14 @@
+2004-11-21  Andreas Schwab  <schwab@suse.de>
+
+	* linux-m68k-low.c (m68k_num_gregs): Define.
+	(m68k_fill_gregset, m68k_store_gregset, m68k_fill_fpregset)
+	(m68k_store_fpregset, target_regsets) [HAVE_LINUX_REGSETS]: New.
+	(m68k_breakpoint, m68k_breakpoint_len, m68k_get_pc, m68k_set_pc)
+	(m68k_breakpoint_at): New.  Add to the_low_target.
+
+	* configure.srv (m68*-*-linux*): Set srv_linux_regsets and
+	srv_linux_thread_db to yes.
+
 2004-10-20  Joel Brobecker  <brobecker@gnat.com>
 
 	* linux-x86-64-low.c (ARCH_SET_GS): Add definition if missing.

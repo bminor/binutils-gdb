@@ -1,5 +1,5 @@
 /* GNU/Linux/m68k specific low level interface, for the remote server for GDB.
-   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -27,6 +27,7 @@
 #endif
 
 #define m68k_num_regs 29
+#define m68k_num_gregs 18
 
 /* This table must line up with REGISTER_NAMES in tm-m68k.h */
 static int m68k_regmap[] =
@@ -64,9 +65,103 @@ m68k_cannot_fetch_register (int regno)
   return (regno >= m68k_num_regs);
 }
 
+#ifdef HAVE_LINUX_REGSETS
+#include <sys/procfs.h>
+#include <sys/ptrace.h>
+
+static void
+m68k_fill_gregset (void *buf)
+{
+  int i;
+
+  for (i = 0; i < m68k_num_gregs; i++)
+    collect_register (i, (char *) buf + m68k_regmap[i]);
+}
+
+static void
+m68k_store_gregset (const void *buf)
+{
+  int i;
+
+  for (i = 0; i < m68k_num_gregs; i++)
+    supply_register (i, (const char *) buf + m68k_regmap[i]);
+}
+
+static void
+m68k_fill_fpregset (void *buf)
+{
+  int i;
+
+  for (i = m68k_num_gregs; i < m68k_num_regs; i++)
+    collect_register (i, ((char *) buf
+			  + (m68k_regmap[i] - m68k_regmap[m68k_num_gregs])));
+}
+
+static void
+m68k_store_fpregset (const void *buf)
+{
+  int i;
+
+  for (i = m68k_num_gregs; i < m68k_num_regs; i++)
+    supply_register (i, ((const char *) buf
+			 + (m68k_regmap[i] - m68k_regmap[m68k_num_gregs])));
+}
+
+
+struct regset_info target_regsets[] = {
+  { PTRACE_GETREGS, PTRACE_SETREGS, sizeof (elf_gregset_t),
+    GENERAL_REGS,
+    m68k_fill_gregset, m68k_store_gregset },
+  { PTRACE_GETFPREGS, PTRACE_SETFPREGS, sizeof (elf_fpregset_t),
+    FP_REGS,
+    m68k_fill_fpregset, m68k_store_fpregset },
+  { 0, 0, -1, -1, NULL, NULL }
+};
+
+#endif /* HAVE_LINUX_REGSETS */
+
+static const char m68k_breakpoint[] = { 0x4E, 0x4F };
+#define m68k_breakpoint_len 2
+
+static CORE_ADDR
+m68k_get_pc ()
+{
+  unsigned long pc;
+
+  collect_register_by_name ("pc", &pc);
+  return pc;
+}
+
+static void
+m68k_set_pc (CORE_ADDR value)
+{
+  unsigned long newpc = value;
+
+  supply_register_by_name ("pc", &newpc);
+}
+
+static int
+m68k_breakpoint_at (CORE_ADDR pc)
+{
+  unsigned char c[2];
+
+  read_inferior_memory (pc, c, 2);
+  if (c[0] == 0x4E && c[1] == 0x4F)
+    return 1;
+
+  return 0;
+}
+
 struct linux_target_ops the_low_target = {
   m68k_num_regs,
   m68k_regmap,
   m68k_cannot_fetch_register,
   m68k_cannot_store_register,
+  m68k_get_pc,
+  m68k_set_pc,
+  m68k_breakpoint,
+  m68k_breakpoint_len,
+  NULL,
+  2,
+  m68k_breakpoint_at,
 };
