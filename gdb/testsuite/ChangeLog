@@ -1,7 +1,11 @@
 2001-05-10  Elena Zannoni  <ezannoni@redhat.com>
 
-	* gdb.base/completion.exp: Revamp test. Make it execute on all
- 	platforms.
+        * config/gdbserver.exp (gdb_load): Handle the case
+        in which the arguments to gdbserver are given in the
+        baseboard configuration file.
+        Also handle the case in which the server needs to do a
+        load.
+
 
 2001-05-07  Keith Seitz <keiths@cygnus.com>
 
