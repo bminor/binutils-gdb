@@ -1,4 +1,11 @@
 start-sanitize-sky
+Wed Jun  3 10:29:47 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* mips.h (Elf32_Dvp_Internal_Overlay,Elf32_Dvp_External_Overlay):
+	Rename from 64 bit versions, update members to be 32 bits.
+	(bfd_dvp_elf32_swap_overlay_in,bfd_dvp_elf32_swap_overlay_out):
+	Rename from 64 bit versions.
+
 Sun May 31 15:46:56 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* mips.h (SHT_DVP_OVERLAY_TABLE,SHT_DVP_OVERLAY): New section types.
