@@ -50,6 +50,7 @@ mh-a29k
 mh-cygnus
 mh-i386
 mt-ebmon29k
+mt-h8300hds
 mt-h8300
 mt-m68k
 mt-mips
@@ -61,6 +62,8 @@ obj-bout.c
 obj-bout.h
 obj-coff.c
 obj-coff.h
+obj-coff-bfd.c
+obj-coff-bfd.h
 obj-generic.c
 obj-generic.h
 obj-ieee.c
@@ -123,7 +126,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.10  1991/11/26 02:16:55  sac
+# Revision 1.11  1991/11/27 22:28:57  sac
+# Added obj-coff-bfd* and mt-h8300hds
+#
+# Revision 1.10  1991/11/26  02:16:55  sac
 # obj-coff-bfd:
 # 	bfd support gets deeper into gas
 # *h8*
