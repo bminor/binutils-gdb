@@ -67,11 +67,11 @@ clear_accex()
 #ifdef sparc
     set_fsr((_get_fsr_raw() & ~0x3e0));
 #elif i386
-    asm("
-.text
-	fnclex
-
-    ");
+    asm("\n"
+".text\n"
+"	fnclex\n"
+"\n"
+"    ");
 #else
 #warning no fpu trap support for this target
 #endif
@@ -108,65 +108,65 @@ uint32 fsr;
 
 #ifdef sparc
 
-    asm("
-
-.text
-        .align 4
-        .global __set_fsr_raw,_set_fsr_raw
-__set_fsr_raw:
-_set_fsr_raw:
-        save %sp,-104,%sp
-        st %i0,[%fp+68]
-        ld [%fp+68], %fsr
-        mov 0,%i0
-        ret
-        restore
- 
-        .align 4
-        .global __get_fsr_raw
-        .global _get_fsr_raw
-__get_fsr_raw:
-_get_fsr_raw:
-        save %sp,-104,%sp
-        st %fsr,[%fp+68]
-        ld [%fp+68], %i0
-        ret
-        restore
- 
-    ");
+    asm("\n"
+"\n"
+".text\n"
+"        .align 4\n"
+"        .global __set_fsr_raw,_set_fsr_raw\n"
+"__set_fsr_raw:\n"
+"_set_fsr_raw:\n"
+"        save %sp,-104,%sp\n"
+"        st %i0,[%fp+68]\n"
+"        ld [%fp+68], %fsr\n"
+"        mov 0,%i0\n"
+"        ret\n"
+"        restore\n"
+"\n"
+"        .align 4\n"
+"        .global __get_fsr_raw\n"
+"        .global _get_fsr_raw\n"
+"__get_fsr_raw:\n"
+"_get_fsr_raw:\n"
+"        save %sp,-104,%sp\n"
+"        st %fsr,[%fp+68]\n"
+"        ld [%fp+68], %i0\n"
+"        ret\n"
+"        restore\n"
+"\n"
+"    ");
 
 #elif i386
 
-    asm("
-
-.text
-        .align 8
-.globl _get_sw,__get_sw
-__get_sw:
-_get_sw:
-        pushl %ebp
-        movl %esp,%ebp
-        movl $0,%eax
-        fnstsw %ax
-        movl %ebp,%esp
-        popl %ebp
-        ret
-
-        .align 8
-.globl _get_cw,__get_cw
-__get_cw:
-_get_cw:
-        pushl %ebp
-        movl %esp,%ebp
-        subw $2,%esp
-        fnstcw -2(%ebp)
-        movw -2(%ebp),%eax
-        movl %ebp,%esp
-        popl %ebp
-        ret
-
-
-    ");
+    asm("\n"
+"\n"
+".text\n"
+"        .align 8\n"
+".globl _get_sw,__get_sw\n"
+"__get_sw:\n"
+"_get_sw:\n"
+"        pushl %ebp\n"
+"        movl %esp,%ebp\n"
+"        movl $0,%eax\n"
+"        fnstsw %ax\n"
+"        movl %ebp,%esp\n"
+"        popl %ebp\n"
+"        ret\n"
+"\n"
+"        .align 8\n"
+".globl _get_cw,__get_cw\n"
+"__get_cw:\n"
+"_get_cw:\n"
+"        pushl %ebp\n"
+"        movl %esp,%ebp\n"
+"        subw $2,%esp\n"
+"        fnstcw -2(%ebp)\n"
+"        movw -2(%ebp),%eax\n"
+"        movl %ebp,%esp\n"
+"        popl %ebp\n"
+"        ret\n"
+"\n"
+"\n"
+"    ");
 
 
 #else

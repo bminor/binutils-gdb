@@ -827,49 +827,6 @@ dis_mem(addr, len, info)
     }
 }
 
-int
-buffer_read_memory(addr, buffer, size, info)
-    bfd_vma         addr;
-    bfd_byte       *buffer;
-    uint32          size;
-    struct disassemble_info *info;
-{
-    if (size == sis_memory_read(addr, buffer, size))
-	return (0);
-    else
-	return (1);
-}
-
-void
-perror_memory(status, addr, info)
-    int32           status;
-    bfd_vma         addr;
-    struct disassemble_info *info;
-{
-
-    printf("Could not read address 0x%08x\n", (unsigned int) addr);
-}
-
-void
-generic_print_address(addr, info)
-    bfd_vma         addr;
-    struct disassemble_info *info;
-{
-
-    printf("0x%x", (unsigned int) addr);
-}
-
-/* Just return the given address.  */
-
-int
-generic_symbol_at_address (addr, info)
-     bfd_vma addr;
-     struct disassemble_info * info;
-{
-  return 1;
-}
-
-
 /* Add event to event queue */
 
 void

@@ -33,10 +33,6 @@
 #include <dis-asm.h>
 #include "sim-config.h"
 
-#ifndef fprintf
-extern          fprintf();
-#endif
-
 #define	VAL(x)	strtol(x,(char **)NULL,0)
 
 /* Structures and functions from readline library */

@@ -1713,6 +1713,7 @@ fpexec(op3, rd, rs1, rs2, sregs)
     	    sregs->fdp[rs2 | 1] = sregs->fs[rs2 & ~1];
     	    sregs->fdp[rs2 & ~1] = sregs->fs[rs2 | 1];
     default:
+      ;
     }
 #endif
 
@@ -1885,6 +1886,7 @@ fpexec(op3, rd, rs1, rs2, sregs)
 	sregs->fs[rd & ~1] = sregs->fdp[rd | 1];
 	sregs->fs[rd | 1] = sregs->fdp[rd & ~1];
     default:
+      ;
     }
 #endif
     if (sregs->fpstate == FP_EXC_PE) {

@@ -34,10 +34,6 @@
 
 #include "gdb/remote-sim.h"
 
-#ifndef fprintf
-extern          fprintf();
-#endif
-
 #define PSR_CWP 0x7
 
 #define	VAL(x)	strtol(x,(char **)NULL,0)

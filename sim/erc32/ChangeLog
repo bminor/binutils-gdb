@@ -1,3 +1,15 @@
+2005-03-07  Jerome Guitton  <guitton@gnat.com>
+
+	* sim/erc32/float.c (set_fsr): Do not use deprecated multi-line
+	strings.
+	(clear_accex): Ditto.
+	* sim/erc32/interf.c: Remove the redeclaration of fprintf.
+	* sim/erc32/sis.c: Ditto.
+	* sim/erc32/exec.c: Add missing semicolon.
+	* sim/erc32/func.c: Remove definitions of generic_print_address,
+	generic_symbol_at_address, buffer_read_memory and perror_memory, as
+	they are already defined in opcodes/dis-buf.c.
+
 2005-01-14  Andrew Cagney  <cagney@gnu.org>
 
 	* configure.ac: Sinclude aclocal.m4 before common.m4.  Add
