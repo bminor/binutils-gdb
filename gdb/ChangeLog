@@ -1,5 +1,8 @@
 Wed Jul 27 14:34:42 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
+	* sparclite/aload.c: Added new -q (quiet) option.
+	  return 0 exit status if file was successfully downloaded.
+
 	* nlm/gdbserve.c: merge in command line argument parsing changes
 	  and bug fixes made to i386-nlmstub.c.
 
