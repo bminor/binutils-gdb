@@ -129,6 +129,12 @@ proc gdbtk_tcl_breakpoint {action bpnum file line pc} {
 	${action}_breakpoint $bpnum $file $line $pc
 }
 
+proc asm_win_name {funcname} {
+	regsub -all {\.} $funcname _ temp
+
+	return .asm.func_${temp}
+}
+
 #
 # Local procedure:
 #
@@ -148,6 +154,7 @@ proc create_breakpoint {bpnum file line pc} {
 	global breakpoint_file
 	global breakpoint_line
 	global pos_to_breakpoint
+	global pos_to_bpcount
 	global cfunc
 	global pclist
 
@@ -156,6 +163,15 @@ proc create_breakpoint {bpnum file line pc} {
 	set breakpoint_file($bpnum) $file
 	set breakpoint_line($bpnum) $line
 	set pos_to_breakpoint($file:$line) $bpnum
+	if ![info exists pos_to_bpcount($file:$line)] {
+		set pos_to_bpcount($file:$line) 0
+	}
+	incr pos_to_bpcount($file:$line)
+	set pos_to_breakpoint($pc) $bpnum
+	if ![info exists pos_to_bpcount($pc)] {
+		set pos_to_bpcount($pc) 0
+	}
+	incr pos_to_bpcount($pc)
 	
 # If there's a window for this file, update it
 
@@ -165,10 +181,9 @@ proc create_breakpoint {bpnum file line pc} {
 
 # If there's an assembly window, update that too
 
-	set win .asm.func_${cfunc}
+	set win [asm_win_name $cfunc]
 	if [winfo exists $win] {
 		set line [lsearch -exact $pclist($cfunc) $pc]
-		incr line
 		insert_breakpoint_tag $win $line
 	}
 }
@@ -192,6 +207,8 @@ proc delete_breakpoint {bpnum file line pc} {
 	global breakpoint_file
 	global breakpoint_line
 	global pos_to_breakpoint
+	global pos_to_bpcount
+	global cfunc pclist
 
 # Save line number and file for later
 
@@ -201,14 +218,39 @@ proc delete_breakpoint {bpnum file line pc} {
 
 # Reset breakpoint annotation info
 
-	unset pos_to_breakpoint($file:$line)
-	unset breakpoint_file($bpnum)
-	unset breakpoint_line($bpnum)
+	if {$pos_to_bpcount($file:$line) > 0} {
+		incr pos_to_bpcount($file:$line) -1
+
+		if {$pos_to_bpcount($file:$line) == 0} {
+			if [info exists pos_to_breakpoint($file:$line)] {
+				unset pos_to_breakpoint($file:$line)
+			}
+			unset breakpoint_file($bpnum)
+			unset breakpoint_line($bpnum)
 
 # If there's a window for this file, update it
 
-	if [info exists wins($file)] {
-		delete_breakpoint_tag $wins($file) $line
+			if [info exists wins($file)] {
+				delete_breakpoint_tag $wins($file) $line
+			}
+		}
+	}
+
+# If there's an assembly window, update that too
+
+	if {$pos_to_bpcount($pc) > 0} {
+		incr pos_to_bpcount($pc) -1
+
+		if {$pos_to_bpcount($pc) == 0} {
+			if [info exists pos_to_breakpoint($pc)] {
+				unset pos_to_breakpoint($pc)
+			}
+			set win [asm_win_name $cfunc]
+			if [winfo exists $win] {
+				set line [lsearch -exact $pclist($cfunc) $pc]
+				delete_breakpoint_tag $win $line
+			}
+		}
 	}
 }
 
@@ -226,8 +268,19 @@ proc delete_breakpoint {bpnum file line pc} {
 
 proc enable_breakpoint {bpnum file line pc} {
 	global wins
+	global cfunc pclist
 
-	$wins($file) tag configure $line -fgstipple {}
+	if [info exists wins($file)] {
+		$wins($file) tag configure $line -fgstipple {}
+	}
+
+# If there's an assembly window, update that too
+
+	set win [asm_win_name $cfunc]
+	if [winfo exists $win] {
+		set line [lsearch -exact $pclist($cfunc) $pc]
+		$win tag configure $line -fgstipple {}
+	}
 }
 
 #
@@ -244,8 +297,19 @@ proc enable_breakpoint {bpnum file line pc} {
 
 proc disable_breakpoint {bpnum file line pc} {
 	global wins
+	global cfunc pclist
 
-	$wins($file) tag configure $line -fgstipple gray50
+	if [info exists wins($file)] {
+		$wins($file) tag configure $line -fgstipple gray50
+	}
+
+# If there's an assembly window, update that too
+
+	set win [asm_win_name $cfunc]
+	if [winfo exists $win] {
+		set line [lsearch -exact $pclist($cfunc) $pc]
+		$win tag configure $line -fgstipple gray50
+	}
 }
 
 #
@@ -624,7 +688,7 @@ proc create_asm_win {funcname} {
 # Replace all the dirty characters in $filename with clean ones, and generate
 # a unique name for the text widget.
 
-	set win .asm.func_${funcname}
+	set win [asm_win_name $funcname]
 
 # Actually create and do basic configuration on the text widget.
 
@@ -646,7 +710,7 @@ proc create_asm_win {funcname} {
 # Disassemble the code, and read it into the new text widget
 
 	set current_output_win $win
-	gdb_cmd "disassemble $funcname"
+	gdb_cmd "disassemble '$funcname'"
 	set current_output_win .command.text
 
 	set numlines [$win index end]
@@ -660,6 +724,7 @@ proc create_asm_win {funcname} {
 # Add margins (for annotations) and note the PC for each line
 
 	if [info exists pclist($funcname)] { unset pclist($funcname) }
+	lappend pclist($funcname) Unused
 	for {set i 1} {$i <= $numlines} {incr i} {
 		scan [$win get $i.0 "$i.0 lineend"] "%s " pc
 		lappend pclist($funcname) $pc
@@ -842,9 +907,11 @@ proc asm_command {} {
 
 	if ![winfo exists .asm] {
 		set cfunc *None*
-		set win .asm.func_${cfunc}
+		set win [asm_win_name $cfunc]
+
 		toplevel .asm
 		wm minsize .asm 1 1
+		wm title .asm Assembly
 
 		label .asm.label -text "*NIL*" -borderwidth 2 -relief raised
 		text $win -height 25 -width 80 -relief raised -borderwidth 2 \
@@ -882,6 +949,62 @@ proc asm_command {} {
 #
 # Local procedure:
 #
+#	registers_command - Open up the register display window.
+#
+# Description:
+#
+#	Create the register display window, with automatic updates.
+#
+
+proc registers_command {} {
+	global cfunc
+
+	if ![winfo exists .reg] {
+		toplevel .reg
+		wm minsize .reg 1 1
+		wm title .reg Registers
+		set win .reg.regs
+
+		text $win -height 25 -width 80 -relief raised \
+			-borderwidth 2 \
+			-setgrid true -cursor hand2
+
+		pack $win -side left -expand yes -fill both
+	} else {
+		destroy .reg
+	}
+}
+
+#
+# Local procedure:
+#
+#	update_registers - Update the registers window.
+#
+# Description:
+#
+#	This procedure updates the registers window.
+#
+
+proc update_registers {} {
+	global current_output_win
+
+	set win .reg.regs
+
+	$win configure -state normal
+
+	$win delete 0.0 end
+
+	set current_output_win $win
+	gdb_cmd "info registers"
+	set current_output_win .command.text
+
+	$win yview 1
+	$win configure -state disabled
+}
+
+#
+# Local procedure:
+#
 #	update_assembly - Update the assembly window.
 #
 # Description:
@@ -910,7 +1033,7 @@ proc update_assembly {linespec} {
 	set funcname [lindex $linespec 1]
 	set debug_file [lindex $linespec 0]
 
-	set win .asm.func_${cfunc}
+	set win [asm_win_name $cfunc]
 
 # Sometimes there's no source file for this location
 
@@ -923,7 +1046,7 @@ proc update_assembly {linespec} {
 		pack forget $win
 		set cfunc $funcname
 
-		set win .asm.func_${cfunc}
+		set win [asm_win_name $cfunc]
 
 # Create a text widget for this func if necessary
 
@@ -938,15 +1061,14 @@ proc update_assembly {linespec} {
 		pack $win -side left -expand yes -fill both \
 			-after .asm.buts
 		set line [lsearch -exact $pclist($cfunc) $pc]
-		incr line
 		$win yview [expr $line - $asm_screen_height / 2]
 		}
 
 # Update the label widget in case the filename or function name has changed
 
-	if {$current_asm_label != $funcname} then {
-		.asm.label configure -text $funcname
-		set current_asm_label $funcname
+	if {$current_asm_label != "$pc $funcname"} then {
+		.asm.label configure -text "$pc $funcname"
+		set current_asm_label "$pc $funcname"
 		}
 
 # Update the pointer, scrolling the text widget if necessary to keep the
@@ -967,8 +1089,6 @@ proc update_assembly {linespec} {
 			echo "Can't find PC $pc"
 			return
 			}
-
-		incr line
 
 		set pointer_pos [$win index $line.1]
 		set asm_pointers($cfunc) $pointer_pos
@@ -992,6 +1112,9 @@ proc update_ptr {} {
 	update_listing [gdb_loc]
 	if [winfo exists .asm] {
 		update_assembly [gdb_loc]
+	}
+	if [winfo exists .reg] {
+		update_registers
 	}
 }
 
@@ -1048,8 +1171,9 @@ button .finish -text Finish -command {gdb_cmd finish ; update_ptr}
 button .exit -text Exit -command {gdb_cmd quit}
 button .up -text Up -command {gdb_cmd up ; update_ptr}
 button .down -text Down -command {gdb_cmd down ; update_ptr}
-button .bottom -text "Bottom" -command {gdb_cmd {frame 0} ; update_ptr}
-button .asm_but -text "Asm" -command {asm_command ; update_ptr}
+button .bottom -text Bottom -command {gdb_cmd {frame 0} ; update_ptr}
+button .asm_but -text Asm -command {asm_command ; update_ptr}
+button .registers -text Regs -command {registers_command ; update_ptr}
 
 proc files_command {} {
 	toplevel .files_window
@@ -1073,8 +1197,10 @@ button .files -text Files -command files_command
 
 pack .listing -side bottom -fill both -expand yes
 #pack .test -side bottom -fill x
-pack .start .step .next .continue .finish .up .down .bottom .asm_but .files .exit -side left
+pack .start .step .next .continue .finish .up .down .bottom .asm_but \
+	.registers .files .exit -side left
 toplevel .command
+wm title .command Command
 
 # Setup command window
 
