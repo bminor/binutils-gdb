@@ -1,5 +1,23 @@
 2003-11-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-linux-tdep.c: Include "frame.h", "frame-base.h",
+	"frame-unwind.h", "gdbcore.h", "regcache.h", "symtab.h",
+	"trad-frame.h", "gdb_assert.h" and "gdb_string.h".
+	(LINUX32_SIGTRAMP_INSN0, LINUX32_SIGTRAMP_INSN1,
+	LINUX32_RT_SIGTRAMP_INSN0, LINUX32_RT_SIGTRAMP_INSN1): New
+	defines.
+	(sparc_linux_sigtramp_start): New function.
+	(sparc32_linux_sigtramp_start): New function.
+	(sparc32_linux_rt_sigtramp_start): New function.
+	(sparc32_linux_pc_in_sigtramp): New function.
+	(sparc32_linux_sigtramp_frame_cache): New function.
+	(sparc32_linux_sigtramp_frame_this_id): New function.
+	(sparc32_linux_sigtramp_frame_prev_register): New function.
+	(sparc32_linux_sigtramp_frame_unwind): New variable.
+	(sparc32_linux_sigtramp_frame_sniffer): New function.
+	(sparc32_linux_init_abi): Set pc_in_sigtramp, Add
+	sparc32_linux_sigtramp_frame_sniffer.
+
 	* configure.in: Check for <machine/reg.h>.  Check for `struct reg'
 	in <machine/reg.h>.
 	* configure, config.in: Regenerate.
