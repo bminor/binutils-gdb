@@ -1,5 +1,7 @@
 /* Target-dependent code for PowerPC systems running NetBSD.
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+
+   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
+
    Contributed by Wasabi Systems, Inc.
 
    This file is part of GDB.
@@ -30,6 +32,8 @@
 #include "ppc-tdep.h"
 #include "ppcnbsd-tdep.h"
 #include "nbsd-tdep.h"
+#include "tramp-frame.h"
+#include "trad-frame.h"
 
 #include "solib-svr4.h"
 
@@ -228,6 +232,59 @@ ppcnbsd_return_value (struct gdbarch *gdbarch, struct type *valtype,
 }
 
 static void
+ppcnbsd_sigtramp_cache_init (const struct tramp_frame *self,
+			     struct frame_info *next_frame,
+			     struct trad_frame_cache *this_cache,
+			     CORE_ADDR func)
+{
+  CORE_ADDR base;
+  CORE_ADDR offset;
+  int i;
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  base = frame_unwind_register_unsigned (next_frame, SP_REGNUM);
+  offset = base + 0x18 + 2 * tdep->wordsize;
+  for (i = 0; i < 32; i++)
+    {
+      int regnum = i + tdep->ppc_gp0_regnum;
+      trad_frame_set_reg_addr (this_cache, regnum, offset);
+      offset += tdep->wordsize;
+    }
+  trad_frame_set_reg_addr (this_cache, tdep->ppc_lr_regnum, offset);
+  offset += tdep->wordsize;
+  trad_frame_set_reg_addr (this_cache, tdep->ppc_cr_regnum, offset);
+  offset += tdep->wordsize;
+  trad_frame_set_reg_addr (this_cache, tdep->ppc_xer_regnum, offset);
+  offset += tdep->wordsize;
+  trad_frame_set_reg_addr (this_cache, tdep->ppc_ctr_regnum, offset);
+  offset += tdep->wordsize;
+  trad_frame_set_reg_addr (this_cache, PC_REGNUM, offset); /* SRR0? */
+  offset += tdep->wordsize;
+
+  /* Construct the frame ID using the function start.  */
+  trad_frame_set_id (this_cache, frame_id_build (base, func));
+}
+
+/* Given the NEXT frame, examine the instructions at and around this
+   frame's resume address (aka PC) to see of they look like a signal
+   trampoline.  Return the address of the trampolines first
+   instruction, or zero if it isn't a signal trampoline.  */
+
+static const struct tramp_frame ppcnbsd_sigtramp = {
+  4, /* insn size */
+  { /* insn */
+    0x38610018, /* addi r3,r1,24 */
+    0x38000127, /* li r0,295 */
+    0x44000002, /* sc */
+    0x38000001, /* li r0,1 */
+    0x44000002, /* sc */
+    TRAMP_SENTINEL_INSN
+  },
+  ppcnbsd_sigtramp_cache_init
+};
+
+static void
 ppcnbsd_init_abi (struct gdbarch_info info,
                   struct gdbarch *gdbarch)
 {
@@ -237,6 +294,7 @@ ppcnbsd_init_abi (struct gdbarch_info info,
   set_gdbarch_return_value (gdbarch, ppcnbsd_return_value);
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
                                 nbsd_ilp32_solib_svr4_fetch_link_map_offsets);
+  tramp_frame_prepend_unwinder (gdbarch, &ppcnbsd_sigtramp);
 }
 
 void

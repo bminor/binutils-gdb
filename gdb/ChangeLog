@@ -1,3 +1,11 @@
+2004-04-22  Andrew Cagney  <cagney@redhat.com>
+
+	* ppcnbsd-tdep.c: Update copyright.  Include "tramp-frame.h" and
+	"trad-frame.h".
+	(ppcnbsd_sigtramp_cache_init, ppcnbsd_sigtramp): Implement a NetBSD
+	signal trampoline unwinder.
+	(ppcnbsd_init_abi): Register ppcnbsd_sigtramp.
+
 2004-04-22  Mark Kettenis  <kettenis@gnu.org>
 
 	Add OpenBSD/powerpc support.
