@@ -44,8 +44,7 @@ static boolean create_got_section
   PARAMS((bfd *, struct bfd_link_info *));
 static boolean elf_i386_create_dynamic_sections
   PARAMS((bfd *, struct bfd_link_info *));
-static void
-elf_i386_copy_indirect_symbol
+static void elf_i386_copy_indirect_symbol
   PARAMS ((struct elf_link_hash_entry *, struct elf_link_hash_entry *));
 static boolean elf_i386_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
@@ -629,7 +628,7 @@ elf_i386_create_dynamic_sections (dynobj, info)
 
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
-void
+static void
 elf_i386_copy_indirect_symbol (dir, ind)
      struct elf_link_hash_entry *dir, *ind;
 {
@@ -703,10 +702,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	  /* This symbol requires a global offset table entry.  */
 	  if (h != NULL)
 	    {
-	      if (h->got.refcount == -1)
-		h->got.refcount = 1;
-	      else
-		h->got.refcount += 1;
+	      h->got.refcount += 1;
 	    }
 	  else
 	    {
@@ -754,13 +750,8 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	  if (h == NULL)
 	    continue;
 
-	  if (h->plt.refcount == -1)
-	    {
-	      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
-	      h->plt.refcount = 1;
-	    }
-	  else
-	    h->plt.refcount += 1;
+	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+	  h->plt.refcount += 1;
 	  break;
 
 	case R_386_32:
@@ -777,10 +768,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 
 	      /* We may need a .plt entry if the function this reloc
 		 refers to is in a shared lib.  */
-	      if (h->plt.refcount == -1)
-		h->plt.refcount = 1;
-	      else
-		h->plt.refcount += 1;
+	      h->plt.refcount += 1;
 	    }
 
 	  /* If we are creating a shared library, and this is a reloc
@@ -1278,13 +1266,13 @@ allocate_dynrelocs (h, inf)
 	}
       else
 	{
-	  h->plt.refcount = -1;
+	  h->plt.offset = (bfd_vma) -1;
 	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
 	}
     }
   else
     {
-      h->plt.refcount = -1;
+      h->plt.offset = (bfd_vma) -1;
       h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
     }
 
@@ -1310,7 +1298,7 @@ allocate_dynrelocs (h, inf)
 	htab->srelgot->_raw_size += sizeof (Elf32_External_Rel);
     }
   else
-    h->got.refcount = -1;
+    h->got.offset = (bfd_vma) -1;
 
   eh = (struct elf_i386_link_hash_entry *) h;
   if (eh->dyn_relocs == NULL)
@@ -1648,7 +1636,6 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
      asection **local_sections;
 {
   struct elf_i386_link_hash_table *htab;
-  bfd *dynobj;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
   bfd_vma *local_got_offsets;
@@ -1656,7 +1643,6 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *relend;
 
   htab = elf_i386_hash_table (info);
-  dynobj = htab->elf.dynobj;
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
   local_got_offsets = elf_local_got_offsets (input_bfd);
@@ -2066,10 +2052,8 @@ elf_i386_finish_dynamic_symbol (output_bfd, info, h, sym)
      Elf_Internal_Sym *sym;
 {
   struct elf_i386_link_hash_table *htab;
-  bfd *dynobj;
 
   htab = elf_i386_hash_table (info);
-  dynobj = htab->elf.dynobj;
 
   if (h->plt.offset != (bfd_vma) -1)
     {
@@ -2141,7 +2125,10 @@ elf_i386_finish_dynamic_symbol (output_bfd, info, h, sym)
       if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
 	  /* Mark the symbol as undefined, rather than as defined in
-	     the .plt section.  Leave the value alone.  */
+	     the .plt section.  Leave the value alone.  This is a clue
+	     for the dynamic linker, to make function pointer
+	     comparisons work between an application and shared
+	     library.  */  
 	  sym->st_shndx = SHN_UNDEF;
 	}
     }
@@ -2265,6 +2252,7 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
       for (; dyncon < dynconend; dyncon++)
 	{
 	  Elf_Internal_Dyn dyn;
+	  asection *s;
 
 	  bfd_elf32_swap_dyn_in (dynobj, dyncon, &dyn);
 
@@ -2282,10 +2270,11 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
 	      break;
 
 	    case DT_PLTRELSZ:
-	      if (htab->srelplt->output_section->_cooked_size != 0)
-		dyn.d_un.d_val = htab->srelplt->output_section->_cooked_size;
+	      s = htab->srelplt->output_section;
+	      if (s->_cooked_size != 0)
+		dyn.d_un.d_val = s->_cooked_size;
 	      else
-		dyn.d_un.d_val = htab->srelplt->output_section->_raw_size;
+		dyn.d_un.d_val = s->_raw_size;
 	      break;
 
 	    case DT_RELSZ:
@@ -2300,10 +2289,11 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
 		 about changing the DT_REL entry.  */
 	      if (htab->srelplt != NULL)
 		{
-		  if (htab->srelplt->output_section->_cooked_size != 0)
-		    dyn.d_un.d_val -= htab->srelplt->output_section->_cooked_size;
+		  s = htab->srelplt->output_section;
+		  if (s->_cooked_size != 0)
+		    dyn.d_un.d_val -= s->_cooked_size;
 		  else
-		    dyn.d_un.d_val -= htab->srelplt->output_section->_raw_size;
+		    dyn.d_un.d_val -= s->_raw_size;
 		}
 	      break;
 	    }
@@ -2365,6 +2355,7 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
 #define ELF_MAXPAGESIZE			0x1000
 
 #define elf_backend_can_gc_sections	1
+#define elf_backend_can_refcount	1
 #define elf_backend_want_got_plt	1
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0

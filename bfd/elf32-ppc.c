@@ -2184,7 +2184,7 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 
 	  if (h != NULL)
 	    {
-	      if (h->got.refcount == -1)
+	      if (h->got.refcount == 0)
 		{
 		  /* Make sure this symbol is output as a dynamic symbol.  */
 		  if (h->dynindx == -1)
@@ -2195,11 +2195,8 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 		  sgot->_raw_size += 4;
 		  /* Allocate relocation space.  */
 		  srelgot->_raw_size += sizeof (Elf32_External_Rela);
-
-		  h->got.refcount = 1;
 		}
-	      else
-		h->got.refcount++;
+	      h->got.refcount++;
 	    }
 	  else
 	    {
@@ -2211,13 +2208,12 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 		  size = symtab_hdr->sh_info;
 		  size *= sizeof (bfd_signed_vma);
 		  local_got_refcounts
-		    = (bfd_signed_vma *) bfd_alloc (abfd, size);
+		    = (bfd_signed_vma *) bfd_zalloc (abfd, size);
 		  if (local_got_refcounts == NULL)
 		    return false;
 		  elf_local_got_refcounts (abfd) = local_got_refcounts;
-		  memset (local_got_refcounts, -1, (size_t) size);
 		}
-	      if (local_got_refcounts[r_symndx] == -1)
+	      if (local_got_refcounts[r_symndx] == 0)
 		{
 		  sgot->_raw_size += 4;
 
@@ -2226,11 +2222,8 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
                      dynamic linker can adjust this GOT entry.  */
 		  if (info->shared)
 		    srelgot->_raw_size += sizeof (Elf32_External_Rela);
-
-		  local_got_refcounts[r_symndx] = 1;
 		}
-	      else
-		local_got_refcounts[r_symndx]++;
+	      local_got_refcounts[r_symndx]++;
 	    }
 	  break;
 
@@ -2343,13 +2336,8 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	      if (! bfd_elf32_link_record_dynamic_symbol (info, h))
 		return false;
 	    }
-	  if (h->plt.refcount == -1)
-	    {
-	      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
-	      h->plt.refcount = 1;
-	    }
-	  else
-	    h->plt.refcount++;
+	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+	  h->plt.refcount++;
 	  break;
 
 	  /* The following relocations don't need to propagate the
@@ -3821,6 +3809,7 @@ ppc_elf_grok_psinfo (abfd, note)
 #define elf_backend_plt_not_loaded	1
 #define elf_backend_got_symbol_offset	4
 #define elf_backend_can_gc_sections	1
+#define elf_backend_can_refcount	1
 #define elf_backend_got_header_size	12
 #define elf_backend_plt_header_size	PLT_INITIAL_ENTRY_SIZE
 

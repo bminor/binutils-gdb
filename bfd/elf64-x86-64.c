@@ -441,10 +441,8 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 
 	  if (h != NULL)
 	    {
-	      if (h->got.refcount == -1)
+	      if (h->got.refcount == 0)
 		{
-		  h->got.refcount = 1;
-
 		  /* Make sure this symbol is output as a dynamic symbol.  */
 		  if (h->dynindx == -1)
 		    {
@@ -455,8 +453,7 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 		  sgot->_raw_size += GOT_ENTRY_SIZE;
 		  srelgot->_raw_size += sizeof (Elf64_External_Rela);
 		}
-	      else
-		h->got.refcount += 1;
+	      h->got.refcount += 1;
 	    }
 	  else
 	    {
@@ -468,16 +465,13 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 		  size = symtab_hdr->sh_info;
 		  size *= sizeof (bfd_signed_vma);
 		  local_got_refcounts = ((bfd_signed_vma *)
-					 bfd_alloc (abfd, size));
+					 bfd_zalloc (abfd, size));
 		  if (local_got_refcounts == NULL)
 		    return false;
 		  elf_local_got_refcounts (abfd) = local_got_refcounts;
-		  memset (local_got_refcounts, -1, (size_t) size);
 		}
-	      if (local_got_refcounts[r_symndx] == -1)
+	      if (local_got_refcounts[r_symndx] == 0)
 		{
-		  local_got_refcounts[r_symndx] = 1;
-
 		  sgot->_raw_size += GOT_ENTRY_SIZE;
 		  if (info->shared)
 		    {
@@ -487,8 +481,7 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 		      srelgot->_raw_size += sizeof (Elf64_External_Rela);
 		    }
 		}
-	      else
-		local_got_refcounts[r_symndx] += 1;
+	      local_got_refcounts[r_symndx] += 1;
 	    }
 	  break;
 
@@ -506,10 +499,7 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 	    continue;
 
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
-	  if (h->plt.refcount == -1)
-	    h->plt.refcount = 1;
-	  else
-	    h->plt.refcount += 1;
+	  h->plt.refcount += 1;
 	  break;
 
 	case R_X86_64_8:
@@ -1959,6 +1949,7 @@ elf64_x86_64_reloc_type_class (rela)
 #define ELF_MAXPAGESIZE			    0x100000
 
 #define elf_backend_can_gc_sections	    1
+#define elf_backend_can_refcount	    1
 #define elf_backend_want_got_plt	    1
 #define elf_backend_plt_readonly	    1
 #define elf_backend_want_plt_sym	    0

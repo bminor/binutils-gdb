@@ -2315,10 +2315,9 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 		 GOT entries.  */
 	      amt = symtab_hdr->sh_info + 1;
 	      amt *= sizeof (bfd_signed_vma);
-	      local_got_refcounts = ((bfd_signed_vma *) bfd_alloc (abfd, amt));
+	      local_got_refcounts = ((bfd_signed_vma *) bfd_zalloc (abfd, amt));
 	      if (local_got_refcounts == NULL)
 		return false;
-	      memset (local_got_refcounts, -1, (size_t) amt);
 
 	      local_got_refcounts++;
 	      elf_local_got_refcounts (abfd) = local_got_refcounts;
@@ -2371,10 +2370,8 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 
 	  if (h != NULL)
 	    {
-	      if (h->got.refcount == -1)
+	      if (h->got.refcount == 0)
 		{
-		  h->got.refcount = 1;
-
 		  /* Make sure this symbol is output as a dynamic symbol.  */
 		  if (h->dynindx == -1)
 		    {
@@ -2387,16 +2384,13 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 		  /* Allocate relocation space.  */
 		  srelgot->_raw_size += sizeof (Elf32_External_Rela);
 		}
-	      else
-		h->got.refcount++;
+	      h->got.refcount++;
 	    }
 	  else
 	    {
 	      /* This is a global offset table entry for a local symbol.  */
-	      if (local_got_refcounts[r_symndx] == -1)
+	      if (local_got_refcounts[r_symndx] == 0)
 		{
-		  local_got_refcounts[r_symndx] = 1;
-
 		  sgot->_raw_size += 4;
 		  if (info->shared)
 		    {
@@ -2406,8 +2400,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 		      srelgot->_raw_size += sizeof (Elf32_External_Rela);
 		    }
 		}
-	      else
-		local_got_refcounts[r_symndx]++;
+	      local_got_refcounts[r_symndx]++;
 	    }
 	  break;
 
@@ -2440,10 +2433,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 	    continue;
 
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
-	  if (h->plt.refcount == -1)
-	    h->plt.refcount = 1;
-	  else
-	    h->plt.refcount++;
+	  h->plt.refcount++;
 	  break;
 
 	case R_CRIS_8:
@@ -2478,10 +2468,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 
 	      /* Make sure a plt entry is created for this symbol if it
 		 turns out to be a function defined by a dynamic object.  */
-	      if (h->plt.refcount == -1)
-		h->plt.refcount = 1;
-	      else
-		h->plt.refcount++;
+	      h->plt.refcount++;
 	    }
 
 	  /* If we are creating a shared library and this is not a local
@@ -3013,6 +3000,7 @@ elf_cris_reloc_type_class (rela)
 #define elf_backend_check_relocs                cris_elf_check_relocs
 
 #define elf_backend_can_gc_sections		1
+#define elf_backend_can_refcount		1
 
 #define elf_backend_object_p			cris_elf_object_p
 #define elf_backend_final_write_processing \

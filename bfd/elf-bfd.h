@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfdlink.h"
 
 /* The number of entries in a section is its size divided by the size
-   of a single entry.  This is normally only applicaable to reloc and
+   of a single entry.  This is normally only applicable to reloc and
    symbol table sections.  */
 #define NUM_SHDR_ENTRIES(shdr) ((shdr)->sh_size / (shdr)->sh_entsize)
 
@@ -223,33 +223,50 @@ struct elf_link_local_dynamic_entry
 struct elf_link_hash_table
 {
   struct bfd_link_hash_table root;
+
   /* Whether we have created the special dynamic sections required
      when linking against or generating a shared object.  */
   boolean dynamic_sections_created;
+
   /* The BFD used to hold special sections created by the linker.
      This will be the first BFD found which requires these sections to
      be created.  */
   bfd *dynobj;
+
+  /* The value to use when initialising got.refcount/offset and
+     plt.refcount/offset in an elf_link_hash_entry.  Set to zero when
+     the values are refcounts.  Set to -1 in size_dynamic_sections
+     when the values may be offsets.  */
+  bfd_signed_vma init_refcount;
+
   /* The number of symbols found in the link which must be put into
      the .dynsym section.  */
   bfd_size_type dynsymcount;
+
   /* The string table of dynamic symbols, which becomes the .dynstr
      section.  */
   struct bfd_strtab_hash *dynstr;
+
   /* The number of buckets in the hash table in the .hash section.
      This is based on the number of dynamic symbols.  */
   bfd_size_type bucketcount;
+
   /* A linked list of DT_NEEDED names found in dynamic objects
      included in the link.  */
   struct bfd_link_needed_list *needed;
+
   /* The _GLOBAL_OFFSET_TABLE_ symbol.  */
   struct elf_link_hash_entry *hgot;
+
   /* A pointer to information used to link stabs in sections.  */
   PTR stab_info;
+
   /* A pointer to information used to merge SEC_MERGE sections.  */
   PTR merge_info;
+
   /* A linked list of local symbols to be added to .dynsym.  */
   struct elf_link_local_dynamic_entry *dynlocal;
+
   /* A linked list of DT_RPATH/DT_RUNPATH names found in dynamic
      objects included in the link.  */
   struct bfd_link_needed_list *runpath;
@@ -726,6 +743,7 @@ struct elf_backend_data
   unsigned plt_not_loaded : 1;
   unsigned plt_alignment : 4;
   unsigned can_gc_sections : 1;
+  unsigned can_refcount : 1;
   unsigned want_got_sym : 1;
   unsigned want_dynbss : 1;
 };

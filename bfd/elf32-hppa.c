@@ -1133,7 +1133,7 @@ elf32_hppa_create_dynamic_sections (abfd, info)
 
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
-void
+static void
 elf32_hppa_copy_indirect_symbol (dir, ind)
      struct elf_link_hash_entry *dir, *ind;
 {
@@ -1359,10 +1359,7 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 
 	  if (h != NULL)
 	    {
-	      if (h->elf.got.refcount == -1)
-		h->elf.got.refcount = 1;
-	      else
-		h->elf.got.refcount += 1;
+	      h->elf.got.refcount += 1;
 	    }
 	  else
 	    {
@@ -1404,13 +1401,8 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 	    {
 	      if (h != NULL)
 		{
-		  if (h->elf.plt.refcount == -1)
-		    {
-		      h->elf.plt.refcount = 1;
-		      h->elf.elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
-		    }
-		  else
-		    h->elf.plt.refcount += 1;
+		  h->elf.elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+		  h->elf.plt.refcount += 1;
 
 		  /* If this .plt entry is for a plabel, mark it so
 		     that adjust_dynamic_symbol will keep the entry
@@ -3491,7 +3483,6 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
      Elf_Internal_Sym *local_syms;
      asection **local_sections;
 {
-  bfd *dynobj;
   bfd_vma *local_got_offsets;
   struct elf32_hppa_link_hash_table *htab;
   Elf_Internal_Shdr *symtab_hdr;
@@ -3501,7 +3492,6 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
 
   htab = hppa_link_hash_table (info);
-  dynobj = htab->elf.dynobj;
   local_got_offsets = elf_local_got_offsets (input_bfd);
 
   rel = relocs;
@@ -4019,10 +4009,8 @@ elf32_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
      Elf_Internal_Sym *sym;
 {
   struct elf32_hppa_link_hash_table *htab;
-  bfd *dynobj;
 
   htab = hppa_link_hash_table (info);
-  dynobj = htab->elf.dynobj;
 
   if (h->plt.offset != (bfd_vma) -1)
     {
@@ -4375,6 +4363,7 @@ elf32_hppa_elf_get_symbol_type (elf_sym, type)
 #define elf_backend_reloc_type_class	     elf32_hppa_reloc_type_class
 
 #define elf_backend_can_gc_sections	     1
+#define elf_backend_can_refcount	     1
 #define elf_backend_plt_alignment	     2
 #define elf_backend_want_got_plt	     0
 #define elf_backend_plt_readonly	     0

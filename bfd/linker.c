@@ -445,28 +445,27 @@ _bfd_link_hash_newfunc (entry, table, string)
      struct bfd_hash_table *table;
      const char *string;
 {
-  struct bfd_link_hash_entry *ret = (struct bfd_link_hash_entry *) entry;
-
   /* Allocate the structure if it has not already been allocated by a
      subclass.  */
-  if (ret == (struct bfd_link_hash_entry *) NULL)
-    ret = ((struct bfd_link_hash_entry *)
-	   bfd_hash_allocate (table, sizeof (struct bfd_link_hash_entry)));
-  if (ret == (struct bfd_link_hash_entry *) NULL)
-    return NULL;
-
-  /* Call the allocation method of the superclass.  */
-  ret = ((struct bfd_link_hash_entry *)
-	 bfd_hash_newfunc ((struct bfd_hash_entry *) ret, table, string));
-
-  if (ret)
+  if (entry == NULL)
     {
-      /* Initialize the local fields.  */
-      ret->type = bfd_link_hash_new;
-      ret->next = NULL;
+      entry = bfd_hash_allocate (table, sizeof (struct bfd_link_hash_entry));
+      if (entry == NULL)
+	return entry;
     }
 
-  return (struct bfd_hash_entry *) ret;
+  /* Call the allocation method of the superclass.  */
+  entry = bfd_hash_newfunc (entry, table, string);
+  if (entry)
+    {
+      struct bfd_link_hash_entry *h = (struct bfd_link_hash_entry *) entry;
+
+      /* Initialize the local fields.  */
+      h->type = bfd_link_hash_new;
+      h->next = NULL;
+    }
+
+  return entry;
 }
 
 /* Initialize a link hash table.  The BFD argument is the one
@@ -642,30 +641,29 @@ _bfd_generic_link_hash_newfunc (entry, table, string)
      struct bfd_hash_table *table;
      const char *string;
 {
-  struct generic_link_hash_entry *ret =
-    (struct generic_link_hash_entry *) entry;
-
   /* Allocate the structure if it has not already been allocated by a
      subclass.  */
-  if (ret == (struct generic_link_hash_entry *) NULL)
-    ret = ((struct generic_link_hash_entry *)
-	   bfd_hash_allocate (table, sizeof (struct generic_link_hash_entry)));
-  if (ret == (struct generic_link_hash_entry *) NULL)
-    return NULL;
+  if (entry == NULL)
+    {
+      entry = bfd_hash_allocate (table,
+				 sizeof (struct generic_link_hash_entry));
+      if (entry == NULL)
+	return entry;
+    }
 
   /* Call the allocation method of the superclass.  */
-  ret = ((struct generic_link_hash_entry *)
-	 _bfd_link_hash_newfunc ((struct bfd_hash_entry *) ret,
-				 table, string));
-
-  if (ret)
+  entry = _bfd_link_hash_newfunc (entry, table, string);
+  if (entry)
     {
+      struct generic_link_hash_entry *ret;
+
       /* Set local fields.  */
+      ret = (struct generic_link_hash_entry *) entry;
       ret->written = false;
       ret->sym = NULL;
     }
 
-  return (struct bfd_hash_entry *) ret;
+  return entry;
 }
 
 /* Create an generic link hash table.  */

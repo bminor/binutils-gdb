@@ -102,6 +102,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef elf_backend_can_gc_sections
 #define elf_backend_can_gc_sections 0
 #endif
+#ifndef elf_backend_can_refcount
+#define elf_backend_can_refcount 0
+#endif
 #ifndef elf_backend_want_got_sym
 #define elf_backend_want_got_sym 1
 #endif
@@ -459,6 +462,7 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_plt_not_loaded,
   elf_backend_plt_alignment,
   elf_backend_can_gc_sections,
+  elf_backend_can_refcount,
   elf_backend_want_dynbss,
   elf_backend_want_got_sym
 };

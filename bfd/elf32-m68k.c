@@ -534,10 +534,8 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 
 	  if (h != NULL)
 	    {
-	      if (h->got.refcount == -1)
+	      if (h->got.refcount == 0)
 		{
-		  h->got.refcount = 1;
-
 		  /* Make sure this symbol is output as a dynamic symbol.  */
 		  if (h->dynindx == -1)
 		    {
@@ -550,8 +548,7 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 		  /* Allocate relocation space.  */
 		  srelgot->_raw_size += sizeof (Elf32_External_Rela);
 		}
-	      else
-		h->got.refcount++;
+	      h->got.refcount++;
 	    }
 	  else
 	    {
@@ -563,16 +560,13 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 		  size = symtab_hdr->sh_info;
 		  size *= sizeof (bfd_signed_vma);
 		  local_got_refcounts = ((bfd_signed_vma *)
-					 bfd_alloc (abfd, size));
+					 bfd_zalloc (abfd, size));
 		  if (local_got_refcounts == NULL)
 		    return false;
 		  elf_local_got_refcounts (abfd) = local_got_refcounts;
-		  memset (local_got_refcounts, -1, (size_t) size);
 		}
-	      if (local_got_refcounts[r_symndx] == -1)
+	      if (local_got_refcounts[r_symndx] == 0)
 		{
-		  local_got_refcounts[r_symndx] = 1;
-
 		  sgot->_raw_size += 4;
 		  if (info->shared)
 		    {
@@ -582,8 +576,7 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 		      srelgot->_raw_size += sizeof (Elf32_External_Rela);
 		    }
 		}
-	      else
-		local_got_refcounts[r_symndx]++;
+	      local_got_refcounts[r_symndx]++;
 	    }
 	  break;
 
@@ -603,10 +596,7 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 	    continue;
 
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
-	  if (h->plt.refcount == -1)
-	    h->plt.refcount = 1;
-	  else
-	    h->plt.refcount++;
+	  h->plt.refcount++;
 	  break;
 
 	case R_68K_PLT8O:
@@ -631,10 +621,7 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 	    }
 
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
-	  if (h->plt.refcount == -1)
-	    h->plt.refcount = 1;
-	  else
-	    h->plt.refcount++;
+	  h->plt.refcount++;
 	  break;
 
 	case R_68K_PC8:
@@ -662,10 +649,7 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 		  /* Make sure a plt entry is created for this symbol if
 		     it turns out to be a function defined by a dynamic
 		     object.  */
-		  if (h->plt.refcount == -1)
-		    h->plt.refcount = 1;
-		  else
-		    h->plt.refcount++;
+		  h->plt.refcount++;
 		}
 	      break;
 	    }
@@ -677,10 +661,7 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 	    {
 	      /* Make sure a plt entry is created for this symbol if it
 		 turns out to be a function defined by a dynamic object.  */
-	      if (h->plt.refcount == -1)
-		h->plt.refcount = 1;
-	      else
-		h->plt.refcount++;
+	      h->plt.refcount++;
 	    }
 
 	  /* If we are creating a shared library, we need to copy the
@@ -2357,6 +2338,7 @@ elf32_m68k_reloc_type_class (rela)
 #define elf_backend_reloc_type_class	elf32_m68k_reloc_type_class
 
 #define elf_backend_can_gc_sections 1
+#define elf_backend_can_refcount 1
 #define elf_backend_want_got_plt 1
 #define elf_backend_plt_readonly 1
 #define elf_backend_want_plt_sym 0

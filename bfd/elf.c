@@ -944,31 +944,31 @@ _bfd_elf_link_hash_newfunc (entry, table, string)
      struct bfd_hash_table *table;
      const char *string;
 {
-  struct elf_link_hash_entry *ret = (struct elf_link_hash_entry *) entry;
-
   /* Allocate the structure if it has not already been allocated by a
      subclass.  */
-  if (ret == (struct elf_link_hash_entry *) NULL)
-    ret = ((struct elf_link_hash_entry *)
-	   bfd_hash_allocate (table, sizeof (struct elf_link_hash_entry)));
-  if (ret == (struct elf_link_hash_entry *) NULL)
-    return (struct bfd_hash_entry *) ret;
+  if (entry == NULL)
+    {
+      entry = bfd_hash_allocate (table, sizeof (struct elf_link_hash_entry));
+      if (entry == NULL)
+	return entry;
+    }
 
   /* Call the allocation method of the superclass.  */
-  ret = ((struct elf_link_hash_entry *)
-	 _bfd_link_hash_newfunc ((struct bfd_hash_entry *) ret,
-				 table, string));
-  if (ret != (struct elf_link_hash_entry *) NULL)
+  entry = _bfd_link_hash_newfunc (entry, table, string);
+  if (entry != NULL)
     {
+      struct elf_link_hash_entry *ret = (struct elf_link_hash_entry *) entry;
+      struct elf_link_hash_table *htab = (struct elf_link_hash_table *) table;
+
       /* Set local fields.  */
       ret->indx = -1;
       ret->size = 0;
       ret->dynindx = -1;
       ret->dynstr_index = 0;
       ret->weakdef = NULL;
-      ret->got.offset = (bfd_vma) -1;
-      ret->plt.offset = (bfd_vma) -1;
-      ret->linker_section_pointer = (elf_linker_section_pointers_t *)0;
+      ret->got.refcount = htab->init_refcount;
+      ret->plt.refcount = htab->init_refcount;
+      ret->linker_section_pointer = NULL;
       ret->verinfo.verdef = NULL;
       ret->vtable_entries_used = NULL;
       ret->vtable_entries_size = 0;
@@ -982,7 +982,7 @@ _bfd_elf_link_hash_newfunc (entry, table, string)
       ret->elf_link_hash_flags = ELF_LINK_NON_ELF;
     }
 
-  return (struct bfd_hash_entry *) ret;
+  return entry;
 }
 
 /* Copy data from an indirect symbol to its direct symbol, hiding the
@@ -1002,21 +1002,21 @@ _bfd_elf_link_hash_copy_indirect (dir, ind)
 	| ELF_LINK_HASH_REF_REGULAR_NONWEAK
 	| ELF_LINK_NON_GOT_REF));
 
-  /* Copy over the global and procedure linkage table offset entries.
+  /* Copy over the global and procedure linkage table refcount entries.
      These may have been already set up by a check_relocs routine.  */
-  if (dir->got.offset == (bfd_vma) -1)
+  if (dir->got.refcount <= 0)
     {
-      dir->got.offset = ind->got.offset;
-      ind->got.offset = (bfd_vma) -1;
+      dir->got.refcount = ind->got.refcount;
+      ind->got.refcount = 0;
     }
-  BFD_ASSERT (ind->got.offset == (bfd_vma) -1);
+  BFD_ASSERT (ind->got.refcount <= 0);
 
-  if (dir->plt.offset == (bfd_vma) -1)
+  if (dir->plt.refcount <= 0)
     {
-      dir->plt.offset = ind->plt.offset;
-      ind->plt.offset = (bfd_vma) -1;
+      dir->plt.refcount = ind->plt.refcount;
+      ind->plt.refcount = 0;
     }
-  BFD_ASSERT (ind->plt.offset == (bfd_vma) -1);
+  BFD_ASSERT (ind->plt.refcount <= 0);
 
   if (dir->dynindx == -1)
     {
@@ -1053,6 +1053,7 @@ _bfd_elf_link_hash_table_init (table, abfd, newfunc)
 
   table->dynamic_sections_created = false;
   table->dynobj = NULL;
+  table->init_refcount = get_elf_backend_data (abfd)->can_refcount - 1;
   /* The first dynamic symbol is a dummy.  */
   table->dynsymcount = 1;
   table->dynstr = NULL;

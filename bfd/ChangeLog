@@ -1,5 +1,49 @@
 2001-09-29  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf-bfd.h (struct elf_link_local_dynamic_entry): Add init_refcount.
+	(struct elf_backend_data): Add can_refcount.
+	* elf.c (_bfd_elf_link_hash_newfunc): Get rid of a few casts.  Set
+	got.refcount and plt.refcount from init_refcount.
+	(_bfd_elf_link_hash_table_init): Set up init_refcount.
+	(_bfd_elf_link_hash_copy_indirect): Reference got/plt.refcount
+	rather than got/plt.offset, and test for <= 0 rather than -1.
+	* elflink.h (size_dynamic_sections): Set init_refcount to -1.
+	* elfxx-target.h (elf_backend_can_refcount): Define.
+	(elfNN_bed): Init can_refcount.
+	* linker.c (_bfd_link_hash_newfunc): Get rid of a few casts.
+	(_bfd_generic_link_hash_newfunc): Likewise.
+	* elf32-cris.c (cris_elf_check_relocs): Modify for refcounts
+	starting from zero.
+	(elf_backend_can_refcount): Define.
+	* elf32-hppa.c (elf32_hppa_check_relocs): Modify for refcounts
+	starting from zero.
+	(elf32_hppa_copy_indirect_symbol): Make static to agree with
+	prototype.
+	(elf_backend_can_refcount): Define.
+	* elf32-i386.c (elf_i386_check_relocs): Modify for refcounts
+	starting from zero.
+	(allocate_dynrelocs): Set plt/got.offset rather than *.refcount.
+	(elf_i386_finish_dynamic_symbol): Expand SHN_UNDEF comment.
+	(elf_i386_finish_dynamic_sections): Use local var so line < 80 chars.
+	(elf_backend_can_refcount): Define.
+	(elf_i386_copy_indirect_symbol): Make static to agree with
+	prototype.  Formatting fix.
+	* elf32-m68k.c (elf_m68k_check_relocs): Modify for refcounts
+	starting from zero.
+	(elf_backend_can_refcount): Define.
+	* elf32-ppc.c (ppc_elf_check_relocs): Modify for refcounts
+	starting from zero.
+	(elf_backend_can_refcount): Define.
+	* elf32-s390.c (elf_s390_check_relocs): Modify for refcounts
+	starting from zero.
+	(elf_backend_can_refcount): Define.
+	* elf64-s390.c (elf_s390_check_relocs): Modify for refcounts
+	starting from zero.
+	(elf_backend_can_refcount): Define.
+	* elf64-x86-64.c (elf64_x86_64_check_relocs): Modify for refcounts
+	starting from zero.
+	(elf_backend_can_refcount): Define.
+
 	* som.c (som_write_symbol_strings): Cast current_offset in
 	bfd_seek call to match param type.
 

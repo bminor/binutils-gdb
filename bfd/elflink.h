@@ -2920,6 +2920,10 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
   if (! is_elf_hash_table (info))
     return false;
 
+  /* Any syms created from now on start with -1 in
+     got.refcount/offset and plt.refcount/offset.  */
+  elf_hash_table (info)->init_refcount = -1;
+
   /* The backend may have to create some sections regardless of whether
      we're dynamic or not.  */
   bed = get_elf_backend_data (output_bfd);
