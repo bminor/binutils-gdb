@@ -1,3 +1,8 @@
+Fri Aug 29 00:32:31 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (ld_new_DEPENDENCIES): Remove @LEXLIB@.
+	* Makefile.in: Rebuild.
+
 Thu Aug 28 10:12:10 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* configure.tgt (arc-*-elf*): Recognize.
