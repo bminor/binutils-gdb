@@ -1,6 +1,6 @@
 /* Define a target vector and some small routines for a variant of a.out.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -513,6 +513,9 @@ MY_bfd_final_link (abfd, info)
 #ifndef MY_bfd_merge_sections
 #define MY_bfd_merge_sections bfd_generic_merge_sections
 #endif
+#ifndef MY_bfd_is_group_section
+#define MY_bfd_is_group_section bfd_generic_is_group_section
+#endif
 #ifndef MY_bfd_discard_group
 #define MY_bfd_discard_group bfd_generic_discard_group
 #endif
@@ -583,6 +586,10 @@ MY_bfd_final_link (abfd, info)
 #ifndef MY_canonicalize_dynamic_symtab
 #define MY_canonicalize_dynamic_symtab \
   _bfd_nodynamic_canonicalize_dynamic_symtab
+#endif
+#ifndef MY_get_synthetic_symtab
+#define MY_get_synthetic_symtab \
+  _bfd_nodynamic_get_synthetic_symtab
 #endif
 #ifndef MY_get_dynamic_reloc_upper_bound
 #define MY_get_dynamic_reloc_upper_bound \

@@ -1,5 +1,5 @@
 /* tc-m32r.c -- Assembler for the Renesas M32R.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -109,7 +109,7 @@ static int enable_special = 0;
 
 /* Non-zero if -bitinst has been specified, in which case support
    for extended M32R bit-field instruction set should be enabled.  */
-static int enable_special_m32r = 0;
+static int enable_special_m32r = 1;
 
 /* Non-zero if -float has been specified, in which case support for
    extended M32R floating point instruction set should be enabled.  */
@@ -216,7 +216,8 @@ struct option md_longopts[] =
 #define OPTION_NO_IGNORE_PARALLEL (OPTION_IGNORE_PARALLEL + 1)
 #define OPTION_SPECIAL		  (OPTION_NO_IGNORE_PARALLEL + 1)
 #define OPTION_SPECIAL_M32R       (OPTION_SPECIAL + 1)
-#define OPTION_SPECIAL_FLOAT      (OPTION_SPECIAL_M32R + 1)
+#define OPTION_NO_SPECIAL_M32R    (OPTION_SPECIAL_M32R + 1)
+#define OPTION_SPECIAL_FLOAT      (OPTION_NO_SPECIAL_M32R + 1)
 #define OPTION_WARN_UNMATCHED 	  (OPTION_SPECIAL_FLOAT + 1)
 #define OPTION_NO_WARN_UNMATCHED  (OPTION_WARN_UNMATCHED + 1)
   {"m32r",  no_argument, NULL, OPTION_M32R},
@@ -238,6 +239,7 @@ struct option md_longopts[] =
   {"nIp", no_argument, NULL, OPTION_NO_IGNORE_PARALLEL},
   {"hidden", no_argument, NULL, OPTION_SPECIAL},
   {"bitinst", no_argument, NULL, OPTION_SPECIAL_M32R},
+  {"no-bitinst", no_argument, NULL, OPTION_NO_SPECIAL_M32R},
   {"float", no_argument, NULL, OPTION_SPECIAL_FLOAT},
   /* Sigh.  I guess all warnings must now have both variants.  */
   {"warn-unmatched-high", no_argument, NULL, OPTION_WARN_UNMATCHED},
@@ -353,6 +355,10 @@ md_parse_option (c, arg)
       enable_special_m32r = 1;
       break;
 
+    case OPTION_NO_SPECIAL_M32R:
+      enable_special_m32r = 0;
+      break;
+
     case OPTION_SPECIAL_FLOAT:
       enable_special_float = 1;
       break;
@@ -409,6 +415,8 @@ md_show_usage (stream)
   -parallel               try to combine instructions in parallel\n"));
   fprintf (stream, _("\
   -no-parallel            disable -parallel\n"));
+  fprintf (stream, _("\
+  -no-bitinst             disallow the M32R2's extended bit-field instructions\n"));
   fprintf (stream, _("\
   -O                      try to optimize code.  Implies -parallel\n"));
 
@@ -1374,6 +1382,14 @@ md_assemble (str)
 	 prev_insn.insn is NULL when we're on a 32 bit boundary.  */
       on_32bit_boundary_p = prev_insn.insn == NULL;
 
+      /* Change a frag to, if each insn to swap is in a different frag.
+         It must keep only one instruction in a frag.  */
+      if (parallel() && on_32bit_boundary_p)
+        {
+          frag_wane (frag_now);
+          frag_new (0);
+        }
+
       /* Look to see if this instruction can be combined with the
 	 previous instruction to make one, parallel, 32 bit instruction.
 	 If the previous instruction (potentially) changed the flow of
@@ -1434,13 +1450,25 @@ md_assemble (str)
 	  else if (insn.frag->fr_opcode == insn.addr)
 	    insn.frag->fr_opcode = prev_insn.addr;
 
-	  /* Update the addresses in any fixups.
-	     Note that we don't have to handle the case where each insn is in
-	     a different frag as we ensure they're in the same frag above.  */
-	  for (i = 0; i < prev_insn.num_fixups; ++i)
-	    prev_insn.fixups[i]->fx_where += 2;
-	  for (i = 0; i < insn.num_fixups; ++i)
-	    insn.fixups[i]->fx_where -= 2;
+          /* Change a frag to, if each insn is in a different frag.
+	     It must keep only one instruction in a frag.  */
+          if (prev_insn.frag != insn.frag)
+            {
+              for (i = 0; i < prev_insn.num_fixups; ++i)
+                prev_insn.fixups[i]->fx_frag = insn.frag;
+              for (i = 0; i < insn.num_fixups; ++i)
+                insn.fixups[i]->fx_frag = prev_insn.frag;
+            }
+          else
+	    {
+	      /* Update the addresses in any fixups.
+		 Note that we don't have to handle the case where each insn is in
+		 a different frag as we ensure they're in the same frag above.  */
+	      for (i = 0; i < prev_insn.num_fixups; ++i)
+		prev_insn.fixups[i]->fx_where += 2;
+	      for (i = 0; i < insn.num_fixups; ++i)
+		insn.fixups[i]->fx_where -= 2;
+	    }
 	}
 
       /* Keep track of whether we've seen a pair of 16 bit insns.

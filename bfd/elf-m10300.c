@@ -1,5 +1,5 @@
 /* Matsushita 10300 specific support for 32-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -616,7 +616,7 @@ _bfd_mn10300_elf_create_got_section (abfd, info)
       h->type = STT_OBJECT;
 
       if (info->shared
-	  && ! _bfd_elf_link_record_dynamic_symbol (info, h))
+	  && ! bfd_elf_link_record_dynamic_symbol (info, h))
 	return FALSE;
     }
 
@@ -650,7 +650,7 @@ _bfd_mn10300_elf_create_got_section (abfd, info)
   h->type = STT_OBJECT;
 
   if (info->shared
-      && ! _bfd_elf_link_record_dynamic_symbol (info, h))
+      && ! bfd_elf_link_record_dynamic_symbol (info, h))
     return FALSE;
 
   elf_hash_table (info)->hgot = h;
@@ -770,14 +770,14 @@ mn10300_elf_check_relocs (abfd, info, sec, relocs)
 	/* This relocation describes the C++ object vtable hierarchy.
 	   Reconstruct it for later use during GC.  */
 	case R_MN10300_GNU_VTINHERIT:
-	  if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
 	    return FALSE;
 	  break;
 
 	/* This relocation describes which C++ vtable entries are actually
 	   used.  Record for later use during GC.  */
 	case R_MN10300_GNU_VTENTRY:
-	  if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+	  if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
 	    return FALSE;
 	  break;
 	case R_MN10300_GOT32:
@@ -822,7 +822,7 @@ mn10300_elf_check_relocs (abfd, info, sec, relocs)
 	      /* Make sure this symbol is output as a dynamic symbol.  */
 	      if (h->dynindx == -1)
 		{
-		  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+		  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 		    return FALSE;
 		}
 
@@ -1537,15 +1537,14 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
      asection **local_sections;
 {
   Elf_Internal_Shdr *symtab_hdr;
-  struct elf32_mn10300_link_hash_entry **sym_hashes;
+  struct elf_link_hash_entry **sym_hashes;
   Elf_Internal_Rela *rel, *relend;
 
   if (info->relocatable)
     return TRUE;
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
-  sym_hashes = (struct elf32_mn10300_link_hash_entry **)
-		 (elf_sym_hashes (input_bfd));
+  sym_hashes = elf_sym_hashes (input_bfd);
 
   rel = relocs;
   relend = relocs + input_section->reloc_count;
@@ -1584,10 +1583,10 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  bfd_boolean warned;
 	  struct elf_link_hash_entry *hh;
 
-	  RELOC_FOR_GLOBAL_SYMBOL (hh, (struct elf_link_hash_entry *) sym_hashes,
-				   r_symndx, symtab_hdr, relocation,
-				   sec, unresolved_reloc, info,
-				   warned);
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   hh, sec, relocation,
+				   unresolved_reloc, warned);
 
 	  h = (struct elf32_mn10300_link_hash_entry *) hh;
 
@@ -4187,7 +4186,7 @@ _bfd_mn10300_elf_adjust_dynamic_symbol (info, h)
       /* Make sure this symbol is output as a dynamic symbol.  */
       if (h->dynindx == -1)
 	{
-	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
 	}
 
@@ -4492,31 +4491,31 @@ _bfd_mn10300_elf_size_dynamic_sections (output_bfd, info)
 	 in by the dynamic linker and used by the debugger.  */
       if (! info->shared)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_DEBUG, 0))
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_DEBUG, 0))
 	    return FALSE;
 	}
 
       if (plt)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_PLTGOT, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_JMPREL, 0))
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_PLTGOT, 0)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_PLTRELSZ, 0)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_JMPREL, 0))
 	    return FALSE;
 	}
 
       if (relocs)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_RELA, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_RELASZ, 0)
-	      || ! bfd_elf32_add_dynamic_entry (info, DT_RELAENT,
-						sizeof (Elf32_External_Rela)))
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_RELA, 0)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_RELASZ, 0)
+	      || !_bfd_elf_add_dynamic_entry (info, DT_RELAENT,
+					      sizeof (Elf32_External_Rela)))
 	    return FALSE;
 	}
 
       if (reltext)
 	{
-	  if (! bfd_elf32_add_dynamic_entry (info, DT_TEXTREL, 0))
+	  if (!_bfd_elf_add_dynamic_entry (info, DT_TEXTREL, 0))
 	    return FALSE;
 	}
     }

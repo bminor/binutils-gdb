@@ -35,7 +35,7 @@ if { ![istarget hppa*-*-*] || [istarget *-*-linux*] } {
 
     # These fail due to NO_STRING_ESCAPES
     setup_xfail "powerpc*-*-aix*" "powerpc*-*-beos*" "powerpc*-*-macos*"
-    setup_xfail "powerpc*-*-mpw*" "powerpc*-*-pe" "powerpc*-*-*win*"
+    setup_xfail "powerpc*-*-pe" "powerpc*-*-*win*"
     setup_xfail "rs6000-*-*"
 
     # FIXME: Due to difference in what "consecutive octets" means.

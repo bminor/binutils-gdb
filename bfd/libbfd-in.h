@@ -355,6 +355,9 @@ extern bfd_boolean _bfd_generic_set_section_contents
 #define _bfd_nolink_bfd_merge_sections \
   ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) \
    bfd_false)
+#define _bfd_nolink_bfd_is_group_section \
+  ((bfd_boolean (*) (bfd *, const struct bfd_section *)) \
+   bfd_false)
 #define _bfd_nolink_bfd_discard_group \
   ((bfd_boolean (*) (bfd *, struct bfd_section *)) \
    bfd_false)
@@ -378,6 +381,8 @@ extern bfd_boolean _bfd_generic_set_section_contents
 #define _bfd_nodynamic_get_dynamic_symtab_upper_bound _bfd_n1
 #define _bfd_nodynamic_canonicalize_dynamic_symtab \
   ((long (*) (bfd *, asymbol **)) _bfd_n1)
+#define _bfd_nodynamic_get_synthetic_symtab \
+  ((long (*) (bfd *, asymbol **, asymbol **)) _bfd_n1)
 #define _bfd_nodynamic_get_dynamic_reloc_upper_bound _bfd_n1
 #define _bfd_nodynamic_canonicalize_dynamic_reloc \
   ((long (*) (bfd *, arelent **, asymbol **)) _bfd_n1)

@@ -264,6 +264,10 @@ typedef struct lang_input_statement_struct
   /* Whether to search for this entry as a dynamic archive.  */
   bfd_boolean dynamic;
 
+  /* Whether this entry should cause a DT_NEEDED tag only when
+     satisfying references from regular files, or always.  */
+  bfd_boolean as_needed;
+
   /* Whether to include the entire contents of an archive.  */
   bfd_boolean whole_archive;
 
@@ -552,7 +556,7 @@ extern struct bfd_elf_version_deps *lang_add_vers_depend
 extern void lang_register_vers_node
   (const char *, struct bfd_elf_version_tree *, struct bfd_elf_version_deps *);
 bfd_boolean unique_section_p
-  (const char *);
+  (const asection *);
 extern void lang_add_unique
   (const char *);
 extern const char *lang_get_output_target

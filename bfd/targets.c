@@ -406,6 +406,7 @@ BFD_JUMP_TABLE macros.
 .  NAME##_bfd_link_split_section, \
 .  NAME##_bfd_gc_sections, \
 .  NAME##_bfd_merge_sections, \
+.  NAME##_bfd_is_group_section, \
 .  NAME##_bfd_discard_group
 .
 .  int         (*_bfd_sizeof_headers) (bfd *, bfd_boolean);
@@ -443,6 +444,9 @@ BFD_JUMP_TABLE macros.
 .  {* Attempt to merge SEC_MERGE sections.  *}
 .  bfd_boolean (*_bfd_merge_sections) (bfd *, struct bfd_link_info *);
 .
+.  {* Is this section a member of a group?  *}
+.  bfd_boolean (*_bfd_is_group_section) (bfd *, const struct bfd_section *);
+.
 .  {* Discard members of a group.  *}
 .  bfd_boolean (*_bfd_discard_group) (bfd *, struct bfd_section *);
 .
@@ -450,6 +454,7 @@ BFD_JUMP_TABLE macros.
 .#define BFD_JUMP_TABLE_DYNAMIC(NAME) \
 .  NAME##_get_dynamic_symtab_upper_bound, \
 .  NAME##_canonicalize_dynamic_symtab, \
+.  NAME##_get_synthetic_symtab, \
 .  NAME##_get_dynamic_reloc_upper_bound, \
 .  NAME##_canonicalize_dynamic_reloc
 .
@@ -458,6 +463,9 @@ BFD_JUMP_TABLE macros.
 .  {* Read in the dynamic symbols.  *}
 .  long        (*_bfd_canonicalize_dynamic_symtab)
 .    (bfd *, struct bfd_symbol **);
+.  {* Create synthetized symbols.  *}
+.  long        (*_bfd_get_synthetic_symtab)
+.    (bfd *, struct bfd_symbol **, struct bfd_symbol **);
 .  {* Get the amount of memory required to hold the dynamic relocs.  *}
 .  long        (*_bfd_get_dynamic_reloc_upper_bound) (bfd *);
 .  {* Read in the dynamic relocs.  *}
@@ -517,6 +525,7 @@ extern const bfd_target bfd_elf32_bigarc_vec;
 extern const bfd_target bfd_elf32_bigarm_oabi_vec;
 extern const bfd_target bfd_elf32_bigarm_vec;
 extern const bfd_target bfd_elf32_bigmips_vec;
+extern const bfd_target bfd_elf32_cr16c_vec;
 extern const bfd_target bfd_elf32_cris_vec;
 extern const bfd_target bfd_elf32_d10v_vec;
 extern const bfd_target bfd_elf32_d30v_vec;
@@ -807,6 +816,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_bigarm_oabi_vec,
 	&bfd_elf32_bigarm_vec,
 	&bfd_elf32_bigmips_vec,
+	&bfd_elf32_cr16c_vec,
 	&bfd_elf32_cris_vec,
 	&bfd_elf32_d10v_vec,
 	&bfd_elf32_d30v_vec,

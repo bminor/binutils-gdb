@@ -98,6 +98,7 @@ static struct m68k_op *op;
   struct m68k_exp exp;
   unsigned long mask;
   int onereg;
+  int trailing_ampersand;
 }
 
 %token <reg> DR AR FPR FPCR LPC ZAR ZDR LZPC CREG
@@ -109,6 +110,7 @@ static struct m68k_op *op;
 %type <exp> optcexpr optexprc
 %type <mask> reglist ireglist reglistpair
 %type <onereg> reglistreg
+%type <trailing_ampersand> optional_ampersand
 
 %%
 
@@ -116,14 +118,35 @@ static struct m68k_op *op;
 
 operand:
 	  generic_operand
-	| motorola_operand
+	| motorola_operand optional_ampersand
+		{
+		  op->trailing_ampersand = $2;
+		}
 	| mit_operand
+	;
+
+/* A trailing ampersand(for MAC/EMAC mask addressing).  */
+optional_ampersand:
+	/* empty */
+		{ $$ = 0; }
+	| '&'
+		{ $$ = 1; }
 	;
 
 /* A generic operand.  */
 
 generic_operand:
-	  DR
+	  '<' '<'
+		{
+		  op->mode = LSH;
+		}
+
+	| '>' '>'
+		{
+		  op->mode = RSH;
+		}
+
+	| DR
 		{
 		  op->mode = DREG;
 		  op->reg = $1;
@@ -757,12 +780,14 @@ yylex ()
     case '/':
     case '[':
     case ']':
+    case '<':
+    case '>':
       return *str++;
     case '+':
       /* It so happens that a '+' can only appear at the end of an
-         operand.  If it appears anywhere else, it must be a unary
-         plus on an expression.  */
-      if (str[1] == '\0')
+	 operand, or if it is trailed by an '&'(see mac load insn).
+	 If it appears anywhere else, it must be a unary.  */
+      if (str[1] == '\0' || (str[1] == '&' && str[2] == '\0'))
 	return *str++;
       break;
     case '-':

@@ -520,7 +520,7 @@ generate_asm_file (int type, char *file)
   char *buf;
   char *tmp = file;
   char *endp = file + strlen (file);
-  char *bufp = buf;
+  char *bufp;
 
   if (last_file != NULL
       && strcmp (last_file, file) == 0)

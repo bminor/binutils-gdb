@@ -1,5 +1,5 @@
 /* tc-arm.c -- Assemble for the ARM
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
@@ -191,6 +191,9 @@ static int march_cpu_opt = -1;
 static int march_fpu_opt = -1;
 static int mfpu_opt = -1;
 static int mfloat_abi_opt = -1;
+#ifdef OBJ_ELF
+static int meabi_flags = EF_ARM_EABI_UNKNOWN;
+#endif
 
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful.  */
@@ -2551,6 +2554,9 @@ static int arm_parse_cpu PARAMS ((char *));
 static int arm_parse_arch PARAMS ((char *));
 static int arm_parse_fpu PARAMS ((char *));
 static int arm_parse_float_abi PARAMS ((char *));
+#ifdef OBJ_ELF
+static int arm_parse_eabi PARAMS ((char *));
+#endif
 #if 0 /* Suppressed - for now.  */
 #if defined OBJ_COFF || defined OBJ_ELF
 static void arm_add_note PARAMS ((const char *, const char *, unsigned int));
@@ -2823,13 +2829,6 @@ validate_offset_imm (val, hwse)
 
 
 #ifdef OBJ_ELF
-enum mstate
-{
-  MAP_DATA,
-  MAP_ARM,
-  MAP_THUMB
-};
-
 /* This code is to handle mapping symbols as defined in the ARM ELF spec.
    (This text is taken from version B-02 of the spec):
 
@@ -2904,10 +2903,11 @@ enum mstate
    the EABI (which is still under development), so they are not
    implemented here.  */
 
+static enum mstate mapstate = MAP_UNDEFINED;
+
 static void
 mapping_state (enum mstate state)
 {
-  static enum mstate mapstate = MAP_DATA;
   symbolS * symbolP;
   const char * symname;
   int type;
@@ -2933,9 +2933,13 @@ mapping_state (enum mstate state)
       symname = "$t";
       type = BSF_FUNCTION;
       break;
+    case MAP_UNDEFINED:
+      return;     
     default:
       abort ();
     }
+
+  seg_info (now_seg)->tc_segment_info_data = state;
 
   symbolP = symbol_new (symname, now_seg, (valueT) frag_now_fix (), frag_now);
   symbol_table_insert (symbolP);
@@ -2977,16 +2981,7 @@ arm_elf_change_section (void)
   if ((flags & SEC_ALLOC) == 0)
     return;
 
-  if (flags & SEC_CODE)
-    {
-      if (thumb_mode)
-	mapping_state (MAP_THUMB);
-      else
-	mapping_state (MAP_ARM);
-    }
-  else
-    /* This section does not contain code.  Therefore it must contain data.  */
-    mapping_state (MAP_DATA);    
+  mapstate = seg_info (now_seg)->tc_segment_info_data;
 }
 #else
 #define mapping_state(a)
@@ -3108,6 +3103,8 @@ s_ltorg (ignored)
       || pool->symbol == NULL
       || pool->next_free_entry == 0)
     return;
+
+  mapping_state (MAP_DATA);
 
   /* Align pool as you have word accesses.
      Only make a frag if we have to.  */
@@ -3598,7 +3595,7 @@ co_proc_number (str)
 	}
       else
 	{
-	  inst.error = _("bad or missing co-processor number");
+	  inst.error = all_reg_maps[REG_TYPE_CP].expected;
 	  return FAIL;
 	}
     }
@@ -3653,7 +3650,7 @@ cp_reg_required_here (str, where)
 
   /* In the few cases where we might be able to accept something else
      this error can be overridden.  */
-  inst.error = _("co-processor register expected");
+  inst.error = all_reg_maps[REG_TYPE_CN].expected;
 
   /* Restore the start point.  */
   *str = start;
@@ -3676,7 +3673,7 @@ fp_reg_required_here (str, where)
 
   /* In the few cases where we might be able to accept something else
      this error can be overridden.  */
-  inst.error = _("floating point register expected");
+  inst.error = all_reg_maps[REG_TYPE_FN].expected;
 
   /* Restore the start point.  */
   *str = start;
@@ -10856,9 +10853,14 @@ mav_parse_offset (str, negative)
   for (offset = 0; *p && ISDIGIT (*p); ++p)
     offset = offset * 10 + *p - '0';
 
-  if (offset > 0xff)
+  if (offset > 0x3fc)
     {
       inst.error = _("offset out of range");
+      return 0;
+    }
+  if (offset & 0x3)
+    {
+      inst.error = _("offset not a multiple of 4");
       return 0;
     }
 
@@ -11437,7 +11439,7 @@ create_register_alias (newname, p)
       char *copy_of_str;
       char *r;
 
-#ifdef IGNORE_OPCODE_CASE
+#ifndef IGNORE_OPCODE_CASE
       newname = original_case_string;
 #endif
       copy_of_str = newname;
@@ -11685,40 +11687,57 @@ md_begin ()
 
   cpu_variant = mcpu_cpu_opt | mfpu_opt;
 
-#if defined OBJ_COFF || defined OBJ_ELF
   {
     unsigned int flags = 0;
 
-    /* Set the flags in the private structure.  */
-    if (uses_apcs_26)      flags |= F_APCS26;
-    if (support_interwork) flags |= F_INTERWORK;
-    if (uses_apcs_float)   flags |= F_APCS_FLOAT;
-    if (pic_code)          flags |= F_PIC;
-    if ((cpu_variant & FPU_ANY) == FPU_NONE
-	 || (cpu_variant & FPU_ANY) == FPU_ARCH_VFP) /* VFP layout only.  */
-      {
-	flags |= F_SOFT_FLOAT;
-      }
-    switch (mfloat_abi_opt)
-      {
-      case ARM_FLOAT_ABI_SOFT:
-      case ARM_FLOAT_ABI_SOFTFP:
-	flags |= F_SOFT_FLOAT;
-	break;
-
-      case ARM_FLOAT_ABI_HARD:
-	if (flags & F_SOFT_FLOAT)
-	  as_bad (_("hard-float conflicts with specified fpu"));
-	break;
-      }
-    /* Using VFP conventions (even if soft-float).  */
-    if (cpu_variant & FPU_VFP_EXT_NONE) flags |= F_VFP_FLOAT;
-
 #if defined OBJ_ELF
-    if (cpu_variant & FPU_ARCH_MAVERICK)
-	flags |= EF_ARM_MAVERICK_FLOAT;
-#endif
+    flags = meabi_flags;
 
+    switch (meabi_flags)
+      {
+      case EF_ARM_EABI_UNKNOWN:
+#endif
+#if defined OBJ_COFF || defined OBJ_ELF
+	/* Set the flags in the private structure.  */
+	if (uses_apcs_26)      flags |= F_APCS26;
+	if (support_interwork) flags |= F_INTERWORK;
+	if (uses_apcs_float)   flags |= F_APCS_FLOAT;
+	if (pic_code)          flags |= F_PIC;
+	if ((cpu_variant & FPU_ANY) == FPU_NONE
+	     || (cpu_variant & FPU_ANY) == FPU_ARCH_VFP) /* VFP layout only.  */
+	  flags |= F_SOFT_FLOAT;
+
+	switch (mfloat_abi_opt)
+	  {
+	  case ARM_FLOAT_ABI_SOFT:
+	  case ARM_FLOAT_ABI_SOFTFP:
+	    flags |= F_SOFT_FLOAT;
+	    break;
+
+	  case ARM_FLOAT_ABI_HARD:
+	    if (flags & F_SOFT_FLOAT)
+	      as_bad (_("hard-float conflicts with specified fpu"));
+	    break;
+	  }
+
+	/* Using VFP conventions (even if soft-float).  */
+	if (cpu_variant & FPU_VFP_EXT_NONE)
+	  flags |= F_VFP_FLOAT;
+#endif
+#if defined OBJ_ELF
+	if (cpu_variant & FPU_ARCH_MAVERICK)
+	    flags |= EF_ARM_MAVERICK_FLOAT;
+	break;
+
+      case EF_ARM_EABI_VER3:
+	/* No additional flags to set.  */
+	break;
+
+      default:
+	abort ();
+      }
+#endif
+#if defined OBJ_COFF || defined OBJ_ELF
     bfd_set_private_flags (stdoutput, flags);
 
     /* We have run out flags in the COFF header to encode the
@@ -11738,8 +11757,8 @@ md_begin ()
 	    bfd_set_section_contents (stdoutput, sec, NULL, 0, 0);
 	  }
       }
-  }
 #endif
+  }
 
   /* Record the CPU type as well.  */
   switch (cpu_variant & ARM_CPU_MASK)
@@ -13450,6 +13469,22 @@ static struct arm_float_abi_option_table arm_float_abis[] =
   {NULL, 0}
 };
 
+struct arm_eabi_option_table
+{
+  char *name;
+  unsigned int value;
+};
+
+#ifdef OBJ_ELF
+/* We only know hot to output GNU and ver 3 (AAELF) formats.  */
+static struct arm_eabi_option_table arm_eabis[] =
+{
+  {"gnu",	EF_ARM_EABI_UNKNOWN},
+  {"3",		EF_ARM_EABI_VER3},
+  {NULL, 0}
+};
+#endif
+
 struct arm_long_option_table
 {
   char *option;		/* Substring to match.  */
@@ -13613,6 +13648,24 @@ arm_parse_float_abi (str)
   return 0;
 }
 
+#ifdef OBJ_ELF
+static int
+arm_parse_eabi (str)
+     char * str;
+{
+  struct arm_eabi_option_table *opt;
+
+  for (opt = arm_eabis; opt->name != NULL; opt++)
+    if (strcmp (opt->name, str) == 0)
+      {
+	meabi_flags = opt->value;
+	return 1;
+      }
+  as_bad (_("unknown EABI `%s'\n"), str);
+  return 0;
+}
+#endif
+
 struct arm_long_option_table arm_long_opts[] =
 {
   {"mcpu=", N_("<cpu name>\t  assemble for CPU <cpu name>"),
@@ -13623,6 +13676,10 @@ struct arm_long_option_table arm_long_opts[] =
    arm_parse_fpu, NULL},
   {"mfloat-abi=", N_("<abi>\t  assemble for floating point ABI <abi>"),
    arm_parse_float_abi, NULL},
+#ifdef OBJ_ELF
+  {"meabi=", N_("<ver>\t  assemble for eabi version <ver>"),
+   arm_parse_eabi, NULL},
+#endif
   {NULL, NULL, 0, NULL}
 };
 
@@ -13817,6 +13874,9 @@ arm_cleanup ()
     {
       /* Put it at the end of the relevent section.  */
       subseg_set (pool->section, pool->sub_section);
+#ifdef OBJ_ELF
+      arm_elf_change_section ();
+#endif
       s_ltorg (0);
     }
 }

@@ -7,7 +7,7 @@ AC_INIT(libbfd.c)
 AC_CANONICAL_SYSTEM
 AC_ISC_POSIX
 
-AM_INIT_AUTOMAKE(bfd, 2.14.90)
+AM_INIT_AUTOMAKE(bfd, 2.15.91)
 # Uncomment the next line to remove the date from the reported bfd version
 #is_release=y
 
@@ -272,14 +272,6 @@ changequote([,])dnl
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/i860mach3.h"'
 	;;
-  mips-dec-bsd*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/mipsbsd.h"'
-	;;
-  mips-dec-mach3*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/mipsmach3.h"'
-	;;
   mips-*-netbsd* | mips*-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;
@@ -290,10 +282,6 @@ changequote([,])dnl
   mips-sgi-irix4*)	COREFILE=irix-core.lo ;;
   mips-sgi-irix5*)	COREFILE=irix-core.lo ;;
   mips-sgi-irix6*)	COREFILE=irix-core.lo ;;
-  mips-*-mach3*)
-	COREFILE=trad-core.lo
-	TRAD_HEADER='"hosts/mipsmach3.h"'
-	;;
   mips-*-sysv4*)	;;
   mips-*-sysv* | mips-*-riscos*)
 	COREFILE=trad-core.lo
@@ -583,8 +571,6 @@ do
     aout0_big_vec)		tb="$tb aout0.lo aout32.lo" ;;
     aout_arm_big_vec)		tb="$tb aout-arm.lo aout32.lo" ;;
     aout_arm_little_vec)	tb="$tb aout-arm.lo aout32.lo" ;;
-    aout_mips_big_vec)		tb="$tb mipsbsd.lo aout32.lo" ;;
-    aout_mips_little_vec)	tb="$tb mipsbsd.lo aout32.lo" ;;
     apollocoff_vec)		tb="$tb coff-apollo.lo" ;;
     arm_epoc_pe_big_vec)	tb="$tb epoc-pe-arm.lo peigen.lo cofflink.lo " ;;
     arm_epoc_pe_little_vec)	tb="$tb epoc-pe-arm.lo peigen.lo cofflink.lo " ;;
@@ -608,6 +594,7 @@ do
     bfd_elf32_bigarm_oabi_vec)	tb="$tb elfarm-oabi.lo elf32.lo $elf" ;;
     bfd_elf32_bigarm_vec)	tb="$tb elfarm-nabi.lo elf32.lo $elf" ;;
     bfd_elf32_bigmips_vec) 	tb="$tb elf32-mips.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo" ;;
+    bfd_elf32_cr16c_vec)	tb="$tb elf32-cr16c.lo elf32.lo $elf" ;;
     bfd_elf32_cris_vec)		tb="$tb elf32-cris.lo elf32.lo $elf" ;;
     bfd_elf32_d10v_vec)		tb="$tb elf32-d10v.lo elf32.lo $elf" ;;
     bfd_elf32_d30v_vec)		tb="$tb elf32-d30v.lo elf32.lo $elf" ;;

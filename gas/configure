@@ -4415,7 +4415,6 @@ echo "$as_me: WARNING: GAS support for ${generic_target} is preliminary and a wo
 
       # don't change em like *-*-bsd does
       mips-dec-openbsd*)		fmt=elf endian=little ;;
-      mips-dec-bsd*)			fmt=aout endian=little ;;
       mips-sony-bsd*)			fmt=ecoff ;;
       mips-*-bsd*)
 	    { { echo "$as_me:$LINENO: error: Unknown vendor for mips-bsd configuration." >&5
@@ -4482,7 +4481,7 @@ echo "$as_me: error: Solaris must be configured little endian" >&2;}
    { (exit 1); exit 1; }; }
 	    fi ;;
       ppc-*-rtems*)			fmt=elf ;;
-      ppc-*-macos* | ppc-*-mpw*)	fmt=coff em=macos ;;
+      ppc-*-macos*)			fmt=coff em=macos ;;
       ppc-*-netware*)			fmt=elf em=ppcnw ;;
       ppc-**-nto*)			fmt=elf ;;
       ppc-*-kaos*)			fmt=elf ;;

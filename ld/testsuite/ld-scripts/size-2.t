@@ -2,13 +2,13 @@ PHDRS
 {
   header PT_PHDR FILEHDR PHDRS ;
 	 
-  image PT_LOAD FLAGS (4);
+  image PT_LOAD FLAGS (5);
   tls PT_TLS FLAGS (4);
   
 }
 SECTIONS
 {
-  .text : { *(.text) } :image
+  .text 0x100 : { *(.text) } :image
   .tdata : { *(.tdata) } :image :tls
   .tbss : { *(.tbss) } :image : tls
   .map : {

@@ -408,6 +408,12 @@ extern void x86_cons_fix_new
   PARAMS ((fragS *, unsigned int, unsigned int, expressionS *));
 #endif
 
+#ifdef TE_PE
+#define TC_CONS_FIX_NEW(FRAG,OFF,LEN,EXP) x86_pe_cons_fix_new(FRAG, OFF, LEN, EXP)
+extern void x86_pe_cons_fix_new
+  PARAMS ((fragS *, unsigned int, unsigned int, expressionS *));
+#endif
+
 #define DIFF_EXPR_OK    /* foo-. gets turned into PC relative relocs */
 
 #define NO_RELOC BFD_RELOC_NONE

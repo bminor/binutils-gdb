@@ -86,7 +86,6 @@ struct ia64_fix
     enum ia64_opnd opnd;
   };
 
-extern void ia64_do_align PARAMS((int n));
 extern void ia64_end_of_source PARAMS((void));
 extern void ia64_start_line PARAMS((void));
 extern int ia64_unrecognized_line PARAMS((int ch));
@@ -115,6 +114,7 @@ extern void ia64_handle_align PARAMS ((fragS *f));
 extern void ia64_after_parse_args PARAMS ((void));
 extern void ia64_dwarf2_emit_offset PARAMS ((symbolS *, unsigned int));
 extern void ia64_check_label PARAMS ((symbolS *));
+extern int ia64_estimate_size_before_relax (fragS *, asection *);
 extern void ia64_convert_frag (fragS *);
 
 #define md_end()       			ia64_end_of_source ()
@@ -138,7 +138,7 @@ extern void ia64_convert_frag (fragS *);
 #define md_create_short_jump(p,f,t,fr,s) \
 					as_fatal ("ia64_create_short_jump")
 #define md_estimate_size_before_relax(f,s) \
-					(f)->fr_var
+					ia64_estimate_size_before_relax(f,s)
 #define md_elf_section_letter		ia64_elf_section_letter
 #define md_elf_section_flags		ia64_elf_section_flags
 #define TC_FIX_TYPE			struct ia64_fix
@@ -153,6 +153,10 @@ extern void ia64_convert_frag (fragS *);
 #define md_after_parse_args()		ia64_after_parse_args ()
 #define TC_DWARF2_EMIT_OFFSET		ia64_dwarf2_emit_offset
 #define tc_check_label(l)		ia64_check_label (l)
+
+/* Record if an alignment frag should end with a stop bit.  */
+#define TC_FRAG_TYPE			int
+#define TC_FRAG_INIT(FRAGP)		do {(FRAGP)->tc_frag_data = 0;}while (0)
 
 #define MAX_MEM_FOR_RS_ALIGN_CODE  (15 + 16)
 

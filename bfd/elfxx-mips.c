@@ -1,6 +1,6 @@
 /* MIPS-specific support for ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003 Free Software Foundation, Inc.
+   2003, 2004 Free Software Foundation, Inc.
 
    Most of the information added by Ian Lance Taylor, Cygnus Support,
    <ian@cygnus.com>.
@@ -400,8 +400,6 @@ static asection *mips_elf_got_section
   (bfd *, bfd_boolean);
 static struct mips_got_info *mips_elf_got_info
   (bfd *, asection **);
-static long mips_elf_get_global_gotsym_index
-  (bfd *abfd);
 static bfd_vma mips_elf_local_got_index
   (bfd *, bfd *, struct bfd_link_info *, bfd_vma);
 static bfd_vma mips_elf_global_got_index
@@ -530,8 +528,7 @@ static bfd *reldyn_sorting_bfd;
   (NEWABI_P (abfd) ? ".MIPS.options" : ".options")
 
 /* The name of the stub section.  */
-#define MIPS_ELF_STUB_SECTION_NAME(abfd) \
-  (NEWABI_P (abfd) ? ".MIPS.stubs" : ".stub")
+#define MIPS_ELF_STUB_SECTION_NAME(abfd) ".MIPS.stubs"
 
 /* The size of an external REL relocation.  */
 #define MIPS_ELF_REL_SIZE(abfd) \
@@ -564,17 +561,8 @@ static bfd *reldyn_sorting_bfd;
    : bfd_put_32 (abfd, val, ptr))
 
 /* Add a dynamic symbol table-entry.  */
-#ifdef BFD64
 #define MIPS_ELF_ADD_DYNAMIC_ENTRY(info, tag, val)	\
-  (ABI_64_P (elf_hash_table (info)->dynobj)		\
-   ? bfd_elf64_add_dynamic_entry (info, tag, val)	\
-   : bfd_elf32_add_dynamic_entry (info, tag, val))
-#else
-#define MIPS_ELF_ADD_DYNAMIC_ENTRY(info, tag, val)	\
-  (ABI_64_P (elf_hash_table (info)->dynobj)		\
-   ? (abort (), FALSE)					\
-   : bfd_elf32_add_dynamic_entry (info, tag, val))
-#endif
+  _bfd_elf_add_dynamic_entry (info, tag, val)
 
 #define MIPS_ELF_RTYPE_TO_HOWTO(abfd, rtype, rela)			\
   (get_elf_backend_data (abfd)->elf_backend_mips_rtype_to_howto (rtype, rela))
@@ -821,7 +809,6 @@ _bfd_mips_elf_read_ecoff_info (bfd *abfd, asection *section,
 #undef READ
 
   debug->fdr = NULL;
-  debug->adjust = NULL;
 
   return TRUE;
 
@@ -1232,13 +1219,6 @@ _bfd_mips_elf_lo16_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
       /* VALLO is a signed 16-bit number.  Bias it by 0x8000 so that any
 	 carry or borrow will induce a change of +1 or -1 in the high part.  */
       hi->rel.addend += (vallo + 0x8000) & 0xffff;
-
-      /* R_MIPS_GNU_REL_HI16 relocations are relative to the address of the
-	 lo16 relocation, not their own address.  If we're calculating the
-	 final value, and hence subtracting the "PC", subtract the offset
-	 of the lo16 relocation from here.  */
-      if (output_bfd == NULL && hi->rel.howto->type == R_MIPS_GNU_REL_HI16)
-	hi->rel.addend -= reloc_entry->address - hi->rel.address;
 
       ret = _bfd_mips_elf_generic_reloc (abfd, &hi->rel, symbol, hi->data,
 					 hi->input_section, output_bfd,
@@ -1825,28 +1805,6 @@ mips_elf_got_info (bfd *abfd, asection **sgotp)
   return g;
 }
 
-/* Obtain the lowest dynamic index of a symbol that was assigned a
-   global GOT entry.  */
-static long
-mips_elf_get_global_gotsym_index (bfd *abfd)
-{
-  asection *sgot;
-  struct mips_got_info *g;
-
-  if (abfd == NULL)
-    return 0;
-
-  sgot = mips_elf_got_section (abfd, TRUE);
-  if (sgot == NULL || mips_elf_section_data (sgot) == NULL)
-    return 0;
-
-  g = mips_elf_section_data (sgot)->u.got_info;
-  if (g == NULL || g->global_gotsym == NULL)
-    return 0;
-
-  return g->global_gotsym->dynindx;
-}
-
 /* Returns the GOT offset at which the indicated address can be found.
    If there is not yet a GOT entry for this value, create one.  Returns
    -1 if no satisfactory GOT offset can be found.  */
@@ -2153,7 +2111,7 @@ mips_elf_record_global_got_symbol (struct elf_link_hash_entry *h,
 	  _bfd_mips_elf_hide_symbol (info, h, TRUE);
 	  break;
 	}
-      if (!bfd_elf32_link_record_dynamic_symbol (info, h))
+      if (!bfd_elf_link_record_dynamic_symbol (info, h))
 	return FALSE;
     }
 
@@ -2763,12 +2721,6 @@ mips_elf_next_relocation (bfd *abfd ATTRIBUTE_UNUSED, unsigned int r_type,
 			  const Elf_Internal_Rela *relocation,
 			  const Elf_Internal_Rela *relend)
 {
-  /* According to the MIPS ELF ABI, the R_MIPS_LO16 relocation must be
-     immediately following.  However, for the IRIX6 ABI, the next
-     relocation may be a composed relocation consisting of several
-     relocations for the same address.  In that case, the R_MIPS_LO16
-     relocation may occur as one of these.  We permit a similar
-     extension in general, as that is useful for GCC.  */
   while (relocation < relend)
     {
       if (ELF_R_TYPE (abfd, relocation->r_info) == r_type)
@@ -2965,7 +2917,7 @@ mips_elf_create_got_section (bfd *abfd, struct bfd_link_info *info,
   h->type = STT_OBJECT;
 
   if (info->shared
-      && ! bfd_elf32_link_record_dynamic_symbol (info, h))
+      && ! bfd_elf_link_record_dynamic_symbol (info, h))
     return FALSE;
 
   amt = sizeof (struct mips_got_info);
@@ -3156,8 +3108,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	   and check to see if they exist by looking at their
 	   addresses.  */
 	symbol = 0;
-      else if (info->shared
-	       && info->unresolved_syms_in_objects == RM_IGNORE
+      else if (info->unresolved_syms_in_objects == RM_IGNORE
 	       && ELF_ST_VISIBILITY (h->root.other) == STV_DEFAULT)
 	symbol = 0;
       else if (strcmp (*namep, "_DYNAMIC_LINK") == 0 ||
@@ -3178,9 +3129,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	  if (! ((*info->callbacks->undefined_symbol)
 		 (info, h->root.root.root.string, input_bfd,
 		  input_section, relocation->r_offset,
-		  ((info->shared && info->unresolved_syms_in_shared_libs == RM_GENERATE_ERROR)
-		   || (!info->shared && info->unresolved_syms_in_objects == RM_GENERATE_ERROR)
-		   || ELF_ST_VISIBILITY (h->root.other)))))
+		  (info->unresolved_syms_in_objects == RM_GENERATE_ERROR)
+		   || ELF_ST_VISIBILITY (h->root.other))))
 	    return bfd_reloc_undefined;
 	  symbol = 0;
 	}
@@ -3385,27 +3335,10 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       value &= howto->dst_mask;
       break;
 
-    case R_MIPS_PC32:
-    case R_MIPS_PC64:
-    case R_MIPS_GNU_REL_LO16:
-      value = symbol + addend - p;
-      value &= howto->dst_mask;
-      break;
-
     case R_MIPS_GNU_REL16_S2:
       value = symbol + _bfd_mips_elf_sign_extend (addend, 18) - p;
       overflowed_p = mips_elf_overflow_p (value, 18);
       value = (value >> 2) & howto->dst_mask;
-      break;
-
-    case R_MIPS_GNU_REL_HI16:
-      /* Instead of subtracting 'p' here, we should be subtracting the
-	 equivalent value for the LO part of the reloc, since the value
-	 here is relative to that address.  Because that's not easy to do,
-	 we adjust 'addend' in _bfd_mips_elf_relocate_section().  See also
-	 the comment there for more information.  */
-      value = mips_elf_high (addend + symbol - p);
-      value &= howto->dst_mask;
       break;
 
     case R_MIPS16_26:
@@ -4726,7 +4659,7 @@ _bfd_mips_elf_section_from_bfd_section (bfd *abfd ATTRIBUTE_UNUSED,
 
 bfd_boolean
 _bfd_mips_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
-			       const Elf_Internal_Sym *sym, const char **namep,
+			       Elf_Internal_Sym *sym, const char **namep,
 			       flagword *flagsp ATTRIBUTE_UNUSED,
 			       asection **secp, bfd_vma *valp)
 {
@@ -4859,7 +4792,7 @@ _bfd_mips_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
       h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
       h->type = STT_OBJECT;
 
-      if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+      if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	return FALSE;
 
       mips_elf_hash_table (info)->use_rld_obj_head = TRUE;
@@ -4891,9 +4824,8 @@ _bfd_mips_elf_link_output_symbol_hook
       && strcmp (input_sec->name, ".scommon") == 0)
     sym->st_shndx = SHN_MIPS_SCOMMON;
 
-  if (sym->st_other == STO_MIPS16
-      && (sym->st_value & 1) != 0)
-    --sym->st_value;
+  if (sym->st_other == STO_MIPS16)
+    sym->st_value &= ~1;
 
   return TRUE;
 }
@@ -4972,7 +4904,7 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
 	  h->type = STT_SECTION;
 
-	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
 	}
 
@@ -5017,7 +4949,7 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
       h->type = STT_SECTION;
 
-      if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+      if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	return FALSE;
 
       if (! mips_elf_hash_table (info)->use_rld_obj_head)
@@ -5041,7 +4973,7 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
 	  h->type = STT_OBJECT;
 
-	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
 	}
     }
@@ -5360,7 +5292,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	      /* We need a stub, not a plt entry for the undefined
 		 function.  But we record it as if it needs plt.  See
-		 elf_adjust_dynamic_symbol in elflink.h.  */
+		 _bfd_elf_adjust_dynamic_symbol.  */
 	      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
 	      h->type = STT_FUNC;
 	    }
@@ -5472,14 +5404,14 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  /* This relocation describes the C++ object vtable hierarchy.
 	     Reconstruct it for later use during GC.  */
 	case R_MIPS_GNU_VTINHERIT:
-	  if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
 	    return FALSE;
 	  break;
 
 	  /* This relocation describes which C++ vtable entries are actually
 	     used.  Record for later use during GC.  */
 	case R_MIPS_GNU_VTENTRY:
-	  if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_offset))
+	  if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_offset))
 	    return FALSE;
 	  break;
 
@@ -6267,7 +6199,6 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		 combination of the addend stored in two different
 		 relocations.   */
 	      if (r_type == R_MIPS_HI16
-		  || r_type == R_MIPS_GNU_REL_HI16
 		  || (r_type == R_MIPS_GOT16
 		      && mips_elf_local_relocation_p (input_bfd, rel,
 						      local_sections, FALSE)))
@@ -6275,7 +6206,6 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  bfd_vma l;
 		  const Elf_Internal_Rela *lo16_relocation;
 		  reloc_howto_type *lo16_howto;
-		  unsigned int lo;
 
 		  /* The combined value is the sum of the HI16 addend,
 		     left-shifted by sixteen bits, and the LO16
@@ -6283,18 +6213,25 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		     a `lui' of the HI16 value, and then an `addiu' of
 		     the LO16 value.)
 
-		     Scan ahead to find a matching LO16 relocation.  */
-		  if (r_type == R_MIPS_GNU_REL_HI16)
-		    lo = R_MIPS_GNU_REL_LO16;
-		  else
-		    lo = R_MIPS_LO16;
-		  lo16_relocation = mips_elf_next_relocation (input_bfd, lo,
+		     Scan ahead to find a matching LO16 relocation.
+
+		     According to the MIPS ELF ABI, the R_MIPS_LO16
+		     relocation must be immediately following.
+		     However, for the IRIX6 ABI, the next relocation
+		     may be a composed relocation consisting of
+		     several relocations for the same address.  In
+		     that case, the R_MIPS_LO16 relocation may occur
+		     as one of these.  We permit a similar extension
+		     in general, as that is useful for GCC.  */
+		  lo16_relocation = mips_elf_next_relocation (input_bfd,
+							      R_MIPS_LO16,
 							      rel, relend);
 		  if (lo16_relocation == NULL)
 		    return FALSE;
 
 		  /* Obtain the addend kept there.  */
-		  lo16_howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd, lo, FALSE);
+		  lo16_howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd,
+							R_MIPS_LO16, FALSE);
 		  l = mips_elf_obtain_contents (lo16_howto, lo16_relocation,
 						input_bfd, contents);
 		  l &= lo16_howto->src_mask;
@@ -6305,16 +6242,6 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 		  /* Compute the combined addend.  */
 		  addend += l;
-
-		  /* If PC-relative, subtract the difference between the
-		     address of the LO part of the reloc and the address of
-		     the HI part.  The relocation is relative to the LO
-		     part, but mips_elf_calculate_relocation() doesn't
-		     know its address or the difference from the HI part, so
-		     we subtract that difference here.  See also the
-		     comment in mips_elf_calculate_relocation().  */
-		  if (r_type == R_MIPS_GNU_REL_HI16)
-		    addend -= (lo16_relocation->r_offset - rel->r_offset);
 		}
 	      else if (r_type == R_MIPS16_GPREL)
 		{
@@ -6372,8 +6299,7 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  else
 	    {
 	      if (r_type == R_MIPS_HI16
-		  || r_type == R_MIPS_GOT16
-		  || r_type == R_MIPS_GNU_REL_HI16)
+		  || r_type == R_MIPS_GOT16)
 		addend = mips_elf_high (addend);
 	      else if (r_type == R_MIPS_HIGHER)
 		addend = mips_elf_higher (addend);
@@ -6814,9 +6740,8 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
     }
 
   /* If this is a mips16 symbol, force the value to be even.  */
-  if (sym->st_other == STO_MIPS16
-      && (sym->st_value & 1) != 0)
-    --sym->st_value;
+  if (sym->st_other == STO_MIPS16)
+    sym->st_value &= ~1;
 
   return TRUE;
 }
@@ -7744,7 +7669,7 @@ _bfd_mips_elf_discard_info (bfd *abfd, struct elf_reloc_cookie *cookie,
 
   for (i = 0, skip = 0; i < o->_raw_size / PDR_SIZE; i ++)
     {
-      if (MNAME(abfd,_bfd_elf,reloc_symbol_deleted_p) (i * PDR_SIZE, cookie))
+      if (bfd_elf_reloc_symbol_deleted_p (i * PDR_SIZE, cookie))
 	{
 	  tdata[i] = 1;
 	  skip ++;
@@ -8801,7 +8726,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* Invoke the regular ELF backend linker to do all the work.  */
-  if (!MNAME(abfd,bfd_elf,bfd_final_link) (abfd, info))
+  if (!bfd_elf_final_link (abfd, info))
     return FALSE;
 
   /* Now write out the computed sections.  */
@@ -9030,10 +8955,10 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	  which are automatically generated by gas.  */
       if (strcmp (sec->name, ".reginfo")
 	  && strcmp (sec->name, ".mdebug")
-	  && ((!strcmp (sec->name, ".text")
-	       || !strcmp (sec->name, ".data")
-	       || !strcmp (sec->name, ".bss"))
-	      && sec->_raw_size != 0))
+	  && (sec->_raw_size != 0
+	      || (strcmp (sec->name, ".text")
+		  && strcmp (sec->name, ".data")
+		  && strcmp (sec->name, ".bss"))))
 	{
 	  null_input_bfd = FALSE;
 	  break;

@@ -518,10 +518,16 @@ _bfd_elf_discard_section_eh_frame
 	  /* For shared libraries, try to get rid of as many RELATIVE relocs
 	     as possible.  */
           if (info->shared
+	      && (get_elf_backend_data (abfd)
+		  ->elf_backend_can_make_relative_eh_frame
+		  (abfd, info, sec))
 	      && (cie.fde_encoding & 0xf0) == DW_EH_PE_absptr)
 	    cie.make_relative = 1;
 
 	  if (info->shared
+	      && (get_elf_backend_data (abfd)
+		  ->elf_backend_can_make_lsda_relative_eh_frame
+		  (abfd, info, sec))
 	      && (cie.lsda_encoding & 0xf0) == DW_EH_PE_absptr)
 	    cie.make_lsda_relative = 1;
 
@@ -1120,6 +1126,7 @@ _bfd_elf_write_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
   asection *eh_frame_sec;
   bfd_size_type size;
   bfd_boolean retval;
+  bfd_vma encoded_eh_frame;
 
   htab = elf_hash_table (info);
   hdr_info = &htab->eh_info;
@@ -1143,7 +1150,10 @@ _bfd_elf_write_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
 
   memset (contents, 0, EH_FRAME_HDR_SIZE);
   contents[0] = 1;				/* Version.  */
-  contents[1] = DW_EH_PE_pcrel | DW_EH_PE_sdata4; /* .eh_frame offset.  */
+  contents[1] = get_elf_backend_data (abfd)->elf_backend_encode_eh_address
+    (abfd, info, eh_frame_sec, 0, sec, 4,
+     &encoded_eh_frame);			/* .eh_frame offset.  */
+
   if (hdr_info->array && hdr_info->array_count == hdr_info->fde_count)
     {
       contents[2] = DW_EH_PE_udata4;		/* FDE count encoding.  */
@@ -1154,8 +1164,8 @@ _bfd_elf_write_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
       contents[2] = DW_EH_PE_omit;
       contents[3] = DW_EH_PE_omit;
     }
-  bfd_put_32 (abfd, eh_frame_sec->vma - sec->output_section->vma - 4,
-	      contents + 4);
+  bfd_put_32 (abfd, encoded_eh_frame, contents + 4);
+
   if (contents[2] != DW_EH_PE_omit)
     {
       unsigned int i;
@@ -1180,4 +1190,30 @@ _bfd_elf_write_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
 				     sec->_cooked_size);
   free (contents);
   return retval;
+}
+
+/* Decide whether we can use a PC-relative encoding within the given
+   EH frame section.  This is the default implementation.  */
+
+bfd_boolean
+_bfd_elf_can_make_relative (bfd *input_bfd ATTRIBUTE_UNUSED,
+			    struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			    asection *eh_frame_section ATTRIBUTE_UNUSED)
+{
+  return TRUE;
+}
+
+/* Select an encoding for the given address.  Preference is given to
+   PC-relative addressing modes.  */
+
+bfd_byte
+_bfd_elf_encode_eh_address (bfd *abfd ATTRIBUTE_UNUSED,
+			    struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			    asection *osec, bfd_vma offset,
+			    asection *loc_sec, bfd_vma loc_offset,
+			    bfd_vma *encoded)
+{
+  *encoded = osec->vma + offset -
+    (loc_sec->output_section->vma + loc_sec->output_offset + loc_offset);
+  return DW_EH_PE_pcrel | DW_EH_PE_sdata4;
 }

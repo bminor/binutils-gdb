@@ -234,7 +234,24 @@ static reloc_howto_type howto_table[] =
   EMPTY_HOWTO (010),
   EMPTY_HOWTO (011),
   EMPTY_HOWTO (012),
+#ifdef COFF_WITH_PE
+  /* 32-bit longword section relative relocation (013).  */
+  HOWTO (R_SECREL32,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 coff_i386_reloc,	/* special_function */
+	 "secrel32",		/* name */
+	 TRUE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+#else
   EMPTY_HOWTO (013),
+#endif
   EMPTY_HOWTO (014),
   EMPTY_HOWTO (015),
   EMPTY_HOWTO (016),
@@ -497,6 +514,30 @@ coff_i386_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
     {
       *addendp -= pe_data(sec->output_section->owner)->pe_opthdr.ImageBase;
     }
+
+  if (rel->r_type == R_SECREL32)
+    {
+      bfd_vma osect_vma;
+
+      if (h && (h->type == bfd_link_hash_defined
+		|| h->type == bfd_link_hash_defweak))
+	osect_vma = h->root.u.def.section->output_section->vma;
+      else
+	{
+	  asection *sec;
+	  int i;
+
+	  /* Sigh, the only way to get the section to offset against
+	     is to find it the hard way.  */
+
+	  for (sec = abfd->sections, i = 1; i < sym->n_scnum; i++)
+	    sec = sec->next;
+
+	  osect_vma = sec->output_section->vma;
+	}
+
+      *addendp -= osect_vma;
+    }
 #endif
 
   return howto;
@@ -525,6 +566,10 @@ coff_i386_reloc_type_lookup (abfd, code)
       return howto_table + R_RELBYTE;
     case BFD_RELOC_8_PCREL:
       return howto_table + R_PCRBYTE;
+#ifdef COFF_WITH_PE
+    case BFD_RELOC_32_SECREL:
+      return howto_table + R_SECREL32;
+#endif
     default:
       BFD_FAIL ();
       return 0;

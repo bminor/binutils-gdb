@@ -43,7 +43,3 @@ Disassembly of section \.got:
    10664:	4e 80 00 21 	blrl
    10668:	00 01 05 c4 	\.long 0x105c4
 	\.\.\.
-Disassembly of section \.plt:
-
-00010698 <\.plt>:
-	\.\.\.

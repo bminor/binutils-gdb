@@ -1,6 +1,6 @@
 /* BFD back-end for ieee-695 objects.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    Written by Steve Chamberlain of Cygnus Support.
@@ -4037,6 +4037,7 @@ ieee_bfd_debug_info_accumulate (abfd, section)
 #define ieee_bfd_relax_section bfd_generic_relax_section
 #define ieee_bfd_gc_sections bfd_generic_gc_sections
 #define ieee_bfd_merge_sections bfd_generic_merge_sections
+#define ieee_bfd_is_group_section bfd_generic_is_group_section
 #define ieee_bfd_discard_group bfd_generic_discard_group
 #define ieee_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define ieee_bfd_link_hash_table_free _bfd_generic_link_hash_table_free

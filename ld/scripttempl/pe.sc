@@ -58,9 +58,9 @@ SECTIONS
     *(.glue_7t)
     *(.glue_7)
     ${CONSTRUCTING+ ___CTOR_LIST__ = .; __CTOR_LIST__ = . ; 
-			LONG (-1); *(SORT(.ctors.*)); *(.ctors); *(.ctor); LONG (0); }
+			LONG (-1);*(.ctors); *(.ctor); *(SORT(.ctors.*));  LONG (0); }
     ${CONSTRUCTING+ ___DTOR_LIST__ = .; __DTOR_LIST__ = . ; 
-			LONG (-1); *(SORT(.dtors.*)); *(.dtors); *(.dtor);  LONG (0); }
+			LONG (-1); *(.dtors); *(.dtor); *(SORT(.dtors.*));  LONG (0); }
     ${RELOCATING+ *(.fini)}
     /* ??? Why is .gcc_exc here?  */
     ${RELOCATING+ *(.gcc_exc)}
@@ -159,13 +159,91 @@ SECTIONS
 
   .stab ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
   {
-    [ .stab ]
+    *(.stab)
   }
 
   .stabstr ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
   {
-    [ .stabstr ]
+    *(.stabstr)
   }
 
+  /* DWARF debug sections.
+     Symbols in the DWARF debugging sections are relative to the beginning
+     of the section.  Unlike other targets that fake this by putting the
+     section VMA at 0, the PE format will not allow it.  */
+     
+  /* DWARF 1.1 and DWARF 2.  */
+  .debug_aranges ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.debug_aranges)
+  }
+
+  .debug_pubnames ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.debug_pubnames)
+  }
+
+  /* DWARF 2.  */
+  .debug_info ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.debug_info) *(.gnu.linkonce.wi.*)
+  }
+
+  .debug_abbrev ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.debug_abbrev)
+  }
+
+  .debug_line ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.debug_line)
+  }
+
+  .debug_frame ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.debug_frame)
+  }
+
+  .debug_str ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.debug_str)
+  }
+
+  .debug_loc ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.debug_loc)
+  }
+
+  .debug_macinfo ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.debug_macinfo)
+  }
+
+  /* SGI/MIPS DWARF 2 extensions.  */
+  .debug_weaknames ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.debug_weaknames)
+  }
+
+  .debug_funcnames ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.debug_funcnames)
+  }
+
+  .debug_typenames ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.debug_typenames)
+  }
+
+  .debug_varnames ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.debug_varnames)
+  }
+
+  /* DWARF 3.  */
+  .debug_ranges ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.debug_ranges)
+  }
 }
 EOF

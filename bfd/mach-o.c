@@ -1,5 +1,5 @@
 /* Mach-O support for BFD.
-   Copyright 1999, 2000, 2001, 2002, 2003
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -68,6 +68,7 @@
 #define bfd_mach_o_set_section_contents _bfd_generic_set_section_contents
 #define bfd_mach_o_bfd_gc_sections bfd_generic_gc_sections
 #define bfd_mach_o_bfd_merge_sections bfd_generic_merge_sections
+#define bfd_mach_o_bfd_is_group_section bfd_generic_is_group_section
 #define bfd_mach_o_bfd_discard_group bfd_generic_discard_group
 
 static bfd_boolean bfd_mach_o_bfd_copy_private_symbol_data

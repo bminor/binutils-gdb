@@ -41,16 +41,6 @@ static reloc_howto_type *coff_mips_rtype_to_howto
   PARAMS ((bfd *, asection *, struct internal_reloc *,
 	   struct coff_link_hash_entry *, struct internal_syment *,
 	   bfd_vma *));
-#if 0
-static void mips_ecoff_swap_reloc_in
-  PARAMS ((bfd *, PTR, struct internal_reloc *));
-static void mips_ecoff_swap_reloc_out
-  PARAMS ((bfd *, const struct internal_reloc *, PTR));
-static void mips_adjust_reloc_in
-  PARAMS ((bfd *, const struct internal_reloc *, arelent *));
-static void mips_adjust_reloc_out
-  PARAMS ((bfd *, const arelent *, struct internal_reloc *));
-#endif
 
 static bfd_boolean in_reloc_p
   PARAMS ((bfd *, reloc_howto_type *));
@@ -534,20 +524,6 @@ coff_mips_reloc_type_lookup (abfd, code)
     case BFD_RELOC_MIPS_LITERAL:
       mips_type = MIPS_R_LITERAL;
       break;
-/* FIXME?
-    case BFD_RELOC_16_PCREL_S2:
-      mips_type = MIPS_R_PCREL16;
-      break;
-    case BFD_RELOC_PCREL_HI16_S:
-      mips_type = MIPS_R_RELHI;
-      break;
-    case BFD_RELOC_PCREL_LO16:
-      mips_type = MIPS_R_RELLO;
-      break;
-    case BFD_RELOC_GPREL32:
-      mips_type = MIPS_R_SWITCH;
-      break;
-*/
     case BFD_RELOC_RVA:
       mips_type = MIPS_R_RVA;
       break;

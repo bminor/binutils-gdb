@@ -1,6 +1,6 @@
 /* Generic BFD library interface and support routines.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -45,14 +45,10 @@ CODE_FRAGMENT
 .  {* A pointer to the target jump table.  *}
 .  const struct bfd_target *xvec;
 .
-.  {* To avoid dragging too many header files into every file that
-.     includes `<<bfd.h>>', IOSTREAM has been declared as a "char *",
-.     and MTIME as a "long".  Their correct types, to which they
-.     are cast when used, are "FILE *" and "time_t".    The iostream
-.     is the result of an fopen on the filename.  However, if the
-.     BFD_IN_MEMORY flag is set, then iostream is actually a pointer
-.     to a bfd_in_memory struct.  *}
+.  {* The IOSTREAM, and corresponding IO vector that provide access
+.     to the file backing the BFD.  *}
 .  void *iostream;
+.  const struct bfd_iovec *iovec;
 .
 .  {* Is the file descriptor being cached?  That is, can it be closed as
 .     needed, and re-opened when accessed later?  *}
@@ -512,6 +508,9 @@ DESCRIPTION
 const char *
 bfd_archive_filename (bfd *abfd)
 {
+  if (abfd == NULL)
+    return NULL;
+  
   if (abfd->my_archive)
     {
       static size_t curr = 0;
@@ -766,12 +765,14 @@ bfd_get_sign_extend_vma (bfd *abfd)
 
   name = bfd_get_target (abfd);
 
-  /* Return a proper value for DJGPP COFF (an x86 COFF variant).
+  /* Return a proper value for DJGPP & PE COFF (x86 COFF variants).
      This function is required for DWARF2 support, but there is
      no place to store this information in the COFF back end.
      Should enough other COFF targets add support for DWARF2,
      a place will have to be found.  Until then, this hack will do.  */
-  if (strncmp (name, "coff-go32", sizeof ("coff-go32") - 1) == 0)
+  if (strncmp (name, "coff-go32", sizeof ("coff-go32") - 1) == 0
+      || strcmp (name, "pe-i386") == 0
+      || strcmp (name, "pei-i386") == 0)
     return 1;
 
   bfd_set_error (bfd_error_wrong_format);
@@ -1082,6 +1083,9 @@ DESCRIPTION
 .#define bfd_merge_sections(abfd, link_info) \
 .	BFD_SEND (abfd, _bfd_merge_sections, (abfd, link_info))
 .
+.#define bfd_is_group_section(abfd, sec) \
+.	BFD_SEND (abfd, _bfd_is_group_section, (abfd, sec))
+.
 .#define bfd_discard_group(abfd, sec) \
 .	BFD_SEND (abfd, _bfd_discard_group, (abfd, sec))
 .
@@ -1111,6 +1115,9 @@ DESCRIPTION
 .
 .#define bfd_canonicalize_dynamic_symtab(abfd, asymbols) \
 .	BFD_SEND (abfd, _bfd_canonicalize_dynamic_symtab, (abfd, asymbols))
+.
+.#define bfd_get_synthetic_symtab(abfd, dynsyms, ret) \
+.	BFD_SEND (abfd, _bfd_get_synthetic_symtab, (abfd, dynsyms, ret))
 .
 .#define bfd_get_dynamic_reloc_upper_bound(abfd) \
 .	BFD_SEND (abfd, _bfd_get_dynamic_reloc_upper_bound, (abfd))

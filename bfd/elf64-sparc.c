@@ -1,6 +1,6 @@
 /* SPARC-specific support for 64-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003 Free Software Foundation, Inc.
+   2003, 2004 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -61,7 +61,7 @@ static bfd_boolean sparc64_elf_size_dynamic_sections
 static int sparc64_elf_get_symbol_type
   PARAMS (( Elf_Internal_Sym *, int));
 static bfd_boolean sparc64_elf_add_symbol_hook
-  PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
+  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
 static bfd_boolean sparc64_elf_output_arch_syms
   PARAMS ((bfd *, struct bfd_link_info *, PTR,
@@ -1178,7 +1178,7 @@ sparc64_elf_check_relocs (abfd, info, sec, relocs)
 	      /* Make sure this symbol is output as a dynamic symbol.  */
 	      if (h->dynindx == -1)
 		{
-		  if (! bfd_elf64_link_record_dynamic_symbol (info, h))
+		  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 		    return FALSE;
 		}
 
@@ -1261,7 +1261,7 @@ sparc64_elf_check_relocs (abfd, info, sec, relocs)
 	  /* Make sure this symbol is output as a dynamic symbol.  */
 	  if (h->dynindx == -1)
 	    {
-	      if (! bfd_elf64_link_record_dynamic_symbol (info, h))
+	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
 		return FALSE;
 	    }
 
@@ -1385,7 +1385,7 @@ static bfd_boolean
 sparc64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd *abfd;
      struct bfd_link_info *info;
-     const Elf_Internal_Sym *sym;
+     Elf_Internal_Sym *sym;
      const char **namep;
      flagword *flagsp ATTRIBUTE_UNUSED;
      asection **secp ATTRIBUTE_UNUSED;
@@ -1876,7 +1876,7 @@ sparc64_elf_size_dynamic_sections (output_bfd, info)
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elf64_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
       int reg;
       struct sparc64_elf_app_reg * app_regs;
@@ -1989,17 +1989,6 @@ sparc64_elf_relax_section (abfd, section, link_info, again)
   return TRUE;
 }
 
-/* This is the condition under which finish_dynamic_symbol will be called
-   from elflink.h.  If elflink.h doesn't call our finish_dynamic_symbol
-   routine, we'll need to do something about initializing any .plt and
-   .got entries in relocate_section.  */
-#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, INFO, H)			\
-  ((DYN)								\
-   && ((INFO)->shared							\
-       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)	\
-   && ((H)->dynindx != -1						\
-       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
-
 /* Relocate a SPARC64 ELF section.  */
 
 static bfd_boolean
@@ -2039,6 +2028,8 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
     got_base = elf_hash_table (info)->hgot->root.u.def.value;
 
   sgot = splt = sreloc = NULL;
+  if (dynobj != NULL)
+    splt = bfd_get_section_by_name (dynobj, ".plt");
 
   rel = relocs;
   relend = relocs + NUM_SHDR_ENTRIES (& elf_section_data (input_section)->rel_hdr);
@@ -2079,10 +2070,10 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  bfd_boolean warned;
 
-	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx,
-				   symtab_hdr, relocation, sec,
-				   unresolved_reloc, info,
-				   warned);
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   h, sec, relocation,
+				   unresolved_reloc, warned);
 	  if (warned)
 	    {
 	      /* To avoid generating warning messages about truncated
@@ -2222,6 +2213,13 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		    break;
 		  }
 
+		/* FIXME: Dynamic reloc handling really needs to be rewritten.  */
+		if (!skip
+		    && h != NULL
+		    && ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+		    && h->root.type == bfd_link_hash_undefweak)
+		  skip = TRUE, relocate = TRUE;
+
 		if (skip)
 		  memset (&outrel, 0, sizeof outrel);
 		/* h->dynindx may be -1 if the symbol was marked to
@@ -2327,7 +2325,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      BFD_ASSERT (off != (bfd_vma) -1);
 	      dyn = elf_hash_table (info)->dynamic_sections_created;
 
-	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h)
+	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
 		  || (info->shared
 		      && (info->symbolic
 			  || h->dynindx == -1
@@ -2420,18 +2418,12 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
              procedure linkage table.  */
 	  BFD_ASSERT (h != NULL);
 
-	  if (h->plt.offset == (bfd_vma) -1)
+	  if (h->plt.offset == (bfd_vma) -1 || splt == NULL)
 	    {
 	      /* We didn't make a PLT entry for this symbol.  This
 		 happens when statically linking PIC code, or when
 		 using -Bsymbolic.  */
 	      goto do_default;
-	    }
-
-	  if (splt == NULL)
-	    {
-	      splt = bfd_get_section_by_name (dynobj, ".plt");
-	      BFD_ASSERT (splt != NULL);
 	    }
 
 	  relocation = (splt->output_section->vma
@@ -3115,6 +3107,24 @@ sparc64_elf_object_p (abfd)
   return bfd_default_set_arch_mach (abfd, bfd_arch_sparc, mach);
 }
 
+/* Return address for Ith PLT stub in section PLT, for relocation REL
+   or (bfd_vma) -1 if it should not be included.  */
+
+static bfd_vma
+sparc64_elf_plt_sym_val (bfd_vma i, const asection *plt,
+			 const arelent *rel ATTRIBUTE_UNUSED)
+{
+  bfd_vma j;
+
+  i += PLT_HEADER_SIZE / PLT_ENTRY_SIZE;
+  if (i < LARGE_PLT_THRESHOLD)
+    return plt->vma + i * PLT_ENTRY_SIZE;
+
+  j = (i - LARGE_PLT_THRESHOLD) % 160;
+  i -= j;
+  return plt->vma + i * PLT_ENTRY_SIZE + j * 4 * 6;
+}
+
 /* Relocations in the 64 bit SPARC ELF ABI are more complex than in
    standard ELF, because R_SPARC_OLO10 has secondary addend in
    ELF64_R_TYPE_DATA field.  This structure is used to redirect the
@@ -3214,6 +3224,8 @@ const struct elf_size_info sparc64_elf_size_info =
   sparc64_elf_merge_private_bfd_data
 #define elf_backend_fake_sections \
   sparc64_elf_fake_sections
+#define elf_backend_plt_sym_val	\
+  sparc64_elf_plt_sym_val
 
 #define elf_backend_size_info \
   sparc64_elf_size_info

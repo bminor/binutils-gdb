@@ -3721,7 +3721,7 @@ xg_assemble_literal (insn)
   set_expr_symbol_offset (&saved_loc, frag_now->fr_symbol, frag_now_fix ());
 
   assert (insn->insn_type == ITYPE_LITERAL);
-  assert (insn->ntok = 1);	/* must be only one token here */
+  assert (insn->ntok == 1);	/* must be only one token here */
 
   xtensa_switch_to_literal_fragment (&state);
 
@@ -7888,10 +7888,9 @@ xtensa_post_relax_hook ()
   xtensa_create_property_segments (get_frag_is_insn,
 				   XTENSA_INSN_SEC_NAME,
 				   xt_insn_sec);
-  if (use_literal_section)
-    xtensa_create_property_segments (get_frag_is_literal,
-				     XTENSA_LIT_SEC_NAME,
-				     xt_literal_sec);
+  xtensa_create_property_segments (get_frag_is_literal,
+				   XTENSA_LIT_SEC_NAME,
+				   xt_literal_sec);
 }
 
 

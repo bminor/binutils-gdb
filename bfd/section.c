@@ -1,6 +1,6 @@
 /* Object file "section" support for the BFD library.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -801,6 +801,57 @@ bfd_get_section_by_name (bfd *abfd, const char *name)
 
 /*
 FUNCTION
+	bfd_get_section_by_name_if
+
+SYNOPSIS
+	asection *bfd_get_section_by_name_if
+	  (bfd *abfd,
+	   const char *name,
+	   bfd_boolean (*func) (bfd *abfd, asection *sect, void *obj),
+	   void *obj);
+
+DESCRIPTION
+	Call the provided function @var{func} for each section
+	attached to the BFD @var{abfd} whose name matches @var{name},
+	passing @var{obj} as an argument. The function will be called
+	as if by
+
+|	func (abfd, the_section, obj);
+
+	It returns the first section for which @var{func} returns true,
+	otherwise <<NULL>>.
+
+*/
+
+asection *
+bfd_get_section_by_name_if (bfd *abfd, const char *name,
+			    bfd_boolean (*operation) (bfd *,
+						      asection *,
+						      void *),
+			    void *user_storage)
+{
+  struct section_hash_entry *sh;
+  unsigned long hash;
+
+  sh = section_hash_lookup (&abfd->section_htab, name, FALSE, FALSE);
+  if (sh == NULL)
+    return NULL;
+
+  hash = sh->root.hash;
+  do
+    {
+      if ((*operation) (abfd, &sh->section, user_storage))
+	return &sh->section;
+      sh = (struct section_hash_entry *) sh->root.next;
+    }
+  while (sh != NULL && sh->root.hash == hash
+	 && strcmp (sh->root.string, name) == 0);
+
+  return NULL;
+}
+
+/*
+FUNCTION
 	bfd_get_unique_section_name
 
 SYNOPSIS
@@ -945,13 +996,19 @@ bfd_make_section_anyway (bfd *abfd, const char *name)
   newsect = &sh->section;
   if (newsect->name != NULL)
     {
-      /* We are making a section of the same name.  It can't go in
-	 section_htab without generating a unique section name and
-	 that would be pointless;  We don't need to traverse the
-	 hash table.  */
-      newsect = bfd_zalloc (abfd, sizeof (asection));
-      if (newsect == NULL)
+      /* We are making a section of the same name.  Put it in the
+	 section hash table.  Even though we can't find it directly by a
+	 hash lookup, we'll be able to find the section by traversing
+	 sh->root.next quicker than looking at all the bfd sections.  */
+      struct section_hash_entry *new_sh;
+      new_sh = (struct section_hash_entry *)
+	bfd_section_hash_newfunc (NULL, &abfd->section_htab, name);
+      if (new_sh == NULL)
 	return NULL;
+
+      new_sh->root = sh->root;
+      sh->root.next = &new_sh->root;
+      newsect = &new_sh->section;
     }
 
   newsect->name = name;
@@ -1086,6 +1143,41 @@ bfd_map_over_sections (bfd *abfd,
 
   if (i != abfd->section_count)	/* Debugging */
     abort ();
+}
+
+/*
+FUNCTION
+	bfd_sections_find_if
+
+SYNOPSIS
+	asection *bfd_sections_find_if
+	  (bfd *abfd,
+	   bfd_boolean (*func) (bfd *abfd, asection *sect, void *obj),
+	   void *obj);
+
+DESCRIPTION
+	Call the provided function @var{func} for each section
+	attached to the BFD @var{abfd}, passing @var{obj} as an
+	argument. The function will be called as if by
+
+|	func (abfd, the_section, obj);
+
+	It returns the first section for which @var{func} returns true.
+
+*/
+
+asection *
+bfd_sections_find_if (bfd *abfd,
+		      bfd_boolean (*operation) (bfd *, asection *, void *),
+		      void *user_storage)
+{
+  asection *sect;
+
+  for (sect = abfd->sections; sect != NULL; sect = sect->next)
+    if ((*operation) (abfd, sect, user_storage))
+      break;
+
+  return sect;
 }
 
 /*
@@ -1347,6 +1439,24 @@ _bfd_strip_section_from_output (struct bfd_link_info *info, asection *s)
   /* If the output section is empty, flag it for removal too.
      See ldlang.c:strip_excluded_output_sections for the action.  */
   os->flags |= SEC_EXCLUDE;
+}
+
+/*
+FUNCTION
+	bfd_generic_is_group_section
+
+SYNOPSIS
+	bfd_boolean bfd_generic_is_group_section (bfd *, const asection *sec);
+
+DESCRIPTION
+	Returns TRUE if @var{sec} is a member of a group.
+*/
+
+bfd_boolean
+bfd_generic_is_group_section (bfd *abfd ATTRIBUTE_UNUSED,
+			      const asection *sec ATTRIBUTE_UNUSED)
+{
+  return FALSE;
 }
 
 /*

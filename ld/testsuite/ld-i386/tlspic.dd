@@ -24,7 +24,7 @@ Disassembly of section .text:
 #  GD
  [0-9a-f]+:	8d 04 1d 5c 00 00 00 	lea    0x5c\(,%ebx,1\),%eax
 #				->R_386_TLS_DTPMOD32	sg1
- [0-9a-f]+:	e8 cf ff ff ff[ 	]+call   [0-9a-f]+ <.*0x[0-9a-f]+>
+ [0-9a-f]+:	e8 cf ff ff ff[ 	]+call   [0-9a-f]+ <___tls_get_addr@plt>
 #				->R_386_JUMP_SLOT	___tls_get_addr
  [0-9a-f]+:	90[ 	]+nop *
  [0-9a-f]+:	90[ 	]+nop *
@@ -57,7 +57,7 @@ Disassembly of section .text:
 #  GD against local variable
  [0-9a-f]+:	8d 04 1d 10 00 00 00 	lea    0x10\(,%ebx,1\),%eax
 #				->R_386_TLS_DTPMOD32	[0x00000000 0x20000000]
- [0-9a-f]+:	e8 8f ff ff ff[ 	]+call   [0-9a-f]+ <.*0x[0-9a-f]+>
+ [0-9a-f]+:	e8 8f ff ff ff[ 	]+call   [0-9a-f]+ <___tls_get_addr@plt>
 #				->R_386_JUMP_SLOT	___tls_get_addr
  [0-9a-f]+:	90[ 	]+nop *
  [0-9a-f]+:	90[ 	]+nop *
@@ -90,7 +90,7 @@ Disassembly of section .text:
 #  GD against hidden and local variable
  [0-9a-f]+:	8d 04 1d 7c 00 00 00 	lea    0x7c\(,%ebx,1\),%eax
 #				->R_386_TLS_DTPMOD32	[0x00000000 0x40000000]
- [0-9a-f]+:	e8 4f ff ff ff[ 	]+call   [0-9a-f]+ <.*0x[0-9a-f]+>
+ [0-9a-f]+:	e8 4f ff ff ff[ 	]+call   [0-9a-f]+ <___tls_get_addr@plt>
 #				->R_386_JUMP_SLOT	___tls_get_addr
  [0-9a-f]+:	90[ 	]+nop *
  [0-9a-f]+:	90[ 	]+nop *
@@ -123,7 +123,7 @@ Disassembly of section .text:
 #  GD against hidden but not local variable
  [0-9a-f]+:	8d 04 1d 34 00 00 00 	lea    0x34\(,%ebx,1\),%eax
 #				->R_386_TLS_DTPMOD32	[0x00000000 0x60000000]
- [0-9a-f]+:	e8 0f ff ff ff[ 	]+call   [0-9a-f]+ <.*0x[0-9a-f]+>
+ [0-9a-f]+:	e8 0f ff ff ff[ 	]+call   [0-9a-f]+ <___tls_get_addr@plt>
 #				->R_386_JUMP_SLOT	___tls_get_addr
  [0-9a-f]+:	90[ 	]+nop *
  [0-9a-f]+:	90[ 	]+nop *
@@ -156,7 +156,7 @@ Disassembly of section .text:
 #  LD
  [0-9a-f]+:	8d 83 2c 00 00 00[ 	]+lea    0x2c\(%ebx\),%eax
 #				->R_386_TLS_DTPMOD32	[0x00000000 0x00000000]
- [0-9a-f]+:	e8 d0 fe ff ff[ 	]+call   [0-9a-f]+ <.*0x[0-9a-f]+>
+ [0-9a-f]+:	e8 d0 fe ff ff[ 	]+call   [0-9a-f]+ <___tls_get_addr@plt>
 #				->R_386_JUMP_SLOT	___tls_get_addr
  [0-9a-f]+:	90[ 	]+nop *
  [0-9a-f]+:	90[ 	]+nop *
@@ -173,7 +173,7 @@ Disassembly of section .text:
 #  LD against hidden and local variables
  [0-9a-f]+:	8d 83 2c 00 00 00[ 	]+lea    0x2c\(%ebx\),%eax
 #				->R_386_TLS_DTPMOD32	[0x00000000 0x00000000]
- [0-9a-f]+:	e8 b1 fe ff ff[ 	]+call   [0-9a-f]+ <.*0x[0-9a-f]+>
+ [0-9a-f]+:	e8 b1 fe ff ff[ 	]+call   [0-9a-f]+ <___tls_get_addr@plt>
 #				->R_386_JUMP_SLOT	___tls_get_addr
  [0-9a-f]+:	90[ 	]+nop *
  [0-9a-f]+:	90[ 	]+nop *
@@ -190,7 +190,7 @@ Disassembly of section .text:
 #  LD against hidden but not local variables
  [0-9a-f]+:	8d 83 2c 00 00 00[ 	]+lea    0x2c\(%ebx\),%eax
 #				->R_386_TLS_DTPMOD32	[0x00000000 0x00000000]
- [0-9a-f]+:	e8 92 fe ff ff[ 	]+call   [0-9a-f]+ <.*0x[0-9a-f]+>
+ [0-9a-f]+:	e8 92 fe ff ff[ 	]+call   [0-9a-f]+ <___tls_get_addr@plt>
 #				->R_386_JUMP_SLOT	___tls_get_addr
  [0-9a-f]+:	90[ 	]+nop *
  [0-9a-f]+:	90[ 	]+nop *

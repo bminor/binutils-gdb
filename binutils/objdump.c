@@ -1,6 +1,6 @@
 /* objdump.c -- dump information about an object file.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -152,6 +152,10 @@ static long sorted_symcount = 0;
 
 /* The dynamic symbol table.  */
 static asymbol **dynsyms;
+
+/* The synthetic symbol table.  */
+static asymbol *synthsyms;
+static long synthcount = 0;
 
 /* Number of symbols in `dynsyms'.  */
 static long dynsymcount = 0;
@@ -1142,8 +1146,8 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
 typedef struct
 {
   char *buffer;
-  size_t size;
-  char *current;
+  size_t pos;
+  size_t alloc;
 } SFILE;
 
 /* sprintf to a "stream".  */
@@ -1151,39 +1155,25 @@ typedef struct
 static int
 objdump_sprintf (SFILE *f, const char *format, ...)
 {
-  char *buf;
   size_t n;
   va_list args;
 
-  va_start (args, format);
-
-  vasprintf (&buf, format, args);
-
-  if (buf == NULL)
+  while (1)
     {
+      size_t space = f->alloc - f->pos;
+  
+      va_start (args, format);
+      n = vsnprintf (f->buffer + f->pos, space, format, args);
       va_end (args);
-      fatal (_("Out of virtual memory"));
+
+      if (space > n)
+	break;
+      
+      f->alloc = (f->alloc + n) * 2;
+      f->buffer = xrealloc (f->buffer, f->alloc);
     }
-
-  n = strlen (buf);
-
-  while ((size_t) ((f->buffer + f->size) - f->current) < n + 1)
-    {
-      size_t curroff;
-
-      curroff = f->current - f->buffer;
-      f->size *= 2;
-      f->buffer = xrealloc (f->buffer, f->size);
-      f->current = f->buffer + curroff;
-    }
-
-  memcpy (f->current, buf, n);
-  f->current += n;
-  f->current[0] = '\0';
-
-  free (buf);
-
-  va_end (args);
+  f->pos += n;
+  
   return n;
 }
 
@@ -1243,10 +1233,15 @@ disassemble_bytes (struct disassemble_info * info,
   int skip_addr_chars;
   bfd_vma addr_offset;
   int opb = info->octets_per_byte;
+  SFILE sfile;
 
   aux = (struct objdump_disasm_info *) info->application_data;
   section = aux->sec;
 
+  sfile.alloc = 120;
+  sfile.buffer = xmalloc (sfile.alloc);
+  sfile.pos = 0;
+  
   if (insns)
     octets_per_line = 4;
   else
@@ -1311,7 +1306,6 @@ disassemble_bytes (struct disassemble_info * info,
       else
 	{
 	  char buf[50];
-	  SFILE sfile;
 	  int bpc = 0;
 	  int pb = 0;
 
@@ -1344,9 +1338,7 @@ disassemble_bytes (struct disassemble_info * info,
 
 	  if (insns)
 	    {
-	      sfile.size = 120;
-	      sfile.buffer = xmalloc (sfile.size);
-	      sfile.current = sfile.buffer;
+	      sfile.pos = 0;
 	      info->fprintf_func = (fprintf_ftype) objdump_sprintf;
 	      info->stream = (FILE *) &sfile;
 	      info->bytes_per_line = 0;
@@ -1371,9 +1363,8 @@ disassemble_bytes (struct disassemble_info * info,
 		octets_per_line = info->bytes_per_line;
 	      if (octets < 0)
 		{
-		  if (sfile.current != sfile.buffer)
+		  if (sfile.pos)
 		    printf ("%s\n", sfile.buffer);
-		  free (sfile.buffer);
 		  break;
 		}
 	    }
@@ -1447,11 +1438,8 @@ disassemble_bytes (struct disassemble_info * info,
 
 	  if (! insns)
 	    printf ("%s", buf);
-	  else
-	    {
-	      printf ("%s", sfile.buffer);
-	      free (sfile.buffer);
-	    }
+	  else if (sfile.pos)
+	    printf ("%s", sfile.buffer);
 
 	  if (prefix_addresses
 	      ? show_raw_insn > 0
@@ -1558,6 +1546,8 @@ disassemble_bytes (struct disassemble_info * info,
 
       addr_offset += octets / opb;
     }
+
+  free (sfile.buffer);
 }
 
 static void
@@ -1582,7 +1572,8 @@ disassemble_section (bfd *abfd, asection *section, void *info)
      code are not normally disassembled.  */
   if (! disassemble_all
       && only == NULL
-      && (section->flags & SEC_CODE) == 0)
+      && ((section->flags & (SEC_CODE | SEC_HAS_CONTENTS))
+	  != (SEC_CODE | SEC_HAS_CONTENTS)))
     return;
 
   if (! process_section_p (section))
@@ -1789,6 +1780,7 @@ disassemble_data (bfd *abfd)
 {
   struct disassemble_info disasm_info;
   struct objdump_disasm_info aux;
+  long i;
 
   print_files = NULL;
   prev_functionname = NULL;
@@ -1796,10 +1788,18 @@ disassemble_data (bfd *abfd)
 
   /* We make a copy of syms to sort.  We don't want to sort syms
      because that will screw up the relocs.  */
-  sorted_syms = xmalloc (symcount * sizeof (asymbol *));
-  memcpy (sorted_syms, syms, symcount * sizeof (asymbol *));
+  sorted_symcount = symcount ? symcount : dynsymcount;
+  sorted_syms = xmalloc ((sorted_symcount + synthcount) * sizeof (asymbol *));
+  memcpy (sorted_syms, symcount ? syms : dynsyms,
+	  sorted_symcount * sizeof (asymbol *));
 
-  sorted_symcount = remove_useless_symbols (sorted_syms, symcount);
+  sorted_symcount = remove_useless_symbols (sorted_syms, sorted_symcount);
+
+  for (i = 0; i < synthcount; ++i)
+    {
+      sorted_syms[sorted_symcount] = synthsyms + i;
+      ++sorted_symcount;
+    }
 
   /* Sort the symbols into section and symbol order.  */
   qsort (sorted_syms, sorted_symcount, sizeof (asymbol *), compare_symbols);
@@ -2559,8 +2559,14 @@ dump_bfd (bfd *abfd)
 
   if (dump_symtab || dump_reloc_info || disassemble || dump_debugging)
     syms = slurp_symtab (abfd);
-  if (dump_dynamic_symtab || dump_dynamic_reloc_info)
+  if (dump_dynamic_symtab || dump_dynamic_reloc_info
+      || (disassemble && bfd_get_dynamic_symtab_upper_bound (abfd) > 0))
     dynsyms = slurp_dynamic_symtab (abfd);
+  if (disassemble && dynsymcount > 0)
+    {
+      synthcount = bfd_get_synthetic_symtab (abfd, dynsyms, &synthsyms);
+      if (synthcount < 0) synthcount = 0;
+    }
 
   if (dump_symtab)
     dump_symbols (abfd, FALSE);
@@ -2605,6 +2611,16 @@ dump_bfd (bfd *abfd)
       free (dynsyms);
       dynsyms = NULL;
     }
+
+  if (synthsyms)
+    {
+      free (synthsyms);
+      synthsyms = NULL;
+    }
+
+  symcount = 0;
+  dynsymcount = 0;
+  synthcount = 0;
 }
 
 static void

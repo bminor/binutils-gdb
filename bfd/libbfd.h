@@ -360,6 +360,9 @@ extern bfd_boolean _bfd_generic_set_section_contents
 #define _bfd_nolink_bfd_merge_sections \
   ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) \
    bfd_false)
+#define _bfd_nolink_bfd_is_group_section \
+  ((bfd_boolean (*) (bfd *, const struct bfd_section *)) \
+   bfd_false)
 #define _bfd_nolink_bfd_discard_group \
   ((bfd_boolean (*) (bfd *, struct bfd_section *)) \
    bfd_false)
@@ -383,6 +386,8 @@ extern bfd_boolean _bfd_generic_set_section_contents
 #define _bfd_nodynamic_get_dynamic_symtab_upper_bound _bfd_n1
 #define _bfd_nodynamic_canonicalize_dynamic_symtab \
   ((long (*) (bfd *, asymbol **)) _bfd_n1)
+#define _bfd_nodynamic_get_synthetic_symtab \
+  ((long (*) (bfd *, asymbol **, asymbol **)) _bfd_n1)
 #define _bfd_nodynamic_get_dynamic_reloc_upper_bound _bfd_n1
 #define _bfd_nodynamic_canonicalize_dynamic_reloc \
   ((long (*) (bfd *, arelent **, asymbol **)) _bfd_n1)
@@ -657,6 +662,27 @@ bfd_boolean bfd_write_bigendian_4byte_int (bfd *, unsigned int);
 unsigned int bfd_log2 (bfd_vma x);
 
 /* Extracted from bfdio.c.  */
+struct bfd_iovec
+{
+  /* To avoid problems with macros, a "b" rather than "f"
+     prefix is prepended to each method name.  */
+  /* Attempt to read/write NBYTES on ABFD's IOSTREAM storing/fetching
+     bytes starting at PTR.  Return the number of bytes actually
+     transfered (a read past end-of-file returns less than NBYTES),
+     or -1 (setting <<bfd_error>>) if an error occurs.  */
+  file_ptr (*bread) (struct bfd *abfd, void *ptr, file_ptr nbytes);
+  file_ptr (*bwrite) (struct bfd *abfd, const void *ptr,
+                      file_ptr nbytes);
+  /* Return the current IOSTREAM file offset, or -1 (setting <<bfd_error>>
+     if an error occurs.  */
+  file_ptr (*btell) (struct bfd *abfd);
+  /* For the following, on successful completion a value of 0 is returned.
+     Otherwise, a value of -1 is returned (and  <<bfd_error>> is set).  */
+  int (*bseek) (struct bfd *abfd, file_ptr offset, int whence);
+  int (*bclose) (struct bfd *abfd);
+  int (*bflush) (struct bfd *abfd);
+  int (*bstat) (struct bfd *abfd, struct stat *sb);
+};
 /* Extracted from bfdwin.c.  */
 struct _bfd_window_internal {
   struct _bfd_window_internal *next;
@@ -699,6 +725,7 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_16_PCREL",
   "BFD_RELOC_12_PCREL",
   "BFD_RELOC_8_PCREL",
+  "BFD_RELOC_32_SECREL",
   "BFD_RELOC_32_GOT_PCREL",
   "BFD_RELOC_16_GOT_PCREL",
   "BFD_RELOC_8_GOT_PCREL",
@@ -836,8 +863,6 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_HI16",
   "BFD_RELOC_HI16_S",
   "BFD_RELOC_LO16",
-  "BFD_RELOC_PCREL_HI16_S",
-  "BFD_RELOC_PCREL_LO16",
   "BFD_RELOC_MIPS_LITERAL",
   "BFD_RELOC_MIPS_GOT16",
   "BFD_RELOC_MIPS_CALL16",
@@ -1437,6 +1462,46 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_M68HC11_PAGE",
   "BFD_RELOC_M68HC11_24",
   "BFD_RELOC_M68HC12_5B",
+  "BFD_RELOC_16C_NUM08",
+  "BFD_RELOC_16C_NUM08_C",
+  "BFD_RELOC_16C_NUM16",
+  "BFD_RELOC_16C_NUM16_C",
+  "BFD_RELOC_16C_NUM32",
+  "BFD_RELOC_16C_NUM32_C",
+  "BFD_RELOC_16C_DISP04",
+  "BFD_RELOC_16C_DISP04_C",
+  "BFD_RELOC_16C_DISP08",
+  "BFD_RELOC_16C_DISP08_C",
+  "BFD_RELOC_16C_DISP16",
+  "BFD_RELOC_16C_DISP16_C",
+  "BFD_RELOC_16C_DISP24",
+  "BFD_RELOC_16C_DISP24_C",
+  "BFD_RELOC_16C_DISP24a",
+  "BFD_RELOC_16C_DISP24a_C",
+  "BFD_RELOC_16C_REG04",
+  "BFD_RELOC_16C_REG04_C",
+  "BFD_RELOC_16C_REG04a",
+  "BFD_RELOC_16C_REG04a_C",
+  "BFD_RELOC_16C_REG14",
+  "BFD_RELOC_16C_REG14_C",
+  "BFD_RELOC_16C_REG16",
+  "BFD_RELOC_16C_REG16_C",
+  "BFD_RELOC_16C_REG20",
+  "BFD_RELOC_16C_REG20_C",
+  "BFD_RELOC_16C_ABS20",
+  "BFD_RELOC_16C_ABS20_C",
+  "BFD_RELOC_16C_ABS24",
+  "BFD_RELOC_16C_ABS24_C",
+  "BFD_RELOC_16C_IMM04",
+  "BFD_RELOC_16C_IMM04_C",
+  "BFD_RELOC_16C_IMM16",
+  "BFD_RELOC_16C_IMM16_C",
+  "BFD_RELOC_16C_IMM20",
+  "BFD_RELOC_16C_IMM20_C",
+  "BFD_RELOC_16C_IMM24",
+  "BFD_RELOC_16C_IMM24_C",
+  "BFD_RELOC_16C_IMM32",
+  "BFD_RELOC_16C_IMM32_C",
   "BFD_RELOC_CRIS_BDISP8",
   "BFD_RELOC_CRIS_UNSIGNED_5",
   "BFD_RELOC_CRIS_SIGNED_6",

@@ -1,6 +1,6 @@
 /* BFD back-end for binary objects.
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
+   2004 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support, <ian@cygnus.com>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -339,6 +339,7 @@ binary_sizeof_headers (abfd, exec)
 #define binary_bfd_relax_section bfd_generic_relax_section
 #define binary_bfd_gc_sections bfd_generic_gc_sections
 #define binary_bfd_merge_sections bfd_generic_merge_sections
+#define binary_bfd_is_group_section bfd_generic_is_group_section
 #define binary_bfd_discard_group bfd_generic_discard_group
 #define binary_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define binary_bfd_link_hash_table_free _bfd_generic_link_hash_table_free

@@ -38,7 +38,7 @@ dejagnu/
 	Patches to bug-dejagnu@gnu.org
 	Avoid making changes to the local repository; please send
 	patches upstream.  Important and approved patches can be
-	checked into the src repository, otheriwse patches will be
+	checked into the src repository, otherwise patches will be
 	imported from the next release.
 
 gdb/; mmalloc/; readline/; sim/; GDB's part of include/ & dejagnu/
@@ -59,8 +59,8 @@ libiberty/; libiberty's part of include/
 	Otherwise, changes are automatically merged, usually within
 	a day.
 
-ltconfig; ltmain.sh
-	libtool: http://gnu.org
+ltconfig; ltmain.sh; ltcf-*.sh
+	libtool: http://www.gnu.org/software/libtool/
 	Changes need to be done in tandem with the official LIBTOOL
 	sources or submitted to the master file maintainer and brought
 	in via a merge.
@@ -100,8 +100,7 @@ winsup/
 	General discussion cygwin@sources.redhat.com.
 	See also winsup/MAINTAINERS.
 
-expect/; config-ml.in; mpw-README; mpw-build.in; mpw-config.in;
-mpw-configure; mpw-install; setup.com; missing; makefile.vms; utils/;
+expect/; config-ml.in; setup.com; missing; makefile.vms; utils/;
 config/; config.if; makefile.vms; missing; ylwrap; mkdep; etc/;
 install-sh; intl/
 	Ask DJ Delorie <dj@redhat.com> after reading the libiberty entry.

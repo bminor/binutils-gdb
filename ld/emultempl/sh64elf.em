@@ -379,7 +379,7 @@ sh64_elf_${EMULATION_NAME}_after_allocation (void)
      lang_process, and the second time when lang_process calls ldemul_finish,
      which calls gld${EMULATION_NAME}_finish, e.g. gldshelf32_finish, which
      is defined in emultempl/elf32.em and calls ldemul_after_allocation,
-     if bfd_elf${ELFSIZE}_discard_info returned true.  */
+     if bfd_elf_discard_info returned true.  */
   if (cranges->contents != NULL)
     free (cranges->contents);
 

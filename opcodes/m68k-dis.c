@@ -1,6 +1,6 @@
 /* Print Motorola 68k instructions.
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002, 2003
+   1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is free software; you can redistribute it and/or modify
@@ -264,16 +264,19 @@ print_insn_m68k (memaddr, info)
       arch_mask = mcf5200;
       break;
     case bfd_mach_mcf528x:
-      arch_mask = mcf528x;
+      arch_mask = mcf528x | mcfmac;
       break;
     case bfd_mach_mcf5206e:
-      arch_mask = mcf5206e;
+      arch_mask = mcf5206e | mcfmac;
       break;
     case bfd_mach_mcf5307:
-      arch_mask = mcf5307;
+      arch_mask = mcf5307 | mcfmac;
       break;
     case bfd_mach_mcf5407:
-      arch_mask = mcf5407;
+      arch_mask = mcf5407 | mcfmac;
+      break;
+    case bfd_mach_mcfv4e:
+      arch_mask = mcfv4e | mcfemac;
       break;
     }
 
@@ -736,6 +739,24 @@ print_insn_arg (d, buffer, p0, addr, info)
 			     fpcr_names[fetch_arg (buffer, place, 3, info)]);
       break;
 
+    case 'e':
+      val = fetch_arg(buffer, place, 2, info);
+      (*info->fprintf_func) (info->stream, "%%acc%d", val);
+      break;
+
+    case 'g':
+      val = fetch_arg(buffer, place, 2, info);
+      (*info->fprintf_func) (info->stream, "%%accext%s", val==0 ? "01" : "23");
+      break;
+      
+    case 'i':
+      val = fetch_arg(buffer, place, 2, info);
+      if (val == 1)
+	(*info->fprintf_func) (info->stream, "<<");
+      else if (val == 3)
+	(*info->fprintf_func) (info->stream, ">>");
+      break;
+
     case 'I':
       /* Get coprocessor ID... */
       val = fetch_arg (buffer, 'd', 3, info);
@@ -744,6 +765,7 @@ print_insn_arg (d, buffer, p0, addr, info)
 	(*info->fprintf_func) (info->stream, "(cpid=%d) ", val);
       break;
 
+    case '4':
     case '*':
     case '~':
     case '%':
@@ -880,6 +902,16 @@ print_insn_arg (d, buffer, p0, addr, info)
 	    default:
 	      return -1;
 	    }
+	}
+
+      /* If place is '/', then this is the case of the mask bit for
+	 mac/emac loads. Now that the arg has been printed, grab the
+	 mask bit and if set, add a '&' to the arg.  */
+      if (place == '/')
+	{
+	  val = fetch_arg (buffer, place, 1, info);
+	  if (val)
+		(*info->fprintf_func) (info->stream, "&");
 	}
       break;
 
@@ -1075,6 +1107,34 @@ fetch_arg (buffer, code, bits, info)
   register int val = 0;
   switch (code)
     {
+    case '/': /* MAC/EMAC mask bit.  */
+      val = buffer[3] >> 5;
+      break;
+
+    case 'G': /* EMAC ACC load.  */
+      val = ((buffer[3] >> 3) & 0x2) | ((~buffer[2] >> 7) & 0x1);
+      break;
+
+    case 'H': /* EMAC ACC !load.  */
+      val = ((buffer[3] >> 3) & 0x2) | ((buffer[2] >> 7) & 0x1);
+      break;
+
+    case ']': /* EMAC ACCEXT bit.  */
+      val = buffer[0] >> 2;
+      break;
+
+    case 'I': /* MAC/EMAC scale factor.  */
+      val = buffer[0] >> 1;
+      break;
+
+    case 'F': /* EMAC ACCx.  */
+      val = buffer[0] >> 1;
+      break;
+
+    case 'f':
+      val = buffer[0];
+      break;
+
     case 's':
       val = buffer[1];
       break;

@@ -594,8 +594,6 @@ extern bfd_boolean bfd_ecoff_write_accumulated_debug
   (void *handle, bfd *abfd, struct ecoff_debug_info *debug,
    const struct ecoff_debug_swap *swap,
    struct bfd_link_info *info, file_ptr where);
-extern bfd_boolean bfd_mips_ecoff_create_embedded_relocs
-  (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *, char **);
 
 /* Externally visible ELF routines.  */
 
@@ -606,29 +604,30 @@ struct bfd_link_needed_list
   const char *name;
 };
 
+enum dynamic_lib_link_class {
+  DYN_NORMAL = 0,
+  DYN_AS_NEEDED = 1,
+  DYN_DT_NEEDED = 2
+};
+
 extern bfd_boolean bfd_elf_record_link_assignment
   (bfd *, struct bfd_link_info *, const char *, bfd_boolean);
 extern struct bfd_link_needed_list *bfd_elf_get_needed_list
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean bfd_elf_get_bfd_needed_list
   (bfd *, struct bfd_link_needed_list **);
-extern bfd_boolean bfd_elf32_size_dynamic_sections
-  (bfd *, const char *, const char *, const char *, const char * const *,
-   struct bfd_link_info *, struct bfd_section **, struct bfd_elf_version_tree *);
-extern bfd_boolean bfd_elf64_size_dynamic_sections
+extern bfd_boolean bfd_elf_size_dynamic_sections
   (bfd *, const char *, const char *, const char *, const char * const *,
    struct bfd_link_info *, struct bfd_section **, struct bfd_elf_version_tree *);
 extern void bfd_elf_set_dt_needed_name
   (bfd *, const char *);
-extern void bfd_elf_set_dt_needed_soname
-  (bfd *, const char *);
 extern const char *bfd_elf_get_dt_soname
   (bfd *);
+extern void bfd_elf_set_dyn_lib_class
+  (bfd *, int);
 extern struct bfd_link_needed_list *bfd_elf_get_runpath_list
   (bfd *, struct bfd_link_info *);
-extern bfd_boolean bfd_elf32_discard_info
-  (bfd *, struct bfd_link_info *);
-extern bfd_boolean bfd_elf64_discard_info
+extern bfd_boolean bfd_elf_discard_info
   (bfd *, struct bfd_link_info *);
 
 /* Return an upper bound on the number of bytes required to store a
@@ -675,8 +674,6 @@ extern struct bfd_section *_bfd_elf_tls_setup
   (bfd *, struct bfd_link_info *);
 
 extern bfd_boolean bfd_m68k_elf32_create_embedded_relocs
-  (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *, char **);
-extern bfd_boolean bfd_mips_elf32_create_embedded_relocs
   (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *, char **);
 
 /* SunOS shared library support routines for the linker.  */
@@ -792,7 +789,7 @@ extern bfd_boolean bfd_elf32_arm_allocate_interworking_sections
   (struct bfd_link_info *);
 
 extern bfd_boolean bfd_elf32_arm_process_before_allocation
-  (bfd *, struct bfd_link_info *, int);
+  (bfd *, struct bfd_link_info *, int, int);
 
 extern bfd_boolean bfd_elf32_arm_get_bfd_for_interworking
   (bfd *, struct bfd_link_info *);
@@ -837,6 +834,18 @@ bfd *bfd_openr (const char *filename, const char *target);
 bfd *bfd_fdopenr (const char *filename, const char *target, int fd);
 
 bfd *bfd_openstreamr (const char *, const char *, void *);
+
+bfd *bfd_openr_iovec (const char *filename, const char *target,
+    void *(*open) (struct bfd *nbfd,
+    void *open_closure),
+    void *open_closure,
+    file_ptr (*pread) (struct bfd *nbfd,
+    void *stream,
+    void *buf,
+    file_ptr nbytes,
+    file_ptr offset),
+    int (*close) (struct bfd *nbfd,
+    void *stream));
 
 bfd *bfd_openw (const char *filename, const char *target);
 
@@ -1424,6 +1433,12 @@ void bfd_section_list_clear (bfd *);
 
 asection *bfd_get_section_by_name (bfd *abfd, const char *name);
 
+asection *bfd_get_section_by_name_if
+   (bfd *abfd,
+    const char *name,
+    bfd_boolean (*func) (bfd *abfd, asection *sect, void *obj),
+    void *obj);
+
 char *bfd_get_unique_section_name
    (bfd *abfd, const char *templat, int *count);
 
@@ -1439,6 +1454,11 @@ bfd_boolean bfd_set_section_flags
 void bfd_map_over_sections
    (bfd *abfd,
     void (*func) (bfd *abfd, asection *sect, void *obj),
+    void *obj);
+
+asection *bfd_sections_find_if
+   (bfd *abfd,
+    bfd_boolean (*func) (bfd *abfd, asection *sect, void *obj),
     void *obj);
 
 bfd_boolean bfd_set_section_size
@@ -1461,6 +1481,8 @@ bfd_boolean bfd_copy_private_section_data
 void _bfd_strip_section_from_output
    (struct bfd_link_info *info, asection *section);
 
+bfd_boolean bfd_generic_is_group_section (bfd *, const asection *sec);
+
 bfd_boolean bfd_generic_discard_group (bfd *abfd, asection *group);
 
 /* Extracted from archures.c.  */
@@ -1482,6 +1504,7 @@ enum bfd_architecture
 #define bfd_mach_mcf5307  11
 #define bfd_mach_mcf5407  12
 #define bfd_mach_mcf528x  13
+#define bfd_mach_mcfv4e   14
   bfd_arch_vax,       /* DEC Vax */
   bfd_arch_i960,      /* Intel 960 */
     /* The order of the following is important.
@@ -1627,6 +1650,7 @@ enum bfd_architecture
 #define bfd_mach_sh3e       0x3e
 #define bfd_mach_sh4        0x40
 #define bfd_mach_sh4_nofpu  0x41
+#define bfd_mach_sh4_nommu_nofpu  0x42
 #define bfd_mach_sh4a       0x4a
 #define bfd_mach_sh4a_nofpu 0x4b
 #define bfd_mach_sh4al_dsp  0x4d
@@ -1682,6 +1706,7 @@ enum bfd_architecture
 #define bfd_mach_frvsimple     2
 #define bfd_mach_fr300         300
 #define bfd_mach_fr400         400
+#define bfd_mach_fr450         450
 #define bfd_mach_frvtomcat     499     /* fr500 prototype */
 #define bfd_mach_fr500         500
 #define bfd_mach_fr550         550
@@ -1702,6 +1727,8 @@ enum bfd_architecture
 #define bfd_mach_avr3          3
 #define bfd_mach_avr4          4
 #define bfd_mach_avr5          5
+  bfd_arch_cr16c,       /* National Semiconductor CompactRISC. */
+#define bfd_mach_cr16c         1
   bfd_arch_cris,      /* Axis CRIS */
   bfd_arch_s390,      /* IBM s390 */
 #define bfd_mach_s390_31       31
@@ -2022,6 +2049,9 @@ The 24-bit relocation is used in some Intel 960 configurations.  */
   BFD_RELOC_12_PCREL,
   BFD_RELOC_8_PCREL,
 
+/* Section relative relocations.  Some targets need this for DWARF2.  */
+  BFD_RELOC_32_SECREL,
+
 /* For ELF.  */
   BFD_RELOC_32_GOT_PCREL,
   BFD_RELOC_16_GOT_PCREL,
@@ -2271,12 +2301,6 @@ to compensate for the borrow when the low bits are added.  */
 
 /* Low 16 bits.  */
   BFD_RELOC_LO16,
-
-/* Like BFD_RELOC_HI16_S, but PC relative.  */
-  BFD_RELOC_PCREL_HI16_S,
-
-/* Like BFD_RELOC_LO16, but PC relative.  */
-  BFD_RELOC_PCREL_LO16,
 
 /* Relocation against a MIPS literal section.  */
   BFD_RELOC_MIPS_LITERAL,
@@ -3340,6 +3364,48 @@ to follow the 16K memory bank of 68HC12 (seen as mapped in the window).  */
 This is the 5 bits of a value.  */
   BFD_RELOC_M68HC12_5B,
 
+/* NS CR16C Relocations.  */
+  BFD_RELOC_16C_NUM08,
+  BFD_RELOC_16C_NUM08_C,
+  BFD_RELOC_16C_NUM16,
+  BFD_RELOC_16C_NUM16_C,
+  BFD_RELOC_16C_NUM32,
+  BFD_RELOC_16C_NUM32_C,
+  BFD_RELOC_16C_DISP04,
+  BFD_RELOC_16C_DISP04_C,
+  BFD_RELOC_16C_DISP08,
+  BFD_RELOC_16C_DISP08_C,
+  BFD_RELOC_16C_DISP16,
+  BFD_RELOC_16C_DISP16_C,
+  BFD_RELOC_16C_DISP24,
+  BFD_RELOC_16C_DISP24_C,
+  BFD_RELOC_16C_DISP24a,
+  BFD_RELOC_16C_DISP24a_C,
+  BFD_RELOC_16C_REG04,
+  BFD_RELOC_16C_REG04_C,
+  BFD_RELOC_16C_REG04a,
+  BFD_RELOC_16C_REG04a_C,
+  BFD_RELOC_16C_REG14,
+  BFD_RELOC_16C_REG14_C,
+  BFD_RELOC_16C_REG16,
+  BFD_RELOC_16C_REG16_C,
+  BFD_RELOC_16C_REG20,
+  BFD_RELOC_16C_REG20_C,
+  BFD_RELOC_16C_ABS20,
+  BFD_RELOC_16C_ABS20_C,
+  BFD_RELOC_16C_ABS24,
+  BFD_RELOC_16C_ABS24_C,
+  BFD_RELOC_16C_IMM04,
+  BFD_RELOC_16C_IMM04_C,
+  BFD_RELOC_16C_IMM16,
+  BFD_RELOC_16C_IMM16_C,
+  BFD_RELOC_16C_IMM20,
+  BFD_RELOC_16C_IMM20_C,
+  BFD_RELOC_16C_IMM24,
+  BFD_RELOC_16C_IMM24_C,
+  BFD_RELOC_16C_IMM32,
+  BFD_RELOC_16C_IMM32_C,
+
 /* These relocs are only used within the CRIS assembler.  They are not
 (at present) written to any object files.  */
   BFD_RELOC_CRIS_BDISP8,
@@ -3658,14 +3724,10 @@ struct bfd
   /* A pointer to the target jump table.  */
   const struct bfd_target *xvec;
 
-  /* To avoid dragging too many header files into every file that
-     includes `<<bfd.h>>', IOSTREAM has been declared as a "char *",
-     and MTIME as a "long".  Their correct types, to which they
-     are cast when used, are "FILE *" and "time_t".    The iostream
-     is the result of an fopen on the filename.  However, if the
-     BFD_IN_MEMORY flag is set, then iostream is actually a pointer
-     to a bfd_in_memory struct.  */
+  /* The IOSTREAM, and corresponding IO vector that provide access
+     to the file backing the BFD.  */
   void *iostream;
+  const struct bfd_iovec *iovec;
 
   /* Is the file descriptor being cached?  That is, can it be closed as
      needed, and re-opened when accessed later?  */
@@ -3927,6 +3989,9 @@ bfd_boolean bfd_set_private_flags (bfd *abfd, flagword flags);
 #define bfd_merge_sections(abfd, link_info) \
        BFD_SEND (abfd, _bfd_merge_sections, (abfd, link_info))
 
+#define bfd_is_group_section(abfd, sec) \
+       BFD_SEND (abfd, _bfd_is_group_section, (abfd, sec))
+
 #define bfd_discard_group(abfd, sec) \
        BFD_SEND (abfd, _bfd_discard_group, (abfd, sec))
 
@@ -3956,6 +4021,9 @@ bfd_boolean bfd_set_private_flags (bfd *abfd, flagword flags);
 
 #define bfd_canonicalize_dynamic_symtab(abfd, asymbols) \
        BFD_SEND (abfd, _bfd_canonicalize_dynamic_symtab, (abfd, asymbols))
+
+#define bfd_get_synthetic_symtab(abfd, dynsyms, ret) \
+       BFD_SEND (abfd, _bfd_get_synthetic_symtab, (abfd, dynsyms, ret))
 
 #define bfd_get_dynamic_reloc_upper_bound(abfd) \
        BFD_SEND (abfd, _bfd_get_dynamic_reloc_upper_bound, (abfd))
@@ -4294,6 +4362,7 @@ typedef struct bfd_target
   NAME##_bfd_link_split_section, \
   NAME##_bfd_gc_sections, \
   NAME##_bfd_merge_sections, \
+  NAME##_bfd_is_group_section, \
   NAME##_bfd_discard_group
 
   int         (*_bfd_sizeof_headers) (bfd *, bfd_boolean);
@@ -4331,6 +4400,9 @@ typedef struct bfd_target
   /* Attempt to merge SEC_MERGE sections.  */
   bfd_boolean (*_bfd_merge_sections) (bfd *, struct bfd_link_info *);
 
+  /* Is this section a member of a group?  */
+  bfd_boolean (*_bfd_is_group_section) (bfd *, const struct bfd_section *);
+
   /* Discard members of a group.  */
   bfd_boolean (*_bfd_discard_group) (bfd *, struct bfd_section *);
 
@@ -4338,6 +4410,7 @@ typedef struct bfd_target
 #define BFD_JUMP_TABLE_DYNAMIC(NAME) \
   NAME##_get_dynamic_symtab_upper_bound, \
   NAME##_canonicalize_dynamic_symtab, \
+  NAME##_get_synthetic_symtab, \
   NAME##_get_dynamic_reloc_upper_bound, \
   NAME##_canonicalize_dynamic_reloc
 
@@ -4346,6 +4419,9 @@ typedef struct bfd_target
   /* Read in the dynamic symbols.  */
   long        (*_bfd_canonicalize_dynamic_symtab)
     (bfd *, struct bfd_symbol **);
+  /* Create synthetized symbols.  */
+  long        (*_bfd_get_synthetic_symtab)
+    (bfd *, struct bfd_symbol **, struct bfd_symbol **);
   /* Get the amount of memory required to hold the dynamic relocs.  */
   long        (*_bfd_get_dynamic_reloc_upper_bound) (bfd *);
   /* Read in the dynamic relocs.  */

@@ -248,7 +248,7 @@ obj_som_init_stab_section (seg)
      (just created above).  Also set some attributes which BFD does
      not understand.  In particular, access bits, sort keys, and load
      quadrant.  */
-  obj_set_subsection_attributes (seg, space, 0x1f, 73, 0);
+  obj_set_subsection_attributes (seg, space, 0x1f, 73, 0, 0, 0, 0);
   bfd_set_section_alignment (stdoutput, seg, 2);
 
   /* Make some space for the first special stab entry and zero the memory.
@@ -271,7 +271,7 @@ obj_som_init_stab_section (seg)
      not understand.  In particular, access bits, sort keys, and load
      quadrant.  */
   seg = bfd_get_section_by_name (stdoutput, "$GDB_STRINGS$");
-  obj_set_subsection_attributes (seg, space, 0x1f, 72, 0);
+  obj_set_subsection_attributes (seg, space, 0x1f, 72, 0, 0, 0, 0);
   bfd_set_section_alignment (stdoutput, seg, 2);
 
   subseg_set (saved_seg, saved_subseg);

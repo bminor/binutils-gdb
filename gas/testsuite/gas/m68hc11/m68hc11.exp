@@ -161,7 +161,7 @@ setup_xfail m6812-*-*
 gas_m68hc11_warning "" ".mode \"bar\"\n" "Invalid mode: .bar."
 gas_m68hc11_error "" ".relax 23\n" "bad .relax format"
 gas_m68hc11_error "" ".relax bar-23\n" "bad .relax format"
-gas_m68hc11_warning "" ".far bar bar\n" "rest of line ignored"
+gas_m68hc11_error "" ".far bar bar\n" "junk at end of line"
 
 
 run_dump_test insns

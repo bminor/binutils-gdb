@@ -1,6 +1,6 @@
 /* Target definitions for NN-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003 Free Software Foundation, Inc.
+   2003, 2004 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -34,6 +34,8 @@
 
 #define bfd_elfNN_canonicalize_dynamic_symtab \
   _bfd_elf_canonicalize_dynamic_symtab
+#define bfd_elfNN_get_synthetic_symtab \
+  _bfd_elf_get_synthetic_symtab
 #ifndef bfd_elfNN_canonicalize_reloc
 #define bfd_elfNN_canonicalize_reloc	_bfd_elf_canonicalize_reloc
 #endif
@@ -126,12 +128,16 @@
 #define elf_backend_gc_sweep_hook	NULL
 #endif
 #ifndef bfd_elfNN_bfd_gc_sections
-#define bfd_elfNN_bfd_gc_sections _bfd_elfNN_gc_sections
+#define bfd_elfNN_bfd_gc_sections bfd_elf_gc_sections
 #endif
 
 #ifndef bfd_elfNN_bfd_merge_sections
 #define bfd_elfNN_bfd_merge_sections \
   _bfd_elf_merge_sections
+#endif
+
+#ifndef bfd_elfNN_bfd_is_group_section
+#define bfd_elfNN_bfd_is_group_section bfd_elf_is_group_section
 #endif
 
 #ifndef bfd_elfNN_bfd_discard_group
@@ -189,6 +195,12 @@
 #ifndef bfd_elfNN_bfd_link_hash_table_create
 #define bfd_elfNN_bfd_link_hash_table_create _bfd_elf_link_hash_table_create
 #endif
+#ifndef bfd_elfNN_bfd_link_add_symbols
+#define bfd_elfNN_bfd_link_add_symbols	bfd_elf_link_add_symbols
+#endif
+#ifndef bfd_elfNN_bfd_final_link
+#define bfd_elfNN_bfd_final_link	bfd_elf_final_link
+#endif
 #else /* ! defined (elf_backend_relocate_section) */
 /* If no backend relocate_section routine, use the generic linker.
    Note - this will prevent the port from being able to use some of
@@ -233,6 +245,10 @@
 
 #ifndef bfd_elfNN_mkarchive
 #define bfd_elfNN_mkarchive _bfd_generic_mkarchive
+#endif
+
+#ifndef bfd_elfNN_print_symbol
+#define bfd_elfNN_print_symbol bfd_elf_print_symbol
 #endif
 
 #ifndef elf_symbol_leading_char
@@ -391,6 +407,15 @@
 #ifndef elf_backend_ignore_discarded_relocs
 #define elf_backend_ignore_discarded_relocs	NULL
 #endif
+#ifndef elf_backend_can_make_relative_eh_frame
+#define elf_backend_can_make_relative_eh_frame	_bfd_elf_can_make_relative
+#endif
+#ifndef elf_backend_can_make_lsda_relative_eh_frame
+#define elf_backend_can_make_lsda_relative_eh_frame	_bfd_elf_can_make_relative
+#endif
+#ifndef elf_backend_encode_eh_address
+#define elf_backend_encode_eh_address		_bfd_elf_encode_eh_address
+#endif
 #ifndef elf_backend_write_section
 #define elf_backend_write_section		NULL
 #endif
@@ -422,6 +447,13 @@
 
 #ifndef elf_backend_rela_normal
 #define elf_backend_rela_normal 0
+#endif
+
+#ifndef elf_backend_plt_sym_val
+#define elf_backend_plt_sym_val NULL
+#endif
+#ifndef elf_backend_relplt_name
+#define elf_backend_relplt_name NULL
 #endif
 
 #ifndef ELF_MACHINE_ALT1
@@ -497,11 +529,16 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_reloc_type_class,
   elf_backend_discard_info,
   elf_backend_ignore_discarded_relocs,
+  elf_backend_can_make_relative_eh_frame,
+  elf_backend_can_make_lsda_relative_eh_frame,
+  elf_backend_encode_eh_address,
   elf_backend_write_section,
   elf_backend_mips_irix_compat,
   elf_backend_mips_rtype_to_howto,
   elf_backend_ecoff_debug_swap,
   elf_backend_bfd_from_remote_memory,
+  elf_backend_plt_sym_val,
+  elf_backend_relplt_name,
   ELF_MACHINE_ALT1,
   ELF_MACHINE_ALT2,
   &elf_backend_size_info,

@@ -1,6 +1,6 @@
 /* Opcode table for m680[012346]0/m6888[12]/m68851/mcf5200.
    Copyright 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2003
+   2000, 2001, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB, GAS, and the GNU binutils.
@@ -1459,44 +1459,33 @@ const struct m68k_opcode m68k_opcodes[] =
 {"lsrl",	one(0160210),	one(0170770), "QdDs", m68000up | mcf },
 {"lsrl",	one(0160250),	one(0170770), "DdDs", m68000up | mcf },
 
-  /* FIXME: add MAM mode (`&' after <ea> operand) / remove MACM */
-{"macw",  two(0120000, 0000000), two(0170660, 0005400), "uMum", mcf5206eup },
-{"macw",  two(0120000, 0001000), two(0170660, 0005400), "uMumMh",mcf5206eup },
-{"macw",  two(0120220, 0000000), two(0170670, 0005460), "uNuoasRn", mcf5206eup },
-{"macw",  two(0120230, 0000000), two(0170670, 0005460), "uNuo+sRn", mcf5206eup },
-{"macw",  two(0120240, 0000000), two(0170670, 0005460), "uNuo-sRn", mcf5206eup },
-{"macw",  two(0120250, 0000000), two(0170670, 0005460), "uNuodsRn", mcf5206eup },
-{"macw",  two(0120220, 0001000), two(0170670, 0005460), "uNuoMhasRn", mcf5206eup },
-{"macw",  two(0120230, 0001000), two(0170670, 0005460), "uNuoMh+sRn", mcf5206eup },
-{"macw",  two(0120240, 0001000), two(0170670, 0005460), "uNuoMh-sRn", mcf5206eup },
-{"macw",  two(0120250, 0001000), two(0170670, 0005460), "uNuoMhdsRn", mcf5206eup },
-{"macmw", two(0120220, 0000040), two(0170670, 0005460), "uNuoasRn", mcf5206eup },
-{"macmw", two(0120230, 0000040), two(0170670, 0005460), "uNuo+sRn", mcf5206eup },
-{"macmw", two(0120240, 0000040), two(0170670, 0005460), "uNuo-sRn", mcf5206eup },
-{"macmw", two(0120250, 0000040), two(0170670, 0005460), "uNuodsRn", mcf5206eup },
-{"macmw", two(0120220, 0001040), two(0170670, 0005460), "uNuoMhasRn", mcf5206eup },
-{"macmw", two(0120230, 0001040), two(0170670, 0005460), "uNuoMh+sRn", mcf5206eup },
-{"macmw", two(0120240, 0001040), two(0170670, 0005460), "uNuoMh-sRn", mcf5206eup },
-{"macmw", two(0120250, 0001040), two(0170670, 0005460), "uNuoMhdsRn", mcf5206eup },
+{"macw",  two(0xa000, 0x0000), two(0xf1b0, 0x0800), "uMum", mcfmac },
+{"macw",  two(0xa000, 0x0000), two(0xf1b0, 0x0b00), "uMumiI", mcfmac },
+{"macw",  two(0xa000, 0x0200), two(0xf1b0, 0x0b00), "uMumMh", mcfmac },
+{"macw",  two(0xa080, 0x0000), two(0xf180, 0x0f30), "uNuo4/Rn", mcfmac },
+{"macw",  two(0xa080, 0x0000), two(0xf180, 0x0910), "uNuoiI4/Rn", mcfmac },
+{"macw",  two(0xa080, 0x0200), two(0xf180, 0x0910), "uNuoMh4/Rn", mcfmac },
 
-{"macl",  two(0120000, 0004000), two(0170660, 0005400), "RsRm", mcf5206eup },
-{"macl",  two(0120000, 0005000), two(0170660, 0005400), "RsRmMh", mcf5206eup },
-{"macl",  two(0120220, 0004000), two(0170670, 0005460), "R3R1asRn", mcf5206eup },
-{"macl",  two(0120230, 0004000), two(0170670, 0005460), "R3R1+sRn", mcf5206eup },
-{"macl",  two(0120240, 0004000), two(0170670, 0005460), "R3R1-sRn", mcf5206eup },
-{"macl",  two(0120250, 0004000), two(0170670, 0005460), "R3R1dsRn", mcf5206eup },
-{"macl",  two(0120220, 0005000), two(0170670, 0005460), "R3R1MhasRn", mcf5206eup },
-{"macl",  two(0120230, 0005000), two(0170670, 0005460), "R3R1Mh+sRn", mcf5206eup },
-{"macl",  two(0120240, 0005000), two(0170670, 0005460), "R3R1Mh-sRn", mcf5206eup },
-{"macl",  two(0120250, 0005000), two(0170670, 0005460), "R3R1MhdsRn", mcf5206eup },
-{"macml", two(0120220, 0004040), two(0170670, 0005460), "R3R1asRn", mcf5206eup },
-{"macml", two(0120230, 0004040), two(0170670, 0005460), "R3R1+sRn", mcf5206eup },
-{"macml", two(0120240, 0004040), two(0170670, 0005460), "R3R1-sRn", mcf5206eup },
-{"macml", two(0120250, 0004040), two(0170670, 0005460), "R3R1dsRn", mcf5206eup },
-{"macml", two(0120220, 0005040), two(0170670, 0005460), "R3R1MhasRn", mcf5206eup },
-{"macml", two(0120230, 0005040), two(0170670, 0005460), "R3R1Mh+sRn", mcf5206eup },
-{"macml", two(0120240, 0005040), two(0170670, 0005460), "R3R1Mh-sRn", mcf5206eup },
-{"macml", two(0120250, 0005040), two(0170670, 0005460), "R3R1MhdsRn", mcf5206eup },
+{"macw",  two(0xa000, 0x0000), two(0xf130, 0x0f00), "uMumeH", mcfemac }, /* Ry,Rx,accX.  */
+{"macw",  two(0xa000, 0x0000), two(0xf130, 0x0900), "uMumiIeH", mcfemac },/* Ry,Rx,SF,accX.  */
+{"macw",  two(0xa000, 0x0200), two(0xf130, 0x0900), "uMumMheH", mcfemac },/* Ry,Rx,+1/-1,accX.  */
+{"macw",  two(0xa000, 0x0000), two(0xf100, 0x0f00), "uMum4/RneG", mcfemac },/* Ry,Rx,<ea>,accX.  */
+{"macw",  two(0xa000, 0x0000), two(0xf100, 0x0900), "uMumiI4/RneG", mcfemac },/* Ry,Rx,SF,<ea>,accX.  */
+{"macw",  two(0xa000, 0x0200), two(0xf100, 0x0900), "uMumMh4/RneG", mcfemac },/* Ry,Rx,+1/-1,<ea>,accX.  */
+
+{"macl",  two(0xa000, 0x0800), two(0xf1b0, 0x0800), "RMRm", mcfmac },
+{"macl",  two(0xa000, 0x0800), two(0xf1b0, 0x0b00), "RMRmiI", mcfmac },
+{"macl",  two(0xa000, 0x0a00), two(0xf1b0, 0x0b00), "RMRmMh", mcfmac },
+{"macl",  two(0xa080, 0x0800), two(0xf180, 0x0f30), "RNRo4/Rn", mcfmac },
+{"macl",  two(0xa080, 0x0800), two(0xf180, 0x0910), "RNRoiI4/Rn", mcfmac },
+{"macl",  two(0xa080, 0x0a00), two(0xf180, 0x0910), "RNRoMh4/Rn", mcfmac },
+
+{"macl",  two(0xa000, 0x0800), two(0xf130, 0x0f00), "RMRmeH", mcfemac },
+{"macl",  two(0xa000, 0x0800), two(0xf130, 0x0900), "RMRmiIeH", mcfemac },
+{"macl",  two(0xa000, 0x0a00), two(0xf130, 0x0900), "RMRmMheH", mcfemac },
+{"macl",  two(0xa000, 0x0800), two(0xf100, 0x0f00), "R3R14/RneG", mcfemac },
+{"macl",  two(0xa000, 0x0800), two(0xf100, 0x0900), "R3R1iI4/RneG", mcfemac },
+{"macl",  two(0xa000, 0x0a00), two(0xf100, 0x0900), "R3R1Mh4/RneG", mcfemac },
 
 /* NOTE: The mcf5200 family programmer's reference manual does not
    indicate the byte form of the movea instruction is invalid (as it
@@ -1517,6 +1506,8 @@ const struct m68k_opcode m68k_opcodes[] =
 
 {"moveal",	one(0020100),	one(0170700), "*lAd", m68000up | mcf },
 {"moveaw",	one(0030100),	one(0170700), "*wAd", m68000up | mcf },
+
+{"movclrl",	one(0xA1C0),	one(0xf9f0), "eFRs", mcfemac },
 
 {"movec",	one(0047173),	one(0177777), "R1Jj", m68010up | mcf },
 {"movec",	one(0047173),	one(0177777), "R1#j", m68010up | mcf },
@@ -1588,16 +1579,31 @@ const struct m68k_opcode m68k_opcodes[] =
 {"movel",	one(0020000),	one(0170000), "olnd", mcfv4up },
 {"movel",	one(0047140),	one(0177770), "AsUd", m68000up | mcfv4e },
 {"movel",	one(0047150),	one(0177770), "UdAs", m68000up | mcfv4e },
-{"movel",	one(0120600),	one(0177760), "EsRs", mcf5206eup },
-{"movel",	one(0120400),	one(0177760), "RsEs", mcf5206eup },
-{"movel",	one(0120474),	one(0177777), "#lEs", mcf5206eup },
-{"movel",	one(0124600),	one(0177760), "GsRs", mcf5206eup },
-{"movel",	one(0124400),	one(0177760), "RsGs", mcf5206eup },
-{"movel",	one(0124474),	one(0177777), "#lGs", mcf5206eup },
-{"movel",	one(0126600),	one(0177760), "HsRs", mcf5206eup },
-{"movel",	one(0126400),	one(0177760), "RsHs", mcf5206eup },
-{"movel",	one(0126474),	one(0177777), "#lHs", mcf5206eup },
-{"movel",	one(0124700),	one(0177777), "GsCs", mcf5206eup },
+{"movel",	one(0120600),	one(0177760), "EsRs", mcfmac },
+{"movel",	one(0120400),	one(0177760), "RsEs", mcfmac },
+{"movel",	one(0120474),	one(0177777), "#lEs", mcfmac },
+{"movel",	one(0124600),	one(0177760), "GsRs", mcfmac },
+{"movel",	one(0124400),	one(0177760), "RsGs", mcfmac },
+{"movel",	one(0124474),	one(0177777), "#lGs", mcfmac },
+{"movel",	one(0126600),	one(0177760), "HsRs", mcfmac },
+{"movel",	one(0126400),	one(0177760), "RsHs", mcfmac },
+{"movel",	one(0126474),	one(0177777), "#lHs", mcfmac },
+{"movel",	one(0124700),	one(0177777), "GsCs", mcfmac },
+
+{"movel",	one(0xa180),	one(0xf9f0), "eFRs", mcfemac }, /* ACCx,Rx.  */
+{"movel",	one(0xab80),	one(0xfbf0), "g]Rs", mcfemac }, /* ACCEXTx,Rx.  */
+{"movel",	one(0xa980),	one(0xfff0), "G-Rs", mcfemac }, /* macsr,Rx.  */
+{"movel",	one(0xad80),	one(0xfff0), "H-Rs", mcfemac }, /* mask,Rx.  */
+{"movel",	one(0xa110),	one(0xf9fc), "efeF", mcfemac }, /* ACCy,ACCx.  */
+{"movel",	one(0xa9c0),	one(0xffff), "G-C-", mcfemac }, /* macsr,ccr.  */
+{"movel",	one(0xa100),	one(0xf9f0), "RseF", mcfemac }, /* Rx,ACCx.  */
+{"movel",	one(0xa13c),	one(0xf9ff), "#leF", mcfemac }, /* #,ACCx.  */
+{"movel",	one(0xab00),	one(0xfbc0), "Rsg]", mcfemac }, /* Rx,ACCEXTx.  */
+{"movel",	one(0xab3c),	one(0xfbff), "#lg]", mcfemac }, /* #,ACCEXTx.  */
+{"movel",	one(0xa900),	one(0xffc0), "RsG-", mcfemac }, /* Rx,macsr.  */
+{"movel",	one(0xa93c),	one(0xffff), "#lG-", mcfemac }, /* #,macsr.  */
+{"movel",	one(0xad00),	one(0xffc0), "RsH-", mcfemac }, /* Rx,mask.  */
+{"movel",	one(0xad3c),	one(0xffff), "#lH-", mcfemac }, /* #,mask.  */
 
 {"move",	one(0030000),	one(0170000), "*w%d", m68000up },
 {"move",	one(0030000),	one(0170000), "ms%d", mcf },
@@ -1637,44 +1643,33 @@ const struct m68k_opcode m68k_opcodes[] =
 {"move16",	one(0xf610),		one(0xfff8), "as_L", m68040up },
 {"move16",	one(0xf618),		one(0xfff8), "_Las", m68040up },
 
-  /* FIXME: add MAM mode (`&' after <ea> operand) / remove MSACM */
-{"msacw",  two(0120000, 0000400), two(0170660, 0005400), "uMum", mcf5206eup },
-{"msacw",  two(0120000, 0001400), two(0170660, 0005400), "uMumMh", mcf5206eup },
-{"msacw",  two(0120220, 0000400), two(0170670, 0005460), "uNuoasRn", mcf5206eup },
-{"msacw",  two(0120230, 0000400), two(0170670, 0005460), "uNuo+sRn", mcf5206eup },
-{"msacw",  two(0120240, 0000400), two(0170670, 0005460), "uNuo-sRn", mcf5206eup },
-{"msacw",  two(0120250, 0000400), two(0170670, 0005460), "uNuodsRn", mcf5206eup },
-{"msacw",  two(0120220, 0001400), two(0170670, 0005460), "uNuoMhasRn", mcf5206eup },
-{"msacw",  two(0120230, 0001400), two(0170670, 0005460), "uNuoMh+sRn", mcf5206eup },
-{"msacw",  two(0120240, 0001400), two(0170670, 0005460), "uNuoMh-sRn", mcf5206eup },
-{"msacw",  two(0120250, 0001400), two(0170670, 0005460), "uNuoMhdsRn", mcf5206eup },
-{"msacmw", two(0120220, 0000440), two(0170670, 0005460), "uNuoasRn", mcf5206eup },
-{"msacmw", two(0120230, 0000440), two(0170670, 0005460), "uNuo+sRn", mcf5206eup },
-{"msacmw", two(0120240, 0000440), two(0170670, 0005460), "uNuo-sRn", mcf5206eup },
-{"msacmw", two(0120250, 0000440), two(0170670, 0005460), "uNuodsRn", mcf5206eup },
-{"msacmw", two(0120220, 0001440), two(0170670, 0005460), "uNuoMhasRn", mcf5206eup },
-{"msacmw", two(0120230, 0001440), two(0170670, 0005460), "uNuoMh+sRn", mcf5206eup },
-{"msacmw", two(0120240, 0001440), two(0170670, 0005460), "uNuoMh-sRn", mcf5206eup },
-{"msacmw", two(0120250, 0001440), two(0170670, 0005460), "uNuoMhdsRn", mcf5206eup },
+{"msacw",  two(0xa000, 0x0100), two(0xf1b0, 0x0800), "uMum", mcfmac },
+{"msacw",  two(0xa000, 0x0100), two(0xf1b0, 0x0b00), "uMumiI", mcfmac },
+{"msacw",  two(0xa000, 0x0300), two(0xf1b0, 0x0b00), "uMumMh", mcfmac },
+{"msacw",  two(0xa080, 0x0100), two(0xf180, 0x0f30), "uNuo4/Rn", mcfmac },
+{"msacw",  two(0xa080, 0x0100), two(0xf180, 0x0910), "uNuoiI4/Rn", mcfmac },
+{"msacw",  two(0xa080, 0x0300), two(0xf180, 0x0910), "uNuoMh4/Rn", mcfmac },
 
-{"msacl",  two(0120000, 0004400), two(0170660, 0005400), "RsRm", mcf5206eup },
-{"msacl",  two(0120000, 0005400), two(0170660, 0005400), "RsRmMh", mcf5206eup },
-{"msacl",  two(0120220, 0004400), two(0170670, 0005460), "R3R1asRn", mcf5206eup },
-{"msacl",  two(0120230, 0004400), two(0170670, 0005460), "R3R1+sRn", mcf5206eup },
-{"msacl",  two(0120240, 0004400), two(0170670, 0005460), "R3R1-sRn", mcf5206eup },
-{"msacl",  two(0120250, 0004400), two(0170670, 0005460), "R3R1dsRn", mcf5206eup },
-{"msacl",  two(0120220, 0005400), two(0170670, 0005460), "R3R1MhasRn", mcf5206eup },
-{"msacl",  two(0120230, 0005400), two(0170670, 0005460), "R3R1Mh+sRn", mcf5206eup },
-{"msacl",  two(0120240, 0005400), two(0170670, 0005460), "R3R1Mh-sRn", mcf5206eup },
-{"msacl",  two(0120250, 0005400), two(0170670, 0005460), "R3R1MhdsRn", mcf5206eup },
-{"msacml", two(0120220, 0004440), two(0170670, 0005460), "R3R1asRn", mcf5206eup },
-{"msacml", two(0120230, 0004440), two(0170670, 0005460), "R3R1+sRn", mcf5206eup },
-{"msacml", two(0120240, 0004440), two(0170670, 0005460), "R3R1-sRn", mcf5206eup },
-{"msacml", two(0120250, 0004440), two(0170670, 0005460), "R3R1dsRn", mcf5206eup },
-{"msacml", two(0120220, 0005440), two(0170670, 0005460), "R3R1MhasRn", mcf5206eup },
-{"msacml", two(0120230, 0005440), two(0170670, 0005460), "R3R1Mh+sRn", mcf5206eup },
-{"msacml", two(0120240, 0005440), two(0170670, 0005460), "R3R1Mh-sRn", mcf5206eup },
-{"msacml", two(0120250, 0005440), two(0170670, 0005460), "R3R1MhdsRn", mcf5206eup },
+{"msacw",  two(0xa000, 0x0100), two(0xf130, 0x0f00), "uMumeH", mcfemac }, /* Ry,Rx,accX.  */
+{"msacw",  two(0xa000, 0x0100), two(0xf130, 0x0900), "uMumiIeH", mcfemac },/* Ry,Rx,SF,accX.  */
+{"msacw",  two(0xa000, 0x0300), two(0xf130, 0x0900), "uMumMheH", mcfemac },/* Ry,Rx,+1/-1,accX.  */
+{"msacw",  two(0xa000, 0x0100), two(0xf100, 0x0f00), "uMum4/RneG", mcfemac },/* Ry,Rx,<ea>,accX.  */
+{"msacw",  two(0xa000, 0x0100), two(0xf100, 0x0900), "uMumiI4/RneG", mcfemac },/* Ry,Rx,SF,<ea>,accX.  */
+{"msacw",  two(0xa000, 0x0300), two(0xf100, 0x0900), "uMumMh4/RneG", mcfemac },/* Ry,Rx,+1/-1,<ea>,accX.  */
+
+{"msacl",  two(0xa000, 0x0900), two(0xf1b0, 0x0800), "RMRm", mcfmac },
+{"msacl",  two(0xa000, 0x0900), two(0xf1b0, 0x0b00), "RMRmiI", mcfmac },
+{"msacl",  two(0xa000, 0x0b00), two(0xf1b0, 0x0b00), "RMRmMh", mcfmac },
+{"msacl",  two(0xa080, 0x0900), two(0xf180, 0x0f30), "RNRo4/Rn", mcfmac },
+{"msacl",  two(0xa080, 0x0900), two(0xf180, 0x0910), "RNRoiI4/Rn", mcfmac },
+{"msacl",  two(0xa080, 0x0b00), two(0xf180, 0x0910), "RNRoMh4/Rn", mcfmac },
+
+{"msacl",  two(0xa000, 0x0900), two(0xf130, 0x0f00), "RMRmeH", mcfemac },
+{"msacl",  two(0xa000, 0x0900), two(0xf130, 0x0900), "RMRmiIeH", mcfemac },
+{"msacl",  two(0xa000, 0x0b00), two(0xf130, 0x0900), "RMRmMheH", mcfemac },
+{"msacl",  two(0xa000, 0x0900), two(0xf100, 0x0f00), "R3R14/RneG", mcfemac },
+{"msacl",  two(0xa000, 0x0900), two(0xf100, 0x0900), "R3R1iI4/RneG", mcfemac },
+{"msacl",  two(0xa000, 0x0b00), two(0xf100, 0x0900), "R3R1Mh4/RneG", mcfemac },
 
 {"mulsw",	one(0140700),		one(0170700), ";wDd", m68000up|mcf },
 {"mulsl",	two(0046000,004000), two(0177700,0107770), ";lD1", m68020up|cpu32 },

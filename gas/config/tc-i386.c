@@ -76,6 +76,9 @@ static void set_code_flag PARAMS ((int));
 static void set_16bit_gcc_code_flag PARAMS ((int));
 static void set_intel_syntax PARAMS ((int));
 static void set_cpu_arch PARAMS ((int));
+#ifdef TE_PE
+static void pe_directive_secrel PARAMS ((int));
+#endif
 static char *output_invalid PARAMS ((int c));
 static int i386_operand PARAMS ((char *operand_string));
 static int i386_intel_operand PARAMS ((char *operand_string, int got_a_float));
@@ -444,6 +447,9 @@ const pseudo_typeS md_pseudo_table[] =
   {"att_syntax", set_intel_syntax, 0},
   {"file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0},
   {"loc", dwarf2_directive_loc, 0},
+#ifdef TE_PE
+  {"secrel32", pe_directive_secrel, 0},
+#endif
   {0, 0, 0}
 };
 
@@ -3638,6 +3644,50 @@ x86_cons (exp, size)
 }
 #endif
 
+#ifdef TE_PE
+
+#define O_secrel (O_max + 1)
+
+void
+x86_pe_cons_fix_new (frag, off, len, exp)
+     fragS *frag;
+     unsigned int off;
+     unsigned int len;
+     expressionS *exp;
+{
+  enum bfd_reloc_code_real r = reloc (len, 0, 0, NO_RELOC);
+
+  if (exp->X_op == O_secrel)
+    {
+      exp->X_op = O_symbol;
+      r = BFD_RELOC_32_SECREL;
+    }
+
+  fix_new_exp (frag, off, len, exp, 0, r);
+}
+
+static void
+pe_directive_secrel (dummy)
+     int dummy ATTRIBUTE_UNUSED;
+{
+  expressionS exp;
+
+  do
+    {
+      expression (&exp);
+      if (exp.X_op == O_symbol)
+	exp.X_op = O_secrel;
+
+      emit_expr (&exp, 4);
+    }
+  while (*input_line_pointer++ == ',');
+
+  input_line_pointer--;
+  demand_empty_rest_of_line ();
+}
+
+#endif
+
 static int i386_immediate PARAMS ((char *));
 
 static int
@@ -5165,6 +5215,9 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_RVA:
     case BFD_RELOC_VTABLE_ENTRY:
     case BFD_RELOC_VTABLE_INHERIT:
+#ifdef TE_PE
+    case BFD_RELOC_32_SECREL:
+#endif
       code = fixp->fx_r_type;
       break;
     default:

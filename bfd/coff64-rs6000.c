@@ -1,5 +1,5 @@
 /* BFD back-end for IBM RS/6000 "XCOFF64" files.
-   Copyright 2000, 2001, 2002, 2003
+   Copyright 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written Clinton Popetz.
    Contributed by Cygnus Support.
@@ -2737,11 +2737,13 @@ const bfd_target rs6000coff64_vec =
     _bfd_generic_link_split_section,
     bfd_generic_gc_sections,
     bfd_generic_merge_sections,
+    bfd_generic_is_group_section,
     bfd_generic_discard_group,
 
     /* Dynamic */
     _bfd_xcoff_get_dynamic_symtab_upper_bound,
     _bfd_xcoff_canonicalize_dynamic_symtab,
+    _bfd_nodynamic_get_synthetic_symtab,
     _bfd_xcoff_get_dynamic_reloc_upper_bound,
     _bfd_xcoff_canonicalize_dynamic_reloc,
 
@@ -2980,11 +2982,13 @@ const bfd_target aix5coff64_vec =
     _bfd_generic_link_split_section,
     bfd_generic_gc_sections,
     bfd_generic_merge_sections,
+    bfd_generic_is_group_section,
     bfd_generic_discard_group,
 
     /* Dynamic */
     _bfd_xcoff_get_dynamic_symtab_upper_bound,
     _bfd_xcoff_canonicalize_dynamic_symtab,
+    _bfd_nodynamic_get_synthetic_symtab,
     _bfd_xcoff_get_dynamic_reloc_upper_bound,
     _bfd_xcoff_canonicalize_dynamic_reloc,
 

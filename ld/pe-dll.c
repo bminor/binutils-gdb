@@ -917,9 +917,9 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   int s, hint;
   unsigned char *edirectory;
-  unsigned long *eaddresses;
-  unsigned long *enameptrs;
-  unsigned short *eordinals;
+  unsigned char *eaddresses;
+  unsigned char *enameptrs;
+  unsigned char *eordinals;
   unsigned char *enamestr;
   time_t now;
 
@@ -929,10 +929,10 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
 
   /* Note use of array pointer math here.  */
   edirectory = edata_d;
-  eaddresses = (unsigned long *) (edata_d + 40);
-  enameptrs = eaddresses + export_table_size;
-  eordinals = (unsigned short *) (enameptrs + count_exported_byname);
-  enamestr = (char *) (eordinals + count_exported_byname);
+  eaddresses = edata_d + 40;
+  enameptrs = eaddresses + 4 * export_table_size;
+  eordinals = enameptrs + 4 * count_exported_byname;
+  enamestr = eordinals + 2 * count_exported_byname;
 
 #define ERVA(ptr) (((unsigned char *)(ptr) - edata_d) \
 		   + edata_s->output_section->vma - image_base)
@@ -966,27 +966,27 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
   hint = 0;
   for (s = 0; s < NE; s++)
     {
-      if (pe_def_file->exports[s].ordinal != -1)
+      struct bfd_section *ssec = exported_symbol_sections[s];
+      if (ssec && pe_def_file->exports[s].ordinal != -1)
 	{
-	  struct bfd_section *ssec = exported_symbol_sections[s];
 	  unsigned long srva = (exported_symbol_offsets[s]
 				+ ssec->output_section->vma
 				+ ssec->output_offset);
 	  int ord = pe_def_file->exports[s].ordinal;
 
 	  bfd_put_32 (abfd, srva - image_base,
-		      (void *) (eaddresses + ord - min_ordinal));
+		      eaddresses + 4 * (ord - min_ordinal));
 
 	  if (!pe_def_file->exports[s].flag_noname)
 	    {
 	      char *ename = pe_def_file->exports[s].name;
 
-	      bfd_put_32 (abfd, ERVA (enamestr), (void *) enameptrs);
-	      enameptrs++;
+	      bfd_put_32 (abfd, ERVA (enamestr), enameptrs);
+	      enameptrs += 4;
 	      strcpy (enamestr, ename);
 	      enamestr += strlen (enamestr) + 1;
-	      bfd_put_16 (abfd, ord - min_ordinal, (void *) eordinals);
-	      eordinals++;
+	      bfd_put_16 (abfd, ord - min_ordinal, eordinals);
+	      eordinals += 2;
 	      pe_def_file->exports[s].hint = hint++;
 	    }
 	}
@@ -2257,6 +2257,9 @@ pe_dll_generate_implib (def_file *def, const char *impfilename)
       char *internal = def->exports[i].internal_name;
       bfd *n;
 
+      /* Don't add PRIVATE entries to import lib.  */ 	
+      if (pe_def_file->exports[i].flag_private)
+	continue;
       def->exports[i].internal_name = def->exports[i].name;
       n = make_one (def->exports + i, outarch);
       n->next = head;

@@ -140,6 +140,7 @@ int do_dynamic;
 int do_syms;
 int do_reloc;
 int do_sections;
+int do_section_groups;
 int do_segments;
 int do_unwind;
 int do_using_dynamic;
@@ -1740,6 +1741,33 @@ decode_ARM_machine_flags (unsigned e_flags, char buf[])
 	}
       break;
 
+    case EF_ARM_EABI_VER3:
+      strcat (buf, ", Version3 EABI");
+      while (e_flags)
+	{
+	  unsigned flag;
+
+	  /* Process flags one bit at a time.  */
+	  flag = e_flags & - e_flags;
+	  e_flags &= ~ flag;
+
+	  switch (flag)
+	    {
+	    case EF_ARM_BE8:
+	      strcat (buf, ", BE8");
+	      break;
+
+	    case EF_ARM_LE8:
+	      strcat (buf, ", LE8");
+	      break;
+
+	    default:
+	      unknown = 1;
+	      break;
+	    }
+	}
+      break;
+
     case EF_ARM_EABI_UNKNOWN:
       strcat (buf, ", GNU EABI");
       while (e_flags)
@@ -2366,6 +2394,7 @@ struct option options[] =
   {"segments",	       no_argument, 0, 'l'},
   {"sections",	       no_argument, 0, 'S'},
   {"section-headers",  no_argument, 0, 'S'},
+  {"section-groups",   no_argument, 0, 'g'},
   {"symbols",	       no_argument, 0, 's'},
   {"syms",	       no_argument, 0, 's'},
   {"relocs",	       no_argument, 0, 'r'},
@@ -2399,6 +2428,7 @@ usage (void)
      --segments          An alias for --program-headers\n\
   -S --section-headers   Display the sections' header\n\
      --sections          An alias for --section-headers\n\
+  -g --section-groups    Display the section groups\n\
   -e --headers           Equivalent to: -h -l -S\n\
   -s --syms              Display the symbol table\n\
       --symbols          An alias for --syms\n\
@@ -2466,7 +2496,7 @@ parse_args (int argc, char **argv)
     usage ();
 
   while ((c = getopt_long
-	  (argc, argv, "ersuahnldSDAIw::x:i:vVWH", options, NULL)) != EOF)
+	  (argc, argv, "ersuahnldSDAIgw::x:i:vVWH", options, NULL)) != EOF)
     {
       char *cp;
       int section;
@@ -2487,11 +2517,15 @@ parse_args (int argc, char **argv)
 	  do_dynamic++;
 	  do_header++;
 	  do_sections++;
+	  do_section_groups++;
 	  do_segments++;
 	  do_version++;
 	  do_histogram++;
 	  do_arch++;
 	  do_notes++;
+	  break;
+	case 'g':
+	  do_section_groups++;
 	  break;
 	case 'e':
 	  do_header++;
@@ -2719,7 +2753,8 @@ parse_args (int argc, char **argv)
 
   if (!do_dynamic && !do_syms && !do_reloc && !do_unwind && !do_sections
       && !do_segments && !do_header && !do_dump && !do_version
-      && !do_histogram && !do_debugging && !do_arch && !do_notes)
+      && !do_histogram && !do_debugging && !do_arch && !do_notes
+      && !do_section_groups)
     usage ();
   else if (argc < 3)
     {
@@ -3596,7 +3631,7 @@ process_section_headers (FILE *file)
 
 	  printf (" %3s ", get_elf_section_flags (section->sh_flags));
 
-	  printf ("%2ld %3lx %2ld\n",
+	  printf ("%2ld %3lu %2ld\n",
 		  (unsigned long) section->sh_link,
 		  (unsigned long) section->sh_info,
 		  (unsigned long) section->sh_addralign);
@@ -3631,7 +3666,7 @@ process_section_headers (FILE *file)
 
 	  printf (" %3s ", get_elf_section_flags (section->sh_flags));
 
-	  printf ("%2ld %3lx ",
+	  printf ("%2ld %3lu ",
 		  (unsigned long) section->sh_link,
 		  (unsigned long) section->sh_info);
 
@@ -3661,7 +3696,7 @@ process_section_headers (FILE *file)
 
 	  printf (" %3s ", get_elf_section_flags (section->sh_flags));
 
-	  printf ("     %2ld   %3lx     %ld\n",
+	  printf ("     %2ld   %3lu     %ld\n",
 		  (unsigned long) section->sh_link,
 		  (unsigned long) section->sh_info,
 		  (unsigned long) section->sh_addralign);
@@ -3672,6 +3707,124 @@ process_section_headers (FILE *file)
   W (write), A (alloc), X (execute), M (merge), S (strings)\n\
   I (info), L (link order), G (group), x (unknown)\n\
   O (extra OS processing required) o (OS specific), p (processor specific)\n"));
+
+  return 1;
+}
+
+static const char *
+get_group_flags (unsigned int flags)
+{
+  static char buff[32];
+  switch (flags)
+    {
+    case GRP_COMDAT:
+      return "COMDAT";
+
+   default:
+      sprintf (buff, _("[<unknown>: 0x%x]"), flags);
+      break;
+    }
+  return buff;
+}
+
+static int
+process_section_groups (FILE *file)
+{
+  Elf_Internal_Shdr *section;
+  unsigned int i;
+
+  if (!do_section_groups)
+    return 1;
+
+  if (elf_header.e_shnum == 0)
+    {
+      if (do_section_groups)
+	printf (_("\nThere are no section groups in this file.\n"));
+
+      return 1;
+    }
+
+  if (section_headers == NULL)
+    {
+      error (_("Section headers are not available!\n"));
+      abort ();
+    }
+
+  /* Scan the sections for the group section.  */
+  for (i = 0, section = section_headers;
+       i < elf_header.e_shnum;
+       i++, section++)
+    {
+      if (section->sh_type == SHT_GROUP)
+	{
+	  char *name = SECTION_NAME (section);
+	  char *group_name, *strtab, *start, *indices;
+	  unsigned int entry, j, size;
+	  Elf_Internal_Sym *sym;
+	  Elf_Internal_Shdr *symtab_sec, *strtab_sec, *sec;
+	  Elf_Internal_Sym *symtab;
+
+	  /* Get the symbol table.  */
+	  symtab_sec = SECTION_HEADER (section->sh_link);
+	  if (symtab_sec->sh_type != SHT_SYMTAB)
+	    {
+	      error (_("Bad sh_link in group section `%s'\n"), name);
+	      continue;
+	    }
+	  symtab = GET_ELF_SYMBOLS (file, symtab_sec);
+
+	  sym = symtab + section->sh_info;
+
+	  if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	    {
+	      bfd_vma sec_index = SECTION_HEADER_INDEX (sym->st_shndx);
+	      if (sec_index == 0)
+		{
+		  error (_("Bad sh_info in group section `%s'\n"), name);
+		  continue;
+		}
+	      
+	      group_name = SECTION_NAME (section_headers + sec_index);
+	      strtab = NULL;
+	    }
+	  else
+	    {
+	      /* Get the string table.  */
+	      strtab_sec = SECTION_HEADER (symtab_sec->sh_link);
+	      strtab = get_data (NULL, file, strtab_sec->sh_offset,
+				 strtab_sec->sh_size,
+				 _("string table"));
+
+	      group_name = strtab + sym->st_name;
+	    }
+
+	  start = get_data (NULL, file, section->sh_offset,
+			    section->sh_size, _("section data"));
+
+	  indices = start;
+	  size = (section->sh_size / section->sh_entsize) - 1;
+	  entry = byte_get (indices, 4);
+	  indices += 4;
+	  printf ("\n%s group section `%s' [%s] contains %u sections:\n",
+		  get_group_flags (entry), name, group_name, size);
+	  
+	  printf (_("   [Index]    Name\n"));
+	  for (j = 0; j < size; j++)
+	    {
+	      entry = byte_get (indices, 4);
+	      indices += 4;
+
+	      sec = SECTION_HEADER (entry);
+	      printf ("   [%5u]   %s\n",
+		      entry, SECTION_NAME (sec));
+	    }
+
+	  if (strtab)
+	    free (strtab);
+	  if (start)
+	    free (start);
+	}
+    }
 
   return 1;
 }
@@ -6767,7 +6920,7 @@ display_debug_pubnames (Elf_Internal_Shdr *section,
 	  if (offset != 0)
 	    {
 	      data += offset_size;
-	      printf ("    %ld\t\t%s\n", offset, data);
+	      printf ("    %-6ld\t\t%s\n", offset, data);
 	      data += strlen ((char *) data) + 1;
 	    }
 	}
@@ -7941,6 +8094,7 @@ read_and_display_attr_value (unsigned long attribute,
 
     case DW_FORM_addr:
       printf (" %#lx", uvalue);
+      break;
 
     case DW_FORM_flag:
     case DW_FORM_data1:
@@ -9150,13 +9304,19 @@ display_debug_frames (Elf_Internal_Shdr *section,
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_restore_state\n");
 	      rs = remembered_state;
-	      remembered_state = rs->next;
-	      frame_need_space (fc, rs->ncols-1);
-	      memcpy (fc->col_type, rs->col_type, rs->ncols);
-	      memcpy (fc->col_offset, rs->col_offset, rs->ncols * sizeof (int));
-	      free (rs->col_type);
-	      free (rs->col_offset);
-	      free (rs);
+	      if (rs)
+		{
+		  remembered_state = rs->next;
+		  frame_need_space (fc, rs->ncols-1);
+		  memcpy (fc->col_type, rs->col_type, rs->ncols);
+		  memcpy (fc->col_offset, rs->col_offset,
+			  rs->ncols * sizeof (int));
+		  free (rs->col_type);
+		  free (rs->col_offset);
+		  free (rs);
+		}
+	      else if (do_debug_frames_interp)
+		printf ("Mismatched DW_CFA_restore_state\n");
 	      break;
 
 	    case DW_CFA_def_cfa:
@@ -9321,7 +9481,7 @@ debug_displays[] =
   { ".debug_macinfo",		display_debug_macinfo },
   { ".debug_str",		display_debug_str },
   { ".debug_loc",		display_debug_loc },
-  { ".debug_pubtypes",		display_debug_not_supported },
+  { ".debug_pubtypes",		display_debug_pubnames },
   { ".debug_ranges",		display_debug_not_supported },
   { ".debug_static_func",	display_debug_not_supported },
   { ".debug_static_vars",	display_debug_not_supported },
@@ -9787,8 +9947,8 @@ process_mips_specific (FILE *file)
 	  free (econf64);
 	}
 
-      printf (_("\nSection '.conflict' contains %ld entries:\n"),
-	      (long) conflictsno);
+      printf (_("\nSection '.conflict' contains %lu entries:\n"),
+	      (unsigned long) conflictsno);
       puts (_("  Num:    Index       Value  Name"));
 
       for (cnt = 0; cnt < conflictsno; ++cnt)
@@ -10296,6 +10456,8 @@ process_object (char *file_name, FILE *file)
   process_version_sections (file);
 
   process_section_contents (file);
+
+  process_section_groups (file);
 
   process_corefile_contents (file);
 

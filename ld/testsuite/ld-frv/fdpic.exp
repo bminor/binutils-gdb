@@ -42,7 +42,9 @@ run_dump_test "fdpic-pie-5"
 run_dump_test "fdpic-shared-5"
 
 run_dump_test "fdpic-static-6"
+run_dump_test "fdpic-pie-6-fail"
 run_dump_test "fdpic-pie-6"
+run_dump_test "fdpic-shared-6-fail"
 run_dump_test "fdpic-shared-6"
 
 run_dump_test "fdpic-static-7"
@@ -50,7 +52,6 @@ run_dump_test "fdpic-pie-7"
 run_dump_test "fdpic-shared-7"
 
 run_dump_test "fdpic-static-8"
-run_dump_test "fdpic-pie-8-fail"
 run_dump_test "fdpic-pie-8"
 run_dump_test "fdpic-shared-8-fail"
 run_dump_test "fdpic-shared-8"

@@ -469,6 +469,18 @@ struct section_stack
 
 static struct section_stack *section_stack;
 
+static bfd_boolean
+get_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
+{
+  const char *gname = inf;
+  const char *group_name = elf_group_name (sec);
+  
+  return (group_name == gname
+	  || (group_name != NULL
+	      && gname != NULL
+	      && strcmp (group_name, gname) == 0));
+}
+
 /* Handle the .section pseudo-op.  This code supports two different
    syntaxes.
 
@@ -520,8 +532,16 @@ obj_elf_change_section (const char *name,
   previous_section = now_seg;
   previous_subsection = now_subseg;
 
-  old_sec = bfd_get_section_by_name (stdoutput, name);
-  sec = subseg_new (name, 0);
+  old_sec = bfd_get_section_by_name_if (stdoutput, name, get_section,
+					(void *) group_name);
+  if (old_sec)
+    {
+      sec = old_sec;
+      subseg_set (sec, 0);
+    }
+  else
+    sec = subseg_force_new (name, 0);
+
   ssect = _bfd_elf_get_sec_type_attr (stdoutput, name);
 
   if (ssect != NULL)
@@ -580,10 +600,15 @@ obj_elf_change_section (const char *name,
 		       || strcmp (name, ".strtab") == 0
 		       || strcmp (name, ".symtab") == 0))
 	    override = TRUE;
+	  /* .note.GNU-stack can have SHF_EXECINSTR.  */
+	  else if (attr == SHF_EXECINSTR
+		   && strcmp (name, ".note.GNU-stack") == 0)
+	    override = TRUE;
 	  else
 	    {
-	      as_warn (_("setting incorrect section attributes for %s"),
-		       name);
+	      if (group_name == NULL)
+		as_warn (_("setting incorrect section attributes for %s"),
+			 name);
 	      override = TRUE;
 	    }
 	}
@@ -609,6 +634,9 @@ obj_elf_change_section (const char *name,
   flags = md_elf_section_flags (flags, attr, type);
 #endif
 
+  if (linkonce)
+    flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
+
   if (old_sec == NULL)
     {
       symbolS *secsym;
@@ -617,8 +645,6 @@ obj_elf_change_section (const char *name,
       if (type == SHT_NOBITS)
 	seg_info (sec)->bss = 1;
 
-      if (linkonce)
-	flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
       bfd_set_section_flags (stdoutput, sec, flags);
       if (flags & SEC_MERGE)
 	sec->entsize = entsize;
@@ -644,9 +670,6 @@ obj_elf_change_section (const char *name,
 	as_warn (_("ignoring changed section attributes for %s"), name);
       if ((flags & SEC_MERGE) && old_sec->entsize != (unsigned) entsize)
 	as_warn (_("ignoring changed section entity size for %s"), name);
-      if ((attr & SHF_GROUP) != 0
-	  && strcmp (elf_group_name (old_sec), group_name) != 0)
-	as_warn (_("ignoring new section group for %s"), name);
     }
 
 #ifdef md_elf_section_change_hook
@@ -787,7 +810,7 @@ obj_elf_section_name (void)
 	end++;
       if (end == input_line_pointer)
 	{
-	  as_warn (_("missing name"));
+	  as_bad (_("missing name"));
 	  ignore_rest_of_line ();
 	  return NULL;
 	}
@@ -938,7 +961,7 @@ obj_elf_section (int push)
 	      SKIP_WHITESPACE ();
 	      if (*input_line_pointer != '#')
 		{
-		  as_warn (_("character following name is not '#'"));
+		  as_bad (_("character following name is not '#'"));
 		  ignore_rest_of_line ();
 		  return;
 		}

@@ -121,10 +121,17 @@ stat_alloc (size_t size)
 }
 
 bfd_boolean
-unique_section_p (const char *secnam)
+unique_section_p (const asection *sec)
 {
   struct unique_sections *unam;
+  const char *secnam;
 
+  if (link_info.relocatable
+      && sec->owner != NULL
+      && bfd_is_group_section (sec->owner, sec))
+    return TRUE;
+
+  secnam = sec->name;
   for (unam = unique_section_list; unam; unam = unam->next)
     if (wildcardp (unam->name)
 	? fnmatch (unam->name, secnam, 0) == 0
@@ -445,6 +452,7 @@ new_afile (const char *name,
   p->next = NULL;
   p->symbol_count = 0;
   p->dynamic = config.dynamic_link;
+  p->as_needed = as_needed;
   p->whole_archive = whole_archive;
   p->loaded = FALSE;
   lang_statement_append (&input_file_chain,
@@ -1261,7 +1269,7 @@ output_section_callback (lang_wild_statement_type *ptr,
   lang_statement_union_type *before;
 
   /* Exclude sections that match UNIQUE_SECTION_LIST.  */
-  if (unique_section_p (bfd_get_section_name (file->the_bfd, section)))
+  if (unique_section_p (section))
     return;
 
   /* If the wild pattern was marked KEEP, the member sections
@@ -1842,7 +1850,7 @@ open_input_bfds (lang_statement_union_type *s, bfd_boolean force)
 	  /* Maybe we should load the file's symbols.  */
 	  if (s->wild_statement.filename
 	      && ! wildcardp (s->wild_statement.filename))
-	    (void) lookup_name (s->wild_statement.filename);
+	    lookup_name (s->wild_statement.filename);
 	  open_input_bfds (s->wild_statement.children.head, force);
 	  break;
 	case lang_group_statement_enum:
@@ -3348,11 +3356,12 @@ lang_do_assignments_1
 	    if (os->bfd_section != NULL)
 	      {
 		dot = os->bfd_section->vma;
-		(void) lang_do_assignments_1 (os->children.head, os,
-					      os->fill, dot);
-		dot = (os->bfd_section->vma
-		       + TO_ADDR (os->bfd_section->_raw_size));
-
+		lang_do_assignments_1 (os->children.head, os, os->fill, dot);
+		/* .tbss sections effectively have zero size.  */
+		if ((os->bfd_section->flags & SEC_HAS_CONTENTS) != 0
+		    || (os->bfd_section->flags & SEC_THREAD_LOCAL) == 0
+		    || link_info.relocatable)
+		  dot += TO_ADDR (os->bfd_section->_raw_size);
 	      }
 	    if (os->load_base)
 	      {
@@ -3687,7 +3696,7 @@ lang_check (void)
 	  if (! bfd_merge_private_bfd_data (input_bfd, output_bfd))
 	    {
 	      if (command_line.warn_mismatch)
-		einfo (_("%E%X: failed to merge target specific data of file %B\n"),
+		einfo (_("%P%X: failed to merge target specific data of file %B\n"),
 		       input_bfd);
 	    }
 	  if (! command_line.warn_mismatch)
@@ -3937,24 +3946,6 @@ lang_for_each_file (void (*func) (lang_input_statement_type *))
       func (f);
     }
 }
-
-#if 0
-
-/* Not used.  */
-
-void
-lang_for_each_input_section (void (*func) (bfd *ab, asection *as))
-{
-  LANG_FOR_EACH_INPUT_STATEMENT (f)
-    {
-      asection *s;
-
-      for (s = f->the_bfd->sections; s != NULL; s = s->next)
-	func (f->the_bfd, s);
-    }
-}
-
-#endif
 
 void
 ldlang_add_file (lang_input_statement_type *entry)

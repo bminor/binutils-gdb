@@ -1,3 +1,176 @@
+2004-04-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/elf/elf.exp: Remove group1, add group1a and group1b for
+	section group.
+
+	* gas/elf/group1a.d: New file.
+	* gas/elf/group1b.d: Likewise.
+
+	* gas/elf/group1.e: Removed.
+
+2004-04-30  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/reg-alias.s: New file: Test case sensitive register
+	aliases.
+	* gas/arm/reg-alias.d: New file: Expected test output.
+	* gas/arm/arm.exp: Run reg-alias test.
+	Arrange tests in a more orderly fashion.
+
+2004-04-30  Ben Elliston  <bje@au.ibm.com>
+
+	* gas/ppc/power4.s: Add dcbz and dcbzl test cases.
+	* gas/ppc/power4.d: Update accordingly.
+
+2004-04-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/elf/elf.exp: Add group0a, group0b and group1 for section
+	group.
+
+	* gas/elf/group0.s: New file.
+	* gas/elf/group0a.d: Likewise.
+	* gas/elf/group0b.d: Likewise.
+	* gas/elf/group1.e: Likewise.
+	* gas/elf/group1.s: Likewise.
+
+2004-04-23  Nick Clifton  <nickc@redhat.com>
+
+	* gas/symver/symver1.d: Cope with extra symbols inserted by
+	arm-elf toolchains.
+	* gas/symver/symver0.d: Likewise
+	* gas/elf/symver.d: Likewise.
+
+2004-04-22  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* gas/sh/pcrel2.d: Update.
+	* gas/sh/tlsd.d: Update.
+	* gas/sh/tlsnopic.d: Update.
+	* gas/sh/tlspic.d: Update.
+
+2004-04-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* lib/gas-defs.exp (is_elf_format): Add OpenBSD support.
+
+2004-04-22  Atsushi Nemoto  <anemo@mba.ocn.ne.jp>
+
+	* gas/mips/lb-xgot-ilocks.d: Remove nops in load delay slot.
+	* gas/mips/mips-abi32-pic.d: Likewise.
+	* gas/mips/mips-abi32-pic2.d: Likewise.
+	* gas/mips/mips-gp32-fp32-pic.d: Likewise.
+	* gas/mips/mips-gp32-fp64-pic.d: Likewise.
+	* gas/mips/mips-gp64-fp32-pic.d: Likewise.
+	* gas/mips/mips-gp64-fp64-pic.d: Likewise.
+	* gas/mips/relax-swap1-mips2.d: Likewise.
+	* gas/mips/lb-svr4pic-ilocks.d: New test.
+	* gas/mips/mips.exp: Run it.
+
+2004-04-22  Paul Brook  <paul@codesourcery.com>
+
+	* maverick.c (off8s): Test full shifted operand range.
+	(MCC2): Define.
+	(MVDSPACC, MVACCDSP): Use it.
+	* maverick.d, maverick.s: Regenerate.
+
+2004-04-22  Peter Barada <peter@the-baradas.com>
+
+	* gas/m68k/mcf-mac.s: New test: Check ColdFire MAC instructions.
+	* gas/m68k/mcf-emac.s: New test: Similar checks.
+	* gas/m68k/mcf-mac.d: New test: Expected output.
+	* gas/m68k/mcf-emac.d: New test: Likewise.
+	* gas/m68k/all.exp: Run new tests.
+
+2004-04-21  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/elempic.d: File removed as part of -membedded-pic removal.
+	* gas/mips/empic.d: Likewise.
+	* gas/mips/empic.l: Likewise.
+	* gas/mips/empic.s: Likewise.
+	* gas/mips/empic2.d: Likewise.
+	* gas/mips/empic2.s: Likewise.
+	* gas/mips/empic3_e.d: Likewise.
+	* gas/mips/empic3_e.s: Likewise.
+	* gas/mips/empic3_g1.d: Likewise.
+	* gas/mips/empic3_g1.s: Likewise.
+	* gas/mips/empic3_g2.d: Likewise.
+	* gas/mips/empic3_g2.s: Likewise.
+	* gas/mips/jal-empic-elf-2.d: Likewise.
+	* gas/mips/jal-empic-elf-2.s: Likewise.
+	* gas/mips/jal-empic-elf-3.d: Likewise.
+	* gas/mips/jal-empic-elf-3.s: Likewise.
+	* gas/mips/jal-empic-elf.d: Likewise.
+	* gas/mips/jal-empic.d: Likewise.
+	* gas/mips/la-empic.d: Likewise.
+	* gas/mips/la-empic.s: Likewise.
+	* gas/mips/lb-empic.d: Likewise.
+	* gas/mips/ld-empic.d: Likewise.
+	* gas/mips/lif-empic.d: Likewise.
+	* gas/mips/telempic.d: Likewise.
+	* gas/mips/tempic.d: Likewise.
+	* gas/mips/ulh-empic.d: Likewise.
+	* gas/mips/ld-pic.s: Remove code conditional on EMPIC.
+	* gas/mips/lifloat.s: Likewise.
+	* gas/mips/mips.exp: Remove -membedded-pic tests and related comments.
+
+2004-04-20  Brian Ford  <ford@vss.fsi.com>
+	    DJ Delorie  <dj@redhat.com>
+
+	* gas/i386/secrel.s: New test for .secrel32.
+	* gas/i386/secrel.d: Likewise.
+	* gas/i386/i386.exp: Call it for PE targets.
+
+2004-04-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* gas/cfi/cfi-sparc64-1.d: Update.
+
+2004-04-14  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mips/vr4122.[sd]: Change option to -mfix-vr4120.
+
+2004-04-14  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/elf/section2.e-mips: Allow named section symbols.
+	* gas/mips/{,el}empic.d, gas/mips/mips{,el}16-[ef].d: Likewise.
+
+2004-04-13  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* gas/m32r/parallel-2.s: New file: Test	case for parallel code.
+	* gas/m32r/parallel-2.d: New file: Expected results.
+	* gas/m32r/m32r2.exp: Run the test.
+	
+	* gas/m32r/seth.s: New file: Test for seth.
+	* gas/m32r/seth.d: New file: Expected results.
+	* gas/m32r/m32r.exp: Run the new test.
+
+2004-04-01  Asgari Jinia  <asgarij@kpitcummins.com>
+
+	* gas/sh/renesas-1.s, gas/sh/renesas-1.d: New test for -renesas
+	option.
+	* gas/sh/basic.exp: Run the new test.
+
+2004-04-01  Dave Korn  <dk@artimi.com>
+
+	* gas/dlx/alltests.exp: Execute new lohi test.
+	* gas/dlx/lohi.s: New test for spurious lo16/hi16
+	  reloc overflow checking.
+	* gas/dlx/lohi.d: New file: expected output.
+	* gas/dlx/lhi.d: Updated to properly expect lo16
+	  relocations where asked for.
+	* gas/dlx/itype.d: Likewise.
+	* gas/dlx/lhi.d: Corrected cut+paste error in test name.
+
+2004-03-30  Stan Shebs  <shebs@apple.com>
+
+	* gas/macros/macros.exp: Remove mention of MPW config.
+
+2004-03-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/i860/dir-intel03-err.l: Update for junk at end line becoming
+	an error.
+	* gas/m68hc11/m68hc11.exp: Likewise.
+
+2004-03-23  Andreas Schwab  <schwab@suse.de>
+
+	* gas/cfi/cfi-m68k.d: Adjust offsets.
+
 2004-03-22  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/cris/regreg.d: Assemble with --no-mul-bug-abort.
@@ -37,6 +210,51 @@
 	* gas/i386/padlock.s, gas/i386/padlock.d: New tests for
 	VIA PadLock instructions.
 	* gas/i386/i386.exp: Run padlock tests.
+
+2004-03-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/i386/katmai.d: Revert last change.
+
+	* gas/i386/katmai.d: Adjust for clflush change.
+
+2004-03-08  Andreas Jaeger  <aj@suse.de>
+
+	* gas/cfi/cfi-s390x-1.d: Adjust offsets.
+
+2004-03-07  Richard Henderson  <rth@redhat.com>
+
+	* gas/cfi/cfi-common-2.d, gas/cfi/cfi-i386.d: Adjust offsets.
+
+2004-03-07  Andreas Jaeger  <aj@suse.de>
+
+	* gas/cfi/cfi-x86_64.d: Adjust offsets.
+
+2004-03-07  Richard Henderson  <rth@redhat.com>
+
+	* gas/alpha/elf-reloc-8.d, gas/cfi/cfi-alpha-1.d,
+	gas/cfi/cfi-alpha-2.d, gas/cfi/cfi-alpha-3.d, gas/cfi/cfi-common-1.d,
+	gas/cfi/cfi-common-2.d, gas/cfi/cfi-common-3.d: Adjust offsets.
+
+2004-03-03  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* gas/sh/sh64/err-dsp.s: Fix expected error message.
+
+2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/frv/fr405-insn.[sdl]: New test.
+	* gas/frv/fr450-spr.[sd]: New test.
+	* gas/frv/fr450-insn.[sdl]: New test.
+	* gas/frv/fr450-media-issue.[sl]: New test.
+	* gas/frv/allinsn.exp: Run new tests.  Ensure fr405 instructions
+	aren't accepted for -mcpu=fr400 or -mcpu=fr500.  Ensure fr450
+	instructions aren't accepted for -mcpu=fr400, -mcpu=fr405 or
+	-mcpu=fr500.
+
+2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/frv/allinsn.s (rstb, rsth, rst, rstd, rstq): Replace with nops.
+	(rstbf, rsthf, rstf, rstdf, rstqf): Likewise.
+	* gas/frv/allinsn.d: Update accordingly.
 
 2004-02-17  Petko Manolov  <petkan@nucleusys.com>
 

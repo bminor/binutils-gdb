@@ -371,52 +371,52 @@ struct m68k_cpu
 
 static const struct m68k_cpu archs[] =
   {
-    { m68000,  "68000", 0 },
-    { m68010,  "68010", 0 },
-    { m68020,  "68020", 0 },
-    { m68030,  "68030", 0 },
-    { m68040,  "68040", 0 },
-    { m68060,  "68060", 0 },
-    { cpu32,   "cpu32", 0 },
-    { m68881,  "68881", 0 },
-    { m68851,  "68851", 0 },
-    { mcf5200, "5200",  0 },
-    { mcf5206e,"5206e", 0 },
-    { mcf528x, "528x",  0 },
-    { mcf5307, "5307",  0 },
-    { mcf5407, "5407",  0 },
-    { mcfv4e,  "cfv4e", 0 },
+    { m68000,		"68000", 0 },
+    { m68010,		"68010", 0 },
+    { m68020,		"68020", 0 },
+    { m68030,		"68030", 0 },
+    { m68040,		"68040", 0 },
+    { m68060,		"68060", 0 },
+    { cpu32,		"cpu32", 0 },
+    { m68881,		"68881", 0 },
+    { m68851,		"68851", 0 },
+    { mcf5200,		"5200",  0 },
+    { mcf5206e,		"5206e", 0 },
+    { mcf528x|mcfmac,	"528x",  0 },
+    { mcf5307|mcfmac,	"5307",  0 },
+    { mcf5407|mcfmac,	"5407",  0 },
+    { mcfv4e|mcfemac,	"cfv4e", 0 },
     /* Aliases (effectively, so far as gas is concerned) for the above
        cpus.  */
-    { m68020, "68k", 1 },
-    { m68000, "68008", 1 },
-    { m68000, "68302", 1 },
-    { m68000, "68306", 1 },
-    { m68000, "68307", 1 },
-    { m68000, "68322", 1 },
-    { m68000, "68356", 1 },
-    { m68000, "68ec000", 1 },
-    { m68000, "68hc000", 1 },
-    { m68000, "68hc001", 1 },
-    { m68020, "68ec020", 1 },
-    { m68030, "68ec030", 1 },
-    { m68040, "68ec040", 1 },
-    { m68060, "68ec060", 1 },
-    { cpu32,  "68330", 1 },
-    { cpu32,  "68331", 1 },
-    { cpu32,  "68332", 1 },
-    { cpu32,  "68333", 1 },
-    { cpu32,  "68334", 1 },
-    { cpu32,  "68336", 1 },
-    { cpu32,  "68340", 1 },
-    { cpu32,  "68341", 1 },
-    { cpu32,  "68349", 1 },
-    { cpu32,  "68360", 1 },
-    { m68881, "68882", 1 },
-    { mcf5200, "5202", 1 },
-    { mcf5200, "5204", 1 },
-    { mcf5200, "5206", 1 },
-    { mcf5407, "cfv4", 1 },
+    { m68020,		"68k", 1 },
+    { m68000,		"68008", 1 },
+    { m68000,		"68302", 1 },
+    { m68000,		"68306", 1 },
+    { m68000,		"68307", 1 },
+    { m68000,		"68322", 1 },
+    { m68000,		"68356", 1 },
+    { m68000,		"68ec000", 1 },
+    { m68000,		"68hc000", 1 },
+    { m68000,		"68hc001", 1 },
+    { m68020,		"68ec020", 1 },
+    { m68030,		"68ec030", 1 },
+    { m68040,		"68ec040", 1 },
+    { m68060,		"68ec060", 1 },
+    { cpu32,		"68330", 1 },
+    { cpu32,		"68331", 1 },
+    { cpu32,		"68332", 1 },
+    { cpu32,		"68333", 1 },
+    { cpu32,		"68334", 1 },
+    { cpu32,		"68336", 1 },
+    { cpu32,		"68340", 1 },
+    { cpu32,		"68341", 1 },
+    { cpu32,		"68349", 1 },
+    { cpu32,		"68360", 1 },
+    { m68881,		"68882", 1 },
+    { mcf5200,		"5202", 1 },
+    { mcf5200,		"5204", 1 },
+    { mcf5200,		"5206", 1 },
+    { mcf5407|mcfmac,	"cfv4", 1 },
   };
 
 static const int n_archs = sizeof (archs) / sizeof (archs[0]);
@@ -1505,6 +1505,14 @@ m68k_ip (instring)
 		    ++losing;
 		  break;
 
+		case '4':
+		  if (opP->mode != AINDR && opP->mode != AINC && opP->mode != ADEC
+		      && (opP->mode != DISP
+			   || opP->reg < ADDR0
+			   || opP->reg > ADDR7))
+		    ++losing;
+		  break;
+
 		case 'B':	/* FOO */
 		  if (opP->mode != ABSL
 		      || (flag_long_jumps
@@ -1552,6 +1560,12 @@ m68k_ip (instring)
 		    losing++;
 		  break;
 
+		case 'e':
+		  if (opP->reg != ACC && opP->reg != ACC1
+		      && opP->reg != ACC2 && opP->reg != ACC3)
+		    losing++;
+		  break;
+
 		case 'F':
 		  if (opP->mode != FPREG)
 		    losing++;
@@ -1559,6 +1573,11 @@ m68k_ip (instring)
 
 		case 'G':
 		  if (opP->reg != MACSR)
+		    losing++;
+		  break;
+
+		case 'g':
+		  if (opP->reg != ACCEXT01 && opP->reg != ACCEXT23)
 		    losing++;
 		  break;
 
@@ -1571,6 +1590,11 @@ m68k_ip (instring)
 		  if (opP->mode != CONTROL
 		      || opP->reg < COP0
 		      || opP->reg > COP7)
+		    losing++;
+		  break;
+
+		case 'i':
+		  if (opP->mode != LSH && opP->mode != RSH)
 		    losing++;
 		  break;
 
@@ -1994,6 +2018,7 @@ m68k_ip (instring)
 	case 'w':
 	case 'y':
 	case 'z':
+	case '4':
 #ifndef NO_68851
 	case '|':
 #endif
@@ -2519,6 +2544,16 @@ m68k_ip (instring)
 	      as_bad (_("unknown/incorrect operand"));
 	      /* abort (); */
 	    }
+
+	  /* If s[0] is '4', then this is for the mac instructions
+	     that can have a trailing_ampersand set.  If so, set 0x100
+	     bit on tmpreg so install_gen_operand can check for it and
+	     set the appropriate bit (word2, bit 5).  */
+	  if (s[0] == '4')
+	    {
+	      if (opP->trailing_ampersand)
+		tmpreg |= 0x100;
+	    }
 	  install_gen_operand (s[1], tmpreg);
 	  break;
 
@@ -2737,11 +2772,19 @@ m68k_ip (instring)
 	  install_operand (s[1], opP->reg - DATA);
 	  break;
 
+	case 'e':  /* EMAC ACCx, reg/reg.  */
+	  install_operand (s[1], opP->reg - ACC);
+	  break;
+	  
 	case 'E':		/* Ignore it.  */
 	  break;
 
 	case 'F':
 	  install_operand (s[1], opP->reg - FP0);
+	  break;
+
+	case 'g':  /* EMAC ACCEXTx.  */
+	  install_operand (s[1], opP->reg - ACCEXT01);
 	  break;
 
 	case 'G':		/* Ignore it.  */
@@ -2751,6 +2794,10 @@ m68k_ip (instring)
 	case 'I':
 	  tmpreg = opP->reg - COP0;
 	  install_operand (s[1], tmpreg);
+	  break;
+
+	case 'i':  /* MAC/EMAC scale factor.  */
+	  install_operand (s[1], opP->mode == LSH ? 0x1 : 0x3);
 	  break;
 
 	case 'J':		/* JF foo.  */
@@ -3286,24 +3333,45 @@ install_operand (mode, val)
       the_ins.opcode[0] |= ((val & 0x7) << 9);
       the_ins.opcode[1] |= ((val & 0x10) << (7 - 4));
       break;
-    case 'n':
+    case 'n': /* MAC/EMAC Rx on !load.  */
       the_ins.opcode[0] |= ((val & 0x8) << (6 - 3));
       the_ins.opcode[0] |= ((val & 0x7) << 9);
+      the_ins.opcode[1] |= ((val & 0x10) << (7 - 4));
       break;
-    case 'o':
+    case 'o': /* MAC/EMAC Rx on load.  */
       the_ins.opcode[1] |= val << 12;
       the_ins.opcode[1] |= ((val & 0x10) << (7 - 4));
       break;
-    case 'M':
+    case 'M': /* MAC/EMAC Ry on !load.  */
       the_ins.opcode[0] |= (val & 0xF);
       the_ins.opcode[1] |= ((val & 0x10) << (6 - 4));
       break;
-    case 'N':
+    case 'N': /* MAC/EMAC Ry on load.  */
       the_ins.opcode[1] |= (val & 0xF);
       the_ins.opcode[1] |= ((val & 0x10) << (6 - 4));
       break;
     case 'h':
       the_ins.opcode[1] |= ((val != 1) << 10);
+      break;
+    case 'F':
+      the_ins.opcode[0] |= ((val & 0x3) << 9);
+      break;
+    case 'f':
+      the_ins.opcode[0] |= ((val & 0x3) << 0);
+      break;
+    case 'G':
+      the_ins.opcode[0] |= ((~val & 0x1) << 7);
+      the_ins.opcode[1] |= ((val & 0x2) << (4 - 1));
+      break;
+    case 'H':
+      the_ins.opcode[0] |= ((val & 0x1) << 7);
+      the_ins.opcode[1] |= ((val & 0x2) << (4 - 1));
+      break;
+    case 'I':
+      the_ins.opcode[1] |= ((val & 0x3) << 9);
+      break;
+    case ']':
+      the_ins.opcode[0] |= (val & 0x1) <<10;
       break;
     case 'c':
     default:
@@ -3318,6 +3386,11 @@ install_gen_operand (mode, val)
 {
   switch (mode)
     {
+    case '/':  /* Special for mask loads for mac/msac insns with
+		  possible mask; trailing_ampersend set in bit 8.  */
+      the_ins.opcode[0] |= (val & 0x3f);
+      the_ins.opcode[1] |= (((val & 0x100) >> 8) << 5);
+      break;
     case 's':
       the_ins.opcode[0] |= val;
       break;
@@ -3507,6 +3580,12 @@ static const struct init_entry init_table[] =
   { "cc", CCR },
 
   { "acc", ACC },
+  { "acc0", ACC },
+  { "acc1", ACC1 },
+  { "acc2", ACC2 },
+  { "acc3", ACC3 },
+  { "accext01", ACCEXT01 },
+  { "accext23", ACCEXT23 },
   { "macsr", MACSR },
   { "mask", MASK },
 

@@ -613,6 +613,12 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 }
 
 bfd_boolean
+bfd_elf_is_group_section (bfd *abfd ATTRIBUTE_UNUSED, const asection *sec)
+{
+  return elf_next_in_group (sec) != NULL;
+}
+
+bfd_boolean
 bfd_elf_discard_group (bfd *abfd ATTRIBUTE_UNUSED, asection *group)
 {
   asection *first = elf_next_in_group (group);
@@ -651,6 +657,9 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
   newsect = bfd_make_section_anyway (abfd, name);
   if (newsect == NULL)
     return FALSE;
+
+  hdr->bfd_section = newsect;
+  elf_section_data (newsect)->this_hdr = *hdr;
 
   /* Always use the real type/flags.  */
   elf_section_type (newsect) = hdr->sh_type;
@@ -797,9 +806,6 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	    }
 	}
     }
-
-  hdr->bfd_section = newsect;
-  elf_section_data (newsect)->this_hdr = *hdr;
 
   return TRUE;
 }
@@ -1479,8 +1485,7 @@ _bfd_elf_link_hash_table_create (bfd *abfd)
 
 /* This is a hook for the ELF emulation code in the generic linker to
    tell the backend linker what file name to use for the DT_NEEDED
-   entry for a dynamic object.  The generic linker passes name as an
-   empty string to indicate that no DT_NEEDED entry should be made.  */
+   entry for a dynamic object.  */
 
 void
 bfd_elf_set_dt_needed_name (bfd *abfd, const char *name)
@@ -1491,11 +1496,11 @@ bfd_elf_set_dt_needed_name (bfd *abfd, const char *name)
 }
 
 void
-bfd_elf_set_dt_needed_soname (bfd *abfd, const char *name)
+bfd_elf_set_dyn_lib_class (bfd *abfd, int lib_class)
 {
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
       && bfd_get_format (abfd) == bfd_object)
-    elf_dt_soname (abfd) = name;
+    elf_dyn_lib_class (abfd) = lib_class;
 }
 
 /* Get the list of DT_NEEDED entries for a link.  This is a hook for
@@ -1946,8 +1951,10 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	    hdr->bfd_section->flags
 	      |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 
+	  /* We try to keep the same section order as it comes in.  */
+	  idx += n_elt;
 	  while (--n_elt != 0)
-	    if ((s = (++idx)->shdr->bfd_section) != NULL
+	    if ((s = (--idx)->shdr->bfd_section) != NULL
 		&& elf_next_in_group (s) != NULL)
 	      {
 		elf_next_in_group (hdr->bfd_section) = s;
@@ -2055,6 +2062,7 @@ static struct bfd_elf_special_section const special_sections[] =
   { ".gnu.version",   12,  0, SHT_GNU_versym, 0 },
   { ".gnu.version_d", 14,  0, SHT_GNU_verdef, 0 },
   { ".gnu.version_r", 14,  0, SHT_GNU_verneed, 0 },
+  { ".note.GNU-stack",15,  0, SHT_PROGBITS, 0 },
   { ".note",           5, -1, SHT_NOTE,     0 },
   { ".rela",           5, -1, SHT_RELA,     0 },
   { ".rel",            4, -1, SHT_REL,      0 },
@@ -2387,7 +2395,31 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
      asect->flags.  */
   if (this_hdr->sh_type == SHT_NULL)
     {
-      if ((asect->flags & SEC_ALLOC) != 0
+      if ((asect->flags & SEC_GROUP) != 0)
+	{
+	  /* We also need to mark SHF_GROUP here for relocatable
+	     link.  */
+	  struct bfd_link_order *l;
+	  asection *elt;
+
+	  for (l = asect->link_order_head; l != NULL; l = l->next)
+	    if (l->type == bfd_indirect_link_order
+		&& (elt = elf_next_in_group (l->u.indirect.section)) != NULL)
+	      do
+		{
+		  /* The name is not important. Anything will do.  */
+		  elf_group_name (elt->output_section) = "G";
+		  elf_section_flags (elt->output_section) |= SHF_GROUP;
+
+		  elt = elf_next_in_group (elt);
+		  /* During a relocatable link, the lists are
+		     circular.  */
+		}
+	      while (elt != elf_next_in_group (l->u.indirect.section));
+
+	  this_hdr->sh_type = SHT_GROUP;
+	}
+      else if ((asect->flags & SEC_ALLOC) != 0
 	  && (((asect->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
 	      || (asect->flags & SEC_NEVER_LOAD) != 0))
 	this_hdr->sh_type = SHT_NOBITS;
@@ -3187,6 +3219,7 @@ map_sections_to_segments (bfd *abfd)
   struct elf_segment_map **pm;
   struct elf_segment_map *m;
   asection *last_hdr;
+  bfd_vma last_size;
   unsigned int phdr_index;
   bfd_vma maxpagesize;
   asection **hdrpp;
@@ -3266,6 +3299,7 @@ map_sections_to_segments (bfd *abfd)
      segment when the start of the second section can be placed within
      a few bytes of the end of the first section.  */
   last_hdr = NULL;
+  last_size = 0;
   phdr_index = 0;
   maxpagesize = get_elf_backend_data (abfd)->maxpagesize;
   writable = FALSE;
@@ -3314,18 +3348,19 @@ map_sections_to_segments (bfd *abfd)
              segment.  */
 	  new_segment = TRUE;
 	}
-      else if (BFD_ALIGN (last_hdr->lma + last_hdr->_raw_size, maxpagesize)
+      else if (BFD_ALIGN (last_hdr->lma + last_size, maxpagesize)
 	       < BFD_ALIGN (hdr->lma, maxpagesize))
 	{
 	  /* If putting this section in this segment would force us to
              skip a page in the segment, then we need a new segment.  */
 	  new_segment = TRUE;
 	}
-      else if ((last_hdr->flags & SEC_LOAD) == 0
-	       && (hdr->flags & SEC_LOAD) != 0)
+      else if ((last_hdr->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) == 0
+	       && (hdr->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) != 0)
 	{
 	  /* We don't want to put a loadable section after a
-             nonloadable section in the same segment.  */
+             nonloadable section in the same segment.
+             Consider .tbss sections as loadable for this purpose.  */
 	  new_segment = TRUE;
 	}
       else if ((abfd->flags & D_PAGED) == 0)
@@ -3337,7 +3372,7 @@ map_sections_to_segments (bfd *abfd)
 	}
       else if (! writable
 	       && (hdr->flags & SEC_READONLY) == 0
-	       && (((last_hdr->lma + last_hdr->_raw_size - 1)
+	       && (((last_hdr->lma + last_size - 1)
 		    & ~(maxpagesize - 1))
 		   != (hdr->lma & ~(maxpagesize - 1))))
 	{
@@ -3360,9 +3395,12 @@ map_sections_to_segments (bfd *abfd)
 	{
 	  if ((hdr->flags & SEC_READONLY) == 0)
 	    writable = TRUE;
-	  /* Ignore .tbss section for segment layout purposes.  */
+	  last_hdr = hdr;
+	  /* .tbss sections effectively have zero size.  */
 	  if ((hdr->flags & (SEC_THREAD_LOCAL | SEC_LOAD)) != SEC_THREAD_LOCAL)
-	    last_hdr = hdr;
+	    last_size = hdr->_raw_size;
+	  else
+	    last_size = 0;
 	  continue;
 	}
 
@@ -3382,6 +3420,11 @@ map_sections_to_segments (bfd *abfd)
 	writable = FALSE;
 
       last_hdr = hdr;
+      /* .tbss sections effectively have zero size.  */
+      if ((hdr->flags & (SEC_THREAD_LOCAL | SEC_LOAD)) != SEC_THREAD_LOCAL)
+	last_size = hdr->_raw_size;
+      else
+	last_size = 0;
       phdr_index = i;
       phdr_in_segment = FALSE;
     }
@@ -7502,4 +7545,80 @@ bfd_elf_bfd_from_remote_memory
 {
   return (*get_elf_backend_data (templ)->elf_backend_bfd_from_remote_memory)
     (templ, ehdr_vma, loadbasep, target_read_memory);
+}
+
+long
+_bfd_elf_get_synthetic_symtab (bfd *abfd, asymbol **dynsyms, asymbol **ret)
+{
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  asection *relplt;
+  asymbol *s;
+  const char *relplt_name;
+  bfd_boolean (*slurp_relocs) (bfd *, asection *, asymbol **, bfd_boolean);
+  arelent *p;
+  long count, i, n;
+  size_t size;
+  Elf_Internal_Shdr *hdr;
+  char *names;
+  asection *plt;
+
+  *ret = NULL;
+  if (!bed->plt_sym_val)
+    return 0;
+
+  relplt_name = bed->relplt_name;
+  if (relplt_name == NULL)
+    relplt_name = bed->default_use_rela_p ? ".rela.plt" : ".rel.plt";
+  relplt = bfd_get_section_by_name (abfd, relplt_name);
+  if (relplt == NULL)
+    return 0;
+
+  hdr = &elf_section_data (relplt)->this_hdr;
+  if (hdr->sh_link != elf_dynsymtab (abfd)
+      || (hdr->sh_type != SHT_REL && hdr->sh_type != SHT_RELA))
+    return 0;
+
+  plt = bfd_get_section_by_name (abfd, ".plt");
+  if (plt == NULL)
+    return 0;
+
+  slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
+  if (! (*slurp_relocs) (abfd, relplt, dynsyms, TRUE))
+    return -1;
+
+  count = relplt->_raw_size / hdr->sh_entsize;
+  size = count * sizeof (asymbol);
+  p = relplt->relocation;
+  for (i = 0; i < count; i++, s++, p++)
+    size += strlen ((*p->sym_ptr_ptr)->name) + sizeof ("@plt");
+
+  s = *ret = bfd_malloc (size);
+  if (s == NULL)
+    return -1;
+
+  names = (char *) (s + count);
+  p = relplt->relocation;
+  n = 0;
+  for (i = 0; i < count; i++, s++, p++)
+    {
+      size_t len;
+      bfd_vma addr;
+
+      addr = bed->plt_sym_val (i, plt, p);
+      if (addr == (bfd_vma) -1)
+	continue;
+
+      *s = **p->sym_ptr_ptr;
+      s->section = plt;
+      s->value = addr - plt->vma;
+      s->name = names;
+      len = strlen ((*p->sym_ptr_ptr)->name);
+      memcpy (names, (*p->sym_ptr_ptr)->name, len);
+      names += len;
+      memcpy (names, "@plt", sizeof ("@plt"));
+      names += sizeof ("@plt");
+      ++n;
+    }
+
+  return n;
 }

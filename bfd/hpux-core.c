@@ -276,7 +276,8 @@ hpux_core_core_file_p (abfd)
 	case CORE_ANON_SHMEM:
 	  if (!make_bfd_asection (abfd, ".data",
 				  SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS,
-				  core_header.len, core_header.addr, 2))
+				  core_header.len,
+				  (bfd_vma) core_header.addr, 2))
 	    goto fail;
 
 	  bfd_seek (abfd, (file_ptr) core_header.len, SEEK_CUR);

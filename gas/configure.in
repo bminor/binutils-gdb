@@ -376,7 +376,6 @@ changequote([,])dnl
 
       # don't change em like *-*-bsd does
       mips-dec-openbsd*)		fmt=elf endian=little ;;
-      mips-dec-bsd*)			fmt=aout endian=little ;;
       mips-sony-bsd*)			fmt=ecoff ;;
       mips-*-bsd*)
 	    AC_MSG_ERROR(Unknown vendor for mips-bsd configuration.) ;;
@@ -433,7 +432,7 @@ changequote([,])dnl
 		AC_MSG_ERROR(Solaris must be configured little endian)
 	    fi ;;
       ppc-*-rtems*)			fmt=elf ;;
-      ppc-*-macos* | ppc-*-mpw*)	fmt=coff em=macos ;;
+      ppc-*-macos*)			fmt=coff em=macos ;;
       ppc-*-netware*)			fmt=elf em=ppcnw ;;
       ppc-**-nto*)			fmt=elf ;;
       ppc-*-kaos*)			fmt=elf ;;

@@ -122,11 +122,11 @@ This tells the assembler to accept MDMX instructions.
 Cause nops to be inserted if the read of the destination register
 of an mfhi or mflo instruction occurs in the following two instructions.
 
-@item -mfix-vr4122-bugs
-@itemx -no-mfix-vr4122-bugs
-Insert @samp{nop} instructions to avoid errors in certain versions of
-the vr4122 core.  This option is intended to be used on GCC-generated
-code: it is not designed to catch errors in hand-written assembler code.
+@item -mfix-vr4120
+@itemx -no-mfix-vr4120
+Insert nops to work around certain VR4120 errata.  This option is
+intended to be used on GCC-generated code: it is not designed to catch
+all problems in hand-written assembler code.
 
 @item -m4010
 @itemx -no-m4010

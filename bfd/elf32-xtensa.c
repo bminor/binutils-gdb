@@ -1,5 +1,5 @@
 /* Xtensa-specific support for 32-bit ELF.
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -497,13 +497,15 @@ xtensa_read_table_entries (abfd, section, table_p, sec_name)
   int block_count;
   bfd_size_type num_records;
   Elf_Internal_Rela *internal_relocs;
+  bfd_vma section_addr;
 
   table_section_name = 
     xtensa_get_property_section_name (section, sec_name);
   table_section = bfd_get_section_by_name (abfd, table_section_name);
   free (table_section_name);
   if (table_section != NULL)
-    table_size = bfd_get_section_size_before_reloc (table_section);
+    table_size = (table_section->_cooked_size
+		  ? table_section->_cooked_size : table_section->_raw_size);
   
   if (table_size == 0) 
     {
@@ -517,10 +519,12 @@ xtensa_read_table_entries (abfd, section, table_p, sec_name)
     bfd_malloc (num_records * sizeof (property_table_entry));
   block_count = 0;
   
+  section_addr = section->output_section->vma + section->output_offset;
+
   /* If the file has not yet been relocated, process the relocations
      and sort out the table entries that apply to the specified section.  */
   internal_relocs = retrieve_internal_relocs (abfd, table_section, TRUE);
-  if (internal_relocs)
+  if (internal_relocs && !table_section->reloc_done)
     {
       unsigned i;
 
@@ -539,7 +543,7 @@ xtensa_read_table_entries (abfd, section, table_p, sec_name)
 	    {
 	      bfd_vma sym_off = get_elf_r_symndx_offset (abfd, r_symndx);
 	      blocks[block_count].address =
-		(section->vma + sym_off + rel->r_addend
+		(section_addr + sym_off + rel->r_addend
 		 + bfd_get_32 (abfd, table_data + rel->r_offset));
 	      blocks[block_count].size =
 		bfd_get_32 (abfd, table_data + rel->r_offset + 4);
@@ -549,16 +553,16 @@ xtensa_read_table_entries (abfd, section, table_p, sec_name)
     }
   else
     {
-      /* No relocations.  Presumably the file has been relocated
-	 and the addresses are already in the table.  */
+      /* The file has already been relocated and the addresses are
+	 already in the table.  */
       bfd_vma off;
 
       for (off = 0; off < table_size; off += 8) 
 	{
 	  bfd_vma address = bfd_get_32 (abfd, table_data + off);
 
-	  if (address >= section->vma
-	      && address < ( section->vma + section->_raw_size))
+	  if (address >= section_addr
+	      && address < ( section_addr + section->_raw_size))
 	    {
 	      blocks[block_count].address = address;
 	      blocks[block_count].size =
@@ -619,19 +623,12 @@ elf_xtensa_check_relocs (abfd, info, sec, relocs)
   struct elf_link_hash_entry **sym_hashes;
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
-  property_table_entry *lit_table;
-  int ltblsize;
 
   if (info->relocatable)
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
-
-  ltblsize = xtensa_read_table_entries (abfd, sec, &lit_table,
-					XTENSA_LIT_SEC_NAME);
-  if (ltblsize < 0)
-    return FALSE;
 
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
@@ -669,11 +666,6 @@ elf_xtensa_check_relocs (abfd, info, sec, relocs)
 
 	  if ((sec->flags & SEC_ALLOC) != 0)
 	    {
-	      if ((sec->flags & SEC_READONLY) != 0
-		  && !elf_xtensa_in_literal_pool (lit_table, ltblsize,
-						  sec->vma + rel->r_offset))
-		h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
-
 	      if (h->got.refcount <= 0)
 		h->got.refcount = 1;
 	      else
@@ -689,11 +681,6 @@ elf_xtensa_check_relocs (abfd, info, sec, relocs)
 
 	  if ((sec->flags & SEC_ALLOC) != 0)
 	    {
-	      if ((sec->flags & SEC_READONLY) != 0
-		  && !elf_xtensa_in_literal_pool (lit_table, ltblsize,
-						  sec->vma + rel->r_offset))
-		h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
-
 	      if (h->plt.refcount <= 0)
 		{
 		  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
@@ -736,14 +723,6 @@ elf_xtensa_check_relocs (abfd, info, sec, relocs)
 		  elf_local_got_refcounts (abfd) = local_got_refcounts;
 		}
 	      local_got_refcounts[r_symndx] += 1;
-
-	      /* If the relocation is not inside the GOT, the DF_TEXTREL
-		 flag needs to be set.  */
-	      if (info->shared
-		  && (sec->flags & SEC_READONLY) != 0
-		  && !elf_xtensa_in_literal_pool (lit_table, ltblsize,
-						  sec->vma + rel->r_offset))
-		info->flags |= DF_TEXTREL;
 	    }
 	  break;
 
@@ -758,14 +737,14 @@ elf_xtensa_check_relocs (abfd, info, sec, relocs)
 	case R_XTENSA_GNU_VTINHERIT:
 	  /* This relocation describes the C++ object vtable hierarchy.
 	     Reconstruct it for later use during GC.  */
-	  if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
 	    return FALSE;
 	  break;
 
 	case R_XTENSA_GNU_VTENTRY:
 	  /* This relocation describes which C++ vtable entries are actually
 	     used.  Record for later use during GC.  */
-	  if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+	  if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
 	    return FALSE;
 	  break;
 
@@ -774,7 +753,6 @@ elf_xtensa_check_relocs (abfd, info, sec, relocs)
 	}
     }
 
-  free (lit_table);
   return TRUE;
 }
 
@@ -1044,7 +1022,6 @@ elf_xtensa_make_sym_local (info, h)
   else
     {
       /* Don't need any dynamic relocations at all.  */
-      h->elf_link_hash_flags &= ~ELF_LINK_NON_GOT_REF;
       h->plt.refcount = 0;
       h->got.refcount = 0;
     }
@@ -1063,11 +1040,6 @@ elf_xtensa_fix_refcounts (h, arg)
 
   if (! xtensa_elf_dynamic_symbol_p (h, info))
     elf_xtensa_make_sym_local (info, h);
-
-  /* If the symbol has a relocation outside the GOT, set the
-     DF_TEXTREL flag.  */
-  if ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) != 0)
-    info->flags |= DF_TEXTREL;
 
   return TRUE;
 }
@@ -1366,7 +1338,7 @@ elf_xtensa_size_dynamic_sections (output_bfd, info)
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
       if (! info->shared)
 	{
@@ -1388,12 +1360,6 @@ elf_xtensa_size_dynamic_sections (output_bfd, info)
 	  if (!add_dynamic_entry (DT_RELA, 0)
 	      || !add_dynamic_entry (DT_RELASZ, 0)
 	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf32_External_Rela)))
-	    return FALSE;
-	}
-
-      if ((info->flags & DF_TEXTREL) != 0)
-	{
-	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return FALSE;
 	}
 
@@ -1851,6 +1817,8 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
   struct elf_link_hash_entry **sym_hashes;
   asection *srelgot, *srelplt;
   bfd *dynobj;
+  property_table_entry *lit_table = 0;
+  int ltblsize = 0;
   char *error_message = NULL;
 
   if (xtensa_default_isa == NULL)
@@ -1866,6 +1834,14 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
     {
       srelgot = bfd_get_section_by_name (dynobj, ".rela.got");;
       srelplt = bfd_get_section_by_name (dynobj, ".rela.plt");
+    }
+
+  if (elf_hash_table (info)->dynamic_sections_created)
+    {
+      ltblsize = xtensa_read_table_entries (input_bfd, input_section,
+					    &lit_table, XTENSA_LIT_SEC_NAME);
+      if (ltblsize < 0)
+	return FALSE;
     }
 
   rel = relocs;
@@ -1993,10 +1969,10 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 	}
       else
 	{
-	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx,
-				   symtab_hdr, relocation, sec,
-				   unresolved_reloc, info,
-				   warned);
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   h, sec, relocation,
+				   unresolved_reloc, warned);
 
 	  if (relocation == 0
 	      && !unresolved_reloc
@@ -2067,6 +2043,20 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 		{
 		  outrel.r_offset += (input_section->output_section->vma
 				      + input_section->output_offset);
+
+		  /* Complain if the relocation is in a read-only section
+		     and not in a literal pool.  */
+		  if ((input_section->flags & SEC_READONLY) != 0
+		      && !elf_xtensa_in_literal_pool (lit_table, ltblsize,
+						      outrel.r_offset))
+		    {
+		      error_message =
+			_("dynamic relocation in read-only section");
+		      if (!((*info->callbacks->reloc_dangerous)
+			    (info, error_message, input_bfd, input_section,
+			     rel->r_offset)))
+			return FALSE;
+		    }
 
 		  if (dynamic_symbol)
 		    {
@@ -2154,6 +2144,11 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 	    return FALSE;
 	}
     }
+
+  if (lit_table)
+    free (lit_table);
+
+  input_section->reloc_done = TRUE;
 
   return TRUE;
 }
@@ -2730,7 +2725,7 @@ elf_xtensa_discard_info_for_section (abfd, cookie, info, sec)
       while (cookie->rel < cookie->relend
 	     && cookie->rel->r_offset == offset)
 	{
-	  if (_bfd_elf32_reloc_symbol_deleted_p (offset, cookie))
+	  if (bfd_elf_reloc_symbol_deleted_p (offset, cookie))
 	    {
 	      /* Remove the table entry.  (If the reloc type is NONE, then
 		 the entry has already been merged with another and deleted
@@ -3441,7 +3436,7 @@ struct value_map_hash_table_struct
 
 
 static bfd_boolean is_same_value
-  PARAMS ((const literal_value *, const literal_value *));
+  PARAMS ((const literal_value *, const literal_value *, bfd_boolean));
 static value_map_hash_table *value_map_hash_table_init
   PARAMS ((void));
 static unsigned hash_literal_value
@@ -3449,16 +3444,20 @@ static unsigned hash_literal_value
 static unsigned hash_bfd_vma
   PARAMS ((bfd_vma));
 static value_map *get_cached_value
-  PARAMS ((value_map_hash_table *, const literal_value *));
+  PARAMS ((value_map_hash_table *, const literal_value *, bfd_boolean));
 static value_map *add_value_map
-  PARAMS ((value_map_hash_table *, const literal_value *, const r_reloc *));
+  PARAMS ((value_map_hash_table *, const literal_value *, const r_reloc *,
+	   bfd_boolean));
 
 
 static bfd_boolean
-is_same_value (src1, src2)
+is_same_value (src1, src2, final_static_link)
      const literal_value *src1;
      const literal_value *src2;
+     bfd_boolean final_static_link;
 {
+  struct elf_link_hash_entry *h1, *h2;
+
   if (r_reloc_is_const (&src1->r_rel) != r_reloc_is_const (&src2->r_rel)) 
     return FALSE;
 
@@ -3476,8 +3475,14 @@ is_same_value (src1, src2)
   if (src1->value != src2->value)
     return FALSE;
   
-  /* Now check for the same section and the same elf_hash.  */
-  if (r_reloc_is_defined (&src1->r_rel))
+  /* Now check for the same section (if defined) or the same elf_hash
+     (if undefined or weak).  */
+  h1 = r_reloc_get_hash_entry (&src1->r_rel);
+  h2 = r_reloc_get_hash_entry (&src2->r_rel);
+  if (r_reloc_is_defined (&src1->r_rel)
+      && (final_static_link
+	  || ((!h1 || h1->root.type != bfd_link_hash_defweak)
+	      && (!h2 || h2->root.type != bfd_link_hash_defweak))))
     {
       if (r_reloc_get_section (&src1->r_rel)
 	  != r_reloc_get_section (&src2->r_rel))
@@ -3485,11 +3490,8 @@ is_same_value (src1, src2)
     }
   else
     {
-      if (r_reloc_get_hash_entry (&src1->r_rel)
-	  != r_reloc_get_hash_entry (&src2->r_rel))
-	return FALSE;
-
-      if (r_reloc_get_hash_entry (&src1->r_rel) == 0)
+      /* Require that the hash entries (i.e., symbols) be identical.  */
+      if (h1 != h2 || h1 == 0)
 	return FALSE;
     }
 
@@ -3550,9 +3552,10 @@ hash_literal_value (src)
 /* Check if the specified literal_value has been seen before.  */
 
 static value_map *
-get_cached_value (map, val)
+get_cached_value (map, val, final_static_link)
      value_map_hash_table *map;
      const literal_value *val;
+     bfd_boolean final_static_link;
 {
   value_map *map_e;
   value_map *bucket;
@@ -3563,7 +3566,7 @@ get_cached_value (map, val)
   bucket = map->buckets[idx];
   for (map_e = bucket; map_e; map_e = map_e->next)
     {
-      if (is_same_value (&map_e->val, val))
+      if (is_same_value (&map_e->val, val, final_static_link))
 	return map_e;
     }
   return NULL;
@@ -3574,17 +3577,18 @@ get_cached_value (map, val)
    already has an entry here.  */
 
 static value_map *
-add_value_map (map, val, loc)
+add_value_map (map, val, loc, final_static_link)
      value_map_hash_table *map;
      const literal_value *val;
      const r_reloc *loc;
+     bfd_boolean final_static_link;
 {
   value_map **bucket_p;
   unsigned idx;
 
   value_map *val_e = (value_map *) bfd_zmalloc (sizeof (value_map));
 
-  BFD_ASSERT (get_cached_value (map, val) == NULL);
+  BFD_ASSERT (get_cached_value (map, val, final_static_link) == NULL);
   val_e->val = *val;
   val_e->loc = *loc;
 
@@ -4490,6 +4494,7 @@ remove_literals (abfd, sec, link_info, values)
   bfd_byte *contents;
   Elf_Internal_Rela *internal_relocs;
   source_reloc *src_relocs;
+  bfd_boolean final_static_link;
   bfd_boolean ok = TRUE;
   int i;
 
@@ -4509,6 +4514,10 @@ remove_literals (abfd, sec, link_info, values)
       ok = FALSE;
       goto error_return;
     }
+
+  final_static_link =
+    (!link_info->relocatable
+     && !elf_hash_table (link_info)->dynamic_sections_created);
 
   /* Sort the source_relocs by target offset.  */
   src_relocs = relax_info->src_relocs;
@@ -4562,7 +4571,7 @@ remove_literals (abfd, sec, link_info, values)
       val.value = bfd_get_32 (abfd, contents + rel->r_rel.target_offset);
           
       /* Check if we've seen another literal with the same value.  */
-      val_map = get_cached_value (values, &val);
+      val_map = get_cached_value (values, &val, final_static_link);
       if (val_map != NULL) 
 	{
 	  /* First check that THIS and all the other relocs to this
@@ -4585,7 +4594,7 @@ remove_literals (abfd, sec, link_info, values)
 	{
 	  /* This is the first time we've seen this literal value.  */
 	  BFD_ASSERT (sec == r_reloc_get_section (&rel->r_rel));
-	  add_value_map (values, &val, &rel->r_rel);
+	  add_value_map (values, &val, &rel->r_rel, final_static_link);
 	}
     }
 
@@ -5825,7 +5834,6 @@ static struct bfd_elf_special_section const elf_xtensa_special_sections[]=
 
 #define elf_info_to_howto		     elf_xtensa_info_to_howto_rela
 
-#define bfd_elf32_bfd_final_link	     bfd_elf32_bfd_final_link
 #define bfd_elf32_bfd_merge_private_bfd_data elf_xtensa_merge_private_bfd_data
 #define bfd_elf32_new_section_hook	     elf_xtensa_new_section_hook
 #define bfd_elf32_bfd_print_private_bfd_data elf_xtensa_print_private_bfd_data

@@ -203,6 +203,9 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 	if { ![istarget hppa*64*-*-linux*] } {
 	    setup_xfail "hppa*-*-linux*"
 	}
+	if { [istarget sparc*-*-linux*] && [is_elf64 $tmpdir/mainnp.o] } {
+	    setup_xfail "sparc*-*-linux*"
+	}
 	setup_xfail "x86_64-*-linux*"
 	setup_xfail "s390x-*-linux*"
 	shared_test shnp "shared (non PIC)" mainnp.o sh1np.o sh2np.o shared
@@ -219,6 +222,9 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 	setup_xfail "mips*-*-linux*"
 	if { ![istarget hppa*64*-*-linux*] } {
 	    setup_xfail "hppa*-*-linux*"
+	}
+	if { [istarget sparc*-*-linux*] && [is_elf64 $tmpdir/mainnp.o] } {
+	    setup_xfail "sparc*-*-linux*"
 	}
 	setup_xfail "x86_64-*-linux*"
 	shared_test shnp "shared (non PIC, load offset)" \
@@ -264,6 +270,9 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG $picflag" $srcdir/$subdir/main.c $tmpdir/m
 	    setup_xfail "alpha*-*-linux*"
 	    if { ![istarget hppa*64*-*-linux*] } {
 		setup_xfail "hppa*-*-linux*"
+	    }
+	    if { [istarget sparc*-*-linux*] && [is_elf64 $tmpdir/mainp.o] } {
+		setup_xfail "sparc*-*-linux*"
 	    }
 	    setup_xfail "x86_64-*-linux*"
 	    setup_xfail "s390x-*-linux*"
