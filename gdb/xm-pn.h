@@ -26,9 +26,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Address of U in kernel space */
 #define	KERNEL_U_ADDR		0x3fc000
+
+/* This is a piece of magic that is given a register number REGNO
+   and as BLOCKEND the address in the system of the end of the user structure
+   and stores in ADDR the address in the kernel or core dump
+   of that register. */
+#define REGISTER_U_ADDR(addr, blockend, regno) {			\
+	addr = blockend + regno * 4;					\
+	if (regno == PC_REGNUM) addr = blockend - 8 * 4;		\
+	if (regno == PS_REGNUM) addr = blockend - 7 * 4;		\
+	if (regno == SP_REGNUM) addr = blockend - 6 * 4;		\
+}
 
-/*
- * No KDB support, Yet! */
+/* No KDB support, Yet! */
 /* Interface definitions for kernel debugger KDB.  */
 
 /* Map machine fault codes into signal numbers.

@@ -125,14 +125,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define DO_REGISTERS_INFO(_regnum, fp) mips_do_registers_info(_regnum, fp)
 
-#define U_REGS_OFFSET 0
-
-#define REGISTER_U_ADDR(addr, blockend, regno) 		\
-  if (regno < PC_REGNUM)				\
-      addr = regno;					\
-  else							\
-      addr = regno + NSIG_HNDLRS; /* Skip over signal handlers */
-
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
 #define REGISTER_BYTES (NUM_REGS*4)

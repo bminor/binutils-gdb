@@ -35,14 +35,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Breakpoint patching is handled at the target end in VxWorks.  */
 /* #define BREAKPOINT {0x00, 0x3e, 0x00, 0x66} */
-
-/* Not needed, because we don't support core files:
-  	#define KERNEL_U_ADDR
-  	#define REGISTER_U_ADDR(addr, blockend, regno)
- */
-
-/* Address of end of stack space.
-  	This doesn't matter for VxWorks, because it's only used
-  	in manipulation of core files, which we don't support.  */
-
-/* #define STACK_END_ADDR (0xfe000000) */

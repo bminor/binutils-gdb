@@ -36,6 +36,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define KERNEL_U_ADDR (int)u.u_ar0
 
+#define REGISTER_U_ADDR(addr, blockend, regno) 		\
+   if (blockend == 0) {					\
+	if (regno < 38) addr = (NBPG*UPAGES) + (regno - 38)*sizeof(int);\
+	else addr = 0; /* ..somewhere in the pcb */	\
+   } else if (regno < 32) addr = regno;			\
+   else if (regno == PC_REGNUM) addr = 96;		\
+   else if (regno == 36) addr = 97;			\
+   else if (regno == HI_REGNUM) addr = 98;		\
+   else if (regno == LO_REGNUM) addr = 99;		\
+   else if (regno == FCRCS_REGNUM) addr = 100;		\
+   else if (regno == FCRIR_REGNUM) addr = 101;		\
+   else if (regno >= FP0_REGNUM) addr = regno - (FP0_REGNUM-32);\
+   else addr = 0;
+
 /* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
 #define FETCH_INFERIOR_REGISTERS
 

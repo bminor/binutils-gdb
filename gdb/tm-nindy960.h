@@ -98,8 +98,3 @@ extern int nindy_frame_chain_valid();		/* See nindy-tdep.c */
  */
 
 #define DECR_PC_AFTER_BREAK 0
-
-/* Not needed, because we don't support core files:
- *	#define KERNEL_U_ADDR
- *	#define REGISTER_U_ADDR(addr, blockend, regno)
- */

@@ -229,17 +229,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define PS_REGNUM 	17	/* Contains processor status */
 #define PC_REGNUM 	18	/* Contains program counter */
 
-/* This is a piece of magic that is given a register number REGNO
-   and as BLOCKEND the address in the system of the end of the user structure
-   and stores in ADDR the address in the kernel or core dump
-   of that register. */
-#define REGISTER_U_ADDR(addr, blockend, regno) {			\
-	addr = blockend + regno * 4;					\
-	if (regno == PC_REGNUM) addr = blockend - 8 * 4;		\
-	if (regno == PS_REGNUM) addr = blockend - 7 * 4;		\
-	if (regno == SP_REGNUM) addr = blockend - 6 * 4;		\
-}
-
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
 #define REGISTER_BYTES			(NUM_GEN_REGS*4 + NUM_CPU_REGS*4)
