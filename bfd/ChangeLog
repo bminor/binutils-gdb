@@ -1,12 +1,5 @@
 Tue Jan 19 09:06:14 1993  Ian Lance Taylor  (ian@cygnus.com)
 
-	* aoutx.h (swap_ext_reloc_in, swap_std_reloc_in),
-	bout.c (b_out_slurp_reloc_table),
-	coff-mips.c (ecoff_swap_reloc_in),
-	coff-msym.c (ecoff_swap_sym_in, ecoff_swap_rndx_in,
-	ecoff_swap_opt_in): Added casts to int to avoid muttering by
-	MIPS compiler.
-
 	* bfd-in.h (bfd_asymbol_value): Add needed parentheses.
 
 	* libcoff-in.h: Update prototype for coff_count_linenumbers.

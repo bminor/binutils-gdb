@@ -330,12 +330,10 @@ DEFUN (ecoff_swap_sym_in, (abfd, ext_copy, intern),
 			| ((ext->s_bits2[0] & SYM_BITS2_SC_BIG)
 					   >> SYM_BITS2_SC_SH_BIG);
     intern->reserved    = 0 != (ext->s_bits2[0] & SYM_BITS2_RESERVED_BIG);
-    intern->index       = (((int) ext->s_bits2[0] & SYM_BITS2_INDEX_BIG)
+    intern->index       = ((ext->s_bits2[0] & SYM_BITS2_INDEX_BIG)
 					   << SYM_BITS2_INDEX_SH_LEFT_BIG)
-			| ((int) ext->s_bits3[0]
-			   		   << SYM_BITS3_INDEX_SH_LEFT_BIG)
-			| ((int) ext->s_bits4[0]
-			   		   << SYM_BITS4_INDEX_SH_LEFT_BIG);
+			| (ext->s_bits3[0] << SYM_BITS3_INDEX_SH_LEFT_BIG)
+			| (ext->s_bits4[0] << SYM_BITS4_INDEX_SH_LEFT_BIG);
   } else {
     intern->st          =  (ext->s_bits1[0] & SYM_BITS1_ST_LITTLE)
 					   >> SYM_BITS1_ST_SH_LITTLE;
@@ -344,12 +342,10 @@ DEFUN (ecoff_swap_sym_in, (abfd, ext_copy, intern),
 			| ((ext->s_bits2[0] & SYM_BITS2_SC_LITTLE)
 					   << SYM_BITS2_SC_SH_LEFT_LITTLE);
     intern->reserved    = 0 != (ext->s_bits2[0] & SYM_BITS2_RESERVED_LITTLE);
-    intern->index       = (((int) ext->s_bits2[0] & SYM_BITS2_INDEX_LITTLE)
+    intern->index       = ((ext->s_bits2[0] & SYM_BITS2_INDEX_LITTLE)
 					   >> SYM_BITS2_INDEX_SH_LITTLE)
-			| ((int) ext->s_bits3[0]
-			   		   << SYM_BITS3_INDEX_SH_LEFT_LITTLE)
-			| ((int) ext->s_bits4[0]
-			   		   << SYM_BITS4_INDEX_SH_LEFT_LITTLE);
+			| (ext->s_bits3[0] << SYM_BITS3_INDEX_SH_LEFT_LITTLE)
+			| (ext->s_bits4[0] << SYM_BITS4_INDEX_SH_LEFT_LITTLE);
   }
 
 #ifdef TEST
@@ -547,18 +543,18 @@ DEFUN (ecoff_swap_rndx_in, (bigend, ext_copy, intern),
     intern->rfd   = (ext->r_bits[0] << RNDX_BITS0_RFD_SH_LEFT_BIG)
 		  | ((ext->r_bits[1] & RNDX_BITS1_RFD_BIG)
 		    		    >> RNDX_BITS1_RFD_SH_BIG);
-    intern->index = (((int) ext->r_bits[1] & RNDX_BITS1_INDEX_BIG)
+    intern->index = ((ext->r_bits[1] & RNDX_BITS1_INDEX_BIG)
 		    		    << RNDX_BITS1_INDEX_SH_LEFT_BIG)
-		  | ((int) ext->r_bits[2] << RNDX_BITS2_INDEX_SH_LEFT_BIG)
-		  | ((int) ext->r_bits[3] << RNDX_BITS3_INDEX_SH_LEFT_BIG);
+		  | (ext->r_bits[2] << RNDX_BITS2_INDEX_SH_LEFT_BIG)
+		  | (ext->r_bits[3] << RNDX_BITS3_INDEX_SH_LEFT_BIG);
   } else {
     intern->rfd   = (ext->r_bits[0] << RNDX_BITS0_RFD_SH_LEFT_LITTLE)
 		  | ((ext->r_bits[1] & RNDX_BITS1_RFD_LITTLE)
 		    		    << RNDX_BITS1_RFD_SH_LEFT_LITTLE);
-    intern->index = (((int) ext->r_bits[1] & RNDX_BITS1_INDEX_LITTLE)
+    intern->index = ((ext->r_bits[1] & RNDX_BITS1_INDEX_LITTLE)
 		    		    >> RNDX_BITS1_INDEX_SH_LITTLE)
-		  | ((int) ext->r_bits[2] << RNDX_BITS2_INDEX_SH_LEFT_LITTLE)
-		  | ((int) ext->r_bits[3] << RNDX_BITS3_INDEX_SH_LEFT_LITTLE);
+		  | (ext->r_bits[2] << RNDX_BITS2_INDEX_SH_LEFT_LITTLE)
+		  | (ext->r_bits[3] << RNDX_BITS3_INDEX_SH_LEFT_LITTLE);
   }
 
 #ifdef TEST
@@ -653,22 +649,16 @@ DEFUN (ecoff_swap_opt_in, (abfd, ext_copy, intern),
   if (abfd->xvec->header_byteorder_big_p != false)
     {
       intern->ot = ext->o_bits1[0];
-      intern->value = (((int) ext->o_bits2[0]
-			<< OPT_BITS2_VALUE_SH_LEFT_BIG)
-		       | ((int) ext->o_bits3[0]
-			  << OPT_BITS2_VALUE_SH_LEFT_BIG)
-		       | ((int) ext->o_bits4[0]
-			  << OPT_BITS2_VALUE_SH_LEFT_BIG));
+      intern->value = ((ext->o_bits2[0] << OPT_BITS2_VALUE_SH_LEFT_BIG)
+		       | (ext->o_bits3[0] << OPT_BITS2_VALUE_SH_LEFT_BIG)
+		       | (ext->o_bits4[0] << OPT_BITS2_VALUE_SH_LEFT_BIG));
     }
   else
     {
       intern->ot = ext->o_bits1[0];
-      intern->value = (((int) ext->o_bits2[0]
-			<< OPT_BITS2_VALUE_SH_LEFT_LITTLE)
-		       | ((int) ext->o_bits3[0]
-			  << OPT_BITS2_VALUE_SH_LEFT_LITTLE)
-		       | ((int) ext->o_bits4[0]
-			  << OPT_BITS2_VALUE_SH_LEFT_LITTLE));
+      intern->value = ((ext->o_bits2[0] << OPT_BITS2_VALUE_SH_LEFT_LITTLE)
+		       | (ext->o_bits3[0] << OPT_BITS2_VALUE_SH_LEFT_LITTLE)
+		       | (ext->o_bits4[0] << OPT_BITS2_VALUE_SH_LEFT_LITTLE));
     }
 
   ecoff_swap_rndx_in (abfd->xvec->header_byteorder_big_p != false,
