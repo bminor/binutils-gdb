@@ -3462,8 +3462,35 @@ argument.
 Continue running your program until either the specified location is
 reached, or the current stack frame returns.  @var{location} is any of
 the forms of argument acceptable to @code{break} (@pxref{Set Breaks,
-,Setting breakpoints}).  This form of the command uses breakpoints,
-and hence is quicker than @code{until} without an argument.
+,Setting breakpoints}).  This form of the command uses breakpoints, and
+hence is quicker than @code{until} without an argument.  The specified
+location is actually reached only if it is in the current frame.  This
+implies that @code{until} can be used to skip over recursive function
+invocations.  For instance in the code below, if the current location is
+line @code{96}, issuing @code{until 99} will execute the program up to
+line @code{99} in the same invocation of factorial, i.e. after the inner
+invocations have returned.
+
+@smallexample
+94	int factorial (int value)
+95	@{
+96	    if (value > 1) @{
+97            value *= factorial (value - 1);
+98	    @}
+99	    return (value);
+100     @}
+@end smallexample
+
+
+@kindex advance @var{location}
+@itemx advance @var{location}
+Continue running the program up to the given location.  An argument is
+required, anything of the same form as arguments for the @code{break}
+command.  Execution will also stop upon exit from the current stack
+frame.  This command is similar to @code{until}, but @code{advance} will
+not skip over recursive function calls, and the target location doesn't
+have to be in the same frame as the current one.
+
 
 @kindex stepi
 @kindex si @r{(@code{stepi})}

@@ -1,3 +1,8 @@
+2003-01-15  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.texinfo (Continuing and Stepping): Add new command
+	'advance'. Clarify behavior of 'until'.
+
 2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.texinfo (Files): Document solib-absolute-prefix and
