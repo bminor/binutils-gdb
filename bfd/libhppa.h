@@ -192,7 +192,7 @@ enum hppa_reloc_expr_type_alt
 #define HPPA_R_ARG_RELOC(a)	(((a) >> 22) & 0x3FF)
 #define HPPA_R_CONSTANT(a)	((((int)(a)) << 10) >> 10)
 #define HPPA_R_ADDEND(r,c)	(((r) << 22) + ((c) & 0x3FFFFF))
-#define HPPA_WIDE               (0) /* PSW W-bit, need to check! FIXME */
+#define HPPA_WIDE	       (0) /* PSW W-bit, need to check! FIXME */
 
 /* These macros get bit fields using HP's numbering (MSB = 0),
  * but note that "MASK" assumes that the LSB bits are what's
@@ -202,17 +202,17 @@ enum hppa_reloc_expr_type_alt
 #define GET_FIELD(X, FROM, TO) \
   ((X) >> (31 - (TO)) & ((1 << ((TO) - (FROM) + 1)) - 1))
 #endif  
-#define GET_BIT( X, WHICH ) \
-  GET_FIELD( X, WHICH, WHICH )
+#define GET_BIT(X, WHICH) \
+  GET_FIELD (X, WHICH, WHICH)
 
-#define MASK( SIZE ) \
+#define MASK(SIZE) \
   (~((-1) << SIZE))
   
-#define CATENATE( X, XSIZE, Y, YSIZE ) \
-  (((X & MASK( XSIZE )) << YSIZE) | (Y & MASK( YSIZE )))
+#define CATENATE(X, XSIZE, Y, YSIZE) \
+  (((X & MASK (XSIZE)) << YSIZE) | (Y & MASK (YSIZE)))
 
-#define ELEVEN( X ) \
-  CATENATE( GET_BIT( X, 10 ), 1, GET_FIELD( X, 0, 9 ), 10)
+#define ELEVEN(X) \
+  CATENATE (GET_BIT (X, 10), 1, GET_FIELD (X, 0, 9), 10)
   
 /* Some functions to manipulate PA instructions.  */
 
@@ -233,7 +233,7 @@ static INLINE unsigned int
 assemble_3 (x)
      unsigned int x;
 {
-  return (((x & 1) << 2) | ((x & 6) >> 1)) & 7;
+  return CATENATE (GET_BIT (x, 2), 1, GET_FIELD (x, 0, 1), 2);
 }
 
 static INLINE void
@@ -244,7 +244,7 @@ dis_assemble_3 (x, r)
   *r = (((x & 4) >> 2) | ((x & 3) << 1)) & 7;
 }
 
-static INLINE unsigned int      /* PA 2.0 */
+static INLINE unsigned int
 assemble_6 (x, y)
      unsigned int x, y;
 {
@@ -255,9 +255,8 @@ static INLINE unsigned int
 assemble_12 (x, y)
      unsigned int x, y;
 {
-  return CATENATE( CATENATE( y,                1,
-                             GET_BIT( x, 10 ), 1), 2,
-                   GET_FIELD( x, 0, 9 ),           9);
+  return CATENATE (CATENATE (y, 1, GET_BIT (x, 10), 1), 2,
+ 		   GET_FIELD (x, 0, 9), 9);
 }
 
 static INLINE void
@@ -269,53 +268,40 @@ dis_assemble_12 (as12, x, y)
   *x = ((as12 & 0x3ff) << 1) | ((as12 & 0x400) >> 10);
 }
 
-static INLINE unsigned long     /* PA 2.0 */
+static INLINE unsigned long
 assemble_16 (x, y)
      unsigned int x, y;
 {
   /* Depends on PSW W-bit !*/
   unsigned int temp;
 
-  if( HPPA_WIDE ) {
-      temp = CATENATE( CATENATE( GET_BIT( y, 13 ), 1,
-                                 (GET_BIT( y, 13 )^GET_BIT( x, 0)), 1 ), 2,
-                       CATENATE( (GET_BIT( y, 13 )^GET_BIT( x, 1)), 1,
-                                 GET_FIELD( y, 0, 12 ), 13 ), 14 );
-  }
-  else { 
-      temp = CATENATE( CATENATE( GET_BIT( y, 13 ), 1,
-                                 GET_BIT( y, 13 ), 1 ), 2,
-                       CATENATE( GET_BIT( y, 13 ), 1,
-                                 GET_FIELD( y, 0, 12 ), 13 ), 14 );
-  }
+  if (HPPA_WIDE)
+    temp = CATENATE (CATENATE (GET_BIT (y, 13), 1,
+			       (GET_BIT (y, 13) ^ GET_BIT (x, 0)), 1), 2,
+		     CATENATE ((GET_BIT (y, 13) ^ GET_BIT (x, 1)), 1,
+			       GET_FIELD (y, 0, 12), 13), 14);
+  else
+    temp = CATENATE (CATENATE (GET_BIT (y, 13), 1, GET_BIT (y, 13), 1), 2,
+		     CATENATE (GET_BIT (y, 13), 1, GET_FIELD (y, 0, 12), 13), 14);
 
-  return sign_extend( temp, 16 );
+  return sign_extend (temp, 16);
 }
 
 
-static INLINE unsigned long     /* PA 2.0 */
+static INLINE unsigned long
 assemble_16a (x, y, z)
      unsigned int x, y, z;
 {
   /* Depends on PSW W-bit !*/
   unsigned int temp;
 
-  if( HPPA_WIDE ) {
-      temp = CATENATE( CATENATE( z,                   1,
-                                 (z^GET_BIT( x, 0 )), 1),  2,
-                                 
-                       CATENATE( (z^GET_BIT( x, 1 )), 1,
-                                 y,                   11), 12);
-  }
-  else {
-      temp = CATENATE( CATENATE( z, 1,
-                                 z, 1), 2,
-                       CATENATE( z, 1,
-                                 y, 11), 12);
+  if (HPPA_WIDE)
+    temp = CATENATE (CATENATE (z, 1, (z ^ GET_BIT (x, 0)), 1), 2,
+		     CATENATE ((z ^ GET_BIT (x, 1)), 1, y, 11), 12);
+  else 
+      temp = CATENATE (CATENATE (z, 1, z, 1), 2, CATENATE (z, 1, y, 11), 12);
 
-  }
-
-  return sign_extend( (temp << 2), 16 );
+  return sign_extend ((temp << 2), 16);
 }
 
 static INLINE unsigned long
@@ -323,12 +309,9 @@ assemble_17 (x, y, z)
      unsigned int x, y, z;
 {
   unsigned long temp;
-  int           q;
 
-  temp = CATENATE( CATENATE( z, q,
-                             x, q), q,
-                   CATENATE( GET_BIT( y, 1 ), 1,
-                             GET_FIELD( y, 0, 9 ), 10), 11);
+  temp = CATENATE (CATENATE (z, 1, x, 5), 6,
+		   CATENATE (GET_BIT (y, 10), 1, GET_FIELD (y, 0, 9), 10), 11);
   
   return temp;
 }
@@ -358,18 +341,16 @@ assemble_21 (x)
   return temp & 0x1fffff;
 }
 
-static INLINE unsigned long     /* PA 2.0 */
+static INLINE unsigned long
 assemble_22 (a,b,c,d)
      unsigned int a,b,c,d;
 {
   unsigned long temp;
   
-  temp = CATENATE( CATENATE( d, 1,
-                             a, 5 ), 6,
-                   CATENATE( b, 5,
-                             ELEVEN( c ), 11 ), 16 );
+  temp = CATENATE (CATENATE (d, 1, a, 5), 6,
+		   CATENATE (b, 5, ELEVEN (c), 11), 16);
 
-  return sign_extend( temp, 22 );
+  return sign_extend (temp, 22);
 }
 
 static INLINE void
@@ -458,7 +439,7 @@ hppa_field_adjust (value, constant_value, r_field)
 {
   switch (r_field)
     {
-    case e_fsel:		/* F  : no change                      */
+    case e_fsel:		/* F  : no change		      */
     case e_nsel:		/* N  : no change		       */
       value += constant_value;
       break;
@@ -471,7 +452,7 @@ hppa_field_adjust (value, constant_value, r_field)
       value = (value & 0xfffff800) >> 11;
       break;
 
-    case e_rssel:		/* RS : Sign extend from bit 21        */
+    case e_rssel:		/* RS : Sign extend from bit 21	*/
       value += constant_value;
       if (value & 0x00000400)
 	value |= 0xfffff800;
@@ -485,19 +466,19 @@ hppa_field_adjust (value, constant_value, r_field)
       value = (value & 0xfffff800) >> 11;
       break;
 
-    case e_rsel:		/* R  : Set bits 0-20 to zero          */
+    case e_rsel:		/* R  : Set bits 0-20 to zero	  */
       value += constant_value;
       value = value & 0x7ff;
       break;
 
     case e_ldsel:		/* LD : Add 0x800, arithmetic shift
-				   right 11 bits                  */
+				   right 11 bits		  */
       value += constant_value;
       value += 0x800;
       value = (value & 0xfffff800) >> 11;
       break;
 
-    case e_rdsel:		/* RD : Set bits 0-20 to one           */
+    case e_rdsel:		/* RD : Set bits 0-20 to one	   */
       value += constant_value;
       value |= 0xfffff800;
       break;

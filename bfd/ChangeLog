@@ -1,3 +1,9 @@
+Wed Jun 16 03:09:57 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* libhppa.h: Fix various formatting errors.
+	(assemble_3); Rewrite using CATENATE.
+	(assemble_17): Fix various bugs.
+
 1999-06-16  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-mcore.c (R_MCORE_RAW): Fix definition.
