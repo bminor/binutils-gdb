@@ -1,3 +1,11 @@
+2000-08-03  H.J. Lu  <hjl@gnu.org>
+
+	* section.c: Back out the change made by Nick Clifton
+	<nickc@cygnus.com> on 2000-07-31. It breaks stripping dynamic
+	binaries.
+	* bfd-in2.h: Likewise.
+	* elf.c: Likewise.
+
 2000-08-03  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf32-sh.c (sh_elf_reloc_loop): Warning removal.

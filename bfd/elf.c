@@ -981,7 +981,7 @@ _bfd_elf_link_hash_copy_indirect (dir, ind)
 }
 
 void
-_bfd_elf_link_hash_hide_symbol (info, h)
+_bfd_elf_link_hash_hide_symbol(info, h)
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
      struct elf_link_hash_entry *h;
 {
@@ -3619,10 +3619,6 @@ copy_private_bfd_data (ibfd, obfd)
   unsigned int i;
   unsigned int num_segments;
   boolean phdr_included = false;
-  asection *s;
-  bfd_vma maxpagesize;
-  struct elf_segment_map * phdr_adjust_seg = NULL;
-  unsigned int phdr_adjust_num = 0;
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
@@ -3637,137 +3633,41 @@ copy_private_bfd_data (ibfd, obfd)
   pm = &mfirst;
 
   num_segments = elf_elfheader (ibfd)->e_phnum;
-  maxpagesize = get_elf_backend_data (obfd)->maxpagesize;
 
-  /* Returns the end address of the segment + 1.  */
-#define SEGMENT_END(segment, start) 			\
-  (start + (segment->p_memsz > segment->p_filesz 	\
-   ? segment->p_memsz : segment->p_filesz))
-
-  /* Returns true if the given section is contained within
-     the given segment.  VMA addresses are compared.  */
-#define IS_CONTAINED_BY_VMA(section, segment)		\
-  (section->vma >= segment->p_vaddr			\
-   && (section->vma + section->_raw_size)		\
-   <= (SEGMENT_END (segment, segment->p_vaddr)))
-    
-  /* Returns true if the given section is contained within
-     the given segment.  LMA addresses are compared.  */
-#define IS_CONTAINED_BY_LMA(section, segment, base)	\
-    (section->lma >= base				\
-     && (section->lma + section->_raw_size)		\
-     <= SEGMENT_END (segment, base))
+#define IS_CONTAINED_BY(addr, len, bottom, phdr)		 	\
+	  ((addr) >= (bottom)				 	  	\
+	   && (   ((addr) + (len)) <= ((bottom) + (phdr)->p_memsz)	\
+	       || ((addr) + (len)) <= ((bottom) + (phdr)->p_filesz)))
 
   /* Special case: corefile "NOTE" section containing regs, prpsinfo etc. */
-#define IS_COREFILE_NOTE(p, s)                          \
-	    (p->p_type == PT_NOTE                       \
-	     && bfd_get_format (ibfd) == bfd_core       \
-	     && s->vma == 0 && s->lma == 0              \
-	     && (bfd_vma) s->filepos >= p->p_offset     \
-	     && (bfd_vma) s->filepos + s->_raw_size     \
+
+#define IS_COREFILE_NOTE(p, s)                                          \
+	    (p->p_type == PT_NOTE                                       \
+	     && bfd_get_format (ibfd) == bfd_core                       \
+	     && s->vma == 0 && s->lma == 0                              \
+	     && (bfd_vma) s->filepos >= p->p_offset                     \
+	     && (bfd_vma) s->filepos + s->_raw_size                     \
 	     <= p->p_offset + p->p_filesz)
 
   /* The complicated case when p_vaddr is 0 is to handle the Solaris
      linker, which generates a PT_INTERP section with p_vaddr and
      p_memsz set to 0.  */
-#define IS_SOLARIS_PT_INTERP(p, s)			\
-	    (p->p_vaddr == 0				\
-	     && p->p_filesz > 0				\
-	     && (s->flags & SEC_HAS_CONTENTS) != 0	\
-	     && s->_raw_size > 0			\
-	     && (bfd_vma) s->filepos >= p->p_offset	\
-	     && ((bfd_vma) s->filepos + s->_raw_size	\
+
+#define IS_SOLARIS_PT_INTERP(p, s)					\
+	    (p->p_vaddr == 0						\
+	     && p->p_filesz > 0						\
+	     && (s->flags & SEC_HAS_CONTENTS) != 0			\
+	     && s->_raw_size > 0					\
+	     && (bfd_vma) s->filepos >= p->p_offset			\
+	     && ((bfd_vma) s->filepos + s->_raw_size			\
 		     <= p->p_offset + p->p_filesz))
 
-  /* Decide if the given section should be included in the given segment.
-     A section will be included if:
-       1. It is within the address space of the segment,
-       2. It is an allocated segment,
-       3. There is an output section associated with it,
-       4. The section has not already been allocated to a previous segment.  */
-#define INCLUDE_SECTION_IN_SEGMENT(section, segment)	\
-  ((((IS_CONTAINED_BY_VMA (section, segment) 		\
-      || IS_SOLARIS_PT_INTERP (segment, section))	\
-     && (section->flags & SEC_ALLOC) != 0)		\
-    || IS_COREFILE_NOTE (segment, section))		\
-   && section->output_section != NULL			\
-   && section->segment_mark == false)
-
-  /* Returns true iff seg1 starts after the end of seg2.  */
-#define SEGMENT_AFTER_SEGMENT(seg1, seg2)		\
-    (seg1->p_vaddr >= SEGMENT_END (seg2, seg2->p_vaddr))
-
-  /* Returns true iff seg1 and seg2 overlap.  */
-#define SEGMENT_OVERLAPS(seg1, seg2)			\
-  (!(SEGMENT_AFTER_SEGMENT (seg1, seg2) && SEGMENT_AFTER_SEGMENT (seg2, seg1)))
-
-  
-  /* Initialise the segment mark field.  */
-  for (s = ibfd->sections; s != NULL; s = s->next)
-    s->segment_mark = false;
-
   /* Scan through the segments specified in the program header
-     of the input BFD.  For this first scan we look for overlaps.
-     These can be created by wierd parameters to objcopy.  */
-  for (i = 0, p = elf_tdata (ibfd)->phdr; i < num_segments; i ++, p ++)
-    {
-      unsigned int j;
-      Elf_Internal_Phdr * pp;
-
-      if (p->p_type == PT_NULL)
-	continue;
-      
-      /* Determine if this segment overlaps any previous segments.
-	 This can happen when objcopy is used to adjust section LMAs.  */
-      for (j = 0, pp = elf_tdata (ibfd)->phdr; j < i; j ++, pp ++)
-	{
-	  bfd_signed_vma extra_length;
-	  
-	  
-	  if (pp->p_type == PT_NULL || ! SEGMENT_OVERLAPS (p, pp))
-	    continue;
-	  
-	  /* Merge the two segments together.  */
-	  if (pp->p_vaddr < p->p_vaddr)
-	    {
-	      /* Extend PP to include P and then delete P.  */
-	      extra_length =
-		SEGMENT_END (p, p->p_vaddr) - SEGMENT_END (pp, pp->p_vaddr);
-	      
-	      if (extra_length > 0)
-		{
-		  pp->p_memsz  += extra_length;
-		  pp->p_filesz += extra_length;
-		}
-	      
-	      p->p_type = PT_NULL;
-	      
-	      /* Since we have deleted P we must restart the outer loop.  */
-	      i = 0;
-	      p = elf_tdata (ibfd)->phdr;
-	      break;
-	    }
-	  else
-	    {
-	      /* Extend P to include PP and then delete PP.  */
-	      extra_length =
-		SEGMENT_END (pp, pp->p_vaddr) - SEGMENT_END (p, p->p_vaddr);
-	      
-	      if (extra_length > 0)
-		{
-		  p->p_memsz  += extra_length;
-		  p->p_filesz += extra_length;
-		}
-	      
-	      pp->p_type = PT_NULL;
-	    }
-	}
-    }
-  
-  /* The second scan attempts to assign sections to segments.  */
+     of the input BFD.  */
   for (i = 0, p = elf_tdata (ibfd)->phdr; i < num_segments; i++, p++)
     {
       unsigned int csecs;
+      asection *s;
       asection **sections;
       asection *os;
       unsigned int isec;
@@ -3775,14 +3675,22 @@ copy_private_bfd_data (ibfd, obfd)
       bfd_vma suggested_lma;
       unsigned int j;
 
-      if (p->p_type == PT_NULL)
-	continue;
-      
-      /* Compute how many sections might be placed into this segment.  */
+      /* For each section in the input BFD, decide if it should be
+	 included in the current segment.  A section will be included
+	 if it is within the address space of the segment, and it is
+	 an allocated segment, and there is an output section
+	 associated with it.  */
       csecs = 0;
       for (s = ibfd->sections; s != NULL; s = s->next)
-	if (INCLUDE_SECTION_IN_SEGMENT (s, p))
-	  ++csecs;
+	if (s->output_section != NULL)
+	  {
+	    if ((IS_CONTAINED_BY (s->vma, s->_raw_size, p->p_vaddr, p)
+		 || IS_SOLARIS_PT_INTERP (p, s))
+		&& (s->flags & SEC_ALLOC) != 0)
+	      ++csecs;
+	    else if (IS_COREFILE_NOTE (p, s))
+	      ++csecs;
+	  }
 
       /* Allocate a segment map big enough to contain all of the
 	 sections we have selected.  */
@@ -3825,6 +3733,7 @@ copy_private_bfd_data (ibfd, obfd)
 	  /* Special segments, such as the PT_PHDR segment, may contain
 	     no sections, but ordinary, loadable segments should contain
 	     something.  */
+
 	  if (p->p_type == PT_LOAD)
 	      _bfd_error_handler
 		(_("%s: warning: Empty loadable segment detected\n"),
@@ -3875,16 +3784,21 @@ copy_private_bfd_data (ibfd, obfd)
 	 case, where the sections have not been moved, this means that
 	 we have completely filled the segment, and there is nothing
 	 more to do.  */
+
       isec = 0;
       matching_lma = 0;
       suggested_lma = 0;
 
       for (j = 0, s = ibfd->sections; s != NULL; s = s->next)
 	{
-	  if (INCLUDE_SECTION_IN_SEGMENT (s, p))
-	    {
-	      os = s->output_section;
+	  os = s->output_section;
 
+	  if ((((IS_CONTAINED_BY (s->vma, s->_raw_size, p->p_vaddr, p)
+		 || IS_SOLARIS_PT_INTERP (p, s))
+		&& (s->flags & SEC_ALLOC) != 0)
+	       || IS_COREFILE_NOTE (p, s))
+	      && os != NULL)
+	    {
 	      sections[j++] = s;
 
 	      /* The Solaris native linker always sets p_paddr to 0.
@@ -3905,14 +3819,14 @@ copy_private_bfd_data (ibfd, obfd)
 
 	      /* Match up the physical address of the segment with the
 		 LMA address of the output section.  */
-	      if (IS_CONTAINED_BY_LMA (os, p, m->p_paddr)
+	      if (IS_CONTAINED_BY (os->lma, os->_raw_size, m->p_paddr, p)
 		  || IS_COREFILE_NOTE (p, s))
 		{
 		  if (matching_lma == 0)
 		    matching_lma = os->lma;
 
 		  /* We assume that if the section fits within the segment
-		     then it does not overlap any other section within that
+		     that it does not overlap any other section within that
 		     segment.  */
 		  m->sections[isec++] = os;
 		}
@@ -3945,6 +3859,7 @@ copy_private_bfd_data (ibfd, obfd)
 	      /* At least one section fits inside the current segment.
 		 Keep it, but modify its physical address to match the
 		 LMA of the first section that fitted.  */
+
 	      m->p_paddr = matching_lma;
 	    }
 	  else
@@ -3952,26 +3867,17 @@ copy_private_bfd_data (ibfd, obfd)
 	      /* None of the sections fitted inside the current segment.
 		 Change the current segment's physical address to match
 		 the LMA of the first section.  */
+
 	      m->p_paddr = suggested_lma;
 	    }
 
-	  /* Offset the segment physical address from the lma
-	     to allow for space taken up by elf headers.  */
+	  /* Offset the segment physical address from the lma to allow
+	     for space taken up by elf headers.  */
 	  if (m->includes_filehdr)
 	    m->p_paddr -= iehdr->e_ehsize;
 
 	  if (m->includes_phdrs)
-	    {
-	      m->p_paddr -= iehdr->e_phnum * iehdr->e_phentsize;
-
-	      /* iehdr->e_phnum is just an estimate of the number
-		 of program headers that we will need.  Make a note
-		 here of the number we used and the segment we chose
-		 to hold these headers, so that we can adjust the
-		 offset when we know the correct value.  */
-	      phdr_adjust_num = iehdr->e_phnum;
-	      phdr_adjust_seg = m;
-	    }
+	    m->p_paddr -= iehdr->e_phnum * iehdr->e_phentsize;
 	}
 
       /* Step Three: Loop over the sections again, this time assigning
@@ -3997,9 +3903,7 @@ copy_private_bfd_data (ibfd, obfd)
 
 	      os = s->output_section;
 
-	      BFD_ASSERT (os != NULL);
-	      
-	      if (IS_CONTAINED_BY_LMA (os, p, m->p_paddr)
+	      if (IS_CONTAINED_BY (os->lma, os->_raw_size, m->p_paddr, p)
 		  || IS_COREFILE_NOTE (p, s))
 		{
 		  if (m->count == 0)
@@ -4017,15 +3921,16 @@ copy_private_bfd_data (ibfd, obfd)
 		  else
 		    {
 		      asection * prev_sec;
+		      bfd_vma maxpagesize;
 
 		      prev_sec = m->sections[m->count - 1];
+		      maxpagesize = get_elf_backend_data (obfd)->maxpagesize;
 
 		      /* If the gap between the end of the previous section
 			 and the start of this section is more than maxpagesize
 			 then we need to start a new segment.  */
-		      if ((BFD_ALIGN (prev_sec->lma + prev_sec->_raw_size, maxpagesize)
+		      if (BFD_ALIGN (prev_sec->lma + prev_sec->_raw_size, maxpagesize)
 			  < BFD_ALIGN (os->lma, maxpagesize))
-			  || ((prev_sec->lma + prev_sec->_raw_size) > os->lma))
 			{
 			  if (suggested_lma == 0)
 			    suggested_lma = os->lma;
@@ -4037,7 +3942,6 @@ copy_private_bfd_data (ibfd, obfd)
 		  m->sections[m->count++] = os;
 		  ++isec;
 		  sections[j] = NULL;
-		  s->segment_mark = true;
 		}
 	      else if (suggested_lma == 0)
 		suggested_lma = os->lma;
@@ -4054,6 +3958,7 @@ copy_private_bfd_data (ibfd, obfd)
 	      /* We still have not allocated all of the sections to
 		 segments.  Create a new segment here, initialise it
 		 and carry on looping.  */
+
 	      m = ((struct elf_segment_map *)
 		   bfd_alloc (obfd,
 			      (sizeof (struct elf_segment_map)
@@ -4064,6 +3969,7 @@ copy_private_bfd_data (ibfd, obfd)
 	      /* Initialise the fields of the segment map.  Set the physical
 		 physical address to the LMA of the first section that has
 		 not yet been assigned.  */
+
 	      m->next             = NULL;
 	      m->p_type           = p->p_type;
 	      m->p_flags          = p->p_flags;
@@ -4094,22 +4000,8 @@ copy_private_bfd_data (ibfd, obfd)
 
   elf_tdata (obfd)->segment_map = mfirst;
 
-  /* If we had to estimate the number of program headers that were
-     going to be needed, then check our estimate know and adjust
-     the offset if necessary.  */
-  if (phdr_adjust_seg != NULL)
-    {
-      unsigned int count;
-      
-      for (count = 0, m = mfirst; m != NULL; m = m->next)
-	count ++;
-
-      if (count > phdr_adjust_num)
-	phdr_adjust_seg->p_paddr -= (count - phdr_adjust_num) * iehdr->e_phentsize;
-    }
-  
 #if 0
-  /* Final Step: Sort the segments into ascending order of physical address.  */
+  /* Final Step: Sort the segments into ascending order of physical address. */
   if (mfirst != NULL)
     {
       struct elf_segment_map* prev;
@@ -4117,15 +4009,15 @@ copy_private_bfd_data (ibfd, obfd)
       prev = mfirst;
       for (m = mfirst->next; m != NULL; prev = m, m = m->next)
 	{
-	  /* Yes I know - its a bubble sort....  */
+	  /* Yes I know - its a bubble sort....*/
 	  if (m->next != NULL && (m->next->p_paddr < m->p_paddr))
 	    {
-	      /* swap m and m->next.  */
+	      /* swap m and m->next */
 	      prev->next = m->next;
 	      m->next = m->next->next;
 	      prev->next->next = m;
 
-	      /* restart loop.  */
+	      /* restart loop. */
 	      m = mfirst;
 	    }
 	}

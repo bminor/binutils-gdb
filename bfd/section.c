@@ -363,9 +363,6 @@ CODE_FRAGMENT
 .  {* A mark flag used by some linker backends for garbage collection.  *}
 .  unsigned int gc_mark : 1;
 .
-.  {* Used by the ELF code to mark sections which have been allocated to segments.  *}
-.  unsigned int segment_mark : 1;
-.
 .  {* End of internal packed boolean fields.  *}
 .
 .  {*  The virtual memory address of the section - where it will be
@@ -552,17 +549,17 @@ static const asymbol global_syms[] =
   GLOBAL_SYM_INIT (BFD_IND_SECTION_NAME, &bfd_ind_section)
 };
 
-#define STD_SECTION(SEC, FLAGS, SYM, NAME, IDX)				\
-  const asymbol * const SYM = (asymbol *) &global_syms[IDX]; 		\
-  const asection SEC = 							\
+#define STD_SECTION(SEC, FLAGS, SYM, NAME, IDX)	\
+  const asymbol * const SYM = (asymbol *) &global_syms[IDX]; \
+  const asection SEC = \
     /* name, id,  index, next, flags, user_set_vma, reloc_done,      */	\
     { NAME,  IDX, 0,     NULL, FLAGS, 0,            0,			\
 									\
-    /* linker_mark, gc_mark, segment_mark, vma, lma, _cooked_size,   */	\
-       0,           0,       0,            0,   0,   0,            	\
+    /* linker_mark, gc_mark, vma, lma, _cooked_size, _raw_size,      */	\
+       0,           0,       0,   0,   0,            0,			\
 									\
-    /* _raw_size, output_offset, output_section,    alignment_power, */ \
-       0,         0,           (struct sec *) &SEC, 0,			\
+    /* output_offset, output_section,      alignment_power,          */	\
+       0,             (struct sec *) &SEC, 0,				\
 									\
     /* relocation, orelocation, reloc_count, filepos, rel_filepos,   */	\
        NULL,       NULL,        0,           0,       0,		\
