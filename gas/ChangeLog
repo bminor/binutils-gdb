@@ -1,3 +1,8 @@
+Sat Feb 28 17:06:22 1998  Richard Henderson  <rth@cygnus.com>
+
+	* config/obj-elf.c [TC_ALPHA]: Include <elf/alpha.h>.
+	* config/tc-alpha.h (ELF_TC_SPECIAL_SECTIONS): New.
+
 start-sanitize-d30v
 Thu Feb 26 15:49:04 1998  Michael Meissner  <meissner@cygnus.com>
 

@@ -33,6 +33,10 @@
 #include "ecoff.h"
 #endif
 
+#ifdef TC_ALPHA
+#include "elf/alpha.h"
+#endif
+
 #ifdef TC_MIPS
 #include "elf/mips.h"
 #endif
