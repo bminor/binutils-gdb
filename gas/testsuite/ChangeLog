@@ -1,3 +1,11 @@
+Tue Aug 15 15:42:33 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mri/for.d, gas/mri/for.s: New test.
+	* gas/mri/if.d, gas/mri/if.s: New test.
+	* gas/mri/repeat.d, gas/mri/repeat.s: New test.
+	* gas/mri/while.d, gas/mri/while.s: New test.
+	* gas/mri/mri.exp: Run the new tests.
+
 Mon Aug 14 16:03:07 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mri/expr.d: Permit leading zeroes, in case we're using a

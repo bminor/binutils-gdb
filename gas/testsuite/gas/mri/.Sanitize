@@ -36,9 +36,17 @@ expr.d
 expr.s
 float.d
 float.s
+for.d
+for.s
+if.d
+if.s
 label.d
 label.s
 mri.exp
+repeat.d
+repeat.s
+while.d
+while.s
 
 Things-to-lose:
 
