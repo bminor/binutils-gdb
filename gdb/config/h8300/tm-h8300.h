@@ -26,6 +26,7 @@
    GDB_TARGET_IS_H8300 in remote-e7000.c */
 extern int h8300hmode;
 extern int h8300smode;
+extern int h8300_normal_mode; /* 1 - Normal Mode , 0 - Advanced mode */
 extern int h8300sxmode;
 #define GDB_TARGET_IS_H8300
 

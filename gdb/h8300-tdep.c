@@ -49,7 +49,7 @@ enum
   h8300h_reg_size = 4,
   h8300_max_reg_size = 4,
 };
-#define BINWORD (h8300hmode ? h8300h_reg_size : h8300_reg_size)
+#define BINWORD (h8300hmode && !h8300_normal_mode ? h8300h_reg_size : h8300_reg_size)
 
 enum gdb_regnum
 {
@@ -350,7 +350,7 @@ h8300_examine_prologue (CORE_ADDR ip, CORE_ADDR limit,
     }
 
   /* If the PC isn't valid, quit now.  */
-  if (ip == 0 || ip & (h8300hmode ? ~0xffffff : ~0xffff))
+  if (ip == 0 || ip & (h8300hmode && !h8300_normal_mode ? ~0xffffff : ~0xffff))
     return 0;
 
   next_ip = h8300_next_prologue_insn (ip, limit, &insn_word);
@@ -1220,8 +1220,18 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_dwarf2_reg_to_regnum (gdbarch, h8300_dbg_reg_to_regnum);
       set_gdbarch_stab_reg_to_regnum (gdbarch, h8300_dbg_reg_to_regnum);
       set_gdbarch_register_name (gdbarch, h8300_register_name);
-      set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
-      set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+      if(info.bfd_arch_info->mach != bfd_mach_h8300hn)
+        {
+          h8300_normal_mode = 0;
+          set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+          set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+        }
+      else
+        {
+          h8300_normal_mode = 1;
+          set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
+          set_gdbarch_addr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
+        }
       set_gdbarch_extract_return_value (gdbarch, h8300h_extract_return_value);
       set_gdbarch_store_return_value (gdbarch, h8300h_store_return_value);
       set_gdbarch_print_insn (gdbarch, print_insn_h8300h);
@@ -1238,8 +1248,18 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_dwarf2_reg_to_regnum (gdbarch, h8300s_dbg_reg_to_regnum);
       set_gdbarch_stab_reg_to_regnum (gdbarch, h8300s_dbg_reg_to_regnum);
       set_gdbarch_register_name (gdbarch, h8300s_register_name);
-      set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
-      set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+      if(info.bfd_arch_info->mach != bfd_mach_h8300sn)
+        {
+          h8300_normal_mode = 0;
+          set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+          set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+        }
+      else
+        {
+          h8300_normal_mode = 1;
+          set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
+          set_gdbarch_addr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
+        }
       set_gdbarch_extract_return_value (gdbarch, h8300h_extract_return_value);
       set_gdbarch_store_return_value (gdbarch, h8300h_store_return_value);
       set_gdbarch_print_insn (gdbarch, print_insn_h8300s);
@@ -1256,8 +1276,18 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_dwarf2_reg_to_regnum (gdbarch, h8300s_dbg_reg_to_regnum);
       set_gdbarch_stab_reg_to_regnum (gdbarch, h8300s_dbg_reg_to_regnum);
       set_gdbarch_register_name (gdbarch, h8300sx_register_name);
-      set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
-      set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+      if(info.bfd_arch_info->mach != bfd_mach_h8300sxn)
+        {
+          h8300_normal_mode = 0;
+          set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+          set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+        }
+      else
+        {
+          h8300_normal_mode = 1;
+          set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
+          set_gdbarch_addr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
+        }
       set_gdbarch_extract_return_value (gdbarch, h8300h_extract_return_value);
       set_gdbarch_store_return_value (gdbarch, h8300h_store_return_value);
       set_gdbarch_print_insn (gdbarch, print_insn_h8300s);
