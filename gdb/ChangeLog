@@ -1,3 +1,8 @@
+2004-08-01  Joel Brobecker  <brobecker@gnat.com>
+
+	* dwarf2read.c (dwarf_decode_lines): Do not consider the current
+	file as included until we record the first line in the linetable.
+
 2004-08-01  Andrew Cagney  <cagney@gnu.org>
 
 	* frame.h (deprecated_pop_dummy_frame)

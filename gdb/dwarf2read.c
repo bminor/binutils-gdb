@@ -5977,6 +5977,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	      address += (adj_opcode / lh->line_range)
 		* lh->minimum_instruction_length;
 	      line += lh->line_base + (adj_opcode % lh->line_range);
+              lh->file_names[file - 1].included_p = 1;
               if (!decode_for_pst_p)
                 {
 	          /* append row to matrix using current values */
@@ -5996,6 +5997,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 		{
 		case DW_LNE_end_sequence:
 		  end_sequence = 1;
+                  lh->file_names[file - 1].included_p = 1;
                   if (!decode_for_pst_p)
 		    record_line (current_subfile, 0, address);
 		  break;
@@ -6030,6 +6032,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 		}
 	      break;
 	    case DW_LNS_copy:
+              lh->file_names[file - 1].included_p = 1;
               if (!decode_for_pst_p)
 	        record_line (current_subfile, line, 
 	                     check_cu_functions (address, cu));
@@ -6054,7 +6057,6 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
                 file = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
                 line_ptr += bytes_read;
                 fe = &lh->file_names[file - 1];
-                fe->included_p = 1;
                 if (fe->dir_index)
                   dir = lh->include_dirs[fe->dir_index - 1];
                 else
