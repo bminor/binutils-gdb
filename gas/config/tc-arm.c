@@ -5560,13 +5560,63 @@ md_apply_fix3 (fixP, val, seg)
     case BFD_RELOC_ARM_PCREL_BRANCH:
       newval = md_chars_to_number (buf, INSN_SIZE);
 
+      /* Sign-extend a 24-bit number.  */
+#define SEXT24(x)	((((x) & 0xffffff) ^ (~ 0x7fffff)) + 0x800000)
+
 #ifdef OBJ_ELF
       if (! target_oabi)
-        value = fixP->fx_offset;
+	value = fixP->fx_offset;
 #endif
-      value  = (value >> 2) & 0x00ffffff;
-      value  = (value + (newval & 0x00ffffff)) & 0x00ffffff;
-      newval = value | (newval & 0xff000000);
+
+      /* We are going to store value (shifted right by two) in the
+	 instruction, in a 24 bit, signed field.  Thus we need to check
+	 that none of the top 8 bits of the shifted value (top 7 bits of
+         the unshifted, unsigned value) are set, or that they are all set.  */
+      if ((value & 0xfe000000UL) != 0
+	  && ((value & 0xfe000000UL) != 0xfe000000UL))
+	{
+#ifdef OBJ_ELF
+	  /* Normally we would be stuck at this point, since we cannot store
+	     the absolute address that is the destination of the branch in the
+	     24 bits of the branch instruction.  If however, we happen to know
+	     that the destination of the branch is in the same section as the
+	     branch instruciton itself, then we can compute the relocation for
+	     ourselves and not have to bother the linker with it.
+	     
+	     FIXME: The tests for OBJ_ELF and ! target_oabi are only here
+	     because I have not worked out how to do this for OBJ_COFF or
+	     target_oabi.  */
+	  if (! target_oabi
+	      && fixP->fx_addsy != NULL
+	      && S_IS_DEFINED (fixP->fx_addsy)
+	      && S_GET_SEGMENT (fixP->fx_addsy) == seg)
+	    {
+	      /* Get pc relative value to go into the branch.  */
+	      value = * val;
+
+	      /* Permit a backward branch provided that enough bits are set.
+		 Allow a forwards branch, provided that enough bits are clear.  */
+	      if ((value & 0xfe000000UL) == 0xfe000000UL
+		  || (value & 0xfe000000UL) == 0)
+		fixP->fx_done = 1;
+	    }
+	  
+	  if (! fixP->fx_done)
+#endif
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("gas can't handle same-section branch dest >= 0x04000000"));
+	}
+
+      value >>= 2;
+      value += SEXT24 (newval);
+      
+      if ((value & 0xff000000UL) != 0
+	  && (fixP->fx_done == 0
+	      || ((value & 0xff000000UL) != 0xff000000UL)))
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("out of range branch"));
+      
+      newval = (value & 0x00ffffff) | (newval & 0xff000000);
       md_number_to_chars (buf, newval, INSN_SIZE);
       break;
 
