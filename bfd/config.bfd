@@ -329,7 +329,7 @@ case "${targ}" in
     targ_defvec=bfd_elf32_fr30_vec
     ;;
 
-  frv-*-elf)
+  frv-*-elf | frv-*-*linux*)
     targ_defvec=bfd_elf32_frv_vec
     ;;
 
