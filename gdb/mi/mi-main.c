@@ -1514,15 +1514,15 @@ mi_command_loop (int mi_version)
 }
 
 static void
-mi0_command_loop (void)
-{
-  mi_command_loop (0);
-}
-
-static void
 mi1_command_loop (void)
 {
   mi_command_loop (1);
+}
+
+static void
+mi2_command_loop (void)
+{
+  mi_command_loop (2);
 }
 
 static void
@@ -1547,11 +1547,12 @@ _initialize_mi_main (void)
     return;
 
   /* If we're _the_ interpreter, take control. */
-  if (strcmp (interpreter_p, "mi0") == 0)
-    command_loop_hook = mi0_command_loop;
-  else if (strcmp (interpreter_p, "mi") == 0
-	   || strcmp (interpreter_p, "mi1") == 0)
+  if (strcmp (interpreter_p, "mi") == 0)
+    command_loop_hook = mi2_command_loop;
+  else if (strcmp (interpreter_p, "mi1") == 0)
     command_loop_hook = mi1_command_loop;
+  else if (strcmp (interpreter_p, "mi2") == 0)
+    command_loop_hook = mi2_command_loop;
   else
     return;
 

@@ -1127,10 +1127,12 @@ Use the interpreter @var{interp} for interface with the controlling
 program or device.  This option is meant to be set by programs which
 communicate with @value{GDBN} using it as a back end.
 
-@samp{--interpreter=mi} (or @samp{--interpreter=mi1}) causes
-@value{GDBN} to use the @dfn{gdb/mi interface} (@pxref{GDB/MI, , The
-@sc{gdb/mi} Interface}). The older @sc{gdb/mi} interface, included in
-@value{GDBN} version 5.0 can be selected with @samp{--interpreter=mi0}.
+@samp{--interpreter=mi} (or @samp{--interpreter=mi2}) causes
+@value{GDBN} to use the current @dfn{@sc{gdb/mi} interface}
+(@pxref{GDB/MI, , The @sc{gdb/mi} Interface}).  The previous @sc{gdb/mi}
+interface, included in @value{GDBN} version 5.3, can be selected with
+@samp{--interpreter=mi1}.  Earlier @sc{gdb/mi} interfaces
+are not supported.
 
 @item -write
 @cindex @code{--write}

@@ -1,3 +1,8 @@
+2002-10-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* NEWS: Mention that MI syntax, selected by "mi" changed to "mi2"
+	and that "mi0" syntax has been removed.
+
 2002-09-30  David Carlton  <carlton@math.stanford.edu>
 
 	* Makefile.in (ppc-sysv-tdep.o): Depend on gdb_string_h.

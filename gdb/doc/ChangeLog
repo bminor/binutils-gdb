@@ -1,3 +1,8 @@
+2002-10-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Mode Options): Update --interpreter option.  "mi2"
+	and "mi1" instead of "mi1" and "mi0".
+
 2002-09-29  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* gdb.texinfo (Packets): Fix typos "alligned".
