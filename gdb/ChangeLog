@@ -4,6 +4,8 @@
 
 2000-07-21  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
+	* thread.c (thread_apply_all_command): Update thread list first.
+	* printcmd.c (printf_command): Guard against 0-length string.
 	* config/i386/tm-i386.h: treat PC and FP as unsigned.
 	(SAVED_PC_AFTER_CALL): Use read_memory_unsigned_integer.
 	(FRAME_SAVED_PC): Ditto.

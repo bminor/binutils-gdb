@@ -567,6 +567,10 @@ thread_apply_all_command (cmd, from_tty)
 
   old_chain = make_cleanup_restore_current_thread (inferior_pid);
 
+  /* It is safe to update the thread list now, before
+     traversing it for "thread apply all".  MVS */
+  target_find_new_threads ();
+
   for (tp = thread_list; tp; tp = tp->next)
     if (thread_alive (tp))
       {
