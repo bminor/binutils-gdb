@@ -1,3 +1,25 @@
+2001-10-04  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (prev_insn_reloc_type): Make it an array to hold a
+	relocation triple.
+	(prev_insn_fixp): Likewise.
+	(append_insn): Changed prototype to accept a relocation pointer.
+	(imm_reloc): Make it an array.
+	(offset_reloc): Likewise.
+	(md_assemble): Handle triple relocations.
+	(append_insn): Likewise. Add handling for some NewABI relocations.
+	(mips_no_prev_insn): Handle triple relocations.
+	(macro_build): Likewise. Add handling for some NewABI relocations.
+	Move handling for the 'u' case to append_insn().
+	(mips16_macro_build): Handle triple relocations.
+	(macro_build_lui): Likewise. Don't handle _gp_disp as special symbol
+	for NewABI.
+	(mips_ip): Handle triple relocations.
+	(mips16_ip): Likewise.
+	(mips_force_relocation): Force handling of triple relocations
+	without symbols for NewABI.
+	(md_apply_fix): Add handling for some NewABI relocations.
+
 2001-10-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-i386.c (parse_register): If not producing code for
