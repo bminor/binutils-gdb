@@ -1,3 +1,21 @@
+Thu Mar 21 17:02:02 1996  David Mosberger-Tang  <davidm@azstarnet.com>
+
+	* gprof.c (default_excluded_list): Add "__mcount".
+
+	* gprof.c (main): Change ifdef __osf__ to __alpha__.
+
+	* gmon_io.c (gmon_out_read): If BSD44_FORMAT is defined, get the
+	profiling rate from the header.
+
+	* gmon.h (struct raw_phdr): Only include pad if both __alpha__ and
+	__osf__ are defined.  Add new fields if BSD44_FORMAT is defined.
+
+	* alpha.h (MIN_INSN_SIZE): Define.
+	* core.c (MIN_INSN_SIZE): If not defined, define as 1.
+	(core_sym_class): Ignore debugging symbols.
+	(core_create_line_syms): Use MIN_INSN_SIZE when gathering line
+	information.
+
 Wed Mar 20 18:15:47 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* cg_print.c (cg_print_function_ordering): Fix __GNUC__ misspelled

@@ -3,6 +3,13 @@
 #include "core.h"
 #include "symtab.h"
 
+#ifndef MIN_INSN_SIZE
+/* If not defined in MACHINE_H, assume smallest instruction is 1 byte
+   long.  THis is safe but may be needlessly slow on machines where
+   all instructions are longer.  */
+#define MIN_INSN_SIZE 1
+#endif
+
 bfd *core_bfd;
 int core_num_syms;
 asymbol **core_syms;
@@ -199,15 +206,15 @@ DEFUN (core_sym_class, (sym), asymbol * sym)
   char sym_prefix;
   int i;
 
-  /*
-   * Must be a text symbol, and static text symbols don't qualify if
-   * ignore_static_funcs set.
-   */
-  if (!sym->section)
+  if (sym->section == NULL || (sym->flags & BSF_DEBUGGING) != 0)
     {
       return 0;
     }
 
+  /*
+   * Must be a text symbol, and static text symbols don't qualify if
+   * ignore_static_funcs set.
+   */
   if (ignore_static_funcs && (sym->flags & BSF_LOCAL))
     {
       DBG (AOUTDEBUG, printf ("[core_sym_class] %s: not a function\n",
@@ -530,7 +537,7 @@ DEFUN (core_create_line_syms, (core_bfd), bfd * core_bfd)
   prev_offset = -min_dist;
   prev_filename[0] = '\0';
   prev_line_num = 0;
-  for (offset = 0; offset < core_text_sect->_raw_size; ++offset)
+  for (offset = 0; offset < core_text_sect->_raw_size; offset += MIN_INSN_SIZE)
     {
       vma = core_text_sect->vma + offset;
       if (!get_src_info (vma, &filename, &dummy.name, &dummy.line_num)

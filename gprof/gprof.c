@@ -69,7 +69,7 @@ bfd *abfd;
  */
 static char *default_excluded_list[] =
 {
-  "_gprof_mcount", "mcount", "_mcount", "__mcleanup",
+  "_gprof_mcount", "mcount", "_mcount", "__mcount", "__mcleanup",
   "<locore>", "<hicore>",
   0
 };
@@ -437,7 +437,7 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
     {
       sym_id_add (*sp, EXCL_TIME);
       sym_id_add (*sp, EXCL_GRAPH);
-#ifdef __osf__
+#ifdef __alpha__
       sym_id_add (*sp, EXCL_FLAT);
 #endif
     }
