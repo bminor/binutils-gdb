@@ -1,5 +1,5 @@
- #    Makefile template for Configure for the BFD library.
-#    Copyright (C) 1990, 1991, 1992 Free Software Foundation, Inc.
+#    Makefile template for Configure for the BFD library.
+#    Copyright (C) 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 #    Written by Cygnus Support.
 # 
 # This file is part of BFD, the Binary File Descriptor library.
@@ -75,14 +75,17 @@ BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
 
 BFD_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
 	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o cpu-rs6000.o cpu-hppa.o \
-	cpu-z8k.o cpu-we32k.o
+	cpu-z8k.o cpu-we32k.o cpu-h8500.o
 
-BFD_BACKENDS = oasys.o ieee.o srec.o elf.o stab-syms.o\
-	aout64.o aout32.o demo64.o sunos.o newsos3.o i386aout.o bout.o \
-	aout-adobe.o \
+BFD_BACKENDS = aout32.o sunos.o newsos3.o aout-mipsbsd.o aout-adobe.o \
+	i386aout.o i386bsd.o i386linux.o \
+	aout64.o demo64.o \
 	coff-i960.o coff-a29k.o coff-m68k.o coff-i386.o coff-m88k.o \
-	coff-mips.o coff-rs6000.o coff-h8300.o coff-msym.o hppa.o i386linux.o \
-	coff-z8k.o coff-we32k.o i386bsd.o
+	coff-rs6000.o coff-h8300.o coff-h8500.o coff-z8k.o coff-we32k.o \
+	coff-mips.o coff-msym.o \
+	elf32.o elf32-sparc.o elf32-i386.o elf32-i860.o elf32-m68k.o \
+	bout.o \
+	hppa.o oasys.o ieee.o srec.o stab-syms.o
 
 OPTIONAL_BACKENDS = trad-core.o
 
@@ -116,10 +119,12 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 coff-a29k.c coff-rs6000.c coff-msym.c coffgen.c format.c \
 	 section.c core.c syms.c stab-syms.c reloc.c init.c ctor.c \
 	 seclet.c coff-m88k.c coff-mips.c trad-core.c newsos3.c \
-	 i386aout.c i386linux.c bout.c elf.c aout-adobe.c coff-we32k.c \
+	 i386aout.c i386linux.c bout.c aout-adobe.c coff-we32k.c \
 	 i386bsd.c cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c \
 	 cpu-m88k.c cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c \
-	 cpu-rs6000.c coff-h8300.c hppa.c cpu-hppa.c cpu-we32k.c reloc16.c
+	 cpu-rs6000.c coff-h8300.c hppa.c cpu-hppa.c cpu-we32k.c reloc16.c \
+	 aout-mipsbsd.c \
+	 elf32.c elf32-sparc.c elf32-i386.c elf32-i860.c elf32-m68k.c
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
 
@@ -127,6 +132,7 @@ all: Makefile $(TARGETLIB)
 	@$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 
 .NOEXPORT:
+MAKEOVERRIDES=
 
 check:
 
@@ -202,6 +208,7 @@ $(OPTIONAL_BACKENDS):  libbfd.h $(BFD_H) $(RECONFIG)
 # Get around a Sun Make bug in SunOS 4.1.1 with VPATH
 cpu-i386.o:cpu-i386.c
 cpu-z8k.o: cpu-z8k.c
+cpu-h8500.o: cpu-h8500.c
 cpu-we32k.o: cpu-we32k.c
 
 saber:
@@ -267,7 +274,7 @@ install:
 	$(INSTALL_DATA) $(INCDIR)/obstack.h $(includedir)/obstack.h
 	-if [ -z "$(oldincludedir)" ] ; then true ; \
 	 else if [ -d $(oldincludedir) ] ; then true ; \
-              else mkdir $(oldincludedir) ; \
+	      else mkdir $(oldincludedir) ; \
 	      fi ; \
 	      $(INSTALL_DATA) $(INCDIR)/bfd.h      $(oldincludedir)/bfd.h;\
 	      $(INSTALL_DATA) $(INCDIR)/ansidecl.h $(oldincludedir)/ansidecl.h;\
@@ -340,6 +347,9 @@ ieee.o : ieee.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
 coff-h8300.o: coff-h8300.c  $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/coff/h8300.h $(INCDIR)/coff/internal.h libcoff.h coffcode.h \
   coffswap.h seclet.h 
+coff-h8500.o: coff-h8500.c  $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/coff/h8300.h $(INCDIR)/coff/internal.h libcoff.h coffcode.h \
+  coffswap.h seclet.h 
 coff-a29k.o: coff-a29k.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/coff/a29k.h $(INCDIR)/coff/internal.h libcoff.h coffcode.h \
   coffswap.h seclet.h
@@ -403,6 +413,17 @@ i386bsd.o : i386bsd.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/aout/ar.h libaout.h 
 bout.o : bout.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/bout.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def libaout.h
+aout-mipsbsd.o : aout-mipsbsd.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h \
+  libbfd.h libaout.h
+elf32.o : elf32.c libelf.h libbfd.h $(INCDIR)/bfd.h $(INCDIR)/obstack.h
+elf32-sparc.o : elf32-sparc.c libelf.h libbfd.h $(INCDIR)/bfd.h \
+  $(INCDIR)/obstack.h
+elf32-m68k.o : elf32-m68k.c libelf.h libbfd.h $(INCDIR)/bfd.h \
+  $(INCDIR)/obstack.h
+elf32-i860.o : elf32-i860.c libelf.h libbfd.h $(INCDIR)/bfd.h \
+  $(INCDIR)/obstack.h
+elf32-i386.o : elf32-i386.c libelf.h libbfd.h $(INCDIR)/bfd.h \
+  $(INCDIR)/obstack.h
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
 
