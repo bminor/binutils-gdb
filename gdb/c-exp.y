@@ -807,15 +807,35 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			{ $$ = builtin_type_short; }
 	|	LONG INT_KEYWORD
 			{ $$ = builtin_type_long; }
+	|	LONG SIGNED_KEYWORD INT_KEYWORD
+			{ $$ = builtin_type_long; }
+	|	LONG SIGNED_KEYWORD
+			{ $$ = builtin_type_long; }
+	|	SIGNED_KEYWORD LONG INT_KEYWORD
+			{ $$ = builtin_type_long; }
 	|	UNSIGNED LONG INT_KEYWORD
+			{ $$ = builtin_type_unsigned_long; }
+	|	LONG UNSIGNED INT_KEYWORD
+			{ $$ = builtin_type_unsigned_long; }
+	|	LONG UNSIGNED
 			{ $$ = builtin_type_unsigned_long; }
 	|	LONG LONG
 			{ $$ = builtin_type_long_long; }
 	|	LONG LONG INT_KEYWORD
 			{ $$ = builtin_type_long_long; }
+	|	LONG LONG SIGNED_KEYWORD INT_KEYWORD
+			{ $$ = builtin_type_long_long; }
+	|	LONG LONG SIGNED_KEYWORD
+			{ $$ = builtin_type_long_long; }
+	|	SIGNED_KEYWORD LONG LONG
+			{ $$ = builtin_type_long_long; }
 	|	UNSIGNED LONG LONG
 			{ $$ = builtin_type_unsigned_long_long; }
 	|	UNSIGNED LONG LONG INT_KEYWORD
+			{ $$ = builtin_type_unsigned_long_long; }
+	|	LONG LONG UNSIGNED
+			{ $$ = builtin_type_unsigned_long_long; }
+	|	LONG LONG UNSIGNED INT_KEYWORD
 			{ $$ = builtin_type_unsigned_long_long; }
 	|	SIGNED_KEYWORD LONG LONG
 			{ $$ = lookup_signed_typename ("long long"); }
@@ -823,7 +843,15 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			{ $$ = lookup_signed_typename ("long long"); }
 	|	SHORT INT_KEYWORD
 			{ $$ = builtin_type_short; }
+	|	SHORT SIGNED_KEYWORD INT_KEYWORD
+			{ $$ = builtin_type_short; }
+	|	SHORT SIGNED_KEYWORD
+			{ $$ = builtin_type_short; }
 	|	UNSIGNED SHORT INT_KEYWORD
+			{ $$ = builtin_type_unsigned_short; }
+	|	SHORT UNSIGNED 
+			{ $$ = builtin_type_unsigned_short; }
+	|	SHORT UNSIGNED INT_KEYWORD
 			{ $$ = builtin_type_unsigned_short; }
 	|	DOUBLE_KEYWORD
 			{ $$ = builtin_type_double; }

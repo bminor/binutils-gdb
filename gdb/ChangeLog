@@ -1,3 +1,13 @@
+2002-04-22  H.J. Lu  (hjl@gnu.org)
+
+	* c-exp.y (typebase): Support
+	
+	[long|long long|short] [signed|unsigned] [int|]
+
+	and
+
+	signed [long|long long|short] int
+
 2002-04-22  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* Makefile.in (vax-tdep.o): Add $(arch_utils_h), $(inferior_h),
