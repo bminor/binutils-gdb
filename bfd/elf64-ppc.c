@@ -1359,8 +1359,8 @@ ppc64_elf_info_to_howto (abfd, cache_ptr, dst)
 {
   unsigned int type;
 
+  /* Initialize howto table if needed.  */
   if (!ppc64_elf_howto_table[R_PPC64_ADDR32])
-    /* Initialize howto table if needed.  */
     ppc_howto_init ();
 
   type = ELF64_R_TYPE (dst->r_info);
@@ -5075,6 +5075,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       unsigned long r_symndx;
       bfd_vma relocation;
       boolean unresolved_reloc;
+      boolean warned;
       long insn;
       struct ppc_stub_hash_entry *stub_entry;
       bfd_vma max_br_offset;
@@ -5090,6 +5091,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       h = (struct elf_link_hash_entry *) 0;
       sym_name = (const char *) 0;
       unresolved_reloc = false;
+      warned = false;
 
       if (r_type == R_PPC64_TOC)
 	{
@@ -5146,6 +5148,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			       || info->no_undefined
 			       || ELF_ST_VISIBILITY (h->other)))))
 		return false;
+	      warned = true;
 	    }
 	}
 
@@ -5714,9 +5717,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 				    relocation,
 				    addend);
 
-      if (r == bfd_reloc_ok)
-	;
-      else if (r == bfd_reloc_overflow)
+      if (r != bfd_reloc_ok)
 	{
 	  const char *name;
 
@@ -5747,13 +5748,25 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		name = bfd_section_name (input_bfd, sec);
 	    }
 
-	  if (! ((*info->callbacks->reloc_overflow)
-		 (info, name, ppc64_elf_howto_table[(int) r_type]->name,
-		  (bfd_vma) 0, input_bfd, input_section, offset)))
-	    return false;
+	  if (r == bfd_reloc_overflow)
+	    {
+	      if (warned)
+		continue;
+	      if (!((*info->callbacks->reloc_overflow)
+		    (info, name, ppc64_elf_howto_table[(int) r_type]->name,
+		     rel->r_addend, input_bfd, input_section, offset)))
+		return false;
+	    }
+	  else
+	    {
+	      (*_bfd_error_handler)
+		(_("%s(%s+0x%lx): reloc against `%s': error %d"),
+		 bfd_archive_filename (input_bfd),
+		 bfd_get_section_name (input_bfd, input_section),
+		 (long) rel->r_offset, name, (int) r);
+	      ret = false;
+	    }
 	}
-      else
-	ret = false;
     }
 
   return ret;

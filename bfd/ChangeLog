@@ -1,5 +1,12 @@
 2002-05-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (ppc64_elf_info_to_howto): Formatting.
+	(ppc64_elf_relocate_section): Don't warn about reloc overflow when
+	we've already warned about an undefined symbol.  Report more
+	detail on reloc errors.
+
+2002-05-17  Alan Modra  <amodra@bigpond.net.au>
+
 	* acinclude.m4 (AM_INSTALL_LIBBFD): New.
 	* configure.in: Invoke AM_INSTALL_LIBBFD.
 	* Makefile.am (install-data-local): Revert 2002-05-13.  Move to..
