@@ -272,9 +272,13 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
    ways in the stack frame.  sp is even more special:
    the address we return for it IS the sp for the next frame.  */
 
-#define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) ( \
-  (frame_saved_regs) = *(frame_info)->saved_regs, \
-  (frame_saved_regs).regs[SP_REGNUM] = (frame_info)->frame)
+#define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
+  do { \
+    if ((frame_info)->saved_regs == NULL) \
+      mips_find_saved_regs (frame_info); \
+    (frame_saved_regs) = *(frame_info)->saved_regs; \
+    (frame_saved_regs).regs[SP_REGNUM] = (frame_info)->frame; \
+  } while (0)
 
 
 /* Things needed for making the inferior call functions.  */

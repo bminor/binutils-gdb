@@ -1,5 +1,11 @@
 Mon Jan 31 12:12:34 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* mips-tdep.c: Remove code which sets saved_regs from
+	init_extra_frame_info and put it in new function mips_find_saved_regs.
+	(READ_FRAME_REG): Remove macro and replace uses with the expansion.
+	* mips-tdep.c, config/mips/tm-mips.h: When examining ->saved_regs,
+	check if it is NULL and call mips_find_saved_regs if so.
+
 	* remote-mips.c: Use unfiltered, not filtered, output most places.
 
 	* blockframe.c (get_prev_frame_info): Detect and stop an infinite
