@@ -7,6 +7,12 @@
 
 	* gdb.base/bigcore.exp: Bail out on *BSD instead of only NetBSD.
 
+2004-02-20  Fred Fish  <fnf@redhat.com>
+
+	* gdb.base/callfuncs.exp (do_function_calls): Remove extraneous
+	blank in test for "returns short", for consistency with other
+	"returns xxx" tests.  Update copyright year.
+
 2004-02-19  Fred Fish  <fnf@redhat.com>
 
 	New testcase for PR breakpoint/1558.
