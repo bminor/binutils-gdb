@@ -1,5 +1,11 @@
+Thu Sep  3 16:14:40 1992  Jim Wilson  (wilson@sphagnum.cygnus.com)
+
+	* sparc-opc.c (condr): Remove extraneous, but harmless, backlash
+	created by last change.
+
 Thu Sep  3 13:52:38 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
+	* reloc.c (reloc_howto_struct):  Make size field be unsigned.
 	* bfd-in.h:  Bump to version 2.0.
 
 Thu Sep  3 09:05:37 1992  Stu Grossman  (grossman at cygnus.com)

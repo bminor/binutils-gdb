@@ -1019,7 +1019,7 @@ cond ("bz",	"tz",   CONDZ, F_ALIAS), /* for e */
  { opcode, (mask)|ANNUL|BPRED, (lose), ",a,T 1,k", F_DELAYED|(flags), v9 }
 
 #define condr(bop, mask, flags) /* v9 */ \
-  brr(bop, F2(0, 3)|COND(mask), F2(~0, ~3)|COND(~(mask)), (flags)) /* v9 */ \
+  brr(bop, F2(0, 3)|COND(mask), F2(~0, ~3)|COND(~(mask)), (flags)) /* v9 */
 
 /* v9 */ condr("brnz", 0x5, 0),
 /* v9 */ condr("brz", 0x1, 0),
