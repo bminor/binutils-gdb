@@ -1,5 +1,9 @@
 Fri Nov 10 06:39:46 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* configure.in (--enable-sim-{opcode,config}): Use $srcdir when
+	check for the existence of files.
+	* configure: Regenerate.
+
 	* table.c (table): New field nr_model_fields.
 	(table_open): New parameter nr_model_fields.
 	(table_entry_read): Parse model fields that begin with a '*' after

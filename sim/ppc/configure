@@ -486,9 +486,9 @@ enableval="$enable_sim_config"
 if test -n "$enableval"; then
   case "${enableval}" in
   yes|no)	{ echo "configure: error: "No value supplied for --enable-sim-config=file"" 1>&2; exit 1; };;
-  *)		if test -f "${enableval}"; then
+  *)		if test -f "${srcdir}/${enableval}"; then
 		  sim_config="${enableval}";
-		elif test -f "${enableval}-config.h"; then
+		elif test -f "${srcdir}/${enableval}-config.h"; then
 		  sim_config="${enableval}-config.h"
 		else
 		  { echo "configure: error: "Config file $enableval was not found"" 1>&2; exit 1; };
@@ -510,9 +510,9 @@ enableval="$enable_sim_opcode"
 if test -n "$enableval"; then
   case "${enableval}" in
   yes|no)	{ echo "configure: error: "No value supplied for --enable-sim-opcode=file"" 1>&2; exit 1; };;
-  *)		if test -f "${enableval}"; then
+  *)		if test -f "${srcdir}/${enableval}"; then
 		  sim_opcode="${enableval}"
-		elif test -f "ppc-opcode-${enableval}"; then
+		elif test -f "${srcdir}/ppc-opcode-${enableval}"; then
 		  sim_opcode="ppc-opcode-${enableval}"
 		else
 		  { echo "configure: error: "File $enableval is not an opcode rules file"" 1>&2; exit 1; };

@@ -28,9 +28,9 @@ AC_ARG_ENABLE(sim-config,
 [  --enable-sim-config=file		Override default config file],
 [case "${enableval}" in
   yes|no)	AC_MSG_ERROR("No value supplied for --enable-sim-config=file");;
-  *)		if test -f "${enableval}"; then
+  *)		if test -f "${srcdir}/${enableval}"; then
 		  sim_config="${enableval}";
-		elif test -f "${enableval}-config.h"; then
+		elif test -f "${srcdir}/${enableval}-config.h"; then
 		  sim_config="${enableval}-config.h"
 		else
 		  AC_MSG_ERROR("Config file $enableval was not found");
@@ -48,9 +48,9 @@ AC_ARG_ENABLE(sim-opcode,
 [  --enable-sim-opcode=which		Override default opcode lookup.],
 [case "${enableval}" in
   yes|no)	AC_MSG_ERROR("No value supplied for --enable-sim-opcode=file");;
-  *)		if test -f "${enableval}"; then
+  *)		if test -f "${srcdir}/${enableval}"; then
 		  sim_opcode="${enableval}"
-		elif test -f "ppc-opcode-${enableval}"; then
+		elif test -f "${srcdir}/ppc-opcode-${enableval}"; then
 		  sim_opcode="ppc-opcode-${enableval}"
 		else
 		  AC_MSG_ERROR("File $enableval is not an opcode rules file");
