@@ -100,6 +100,7 @@ demo64.c
 dep-in.sed
 doc
 ecoff.c
+ecofflink.c
 ecoffswap.h
 elf.c
 elf32-gen.c
