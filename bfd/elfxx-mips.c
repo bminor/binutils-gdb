@@ -2870,10 +2870,12 @@ mips_elf_create_got_section (abfd, info, maybe_exclude)
   if (maybe_exclude)
     flags |= SEC_EXCLUDE;
 
+  /* We have to use an alignment of 2**4 here because this is hardcoded
+     in the function stub generation and in the linker script.  */
   s = bfd_make_section (abfd, ".got");
   if (s == NULL
       || ! bfd_set_section_flags (abfd, s, flags)
-      || ! bfd_set_section_alignment (abfd, s, MIPS_ELF_LOG_FILE_ALIGN (abfd)))
+      || ! bfd_set_section_alignment (abfd, s, 4))
     return FALSE;
 
   /* Define the symbol _GLOBAL_OFFSET_TABLE_.  We don't do this in the

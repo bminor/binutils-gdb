@@ -1,5 +1,9 @@
 2003-06-27  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* elfxx-mips.c: Revert .got alignment to 2**4.
+
+2003-06-27  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* elf32-mips.c: Fix addend for _gp_disp special symbol.
 
 2003-06-27  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
