@@ -1,3 +1,9 @@
+Fri Mar 28 13:08:33 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-elf.c (obj_elf_section_change_hook): New function.
+	* config/obj-elf.h (obj_elf_section_change_hook): Declare it.
+	* config/tc-mips.c (s_change_sec): Call it if OBJ_ELF.
+
 Thu Mar 27 12:23:56 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* as.c (parse_args): Update copyright date in version message.

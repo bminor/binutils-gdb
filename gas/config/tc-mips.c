@@ -9078,6 +9078,16 @@ s_change_sec (sec)
       && (sec == 'd' || sec == 'r'))
     sec = 's';
 
+#ifdef OBJ_ELF
+  /* The ELF backend needs to know that we are changing sections, so
+     that .previous works correctly.  We could do something like check
+     for a obj_section_change_hook macro, but that might be confusing
+     as it would not be appropriate to use it in the section changing
+     functions in read.c, since obj-elf.c intercepts those.  FIXME:
+     This should be cleaner, somehow.  */
+  obj_elf_section_change_hook ();
+#endif
+
   mips_emit_delays (false);
   switch (sec)
     {
