@@ -1,5 +1,8 @@
 2001-02-04  Eli Zaretskii  <eliz@is.elta.co.il>
 
+	* config/djgpp/fnchange.lst: Tweak to make consistent with the
+	new files.
+
 	* config/djgpp/djconfig.sh: Use explicit absolute file name when
 	invoking `find'.
 
