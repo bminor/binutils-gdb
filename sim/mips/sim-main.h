@@ -188,6 +188,22 @@ convert (SD, CPU, cia, rm, op, from, to)
 
 /* start-sanitize-r5900 */
 
+/* Figure 10-5 FPU Control/Status Register.
+   Note: some of these bits are different to what is found in a
+   standard MIPS manual. */
+enum {
+  R5900_FCSR_C = BIT (23), /* OK */
+  R5900_FCSR_I = BIT (17),
+  R5900_FCSR_D = BIT (16),
+  R5900_FCSR_O = BIT (15),
+  R5900_FCSR_U = BIT (14),
+  R5900_FCSR_CAUSE = MASK (16,14),
+  R5900_FCSR_SI = BIT (6),
+  R5900_FCSR_SD = BIT (5),
+  R5900_FCSR_SO = BIT (4),
+  R5900_FCSR_SU = BIT (3),
+};
+
 typedef struct _sim_r5900_cpu {
 
   /* The R5900 has 32 x 128bit general purpose registers.

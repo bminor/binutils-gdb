@@ -1,3 +1,24 @@
+Wed Feb 25 18:56:22 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips.igen (CxC1): Add tracing.
+
+start-sanitize-r5900
+Wed Feb 25 13:59:03 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* r5900.igen (StoreFP): Delete.
+	(r59fp_store, r59fp_overflow, r59fp_op1, r59fp_op2, r59fp_op3):
+ 	New functions.
+	(rsqrt.s, sqrt.s): Implement.
+	(r59cond): New function.
+	(C.COND.S): Call r59cond in assembler line.
+	(cvt.w.s, cvt.s.w): Implement.
+	
+	* mips.igen (rsqrt.fmt, sqrt.fmt, cvt.*.*): Remove from r5900
+ 	instruction set.
+
+	* sim-main.h: Define an enum of r5900 FCSR bit fields.
+	
+end-sanitize-r5900
 start-sanitize-r5900
 Tue Feb 24 14:44:18 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 

@@ -3718,19 +3718,38 @@
 {
   if (X)
     {
+      /* control to */
+      TRACE_ALU_INPUT1 (GPR[RT]);
       if (FS == 0)
-	FCR0 = VL4_8(GPR[RT]);
+	{
+	  FCR0 = VL4_8(GPR[RT]);
+	  TRACE_ALU_RESULT (FCR0);
+	}
       else if (FS == 31)
-	FCR31 = VL4_8(GPR[RT]);
+	{
+	  FCR31 = VL4_8(GPR[RT]);
+	  SETFCC(0,((FCR31 & (1 << 23)) ? 1 : 0));
+	  TRACE_ALU_RESULT (FCR31);
+	}
+      else
+	{
+	  TRACE_ALU_RESULT0 ();
+	}
       /* else NOP */
-      SETFCC(0,((FCR31 & (1 << 23)) ? 1 : 0));
     }
   else
     { /* control from */
       if (FS == 0)
- 	GPR[RT] = SIGNEXTEND (FCR0, 32);
+	{
+	  TRACE_ALU_INPUT1 (FCR0);
+	  GPR[RT] = SIGNEXTEND (FCR0, 32);
+	}
       else if (FS == 31)
- 	GPR[RT] = SIGNEXTEND (FCR31, 32);
+	{
+	  TRACE_ALU_INPUT1 (FCR31);
+	  GPR[RT] = SIGNEXTEND (FCR31, 32);
+	}
+      TRACE_ALU_RESULT (GPR[RT]);
       /* else NOP */
     }
 }
@@ -3746,9 +3765,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -3775,9 +3791,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -3806,9 +3819,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -3834,9 +3844,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -4711,9 +4718,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 *r3900:
 // start-sanitize-tx19
 *tx19:
