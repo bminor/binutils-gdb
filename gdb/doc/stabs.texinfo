@@ -1091,15 +1091,32 @@ happens when the argument was passed in a register and then the compiler
 stores it as a local variable.  If possible, the compiler should claim
 that it's in a register, but this isn't always done.
 
-@findex N_LSYM, for parameter
-Some compilers use the pair of symbols approach described above
-(@samp{@var{arg}:p} followed by @samp{@var{arg}:}); this includes GCC1
-(not GCC2) on the sparc when passing a small structure and GCC2
-(sometimes) when the argument type is @code{float} and it is passed as a
-@code{double} and converted to @code{float} by the prologue (in the
-latter case the type of the @samp{@var{arg}:p} symbol is @code{double}
-and the type of the @samp{@var{arg}:} symbol is @code{float}).  
+If a parameter is passed as one type and converted to a smaller type by
+the prologue (for example, the parameter is declared as a @code{float},
+but the calling conventions specify that it is passed as a
+@code{double}), then GCC2 (sometimes) uses a pair of symbols.  The first
+symbol uses symbol descriptor @samp{p} and the type which is passed.
+The second symbol has the type and location which the parameter actually
+has after the prologue.  For example, suppose the following C code
+appears with no prototypes involved:
 
+@example
+void
+subr (f)
+     float f;
+@{
+@end example
+
+if @code{f} gets allocated in a register, then its stabs look like:
+
+@c FIXME: Probably should run this through the compiler and get the
+@c whole thing including ".stabs" and so on.
+@example
+f:p13              # @r{where 13 is double}
+f:r12              # @r{where 12 is float}
+@end example
+
+@findex N_LSYM, for parameter
 GCC, at least on the 960, has another solution to the same problem.  It
 uses a single @samp{p} symbol descriptor for an argument which is stored
 as a local variable but uses @code{N_LSYM} instead of @code{N_PSYM}.  In
