@@ -1,3 +1,7 @@
+2002-03-07  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/expdyn1.d: Tweak for change in elf.sc.
+
 2002-02-24  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-sh/ld-r-1.d: Adjust to changes in readelf output.
