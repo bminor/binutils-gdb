@@ -1,3 +1,7 @@
+2004-01-02  Bernardo Innocenti  <bernie@develer.com>
+
+	* config.bfd: Add m68k-uClinux target.
+
 2004-01-01  Grant Edwards <grante@visi.com>
 
 	* elflink.h (elf_gc_sections): Warn when gc-sections option is ignored.

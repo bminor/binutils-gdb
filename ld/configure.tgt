@@ -367,6 +367,7 @@ m68k-*-linux-gnu*)	targ_emul=m68kelf
 			targ_extra_emuls=m68klinux
 			tdir_m68klinux=`echo ${targ_alias} | sed -e 's/linux/linuxaout/'`
 			;;
+m68k-*-uclinux*)	targ_emul=m68kelf ;;
 m68*-*-gnu*)		targ_emul=m68kelf ;;
 m68*-*-lynxos*)		targ_emul=m68klynx ;;
 m68*-*-netbsd*4k*)	targ_emul=m68k4knbsd

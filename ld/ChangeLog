@@ -1,3 +1,6 @@
+2004-01-02  Bernardo Innocenti  <bernie@develer.com>
+
+	* configure.tgt: Add m68k-uClinux target.
 
 For older changes see ChangeLog-0203
 

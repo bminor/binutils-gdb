@@ -1,3 +1,7 @@
+2004-01-02  Bernardo Innocenti  <bernie@develer.com>
+
+	* configure.in: Add m68k-uClinux target.
+	* configure: Regenerate.
 
 For older changes see ChangeLog-0203
 
