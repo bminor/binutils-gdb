@@ -1,3 +1,7 @@
+Fri Mar 25 08:33:28 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* main.c (complete_command): Deal with it if arg is NULL.
+
 Thu Mar 24 07:12:09 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/mips/tm-mips.h (SETUP_ARBITRARY_FRAME): Revise comment

@@ -1987,8 +1987,16 @@ complete_command (arg, from_tty)
 
   dont_repeat ();
 
-  strcpy (rl_line_buffer, arg);
-  rl_point = strlen (arg);
+  if (arg == NULL)
+    {
+      rl_line_buffer[0] = '\0';
+      rl_point = 0;
+    }
+  else
+    {
+      strcpy (rl_line_buffer, arg);
+      rl_point = strlen (arg);
+    }
 
   for (completion = symbol_completion_function (rl_line_buffer, i = 0);
        completion;
