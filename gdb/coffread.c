@@ -1511,7 +1511,7 @@ process_coff_symbol (cs, aux, section_offsets, objfile)
 		    concat (SYMBOL_NAME (sym), NULL);
 	      }
 #ifdef CXUX_TARGET
-	    /* Ignore vendor section for Harris CX/UX targets.
+	    /* Ignore vendor section for Harris CX/UX targets. */
             else if (cs->c_name[0] == '$') 
 	      break;
 #endif /* CXUX_TARGET */
