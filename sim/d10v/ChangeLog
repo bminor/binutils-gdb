@@ -42,8 +42,16 @@ Wed Sep  4 11:35:17 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	(CC_FOR_BUILD,gencode): Use CC_FOR_BUILD to compile gencode.
 	(run): By default, the math library is not needed to be linked
 	in.
-	({BFD,OPCODES,LIBIBERTY}_LIB): Define as variables so they can be
+	({BFD,LIBIBERTY}_LIB): Define as variables so they can be
 	overridden.
+	(VPATH): Don't set to anything but @srcdir@ to work with non-GNU
+	makes.
+	({run,callback}.o): Provide explicit paths to their appropriate
+	source directories.
+	(gencode{,.o},d10v-opc.o): Split compilation into creating object
+	and linking.  Instead of linking in libopcodes.a, just compile
+	d10v-opc.o directly to handle canadian cross.
+	(CSEARCH): Add opcodes directory.
 
 	* configure.in (--enable-sim-cflags): New switch to allow user to
 	set the defaults.

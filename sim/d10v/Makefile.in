@@ -18,7 +18,7 @@
 
 default: all
 
-VPATH = @srcdir@:@srcdir@/../common:@srcdir@/../../gdb/
+VPATH = @srcdir@
 srcdir = @srcdir@
 srcroot = $(srcdir)/../..
 
@@ -79,24 +79,29 @@ X_LIB=
 MATH_LIB=
 
 
-INCLUDE = d10v_sim.h
+INCLUDE = d10v_sim.h $(srcdir)/../../gdb/callback.h
 INCDIR = $(srcdir)/../../include 
 CSEARCH = -I. -I$(srcdir)  -I../../include  \
-  -I../../bfd -I$(INCDIR) -I$(srcdir)/../../bfd -I$(srcdir)/../../gdb -I$(srcdir)/../../newlib/libc/sys/d10v
+  -I../../bfd -I$(INCDIR) -I$(srcdir)/../../bfd -I$(srcdir)/../../gdb -I$(srcdir)/../../newlib/libc/sys/d10v \
+  -I$(srcdir)/opcodes
 DEP = mkdep
 
 LIBIBERTY_LIB	= ../../libiberty/libiberty.a
 BFD_LIB		= ../../bfd/libbfd.a
-OPCODES_LIB	= ../../opcodes/libopcodes.a
 
 all: run libsim.a
 
 run: interp.o $(X) run.o table.o callback.o simops.o
-	$(CC) $(CFLAGS) $(CONFIG_CFLAGS) -o run $(X) interp.o table.o callback.o simops.o run.o $(BFD_LIB) $(LIBIBERTY_LIB) $(X_LIB) $(MATH_LIB)
+	$(CC) $(CFLAGS) $(CONFIG_CFLAGS) -o run $(X) interp.o table.o callback.o simops.o run.o \
+		$(BFD_LIB) $(LIBIBERTY_LIB) $(X_LIB) $(MATH_LIB)
 
 interp.o:interp.c table.c $(INCLUDE)
-run.o:run.c $(INCLUDE)
-simops.o:simops.c $(INCLUDE)
+run.o: $(srcdir)/../common/run.c $(INCLUDE)
+	$(CC) -c $(CFLAGS) $(CONFIG_CFLAGS) $<
+
+simops.o: simops.c $(INCLUDE)
+callback.o: $(srcdir)/../../gdb/callback.c $(INCLUDE)
+	$(CC) -c $(CFLAGS) $(CONFIG_CFLAGS) $<
 
 libsim.a:interp.o table.o simops.o
 	$(AR) $(ARFLAGS) libsim.a interp.o table.o simops.o
@@ -108,8 +113,14 @@ simops.h: gencode
 table.c: gencode simops.h
 	./gencode >$@
 
-gencode: gencode.c ../../opcodes/libopcodes.a $(INCLUDE)
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -o gencode $(srcdir)/gencode.c $(OPCODES_LIB)
+gencode.o: gencode.c $(INCLUDE)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/gencode.c
+
+d10v-opc.o: $(srcdir)/../../opcodes/d10v-opc.c
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/../../opcodes/d10v-opc.c
+
+gencode: gencode.o d10v-opc.o
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -o gencode gencode.o d10v-opc.o $(BUILD_LIB)
 
 .c.o:
 	$(CC) -c $(CFLAGS) $(CONFIG_CFLAGS) $<
