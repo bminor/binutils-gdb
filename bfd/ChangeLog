@@ -1,3 +1,33 @@
+1999-06-03  David Mosberger  <davidm@hpl.hp.com>
+
+	* dwarf2.c (struct line_info): Add member END_SEQUENCE to keep
+	track of end_sequence markers.
+	(add_line_info): Add END_SEQUENCE arg.
+	(decode_line_info): Don't try to infer lo_pc and hi_pc from the
+	debug-line info---it doesn't work right if a compilation unit
+	consists of multiple discontiguous code-sequences.  It would be
+	worthwhile to optimize for the common case where a compilation
+	unit results in a contiguous set of code sequences, but this is
+	quite tricky to get right for arbitrary DWARF2 files.
+	(lookup_address_in_line_info_table): Don't use the last line entry
+	for a compilation unit for anything with an address higher than
+	this line entry.  Also, check for end_sequence markers to
+	correctly handle discontinuities.
+	(_bfd_dwarf2_find_nearest_line): When checking previously loaded
+	compilation units, check all compilation units with each->high==0
+	just like when reading compilation units.
+
+	* dwarf2.c (decode_line_info): Initialize table->files and
+	table->last_line to NULL to avoid segfaults due to random
+	values in these members.
+	(concat_filename): Check for out-of-range file number before
+	indexing filename table.  Segfaults suck.
+
+	* dwarf2.c (decode_line_info): Don't truncate address to least
+	significant 32 bits (breaks 64 bit targets).
+	(lookup_address_in_function_table): Ditto.
+	(comp_unit_contains_address): Ditto.
+
 1999-06-02  Mark Mitchell  <Mark Mitchell <mark@codesourcery.com>>
 
 	* elf32-mips.c (elf_mips_howto_table): Add R_MIPS_JALR.

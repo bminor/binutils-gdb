@@ -631,6 +631,7 @@ struct line_info {
   char* filename;
   unsigned int line;
   unsigned int column;
+  int end_sequence;		/* end of (sequential) code sequence */
 };
 
 struct fileinfo {
@@ -653,12 +654,13 @@ struct line_info_table {
 };
 
 static void 
-add_line_info (table, address, filename, line, column)
+add_line_info (table, address, filename, line, column, end_sequence)
      struct line_info_table* table;
      bfd_vma address;
      char* filename;
      unsigned int line;
      unsigned int column;
+     int end_sequence;
 {
   struct line_info* info = (struct line_info*)
     bfd_alloc (table->abfd, sizeof (struct line_info));
@@ -670,6 +672,7 @@ add_line_info (table, address, filename, line, column)
   info->filename = filename;
   info->line = line;
   info->column = column;
+  info->end_sequence = end_sequence;
 }
 
 static char* 
@@ -677,7 +680,16 @@ concat_filename (table, file)
      struct line_info_table* table;
      unsigned int file;
 {
-  char* filename = table->files[file - 1].name;
+  char* filename;
+
+  if (file - 1 >= table->num_files)
+    {
+      (*_bfd_error_handler) (_("Dwarf Error: mangled line number "
+			       "section (bad file number)."));
+      return "<unknown>";
+    }
+
+  filename = table->files[file - 1].name;
   if (*filename == '/')
     return filename;
 
@@ -708,6 +720,12 @@ decode_line_info (unit)
   unsigned int i, bytes_read;
   char *cur_file, *cur_dir;
   unsigned char op_code, extended_op, adj_opcode;
+#if 0
+  /* This optimization unfortunately does not work well on programs
+     that have multiple sections containing text (such as Linux which
+     uses .text, and .text.init, for example.  */
+  bfd_vma hi_pc = 0, lo_pc = ~ (bfd_vma) 0;
+#endif
 
   if (! dwarf_line_buffer)
     {
@@ -746,6 +764,9 @@ decode_line_info (unit)
 
   table->num_dirs = 0;
   table->dirs = NULL;
+
+  table->files = NULL;
+  table->last_line = NULL;
 
   line_ptr = dwarf_line_buffer + unit->line_offset;
 
@@ -831,6 +852,7 @@ decode_line_info (unit)
       int is_stmt = lh.default_is_stmt;
       int basic_block = 0;
       int end_sequence = 0;
+      boolean first_time = true;
 
       /* Decode the table. */
       while (! end_sequence)
@@ -847,7 +869,7 @@ decode_line_info (unit)
 		{
 		case DW_LNE_end_sequence:
 		  end_sequence = 1;
-		  add_line_info (table, address, filename, line, column);
+		  add_line_info (table, address, filename, line, column, end_sequence);
 		  break;
 		case DW_LNE_set_address:
 		  address = read_address (unit, line_ptr);
@@ -884,7 +906,7 @@ decode_line_info (unit)
 		}
 	      break;
 	    case DW_LNS_copy:
-	      add_line_info (table, address, filename, line, column);
+	      add_line_info (table, address, filename, line, column, 0);
 	      basic_block = 0;
 	      break;
 	    case DW_LNS_advance_pc:
@@ -918,7 +940,8 @@ decode_line_info (unit)
 	      basic_block = 1;
 	      break;
 	    case DW_LNS_const_add_pc:
-	      address += (255 - lh.opcode_base) / lh.line_range;
+	      address += lh.minimum_instruction_length
+		      * ((255 - lh.opcode_base) / lh.line_range);
 	      break;
 	    case DW_LNS_fixed_advance_pc:
 	      address += read_2_bytes (abfd, line_ptr);
@@ -930,11 +953,27 @@ decode_line_info (unit)
 		* lh.minimum_instruction_length;
 	      line += lh.line_base + (adj_opcode % lh.line_range);
 	      /* append row to matrix using current values */
-	      add_line_info (table, address, filename, line, column);
+	      add_line_info (table, address, filename, line, column, 0);
 	      basic_block = 1;
 	    }
+#if 0
+	  if (unit->high == 0)
+	    {
+	      if (address > hi_pc)
+		hi_pc = address;
+	      if (address < lo_pc)
+		lo_pc = address;
+	    }
+#endif
 	}
     }
+#if 0
+  if (unit->high == 0 && hi_pc != 0)
+    {
+      unit->high = hi_pc;
+      unit->low = lo_pc;
+    }
+#endif
 
   return table;
 }
@@ -954,21 +993,25 @@ lookup_address_in_line_info_table (table,
      const char **filename_ptr;
      unsigned int *linenumber_ptr;
 {
+  struct line_info* next_line = table->last_line;
   struct line_info* each_line;
-  struct line_info* next_line;
   
-  for (next_line = 0, each_line = table->last_line;
-       each_line;
-       next_line = each_line, each_line = each_line->prev_line)
+  if (!next_line)
+    return false;
+
+  each_line = next_line->prev_line;
+
+  while (each_line && next_line)
     {
-      if (addr >= each_line->address
-	  && (next_line == 0
-	      || addr < next_line->address)) 
+      if (!each_line->end_sequence
+	  && addr >= each_line->address && addr < next_line->address)
 	{
 	  *filename_ptr = each_line->filename;
 	  *linenumber_ptr = each_line->line;
 	  return true;
 	}
+      next_line = each_line;
+      each_line = each_line->prev_line;
     }
   
   return false;
@@ -1363,6 +1406,8 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 
   struct comp_unit* each;
   
+  boolean found;
+
   *filename_ptr = NULL;
   *functionname_ptr = NULL;
   *linenumber_ptr = 0;
@@ -1404,14 +1449,20 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 
       stash->info_ptr_end = stash->info_ptr + size;
 
-      /* FIXME:  There is a problem with the contents of the .debug_info section.
-	 The 'low' and 'high' addresses of the comp_units are computed by relocs
-	 against symbols in the .text segment.  We need these addresses in
-	 order to determine the nearest line number, and so we have to resolve
-	 the relocs.  There is a similar problem when the .debug_line section is
-	 processed as well.
+      /* FIXME: There is a problem with the contents of the
+	 .debug_info section.  The 'low' and 'high' addresses of the
+	 comp_units are computed by relocs against symbols in the
+	 .text segment.  We need these addresses in order to determine
+	 the nearest line number, and so we have to resolve the
+	 relocs.  There is a similar problem when the .debug_line
+	 section is processed as well (e.g., there may be relocs
+	 against the operand of the DW_LNE_set_address operator).
 	 
-	 Unfortunately getting hold of the reloc information is hard... */
+	 Unfortunately getting hold of the reloc information is hard...
+
+	 For now, this means that disassembling object files (as
+	 opposed to fully executables) does not always work as well as
+	 we would like.  */
     }
   
   /* A null info_ptr indicates that there is no dwarf2 info 
@@ -1424,11 +1475,23 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 
   for (each = stash->all_comp_units; each; each = each->next_unit)
     {
-      if (comp_unit_contains_address (each, addr))
-	return comp_unit_find_nearest_line (each, addr,
-					    filename_ptr, 
-					    functionname_ptr, 
-					    linenumber_ptr);
+      if (each->high > 0)
+	{
+	  if (comp_unit_contains_address (each, addr))
+	    return comp_unit_find_nearest_line (each, addr,
+						filename_ptr, 
+						functionname_ptr, 
+						linenumber_ptr);
+	}
+      else
+	{
+	  found = comp_unit_find_nearest_line (each, addr,
+						filename_ptr, 
+						functionname_ptr, 
+						linenumber_ptr);
+	  if (found)
+	    return true;
+	}
     }
 
   /* Read each remaining comp. units checking each as they are read. */
@@ -1451,11 +1514,28 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 	      each->next_unit = stash->all_comp_units;
 	      stash->all_comp_units = each;
 
-	      if (comp_unit_contains_address (each, addr))
-		return comp_unit_find_nearest_line (each, addr,
-						    filename_ptr, 
-						    functionname_ptr, 
-						    linenumber_ptr);
+	      /* DW_AT_low_pc and DW_AT_high_pc are optional for
+		 compilation units.  If we don't have them (i.e.,
+		 unit->high == 0), we need to consult the line info
+		 table to see if a compilation unit contains the given
+		 address. */
+	      if (each->high > 0)
+		{
+		  if (comp_unit_contains_address (each, addr))
+		    return comp_unit_find_nearest_line (each, addr,
+						       filename_ptr,
+						       functionname_ptr,
+						       linenumber_ptr);
+		}
+	      else
+		{
+		  found = comp_unit_find_nearest_line (each, addr,
+						       filename_ptr,
+						       functionname_ptr,
+						       linenumber_ptr);
+		  if (found)
+		    return true;
+		}
 	    }
 	}
     }
