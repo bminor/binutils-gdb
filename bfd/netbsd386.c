@@ -30,7 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	SEGMENT_SIZE	PAGE_SIZE
 
 #define	DEFAULT_ARCH	bfd_arch_i386
-#define MACHTYPE_OK(mtype) ((mtype) == M_386 || (mtype) == M_I386 || (mtype) == M_UNKNOWN)
+#define MACHTYPE_OK(mtype) ((mtype) == M_386 || (mtype) == M_386_NETBSD || (mtype) == M_UNKNOWN)
 
 #define MY(OP) CAT(netbsd386_,OP)
 /* This needs to start with a.out so GDB knows it is an a.out variant.  */

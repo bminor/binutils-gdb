@@ -1,3 +1,8 @@
+Wed Sep  1 14:23:32 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* libaout.h, netbsd386.c: Change M_I386 to M_386_NETBSD.  M_I386
+	is an SCO pre-define.
+
 Tue Aug 31 12:50:19 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* nlmcode.h (nlm_object_p): Set HAS_SYMS if there are external
