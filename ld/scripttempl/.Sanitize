@@ -15,6 +15,14 @@
 
 Do-first:
 
+d10v_files="elfd10v.sc"
+
+if ( echo $* | grep keep\-d10v > /dev/null ) ; then
+	keep_these_too="${d10v_files} ${keep_these_too}"
+else
+	lose_these_too="${d10v_files} ${lose_these_too}"
+fi
+
 v850_files="v850.sc"
 
 if ( echo $* | grep keep\-v850 > /dev/null ) ; then
@@ -41,7 +49,6 @@ aout.sc
 delta68.sc
 ebmon29k.sc
 elf.sc
-elfd10v.sc
 elfmips.sc
 elfppc.sc
 go32coff.sc
