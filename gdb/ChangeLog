@@ -1,3 +1,8 @@
+2001-05-12  Fernando Nasser  <fnasser@redhat.com>
+
+	* remote-e7000.c (e7000_open): Check for bad baud rate.
+	* remote-st.c (st2000_open): Ditto.
+
 2001-05-11  Jim Blandy  <jimb@redhat.com>
 
 	* thread.c (do_captured_list_thread_ids): Use ui_out_tuple_begin

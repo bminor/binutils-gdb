@@ -285,7 +285,11 @@ or target st2000 <host> <port>\n");
   if (!st2000_desc)
     perror_with_name (dev_name);
 
-  SERIAL_SETBAUDRATE (st2000_desc, baudrate);
+  if (SERIAL_SETBAUDRATE (st2000_desc, baudrate))
+    {
+      SERIAL_CLOSE (dev_name);
+      perror_with_name (dev_name);
+    }
 
   SERIAL_RAW (st2000_desc);
 

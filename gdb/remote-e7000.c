@@ -667,7 +667,11 @@ e7000_open (char *args, int from_tty)
   if (!e7000_desc)
     perror_with_name (dev_name);
 
-  SERIAL_SETBAUDRATE (e7000_desc, baudrate);
+  if (SERIAL_SETBAUDRATE (e7000_desc, baudrate))
+    {
+      SERIAL_CLOSE (dev_name);
+      perror_with_name (dev_name);
+    }
   SERIAL_RAW (e7000_desc);
 
 #ifdef GDB_TARGET_IS_H8300
