@@ -152,7 +152,6 @@ bfd_openr (filename, target)
   target_vec = bfd_find_target (target, nbfd);
   if (target_vec == NULL)
     {
-      bfd_set_error (bfd_error_invalid_target);
       _bfd_delete_bfd (nbfd);
       return NULL;
     }
@@ -220,7 +219,8 @@ bfd_fdopenr (filename, target, fd)
 #else
   fdflags = fcntl (fd, F_GETFL, NULL);
 #endif
-  if (fdflags == -1) return NULL;
+  if (fdflags == -1)
+    return NULL;
 
   nbfd = _bfd_new_bfd ();
   if (nbfd == NULL)
@@ -229,7 +229,6 @@ bfd_fdopenr (filename, target, fd)
   target_vec = bfd_find_target (target, nbfd);
   if (target_vec == NULL)
     {
-      bfd_set_error (bfd_error_invalid_target);
       _bfd_delete_bfd (nbfd);
       return NULL;
     }
@@ -308,7 +307,6 @@ bfd_openstreamr (filename, target, streamarg)
   target_vec = bfd_find_target (target, nbfd);
   if (target_vec == NULL)
     {
-      bfd_set_error (bfd_error_invalid_target);
       _bfd_delete_bfd (nbfd);
       return NULL;
     }
@@ -353,8 +351,6 @@ bfd_openw (filename, target)
 {
   bfd *nbfd;
   const bfd_target *target_vec;
-
-  bfd_set_error (bfd_error_system_call);
 
   /* nbfd has to point to head of malloc'ed block so that bfd_close may
      reclaim it correctly.  */
