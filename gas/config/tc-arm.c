@@ -6355,56 +6355,38 @@ arm_adjust_symtab ()
 	coffsymbol(sym->bsym)->native->u.syment.n_flags = 0xFF;
     }
 }
-#endif
+#endif /* OBJ_COFF */
 #ifdef OBJ_ELF
 void
 armelf_adjust_symtab ()
 {
   symbolS * sym;
-  elf_symbol_type *elf_sym;
-  char bind;
 
   for (sym = symbol_rootP; sym != NULL; sym = symbol_next (sym))
     {
-      if (ARM_IS_THUMB (sym))
-        {
-	  if (THUMB_IS_FUNC (sym))
-	    {
-            elf_sym = elf_symbol(sym->bsym);
-            bind = ELF_ST_BIND(elf_sym);
-            elf_sym->internal_elf_sym.st_info = ELF_ST_INFO(bind, STT_ARM_TFUNC);
-            }
+      if (ARM_IS_THUMB (sym) && (THUMB_IS_FUNC (sym)))
+	{
+	  elf_symbol_type * elf_sym;
+	  unsigned char bind;
 
-         }
-     }
+	  elf_sym = elf_symbol (sym->bsym);
+	  bind = ELF_ST_BIND (elf_sym->internal_elf_sym.st_info);
+	  
+	  elf_sym->internal_elf_sym.st_info = ELF_ST_INFO (bind, STT_ARM_TFUNC);
+	}
+    }
 }
 
-#endif
-
-#ifdef OBJ_ELF
 void
 armelf_frob_symbol (symp, puntp)
-    symbolS *symp;
-    int *puntp;
-
+     symbolS * symp;
+     int * puntp;
 {
    elf_frob_symbol (symp, puntp);
+}
 
-/*
-   if (S_IS_EXTERNAL (symp))
-      S_SET_STORAGE_CLASS(symp, C_EXT);
+#endif /* OBJ_ELF */
 
-   if (S_GET_STORAGE_CLASS (symp) == C_NULL)
-     {
-     if (S_GET_SEGMENT (symp) == text_section
-              && symp != seg_info (text_section)->sym)
-            S_SET_STORAGE_CLASS (symp, C_LABEL);
-          else
-            S_SET_STORAGE_CLASS (symp, C_STAT);
-      }
-*/
-} 
-#endif
 int
 arm_data_in_code ()
 {

@@ -1,3 +1,8 @@
+Fri Sep  4 17:07:14 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.h (obj_adjust_symtab): Fixed typo.
+	* config/tc-arm.c (armelf_adjust_symtab): Reformatted.
+
 Fri Sep  4 13:57:43 1998  Jakub Jelinek <jj@sunsite.ms.mff.cuni.cz>
 
 	* config/tc-sparc.c (in_signed_range): Sign extend 32-bit words

@@ -151,10 +151,10 @@ char *arm_canonicalize_symbol_name PARAMS ((char *));
 
 /* Finish processing the entire symbol table:  */
 #ifdef OBJ_ELF
-#define obj_adjust_symtab() armelf_adjust_symtab ()
+#define obj_adjust_symtab armelf_adjust_symtab 
 extern void armelf_adjust_symtab PARAMS ((void));
 #else
-#define obj_adjust_symtab() arm_adjust_symtab ()
+#define obj_adjust_symtab arm_adjust_symtab 
 extern void arm_adjust_symtab PARAMS ((void));
 #endif
 
