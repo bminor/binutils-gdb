@@ -88,9 +88,7 @@ if ![runto_main] then {
 get_debug_format
 
 proc local_compiler_xfail_check { } {
-    global gcc_compiled;
-
-    if {$gcc_compiled == 2} then {
+    if { [test_compiler_info gcc-2-*] } then {
 	if { ![test_debug_format "HP"] \
 		&& ![test_debug_format "DWARF 2"] } then {
 	    setup_xfail "*-*-*" 
@@ -258,7 +256,7 @@ gdb_test "ptype vendor" "type = const volatile unsigned char \\* const volatile.
 
 # test function parameters
 local_compiler_xfail_check
-if {$gcc_compiled == 3 && [test_debug_format "stabs"]} then {
+if { [test_compiler_info gcc-3-*] && [test_debug_format "stabs"] } then {
     # For reasons unknown, GCC 3 with stabs mangles several cv-qualified
     # arguments to this function.
     setup_xfail "*-*-*"

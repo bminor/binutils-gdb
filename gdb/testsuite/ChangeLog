@@ -1,3 +1,9 @@
+2003-11-27  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.base/volatile.exp: Replace references to gcc_compiled with
+	calls to test_compiler_info.
+
 2003-11-27  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/structs.exp: Use i*86-*-* instead of i686-*-* as a
