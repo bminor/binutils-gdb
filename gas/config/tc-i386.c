@@ -1763,12 +1763,6 @@ md_assemble (line)
 	    if (i.tm.opcode_modifier & FloatMF)
 	      i.tm.base_opcode ^= 4;
 	  }
-
-	if (intel_syntax && i.suffix == LONG_DOUBLE_MNEM_SUFFIX)
-	  {
-	    if (i.tm.opcode_modifier & FloatMF)
-	      i.tm.base_opcode ^= 2;
-	  }
       }
 
     if (i.tm.opcode_modifier & ImmExt)

@@ -1,3 +1,8 @@
+1999-08-11  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (md_assemble): Remove dead code.  intel_syntax
+	LONG_DOUBLE_MNEM_SUFFIX floating point is done in opcode/i386.h
+
 Tue Aug 10 12:58:31 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (pa_build_unwind_subspace): Use sane section
