@@ -1,5 +1,17 @@
 Fri Sep 25 12:09:33 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	* inftarg.c (child_create_inferior, child_attach,
+	  child_mourn_inferior): collect unix child process stratum
+	  functions which live below the target vector into this file to
+	  facilitate host/target/native split.  Also, make them static.
+	* inflow.c (child_mourn_inferior): removed.
+	* infrun.c (child_create_inferior, child_attach): removed.
+	  (resume): becomes global so that functions below the
+	  target vector can find it.
+	* inferior.h (resume): add prototype.
+	  (child_mourn_inferior, child_create_inferior, child_attach):
+	  remove prototypes.
+
 	* xcoffexec.c (exec_ops): child_attach and child_create_inferior
 	  replaced with find_default_attach and
 	  find_default_create_inferior.

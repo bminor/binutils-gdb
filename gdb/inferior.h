@@ -81,6 +81,11 @@ extern int inferior_pid;
 
 extern char registers[];
 
+/* Array of validity bits (one per register).  Nonzero at position XXX_REGNUM
+   means that `registers' contains a valid copy of inferior register XXX.  */
+
+extern char register_valid[NUM_REGS];
+
 extern void
 clear_proceed_status PARAMS ((void));
 
@@ -89,9 +94,6 @@ proceed PARAMS ((CORE_ADDR, int, int));
 
 extern void
 kill_inferior PARAMS ((void));
-
-extern void
-kill_inferior_fast PARAMS ((void));
 
 extern void
 generic_mourn_inferior PARAMS ((void));
@@ -120,6 +122,9 @@ close_exec_file PARAMS ((void));
 extern void
 reopen_exec_file PARAMS ((void));
 
+extern void
+resume PARAMS ((int, int));
+
 /* From misc files */
 
 extern void
@@ -130,9 +135,6 @@ fetch_inferior_registers PARAMS ((int));
 
 extern void 
 solib_create_inferior_hook PARAMS ((void));
-
-extern void
-child_mourn_inferior PARAMS ((void));
 
 extern void
 child_terminal_info PARAMS ((char *, int));
@@ -159,6 +161,13 @@ detach PARAMS ((int));
 
 extern void
 child_resume PARAMS ((int, int));
+
+#ifndef PTRACE_ARG3_TYPE
+#define PTRACE_ARG3_TYPE int	/* Correct definition for most systems. */
+#endif
+
+extern int
+call_ptrace PARAMS ((int, int, PTRACE_ARG3_TYPE, int));
 
 /* From procfs.c */
 
@@ -190,12 +199,6 @@ new_tty_prefork PARAMS ((char *));
 
 extern void
 start_remote PARAMS ((void));
-
-extern void
-child_create_inferior PARAMS ((char *, char *, char **));
-
-extern void
-child_attach PARAMS ((char *, int));
 
 extern void
 normal_stop PARAMS ((void));
