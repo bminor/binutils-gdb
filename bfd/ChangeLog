@@ -1,3 +1,8 @@
+Mon Nov 27 12:27:46 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-i386.c (elf_backend_plt_readonly): Set correctly, to 1.
+	* elf32-sparc.c (elf_backend_plt_readonly): Set correctly, to 0.
+
 Wed Nov 22 12:02:09 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ecoff.c (_bfd_ecoff_new_section_hook): Handle .rconst section.

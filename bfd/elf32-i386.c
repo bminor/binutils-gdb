@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "bfdlink.h"
 #include "libbfd.h"
-#include "libelf.h"
+#include "elf-bfd.h"
 
 static reloc_howto_type *elf_i386_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
@@ -275,7 +275,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
     {
-      long r_symndx;
+      unsigned long r_symndx;
       struct elf_link_hash_entry *h;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
@@ -358,7 +358,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	      if (local_got_offsets == NULL)
 		{
 		  size_t size;
-		  register int i;
+		  register unsigned int i;
 
 		  size = symtab_hdr->sh_info * sizeof (bfd_vma);
 		  local_got_offsets = (bfd_vma *) bfd_alloc (abfd, size);
@@ -418,7 +418,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	case R_386_PC32:
 	  if (info->shared
 	      && (sec->flags & SEC_ALLOC) != 0
-	      && (r_type != R_386_PC32 || h != NULL))
+	      && (ELF32_R_TYPE (rel->r_info) != R_386_PC32 || h != NULL))
 	    {
 	      /* When creating a shared object, we must copy these
                  reloc types into the output file.  We create a reloc
@@ -848,7 +848,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
     {
       int r_type;
       reloc_howto_type *howto;
-      long r_symndx;
+      unsigned long r_symndx;
       struct elf_link_hash_entry *h;
       Elf_Internal_Sym *sym;
       asection *sec;
@@ -1143,7 +1143,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		    outrel.r_info = ELF32_R_INFO (0, R_386_RELATIVE);
 		  else
 		    {
-		      BFD_ASSERT (h->dynindx != (bfd_vma) -1);
+		      BFD_ASSERT (h->dynindx != -1);
 		      outrel.r_info = ELF32_R_INFO (h->dynindx, R_386_32);
 		    }
 		}
@@ -1519,7 +1519,7 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
 #define elf_backend_finish_dynamic_sections \
 					elf_i386_finish_dynamic_sections
 #define elf_backend_want_got_plt 1
-#define elf_backend_plt_readonly 0
+#define elf_backend_plt_readonly 1
 #define elf_backend_want_plt_sym 0
 
 #include "elf32-target.h"
