@@ -29,6 +29,7 @@ Makefile.in
 arcs.c
 bsd_callg_bl.m
 config
+configure.bat
 configure.in
 dfn.c
 dummy.c
