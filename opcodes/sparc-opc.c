@@ -945,18 +945,18 @@ struct sparc_opcode sparc_opcodes[] = {
  { opcode, (mask)      , (lose)|ANNUL, "l",     (flags), v6 }
 
 #define brx(opcode, mask, lose, flags) /* v9 */ \
- { opcode, (mask), (lose)|ANNUL|BPRED, "Z,G",   (flags), v9 }, \
- { opcode, (mask), (lose)|ANNUL|BPRED, ",N Z,G",   (flags), v9 }, \
- { opcode, (mask)|ANNUL, (lose)|BPRED, ",a Z,G", (flags), v9 }, \
- { opcode, (mask)|ANNUL, (lose)|BPRED, ",a,N Z,G", (flags), v9 }, \
- { opcode, (mask)|BPRED, (lose)|ANNUL, ",T Z,G",   (flags), v9 }, \
- { opcode, (mask)|ANNUL|BPRED, (lose), ",a,T Z,G", (flags), v9 }, \
- { opcode, (mask), (lose)|ANNUL|BPRED, "z,G",   (flags), v9 }, \
- { opcode, (mask), (lose)|ANNUL|BPRED, ",N z,G",   (flags), v9 }, \
- { opcode, (mask)|ANNUL, (lose)|BPRED, ",a z,G", (flags), v9 }, \
- { opcode, (mask)|ANNUL, (lose)|BPRED, ",a,N z,G", (flags), v9 }, \
- { opcode, (mask)|BPRED, (lose)|ANNUL, ",T z,G",   (flags), v9 }, \
- { opcode, (mask)|ANNUL|BPRED, (lose), ",a,T z,G", (flags), v9 }
+ { opcode, (mask)|(2<<20), (lose)|ANNUL|BPRED, "Z,G",   (flags), v9 }, \
+ { opcode, (mask)|(2<<20), (lose)|ANNUL|BPRED, ",N Z,G",   (flags), v9 }, \
+ { opcode, (mask)|(2<<20)|ANNUL, (lose)|BPRED, ",a Z,G", (flags), v9 }, \
+ { opcode, (mask)|(2<<20)|ANNUL, (lose)|BPRED, ",a,N Z,G", (flags), v9 }, \
+ { opcode, (mask)|(2<<20)|BPRED, (lose)|ANNUL, ",T Z,G",   (flags), v9 }, \
+ { opcode, (mask)|(2<<20)|ANNUL|BPRED, (lose), ",a,T Z,G", (flags), v9 }, \
+ { opcode, (mask), (lose)|(2<<20)|ANNUL|BPRED, "z,G",   (flags), v9 }, \
+ { opcode, (mask), (lose)|(2<<20)|ANNUL|BPRED, ",N z,G",   (flags), v9 }, \
+ { opcode, (mask)|ANNUL, (lose)|(2<<20)|BPRED, ",a z,G", (flags), v9 }, \
+ { opcode, (mask)|ANNUL, (lose)|(2<<20)|BPRED, ",a,N z,G", (flags), v9 }, \
+ { opcode, (mask)|BPRED, (lose)|(2<<20)|ANNUL, ",T z,G",   (flags), v9 }, \
+ { opcode, (mask)|ANNUL|BPRED, (lose)|(2<<20), ",a,T z,G", (flags), v9 }
 
 /* Define four traps: reg+reg, reg + immediate, immediate alone, reg alone. */
 #define tr(opcode, mask, lose, flags) \
@@ -973,10 +973,15 @@ struct sparc_opcode sparc_opcodes[] = {
  { opcode, (mask), IMMED|(lose),		"1+2",   (flags), v6 }, /* rs1 + rs2 */ \
  { opcode, (mask), IMMED|(lose)|RS2_G0,		"1",     (flags), v6 } /* rs1 + %g0 */
 
+/* v9: We must put `brx' before `br', to ensure that we never match something
+   v9: against an expression unless it is an expression.  Otherwise, we end
+   v9: up with undefined symbol tables entries, because they get added, but
+   v9: are not deleted if the pattern fails to match.  */
+
 /* Define both branches and traps based on condition mask */
 #define cond(bop, top, mask, flags) \
-  br(bop,  F2(0, 2)|(mask), F2(~0, ~2)|((~mask)&COND(~0)), F_DELAYED|(flags)), \
   brx(bop, F2(0, 1)|(mask), F2(~0, ~1)|((~mask)&COND(~0)), F_DELAYED|(flags)), /* v9 */ \
+  br(bop,  F2(0, 2)|(mask), F2(~0, ~2)|((~mask)&COND(~0)), F_DELAYED|(flags)), \
   tr(top,  F3(2, 0x3a, 0)|(mask), F3(~2, ~0x3a, 0)|((~mask)&COND(~0)), (flags))
 
 /* Define all the conditions, all the branches, all the traps.  */
