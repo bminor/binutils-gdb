@@ -1,5 +1,11 @@
 2000-07-20  H.J. Lu  <hjl@gnu.org>
 
+	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Don't check
+	info->new_dtags when setting DT_FLAGS_1. It will only be set
+	by the new linker options. It shouldn't break anything.
+
+2000-07-20  H.J. Lu  <hjl@gnu.org>
+
 	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Set DT_FLAGS_1
 	only if info->new_dtags is true.
 
