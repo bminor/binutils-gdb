@@ -4535,7 +4535,8 @@ pa_build_unwind_subspace (call_info)
       seg = bfd_make_section_old_way (stdoutput, UNWIND_SECTION_NAME);
       bfd_set_section_flags (stdoutput, seg,
 			     SEC_READONLY | SEC_HAS_CONTENTS
-			     | SEC_LOAD | SEC_RELOC);
+			     | SEC_LOAD | SEC_RELOC | SEC_ALLOC | SEC_DATA);
+      bfd_set_section_alignment (stdoutput, seg, 2);
     }
 
   save_seg = now_seg;

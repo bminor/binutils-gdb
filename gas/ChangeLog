@@ -1,5 +1,8 @@
 Tue Aug 10 12:58:31 1999  Jeffrey A Law  (law@cygnus.com)
 
+	* config/tc-hppa.c (pa_build_unwind_subspace): Use sane section
+	flags for the unwind subspace.
+
 	* config/tc-hppa.c (UNWIND_SECTION_NAME): Define for ELF.
 	(pa_build_unwind_subspace): Remove #if 0 wrapper.  Select a
 	suitable relocation based on the size of the target's pointer.
