@@ -192,8 +192,6 @@ static struct value *evaluate_subexp (struct type *, struct expression *,
 
 static struct value *evaluate_subexp_type (struct expression *, int *);
 
-static struct type *ada_create_fundamental_type (struct objfile *, int);
-
 static int is_dynamic_field (struct type *, int);
 
 static struct type *to_fixed_variant_branch_type (struct type *, char *,
@@ -281,6 +279,11 @@ static int ada_is_direct_array_type (struct type *);
 static void error_breakpoint_runtime_sym_not_found (const char *err_desc);
 
 static int is_runtime_sym_defined (const char *name, int allow_tramp);
+
+static void ada_language_arch_info (struct gdbarch *,
+				    struct language_arch_info *);
+
+static void check_size (const struct type *);
 
 
 
@@ -2440,7 +2443,7 @@ ada_array_length (struct value *arr, int n)
     }
   else
     return
-      value_from_longest (builtin_type_ada_int,
+      value_from_longest (builtin_type_int,
                           value_as_long (desc_one_bound (desc_bounds (arr),
                                                          n, 1))
                           - value_as_long (desc_one_bound (desc_bounds (arr),
@@ -8343,7 +8346,7 @@ pos_atr (struct value *arg)
 static struct value *
 value_pos_atr (struct value *arg)
 {
-  return value_from_longest (builtin_type_ada_int, pos_atr (arg));
+  return value_from_longest (builtin_type_int, pos_atr (arg));
 }
 
 /* Evaluate the TYPE'VAL attribute applied to ARG.  */
@@ -9320,7 +9323,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       if (noside == EVAL_SKIP)
         goto nosideret;
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
-        return value_zero (builtin_type_ada_int, not_lval);
+        return value_zero (builtin_type_int, not_lval);
       else
         return value_pos_atr (arg1);
 
@@ -9329,9 +9332,9 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       if (noside == EVAL_SKIP)
         goto nosideret;
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
-        return value_zero (builtin_type_ada_int, not_lval);
+        return value_zero (builtin_type_int, not_lval);
       else
-        return value_from_longest (builtin_type_ada_int,
+        return value_from_longest (builtin_type_int,
                                    TARGET_CHAR_BIT
                                    * TYPE_LENGTH (VALUE_TYPE (arg1)));
 
@@ -10167,7 +10170,9 @@ ada_create_fundamental_type (struct objfile *objfile, int typeid)
                         0, "integer", objfile);
       break;
     case FT_SIGNED_INTEGER:
-      type = init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT, 0, "integer", objfile);        /* FIXME -fnf */
+      type = init_type (TYPE_CODE_INT, TARGET_INT_BIT /
+			TARGET_CHAR_BIT, 
+			0, "integer", objfile);        /* FIXME -fnf */
       break;
     case FT_UNSIGNED_INTEGER:
       type = init_type (TYPE_CODE_INT,
@@ -10223,88 +10228,69 @@ ada_create_fundamental_type (struct objfile *objfile, int typeid)
   return (type);
 }
 
-struct type *builtin_type_ada_int;
-struct type *builtin_type_ada_short;
-struct type *builtin_type_ada_long;
-struct type *builtin_type_ada_long_long;
-struct type *builtin_type_ada_char;
-struct type *builtin_type_ada_float;
-struct type *builtin_type_ada_double;
-struct type *builtin_type_ada_long_double;
-struct type *builtin_type_ada_natural;
-struct type *builtin_type_ada_positive;
-struct type *builtin_type_ada_system_address;
-
-struct type **const (ada_builtin_types[]) =
-{
-  &builtin_type_ada_int,
-    &builtin_type_ada_long,
-    &builtin_type_ada_short,
-    &builtin_type_ada_char,
-    &builtin_type_ada_float,
-    &builtin_type_ada_double,
-    &builtin_type_ada_long_long,
-    &builtin_type_ada_long_double,
-    &builtin_type_ada_natural, &builtin_type_ada_positive,
-    /* The following types are carried over from C for convenience.  */
-&builtin_type_int,
-    &builtin_type_long,
-    &builtin_type_short,
-    &builtin_type_char,
-    &builtin_type_float,
-    &builtin_type_double,
-    &builtin_type_long_long,
-    &builtin_type_void,
-    &builtin_type_signed_char,
-    &builtin_type_unsigned_char,
-    &builtin_type_unsigned_short,
-    &builtin_type_unsigned_int,
-    &builtin_type_unsigned_long,
-    &builtin_type_unsigned_long_long,
-    &builtin_type_long_double,
-    &builtin_type_complex, &builtin_type_double_complex, 0};
+enum ada_primitive_types {
+  ada_primitive_type_int,
+  ada_primitive_type_long,
+  ada_primitive_type_short,
+  ada_primitive_type_char,
+  ada_primitive_type_float,
+  ada_primitive_type_double,
+  ada_primitive_type_void,
+  ada_primitive_type_long_long,
+  ada_primitive_type_long_double,
+  ada_primitive_type_natural,
+  ada_primitive_type_positive,
+  ada_primitive_type_system_address,
+  nr_ada_primitive_types
+};
 
 static void
-build_ada_types (struct gdbarch *current_gdbarch)
+ada_language_arch_info (struct gdbarch *current_gdbarch,
+			struct language_arch_info *lai)
 {
-  builtin_type_ada_int =
+  const struct builtin_type *builtin = builtin_type (current_gdbarch);
+  lai->primitive_type_vector
+    = GDBARCH_OBSTACK_CALLOC (current_gdbarch, nr_ada_primitive_types + 1,
+			      struct type *);
+  lai->primitive_type_vector [ada_primitive_type_int] =
     init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
                0, "integer", (struct objfile *) NULL);
-  builtin_type_ada_long =
+  lai->primitive_type_vector [ada_primitive_type_long] =
     init_type (TYPE_CODE_INT, TARGET_LONG_BIT / TARGET_CHAR_BIT,
                0, "long_integer", (struct objfile *) NULL);
-  builtin_type_ada_short =
+  lai->primitive_type_vector [ada_primitive_type_short] =
     init_type (TYPE_CODE_INT, TARGET_SHORT_BIT / TARGET_CHAR_BIT,
                0, "short_integer", (struct objfile *) NULL);
-  builtin_type_ada_char =
+  lai->primitive_type_vector [ada_primitive_type_char] =
     init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
                0, "character", (struct objfile *) NULL);
-  builtin_type_ada_float =
+  lai->string_char_type = builtin->builtin_char;
+  lai->primitive_type_vector [ada_primitive_type_float] =
     init_type (TYPE_CODE_FLT, TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
                0, "float", (struct objfile *) NULL);
-  builtin_type_ada_double =
+  lai->primitive_type_vector [ada_primitive_type_double] =
     init_type (TYPE_CODE_FLT, TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
                0, "long_float", (struct objfile *) NULL);
-  builtin_type_ada_long_long =
+  lai->primitive_type_vector [ada_primitive_type_long_long] =
     init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
                0, "long_long_integer", (struct objfile *) NULL);
-  builtin_type_ada_long_double =
+  lai->primitive_type_vector [ada_primitive_type_long_double] =
     init_type (TYPE_CODE_FLT, TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
                0, "long_long_float", (struct objfile *) NULL);
-  builtin_type_ada_natural =
+  lai->primitive_type_vector [ada_primitive_type_natural] =
     init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
                0, "natural", (struct objfile *) NULL);
-  builtin_type_ada_positive =
+  lai->primitive_type_vector [ada_primitive_type_positive] =
     init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
                0, "positive", (struct objfile *) NULL);
+  lai->primitive_type_vector [ada_primitive_type_void] = builtin->builtin_void;
 
-
-  builtin_type_ada_system_address =
+  lai->primitive_type_vector [ada_primitive_type_system_address] =
     lookup_pointer_type (init_type (TYPE_CODE_VOID, 1, 0, "void",
                                     (struct objfile *) NULL));
-  TYPE_NAME (builtin_type_ada_system_address) = "system__address";
+  TYPE_NAME (lai->primitive_type_vector [ada_primitive_type_system_address])
+    = "system__address";
 }
-
 
 				/* Language vector */
 
@@ -10334,7 +10320,7 @@ static const struct exp_descriptor ada_exp_descriptor = {
 const struct language_defn ada_language_defn = {
   "ada",                        /* Language name */
   language_ada,
-  ada_builtin_types,
+  NULL,
   range_check_off,
   type_check_off,
   case_sensitive_on,            /* Yes, Ada is case-insensitive, but
@@ -10364,8 +10350,9 @@ const struct language_defn ada_language_defn = {
   ada_op_print_tab,             /* expression operators for printing */
   0,                            /* c-style arrays */
   1,                            /* String lower bound */
-  &builtin_type_ada_char,
+  NULL,
   ada_get_gdb_completer_word_break_characters,
+  ada_language_arch_info,
 #ifdef GNAT_GDB
   ada_translate_error_message,  /* Substitute Ada-specific terminology
                                    in errors and warnings.  */
@@ -10376,9 +10363,6 @@ const struct language_defn ada_language_defn = {
 void
 _initialize_ada_language (void)
 {
-
-  build_ada_types (current_gdbarch);
-  gdbarch_data_register_post_init (build_ada_types);
   add_language (&ada_language_defn);
 
   varsize_limit = 65536;

@@ -160,18 +160,6 @@ struct task_entry
   int stack_per;
 };
 
-extern struct type *builtin_type_ada_int;
-extern struct type *builtin_type_ada_short;
-extern struct type *builtin_type_ada_long;
-extern struct type *builtin_type_ada_long_long;
-extern struct type *builtin_type_ada_char;
-extern struct type *builtin_type_ada_float;
-extern struct type *builtin_type_ada_double;
-extern struct type *builtin_type_ada_long_double;
-extern struct type *builtin_type_ada_natural;
-extern struct type *builtin_type_ada_positive;
-extern struct type *builtin_type_ada_system_address;
-
 /* The maximum number of tasks known to the Ada runtime.  */
 extern const int MAX_NUMBER_OF_KNOWN_TASKS;
 

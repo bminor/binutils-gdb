@@ -1,3 +1,52 @@
+2004-09-18  Paul N. Hilfinger  <hilfinger@gnat.com>
+	
+	* ada-exp.y (type_int): New function to add layer of abstraction
+	around references to expression types.
+	(type_long): Ditto.
+	(type_long_long): Ditto.
+	(type_float): Ditto.
+	(type_double): Ditto.
+	(type_long_double): Ditto.
+	(type_char): Ditto.
+	(type_system_address): Ditto.
+	(simple_exp): Use type_* functions in place of builtin_* 
+	variables.
+	(exp): Ditto.
+	(write_var_from_name): Ditto.
+	(write_object_renaming): Ditto.
+	* ada-lang.c (ada_create_fundamental_type): Remove redundant
+	declaration.
+	(build_ada_types): Remove, replacing with...
+	(ada_language_arch_info): New function to initialize primitive
+	type vector in language_arch_info.
+	(ada_array_length): Remove use of builtin_type_ada_int.
+	(value_pos_atr): Ditto.
+	(ada_evaluate_subexp): Ditto.
+	(builtin_type_ada_int, builtin_type_ada_short, builtin_type_ada_long,
+	builtin_type_ada_long_long, builtin_type_ada_char, 
+	builtin_type_ada_float, builtin_type_ada_double, 
+	builtin_type_ada_long_double, builtin_type_ada_natural,
+	builtin_type_ada_positive, builtin_type_ada_system_address): Remove.
+	(ada_builtin_types): Remove.
+	(ada_language_defn): Remove entries for la_builtin_type_vector and
+	string_char_type and use ada_language_arch_info.
+	(_initialize_ada_language): Do type-vector initialization along
+	the lines of c-lang.c.
+	(ada_create_fundamental_type): Break up line.
+	(ada_dump_symtab): Remove unused function.
+	(enum ada_primitive_types): Define.
+	* ada-lang.h (builtin_type_ada_int, builtin_type_ada_short, 
+	builtin_type_ada_long,builtin_type_ada_long_long,builtin_type_ada_char, 
+	builtin_type_ada_float, builtin_type_ada_double, 
+	builtin_type_ada_long_double, builtin_type_ada_natural,
+	builtin_type_ada_positive, builtin_type_ada_system_address): Remove.
+	* ada-lex.l: Use type_* functions in place of builtin_* variables.
+	(processInt): Ditto.
+	(processReal): Ditto.
+	(name_lookup): Ditto.
+	* ada-typeprint.c (print_range): Use builtin_type_int, not
+	builtin_type_ada_int.
+	
 2004-09-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_register_name): Rename regno to regnum.
@@ -10,7 +59,7 @@
 	standard curses on HP-UX.
 	* configure: Regenerated.
 
-2004-09-18  Paul N. Hilfinger  <hilfingr@otisco.mckusick.com>
+2004-09-18  Paul N. Hilfinger  <hilfinger@gnat.com>
 
 	* ada-lang.c: (ada_main_name, ada_value_slice_ptr, ada_value_slice,
 	ada_breakpoint_rewrite, ada_template_to_fixed_record_type_1): 
