@@ -1,3 +1,10 @@
+Sat Aug 15 02:28:52 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* sparc-stub.c:  New file.  Mix it with your SPARClite
+	application, and it will speak GDB remote protocol!
+	* remote.c (remote_wait):  Change 'T' (expedited reply) message to
+	deal with arbitrary registers.  Needed for sparc-stub,
+
 Fri Aug 14 12:11:25 1992  Fred Fish  (fnf@cygnus.com)
 
 	* cplus-dem.c (cplus_markers):  Add table for gnu style and

@@ -416,7 +416,8 @@ remote_wait (status)
   void (*ofunc)();
   unsigned char *p;
   int i;
-  char regs[REGISTER_RAW_SIZE (PC_REGNUM) + REGISTER_RAW_SIZE (FP_REGNUM)];
+  int regno;
+  unsigned char regs[8];	/* Better be big enough for largest reg */
 
   WSETEXIT ((*status), 0);
 
@@ -428,17 +429,27 @@ remote_wait (status)
     error ("Remote failure reply: %s", buf);
   if (buf[0] == 'T')
     {
-      /* Expedited reply, containing Signal, PC, and FP.  */
+      /* Expedited reply, containing Signal, {regno, reg} repeat */
       p = &buf[3];		/* after Txx */
-      for (i = 0; i < sizeof (regs); i++)
+
+      while (*p)
 	{
-	  if (p[0] == 0 || p[1] == 0)
-	    error ("Remote reply is too short: %s", buf);
-	  regs[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
+	  regno = fromhex (p[0]) * 16 + fromhex (p[1]);
 	  p += 2;
+	  if (regno >= NUM_REGS)
+	    error ("Remote sent illegal register number %d (0x%x)", regno,
+		   regno);
+
+	  for (i = 0; i < REGISTER_RAW_SIZE (regno); i++)
+	    {
+	      if (p[0] == 0 || p[1] == 0)
+		error ("Remote reply is too short: %s", buf);
+	      regs[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
+	      p += 2;
+	    }
+
+	  supply_register (regno, regs);
 	}
-      supply_register (PC_REGNUM, &regs[0]);
-      supply_register (FP_REGNUM, &regs[REGISTER_RAW_SIZE (PC_REGNUM)]);
     }
   else if (buf[0] != 'S')
     error ("Invalid remote reply: %s", buf);
