@@ -62,7 +62,7 @@ static void ocd_interrupt_twice PARAMS ((int signo));
 
 static void interrupt_query PARAMS ((void));
 
-static unsigned char * do_command PARAMS ((int cmd, int *statusp, int *lenp));
+static unsigned char * ocd_do_command PARAMS ((int cmd, int *statusp, int *lenp));
 
 static void ocd_put_packet PARAMS ((unsigned char *packet, int pktlen));
 
@@ -160,9 +160,9 @@ ocd_start_remote (dummy)
 
   SERIAL_SEND_BREAK (ocd_desc); /* Wake up the wiggler */
 
-  do_command (OCD_AYT, &status, &pktlen);
+  ocd_do_command (OCD_AYT, &status, &pktlen);
 
-  p = do_command (OCD_GET_VERSION, &status, &pktlen);
+  p = ocd_do_command (OCD_GET_VERSION, &status, &pktlen);
 
   printf_unfiltered ("[Wiggler version %x.%x, capability 0x%x]\n",
 		     p[0], p[1], (p[2] << 16) | p[3]);
@@ -190,8 +190,8 @@ ocd_start_remote (dummy)
 #if 0
   /* Reset the target */
 
-  do_command (OCD_RESET_RUN, &status, &pktlen);
-/*  do_command (OCD_RESET, &status, &pktlen);*/
+  ocd_do_command (OCD_RESET_RUN, &status, &pktlen);
+/*  ocd_do_command (OCD_RESET, &status, &pktlen);*/
 #endif
 
   /* If processor is still running, stop it.  */
@@ -331,9 +331,9 @@ ocd_resume (pid, step, siggnal)
   dcache_flush (ocd_dcache);
 
   if (step)
-    do_command (OCD_STEP, &last_run_status, &pktlen);
+    ocd_do_command (OCD_STEP, &last_run_status, &pktlen);
   else
-    do_command (OCD_RUN, &last_run_status, &pktlen);
+    ocd_do_command (OCD_RUN, &last_run_status, &pktlen);
 }
 
 void
@@ -342,7 +342,7 @@ ocd_stop ()
   int status;
   int pktlen;
 
-  do_command (OCD_STOP, &status, &pktlen);
+  ocd_do_command (OCD_STOP, &status, &pktlen);
 
   if (!(status & OCD_FLAG_BDM))
     error ("Can't stop target via BDM");
@@ -1140,7 +1140,7 @@ ocd_get_packet (cmd, lenp, timeout)
    following the error code.  */
 
 static unsigned char *
-do_command (cmd, statusp, lenp)
+ocd_do_command (cmd, statusp, lenp)
      int cmd;
      int *statusp;
      int *lenp;
@@ -1161,7 +1161,7 @@ do_command (cmd, statusp, lenp)
 
   if (error_code != 0)
     {
-      sprintf (errbuf, "do_command (0x%x):", cmd);
+      sprintf (errbuf, "ocd_do_command (0x%x):", cmd);
       ocd_error (errbuf, error_code);
     }
 
@@ -1269,7 +1269,7 @@ bdm_reset_command (args, from_tty)
   if (!ocd_desc)
     error ("Not connected to OCD device.");
 
-  do_command (OCD_RESET, &status, &pktlen);
+  ocd_do_command (OCD_RESET, &status, &pktlen);
   dcache_flush (ocd_dcache);
   registers_changed ();
 }
@@ -1284,7 +1284,7 @@ bdm_restart_command (args, from_tty)
   if (!ocd_desc)
     error ("Not connected to OCD device.");
 
-  do_command (OCD_RESET_RUN, &status, &pktlen);
+  ocd_do_command (OCD_RESET_RUN, &status, &pktlen);
   last_run_status = status;
   clear_proceed_status ();
   wait_for_inferior ();
@@ -1317,9 +1317,9 @@ bdm_update_flash_command (args, from_tty)
 
 /*  old_chain = make_cleanup (flash_cleanup, 0);*/
 
-  do_command (OCD_ENTER_MON, &status, &pktlen);
+  ocd_do_command (OCD_ENTER_MON, &status, &pktlen);
 
-  do_command (OCD_ERASE_FLASH, &status, &pktlen);
+  ocd_do_command (OCD_ERASE_FLASH, &status, &pktlen);
 
   write_mem_command = OCD_PROGRAM_FLASH;
   store_registers_tmp = current_target.to_store_registers;
@@ -1330,7 +1330,7 @@ bdm_update_flash_command (args, from_tty)
   current_target.to_store_registers = store_registers_tmp;
   write_mem_command = OCD_WRITE_MEM;
 
-  do_command (OCD_EXIT_MON, &status, &pktlen);
+  ocd_do_command (OCD_EXIT_MON, &status, &pktlen);
 
 /*  discard_cleanups (old_chain);*/
 }

@@ -1,6 +1,7 @@
 Thu Aug  7 13:39:31 1997  Geoffrey Noer  <noer@cygnus.com>
 
 	* ocd.h: add OCD_SET_CONNECTION
+	* ocd.c: rename "do_command" to "ocd_do_command" 
 
 Thu Aug  7 13:09:17 1997  Geoffrey Noer  <noer@cygnus.com>
 
