@@ -5,6 +5,7 @@ start-sanitize-cygnus
 	* cgen.sh: New file.
 end-sanitize-cygnus
 	* cgen-scache.h: Deleted.
+	* Make-common.in (cgen-run.o,cgen-scache.o): Delete cgen-scache.h dep.
 	* cgen-scache.c: Only compile contents if WITH_SCACHE.
 	(scache_init): Use runtime computed size of SCACHE.
 	(scache_flush): Likewise.

@@ -405,12 +405,10 @@ nrun.o: $(srccom)/nrun.c config.h tconfig.h \
 # CGEN support.
 
 cgen-run.o: $(srccom)/cgen-run.c $(sim_main_headers) \
-	  $(srccom)/cgen-mem.h $(srccom)/cgen-ops.h \
-	  $(srccom)/cgen-scache.h
+	  $(srccom)/cgen-mem.h $(srccom)/cgen-ops.h
 	$(CC) -c $(srccom)/cgen-run.c $(ALL_CFLAGS)
 
-cgen-scache.o: $(srccom)/cgen-scache.c $(sim_main_headers) \
-	  $(srccom)/cgen-scache.h
+cgen-scache.o: $(srccom)/cgen-scache.c $(sim_main_headers)
 	$(CC) -c $(srccom)/cgen-scache.c $(ALL_CFLAGS)
 
 cgen-trace.o: $(srccom)/cgen-trace.c $(sim_main_headers) \
