@@ -1,6 +1,6 @@
 Tue Sep 28 23:08:59 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
-	* dbxread.c, coffread.c: A few changes to comments.
+	* dbxread.c, coffread.c, elfread.c: A few changes to comments.
 
 Tue Sep 28 18:39:37 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 

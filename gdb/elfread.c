@@ -104,7 +104,10 @@ elf_locate_sections PARAMS ((bfd *, asection *, PTR));
    We also recognize the ".stab" sections used by the Sun compilers
    released with Solaris 2.
 
-   FIXME:  The section names should not be hardwired strings. */
+   FIXME: The section names should not be hardwired strings (what
+   should they be?  I don't think most object file formats have enough
+   section flags to specify what kind of debug section it is
+   -kingdon).  */
 
 static void
 elf_locate_sections (ignore_abfd, sectp, eip)
