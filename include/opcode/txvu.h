@@ -245,6 +245,31 @@ const struct txvu_opcode *txvu_lower_opcode_lookup_dis PARAMS ((unsigned int));
 /* the unpack instruction */
 #define PKE_OPCODE_UNPACK 64
 
+/* Instruction flag bits.  M,R are only applicable to `unpack'.  */
+#define PKE_FLAG_I 1
+#define PKE_FLAG_M 2
+#define PKE_FLAG_R 4
+
+/* The "mode" operand of the "stmod" insn.  */
+#define PKE_MODE_DIRECT 0
+#define PKE_MODE_ADD 1
+#define PKE_MODE_ADDROW 2
+
+/* Unpack types.  */
+#define PKE_UNPACK_S_32  0
+#define PKE_UNPACK_S_16  1
+#define PKE_UNPACK_S_8   2
+#define PKE_UNPACK_V2_32 4
+#define PKE_UNPACK_V2_16 5
+#define PKE_UNPACK_V2_8  6
+#define PKE_UNPACK_V3_32 8
+#define PKE_UNPACK_V3_16 9
+#define PKE_UNPACK_V3_8  10
+#define PKE_UNPACK_V4_32 12
+#define PKE_UNPACK_V4_16 13
+#define PKE_UNPACK_V4_8  14
+#define PKE_UNPACK_V4_5  15
+
 extern const struct txvu_operand pke_operands[];
 extern /*const*/ struct txvu_opcode pke_opcodes[];
 extern const int pke_opcodes_count;
