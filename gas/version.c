@@ -21,7 +21,6 @@ dummy3 ()
 #if defined (__STDC__) || defined (const)
 const
 #endif
-
-char version_string[] = "GNU assembler version 1.94 (alpha release)\n";
+char version_string[] = "GNU assembler version 2.0.1 (alpha release)\n";
 
 /* end of version.c */
