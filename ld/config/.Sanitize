@@ -41,6 +41,7 @@ hp300bsd.mt
 i386-aout.mt
 i386v.mt
 ieee-h8300.mt
+m68k-coff.mt
 m68k.mt
 m68kv.mt
 m88k-bcs.mt
