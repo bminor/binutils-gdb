@@ -1643,9 +1643,8 @@ command_loop (void)
    such things as displaying time and space usage. If the user asks
    for those, they won't work. */
 void
-simplified_command_loop (read_input_func, execute_command_func)
-     char *(*read_input_func) (char *);
-     void (*execute_command_func) (char *, int);
+simplified_command_loop (char *(*read_input_func) (char *),
+			 void (*execute_command_func) (char *, int))
 {
   struct cleanup *old_chain;
   char *command;
@@ -2871,10 +2870,7 @@ make_cleanup_free_command_lines (struct command_line **arg)
 /* Add an element to the list of info subcommands.  */
 
 struct cmd_list_element *
-add_info (name, fun, doc)
-     char *name;
-     void (*fun) (char *, int);
-     char *doc;
+add_info (char *name, void (*fun) (char *, int), char *doc)
 {
   return add_cmd (name, no_class, fun, doc, &infolist);
 }
@@ -2935,11 +2931,8 @@ show_command (char *arg, int from_tty)
 /* Add an element to the list of commands.  */
 
 struct cmd_list_element *
-add_com (name, class, fun, doc)
-     char *name;
-     enum command_class class;
-     void (*fun) (char *, int);
-     char *doc;
+add_com (char *name, enum command_class class, void (*fun) (char *, int),
+	 char *doc)
 {
   return add_cmd (name, class, fun, doc, &cmdlist);
 }
@@ -2959,11 +2952,12 @@ error_no_arg (char *why)
   error ("Argument required (%s).", why);
 }
 
+/* Provide documentation on command or list given by COMMAND.  FROM_TTY
+   is ignored.  */
+
 /* ARGSUSED */
 static void
-help_command (command, from_tty)
-     char *command;
-     int from_tty;		/* Ignored */
+help_command (char *command, int from_tty)
 {
   help_cmd (command, gdb_stdout);
 }

@@ -1,5 +1,11 @@
 2000-10-30  Kevin Buettner  <kevinb@redhat.com>
 
+	* top.c (simplified_command_loop, add_info, add_com,
+	help_command): Protoize.
+	* ui-out.c (gdb_query): Protoize.
+
+2000-10-30  Kevin Buettner  <kevinb@redhat.com>
+
 	Changes based on analysis from Peter Schauer:
 	* solist.h (struct so_list): Remove field lmend.
 	(struct target_so_ops): Remove field lm_addr.  Add field

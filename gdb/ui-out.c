@@ -542,10 +542,7 @@ gdb_error (ui_out * uiout, int severity, char *format,...)
 }
 
 void
-gdb_query (uiout, qflags, qprompt)
-     struct ui_out *uiout;
-     int flags;
-     char *qprompt;
+gdb_query (struct ui_out *uiout, int qflags, char *qprompt)
 {
 }
 #endif
