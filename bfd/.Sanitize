@@ -137,6 +137,4 @@ else
 	done
 fi
 
-echo Done in `pwd`.
-
 # End of file.
