@@ -1,3 +1,11 @@
+2002-02-04  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* gas/mmix/basep-8.d, gas/mmix/basep-9.s, gas/mmix/basep-9.d,
+	gas/mmix/err-bpo6.s, gas/mmix/basep-8.s, gas/mmix/basep-10.d,
+	gas/mmix/basep-10.s, gas/mmix/basep-11.s, gas/mmix/basep-11.d: New
+	tests for base-plus-offset relocations and global register
+	allocations for weak and common symbols.
+
 2002-02-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/elf/elf.exp: Don't special case v850.
