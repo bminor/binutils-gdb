@@ -1,3 +1,10 @@
+2002-12-17  Kevin Buettner  <kevinb@redhat.com>
+
+	* dve3900-rom.c (r3900_regnames): Don't use NUM_REGS to determine
+	array size.
+	(fetch_bitmapped_register, store_bitmapped_register): Add bounds
+	checks for r3900_regnames[].
+
 2002-12-17  Richard Earnshaw  <rearnsha@arm.com>
 
 	* armnbsd-tdep.c (ARM_NBSD_JB_PC): Renamed from JB_PC.

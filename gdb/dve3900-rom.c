@@ -113,7 +113,7 @@ static int ethernet = 0;
    different names than GDB does, and don't support all the registers
    either.  */
 
-static char *r3900_regnames[NUM_REGS] =
+static char *r3900_regnames[] =
 {
   "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
   "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -456,8 +456,15 @@ fetch_bitmapped_register (int regno, struct bit_field *bf)
 {
   unsigned long val;
   unsigned char regbuf[MAX_REGISTER_RAW_SIZE];
+  char *regname = NULL;
 
-  monitor_printf ("x%s\r", r3900_regnames[regno]);
+  if (regno >= sizeof (r3900_regnames) / sizeof (r3900_regnames[0]))
+    internal_error (__FILE__, __LINE__,
+                    "fetch_bitmapped_register: regno out of bounds");
+  else
+    regname = r3900_regnames[regno];
+
+  monitor_printf ("x%s\r", regname);
   val = fetch_fields (bf);
   monitor_printf (".\r");
   monitor_expect_prompt (NULL, 0);
@@ -501,9 +508,16 @@ static void
 store_bitmapped_register (int regno, struct bit_field *bf)
 {
   unsigned long oldval, newval;
+  char *regname = NULL;
+
+  if (regno >= sizeof (r3900_regnames) / sizeof (r3900_regnames[0]))
+    internal_error (__FILE__, __LINE__,
+                    "fetch_bitmapped_register: regno out of bounds");
+  else
+    regname = r3900_regnames[regno];
 
   /* Fetch the current value of the register.  */
-  monitor_printf ("x%s\r", r3900_regnames[regno]);
+  monitor_printf ("x%s\r", regname);
   oldval = fetch_fields (bf);
   newval = read_register (regno);
 
