@@ -222,6 +222,7 @@ parser-defs.h
 partial-stab.h
 printcmd.c
 procfs.c
+ptx4-nat.c
 pyr-pinsn.c
 pyr-tdep.c
 pyr-xdep.c
