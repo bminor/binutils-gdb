@@ -1,3 +1,8 @@
+2000-02-27  Loren J. Rittle  <ljrittle@acm.org>
+
+	* configure.host: Added HOSTING_CRT0, HOSTING_LIBS for
+	host "i[3456]86-*-freebsdelf*".
+
 2000-02-27  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* scripttempl/i386go32.sc: Move misplaced semicolons.
