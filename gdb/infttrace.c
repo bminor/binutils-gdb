@@ -5278,7 +5278,7 @@ get_dictionary_entry_of_page (int pid, CORE_ADDR page_start)
   memory_page_t *previous_page = NULL;
 
   /* We're going to be using the dictionary now, than-kew. */
-  require_memory_page_dictionary (pid);
+  require_memory_page_dictionary ();
 
   /* Try to find an existing dictionary entry for this page.  Hash
      on the page's starting address.
