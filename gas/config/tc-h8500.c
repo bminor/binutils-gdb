@@ -1,4 +1,3 @@
-
 /* tc-h8500.c -- Assemble code for the Hitachi H8/500
    Copyright (C) 1993 Free Software Foundation.
 
@@ -26,16 +25,15 @@
 #include <stdio.h>
 #include "as.h"
 #include "bfd.h"
-
+#include "subsegs.h"
 #define DEFINE_TABLE
+#define ASSEMBLER_TABLE
 #include "../opcodes/h8500-opc.h"
 #include <ctype.h>
 
-const char comment_chars[] =
-{';', 0};
-const char line_separator_chars[] =
-{'$', 0};
-const char line_comment_chars[] = "";
+const char comment_chars[] = "!";
+const char line_separator_chars[] = ";";
+const char line_comment_chars[] = "!";
 
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:
@@ -151,21 +149,22 @@ md_begin ()
 
 }
 
-int rn;				/* register number used by RN */
-int rs;				/* register number used by RS */
-int rd;				/* register number used by RD */
-int crb;			/* byte size cr */
-int crw;			/* word sized cr */
+static int rn;			/* register number used by RN */
+static int rs;			/* register number used by RS */
+static int rd;			/* register number used by RD */
+static int crb;			/* byte size cr */
+static int crw;			/* word sized cr */
+static int cr;			/* unknown size cr */
 
-expressionS displacement;	/* displacement expression */
-int displacement_size;		/* and size if given */
+static expressionS displacement;/* displacement expression */
+static int displacement_size;	/* and size if given */
 
-int immediate_inpage;
-expressionS immediate;		/* immediate expression */
-int immediate_size;		/* and size if given */
+static int immediate_inpage;
+static expressionS immediate;	/* immediate expression */
+static int immediate_size;	/* and size if given */
 
-expressionS absolute;		/* absolute expression */
-int absolute_size;		/* and size if given */
+static expressionS absolute;	/* absolute expression */
+static int absolute_size;	/* and size if given */
 
 typedef struct
 {
@@ -178,11 +177,11 @@ typedef struct
 h8500_operand_info;
 
 /* try and parse a reg name, returns number of chars consumed */
-int
+static int
 parse_reg (src, mode, reg)
      char *src;
      int *mode;
-     unsigned int *reg;
+     int *reg;
 {
   if (src[0] == 'r')
     {
@@ -236,7 +235,7 @@ parse_reg (src, mode, reg)
 
   if (src[0] == 't' && src[1] == 'p')
     {
-      *mode = CRW;
+      *mode = CRB;
       *reg = 7;
       return 2;
     }
@@ -250,30 +249,34 @@ parse_reg (src, mode, reg)
   return 0;
 }
 
+static
 char *
 parse_exp (s, op, page)
      char *s;
      expressionS *op;
-int *page;
+     int *page;
 {
-  char *save; 
+  char *save;
   char *new;
   segT seg;
 
   save = input_line_pointer;
 
-*page = 0;
+  *page = 0;
   if (s[0] == '%')
-  {
-    if (s[1] == 'p' && s[2] == 'a' && s[3] == 'g' && s[4] == 'e') {
-      s+=5;
+    {
+      if (s[1] == 'p' && s[2] == 'a' && s[3] == 'g' && s[4] == 'e')
+	{
+	  s += 5;
 
-*page = 1;
+	  *page = 'p';
+	}
+      else if (s[1] == 'o' && s[2] == 'f' && s[3] == 'f')
+	{
+	  s += 4;
+	  *page = 'o';
+	}
     }
-    else  if (s[1] == 'o' && s[2] == 'f' && s[3] == 'f') {
-      s+=4;
-    }
-  }
 
   input_line_pointer = s;
 
@@ -281,26 +284,33 @@ int *page;
   new = input_line_pointer;
   input_line_pointer = save;
   if (SEG_NORMAL (seg))
-   return new;
+    return new;
   switch (seg)
-  {
-   case SEG_ABSOLUTE:
-   case SEG_UNKNOWN:
-   case SEG_DIFFERENCE:
-   case SEG_BIG:
-   case SEG_REGISTER:
-    return new;
-   case SEG_ABSENT:
-    as_bad ("Missing operand");
-    return new;
-   default:
-    as_bad ("Don't understand operand of type %s", segment_name (seg));
-    return new;
-  }
+    {
+    case SEG_ABSOLUTE:
+    case SEG_UNKNOWN:
+    case SEG_DIFFERENCE:
+    case SEG_BIG:
+    case SEG_REGISTER:
+      return new;
+    case SEG_ABSENT:
+      as_bad ("Missing operand");
+      return new;
+    default:
+      as_bad ("Don't understand operand of type %s", segment_name (seg));
+      return new;
+    }
 }
 
+typedef enum
+  {
+    exp_signed, exp_unsigned, exp_sandu
+  } sign_type;
+
+
 static char *
-skip_colonthing (ptr, exp, def, size8, size16, size24)
+skip_colonthing (sign, ptr, exp, def, size8, size16, size24)
+     sign_type sign;
      char *ptr;
      h8500_operand_info *exp;
      int def;
@@ -310,106 +320,116 @@ skip_colonthing (ptr, exp, def, size8, size16, size24)
 {
   ptr = parse_exp (ptr, &exp->exp, &exp->page);
   if (*ptr == ':')
-  {
-    ptr++;
-    if (*ptr == '8')
     {
       ptr++;
-      exp->type = size8;
-    }
-    else if (ptr[0] == '1' & ptr[1] == '6')
-    {
-      ptr += 2;
-      exp->type = size16;
-    }
-    else if (ptr[0] == '2' & ptr[1] == '4')
-    {
-      if (!size24)
-      {
-	as_bad (":24 not valid for this opcode");
-      }
-      ptr += 2;
-      exp->type = size24;
-    }
-    else
-    {
-      as_bad ("expect :8,:16 or :24");
-      exp->type = size16;
-    }
-  }
-  else
-  {
-    if(exp->page) {
-      exp->type = IMM8;
-    }
-    else {
-      /* Let's work out the size from the context */
-      if (size8
-	  && exp->exp.X_seg == SEG_ABSOLUTE
-	  && exp->exp.X_add_number >= -128
-	  && exp->exp.X_add_number <= 127)
-      {
-	exp->type = size8;
-      }
+      if (*ptr == '8')
+	{
+	  ptr++;
+	  exp->type = size8;
+	}
+      else if (ptr[0] == '1' & ptr[1] == '6')
+	{
+	  ptr += 2;
+	  exp->type = size16;
+	}
+      else if (ptr[0] == '2' & ptr[1] == '4')
+	{
+	  if (!size24)
+	    {
+	      as_bad (":24 not valid for this opcode");
+	    }
+	  ptr += 2;
+	  exp->type = size24;
+	}
       else
-      {
-	exp->type = def;
-      }
+	{
+	  as_bad ("expect :8,:16 or :24");
+	  exp->type = size16;
+	}
     }
-  }
+  else
+    {
+      if (exp->page == 'p')
+	{
+	  exp->type = IMM8;
+	}
+      else
+	{
+	  /* Let's work out the size from the context */
+	  int n = exp->exp.X_add_number;
+	  if (size8
+	      && exp->exp.X_seg == SEG_ABSOLUTE
+	      && ((sign == exp_signed && (n >= -128 && n <= 127))
+		  || (sign == exp_unsigned && (n >= 0 && (n <= 255)))
+		  || (sign == exp_sandu && (n >= -128 && (n <= 255)))))
+	    {
+	      exp->type = size8;
+	    }
+	  else
+	    {
+	      exp->type = def;
+	    }
+	}
+    }
   return ptr;
 }
 
 static int
-parse_reglist(src, op)
-char *src;
-h8500_operand_info *op;
+parse_reglist (src, op)
+     char *src;
+     h8500_operand_info *op;
 {
   int mode;
   int rn;
   int mask = 0;
   int rm;
   int idx = 1;			/* skip ( */
-  while (src[idx] && src[idx] != ')') 
-  {
-    int done = parse_reg(src+idx, &mode, &rn);
-    if (done) 
+
+  while (src[idx] && src[idx] != ')')
     {
-      idx += done;
-      mask |= 1<<rn;
-    }
-    else 
-    {
-      as_bad("syntax error in reg list");
-      return 0;
-    }
-    if (src[idx]== '-') 
-    {
-      idx++;
-      done = parse_reg(src+idx, &mode, &rm);
-      if (done) {
-	idx += done;
-	while (rn <= rm) {
-	  mask |= 1<<rn;
-	  rn++;
+      int done = parse_reg (src + idx, &mode, &rn);
+
+      if (done)
+	{
+	  idx += done;
+	  mask |= 1 << rn;
 	}
-      }
-      else {
-	as_bad("missing final register in range");
-      }
+      else
+	{
+	  as_bad ("syntax error in reg list");
+	  return 0;
+	}
+      if (src[idx] == '-')
+	{
+	  idx++;
+	  done = parse_reg (src + idx, &mode, &rm);
+	  if (done)
+	    {
+	      idx += done;
+	      while (rn <= rm)
+		{
+		  mask |= 1 << rn;
+		  rn++;
+		}
+	    }
+	  else
+	    {
+	      as_bad ("missing final register in range");
+	    }
+	}
+      if (src[idx] == ',')
+	idx++;
     }
-    if (src[idx] == ',')
-     idx++;
-  }
   idx++;
   op->exp.X_add_symbol = 0;
   op->exp.X_subtract_symbol = 0;
   op->exp.X_add_number = mask;
   op->exp.X_seg = SEG_ABSOLUTE;
-  op->type= IMM8;
+  op->type = IMM8;
   return idx;
 
 }
+
 /* The many forms of operand:
 
    Rn			Register direct
@@ -423,22 +443,22 @@ h8500_operand_info *op;
    */
 
 static void
-get_operand (ptr, op)
+get_operand (ptr, op, ispage)
      char **ptr;
      h8500_operand_info *op;
+     char ispage;
 {
   char *src = *ptr;
   int mode;
   unsigned int num;
   unsigned int len;
-  unsigned int size;
 
   if (src[0] == '(' && src[1] == 'r')
-  {
-    /* This is a register list */
-    *ptr = src +  parse_reglist(src, op);
-    return;
-  }
+    {
+      /* This is a register list */
+      *ptr = src + parse_reglist (src, op);
+      return;
+    }
 
   len = parse_reg (src, &op->type, &op->reg);
 
@@ -460,7 +480,8 @@ get_operand (ptr, op)
 	      /* Oops, not a reg after all, must be ordinary exp */
 	      src--;
 	      /* must be a symbol */
-	      *ptr = skip_colonthing (src, op, ABS16, ABS8, ABS16, ABS24);
+	      *ptr = skip_colonthing (exp_unsigned, src,
+				      op, ABS16, ABS8, ABS16, ABS24);
 	      return;
 	    }
 
@@ -474,7 +495,8 @@ get_operand (ptr, op)
 	  /* Disp */
 	  src++;
 
-	  src = skip_colonthing (src, op, RNIND_D16, RNIND_D8, RNIND_D16, 0);
+	  src = skip_colonthing (exp_signed, src, 
+				 op, RNIND_D16, RNIND_D8, RNIND_D16, 0);
 
 	  if (*src != ',')
 	    {
@@ -528,7 +550,9 @@ get_operand (ptr, op)
       else
 	{
 	  /* must be a symbol */
-	  *ptr = skip_colonthing (src, op, ABS16, ABS8, ABS16, 0);
+	  *ptr =
+	    skip_colonthing (exp_unsigned, src, op,
+			     ispage ? ABS24 : ABS16, ABS8, ABS16, ABS24);
 	  return;
 	}
     }
@@ -536,12 +560,13 @@ get_operand (ptr, op)
   if (*src == '#')
     {
       src++;
-      *ptr = skip_colonthing (src, op, IMM16, IMM8, IMM16, 0);
+      *ptr = skip_colonthing (exp_sandu, src, op, IMM16, IMM8, IMM16, ABS24);
       return;
     }
   else
     {
-      *ptr = skip_colonthing (src, op, PCREL8, PCREL8, PCREL16, 0);
+      *ptr = skip_colonthing (exp_signed, src, op,
+			      ispage ? ABS24 : PCREL8, PCREL8, PCREL16, ABS24);
     }
 }
 
@@ -564,7 +589,7 @@ get_operands (info, args, operand)
 
     case 1:
       ptr++;
-      get_operand (&ptr, operand + 0, 0);
+      get_operand (&ptr, operand + 0, info->name[0] == 'p');
       operand[1].type = 0;
       break;
 
@@ -573,7 +598,7 @@ get_operands (info, args, operand)
       get_operand (&ptr, operand + 0, 0);
       if (*ptr == ',')
 	ptr++;
-      get_operand (&ptr, operand + 1, 1);
+      get_operand (&ptr, operand + 1, 0);
       break;
 
     default:
@@ -588,7 +613,7 @@ get_operands (info, args, operand)
    provided
    */
 
-int pcrel8;
+int pcrel8;			/* Set when we've seen a pcrel operand */
 
 static
 h8500_opcode_info *
@@ -600,7 +625,6 @@ get_specific (opcode, operands)
   int found = 0;
   unsigned int noperands = opcode->nargs;
 
-  unsigned int dispreg;
   unsigned int this_index = opcode->idx;
 
   while (this_index == opcode->idx && !found)
@@ -617,17 +641,9 @@ get_specific (opcode, operands)
 
 	  switch (this_try->arg_type[i])
 	    {
-	    case FPIND_D16:
-	      /* Opcode needs (disp:16,fp) */
-	      if (user->type == DISP16 && user->reg == 6)
-		{
-		  displacement = user->exp;
-		  continue;
-		}
-	      break;
 	    case FPIND_D8:
 	      /* Opcode needs (disp:8,fp) */
-	      if (user->type == DISP8 && user->reg == 6)
+	      if (user->type == RNIND_D8 && user->reg == 6)
 		{
 		  displacement = user->exp;
 		  continue;
@@ -658,6 +674,7 @@ get_specific (opcode, operands)
 		  continue;
 		}
 	      break;
+
 	    case SPDEC:
 	      if (user->type == RNDEC && user->reg == 7)
 		{
@@ -685,15 +702,16 @@ get_specific (opcode, operands)
 		  continue;
 		}
 	      break;
+
 	    case CRB:
-	      if (user->type == CRB)
+	      if ((user->type == CRB || user->type == CR) && user->reg != 0)
 		{
 		  crb = user->reg;
 		  continue;
 		}
 	      break;
 	    case CRW:
-	      if (user->type == CRW)
+	      if ((user->type == CRW || user->type == CR) && user->reg == 0)
 		{
 		  crw = user->reg;
 		  continue;
@@ -736,7 +754,7 @@ get_specific (opcode, operands)
 	      break;
 
 	    case IMM16:
-	      if (user->type == IMM16 
+	      if (user->type == IMM16
 		  || user->type == IMM8)
 		{
 		  immediate_inpage = user->page;
@@ -744,7 +762,7 @@ get_specific (opcode, operands)
 		  continue;
 		}
 	      break;
-	     case RLIST:
+	    case RLIST:
 	    case IMM8:
 	      if (user->type == IMM8)
 		{
@@ -789,12 +807,13 @@ get_specific (opcode, operands)
 		  continue;
 		}
 	      break;
-	     case RDIND:
+	    case RDIND:
 	      if (user->type == RNIND)
-	      {
-	      rd = user->reg;
-	      continue;
-	    }
+		{
+		  rd = user->reg;
+		  continue;
+
+		}
 	      break;
 	    case RNINC:
 	    case RNIND:
@@ -847,50 +866,23 @@ check (operand, low, high)
   return operand->X_add_number;
 }
 
-#if 0
-static void
-DEFUN (check_operand, (operand, width, string),
-       struct h8_op *operand AND
-       unsigned int width AND
-       char *string)
-{
-  if (operand->exp.X_add_symbol == 0
-      && operand->exp.X_subtract_symbol == 0)
-    {
-
-      /* No symbol involved, let's look at offset, it's dangerous if any of
-         the high bits are not 0 or ff's, find out by oring or anding with
-         the width and seeing if the answer is 0 or all fs*/
-      if ((operand->exp.X_add_number & ~width) != 0 &&
-	  (operand->exp.X_add_number | width) != (~0))
-	{
-	  as_warn ("operand %s0x%x out of range.", string, operand->exp.X_add_number);
-	}
-    }
-
-}
-
-#endif
-
-insert (size, output, index, exp, reloc, opcode)
+static
+void
+insert (output, index, exp, reloc, pcrel)
      char *output;
      int index;
      expressionS *exp;
-     char *opcode;
+     int reloc;
+     int pcrel;
 {
-  md_number_to_chars (output + index, exp->X_add_number, size);
-  exp->X_add_number = 0;
-  if (exp->X_add_symbol || exp->X_subtract_symbol)
-    {
-      fix_new (frag_now,
-	       output - frag_now->fr_literal + index,
-	       size,
-	       exp->X_add_symbol,
-	       exp->X_subtract_symbol,
-	       (short) (exp->X_add_number),
-	       0,
-	       reloc);
-    }
+  fix_new (frag_now,
+	   output - frag_now->fr_literal + index,
+	   4,			/* always say size is 4, but we know better */
+	   exp->X_add_symbol,
+	   exp->X_subtract_symbol,
+	   exp->X_add_number,
+	   pcrel,
+	   reloc);
 }
 
 void
@@ -906,18 +898,18 @@ build_relaxable_instruction (opcode, operand)
   int type;
 
   if (opcode->bytes[0].contents == 0x01)
-  {
-    type = SCB_F;
-  }
+    {
+      type = SCB_F;
+    }
   else if (opcode->bytes[0].contents == 0x06
 	   || opcode->bytes[0].contents == 0x07)
-  {
-    type = SCB_TST;
-  }
+    {
+      type = SCB_TST;
+    }
   else
-  {
-    type = BRANCH;
-  }
+    {
+      type = BRANCH;
+    }
 
   p = frag_var (rs_machine_dependent,
 		md_relax_table[C (type, WORD_DISP)].rlx_length,
@@ -928,10 +920,10 @@ build_relaxable_instruction (opcode, operand)
 		0);
 
   p[0] = opcode->bytes[0].contents;
-  if (type != BRANCH) 
-  {
-    p[1] = opcode->bytes[1].contents | rs;
-  }
+  if (type != BRANCH)
+    {
+      p[1] = opcode->bytes[1].contents | rs;
+    }
 }
 
 /* Now we know what sort of opcodes it is, lets build the bytes -
@@ -942,13 +934,7 @@ build_bytes (opcode, operand)
      h8500_operand_info *operand;
 
 {
-  unsigned int i;
-
-  char part;
   int index;
-  char high;
-  int nib;
-  int byte;
 
   if (pcrel8)
     {
@@ -981,45 +967,71 @@ build_bytes (opcode, operand)
 	      output[index] |= rs;
 	      break;
 	    case DISP16:
-	    case FPIND_D16:
-	      insert (2, output, index, &displacement, R_H8500_IMM16);
+	      insert (output, index, &displacement, R_H8500_IMM16, 0);
 	      index++;
 	      break;
 	    case DISP8:
 	    case FPIND_D8:
-	      insert (1, output, index, &displacement, R_H8500_IMM8);
+	      insert (output, index, &displacement, R_H8500_IMM8, 0);
 	      break;
 	    case IMM16:
-	      insert (2, output, index, &immediate, R_H8500_IMM16);
+	      insert (output, index, &immediate, immediate_inpage ?
+		      R_H8500_LOW16 : R_H8500_IMM16, 0);
 	      index++;
 	      break;
-            case RLIST:
+	    case RLIST:
 	    case IMM8:
-	      insert (1, output, index, &immediate, immediate_inpage ?
-		      R_H8500_HIGH8 : R_H8500_IMM8);
+	      if (immediate_inpage)
+		{
+		  insert (output, index, &immediate, R_H8500_HIGH8, 0);
+		}
+	      else
+		{
+		  insert (output, index, &immediate, R_H8500_IMM8, 0);
+		}
 	      break;
 	    case PCREL16:
-	      insert (2, output, index, &displacement, R_H8500_PCREL16);
+	      insert (output, index, &displacement, R_H8500_PCREL16, 1);
 	      index++;
 	      break;
 	    case PCREL8:
-	      insert (1, output, index, &displacement, R_H8500_PCREL8, output);
+	      insert (output, index, &displacement, R_H8500_PCREL8, 1);
 	      break;
 	    case IMM4:
 	      output[index] |= check (&immediate, 0, 15);
 	      break;
+	    case CR:
+
+	      output[index] |= cr;
+	      if (cr == 0)
+		{
+		  output[0] |= 0x8;
+		}
+	      else
+		{
+		  output[0] &= ~0x8;
+		}
+
+	      break;
+
 	    case CRB:
 	      output[index] |= crb;
+	      output[0] &= ~0x8;
 	      break;
 	    case CRW:
 	      output[index] |= crw;
+	      output[0] |= 0x8;
+	      break;
+	    case ABS24:
+	      insert (output, index, absolute, R_H8500_IMM24, 0);
+	      index += 2;
 	      break;
 	    case ABS16:
-	      insert (2, output, index, absolute, R_H8500_IMM16);
+	      insert (output, index, absolute, R_H8500_IMM16, 0);
 	      index++;
 	      break;
 	    case ABS8:
-	      insert (1, output, index, absolute, R_H8500_IMM8);
+	      insert (output, index, absolute, R_H8500_IMM8, 0);
 	      break;
 	    case QIM:
 	      switch (immediate.X_add_number)
@@ -1054,13 +1066,10 @@ DEFUN (md_assemble, (str),
 {
   char *op_start;
   char *op_end;
-  unsigned int i;
   h8500_operand_info operand[2];
   h8500_opcode_info *opcode;
   h8500_opcode_info *prev_opcode;
   char name[11];
-  char *dot = 0;
-  char c;
 
   int nlen = 0;
 
@@ -1070,12 +1079,13 @@ DEFUN (md_assemble, (str),
 
   /* find the op code end */
   for (op_start = op_end = str;
-       *op_end != 0 && *op_end != ' ';
+       *op_end &&
+       !is_end_of_line[*op_end] && *op_end != ' ';
        op_end++)
     {
-      if (*op_end != '.'
+      if (			/**op_end != '.'
 	  && *op_end != ':'
-	  && nlen < 10)
+	   	   	   	  && */ nlen < 10)
 	{
 	  name[nlen++] = *op_end;
 	}
@@ -1212,7 +1222,6 @@ md_parse_option (argP, cntP, vecP)
 
 {
   return 0;
-
 }
 
 int md_short_jump_size;
@@ -1256,11 +1265,12 @@ wordify_scb (buffer, disp_size, inst_size)
 
   switch (buffer[0])
     {
-     case 0x0e: /* BSR */
+    case 0x0e:			/* BSR */
     case 0x20:
     case 0x21:
     case 0x22:
     case 0x23:
+    case 0x24:
     case 0x25:
     case 0x26:
     case 0x27:
@@ -1319,7 +1329,6 @@ md_convert_frag (headers, fragP)
      fragS *fragP;
 
 {
-  fixS *fixP;
   int disp_size = 0;
   int inst_size = 0;
   char *buffer = fragP->fr_fix + fragP->fr_literal;
@@ -1354,14 +1363,14 @@ md_convert_frag (headers, fragP)
       wordify_scb (buffer, &disp_size, &inst_size);
 
       /* Make a reloc */
-      fixP = fix_new (fragP,
-		      fragP->fr_fix + inst_size,
-		      2,
-		      fragP->fr_symbol,
-		      0,
-		      fragP->fr_offset,
-		      0,
-		      R_H8500_PCREL16);
+      fix_new (fragP,
+	       fragP->fr_fix + inst_size,
+	       4,
+	       fragP->fr_symbol,
+	       0,
+	       fragP->fr_offset,
+	       0,
+	       R_H8500_PCREL16);
 
       fragP->fr_fix += disp_size + inst_size;
       fragP->fr_var = 0;
@@ -1390,7 +1399,8 @@ DEFUN (md_section_align, (seg, size),
        segT seg AND
        long size)
 {
-  return ((size + (1 << section_alignment[(int) seg]) - 1) & (-1 << section_alignment[(int) seg]));
+  return ((size + (1 << section_alignment[(int) seg]) - 1) 
+	  & (-1 << section_alignment[(int) seg]));
 
 }
 
@@ -1401,16 +1411,33 @@ md_apply_fix (fixP, val)
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
 
-  switch (fixP->fx_size)
+  if (fixP->fx_r_type == 0)
     {
-    case 1:
+      fixP->fx_r_type = fixP->fx_size == 4 ? R_H8500_IMM32 : R_H8500_IMM16;
+    }
+
+  switch (fixP->fx_r_type)
+    {
+
+    case R_H8500_IMM8:
+    case R_H8500_PCREL8:
       *buf++ = val;
       break;
-    case 2:
+    case R_H8500_IMM16:
+    case R_H8500_LOW16:
+    case R_H8500_PCREL16:
       *buf++ = (val >> 8);
       *buf++ = val;
       break;
-    case 4:
+    case R_H8500_HIGH8:
+      *buf++ = val >> 16;
+      break;
+    case R_H8500_IMM24:
+      *buf++ = (val >> 16);
+      *buf++ = (val >> 8);
+      *buf++ = val;
+      break;
+    case R_H8500_IMM32:
       *buf++ = (val >> 24);
       *buf++ = (val >> 16);
       *buf++ = (val >> 8);
@@ -1438,14 +1465,12 @@ md_estimate_size_before_relax (fragP, segment_type)
      register fragS *fragP;
      register segT segment_type;
 {
-  int growth = 0;
-  char *buffer = fragP->fr_fix + fragP->fr_literal;
   int what = GET_WHAT (fragP->fr_subtype);
 
   switch (fragP->fr_subtype)
     {
-     default:
-      abort();
+    default:
+      abort ();
     case C (BRANCH, UNDEF_BYTE_DISP):
     case C (SCB_F, UNDEF_BYTE_DISP):
     case C (SCB_TST, UNDEF_BYTE_DISP):
@@ -1455,16 +1480,17 @@ md_estimate_size_before_relax (fragP, segment_type)
 	  /* Got a symbol and it's defined in this segment, become byte
 	 sized - maybe it will fix up */
 	  fragP->fr_subtype = C (what, BYTE_DISP);
+	  fragP->fr_var = md_relax_table[C (what, BYTE_DISP)].rlx_length;
 	}
       else
 	{
 	  /* Its got a segment, but its not ours, so it will always be long */
 	  fragP->fr_subtype = C (what, UNDEF_WORD_DISP);
-	  fragP->fr_var = md_relax_table[C(what, WORD_DISP)].rlx_length;
-	  return md_relax_table[C(what, WORD_DISP)].rlx_length;
+	  fragP->fr_var = md_relax_table[C (what, WORD_DISP)].rlx_length;
+	  return md_relax_table[C (what, WORD_DISP)].rlx_length;
 	}
     }
-  return fragP->fr_var + fragP->fr_fix;
+  return fragP->fr_var;
 }
 
 /* Put number into target byte order */
@@ -1501,6 +1527,29 @@ md_pcrel_from (fixP)
 void
 tc_coff_symbol_emit_hook ()
 {
+}
+
+short
+tc_coff_fix2rtype (fix_ptr)
+     fixS *fix_ptr;
+{
+  if (fix_ptr->fx_r_type == RELOC_32)
+    {
+      /* cons likes to create reloc32's whatever the size of the reloc..
+     */
+      switch (fix_ptr->fx_size)
+	{
+	case 2:
+	  return R_H8500_IMM16;
+	  break;
+	case 1:
+	  return R_H8500_IMM8;
+	  break;
+	default:
+	  abort ();
+	}
+    }
+  return fix_ptr->fx_r_type;
 }
 
 void
@@ -1540,11 +1589,43 @@ tc_reloc_mangle (fix_ptr, intr, base)
   intr->r_vaddr = fix_ptr->fx_frag->fr_address + fix_ptr->fx_where + base;
   intr->r_offset = fix_ptr->fx_offset;
 
+  /* Turn the segment of the symbol into an offset.  */
   if (symbol_ptr)
-    intr->r_symndx = symbol_ptr->sy_number;
+    {
+      symbolS *dot;
+
+      dot = segment_info[S_GET_SEGMENT (symbol_ptr)].dot;
+      if (dot)
+	{
+	  /*	  intr->r_offset -=
+	    segment_info[S_GET_SEGMENT(symbol_ptr)].scnhdr.s_paddr;*/
+	  intr->r_offset += S_GET_VALUE (symbol_ptr);
+	  intr->r_symndx = dot->sy_number;
+	}
+      else
+	{
+	  intr->r_symndx = symbol_ptr->sy_number;
+	}
+
+    }
   else
-    intr->r_symndx = -1;
+    {
+      intr->r_symndx = -1;
+    }
 
 }
 
 /* end of tc-h8500.c */
+
+int
+start_label (ptr)
+     char *ptr;
+{
+  /* Check for :s.w */
+  if (isalpha (ptr[1]) && ptr[2] == '.')
+    return 0;
+  /* Check for :s */
+  if (isalpha (ptr[1]) && !isalpha (ptr[2]))
+    return 0;
+  return 1;
+}

@@ -20,13 +20,13 @@
 
 
 #define TC_H8500
-
+#define const
 /* This macro translates between an internal fix and an coff reloc type */
-#define TC_COFF_FIX2RTYPE(fixP) abort();
+#define TC_COFF_FIX2RTYPE(fixP) tc_coff_fix2rtype(fixP)
 
 #define BFD_ARCH bfd_arch_h8500
 #define COFF_MAGIC 0x8500
-#define TC_COUNT_RELOC(x) (1)
+#define TC_COUNT_RELOC(x) ((x)->fx_addsy||(x)->fx_subsy)
 #define IGNORE_NONSTANDARD_ESCAPES
 
 #define TC_RELOC_MANGLE(a,b,c) tc_reloc_mangle(a,b,c)
@@ -37,5 +37,8 @@
 #define NEED_FX_R_TYPE 1
 #define RELOC_32 1234
 #define COFF_FLAGS 1
+
+#define TC_START_LABEL(ch, ptr)  (ch == ':' && start_label(ptr))
+
 
 /* end of tc-h8500.h */
