@@ -1,5 +1,10 @@
 2004-05-28  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldlang.c: Formatting.  Wrap long lines, expand bfd_get_section_flags
+	throughout file.
+	* lexsup.c: Formatting.  Wrap long lines.
+	* ldwrite.c: Update copyright date.
+
 	* ldlang.c (lang_add_section): Don't twidlle SEC_EXCLUDE here.
 	(output_section_callback): Nor SEC_KEEP here.
 	(gc_section_callback): Twiddle SEC_EXCLUDE here.

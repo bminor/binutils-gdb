@@ -1,6 +1,6 @@
 /* ldwrite.c -- write out the linked file
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2002,
+   2003, 2004 Free Software Foundation, Inc.
    Written by Steve Chamberlain sac@cygnus.com
 
 This file is part of GLD, the Gnu Linker.
