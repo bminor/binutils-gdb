@@ -1,3 +1,24 @@
+Mon Jun 21 18:19:14 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
+
+	* elf32-target.h, elf32-hppa.c, elfcode.h: Use new
+	size-independent elf internal data structures.
+	* elfcode.h (put_word, get_word): Define as appropriate for
+	architecture word size.  Structure swapping functions changed to
+	use them as appropriate.
+
+	* configure.in: If compiling 64-bit back ends, do them before
+	32-bit ones.
+
+	* libelf.h: Use new size-independent versions of elf internal data
+	structures.
+	(symbol_type): Reordered to put any fields dependent on target
+	size at the end.
+	(elf_backend_data): Renamed from elf##_backend_data and made
+	size-independent.
+	(elf_sect_thunk): Now size-independent.
+
+	* libbfd.c (bfd_log2): Now returns unsigned int.
+
 Mon Jun 21 12:30:47 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* Rename config/m88k-aout.mt to config/noop.mt.
@@ -5,9 +26,44 @@ Mon Jun 21 12:30:47 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 Sun Jun 20 20:32:19 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
 
+	* cpu-m68k.c (arch_info_struct): Eliminate "partially bracketed
+	initializer" warning from gcc.
+	* cpu-h8500.c (arch_info_struct): Likewise.
+	* cpu-sh.c (arch_info_struct): Likewise.
+
+	* cpu-h8300.c (local_bfd_reloc_type_lookup, howto*_callback,
+	howto_*): Unused functions and variables commented out.
+	* cpu-z8k.c (local_bfd_reloc_type_lookup, howto*_callback,
+	howto_*): Likewise.
+	* cpu-h8500.c (compatible): Likewise.
+	* cpu-sh.c (compatible): Likewise.
+
+	* hp300hpux.c (swap_std_reloc_in): Delete unused variables.
+	Always set a valid length value, even for invalid input.
+
+	* srec.c (srec_write_symbols): Use sprintf_vma.
+
+	* bfd-in.h (uint64_typeLOW, uint64_typeHIGH, int64_type,
+	uint64_type): Provide default definitions.
+	* hosts/std-host.h (int64 stuff): Remove them from here.
+
+	* bfd-in.h (sprintf_vma): Define parallel to fprintf_vma.
+
+	* elf32-i386.c (elf_i386_reloc_type_lookup): Delete unused
+	variable.  Added default case to switch.
+
+	* aoutx.h (translate_from_native_sym_flags): Before casting
+	pointers to integers, make sure the integer type is wide enough.
+	* coff-mips.c (ecoff_set_symbol_info): Ditto.
+
+	* section.c (bfd_get_section_contents): Since `count' is unsigned,
+	don't bother comparing for less-than-zero.
+	(bfd_set_section_contents): Ditto.
+
 	* elfcode.h (bfd_add_to_strtab): Now static.
 	(sym_is_global): New function.
-	(elf_map_symbols): Call it.
+	(elf_map_symbols): Call it.  Now returns void.  Removed unused
+	local variable.
 	(bfd_section_from_shdr): Mark string tables other than for section
 	and symbol names as normal sections having contents.
 	(fix_up_strtabs): New function; fixes up ELF header fields for
@@ -15,6 +71,11 @@ Sun Jun 20 20:32:19 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
 	(elf_write_object_contents): Map fix_up_strtabs over all BFD
 	sections.  Reordered condition tests for symbol flags; default to
 	local-object value instead of global-object.
+	(elf_symbol_from_bfd_symbol): Hid conditionally-used variable
+	inside condition test.
+	(elf_print_symbol): Use fprintf_vma.
+	(elf_idx_of_sym, bfd_shdr_from_section): Unused functions
+	commented out.
 
 	* bfd-in.h (int64_type, uint64_type): Define these if we fall
 	back to "long long" for HOST_64_BIT.
