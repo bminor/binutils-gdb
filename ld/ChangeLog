@@ -1,3 +1,8 @@
+2005-02-16  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Define
+	lib_path if NATIVE is yes.
+
 2005-02-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/ppc64elf.em (ppc_create_output_section_statements): Make

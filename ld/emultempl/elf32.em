@@ -836,9 +836,13 @@ gld${EMULATION_NAME}_after_open (void)
 	  size_t len;
 	  search_dirs_type *search;
 EOF
-if [ "x${USE_LIBPATH}" = xyes ] ; then
+if [ "x${NATIVE}" = xyes ] ; then
 cat >>e${EMULATION_NAME}.c <<EOF
 	  const char *lib_path;
+EOF
+fi
+if [ "x${USE_LIBPATH}" = xyes ] ; then
+cat >>e${EMULATION_NAME}.c <<EOF
 	  struct bfd_link_needed_list *rp;
 	  int found;
 EOF
