@@ -89,12 +89,16 @@ case "${targ}" in
   h8300h-*-hms)		ld_target=cf-h8300h ;;
   h8500-*-hms)		ld_target=coff-h8500 ;;
   sh-*-*)		ld_target=coff-sh ;;
+# start-sanitize-r16
+  r16-*-*)		ld_target=r16-aout ;;
+# end-sanitize-r16
   m68k-sony-*)		ld_target=news ;;
   m68k-hp-bsd*)		ld_target=hp300bsd ;;
   m68*-*-aout)		ld_target=m68k ;;
   m68*-*-coff)		ld_target=m68k-coff ;;
   m68*-*-hpux*)		ld_target=hp300hpux ;;
   m68*-*-lynxos*)	ld_target=m68k-lynx ;;
+  m68*-*-netbsd*)	ld_target=m68k-nbsd ;;
   m68*-*-*)
     echo '***' "Unknown m68k target vendor for ld:" ${target_vendor} 1>&2
 			exit 1 ;;
