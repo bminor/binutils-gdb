@@ -478,8 +478,7 @@ $(BFD_H): stmp-bfd.h ; @true
 # If the file is still there, kill it.
 stmp-bfd.h : $(srcdir)/bfd-in2.h Makefile
 	rm -f bfd.h-new 64 ../include/bfd.h
-	if grep BFD_HOST_64_BIT sysdep.h > 64 2>/dev/null ; then true ; \
-	else touch 64 ; fi
+	grep BFD_HOST_64_BIT sysdep.h > 64 2>/dev/null || exit 0
 	sed -e 's/@WORDSIZE@/$(WORDSIZE)/' \
 	    -e "s/@VERSION@/`cat $(srcdir)/VERSION`/" \
 	    -e '/64-bit.*sysdep.h/ r 64' \
