@@ -35,12 +35,14 @@ collection.c
 collection.exp
 deltrace.exp
 gdb_c_test.c
+infotrace.exp
 limits.c
 limits.exp
 packetlen.exp
 passc-dyn.exp
 passcount.exp
 report.exp
+save-trace.exp
 tfind.exp
 tracecmd.exp
 while-dyn.exp
