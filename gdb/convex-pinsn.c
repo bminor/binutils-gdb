@@ -1,5 +1,5 @@
 /* Print Convex instructions for GDB, the GNU debugger.
-   Copyright 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1989, 1991, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -70,9 +70,9 @@ struct formstr {
     unsigned i:5, j:5, k:2;	/* operand formats */
 };
 
-#include "convx-opcode.h"
+#include "opcode/convex.h"
 
-unsigned char formdecode [] = {
+CONST unsigned char formdecode [] = {
     1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
     9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,
     1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -91,7 +91,7 @@ unsigned char formdecode [] = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 };
 
-struct opform opdecode[] = {
+CONST struct opform opdecode[] = {
     0x7e00, 9, format0, e0_format0, e1_format0,
     0x3f00, 8, format1, e0_format1, e1_format1,
     0x1fc0, 6, format2, e0_format2, e1_format2,

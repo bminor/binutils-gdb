@@ -143,12 +143,7 @@ modified, but it is not yet 100% predictable when e.g. the commands
 call functions in the child, and while there, the child is interrupted
 with a signal, or hits a breakpoint.)
 
-Symbol completion with TAB does not unmangle names!
-
 help completion, help history should work.
-
-Symbol completion doesn't handle e.g. W::f.  (symtab.c,
-make_symbol_completion_list).
 
 Check that we can handle stack trace through varargs AND alloca in same
 function, on 29K.
@@ -184,8 +179,6 @@ non-alias patterns match, point this out too.  Finally, there should
 be a sparc-optest.s file that tries each pattern out.  This file
 should end up coming back the same (modulo transformation comments) 
 if fed to "gas" then the .o is fed to gdb for disassembly.
-
-Merge the xxx-opcode.h files with gas again...
 
 Eliminate all the core_file_command's in all the xdep files.
 Eliminate separate declarations of registers[] everywhere.

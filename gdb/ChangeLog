@@ -1,3 +1,17 @@
+Thu Feb  4 01:52:36 1993  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (TARDIRS):  Add sparclite demo dir.
+	(*.tab.c):  Change dependency on Makefile to depend on
+	Makefile.in, otherwise it always rebuilds after configuring.
+	Force output *.tab.c file into current directory even in "make"
+	versions that rewrite dependent file names used in command lines.
+
+	* TODO:  Remove some things we did.
+	* am29k-opcode.h, convx-opcode:  Remove; now in ../include/opcode.
+	* os68k-xdep.c:  Remove; useless file (os68k is a target only).
+	* convex-pinsn.c:  Use ../include/opcode/convex.h.  Add CONST.
+	* symtab.h:  Eliminate unnamed unions and structs.
+
 Wed Feb  3 14:48:08 1993  John Gilmore  (gnu@cygnus.com)
 
 	* Makefile.in (VERSION):  Roll to 4.7.5.
