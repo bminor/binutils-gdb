@@ -1932,7 +1932,12 @@ coff_set_flags (abfd, magicp, flagsp)
 #ifdef APOLLOM68KMAGIC
       *magicp = APOLLO_COFF_VERSION_NUMBER;
 #else
+      /* NAMES_HAVE_UNDERSCORE may be defined by coff-u68k.c.  */
+#ifdef NAMES_HAVE_UNDERSCORE
+      *magicp = MC68KBCSMAGIC;
+#else
       *magicp = MC68MAGIC;
+#endif
 #endif
 #ifdef LYNXOS
       /* Just overwrite the usual value if we're doing Lynx. */
@@ -2217,8 +2222,14 @@ coff_compute_section_file_positions (abfd)
 #ifndef I960
       /* make sure that this section is of the right size too */
       if ((abfd->flags & EXEC_P) == 0)
-	current->_raw_size = BFD_ALIGN (current->_raw_size,
-					1 << current->alignment_power);
+	{
+	  bfd_size_type old_size;
+
+	  old_size = current->_raw_size;
+	  current->_raw_size = BFD_ALIGN (current->_raw_size,
+					  1 << current->alignment_power);
+	  sofar += current->_raw_size - old_size;
+	}
       else
 	{
 	  old_sofar = sofar;
@@ -3663,6 +3674,7 @@ coff_slurp_reloc_table (abfd, asect, symbols)
 	  (*_bfd_error_handler)
 	    ("%s: illegal relocation type %d at address 0x%lx",
 	     bfd_get_filename (abfd), dst.r_type, (long) dst.r_vaddr);
+	  bfd_set_error (bfd_error_bad_value);
 	  return false;
 	}
     }
