@@ -1,3 +1,11 @@
+Thu Mar 13 22:51:00 1997  Dawn Perchik  <dawn@cygnus.com>
+
+	* utils.c(pollquit, notice_quit): If _WIN32, limit test for cntl-C 
+	to wingdb.
+	(initialize_utils): If _WIN32, don't call ScreenRows and ScreenCols 
+	except under wingdb.  (Contributed by Martin Hunt).
+
+
 Thu Mar 13 12:40:49 1997  Tom Tromey  <tromey@cygnus.com>
 
 	* configure: Regenerated.
