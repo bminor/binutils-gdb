@@ -1,3 +1,17 @@
+2001-04-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* solib-aix5.c (enum maptype): Delete.
+	(struct lm_info): Add new member ``nmappings''.  Make ``mapping''
+	member a pointer instead of a statically sized array.
+	(build_so_list_from_mapfile): Dynamically allocate ``mapping''
+	array.
+	(aix5_relocate_main_executable, aix5_relocate_section_addresses,
+	aix5_find_global_pointer): Search for correct mapping to use
+	based on file offset instead of knowledge of whether the section
+	is read-only or read/write.
+	(aix5_find_gate_addresses): Use the first mapping instead of
+	the (now defunct) MT_READONLY mapping.
+
 2001-04-12  Nicholas Duffek  <nsd@redhat.com>
 
 	* xcoffread.c (scan_xcoff_symtab): Ignore symbols beginning with

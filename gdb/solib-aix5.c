@@ -49,22 +49,17 @@
 
 /* Link map info to include in an allocated so_list entry */
 
-enum maptype {
-  MT_READONLY = 0,
-  MT_READWRITE = 1,
-  MT_LAST = 2
-};
-
 struct lm_info
   {
-    struct
+    int nmappings;		/* number of mappings */
+    struct lm_mapping
       {
 	CORE_ADDR addr;		/* base address */
 	CORE_ADDR size;		/* size of mapped object */
 	CORE_ADDR offset;	/* offset into mapped object */
 	long flags;		/* MA_ protection and attribute flags */
 	CORE_ADDR gp;		/* global pointer value */
-      } mapping[MT_LAST];
+      } *mapping;
       char *mapname;		/* name in /proc/pid/object */
       char *pathname;		/* full pathname to object */
       char *membername;		/* member name in archive file */
@@ -232,7 +227,7 @@ build_so_list_from_mapfile (int pid, long match_mask, long match_val)
     {
       char *mapname, *pathname, *membername;
       struct so_list *sop;
-      enum maptype maptype;
+      int mapidx;
 
       if (prmap->pr_size == 0)
 	break;
@@ -288,12 +283,16 @@ build_so_list_from_mapfile (int pid, long match_mask, long match_val)
 	  sos = sop;
 	}
 
-      maptype = (prmap->pr_mflags & MA_WRITE) ? MT_READWRITE : MT_READONLY;
-      sop->lm_info->mapping[maptype].addr = (CORE_ADDR) prmap->pr_vaddr;
-      sop->lm_info->mapping[maptype].size = prmap->pr_size;
-      sop->lm_info->mapping[maptype].offset = prmap->pr_off;
-      sop->lm_info->mapping[maptype].flags = prmap->pr_mflags;
-      sop->lm_info->mapping[maptype].gp = (CORE_ADDR) prmap->pr_gp;
+      mapidx = sop->lm_info->nmappings;
+      sop->lm_info->nmappings += 1;
+      sop->lm_info->mapping 
+	= xrealloc (sop->lm_info->mapping,
+	            sop->lm_info->nmappings * sizeof (struct lm_mapping));
+      sop->lm_info->mapping[mapidx].addr = (CORE_ADDR) prmap->pr_vaddr;
+      sop->lm_info->mapping[mapidx].size = prmap->pr_size;
+      sop->lm_info->mapping[mapidx].offset = prmap->pr_off;
+      sop->lm_info->mapping[mapidx].flags = prmap->pr_mflags;
+      sop->lm_info->mapping[mapidx].gp = (CORE_ADDR) prmap->pr_gp;
     }
 
   xfree (mapbuf);
@@ -596,24 +595,26 @@ aix5_relocate_main_executable (void)
 
   /* Iterate over the mappings in the main executable and compute
      the new offset value as appropriate.  */
-  for (i = 0; i < MT_LAST; i++)
+  for (i = 0; i < so->lm_info->nmappings; i++)
     {
       CORE_ADDR increment = 0;
       struct obj_section *sect;
       bfd *obfd = symfile_objfile->obfd;
+      struct lm_mapping *mapping = &so->lm_info->mapping[i];
 
       ALL_OBJFILE_OSECTIONS (symfile_objfile, sect)
 	{
 	  int flags = bfd_get_section_flags (obfd, sect->the_bfd_section);
 	  if (flags & SEC_ALLOC)
 	    {
-	      if (((so->lm_info->mapping[i].flags & MA_WRITE) == 0)
-		    == ((flags & SEC_READONLY) != 0))
+	      file_ptr filepos = sect->the_bfd_section->filepos;
+	      if (mapping->offset <= filepos
+	          && filepos <= mapping->offset + mapping->size)
 		{
 		  int idx = sect->the_bfd_section->index;
 
 		  if (increment == 0)
-		    increment = so->lm_info->mapping[i].addr
+		    increment = mapping->addr
 		      - (bfd_section_vma (obfd, sect->the_bfd_section) 
 		         & SECTMAPMASK);
 
@@ -694,11 +695,27 @@ aix5_relocate_section_addresses (struct so_list *so,
                                  struct section_table *sec)
 {
   int flags = bfd_get_section_flags (sec->bfd, sec->the_bfd_section);
+  file_ptr filepos = sec->the_bfd_section->filepos;
 
   if (flags & SEC_ALLOC)
     {
-      int idx = (flags & SEC_READONLY) ? MT_READONLY : MT_READWRITE;
-      CORE_ADDR addr = so->lm_info->mapping[idx].addr;
+      int idx;
+      CORE_ADDR addr;
+
+      for (idx = 0; idx < so->lm_info->nmappings; idx++)
+	{
+	  struct lm_mapping *mapping = &so->lm_info->mapping[idx];
+	  if (mapping->offset <= filepos
+	      && filepos <= mapping->offset + mapping->size)
+	    break;
+	}
+
+      if (idx >= so->lm_info->nmappings)
+	internal_error (__FILE__, __LINE__,
+	  "aix_relocate_section_addresses: Can't find mapping for section %s",
+	  bfd_get_section_name (sec->bfd, sec->the_bfd_section));
+      
+      addr = so->lm_info->mapping[idx].addr;
 
       sec->addr += addr;
       sec->endaddr += addr;
@@ -718,11 +735,27 @@ aix5_find_global_pointer (CORE_ADDR addr)
 
   for (so = sos; so != NULL; so = so->next)
     {
-      if (so->lm_info->mapping[MT_READONLY].addr <= addr
-          && addr <= so->lm_info->mapping[MT_READONLY].addr
-	               + so->lm_info->mapping[MT_READONLY].size)
+      int idx;
+      for (idx = 0; idx < so->lm_info->nmappings; idx++)
+	if (so->lm_info->mapping[idx].addr <= addr
+	    && addr <= so->lm_info->mapping[idx].addr
+			 + so->lm_info->mapping[idx].size)
+	  {
+	    break;
+	  }
+
+      if (idx < so->lm_info->nmappings)
 	{
-	  global_pointer = so->lm_info->mapping[MT_READWRITE].gp;
+	  /* Look for a non-zero global pointer in the current set of
+	     mappings.  */
+	  for (idx = 0; idx < so->lm_info->nmappings; idx++)
+	    if (so->lm_info->mapping[idx].gp != 0)
+	      {
+		global_pointer = so->lm_info->mapping[idx].gp;
+		break;
+	      }
+	  /* Get out regardless of whether we found one or not.  Mappings
+	     don't overlap, so it would be pointless to continue.  */
 	  break;
 	}
     }
@@ -759,8 +792,8 @@ aix5_find_gate_addresses (CORE_ADDR *start, CORE_ADDR *end)
      it'll be in the read-only (even though it's execute-only)
      mapping in the lm_info struct.  */
 
-  *start = so->lm_info->mapping[MT_READONLY].addr;
-  *end = *start + so->lm_info->mapping[MT_READONLY].size;
+  *start = so->lm_info->mapping[0].addr;
+  *end = *start + so->lm_info->mapping[0].size;
 
   /* Free up all the space we've allocated.  */
   do_cleanups (old_chain);
