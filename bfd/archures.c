@@ -89,11 +89,12 @@ DESCRIPTION
 . {* start-sanitize-i960xl *}
 .#define bfd_mach_i960_xl	 7
 . {* end-sanitize-i960xl *}
+.#define bfd_mach_i960_hx        8
 .
 .  bfd_arch_a29k,      {* AMD 29000 *}
 .  bfd_arch_sparc,     {* SPARC *}
 .#define bfd_mach_sparc			1
-{* The difference between v8plus and v9 is that v9 is a true 64 bit env.  *}
+.{* The difference between v8plus and v9 is that v9 is a true 64 bit env.  *}
 .#define bfd_mach_sparc_v8plus		2
 .#define bfd_mach_sparc_v8plusa		3 {* with ultrasparc add'ns *}
 .#define bfd_mach_sparc_v9		4

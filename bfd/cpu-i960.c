@@ -30,8 +30,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 static boolean
 scan_960_mach (ap, string)
-     CONST bfd_arch_info_type *ap;
-     CONST char *string;
+     const bfd_arch_info_type *ap;
+     const char *string;
 {
   unsigned long machine;
 
@@ -79,6 +79,8 @@ scan_960_mach (ap, string)
   else if (string[0] == 'x' && string[1] == 'l')
     machine = bfd_mach_i960_xl;
   /* end-sanitize-i960xl */
+  else if (string[0] == 'h' && string[1] == 'x')
+    machine = bfd_mach_i960_hx;
   else
     return false;
   if (machine == ap->mach)   return true;
@@ -91,10 +93,10 @@ scan_960_mach (ap, string)
    machine which would be compatible with both and returns a pointer
    to its info structure */
 
-static CONST bfd_arch_info_type *
+static const bfd_arch_info_type *
 compatible (a,b)
-     CONST bfd_arch_info_type *a;
-     CONST bfd_arch_info_type *b;
+     const bfd_arch_info_type *a;
+     const bfd_arch_info_type *b;
 {
 
   /* The i960 has distinct subspecies which may not interbreed:
@@ -115,27 +117,23 @@ compatible (a,b)
 #define MC 	bfd_mach_i960_mc    /*4*/
 #define XA 	bfd_mach_i960_xa    /*5*/
 #define CA 	bfd_mach_i960_ca    /*6*/
-#define MAX_ARCH ((int)CA)
-
 /* start-sanitize-i960xl */
 #define XL	bfd_mach_i960_xl    /*7*/
-#undef MAX_ARCH
-#define MAX_ARCH ((int)XL)
 /* end-sanitize-i960xl */
-
+#define HX	bfd_mach_i960_hx    /*8*/
+#define MAX_ARCH ((int)HX)
 
   static CONST unsigned long matrix[MAX_ARCH+1][MAX_ARCH+1] = 
     {
-      { ERROR,	CORE,	KA,	KB,	MC,	XA,	CA },
-      { CORE,	CORE,	KA,	KB,	MC,	XA,	CA },
-      { KA,	KA,	KA,	KB,	MC,	XA,	ERROR },
-      { KB,	KB,	KB,	KB,	MC,	XA,	ERROR },
-      { MC,	MC,	MC,	MC,	MC,	XA,	ERROR },
-      { XA,	XA,	XA,	XA,	XA,	XA,	ERROR },
-      { CA,	CA,	ERROR,	ERROR,	ERROR,	ERROR,	CA },
-      /* start-sanitize-i960xl */
-      { XL,	ERROR,  ERROR,	ERROR,	ERROR,	ERROR,	ERROR,  XL },
-      /* end-sanitize-i960xl */
+      { ERROR,	CORE,	KA,	KB,	MC,	XA,	CA,	7,	HX },
+      { CORE,	CORE,	KA,	KB,	MC,	XA,	CA,	7,	HX },
+      { KA,	KA,	KA,	KB,	MC,	XA,	ERROR,	ERROR,	ERROR},
+      { KB,	KB,	KB,	KB,	MC,	XA,	ERROR, 	ERROR,	ERROR},
+      { MC,	MC,	MC,	MC,	MC,	XA,	ERROR,	ERROR,	ERROR},
+      { XA,	XA,	XA,	XA,	XA,	XA,	ERROR,	ERROR,	ERROR},
+      { CA,	CA,	ERROR,	ERROR,	ERROR,	ERROR,	CA,	ERROR,	ERROR},
+      { 7,	ERROR,  ERROR,	ERROR,	ERROR,	ERROR,	ERROR,  7 },
+      { HX,	ERROR,	ERROR,	ERROR,	ERROR,	ERROR,	ERROR,	8 },
     };
 
 
@@ -152,28 +150,21 @@ compatible (a,b)
 
 
 int bfd_default_scan_num_mach();
-#define N(a,b,d) \
-{ 32, 32, 8,bfd_arch_i960,a,"i960",b,3,d,compatible,scan_960_mach,0,}
+#define N(a,b,d,n) \
+{ 32, 32, 8,bfd_arch_i960,a,"i960",b,3,d,compatible,scan_960_mach,n,}
 
-static bfd_arch_info_type arch_info_struct[] = 
+static const bfd_arch_info_type arch_info_struct[] = 
 { 
-  N(bfd_mach_i960_core, "i960:core", true),
-  N(bfd_mach_i960_ka_sa,"i960:ka_sa",false),
-  N(bfd_mach_i960_kb_sb,"i960:kb_sb",false),
-  N(bfd_mach_i960_mc,   "i960:mc",   false),
-  N(bfd_mach_i960_xa,   "i960:xa",   false),
-  N(bfd_mach_i960_ca,   "i960:ca",   false),
+  N(bfd_mach_i960_ka_sa,"i960:ka_sa",false, &arch_info_struct[1]),
+  N(bfd_mach_i960_kb_sb,"i960:kb_sb",false, &arch_info_struct[2]),
+  N(bfd_mach_i960_mc,   "i960:mc",   false, &arch_info_struct[3]),
+  N(bfd_mach_i960_xa,   "i960:xa",   false, &arch_info_struct[4]),
+  N(bfd_mach_i960_ca,   "i960:ca",   false, &arch_info_struct[5]),
   /* start-sanitize-i960xl */
-  N(bfd_mach_i960_xl,   "i960:xl",   false),
+  N(bfd_mach_i960_xl,   "i960:xl",   false, &arch_info_struct[6]),
   /* end-sanitize-i960xl */
+  N(bfd_mach_i960_hx,	"i960:hx",   false, 0),
 };
 
-
-void
-bfd_i960_arch ()
-{
-  unsigned int i;
-  for (i = 0; i < sizeof(arch_info_struct)/sizeof (*arch_info_struct); i++)  {
-    bfd_arch_linkin(arch_info_struct + i);
-  }
-}
+const bfd_arch_info_type bfd_i960_arch =
+  N(bfd_mach_i960_core, "i960:core", true, &arch_info_struct[0]);

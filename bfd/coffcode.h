@@ -844,8 +844,7 @@ dependent COFF routines:
 .#define bfd_coff_adjust_symndx(obfd, info, ibfd, sec, rel, adjustedp)\
 .        ((coff_backend_info (abfd)->_bfd_coff_adjust_symndx)\
 .         (obfd, info, ibfd, sec, rel, adjustedp))
-.#define bfd_coff_link_add_one_symbol(info, abfd, name, flags, section,\
-.                                     value, string, cp, coll, hashp)\
+.#define bfd_coff_link_add_one_symbol(info,abfd,name,flags,section,value,string,cp,coll,hashp)\
 .        ((coff_backend_info (abfd)->_bfd_coff_link_add_one_symbol)\
 .         (info, abfd, name, flags, section, value, string, cp, coll, hashp))
 .
@@ -1267,6 +1266,9 @@ coff_set_arch_mach_hook (abfd, filehdr)
 	  machine = bfd_mach_i960_xl;
 	  break;
 	  /* end-sanitize-i960xl */
+	case F_I960HX:
+	  machine = bfd_mach_i960_hx;
+	  break;
 	}
       break;
 #endif
@@ -1751,6 +1753,9 @@ coff_set_flags (abfd, magicp, flagsp)
 	    flags = F_I960XL;
 	    break;
 	    /* end-sanitize-i960xl */
+	  case bfd_mach_i960_hx:
+	    flags = F_I960HX;
+	    break;
 	  default:
 	    return false;
 	  }

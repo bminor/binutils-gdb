@@ -1,5 +1,14 @@
 Mon Feb  5 10:38:27 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* archures.c (bfd_mach_i960_hx): Define.
+	* bfd-in2.h: Rebuild.
+	* cpu-i960.c (scan_960_mach): Accept machine "hx".
+	(MATRIX): Expand entries for HX.
+	(arch_info_struct): Add i960:hx entry.
+	* bout.c (b_out_set_arch_mach): Handle bfd_mach_i960_hx.
+	* coffcode.h (coff_set_arch_mach_hook): Handle F_I960HX.
+	(coff_set_flags): Handle bfd_mach_i960_hx.
+
 	Support for building as a shared library, based on patches from
 	Alan Modra <alan@spri.levels.unisa.edu.au>:
 	* configure.in: Add AC_ARG_ENABLE for shared and commonbfdlib.
