@@ -355,11 +355,13 @@ listing_newline (ps)
 	{
 	  char * copy;
 	  int len;
+	  int seen_quote = 0;
 
 	  for (copy = input_line_pointer - 1;
-	       * copy && ! is_end_of_line [* copy];
+	       * copy && (seen_quote || (! is_end_of_line [* copy]));
 	       copy ++)
-	    continue;
+	    if (* copy == '"' && copy[-1] != '\')
+	      seen_quote = ! seen_quote;
 
 	  len = (copy - input_line_pointer) + 2;
 

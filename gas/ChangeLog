@@ -1,3 +1,8 @@
+Tue Nov 17 13:42:42 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* listing.c: Ignore line terminator characters found inside
+	strings. 
+
 start-sanitize-fr30
 Thu Nov 12 19:21:24 1998  Dave Brolley  <brolley@cygnus.com>
 
