@@ -30,6 +30,8 @@ case "${target}" in
   sparc*-*-aout)	my_target=sun4
 			;;
 # start-sanitize-v9
+  sparc64-*-elf*)	my_target=sparc64-elf
+			;;
   sparc64*)		my_target=sun4
 			;;
 # end-sanitize-v9
