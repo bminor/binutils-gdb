@@ -1,5 +1,7 @@
 Wed Jun 17 13:08:33 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* xm-rs6000.h:  Fix decls for malloc, realloc, and free.
+
 	* xm-rs6000.h:  Add decl for strdup().
 
 	* tm-rs6000.h:  Remove #include of inferior.h.  Fixes many

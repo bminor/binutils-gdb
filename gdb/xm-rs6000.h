@@ -66,8 +66,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* /usr/include/stdlib.h always uses void* and void,
    even when __STDC__ isn't defined. */
 #define MALLOC_INCOMPATIBLE
-extern void* malloc PARAMS (());
-extern void* realloc PARAMS (());
-extern void free PARAMS (());
+extern char *malloc();
+extern char *realloc();
+extern void free();
 
 extern char *strdup();
