@@ -78,6 +78,7 @@ mips-sgi-irix3)		gdb_host=irix3 ;;
 mips-sgi-irix4*)	gdb_host=irix4 ;;
 mips-sony-*)		gdb_host=news-mips ;;
 mips-*-sysv*)		gdb_host=riscos ;;
+mips-*-riscos*)		gdb_host=riscos ;;
 
 none-*-*)		gdb_host=none ;;
 
@@ -233,6 +234,7 @@ mips-little-*)		gdb_target=littlemips ;;
 mips-sgi-*)		gdb_target=irix3 ;;
 mips-sony-*)		gdb_target=bigmips ;;
 mips-*-sysv*)		gdb_target=bigmips ;;
+mips-*-riscos*)		gdb_target=bigmips ;;
 
 none-*-*)		gdb_target=none ;;
 
@@ -329,7 +331,7 @@ case ${srcdir} in
   .)
     ;;
   *)
-    grep -s "source ${srcdir}/.gdbinit" .gdbinit 2>/dev/null || \
+    grep "source ${srcdir}/.gdbinit" .gdbinit >/dev/null 2>/dev/null || \
       echo "source ${srcdir}/.gdbinit" >> .gdbinit
 esac
 
