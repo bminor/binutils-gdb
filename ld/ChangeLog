@@ -1,3 +1,11 @@
+2002-10-10  Jakub Jelinek  <jakub@redhat.com>
+
+	* ldfile.c (ldfile_try_open_bfd): When searching skip linker scripts if
+	they have OUTPUT_FORMAT not matching actual output format.
+	* ldlang.c (lang_get_output_target): New function.
+	(open_output): Use it.
+	* ldlang.h (lang_get_output_target): New prototype.
+
 2002-10-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/elf32.em (output_rel_find): Prefer .rel script sections

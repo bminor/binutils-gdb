@@ -1787,6 +1787,29 @@ get_first_input_target ()
   return target;
 }
 
+const char *
+lang_get_output_target ()
+{
+  const char *target;
+
+  /* Has the user told us which output format to use?  */
+  if (output_target != (char *) NULL)
+    return output_target;
+
+  /* No - has the current target been set to something other than
+     the default?  */
+  if (current_target != default_target)
+    return current_target;
+
+  /* No - can we determine the format of the first input file?  */
+  target = get_first_input_target ();
+  if (target != NULL)
+    return target;
+
+  /* Failed - use the default output target.  */
+  return default_target;
+}
+
 /* Open the output file.  */
 
 static bfd *
@@ -1795,24 +1818,7 @@ open_output (name)
 {
   bfd *output;
 
-  /* Has the user told us which output format to use?  */
-  if (output_target == (char *) NULL)
-    {
-      /* No - has the current target been set to something other than
-         the default?  */
-      if (current_target != default_target)
-	output_target = current_target;
-
-      /* No - can we determine the format of the first input file?  */
-      else
-	{
-	  output_target = get_first_input_target ();
-
-	  /* Failed - use the default output target.  */
-	  if (output_target == NULL)
-	    output_target = default_target;
-	}
-    }
+  output_target = lang_get_output_target ();
 
   /* Has the user requested a particular endianness on the command
      line?  */
