@@ -1,3 +1,22 @@
+Fri Oct 30 11:37:52 1992  Fred Fish  (fnf@cygnus.com)
+
+	* configure.in (configdirs):  Add deja-gnu.
+
+Fri Oct 23 00:39:18 1992  John Gilmore  (gnu@cygnus.com)
+
+	* README:  Update for configure.texi and gdb-4.7 release.
+
+Wed Oct 21 21:54:27 1992  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in:  Move "all" target to top of file.
+	Previously, first target was ".PHONY" which caused BSD4.4 make
+	to build .PHONY when make was run without arguments.
+
+Mon Oct 19 01:17:54 1992  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in:  Add COPYING.LIB to GDB releases, now that there's
+	Library-copylefted code in libiberty.
+
 Tue Oct 13 01:22:32 1992  John Gilmore  (gnu@cygnus.com)
 
 	* config.sub:  Replace m68kmote with plain old m68k.

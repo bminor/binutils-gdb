@@ -3,7 +3,7 @@
 # script appropriate for this directory.  For more information, check
 # any existing configure script.
 
-configdirs="autoconf libgcc mmalloc libiberty texinfo flex byacc bison opcodes bfd binutils gcc readline glob ld gas gdb emacs ispell make grep diff rcs cvs patch send_pr libg++ newlib gprof gdbtest libm tgas "
+configdirs="autoconf libgcc mmalloc libiberty texinfo flex byacc bison opcodes bfd binutils gcc readline glob ld gas gdb emacs ispell make grep diff rcs cvs patch send_pr libg++ newlib gprof gdbtest libm tgas deja-gnu "
 srctrigger=cfg-paper.texi
 srcname="gnu development package"
 
