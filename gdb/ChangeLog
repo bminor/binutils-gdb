@@ -1,3 +1,9 @@
+2003-03-10  David Carlton  <carlton@math.stanford.edu>
+
+	* buildsym.c (scan_for_anonymous_namespaces): Allow
+	"{anonymous}".
+	* cp-support.c (cp_is_anonymous): Scan for "{anonymous}".
+
 2003-03-07  David Carlton  <carlton@math.stanford.edu>
 
 	* symtab.c (lookup_partial_symbol): Replace uses of

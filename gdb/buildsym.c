@@ -148,10 +148,6 @@ add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
 /* Check to see if a symbol is contained within an anonymous
    namespace; if so, add an appropriate using directive.  */
 
-/* Optimize away strlen ("(anonymous namespace)").  */
-
-#define ANONYMOUS_NAMESPACE_LEN 21
-
 static void
 scan_for_anonymous_namespaces (struct symbol *symbol)
 {
@@ -159,22 +155,40 @@ scan_for_anonymous_namespaces (struct symbol *symbol)
   unsigned int previous_component;
   unsigned int next_component;
   const char *len;
+  const char *anonymous_name;
+  int anonymous_len;
 
-  /* Start with a quick-and-dirty check for mention of "(anonymous
-     namespace)".  */
+  /* Start with a quick-and-dirty check for mentions of anonymous
+     namespaces.  */
 
-  if (!cp_is_anonymous (name))
-    return;
+  switch (cp_is_anonymous (name))
+    {
+    case 1:
+      anonymous_name = "(anonymous namespace)";
+      break;
+    case 2:
+      /* FIXME: carlton/2003-03-10: This corresponds to GCCv2, and
+	 urrently, the demangler actually can't demangle all anonymous
+	 namespace mentions correctly.  (See PR gdb/1134.) Given
+	 GCCv2's lack of namespace support, I'm tempted to skip this
+	 case entirely.  */
+      anonymous_name = "{anonymous}";
+      break;
+    default:
+      return;
+    }
+
+  anonymous_len = strlen (anonymous_name);
 
   previous_component = 0;
   next_component = cp_find_first_component (name + previous_component);
 
   while (name[next_component] == ':')
     {
-      if ((next_component - previous_component) == ANONYMOUS_NAMESPACE_LEN
-	  && strncmp (name + previous_component,
-		      "(anonymous namespace)",
-		      ANONYMOUS_NAMESPACE_LEN) == 0)
+      if ((next_component - previous_component) == anonymous_len
+	  && (strncmp (name + previous_component, anonymous_name,
+		       anonymous_len)
+	      == 0))
 	{
 	  /* We've found a component of the name that's an anonymous
 	     namespace.  So add symbols in it to the namespace given

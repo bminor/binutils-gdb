@@ -647,13 +647,18 @@ maintenance_print_namespace (char *args, int from_tty)
 }
 
 /* Test whether or not NAMESPACE looks like it mentions an anonymous
-   namespace; return nonzero if so.  */
+   namespace; return 1 if it mentions "(anonymous namespace)", 2 if it
+   mentions "{anonymous}", and 0 otherwise.  */
 
 int
 cp_is_anonymous (const char *namespace)
 {
-  return (strstr (namespace, "(anonymous namespace)")
-	  != NULL);
+  if (strstr (namespace, "(anonymous namespace)") != NULL)
+    return 1;
+  else if (strstr (namespace, "{anonymous}") != NULL)
+    return 2;
+  else
+    return 0;
 }
 
 /* Create a copy of the initial substring of STRING of length LEN.
