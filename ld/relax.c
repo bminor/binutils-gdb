@@ -96,19 +96,21 @@ DEFUN(build_it,(statement),
     {
       /* Create a new seclet in the output section with this
 	 attached */
+      if (statement->input_section.ifile->just_syms_flag == false) 
+      {
+	asection *i  = statement->input_section.section;
 
-      asection *i  = statement->input_section.section;
-
-      asection *output_section = i->output_section;
+	asection *output_section = i->output_section;
 	
-      bfd_seclet_type *seclet  = bfd_new_seclet(output_section->owner,output_section);
+	bfd_seclet_type *seclet  = bfd_new_seclet(output_section->owner,output_section);
 	
-      seclet->type = bfd_indirect_seclet;
-      seclet->u.indirect.section = i;
-      seclet->u.indirect.symbols = statement->input_section.ifile->asymbols;
-      seclet->size = bfd_get_section_size_before_reloc(i);
-      seclet->offset = i->output_offset;
-      seclet->next = 0;
+	seclet->type = bfd_indirect_seclet;
+	seclet->u.indirect.section = i;
+	seclet->u.indirect.symbols = statement->input_section.ifile->asymbols;
+	seclet->size = bfd_get_section_size_before_reloc(i);
+	seclet->offset = i->output_offset;
+	seclet->next = 0;
+      }
 	
     }
     break;
