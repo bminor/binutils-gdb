@@ -1,5 +1,9 @@
 2003-10-30  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/fbsd64.mt (TDEPFILES): Add corelow.o.
+	* config/i386/fbsd64.mh (NATDEPFILES): Remove corelow.o and
+	core-regset.o.
+
 	* fbsd-proc.c (fbsd_make_corefile_notes): Put a "FreeBSD" label in
 	the ELF header.
 
