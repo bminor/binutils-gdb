@@ -1,3 +1,8 @@
+2004-03-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* config.in: Regenerate.
+	* po/ld.pot: Regenerate.
+
 2004-03-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld.texinfo: Add --as-needed doco.
