@@ -58,7 +58,7 @@ GDB_NLM_DEPS =
 SHELL = /bin/sh
 
 # INSTALL_PROGRAM_ARGS is changed by configure.in to use -x for a
-# cygwin32 host.
+# cygwin host.
 INSTALL_PROGRAM_ARGS =
 
 INSTALL = $(SHELL) $$s/install-sh -c
