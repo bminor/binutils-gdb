@@ -205,7 +205,7 @@ terminal_init_inferior_with_pgrp (int pgrp)
    and gdb must be able to restore it correctly.  */
 
 void
-terminal_save_ours ()
+terminal_save_ours (void)
 {
   if (gdb_has_a_terminal ())
     {
