@@ -746,8 +746,7 @@ extern void set_endian_from_file PARAMS ((bfd *));
 #else /* Target and host byte order differ.  */
 #define SWAP_TARGET_AND_HOST(buffer,len) \
   {                                                                      \
-    char __tmp_;
- \
+    char __tmp_;							 \
     char *p = (char *)(buffer);                                          \
     char *q = ((char *)(buffer)) + len - 1;                              \
     for (; p < q; p++, q--)                                              \

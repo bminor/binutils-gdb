@@ -1,5 +1,7 @@
 Tue Feb 28 14:38:39 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
+	* defs.h: fix a syntax error.
+
 	* a29k-tdep.c (get_longjmp_target): add this function, from WRS.
 	* remote-vx.c: move read_register and write_register out to 
 	target specific files.
