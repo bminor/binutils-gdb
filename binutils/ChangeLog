@@ -1,5 +1,7 @@
 Thu May 14 14:00:56 1998  Nick Clifton  <nickc@cygnus.com>
 
+	* version.c (print_version): Include 1998 in copyright strings.
+
 	* stabs.c (parse_stab): Support Win32 style directory separators.
 
 Sun May 10 22:34:44 1998  Jeffrey A Law  (law@cygnus.com)
