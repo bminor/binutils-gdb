@@ -57,7 +57,7 @@ proc test_running_to_callee4 {} {
     mi_run_cmd
 
     gdb_expect {
-	-re "000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"callee4\",args=\\\[\\\],file=\".*basics.c\",line=\"8\"\}\r\n$mi_gdb_prompt$" {
+	-re "000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"callee4\",args=\\\[\\\],file=\".*basics.c\",line=\"8\"\}\r\n$mi_gdb_prompt$" {
 	    pass "run to callee4"
 	}
 	-re ".*$mi_gdb_prompt$" {

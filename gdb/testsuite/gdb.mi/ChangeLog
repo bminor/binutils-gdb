@@ -1,3 +1,16 @@
+2001-08-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi0-var-block.exp, mi0-stack.exp, mi0-simplerun.exp,
+	mi0-regs.exp, mi0-watch.exp, mi0-stepi.exp, mi0-until.exp,
+	mi0-return.exp, mi0-read-memory.exp, mi0-eval.exp,
+	mi0-disassemble.exp, mi0-console.exp, mi-watch.exp,
+	mi-var-display.exp, mi-var-cmd.exp, mi-var-child.exp,
+	mi-until.exp, mi-var-block.exp, mi-stepi.exp, mi-stack.exp,
+	mi-simplerun.exp, mi-return.exp, mi-regs.exp, mi-read-memory.exp,
+	mi-disassemble.exp, mi-eval.exp, mi-console.exp: Replace pattern
+	matching thread=0 with one to also match thread=1.
+	Fix PR gdb/190.
+
 2001-08-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi0-until.exp, mi-until.exp, mi0-stepi.exp, mi-stepi.exp,
