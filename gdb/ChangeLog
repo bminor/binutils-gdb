@@ -1,3 +1,9 @@
+2002-09-14  Corinna Vinschen  <vinschen@redhat.com>
+
+	* arch-utils.c (legacy_pc_in_sigtramp): Move preprocessor expression
+	for IN_SIGTRAMP to here.  Use IN_SIGTRAMP only if it's defined. 
+	Guard usage of SIGTRAMP_START() by using SIGTRAMP_START_P.
+
 2002-09-13  Christopher Faylor  <cgf@redhat.com>
 
 	* win32-nat.c (child_create_inferior): Honor 'tty' command.

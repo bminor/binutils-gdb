@@ -438,18 +438,6 @@ generic_register_size (int regnum)
   return TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (regnum));
 }
 
-#if !defined (IN_SIGTRAMP)
-#if defined (SIGTRAMP_START)
-#define IN_SIGTRAMP(pc, name) \
-       ((pc) >= SIGTRAMP_START(pc)   \
-        && (pc) < SIGTRAMP_END(pc) \
-        )
-#else
-#define IN_SIGTRAMP(pc, name) \
-       (name && STREQ ("_sigtramp", name))
-#endif
-#endif
-
 /* Assume all registers are adjacent.  */
 
 int
@@ -470,7 +458,14 @@ generic_register_byte (int regnum)
 int
 legacy_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
-  return IN_SIGTRAMP(pc, name);
+#if !defined (IN_SIGTRAMP)
+  if (SIGTRAMP_START_P ())
+    return (pc) >= SIGTRAMP_START (pc) && (pc) < SIGTRAMP_END (pc);
+  else
+    return name && strcmp ("_sigtramp", name) == 0;
+#else
+  return IN_SIGTRAMP (pc, name);
+#endif
 }
 
 int
