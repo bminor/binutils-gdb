@@ -1230,19 +1230,29 @@ print_input_statement (statm)
     }
 }
 
-static void
-print_symbol (q)
-     asymbol * q;
+/* Print all the defined symbols for the abfd provided by in the supplied
+   section.
+*/
+
+static boolean 
+print_one_symbol (hash_entry, ptr)
+struct  bfd_link_hash_entry *hash_entry;
+PTR ptr;
 {
-  print_section ("");
-  fprintf (config.map_file, " ");
-  print_section ("");
-  fprintf (config.map_file, " ");
-  print_address (outside_symbol_address (q));
-  fprintf (config.map_file, "              %s", q->name ? q->name : " ");
-  if (q->flags & BSF_WEAK)
-    fprintf (config.map_file, " *weak*");
-  print_nl ();
+  asection * sec = (asection *)ptr;
+
+  if (hash_entry->type == bfd_link_hash_defined) 
+    {
+      if (sec == hash_entry->u.def.section) {
+	print_section ("");
+	fprintf (config.map_file, " ");
+	print_section ("");
+	fprintf (config.map_file, " ");
+	print_address (hash_entry->u.def.value + outside_section_address (sec));
+	fprintf (config.map_file, "              %s", hash_entry->root.string);
+	print_nl ();
+      }
+    }
 }
 
 static void
@@ -1293,23 +1303,8 @@ print_input_section (in)
 	      fprintf (config.map_file, "(overhead %d bytes)", (int) bfd_alloc_size (abfd));
 	      print_nl ();
 
-	      /* Find all the symbols in this file defined in this section */
-
-	      if (in->ifile->symbol_count)
-		{
-		  asymbol **p;
-
-		  for (p = in->ifile->asymbols; *p; p++)
-		    {
-		      asymbol *q = *p;
-
-		      if (bfd_get_section (q) == i
-			  && (q->flags & (BSF_GLOBAL | BSF_WEAK)) != 0)
-			{
-			  print_symbol (q);
-			}
-		    }
-		}
+	      /* Print all the symbols */
+	      bfd_link_hash_traverse (link_info.hash, print_one_symbol, (PTR) i);
 	    }
 	  else
 	    {

@@ -1,3 +1,8 @@
+Thu Jan 27 17:19:54 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* ldlang.c (print_one_symbol, print_input_section):  Print
+	global symbols in symbol table again.
+
 Thu Jan 27 12:35:01 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ldmain.c ldmain.h ldgram.y: If -v -V or --version was given, 
