@@ -1,5 +1,7 @@
 2003-02-07  David Carlton  <carlton@math.stanford.edu>
 
+	* gdb_mbuild.sh (keep): Delete extra shift after -f.
+
 	* Merge with mainline; tag is carlton_dictionary-20030207-merge.
 
 2003-02-07  Andrew Cagney  <ac131313@redhat.com>
