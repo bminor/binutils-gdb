@@ -1,3 +1,9 @@
+2004-09-23  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.base/bigcore.exp: Replace the code that creates a corefile
+	from a separate process with code that creates a corefile by
+	making the inferior dump core.
+
 2004-09-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/sigstep.exp: Avoid comments withing gdb_test_multiple
