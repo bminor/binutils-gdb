@@ -1133,9 +1133,25 @@ _initialize_event_loop (void)
 {
   if (event_loop_p)
     {
-      /* When a character is detected on instream by select or poll,
-         readline will be invoked via this callback function. */
-      call_readline = rl_callback_read_char_wrapper;
+      /* If the input stream is connected to a terminal, turn on
+         editing.  */
+      if (ISATTY (instream))
+	{
+	  /* Tell gdb that we will be using the readline library. This
+	     could be overwritten by a command in .gdbinit like 'set
+	     editing on' or 'off'. */
+	  async_command_editing_p = 1;
+	  
+	  /* When a character is detected on instream by select or
+	     poll, readline will be invoked via this callback
+	     function. */
+	  call_readline = rl_callback_read_char_wrapper;
+	}
+      else
+	{
+	  async_command_editing_p = 0;
+	  call_readline = gdb_readline2;
+	}
 
       /* When readline has read an end-of-line character, it passes
          the complete line to gdb for processing. command_line_handler
@@ -1160,10 +1176,5 @@ _initialize_event_loop (void)
          only when it actually exists (I.e. after we say 'run' or
          after we connect to a remote target. */
       add_file_handler (input_fd, stdin_event_handler, 0);
-
-      /* Tell gdb that we will be using the readline library. This
-         could be overwritten by a command in .gdbinit like 'set
-         editing on' or 'off'. */
-      async_command_editing_p = 1;
     }
 }

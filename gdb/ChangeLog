@@ -1,5 +1,10 @@
 2000-03-19  Eli Zaretskii  <eliz@is.elta.co.il>
 
+	* event-top.c (_initialize_event_loop): If instream is not
+	connected to a terminal device, turn editing off.
+
+2000-03-19  Eli Zaretskii  <eliz@is.elta.co.il>
+
 	Support for building GDB with DJGPP, and running the test suite on
 	it:
 	* config/djgpp/djconfig.sh: New file.
