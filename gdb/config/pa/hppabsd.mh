@@ -1,5 +1,9 @@
 # Host: Hewlett-Packard PA-RISC machine, running BSD
+HPREAD=
+# start-sanitize-hpread
+HPREAD=hpread.o
+# end-sanitize-hpread
 XDEPFILES= 
 XM_FILE= xm-hppab.h
 NAT_FILE= nm-hppab.h
-NATDEPFILES= hppab-nat.o coredep.o corelow.o exec.o inftarg.o fork-child.o somread.o infptrace.o
+NATDEPFILES= hppab-nat.o coredep.o corelow.o exec.o inftarg.o fork-child.o somread.o infptrace.o $(HPREAD)

@@ -860,6 +860,11 @@ unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 # These are things from config/*/*.m? fragments.  There is no good reason
 # why they are separate from the lists of files above.
 
+HPREAD_SOURCE=
+# start-sanitize-hpread
+HPREAD_SOURCE=hpread.c
+# end-sanitize-hpread
+
 ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	29k-share/udi/udi2go32.c \
 	a29k-pinsn.c a29k-tdep.c a68v-nat.c alpha-nat.c alpha-tdep.c \
@@ -882,7 +887,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	nindy-share/Onindy.c nindy-share/nindy.c \
 	nindy-share/ttyflush.c nindy-tdep.c \
 	ns32k-pinsn.c ns32km3-nat.c osfsolib.c \
-	somread.c procfs.c pyr-pinsn.c pyr-tdep.c pyr-xdep.c \
+	somread.c $(HPREAD_SOURCE) procfs.c pyr-pinsn.c pyr-tdep.c pyr-xdep.c \
 	remote-adapt.c remote-bug.c remote-e7000.c remote-eb.c remote-es.c \
 	remote-hms.c remote-mips.c \
 	remote-mm.c remote-mon.c remote-nindy.c remote-os9k.c remote-sim.c \
@@ -1239,6 +1244,11 @@ osfsolib.o: osfsolib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 
 somread.o: somread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	gdb-stabs.h objfiles.h symfile.h $(symtab_h)
+
+# start-sanitize-hpread
+hpread.o: hpread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
+	gdb-stabs.h objfiles.h symfile.h $(symtab_h)
+# end-sanitize-hpread
 
 parse.o: parse.c $(command_h) $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbtypes_h) language.h parser-defs.h $(symtab_h) $(value_h)

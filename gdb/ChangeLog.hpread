@@ -1,0 +1,204 @@
+Fri Aug 19 10:36:15 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* Makefile.in (ALLDEPFILES): Add hpread.c.
+	(hpread.o): Add dependencies.
+
+	* somread.c: Do not include "aout/aout64.h".  SOM has nothing to
+	do with a.out.
+	(BYTES_IN_WORD): Delete.
+	(som_symfile_read): Call hpread_build_psymtabs to build any
+	minimal symbols based on the HP C native debug symbols.
+	(som_symfile_finish): Call hpread_symfile_finish.
+	(som_symfile_init): Call hpread_symfile_init.
+	* config/pa/tm-hppa.h (HPREAD_ADJUST_STACK_ADDRESS): Define.
+	* hppa-tdep.c (hpread_adjust_stack_address): New function.
+
+	* config/pa/hppabsd.mh (NATDEPFILES): Add hpread.o
+	* config/pa/hppahpux.mh (NATDEPFILES): Likewise.
+	* hpread.c: New file.
+
+Fri Aug 12 19:30:53 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c: Delete rest of TODO list.  Do not include "libbfd.h",
+	<time.h>, <sys/types.h>, "demangle.h", <sys/file.h>,
+	"expression.h", "language.h", "gdbtypes.h", "demangleh".
+	Move all global variables into the private symbol table structure
+	and add accessor macros.  Update some comments.
+	(hpread_build_psymtabs): Delete dbsubc_addr, we don't need it.
+	(hpread_end_psymtab): New function to end a partial symbol table,
+	all callers changed (no more bogus sharing with dbxread.c).
+
+Mon Aug 08 15:34:13 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c (hpread_process_one_debug_symbol): Fix block scoping
+	problem (losing localvars on the close-brace instead of after
+	the close brace).
+
+Wed Jul 06 12:39:07 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c: More cleanups.  Delete lots of trailing whitespace.
+	Remove some items from the TODO list and notes throughout code
+	for things which need fixing.  Add more comments.
+	Document bogus struct symloc sharing with dbxread.c.  Delete more
+	useless variables.  Add more PARAM prototypes.  Fixup more
+	indention problems that have crept in.
+	(SET_NAMESTRING): Accept new namep and objfile arguments so that
+	it doesn't depend on the variable names on the procedures it's
+	used from.  
+	(hpread_symfile_init): Delete incorrect checks for bogus sizes of
+	the debug sections.
+
+Mon Jul 04 19:48:03 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c (hpread_symfile_init): Make sure to initialize all the
+	private data to zero.  Not having any HP C debug symbols is not an
+	error.  Just return.
+
+Fri Jul 01 19:50:21 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c: Change contribution notice to the Cygnus/Utah agreed
+	upon notice.  Delete some stuff from the TODO list.  Rework
+	many comments to be clearer.  Major cleanups.  Consistently
+	use "hpread_" prefix.  Delete unnecessary macros, structures
+	variables, fiels, functions and #if 0 code.  Mark code which
+	still needs to be cleaned up.  PARAMize and make most functions
+	static. Fix error checking when reading in the debug section
+	contents.  No more minimal symbol table handling in this code!
+
+Mon Mar 21 10:09:06 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c (_initialize_hpuxread): Don't call add_symtab_fns if
+	HPREAD is not defined.
+
+Sun Mar 13 17:19:03 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c (read_hpux_symtab: Correctly determine the namespace
+	and address class of SVAR, DVAR, TYPEDEF, TAGDEF, CONST, and
+	MEMENUM symbols.  Do not include function-scoped variables in
+	the partial symbol table.
+
+Sun Feb  6 15:56:09 1994  Jeff Law  (law@wild.cs.utah.edu)
+
+	* hpread.c (hpux_symfile_init): Use obj_som_* rather than obj_* to
+	access BFD private data.  Search for the "$TEXT$" space rather
+	than ".text".
+	(hppa_sym_fns): Add bfd target flavour to initializer.
+
+Thu Dec 16 09:14:58 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c (read_hp_function_type): Correctly handle
+	pass-by-value structures > 64bits in size.
+	(process_one_debug_symbol): Likewise.
+
+Tue Nov  2 03:01:01 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	 * hpread.c: Include <time.h> and <sys/types.h>.  Change include
+	 of "libhppa.h" to "som.h".
+	 (BYTES_IN_WORD): Define.
+	 (hppa_sym_fns): "hppa" is 4 characters, not 5.
+	
+Wed Sep 29 17:20:54 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c (read_hpux_symtab): When a K_END is found for a
+	K_MODULE, clear the have_module and have_name flags.
+
+Sun Aug 22 22:50:32 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c (get_textlow): Don't go past a K_END when looking for a
+	K_FUNCTION.  Avoids losing on source files with no functions. 
+
+Wed Aug 18 21:42:52 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c (read_hpux_symtab): Call SET_NAMESTRING for K_MODULE
+	debug symbols.
+
+Mon Aug 16 09:52:33 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c: Add U Utah contribution notice.  Add TODO list.
+	(hp_type_lookup): Use TYPE_NAME and TYPE_TAG_NAME.
+	(process_one_debug_symbol): Likewise.
+
+Tue Jul 20 14:14:59 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c (read_hp_array_type): Handle "char foo[]".
+
+Thu Jul  1 15:46:10 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c: Run through gnu-indent.
+
+Mon Jun 28 19:00:21 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c: Do not include libhppax.  Instead include libhppa.h
+	and hpux-symtab.h.  Misc indention fixes.
+	(find_unwind_entry): Add PARAM prototype.
+	(read_hpux_symtab): More fixes for names and sizes of structs,
+	unions, enums, typedefs, and tagdefs.
+	(read_hp_enum_type, read_hp_struct_type): Likewise.
+	(read_hp_set_type, read_hp_subrange_type): Likewise.
+	(hp_type_lookup, process_one_debug_symbol): Likewise.
+	(process_one_debug_symbol): Search forward from the K_FUNCTION for
+	the first K_BEGIN when setting the line number associated with a
+	function.  Avoid unnecessary calls to savestring.
+	(hp_alloc_type): Initialize TYPE_CPLUS_SPECIFIC here.  Remove
+	most cases where we set it elsewhere.
+	(hppa_sym_fns): Use "hppa" instead of hppax since hpread.c and
+	paread.c use the same BFD backend now.  All references changed.
+	(hpux_symfile_init): Allocate space to hold the debugging section
+	contents on the symbol obstack.
+
+Wed Jun 23 16:33:36 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c: Document a few functions, misc cleanups.  Update
+	copyright to reflect the first "release" of this file.
+	(struct hpux_symfile_info): Delete unneeded fields.  Keep pointers
+	to the contents of the debug sections rather than offsets within
+	the file itself.  Corresponding changes to the accessor macros.
+	(sl_symbol_size, slt_symbuf): Delete unneeded global variables.
+	(slt_symbuf_start, slt_symbuf_end, lntt_symbuf): Likewise.
+	(lntt_symbuf_start, lntt_symbuf_end, gntt_symbuf): Likewise.
+	(gntt_symbuf_start, gntt_symbuf_end): Likewise.
+	(fill_slt_symbuf, fill_lntt_symbuf): Delete unneeded functions.
+	(fill_gntt_symbuf): Likewise.
+	(get_lntt, get_gntt, get_slt): Simplify.
+	(hpux_symfile_init): Read and store the contents of the debugging
+	sections.  Do error checking on memory allocation and BFD calls.
+	(read_hpux_symtab): Delete KERNELDEBUG crud.  Ignore debug symbols
+	which are not needed for building partial symbol tables.  Handle
+	K_CONST, K_TYPEDEF, and K_TAGDEF just like K_SVAR and K_DVAR.
+	(read_ofile_symtab): Delete useless processing_gcc_compilation stuff.
+	(read_hp_struct_type): Initialize TYPE_CPLUS_SPECIFIC.
+	(read_hp_set_type, read_hp_array_type): Likewise.
+	(read_hp_subrange_type, hp_type_lookup): Likewise.
+
+Tue Jun 22 11:03:13 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c: Delete useless #if 1 statements.
+	(hp_type_translate): Use T_LONG, T_UNS_LONG, and T_DOUBLE instead
+	of magic integers.  Fix handling for T_UNS_INT.  Abort if the type
+	passed in is not an "immediate" type.
+	(read_hp_enum_type): Properly compute the size of the type.
+	(read_hp_array_type): Likewise.
+	(hp_type_lookup): Prefix the names of structs, unions and enums
+	with "struct", "union", and "enum" as appropriate.
+
+Mon Jun 21 10:13:42 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c: Include "demangle.h".
+	(process_one_debug_symbol): Set the SYMBOL_LANGUAGE and
+	SYMBOL_INIT_DEMANGLED_NAME for the current symbol.  Adjust
+	SYMBOL_VALUE for local variables in the stack by the size of the
+	current function's stack (found in unwind descriptor).  Keep
+	better track of the current unwind descriptor. 
+
+Wed Jun 16 14:34:10 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c (hp_type_translate): Fix promotion bugs from
+	char to short and short to int.
+
+Thu Jun 10 11:27:34 1993  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hpread.c (read_hp_function_type): Adjust SYMBOL_VALUE for
+	arguments in the stack by the size of the current function's stack
+	(found in the unwind descriptor).
+	(process_one_debug_symbol): Likewise.  Keep track of the current
+	function's unwind descriptor.

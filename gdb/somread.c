@@ -34,13 +34,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "demangle.h"
 #include <sys/file.h>
 
-/* Size of n_value and n_strx fields in a stab symbol.  */
-#define BYTES_IN_WORD 4
-
-#if 0
-#include "aout/aout64.h"
-#endif
-
 /* Various things we might complain about... */
 
 static void
@@ -336,9 +329,14 @@ som_symfile_read (objfile, section_offsets, mainline)
 
   som_symtab_read (abfd, offset, objfile);
 
-  /* Now read information from the debugging sections.  */
+  /* Now read information from the stabs debug sections.  */
   stabsect_build_psymtabs (objfile, section_offsets, mainline,
 			   "$GDB_SYMBOLS$", "$GDB_STRINGS$", "$TEXT$");
+
+/* start-sanitize-hpread */
+  /* Now read the native debug information.  */
+  hpread_build_psymtabs (objfile, section_offsets, mainline);
+/* end-sanitize-hpread */
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile.  */
@@ -374,15 +372,21 @@ som_symfile_finish (objfile)
     {
       mfree (objfile -> md, objfile -> sym_stab_info);
     }
+/* start-sanitize-hpread */
+  hpread_symfile_finish (objfile);
+/* end-sanitize-hpread */
 }
 
 /* SOM specific initialization routine for reading symbols.
 
    Nothing SOM specific left to do anymore.  */
 static void
-som_symfile_init (ignore)
-     struct objfile *ignore;
+som_symfile_init (objfile)
+     struct objfile *objfile;
 {
+/* start-sanitize-hpread */
+  hpread_symfile_init (objfile);
+/* end-sanitize-hpread */
 }
 
 /* SOM specific parsing routine for section offsets.

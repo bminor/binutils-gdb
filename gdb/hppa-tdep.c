@@ -508,6 +508,27 @@ find_unwind_entry(pc)
   return NULL;
 }
 
+/* start-sanitize-hpread */
+/* Return the adjustment necessary to make for addresses on the stack
+   as presented by hpread.c.
+
+   This is necessary because of the stack direction on the PA and the
+   bizarre way in which someone (?) decided they wanted to handle
+   frame pointerless code in GDB.  */
+int
+hpread_adjust_stack_address (func_addr)
+     CORE_ADDR func_addr;
+{
+  struct unwind_table_entry *u;
+
+  u = find_unwind_entry (func_addr);
+  if (!u)
+    return 0;
+  else
+    return u->Total_frame_size << 3;
+}
+/* end-sanitize-hpread */
+
 /* Called to determine if PC is in an interrupt handler of some
    kind.  */
 
