@@ -27,6 +27,7 @@
 #include "gdbcore.h"
 #include "osabi.h"
 #include "regcache.h"
+#include "regset.h"
 #include "solib-svr4.h"
 #include "symtab.h"
 #include "trad-frame.h"
@@ -54,50 +55,21 @@ const struct sparc_gregset sparc32nbsd_gregset =
    share one routine for a.out and ELF core files.  */
 
 static void
-fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
-                      CORE_ADDR ignore)
+sparc32nbsd_supply_gregset (const struct regset *regset,
+			    struct regcache *regcache,
+			    int regnum, const void *gregs, size_t len)
 {
-  int reg_size = 20 * 4;
-  int fpreg_size = 33 * 4;
-
-  switch (which)
-    {
-    case 0:  /* Integer registers.  */
-      if (core_reg_size != reg_size)
-	warning ("Wrong size register set in core file.");
-      sparc32_supply_gregset (&sparc32nbsd_gregset, current_regcache,
-			      -1, core_reg_sect);
-      break;
-
-    case 2:  /* Floating pointer registers.  */
-      if (core_reg_size != fpreg_size)
-	warning ("Wrong size FP register set in core file.");
-      sparc32_supply_fpregset (current_regcache, -1, core_reg_sect);
-      break;
-
-    default:
-      /* Don't know what kind of register request this is; just ignore it.  */
-      break;
-    }
+  sparc32_supply_gregset (regset->descr, regcache, regnum, gregs);
 }
 
-static struct core_fns sparcnbsd_core_fns =
+static void
+sparc32nbsd_supply_fpregset (const struct regset *regset,
+			     struct regcache *regcache,
+			     int regnum, const void *fpregs, size_t len)
 {
-  bfd_target_unknown_flavour,		/* core_flavour */
-  default_check_format,			/* check_format */
-  default_core_sniffer,			/* core_sniffer */
-  fetch_core_registers,			/* core_read_registers */
-  NULL
-};
+  sparc32_supply_fpregset (regcache, regnum, fpregs);
+}
 
-static struct core_fns sparcnbsd_elfcore_fns =
-{
-  bfd_target_elf_flavour,		/* core_flavour */
-  default_check_format,			/* check_format */
-  default_core_sniffer,			/* core_sniffer */
-  fetch_core_registers,			/* core_read_registers */
-  NULL
-};
 
 /* Signal trampolines.  */
 
@@ -268,9 +240,18 @@ sparcnbsd_aout_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 static void
 sparc32nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   /* NetBSD doesn't support the 128-bit `long double' from the psABI.  */
   set_gdbarch_long_double_bit (gdbarch, 64);
   set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
+
+  tdep->gregset = XMALLOC (struct regset);
+  tdep->gregset->descr = &sparc32nbsd_gregset;
+  tdep->gregset->supply_regset = sparc32nbsd_supply_gregset;
+
+  tdep->fpregset = XMALLOC (struct regset);
+  tdep->fpregset->supply_regset = sparc32nbsd_supply_fpregset;
 
   set_gdbarch_pc_in_sigtramp (gdbarch, sparc32nbsd_pc_in_sigtramp);
   frame_unwind_append_sniffer (gdbarch, sparc32nbsd_sigtramp_frame_sniffer);
@@ -317,7 +298,4 @@ _initialize_sparnbsd_tdep (void)
 			  sparc32nbsd_aout_init_abi);
   gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_NETBSD_ELF,
 			  sparc32nbsd_elf_init_abi);
-
-  add_core_fns (&sparcnbsd_core_fns);
-  add_core_fns (&sparcnbsd_elfcore_fns);
 }

@@ -1,5 +1,14 @@
 2004-01-11  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparcnbsd-tdep.c: Include "regset.h".
+	(fetch_core_registers): Remove function.
+	(sparcnbsd_core_fns, sparcnbsd_elfcore_fns): Remove varaibles.
+	(sparc32nbsd_supply_gregset, sparc32nbsd_supply_fpregset): New
+	functions.
+	(sparc32nbsd_init_abi): Initialize TDEP->gregset and
+	TDEP->fpregset.
+	(_initialize_sparnbsd_tdep): Remove calls to add_core_fns.
+
 	* sparc-tdep.h (struct regset): Provide opaque declaration.
 	(struct gdbarch_tdep): Add gregset, sizeof_gregset,
 	fpregset and sizeof_fpregset members.
