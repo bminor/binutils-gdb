@@ -1996,57 +1996,59 @@ this command with as little as @samp{rev}.
 
 @cindex source path
 @cindex directories for source files
-Executable programs do not record the directories of the source files
-from which they were compiled, just the names.  GDB remembers a list of
+Executable programs sometimes do not record the directories of the source files
+from which they were compiled, just the names.  Even when they do, the 
+directories could be moved between the compilation and your debugging
+session.  GDB remembers a list of
 directories to search for source files; this is called the @dfn{source
 path}.  Each time GDB wants a source file, it tries all the directories
 in the list, in the order they are present in the list, until it finds a
 file with the desired name.  @b{Note that the executable search path is
 @i{not} used for this purpose.  Neither is the current working
-directory, unless it happens to be in the source path.}
+directory, unless it happens to be in the source path.}  
+
+If it can't find a source file in the source path, and the object program
+records what directory it was compiled in, GDB tries that directory too.
+If the source path is empty, and there is no record of the compilation
+directory, GDB will, as a last resort, look in the current directory.
+
+Whenever you reset or rearrange the source path, GDB will clear out
+any information it has cached about where source files are found, where
+each line is in the file, etc.
 
 @kindex directory
-When you start GDB, its source path contains just the current working
-directory.  To add other directories, use the @samp{directory} command.
+When you start GDB, its source path is empty.
+To add other directories, use the @samp{directory} command.
 
 @table @code
 @item directory @var{dirnames...}
-Add directory @var{dirname} to the end of the source path.  Several
+Add directory @var{dirname} to the front of the source path.  Several
 directory names may be given to this command, separated by whitespace or
-@samp{:}.
+@samp{:}.  If a name is already in the source path, it is moved to the
+front of the path, so it will be searched sooner.
 
 @item directory
-Reset the source path to just the current working directory of GDB.
-This requires confirmation.
-
-Since this command deletes directories from the search path, it may
-change the directory in which a previously read source file will be
-discovered.  To make this work correctly, this command also clears out
-the tables GDB maintains about the source files it has already found.
+Reset the source path to empty again.  This requires confirmation.
 
 @item info directories
 @kindex info directories
 Print the source path: show which directories it contains.
 @end table
 
-Because the @samp{directory} command adds to the end of the source path,
-it does not affect any file that GDB has already found.  If the source
+Because the @samp{directory} command adds to the front of the source path,
+it can affect files that GDB has already found.  If the source
 path contains directories that you do not want, and these directories
 contain misleading files with names matching your source files, the
 way to correct the situation is as follows:
 
 @enumerate
 @item
-Choose the directory you want at the beginning of the source path.
-Use the @samp{cd} command to make that the current working directory.
-
-@item
-Use @samp{directory} with no argument to reset the source path to just
-that directory.
+Use @samp{directory} with no argument to reset the source path to empty.
 
 @item
 Use @samp{directory} with suitable arguments to add any other
-directories you want in the source path.
+directories you want in the source path.  You can add all the directories
+in one command.
 @end enumerate
 
 @node Data, Symbols, Source, Top
