@@ -78,4 +78,4 @@ void serial_close PARAMS ((void));
 
 /* Restore the serial port to the state saved in oldstate */
 
-void serial_restore PARAMS ((int desc, struct ttystate oldstate));
+void serial_restore PARAMS ((int desc, struct ttystate *oldstate));

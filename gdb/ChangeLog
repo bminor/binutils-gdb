@@ -1,3 +1,10 @@
+Thu Nov  5 17:33:08 1992  Fred Fish  (fnf@cygnus.com)
+
+	* {ser-bsd.c, ser-termios.c} (serial_close):  Pass address of
+	struct, not struct itself.
+	* serial.h (serial_restore):  Fix prototype, takes pointer not
+	struct.
+
 Thu Nov  5 17:12:42 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in (depend):  Add nm.h to the list of things to fixup.

@@ -221,7 +221,7 @@ serial_close()
   if (desc < 0)
     return;
 
-  serial_restore(desc, oldstate);
+  serial_restore(desc, &oldstate);
 
   close(desc);
   desc = -1;
