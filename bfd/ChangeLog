@@ -1,3 +1,9 @@
+2001-03-12  DJ Delorie  <dj@redhat.com>
+
+	* elf32-sh.c (sh_elf_relocate_section): Only relocation
+	R_SH_DIR8WP* relocs if they're against external symbols, else
+	they're just for relaxing.  Validate the reloc values.
+
 2001-03-12  Stefan Geuken <mail@stefan-geuken.de>
 
 	* binary.c (bfd_external_binary_architecture): Declare.
