@@ -60,20 +60,6 @@ else
 	fi
 fi
 
-d30v_files="d30v-tdep.c"
-
-if ( echo $* | grep keep\-d30v > /dev/null ) ; then
-	keep_these_too="${d30v_files} ${keep_these_too}"
-	if [ -n "${verbose}" ] ; then
-		echo Keeping ${d30v_files}
-	fi
-else
-	lose_these_too="${d30v_files} ${lose_these_too}"
-	if [ -n "${verbose}" ] ; then
-		echo Deleting ${d30v_files}
-	fi
-fi
-
 sky_files="txvu-tdep.c"
 
 if ( echo $* | grep keep\-sky > /dev/null ) ; then
@@ -201,6 +187,7 @@ cp-valprint.c
 cpu32bug-rom.c
 cxux-nat.c
 d10v-tdep.c
+d30v-tdep.c
 dbug-rom.c
 dbxread.c
 dcache.c
@@ -773,33 +760,6 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-am33/,/end-\sanitize\-am33/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
-if ( echo $* | grep keep\-d30v > /dev/null ) ; then
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-d30v $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping d30v stuff in $i
-			fi
-		fi
-	done
-else
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-d30v $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"d30v\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-d30v/,/end-\sanitize\-d30v/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...

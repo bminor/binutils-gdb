@@ -602,12 +602,10 @@ Mon May 18 13:04:27 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 	capable target (currently only "remote") before doing anything 
 	else.
 	
-start-sanitize-d30v
 Sat May 16 22:21:48 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* config/d30v/tm-d30v.h (INIT_FRAME_PC_FIRST): Fill in PC into
  	frame struct before extracting saved register offsets.
-end-sanitize-d30v
 	
 Fri May 15 22:47:45 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
@@ -1433,13 +1431,10 @@ Tue Mar 24 16:22:40 1998  Stu Grossman  <grossman@bhuna.cygnus.co.uk>
 
 	* Makefile.in:  Derive SHELL from configure.
 	* config/d10v/d10v.mt config/m32r/m32r.mt
-	config/mn10200/mn10200.mt config/mn10300/mn10300.mt :  Remove -lm
-	from SIM.  This prevents dependency checking of -lm (under NT
-	native builds).  (It is automatically added by configure if it
-	exists.)
-start-sanitize-d30v
-	* config/d30v/d30v.mt: Ditto.
-end-sanitize-d30v
+	config/mn10200/mn10200.mt config/mn10300/mn10300.mt
+	config/d30v/d30v.mt :  Remove -lm from SIM.  This prevents
+	dependency checking of -lm (under NT native builds).  (It is
+	automatically added by configure if it exists.)
 	* doc/configure mswin/configure nlm/configure
 	testsuite/gdb.base/configure testsuite/gdb.c++/configure
 	testsuite/gdb.chill/configure testsuite/gdb.disasm/configure
@@ -2245,7 +2240,6 @@ Wed Jan 14 19:27:02 1998  Stan Shebs  <shebs@andros.cygnus.com>
 	* config/mips/{r3900.mt,r3900l.mt,tm-r3900.h,tm-r3900l.h}:
 	Remove, no longer used.
 
-start-sanitize-d30v
 Wed Jan 14 18:11:26 1998  Michael Meissner  <meissner@cygnus.com>
 
 	Patch from Jim Wilson.
@@ -2254,7 +2248,6 @@ Wed Jan 14 18:11:26 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* config/d30v/tm-d30v.h (CALL_DUMMY): Initialize as { 0 }, not {}.
 
-end-sanitize-d30v
 Tue Jan 13 16:38:48 1998  Fred Fish  <fnf@cygnus.com>
 
 	* configure.in (--with-mmalloc): Add new configure arg to use the

@@ -39,7 +39,6 @@ Mon Dec 22 21:51:53 1997  Mark Alexander  <marka@cygnus.com>
 
 	* remote-mips.c (_initialize_remote_mips): Fix DDB doc string.
 
-start-sanitize-d30v
 Sun Dec 21 17:00:06 1997  David Taylor  <taylor@texas.cygnus.com>
 
 	* d30v-tdep.c (d30v_frame_find_saved_regs): split most of
@@ -55,7 +54,6 @@ Fri Dec 19 09:49:49 1997  David Taylor  <taylor@texas.cygnus.com>
 	(d30v_frame_find_saved_regs): set it.
 	* config/d30v/tm-d30v.h: improved FRAME_CHAIN_VALID
 
-end-sanitize-d30v
 Thu Dec 18 12:34:28 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From Gavin Koch <gavin@cygnus.com>: mips-tdep.c
@@ -107,7 +105,6 @@ Tue Dec 16 11:24:30 1997  Jeffrey A Law  (law@cygnus.com)
 	* remote-sim.c (gdbsim_open): Use "--architecture" instead of
 	ambigious short form.
 	
-start-sanitize-d30v
 Tue Dec 16 10:29:16 1997  David Taylor  <taylor@texas.cygnus.com>
 
 	* d30v-tdep.c (d30v_frame_chain): don't or in DMEM_START to
@@ -122,7 +119,6 @@ Tue Dec 16 10:29:16 1997  David Taylor  <taylor@texas.cygnus.com>
 	* config/tm-d30v.h (EXTRACT_STRUCT_VALUE_ADDRESS): fix, it's r2,
 	not r0; (FRAME_CHAIN_VALID): handle use of external memory;
 	(STACK_ALIGN): define.
-end-sanitize-d30v
 
 Mon Dec 15 15:13:57 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -173,7 +169,6 @@ Thu Dec 11 14:28:01 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 	backwards thru the trace buffer in a loop.
 	* (struct tracepoint): delete unused field.
 
-start-sanitize-d30v
 Wed Dec 10 17:57:00 1997  David Taylor  <taylor@texas.cygnus.com>
 
 	* d30v-tdep.c : don't bury lots of magic numbers in the code
@@ -188,7 +183,6 @@ Wed Dec 10 17:57:00 1997  David Taylor  <taylor@texas.cygnus.com>
 	STACK_START; change FR_REGNUM to 61 (was 11).  Reformat comment
 	about DUMMY FRAMES so that it is readable.  Fix SAVED_PC_AFTER_FRAME
 	macro.
-end-sanitize-d30v
 
 Wed Dec 10 17:41:07 1997  Jim Blandy  <jimb@zwingli.cygnus.com>
 
@@ -383,7 +377,6 @@ Fri Nov 14 13:04:34 1997  Jeffrey A Law  (law@cygnus.com)
 	* jv-exp.y (copy_exp, insert_exp): Avoid ANSI prototypes.
 
 end-sanitize-java	
-start-sanitize-d30v
 Thu Nov 13 09:47:35 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* d30v-tdep.c (d30v_print_flags): Function to print the d30v flags
@@ -396,7 +389,6 @@ Thu Nov 13 09:47:35 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* config/d30v/tm-d30v.h (PSW_*): Add macros for each of the PSW
 	bits that are defined.
-end-sanitize-d30v
 
 Wed Nov 12 14:58:39 1997  Jeff Holcomb  <jeffh@cygnus.com>
 
@@ -671,11 +663,10 @@ Wed Sep 24 18:12:47 1997  Stu Grossman  <grossman@babylon-5.cygnus.com>
 	* remote-sim.c:  New functions gdbsim_insert/remove_breakpoint.  Use
 	intrinsic simulator breakpoints if available, otherwise do it the
  	hard way.
-start-sanitize-d30v
+
 	* configure.tgt:  Add d30v.
 	* d30v-tdep.c:  New file.
 	* config/d30v/d30v.mt, config/d30v/tm-d30v.h:  New files.
-end-sanitize-d30v
 
 Tue Sep 23 11:24:13 1997  Stan Shebs  <shebs@andros.cygnus.com>
 

@@ -64,10 +64,8 @@ c1-*-*)			gdb_target=convex ;;
 c2-*-*)			gdb_target=convex ;;
 
 d10v-*-*)		gdb_target=d10v ;;
-# start-sanitize-d30v
 d30v-*-*)		gdb_target=d30v ;;
 
-# end-sanitize-d30v
 h8300-*-*)		gdb_target=h8300 ;;
 h8500-*-*)		gdb_target=h8500 ;;
 
