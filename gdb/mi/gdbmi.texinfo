@@ -1875,7 +1875,7 @@ The corresponding @value{GDBN} command is @samp{interrupt}.
 222^done
 (@value{GDBP})
 111*stopped,signal-name="SIGINT",signal-meaning="Interrupt",
-frame=@{addr="0x00010140",func="foo",args=@{@},file="try.c",line="13"@}
+frame=@{addr="0x00010140",func="foo",args=[],file="try.c",line="13"@}
 (@value{GDBP})
 
 (@value{GDBP})
@@ -2600,34 +2600,34 @@ file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="32"@}]
 -stack-list-arguments 0
 ^done,
 stack-args=[
-frame=@{level="0",args=@{@}@},
-frame=@{level="1",args=@{name="strarg"@}@},
-frame=@{level="2",args=@{name="intarg",name="strarg"@}@},
-frame=@{level="3",args=@{name="intarg",name="strarg",name="fltarg"@}@},
-frame=@{level="4",args=@{@}@}]
+frame=@{level="0",args=[]@},
+frame=@{level="1",args=[name="strarg"]@},
+frame=@{level="2",args=[name="intarg",name="strarg"]@},
+frame=@{level="3",args=[name="intarg",name="strarg",name="fltarg"]@},
+frame=@{level="4",args=[]@}]
 (@value{GDBP})
 -stack-list-arguments 1
 ^done,
 stack-args=[
-frame=@{level="0",args=@{@}@},
+frame=@{level="0",args=[]@},
 frame=@{level="1",
- args=@{@{name="strarg",value="0x11940 \"A string argument.\""@}@}@},
-frame=@{level="2",args=@{
+ args=[@{name="strarg",value="0x11940 \"A string argument.\""@}]@},
+frame=@{level="2",args=[
 @{name="intarg",value="2"@},
-@{name="strarg",value="0x11940 \"A string argument.\""@}@}@},
-@{frame=@{level="3",args=@{
+@{name="strarg",value="0x11940 \"A string argument.\""@}]@},
+@{frame=@{level="3",args=[
 @{name="intarg",value="2"@},
 @{name="strarg",value="0x11940 \"A string argument.\""@},
-@{name="fltarg",value="3.5"@}@}@},
-frame=@{level="4",args=@{@}@}]
+@{name="fltarg",value="3.5"@}]@},
+frame=@{level="4",args=[]@}]
 (@value{GDBP})
 -stack-list-arguments 0 2 2
-^done,stack-args=[frame=@{level="2",args=@{name="intarg",name="strarg"@}@}]
+^done,stack-args=[frame=@{level="2",args=[name="intarg",name="strarg"]@}]
 (@value{GDBP})
 -stack-list-arguments 1 2 2
 ^done,stack-args=[frame=@{level="2",
-args=@{@{name="intarg",value="2"@},
-@{name="strarg",value="0x11940 \"A string argument.\""@}@}@}]
+args=[@{name="intarg",value="2"@},
+@{name="strarg",value="0x11940 \"A string argument.\""@}]@}]
 (@value{GDBP})
 @end smallexample
 
@@ -2752,11 +2752,11 @@ prints also their values.
 @smallexample
 (@value{GDBP})
 -stack-list-locals 0
-^done,locals=@{name="A",name="B",name="C"@}
+^done,locals=[name="A",name="B",name="C"]
 (@value{GDBP})
 -stack-list-locals 1
-^done,locals=@{@{name="A",value="1"@},@{name="B",value="2"@},
-  @{name="C",value="3"@}@}
+^done,locals=[@{name="A",value="1"@},@{name="B",value="2"@},
+  @{name="C",value="3"@}]
 (@value{GDBP})
 @end smallexample
 
@@ -3260,7 +3260,7 @@ which the target program is, in the following form:
 
 @smallexample
 ^connected,addr="@var{address}",func="@var{function name}",
-  args=@{@var{arg list}@}
+  args=[@var{arg list}]
 @end smallexample
 
 @subsubheading @value{GDBN} Command
@@ -3272,7 +3272,7 @@ The corresponding @value{GDBN} command is @samp{target}.
 @smallexample
 (@value{GDBP})
 -target-select async /dev/ttya
-^connected,addr="0xfe00a300",func="??",args=@{@}
+^connected,addr="0xfe00a300",func="??",args=[]
 (@value{GDBP})
 @end smallexample
 
@@ -3388,8 +3388,8 @@ number-of-threads="3"
 -thread-select 3
 ^done,new-thread-id="3",
 frame=@{level="0 ",func="vprintf",
-args=@{@{name="format",value="0x8048e9c \"%*s%c %d %c\\n\""@},
-@{name="arg",value="0x2"@}@},file="vprintf.c",line="31"@}
+args=[@{name="format",value="0x8048e9c \"%*s%c %d %c\\n\""@},
+@{name="arg",value="0x2"@}],file="vprintf.c",line="31"@}
 (@value{GDBP})
 @end smallexample
 

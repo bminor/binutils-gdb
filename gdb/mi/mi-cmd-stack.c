@@ -222,7 +222,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 
   block = get_frame_block (fi);
 
-  ui_out_tuple_begin (uiout, locals ? "locals" : "args");
+  ui_out_list_begin (uiout, locals ? "locals" : "args");
 
   while (block != 0)
     {
@@ -289,7 +289,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
       else
 	block = BLOCK_SUPERBLOCK (block);
     }
-  ui_out_tuple_end (uiout);
+  ui_out_list_end (uiout);
   ui_out_stream_delete (stb);
 }
 

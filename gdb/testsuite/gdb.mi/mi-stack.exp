@@ -102,27 +102,27 @@ proc test_stack_args_listing {} {
     # -stack-list-arguments 
 
     mi_gdb_test "231-stack-list-arguments 0" \
-	    "231\\^done,stack-args=\\\[frame=\{level=\"0\",args=\{\}\},frame=\{level=\"1\",args=\{name=\"strarg\"\}\},frame=\{level=\"2\",args=\{name=\"intarg\",name=\"strarg\"\}\},frame=\{level=\"3\",args=\{name=\"intarg\",name=\"strarg\",name=\"fltarg\"\}\},frame=\{level=\"4\",args=\{\}\}\\\]" \
+	    "231\\^done,stack-args=\\\[frame=\{level=\"0\",args=\\\[\\\]\},frame=\{level=\"1\",args=\\\[name=\"strarg\"\\\]\},frame=\{level=\"2\",args=\\\[name=\"intarg\",name=\"strarg\"\\\]\},frame=\{level=\"3\",args=\\\[name=\"intarg\",name=\"strarg\",name=\"fltarg\"\\\]\},frame=\{level=\"4\",args=\\\[\\\]\}\\\]" \
                 "stack args listing 0"
 
     mi_gdb_test "232-stack-list-arguments 0 1 1" \
-	    "232\\^done,stack-args=\\\[frame=\{level=\"1\",args=\{name=\"strarg\"\}\}\\\]" \
+	    "232\\^done,stack-args=\\\[frame=\{level=\"1\",args=\\\[name=\"strarg\"\\\]\}\\\]" \
                 "stack args listing 0 1 1"
 
     mi_gdb_test "233-stack-list-arguments 0 1 3" \
-	    "233\\^done,stack-args=\\\[frame=\{level=\"1\",args=\{name=\"strarg\"\}\},frame=\{level=\"2\",args=\{name=\"intarg\",name=\"strarg\"\}\},frame=\{level=\"3\",args=\{name=\"intarg\",name=\"strarg\",name=\"fltarg\"\}\}\\\]" \
+	    "233\\^done,stack-args=\\\[frame=\{level=\"1\",args=\\\[name=\"strarg\"\\\]\},frame=\{level=\"2\",args=\\\[name=\"intarg\",name=\"strarg\"\\\]\},frame=\{level=\"3\",args=\\\[name=\"intarg\",name=\"strarg\",name=\"fltarg\"\\\]\}\\\]" \
                 "stack args listing 0 1 3"
 
     mi_gdb_test "231-stack-list-arguments 1" \
-	    "231\\^done,stack-args=\\\[frame=\{level=\"0\",args=\{\}\},frame=\{level=\"1\",args=\{\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\}\},frame=\{level=\"2\",args=\{\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\}\},frame=\{level=\"3\",args=\{\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\},\{name=\"fltarg\",value=\"3.5\"\}\}\},frame=\{level=\"4\",args=\{\}\}\\\]" \
+	    "231\\^done,stack-args=\\\[frame=\{level=\"0\",args=\\\[\\\]\},frame=\{level=\"1\",args=\\\[\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\\\]\},frame=\{level=\"2\",args=\\\[\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\\\]\},frame=\{level=\"3\",args=\\\[\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\},\{name=\"fltarg\",value=\"3.5\"\}\\\]\},frame=\{level=\"4\",args=\\\[\\\]\}\\\]" \
                 "stack args listing 1"
 
     mi_gdb_test "232-stack-list-arguments 1 1 1" \
-	    "232\\^done,stack-args=\\\[frame=\{level=\"1\",args=\{\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\}\}\\\]" \
+	    "232\\^done,stack-args=\\\[frame=\{level=\"1\",args=\\\[\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\\\]\}\\\]" \
                 "stack args listing 1 1 1"
 
     mi_gdb_test "233-stack-list-arguments 1 1 3" \
-	    "233\\^done,stack-args=\\\[frame=\{level=\"1\",args=\{\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\}\},frame=\{level=\"2\",args=\{\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\}\},frame=\{level=\"3\",args=\{\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\},\{name=\"fltarg\",value=\"3.5\"\}\}\}\\\]" \
+	    "233\\^done,stack-args=\\\[frame=\{level=\"1\",args=\\\[\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\\\]\},frame=\{level=\"2\",args=\\\[\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\\\]\},frame=\{level=\"3\",args=\\\[\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\},\{name=\"fltarg\",value=\"3.5\"\}\\\]\}\\\]" \
                 "stack args listing 1 1 3"
 
     mi_gdb_test "234-stack-list-arguments" \
@@ -168,7 +168,7 @@ proc test_stack_locals_listing {} {
     # -stack-list-arguments 
 
     mi_gdb_test "232-stack-list-locals 0" \
-	    "232\\^done,locals=\{name=\"A\",name=\"B\",name=\"C\"\}" \
+	    "232\\^done,locals=\\\[name=\"A\",name=\"B\",name=\"C\"\\\]" \
                 "stack locals listing 0"
 
 # step until A, B, C, have some reasonable values.
@@ -181,7 +181,7 @@ gdb_expect {
 }
 
     mi_gdb_test "232-stack-list-locals 1" \
-	    "232\\^done,locals=\{\{name=\"A\",value=\"1\"\},\{name=\"B\",value=\"2\"\},\{name=\"C\",value=\"3\"\}\}" \
+	    "232\\^done,locals=\\\[\{name=\"A\",value=\"1\"\},\{name=\"B\",value=\"2\"\},\{name=\"C\",value=\"3\"\}\\\]" \
                 "stack locals listing 1"
 
     mi_gdb_test "234-stack-list-locals" \
@@ -193,7 +193,7 @@ gdb_expect {
                 "stack select frame 1"
 
     mi_gdb_test "232-stack-list-locals 1" \
-	    "232\\^done,locals=\{\}" \
+	    "232\\^done,locals=\\\[\\\]" \
                 "stack locals listing for new frame"
 
 # this should be a no-op
@@ -203,7 +203,7 @@ gdb_expect {
                 "stack select same frame"
 
     mi_gdb_test "232-stack-list-locals 1" \
-	    "232\\^done,locals=\{\}" \
+	    "232\\^done,locals=\\\[\\\]" \
                 "stack locals for same frame (level 1)"
 
 }

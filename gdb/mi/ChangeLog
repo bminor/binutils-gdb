@@ -1,5 +1,13 @@
 2001-06-26  Andrew Cagney  <ac131313@redhat.com>
 
+	* mi-cmd-stack.c (list_args_or_locals): Output a list of "args" or
+	"locals" entries.
+	* gdbmi.texinfo (stack-list-locals, stack-list-arguments)
+	(exec-interrupt, target-select, thread-select): Update
+	documentation.
+
+2001-06-26  Andrew Cagney  <ac131313@redhat.com>
+
 	* mi-cmd-stack.c (mi_cmd_stack_list_frames): Output a list of
 	"stack" entries.
 	(mi_cmd_stack_list_args): Ditto for "stack-args".

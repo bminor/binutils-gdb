@@ -1,5 +1,10 @@
 2001-06-26  Andrew Cagney  <ac131313@redhat.com>
 
+	* mi-stack.exp: Update.  Output for args=... and
+	locals=... changed to a list.
+	
+2001-06-26  Andrew Cagney  <ac131313@redhat.com>
+
 	* mi-stack.exp: Update. Output for stack=..., args=... and
 	stack-args=... changed to a list.
 
