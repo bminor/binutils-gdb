@@ -1,3 +1,12 @@
+2002-10-12  H.J. Lu  (hjl@gnu.org)
+
+	* ld-discard/extern.d: Remove $srcdir/$subdir/.
+	* ld-discard/start.d: Likewise.
+	* ld-discard/static.d: Likewise.
+	* ld-linkonce/zeroehl32.d: Likewise.
+	* ld-selective/keepdot.d: Likewise.
+	* ld-selective/keepdot0.d: Likewise.
+
 2002-10-11  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* ld-sh/rd-sh.exp: If the test matches *-dso.d, copy the output

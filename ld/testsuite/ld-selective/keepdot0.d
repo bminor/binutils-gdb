@@ -1,5 +1,5 @@
 #source: keepdot.s
-#ld: --gc-sections -Bstatic -e _start -T$srcdir/$subdir/keepdot0.ld
+#ld: --gc-sections -Bstatic -e _start -T keepdot0.ld
 #name: Preserve explicit . = 0
 #objdump: -h
 

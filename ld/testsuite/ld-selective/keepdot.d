@@ -1,4 +1,4 @@
-#ld: --gc-sections -Bstatic -e _start -T$srcdir/$subdir/keepdot.ld
+#ld: --gc-sections -Bstatic -e _start -T keepdot.ld
 #name: Preserve default . = 0
 #objdump: -h
 

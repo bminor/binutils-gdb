@@ -1,6 +1,6 @@
 #source: x.s
 #source: y.s
-#ld: -Ttext 0xa00 -T $srcdir/$subdir/zeroeh.ld
+#ld: -Ttext 0xa00 -T zeroeh.ld
 #objdump: -s
 #target: cris-*-elf cris-*-linux* i?86-*-elf i?86-*-linux*
 
