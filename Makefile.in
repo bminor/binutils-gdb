@@ -1,7 +1,7 @@
 #
 # Makefile for directory with subdirs to build.
 #
-# Last Mod Fri May 31 10:35:51 PDT 1991, by rich@cygint.cygnus.com
+# Last Mod Fri Jun 14 06:34:11 PDT 1991, by rich@cygint.cygnus.com
 #
 
 # $Id$
@@ -103,8 +103,11 @@ clean:
 	rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
 	$(MAKE) subdir_do DO=clean "DODIRS=$(SUBDIRS) $(OTHERS)"
 
-install:
+install: install-fixed-includes
 	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS) $(OTHERS)"
+
+install-fixed-includes:
+	(cd gcc ; $(MAKE) install-fixed-includes)
 
 etags tags: TAGS
 
@@ -136,7 +139,10 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 
 #
 # $Log$
-# Revision 1.15  1991/06/09 20:27:01  rich
+# Revision 1.16  1991/06/14 13:35:40  rich
+# install fixed include files on install.
+#
+# Revision 1.15  1991/06/09  20:27:01  rich
 # added support for binary comparisons.
 #
 # Revision 1.14  1991/05/31  12:34:55  gnu
