@@ -1,3 +1,8 @@
+2004-12-08  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Test for R_MIPS_26
+	overflow.
+
 2004-12-07  Ben Elliston  <bje@gnu.org>
 
 	* netbsd-core.c (netbsd_core_file_p): Make `i' unsigned.

@@ -3350,7 +3350,10 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       if (local_p)
 	value = ((addend | ((p + 4) & 0xf0000000)) + symbol) >> 2;
       else
-	value = (_bfd_mips_elf_sign_extend (addend, 28) + symbol) >> 2;
+	{
+	  value = (_bfd_mips_elf_sign_extend (addend, 28) + symbol) >> 2;
+	  overflowed_p = (value >> 26) != ((p + 4) >> 28);
+	}
       value &= howto->dst_mask;
       break;
 
