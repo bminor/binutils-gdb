@@ -1,3 +1,7 @@
+2001-04-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* config/i386/fbsd.mh (NATDEPFILES): Add i386-nat.o.
+
 2001-04-09  Andrew Cagney  <ac131313@redhat.com>
 
 	Obsolete i[3456]86-*-sunos* (aka Sun386) host and target.
