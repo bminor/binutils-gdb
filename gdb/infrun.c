@@ -1656,7 +1656,10 @@ signals_info (signum_exp, from_tty)
     }
 
   printf_filtered ("\n");
-  for (oursig = 0; oursig < TARGET_SIGNAL_LAST; ++oursig)
+  /* These ugly casts brought to you by the native VAX compiler.  */
+  for (oursig = 0;
+       (int)oursig < (int)TARGET_SIGNAL_LAST;
+       oursig = (enum target_signal)((int)oursig + 1))
     {
       QUIT;
 

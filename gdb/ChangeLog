@@ -1,3 +1,8 @@
+Tue Jan 18 14:09:25 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* infrun.c (signals_info), target.c (target_signal_from_name):
+	Use ugly casts to avoid enumvar < enumvar or enumvar++.
+
 Mon Jan 17 22:00:15 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* ser-unix.c (hardwire_noflush_set_tty_state): Don't muck with ICANON.
