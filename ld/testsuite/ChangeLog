@@ -1,5 +1,7 @@
 2000-04-12  Alan Modra  <alan@linuxcare.com.au>
 
+	* ld-selective/3.cc (_start): Add cheat for gcc-2.95.2 failure.
+
 	* ld-selective/selective.exp (test4): Test for presence of
 	foo__1B, not absence.  Also check for foo__1A and _start.
 	White space changes throughout file.
