@@ -1,3 +1,7 @@
+2004-12-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/group1.d: Support 64bit.
+
 2004-12-01  Paul Brook  <paul@codesourcery.com>
 
 	* ld-elf/group1.d: New test.
