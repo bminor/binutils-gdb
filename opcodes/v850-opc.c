@@ -20,7 +20,7 @@ static long extract_d8_6 PARAMS ((unsigned long, int *));
 
 /* conditional branch opcode */
 #define BOP(x)		((0x0b << 7) | (x & 0x0f))
-#define BOP_MASK	((0x0b << 7) | 0x0f)
+#define BOP_MASK	((0x0f << 7) | 0x0f)
 
 /* one-word opcodes */
 #define one(x)		((unsigned int) (x))
@@ -247,8 +247,8 @@ const struct v850_opcode v850_opcodes[] = {
 { "bsa",	BOP(0xd),		BOP_MASK,	IF3, 2 },
 
 { "jmp",	one(0x0060),		one(0xffe0),	{ R1}, 2 },
-{ "jarl",	one(0x0780),		one(0xf83f),	{ D22, R2 }, 4 }, 
-{ "jr",		one(0x0780),		one(0xffe0),	{ D22 }, 4 },
+{ "jarl",	one(0x0780),		two(0x07c0,0x0001),{ D22, R2 }, 4 }, 
+{ "jr",		one(0x0780),		two(0xffc0,0x0001),{ D22 }, 4 },
 
 /* bit manipulation instructions */
 { "set1",	two(0x07c0,0x0000),	two(0xc7e0,0x0000),	{B3, D16, R1}, 4 },

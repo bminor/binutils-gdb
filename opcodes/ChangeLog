@@ -1,6 +1,13 @@
 start-sanitize-v850
 Sat Aug 31 01:27:26 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* v850-dis.c (v850_reg_names): Define.
+	(v850_sreg_names, v850_cc_names): Likewise.
+	(disassemble): Very rough cut at printing operands (unformatted).
+
+	* v850-opc.c (BOP_MASK): Fix.
+	(v850_opcodes): Fix mask for jarl and jr.
+
 	* v850-dis.c: New file.  Skeleton for disassembler support.
 	* Makefile.in Remove v850 references, they're not needed here
 	and they weren't being sanitized away.
