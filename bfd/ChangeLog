@@ -1,3 +1,8 @@
+Wed May 11 00:31:57 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* Makefile.in (stmp-bfd.h): Use || instead of ; to force SunOS
+	make to invoke the shell.
+
 Tue May 10 14:23:43 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* section.c (SEC_COFF_SHARED_LIBRARY): Renamed from

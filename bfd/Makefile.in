@@ -113,6 +113,7 @@ ALL_MACHINES = \
 # target_vector in targets.c if configured with --with-targets=all.
 BFD32_BACKENDS = \
 	aout-adobe.o \
+	aout0.o \
 	aout32.o \
 	bout.o \
 	cf-i386lynx.o \
@@ -222,7 +223,7 @@ ALL_CFLAGS=$(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES)
 # C source files that correspond to .o's.
 CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 archures.c coff-i386.c aout64.c aout32.c sunos.c demo64.c \
-	 coff-i960.c srec.c tekhex.c oasys.c ieee.c \
+	 coff-i960.c srec.c tekhex.c oasys.c ieee.c aout0.c \
 	 ecoff.c ecofflink.c coff-m68k.c coff-u68k.c coff-apollo.c \
 	 coff-a29k.c coff-rs6000.c coff-sparc.c coffgen.c format.c \
 	 section.c core.c syms.c stab-syms.c reloc.c init.c ctor.c \
@@ -477,7 +478,7 @@ $(BFD_H): stmp-bfd.h ; @true
 # If the file is still there, kill it.
 stmp-bfd.h : $(srcdir)/bfd-in2.h Makefile
 	rm -f bfd.h-new 64 ../include/bfd.h
-	-grep BFD_HOST_64_BIT sysdep.h > 64
+	grep BFD_HOST_64_BIT sysdep.h > 64 2>/dev/null || exit 0
 	sed -e 's/@WORDSIZE@/$(WORDSIZE)/' \
 	    -e "s/@VERSION@/`cat $(srcdir)/VERSION`/" \
 	    -e '/64-bit.*sysdep.h/ r 64' \
@@ -541,6 +542,9 @@ srec.o : srec.c
 tekhex.o : tekhex.c
 oasys.o : oasys.c $(INCDIR)/oasys.h liboasys.h
 ieee.o : ieee.c $(INCDIR)/ieee.h libieee.h
+aout0.o : aout0.c aoutf1.h $(INCDIR)/aout/sun4.h libaout.h \
+  $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
+  $(INCDIR)/aout/ar.h aout-target.h
 ecoff.o : ecoff.c $(INCDIR)/bfdlink.h $(INCDIR)/aout/ar.h \
   $(INCDIR)/aout/ranlib.h libaout.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h \
@@ -602,9 +606,9 @@ coff-we32k.o : coff-we32k.c $(INCDIR)/coff/we32k.h \
   $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
 i386bsd.o : i386bsd.c libaout.h aout-target.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
-i386dynix.o : i386dynix.c libaout.h aout-target.h $(INCDIR)/aout/aout64.h \
-  $(INCDIR)/aout/dynix3.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
-  $(INCDIR)/aout/ar.h
+i386dynix.o : i386dynix.c $(INCDIR)/aout/dynix3.h libaout.h \
+  aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
+  $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 cpu-h8300.o : cpu-h8300.c
 cpu-i960.o : cpu-i960.c
 cpu-sparc.o : cpu-sparc.c
