@@ -109,6 +109,19 @@ add_cmd (char *name, enum command_class class, void (*fun) (char *, int),
   return c;
 }
 
+/* Same as above, except that the abbrev_flag is set. */
+/* Note: Doesn't seem to be used anywhere currently. */
+
+struct cmd_list_element *
+add_abbrev_cmd (char *name, enum command_class class, void (*fun) (char *, int),
+		char *doc, struct cmd_list_element **list)
+{
+  register struct cmd_list_element *c
+  = add_cmd (name, class, fun, doc, list);
+
+  c->abbrev_flag = 1;
+  return c;
+}
 
 /* Deprecates a command CMD.
    REPLACEMENT is the name of the command which should be used in place
@@ -132,24 +145,6 @@ deprecate_cmd (struct cmd_list_element *cmd, char *replacement)
 
   return cmd;
 }
-
-
-/* Same as above, except that the abbrev_flag is set. */
-
-#if 0				/* Currently unused */
-
-struct cmd_list_element *
-add_abbrev_cmd (char *name, enum command_class class, void (*fun) (char *, int),
-		char *doc, struct cmd_list_element **list)
-{
-  register struct cmd_list_element *c
-  = add_cmd (name, class, fun, doc, list);
-
-  c->abbrev_flag = 1;
-  return c;
-}
-
-#endif
 
 struct cmd_list_element *
 add_alias_cmd (char *name, char *oldname, enum command_class class,
