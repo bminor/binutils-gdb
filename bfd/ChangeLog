@@ -1,3 +1,14 @@
+2002-06-16  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* elf-hppa.h (elf_hppa_final_link): Fix formatting in comment.
+	Skip excluded sections in determing __gp value.
+	(elf_hppa_final_link_relocate): Use the symbol's address in
+	R_PARISC_FPTR64 relocations that don't need an opd entry.
+	* elf64-hppa.c (allocate_dynrel_entries): Simplify code.
+	(elf64_hppa_finalize_dynreloc): Likewise.
+	(elf64_hppa_size_dynamic_sections): Move comments and fix typo.
+	(elf64_hppa_finish_dynamic_symbol): Break up assert.
+
 2002-06-14  Sergey Grigoriev  <serge@leopold.Physik.Uni-Augsburg.DE>
 
 	* pei-i386.c (COFF_SECTION_ALIGNMENT_ENTRIES): Enable 16 byte

@@ -1296,22 +1296,22 @@ elf_hppa_final_link (abfd, info)
 	     address of the .plt + gp_offset.
 
 	     If no .plt is found, then look for .dlt, .opd and .data (in
-	     that order) and set __gp to the base address of whichever section
-	    is found first.  */
+	     that order) and set __gp to the base address of whichever
+	     section is found first.  */
 
 	  sec = hppa_info->plt_sec;
-	  if (sec)
+	  if (sec && ! (sec->flags & SEC_EXCLUDE))
 	    gp_val = (sec->output_offset
 		      + sec->output_section->vma
 		      + hppa_info->gp_offset);
 	  else
 	    {
 	      sec = hppa_info->dlt_sec;
-	      if (!sec)
+	      if (!sec || (sec->flags & SEC_EXCLUDE))
 		sec = hppa_info->opd_sec;
-	      if (!sec)
+	      if (!sec || (sec->flags & SEC_EXCLUDE))
 		sec = bfd_get_section_by_name (abfd, ".data");
-	      if (!sec)
+	      if (!sec || (sec->flags & SEC_EXCLUDE))
 		return false;
 
 	      gp_val = sec->output_offset + sec->output_section->vma;
@@ -2074,11 +2074,14 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 			hppa_info->opd_sec->contents + dyn_h->opd_offset + 24);
 	  }
 
-	/* We want the value of the OPD offset for this symbol, not
-	   the symbol's actual address.  */
-	value = (dyn_h->opd_offset
-		 + hppa_info->opd_sec->output_offset
-		 + hppa_info->opd_sec->output_section->vma);
+	if (dyn_h->want_opd)
+	  /* We want the value of the OPD offset for this symbol.  */
+	  value = (dyn_h->opd_offset
+		   + hppa_info->opd_sec->output_offset
+		   + hppa_info->opd_sec->output_section->vma);
+	else
+	  /* We want the address of the symbol.  */
+	  value += addend;
 
 	bfd_put_64 (input_bfd, value, hit_data);
 	return bfd_reloc_ok;

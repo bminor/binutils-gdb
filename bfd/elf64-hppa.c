@@ -1532,15 +1532,11 @@ allocate_dynrel_entries (dyn_h, data)
 
   for (rent = dyn_h->reloc_entries; rent; rent = rent->next)
     {
-      switch (rent->type)
-	{
-	case R_PARISC_FPTR64:
-	  /* Allocate one iff we are building a shared library and don't
-	     want an opd entry.  */
-	  if (!x->info->shared && dyn_h->want_opd)
-	    continue;
-	  break;
-	}
+      /* Allocate one iff we are building a shared library, the relocation
+	 isn't a R_PARISC_FPTR64, or we don't want an opd entry.  */
+      if (!shared && rent->type == R_PARISC_FPTR64 && dyn_h->want_opd)
+	continue;
+
       hppa_info->other_rel_sec->_raw_size += sizeof (Elf64_External_Rela);
 
       /* Make sure this symbol gets into the dynamic symbol table if it is
@@ -1722,10 +1718,9 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
 
       if (strcmp (name, ".plt") == 0)
 	{
+	  /* Strip this section if we don't need it; see the comment below.  */
 	  if (s->_raw_size == 0)
 	    {
-	      /* Strip this section if we don't need it; see the
-		 comment below.  */
 	      strip = true;
 	    }
 	  else
@@ -1736,24 +1731,29 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
 	}
       else if (strcmp (name, ".dlt") == 0)
 	{
+	  /* Strip this section if we don't need it; see the comment below.  */
 	  if (s->_raw_size == 0)
 	    {
-	      /* Strip this section if we don't need it; see the
-		 comment below.  */
 	      strip = true;
 	    }
 	}
       else if (strcmp (name, ".opd") == 0)
 	{
+	  /* Strip this section if we don't need it; see the comment below.  */
 	  if (s->_raw_size == 0)
 	    {
-	      /* Strip this section if we don't need it; see the
-		 comment below.  */
 	      strip = true;
 	    }
 	}
-      else if (strncmp (name, ".rela", 4) == 0)
+      else if (strncmp (name, ".rela", 5) == 0)
 	{
+	  /* If we don't need this section, strip it from the output file.
+	     This is mostly to handle .rela.bss and .rela.plt.  We must
+	     create both sections in create_dynamic_sections, because they
+	     must be created before the linker maps input sections to output
+	     sections.  The linker does that before adjust_dynamic_symbol
+	     is called, and it is that function which decides whether
+	     anything needs to go into these sections.  */
 	  if (s->_raw_size == 0)
 	    {
 	      /* If we don't need this section, strip it from the
@@ -1951,9 +1951,6 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
   spltrel = hppa_info->plt_rel_sec;
   sdltrel = hppa_info->dlt_rel_sec;
 
-  BFD_ASSERT (stub != NULL && splt != NULL
-	      && sopd != NULL && sdlt != NULL)
-
   /* Incredible.  It is actually necessary to NOT use the symbol's real
      value when building the dynamic symbol table for a shared library.
      At least for symbols that refer to functions.
@@ -1963,6 +1960,8 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
      the original values (in elf64_hppa_link_output_symbol_hook).  */
   if (dyn_h && dyn_h->want_opd)
     {
+      BFD_ASSERT (sopd != NULL)
+
       /* Save away the original value and section index so that we
 	 can restore them later.  */
       dyn_h->st_value = sym->st_value;
@@ -1983,6 +1982,8 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
     {
       bfd_vma value;
       Elf_Internal_Rela rel;
+
+      BFD_ASSERT (splt != NULL && spltrel != NULL)
 
       /* We do not actually care about the value in the PLT entry
 	 if we are creating a shared library and the symbol is
@@ -2033,6 +2034,8 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
       bfd_vma value;
       int insn;
       unsigned int max_offset;
+
+      BFD_ASSERT (stub != NULL)
 
       /* Install the generic stub template.
 
@@ -2357,15 +2360,10 @@ elf64_hppa_finalize_dynreloc (dyn_h, data)
 	{
 	  Elf64_Internal_Rela rel;
 
-	  switch (rent->type)
-	    {
-	      case R_PARISC_FPTR64:
-	      /* Allocate one iff we are building a shared library and don't
-		 want an opd entry.  */
-	      if (!info->shared && dyn_h->want_opd)
-		continue;
-	      break;
-	    }
+	  /* Allocate one iff we are building a shared library, the relocation
+	     isn't a R_PARISC_FPTR64, or we don't want an opd entry.  */
+	  if (!info->shared && rent->type == R_PARISC_FPTR64 && dyn_h->want_opd)
+	    continue;
 
 	  /* Create a dynamic relocation for this entry.
 
