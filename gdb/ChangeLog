@@ -1,5 +1,11 @@
 Mon Jun 14 09:23:51 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* main.c, gdbcmd.h: Add function filename_completer.
+	source.c: Use it for "directory" command.
+	(This will be more useful if the word break stuff is fixed).
+
+	* source.c (mod_path): Warning not error if can't find directory.
+
 	* isi-xdep.c: New file.
 	* config/m68k/isi.mh (XDEPFILES): Add isi-xdep.o
 

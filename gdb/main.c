@@ -1148,6 +1148,48 @@ noop_completer (text)
   return NULL;
 }
 
+/* Complete on filenames.  */
+/* FIXME: This would be a lot more useful if the word breaks got set
+   to not include '/'.  Probably best to make it up to each completer
+   to do its own word breaking.  */
+char **
+filename_completer (text)
+     char *text;
+{
+  /* From readline.  */
+  extern char *filename_completion_function ();
+  int subsequent_name;
+  char **return_val;
+  int return_val_used;
+  int return_val_alloced;
+
+  return_val_used = 0;
+  /* Small for testing.  */
+  return_val_alloced = 1;
+  return_val = (char **) xmalloc (return_val_alloced * sizeof (char *));
+
+  subsequent_name = 0;
+  while (1)
+    {
+      char *p;
+      p = filename_completion_function (text, subsequent_name);
+      if (return_val_used >= return_val_alloced)
+	{
+	  return_val_alloced *= 2;
+	  return_val =
+	    (char **) xrealloc (return_val,
+				return_val_alloced * sizeof (char *));
+	}
+      /* The string itself has already been stored in newly malloc'd space
+	 for us by filename_completion_function.  */
+      return_val[return_val_used++] = p;
+      if (p == NULL)
+	break;
+      subsequent_name = 1;
+    }
+  return return_val;
+}
+
 /* Generate symbol names one by one for the completer.  Each time we are
    called return another potential completion to the caller.
 
@@ -1199,6 +1241,11 @@ symbol_completion_function (text, matches)
 	 functions, which can be any string) then we will switch to the
 	 special word break set for command strings, which leaves out the
 	 '-' character used in some commands. */
+
+      /* FIXME: Using rl_completer_word_break_characters is the wrong
+	 approach, because "show foo-bar<TAB>" won't know to use the
+	 new set until too late.  Better approach is to do the word breaking
+	 ourself.  */
 
       rl_completer_word_break_characters =
 	  gdb_completer_word_break_characters;
