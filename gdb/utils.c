@@ -3,19 +3,19 @@
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include <sys/ioctl.h>
@@ -59,7 +59,7 @@ extern char *realloc();
 void
 vprintf (format, ap)
      char *format;
-     va_alist ap;
+     va_list ap;
 {
   vfprintf (stdout, format, ap);
 }
@@ -718,10 +718,15 @@ set_width_command (args, from_tty, c)
 static void
 prompt_for_continue ()
 {
+  char *ignore;
+
   immediate_quit++;
-  gdb_readline ("---Type <return> to continue---", 0);
+  ignore = gdb_readline ("---Type <return> to continue---");
+  if (ignore)
+    free (ignore);
   chars_printed = lines_printed = 0;
   immediate_quit--;
+  dont_repeat ();		/* Forget prev cmd -- CR won't repeat it. */
 }
 
 /* Reinitialize filter; ie. tell it to reset to original values.  */

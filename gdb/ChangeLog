@@ -1,3 +1,17 @@
+Thu Aug 15 18:43:57 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* main.c: Remove unused terminating_signals and catch_termination().
+	(long_options):  Terminate with a zero element.
+	[Bugfix from Atsuo Kawaguchi <atsuo@hark86.harl.hitachi.co.jp>.]
+	(gdb_readline):  Make call-compatible with readline.
+	(init_signals):  Improve comments re vfork vs. signal.
+
+	* utils.c (prompt_for_continue):  Use new gdb_readline().
+	If we prompt for continuation, we don't let CR repeat the previous
+	command, once we get back to a prompt.  It's too easy to keep
+	hitting CR, expecting "--more--" prompts, and have some long
+	command start repeating on you.
+
 Tue Aug 13 16:17:56 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* blockframe.c (frameless_look_for_prologue):  Speed up by
