@@ -1,3 +1,12 @@
+Wed Nov 17 04:50:55 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* strings.1: Fix typo.
+
+Mon Nov 15 12:03:20 1993  Ken Raeburn  (raeburn@rtl.cygnus.com)
+
+	* Makefile.in (DISTSTUFF): Build "info".
+	(VERSION): Updated to cygnus-2.3.1; 2.3 has gone out.
+
 Sun Nov 14 00:27:24 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* objdump.c (dump_stabs): Handle stabs-in-som as implemented
