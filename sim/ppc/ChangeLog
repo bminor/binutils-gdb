@@ -1,3 +1,11 @@
+2003-06-22  Andrew Cagney  <cagney@redhat.com>
+
+	Problems reported by Joshua LeVasseur.
+	* emul_chirp.c: Update copyright.
+	(chirp_emul_nextprop): Return the first property.
+	* hw_htab.c: Update copyright.
+	(htab_decode_hash_table): Fix check for htab size.
+
 2003-06-21  Andrew Cagney  <cagney@redhat.com>
 
 	* interrupts.c: Update copyright.
