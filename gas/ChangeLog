@@ -1,3 +1,8 @@
+2003-12-05  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-sh.c (md_show_usage): Fix compilation errors
+	introduced by the previous delta.
+
 2003-12-03  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-sh.c: Add support for sh4a and no-fpu variants,

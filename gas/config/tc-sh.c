@@ -2973,21 +2973,16 @@ SH options:\n\
 -relax			alter jump instructions for long displacements\n\
 -small			align sections to 4 byte boundaries, not 16\n\
 -dsp			enable sh-dsp insns, and disable floating-point ISAs.\n"));
+#ifdef HAVE_SH64
   fprintf (stream, _("\
 -isa=[sh4\n\
     | sh4a\n\
     | dsp		same as '-dsp'\n\
-    | fp\n"
-#ifdef HAVE_SH64
-"\
-    | shmedia		set default instruction set for SH64\n\
+    | fp\n\
+    | shmedia		set as the default instruction set for SH64\n\
     | SHmedia\n\
     | shcompact\n\
-    | SHcompact\n"
-#endif
-"\
-    | any]\n"));
-#ifdef HAVE_SH64
+    | SHcompact\n"));
   fprintf (stream, _("\
 -abi=[32|64]		set size of expanded SHmedia operands and object\n\
 			file type\n\
@@ -2997,7 +2992,14 @@ SH options:\n\
 			constants and SHcompact code\n\
 -no-expand		do not expand MOVI, PT, PTA or PTB instructions\n\
 -expand-pt32		with -abi=64, expand PT, PTA and PTB instructions\n\
-			to 32 bits only"));
+			to 32 bits only\n"));
+#else
+  fprintf (stream, _("\
+-isa=[sh4\n\
+    | sh4a\n\
+    | dsp		same as '-dsp'\n\
+    | fp\n\
+    | any]\n"));
 #endif /* HAVE_SH64 */
 }
 
