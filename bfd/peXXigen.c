@@ -1,5 +1,5 @@
 /* Support for the generic parts of PE/PEI; the common executable parts.
-   Copyright 1995, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
+   Copyright 1995, 96, 97, 98, 99, 2000, 2001 Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -53,6 +53,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    wasting too much time.
 */
 
+/* This expands into COFF_WITH_pe or COFF_WITH_pep depending on whether
+   we're compiling for straight PE or PE+.  */
+#define COFF_WITH_XX
+
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
@@ -64,11 +68,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    within PE/PEI, so we get them from there.  FIXME: The lack of
    variance is an assumption which may prove to be incorrect if new
    PE/PEI targets are created.  */
-#include "coff/i386.h"
+#ifdef COFF_WITH_pep
+# include "coff/ia64.h"
+#else
+# include "coff/i386.h"
+#endif
 
 #include "coff/pe.h"
 #include "libcoff.h"
 #include "libpei.h"
+
+#ifdef COFF_WITH_pep
+# undef AOUTSZ
+# define AOUTSZ		PEPAOUTSZ
+# define PEAOUTHDR	PEPAOUTHDR
+#endif
 
 /* FIXME: This file has various tests of POWERPC_LE_PE.  Those tests
    worked when the code was in peicode.h, but no longer work now that
@@ -84,7 +98,7 @@ static boolean pe_print_reloc PARAMS ((bfd *, PTR));
 /**********************************************************************/
 
 void
-_bfd_pei_swap_sym_in (abfd, ext1, in1)
+_bfd_XXi_swap_sym_in (abfd, ext1, in1)
      bfd *abfd;
      PTR ext1;
      PTR in1;
@@ -207,7 +221,7 @@ _bfd_pei_swap_sym_in (abfd, ext1, in1)
 }
 
 unsigned int
-_bfd_pei_swap_sym_out (abfd, inp, extp)
+_bfd_XXi_swap_sym_out (abfd, inp, extp)
      bfd       *abfd;
      PTR	inp;
      PTR	extp;
@@ -241,7 +255,7 @@ _bfd_pei_swap_sym_out (abfd, inp, extp)
 }
 
 void
-_bfd_pei_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
+_bfd_XXi_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
      bfd            *abfd;
      PTR	     ext1;
      int             type;
@@ -320,7 +334,7 @@ _bfd_pei_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
 }
 
 unsigned int
-_bfd_pei_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
+_bfd_XXi_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
      bfd  *abfd;
      PTR   inp;
      int   type;
@@ -401,7 +415,7 @@ _bfd_pei_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
 }
 
 void
-_bfd_pei_swap_lineno_in (abfd, ext1, in1)
+_bfd_XXi_swap_lineno_in (abfd, ext1, in1)
      bfd *abfd;
      PTR ext1;
      PTR in1;
@@ -414,7 +428,7 @@ _bfd_pei_swap_lineno_in (abfd, ext1, in1)
 }
 
 unsigned int
-_bfd_pei_swap_lineno_out (abfd, inp, outp)
+_bfd_XXi_swap_lineno_out (abfd, inp, outp)
      bfd       *abfd;
      PTR	inp;
      PTR	outp;
@@ -429,7 +443,7 @@ _bfd_pei_swap_lineno_out (abfd, inp, outp)
 }
 
 void
-_bfd_pei_swap_aouthdr_in (abfd, aouthdr_ext1, aouthdr_int1)
+_bfd_XXi_swap_aouthdr_in (abfd, aouthdr_ext1, aouthdr_int1)
      bfd *abfd;
      PTR aouthdr_ext1;
      PTR aouthdr_int1;
@@ -451,7 +465,7 @@ _bfd_pei_swap_aouthdr_in (abfd, aouthdr_ext1, aouthdr_int1)
     GET_AOUTHDR_ENTRY (abfd, (bfd_byte *) aouthdr_ext->entry);
   aouthdr_int->text_start =
     GET_AOUTHDR_TEXT_START (abfd, (bfd_byte *) aouthdr_ext->text_start);
-#ifndef COFF_WITH_PEP64
+#ifndef COFF_WITH_pep
   /* PE32+ does not have data_start member! */
   aouthdr_int->data_start =
     GET_AOUTHDR_DATA_START (abfd, (bfd_byte *) aouthdr_ext->data_start);
@@ -504,18 +518,18 @@ _bfd_pei_swap_aouthdr_in (abfd, aouthdr_ext1, aouthdr_int1)
   if (aouthdr_int->entry)
     {
       aouthdr_int->entry += a->ImageBase;
-#ifndef COFF_WITH_PEP64
+#ifndef COFF_WITH_pep
       aouthdr_int->entry &= 0xffffffff;
 #endif
     }
   if (aouthdr_int->tsize)
     {
       aouthdr_int->text_start += a->ImageBase;
-#ifndef COFF_WITH_PEP64
+#ifndef COFF_WITH_pep
       aouthdr_int->text_start &= 0xffffffff;
 #endif
     }
-#ifndef COFF_WITH_PEP64
+#ifndef COFF_WITH_pep
   /* PE32+ does not have data_start member! */
   if (aouthdr_int->dsize)
     {
@@ -566,32 +580,27 @@ add_data_entry (abfd, aout, idx, name, base)
 }
 
 unsigned int
-_bfd_pei_swap_aouthdr_out (abfd, in, out)
+_bfd_XXi_swap_aouthdr_out (abfd, in, out)
      bfd       *abfd;
      PTR	in;
      PTR	out;
 {
   struct internal_aouthdr *aouthdr_in = (struct internal_aouthdr *) in;
-  struct internal_extra_pe_aouthdr *extra = &pe_data (abfd)->pe_opthdr;
+  pe_data_type *pe = pe_data (abfd);
+  struct internal_extra_pe_aouthdr *extra = &pe->pe_opthdr;
   PEAOUTHDR *aouthdr_out = (PEAOUTHDR *) out;
   bfd_vma sa, fa, ib;
 
-  /* The following definitely is required for EFI applications.
-     Perhaps it's needed for other PEI targets as well, but I don't
-     know that for a fact, so we play it safe here and tweak the
-     alignments only if PEI_FORCE_MINIMUM_ALIGNMENT is
-     defined. --davidm */
-#ifdef PEI_FORCE_MINIMUM_ALIGNMENT
-  if (!extra->FileAlignment)
-    extra->FileAlignment = PE_DEF_FILE_ALIGNMENT;
-  if (!extra->SectionAlignment)
-    extra->SectionAlignment = PE_DEF_SECTION_ALIGNMENT;
-#endif
+  if (pe->force_minimum_alignment)
+    {
+      if (!extra->FileAlignment)
+	extra->FileAlignment = PE_DEF_FILE_ALIGNMENT;
+      if (!extra->SectionAlignment)
+	extra->SectionAlignment = PE_DEF_SECTION_ALIGNMENT;
+    }
 
-#ifdef PEI_DEFAULT_TARGET_SUBSYSTEM
   if (extra->Subsystem == IMAGE_SUBSYSTEM_UNKNOWN)
-    extra->Subsystem = PEI_DEFAULT_TARGET_SUBSYSTEM;
-#endif
+    extra->Subsystem = pe->target_subsystem;
 
   sa = extra->SectionAlignment;
   fa = extra->FileAlignment;
@@ -600,17 +609,23 @@ _bfd_pei_swap_aouthdr_out (abfd, in, out)
   if (aouthdr_in->tsize)
     {
       aouthdr_in->text_start -= ib;
+#ifndef COFF_WITH_pep
       aouthdr_in->text_start &= 0xffffffff;
+#endif
     }
   if (aouthdr_in->dsize)
     {
       aouthdr_in->data_start -= ib;
+#ifndef COFF_WITH_pep
       aouthdr_in->data_start &= 0xffffffff;
+#endif
     }
   if (aouthdr_in->entry)
     {
       aouthdr_in->entry -= ib;
+#ifndef COFF_WITH_pep
       aouthdr_in->entry &= 0xffffffff;
+#endif
     }
 
 #define FA(x) (((x) + fa -1 ) & (- fa))
@@ -644,7 +659,7 @@ _bfd_pei_swap_aouthdr_out (abfd, in, out)
      in this slot by MSVC; it doesn't seem to cause problems (so far),
      but since it's the best we've got, use it.  It does do the right
      thing for .pdata.  */
-  if (pe_data (abfd)->has_reloc_section)
+  if (pe->has_reloc_section)
     add_data_entry (abfd, extra, 5, ".reloc", ib);
 
   {
@@ -692,7 +707,7 @@ _bfd_pei_swap_aouthdr_out (abfd, in, out)
   PUT_AOUTHDR_TEXT_START (abfd, aouthdr_in->text_start,
 			  (bfd_byte *) aouthdr_out->standard.text_start);
 
-#ifndef COFF_WITH_PEP64
+#ifndef COFF_WITH_pep
   /* PE32+ does not have data_start member! */
   PUT_AOUTHDR_DATA_START (abfd, aouthdr_in->data_start,
 			  (bfd_byte *) aouthdr_out->standard.data_start);
@@ -755,7 +770,7 @@ _bfd_pei_swap_aouthdr_out (abfd, in, out)
 }
 
 unsigned int
-_bfd_pei_only_swap_filehdr_out (abfd, in, out)
+_bfd_XXi_only_swap_filehdr_out (abfd, in, out)
      bfd       *abfd;
      PTR	in;
      PTR	out;
@@ -878,7 +893,7 @@ _bfd_pei_only_swap_filehdr_out (abfd, in, out)
 }
 
 unsigned int
-_bfd_pe_only_swap_filehdr_out (abfd, in, out)
+_bfd_XX_only_swap_filehdr_out (abfd, in, out)
      bfd       *abfd;
      PTR	in;
      PTR	out;
@@ -899,7 +914,7 @@ _bfd_pe_only_swap_filehdr_out (abfd, in, out)
 }
 
 unsigned int
-_bfd_pei_swap_scnhdr_out (abfd, in, out)
+_bfd_XXi_swap_scnhdr_out (abfd, in, out)
      bfd       *abfd;
      PTR	in;
      PTR	out;
@@ -1544,7 +1559,7 @@ pe_print_pdata (abfd, vfile)
      bfd *abfd;
      PTR vfile;
 {
-#ifdef COFF_WITH_PEP64
+#ifdef COFF_WITH_pep
 # define PDATA_ROW_SIZE	(3*8)
 #else
 # define PDATA_ROW_SIZE	(5*4)
@@ -1570,7 +1585,7 @@ pe_print_pdata (abfd, vfile)
 
   fprintf (file,
 	   _("\nThe Function Table (interpreted .pdata section contents)\n"));
-#ifdef COFF_WITH_PEP64
+#ifdef COFF_WITH_pep
   fprintf (file,
 	   _(" vma:\t\t\tBegin Address    End Address      Unwind Info\n"));
 #else
@@ -1629,7 +1644,7 @@ pe_print_pdata (abfd, vfile)
       fprintf_vma (file, begin_addr); fputc (' ', file);
       fprintf_vma (file, end_addr); fputc (' ', file);
       fprintf_vma (file, eh_handler);
-#ifndef COFF_WITH_PEP64
+#ifndef COFF_WITH_pep
       fputc (' ', file);
       fprintf_vma (file, eh_data); fputc (' ', file);
       fprintf_vma (file, prolog_end_addr);
@@ -1780,7 +1795,7 @@ pe_print_reloc (abfd, vfile)
 /* Print out the program headers.  */
 
 boolean
-_bfd_pe_print_private_bfd_data_common (abfd, vfile)
+_bfd_XX_print_private_bfd_data_common (abfd, vfile)
      bfd *abfd;
      PTR vfile;
 {
@@ -1892,7 +1907,7 @@ _bfd_pe_print_private_bfd_data_common (abfd, vfile)
    to the output bfd.  */
 
 boolean
-_bfd_pe_bfd_copy_private_bfd_data_common (ibfd, obfd)
+_bfd_XX_bfd_copy_private_bfd_data_common (ibfd, obfd)
      bfd *ibfd, *obfd;
 {
   /* One day we may try to grok other private data.  */
@@ -1915,7 +1930,7 @@ _bfd_pe_bfd_copy_private_bfd_data_common (ibfd, obfd)
 
 /* Copy private section data.  */
 boolean
-_bfd_pe_bfd_copy_private_section_data (ibfd, isec, obfd, osec)
+_bfd_XX_bfd_copy_private_section_data (ibfd, isec, obfd, osec)
      bfd *ibfd;
      asection *isec;
      bfd *obfd;
@@ -1952,7 +1967,7 @@ _bfd_pe_bfd_copy_private_section_data (ibfd, isec, obfd, osec)
 }
 
 void
-_bfd_pe_get_symbol_info (abfd, symbol, ret)
+_bfd_XX_get_symbol_info (abfd, symbol, ret)
      bfd *abfd;
      asymbol *symbol;
      symbol_info *ret;
@@ -1972,7 +1987,7 @@ _bfd_pe_get_symbol_info (abfd, symbol, ret)
    access.  */
 
 boolean
-_bfd_pei_final_link_postscript (abfd, pfinfo)
+_bfd_XXi_final_link_postscript (abfd, pfinfo)
      bfd *abfd;
      struct coff_final_link_info *pfinfo;
 {

@@ -1,3 +1,63 @@
+2001-02-13  David Mosberger  <davidm@hpl.hp.com>
+
+	* peicode.h (coff_swap_filehdr_out) [COFF_IMAGE_WITH_PE]: Define
+	as _bfd_XXi_only_swap_filehdr_out.
+	(pe_mkobject) [PEI_FORCE_MINIMUM_ALIGNMENT]: Set
+	pe->force_minimum_alignment to TRUE.
+	(pe_mkobject) [PEI_TARGET_SUBSYSTEM]: Set pe->target_subsystem to
+	PEI_TARGET_SUBSYSTEM.
+	(pe_print_private_bfd_data): Call
+	_bfd_XX_print_private_bfd_data_common() instead of
+	_bfd_pe_print_private_bfd_data_common().
+	(pe_bfd_copy_private_bfd_data): Call
+	_bfd_XX_bfd_copy_private_bfd_data_common() instead of
+	_bfd_pe_bfd_copy_private_bfd_data_common().
+	(coff_bfd_copy_private_section_data): Define as
+	_bfd_XX_bfd_copy_private_section_data instead of
+	_bfd_pe_bfd_copy_private_section_data.
+	(coff_get_symbol_info): Define as _bfd_XX_get_symbol_info instead
+	of a _bfd_pe_get_symbol_info.
+
+	* peigen.c: Delete.
+
+	* peXXigen.c: Renamed from peigen.c.
+	(COFF_WITH_XX): Define this macro (will get expanded into
+	COFF_WITH_pep or COFF_WITH_pe, depending on whether this is being
+	compiled as peigen.c or pepigen.c.
+	[COFF_WITH_pep]: Include "coff/ia64.h" instead of "coff/i386.h" to
+	define the canonical PEP structures and definitions.
+	(_bfd_XXi_swap_aouthdr_out): If pe->force_minimum_alignment is in
+	effect, enforce minimum file and section alignments.  If
+	extra->Subsystem is IMAGE_SUBSYSTEM_UNKNOWN, set it to
+	pe->target_subsystem (this defaults to IMAGE_SUBSYSTEM_UNKNOWN,
+	so, by default, this is a no-op).
+
+	* libpei.h: Rename COFF_WITH_PEP to COFF_WITH_pep.
+	(_bfd_XX_bfd_copy_private_bfd_data_common): Add macros to map
+	_bfd_XXfoo to _bfd_pepfoo if COFF_WIT_PEP is defined and to
+	_bfd_pefoo if it's not defined.  Use these macros to define
+	coff swap macros.
+
+	* libcoff.h (pe_tdata): Add members target_subsystem and
+	force_minimum_alignment.
+
+	* efi-app-ia64.c (COFF_WITH_pep): Rename COFF_WITH_PEP to
+	COFF_WITH_pep.
+	(PEI_TARGET_SUBSYSTEM): Rename from PEI_DEFAULT_TARGET_SUBSYSTEM.
+
+	* configure.in (bfd_efi_app_ia64_vec): Use pepigen.lo instead of
+	peigen.lo.
+
+	* coff-ia64.c: Rename COFF_WITH_PEP to COFF_WITH_pep.
+	(AOUTSZ): Rename PEP64AOUTSZ and PEP64AOUTHDR to PEPAOUTSZ and
+	PEPAOUTHDR.
+
+	* Makefile.in (BFD64_BACKENDS): Mention pepigen.lo.
+	(BFD64_BACKENDS_CFILES): Mention pepigen.c
+	(peigen.c): Add rule to generate from peXXigen.c.
+	(pepigen.c): Ditto.
+	(pepigen.lo): List dependencies for pepigen.lo.
+
 2001-02-13  Alan Modra  <alan@linuxcare.com.au>
 
 	* elf32-hppa.c (elf32_hppa_set_gp): Handle weak $global$.  If

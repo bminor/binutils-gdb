@@ -1,5 +1,5 @@
 /* BFD back-end for HP/Intel IA-64 COFF files.
-   Copyright 1999 Free Software Foundation, Inc.
+   Copyright 1999, 2001 Free Software Foundation, Inc.
    Contributed by David Mosberger <davidm@hpl.hp.com>
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -21,13 +21,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
-
 #include "coff/ia64.h"
-
 #include "coff/internal.h"
-
 #include "coff/pe.h"
-
 #include "libcoff.h"
 
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
@@ -43,10 +39,10 @@ static reloc_howto_type howto_table[] =
 #define BADMAG(x) IA64BADMAG(x)
 #define IA64 1			/* Customize coffcode.h */
 
-#ifdef COFF_WITH_PEP64
+#ifdef COFF_WITH_pep
 # undef AOUTSZ
-# define AOUTSZ		PEP64AOUTSZ
-# define PEAOUTHDR	PEP64AOUTHDR
+# define AOUTSZ		PEPAOUTSZ
+# define PEAOUTHDR	PEPAOUTHDR
 #endif
 
 #define RTYPE2HOWTO(cache_ptr, dst) \

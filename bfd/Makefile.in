@@ -1,6 +1,6 @@
 # Makefile.in generated automatically by automake 1.4 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -540,6 +540,7 @@ BFD64_BACKENDS = \
 	coff64-rs6000.lo \
 	demo64.lo \
 	efi-app-ia64.lo \
+	pepigen.lo \
 	elf64-x86-64.lo \
 	elf64-alpha.lo \
 	elf64-hppa.lo \
@@ -559,6 +560,7 @@ BFD64_BACKENDS_CFILES = \
 	coff64-rs6000.c \
 	demo64.c \
 	efi-app-ia64.c \
+	pepigen.c \
 	elf64-x86-64.c \
 	elf64-alpha.c \
 	elf64-hppa.c \
@@ -1142,6 +1144,16 @@ $(BFD_LIBS): $(BFD_H) $(BFD_H_DEPS) $(LOCAL_H_DEPS)
 $(BFD_MACHINES): $(BFD_H) $(BFD_H_DEPS) $(LOCAL_H_DEPS)
 $(BFD_BACKENDS): $(BFD_H) $(BFD_H_DEPS) $(LOCAL_H_DEPS)
 $(OPTIONAL_BACKENDS): $(BFD_H) $(BFD_H_DEPS) $(LOCAL_H_DEPS)
+
+peigen.c : peXXigen.c
+	rm -f peigen.c
+	sed -e s/XX/pe/g < $(srcdir)/peXXigen.c > peigen.new
+	mv -f peigen.new peigen.c
+
+pepigen.c : peXXigen.c
+	rm -f pepigen.c
+	sed -e s/XX/pep/g < $(srcdir)/peXXigen.c > pepigen.new
+	mv -f pepigen.new pepigen.c
 
 # Install BFD include file, and others that it needs.
 install-data-local: $(BFD_H)
@@ -1738,6 +1750,9 @@ pei-mips.lo: pei-mips.c $(INCDIR)/filenames.h pe-mips.c \
   libpei.h
 peigen.lo: peigen.c $(INCDIR)/filenames.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/i386.h $(INCDIR)/coff/pe.h libcoff.h \
+  $(INCDIR)/bfdlink.h libpei.h
+pepigen.lo: pepigen.c $(INCDIR)/filenames.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/ia64.h $(INCDIR)/coff/pe.h libcoff.h \
   $(INCDIR)/bfdlink.h libpei.h
 ppcboot.lo: ppcboot.c $(INCDIR)/filenames.h
 reloc16.lo: reloc16.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
