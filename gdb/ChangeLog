@@ -1,3 +1,8 @@
+Wed Apr  7 15:52:11 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* configure.in:  Only configure sparclite subdir when target_cpu
+	is sparclite.
+
 Wed Apr  7 10:11:22 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* xcoffread.c (struct coff_symbol): Change c_sclass to unsigned char.

@@ -1,4 +1,4 @@
-configdirs="doc testsuite sparclite"
+configdirs="doc testsuite"
 srcname="GDB"
 srctrigger=main.c
 gdb_serial_driver=ser-unix.c
@@ -305,6 +305,10 @@ if [ "${nativefile}" != "" ]; then
 else
 	files="${files} config/nm-trash.h"
 	links="${links} nm.h"
+fi
+
+if [ ${target_cpu} = "sparclite" ]; then
+	configdirs="${configdirs} sparclite"
 fi
 
 # post-target:
