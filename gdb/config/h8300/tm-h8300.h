@@ -288,3 +288,5 @@ typedef unsigned short INSN_WORD;
 #define DONT_USE_REMOTE
 
 #define	PRINT_REGISTER_HOOK(regno) print_register_hook(regno)
+
+#define sr_get_debug() 0
