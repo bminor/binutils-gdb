@@ -1,3 +1,7 @@
+2005-01-27  Andrew Cagney  <cagney@gnu.org>
+
+	* configure: Regenerate to track ../gettext.m4 change.
+
 2005-01-25  Alexandre Oliva  <aoliva@redhat.com>
 
 	2004-11-10  Alexandre Oliva  <aoliva@redhat.com>

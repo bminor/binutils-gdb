@@ -7238,7 +7238,7 @@ echo "${ECHO_T}$nls_cv_force_use_gnu_gettext" >&6
       if test "$nls_cv_force_use_gnu_gettext" != "yes"; then
                         		nls_cv_header_intl=
 	nls_cv_header_libgt=
-	CATOBJEXT=NONE
+	CATOBJEXT=
 
 	if test "${ac_cv_header_libintl_h+set}" = set; then
   echo "$as_me:$LINENO: checking for libintl.h" >&5
@@ -7836,7 +7836,7 @@ fi
 
 
 
-        if test "$CATOBJEXT" = "NONE" && test -d $srcdir/../intl; then
+        if test x"$CATOBJEXT" = x && test -d $srcdir/../intl; then
 	  # Neither gettext nor catgets in included in the C library.
 	  # Fall back on GNU gettext library (assuming it is present).
 	  nls_cv_use_gnu_gettext=yes
