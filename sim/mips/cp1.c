@@ -21,7 +21,7 @@
 
 /* Within cp1.c we refer to sim_cpu directly.  */
 #define CPU cpu
-#define SD sd
+#define SD CPU_STATE(cpu)
 
 /*-- FPU support routines ---------------------------------------------------*/
 
@@ -63,8 +63,7 @@ static const char *fpu_rounding_mode_name (int rm);
 #endif
 
 uword64
-value_fpr (SIM_DESC sd,
-	   sim_cpu *cpu,
+value_fpr (sim_cpu *cpu,
 	   address_word cia,
 	   int fpr,
 	   FP_formats fmt)
@@ -95,7 +94,7 @@ value_fpr (SIM_DESC sd,
     }
   if (fmt != FPR_STATE[fpr])
     {
-      sim_io_eprintf (sd, "FPR %d (format %s) being accessed with format %s - setting to unknown (PC = 0x%s)\n",
+      sim_io_eprintf (SD, "FPR %d (format %s) being accessed with format %s - setting to unknown (PC = 0x%s)\n",
 		      fpr, fpu_format_name (FPR_STATE[fpr]),
 		      fpu_format_name (fmt), pr_addr (cia));
       FPR_STATE[fpr] = fmt_unknown;
@@ -195,8 +194,7 @@ value_fpr (SIM_DESC sd,
 }
 
 void
-store_fpr (SIM_DESC sd,
-	   sim_cpu *cpu,
+store_fpr (sim_cpu *cpu,
 	   address_word cia,
 	   int fpr,
 	   FP_formats fmt,
@@ -894,8 +892,7 @@ SquareRoot (op, fmt)
 }
 
 uword64
-convert (SIM_DESC sd,
-	 sim_cpu *cpu,
+convert (sim_cpu *cpu,
 	 address_word cia,
 	 int rm,
 	 uword64 op,

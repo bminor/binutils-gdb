@@ -1,5 +1,18 @@
 2002-06-03  Chris Demetriou  <cgd@broadcom.com>
 
+	* sim-main.h (Nan, Infinity, Less, Equal, AbsoluteValue, Negate)
+	(Add, Sub, Multiply, Divide, Recip, SquareRoot): Move lower in
+	file, remove PARAMS from prototypes.
+	(value_fpr, store_fpr, convert): Likewise.  Use SIM_STATE to provide
+	simulator state arguments.
+	(ValueFPR, StoreFPR, Convert): Move lower in file.  Use SIM_ARGS to
+	pass simulator state arguments.
+	* cp1.c (SD): Redefine as CPU_STATE(cpu).
+	(store_fpr, convert): Remove 'sd' argument.
+	(value_fpr): Likewise.  Convert to use 'SD' instead.
+
+2002-06-03  Chris Demetriou  <cgd@broadcom.com>
+
 	* cp1.c (Min, Max): Remove #if 0'd functions.
 	* sim-main.h (Min, Max): Remove.
 

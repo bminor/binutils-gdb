@@ -80,28 +80,6 @@ typedef enum {
  fmt_uninterpreted_64 = 0x80000000U,
 } FP_formats;
 
-unsigned64 value_fpr PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int fpr, FP_formats));
-#define ValueFPR(FPR,FMT) value_fpr (SD, CPU, cia, (FPR), (FMT))
-
-void store_fpr PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int fpr, FP_formats fmt, unsigned64 value));
-#define StoreFPR(FPR,FMT,VALUE) store_fpr (SD, CPU, cia, (FPR), (FMT), (VALUE))
-
-int NaN PARAMS ((unsigned64 op, FP_formats fmt));
-int Infinity PARAMS ((unsigned64 op, FP_formats fmt));
-int Less PARAMS ((unsigned64 op1, unsigned64 op2, FP_formats fmt));
-int Equal PARAMS ((unsigned64 op1, unsigned64 op2, FP_formats fmt));
-unsigned64 AbsoluteValue PARAMS ((unsigned64 op, FP_formats fmt));
-unsigned64 Negate PARAMS ((unsigned64 op, FP_formats fmt));
-unsigned64 Add PARAMS ((unsigned64 op1, unsigned64 op2, FP_formats fmt));
-unsigned64 Sub PARAMS ((unsigned64 op1, unsigned64 op2, FP_formats fmt));
-unsigned64 Multiply PARAMS ((unsigned64 op1, unsigned64 op2, FP_formats fmt));
-unsigned64 Divide PARAMS ((unsigned64 op1, unsigned64 op2, FP_formats fmt));
-unsigned64 Recip PARAMS ((unsigned64 op, FP_formats fmt));
-unsigned64 SquareRoot PARAMS ((unsigned64 op, FP_formats fmt));
-unsigned64 convert PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int rm, unsigned64 op, FP_formats from, FP_formats to));
-#define Convert(rm,op,from,to) \
-convert (SD, CPU, cia, rm, op, from, to)
-
 /* Macro to update FPSR condition-code field. This is complicated by
    the fact that there is a hole in the index range of the bits within
    the FCSR register. Also, the number of bits visible depends on the
@@ -728,6 +706,30 @@ decode_coproc (SD, CPU, cia, (instruction))
 
 int sim_monitor (SIM_DESC sd, sim_cpu *cpu, address_word cia, unsigned int arg);
   
+
+/* FPR access.  */
+unsigned64 value_fpr (SIM_STATE, int fpr, FP_formats);
+#define ValueFPR(FPR,FMT) value_fpr (SIM_ARGS, (FPR), (FMT))
+void store_fpr (SIM_STATE, int fpr, FP_formats fmt, unsigned64 value);
+#define StoreFPR(FPR,FMT,VALUE) store_fpr (SIM_ARGS, (FPR), (FMT), (VALUE))
+
+
+/* FPU operations.  */
+int NaN (unsigned64 op, FP_formats fmt);
+int Infinity (unsigned64 op, FP_formats fmt);
+int Less (unsigned64 op1, unsigned64 op2, FP_formats fmt);
+int Equal (unsigned64 op1, unsigned64 op2, FP_formats fmt);
+unsigned64 AbsoluteValue (unsigned64 op, FP_formats fmt);
+unsigned64 Negate (unsigned64 op, FP_formats fmt);
+unsigned64 Add (unsigned64 op1, unsigned64 op2, FP_formats fmt);
+unsigned64 Sub (unsigned64 op1, unsigned64 op2, FP_formats fmt);
+unsigned64 Multiply (unsigned64 op1, unsigned64 op2, FP_formats fmt);
+unsigned64 Divide (unsigned64 op1, unsigned64 op2, FP_formats fmt);
+unsigned64 Recip (unsigned64 op, FP_formats fmt);
+unsigned64 SquareRoot (unsigned64 op, FP_formats fmt);
+unsigned64 convert (SIM_STATE, int rm, unsigned64 op, FP_formats from, FP_formats to);
+#define Convert(rm,op,from,to) convert (SIM_ARGS, rm, op, from, to)
+
 
 /* MDMX access.  */
 
