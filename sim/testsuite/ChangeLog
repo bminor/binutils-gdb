@@ -1,3 +1,13 @@
+Thu Dec  3 14:20:03 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/fr30: New Directory.
+
+Wed Nov 18 10:50:19 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* common/bits-gen.c (main): Add BYTE_ORDER so that it matches
+ 	recent sim/common/sim-basics.h changes.
+	* common/Makefile.in: Update.
+	
 Fri Oct 30 00:37:31 1998  Felix Lee  <flee@cygnus.com>
 
 	* lib/sim-defs.exp (sim_run): download target program to remote

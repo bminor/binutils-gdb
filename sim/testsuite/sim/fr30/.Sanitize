@@ -1,0 +1,75 @@
+# .Sanitize for devo/sim/testsuite/sim/m32r
+
+# Each directory to survive it's way into a release will need a file
+# like this one called "./.Sanitize".  All keyword lines must exist,
+# and must exist in the order specified by this file.  Each directory
+# in the tree will be processed, top down, in the following order.
+
+# Hash started lines like this one are comments and will be deleted
+# before anything else is done.  Blank lines will also be squashed
+# out.
+
+# The lines between the "Do-first:" line and the "Things-to-keep:"
+# line are executed as a /bin/sh shell script before anything else is
+# done in this 
+
+Do-first:
+
+Things-to-keep:
+
+allinsn.exp
+testutils.inc
+
+add.cgs
+add.ms
+add2.cgs
+addc.cgs
+addn.cgs
+addn2.cgs
+and.cgs
+andb.cgs
+andh.cgs
+asr.cgs
+asr2.cgs
+bandh.cgs
+bandl.cgs
+beorh.cgs
+beorl.cgs
+borh.cgs
+borl.cgs
+btsth.cgs
+btstl.cgs
+cmp.cgs
+cmp2.cgs
+eor.cgs
+eorb.cgs
+eorh.cgs
+hello.ms
+hello.ms
+ld.cgs
+ldi20.cgs
+ldi32.cgs
+ldi8.cgs
+ldub.cgs
+lduh.cgs
+lsl.cgs
+lsl2.cgs
+lsr.cgs
+lsr2.cgs
+misc.exp
+mul.cgs
+mulh.cgs
+mulu.cgs
+muluh.cgs
+or.cgs
+orb.cgs
+orh.cgs
+sub.cgs
+subc.cgs
+subn.cgs
+
+Things-to-lose:
+
+Do-last:
+
+# End of file.
