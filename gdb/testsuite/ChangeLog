@@ -1,5 +1,8 @@
 Wed Mar 15 04:11:14 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.base/signals.exp (signal_tests_1): Make pass message
+	consistent with fail message.
+
 	* gdb.base/whatis.exp: Remove xfails for printing char vs.
 	unsigned char; the bug (PR 1821) is fixed.
 
