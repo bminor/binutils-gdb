@@ -1,3 +1,9 @@
+2005-01-04  Martin Koegler  <mkoegler@auto.tuwien.ac.at>
+
+	* binutils-all/testprog.c: Add prototype for printf() and make
+	type of "string" array be "char" in order to avoid compile time
+	warnings.
+
 2004-12-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* binutils-all/readelf.ss: Allow for both .rel and .rela sections.
