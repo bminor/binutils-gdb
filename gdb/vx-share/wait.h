@@ -1,5 +1,9 @@
 /* wait.h - header file for remote wait call */
 
+/*  Copyright 1992 Free Software Foundation, Inc.
+
+    This code was donated by Wind River Systems, Inc. */
+
 /*
 modification history
 --------------------

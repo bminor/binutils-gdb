@@ -1,4 +1,8 @@
-/* dbgRpcLib.h - header file for remote debugging via rpc */
+/*  Copyright 1992 Free Software Foundation, Inc.
+
+    This code was donated by Wind River Systems, Inc.
+
+   dbgRpcLib.h - header file for remote debugging via rpc */
 
 /*
 modification history

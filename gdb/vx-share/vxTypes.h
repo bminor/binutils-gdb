@@ -1,6 +1,8 @@
 /* vxTypes.h - VxWorks type definition header */
 
-/* Copyright 1984-1990 Wind River Systems, Inc. */
+/*  Copyright 1984, 1985, 1986, 1987, 1988, 1989, 1990, 1992 Free Software Foundation, Inc.
+
+    This code was donated by Wind River Systems, Inc. */
 
 /*
 modification history

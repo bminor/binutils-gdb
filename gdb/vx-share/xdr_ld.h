@@ -1,5 +1,9 @@
 /* xdr_ld.h - xdr for additional dbxWorks structures */
 
+/*  Copyright 1992 Free Software Foundation, Inc.
+
+    This code was donated by Wind River Systems, Inc. */
+
 /*
 modification history
 --------------------

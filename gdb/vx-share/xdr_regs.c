@@ -1,6 +1,8 @@
 /* xdr_regs.c - xdr routines for 68k registers */
 
-/* Copyright 1984,1985,1986,1987,1988,1989 Wind River Systems, Inc. */
+/* Copyright 1984, 1985, 1986, 1987, 1988, 1989, 1992 Free Software Foundation, Inc.
+
+   This code was donated by Wind River Systems, Inc. */
 
 /*
 DESCRIPTION

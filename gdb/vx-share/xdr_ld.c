@@ -1,7 +1,8 @@
 /* xdr_ld.c  - xdr routines for remote dbx interface to VxWorks  */
 
-/* Copyright 1984,1985,1986,1987,1988,1989 Wind River Systems, Inc. */
-/*extern char copyright_wind_river[]; static char *copyright=copyright_wind_river;*/
+/*  Copyright 1984, 1985, 1986, 1987, 1988, 1989, 1992 Free Software Foundation, Inc.
+
+    This code was donated by Wind River Systems, Inc. */
 
 /*
 modification history

@@ -1,5 +1,9 @@
 /* xdr_rdb.h - xdr for additional rdb structures */
 
+/* Copyright 1992 Free Software Foundation, Inc.
+
+   This code was donated by Wind River Systems, Inc. */
+
 /*
 modification history
 --------------------
