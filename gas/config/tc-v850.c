@@ -1,6 +1,5 @@
 /* tc-v850.c -- Assembler code for the NEC V850
-
-   Copyright (C) 1996 Free Software Foundation.
+   Copyright (C) 1996, 1997 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -146,11 +145,11 @@ static const struct reg_name pre_defined_registers[] =
 
 static const struct reg_name system_registers[] = 
 {
+  { "ecr", 4 },
   { "eipc", 0 },
   { "eipsw", 1 },
   { "fepc", 2 },
   { "fepsw", 3 },
-  { "ecr", 4 },
   { "psw", 5 },
 };
 #define SYSREG_NAME_CNT	(sizeof(system_registers) / sizeof(struct reg_name))
@@ -676,6 +675,10 @@ md_assemble (str)
 		  if (fc > MAX_INSN_FIXUPS)
 		    as_fatal ("too many fixups");
 
+		  /* Adjust any offsets for sst.{h,w}/sld.{h,w} instructions */
+		  if (operand->flags & V850_OPERAND_ADJUST_SHORT_MEMORY)
+		    ex.X_add_number >>= 1;
+
 		  fixups[fc].exp = ex;
 		  fixups[fc].opindex = *opindex_ptr;
 		  fixups[fc].reloc = reloc;
@@ -827,7 +830,9 @@ md_assemble (str)
   if (relaxable && fc > 0)
     {
       f = frag_var (rs_machine_dependent, 6, 4, 0,
-		    fixups[0].exp.X_add_symbol, 0, (char *)fixups[0].opindex);
+		    fixups[0].exp.X_add_symbol,
+		    fixups[0].exp.X_add_number,
+		    (char *)fixups[0].opindex);
       insn_size = 2;
       md_number_to_chars (f, insn, insn_size);
       md_number_to_chars (f + 2, 0, 4);
@@ -904,7 +909,7 @@ tc_gen_reloc (seg, fixp)
      fixS *fixp;
 {
   arelent *reloc;
-  reloc = (arelent *) bfd_alloc_by_size_t (stdoutput, sizeof (arelent));
+  reloc = (arelent *) xmalloc (sizeof (arelent));
   reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
