@@ -2627,6 +2627,16 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  {
 	    const char *name;
 
+	    /* The Solaris native linker silently disregards
+	       overflows.  We don't, but this breaks stabs debugging
+	       info, whose relocations are only 32-bits wide.  Ignore
+	       overflows in this case.  */
+	    if (r_type == R_SPARC_32
+		&& (input_section->flags & SEC_DEBUGGING) != 0
+		&& strcmp (bfd_section_name (input_bfd, input_section),
+			   ".stab") == 0)
+	      break;
+
 	    if (h != NULL)
 	      {
 		if (h->root.type == bfd_link_hash_undefweak
