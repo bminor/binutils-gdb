@@ -1,10 +1,12 @@
-/* Copyright (C) 1991 Free Software Foundation, Inc.
+/* ldctor.c -- constructor support routines
+   Copyright (C) 1991, 92, 93, 94 Free Software Foundation, Inc.
+   By Steve Chamberlain <sac@cygnus.com>
    
 This file is part of GLD, the Gnu Linker.
 
 GLD is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 GLD is distributed in the hope that it will be useful,
@@ -16,140 +18,207 @@ You should have received a copy of the GNU General Public License
 along with GLD; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/*
- * By steve chamberlain
- * steve@cygnus.com
- */
-
 #include "bfd.h"
-#include "sysdep.h" 
+#include "sysdep.h"
+#include "bfdlink.h"
+
 #include "ld.h"
 #include "ldexp.h"
 #include "ldlang.h"
-#include "ldsym.h"
 #include "ldmisc.h"
 #include "ldgram.h"
+#include "ldmain.h"
+#include "ldctor.h"
 
-/* exported list of statements needed to handle constructors */
+/* The list of statements needed to handle constructors.  These are
+   invoked by the command CONSTRUCTORS in the linker script.  */
 lang_statement_list_type constructor_list;
 
+/* We keep a list of these structures for each sets we build.  */
 
-
-typedef struct constructor_list 
+struct set_info
 {
-   CONST char *name;
-    struct constructor_list *next;
-}  constructor_list_type;
-   
-static constructor_list_type *constructor_name_list;
+  struct set_info *next;		/* Next set.  */
+  struct bfd_link_hash_entry *h;	/* Hash table entry.  */
+  bfd_reloc_code_real_type reloc;	/* Reloc to use for an entry.  */
+  size_t count;				/* Number of elements.  */
+  struct set_element *elements;		/* Elements in set.  */
+};
 
-static void
-add_constructor_name (name)
-     CONST char *name;
+struct set_element
 {
-    register constructor_list_type *ptr = constructor_name_list;
-    for (; ptr != (constructor_list_type *)NULL; ptr = ptr->next) {
-	if (strcmp (ptr->name, name) == 0) 
-	    return;
+  struct set_element *next;		/* Next element.  */
+  asection *section;			/* Section of value.  */
+  bfd_vma value;			/* Value.  */
+};
+
+/* The sets we have seen.  */
+
+static struct set_info *sets;
+
+/* Add an entry to a set.  H is the entry in the linker hash table.
+   RELOC is the relocation to use for an entry in the set.  SECTION
+   and VALUE are the value to add.  This is called during the first
+   phase of the link, when we are still gathering symbols together.
+   We just record the information now.  The ldctor_find_constructors
+   function will construct the sets.  */
+
+void
+ldctor_add_set_entry (h, reloc, section, value)
+     struct bfd_link_hash_entry *h;
+     bfd_reloc_code_real_type reloc;
+     asection *section;
+     bfd_vma value;
+{
+  struct set_info *p;
+  struct set_element *e;
+  struct set_element **epp;
+
+  for (p = sets; p != (struct set_info *) NULL; p = p->next)
+    if (p->h == h)
+      break;
+
+  if (p == (struct set_info *) NULL)
+    {
+      p = (struct set_info *) xmalloc (sizeof (struct set_info));
+      p->next = sets;
+      sets = p;
+      p->h = h;
+      p->reloc = reloc;
+      p->count = 0;
+      p->elements = NULL;
+    }
+  else
+    {
+      if (p->reloc != reloc)
+	{
+	  einfo ("%P%X: Different relocs used in set %s\n", h->root.string);
+	  return;
+	}
+
+      /* Don't permit a set to be constructed from different object
+         file formats.  The same reloc may have different results.  We
+         actually could sometimes handle this, but the case is
+         unlikely to ever arise.  Sometimes constructor symbols are in
+         unusual sections, such as the absolute section--this appears
+         to be the case in Linux a.out--and in such cases we just
+         assume everything is OK.  */
+      if (p->elements != NULL
+	  && section->owner != NULL
+	  && p->elements->section->owner != NULL
+	  && strcmp (bfd_get_target (section->owner),
+		     bfd_get_target (p->elements->section->owner)) != 0)
+	{
+	  einfo ("%P%X: Different object file formats composing set %s\n",
+		 h->root.string);
+	  return;
+	}
     }
 
-    /* There isn't an entry, so add one */
-    ptr = (constructor_list_type *) ldmalloc (sizeof(constructor_list_type));
-    ptr->next = constructor_name_list;
-    ptr->name = name;
-    constructor_name_list = ptr;
+  e = (struct set_element *) xmalloc (sizeof (struct set_element));
+  e->next = NULL;
+  e->section = section;
+  e->value = value;
+
+  for (epp = &p->elements; *epp != NULL; epp = &(*epp)->next)
+    ;
+  *epp = e;
+
+  ++p->count;
 }
 
-void
-ldlang_add_constructor (name)
-     ldsym_type *name;
-{
-  if (name->flags & SYM_CONSTRUCTOR) return;
-  add_constructor_name (name->name);
-  name->flags |= SYM_CONSTRUCTOR;
-}
-
-
-/* this function looks through the sections attached to the supplied
-   bfd to see if any of them are magical constructor sections. If so
-   their names are remembered and added to the list of constructors */
+/* This function is called after the first phase of the link and
+   before the second phase.  At this point all set information has
+   been gathered.  We now put the statements to build the sets
+   themselves into constructor_list.  */
 
 void
-ldlang_check_for_constructors (entry)
-     struct lang_input_statement_struct *entry;
+ldctor_build_sets ()
 {
-    asection *section;
+  lang_statement_list_type *old;
+  struct set_info *p;
 
-    for (section = entry->the_bfd->sections;
-	 section != (asection *)NULL;
-	 section = section->next) 
+  old = stat_ptr;
+  stat_ptr = &constructor_list;
+
+  lang_list_init (stat_ptr);
+
+  for (p = sets; p != (struct set_info *) NULL; p = p->next)
     {
-	if (section->flags & SEC_CONSTRUCTOR) 
-	    add_constructor_name (section->name);
-    }
-}
+      struct set_element *e;
+      reloc_howto_type *howto;
+      int size;
 
+      /* If the symbol is defined, we may have been invoked from
+	 collect, and the sets may already have been built, so we do
+	 not do anything.  */
+      if (p->h->type == bfd_link_hash_defined)
+	continue;
 
-/* run through the symbol table, find all the symbols which are
-   constructors and for each one, create statements to do something
-   like..
-
-   for something like "__CTOR_LIST__, foo" in the assembler
-
-   __CTOR_LIST__ = . ;
-   LONG(__CTOR_LIST_END - . / 4 - 2)
-   *(foo)
-   __CTOR_LIST_END= .
-
-   Put these statements onto a special list.
-
-*/
-
-
-void
-find_constructors ()
-{
-    lang_statement_list_type *old = stat_ptr;
-    constructor_list_type *p = constructor_name_list;
-    stat_ptr = & constructor_list;
-    lang_list_init(stat_ptr);
-    while (p != (constructor_list_type *)NULL) 
-    {
-	/* Have we already done this one ? */
-	CONST char *name = p->name;
-	ldsym_type *lookup = ldsym_get_soft(name);
-
-	/* If ld is invoked from collect, then the constructor list
-	   will already have been defined, so don't do it again. */
-
-	if (lookup->sdefs_chain == (asymbol **)NULL) 
+      /* For each set we build:
+	   set:
+	     .long number_of_elements
+	     .long element0
+	     ...
+	     .long elementN
+	     .long 0
+	 except that we use the right size instead of .long.  When
+	 generating relocateable output, we generate relocs instead of
+	 addresses.  */
+      howto = bfd_reloc_type_lookup (output_bfd, p->reloc);
+      if (howto == (reloc_howto_type *) NULL)
+	{
+	  if (link_info.relocateable)
 	    {
-		size_t len = strlen(name);
-		char *end = ldmalloc(len+3);
-		strcpy(end, name);
-		strcat(end,"$e");
-
-		lang_add_assignment
-		    ( exp_assop('=',name, exp_nameop(NAME,".")));
-
-		lang_add_data
-		    (LONG, exp_binop('-',
-				     exp_binop ( '/',
-						exp_binop ( '-',
-							   exp_nameop(NAME, end),
-							   exp_nameop(NAME,".")),
-						exp_intop(4)),
-
-				     exp_intop(2)));
-
-				      
-		lang_add_wild(name, (char *)NULL);
-		lang_add_data(LONG, exp_intop(0));
-		lang_add_assignment
-		    (exp_assop('=', end, exp_nameop(NAME,".")));
+	      einfo ("%P%X: %s does not support reloc %s for set %s\n",
+		     bfd_get_target (output_bfd),
+		     bfd_get_reloc_code_name (p->reloc),
+		     p->h->root.string);
+	      continue;
 	    }
-	p = p->next;		    
-    }
-    stat_ptr = old;
-}
 
+	  /* If this is not a relocateable link, all we need is the
+	     size, which we can get from the input BFD.  */
+	  howto = bfd_reloc_type_lookup (p->elements->section->owner,
+					 p->reloc);
+	  if (howto == NULL)
+	    {
+	      einfo ("%P%X: %s does not support reloc %s for set %s\n",
+		     bfd_get_target (p->elements->section->owner),
+		     bfd_get_reloc_code_name (p->reloc),
+		     p->h->root.string);
+	      continue;
+	    }
+	}
+
+      switch (bfd_get_reloc_size (howto))
+	{
+	case 1: size = BYTE; break;
+	case 2: size = SHORT; break;
+	case 4: size = LONG; break;
+	case 8: size = QUAD; break;
+	default:
+	  einfo ("%P%X: Unsupported size %d for set %s\n",
+		 bfd_get_reloc_size (howto), p->h->root.string);
+	  size = LONG;
+	  break;
+	}
+
+      lang_add_assignment (exp_assop ('=', p->h->root.string,
+				      exp_nameop (NAME, ".")));
+      lang_add_data (size, exp_intop ((bfd_vma) p->count));
+
+      for (e = p->elements; e != (struct set_element *) NULL; e = e->next)
+	{
+	  if (link_info.relocateable)
+	    lang_add_reloc (p->reloc, howto, e->section,
+			    (const char *) NULL, exp_intop (e->value));
+	  else
+	    lang_add_data (size, exp_relop (e->section, e->value));
+	}
+
+      lang_add_data (size, exp_intop (0));
+    }
+
+  stat_ptr = old;
+}

@@ -1,3 +1,8 @@
+Tue Jan 24 10:32:15 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* ldctor.c (ldctor_add_set_entry): Don't dump core if a
+	constructor entry is in the absolute section.
+
 Mon Jan 23 13:58:13 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* configure.in (i[345]86-*-gnu*): Set ld_target to i386-gnu.
