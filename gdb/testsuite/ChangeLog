@@ -1,3 +1,7 @@
+2000-03-27  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdb.base/printcmds.c: Terminate char array ctable 2 with 0.
+
 Mon Mar 27 14:46:37 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* ChangeLog, gdb.base/commands.exp: Revert whitespace changes.

@@ -53,7 +53,7 @@ unsigned char ctable2[] = {
   'a','a','a','a','a','a','a','a','a','a','a','a','a','X','X','X',
   'a','a','a','a','a','a','a','a','a','a','a','a','a','a','X','X',
   'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','X',
-  'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a'
+  'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a', 0
 };
 
 /* Single and multidimensional arrays to test access and printing of array
