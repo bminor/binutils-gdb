@@ -1,3 +1,7 @@
+Fri Dec 15 16:36:17 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-srec/srec.exp: Remove i960 COFF setup_xfail.
+
 Sat Dec  2 01:20:31 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-srec/srec.exp: Don't use [] in setup_xfail expressions.
