@@ -42,6 +42,10 @@ scriptm.t
 sizeof.exp
 sizeof.s
 sizeof.t
+weak.exp
+weak.t
+weak1.s
+weak2.s
 
 Things-to-lose:
 
