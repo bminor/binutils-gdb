@@ -47,6 +47,7 @@ remote-eb.c\
 remote-hms.c\
 remote-mm.c\
 remote-nindy.c\
+remote-st2000.c\
 remote-udi.c\
 remote-vx.c\
 rs6000-pinsn.c\
@@ -112,6 +113,7 @@ tm-pn.h\
 tm-pyr.h\
 tm-rs6000.h\
 tm-sparc.h\
+tm-st2000.h\
 tm-stratus.h\
 tm-sun2.h\
 tm-sun2os4.h\
@@ -246,6 +248,7 @@ ALLCONFIG=\
 ./config/rs6000.mh\
 ./config/rs6000.mt\
 ./config/rtbsd.mh\
+./config/st2000.mt\
 ./config/stratus.mh\
 ./config/stratus.mt\
 ./config/sun2os3.mh\
