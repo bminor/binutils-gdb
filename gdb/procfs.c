@@ -65,19 +65,19 @@ regardless of whether or not the actual target has floating point hardware.
 
 /* proc name formats may vary depending on the proc implementation */
 #ifdef HAVE_MULTIPLE_PROC_FDS
-  #ifndef CTL_PROC_NAME_FMT
-  #define CTL_PROC_NAME_FMT "/proc/%d/ctl"
-  #define AS_PROC_NAME_FMT "/proc/%d/as"
-  #define MAP_PROC_NAME_FMT "/proc/%d/map"
-  #define STATUS_PROC_NAME_FMT "/proc/%d/status"
-  #endif
+#  ifndef CTL_PROC_NAME_FMT
+#  define CTL_PROC_NAME_FMT "/proc/%d/ctl"
+#  define AS_PROC_NAME_FMT "/proc/%d/as"
+#  define MAP_PROC_NAME_FMT "/proc/%d/map"
+#  define STATUS_PROC_NAME_FMT "/proc/%d/status"
+#  endif
 #else /* HAVE_MULTIPLE_PROC_FDS */
-  #ifndef CTL_PROC_NAME_FMT
-  #define CTL_PROC_NAME_FMT "/proc/%05d"
-  #define AS_PROC_NAME_FMT "/proc/%05d"
-  #define MAP_PROC_NAME_FMT "/proc/%05d"
-  #define STATUS_PROC_NAME_FMT "/proc/%05d"
-  #endif
+#  ifndef CTL_PROC_NAME_FMT
+#  define CTL_PROC_NAME_FMT "/proc/%05d"
+#  define AS_PROC_NAME_FMT "/proc/%05d"
+#  define MAP_PROC_NAME_FMT "/proc/%05d"
+#  define STATUS_PROC_NAME_FMT "/proc/%05d"
+#  endif
 #endif /* HAVE_MULTIPLE_PROC_FDS */
 
 #define MAX_PROC_NAME_SIZE sizeof("/proc/1234567890/status")
@@ -1740,6 +1740,23 @@ unconditionally_kill_inferior (pi)
   procfs_write_pckill (pi);
 #endif /* PROCFS_NEED_PIOCSSIG_FOR_KILL */
 
+#ifdef PR_DEAD
+  /* With Alpha OSF/1 procfs, the process remains stopped after the inferior
+     gets killed. After some time, the stop reason of the inferior changes
+     to PR_DEAD and a PIOCRUN ioctl must be used to finally terminate the
+     process.  While the stop reason has not yet changed to PR_DEAD,
+     the PIOCRUN will return with EAGAIN, and we keep trying.
+     Any other errors are silently ignored as the inferior might have
+     died already.  */
+  while (procfs_read_status (pi) && (pi->prstatus.pr_flags & PR_STOPPED))
+    {
+      pi->prrun.pr_flags = PRCFAULT;
+      if (ioctl (pi->ctl_fd, PIOCRUN, &pi->prrun) >= 0 || errno != EAGAIN)
+        break;
+      sleep (1);
+    }
+#endif
+
   close_proc_file (pi);
 
 /* Only wait() for our direct children.  Our grandchildren zombies are killed
@@ -2340,6 +2357,10 @@ procfs_notice_signals (pid)
 #endif
 
   notice_signals (pi, &sctl);
+
+#ifndef UNIXWARE
+  pi->prrun.pr_trace = sctl.sigset;
+#endif
 }
 
 static void

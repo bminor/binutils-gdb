@@ -1,5 +1,5 @@
 /* Core dump and executable file functions below target vector, for GDB.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -280,7 +280,7 @@ get_core_registers (regno)
   char *the_regs;
   char secname[10];
   enum bfd_flavour our_flavour = bfd_get_flavour (core_bfd);
-  struct core_fns *cf;
+  struct core_fns *cf = NULL;
 
   if (core_file_fns == NULL)
     {

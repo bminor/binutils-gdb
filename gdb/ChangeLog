@@ -1,3 +1,13 @@
+Sat Apr 26 02:42:52 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* corelow.c (get_core_registers):  Initialize cf.
+
+	* procfs.c:  Minor changes to make pre-ANSI compilers happy.
+	(procfs_notice_signals):  Copy traced signal set back to
+	pi->prrun.pr_trace.
+	(unconditionally_kill_inferior):  If PR_DEAD is defined,
+	rerun inferior after killing it.
+
 Fri Apr 25 00:10:18 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config/mn10300/tm-mn10300.h (EXTRACT_STRUCT_VALUE_ADDRESS): The
