@@ -125,11 +125,11 @@ i386_mxcsr_regnum_p (int regnum)
 const char *
 i386_register_name (int reg)
 {
-  if (reg >= 0 && reg < i386_num_register_names)
-    return i386_register_names[reg];
-
   if (i386_mmx_regnum_p (reg))
     return i386_mmx_names[reg - MM0_REGNUM];
+
+  if (reg >= 0 && reg < i386_num_register_names)
+    return i386_register_names[reg];
 
   return NULL;
 }

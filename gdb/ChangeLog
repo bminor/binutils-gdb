@@ -1,5 +1,9 @@
 2003-05-31  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_register_name): Check for MMX registers first.
+	Fixes a bug where GDB would print the wrong register names for
+	targets without SSE.
+
 	* x86-64-tdep.c (X86_64_NUM_SAVED_REGS): Set to X86_64_NUM_GREGS.
 	(x86_64_sigtramp_frame_cache): Use `sc_reg_offset' to find saved
 	registers.
