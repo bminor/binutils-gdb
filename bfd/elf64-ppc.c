@@ -5164,6 +5164,7 @@ ppc64_elf_build_stubs (info)
 	    }
 	  bfd_put_32 (htab->sglink->owner,
 		      B_DOT | ((htab->sglink->contents - p) & 0x3fffffc), p);
+	  indx++;
 	  p += 4;
 	}
       htab->sglink->_cooked_size = p - htab->sglink->contents;
