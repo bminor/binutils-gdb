@@ -128,7 +128,10 @@ bsd_kvm_fetch_registers (int regnum)
   struct nlist nl[2];
 
   if (bsd_kvm_paddr)
-    bsd_kvm_fetch_pcb (bsd_kvm_paddr);
+    {
+      bsd_kvm_fetch_pcb (bsd_kvm_paddr);
+      return;
+    }
 
   /* On dumping core, BSD kernels store the faulting context (PCB)
      in the variable "dumppcb".  */
@@ -185,8 +188,8 @@ bsd_kvm_fetch_registers (int regnum)
       struct pcb *paddr;
 
       /* Found thread0.  */
-      nl[1].n_value += offsetof (struct thread, td_pcb);
-      if (kvm_read (core_kd, nl[1].n_value, &paddr, sizeof paddr) == -1)
+      nl[0].n_value += offsetof (struct thread, td_pcb);
+      if (kvm_read (core_kd, nl[0].n_value, &paddr, sizeof paddr) == -1)
 	error ("%s", kvm_geterr (core_kd));
 
       bsd_kvm_fetch_pcb (paddr);

@@ -1,5 +1,9 @@
 2004-06-27  Mark Kettenis  <kettenis@gnu.org>
 
+	* bsd-kvm.c (bsd_kvm_fetch_registers): Directly return after
+	fetching from BSD_KVM_PADDR.  Correctly lookup address for
+	"_thread0".
+
 	* amd64fbsd-nat.c: Include <sys/types.h, <machine/pcb.h> and
 	"bsd-kvm.h".
 	(amd64fbsd_supply_pcb): New funcion.
