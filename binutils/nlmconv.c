@@ -41,6 +41,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libnlm.h"
 #include "nlmconv.h"
 
+/* Needed for Alpha support.  */
+#include "coff/sym.h"
+#include "coff/ecoff.h"
+
 /* If strerror is just a macro, we want to use the one from libiberty
    since it will handle undefined values.  */
 #undef strerror
@@ -70,7 +74,7 @@ static asymbol **symbols;
 /* The list of long options.  */
 static struct option long_options[] =
 {
-  { "header-info", required_argument, 0, 'T' },
+  { "header-file", required_argument, 0, 'T' },
   { "help", no_argument, 0, 'h' },
   { "input-format", required_argument, 0, 'I' },
   { "output-format", required_argument, 0, 'O' },
@@ -83,15 +87,21 @@ static struct option long_options[] =
 static void show_help PARAMS ((void));
 static void show_usage PARAMS ((FILE *, int));
 static const char *select_output_format PARAMS ((enum bfd_architecture,
-						 long, boolean));
+						 unsigned long, boolean));
 static void setup_sections PARAMS ((bfd *, asection *, PTR));
 static void copy_sections PARAMS ((bfd *, asection *, PTR));
-static void mangle_relocs PARAMS ((bfd *, asection *, arelent **,
+static void mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
 				   bfd_size_type *, char *,
 				   bfd_size_type));
-static void i386_mangle_relocs PARAMS ((bfd *, asection *, arelent **,
+static void i386_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
 					bfd_size_type *, char *,
 					bfd_size_type));
+static void alpha_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
+					 bfd_size_type *, char *,
+					 bfd_size_type));
+static void default_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
+					   bfd_size_type *, char *,
+					   bfd_size_type));
 
 /* The main routine.  */
 
@@ -117,11 +127,11 @@ main (argc, argv)
   boolean gotstart, gotexit, gotcheck;
   struct stat st;
   FILE *custom_data, *help_data, *message_data, *rpc_data, *shared_data;
-  bfd_size_type custom_size, help_size, message_size, module_size, rpc_size;
+  size_t custom_size, help_size, message_size, module_size, rpc_size;
   asection *custom_section, *help_section, *message_section, *module_section;
   asection *rpc_section, *shared_section;
   bfd *sharedbfd;
-  bfd_size_type shared_offset, shared_size;
+  size_t shared_offset, shared_size;
   Nlm_Internal_Fixed_Header sharedhdr;
   int len;
   char *modname;
@@ -750,13 +760,13 @@ main (argc, argv)
   if (modules != NULL)
     {
       PTR data;
-      char *set;
+      unsigned char *set;
       struct string_list *l;
       bfd_size_type c;
 
       data = xmalloc (module_size);
       c = 0;
-      set = (char *) data;
+      set = (unsigned char *) data;
       for (l = modules; l != NULL; l = l->next)
 	{
 	  *set = strlen (l->string);
@@ -896,7 +906,7 @@ Usage: %s [-hV] [-I format] [-O format] [-T header-file]\n\
 static const char *
 select_output_format (arch, mach, bigendian)
      enum bfd_architecture arch;
-     long mach;
+     unsigned long mach;
      boolean bigendian;
 {
   switch (arch)
@@ -905,6 +915,8 @@ select_output_format (arch, mach, bigendian)
       return "nlm32-i386";
     case bfd_arch_sparc:
       return "nlm32-sparc";
+    case bfd_arch_alpha:
+      return "nlm32-alpha";
     default:
       fprintf (stderr, "%s: no default NLM format for %s\n",
 	       program_name, bfd_printable_arch_mach (arch, mach));
@@ -929,6 +941,13 @@ setup_sections (inbfd, insec, data_ptr)
   flagword f;
   const char *outname;
   asection *outsec;
+
+  /* FIXME: We don't want to copy the .reginfo section of an ECOFF
+     file.  However, I don't have a good way to describe this section.
+     We do want to copy the section when using objcopy.  */
+  if (bfd_get_flavour (inbfd) == bfd_target_ecoff_flavour
+      && strcmp (bfd_section_name (inbfd, insec), ".reginfo") == 0)
+    return;
 
   f = bfd_get_section_flags (inbfd, insec);
   if (f & SEC_CODE)
@@ -964,6 +983,8 @@ setup_sections (inbfd, insec, data_ptr)
 
   if (! bfd_set_section_flags (outbfd, outsec, f))
     bfd_fatal ("set section flags");
+
+  bfd_set_reloc (outbfd, outsec, (arelent **) NULL, 0);
 }
 
 /* Copy the section contents.  */
@@ -979,6 +1000,13 @@ copy_sections (inbfd, insec, data_ptr)
   bfd_size_type size;
   PTR contents;
   bfd_size_type reloc_size;
+
+  /* FIXME: We don't want to copy the .reginfo section of an ECOFF
+     file.  However, I don't have a good way to describe this section.
+     We do want to copy the section when using objcopy.  */
+  if (bfd_get_flavour (inbfd) == bfd_target_ecoff_flavour
+      && strcmp (bfd_section_name (inbfd, insec), ".reginfo") == 0)
+    return;
 
   outsec = insec->output_section;
   assert (outsec != NULL);
@@ -1002,17 +1030,33 @@ copy_sections (inbfd, insec, data_ptr)
     }
 
   reloc_size = bfd_get_reloc_upper_bound (inbfd, insec);
-  if (reloc_size == 0)
-    bfd_set_reloc (outbfd, outsec, (arelent **) NULL, 0);
-  else
+  if (reloc_size != 0)
     {
       arelent **relocs;
       bfd_size_type reloc_count;
 
       relocs = (arelent **) xmalloc (reloc_size);
       reloc_count = bfd_canonicalize_reloc (inbfd, insec, relocs, symbols);
-      mangle_relocs (outbfd, insec, relocs, &reloc_count, (char *) contents,
+      mangle_relocs (outbfd, insec, &relocs, &reloc_count, (char *) contents,
 		     size);
+
+      /* FIXME: refers to internal BFD fields.  */
+      if (outsec->orelocation != (arelent **) NULL)
+	{
+	  bfd_size_type total_count;
+	  arelent **combined;
+
+	  total_count = reloc_count + outsec->reloc_count;
+	  combined = (arelent **) xmalloc (total_count * sizeof (arelent));
+	  memcpy (combined, outsec->orelocation,
+		  outsec->reloc_count * sizeof (arelent));
+	  memcpy (combined + outsec->reloc_count, relocs,
+		  (size_t) (reloc_count * sizeof (arelent)));
+	  free (outsec->orelocation);
+	  reloc_count = total_count;
+	  relocs = combined;
+	}
+
       bfd_set_reloc (outbfd, outsec, relocs, reloc_count);
     }
 
@@ -1029,10 +1073,11 @@ copy_sections (inbfd, insec, data_ptr)
    by the input formats.  */
 
 static void
-mangle_relocs (outbfd, insec, relocs, reloc_count_ptr, contents, contents_size)
+mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
+	       contents_size)
      bfd *outbfd;
      asection *insec;
-     arelent **relocs;
+     arelent ***relocs_ptr;
      bfd_size_type *reloc_count_ptr;
      char *contents;
      bfd_size_type contents_size;
@@ -1040,11 +1085,44 @@ mangle_relocs (outbfd, insec, relocs, reloc_count_ptr, contents, contents_size)
   switch (bfd_get_arch (outbfd))
     {
     case bfd_arch_i386:
-      i386_mangle_relocs (outbfd, insec, relocs, reloc_count_ptr, contents,
-			  contents_size);
+      i386_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr,
+			  contents, contents_size);
+      break;
+    case bfd_arch_alpha:
+      alpha_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr,
+			   contents, contents_size);
       break;
     default:
+      default_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr,
+			     contents, contents_size);
       break;
+    }
+}
+
+/* By default all we need to do for relocs is change the address by
+   the output_offset.  */
+
+/*ARGSUSED*/
+static void
+default_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
+		       contents_size)
+     bfd *outbfd;
+     asection *insec;
+     arelent ***relocs_ptr;
+     bfd_size_type *reloc_count_ptr;
+     char *contents;
+     bfd_size_type contents_size;
+{
+  if (insec->output_offset != 0)
+    {
+      bfd_size_type reloc_count;
+      register arelent **relocs;
+      register bfd_size_type i;
+
+      reloc_count = *reloc_count_ptr;
+      relocs = *relocs_ptr;
+      for (i = 0; i < reloc_count; i++, relocs++)
+	(*relocs)->address += insec->output_offset;
     }
 }
 
@@ -1070,18 +1148,20 @@ static reloc_howto_type nlm_i386_pcrel_howto =
 	 true);			/* pcrel_offset */
 
 static void
-i386_mangle_relocs (outbfd, insec, relocs, reloc_count_ptr, contents,
+i386_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 		    contents_size)
      bfd *outbfd;
      asection *insec;
-     arelent **relocs;
+     arelent ***relocs_ptr;
      bfd_size_type *reloc_count_ptr;
      char *contents;
      bfd_size_type contents_size;
 {
   bfd_size_type reloc_count, i;
+  arelent **relocs;
 
   reloc_count = *reloc_count_ptr;
+  relocs = *relocs_ptr;
   for (i = 0; i < reloc_count; i++)
     {
       arelent *rel;
@@ -1115,7 +1195,7 @@ i386_mangle_relocs (outbfd, insec, relocs, reloc_count_ptr, contents,
 	  --*reloc_count_ptr;
 	  --relocs;
 	  memmove (relocs, relocs + 1,
-		   (reloc_count - i) * sizeof (arelent *));
+		   (size_t) ((reloc_count - i) * sizeof (arelent *)));
 	  continue;
 	}
 
@@ -1142,7 +1222,7 @@ i386_mangle_relocs (outbfd, insec, relocs, reloc_count_ptr, contents,
 	  --*reloc_count_ptr;
 	  --relocs;
 	  memmove (relocs, relocs + 1,
-		   (reloc_count - i) * sizeof (arelent *));
+		   (size_t) ((reloc_count - i) * sizeof (arelent *)));
 	  continue;
 	}
 
@@ -1198,5 +1278,114 @@ i386_mangle_relocs (outbfd, insec, relocs, reloc_count_ptr, contents,
 	  /* We must change to a new howto.  */
 	  rel->howto = &nlm_i386_pcrel_howto;
 	}
+    }
+}
+
+/* On the Alpha the first reloc for every section must be a special
+   relocs which hold the GP address.  Also, the first reloc in the
+   file must be a special reloc which holds the address of the .lita
+   section.  */
+
+static reloc_howto_type nlm32_alpha_nw_howto =
+  HOWTO (ALPHA_R_NW_RELOC,	/* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 0,			/* special_function */
+	 "NW_RELOC",		/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 false);		/* pcrel_offset */
+
+/*ARGSUSED*/
+static void
+alpha_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
+		     contents_size)
+     bfd *outbfd;
+     asection *insec;
+     register arelent ***relocs_ptr;
+     bfd_size_type *reloc_count_ptr;
+     char *contents;
+     bfd_size_type contents_size;
+{
+  bfd_size_type old_reloc_count;
+  arelent **old_relocs;
+  register arelent **relocs;
+
+  old_reloc_count = *reloc_count_ptr;
+  old_relocs = *relocs_ptr;
+  relocs = (arelent **) xmalloc ((old_reloc_count + 3) * sizeof (arelent *));
+  *relocs_ptr = relocs;
+
+  if (nlm_alpha_backend_data (outbfd)->lita_address == 0)
+    {
+      bfd *inbfd;
+      asection *lita_section;
+
+      inbfd = insec->owner;
+      lita_section = bfd_get_section_by_name (inbfd, _LITA);
+      if (lita_section != (asection *) NULL)
+	{
+	  nlm_alpha_backend_data (outbfd)->lita_address =
+	    bfd_get_section_vma (inbfd, lita_section);
+	  nlm_alpha_backend_data (outbfd)->lita_size =
+	    bfd_section_size (inbfd, lita_section);
+	}
+      else
+	{
+	  /* Avoid outputting this reloc again.  */
+	  nlm_alpha_backend_data (outbfd)->lita_address = 4;
+	}
+
+      *relocs = (arelent *) xmalloc (sizeof (arelent));
+      (*relocs)->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
+      (*relocs)->address = nlm_alpha_backend_data (outbfd)->lita_address;
+      (*relocs)->addend = nlm_alpha_backend_data (outbfd)->lita_size + 1;
+      (*relocs)->howto = &nlm32_alpha_nw_howto;
+      ++relocs;
+      ++(*reloc_count_ptr);
+    }
+
+  /* Get the GP value from bfd.  It is in the .reginfo section.  */
+  if (nlm_alpha_backend_data (outbfd)->gp == 0)
+    {
+      bfd *inbfd;
+      asection *reginfo_sec;
+      struct ecoff_reginfo sreginfo;
+
+      inbfd = insec->owner;
+      assert (bfd_get_flavour (inbfd) == bfd_target_ecoff_flavour);
+      reginfo_sec = bfd_get_section_by_name (inbfd, REGINFO);
+      if (reginfo_sec != (asection *) NULL
+	  && bfd_get_section_contents (inbfd, reginfo_sec,
+				       (PTR) &sreginfo, (file_ptr) 0,
+				       sizeof sreginfo) != false)
+	nlm_alpha_backend_data (outbfd)->gp = sreginfo.gp_value;
+    }
+
+  *relocs = (arelent *) xmalloc (sizeof (arelent));
+  (*relocs)->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
+  (*relocs)->address = nlm_alpha_backend_data (outbfd)->gp;
+  (*relocs)->addend = 0;
+  (*relocs)->howto = &nlm32_alpha_nw_howto;
+  ++relocs;
+  ++(*reloc_count_ptr);
+
+  memcpy ((PTR) relocs, (PTR) old_relocs,
+	  (size_t) old_reloc_count * sizeof (arelent *));
+  relocs[old_reloc_count] = (arelent *) NULL;
+
+  free (old_relocs);
+
+  if (insec->output_offset != 0)
+    {
+      register bfd_size_type i;
+
+      for (i = 0; i < old_reloc_count; i++, relocs++)
+	(*relocs)->address += insec->output_offset;
     }
 }

@@ -1,3 +1,8 @@
+Mon Dec  6 16:11:32 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* nlmconv.c (long_options): Changed --header-info to --header-file
+	to match documentation and usage message.
+
 Sun Dec  5 01:31:01 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* objdump.c (dump_relocs): Avoid dereferencing a NULL sym_ptr_ptr
