@@ -13209,6 +13209,35 @@ assembly and registers
 
 @end itemize
 
+On top of the command window a status line gives various information
+concerning the current process begin debugged.  The status line is
+updated when the information it shows changes.  The following fields
+are displayed:
+
+@table @emph
+@item target
+Indicates the current gdb target
+(@pxref{Targets, ,Specifying a Debugging Target}).
+
+@item process
+Gives information about the current process or thread number.
+When no process is being debugged, this field is set to @code{No process}.
+
+@item function
+Gives the current function name for the selected frame.
+The name is demangled if demangling is turned on (@pxref{Print Settings}).
+When there is no symbol corresponding to the current program counter
+the string @code{??} is displayed.
+
+@item line
+Indicates the current line number for the selected frame.
+When the current line number is not known the string @code{??} is displayed.
+
+@item pc
+Indicates the current program counter address.
+
+@end table
+
 @node TUI Keys
 @section TUI Key Bindings
 @cindex TUI key bindings
