@@ -1,5 +1,13 @@
 2004-11-07  Mark Kettenis  <kettenis@gnu.org>
 
+	* mipsnbsd-tdep.c (mipsnbsd_ilp32_fetch_link_map_offsets): Renamed
+	from mipsnbsd_ilp32_solib_svr4_fetch_link_map_offsets.  Trim sizes
+	to only include the structure members we actually need.
+	(mipsnbsd_lp64_fetch_link_map_offsets): Renamed from
+	mipsnbsd_lp64_solib_svr4_fetch_link_map_offsets.  Trim sizes to
+	only include the structure members we actually need.
+	(mipsnbsd_init_abi): Update.
+
 	* mips64obsd-nat.c: Include "mips-tdep.h".
 	(MIPS64OBSD_NUM_REGS): Remove define.
 	(MIPS_PC_REGNUM, MIPS_FP0_REGNUM, MIPS_FSR_REGNUM): New defines.

@@ -312,10 +312,13 @@ mipsnbsd_cannot_store_register (int regno)
 	  || regno == mips_regnum (current_gdbarch)->fp_implementation_revision);
 }
 
-/* NetBSD/mips uses a slightly different link_map structure from the
+/* Shared library support.  */
+
+/* NetBSD/mips uses a slightly different `struct link_map' than the
    other NetBSD platforms.  */
+
 static struct link_map_offsets *
-mipsnbsd_ilp32_solib_svr4_fetch_link_map_offsets (void)
+mipsnbsd_ilp32_fetch_link_map_offsets (void)
 {
   static struct link_map_offsets lmo;
   static struct link_map_offsets *lmp = NULL;
@@ -324,22 +327,19 @@ mipsnbsd_ilp32_solib_svr4_fetch_link_map_offsets (void)
     {
       lmp = &lmo;
 
-      lmo.r_debug_size = 16;
-
+      /* Everything we need is in the first 8 bytes.  */
+      lmo.r_debug_size = 8;
       lmo.r_map_offset = 4;
       lmo.r_map_size   = 4;
 
+      /* Everything we need is in the first 24 bytes.  */
       lmo.link_map_size = 24;
-
       lmo.l_addr_offset = 4;
       lmo.l_addr_size   = 4;
-
       lmo.l_name_offset = 8;
       lmo.l_name_size   = 4;
-
       lmo.l_next_offset = 16;
       lmo.l_next_size   = 4;
-
       lmo.l_prev_offset = 20;
       lmo.l_prev_size   = 4;
     }
@@ -348,7 +348,7 @@ mipsnbsd_ilp32_solib_svr4_fetch_link_map_offsets (void)
 }
 
 static struct link_map_offsets *
-mipsnbsd_lp64_solib_svr4_fetch_link_map_offsets (void)
+mipsnbsd_lp64_fetch_link_map_offsets (void)
 {
   static struct link_map_offsets lmo;
   static struct link_map_offsets *lmp = NULL;
@@ -357,28 +357,26 @@ mipsnbsd_lp64_solib_svr4_fetch_link_map_offsets (void)
     {
       lmp = &lmo;
 
-      lmo.r_debug_size = 32;
-
+      /* Everything we need is in the first 16 bytes.  */
+      lmo.r_debug_size = 16;
       lmo.r_map_offset = 8;  
       lmo.r_map_size   = 8;
 
+      /* Everything we need is in the first 40 bytes.  */
       lmo.link_map_size = 48;
-
       lmo.l_addr_offset = 0;
       lmo.l_addr_size   = 8;
-
       lmo.l_name_offset = 16; 
       lmo.l_name_size   = 8;
-
       lmo.l_next_offset = 32;
       lmo.l_next_size   = 8;
-
       lmo.l_prev_offset = 40;
       lmo.l_prev_size   = 8;
     }
 
   return lmp;
 }
+
 
 static void
 mipsnbsd_init_abi (struct gdbarch_info info,
@@ -394,10 +392,11 @@ mipsnbsd_init_abi (struct gdbarch_info info,
 
   set_gdbarch_software_single_step (gdbarch, mips_software_single_step);
 
-  set_solib_svr4_fetch_link_map_offsets (gdbarch,
-					 gdbarch_ptr_bit (gdbarch) == 32 ?
-                            mipsnbsd_ilp32_solib_svr4_fetch_link_map_offsets :
-			    mipsnbsd_lp64_solib_svr4_fetch_link_map_offsets);
+  /* NetBSD/mips has SVR4-style shared libraries.  */
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, (gdbarch_ptr_bit (gdbarch) == 32 ?
+	       mipsnbsd_ilp32_fetch_link_map_offsets :
+	       mipsnbsd_lp64_fetch_link_map_offsets));
 }
 
 
