@@ -1,3 +1,44 @@
+Tue Mar 24 15:27:00 1998  Joyce Janczyn  <janczyn@cygnus.com>
+
+	Add support for --enable-sim-common option.
+	* Makefile.in (WITHOUT_COMMON_OBJS): Files included if
+	! --enable-sim-common
+	(WITH_COMMON_OBJS): Files included if --enable-sim-common.
+	(MN10300_OBJS,MN10300_INTERP_DEP): New variables.
+	(SIM_OBJS): Rewrite.
+	({WITHOUT,WITH}_COMMON_RUN_OBJS,SIM_RUN_OBJS): New variables.
+	(SIM_EXTRA_CFLAGS): New variable.
+	(clean-extra): Clean up igen files.
+	(../igen/igen,clean-igen,tmp-igen): New rules.
+	* configure.in: Add support for common framework via 
+	--enable-sim-common.
+	* configure: Regenerate.
+	* interp.c: #include sim-main if WITH_COMMON, not mn10300_sim.h.
+	(hash,dispatch,sim_size): Don't compile if ! WITH_COMMON.
+	(init_system,sim_write,compare_simops): Likewise.
+	(sim_set_profile,sim_set_profile_size): Likewise.
+	(sim_stop,sim_resume,sim_trace,sim_info): Likewise.
+	(sim_set_callbacks,sim_stop_reason,sim_read,sim_load): Likewise.
+	(enum interrupt_type): New enum.
+	(interrupt_names): New global.
+	(do_interrupt): New function.
+	(sim_open): Define differently if WITH_COMMON.
+	(sim_close,sim_create_inferior,sim_do_command): Likewise.
+	* mn10300_sim.h ({load,store}_{byte,half,word}): Define versions
+	for WITH_COMMON.
+	* mn10300.igen: New file.
+	* mn10300.dc: New file.
+	* op_utils.c: New file.
+	* sim-main.h: New file.
+
+Wed Mar 18 12:38:12 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Fri Feb 27 18:36:04 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c (inc): Fix typo.
+
 Wed Feb 25 01:59:29 1998  Jeffrey A Law  (law@cygnus.com)
 
         * simops.c (signed multiply instructions): Cast input operands to
