@@ -1,3 +1,12 @@
+Sat Oct 30 14:12:31 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/all/gas.exp: Disable (and fail) p1480.s for all PA targets.
+
+Fri Oct 29 16:29:06 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/more.parse/calldatabug.s: Colonize.
+	* gas/hppa/more.parse/parse.exp: Fix typos.
+
 Thu Oct 28 21:40:06 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/{basic, more.parse, reloc, unsorted}: New directories.
