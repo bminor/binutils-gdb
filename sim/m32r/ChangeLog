@@ -1,3 +1,24 @@
+1998-11-18  Doug Evans  <devans@casey.cygnus.com>
+
+	* Makefile.in (M32R_OBJS): Delete extract.o.
+	(extract.o): Delete.
+	(stamp-arch): Depend on $(CGEN_ARCH_SCM).
+	(stamp-cpu): Don't build extract.c.
+	* cpu.c,cpu.h,decode.c,decode.h,sem-switch.c,sem.c: Rebuild.
+	* mloop.in (extract16): Update type of `insn' arg.
+	Delete call to d->extract.
+	(extract32): Ditto.
+start-sanitize-m32rx
+	* Makefile.in (M32RX_OBJS): Delete extractx.o.
+	(extractx.o): Delete.
+	(stamp-xcpu): Don't build extractx.c.
+	* cpux.c,cpux.h,decodex.c,decodex.h,semx-switch.c: Rebuild.
+	* mloopx.in (extractx16): Update type of `insn' arg.
+	Delete call to d->extract.  Delete arg pbb_p.  All callers updated.
+	(extract-simple,full-exec-simple,fast-exec-simple): Delete.
+	(extractx32): Ditto.
+end-sanitize-m32rx
+
 Wed Nov  4 23:55:37 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* sim-main.h: Delete inclusion of config.h, include sim-basics.h

@@ -16,7 +16,7 @@
 
 Do-first:
 
-m32rx_files="cpux.c cpux.h decodex.c decodex.h extractx.c m32rx.c mloopx.in modelx.c semx-switch.c"
+m32rx_files="cpux.c cpux.h decodex.c decodex.h m32rx.c mloopx.in modelx.c semx-switch.c"
 if ( echo $* | grep keep\-m32rx > /dev/null ) ; then
         keep_these_too="${m32rx_files} ${keep_these_too}"
 else
@@ -47,7 +47,6 @@ cpuall.h
 decode.c
 decode.h
 devices.c
-extract.c
 m32r-sim.h
 m32r.c
 mloop.in
