@@ -3,6 +3,9 @@
 /* Define if using alloca.c.  */
 #undef C_ALLOCA
 
+/* Define to empty if the keyword does not work.  */
+#undef const
+
 /* Define to one of _getb67, GETB67, getb67 for Cray-2 and Cray-YMP systems.
    This function is required for alloca.c support on those systems.  */
 #undef CRAY_STACKSEG_END
@@ -13,8 +16,20 @@
 /* Define if you have <alloca.h> and it should be used (not on Ultrix).  */
 #undef HAVE_ALLOCA_H
 
+/* Define if you have a working `mmap' system call.  */
+#undef HAVE_MMAP
+
 /* Define as __inline if that's what the C compiler calls it.  */
 #undef inline
+
+/* Define to `long' if <sys/types.h> doesn't define.  */
+#undef off_t
+
+/* Define if you need to in order for stat and other things to work.  */
+#undef _POSIX_SOURCE
+
+/* Define to `unsigned' if <sys/types.h> doesn't define.  */
+#undef size_t
 
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
@@ -25,14 +40,11 @@
  */
 #undef STACK_DIRECTION
 
+/* Define if you have the ANSI C header files.  */
+#undef STDC_HEADERS
+
 /* Define if lex declares yytext as a char * by default, not a char[].  */
 #undef YYTEXT_POINTER
-
-/* Name of package.  */
-#undef PACKAGE
-
-/* Version of package.  */
-#undef VERSION
 
 /* Should gas use high-level BFD interfaces?  */
 #undef BFD_ASSEMBLER
@@ -70,9 +82,9 @@
 
 #undef MANY_SEGMENTS
 
-/* Needed only for sparc configuration.  */
-#undef SPARC_V9
-#undef SPARC_ARCH64
+/* The configure script defines this for some targets based on the
+   target name used.  It is not always defined.  */
+#undef TARGET_BYTES_BIG_ENDIAN
 
 /* Needed only for some configurations that can produce multiple output
    formats.  */
@@ -99,20 +111,83 @@
 /* Using cgen code?  */
 #undef USING_CGEN
 
+/* Needed only for sparc configuration.  */
+#undef DEFAULT_ARCH
+
+/* Needed only for PowerPC Solaris.  */
+#undef TARGET_SOLARIS_COMMENT
+
+/* Needed only for SCO 5.  */
+#undef SCO_ELF
+
+/* Define if you have the __argz_count function.  */
+#undef HAVE___ARGZ_COUNT
+
+/* Define if you have the __argz_next function.  */
+#undef HAVE___ARGZ_NEXT
+
+/* Define if you have the __argz_stringify function.  */
+#undef HAVE___ARGZ_STRINGIFY
+
+/* Define if you have the dcgettext function.  */
+#undef HAVE_DCGETTEXT
+
+/* Define if you have the getcwd function.  */
+#undef HAVE_GETCWD
+
+/* Define if you have the getpagesize function.  */
+#undef HAVE_GETPAGESIZE
+
+/* Define if you have the munmap function.  */
+#undef HAVE_MUNMAP
+
+/* Define if you have the putenv function.  */
+#undef HAVE_PUTENV
+
 /* Define if you have the remove function.  */
 #undef HAVE_REMOVE
 
 /* Define if you have the sbrk function.  */
 #undef HAVE_SBRK
 
+/* Define if you have the setenv function.  */
+#undef HAVE_SETENV
+
+/* Define if you have the setlocale function.  */
+#undef HAVE_SETLOCALE
+
+/* Define if you have the stpcpy function.  */
+#undef HAVE_STPCPY
+
+/* Define if you have the strcasecmp function.  */
+#undef HAVE_STRCASECMP
+
+/* Define if you have the strchr function.  */
+#undef HAVE_STRCHR
+
 /* Define if you have the unlink function.  */
 #undef HAVE_UNLINK
+
+/* Define if you have the <argz.h> header file.  */
+#undef HAVE_ARGZ_H
 
 /* Define if you have the <errno.h> header file.  */
 #undef HAVE_ERRNO_H
 
+/* Define if you have the <limits.h> header file.  */
+#undef HAVE_LIMITS_H
+
+/* Define if you have the <locale.h> header file.  */
+#undef HAVE_LOCALE_H
+
+/* Define if you have the <malloc.h> header file.  */
+#undef HAVE_MALLOC_H
+
 /* Define if you have the <memory.h> header file.  */
 #undef HAVE_MEMORY_H
+
+/* Define if you have the <nl_types.h> header file.  */
+#undef HAVE_NL_TYPES_H
 
 /* Define if you have the <stdarg.h> header file.  */
 #undef HAVE_STDARG_H
@@ -126,11 +201,36 @@
 /* Define if you have the <strings.h> header file.  */
 #undef HAVE_STRINGS_H
 
+/* Define if you have the <sys/param.h> header file.  */
+#undef HAVE_SYS_PARAM_H
+
 /* Define if you have the <sys/types.h> header file.  */
 #undef HAVE_SYS_TYPES_H
 
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
 
+/* Define if you have the <values.h> header file.  */
+#undef HAVE_VALUES_H
+
 /* Define if you have the <varargs.h> header file.  */
 #undef HAVE_VARARGS_H
+
+/* Name of package */
+#undef PACKAGE
+
+/* Version number of package */
+#undef VERSION
+
+/* Define if you have the stpcpy function */
+#undef HAVE_STPCPY
+
+/* Define if your locale.h file contains LC_MESSAGES. */
+#undef HAVE_LC_MESSAGES
+
+/* Define to 1 if NLS is requested */
+#undef ENABLE_NLS
+
+/* Define as 1 if you have gettext and don't want to use GNU gettext. */
+#undef HAVE_GETTEXT
+

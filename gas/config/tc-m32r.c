@@ -23,7 +23,8 @@
 #include "as.h"
 #include "subsegs.h"     
 #include "symcat.h"
-#include "cgen-opc.h"
+#include "opcodes/m32r-desc.h"
+#include "opcodes/m32r-opc.h"
 #include "cgen.h"
 
 /* Linked list of symbols that are debugging symbols to be defined as the
@@ -506,14 +507,19 @@ md_begin ()
   /* Initialize the `cgen' interface.  */
   
   /* Set the machine number and endian.  */
-  gas_cgen_opcode_desc = m32r_cgen_opcode_open (0 /* mach number */,
-						target_big_endian ?
-						CGEN_ENDIAN_BIG
-						: CGEN_ENDIAN_LITTLE);
-  m32r_cgen_init_asm (gas_cgen_opcode_desc);
+  gas_cgen_cpu_desc = m32r_cgen_cpu_open (0 /* mach number */,
+					  target_big_endian ?
+					  CGEN_ENDIAN_BIG
+					  : CGEN_ENDIAN_LITTLE);
+  m32r_cgen_init_asm (gas_cgen_cpu_desc);
+
+  /* The operand instance table is used during optimization to determine
+     which insns can be executed in parallel.  It is also used to give
+     warnings regarding operand interference in parallel insns.  */
+  m32r_cgen_init_opinst_table (gas_cgen_cpu_desc);
 
   /* This is a callback from cgen to gas to parse operands.  */
-  cgen_set_parse_operand_fn (gas_cgen_opcode_desc, gas_cgen_parse_operand);
+  cgen_set_parse_operand_fn (gas_cgen_cpu_desc, gas_cgen_parse_operand);
 
 #if 0 /* not supported yet */
   /* If a runtime cpu description file was provided, parse it.  */
@@ -521,7 +527,7 @@ md_begin ()
     {
       const char * errmsg;
 
-      errmsg = cgen_read_cpu_file (gas_cgen_opcode_desc, m32r_cpu_desc);
+      errmsg = cgen_read_cpu_file (gas_cgen_cpu_desc, m32r_cpu_desc);
       if (errmsg != NULL)
 	as_bad ("%s: %s", m32r_cpu_desc, errmsg);
     }
@@ -563,11 +569,11 @@ md_begin ()
 
 /* start-sanitize-cygnus */
 
-#define OPERAND_IS_COND_BIT(operand, indices, index) 			\
-	(CGEN_OPERAND_INSTANCE_HW (operand)->type == HW_H_COND		\
-	 || (CGEN_OPERAND_INSTANCE_HW (operand)->type == HW_H_PSW)	\
-	 || (CGEN_OPERAND_INSTANCE_HW (operand)->type == HW_H_CR	\
-	     && (indices [index] == 0 || indices [index] == 1)))
+#define OPERAND_IS_COND_BIT(operand, indices, index) \
+  ((operand)->hw->type == HW_H_COND			\
+   || ((operand)->hw->type == HW_H_PSW)			\
+   || ((operand)->hw->type == HW_H_CR			\
+       && (indices [index] == 0 || indices [index] == 1)))
 
 /* Returns true if an output of instruction 'a' is referenced by an operand
    of instruction 'b'.  If 'check_outputs' is true then b's outputs are
@@ -579,9 +585,9 @@ first_writes_to_seconds_operands (a, b, check_outputs)
      m32r_insn * b;
      const int   check_outputs;
 {
-  const CGEN_OPERAND_INSTANCE * a_operands = CGEN_INSN_OPERANDS (a->insn);
-  const CGEN_OPERAND_INSTANCE * b_ops = CGEN_INSN_OPERANDS (b->insn);
-  int                           a_index;
+  const CGEN_OPINST * a_operands = CGEN_INSN_OPERANDS (a->insn);
+  const CGEN_OPINST * b_ops = CGEN_INSN_OPERANDS (b->insn);
+  int a_index;
 
   /* If at least one of the instructions takes no operands, then there is
      nothing to check.  There really are instructions without operands,
@@ -591,13 +597,13 @@ first_writes_to_seconds_operands (a, b, check_outputs)
       
   /* Scan the operand list of 'a' looking for an output operand.  */
   for (a_index = 0;
-       CGEN_OPERAND_INSTANCE_TYPE (a_operands) != CGEN_OPERAND_INSTANCE_END;
+       a_operands->type != CGEN_OPINST_END;
        a_index ++, a_operands ++)
     {
-      if (CGEN_OPERAND_INSTANCE_TYPE (a_operands) == CGEN_OPERAND_INSTANCE_OUTPUT)
+      if (a_operands->type == CGEN_OPINST_OUTPUT)
 	{
 	  int b_index;
-	  const CGEN_OPERAND_INSTANCE * b_operands = b_ops;
+	  const CGEN_OPINST * b_operands = b_ops;
 
 	  /* Special Case:
 	     The Condition bit 'C' is a shadow of the CBR register (control
@@ -610,11 +616,13 @@ first_writes_to_seconds_operands (a, b, check_outputs)
 	      /* Scan operand list of 'b' looking for another reference to the
 		 condition bit, which goes in the right direction.  */
 	      for (b_index = 0;
-		   CGEN_OPERAND_INSTANCE_TYPE (b_operands) != CGEN_OPERAND_INSTANCE_END;
+		   b_operands->type != CGEN_OPINST_END;
 		   b_index ++, b_operands ++)
 		{
-		  if ((CGEN_OPERAND_INSTANCE_TYPE (b_operands) ==
-		       (check_outputs ? CGEN_OPERAND_INSTANCE_OUTPUT : CGEN_OPERAND_INSTANCE_INPUT))
+		  if ((b_operands->type
+		       == (check_outputs
+			   ? CGEN_OPINST_OUTPUT
+			   : CGEN_OPINST_INPUT))
 		      && OPERAND_IS_COND_BIT (b_operands, b->indices, b_index))
 		    return 1;
 		}
@@ -625,12 +633,14 @@ first_writes_to_seconds_operands (a, b, check_outputs)
 		 references the same hardware element, and which goes in the
 		 right direction.  */
 	      for (b_index = 0;
-		   CGEN_OPERAND_INSTANCE_TYPE (b_operands) != CGEN_OPERAND_INSTANCE_END;
+		   b_operands->type != CGEN_OPINST_END;
 		   b_index ++, b_operands ++)
 		{
-		  if ((CGEN_OPERAND_INSTANCE_TYPE (b_operands) ==
-		       (check_outputs ? CGEN_OPERAND_INSTANCE_OUTPUT : CGEN_OPERAND_INSTANCE_INPUT))
-		      && (CGEN_OPERAND_INSTANCE_HW (b_operands) == CGEN_OPERAND_INSTANCE_HW (a_operands))
+		  if ((b_operands->type
+		       == (check_outputs
+			   ? CGEN_OPINST_OUTPUT
+			   : CGEN_OPINST_INPUT))
+		      && (b_operands->hw == a_operands->hw)
 		      && (a->indices [a_index] == b->indices [b_index]))
 		    return 1;
 		}
@@ -648,22 +658,23 @@ writes_to_pc (a)
      m32r_insn * a;
 {
 #if 0  /* Once PC operands are working.... */
-  const CGEN_OPERAND_INSTANCE * a_operands == CGEN_INSN_OPERANDS (a->insn);
+  const CGEN_OPINST * a_operands == CGEN_INSN_OPERANDS (gas_cgen_cpu_desc,
+							a->insn);
 
   if (a_operands == NULL)
     return 0;
 
-  while (CGEN_OPERAND_INSTANCE_TYPE (a_operands) != CGEN_OPERAND_INSTANCE_END)
+  while (a_operands->type != CGEN_OPINST_END)
     {
-      if (CGEN_OPERAND_INSTANCE_OPERAND (a_operands) != NULL
-	  && CGEN_OPERAND_INDEX (CGEN_OPERAND_INSTANCE_OPERAND (a_operands)) == M32R_OPERAND_PC)
+      if (a_operands->operand != NULL
+	  && CGEN_OPERAND_INDEX (gas_cgen_cpu_desc, a_operands->operand) == M32R_OPERAND_PC)
 	return 1;
       
       a_operands ++;
     }
 #else
-  if (CGEN_INSN_ATTR (a->insn, CGEN_INSN_UNCOND_CTI)
-      || CGEN_INSN_ATTR (a->insn, CGEN_INSN_COND_CTI))
+  if (CGEN_INSN_ATTR_VALUE (a->insn, CGEN_INSN_UNCOND_CTI)
+      || CGEN_INSN_ATTR_VALUE (a->insn, CGEN_INSN_COND_CTI))
     return 1;
 #endif
   return 0;
@@ -688,8 +699,8 @@ can_make_parallel (a, b)
   if (first_writes_to_seconds_operands (a, b, true))
     return _("Instructions write to the same destination register.");
   
-  a_pipe = CGEN_INSN_ATTR (a->insn, CGEN_INSN_PIPE);
-  b_pipe = CGEN_INSN_ATTR (b->insn, CGEN_INSN_PIPE);
+  a_pipe = CGEN_INSN_ATTR_VALUE (a->insn, CGEN_INSN_PIPE);
+  b_pipe = CGEN_INSN_ATTR_VALUE (b->insn, CGEN_INSN_PIPE);
 
   /* Make sure that the instructions use the correct execution pipelines.  */
   if (   a_pipe == PIPE_NONE
@@ -715,7 +726,7 @@ make_parallel (buffer)
 #if CGEN_INT_INSN_P
   *buffer |= 0x8000;
 #else
-  buffer [CGEN_OPCODE_ENDIAN (gas_cgen_opcode_desc) == CGEN_ENDIAN_BIG ? 0 : 1]
+  buffer [CGEN_CPU_ENDIAN (gas_cgen_cpu_desc) == CGEN_ENDIAN_BIG ? 0 : 1]
     |= 0x80;
 #endif
 }
@@ -726,7 +737,7 @@ static void
 target_make_parallel (buffer)
      char *buffer;
 {
-  buffer [CGEN_OPCODE_ENDIAN (gas_cgen_opcode_desc) == CGEN_ENDIAN_BIG ? 0 : 1]
+  buffer [CGEN_CPU_ENDIAN (gas_cgen_cpu_desc) == CGEN_ENDIAN_BIG ? 0 : 1]
     |= 0x80;
 }
 
@@ -760,7 +771,7 @@ assemble_two_insns (str, str2, parallel_p)
 
   /* Parse the first instruction.  */
   if (! (first.insn = m32r_cgen_assemble_insn
-	 (gas_cgen_opcode_desc, str, & first.fields, first.buffer, & errmsg)))
+	 (gas_cgen_cpu_desc, str, & first.fields, first.buffer, & errmsg)))
     {
       as_bad (errmsg);
       return;
@@ -774,7 +785,7 @@ assemble_two_insns (str, str2, parallel_p)
       return;
     }
   else if (! enable_special
-      && CGEN_INSN_ATTR (first.insn, CGEN_INSN_SPECIAL))
+      && CGEN_INSN_ATTR_VALUE (first.insn, CGEN_INSN_SPECIAL))
     {
       /* xgettext:c-format */
       as_bad (_("unknown instruction '%s'"), str);
@@ -782,7 +793,7 @@ assemble_two_insns (str, str2, parallel_p)
     }
   else if (! enable_m32rx
       /* FIXME: Need standard macro to perform this test.  */
-      && CGEN_INSN_ATTR (first.insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
+      && CGEN_INSN_ATTR_VALUE (first.insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
     {
       /* xgettext:c-format */
       as_bad (_("instruction '%s' is for the M32RX only"), str);
@@ -790,7 +801,7 @@ assemble_two_insns (str, str2, parallel_p)
     }
     
   /* Check to see if this is an allowable parallel insn.  */
-  if (parallel_p && CGEN_INSN_ATTR (first.insn, CGEN_INSN_PIPE) == PIPE_NONE)
+  if (parallel_p && CGEN_INSN_ATTR_VALUE (first.insn, CGEN_INSN_PIPE) == PIPE_NONE)
     {
       /* xgettext:c-format */
       as_bad (_("instruction '%s' cannot be executed in parallel."), str);
@@ -832,9 +843,12 @@ assemble_two_insns (str, str2, parallel_p)
      version (eg relaxability).  When aliases behave differently this
      may have to change.  */
   first.orig_insn = first.insn;
-  first.insn = m32r_cgen_lookup_get_insn_operands
-    (gas_cgen_opcode_desc, NULL, INSN_VALUE (first.buffer), 16,
-     first.indices);
+  {
+    CGEN_FIELDS tmp_fields;
+    first.insn = cgen_lookup_get_insn_operands
+      (gas_cgen_cpu_desc, NULL, INSN_VALUE (first.buffer), NULL, 16,
+       first.indices, &tmp_fields);
+  }
   
   if (first.insn == NULL)
     as_fatal (_("internal error: lookup/get operands failed"));
@@ -843,7 +857,7 @@ assemble_two_insns (str, str2, parallel_p)
 
   /* Parse the second instruction.  */
   if (! (second.insn = m32r_cgen_assemble_insn
-	 (gas_cgen_opcode_desc, str, & second.fields, second.buffer, & errmsg)))
+	 (gas_cgen_cpu_desc, str, & second.fields, second.buffer, & errmsg)))
     {
       as_bad (errmsg);
       return;
@@ -857,14 +871,14 @@ assemble_two_insns (str, str2, parallel_p)
       return;
     }
   else if (! enable_special
-      && CGEN_INSN_ATTR (second.insn, CGEN_INSN_SPECIAL))
+      && CGEN_INSN_ATTR_VALUE (second.insn, CGEN_INSN_SPECIAL))
     {
       /* xgettext:c-format */
       as_bad (_("unknown instruction '%s'"), str);
       return;
     }
   else if (! enable_m32rx
-      && CGEN_INSN_ATTR (second.insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
+      && CGEN_INSN_ATTR_VALUE (second.insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
     {
       /* xgettext:c-format */
       as_bad (_("instruction '%s' is for the M32RX only"), str);
@@ -872,7 +886,7 @@ assemble_two_insns (str, str2, parallel_p)
     }
 
   /* Check to see if this is an allowable parallel insn.  */
-  if (parallel_p && CGEN_INSN_ATTR (second.insn, CGEN_INSN_PIPE) == PIPE_NONE)
+  if (parallel_p && CGEN_INSN_ATTR_VALUE (second.insn, CGEN_INSN_PIPE) == PIPE_NONE)
     {
       /* xgettext:c-format */
       as_bad (_("instruction '%s' cannot be executed in parallel."), str);
@@ -892,9 +906,12 @@ assemble_two_insns (str, str2, parallel_p)
 
   /* Get the indices of the operands of the instruction.  */
   second.orig_insn = second.insn;
-  second.insn = m32r_cgen_lookup_get_insn_operands
-    (gas_cgen_opcode_desc, NULL, INSN_VALUE (second.buffer), 16,
-     second.indices);
+  {
+    CGEN_FIELDS tmp_fields;
+    second.insn = cgen_lookup_get_insn_operands
+      (gas_cgen_cpu_desc, NULL, INSN_VALUE (second.buffer), NULL, 16,
+       second.indices, &tmp_fields);
+  }
   
   if (second.insn == NULL)
     as_fatal (_("internal error: lookup/get operands failed"));
@@ -1005,7 +1022,7 @@ md_assemble (str)
   debug_sym_link = (sym_linkS *)0;
 
   insn.insn = m32r_cgen_assemble_insn
-    (gas_cgen_opcode_desc, str, & insn.fields, insn.buffer, & errmsg);
+    (gas_cgen_cpu_desc, str, & insn.fields, insn.buffer, & errmsg);
   
   if (!insn.insn)
     {
@@ -1015,14 +1032,14 @@ md_assemble (str)
 
 /* start-sanitize-cygnus */
   if (! enable_special
-      && CGEN_INSN_ATTR (insn.insn, CGEN_INSN_SPECIAL))
+      && CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_SPECIAL))
     {
       /* xgettext:c-format */
       as_bad (_("unknown instruction '%s'"), str);
       return;
     }
   else if (! enable_m32rx
-	   && CGEN_INSN_ATTR (insn.insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
+	   && CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
     {
       /* xgettext:c-format */
       as_bad (_("instruction '%s' is for the M32RX only"), str);
@@ -1070,9 +1087,12 @@ md_assemble (str)
 	{
 	  /* Get the indices of the operands of the instruction.
 	     FIXME: See assemble_parallel for notes on orig_insn.  */
-	  insn.insn = m32r_cgen_lookup_get_insn_operands
-	    (gas_cgen_opcode_desc, NULL, INSN_VALUE (insn.buffer),
-	     16, insn.indices);
+	  {
+	    CGEN_FIELDS tmp_fields;
+	    insn.insn = cgen_lookup_get_insn_operands
+	      (gas_cgen_cpu_desc, NULL, INSN_VALUE (insn.buffer), NULL,
+	       16, insn.indices, &tmp_fields);
+	  }
 	  
 	  if (insn.insn == NULL)
 	    as_fatal (_("internal error: lookup/get operands failed"));
@@ -1097,7 +1117,7 @@ md_assemble (str)
       if (     ! on_32bit_boundary_p
 	  &&   enable_m32rx
 	  &&   optimize
-	  &&   CGEN_INSN_ATTR (insn.orig_insn, CGEN_INSN_RELAXABLE) == 0
+	  &&   CGEN_INSN_ATTR_VALUE (insn.orig_insn, CGEN_INSN_RELAXABLE) == 0
 	  && ! writes_to_pc (& prev_insn)
 	  && ! first_writes_to_seconds_operands (& prev_insn, &insn, false)
 	  )
@@ -1168,13 +1188,13 @@ md_assemble (str)
       /* If the insn needs the following one to be on a 32 bit boundary
 	 (e.g. subroutine calls), fill this insn's slot.  */
       if (on_32bit_boundary_p
-	  && CGEN_INSN_ATTR (insn.orig_insn, CGEN_INSN_FILL_SLOT) != 0)
+	  && CGEN_INSN_ATTR_VALUE (insn.orig_insn, CGEN_INSN_FILL_SLOT) != 0)
 	fill_insn (0);
 
       /* If this is a relaxable insn (can be replaced with a larger version)
 	 mark the fact so that we can emit an alignment directive for a
 	 following 32 bit insn if we see one.   */
-      if (CGEN_INSN_ATTR (insn.orig_insn, CGEN_INSN_RELAXABLE) != 0)
+      if (CGEN_INSN_ATTR_VALUE (insn.orig_insn, CGEN_INSN_RELAXABLE) != 0)
 	seen_relaxable_p = 1;
     }
 
@@ -1477,7 +1497,7 @@ md_estimate_size_before_relax (fragP, segment)
 	    if ((strcmp (CGEN_INSN_MNEMONIC (insn),
 			 CGEN_INSN_MNEMONIC (fragP->fr_cgen.insn))
 		 == 0)
-		&& CGEN_INSN_ATTR (insn, CGEN_INSN_RELAX))
+		&& CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_RELAX))
 	      break;
 	  }
 	if (i == 4)
@@ -1568,9 +1588,11 @@ md_convert_frag (abfd, sec, fragP)
 			     4 /*length*/,
 			     /* FIXME: quick hack */
 #if 0
-			     CGEN_OPERAND_ENTRY (fragP->fr_cgen.opindex),
+			     CGEN_OPERAND_ENTRY (gas_cgen_cpu_desc,
+						 fragP->fr_cgen.opindex),
 #else
-			     CGEN_OPERAND_ENTRY (M32R_OPERAND_DISP24),
+			     CGEN_OPERAND_ENTRY (gas_cgen_cpu_desc,
+						 M32R_OPERAND_DISP24),
 #endif
 			     fragP->fr_cgen.opinfo,
 			     fragP->fr_symbol, fragP->fr_offset);
@@ -1616,7 +1638,7 @@ md_cgen_lookup_reloc (insn, operand, fixP)
      const CGEN_OPERAND * operand;
      fixS *               fixP;
 {
-  switch (CGEN_OPERAND_TYPE (operand))
+  switch (CGEN_OPERAND_TYPE (gas_cgen_cpu_desc, operand))
     {
     case M32R_OPERAND_DISP8 : return  BFD_RELOC_M32R_10_PCREL;
     case M32R_OPERAND_DISP16 : return BFD_RELOC_M32R_18_PCREL;
@@ -1673,7 +1695,7 @@ m32r_cgen_record_fixup_exp (frag, where, insn, length, operand, opinfo, exp)
   fixS * fixP = gas_cgen_record_fixup_exp (frag, where, insn, length,
 					   operand, opinfo, exp);
 
-  switch (CGEN_OPERAND_TYPE (operand))
+  switch (CGEN_OPERAND_TYPE (gas_cgen_cpu_desc, operand))
     {
     case M32R_OPERAND_HI16 :
       /* If low/high/shigh/sda was used, it is recorded in `opinfo'.  */

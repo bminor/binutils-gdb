@@ -5,7 +5,7 @@ dnl brackets, be sure changequote invocations surround it.
 dnl
 dnl
 dnl v2.5 needed for --bindir et al
-AC_PREREQ(2.5)
+AC_PREREQ(2.13)
 AC_INIT(as.h)
 
 AC_CANONICAL_SYSTEM
@@ -38,6 +38,8 @@ AC_ARG_ENABLE(commonbfdlib,
   *)   AC_MSG_ERROR([bad value ${enableval} for BFD commonbfdlib option]) ;;
 esac])dnl
 
+using_cgen=no
+
 # Generate a header file
 AM_CONFIG_HEADER(config.h:config.in)
 
@@ -61,8 +63,6 @@ if test -n "$enable_targets" ; then
 fi
 
 emulations=""
-
-using_cgen=no
 
 for this_target in $target $canon_targets ; do
 
@@ -389,12 +389,7 @@ dnl end-sanitize-beos
     # Any other special object files needed ?
     case ${cpu_type} in
       fr30 | m32r)
-	case "x${extra_objects}" in
-	*cgen.o*) ;;
-	*) extra_objects="$extra_objects cgen.o"
-	   using_cgen=yes
-	   ;;
-	esac
+	using_cgen=yes
 	;;
 
       m68k)
@@ -430,6 +425,13 @@ dnl end-sanitize-beos
       *)
 	;;
     esac
+
+    if test $using_cgen = yes ; then
+	case "x${extra_objects}" in
+	*cgen.o*) ;;
+	*) extra_objects="$extra_objects cgen.o" ;;
+	esac
+    fi
 
 # See if we really can support this configuration with the emulation code.
 
@@ -488,7 +490,7 @@ esac
 
 # Unfortunately the cpu in cpu-opc.h file isn't always $(TARGET_CPU).
 cgen_cpu_prefix=""
-if test "x$using_cgen" = xyes ; then
+if test $using_cgen = yes ; then
   case ${target_cpu} in
     *) cgen_cpu_prefix=${target_cpu} ;;
   esac
@@ -662,8 +664,7 @@ ALL_LINGUAS=
 CY_GNU_GETTEXT
 
 AM_MAINTAINER_MODE
-AM_CYGWIN32
-AM_EXEEXT
+AC_EXEEXT
 
 AC_CHECK_HEADERS(string.h stdlib.h memory.h strings.h unistd.h stdarg.h varargs.h errno.h sys/types.h)
 
@@ -743,7 +744,7 @@ AC_OUTPUT(Makefile doc/Makefile .gdbinit:gdbinit.in po/Makefile.in:po/Make-in,
  echo '#include "te-'"${te_file}"'.h"' > targ-env.h
  echo '#include "itbl-'"${target_cpu_type}"'.h"' > itbl-cpu.h
  if test "x$cgen_cpu_prefix" != x ; then
-   echo '#include "opcodes/'"${cgen_cpu_prefix}"'-opc.h"' > cgen-opc.h
+   echo '#include "opcodes/'"${cgen_cpu_prefix}"'-desc.h"' > cgen-desc.h
  fi
 
  sed -e '/POTFILES =/r po/POTFILES' po/Makefile.in > po/Makefile],

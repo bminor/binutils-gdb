@@ -1,5 +1,5 @@
 /* tc-fr30.c -- Assembler for the Fujitsu FR30.
-   Copyright (C) 1998 Free Software Foundation.
+   Copyright (C) 1998, 1999 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -23,7 +23,8 @@
 #include "as.h"
 #include "subsegs.h"     
 #include "symcat.h"
-#include "cgen-opc.h"
+#include "opcodes/fr30-desc.h"
+#include "opcodes/fr30-opc.h"
 #include "cgen.h"
 
 /* Structure to hold all of the different components describing
@@ -101,17 +102,18 @@ md_begin ()
   /* Initialize the `cgen' interface.  */
   
   /* Set the machine number and endian.  */
-  gas_cgen_opcode_desc = fr30_cgen_opcode_open (bfd_mach_fr30, CGEN_ENDIAN_BIG);
-  fr30_cgen_init_asm (gas_cgen_opcode_desc);
+  gas_cgen_cpu_desc = fr30_cgen_cpu_open (bfd_mach_fr30, CGEN_ENDIAN_BIG);
+  fr30_cgen_init_asm (gas_cgen_cpu_desc);
 
   /* This is a callback from cgen to gas to parse operands.  */
-  cgen_set_parse_operand_fn (gas_cgen_opcode_desc, gas_cgen_parse_operand);
+  cgen_set_parse_operand_fn (gas_cgen_cpu_desc, gas_cgen_parse_operand);
 }
 
 void
 md_assemble (str)
      char * str;
 {
+  static int last_insn_had_delay_slot = 0;
   fr30_insn insn;
   char *    errmsg;
   char *    str2 = NULL;
@@ -120,7 +122,7 @@ md_assemble (str)
   gas_cgen_init_parse ();
 
   insn.insn = fr30_cgen_assemble_insn
-    (gas_cgen_opcode_desc, str, & insn.fields, insn.buffer, & errmsg);
+    (gas_cgen_cpu_desc, str, & insn.fields, insn.buffer, & errmsg);
   
   if (!insn.insn)
     {
@@ -131,6 +133,15 @@ md_assemble (str)
   /* Doesn't really matter what we pass for RELAX_P here.  */
   gas_cgen_finish_insn (insn.insn, insn.buffer,
 			CGEN_FIELDS_BITSIZE (& insn.fields), 1, NULL);
+
+  /* Warn about invalid insns in delay slots.  */
+  if (last_insn_had_delay_slot
+      && CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_NOT_IN_DELAY_SLOT))
+    as_warn (_("Instruction %s not allowed in a delay slot."),
+	     CGEN_INSN_NAME (insn.insn));
+
+  last_insn_had_delay_slot
+    = CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_DELAY_SLOT);
 }
 
 /* The syntax in the manual says constants begin with '#'.
@@ -296,7 +307,7 @@ md_estimate_size_before_relax (fragP, segment)
 	    if ((strcmp (CGEN_INSN_MNEMONIC (insn),
 			 CGEN_INSN_MNEMONIC (fragP->fr_cgen.insn))
 		 == 0)
-		&& CGEN_INSN_ATTR (insn, CGEN_INSN_RELAX))
+		&& CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_RELAX))
 	      break;
 	  }
 	if (i == 4)
@@ -437,7 +448,7 @@ md_cgen_lookup_reloc (insn, operand, fixP)
      const CGEN_OPERAND * operand;
      fixS *               fixP;
 {
-  switch (CGEN_OPERAND_TYPE (operand))
+  switch (CGEN_OPERAND_TYPE (gas_cgen_cpu_desc, operand))
     {
     case FR30_OPERAND_LABEL9:  fixP->fx_pcrel = 1; return BFD_RELOC_FR30_9_PCREL;
     case FR30_OPERAND_LABEL12: fixP->fx_pcrel = 1; return BFD_RELOC_FR30_12_PCREL;
@@ -469,11 +480,11 @@ int
 fr30_force_relocation (fix)
      fixS * fix;
 {
-  if (fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+  if (   fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 1;
 
-  return fix->fx_pcrel;
+  return 0;
 }
 
 /* Write a value out to the object file, using the appropriate endianness.  */
@@ -629,4 +640,28 @@ fr30_is_colon_insn (start)
     return restore_colon (3);
 
   return 0;
+}
+
+boolean
+fr30_fix_adjustable (fixP)
+   fixS * fixP;
+{
+  if (fixP->fx_addsy == NULL)
+    return 1;
+  
+#if 0  
+  /* Prevent all adjustments to global symbols. */
+  if (S_IS_EXTERN (fixP->fx_addsy))
+    return 0;
+  
+  if (S_IS_WEAK (fixP->fx_addsy))
+    return 0;
+#endif
+  
+  /* We need the symbol name for the VTABLE entries */
+  if (   fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 0;
+
+  return 1;
 }
