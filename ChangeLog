@@ -1,3 +1,9 @@
+Thu Jul  8 18:26:12 1993  John Gilmore  (gnu@cygnus.com)
+
+	* configure:  Remove extraneous output when guessing host type.
+	* config.guess:  Remove extraneous output when guessing using C
+	compiler rather than uname, or when guessing fails.
+
 Wed Jul  7 17:58:14 1993  david d `zoo' zuhn  (zoo at rtl.cygnus.com)
 
 	* Makefile.in: remove all.cross and install.cross targets

@@ -145,7 +145,7 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	  && echo i486-ncr-sysv4 && exit 0 ;;
 esac
 
-echo '(No uname command or uname output not recognized.)' 1>&2
+#echo '(No uname command or uname output not recognized.)' 1>&2
 #echo "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" 1>&2
 
 cat >dummy.c <<EOF
@@ -160,6 +160,10 @@ main()
 
 #if defined(hp300) && !defined(hpux)
   printf("m68k-hp-bsd\n"); exit(0);
+#endif
+
+#if defined(NeXT)
+  printf("m68k-next-bsd\n"); exit(0);
 #endif
 
 #if defined (MULTIMAX) || defined (n16)
@@ -198,6 +202,6 @@ EOF
 ${CC-cc} dummy.c -o dummy && ./dummy && rm dummy.c dummy && exit 0
 rm -f dummy.c dummy
 
-echo '(Unable to guess system type)' 1>&2
+#echo '(Unable to guess system type)' 1>&2
 
 exit 1

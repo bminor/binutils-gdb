@@ -323,11 +323,9 @@ case "${fatal}" in
                 echo '***' Can only configure for one host and one target at a time.  1>&2
                 fatal=yes
         elif [ -z "${host_alias}" -a -z "${undefs}" ] ; then
-                echo '- You did not tell me what kind of host system you want to configure.
-- I will attempt to guess the kind of system this is.' 1>&2
                 guesssys=`echo ${progname} | sed 's/configure$/config.guess/'`
                 if tmp_alias=`${guesssys}` ; then
-                        echo "- Looks like this is a ${tmp_alias}" 1>&2
+                        echo "Configuring for a ${tmp_alias} host." 1>&2
                         host_alias=${tmp_alias}
 			case "${target_alias}" in
 			"") target_alias=${tmp_alias} ;;
@@ -335,7 +333,7 @@ case "${fatal}" in
 			esac
 			arguments="--host=${host_alias} ${arguments}"
                 else
-                        echo '- Failed to guess the system type.  You need to tell me.' 1>&2
+                        echo 'Config.guess failed to determine the host type.  You need to specify one.' 1>&2
                         fatal=yes
                 fi
         else
