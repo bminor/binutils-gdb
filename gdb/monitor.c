@@ -521,7 +521,6 @@ monitor_expect (char *string, char *buf, int buflen)
   char *p = string;
   int obuflen = buflen;
   int c;
-  extern struct target_ops *targ_ops;
 
   if (monitor_debug_p)
     {
