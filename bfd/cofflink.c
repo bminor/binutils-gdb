@@ -838,6 +838,18 @@ _bfd_coff_final_link (abfd, info)
 	return false;
     }
 
+  /* If doing task linking (ld --task-link) then make a pass through the
+     global symbols, writing out any that are defined, and making them
+     static. */
+  if (info->task_link)
+    {
+      finfo.failed = false;
+      coff_link_hash_traverse (coff_hash_table (info), _bfd_coff_write_task_globals,
+			       (PTR) &finfo);
+      if (finfo.failed)
+	goto error_return;
+    }
+
   /* Write out the global symbols.  */
   finfo.failed = false;
   coff_link_hash_traverse (coff_hash_table (info), _bfd_coff_write_global_sym,
@@ -1604,6 +1616,12 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 	      finfo->last_file = isym;
 	    }
 
+	  /* If doing task linking, convert normal global function symbols to
+	     static functions. */
+
+	  if (finfo->info->task_link && isym.n_sclass == C_EXT)
+	    isym.n_sclass = C_STAT;
+
 	  /* Output the symbol.  */
 
 	  bfd_coff_swap_sym_out (output_bfd, (PTR) &isym, (PTR) outsym);
@@ -2290,6 +2308,18 @@ _bfd_coff_write_global_sym (h, data)
   if (isym.n_sclass == C_NULL)
     isym.n_sclass = C_EXT;
 
+  /* If doing task linking and this is the pass where we convert defined globals to
+     statics, then do that conversion now.  If the symbol is not being converted,
+     just ignore it and it will be output during a later pass. */
+  if (finfo->global_to_static)
+    {
+      if (isym.n_sclass != C_EXT)
+	{
+	  return true;
+	}
+      isym.n_sclass = C_STAT;
+    }
+
   isym.n_numaux = h->numaux;
   
   bfd_coff_swap_sym_out (output_bfd, (PTR) &isym, (PTR) finfo->outsyms);
@@ -2326,6 +2356,33 @@ _bfd_coff_write_global_sym (h, data)
     }
 
   return true;
+}
+
+/* Write out task global symbols, converting them to statics.  Called
+   via coff_link_hash_traverse.  Calls bfd_coff_write_global_sym to do
+   the dirty work, if the symbol we are processing needs conversion. */
+
+boolean
+_bfd_coff_write_task_globals (h, data)
+     struct coff_link_hash_entry *h;
+     PTR data;
+{
+  struct coff_final_link_info *finfo = (struct coff_final_link_info *) data;
+  boolean rtnval = true;
+
+  if (h->indx < 0)
+    {
+      switch (h->root.type)
+	{
+	case bfd_link_hash_defined:
+	case bfd_link_hash_defweak:
+	  finfo->global_to_static = true;
+	  rtnval = _bfd_coff_write_global_sym (h, data);
+	  finfo->global_to_static = false;
+	  break;
+	}
+    }
+  return (rtnval);
 }
 
 /* Handle a link order which is supposed to generate a reloc.  */

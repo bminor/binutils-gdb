@@ -1,3 +1,30 @@
+Fri May 23 15:14:58 1997  Fred Fish  <fnf@cygnus.com>
+
+	* libcoff-in.h (struct coff_final_link_info): Add boolean
+	global_to_static member for support of task linking.
+	(_bfd_coff_write_task_globals): Add prototype.
+	* libcoff.h: Regenerate.
+	* coffcode.h (coff_write_object_contents): Use #ifdef to
+	check RS6000COFF_C, to be consistent with all other uses
+	in this file.
+	* cofflink.c (_bfd_coff_final_link): If doing task linking,
+	call _bfd_coff_write_task_globals.
+	(_bfd_coff_link_input_bfd): If doing task linking, convert
+	global functions to static.
+	(_bfd_coff_write_global_sym): If doing task linking, convert
+	global variables to static.
+	(_bfd_coff_write_task_globals): New function.
+start-sanitize-tic80
+	* coff-tic80.c (TIC80COFF): Define this instead of just TIC80.
+	(C_AUTOARG): #undef since it clashes with C_UEXT.
+	(C_LASTENT): #undef since it clashes with C_STATLAB.
+	* coffcode.h (coff_write_object_contents): Use TIC80COFF
+	rather than TIC80.
+	(coff_slurp_symbol_table): Use C_SYSTEM.  Hide C_AUTOARG use
+	when TIC80COFF defined (clashes with C_UEXT).  Explicitly
+	recognize C_UEXT, C_STATLAB, and C_EXTLAB as unsupported.
+end-sanitize-tic80
+
 start-sanitize-tic80
 Fri May 23 12:38:24 1997  Ian Lance Taylor  <ian@cygnus.com>
 
