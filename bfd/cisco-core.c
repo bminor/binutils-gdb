@@ -21,6 +21,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
+/* core_file_failing_signal returns a host signal (this probably should
+   be fixed).  */
+#include <signal.h>
 
 #define CRASH_INFO (0xffc)
 #define CRASH_MAGIC 0xdead1234
@@ -129,9 +132,63 @@ cisco_core_file_p (abfd)
       abfd->tdata.cisco_core_data->sig = 0;
       break;
     case CRASH_REASON_EXCEPTION:
-      /* Crash occured due to CPU exception.
-	 FIXME: convert cpu_vector to a signal number.  */
-      abfd->tdata.cisco_core_data->sig = 0;
+      /* Crash occured due to CPU exception.  */
+
+      /* This is 68k-specific; for MIPS we'll need to interpret
+	 cpu_vector differently based on the target configuration
+	 (since CISCO core files don't seem to have the processor
+	 encoded in them).  */
+
+      switch (bfd_get_32 (abfd, crashinfo.cpu_vector))
+	{
+	   /* bus error           */
+	case 2 : abfd->tdata.cisco_core_data->sig = SIGBUS; break;
+	   /* address error       */
+	case 3 : abfd->tdata.cisco_core_data->sig = SIGBUS; break;
+	   /* illegal instruction */
+	case 4 : abfd->tdata.cisco_core_data->sig = SIGILL;  break;
+	   /* zero divide         */
+	case 5 : abfd->tdata.cisco_core_data->sig = SIGFPE;  break;
+	   /* chk instruction     */
+	case 6 : abfd->tdata.cisco_core_data->sig = SIGFPE; break;
+	   /* trapv instruction   */
+	case 7 : abfd->tdata.cisco_core_data->sig = SIGFPE; break;
+	   /* privilege violation */
+	case 8 : abfd->tdata.cisco_core_data->sig = SIGSEGV; break;
+	   /* trace trap          */
+	case 9 : abfd->tdata.cisco_core_data->sig = SIGTRAP;  break;
+	   /* line 1010 emulator  */
+	case 10: abfd->tdata.cisco_core_data->sig = SIGILL;  break;
+	   /* line 1111 emulator  */
+	case 11: abfd->tdata.cisco_core_data->sig = SIGILL;  break;
+
+	  /* Coprocessor protocol violation.  Using a standard MMU or FPU
+	     this cannot be triggered by software.  Call it a SIGBUS.  */
+	case 13: abfd->tdata.cisco_core_data->sig = SIGBUS;  break;
+
+	  /* interrupt           */
+	case 31: abfd->tdata.cisco_core_data->sig = SIGINT;  break;
+	  /* breakpoint          */
+	case 33: abfd->tdata.cisco_core_data->sig = SIGTRAP;  break;
+
+	  /* floating point err  */
+	case 48: abfd->tdata.cisco_core_data->sig = SIGFPE;  break;
+	  /* floating point err  */
+	case 49: abfd->tdata.cisco_core_data->sig = SIGFPE;  break;
+	  /* zero divide         */
+	case 50: abfd->tdata.cisco_core_data->sig = SIGFPE;  break;
+	  /* underflow           */
+	case 51: abfd->tdata.cisco_core_data->sig = SIGFPE;  break;
+	  /* operand error       */
+	case 52: abfd->tdata.cisco_core_data->sig = SIGFPE;  break;
+	   /* overflow            */
+	case 53: abfd->tdata.cisco_core_data->sig = SIGFPE;  break;
+	  /* NAN                 */
+	case 54: abfd->tdata.cisco_core_data->sig = SIGFPE;  break;
+	default:
+	  /* "software generated"*/
+	  abfd->tdata.cisco_core_data->sig = SIGEMT;
+	}
       break;
     default:
       /* Unknown crash reason.  */
