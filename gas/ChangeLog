@@ -1,8 +1,13 @@
 start-sanitize-v850
-Fri Aug 30 23:50:08 1996  Jeffrey A Law  (law@cygnus.com)
+Sat Aug 31 16:03:00 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-v850.c (md_assemble): Compute size of the instrction
+	from the opcode.
 
 	* config/tc-v850.c (md_apply_fix3): Do simple byte, short and
 	word fixups too.
+
+Fri Aug 30 23:50:08 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-v850.c (md_apply_fix3): Use little endian get/put
 	routines to fetch/store the updated instruction from/to memory.
