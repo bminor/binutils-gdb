@@ -287,10 +287,10 @@ SFILES = blockframe.c breakpoint.c buildsym.c c-exp.y c-lang.c \
 	dbxread.c demangle.c dwarfread.c elfread.c environ.c eval.c expprint.c \
 	findvar.c gdbtypes.c infcmd.c inflow.c infrun.c language.c putenv.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c main.c maint.c \
-	mem-break.c minsyms.c mipsread.c objfiles.c parse.c printcmd.c \
-	remote.c source.c stabsread.c stack.c symfile.c symmisc.c symtab.c \
-	target.c typeprint.c utils.c valarith.c valops.c valprint.c values.c \
-	serial.c ser-unix.c
+	mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c parse.c \
+	printcmd.c remote.c source.c stabsread.c stack.c symfile.c symmisc.c \
+	symtab.c target.c typeprint.c utils.c valarith.c valops.c valprint.c \
+	values.c serial.c ser-unix.c
 
 # Files that are not source code, but need to go into
 # gdb-$(VERSION).tar.Z.
@@ -397,7 +397,7 @@ TARFILES = $(SFILES) $(HFILES) $(NONSRC) $(ALLDEPFILES) $(ALLCONFIG) \
 	$(ALLPARAM) $(INFOFILES) $(POSSLIBS) $(REMOTE_EXAMPLES)
 
 
-OBS = version.o main.o blockframe.o breakpoint.o findvar.o stack.o \
+OBS =	version.o main.o blockframe.o breakpoint.o findvar.o stack.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
 	symtab.o symfile.o symmisc.o infcmd.o infrun.o remote.o command.o \
 	utils.o expprint.o environ.o gdbtypes.o copying.o $(DEPFILES) \
@@ -405,7 +405,8 @@ OBS = version.o main.o blockframe.o breakpoint.o findvar.o stack.o \
 	objfiles.o minsyms.o maint.o demangle.o dbxread.o coffread.o elfread.o \
 	dwarfread.o mipsread.o stabsread.o core.o c-lang.o ch-lang.o m2-lang.o \
 	complaints.o typeprint.o c-typeprint.o ch-typeprint.o m2-typeprint.o \
-	c-valprint.o cp-valprint.o ch-valprint.o m2-valprint.o serial.o
+	c-valprint.o cp-valprint.o ch-valprint.o m2-valprint.o nlmread.o \
+	serial.o
 
 RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
 
@@ -1130,6 +1131,9 @@ Onindy.o: nindy-share/Onindy.c $(wait_h) nindy-share/block_io.h \
 nindy.o: nindy-share/nindy.c $(wait_h) nindy-share/block_io.h \
 	nindy-share/env.h nindy-share/ttycntl.h
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/nindy.c
+
+nlmread.o: nlmread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
+	gdb-stabs.h objfiles.h symfile.h $(symtab_h)
 
 ttybreak.o: nindy-share/ttybreak.c nindy-share/ttycntl.h 
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/ttybreak.c

@@ -187,6 +187,7 @@ i[34]86-*-sco*)		gdb_target=i386v ;;
 i[34]86-*-sysv*)	gdb_target=i386v ;;
 i[34]86-*-linux*)	gdb_target=linux ;;
 i[34]86-*-isc*)		gdb_target=i386v ;;
+i[34]86-*-netware*)	gdb_target=i386nw ;;
 
 i960-*-bout)		gdb_target=vxworks960 ;;
 i960-*-coff)		gdb_target=nindy960 ;;

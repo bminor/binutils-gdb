@@ -161,6 +161,7 @@ munch
 news-xdep.c
 nindy-share
 nindy-tdep.c
+nlmread.c
 ns32k-opcode.h
 ns32k-pinsn.c
 objfiles.c

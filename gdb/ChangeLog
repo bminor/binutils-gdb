@@ -1,3 +1,12 @@
+Mon Jul 19 21:29:14 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* Makefile.in (SFILES):  Add nlmread.c.
+	* Makefile.in (OBS):  Add nlmread.o.
+	* Makefile.in (nlmread.o):  Add new target.
+	* configure.in (i[34]86-*-netware):  New configuration.
+	* nlmread.c, config/i386/{i386nw.mt, tm-i386nw.h}:  New files
+	for NLM/NetWare support.
+
 Mon Jul 19 11:48:57 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* symtab.h (enum minimal_symbol_type): Add mst_file_*.

@@ -30,6 +30,7 @@ i386bsd.mt
 i386lynx.mh
 i386lynx.mt
 i386mach.mh
+i386nw.mt
 i386sco.mh
 i386sco4.mh
 i386sol2.mh
@@ -60,6 +61,7 @@ symmetry.mt
 tm-i386aix.h
 tm-i386bsd.h
 tm-i386lynx.h
+tm-i386nw.h
 tm-i386v.h
 tm-i386v4.h
 tm-linux.h
