@@ -1909,7 +1909,7 @@ som_prep_headers (abfd)
 
   /* FIXME.  This should really be conditional based on whether or not
      PA1.1 instructions/registers have been used.  */
-  file_hdr->system_id = HP9000S800_ID;
+  file_hdr->system_id = CPU_PA_RISC1_0;
 
   /* FIXME.  Only correct for building relocatable objects.  */
   if (abfd->flags & EXEC_P)

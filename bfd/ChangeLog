@@ -1,3 +1,9 @@
+Wed Feb 23 18:28:37 1994  Jeffrey A. Law  (law@cygnus.com)
+
+	* som.c (som_prep_headers): Use CPU_PA_RISC1_0 for magic
+	number rather than HP9000S800_ID.  Note som.c is careful
+	to make sure CPU_PA_RISC1_0 is always defined.
+
 Mon Feb 21 10:12:02 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* Makefile.in (targets.o, archures.o): Use ALL_CFLAGS to supply
