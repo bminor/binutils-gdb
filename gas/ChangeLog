@@ -1,3 +1,8 @@
+2000-03-27  Ian Lance Taylor  <ian@zembu.com>
+
+	* config/tc-sh.c (md_show_usage): Use backslash before newline in
+	string literal.
+
 2000-03-27  Alan Modra  <alan@linuxcare.com>
 
 	* config/tc-avr.h (TC_HANDLES_FX_DONE): Define.

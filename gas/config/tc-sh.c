@@ -1,5 +1,5 @@
 /* tc-sh.c -- Assemble code for the Hitachi Super-H
-   Copyright (C) 1993, 94, 95, 96, 97, 98, 1999 Free Software Foundation.
+   Copyright (C) 1993, 94, 95, 96, 97, 98, 99, 2000 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1851,7 +1851,7 @@ md_show_usage (stream)
 SH options:\n\
 -little			generate little endian code\n\
 -relax			alter jump instructions for long displacements\n\
--small			align sections to 4 byte boundaries, not 16\n
+-small			align sections to 4 byte boundaries, not 16\n\
 -dsp			enable sh-dsp insns, and disable sh3e / sh4 insns.\n"));
 }
 
