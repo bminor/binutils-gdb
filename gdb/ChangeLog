@@ -1,3 +1,8 @@
+2000-07-14  Nick Clifton  <nickc@cygnus.com>
+
+	* config/mcore/tm-mcore.h (SKIP_PROLOGUE): Fix defintion to avoid
+	assignment.
+
 2000-07-13  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* parse.c: Include inferior.h.

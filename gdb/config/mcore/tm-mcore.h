@@ -101,7 +101,7 @@ extern CORE_ADDR mcore_extract_struct_value_address (char *regbuf);
     mcore_extract_struct_value_address (REGBUF)
 
 extern CORE_ADDR mcore_skip_prologue (CORE_ADDR pc);
-#define SKIP_PROLOGUE(PC) (PC) = mcore_skip_prologue ((PC))
+#define SKIP_PROLOGUE(PC) mcore_skip_prologue (PC)
 
 #define FRAME_ARGS_SKIP 0
 extern CORE_ADDR mcore_frame_args_address (struct frame_info *fi);
