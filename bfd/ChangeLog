@@ -1,3 +1,13 @@
+Tue Sep 28 14:47:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* section.c (bfd_make_section_anyway): New function.
+	* section.c: Change comments to say several sections can have
+	the same name.
+	* bfd-in2.h: Re-generate to reflect above change.
+	* coffgen.c (make_a_section_from_file): Call bfd_make_section_anyway
+	if still no section after the bfd_coff_make_section_hook.
+	* coffcode.h: Add comment about TWO_DATA_SECS.
+
 Tue Sep 28 03:22:24 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* ecoff.c (ecoff_slurp_symbolic_info):  Always determine raw_size
