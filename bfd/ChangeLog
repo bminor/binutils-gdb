@@ -1,5 +1,8 @@
 Fri Sep  9 11:51:49 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* coffgen.c (coff_get_symtab): Reindented.  Removed commented out
+	call to bfd_constructor_entry.
+
 	Convert m68k COFF to use new COFF backend linker.
 	* coff-m68k.c (coff_relocate_section): Define.
 	* cf-m68klynx.c (coff_rtype_to_howto): Define.
