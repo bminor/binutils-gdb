@@ -1,3 +1,8 @@
+2001-02-06  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* ser-unix.c (hardware_print_tty_state) [HAVE_SGTTY]: Call
+	fprintf_filtered with correct arguments.
+
 2001-02-06  Michael Snyder  <msnyder@makita.cygnus.com>
 	Submitted by Paul Hilfinger (hilfingr@gnat.com) 
 	and Andrei Petrov (and@genesyslab.com).

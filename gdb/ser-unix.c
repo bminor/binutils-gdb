@@ -267,7 +267,7 @@ hardwire_print_tty_state (serial_t scb,
   fprintf_filtered (stream, "tchars: ");
   for (i = 0; i < (int) sizeof (struct tchars); i++)
     fprintf_filtered (stream, "0x%x ", ((unsigned char *) &state->tc)[i]);
-  fprintf_filtered ("\n");
+  fprintf_filtered (stream, "\n");
 
   fprintf_filtered (stream, "ltchars: ");
   for (i = 0; i < (int) sizeof (struct ltchars); i++)
