@@ -32,34 +32,6 @@ struct frame_saved_regs;
 struct value;
 struct type;
 
-/* Return the GDB type object for the "standard" data type of data in
-   register REGNUM.  */
-
-#define REGISTER_VIRTUAL_TYPE(regnum) i386_register_virtual_type (regnum)
-extern struct type *i386_register_virtual_type (int regnum);
-
-/* Return true iff register REGNUM's virtual format is different from
-   its raw format.  */
-
-#define REGISTER_CONVERTIBLE(regnum) i386_register_convertible (regnum)
-extern int i386_register_convertible (int regnum);
-
-/* Convert data from raw format for register REGNUM in buffer FROM to
-   virtual format with type TYPE in buffer TO.  */
-
-#define REGISTER_CONVERT_TO_VIRTUAL(regnum, type, from, to) \
-  i386_register_convert_to_virtual ((regnum), (type), (from), (to))
-extern void i386_register_convert_to_virtual (int regnum, struct type *type,
-					      char *from, char *to);
-
-/* Convert data from virtual format with type TYPE in buffer FROM to
-   raw format for register REGNUM in buffer TO.  */
-
-#define REGISTER_CONVERT_TO_RAW(type, regnum, from, to) \
-  i386_register_convert_to_raw ((type), (regnum), (from), (to))
-extern void i386_register_convert_to_raw (struct type *type, int regnum,
-					  char *from, char *to);
-
 /* Print out the i387 floating point state.  */
 extern void i387_float_info (void);
 #define FLOAT_INFO { i387_float_info (); }

@@ -1,5 +1,14 @@
 2002-06-16  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/tm-i386.h (REGISTER_VIRTUAL_TYPE,
+	REGISTER_CONVERTIBLE, REGISTER_CONVERT_TO_VIRTUAL,
+	REGISTER_CONVERT_TO_RAW): Remove defines.
+	(i386_register_virtual_type, i386_register_convertible,
+	i386_register_convert_to_virtual, i386_register_convert_to_raw):
+	Remove prototypes.
+	* i386-tdep.c (i386_gdbarch_init): Adjust for removal of the
+	macros mentioned above.
+
 	* config/i386/tm-i386lynx.h (SAVED_PC_AFTER_CALL): Remove define.
 	(i386lynx_saved_pc_after_call): Remove prototype.
 	* i386ly-tdep.c: Include "i386-tdep.h".

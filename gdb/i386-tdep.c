@@ -1413,6 +1413,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_raw_size (gdbarch, i386_register_raw_size);
   set_gdbarch_max_register_raw_size (gdbarch, 16);
   set_gdbarch_max_register_virtual_size (gdbarch, 16);
+  set_gdbarch_register_virtual_type (gdbarch, i386_register_virtual_type);
 
   set_gdbarch_get_longjmp_target (gdbarch, i386_get_longjmp_target);
 
@@ -1430,6 +1431,11 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				       sizeof (i386_call_dummy_words));
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, i386_fix_call_dummy);
+
+  set_gdbarch_register_convertible (gdbarch, i386_register_convertible);
+  set_gdbarch_register_convert_to_virtual (gdbarch,
+					   i386_register_convert_to_virtual);
+  set_gdbarch_register_convert_to_raw (gdbarch, i386_register_convert_to_raw);
 
   set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
   set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
