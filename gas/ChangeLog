@@ -1,3 +1,8 @@
+1999-07-27  Ian Lance Taylor  <ian@zembu.com>
+
+	* config/tc-sparc.h (tc_fix_adjustable): Don't adjust GOT, PLT, or
+	VTABLE relocations.
+
 1999-07-21  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* config/te-go32.h (COFF_LONG_SECTION_NAMES): Define.

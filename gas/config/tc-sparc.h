@@ -127,6 +127,12 @@ extern int elf32_sparc_force_relocation PARAMS ((struct fix *));
 #define tc_fix_adjustable(FIX)						\
   (! S_IS_EXTERNAL ((FIX)->fx_addsy)					\
    && ! S_IS_WEAK ((FIX)->fx_addsy)					\
+   && (FIX)->fx_r_type != BFD_RELOC_SPARC_GOT10				\
+   && (FIX)->fx_r_type != BFD_RELOC_SPARC_GOT13				\
+   && (FIX)->fx_r_type != BFD_RELOC_SPARC_GOT22				\
+   && (FIX)->fx_r_type != BFD_RELOC_SPARC_WPLT30			\
+   && (FIX)->fx_r_type != BFD_RELOC_VTABLE_INHERIT			\
+   && (FIX)->fx_r_type != BFD_RELOC_VTABLE_ENTRY			\
    && (! sparc_pic_code							\
        || (FIX)->fx_pcrel						\
        || ((FIX)->fx_subsy != NULL					\
