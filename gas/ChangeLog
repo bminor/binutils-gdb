@@ -1,3 +1,7 @@
+Mon Feb 24 02:03:00 1997  Dawn Perchik  <dawn@cygnus.com>
+
+	* itbl-ops.h: Include as.h.
+
 Mon Feb 24 01:04:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* as.c: Remove -t option.
