@@ -1,5 +1,9 @@
 Thu Jun 20 19:10:28 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/obj-aout.c (obj_emit_relocations): Give an error if the
+	relocation symbol was not resolved.
+	* config/obj-coff.c (do_relocs_for): Likewise.
+
 	* write.c (adjust_reloc_syms): Refetch the symbol section after
 	calling S_GET_VALUE, since it may have changed.
 
