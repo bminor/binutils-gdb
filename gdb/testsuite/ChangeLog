@@ -1,3 +1,7 @@
+2002-01-04  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/maint.exp: Add tests for maint info sections options.
+
 Fri Dec 21 09:42:11 2001  Jeffrey A Law  (law@redhat.com)
 
 	* gdb.base/default.exp: Remove bogus hppa*-hp-hpux* xfails.
