@@ -9,54 +9,58 @@ targetdependent=true
 
 # per-host:
 
+gas_host=generic
+
+case "${host_cpu}" in
+a29k | rs6000 | vax)  gas_host=${host_cpu} ;;	
+mips)
+	case "${host_os}" in
+	ultrix) gas_host=decstation ;;
+	esac
+	;;
+*)
+	case "${host_os}" in
+	ansi | ultrix | hpux | sysv*)	gas_host=${host_os} ;;
+	*)
+		case "${host_vendor}" in
+		sun)
+			case "${host_cpu}" in
+			m68k)	gas_host=sun3 ;;
+			i386)	gas_host=sun386 ;;
+			sparc)	gas_host=sun4 ;;
+			esac
+			;;
+		esac
+		;;
+	esac
+	;;
+esac
+
 # per-target:
 
 # assign cpu type
 emulation=generic
 
-case ${target} in
-sun4* | sparc*)
-	cpu_type=sparc
-	;;
-sun3*)
-	cpu_type=m68k
-	;;
-i386*)
-	cpu_type=i386
-	;;
-i960*)
-	cpu_type=i960
-	emulation=ic960
-	;;
-a29k*)
-	cpu_type=a29k
-	;;
-m68k*)
-	cpu_type=m68k
-	;;
-*)
-	cpu_type=generic
-	;;
-esac
+cpu_type=${target_cpu}
 
 # assign object format
-case ${target} in
-*-coff)
+case ${target_os} in
+sysv* | -coff*)
 	obj_format=coff
 	;;
-*-bout)
+bout*)
 	obj_format=bout
+	;;
+bsd* | sunos* | *)
+	obj_format=aout
 	;;
 generic)
 	obj_format=generic
 	;;
-*)
-	obj_format=aout
-	;;
 esac
 
 # assign floating point type
-case ${target} in
+case ${target_cpu} in
 vax)
 	atof=vax
 	;;
@@ -65,7 +69,7 @@ vax)
 	;;
 esac
 
-files="config/ho-${host}.h config/tc-${cpu_type}.c \
+files="config/ho-${gas_host}.h config/tc-${cpu_type}.c \
 	config/tc-${cpu_type}.h config/te-${emulation}.h \
 	config/obj-${obj_format}.h config/obj-${obj_format}.c \
 	config/atof-${atof}.c"

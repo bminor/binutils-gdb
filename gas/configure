@@ -375,13 +375,13 @@ cpu_type=${target_cpu}
 
 # assign object format
 case ${target_os} in
--sysv* | -coff*)
+sysv* | -coff*)
 	obj_format=coff
 	;;
--bout*)
+bout*)
 	obj_format=bout
 	;;
--bsd* | -sunos* | *)
+bsd* | sunos* | *)
 	obj_format=aout
 	;;
 generic)
@@ -620,6 +620,26 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 			originaldir=`pwd`
 			cd ${srcdir}
 		fi
+
+		# If there are subdirectories, then recurse. 
+		if [ -z "${norecurse}" -a -n "${configdirs}" ] ; then 
+			for configdir in ${configdirs} ; do
+				if [ -n "${verbose}" ] ; then
+					echo Configuring ${configdir}...
+				fi
+
+				if [ -d ${configdir} ] ; then
+					(cd ${configdir} ;
+						./configure -recursing ${host} +target=${target} \
+							${verbose} ${subdirs} ${removing} +destdir=${destdir}) \
+						| sed 's/^/	/'
+				else
+					if [ -n "${verbose}" ] ; then
+						echo Warning: directory \"${configdir}\" is missing.
+					fi
+				fi
+			done
+		fi
 	done # for each target
 
 	# Now build a Makefile for this host.
@@ -639,104 +659,32 @@ E!O!F
 	fi
 done # for each host
 
-# If there are subdirectories, then recurse. 
-
-if [ -n "${norecurse}" -o -z "${configdirs}" ] ; then exit 0 ; fi
-
-# configdirs is not null
-for configdir in ${configdirs} ; do
-	if [ -n "${verbose}" ] ; then
-		echo Configuring ${configdir}...
-	fi
-
-	specifics=
-	commons=
-
-	if [ -n "${defaulttargets}" ] ; then
-		for host in ${hosts} ; do
-			if [ -d ${configdir}.${host} ] ; then
-				newspecifics="${specifics} ${host}"
-				specifics=${newspecifics}
-			else
-				newcommons="${commons} ${host}"
-				commons=${newcommons}
-			fi # if target specific
-		done # for each host
-
-		if [ -n "${commons}" ] ; then
-			if [ -d ${configdir} ] ; then
-				(cd ${configdir} ;
-					./configure -recursing ${commons} ${verbose} ${subdirs} ${removing} +destdir=${destdir}) \
-					| sed 's/^/	/'
-			else
-				if [ -n "${verbose}" ] ; then
-				  echo Warning: directory \"${configdir}\" is missing.
-				fi
-			fi
-		fi # if any common hosts
-
-		if [ -n "${specifics}" ] ; then
-			for host in ${specifics} ; do
-				if [ -n "${verbose}" ] ; then
-					echo Configuring target specific directory ${configdir}.${host}...
-				fi
-
-				(cd ${configdir}.${host} ;
-					./configure -recursing ${host} ${verbose} ${subdirs} ${removing} +destdir=${destdir}) \
-					| sed 's/^/	/'
-			done # for host in specifics
-		fi # if there are any specifics
-	else
-
-		for target in ${targets} ; do
-			if [ -d ${configdir}.${target} ] ; then
-				newspecifics="${specifics} ${target}"
-				specifics=${newspecifics}
-			else
-				newcommons="${commons} +target=${target}"
-				commons=${newcommons}
-			fi
-
-		done # check for target specific dir override
-
-		if [ -n "${verbose}" ] ; then
-			echo "	"commons=\"${commons}\"
-			echo "	"specifics=\"${specifics}\"
-		fi # if verbose
-
-		if [ -n "${commons}" ] ; then
-			if [ -d ${configdir} ] ; then
-				(cd ${configdir} ;
-					./configure -recursing ${hosts} ${verbose} ${subdirs} ${removing} \
-						${commons} +destdir=${destdir}) \
-					| sed 's/^/	/'
-			else
-				if [ -n "${verbose}" ] ; then
-				  echo Warning: directory \"${configdir}\" is missing.
-				fi
-			fi
-		fi # if any commons
-
-		if [ -n "${specifics}" ] ; then
-			for target in ${specifics} ; do
-				if [ -n "${verbose}" ] ; then
-					echo Configuring target specific directory ${configdir}.${target}...
-				fi
-
-				(cd ${configdir}.${target} ;
-					./configure -recursing ${hosts} ${verbose} ${subdirs} ${removing} \
-						"+target=${target}" +destdir=${destdir}) \
-					| sed 's/^/	/'
-			done
-		fi # if any specifics
-	fi # not default targets
-done
-
 exit 0
 
 #
 # $Log$
-# Revision 1.21  1991/08/22 03:21:56  rich
+# Revision 1.23  1991/08/28 21:49:10  rich
+# Update to current standards.
+#
+# Revision 1.35  1991/08/26  04:29:31  rich
+# Welcome cvs to the big time.
+#
+# Revision 1.34  1991/08/25  23:40:23  rich
+# rcs enters the soup.
+#
+# Revision 1.33  1991/08/25  21:48:38  rich
+# Adding diff to the fray.
+#
+# Revision 1.32  1991/08/25  20:18:20  rich
+# Adding grep to the fray.
+#
+# Revision 1.31  1991/08/23  04:50:57  rich
+# Minor config polish.
+#
+# Revision 1.22  1991/08/23  03:31:43  rich
+# Minor polish & config mapping.
+#
+# Revision 1.30  1991/08/22  07:15:51  rich
 # Three part names, etc.
 #
 # Revision 1.29  1991/08/20  04:56:51  rich
