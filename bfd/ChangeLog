@@ -1,5 +1,8 @@
 Tue May 14 12:35:32 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* som.c (som_slurp_reloc_table): Clear external_relocs cache after
+	freeing it.
+
 	* libbfd.c: Remove #ifdef FILE_OFFSET_IS_CHAR_INDEX, and compile
 	the code unconditionally.
 
