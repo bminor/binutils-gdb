@@ -1,3 +1,9 @@
+Wed Feb  4 15:40:00 1998  Geoffrey Keating  <geoffk@ozemail.com.au>
+
+	* gas/ppc/ppc.exp: New file.
+	* gas/ppc/astest.s, gas/ppc/astest.d: New test.
+	* gas/ppc/astest2.s, gas/ppc/astest2.d: New test.
+
 Sun Feb  1 21:43:54 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mips/4010.s: Pad test code out to a 16byte boundary.

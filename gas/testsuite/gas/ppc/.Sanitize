@@ -1,6 +1,4 @@
-# Sanitize.in for devo.
-# $Id$
-#
+# .Sanitize for devo/gas/testsuite/gas/ppc.
 
 # Each directory to survive it's way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
@@ -17,30 +15,6 @@
 
 Do-first:
 
-for d in gasp i386-bsd ieee.fp mn10x00 ; do
-	if [ -d $d ]; then
-		lose_these_too="$d ${lose_these_too}"
-	fi
-done
-
-if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
-	keep_these_too="tic80 ${keep_these_too}"
-else
-	lose_these_too="tic80 ${lose_these_too}"
-fi
-
-if ( echo $* | grep keep\-sky > /dev/null ) ; then
-	keep_these_too="dvp ${keep_these_too}"
-else
-	lose_these_too="dvp ${lose_these_too}"
-fi
-
-if ( echo $* | grep keep\-d30v > /dev/null ) ; then
-	keep_these_too="d30v ${keep_these_too}"
-else
-	lose_these_too="d30v ${lose_these_too}"
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -49,31 +23,11 @@ fi
 
 Things-to-keep:
 
-all
-alpha
-arc
-arm
-h8300
-hppa
-i386
-ieee-fp
-m32r
-m68k
-m68k-coff
-m88k
-macros
-mips
-mn10200
-mn10300
-mri
-ppc
-sh
-sparc
-sparc-solaris
-sun4
-template
-v850
-vax
+astest.d
+astest.s
+astest2.d
+astest2.s
+ppc.exp
 
 Things-to-lose:
 
