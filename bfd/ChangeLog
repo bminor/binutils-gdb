@@ -1,5 +1,8 @@
 2002-10-16  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.h (elf_link_add_object_symbols): Error out on dynamic objects
+	loaded with --just-symbols.
+
 	* elf32-i386qnx.c (TARGET_LITTLE_NAME): Define.
 	* elf32-ppcqnx.c (TARGET_LITTLE_NAME, TARGET_BIG_NAME): Define.
 	* elf32-shqnx.c (TARGET_LITTLE_NAME, TARGET_BIG_NAME): Define.

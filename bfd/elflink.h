@@ -1299,6 +1299,13 @@ elf_link_add_object_symbols (abfd, info)
       bfd_size_type oldsize;
       bfd_size_type strindex;
 
+      /* ld --just-symbols and dynamic objects don't mix very well.
+	 Test for --just-symbols by looking at info set up by
+	 _bfd_elf_link_just_syms.  */
+      if ((s = abfd->sections) != NULL
+	  && elf_section_data (s)->sec_info_type == ELF_INFO_TYPE_JUST_SYMS)
+	goto error_return;
+
       /* Find the name to use in a DT_NEEDED entry that refers to this
 	 object.  If the object has a DT_SONAME entry, we use it.
 	 Otherwise, if the generic linker stuck something in
