@@ -1,7 +1,15 @@
+Tue May 25 13:28:27 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t00/help.exp: Use .* in place of some help messages which
+	just changed.
+	gdb.t00/default.exp: Update "info frame" test for new message.
+	* gdb.stabs/wierd.exp: Check for eof, directly or via gdb_test.
+
 Mon May 24 00:24:47 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t03/{gdbme.c,ptype.exp}:
 	Add tests for typedef'd struct and union without tags.
+	Also check "whatis" on a variable of a typedef'd enum without a tag.
 
 	* gdb.t00/teststrategy.exp: For p "foo", remove sun4 XFAIL (see
 	PRMS 1823; the bug still exists but isn't reproduced by this test
