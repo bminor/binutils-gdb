@@ -1,6 +1,18 @@
 Fri Jan 14 14:24:21 1994  Rob Savoye  (rob@darkstar.cygnus.com)
 
-	* Most .exp files: Tweak to run under either version of expect.
+	* gdb.t00/teststrategy.exp, gdb.t07/watchpoint.exp,
+	gdb.t31/chillvars.exp, lib/gdb.exp:
+	Tweak to run under either version of expect.
+	* lib/gdb.exp (default_gdb_exit): Remove "catch" statement.
+	* gdb.t00/teststrategy.exp: Use isnative and verbose procedures.
+	* gdb.t11/list.exp: Remove extraneous whitespace.
+
+Sat Jan 15 09:57:22 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t16/printcmds.exp (test_print_strings): Accept
+	"(unsigned char *) " before the string.
+
+	* TODO: Add notes about printing of fancy types and GDB expressions.
 
 Thu Jan 13 17:16:09 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
@@ -1327,4 +1339,10 @@ Sun Feb 21 10:55:55 1993  Mike Werner  (mtw@poseidon.cygnus.com)
 	of dejagnu.  The modifications to these testcases, etc., which
 	will allow them to work with the new version of dejagnu will be
 	made in a future update.
-
+
+Local Variables:
+mode: indented-text
+left-margin: 8
+fill-column: 74
+version-control: never
+End:
