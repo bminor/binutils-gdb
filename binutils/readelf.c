@@ -1180,7 +1180,7 @@ get_machine_name (e_machine)
     case EM_486:         	return "Intel 80486";
     case EM_860:         	return "Intel 80860";
     case EM_MIPS:        	return "MIPS R3000";
-    case EM_S370:        	return "Amdahl";
+    case EM_S370:        	return "IBM System/370";
     case EM_MIPS_RS4_BE: 	return "MIPS R4000 big-endian";
     case EM_OLD_SPARCV9:	return "Sparc v9 (old)";
     case EM_PARISC:      	return "HPPA";
