@@ -43,6 +43,7 @@ nm-sysv4.h
 none
 ns32k
 pa
+powerpc
 pyr
 romp
 rs6000
