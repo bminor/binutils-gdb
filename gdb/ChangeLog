@@ -1,5 +1,7 @@
 Thu Dec 21 11:58:52 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* Makefile.in (ppcbug-rom.o, srec.o): Add dependencies.
+
 	* monitor.c (monitor_debug): Take prefix, and suffix arguments.
 	Print trailing newline after the suffix.
 	(monitor_printf{,_noecho}): Change monitor_debug calls.
