@@ -25,6 +25,7 @@ the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307
 
 #include "bfd.h"
 #include "sysdep.h"
+#include "bfdlink.h"
 #include "ld.h"
 #include "ldmisc.h"
 #include "ldexp.h"
@@ -68,8 +69,9 @@ typedef struct search_arch
 static search_arch_type *search_arch_head;
 static search_arch_type **search_arch_tail_ptr = &search_arch_head;
  
-static boolean try_open_bfd PARAMS ((const char *attempt,
-				     lang_input_statement_type *entry));
+static boolean ldfile_open_file_search
+  PARAMS ((const char *arch, lang_input_statement_type *,
+	   const char *lib, const char *suffix));
 static FILE *try_open PARAMS ((const char *name, const char *exten));
 
 void
@@ -89,8 +91,8 @@ ldfile_add_library_path (name, cmdline)
 
 /* Try to open a BFD for a lang_input_statement.  */
 
-static boolean
-try_open_bfd (attempt, entry)
+boolean
+ldfile_try_open_bfd (attempt, entry)
      const char *attempt;
      lang_input_statement_type *entry;
 {
@@ -109,7 +111,7 @@ try_open_bfd (attempt, entry)
 /* Search for and open the file specified by ENTRY.  If it is an
    archive, use ARCH, LIB and SUFFIX to modify the file name.  */
 
-boolean
+static boolean
 ldfile_open_file_search (arch, entry, lib, suffix)
      const char *arch;
      lang_input_statement_type *entry;
@@ -122,7 +124,7 @@ ldfile_open_file_search (arch, entry, lib, suffix)
      directory first.  */
   if (! entry->is_archive)
     {
-      if (try_open_bfd (entry->filename, entry))
+      if (ldfile_try_open_bfd (entry->filename, entry))
 	return true;
     }
 
@@ -131,6 +133,12 @@ ldfile_open_file_search (arch, entry, lib, suffix)
        search = search->next) 
     {
       char *string;
+
+      if (entry->dynamic && ! link_info.relocateable)
+	{
+	  if (ldemul_open_dynamic_archive (arch, search, entry))
+	    return true;
+	}
 
       string = (char *) xmalloc (strlen (search->name)
 				 + strlen (slash)
@@ -148,7 +156,7 @@ ldfile_open_file_search (arch, entry, lib, suffix)
       else
 	sprintf (string, "%s%s%s", search->name, slash, entry->filename);
 
-      if (try_open_bfd (string, entry))
+      if (ldfile_try_open_bfd (string, entry))
 	{
 	  entry->filename = string;
 	  return true;
@@ -171,7 +179,7 @@ ldfile_open_file (entry)
 
   if (! entry->search_dirs_flag)
     {
-      if (try_open_bfd (entry->filename, entry))
+      if (ldfile_try_open_bfd (entry->filename, entry))
 	return;
     }
   else
@@ -183,11 +191,6 @@ ldfile_open_file (entry)
 	   arch != (search_arch_type *) NULL;
 	   arch = arch->next)
 	{
-	  if (config.dynamic_link)
-	    {
-	      if (ldemul_open_dynamic_archive (arch->name, entry))
-		return;
-	    }
 	  if (ldfile_open_file_search (arch->name, entry, "lib", ".a"))
 	    return;
 #ifdef VMS

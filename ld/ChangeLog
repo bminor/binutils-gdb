@@ -1,3 +1,28 @@
+Wed Jul 12 11:32:22 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldemul.h (ldemul_open_dynamic_archive): Add search parameter to
+	declaration.
+	(ld_emulation_xfer_type): Add search parameter to
+	open_dynamic_archive entry point.
+	* ldemul.c (ldemul_open_dynamic_archive): Add search parameter.
+	* ldfile.c (ldfile_try_open_bfd): Rename from try_open_bfd, and
+	make non-static.  Change all callers to use new name.
+	(ldfile_open_file_search): Make static.  If entry is dynamic, call
+	ldemul_open_dynamic_archive.
+	(ldfile_open_file): Don't call ldemul_open_dynamic_archive.
+	* ldfile.h (ldfile_open_file_search): Don't declare.
+	(ldfile_try_open_bfd): Declare.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_open_dynamic_archive):
+	Accept search parameter.  Don't search for a library, just look in
+	a single place.
+	* emultempl/linux.em (gld${EMULATION_NAME}_open_dynamic_archive):
+	Likewise.
+
+Tue Jul 11 16:44:21 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldmain.c (set_scripts_dir): Don't base script directory on
+	current directory.
+
 Tue Jul 11 12:29:02 1995  Rick Sladkey  <jrs@world.std.com>
 
 	* ldmisc.c (vfinfo): Don't print the line number if it isn't
