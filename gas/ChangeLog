@@ -1,5 +1,8 @@
 1999-06-03  Ian Lance Taylor  <ian@zembu.com>
 
+	* config/tc-hppa.h: Update for symbol handling changes.
+	* config/tc-hppa.c: Likewise.
+
 	* config/tc-arm.h: Update for symbol handling changes.
 	* config/tc-arm.c: Likewise.
 	(symbol_make_empty): Remove.  Just use symbol_create.

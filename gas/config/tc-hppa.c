@@ -1072,11 +1072,11 @@ static struct default_space_dict pa_def_spaces[] =
 
 #define is_DP_relative(exp)			\
   ((exp).X_op == O_subtract			\
-   && strcmp((exp).X_op_symbol->bsym->name, "$global$") == 0)
+   && strcmp (S_GET_NAME ((exp).X_op_symbol), "$global$") == 0)
 
 #define is_PC_relative(exp)			\
   ((exp).X_op == O_subtract			\
-   && strcmp((exp).X_op_symbol->bsym->name, "$PIC_pcrel$0") == 0)
+   && strcmp (S_GET_NAME ((exp).X_op_symbol), "$PIC_pcrel$0") == 0)
 
 /* We need some complex handling for stabs (sym1 - sym2).  Luckily, we'll
    always be able to reduce the expression to a constant, so we don't
@@ -1369,7 +1369,8 @@ md_assemble (str)
 	  if (label_symbol->lss_label)
 	    {
 	      last_call_info->start_symbol = label_symbol->lss_label;
-	      label_symbol->lss_label->bsym->flags |= BSF_FUNCTION;
+	      symbol_get_bfdsym (label_symbol->lss_label)->flags
+		|= BSF_FUNCTION;
 #ifdef OBJ_SOM
 	      /* Also handle allocation of a fixup to hold the unwind
 		 information when the label appears after the proc/procend.  */
@@ -2731,13 +2732,14 @@ tc_gen_reloc (section, fixp)
 
   reloc = (arelent *) xmalloc (sizeof (arelent));
 
-  reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   codes = (bfd_reloc_code_real_type **) hppa_gen_reloc_type (stdoutput,
 			       fixp->fx_r_type,
 			       hppa_fixp->fx_r_format,
 			       hppa_fixp->fx_r_field,
 			       fixp->fx_subsy != NULL,
-			       fixp->fx_addsy->bsym);
+			       symbol_get_bfdsym (fixp->fx_addsy));
 
   if (codes == NULL)
     abort ();
@@ -2760,7 +2762,8 @@ tc_gen_reloc (section, fixp)
 
       code = *codes[0];
 
-      reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+      reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+      *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
       reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
       reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
       reloc->addend = 0;	/* default */
@@ -3068,8 +3071,8 @@ md_apply_fix (fixP, valp)
 	  && fixP->fx_addsy
 	  && fixP->fx_pcrel
 	  && !arg_reloc_stub_needed ((long) ((obj_symbol_type *)
-			fixP->fx_addsy->bsym)->tc_data.ap.hppa_arg_reloc,
-				    hppa_fixP->fx_arg_reloc)
+		symbol_get_bfdsym (fixP->fx_addsy))->tc_data.ap.hppa_arg_reloc,
+		hppa_fixP->fx_arg_reloc)
 	  && (((int)(*valp) > -262144 && (int)(*valp) < 262143) && fmt != 22)
 	  && S_GET_SEGMENT (fixP->fx_addsy) == hppa_fixP->segment
 	  && !(fixP->fx_subsy
@@ -4602,7 +4605,7 @@ pa_comm (unused)
       /* colon() has already set the frag to the current location in the
          current subspace; we need to reset the fragment to the zero address
          fragment.  We also need to reset the segment pointer.  */
-      symbol->sy_frag = &zero_address_frag;
+      symbol_set_frag (symbol, &zero_address_frag);
     }
   demand_empty_rest_of_line ();
 }
@@ -4809,13 +4812,13 @@ pa_type_args (symbolP, is_export)
   char *name, c, *p;
   unsigned int temp, arg_reloc;
   pa_symbol_type type = SYMBOL_TYPE_UNKNOWN;
-  obj_symbol_type *symbol = (obj_symbol_type *) symbolP->bsym;
+  obj_symbol_type *symbol = (obj_symbol_type *) symbol_get_bfdsym (symbolP);
 
   if (strncasecmp (input_line_pointer, "absolute", 8) == 0)
 
     {
       input_line_pointer += 8;
-      symbolP->bsym->flags &= ~BSF_FUNCTION;
+      symbol_get_bfdsym (symbolP)->flags &= ~BSF_FUNCTION;
       S_SET_SEGMENT (symbolP, bfd_abs_section_ptr);
       type = SYMBOL_TYPE_ABSOLUTE;
     }
@@ -4828,54 +4831,55 @@ pa_type_args (symbolP, is_export)
          Complain if one tries to EXPORT a CODE type since that's never
          done.  Both GCC and HP C still try to IMPORT CODE types, so
          silently fix them to be ENTRY types.  */
-      if (symbolP->bsym->flags & BSF_FUNCTION)
+      if (S_IS_FUNCTION (symbolP))
 	{
 	  if (is_export)
-	    as_tsktsk (_("Using ENTRY rather than CODE in export directive for %s"), symbolP->bsym->name);
+	    as_tsktsk (_("Using ENTRY rather than CODE in export directive for %s"),
+		       S_GET_NAME (symbolP));
 
-	  symbolP->bsym->flags |= BSF_FUNCTION;
+	  symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
 	  type = SYMBOL_TYPE_ENTRY;
 	}
       else
 	{
-	  symbolP->bsym->flags &= ~BSF_FUNCTION;
+	  symbol_get_bfdsym (symbolP)->flags &= ~BSF_FUNCTION;
 	  type = SYMBOL_TYPE_CODE;
 	}
     }
   else if (strncasecmp (input_line_pointer, "data", 4) == 0)
     {
       input_line_pointer += 4;
-      symbolP->bsym->flags &= ~BSF_FUNCTION;
+      symbol_get_bfdsym (symbolP)->flags &= ~BSF_FUNCTION;
       type = SYMBOL_TYPE_DATA;
     }
   else if ((strncasecmp (input_line_pointer, "entry", 5) == 0))
     {
       input_line_pointer += 5;
-      symbolP->bsym->flags |= BSF_FUNCTION;
+      symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
       type = SYMBOL_TYPE_ENTRY;
     }
   else if (strncasecmp (input_line_pointer, "millicode", 9) == 0)
     {
       input_line_pointer += 9;
-      symbolP->bsym->flags |= BSF_FUNCTION;
+      symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
       type = SYMBOL_TYPE_MILLICODE;
     }
   else if (strncasecmp (input_line_pointer, "plabel", 6) == 0)
     {
       input_line_pointer += 6;
-      symbolP->bsym->flags &= ~BSF_FUNCTION;
+      symbol_get_bfdsym (symbolP)->flags &= ~BSF_FUNCTION;
       type = SYMBOL_TYPE_PLABEL;
     }
   else if (strncasecmp (input_line_pointer, "pri_prog", 8) == 0)
     {
       input_line_pointer += 8;
-      symbolP->bsym->flags |= BSF_FUNCTION;
+      symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
       type = SYMBOL_TYPE_PRI_PROG;
     }
   else if (strncasecmp (input_line_pointer, "sec_prog", 8) == 0)
     {
       input_line_pointer += 8;
-      symbolP->bsym->flags |= BSF_FUNCTION;
+      symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
       type = SYMBOL_TYPE_SEC_PROG;
     }
 
@@ -4883,7 +4887,7 @@ pa_type_args (symbolP, is_export)
      than BFD understands.  This is how we get this information
      to the SOM BFD backend.  */
 #ifdef obj_set_symbol_type
-  obj_set_symbol_type (symbolP->bsym, (int) type);
+  obj_set_symbol_type (symbol_get_bfdsym (symbolP), (int) type);
 #endif
 
   /* Now that the type of the exported symbol has been handled,
@@ -4977,7 +4981,7 @@ pa_import (unused)
 	     the the current segment.  Note only BSF_FUNCTION really
 	     matters, we do not need to set the full SYMBOL_TYPE_* info.  */
 	  if (now_seg == text_section)
-	    symbol->bsym->flags |= BSF_FUNCTION;
+	    symbol_get_bfdsym (symbol)->flags |= BSF_FUNCTION;
 
 	  /* If the section is undefined, then the symbol is undefined
 	     Since this is an import, leave the section undefined.  */
@@ -5177,7 +5181,7 @@ pa_proc (unused)
 	if (label_symbol->lss_label)
 	  {
 	    last_call_info->start_symbol = label_symbol->lss_label;
-	    label_symbol->lss_label->bsym->flags |= BSF_FUNCTION;
+	    symbol_get_bfdsym (label_symbol->lss_label)->flags |= BSF_FUNCTION;
 	  }
 	else
 	  as_bad (_("Missing function name for .PROC (corrupted label chain)"));
@@ -5216,7 +5220,8 @@ pa_procend (unused)
 	  if (label_symbol->lss_label)
 	    {
 	      last_call_info->start_symbol = label_symbol->lss_label;
-	      label_symbol->lss_label->bsym->flags |= BSF_FUNCTION;
+	      symbol_get_bfdsym (label_symbol->lss_label)->flags
+		|= BSF_FUNCTION;
 #ifdef OBJ_SOM
 	      /* Also handle allocation of a fixup to hold the unwind
 		 information when the label appears after the proc/procend.  */
@@ -6572,7 +6577,7 @@ hppa_fix_adjustable (fixp)
       || hppa_fix->fx_r_field == e_lpsel)
     return 0;
 
-  if (fixp->fx_addsy && fixp->fx_addsy->bsym->flags & BSF_GLOBAL)
+  if (fixp->fx_addsy && S_IS_EXTERNAL (fixp->fx_addsy))
     return 0;
 
   /* Reject absolute calls (jumps).  */
@@ -6580,8 +6585,7 @@ hppa_fix_adjustable (fixp)
     return 0;
 
   /* Reject reductions of function symbols.  */
-  if (fixp->fx_addsy == 0
-      || (fixp->fx_addsy->bsym->flags & BSF_FUNCTION) == 0)
+  if (fixp->fx_addsy == 0 || ! S_IS_FUNCTION (fixp->fx_addsy))
     return 1;
 
   return 0;
@@ -6618,9 +6622,8 @@ hppa_force_relocation (fixp)
      call stub.  FIXME.  Can't we need the same for absolute calls?  */
   if (fixp->fx_pcrel && fixp->fx_addsy
       && (arg_reloc_stub_needed ((long) ((obj_symbol_type *)
-				  fixp->fx_addsy->bsym)->tc_data.ap.hppa_arg_reloc,
-
-				 hppa_fixp->fx_arg_reloc)))
+	symbol_get_bfdsym (fixp->fx_addsy))->tc_data.ap.hppa_arg_reloc,
+	hppa_fixp->fx_arg_reloc)))
     return 1;
   distance = (fixp->fx_offset + S_GET_VALUE (fixp->fx_addsy)
 	      - md_pcrel_from (fixp));
@@ -6678,7 +6681,7 @@ hppa_elf_mark_end_of_function ()
 				frag_now);
 
 	  assert (symbolP);
-	  symbolP->bsym->flags = BSF_LOCAL;
+	  S_CLEAR_EXTERNAL (symbolP);
 	  symbol_table_insert (symbolP);
 	}
 
@@ -6708,7 +6711,8 @@ elf_hppa_final_processing ()
        call_info_pointer = call_info_pointer->ci_next)
     {
       elf_symbol_type *esym
-      = (elf_symbol_type *) call_info_pointer->start_symbol->bsym;
+	= ((elf_symbol_type *)
+	   symbol_get_bfdsym (call_info_pointer->start_symbol));
       esym->internal_elf_sym.st_size =
 	S_GET_VALUE (call_info_pointer->end_symbol)
 	- S_GET_VALUE (call_info_pointer->start_symbol) + 4;
