@@ -89,8 +89,7 @@ typedef struct mips_extra_func_info {
 #include "bfd.h"
 
 #include "coff/internal.h"
-#include "coff/mips.h"		/* COFF-like aspects of ecoff files */
-#include "coff/ecoff-ext.h"	/* External forms of ecoff sym structures */
+#include "coff/ecoff.h"		/* COFF-like aspects of ecoff files */
 
 /* FIXME: coff/internal.h and aout/aout64.h both define N_ABS.  We
    want the definition from aout/aout64.h.  */
@@ -194,6 +193,15 @@ struct complaint pdr_static_symbol_complaint =
 
 struct complaint bad_setjmp_pdr_complaint =
 {"fixing bad setjmp PDR from libc", 0, 0};
+
+struct complaint bad_fbitfield_complaint =
+{"can't handle TIR fBitfield", 0, 0};
+
+struct complaint bad_rfd_entry_complaint =
+{"bad rfd entry for file %d, index %d", 0, 0};
+
+struct complaint unexpected_type_code_complaint =
+{"unexpected type code for %s", 0, 0};
 
 /* Macros and extra defs */
 
@@ -367,8 +375,10 @@ mipscoff_symfile_read (objfile, section_offsets, mainline)
      struct section_offsets *section_offsets;
      int mainline;
 {
+  struct cleanup * back_to;
+
   init_minimal_symbol_collection ();
-  make_cleanup (discard_minimal_symbols, 0);
+  back_to = make_cleanup (discard_minimal_symbols, 0);
 
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */
@@ -379,6 +389,8 @@ mipscoff_symfile_read (objfile, section_offsets, mainline)
      minimal symbols for this objfile. */
 
   install_minimal_symbols (objfile);
+
+  do_cleanups (back_to);
 }
 
 /* Perform any local cleanups required when we are done with a particular
@@ -480,9 +492,11 @@ get_rfd (cf, rf)
   /* Object files do not have the RFD table, all refs are absolute */
   if (f->rfdBase == 0)
     return fdrs + rf;
-  ecoff_swap_rfd_in (cur_bfd,
-		     ecoff_data (cur_bfd)->external_rfd + f->rfdBase + rf,
-		     &rfd);
+  (*ecoff_backend (cur_bfd)->swap_rfd_in)
+    (cur_bfd,
+     ((char *) ecoff_data (cur_bfd)->external_rfd
+      + (f->rfdBase + rf) * ecoff_backend (cur_bfd)->external_rfd_size),
+     &rfd);
   return fdrs + rfd;
 }
 
@@ -606,7 +620,7 @@ pop_parse_stack ()
 static struct mips_pending
 {
   struct mips_pending *next;	/* link */
-  struct sym_ext *s;		/* the symbol */
+  char *s;			/* the unswapped symbol */
   struct type *t;		/* its partial type descriptor */
 } **pending_list;
 
@@ -616,7 +630,7 @@ static struct mips_pending
 static struct mips_pending *
 is_pending_symbol (fh, sh)
      FDR *fh;
-     struct sym_ext *sh;
+     char *sh;
 {
   int f_idx = fh - ecoff_data (cur_bfd)->fdr;
   register struct mips_pending *p;
@@ -633,7 +647,7 @@ is_pending_symbol (fh, sh)
 static void
 add_pending (fh, sh, t)
      FDR *fh;
-     struct sym_ext *sh;
+     char *sh;
      struct type *t;
 {
   int f_idx = fh - ecoff_data (cur_bfd)->fdr;
@@ -691,9 +705,13 @@ static int
 parse_symbol (sh, ax, ext_sh, bigend)
      SYMR *sh;
      union aux_ext *ax;
-     struct sym_ext *ext_sh;
+     char *ext_sh;
      int bigend;
 {
+  const bfd_size_type external_sym_size
+    = ecoff_backend (cur_bfd)->external_sym_size;
+  void (* const swap_sym_in) PARAMS ((bfd *, PTR, SYMR *)) =
+    ecoff_backend (cur_bfd)->swap_sym_in;
   char *name;
   struct symbol *s;
   struct block *b;
@@ -704,7 +722,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
   enum address_class class;
   TIR tir;
 
-  if (ext_sh == (struct sym_ext *) NULL)
+  if (ext_sh == (char *) NULL)
     name = ecoff_data (cur_bfd)->ssext + sh->iss;
   else
     name = ecoff_data (cur_bfd)->ss + cur_fdr->issBase + sh->iss;
@@ -817,14 +835,8 @@ parse_symbol (sh, ax, ext_sh, bigend)
       add_symbol (s, top_stack->cur_block);
       break;
 
-    case stStaticProc:
-      /* I believe this is used only for file-local functions.
-	 The comment in symconst.h ("load time only static procs") isn't
-	 particularly clear on this point.  */
-      prim_record_minimal_symbol (name, sh->value, mst_file_text);
-      /* FALLTHROUGH */
-
     case stProc:		/* Procedure, usually goes into global block */
+    case stStaticProc:		/* Static procedure, goes into current block */
       s = new_symbol (name);
       SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
       SYMBOL_CLASS (s) = LOC_BLOCK;
@@ -877,13 +889,14 @@ parse_symbol (sh, ax, ext_sh, bigend)
       top_stack->numargs = 0;
 
       sh->value = (long) SYMBOL_TYPE (s);
+      sh->st = stParsed;
       break;
 
       /* Beginning of code for structure, union, and enum definitions.
 	       They all share a common set of local variables, defined here.  */
       {
 	enum type_code type_code;
-	struct sym_ext *ext_tsym;
+	char *ext_tsym;
 	int nfields;
 	long max_value;
 	struct field *f;
@@ -922,11 +935,13 @@ parse_symbol (sh, ax, ext_sh, bigend)
 	/* First count the number of fields and the highest value. */
 	nfields = 0;
 	max_value = 0;
-	for (ext_tsym = ext_sh + 1; ; ext_tsym++)
+	for (ext_tsym = ext_sh + external_sym_size;
+	     ;
+	     ext_tsym += external_sym_size)
 	  {
 	    SYMR tsym;
 
-	    ecoff_swap_sym_in (cur_bfd, ext_tsym, &tsym);
+	    (*swap_sym_in) (cur_bfd, ext_tsym, &tsym);
 
 	    switch (tsym.st)
 	      {
@@ -954,20 +969,6 @@ parse_symbol (sh, ax, ext_sh, bigend)
 		  max_value = tsym.value;
 		break;
 
-#if 0
-		/* This does not fix the bug which it intended to fix,
-		   and makes GDB hang when reading its own symbol table on
-		   the SGI, when compiled with the SGI compiler.  */
-	      case stTypedef:
-	      case stConstant:
-	      case stStaticProc:
-		complain (&block_member_complaint, tsym.st);
-		/* These are said to show up in cfront-generated programs.
-		   Apparently processing them like the following prevents
-		   core dumps.  */
-		/* FALLTHROUGH */
-#endif
-
 	      case stBlock:
 	      case stUnion:
 	      case stEnum:
@@ -985,12 +986,18 @@ parse_symbol (sh, ax, ext_sh, bigend)
 			 struct.  Skip over the fields of the inner
 			 struct.  The -1 is because the for loop will
 			 increment ext_tsym.  */
-		      ext_tsym = (ecoff_data (cur_bfd)->external_sym
-				  + cur_fdr->isymBase
-				  + tsym.index
-				  - 1);
+		      ext_tsym = ((char *) ecoff_data (cur_bfd)->external_sym
+				  + ((cur_fdr->isymBase + tsym.index - 1)
+				     * external_sym_size));
 		    }
 		}
+		break;
+
+	      case stTypedef:
+		/* mips cc puts out a typedef for struct x if it is not yet
+		   defined when it encounters
+		   struct y { struct x *xp; };
+		   Just ignore it. */
 		break;
 
 	      default:
@@ -1053,16 +1060,24 @@ parse_symbol (sh, ax, ext_sh, bigend)
 	TYPE_FIELDS (t) = f = ((struct field *)
 			       TYPE_ALLOC (t,
 					   nfields * sizeof (struct field)));
+	/* Handle opaque struct definitions.  */
+	if (TYPE_NFIELDS (t) == 0)
+	  {
+	    TYPE_FLAGS (t) |= TYPE_FLAG_STUB;
+	    SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
+	  }
 
 	if (type_code == TYPE_CODE_ENUM)
 	  {
 	    /* This is a non-empty enum. */
-	    for (ext_tsym = ext_sh + 1; ; ext_tsym++)
+	    for (ext_tsym = ext_sh + external_sym_size;
+		 ;
+		 ext_tsym += external_sym_size)
 	      {
 		SYMR tsym;
 		struct symbol *enum_sym;
 
-		ecoff_swap_sym_in (cur_bfd, ext_tsym, &tsym);
+		(*swap_sym_in) (cur_bfd, ext_tsym, &tsym);
 
 		if (tsym.st != stMember)
 		  break;
@@ -1096,6 +1111,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
 	top_stack->cur_field = 0;
 	/* Mark that symbol has a type, and say which one */
 	sh->value = (long) t;
+	sh->st = stParsed;
 	break;
 
 	/* End of local variables shared by struct, union, enum, and
@@ -1197,6 +1213,44 @@ parse_symbol (sh, ax, ext_sh, bigend)
       add_symbol (s, top_stack->cur_block);
       SYMBOL_TYPE (s) = parse_type (ax + sh->index, 0, bigend);
       sh->value = (long) SYMBOL_TYPE (s);
+      sh->st = stParsed;
+      if (TYPE_TAG_NAME (SYMBOL_TYPE (s)) != NULL
+          && STREQ (TYPE_TAG_NAME (SYMBOL_TYPE (s)), "<undefined>"))
+	{
+	  /* mips cc puts out a stTypedef for opaque struct definitions.  */
+          TYPE_FLAGS (SYMBOL_TYPE (s)) |= TYPE_FLAG_STUB;
+	}
+      /* Incomplete definitions of structs should not get a name.  */
+      if (TYPE_NAME (SYMBOL_TYPE (s)) == NULL
+	  && (TYPE_NFIELDS (SYMBOL_TYPE (s)) != 0
+              || (TYPE_CODE (SYMBOL_TYPE (s)) != TYPE_CODE_STRUCT
+		  && TYPE_CODE (SYMBOL_TYPE (s)) != TYPE_CODE_UNION)))
+	{
+	  if (TYPE_CODE (SYMBOL_TYPE (s)) == TYPE_CODE_PTR
+	      || TYPE_CODE (SYMBOL_TYPE (s)) == TYPE_CODE_FUNC)
+	    {
+	      /* If we are giving a name to a type such as "pointer to
+		 foo" or "function returning foo", we better not set
+		 the TYPE_NAME.  If the program contains "typedef char
+		 *caddr_t;", we don't want all variables of type char
+		 * to print as caddr_t.  This is not just a
+		 consequence of GDB's type management; CC and GCC (at
+		 least through version 2.4) both output variables of
+		 either type char * or caddr_t with the type
+		 refering to the stTypedef symbol for caddr_t.  If a future
+		 compiler cleans this up it GDB is not ready for it
+		 yet, but if it becomes ready we somehow need to
+		 disable this check (without breaking the PCC/GCC2.4
+		 case).
+
+		 Sigh.
+
+		 Fortunately, this check seems not to be necessary
+		 for anything except pointers or functions.  */
+	    }
+	  else
+	    TYPE_NAME (SYMBOL_TYPE (s)) = SYMBOL_NAME (s);
+	}
       break;
 
     case stFile:		/* file name */
@@ -1215,8 +1269,6 @@ parse_symbol (sh, ax, ext_sh, bigend)
       complain (&unknown_mips_symtype_complaint, sh->st);
       break;
     }
-
-  sh->st = stParsed;
 
   return count;
 }
@@ -1268,7 +1320,6 @@ parse_type (ax, bs, bigend)
 
   TIR t[1];
   struct type *tp = 0;
-  char *fmt;
   union aux_ext *tax;
   enum type_code type_code = TYPE_CODE_UNDEF;
 
@@ -1333,6 +1384,13 @@ parse_type (ax, bs, bigend)
 
   if (t->fBitfield)
     {
+      /* Inhibit core dumps with some cfront generated objects that
+	 corrupt the TIR.  */
+      if (bs == (int *)NULL)
+	{
+	  complain (&bad_fbitfield_complaint, t->bt);
+	  return builtin_type_int;
+	}
       *bs = AUX_GET_WIDTH (bigend, ax);
       ax++;
     }
@@ -1357,25 +1415,41 @@ parse_type (ax, bs, bigend)
 	tp = init_type (type_code, 0, 0, (char *) NULL,
 			(struct objfile *) NULL);
 
-      /* Usually, TYPE_CODE(tp) is already type_code.  The main
-	 exception is if we guessed wrong re struct/union/enum. */
-      if (TYPE_CODE (tp) != type_code)
+      /* Make sure that TYPE_CODE(tp) has an expected type code.
+	 Any type may be returned from cross_ref if file indirect entries
+	 are corrupted.  */
+      if (TYPE_CODE (tp) != TYPE_CODE_STRUCT
+	  && TYPE_CODE (tp) != TYPE_CODE_UNION
+	  && TYPE_CODE (tp) != TYPE_CODE_ENUM)
 	{
-	  complain (&bad_tag_guess_complaint, name);
-	  TYPE_CODE (tp) = type_code;
+	  complain (&unexpected_type_code_complaint, name);
 	}
-      /* Do not set the tag name if it is a compiler generated tag name
-	  (.Fxx or .xxfake) for unnamed struct/union/enums.  */
-      if (name[0] == '.')
-	TYPE_TAG_NAME (tp) = NULL;
-      else if (TYPE_TAG_NAME (tp) == NULL || !STREQ (TYPE_TAG_NAME (tp), name))
-	TYPE_TAG_NAME (tp) = obsavestring (name, strlen (name),
-					   &current_objfile->type_obstack);
+      else
+	{
+
+	  /* Usually, TYPE_CODE(tp) is already type_code.  The main
+	     exception is if we guessed wrong re struct/union/enum. */
+	  if (TYPE_CODE (tp) != type_code)
+	    {
+	      complain (&bad_tag_guess_complaint, name);
+	      TYPE_CODE (tp) = type_code;
+	    }
+	  /* Do not set the tag name if it is a compiler generated tag name
+	      (.Fxx or .xxfake or empty) for unnamed struct/union/enums.  */
+	  if (name[0] == '.' || name[0] == '\0')
+	    TYPE_TAG_NAME (tp) = NULL;
+	  else if (TYPE_TAG_NAME (tp) == NULL
+		   || !STREQ (TYPE_TAG_NAME (tp), name))
+	    TYPE_TAG_NAME (tp) = obsavestring (name, strlen (name),
+					       &current_objfile->type_obstack);
+	}
     }
 
   /* All these types really point to some (common) MIPS type
      definition, and only the type-qualifiers fully identify
-     them.  We'll make the same effort at sharing. */
+     them.  We'll make the same effort at sharing.
+     FIXME: btIndirect cannot happen here as it is handled by the
+     switch t->bt above.  And we are not doing any guessing on range types.  */
   if (t->bt == btIndirect ||
       t->bt == btRange)
     {
@@ -1388,16 +1462,26 @@ parse_type (ax, bs, bigend)
 	tp = init_type (type_code, 0, 0, (char *) NULL,
 			(struct objfile *) NULL);
 
-      /* Usually, TYPE_CODE(tp) is already type_code.  The main
-	 exception is if we guessed wrong re struct/union/enum. */
-      if (TYPE_CODE (tp) != type_code)
+      /* Make sure that TYPE_CODE(tp) has an expected type code.
+	 Any type may be returned from cross_ref if file indirect entries
+	 are corrupted.  */
+      if (TYPE_CODE (tp) != TYPE_CODE_RANGE)
 	{
-	  complain (&bad_tag_guess_complaint, name);
-	  TYPE_CODE (tp) = type_code;
+	  complain (&unexpected_type_code_complaint, name);
 	}
-      if (TYPE_NAME (tp) == NULL || !STREQ (TYPE_NAME (tp), name))
-	TYPE_NAME (tp) = obsavestring (name, strlen (name),
-				       &current_objfile->type_obstack);
+      else
+	{
+	  /* Usually, TYPE_CODE(tp) is already type_code.  The main
+	     exception is if we guessed wrong re struct/union/enum. */
+	  if (TYPE_CODE (tp) != type_code)
+	    {
+	      complain (&bad_tag_guess_complaint, name);
+	      TYPE_CODE (tp) = type_code;
+	    }
+	  if (TYPE_NAME (tp) == NULL || !STREQ (TYPE_NAME (tp), name))
+	    TYPE_NAME (tp) = obsavestring (name, strlen (name),
+					   &current_objfile->type_obstack);
+	}
     }
 
   /* Deal with range types */
@@ -1580,9 +1664,11 @@ parse_procedure (pr, search_symtab, first_off)
 	  /* external */
 	  EXTR she;
 	  
-	  ecoff_swap_ext_in (cur_bfd,
-			     ecoff_data (cur_bfd)->external_ext + pr->isym,
-			     &she);
+	  (*ecoff_backend (cur_bfd)->swap_ext_in)
+	    (cur_bfd,
+	     ((char *) ecoff_data (cur_bfd)->external_ext
+	      + pr->isym * ecoff_backend (cur_bfd)->external_ext_size),
+	     &she);
 	  sh_name = ecoff_data (cur_bfd)->ssext + she.asym.iss;
 	}
     }
@@ -1591,11 +1677,12 @@ parse_procedure (pr, search_symtab, first_off)
       /* Full symbols */
       SYMR sh;
 
-      ecoff_swap_sym_in (cur_bfd,
-			 (ecoff_data (cur_bfd)->external_sym
-			  + cur_fdr->isymBase
-			  + pr->isym),
-			 &sh);
+      (*ecoff_backend (cur_bfd)->swap_sym_in)
+	(cur_bfd,
+	 ((char *) ecoff_data (cur_bfd)->external_sym
+	  + ((cur_fdr->isymBase + pr->isym)
+	     * ecoff_backend (cur_bfd)->external_sym_size)),
+	 &sh);
       sh_name = ecoff_data (cur_bfd)->ss + cur_fdr->issBase + sh.iss;
     }
 
@@ -1752,7 +1839,7 @@ parse_external (es, skip_procedures, bigend)
     case stLabel:
       /* Note that the case of a symbol with indexNil must be handled
 	 anyways by parse_symbol().  */
-      parse_symbol (&es->asym, ax, (struct sym_ext *) NULL, bigend);
+      parse_symbol (&es->asym, ax, (char *) NULL, bigend);
       /* Note that parse_symbol changed es->asym.  */
       break;
     default:
@@ -1840,12 +1927,22 @@ parse_partial_symbols (objfile, section_offsets)
      struct objfile *objfile;
      struct section_offsets *section_offsets;
 {
+  const struct ecoff_backend_data * const backend = ecoff_backend (cur_bfd);
+  const bfd_size_type external_sym_size = backend->external_sym_size;
+  const bfd_size_type external_rfd_size = backend->external_rfd_size;
+  const bfd_size_type external_ext_size = backend->external_ext_size;
+  void (* const swap_ext_in) PARAMS ((bfd *, PTR, EXTR *))
+    = backend->swap_ext_in;
+  void (* const swap_sym_in) PARAMS ((bfd *, PTR, SYMR *))
+    = backend->swap_sym_in;
+  void (* const swap_rfd_in) PARAMS ((bfd *, PTR, RFDT *))
+    = backend->swap_rfd_in;
   int f_idx, s_idx;
   HDRR *hdr = &ecoff_data (cur_bfd)->symbolic_header;
   /* Running pointers */
   FDR *fh;
-  struct ext_ext *ext_out;
-  struct ext_ext *ext_out_end;
+  char *ext_out;
+  char *ext_out_end;
   EXTR *ext_block;
   register EXTR *ext_in;
   EXTR *ext_in_end;
@@ -1911,11 +2008,11 @@ parse_partial_symbols (objfile, section_offsets)
   ext_block = (EXTR *) xmalloc (hdr->iextMax * sizeof (EXTR));
   make_cleanup (free, ext_block);
 
-  ext_out = ecoff_data (cur_bfd)->external_ext;
-  ext_out_end = ext_out + hdr->iextMax;
+  ext_out = (char *) ecoff_data (cur_bfd)->external_ext;
+  ext_out_end = ext_out + hdr->iextMax * external_ext_size;
   ext_in = ext_block;
-  for (; ext_out < ext_out_end; ext_out++, ext_in++)
-    ecoff_swap_ext_in (cur_bfd, ext_out, ext_in);
+  for (; ext_out < ext_out_end; ext_out += external_ext_size, ext_in++)
+    (*swap_ext_in) (cur_bfd, ext_out, ext_in);
 
   /* Pass 1 over external syms: Presize and partition the list */
   ext_in = ext_block;
@@ -1951,9 +2048,24 @@ parse_partial_symbols (objfile, section_offsets)
 	case stProc:
 	  break;
 	case stGlobal:
-	  ms_type = mst_data;
+          if (ext_in->asym.sc == scData
+	      || ext_in->asym.sc == scSData
+	      || ext_in->asym.sc == scRData)
+	    ms_type = mst_data;
+	  else
+	    ms_type = mst_bss;
 	  break;
 	case stLabel:
+          if (ext_in->asym.sc == scAbs)
+	    ms_type = mst_abs;
+          else if (ext_in->asym.sc == scText)
+	    ms_type = mst_text;
+          else if (ext_in->asym.sc == scData
+		   || ext_in->asym.sc == scSData
+		   || ext_in->asym.sc == scRData)
+	    ms_type = mst_data;
+	  else
+	    ms_type = mst_bss;
 	  break;
 	default:
 	  ms_type = mst_unknown;
@@ -2009,11 +2121,10 @@ parse_partial_symbols (objfile, section_offsets)
       processing_gcc_compilation = 0;
       if (fh->csym >= 2)
 	{
-	  ecoff_swap_sym_in (cur_bfd,
-			     (ecoff_data (cur_bfd)->external_sym
-			      + fh->isymBase
-			      + 1),
-			     &sh);
+	  (*swap_sym_in) (cur_bfd,
+			  ((char *) ecoff_data (cur_bfd)->external_sym
+			   + (fh->isymBase + 1) * external_sym_size),
+			  &sh);
 	  if (STREQ (ecoff_data (cur_bfd)->ss + fh->issBase + sh.iss,
 		     stabs_symbol))
 	    processing_gcc_compilation = 2;
@@ -2026,13 +2137,12 @@ parse_partial_symbols (objfile, section_offsets)
 	      int type_code;
 	      char *namestring;
 
-	      ecoff_swap_sym_in (cur_bfd,
-				 (ecoff_data (cur_bfd)->external_sym
-				  + fh->isymBase
-				  + cur_sdx),
-				 &sh);
-	      type_code = MIPS_UNMARK_STAB (sh.index);
-	      if (!MIPS_IS_STAB (&sh))
+	      (*swap_sym_in) (cur_bfd,
+			      ((char *) ecoff_data (cur_bfd)->external_sym
+			       + (fh->isymBase + cur_sdx) * external_sym_size),
+			      &sh);
+	      type_code = ECOFF_UNMARK_STAB (sh.index);
+	      if (!ECOFF_IS_STAB (&sh))
 		{
 		  if (sh.st == stProc || sh.st == stStaticProc)
 		    {
@@ -2044,12 +2154,12 @@ parse_partial_symbols (objfile, section_offsets)
 					   (ecoff_data (cur_bfd)->external_aux
 					    + fh->iauxBase
 					    + sh.index));
-		      ecoff_swap_sym_in (cur_bfd,
-					 (ecoff_data (cur_bfd)->external_sym
-					  + fh->isymBase
-					  + isym
-					  - 1),
-					 &sh);
+		      (*swap_sym_in) (cur_bfd,
+				      (((char *)
+					ecoff_data (cur_bfd)->external_sym)
+				       + ((fh->isymBase + isym - 1)
+					  * external_sym_size)),
+				      &sh);
 		      if (sh.st == stEnd)
 			{
 			  long high = procaddr + sh.value;
@@ -2078,20 +2188,22 @@ parse_partial_symbols (objfile, section_offsets)
 	      char *name;
 	      enum address_class class;
 
-	      ecoff_swap_sym_in (cur_bfd,
-				 (ecoff_data (cur_bfd)->external_sym
-				  + fh->isymBase
-				  + cur_sdx),
-				 &sh);
+	      (*swap_sym_in) (cur_bfd,
+			      ((char *) ecoff_data (cur_bfd)->external_sym
+			       + ((fh->isymBase + cur_sdx)
+				  * external_sym_size)),
+			      &sh);
 
-	      if (MIPS_IS_STAB (&sh))
+	      if (ECOFF_IS_STAB (&sh))
 		{
 		  cur_sdx++;
 		  continue;
 		}
 
-	      if (sh.sc == scUndefined || sh.sc == scNil ||
-		  sh.index == 0xfffff)
+	      /* Non absolute static symbols go into the minimal table.  */
+	      if (sh.sc == scUndefined || sh.sc == scNil
+		  || (sh.index == indexNil
+		      && (sh.st != stStatic || sh.sc == scAbs)))
 		{
 		  /* FIXME, premature? */
 		  cur_sdx++;
@@ -2106,8 +2218,14 @@ parse_partial_symbols (objfile, section_offsets)
 		  long procaddr;
 		  int new_sdx;
 
-		case stProc:	/* Asm labels apparently */
 		case stStaticProc:	/* Function */
+		  /* I believe this is used only for file-local functions.
+		     The comment in symconst.h ("load time only static procs")
+		     isn't particularly clear on this point.  */
+		  prim_record_minimal_symbol (name, sh.value, mst_file_text);
+		  /* FALLTHROUGH */
+
+		case stProc:	/* Asm labels apparently */
 		  ADD_PSYMBOL_TO_LIST (name, strlen (name),
 				       VAR_NAMESPACE, LOC_BLOCK,
 				       objfile->static_psymbols, sh.value,
@@ -2135,12 +2253,11 @@ parse_partial_symbols (objfile, section_offsets)
 		    }
 
 		  cur_sdx = new_sdx;
-		  ecoff_swap_sym_in (cur_bfd,
-				     (ecoff_data (cur_bfd)->external_sym
-				      + fh->isymBase
-				      + cur_sdx
-				      - 1),
-				     &sh);
+		  (*swap_sym_in) (cur_bfd,
+				  ((char *) ecoff_data (cur_bfd)->external_sym
+				   + ((fh->isymBase + cur_sdx - 1)
+				      * external_sym_size)),
+				  &sh);
 		  if (sh.st != stEnd)
 		    continue;
 		  high = procaddr + sh.value;
@@ -2149,6 +2266,10 @@ parse_partial_symbols (objfile, section_offsets)
 		  continue;
 
 		case stStatic:	/* Variable */
+		  if (sh.sc == scData || sh.sc == scSData || sh.sc == scRData)
+		    prim_record_minimal_symbol (name, sh.value, mst_file_data);
+		  else
+		    prim_record_minimal_symbol (name, sh.value, mst_file_bss);
 		  class = LOC_STATIC;
 		  break;
 
@@ -2218,7 +2339,6 @@ parse_partial_symbols (objfile, section_offsets)
 	  PST_PRIVATE (save_pst)->extern_tab = ext_ptr;
 	  for (; --cur_sdx >= 0; ext_ptr++)
 	    {
-	      register struct partial_symbol *psym;
 	      enum address_class class;
 	      SYMR *psh;
 	      char *name;
@@ -2279,11 +2399,10 @@ parse_partial_symbols (objfile, section_offsets)
 	    {
 	      RFDT rh;
 
-	      ecoff_swap_rfd_in (cur_bfd,
-				 (ecoff_data (cur_bfd)->external_rfd
-				  + fh->rfdBase
-				  + s_id0),
-				 &rh);
+	      (*swap_rfd_in) (cur_bfd,
+			      ((char *) ecoff_data (cur_bfd)->external_rfd
+			       + (fh->rfdBase + s_id0) * external_rfd_size),
+			      &rh);
 	      if (rh == f_idx)
 		{
 		  s_id0++;	/* Skip self-dependency */
@@ -2301,11 +2420,10 @@ parse_partial_symbols (objfile, section_offsets)
 	{
 	  RFDT rh;
 
-	  ecoff_swap_rfd_in (cur_bfd,
-			     (ecoff_data (cur_bfd)->external_rfd
-			      + fh->rfdBase
-			      + s_idx),
-			     &rh);
+	  (*swap_rfd_in) (cur_bfd,
+			  ((char *) ecoff_data (cur_bfd)->external_rfd
+			   + (fh->rfdBase + s_idx) * external_rfd_size),
+			  &rh);
 	  if (rh < 0 || rh >= hdr->ifdMax)
 	    complain (&bad_file_number_complaint, rh);
 	  else
@@ -2328,6 +2446,10 @@ parse_fdr (f_idx, lev, objfile)
      int lev;
      struct objfile *objfile;
 {
+  const bfd_size_type external_rfd_size
+    = ecoff_backend (cur_bfd)->external_rfd_size;
+  void (* const swap_rfd_in) PARAMS ((bfd *, PTR, RFDT *))
+    = ecoff_backend (cur_bfd)->swap_rfd_in;
   register FDR *fh;
   register struct partial_symtab *pst;
   int s_idx, s_id0;
@@ -2372,11 +2494,10 @@ parse_fdr (f_idx, lev, objfile)
 	{
 	  RFDT rh;
 
-	  ecoff_swap_rfd_in (cur_bfd,
-			     (ecoff_data (cur_bfd)->external_rfd
-			      + fh->rfdBase
-			      + s_id0),
-			     &rh);
+	  (*swap_rfd_in) (cur_bfd,
+			  ((char *) ecoff_data (cur_bfd)->external_rfd
+			   + (fh->rfdBase + s_id0) * external_rfd_size),
+			  &rh);
 	  if (rh == f_idx)
 	    {
 	      s_id0++;		/* Skip self-dependency */
@@ -2393,11 +2514,10 @@ parse_fdr (f_idx, lev, objfile)
     {
       RFDT rh;
 
-      ecoff_swap_rfd_in (cur_bfd,
-			 (ecoff_data (cur_bfd)->external_rfd
-			  + fh->rfdBase
-			  + s_idx),
-			 &rh);
+      (*swap_rfd_in) (cur_bfd,
+		      ((char *) ecoff_data (cur_bfd)->external_rfd
+		       + (fh->rfdBase + s_idx) * external_rfd_size),
+		      &rh);
       pst->dependencies[s_idx - s_id0] = parse_fdr (rh, lev + 1, objfile);
     }
 
@@ -2412,11 +2532,12 @@ mips_next_symbol_text ()
   SYMR sh;
 
   cur_sdx++;
-  ecoff_swap_sym_in (cur_bfd,
-		     (ecoff_data (cur_bfd)->external_sym
-		      + cur_fdr->isymBase
-		      + cur_sdx),
-		     &sh);
+  (*ecoff_backend (cur_bfd)->swap_sym_in)
+    (cur_bfd,
+     ((char *) ecoff_data (cur_bfd)->external_sym
+      + ((cur_fdr->isymBase + cur_sdx)
+	 * ecoff_backend (cur_bfd)->external_sym_size)),
+     &sh);
   return ecoff_data (cur_bfd)->ss + cur_fdr->issBase + sh.iss;
 }
 
@@ -2435,6 +2556,16 @@ psymtab_to_symtab_1 (pst, filename)
      struct partial_symtab *pst;
      char *filename;
 {
+  const bfd_size_type external_sym_size
+    = ecoff_backend (cur_bfd)->external_sym_size;
+  const bfd_size_type external_pdr_size
+    = ecoff_backend (cur_bfd)->external_pdr_size;
+  void (* const swap_sym_in) PARAMS ((bfd *, PTR, SYMR *))
+    = ecoff_backend (cur_bfd)->swap_sym_in;
+  void (* const swap_sym_out) PARAMS ((bfd *, const SYMR *, PTR))
+    = ecoff_backend (cur_bfd)->swap_sym_out;
+  void (* const swap_pdr_in) PARAMS ((bfd *, PTR, PDR *))
+    = ecoff_backend (cur_bfd)->swap_pdr_in;
   int i;
   struct symtab *st;
   FDR *fh;
@@ -2488,11 +2619,10 @@ psymtab_to_symtab_1 (pst, filename)
     {
       SYMR sh;
 
-      ecoff_swap_sym_in (cur_bfd,
-			 (ecoff_data (cur_bfd)->external_sym
-			  + fh->isymBase
-			  + 1),
-			 &sh);
+      (*swap_sym_in) (cur_bfd,
+		      ((char *) ecoff_data (cur_bfd)->external_sym
+		       + (fh->isymBase + 1) * external_sym_size),
+		      &sh);
       if (STREQ (ecoff_data (cur_bfd)->ss + fh->issBase + sh.iss,
 		 stabs_symbol))
 	{
@@ -2504,8 +2634,8 @@ psymtab_to_symtab_1 (pst, filename)
 
   if (processing_gcc_compilation != 0)
     {
-      struct pdr_ext *pdr_ptr;
-      struct pdr_ext *pdr_end;
+      char *pdr_ptr;
+      char *pdr_end;
       int first_pdr;
       unsigned long first_off;
 
@@ -2524,16 +2654,15 @@ psymtab_to_symtab_1 (pst, filename)
 	  char *name;
 	  CORE_ADDR valu;
 
-	  ecoff_swap_sym_in (cur_bfd,
-			     (ecoff_data (cur_bfd)->external_sym
-			      + fh->isymBase
-			      + cur_sdx),
-			     &sh);
+	  (*swap_sym_in) (cur_bfd,
+			  ((char *) ecoff_data (cur_bfd)->external_sym
+			   + (fh->isymBase + cur_sdx) * external_sym_size),
+			  &sh);
 	  name = ecoff_data (cur_bfd)->ss + fh->issBase + sh.iss;
 	  valu = sh.value;
-	  if (MIPS_IS_STAB (&sh))
+	  if (ECOFF_IS_STAB (&sh))
 	    {
-	      int type_code = MIPS_UNMARK_STAB (sh.index);
+	      int type_code = ECOFF_UNMARK_STAB (sh.index);
 	      process_one_symbol (type_code, 0, valu, name,
 				  pst->section_offsets, pst->objfile);
 	      if (type_code == N_FUN)
@@ -2575,13 +2704,14 @@ psymtab_to_symtab_1 (pst, filename)
 
       /* Fill in procedure info next.  */
       first_pdr = 1;
-      pdr_ptr = ecoff_data (cur_bfd)->external_pdr + fh->ipdFirst;
-      pdr_end = pdr_ptr + fh->cpd;
-      for (; pdr_ptr < pdr_end; pdr_ptr++)
+      pdr_ptr = ((char *) ecoff_data (cur_bfd)->external_pdr
+		 + fh->ipdFirst * external_pdr_size);
+      pdr_end = pdr_ptr + fh->cpd * external_pdr_size;
+      for (; pdr_ptr < pdr_end; pdr_ptr += external_pdr_size)
 	{
 	  PDR pr;
 
-	  ecoff_swap_pdr_in (cur_bfd, pdr_ptr, &pr);
+	  (*swap_pdr_in) (cur_bfd, pdr_ptr, &pr);
 	  if (first_pdr)
 	    {
 	      first_off = pr.adr;
@@ -2641,26 +2771,27 @@ psymtab_to_symtab_1 (pst, filename)
 
       if (fh)
 	{
-	  struct sym_ext *sym_ptr;
-	  struct sym_ext *sym_end;
+	  char *sym_ptr;
+	  char *sym_end;
 
 	  /* Parse local symbols first */
-	  sym_ptr = ecoff_data (cur_bfd)->external_sym + fh->isymBase;
-	  sym_end = sym_ptr + fh->csym;
+	  sym_ptr = ((char *) ecoff_data (cur_bfd)->external_sym
+		     + fh->isymBase * external_sym_size);
+	  sym_end = sym_ptr + fh->csym * external_sym_size;
 	  while (sym_ptr < sym_end)
 	    {
 	      SYMR sh;
 	      int c;
 
-	      ecoff_swap_sym_in (cur_bfd, sym_ptr, &sh);
+	      (*swap_sym_in) (cur_bfd, sym_ptr, &sh);
 	      c = parse_symbol (&sh,
 				(ecoff_data (cur_bfd)->external_aux
 				 + fh->iauxBase),
 				sym_ptr, fh->fBigendian);
 	      /* FIXME: We must swap the modified symbol back out,
 		 although we would rather not.  See parse_symbol.  */
-	      ecoff_swap_sym_out (cur_bfd, &sh, sym_ptr);
-	      sym_ptr += c;
+	      (*swap_sym_out) (cur_bfd, &sh, sym_ptr);
+	      sym_ptr += c * external_sym_size;
 	    }
 
 	  /* Linenumbers.  At the end, check if we can save memory.
@@ -2670,8 +2801,8 @@ psymtab_to_symtab_1 (pst, filename)
 	    {
 	      PDR *pr_block;
 	      struct cleanup *old_chain;
-	      struct pdr_ext *pdr_ptr;
-	      struct pdr_ext *pdr_end;
+	      char *pdr_ptr;
+	      char *pdr_end;
 	      PDR *pdr_in;
 	      PDR *pdr_in_end;
 
@@ -2679,11 +2810,14 @@ psymtab_to_symtab_1 (pst, filename)
 
 	      old_chain = make_cleanup (free, pr_block);
 
-	      pdr_ptr = ecoff_data (cur_bfd)->external_pdr + fh->ipdFirst;
-	      pdr_end = pdr_ptr + fh->cpd;
+	      pdr_ptr = ((char *) ecoff_data (cur_bfd)->external_pdr
+			 + fh->ipdFirst * external_pdr_size);
+	      pdr_end = pdr_ptr + fh->cpd * external_pdr_size;
 	      pdr_in = pr_block;
-	      for (; pdr_ptr < pdr_end; pdr_ptr++, pdr_in++)
-		ecoff_swap_pdr_in (cur_bfd, pdr_ptr, pdr_in);
+	      for (;
+		   pdr_ptr < pdr_end;
+		   pdr_ptr += external_pdr_size, pdr_in++)
+		(*swap_pdr_in) (cur_bfd, pdr_ptr, pdr_in);
 
 	      parse_lines (fh, pr_block, lines);
 	      if (lines->nitems < fh->cline)
@@ -2756,7 +2890,7 @@ cross_ref (ax, tpp, type_code, pname, bigend)
      int bigend;
 {
   RNDXR rn[1];
-  unsigned rf;
+  unsigned int rf;
   int result = 1;
 
   ecoff_swap_rndx_in (bigend, &ax->a_rndx, rn);
@@ -2783,9 +2917,19 @@ cross_ref (ax, tpp, type_code, pname, bigend)
        * Find the relative file descriptor and the symbol in it
        */
       FDR *fh = get_rfd (cur_fd, rf);
-      struct sym_ext *esh;
+      char *esh;
       SYMR sh;
       struct type *t;
+
+      if (rn->index >= fh->csym)
+	{
+	  /* File indirect entry is corrupt.  */
+	  *tpp = (struct type *)NULL;
+	  *pname = "<illegal>";
+	  complain (&bad_rfd_entry_complaint,
+		    fh - ecoff_data (cur_bfd)->fdr, rn->index);
+	  return result;
+	}
 
       /* If we have processed this symbol then we left a forwarding
 	 pointer to the corresponding GDB symbol.  If not, we`ll put
@@ -2793,8 +2937,10 @@ cross_ref (ax, tpp, type_code, pname, bigend)
 	 the file will be.  In any event, we collect the name for the
 	 type here.  Which is why we made a first pass at strings.  */
 
-      esh = ecoff_data (cur_bfd)->external_sym + fh->isymBase + rn->index;
-      ecoff_swap_sym_in (cur_bfd, esh, &sh);
+      esh = ((char *) ecoff_data (cur_bfd)->external_sym
+	     + ((fh->isymBase + rn->index)
+		* ecoff_backend (cur_bfd)->external_sym_size));
+      (*ecoff_backend (cur_bfd)->swap_sym_in) (cur_bfd, esh, &sh);
 
       /* Careful, we might be looking at .o files */
       if (sh.iss == 0)
@@ -2805,7 +2951,21 @@ cross_ref (ax, tpp, type_code, pname, bigend)
 	   seems to mean that we don't know.  This is said to fix a problem
 	   with "info func opendir" on an SGI showing
 	   "struct BSDopendir.c *BSDopendir();".  */
-	*pname = "<unknown>";
+	{
+	  *tpp = (struct type *)NULL;
+	  *pname = "<unknown>";
+	  return result;
+	}
+      else if ((sh.st != stBlock && sh.st != stTypedef && sh.st != stParsed)
+	       || sh.sc != scInfo)
+	{
+	  /* File indirect entry is corrupt.  */
+	  *tpp = (struct type *)NULL;
+	  *pname = "<illegal>";
+	  complain (&bad_rfd_entry_complaint,
+		    fh - ecoff_data (cur_bfd)->fdr, rn->index);
+	  return result;
+	}
       else
 	*pname = ecoff_data (cur_bfd)->ss + fh->issBase + sh.iss;
 

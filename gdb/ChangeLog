@@ -1,3 +1,10 @@
+Thu Aug 19 22:08:09 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config/vax/tm-vax.h (BELIEVE_PCC_PROMOTION):  Define.
+	* mipsread.c (parse_symbol, parse_type, cross_ref):  Handle corrupt
+	file indirect entries with complaints instead of core dumps. Remove
+	complaint for stTypedef within aggregates.
+
 Thu Aug 19 17:58:39 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* coffread.c (process_coff_symbol): Ignore tagnames like .0fake.
