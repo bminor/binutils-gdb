@@ -98,7 +98,7 @@ Disassembly of section .text:
  160:	a8240000 	swl	a0,0\(at\)
  164:	b8240003 	swr	a0,3\(at\)
  168:	3c043ff0 	lui	a0,0x3ff0
- 16c:	00002825 	move	a1,zero
+ 16c:	00002821 	move	a1,zero
  170:	8f810000 	lw	at,0\(gp\)
  174:	8c240000 	lw	a0,0\(at\)
  178:	8c250004 	lw	a1,4\(at\)
@@ -111,7 +111,7 @@ Disassembly of section .text:
  194:	2c840001 	sltiu	a0,a0,1
  198:	24a40064 	addiu	a0,a1,100
  19c:	0004202b 	sltu	a0,zero,a0
- 1a0:	00a02025 	move	a0,a1
+ 1a0:	00a02021 	move	a0,a1
 
 0+01a4 <[^>]*>:
 	...
