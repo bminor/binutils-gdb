@@ -27,7 +27,7 @@
 	(resolve_symbol_value): Convert weak symbols.
 	(S_SET_EXTERNAL): Support any_external_name.
 	(S_SET_NAME): Qualify parameter const.
-	(symbol_equated_reloc_p): Don't equate weaks when relocating.
+	(symbol_equated_reloc_p): Equate to weaks when relocating.
 	* symbols.h (S_SET_NAME): Qualfiy parameter const.
 	* tc.h (any_external_name): Declare.
 	* config/obj-coff.c ("coff/pe.h"): Include for BFD
