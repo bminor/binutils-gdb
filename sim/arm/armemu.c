@@ -2932,7 +2932,6 @@ ARMul_Emulate26 (register ARMul_State * state)
 	      LOADSMULT (instr, temp + 4L, temp);
 	      break;
 
-
 	    case 0x88:		/* Store, No WriteBack, Post Inc */
 	      STOREMULT (instr, LSBase, 0L);
 	      break;
@@ -2969,7 +2968,6 @@ ARMul_Emulate26 (register ARMul_State * state)
 	      LOADSMULT (instr, temp, temp + LSMNumRegs);
 	      break;
 
-
 	    case 0x90:		/* Store, No WriteBack, Pre Dec */
 	      STOREMULT (instr, LSBase - LSMNumRegs, 0L);
 	      break;
@@ -3005,7 +3003,6 @@ ARMul_Emulate26 (register ARMul_State * state)
 	      temp = LSBase - LSMNumRegs;
 	      LOADSMULT (instr, temp, temp);
 	      break;
-
 
 	    case 0x98:		/* Store, No WriteBack, Pre Inc */
 	      STOREMULT (instr, LSBase + 4L, 0L);
@@ -4340,7 +4337,9 @@ LoadSMult (ARMul_State * state, ARMword instr,
   UNDEF_LSMNoRegs;
   UNDEF_LSMPCBase;
   UNDEF_LSMBaseInListWb;
+
   BUSUSEDINCPCS;
+
 #ifndef MODE32
   if (ADDREXCEPT (address))
     {
@@ -4348,27 +4347,34 @@ LoadSMult (ARMul_State * state, ARMword instr,
     }
 #endif
 
-  if (!BIT (15) && state->Bank != USERBANK)
-    {
-      (void) ARMul_SwitchMode (state, state->Mode, USER26MODE);	/* temporary reg bank switch */
-      UNDEF_LSMUserBankWb;
-    }
-
   if (BIT (21) && LHSReg != 15)
     LSBase = WBBase;
 
-  for (temp = 0; !BIT (temp); temp++);	/* N cycle first */
+  if (!BIT (15) && state->Bank != USERBANK)
+    {
+      /* Temporary reg bank switch.  */
+      (void) ARMul_SwitchMode (state, state->Mode, USER26MODE);
+      UNDEF_LSMUserBankWb;
+    }
+
+  for (temp = 0; !BIT (temp); temp ++)
+    ;	/* N cycle first.  */
+
   dest = ARMul_LoadWordN (state, address);
+
   if (!state->abortSig)
     state->Reg[temp++] = dest;
   else if (!state->Aborted)
     state->Aborted = ARMul_DataAbortV;
 
-  for (; temp < 16; temp++)	/* S cycles from here on */
+  for (; temp < 16; temp++)
+    /* S cycles from here on.  */
     if (BIT (temp))
-      {				/* load this register */
+      {
+	/* Load this register.  */
 	address += 4;
 	dest = ARMul_LoadWordS (state, address);
+
 	if (!state->abortSig && !state->Aborted)
 	  state->Reg[temp] = dest;
 	else if (!state->Aborted)
@@ -4376,17 +4382,20 @@ LoadSMult (ARMul_State * state, ARMword instr,
       }
 
   if (BIT (15) && !state->Aborted)
-    {				/* PC is in the reg list */
+    {
+      /* PC is in the reg list.  */
 #ifdef MODE32
       if (state->Mode != USER26MODE && state->Mode != USER32MODE)
 	{
 	  state->Cpsr = GETSPSR (state->Bank);
 	  ARMul_CPSRAltered (state);
 	}
+
       WriteR15 (state, PC);
 #else
       if (state->Mode == USER26MODE || state->Mode == USER32MODE)
-	{			/* protect bits in user mode */
+	{
+	  /* Protect bits in user mode.  */
 	  ASSIGNN ((state->Reg[15] & NBIT) != 0);
 	  ASSIGNZ ((state->Reg[15] & ZBIT) != 0);
 	  ASSIGNC ((state->Reg[15] & CBIT) != 0);
@@ -4399,9 +4408,11 @@ LoadSMult (ARMul_State * state, ARMword instr,
     }
 
   if (!BIT (15) && state->Mode != USER26MODE && state->Mode != USER32MODE)
-    (void) ARMul_SwitchMode (state, USER26MODE, state->Mode);	/* restore the correct bank */
+    /* Restore the correct bank.  */
+    (void) ARMul_SwitchMode (state, USER26MODE, state->Mode);
 
-  ARMul_Icycles (state, 1, 0L);	/* to write back the final register */
+  /* To write back the final register.  */
+  ARMul_Icycles (state, 1, 0L);
 
   if (state->Aborted)
     {
@@ -4409,7 +4420,6 @@ LoadSMult (ARMul_State * state, ARMword instr,
 	LSBase = WBBase;
       TAKEABORT;
     }
-
 }
 
 /***************************************************************************\
@@ -4491,68 +4501,89 @@ StoreMult (ARMul_State * state, ARMword instr,
 \***************************************************************************/
 
 static void
-StoreSMult (ARMul_State * state, ARMword instr,
-	    ARMword address, ARMword WBBase)
+StoreSMult (
+	    ARMul_State * state,
+	    ARMword       instr,
+	    ARMword       address,
+	    ARMword       WBBase)
 {
   ARMword temp;
 
   UNDEF_LSMNoRegs;
   UNDEF_LSMPCBase;
   UNDEF_LSMBaseInListWb;
+
   BUSUSEDINCPCN;
+
 #ifndef MODE32
   if (VECTORACCESS (address) || ADDREXCEPT (address))
     {
       INTERNALABORT (address);
     }
+
   if (BIT (15))
     PATCHR15;
 #endif
 
   if (state->Bank != USERBANK)
     {
-      (void) ARMul_SwitchMode (state, state->Mode, USER26MODE);	/* Force User Bank */
+      /* Force User Bank.  */
+      (void) ARMul_SwitchMode (state, state->Mode, USER26MODE);
       UNDEF_LSMUserBankWb;
     }
 
-  for (temp = 0; !BIT (temp); temp++);	/* N cycle first */
+  for (temp = 0; !BIT (temp); temp++)
+    ;	/* N cycle first.  */
+  
 #ifdef MODE32
   ARMul_StoreWordN (state, address, state->Reg[temp++]);
 #else
   if (state->Aborted)
     {
       (void) ARMul_LoadWordN (state, address);
-      for (; temp < 16; temp++)	/* Fake the Stores as Loads */
+
+      for (; temp < 16; temp++)
+	/* Fake the Stores as Loads.  */
 	if (BIT (temp))
-	  {			/* save this register */
+	  {
+	    /* Save this register.  */
 	    address += 4;
 	    (void) ARMul_LoadWordS (state, address);
 	  }
+      
       if (BIT (21) && LHSReg != 15)
 	LSBase = WBBase;
+
       TAKEABORT;
+
       return;
     }
   else
     ARMul_StoreWordN (state, address, state->Reg[temp++]);
 #endif
+
   if (state->abortSig && !state->Aborted)
     state->Aborted = ARMul_DataAbortV;
 
-  if (BIT (21) && LHSReg != 15)
-    LSBase = WBBase;
-
-  for (; temp < 16; temp++)	/* S cycles from here on */
+  for (; temp < 16; temp++)
+    /* S cycles from here on.  */
     if (BIT (temp))
-      {				/* save this register */
+      {
+	/* Save this register.  */
 	address += 4;
+
 	ARMul_StoreWordS (state, address, state->Reg[temp]);
+
 	if (state->abortSig && !state->Aborted)
 	  state->Aborted = ARMul_DataAbortV;
       }
 
   if (state->Mode != USER26MODE && state->Mode != USER32MODE)
-    (void) ARMul_SwitchMode (state, USER26MODE, state->Mode);	/* restore the correct bank */
+    /* Restore the correct bank.  */
+    (void) ARMul_SwitchMode (state, USER26MODE, state->Mode);
+
+  if (BIT (21) && LHSReg != 15)
+    LSBase = WBBase;
 
   if (state->Aborted)
     {
