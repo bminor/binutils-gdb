@@ -1,3 +1,32 @@
+Wed Oct 13 18:39:03 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* Makefile.in (dep-in): New rule, for editing dependencies into
+	Makefile.in in $(srcdir).  Use move-if-change.
+	(.dep1, dep): Use move-if-change.
+	(CFILES): Add coff-apollo.c.
+
+	Sun Oct 10 18:02:56 1993  Troy Rollo (troy@cbme.unsw.EDU.AU)
+
+	* Makefile.in: Recognise new file, coff-apollo.o
+
+	* coff-apollo.c: New file
+
+	* coffcode.h: Recognise apollo magic numbers and writable text
+
+	* coffswap.h: Swap Apollo optional header entries
+
+	* config.bfd: Add line for Apollo
+
+	* configure.host: Replace apollo68b and apollo68v with Apollo
+
+	* configure.in: Recognise apollocoff_vec
+
+	* targets.c: Likewise
+
+	* config/apollo.mh, config/apollo.mt: New files
+
+	* hosts/apollo68.h: Remove inclusion of strings.h
+
 Wed Oct 13 14:28:17 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* coff-i386.c (i3coff_object_p): Now static.

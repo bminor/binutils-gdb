@@ -52,6 +52,7 @@ bout.c
 cache.c
 coff-a29k.c
 coff-alpha.c
+coff-apollo.c
 coff-h8300.c
 coff-h8500.c
 coff-i386.c
@@ -91,6 +92,7 @@ cpu-we32k.c
 cpu-z8k.c
 ctor.c
 demo64.c
+dep-in.sed
 doc
 ecoff.c
 ecoffswap.h

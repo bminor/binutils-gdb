@@ -860,7 +860,12 @@ coff_set_arch_mach_hook(abfd, filehdr)
 #ifdef MC68MAGIC
   case MC68MAGIC:
   case M68MAGIC:
+#ifdef MC68KBCSMAGIC
   case MC68KBCSMAGIC:
+#endif
+#ifdef APOLLOM68KMAGIC
+  case APOLLOM68KMAGIC:
+#endif
     arch = bfd_arch_m68k;
     machine = 68020;
     break;
@@ -1140,7 +1145,11 @@ DEFUN(coff_set_flags,(abfd, magicp, flagsp),
 #endif
 #ifdef MC68MAGIC
   case bfd_arch_m68k:
+#ifdef APOLLOM68KMAGIC
+    *magicp = APOLLO_COFF_VERSION_NUMBER;
+#else
     *magicp = MC68MAGIC;
+#endif
     return true;
     break;
 #endif
@@ -1340,6 +1349,10 @@ coff_add_missing_symbols (abfd)
 	 continue;
 	if (!strcmp (name, _TEXT))
 	 need_text = 0;
+#ifdef APOLLO_M68
+	else if (!strcmp(name, ".wtext"))
+	  need_text = 0;
+#endif
 	else if (!strcmp (name, _DATA))
 	 need_data = 0;
 	else if (!strcmp (name, _BSS))
@@ -1632,6 +1645,11 @@ DEFUN(coff_write_object_contents,(abfd),
 #define __A_MAGIC_SET__
   internal_a.magic = PAGEMAGICBCS;
 #endif				/* M88 */
+
+#if APOLLO_M68
+#define __A_MAGIC_SET__
+  internal_a.magic = APOLLO_COFF_VERSION_NUMBER;
+#endif
 
 #if M68 || WE32K
 #define __A_MAGIC_SET__
