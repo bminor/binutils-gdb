@@ -1,3 +1,12 @@
+Thu Oct 23 16:16:04 1997  Jeff Law  (law@fast.cs.utah.edu)
+
+	* dbxread.c (process_one_symbol): Put back initialization
+	of a variable lost during last change.  Don't perform
+	assignment inside conditionals.
+	* stabsread.c (symbol_reference_defined): Return -1 for error/not
+	found.  All callers changed appropriately.
+	(define_symbol): Don't perform assignment inside conditionals.
+
 Wed Oct 22 13:04:52 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mdebugread.c (psymtab_to_symtab_1): Handle new live range stabs

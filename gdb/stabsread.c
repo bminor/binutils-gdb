@@ -1276,7 +1276,7 @@ symbol_reference_defined (string)
       /* Must be a reference.   Either the symbol has already been defined,
          or this is a forward reference to it.  */
       *string = p;
-      return 0;
+      return -1;
     }
 }
 
@@ -1393,7 +1393,8 @@ define_symbol (valu, string, desc, type, objfile)
 	 defined symbol, so add it to the alias list of the previously
 	 defined symbol.  */
       s = string;
-      if (refnum = symbol_reference_defined (&s), refnum)
+      refnum = symbol_reference_defined (&s);
+      if (refnum >= 0)
 	  ref_add (refnum, sym, string, SYMBOL_VALUE (sym));
       else
 	resolve_symbol_reference (objfile, sym, string);
@@ -1401,7 +1402,7 @@ define_symbol (valu, string, desc, type, objfile)
       /* S..P contains the name of the symbol.  We need to store
 	 the correct name into SYMBOL_NAME.  */
       nlen = p - s;
-      if (refnum)
+      if (refnum >= 0)
 	{
 	  if (nlen > 0)
 	    {
