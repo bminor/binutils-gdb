@@ -1,3 +1,37 @@
+Fri Jul  2 17:42:59 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* Makefile.in: Add -I../../bfd to pick up bfd.h.
+
+Thu Jun 24 13:40:12 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* run.c (main): Fix parsing of args.
+
+	* compile.c (sim_resume): Fix shll insn.
+
+Tue Jun  8 14:16:46 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* compile.c: New file, supports H8/300H.
+	* p1,p3, gencode.c, state.h, writecode.c All dead and obsolete.
+
+Tue Jun  1 11:14:59 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* run.c (main): Add -v to print info.
+	* p3.c (sim_info):  New function.
+
+Mon Mar 15 15:48:31 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* h8300.mt (DO_INSTALL): Renamed from INSTALL.
+
+Wed Mar  3 15:06:53 1993  Steve Chamberlain  (sac@poseidon.cygnus.com)
+
+	* Makefile.in: Don't use cb or indent
+	* p1.c, state.h, writecode.c: lint
+
+Mon Feb  1 16:44:58 1993  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in:  Make SunOS halfdone VPATH work.
+	* p1.c:  Lint picked up by HP native compiler.
+
 Mon Jan  4 12:32:35 1993  Steve Chamberlain  (sac@wahini.cygnus.com)
 
 	* p1.c (sim_resume): when running on dos, any character typed to
