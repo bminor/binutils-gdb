@@ -1,3 +1,8 @@
+2004-05-19  Mikulas Patocka  <mikulas@artax.karlin.mff.cuni.cz>
+
+	* archive.c (_bfd_get_elt_at_filepos): Cope with a nested archives.
+	(bfd_generic_openr_next_archived_file): Likewise.
+
 2004-05-17  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (xtensa_get_property_section_name): Determine linkonce
