@@ -1432,9 +1432,9 @@ os9k_process_one_symbol (type, desc, valu, name, section_offsets, objfile)
      seeing a source file name.  */
   if (last_source_file == NULL && type != (unsigned char)N_SO)
     {
-      /* Ignore any symbols which appear before an N_SO symbol.  Currently
-	 no one puts symbols there, but we should deal gracefully with the
-	 case.  A complain()t might be in order (if !IGNORE_SYMBOL (type)),
+      /* Ignore any symbols which appear before an N_SO symbol.
+	 Currently no one puts symbols there, but we should deal
+	 gracefully with the case.  A complain()t might be in order,
 	 but this should not be an error ().  */
       return;
     }
