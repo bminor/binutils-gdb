@@ -1,3 +1,8 @@
+2005-03-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* mips-tdep.c (mips_single_step_through_delay): Put back check for
+	breakpoint lost with the introduction of this function.
+
 2005-03-17  Paul Brook  <paul@codesourcery.com>
 
 	* amd64-tdep.c (amd64_dwarf_reg_to_regnum): Fix broken logic.

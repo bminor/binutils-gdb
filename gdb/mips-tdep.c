@@ -4148,6 +4148,9 @@ mips_single_step_through_delay (struct gdbarch *gdbarch,
   if (mips_pc_is_mips16 (pc))
     return 0;
 
+  if (!breakpoint_here_p (pc + 4))
+    return 0;
+
   if (!safe_frame_unwind_memory (frame, pc, buf, sizeof buf))
     /* If error reading memory, guess that it is not a delayed
        branch.  */
