@@ -60,9 +60,9 @@ sun3os3.mt
 sun3os4.mh
 sun3os4.mt
 tm-3b1.h
-tm-68k-fp.h
-tm-68k-nofp.h
-tm-68k.h
+tm-m68k-fp.h
+tm-m68k-nofp.h
+tm-m68k.h
 tm-altos.h
 tm-amix.h
 tm-es1800.h
