@@ -1,5 +1,8 @@
 Tue Jul 14 13:22:18 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure: If CC is set but CFLAGS is not, and CC is gcc, make
+	CFLAGS default to -O2.
+
 	* ltmain.sh: Add some hacks to make SunOS --enable-shared work
 	when using GNU ld.
 
