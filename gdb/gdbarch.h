@@ -1104,13 +1104,11 @@ extern void set_gdbarch_get_longjmp_target (struct gdbarch *gdbarch, gdbarch_get
 
 extern int gdbarch_deprecated_use_generic_dummy_frames (struct gdbarch *gdbarch);
 extern void set_gdbarch_deprecated_use_generic_dummy_frames (struct gdbarch *gdbarch, int deprecated_use_generic_dummy_frames);
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
 #error "Non multi-arch definition of DEPRECATED_USE_GENERIC_DUMMY_FRAMES"
 #endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
+#if !defined (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
 #define DEPRECATED_USE_GENERIC_DUMMY_FRAMES (gdbarch_deprecated_use_generic_dummy_frames (current_gdbarch))
-#endif
 #endif
 
 /* Default (value) for non- multi-arch platforms. */
@@ -1120,13 +1118,11 @@ extern void set_gdbarch_deprecated_use_generic_dummy_frames (struct gdbarch *gdb
 
 extern int gdbarch_call_dummy_location (struct gdbarch *gdbarch);
 extern void set_gdbarch_call_dummy_location (struct gdbarch *gdbarch, int call_dummy_location);
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (CALL_DUMMY_LOCATION)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (CALL_DUMMY_LOCATION)
 #error "Non multi-arch definition of CALL_DUMMY_LOCATION"
 #endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) || !defined (CALL_DUMMY_LOCATION)
+#if !defined (CALL_DUMMY_LOCATION)
 #define CALL_DUMMY_LOCATION (gdbarch_call_dummy_location (current_gdbarch))
-#endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
@@ -1192,10 +1188,10 @@ extern void set_gdbarch_call_dummy_length (struct gdbarch *gdbarch, int call_dum
 #endif
 
 extern int gdbarch_deprecated_pc_in_call_dummy_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PC_IN_CALL_DUMMY_P)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PC_IN_CALL_DUMMY_P)
 #error "Non multi-arch definition of DEPRECATED_PC_IN_CALL_DUMMY"
 #endif
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_PC_IN_CALL_DUMMY_P)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_PC_IN_CALL_DUMMY_P)
 #define DEPRECATED_PC_IN_CALL_DUMMY_P() (gdbarch_deprecated_pc_in_call_dummy_p (current_gdbarch))
 #endif
 
@@ -1207,11 +1203,11 @@ extern int gdbarch_deprecated_pc_in_call_dummy_p (struct gdbarch *gdbarch);
 typedef int (gdbarch_deprecated_pc_in_call_dummy_ftype) (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address);
 extern int gdbarch_deprecated_pc_in_call_dummy (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address);
 extern void set_gdbarch_deprecated_pc_in_call_dummy (struct gdbarch *gdbarch, gdbarch_deprecated_pc_in_call_dummy_ftype *deprecated_pc_in_call_dummy);
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PC_IN_CALL_DUMMY)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PC_IN_CALL_DUMMY)
 #error "Non multi-arch definition of DEPRECATED_PC_IN_CALL_DUMMY"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_PC_IN_CALL_DUMMY)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_PC_IN_CALL_DUMMY)
 #define DEPRECATED_PC_IN_CALL_DUMMY(pc, sp, frame_address) (gdbarch_deprecated_pc_in_call_dummy (current_gdbarch, pc, sp, frame_address))
 #endif
 #endif

@@ -1,3 +1,10 @@
+2003-04-06  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
+	(CALL_DUMMY_LOCATION, DEPRECATED_PC_IN_CALL_DUMMY): Allow partial
+	multi-arch definition.
+	* gdbarch.h: Re-generate.
+
 2003-04-05  Andrew Cagney  <cagney@redhat.com>
 
 	Eliminate FRAME_FIND_SAVED_REGS.
