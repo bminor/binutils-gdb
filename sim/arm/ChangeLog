@@ -1,3 +1,9 @@
+2000-12-03  Nick Clifton  <nickc@redhat.com>
+
+	* armos.c: Fix formatting.
+	(ARMul_OSHandleSWI): Suppress support of DEMON SWIs when in xscale
+	mode.
+
 2000-11-29  Nick Clifton  <nickc@redhat.com>
 
 	* armdefs.h (State): Add 'v5e' and 'xscale' fields.
