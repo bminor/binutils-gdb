@@ -1010,6 +1010,9 @@ typedef enum bfd_reloc_code_real
         /* Low 16 bits.  */
   BFD_RELOC_LO16,
 
+	 /* 16 bit relocation relative to the global pointer.  */
+  BFD_RELOC_MIPS_GPREL,
+
    /* this must be the highest numeric value */
   BFD_RELOC_UNUSED
  } bfd_reloc_code_real_type;
@@ -1312,6 +1315,12 @@ bfd_get_mtime PARAMS ((bfd *));
 
 long 
 bfd_get_size PARAMS ((bfd *));
+
+int 
+bfd_get_gp_size PARAMS ((bfd *));
+
+void 
+bfd_set_gp_size PARAMS ((bfd *, int));
 
 #define bfd_sizeof_headers(abfd, reloc) \
      BFD_SEND (abfd, _bfd_sizeof_headers, (abfd, reloc))

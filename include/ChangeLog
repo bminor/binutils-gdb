@@ -1,3 +1,8 @@
+Wed Mar 31 17:51:42 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* bfd.h: Updated for BFD_RELOC_MIPS_GPREL and bfd_[gs]et_gp_size
+	prototypes.
+
 Wed Mar 31 16:35:12 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* dis-asm.h: (disassemble_info):  Fix typo in prototype of
