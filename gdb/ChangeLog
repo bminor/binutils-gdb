@@ -1,3 +1,19 @@
+2002-08-19  Elena Zannoni  <ezannoni@redhat.com>
+
+	* rs6000-tdep.c (TDEP): Delete macro.
+	(branch_dest): Replace use of TDEP macro with its body.
+	(rs6000_pop_frame): Ditto.
+	(rs6000_push_arguments): Ditto.
+	(rs6000_skip_trampoline_code): Ditto.
+	(rs6000_frame_saved_pc): Ditto.
+	(rs6000_frame_chain): Ditto.
+	(rs6000_register_name): Ditto.
+	(rs6000_register_byte): Ditto.
+        (rs6000_register_raw_size): Ditto.
+	(rs6000_register_virtual_type): Ditto.
+	(rs6000_register_convertible): Ditto.
+	(rs6000_convert_from_func_ptr_addr): Ditto.
+
 2002-08-19  Daniel Jacobowitz  <drow@mvista.com>
 
 	* config/mips/tm-linux.h (REALTIME_LO, REALTIME_HI): Define

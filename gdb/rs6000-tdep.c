@@ -88,10 +88,6 @@ struct reg
     unsigned char fpr;		/* whether register is floating-point */
   };
 
-/* Return the current architecture's gdbarch_tdep structure. */
-
-#define TDEP	gdbarch_tdep (current_gdbarch)
-
 /* Breakpoint shadows for the single step instructions will be kept here. */
 
 static struct sstep_breaks
@@ -252,7 +248,7 @@ branch_dest (int opcode, int instr, CORE_ADDR pc, CORE_ADDR safety)
 	      fi = get_current_frame ();
 	      if (fi != NULL)
 		dest = read_memory_addr (fi->frame + SIG_FRAME_PC_OFFSET,
-					 TDEP->wordsize);
+					 gdbarch_tdep (current_gdbarch)->wordsize);
 	    }
 	}
 
@@ -857,7 +853,7 @@ rs6000_pop_frame (void)
   addr = get_pc_function_start (frame->pc);
   (void) skip_prologue (addr, frame->pc, &fdata);
 
-  wordsize = TDEP->wordsize;
+  wordsize = gdbarch_tdep (current_gdbarch)->wordsize;
   if (fdata.frameless)
     prev_sp = sp;
   else
@@ -942,7 +938,7 @@ rs6000_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   int argbytes;			/* current argument byte */
   char tmp_buffer[50];
   int f_argno = 0;		/* current floating point argno */
-  int wordsize = TDEP->wordsize;
+  int wordsize = gdbarch_tdep (current_gdbarch)->wordsize;
 
   struct value *arg = 0;
   struct type *type;
@@ -1284,7 +1280,7 @@ rs6000_skip_trampoline_code (CORE_ADDR pc)
 	return 0;
     }
   ii = read_register (11);	/* r11 holds destination addr   */
-  pc = read_memory_addr (ii, TDEP->wordsize); /* (r11) value */
+  pc = read_memory_addr (ii, gdbarch_tdep (current_gdbarch)->wordsize); /* (r11) value */
   return pc;
 }
 
@@ -1329,7 +1325,7 @@ rs6000_frame_saved_pc (struct frame_info *fi)
 {
   CORE_ADDR func_start;
   struct rs6000_framedata fdata;
-  struct gdbarch_tdep *tdep = TDEP;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int wordsize = tdep->wordsize;
 
   if (fi->signal_handler_caller)
@@ -1533,7 +1529,7 @@ CORE_ADDR
 rs6000_frame_chain (struct frame_info *thisframe)
 {
   CORE_ADDR fp, fpp, lr;
-  int wordsize = TDEP->wordsize;
+  int wordsize = gdbarch_tdep (current_gdbarch)->wordsize;
 
   if (PC_IN_CALL_DUMMY (thisframe->pc, thisframe->frame, thisframe->frame))
     return thisframe->frame;	/* dummy frame same as caller's frame */
@@ -1578,7 +1574,7 @@ regsize (const struct reg *reg, int wordsize)
 static const char *
 rs6000_register_name (int n)
 {
-  struct gdbarch_tdep *tdep = TDEP;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   const struct reg *reg = tdep->regs + n;
 
   if (!regsize (reg, tdep->wordsize))
@@ -1592,7 +1588,7 @@ rs6000_register_name (int n)
 static int
 rs6000_register_byte (int n)
 {
-  return TDEP->regoff[n];
+  return gdbarch_tdep (current_gdbarch)->regoff[n];
 }
 
 /* Return the number of bytes of storage in the actual machine representation
@@ -1601,7 +1597,7 @@ rs6000_register_byte (int n)
 static int
 rs6000_register_raw_size (int n)
 {
-  struct gdbarch_tdep *tdep = TDEP;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   const struct reg *reg = tdep->regs + n;
   return regsize (reg, tdep->wordsize);
 }
@@ -1612,7 +1608,7 @@ rs6000_register_raw_size (int n)
 static struct type *
 rs6000_register_virtual_type (int n)
 {
-  struct gdbarch_tdep *tdep = TDEP;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   const struct reg *reg = tdep->regs + n;
 
   if (reg->fpr)
@@ -1655,7 +1651,7 @@ rs6000_coerce_float_to_double (struct type *formal, struct type *actual)
 static int
 rs6000_register_convertible (int n)
 {
-  const struct reg *reg = TDEP->regs + n;
+  const struct reg *reg = gdbarch_tdep (current_gdbarch)->regs + n;
   return reg->fpr;
 }
 
@@ -1998,7 +1994,7 @@ rs6000_convert_from_func_ptr_addr (CORE_ADDR addr)
     return addr;
 
   /* ADDR is in the data space, so it's a special function pointer. */
-  return read_memory_addr (addr, TDEP->wordsize);
+  return read_memory_addr (addr, gdbarch_tdep (current_gdbarch)->wordsize);
 }
 
 
