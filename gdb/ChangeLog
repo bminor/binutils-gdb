@@ -1,5 +1,16 @@
 2001-05-08  Jim Blandy  <jimb@redhat.com>
 
+	* mn10300-tdep.c (mn10300_saved_pc_after_call,
+	mn10300_extract_return_value,
+	mn10300_extract_struct_value_address, mn10300_store_return_value,
+	mn10300_use_struct_convention, mn10300_breakpoint_from_pc,
+	mn10300_frame_chain, mn10300_skip_prologue,
+	mn10300_push_arguments, mn10300_push_return_address,
+	mn10300_store_struct_return, mn10300_frame_saved_pc,
+	mn10300_init_extra_frame_info, mn10300_frame_init_saved_regs):
+	Make these functions static; they should only be visible to the
+	outside world as gdbarch methods.
+
 	* config/mn10300/tm-mn10300.h (mn10300_find_callers_reg): Delete
 	unused declaration.
 	

@@ -86,7 +86,7 @@ am33_register_name (int reg)
   return register_name (reg, regs, sizeof regs);
 }
   
-CORE_ADDR
+static CORE_ADDR
 mn10300_saved_pc_after_call (struct frame_info *fi)
 {
   return read_memory_integer (read_register (SP_REGNUM), 4);
@@ -101,14 +101,14 @@ mn10300_extract_return_value (struct type *type, char *regbuf, char *valbuf)
     memcpy (valbuf, regbuf + REGISTER_BYTE (0), TYPE_LENGTH (type));
 }
 
-CORE_ADDR
+static CORE_ADDR
 mn10300_extract_struct_value_address (char *regbuf)
 {
   return extract_address (regbuf + REGISTER_BYTE (4),
 			  REGISTER_RAW_SIZE (4));
 }
 
-void
+static void
 mn10300_store_return_value (struct type *type, char *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
@@ -147,7 +147,7 @@ analyze_dummy_frame (CORE_ADDR pc, CORE_ADDR frame)
 
 
 /* Should call_function allocate stack space for a struct return?  */
-int
+static int
 mn10300_use_struct_convention (int gcc_p, struct type *type)
 {
   return (TYPE_NFIELDS (type) > 1 || TYPE_LENGTH (type) > 8);
@@ -160,7 +160,7 @@ mn10300_use_struct_convention (int gcc_p, struct type *type)
    so we need a single byte breakpoint.  Matsushita hasn't defined
    one, so we defined it ourselves.  */
 
-unsigned char *
+static unsigned char *
 mn10300_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
 {
   static char breakpoint[] =
@@ -517,7 +517,7 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
    We don't handle dummy frames yet but we would probably just return the
    stack pointer that was in use at the time the function call was made?  */
 
-CORE_ADDR
+static CORE_ADDR
 mn10300_frame_chain (struct frame_info *fi)
 {
   struct frame_info *dummy;
@@ -584,7 +584,7 @@ mn10300_frame_chain (struct frame_info *fi)
 /* Function: skip_prologue
    Return the address of the first inst past the prologue of the function.  */
 
-CORE_ADDR
+static CORE_ADDR
 mn10300_skip_prologue (CORE_ADDR pc)
 {
   /* We used to check the debug symbols, but that can lose if
@@ -633,7 +633,7 @@ mn10300_pop_frame (struct frame_info *frame)
    Setup arguments for a call to the target.  Arguments go in
    order on the stack.  */
 
-CORE_ADDR
+static CORE_ADDR
 mn10300_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 			int struct_return, CORE_ADDR struct_addr)
 {
@@ -714,7 +714,7 @@ mn10300_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
    Set up the return address for the inferior function call.
    Needed for targets where we don't actually execute a JSR/BSR instruction */
 
-CORE_ADDR
+static CORE_ADDR
 mn10300_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   unsigned char buf[4];
@@ -728,7 +728,7 @@ mn10300_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
    Store the structure value return address for an inferior function
    call.  */
 
-void
+static void
 mn10300_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   /* The structure return address is passed as the first argument.  */
@@ -742,7 +742,7 @@ mn10300_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
    instead of RP, because that's where "caller" of the dummy-frame
    will be found.  */
 
-CORE_ADDR
+static CORE_ADDR
 mn10300_frame_saved_pc (struct frame_info *fi)
 {
   int adjust = 0;
@@ -776,7 +776,7 @@ mn10300_frame_saved_pc (struct frame_info *fi)
    First, during normal backtracing, second, while figuring out the frame
    pointer just prior to calling the target function (see run_stack_dummy).  */
 
-void
+static void
 mn10300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   if (fi->next)
@@ -794,7 +794,7 @@ mn10300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
 
 /* This function's job is handled by init_extra_frame_info.  */
-void
+static void
 mn10300_frame_init_saved_regs (struct frame_info *frame)
 {
 }
