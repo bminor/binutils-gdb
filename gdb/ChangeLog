@@ -1,3 +1,9 @@
+2003-10-13  Richard Henderson  <rth@redhat.com>
+
+	* f-typeprint.c (f_type_print_base): Handle TYPE_CODE_REF.
+	* f-valprint.c (f_val_print): Likewise.  Tweak TYPE_CODE_PTR to
+	match c_val_print a bit closer.
+
 2003-10-13  Kevin Buettner  <kevinb@redhat.com>
 
 	* frv-tdep.c (max_instrs_per_bundle, frv_instr_size): New constants.
