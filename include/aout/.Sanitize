@@ -32,6 +32,7 @@ ar.h
 encap.h
 host.h
 hp.h
+hppa.h
 ranlib.h
 reloc.h
 stab.def
@@ -63,7 +64,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.1  1991/12/01 04:35:59  sac
+# Revision 1.2  1992/06/20 01:00:31  grossman
+# HPPA BS
+#
+# Revision 1.1  1991/12/01  04:35:59  sac
 # Initial revision
 #
 # Revision 1.22  1991/11/27  22:25:34  sac

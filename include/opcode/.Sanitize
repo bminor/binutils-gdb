@@ -29,6 +29,7 @@ ChangeLog
 a29k.h
 arm.h
 h8300.h
+hppa.h
 i386.h
 i860.h
 i960.h

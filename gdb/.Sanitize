@@ -94,6 +94,13 @@ gould-pinsn.c
 gould-xdep.c
 h8300-tdep.c
 hp300ux-xdep.c
+hppa-coredep.c
+hppa-pinsn.c
+hppabsd-core.c
+hppabsd-tdep.c
+hppabsd-xdep.c
+hppahpux-tdep.c
+hppahpux-xdep.c
 i386-pinsn.c
 i386-stub.c
 i386-tdep.c
@@ -200,6 +207,8 @@ tm-convex.h
 tm-delta88.h
 tm-hp300bsd.h
 tm-hp300hpux.h
+tm-hppabsd.h
+tm-hppahpux.h
 tm-i386v-g.h
 tm-i386v.h
 tm-i386v4.h
@@ -259,6 +268,8 @@ xm-delta88.h
 xm-go32.h
 xm-hp300bsd.h
 xm-hp300hpux.h
+xm-hppabsd.h
+xm-hppahpux.h
 xm-i386mach.h
 xm-i386sco.h
 xm-i386v.h

@@ -49,6 +49,10 @@ hp300bsd.mh
 hp300bsd.mt
 hp300hpux.mh
 hp300hpux.mt
+hppabsd.mh
+hppabsd.mt
+hppahpux.mh
+hppahpux.mt
 i386aout.mt
 i386mach.mh
 i386sco.mh
