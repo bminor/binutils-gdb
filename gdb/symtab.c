@@ -343,7 +343,7 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
   is_full_physname_constructor = is_constructor_name (physname);
 
   is_constructor =
-    is_full_physname_constructor || (newname && STREQ (field_name, newname));
+    is_full_physname_constructor || (newname && strcmp (field_name, newname) == 0);
 
   if (!is_destructor)
     is_destructor = (strncmp (physname, "__dt", 4) == 0);
@@ -2125,7 +2125,7 @@ find_line_symtab (struct symtab *symtab, int line, int *index, int *exact_match)
 	struct linetable *l;
 	int ind;
 
-	if (!STREQ (symtab->filename, s->filename))
+	if (strcmp (symtab->filename, s->filename) != 0)
 	  continue;
 	l = LINETABLE (s);
 	ind = find_line_common (l, line, &exact);

@@ -80,25 +80,25 @@ elf_locate_sections (bfd *ignore_abfd, asection *sectp, void *eip)
   struct elfinfo *ei;
 
   ei = (struct elfinfo *) eip;
-  if (STREQ (sectp->name, ".debug"))
+  if (strcmp (sectp->name, ".debug") == 0)
     {
       ei->dboffset = sectp->filepos;
       ei->dbsize = bfd_get_section_size_before_reloc (sectp);
     }
-  else if (STREQ (sectp->name, ".line"))
+  else if (strcmp (sectp->name, ".line") == 0)
     {
       ei->lnoffset = sectp->filepos;
       ei->lnsize = bfd_get_section_size_before_reloc (sectp);
     }
-  else if (STREQ (sectp->name, ".stab"))
+  else if (strcmp (sectp->name, ".stab") == 0)
     {
       ei->stabsect = sectp;
     }
-  else if (STREQ (sectp->name, ".stab.index"))
+  else if (strcmp (sectp->name, ".stab.index") == 0)
     {
       ei->stabindexsect = sectp;
     }
-  else if (STREQ (sectp->name, ".mdebug"))
+  else if (strcmp (sectp->name, ".mdebug") == 0)
     {
       ei->mdebugsect = sectp;
     }
@@ -690,7 +690,7 @@ elfstab_offset_sections (struct objfile *objfile, struct partial_symtab *pst)
   for (; maybe; maybe = maybe->next)
     {
       if (filename[0] == maybe->filename[0]
-	  && STREQ (filename, maybe->filename))
+	  && strcmp (filename, maybe->filename) == 0)
 	{
 	  /* We found a match.  But there might be several source files
 	     (from different directories) with the same name.  */

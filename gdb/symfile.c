@@ -1223,7 +1223,7 @@ symbol_file_command (char *args, int from_tty)
       cleanups = make_cleanup_freeargv (argv);
       while (*argv != NULL)
 	{
-	  if (STREQ (*argv, "-mapped"))
+	  if (strcmp (*argv, "-mapped") == 0)
 	    flags |= OBJF_MAPPED;
 	  else 
 	    if (STREQ (*argv, "-readnow"))
@@ -2539,7 +2539,7 @@ free_named_symtabs (char *name)
 again2:
   for (ps = partial_symtab_list; ps; ps = ps->next)
     {
-      if (STREQ (name, ps->filename))
+      if (strcmp (name, ps->filename) == 0)
 	{
 	  cashier_psymtab (ps);	/* Blow it away...and its little dog, too.  */
 	  goto again2;		/* Must restart, chain has been munged */
@@ -2550,7 +2550,7 @@ again2:
 
   for (s = symtab_list; s; s = s->next)
     {
-      if (STREQ (name, s->filename))
+      if (strcmp (name, s->filename) == 0)
 	break;
       prev = s;
     }

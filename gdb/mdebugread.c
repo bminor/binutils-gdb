@@ -1632,7 +1632,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	  if (name[0] == '.' || name[0] == '\0')
 	    TYPE_TAG_NAME (tp) = NULL;
 	  else if (TYPE_TAG_NAME (tp) == NULL
-		   || !STREQ (TYPE_TAG_NAME (tp), name))
+		   || strcmp (TYPE_TAG_NAME (tp), name) != 0)
 	    TYPE_TAG_NAME (tp) = obsavestring (name, strlen (name),
 					    &current_objfile->type_obstack);
 	}

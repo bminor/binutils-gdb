@@ -1128,7 +1128,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	      prev_sym = local_symbols->symbol[local_symbols->nsyms - 1];
 	      if ((SYMBOL_CLASS (prev_sym) == LOC_REF_ARG
 		   || SYMBOL_CLASS (prev_sym) == LOC_ARG)
-		  && STREQ (DEPRECATED_SYMBOL_NAME (prev_sym), DEPRECATED_SYMBOL_NAME (sym)))
+		  && strcmp (DEPRECATED_SYMBOL_NAME (prev_sym),
+			     DEPRECATED_SYMBOL_NAME (sym)) == 0)
 		{
 		  SYMBOL_CLASS (prev_sym) = LOC_REGPARM;
 		  /* Use the type from the LOC_REGISTER; that is the type
@@ -1575,7 +1576,7 @@ again:
 	      if (SYMBOL_CLASS (sym) == LOC_TYPEDEF
 		  && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
 		  && (TYPE_CODE (SYMBOL_TYPE (sym)) == code)
-		  && STREQ (DEPRECATED_SYMBOL_NAME (sym), type_name))
+		  && strcmp (DEPRECATED_SYMBOL_NAME (sym), type_name) == 0)
 		{
 		  obstack_free (&objfile->type_obstack, type_name);
 		  type = SYMBOL_TYPE (sym);
@@ -4207,7 +4208,7 @@ cleanup_undefined_types (void)
 			    && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
 			    && (TYPE_CODE (SYMBOL_TYPE (sym)) ==
 				TYPE_CODE (*type))
-			    && STREQ (DEPRECATED_SYMBOL_NAME (sym), typename))
+			    && strcmp (DEPRECATED_SYMBOL_NAME (sym), typename) == 0)
                           replace_type (*type, SYMBOL_TYPE (sym));
 		      }
 		  }
@@ -4289,7 +4290,7 @@ scan_file_globals (struct objfile *objfile)
 	  for (sym = global_sym_chain[hash]; sym;)
 	    {
 	      if (DEPRECATED_SYMBOL_NAME (msymbol)[0] == DEPRECATED_SYMBOL_NAME (sym)[0] &&
-		  STREQ (DEPRECATED_SYMBOL_NAME (msymbol) + 1, DEPRECATED_SYMBOL_NAME (sym) + 1))
+		  strcmp (DEPRECATED_SYMBOL_NAME (msymbol) + 1, DEPRECATED_SYMBOL_NAME (sym) + 1) == 0)
 		{
 		  /* Splice this symbol out of the hash chain and
 		     assign the value we have to it. */

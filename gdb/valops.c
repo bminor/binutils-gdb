@@ -2267,7 +2267,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
     {
       char *t_field_name = TYPE_FIELD_NAME (t, i);
 
-      if (t_field_name && STREQ (t_field_name, name))
+      if (t_field_name && strcmp (t_field_name, name) == 0)
 	{
 	  if (TYPE_FIELD_STATIC (t, i))
 	    {
@@ -2314,7 +2314,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	  else if (cplus_demangle_opname (t_field_name, dem_opname, 0))
 	    t_field_name = dem_opname;
 	}
-      if (t_field_name && STREQ (t_field_name, name))
+      if (t_field_name && strcmp (t_field_name, name) == 0)
 	{
 	  int j = TYPE_FN_FIELDLIST_LENGTH (t, i);
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, i);

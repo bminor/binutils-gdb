@@ -205,7 +205,8 @@ lookup_minimal_symbol (const char *name, const char *sfile,
                       case mst_file_data:
                       case mst_file_bss:
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
-                        if (sfile == NULL || STREQ (msymbol->filename, sfile))
+                        if (sfile == NULL
+			    || strcmp (msymbol->filename, sfile) == 0)
                           found_file_symbol = msymbol;
 #else
                         /* We have neither the ability nor the need to
@@ -737,10 +738,10 @@ compact_minimal_symbols (struct minimal_symbol *msymbol, int mcount,
       copyfrom = copyto = msymbol;
       while (copyfrom < msymbol + mcount - 1)
 	{
-	  if (SYMBOL_VALUE_ADDRESS (copyfrom) ==
-	      SYMBOL_VALUE_ADDRESS ((copyfrom + 1)) &&
-	      (STREQ (SYMBOL_LINKAGE_NAME (copyfrom),
-		      SYMBOL_LINKAGE_NAME ((copyfrom + 1)))))
+	  if (SYMBOL_VALUE_ADDRESS (copyfrom)
+	      == SYMBOL_VALUE_ADDRESS ((copyfrom + 1))
+	      && strcmp (SYMBOL_LINKAGE_NAME (copyfrom),
+			 SYMBOL_LINKAGE_NAME ((copyfrom + 1))) == 0)
 	    {
 	      if (MSYMBOL_TYPE ((copyfrom + 1)) == mst_unknown)
 		{
@@ -975,8 +976,8 @@ find_solib_trampoline_target (CORE_ADDR pc)
       ALL_MSYMBOLS (objfile, msymbol)
       {
 	if (MSYMBOL_TYPE (msymbol) == mst_text
-	    && STREQ (SYMBOL_LINKAGE_NAME (msymbol),
-		      SYMBOL_LINKAGE_NAME (tsymbol)))
+	    && strcmp (SYMBOL_LINKAGE_NAME (msymbol),
+		       SYMBOL_LINKAGE_NAME (tsymbol)) == 0)
 	  return SYMBOL_VALUE_ADDRESS (msymbol);
       }
     }

@@ -2837,8 +2837,8 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
 	      bs->print = 0;
 	    bs->commands = b->commands;
 	    if (bs->commands &&
-		(STREQ ("silent", bs->commands->line) ||
-		 (xdb_commands && STREQ ("Q", bs->commands->line))))
+		(strcmp ("silent", bs->commands->line) == 0
+		 || (xdb_commands && strcmp ("Q", bs->commands->line) == 0)))
 	      {
 		bs->commands = bs->commands->next;
 		bs->print = 0;
@@ -6591,7 +6591,7 @@ clear_command (char *arg, int from_tty)
 		  || ((default_match || (0 == sal.pc))
 		      && b->source_file != NULL
 		      && sal.symtab != NULL
-		      && STREQ (b->source_file, sal.symtab->filename)
+		      && strcmp (b->source_file, sal.symtab->filename) == 0
 		      && b->line_number == sal.line)))
 	    /* Yes, if sal source file and line matches b.  */
 	    {
@@ -6992,7 +6992,7 @@ breakpoint_re_set_one (void *bint)
 	     the source file name or the line number changes...  */
 	      || (b->source_file != NULL
 		  && sals.sals[i].symtab != NULL
-		  && (!STREQ (b->source_file, sals.sals[i].symtab->filename)
+		  && (strcmp (b->source_file, sals.sals[i].symtab->filename) != 0
 		      || b->line_number != sals.sals[i].line)
 	      )
 	  /* ...or we switch between having a source file and not having

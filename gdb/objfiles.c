@@ -1087,7 +1087,7 @@ in_plt_section (CORE_ADDR pc, char *name)
 
   retval = (s != NULL
 	    && s->the_bfd_section->name != NULL
-	    && STREQ (s->the_bfd_section->name, ".plt"));
+	    && strcmp (s->the_bfd_section->name, ".plt") == 0);
   return (retval);
 }
 

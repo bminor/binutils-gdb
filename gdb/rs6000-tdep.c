@@ -985,7 +985,8 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	     initializer function as well.  */
 
 	  tmp = find_pc_misc_function (pc);
-	  if (tmp >= 0 && STREQ (misc_function_vector[tmp].name, main_name ()))
+	  if (tmp >= 0
+	      && strcmp (misc_function_vector[tmp].name, main_name ()) == 0)
 	    return pc + 8;
 	}
     }

@@ -205,7 +205,7 @@ set_language_command (char *ignore, int from_tty)
   /* Search the list of languages for a match.  */
   for (i = 0; i < languages_size; i++)
     {
-      if (STREQ (languages[i]->la_name, language))
+      if (strcmp (languages[i]->la_name, language) == 0)
 	{
 	  /* Found it!  Go into manual mode, and use this language.  */
 	  if (languages[i]->la_language == language_auto)
@@ -253,22 +253,22 @@ show_type_command (char *ignore, int from_tty)
 static void
 set_type_command (char *ignore, int from_tty)
 {
-  if (STREQ (type, "on"))
+  if (strcmp (type, "on") == 0)
     {
       type_check = type_check_on;
       type_mode = type_mode_manual;
     }
-  else if (STREQ (type, "warn"))
+  else if (strcmp (type, "warn") == 0)
     {
       type_check = type_check_warn;
       type_mode = type_mode_manual;
     }
-  else if (STREQ (type, "off"))
+  else if (strcmp (type, "off") == 0)
     {
       type_check = type_check_off;
       type_mode = type_mode_manual;
     }
-  else if (STREQ (type, "auto"))
+  else if (strcmp (type, "auto") == 0)
     {
       type_mode = type_mode_auto;
       set_type_range_case ();
@@ -299,22 +299,22 @@ show_range_command (char *ignore, int from_tty)
 static void
 set_range_command (char *ignore, int from_tty)
 {
-  if (STREQ (range, "on"))
+  if (strcmp (range, "on") == 0)
     {
       range_check = range_check_on;
       range_mode = range_mode_manual;
     }
-  else if (STREQ (range, "warn"))
+  else if (strcmp (range, "warn") == 0)
     {
       range_check = range_check_warn;
       range_mode = range_mode_manual;
     }
-  else if (STREQ (range, "off"))
+  else if (strcmp (range, "off") == 0)
     {
       range_check = range_check_off;
       range_mode = range_mode_manual;
     }
-  else if (STREQ (range, "auto"))
+  else if (strcmp (range, "auto") == 0)
     {
       range_mode = range_mode_auto;
       set_type_range_case ();

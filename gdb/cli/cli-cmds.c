@@ -297,7 +297,7 @@ pwd_command (char *args, int from_tty)
     error ("The \"pwd\" command does not take an argument: %s", args);
   getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
 
-  if (!STREQ (gdb_dirbuf, current_directory))
+  if (strcmp (gdb_dirbuf, current_directory) != 0)
     printf_unfiltered ("Working directory %s\n (canonically %s).\n",
 		       current_directory, gdb_dirbuf);
   else
@@ -651,7 +651,7 @@ list_command (char *arg, int from_tty)
 
   /* "l" or "l +" lists next ten lines.  */
 
-  if (arg == 0 || STREQ (arg, "+"))
+  if (arg == 0 || strcmp (arg, "+") == 0)
     {
       print_source_lines (cursal.symtab, cursal.line,
 			  cursal.line + get_lines_to_list (), 0);
@@ -659,7 +659,7 @@ list_command (char *arg, int from_tty)
     }
 
   /* "l -" lists previous ten lines, the ones before the ten just listed.  */
-  if (STREQ (arg, "-"))
+  if (strcmp (arg, "-") == 0)
     {
       print_source_lines (cursal.symtab,
 			  max (get_first_line_listed () - get_lines_to_list (), 1),

@@ -503,7 +503,7 @@ delete_cmd (char *name, struct cmd_list_element **list)
   struct cmd_list_element *c;
   struct cmd_list_element *p;
 
-  while (*list && STREQ ((*list)->name, name))
+  while (*list && strcmp ((*list)->name, name) == 0)
     {
       if ((*list)->hookee_pre)
       (*list)->hookee_pre->hook_pre = 0;   /* Hook slips out of its mouth */
@@ -517,7 +517,7 @@ delete_cmd (char *name, struct cmd_list_element **list)
   if (*list)
     for (c = *list; c->next;)
       {
-	if (STREQ (c->next->name, name))
+	if (strcmp (c->next->name, name) == 0)
 	  {
           if (c->next->hookee_pre)
             c->next->hookee_pre->hook_pre = 0; /* hooked cmd gets away.  */

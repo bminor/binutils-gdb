@@ -1430,7 +1430,7 @@ patch_opaque_types (struct symtab *s)
 	  for (sym = opaque_type_chain[hash]; sym;)
 	    {
 	      if (name[0] == DEPRECATED_SYMBOL_NAME (sym)[0] &&
-		  STREQ (name + 1, DEPRECATED_SYMBOL_NAME (sym) + 1))
+		  strcmp (name + 1, DEPRECATED_SYMBOL_NAME (sym) + 1) == 0)
 		{
 		  if (prev)
 		    {

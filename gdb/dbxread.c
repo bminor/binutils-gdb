@@ -352,7 +352,7 @@ add_old_header_file (char *name, int instance)
   int i;
 
   for (i = 0; i < N_HEADER_FILES (current_objfile); i++)
-    if (STREQ (p[i].name, name) && instance == p[i].instance)
+    if (strcmp (p[i].name, name) == 0 && instance == p[i].instance)
       {
 	add_this_object_header_file (i);
 	return;
@@ -935,7 +935,7 @@ find_corresponding_bincl_psymtab (char *name, int instance)
 
   for (bincl = bincl_list; bincl < next_bincl; bincl++)
     if (bincl->instance == instance
-	&& STREQ (name, bincl->name))
+	&& strcmp (name, bincl->name) == 0)
       return bincl->pst;
 
   repeated_header_complaint (name, symnum);
@@ -1607,12 +1607,12 @@ read_dbx_symtab (struct objfile *objfile)
 	       things like "break c-exp.y:435" need to work (I
 	       suppose the psymtab_include_list could be hashed or put
 	       in a binary tree, if profiling shows this is a major hog).  */
-	    if (pst && STREQ (namestring, pst->filename))
+	    if (pst && strcmp (namestring, pst->filename) == 0)
 	    continue;
 	    {
 	      int i;
 	      for (i = 0; i < includes_used; i++)
-		if (STREQ (namestring, psymtab_include_list[i]))
+		if (strcmp (namestring, psymtab_include_list[i]) == 0)
 		  {
 		    i = -1;
 		    break;
@@ -3229,7 +3229,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
     case N_OPT:		/* Solaris 2:  Compiler options */
       if (name)
 	{
-	  if (STREQ (name, GCC2_COMPILED_FLAG_SYMBOL))
+	  if (strcmp (name, GCC2_COMPILED_FLAG_SYMBOL) == 0)
 	    {
 	      processing_gcc_compilation = 2;
 #if 0				/* Works, but is experimental.  -fnf */

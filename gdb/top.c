@@ -1375,7 +1375,7 @@ There is absolutely no warranty for GDB.  Type \"show warranty\" for details.\n"
   /* After the required info we print the configuration information. */
 
   fprintf_filtered (stream, "This GDB was configured as \"");
-  if (!STREQ (host_name, target_name))
+  if (strcmp (host_name, target_name) != 0)
     {
       fprintf_filtered (stream, "--host=%s --target=%s", host_name, target_name);
     }

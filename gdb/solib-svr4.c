@@ -228,7 +228,7 @@ bfd_lookup_symbol (bfd *abfd, char *symname, flagword sect_flags)
       for (i = 0; i < number_of_symbols; i++)
 	{
 	  sym = *symbol_table++;
-	  if (STREQ (sym->name, symname)
+	  if (strcmp (sym->name, symname) == 0
               && (sym->section->flags & sect_flags) == sect_flags)
 	    {
 	      /* Bfd symbols are section relative. */
@@ -257,7 +257,7 @@ bfd_lookup_symbol (bfd *abfd, char *symname, flagword sect_flags)
 	{
 	  sym = *symbol_table++;
 
-	  if (STREQ (sym->name, symname)
+	  if (strcmp (sym->name, symname) == 0
               && (sym->section->flags & sect_flags) == sect_flags)
 	    {
 	      /* Bfd symbols are section relative. */

@@ -1,5 +1,46 @@
 2003-11-07  Andrew Cagney  <cagney@redhat.com>
 
+	* top.c (print_gdb_version): Replace STREQ with strcmp.
+	* valops.c (value_struct_elt_for_reference): Ditto.
+	(value_struct_elt_for_reference): Ditto.
+	* symtab.c (gdb_mangle_name): Ditto.
+	(find_line_symtab): Ditto.
+	* symmisc.c (maintenance_print_symbols): Ditto.
+	* symfile.c (symbol_file_command): Ditto.
+	* stabsread.c (define_symbol, read_type): Ditto.
+	(cleanup_undefined_types, scan_file_globals): Ditto.
+	* solib.c (solib_map_sections): Ditto.
+	* solib-svr4.c (bfd_lookup_symbol): Ditto.
+	* rs6000-tdep.c (skip_prologue): Ditto.
+	* p-valprint.c (pascal_value_print): Ditto.
+	(pascal_object_is_vtbl_ptr_type): Ditto.
+	* objfiles.c (in_plt_section): Ditto.
+	* minsyms.c (lookup_minimal_symbol): Ditto.
+	(compact_minimal_symbols): Ditto.
+	(find_solib_trampoline_target): Ditto.
+	* mdebugread.c (parse_type): Ditto.
+	* language.c (set_language_command): Ditto.
+	(set_type_command, set_range_command): Ditto.
+	* f-lang.c (add_common_block): Ditto.
+	(add_common_block): Ditto.
+	(find_first_common_named): Ditto.
+	(patch_all_commons_by_name): Ditto.
+	* elfread.c (elf_locate_sections): Ditto.
+	(elf_locate_sections): Ditto.
+	(elfstab_offset_sections): Ditto.
+	* dwarf2read.c (dwarf2_locate_sections): Ditto.
+	* dbxread.c (add_old_header_file): Ditto.
+	(find_corresponding_bincl_psymtab): Ditto.
+	(read_dbx_symtab, process_one_symbol): Ditto.
+	* coffread.c (patch_opaque_types): Ditto.
+	* cli/cli-decode.c (delete_cmd): Ditto.
+	* cli/cli-cmds.c (pwd_command, list_command): Ditto.
+	* c-typeprint.c (c_type_print_base): Ditto.
+	* breakpoint.c (bpstat_stop_status): Ditto.
+	(clear_command, breakpoint_re_set_one): Ditto.
+
+2003-11-07  Andrew Cagney  <cagney@redhat.com>
+
 	* bcache.h: Update copyright.  Add comments on bcache VS hashtab.
 	* bcache.c (struct bstring): Make "length" an unsigned short, add
 	"half_hash".
