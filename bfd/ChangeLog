@@ -1,3 +1,11 @@
+Sat May  4 05:08:45 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* elfcode.h (elf_object_p):  Reject generic ELF target if
+	e_machine matches an alternate machine code in a specific backend.
+
+	* netbsd-core.c (netbsd_core_vec):  Remove initializer for
+	obsolete align_power_min field.
+
 Fri May  3 13:07:35 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* coff-h8300.c (reloc_howto_type): Add howto entry for
