@@ -1,3 +1,10 @@
+2001-02-11  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+        * mips-dis.c (print_insn_arg): Use top four bits of the address of
+	the following instruction not of the jump itself for the jump
+	target.
+	(print_mips16_insn_arg): Likewise.
+
 2001-02-11  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* Makefile.am (stamp-lib): ranlib the libopcodes.a in the build

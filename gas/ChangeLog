@@ -1,3 +1,12 @@
+2001-02-11  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* config/tc-mips.c (macro): For M_LA_AB emit a
+	BFD_RELOC_MIPS_CALL16 relocation or a
+	BFD_RELOC_MIPS_CALL_HI16/BFD_RELOC_MIPS_CALL_LO16 pair instead of
+	BFD_RELOC_MIPS_GOT16 and
+	BFD_RELOC_MIPS_GOT_HI16/BFD_RELOC_MIPS_GOT_LO16, respectively for
+	loading the jump register when generating SVR4_PIC code.
+
 2001-02-10  Chris Demetriou  <cgd@broadcom.com>
 
 	* configure.in: Make 'mipself' and 'mipsecoff' emulations

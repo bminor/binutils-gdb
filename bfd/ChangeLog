@@ -1,3 +1,36 @@
+2001-02-11  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* elf32-mips.c (mips_elf_create_dynamic_relocation): Undo patch
+	from 2000-10-13.  Do not add the symbol's value for R_MIPS_REL32
+	relocations against dynsym symbols.
+
+	* elf32-mips.c (elf_mips_howto_table): Fix the comment on
+	the R_MIPS_26 relocation.
+	(mips_elf_calculate_relocation): Use (p + 4) instead of p for
+	the R_MIPS_26 relocation.
+	(mips_elf_perform_relocation): Fix the comment on the R_MIPS16_26
+	relocation.
+	* elf64-mips.c (mips_elf64_howto_table_rel): Fix the comment on
+	the R_MIPS_26 relocation.
+	(mips_elf64_howto_table_rela): Likewise.
+
+	* elf32-mips.c (struct mips_elf_link_hash_entry): Added no_fn_stub
+	member to mark symbols that have non-CALL relocations against
+	them.
+	(mips_elf_link_hash_newfunc): Initialize no_fn_stub.
+	(mips_elf_calculate_relocation): Handle R_MIPS_CALL16 like
+	R_MIPS_GOT16.
+	(_bfd_mips_elf_check_relocs): Set no_fn_stub for a symbol if a
+	non-CALL relocation against it is encountered.
+	(_bfd_mips_elf_copy_indirect_symbol): Merge no_fn_stub as well.
+	(_bfd_mips_elf_adjust_dynamic_symbol): Only create a stub if
+	no_fn_stub is not set.
+
+	* elf32-mips.c (mips_elf_output_extsym): Get the output section
+	information from the real symbol for indirect ones.
+	Check no_fn_stub to find out if a symbol has a function stub
+	indeed.
+
 2001-02-11  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* Makefile.am (stamp-lib): ranlib the libbfd.a in the build directory.
