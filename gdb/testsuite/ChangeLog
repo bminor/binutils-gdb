@@ -1,5 +1,9 @@
 2004-07-31  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/virtfunc.exp: Accept more varieties of ptype output.
+
+2004-07-31  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.cp/inherit.exp: Accept more varieties of ptype output.
 	Accept more values of vtbl pointer.  Remove some messages
 	about "obsolete gcc or gdb".
