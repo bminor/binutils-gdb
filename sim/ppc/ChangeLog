@@ -1,3 +1,9 @@
+Fri Dec 15 15:55:56 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* corefile.h: Delete declarations for unknown functions.
+	* device.h: Ditto.
+	* interrupts.h: Ditto.
+
 Thu Dec 14 18:49:34 1995  Andrew Cagney  <cagney@highland.com.au>
 
 	* lf.c (lf_print_function_type): New function.  Munges a function

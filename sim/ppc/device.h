@@ -39,12 +39,6 @@
    All the devices in this model live in a tree. The following allow
    the location/manipulation of this tree */
 
-device INLINE_DEVICE *device_sibling
-(device *me);
-
-device INLINE_DEVICE *device_child
-(device *me);
-
 device INLINE_DEVICE *device_parent
 (device *me);
 
@@ -190,13 +184,6 @@ struct _device_property {
 const char INLINE_DEVICE *device_find_next_property
 (device *me,
  const char *previous);
-
-void INLINE_DEVICE device_set_property
-(device *me,
- const char *property,
- const void *array,
- int sizeof_array);
-
 
 /* INLINE_DEVICE void device_add_property
    No such external function, all properties, when added are explictly
@@ -538,6 +525,7 @@ void EXTERN_DEVICE device_ioctl
    indirectly via OpenBoot calls.  The following provide a higher
    level software interface to the devices */
 
+#if 0
 device_instance INLINE_DEVICE *device_instance_open
 (device *me,
  const char *device_specifier);
@@ -565,7 +553,7 @@ device INLINE_DEVICE *device_instance_device
 
 const char INLINE_DEVICE *device_instance_name
 (device_instance *instance);
-
+#endif
 
 
 
