@@ -165,6 +165,8 @@ which is part of the DJGPP development kit).
 
 DWARF2 debug info is now supported.
 
+It is now possible to `step' and `next' through calls to `longjmp'.
+
 * Changes in documentation.
 
 All GDB documentation was converted to GFDL, the GNU Free

@@ -1,3 +1,11 @@
+2001-07-29  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	Support for stepping through longjmp in DJGPP programs:
+
+	* config/i386/tm-go32.h (JB_ELEMENT_SIZE, JB_PC): New macros.
+	(GET_LONGJMP_TARGET): Define to call get_longjmp_target.
+	(get_longjmp_target): Add prototype.
+
 2001-07-28  Andrew Cagney  <ac131313@redhat.com>
 
 	* version.in: Bump version number to 5.0.90-cvs.
