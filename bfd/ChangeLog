@@ -1,3 +1,30 @@
+Mon Feb  5 10:38:27 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_adjust_dynamic_symbol): Don't try to get the
+	flavour of a section with no owner.
+
+	* elf32-mips.c (mips_elf_create_dynamic_sections): Clear
+	ELF_LINK_NON_ELF flag.
+	(mips_elf_create_got_section): Likewise.
+
+	* elf.c: Revert last change, since it breaks dynamic linking.
+	* elf-bfd.h (struct elf_backend_data): Remove want_hdr_in_seg
+	field.
+	* elf32-mips.c (elf_backend_want_hdr_in_seg): Don't define.
+	* elfxx-target.h (elf_backend_want_hdr_in_seg): Don't define.
+	(elfNN_bed): Don't initialize want_hdr_in_seg field.
+
+Sun Feb  4 20:45:13 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf.c (assign_file_positions_for_segments): If the backend does
+	not want the elf header or the program headers in the address
+	space, do not include them in the calculations.
+
+	* elf32-ppc.c (ppc_elf_additional_program_headers): New hook
+	function to determine if we need additional program headers.
+	(ppc_elf_modify_segment_map): Define as a NOP function for now.
+	(ppc_elf_create_linker_section): .sdata2 is a read-only section.
+
 Sat Feb  3 23:00:03 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coffcode.h: Move today's libcoff.h change into coffcode.h.
