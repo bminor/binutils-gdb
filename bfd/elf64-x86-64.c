@@ -37,29 +37,41 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 static reloc_howto_type x86_64_elf_howto_table[] =
 {
   HOWTO(R_X86_64_NONE, 0, 0, 0, false, 0, complain_overflow_dont,
-	bfd_elf_generic_reloc, "R_X86_64_NONE",	false, 0x00000000, 0x00000000, false),
+	bfd_elf_generic_reloc, "R_X86_64_NONE",	false, 0x00000000, 0x00000000,
+	false),
   HOWTO(R_X86_64_64, 0, 4, 64, false, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_X86_64_64", false, MINUS_ONE, MINUS_ONE, false),
+	bfd_elf_generic_reloc, "R_X86_64_64", false, MINUS_ONE, MINUS_ONE,
+	false),
   HOWTO(R_X86_64_PC32, 0, 4, 32, true, 0, complain_overflow_signed,
-	bfd_elf_generic_reloc, "R_X86_64_PC32", false, 0xffffffff, 0xffffffff, true),
+	bfd_elf_generic_reloc, "R_X86_64_PC32", false, 0xffffffff, 0xffffffff,
+	true),
   HOWTO(R_X86_64_GOT32, 0, 4, 32, false, 0, complain_overflow_signed,
-	bfd_elf_generic_reloc, "R_X86_64_GOT32", false, 0xffffffff, 0xffffffff, false),
+	bfd_elf_generic_reloc, "R_X86_64_GOT32", false, 0xffffffff, 0xffffffff,
+	false),
   HOWTO(R_X86_64_PLT32, 0, 4, 32, true, 0, complain_overflow_signed,
-	bfd_elf_generic_reloc, "R_X86_64_PLT32", false, 0xffffffff, 0xffffffff, true),
+	bfd_elf_generic_reloc, "R_X86_64_PLT32", false, 0xffffffff, 0xffffffff,
+	true),
   HOWTO(R_X86_64_COPY, 0, 4, 32, false, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_X86_64_COPY", false, 0xffffffff, 0xffffffff, false),
+	bfd_elf_generic_reloc, "R_X86_64_COPY", false, 0xffffffff, 0xffffffff,
+	false),
   HOWTO(R_X86_64_GLOB_DAT, 0, 4, 64, false, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_X86_64_GLOB_DAT", false, MINUS_ONE, MINUS_ONE, false),
+	bfd_elf_generic_reloc, "R_X86_64_GLOB_DAT", false, MINUS_ONE,
+	MINUS_ONE, false),
   HOWTO(R_X86_64_JUMP_SLOT, 0, 4, 64, false, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_X86_64_JUMP_SLOT", false, MINUS_ONE, MINUS_ONE, false),
+	bfd_elf_generic_reloc, "R_X86_64_JUMP_SLOT", false, MINUS_ONE,
+	MINUS_ONE, false),
   HOWTO(R_X86_64_RELATIVE, 0, 4, 64, false, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_X86_64_RELATIVE", false, MINUS_ONE, MINUS_ONE, false),
+	bfd_elf_generic_reloc, "R_X86_64_RELATIVE", false, MINUS_ONE,
+	MINUS_ONE, false),
   HOWTO(R_X86_64_GOTPCREL, 0, 4, 32, true,0 , complain_overflow_signed,
-	bfd_elf_generic_reloc, "R_X86_64_GOTPCREL", false, 0xffffffff, 0xffffffff, true),
+	bfd_elf_generic_reloc, "R_X86_64_GOTPCREL", false, 0xffffffff,
+	0xffffffff, true),
   HOWTO(R_X86_64_32, 0, 4, 32, false, 0, complain_overflow_unsigned,
-	bfd_elf_generic_reloc, "R_X86_64_32", false, 0xffffffff, 0xffffffff, false),
+	bfd_elf_generic_reloc, "R_X86_64_32", false, 0xffffffff, 0xffffffff,
+	false),
   HOWTO(R_X86_64_32S, 0, 4, 32, false, 0, complain_overflow_signed,
-	bfd_elf_generic_reloc, "R_X86_64_32S", false, 0xffffffff, 0xffffffff, false),
+	bfd_elf_generic_reloc, "R_X86_64_32S", false, 0xffffffff, 0xffffffff,
+	false),
   HOWTO(R_X86_64_16, 0, 1, 16, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_X86_64_16", false, 0xffff, 0xffff, false),
   HOWTO(R_X86_64_PC16,0, 1, 16, true, 0, complain_overflow_bitfield,
@@ -460,17 +472,17 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 	  if (h == NULL)
 	    continue;
 
+	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
 	  if (h->plt.refcount == -1)
-	    {
-	      h->plt.refcount = 1;
-	      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
-	    }
+	    h->plt.refcount = 1;
 	  else
 	    h->plt.refcount += 1;
 	  break;
 
-	case R_X86_64_64:
+	case R_X86_64_8:
+	case R_X86_64_16:
 	case R_X86_64_32:
+	case R_X86_64_64:
 	case R_X86_64_32S:
 	case R_X86_64_PC32:
 	  if (h != NULL)
@@ -492,7 +504,9 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 	     and symbol visibility changes render the symbol local.  */
 	  if (info->shared
 	      && (sec->flags & SEC_ALLOC) != 0
-	      && (ELF64_R_TYPE (rel->r_info) != R_X86_64_PC32
+	      && (((ELF64_R_TYPE (rel->r_info) != R_X86_64_PC8)
+		  && (ELF64_R_TYPE (rel->r_info) != R_X86_64_PC16)
+		  && (ELF64_R_TYPE (rel->r_info) != R_X86_64_PC32))
 		  || (h != NULL
 		      && (! info->symbolic
 			  || (h->elf_link_hash_flags
@@ -528,7 +542,7 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 			flags |= SEC_ALLOC | SEC_LOAD;
 		      if (sreloc == NULL
 			  || ! bfd_set_section_flags (dynobj, sreloc, flags)
-			  || ! bfd_set_section_alignment (dynobj, sreloc, 2))
+			  || ! bfd_set_section_alignment (dynobj, sreloc, 3))
 			return false;
 		    }
 		}
@@ -542,7 +556,9 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 		 elf64_x86_64 linker hash table, which means that h is
 		 really a pointer to an elf64_x86_64_link_hash_entry.  */
 	      if (h != NULL
-		  && ELF64_R_TYPE (rel->r_info) == R_X86_64_PC32)
+		  && ((ELF64_R_TYPE (rel->r_info) == R_X86_64_PC8)
+		      || (ELF64_R_TYPE (rel->r_info) == R_X86_64_PC16)
+		      || (ELF64_R_TYPE (rel->r_info) == R_X86_64_PC32)))
 		{
 		  struct elf64_x86_64_link_hash_entry *eh;
 		  struct elf64_x86_64_pcrel_relocs_copied *p;
@@ -1097,7 +1113,7 @@ elf64_x86_64_discard_copies (h, inf)
 
 static boolean
 elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
-			     contents, relocs, local_syms, local_sections)
+			       contents, relocs, local_syms, local_sections)
      bfd *output_bfd;
      struct bfd_link_info *info;
      bfd *input_bfd;
@@ -1208,12 +1224,13 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		      && ((! info->symbolic && h->dynindx != -1)
 			  || (h->elf_link_hash_flags
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0)
-		      && ( r_type == R_X86_64_8 ||
-			   r_type == R_X86_64_16 ||
-                           r_type == R_X86_64_32 ||
-			   r_type == R_X86_64_64 ||
-                           r_type == R_X86_64_PC16 ||
-			   r_type == R_X86_64_PC32)
+		      && (r_type == R_X86_64_8
+			  || r_type == R_X86_64_16
+			  || r_type == R_X86_64_32
+			  || r_type == R_X86_64_64
+			  || r_type == R_X86_64_PC8
+			  || r_type == R_X86_64_PC16
+			  || r_type == R_X86_64_PC32)
                       && ((input_section->flags & SEC_ALLOC) != 0
                           /* DWARF will emit R_X86_64_32 relocations in its
                              sections against symbols defined externally
@@ -1377,24 +1394,27 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 			+ h->plt.offset);
 	  break;
 
+	case R_X86_64_PC8:
+	case R_X86_64_PC16:
+	case R_X86_64_PC32:
+	  if (h == NULL)
+	    break;
+	  /* Fall through.  */
 	case R_X86_64_8:
 	case R_X86_64_16:
 	case R_X86_64_32:
 	case R_X86_64_64:
-	case R_X86_64_PC8:
-	case R_X86_64_PC16:
-	case R_X86_64_PC32:
-	  /* FIXME: The abi says the linker should make sure the value is
+	  /* FIXME: The ABI says the linker should make sure the value is
 	     the same when it's zeroextended to 64 bit.	 */
 	  if (info->shared
 	      && (input_section->flags & SEC_ALLOC) != 0
-	      && ((r_type != R_X86_64_PC8 && r_type != R_X86_64_PC16
+	      && ((r_type != R_X86_64_PC8
+		   && r_type != R_X86_64_PC16
 		   && r_type != R_X86_64_PC32)
-		  || (h != NULL
-		      && h->dynindx != -1
-		      && (! info->symbolic
-			  || (h->elf_link_hash_flags
-			      & ELF_LINK_HASH_DEF_REGULAR) == 0))))
+		  || (! info->symbolic
+		      || (h->elf_link_hash_flags
+			  & ELF_LINK_HASH_DEF_REGULAR) == 0)))
+
 	    {
 	      Elf_Internal_Rela outrel;
 	      boolean skip, relocate;
@@ -1449,22 +1469,21 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		  memset (&outrel, 0, sizeof outrel);
 		  relocate = false;
 		}
-	      else if ((r_type == R_X86_64_PC8) || (r_type == R_X86_64_PC16)
-		       || (r_type == R_X86_64_PC32))
+	      /* h->dynindx may be -1 if this symbol was marked to
+		 become local.  */
+	      else if (h != NULL
+		       && ((! info->symbolic && h->dynindx != -1)
+			   || (h->elf_link_hash_flags
+			       & ELF_LINK_HASH_DEF_REGULAR) == 0))
 		{
-		  BFD_ASSERT (h != NULL && h->dynindx != -1);
+		  BFD_ASSERT (h->dynindx != -1);
 		  relocate = false;
 		  outrel.r_info = ELF64_R_INFO (h->dynindx, r_type);
 		  outrel.r_addend = relocation + rela->r_addend;
 		}
 	      else
 		{
-		  /* h->dynindx may be -1 if this symbol was marked to
-		     become local.  */
-		  if (h == NULL
-		      || ((info->symbolic || h->dynindx == -1)
-			  && (h->elf_link_hash_flags
-			      & ELF_LINK_HASH_DEF_REGULAR) != 0))
+		  if (r_type == R_X86_64_64)
 		    {
 		      relocate = true;
 		      outrel.r_info = ELF64_R_INFO (0, R_X86_64_RELATIVE);
@@ -1472,11 +1491,38 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		    }
 		  else
 		    {
-		      BFD_ASSERT (h->dynindx != -1);
-		      relocate = false;
-		      outrel.r_info = ELF64_R_INFO (h->dynindx, R_X86_64_32);
-		      outrel.r_addend = relocation + rela->r_addend;
-		    }
+		      long indx;
+
+		      if (h == NULL)
+			sec = local_sections[r_symndx];
+		      else
+			{
+			  BFD_ASSERT (h->root.type == bfd_link_hash_defined
+				      || (h->root.type
+					  == bfd_link_hash_defweak));
+			  sec = h->root.u.def.section;
+			}
+		      if (sec != NULL && bfd_is_abs_section (sec))
+			indx = 0;
+		      else if (sec == NULL || sec->owner == NULL)
+			{
+			  bfd_set_error (bfd_error_bad_value);
+			  return false;
+			}
+		      else
+			{
+			  asection *osec;
+
+			  osec = sec->output_section;
+			  indx = elf_section_data (osec)->dynindx;
+			  BFD_ASSERT (indx > 0);
+			}
+
+ 		      relocate = false;
+		      outrel.r_info = ELF64_R_INFO (indx, r_type);
+ 		      outrel.r_addend = relocation + rela->r_addend;
+ 		    }
+
 		}
 
 	      bfd_elf64_swap_reloca_out (output_bfd, &outrel,
@@ -1580,7 +1626,7 @@ elf64_x86_64_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       /* Get the offset into the .got table of the entry that
 	 corresponds to this function.	Each .got entry is GOT_ENTRY_SIZE
-	 bytes. The first three are reserved.  */
+	 bytes. The first three are reserved for the dynamic linker.  */
       got_offset = (plt_index + 3) * GOT_ENTRY_SIZE;
 
       /* Fill in the entry in the procedure linkage table.  */
@@ -1666,6 +1712,7 @@ elf64_x86_64_finish_dynamic_symbol (output_bfd, info, h, sym)
 	      && (info->symbolic || h->dynindx == -1)
 	      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
 	{
+	  BFD_ASSERT((h->got.offset & 1) != 0);
 	  rela.r_info = ELF64_R_INFO (0, R_X86_64_RELATIVE);
 	  rela.r_addend = (h->root.u.def.value
 			   + h->root.u.def.section->output_section->vma
