@@ -117,14 +117,41 @@ struct nlm_obj_tdata
 #define nlm_relocation_fixups(bfd)	(nlm_tdata(bfd) -> nlm_reloc_fixups)
 #define nlm_relocation_fixup_secs(bfd)	(nlm_tdata(bfd)->nlm_reloc_fixup_secs)
 
+/* This is used when writing out the external relocs. */
+
+struct reloc_and_sec
+{
+  arelent *rel;
+  asection *sec;
+};
+
 /* We store some function pointer in the backend structure.  This lets
    different NLM targets share most of the same code, while providing
    slightly different code where necessary.  */
 
 struct nlm_backend_data
 {
-  /* Machine architecture.  */
+  /* Signature for this backend.  */
+  char signature[NLM_SIGNATURE_SIZE];
+  /* Size of the fixed header.  */
+  bfd_size_type fixed_header_size;
+  /* Size of optional prefix for this backend.  Some backend may
+     require this to be a function, but so far a constant is OK.  This
+     is for a prefix which precedes the standard NLM fixed header.  */
+  bfd_size_type optional_prefix_size;
+  /* Architecture.  */
   enum bfd_architecture arch;
+  /* Machine.  */
+  long mach;
+  /* Some NLM formats have a prefix on the file.  If this function is
+     not NULL, it will be called by nlm_object_p.  It should return
+     true if this file could match this format, and it should leave
+     the BFD such that a bfd_read will pick up the fixed header.  */
+  boolean (*nlm_backend_object_p) PARAMS ((bfd *));
+  /* Write out the prefix.  This function may be NULL.  This must
+     write out the same number of bytes as is in the field
+     optional_prefix_size.  */
+  boolean (*nlm_write_prefix) PARAMS ((bfd *));
   /* Read a relocation fixup from abfd.  The reloc information is
      machine specific.  The second argument is the symbol if this is
      an import, or NULL if this is a reloc fixup.  This function
@@ -134,25 +161,69 @@ struct nlm_backend_data
      import symbol.  */
   boolean (*nlm_read_reloc) PARAMS ((bfd *, nlmNAME(symbol_type) *,
 				     asection **, arelent *));
-  /* Write a relocation fixup to abfd.  */
-  boolean (*nlm_write_reloc) PARAMS ((bfd *, asection *, arelent *));
   /* To make objcopy to an i386 NLM work, the i386 backend needs a
      chance to work over the relocs.  This is a bit icky.  */
   boolean (*nlm_mangle_relocs) PARAMS ((bfd *, asection *, PTR data,
 					bfd_vma offset,
 					bfd_size_type count));
+  /* Read an import record from abfd.  It would be nice if this
+     were in a machine-dependent format, but it doesn't seem to be. */
+  boolean (*nlm_read_import) PARAMS ((bfd *, nlmNAME(symbol_type) *));
+  /* Write an import record to abfd. */
+  boolean (*nlm_write_import) PARAMS ((bfd *, asection *, arelent *));
+  /* Set the section for a public symbol.  This may be NULL, in which
+     case a default method will be used.  */
+  boolean (*nlm_set_public_section) PARAMS ((bfd *, nlmNAME(symbol_type) *));
+  /* Get the offset to write out for a public symbol.  This may be
+     NULL, in which case a default method will be used.  */
+  bfd_vma (*nlm_get_public_offset) PARAMS ((bfd *, asymbol *));
+  /* Swap the fixed header in and out */
+  void (*nlm_swap_fhdr_in) PARAMS ((bfd *,
+				    PTR,
+				    Nlm_Internal_Fixed_Header *));
+  void (*nlm_swap_fhdr_out) PARAMS ((bfd *,
+				     struct nlm_internal_fixed_header *,
+				     PTR));
+  /* Write out an external reference.  */
+  boolean (*nlm_write_external) PARAMS ((bfd *, bfd_size_type,
+					 asymbol *,
+					 struct reloc_and_sec *));
 };
 
 #define nlm_backend(bfd) \
   ((struct nlm_backend_data *)((bfd) -> xvec -> backend_data))
+#define nlm_signature(bfd) \
+  (nlm_backend(bfd) ? nlm_backend(bfd) -> signature : "")
+#define nlm_fixed_header_size(bfd) \
+  (nlm_backend(bfd) ? nlm_backend(bfd) -> fixed_header_size : 0)
+#define nlm_optional_prefix_size(bfd) \
+  (nlm_backend(bfd) ? nlm_backend(bfd) -> optional_prefix_size : 0)
 #define nlm_architecture(bfd) \
   (nlm_backend(bfd) ? nlm_backend(bfd) -> arch : bfd_arch_unknown)
+#define nlm_machine(bfd) \
+  (nlm_backend(bfd) ? nlm_backend(bfd) -> mach : 0)
+#define nlm_backend_object_p_func(bfd) \
+  (nlm_backend(bfd) ? nlm_backend(bfd) -> nlm_backend_object_p : 0)
+#define nlm_write_prefix_func(bfd) \
+  (nlm_backend(bfd) ? nlm_backend(bfd) -> nlm_write_prefix : 0)
 #define nlm_read_reloc_func(bfd) \
   (nlm_backend(bfd) ? nlm_backend(bfd) -> nlm_read_reloc : 0)
-#define nlm_write_reloc_func(bfd) \
-  (nlm_backend(bfd) ? nlm_backend(bfd) -> nlm_write_reloc : 0)
 #define nlm_mangle_relocs_func(bfd) \
   (nlm_backend(bfd) ? nlm_backend(bfd) -> nlm_mangle_relocs : 0)
+#define nlm_read_import_func(bfd) \
+  (nlm_backend(bfd) ? nlm_backend(bfd) -> nlm_read_import : 0)
+#define nlm_write_import_func(bfd) \
+  (nlm_backend(bfd) ? nlm_backend(bfd) -> nlm_write_import : 0)
+#define nlm_set_public_section_func(bfd) \
+  (nlm_backend(bfd) ? nlm_backend(bfd) -> nlm_set_public_section : 0)
+#define nlm_get_public_offset_func(bfd) \
+  (nlm_backend(bfd) ? nlm_backend(bfd) -> nlm_get_public_offset : 0)
+#define nlm_swap_fixed_header_in_func(bfd) \
+  (nlm_backend(bfd) ? nlm_backend(bfd) -> nlm_swap_fhdr_in : 0)
+#define nlm_swap_fixed_header_out_func(bfd) \
+  (nlm_backend(bfd) ? nlm_backend(bfd) -> nlm_swap_fhdr_out : 0)
+#define nlm_write_external_func(bfd) \
+  (nlm_backend(bfd) ? nlm_backend(bfd) -> nlm_write_external : 0)
 
 /* The NLM code, data, and uninitialized sections have no names defined
    in the NLM, but bfd wants to give them names, so use the traditional

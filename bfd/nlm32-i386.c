@@ -22,14 +22,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libbfd.h"
 
 #define ARCH_SIZE 32
+
+#include "nlm/i386-ext.h"
+#define Nlm_External_Fixed_Header	Nlm32_i386_External_Fixed_Header
+
 #include "libnlm.h"
 
 static boolean nlm_i386_read_reloc
   PARAMS ((bfd *, nlmNAME(symbol_type) *, asection **, arelent *));
-static boolean nlm_i386_write_reloc
+static boolean nlm_i386_write_import
   PARAMS ((bfd *, asection *, arelent *));
 static boolean nlm_i386_mangle_relocs
   PARAMS ((bfd *, asection *, PTR, bfd_vma, bfd_size_type));
+static boolean nlm_i386_read_import
+  PARAMS ((bfd *, nlmNAME(symbol_type) *));
+static boolean nlm_i386_write_external
+  PARAMS ((bfd *, bfd_size_type, asymbol *, struct reloc_and_sec *));
 
 /* Adjust the reloc location by an absolute value.  */
 
@@ -146,7 +154,7 @@ nlm_i386_read_reloc (abfd, sym, secp, rel)
 /* Write a NetWare i386 reloc.  */
 
 static boolean
-nlm_i386_write_reloc (abfd, sec, rel)
+nlm_i386_write_import (abfd, sec, rel)
      bfd *abfd;
      asection *sec;
      arelent *rel;
@@ -165,7 +173,6 @@ nlm_i386_write_reloc (abfd, sec, rel)
       || rel->howto->size != 2
       || rel->howto->bitsize != 32
       || rel->howto->bitpos != 0
-      || ! rel->howto->partial_inplace
       || rel->howto->src_mask != 0xffffffff
       || rel->howto->dst_mask != 0xffffffff)
     {
@@ -264,7 +271,7 @@ nlm_i386_mangle_relocs (abfd, sec, data, offset, count)
       sym = *rel->sym_ptr_ptr;
 
       /* Note that no serious harm will ensue if we fail to change a
-	 reloc.  We will wind up failing in nlm_i386_write_reloc.  */
+	 reloc.  We will wind up failing in nlm_i386_write_import.  */
 
       /* Make sure this reloc is within the data we have.  We only 4
 	 byte relocs here, so we insist on having 4 bytes.  */
@@ -283,7 +290,7 @@ nlm_i386_mangle_relocs (abfd, sec, data, offset, count)
 	 that at this point the size of the data section is in the NLM
 	 header.  */
       if (((bfd_get_section_flags (abfd, bfd_get_section (sym))
-	    & (SEC_CODE | SEC_DATA)) == 0)
+	    & SEC_LOAD) == 0)
 	  && ((bfd_get_section_flags (abfd, bfd_get_section (sym))
 	       & SEC_ALLOC) != 0))
 	addend += nlm_fixed_header (abfd)->dataImageSize;
@@ -294,15 +301,14 @@ nlm_i386_mangle_relocs (abfd, sec, data, offset, count)
 	  && rel->howto->size == 2
 	  && rel->howto->bitsize == 32
 	  && rel->howto->bitpos == 0
-	  && rel->howto->partial_inplace
 	  && rel->howto->src_mask == 0xffffffff
 	  && rel->howto->dst_mask == 0xffffffff)
 	{
 	  bfd_vma val;
 
-	  val = bfd_get_32 (abfd, (char *) data + rel->address - offset);
+	  val = bfd_get_32 (abfd, (bfd_byte *) data + rel->address - offset);
 	  val += addend;
-	  bfd_put_32 (abfd, val, (char *) data + rel->address - offset);
+	  bfd_put_32 (abfd, val, (bfd_byte *) data + rel->address - offset);
 	  rel->addend = 0;
 	}
 
@@ -319,7 +325,6 @@ nlm_i386_mangle_relocs (abfd, sec, data, offset, count)
 	  && rel->howto->size == 2
 	  && rel->howto->bitsize == 32
 	  && rel->howto->bitpos == 0
-	  && rel->howto->partial_inplace
 	  && rel->howto->src_mask == 0xffffffff
 	  && rel->howto->dst_mask == 0xffffffff)
 	{
@@ -328,9 +333,9 @@ nlm_i386_mangle_relocs (abfd, sec, data, offset, count)
 	  /* When pcrel_offset is not set, it means that the negative
 	     of the address of the memory location is stored in the
 	     memory location.  We must add it back in.  */
-	  val = bfd_get_32 (abfd, (char *) data + rel->address - offset);
+	  val = bfd_get_32 (abfd, (bfd_byte *) data + rel->address - offset);
 	  val += rel->address;
-	  bfd_put_32 (abfd, val, (char *) data + rel->address - offset);
+	  bfd_put_32 (abfd, val, (bfd_byte *) data + rel->address - offset);
 
 	  rel->howto = &nlm_i386_pcrel_howto;
 	}
@@ -339,12 +344,117 @@ nlm_i386_mangle_relocs (abfd, sec, data, offset, count)
   return true;
 }
 
+/* Read a NetWare i386 import record */
+static boolean
+nlm_i386_read_import (abfd, sym)
+     bfd *abfd;
+     nlmNAME(symbol_type) *sym;
+{
+  struct nlm_relent *nlm_relocs;	/* relocation records for symbol */
+  bfd_size_type rcount;			/* number of relocs */
+  bfd_byte temp[NLM_TARGET_LONG_SIZE];	/* temporary 32-bit value */
+  unsigned char symlength;		/* length of symbol name */
+
+  if (bfd_read ((PTR) &symlength, sizeof (symlength), 1, abfd)
+      != sizeof (symlength))
+    {
+      bfd_error = system_call_error;
+      return (false);
+    }
+  sym -> symbol.the_bfd = abfd;
+  sym -> symbol.name = bfd_alloc (abfd, symlength + 1);
+  if (bfd_read ((PTR) sym -> symbol.name, symlength, 1, abfd)
+      != symlength)
+    {
+      bfd_error = system_call_error;
+      return (false);
+    }
+  sym -> symbol.flags = 0;
+  sym -> symbol.value = 0;
+  sym -> symbol.section = &bfd_und_section;
+  if (bfd_read ((PTR) temp, sizeof (temp), 1, abfd) != sizeof (temp))
+    {
+      bfd_error = system_call_error;
+      return (false);
+    }
+  rcount = bfd_h_get_32 (abfd, temp);
+  nlm_relocs = ((struct nlm_relent *)
+		bfd_alloc (abfd, rcount * sizeof (struct nlm_relent)));
+  sym -> relocs = nlm_relocs;
+  sym -> rcnt = 0;
+  while (sym -> rcnt < rcount)
+    {
+      asection *section;
+      
+      if (nlm_i386_read_reloc (abfd, sym, &section,
+			       &nlm_relocs -> reloc)
+	  == false)
+	return false;
+      nlm_relocs -> section = section;
+      nlm_relocs++;
+      sym -> rcnt++;
+    }
+  return true;
+}
+
+/* Write out an external reference.  */
+
+static boolean
+nlm_i386_write_external (abfd, count, sym, relocs)
+     bfd *abfd;
+     bfd_size_type count;
+     asymbol *sym;
+     struct reloc_and_sec *relocs;
+{
+  int i;
+  bfd_byte len;
+  unsigned char temp[NLM_TARGET_LONG_SIZE];
+
+  len = strlen (sym->name);
+  if ((bfd_write (&len, sizeof (bfd_byte), 1, abfd) != sizeof(bfd_byte))
+      || bfd_write (sym->name, len, 1, abfd) != len)
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  bfd_put_32 (abfd, count, temp);
+  if (bfd_write (temp, sizeof(temp), 1, abfd) != sizeof (temp))
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  for (i = 0; i < count; i++)
+    {
+      if (nlm_i386_write_import (abfd, relocs[i].sec,
+				 relocs[i].rel) == false)
+	return false;
+    }
+
+  return true;
+}
+
+#include "nlmswap.h"
+
 static const struct nlm_backend_data nlm32_i386_backend =
 {
+  "NetWare Loadable Module\032",
+  sizeof (Nlm32_i386_External_Fixed_Header),
+  0,	/* optional_prefix_size */
   bfd_arch_i386,
+  0,
+  0,	/* backend_object_p */
+  0,	/* write_prefix_func */
   nlm_i386_read_reloc,
-  nlm_i386_write_reloc,
-  nlm_i386_mangle_relocs
+  nlm_i386_mangle_relocs,
+  nlm_i386_read_import,
+  nlm_i386_write_import,
+  0,	/* set_public_section */
+  0,	/* get_public_offset */
+  nlm_swap_fixed_header_in,
+  nlm_swap_fixed_header_out,
+  nlm_i386_write_external,
 };
 
 #define TARGET_LITTLE_NAME		"nlm32-i386"
