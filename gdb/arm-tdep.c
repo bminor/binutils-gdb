@@ -955,21 +955,19 @@ arm_find_callers_reg (struct frame_info *fi, int regnum)
    DEPRECATED_INIT_FRAME_PC will be called for the new frame.  For
    ARM, we save the frame size when we initialize the frame_info.  */
 
-static CORE_ADDR
-arm_frame_chain (struct frame_info *fi)
+CORE_ADDR
+arm_minimal_frame_chain (struct frame_info *next_frame, struct arm_prologue_cache *cache)
 {
   CORE_ADDR caller_pc;
-  int framereg = arm_get_cache (fi)->framereg;
+  int framereg = arm_get_cache (next_frame)->framereg;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), 0, 0))
-    /* A generic call dummy's frame is the same as caller's.  */
-    return get_frame_base (fi);
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (next_frame), 0, 0))
+    return get_frame_base (next_frame);
 
-  if (get_frame_pc (fi) < LOWEST_PC)
+  if (get_frame_pc (next_frame) < LOWEST_PC)
     return 0;
 
-  /* If the caller is the startup code, we're at the end of the chain.  */
-  caller_pc = DEPRECATED_FRAME_SAVED_PC (fi);
+  caller_pc = cache->unwound_pc;
 
   /* If the caller is Thumb and the caller is ARM, or vice versa,
      the frame register of the caller is different from ours.
@@ -977,7 +975,12 @@ arm_frame_chain (struct frame_info *fi)
      frame register number.  */
   /* XXX Fixme, we should try to do this without creating a temporary
      cache!  */
-  if (arm_pc_is_thumb (caller_pc) != arm_pc_is_thumb (get_frame_pc (fi)))
+  /* NOTE drow/2003-06-26: I'm quite suspicious of this code... what is it
+     really doing?  I have the feeling that it's trying to handle the case
+     where my framereg is ARM_FP_REGNUM, and my (Thumb) caller's framereg is
+     THUMB_FP_REGNUM, and switching between the two.  But the unwinder should
+     be taking care of that.  */
+  if (arm_pc_is_thumb (caller_pc) != arm_pc_is_thumb (get_frame_pc (next_frame)))
     {
       struct arm_prologue_cache *cache
 	= xcalloc (1, sizeof (struct arm_prologue_cache)
@@ -997,52 +1000,45 @@ arm_frame_chain (struct frame_info *fi)
   /* If the caller used a frame register, return its value.
      Otherwise, return the caller's stack pointer.  */
   if (framereg == ARM_FP_REGNUM || framereg == THUMB_FP_REGNUM)
-    return arm_find_callers_reg (fi, framereg);
+    return arm_find_callers_reg (next_frame, framereg);
   else
-    return get_frame_base (fi) + arm_get_cache (fi)->framesize;
+    /* FIXME drow/2003-06-26: The next frame is an opaque thing at this point,
+       we should only be using frame methods on it.  What if it's a dummy
+       frame, calling a frameless function (framereg == ARM_SP_REGNUM)?  Test
+       it.  */
+    return get_frame_base (next_frame) + arm_get_cache (next_frame)->framesize;
 }
 
 /* This function actually figures out the frame address for a given pc
    and sp.  This is tricky because we sometimes don't use an explicit
    frame pointer, and the previous stack pointer isn't necessarily
    recorded on the stack.  The only reliable way to get this info is
-   to examine the prologue.  FROMLEAF is a little confusing, it means
-   this is the next frame up the chain AFTER a frameless function.  If
-   this is true, then the frame value for this frame is still in the
-   fp register.  */
+   to examine the prologue.  */
 
 static void
-arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
+arm_minimal_frame_info (struct frame_info *next_frame,
+			struct arm_prologue_cache *cache)
 {
   int reg;
   CORE_ADDR sp;
 
-  if (get_frame_saved_regs (fi) == NULL)
-    frame_saved_regs_zalloc (fi);
-
-  frame_extra_info_zalloc (fi, (sizeof (struct arm_prologue_cache)
-				+ ((NUM_REGS + NUM_PSEUDO_REGS - 1)
-				   * sizeof (CORE_ADDR))));
-
-  if (get_next_frame (fi))
-    deprecated_update_frame_pc_hack (fi, DEPRECATED_FRAME_SAVED_PC (get_next_frame (fi)));
-
-  memset (get_frame_saved_regs (fi), '\000', sizeof get_frame_saved_regs (fi));
+  memset (cache->saved_regs, '\000', sizeof (CORE_ADDR) * (NUM_REGS + NUM_PSEUDO_REGS));
 
   /* Compute stack pointer for this frame.  We use this value for both
      the sigtramp and call dummy cases.  */
-  if (!get_next_frame (fi))
-    sp = read_sp();
-  else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (get_next_frame (fi)), 0, 0))
+
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (next_frame), 0, 0))
     /* For generic dummy frames, pull the value direct from the frame.
        Having an unwind function to do this would be nice.  */
-    sp = deprecated_read_register_dummy (get_frame_pc (get_next_frame (fi)),
-					 get_frame_base (get_next_frame (fi)),
+    sp = deprecated_read_register_dummy (get_frame_pc (next_frame),
+					 get_frame_base (next_frame),
 					 ARM_SP_REGNUM);
+  else if (arm_get_cache (next_frame))
+    sp = (get_frame_base (next_frame)
+	  - arm_get_cache (next_frame)->frameoffset
+	  + arm_get_cache (next_frame)->framesize);
   else
-    sp = (get_frame_base (get_next_frame (fi))
-	  - arm_get_cache (get_next_frame (fi))->frameoffset
-	  + arm_get_cache (get_next_frame (fi))->framesize);
+    sp = read_sp ();  /* FIXME remove case */
 
   /* Determine whether or not we're in a sigtramp frame.
      Unfortunately, it isn't sufficient to test (get_frame_type (fi)
@@ -1061,57 +1057,106 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
      frame.c:get_prev_frame() is modified to set the frame's type
      before calling functions like this.  */
 
+  /* NOTE drow/2003-06-26: This will move to a predicate for a different unwinder shortly.  */
+
   if (SIGCONTEXT_REGISTER_ADDRESS_P () 
-      && ((get_frame_type (fi) == SIGTRAMP_FRAME) || PC_IN_SIGTRAMP (get_frame_pc (fi), (char *)0)))
+      && PC_IN_SIGTRAMP (cache->unwound_pc, (char *)0))
     {
       for (reg = 0; reg < NUM_REGS; reg++)
-	get_frame_saved_regs (fi)[reg] = SIGCONTEXT_REGISTER_ADDRESS (sp, get_frame_pc (fi), reg);
+	cache->saved_regs[reg] = SIGCONTEXT_REGISTER_ADDRESS (sp, cache->unwound_pc, reg);
 
       /* FIXME: What about thumb mode?  */
-      arm_get_cache (fi)->framereg = ARM_SP_REGNUM;
-      deprecated_update_frame_base_hack (fi, read_memory_integer (get_frame_saved_regs (fi)[arm_get_cache (fi)->framereg], REGISTER_RAW_SIZE (arm_get_cache (fi)->framereg)));
-      arm_get_cache (fi)->framesize = 0;
-      arm_get_cache (fi)->frameoffset = 0;
-
+      cache->framereg = ARM_SP_REGNUM;
+      cache->unwound_sp = read_memory_integer (cache->saved_regs[cache->framereg], REGISTER_RAW_SIZE (cache->framereg));
+      cache->framesize = 0;
+      cache->frameoffset = 0;
     }
   else
     {
-      arm_get_cache (fi)->unwound_pc = get_frame_pc (fi);
-      arm_get_cache (fi)->unwound_sp = get_frame_base (fi);
+      /* At this point, the unwound sp is just the result of frame_chain.
+	 Then it gets changed below.  */
 
-      arm_scan_prologue (arm_get_cache (fi));
+      arm_scan_prologue (cache);
 
-      if (!get_next_frame (fi))
+      if (!next_frame)
 	/* This is the innermost frame?  */
-	deprecated_update_frame_base_hack (fi, read_register (arm_get_cache (fi)->framereg));
-      else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (get_next_frame (fi)), 0, 0))
+	cache->unwound_sp = read_register (cache->framereg);
+      else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (next_frame), 0, 0))
 	/* Next inner most frame is a dummy, just grab its frame.
            Dummy frames always have the same FP as their caller.  */
-	deprecated_update_frame_base_hack (fi, get_frame_base (get_next_frame (fi)));
-      else if (arm_get_cache (fi)->framereg == ARM_FP_REGNUM
-	       || arm_get_cache (fi)->framereg == THUMB_FP_REGNUM)
+	cache->unwound_sp = get_frame_base (next_frame);
+      else if (cache->framereg == ARM_FP_REGNUM
+	       || cache->framereg == THUMB_FP_REGNUM)
 	{
 	  /* not the innermost frame */
 	  /* If we have an FP, the callee saved it.  */
-	  if (get_frame_saved_regs (get_next_frame (fi))[arm_get_cache (fi)->framereg] != 0)
-	    deprecated_update_frame_base_hack (fi, read_memory_integer (get_frame_saved_regs (get_next_frame (fi))[arm_get_cache (fi)->framereg], 4));
-	  else if (fromleaf)
+	  if (get_frame_saved_regs (next_frame) /**/ && get_frame_saved_regs (next_frame)[cache->framereg] != 0)
+	    cache->unwound_sp = read_memory_integer (get_frame_saved_regs (next_frame)[cache->framereg], 4);
+	  else if (frame_relative_level (next_frame) == 0
+		   && FRAMELESS_FUNCTION_INVOCATION (next_frame))
 	    /* If we were called by a frameless fn.  then our frame is
 	       still in the frame pointer register on the board...  */
-	    deprecated_update_frame_base_hack (fi, deprecated_read_fp ());
+	    cache->unwound_sp = deprecated_read_fp ();
 	}
 
       /* Calculate actual addresses of saved registers using offsets
          determined by arm_scan_prologue.  */
       for (reg = 0; reg < NUM_REGS; reg++)
-	if (arm_get_cache (fi)->saved_regs[reg] != 0)
-	  get_frame_saved_regs (fi)[reg] = (arm_get_cache (fi)->saved_regs[reg]
-					    + get_frame_base (fi)
-					    + arm_get_cache (fi)->framesize
-					    - arm_get_cache (fi)->frameoffset);
+	if (cache->saved_regs[reg] != 0)
+	  cache->saved_regs[reg] = (cache->saved_regs[reg]
+				    + cache->unwound_sp
+				    + cache->framesize
+				    - cache->frameoffset);
     }
 }
 
+static struct arm_prologue_cache *
+arm_make_prologue_cache (struct frame_info *next_frame)
+{
+  struct arm_prologue_cache *cache;
+
+  cache = frame_obstack_zalloc (sizeof (struct arm_prologue_cache)
+				+ sizeof (CORE_ADDR) * (NUM_REGS + NUM_PSEUDO_REGS - 1));
+
+  cache->unwound_pc = frame_pc_unwind (next_frame);
+  if (frame_relative_level (next_frame) < 0)
+    cache->unwound_sp = deprecated_read_fp ();
+  else
+    cache->unwound_sp = arm_minimal_frame_chain (next_frame, cache);
+  arm_minimal_frame_info (next_frame, cache);
+
+  return cache;
+}
+
+static CORE_ADDR
+arm_frame_chain (struct frame_info *next_frame)
+{
+  struct arm_prologue_cache *cache;
+
+  cache = arm_make_prologue_cache (next_frame);
+  return cache->unwound_sp;
+}
+
+static void
+arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
+{
+  struct arm_prologue_cache *cache;
+
+  cache = arm_make_prologue_cache (deprecated_get_next_frame_hack (fi));
+
+  if (get_frame_saved_regs (fi) == NULL)
+    frame_saved_regs_zalloc (fi);
+
+  frame_extra_info_zalloc (fi, (sizeof (struct arm_prologue_cache)
+				+ ((NUM_REGS + NUM_PSEUDO_REGS - 1)
+				   * sizeof (CORE_ADDR))));
+
+  memcpy (get_frame_extra_info (fi), cache,  (sizeof (struct arm_prologue_cache)
+					      + ((NUM_REGS + NUM_PSEUDO_REGS - 1)
+						 * sizeof (CORE_ADDR))));
+  memcpy (get_frame_saved_regs (fi), cache->saved_regs,
+	  (NUM_REGS + NUM_PSEUDO_REGS - 1) * sizeof (CORE_ADDR));
+}
 
 /* Find the caller of this frame.  We do this by seeing if ARM_LR_REGNUM
    is saved in the stack anywhere, otherwise we get it from the

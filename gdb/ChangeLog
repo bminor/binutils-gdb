@@ -1,5 +1,19 @@
 2003-09-03  Daniel Jacobowitz  <drow@mvista.com>
 
+	* arm-tdep.c (arm_minimal_frame_chain): Renamed from
+	arm_frame_chain.  Take NEXT_FRAME and CACHE arguments.
+	Use the cache instead of DEPRECATED_FRAME_SAVED_PC.
+	(arm_minimal_frame_info): Renamed from arm_init_extra_frame_info.
+	Take NEXT_FRAME and CACHE arguments.  Call
+	FRAMELESS_FUNCTION_INVOCATION instead of checking FROMLEAF argument.
+	Set unwound_pc in CACHE instead of modifying the frame argument.
+	Don't bother checking the frame type when looking for sigtramp
+	frames.
+	(arm_make_prologue_cache, arm_frame_chain)
+	(arm_init_extra_frame_info): New functions.
+
+2003-09-03  Daniel Jacobowitz  <drow@mvista.com>
+
 	* arm-tdep.c (arm_get_cache): Define.
 	(struct arm_prologue_cache): Renamed from frame_extra_info.  Add
 	unwound_sp, unwound_pc, and saved_regs.
