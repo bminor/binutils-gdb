@@ -1,3 +1,7 @@
+2002-10-21  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* objdump.c (dump_data): Correct addr_offset for opb != 1.
+
 2002-10-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* bucomm.c (list_supported_targets): Use bfd_target_list.
@@ -20,7 +24,7 @@
 	* readelf.c (display_debug_info): Ignore empty .rela.debug_info
 	sections.  Allow relocations against the absolute symbol.  Don't
 	use the value in compunit.cu_abbrev_offset if we found a RELA
-	relocation.   
+	relocation.
 
 2002-10-07  Gordon Chaffee <chaffee@netvmg.com>
 
