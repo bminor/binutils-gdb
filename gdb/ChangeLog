@@ -1,5 +1,10 @@
 2003-11-09  Andrew Cagney  <cagney@redhat.com>
 
+	* config/s390/s390.mh (XM_FILE, XM_CLIBS): Delete macros.
+	* config/s390/nm-linux.h (KERNEL_U_ADDR): Define.
+	* config/s390/xm-linux.h: Delete file.
+	* config/m88k/xm-delta88v4.h: Delete stray.
+
 	* Makefile.in (arch-utils.o): Update dependencies.
 	* arch-utils.c: Include "osabi.h".
 	(gdbarch_info_fill): New function.

@@ -27,6 +27,10 @@
 
 #include "config/nm-linux.h"
 
+/* This is the amount to subtract from u.u_ar0
+   to get the offset in the core file of the register values.  */
+#define KERNEL_U_ADDR 0x0
+
 #define REGISTER_U_ADDR(addr, blockend, regno) \
 	(addr) = s390_register_u_addr((blockend),(regno));
 extern int s390_register_u_addr (int, int);
