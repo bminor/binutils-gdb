@@ -1059,6 +1059,9 @@ case "${targ}" in
     targ_defvec=bfd_elf64_s390_vec
     targ_selvecs=bfd_elf32_s390_vec
     ;;
+  s390x-*-tpf*)
+    targ_defvec=bfd_elf64_s390_vec
+    ;;
 #endif
 
 #ifdef BFD64

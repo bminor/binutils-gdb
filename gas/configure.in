@@ -462,6 +462,7 @@ changequote([,])dnl
 
       s390x-*-linux-gnu*)		fmt=elf em=linux ;;
       s390-*-linux-gnu*)		fmt=elf em=linux ;;
+      s390-*-tpf*)			fmt=elf ;;
 
       sh*-*-linux*)			fmt=elf em=linux
 	    case ${cpu} in

@@ -1,3 +1,7 @@
+2004-12-14  P.J. Darcy  <darcypj@us.ibm.com>
+
+	* config.bfd: Add s390x-ibm-tpf support.
+
 2004-12-14  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* elf32-crx.c (elf32_crx_relax_delete_bytes): Add 'struct bfd_link_info *' 
