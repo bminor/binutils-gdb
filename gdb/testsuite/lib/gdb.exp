@@ -965,7 +965,7 @@ proc default_gdb_init { args } {
 }
 
 proc gdb_init { args } {
-    return [default_gdb_init];
+    return [eval default_gdb_init $args];
 }
 
 proc gdb_finish { } {
