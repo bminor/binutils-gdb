@@ -58,7 +58,7 @@ static int register_name PARAMS ((expressionS *expressionP));
 static int postfix PARAMS ((char *p));
 static bfd_reloc_code_real_type get_reloc PARAMS ((struct d10v_operand *op));
 static int get_operands PARAMS ((expressionS exp[]));
-static unsigned long build_insn PARAMS ((struct d10v_opcode *opcode, expressionS *opers));
+static unsigned long build_insn PARAMS ((struct d10v_opcode *opcode, expressionS *opers, unsigned long insn));
 static void write_long PARAMS ((struct d10v_opcode *opcode, unsigned long insn, Fixups *fx));
 static void write_1_short PARAMS ((struct d10v_opcode *opcode, unsigned long insn, Fixups *fx));
 static int write_2_short PARAMS ((struct d10v_opcode *opcode1, unsigned long insn1, 
@@ -143,6 +143,35 @@ register_name (expressionP)
     *(p-1) = c;
   return 0;
 }
+
+
+static int
+check_range (num, bits, sign)
+     unsigned long num;
+     int bits;
+     int sign;
+{
+  long min, max;
+  int retval=0;
+
+  if (sign)
+    {
+      max = (1 << (bits - 1)) - 1; 
+      min = - (1 << (bits - 1));  
+      if (((long)num > max) || ((long)num < min))
+	retval = 1;
+    }
+  else
+    {
+      max = (1 << bits) - 1;
+      min = 0;
+      if ((num > max) || (num < min))
+	retval = 1;
+    }
+
+  return retval;
+}
+
 
 void
 md_show_usage (stream)
@@ -372,6 +401,10 @@ d10v_insert_operand (insn, op_type, value, left)
 
   /* truncate to the proper number of bits */
   /* FIXME: overflow checking here? */
+
+  if (check_range (value, bits, d10v_operands[op_type].flags & OPERAND_SIGNED))
+    as_bad("operand out of range: %d",value);
+
   value &= 0x7FFFFFFF >> (31 - bits);
   insn |= (value << shift);
 
@@ -383,15 +416,23 @@ d10v_insert_operand (insn, op_type, value, left)
    and the array of operand expressions and returns the instruction */
 
 static unsigned long
-build_insn (opcode, opers) 
+build_insn (opcode, opers, insn) 
      struct d10v_opcode *opcode;
      expressionS *opers;
+     unsigned long insn;
 {
-  int i, bits, shift, flags;
-  unsigned long insn;
+  int i, bits, shift, flags, format;
   unsigned int number;
-  insn = opcode->opcode;
-
+  
+  /* the insn argument is only used for the DIVS kludge */
+  if (insn)
+    format = LONG_R;
+  else
+    {
+      insn = opcode->opcode;
+      format = opcode->format;
+    }
+  
   for (i=0;opcode->operands[i];i++) 
     {
       flags = d10v_operands[opcode->operands[i]].flags;
@@ -402,7 +443,7 @@ build_insn (opcode, opers)
       if (flags & OPERAND_REG) 
 	{
 	  number &= REGISTER_MASK;
-	  if (opcode->format == LONG_L)
+	  if (format == LONG_L)
 	    shift += 15;
 	}
 
@@ -427,10 +468,18 @@ build_insn (opcode, opers)
 	}
 
       /* truncate to the proper number of bits */
-      /* FIXME: overflow checking here? */
+      if ((opers[i].X_op == O_constant) && check_range (number, bits, flags & OPERAND_SIGNED))
+	as_bad("operand out of range: %d",number);
       number &= 0x7FFFFFFF >> (31 - bits);
       insn = insn | (number << shift);
     }
+
+  /* kludge: for DIVS, we need to put the operands in twice */
+  /* on the second pass, format is changed to LONG_R to force */
+  /* the second set of operands to not be shifted over 15 */
+  if ((opcode->opcode == OPCODE_DIVS) && (format==LONG_L))
+    insn = build_insn (opcode, opers, insn);
+      
   return insn;
 }
 
@@ -480,7 +529,14 @@ write_1_short (opcode, insn, fx)
   char *f = frag_more(4);
   int i;
 
-  insn |= FM00 | (NOP << 15);
+  /* the other container needs to be NOP */
+  /* according to 4.3.1: for FM=00, sub-instructions performed only
+     by IU cannot be encoded in L-container. */
+  if (opcode->unit == IU)
+    insn |= FM00 | (NOP << 15);		/* right container */
+  else
+    insn = FM00 | (insn << 15) | NOP;	/* left container */
+
   /*  printf("INSN: %08x\n",insn);  */
   number_to_chars_bigendian (f, insn, 4);
   for (i=0; i < fx->fc; i++) 
@@ -720,7 +776,7 @@ do_assemble (str, opcode)
   *opcode = (struct d10v_opcode *)hash_find (d10v_hash, name);
   if (*opcode == NULL)
     {
-      as_bad ("unknown opcode");
+      as_fatal ("unknown opcode: %s",name);
       return;
     }
 
@@ -730,56 +786,94 @@ do_assemble (str, opcode)
   /* get all the operands and save them as expressions */
   numops = get_operands (myops);
 
-  /* now search the opcode table table for one with operands */
-  /* that match what we've got */
-  do
+  /* now see if the operand is a fake.  If so, find the correct size */
+  /* instruction, if possible */
+  match = 0;
+  if ((*opcode)->format == OPCODE_FAKE)
     {
-      match = 1;
-      for (i = 0; (*opcode)->operands[i]; i++) 
+      int opnum = (*opcode)->operands[0];
+      if (myops[opnum].X_op == O_constant)
 	{
-	  int flags = d10v_operands[(*opcode)->operands[i]].flags;
-
-	  if (myops[i].X_op==0) 
+	  next_opcode=(*opcode)+1;
+	  for (i=0; (*opcode)->operands[i+1]; i++)
 	    {
-	      match=0;
-	      break;
+	      int bits = d10v_operands[next_opcode->operands[opnum]].bits;
+	      int flags = d10v_operands[next_opcode->operands[opnum]].flags;
+	      if (!check_range (myops[opnum].X_add_number, bits, flags & OPERAND_SIGNED))
+		{
+		  match = 1;
+		  break;
+		}
+	      next_opcode++;
 	    }
-
-	  if (flags & OPERAND_REG) 
+	}
+      else
+	{
+	  /* not a constant, so use a long instruction */
+	  next_opcode = (*opcode)+2;
+	  match = 1;
+	}
+      if (match)
+	*opcode = next_opcode;
+      else
+	as_fatal ("value out of range");
+    }
+  else
+    {
+      /* now search the opcode table table for one with operands */
+      /* that match what we've got */
+      while (!match)
+	{
+	  match = 1;
+	  for (i = 0; (*opcode)->operands[i]; i++) 
 	    {
-	      if ((myops[i].X_op != O_register) ||
-		  ((flags & OPERAND_ACC) != (myops[i].X_add_number & OPERAND_ACC)) ||
-		  ((flags & OPERAND_FLAG) != (myops[i].X_add_number & OPERAND_FLAG)) ||
-		  ((flags & OPERAND_CONTROL) != (myops[i].X_add_number & OPERAND_CONTROL)))
+	      int flags = d10v_operands[(*opcode)->operands[i]].flags;
+	      int X_op = myops[i].X_op;
+	      int num = myops[i].X_add_number;
+	      
+	      if (X_op==0) 
 		{
 		  match=0;
 		  break;
-		}	  
+		}
+	      
+	      if (flags & OPERAND_REG) 
+		{
+		  if ((X_op != O_register) ||
+		      ((flags & OPERAND_ACC) != (num & OPERAND_ACC)) ||
+		      ((flags & OPERAND_FLAG) != (num & OPERAND_FLAG)) ||
+		      ((flags & OPERAND_CONTROL) != (num & OPERAND_CONTROL)))
+		    {
+		      match=0;
+		      break;
+		    }	  
+		}
+	      
+	      if (((flags & OPERAND_MINUS) && ((X_op != O_absent) || (num != OPERAND_MINUS))) ||
+		  ((flags & OPERAND_PLUS) && ((X_op != O_absent) || (num != OPERAND_PLUS))) ||
+		  ((flags & OPERAND_ATMINUS) && ((X_op != O_absent) || (num != OPERAND_ATMINUS))) ||
+		  ((flags & OPERAND_ATPAR) && ((X_op != O_absent) || (num != OPERAND_ATPAR))) ||
+		  ((flags & OPERAND_ATSIGN) && ((X_op != O_absent) || (num != OPERAND_ATSIGN)))) 
+		{
+		  match=0;
+		  break;
+		}
+	      
 	    }
-
-	  if (((flags & OPERAND_MINUS) && ((myops[i].X_op != O_absent) || (myops[i].X_add_number != OPERAND_MINUS))) ||
-	      ((flags & OPERAND_PLUS) && ((myops[i].X_op != O_absent) || (myops[i].X_add_number != OPERAND_PLUS))) ||
-	      ((flags & OPERAND_ATMINUS) && ((myops[i].X_op != O_absent) || (myops[i].X_add_number != OPERAND_ATMINUS))) ||
-	      ((flags & OPERAND_ATPAR) && ((myops[i].X_op != O_absent) || (myops[i].X_add_number != OPERAND_ATPAR))) ||
-	      ((flags & OPERAND_ATSIGN) && ((myops[i].X_op != O_absent) || (myops[i].X_add_number != OPERAND_ATSIGN)))) 
-	    {
-	      match=0;
-	      break;
-	    }
+	  
+	  /* we're only done if the operands matched AND there
+	     are no more to check */
+	  if (match && myops[i].X_op==0) 
+	    break;
+	  
+	  next_opcode = (*opcode)+1;
+	  if (next_opcode->opcode == 0) 
+	    break;
+	  if (strcmp(next_opcode->name, (*opcode)->name))
+	    break;
+	  (*opcode) = next_opcode;
 	}
-
-      /* we're only done if the operands matched AND there
-	 are no more to check */
-      if (match && myops[i].X_op==0) 
-	break;
-
-      next_opcode = (*opcode)+1;
-      if (next_opcode->opcode == 0) 
-	break;
-      if (strcmp(next_opcode->name, (*opcode)->name))
-	  break;
-      (*opcode) = next_opcode;
-    } while (!match);
+    }
 
   if (!match)  
     {
@@ -812,8 +906,8 @@ do_assemble (str, opcode)
 
   /* at this point, we have "opcode" pointing to the opcode entry in the
      d10v opcode table, with myops filled out with the operands. */
-  insn = build_insn ((*opcode), myops); 
-  /*  printf("sub-insn = %lx\n",insn); */
+  insn = build_insn ((*opcode), myops, 0); 
+  /* printf("sub-insn = %lx\n",insn); */
 
   return (insn);
 }
@@ -947,12 +1041,13 @@ md_apply_fix3 (fixp, valuep, seg)
    instructions to see if it can package them with the next instruction, there may
    be a short instruction that still needs written.  */
 int
-d10v_cleanup()
+d10v_cleanup (done)
+     int done;
 {
   segT seg;
   subsegT subseg;
 
-  if (prev_opcode) 
+  if ( prev_opcode && (done  || (now_seg == prev_seg) && (now_subseg == prev_subseg)))
     {
       seg = now_seg;
       subseg = now_subseg;
