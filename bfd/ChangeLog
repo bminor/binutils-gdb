@@ -1,3 +1,16 @@
+1998-07-21  Ulrich Drepper  <drepper@cygnus.com>
+
+	* elf32-mips.c (reloc_type): Temporarily disable definition of
+	standard relocation since they are now defined in elf/mips.h.
+
+Tue Jul 21 09:47:00 1998  Catherine Moore  <clm@cygnus.com>
+
+        * elf-m10200.c (mn10200_elf_final_link_relocate):
+        Modify range test for case R_MN10200_8.
+
+        * elf-m10300.c (mn10300_elf_final_link_relocate):
+        Modify range test for case R_MN10300_8.
+
 Mon Jul 20 18:50:54 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elf-bfd.h (struct elf_backend_data): Add got_ & plt_header_size.
@@ -226,7 +239,7 @@ Thu Jun 25 18:31:41 1998  Richard Henderson  <rth@cygnus.com>
 	* elfxx-target.h: Add and default gc hooks.
 
 	* elf-bfd.h (struct elf_link_hash_entry): Swap got_offset/plt_offset
-	for unions. 
+	for unions.
 	(struct elf_obj_tdata): Likewise for local_got_offsets.
 	* elf.c, elf-i386.c, elf32-m68k.c, elf32-mips.c: Update all uses.
 	* elf32-ppc.c, elf32-sparc.c, elf64-alpha.c: Likewise.
@@ -280,7 +293,7 @@ end-sanitize-am33
 Thu Jun 25 18:31:08 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-v850.c (v850_elf_perform_relocation): Fix HI16_S
-	relocation. 
+	relocation.
 
 Wed Jun 24 17:17:57 1998  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -342,7 +355,7 @@ Sat Jun  6 00:31:21 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-m32r.c: Add prototyps for static functions.
 
-	* coff-arm.c: Add prototypes for static functions. 
+	* coff-arm.c: Add prototypes for static functions.
 
 Fri Jun  5 17:21:51 1998  Nick Clifton  <nickc@cygnus.com>
 
@@ -455,7 +468,7 @@ Tue May 26 19:37:47 1998  Stan Cox  <scox@equinox.cygnus.com>
 Thu May 21 16:59:28 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* peicode.h (add_data_entry): Fix precedence of operators in if ()
-	statement. 
+	statement.
 
 Tue May 19 18:41:19 1998  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -622,7 +635,7 @@ Sat Apr 25 18:29:07 1998  Richard Henderson  <rth@cygnus.com>
 	* elf64-alpha.c (struct alpha_relax_info): Add tsec & elfsym members.
 	(elf64_alpha_relax_section): Fill them in.
 	(elf64_alpha_relax_opt_call): Implement more than a stub.
-	(elf64_alpha_add_symbol_hook): Don't set SEC_LOAD or default 
+	(elf64_alpha_add_symbol_hook): Don't set SEC_LOAD or default
 	alignment on .scommon.
 	(elf64_alpha_merge_gots): Merge use counts as well.
 
@@ -637,7 +650,7 @@ Fri Apr 24 09:16:00 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-v850.c (v850_elf_print_private_bfd_data): Add
 	internationalisation of printed information.
-	
+
 	* coff-arm.c (coff_arm_print_private_bfd_data): Add
 	internationalisation of printed information.
 
@@ -705,11 +718,11 @@ Tue Apr 21 10:00:12 1998  Nick Clifton  <nickc@cygnus.com>
 	* cofflink.c: Pass extra parameter to
 	bfd_coff_link_output_has_begun function.
 	* bfd-in.h: Add prototypes for exported ARM interworking
-	functions. 
+	functions.
 	* peicode.h: ARM specific code reorganised to conform to BFD
-	coding conventions. 
+	coding conventions.
 	* coffcode.h: ARM specific code reorganised to conform to BFD
-	coding conventions. 
+	coding conventions.
 	* coff-arm.c: Code reorganised to conform to the BFD coding
 	conventions.  Global variables have been moved into an ARM
 	specific hash table structure and a new function:
@@ -728,7 +741,7 @@ Tue Apr 21 00:11:51 1998  Richard Henderson  <rth@cygnus.com>
 Sat Apr 18 01:21:04 1998  Stan Cox  <scox@cygnus.com>
 
 	* config.bfd: Added sparc86x support.
-	
+
 Fri Apr 17 22:29:04 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-mips.c (mips_elf_relocate_section): Do not complain about
@@ -736,7 +749,7 @@ Fri Apr 17 22:29:04 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 Thu Apr 16 13:49:00 1998  Richard Henderson  <rth@cygnus.com>
 
-	* elf64-alpha.c (elf64_alpha_do_reloc_gpdisp): Do all gpdisp 
+	* elf64-alpha.c (elf64_alpha_do_reloc_gpdisp): Do all gpdisp
 	comparisons signed.
 
 Thu Apr 16 11:43:33 1998  Ian Lance Taylor  <ian@cygnus.com>
@@ -1015,11 +1028,11 @@ Thu Mar 26 10:13:41 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* peicode.h: Chain together calls to
 	coff_bfd_copy_private_bfd_data and
-	coff_bfd_print_private_bfd_data. 
+	coff_bfd_print_private_bfd_data.
 
 	* coff-arm.c: Add prototypes for
 	coff_arm_bfd_print_private_bfd_data and
-	coff_arm_bfd_copy_private_bfd_data. 
+	coff_arm_bfd_copy_private_bfd_data.
 
 Wed Mar 25 15:45:55 1998  Nick Clifton  <nickc@cygnus.com>
 
