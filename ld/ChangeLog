@@ -1,3 +1,9 @@
+Wed Jun 29 16:50:00 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* lexsup.c (parse_args): Accept -Bstatic and -Bdynamic.  Do not
+	accept plain -B.
+	* ld.texinfo: -Bstatic is not ignored.
+
 Tue Jun 28 12:13:34 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* ldlex.l: Recognize \r the same as \n.
