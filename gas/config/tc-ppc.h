@@ -33,8 +33,15 @@ extern int target_big_endian;
 
 /* The target BFD format.  */
 #ifdef OBJ_COFF
+#ifdef TE_PE
+#define TARGET_FORMAT (target_big_endian) ? "pe-powerpc" : "pe-powerpcle"
+#elif defined(PPC)
+#define TARGET_FORMAT (target_big_endian) ? "coff-powerpc" : "coff-powerpcle"
+#else
 #define TARGET_FORMAT "aixcoff-rs6000"
 #endif
+#endif
+
 #ifdef OBJ_ELF
 #define TARGET_FORMAT (target_big_endian) ? "elf32-powerpc" : "elf32-powerpcle"
 #endif
