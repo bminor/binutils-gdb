@@ -701,11 +701,11 @@ store_inferior_registers (int regno)
 }
 
 
-static long
+static unsigned long
 i386_linux_dr_get (int regnum)
 {
   int tid;
-  long value;
+  unsigned long value;
 
   /* FIXME: kettenis/2001-01-29: It's not clear what we should do with
      multi-threaded processes here.  For now, pretend there is just
@@ -731,7 +731,7 @@ i386_linux_dr_get (int regnum)
 }
 
 static void
-i386_linux_dr_set (int regnum, long value)
+i386_linux_dr_set (int regnum, unsigned long value)
 {
   int tid;
 
@@ -748,7 +748,7 @@ i386_linux_dr_set (int regnum, long value)
 }
 
 void
-i386_linux_dr_set_control (long control)
+i386_linux_dr_set_control (unsigned long control)
 {
   i386_linux_dr_set (DR_CONTROL, control);
 }
@@ -769,7 +769,7 @@ i386_linux_dr_reset_addr (int regnum)
   i386_linux_dr_set (DR_FIRSTADDR + regnum, 0L);
 }
 
-long
+unsigned long
 i386_linux_dr_get_status (void)
 {
   return i386_linux_dr_get (DR_STATUS);
@@ -916,7 +916,7 @@ child_resume (int pid, int step, enum target_signal signal)
 	      CORE_ADDR sp = read_register (SP_REGNUM);
 	      CORE_ADDR addr = sp;
 	      unsigned long int eflags;
-	      
+
 	      if (syscall == SYS_rt_sigreturn)
 		addr = read_memory_integer (sp + 8, 4) + 20;
 

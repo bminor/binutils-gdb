@@ -1,3 +1,17 @@
+2001-04-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-nat.c (i386_linux_dr_get): Change type of return
+	value to `unsigned long'.  Change type of `value' to `unsigned
+	long'.
+	(i386_linux_dr_set): Change type of second argument to `unsigned
+	long'.
+	(i386_linux_dr_set_control): Change type of first argument to
+	`unsigned long'.
+	(i386_linux_dr_get_status): Change type of return value to
+	unsigned long.
+	* config/i386/nm-linux.h (i386_linux_dr_set_control,
+	i386_linux_dr_get_status): Adjust prototypes accordingly. 
+
 2001-03-31  Kevin Buettner  <kevinb@redhat.com>
 
 	* ia64-linux-nat.c (ia64_linux_stopped_by_watchpoint): Change

@@ -43,7 +43,7 @@ extern CORE_ADDR register_u_addr (CORE_ADDR blockend, int regnum);
 
 /* Provide access to the i386 hardware debugging registers.  */
 
-extern void i386_linux_dr_set_control (long control);
+extern void i386_linux_dr_set_control (unsigned long control);
 #define I386_DR_LOW_SET_CONTROL(control) \
   i386_linux_dr_set_control (control)
 
@@ -55,7 +55,7 @@ extern void i386_linux_dr_reset_addr (int regnum);
 #define I386_DR_LOW_RESET_ADDR(regnum) \
   i386_linux_dr_reset_addr (regnum)
 
-extern long i386_linux_dr_get_status (void);
+extern unsigned long i386_linux_dr_get_status (void);
 #define I386_DR_LOW_GET_STATUS() \
   i386_linux_dr_get_status ()
 
