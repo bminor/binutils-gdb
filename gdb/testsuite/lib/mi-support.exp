@@ -686,45 +686,19 @@ proc mi_runto {func} {
 }
 
 
-# Helper function for mi_next and mi_step
-# CMD is either "step" or "next"
-# TEST is the name of the test (passed to dejagnu's pass/fail)
-# Returns:
-#     0  if passed
-#     1  if failed/timeout
-proc mi_step_next_helper {cmd test} {
-  global suppress_flag
-  if { $suppress_flag } {
-    return 1
-  }
-
-  global mi_gdb_prompt decimal hex
-  send_gdb "220-exec-$cmd\n"
-  gdb_expect {
-    -re ".*220\\^running\r\n$mi_gdb_prompt.*220\\*stopped,reason=\"end-stepping-range\",thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\".*\",args=\(\\\[.*\\\]\|\{.*\}\),file=\".*\",line=\"$decimal\"\}\r\n$mi_gdb_prompt$" {
-      pass "$test"
-      return 0
-    }
-    timeout {
-      fail "$test"
-      return 1
-    }
-  }
-}
-
 # Next to the next statement
-# For return values, see mi_step_next_helper
+# For return values, see mi_run_to_helper
 
 proc mi_next { test } {
-  return [mi_step_next_helper next $test]
+  return [mi_next_to {.*} {.*} {.*} {.*} $test]
 }
 
 
 # Step to the next statement
-# For return values, see mi_step_next_helper
+# For return values, see mi_run_to_helper
 
 proc mi_step { test } {
-  return [mi_step_next_helper step $test]
+  return [mi_step_to {.*} {.*} {.*} {.*} $test]
 }
 
 # cmd should not include the number or newline (i.e. "exec-step 3", not
