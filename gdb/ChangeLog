@@ -1,3 +1,9 @@
+2002-04-29  Michal Ludvig  <mludvig@suse.cz>
+
+	* x86-64-linux-nat.c (fill_gregset): Explicit cast to avoid warning.
+	* x86-64-tdep.c (i386_gdbarch_init): Ditto.
+	(x86_64_register_info_table): Added comments with register numbers.
+	
 2002-04-29  Elena Zannoni  <ezannoni@redhat.com>
 
 	* rs6000-tdep.c (rs6000_extract_return_value,

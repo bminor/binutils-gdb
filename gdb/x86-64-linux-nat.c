@@ -158,7 +158,7 @@ fill_gregset (elf_gregset_t * gregsetp, int regno)
 
   for (i = 0; i < x86_64_num_gregs; i++)
     if ((regno == -1 || regno == i))
-      read_register_gen (i, regp + x86_64_regmap[i]);
+      read_register_gen (i, (char *) (regp + x86_64_regmap[i]));
 }
 
 /* Fetch all general-purpose registers from process/thread TID and
@@ -446,4 +446,3 @@ kernel_u_size (void)
 {
   return (sizeof (struct user));
 }
-  
