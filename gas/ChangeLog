@@ -1,3 +1,9 @@
+Mon Jul 19 12:35:39 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-m68k.c (m68k_ip, case AINDX): Add 6 to operand
+	expression (to take the pc-rel instruction itself into account)
+	before using the expression, instead of after.
+
 Fri Jul 16 08:56:04 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* read.c (float_cons): Simplified parsing logic.  If

@@ -2443,8 +2443,8 @@ m68k_ip (instring)
 		{
 		  if (opP->reg == PC || opP->reg == ZPC)
 		    {
-		      add_fix (siz1 == 3 ? 'l' : 'w', opP->con1, 1);
 		      opP->con1->e_exp.X_add_number += 6;
+		      add_fix (siz1 == 3 ? 'l' : 'w', opP->con1, 1);
 		    }
 		  else
 		    add_fix (siz1 == 3 ? 'l' : 'w', opP->con1, 0);
@@ -2458,8 +2458,8 @@ m68k_ip (instring)
 		{
 		  if (opP->reg == PC || opP->reg == ZPC)
 		    {
-		      add_fix (siz2 == 3 ? 'l' : 'w', opP->con2, 1);
 		      opP->con1->e_exp.X_add_number += 6;
+		      add_fix (siz2 == 3 ? 'l' : 'w', opP->con2, 1);
 		    }
 		  else
 		    add_fix (siz2 == 3 ? 'l' : 'w', opP->con2, 0);
