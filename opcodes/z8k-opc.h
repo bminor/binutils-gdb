@@ -4467,5 +4467,13 @@ opcode_entry_type z8k_table[] = {
 #endif
 "xorb",OPC_xorb,0,{CLASS_REG_BYTE+(ARG_RD),CLASS_REG_BYTE+(ARG_RS),},
 	{CLASS_BIT+8,CLASS_BIT+8,CLASS_REG+(ARG_RS),CLASS_REG+(ARG_RD),0,0,0,0,0,},2,2,420},
-0,0};
+
+/* end marker */
+{
+#ifdef NICENAMES
+NULL,0,0,
+0,
+#endif
+NULL,0,0,{0,0,0,0},{0,0,0,0,0,0,0,0,0,0},0,0,0}
+};
 #endif

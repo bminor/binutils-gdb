@@ -19,6 +19,7 @@
 
 /* This program generates z8k-opc.h */
 
+#include <stdio.h>
 #include "sysdep.h"
 
 #define BYTE_INFO_LEN 10
@@ -81,12 +82,12 @@ struct op opt[] =
   "CZSV--", 5, 16, "1011 0101 ssss dddd", "adc rd,rs", 0,
   "CZSVDH", 5, 8, "1011 0100 ssss dddd", "adcb rbd,rbs", 0,
   "CZSV--", 7, 16, "0000 0001 ssN0 dddd", "add rd,@rs", 0,
-"CZSV--", 9, 16, "0100 0001 0000 dddd address_src", "add rd,address_src", 0,
+  "CZSV--", 9, 16, "0100 0001 0000 dddd address_src", "add rd,address_src", 0,
   "CZSV--", 10, 16, "0100 0001 ssN0 dddd address_src", "add rd,address_src(rs)", 0,
   "CZSV--", 7, 16, "0000 0001 0000 dddd imm16", "add rd,imm16", 0,
   "CZSV--", 4, 16, "1000 0001 ssss dddd", "add rd,rs", 0,
   "CZSVDH", 7, 8, "0000 0000 ssN0 dddd", "addb rbd,@rs", 0,
-"CZSVDH", 9, 8, "0100 0000 0000 dddd address_src", "addb rbd,address_src", 0,
+  "CZSVDH", 9, 8, "0100 0000 0000 dddd address_src", "addb rbd,address_src", 0,
   "CZSVDH", 10, 8, "0100 0000 ssN0 dddd address_src", "addb rbd,address_src(rs)", 0,
   "CZSVDH", 7, 8, "0000 0000 0000 dddd imm8 imm8", "addb rbd,imm8", 0,
   "CZSVDH", 4, 8, "1000 0000 ssss dddd", "addb rbd,rbs", 0,
@@ -97,12 +98,12 @@ struct op opt[] =
   "CZSV--", 8, 32, "1001 0110 ssss dddd", "addl rrd,rrs", 0,
 
   "-ZS---", 7, 16, "0000 0111 ssN0 dddd", "and rd,@rs", 0,
-"-ZS---", 9, 16, "0100 0111 0000 dddd address_src", "and rd,address_src", 0,
+  "-ZS---", 9, 16, "0100 0111 0000 dddd address_src", "and rd,address_src", 0,
   "-ZS---", 10, 16, "0100 0111 ssN0 dddd address_src", "and rd,address_src(rs)", 0,
   "-ZS---", 7, 16, "0000 0111 0000 dddd imm16", "and rd,imm16", 0,
   "-ZS---", 4, 16, "1000 0111 ssss dddd", "and rd,rs", 0,
   "-ZSP--", 7, 8, "0000 0110 ssN0 dddd", "andb rbd,@rs", 0,
-"-ZSP--", 9, 8, "0100 0110 0000 dddd address_src", "andb rbd,address_src", 0,
+  "-ZSP--", 9, 8, "0100 0110 0000 dddd address_src", "andb rbd,address_src", 0,
   "-ZSP--", 10, 8, "0100 0110 ssN0 dddd address_src", "andb rbd,address_src(rs)", 0,
   "-ZSP--", 7, 8, "0000 0110 0000 dddd imm8 imm8", "andb rbd,imm8", 0,
   "-ZSP--", 4, 8, "1000 0110 ssss dddd", "andb rbd,rbs", 0,
@@ -111,13 +112,13 @@ struct op opt[] =
   "-Z----", 11, 16, "0110 0111 ddN0 imm4 address_dst", "bit address_dst(rd),imm4", 0,
   "-Z----", 10, 16, "0110 0111 0000 imm4 address_dst", "bit address_dst,imm4", 0,
   "-Z----", 4, 16, "1010 0111 dddd imm4", "bit rd,imm4", 0,
-"-Z----", 10, 16, "0010 0111 0000 ssss 0000 dddd 0000 0000", "bit rd,rs", 0,
+  "-Z----", 10, 16, "0010 0111 0000 ssss 0000 dddd 0000 0000", "bit rd,rs", 0,
 
   "-Z----", 8, 8, "0010 0110 ddN0 imm4", "bitb @rd,imm4", 0,
   "-Z----", 11, 8, "0110 0110 ddN0 imm4 address_dst", "bitb address_dst(rd),imm4", 0,
   "-Z----", 10, 8, "0110 0110 0000 imm4 address_dst", "bitb address_dst,imm4", 0,
   "-Z----", 4, 8, "1010 0110 dddd imm4", "bitb rbd,imm4", 0,
-"-Z----", 10, 8, "0010 0110 0000 ssss 0000 dddd 0000 0000", "bitb rbd,rs", 0,
+  "-Z----", 10, 8, "0010 0110 0000 ssss 0000 dddd 0000 0000", "bitb rbd,rs", 0,
 
   "------", 10, 32, "0001 1111 ddN0 0000", "call @rd", 0,
   "------", 12, 32, "0101 1111 0000 0000 address_dst", "call address_dst", 0,
@@ -156,7 +157,7 @@ struct op opt[] =
   "CZSV--", 15, 8, "0100 1100 ddN0 0001 address_dst imm8 imm8", "cpb address_dst(rd),imm8", 0,
   "CZSV--", 14, 8, "0100 1100 0000 0001 address_dst imm8 imm8", "cpb address_dst,imm8", 0,
   "CZSV--", 7, 8, "0000 1010 ssN0 dddd", "cpb rbd,@rs", 0,
-"CZSV--", 9, 8, "0100 1010 0000 dddd address_src", "cpb rbd,address_src", 0,
+  "CZSV--", 9, 8, "0100 1010 0000 dddd address_src", "cpb rbd,address_src", 0,
   "CZSV--", 10, 8, "0100 1010 ssN0 dddd address_src", "cpb rbd,address_src(rs)", 0,
   "CZSV--", 7, 8, "0000 1010 0000 dddd imm8 imm8", "cpb rbd,imm8", 0,
   "CZSV--", 4, 8, "1000 1010 ssss dddd", "cpb rbd,rbs", 0,
@@ -194,11 +195,11 @@ struct op opt[] =
   "------", 7, 16, "0111 1100 0000 01ii", "ei i2", 0,
   "------", 6, 16, "1010 1101 ssss dddd", "ex rd,rs", 0,
   "------", 12, 16, "0010 1101 ssN0 dddd", "ex rd,@rs", 0,
-"------", 15, 16, "0110 1101 0000 dddd address_src", "ex rd,address_src", 0,
+  "------", 15, 16, "0110 1101 0000 dddd address_src", "ex rd,address_src", 0,
   "------", 16, 16, "0110 1101 ssN0 dddd address_src", "ex rd,address_src(rs)", 0,
 
   "------", 12, 8, "0010 1100 ssN0 dddd", "exb rbd,@rs", 0,
-"------", 15, 8, "0110 1100 0000 dddd address_src", "exb rbd,address_src", 0,
+  "------", 15, 8, "0110 1100 0000 dddd address_src", "exb rbd,address_src", 0,
   "------", 16, 8, "0110 1100 ssN0 dddd address_src", "exb rbd,address_src(rs)", 0,
   "------", 6, 8, "1010 1100 ssss dddd", "exb rbd,rbs", 0,
 
@@ -234,7 +235,7 @@ struct op opt[] =
   "------", 15, 16, "0100 1101 ddN0 0101 address_dst imm16", "ld address_dst(rd),imm16", 0,
   "------", 12, 16, "0110 1111 ddN0 ssss address_dst", "ld address_dst(rd),rs", 0,
   "------", 14, 16, "0100 1101 0000 0101 address_dst imm16", "ld address_dst,imm16", 0,
-"------", 11, 16, "0110 1111 0000 ssss address_dst", "ld address_dst,rs", 0,
+  "------", 11, 16, "0110 1111 0000 ssss address_dst", "ld address_dst,rs", 0,
   "------", 14, 16, "0011 0011 ddN0 ssss imm16", "ld rd(imm16),rs", 0,
   "------", 14, 16, "0111 0011 ddN0 ssss 0000 xxxx 0000 0000", "ld rd(rx),rs", 0,
   "------", 7, 16, "0010 0001 ssN0 dddd", "ld rd,@rs", 0,
@@ -250,11 +251,11 @@ struct op opt[] =
   "------", 15, 8, "0100 1100 ddN0 0101 address_dst imm8 imm8", "ldb address_dst(rd),imm8", 0,
   "------", 12, 8, "0110 1110 ddN0 ssss address_dst", "ldb address_dst(rd),rbs", 0,
   "------", 14, 8, "0100 1100 0000 0101 address_dst imm8 imm8", "ldb address_dst,imm8", 0,
-"------", 11, 8, "0110 1110 0000 ssss address_dst", "ldb address_dst,rbs", 0,
+  "------", 11, 8, "0110 1110 0000 ssss address_dst", "ldb address_dst,rbs", 0,
   "------", 14, 8, "0011 0010 ddN0 ssss imm16", "ldb rd(imm16),rbs", 0,
   "------", 14, 8, "0111 0010 ddN0 ssss 0000 xxxx 0000 0000", "ldb rd(rx),rbs", 0,
   "------", 7, 8, "0010 0000 ssN0 dddd", "ldb rbd,@rs", 0,
-"------", 9, 8, "0110 0000 0000 dddd address_src", "ldb rbd,address_src", 0,
+  "------", 9, 8, "0110 0000 0000 dddd address_src", "ldb rbd,address_src", 0,
   "------", 10, 8, "0110 0000 ssN0 dddd address_src", "ldb rbd,address_src(rs)", 0,
   "------", 5, 8, "1100 dddd imm8", "ldb rbd,imm8", 0,
   "------", 3, 8, "1010 0000 ssss dddd", "ldb rbd,rbs", 0,
@@ -335,7 +336,7 @@ struct op opt[] =
   "CZS---", 4, 16, "1000 0101 ssss dddd", "or rd,rs", 0,
 
   "CZSP--", 7, 8, "0000 0100 ssN0 dddd", "orb rbd,@rs", 0,
-"CZSP--", 9, 8, "0100 0100 0000 dddd address_src", "orb rbd,address_src", 0,
+  "CZSP--", 9, 8, "0100 0100 0000 dddd address_src", "orb rbd,address_src", 0,
   "CZSP--", 10, 8, "0100 0100 ssN0 dddd address_src", "orb rbd,address_src(rs)", 0,
   "CZSP--", 7, 8, "0000 0100 0000 dddd imm8 imm8", "orb rbd,imm8", 0,
   "CZSP--", 4, 8, "1000 0100 ssss dddd", "orb rbd,rbs", 0,
@@ -375,13 +376,13 @@ struct op opt[] =
   "------", 14, 16, "0110 0011 ddN0 imm4 address_dst", "res address_dst(rd),imm4", 0,
   "------", 13, 16, "0110 0011 0000 imm4 address_dst", "res address_dst,imm4", 0,
   "------", 4, 16, "1010 0011 dddd imm4", "res rd,imm4", 0,
-"------", 10, 16, "0010 0011 0000 ssss 0000 dddd 0000 0000", "res rd,rs", 0,
+  "------", 10, 16, "0010 0011 0000 ssss 0000 dddd 0000 0000", "res rd,rs", 0,
 
   "------", 11, 8, "0010 0010 ddN0 imm4", "resb @rd,imm4", 0,
   "------", 14, 8, "0110 0010 ddN0 imm4 address_dst", "resb address_dst(rd),imm4", 0,
   "------", 13, 8, "0110 0010 0000 imm4 address_dst", "resb address_dst,imm4", 0,
   "------", 4, 8, "1010 0010 dddd imm4", "resb rbd,imm4", 0,
-"------", 10, 8, "0010 0010 0000 ssss 0000 dddd 0000 0000", "resb rbd,rs", 0,
+  "------", 10, 8, "0010 0010 0000 ssss 0000 dddd 0000 0000", "resb rbd,rs", 0,
 
   "CZSV--", 7, 16, "1000 1101 flags 0011", "resflg flags", 0,
   "------", 10, 16, "1001 1110 0000 cccc", "ret cc", 0,
@@ -404,24 +405,24 @@ struct op opt[] =
 
   "CZSVDH", 33, 8, "0111 1111 imm8", "sc imm8", 0,
 
-"CZSV--", 15, 16, "1011 0011 dddd 1011 0000 ssss 0000 0000", "sda rd,rs", 0,
-"CZSV--", 15, 8, "1011 0010 dddd 1011 0000 ssss 0000 0000", "sdab rbd,rs", 0,
+  "CZSV--", 15, 16, "1011 0011 dddd 1011 0000 ssss 0000 0000", "sda rd,rs", 0,
+  "CZSV--", 15, 8, "1011 0010 dddd 1011 0000 ssss 0000 0000", "sdab rbd,rs", 0,
   "CZSV--", 15, 32, "1011 0011 dddd 1111 0000 ssss 0000 0000", "sdal rrd,rs", 0,
 
-"CZS---", 15, 16, "1011 0011 dddd 0011 0000 ssss 0000 0000", "sdl rd,rs", 0,
-"CZS---", 15, 8, "1011 0010 dddd 0011 0000 ssss 0000 0000", "sdlb rbd,rs", 0,
+  "CZS---", 15, 16, "1011 0011 dddd 0011 0000 ssss 0000 0000", "sdl rd,rs", 0,
+  "CZS---", 15, 8, "1011 0010 dddd 0011 0000 ssss 0000 0000", "sdlb rbd,rs", 0,
   "CZS---", 15, 32, "1011 0011 dddd 0111 0000 ssss 0000 0000", "sdll rrd,rs", 0,
 
   "------", 11, 16, "0010 0101 ddN0 imm4", "set @rd,imm4", 0,
   "------", 14, 16, "0110 0101 ddN0 imm4 address_dst", "set address_dst(rd),imm4", 0,
   "------", 13, 16, "0110 0101 0000 imm4 address_dst", "set address_dst,imm4", 0,
   "------", 4, 16, "1010 0101 dddd imm4", "set rd,imm4", 0,
-"------", 10, 16, "0010 0101 0000 ssss 0000 dddd 0000 0000", "set rd,rs", 0,
+  "------", 10, 16, "0010 0101 0000 ssss 0000 dddd 0000 0000", "set rd,rs", 0,
   "------", 11, 8, "0010 0100 ddN0 imm4", "setb @rd,imm4", 0,
   "------", 14, 8, "0110 0100 ddN0 imm4 address_dst", "setb address_dst(rd),imm4", 0,
   "------", 13, 8, "0110 0100 0000 imm4 address_dst", "setb address_dst,imm4", 0,
   "------", 4, 8, "1010 0100 dddd imm4", "setb rbd,imm4", 0,
-"------", 10, 8, "0010 0100 0000 ssss 0000 dddd 0000 0000", "setb rbd,rs", 0,
+  "------", 10, 8, "0010 0100 0000 ssss 0000 dddd 0000 0000", "setb rbd,rs", 0,
 
   "CZSV--", 7, 16, "1000 1101 flags 0001", "setflg flags", 0,
 
@@ -456,13 +457,13 @@ struct op opt[] =
   "CZSV--", 13, 32, "1011 0011 dddd 0101 1111 1111 nim8", "srll rrd,imm8", 0,
 
   "CZSV--", 7, 16, "0000 0011 ssN0 dddd", "sub rd,@rs", 0,
-"CZSV--", 9, 16, "0100 0011 0000 dddd address_src", "sub rd,address_src", 0,
+  "CZSV--", 9, 16, "0100 0011 0000 dddd address_src", "sub rd,address_src", 0,
   "CZSV--", 10, 16, "0100 0011 ssN0 dddd address_src", "sub rd,address_src(rs)", 0,
   "CZSV--", 7, 16, "0000 0011 0000 dddd imm16", "sub rd,imm16", 0,
   "CZSV--", 4, 16, "1000 0011 ssss dddd", "sub rd,rs", 0,
 
   "CZSVDH", 7, 8, "0000 0010 ssN0 dddd", "subb rbd,@rs", 0,
-"CZSVDH", 9, 8, "0100 0010 0000 dddd address_src", "subb rbd,address_src", 0,
+  "CZSVDH", 9, 8, "0100 0010 0000 dddd address_src", "subb rbd,address_src", 0,
   "CZSVDH", 10, 8, "0100 0010 ssN0 dddd address_src", "subb rbd,address_src(rs)", 0,
   "CZSVDH", 7, 8, "0000 0010 0000 dddd imm8 imm8", "subb rbd,imm8", 0,
   "CZSVDH", 4, 8, "1000 0010 ssss dddd", "subb rbd,rbs", 0,
@@ -487,7 +488,7 @@ struct op opt[] =
   "-ZSP--", 7, 8, "1000 1100 dddd 0100", "testb rbd", 0,
 
   "-ZS---", 13, 32, "0001 1100 ddN0 1000", "testl @rd", 0,
-"-ZS---", 16, 32, "0101 1100 0000 1000 address_dst", "testl address_dst", 0,
+  "-ZS---", 16, 32, "0101 1100 0000 1000 address_dst", "testl address_dst", 0,
   "-ZS---", 17, 32, "0101 1100 ddN0 1000 address_dst", "testl address_dst(rd)", 0,
   "-ZS---", 13, 32, "1001 1100 dddd 1000", "testl rrd", 0,
 
@@ -512,13 +513,13 @@ struct op opt[] =
   "--S---", 7, 8, "1000 1100 dddd 0110", "tsetb rbd", 0,
 
   "-ZS---", 7, 16, "0000 1001 ssN0 dddd", "xor rd,@rs", 0,
-"-ZS---", 9, 16, "0100 1001 0000 dddd address_src", "xor rd,address_src", 0,
+  "-ZS---", 9, 16, "0100 1001 0000 dddd address_src", "xor rd,address_src", 0,
   "-ZS---", 10, 16, "0100 1001 ssN0 dddd address_src", "xor rd,address_src(rs)", 0,
   "-ZS---", 7, 16, "0000 1001 0000 dddd imm16", "xor rd,imm16", 0,
   "-ZS---", 4, 16, "1000 1001 ssss dddd", "xor rd,rs", 0,
 
   "-ZSP--", 7, 8, "0000 1000 ssN0 dddd", "xorb rbd,@rs", 0,
-"-ZSP--", 9, 8, "0100 1000 0000 dddd address_src", "xorb rbd,address_src", 0,
+  "-ZSP--", 9, 8, "0100 1000 0000 dddd address_src", "xorb rbd,address_src", 0,
   "-ZSP--", 10, 8, "0100 1000 ssN0 dddd address_src", "xorb rbd,address_src(rs)", 0,
   "-ZSP--", 7, 8, "0000 1000 0000 dddd imm8 imm8", "xorb rbd,imm8", 0,
   "-ZSP--", 4, 8, "1000 1000 ssss dddd", "xorb rbd,rbs", 0,
@@ -703,7 +704,6 @@ struct tok_struct toks[] =
   "01ii", "CLASS_01II", 1,
   "00ii", "CLASS_00II", 1,
   0, 0
-
 };
 
 char *
@@ -899,7 +899,7 @@ void
 internal ()
 {
   int c = count ();
-  struct op *new = xmalloc (sizeof (struct op) * c);
+  struct op *new = (struct op *) xmalloc (sizeof (struct op) * c);
   struct op *p = opt;
   memcpy (new, p, c * sizeof (struct op));
 
@@ -958,7 +958,7 @@ gas ()
   struct op *p = opt;
   int idx = 0;
   char *oldname = "";
-  struct op *new = xmalloc (sizeof (struct op) * c);
+  struct op *new = (struct op *) xmalloc (sizeof (struct op) * c);
 
   memcpy (new, p, c * sizeof (struct op));
 
@@ -1278,7 +1278,9 @@ gas ()
       printf ("},\n");
       new++;
     }
-  printf ("0,0};\n");
+  printf ("\n/* end marker */\n");
+  printf ("{\n#ifdef NICENAMES\nNULL,0,0,\n0,\n#endif\n");
+  printf ("NULL,0,0,{0,0,0,0},{0,0,0,0,0,0,0,0,0,0},0,0,0}\n};\n");
   printf ("#endif\n");
 }
 
@@ -1319,5 +1321,5 @@ main (ac, av)
       printf ("-d : generate new table for disassemble\n");
       printf ("-h : generate new table for humans\n");
     }
-return 0;
+  return 0;
 }

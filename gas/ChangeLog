@@ -1,3 +1,10 @@
+2001-08-01  Christian Groessler <cpg@aladdin.de>
+
+	* config/tc-z8k.c (parse_reg): If a string starts with "r", "rl",
+	"rh", "rr", "rq", or "sp" then don't automatically assume
+	it's a register name.  Check whether there is a number
+	following.
+
 2001-08-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-i386.c (lex_got): Match lower case relocation tokens.

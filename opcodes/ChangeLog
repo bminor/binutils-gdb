@@ -1,3 +1,11 @@
+2001-08-01  Christian Groessler <cpg@aladdin.de>
+
+	* z8kgen.c: Fixed indentation of opt[] array.  Include stdio.h to
+	get stderr definition.
+	(internal, gas): Removed warnings.
+	(gas): Create a correct final entry for created array.
+	* z8k-opc.h: Recreated with new z8kgen.
+
 2001-07-28  Kazu Hirata  <kazu@hxi.com>
 
 	* i386-dis.c: Fix formatting.

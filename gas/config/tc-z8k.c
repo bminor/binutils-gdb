@@ -259,7 +259,7 @@ parse_reg (src, mode, reg)
   char *res = 0;
   char regno;
 
-  if (src[0] == 's' && src[1] == 'p')
+  if (src[0] == 's' && src[1] == 'p' && (src[2] == 0 || src[2] == ','))
     {
       if (segmented_mode)
 	{
@@ -277,6 +277,8 @@ parse_reg (src, mode, reg)
     {
       if (src[1] == 'r')
 	{
+	  if (src[2] < '0' || src[2] > '9')
+	    return res;	 /* Assume no register name but a label starting with 'rr'.  */
 	  *mode = CLASS_REG_LONG;
 	  res = whatreg (reg, src + 2);
 	  regno = *reg;
@@ -285,6 +287,8 @@ parse_reg (src, mode, reg)
 	}
       else if (src[1] == 'h')
 	{
+	  if (src[2] < '0' || src[2] > '9')
+	    return res;	 /* Assume no register name but a label starting with 'rh'.  */
 	  *mode = CLASS_REG_BYTE;
 	  res = whatreg (reg, src + 2);
 	  regno = *reg;
@@ -293,6 +297,8 @@ parse_reg (src, mode, reg)
 	}
       else if (src[1] == 'l')
 	{
+	  if (src[2] < '0' || src[2] > '9')
+	    return res;	 /* Assume no register name but a label starting with 'rl'.  */
 	  *mode = CLASS_REG_BYTE;
 	  res = whatreg (reg, src + 2);
 	  regno = *reg;
@@ -302,6 +308,8 @@ parse_reg (src, mode, reg)
 	}
       else if (src[1] == 'q')
 	{
+	  if (src[2] < '0' || src[2] > '9')
+	    return res;	 /* Assume no register name but a label starting with 'rq'.  */
 	  *mode = CLASS_REG_QUAD;
 	  res = whatreg (reg, src + 2);
 	  regno = *reg;
@@ -310,6 +318,8 @@ parse_reg (src, mode, reg)
 	}
       else
 	{
+	  if (src[1] < '0' || src[1] > '9')
+	    return res;	 /* Assume no register name but a label starting with 'r'.  */
 	  *mode = CLASS_REG_WORD;
 	  res = whatreg (reg, src + 1);
 	  regno = *reg;
