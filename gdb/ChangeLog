@@ -1,3 +1,15 @@
+Mon Feb 03 17:57:58 1997  Mark Alexander  <marka@cygnus.com>
+
+	* mips-tdep.c (mips16_decode_reg_save): Distinguish between
+	sd and sw instructions correctly.
+	(heuristic_proc_start): Add support for MIPS16.
+	(mips16_get_imm, mips16_heuristic_proc_desc,
+	mips32_heuristic_proc_desc): New helper functions for
+	heuristic_proc_desc.
+	(heuristic_proc_desc): Rewrite and reorganize to support MIPS16.
+	(mips_push_arguments): Don't align small arguments in EABI.
+	(mips32_skip_prologue): Attempt to shrink code size a little.
+
 start-sanitize-m32r
 Mon Feb  3 11:06:05 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
 

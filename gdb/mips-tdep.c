@@ -295,10 +295,14 @@ mips16_decode_reg_save (inst, gen_mask)
      t_inst inst;
      unsigned long *gen_mask;
 {
-  if ((inst & 0xf800) == 0xd000			/* sw reg,n($sp) */
-      || (inst & 0xff00) == 0xf900)		/* sd reg,n($sp) */
+  if ((inst & 0xf800) == 0xd000)		/* sw reg,n($sp) */
     {
-      int reg = mips16_to_32_reg[(inst & 0xf00) >> 8];
+      int reg = mips16_to_32_reg[(inst & 0x700) >> 8];
+      *gen_mask |= (1 << reg);
+    }
+  else if ((inst & 0xff00) == 0xf900)		/* sd reg,n($sp) */
+    {
+      int reg = mips16_to_32_reg[(inst & 0xe0) >> 5];
       *gen_mask |= (1 << reg);
     }
   else if ((inst & 0xff00) == 0x6200		/* sw $ra,n($sp) */
@@ -553,6 +557,7 @@ heuristic_proc_start(pc)
     CORE_ADDR start_pc = pc;
     CORE_ADDR fence = start_pc - heuristic_fence_post;
     int instlen;
+    int seen_adjsp = 0;
 
     if (start_pc == 0)	return 0;
 
@@ -597,12 +602,23 @@ Otherwise, you told GDB there was a function where there isn't one, or\n\
 	  }
 	else if (start_pc & 1)
 	  {
-	    /* On MIPS16, look for the 'entry' pseudo-op at the start
-	       of a function.  This is only going to work if the program
-	       was compiled with -mentry.  Otherwise, there's no reliable
-	       way of finding the start of a function.  */
-	    if ((read_memory_integer (start_pc & ~1, 2) & 0xf81f)== 0xe809)
-	      return start_pc;
+	    /* On MIPS16, any one of the following is likely to be the
+	       start of a function:
+		 entry
+		 addiu sp,-n
+		 daddiu sp,-n
+		 extend -n followed by 'addiu sp,+n' or 'daddiu sp,+n'  */
+	    unsigned short inst = read_memory_integer (start_pc & ~1, 2);
+	    if (((inst & 0xf81f) == 0xe809 && (inst & 0x700) != 0x700) /* entry */
+		|| (inst & 0xff80) == 0x6380	/* addiu sp,-n */
+		|| (inst & 0xff80) == 0xfb80	/* daddiu sp,-n */
+		|| ((inst & 0xf810) == 0xf010 && seen_adjsp))	/* extend -n */
+	      break;
+	    else if ((inst & 0xff00) == 0x6300		/* addiu sp */
+		     || (inst & 0xff00) == 0xfb00)	/* daddiu sp */
+	      seen_adjsp = 1;
+	    else
+	      seen_adjsp = 0;
 	  }
 	else if (ABOUT_TO_RETURN(start_pc))
 	  {
@@ -618,115 +634,288 @@ Otherwise, you told GDB there was a function where there isn't one, or\n\
     return start_pc;
 }
 
+/* Fetch the immediate value from the current instruction.
+   If the previous instruction was an EXTEND, use it to extend
+   the upper bits of the immediate value.  This is a helper function
+   for mips16_heuristic_proc_desc.  */
+
+static int
+mips16_get_imm (prev_inst, inst, nbits, scale, is_signed)
+    unsigned short prev_inst;	/* previous instruction */
+    unsigned short inst;	/* current current instruction */
+    int nbits;			/* number of bits in imm field */
+    int scale;			/* scale factor to be applied to imm */
+    int is_signed;		/* is the imm field signed? */
+{
+  int offset;
+
+  if ((prev_inst & 0xf800) == 0xf000)	/* prev instruction was EXTEND? */
+    {
+      offset = ((prev_inst & 0x1f) << 11) | (prev_inst & 0x7e00);
+      if (offset & 0x8000)		/* check for negative extend */
+	offset = 0 - (0x10000 - (offset & 0xffff));
+      return offset | (inst & 0x1f);
+    }
+  else
+    {
+      int max_imm = 1 << nbits;
+      int mask = max_imm - 1;
+      int sign_bit = max_imm >> 1;
+
+      offset = inst & mask;
+      if (is_signed && (offset & sign_bit))
+	offset = 0 - (max_imm - offset);
+      return offset * scale;
+    }
+}
+
+
+/* Fill in values in temp_proc_desc based on the MIPS16 instruction
+   stream from start_pc to limit_pc.  */
+
+static void
+mips16_heuristic_proc_desc(start_pc, limit_pc, next_frame, sp)
+    CORE_ADDR start_pc, limit_pc;
+    struct frame_info *next_frame;
+    CORE_ADDR sp;
+{
+  CORE_ADDR cur_pc;
+  CORE_ADDR frame_addr = 0;	/* Value of $r17, used as frame pointer */
+  unsigned short prev_inst = 0;	/* saved copy of previous instruction */
+  unsigned inst = 0;		/* current instruction */
+
+  PROC_FRAME_OFFSET(&temp_proc_desc) = 0;
+
+  for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS16_INSTLEN)
+    {
+      char buf[MIPS16_INSTLEN];
+      int status, reg, offset;
+
+      /* Save the previous instruction.  If it's an EXTEND, we'll extract
+         the immediate offset extension from it in mips16_get_imm.  */
+      prev_inst = inst;
+
+      /* Fetch the instruction.   */
+      status = read_memory_nobpt (cur_pc & ~1, buf, MIPS16_INSTLEN);
+      if (status) memory_error (status, cur_pc);
+      inst = (unsigned short) extract_unsigned_integer (buf, MIPS16_INSTLEN);
+
+      if ((inst & 0xff00) == 0x6300		/* addiu sp */
+	  || (inst & 0xff00) == 0xfb00)		/* daddiu sp */
+	{
+	  offset = mips16_get_imm (prev_inst, inst, 8, 8, 1);
+	  if (offset < 0)			/* negative stack adjustment? */
+	    PROC_FRAME_OFFSET(&temp_proc_desc) -= offset;
+	  else
+	    /* Exit loop if a positive stack adjustment is found, which
+	       usually means that the stack cleanup code in the function
+	       epilogue is reached.  */
+	    break;
+	}
+      else if ((inst & 0xf800) == 0xd000)	/* sw reg,n($sp) */
+	{
+	  offset = mips16_get_imm (prev_inst, inst, 8, 4, 0);
+	  reg = mips16_to_32_reg[(inst & 0x700) >> 8];
+	  PROC_REG_MASK(&temp_proc_desc) |= (1 << reg);
+	  temp_saved_regs.regs[reg] = sp + offset;
+	}
+      else if ((inst & 0xff00) == 0xf900)	/* sd reg,n($sp) */
+	{
+	  offset = mips16_get_imm (prev_inst, inst, 5, 8, 0);
+	  reg = mips16_to_32_reg[(inst & 0xe0) >> 5];
+	  PROC_REG_MASK(&temp_proc_desc) |= (1 << reg);
+	  temp_saved_regs.regs[reg] = sp + offset;
+	}
+      else if ((inst & 0xff00) == 0x6200)	/* sw $ra,n($sp) */
+	{
+	  offset = mips16_get_imm (prev_inst, inst, 8, 4, 0);
+	  PROC_REG_MASK(&temp_proc_desc) |= (1 << 31);
+	  temp_saved_regs.regs[31] = sp + offset;
+	}
+      else if ((inst & 0xff00) == 0xfa00)	/* sd $ra,n($sp) */
+	{
+	  offset = mips16_get_imm (prev_inst, inst, 8, 8, 0);
+	  PROC_REG_MASK(&temp_proc_desc) |= (1 << 31);
+	  temp_saved_regs.regs[31] = sp + offset;
+	}
+      else if (inst == 0x673d)			/* move $s1, $sp */
+	{
+	  frame_addr = read_next_frame_reg(next_frame, 30);
+	  PROC_FRAME_REG (&temp_proc_desc) = 17;
+	}
+      else if ((inst & 0xFF00) == 0xd900)	/* sw reg,offset($s1) */
+	{
+	  offset = mips16_get_imm (prev_inst, inst, 5, 4, 0);
+	  reg = mips16_to_32_reg[(inst & 0xe0) >> 5];
+	  PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
+	  temp_saved_regs.regs[reg] = frame_addr + offset;
+	}
+      else if ((inst & 0xFF00) == 0x7900)	/* sd reg,offset($s1) */
+	{
+	  offset = mips16_get_imm (prev_inst, inst, 5, 8, 0);
+	  reg = mips16_to_32_reg[(inst & 0xe0) >> 5];
+	  PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
+	  temp_saved_regs.regs[reg] = frame_addr + offset;
+	}
+      else if ((inst & 0xf81f) == 0xe809 && (inst & 0x700) != 0x700) /* entry */
+	{
+	  int areg_count = (inst >> 8) & 7;
+	  int sreg_count = (inst >> 6) & 3;
+
+	  /* The entry instruction always subtracts 32 from the SP.  */
+	  PROC_FRAME_OFFSET(&temp_proc_desc) += 32;
+
+	  /* Check if a0-a3 were saved in the caller's argument save area.  */
+	  for (reg = 4, offset = 32; reg < areg_count+4; reg++, offset += 4)
+	    {
+	      PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
+	      temp_saved_regs.regs[reg] = sp + offset;
+	    }
+
+	  /* Check if the ra register was pushed on the stack.  */
+	  offset = 28;
+	  if (inst & 0x20)
+	    {
+	      PROC_REG_MASK(&temp_proc_desc) |= 1 << 31;
+	      temp_saved_regs.regs[31] = sp + offset;
+	      offset -= 4;
+	    }
+
+	  /* Check if the s0 and s1 registers were pushed on the stack.  */
+	  for (reg = 16; reg < sreg_count+16; reg++, offset -= 4)
+	    {
+	      PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
+	      temp_saved_regs.regs[reg] = sp + offset;
+	    }
+	}
+    }
+}
+
+static void
+mips32_heuristic_proc_desc(start_pc, limit_pc, next_frame, sp)
+    CORE_ADDR start_pc, limit_pc;
+    struct frame_info *next_frame;
+    CORE_ADDR sp;
+{
+  CORE_ADDR cur_pc;
+  CORE_ADDR frame_addr = 0; /* Value of $r30. Used by gcc for frame-pointer */
+restart:
+  PROC_FRAME_OFFSET(&temp_proc_desc) = 0;
+  for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS_INSTLEN)
+    {
+      char buf[MIPS_INSTLEN];
+      unsigned long inst, high_word, low_word;
+      int status, reg;
+
+      /* Fetch the instruction.   */
+      status = (unsigned long) read_memory_nobpt (cur_pc, buf, MIPS_INSTLEN);
+      if (status) memory_error (status, cur_pc);
+      inst = (unsigned long) extract_unsigned_integer (buf, MIPS_INSTLEN);
+
+      /* Save some code by pre-extracting some useful fields.  */
+      high_word = (inst >> 16) & 0xffff;
+      low_word = inst & 0xffff;
+      reg = high_word & 0x1f;
+
+      if (high_word == 0x27bd		/* addiu $sp,$sp,-i */
+	  || high_word == 0x23bd	/* addi $sp,$sp,-i */
+	  || high_word == 0x67bd)	/* daddiu $sp,$sp,-i */
+	{
+	  if (low_word & 0x8000)	/* negative stack adjustment? */
+	    PROC_FRAME_OFFSET(&temp_proc_desc) += 0x10000 - low_word;
+	  else
+	    /* Exit loop if a positive stack adjustment is found, which
+	       usually means that the stack cleanup code in the function
+	       epilogue is reached.  */
+	    break;
+	}
+      else if ((high_word & 0xFFE0) == 0xafa0)	/* sw reg,offset($sp) */
+	{
+	  PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
+	  temp_saved_regs.regs[reg] = sp + low_word;
+	}
+      else if ((high_word & 0xFFE0) == 0xffa0)	/* sd reg,offset($sp) */
+	{
+	  /* Irix 6.2 N32 ABI uses sd instructions for saving $gp and $ra,
+	     but the register size used is only 32 bits. Make the address
+	     for the saved register point to the lower 32 bits.  */
+	  PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
+	  temp_saved_regs.regs[reg] = sp + low_word + 8 - MIPS_REGSIZE;
+	}
+      else if (high_word == 0x27be)			/* addiu $30,$sp,size */
+	{
+	  /* Old gcc frame, r30 is virtual frame pointer.  */
+	  if (low_word != PROC_FRAME_OFFSET(&temp_proc_desc))
+	      frame_addr = sp + low_word;
+	  else if (PROC_FRAME_REG (&temp_proc_desc) == SP_REGNUM)
+	    {
+	      unsigned alloca_adjust;
+	      PROC_FRAME_REG (&temp_proc_desc) = 30;
+	      frame_addr = read_next_frame_reg(next_frame, 30);
+	      alloca_adjust = (unsigned)(frame_addr - (sp + low_word));
+	      if (alloca_adjust > 0)
+		{
+		  /* FP > SP + frame_size. This may be because
+		   * of an alloca or somethings similar.
+		   * Fix sp to "pre-alloca" value, and try again.
+		   */
+		  sp += alloca_adjust;
+		  goto restart;
+		}
+	    }
+	}
+     /* move $30,$sp.  With different versions of gas this will be either
+       `addu $30,$sp,$zero' or `or $30,$sp,$zero' or `daddu 30,sp,$0'.
+	Accept any one of these.  */
+      else if (inst == 0x03A0F021 || inst == 0x03a0f025 || inst == 0x03a0f02d)
+	{
+	  /* New gcc frame, virtual frame pointer is at r30 + frame_size.  */
+	  if (PROC_FRAME_REG (&temp_proc_desc) == SP_REGNUM)
+	    {
+	      unsigned alloca_adjust;
+	      PROC_FRAME_REG (&temp_proc_desc) = 30;
+	      frame_addr = read_next_frame_reg(next_frame, 30);
+	      alloca_adjust = (unsigned)(frame_addr - sp);
+	      if (alloca_adjust > 0)
+		{
+		  /* FP > SP + frame_size. This may be because
+		   * of an alloca or somethings similar.
+		   * Fix sp to "pre-alloca" value, and try again.
+		   */
+		  sp += alloca_adjust;
+		  goto restart;
+		}
+	    }
+	}
+      else if ((high_word & 0xFFE0) == 0xafc0)		/* sw reg,offset($30) */
+	{
+	  PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
+	  temp_saved_regs.regs[reg] = frame_addr + low_word;
+	}
+    }
+}
+
 static mips_extra_func_info_t
 heuristic_proc_desc(start_pc, limit_pc, next_frame)
     CORE_ADDR start_pc, limit_pc;
     struct frame_info *next_frame;
 {
-    CORE_ADDR sp = read_next_frame_reg (next_frame, SP_REGNUM);
-    CORE_ADDR cur_pc;
-    unsigned long frame_size;
-    unsigned long r30_frame_size = 0;
-    int has_frame_reg = 0;
-    CORE_ADDR reg30 = 0; /* Value of $r30. Used by gcc for frame-pointer */
-    unsigned long reg_mask = 0;
+  CORE_ADDR sp = read_next_frame_reg (next_frame, SP_REGNUM);
 
-    if (start_pc == 0) return NULL;
-    memset (&temp_proc_desc, '\0', sizeof(temp_proc_desc));
-    memset (&temp_saved_regs, '\0', sizeof(struct frame_saved_regs));
-    PROC_LOW_ADDR (&temp_proc_desc) = start_pc;
+  if (start_pc == 0) return NULL;
+  memset (&temp_proc_desc, '\0', sizeof(temp_proc_desc));
+  memset (&temp_saved_regs, '\0', sizeof(struct frame_saved_regs));
+  PROC_LOW_ADDR (&temp_proc_desc) = start_pc;
+  PROC_FRAME_REG (&temp_proc_desc) = SP_REGNUM;
+  PROC_PC_REG (&temp_proc_desc) = RA_REGNUM;
 
-    if (start_pc + 200 < limit_pc)
-      limit_pc = start_pc + 200;
-  restart:
-    frame_size = 0;
-    for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS_INSTLEN) {
-        char buf[MIPS_INSTLEN];
-	unsigned long word;
-	int status;
-
-	status = (unsigned long) read_memory_nobpt (cur_pc, buf, MIPS_INSTLEN); /* FIXME!! */ 
-	if (status) memory_error (status, cur_pc);
-	word = (unsigned long) extract_unsigned_integer (buf, MIPS_INSTLEN); /* FIXME!! */
-
-	if ((word & 0xFFFF0000) == 0x27bd0000		/* addiu $sp,$sp,-i */
-	    || (word & 0xFFFF0000) == 0x23bd0000	/* addi $sp,$sp,-i */
-	    || (word & 0xFFFF0000) == 0x67bd0000) {	/* daddiu $sp,$sp,-i */
-	    if (word & 0x8000)
-	      frame_size += (-word) & 0xffff;
-	    else
-	      /* Exit loop if a positive stack adjustment is found, which
-		 usually means that the stack cleanup code in the function
-		 epilogue is reached.  */
-	      break;
-	}
-	else if ((word & 0xFFE00000) == 0xafa00000) {	/* sw reg,offset($sp) */
-	    int reg = (word & 0x001F0000) >> 16;
-	    reg_mask |= 1 << reg;
-	    temp_saved_regs.regs[reg] = sp + (word & 0xffff);
-	}
-	else if ((word & 0xFFE00000) == 0xffa00000) {	/* sd reg,offset($sp) */
-	    /* Irix 6.2 N32 ABI uses sd instructions for saving $gp and $ra,
-	       but the register size used is only 32 bits. Make the address
-	       for the saved register point to the lower 32 bits.  */
-	    int reg = (word & 0x001F0000) >> 16;
-	    reg_mask |= 1 << reg;
-	    temp_saved_regs.regs[reg] = sp + (word & 0xffff) + 8 - MIPS_REGSIZE;
-	}
-	else if ((word & 0xFFFF0000) == 0x27be0000) { /* addiu $30,$sp,size */
-	    /* Old gcc frame, r30 is virtual frame pointer.  */
-	    if ((word & 0xffff) != frame_size)
-		reg30 = sp + (word & 0xffff);
-	    else if (!has_frame_reg) {
-		unsigned alloca_adjust;
-		has_frame_reg = 1;
-		reg30 = read_next_frame_reg(next_frame, 30);
-		alloca_adjust = (unsigned)(reg30 - (sp + (word & 0xffff)));
-		if (alloca_adjust > 0) {
-		    /* FP > SP + frame_size. This may be because
-		     * of an alloca or somethings similar.
-		     * Fix sp to "pre-alloca" value, and try again.
-		     */
-		    sp += alloca_adjust;
-		    goto restart;
-		}
-	    }
-	}
-	else if ((word & 0xFFFFFFFB) == 0x03a0f021) { /* mov $30,$sp */
-	    /* New gcc frame, virtual frame pointer is at r30 + frame_size.  */
-	    if (!has_frame_reg) {
-		unsigned alloca_adjust;
-		has_frame_reg = 1;
-		reg30 = read_next_frame_reg(next_frame, 30);
-		r30_frame_size = frame_size;
-		alloca_adjust = (unsigned)(reg30 - sp);
-		if (alloca_adjust > 0) {
-		    /* FP > SP + frame_size. This may be because
-		     * of an alloca or somethings similar.
-		     * Fix sp to "pre-alloca" value, and try again.
-		     */
-		    sp += alloca_adjust;
-		    goto restart;
-		}
-	    }
-	}
-	else if ((word & 0xFFE00000) == 0xafc00000) { /* sw reg,offset($30) */
-	    int reg = (word & 0x001F0000) >> 16;
-	    reg_mask |= 1 << reg;
-	    temp_saved_regs.regs[reg] = reg30 + (word & 0xffff);
-	}
-    }
-    if (has_frame_reg) {
-	PROC_FRAME_REG(&temp_proc_desc) = 30;
-	PROC_FRAME_OFFSET(&temp_proc_desc) = r30_frame_size;
-    }
-    else {
-	PROC_FRAME_REG(&temp_proc_desc) = SP_REGNUM;
-	PROC_FRAME_OFFSET(&temp_proc_desc) = frame_size;
-    }
-    PROC_REG_MASK(&temp_proc_desc) = reg_mask;
-    PROC_PC_REG(&temp_proc_desc) = RA_REGNUM;
-    return &temp_proc_desc;
+  if (start_pc + 200 < limit_pc)
+    limit_pc = start_pc + 200;
+  if (start_pc & 1)
+    mips16_heuristic_proc_desc (start_pc, limit_pc, next_frame, sp);
+  else
+    mips32_heuristic_proc_desc (start_pc, limit_pc, next_frame, sp);
+  return &temp_proc_desc;
 }
 
 static mips_extra_func_info_t
@@ -1054,9 +1243,11 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 		  /* It's a simple argument being passed in a general
 		     register.
 		     If the argument length is smaller than the register size,
-		     we have to adjust the argument on big endian targets.  */
+		     we have to adjust the argument on big endian targets.
+		     But don't do this adjustment on EABI targets. */
 		  if (TARGET_BYTE_ORDER == BIG_ENDIAN
-		      && partial_len < MIPS_REGSIZE)
+		      && partial_len < MIPS_REGSIZE
+		      && !MIPS_EABI)
 		    regval <<= ((MIPS_REGSIZE - partial_len) * TARGET_CHAR_BIT);
 		  write_register (argreg, regval);
 		  argreg++;
@@ -1398,19 +1589,21 @@ mips32_skip_prologue (pc, lenient)
       {
 	char buf[MIPS_INSTLEN];
 	int status;
+	unsigned long high_word;
 
 	status = read_memory_nobpt (pc, buf, MIPS_INSTLEN);
 	if (status)
 	  memory_error (status, pc);
 	inst = (unsigned long)extract_unsigned_integer (buf, MIPS_INSTLEN);
+	high_word = (inst >> 16) & 0xffff;
 
 #if 0
 	if (lenient && is_delayed (inst))
 	  continue;
 #endif
 
-	if ((inst & 0xffff0000) == 0x27bd0000	/* addiu $sp,$sp,offset */
-	    || (inst & 0xffff0000) == 0x67bd0000) /* daddiu $sp,$sp,offset */
+	if (high_word == 0x27bd			/* addiu $sp,$sp,offset */
+	    || high_word == 0x67bd)		/* daddiu $sp,$sp,offset */
 	    seen_sp_adjust = 1;
 	else if (inst == 0x03a1e823 || 	        /* subu $sp,$sp,$at */
 		 inst == 0x03a8e823)   	        /* subu $sp,$sp,$t0 */
@@ -1434,9 +1627,9 @@ mips32_skip_prologue (pc, lenient)
 
 	else if ((inst & 0xFF9F07FF) == 0x00800021) /* move reg,$a0-$a3 */
 	    continue;
-	else if ((inst & 0xffff0000) == 0x3c1c0000) /* lui $gp,n */
+	else if (high_word == 0x3c1c) 		/* lui $gp,n */
 	    continue;
-	else if ((inst & 0xffff0000) == 0x279c0000) /* addiu $gp,$gp,n */
+	else if (high_word == 0x279c) 		/* addiu $gp,$gp,n */
 	    continue;
 	else if (inst == 0x0399e021		/* addu $gp,$gp,$t9 */
 		 || inst == 0x033ce021)		/* addu $gp,$t9,$gp */
@@ -1448,16 +1641,16 @@ mips32_skip_prologue (pc, lenient)
 	   instruction was seen.  */
 	else if (!seen_sp_adjust)
 	  {
-	    if ((inst & 0xffff0000) == 0x3c010000 ||	  /* lui $at,n */
-		(inst & 0xffff0000) == 0x3c080000)	  /* lui $t0,n */
+	    if (high_word == 0x3c01 ||	 	/* lui $at,n */
+		high_word == 0x3c08)	  	/* lui $t0,n */
 	      {
 		load_immediate_bytes += MIPS_INSTLEN; /* FIXME!! */
 		continue;
 	      }
-	    else if ((inst & 0xffff0000) == 0x34210000 || /* ori $at,$at,n */
-		     (inst & 0xffff0000) == 0x35080000 || /* ori $t0,$t0,n */
-		     (inst & 0xffff0000) == 0x34010000 || /* ori $at,$zero,n */
-		     (inst & 0xffff0000) == 0x34080000)   /* ori $t0,$zero,n */
+	    else if (high_word == 0x3421 || 	/* ori $at,$at,n */
+		     high_word == 0x3508 || 	/* ori $t0,$t0,n */
+		     high_word == 0x3401 || 	/* ori $at,$zero,n */
+		     high_word == 0x3408)   	/* ori $t0,$zero,n */
 	      {
 		load_immediate_bytes += MIPS_INSTLEN; /* FIXME!! */
 		continue;
