@@ -67,6 +67,7 @@ coffcode.h
 coffgen.c
 coffswap.h
 config
+config.bfd
 configure.bat
 configure.host
 configure.in
