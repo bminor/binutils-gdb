@@ -315,7 +315,7 @@ else
 	done
 fi
 
-h8s_files="archures.c coff-h8300.c coffcode.h cpu-h8300.c ChangeLog"
+h8s_files="archures.c coff-h8300.c coffcode.h cpu-h8300.c ChangeLog bfd-in2.h"
 if ( echo $* | grep keep\-h8s > /dev/null ) ; then
 	for i in $h8s_files ; do
 		if test ! -d $i && (grep sanitize-h8s $i > /dev/null) ; then
