@@ -153,6 +153,11 @@ updated using the sequence:
 	$  make -f Makefile.in SHELL=/bin/sh autoheader-changelog
 	$  more */new-ChangeLog
 	$  make -f Makefile.in SHELL=/bin/sh autoheader-install
+
+To add the entries to an alternative ChangeLog file, use:
+
+	$  make ChangeLog=MyChangeLog ....
+
 
 tconfig.in
 ==========

@@ -598,5 +598,3 @@ extern boolean ppc_allocate_toc_section
 extern boolean ppc_process_before_allocation
   PARAMS ((bfd *, struct bfd_link_info *));
 
-/* And more taken from the source .. */
-

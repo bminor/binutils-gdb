@@ -1230,7 +1230,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_address_to_pointer (gdbarch, avr_address_to_pointer);
   set_gdbarch_pointer_to_address (gdbarch, avr_pointer_to_address);
-  set_gdbarch_extract_return_value (gdbarch, avr_extract_return_value);
+  set_gdbarch_deprecated_extract_return_value (gdbarch, avr_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, avr_push_arguments);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
 /*    set_gdbarch_push_return_address (gdbarch, avr_push_return_address); */
@@ -1240,8 +1240,8 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_use_struct_convention (gdbarch, generic_use_struct_convention);
   set_gdbarch_store_struct_return (gdbarch, avr_store_struct_return);
-  set_gdbarch_extract_struct_value_address (gdbarch,
-					    avr_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_struct_value_address
+    (gdbarch, avr_extract_struct_value_address);
 
   set_gdbarch_frame_init_saved_regs (gdbarch, avr_scan_prologue);
   set_gdbarch_init_extra_frame_info (gdbarch, avr_init_extra_frame_info);

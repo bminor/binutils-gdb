@@ -28,6 +28,8 @@
 #include "arch-utils.h"
 #include "regcache.h"
 
+#include "sh-tdep.h"
+
 static struct serial *parallel;
 static int parallel_in_use;
 

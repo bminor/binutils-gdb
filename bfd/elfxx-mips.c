@@ -135,7 +135,7 @@ struct mips_elf_link_hash_table
   /* The size of the .compact_rel section (if SGI_COMPAT).  */
   bfd_size_type compact_rel_size;
   /* This flag indicates that the value of DT_MIPS_RLD_MAP dynamic
-     entry is set to the address of __rld_obj_head as in Irix 5.  */
+     entry is set to the address of __rld_obj_head as in IRIX5.  */
   boolean use_rld_obj_head;
   /* This is the value of the __rld_map or __rld_obj_head symbol.  */
   bfd_vma rld_value;
@@ -154,7 +154,7 @@ struct extsym_info
   boolean failed;
 };
 
-/* The names of the runtime procedure table symbols used on Irix 5.  */
+/* The names of the runtime procedure table symbols used on IRIX5.  */
 
 static const char * const mips_elf_dynsym_rtproc_names[] =
 {
@@ -165,7 +165,7 @@ static const char * const mips_elf_dynsym_rtproc_names[] =
 };
 
 /* These structures are used to generate the .compact_rel section on
-   Irix 5.  */
+   IRIX5.  */
 
 typedef struct
 {
@@ -375,7 +375,7 @@ static bfd *reldyn_sorting_bfd;
 
 /* Nonzero if ABFD is using the 64-bit ABI. */
 #define ABI_64_P(abfd) \
-  ((elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS64) != 0)
+  ((get_elf_backend_data (abfd)->s->elfclass == ELFCLASS64) != 0)
 
 #define IRIX_COMPAT(abfd) \
   (get_elf_backend_data (abfd)->elf_backend_mips_irix_compat (abfd))
@@ -2082,8 +2082,16 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
       sec = local_sections[r_symndx];
 
       symbol = sec->output_section->vma + sec->output_offset;
-      if (ELF_ST_TYPE (sym->st_info) != STT_SECTION)
+      if (ELF_ST_TYPE (sym->st_info) != STT_SECTION
+	  || (sec->flags & SEC_MERGE))
 	symbol += sym->st_value;
+      if ((sec->flags & SEC_MERGE)
+	  && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	{
+	  addend = _bfd_elf_rel_local_sym (abfd, sym, &sec, addend);
+	  addend -= symbol;
+	  addend += sec->output_section->vma + sec->output_offset;
+	}
 
       /* MIPS16 text labels should be treated as odd.  */
       if (sym->st_other == STO_MIPS16)
@@ -2411,7 +2419,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
 	{
 	  value = addend + gp - p + 4;
 	  /* The MIPS ABI requires checking the R_MIPS_LO16 relocation
-	     for overflow.  But, on, say, Irix 5, relocations against
+	     for overflow.  But, on, say, IRIX5, relocations against
 	     _gp_disp are normally generated from the .cpload
 	     pseudo-op.  It generates code that normally looks like
 	     this:
@@ -3351,7 +3359,7 @@ boolean
 _bfd_mips_elf_section_from_shdr (abfd, hdr, name)
      bfd *abfd;
      Elf_Internal_Shdr *hdr;
-     char *name;
+     const char *name;
 {
   flagword flags = 0;
 
@@ -3542,7 +3550,7 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
   else if (strcmp (name, ".mdebug") == 0)
     {
       hdr->sh_type = SHT_MIPS_DEBUG;
-      /* In a shared object on Irix 5.3, the .mdebug section has an
+      /* In a shared object on IRIX 5.3, the .mdebug section has an
          entsize of 0.  FIXME: Does this matter?  */
       if (SGI_COMPAT (abfd) && (abfd->flags & DYNAMIC) != 0)
 	hdr->sh_entsize = 0;
@@ -3552,7 +3560,7 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
   else if (strcmp (name, ".reginfo") == 0)
     {
       hdr->sh_type = SHT_MIPS_REGINFO;
-      /* In a shared object on Irix 5.3, the .reginfo section has an
+      /* In a shared object on IRIX 5.3, the .reginfo section has an
          entsize of 0x18.  FIXME: Does this matter?  */
       if (SGI_COMPAT (abfd))
 	{
@@ -3572,7 +3580,7 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
       if (SGI_COMPAT (abfd))
 	hdr->sh_entsize = 0;
 #if 0
-      /* This isn't how the Irix 6 linker behaves.  */
+      /* This isn't how the IRIX6 linker behaves.  */
       hdr->sh_info = SIZEOF_MIPS_DYNSYM_SECNAMES;
 #endif
     }
@@ -3693,7 +3701,7 @@ _bfd_mips_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
       && (abfd->flags & DYNAMIC) != 0
       && strcmp (*namep, "_rld_new_interface") == 0)
     {
-      /* Skip Irix 5 rld entry name.  */
+      /* Skip IRIX5 rld entry name.  */
       *namep = NULL;
       return true;
     }
@@ -4790,7 +4798,7 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
 	}
       else if (strcmp (name, MIPS_ELF_STUB_SECTION_NAME (output_bfd)) == 0)
 	{
-	  /* Irix rld assumes that the function stub isn't at the end
+	  /* IRIX rld assumes that the function stub isn't at the end
 	     of .text section. So put a dummy. XXX  */
 	  s->_raw_size += MIPS_FUNCTION_STUB_SIZE;
 	}
@@ -5005,8 +5013,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	     space.  Thus, when they use an R_MIPS_64 they mean what is
 	     usually meant by R_MIPS_32, with the exception that the
 	     stored value is sign-extended to 64 bits.  */
-	  howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd, R_MIPS_32,
-					   NEWABI_P (input_bfd));
+	  howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd, R_MIPS_32, false);
 
 	  /* On big-endian systems, we need to lie about the position
 	     of the reloc.  */
@@ -5041,6 +5048,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      addend = mips_elf_obtain_contents (howto, rel, input_bfd,
 						 contents);
 	      addend &= howto->src_mask;
+	      addend <<= howto->rightshift;
 
 	      /* For some kinds of relocations, the ADDEND is a
 		 combination of the addend stored in two different
@@ -5073,11 +5081,11 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		    return false;
 
 		  /* Obtain the addend kept there.  */
-		  lo16_howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd, lo,
-							rela_relocation_p);
+		  lo16_howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd, lo, false);
 		  l = mips_elf_obtain_contents (lo16_howto, lo16_relocation,
 						input_bfd, contents);
 		  l &= lo16_howto->src_mask;
+		  l <<= lo16_howto->rightshift;
 		  l = mips_elf_sign_extend (l, 16);
 
 		  addend <<= 16;
@@ -5136,13 +5144,6 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      || r_type == R_MIPS_LITERAL)
 	    addend -= (_bfd_get_gp_value (output_bfd)
 		       - _bfd_get_gp_value (input_bfd));
-	  else if (r_type == R_MIPS_26 || r_type == R_MIPS16_26
-		   || r_type == R_MIPS_GNU_REL16_S2)
-	    /* The addend is stored without its two least
-	       significant bits (which are always zero.)  In a
-	       non-relocateable link, calculate_relocation will do
-	       this shift; here, we must do it ourselves.  */
-	    addend <<= 2;
 
 	  r_symndx = ELF_R_SYM (output_bfd, rel->r_info);
 	  sym = local_syms + r_symndx;
@@ -5150,23 +5151,20 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    /* Adjust the addend appropriately.  */
 	    addend += local_sections[r_symndx]->output_offset;
 
-	  /* If the relocation is for a R_MIPS_HI16 or R_MIPS_GOT16,
-	     then we only want to write out the high-order 16 bits.
-	     The subsequent R_MIPS_LO16 will handle the low-order bits.  */
-	  if (r_type == R_MIPS_HI16 || r_type == R_MIPS_GOT16
-	      || r_type == R_MIPS_GNU_REL_HI16)
-	    addend = mips_elf_high (addend);
-	  else if (r_type == R_MIPS_HIGHER)
-	    addend = mips_elf_higher (addend);
-	  else if (r_type == R_MIPS_HIGHEST)
-	    addend = mips_elf_highest (addend);
-
-	  /* If the relocation is for an R_MIPS_26 relocation, then
-	     the two low-order bits are not stored in the object file;
-	     they are implicitly zero.  */
-	  else if (r_type == R_MIPS_26 || r_type == R_MIPS16_26
-		   || r_type == R_MIPS_GNU_REL16_S2)
-	    addend >>= 2;
+	  if (howto->partial_inplace)
+	    {
+	      /* If the relocation is for a R_MIPS_HI16 or R_MIPS_GOT16,
+		 then we only want to write out the high-order 16 bits.
+		 The subsequent R_MIPS_LO16 will handle the low-order bits.
+	       */
+	      if (r_type == R_MIPS_HI16 || r_type == R_MIPS_GOT16
+		  || r_type == R_MIPS_GNU_REL_HI16)
+		addend = mips_elf_high (addend);
+	      else if (r_type == R_MIPS_HIGHER)
+		addend = mips_elf_higher (addend);
+	      else if (r_type == R_MIPS_HIGHEST)
+		addend = mips_elf_highest (addend);
+	    }
 
 	  if (rela_relocation_p)
 	    /* If this is a RELA relocation, just update the addend.
@@ -5179,9 +5177,10 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		 destination mask because the place to which we are
 		 writing will be source of the addend in the final
 		 link.  */
+	      addend >>= howto->rightshift;
 	      addend &= howto->src_mask;
 
-	      if (r_type == R_MIPS_64 && !ABI_64_P (output_bfd))
+	      if (r_type == R_MIPS_64 && ! NEWABI_P (output_bfd))
 		/* See the comment above about using R_MIPS_64 in the 32-bit
 		   ABI.  Here, we need to update the addend.  It would be
 		   possible to get away with just using the R_MIPS_32 reloc
@@ -5241,6 +5240,8 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	use_saved_addend_p = true;
       else
 	use_saved_addend_p = false;
+
+      addend >>= howto->rightshift;
 
       /* Figure out what value we are supposed to relocate.  */
       switch (mips_elf_calculate_relocation (output_bfd, input_bfd,
@@ -5785,7 +5786,7 @@ _bfd_mips_elf_finish_dynamic_sections (output_bfd, info)
 
   /* The first entry of the global offset table will be filled at
      runtime. The second entry will be used by some runtime loaders.
-     This isn't the case of Irix rld.  */
+     This isn't the case of IRIX rld.  */
   if (sgot != NULL && sgot->_raw_size > 0)
     {
       MIPS_ELF_PUT_WORD (output_bfd, (bfd_vma) 0, sgot->contents);
@@ -6030,7 +6031,7 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
     }
 }
 
-/* When creating an Irix 5 executable, we need REGINFO and RTPROC
+/* When creating an IRIX5 executable, we need REGINFO and RTPROC
    segments.  */
 
 int
@@ -6060,7 +6061,7 @@ _bfd_mips_elf_additional_program_headers (abfd)
   return ret;
 }
 
-/* Modify the segment map for an Irix 5 executable.  */
+/* Modify the segment map for an IRIX5 executable.  */
 
 boolean
 _bfd_mips_elf_modify_segment_map (abfd)
@@ -6183,7 +6184,7 @@ _bfd_mips_elf_modify_segment_map (abfd)
 		}
 	    }
 	}
-      /* On Irix 5, the PT_DYNAMIC segment includes the .dynamic,
+      /* On IRIX5, the PT_DYNAMIC segment includes the .dynamic,
 	 .dynstr, .dynsym, and .hash sections, and everything in
 	 between.  */
       for (pm = &elf_tdata (abfd)->segment_map; *pm != NULL;
@@ -6412,6 +6413,15 @@ _bfd_mips_elf_hide_symbol (info, entry, force_local)
   /* FIXME: Do we allocate too much GOT space here?  */
   g->local_gotno++;
   got->_raw_size += MIPS_ELF_GOT_SIZE (dynobj);
+}
+
+boolean
+_bfd_mips_elf_ignore_discarded_relocs (sec)
+     asection *sec;
+{
+  if (strcmp (sec->name, ".pdr") == 0)
+    return true;
+  return false;
 }
 
 /* MIPS ELF uses a special find_nearest_line routine in order the

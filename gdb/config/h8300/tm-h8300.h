@@ -100,7 +100,7 @@ extern CORE_ADDR h8300_skip_prologue ();
 
 #define REGISTER_SIZE 4
 
-#define NUM_REGS 13
+#define NUM_REGS 14
 
 #define REGISTER_BYTES (NUM_REGS * 4)
 
@@ -137,7 +137,7 @@ extern CORE_ADDR h8300_skip_prologue ();
    Entries beyond the first NUM_REGS are ignored.  */
 
 #define REGISTER_NAMES \
-  {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "sp", "ccr","pc","cycles","tick","inst"}
+  {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "sp", "ccr","pc","cycles","tick","inst",""}
 
 /* An array of names of registers. */
 
@@ -157,6 +157,7 @@ extern char **h8300_register_names;
 #define SP_REGNUM      7	/* Contains address of top of stack */
 #define CCR_REGNUM     8	/* Contains processor status */
 #define PC_REGNUM      9	/* Contains program counter */
+#define EXR_REGNUM     11	/* Contains processor status */
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
@@ -165,7 +166,7 @@ extern char **h8300_register_names;
 /* FIXME: Won't work with both h8/300's.  */
 
 extern void h8300_extract_return_value (struct type *, char *, char *);
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
+#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
     h8300_extract_return_value (TYPE, (char *)(REGBUF), (char *)(VALBUF))
 
 /* Write into appropriate registers a function return value
@@ -187,7 +188,7 @@ extern void h8300_store_return_value (struct type *, char *);
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
 
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
+#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
      extract_address (REGBUF + REGISTER_BYTE (0), \
 		      REGISTER_RAW_SIZE (0))
 
@@ -272,7 +273,7 @@ extern void h8300_print_register_hook (int);
 
 #define GDB_TARGET_IS_H8300
 
-#define NUM_REALREGS 10
+#define NUM_REALREGS (h8300smode?11:10)
 #define NOP { 0x01, 0x80}	/* A sleep insn */
 
 #define BELIEVE_PCC_PROMOTION 1

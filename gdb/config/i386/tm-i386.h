@@ -32,25 +32,6 @@ struct frame_saved_regs;
 struct value;
 struct type;
 
-/* The format used for `long double' on almost all i386 targets is the
-   i387 extended floating-point format.  In fact, of all targets in the
-   GCC 2.95 tree, only OSF/1 does it different, and insists on having
-   a `long double' that's not `long' at all.  */
-
-#define TARGET_LONG_DOUBLE_FORMAT &floatformat_i387_ext
-
-/* Although the i386 extended floating-point has only 80 significant
-   bits, a `long double' actually takes up 96, probably to enforce
-   alignment.  */
-
-#define TARGET_LONG_DOUBLE_BIT 96
-
-/* Number of traps that happen between exec'ing the shell to run an
-   inferior, and when we finally get to the inferior code.  This is 2
-   on most implementations. */
-
-#define START_INFERIOR_TRAPS_EXPECTED 2
-
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
 
@@ -62,11 +43,6 @@ struct type;
 #define SKIP_PROLOGUE(frompc)   (i386_skip_prologue (frompc))
 
 extern int i386_skip_prologue (int);
-
-/* Immediately after a function call, return the saved pc.  */
-
-#define SAVED_PC_AFTER_CALL(frame) i386_saved_pc_after_call (frame)
-extern CORE_ADDR i386_saved_pc_after_call (struct frame_info *frame);
 
 /* Stack grows downward.  */
 
@@ -118,7 +94,7 @@ extern CORE_ADDR i386_saved_pc_after_call (struct frame_info *frame);
 #endif
 
 /* Largest number of registers we could have in any configuration.  */
-#define MAX_NUM_REGS (16 + 16 + 9)
+#define MAX_NUM_REGS (16 + 16 + 9 + 1)
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
@@ -139,59 +115,7 @@ extern CORE_ADDR i386_saved_pc_after_call (struct frame_info *frame);
 #else
 #define FP0_REGNUM 0
 #endif
-
-/* Return the name of register REG.  */
-
-#define REGISTER_NAME(reg) i386_register_name ((reg))
-extern char *i386_register_name (int reg);
-
-/* Use the "default" register numbering scheme for stabs and COFF.  */
-
-#define STAB_REG_TO_REGNUM(reg) i386_stab_reg_to_regnum ((reg))
-#define SDB_REG_TO_REGNUM(reg) i386_stab_reg_to_regnum ((reg))
-extern int i386_stab_reg_to_regnum (int reg);
-
-/* Use the DWARF register numbering scheme for DWARF and DWARF 2.  */
-
-#define DWARF_REG_TO_REGNUM(reg) i386_dwarf_reg_to_regnum ((reg))
-#define DWARF2_REG_TO_REGNUM(reg) i386_dwarf_reg_to_regnum ((reg))
-extern int i386_dwarf_reg_to_regnum (int reg);
-
-/* We don't define ECOFF_REG_TO_REGNUM, since ECOFF doesn't seem to be
-   in use on any of the supported i386 targets.  */
 
-
-/* Sizes of individual register sets.  These cover the entire register
-   file, so summing up the sizes of those portions actually present
-   yields REGISTER_BYTES.  */
-#define SIZEOF_GREGS (NUM_GREGS * 4)
-#define SIZEOF_FPU_REGS (8 * 10)
-#define SIZEOF_FPU_CTRL_REGS (8 * 4)
-#define SIZEOF_SSE_REGS (8 * 16 + 4)
-
-
-/* Total amount of space needed to store our copies of the machine's register
-   state, the array `registers'. */
-#ifdef HAVE_SSE_REGS
-#define REGISTER_BYTES \
-  (SIZEOF_GREGS + SIZEOF_FPU_REGS + SIZEOF_FPU_CTRL_REGS + SIZEOF_SSE_REGS)
-#else
-#ifdef HAVE_I387_REGS
-#define REGISTER_BYTES (SIZEOF_GREGS + SIZEOF_FPU_REGS + SIZEOF_FPU_CTRL_REGS)
-#else
-#define REGISTER_BYTES (SIZEOF_GREGS)
-#endif
-#endif
-
-/* Return the offset into the register array of the start of register
-   number REG.  */
-#define REGISTER_BYTE(reg) i386_register_byte ((reg))
-extern int i386_register_byte (int reg);
-
-/* Return the number of bytes of storage in GDB's register array
-   occupied by register REG.  */
-#define REGISTER_RAW_SIZE(reg) i386_register_raw_size ((reg))
-extern int i386_register_raw_size (int reg);
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 #define MAX_REGISTER_RAW_SIZE 16
@@ -255,7 +179,7 @@ extern void i386_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
-#define EXTRACT_RETURN_VALUE(type, regbuf, valbuf) \
+#define DEPRECATED_EXTRACT_RETURN_VALUE(type, regbuf, valbuf) \
   i386_extract_return_value ((type), (regbuf), (valbuf))
 extern void i386_extract_return_value (struct type *type, char *regbuf,
 				       char *valbuf);
@@ -271,21 +195,9 @@ extern void i386_store_return_value (struct type *type, char *valbuf);
    the address in which a function should return its structure value,
    as a CORE_ADDR.  */
 
-#define EXTRACT_STRUCT_VALUE_ADDRESS(regbuf) \
+#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(regbuf) \
   i386_extract_struct_value_address ((regbuf))
 extern CORE_ADDR i386_extract_struct_value_address (char *regbuf);
-
-/* The following redefines make backtracing through sigtramp work.
-   They manufacture a fake sigtramp frame and obtain the saved pc in sigtramp
-   from the sigcontext structure which is pushed by the kernel on the
-   user stack, along with a pointer to it.  */
-
-/* Return the chain-pointer for FRAME.  In the case of the i386, the
-   frame's nominal address is the address of a 4-byte word containing
-   the calling frame's address.  */
-
-#define FRAME_CHAIN(frame) i386_frame_chain ((frame))
-extern CORE_ADDR i386_frame_chain (struct frame_info *frame);
 
 /* Determine whether the function invocation represented by FRAME does
    not have a from on the stack associated with it.  If it does not,
@@ -294,11 +206,6 @@ extern CORE_ADDR i386_frame_chain (struct frame_info *frame);
 #define FRAMELESS_FUNCTION_INVOCATION(frame) \
   i386_frameless_function_invocation (frame)
 extern int i386_frameless_function_invocation (struct frame_info *frame);
-
-/* Return the saved program counter for FRAME.  */
-
-#define FRAME_SAVED_PC(frame) i386_frame_saved_pc (frame)
-extern CORE_ADDR i386_frame_saved_pc (struct frame_info *frame);
 
 #define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
 

@@ -424,7 +424,7 @@ _bfd_xcoff64_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
   switch (class)
     {
     case C_FILE:
-      if (ext->x_file.x_n.x_zeroes == 0)
+      if (in->x_file.x_n.x_zeroes == 0)
 	{
 	  H_PUT_32 (abfd, 0, ext->x_file.x_n.x_zeroes);
 	  H_PUT_32 (abfd, in->x_file.x_n.x_offset, ext->x_file.x_n.x_offset);
@@ -1730,6 +1730,22 @@ reloc_howto_type xcoff64_howto_table[] =
 	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
 	 false),                /* pcrel_offset */
+
+  /* Modifiable branch absolute.  */
+  HOWTO (R_RBA,			/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 0,			/* special_function */
+	 "R_RBA_16",		/* name */
+	 true,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
 };
 
 void
@@ -1750,6 +1766,8 @@ xcoff64_rtype2howto (relent, internal)
 	relent->howto = &xcoff64_howto_table[0x1d];
       else if (R_RBR == internal->r_type) 
 	relent->howto = &xcoff64_howto_table[0x1e];
+      else if (R_RBA == internal->r_type) 
+	relent->howto = &xcoff64_howto_table[0x1f];
     }
   /* Special case 32 bit */
   else if (31 == (internal->r_size & 0x3f))
@@ -2246,11 +2264,9 @@ xcoff64_generate_rtinit (abfd, init, fini, rtld)
   data_buffer_size = 0x0058 + initsz + finisz;
   data_buffer_size += (data_buffer_size & 7) ? 8 - (data_buffer_size & 7) : 0;
   data_buffer = NULL;
-  data_buffer = (bfd_byte *)bfd_malloc (data_buffer_size);
+  data_buffer = (bfd_byte *) bfd_zmalloc (data_buffer_size);
   if (data_buffer == NULL)
     return false;
-
-  memset (data_buffer, 0, data_buffer_size);
 
   if (initsz)
     {
@@ -2284,8 +2300,10 @@ xcoff64_generate_rtinit (abfd, init, fini, rtld)
   if (true == rtld)
     string_table_size += strlen (rtld_name) + 1;
 
-  string_table = (bfd_byte *)bfd_malloc (string_table_size);
-  memset (string_table, 0, string_table_size);
+  string_table = (bfd_byte *) bfd_zmalloc (string_table_size);
+  if (string_table == NULL)
+    return false;
+
   val = string_table_size;
   bfd_put_32 (abfd, val, &string_table[0]);
   st_tmp = string_table + 4;
@@ -2712,10 +2730,12 @@ const bfd_target rs6000coff64_vec =
   _bfd_xcoff_bfd_link_hash_table_create,/* _bfd_link_hash_table_create */
   _bfd_generic_link_hash_table_free,    /* _bfd_link_hash_table_free */
   _bfd_xcoff_bfd_link_add_symbols,	/* _bfd_link_add_symbols */
-  _bfd_xcoff_bfd_final_link,		/* _bfd_filnal_link */
+  _bfd_generic_link_just_syms,		/* _bfd_link_just_syms */
+  _bfd_xcoff_bfd_final_link,		/* _bfd_final_link */
   _bfd_generic_link_split_section,	/* _bfd_link_split_section */
   bfd_generic_gc_sections,		/* _bfd_gc_sections */
   bfd_generic_merge_sections,		/* _bfd_merge_sections */
+  bfd_generic_discard_group,		/* _bfd_discard_group */
 
   /* Dynamic */
   /* _get_dynamic_symtab_upper_bound */
@@ -2964,10 +2984,12 @@ const bfd_target aix5coff64_vec =
   _bfd_xcoff_bfd_link_hash_table_create,/* _bfd_link_hash_table_create */
   _bfd_generic_link_hash_table_free,    /* _bfd_link_hash_table_free */
   _bfd_xcoff_bfd_link_add_symbols,	/* _bfd_link_add_symbols */
-  _bfd_xcoff_bfd_final_link,		/* _bfd_filnal_link */
+  _bfd_generic_link_just_syms,		/* _bfd_link_just_syms */
+  _bfd_xcoff_bfd_final_link,		/* _bfd_final_link */
   _bfd_generic_link_split_section,	/* _bfd_link_split_section */
   bfd_generic_gc_sections,		/* _bfd_gc_sections */
   bfd_generic_merge_sections,		/* _bfd_merge_sections */
+  bfd_generic_discard_group,		/* _bfd_discard_group */
 
   /* Dynamic */
   /* _get_dynamic_symtab_upper_bound */

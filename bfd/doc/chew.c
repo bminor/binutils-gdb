@@ -82,7 +82,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
    Foo.  */
 
-#include <ansidecl.h>
+#include "ansidecl.h"
 #include "sysdep.h"
 #include <assert.h>
 #include <stdio.h>

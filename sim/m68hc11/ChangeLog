@@ -1,3 +1,8 @@
+2002-06-09  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (INCLUDE): Update path to callback.h.
+	* sim-main.h: Include "gdb/callback.h" and "gdb/remote-sim.h".
+
 2002-03-07  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* m68hc11_sim.c (cpu_move8): Call sim_engine_abort in default case.

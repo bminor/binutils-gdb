@@ -38,7 +38,6 @@
 #include <netdb.h>
 #include <sys/socket.h>
 #include <netinet/tcp.h>
-#include <netinet/udp.h>
 
 #include <signal.h>
 #include "gdb_string.h"

@@ -1,5 +1,5 @@
 /* d10v-opc.c -- D10V opcode list
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Written by Martin Hunt, Cygnus Support
 
 This file is part of GDB, GAS, and the GNU binutils.
@@ -196,7 +196,7 @@ const struct d10v_opcode d10v_opcodes[] = {
   { "brf0t.s", SHORT_B, 3, MU, BRANCH|PAR|RF0, 0x4b00, 0x7f00, { ANUM8 } },
   { "brf0t.l", LONG_B, 3, MU, SEQ, 0x25800000, 0x3fff0000, { ANUM16 } },
   { "bseti", SHORT_2, 1, IU, PAR, 0x801, 0x7e01, { RDST, UNUM4 } },
-  { "btsti", SHORT_2, 1, IU, PAR|WF0, 0xe01, 0x7e01, { RDST, UNUM4 } },
+  { "btsti", SHORT_2, 1, IU, PAR|WF0, 0xe01, 0x7e01, { RSRC2, UNUM4 } },
   { "clrac", SHORT_2, 1, IU, PAR, 0x5601, 0x7eff, { ADST } },
   { "cmp", SHORT_2, 1, EITHER, PAR|WF0, 0x600, 0x7e01, { RSRC2, RSRC } },
   { "cmp", SHORT_2, 1, IU, PAR|WF0, 0x1603, 0x7eef, { ASRC2, ASRC } },

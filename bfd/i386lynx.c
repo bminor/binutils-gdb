@@ -1,5 +1,5 @@
 /* BFD back-end for i386 a.out binaries under LynxOS.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 2001
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -429,10 +429,9 @@ doit:
   count = reloc_size / each_size;
 
 
-  reloc_cache = (arelent *) bfd_malloc (count * sizeof (arelent));
+  reloc_cache = (arelent *) bfd_zmalloc (count * sizeof (arelent));
   if (!reloc_cache && count != 0)
     return false;
-  memset (reloc_cache, 0, (size_t) count * sizeof (arelent));
 
   relocs = (PTR) bfd_alloc (abfd, reloc_size);
   if (!relocs && reloc_size != 0)

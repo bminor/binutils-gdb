@@ -321,7 +321,12 @@ core_open (char *filename, int from_tty)
     error ("\"%s\": Can't find sections: %s",
 	   bfd_get_filename (core_bfd), bfd_errmsg (bfd_get_error ()));
 
-  set_gdbarch_from_file (core_bfd);
+  /* If we have no exec file, try to set the architecture from the
+     core file.  We don't do this unconditionally since an exec file
+     typically contains more information that helps us determine the
+     architecture than a core file.  */
+  if (!exec_bfd)
+    set_gdbarch_from_file (core_bfd);
 
   ontop = !push_target (&core_ops);
   discard_cleanups (old_chain);

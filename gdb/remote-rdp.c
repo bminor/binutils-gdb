@@ -41,7 +41,7 @@
 #include "defs.h"
 #include "inferior.h"
 #include "value.h"
-#include "callback.h"
+#include "gdb/callback.h"
 #include "command.h"
 #include <ctype.h>
 #include <fcntl.h>

@@ -30,7 +30,7 @@
 #define	DECR_PC_AFTER_BREAK	0
 
 #include "m68k/tm-m68k.h"
-#include "tm-vxworks.h"
+#include "config/tm-vxworks.h"
 
 /* Takes the current frame-struct pointer and returns the chain-pointer
    to get to the calling frame.

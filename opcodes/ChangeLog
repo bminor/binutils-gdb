@@ -1,3 +1,132 @@
+2002-06-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* a29k-dis.c: Replace CONST with const.
+	* h8300-dis.c: Likewise.
+	* m68k-dis.c: Likewise.
+	* or32-dis.c: Likewise.
+	* sparc-dis.c: Likewise.
+
+2002-06-04  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* configure.in: Add "sh5*-*" to list of targets which include
+	sh64 support.
+	* configure: Regenerate.
+
+2002-05-31  Chris G. Demetriou  <cgd@broadcom.com>
+
+	* mips-opc.c: Clean up a few whitespace issues, and sort a
+	few entries understanding that 'x' follows 'w' in the alphabet.
+	
+2002-05-31  Chris G. Demetriou  <cgd@broadcom.com>
+            Ed Satterthwaite  <ehs@broadcom.com>
+
+	* mips-opc.c: Add support for SB-1 MDMX subset and extensions.
+
+2002-05-31  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
+2002-05-30  Chris G. Demetriou  <cgd@broadcom.com>
+            Ed Satterthwaite  <ehs@broadcom.com>
+
+	* mips-dis.c (print_insn_arg): Add support for 'O', 'Q', 'X', 'Y',
+	and 'Z' formats, for MDMX.
+        (mips_isa_type): Add MDMX instructions to the ISA
+	bit mask for bfd_mach_mipsisa64.
+	* mips-opc.c: Add support for MDMX instructions.
+	(MX): New definition.
+
+	* mips-dis.c: Update copyright years to include 2002.
+
+2002-05-30  Diego Novillo  <dnovillo@redhat.com>
+
+	* d10v-opc.c (d10v_opcodes): `btsti' does not modify its
+        arguments.
+
+2002-05-28  Kuang Hwa Lin <kuang@sbcglobal.net>
+
+	* configure.in: Add DLX configuraton support.
+	* configure: Regenerate.
+	* Makefile.am: Add DLX configuraton support.
+	* Makefile.in: Regenerate.
+	* disassemble.c: Add DLX support.
+	* dlx-dis.c: New file.
+
+2002-05-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (sh-dis.lo): Don't put make commands in deps.
+	* Makefile.in: Regenerate.
+	* arc-dis.c: Use #include "" instead of <> for local header files.
+	* m68k-dis.c: Likewise.
+
+Wed May 22 20:11:51 2002  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* Makefile.am (sh-dis.lo): Compile with @archdefs@.
+	* Makefile.in: regenerate.
+
+	* sh-dis.c (print_insn_sh): If coff and bfd_mach_sh, use arch_sh4
+	for disassembly.
+
+2002-05-22  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* mips-opc.c (mips_builtin_opcodes): Add drol, dror macros.
+
+Fri May 17 14:26:44 2002  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* disassemble.c (disassembler): Just use print_insn_sh for bfd_arch_sh.
+	* sh-dis.c (LITTLE_BIT): Delete.
+	(print_insn_sh, print_insn_shl): Deleted.
+	(print_insn_shx): Renamed to
+	(print_insn_sh).  No longer static.  Handle SHmedia instructions.
+	Use info->endian to determine endianness.
+	* sh64-dis.c (print_insn_sh64, print_insn_sh64l): Delete.
+	(print_insn_sh64x): No longer static.  Renamed to
+	(print_insn_sh64).  Removed pfun_compact and endian arguments.
+	If we got an uneven address to indicate SHmedia, adjust it.
+	Return -2 for SHcompact instructions.
+
+2002-05-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* acinclude.m4 (AM_INSTALL_LIBBFD): Fake to fool autotools.
+	* configure.in: Invoke AM_INSTALL_LIBBFD.
+	* Makefile.am (install-data-local): Move to..
+	(install_libopcodes): .. New target.
+	(uninstall_libopcodes): Likewise.
+	(install-bfdlibLTLIBRARIES): Likewise.
+	(uninstall-bfdlibLTLIBRARIES): Likewise.
+	(bfdlibdir): New.
+	(bfdincludedir): New.
+	(lib_LTLIBRARIES): Rename to bfdlib_LTLIBRARIES.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+
+2002-05-15  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* fr30-asm.c: Regenerate.
+	* fr30-desc.c: Regenerate.
+	* fr30-dis.c: Regenerate.
+	* m32r-asm.c: Regenerate.
+	* m32r-desc.c: Regenerate.
+	* m32r-dis.c: Regenerate.
+	* openrisc-asm.c: Regenerate.
+	* openrisc-desc.c: Regenerate.
+	* openrisc-dis.c: Regenerate.
+	* xstormy16-asm.c: Regenerate.
+	* xstormy16-desc.c: Regenerate.
+	* xstormy16-dis.c: Regenerate.
+
+2002-05-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* mips-dis.c (is_newabi): EABI is not a NewABI.
+
+2002-05-13  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* configure.in (shle-*-*elf*): Include sh64 support.
+	* configure: Regenerate.
+
 2002-04-28  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* vax-dis.c (print_insn_arg): Pass the insn info to print_insn_mode.
@@ -180,7 +309,7 @@ Mon Mar 18 21:10:43 CET 2002  Jan Hubicka  <jh@suse.cz>
 
 2002-02-20  Tom Rix  <trix@redhat.com>
 
-	* ppc-opc.c (powerpc_operands): Add WS feild.  Use for tlbre, tlbwe.
+	* ppc-opc.c (powerpc_operands): Add WS field.  Use for tlbre, tlbwe.
 
 2002-02-19  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 

@@ -1,6 +1,7 @@
 /* Handle HP SOM shared libraries for GDB, the GNU Debugger.
-   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -38,7 +39,6 @@
 #include "gdb-stabs.h"
 #include "gdb_stat.h"
 #include "gdbcmd.h"
-#include "assert.h"
 #include "language.h"
 #include "regcache.h"
 
@@ -319,7 +319,7 @@ som_solib_add_solib_objfile (struct so_list *so, char *name, int from_tty,
 		       sizeof (obj_private_data_t));
       obj_private->unwind_info = NULL;
       obj_private->so_info = NULL;
-      so->objfile->obj_private = (PTR) obj_private;
+      so->objfile->obj_private = obj_private;
     }
 
   obj_private = (obj_private_data_t *) so->objfile->obj_private;

@@ -3,6 +3,41 @@
 
 *** Changes since GDB 5.2:
 
+* ``gdbserver'' now supports multithreaded applications on some targets
+
+Support for multithreaded applications using LinuxThreads has been added
+for arm*-*-linux*, i[3456]86-*-linux*, mips*-*-linux*, powerpc*-*-linux*,
+and sh*-*-linux*.
+
+* GDB now supports C/C++ preprocessor macros.
+
+GDB now expands preprocessor macro invocations in C/C++ expressions,
+and provides various commands for showing macro definitions and how
+they expand.
+
+Most compilers don't include information about macros in the debugging
+information by default.  In GCC 3.1, for example, you need to compile
+your program with the options `-gdwarf-2 -g3'.  If the macro
+information is present in the executable, GDB will read it.
+
+Here are the new commands for working with macros:
+
+** macro expand EXPRESSION
+
+Expand any macro invocations in expression, and show the result.
+
+** show macro MACRO-NAME
+
+Show the definition of the macro named MACRO-NAME, and where it was
+defined.
+
+* Multi-arched targets.
+
+DEC Alpha (partial)				alpha*-*-*
+DEC VAX (partial)				vax-*-*
+NEC V850					v850-*-*
+National Semiconductor NS32000 (partial)	ns32k-*-*
+
 * New targets.
 
 Atmel AVR					avr*-*-*
@@ -11,6 +46,8 @@ Atmel AVR					avr*-*-*
 
 Alpha NetBSD					alpha*-*-netbsd*
 SH NetBSD					sh*-*-netbsdelf*
+MIPS NetBSD					mips*-*-netbsd*
+UltraSPARC NetBSD				sparc64-*-netbsd*
 
 * OBSOLETE configurations and files
 
@@ -28,14 +65,6 @@ AMD 29000 embedded with COFF			a29k-none-coff
 AMD 29000 embedded with a.out			a29k-none-aout
 
 testsuite/gdb.hp/gdb.threads-hp/		directory
-
-* Changes in VAX configurations.
-
-Multi-arch support is enabled for all VAX configurations.
-
-* Changes in Alpha configurations. 
-
-Multi-arch support is enabled for all Alpha configurations.
 
 * New command "set max-user-call-depth <nnn>"
 

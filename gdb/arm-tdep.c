@@ -36,10 +36,15 @@
 #include "solib-svr4.h"
 
 #include "arm-tdep.h"
+#include "gdb/sim-arm.h"
 
 #include "elf-bfd.h"
 #include "coff/internal.h"
 #include "elf/arm.h"
+
+#include "gdb_assert.h"
+
+static int arm_debug;
 
 /* Each OS has a different mechanism for accessing the various
    registers stored in the sigcontext structure.
@@ -92,23 +97,6 @@
 
 #define MSYMBOL_SIZE(msym)				\
 	((long) MSYMBOL_INFO (msym) & 0x7fffffff)
-
-/* This table matches the indicees assigned to enum arm_abi. 
-   Keep them in sync.  */
-
-static const char * const arm_abi_names[] =
-{
-  "<unknown>",
-  "ARM EABI (version 1)",
-  "ARM EABI (version 2)",
-  "GNU/Linux",
-  "NetBSD (a.out)",
-  "NetBSD (ELF)",
-  "APCS",
-  "FreeBSD",
-  "Windows CE",
-  NULL
-};
 
 /* Number of different reg name sets (options).  */
 static int num_flavor_options;
@@ -1424,104 +1412,125 @@ static CORE_ADDR
 arm_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		    int struct_return, CORE_ADDR struct_addr)
 {
-  char *fp;
-  int argnum, argreg, nstack_size;
+  CORE_ADDR fp;
+  int argnum;
+  int argreg;
+  int nstack;
+  int simd_argreg;
+  int second_pass;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   /* Walk through the list of args and determine how large a temporary
      stack is required.  Need to take care here as structs may be
-     passed on the stack, and we have to to push them.  */
-  nstack_size = -4 * REGISTER_SIZE;	/* Some arguments go into A1-A4.  */
-  if (struct_return)			/* The struct address goes in A1.  */
-    nstack_size += REGISTER_SIZE;
-
-  /* Walk through the arguments and add their size to nstack_size.  */
-  for (argnum = 0; argnum < nargs; argnum++)
+     passed on the stack, and we have to to push them.  On the second
+     pass, do the store.  */
+  nstack = 0;
+  fp = sp;
+  for (second_pass = 0; second_pass < 2; second_pass++)
     {
-      int len;
-      struct type *arg_type;
+      /* Compute the FP using the information computed during the
+         first pass.  */
+      if (second_pass)
+	fp = sp - nstack;
 
-      arg_type = check_typedef (VALUE_TYPE (args[argnum]));
-      len = TYPE_LENGTH (arg_type);
+      simd_argreg = 0;
+      argreg = ARM_A1_REGNUM;
+      nstack = 0;
 
-      nstack_size += len;
-    }
-
-  /* Allocate room on the stack, and initialize our stack frame
-     pointer.  */
-  fp = NULL;
-  if (nstack_size > 0)
-    {
-      sp -= nstack_size;
-      fp = (char *) sp;
-    }
-
-  /* Initialize the integer argument register pointer.  */
-  argreg = ARM_A1_REGNUM;
-
-  /* The struct_return pointer occupies the first parameter passing
-     register.  */
-  if (struct_return)
-    write_register (argreg++, struct_addr);
-
-  /* Process arguments from left to right.  Store as many as allowed
-     in the parameter passing registers (A1-A4), and save the rest on
-     the temporary stack.  */
-  for (argnum = 0; argnum < nargs; argnum++)
-    {
-      int len;
-      char *val;
-      CORE_ADDR regval;
-      enum type_code typecode;
-      struct type *arg_type, *target_type;
-
-      arg_type = check_typedef (VALUE_TYPE (args[argnum]));
-      target_type = TYPE_TARGET_TYPE (arg_type);
-      len = TYPE_LENGTH (arg_type);
-      typecode = TYPE_CODE (arg_type);
-      val = (char *) VALUE_CONTENTS (args[argnum]);
-
-#if 1
-      /* I don't know why this code was disable. The only logical use
-         for a function pointer is to call that function, so setting
-         the mode bit is perfectly fine.  FN */
-      /* If the argument is a pointer to a function, and it is a Thumb
-         function, set the low bit of the pointer.  */
-      if (TYPE_CODE_PTR == typecode
-	  && NULL != target_type
-	  && TYPE_CODE_FUNC == TYPE_CODE (target_type))
+      /* The struct_return pointer occupies the first parameter
+	 passing register.  */
+      if (struct_return)
 	{
-	  CORE_ADDR regval = extract_address (val, len);
-	  if (arm_pc_is_thumb (regval))
-	    store_address (val, len, MAKE_THUMB_ADDR (regval));
-	}
-#endif
-      /* Copy the argument to general registers or the stack in
-         register-sized pieces.  Large arguments are split between
-         registers and stack.  */
-      while (len > 0)
-	{
-	  int partial_len = len < REGISTER_SIZE ? len : REGISTER_SIZE;
-
-	  if (argreg <= ARM_LAST_ARG_REGNUM)
+	  if (second_pass)
 	    {
-	      /* It's an argument being passed in a general register.  */
-	      regval = extract_address (val, partial_len);
-	      write_register (argreg++, regval);
+	      if (arm_debug)
+		fprintf_unfiltered (gdb_stdlog,
+				    "struct return in %s = 0x%s\n",
+				    REGISTER_NAME (argreg),
+				    paddr (struct_addr));
+	      write_register (argreg, struct_addr);
 	    }
-	  else
+	  argreg++;
+	}
+
+      for (argnum = 0; argnum < nargs; argnum++)
+	{
+	  int len;
+	  struct type *arg_type;
+	  struct type *target_type;
+	  enum type_code typecode;
+	  char *val;
+	  
+	  arg_type = check_typedef (VALUE_TYPE (args[argnum]));
+	  len = TYPE_LENGTH (arg_type);
+	  target_type = TYPE_TARGET_TYPE (arg_type);
+	  typecode = TYPE_CODE (arg_type);
+	  val = VALUE_CONTENTS (args[argnum]);
+	  
+	  /* If the argument is a pointer to a function, and it is a
+	     Thumb function, create a LOCAL copy of the value and set
+	     the THUMB bit in it.  */
+	  if (second_pass
+	      && TYPE_CODE_PTR == typecode
+	      && target_type != NULL
+	      && TYPE_CODE_FUNC == TYPE_CODE (target_type))
 	    {
-	      /* Push the arguments onto the stack.  */
-	      write_memory ((CORE_ADDR) fp, val, REGISTER_SIZE);
-	      fp += REGISTER_SIZE;
+	      CORE_ADDR regval = extract_address (val, len);
+	      if (arm_pc_is_thumb (regval))
+		{
+		  val = alloca (len);
+		  store_address (val, len, MAKE_THUMB_ADDR (regval));
+		}
 	    }
 
-	  len -= partial_len;
-	  val += partial_len;
+	  /* Copy the argument to general registers or the stack in
+	     register-sized pieces.  Large arguments are split between
+	     registers and stack.  */
+	  while (len > 0)
+	    {
+	      int partial_len = len < REGISTER_SIZE ? len : REGISTER_SIZE;
+	      
+	      if (argreg <= ARM_LAST_ARG_REGNUM)
+		{
+		  /* The argument is being passed in a general purpose
+		     register.  */
+		  if (second_pass)
+		    {
+		      CORE_ADDR regval = extract_address (val,
+							  partial_len);
+		      if (arm_debug)
+			fprintf_unfiltered (gdb_stdlog,
+					    "arg %d in %s = 0x%s\n",
+					    argnum,
+					    REGISTER_NAME (argreg),
+					    phex (regval, REGISTER_SIZE));
+		      write_register (argreg, regval);
+		    }
+		  argreg++;
+		}
+	      else
+		{
+		  if (second_pass)
+		    {
+		      /* Push the arguments onto the stack.  */
+		      if (arm_debug)
+			fprintf_unfiltered (gdb_stdlog,
+					    "arg %d @ 0x%s + %d\n",
+					    argnum, paddr (fp), nstack);
+		      write_memory (fp + nstack, val, REGISTER_SIZE);
+		    }
+		  nstack += REGISTER_SIZE;
+		}
+	      
+	      len -= partial_len;
+	      val += partial_len;
+	    }
+
 	}
     }
 
-  /* Return adjusted stack pointer.  */
-  return sp;
+  /* Return the botom of the argument list (pointed to by fp).  */
+  return fp;
 }
 
 /* Pop the current frame.  So long as the frame info has been
@@ -1575,7 +1584,8 @@ print_fpu_flags (int flags)
 /* Print interesting information about the floating point processor
    (if present) or emulator.  */
 static void
-arm_print_float_info (void)
+arm_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
+		      struct frame_info *frame)
 {
   register unsigned long status = read_register (ARM_FPS_REGNUM);
   int type;
@@ -1652,6 +1662,27 @@ arm_register_virtual_size (int regnum)
     return STATUS_REGISTER_SIZE;
 }
 
+/* Map GDB internal REGNUM onto the Arm simulator register numbers.  */
+static int
+arm_register_sim_regno (int regnum)
+{
+  int reg = regnum;
+  gdb_assert (reg >= 0 && reg < NUM_REGS);
+
+  if (reg < NUM_GREGS)
+    return SIM_ARM_R0_REGNUM + reg;
+  reg -= NUM_GREGS;
+
+  if (reg < NUM_FREGS)
+    return SIM_ARM_FP0_REGNUM + reg;
+  reg -= NUM_FREGS;
+
+  if (reg < NUM_SREGS)
+    return SIM_ARM_FPS_REGNUM + reg;
+  reg -= NUM_SREGS;
+
+  internal_error (__FILE__, __LINE__, "Bad REGNUM %d", regnum);
+}
 
 /* NOTE: cagney/2001-08-20: Both convert_from_extended() and
    convert_to_extended() use floatformat_arm_ext_littlebyte_bigword.
@@ -2608,208 +2639,82 @@ arm_coff_make_msymbol_special(int val, struct minimal_symbol *msym)
 }
 
 
-static void
-process_note_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
+static enum gdb_osabi
+arm_elf_osabi_sniffer (bfd *abfd)
 {
-  enum arm_abi *os_ident_ptr = obj;
-  const char *name;
-  unsigned int sectsize;
-
-  name = bfd_get_section_name (abfd, sect);
-  sectsize = bfd_section_size (abfd, sect);
-
-  if (strcmp (name, ".note.ABI-tag") == 0 && sectsize > 0)
-    {
-      unsigned int name_length, data_length, note_type;
-      char *note;
-
-      /* If the section is larger than this, it's probably not what we are
-	 looking for.  */
-      if (sectsize > 128)
-	sectsize = 128;
-
-      note = alloca (sectsize);
-
-      bfd_get_section_contents (abfd, sect, note,
-                                (file_ptr) 0, (bfd_size_type) sectsize);
-
-      name_length = bfd_h_get_32 (abfd, note);
-      data_length = bfd_h_get_32 (abfd, note + 4);
-      note_type   = bfd_h_get_32 (abfd, note + 8);
-
-      if (name_length == 4 && data_length == 16 && note_type == 1
-          && strcmp (note + 12, "GNU") == 0)
-	{
-	  int os_number = bfd_h_get_32 (abfd, note + 16);
-
-	  /* The case numbers are from abi-tags in glibc.  */
-	  switch (os_number)
-	    {
-	    case 0 :
-	      *os_ident_ptr = ARM_ABI_LINUX;
-	      break;
-
-	    case 1 :
-	      internal_error
-		(__FILE__, __LINE__,
-		 "process_note_abi_sections: Hurd objects not supported");
-	      break;
-
-	    case 2 :
-	      internal_error
-		(__FILE__, __LINE__,
-		 "process_note_abi_sections: Solaris objects not supported");
-	      break;
-
-	    default :
-	      internal_error
-		(__FILE__, __LINE__,
-		 "process_note_abi_sections: unknown OS number %d",
-		 os_number);
-	      break;
-	    }
-	}
-    }
-  /* NetBSD uses a similar trick.  */
-  else if (strcmp (name, ".note.netbsd.ident") == 0 && sectsize > 0)
-    {
-      unsigned int name_length, desc_length, note_type;
-      char *note;
-
-      /* If the section is larger than this, it's probably not what we are
-	 looking for.  */
-      if (sectsize > 128)
-	sectsize = 128;
-
-      note = alloca (sectsize);
-
-      bfd_get_section_contents (abfd, sect, note,
-                                (file_ptr) 0, (bfd_size_type) sectsize);
-
-      name_length = bfd_h_get_32 (abfd, note);
-      desc_length = bfd_h_get_32 (abfd, note + 4);
-      note_type   = bfd_h_get_32 (abfd, note + 8);
-
-      if (name_length == 7 && desc_length == 4 && note_type == 1
-          && strcmp (note + 12, "NetBSD") == 0)
-	/* XXX Should we check the version here?
-	   Probably not necessary yet.  */
-	*os_ident_ptr = ARM_ABI_NETBSD_ELF;
-    }
-}
-
-/* Return one of the ELFOSABI_ constants for BFDs representing ELF
-   executables.  If it's not an ELF executable or if the OS/ABI couldn't
-   be determined, simply return -1.  */
-
-static int
-get_elfosabi (bfd *abfd)
-{
-  int elfosabi;
-  enum arm_abi arm_abi = ARM_ABI_UNKNOWN;
+  unsigned int elfosabi, eflags;
+  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
   elfosabi = elf_elfheader (abfd)->e_ident[EI_OSABI];
 
-  /* When elfosabi is 0 (ELFOSABI_NONE), this is supposed to indicate
-     that we're on a SYSV system.  However, GNU/Linux uses a note section
-     to record OS/ABI info, but leaves e_ident[EI_OSABI] zero.  So we
-     have to check the note sections too.
-
-     GNU/ARM tools set the EI_OSABI field to ELFOSABI_ARM, so handle that
-     as well.  */
-  if (elfosabi == 0 || elfosabi == ELFOSABI_ARM)
-    {
-      bfd_map_over_sections (abfd,
-			     process_note_abi_tag_sections,
-			     &arm_abi);
-    }
-
-  if (arm_abi != ARM_ABI_UNKNOWN)
-    return arm_abi;
-
   switch (elfosabi)
     {
-    case ELFOSABI_NONE:
-      /* Existing ARM Tools don't set this field, so look at the EI_FLAGS
-	 field for more information.  */
-
-      switch (EF_ARM_EABI_VERSION(elf_elfheader(abfd)->e_flags))
+    case ELFOSABI_NONE:  
+      /* When elfosabi is ELFOSABI_NONE (0), then the ELF structures in the
+	 file are conforming to the base specification for that machine 
+	 (there are no OS-specific extensions).  In order to determine the 
+	 real OS in use we must look for OS notes that have been added.  */
+      bfd_map_over_sections (abfd,
+			     generic_elf_osabi_sniff_abi_tag_sections,  
+			     &osabi);
+      if (osabi == GDB_OSABI_UNKNOWN)
 	{
-	case EF_ARM_EABI_VER1:
-	  return ARM_ABI_EABI_V1;
+	  /* Existing ARM tools don't set this field, so look at the EI_FLAGS
+	     field for more information.  */
+	  eflags = EF_ARM_EABI_VERSION(elf_elfheader(abfd)->e_flags);
+	  switch (eflags)
+	    {
+	    case EF_ARM_EABI_VER1:
+	      osabi = GDB_OSABI_ARM_EABI_V1;
+	      break;
 
-	case EF_ARM_EABI_VER2:
-	  return ARM_ABI_EABI_V2;
+	    case EF_ARM_EABI_VER2:
+	      osabi = GDB_OSABI_ARM_EABI_V2;
+	      break;
 
-	case EF_ARM_EABI_UNKNOWN:
-	  /* Assume GNU tools.  */
-	  return ARM_ABI_APCS;
+	    case EF_ARM_EABI_UNKNOWN:
+	      /* Assume GNU tools.  */
+	      osabi = GDB_OSABI_ARM_APCS;
+	      break;
 
-	default:
-	  internal_error (__FILE__, __LINE__,
-			  "get_elfosabi: Unknown ARM EABI version 0x%lx",
-			  EF_ARM_EABI_VERSION(elf_elfheader(abfd)->e_flags));
-
+	    default:
+	      internal_error (__FILE__, __LINE__,
+			      "arm_elf_osabi_sniffer: Unknown ARM EABI "
+			      "version 0x%x", eflags);
+	    }
 	}
       break;
 
-    case ELFOSABI_NETBSD:
-      return ARM_ABI_NETBSD_ELF;
+    case ELFOSABI_ARM:
+      /* GNU tools use this value.  Check note sections in this case,
+	 as well.  */
+      bfd_map_over_sections (abfd,
+			     generic_elf_osabi_sniff_abi_tag_sections, 
+			     &osabi);
+      if (osabi == GDB_OSABI_UNKNOWN)
+	{
+	  /* Assume APCS ABI.  */
+	  osabi = GDB_OSABI_ARM_APCS;
+	}
+      break;
 
     case ELFOSABI_FREEBSD:
-      return ARM_ABI_FREEBSD;
+      osabi = GDB_OSABI_FREEBSD_ELF;
+      break;
+
+    case ELFOSABI_NETBSD:
+      osabi = GDB_OSABI_NETBSD_ELF;
+      break;
 
     case ELFOSABI_LINUX:
-      return ARM_ABI_LINUX;
-
-    case ELFOSABI_ARM:
-      /* Assume GNU tools with the old APCS abi.  */
-      return ARM_ABI_APCS;
-
-    default:
+      osabi = GDB_OSABI_LINUX;
+      break;
     }
 
-  return ARM_ABI_UNKNOWN;
+  return osabi;
 }
 
-struct arm_abi_handler
-{
-  struct arm_abi_handler *next;
-  enum arm_abi abi;
-  void (*init_abi)(struct gdbarch_info, struct gdbarch *);
-};
-
-struct arm_abi_handler *arm_abi_handler_list = NULL;
-
-void
-arm_gdbarch_register_os_abi (enum arm_abi abi,
-			     void (*init_abi)(struct gdbarch_info,
-					      struct gdbarch *))
-{
-  struct arm_abi_handler **handler_p;
-
-  for (handler_p = &arm_abi_handler_list; *handler_p != NULL;
-       handler_p = &(*handler_p)->next)
-    {
-      if ((*handler_p)->abi == abi)
-	{
-	  internal_error
-	    (__FILE__, __LINE__,
-	     "arm_gdbarch_register_os_abi: A handler for this ABI variant (%d)"
-	     " has already been registered", (int)abi);
-	  /* If user wants to continue, override previous definition.  */
-	  (*handler_p)->init_abi = init_abi;
-	  return;
-	}
-    }
-
-  (*handler_p)
-    = (struct arm_abi_handler *) xmalloc (sizeof (struct arm_abi_handler));
-  (*handler_p)->next = NULL;
-  (*handler_p)->abi = abi;
-  (*handler_p)->init_abi = init_abi;
-}
-
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -2822,36 +2727,31 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
-  enum arm_abi arm_abi = ARM_ABI_UNKNOWN;
-  struct arm_abi_handler *abi_handler;
+  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
   /* Try to deterimine the ABI of the object we are loading.  */
 
   if (info.abfd != NULL)
     {
-      switch (bfd_get_flavour (info.abfd))
+      osabi = gdbarch_lookup_osabi (info.abfd);
+      if (osabi == GDB_OSABI_UNKNOWN)
 	{
-	case bfd_target_elf_flavour:
-	  arm_abi = get_elfosabi (info.abfd);
-	  break;
+	  switch (bfd_get_flavour (info.abfd))
+	    {
+	    case bfd_target_aout_flavour:
+	      /* Assume it's an old APCS-style ABI.  */
+	      osabi = GDB_OSABI_ARM_APCS;
+	      break;
 
-	case bfd_target_aout_flavour:
-	  if (strcmp (bfd_get_target(info.abfd), "a.out-arm-netbsd") == 0)
-	    arm_abi = ARM_ABI_NETBSD_AOUT;
-	  else
-	    /* Assume it's an old APCS-style ABI.  */
-	    arm_abi = ARM_ABI_APCS;
-	  break;
+	    case bfd_target_coff_flavour:
+	      /* Assume it's an old APCS-style ABI.  */
+	      /* XXX WinCE?  */
+	      osabi = GDB_OSABI_ARM_APCS;
+	      break;
 
-	case bfd_target_coff_flavour:
-	  /* Assume it's an old APCS-style ABI.  */
-	  /* XXX WinCE?  */
-	  arm_abi = ARM_ABI_APCS;
-	  break;
-
-	default:
-	  /* Not sure what to do here, leave the ABI as unknown.  */
-	  break;
+	    default:
+	      /* Leave it as "unknown".  */
+	    }
 	}
     }
 
@@ -2862,22 +2762,14 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
       /* Make sure the ABI selection matches.  */
       tdep = gdbarch_tdep (arches->gdbarch);
-      if (tdep && tdep->arm_abi == arm_abi)
+      if (tdep && tdep->osabi == osabi)
 	return arches->gdbarch;
     }
 
   tdep = xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
 
-  tdep->arm_abi = arm_abi;
-  if (arm_abi < ARM_ABI_INVALID)
-    tdep->abi_name = arm_abi_names[arm_abi];
-  else
-    {
-      internal_error (__FILE__, __LINE__, "Invalid setting of arm_abi %d",
-		      (int) arm_abi);
-      tdep->abi_name = "<invalid>";
-    }
+  tdep->osabi = osabi;
 
   /* This is the way it has always defaulted.  */
   tdep->fp_model = ARM_FLOAT_FPA;
@@ -3025,16 +2917,19 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_max_register_virtual_size (gdbarch, FP_REGISTER_VIRTUAL_SIZE);
   set_gdbarch_register_virtual_type (gdbarch, arm_register_type);
 
+  /* Internal <-> external register number maps.  */
+  set_gdbarch_register_sim_regno (gdbarch, arm_register_sim_regno);
+
   /* Integer registers are 4 bytes.  */
   set_gdbarch_register_size (gdbarch, 4);
   set_gdbarch_register_name (gdbarch, arm_register_name);
 
   /* Returning results.  */
-  set_gdbarch_extract_return_value (gdbarch, arm_extract_return_value);
+  set_gdbarch_deprecated_extract_return_value (gdbarch, arm_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, arm_store_return_value);
   set_gdbarch_store_struct_return (gdbarch, arm_store_struct_return);
   set_gdbarch_use_struct_convention (gdbarch, arm_use_struct_convention);
-  set_gdbarch_extract_struct_value_address (gdbarch,
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
 					    arm_extract_struct_value_address);
 
   /* Single stepping.  */
@@ -3047,38 +2942,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					 arm_coff_make_msymbol_special);
 
   /* Hook in the ABI-specific overrides, if they have been registered.  */
-  if (arm_abi == ARM_ABI_UNKNOWN)
-    {
-      /* Don't complain about not knowing the ABI variant if we don't 
-	 have an inferior.  */
-      if (info.abfd)
-	fprintf_filtered
-	  (gdb_stderr, "GDB doesn't recognize the ABI of the inferior.  "
-	   "Attempting to continue with the default ARM settings");
-    }
-  else
-    {
-      for (abi_handler = arm_abi_handler_list; abi_handler != NULL;
-	   abi_handler = abi_handler->next)
-	if (abi_handler->abi == arm_abi)
-	  break;
-
-      if (abi_handler)
-	abi_handler->init_abi (info, gdbarch);
-      else
-	{
-	  /* We assume that if GDB_MULTI_ARCH is less than 
-	     GDB_MULTI_ARCH_TM that an ABI variant can be supported by
-	     overriding definitions in this file.  */
-	  if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-	    fprintf_filtered
-	      (gdb_stderr,
-	       "A handler for the ABI variant \"%s\" is not built into this "
-	       "configuration of GDB.  "
-	       "Attempting to continue with the default ARM settings",
-	       arm_abi_names[arm_abi]);
-	}
-    }
+  gdbarch_init_osabi (info, gdbarch, osabi);
 
   /* Now we have tuned the configuration, set a few final things,
      based on what the OS ABI has told us.  */
@@ -3144,12 +3008,8 @@ arm_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   if (tdep == NULL)
     return;
 
-  if (tdep->abi_name != NULL)
-    fprintf_unfiltered (file, "arm_dump_tdep: ABI = %s\n", tdep->abi_name);
-  else
-    internal_error (__FILE__, __LINE__,
-		    "arm_dump_tdep: illegal setting of tdep->arm_abi (%d)",
-		    (int) tdep->arm_abi);
+  fprintf_unfiltered (file, "arm_dump_tdep: OS ABI = %s\n",
+		      gdbarch_osabi_name (tdep->osabi));
 
   fprintf_unfiltered (file, "arm_dump_tdep: Lowest pc = 0x%lx",
 		      (unsigned long) tdep->lowest_pc);
@@ -3191,10 +3051,18 @@ _initialize_arm_tdep (void)
   if (GDB_MULTI_ARCH)
     gdbarch_register (bfd_arch_arm, arm_gdbarch_init, arm_dump_tdep);
 
+  /* Register an ELF OS ABI sniffer for ARM binaries.  */
+  gdbarch_register_osabi_sniffer (bfd_arch_arm,
+				  bfd_target_elf_flavour,
+				  arm_elf_osabi_sniffer);
+
   /* Register some ABI variants for embedded systems.  */
-  arm_gdbarch_register_os_abi (ARM_ABI_EABI_V1, arm_init_abi_eabi_v1);
-  arm_gdbarch_register_os_abi (ARM_ABI_EABI_V2, arm_init_abi_eabi_v2);
-  arm_gdbarch_register_os_abi (ARM_ABI_APCS, arm_init_abi_apcs);
+  gdbarch_register_osabi (bfd_arch_arm, GDB_OSABI_ARM_EABI_V1,
+                          arm_init_abi_eabi_v1);
+  gdbarch_register_osabi (bfd_arch_arm, GDB_OSABI_ARM_EABI_V2,
+                          arm_init_abi_eabi_v2);
+  gdbarch_register_osabi (bfd_arch_arm, GDB_OSABI_ARM_APCS,
+                          arm_init_abi_apcs);
 
   tm_print_insn = gdb_print_insn_arm;
 
@@ -3259,4 +3127,10 @@ The valid values are:\n");
   prologue_cache.saved_regs = NULL;
   prologue_cache.extra_info = (struct frame_extra_info *)
     xcalloc (1, sizeof (struct frame_extra_info));
+
+  /* Debugging flag.  */
+  add_show_from_set (add_set_cmd ("arm", class_maintenance, var_zinteger,
+				  &arm_debug, "Set arm debugging.\n\
+When non-zero, arm specific debugging is enabled.", &setdebuglist),
+		     &showdebuglist);
 }

@@ -22,7 +22,7 @@
 #define TM_AIX_H
 
 #include "ia64/tm-ia64.h"
-#include "tm-sysv4.h"
+#include "config/tm-sysv4.h"
 
 #define TARGET_ELF64
 

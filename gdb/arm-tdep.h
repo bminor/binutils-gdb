@@ -18,6 +18,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#include "osabi.h"
+
 /* Register numbers of various important registers.  Note that some of
    these values are "real" register numbers, and correspond to the
    general registers of the machine, and some are "phony" register
@@ -104,23 +106,6 @@ enum gdb_regnum {
 #define FLAG_C		0x20000000
 #define FLAG_V		0x10000000
 
-/* ABI variants that we know about.  If you add to this enum, please 
-   update the table of names in tm-arm.c.  */
-enum arm_abi
-{
-  ARM_ABI_UNKNOWN = 0,
-  ARM_ABI_EABI_V1,
-  ARM_ABI_EABI_V2,
-  ARM_ABI_LINUX,
-  ARM_ABI_NETBSD_AOUT,
-  ARM_ABI_NETBSD_ELF,
-  ARM_ABI_APCS,
-  ARM_ABI_FREEBSD,
-  ARM_ABI_WINCE,
-
-  ARM_ABI_INVALID	/* Keep this last.  */
-};
-
 /* Type of floating-point code in use by inferior.  There are really 3 models
    that are traditionally supported (plus the endianness issue), but gcc can
    only generate 2 of those.  The third is APCS_FLOAT, where arguments to
@@ -139,8 +124,7 @@ enum arm_float_model
 /* Target-dependent structure in gdbarch.  */
 struct gdbarch_tdep
 {
-  enum arm_abi arm_abi;		/* OS/ABI of inferior.  */
-  const char *abi_name;		/* Name of the above.  */
+  enum gdb_osabi osabi;		/* OS/ABI of inferior.  */
 
   enum arm_float_model fp_model; /* Floating point calling conventions.  */
 
@@ -170,10 +154,3 @@ int arm_pc_is_thumb (CORE_ADDR);
 CORE_ADDR thumb_get_next_pc (CORE_ADDR);
 
 CORE_ADDR arm_get_next_pc (CORE_ADDR);
-
-/* How a OS variant tells the ARM generic code that it can handle an ABI
-   type. */
-void
-arm_gdbarch_register_os_abi (enum arm_abi abi,
-			     void (*init_abi)(struct gdbarch_info,
-					      struct gdbarch *));

@@ -21,7 +21,7 @@
 #ifndef NM_ARMLINUX_H
 #define NM_ARMLINUX_H
 
-#include "nm-linux.h"
+#include "config/nm-linux.h"
 
 /* ptrace register ``addresses'' are absolute.  */
 

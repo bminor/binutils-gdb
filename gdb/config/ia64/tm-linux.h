@@ -24,7 +24,7 @@
 #define IA64_GNULINUX_TARGET
 
 #include "ia64/tm-ia64.h"
-#include "tm-linux.h"
+#include "config/tm-linux.h"
 
 #define TARGET_ELF64
 

@@ -270,10 +270,10 @@ struct breakpoint
        it the watchpoint_scope breakpoint or something like that. FIXME).  */
     struct breakpoint *related_breakpoint;
 
-    /* Holds the frame address which identifies the frame this watchpoint
-       should be evaluated in, or NULL if the watchpoint should be evaluated
-       on the outermost frame.  */
-    CORE_ADDR watchpoint_frame;
+    /* Holds the frame address which identifies the frame this
+       watchpoint should be evaluated in, or `null' if the watchpoint
+       should be evaluated on the outermost frame.  */
+    struct frame_id watchpoint_frame;
 
     /* Thread number for thread-specific breakpoint, or -1 if don't care */
     int thread;

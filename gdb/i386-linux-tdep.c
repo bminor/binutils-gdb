@@ -33,9 +33,12 @@
 
 #include "solib-svr4.h"		/* For struct link_map_offsets.  */
 
+#include "i386-tdep.h"
+#include "i386-linux-tdep.h"
+
 /* Return the name of register REG.  */
 
-char *
+static char *
 i386_linux_register_name (int reg)
 {
   /* Deal with the extra "orig_eax" pseudo register.  */
@@ -45,7 +48,7 @@ i386_linux_register_name (int reg)
   return i386_register_name (reg);
 }
 
-int
+static int
 i386_linux_register_byte (int reg)
 {
   /* Deal with the extra "orig_eax" pseudo register.  */
@@ -56,7 +59,7 @@ i386_linux_register_byte (int reg)
   return i386_register_byte (reg);
 }
 
-int
+static int
 i386_linux_register_raw_size (int reg)
 {
   /* Deal with the extra "orig_eax" pseudo register.  */
@@ -224,8 +227,8 @@ i386_linux_rt_sigtramp_start (CORE_ADDR pc)
 
 /* Return whether PC is in a GNU/Linux sigtramp routine.  */
 
-int
-i386_linux_in_sigtramp (CORE_ADDR pc, char *name)
+static int
+i386_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
   if (name)
     return STREQ ("__restore", name) || STREQ ("__restore_rt", name);
@@ -379,7 +382,7 @@ i386_linux_saved_pc_after_call (struct frame_info *frame)
 
 /* Set the program counter for process PTID to PC.  */
 
-void
+static void
 i386_linux_write_pc (CORE_ADDR pc, ptid_t ptid)
 {
   write_register_pid (PC_REGNUM, pc, ptid);
@@ -496,7 +499,7 @@ i386_linux_skip_solib_resolver (CORE_ADDR pc)
    from a GDB that was not built on an GNU/Linux x86 host (for cross
    debugging).  */
 
-struct link_map_offsets *
+static struct link_map_offsets *
 i386_linux_svr4_fetch_link_map_offsets (void)
 {
   static struct link_map_offsets lmo;
@@ -527,4 +530,54 @@ i386_linux_svr4_fetch_link_map_offsets (void)
     }
 
   return lmp;
+}
+
+
+static void
+i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  /* GNU/Linux uses ELF.  */
+  i386_elf_init_abi (info, gdbarch);
+
+  /* We support the SSE registers on GNU/Linux.  */
+  tdep->num_xmm_regs = I386_NUM_XREGS - 1;
+  /* set_gdbarch_num_regs (gdbarch, I386_SSE_NUM_REGS); */
+
+  /* Since we have the extra "orig_eax" register on GNU/Linux, we have
+     to adjust a few things.  */
+
+  set_gdbarch_write_pc (gdbarch, i386_linux_write_pc);
+  set_gdbarch_num_regs (gdbarch, I386_SSE_NUM_REGS + 1);
+  set_gdbarch_register_name (gdbarch, i386_linux_register_name);
+  set_gdbarch_register_bytes (gdbarch, I386_SSE_SIZEOF_REGS + 4);
+  set_gdbarch_register_byte (gdbarch, i386_linux_register_byte);
+  set_gdbarch_register_raw_size (gdbarch, i386_linux_register_raw_size);
+
+  tdep->jb_pc_offset = 20;	/* From <bits/setjmp.h>.  */
+
+  /* When the i386 Linux kernel calls a signal handler, the return
+     address points to a bit of code on the stack.  These definitions
+     are used to identify this bit of code as a signal trampoline in
+     order to support backtracing through calls to signal handlers.  */
+
+  set_gdbarch_pc_in_sigtramp (gdbarch, i386_linux_pc_in_sigtramp);
+  set_gdbarch_frame_chain (gdbarch, i386_linux_frame_chain);
+  set_gdbarch_frame_saved_pc (gdbarch, i386_linux_frame_saved_pc);
+  set_gdbarch_saved_pc_after_call (gdbarch, i386_linux_saved_pc_after_call);
+  tdep->sigtramp_saved_pc = i386_linux_sigtramp_saved_pc;
+
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+				       i386_linux_svr4_fetch_link_map_offsets);
+}
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern void _initialize_i386_linux_tdep (void);
+
+void
+_initialize_i386_linux_tdep (void)
+{
+  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_LINUX,
+			  i386_linux_init_abi);
 }

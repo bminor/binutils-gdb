@@ -24,11 +24,6 @@
 #define HAVE_I387_REGS
 #include "i386/tm-i386v4.h"
 
-/* We use stabs-in-ELF with the DWARF register numbering scheme.  */
-
-#undef STAB_REG_TO_REGNUM
-#define STAB_REG_TO_REGNUM(reg) i386_dwarf_reg_to_regnum ((reg))
-
 /* If the current gcc for for this target does not produce correct
    debugging information for float parameters, both prototyped and
    unprototyped, then define this macro.  This forces gdb to always
@@ -36,15 +31,6 @@
    callee. */
 
 #define COERCE_FLOAT_TO_DOUBLE(formal, actual) (1)
-
-/* Signal handler frames under Solaris 2 are recognized by a return address
-   of 0xFFFFFFFF, the third parameter on the signal handler stack is
-   a pointer to an ucontext.  */
-#undef sigtramp_saved_pc
-#undef I386V4_SIGTRAMP_SAVED_PC
-#define SIGCONTEXT_PC_OFFSET (36 + 14 * 4)
-#undef IN_SIGTRAMP
-#define IN_SIGTRAMP(pc, name) (pc == 0xFFFFFFFF)
 
 /* The SunPRO compiler puts out 0 instead of the address in N_SO symbols,
    and for SunPRO 3.0, N_FUN symbols too.  */

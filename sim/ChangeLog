@@ -1,3 +1,16 @@
+Thu Jun  6 12:34:13 2002  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (ChangeLog): New makefile variable.
+	* README-HACKING: Mention the ChangeLog makefile variable.
+
+2002-06-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* tic80/: Delete directory.
+
+2002-05-16  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* MAINTAINERS: Update my email address.
+
 2002-03-06  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* MAINTAINERS: Record self as maintainer of m68hc11 simulator.

@@ -20,4 +20,4 @@
 
 /* Include the generic hurd definitions.  */
 
-#include "nm-gnu.h"
+#include "config/nm-gnu.h"

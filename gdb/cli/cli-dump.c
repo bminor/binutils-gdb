@@ -623,18 +623,16 @@ restore_command (char *args, int from_tty)
       /* Parse offset (optional). */
       if (args != NULL && *args != '\0')
       data.load_offset = 
-	parse_and_eval_address (scan_expression_with_cleanup (&args, 
-							      NULL));
+	parse_and_eval_long (scan_expression_with_cleanup (&args, NULL));
       if (args != NULL && *args != '\0')
 	{
 	  /* Parse start address (optional). */
 	  data.load_start = 
-	    parse_and_eval_address (scan_expression_with_cleanup (&args, 
-								  NULL));
+	    parse_and_eval_long (scan_expression_with_cleanup (&args, NULL));
 	  if (args != NULL && *args != '\0')
 	    {
 	      /* Parse end address (optional). */
-	      data.load_end = parse_and_eval_address (args);
+	      data.load_end = parse_and_eval_long (args);
 	      if (data.load_end <= data.load_start)
 		error ("Start must be less than end.");
 	    }

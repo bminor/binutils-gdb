@@ -4163,7 +4163,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_push_arguments (gdbarch, cris_abi_original_push_arguments);
       set_gdbarch_store_return_value (gdbarch, 
                                       cris_abi_original_store_return_value);
-      set_gdbarch_extract_return_value 
+      set_gdbarch_deprecated_extract_return_value 
         (gdbarch, cris_abi_original_extract_return_value);
       set_gdbarch_reg_struct_has_addr 
         (gdbarch, cris_abi_original_reg_struct_has_addr);
@@ -4173,8 +4173,8 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_double_bit (gdbarch, 64);
       set_gdbarch_push_arguments (gdbarch, cris_abi_v2_push_arguments);
       set_gdbarch_store_return_value (gdbarch, cris_abi_v2_store_return_value);
-      set_gdbarch_extract_return_value (gdbarch, 
-                                        cris_abi_v2_extract_return_value);
+      set_gdbarch_deprecated_extract_return_value
+	(gdbarch, cris_abi_v2_extract_return_value);
       set_gdbarch_reg_struct_has_addr (gdbarch, 
                                        cris_abi_v2_reg_struct_has_addr);
     }
@@ -4297,8 +4297,8 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pop_frame (gdbarch, cris_pop_frame);
 
   set_gdbarch_store_struct_return (gdbarch, cris_store_struct_return);
-  set_gdbarch_extract_struct_value_address (gdbarch, 
-                                            cris_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_struct_value_address
+    (gdbarch, cris_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, cris_use_struct_convention);
 
   set_gdbarch_frame_init_saved_regs (gdbarch, cris_frame_init_saved_regs);

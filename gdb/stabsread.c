@@ -142,7 +142,7 @@ static struct type *read_struct_type (char **, struct type *,
 static struct type *read_array_type (char **, struct type *,
 				     struct objfile *);
 
-static struct type **read_args (char **, int, struct objfile *);
+static struct field *read_args (char **, int, struct objfile *, int *, int *);
 
 static int
 read_cpp_abbrev (struct field_info *, char **, struct type *,
@@ -2780,7 +2780,8 @@ again:
 	{
 	  struct type *domain = read_type (pp, objfile);
 	  struct type *return_type;
-	  struct type **args;
+	  struct field *args;
+	  int nargs, varargs;
 
 	  if (**pp != ',')
 	    /* Invalid member type data format.  */
@@ -2789,9 +2790,10 @@ again:
 	    ++(*pp);
 
 	  return_type = read_type (pp, objfile);
-	  args = read_args (pp, ';', objfile);
+	  args = read_args (pp, ';', objfile, &nargs, &varargs);
 	  type = dbx_alloc_type (typenums, objfile);
-	  smash_to_method_type (type, domain, return_type, args);
+	  smash_to_method_type (type, domain, return_type, args,
+				nargs, varargs);
 	}
       break;
 
@@ -4929,38 +4931,39 @@ handle_true_range:
    and terminated with END.  Return the list of types read in, or (struct type
    **)-1 if there is an error.  */
 
-static struct type **
-read_args (char **pp, int end, struct objfile *objfile)
+static struct field *
+read_args (char **pp, int end, struct objfile *objfile, int *nargsp,
+	   int *varargsp)
 {
   /* FIXME!  Remove this arbitrary limit!  */
-  struct type *types[1024], **rval;	/* allow for fns of 1023 parameters */
-  int n = 0;
+  struct type *types[1024];	/* allow for fns of 1023 parameters */
+  int n = 0, i;
+  struct field *rval;
 
   while (**pp != end)
     {
       if (**pp != ',')
 	/* Invalid argument list: no ','.  */
-	return (struct type **) -1;
+	return (struct field *) -1;
       (*pp)++;
       STABS_CONTINUE (pp, objfile);
       types[n++] = read_type (pp, objfile);
     }
   (*pp)++;			/* get past `end' (the ':' character) */
 
-  if (n == 1)
-    {
-      rval = (struct type **) xmalloc (2 * sizeof (struct type *));
-    }
-  else if (TYPE_CODE (types[n - 1]) != TYPE_CODE_VOID)
-    {
-      rval = (struct type **) xmalloc ((n + 1) * sizeof (struct type *));
-      memset (rval + n, 0, sizeof (struct type *));
-    }
+  if (TYPE_CODE (types[n - 1]) != TYPE_CODE_VOID)
+    *varargsp = 1;
   else
     {
-      rval = (struct type **) xmalloc (n * sizeof (struct type *));
+      n--;
+      *varargsp = 0;
     }
-  memcpy (rval, types, n * sizeof (struct type *));
+
+  rval = (struct field *) xmalloc (n * sizeof (struct field));
+  memset (rval, 0, n * sizeof (struct field));
+  for (i = 0; i < n; i++)
+    rval[i].type = types[i];
+  *nargsp = n;
   return rval;
 }
 

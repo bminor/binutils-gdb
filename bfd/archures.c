@@ -193,6 +193,7 @@ DESCRIPTION
 .#define bfd_mach_d10v_ts2	2
 .#define bfd_mach_d10v_ts3	3
 .  bfd_arch_d30v,      {* Mitsubishi D30V *}
+.  bfd_arch_dlx,       {* DLX *}
 .  bfd_arch_m68hc11,   {* Motorola 68HC11 *}
 .  bfd_arch_m68hc12,   {* Motorola 68HC12 *}
 .  bfd_arch_z8k,       {* Zilog Z8000 *}
@@ -312,6 +313,7 @@ extern const bfd_arch_info_type bfd_avr_arch;
 extern const bfd_arch_info_type bfd_cris_arch;
 extern const bfd_arch_info_type bfd_d10v_arch;
 extern const bfd_arch_info_type bfd_d30v_arch;
+extern const bfd_arch_info_type bfd_dlx_arch;
 extern const bfd_arch_info_type bfd_fr30_arch;
 extern const bfd_arch_info_type bfd_h8300_arch;
 extern const bfd_arch_info_type bfd_h8500_arch;
@@ -365,6 +367,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_cris_arch,
     &bfd_d10v_arch,
     &bfd_d30v_arch,
+    &bfd_dlx_arch,
     &bfd_fr30_arch,
     &bfd_h8300_arch,
     &bfd_h8500_arch,

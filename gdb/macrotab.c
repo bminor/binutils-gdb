@@ -660,27 +660,64 @@ find_definition (const char *name,
 }
 
 
-/* If NAME already has a definition in scope at LINE in FILE, and
-   return the key.  Otherwise, return zero.  */
+/* If NAME already has a definition in scope at LINE in SOURCE, return
+   the key.  If the old definition is different from the definition
+   given by KIND, ARGC, ARGV, and REPLACEMENT, complain, too.
+   Otherwise, return zero.  (ARGC and ARGV are meaningless unless KIND
+   is `macro_function_like'.)  */
 static struct macro_key *
 check_for_redefinition (struct macro_source_file *source, int line,
-                        const char *name)
+                        const char *name, enum macro_kind kind,
+                        int argc, const char **argv,
+                        const char *replacement)
 {
   splay_tree_node n = find_definition (name, source, line);
 
-  /* This isn't really right.  There's nothing wrong with redefining a
-     macro if the new replacement list is the same as the old one.  */
   if (n)
     {
       struct macro_key *found_key = (struct macro_key *) n->key;
-      static struct complaint macro_redefined = {
-        "macro `%s' redefined at %s:%d;"
-        "original definition at %s:%d", 0, 0
-      };
-      complain (&macro_redefined, name,
-                source->filename, line,
-                found_key->start_file->filename,
-                found_key->start_line);
+      struct macro_definition *found_def
+        = (struct macro_definition *) n->value;
+      int same = 1;
+
+      /* Is this definition the same as the existing one?
+         According to the standard, this comparison needs to be done
+         on lists of tokens, not byte-by-byte, as we do here.  But
+         that's too hard for us at the moment, and comparing
+         byte-by-byte will only yield false negatives (i.e., extra
+         warning messages), not false positives (i.e., unnoticed
+         definition changes).  */
+      if (kind != found_def->kind)
+        same = 0;
+      else if (strcmp (replacement, found_def->replacement))
+        same = 0;
+      else if (kind == macro_function_like)
+        {
+          if (argc != found_def->argc)
+            same = 0;
+          else
+            {
+              int i;
+
+              for (i = 0; i < argc; i++)
+                if (strcmp (argv[i], found_def->argv[i]))
+                  same = 0;
+            }
+        }
+
+      if (! same)
+        {
+          static struct complaint macro_redefined = {
+            "macro `%s' redefined at %s:%d; original definition at %s:%d",
+            0, 0
+          };
+          complain (&macro_redefined,
+                    name,
+                    source->filename, line,
+                    found_key->start_file->filename,
+                    found_key->start_line);
+        }
+
       return found_key;
     }
   else
@@ -696,7 +733,10 @@ macro_define_object (struct macro_source_file *source, int line,
   struct macro_key *k;
   struct macro_definition *d;
 
-  k = check_for_redefinition (source, line, name);
+  k = check_for_redefinition (source, line, 
+                              name, macro_object_like,
+                              0, 0,
+                              replacement);
 
   /* If we're redefining a symbol, and the existing key would be
      identical to our new key, then the splay_tree_insert function
@@ -726,7 +766,10 @@ macro_define_function (struct macro_source_file *source, int line,
   struct macro_key *k;
   struct macro_definition *d;
 
-  k = check_for_redefinition (source, line, name);
+  k = check_for_redefinition (source, line,
+                              name, macro_function_like,
+                              argc, argv,
+                              replacement);
 
   /* See comments about duplicate keys in macro_define_object.  */
   if (k && ! key_compare (k, name, source, line))

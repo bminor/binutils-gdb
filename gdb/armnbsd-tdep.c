@@ -21,6 +21,8 @@
 #include "defs.h"
 
 #include "arm-tdep.h"
+#include "nbsd-tdep.h"
+#include "solib-svr4.h"
 
 /* Description of the longjmp buffer.  */
 #define JB_PC 24
@@ -74,12 +76,29 @@ arm_netbsd_elf_init_abi (struct gdbarch_info info,
 
   arm_netbsd_init_abi_common (info, gdbarch);
 
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+                                nbsd_ilp32_solib_svr4_fetch_link_map_offsets);
+
   tdep->fp_model = ARM_FLOAT_SOFT_VFP;
+}
+
+static enum gdb_osabi
+arm_netbsd_aout_osabi_sniffer (bfd *abfd)
+{
+  if (strcmp (bfd_get_target (abfd), "a.out-arm-netbsd") == 0)
+    return GDB_OSABI_NETBSD_AOUT;
+
+  return GDB_OSABI_UNKNOWN;
 }
 
 void
 _initialize_arm_netbsd_tdep (void)
 {
-  arm_gdbarch_register_os_abi (ARM_ABI_NETBSD_AOUT, arm_netbsd_aout_init_abi);
-  arm_gdbarch_register_os_abi (ARM_ABI_NETBSD_ELF, arm_netbsd_elf_init_abi);
+  gdbarch_register_osabi_sniffer (bfd_arch_arm, bfd_target_aout_flavour,
+				  arm_netbsd_aout_osabi_sniffer);
+
+  gdbarch_register_osabi (bfd_arch_arm, GDB_OSABI_NETBSD_AOUT,
+                          arm_netbsd_aout_init_abi);
+  gdbarch_register_osabi (bfd_arch_arm, GDB_OSABI_NETBSD_ELF,
+                          arm_netbsd_elf_init_abi);
 }

@@ -85,7 +85,6 @@ XScale_cp15_init (ARMul_State * state ATTRIBUTE_UNUSED)
 
   /* Initialise the ARM Control Register.  */
   XScale_cp15_opcode_2_is_0_Regs[1] = 0x00000078;
-
 }
 
 /* Check an access to a register.  */
@@ -253,7 +252,7 @@ write_cp15_reg (ARMul_State * state,
 	  value &= 0x00003b87;
 	  value |= 0x00000078;
 
-          /* Change the endianness if necessary */
+          /* Change the endianness if necessary.  */
           if ((value & ARMul_CP15_R1_ENDIAN) !=
 	      (XScale_cp15_opcode_2_is_0_Regs [reg] & ARMul_CP15_R1_ENDIAN))
 	    {
@@ -475,12 +474,19 @@ XScale_check_memacc (ARMul_State * state, ARMword * address, int store)
   /* Check for PID-ification.
      XXX BTB access support will require this test failing.  */
   r0 = (read_cp15_reg (13, 0, 0) & 0xfe000000);
-  if (r0 && (*address & 0xfe000000) == 0)
-    *address |= r0;
+  if (r0 && (* address & 0xfe000000) == 0)
+    * address |= r0;
 
   /* Check alignment fault enable/disable.  */
-  if ((read_cp15_reg (1, 0, 0) & ARMul_CP15_R1_ALIGN) && (*address & 3))
-    ARMul_Abort (state, ARMul_DataAbortV);
+  if ((read_cp15_reg (1, 0, 0) & ARMul_CP15_R1_ALIGN) && (* address & 3))
+    {
+      /* Set the FSR and FAR.
+	 Do not use XScale_set_fsr_far as this checks the DCSR register.  */
+      write_cp15_reg (state, 5, 0, 0, ARMul_CP15_R5_MMU_EXCPT);
+      write_cp15_reg (state, 6, 0, 0, * address);
+
+      ARMul_Abort (state, ARMul_DataAbortV);
+    }
 
   if (XScale_debug_moe (state, -1))
     return;
@@ -495,7 +501,7 @@ XScale_check_memacc (ARMul_State * state, ARMword * address, int store)
     {
       /* r1 is a inverse mask.  */
       if (e0 != 0 && ((store && e0 != 3) || (!store && e0 != 1))
-          && ((*address & ~r1) == (r0 & ~r1)))
+          && ((* address & ~r1) == (r0 & ~r1)))
 	{
           XScale_debug_moe (state, ARMul_CP14_R10_MOE_DB);
           ARMul_OSHandleSWI (state, SWI_Breakpoint);
@@ -504,7 +510,7 @@ XScale_check_memacc (ARMul_State * state, ARMword * address, int store)
   else
     {
       if (e0 != 0 && ((store && e0 != 3) || (!store && e0 != 1))
-              && ((*address & ~3) == (r0 & ~3)))
+              && ((* address & ~3) == (r0 & ~3)))
 	{
           XScale_debug_moe (state, ARMul_CP14_R10_MOE_DB);
           ARMul_OSHandleSWI (state, SWI_Breakpoint);
@@ -512,7 +518,7 @@ XScale_check_memacc (ARMul_State * state, ARMword * address, int store)
 
       e1 = (dbcon & ARMul_CP15_DBCON_E1) >> 2;
       if (e1 != 0 && ((store && e1 != 3) || (!store && e1 != 1))
-              && ((*address & ~3) == (r1 & ~3)))
+              && ((* address & ~3) == (r1 & ~3)))
 	{
           XScale_debug_moe (state, ARMul_CP14_R10_MOE_DB);
           ARMul_OSHandleSWI (state, SWI_Breakpoint);
@@ -520,7 +526,7 @@ XScale_check_memacc (ARMul_State * state, ARMword * address, int store)
     }
 }
 
-/* Check set.  */
+/* Set the XScale FSR and FAR registers.  */
 
 void
 XScale_set_fsr_far (ARMul_State * state, ARMword fsr, ARMword far)
@@ -587,7 +593,7 @@ check_cp13_access (ARMul_State * state,
 		   unsigned      opcode_1,
 		   unsigned      opcode_2)
 {
-  /* Do not allow access to these register in USER mode.  */
+  /* Do not allow access to these registers in USER mode.  */
   if (state->Mode == USER26MODE || state->Mode == USER32MODE)
     return ARMul_CANT;
 
@@ -601,7 +607,7 @@ check_cp13_access (ARMul_State * state,
     return ARMul_CANT;
 
   /* Registers 0, 4 and 8 are defined when CRm == 0.
-     Registers 0, 4, 5, 6, 7, 8 are defined when CRm == 1.
+     Registers 0, 1, 4, 5, 6, 7, 8 are defined when CRm == 1.
      For all other CRm values undefined behaviour results.  */
   if (CRm == 0)
     {
@@ -610,7 +616,7 @@ check_cp13_access (ARMul_State * state,
     }
   else if (CRm == 1)
     {
-      if (reg == 0 || (reg >= 4 && reg <= 8))
+      if (reg == 0 || reg == 1 || (reg >= 4 && reg <= 8))
 	return ARMul_DONE;
     }
 
@@ -657,6 +663,12 @@ write_cp13_reg (unsigned reg, unsigned CRm, ARMword value)
 	     BIT(31) is write ignored.  */
 	  value &= 0x7000000f;
 	  value |= XScale_cp13_CR1_Regs[0] & (1UL << 31);
+	  break;
+
+	case 1: /* BCUMOD */
+	  /* Only bit 0 is accecssible.  */
+	  value &= 1;
+	  value |= XScale_cp13_CR1_Regs[1] & ~ 1;
 	  break;
 
 	case 4: /* ELOG0 */
@@ -841,7 +853,7 @@ write_cp14_reg (unsigned reg, ARMword value)
       /* Only BITS (27:12), BITS (10:8) and BITS (6:0) can be written.  */
       value &= 0x0ffff77f;
 
-      /* Reset the clock counter if necessary */
+      /* Reset the clock counter if necessary.  */
       if (value & ARMul_CP14_R0_CLKRST)
         XScale_cp14_Regs [1] = 0;
       break;

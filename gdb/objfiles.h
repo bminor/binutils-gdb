@@ -360,7 +360,7 @@ struct objfile
        so that it gets freed automatically when reading a new object
        file. */
 
-    PTR obj_private;
+    void *obj_private;
 
     /* Set of relocation offsets to apply to each section.
        Currently on the psymbol_obstack (which makes no sense, but I'm

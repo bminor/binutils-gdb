@@ -21,6 +21,6 @@
 #ifndef NM_M68KLYNX_H
 #define NM_M68KLYNX_H
 
-#include "nm-lynx.h"
+#include "config/nm-lynx.h"
 
 #endif /* NM_M68KLYNX_H */

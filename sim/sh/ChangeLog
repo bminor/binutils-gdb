@@ -1,3 +1,7 @@
+2002-06-08  Andrew Cagney  <cagney@redhat.com>
+
+	* interp.c: Include "gdb/callback.h" and "gdb/remote-sim.h".
+
 2001-01-30  Ben Elliston  <bje@redhat.com>
 
 	* interp.c (sim_create_inferior): Record program arguments for

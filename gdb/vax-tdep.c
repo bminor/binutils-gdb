@@ -48,9 +48,9 @@ static gdbarch_frame_init_saved_regs_ftype vax_frame_init_saved_regs;
 static gdbarch_get_saved_register_ftype vax_get_saved_register;
 
 static gdbarch_store_struct_return_ftype vax_store_struct_return;
-static gdbarch_extract_return_value_ftype vax_extract_return_value;
+static gdbarch_deprecated_extract_return_value_ftype vax_extract_return_value;
 static gdbarch_store_return_value_ftype vax_store_return_value;
-static gdbarch_extract_struct_value_address_ftype
+static gdbarch_deprecated_extract_struct_value_address_ftype
     vax_extract_struct_value_address;
 
 static gdbarch_push_dummy_frame_ftype vax_push_dummy_frame;
@@ -671,10 +671,9 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Return value info */
   set_gdbarch_store_struct_return (gdbarch, vax_store_struct_return);
-  set_gdbarch_extract_return_value (gdbarch, vax_extract_return_value);
+  set_gdbarch_deprecated_extract_return_value (gdbarch, vax_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, vax_store_return_value);
-  set_gdbarch_extract_struct_value_address (gdbarch,
-					    vax_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, vax_extract_struct_value_address);
 
   /* Call dummy info */
   set_gdbarch_push_dummy_frame (gdbarch, vax_push_dummy_frame);

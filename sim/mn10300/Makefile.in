@@ -48,7 +48,7 @@ SIM_EXTRA_CLEAN = clean-extra
 # Select mn10300 support in nltvals.def.
 NL_TARGET = -DNL_TARGET_mn10300
 
-INCLUDE = mn10300_sim.h $(srcdir)/../../include/callback.h
+INCLUDE = mn10300_sim.h $(srcdir)/../../include/gdb/callback.h
 
 # List of extra flags to always pass to $(CC).
 SIM_EXTRA_CFLAGS = @sim_gen@ -DPOLL_QUIT_INTERVAL=0x20

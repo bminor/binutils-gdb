@@ -330,3 +330,9 @@ struct RDIProcVec
 };
 
 #endif
+
+extern unsigned int swi_mask;
+
+#define SWI_MASK_DEMON		(1 << 0)
+#define SWI_MASK_ANGEL		(1 << 1)
+#define SWI_MASK_REDBOOT	(1 << 2)

@@ -1,4 +1,4 @@
-/* Cache and manage the values of registers for GDB, the GNU debugger.
+/* Cache and manage frames for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000,
    2001, 2002 Free Software Foundation, Inc.
@@ -26,6 +26,57 @@
 #include "value.h"
 #include "inferior.h"	/* for inferior_ptid */
 #include "regcache.h"
+#include "gdb_assert.h"
+
+/* Return a frame uniq ID that can be used to, later re-find the
+   frame.  */
+
+void
+get_frame_id (struct frame_info *fi, struct frame_id *id)
+{
+  if (fi == NULL)
+    {
+      id->base = 0;
+      id->pc = 0;
+    }
+  else
+    {
+      id->base = FRAME_FP (fi);
+      id->pc = fi->pc;
+    }
+}
+
+struct frame_info *
+frame_find_by_id (struct frame_id id)
+{
+  struct frame_info *frame;
+
+  /* ZERO denotes the null frame, let the caller decide what to do
+     about it.  Should it instead return get_current_frame()?  */
+  if (id.base == 0 && id.pc == 0)
+    return NULL;
+
+  for (frame = get_current_frame ();
+       frame != NULL;
+       frame = get_prev_frame (frame))
+    {
+      if (INNER_THAN (FRAME_FP (frame), id.base))
+	/* ``inner/current < frame < id.base''.  Keep looking along
+           the frame chain.  */
+	continue;
+      if (INNER_THAN (id.base, FRAME_FP (frame)))
+	/* ``inner/current < id.base < frame''.  Oops, gone past it.
+           Just give up.  */
+	return NULL;
+      /* FIXME: cagney/2002-04-21: This isn't sufficient.  It should
+	 use id.pc to check that the two frames belong to the same
+	 function.  Otherwise we'll do things like match dummy frames
+	 or mis-match frameless functions.  However, until someone
+	 notices, stick with the existing behavour.  */
+      return frame;
+    }
+  return NULL;
+}
 
 /* FIND_SAVED_REGISTER ()
 
@@ -62,75 +113,94 @@ find_saved_register (struct frame_info *frame, int regnum)
   return addr;
 }
 
-/* DEFAULT_GET_SAVED_REGISTER ()
-
-   Find register number REGNUM relative to FRAME and put its (raw,
-   target format) contents in *RAW_BUFFER.  Set *OPTIMIZED if the
-   variable was optimized out (and thus can't be fetched).  Set *LVAL
-   to lval_memory, lval_register, or not_lval, depending on whether
-   the value was fetched from memory, from a register, or in a strange
-   and non-modifiable way (e.g. a frame pointer which was calculated
-   rather than fetched).  Set *ADDRP to the address, either in memory
-   on as a REGISTER_BYTE offset into the registers array.
-
-   Note that this implementation never sets *LVAL to not_lval.  But
-   it can be replaced by defining GET_SAVED_REGISTER and supplying
-   your own.
-
-   The argument RAW_BUFFER must point to aligned memory.  */
-
-static void
-default_get_saved_register (char *raw_buffer,
-			    int *optimized,
-			    CORE_ADDR *addrp,
-			    struct frame_info *frame,
-			    int regnum,
-			    enum lval_type *lval)
+void
+frame_register_unwind (struct frame_info *frame, int regnum,
+		       int *optimizedp, enum lval_type *lvalp,
+		       CORE_ADDR *addrp, int *realnump, void *bufferp)
 {
-  CORE_ADDR addr;
+  struct frame_unwind_cache *cache;
+
+  /* Require all but BUFFERP to be valid.  A NULL BUFFERP indicates
+     that the value proper does not need to be fetched.  */
+  gdb_assert (optimizedp != NULL);
+  gdb_assert (lvalp != NULL);
+  gdb_assert (addrp != NULL);
+  gdb_assert (realnump != NULL);
+  /* gdb_assert (bufferp != NULL); */
+
+  /* NOTE: cagney/2002-04-14: It would be nice if, instead of a
+     special case, there was always an inner frame dedicated to the
+     hardware registers.  Unfortunatly, there is too much unwind code
+     around that looks up/down the frame chain while making the
+     assumption that each frame level is using the same unwind code.  */
+
+  if (frame == NULL)
+    {
+      /* We're in the inner-most frame, get the value direct from the
+	 register cache.  */
+      *optimizedp = 0;
+      *lvalp = lval_register;
+      *addrp = 0;
+      /* Should this code test ``register_cached (regnum) < 0'' and do
+         something like set realnum to -1 when the register isn't
+         available?  */
+      *realnump = regnum;
+      if (bufferp)
+	read_register_gen (regnum, bufferp);
+      return;
+    }
+
+  /* Ask this frame to unwind its register.  */
+  frame->register_unwind (frame, &frame->register_unwind_cache, regnum,
+			  optimizedp, lvalp, addrp, realnump, bufferp);
+}
+
+
+void
+generic_unwind_get_saved_register (char *raw_buffer,
+				   int *optimizedp,
+				   CORE_ADDR *addrp,
+				   struct frame_info *frame,
+				   int regnum,
+				   enum lval_type *lvalp)
+{
+  int optimizedx;
+  CORE_ADDR addrx;
+  int realnumx;
+  enum lval_type lvalx;
 
   if (!target_has_registers)
     error ("No registers.");
 
-  /* Normal systems don't optimize out things with register numbers.  */
-  if (optimized != NULL)
-    *optimized = 0;
-  addr = find_saved_register (frame, regnum);
-  if (addr != 0)
-    {
-      if (lval != NULL)
-	*lval = lval_memory;
-      if (regnum == SP_REGNUM)
-	{
-	  if (raw_buffer != NULL)
-	    {
-	      /* Put it back in target format.  */
-	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
-			     (LONGEST) addr);
-	    }
-	  if (addrp != NULL)
-	    *addrp = 0;
-	  return;
-	}
-      if (raw_buffer != NULL)
-	target_read_memory (addr, raw_buffer, REGISTER_RAW_SIZE (regnum));
-    }
-  else
-    {
-      if (lval != NULL)
-	*lval = lval_register;
-      addr = REGISTER_BYTE (regnum);
-      if (raw_buffer != NULL)
-	read_register_gen (regnum, raw_buffer);
-    }
-  if (addrp != NULL)
-    *addrp = addr;
-}
+  /* Keep things simple, ensure that all the pointers (except valuep)
+     are non NULL.  */
+  if (optimizedp == NULL)
+    optimizedp = &optimizedx;
+  if (lvalp == NULL)
+    lvalp = &lvalx;
+  if (addrp == NULL)
+    addrp = &addrx;
 
-#if !defined (GET_SAVED_REGISTER)
-#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
-  default_get_saved_register(raw_buffer, optimized, addrp, frame, regnum, lval)
-#endif
+  /* Reached the the bottom (youngest, inner most) of the frame chain
+     (youngest, inner most) frame, go direct to the hardware register
+     cache (do not pass go, do not try to cache the value, ...).  The
+     unwound value would have been cached in frame->next but that
+     doesn't exist.  This doesn't matter as the hardware register
+     cache is stopping any unnecessary accesses to the target.  */
+
+  /* NOTE: cagney/2002-04-14: It would be nice if, instead of a
+     special case, there was always an inner frame dedicated to the
+     hardware registers.  Unfortunatly, there is too much unwind code
+     around that looks up/down the frame chain while making the
+     assumption that each frame level is using the same unwind code.  */
+
+  if (frame == NULL)
+    frame_register_unwind (NULL, regnum, optimizedp, lvalp, addrp, &realnumx,
+			   raw_buffer);
+  else
+    frame_register_unwind (frame->next, regnum, optimizedp, lvalp, addrp,
+			   &realnumx, raw_buffer);
+}
 
 void
 get_saved_register (char *raw_buffer,

@@ -1,3 +1,8 @@
+2002-06-09  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (INCLUDE): Update path to callback.h.
+	* mn10200_sim.h: Include "gdb/callback.h" and "gdb/remote-sim.h".
+
 2001-04-15  J.T. Conklin  <jtc@redback.com>
 
 	* Makefile.in (simops.o): Add simops.h to dependency list.

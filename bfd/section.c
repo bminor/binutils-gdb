@@ -230,12 +230,6 @@ CODE_FRAGMENT
 .     standard data.  *}
 .#define SEC_CONSTRUCTOR 0x100
 .
-.  {* The section is a constructor, and should be placed at the
-.     end of the text, data, or bss section(?).  *}
-.#define SEC_CONSTRUCTOR_TEXT 0x1100
-.#define SEC_CONSTRUCTOR_DATA 0x2100
-.#define SEC_CONSTRUCTOR_BSS  0x3100
-.
 .  {* The section has contents - a data section could be
 .     <<SEC_ALLOC>> | <<SEC_HAS_CONTENTS>>; a debug section could be
 .     <<SEC_HAS_CONTENTS>>  *}
@@ -255,6 +249,9 @@ CODE_FRAGMENT
 .     allow the back end to control what the linker does with
 .     sections.  *}
 .#define SEC_COFF_SHARED_LIBRARY 0x800
+.
+.  {* The section contains thread local data.  *}
+.#define SEC_THREAD_LOCAL 0x1000
 .
 .  {* The section has GOT references.  This flag is only for the
 .     linker, and is currently only used by the elf32-hppa back end.
@@ -1371,10 +1368,30 @@ _bfd_strip_section_from_output (info, s)
 	if (*spp == os)
 	  {
 	    bfd_section_list_remove (os->owner, spp);
+	    os->flags |= SEC_EXCLUDE;
 	    os->owner->section_count--;
 	    break;
 	  }
     }
 
   s->flags |= SEC_EXCLUDE;
+}
+
+/*
+FUNCTION
+	bfd_generic_discard_group
+
+SYNOPSIS
+	boolean bfd_generic_discard_group (bfd *abfd, asection *group);
+
+DESCRIPTION
+	Remove all members of @var{group} from the output.
+*/
+
+boolean
+bfd_generic_discard_group (abfd, group)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *group ATTRIBUTE_UNUSED;
+{
+  return true;
 }

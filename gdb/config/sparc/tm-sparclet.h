@@ -108,8 +108,8 @@ enum {
 /* sparclet register numbers */
 #define CCSR_REGNUM 72
 
-#undef EXTRACT_RETURN_VALUE
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF)                       \
+#undef DEPRECATED_EXTRACT_RETURN_VALUE
+#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF)            \
   {                                                                    \
     memcpy ((VALBUF),                                                  \
 	    (char *)(REGBUF) + REGISTER_RAW_SIZE (O0_REGNUM) * 8 +     \

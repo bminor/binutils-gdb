@@ -47,6 +47,7 @@ esac
 
 case `pwd` in
     */gdb ) ;;
+    */sim/* ) ;;
     * ) echo "Not in GDB directory" 1>&2 ; exit 1 ;;
 esac
 

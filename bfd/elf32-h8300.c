@@ -1,5 +1,6 @@
 /* Generic support for 32-bit ELF
-   Copyright 1993, 1995, 1998, 1999, 2001 Free Software Foundation, Inc.
+   Copyright 1993, 1995, 1998, 1999, 2001, 2002
+   Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -677,10 +678,7 @@ elf32_h8_merge_private_bfd_data (ibfd, obfd)
      mov.b:16	     ->    mov.b:8                2 bytes
      mov.b:24/32     ->    mov.b:8                4 bytes
 
-     mov.[bwl]:24/32 ->    mov.[bwl]:16           2 bytes
-
-
-*/
+     mov.[bwl]:24/32 ->    mov.[bwl]:16           2 bytes */
 
 static boolean
 elf32_h8_relax_section (abfd, sec, link_info, again)
@@ -746,6 +744,13 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 	 some long jumps created by the compiler.  */
       if (irel != internal_relocs)
 	last_reloc = irel - 1;
+
+      if (ELF32_R_TYPE (irel->r_info) != R_H8_DIR24R8
+	  && ELF32_R_TYPE (irel->r_info) != R_H8_PCREL16
+	  && ELF32_R_TYPE (irel->r_info) != R_H8_DIR16A8
+	  && ELF32_R_TYPE (irel->r_info) != R_H8_DIR24A8
+	  && ELF32_R_TYPE (irel->r_info) != R_H8_DIR32A16)
+	continue;
 
       /* Get the section contents if we haven't done so already.  */
       if (contents == NULL)
@@ -815,7 +820,8 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 	  /* A local symbol.  */
 	  esym = extsyms + ELF32_R_SYM (irel->r_info);
 	  shndx = shndx_buf + (shndx_buf ? ELF32_R_SYM (irel->r_info) : 0);
-	  bfd_elf32_swap_symbol_in (abfd, esym, shndx, &isym);
+	  bfd_elf32_swap_symbol_in (abfd, (const PTR) esym, (const PTR) shndx,
+				    &isym);
 
 	  sym_sec = bfd_section_from_elf_index (abfd, isym.st_shndx);
 	  symval = (isym.st_value
@@ -911,7 +917,9 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 		    shndx = shndx_buf;
 		    if (shndx != NULL)
 		      shndx += ELF32_R_SYM (last_reloc->r_info);
-		    bfd_elf32_swap_symbol_in (abfd, esym, shndx, &last_symbol);
+		    bfd_elf32_swap_symbol_in (abfd, (const PTR) esym,
+					      (const PTR) shndx,
+					      &last_symbol);
 
 		    last_sym_sec
 		      = bfd_section_from_elf_index (abfd, last_symbol.st_shndx);
@@ -1338,7 +1346,8 @@ elf32_h8_relax_delete_bytes (abfd, sec, addr, count)
       Elf_Internal_Sym isym;
       Elf_External_Sym_Shndx dummy;
 
-      bfd_elf32_swap_symbol_in (abfd, esym, shndx, &isym);
+      bfd_elf32_swap_symbol_in (abfd, (const PTR) esym, (const PTR) shndx,
+				&isym);
 
       if (isym.st_shndx == sec_shndx
 	  && isym.st_value > addr
@@ -1399,7 +1408,8 @@ elf32_h8_symbol_address_p (abfd, sec, addr)
     {
       Elf_Internal_Sym isym;
 
-      bfd_elf32_swap_symbol_in (abfd, esym, shndx, &isym);
+      bfd_elf32_swap_symbol_in (abfd, (const PTR) esym, (const PTR) shndx,
+				&isym);
 
       if (isym.st_shndx == sec_shndx
 	  && isym.st_value == addr)
@@ -1521,7 +1531,8 @@ elf32_h8_get_relocated_section_contents (output_bfd, link_info, link_order,
 	{
 	  asection *isec;
 
-	  bfd_elf32_swap_symbol_in (input_bfd, esym, shndx, isymp);
+	  bfd_elf32_swap_symbol_in (input_bfd, (const PTR) esym,
+				    (const PTR) shndx, isymp);
 
 	  if (isymp->st_shndx == SHN_UNDEF)
 	    isec = bfd_und_section_ptr;

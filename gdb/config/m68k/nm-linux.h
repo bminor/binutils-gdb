@@ -21,7 +21,7 @@
 #ifndef NM_LINUX_H
 #define NM_LINUX_H
 
-#include "nm-linux.h"
+#include "config/nm-linux.h"
 
 /* Return sizeof user struct to callers in less machine dependent routines */
 

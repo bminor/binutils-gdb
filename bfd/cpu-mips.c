@@ -37,11 +37,8 @@ mips_compatible (a, b)
   if (a->arch != b->arch)
     return NULL;
 
-  if (a->mach > b->mach)
-    return a;
-
-  if (b->mach > a->mach)
-    return b;
+  /* Machine compatibility is checked in
+     _bfd_mips_elf_merge_private_bfd_data.  */
 
   return a;
 }

@@ -138,6 +138,7 @@ void
 ARMul_FixCPSR (ARMul_State * state, ARMword instr, ARMword rhs)
 {
   state->Cpsr = ARMul_GetCPSR (state);
+
   if (state->Mode != USER26MODE
       && state->Mode != USER32MODE)
     {
@@ -569,7 +570,6 @@ ARMul_STC (ARMul_State * state, ARMword instr, ARMword address)
 #ifndef MODE32
   if (ADDREXCEPT (address) || VECTORACCESS (address))
     INTERNALABORT (address);
-
 #endif
   BUSUSEDINCPCN;
   if (BIT (21))

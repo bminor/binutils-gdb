@@ -112,7 +112,7 @@ maintainer works with the native maintainer when resolving API issues.
 			Not multi-arch
 
 	m68hc11		--target=m68hc11-elf ,-Werror
-			Stephane Carrez		Stephane.Carrez@worldnet.fr
+			Stephane Carrez		stcarrez@nerim.fr
 
 	m68k		--target=m68k-elf ,-Werror
 			Maintenance only
@@ -139,7 +139,6 @@ maintainer works with the native maintainer when resolving API issues.
 
 	ns32k		--target=ns32k-netbsd ,-Werror
 			Maintenance only
-			OBSOLETE candidate, not multi-arch
 
 	pa		(--target=hppa1.1-hp-proelf broken)
 			Maintenance only
@@ -164,7 +163,6 @@ maintainer works with the native maintainer when resolving API issues.
 
 	v850		--target=v850-elf ,-Werror
 			Maintenance only
-			OBSOLETE candidate, not multi-arch
 
 	vax		--target=vax-dec-vms5.5 ,-Werror
 			Maintenance only
@@ -192,21 +190,36 @@ All recognized developers can make mechanical changes (by virtue of
 the obvious fix rule) to ``maintenance only'' targets.  The change
 shall be sanity checked by compiling with one of the listed targets.
 
-The GAWK segment:
+The Bourne shell script:
 
-  awk < "${maintainers}" '
-  $2 ~ /--target=.*/ {
-    targets = gensub (/^.*--target=/, "", 1, $2)
-    warnings = gensub (/[)]*$/, "", 1, $3)
-    split (targets, targ, /,/)
-    for (i in targ) {
-	print targ[i], warnings
-    }
-  }'
+cat MAINTAINERS | tr -s '[\t]' '[ ]' | sed -n '
+/^[ ]*[-a-z0-9\.]*[ ]*[(]*--target=.*/ !d
+s/^.*--target=//
+s/).*$//
+h
+:loop
+  g
+  /^[^ ]*,/ !b end
+  s/,[^ ]*//
+  p
+  g
+  s/^[^,]*,//
+  h
+b loop
+:end
+p
+'
 
-can be used to generate a full list of --target=
---enable-gdb-build-warnings= pairs.
+can be used to generate a complete list of --target=
+--enable-gdb-build-warnings= pairs of the form:
 
+	arc-elf ,-Werror
+	...
+	hppa1.1-hp-proelf broken
+	...
+
+While the ``broken'' targets are included in the listing, the are not
+expected to build.
 
 
 Host/Native:
@@ -269,6 +282,8 @@ generic symtabs		Jim Blandy		jimb@redhat.com
   linespec		Jim Blandy		jimb@redhat.com
 			Elena Zannoni		ezannoni@redhat.com
 			Fernando Nasser		fnasser@redhat.com
+  HP/UX readers		Any [past] maintainer can modify this.
+			Please send tricky ones to the symtabs maintainers.
 
 tracing bytecode stuff  Jim Blandy              jimb@redhat.com
 tracing			Michael Snyder		msnyder@redhat.com
@@ -335,6 +350,8 @@ Makefile.in, configure*	ALL
 
 mmalloc/		ALL Host maintainers
 
+NEWS			ALL
+
 sim/			See sim/MAINTAINERS
 
 readline/		Master version: ftp://ftp.cwru.edu/pub/bash/
@@ -351,16 +368,32 @@ To get recommended for the Write After Approval list you need a valid
 FSF assignment and have submitted one good patch.
 
 David Anderson					davea@sgi.com
+Scott Bambrough					scottb@netwinder.org
+Jim Blandy					jimb@redhat.com
 Philip Blundell					philb@gnu.org
+Per Bothner					per@bothner.com
 Joel Brobecker					brobecker@act-europe.fr
+Kevin Buettner					kevinb@redhat.com
+Andrew Cagney					ac131313@redhat.com
+Stephane Carrez					stcarrez@nerim.fr
+Michael Chastain				mec@shout.net
+Eric Christopher				echristo@redhat.com
 Nick Clifton					nickc@redhat.com
+Philippe De Muyter				phdm@macqel.be
 Chris G. Demetriou				cgd@broadcom.com
 Klee Dienes					kdienes@apple.com
+DJ Delorie					dj@redhat.com
 Richard Earnshaw				rearnsha@arm.com
+Frank Ch. Eigler				fche@redhat.com
+Ben Elliston					bje@redhat.com
+Anthony Green			 		green@redhat.com
 Matthew Green					mrg@eterna.com.au
+Chris Faylor					cgf@redhat.com
+Fred Fish					fnf@ninemoons.com
 Orjan Friberg					orjanf@axis.com
 Ben Harris					bjh21@netbsd.org
 Richard Henderson				rth@redhat.com
+Aldy Hernandez					aldyh@redhat.com
 Paul Hilfinger					hilfinger@gnat.com
 Matt Hiller					hiller@redhat.com
 Kazu Hirata					kazu@hxi.com
@@ -371,33 +404,43 @@ Jim Ingham					jingham@apple.com
 Daniel Jacobowitz				dan@debian.org
 Andreas Jaeger					aj@suse.de
 Geoff Keating					geoffk@redhat.com
+Mark Kettenis					kettenis@gnu.org
 Jim Kingdon					jkingdon@engr.sgi.com  ++
+Jeff Law					law@redhat.com
 Jonathan Larmour				jlarmour@redhat.co.uk
+Robert Lipe					rjl@sco.com
 H.J. Lu						hjl@lucon.org
+Michal Ludvig                                   mludvig@suse.cz
 Glen McCready					gkm@redhat.com
 Greg McGary					greg@mcgary.org
 Jason Merrill					jason@redhat.com
+David S. Miller					davem@redhat.com
 Jason Molenda					jmolenda@apple.com
 Pierre Muller					muller@sources.redhat.com
+Fernando Nasser					fnasser@redhat.com
+David O'Brien					obrien@freebsd.org
 Alexandre Oliva					aoliva@redhat.com
 Tom Rix						trix@redhat.com
 Theodore A. Roth				troth@verinet.com
+Ian Roxborough					irox@redhat.com
 Mark Salter					msalter@redhat.com
+Peter Schauer					Peter.Schauer@regent
 Andreas Schwab					schwab@suse.de
 Keith Seitz					keiths@redhat.com
 Jiri Smid					smid@suse.cz
 David Smith					dsmith@redhat.com
 Stephen P. Smith				ischis2@home.com
 Jackie Smith Cashion				jsmith@redhat.com
+Stan Shebs					shebs@apple.com
+Michael Snyder					msnyder@redhat.com
 Petr Sorfa					petrs@caldera.com
 Gary Thomas					gthomas@redhat.com
 Jason Thorpe					thorpej@wasabisystems.com
 Tom Tromey					tromey@redhat.com
 Corinna Vinschen				vinschen@redhat.com
 Keith Walker					keith.walker@arm.com
-Michal Ludvig                                   mludvig@suse.cz
-David S. Miller					davem@redhat.com
-Eric Christopher				echristo@redhat.com
+Elena Zannoni					ezannoni@redhat.com
+Eli Zaretskii					eliz@gnu.org
 
 
 

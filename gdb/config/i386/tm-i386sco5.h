@@ -28,7 +28,7 @@
 
 /* Pick up more stuff from the generic SYSV and SVR4 host include files. */
 #include "i386/tm-i386v.h"
-#include "tm-sysv4.h"
+#include "config/tm-sysv4.h"
 
 #define KERNEL_U_SIZE kernel_u_size()
 

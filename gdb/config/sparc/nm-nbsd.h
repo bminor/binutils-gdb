@@ -1,5 +1,5 @@
 /* Native-dependent definitions for Sparc running NetBSD, for GDB.
-   Copyright 1986, 1987, 1989, 1992, 1994, 1996, 1999, 2000
+   Copyright 1986, 1987, 1989, 1992, 1994, 1996, 1999, 2000, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -31,31 +31,5 @@
 /* Before storing, we need to read all the registers.  */
 
 #define CHILD_PREPARE_TO_STORE() read_register_bytes (0, NULL, REGISTER_BYTES)
-
-/* Make things match up with what is expected in sparc-nat.c.  */
-
-#define regs		trapframe
-#define fp_status	fpstate
-
-#define r_g1		tf_global[1]
-#define r_ps		tf_psr
-#define r_pc		tf_pc
-#define r_npc		tf_npc
-#define r_y		tf_y
-
-#define fpu		fpstate
-#define fpu_regs	fs_regs
-#define fpu_fsr		fs_fsr
-#define fpu_fr		fs_regs
-#define Fpu_fsr		fs_fsr
-#define FPU_FSR_TYPE	int
-
-#define PTRACE_GETREGS	 PT_GETREGS
-#define PTRACE_GETFPREGS PT_GETFPREGS
-#define PTRACE_SETREGS	 PT_SETREGS
-#define PTRACE_SETFPREGS PT_SETFPREGS
-
-#define GDB_GREGSET_T	struct reg
-#define GDB_FPREGSET_T	struct fpreg
 
 #endif /* NM_NBSD_H */

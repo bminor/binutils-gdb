@@ -602,8 +602,7 @@ extern boolean ppc_allocate_toc_section
 extern boolean ppc_process_before_allocation
   PARAMS ((bfd *, struct bfd_link_info *));
 
-/* And more taken from the source .. */
-
+/* Extracted from coffcode.h.  */
 typedef struct coff_ptr_struct
 {
   /* Remembers the offset from the first symbol in the file for

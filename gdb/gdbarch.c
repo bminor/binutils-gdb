@@ -68,7 +68,6 @@
 
 static void verify_gdbarch (struct gdbarch *gdbarch);
 static void alloc_gdbarch_data (struct gdbarch *);
-static void init_gdbarch_data (struct gdbarch *);
 static void free_gdbarch_data (struct gdbarch *);
 static void init_gdbarch_swap (struct gdbarch *);
 static void clear_gdbarch_swap (struct gdbarch *);
@@ -87,6 +86,8 @@ int gdbarch_debug = GDBARCH_DEBUG;
 
 struct gdbarch
 {
+  /* Has this architecture been fully initialized?  */
+  int initialized_p;
   /* basic architectural information */
   const struct bfd_arch_info * bfd_arch_info;
   int byte_order;
@@ -209,6 +210,7 @@ struct gdbarch
   gdbarch_integer_to_address_ftype *integer_to_address;
   gdbarch_return_value_on_stack_ftype *return_value_on_stack;
   gdbarch_extract_return_value_ftype *extract_return_value;
+  gdbarch_deprecated_extract_return_value_ftype *deprecated_extract_return_value;
   gdbarch_push_arguments_ftype *push_arguments;
   gdbarch_push_dummy_frame_ftype *push_dummy_frame;
   gdbarch_push_return_address_ftype *push_return_address;
@@ -216,6 +218,7 @@ struct gdbarch
   gdbarch_store_struct_return_ftype *store_struct_return;
   gdbarch_store_return_value_ftype *store_return_value;
   gdbarch_extract_struct_value_address_ftype *extract_struct_value_address;
+  gdbarch_deprecated_extract_struct_value_address_ftype *deprecated_extract_struct_value_address;
   gdbarch_use_struct_convention_ftype *use_struct_convention;
   gdbarch_frame_init_saved_regs_ftype *frame_init_saved_regs;
   gdbarch_init_extra_frame_info_ftype *init_extra_frame_info;
@@ -269,6 +272,7 @@ extern const struct bfd_arch_info bfd_default_arch_struct;
 
 struct gdbarch startup_gdbarch =
 {
+  1, /* Always initialized.  */
   /* basic architecture information */
   &bfd_default_arch_struct,
   BFD_ENDIAN_BIG,
@@ -319,6 +323,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
+  default_print_float_info,
   0,
   0,
   0,
@@ -344,7 +349,8 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
-  generic_get_saved_register,
+  0,
+  0,
   0,
   0,
   0,
@@ -423,7 +429,6 @@ initialize_non_multiarch ()
      they are starting from scratch.  */
   clear_gdbarch_swap (&startup_gdbarch);
   init_gdbarch_swap (&startup_gdbarch);
-  init_gdbarch_data (&startup_gdbarch);
 }
 
 
@@ -488,7 +493,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->max_register_virtual_size = -1;
   current_gdbarch->do_registers_info = do_registers_info;
   current_gdbarch->print_float_info = default_print_float_info;
-  current_gdbarch->register_sim_regno = default_register_sim_regno;
+  current_gdbarch->register_sim_regno = legacy_register_sim_regno;
   current_gdbarch->cannot_fetch_register = cannot_register_not;
   current_gdbarch->cannot_store_register = cannot_register_not;
   current_gdbarch->use_generic_dummy_frames = -1;
@@ -503,6 +508,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->init_frame_pc_first = init_frame_pc_noop;
   current_gdbarch->init_frame_pc = init_frame_pc_default;
   current_gdbarch->coerce_float_to_double = default_coerce_float_to_double;
+  current_gdbarch->get_saved_register = generic_unwind_get_saved_register;
   current_gdbarch->register_convertible = generic_register_convertible_not;
   current_gdbarch->convert_register_p = legacy_convert_register_p;
   current_gdbarch->register_to_value = legacy_register_to_value;
@@ -522,7 +528,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->remote_translate_xfer_address = generic_remote_translate_xfer_address;
   current_gdbarch->frame_args_skip = -1;
   current_gdbarch->frameless_function_invocation = generic_frameless_function_invocation_not;
-  current_gdbarch->frame_chain_valid = func_frame_chain_valid;
+  current_gdbarch->frame_chain_valid = generic_func_frame_chain_valid;
   current_gdbarch->extra_stack_alignment_needed = 1;
   current_gdbarch->convert_from_func_ptr_addr = core_addr_identity;
   current_gdbarch->addr_bits_remove = core_addr_identity;
@@ -681,9 +687,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of init_frame_pc_first, invalid_p == 0 */
   /* Skip verify of init_frame_pc, invalid_p == 0 */
   /* Skip verify of coerce_float_to_double, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->get_saved_register == 0))
-    fprintf_unfiltered (log, "\n\tget_saved_register");
+  /* Skip verify of get_saved_register, invalid_p == 0 */
   /* Skip verify of register_convertible, invalid_p == 0 */
   /* Skip verify of register_convert_to_virtual, invalid_p == 0 */
   /* Skip verify of register_convert_to_raw, invalid_p == 0 */
@@ -699,6 +703,9 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->extract_return_value == 0))
     fprintf_unfiltered (log, "\n\textract_return_value");
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
+      && (gdbarch->deprecated_extract_return_value == 0))
+    fprintf_unfiltered (log, "\n\tdeprecated_extract_return_value");
   /* Skip verify of push_arguments, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->push_dummy_frame == 0))
@@ -714,6 +721,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
       && (gdbarch->store_return_value == 0))
     fprintf_unfiltered (log, "\n\tstore_return_value");
   /* Skip verify of extract_struct_value_address, has predicate */
+  /* Skip verify of deprecated_extract_struct_value_address, has predicate */
   /* Skip verify of use_struct_convention, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->frame_init_saved_regs == 0))
@@ -1037,6 +1045,31 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: DECR_PC_AFTER_BREAK = %ld\n",
                       (long) DECR_PC_AFTER_BREAK);
+#endif
+#ifdef DEPRECATED_EXTRACT_RETURN_VALUE
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_EXTRACT_RETURN_VALUE(type, regbuf, valbuf)",
+                      XSTRING (DEPRECATED_EXTRACT_RETURN_VALUE (type, regbuf, valbuf)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_EXTRACT_RETURN_VALUE = 0x%08lx\n",
+                        (long) current_gdbarch->deprecated_extract_return_value
+                        /*DEPRECATED_EXTRACT_RETURN_VALUE ()*/);
+#endif
+#ifdef DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(regbuf)",
+                      XSTRING (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (regbuf)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS = 0x%08lx\n",
+                        (long) current_gdbarch->deprecated_extract_struct_value_address
+                        /*DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
 #endif
 #ifdef DO_REGISTERS_INFO
 #if GDB_MULTI_ARCH
@@ -1533,20 +1566,10 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->prepare_to_proceed
                         /*PREPARE_TO_PROCEED ()*/);
 #endif
-#ifdef PRINT_FLOAT_INFO
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "PRINT_FLOAT_INFO()",
-                      XSTRING (PRINT_FLOAT_INFO ()));
-#endif
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
-                        "gdbarch_dump: PRINT_FLOAT_INFO = 0x%08lx\n",
-                        (long) current_gdbarch->print_float_info
-                        /*PRINT_FLOAT_INFO ()*/);
-#endif
+                        "gdbarch_dump: print_float_info = 0x%08lx\n",
+                        (long) current_gdbarch->print_float_info);
 #ifdef PROLOGUE_FRAMELESS_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -3007,7 +3030,7 @@ set_gdbarch_do_registers_info (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_print_float_info (struct gdbarch *gdbarch)
+gdbarch_print_float_info (struct gdbarch *gdbarch, struct ui_file *file, struct frame_info *frame)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->print_float_info == 0)
@@ -3015,7 +3038,7 @@ gdbarch_print_float_info (struct gdbarch *gdbarch)
                     "gdbarch: gdbarch_print_float_info invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_print_float_info called\n");
-  gdbarch->print_float_info ();
+  gdbarch->print_float_info (gdbarch, file, frame);
 }
 
 void
@@ -3772,6 +3795,25 @@ set_gdbarch_extract_return_value (struct gdbarch *gdbarch,
   gdbarch->extract_return_value = extract_return_value;
 }
 
+void
+gdbarch_deprecated_extract_return_value (struct gdbarch *gdbarch, struct type *type, char *regbuf, char *valbuf)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->deprecated_extract_return_value == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_deprecated_extract_return_value invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_extract_return_value called\n");
+  gdbarch->deprecated_extract_return_value (type, regbuf, valbuf);
+}
+
+void
+set_gdbarch_deprecated_extract_return_value (struct gdbarch *gdbarch,
+                                             gdbarch_deprecated_extract_return_value_ftype deprecated_extract_return_value)
+{
+  gdbarch->deprecated_extract_return_value = deprecated_extract_return_value;
+}
+
 CORE_ADDR
 gdbarch_push_arguments (struct gdbarch *gdbarch, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
 {
@@ -3917,6 +3959,32 @@ set_gdbarch_extract_struct_value_address (struct gdbarch *gdbarch,
                                           gdbarch_extract_struct_value_address_ftype extract_struct_value_address)
 {
   gdbarch->extract_struct_value_address = extract_struct_value_address;
+}
+
+int
+gdbarch_deprecated_extract_struct_value_address_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->deprecated_extract_struct_value_address != 0;
+}
+
+CORE_ADDR
+gdbarch_deprecated_extract_struct_value_address (struct gdbarch *gdbarch, char *regbuf)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->deprecated_extract_struct_value_address == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_deprecated_extract_struct_value_address invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_extract_struct_value_address called\n");
+  return gdbarch->deprecated_extract_struct_value_address (regbuf);
+}
+
+void
+set_gdbarch_deprecated_extract_struct_value_address (struct gdbarch *gdbarch,
+                                                     gdbarch_deprecated_extract_struct_value_address_ftype deprecated_extract_struct_value_address)
+{
+  gdbarch->deprecated_extract_struct_value_address = deprecated_extract_struct_value_address;
 }
 
 int
@@ -4771,6 +4839,7 @@ set_gdbarch_coff_make_msymbol_special (struct gdbarch *gdbarch,
 struct gdbarch_data
 {
   unsigned index;
+  int init_p;
   gdbarch_data_init_ftype *init;
   gdbarch_data_free_ftype *free;
 };
@@ -4797,6 +4866,7 @@ register_gdbarch_data (gdbarch_data_init_ftype *init,
                        gdbarch_data_free_ftype *free)
 {
   struct gdbarch_data_registration **curr;
+  /* Append the new registraration.  */
   for (curr = &gdbarch_data_registry.registrations;
        (*curr) != NULL;
        curr = &(*curr)->next);
@@ -4805,30 +4875,11 @@ register_gdbarch_data (gdbarch_data_init_ftype *init,
   (*curr)->data = XMALLOC (struct gdbarch_data);
   (*curr)->data->index = gdbarch_data_registry.nr++;
   (*curr)->data->init = init;
+  (*curr)->data->init_p = 1;
   (*curr)->data->free = free;
   return (*curr)->data;
 }
 
-
-/* Walk through all the registered users initializing each in turn. */
-
-static void
-init_gdbarch_data (struct gdbarch *gdbarch)
-{
-  struct gdbarch_data_registration *rego;
-  for (rego = gdbarch_data_registry.registrations;
-       rego != NULL;
-       rego = rego->next)
-    {
-      struct gdbarch_data *data = rego->data;
-      gdb_assert (data->index < gdbarch->nr_data);
-      if (data->init != NULL)
-        {
-          void *pointer = data->init (gdbarch);
-          set_gdbarch_data (gdbarch, data, pointer);
-        }
-    }
-}
 
 /* Create/delete the gdbarch data vector. */
 
@@ -4862,7 +4913,7 @@ free_gdbarch_data (struct gdbarch *gdbarch)
 }
 
 
-/* Initialize the current value of thee specified per-architecture
+/* Initialize the current value of the specified per-architecture
    data-pointer. */
 
 void
@@ -4871,8 +4922,11 @@ set_gdbarch_data (struct gdbarch *gdbarch,
                   void *pointer)
 {
   gdb_assert (data->index < gdbarch->nr_data);
-  if (data->free != NULL && gdbarch->data[data->index] != NULL)
-    data->free (gdbarch, gdbarch->data[data->index]);
+  if (gdbarch->data[data->index] != NULL)
+    {
+      gdb_assert (data->free != NULL);
+      data->free (gdbarch, gdbarch->data[data->index]);
+    }
   gdbarch->data[data->index] = pointer;
 }
 
@@ -4883,6 +4937,20 @@ void *
 gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *data)
 {
   gdb_assert (data->index < gdbarch->nr_data);
+  /* The data-pointer isn't initialized, call init() to get a value but
+     only if the architecture initializaiton has completed.  Otherwise
+     punt - hope that the caller knows what they are doing.  */
+  if (gdbarch->data[data->index] == NULL
+      && gdbarch->initialized_p)
+    {
+      /* Be careful to detect an initialization cycle.  */
+      gdb_assert (data->init_p);
+      data->init_p = 0;
+      gdb_assert (data->init != NULL);
+      gdbarch->data[data->index] = data->init (gdbarch);
+      data->init_p = 1;
+      gdb_assert (gdbarch->data[data->index] != NULL);
+    }
   return gdbarch->data[data->index];
 }
 
@@ -5276,8 +5344,9 @@ gdbarch_update_p (struct gdbarch_info info)
     rego->arches = this;
   }    
 
-  /* Switch to this new architecture.  Dump it out. */
+  /* Switch to this new architecture marking it initialized.  */
   current_gdbarch = new_gdbarch;
+  current_gdbarch->initialized_p = 1;
   if (gdbarch_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
@@ -5296,10 +5365,8 @@ gdbarch_update_p (struct gdbarch_info info)
      called. */
   init_gdbarch_swap (new_gdbarch);
   
-  /* Initialize the per-architecture data-pointer of all parties that
-     registered an interest in this architecture.  CURRENT_GDBARCH
+  /* Initialize the per-architecture data.  CURRENT_GDBARCH
      must be updated before these modules are called. */
-  init_gdbarch_data (new_gdbarch);
   architecture_changed_event ();
 
   if (gdbarch_debug)

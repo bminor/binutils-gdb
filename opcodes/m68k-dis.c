@@ -1,6 +1,6 @@
 /* Print Motorola 68k instructions.
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001
+   1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "dis-asm.h"
 #include "floatformat.h"
-#include <libiberty.h>
+#include "libiberty.h"
 #include "opintl.h"
 
 #include "opcode/m68k.h"
@@ -46,7 +46,7 @@ static int
 print_insn_arg PARAMS ((const char *, unsigned char *, unsigned char *,
 			bfd_vma, disassemble_info *));
 
-CONST char * CONST fpcr_names[] = {
+const char * const fpcr_names[] = {
     "", "%fpiar", "%fpsr", "%fpiar/%fpsr", "%fpcr",
     "%fpiar/%fpcr", "%fpsr/%fpcr", "%fpiar/%fpsr/%fpcr"
 };
@@ -478,7 +478,7 @@ print_insn_arg (d, buffer, p0, addr, info)
   register int place = d[1];
   register unsigned char *p = p0;
   int regno;
-  register CONST char *regname;
+  register const char *regname;
   register unsigned char *p1;
   double flval;
   int flt_p;

@@ -22,7 +22,7 @@
 #define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
 
 #include "sparc/tm-sparc.h"
-#include "tm-sysv4.h"
+#include "config/tm-sysv4.h"
 
 /* With Sol2 it is no longer necessary to enable software single-step,
    since the /proc interface can take care of it for us in hardware.  */

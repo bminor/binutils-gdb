@@ -1,5 +1,5 @@
 /* Routines to link ECOFF debugging information.
-   Copyright 1993, 1994, 1995, 1996, 1997, 2000, 2001
+   Copyright 1993, 1994, 1995, 1996, 1997, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support, <ian@cygnus.com>.
 
@@ -1650,11 +1650,10 @@ ecoff_write_shuffle (abfd, swap, shuffle, space)
       bfd_byte *s;
 
       i = swap->debug_align - (total & (swap->debug_align - 1));
-      s = (bfd_byte *) bfd_malloc ((bfd_size_type) i);
+      s = (bfd_byte *) bfd_zmalloc ((bfd_size_type) i);
       if (s == NULL && i != 0)
 	return false;
 
-      memset ((PTR) s, 0, i);
       if (bfd_bwrite ((PTR) s, (bfd_size_type) i, abfd) != i)
 	{
 	  free (s);
@@ -1736,10 +1735,10 @@ bfd_ecoff_write_accumulated_debug (handle, abfd, debug, swap, info, where)
 	  bfd_byte *s;
 
 	  i = swap->debug_align - (total & (swap->debug_align - 1));
-	  s = (bfd_byte *) bfd_malloc ((bfd_size_type) i);
+	  s = (bfd_byte *) bfd_zmalloc ((bfd_size_type) i);
 	  if (s == NULL && i != 0)
 	    goto error_return;
-	  memset ((PTR) s, 0, i);
+
 	  if (bfd_bwrite ((PTR) s, (bfd_size_type) i, abfd) != i)
 	    {
 	      free (s);
@@ -1761,10 +1760,10 @@ bfd_ecoff_write_accumulated_debug (handle, abfd, debug, swap, info, where)
 
       i = (swap->debug_align
 	   - (debug->symbolic_header.issExtMax & (swap->debug_align - 1)));
-      s = (bfd_byte *) bfd_malloc ((bfd_size_type) i);
+      s = (bfd_byte *) bfd_zmalloc ((bfd_size_type) i);
       if (s == NULL && i != 0)
 	goto error_return;
-      memset ((PTR) s, 0, i);
+
       if (bfd_bwrite ((PTR) s, (bfd_size_type) i, abfd) != i)
 	{
 	  free (s);

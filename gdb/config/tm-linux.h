@@ -30,7 +30,7 @@
 
 /* We need this file for the SOLIB_TRAMPOLINE stuff. */
 
-#include "tm-sysv4.h"
+#include "config/tm-sysv4.h"
 
 /* We define SVR4_SHARED_LIBS unconditionally, on the assumption that
    link.h is available on all linux platforms.  For I386 and SH3/4, 

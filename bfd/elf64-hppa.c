@@ -184,7 +184,7 @@ static boolean elf64_hppa_object_p
   PARAMS ((bfd *));
 
 static boolean elf64_hppa_section_from_shdr
-  PARAMS ((bfd *, Elf64_Internal_Shdr *, char *));
+  PARAMS ((bfd *, Elf64_Internal_Shdr *, const char *));
 
 static void elf64_hppa_post_process_headers
   PARAMS ((bfd *, struct bfd_link_info *));
@@ -403,7 +403,7 @@ static boolean
 elf64_hppa_section_from_shdr (abfd, hdr, name)
      bfd *abfd;
      Elf64_Internal_Shdr *hdr;
-     char *name;
+     const char *name;
 {
   asection *newsect;
 
@@ -682,7 +682,8 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
 	   i < symtab_hdr->sh_info;
 	   i++, esym++, isym++, shndx = (shndx != NULL ? shndx + 1 : NULL))
 	{
-	  bfd_elf64_swap_symbol_in (abfd, esym, shndx, isym);
+	  bfd_elf64_swap_symbol_in (abfd, (const PTR) esym, (const PTR) shndx,
+				    isym);
 	  if (isym->st_shndx > highest_shndx)
 	    highest_shndx = isym->st_shndx;
 	}
@@ -1158,7 +1159,8 @@ allocate_global_data_opd (dyn_h, data)
 
       /* We never need an opd entry for a symbol which is not
 	 defined by this output file.  */
-      if (h && h->root.type == bfd_link_hash_undefined)
+      if (h && (h->root.type == bfd_link_hash_undefined
+		|| h->root.u.def.section->output_section == NULL))
 	dyn_h->want_opd = 0;
 
       /* If we are creating a shared library, took the address of a local
@@ -1167,9 +1169,8 @@ allocate_global_data_opd (dyn_h, data)
       else if (x->info->shared
 	       || h == NULL
 	       || h->dynindx == -1
-	       || ((h->root.type == bfd_link_hash_defined
-		    || h->root.type == bfd_link_hash_defweak)
-		   && h->root.u.def.section->output_section != NULL))
+	       || (h->root.type == bfd_link_hash_defined
+		   || h->root.type == bfd_link_hash_defweak))
 	{
 	  /* If we are creating a shared library, then we will have to
 	     create a runtime relocation for the symbol to properly
@@ -1534,9 +1535,8 @@ allocate_dynrel_entries (dyn_h, data)
       switch (rent->type)
 	{
 	case R_PARISC_FPTR64:
-	  /* Allocate one iff we are not building a shared library and
-	     !want_opd, which by this point will be true only if we're
-	     actually allocating one statically in the main executable.  */
+	  /* Allocate one iff we are building a shared library and don't
+	     want an opd entry.  */
 	  if (!x->info->shared && dyn_h->want_opd)
 	    continue;
 	  break;
@@ -2114,7 +2114,7 @@ elf64_hppa_finalize_opd (dyn_h, data)
 {
   struct bfd_link_info *info = (struct bfd_link_info *)data;
   struct elf64_hppa_link_hash_table *hppa_info;
-  struct elf_link_hash_entry *h = dyn_h->h;
+  struct elf_link_hash_entry *h = dyn_h ? dyn_h->h : NULL;
   asection *sopd;
   asection *sopdrel;
 
@@ -2122,7 +2122,7 @@ elf64_hppa_finalize_opd (dyn_h, data)
   sopd = hppa_info->opd_sec;
   sopdrel = hppa_info->opd_rel_sec;
 
-  if (h && dyn_h && dyn_h->want_opd)
+  if (h && dyn_h->want_opd)
     {
       bfd_vma value;
 
@@ -2235,7 +2235,7 @@ elf64_hppa_finalize_dlt (dyn_h, data)
   struct bfd_link_info *info = (struct bfd_link_info *)data;
   struct elf64_hppa_link_hash_table *hppa_info;
   asection *sdlt, *sdltrel;
-  struct elf_link_hash_entry *h = dyn_h->h;
+  struct elf_link_hash_entry *h = dyn_h ? dyn_h->h : NULL;
 
   hppa_info = elf64_hppa_hash_table (info);
 
@@ -2246,7 +2246,7 @@ elf64_hppa_finalize_dlt (dyn_h, data)
      address, so there is no need to create a relocation.  Just install
      the proper value into the DLT, note this shortcut can not be
      skipped when building a shared library.  */
-  if (! info->shared && h && dyn_h && dyn_h->want_dlt)
+  if (! info->shared && h && dyn_h->want_dlt)
     {
       bfd_vma value;
 
@@ -2262,16 +2262,17 @@ elf64_hppa_finalize_dlt (dyn_h, data)
 		   + hppa_info->opd_sec->output_offset
 		   + hppa_info->opd_sec->output_section->vma);
 	}
-      else
+      else if (h->root.u.def.section)
 	{
-	  value = (h->root.u.def.value
-		   + h->root.u.def.section->output_offset);
-
+	  value = h->root.u.def.value + h->root.u.def.section->output_offset;
 	  if (h->root.u.def.section->output_section)
 	    value += h->root.u.def.section->output_section->vma;
 	  else
 	    value += h->root.u.def.section->vma;
 	}
+      else
+	/* We have an undefined function reference.  */
+	value = 0;
 
       /* We do not need to include the output offset of the DLT section
 	 here because we are modifying the in-memory contents.  */
@@ -2359,9 +2360,8 @@ elf64_hppa_finalize_dynreloc (dyn_h, data)
 	  switch (rent->type)
 	    {
 	      case R_PARISC_FPTR64:
-	      /* Allocate one iff we are not building a shared library and
-		 !want_opd, which by this point will be true only if we're
-		 actually allocating one statically in the main executable.  */
+	      /* Allocate one iff we are building a shared library and don't
+		 want an opd entry.  */
 	      if (!info->shared && dyn_h->want_opd)
 		continue;
 	      break;
@@ -2394,7 +2394,7 @@ elf64_hppa_finalize_dynreloc (dyn_h, data)
 	     We use a section symbol recorded by check_relocs as the
 	     base symbol for the relocation.  The addend is the difference
 	     between the section symbol and the address of the .opd entry.  */
-	  if (info->shared && rent->type == R_PARISC_FPTR64)
+	  if (info->shared && rent->type == R_PARISC_FPTR64 && dyn_h->want_opd)
 	    {
 	      bfd_vma value, value2;
 
@@ -2673,6 +2673,7 @@ const struct elf_size_info hppa64_elf_size_info =
   bfd_elf64_write_out_phdrs,
   bfd_elf64_write_shdrs_and_ehdr,
   bfd_elf64_write_relocs,
+  bfd_elf64_swap_symbol_in,
   bfd_elf64_swap_symbol_out,
   bfd_elf64_slurp_reloc_table,
   bfd_elf64_slurp_symbol_table,

@@ -3,7 +3,7 @@
 #include <ctype.h>
 #include <limits.h>
 #include "ansidecl.h"
-#include "callback.h"
+#include "gdb/callback.h"
 #include "opcode/d10v.h"
 #include "bfd.h"
 
@@ -21,7 +21,7 @@
 
 extern int d10v_debug;
 
-#include "remote-sim.h"
+#include "gdb/remote-sim.h"
 #include "sim-config.h"
 #include "sim-types.h"
 
@@ -435,7 +435,7 @@ do \
   { \
     int test_i = i < 0 ? i : ~((i) - 1); \
     if (PSW_MD && GPR (x) == (MOD_E & test_i)) \
-      SET_GPR (x, MOD_S); \
+      SET_GPR (x, MOD_S & test_i); \
     else \
       SET_GPR (x, GPR (x) + (i)); \
   } \

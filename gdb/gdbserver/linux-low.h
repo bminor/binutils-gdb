@@ -19,12 +19,21 @@
    Boston, MA 02111-1307, USA.  */
 
 #ifdef HAVE_LINUX_REGSETS
-typedef void (*regset_func) (void *);
+typedef void (*regset_fill_func) (void *);
+typedef void (*regset_store_func) (const void *);
+enum regset_type {
+  GENERAL_REGS,
+  FP_REGS,
+  EXTENDED_REGS,
+};
+
 struct regset_info
 {
   int get_request, set_request;
   int size;
-  regset_func fill_function, store_function;
+  enum regset_type type;
+  regset_fill_func fill_function;
+  regset_store_func store_function;
 };
 extern struct regset_info target_regsets[];
 #endif
@@ -39,11 +48,67 @@ struct linux_target_ops
      store the register, and 2 if failure to store the register
      is acceptable.  */
   int (*cannot_store_register) (int);
-  CORE_ADDR (*stop_pc) (void);
+  CORE_ADDR (*get_pc) (void);
   void (*set_pc) (CORE_ADDR newpc);
   const char *breakpoint;
   int breakpoint_len;
   CORE_ADDR (*breakpoint_reinsert_addr) (void);
+
+
+  int decr_pc_after_break;
+  int (*breakpoint_at) (CORE_ADDR pc);
 };
 
 extern struct linux_target_ops the_low_target;
+
+#define get_process(inf) ((struct process_info *)(inf))
+#define get_thread_process(thr) (get_process (inferior_target_data (thr)))
+#define get_process_thread(proc) ((struct thread_info *) \
+				  find_inferior_id (&all_threads, \
+				  get_process (proc)->tid))
+
+struct process_info
+{
+  struct inferior_list_entry head;
+  int thread_known;
+  int lwpid;
+  int tid;
+
+  /* If this flag is set, the next SIGSTOP will be ignored (the process will
+     be immediately resumed).  */
+  int stop_expected;
+
+  /* If this flag is set, the process is known to be stopped right now (stop
+     event already received in a wait()).  */
+  int stopped;
+
+  /* If this flag is set, we have sent a SIGSTOP to this process and are
+     waiting for it to stop.  */
+  int sigstop_sent;
+
+  /* If this flag is set, STATUS_PENDING is a waitstatus that has not yet
+     been reported.  */
+  int status_pending_p;
+  int status_pending;
+
+  /* If this flag is set, the pending status is a (GDB-placed) breakpoint.  */
+  int pending_is_breakpoint;
+  CORE_ADDR pending_stop_pc;
+
+  /* If this is non-zero, it is a breakpoint to be reinserted at our next
+     stop (SIGTRAP stops only).  */
+  CORE_ADDR bp_reinsert;
+
+  /* If this flag is set, the last continue operation on this process
+     was a single-step.  */
+  int stepping;
+
+  /* If this is non-zero, it points to a chain of signals which need to
+     be delivered to this process.  */
+  struct pending_signals *pending_signals;
+};
+extern struct inferior_list all_processes;
+
+void linux_attach_lwp (int pid, int tid);
+
+int thread_db_init (void);

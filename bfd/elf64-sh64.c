@@ -139,7 +139,7 @@ static int sh64_elf64_get_symbol_type PARAMS ((Elf_Internal_Sym *, int));
 static boolean sh64_elf64_add_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
-extern boolean sh64_elf64_link_output_symbol_hook
+static boolean sh64_elf64_link_output_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const char *, Elf_Internal_Sym *,
 	   asection *));
 static boolean sh64_elf64_fake_sections
@@ -1342,8 +1342,8 @@ sh_elf64_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
     return bfd_reloc_undefined;
 
   if (bfd_is_com_section (symbol_in->section))
-    sym_value = 0;                           
-  else 
+    sym_value = 0;
+  else
     sym_value = (symbol_in->value +
 		 symbol_in->section->output_section->vma +
 		 symbol_in->section->output_offset);
@@ -1614,7 +1614,7 @@ sh_elf64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      sec = h->root.u.def.section;
 	      /* In these cases, we don't need the relocation value.
 		 We check specially because in some obscure cases
-		 sec->output_section will be NULL. */
+		 sec->output_section will be NULL.  */
 	      if (r_type == R_SH_GOTPC_LOW16
 		  || r_type == R_SH_GOTPC_MEDLOW16
 		  || r_type == R_SH_GOTPC_MEDHI16
@@ -1756,7 +1756,7 @@ sh_elf64_relocate_section (output_bfd, info, input_bfd, input_section,
 		skip = true;
 	      else if (outrel.r_offset == (bfd_vma) -2)
 		skip = true, relocate = true;
-	      
+
 	      outrel.r_offset += (input_section->output_section->vma
 				  + input_section->output_offset);
 
@@ -2234,7 +2234,8 @@ sh_elf64_get_relocated_section_contents (output_bfd, link_info, link_order,
 	{
 	  asection *isec;
 
-	  bfd_elf64_swap_symbol_in (input_bfd, esym, shndx, isymp);
+	  bfd_elf64_swap_symbol_in (input_bfd, (const PTR) esym,
+				    (const PTR) shndx, isymp);
 
 	  if (isymp->st_shndx == SHN_UNDEF)
 	    isec = bfd_und_section_ptr;
@@ -2481,11 +2482,7 @@ sh_elf64_gc_mark_hook (abfd, info, rel, h, sym)
     }
   else
     {
-      if (!(elf_bad_symtab (abfd)
-	    && ELF_ST_BIND (sym->st_info) != STB_LOCAL)
-	  && ! ((sym->st_shndx <= 0 || sym->st_shndx >= SHN_LORESERVE)
-		&& sym->st_shndx != SHN_COMMON))
-	return bfd_section_from_elf_index (abfd, sym->st_shndx);
+      return bfd_section_from_elf_index (abfd, sym->st_shndx);
     }
 
   return NULL;
@@ -2507,7 +2504,7 @@ sh_elf64_gc_sweep_hook (abfd, info, sec, relocs)
 /* Look through the relocs for a section during the first phase.
    Since we don't do .gots or .plts, we just need to consider the
    virtual table relocs for gc.  */
- 
+
 static boolean
 sh_elf64_check_relocs (abfd, info, sec, relocs)
      bfd *abfd;
@@ -2537,7 +2534,7 @@ sh_elf64_check_relocs (abfd, info, sec, relocs)
   sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof(Elf64_External_Sym);
   if (!elf_bad_symtab (abfd))
     sym_hashes_end -= symtab_hdr->sh_info;
- 
+
   dynobj = elf_hash_table (info)->dynobj;
   local_got_offsets = elf_local_got_offsets (abfd);
 
@@ -2546,13 +2543,13 @@ sh_elf64_check_relocs (abfd, info, sec, relocs)
     {
       struct elf_link_hash_entry *h;
       unsigned long r_symndx;
- 
+
       r_symndx = ELF64_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
         h = NULL;
       else
         h = sym_hashes[r_symndx - symtab_hdr->sh_info];
- 
+
       /* Some relocs require a global offset table.  */
       if (dynobj == NULL)
 	{
@@ -2596,7 +2593,7 @@ sh_elf64_check_relocs (abfd, info, sec, relocs)
           if (!_bfd_elf64_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
             return false;
           break;
- 
+
 	  /* This relocation describes which C++ vtable entries are actually
 	     used.  Record for later use during GC.  */
         case R_SH_GNU_VTENTRY:
@@ -2881,7 +2878,7 @@ sh_elf64_check_relocs (abfd, info, sec, relocs)
 	  break;
         }
     }
- 
+
   return true;
 }
 
@@ -3016,7 +3013,7 @@ sh64_elf64_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
    we don't need to look up and make sure to emit the main symbol for each
    DataLabel symbol.  */
 
-boolean
+static boolean
 sh64_elf64_link_output_symbol_hook (abfd, info, cname, sym, input_sec)
      bfd *abfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;

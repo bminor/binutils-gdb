@@ -57,9 +57,49 @@ sh_cannot_fetch_register (int regno)
   return 0;
 }
 
+static CORE_ADDR
+sh_get_pc ()
+{
+  unsigned long pc;
+  collect_register_by_name ("pc", &pc);
+  return pc;
+}
+
+static void
+sh_set_pc (CORE_ADDR pc)
+{
+  unsigned long newpc = pc;
+  supply_register_by_name ("pc", &newpc);
+}
+
+/* Correct in either endianness, obviously.  */
+static const unsigned short sh_breakpoint = 0xc3c3;
+#define sh_breakpoint_len 2
+
+static int
+sh_breakpoint_at (CORE_ADDR where)
+{
+  unsigned short insn;
+
+  (*the_target->read_memory) (where, (char *) &insn, 2);
+  if (insn == sh_breakpoint)
+    return 1;
+
+  /* If necessary, recognize more trap instructions here.  GDB only uses the
+     one.  */
+  return 0;
+}
+
 struct linux_target_ops the_low_target = {
   sh_num_regs,
   sh_regmap,
   sh_cannot_fetch_register,
   sh_cannot_store_register,
+  sh_get_pc,
+  sh_set_pc,
+  (const char *) &sh_breakpoint,
+  sh_breakpoint_len,
+  NULL,
+  0,
+  sh_breakpoint_at,
 };

@@ -98,6 +98,7 @@ if test -z "$target" ; then
 fi
 
 AM_MAINTAINER_MODE
+AM_INSTALL_LIBBFD
 AC_EXEEXT
 
 host64=false
@@ -162,7 +163,9 @@ if test "${target}" = "${host}"; then
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/alphalinux.h"'
 	;;
-  alpha*-*-netbsd*)	COREFILE=netbsd-core.lo ;;
+  alpha*-*-netbsd* | alpha*-*-openbsd*)
+	COREFILE=netbsd-core.lo
+	;;
   alpha*-*-*)		COREFILE=osf-core.lo ;;
   arm-*-freebsd*)	COREFILE='' ;;
   arm-*-netbsd*)	COREFILE=netbsd-core.lo ;;
@@ -332,11 +335,18 @@ changequote([,])dnl
 	COREFLAG="$COREFLAG -DAIX_5_CORE -DAIX_CORE_DUMPX_CORE"
 	;;
 changequote(,)dnl
-  rs6000-*-aix4.[4-9]* | powerpc-*-aix4.[4-9]* | \
-  rs6000-*-aix4.3.[3-9]* | powerpc-*-aix4.3.[3-9]*)
+  rs6000-*-aix4.[3-9]* | powerpc-*-aix4.[3-9]*)
 changequote([,])dnl
         COREFILE=rs6000-core.lo
 	COREFLAG="$COREFLAG -DAIX_CORE_DUMPX_CORE"
+	# Not all versions of AIX with -DAIX_CORE_DUMPX_CORE
+	# have c_impl as a member of struct core_dumpx
+	AC_MSG_CHECKING([for c_impl in struct core_dumpx])
+	AC_TRY_COMPILE([#include <core.h>],
+	  [struct core_dumpx c; c.c_impl = 0;],
+	  [AC_DEFINE(HAVE_ST_C_IMPL, 1,
+	    [Define if struct core_dumpx has member c_impl])
+	  AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
 	;;
   rs6000-*-aix4*)	COREFILE=rs6000-core.lo ;;
   rs6000-*-*)		COREFILE=rs6000-core.lo ;;
@@ -348,7 +358,7 @@ changequote([,])dnl
   powerpc-*-*bsd*)	COREFILE=netbsd-core.lo ;;
   s390*-*-*)            COREFILE=trad-core.lo ;;
   sh*-*-netbsd*)	COREFILE=netbsd-core.lo ;;
-  sparc-*-netbsd* | sparc-*-openbsd*)
+  sparc-*-netbsd* | sparc*-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;
   tahoe-*-*)
@@ -556,12 +566,14 @@ do
     bfd_elf32_cris_vec)		tb="$tb elf32-cris.lo elf32.lo $elf" ;;
     bfd_elf32_d10v_vec)		tb="$tb elf32-d10v.lo elf32.lo $elf" ;;
     bfd_elf32_d30v_vec)		tb="$tb elf32-d30v.lo elf32.lo $elf" ;;
+    bfd_elf32_dlx_big_vec)	tb="$tb elf32-dlx.lo elf32.lo $elf" ;;
     bfd_elf32_fr30_vec)		tb="$tb elf32-fr30.lo elf32.lo $elf" ;;
     bfd_elf32_h8300_vec)	tb="$tb elf32-h8300.lo elf32.lo $elf" ;;
     bfd_elf32_hppa_linux_vec)	tb="$tb elf32-hppa.lo elf32.lo $elf" ;;
     bfd_elf32_hppa_vec)		tb="$tb elf32-hppa.lo elf32.lo $elf" ;;
     bfd_elf32_i370_vec)		tb="$tb elf32-i370.lo elf32.lo $elf" ;;
     bfd_elf32_i386_vec)		tb="$tb elf32-i386.lo elf32.lo $elf" ;;
+    bfd_elf32_i386qnx_vec)	tb="$tb elf32-i386qnx.lo elf32.lo $elf" ;;
     bfd_elf32_i860_little_vec)	tb="$tb elf32-i860.lo elf32.lo $elf" ;;
     bfd_elf32_i860_vec)		tb="$tb elf32-i860.lo elf32.lo $elf" ;;
     bfd_elf32_i960_vec)		tb="$tb elf32-i960.lo elf32.lo $elf" ;;
@@ -597,15 +609,20 @@ do
     # FIXME: We include cofflink.lo not because it's needed for
     # bfd_elf32_sh64[l]_vec, but because we include bfd_elf32_sh[l]_vec
     # which needs it but does not list it.  Should be fixed in right place.
-    bfd_elf32_sh64_vec)		tb="$tb elf32-sh64.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
-    bfd_elf32_sh64l_vec)	tb="$tb elf32-sh64.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
+    bfd_elf32_sh64_vec)		tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
+    bfd_elf32_sh64l_vec)	tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
     bfd_elf64_sh64_vec)		tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
     bfd_elf64_sh64l_vec)	tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
+    bfd_elf32_sh64nbsd_vec)	tb="$tb elf32-sh64-nbsd.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" ;;
+    bfd_elf32_sh64lnbsd_vec)	tb="$tb elf32-sh64-nbsd.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" ;;
+    bfd_elf64_sh64nbsd_vec)	tb="$tb elf64-sh64-nbsd.lo elf64.lo $elf" target_size=64 ;;
+    bfd_elf64_sh64lnbsd_vec)	tb="$tb elf64-sh64-nbsd.lo elf64.lo $elf" target_size=64 ;;
     bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.lo elf32.lo $elf" ;;
     bfd_elf32_tradbigmips_vec)  tb="$tb elf32-mips.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf32_tradlittlemips_vec) tb="$tb elf32-mips.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf32_us_cris_vec)	tb="$tb elf32-cris.lo elf32.lo $elf" ;;
     bfd_elf32_v850_vec)		tb="$tb elf32-v850.lo elf32.lo $elf" ;;
+    bfd_elf32_vax_vec)		tb="$tb elf32-vax.lo elf32.lo $elf" ;;
     bfd_elf32_xstormy16_vec)	tb="$tb elf32-xstormy16.lo elf32.lo $elf" ;;
     bfd_elf64_alpha_vec)	tb="$tb elf64-alpha.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_big_generic_vec) 	tb="$tb elf64-gen.lo elf64.lo $elf"; target_size=64 ;;
@@ -722,6 +739,8 @@ do
     tic54x_coff2_beh_vec)	tb="$tb coff-tic54x.lo" ;;
     tic54x_coff2_vec)		tb="$tb coff-tic54x.lo" ;;
     tic80coff_vec)		tb="$tb coff-tic80.lo cofflink.lo" ;;
+    vaxnetbsd_vec)		tb="$tb vaxnetbsd.lo aout32.lo" ;;
+    vax1knetbsd_vec)		tb="$tb vax1knetbsd.lo aout32.lo" ;;
     versados_vec)		tb="$tb versados.lo" ;;
     vms_alpha_vec)		tb="$tb vms.lo vms-hdr.lo vms-gsd.lo vms-tir.lo vms-misc.lo"; target_size=64 ;;
     vms_vax_vec)		tb="$tb vms.lo vms-hdr.lo vms-gsd.lo vms-tir.lo vms-misc.lo" ;;

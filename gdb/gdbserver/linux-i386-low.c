@@ -72,7 +72,7 @@ i386_fill_gregset (void *buf)
 }
 
 static void
-i386_store_gregset (void *buf)
+i386_store_gregset (const void *buf)
 {
   int i;
 
@@ -89,7 +89,7 @@ i386_fill_fpregset (void *buf)
 }
 
 static void
-i386_store_fpregset (void *buf)
+i386_store_fpregset (const void *buf)
 {
   i387_fsave_to_cache (buf);
 }
@@ -101,7 +101,7 @@ i386_fill_fpxregset (void *buf)
 }
 
 static void
-i386_store_fpxregset (void *buf)
+i386_store_fpxregset (const void *buf)
 {
   i387_fxsave_to_cache (buf);
 }
@@ -109,14 +109,17 @@ i386_store_fpxregset (void *buf)
 
 struct regset_info target_regsets[] = {
   { PTRACE_GETREGS, PTRACE_SETREGS, sizeof (elf_gregset_t),
+    GENERAL_REGS,
     i386_fill_gregset, i386_store_gregset },
 #ifdef HAVE_PTRACE_GETFPXREGS
   { PTRACE_GETFPXREGS, PTRACE_SETFPXREGS, sizeof (elf_fpxregset_t),
+    EXTENDED_REGS,
     i386_fill_fpxregset, i386_store_fpxregset },
 #endif
   { PTRACE_GETFPREGS, PTRACE_SETFPREGS, sizeof (elf_fpregset_t),
+    FP_REGS,
     i386_fill_fpregset, i386_store_fpregset },
-  { 0, 0, -1, NULL, NULL }
+  { 0, 0, -1, -1, NULL, NULL }
 };
 
 #endif /* HAVE_LINUX_REGSETS */
@@ -124,25 +127,38 @@ struct regset_info target_regsets[] = {
 static const char i386_breakpoint[] = { 0xCC };
 #define i386_breakpoint_len 1
 
+extern int debug_threads;
+
 static CORE_ADDR
-i386_stop_pc ()
+i386_get_pc ()
 {
   unsigned long pc;
 
-  /* Overkill */
-  fetch_inferior_registers (0);
-
   collect_register_by_name ("eip", &pc);
-  return pc - 1;
+
+  if (debug_threads)
+    fprintf (stderr, "stop pc (before any decrement) is %08lx\n", pc);
+  return pc;
 }
 
 static void
 i386_set_pc (CORE_ADDR newpc)
 {
+  if (debug_threads)
+    fprintf (stderr, "set pc to %08lx\n", (long) newpc);
   supply_register_by_name ("eip", &newpc);
+}
 
-  /* Overkill */
-  store_inferior_registers (0);
+static int
+i386_breakpoint_at (CORE_ADDR pc)
+{
+  unsigned char c;
+
+  read_inferior_memory (pc, &c, 1);
+  if (c == 0xCC)
+    return 1;
+
+  return 0;
 }
 
 struct linux_target_ops the_low_target = {
@@ -150,8 +166,11 @@ struct linux_target_ops the_low_target = {
   i386_regmap,
   i386_cannot_fetch_register,
   i386_cannot_store_register,
-  i386_stop_pc,
+  i386_get_pc,
   i386_set_pc,
   i386_breakpoint,
   i386_breakpoint_len,
+  NULL,
+  1,
+  i386_breakpoint_at,
 };

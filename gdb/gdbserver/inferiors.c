@@ -25,81 +25,175 @@
 
 #include "server.h"
 
-struct inferior_info
+struct thread_info
 {
-  int pid;
+  struct inferior_list_entry entry;
   void *target_data;
   void *regcache_data;
-  struct inferior_info *next;
 };
 
-static struct inferior_info *inferiors;
-struct inferior_info *current_inferior;
-int signal_pid;
+struct inferior_list all_threads;
+
+struct thread_info *current_inferior;
+
+#define get_thread(inf) ((struct thread_info *)(inf))
 
 void
-add_inferior (int pid)
+add_inferior_to_list (struct inferior_list *list,
+		      struct inferior_list_entry *new_inferior)
 {
-  struct inferior_info *new_inferior
-    = (struct inferior_info *) malloc (sizeof (*new_inferior));
+  new_inferior->next = NULL;
+  if (list->tail != NULL)
+    list->tail->next = new_inferior;
+  else
+    list->head = new_inferior;
+  list->tail = new_inferior;
+}
 
-  memset (new_inferior, 0, sizeof (*new_inferior));
+void
+for_each_inferior (struct inferior_list *list,
+		   void (*action) (struct inferior_list_entry *))
+{
+  struct inferior_list_entry *cur = list->head, *next;
 
-  new_inferior->pid = pid;
+  while (cur != NULL)
+    {
+      next = cur->next;
+      (*action) (cur);
+      cur = next;
+    }
+}
 
-  new_inferior->next = inferiors;
-  inferiors = new_inferior;
+void
+change_inferior_id (struct inferior_list *list,
+		    int new_id)
+{
+  if (list->head != list->tail)
+    error ("tried to change thread ID after multiple threads are created");
 
+  list->head->id = new_id;
+}
+
+void
+remove_inferior (struct inferior_list *list,
+		 struct inferior_list_entry *entry)
+{
+  struct inferior_list_entry **cur;
+
+  if (list->head == entry)
+    {
+      list->head = entry->next;
+      if (list->tail == entry)
+	list->tail = list->head;
+      return;
+    }
+
+  cur = &list->head;
+  while (*cur && (*cur)->next != entry)
+    cur = &(*cur)->next;
+
+  if (*cur == NULL)
+    return;
+
+  (*cur)->next = entry->next;
+
+  if (list->tail == entry)
+    list->tail = *cur;
+}
+
+void
+add_thread (int thread_id, void *target_data)
+{
+  struct thread_info *new_thread
+    = (struct thread_info *) malloc (sizeof (*new_thread));
+
+  memset (new_thread, 0, sizeof (*new_thread));
+
+  new_thread->entry.id = thread_id;
+
+  add_inferior_to_list (&all_threads, & new_thread->entry);
+  
   if (current_inferior == NULL)
-    current_inferior = inferiors;
+    current_inferior = new_thread;
 
-  create_register_cache (new_inferior);
+  new_thread->target_data = target_data;
+  set_inferior_regcache_data (new_thread, new_register_cache ());
+}
 
-  if (signal_pid == 0)
-    signal_pid = pid;
+static void
+free_one_thread (struct inferior_list_entry *inf)
+{
+  struct thread_info *thread = get_thread (inf);
+  free_register_cache (inferior_regcache_data (thread));
+  free (thread);
+}
+
+void
+remove_thread (struct thread_info *thread)
+{
+  remove_inferior (&all_threads, (struct inferior_list_entry *) thread);
+  free_one_thread (&thread->entry);
 }
 
 void
 clear_inferiors (void)
 {
-  struct inferior_info *inf = inferiors, *next_inf;
+  for_each_inferior (&all_threads, free_one_thread);
 
-  while (inf)
+  all_threads.head = all_threads.tail = NULL;
+}
+
+struct inferior_list_entry *
+find_inferior (struct inferior_list *list,
+	       int (*func) (struct inferior_list_entry *, void *), void *arg)
+{
+  struct inferior_list_entry *inf = list->head;
+
+  while (inf != NULL)
     {
-      next_inf = inf->next;
-
-      if (inf->target_data)
-	free (inf->target_data);
-      if (inf->regcache_data)
-	free_register_cache (inf);
-
-      free (inf);
-      inf = next_inf;
+      if ((*func) (inf, arg))
+	return inf;
+      inf = inf->next;
     }
 
-  inferiors = NULL;
+  return NULL;
+}
+
+struct inferior_list_entry *
+find_inferior_id (struct inferior_list *list, int id)
+{
+  struct inferior_list_entry *inf = list->head;
+
+  while (inf != NULL)
+    {
+      if (inf->id == id)
+	return inf;
+      inf = inf->next;
+    }
+
+  return NULL;
 }
 
 void *
-inferior_target_data (struct inferior_info *inferior)
+inferior_target_data (struct thread_info *inferior)
 {
   return inferior->target_data;
 }
 
 void
-set_inferior_target_data (struct inferior_info *inferior, void *data)
+set_inferior_target_data (struct thread_info *inferior, void *data)
 {
   inferior->target_data = data;
 }
 
 void *
-inferior_regcache_data (struct inferior_info *inferior)
+inferior_regcache_data (struct thread_info *inferior)
 {
   return inferior->regcache_data;
 }
 
 void
-set_inferior_regcache_data (struct inferior_info *inferior, void *data)
+set_inferior_regcache_data (struct thread_info *inferior, void *data)
 {
   inferior->regcache_data = data;
 }

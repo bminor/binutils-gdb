@@ -61,7 +61,16 @@
 //  MIPS Application Specific Extensions (ASEs)
 //
 //  Instructions for the ASEs are in separate .igen files.
+//  ASEs add instructions on to a base ISA.
 :model:::mips16:mips16:			// m16.igen (and m16.dc)
+:model:::mips3d:mips3d:			// mips3d.igen
+:model:::mdmx:mdmx:			// mdmx.igen
+
+//  Vendor Extensions
+//
+//  Instructions specific to these extensions are in separate .igen files.
+//  Extensions add instructions on to a base ISA.
+:model:::sb1:sb1:			// sb1.igen
 
 
 // Pseudo instructions known by IGEN
@@ -2274,7 +2283,10 @@
 *vr5000:
 {
   if (GPR[RT] != 0)
-    GPR[RD] = GPR[RS];
+    {
+      GPR[RD] = GPR[RS];
+      TRACE_ALU_RESULT (GPR[RD]);
+    }
 }
 
 
@@ -2288,7 +2300,10 @@
 *vr5000:
 {
   if (GPR[RT] == 0)
-    GPR[RD] = GPR[RS];
+    {
+      GPR[RD] = GPR[RS];
+      TRACE_ALU_RESULT (GPR[RD]);
+    }
 }
 
 
@@ -3430,7 +3445,7 @@
 
 
 000001,5.RS,01110,16.IMMEDIATE:REGIMM:32::TNEI
-"tne r<RS>, <IMMEDIATE>"
+"tnei r<RS>, <IMMEDIATE>"
 *mipsII:
 *mipsIII:
 *mipsIV:
@@ -3508,16 +3523,7 @@
     case fmt_double: return "d";
     case fmt_word: return "w";
     case fmt_long: return "l";
-    default: return "?";
-    }
-}
-
-:%s::::X:int x
-{
-  switch (x)
-    {
-    case 0: return "f";
-    case 1: return "t";
+    case fmt_ps: return "ps";
     default: return "?";
     }
 }
@@ -3606,13 +3612,9 @@
 *mipsV:
 *mips64:
 {
-#if 0 /* XXX FIXME: FP code doesn't yet support paired single ops.  */
   if ((fmt != fmt_single) && (fmt != fmt_double)
       && (fmt != fmt_ps || (UserMode && (SR & (status_UX|status_PX)) == 0)))
     SignalException (ReservedInstruction, insn);
-#else
-  check_fmt (SD_, fmt, insn);
-#endif
 }
 
 
@@ -3655,7 +3657,7 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt_p (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt,AbsoluteValue(ValueFPR(FS,fmt),fmt));
+  StoreFPR (FD, fmt, AbsoluteValue (ValueFPR (FS, fmt), fmt));
 }
 
 
@@ -3676,9 +3678,35 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt_p (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt,Add(ValueFPR(FS,fmt),ValueFPR(FT,fmt),fmt));
+  StoreFPR (FD, fmt, Add (ValueFPR (FS, fmt), ValueFPR (FT, fmt), fmt));
 }
 
+
+010011,5.RS,5.FT,5.FS,5.FD,011,110:COP1X:64,f::ALNV.PS
+"alnv.ps f<FD>, f<FS>, f<FT>, r<RS>"
+*mipsV:
+*mips64:
+{
+  unsigned64 fs;
+  unsigned64 ft;
+  unsigned64 fd;
+  check_fpu (SD_);
+  check_u64 (SD_, instruction_0);
+  fs = ValueFPR (FS, fmt_ps);
+  if ((GPR[RS] & 0x3) != 0)
+    Unpredictable ();
+  if ((GPR[RS] & 0x4) == 0)
+    fd = fs;
+  else
+    {
+      ft = ValueFPR (FT, fmt_ps);
+      if (BigEndianCPU)
+	fd = PackPS (PSLower (fs), PSUpper (ft));
+      else
+	fd = PackPS (PSLower (ft), PSUpper (fs));
+    }
+  StoreFPR (FD, fmt_ps, fd);
+}
 
 
 // BC1F
@@ -3739,45 +3767,6 @@
 }
 
 
-
-
-
-
-// C.EQ.S
-// C.EQ.D
-// ...
-
-:function:::void:do_c_cond_fmt:int fmt, int ft, int fs, int cc, int cond, instruction_word insn
-{
-  int less;
-  int equal;
-  int unordered;
-  int condition;
-  unsigned64 ofs = ValueFPR (fs, fmt);
-  unsigned64 oft = ValueFPR (ft, fmt);
-  if (NaN (ofs, fmt) || NaN (oft, fmt))
-    {
-      if (FCSR & FP_ENABLE (IO))
-	{
-	  FCSR |= FP_CAUSE (IO);
-	  SignalExceptionFPE ();
-	}
-      less = 0;
-      equal = 0;
-      unordered = 1;
-    }
-  else
-    {
-      less = Less (ofs, oft, fmt);
-      equal = Equal (ofs, oft, fmt);
-      unordered = 0;
-    }
-  condition = (((cond & (1 << 2)) && less)
-	       || ((cond & (1 << 1)) && equal)
-	       || ((cond & (1 << 0)) && unordered));
-  SETFCC (cc, condition);
-}
-
 010001,10,3.FMT,5.FT,5.FS,3.0,00,11,4.COND:COP1:32,f::C.cond.fmta
 "c.%s<COND>.%s<FMT> f<FS>, f<FT>"
 *mipsI:
@@ -3787,7 +3776,8 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt_p (SD_, fmt, instruction_0);
-  do_c_cond_fmt (SD_, fmt, FT, FS, 0, COND, instruction_0);
+  Compare (ValueFPR (FS, fmt), ValueFPR (FT, fmt), fmt, COND, 0);
+  TRACE_ALU_RESULT (ValueFCR (31));
 }
 
 010001,10,3.FMT,5.FT,5.FS,3.CC,00,11,4.COND:COP1:32,f::C.cond.fmtb
@@ -3804,7 +3794,8 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt_p (SD_, fmt, instruction_0);
-  do_c_cond_fmt (SD_, fmt, FT, FS, CC, COND, instruction_0);
+  Compare (ValueFPR (FS, fmt), ValueFPR (FT, fmt), fmt, COND, CC);
+  TRACE_ALU_RESULT (ValueFCR (31));
 }
 
 
@@ -3821,11 +3812,13 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt_long,Convert(FP_RM_TOPINF,ValueFPR(FS,fmt),fmt,fmt_long));
+  StoreFPR (FD, fmt_long, Convert (FP_RM_TOPINF, ValueFPR (FS, fmt), fmt,
+	    fmt_long));
 }
 
 
 010001,10,3.FMT,00000,5.FS,5.FD,001110:COP1:32,f::CEIL.W
+"ceil.w.%s<FMT> f<FD>, f<FS>"
 *mipsII:
 *mipsIII:
 *mipsIV:
@@ -3839,84 +3832,97 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt_word,Convert(FP_RM_TOPINF,ValueFPR(FS,fmt),fmt,fmt_word));
+  StoreFPR (FD, fmt_word, Convert (FP_RM_TOPINF, ValueFPR (FS, fmt), fmt,
+	    fmt_word));
 }
 
 
-// CFC1
-// CTC1
-010001,00,X,10,5.RT,5.FS,00000000000:COP1Sa:32,f::CxC1
-"c%s<X>c1 r<RT>, f<FS>"
+010001,00010,5.RT,5.FS,00000000000:COP1:32,f::CFC1a
+"cfc1 r<RT>, f<FS>"
 *mipsI:
 *mipsII:
 *mipsIII:
 {
   check_fpu (SD_);
-  if (X)
-    {
-      if (FS == 0)
-	PENDING_FILL(FCR0IDX,VL4_8(GPR[RT]));
-      else if (FS == 31)
-	PENDING_FILL(FCR31IDX,VL4_8(GPR[RT]));
-      /* else NOP */
-      PENDING_SCHED(FCSR, FCR31 & (1<<23), 1, 23);
-    }
-  else
-    { /* control from */
-      if (FS == 0)
- 	PENDING_FILL(RT, EXTEND32 (FCR0));
-      else if (FS == 31)
- 	PENDING_FILL(RT, EXTEND32 (FCR31));
-      /* else NOP */
-    }
+  if (FS == 0)
+    PENDING_FILL (RT, EXTEND32 (FCR0));
+  else if (FS == 31)
+    PENDING_FILL (RT, EXTEND32 (FCR31));
+  /* else NOP */
 }
-010001,00,X,10,5.RT,5.FS,00000000000:COP1Sb:32,f::CxC1
-"c%s<X>c1 r<RT>, f<FS>"
+
+010001,00010,5.RT,5.FS,00000000000:COP1:32,f::CFC1b
+"cfc1 r<RT>, f<FS>"
 *mipsIV:
-*mipsV:
-*mips32:
-*mips64:
 *vr4100:
 *vr5000:
 *r3900:
 {
   check_fpu (SD_);
-  if (X)
+  if (FS == 0 || FS == 31)
     {
-      /* control to */
-      TRACE_ALU_INPUT1 (GPR[RT]);
-      if (FS == 0)
-	{
-	  FCR0 = VL4_8(GPR[RT]);
-	  TRACE_ALU_RESULT (FCR0);
-	}
-      else if (FS == 31)
-	{
-	  FCR31 = VL4_8(GPR[RT]);
-	  SETFCC(0,((FCR31 & (1 << 23)) ? 1 : 0));
-	  TRACE_ALU_RESULT (FCR31);
-	}
-      else
-	{
-	  TRACE_ALU_RESULT0 ();
-	}
-      /* else NOP */
+      unsigned_word  fcr = ValueFCR (FS);
+      TRACE_ALU_INPUT1 (fcr);
+      GPR[RT] = fcr;
     }
-  else
-    { /* control from */
-      if (FS == 0)
-	{
-	  TRACE_ALU_INPUT1 (FCR0);
-	  GPR[RT] = EXTEND32 (FCR0);
-	}
-      else if (FS == 31)
-	{
-	  TRACE_ALU_INPUT1 (FCR31);
-	  GPR[RT] = EXTEND32 (FCR31);
-	}
-      TRACE_ALU_RESULT (GPR[RT]);
-      /* else NOP */
+  /* else NOP */
+  TRACE_ALU_RESULT (GPR[RT]);
+}
+
+010001,00010,5.RT,5.FS,00000000000:COP1:32,f::CFC1c
+"cfc1 r<RT>, f<FS>"
+*mipsV:
+*mips32:
+*mips64:
+{
+  check_fpu (SD_);
+  if (FS == 0 || FS == 25 || FS == 26 || FS == 28 || FS == 31)
+    {
+      unsigned_word  fcr = ValueFCR (FS);
+      TRACE_ALU_INPUT1 (fcr);
+      GPR[RT] = fcr;
     }
+  /* else NOP */
+  TRACE_ALU_RESULT (GPR[RT]);
+}
+
+010001,00110,5.RT,5.FS,00000000000:COP1:32,f::CTC1a
+"ctc1 r<RT>, f<FS>"
+*mipsI:
+*mipsII:
+*mipsIII:
+{
+  check_fpu (SD_);
+  if (FS == 31)
+    PENDING_FILL (FCRCS_REGNUM, VL4_8 (GPR[RT]));
+  /* else NOP */
+}
+
+010001,00110,5.RT,5.FS,00000000000:COP1:32,f::CTC1b
+"ctc1 r<RT>, f<FS>"
+*mipsIV:
+*vr4100:
+*vr5000:
+*r3900:
+{
+  check_fpu (SD_);
+  TRACE_ALU_INPUT1 (GPR[RT]);
+  if (FS == 31)
+    StoreFCR (FS, GPR[RT]);
+  /* else NOP */
+}
+
+010001,00110,5.RT,5.FS,00000000000:COP1:32,f::CTC1c
+"ctc1 r<RT>, f<FS>"
+*mipsV:
+*mips32:
+*mips64:
+{
+  check_fpu (SD_);
+  TRACE_ALU_INPUT1 (GPR[RT]);
+  if (FS == 25 || FS == 26 || FS == 28 || FS == 31)
+      StoreFCR (FS, GPR[RT]);
+  /* else NOP */
 }
 
 
@@ -3938,12 +3944,10 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-    if ((fmt == fmt_double) | 0)
-      SignalException (ReservedInstruction, instruction_0);
-    else
-      StoreFPR(FD,fmt_double,Convert(GETRM(),ValueFPR(FS,fmt),fmt,fmt_double));
-  }
+  if ((fmt == fmt_double) | 0)
+    SignalException (ReservedInstruction, instruction_0);
+  StoreFPR (FD, fmt_double, Convert (GETRM (), ValueFPR (FS, fmt), fmt,
+	    fmt_double));
 }
 
 
@@ -3959,19 +3963,29 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-    if ((fmt == fmt_long) | ((fmt == fmt_long) || (fmt == fmt_word)))
-      SignalException (ReservedInstruction, instruction_0);
-    else
-      StoreFPR(FD,fmt_long,Convert(GETRM(),ValueFPR(FS,fmt),fmt,fmt_long));
-  }
+  if ((fmt == fmt_long) | ((fmt == fmt_long) || (fmt == fmt_word)))
+    SignalException (ReservedInstruction, instruction_0);
+  StoreFPR (FD, fmt_long, Convert (GETRM (), ValueFPR (FS, fmt), fmt,
+	    fmt_long));
+}
+
+
+010001,10,000,5.FT,5.FS,5.FD,100110:COP1:64,f::CVT.PS.S
+"cvt.ps.s f<FD>, f<FS>, f<FT>"
+*mipsV:
+*mips64:
+{
+  check_fpu (SD_);
+  check_u64 (SD_, instruction_0);
+  StoreFPR (FD, fmt_ps, PackPS (ValueFPR (FS, fmt_single),
+				ValueFPR (FT, fmt_single)));
 }
 
 
 //
 // FIXME: Does not correctly differentiate between mips*
 //
-010001,10,3.FMT,00000,5.FS,5.FD,100000:COP1:32,f::CVT.S.fmt
+010001,10,3.FMT!6,00000,5.FS,5.FD,100000:COP1:32,f::CVT.S.fmt
 "cvt.s.%s<FMT> f<FD>, f<FS>"
 *mipsI:
 *mipsII:
@@ -3986,16 +4000,36 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-    if ((fmt == fmt_single) | 0)
-      SignalException (ReservedInstruction, instruction_0);
-    else
-      StoreFPR(FD,fmt_single,Convert(GETRM(),ValueFPR(FS,fmt),fmt,fmt_single));
-  }
+  if ((fmt == fmt_single) | 0)
+    SignalException (ReservedInstruction, instruction_0);
+  StoreFPR (FD, fmt_single, Convert (GETRM (), ValueFPR (FS, fmt), fmt,
+	    fmt_single));
 }
 
 
-010001,10,3.FMT,00000,5.FS,5.FD,100100:COP1:32,f::CVT.W.fmt
+010001,10,110,00000,5.FS,5.FD,101000:COP1:64,f::CVT.S.PL
+"cvt.s.pl f<FD>, f<FS>"
+*mipsV:
+*mips64:
+{
+  check_fpu (SD_);
+  check_u64 (SD_, instruction_0);
+  StoreFPR (FD, fmt_single, PSLower (ValueFPR (FS, fmt_ps)));
+}
+
+
+010001,10,110,00000,5.FS,5.FD,100000:COP1:64,f::CVT.S.PU
+"cvt.s.pu f<FD>, f<FS>"
+*mipsV:
+*mips64:
+{
+  check_fpu (SD_);
+  check_u64 (SD_, instruction_0);
+  StoreFPR (FD, fmt_single, PSUpper (ValueFPR (FS, fmt_ps)));
+}
+
+
+010001,10,3.FMT!6,00000,5.FS,5.FD,100100:COP1:32,f::CVT.W.fmt
 "cvt.w.%s<FMT> f<FD>, f<FS>"
 *mipsI:
 *mipsII:
@@ -4010,12 +4044,10 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-    if ((fmt == fmt_word) | ((fmt == fmt_long) || (fmt == fmt_word)))
-      SignalException (ReservedInstruction, instruction_0);
-    else
-      StoreFPR(FD,fmt_word,Convert(GETRM(),ValueFPR(FS,fmt),fmt,fmt_word));
-  }
+  if ((fmt == fmt_word) | ((fmt == fmt_long) || (fmt == fmt_word)))
+    SignalException (ReservedInstruction, instruction_0);
+  StoreFPR (FD, fmt_word, Convert (GETRM (), ValueFPR (FS, fmt), fmt,
+	    fmt_word));
 }
 
 
@@ -4035,46 +4067,29 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt,Divide(ValueFPR(FS,fmt),ValueFPR(FT,fmt),fmt));
+  StoreFPR (FD, fmt, Divide (ValueFPR (FS, fmt), ValueFPR (FT, fmt), fmt));
 }
 
 
-// DMFC1
-// DMTC1
-010001,00,X,01,5.RT,5.FS,00000000000:COP1Sa:64,f::DMxC1
-"dm%s<X>c1 r<RT>, f<FS>"
+010001,00001,5.RT,5.FS,00000000000:COP1:64,f::DMFC1a
+"dmfc1 r<RT>, f<FS>"
 *mipsIII:
 {
+  unsigned64 v;
   check_fpu (SD_);
   check_u64 (SD_, instruction_0);
-  if (X)
-    {
-      if (SizeFGR() == 64)
-	PENDING_FILL((FS + FGRIDX),GPR[RT]);
-      else if ((FS & 0x1) == 0)
-	{
-	  PENDING_FILL(((FS + 1) + FGRIDX),VH4_8(GPR[RT]));
-	  PENDING_FILL((FS + FGRIDX),VL4_8(GPR[RT]));
-	}
-    }
+  if (SizeFGR () == 64)
+    v = FGR[FS];
+  else if ((FS & 0x1) == 0)
+    v = SET64HI (FGR[FS+1]) | FGR[FS];
   else
-    {
-      if (SizeFGR() == 64)
-	PENDING_FILL(RT,FGR[FS]);
-      else if ((FS & 0x1) == 0)
-	PENDING_FILL(RT,(SET64HI(FGR[FS+1]) | FGR[FS]));
-      else
-	{
-	  if (STATE_VERBOSE_P(SD))
-	    sim_io_eprintf (SD,
-	      "Warning: PC 0x%lx: semantic_DMxC1_COP1Sa 32-bit use of odd FPR number\n",
-	      (long) CIA);
-	  PENDING_FILL(RT,SET64HI(0xDEADC0DE) | 0xBAD0BAD0);
-	}
-    }
+    v = SET64HI (0xDEADC0DE) | 0xBAD0BAD0;
+  PENDING_FILL (RT, v);
+  TRACE_ALU_RESULT (v);
 }
-010001,00,X,01,5.RT,5.FS,00000000000:COP1Sb:64,f::DMxC1
-"dm%s<X>c1 r<RT>, f<FS>"
+
+010001,00001,5.RT,5.FS,00000000000:COP1:64,f::DMFC1b
+"dmfc1 r<RT>, f<FS>"
 *mipsIV:
 *mipsV:
 *mips64:
@@ -4084,28 +4099,52 @@
 {
   check_fpu (SD_);
   check_u64 (SD_, instruction_0);
-  if (X)
+  if (SizeFGR () == 64)
+    GPR[RT] = FGR[FS];
+  else if ((FS & 0x1) == 0)
+    GPR[RT] = SET64HI (FGR[FS+1]) | FGR[FS];
+  else
+    GPR[RT] = SET64HI (0xDEADC0DE) | 0xBAD0BAD0;
+  TRACE_ALU_RESULT (GPR[RT]);
+}
+
+
+010001,00101,5.RT,5.FS,00000000000:COP1:64,f::DMTC1a
+"dmtc1 r<RT>, f<FS>"
+*mipsIII:
+{
+  unsigned64 v;
+  check_fpu (SD_);
+  check_u64 (SD_, instruction_0);
+  if (SizeFGR () == 64)
+    PENDING_FILL ((FS + FGR_BASE), GPR[RT]);
+  else if ((FS & 0x1) == 0)
     {
-      if (SizeFGR() == 64)
-	StoreFPR (FS, fmt_uninterpreted_64, GPR[RT]);
-      else if ((FS & 0x1) == 0)
-	StoreFPR (FS, fmt_uninterpreted_64, SET64HI (FGR[FS+1]) | FGR[FS]);
+      PENDING_FILL (((FS + 1) + FGR_BASE), VH4_8 (GPR[RT]));
+      PENDING_FILL ((FS + FGR_BASE), VL4_8 (GPR[RT]));
     }
   else
-    {
-      if (SizeFGR() == 64)
-	GPR[RT] = FGR[FS];
-      else if ((FS & 0x1) == 0)
-	GPR[RT] = SET64HI (FGR[FS+1]) | FGR[FS];
-      else
-	{
-	  if (STATE_VERBOSE_P(SD))
-	    sim_io_eprintf (SD,
-	      "Warning: PC 0x%lx: DMxC1 32-bit use of odd FPR number\n",
-			    (long) CIA);
-	  GPR[RT] = SET64HI (0xDEADC0DE) | 0xBAD0BAD0;
-	}
-    }
+    Unpredictable ();
+  TRACE_FP_RESULT (GPR[RT]);
+}
+
+010001,00101,5.RT,5.FS,00000000000:COP1:64,f::DMTC1b
+"dmtc1 r<RT>, f<FS>"
+*mipsIV:
+*mipsV:
+*mips64:
+*vr4100:
+*vr5000:
+*r3900:
+{
+  check_fpu (SD_);
+  check_u64 (SD_, instruction_0);
+  if (SizeFGR () == 64)
+    StoreFPR (FS, fmt_uninterpreted_64, GPR[RT]);
+  else if ((FS & 0x1) == 0)
+    StoreFPR (FS, fmt_uninterpreted_64, GPR[RT]);
+  else
+    Unpredictable ();
 }
 
 
@@ -4122,7 +4161,8 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt_long,Convert(FP_RM_TOMINF,ValueFPR(FS,fmt),fmt,fmt_long));
+  StoreFPR (FD, fmt_long, Convert (FP_RM_TOMINF, ValueFPR (FS, fmt), fmt,
+	    fmt_long));
 }
 
 
@@ -4141,7 +4181,8 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt_word,Convert(FP_RM_TOMINF,ValueFPR(FS,fmt),fmt,fmt_word));
+  StoreFPR (FD, fmt_word, Convert (FP_RM_TOMINF, ValueFPR (FS, fmt), fmt,
+	    fmt_word));
 }
 
 
@@ -4208,64 +4249,37 @@
 
 
 
-//
-// FIXME: Not correct for mips*
-//
-010011,5.FR,5.FT,5.FS,5.FD,100,001:COP1X:32,f::MADD.D
-"madd.d f<FD>, f<FR>, f<FS>, f<FT>"
+010011,5.FR,5.FT,5.FS,5.FD,100,3.FMT:COP1X:64,f::MADD.fmt
+"madd.%s<FMT> f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *mipsV:
 *mips64:
 *vr5000:
 {
+  int fmt = FMT;
   check_fpu (SD_);
-  {
-    StoreFPR(FD,fmt_double,Add(Multiply(ValueFPR(FS,fmt_double),ValueFPR(FT,fmt_double),fmt_double),ValueFPR(FR,fmt_double),fmt_double));
-  }
+  check_u64 (SD_, instruction_0);
+  check_fmt_p (SD_, fmt, instruction_0); 
+  StoreFPR (FD, fmt, MultiplyAdd (ValueFPR (FS, fmt), ValueFPR (FT, fmt),
+				  ValueFPR (FR, fmt), fmt));
 }
 
 
-010011,5.FR,5.FT,5.FS,5.FD,100,000:COP1X:32,f::MADD.S
-"madd.s f<FD>, f<FR>, f<FS>, f<FT>"
-*mipsIV:
-*mipsV:
-*mips64:
-*vr5000:
-{
-  check_fpu (SD_);
-  {
-    StoreFPR(FD,fmt_single,Add(Multiply(ValueFPR(FS,fmt_single),ValueFPR(FT,fmt_single),fmt_single),ValueFPR(FR,fmt_single),fmt_single));
-  }
-}
-
-
-// MFC1
-// MTC1
-010001,00,X,00,5.RT,5.FS,00000000000:COP1Sa:32,f::MxC1
-"m%s<X>c1 r<RT>, f<FS>"
+010001,00000,5.RT,5.FS,00000000000:COP1:32,f::MFC1a
+"mfc1 r<RT>, f<FS>"
 *mipsI:
 *mipsII:
 *mipsIII:
 {
+  unsigned64 v;
   check_fpu (SD_);
-  if (X)
-    { /*MTC1*/
-      if (SizeFGR() == 64)
-	{
-	  if (STATE_VERBOSE_P(SD))
-	    sim_io_eprintf (SD,
-			    "Warning:  PC 0x%lx: MTC1 not DMTC1 with 64 bit regs\n",
-			    (long) CIA);
-	  PENDING_FILL ((FS + FGRIDX), (SET64HI(0xDEADC0DE) | VL4_8(GPR[RT])));
-	}
-      else
-	PENDING_FILL ((FS + FGRIDX), VL4_8(GPR[RT]));
-    }
-  else /*MFC1*/
-    PENDING_FILL (RT, EXTEND32 (FGR[FS]));
+  v = EXTEND32 (FGR[FS]);
+  PENDING_FILL (RT, v);
+  TRACE_ALU_RESULT (v);
 }
-010001,00,X,00,5.RT,5.FS,00000000000:COP1Sb:32,f::MxC1
-"m%s<X>c1 r<RT>, f<FS>"
+  
+010001,00000,5.RT,5.FS,00000000000:COP1:32,f::MFC1b
+"mfc1 r<RT>, f<FS>"
 *mipsIV:
 *mipsV:
 *mips32:
@@ -4273,14 +4287,10 @@
 *vr4100:
 *vr5000:
 *r3900:
-{
-  int fs = FS;
+{ 
   check_fpu (SD_);
-  if (X)
-    /*MTC1*/
-    StoreFPR (FS, fmt_uninterpreted_32, VL4_8 (GPR[RT]));
-  else /*MFC1*/
-    GPR[RT] = EXTEND32 (FGR[FS]);
+  GPR[RT] = EXTEND32 (FGR[FS]);
+  TRACE_ALU_RESULT (GPR[RT]);
 }
 
 
@@ -4300,7 +4310,7 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt_p (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt,ValueFPR(FS,fmt));
+  StoreFPR (FD, fmt, ValueFPR (FS, fmt));
 }
 
 
@@ -4332,12 +4342,22 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-   if (GETFCC(CC) == TF)
-     StoreFPR (FD, fmt, ValueFPR (FS, fmt));
-   else
-     StoreFPR (FD, fmt, ValueFPR (FD, fmt));
-  }
+  if (fmt != fmt_ps)
+    {
+      if (GETFCC(CC) == TF)
+	StoreFPR (FD, fmt, ValueFPR (FS, fmt));
+      else
+	StoreFPR (FD, fmt, ValueFPR (FD, fmt));   /* set fmt */
+    }
+  else
+    {
+      unsigned64 fd;
+      fd = PackPS (PSUpper (ValueFPR ((GETFCC (CC+1) == TF) ? FS : FD,
+				      fmt_ps)),
+		   PSLower (ValueFPR ((GETFCC (CC+0) == TF) ? FS : FD,
+				      fmt_ps)));
+      StoreFPR (FD, fmt_ps, fd);
+    }
 }
 
 
@@ -4380,33 +4400,49 @@
 }
 
 
-// MSUB.fmt
-010011,5.FR,5.FT,5.FS,5.FD,101,001:COP1X:32,f::MSUB.D
-"msub.d f<FD>, f<FR>, f<FS>, f<FT>"
+010011,5.FR,5.FT,5.FS,5.FD,101,3.FMT:COP1X:64,f::MSUB.fmt
+"msub.%s<FMT> f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *mipsV:
 *mips64:
 *vr5000:
 {
+  int fmt = FMT;
   check_fpu (SD_);
-  StoreFPR(FD,fmt_double,Sub(Multiply(ValueFPR(FS,fmt_double),ValueFPR(FT,fmt_double),fmt_double),ValueFPR(FR,fmt_double),fmt_double));
+  check_u64 (SD_, instruction_0);
+  check_fmt_p (SD_, fmt, instruction_0);
+  StoreFPR (FD, fmt, MultiplySub (ValueFPR (FS, fmt), ValueFPR (FT, fmt),
+				  ValueFPR (FR, fmt), fmt));
 }
 
 
-// MSUB.fmt
-010011,5.FR,5.FT,5.FS,5.FD,101000:COP1X:32,f::MSUB.S
-"msub.s f<FD>, f<FR>, f<FS>, f<FT>"
+010001,00100,5.RT,5.FS,00000000000:COP1:32,f::MTC1a
+"mtc1 r<RT>, f<FS>"
+*mipsI:
+*mipsII:
+*mipsIII:
+{ 
+  check_fpu (SD_);
+  if (SizeFGR () == 64)
+    PENDING_FILL ((FS + FGR_BASE), (SET64HI (0xDEADC0DE) | VL4_8 (GPR[RT])));
+  else
+    PENDING_FILL ((FS + FGR_BASE), VL4_8 (GPR[RT]));
+  TRACE_FP_RESULT (GPR[RT]);
+} 
+
+010001,00100,5.RT,5.FS,00000000000:COP1:32,f::MTC1b
+"mtc1 r<RT>, f<FS>"
 *mipsIV:
 *mipsV:
+*mips32:
 *mips64:
+*vr4100:
 *vr5000:
+*r3900:
 {
-  check_fpu (SD_);
-  StoreFPR(FD,fmt_single,Sub(Multiply(ValueFPR(FS,fmt_single),ValueFPR(FT,fmt_single),fmt_single),ValueFPR(FR,fmt_single),fmt_single));
+  check_fpu (SD_); 
+  StoreFPR (FS, fmt_uninterpreted_32, VL4_8 (GPR[RT]));
 }
-
-
-// MTC1 see MxC1
 
 
 010001,10,3.FMT,5.FT,5.FS,5.FD,000010:COP1:32,f::MUL.fmt
@@ -4425,7 +4461,7 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt_p (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt,Multiply(ValueFPR(FS,fmt),ValueFPR(FT,fmt),fmt));
+  StoreFPR (FD, fmt, Multiply (ValueFPR (FS, fmt), ValueFPR (FT, fmt), fmt));
 }
 
 
@@ -4445,59 +4481,63 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt_p (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt,Negate(ValueFPR(FS,fmt),fmt));
+  StoreFPR (FD, fmt, Negate (ValueFPR (FS, fmt), fmt));
 }
 
 
-// NMADD.fmt
-010011,5.FR,5.FT,5.FS,5.FD,110001:COP1X:32,f::NMADD.D
-"nmadd.d f<FD>, f<FR>, f<FS>, f<FT>"
+010011,5.FR,5.FT,5.FS,5.FD,110,3.FMT:COP1X:64,f::NMADD.fmt
+"nmadd.%s<FMT> f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *mipsV:
 *mips64:
 *vr5000:
 {
+  int fmt = FMT;
   check_fpu (SD_);
-  StoreFPR(FD,fmt_double,Negate(Add(Multiply(ValueFPR(FS,fmt_double),ValueFPR(FT,fmt_double),fmt_double),ValueFPR(FR,fmt_double),fmt_double),fmt_double));
+  check_u64 (SD_, instruction_0);
+  check_fmt_p (SD_, fmt, instruction_0);
+  StoreFPR (FD, fmt, NegMultiplyAdd (ValueFPR (FS, fmt), ValueFPR (FT, fmt),
+				     ValueFPR (FR, fmt), fmt));
 }
 
 
-// NMADD.fmt
-010011,5.FR,5.FT,5.FS,5.FD,110000:COP1X:32,f::NMADD.S
-"nmadd.s f<FD>, f<FR>, f<FS>, f<FT>"
+010011,5.FR,5.FT,5.FS,5.FD,111,3.FMT:COP1X:64,f::NMSUB.fmt
+"nmsub.%s<FMT> f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *mipsV:
 *mips64:
 *vr5000:
 {
+  int fmt = FMT;
   check_fpu (SD_);
-  StoreFPR(FD,fmt_single,Negate(Add(Multiply(ValueFPR(FS,fmt_single),ValueFPR(FT,fmt_single),fmt_single),ValueFPR(FR,fmt_single),fmt_single),fmt_single));
+  check_u64 (SD_, instruction_0);
+  check_fmt_p (SD_, fmt, instruction_0);
+  StoreFPR (FD, fmt, NegMultiplySub (ValueFPR (FS, fmt), ValueFPR (FT, fmt),
+				     ValueFPR (FR, fmt), fmt));
 }
 
 
-// NMSUB.fmt
-010011,5.FR,5.FT,5.FS,5.FD,111001:COP1X:32,f::NMSUB.D
-"nmsub.d f<FD>, f<FR>, f<FS>, f<FT>"
-*mipsIV:
+010001,10,110,5.FT,5.FS,5.FD,101100:COP1:64,f::PLL.PS
+"pll.ps f<FD>, f<FS>, f<FT>"
 *mipsV:
 *mips64:
-*vr5000:
 {
   check_fpu (SD_);
-  StoreFPR(FD,fmt_double,Negate(Sub(Multiply(ValueFPR(FS,fmt_double),ValueFPR(FT,fmt_double),fmt_double),ValueFPR(FR,fmt_double),fmt_double),fmt_double));
+  check_u64 (SD_, instruction_0);
+  StoreFPR (FD, fmt_ps, PackPS (PSLower (ValueFPR (FS, fmt_ps)),
+				PSLower (ValueFPR (FT, fmt_ps))));
 }
 
 
-// NMSUB.fmt
-010011,5.FR,5.FT,5.FS,5.FD,111000:COP1X:32,f::NMSUB.S
-"nmsub.s f<FD>, f<FR>, f<FS>, f<FT>"
-*mipsIV:
+010001,10,110,5.FT,5.FS,5.FD,101101:COP1:64,f::PLU.PS
+"plu.ps f<FD>, f<FS>, f<FT>"
 *mipsV:
 *mips64:
-*vr5000:
 {
   check_fpu (SD_);
-  StoreFPR(FD,fmt_single,Negate(Sub(Multiply(ValueFPR(FS,fmt_single),ValueFPR(FT,fmt_single),fmt_single),ValueFPR(FR,fmt_single),fmt_single),fmt_single));
+  check_u64 (SD_, instruction_0);
+  StoreFPR (FD, fmt_ps, PackPS (PSLower (ValueFPR (FS, fmt_ps)),
+				PSUpper (ValueFPR (FT, fmt_ps))));
 }
 
 
@@ -4519,6 +4559,31 @@
   }
 }
 
+
+010001,10,110,5.FT,5.FS,5.FD,101110:COP1:64,f::PUL.PS
+"pul.ps f<FD>, f<FS>, f<FT>"
+*mipsV:
+*mips64:
+{
+  check_fpu (SD_);
+  check_u64 (SD_, instruction_0);
+  StoreFPR (FD, fmt_ps, PackPS (PSUpper (ValueFPR (FS, fmt_ps)),
+				PSLower (ValueFPR (FT, fmt_ps))));
+}
+
+
+010001,10,110,5.FT,5.FS,5.FD,101111:COP1:64,f::PUU.PS
+"puu.ps f<FD>, f<FS>, f<FT>"
+*mipsV:
+*mips64:
+{
+  check_fpu (SD_);
+  check_u64 (SD_, instruction_0);
+  StoreFPR (FD, fmt_ps, PackPS (PSUpper (ValueFPR (FS, fmt_ps)),
+				PSUpper (ValueFPR (FT, fmt_ps))));
+}
+
+
 010001,10,3.FMT,00000,5.FS,5.FD,010101:COP1:32,f::RECIP.fmt
 "recip.%s<FMT> f<FD>, f<FS>"
 *mipsIV:
@@ -4529,7 +4594,7 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt,Recip(ValueFPR(FS,fmt),fmt));
+  StoreFPR (FD, fmt, Recip (ValueFPR (FS, fmt), fmt));
 }
 
 
@@ -4546,7 +4611,8 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt_long,Convert(FP_RM_NEAREST,ValueFPR(FS,fmt),fmt,fmt_long));
+  StoreFPR (FD, fmt_long, Convert (FP_RM_NEAREST, ValueFPR (FS, fmt), fmt,
+	    fmt_long));
 }
 
 
@@ -4565,21 +4631,22 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt_word,Convert(FP_RM_NEAREST,ValueFPR(FS,fmt),fmt,fmt_word));
+  StoreFPR (FD, fmt_word, Convert (FP_RM_NEAREST, ValueFPR (FS, fmt), fmt,
+	    fmt_word));
 }
 
 
 010001,10,3.FMT,00000,5.FS,5.FD,010110:COP1:32,f::RSQRT.fmt
+"rsqrt.%s<FMT> f<FD>, f<FS>"
 *mipsIV:
 *mipsV:
 *mips64:
-"rsqrt.%s<FMT> f<FD>, f<FS>"
 *vr5000:
 {
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt,Recip(SquareRoot(ValueFPR(FS,fmt),fmt),fmt));
+  StoreFPR (FD, fmt, RSquareRoot (ValueFPR (FS, fmt), fmt));
 }
 
 
@@ -4628,7 +4695,7 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt,(SquareRoot(ValueFPR(FS,fmt),fmt)));
+  StoreFPR (FD, fmt,  (SquareRoot (ValueFPR (FS, fmt), fmt)));
 }
 
 
@@ -4648,7 +4715,7 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt_p (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt,Sub(ValueFPR(FS,fmt),ValueFPR(FT,fmt),fmt));
+  StoreFPR (FD, fmt, Sub (ValueFPR (FS, fmt), ValueFPR (FT, fmt), fmt));
 }
 
 
@@ -4750,7 +4817,8 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt_long,Convert(FP_RM_TOZERO,ValueFPR(FS,fmt),fmt,fmt_long));
+  StoreFPR (FD, fmt_long, Convert (FP_RM_TOZERO, ValueFPR (FS, fmt), fmt,
+	    fmt_long));
 }
 
 
@@ -4769,7 +4837,8 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt_word,Convert(FP_RM_TOZERO,ValueFPR(FS,fmt),fmt,fmt_word));
+  StoreFPR (FD, fmt_word, Convert (FP_RM_TOZERO, ValueFPR (FS, fmt), fmt,
+	    fmt_word));
 }
 
 
@@ -5054,6 +5123,9 @@
 
 
 :include:::m16.igen
+:include:::mdmx.igen
+:include:::mips3d.igen
+:include:::sb1.igen
 :include:::tx.igen
 :include:::vr.igen
 

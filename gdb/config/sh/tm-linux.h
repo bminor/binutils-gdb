@@ -21,7 +21,7 @@
    Boston, MA 02111-1307, USA.  */
 
 /* Pull in GNU/Linux generic defs.  */
-#include "tm-linux.h"
+#include "config/tm-linux.h"
 
 /* Pull in sh-target defs */
 #include "sh/tm-sh.h"

@@ -31,7 +31,7 @@
 #include <dis-asm.h>
 #include "sim-config.h"
 
-#include "remote-sim.h"
+#include "gdb/remote-sim.h"
 
 #ifndef fprintf
 extern          fprintf();

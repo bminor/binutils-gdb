@@ -492,7 +492,7 @@ parse_insn_normal (cd, insn, strp, fields)
 	}
 
       /* We have an operand of some sort.  */
-      errmsg = openrisc_cgen_parse_operand (cd, CGEN_SYNTAX_FIELD (*syn),
+      errmsg = cd->parse_operand (cd, CGEN_SYNTAX_FIELD (*syn),
 					  &str, fields);
       if (errmsg)
 	return errmsg;

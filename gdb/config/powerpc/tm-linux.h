@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "powerpc/tm-ppc-eabi.h"
 /* Avoid warning from redefinition in tm-sysv4.h (included from tm-linux.h) */
 #undef SKIP_TRAMPOLINE_CODE
-#include "tm-linux.h"
+#include "config/tm-linux.h"
 
 /* We can single step on linux */
 #undef  SOFTWARE_SINGLE_STEP

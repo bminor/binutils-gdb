@@ -21,7 +21,7 @@
 #ifndef TM_I386LYNX_H
 #define TM_I386LYNX_H
 
-#include "tm-lynx.h"
+#include "config/tm-lynx.h"
 
 /* Most definitions from sysv could be used. */
 #include "i386/tm-i386.h"

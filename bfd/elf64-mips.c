@@ -1548,7 +1548,7 @@ mips_elf64_assign_gp (output_bfd, pgp)
     {
       for (i = 0; i < count; i++, sym++)
 	{
-	  register CONST char *name;
+	  register const char *name;
 
 	  name = bfd_asymbol_name (*sym);
 	  if (*name == '_' && strcmp (name, "_gp") == 0)
@@ -2666,6 +2666,7 @@ const struct elf_size_info mips_elf64_size_info =
   bfd_elf64_write_out_phdrs,
   bfd_elf64_write_shdrs_and_ehdr,
   mips_elf64_write_relocs,
+  bfd_elf64_swap_symbol_in,
   bfd_elf64_swap_symbol_out,
   mips_elf64_slurp_reloc_table,
   bfd_elf64_slurp_symbol_table,
@@ -2719,6 +2720,8 @@ const struct elf_size_info mips_elf64_size_info =
 #define elf_backend_gc_mark_hook	_bfd_mips_elf_gc_mark_hook
 #define elf_backend_gc_sweep_hook	_bfd_mips_elf_gc_sweep_hook
 #define elf_backend_hide_symbol		_bfd_mips_elf_hide_symbol
+#define elf_backend_ignore_discarded_relocs \
+					_bfd_mips_elf_ignore_discarded_relocs
 #define elf_backend_mips_irix_compat	elf64_mips_irix_compat
 #define elf_backend_mips_rtype_to_howto	mips_elf64_rtype_to_howto
 #define elf_backend_ecoff_debug_swap	&mips_elf64_ecoff_debug_swap

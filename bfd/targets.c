@@ -396,10 +396,12 @@ the tokens.
 .CONCAT2 (NAME,_bfd_link_hash_table_create), \
 .CONCAT2 (NAME,_bfd_link_hash_table_free), \
 .CONCAT2 (NAME,_bfd_link_add_symbols), \
+.CONCAT2 (NAME,_bfd_link_just_syms), \
 .CONCAT2 (NAME,_bfd_final_link), \
 .CONCAT2 (NAME,_bfd_link_split_section), \
 .CONCAT2 (NAME,_bfd_gc_sections), \
-.CONCAT2 (NAME,_bfd_merge_sections)
+.CONCAT2 (NAME,_bfd_merge_sections), \
+.CONCAT2 (NAME,_bfd_discard_group)
 .  int      (*_bfd_sizeof_headers) PARAMS ((bfd *, boolean));
 .  bfd_byte *(*_bfd_get_relocated_section_contents)
 .    PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *,
@@ -418,6 +420,9 @@ the tokens.
 .  {* Add symbols from this object file into the hash table.  *}
 .  boolean  (*_bfd_link_add_symbols) PARAMS ((bfd *, struct bfd_link_info *));
 .
+.  {* Indicate that we are only retrieving symbol values from this section.  *}
+.  void     (*_bfd_link_just_syms) PARAMS ((asection *, struct bfd_link_info *));
+.
 .  {* Do a link based on the link_order structures attached to each
 .     section of the BFD.  *}
 .  boolean  (*_bfd_final_link) PARAMS ((bfd *, struct bfd_link_info *));
@@ -430,6 +435,9 @@ the tokens.
 .
 .  {* Attempt to merge SEC_MERGE sections.  *}
 .  boolean  (*_bfd_merge_sections) PARAMS ((bfd *, struct bfd_link_info *));
+.
+.  {* Discard members of a group.  *}
+.  boolean  (*_bfd_discard_group) PARAMS ((bfd *, struct sec *));
 .
 .  {* Routines to handle dynamic symbols and relocs.  *}
 .#define BFD_JUMP_TABLE_DYNAMIC(NAME) \
@@ -503,12 +511,14 @@ extern const bfd_target bfd_elf32_bigmips_vec;
 extern const bfd_target bfd_elf32_cris_vec;
 extern const bfd_target bfd_elf32_d10v_vec;
 extern const bfd_target bfd_elf32_d30v_vec;
+extern const bfd_target bfd_elf32_dlx_big_vec;
 extern const bfd_target bfd_elf32_fr30_vec;
 extern const bfd_target bfd_elf32_h8300_vec;
 extern const bfd_target bfd_elf32_hppa_linux_vec;
 extern const bfd_target bfd_elf32_hppa_vec;
 extern const bfd_target bfd_elf32_i370_vec;
 extern const bfd_target bfd_elf32_i386_vec;
+extern const bfd_target bfd_elf32_i386qnx_vec;
 extern const bfd_target bfd_elf32_i860_little_vec;
 extern const bfd_target bfd_elf32_i860_vec;
 extern const bfd_target bfd_elf32_i960_vec;
@@ -546,6 +556,7 @@ extern const bfd_target bfd_elf32_tradbigmips_vec;
 extern const bfd_target bfd_elf32_tradlittlemips_vec;
 extern const bfd_target bfd_elf32_us_cris_vec;
 extern const bfd_target bfd_elf32_v850_vec;
+extern const bfd_target bfd_elf32_vax_vec;
 extern const bfd_target bfd_elf32_xstormy16_vec;
 extern const bfd_target bfd_elf64_alpha_vec;
 extern const bfd_target bfd_elf64_big_generic_vec;
@@ -660,6 +671,7 @@ extern const bfd_target tic54x_coff2_beh_vec;
 extern const bfd_target tic54x_coff2_vec;
 extern const bfd_target tic80coff_vec;
 extern const bfd_target vaxnetbsd_vec;
+extern const bfd_target vax1knetbsd_vec;
 extern const bfd_target versados_vec;
 extern const bfd_target vms_alpha_vec;
 extern const bfd_target vms_vax_vec;
@@ -691,6 +703,11 @@ extern const bfd_target bfd_elf32_sh64_vec;
 extern const bfd_target bfd_elf32_sh64l_vec;
 extern const bfd_target bfd_elf64_sh64_vec;
 extern const bfd_target bfd_elf64_sh64l_vec;
+
+extern const bfd_target bfd_elf32_sh64nbsd_vec;
+extern const bfd_target bfd_elf32_sh64lnbsd_vec;
+extern const bfd_target bfd_elf64_sh64nbsd_vec;
+extern const bfd_target bfd_elf64_sh64lnbsd_vec;
 static const bfd_target * const _bfd_target_vector[] = {
 
 #ifdef SELECT_VECS
@@ -753,12 +770,14 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_cris_vec,
 	&bfd_elf32_d10v_vec,
 	&bfd_elf32_d30v_vec,
+	&bfd_elf32_dlx_big_vec,
 	&bfd_elf32_fr30_vec,
 	&bfd_elf32_h8300_vec,
 	&bfd_elf32_hppa_linux_vec,
 	&bfd_elf32_hppa_vec,
 	&bfd_elf32_i370_vec,
 	&bfd_elf32_i386_vec,
+	&bfd_elf32_i386qnx_vec,
 	&bfd_elf32_i860_little_vec,
 	&bfd_elf32_i860_vec,
 	&bfd_elf32_i960_vec,
@@ -798,6 +817,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_tradlittlemips_vec,
 	&bfd_elf32_us_cris_vec,
 	&bfd_elf32_v850_vec,
+	&bfd_elf32_vax_vec,
 	&bfd_elf32_xstormy16_vec,
 #ifdef BFD64
 	&bfd_elf64_alpha_vec,
@@ -960,6 +980,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&tic54x_coff2_vec,
 	&tic80coff_vec,
 	&vaxnetbsd_vec,
+	&vax1knetbsd_vec,
 	&versados_vec,
 #ifdef BFD64
 	&vms_alpha_vec,

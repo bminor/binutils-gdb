@@ -1,6 +1,6 @@
 /* BFD back-end for MIPS Extended-Coff files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001
+   2000, 2001, 2002
    Free Software Foundation, Inc.
    Original version by Per Bothner.
    Full support added by Ian Lance Taylor, ian@cygnus.com.
@@ -2116,10 +2116,9 @@ mips_relax_section (abfd, sec, info, again)
 	  bfd_size_type size;
 
 	  size = (bfd_size_type) sec->reloc_count * sizeof (long);
-	  offsets = (long *) bfd_alloc (abfd, size);
+	  offsets = (long *) bfd_zalloc (abfd, size);
 	  if (offsets == (long *) NULL)
 	    goto error_return;
-	  memset (offsets, 0, (size_t) size);
 	  section_tdata->offsets = offsets;
 	}
 
@@ -2601,6 +2600,8 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
 
 /* Merging of sections is not done.  */
 #define _bfd_ecoff_bfd_merge_sections bfd_generic_merge_sections
+
+#define _bfd_ecoff_bfd_discard_group bfd_generic_discard_group
 
 extern const bfd_target ecoff_big_vec;
 

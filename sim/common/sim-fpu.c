@@ -330,6 +330,7 @@ unpack_fpu (sim_fpu *dst, unsigned64 packed, int is_double)
 	  /* tastes like zero */
 	  dst->class = sim_fpu_class_zero;
 	  dst->sign = sign;
+	  dst->normal_exp = 0;
 	}
       else
 	{
@@ -520,6 +521,7 @@ i2fpu (sim_fpu *f, signed64 i, int is_64bit)
     {
       f->class = sim_fpu_class_zero;
       f->sign = 0;
+      f->normal_exp = 0;
     }
   else
     {
@@ -648,6 +650,7 @@ u2fpu (sim_fpu *f, unsigned64 u, int is_64bit)
     {
       f->class = sim_fpu_class_zero;
       f->sign = 0;
+      f->normal_exp = 0;
     }
   else
     {
@@ -1799,6 +1802,7 @@ sim_fpu_sqrt (sim_fpu *f,
     {
       f->class = sim_fpu_class_zero;
       f->sign = r->sign;
+      f->normal_exp = 0;
       return 0;
     }
   if (sim_fpu_is_infinity (r))

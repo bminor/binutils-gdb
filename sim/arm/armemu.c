@@ -3206,7 +3206,7 @@ check_PMUintr:
 			ARMul_UndefInstr (state, instr);
 		      else
 			{
-			  /* XScale MAR insn.  Move two registers into accumulator.  */		      
+			  /* XScale MAR insn.  Move two registers into accumulator.  */
 			  state->Accumulator = state->Reg[BITS (12, 15)];
 			  state->Accumulator += (ARMdword) state->Reg[BITS (16, 19)] << 32;
 			}

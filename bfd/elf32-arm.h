@@ -547,29 +547,20 @@ record_thumb_to_arm_glue (link_info, h)
   return;
 }
 
-/* Select a BFD to be used to hold the sections used by the glue code.
-   This function is called from the linker scripts in ld/emultempl/
-   {armelf/pe}.em  */
+/* Add the glue sections to ABFD.  This function is called from the
+   linker scripts in ld/emultempl/{armelf}.em.  */
 
 boolean
-bfd_elf32_arm_get_bfd_for_interworking (abfd, info)
+bfd_elf32_arm_add_glue_sections_to_bfd (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
-  struct elf32_arm_link_hash_table *globals;
   flagword flags;
   asection *sec;
 
-  /* If we are only performing a partial link do not bother
-     getting a bfd to hold the glue.  */
+  /* If we are only performing a partial
+     link do not bother adding the glue.  */
   if (info->relocateable)
-    return true;
-
-  globals = elf32_arm_hash_table (info);
-
-  BFD_ASSERT (globals != NULL);
-
-  if (globals->bfd_of_glue_owner != NULL)
     return true;
 
   sec = bfd_get_section_by_name (abfd, ARM2THUMB_GLUE_SECTION_NAME);
@@ -608,6 +599,32 @@ bfd_elf32_arm_get_bfd_for_interworking (abfd, info)
 
       sec->gc_mark = 1;
     }
+
+  return true;
+}
+
+/* Select a BFD to be used to hold the sections used by the glue code.
+   This function is called from the linker scripts in ld/emultempl/
+   {armelf/pe}.em  */
+
+boolean
+bfd_elf32_arm_get_bfd_for_interworking (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  struct elf32_arm_link_hash_table *globals;
+
+  /* If we are only performing a partial link
+     do not bother getting a bfd to hold the glue.  */
+  if (info->relocateable)
+    return true;
+
+  globals = elf32_arm_hash_table (info);
+
+  BFD_ASSERT (globals != NULL);
+
+  if (globals->bfd_of_glue_owner != NULL)
+    return true;
 
   /* Save the bfd for later use.  */
   globals->bfd_of_glue_owner = abfd;
@@ -1471,22 +1488,19 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	if (signed_check > reloc_signed_max || signed_check < reloc_signed_min)
 	  overflow = true;
 
+#ifndef OLD_ARM_ABI
+	if (r_type == R_ARM_THM_XPC22
+	    && ((lower_insn & 0x1800) == 0x0800))
+	  /* For a BLX instruction, make sure that the relocation is rounded up
+	     to a word boundary.  This follows the semantics of the instruction
+	     which specifies that bit 1 of the target address will come from bit
+	     1 of the base address.  */
+	  relocation = (relocation + 2) & ~ 3;
+#endif
 	/* Put RELOCATION back into the insn.  */
 	upper_insn = (upper_insn & ~(bfd_vma) 0x7ff) | ((relocation >> 12) & 0x7ff);
 	lower_insn = (lower_insn & ~(bfd_vma) 0x7ff) | ((relocation >> 1) & 0x7ff);
 
-#ifndef OLD_ARM_ABI
-	if (r_type == R_ARM_THM_XPC22
-	    && ((lower_insn & 0x1800) == 0x0800))
-	  /* Remove bit zero of the adjusted offset.  Bit zero can only be
-	     set if the upper insn is at a half-word boundary, since the
-	     destination address, an ARM instruction, must always be on a
-	     word boundary.  The semantics of the BLX (1) instruction, however,
-	     are that bit zero in the offset must always be zero, and the
-	     corresponding bit one in the target address will be set from bit
-	     one of the source address.  */
-	  lower_insn &= ~1;
-#endif
 	/* Put the relocated value back in the object file:  */
 	bfd_put_16 (input_bfd, upper_insn, hit_data);
 	bfd_put_16 (input_bfd, lower_insn, hit_data + 2);
@@ -1526,7 +1540,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	  signed_check = check | ~((bfd_vma) -1 >> howto->rightshift);
 
 	relocation |= (bfd_get_16 (input_bfd, hit_data) & (~ howto->dst_mask));
- 
+
 	bfd_put_16 (input_bfd, relocation, hit_data);
 
 	/* Assumes two's complement.  */
@@ -1535,7 +1549,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 
 	return bfd_reloc_ok;
       }
-      
+
     case R_ARM_GNU_VTINHERIT:
     case R_ARM_GNU_VTENTRY:
       return bfd_reloc_ok;
@@ -1560,7 +1574,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
       if (sgot == NULL)
         return bfd_reloc_notsupported;
 
-      /* If we are addressing a Thumb function, we need to adjust the 
+      /* If we are addressing a Thumb function, we need to adjust the
 	 address by one, so that attempts to call the function pointer will
 	 correctly interpret it as Thumb code.  */
       if (sym_flags == STT_ARM_TFUNC)
@@ -2360,7 +2374,7 @@ ERROR: %s uses hardware FP, whereas %s uses software FP"),
 	      _bfd_error_handler (_("\
 Warning: %s supports interworking, whereas %s does not"),
 				  bfd_archive_filename (ibfd),
-				  bfd_get_filename (obfd));    
+				  bfd_get_filename (obfd));
 	    }
 	  else
 	    {

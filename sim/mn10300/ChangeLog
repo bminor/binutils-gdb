@@ -1,3 +1,9 @@
+2002-06-09  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (INCLUDE): Update path to callback.h.
+	* mn10300_sim.h: Include "gdb/callback.h" and "gdb/remote-sim.h".
+	* tconfig.in: Ditto.
+
 2001-05-06  Jim Blandy  <jimb@redhat.com>
 
 	* mn10300.igen: Doc fixes.

@@ -11,7 +11,10 @@ MKDEP = gcc -MM
 WARN_CFLAGS = @WARN_CFLAGS@
 AM_CFLAGS = $(WARN_CFLAGS)
 
-lib_LTLIBRARIES = libopcodes.la
+bfdlibdir = @bfdlibdir@
+bfdincludedir = @bfdincludedir@
+
+bfdlib_LTLIBRARIES = libopcodes.la
 
 # This is where bfd.h lives.
 BFD_H = ../bfd/bfd.h
@@ -55,6 +58,7 @@ CFILES = \
 	d10v-opc.c \
 	d30v-dis.c \
 	d30v-opc.c \
+	dlx-dis.c \
 	dis-buf.c \
 	disassemble.c \
 	fr30-asm.c \
@@ -158,6 +162,7 @@ ALL_MACHINES = \
 	d10v-opc.lo \
 	d30v-dis.lo \
 	d30v-opc.lo \
+	dlx-dis.lo \
 	fr30-asm.lo \
 	fr30-desc.lo \
 	fr30-dis.lo \
@@ -271,11 +276,29 @@ po/POTFILES.in: @MAINT@ Makefile
 config.status: $(srcdir)/configure $(srcdir)/../bfd/configure.in
 	$(SHELL) ./config.status --recheck
 
-# Install libopcodes include file.
-install-data-local: 
+install-bfdlibLTLIBRARIES: @INSTALL_LIBBFD_TRUE@install_libopcodes
 	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(includedir)
-	$(INSTALL_DATA) $(INCDIR)/dis-asm.h $(DESTDIR)$(includedir)/dis-asm.h
+
+uninstall-bfdlibLTLIBRARIES: @INSTALL_LIBBFD_TRUE@uninstall_libopcodes
+	@$(NORMAL_UNINSTALL)
+
+.PHONY: install_libopcodes uninstall_libopcodes
+install_libopcodes: $(bfdlib_LTLIBRARIES)
+	$(mkinstalldirs) $(DESTDIR)$(bfdlibdir)
+	$(mkinstalldirs) $(DESTDIR)$(bfdincludedir)
+	@list='$(bfdlib_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    echo "$(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(bfdlibdir)/$$p"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(bfdlibdir)/$$p; \
+	  else :; fi; \
+	done
+	$(INSTALL_DATA) $(INCDIR)/dis-asm.h $(DESTDIR)$(bfdincludedir)/dis-asm.h
+
+uninstall_libopcodes:
+	list='$(bfdlib_LTLIBRARIES)'; for p in $$list; do \
+	  $(LIBTOOL)  --mode=uninstall rm -f $(DESTDIR)$(bfdlibdir)/$$p; \
+	done
+	rm -f $(DESTDIR)$(bfdincludedir)/dis-asm.h
 
 CLEANFILES = \
 	stamp-m32r stamp-fr30 stamp-openrisc \
@@ -349,6 +372,9 @@ s390-mkopc: s390-mkopc.c
 
 s390-opc.tab: s390-mkopc s390-opc.txt
 	./s390-mkopc < $(srcdir)/s390-opc.txt > s390-opc.tab
+
+sh-dis.lo: sh-dis.c
+	$(LIBTOOL) --mode=compile $(COMPILE) -c @archdefs@ $<
 
 Makefile: $(BFDDIR)/configure.in
 
@@ -447,6 +473,8 @@ d30v-dis.lo: d30v-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h opintl.h
 d30v-opc.lo: d30v-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/d30v.h
+dlx-dis.lo: dlx-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/dlx.h
 dis-buf.lo: dis-buf.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h opintl.h
 disassemble.lo: disassemble.c sysdep.h config.h $(INCDIR)/ansidecl.h \

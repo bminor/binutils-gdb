@@ -2558,7 +2558,7 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 
 /* Set up various things so that we can make a list of input sections
    for each output section included in the link.  Returns -1 on error,
-   0 when no stubs will be needed, and 1 on success. */
+   0 when no stubs will be needed, and 1 on success.  */
 
 int
 elf32_hppa_setup_section_lists (output_bfd, info)
@@ -2827,7 +2827,8 @@ get_local_syms (output_bfd, input_bfd, info)
 	     isym = local_syms, shndx = shndx_buf;
 	   esym < end_sy;
 	   esym++, isym++, shndx = (shndx ? shndx + 1 : NULL))
-	bfd_elf32_swap_symbol_in (input_bfd, esym, shndx, isym);
+	bfd_elf32_swap_symbol_in (input_bfd, (const PTR) esym,
+				  (const PTR) shndx, isym);
 
       /* Now we can free the external symbols.  */
       free (shndx_buf);

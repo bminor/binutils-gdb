@@ -96,8 +96,8 @@ static gdbarch_frame_saved_pc_ftype ia64_frame_saved_pc;
 static gdbarch_skip_prologue_ftype ia64_skip_prologue;
 static gdbarch_frame_init_saved_regs_ftype ia64_frame_init_saved_regs;
 static gdbarch_get_saved_register_ftype ia64_get_saved_register;
-static gdbarch_extract_return_value_ftype ia64_extract_return_value;
-static gdbarch_extract_struct_value_address_ftype ia64_extract_struct_value_address;
+static gdbarch_deprecated_extract_return_value_ftype ia64_extract_return_value;
+static gdbarch_deprecated_extract_struct_value_address_ftype ia64_extract_struct_value_address;
 static gdbarch_use_struct_convention_ftype ia64_use_struct_convention;
 static gdbarch_frameless_function_invocation_ftype ia64_frameless_function_invocation;
 static gdbarch_init_extra_frame_info_ftype ia64_init_extra_frame_info;
@@ -2190,11 +2190,11 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_convert_to_raw (gdbarch, ia64_register_convert_to_raw);
 
   set_gdbarch_use_struct_convention (gdbarch, ia64_use_struct_convention);
-  set_gdbarch_extract_return_value (gdbarch, ia64_extract_return_value);
+  set_gdbarch_deprecated_extract_return_value (gdbarch, ia64_extract_return_value);
 
   set_gdbarch_store_struct_return (gdbarch, ia64_store_struct_return);
   set_gdbarch_store_return_value (gdbarch, ia64_store_return_value);
-  set_gdbarch_extract_struct_value_address (gdbarch, ia64_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, ia64_extract_struct_value_address);
 
   set_gdbarch_memory_insert_breakpoint (gdbarch, ia64_memory_insert_breakpoint);
   set_gdbarch_memory_remove_breakpoint (gdbarch, ia64_memory_remove_breakpoint);

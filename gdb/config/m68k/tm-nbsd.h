@@ -37,7 +37,10 @@
 #define SIGTRAMP_END(pc) (STACK_END_ADDR)
 
 #include "m68k/tm-m68k.h"
-#include "tm-nbsd.h"
+
+/* Return non-zero if we are in a shared library trampoline code stub. */
+#define IN_SOLIB_CALL_TRAMPOLINE(pc, name) \
+  (name && !strcmp(name, "_DYNAMIC"))
 
 extern use_struct_convention_fn m68knbsd_use_struct_convention;
 #define USE_STRUCT_CONVENTION(gcc_p, type) \

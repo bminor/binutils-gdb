@@ -285,6 +285,9 @@ CODE_FRAGMENT
 .     as well.  *}
 .#define BSF_DEBUGGING_RELOC 0x20000
 .
+.  {* This symbol is thread local.  Used in ELF.  *}
+.#define BSF_THREAD_LOCAL  0x40000
+.
 .  flagword flags;
 .
 .  {* A pointer to the section to which this symbol is
@@ -880,6 +883,7 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
   char *file_name;
   char *directory_name;
   int saw_fun;
+  boolean saw_line, saw_func;
 
   *pfound = false;
   *pfilename = bfd_get_filename (abfd);
@@ -1236,13 +1240,13 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
   directory_name = indexentry->directory_name;
   str = indexentry->str;
 
+  saw_line = false;
+  saw_func = false;
   for (; stab < (indexentry+1)->stab; stab += STABSIZE)
     {
-      boolean done, saw_line, saw_func;
+      boolean done;
       bfd_vma val;
 
-      saw_line = false;
-      saw_func = false;
       done = false;
 
       switch (stab[TYPEOFF])

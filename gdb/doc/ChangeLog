@@ -1,3 +1,50 @@
+2002-06-11  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (Symbols): Update documentation for `info source'
+	command.
+
+	* gdb.texinfo (Macros): Call the command `info macro', not
+	`show macro'.
+
+2002-06-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Coding): Add section ``Per-architecture module
+	data''.
+
+2002-06-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbint.texinfo (Target Architecture Definition): Document
+	GDB_OSABI_GO32 and GDB_OSABI_NETWARE.
+
+2002-06-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Releasing GDB): Fix typos in @itemize @bullet
+	lists.
+
+2002-06-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Releasing GDB): Revise the section ``Cut the
+	Branch''.
+
+2002-06-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Add section
+	``Converting an existing Target Architecture to Multi-arch''.
+
+2002-05-30  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Releasing GDB): Rename ``Obsoleting any code''
+	to ``Obsoleting code''.  Revise.
+
+2002-05-17  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (C Preprocessor Macros): New chapter.
+	Include it in the main menu.
+	(Contributors): Credit Jim Blandy with macro support.
+	(Compilation): Explain how to get macro information into the
+	executable.
+	(Expressions): Note that preprocessor macros are expanded.
+
 2002-05-14  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.texinfo (Debug Session): Document new `udp:' and `tcp:'

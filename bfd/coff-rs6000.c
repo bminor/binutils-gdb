@@ -237,7 +237,7 @@ _bfd_xcoff_mkobject (abfd)
   xcoff_data (abfd)->debug_indices = NULL;
 
   /* text section alignment is different than the default */
-  /* xcoff_data (abfd)->text_align_power = 5; */
+  bfd_xcoff_text_align_power (abfd) = 2;
 
   return true;
 }
@@ -278,8 +278,8 @@ _bfd_xcoff_copy_private_bfd_data (ibfd, obfd)
       else
 	ox->snentry = sec->output_section->target_index;
     }
-  ox->text_align_power = ix->text_align_power;
-  ox->data_align_power = ix->data_align_power;
+  bfd_xcoff_text_align_power (obfd) = bfd_xcoff_text_align_power (ibfd);
+  bfd_xcoff_data_align_power (obfd) = bfd_xcoff_data_align_power (ibfd);
   ox->modtype = ix->modtype;
   ox->cputype = ix->cputype;
   ox->maxdata = ix->maxdata;
@@ -948,6 +948,21 @@ reloc_howto_type xcoff_howto_table[] =
 	 0xffff,        	/* dst_mask */
 	 false),                /* pcrel_offset */
 
+  /* Modifiable branch relative.  */
+  HOWTO (R_RBA,	                /* type */
+	 0,	                /* rightshift */
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
+	 16,	                /* bitsize */
+	 false,	                /* pc_relative */
+	 0,	                /* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 0,		        /* special_function */
+	 "R_RBA_16",            /* name */
+	 true,	                /* partial_inplace */
+	 0xffff,	        /* src_mask */
+	 0xffff,        	/* dst_mask */
+	 false),                /* pcrel_offset */
+
 };
 
 void
@@ -968,6 +983,8 @@ xcoff_rtype2howto (relent, internal)
 	relent->howto = &xcoff_howto_table[0x1c];
       else if (R_RBR == internal->r_type) 
 	relent->howto = &xcoff_howto_table[0x1d];
+      else if (R_RBA == internal->r_type) 
+	relent->howto = &xcoff_howto_table[0x1e];
     }
   
   /* The r_size field of an XCOFF reloc encodes the bitsize of the
@@ -1713,7 +1730,6 @@ do_shared_object_padding (out_bfd, in_bfd, offset, ar_header_size)
       int text_align_power;
 
       text_align_power = bfd_xcoff_text_align_power (in_bfd);
-      BFD_ASSERT (2 < text_align_power);
 
       pad = 1 << text_align_power;
       pad -= (*offset + ar_header_size) & (pad - 1);
@@ -1822,10 +1838,9 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
 	+ str_32 + (str_32 & 1);
 
       symbol_table = NULL;
-      symbol_table = (bfd_byte *) bfd_malloc (symbol_table_size);
+      symbol_table = (bfd_byte *) bfd_zmalloc (symbol_table_size);
       if (symbol_table == NULL)
 	return false;
-      memset (symbol_table, 0, symbol_table_size);
 
       hdr = (struct xcoff_ar_hdr_big *) symbol_table;
 	
@@ -1926,10 +1941,9 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
 	+ str_64 + (str_64 & 1);
 
       symbol_table = NULL;
-      symbol_table = (bfd_byte *) bfd_malloc (symbol_table_size);
+      symbol_table = (bfd_byte *) bfd_zmalloc (symbol_table_size);
       if (symbol_table == NULL)
 	return false;
-      memset (symbol_table, 0, symbol_table_size);
 
       hdr = (struct xcoff_ar_hdr_big *) symbol_table;
 
@@ -2440,10 +2454,9 @@ xcoff_write_archive_contents_big (abfd)
 
   member_table_size += member_table_size & 1;
   member_table = NULL;
-  member_table = (bfd_byte *) bfd_malloc (member_table_size);
+  member_table = (bfd_byte *) bfd_zmalloc (member_table_size);
   if (member_table == NULL)
     return false;
-  memset (member_table, 0, member_table_size);
 
   hdr = (struct xcoff_ar_hdr_big *) member_table;
 
@@ -3702,11 +3715,9 @@ xcoff_generate_rtinit  (abfd, init, fini, rtld)
   data_buffer_size = 0x0040 + initsz + finisz;
   data_buffer_size += (data_buffer_size & 7) ? 8 - (data_buffer_size & 7) : 0;
   data_buffer = NULL;
-  data_buffer = (bfd_byte *) bfd_malloc (data_buffer_size);
+  data_buffer = (bfd_byte *) bfd_zmalloc (data_buffer_size);
   if (data_buffer == NULL)
     return false;
-  
-  memset (data_buffer, 0, data_buffer_size);
 
   if (initsz) 
     {
@@ -3740,8 +3751,10 @@ xcoff_generate_rtinit  (abfd, init, fini, rtld)
   if (string_table_size)
     {
       string_table_size += 4;
-      string_table = (bfd_byte *)bfd_malloc (string_table_size);
-      memset (string_table, 0, string_table_size);
+      string_table = (bfd_byte *) bfd_zmalloc (string_table_size);
+      if (string_table_size == NULL)
+	return false;
+
       val = string_table_size;
       bfd_h_put_32 (abfd, val, &string_table[0]);
       st_tmp = string_table + 4;
@@ -4167,10 +4180,12 @@ const bfd_target rs6000coff_vec =
   _bfd_xcoff_bfd_link_hash_table_create,   /* _bfd_link_hash_table_create */
   _bfd_generic_link_hash_table_free,       /* _bfd_link_hash_table_free */
   _bfd_xcoff_bfd_link_add_symbols,         /* _bfd_link_add_symbols */
-  _bfd_xcoff_bfd_final_link,               /* _bfd_filnal_link */
+  _bfd_generic_link_just_syms,             /* _bfd_link_just_syms */
+  _bfd_xcoff_bfd_final_link,               /* _bfd_final_link */
   _bfd_generic_link_split_section,         /* _bfd_link_split_section */
   bfd_generic_gc_sections,                 /* _bfd_gc_sections */
   bfd_generic_merge_sections,              /* _bfd_merge_sections */
+  bfd_generic_discard_group,               /* _bfd_discard_group */
 
   /* Dynamic */
                                           /* _get_dynamic_symtab_upper_bound */
@@ -4428,10 +4443,12 @@ const bfd_target pmac_xcoff_vec =
   _bfd_xcoff_bfd_link_hash_table_create,   /* _bfd_link_hash_table_create */
   _bfd_generic_link_hash_table_free,       /* _bfd_link_hash_table_free */
   _bfd_xcoff_bfd_link_add_symbols,         /* _bfd_link_add_symbols */
-  _bfd_xcoff_bfd_final_link,               /* _bfd_filnal_link */
+  _bfd_generic_link_just_syms,             /* _bfd_link_just_syms */
+  _bfd_xcoff_bfd_final_link,               /* _bfd_final_link */
   _bfd_generic_link_split_section,         /* _bfd_link_split_section */
   bfd_generic_gc_sections,                 /* _bfd_gc_sections */
-  bfd_generic_merge_sections,               /* _bfd_merge_sections */
+  bfd_generic_merge_sections,              /* _bfd_merge_sections */
+  bfd_generic_discard_group,               /* _bfd_discard_group */
 
   /* Dynamic */
                                           /* _get_dynamic_symtab_upper_bound */

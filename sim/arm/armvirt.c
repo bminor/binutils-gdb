@@ -64,7 +64,8 @@ GetWord (ARMul_State * state, ARMword address, int check)
   ARMword **pagetable;
   ARMword *pageptr;
 
-  XScale_check_memacc (state, &address, 0);
+  if (check)
+    XScale_check_memacc (state, &address, 0);
 
   page = address >> PAGEBITS;
   offset = (address & OFFSETBITS) >> 2;
@@ -99,7 +100,8 @@ PutWord (ARMul_State * state, ARMword address, ARMword data, int check)
   ARMword **pagetable;
   ARMword *pageptr;
 
-  XScale_check_memacc (state, &address, 1);
+  if (check)
+    XScale_check_memacc (state, &address, 1);
 
   page = address >> PAGEBITS;
   offset = (address & OFFSETBITS) >> 2;

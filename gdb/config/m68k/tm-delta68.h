@@ -45,7 +45,7 @@
 /* When it returns a float/double value, use fp0 in sysV68.  */
 /* When it returns a pointer value, use a0 in sysV68.  */
 
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF)			\
+#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF)		\
   if (TYPE_CODE (TYPE) == TYPE_CODE_FLT)				\
     REGISTER_CONVERT_TO_VIRTUAL (FP0_REGNUM, TYPE,			\
 				 &REGBUF[REGISTER_BYTE (FP0_REGNUM)],	\
@@ -91,8 +91,8 @@ extern int delta68_frame_num_args (struct frame_info *fi);
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
 
-#undef EXTRACT_STRUCT_VALUE_ADDRESS
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF)\
+#undef DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS
+#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF)\
 	(*(CORE_ADDR *)((char*)(REGBUF) + 8 * 4))
 
 extern int delta68_in_sigtramp (CORE_ADDR pc, char *name);

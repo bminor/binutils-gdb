@@ -23,7 +23,7 @@
 #define NM_NBSD_H
 
 /* Get generic NetBSD native definitions. */
-#include "nm-nbsd.h"
+#include "config/nm-nbsd.h"
 
 #if 0
 #define FLOAT_INFO	{ extern ns32k_float_info(); ns32k_float_info(); }

@@ -78,5 +78,6 @@ alphafbsd_init_abi (struct gdbarch_info info,
 void
 _initialize_alphafbsd_tdep (void)
 {
-  alpha_gdbarch_register_os_abi (ALPHA_ABI_FREEBSD, alphafbsd_init_abi);
+  gdbarch_register_osabi (bfd_arch_alpha, GDB_OSABI_FREEBSD_ELF,
+                          alphafbsd_init_abi);
 }

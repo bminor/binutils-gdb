@@ -23,7 +23,7 @@
 #ifndef NM_LINUX_H
 #define NM_LINUX_H
 
-#include "nm-linux.h"
+#include "config/nm-linux.h"
 
 /* ptrace register ``addresses'' are absolute.  */
 

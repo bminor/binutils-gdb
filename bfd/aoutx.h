@@ -1837,11 +1837,9 @@ NAME(aout,slurp_symbol_table) (abfd)
 
   cached_size = obj_aout_external_sym_count (abfd);
   cached_size *= sizeof (aout_symbol_type);
-  cached = (aout_symbol_type *) bfd_malloc (cached_size);
+  cached = (aout_symbol_type *) bfd_zmalloc (cached_size);
   if (cached == NULL && cached_size != 0)
     return false;
-  if (cached_size != 0)
-    memset (cached, 0, (size_t) cached_size);
 
   /* Convert from external symbol information to internal.  */
   if (! (NAME(aout,translate_symbol_table)
@@ -2411,10 +2409,9 @@ NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
   count = reloc_size / each_size;
 
   amt = count * sizeof (arelent);
-  reloc_cache = (arelent *) bfd_malloc (amt);
+  reloc_cache = (arelent *) bfd_zmalloc (amt);
   if (reloc_cache == NULL && count != 0)
     return false;
-  memset (reloc_cache, 0, (size_t) amt);
 
   relocs = bfd_malloc (reloc_size);
   if (relocs == NULL && reloc_size != 0)

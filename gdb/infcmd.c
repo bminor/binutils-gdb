@@ -1847,7 +1847,7 @@ interrupt_target_command (char *args, int from_tty)
 static void
 float_info (char *addr_exp, int from_tty)
 {
-  PRINT_FLOAT_INFO ();
+  gdbarch_print_float_info (current_gdbarch, gdb_stdout, selected_frame);
 }
 
 /* ARGSUSED */

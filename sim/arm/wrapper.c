@@ -28,13 +28,15 @@
 #include <string.h>
 #include <bfd.h>
 #include <signal.h>
-#include "callback.h"
-#include "remote-sim.h"
+#include "gdb/callback.h"
+#include "gdb/remote-sim.h"
 #include "armdefs.h"
 #include "armemu.h"
 #include "dbg_rdi.h"
 #include "ansidecl.h"
 #include "sim-utils.h"
+#include "run-sim.h"
+#include "gdb/sim-arm.h"
 
 host_callback *sim_callback;
 
@@ -222,7 +224,8 @@ sim_create_inferior (sd, abfd, argv, env)
     default:
       (*sim_callback->printf_filtered)
 	(sim_callback,
-	 "Unknown machine type; please update sim_create_inferior.\n");
+	 "Unknown machine type '%d'; please update sim_create_inferior.\n",
+	 mach);
       /* fall through */
 
     case 0:
@@ -384,13 +387,45 @@ sim_store_register (sd, rn, memory, length)
 {
   init ();
 
-  if (rn == 25)
+  switch ((enum sim_arm_regs) rn)
     {
+    case SIM_ARM_R0_REGNUM:
+    case SIM_ARM_R1_REGNUM:
+    case SIM_ARM_R2_REGNUM:
+    case SIM_ARM_R3_REGNUM:
+    case SIM_ARM_R4_REGNUM:
+    case SIM_ARM_R5_REGNUM:
+    case SIM_ARM_R6_REGNUM:
+    case SIM_ARM_R7_REGNUM:
+    case SIM_ARM_R8_REGNUM:
+    case SIM_ARM_R9_REGNUM:
+    case SIM_ARM_R10_REGNUM:
+    case SIM_ARM_R11_REGNUM:
+    case SIM_ARM_R12_REGNUM:
+    case SIM_ARM_R13_REGNUM:
+    case SIM_ARM_R14_REGNUM:
+    case SIM_ARM_R15_REGNUM: /* PC */
+    case SIM_ARM_FP0_REGNUM:
+    case SIM_ARM_FP1_REGNUM:
+    case SIM_ARM_FP2_REGNUM:
+    case SIM_ARM_FP3_REGNUM:
+    case SIM_ARM_FP4_REGNUM:
+    case SIM_ARM_FP5_REGNUM:
+    case SIM_ARM_FP6_REGNUM:
+    case SIM_ARM_FP7_REGNUM:
+    case SIM_ARM_FPS_REGNUM:
+      ARMul_SetReg (state, state->Mode, rn, frommem (state, memory));
+      break;
+
+    case SIM_ARM_PS_REGNUM:
       state->Cpsr = frommem (state, memory);
-      ARMul_CPSRAltered (state);	     
+      ARMul_CPSRAltered (state);
+      break;
+
+    default:
+      return 0;
     }
-  else
-    ARMul_SetReg (state, state->Mode, rn, frommem (state, memory));
+
   return -1;
 }
 
@@ -405,14 +440,46 @@ sim_fetch_register (sd, rn, memory, length)
 
   init ();
 
-  if (rn < 16)
-    regval = ARMul_GetReg (state, state->Mode, rn);
-  else if (rn == 25)
-    /* FIXME: use PS_REGNUM from gdb/config/arm/tm-arm.h.  */
-    regval = ARMul_GetCPSR (state);
-  else
-    /* FIXME: should report an error.  */
-    regval = 0;
+  switch ((enum sim_arm_regs) rn)
+    {
+    case SIM_ARM_R0_REGNUM:
+    case SIM_ARM_R1_REGNUM:
+    case SIM_ARM_R2_REGNUM:
+    case SIM_ARM_R3_REGNUM:
+    case SIM_ARM_R4_REGNUM:
+    case SIM_ARM_R5_REGNUM:
+    case SIM_ARM_R6_REGNUM:
+    case SIM_ARM_R7_REGNUM:
+    case SIM_ARM_R8_REGNUM:
+    case SIM_ARM_R9_REGNUM:
+    case SIM_ARM_R10_REGNUM:
+    case SIM_ARM_R11_REGNUM:
+    case SIM_ARM_R12_REGNUM:
+    case SIM_ARM_R13_REGNUM:
+    case SIM_ARM_R14_REGNUM:
+    case SIM_ARM_R15_REGNUM: /* PC */
+      regval = ARMul_GetReg (state, state->Mode, rn);
+      break;
+
+    case SIM_ARM_FP0_REGNUM:
+    case SIM_ARM_FP1_REGNUM:
+    case SIM_ARM_FP2_REGNUM:
+    case SIM_ARM_FP3_REGNUM:
+    case SIM_ARM_FP4_REGNUM:
+    case SIM_ARM_FP5_REGNUM:
+    case SIM_ARM_FP6_REGNUM:
+    case SIM_ARM_FP7_REGNUM:
+    case SIM_ARM_FPS_REGNUM:
+      memset (memory, 0, length);
+      return 0;
+
+    case SIM_ARM_PS_REGNUM:
+      regval = ARMul_GetCPSR (state);
+      break;
+
+    default:
+      return 0;
+    }
 
   while (length)
     {
@@ -426,6 +493,119 @@ sim_fetch_register (sd, rn, memory, length)
   return -1;
 }
 
+#ifdef SIM_TARGET_SWITCHES
+
+static void sim_target_parse_arg_array PARAMS ((char **));
+
+typedef struct
+{
+  char * 	swi_option;
+  unsigned int	swi_mask;
+} swi_options;
+
+#define SWI_SWITCH	"--swi-support"
+
+static swi_options options[] =
+  {
+    { "none",    0 },
+    { "demon",   SWI_MASK_DEMON },
+    { "angel",   SWI_MASK_ANGEL },
+    { "redboot", SWI_MASK_REDBOOT },
+    { "all",     -1 },
+    { "NONE",    0 },
+    { "DEMON",   SWI_MASK_DEMON },
+    { "ANGEL",   SWI_MASK_ANGEL },
+    { "REDBOOT", SWI_MASK_REDBOOT },
+    { "ALL",     -1 }
+  };
+
+
+int
+sim_target_parse_command_line (argc, argv)
+     int argc;
+     char ** argv;
+{
+  int i;
+
+  for (i = 1; i < argc; i++)
+    {
+      char * ptr = argv[i];
+      int arg;
+
+      if ((ptr == NULL) || (* ptr != '-'))
+	break;
+
+      if (strncmp (ptr, SWI_SWITCH, sizeof SWI_SWITCH - 1) != 0)
+	continue;
+
+      if (ptr[sizeof SWI_SWITCH - 1] == 0)
+	{
+	  /* Remove this option from the argv array.  */
+	  for (arg = i; arg < argc; arg ++)
+	    argv[arg] = argv[arg + 1];
+	  argc --;
+	  
+	  ptr = argv[i];
+	}
+      else
+	ptr += sizeof SWI_SWITCH;
+
+      swi_mask = 0;
+      
+      while (* ptr)
+	{
+	  int i;
+
+	  for (i = sizeof options / sizeof options[0]; i--;)
+	    if (strncmp (ptr, options[i].swi_option,
+			 strlen (options[i].swi_option)) == 0)
+	      {
+		swi_mask |= options[i].swi_mask;
+		ptr += strlen (options[i].swi_option);
+
+		if (* ptr == ',')
+		  ++ ptr;
+
+		break;
+	      }
+
+	  if (i < 0)
+	    break;
+	}
+
+      if (* ptr != 0)
+	fprintf (stderr, "Ignoring swi options: %s\n", ptr);
+      
+      /* Remove this option from the argv array.  */
+      for (arg = i; arg < argc; arg ++)
+	argv[arg] = argv[arg + 1];
+      argc --;
+      i --;
+    }
+  return argc;
+}
+
+static void
+sim_target_parse_arg_array (argv)
+     char ** argv;
+{
+  int i;
+
+  for (i = 0; argv[i]; i++)
+    ;
+
+  return (void) sim_target_parse_command_line (i, argv);
+}
+
+void
+sim_target_display_usage ()
+{
+  fprintf (stderr, "%s=<list>  Comma seperated list of SWI protocols to supoport.\n\
+                This list can contain: NONE, DEMON, ANGEL, REDBOOT and/or ALL.\n",
+	   SWI_SWITCH);
+}
+#endif
+
 SIM_DESC
 sim_open (kind, ptr, abfd, argv)
      SIM_OPEN_KIND kind;
@@ -438,6 +618,10 @@ sim_open (kind, ptr, abfd, argv)
   myname = (char *) xstrdup (argv[0]);
   sim_callback = ptr;
 
+#ifdef SIM_TARGET_SWITCHES
+  sim_target_parse_arg_array (argv);
+#endif
+  
   /* Decide upon the endian-ness of the processor.
      If we can, get the information from the bfd itself.
      Otherwise look to see if we have been given a command

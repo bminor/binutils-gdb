@@ -965,6 +965,9 @@ tic30_aout_set_arch_mach (abfd, arch, machine)
 #ifndef MY_bfd_merge_sections
 #define MY_bfd_merge_sections bfd_generic_merge_sections
 #endif
+#ifndef MY_bfd_discard_group
+#define MY_bfd_discard_group bfd_generic_discard_group
+#endif
 #ifndef MY_bfd_reloc_type_lookup
 #define MY_bfd_reloc_type_lookup tic30_aout_reloc_type_lookup
 #endif
@@ -985,6 +988,9 @@ tic30_aout_set_arch_mach (abfd, arch, machine)
 #endif
 #ifndef MY_bfd_link_add_symbols
 #define MY_bfd_link_add_symbols NAME(aout,link_add_symbols)
+#endif
+#ifndef MY_bfd_link_just_syms
+#define MY_bfd_link_just_syms _bfd_generic_link_just_syms
 #endif
 #ifndef MY_bfd_link_split_section
 #define MY_bfd_link_split_section  _bfd_generic_link_split_section

@@ -1,3 +1,42 @@
+2002-06-09  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (INCLUDE): Update path to callback.h.
+	* gencode.c: Do not include "callback.h".
+	* d10v_sim.h: Include "gdb/callback.h" and "gdb/remote-sim.h".
+	* interp.c: Ditto.
+
+2002-06-08  Andrew Cagney  <cagney@redhat.com>
+
+	* interp.c (sim_fetch_register): Fix name of enum used in cast.
+	(sim_store_register): Ditto.
+
+2002-06-02  Elena Zannoni  <ezannoni@redhat.com>
+
+        From Jason Eckhardt <jle@redhat.com>
+        * d10v_sim.h (INC_ADDR): Correctly handle the case where MOD_E is
+        less than MOD_S (post-decrement).
+
+2002-06-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* interp.c (sim_fetch_register, sim_store_register): Use a switch
+	statement and enums from "sim-d10v.h".
+
+2002-05-28  Elena Zannoni  <ezannoni@redhat.com>
+
+	* interp.c (sim_create_inferior): Add comment.
+
+	From Alan Matsuoka <alanm@redhat.com>:
+	From 2001-04-27 Jason Eckhardt <jle@cygnus.com>:
+	* simops.c (OP_4400): Output "mvf0f" instead of "mf0f".
+	(OP_4401): Output "mvf0t" instead of "mf0t".
+	(OP_460B): Do not output a flag register.
+	(OP_4609): Do not output a flag register.
+
+2002-05-23  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (INCLUDE): Add "gdb/sim-d10v.h".
+	* interp.c: Include "gdb/sim-d10v.h" instead of "sim-d10v.h".
+
 2001-08-01  John R. Moore  <jmoore@redhat.com>
 
 	* interp.c (sim_create_inferior): Removed a hack that stated

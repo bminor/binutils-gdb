@@ -749,7 +749,6 @@ bfd_get_arch_size (abfd)
   if (abfd->xvec->flavour == bfd_target_elf_flavour)
     return (get_elf_backend_data (abfd))->s->arch_size;
 
-  bfd_set_error (bfd_error_wrong_format);
   return -1;
 }
 
@@ -1186,6 +1185,9 @@ DESCRIPTION
 .#define bfd_merge_sections(abfd, link_info) \
 .	BFD_SEND (abfd, _bfd_merge_sections, (abfd, link_info))
 .
+.#define bfd_discard_group(abfd, sec) \
+.	BFD_SEND (abfd, _bfd_discard_group, (abfd, sec))
+.
 .#define bfd_link_hash_table_create(abfd) \
 .	BFD_SEND (abfd, _bfd_link_hash_table_create, (abfd))
 .
@@ -1194,6 +1196,9 @@ DESCRIPTION
 .
 .#define bfd_link_add_symbols(abfd, info) \
 .	BFD_SEND (abfd, _bfd_link_add_symbols, (abfd, info))
+.
+.#define bfd_link_just_syms(sec, info) \
+.	BFD_SEND (abfd, _bfd_link_just_syms, (sec, info))
 .
 .#define bfd_final_link(abfd, info) \
 .	BFD_SEND (abfd, _bfd_final_link, (abfd, info))
