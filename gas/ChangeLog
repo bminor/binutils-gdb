@@ -13,6 +13,9 @@ Tue May 12 12:03:44 1998  Richard Henderson  <rth@cygnus.com>
         (tc_frob_label): Call d30v_frob_label.
         (md_cons_align): New.
 
+	* config/tc-d30v.c (find_format): Convert complex expressions to 
+	expression symbols before processing.  Clean up code formatting.
+
 start-sanitize-sky
 Mon May 11 12:48:33 1998  Doug Evans  <devans@canuck.cygnus.com>
 
