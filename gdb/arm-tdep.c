@@ -485,6 +485,12 @@ arm_skip_prologue (CORE_ADDR pc)
     }
 
   if ((inst & 0xfffff000) == 0xe24cb000)	/* sub fp, ip, #nn */
+    {
+      skip_pc += 4;
+      inst = read_memory_integer (skip_pc, 4);
+    }
+
+  if ((inst & 0xfffff000) == 0xe24dd000)                /* sub sp, sp, #nn */
     skip_pc += 4;
 
   return skip_pc;

@@ -39,7 +39,8 @@
 
 2002-04-22  Michael Snyder  <msnyder@redhat.com>
 
-	* arm-tdep.c: Some whitespace and coding standards tweaks.
+	* arm-tdep.c (arm_skip_prologue): Recognize "sub sp, sp, #nn".
+	Some whitespace and coding standards tweaks.
 
 2002-04-22  Jason Thorpe  <thorpej@wasabisystems.com>
 
