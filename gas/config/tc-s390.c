@@ -327,22 +327,29 @@ init_default_arch ()
     {
       if (s390_arch_size == 0)
 	s390_arch_size = 32;
-      if (current_mode_mask == 0)
-	current_mode_mask = 1 << S390_OPCODE_ESA;
-      if (current_cpu == -1U)
-	current_cpu = S390_OPCODE_G5;
     }
   else if (strcmp (default_arch, "s390x") == 0)
     {
       if (s390_arch_size == 0)
 	s390_arch_size = 64;
-      if (current_mode_mask == 0)
-	current_mode_mask = 1 << S390_OPCODE_ZARCH;
-      if (current_cpu == -1U)
-	current_cpu = S390_OPCODE_Z900;
     }
   else
     as_fatal ("Invalid default architecture, broken assembler.");
+
+  if (current_mode_mask == 0)
+    {
+      if (s390_arch_size == 32)
+	current_mode_mask = 1 << S390_OPCODE_ESA;
+      else
+	current_mode_mask = 1 << S390_OPCODE_ZARCH;
+    }
+  if (current_cpu == -1U)
+    {
+      if (current_mode_mask == (1 << S390_OPCODE_ESA))
+	current_cpu = S390_OPCODE_G5;
+      else
+	current_cpu = S390_OPCODE_Z900;
+    }
 }
 
 /* Called by TARGET_FORMAT.  */

@@ -1,3 +1,9 @@
+2003-06-18  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* config/tc-s390.c (init_default_arch): Make current_mode_mask
+	dependent on s390_arch_size and current_cpu dependent on
+	current_mode_mask.
+
 2003-06-18  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* configure.in: Add c4x as an architecture variant to tic4x.
