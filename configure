@@ -59,19 +59,13 @@ fatal=
 floating_point=default
 gas=default
 hosts=
-#hostsubdir=
-#namesubdir=
 next_prefix=
 next_host=
-#next_namesubdir=
-#next_objdir=
 next_site=
 next_srcdir=
 next_target=
 next_tmpdir=
 norecursion=
-#objdir=
-#objdiroption=
 prefix=/usr/local
 progname=
 recurring=
@@ -80,7 +74,6 @@ srcdir=
 srctrigger=
 target=
 targets=
-#targetsubdir=
 undefinedargs=
 verbose=
 version="$Revision$"
@@ -116,9 +109,6 @@ do
 	# handle things that might have args following as separate words
 	if [ -n "${next_prefix}" ] ; then prefix=${arg} ; prefixoption="-prefix=${prefix}" ; next_prefix=
 	elif [ -n "${next_datadir}" ] ; then datadir=${arg} ; datadiroption="-datadir=${datadir}" ; next_datadir=
-#	elif [ -n "${next_namesubdir}" ] ; then \
-#		namesubdir=${arg} ; namesubdiroption="--namesubdir=${namesubdir}" ; next_namesubdir=
-#	elif [ -n "${next_objdir}" ] ; then objdir=${arg} ; objdiroption="--objdir=${objdir}" ; next_objdir=
 	elif [ -n "${next_site}" ] ; then site=${arg} ; next_site=
 	elif [ -n "${next_srcdir}" ] ; then srcdir=${arg} ; next_srcdir=		
 	elif [ -n "${next_target}" ] ; then
@@ -151,10 +141,6 @@ do
 			fatal=true
 			;;
 		-host=* | --host=* | --hos=* | --ho=*)
-#			if [ -n "${hosts}" ] ; then
-#				subdirs="--subdirs"
-#			fi
-
 			if [ -z "${hosts}" ] ; then
 				newhosts="${hosts} `echo ${arg} | sed 's/^[-a-z]*=//'`"
 				hosts="${newhosts}"
@@ -163,26 +149,12 @@ do
 				fatal=yes
 			fi
 			;;
-#		-namesubdir | --namesubdir | --namesubdi | --namesubd | --namesub | --namesu | --names | --name | --nam | --na)
-#			next_namesubdir=yes
-#			;;
-#		-namesubdir=* | --namesubdir=* | --namesubdi=* | --namesubd=* | --namesub=* | --namesu=* | --names=* | --name=* | --nam=* | --na=*)
-#			namesubdir=`echo ${arg} | sed 's/^[-a-z]*=//'`
-#			namesubdiroption=${arg}
-#			;;
 		-nfp | --nf*)
 			floating_point=no
 			;;
 		-norecursion | --no*)
 			norecursion=true
 			;;
-#		-objdir=* | --objdir=* | --objdi=* | --objd=* | --obj=* | --ob=* | --o=*)
-#			objdiroption=${arg}
-#			objdir=`echo ${arg} | sed 's/^[-a-z]*=//'`
-#			;;
-#		-objdir | --objdir | --objdi | --objd | --obj | --ob | --o)
-#			next_objdir=yes
-#			;;
 		-prefix=* | --prefix=* | --prefi=* | --pref=* | --pre=* | --pr=* | --p=*)
 			prefix=`echo ${arg} | sed 's/^[-a-z]*=//'`
 			prefixoption=${arg}
@@ -209,14 +181,7 @@ do
 		-srcdir | --srcdir | --srcdi | --srcd | --src | --sr)
 			next_srcdir=yes
 			;;
-#		-subdirs | --su*)
-#			subdirs=${arg}
-#			;;
 		-target=* | --target=* | --targe=* | --targ=* | --tar=* | --ta=*)
-#			if [ -n "${targets}" ] ; then
-#				subdirs="--subdirs"
-#			fi
-
 			if [ -z "${targets}" ] ; then
 				newtargets="${targets} `echo ${arg} | sed 's/^[-a-z]*=//'`"
 				targets="${newtargets}"
@@ -250,10 +215,6 @@ do
 			fatal=true
 			;;
 		*)
-#			if [ -n "${hosts}" ] ; then
-#				subdirs="--subdirs"
-#			fi
-
 			if [ -z "${undefs}" ] ; then
 				newundefs="${undefs} ${arg}"
 				undefs=${newundefs}
@@ -315,19 +276,14 @@ if [ -n "${fatal}" -o "${hosts}" = "help" ] ; then
 	echo " -lang=LANG	configure to build LANG. [gcc]" ;
 	echo " -nfp		configure the compilers default to soft floating point. [hard float]" ;
 	echo " -norecursion	configure this directory only. [recurse]" ;
-#	echo " -objdir=ODIR	configure in a parallel tree rooted in ODIR. [rooted in \".\"]" ;
 	echo " -prefix=MYDIR	configure for installation of host dependent files into MYDIR. [\"/usr/local\"]" ;
 	echo " -rm		remove this configuration. [build a configuration]" ;
 	echo " -site		configure with site specific makefile" ;
 	echo " -srcdir=DIR	find the sources in DIR. [\".\" or \"..\"]" ;
-# This is correctly aligned in the output, even though it isn't here.
-#	echo " -subdirs	configure in subdirectories.  [in source directories]" ;
 	echo " -target=TARGET	configure for TARGET.  [TARGET = HOST]" ;
 	echo " -tmpdir=TMPDIR	create temporary files in TMPDIR.  [ TMPDIR = \"/tmp\" ]" ;
 	echo ;
 	echo "Where HOST and TARGET are something like \"vax\", \"sun3\", \"encore\", etc." ;
-#	echo "Asking for more than one \"--target\" implies \"--subdirs\".  Any other" ;
-#	echo "options given will apply to all targets."
 	) 1>&2
 
 	if [ -r config.status ] ; then
@@ -446,63 +402,8 @@ for host in ${hosts} ; do
 		fi
 
 		if [ -n "${removing}" ] ; then
-#			if [ -n "${objdir}" ] ; then
-#				echo '***' --rm not supported for --objdir.  Just \"rm -rf ${objdir}\" by hand.
-#				exit 1
-#			fi
-
-#			if [ -n "${subdirs}" ] ; then
-#				if [ -d "${subdirname}" ] ; then
-#					rm -rf ${hostsubdir}
-#				else
-#					echo Warning: no ${PWD}/${hostsubdir} to remove.
-#				fi
-#			else
 				rm -f ${Makefile} config.status ${links}
-#			fi
 		else
-#			if [ -n "${objdir}" ]; then
-#				srcdir=${PWD}
-#				cd ${objdir}
-#			fi
-
-#			if [ -n "${subdirs}" ] ; then
-#				# check for existing status before allowing forced subdirs.
-#				if [ -f ${Makefile} ] ; then
-#					echo '***' "${Makefile} already exists in source directory.  ${PWD} not configured." 1>&2
-#					exit 1
-#				fi
-#
-#				# use a subdir common to all targets for this host iff: this is a cross AND
-#				# this tool does not claim to be target dependent AND we have not been asked to name the subdir.
-#				if [ ${host_alias} != ${target_alias} -a -z "${target_dependent}" -a -z "${namesubdiroption}" ]
-#				then
-#					if [ ! -d H-${host_alias} ] ; then mkdir H-${host_alias} ; fi
-#
-#					if ${symbolic_link} ${subdirname} H-${host_alias} 2> /dev/null ; then
-#						true
-#					else # just give up. they lose.
-#						rmdir H-${host_alias}
-#						if [ ! -d ${subdirname} ] ; then mkdir ${subdirname} ; fi
-#					fi
-#				elif [ ! -d ${subdirname} ] ; then
-#					mkdir ${subdirname}
-#				fi
-#
-#				cd ${subdirname}
-#
-#				if [ -z "${srcdir}" ] ; then
-#					srcdir=..
-#				fi
-#			elif [ "`echo H-*`" != "H-*" -a "`echo X-*`" != "X-*" ] ; then
-#				# if not subdir builds, then make sure none exist.
-#				# We might miss if there are explicitly named subdirs.
-#				echo '***' "Configured subdirs exist.  ${PWD} not configured." 1>&2
-#				exit 1
-#			else
-#				true
-#			fi
-
 			# Find the source files, if location was not specified.
 			if [ -z "${srcdir}" ] ; then
 				srcdirdefaulted=1
@@ -596,15 +497,9 @@ for host in ${hosts} ; do
 			echo "target_vendor = ${target_vendor}" >> ${Makefile}
 			echo "target_os = ${target_os}" >> ${Makefile}
 
-#			if [ -n "${subdirs}" ] ; then
-#				echo "subdir = /${subdirname}" >> ${Makefile}
-#				echo "unsubdir = .." >> ${Makefile}
-#			else
 				echo "subdir =" >> ${Makefile}
 				echo "unsubdir = ." >> ${Makefile}
-#			fi
 
-		#	echo "workdir = ${PWD}" >> ${Makefile}
 			echo "VPATH = ${srcdir}" >> ${Makefile}
 
 			# add "Makefile.in" (or whatever it's called)
@@ -713,8 +608,6 @@ ${progname}" ${arguments}  "
 # ${using}" > config.status
 			chmod a+x config.status
 
-#			originaldir=${PWD}
-#			cd ${srcdir}
 		fi
 
 		# If there are subdirectories, then recur. 
@@ -764,28 +657,6 @@ ${progname}" ${arguments}  "
 			done
 		fi
 	done # for each target
-
-	# Now build a Makefile for this host.
-#	if [ -n "${subdirs}" -a ! -n "${removing}" ] ; then
-#		push=${PWD}
-#
-#		if [ -n "${objdir}" ] ; then
-#			cd ${objdir}
-#		fi
-#
-#		cd ${hostsubdir}
-#		cat > GNUmakefile << 'E!O!F'
-## Makefile generated by configure for host ${host_alias}.
-#
-#ALL := $(shell ls -d T-*)
-#
-#%:
-#	$(foreach subdir,$(ALL),$(MAKE) -C $(subdir) \$@ &&) true
-#
-#all:
-#E!O!F
-#		cd ${push}
-#	fi
 done # for each host
 
 ### clean up.
