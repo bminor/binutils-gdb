@@ -76,6 +76,9 @@ endif
 ifeq ($(canonhost),mips-sgi-irix4.0.5H)
 canonhost := mips-sgi-irix4
 endif
+ifeq ($(canonhost),mips-sgi-irix5.2)
+canonhost := mips-sgi-irix5
+endif
 ifeq ($(canonhost),rs6000-ibm-aix3.2)
 canonhost := rs6000-ibm-aix
 endif
@@ -140,7 +143,7 @@ TARGETS = $(NATIVE) \
 	i960-vxworks5.0 i960-vxworks5.1 \
 	m68k-aout	m68k-coff 	m68k-vxworks \
 	mipsel-idt-ecoff sparc-lynx \
-	sparclite-aout sparclite-coff m88k-coff 
+	sparclite-aout sparclite-coff m88k-coff z8k-coff
 CC = cc -Xs
 GCC = gcc -O2 -pipe
 all: all-cygnus
@@ -159,6 +162,14 @@ all: all-cygnus
 endif
 
 ifeq ($(canonhost),mips-sgi-irix4)
+TARGETS	= $(NATIVE) \
+	mips-idt-ecoff	sh-hms \
+	mips64-elf
+CC = cc -cckr -Wf,-XNg1500 -Wf,-XNk1000 -Wf,-XNh2000
+all: all-cygnus
+endif
+
+ifeq ($(canonhost),mips-sgi-irix5)
 TARGETS	= $(NATIVE) \
 	mips-idt-ecoff	sh-hms \
 	mips64-elf
