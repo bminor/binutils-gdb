@@ -145,30 +145,13 @@ GENERATED_CFILES = \
 	$(CC) -c $(ALL_CFLAGS) $<
 
 DEBUG_OBJS = rddbg.o debug.o stabs.o ieee.o prdbg.o
-#
-## Random definitions
-# Hopefully all these may be flushed once we get configuration down pat.
 
-# alloca only needed for systems which don't have it and when cc != gcc.
-# ALLOCA = alloca.o
-
-# nm tries to malloc enough space for the string table.  The old GNU malloc
-# rounds this up to a power of two (e.g. 5M becomes 8M), and so it might 
-# fail unnecessarily.  I've also seen some Unix malloc's fail, even when
-# there is enough memory.  So use the new GNU malloc.
-# MALLOC = gmalloc.o
-# Use this if the system malloc is good enough.
-MALLOC =
-
-# Use the GNU getopt unless you have problems with it.
-# The IRIS version could probably benefit from being assembled with
-# libmalloc rather than the ordinary malloc.
 LIBIBERTY = ../libiberty/libiberty.a
 
 # Code shared by all the binutils.
 BULIBS = bucomm.o version.o filemode.o
 
-ADDL_LIBS = $(MALLOC) $(BULIBS) $(BFD) $(LIBIBERTY) 
+ADDL_LIBS = $(BULIBS) $(BFD) $(LIBIBERTY) 
 
 BFD = ../bfd/libbfd.a
 OPCODES = ../opcodes/libopcodes.a

@@ -30,7 +30,6 @@ README
 TODO
 acconfig.h
 aclocal.m4
-alloca.c
 ar.1
 ar.c
 arlex.l
@@ -56,7 +55,6 @@ dep-in.sed
 defparse.y
 deflex.l
 filemode.c
-gmalloc.c
 ieee.c
 is-ranlib.c
 is-strip.c
