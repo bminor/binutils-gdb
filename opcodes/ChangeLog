@@ -1,3 +1,9 @@
+Wed Oct 22 17:18:02 1997  Richard Henderson  <rth@cygnus.com>
+
+	* sparc-opc.c (v9notv9a): New insn type.
+	(IMPDEP): Move to the end to not conflict with edge8 et al.
+	Patch from David Miller <davem@vger.rutgers.edu>.
+
 Fri Oct 17 13:18:53 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* mips-opc.c (bnezl,beqzl): Mark these as also tx39.

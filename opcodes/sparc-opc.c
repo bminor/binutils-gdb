@@ -59,6 +59,9 @@ Boston, MA 02111-1307, USA.	*/
 /* v6 insns not supported by v9 */
 #define v6notv9		(MASK_V6 | MASK_V7 | MASK_V8 \
 			 | MASK_SPARCLET | MASK_SPARCLITE)
+/* v9a instructions which would appear to be aliases to v9's impdep's
+   otherwise */
+#define v9notv9a	(MASK_V9)
 
 /* Table of opcode architectures.
    The order is defined in opcode/sparc.h.
@@ -71,7 +74,6 @@ const struct sparc_opcode_arch sparc_opcode_archs[] = {
   { "sparclet", MASK_V6 | MASK_V7 | MASK_V8 | MASK_SPARCLET },
   { "sparclite", MASK_V6 | MASK_V7 | MASK_V8 | MASK_SPARCLITE },
   /* ??? Don't some v8 priviledged insns conflict with v9?  */
-  /* ??? Will we want v8plus{,a} entries?  */
   { "v9", MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 },
   /* v9 with ultrasparc additions */
   { "v9a", MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A },
@@ -1577,19 +1579,6 @@ SLCBCC("cbnefr", 15),
 #undef SLCBCC2
 #undef SLCBCC
 
-/* More v9 specific insns */
-
-#define IMPDEP(name, code) \
-{ name,	F3(2, code, 0), F3(~2, ~code, ~0)|ASI(~0), "1,2,d", 0, v9 }, \
-{ name,	F3(2, code, 1), F3(~2, ~code, ~1),	   "1,i,d", 0, v9 }, \
-{ name, F3(2, code, 0), F3(~2, ~code, ~0),         "x,1,2,d", 0, v9 }, \
-{ name, F3(2, code, 0), F3(~2, ~code, ~0),         "x,e,f,g", 0, v9 }
-
-IMPDEP ("impdep1", 0x36),
-IMPDEP ("impdep2", 0x37),
-
-#undef IMPDEP
-
 { "casa",	F3(3, 0x3c, 0), F3(~3, ~0x3c, ~0), "[1]A,2,d", 0, v9 },
 { "casa",	F3(3, 0x3c, 1), F3(~3, ~0x3c, ~1), "[1]o,2,d", 0, v9 },
 { "casxa",	F3(3, 0x3e, 0), F3(~3, ~0x3e, ~0), "[1]A,2,d", 0, v9 },
@@ -1624,8 +1613,7 @@ IMPDEP ("impdep2", 0x37),
 { "fexpand",	F3F(2, 0x36, 0x04d), F3F(~2, ~0x36, ~0x04d)|RS1_G0, "f,H", 0, v9a },
 { "fpmerge",	F3F(2, 0x36, 0x04b), F3F(~2, ~0x36, ~0x04b), "e,f,H", 0, v9a },
 
-/* Note that the mixing of 32/64 bit regs is intentional.
-   FIXME: Should these be commutative?  */
+/* Note that the mixing of 32/64 bit regs is intentional.  */
 { "fmul8x16",		F3F(2, 0x36, 0x031), F3F(~2, ~0x36, ~0x031), "e,B,H", 0, v9a },
 { "fmul8x16au",		F3F(2, 0x36, 0x033), F3F(~2, ~0x36, ~0x033), "e,f,H", 0, v9a },
 { "fmul8x16al",		F3F(2, 0x36, 0x035), F3F(~2, ~0x36, ~0x035), "e,f,H", 0, v9a },
@@ -1692,6 +1680,20 @@ IMPDEP ("impdep2", 0x37),
 { "array8",	F3F(2, 0x36, 0x010), F3F(~2, ~0x36, ~0x010), "1,2,d", 0, v9a },
 { "array16",	F3F(2, 0x36, 0x012), F3F(~2, ~0x36, ~0x012), "1,2,d", 0, v9a },
 { "array32",	F3F(2, 0x36, 0x014), F3F(~2, ~0x36, ~0x014), "1,2,d", 0, v9a },
+
+/* More v9 specific insns, these need to come last so they do not clash
+   with v9a instructions such as "edge8" which looks like impdep1. */
+
+#define IMPDEP(name, code) \
+{ name,	F3(2, code, 0), F3(~2, ~code, ~0)|ASI(~0), "1,2,d", 0, v9notv9a }, \
+{ name,	F3(2, code, 1), F3(~2, ~code, ~1),	   "1,i,d", 0, v9notv9a }, \
+{ name, F3(2, code, 0), F3(~2, ~code, ~0),         "x,1,2,d", 0, v9notv9a }, \
+{ name, F3(2, code, 0), F3(~2, ~code, ~0),         "x,e,f,g", 0, v9notv9a }
+
+IMPDEP ("impdep1", 0x36),
+IMPDEP ("impdep2", 0x37),
+
+#undef IMPDEP
 
 };
 
