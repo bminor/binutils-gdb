@@ -823,11 +823,11 @@ sim_resume (step)
 	  res = rd + ea;
 	  goto alu8;
 
-#define RD    rd = fetch(&code->src);
-#define RD_EA rd =  fetch(&code->dst); ea = fetch(&code->src);
+#define EA    ea = fetch(&code->src);
+#define RD_EA ea = fetch(&code->src); rd = fetch(&code->dst);
 
-	  ALUOP (1, O_SUB, 	 RD_EA;	 ea = -ea ;	 res = rd + ea);
-	  ALUOP (1, O_NEG, 	 RD;	 ea = -ea ;rd = 0; res = rd + ea);
+	  ALUOP (1, O_SUB, RD_EA; ea = -ea ;         res = rd + ea);
+	  ALUOP (1, O_NEG, EA;	  ea = -ea ; rd = 0; res = rd + ea);
 
 	case O(O_ADD,SB):
 	  rd = GET_B_REG(code->dst.reg);

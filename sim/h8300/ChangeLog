@@ -1,3 +1,8 @@
+Thu Jul 15 09:59:01 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* run.c (main): If h8/300h binary detected, call set_h8300h.
+	* compile.c (sim_resume): Fix O_NEG insn.
+
 Fri Jul  9 14:36:48 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* run.c (main): Add -h flag to enable h8/300h emulation.
