@@ -3,7 +3,7 @@
 # see pretex.m4 for discussion of preprocessor definitions
 
 # What version of the manual you want (see *.m4); "all" includes everything
-CONFIG=all
+CONFIG=a29k-coff
 
 # Sun/Berkeley m4 doesn't have all the things we need; use GNU or sV
 #M4=gm4
@@ -60,11 +60,11 @@ as.me: as-${CONFIG}.texinfo
 as-all.texinfo: as.texinfo pretex.m4 none.m4 all.m4
 	${M4} pretex.m4 none.m4 all.m4 as.texinfo >as-all.texinfo
 
-as-amd29k.texinfo: as.texinfo pretex.m4 none.m4 amd29k.m4
-	${M4} pretex.m4 none.m4 amd29k.m4 as.texinfo >as-amd29k.texinfo
+as-a29k.texinfo: as.texinfo pretex.m4 none.m4 a29k.m4
+	${M4} pretex.m4 none.m4 a29k.m4 as.texinfo >as-a29k.texinfo
 
-as-amd29k-coff.texinfo: as.texinfo pretex.m4 none.m4 amd29k-coff.m4
-	${M4} pretex.m4 none.m4 amd29k-coff.m4 as.texinfo >as-amd29k-coff.texinfo
+as-a29k-coff.texinfo: as.texinfo pretex.m4 none.m4 a29k-coff.m4
+	${M4} pretex.m4 none.m4 a29k-coff.m4 as.texinfo >as-a29k-coff.texinfo
 
 as-gen.texinfo: as.texinfo pretex.m4 none.m4 gen.m4
 	${M4} pretex.m4 none.m4 gen.m4 as.texinfo >as-gen.texinfo
