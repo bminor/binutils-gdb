@@ -1,5 +1,13 @@
 Fri Nov  9 17:55:39 2001  Jeffrey A Law  (law@cygnus.com)
 
+	* unwind-ia64.c (unw_print_brmask): Fix ISO C portability glitch.
+	(unw_print_grmask, unw_print_frmask, unw_print_abreg): Likewise.
+	(unw_print_xyreg, unw_decode_x1, unw_decode_x2): Likewise.
+	(unw_decode_x3, unw_decode_r1, unw_decode_r2): Likewise.
+	(unw_decode_r3, unw_decode_p1, unw_decode_p2_p5): Likewise.
+	(unw_decode_p6, unw_decode_p7_p10, unw_decode_b1): Likewise.
+	(unw_decode_b2, unw_decode_b3_b4): Likewise.
+
 	* readelf.c (get_elf_class): Fix ISO portability glitch.
 	(get_data_encoding, get_osabi_name, request_dump): Likewise.
 
