@@ -90,12 +90,17 @@ die horribly;
 #define LEX_QM 0
 #endif
 
+#ifndef LEX_DOLLAR
+/* The a29k assembler does not permits labels to start with $.  */
+#define LEX_DOLLAR 3
+#endif
+
 /* used by is_... macros. our ctype[] */
 char lex_type[256] =
 {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* @ABCDEFGHIJKLMNO */
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* PQRSTUVWXYZ[\]^_ */
-  0, 0, 0, 0, 3, LEX_PCT, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0,	/* _!"#$%&'()*+,-./ */
+  0, 0, 0, 0, LEX_DOLLAR, LEX_PCT, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, /* _!"#$%&'()*+,-./ */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, LEX_QM,	/* 0123456789:;<=>? */
   LEX_AT, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,	/* @ABCDEFGHIJKLMNO */
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, LEX_BR, 0, LEX_BR, 0, 3, /* PQRSTUVWXYZ[\]^_ */
@@ -218,8 +223,8 @@ read_begin ()
 
   /* Something close -- but not too close -- to a multiple of 1024.
      The debugging malloc I'm using has 24 bytes of overhead.  */
-  obstack_begin (&notes, 5090);
-  obstack_begin (&cond_obstack, 990);
+  obstack_begin (&notes, chunksize);
+  obstack_begin (&cond_obstack, chunksize);
 
   /* Use machine dependent syntax */
   for (p = line_separator_chars; *p; p++)
@@ -396,7 +401,8 @@ pop_insert (table)
     {
       errtxt = hash_insert (po_hash, pop->poc_name, (char *) pop);
       if (errtxt && (!pop_override_ok || strcmp (errtxt, "exists")))
-	as_fatal ("error constructing %s pseudo-op table", pop_table_name);
+	as_fatal ("error constructing %s pseudo-op table: %s", pop_table_name,
+		  errtxt);
     }
 }
 
@@ -2716,32 +2722,19 @@ cons_worker (nbytes, rva)
   c = 0;
   do
     {
-      if (rva) 
-	{
-	  /* If this is an .rva pseudoop then stick
-	     an extra reloc in for this word. */
-	  int reloc;
-	  char *p = frag_more (0);
-	  exp.X_op = O_absent;
-
-#ifdef BFD_ASSEMBLER
-	  reloc = BFD_RELOC_RVA;
-#else
-#ifdef TC_RVA_RELOC
-	  reloc = TC_RVA_RELOC;
-#else
-	  abort();
-#endif
-#endif
-	  fix_new_exp (frag_now, p - frag_now->fr_literal,
-		       nbytes, &exp, 0, reloc);
-
-	}
       if (flag_mri)
 	parse_mri_cons (&exp, (unsigned int) nbytes);
       else
 	TC_PARSE_CONS_EXPRESSION (&exp, (unsigned int) nbytes);
-       emit_expr (&exp, (unsigned int) nbytes);
+
+      if (rva)
+	{
+	  if (exp.X_op == O_symbol)
+	    exp.X_op = O_symbol_rva;
+	  else
+	    as_fatal ("rva without symbol");
+	}
+      emit_expr (&exp, (unsigned int) nbytes);
       ++c;
     }
   while (*input_line_pointer++ == ',');
@@ -3733,9 +3726,7 @@ demand_copy_C_string (len_pointer)
     {
       register int len;
 
-      for (len = *len_pointer;
-	   len > 0;
-	   len--)
+      for (len = *len_pointer; len > 0; len--)
 	{
 	  if (*s == 0)
 	    {
@@ -3746,7 +3737,7 @@ demand_copy_C_string (len_pointer)
 	    }
 	}
     }
-  return (s);
+  return s;
 }
 
 /*
@@ -3933,5 +3924,12 @@ s_ignore (arg)
   ++input_line_pointer;
 }
 
+
+void
+read_print_statistics (file)
+     FILE *file;
+{
+  hash_print_statistics (file, "pseudo-op table", po_hash);
+}
 
 /* end of read.c */
