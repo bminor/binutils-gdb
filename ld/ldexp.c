@@ -142,14 +142,17 @@ bfd_vma value;
   return new;
 }
 
-static void check(os)
-lang_output_section_statement_type *os;
+static void 
+DEFUN(check, (os, name, op),
+      lang_output_section_statement_type *os AND
+      CONST char *name AND
+      CONST char *op)
 {
   if (os == (lang_output_section_statement_type *)NULL) {
-    info("%F%P undefined section");
+    info("%F%P %s uses undefined section %s\n", op, name);
   }
   if (os->processed == false) {
-    info("%F%P forward reference of section");
+    info("%F%P %s forward reference of section %s\n",op, name);
   }
 }
 
@@ -331,7 +334,7 @@ bfd_vma dot;
       if (allocation_done != lang_first_phase_enum) {
 	lang_output_section_statement_type *os =
 	  lang_output_section_find(tree->name.name);
-	check(os);
+	check(os,tree->name.name,"ADDR");
 	result =    new_rel((bfd_vma)0,  os);
       }
       else {
@@ -342,7 +345,7 @@ bfd_vma dot;
       if(allocation_done != lang_first_phase_enum) {
 	lang_output_section_statement_type *os = 
 	  lang_output_section_find(tree->name.name);
-	check(os);
+	check(os,tree->name.name,"SIZEOF");
 	result = new_abs((bfd_vma)(os->bfd_section->size));
       }
       else {
