@@ -1,3 +1,8 @@
+2001-12-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* PROBLEMS: New file.
+	* README: Move known problems to PROBLEMS file.
+
 2001-12-07  Daniel Jacobowitz  <drow@mvista.com>
 
 	* stabsread.c (read_member_functions): Skip member functions which
