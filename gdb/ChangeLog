@@ -1,3 +1,13 @@
+Thu Sep 19 15:14:23 1991  John Gilmore  (gnu at cygnus.com)
+
+	* Makefile.in:  Circumvent Sun Make bug on *-exp.tab.o.
+	* c-exp.y, m2-exp.y:  Lint.
+	* m2-exp.y:  Avoid using yytname[] which is a Bison-ism.
+	* valprint.c (val_print_fields):  Check for stub type.
+	* mipsread.c (_initialize_mipsread):  Avoid using
+	builtin_type_void at initialize time.
+	(mipscoff_symfile_read):  use it now.	
+
 Wed Sep 18 15:55:51 1991  John Gilmore  (gnu at cygnus.com)
 
 	Merge multiple-language support, and partial Modula-2 support,
