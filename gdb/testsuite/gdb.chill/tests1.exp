@@ -461,17 +461,17 @@ proc test_locations {} {
     
     # reference modes
     test_print_accept "ptype ref3l" "PTR" "print mode of reference location"
-    setup_xfail "*-*-*"
+    # setup_xfail "*-*-*"
     test_print_accept "whatis ref3l" "ref3" \
 	"print modename of reference location"
-    setup_xfail "*-*-*"
+    # setup_xfail "*-*-*"
     test_print_accept "print ref3l" "ref3\\(H'.*\\)" \
 	"print reference location"
     test_print_accept "ptype ref4l" "PTR" "print mode of reference location"
-    setup_xfail "*-*-*"
+    # setup_xfail "*-*-*"
     test_print_accept "whatis ref4l" "ref4" \
 	"print modename of reference location"
-    setup_xfail "*-*-*"
+    # setup_xfail "*-*-*"
     test_print_accept "print ref4l" "ref4\\(H'.*\\)" \
 	"print reference location"
     test_print_accept "ptype ref5l" "PTR" "print mode of reference location"
@@ -784,18 +784,28 @@ proc test_locations {} {
     test_print_accept "print strul1.ch1" \
 	"\"12345678900987654321\"" \
 	"print field of structure location 1"
-    setup_xfail "*-*-*"
+    # setup_xfail "*-*-*"
     test_print_accept "print strul1.ch2" \
-	"\"1234567890\".*warning: tag field value does'nt match" \
+	"\"1234567890\"" \
 	"print field of structure location 1"
-    setup_xfail "*-*-*"
+    # setup_xfail "*-*-*"
     test_print_accept "print strul1.ch3" \
-	"\"1\".*warning: tag field value does'nt match" \
+	"\"1\"" \
 	"print field of structure location 1"
     
     if $passcount then {
 	pass "$passcount correct locations printed"
     }
+}
+
+# This is chill/9434
+
+proc test_9434 {} {
+    global passcount
+
+    verbose "testing pr-9434"
+
+    test_print_accept "ptype m_xyzmode" "STRUCT \\(.*next REF m_xyzmode,.*i long.*\\)"
 }
 
 # Start with a fresh gdb.
@@ -809,6 +819,7 @@ send "set print sevenbit-strings\n" ; expect -re ".*$prompt $"
 if [set_lang_chill] then {
     test_modes
     test_locations
+    test_9434
 } else {
     warning "$test_name tests suppressed."
 }

@@ -1,3 +1,7 @@
+Wed Apr 17 01:23:06 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+
+	* tests1.{ch,exp}: Tets case modified and enhanced.
+
 Tue Apr  9 01:18:04 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
 
 	* gch981.{ch,exp}, gch1041.{ch,exp}: New test cases.

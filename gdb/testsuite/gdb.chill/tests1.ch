@@ -122,6 +122,9 @@ newmode stru4m = struct (i long,
                          esac,
                          y stru3m);
 
+synmode m_xyzmode = struct (next ref m_xyzmode,
+			    i long);
+
 -- set mode locations
 dcl s1l set1 := ccc;
 dcl s2l nset1 := nb;
