@@ -325,10 +325,6 @@ enum mips_pic_level
   /* Do not generate PIC code.  */
   NO_PIC,
 
-  /* Generate PIC code as in Irix 4.  This is not implemented, and I'm
-     not sure what it is supposed to do.  */
-  IRIX4_PIC,
-
   /* Generate PIC code as in the SVR4 MIPS ABI.  */
   SVR4_PIC,
 
