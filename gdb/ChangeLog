@@ -1,5 +1,10 @@
 2003-04-13  Andrew Cagney  <cagney@redhat.com>
 
+	* ppc-linux-tdep.c: Use get_frame_base, get_frame_pc,
+	get_next_frame and get_frame_saved_regs.
+
+2003-04-13  Andrew Cagney  <cagney@redhat.com>
+
 	* reggroups.c (default_register_reggroup_p): Use NUM_REGS instead
 	of gdbarch_num_regs.
 
