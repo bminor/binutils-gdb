@@ -1,5 +1,33 @@
 2003-05-19  David Carlton  <carlton@bactrian.org>
 
+	* language.h (struct language_defn): Add 'la_value_of_this'
+	and 'la_lookup_symbol_nonlocal' members.
+	* symtab.h: Declare basic_lookup_symbol_nonlocal,
+	lookup_symbol_static, lookup_symbol_global,
+	lookup_symbol_aux_block.
+	* symtab.c (lookup_symbol_aux): Call language hooks to determine
+	if we should search fields of this and how to do static/global
+	lookup.
+	(lookup_symbol_aux_block): Make extern.
+	(basic_lookup_symbol_nonlocal): New.
+	(lookup_symbol_static, lookup_symbol_global): Ditto.
+	* ada-lang.c (ada_language_defn): Set 'la_value_of_this' and
+	'la_lookup_symbol_nonlocal' members.
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Ditto.
+	* jv-lang.c (java_language_defn): Ditto.
+	* language.c (unknown_language_defn, auto_language_defn)
+	(local_language_defn): Ditto.
+	* m2-lang.c (m2_language_defn): Ditto.
+	* objc-lang.c (objc_language_defn): Ditto.
+	* scm-lang.c (scm_language_defn): Ditto.
+	* f-lang.c (f_language_defn): Ditto, and include value.h as well.
+	* p-lang.c (pascal_language_defn): Ditto for both.
+	* Makefile.in (f-lang.o): Depend on value_h.
+	(p-lang.o): Ditto.
+
+2003-05-19  David Carlton  <carlton@bactrian.org>
+
 	* block.h: Declare block_static_block.
 	* block.c (block_static_block): New.
 	* symtab.c (lookup_symbol_aux): Remove 'static_block' argument to

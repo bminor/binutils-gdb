@@ -1703,7 +1703,7 @@ expprint.o: expprint.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 	$(block_h)
 f-lang.o: f-lang.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(parser_defs_h) $(language_h) $(f_lang_h) \
-	$(valprint_h)
+	$(valprint_h) $(value_h)
 f-typeprint.o: f-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) $(target_h) \
 	$(f_lang_h) $(gdb_string_h)
@@ -2022,7 +2022,7 @@ osabi.o: osabi.c $(defs_h) $(gdb_string_h) $(osabi_h) $(elf_bfd_h) \
 	$(gdbcmd_h) $(command_h) $(arch_utils_h)
 p-lang.o: p-lang.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(parser_defs_h) $(language_h) $(p_lang_h) \
-	$(valprint_h)
+	$(valprint_h) $(value_h)
 p-typeprint.o: p-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) $(target_h) \
 	$(language_h) $(p_lang_h) $(typeprint_h) $(gdb_string_h)

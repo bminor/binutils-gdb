@@ -28,6 +28,7 @@
 #include "language.h"
 #include "p-lang.h"
 #include "valprint.h"
+#include "value.h"
 #include <ctype.h>
  
 extern void _initialize_pascal_language (void);
@@ -461,6 +462,8 @@ const struct language_defn pascal_language_defn =
   pascal_val_print,		/* Print a value using appropriate syntax */
   pascal_value_print,		/* Print a top-level value */
   NULL,				/* Language specific skip_trampoline */
+  value_of_this,		/* value_of_this */
+  basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   NULL,				/* Language specific symbol demangler */
   {"", "%", "b", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */

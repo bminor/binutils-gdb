@@ -988,6 +988,45 @@ extern struct symbol *lookup_symbol (const char *, const struct block *,
 				     const domain_enum, int *,
 				     struct symtab **);
 
+/* A default version of lookup_symbol_nonlocal for use by languages
+   that can't think of anything better to do.  */
+
+extern struct symbol *basic_lookup_symbol_nonlocal (const char *,
+						    const char *,
+						    const struct block *,
+						    const domain_enum,
+						    struct symtab **);
+
+/* Some helper functions for languages that need to write their own
+   lookup_symbol_nonlocal functions.  */
+
+/* Lookup a symbol in the static block associated to BLOCK, if there
+   is one; do nothing if BLOCK is NULL or a global block.  */
+
+extern struct symbol *lookup_symbol_static (const char *name,
+					    const char *linkage_name,
+					    const struct block *block,
+					    const domain_enum domain,
+					    struct symtab **symtab);
+
+/* Lookup a symbol in all files' global blocks (searching psymtabs if
+   necessary).  */
+
+extern struct symbol *lookup_symbol_global (const char *name,
+					    const char *linkage_name,
+					    const domain_enum domain,
+					    struct symtab **symtab);
+
+/* Lookup a symbol within the block BLOCK.  This, unlike
+   lookup_symbol_block, will set SYMTAB and BLOCK_FOUND correctly, and
+   will fix up the symbol if necessary.  */
+
+extern struct symbol *lookup_symbol_aux_block (const char *name,
+					       const char *linkage_name,
+					       const struct block *block,
+					       const domain_enum domain,
+					       struct symtab **symtab);
+
 /* lookup a symbol by name, within a specified block */
 
 extern struct symbol *lookup_block_symbol (const struct block *, const char *,

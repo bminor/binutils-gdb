@@ -96,13 +96,6 @@ struct symbol *lookup_symbol_aux_local (const char *name,
 					struct symtab **symtab);
 
 static
-struct symbol *lookup_symbol_aux_block (const char *name,
-					const char *linkage_name,
-					const struct block *block,
-					const domain_enum domain,
-					struct symtab **symtab);
-
-static
 struct symbol *lookup_symbol_aux_symtabs (int block_index,
 					  const char *name,
 					  const char *linkage_name,
@@ -957,7 +950,6 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
 		   int *is_a_field_of_this, struct symtab **symtab)
 {
   struct symbol *sym;
-  const struct block *static_block;
 
   /* Search specified block and its superiors.  Don't search
      STATIC_BLOCK or GLOBAL_BLOCK.  */
@@ -967,11 +959,13 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
   if (sym != NULL)
     return sym;
 
-  /* C++/Java/Objective-C: If requested to do so by the caller, 
-     check to see if NAME is a field of `this'. */
-  if (is_a_field_of_this)
+  /* If requested to do so by the caller and if appropriate for the
+     current language, check to see if NAME is a field of `this'. */
+
+  if (current_language->la_value_of_this != NULL
+      && is_a_field_of_this != NULL)
     {
-      struct value *v = value_of_this (0);
+      struct value *v = current_language->la_value_of_this (0);
 
       *is_a_field_of_this = 0;
       if (v && check_field (v, name))
@@ -983,51 +977,12 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
 	}
     }
 
-  /* If there's a static block to search, search it next.  */
+  /* Now do whatever is appropriate for the current language to look
+     up static and global variables.  */
 
-  /* NOTE: carlton/2002-12-05: There is a question as to whether or
-     not it would be appropriate to search the current global block
-     here as well.  (That's what this code used to do before the
-     is_a_field_of_this check was moved up.)  On the one hand, it's
-     redundant with the lookup_symbol_aux_symtabs search that happens
-     next.  On the other hand, if decode_line_1 is passed an argument
-     like filename:var, then the user presumably wants 'var' to be
-     searched for in filename.  On the third hand, there shouldn't be
-     multiple global variables all of which are named 'var', and it's
-     not like decode_line_1 has ever restricted its search to only
-     global variables in a single filename.  All in all, only
-     searching the static block here seems best: it's correct and it's
-     cleanest.  */
-
-  /* NOTE: carlton/2002-12-05: There's also a possible performance
-     issue here: if you usually search for global symbols in the
-     current file, then it would be slightly better to search the
-     current global block before searching all the symtabs.  But there
-     are other factors that have a much greater effect on performance
-     than that one, so I don't think we should worry about that for
-     now.  */
-
-  static_block = block_static_block (block);
-  if (static_block != NULL)
-    {
-      sym = lookup_symbol_aux_block (name, linkage_name, static_block,
-				     domain, symtab);
-      if (sym != NULL)
-	return sym;
-    }
-
-  /* Now search all global blocks.  Do the symtab's first, then
-     check the psymtab's. If a psymtab indicates the existence
-     of the desired name as a global, then do psymtab-to-symtab
-     conversion on the fly and return the found symbol. */
-
-  sym = lookup_symbol_aux_symtabs (GLOBAL_BLOCK, name, linkage_name,
-				   domain, symtab);
-  if (sym != NULL)
-    return sym;
-
-  sym = lookup_symbol_aux_psymtabs (GLOBAL_BLOCK, name, linkage_name,
-				    domain, symtab);
+  sym = current_language->la_lookup_symbol_nonlocal (name, linkage_name,
+						     block, domain,
+						     symtab);
   if (sym != NULL)
     return sym;
 
@@ -1086,7 +1041,7 @@ lookup_symbol_aux_local (const char *name, const char *linkage_name,
 /* Look up a symbol in a block; if found, locate its symtab, fixup the
    symbol, and set block_found appropriately.  */
 
-static struct symbol *
+struct symbol *
 lookup_symbol_aux_block (const char *name, const char *linkage_name,
 			 const struct block *block,
 			 const domain_enum domain,
@@ -1343,6 +1298,93 @@ lookup_symbol_aux_minsyms (const char *name,
   return NULL;
 }
 #endif /* 0 */
+
+/* A default version of lookup_symbol_nonlocal for use by languages
+   that can't think of anything better to do.  This implements the C
+   lookup rules.  */
+
+struct symbol *
+basic_lookup_symbol_nonlocal (const char *name,
+			      const char *linkage_name,
+			      const struct block *block,
+			      const domain_enum domain,
+			      struct symtab **symtab)
+{
+  struct symbol *sym;
+
+  /* NOTE: carlton/2003-05-19: The comments below were written when
+     this (or what turned into this) was part of lookup_symbol_aux;
+     I'm much less worried about these questions now, since these
+     decisions have turned out well, but I leave these comments here
+     for posterity.  */
+
+  /* NOTE: carlton/2002-12-05: There is a question as to whether or
+     not it would be appropriate to search the current global block
+     here as well.  (That's what this code used to do before the
+     is_a_field_of_this check was moved up.)  On the one hand, it's
+     redundant with the lookup_symbol_aux_symtabs search that happens
+     next.  On the other hand, if decode_line_1 is passed an argument
+     like filename:var, then the user presumably wants 'var' to be
+     searched for in filename.  On the third hand, there shouldn't be
+     multiple global variables all of which are named 'var', and it's
+     not like decode_line_1 has ever restricted its search to only
+     global variables in a single filename.  All in all, only
+     searching the static block here seems best: it's correct and it's
+     cleanest.  */
+
+  /* NOTE: carlton/2002-12-05: There's also a possible performance
+     issue here: if you usually search for global symbols in the
+     current file, then it would be slightly better to search the
+     current global block before searching all the symtabs.  But there
+     are other factors that have a much greater effect on performance
+     than that one, so I don't think we should worry about that for
+     now.  */
+
+  sym = lookup_symbol_static (name, linkage_name, block, domain, symtab);
+  if (sym != NULL)
+    return sym;
+
+  return lookup_symbol_global (name, linkage_name, domain, symtab);
+}
+
+/* Lookup a symbol in the static block associated to BLOCK, if there
+   is one; do nothing if BLOCK is NULL or a global block.  */
+
+struct symbol *
+lookup_symbol_static (const char *name,
+		      const char *linkage_name,
+		      const struct block *block,
+		      const domain_enum domain,
+		      struct symtab **symtab)
+{
+  const struct block *static_block = block_static_block (block);
+
+  if (static_block != NULL)
+    return lookup_symbol_aux_block (name, linkage_name, static_block,
+				    domain, symtab);
+  else
+    return NULL;
+}
+
+/* Lookup a symbol in all files' global blocks (searching psymtabs if
+   necessary).  */
+
+struct symbol *
+lookup_symbol_global (const char *name,
+		      const char *linkage_name,
+		      const domain_enum domain,
+		      struct symtab **symtab)
+{
+  struct symbol *sym;
+
+  sym = lookup_symbol_aux_symtabs (GLOBAL_BLOCK, name, linkage_name,
+				   domain, symtab);
+  if (sym != NULL)
+    return sym;
+
+  return lookup_symbol_aux_psymtabs (GLOBAL_BLOCK, name, linkage_name,
+				     domain, symtab);
+}
 
 /* Look, in partial_symtab PST, for symbol whose natural name is NAME.
    If LINKAGE_NAME is non-NULL, check in addition that the symbol's

@@ -701,6 +701,8 @@ const struct language_defn objc_language_defn = {
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
   objc_skip_trampoline, 	/* Language specific skip_trampoline */
+  value_of_this,		/* value_of_this */
+  basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   objc_demangle,		/* Language specific symbol demangler */
   {"",     "",    "",  ""},	/* Binary format info */
   {"0%lo",  "0",   "o", ""},	/* Octal format info */

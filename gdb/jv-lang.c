@@ -1063,6 +1063,8 @@ const struct language_defn java_language_defn =
   java_val_print,		/* Print a value using appropriate syntax */
   java_value_print,		/* Print a top-level value */
   NULL,				/* Language specific skip_trampoline */
+  value_of_this,		/* value_of_this */
+  basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   java_demangle,		/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
