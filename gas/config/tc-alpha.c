@@ -1244,8 +1244,7 @@ alpha_ip (str, insns)
       break;
 
     default:
-      as_warn ("Unknown opcode: `%s'", str);
-      exit (1);
+      as_fatal ("Unknown opcode: `%s'", str);
     }
   if ((pattern = (struct alpha_opcode *) hash_find (op_hash, str)) == NULL)
     {
@@ -2357,6 +2356,10 @@ s_alpha_set (x)
     at_ok = yesno;
   else if (!strcmp ("macro", s))
     macro_ok = yesno;
+  else if (!strcmp ("move", s))
+    /* ignore */ ;
+  else if (!strcmp ("volatile", s))
+    /* ignore */ ;
   else
     as_warn ("Tried to set unrecognized symbol: %s", name);
   *input_line_pointer = ch;
