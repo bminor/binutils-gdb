@@ -1,3 +1,8 @@
+2005-03-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* emulparams/elf32ppclinux.sh (OTHER_READWRITE_SECTION): Delete.
+	(OTHER_RELRO_SECTIONS): Set this instead.
+
 2005-03-15  Nick Clifton  <nickc@redhat.com>
 
 	* NEWS: Add cutoff for changes in 2.16 release.

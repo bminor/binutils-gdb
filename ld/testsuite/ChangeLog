@@ -1,3 +1,14 @@
+2005-03-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/tlsexe32.d: Update.
+	* ld-powerpc/tlsexe32.g: Update.
+	* ld-powerpc/tlsexe32.r: Update.
+	* ld-powerpc/tlsexe32.t: Update.
+	* ld-powerpc/tlsso32.d: Update.
+	* ld-powerpc/tlsso32.g: Update.
+	* ld-powerpc/tlsso32.r: Update.
+	* ld-powerpc/tlsso32.t: Update.
+
 2005-03-08  Hans-Peter Nilsson  <hp@axis.com>
 
 	Adjust testsuite for cris-axis-aout.
@@ -63,7 +74,7 @@
 
 	* ld-d10v/default_layout.d: Adjust expected offsets to allow for
 	section alignment.
-	
+
 	* ld-discard/extern.d: Adjust expected warning to take into
 	account the fact that the linker's name might be included and that
 	the reloc might have been adjusted to be against the section
@@ -341,7 +352,7 @@
 
 	* ld-crx/reloc-abs32.d: Update reference file according
 	to disassembler printing method.
- 	* ld-crx/reloc-rel16.d: Likewise.
+	* ld-crx/reloc-rel16.d: Likewise.
 	* ld-crx/reloc-rel24.d: Likewise.
 	* ld-crx/reloc-rel32.d: Likewise.
 	* ld-crx/reloc-rel4.d: Likewise.
