@@ -338,7 +338,8 @@ do_child_fetch_inferior_registers (int r)
   long l;
 
   if (!current_thread)
-    return;
+    return;	/* Windows sometimes uses a non-existent thread id in its
+		   events */
 
   if (current_thread->reload_context)
     {
@@ -382,6 +383,8 @@ static void
 child_fetch_inferior_registers (int r)
 {
   current_thread = thread_rec (PIDGET (inferior_ptid), TRUE);
+  /* Check if current_thread exists.  Windows sometimes uses a non-existent
+     thread id in its events */
   if (current_thread)
     do_child_fetch_inferior_registers (r);
 }
@@ -390,7 +393,7 @@ static void
 do_child_store_inferior_registers (int r)
 {
   if (!current_thread)
-    /* nothing to do */;
+    /* Windows sometimes uses a non-existent thread id in its events */;
   else if (r >= 0)
     regcache_collect (r, ((char *) &current_thread->context) + mappings[r]);
   else
@@ -405,6 +408,8 @@ static void
 child_store_inferior_registers (int r)
 {
   current_thread = thread_rec (PIDGET (inferior_ptid), TRUE);
+  /* Check if current_thread exists.  Windows sometimes uses a non-existent
+     thread id in its events */
   if (current_thread)
     do_child_store_inferior_registers (r);
 }
@@ -1207,6 +1212,8 @@ child_continue (DWORD continue_status, int id)
   return res;
 }
 
+/* Called in pathological case where Windows fails to send a
+   CREATE_PROCESS_DEBUG_EVENT after an attach.  */
 DWORD
 fake_create_process ()
 {
@@ -1253,6 +1260,9 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
 	{
 	  if (!saw_create && attach_flag)
 	    {
+	      /* Kludge around a Windows bug where first event is a create
+		 thread event.  Caused when attached process does not have
+		 a main thread. */
 	      retval = ourstatus->value.related_pid = fake_create_process ();
 	      saw_create++;
 	    }

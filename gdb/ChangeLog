@@ -1,3 +1,7 @@
+2003-12-26  Christopher Faylor  <cgf@redhat.com>
+
+	* win32-nat.c: Add some comments about below change.
+
 2003-12-25  Christopher Faylor  <cgf@redhat.com>
 
 	Fix for PR threads/1048
