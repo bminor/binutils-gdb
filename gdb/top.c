@@ -669,10 +669,10 @@ execute_command (char *p, int from_tty)
       /* If the target is running, we allow only a limited set of
          commands. */
       if (event_loop_p && target_can_async_p () && target_executing)
-	if (!strcmp (c->name, "help")
-	    && !strcmp (c->name, "pwd")
-	    && !strcmp (c->name, "show")
-	    && !strcmp (c->name, "stop"))
+	if (strcmp (c->name, "help") != 0
+	    && strcmp (c->name, "pwd") != 0
+	    && strcmp (c->name, "show") != 0
+	    && strcmp (c->name, "stop") != 0)
 	  error ("Cannot execute this command while the target is running.");
 
       /* Pass null arg rather than an empty one.  */

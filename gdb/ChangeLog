@@ -1,3 +1,8 @@
+2003-11-05  Elena Zannoni  <ezannoni@redhat.com>
+
+	* top.c (execute_command): Fix broken logic for command execution
+	while inferior is running in async mode.
+
 2003-11-06  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2-frame.c (execute_cfa_program): Mark register as
