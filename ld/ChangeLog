@@ -1,3 +1,7 @@
+2000-04-2  Matthew Green  <mrg@cygnus.com>
+
+	* configure.tgt: Add NetBSD/sparc ELF, and NetBSD/sparc64 support.
+
 Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
 			  David Mosberger  <davidm@hpl.hp.com>
 
