@@ -2709,7 +2709,11 @@ fixup_unw_records (list)
 	    size = (slot_index (last_addr, last_frag, first_addr, first_frag)
 		    + dir_len);
 	    rlen = ptr->r.record.r.rlen = size;
-	    region = ptr;
+	    if (ptr->r.type == body)
+	      /* End of region.  */
+	      region = 0;
+	    else
+	      region = ptr;
 	    break;
 	  }
 	case epilogue:
