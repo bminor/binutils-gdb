@@ -244,7 +244,7 @@ proc spawn_vxgdb { } {
 proc gdb_exit { } {
     global shell_id
     exit_remote_shell $shell_id
-    default_gdb_exit
+    catch default_gdb_exit
 }
 
 #expect_after {
