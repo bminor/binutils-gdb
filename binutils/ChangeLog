@@ -1,3 +1,7 @@
+1999-06-04  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c: Add support for 64bit ELF files.
+
 1999-06-03  Nick Clifton  <nickc@cygnus.com>
 
 	* dlltool.c (mcore_elf_gen_out_file): Use constants for temporary
