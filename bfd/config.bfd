@@ -170,7 +170,7 @@ case "${targ}" in
     targ_defvec=armpe_little_vec
     targ_selvecs="armpe_little_vec armpe_big_vec armpei_little_vec armpei_big_vec"
     targ_underscore=no
-    targ_cflags=-DARM_WINCE
+    targ_cflags="-DARM_WINCE -DARM_COFF_BUGFIX"
     ;;
   arm-*-pe*)
     targ_defvec=armpe_little_vec
