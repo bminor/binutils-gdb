@@ -895,7 +895,7 @@ h8300s_register_name (int regno)
   static char *register_names[] = {
     "er0", "er1", "er2", "er3", "er4", "er5", "er6",
     "sp", "", "pc", "cycles", "", "tick", "inst",
-    //"mach", "macl", 
+    /* "mach", "macl", */
     "ccr", "exr" /* pseudo registers */
   };
   if (regno < 0

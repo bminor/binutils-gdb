@@ -22,6 +22,8 @@
 #ifndef TRAD_FRAME_H
 #define TRAD_FRAME_H
 
+struct frame_info;
+
 /* A traditional saved regs table, indexed by REGNUM, encoding where
    the value of REGNUM for the previous frame can be found in this
    frame.

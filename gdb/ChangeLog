@@ -1,3 +1,11 @@
+2003-06-17  Andrew Cagney  <cagney@redhat.com>
+
+	* trad-frame.h (struct frame_info): Add opaque declaration.
+	* remote-fileio.h (struct cmd_list_element): Add opaque
+	declaration.
+	* h8300-tdep.c (h8300s_register_name): Avoid C++ // style
+	comments.
+
 2003-06-17  Daniel Jacobowitz  <drow@mvista.com>
 
 	* remote.c (remote_prepare_to_store): Replace call to
