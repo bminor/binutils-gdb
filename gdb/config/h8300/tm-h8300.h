@@ -47,9 +47,11 @@ extern void init_extra_frame_info ();
 #define IEEE_FLOAT
 /* Define the bit, byte, and word ordering of the machine.  */
 #define TARGET_BYTE_ORDER BIG_ENDIAN
-
+#undef TARGET_INT_BIT
 #define TARGET_INT_BIT  16
+#undef TARGET_LONG_BIT
 #define TARGET_LONG_BIT  32
+#undef TARGET_PTR_BIT
 #define TARGET_PTR_BIT  (h8300hmode ? 32:16)
 
 /* Offset from address of function to start of its code.
@@ -93,11 +95,10 @@ extern CORE_ADDR h8300_skip_prologue ();
 
 #define INVALID_FLOAT(p, len) 0   /* Just a first guess; not checked */
 
-/* Say how long (ordinary) registers are.  This is a piece of bogosity
-   used in push_word and a few other places; REGISTER_RAW_SIZE is the
-   real way to know how big a register is.  */
+/* Say how long registers are.  */
 
-#define REGISTER_SIZE 2
+#define REGISTER_TYPE  unsigned short
+#define REGISTER_SIZE 4
 
 #define NUM_REGS 13  
 
