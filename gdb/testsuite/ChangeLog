@@ -1,5 +1,13 @@
 2003-06-14  Andrew Cagney  <cagney@redhat.com>
 
+	* gdb.base/store.exp: Test longest and doublest.  Test all
+	parameters.  Weaken return statement match.
+	* gdb.base/store.c: Add longest and doublest - aka long long and
+	long double functions.  Put all parameters into local register
+	variables.  Use negative values.
+
+2003-06-14  Andrew Cagney  <cagney@redhat.com>
+
 	* gdb.base/fileio.c: Include <errno.h>, and <sys/wait.h>.  Gag
 	-Wformat errors.  Add lost line.  Use WEXITSTATUS to get system
 	exit status.
@@ -7,7 +15,6 @@
 	noinferiorio, instead of limiting it to remote.  Use remote_exec
 	instead of system.
 	
-
 2003-06-12  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdb.base/float.exp: Add ia64 support.
