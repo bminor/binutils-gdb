@@ -1,3 +1,8 @@
+Mon Aug 10 15:06:18 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d30v.c (d30v_align): Always perform alignment request,
+	even if it is belived to be unnecessary.
+
 Mon Aug 10 17:48:09 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	config/tc-i386.c (i386_operand): Size immediate constants by
