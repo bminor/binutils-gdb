@@ -1,3 +1,8 @@
+
+	* bucomm.c (xmalloc, xrealloc): Deleted.
+	* bucomm.h (xmalloc, xrealloc): Fix prototypes, to correspond to
+	libiberty version of functions.
+
 Thu Jan  6 06:18:15 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* binutils.texi: Add a chapter summarizing the ways to select
