@@ -164,5 +164,8 @@ tuiInit.c: $(SOURCES)
 	@echo '}' >>init.c-tmp
 	@mv init.c-tmp tuiInit.c
 
-clean:
-	rm -f *.o *.a
+clean mostlyclean:
+	-rm -f *.o *.a
+
+distclean maintainer-clean realclean: clean
+	-rm -f Makefile config.log config.cache
