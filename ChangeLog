@@ -1,7 +1,25 @@
+Wed Dec 18 15:39:34 1991  K. Richard Pixley  (rich at cygnus.com)
+
+	* DOC.configure, cfg-paper.texi: revised, updated, and texinfo'd.
+	  renamed from DOC.configure to cfg-paper.texi.
+
+Mon Dec 16 23:05:19 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* configure, config.subr, config.sub: config.subr is now
+	  config.sub again.
+
 Fri Dec 13 01:17:06 1991  K. Richard Pixley  (rich at cygnus.com)
 
+	* configure.texi: new file, in progress.
+
+	* Makefile.in: build info file and install the man page for
+	  configure.
+
+	* configure.man: new file, first cut.
+
 	* configure: find config.subr again now that configuration "none"
-	  has gone.
+	  has gone.  removed all traces of the -ansi option.  removed all
+	  traces of the -languages option.
 
 	* config.subr: resync from rms.
 

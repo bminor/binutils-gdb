@@ -27,10 +27,10 @@ Things-to-keep:
 
 Makefile.in
 README
-DOC.configure
 bison
 bfd
 binutils
+cfg-paper.texi
 clib
 config
 config.sub
