@@ -32,6 +32,7 @@
 #include "gdb-stabs.h"
 #include "regcache.h"
 #include "arch-utils.h"
+#include "ppc-tdep.h"
 
 #include <sys/ptrace.h>
 #include <sys/reg.h>
@@ -192,7 +193,7 @@ rs6000_ptrace64 (int req, int id, long long addr, int data, int *buf)
 static void
 fetch_register (int regno)
 {
-  int *addr = (int *) &registers[REGISTER_BYTE (regno)];
+  int *addr = alloca (MAX_REGISTER_RAW_SIZE);
   int nr;
 
   /* Retrieved values may be -1, so infer errors from errno. */
@@ -238,7 +239,7 @@ fetch_register (int regno)
     }
 
   if (!errno)
-    register_valid[regno] = 1;
+    supply_register (regno, (char *) addr);
   else
     {
 #if 0
@@ -254,8 +255,11 @@ fetch_register (int regno)
 static void
 store_register (int regno)
 {
-  int *addr = (int *) &registers[REGISTER_BYTE (regno)];
+  int *addr = alloca (MAX_REGISTER_RAW_SIZE);
   int nr;
+
+  /* Fetch the register's value from the register cache.  */
+  regcache_collect (regno, addr);
 
   /* -1 can be a successful return value, so infer errors from errno. */
   errno = 0;
@@ -292,6 +296,9 @@ store_register (int regno)
       else
 	nr = regno;
 
+      /* The PT_WRITE_GPR operation is rather odd.  For 32-bit inferiors,
+         the register's value is passed by value, but for 64-bit inferiors,
+	 the address of a buffer containing the value is passed.  */
       if (!ARCH64 ())
 	rs6000_ptrace32 (PT_WRITE_GPR, PIDGET (inferior_ptid), (int *)nr, *addr, 0);
       else
@@ -514,9 +521,8 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 		      int which, CORE_ADDR reg_addr)
 {
   CoreRegs *regs;
-  double *fprs;
-  int arch64, i, size;
-  void *gprs, *sprs[7];
+  int regi;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
 
   if (which != 0)
     {
@@ -526,45 +532,41 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       return;
     }
 
-  arch64 = ARCH64 ();
   regs = (CoreRegs *) core_reg_sect;
 
-  /* Retrieve register pointers. */
+  /* Put the register values from the core file section in the regcache.  */
 
-  if (arch64)
+  if (ARCH64 ())
     {
-      gprs = regs->r64.gpr;
-      fprs = regs->r64.fpr;
-      sprs[0] = &regs->r64.iar;
-      sprs[1] = &regs->r64.msr;
-      sprs[2] = &regs->r64.cr;
-      sprs[3] = &regs->r64.lr;
-      sprs[4] = &regs->r64.ctr;
-      sprs[5] = &regs->r64.xer;
+      for (regi = 0; regi < 32; regi++)
+        supply_register (regi, (char *) &regs->r64.gpr[regi]);
+
+      for (regi = 0; regi < 32; regi++)
+	supply_register (FP0_REGNUM + regi, (char *) &regs->r64.fpr[regi]);
+
+      supply_register (PC_REGNUM, (char *) &regs->r64.iar);
+      supply_register (tdep->ppc_ps_regnum, (char *) &regs->r64.msr);
+      supply_register (tdep->ppc_cr_regnum, (char *) &regs->r64.cr);
+      supply_register (tdep->ppc_lr_regnum, (char *) &regs->r64.lr);
+      supply_register (tdep->ppc_ctr_regnum, (char *) &regs->r64.ctr);
+      supply_register (tdep->ppc_xer_regnum, (char *) &regs->r64.xer);
     }
   else
     {
-      gprs = regs->r32.gpr;
-      fprs = regs->r32.fpr;
-      sprs[0] = &regs->r32.iar;
-      sprs[1] = &regs->r32.msr;
-      sprs[2] = &regs->r32.cr;
-      sprs[3] = &regs->r32.lr;
-      sprs[4] = &regs->r32.ctr;
-      sprs[5] = &regs->r32.xer;
-      sprs[6] = &regs->r32.mq;
-    }
+      for (regi = 0; regi < 32; regi++)
+        supply_register (regi, (char *) &regs->r32.gpr[regi]);
 
-  /* Copy from pointers to registers[]. */
+      for (regi = 0; regi < 32; regi++)
+	supply_register (FP0_REGNUM + regi, (char *) &regs->r32.fpr[regi]);
 
-  memcpy (registers, gprs, 32 * (arch64 ? 8 : 4));
-  memcpy (registers + REGISTER_BYTE (FP0_REGNUM), fprs, 32 * 8);
-  for (i = FIRST_UISA_SP_REGNUM; i <= LAST_UISA_SP_REGNUM; i++)
-    {
-      size = REGISTER_RAW_SIZE (i);
-      if (size)
-	memcpy (registers + REGISTER_BYTE (i),
-		sprs[i - FIRST_UISA_SP_REGNUM], size);
+      supply_register (PC_REGNUM, (char *) &regs->r32.iar);
+      supply_register (tdep->ppc_ps_regnum, (char *) &regs->r32.msr);
+      supply_register (tdep->ppc_cr_regnum, (char *) &regs->r32.cr);
+      supply_register (tdep->ppc_lr_regnum, (char *) &regs->r32.lr);
+      supply_register (tdep->ppc_ctr_regnum, (char *) &regs->r32.ctr);
+      supply_register (tdep->ppc_xer_regnum, (char *) &regs->r32.xer);
+      if (tdep->ppc_mq_regnum >= 0)
+	supply_register (tdep->ppc_mq_regnum, (char *) &regs->r32.mq);
     }
 }
 
@@ -1151,7 +1153,7 @@ find_toc_address (CORE_ADDR pc)
 					      : vp->objfile);
 	}
     }
-  error ("Unable to find TOC entry for pc 0x%x\n", pc);
+  error ("Unable to find TOC entry for pc %s\n", local_hex_string (pc));
 }
 
 /* Register that we are able to handle rs6000 core file formats. */
