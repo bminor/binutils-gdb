@@ -1,3 +1,7 @@
+Thu Jul 21 17:24:31 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* i386mach3.c: Reverted to version from before Jul 5 1994 changes.
+
 Thu Jul 21 12:26:01 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* reloc.c (struct reloc_howto_struct): Remove special_function1.
