@@ -52,8 +52,6 @@ ldgld68k.sc
 ldm88k.sc
 ldgld960.c
 ldgld960.sc
-ldgld.c
-ldgld68k.c
 gld.1
 ldglda29k.sc
 ldgld68k.sc
@@ -67,7 +65,6 @@ ldlex.h
 ldlex.l
 ldlnk960.c
 ldlnk960.sc
-ldm88k.c
 ldmain.c
 ldmain.h
 ldmisc.c
@@ -91,7 +88,11 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.22  1991/11/06 09:26:59  sac
+# Revision 1.23  1991/11/15 21:09:49  bothner
+# Remove ldgld.c, ldgld68k.c, ldm88k.c, since these are
+# now automatically generated.
+#
+# Revision 1.22  1991/11/06  09:26:59  sac
 # Added three files which had been forgotten
 #
 # Revision 1.21  1991/11/05  21:56:06  sac
