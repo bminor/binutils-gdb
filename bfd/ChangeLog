@@ -1,3 +1,9 @@
+Mon Oct 31 14:19:08 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* elfcode.h (assign_file_positions_except_relocs): Sort the ELF
+	headers by section address when assigning file positions.
+	(elf_sort_hdrs): New static function.
+
 Sun Oct 30 18:56:58 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* elfcode.h (NAME(bfd_elf,size_dynamic_sections)): Create DT_INIT
