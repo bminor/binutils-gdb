@@ -902,7 +902,7 @@ md_assemble (str)
   struct mn10300_opcode *next_opcode;
   const unsigned char *opindex_ptr;
   int next_opindex, relaxable;
-  unsigned long insn, extension, size = 0;
+  unsigned long insn, extension, size = 0, real_size;
   char *f;
   int i;
   int match;
@@ -1480,6 +1480,8 @@ keep_going:
   if (opcode->format == FMT_D4)
     size = 6;
 
+  real_size = size;
+
   if (relaxable && fc > 0)
     {
       int type;
@@ -1760,7 +1762,7 @@ keep_going:
 
       /* We want the offset of the start of this instruction within the
          the current frag.  */
-      addr = frag_now->fr_address + frag_now_fix () - size;
+      addr = frag_now->fr_address + frag_now_fix () - real_size;
 
       /* And record the information.  */
       dwarf2_gen_line_info (addr, &debug_line);
