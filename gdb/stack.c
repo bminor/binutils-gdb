@@ -317,25 +317,7 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
   int source_print;
   int location_print;
 
-#if 0
-  char buf[MAX_REGISTER_RAW_SIZE];
-  CORE_ADDR sp;
-
-  /* On the 68k, this spends too much time in m68k_find_saved_regs.  */
-
-  /* Get the value of SP_REGNUM relative to the frame.  */
-  get_saved_register (buf, (int *) NULL, (CORE_ADDR *) NULL,
-		    FRAME_INFO_ID (fi), SP_REGNUM, (enum lval_type *) NULL);
-  sp = extract_address (buf, REGISTER_RAW_SIZE (SP_REGNUM));
-
-  /* This is not a perfect test, because if a function alloca's some
-     memory, puts some code there, and then jumps into it, then the test
-     will succeed even though there is no call dummy.  Probably best is
-     to check for a bp_call_dummy breakpoint.  */
-  if (PC_IN_CALL_DUMMY (fi->pc, sp, fi->frame))
-#else
-  if (deprecated_frame_in_dummy (fi))
-#endif
+  if (get_frame_type (fi) == DUMMY_FRAME)
     {
       annotate_frame_begin (level == -1 ? 0 : level, fi->pc);
 
@@ -378,7 +360,7 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
     find_pc_line (fi->pc,
 		  fi->next != NULL
 		  && !(get_frame_type (fi->next) == SIGTRAMP_FRAME)
-		  && !deprecated_frame_in_dummy (fi->next));
+		  && !(get_frame_type (fi->next) == DUMMY_FRAME));
 
   location_print = (source == LOCATION 
 		    || source == LOC_AND_ADDRESS
@@ -778,7 +760,7 @@ frame_info (char *addr_exp, int from_tty)
   sal = find_pc_line (fi->pc,
 		      fi->next != NULL
 		      && !(get_frame_type (fi->next) == SIGTRAMP_FRAME)
-		      && !deprecated_frame_in_dummy (fi->next));
+		      && !(get_frame_type (fi->next) == DUMMY_FRAME));
   func = get_frame_function (fi);
   s = find_pc_symtab (fi->pc);
   if (func)

@@ -5045,7 +5045,7 @@ find_printable_frame (struct frame_info *fi, int level)
 	find_pc_line (fi->pc,
 		      fi->next != NULL
 		      && !(get_frame_type (fi->next) == SIGTRAMP_FRAME)
-		      && !deprecated_frame_in_dummy (fi->next));
+		      && !(get_frame_type (fi->next) == DUMMY_FRAME));
       if (sal.symtab && !is_ada_runtime_file (sal.symtab->filename))
 	{
 #if defined(__alpha__) && defined(__osf__) && !defined(VXWORKS_TARGET)

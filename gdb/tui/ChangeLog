@@ -1,3 +1,8 @@
+2002-11-23  Andrew Cagney  <ac131313@redhat.com>
+
+	* tuiStack.c (tuiShowFrameInfo): Use get_frame_type instead of
+	deprecated_frame_in_dummy.  Fix coding style.
+
 2002-11-21  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* tui-hooks.c (tui_init_hook): Don't enable the TUI if a specific

@@ -1,3 +1,15 @@
+2002-11-23  Andrew Cagney  <ac131313@redhat.com>
+
+	* breakpoint.c: Include "gdb_assert.h".
+	(deprecated_frame_in_dummy): Assert that generic dummy frames are
+	not being used.
+	* Makefile.in (breakpoint.o): Update dependencies.
+	* ada-lang.c (find_printable_frame): Use get_frame_type instead of
+	deprecated_frame_in_dummy.
+	* stack.c (print_frame_info_base): Ditto.
+	(frame_info): Ditto.
+	(print_frame_info_base): Ditto.  Delete dead code.
+	
 2002-11-23  Andreas Schwab  <schwab@suse.de>
 
 	* Makefile.in (m68k_tdep_h): Define.

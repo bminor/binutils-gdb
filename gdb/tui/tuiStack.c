@@ -350,9 +350,9 @@ tuiShowFrameInfo (struct frame_info *fi)
       struct symtab_and_line sal;
 
       sal = find_pc_line (fi->pc,
-                          (fi->next != (struct frame_info *) NULL &&
-                           !(get_frame_type (fi->next) == SIGTRAMP_FRAME) &&
-                           !deprecated_frame_in_dummy (fi->next)));
+                          (fi->next != (struct frame_info *) NULL
+			   && !(get_frame_type (fi->next) == SIGTRAMP_FRAME)
+			   && !(get_frame_type (fi->next) == DUMMY_FRAME)));
 
       sourceAlreadyDisplayed = sal.symtab != 0
         && tuiSourceIsDisplayed (sal.symtab->filename);

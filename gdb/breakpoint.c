@@ -47,6 +47,7 @@
 #include "gdb.h"
 #include "ui-out.h"
 #include "cli/cli-script.h"
+#include "gdb_assert.h"
 
 #include "gdb-events.h"
 
@@ -1695,8 +1696,10 @@ deprecated_frame_in_dummy (struct frame_info *frame)
   if (!CALL_DUMMY_P)
     return 0;
 
-  if (USE_GENERIC_DUMMY_FRAMES)
-    return generic_pc_in_call_dummy (frame->pc, frame->frame, frame->frame);
+  /* This function is used by two files: get_frame_type(), after first
+     checking that !USE_GENERIC_DUMMY_FRAMES; and sparc-tdep.c, which
+     doesn't yet use generic dummy frames anyway.  */
+  gdb_assert (!USE_GENERIC_DUMMY_FRAMES);
 
   ALL_BREAKPOINTS (b)
   {
