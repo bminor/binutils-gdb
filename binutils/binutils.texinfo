@@ -380,12 +380,11 @@ Display only undefined symbols (those external to each object file).
 @chapter objdump
 
 @smallexample
-  objdump [ -a ]  [ -b @var{bfdname} ]  [ -d ]  [ -f ]  [ -i ]
-          [ -j @var{section} ]  [ -l ]
-          [ -m @var{machine} ]  [ -s ]  [ -x ]
-
-           [ -h | +header ]  [ -r | +reloc ]  
-           [ -t | +syms ]   @var{objfiles}@dots{}
+  objdump [ -a ]  [ -b @var{bfdname} ]  [ -d ]  [ -f ]
+          [ -h | +header ]  [ -i ]  [ -j @var{section} ]  [ -l ]
+          [ -m @var{machine} ]  [ -r | +reloc ]  [ -s ]
+          [ -t | +syms ]  [ -x ]
+          @var{objfiles}@dots{}
 @end smallexample
 
 @code{objdump} displays information about one or more object files.
@@ -572,7 +571,6 @@ text	data	bss	dec	hex	filename
 This is the same data, but displayed closer to System V conventions:
 
 @smallexample
-@end smallexample
  eg$  size +format SysV ranlib size
 ranlib  :
 section		size	     addr
@@ -588,6 +586,7 @@ section		size	     addr
 .data          81920	   303104	
 .bss           11888	   385024	
 Total         388688	
+@end smallexample
 
 @item +target @var{bfdname}
 You can specify a particular object-code format for @var{objfiles} as
