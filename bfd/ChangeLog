@@ -1,3 +1,8 @@
+Mon Aug  1 17:55:53 1994  Fred Fish  (fnf@cygnus.com)
+
+	* ptrace-core.c (ptrace_unix_core_file_p):  Convert zalloc usage
+	to bfd_zalloc.
+
 Mon Aug  1 12:04:40 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* elfcode.h (elf_adjust_dynamic_symbol): Correct weak symbol
