@@ -1,3 +1,15 @@
+Mon Feb 24 10:40:45 1997  Fred Fish  <fnf@cygnus.com>
+
+	* config/obj-coff.c: Fix typo in comment section.
+start-sanitize-tic80
+	* config/tc-tic80.c (md_pseudo_table): Add entry for bss, which takes
+ 	an additional alignment argument.
+	(find_opcode): Allow O_symbol relocs for any 32 bit field, not just
+ 	base relative ones.
+	(build_insn): Handle O_symbol relocs for any 32 bit field, not just
+ 	base relative ones.
+end-sanitize-tic80
+
 Mon Feb 24 02:23:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* Makefile.in: Remove dependancies on itbl-cpu.h.

@@ -57,8 +57,9 @@ const char FLT_CHARS[] = "dD";
 
 const pseudo_typeS md_pseudo_table[] =
 {
-  {"word", cons, 4},				/* FIXME: Should this be machine independent? */
-  { NULL,       NULL,           0 }
+  { "word",	cons,		4 },				/* FIXME: Should this be machine independent? */
+  { "bss",	s_lcomm,	1 },
+  { NULL,	NULL,		0 }
 };
 
 /* Opcode hash table.  */
@@ -388,7 +389,7 @@ find_opcode (opcode, myops)
 		     short immediate fields, like the TI assembler.
 		     FIXME: Should be able to choose "best-fit". */
 		}
-	      else if ((bits == 32) && (flags & TIC80_OPERAND_BASEREL))
+	      else if ((bits == 32) /* && (flags & TIC80_OPERAND_BASEREL) */)
 		{
 		  /* For now we only allow base relative relocations in
 		     the long immediate fields, like the TI assembler.
@@ -627,19 +628,19 @@ build_insn (opcode, opers)
 			   1,
 			   R_MPPCR);
 	    }
-	  else if (flags & TIC80_OPERAND_BASEREL)
+	  else if (bits == 32)	/* was (flags & TIC80_OPERAND_BASEREL) */
 	    {
 	      extended++;
 	      fix_new_exp (frag_now,
 			   (f + 4) - (frag_now -> fr_literal),
 			   4,
 			   &opers[expi], 
-			   0,			/* FIXME! should allow pcrel */
-			   R_RELLONGX);		/* FIXME! should be the right reloc type */
+			   0,
+			   R_RELLONGX);
 	    }
 	  else
 	    {
-	      internal_error ("symbol reloc that is not PC or BASEREG relative");
+	      internal_error ("symbol reloc that is not PC relative or 32 bits");
 	    }
 	  break;
 	case O_illegal:
