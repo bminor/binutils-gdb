@@ -1183,7 +1183,10 @@ monitor_fetch_register (int regno)
   zerobuf = alloca (MAX_REGISTER_RAW_SIZE);
   memset (zerobuf, 0, MAX_REGISTER_RAW_SIZE);
 
-  name = current_monitor->regnames[regno];
+  if (current_monitor->regname != NULL)
+    name = current_monitor->regname (regno);
+  else
+    name = current_monitor->regnames[regno];
   monitor_debug ("MON fetchreg %d '%s'\n", regno, name ? name : "(null name)");
 
   if (!name || (*name == '\0'))
@@ -1335,8 +1338,12 @@ monitor_store_register (int regno)
 {
   char *name;
   ULONGEST val;
-
-  name = current_monitor->regnames[regno];
+  
+  if (current_monitor->regname != NULL)
+    name = current_monitor->regname (regno);
+  else
+    name = current_monitor->regnames[regno];
+  
   if (!name || (*name == '\0'))
     {
       monitor_debug ("MON Cannot store unknown register\n");

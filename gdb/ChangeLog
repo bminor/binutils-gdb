@@ -1,3 +1,22 @@
+2002-06-26  Grace Sainsbury  <graces@redhat.com>
+
+	* monitor.h: Add the function regname to monitor_ops
+	structure. This way NUM_REGS does not have to be a constant.
+	* monitor.c (monitor_fetch_register): Added support for regname
+	function. The function is called if the array regnames is NULL.
+	(monitor_store_register): Same.
+	* cpu32bug-rom.c (cpu32bug_regname):  Add function. Replaces regnames array.
+	(init_cpu32bug_cmds): set cpu32bug_cmds.regnames to NULL,
+	cpu32bug_cmds.regname to point to new function.
+	* abug-rom.c (abug_regname): Same as above.
+	(init_abug_cmds): Same.
+	* dbug-rom.c (dbug_regname): Same as above.
+	(init_dbug_cmds): Same.
+	* remote-est.c (est_regname): Same. 
+	(init_est_cmds): Same.
+	* rom68k-rom.c (rom68k_regname): Same. 
+	(init_rom68k_cmds): Same.
+
 2002-06-25  Tom Tromey  <tromey@redhat.com>
 
 	* breakpoint.c (delete_command): Don't repeat `delete' commands.

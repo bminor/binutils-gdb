@@ -116,6 +116,9 @@ struct monitor_ops
     struct target_ops *target;	/* target operations */
     int stopbits;		/* number of stop bits */
     char **regnames;		/* array of register names in ascii */
+                                /* deprecated: use regname instead */
+    const char *(*regname) (int index); 
+                                /* function for dynamic regname array */
     int num_breakpoints;	/* If set_break != NULL, number of supported
 				   breakpoints */
     int magic;			/* Check value */

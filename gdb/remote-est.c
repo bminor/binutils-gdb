@@ -76,12 +76,24 @@ est_supply_register (char *regname, int regnamelen, char *val, int vallen)
  * registers either. So, typing "info reg sp" becomes a "r30".
  */
 
-static char *est_regnames[NUM_REGS] =
+static char *
+est_regname (int index) 
 {
-  "D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7",
-  "A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7",
-  "SR", "PC",
-};
+  
+  static char *regnames[] =
+  {
+    "D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7",
+    "A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7",
+    "SR", "PC",
+  };
+  
+
+  if ((index >= (sizeof (regnames) /  sizeof (regnames[0]))) 
+       || (index < 0) || (index >= NUM_REGS))
+    return NULL;
+  else
+    return regnames[index];
+}
 
 /*
  * Define the monitor command strings. Since these are passed directly
@@ -143,7 +155,8 @@ init_est_cmds (void)
   est_cmds.cmd_end = NULL;	/* optional command terminator */
   est_cmds.target = &est_ops;	/* target operations */
   est_cmds.stopbits = SERIAL_1_STOPBITS;	/* number of stop bits */
-  est_cmds.regnames = est_regnames;	/* registers names */
+  est_cmds.regnames = NULL;
+  est_cmds.regname = est_regname; /*register names*/
   est_cmds.magic = MONITOR_OPS_MAGIC;	/* magic */
 }				/* init_est_cmds */
 
