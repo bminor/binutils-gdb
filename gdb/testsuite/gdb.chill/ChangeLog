@@ -1,6 +1,9 @@
 Thu Aug 21 10:31:23 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* enum.exp: More quoting fixes.
+	* pr-9946.exp: Ditto.
+	* gch1280.exp: Ditto.
+	* gch1272.exp: Ditto.
 
 Tue Aug 12 21:48:08 1997  Bob Manson  <manson@charmed.cygnus.com>
 

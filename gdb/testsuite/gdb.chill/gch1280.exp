@@ -67,7 +67,7 @@ gdb_test "set print sevenbit-strings" ".*"
 
 if ![set_lang_chill] then {
     runto doit
-    gdb_test "next ""
+    gdb_test "next" ""
     # check too many array elements
     gdb_test {set var v_x := [1,2,3,4,5]} {Too many array elements}
     gdb_test {set var $i := m_x[(3): 22, 25]} {Too many array elements}

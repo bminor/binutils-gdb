@@ -68,7 +68,7 @@ gdb_test "set print sevenbit-strings" ".*"
 
 if ![set_lang_chill] then {
     runto x_
-    gdb_test "next ""
+    gdb_test "next" ""
     # check comparison of SET's
     gdb_test {print xyz=moving} { = TRUE}
     gdb_test {print xyz/=moving} { = FALSE}
