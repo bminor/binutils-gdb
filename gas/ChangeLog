@@ -1,3 +1,8 @@
+Tue Aug  8 13:07:05 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/m68k-parse.y (motorola_operand): For (%pc), set mode to
+	DISP, not BASE.
+
 Tue Aug  8 02:31:38 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* write.c (relax_align): Add extra padding for linkrelax only if
