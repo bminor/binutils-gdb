@@ -157,8 +157,8 @@ static int x86_64_dwarf_regmap[] =
   /* Extended Integer Registers 8 - 15.  */
   8, 9, 10, 11, 12, 13, 14, 15,
 
-  /* Return Address RA.  Not mapped.  */
-  -1,
+  /* Return Address RA.  Mapped to RIP.  */
+  X86_64_RIP_REGNUM,
 
   /* SSE Registers 0 - 7.  */
   X86_64_XMM0_REGNUM + 0, X86_64_XMM1_REGNUM,
