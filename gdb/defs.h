@@ -219,9 +219,6 @@ query ();
 /* Annotation stuff.  */
 
 extern int annotation_level; /* in stack.c */
-
-/* in printcmd.c */
-extern void print_value_flags PARAMS ((struct type *));
 
 extern void
 begin_line PARAMS ((void));

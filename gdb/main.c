@@ -1730,10 +1730,9 @@ command_line_input (prrompt, repeat)
 
   while (1)
     {
-      /* Reports are that some Sys V's don't flush gdb_stdout/err on reads
-	 from stdin, when stdin/out are sockets rather than ttys.  So we
-	 have to do it ourselves, to make emacs-gdb and xxgdb work.
-	 On other machines, doing this once per input should be a cheap nop.  */
+      /* Make sure that all output has been output.  Some machines may let
+	 you get away with leaving out some of the gdb_flush, but not all.  */
+      wrap_here ("");
       gdb_flush (gdb_stdout);
       gdb_flush (gdb_stderr);
 

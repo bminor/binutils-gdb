@@ -1,3 +1,13 @@
+Thu Apr 21 07:45:49 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* breakpoint.c (watch_command): Use (CORE_ADDR)0, not NULL, for
+	target null pointer.
+	* blockframe.c (find_frame_addr_in_frame_chain): Likewise.
+
+	* printcmd.c (output_command): Annotate things we print here too.
+	* Move declaration of print_value_flags from defs.h to value.h.
+	* main.c (command_line_input): Call wrap_here as well as gdb_flush.
+
 Thu Apr 21 09:29:37 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* dbxread.c (read_dbx_dynamic_symtab):  Reinstall support for sun3,

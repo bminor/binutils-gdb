@@ -2238,7 +2238,7 @@ watch_command (arg, from_tty)
       b->watchpoint_frame = FRAME_FP (frame);
     }
   else
-    b->watchpoint_frame = NULL;
+    b->watchpoint_frame = (CORE_ADDR)0;
 
   if (can_use_hardware_watchpoint (b))
     b->type = bp_hardware_watchpoint;

@@ -839,6 +839,9 @@ print_command_1 (exp, inspect, voidprint)
       else
 	if (histindex >= 0) printf_filtered ("$%d = ", histindex);
 
+      if (annotation_level > 1 && histindex >= 0)
+	printf_filtered ("\n\032\032value-history-value\n");
+
       print_formatted (val, format, fmt.size);
       printf_filtered ("\n");
 
@@ -915,7 +918,17 @@ output_command (exp, from_tty)
 
   val = evaluate_expression (expr);
 
+  if (annotation_level > 1)
+    {
+      printf_filtered ("\n\032\032value-begin ");
+      print_value_flags (VALUE_TYPE (val));
+      printf_filtered ("\n");
+    }
+
   print_formatted (val, format, fmt.size);
+
+  if (annotation_level > 1)
+    printf_filtered ("\n\032\032value-end\n");
 
   do_cleanups (old_chain);
 }
