@@ -550,6 +550,14 @@ case "${targ}" in
     ;;
 
 # end-sanitize-tic80
+
+# start-sanitize-sky
+  txvu-*-*)
+    targ_defvec=bfd_elf32_txvu_vec
+    ;;
+
+# end-sanitize-tic80
+
   v850-*-*)
     targ_defvec=bfd_elf32_v850_vec
     ;;

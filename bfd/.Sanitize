@@ -31,6 +31,14 @@ else
 	lose_these_too="${tic80_files} ${lose_these_too}"
 fi
 
+sky_files="cpu-txvu.c elf32-txvu.c"
+
+if ( echo $* | grep keep\-sky > /dev/null ) ; then
+	keep_these_too="${sky_files} ${keep_these_too}"
+else
+	lose_these_too="${sky_files} ${lose_these_too}"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -503,6 +511,34 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-m32rx/,/end\-sanitize\-m32rx/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+sky_files="ChangeLog Makefile.in Makefile.am archures.c elf.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h libbfd.h"
+if ( echo $* | grep keep\-sky > /dev/null ) ; then
+	for i in $sky_files ; do
+		if test ! -d $i && (grep sanitize-sky $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping sky stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $sky_files ; do
+		if test ! -d $i && (grep sanitize-sky $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"sky\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-sky/,/end-\sanitize\-sky/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...

@@ -1250,6 +1250,10 @@ enum bfd_architecture
   /* start-sanitize-tic80 */
   bfd_arch_tic80,      /* TI TMS320c80 (MVP) */
   /* end-sanitize-tic80 */
+  /* start-sanitize-sky */
+  bfd_arch_txvu,      /* TX VU */
+#define bfd_mach_txvu 0
+  /* end-sanitize-sky */
   bfd_arch_v850,       /* NEC V850 */
 #define bfd_mach_v850          0
   /* start-sanitize-v850e */

@@ -2431,6 +2431,15 @@ assign_file_positions_for_segments (abfd)
 	  if (m->count > 0)
 	    {
 	      BFD_ASSERT (p->p_type == PT_LOAD);
+
+	      if (p->p_vaddr < off)
+		{
+		  _bfd_error_handler ("%s: Not enough room for program headers, try linking with -N",
+				      bfd_get_filename (abfd));
+		  bfd_set_error (bfd_error_bad_value);
+		  return false;
+		}
+	      
 	      p->p_vaddr -= off;
 	      if (! m->p_paddr_valid)
 		p->p_paddr -= off;
@@ -2900,6 +2909,11 @@ prep_headers (abfd)
     case bfd_arch_mn10300:
       i_ehdrp->e_machine = EM_CYGNUS_MN10300;
       break;
+/* start-sanitize-sky */
+    case bfd_arch_txvu:
+      i_ehdrp->e_machine = EM_CYGNUS_TXVU;
+      break;
+/* end-sanitize-sky */
       /* also note that EM_M32, AT&T WE32100 is unknown to bfd */
     default:
       i_ehdrp->e_machine = EM_NONE;

@@ -158,6 +158,10 @@ DESCRIPTION
 . {* start-sanitize-tic80 *}
 .  bfd_arch_tic80,     {* TI TMS320c80 (MVP) *}
 . {* end-sanitize-tic80 *}
+. {* start-sanitize-sky *}
+.  bfd_arch_txvu,     {* TX VU *}
+.#define bfd_mach_txvu 0
+. {* end-sanitize-sky *}
 .  bfd_arch_v850,      {* NEC V850 *}
 .#define bfd_mach_v850          0
 . {* start-sanitize-v850e *}
@@ -168,7 +172,9 @@ DESCRIPTION
 .#define bfd_mach_arc_base 0
 .  bfd_arch_m32r,      {* Mitsubishi M32R/D *}
 .#define bfd_mach_m32r		0 {* backwards compatibility *}
+. {* start-sanitize-m32rx *}
 .#define bfd_mach_m32rx		'x'
+. {* end-sanitize-m32rx *}
 .  bfd_arch_mn10200,   {* Matsushita MN10200 *}
 .  bfd_arch_mn10300,   {* Matsushita MN10300 *}
 .  bfd_arch_last
@@ -236,6 +242,9 @@ extern const bfd_arch_info_type bfd_sparc_arch;
 /* start-sanitize-tic80 */
 extern const bfd_arch_info_type bfd_tic80_arch;
 /* end-sanitize-tic80 */
+/* start-sanitize-sky */
+extern const bfd_arch_info_type bfd_txvu_arch;
+/* end-sanitize-sky */
 extern const bfd_arch_info_type bfd_vax_arch;
 extern const bfd_arch_info_type bfd_we32k_arch;
 extern const bfd_arch_info_type bfd_z8k_arch;
@@ -275,6 +284,9 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
 /* start-sanitize-tic80 */
   &bfd_tic80_arch,
 /* end-sanitize-tic80 */
+/* start-sanitize-sky */
+  &bfd_txvu_arch,
+/* end-sanitize-sky */
   &bfd_vax_arch,
   &bfd_we32k_arch,
   &bfd_z8k_arch,

@@ -483,10 +483,8 @@ extern const bfd_target armpei_big_vec;
 extern const bfd_target b_out_vec_big_host;
 extern const bfd_target b_out_vec_little_host;
 extern const bfd_target bfd_elf64_alpha_vec;
-/* start-sanitize-arc */
 extern const bfd_target bfd_elf32_bigarc_vec;
 extern const bfd_target bfd_elf32_littlearc_vec;
-/* end-sanitize-arc */
 extern const bfd_target bfd_elf32_big_generic_vec;
 extern const bfd_target bfd_elf32_bigmips_vec;
 extern const bfd_target bfd_elf64_bigmips_vec;
@@ -510,9 +508,10 @@ extern const bfd_target bfd_elf32_powerpcle_vec;
 extern const bfd_target bfd_elf32_sh_vec;
 extern const bfd_target bfd_elf32_shl_vec;
 extern const bfd_target bfd_elf32_sparc_vec;
-/* start-sanitize-v850 */
+/* start-sanitize-sky */
+extern const bfd_target bfd_elf32_txvu_vec;
+/* end-sanitize-sky */
 extern const bfd_target bfd_elf32_v850_vec;
-/* end-sanitize-v850 */
 extern const bfd_target bfd_elf64_big_generic_vec;
 extern const bfd_target bfd_elf64_little_generic_vec;
 extern const bfd_target bfd_elf64_sparc_vec;
@@ -541,6 +540,7 @@ extern const bfd_target bfd_powerpcle_pei_vec;
 extern const bfd_target i386pe_vec;
 extern const bfd_target i386pei_vec;
 extern const bfd_target go32coff_vec;
+extern const bfd_target go32stubbedcoff_vec;
 extern const bfd_target i386linux_vec;
 extern const bfd_target i386lynx_aout_vec;
 extern const bfd_target i386lynx_coff_vec;
@@ -576,7 +576,10 @@ extern const bfd_target pmac_xcoff_vec;
 extern const bfd_target rs6000coff_vec;
 extern const bfd_target shcoff_vec;
 extern const bfd_target shlcoff_vec;
+extern const bfd_target shcoff_small_vec;
+extern const bfd_target shlcoff_small_vec;
 extern const bfd_target sparcle_aout_vec;
+extern const bfd_target sparclinux_vec;
 extern const bfd_target sparclynx_aout_vec;
 extern const bfd_target sparclynx_coff_vec;
 extern const bfd_target sparcnetbsd_vec;
@@ -607,6 +610,7 @@ extern const bfd_target cisco_core_vec;
 extern const bfd_target hpux_core_vec;
 extern const bfd_target hppabsd_core_vec;
 extern const bfd_target irix_core_vec;
+extern const bfd_target netbsd_core_vec;
 extern const bfd_target osf_core_vec;
 extern const bfd_target sco_core_vec;
 extern const bfd_target trad_core_vec;
@@ -646,9 +650,7 @@ const bfd_target * const bfd_target_vector[] = {
 #ifdef BFD64
 	&bfd_elf64_alpha_vec,
 #endif
-/* start-sanitize-arc */
 	&bfd_elf32_bigarc_vec,
-/* end-sanitize-arc */
 	&bfd_elf32_bigmips_vec,
 #ifdef BFD64
 	&bfd_elf64_bigmips_vec,
@@ -661,9 +663,7 @@ const bfd_target * const bfd_target_vector[] = {
 	&bfd_elf32_i386_vec,
 	&bfd_elf32_i860_vec,
 	&bfd_elf32_little_generic_vec,
-/* start-sanitize-arc */
 	&bfd_elf32_littlearc_vec,
-/* end-sanitize-arc */
 	&bfd_elf32_littlemips_vec,
 #ifdef BFD64
 	&bfd_elf64_littlemips_vec,
@@ -675,9 +675,10 @@ const bfd_target * const bfd_target_vector[] = {
 	&bfd_elf32_m88k_vec,
 	&bfd_elf32_sparc_vec,
 	&bfd_elf32_powerpc_vec,
-/* start-sanitize-v850 */
+/* start-sanitize-sky */
+	&bfd_elf32_txvu_vec,
+/* end-sanitize-sky */
 	&bfd_elf32_v850_vec,
-/* end-sanitize-v850 */
 #ifdef BFD64			/* No one seems to use this.  */
 	&bfd_elf64_big_generic_vec,
 	&bfd_elf64_little_generic_vec,
@@ -722,6 +723,7 @@ const bfd_target * const bfd_target_vector[] = {
 	&bfd_powerpc_pei_vec,
 	&bfd_powerpcle_pei_vec,
 	&go32coff_vec,
+	&go32stubbedcoff_vec,
 #if 0
 	/* Since a.out files lack decent magic numbers, no way to recognize
 	   which kind of a.out file it is.  */
@@ -790,7 +792,10 @@ const bfd_target * const bfd_target_vector[] = {
 	&ppcboot_vec,
 	&shcoff_vec,
 	&shlcoff_vec,
+	&shcoff_small_vec,
+	&shlcoff_small_vec,
 	&sparcle_aout_vec,
+	&sparclinux_vec,
 	&sparclynx_aout_vec,
 	&sparclynx_coff_vec,
 	&sparcnetbsd_vec,
@@ -867,12 +872,9 @@ struct targmatch
   const char *triplet;
   /* The BFD vector.  If this is NULL, then the vector is found by
      searching forward for the next structure with a non NULL vector
-     field.  If this is UNSUPPORTED_TARGET, then the target is not
-     supported.  */
+     field.  */
   const bfd_target *vector;
 };
-
-#define UNSUPPORTED_TARGET ((const bfd_target *) 1)
 
 /* targmatch.h is built by Makefile out of config.bfd.  */
 static const struct targmatch bfd_target_match[] = {
@@ -904,8 +906,7 @@ find_target (name)
 	{
 	  while (match->vector == NULL)
 	    ++match;
-	  if (match->vector != UNSUPPORTED_TARGET)
-	    return match->vector;
+	  return match->vector;
 	  break;
 	}
     }
@@ -931,41 +932,11 @@ boolean
 bfd_set_default_target (name)
      const char *name;
 {
-  const bfd_target *old_default;
   const bfd_target *target;
 
-  old_default = bfd_default_vector[0];
-  if (old_default != NULL)
-    {
-      register const struct targmatch *match;
-
-      /* Try to save some strcmp and fnmatch calls by seeing if we
-         already have the default.  */
-
-      if (strcmp (name, old_default->name) == 0)
-	return true;
-
-      for (match = &bfd_target_match[0]; match->triplet != NULL; match++)
-	{
-	  if (match->vector == old_default)
-	    {
-	      const struct targmatch *back;
-
-	      back = match;
-	      do
-		{
-		  if (fnmatch (back->triplet, name, 0) == 0)
-		    return true;
-
-		  if (back == &bfd_target_match[0])
-		    break;
-
-		  --back;
-		}
-	      while (back->vector == NULL);
-	    }
-	}
-    }
+  if (bfd_default_vector[0] != NULL
+      && strcmp (name, bfd_default_vector[0]->name) == 0)
+    return true;
 
   target = find_target (name);
   if (target == NULL)

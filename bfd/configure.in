@@ -261,6 +261,10 @@ changequote([,])dnl
   sparc-*-netbsd* | sparc-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;
+  sparc*-*-linux*)
+	COREFILE=trad-core.lo
+	AC_DEFINE(TRAD_HEADER,"hosts/sparclinux.h")
+	;;
   tahoe-*-*)
 	COREFILE=trad-core.lo
 	AC_DEFINE(TRAD_HEADER,"hosts/tahoe.h")
@@ -375,7 +379,7 @@ selarchs="$f"
 # Target backend .o files.
 tb=
 
-elf="elflink.lo"
+elf="elflink.lo dwarf2.lo"
 
 for vec in $selvecs
 do
@@ -427,6 +431,9 @@ do
     bfd_elf32_sh_vec)		tb="$tb elf32-sh.lo elf32.lo $elf coff-sh.lo" ;;
     bfd_elf32_shl_vec)		tb="$tb elf32-sh.lo elf32.lo $elf coff-sh.lo" ;;
     bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.lo elf32.lo $elf" ;;
+# start-sanitize-sky
+    bfd_elf32_txvu_vec)		tb="$tb elf32-txvu.lo elf32.lo $elf" ;;
+# end-sanitize-sky
     bfd_elf32_v850_vec)		tb="$tb elf32-v850.lo elf32.lo $elf" ;;
     bfd_elf64_big_generic_vec) 	tb="$tb elf64-gen.lo elf64.lo $elf"
 				target64=true ;;
