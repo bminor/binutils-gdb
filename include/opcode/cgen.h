@@ -21,11 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef CGEN_H
 #define CGEN_H
 
-/* Version information.  */
-#define CGEN_VERSION_MAJOR    0
-#define CGEN_VERSION_MINOR    6
-#define CGEN_VERSION_FIXLEVEL 0
-
 /* Prepend the arch name, defined in <arch>-opc.h, and _cgen_ to symbol S.
    The lack of spaces in the arg list is important for non-stdc systems.
    This file is included by <arch>-opc.h.
@@ -51,12 +46,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* Lots of cpu's have a fixed insn size, or one which rarely changes,
    and it's generally easier to handle these by treating the insn as an
    integer type, rather than an array of characters.  So we allow targets
-   to control this.  */
+   to control this.  When an integer type the value is in host byte order,
+   when an array of characters the value is in target byte order.  */
 
-#ifdef CGEN_INT_INSN
-typedef unsigned int cgen_insn_t;
+typedef unsigned int CGEN_INSN_INT;
+#if CGEN_INT_INSN_P
+typedef CGEN_INSN_INT CGEN_INSN_BYTES;
+typedef CGEN_INSN_INT *CGEN_INSN_BYTES_PTR;
 #else
-typedef char * cgen_insn_t;
+typedef unsigned char *CGEN_INSN_BYTES;
+typedef unsigned char *CGEN_INSN_BYTES_PTR;
 #endif
 
 #ifdef __GNUC__
@@ -100,6 +99,9 @@ typedef struct
 struct { unsigned char num_nonbools; \
 	   unsigned int bool; \
 	   unsigned int nonbool[(n) ? (n) : 1]; }
+
+/* Return the boolean attributes.  */
+#define CGEN_ATTR_BOOLS(a) ((a)->bool)
 
 /* Given an attribute number, return its mask.  */
 #define CGEN_ATTR_MASK(attr) (1 << (attr))
@@ -159,6 +161,27 @@ typedef struct cgen_fields CGEN_FIELDS;
    further optimizations.  */
 #define CGEN_FIELDS_BITSIZE(fields) ((fields)->length)
 
+/* Extraction support for variable length insn sets.  */
+
+/* When disassembling we don't know the number of bytes to read at the start.
+   So the first CGEN_BASE_INSN_BITSIZE bytes are read at the start and the rest
+   are read when needed.  This struct controls this.  It is basically the
+   disassemble_info stuff, except that we provide a cache for values already
+   read (since bytes can typically be read several times to fetch multiple
+   operands that may be in them), and that extraction of fields is needed
+   in contexts other than disassembly.  */
+
+typedef struct {
+  /* A pointer to the disassemble_info struct.
+     We don't require dis-asm.h so we use PTR for the type here.
+     If NULL, BYTES is full of valid data (VALID == -1).  */
+  PTR dis_info;
+  /* Points to a working buffer of sufficient size.  */
+  unsigned char *bytes;
+  /* Mask of bytes that are valid in BYTES.  */
+  unsigned int valid;
+} CGEN_EXTRACT_INFO;
+
 /* Associated with each insn or expression is a set of "handlers" for
    performing operations like parsing, printing, etc.  These require a bfd_vma
    value to be passed around but we don't want all applications to need bfd.h.
@@ -188,7 +211,7 @@ typedef const char * (cgen_parse_fn)
    The result is an error message or NULL if success.  */
 typedef const char * (cgen_insert_fn)
      PARAMS ((CGEN_OPCODE_DESC, const CGEN_INSN * /*insn*/,
-	      CGEN_FIELDS * /*fields*/, cgen_insn_t * /*insnp*/,
+	      CGEN_FIELDS * /*fields*/, CGEN_INSN_BYTES_PTR /*insnp*/,
 	      bfd_vma /*pc*/));
 
 /* Extract handler.
@@ -196,15 +219,15 @@ typedef const char * (cgen_insert_fn)
    INSN is a pointer to a struct describing the insn being parsed.
    The second argument is a pointer to a struct controlling extraction
    (only used for variable length insns).
-   BUF_CTRL is a pointer to a struct for controlling reading of further
+   EX_INFO is a pointer to a struct for controlling reading of further
    bytes for the insn.
-   BASE_INSN is the first CGEN_BASE_INSN_SIZE bytes.
+   BASE_INSN is the first CGEN_BASE_INSN_SIZE bytes (host order).
    FIELDS is a pointer to a cgen_fields struct in which the results are placed.
    PC is the pc value of the insn.
    The result is the length of the insn in bits or zero if not recognized.  */
 typedef int (cgen_extract_fn)
      PARAMS ((CGEN_OPCODE_DESC, const CGEN_INSN * /*insn*/,
-	      PTR /*buf_ctrl*/, unsigned long /*base_insn*/,
+	      CGEN_EXTRACT_INFO * /*ex_info*/, unsigned long /*base_insn*/,
 	      CGEN_FIELDS * /*fields*/, bfd_vma /*pc*/));
 
 /* Print handler.
@@ -341,7 +364,16 @@ typedef struct cgen_hw_entry
   char * name;
   enum cgen_asm_type asm_type;
   PTR asm_data;
+#ifndef CGEN_HW_NBOOL_ATTRS
+#define CGEN_HW_NBOOL_ATTRS 1
+#endif
+  const CGEN_ATTR_TYPE (CGEN_HW_NBOOL_ATTRS) attrs;
+#define CGEN_HW_ATTRS(hw) (&(hw)->attrs)
 } CGEN_HW_ENTRY;
+
+/* Return value of attribute ATTR in HW.  */
+#define CGEN_HW_ATTR(hw, attr) \
+CGEN_ATTR_VALUE (hw, CGEN_HW_ATTRS (hw), attr)
 
 extern const CGEN_HW_ENTRY * cgen_hw_lookup_by_name
      PARAMS ((CGEN_OPCODE_DESC, const char *));
@@ -551,6 +583,10 @@ typedef struct
   enum cgen_operand_instance_type type;
 #define CGEN_OPERAND_INSTANCE_TYPE(opinst) ((opinst)->type)
 
+  /* Name of operand.  */
+  const char *name;
+#define CGEN_OPERAND_INSTANCE_NAME(opinst) ((opinst)->name)
+
   /* The hardware element referenced.  */
   const CGEN_HW_ENTRY *hw;
 #define CGEN_OPERAND_INSTANCE_HW(opinst) ((opinst)->hw)
@@ -674,11 +710,15 @@ struct cgen_insn
 #define CGEN_INSN_VALUE(insn) ((insn)->value)
 #define CGEN_INSN_MASK(insn) ((insn)->format.mask)
 
+#if 0 /* ??? Disabled for now as there is a problem with embedded newlines
+	 and the table is already pretty big.  Should perhaps be moved
+	 to a file of its own.  */
   /* Semantics, as CDL.  */
   /* ??? Note that the operand instance table could be computed at runtime
      if we parse this and cache the results.  */
   const char *cdx;
 #define CGEN_INSN_CDX(insn) ((insn)->cdx)
+#endif
 
   /* Opaque pointer to "subclass" specific data.
      In the case of real insns this points to a NULL entry terminated
@@ -705,6 +745,9 @@ struct cgen_insn
 #define CGEN_INSN_ATTR(insn, attr) \
 CGEN_ATTR_VALUE (insn, CGEN_INSN_ATTRS (insn), attr)
 };
+
+/* Return non-zero if INSN is the "invalid" insn marker.  */
+#define CGEN_INSN_INVALID_P(insn) (CGEN_INSN_MNEMONIC (insn) == 0)
 
 /* Instruction lists.
    This is used for adding new entries and for creating the hash lists.  */
@@ -824,8 +867,6 @@ extern CGEN_INSN_LIST * cgen_asm_lookup_insn
 
 /* It doesn't make much sense to provide a default here,
    but while this is under development we do.
-   INSN is the CGEN_INSN entry when building the hash table and NULL
-   when looking up the insn during assembly.
    BUFFER is a pointer to the bytes of the insn.
    VALUE is the first CGEN_BASE_INSN_SIZE bytes as an int in host order.  */
 #ifndef CGEN_DIS_HASH
@@ -897,6 +938,10 @@ typedef struct cgen_opcode_table
   enum cgen_endian endian;
 #define CGEN_OPCODE_ENDIAN(od) ((od)->endian)
 
+  /* Current insn endian.  */
+  enum cgen_endian insn_endian;
+#define CGEN_OPCODE_INSN_ENDIAN(od) ((od)->insn_endian)
+
   /* Assembler instruction hash table.  */
   CGEN_INSN_LIST **asm_hash_table;
 #define CGEN_OPCODE_ASM_HASH_TABLE(od) ((od)->asm_hash_table)
@@ -912,6 +957,7 @@ typedef struct cgen_opcode_table
 } CGEN_OPCODE_TABLE;
 
 /* Prototypes of major functions.  */
+/* FIXME: Move all CGEN_SYM-defined functions into CGEN_OPCODE_DESC.  */
 
 /* Open an opcode table for use.  */
 extern CGEN_OPCODE_DESC CGEN_SYM (opcode_open)
@@ -930,27 +976,22 @@ extern void CGEN_SYM (init_dis) PARAMS ((CGEN_OPCODE_DESC));
 /* Change the mach and/or endianness.  */
 extern void cgen_set_cpu PARAMS ((CGEN_OPCODE_DESC, int, enum cgen_endian));
 
-/* FIXME: This prototype is wrong ifndef CGEN_INT_INSN.
-   Furthermore, ifdef CGEN_INT_INSN, the insn is created in
-   target byte order (in which case why use int's at all).
-   Perhaps replace cgen_insn_t * with char *?  */
 extern const CGEN_INSN * CGEN_SYM (assemble_insn)
-     PARAMS ((CGEN_OPCODE_DESC, const char *, CGEN_FIELDS *, cgen_insn_t *, char **));
-#if 0 /* old */
-extern int CGEN_SYM (insn_supported) PARAMS ((const CGEN_INSN *));
-extern int CGEN_SYM (opval_supported) PARAMS ((const struct cgen_opval *));
-#endif
+     PARAMS ((CGEN_OPCODE_DESC, const char *, CGEN_FIELDS *,
+	      CGEN_INSN_BYTES_PTR, char **));
 
 extern const CGEN_KEYWORD CGEN_SYM (operand_mach);
 extern int CGEN_SYM (get_mach) PARAMS ((const char *));
 
 extern const CGEN_INSN * CGEN_SYM (lookup_insn)
      PARAMS ((CGEN_OPCODE_DESC, const CGEN_INSN *,
-	      cgen_insn_t, int, CGEN_FIELDS *, int));
+	      CGEN_INSN_BYTES, int, CGEN_FIELDS *, int));
 extern void CGEN_SYM (get_insn_operands)
-     PARAMS ((CGEN_OPCODE_DESC, const CGEN_INSN *, const CGEN_FIELDS *, int *));
+     PARAMS ((CGEN_OPCODE_DESC, const CGEN_INSN *,
+	      const CGEN_FIELDS *, int *));
 extern const CGEN_INSN * CGEN_SYM (lookup_get_insn_operands)
-     PARAMS ((CGEN_OPCODE_DESC, const CGEN_INSN *, cgen_insn_t, int, int *));
+     PARAMS ((CGEN_OPCODE_DESC, const CGEN_INSN *,
+	      CGEN_INSN_BYTES, int, int *));
 
 /* Get/set fields in the CGEN_FIELDS struct.  */
 int CGEN_SYM (get_int_operand)
@@ -969,8 +1010,18 @@ extern const char * CGEN_SYM (parse_operand)
 
 #ifdef BFD_VERSION /* Don't require bfd.h unnecessarily.  */
 extern const char * CGEN_SYM (insert_operand)
-     PARAMS ((CGEN_OPCODE_DESC, int, CGEN_FIELDS *, char *, bfd_vma));
+     PARAMS ((CGEN_OPCODE_DESC, int, CGEN_FIELDS *, CGEN_INSN_BYTES_PTR,
+	      bfd_vma));
+extern int CGEN_SYM (extract_operand)
+     PARAMS ((CGEN_OPCODE_DESC, int, CGEN_EXTRACT_INFO *, CGEN_INSN_BYTES,
+	      CGEN_FIELDS *, bfd_vma));
 #endif
+
+/* Cover fns to bfd_get/set.  */
+extern CGEN_INSN_INT cgen_get_insn_value
+     PARAMS ((CGEN_OPCODE_DESC, unsigned char *, int));
+extern void cgen_put_insn_value
+     PARAMS ((CGEN_OPCODE_DESC, unsigned char *, int, CGEN_INSN_INT));
 
 /* Read in a cpu description file.  */
 extern const char * cgen_read_cpu_file

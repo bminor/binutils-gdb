@@ -1,3 +1,7 @@
+Thu Oct 29 11:38:36 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* cgen.h (CGEN_VERSION_{MAJOR,MINOR,FIXLEVEL}): Delete.
+
 Tue Oct 27 08:57:59 1998  Gavin Romig-Koch  <gavin@cygnus.com>
 
 	* mips.h (INSN_MULT): Added.
