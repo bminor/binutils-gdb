@@ -1,3 +1,9 @@
+Wed Jul 17 06:54:50 1996  Mark Alexander  <marka@cygnus.com>
+
+	* mon960-rom.c: Shorten the mon960_inits string to a single
+	carriage return; this prevents a hang on connecting immediately
+	after powerup, when MON960 is attempting autobaud detection.
+
 Tue Jul 16 23:47:04 1996  Mark Alexander  <marka@cygnus.com>
 
 	* a29k-tdep.c (get_saved_register): Allow PC to be modified

@@ -149,7 +149,7 @@ static char *mon960_regnames[NUM_REGS];
 
 /* need to pause the monitor for timing reasons, so slow it down */
 
-#if 1
+#if 0
 /* FIXME: this extremely long init string causes MON960 to return two NAKS
    instead of performing the autobaud recognition, at least when gdb
    is running on Linux.  The short string below works on Linux, and on
