@@ -1,3 +1,8 @@
+2000-07-05  Eli Zaretskii <eliz@is.elta.co.il>
+
+	* refcard.tex: Remove \centerline from the blurb.  Patch from
+        Brian Youmans.
+
 2000-06-25  Eli Zaretskii <eliz@is.elta.co.il>
 
 	* Makefile.in (install-info): Support installation from outside of
