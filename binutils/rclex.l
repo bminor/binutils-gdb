@@ -291,6 +291,41 @@ handle_quotes (input, len)
 	      rcparse_warning ("use \"\" to put \" in a string");
 	      break;
 
+	    case 'a':
+	      *s++ = ESCAPE_A;
+	      ++t;
+	      break;
+
+	    case 'b':
+	      *s++ = ESCAPE_B;
+	      ++t;
+	      break;
+
+	    case 'f':
+	      *s++ = ESCAPE_F;
+	      ++t;
+	      break;
+
+	    case 'n':
+	      *s++ = ESCAPE_N;
+	      ++t;
+	      break;
+
+	    case 'r':
+	      *s++ = ESCAPE_R;
+	      ++t;
+	      break;
+
+	    case 't':
+	      *s++ = ESCAPE_T;
+	      ++t;
+	      break;
+
+	    case 'v':
+	      *s++ = ESCAPE_V;
+	      ++t;
+	      break;
+
 	    case '\\':
 	      *s++ = *t++;
 	      break;
@@ -328,6 +363,12 @@ handle_quotes (input, len)
 		  ++t;
 		}
 	      *s++ = ch;
+	      break;
+
+	    default:
+	      rcparse_warning ("unrecognized escape sequence");
+	      *s++ = '\\';
+	      *s++ = *t++;
 	      break;
 	    }
 	}

@@ -1,3 +1,31 @@
+Tue Dec  2 13:06:46 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* windres.h (ESCAPE_*): Define standard escape sequences.
+	* rclex.l (handle_quotes): Handle standard escape sequences.  Warn
+	about an unrecognized escape character.
+	* windres.c (unicode_print): Print standard escape sequences.
+	* rcparse.y (acc_event): Initialize $$.next.
+	* resbin.c (bin_to_res_menuitems): Don't set MENUITEM_POPUP or
+	MENUITEM_ENDMENU in the menu item flags.
+	(bin_to_res_accelerators): Allocate a structure (the old code
+	never worked).
+	(res_to_bin_accelerator): Correct the test for setting ACC_LAST.
+	(res_to_bin_dialog): Save the extended style rather than saving
+	the style twice.  Remove useless shadowing length variable.  Set
+	the length of control data correctly.
+	* resrc.c (write_rc_dialog): Don't print the class or menu if the
+	string length is zero.
+
+Mon Nov 24 18:52:43 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* stabs.c (parse_stab_argtypes): Don't try to parse the name of a
+	destructor as mangled argument types.
+
+Mon Nov 10 17:51:41 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* addr2line.c (translate_addresses): Use bfd_scan_vma rather
+	than strtol to scan addresses.
+
 Sun Nov  9 11:01:31 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* Makefile.am (bin_PROGRAMS): Don't use line continuations here.
@@ -33,7 +61,7 @@ Tue Oct 14 16:14:35 1997  Nick Clifton  <nickc@cygnus.com>
 	(disassemble_data): Set the symbol_at_address_func field to point
 	to objdump_symbol_at_address.
 
-Fri Oct 10 14:13:09 1997  Ricahrd Henderson  <rth@cygnus.com>
+Fri Oct 10 14:13:09 1997  Richard Henderson  <rth@cygnus.com>
 
 	* objcopy.c, objcopy.1, binutils.texi: "localize" is a better name
 	than "privatize".  Update all references.
