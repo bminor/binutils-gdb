@@ -1,3 +1,10 @@
+Mon Dec  4 12:22:24 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* gencode.c (tab): Added several sh3 opcodes.
+	(think): Added printonmatch for A_SSR and A_SPC.
+	* interp.c (SSR, SPC): Added definitions.
+	(saved_state_type): Added ssr and spc registers.
+
 Wed Nov 29 12:39:27 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* gencode.c (tab): In shad/shld definitions, negate R[m] before
@@ -32,7 +39,7 @@ Sat Oct 21 13:01:18 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 start-sanitize-sh3e
 Mon Oct 16 18:24:03 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
-	* interp.c (saved_start_type): Move FP registers to immediately
+	* interp.c (saved_state_type): Move FP registers to immediately
 	after SR.
 
 end-sanitize-sh3e
