@@ -1,3 +1,8 @@
+2002-02-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* regformats/regdef.h (struct reg): Add comment describing the
+	requirements for offset and size fields.
+
 2002-02-04  Andreas Schwab  <schwab@suse.de>
 
 	* config/ia64/linux.mh: Don't set NAT_CLIBS and REGEX.
@@ -7,7 +12,7 @@
 
 	* gdbarch.sh (copyright): Update years in generated header.
 	(SMASH_TEXT_ADDRESS): Add rule.
-	*gdbarch.h, gdbarch.c: Re-generate.
+	* gdbarch.h, gdbarch.c: Re-generate.
 	* coffread.c: Multi-arch uses of SMASH_TEXT_ADDRESS.
 	* dbxread.c: Likewise.
 	* dwarfread.c: Likewise.

@@ -23,6 +23,11 @@ struct reg
   /* The name of this register - NULL for pad entries.  */
   const char *name;
 
+  /* At the moment, both of the following bit counts must be divisible
+     by eight (to match the representation as two hex digits) and divisible
+     by the size of a byte (to match the layout of each register in
+     memory).  */
+
   /* The offset (in bits) of the value of this register in the buffer.  */
   int offset;
 
