@@ -1,3 +1,11 @@
+Thu Dec  5 12:09:48 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* m68k-dis.c (print_insn_arg): Handle new < and > operand
+	specifiers.
+
+	* m68k-opc.c (m68k_opcodes): Simplify table by using < and >
+	operand specifiers in fmovm* instructions.
+
 Wed Dec  4 14:52:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ppc-opc.c (insert_li): Give an error if the offset has the two

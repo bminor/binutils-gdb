@@ -1,4 +1,4 @@
-/* Opcode table for m680[01234]0/m6888[12]/m68851.
+/* Opcode table for m680[012346]0/m6888[12]/m68851/mcf5200.
    Copyright 1989, 91, 92, 93, 94, 95, 1996 Free Software Foundation.
 
 This file is part of GDB, GAS, and the GNU binutils.
@@ -781,18 +781,13 @@ const struct m68k_opcode m68k_opcodes[] =
 
 {"fmovecrx",	two(0xF000, 0x5C00), two(0xF1FF, 0xFC00), "Ii#CF7", mfloat },
 
-{"fmovemx",	two(0xF000, 0xF800), two(0xF1C0, 0xFF8F), "IiDk&s", mfloat },
-{"fmovemx",	two(0xF020, 0xE800), two(0xF1F8, 0xFF8F), "IiDk-s", mfloat },
-{"fmovemx",	two(0xF000, 0xD800), two(0xF1C0, 0xFF8F), "Ii&sDk", mfloat },
-{"fmovemx",	two(0xF018, 0xD800), two(0xF1F8, 0xFF8F), "Ii+sDk", mfloat },
+{"fmovemx",	two(0xF000, 0xF800), two(0xF1C0, 0xFF8F), "IiDk>s", mfloat },
+{"fmovemx",	two(0xF000, 0xD800), two(0xF1C0, 0xFF8F), "Ii<sDk", mfloat },
 {"fmovemx",	two(0xF000, 0xF000), two(0xF1C0, 0xFF00), "Idl3&s", mfloat },
-{"fmovemx",	two(0xF000, 0xF000), two(0xF1C0, 0xFF00), "Id#3&s", mfloat },
-{"fmovemx",	two(0xF000, 0xD000), two(0xF1C0, 0xFF00), "Id&sl3", mfloat },
-{"fmovemx",	two(0xF000, 0xD000), two(0xF1C0, 0xFF00), "Id&s#3", mfloat },
 {"fmovemx",	two(0xF020, 0xE000), two(0xF1F8, 0xFF00), "IdL3-s", mfloat },
-{"fmovemx",	two(0xF020, 0xE000), two(0xF1F8, 0xFF00), "Id#3-s", mfloat },
-{"fmovemx",	two(0xF018, 0xD000), two(0xF1F8, 0xFF00), "Id+sl3", mfloat },
-{"fmovemx",	two(0xF018, 0xD000), two(0xF1F8, 0xFF00), "Id+s#3", mfloat },
+{"fmovemx",	two(0xF000, 0xF000), two(0xF1C0, 0xFF00), "Id#3>s", mfloat },
+{"fmovemx",	two(0xF000, 0xD000), two(0xF1C0, 0xFF00), "Id<sl3", mfloat },
+{"fmovemx",	two(0xF000, 0xD000), two(0xF1C0, 0xFF00), "Id<s#3", mfloat },
 
 {"fmoveml",	two(0xF000, 0xA000), two(0xF1C0, 0xE3FF), "Iis8%s", mfloat },
 {"fmoveml",	two(0xF000, 0xA000), two(0xF1C0, 0xE3FF), "IiL8~s", mfloat },
@@ -801,22 +796,18 @@ const struct m68k_opcode m68k_opcodes[] =
    target is a single %fpiar.  */
 {"fmoveml",	two(0xF000, 0x8000), two(0xF1C0, 0xE3FF), "Ii*lL8", mfloat },
 
-{"fmovem",	two(0xF020, 0xE000), two(0xF1F8, 0xFF00), "IdL3-s", mfloat },
+{"fmovem",	two(0xF000, 0xF800), two(0xF1C0, 0xFF8F), "IiDk>s", mfloat },
+{"fmovem",	two(0xF000, 0xD800), two(0xF1C0, 0xFF8F), "Ii<sDk", mfloat },
 {"fmovem",	two(0xF000, 0xF000), two(0xF1C0, 0xFF00), "Idl3&s", mfloat },
-{"fmovem",	two(0xF018, 0xD000), two(0xF1F8, 0xFF00), "Id+sl3", mfloat },
-{"fmovem",	two(0xF000, 0xD000), two(0xF1C0, 0xFF00), "Id&sl3", mfloat },
-{"fmovem",	two(0xF020, 0xE000), two(0xF1F8, 0xFF00), "Id#3-s", mfloat },
-{"fmovem",	two(0xF020, 0xE800), two(0xF1F8, 0xFF8F), "IiDk-s", mfloat },
-{"fmovem",	two(0xF000, 0xF000), two(0xF1C0, 0xFF00), "Id#3&s", mfloat },
-{"fmovem",	two(0xF000, 0xF800), two(0xF1C0, 0xFF8F), "IiDk&s", mfloat },
-{"fmovem",	two(0xF018, 0xD000), two(0xF1F8, 0xFF00), "Id+s#3", mfloat },
-{"fmovem",	two(0xF018, 0xD800), two(0xF1F8, 0xFF8F), "Ii+sDk", mfloat },
-{"fmovem",	two(0xF000, 0xD000), two(0xF1C0, 0xFF00), "Id&s#3", mfloat },
-{"fmovem",	two(0xF000, 0xD800), two(0xF1C0, 0xFF8F), "Ii&sDk", mfloat },
+{"fmovem",	two(0xF020, 0xE000), two(0xF1F8, 0xFF00), "IdL3-s", mfloat },
+{"fmovem",	two(0xF000, 0xF000), two(0xF1C0, 0xFF00), "Id#3>s", mfloat },
+{"fmovem",	two(0xF000, 0xD000), two(0xF1C0, 0xFF00), "Id<sl3", mfloat },
+{"fmovem",	two(0xF000, 0xD000), two(0xF1C0, 0xFF00), "Id<s#3", mfloat },
+
 {"fmovem",	two(0xF000, 0xA000), two(0xF1C0, 0xE3FF), "Iis8%s", mfloat },
-{"fmovem",	two(0xF000, 0x8000), two(0xF1C0, 0xE3FF), "Ii*ss8", mfloat },
 {"fmovem",	two(0xF000, 0xA000), two(0xF1C0, 0xE3FF), "IiL8~s", mfloat },
-{"fmovem",	two(0xF000, 0x8000), two(0xF2C0, 0xE3FF), "Ii*sL8", mfloat },
+/* FIXME: see above */
+{"fmovem",	two(0xF000, 0x8000), two(0xF2C0, 0xE3FF), "Ii*lL8", mfloat },
 
 {"fmulb",	two(0xF000, 0x5823), two(0xF1C0, 0xFC7F), "Ii;bF7", mfloat },
 {"fmuld",	two(0xF000, 0x5423), two(0xF1C0, 0xFC7F), "Ii;FF7", mfloat },
@@ -886,11 +877,9 @@ const struct m68k_opcode m68k_opcodes[] =
 {"fremx",	two(0xF000, 0x0025), two(0xF1C0, 0xE07F), "IiF8F7", mfloat },
 {"fremx",	two(0xF000, 0x4825), two(0xF1C0, 0xFC7F), "Ii;xF7", mfloat },
 
-{"frestore",	one(0xF140),		one(0xF1C0), "Id&s", mfloat },
-{"frestore",	one(0xF158),		one(0xF1F8), "Id+s", mfloat },
+{"frestore",	one(0xF140),		one(0xF1C0), "Id<s", mfloat },
 
-{"fsave",	one(0xF100),		one(0xF1C0), "Id&s", mfloat },
-{"fsave",	one(0xF120),		one(0xF1F8), "Id-s", mfloat },
+{"fsave",	one(0xF100),		one(0xF1C0), "Id>s", mfloat },
 
 {"fscaleb",	two(0xF000, 0x5826), two(0xF1C0, 0xFC7F), "Ii;bF7", mfloat },
 {"fscaled",	two(0xF000, 0x5426), two(0xF1C0, 0xFC7F), "Ii;FF7", mfloat },
@@ -1243,20 +1232,14 @@ const struct m68k_opcode m68k_opcodes[] =
 
 {"movemw",	one(0044200),	one(0177700), "Lw&s", m68000up },
 {"movemw",	one(0044240),	one(0177770), "lw-s", m68000up },
-{"movemw",	one(0046200),	one(0177700), "!sLw", m68000up },
-{"movemw",	one(0046230),	one(0177770), "+sLw", m68000up },
-{"movemw",	one(0044200),	one(0177700), "#w&s", m68000up },
-{"movemw",	one(0044240),	one(0177770), "#w-s", m68000up },
-{"movemw",	one(0046200),	one(0177700), "!s#w", m68000up },
-{"movemw",	one(0046230),	one(0177770), "+s#w", m68000up },
+{"movemw",	one(0044200),	one(0177700), "#w>s", m68000up },
+{"movemw",	one(0046200),	one(0177700), "<sLw", m68000up },
+{"movemw",	one(0046200),	one(0177700), "<s#w", m68000up },
 {"moveml",	one(0044300),	one(0177700), "Lw&s", m68000up },
 {"moveml",	one(0044340),	one(0177770), "lw-s", m68000up },
-{"moveml",	one(0046300),	one(0177700), "!sLw", m68000up },
-{"moveml",	one(0046330),	one(0177770), "+sLw", m68000up },
-{"moveml",	one(0044300),	one(0177700), "#w&s", m68000up },
-{"moveml",	one(0044340),	one(0177770), "#w-s", m68000up },
-{"moveml",	one(0046300),	one(0177700), "!s#w", m68000up },
-{"moveml",	one(0046330),	one(0177770), "+s#w", m68000up },
+{"moveml",	one(0044300),	one(0177700), "#w>s", m68000up },
+{"moveml",	one(0046300),	one(0177700), "<sLw", m68000up },
+{"moveml",	one(0046300),	one(0177700), "<s#w", m68000up },
 /* FIXME: need specifier for mode 2 and 5 to simplify below insn patterns */
 {"moveml",	one(0044320),	one(0177700), "Lwas", mcf5200 },
 {"moveml",	one(0044320),	one(0177700), "#was", mcf5200 },
@@ -1295,11 +1278,11 @@ const struct m68k_opcode m68k_opcodes[] =
 {"movew",	one(0043300),	one(0177700), "DsSd", mcf5200 },
 {"movew",	one(0043300),	one(0177700), "#wSd", mcf5200 },
 
+{"movel",	one(0070000),	one(0170400), "MsDd", m68000up | mcf5200 },
 {"movel",	one(0020000),	one(0170000), "*l%d", m68000up },
 {"movel",	one(0020000),	one(0170000), "ms%d", mcf5200 },
 {"movel",	one(0020000),	one(0170000), "nspd", mcf5200 },
 {"movel",	one(0020000),	one(0170000), "osmd", mcf5200 },
-{"movel",	one(0070000),	one(0170400), "MsDd", m68000up | mcf5200 },
 {"movel",	one(0047140),	one(0177770), "AsUd", m68000up },
 {"movel",	one(0047150),	one(0177770), "UdAs", m68000up },
 
@@ -1500,11 +1483,9 @@ const struct m68k_opcode m68k_opcodes[] =
 {"pmovefd",	two(0xf000, 0x4100),	two(0xffc0, 0xe3ff), "|sW8", m68030 },
 {"pmovefd",	two(0xf000, 0x0900),	two(0xffc0, 0xfbff), "*l38", m68030 },
 
-{"prestore",	one(0xf140),		one(0xffc0), "&s", m68851 },
-{"prestore",	one(0xf158),		one(0xfff8), "+s", m68851 },
+{"prestore",	one(0xf140),		one(0xffc0), "<s", m68851 },
 
-{"psave",	one(0xf100),		one(0xffc0), "&s", m68851 },
-{"psave",	one(0xf120),		one(0xfff8), "-s", m68851 },
+{"psave",	one(0xf100),		one(0xffc0), ">s", m68851 },
 
 {"psac",	two(0xf040, 0x0007),	two(0xffc0, 0xffff), "$s", m68851 },
 {"psas",	two(0xf040, 0x0006),	two(0xffc0, 0xffff), "$s", m68851 },
@@ -1636,9 +1617,9 @@ const struct m68k_opcode m68k_opcodes[] =
 
 {"roxrb",	one(0160020),		one(0170770), "QdDs", m68000up },
 {"roxrb",	one(0160060),		one(0170770), "DdDs", m68000up },
-{"roxrw",	one(0160120),		one(0170770),"QdDs", m68000up },
+{"roxrw",	one(0160120),		one(0170770), "QdDs", m68000up },
 {"roxrw",	one(0160160),		one(0170770), "DdDs", m68000up },
-{"roxrw",	one(0162300),		one(0177700),"~s",   m68000up },
+{"roxrw",	one(0162300),		one(0177700), "~s",   m68000up },
 {"roxrl",	one(0160220),		one(0170770), "QdDs", m68000up },
 {"roxrl",	one(0160260),		one(0170770), "DdDs", m68000up },
 
