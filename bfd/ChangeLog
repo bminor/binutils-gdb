@@ -1,3 +1,8 @@
+Fri Jun  5 17:21:51 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-v850.c: Add prototypes for static functions.
+	Change type of addend parameter to bfd_vma in various functions.
+
 Fri Jun  5 18:09:58 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aoutx.h (howto_table_ext): Change RELOC_BASE13 to use

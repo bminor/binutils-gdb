@@ -41,15 +41,48 @@ static void v850_elf_info_to_howto_rela
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
 static bfd_reloc_status_type v850_elf_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static boolean v850_elf_is_local_label_name PARAMS ((bfd *, const char *));
-static boolean v850_elf_relocate_section PARAMS((bfd *,
-						 struct bfd_link_info *,
-						 bfd *,
-						 asection *,
-						 bfd_byte *,
-						 Elf_Internal_Rela *,
-						 Elf_Internal_Sym *,
-						 asection **));
+static boolean v850_elf_is_local_label_name
+  PARAMS ((bfd *, const char *));
+static boolean v850_elf_relocate_section
+  PARAMS((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
+	  Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
+static bfd_reloc_status_type v850_elf_perform_relocation
+  PARAMS ((bfd *, int, bfd_vma, bfd_byte *));
+static boolean v850_elf_check_relocs
+  PARAMS ((bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *));
+static void remember_hi16s_reloc
+  PARAMS ((bfd_vma, bfd_byte *));
+static bfd_byte * find_remembered_hi16s_reloc
+  PARAMS ((bfd_vma addend));
+static bfd_reloc_status_type v850_elf_final_link_relocate
+  PARAMS ((reloc_howto_type *, bfd *, bfd *, asection *, bfd_byte *, bfd_vma,
+	   bfd_vma, bfd_vma, struct bfd_link_info *, asection *, int));
+static boolean v850_elf_object_p
+  PARAMS ((bfd *));
+static boolean v850_elf_fake_sections
+  PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
+static void v850_elf_final_write_processing
+  PARAMS ((bfd *, boolean));
+static boolean v850_elf_set_private_flags
+  PARAMS ((bfd *, flagword));
+static boolean v850_elf_copy_private_bfd_data
+  PARAMS ((bfd *, bfd *));
+static boolean v850_elf_merge_private_bfd_data
+  PARAMS ((bfd *, bfd *));
+static boolean v850_elf_print_private_bfd_data
+  PARAMS ((bfd *, PTR));
+static boolean v850_elf_section_from_bfd_section
+  PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *, int *));
+static void v850_elf_symbol_processing
+  PARAMS ((bfd *, asymbol *));
+static boolean v850_elf_add_symbol_hook
+  PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
+	   const char **, flagword *, asection **, bfd_vma *));
+static boolean v850_elf_link_output_symbol_hook
+  PARAMS ((bfd *, struct bfd_link_info *, const char *,
+	   Elf_Internal_Sym *, asection *));
+static boolean v850_elf_section_from_shdr
+  PARAMS ((bfd *, Elf_Internal_Shdr *, char *));
 
 /* Note: It is REQUIRED that the 'type' value of each entry in this array
    match the index of the entry in the array.  */
@@ -657,7 +690,7 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
 
 typedef struct
 {
-  long          addend;
+  bfd_vma       addend;
   bfd_byte *    address;
   unsigned long counter;
 }
@@ -668,7 +701,7 @@ static unsigned long   hi16s_counter;
 
 static void
 remember_hi16s_reloc (addend, address)
-     long       addend;
+     bfd_vma    addend;
      bfd_byte * address;
 {
   hi16s_location * oldest = NULL;
@@ -714,7 +747,7 @@ remember_hi16s_reloc (addend, address)
 
 static bfd_byte *
 find_remembered_hi16s_reloc (addend)
-     long       addend;
+     bfd_vma addend;
 {
   hi16s_location * match = NULL;
   int              i;
@@ -751,7 +784,7 @@ static bfd_reloc_status_type
 v850_elf_perform_relocation (abfd, r_type, addend, address)
      bfd *      abfd;
      int        r_type;
-     long       addend;
+     bfd_vma    addend;
      bfd_byte * address;
 {
   unsigned long insn;
@@ -1384,7 +1417,6 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
 
   /* Perform the relocation.  */
   return v850_elf_perform_relocation (input_bfd, r_type, value + addend, hit_data); 
-
 }
 
 
@@ -1606,7 +1638,7 @@ v850_elf_object_p (abfd)
 }
 
 /* Store the machine number in the flags field.  */
-void
+static void
 v850_elf_final_write_processing (abfd, linker)
      bfd *   abfd;
      boolean linker;
@@ -1628,7 +1660,7 @@ v850_elf_final_write_processing (abfd, linker)
 }
 
 /* Function to keep V850 specific file flags. */
-boolean
+static boolean
 v850_elf_set_private_flags (abfd, flags)
      bfd *    abfd;
      flagword flags;
@@ -1642,7 +1674,7 @@ v850_elf_set_private_flags (abfd, flags)
 }
 
 /* Copy backend specific data from one object module to another */
-boolean
+static boolean
 v850_elf_copy_private_bfd_data (ibfd, obfd)
      bfd * ibfd;
      bfd * obfd;
@@ -1663,7 +1695,7 @@ v850_elf_copy_private_bfd_data (ibfd, obfd)
 
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
-boolean
+static boolean
 v850_elf_merge_private_bfd_data (ibfd, obfd)
      bfd * ibfd;
      bfd * obfd;
