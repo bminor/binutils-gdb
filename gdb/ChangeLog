@@ -3,7 +3,10 @@ Wed May 15 11:02:48 1991  Roland H. Pesch  (pesch at fowanton.cygnus.com)
 	* doc/gdb.texinfo: (1) better introductory example; (2) more
 	consistent use of @code, @samp, @file, @kbd throughout; small
 	cleanups to first three nodes; (3) new "Contributors" node;
-	(4) Appendix, Renamed Commands
+	(4) Appendix, Renamed Commands; (5) divert specialized startup
+	instructions to "Targets" chapter for generic manuals, while
+	leaving them up front for manuals specific to specialized
+	environments; (6) apply fixes from RMS comments through chapter 4.
 
 	* pretex.m4: modify explanatory text slightly (and redefine
 	"regexp") to keep GNU m4 from complaining.  (It still crashes
