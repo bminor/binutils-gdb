@@ -1,3 +1,8 @@
+2002-11-05  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c (lookup_symbol_aux): In minsym sections, don't use the
+	previous values of 'objfile' and 'block'.
+
 2002-11-05  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* values.c (value_change_enclosing_type): Set 
