@@ -61,6 +61,12 @@ else
 	lose_these_too="tm-vr4320.h vr4320.mt ${lose_these_too}"
 fi
 
+if ( echo $* | grep keep\-vr4xxx > /dev/null ) ; then
+	keep_these_too="tm-vr4xxx.h vr4xxx.mt ${keep_these_too}"
+else
+	lose_these_too="tm-vr4xxx.h vr4xxx.mt ${lose_these_too}"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -110,7 +116,7 @@ tm-mipsm3.h
 tm-mipsv4.h
 tm-tx39.h
 tm-tx39l.h
-tm-vr4xxx.h
+tm-vr4100.h
 tm-vr4300.h
 tm-vr4300el.h
 tm-vr5000.h
@@ -118,7 +124,7 @@ tm-vr5000el.h
 tm-vxmips.h
 tx39.mt
 tx39l.mt
-vr4xxx.mt
+vr4100.mt
 vr4300.mt
 vr4300el.mt
 vr5000.mt
