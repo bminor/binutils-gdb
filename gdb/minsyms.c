@@ -116,7 +116,7 @@ iterate_over_msymbols (func, arg1, arg2, arg3)
    particular objfile and the search is limited to that objfile.  Returns
    a pointer to the minimal symbol that matches, or NULL if no match is found.
 
-   Note:  One instance where their may be duplicate minimal symbols with
+   Note:  One instance where there may be duplicate minimal symbols with
    the same name is when the symbol tables for a shared library and the
    symbol tables for an executable contain global symbols with the same
    names (the dynamic linker deals with the duplication). */
@@ -129,6 +129,9 @@ lookup_minimal_symbol (name, objf)
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
   struct minimal_symbol *found_symbol = NULL;
+#ifdef IBM6000
+  struct minimal_symbol *trampoline_symbol = NULL;
+#endif
 
   for (objfile = object_files;
        objfile != NULL && found_symbol == NULL;
@@ -143,11 +146,36 @@ lookup_minimal_symbol (name, objf)
 	    {
 	      if (strcmp (msymbol -> name, name) == 0)
 		{
+/* I *think* all platforms using shared libraries (and trampoline code)
+ * will suffer this problem. Consider a case where there are 5 shared
+ * libraries, each referencing `foo' with a trampoline entry. When someone
+ * wants to put a breakpoint on `foo' and the only info we have is minimal
+ * symbol vector, we want to use the real `foo', rather than one of those
+ * trampoline entries. MGO */	
+#ifdef IBM6000
+	  /* If a trampoline symbol is found, we prefer to keep looking
+	     for the *real* symbol. If the actual symbol not found,
+	     then we'll use the trampoline entry. Sorry for the machine
+	     dependent code here, but I hope this will benefit other
+	     platforms as well. For trampoline entries, we used mst_unknown
+	     earlier. Perhaps we should define a `mst_trampoline' type?? */
+
+		  if (msymbol->type != mst_unknown)
+		    found_symbol = msymbol;
+	          else if (msymbol->type == mst_unknown && !trampoline_symbol)
+		    trampoline_symbol = msymbol;
+		     
+#else
 		  found_symbol = msymbol;
+#endif
 		}
 	    }
 	}
     }
+#ifdef IBM6000
+  return found_symbol ? found_symbol : trampoline_symbol;
+#endif
+
   return (found_symbol);
 }
 

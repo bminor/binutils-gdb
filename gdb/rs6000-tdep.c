@@ -44,6 +44,7 @@ extern int attach_flag;
 /* Nonzero if we just simulated a single step break. */
 int one_stepped;
 
+
 /* Breakpoint shadows for the single step instructions will be kept here. */
 
 static struct sstep_breaks {
@@ -188,13 +189,6 @@ int pc;
     op = read_memory_integer (pc, 4);
   }
 
-#if 0
-  if ((op & 0xfc1f0000) == 0xd8010000) { /* stfd Rx,NUM(r1) */
-    pc += 4;				 /* store floating register double */
-    op = read_memory_integer (pc, 4);
-  }
-#endif
-
   if ((op & 0xfc1f0000) == 0xbc010000) { /* stm Rx, NUM(r1) */
     pc += 4;
     op = read_memory_integer (pc, 4);
@@ -213,7 +207,7 @@ int pc;
     op = read_memory_integer (pc, 4);
   }
 
-   /* store parameters into stack */
+  /* store parameters into stack */
   while(
 	(op & 0xfc1f0000) == 0xd8010000 || 	/* stfd Rx,NUM(r1) */
 	(op & 0xfc1f0000) == 0x90010000 ||	/* st r?, NUM(r1)  */
@@ -235,6 +229,33 @@ int pc;
       tmp += 0x20;
     }
   }
+#if 0
+/* I have problems with skipping over __main() that I need to address
+ * sometime. Previously, I used to use misc_function_vector which
+ * didn't work as well as I wanted to be.  -MGO */
+
+  /* If the first thing after skipping a prolog is a branch to a function,
+     this might be a call to an initializer in main(), introduced by gcc2.
+     We'd like to skip over it as well. Fortunately, xlc does some extra
+     work before calling a function right after a prologue, thus we can
+     single out such gcc2 behaviour. */
+     
+
+  if ((op & 0xfc000001) == 0x48000001) { /* bl foo, an initializer function? */
+    op = read_memory_integer (pc+4, 4);
+
+    if (op == 0x4def7b82) {		/* cror 0xf, 0xf, 0xf (nop) */
+
+      /* check and see if we are in main. If so, skip over this initializer
+         function as well. */
+
+      tmp = find_pc_misc_function (pc);
+      if (tmp >= 0 && !strcmp (misc_function_vector [tmp].name, "main"))
+        return pc + 8;
+    }
+  }
+#endif /* 0 */
+ 
   return pc;
 }
 
@@ -243,6 +264,7 @@ int pc;
 
 CORE_ADDR text_start;
 CORE_ADDR text_end;
+
 
 /*************************************************************************
   Support for creating pushind a dummy frame into the stack, and popping

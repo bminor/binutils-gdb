@@ -1285,7 +1285,11 @@ function_entry_point:
 	  }
 	  /* shared library function trampoline code entry point. */
 	  else if (CSECT_SCLAS (main_aux) == XMC_GL) {
-	    RECORD_MINIMAL_SYMBOL (cs->c_name, cs->c_value, mst_text,
+
+	    /* record trampoline code entries as mst_unknown symbol. When we
+	       lookup mst symbols, we will choose mst_text over mst_unknown. */
+
+	    RECORD_MINIMAL_SYMBOL (cs->c_name, cs->c_value, mst_unknown,
 				   symname_alloced);
 	    continue;
 	  }
@@ -1622,11 +1626,12 @@ process_xcoff_symbol (cs, objfile)
 	   char *tmp_pp = pp;
 
 	   read_type_number (&tmp_pp, typenums);
-	   tmp_type = dbx_alloc_type (typenums);
+	   tmp_type = dbx_alloc_type (typenums, objfile);
 
 	   if (tmp_type && !TYPE_NAME (tmp_type) && !nameless)
 	     TYPE_NAME (tmp_type) = SYMBOL_NAME (sym) =
-				obsavestring (name, qq-name);
+				obsavestring (name, qq-name,
+					      &objfile->symbol_obstack);
 	}
 	ttype = SYMBOL_TYPE (sym) = read_type (&pp, objfile);
 
@@ -2264,3 +2269,176 @@ char **pp;
     fatal ("internals eror: builtin_type called!");
 }
 #endif /* IBM6000 */
+
+
+#define DEBUG 1
+
+#ifdef DEBUG
+void
+dump_strtbl ()
+{
+  int ii;
+  printf ("===STRING TABLE DUMP...\n\n");
+  for ( ii=0; ii < strtbl_len; ++ii )
+    printf ("%c", isprint (*(strtbl+ii)) ? *(strtbl+ii) : ' ');
+  printf ("\n");
+}
+
+void
+dump_linetable (ltb)
+     struct linetable *ltb;
+{
+  int ii;
+  for (ii=0; ii < ltb->nitems; ++ii)
+    printf ("line: %d, addr: 0x%x\n", ltb->item[ii].line, ltb->item[ii].pc);
+}
+
+void
+dump_type (typeP)
+     struct type *typeP;
+{
+  printf ("0x%x: name: %s\n", typeP, typeP->name ? typeP->name : "(nil)");
+}
+
+char *dump_namespace ();
+char *dump_addrclass ();
+
+void
+dump_symbol (pp)
+     struct symbol *pp;
+{
+  printf (" sym: %s\t%s,\t%s\ttype: 0x%x, val: 0x%x end: 0x%x\n", 
+      pp->name, dump_namespace (pp->namespace),
+      dump_addrclass (pp->class), pp->type,
+      SYMBOL_CLASS(pp) == LOC_BLOCK ? BLOCK_START(SYMBOL_BLOCK_VALUE(pp))
+      : pp->value.value,
+      SYMBOL_CLASS(pp) == LOC_BLOCK ? BLOCK_END(SYMBOL_BLOCK_VALUE(pp)) : 0);
+}
+
+
+char *
+dump_namespace (ns)
+int ns;
+{
+  static char *ns_name [] = { 
+    "UNDEF_NS", "VAR_NS", "STRUCT_NS", "LABEL_NS"};
+
+  switch (ns) {
+  case UNDEF_NAMESPACE:
+  case VAR_NAMESPACE:
+  case STRUCT_NAMESPACE:
+  case LABEL_NAMESPACE:
+    return ns_name[ns];
+  }
+ 
+  return "***ERROR***";
+}
+
+
+char *
+dump_addrclass (ac)
+int ac;						/* address class */
+{
+  static char *ac_name [] = {
+    "LOC_UNDEF",
+    "LOC_CONST",
+    "LOC_STATIC",
+    "LOC_REGISTER",
+    "LOC_ARG",
+    "LOC_REF_ARG",
+    "LOC_REGPARM",
+    "LOC_LOCAL",
+    "LOC_TYPEDEF",
+    "LOC_LABEL",
+    "LOC_BLOCK",
+    "LOC_CONST_BYTES",
+    "LOC_LOCAL_ARG",
+  };
+  switch (ac) {
+  case LOC_UNDEF:
+  case LOC_CONST:
+  case LOC_STATIC:
+  case LOC_REGISTER:
+  case LOC_ARG:
+  case LOC_REF_ARG:
+  case LOC_REGPARM:
+  case LOC_LOCAL:
+  case LOC_TYPEDEF:
+  case LOC_LABEL:
+  case LOC_BLOCK:
+  case LOC_CONST_BYTES:
+  case LOC_LOCAL_ARG:
+    return ac_name [ac];
+  }
+  return "***ERROR***";
+}
+
+void
+dump_block (pp)
+     struct block *pp;
+{
+  int ii;
+  printf ("BLOCK..: start: 0x%x, end: 0x%x\n", pp->startaddr, pp->endaddr);
+  for (ii=0; ii < pp->nsyms; ++ii)
+    dump_symbol (pp->sym[ii]);
+}
+
+void
+dump_blockvector (pp)
+     struct blockvector *pp;
+{
+  int ii;
+  for (ii=0; ii < pp->nblocks; ++ii)
+    dump_block (pp->block [ii]);
+}
+
+
+void
+dump_last_symtab (pp)
+     struct symtab *pp;
+{
+  for ( ; pp; pp = pp->next) {
+    if ( pp->next == 0 ) {
+      printf ("SYMTAB NAME: %s\n", pp->filename);
+      dump_blockvector (pp->blockvector);
+    }
+  }
+}
+
+void
+dump_symtabs (pp)
+     struct symtab *pp;
+{
+  for ( ; pp; pp = pp->next) {
+    printf ("SYMTAB NAME: %s\n", pp->filename ? pp->filename : "(nil)");
+/*    if (pp->linetable)
+      dump_linetable (pp->linetable); */
+    dump_blockvector (pp->blockvector);
+  }
+}
+
+void
+dump_symtab_lines (pp)
+     struct symtab *pp;
+{
+  for ( ; pp; pp = pp->next) {
+    printf ("SYMTAB NAME: %s\n", pp->filename ? pp->filename : "(nil)");
+    if (pp->linetable)
+      dump_linetable (pp->linetable);
+    /* dump_blockvector (pp->blockvector); */
+  }
+}
+
+void
+dump_msymbols (of)
+struct objfile *of;
+{
+  int ii;
+  for (ii=0; ii < of->minimal_symbol_count; ++ii)
+    printf ("name: %s, addr: 0x%x, info: 0x%x\n", 
+	of->msymbols[ii].name,
+	of->msymbols[ii].address,
+	of->msymbols[ii].info );
+}
+
+#endif /* DEBUG */

@@ -124,7 +124,16 @@ exec_close(quitting)
     }
   
   vmap = 0;
-  exec_bfd = 0;
+
+  if (exec_bfd) {
+    bfd_close (exec_bfd);
+    exec_bfd = NULL;
+  }
+  if (exec_ops.to_sections) {
+    free (exec_ops.to_sections);
+    exec_ops.to_sections = NULL;
+    exec_ops.to_sections_end = NULL;
+  }
 }
 
 /*
@@ -134,9 +143,9 @@ void
 exec_file_command(filename, from_tty)
 char *filename;
 {
-  bfd *bfd;
-
   target_preopen(from_tty);
+
+  /* Remove any previous exec file.  */
   unpush_target(&exec_ops);
 
   /* Now open and digest the file the user requested, if any. */
@@ -148,33 +157,33 @@ char *filename;
   	filename = tilde_expand(filename);
   	make_cleanup (free, filename);
       
-  	scratch_chan = openp(getenv("PATH"), 1, filename, O_RDONLY, 0
-  			     , &scratch_pathname);
+  	scratch_chan = openp(getenv("PATH"), 1, filename,
+			     write_files? O_RDWR: O_RDONLY, 0,
+  			     &scratch_pathname);
   	if (scratch_chan < 0)
 	  perror_with_name(filename);
 
-  	bfd = bfd_fdopenr(scratch_pathname, NULL, scratch_chan);
-  	if (!bfd)
+  	exec_bfd = bfd_fdopenr(scratch_pathname, NULL, scratch_chan);
+  	if (!exec_bfd)
 	  error("Could not open `%s' as an executable file: %s"
   		      , scratch_pathname, bfd_errmsg(bfd_error));
 
   	/* make sure we have an object file */
 
-  	if (!bfd_check_format(bfd, bfd_object))
-  		error("\"%s\": not in executable format: %s."
-  		      , scratch_pathname, bfd_errmsg(bfd_error));
+  	if (!bfd_check_format(exec_bfd, bfd_object))
+  		error("\"%s\": not in executable format: %s.",
+  		      scratch_pathname, bfd_errmsg(bfd_error));
 
 
   	/* setup initial vmap */
 
-  	map_vmap (bfd, 0);
+  	map_vmap (exec_bfd, 0);
   	if (!vmap)
-  		error("Can't find the file sections in `%s': %s"
-  		      , bfd->filename, bfd_errmsg(bfd_error));
+  		error("Can't find the file sections in `%s': %s",
+  		      exec_bfd->filename, bfd_errmsg(bfd_error));
 
-  	exec_bfd = bfd;
-
-	if (build_section_table (exec_bfd, &exec_sections, &exec_sections_end))
+	if (build_section_table (exec_bfd, &exec_ops.to_sections,
+				&exec_ops.to_sections_end))
 	  error ("Can't find the file sections in `%s': %s", 
   		exec_bfd->filename, bfd_errmsg (bfd_error));
 
@@ -224,6 +233,9 @@ add_to_section_table (abfd, asect, table_pp_char)
   /* FIXME, we need to handle BSS segment here...it alloc's but doesn't load */
   if (!(aflag & SEC_LOAD))
     return;
+  if (0 == bfd_section_size (abfd, asect))
+    return;
+  (*table_pp)->bfd = abfd;
   (*table_pp)->sec_ptr = asect;
   (*table_pp)->addr = bfd_section_vma (abfd, asect);
   (*table_pp)->endaddr = (*table_pp)->addr + bfd_section_size (abfd, asect);
@@ -280,12 +292,12 @@ sex_to_vmap(bfd *bf, sec_ptr sex, struct vmap_and_bfd *vmap_bfd)
     vp->tstart = 0;
     vp->tend   = vp->tstart + bfd_section_size(bf, sex);
 
-    /* This is quite a tacky way to recognize the `exec' load segment (rather
-       than shared libraries. You should use `arch' instead. FIXMEmgo */
-    if (!vmap)
-      vp->tadj = sex->filepos - bfd_section_vma(bf, sex);
-    else
-      vp->tadj = 0;
+    /* When it comes to this adjustment value, in contrast to our previous
+       belief shared objects should behave the same as the main load segment.
+       This is the offset from the beginning of text section to the first
+       real instruction. */
+
+    vp->tadj = sex->filepos - bfd_section_vma(bf, sex);
   }
 
   else if (!strcmp(bfd_section_name(bf, sex), ".data")) {
@@ -328,9 +340,33 @@ map_vmap (bfd *bf, bfd *arch)
   *vpp = vp;
 }
 
+
+#define	FASTER_MSYMBOL_RELOCATION 1
+
+#ifdef FASTER_MSYMBOL_RELOCATION
+
+/* Used to relocate an object file's minimal symbols. */
+
+static void
+reloc_objfile_msymbols (objf, addr)
+struct objfile *objf;
+CORE_ADDR	addr;
+{
+  register struct minimal_symbol *msymbol;
+  int	ii;
+
+  for (msymbol = objf->msymbols, ii=0; 
+	msymbol && ii < objf->minimal_symbol_count; ++msymbol, ++ii)
+
+    if (msymbol->address < TEXT_SEGMENT_BASE)
+      msymbol->address += addr;
+}	
+
+#else /* !FASTER_MSYMBOL_RELOCATION */
+
 /* Called via iterate_over_msymbols to relocate minimal symbols */
 
-static PTR
+static int
 relocate_minimal_symbol (objfile, msymbol, arg1, arg2, arg3)
      struct objfile *objfile;
      struct minimal_symbol *msymbol;
@@ -340,8 +376,12 @@ relocate_minimal_symbol (objfile, msymbol, arg1, arg2, arg3)
 {
   if (msymbol->address < TEXT_SEGMENT_BASE)
     msymbol -> address += (int) arg1;
-  return (NULL);
+
+  /* return 0, otherwise `iterate_over_msymbols()' will stop at the
+     first iteration. */
+  return 0;
 }
+#endif /* FASTER_MSYMBOL_RELOCATION */
 
 /* true, if symbol table and minimal symbol table are relocated. */
 
@@ -400,14 +440,34 @@ struct stat *vip;
 	    continue;
 	}
 	
-	if (vp->tstart != old_start)
-	  vmap_symtab_1(s, vp, old_start);
+	if (vp->tstart != old_start) {
+
+	  /* Once we find a relocation base address for one of the symtabs
+	     in this objfile, it will be the same for all symtabs in this
+	     objfile. Clean this algorithm. FIXME. */
+
+	  for (; s; s = s->next)
+	    if (!s->nonreloc || LINETABLE(s))
+		vmap_symtab_1(s, vp, old_start);
+
+#ifdef FASTER_MSYMBOL_RELOCATION
+	  /* we can rely on the fact that at least one symtab in this objfile
+	     will get relocated. Thus, we can be sure that minimal symbol
+	     vector is guaranteed for relocation. */
+
+	  reloc_objfile_msymbols (objfile, vp->tstart - old_start);
+#endif
+	   break;
+	}
       }
     }
+
   if (vp->tstart != old_start) {
+#ifndef FASTER_MSYMBOL_RELOCATION
     (void) iterate_over_msymbols (relocate_minimal_symbol,
 			   (PTR) (vp->tstart - old_start),
 			   (PTR) NULL, (PTR) NULL);
+#endif
 
     /* breakpoints need to be relocated as well. */
     fixup_breakpoints (0, TEXT_SEGMENT_BASE, vp->tstart - old_start);
@@ -415,6 +475,7 @@ struct stat *vip;
   
   symtab_relocated = 1;
 }
+
 
 vmap_symtab_1(s, vp, old_start)
 register struct symtab *s;
@@ -515,19 +576,26 @@ CORE_ADDR old_start;
 add_vmap(ldi)
 register struct ld_info *ldi; {
 	bfd *bfd, *last;
-	register char *mem;
+	register char *mem, *objname;
+
+	/* This ldi structure was allocated using alloca() in 
+	   aixcoff_relocate_symtab(). Now we need to have persistent object 
+	   and member names, so we should save them. */
 
 	mem = ldi->ldinfo_filename + strlen(ldi->ldinfo_filename) + 1;
-	bfd = bfd_fdopenr(ldi->ldinfo_filename, NULL, ldi->ldinfo_fd);
+	mem = savestring (mem, strlen (mem));
+	objname = savestring (ldi->ldinfo_filename, strlen (ldi->ldinfo_filename));
+
+	bfd = bfd_fdopenr(objname, NULL, ldi->ldinfo_fd);
 	if (!bfd)
-		error("Could not open `%s' as an executable file: %s"
-		      , ldi->ldinfo_filename, bfd_errmsg(bfd_error));
+	  error("Could not open `%s' as an executable file: %s",
+					objname, bfd_errmsg(bfd_error));
 
 
 	/* make sure we have an object file */
 
 	if (bfd_check_format(bfd, bfd_object))
-		map_vmap (bfd, 0);
+	  map_vmap (bfd, 0);
 
 	else if (bfd_check_format(bfd, bfd_archive)) {
 		last = 0;
@@ -539,11 +607,10 @@ register struct ld_info *ldi; {
 				break;
 
 		if (!last) {
-			bfd_close(bfd);
-/* FIXME -- should be error */
-			warning("\"%s\": member \"%s\" missing.",
-			      bfd->filename, mem);
-			return;
+		  bfd_close(bfd);
+		  /* FIXME -- should be error */
+		  warning("\"%s\": member \"%s\" missing.", bfd->filename, mem);
+		  return;
 		}
 
 		if (!bfd_check_format(last, bfd_object)) {
@@ -558,18 +625,20 @@ register struct ld_info *ldi; {
 		bfd_close(bfd);
 /* FIXME -- should be error */
 		warning("\"%s\": not in executable format: %s."
-		      , ldi->ldinfo_filename, bfd_errmsg(bfd_error));
+		      , objname, bfd_errmsg(bfd_error));
 		return;
 	}
 }
 
 
-/* As well as symbol tables, exec_sections need relocation. Otherwise after
-   the inferior process terminates, symbol table is relocated but there is
-   no inferior process. Thus, we have to use `exec' bfd, rather than the inferior
-   process's memory space, when lookipng at symbols.
-   `exec_sections' need to be relocated only once though, as long as the exec
-   file was not changed.
+/* As well as symbol tables, exec_sections need relocation. After
+   the inferior process' termination, there will be a relocated symbol
+   table exist with no corresponding inferior process. At that time, we
+   need to use `exec' bfd, rather than the inferior process's memory space
+   to look up symbols.
+
+   `exec_sections' need to be relocated only once, as long as the exec
+   file remains unchanged.
 */
 vmap_exec ()
 {
@@ -579,17 +648,19 @@ vmap_exec ()
 
   execbfd = exec_bfd;
 
-  if (!vmap || !exec_sections) {
-    printf ("WARNING: vmap not found in vmap_exec()!\n");
-    return;
-  }
   /* First exec section is `.text', second is `.data'. If this is changed,
-     then this routine will choke. Better you should check section names,
-     FIXMEmgo. */
-  exec_sections [0].addr += vmap->tstart;
-  exec_sections [0].endaddr += vmap->tstart;
-  exec_sections [1].addr += vmap->dstart;
-  exec_sections [1].endaddr += vmap->dstart;
+     then this routine will choke. */
+
+  if (!vmap || !exec_ops.to_sections ||
+	strcmp (exec_ops.to_sections[0].sec_ptr->name, ".text") ||
+	strcmp (exec_ops.to_sections[1].sec_ptr->name, ".data"))
+
+    fatal ("aix: Improper exec_ops sections.");
+
+  exec_ops.to_sections [0].addr += vmap->tstart;
+  exec_ops.to_sections [0].endaddr += vmap->tstart;
+  exec_ops.to_sections [1].addr += vmap->dstart;
+  exec_ops.to_sections [1].endaddr += vmap->dstart;
 }
 
 
@@ -710,10 +781,9 @@ retry:
 vmap_inferior() {
 
 	if (inferior_pid == 0)
-		return 0;		/* normal processing	*/
+	  return 0;				/* normal processing	*/
 
 	exec_files_info();
-
 	return 1;
 }
 
@@ -791,7 +861,6 @@ print_section_info (t, abfd)
   struct target_ops *t;
   bfd *abfd;
 {
-#if 1
   struct section_table *p;
 
   printf_filtered ("\t`%s', ", bfd_get_filename(abfd));
@@ -810,32 +879,32 @@ print_section_info (t, abfd)
     }
     printf_filtered ("\n");
   }
-#else
-	register struct vmap *vp = vmap;
-
-	if (!vp)
-		return;
-
-	printf("\tMapping info for file `%s'.\n", vp->name);
-	printf("\t  %8.8s   %8.8s %8.8s %s\n"
-	       , "start", "end", "section", "file(member)");
-
-	for (; vp; vp = vp->nxt)
-		printf("\t0x%8.8x 0x%8.8x %s%s%s%s\n"
-		       , vp->tstart
-		       , vp->tend
-		       , vp->name
-		       , *vp->member ? "(" : ""
-		       ,  vp->member
-		       , *vp->member ? ")" : "");
-#endif
 }
+
 
 static void
 exec_files_info (t)
   struct target_ops *t;
 {
+  register struct vmap *vp = vmap;
+
   print_section_info (t, exec_bfd);
+
+  if (!vp)
+    return;
+
+  printf("\n\tMapping info for file `%s'.\n", vp->name);
+  printf("\t  %8.8s   %8.8s %8.8s %s\n",
+			"start", "end", "section", "file(member)");
+
+  for (; vp; vp = vp->nxt)
+	printf("\t0x%8.8x 0x%8.8x %s%s%s%s\n",
+		vp->tstart,
+		vp->tend,
+		vp->name,
+		vp->member ? "(" : "",
+		vp->member,
+		vp->member ? ")" : "");
 }
 
 #ifdef DAMON
@@ -909,13 +978,14 @@ set_section_command (args, from_tty)
   /* Parse out new virtual address */
   secaddr = parse_and_eval_address (args);
 
-  for (p = exec_sections; p < exec_sections_end; p++) {
+  for (p = exec_ops.to_sections; p < exec_ops.to_sections_end; p++) {
     if (!strncmp (secname, bfd_section_name (exec_bfd, p->sec_ptr), seclen)
 	&& bfd_section_name (exec_bfd, p->sec_ptr)[seclen] == '\0') {
       offset = secaddr - p->addr;
       p->addr += offset;
       p->endaddr += offset;
-      exec_files_info();
+      if (from_tty)
+        exec_files_info(&exec_ops);
       return;
     }
   } 

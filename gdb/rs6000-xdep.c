@@ -333,7 +333,7 @@ frame_initial_stack_address (fi)
     return fi->initial_sp = read_register (fdata.alloca_reg);     
 
   /* Otherwise, this is a caller frame. Callee has usually already saved
-     registers, but there are are exceptions (such as when the callee
+     registers, but there are exceptions (such as when the callee
      has no parameters). Find the address in which caller's alloca
      register is saved. */
 
