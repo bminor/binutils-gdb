@@ -1058,22 +1058,33 @@ monitor_load (file, fromtty)
 
   if (STREQ (loadtype_str, "default")) {	/* default, load a binary */
     gr_load_image (file, fromtty);		/* by writing it into memory */
+    return;
+  }
+
+  /* load an srecord by converting */
+  if ((STREQ (loadtype_str, "srec")) && STREQ (loadproto_str, "xmodem")) {
+    monitor_load_srec(file, XMODEM);
+    return;
   }
 
   if (STREQ (loadtype_str, "srec")) {		/* load an srecord by converting */
     monitor_load_srec(file, 0);			/* if from a binary */
+    return;
   }
 
   if (STREQ (loadtype_str, "none")) {		/* load an srecord by converting */
     error ("Unimplemented");
+    return;
   }
 
   if (STREQ (loadproto_str, "none")) {	/* load an srecord file */
     monitor_load_ascii_srec(file, fromtty);		/* if from a binary */
+    return;
   }
 
   if (STREQ (loadproto_str, "xmodem")) {		/* load an srecord using the */
     monitor_load_srec(file, XMODEM);
+    return;
   }
 }
 
@@ -1239,9 +1250,14 @@ monitor_load_srec (args, protocol)
 	      write_monitor (packet, XMODEM_PACKETSIZE+1); /* send it again */
 	      if (GETACK)			/* ACKnowledged, get next data chunk */
 		break;
+	    } else {				/* assume we got an ACK */
+	      if (hashmark)
+		printf_filtered ("#");
+	      debuglogs (3, "Got an ACK, sending next packet");
+	      break;
 	    }
 	  }
-	  if (retries >= 4) {		/* too many tries, must be hosed */
+	  if (retries >= 4) {			/* too many tries, must be hosed */
 	    printf_monitor ("%c", EOT);
 	    error ("Never got a ACK after sending an xmodem packet");
 	  }
@@ -1265,8 +1281,14 @@ monitor_load_srec (args, protocol)
      write a type 7 terminator record. no data for a type 7,
      and there is no data, so len is 0. 
    */
-  monitor_make_srec (srec, 7, abfd->start_address, "", 0);
-  printf_monitor ("%s\n", srec);
+  if (protocol == XMODEM) {		/* send a packet using xmodem */
+    monitor_make_srec (srec, 7, abfd->start_address, "", 0);
+    make_xmodem_packet (packet, srec, XMODEM_DATASIZE);  
+    write_monitor (packet, XMODEM_PACKETSIZE+1);
+  } else {
+    monitor_make_srec (srec, 7, abfd->start_address, "", 0);
+    printf_monitor ("%s\n", srec);
+  }
   if (protocol == XMODEM) {
     printf_monitor ("%c", EOT);
     if (!GETACK)
@@ -1460,9 +1482,10 @@ make_xmodem_packet (packet, data, len)
 
   packet[XMODEM_PACKETSIZE] = sum & 0xff;	/* add the checksum */
 
-  if (sr_get_debug() > 4)
+  if (sr_get_debug() > 4) {
     debuglogs (4, "The xmodem checksum is %d (0x%x)\n", sum & 0xff, sum & 0xff);
     print_xmodem_packet (packet);
+    }
 }
 
 /*
