@@ -749,7 +749,7 @@ child_clear_solibs (void)
   solib_end = &solib_start;
   max_dll_name_len = sizeof ("DLL Name") - 1;
 }
-
+
 /* Get the loaded address of all sections, given that .text was loaded
    at text_load. Assumes that all sections are subject to the same
    relocation offset. Returns NULL if problems occur or if the
@@ -802,7 +802,7 @@ get_relocated_section_addrs (bfd *abfd, CORE_ADDR text_load)
 
   return result;
 }
-
+
 /* Add DLL symbol information. */
 static struct objfile *
 solib_symbols_add (char *name, int from_tty, CORE_ADDR load_addr)
@@ -1501,12 +1501,12 @@ set_process_privilege (const char *privilege, BOOL enable)
 	AdjustTokenPrivileges = GetProcAddress (advapi32,
 						"AdjustTokenPrivileges");
       if (!OpenProcessToken || !LookupPrivilegeValue || !AdjustTokenPrivileges)
-        {
+	{
 	  advapi32 = NULL;
 	  goto out;
 	}
     }
-  
+
   if (!OpenProcessToken (GetCurrentProcess (),
 			 TOKEN_QUERY | TOKEN_ADJUST_PRIVILEGES,
 			 &token_hdl))
@@ -1520,7 +1520,7 @@ set_process_privilege (const char *privilege, BOOL enable)
   new_priv.Privileges[0].Attributes = enable ? SE_PRIVILEGE_ENABLED : 0;
 
   if (!AdjustTokenPrivileges (token_hdl, FALSE, &new_priv,
-                              sizeof orig_priv, &orig_priv, &size))
+			      sizeof orig_priv, &orig_priv, &size))
     goto out;
 #if 0
   /* Disabled, otherwise every `attach' in an unprivileged user session
