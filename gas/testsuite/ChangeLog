@@ -1,5 +1,14 @@
 2001-04-05  Hans-Peter Nilsson  <hp@axis.com>
 
+	* gas/cris/rd-dw2-1.d, gas/cris/rd-dw2-2.d, gas/cris/rd-dw2-3.d,
+	gas/cris/rd-dw2-4.d, gas/cris/rd-dw2-5.d, gas/cris/rd-dw2-6.d,
+	gas/cris/rd-dw2-7.d, gas/cris/rd-dw2-8.d, gas/cris/rd-dw2-9.d,
+	gas/cris/rd-dw2-10.d, gas/cris/rd-dw2-11.d, gas/cris/rd-dw2-12.d,
+	gas/cris/rd-dw2-13.d, gas/cris/rd-dw2-14.d, gas/cris/rd-dw2-15.d:
+	New tests.
+
+2001-04-05  Hans-Peter Nilsson  <hp@axis.com>
+
 	* lib/gas-defs.exp (run_dump_test): Support using readelf.
 	* config/default.exp: Default READELF and READELFFLAGS.
 
