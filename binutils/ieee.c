@@ -344,7 +344,7 @@ ieee_read_number (info, pp, pv)
 }
 
 /* Read a number in an IEEE file.  If ppresent is not NULL, the number
-   need not be there. */
+   need not be there.  */
 
 static boolean
 ieee_read_optional_number (info, pp, pv, ppresent)
@@ -1036,7 +1036,7 @@ parse_ieee_bb (info, pp)
 
     case 2:
       /* BB2: Global type definitions.  The name is supposed to be
-	 empty, but we don't check. */
+	 empty, but we don't check.  */
       if (! debug_set_filename (info->dhandle, "*global*"))
 	return false;
       info->saw_filename = true;
@@ -6207,7 +6207,7 @@ ieee_end_struct_type (p)
 
   /* If we were ignoring this struct definition because it was a
      duplicate defintion, just through away whatever bytes we have
-     accumulated.  Leave the type on the stack. */
+     accumulated.  Leave the type on the stack.  */
   if (info->type_stack->type.ignorep)
     return true;
 
@@ -6761,7 +6761,7 @@ ieee_tag_type (p, name, id, kind)
       if (! nt->type.localp)
 	{
 	  /* This is a duplicate of a global type, so it must be
-             local. */
+             local.  */
 	  localp = true;
 	}
     }

@@ -1,3 +1,18 @@
+2002-05-21  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* filemode.c: Fix formatting.
+	* ieee.c: Likewise.
+	* is-ranlib.c: Likewise.
+	* is-strip.c: Likewise.
+	* maybe-ranlib.c: Likewise.
+	* maybe-strip.c: Likewise.
+	* nlmconv.c: Likewise.
+	* nm.c: Likewise.
+	* not-ranlib.c: Likewise.
+	* not-strip.c: Likewise.
+	* objcopy.c: Likewise.
+	* objdump.c: Likewise.
+
 2002-05-21  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* objdump.c (dump_headers): Fix output formatting for ELF32

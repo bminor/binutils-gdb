@@ -441,14 +441,14 @@ main (argc, argv)
 	  if (optarg != NULL)
 	    {
 	      enum demangling_styles style;
-	      
+
 	      style = cplus_demangle_name_to_style (optarg);
-	      if (style == unknown_demangling) 
+	      if (style == unknown_demangling)
 		fatal (_("unknown demangling style `%s'"),
 		       optarg);
-	      
+
 	      cplus_demangle_set_style (style);
-           }
+	    }
 	  break;
 	case 'D':
 	  dynamic = 1;
@@ -1035,7 +1035,7 @@ filter_symbols (abfd, dynamic, minisyms, symcount, size)
       asymbol *sym;
 
       PROGRESS (1);
-      
+
       sym = bfd_minisymbol_to_symbol (abfd, dynamic, (const PTR) from, store);
       if (sym == NULL)
 	bfd_fatal (bfd_get_filename (abfd));
@@ -1144,7 +1144,7 @@ print_symbols (abfd, dynamic, minisyms, symcount, size, archive_bfd)
 
 /* Print the symbols when sorting by size.  */
 
-static void 
+static void
 print_size_symbols (abfd, dynamic, symsizes, symcount, archive_bfd)
      bfd *abfd;
      boolean dynamic;

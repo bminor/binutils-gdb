@@ -559,7 +559,7 @@ main (argc, argv)
 	      sym->section = got_sec->output_section;
 	    }
 #endif
- 	}
+	}
 
       /* If this is a global symbol, check the export list.  */
       if ((sym->flags & (BSF_EXPORT | BSF_GLOBAL)) != 0)
@@ -635,7 +635,7 @@ main (argc, argv)
 	    non_fatal (_("warning: symbol %s imported but not in import list"),
 		       bfd_asymbol_name (sym));
 	}
-	
+
       /* See if it's one of the special named symbols.  */
       if ((sym->flags & BSF_DEBUGGING) == 0)
 	{
@@ -699,7 +699,7 @@ main (argc, argv)
     }
 
   bfd_set_symtab (outbfd, outsyms, symcount + newsymcount);
-    
+
   if (! gotstart)
     non_fatal (_("warning: START procedure %s not defined"), start_procedure);
   if (! gotexit)
@@ -1810,7 +1810,7 @@ powerpc_build_stubs (inbfd, outbfd, symbols_ptr, symcount_ptr)
 
       item->next = powerpc_stubs;
       powerpc_stubs = item;
-      
+
       ++stubcount;
     }
 
@@ -1893,7 +1893,7 @@ powerpc_resolve_stubs (inbfd, outbfd)
       reloc->address = l->toc_index + got_sec->output_offset;
       reloc->addend = 0;
       reloc->howto = bfd_reloc_type_lookup (inbfd, BFD_RELOC_32);
-				      
+
       *r++ = reloc;
     }
 
