@@ -1263,6 +1263,9 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Prologue heuristics.  */
   set_gdbarch_skip_prologue (gdbarch, alpha_skip_prologue);
 
+  /* Disassembler.  */
+  set_gdbarch_print_insn (gdbarch, print_insn_alpha);
+
   /* Call info.  */
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_frameless_function_invocation (gdbarch,
@@ -1317,7 +1320,6 @@ _initialize_alpha_tdep (void)
   struct cmd_list_element *c;
 
   gdbarch_register (bfd_arch_alpha, alpha_gdbarch_init, NULL);
-  deprecated_tm_print_insn = print_insn_alpha;
 
   /* Let the user set the fence post for heuristic_proc_start.  */
 

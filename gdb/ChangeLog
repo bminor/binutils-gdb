@@ -1,3 +1,8 @@
+2003-06-01  Richard Henderson  <rth@redhat.com>
+
+        * alpha-tdep.c (alpha_gdbarch_init): Use set_gdbarch_print_insn ...
+        (_initialize_alpha_tdep): ... not deprecated_tm_print_insn.
+
 2003-06-01  Adam Fedor  <fedor@gnu.org>
 
 	* gdbarch.sh (function_list): Add FETCH_POINTER_ARGUMENT.
