@@ -113,12 +113,24 @@ proc delete_breakpoints {} {
 
 
 #
+#
+#
+proc gdb_run_cmd {} {
+    send "run\n"
+    expect {
+	-re "The program .* has been started already.*y or n. $" {
+	    send "y\n"
+	    exp_continue
+	}
+    }
+}
+
+
 # Set breakpoint at function and run gdb until it breaks there.
 # Since this is the only breakpoint that will be set, if it stops
 # at a breakpoint, we will assume it is the one we want.  We can't
 # just compare to "function" because it might be a fully qualified,
 # single quoted C++ function specifier.
-#
 
 proc runto { function } {
     global prompt
