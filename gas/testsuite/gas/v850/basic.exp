@@ -262,14 +262,14 @@ proc do_mem {} {
 	    -re "^ +\[0-9\]+ 0004 25370400\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0008 25370500\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 000c 4033\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 000e\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0010\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 000e 4034\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0010 4035\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0012 462F0500\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0016 662F0400\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 001a 662F0500\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 001e\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0020\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0022\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 001e C033\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0020 C034\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0022 4135\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "\[^\n\]*\n"				{ }
 	    timeout				{ perror "timeout\n"; break }
 	    eof					{ break }
@@ -282,12 +282,6 @@ proc do_mem {} {
 
     # Did we find what we were looking for?  If not, flunk it.
     if [expr $x==12] then { pass $testname } else { fail $testname }
-
-    setup_xfail v850*-*-*
-    fail "sld and sst instructions improperly assembled."
-
-    setup_xfail v850*-*-*
-    fail "sld and sst instructions did not catch improper index assembled."
 }
 
 proc do_misc {} {
@@ -381,6 +375,43 @@ proc do_hilo {} {
     if [expr $x==3] then { pass $testname } else { fail $testname }
 }
 
+
+proc do_simple_reloc_tests {} {
+    set testname "reloc.s: Test for proper relocations (part 2)"
+    set x 0
+
+    if [gas_test_old "reloc.s" "" "Test for proper relocation (part 1)"] then {
+	objdump_start_no_subdir "a.out" "-r"
+
+	while 1 {
+	    expect {
+		-re "^00000002\[^\n\]*R_V850_LO16\[^\n\]*\n"
+			{ set x [expr $x+1] }
+		-re "^00000006\[^\n\]*R_V850_HI16_S\[^\n\]*\n"
+			{ set x [expr $x+1] }
+		-re "^0000000a\[^\n\]*R_V850_HI16\[^\n\]*\n"
+			{ set x [expr $x+1] }
+		-re "^0000000e\[^\n\]*R_V850_ZDA_OFFSET\[^\n\]*\n"
+			{ set x [expr $x+1] }
+		-re "^00000012\[^\n\]*R_V850_TDA_OFFSET\[^\n\]*\n"
+			{ set x [expr $x+1] }
+		-re "^00000016\[^\n\]*R_V850_SDA_OFFSET\[^\n\]*\n"
+			{ set x [expr $x+1] }
+		-re "\[^\n\]*\n"				{ }
+		timeout			{ perror "timeout\n"; break }
+		eof				{ break }
+	    }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    objdump_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==6] then { pass $testname } else { fail $testname }
+}
+
 if [istarget v850*-*-*] then {
     # Test the basic instruction parser.
     do_arith
@@ -395,4 +426,11 @@ if [istarget v850*-*-*] then {
 
     # Make sure we handle lo() hi() and hi0() correctly.
     do_hilo
+
+    # Check for proper relocs on lo, hi, hi0, zdaoff, tdaoff and sdaoff
+    # expressions
+    do_simple_reloc_tests
+
+    gas_test "hilo2.s" "" "" "hi/lo regression test"
+    gas_test "fepsw.s" "" "" "eqsw regression test"
 }

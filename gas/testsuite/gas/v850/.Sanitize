@@ -30,7 +30,9 @@ basic.exp
 bit.s
 branch.s
 compare.s
+fepsw.s
 hilo.s
+hilo2.s
 jumps.s
 logical.s
 mem.s
