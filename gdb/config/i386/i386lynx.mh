@@ -1,6 +1,5 @@
 # Host: Intel 386 running LynxOS
 
-XM_FILE= xm-i386lynx.h
 XM_CLIBS= -lbsd
 
 NAT_FILE= nm-i386lynx.h

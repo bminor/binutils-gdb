@@ -1,3 +1,16 @@
+2002-01-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/sparc/sparclynx.mh (XM_FILE): Delete.
+	* config/rs6000/rs6000lynx.mh (XM_FILE): Delete.
+	* config/m68k/m68klynx.mh (XM_FILE): Delete.
+	* config/i386/i386lynx.mh (XM_FILE): Delete.
+	* config/rs6000/xm-rs6000ly.h: Delete file.
+	* config/sparc/xm-sparclynx.h: Delete file.
+	* config/m68k/xm-m68klynx.h: Delete file.
+	* config/i386/xm-i386lynx.h: Delete file.
+	* config/xm-lynx.h: Delete file.
+	* config/djgpp/fnchange.lst: Update.
+
 2002-01-19  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* alpha-tdep.c (alpha_register_byte): New function.

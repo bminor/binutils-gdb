@@ -92,11 +92,9 @@
 @V@/gdb/config/rs6000/nm-rs6000ly.h @V@/gdb/config/rs6000/nm-rs6kly.h
 @V@/gdb/config/rs6000/tm-rs6000.h @V@/gdb/config/rs6000/tm-rs6k.h
 @V@/gdb/config/rs6000/tm-rs6000ly.h @V@/gdb/config/rs6000/tm-rs6kly.h
-@V@/gdb/config/rs6000/xm-rs6000ly.h @V@/gdb/config/rs6000/xm-rs6kly.h
 @V@/gdb/config/sparc/tm-sparclet.h @V@/gdb/config/sparc/tm-splet.h
 @V@/gdb/config/sparc/tm-sparclite.h @V@/gdb/config/sparc/tm-splite.h
 @V@/gdb/config/sparc/tm-sparclynx.h @V@/gdb/config/sparc/tm-splynx.h
-@V@/gdb/config/sparc/xm-sparclynx.h @V@/gdb/config/sparc/xm-xplynx.h
 @V@/gdb/config/vax/xm-vaxult2.h @V@/gdb/config/vax/xm-vaxut2.h
 @V@/gdb/f-exp.tab.c @V@/gdb/f-exp_tab.c
 @V@/gdb/gdbtk/generic/ChangeLog-1997 @V@/gdb/gdbtk/generic/ChangeLog.97
