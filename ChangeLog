@@ -1,3 +1,30 @@
+Tue Jan  4 17:10:19 1994  Stu Grossman  (grossman at cygnus.com)
+
+	* configure:  Back out Per's change of 12/19/1993.  It changes the
+	behavior of configure in unexpected and confusing ways.
+
+	Also, use different delim char when calculating
+	program_transform_name so that the name can contain slashes.
+
+Sat Jan  1 13:45:31 1994  Rob Savoye  (rob@darkstar.cygnus.com)
+
+	* configure.in, config.sub: Add support for VSTa micro-kernel.
+
+Sat Dec 25 20:00:47 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* configure.in: Nuke hacks which were used to get a special
+	version of GAS for HPPA configurations.
+
+Sun Dec 19 20:40:44 1993  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* configure:  If only ${target_alias} is given, use that
+	as the default for ${host_alias}.
+	* configure:  Add missing back-slashes before nested quotes.
+
+Wed Dec 15 18:07:18 1993  david d `zoo' zuhn  (zoo@andros.cygnus.com)
+
+	* Makefile.in (BASE_FLAGS_TO_PASS): add YACC=$(BISON)
+
 Tue Dec 14 21:25:33 1993  Per Bothner  (bothner@cygnus.com)
 
 	* config.guess:  Recognize some Tektronix configurations.
