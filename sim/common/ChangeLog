@@ -4,6 +4,7 @@
 	* sim-trace.c: Include stdlib.h if present.
 	* dv-sockser.c: Include unistd.h if present.
 	(dv_sockser_init): Add missing arg to call to sim_io_eprintf.
+	* cgen-scache.c (scache_flush): Delete unused locals i,sc.
 
 1998-12-08  James E Wilson  <wilson@wilson-pc.cygnus.com>
 
