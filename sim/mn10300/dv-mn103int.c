@@ -197,10 +197,12 @@ enum {
   G21_PORT = 84,
   G22_PORT = 88,
   G23_PORT = 92,
+  IRQ0_PORT = G23_PORT,
   G24_PORT = 96,
   G25_PORT = 100,
   G26_PORT = 104,
   G27_PORT = 108,
+  IRQ4_PORT = G27_PORT,
   G28_PORT = 112,
   G29_PORT = 116,
   G30_PORT = 120,
@@ -664,9 +666,9 @@ external_group (struct mn103int *controller,
   switch (offset)
     {
     case 0:
-      return &controller->group[16];
+      return &controller->group[IRQ0_PORT/4];
     case 1:
-      return &controller->group[20];
+      return &controller->group[IRQ4_PORT/4];
     default:
       return NULL;
     }
