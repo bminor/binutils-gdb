@@ -16,8 +16,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-   Please email any bugs, comments, and/or additions to this file to:
-   bug-gdb@prep.ai.mit.edu  */
+   */
 
 /* This file is exactly like compiler.c.  I could just use compiler.c if
    I could be sure that every C++ compiler accepted extensions of ".c".  */
@@ -52,11 +51,4 @@ set compiler_info [join {hpcc __HP_cc} -]
 
 #if defined (__HP_aCC)
 set compiler_info [join {hpacc __HP_aCC} -]
-#endif
-
-/* gdb.base/whatis.exp still uses this */
-#if defined (__STDC__) || defined (_AIX)
-set signed_keyword_not_used 0
-#else
-set signed_keyword_not_used 1
 #endif

@@ -16,9 +16,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
-
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
 # Generic gdb subroutines that should work for any target.  If these
@@ -1140,7 +1137,6 @@ set compiler_info		"unknown"
 set gcc_compiled		0
 set hp_cc_compiler		0
 set hp_aCC_compiler		0
-set signed_keyword_not_used	0
 
 # Figure out what compiler I am using.
 #
@@ -1206,7 +1202,6 @@ proc get_compiler_info {binfile args} {
 
     # These come from compiler.c or compiler.cc
     global compiler_info
-    global signed_keyword_not_used
 
     # Legacy global data symbols.
     global gcc_compiled
@@ -1246,7 +1241,6 @@ proc get_compiler_info {binfile args} {
     # Reset to unknown compiler if any diagnostics happened.
     if { $unknown } {
 	set compiler_info "unknown"
-	set signed_keyword_not_used 0
     }
 
     # Set the legacy symbols.
