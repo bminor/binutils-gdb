@@ -143,7 +143,7 @@ int signal;
     }  
 
     one_stepped = 1;
-    ptrace (PT_CONTINUE, inferior_pid, 1, signal, 0);
+    ptrace (PT_CONTINUE, inferior_pid, (PTRACE_ARG3_TYPE) 1, signal, 0);
   }
   else {
 

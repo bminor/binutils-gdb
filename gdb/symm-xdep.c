@@ -70,7 +70,7 @@ int regno;
   else
     {
       reg_tmp = *(int *)&registers[REGISTER_BYTE(regno)];
-      ptrace(XPT_RREGS, inferior_pid, &regs, 0);
+      ptrace(XPT_RREGS, inferior_pid, (PTRACE_ARG3_TYPE) &regs, 0);
       switch (regno)
 	{
 	case 0:
@@ -106,7 +106,7 @@ int regno;
 	}
     }
 #endif /* 0 */
-  ptrace(XPT_WREGS, inferior_pid, &regs, 0);
+  ptrace(XPT_WREGS, inferior_pid, (PTRACE_ARG3_TYPE) &regs, 0);
 }
 
 void
@@ -119,7 +119,7 @@ fetch_inferior_registers (regno)
 
     registers_fetched ();
     
-    ptrace(XPT_RREGS, inferior_pid, &regs, 0);
+    ptrace(XPT_RREGS, inferior_pid, (PTRACE_ARG3_TYPE) &regs, 0);
     *(int *)&registers[REGISTER_BYTE(0)] = regs.pr_eax;
     *(int *)&registers[REGISTER_BYTE(5)] = regs.pr_ebx;
     *(int *)&registers[REGISTER_BYTE(2)] = regs.pr_ecx;
@@ -427,7 +427,7 @@ i386_float_info ()
     extern int corechan;
     
     if (have_inferior_p()) {
-	call_ptrace(XPT_RREGS, inferior_pid, &regset, 0);
+	call_ptrace(XPT_RREGS, inferior_pid, (PTRACE_ARG3_TYPE) &regset, 0);
     } else {
 	if (lseek (corechan, 0, 0) < 0) {
 	    perror ("seek on core file");

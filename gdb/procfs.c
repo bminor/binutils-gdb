@@ -1007,7 +1007,7 @@ GLOBAL FUNCTION
 
 SYNOPSIS
 
-	int ptrace (int request, int pid, int arg3, int arg4)
+	int ptrace (int request, int pid, PTRACE_ARG3_TYPE arg3, int arg4)
 
 DESCRIPTION
 
@@ -1022,7 +1022,7 @@ int
 ptrace (request, pid, arg3, arg4)
      int request;
      int pid;
-     int arg3;
+     PTRACE_ARG3_TYPE arg3;
      int arg4;
 {
   error ("internal error - there is a call to ptrace() somewhere");

@@ -614,7 +614,8 @@ coff_end_symtab (objfile)
 
 	  if (BLOCK_START(pb->block) < BLOCK_START(pbnext->block)) {
 	    struct block *tmp = pb->block;
-	    complain (&misordered_blocks_complaint, BLOCK_START (pb->block));
+	    complain (&misordered_blocks_complaint,
+		      (char *) BLOCK_START (pb->block));
 	    pb->block = pbnext->block;
 	    pbnext->block = tmp;
 	    swapped = 1;

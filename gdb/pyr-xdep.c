@@ -46,7 +46,7 @@ fetch_inferior_registers (regno)
   registers_fetched ();
   
   for (regno = 0; regno < 64; regno++) {
-    reg_buf[regno] = ptrace (3, inferior_pid, regno, 0);
+    reg_buf[regno] = ptrace (3, inferior_pid, (PTRACE_ARG3_TYPE) regno, 0);
     
 #if defined(PYRAMID_CONTROL_FRAME_DEBUGGING)
     printf ("Fetching %s from inferior, got %0x\n",
@@ -63,8 +63,8 @@ fetch_inferior_registers (regno)
   }
   /* that leaves regs 64, 65, and 66 */
   datum = ptrace (3, inferior_pid,
-		  ((char *)&u.u_pcb.pcb_csp) -
-		  ((char *)&u), 0);
+		  (PTRACE_ARG3_TYPE) (((char *)&u.u_pcb.pcb_csp) -
+		  ((char *)&u)), 0);
   
   
   
@@ -100,7 +100,8 @@ fetch_inferior_registers (regno)
   
   while (1) {
     register int inferior_saved_pc;
-    inferior_saved_pc = ptrace (1, inferior_pid, datum+((32+15)*4), 0);
+    inferior_saved_pc = ptrace (1, inferior_pid,
+				(PTRACE_ARG3_TYPE) (datum+((32+15)*4)), 0);
     if (inferior_saved_pc > 0) break;
 #if defined(PYRAMID_CONTROL_FRAME_DEBUGGING)
     printf("skipping kernel frame %08x, pc=%08x\n", datum,
@@ -138,7 +139,8 @@ store_inferior_registers (regno)
 	/*regaddr = register_addr (regno, offset);*/
 	regaddr = regno;
 	errno = 0;
-	ptrace (6, inferior_pid, regaddr, read_register (regno));
+	ptrace (6, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+		read_register (regno));
 	if (errno != 0)
 	  {
 	    sprintf (buf, "writing register number %d", regno);
@@ -153,7 +155,8 @@ store_inferior_registers (regno)
 	  /*regaddr = register_addr (regno, offset);*/
 	  regaddr = regno;
 	  errno = 0;
-	  ptrace (6, inferior_pid, regaddr, read_register (regno));
+	  ptrace (6, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+		  read_register (regno));
 	  if (errno != 0)
 	    {
 	      sprintf (buf, "writing all regs, number %d", regno);

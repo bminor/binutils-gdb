@@ -223,6 +223,9 @@ n_spaces PARAMS ((int));
 extern void
 printchar PARAMS ((int, FILE *, int));
 
+extern char *
+strdup_demangled PARAMS ((const char *));
+
 extern void
 fprint_symbol PARAMS ((FILE *, char *));
 
@@ -407,7 +410,11 @@ local_hex_string_custom PARAMS ((int, char *));	/* language.c */
    to keep them happy */
 
 #ifndef NORETURN
-# define NORETURN volatile
+# ifdef __lucid
+#   define NORETURN /*nothing*/
+# else
+#   define NORETURN volatile
+# endif
 #endif
 
 /* Defaults for system-wide constants (if not defined by xm.h, we fake it).  */
@@ -558,7 +565,7 @@ mmtrace PARAMS ((void));
 extern int
 parse_escape PARAMS ((char **));
 
-extern char *reg_names[];
+extern const char * const reg_names[];
 
 extern NORETURN void			/* Does not return to the caller.  */
 error ();
@@ -688,7 +695,9 @@ strerror PARAMS ((int));				/* 4.11.6.2 */
 #  ifdef sparc
 #   include <alloca.h>
 #  endif
-   extern char *alloca ();
+#  ifndef alloca		/* May be macro, with args, in <alloca.h> */
+    extern char *alloca ();
+#  endif
 # endif
 #endif
 

@@ -37,11 +37,11 @@ pyr_print_registers(reg_buf, regnum)
 		     reg_names[regno+48], reg_buf[regno+48]);
   }
   usp = ptrace (3, inferior_pid,
-		      ((char *)&u.u_pcb.pcb_usp) -
-		      ((char *)&u), 0);
+		(PTRACE_ARG3_TYPE) ((char *)&u.u_pcb.pcb_usp) -
+		((char *)&u), 0);
   ksp = ptrace (3, inferior_pid,
-		      ((char *)&u.u_pcb.pcb_ksp) -
-		      ((char *)&u), 0);
+		(PTRACE_ARG3_TYPE) ((char *)&u.u_pcb.pcb_ksp) -
+		((char *)&u), 0);
   printf/*_filtered*/ ("\n%6.6s: %8x  %6.6s: %8x (%08x) %6.6s %8x\n",
 		   reg_names[CSP_REGNUM],reg_buf[CSP_REGNUM],
 		   reg_names[KSP_REGNUM], reg_buf[KSP_REGNUM], ksp,

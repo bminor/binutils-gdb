@@ -50,29 +50,33 @@ fetch_inferior_registers (regno)
 
   struct user u;
   unsigned int offset = (char *) &u.u_ar0 - (char *) &u;
-  offset = ptrace (PT_READ_U, inferior_pid, offset, 0) - KERNEL_U_ADDR;
+  offset = ptrace (PT_READ_U, inferior_pid, (PTRACE_ARG3_TYPE) offset, 0)
+      - KERNEL_U_ADDR;
 
   registers_fetched ();
   
   for (regno = 0; regno < 16; regno++)
     {
       regaddr = offset + regno * 4;
-      *(int *)&buf[0] = ptrace (PT_READ_U, inferior_pid, regaddr, 0);
+      *(int *)&buf[0] = ptrace (PT_READ_U, inferior_pid,
+				(PTRACE_ARG3_TYPE) regaddr, 0);
       if (regno == PC_REGNUM)
 	  *(int *)&buf[0] = GET_PC_PART(*(int *)&buf[0]);
       supply_register (regno, buf);
     }
-  *(int *)&buf[0] = ptrace (PT_READ_U, inferior_pid, offset + PC*4);
+  *(int *)&buf[0] = ptrace (PT_READ_U, inferior_pid,
+			    (PTRACE_ARG3_TYPE) (offset + PC*4), 0);
   supply_register (PS_REGNUM, buf); /* set virtual register ps same as pc */
 
   /* read the floating point registers */
   offset = (char *) &u.u_fp_regs - (char *)&u;
-  *(int *)buf = ptrace (PT_READ_U, inferior_pid, offset, 0);
+  *(int *)buf = ptrace (PT_READ_U, inferior_pid, (PTRACE_ARG3_TYPE) offset, 0);
   supply_register (FPS_REGNUM, buf);
   for (regno = 16; regno < 24; regno++) {
       regaddr = offset + 4 + 12 * (regno - 16);
       for (i = 0; i < 12; i += sizeof(int))
-	  *(int *) &buf[i] = ptrace (PT_READ_U, inferior_pid, regaddr + i, 0);
+	  *(int *) &buf[i] = ptrace (PT_READ_U, inferior_pid,
+				     (PTRACE_ARG3_TYPE) (regaddr + i), 0);
       supply_register (regno, buf);
   }
 }
@@ -91,7 +95,8 @@ store_inferior_registers (regno)
   struct user u;
   unsigned long value;
   unsigned int offset = (char *) &u.u_ar0 - (char *) &u;
-  offset = ptrace (PT_READ_U, inferior_pid, offset, 0) - KERNEL_U_ADDR;
+  offset = ptrace (PT_READ_U, inferior_pid, (PTRACE_ARG3_TYPE) offset, 0)
+      - KERNEL_U_ADDR;
 
   if (regno >= 0) {
       if (regno >= 16) return;
@@ -100,7 +105,7 @@ store_inferior_registers (regno)
       value = read_register(regno);
       if (regno == PC_REGNUM)
 	  value = SET_PC_PART(read_register (PS_REGNUM), value);
-      ptrace (PT_WRITE_U, inferior_pid, regaddr, value);
+      ptrace (PT_WRITE_U, inferior_pid, (PTRACE_ARG3_TYPE) regaddr, value);
       if (errno != 0)
 	{
 	  sprintf (buf, "writing register number %d", regno);
@@ -114,7 +119,7 @@ store_inferior_registers (regno)
       value = read_register(regno);
       if (regno == PC_REGNUM)
 	  value = SET_PC_PART(read_register (PS_REGNUM), value);
-      ptrace (6, inferior_pid, regaddr, value);
+      ptrace (6, inferior_pid, (PTRACE_ARG3_TYPE) regaddr, value);
       if (errno != 0)
 	{
 	  sprintf (buf, "writing all regs, number %d", regno);

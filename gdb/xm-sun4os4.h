@@ -48,3 +48,6 @@ extern char* malloc PARAMS (());
 extern char* realloc PARAMS (());
 extern int free PARAMS (());
 
+/* SunOS 4.x uses nonstandard "char *" as type of third argument to ptrace() */
+
+#define PTRACE_ARG3_TYPE char*

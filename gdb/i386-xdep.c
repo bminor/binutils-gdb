@@ -194,7 +194,7 @@ i386_float_info ()
       unsigned int mask;
       
       rounded_addr = uaddr & -sizeof (int);
-      data = ptrace (3, inferior_pid, rounded_addr, 0);
+      data = ptrace (3, inferior_pid, (PTRACE_ARG3_TYPE) rounded_addr, 0);
       mask = 0xff << ((uaddr - rounded_addr) * 8);
       
       fpvalid = ((data & mask) != 0);
@@ -229,7 +229,7 @@ i386_float_info ()
       ip = (int *)buf;
       for (i = 0; i < rounded_size; i++) 
 	{
-	  *ip++ = ptrace (3, inferior_pid, rounded_addr, 0);
+	  *ip++ = ptrace (3, inferior_pid, (PTRACE_ARG3_TYPE) rounded_addr, 0);
 	  rounded_addr += sizeof (int);
 	}
     } 

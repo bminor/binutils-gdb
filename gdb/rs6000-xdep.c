@@ -75,18 +75,20 @@ fetch_inferior_registers (regno)
 
     for (ii=0; ii < 32; ++ii)
       *(int*)&registers[REGISTER_BYTE (ii)] = 
-	ptrace (PT_READ_GPR, inferior_pid, ii, 0, 0);
+	ptrace (PT_READ_GPR, inferior_pid, (PTRACE_ARG3_TYPE) ii, 0, 0);
 
     /* read general purpose floating point registers. */
 
     for (ii=0; ii < 32; ++ii)
       ptrace (PT_READ_FPR, inferior_pid, 
-	(int*)&registers [REGISTER_BYTE (FP0_REGNUM+ii)], FPR0+ii, 0);
+	(PTRACE_ARG3_TYPE) &registers [REGISTER_BYTE (FP0_REGNUM+ii)],
+	      FPR0+ii, 0);
 
     /* read special registers. */
     for (ii=0; ii <= LAST_SP_REGNUM-FIRST_SP_REGNUM; ++ii)
       *(int*)&registers[REGISTER_BYTE (FIRST_SP_REGNUM+ii)] = 
-	ptrace (PT_READ_GPR, inferior_pid, special_regs[ii], 0, 0);
+	ptrace (PT_READ_GPR, inferior_pid, (PTRACE_ARG3_TYPE) special_regs[ii],
+		0, 0);
 
     registers_fetched ();
     return;
@@ -96,16 +98,17 @@ fetch_inferior_registers (regno)
 
   else if (regno < FP0_REGNUM) {		/* a GPR */
     *(int*)&registers[REGISTER_BYTE (regno)] =
-	ptrace (PT_READ_GPR, inferior_pid, regno, 0, 0);
+	ptrace (PT_READ_GPR, inferior_pid, (PTRACE_ARG3_TYPE) regno, 0, 0);
   }
   else if (regno <= FPLAST_REGNUM) {		/* a FPR */
     ptrace (PT_READ_FPR, inferior_pid,
-	(int*)&registers [REGISTER_BYTE (regno)], (regno-FP0_REGNUM+FPR0), 0);
+	(PTRACE_ARG3_TYPE) &registers [REGISTER_BYTE (regno)],
+	    (regno-FP0_REGNUM+FPR0), 0);
   }
   else if (regno <= LAST_SP_REGNUM) {		/* a special register */
     *(int*)&registers[REGISTER_BYTE (regno)] =
 	ptrace (PT_READ_GPR, inferior_pid,
-		special_regs[regno-FIRST_SP_REGNUM], 0, 0);
+		(PTRACE_ARG3_TYPE) special_regs[regno-FIRST_SP_REGNUM], 0, 0);
   }
   else
     fprintf (stderr, "gdb error: register no %d not implemented.\n", regno);
@@ -137,7 +140,7 @@ store_inferior_registers (regno)
 
       /* write general purpose registers first! */
       for ( ii=GPR0; ii<=GPR31; ++ii) {
-	ptrace (PT_WRITE_GPR, inferior_pid, ii,
+	ptrace (PT_WRITE_GPR, inferior_pid, (PTRACE_ARG3_TYPE) ii,
 		*(int*)&registers[REGISTER_BYTE (ii)], 0);
 	if ( errno ) { 
 	  perror ("ptrace write_gpr"); errno = 0;
@@ -147,7 +150,8 @@ store_inferior_registers (regno)
       /* write floating point registers now. */
       for ( ii=0; ii < 32; ++ii) {
 	ptrace (PT_WRITE_FPR, inferior_pid, 
-		  (int*)&registers[REGISTER_BYTE (FP0_REGNUM+ii)], FPR0+ii, 0);
+		  (PTRACE_ARG3_TYPE) &registers[REGISTER_BYTE (FP0_REGNUM+ii)],
+		FPR0+ii, 0);
         if ( errno ) {
 	  perror ("ptrace write_fpr"); errno = 0;
         }
@@ -155,8 +159,9 @@ store_inferior_registers (regno)
 
       /* write special registers. */
       for (ii=0; ii <= LAST_SP_REGNUM-FIRST_SP_REGNUM; ++ii) {
-        ptrace (PT_WRITE_GPR, inferior_pid, special_regs[ii],
-		 *(int*)&registers[REGISTER_BYTE (FIRST_SP_REGNUM+ii)], 0);
+        ptrace (PT_WRITE_GPR, inferior_pid,
+		(PTRACE_ARG3_TYPE) special_regs[ii],
+		*(int*)&registers[REGISTER_BYTE (FIRST_SP_REGNUM+ii)], 0);
 	if ( errno ) {
 	  perror ("ptrace write_gpr"); errno = 0;
 	}
@@ -167,19 +172,21 @@ store_inferior_registers (regno)
 
   else if (regno < FP0_REGNUM) {		/* a GPR */
 
-    ptrace (PT_WRITE_GPR, inferior_pid, regno,
+    ptrace (PT_WRITE_GPR, inferior_pid, (PTRACE_ARG3_TYPE) regno,
 		*(int*)&registers[REGISTER_BYTE (regno)], 0);
   }
 
   else if (regno <= FPLAST_REGNUM) {		/* a FPR */
     ptrace (PT_WRITE_FPR, inferior_pid, 
-	(int*)&registers[REGISTER_BYTE (regno)], regno-FP0_REGNUM+FPR0, 0);
+	    (PTRACE_ARG3_TYPE) &registers[REGISTER_BYTE (regno)],
+	    regno-FP0_REGNUM+FPR0, 0);
   }
 
   else if (regno <= LAST_SP_REGNUM) {		/* a special register */
 
-    ptrace (PT_WRITE_GPR, inferior_pid, special_regs [regno-FIRST_SP_REGNUM],
-		*(int*)&registers[REGISTER_BYTE (regno)], 0);
+    ptrace (PT_WRITE_GPR, inferior_pid,
+	    (PTRACE_ARG3_TYPE) special_regs [regno-FIRST_SP_REGNUM],
+	    *(int*)&registers[REGISTER_BYTE (regno)], 0);
   }
 
   else
@@ -382,7 +389,8 @@ unsigned int pid;
     usleep (36000);
 
     errno = 0;
-    ptrace(PT_LDINFO, pid, ldi, MAX_LOAD_SEGS * sizeof(*ldi), ldi);
+    ptrace(PT_LDINFO, pid, (PTRACE_ARG3_TYPE) ldi,
+	   MAX_LOAD_SEGS * sizeof(*ldi), ldi);
     if (errno) {
       perror_with_name ("ptrace ldinfo");
       return 0;
@@ -497,7 +505,7 @@ exec_one_dummy_insn ()
   target_insert_breakpoint (DUMMY_INSN_ADDR, &shadow);
 
   errno = 0;
-  ptrace (PT_CONTINUE, inferior_pid, DUMMY_INSN_ADDR, 0, 0);
+  ptrace (PT_CONTINUE, inferior_pid, (PTRACE_ARG3_TYPE) DUMMY_INSN_ADDR, 0, 0);
   if (errno)
     perror ("pt_continue");
 

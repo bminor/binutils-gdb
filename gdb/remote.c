@@ -174,7 +174,8 @@ int remote_desc = -1;
 /* Called when SIGALRM signal sent due to alarm() timeout.  */
 #ifndef HAVE_TERMIO
 void
-remote_timer ()
+remote_timer (signo)
+     int signo;
 {
   if (kiodebug)
     printf ("remote_timer called\n");
@@ -391,7 +392,8 @@ remote_resume (step, siggnal)
 /* Send ^C to target to halt it.  Target will respond, and send us a
    packet.  */
 
-void remote_interrupt()
+void remote_interrupt(signo)
+     int signo;
 {
   
   if (kiodebug)

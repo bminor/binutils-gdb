@@ -25,7 +25,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define AIX_BUGGY_PTRACE_CONTINUE	\
 { \
-  int ret = ptrace (PT_CONTINUE, inferior_pid, (int *)1, signal, 0); \
+  int ret = ptrace (PT_CONTINUE, inferior_pid, \
+		    (PTRACE_ARG3_TYPE) 1, signal, 0); \
   if (errno) { \
 /*    printf ("ret: %d, errno: %d, signal: %d\n", ret, errno, signal); */ \
     errno = 0; } \

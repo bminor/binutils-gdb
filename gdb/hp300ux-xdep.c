@@ -41,7 +41,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define INFERIOR_AR0(u)							\
   ((ptrace								\
-    (PT_RUAREA, inferior_pid, ((char *) &u.u_ar0 - (char *) &u), 0))	\
+    (PT_RUAREA, inferior_pid,						\
+     (PTRACE_ARG3_TYPE) ((char *) &u.u_ar0 - (char *) &u), 0))		\
    - KERNEL_U_ADDR)
 
 static void
@@ -55,7 +56,8 @@ fetch_inferior_register (regno, regaddr)
       union { int i; short s[2]; } ps_val;
       int regval;
       
-      ps_val.i = (ptrace (PT_RUAREA, inferior_pid, regaddr, 0));
+      ps_val.i = (ptrace (PT_RUAREA, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+			  0));
       regval = ps_val.s[0];
       supply_register (regno, &regval);
     }
@@ -67,7 +69,8 @@ fetch_inferior_register (regno, regaddr)
       
       for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
 	{
-	  *(int *) &buf[i] = ptrace (PT_RUAREA, inferior_pid, regaddr, 0);
+	  *(int *) &buf[i] = ptrace (PT_RUAREA, inferior_pid,
+				     (PTRACE_ARG3_TYPE) regaddr, 0);
 	  regaddr += sizeof (int);
 	}
       supply_register (regno, buf);
@@ -82,7 +85,7 @@ store_inferior_register_1 (regno, regaddr, value)
      int value;
 {
   errno = 0;
-  ptrace (PT_WUAREA, inferior_pid, regaddr, value);
+  ptrace (PT_WUAREA, inferior_pid, (PTRACE_ARG3_TYPE) regaddr, value);
 #if 0
   /* HP-UX randomly sets errno to non-zero for regno == 25.
      However, the value is correctly written, so ignore errno. */
@@ -107,7 +110,8 @@ store_inferior_register (regno, regaddr)
     {
       union { int i; short s[2]; } ps_val;
       
-      ps_val.i = (ptrace (PT_RUAREA, inferior_pid, regaddr, 0));
+      ps_val.i = (ptrace (PT_RUAREA, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+			  0));
       ps_val.s[0] = (read_register (regno));
       store_inferior_register_1 (regno, regaddr, ps_val.i);
     }

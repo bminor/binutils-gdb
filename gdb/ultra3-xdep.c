@@ -72,7 +72,8 @@ fetch_register (regno)
     supply_register (regno, &val);
   } else {
     errno = 0;
-    val = ptrace (PT_READ_U, inferior_pid, (int*)register_addr(regno,0), 0);
+    val = ptrace (PT_READ_U, inferior_pid,
+		  (PTRACE_ARG3_TYPE) register_addr(regno,0), 0);
     if (errno != 0) {
       sprintf(buf,"reading register %s (#%d)",reg_names[regno],regno);
       perror_with_name (buf);
@@ -103,8 +104,9 @@ fetch_inferior_registers (regno)
 /* Global Registers */
 #ifdef ULTRA3
   errno = 0;
-  ptrace (PT_READ_STRUCT, inferior_pid, (int*)register_addr(GR96_REGNUM,0), 
-					(int)&pt_struct.pt_gr[0], 32*4);
+  ptrace (PT_READ_STRUCT, inferior_pid,
+	  (PTRACE_ARG3_TYPE) register_addr(GR96_REGNUM,0), 
+	  (int)&pt_struct.pt_gr[0], 32*4);
   if (errno != 0) {
       perror_with_name ("reading global registers");
       ret_val = -1;
@@ -119,8 +121,9 @@ fetch_inferior_registers (regno)
 /* Local Registers */
 #ifdef ULTRA3
   errno = 0;
-  ptrace (PT_READ_STRUCT, inferior_pid, (int*)register_addr(LR0_REGNUM,0), 
-					(int)&pt_struct.pt_lr[0], 128*4);
+  ptrace (PT_READ_STRUCT, inferior_pid,
+	  (PTRACE_ARG3_TYPE) register_addr(LR0_REGNUM,0), 
+	  (int)&pt_struct.pt_lr[0], 128*4);
   if (errno != 0) {
       perror_with_name ("reading local registers");
       ret_val = -1;
@@ -168,7 +171,8 @@ store_inferior_registers (regno)
 	return;
       regaddr = register_addr (regno, 0);
       errno = 0;
-      ptrace (PT_WRITE_U, inferior_pid,(int*)regaddr,read_register(regno));
+      ptrace (PT_WRITE_U, inferior_pid,
+	      (PTRACE_ARG3_TYPE) regaddr, read_register(regno));
       if (errno != 0)
 	{
 	  sprintf (buf, "writing register %s (#%d)", reg_names[regno],regno);
@@ -184,8 +188,9 @@ store_inferior_registers (regno)
       for (regno = LR0_REGNUM; regno < LR0_REGNUM+128; regno++)
 	pt_struct.pt_gr[regno] = read_register(regno);
       errno = 0;
-      ptrace (PT_WRITE_STRUCT, inferior_pid, (int*)register_addr(GR1_REGNUM,0), 
-				(int)&pt_struct.pt_gr1,(1*32*128)*4);
+      ptrace (PT_WRITE_STRUCT, inferior_pid,
+	      (PTRACE_ARG3_TYPE) register_addr(GR1_REGNUM,0), 
+	      (int)&pt_struct.pt_gr1,(1*32*128)*4);
       if (errno != 0)
 	{
 	   sprintf (buf, "writing all local/global registers");
@@ -202,8 +207,9 @@ store_inferior_registers (regno)
       pt_struct.pt_bp  = read_register(BP_REGNUM);
       pt_struct.pt_fc  = read_register(FC_REGNUM);
       errno = 0;
-      ptrace (PT_WRITE_STRUCT, inferior_pid, (int*)register_addr(CPS_REGNUM,0), 
-				(int)&pt_struct.pt_psr,(10)*4);
+      ptrace (PT_WRITE_STRUCT, inferior_pid,
+	      (PTRACE_ARG3_TYPE) register_addr(CPS_REGNUM,0), 
+	      (int)&pt_struct.pt_psr,(10)*4);
       if (errno != 0)
 	{
 	   sprintf (buf, "writing all special registers");

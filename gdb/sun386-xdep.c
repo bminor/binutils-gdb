@@ -51,8 +51,10 @@ fetch_inferior_registers (regno)
 
   registers_fetched ();
 
-  ptrace (PTRACE_GETREGS, inferior_pid, &inferior_registers);
-  ptrace (PTRACE_GETFPREGS, inferior_pid, &inferior_fp_registers);
+  ptrace (PTRACE_GETREGS, inferior_pid,
+	  (PTRACE_ARG3_TYPE) &inferior_registers);
+  ptrace (PTRACE_GETFPREGS, inferior_pid,
+	  (PTRACE_ARG3_TYPE) &inferior_fp_registers);
 
   bcopy (&inferior_registers, registers, sizeof inferior_registers);
 
@@ -89,20 +91,27 @@ store_inferior_registers (regno)
        instruction that moves eax into ebp gets single-stepped.  */
     {
       int stack = inferior_registers.r_reg[SP_REGNUM];
-      int stuff = ptrace (PTRACE_PEEKDATA, inferior_pid, stack);
+      int stuff = ptrace (PTRACE_PEEKDATA, inferior_pid,
+			  (PTRACE_ARG3_TYPE) stack);
       int reg = inferior_registers.r_reg[EAX];
       inferior_registers.r_reg[EAX] =
 	inferior_registers.r_reg[FP_REGNUM];
-      ptrace (PTRACE_SETREGS, inferior_pid, &inferior_registers);
-      ptrace (PTRACE_POKEDATA, inferior_pid, stack, 0xc589);
-      ptrace (PTRACE_SINGLESTEP, inferior_pid, stack, 0);
+      ptrace (PTRACE_SETREGS, inferior_pid, 
+	      (PTRACE_ARG3_TYPE) &inferior_registers);
+      ptrace (PTRACE_POKEDATA, inferior_pid, (PTRACE_ARG3_TYPE) stack,
+	      0xc589);
+      ptrace (PTRACE_SINGLESTEP, inferior_pid, (PTRACE_ARG3_TYPE) stack,
+	      0);
       wait (0);
-      ptrace (PTRACE_POKEDATA, inferior_pid, stack, stuff);
+      ptrace (PTRACE_POKEDATA, inferior_pid, (PTRACE_ARG3_TYPE) stack,
+	      stuff);
       inferior_registers.r_reg[EAX] = reg;
     }
 #endif
-  ptrace (PTRACE_SETREGS, inferior_pid, &inferior_registers);
-  ptrace (PTRACE_SETFPREGS, inferior_pid, &inferior_fp_registers);
+  ptrace (PTRACE_SETREGS, inferior_pid,
+	  (PTRACE_ARG3_TYPE) &inferior_registers);
+  ptrace (PTRACE_SETFPREGS, inferior_pid,
+	  (PTRACE_ARG3_TYPE) &inferior_fp_registers);
 }
 
 /* Machine-dependent code which would otherwise be in core.c */

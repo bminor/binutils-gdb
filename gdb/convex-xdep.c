@@ -218,7 +218,9 @@ static ptr_cmp ();
 
 int
 call_ptrace (request, pid, procaddr, buf)
-     int request, pid, procaddr, buf;
+     int request, pid;
+     PTRACE_ARG3_TYPE procaddr;
+     int buf;
 {
   if (request == 0)
     return;

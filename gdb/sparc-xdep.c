@@ -71,8 +71,9 @@ fetch_inferior_registers (regno)
       || regno >= Y_REGNUM
       || (!register_valid[SP_REGNUM] && regno < I7_REGNUM))
     {
-      if (0 != ptrace (PTRACE_GETREGS, inferior_pid, &inferior_registers))
-	    perror("ptrace_getregs");
+      if (0 != ptrace (PTRACE_GETREGS, inferior_pid,
+		       (PTRACE_ARG3_TYPE) &inferior_registers, 0))
+	perror("ptrace_getregs");
       
       registers[REGISTER_BYTE (0)] = 0;
       bcopy (&inferior_registers.r_g1, &registers[REGISTER_BYTE (1)], 15 * REGISTER_RAW_SIZE (G0_REGNUM));
@@ -98,7 +99,9 @@ fetch_inferior_registers (regno)
   /* Floating point registers */
   if (regno == -1 || (regno >= FP0_REGNUM && regno <= FP0_REGNUM + 31))
     {
-      if (0 != ptrace (PTRACE_GETFPREGS, inferior_pid, &inferior_fp_registers))
+      if (0 != ptrace (PTRACE_GETFPREGS, inferior_pid,
+		       (PTRACE_ARG3_TYPE) &inferior_fp_registers,
+		       0))
 	    perror("ptrace_getfpregs");
       bcopy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
 	     sizeof inferior_fp_registers.fpu_fr);
@@ -218,7 +221,8 @@ store_inferior_registers (regno)
       inferior_registers.r_y =
 	*(int *)&registers[REGISTER_BYTE (Y_REGNUM)];
 
-      if (0 != ptrace (PTRACE_SETREGS, inferior_pid, &inferior_registers))
+      if (0 != ptrace (PTRACE_SETREGS, inferior_pid,
+		       (PTRACE_ARG3_TYPE) &inferior_registers, 0))
 	perror("ptrace_setregs");
     }
 
@@ -234,7 +238,8 @@ store_inferior_registers (regno)
 	     sizeof (FPU_FSR_TYPE));
 ****/
       if (0 !=
-	 ptrace (PTRACE_SETFPREGS, inferior_pid, &inferior_fp_registers))
+	 ptrace (PTRACE_SETFPREGS, inferior_pid,
+		 (PTRACE_ARG3_TYPE) &inferior_fp_registers, 0))
 	 perror("ptrace_setfpregs");
     }
 }

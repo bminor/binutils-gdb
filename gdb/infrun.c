@@ -581,9 +581,11 @@ child_create_inferior (exec_file, allargs, env)
 	 for the inferior.  */
 
 #ifdef USE_PROC_FS
-      proc_set_exec_trap ();		/* Use SVR4 /proc interface */
+      /* Use SVR4 /proc interface */
+      proc_set_exec_trap ();
 #else
-      call_ptrace (0, 0, 0, 0);		/* "Trace me, Dr. Memory!" */
+      /* "Trace me, Dr. Memory!" */
+      call_ptrace (0, 0, (PTRACE_ARG3_TYPE) 0, 0);
 #endif
 
       /* There is no execlpe call, so we have to set the environment

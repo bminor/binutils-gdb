@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
 #include "defs.h"
 #include "frame.h"
 #include "inferior.h"
@@ -37,7 +36,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/param.h>
 #include <signal.h>
 
-extern char *strerror();		/* strings corresponding to errno */
+static void
+kill_command PARAMS ((char *, int));
+
+static void
+terminal_ours_1 PARAMS ((int));
 
 extern struct target_ops child_ops;
 
@@ -51,10 +54,10 @@ int attach_flag;
 
 /* Does GDB have a terminal (on stdin)?  */
 int gdb_has_a_terminal;
-
+#if !defined(__GO32__)
 static TERMINAL sg_inferior;
 static TERMINAL sg_ours;
-
+#endif
 static int tflags_inferior;
 static int tflags_ours;
 
@@ -111,6 +114,7 @@ static void terminal_ours_1 ();
 void
 terminal_init_inferior ()
 {
+#if !defined(__GO32__)
   sg_inferior = sg_ours;
   tflags_inferior = tflags_ours;
 
@@ -129,7 +133,7 @@ terminal_init_inferior ()
 #ifdef TIOCGPGRP
   pgrp_inferior = inferior_pid;
 #endif /* TIOCGPGRP */
-
+#endif
   terminal_is_ours = 1;
 }
 
@@ -139,6 +143,7 @@ terminal_init_inferior ()
 void
 terminal_inferior ()
 {
+#if !defined(__GO32__)
   int result;
 
   if (gdb_has_a_terminal && terminal_is_ours && inferior_thisrun_terminal == 0)
@@ -175,6 +180,7 @@ terminal_inferior ()
       sigquit_ours = (void (*) ()) signal (SIGQUIT, SIG_IGN);
 #endif /* TIOCGPGRP */
     }
+#endif
   terminal_is_ours = 0;
 }
 
@@ -206,6 +212,7 @@ static void
 terminal_ours_1 (output_only)
      int output_only;
 {
+#if !defined(__GO32__)
   int result;
 #ifdef TIOCGPGRP
   /* Ignore this signal since it will happen when we try to set the pgrp.  */
@@ -278,6 +285,9 @@ terminal_ours_1 (output_only)
 #else /* not HAVE_TERMIO */
   sg_ours.sg_flags &= ~RAW & ~CBREAK;
 #endif /* not HAVE_TERMIO */
+
+  result = result;	/* lint */
+#endif
 }
 
 /* ARGSUSED */
@@ -301,7 +311,7 @@ child_terminal_info (args, from_tty)
     printf_filtered ("This GDB does not control a terminal.\n");
     return;
   }
-
+#if !defined(__GO32__)
 #ifdef TIOCGPGRP
   printf_filtered ("Inferior's terminal status (currently saved by GDB):\n");
 
@@ -343,6 +353,10 @@ child_terminal_info (args, from_tty)
 #ifdef TIOCLGET
   printf_filtered ("lmode:  0x%x\n", lmode_inferior);
 #endif
+#else
+  printf_filtered("This is a DOS machine; there is no terminal state\n");
+#endif
+
 }
 
 /* NEW_TTY_PREFORK is called before forking a new child process,
@@ -367,17 +381,22 @@ void
 new_tty ()
 {
   register int tty;
+  void (*osigttou) ();
 
   if (inferior_thisrun_terminal == 0)
     return;
-
+#if !defined(__GO32__)
 #ifdef TIOCNOTTY
-  /* Disconnect the child process from our controlling terminal.  */
+  /* Disconnect the child process from our controlling terminal.  On some
+     systems (SVR4 for example), this may cause a SIGTTOU, so temporarily
+     ignore SIGTTOU. */
   tty = open("/dev/tty", O_RDWR);
   if (tty > 0)
     {
+      osigttou = (void (*)()) signal(SIGTTOU, SIG_IGN);
       ioctl(tty, TIOCNOTTY, 0);
       close(tty);
+      (void) signal(SIGTTOU, osigttou);
     }
 #endif
 
@@ -403,6 +422,7 @@ new_tty ()
     { close (2); dup (tty); }
   if (tty > 2)
     close(tty);
+#endif /* !go32*/o
 }
 
 /* Kill the inferior process.  Make us have no inferior.  */
@@ -492,8 +512,8 @@ try_writing_regs_command (arg, from_tty)
     {
       QUIT;
       errno = 0;
-      value = call_ptrace (3, inferior_pid, i, 0);
-      call_ptrace (6, inferior_pid, i, value);
+      value = call_ptrace (3, inferior_pid, (PTRACE_ARG3_TYPE) i, 0);
+      call_ptrace (6, inferior_pid, (PTRACE_ARG3_TYPE) i, value);
       if (errno == 0)
 	{
 	  printf (" Succeeded with address 0x%x; value 0x%x (%d).\n",
@@ -527,8 +547,8 @@ Report which ones can be written.");
   /* Get all the current tty settings (including whether we have a tty at
      all!).  */
 
+#if !defined(__GO32__)
   tflags_ours = fcntl (0, F_GETFL, 0);
-  OOPSY ("fcntl F_GETFL");		/* Should always work */
 
   result = ioctl (0, TIOCGETP, &sg_ours);
   if (result == 0) {
@@ -549,6 +569,10 @@ Report which ones can be written.");
   } else {
     gdb_has_a_terminal = 0;
   }
+#else
+  gdb_has_a_terminal = 0;
+#endif
+
 
   terminal_is_ours = 1;
 }

@@ -197,12 +197,12 @@ DEFUN(serial_write,(str, len),
       CONST char *str AND
       int len)
 {
-  write (desc, str, len);
+  return (write (desc, str, len));
 }
 
 
 int
 DEFUN_VOID(serial_close)
 {
-close(desc);
+  return (close(desc));
 }

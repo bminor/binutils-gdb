@@ -105,7 +105,8 @@ fetch_inferior_registers (regno)
       regaddr = REGISTER_PTRACE_ADDR (regno);
       for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
  	{
- 	  *(int *) &buf[i] = ptrace (3, inferior_pid, regaddr, 0);
+ 	  *(int *) &buf[i] = ptrace (3, inferior_pid,
+				     (PTRACE_ARG3_TYPE) regaddr, 0);
  	  regaddr += sizeof (int);
  	}
       supply_register (regno, buf);
@@ -130,7 +131,8 @@ store_inferior_registers (regno)
     {
       regaddr = REGISTER_PTRACE_ADDR (regno);
       errno = 0;
-      ptrace (6, inferior_pid, regaddr, read_register (regno));
+      ptrace (6, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+	      read_register (regno));
       if (errno != 0)
 	{
 	  sprintf (buf, "writing register number %d", regno);
@@ -148,7 +150,8 @@ store_inferior_registers (regno)
 	    continue;
 	  regaddr = register_addr (regno, 1);
 	  errno = 0;
-	  ptrace (6, inferior_pid, regaddr, read_register (regno));
+	  ptrace (6, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+		  read_register (regno));
 	  if (errno != 0)
 	    {
 	      sprintf (buf, "writing all regs, number %d", regno);

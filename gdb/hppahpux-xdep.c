@@ -59,7 +59,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    machine-dependent file. */
 int
 call_ptrace (request, pid, addr, data)
-     int request, pid, *addr, data;
+     int request, pid;
+     PTRACE_ARG3_TYPE addr;
+     int data;
 {
   return ptrace (request, pid, addr, data, 0);
 }
@@ -77,7 +79,7 @@ kill_inferior_fast ()
 {
   if (inferior_pid == 0)
     return;
-  ptrace (PT_EXIT, inferior_pid, 0, 0, 0); /* PT_EXIT = PT_KILL ? */
+  ptrace (PT_EXIT, inferior_pid, (PTRACE_ARG3_TYPE) 0, 0, 0); /* PT_EXIT = PT_KILL ? */
   wait ((int *)0);
 }
 
@@ -99,14 +101,14 @@ child_resume (step, signal)
 {
   errno = 0;
 
-  /* An address of (int *)1 tells ptrace to continue from where it was. 
-     (If GDB wanted it to start some other way, we have already written
-     a new PC value to the child.)  */
+  /* An address of (PTRACE_ARG3_TYPE) 1 tells ptrace to continue from where
+     it was. (If GDB wanted it to start some other way, we have already
+     written a new PC value to the child.)  */
 
   if (step)
-    ptrace (PT_SINGLE, inferior_pid, (int *)1, signal, 0);
+    ptrace (PT_SINGLE, inferior_pid, (PTRACE_ARG3_TYPE) 1, signal, 0);
   else
-    ptrace (PT_CONTIN, inferior_pid, (int *)1, signal, 0);
+    ptrace (PT_CONTIN, inferior_pid, (PTRACE_ARG3_TYPE) 1, signal, 0);
 
   if (errno)
     perror_with_name ("ptrace");
@@ -123,7 +125,7 @@ attach (pid)
      int pid;
 {
   errno = 0;
-  ptrace (PT_ATTACH, pid, 0, 0, 0);
+  ptrace (PT_ATTACH, pid, (PTRACE_ARG3_TYPE) 0, 0, 0);
   if (errno)
     perror_with_name ("ptrace");
   attach_flag = 1;
@@ -139,7 +141,7 @@ detach (signal)
      int signal;
 {
   errno = 0;
-  ptrace (PT_DETACH, inferior_pid, 1, signal, 0);
+  ptrace (PT_DETACH, inferior_pid, (PTRACE_ARG3_TYPE) 1, signal, 0);
   if (errno)
     perror_with_name ("ptrace");
   attach_flag = 0;
@@ -201,7 +203,8 @@ void _initialize_kernel_u_addr ()
 #if !defined (U_REGS_OFFSET)
 #define U_REGS_OFFSET \
   ptrace (PT_READ_U, inferior_pid, \
-          (int *)(offsetof (struct user, u_ar0)), 0, 0) - KERNEL_U_ADDR
+          (PTRACE_ARG3_TYPE) (offsetof (struct user, u_ar0)), 0, 0) \
+    - KERNEL_U_ADDR
 #endif
 
 /* Registers we shouldn't try to fetch.  */
@@ -236,7 +239,8 @@ fetch_register (regno)
   for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
     {
       errno = 0;
-      *(int *) &buf[i] = ptrace (PT_RUREGS, inferior_pid, (int *)regaddr, 0, 0);
+      *(int *) &buf[i] = ptrace (PT_RUREGS, inferior_pid,
+				 (PTRACE_ARG3_TYPE) regaddr, 0, 0);
       regaddr += sizeof (int);
       if (errno != 0)
 	{
@@ -289,7 +293,7 @@ store_inferior_registers (regno)
       for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
 	{
 	  errno = 0;
-	  ptrace (PT_WUAREA, inferior_pid, (int *)regaddr,
+	  ptrace (PT_WUAREA, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
 		  *(int *) &registers[REGISTER_BYTE (regno) + i], 0);
 	  if (errno != 0)
 	    {
@@ -309,7 +313,7 @@ store_inferior_registers (regno)
 	  for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
 	    {
 	      errno = 0;
-	      ptrace (PT_WUAREA, inferior_pid, (int *)regaddr,
+	      ptrace (PT_WUAREA, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
 		      *(int *) &registers[REGISTER_BYTE (regno) + i], 0);
 	      if (errno != 0)
 		{
@@ -362,14 +366,16 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
 
       if (addr != memaddr || len < (int)sizeof (int)) {
 	/* Need part of initial word -- fetch it.  */
-        buffer[0] = ptrace (PT_RIUSER, inferior_pid, (int *)addr, 0, 0);
+        buffer[0] = ptrace (PT_RIUSER, inferior_pid,
+			    (PTRACE_ARG3_TYPE) addr, 0, 0);
       }
 
       if (count > 1)		/* FIXME, avoid if even boundary */
 	{
 	  buffer[count - 1]
 	    = ptrace (PT_RIUSER, inferior_pid,
-		      (int *)(addr + (count - 1) * sizeof (int)), 0, 0);
+		      (PTRACE_ARG3_TYPE) (addr + (count - 1) * sizeof (int)),
+		      0, 0);
 	}
 
       /* Copy data to be written over corresponding part of buffer */
@@ -381,13 +387,15 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
       for (i = 0; i < count; i++, addr += sizeof (int))
 	{
 	  errno = 0;
-	  ptrace (PT_WDUSER, inferior_pid, (int *)addr, buffer[i], 0);
+	  ptrace (PT_WDUSER, inferior_pid, (PTRACE_ARG3_TYPE) addr,
+		  buffer[i], 0);
 	  if (errno)
 	    {
 	      /* Using the appropriate one (I or D) is necessary for
 		 Gould NP1, at least.  */
 	      errno = 0;
-	      ptrace (PT_WIUSER, inferior_pid, (int *)addr, buffer[i], 0);
+	      ptrace (PT_WIUSER, inferior_pid, (PTRACE_ARG3_TYPE) addr,
+		      buffer[i], 0);
 	    }
 	  if (errno)
 	    return 0;
@@ -399,7 +407,8 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
       for (i = 0; i < count; i++, addr += sizeof (int))
 	{
 	  errno = 0;
-	  buffer[i] = ptrace (PT_RIUSER, inferior_pid, (int *)addr, 0, 0);
+	  buffer[i] = ptrace (PT_RIUSER, inferior_pid,
+			      (PTRACE_ARG3_TYPE) addr, 0, 0);
 	  if (errno)
 	    return 0;
 	  QUIT;

@@ -1,3 +1,28 @@
+Tue Jun 23 21:46:26 1992  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (VERSION):  Bump to 4.5.6.
+	* coffread.c (coff_end_symtab):  Cast 2nd arg of complain() to
+	correct type.
+	* defs.h (NORETURN):  Define away for Lucid compiler.
+	* remote.c (remote_timer, remote_interrupt):  Signal handlers
+	take one int arg.
+	* ser-termios.c (serial_write, serial_close):  Return whatever
+	value the write/close call returns, rather than falling off end.
+	* inferior.h (PTRACE_ARG3_TYPE):  Third arg to ptrace is int on
+	more systems than it is "char *".  Define PTRACE_ARG3_TYPE to
+	default to int.
+	* infptrace.c, hppabsd-xdep.c, hppahpux-xdep.c, i386-xdep.c,
+	inferior.h (call_ptrace):  Use PTRACE_ARG3_TYPE to declare type
+	of third arg.
+	* a68v-xdep.c, arm-xdep.c, convex-xdep.c, hp300ux-xdep.c, infrun.c,
+	m88k-xdep.c, mach386-xdep.c, mips-xdep.c, os68k-xdep.c, pyr-tdep.c,
+	pyr-xdep.c, rs6000-xdep.c, sparc-xdep.c, sun3-xdep.c, sun386-xdep.c,
+	symm-xdep.c, ultra3-xdep.c:  Use PTRACE_ARG3_TYPE to cast ptrace
+	argument 3.
+	* sparc-xdep.c, a68v-xdep.c (fetch_inferior_registers,
+	store_inferior_registers): Supply missing fourth argument to
+	ptrace().
+
 Mon Jun 22 20:18:06 1992  Fred Fish  (fnf@cygnus.com)
 
 	* command.c (add_abbrev_prefix_cmd):  Fix misspelling in comment.

@@ -36,9 +36,11 @@ fetch_inferior_registers ()
 
   registers_fetched ();
   
-  ptrace (PTRACE_GETREGS, inferior_pid, &inferior_registers);
+  ptrace (PTRACE_GETREGS, inferior_pid,
+	  (PTRACE_ARG3_TYPE) &inferior_registers, 0);
 #ifdef FP0_REGNUM
-  ptrace (PTRACE_GETFPREGS, inferior_pid, &inferior_fp_registers);
+  ptrace (PTRACE_GETFPREGS, inferior_pid,
+	  (PTRACE_ARG3_TYPE) &inferior_fp_registers, 0);
 #endif 
   
   bcopy (&inferior_registers, registers, 16 * 4);
@@ -82,9 +84,11 @@ store_inferior_registers (regno)
 	 sizeof inferior_fp_registers - sizeof inferior_fp_registers.fps_regs);
 #endif
 
-  ptrace (PTRACE_SETREGS, inferior_pid, &inferior_registers);
+  ptrace (PTRACE_SETREGS, inferior_pid,
+	  (PTRACE_ARG3_TYPE) &inferior_registers, 0);
 #if FP0_REGNUM
-  ptrace (PTRACE_SETFPREGS, inferior_pid, &inferior_fp_registers);
+  ptrace (PTRACE_SETFPREGS, inferior_pid,
+	  (PTRACE_ARG3_TYPE) &inferior_fp_registers, 0);
 #endif
 }
 
