@@ -40,7 +40,7 @@ if ![regexp $cpus_expected $target_cpu] {
     regsub "^\[(\]" "$cpus_expected" "(${target_cpu}|" cpus_expected;
 }
 
-set want "BFD header file version.*srec.*header .* endian.*, data .* endian.*$cpus_expected"
+set want "BFD header file version.*srec\[^\n\]*\n\[^\n\]*header \[^\n\]*endian\[^\n\]*, data \[^\n\]*endian.*$cpus_expected"
 
 if [regexp $want $got] then {
     pass "objdump -i"
