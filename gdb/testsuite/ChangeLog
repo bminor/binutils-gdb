@@ -1,3 +1,12 @@
+Mon Jan 17 20:07:51 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gdb.disasm/hppa.s: Add new tests for sfu and copr instructions.
+	Enable "diag" instruction.  Delete copr from fpu_misc_tests, it's
+	in the copr tests now.
+	* gdb.disasm/hppa.exp: Run new sfu and copr tests.  Do not expect
+	copr in the fpu_misc tests anymore.  fpu_misc tests are no longer
+	expected to fail.
+
 Fri Jan 14 14:24:21 1994  Rob Savoye  (rob@darkstar.cygnus.com)
 
 	* gdb.t00/teststrategy.exp, gdb.t07/watchpoint.exp,
