@@ -64,7 +64,6 @@ ldglda29kUr.sc
 ldglda29kr.sc
 ldgld68k.sc
 ldgldr.sc
-ldgram.h
 ldgram.y
 ldlang.c
 ldlang.h
@@ -95,7 +94,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.11  1991/09/23 20:59:12  steve
+# Revision 1.12  1991/09/24 02:30:20  rich
+# ldgram.h is not cvs'd source.
+#
+# Revision 1.11  1991/09/23  20:59:12  steve
 # Cleaned it up for 88k
 #
 # Revision 1.5  1991/08/27  00:21:34  steve
