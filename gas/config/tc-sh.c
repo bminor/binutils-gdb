@@ -1712,7 +1712,7 @@ sh_do_align (n, fill, len)
 
       /* First align to a 2 byte boundary, in case there is an odd
          .byte.  */
-      frag_align (2, 0);
+      frag_align (1, 0);
       if (target_big_endian)
 	frag_align_pattern (n, big_nop_pattern, sizeof big_nop_pattern);
       else

@@ -1,3 +1,7 @@
+Tue Mar  5 15:10:43 1996  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* config/tc-sh.c (sh_do_align): Pass 1 not 2 to frag_align.
+
 Mon Mar  4 20:50:57 1996  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* configure.in (i386-*-cygwin32): Don't use bfd_gas.
