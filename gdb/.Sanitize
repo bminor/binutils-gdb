@@ -216,7 +216,7 @@ m88k-nat.c
 m88k-tdep.c
 mac-defs.h
 mac-xdep.c
-macgdb.r
+mac-gdb.r
 main.c
 maint.c
 mdebugread.c
@@ -231,7 +231,7 @@ mipsread.c
 monitor.h
 monitor.c
 mpw-config.in
-mpw-make.in
+mpw-make.sed
 news-xdep.c
 nindy-share
 nindy-tdep.c
