@@ -683,12 +683,21 @@ parse_primval ()
       write_exp_elt_type (builtin_type_int);
       write_exp_elt_opcode (UNOP_CAST);
       break;
+    case CARD:
+      parse_unary_call ();
+      write_exp_elt_opcode (UNOP_CARD);
+      break;
+    case MAX_TOKEN:
+      parse_unary_call ();
+      write_exp_elt_opcode (UNOP_CHMAX);
+      break;
+    case MIN_TOKEN:
+      parse_unary_call ();
+      write_exp_elt_opcode (UNOP_CHMIN);
+      break;
     case PRED:      op_name = "PRED"; goto unimplemented_unary_builtin;
     case SUCC:      op_name = "SUCC"; goto unimplemented_unary_builtin;
     case ABS:       op_name = "ABS";  goto unimplemented_unary_builtin;
-    case CARD:      op_name = "CARD"; goto unimplemented_unary_builtin;
-    case MAX_TOKEN: op_name = "MAX";  goto unimplemented_unary_builtin;
-    case MIN_TOKEN: op_name = "MIN";  goto unimplemented_unary_builtin;
     unimplemented_unary_builtin:
       parse_unary_call ();
       error ("not implemented:  %s builtin function", op_name);
@@ -1404,23 +1413,67 @@ static enum ch_terminal
 match_string_literal ()
 {
   char *tokptr = lexptr;
+  int in_ctrlseq = 0;
+  LONGEST ival;
 
   for (tempbufindex = 0, tokptr++; *tokptr != '\0'; tokptr++)
     {
       CHECKBUF (1);
-      if (*tokptr == *lexptr)
+    tryagain: ;
+      if (in_ctrlseq)
+	{
+	  /* skip possible whitespaces */
+	  while ((*tokptr == ' ' || *tokptr == '\t') && *tokptr)
+	    tokptr++;
+	  if (*tokptr == ')')
+	    {
+	      in_ctrlseq = 0;
+	      tokptr++;
+	      goto tryagain;
+	    }
+	  else if (*tokptr != ',')
+	    error ("Invalid control sequence");
+	  tokptr++;
+	  /* skip possible whitespaces */
+	  while ((*tokptr == ' ' || *tokptr == '\t') && *tokptr)
+	    tokptr++;
+	  if (!decode_integer_literal (&ival, &tokptr))
+	    error ("Invalid control sequence");
+	  tokptr--;
+	}
+      else if (*tokptr == *lexptr)
 	{
 	  if (*(tokptr + 1) == *lexptr)
 	    {
-	      tokptr++;
+	      ival = *tokptr++;
 	    }
 	  else
 	    {
 	      break;
 	    }
 	}
-      tempbuf[tempbufindex++] = *tokptr;
+      else if (*tokptr == '^')
+	{
+	  if (*(tokptr + 1) == '(')
+	    {
+	      in_ctrlseq = 1;
+	      tokptr += 2;
+	      if (!decode_integer_literal (&ival, &tokptr))
+		error ("Invalid control sequence");
+	      tokptr--;
+	    }
+	  else if (*(tokptr + 1) == '^')
+	    ival = *tokptr++;
+	  else
+	    error ("Invalid control sequence");
+	}
+      else
+	ival = *tokptr;
+      tempbuf[tempbufindex++] = ival;
     }
+  if (in_ctrlseq)
+    error ("Invalid control sequence");
+
   if (*tokptr == '\0'					/* no terminator */
       || (tempbufindex == 1 && *tokptr == '\''))	/* char literal */
     {
@@ -1448,12 +1501,6 @@ match_string_literal ()
 
    Note that more than a single character, enclosed in single quotes, is
    a string literal.
-
-   Also note that the control sequence form is not in GNU Chill since it
-   is ambiguous with the string literal form using single quotes.  I.E.
-   is '^(7)' a character literal or a string literal.  In theory it it
-   possible to tell by context, but GNU Chill doesn't accept the control
-   sequence form, so neither do we (for now the code is disabled).
 
    Returns CHARACTER_LITERAL if a match is found.
    */
@@ -1483,28 +1530,39 @@ match_character_literal ()
       /* Determine which form we have, either a control sequence or the
 	 single character form. */
       
-      if ((*tokptr == '^') && (*(tokptr + 1) == '('))
+      if (*tokptr == '^')
 	{
-#if 0     /* Disable, see note above. -fnf */
-	  /* Match and decode a control sequence.  Return zero if we don't
-	     find a valid integer literal, or if the next unconsumed character
-	     after the integer literal is not the trailing ')'.
-	     FIXME:  We currently don't handle the multiple integer literal
-	     form. */
-	  tokptr += 2;
-	  if (!decode_integer_literal (&ival, &tokptr) || (*tokptr++ != ')'))
+	  if (*(tokptr + 1) == '(')
 	    {
-	      return (0);
+	      /* Match and decode a control sequence.  Return zero if we don't
+		 find a valid integer literal, or if the next unconsumed character
+		 after the integer literal is not the trailing ')'. */
+	      tokptr += 2;
+	      if (!decode_integer_literal (&ival, &tokptr) || (*tokptr++ != ')'))
+		{
+		  return (0);
+		}
 	    }
-#else
-	  return (0);
-#endif
+	  else if (*(tokptr + 1) == '^')
+	    {
+	      ival = *tokptr;
+	      tokptr += 2;
+	    }
+	  else
+	    /* fail */
+	    error ("Invalid control sequence");
+	}
+      else if (*tokptr == '\'')
+	{
+	  /* this must be duplicated */
+	  ival = *tokptr;
+	  tokptr += 2;
 	}
       else
 	{
 	  ival = *tokptr++;
 	}
-      
+
       /* The trailing quote has not yet been consumed.  If we don't find
 	 it, then we have no match. */
       
@@ -1618,7 +1676,8 @@ match_bitstring_literal ()
 	    digit += 10;
 	    break;
 	  default:
-	    error ("Invalid character in bitstring or integer.");
+	    /* this is not a bitstring literal, probably an integer */
+	    return 0;
 	}
       if (digit >= 1 << bits_per_char)
 	{

@@ -1191,6 +1191,8 @@ value_in (element, set)
   int member;
   struct type *settype = check_typedef (VALUE_TYPE (set));
   struct type *eltype = check_typedef (VALUE_TYPE (element));
+  if (TYPE_CODE (eltype) == TYPE_CODE_RANGE)
+    eltype = TYPE_TARGET_TYPE (eltype);
   if (TYPE_CODE (settype) != TYPE_CODE_SET)
     error ("Second argument of 'IN' has wrong type");
   if (TYPE_CODE (eltype) != TYPE_CODE_INT
@@ -1202,7 +1204,7 @@ value_in (element, set)
 			    value_as_long (element));
   if (member < 0)
     error ("First argument of 'IN' not in range");
-  return value_from_longest (builtin_type_int, member);
+  return value_from_longest (builtin_type_chill_bool, member);
 }
 
 void

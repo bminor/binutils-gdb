@@ -1,3 +1,23 @@
+Tue Mar  5 23:48:36 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+
+	* ch-exp.c (parse_primval): Handle CARD, MAX, MIN.
+	(match_string_literal): Handle control sequence.
+	(match_character_literal): Deto.
+
+	* ch-lang.c (chill_printchar): Change formating of nonprintable
+	characters from C'xx' to ^(num).
+	(chill_printstr): Deto.
+	(value_chill_card, value_chill_max_min): New functions to process
+	Chill's CARD, MAX, MIN.
+	(evaluate_subexp_chill): Process UNOP_CARD, UNOP_CHMAX, UNOP_CHMIN.
+
+	* expression.h (exp_opcode): Add UNOP_CARD, UNOP_CHMAX, UNOP_CHMIN
+	for Chill's CARD, MAX, MIN.
+
+	* valarith.c (value_in): Add processing of TYPE_CODE_RANGE
+	and change return type from builtin_type_int to
+	builtin_type_chill_bool.
+
 Tue Mar  5 18:54:04 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* config/nm-nbsd.h (link_object, lo_name, etc): Move to here

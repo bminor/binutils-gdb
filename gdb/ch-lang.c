@@ -68,11 +68,14 @@ chill_printchar (c, stream)
 
   if (PRINT_LITERAL_FORM (c))
     {
-      fprintf_filtered (stream, "'%c'", c);
+      if (c == '\'' || c == '^')
+	fprintf_filtered (stream, "'%c%c'", c, c);
+      else
+	fprintf_filtered (stream, "'%c'", c);
     }
   else
     {
-      fprintf_filtered (stream, "C'%.2x'", (unsigned int) c);
+      fprintf_filtered (stream, "'^(%u)'", (unsigned int) c);
     }
 }
 
@@ -138,6 +141,8 @@ chill_printstr (stream, string, length, force_ellipses)
 	{
 	  if (in_control_form || in_literal_form)
 	    {
+	      if (in_control_form)
+		fputs_filtered (")", stream);
 	      fputs_filtered ("\"//", stream);
 	      in_control_form = in_literal_form = 0;
 	    }
@@ -149,19 +154,23 @@ chill_printstr (stream, string, length, force_ellipses)
 	}
       else
 	{
+	  if (! in_literal_form && ! in_control_form)
+	    fputs_filtered ("\"", stream);
 	  if (PRINT_LITERAL_FORM (c))
 	    {
 	      if (!in_literal_form)
 		{
 		  if (in_control_form)
 		    {
-		      fputs_filtered ("\"//", stream);
+		      fputs_filtered (")", stream);
 		      in_control_form = 0;
 		    }
-		  fputs_filtered ("\"", stream);
 		  in_literal_form = 1;
 		}
 	      fprintf_filtered (stream, "%c", c);
+	      if (c == '"' || c == '^')
+		/* duplicate this one as must be done at input */
+		fprintf_filtered (stream, "%c", c);
 	    }
 	  else
 	    {
@@ -169,19 +178,25 @@ chill_printstr (stream, string, length, force_ellipses)
 		{
 		  if (in_literal_form)
 		    {
-		      fputs_filtered ("\"//", stream);
 		      in_literal_form = 0;
 		    }
-		  fputs_filtered ("c\"", stream);
+		  fputs_filtered ("^(", stream);
 		  in_control_form = 1;
 		}
-	      fprintf_filtered (stream, "%.2x", c);
+	      else
+		fprintf_filtered (stream, ",");
+	      c = c & 0xff;
+	      fprintf_filtered (stream, "%u", (unsigned int) c);
 	    }
 	  ++things_printed;
 	}
     }
 
   /* Terminate the quotes if necessary.  */
+  if (in_control_form)
+    {
+      fputs_filtered (")", stream);
+    }
   if (in_literal_form || in_control_form)
     {
       fputs_filtered ("\"", stream);
@@ -265,7 +280,9 @@ static const struct op_print chill_op_print_tab[] = {
     {"SIZE",UNOP_SIZEOF, PREC_BUILTIN_FUNCTION, 0},
     {"LOWER",UNOP_LOWER, PREC_BUILTIN_FUNCTION, 0},
     {"UPPER",UNOP_UPPER, PREC_BUILTIN_FUNCTION, 0},
-    {"LOWER",UNOP_UPPER, PREC_BUILTIN_FUNCTION, 0},
+    {"CARD",UNOP_CARD, PREC_BUILTIN_FUNCTION, 0},
+    {"MAX",UNOP_CHMAX, PREC_BUILTIN_FUNCTION, 0},
+    {"MIN",UNOP_CHMIN, PREC_BUILTIN_FUNCTION, 0},
     {":=",  BINOP_ASSIGN, PREC_ASSIGN, 1},
     {"=",   BINOP_EQUAL, PREC_EQUAL, 0},
     {"/=",  BINOP_NOTEQUAL, PREC_EQUAL, 0},
@@ -391,6 +408,86 @@ value_chill_length (val)
 }
 
 static value_ptr
+value_chill_card (val)
+     value_ptr val;
+{
+  LONGEST tmp = 0;
+  struct type *type = VALUE_TYPE (val);
+  CHECK_TYPEDEF (type);
+
+  if (TYPE_CODE (type) == TYPE_CODE_SET)
+    {
+      struct type *range_type = TYPE_INDEX_TYPE (type);
+      LONGEST lower_bound, upper_bound;
+      int i;
+
+      get_discrete_bounds (range_type, &lower_bound, &upper_bound);
+      for (i = lower_bound; i <= upper_bound; i++)
+	if (value_bit_index (type, VALUE_CONTENTS (val), i) > 0)
+	  tmp++;
+    }
+  else
+    error ("bad argument to CARD builtin");
+
+  return value_from_longest (builtin_type_int, tmp);
+}
+
+static value_ptr
+value_chill_max_min (op, val)
+     enum exp_opcode op;
+     value_ptr val;
+{
+  LONGEST tmp = 0;
+  struct type *type = VALUE_TYPE (val);
+  struct type *elttype;
+  CHECK_TYPEDEF (type);
+
+  if (TYPE_CODE (type) == TYPE_CODE_SET)
+    {
+      LONGEST lower_bound, upper_bound;
+      int i, empty = 1;
+
+      elttype = TYPE_INDEX_TYPE (type);
+      CHECK_TYPEDEF (elttype);
+      get_discrete_bounds (elttype, &lower_bound, &upper_bound);
+
+      if (op == UNOP_CHMAX)
+	{
+	  for (i = upper_bound; i >= lower_bound; i--)
+	    {
+	      if (value_bit_index (type, VALUE_CONTENTS (val), i) > 0)
+		{
+		  tmp = i;
+		  empty = 0;
+		  break;
+		}
+	    }
+	}
+      else
+	{
+	  for (i = lower_bound; i <= upper_bound; i++)
+	    {
+	      if (value_bit_index (type, VALUE_CONTENTS (val), i) > 0)
+		{
+		  tmp = i;
+		  empty = 0;
+		  break;
+		}
+	    }
+	}
+      if (empty)
+	error ("%s for empty powerset", op == UNOP_CHMAX ? "MAX" : "MIN");
+    }
+  else
+    error ("bad argument to %s builtin", op == UNOP_CHMAX ? "MAX" : "MIN");
+
+  return value_from_longest (TYPE_CODE (elttype) == TYPE_CODE_RANGE
+			       ? TYPE_TARGET_TYPE (elttype)
+			       : elttype,
+			     tmp);
+}
+
+static value_ptr
 evaluate_subexp_chill (expect_type, exp, pos, noside)
      struct type *expect_type;
      register struct expression *exp;
@@ -476,6 +573,17 @@ evaluate_subexp_chill (expect_type, exp, pos, noside)
       (*pos)++;
       arg1 = (*exp->language_defn->evaluate_exp) (NULL_TYPE, exp, pos, noside);
       return value_chill_length (arg1);
+
+    case UNOP_CARD:
+      (*pos)++;
+      arg1 = (*exp->language_defn->evaluate_exp) (NULL_TYPE, exp, pos, noside);
+      return value_chill_card (arg1);
+
+    case UNOP_CHMAX:
+    case UNOP_CHMIN:
+      (*pos)++;
+      arg1 = (*exp->language_defn->evaluate_exp) (NULL_TYPE, exp, pos, noside);
+      return value_chill_max_min (op, arg1);
 
     case BINOP_COMMA:
       error ("',' operator used in invalid context");
