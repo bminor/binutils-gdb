@@ -1,5 +1,7 @@
 Thu Oct  5 20:17:30 1995  Ken Raeburn  <raeburn@cygnus.com>
 
+	* sb.c, macro.c: Include string.h.
+
 	* Makefile.in (comparison): Only check *.o; we don't care if
 	timestamps inserted by the native linker differ.
 

@@ -23,6 +23,7 @@
 
 #include "config.h"
 #include <stdio.h>
+#include <string.h>
 #include <ctype.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -112,6 +113,10 @@ static int macro_alternate;
 
 static int macro_mri;
 
+/* Whether we should strip '@' characters.  */
+
+static int macro_strip_at;
+
 /* Function to use to parse an expression.  */
 
 static int (*macro_expr) PARAMS ((const char *, int, sb *, int *));
@@ -123,15 +128,17 @@ static int macro_number;
 /* Initialize macro processing.  */
 
 void
-macro_init (alternate, mri, expr)
+macro_init (alternate, mri, strip_at, expr)
      int alternate;
      int mri;
+     int strip_at;
      int (*expr) PARAMS ((const char *, int, sb *, int *));
 {
   macro_hash = hash_new ();
   macro_defined = 0;
   macro_alternate = alternate;
   macro_mri = mri;
+  macro_strip_at = strip_at;
   macro_expr = expr;
 }
 
@@ -469,6 +476,7 @@ do_formals (macro, idx, in)
   if (macro_mri)
     {
       formal_entry *formal;
+      const char *name;
 
       /* Add a special NARG formal, which macro_expand will set to the
          number of arguments.  */
@@ -478,10 +486,17 @@ do_formals (macro, idx, in)
       sb_new (&formal->def);
       sb_new (&formal->actual);
 
-      sb_add_string (&formal->name, "NARG");
+      /* The same MRI assemblers which treat '@' characters also use
+         the name $NARG.  At least until we find an exception.  */
+      if (macro_strip_at)
+	name = "$NARG";
+      else
+	name = "NARG";
+
+      sb_add_string (&formal->name, name);
 
       /* Add to macro's hash table */
-      hash_jam (macro->formal_hash, "NARG", formal);
+      hash_jam (macro->formal_hash, name, formal);
 
       formal->index = NARG_INDEX;
       *p = formal;
@@ -533,7 +548,7 @@ define_macro (idx, in, label, get_line)
   else
     {
       idx = get_token (idx, in, &name);
-      idx = sb_skip_white (idx, in);
+      idx = sb_skip_comma (idx, in);
       idx = do_formals (macro, idx, in);
     }
 
@@ -558,7 +573,8 @@ get_apost_token (idx, in, name, kind)
      int kind;
 {
   idx = get_token (idx, in, name);
-  if (idx < in->len && in->ptr[idx] == kind && ! macro_mri)
+  if (idx < in->len && in->ptr[idx] == kind
+      && (! macro_mri || macro_strip_at))
     idx++;
   return idx;
 }
@@ -709,7 +725,10 @@ macro_expand_body (in, out, formals, formal_hash, comment_char, locals)
       else if ((macro_alternate || macro_mri)
 	       && (isalpha ((unsigned char) in->ptr[src])
 		   || in->ptr[src] == '_'
-		   || in->ptr[src] == '$'))
+		   || in->ptr[src] == '$')
+	       && (! inquote
+		   || ! macro_strip_at
+		   || (src > 0 && in->ptr[src - 1] == '@')))
 	{
 	  if (! locals
 	      || src + 5 >= in->len
@@ -717,7 +736,9 @@ macro_expand_body (in, out, formals, formal_hash, comment_char, locals)
 	      || ! ISWHITE (in->ptr[src + 5]))
 	    {
 	      sb_reset (&t);
-	      src = sub_actual (src, in, &t, formal_hash, '\'', out, 1);
+	      src = sub_actual (src, in, &t, formal_hash,
+				(macro_strip_at && inquote) ? '@' : '\'',
+				out, 1);
 	    }
 	  else
 	    {
@@ -768,6 +789,16 @@ macro_expand_body (in, out, formals, formal_hash, comment_char, locals)
 	  inquote = !inquote;
 	  sb_add_char (out, in->ptr[src++]);
 	}
+      else if (in->ptr[src] == '@' && macro_strip_at)
+	{
+	  ++src;
+	  if (src < in->len
+	      && in->ptr[src] == '@')
+	    {
+	      sb_add_char (out, '@');
+	      ++src;
+	    }
+	}
       else if (macro_mri
 	       && in->ptr[src] == '='
 	       && src + 1 < in->len
@@ -805,6 +836,7 @@ macro_expand_body (in, out, formals, formal_hash, comment_char, locals)
       formal_entry *f;
 
       f = loclist->next;
+      hash_delete (formal_hash, sb_terminate (&loclist->name));
       sb_kill (&loclist->name);
       sb_kill (&loclist->def);
       sb_kill (&loclist->actual);
@@ -944,7 +976,15 @@ macro_expand (idx, in, m, out, comment_char)
 	  while (f != NULL && f->index < 0);
 	}
 
-      idx = sb_skip_comma (idx, in);
+      if (! macro_mri)
+	idx = sb_skip_comma (idx, in);
+      else
+	{
+	  if (in->ptr[idx] == ',')
+	    ++idx;
+	  if (ISWHITE (in->ptr[idx]))
+	    break;
+	}
     }
 
   if (macro_mri)
@@ -952,7 +992,7 @@ macro_expand (idx, in, m, out, comment_char)
       char buffer[20];
 
       sb_reset (&t);
-      sb_add_string (&t, "NARG");
+      sb_add_string (&t, macro_strip_at ? "$NARG" : "NARG");
       ptr = (formal_entry *) hash_find (m->formal_hash, sb_terminate (&t));
       sb_reset (&ptr->actual);
       sprintf (buffer, "%d", narg);
@@ -1045,6 +1085,15 @@ check_macro (line, expand, comment_char, error)
   return 1;
 }
 
+/* Delete a macro.  */
+
+void
+delete_macro (name)
+     const char *name;
+{
+  hash_delete (macro_hash, name);
+}
+
 /* Handle the MRI IRP and IRPC pseudo-ops.  These are handled as a
    combined macro definition and execution.  This returns NULL on
    success, or an error message otherwise.  */
@@ -1103,12 +1152,25 @@ expand_irp (irpc, idx, in, out, get_line, comment_char)
     }
   else
     {
+      if (irpc && in->ptr[idx] == '"')
+	++idx;
       while (idx < in->len && in->ptr[idx] != comment_char)
 	{
 	  if (!irpc)
 	    idx = get_any_string (idx, in, &f.actual, 1, 0);
 	  else
 	    {
+	      if (in->ptr[idx] == '"')
+		{
+		  int nxt;
+
+		  nxt = sb_skip_white (idx + 1, in);
+		  if (nxt >= in->len || in->ptr[nxt] == comment_char)
+		    {
+		      idx = nxt;
+		      break;
+		    }
+		}
 	      sb_reset (&f.actual);
 	      sb_add_char (&f.actual, in->ptr[idx]);
 	      ++idx;

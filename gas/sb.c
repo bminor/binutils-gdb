@@ -23,6 +23,8 @@
 
 #include "config.h"
 #include <stdio.h>
+#include <string.h>
+#include "libiberty.h"
 #include "sb.h"
 
 /* These routines are about manipulating strings.
@@ -63,7 +65,6 @@ sb_build (ptr, size)
   /* see if we can find one to allocate */
   sb_element *e;
 
-#undef abort
   if (size > sb_max_power_two)
     abort ();
 
