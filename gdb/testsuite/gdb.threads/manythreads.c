@@ -24,6 +24,7 @@
 
 #include <pthread.h>
 #include <stdio.h>
+#include <limits.h>
 
 void *
 thread_function (void *arg)
@@ -43,6 +44,7 @@ main (int argc, char **argv)
   int i, j;
 
   pthread_attr_init (&attr);
+  pthread_attr_setstacksize (&attr, PTHREAD_STACK_MIN);
 
   /* Create a ton of quick-executing threads, then wait for them to
      complete.  */

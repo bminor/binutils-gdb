@@ -1,3 +1,7 @@
+2004-04-23  Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.threads/manythreads.c: Reduce thread stack size.
+
 2004-04-23  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdb.threads/manythreads.c: Add copyright notice.
