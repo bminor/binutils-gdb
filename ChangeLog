@@ -1,3 +1,16 @@
+Mon Nov 13 12:34:20 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* config.sub: Accept pmac and pmac-mpw as names for PowerMacs,
+ 	accept mpw and mac-mpw as names for m68k Macs, change macos7 to
+ 	just macos.
+	* configure.in: Configure grez resource compiler if targeting Mac.
+	* Makefile.in (all-grez, install-grez): New targets.
+
+Wed Nov  8 17:33:51 1995  Jason Merrill  <jason@yorick.cygnus.com>
+
+	* configure: CXX defaults to gcc, not g++.  If we find
+ 	gcc in the path, set CC to gcc -O2.
+
 Tue Nov  7 15:45:17 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Default ${build} correctly.  Avoid picking up extra
@@ -161,7 +174,7 @@ Thu Oct 19 10:40:57 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 Wed Oct 18 15:53:56 1995  steve chamberlain  <sac@slash.cygnus.com>
 
-	* winsup. New directory.
+	* winsup: New directory.
 	* Makefile.in: Build winsup.
 	* configure.in: Winsup is configured when target is win32.
 	Can only build win32 target GDB when native.
@@ -717,7 +730,7 @@ Sat Feb  4 12:11:35 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 Fri Feb  3 11:54:42 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
-	* Makefile.in (source-vault, binary-vault): New targets
+	* Makefile.in (source-vault, binary-vault): New targets.
 
 Thu Jan 26 13:00:11 1995  Michael Meissner  <meissner@cygnus.com>
 

@@ -394,6 +394,7 @@ ALL_MODULES = \
 	all-gawk \
 	all-gprof \
 	all-grep \
+	all-grez \
 	all-gzip \
 	all-hello \
 	all-indent \
@@ -498,6 +499,7 @@ INSTALL_MODULES = \
 	install-gawk \
 	install-gprof \
 	install-grep \
+	install-grez \
 	install-gzip \
 	install-hello \
 	install-indent \
@@ -859,8 +861,15 @@ $(CONFIGURE_TARGET_MODULES):
 	    LD="$(LD_FOR_TARGET)"; export LD; \
 	    NM="$(NM_FOR_TARGET)"; export NM; \
 	    RANLIB="$(RANLIB_FOR_TARGET)"; export RANLIB; \
+	    echo Configuring in $(TARGET_SUBDIR)/$${dir}; \
 	    cd $(TARGET_SUBDIR)/$${dir}; \
-	    $${srcroot}/configure $(CONFIG_ARGUMENTS) --srcdir=$${srcroot}/$${dir}; \
+	    if [ -f $${srcroot}/$${dir}/configure ] ; then \
+	      $${srcroot}/$${dir}/configure \
+		$(CONFIG_ARGUMENTS) --srcdir=$${srcroot}/$${dir}; \
+	    else \
+	      $${srcroot}/configure \
+		$(CONFIG_ARGUMENTS) --srcdir=$${srcroot}/$${dir}; \
+	    fi; \
 	  else \
 	    true; \
 	  fi \
@@ -1023,6 +1032,7 @@ all-gcc: all-libiberty all-byacc all-binutils all-gas all-ld
 all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-byacc all-sim $(gdbnlmrequirements)
 all-gprof: all-libiberty all-bfd
 all-grep: all-libiberty
+all-grez: all-libiberty all-bfd
 all-gui: all-gdb all-libproc all-target-librx
 all-gzip: all-libiberty
 all-hello: all-libiberty

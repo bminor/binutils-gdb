@@ -502,9 +502,14 @@ case "${target}" in
     noconfigdirs="$noconfigdirs target-newlib"
     ;;
   *-*-lynxos*)
-     # Newlib makes problems for libg++ in crosses.
-     noconfigdirs="$noconfigdirs target-newlib"
-     ;;    
+    # Newlib makes problems for libg++ in crosses.
+    noconfigdirs="$noconfigdirs target-newlib"
+    ;; 
+  *-*-macos* | \
+  *-*-mpw*)
+    # Macs want a resource compiler.
+    configdirs="$configdirs grez"
+    ;;    
 esac
 
 # If we are building a Canadian Cross, discard tools that can not be built
