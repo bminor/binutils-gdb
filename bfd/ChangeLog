@@ -1,3 +1,8 @@
+Wed Jan 11 14:36:41 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* linker.c (_bfd_generic_link_add_one_symbol): Ignore
+	redefinitions of an absolute symbol to the same value.
+
 Mon Jan  9 15:51:32 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* elfcode.h (elf_link_add_object_symbols): It's reasonable for no

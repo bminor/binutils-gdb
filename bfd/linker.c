@@ -867,6 +867,9 @@ _bfd_generic_link_add_archive_symbols (abfd, info, checkfn)
 
   if (! bfd_has_map (abfd))
     {
+      /* An empty archive is a special case.  */
+      if (bfd_openr_next_archived_file (abfd, (bfd *) NULL) == NULL)
+	return true;
       bfd_set_error (bfd_error_no_symbols);
       return false;
     }
@@ -1639,7 +1642,15 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	      default:
 		abort ();
 	      }
-	      
+
+	    /* Ignore a redefinition of an absolute symbol to the same
+               value; it's harmless.  */
+	    if (h->type == bfd_link_hash_defined
+		&& bfd_is_abs_section (msec)
+		&& bfd_is_abs_section (section)
+		&& value == mval)
+	      break;
+
 	    if (! ((*info->callbacks->multiple_definition)
 		   (info, name, msec->owner, msec, mval, abfd, section,
 		    value)))
