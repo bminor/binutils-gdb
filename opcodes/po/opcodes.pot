@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 1998-04-27 14:22-0700\n"
+"POT-Creation-Date: 1998-11-02 15:30-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -14,60 +14,229 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: ENCODING\n"
 
-#: arm-dis.c:357
+#: alpha-opc.c:321
+msgid "branch operand unaligned"
+msgstr ""
+
+#: alpha-opc.c:344
+msgid "jump hint unaligned"
+msgstr ""
+
+#: arm-dis.c:362
 msgid "<illegal precision>"
 msgstr ""
 
-#: v850-dis.c:228
+#: cgen-asm.c:228
+msgid "unrecognized keyword/register name"
+msgstr ""
+
+#: cgen-asm.c:336 fr30-asm.c:312 m32r-asm.c:611
 #, c-format
-msgid "unknown operand shift: %x\n"
+msgid "operand out of range (%ld not between %ld and %ld)"
 msgstr ""
 
-#: v850-dis.c:240
+#: cgen-asm.c:357
 #, c-format
-msgid "unknown pop reg: %d\n"
+msgid "operand out of range (%lu not between %lu and %lu)"
 msgstr ""
 
-#: v850-opc.c:46
-msgid "displacement value is not in range and is not aligned"
+#: d30v-dis.c:305
+#, c-format
+msgid "<unknown register %d>"
 msgstr ""
 
-#: v850-opc.c:47
-msgid "displacement value is out of range"
+#. Can't happen.
+#: dis-buf.c:50
+#, c-format
+msgid "Unknown error %d\n"
 msgstr ""
 
-#: v850-opc.c:48
-msgid "displacement value is not aligned"
+#: dis-buf.c:55
+#, c-format
+msgid "Address 0x%x is out of bounds.\n"
 msgstr ""
 
-#: v850-opc.c:50
-msgid "immediate value is out of range"
+#: fr30-asm.c:91 m32r-asm.c:303
+#, c-format
+msgid "Unrecognized field %d while parsing.\n"
 msgstr ""
 
-#: v850-opc.c:61
-msgid "branch value not in range and to odd offset"
+#: fr30-asm.c:134 m32r-asm.c:433
+#, c-format
+msgid "Unrecognized field %d while building insn.\n"
 msgstr ""
 
-#: v850-opc.c:63 v850-opc.c:95
-msgid "branch value out of range"
+#: fr30-asm.c:299 m32r-asm.c:598
+#, c-format
+msgid "operand out of range (%lu not between 0 and %lu)"
 msgstr ""
 
-#: v850-opc.c:66 v850-opc.c:98
-msgid "branch to odd offset"
+#. We couldn't parse it.
+#: fr30-asm.c:512 fr30-asm.c:581 m32r-asm.c:811 m32r-asm.c:880
+msgid "unrecognized instruction"
 msgstr ""
 
-#: v850-opc.c:93
-msgid "branch value not in range and to an odd offset"
+#. Syntax char didn't match.  Can't be this insn.
+#. FIXME: would like to return something like
+#. "expected char `c'"
+#: fr30-asm.c:549 m32r-asm.c:848
+msgid "syntax error"
 msgstr ""
 
-#: v850-opc.c:322
-msgid "invalid register for stack adjustment"
+#: fr30-asm.c:575 m32r-asm.c:874
+msgid "junk at end of line"
 msgstr ""
 
-#: v850-opc.c:344
-msgid "immediate value not in range and not even"
+#: fr30-asm.c:719 m32r-asm.c:1018
+#, c-format
+msgid "bad instruction `%.50s...'"
 msgstr ""
 
-#: v850-opc.c:349
-msgid "immediate value must be even"
+#: fr30-asm.c:722 m32r-asm.c:1021
+#, c-format
+msgid "bad instruction `%.50s'"
+msgstr ""
+
+#: fr30-dis.c:101 m32r-dis.c:271
+#, c-format
+msgid "Unrecognized field %d while decoding insn.\n"
+msgstr ""
+
+#: fr30-dis.c:144 m32r-dis.c:385
+#, c-format
+msgid "Unrecognized field %d while printing insn.\n"
+msgstr ""
+
+#: fr30-opc.c:576 m32r-opc.c:2922
+#, c-format
+msgid "Unrecognized field %d while getting int operand.\n"
+msgstr ""
+
+#: fr30-opc.c:602 m32r-opc.c:3019
+#, c-format
+msgid "Unrecognized field %d while getting vma operand.\n"
+msgstr ""
+
+#: fr30-opc.c:632 m32r-opc.c:3120
+#, c-format
+msgid "Unrecognized field %d while setting int operand.\n"
+msgstr ""
+
+#: fr30-opc.c:655 m32r-opc.c:3214
+#, c-format
+msgid "Unrecognized field %d while setting vma operand.\n"
+msgstr ""
+
+#: h8300-dis.c:404
+#, c-format
+msgid "Hmmmm %x"
+msgstr ""
+
+#: h8300-dis.c:416
+#, c-format
+msgid "Don't understand %x \n"
+msgstr ""
+
+#: h8500-dis.c:139
+#, c-format
+msgid "can't cope with insert %d\n"
+msgstr ""
+
+#. Couldn't understand anything
+#: h8500-dis.c:344
+#, c-format
+msgid "%02x\t\t*unknown*"
+msgstr ""
+
+#: m10200-dis.c:199
+#, c-format
+msgid "unknown\t0x%02x"
+msgstr ""
+
+#: m10200-dis.c:339
+#, c-format
+msgid "unknown\t0x%04lx"
+msgstr ""
+
+#: m10300-dis.c:706
+#, c-format
+msgid "unknown\t0x%04x"
+msgstr ""
+
+#: m68k-dis.c:410
+#, c-format
+msgid "<internal error in opcode table: %s %s>\n"
+msgstr ""
+
+#: m68k-dis.c:967
+#, c-format
+msgid "<function code %d>"
+msgstr ""
+
+#: m88k-dis.c:273
+#, c-format
+msgid "# <dis error: %08x>"
+msgstr ""
+
+#: mips-dis.c:373
+#, c-format
+msgid "# internal error, undefined modifier(%c)"
+msgstr ""
+
+#. I and Z are output operands and can`t be immediate
+#. * A is an address and we can`t have the address of
+#. * an immediate either. We don't know how much to increase
+#. * aoffsetp by since whatever generated this is broken
+#. * anyway!
+#.
+#: ns32k-dis.c:618
+msgid "$<undefined>"
+msgstr ""
+
+#: ppc-opc.c:586 ppc-opc.c:617
+msgid "invalid conditional option"
+msgstr ""
+
+#: ppc-opc.c:619
+msgid "attempt to set y bit when using + or - modifier"
+msgstr ""
+
+#: ppc-opc.c:674
+msgid "ignoring least significant bits in branch offset"
+msgstr ""
+
+#: ppc-opc.c:709 ppc-opc.c:746
+msgid "illegal bitmask"
+msgstr ""
+
+#: ppc-opc.c:815
+msgid "value out of range"
+msgstr ""
+
+#: ppc-opc.c:889
+msgid "index register in load range"
+msgstr ""
+
+#: ppc-opc.c:904
+msgid "invalid register operand when updating"
+msgstr ""
+
+#. Mark as non-valid instruction
+#: sparc-dis.c:739
+msgid "unknown"
+msgstr ""
+
+#: sparc-dis.c:811
+#, c-format
+msgid "Internal error:  bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
+msgstr ""
+
+#: sparc-dis.c:822
+#, c-format
+msgid "Internal error: bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
+msgstr ""
+
+#: sparc-dis.c:871
+#, c-format
+msgid "Internal error: bad sparc-opcode.h: \"%s\" == \"%s\"\n"
 msgstr ""
