@@ -1,5 +1,13 @@
 2002-02-01  Alan Modra  <amodra@bigpond.net.au>
 
+	* configure.in (build_warnings): Add -Wstrict-prototypes
+	-Wmissing-prototypes.
+	* aclocal.m4: Regenerate.
+	* gconfig.in: Regenerate.
+	* configure: Regenerate.
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 	* alpha.c (alpha_find_call): Warning fixes.
 	* mips.c (mips_find_call): Likewise.
 	* sparc.c (sparc_find_call): Likewise.
