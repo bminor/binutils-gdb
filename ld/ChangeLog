@@ -1,3 +1,8 @@
+1999-09-03  Scott Bambrough  <scottb@netwinder.org>
+
+	* ld/configure.host: Added HOSTING_CRT0, HOSTING_LIBS for 
+	target "arm*-*-linux-gnu*"
+
 1999-09-04  Steve Chamberlain  <sac@pobox.com>
 
 	* configure.tgt (pjl-*-*, pj-*-*): New targets.

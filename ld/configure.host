@@ -35,6 +35,11 @@ alpha*-*-*)
   NATIVE_LIB_DIRS=/usr/ccs/lib
   ;;
 
+arm*-*-linux-gnu*)
+  HOSTING_CRT0='-p -dynamic-linker `fgrep ld-linux.so \`${CC} --print-file-name=specs\` | sed -e "s,.*-dynamic-linker[ 	][ 	]*\(.*/ld-linux.so..\).*,\1,"` `${CC} --print-file-name=crt1.o` `${CC} --print-file-name=crti.o` `if [ -f ../gcc/crtbegin.o ]; then echo ../gcc/crtbegin.o; else ${CC} --print-file-name=crtbegin.o; fi`'
+  HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi` -L`dirname \`${CC} --print-file-name=libc.so\`` -lc `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi` `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else ${CC} --print-file-name=crtend.o; fi` `${CC} --print-file-name=crtn.o`'
+  ;;
+
 i[3456]86-*-bsd* | i[3456]86-*-freebsd* | i[3456]86-*-netbsd*)
   # The new BSD `make' has a bug: it doesn't pass empty arguments in
   # shell commands.  So we need to make this value non-empty in order
