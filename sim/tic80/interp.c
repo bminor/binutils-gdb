@@ -211,7 +211,7 @@ tic80_trace_nop (int indx)
   if (!tic80_size_name)
     tic80_init_trace ();
 
-  sprintf (tic80_trace_buffer, "%s:", itable[indx].name);
+  sprintf (tic80_trace_buffer, "%s", itable[indx].name);
   return tic80_trace_buffer;
 }
 
@@ -225,7 +225,7 @@ tic80_trace_sink1 (int indx, unsigned32 input)
     tic80_init_trace ();
 
   sprintf (buf, "(%ld)", (long) (signed32) input);
-  sprintf (tic80_trace_buffer, "%-*s: 0x%.*lx %-*s",
+  sprintf (tic80_trace_buffer, "%-*s 0x%.*lx %-*s",
 	   tic80_size_name, itable[indx].name,
 	   SIZE_HEX, input, SIZE_DECIMAL, buf);
 
@@ -243,7 +243,7 @@ tic80_trace_sink2 (int indx, unsigned32 input1, unsigned32 input2)
 
   sprintf (buf1, "(%ld)", (long) (signed32) input1);
   sprintf (buf2, "(%ld)", (long) (signed32) input2);
-  sprintf (tic80_trace_buffer, "%-*s: 0x%.*lx %-*s 0x%.*lx %-*s",
+  sprintf (tic80_trace_buffer, "%-*s 0x%.*lx %-*s 0x%.*lx %-*s",
 	   tic80_size_name, itable[indx].name,
 	   SIZE_HEX, input1, SIZE_DECIMAL, buf1,
 	   SIZE_HEX, input2, SIZE_DECIMAL, buf2);
