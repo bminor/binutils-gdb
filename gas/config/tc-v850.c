@@ -500,6 +500,12 @@ md_assemble (str)
 		  fc++;
 		}
 	    }
+	  else if (register_name (&ex)
+		   && (operand->flags & V850_OPERAND_REG) == 0)
+	    {
+	      errmsg = "syntax error: register not expected";
+	      goto error;
+	    }
 	  else
 	    {
 		expression(&ex);
@@ -572,17 +578,8 @@ md_assemble (str)
 
   input_line_pointer = str;
 
-  /* Write out the instruction.  */
-  if ((insn & 0x0600) == 0x0600)
-    {
-      f = frag_more (4);
-      md_number_to_chars (f, insn, 4);
-    }
-  else
-    {
-      f = frag_more (2);
-      md_number_to_chars (f, insn, 2);
-    }
+  f = frag_more (opcode->size);
+  md_number_to_chars (f, insn, opcode->size);
 }
 
 
