@@ -926,20 +926,12 @@ run_stack_dummy (addr, buffer)
 
   discard_cleanups (old_cleanups);
 
+  /* We can stop during an inferior call because a signal is received. */
   if (stopped_by_random_signal)
-    {
-      /* If the inferior execution fails we need to restore our
-         stack.  It is not done by proceed() in this case. */
-      /* Pop the empty frame that contains the stack dummy.
-         POP_FRAME ends with a setting of the current frame, so we
-         can use that next. */
-      POP_FRAME;
-      return 1;
-    }
+    return 1;
     
   /* We may also stop prematurely because we hit a breakpoint in the
-     called routine.  We do not pop the frame as the user may wish
-     to single step or continue from there. */
+     called routine. */
   if (!stop_stack_dummy)
     return 2;
 

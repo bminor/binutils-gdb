@@ -75,6 +75,13 @@ static int auto_abandon = 0;
 #endif
 
 int overload_resolution = 0;
+
+/* This boolean tells what gdb should do if a signal is received while in
+   a function called from gdb (call dummy).  If set, gdb unwinds the stack
+   and restore the context to what as it was before the call.
+   The default is to stop in the frame where the signal was received. */
+
+int unwind_on_signal_p = 0;
 
 
 
@@ -1726,16 +1733,42 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	/* We stopped inside the FUNCTION because of a random signal.
 	   Further execution of the FUNCTION is not allowed. */
 
-	/* In this case, we must do the cleanups because we don't
-	   want the dummy anymore (the dummy frame has been poped already. */
-	do_cleanups (old_chain);
+        if (unwind_on_signal_p)
+	  {
+	    /* The user wants the context restored. */
 
-	/* FIXME: Insert a bunch of wrap_here; name can be very long if it's
-	   a C++ name with arguments and stuff.  */
-	error ("\
-The program being debugged stopped while in a function called from GDB.\n\
+            /* We must get back to the frame we were before the dummy call. */
+            POP_FRAME;
+
+	    /* FIXME: Insert a bunch of wrap_here; name can be very long if it's
+	       a C++ name with arguments and stuff.  */
+	    error ("\
+The program being debugged was signaled while in a function called from GDB.\n\
+GDB has restored the context to what it was before the call.\n\
+To change this behavior use \"set unwindonsignal off\"\n\
 Evaluation of the expression containing the function (%s) will be abandoned.",
-	       name);
+		   name);
+	  }
+	else
+	  {
+	    /* The user wants to stay in the frame where we stopped (default).*/
+
+	    /* If we did the cleanups, we would print a spurious error
+	       message (Unable to restore previously selected frame),
+	       would write the registers from the inf_status (which is
+	       wrong), and would do other wrong things.  */
+	    discard_cleanups (old_chain);
+	    discard_inferior_status (inf_status);
+
+	    /* FIXME: Insert a bunch of wrap_here; name can be very long if it's
+	       a C++ name with arguments and stuff.  */
+	    error ("\
+The program being debugged was signaled while in a function called from GDB.\n\
+GDB remains in the frame where the signal was received.\n\
+To change this behavior use \"set unwindonsignal on\"\n\
+Evaluation of the expression containing the function (%s) will be abandoned.",
+		   name);
+	  }
       }
 
     if (rc == 2)
@@ -3562,4 +3595,13 @@ _initialize_valops ()
      &showlist);
   overload_resolution = 1;
 
+  add_show_from_set (
+  add_set_cmd ("unwindonsignal", no_class, var_boolean,
+	       (char *) &unwind_on_signal_p,
+"Set unwinding of stack if a signal is received while in a call dummy.\n\
+The unwindonsignal lets the user determine what gdb should do if a signal\n\
+is received while in a function called from gdb (call dummy).  If set, gdb\n\
+unwinds the stack and restore the context to what as it was before the call.\n\
+The default is to stop in the frame where the signal was received.", &setlist),
+		     &showlist);
 }
