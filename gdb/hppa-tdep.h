@@ -104,6 +104,8 @@ enum unwind_stub_types
     IMPORT_SHLIB = 12,
   };
 
+struct unwind_table_entry *find_unwind_entry (CORE_ADDR);
+
 /* We use the objfile->obj_private pointer for two things:
  * 1.  An unwind table;
  *
@@ -133,5 +135,15 @@ struct hppa_objfile_private
   };
 
 extern const struct objfile_data *hppa_objfile_priv_data;
+
+int hppa_get_field (unsigned word, int from, int to);
+int hppa_extract_5_load (unsigned int);
+unsigned hppa_extract_5R_store (unsigned int);
+unsigned hppa_extract_5r_store (unsigned int);
+int hppa_extract_17 (unsigned int);
+int hppa_extract_21 (unsigned);
+int hppa_extract_14 (unsigned);
+int hppa_low_sign_extend (unsigned int, unsigned int);
+int hppa_sign_extend (unsigned int, unsigned int);
 
 #endif  /* HPPA_TDEP_H */

@@ -1,5 +1,29 @@
 2004-04-22  Randolph Chung  <tausq@debian.org>
 
+	* hppa-tdep.h (find_unwind_entry, hppa_get_field, hppa_extract_5_load)
+	(hppa_extract_5R_store, hppa_extract_5r_store, hppa_extract_17)
+	(hppa_extract_21, hppa_extract_14, hppa_low_sign_extend)
+	(hppa_sign_extend): Add prototype.
+	* hppa-tdep.c (get_field, extract_5_load, extract_5R_store)
+	(extract_5r_store, extract_17, extract_21, extract_14, low_sign_extend)
+	(sign_extend): Rename with hppa_ prefix and make non-static.  Other
+	hppa targets will also use these functions.
+	(find_unwind_entry): Remove prototype (moved to hppa-tdep.h).
+	(hppa_in_solib_call_trampoline, hppa_in_solib_return_trampoline)
+	(hppa_skip_trampoline_code): Move to hppa-hpux-tdep.c
+	(hppa_gdbarch_init): Remove gdbarch setting of 
+	skip_trampoline_code, in_solib_call_trampoline and
+	in_solib_return_trampoline.
+	* hppa-hpux-tdep.c (hppa32_hpux_in_solib_call_trampoline)
+	(hppa64_hpux_in_solib_call_trampoline): New functions, split from
+	hppa_in_solib_call_trampoline.
+	(hppa_hpux_in_solib_return_trampoline, hppa_hpux_skip_trampoline_code):
+	Moved from hppa-tdep.c.
+ 	(hppa_hpux_init_abi): Set gdbarch for skip_trampoline_code, 
+	in_solib_call_trampoline and in_solib_return_trampoline.
+
+2004-04-22  Randolph Chung  <tausq@debian.org>
+
 	* hppa-tdep.c (hppa_debug): New variable.
 	(find_unwind_entry, hppa_frame_cache): Add debug output.
 	(_initialize_hppa_tdep): Add command to set debug flag.
