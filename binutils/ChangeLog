@@ -1,3 +1,8 @@
+2002-12-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* README <building ar>: Don't use libibery's needed_list or
+	required_list, instead link libiberty/*.o.
+
 2002-11-23  Nick Clifton  <nickc@redhat.com>
 
 	* size.c (usage): Fix typo describing switch for hex format.
