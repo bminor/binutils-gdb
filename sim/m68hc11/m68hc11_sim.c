@@ -464,6 +464,9 @@ cpu_initialize (SIM_DESC sd, sim_cpu *cpu)
   cpu->cpu_use_elf_start = 0;
   cpu->cpu_elf_start     = 0;
   cpu->cpu_use_local_config = 0;
+  cpu->bank_start = 0;
+  cpu->bank_end   = 0;
+  cpu->bank_shift = 0;
   cpu->cpu_config        = M6811_NOSEC | M6811_NOCOP | M6811_ROMON |
     M6811_EEON;
   interrupts_initialize (sd, cpu);

@@ -1,3 +1,21 @@
+2003-08-08  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* sim-main.h (phys_to_virt): Use memory bank parameters to translate
+	the physical address in virtual address.
+	(struct _sim_cpu): Add memory bank members.
+	* m68hc11_sim.c (cpu_initialize): Clear memory bank parameters.
+	* interp.c (sim_hw_configure): Create memory bank according to memory
+	bank parameters.
+	(sim_get_bank_parameters): New function to obtain memory bank config
+	from the symbol table.
+	(sim_prepare_for_program): Call it to obtain the memory bank parameters.
+	(sim_open): Call sim_prepare_for_program.
+	* dv-m68hc11.c (m68hc11cpu_io_write_buffer): Use memory bank parameters
+	to check if address is within bank window.
+	(m68hc11cpu_io_read_buffer): Likewise.
+	(attach_m68hc11_regs): Map the memory bank according to memory bank
+	parameters.
+
 2003-08-08  Stephane Carrez  <stcarrez@nerim.fr>,
 
 	* sim-main.h (PAGE_REGNUM, Z_REGNUM): Use same numbering as gdb.
