@@ -3297,7 +3297,8 @@ psymtab_to_symtab_1 (pst, filename)
 			  &sh);
 	  name = debug_info->ss + fh->issBase + sh.iss;
 	  valu = sh.value;
-	  if (ECOFF_IS_STAB (&sh))
+	  /* XXX This is a hack.  It will go away!  */
+	  if (ECOFF_IS_STAB (&sh) || (name[0] == '#'))
 	    {
 	      int type_code = ECOFF_UNMARK_STAB (sh.index);
 
@@ -3307,6 +3308,12 @@ psymtab_to_symtab_1 (pst, filename)
 	      if (type_code & N_STAB)
 		{
 		  process_one_symbol (type_code, 0, valu, name,
+				      pst->section_offsets, pst->objfile);
+		}
+	      /* Similarly a hack.  */
+	      else if (name[0] == '#')
+		{
+		  process_one_symbol (N_SLINE, 0, valu, name,
 				      pst->section_offsets, pst->objfile);
 		}
 	      if (type_code == N_FUN)

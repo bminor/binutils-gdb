@@ -243,11 +243,6 @@ extern void ref_add PARAMS ((int, struct symbol *, char *, CORE_ADDR));
 
 extern struct symbol * ref_search PARAMS ((int));
 
-extern struct symbol * resolve_reference PARAMS ((char *p));
-
-extern int resolve_symbol_reference 
-  PARAMS ((struct objfile * objfile, struct symbol * sym, char * p));
-
 extern int resolve_cfront_continuation 
   PARAMS ((struct objfile * objfile, struct symbol * sym, char * p));
 

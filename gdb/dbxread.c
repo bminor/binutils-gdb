@@ -2411,10 +2411,6 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
       char *s;
       int refnum;
 
-      /* If defined, store away a pointer to the symbol;
-	 we'll use it later when we resolve references in
-	 "resolve_symbol_reference". */
-
       /* If this stab defines a new reference ID that is not on the
 	 reference list, then put it on the reference list.
 

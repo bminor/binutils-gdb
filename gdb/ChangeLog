@@ -1,5 +1,36 @@
 Wed Oct 22 13:04:52 1997  Jeffrey A Law  (law@cygnus.com)
 
+	* mdebugread.c (psymtab_to_symtab_1): Handle new live range stabs
+	entries.
+
+	* dbxread.c: More comment cleanups.
+	* stabsread.c: Fix various violations of the GNU coding and
+	formatting standards.  Update/add comments to make code clearer.
+	(resolve_reference): Delete unused function.
+	(ref_search_val): Remove function.  It didn't belong in stabsread.c
+	(resolve_live_range): No longer returns a value.  Do not add it
+	to the live range list until the entire range stab has been parsed.
+	(get_substring): Remove duplicate declaration.
+	(resolve_symbol_reference): Now static.  Remove unnecessary code
+	to deal with cleanups.
+	(ref_add): Use xrealloc instea of realloc.
+	(process_reference): Reorganize slightly to make clearer.
+	* stabsread.h (resolve_symbol_reference): Remove declaration.
+	(resolve_reference): Likewise.
+	* symtab.c (find_active_alias): New function.
+	(lookup_block_symbol): Use find_active_alias.
+	* symtab.h (struct range_list): Fix dangling struct live_range
+	reference.
+	(ref_search_val): Remove decl.
+
+	* symtab.h (struct range_list): Renamed from struct live_range.
+	(struct symbol): Remove struct live_range_info substruct.
+	Bring the alias list and range list fields up to the toplevel
+	as "aliases" and "ranges".
+	(SYMBOL_ALIASES, SYMBOL_RANGES): Corresponding changes.
+	(SYMBOL_RANGE_START, SYMBOL_RANGE_END, SYMBOL_RANGE_NEXT): Delete.
+	* stabsread.c: Corresponding changes.
+
 	* dbxread.c: Fix various violations of the GNU coding and
 	formatting standards.  Update/add comments to make code
 	clearer.
