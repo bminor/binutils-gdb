@@ -1,5 +1,8 @@
 2004-05-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* vax-tdep.c (vax_frame_num_args): Use get_frame_base_address
+	instead of get_frame_base.
+
 	* i386bsd-nat.c (supply_gregset): Use regcache_raw_supply.
 	(fill_gregset): Use regcache_raw_collect.
 

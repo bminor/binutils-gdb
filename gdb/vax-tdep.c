@@ -429,7 +429,7 @@ vax_frame_num_args (struct frame_info *frame)
 
   /* Assume that the argument pointer for the outermost frame is
      hosed, as is the case on NetBSD/vax ELF.  */
-  if (get_frame_base (frame) == 0)
+  if (get_frame_base_address (frame) == 0)
     return 0;
 
   args = get_frame_register_unsigned (frame, VAX_AP_REGNUM);
