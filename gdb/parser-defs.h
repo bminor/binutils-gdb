@@ -49,17 +49,6 @@ struct block *block_found;
 /* Number of arguments seen so far in innermost function call.  */
 int arglist_len;
 
-/* Data structure for saving values of arglist_len
-   for function calls whose arguments contain other function calls.  */
-
-struct funcall
-  {
-    struct funcall *next;
-    int arglist_len;
-  };
-
-struct funcall *funcall_chain;
-
 /* A string token, either a char-string or bit-string.  Char-strings are
    used, for example, for the names of symbols. */
 
@@ -128,9 +117,6 @@ start_arglist PARAMS ((void));
 
 extern int
 end_arglist PARAMS ((void));
-
-extern void
-free_funcalls PARAMS ((void));
 
 extern char *
 copy_name PARAMS ((struct stoken));

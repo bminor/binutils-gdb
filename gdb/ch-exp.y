@@ -1420,7 +1420,7 @@ match_character_literal ()
       
       if ((*tokptr == '^') && (*(tokptr + 1) == '('))
 	{
-	  return (0);  /* Disable, see note above. */
+#if 0     /* Disable, see note above. -fnf */
 	  /* Match and decode a control sequence.  Return zero if we don't
 	     find a valid integer literal, or if the next unconsumed character
 	     after the integer literal is not the trailing ')'.
@@ -1431,6 +1431,9 @@ match_character_literal ()
 	    {
 	      return (0);
 	    }
+#else
+	  return (0);
+#endif
 	}
       else
 	{

@@ -367,6 +367,8 @@ typedef struct mips_extra_func_info {
    multiple functions with the same SP that are at different stack levels. */
 
 #define SETUP_ARBITRARY_FRAME(argc, argv) setup_arbitrary_frame (argc, argv)
-extern struct frame_info *setup_arbitrary_frame ();
+/* FIXME:  Depends on equivalence between FRAME and "struct frame_info *",
+   and equivalence between CORE_ADDR and FRAME_ADDR. */
+extern struct frame_info *setup_arbitrary_frame PARAMS ((int, CORE_ADDR *));
 
 #define STAB_REG_TO_REGNUM(num) ((num) < 32 ? (num) : (num)+FP0_REGNUM-32)

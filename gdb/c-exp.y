@@ -128,7 +128,8 @@ static int
 parse_number PARAMS ((char *, int, int, YYSTYPE *));
 %}
 
-%type <voidval> exp exp1 type_exp start variable qualified_name
+%type <voidval> exp exp1 type_exp start variable qualified_name lcurly
+%type <lval> rcurly
 %type <tval> type typebase
 %type <tvec> nonempty_typelist
 /* %type <bval> block */
@@ -307,6 +308,10 @@ exp	:	exp '('
 			  write_exp_elt_opcode (OP_FUNCALL); }
 	;
 
+lcurly	:	'{'
+			{ start_arglist (); }
+	;
+
 arglist	:
 	;
 
@@ -318,18 +323,17 @@ arglist	:	arglist ',' exp   %prec ABOVE_COMMA
 			{ arglist_len++; }
 	;
 
-exp	:	'{' 
-			/* This is to save the value of arglist_len
-			   being accumulated by an outer function call.  */
-			{ start_arglist (); }
-		arglist '}'	%prec ARROW
+rcurly	:	'}'
+			{ $$ = end_arglist () - 1; }
+	;
+exp	:	lcurly arglist rcurly	%prec ARROW
 			{ write_exp_elt_opcode (OP_ARRAY);
 			  write_exp_elt_longcst ((LONGEST) 0);
-			  write_exp_elt_longcst ((LONGEST) end_arglist () - 1);
+			  write_exp_elt_longcst ((LONGEST) $3);
 			  write_exp_elt_opcode (OP_ARRAY); }
 	;
 
-exp	:	'{' type '}' exp  %prec UNARY
+exp	:	lcurly type rcurly exp  %prec UNARY
 			{ write_exp_elt_opcode (UNOP_MEMVAL);
 			  write_exp_elt_type ($2);
 			  write_exp_elt_opcode (UNOP_MEMVAL); }

@@ -39,6 +39,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "parser-defs.h"
 
 static void
+free_funcalls PARAMS ((void));
+
+static void
 prefixify_expression PARAMS ((struct expression *));
 
 static int
@@ -46,6 +49,17 @@ length_of_subexp PARAMS ((struct expression *, int));
 
 static void
 prefixify_subexp PARAMS ((struct expression *, struct expression *, int, int));
+
+/* Data structure for saving values of arglist_len for function calls whose
+   arguments contain other function calls.  */
+
+struct funcall
+  {
+    struct funcall *next;
+    int arglist_len;
+  };
+
+static struct funcall *funcall_chain;
 
 /* Assign machine-independent names to certain registers 
    (unless overridden by the REGISTER_NAMES table) */
@@ -82,8 +96,9 @@ unsigned num_std_regs = (sizeof std_regs / sizeof std_regs[0]);
 void
 start_arglist ()
 {
-  register struct funcall *new = (struct funcall *) xmalloc (sizeof (struct funcall));
+  register struct funcall *new;
 
+  new = (struct funcall *) xmalloc (sizeof (struct funcall));
   new->next = funcall_chain;
   new->arglist_len = arglist_len;
   arglist_len = 0;
@@ -107,7 +122,7 @@ end_arglist ()
 /* Free everything in the funcall chain.
    Used when there is an error inside parsing.  */
 
-void
+static void
 free_funcalls ()
 {
   register struct funcall *call, *next;
