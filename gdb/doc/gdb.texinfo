@@ -3310,7 +3310,7 @@ no provision for frameless functions elsewhere in the stack.
 @item frame @var{args}
 The @code{frame} command allows you to move from one stack frame to another, 
 and to print the stack frame you select.  @var{args} may be either the
-address of the frame of the stack frame number.  Without an argument, 
+address of the frame or the stack frame number.  Without an argument, 
 @code{frame} prints the current stack frame.  
 
 @kindex select-frame
