@@ -1,5 +1,11 @@
 2003-07-09  Richard Sandiford  <rsandifo@redhat.com>
 
+	* bfd/elfxx-mips.c (mips_elf_create_dynamic_relocation): Treat
+	forced-local symbols like other locals.  Don't create relocations
+	against STN_UNDEF in irix objects.
+
+2003-07-09  Richard Sandiford  <rsandifo@redhat.com>
+
 	* bfd/elfxx-mips.c (mips_elf_create_dynamic_relocation): In SGI-
 	compatible objects, add the values of defined external symbols
 	to the addend.

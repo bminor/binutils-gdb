@@ -3893,13 +3893,12 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
 	 in the relocation.  */
       if (h != NULL
 	  && (! info->symbolic || (h->root.elf_link_hash_flags
-				   & ELF_LINK_HASH_DEF_REGULAR) == 0))
-	{
-	  indx = h->root.dynindx;
+				   & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	  /* h->root.dynindx may be -1 if this symbol was marked to
 	     become local.  */
-	  if (indx == -1)
-	    indx = 0;
+	  && h->root.dynindx != -1)
+	{
+	  indx = h->root.dynindx;
 	  if (SGI_COMPAT (output_bfd))
 	    defined_p = ((h->root.elf_link_hash_flags
 			  & ELF_LINK_HASH_DEF_REGULAR) != 0);
@@ -3937,7 +3936,12 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
 	     section-relative relocations.  It's not like they're
 	     useful, after all.  This should be a bit more efficient
 	     as well.  */
-	  indx = 0;
+	  /* ??? Although this behavior is compatible with glibc's ld.so,
+	     the ABI says that relocations against STN_UNDEF should have
+	     a symbol value of 0.  Irix rld honors this, so relocations
+	     against STN_UNDEF have no effect.  */
+	  if (!SGI_COMPAT (output_bfd))
+	    indx = 0;
 	  defined_p = TRUE;
 	}
 
