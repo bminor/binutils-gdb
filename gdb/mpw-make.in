@@ -719,7 +719,17 @@ uninstall \Option-f  force
 # Formatting conventions:   The name of the _initialize_* routines must start
 # in column zero, and must not be inside #if.
 
+# FIXME: the last sed substitution 's/^://' should really be 's/^{o}//',
+# but only some versions of Make (like 4.0d2, but NOT 4.0b6) will make
+# the substitution.
+
 "{o}"init.c \Option-f  {OBS} {TSOBS}
+	If "{o}" =~ /:/
+		Echo objdir is :
+	Else
+		Echo Aack, objdir is not :
+		Exit -5
+	End If
 	Echo Making "{o}"init.c
 	Delete -i -y "{o}"init.c init.c-tmp
 	Echo '/* Do not modify this file.  */' >init.c-tmp
@@ -740,7 +750,7 @@ uninstall \Option-f  force
 	    -e '/[a-z0-9A-Z_]*-exp.tab.c.o/d' \Option-d
 	    -e 's/\.gc\.o/.c/' \Option-d
 	    -e 's/\.c\.o/.c/' \Option-d
-		-e 's/^{o}//'`"
+	    -e 's/^://'`"
 	  If "{filename}" != ""
 	    sed <"{s}""{filename}" >>init.c-tmp -n \Option-d
 	    -e '/^_initialize_[a-z_0-9A-Z]* *(/s/^\([a-z_0-9A-Z]*\).*/  {extern void \1 (); \1 ();}/p'

@@ -239,12 +239,46 @@ mac_print_tty_state (scb, ttystate)
   return;
 }
 
+/* If there is a tricky formula to relate real baud rates
+   to what the serial driver wants, we should use it.  Until
+   we get one, this table will have to do.  */
+
+static struct {
+  int real_rate;
+  int bits;
+} mac_baud_rate_table[] = {
+  { 57600, baud57600 },
+  { 38400, 2 /* ??? */ },
+  { 19200, baud19200 },
+  { 9600, baud9600 },
+  { 7200, baud7200 },
+  { 4800, baud4800 },
+  { 3600, baud3600 },
+  { 2400, baud2400 },
+  { 1800, baud1800 },
+  { 1200, baud1200 },
+  { 600, baud600 },
+  { 300, baud300 },
+  { 0, 0 }
+};
+
 static int
 mac_set_baud_rate (scb, rate)
      serial_t scb;
      int rate;
 {
-  return 0;
+  int i, bits;
+
+  for (i = 0; mac_baud_rate_table[i].real_rate != 0; ++i)
+    {
+      if (mac_baud_rate_table[i].real_rate == rate)
+	{
+	  bits = mac_baud_rate_table[i].bits;
+	  break;
+	}
+    }
+  SerReset (input_refnum,  stop10|noParity|data8|bits);
+  SerReset (output_refnum, stop10|noParity|data8|bits);
 }
 
 static int
