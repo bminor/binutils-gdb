@@ -3293,13 +3293,25 @@ pa_parse_fp_cmp_cond (s)
 	{
 	  cond = fp_cond_map[i].cond;
 	  *s += strlen (fp_cond_map[i].string);
+	  /* If not a complete match, back up the input string and
+	     report an error.  */
+	  if (**s != ' ' && **s != '\t')
+	    {
+	      *s -= strlen (fp_cond_map[i].string);
+	      break;
+	    }
 	  while (**s == ' ' || **s == '\t')
 	    *s = *s + 1;
 	  return cond;
 	}
     }
 
-  as_bad ("Invalid FP Compare Condition: %c", **s);
+  as_bad ("Invalid FP Compare Condition: %s", *s);
+
+  /* Advance over the bogus completer.  */
+  while (**s != ',' && **s != ' ' && **s != '\t')
+    *s += 1;
+
   return 0;
 }
 

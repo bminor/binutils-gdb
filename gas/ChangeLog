@@ -1,3 +1,8 @@
+Tue May 17 12:50:46 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (pa_parse_fp_cmp_cond): Report an error
+	on a partial completer match.
+
 Mon May 16 12:03:49 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c: Change .hppa_unwind to .PARISC.unwind
