@@ -178,9 +178,11 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 
+#ifndef REGISTER_VIRTUAL_TYPE
 #define REGISTER_VIRTUAL_TYPE(N) \
 	(((N) >= FP0_REGNUM && (N) < FP0_REGNUM+32)  \
-	 ? builtin_type_float : builtin_type_int) \
+	 ? builtin_type_float : builtin_type_int)
+#endif
 
 #if HOST_BYTE_ORDER == BIG_ENDIAN
 /* All mips targets store doubles in a register pair with the least

@@ -23,6 +23,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Use eight byte registers.  */
 #define MIPS_REGSIZE 8
 
+/* define 8 byte register type */
+#define REGISTER_VIRTUAL_TYPE(N) \
+        (((N) >= FP0_REGNUM && (N) < FP0_REGNUM+32)  \
+         ? builtin_type_double : builtin_type_long_long) \
+
 /* Load double words in CALL_DUMMY.  */
 #define OP_LDFPR 065	/* ldc1 */
 #define OP_LDGPR 067	/* ld */
