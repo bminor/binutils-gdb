@@ -36,12 +36,12 @@ SECTION
 	The arch information is provided by each architecture package.
 	The set of default architectures is selected by the #define
 	<<SELECT_ARCHITECTURES>>.  This is normally set up in the
-	<<config\/h\->> file of your choice.  If the name is not
+	<<hosts/*.h>> file of your choice.  If the name is not
 	defined, then all the architectures supported are included. 
 
 	When BFD starts up, all the architectures are called with an
 	initialize method.  It is up to the architecture back end to
-	insert as many items into the list of arches as it wants to,
+	insert as many items into the list of architectures as it wants to;
 	generally this would be one for each machine and one for the
 	default case (an item with a machine field of 0). 
 */
@@ -53,7 +53,7 @@ SUBSECTION
 
 DESCRIPTION
 	This enum gives the object file's CPU architecture, in a
-	global sense. E.g. what processor family does it belong to?
+	global sense --- i.e., what processor family does it belong to?
 	There is another field, which indicates what processor within
 	the family is in use.  The machine gives a number which
 	distingushes different versions of the architecture,
@@ -86,7 +86,7 @@ DESCRIPTION
 .  bfd_arch_sparc,     {* SPARC *}
 .  bfd_arch_mips,      {* MIPS Rxxxx *}
 .  bfd_arch_i386,      {* Intel 386 *}
-.  bfd_arch_ns32k,     {* National Semiconductor 32xxx *}
+.  bfd_arch_we32k,     {* AT&T WE32xxx *}
 .  bfd_arch_tahoe,     {* CCI/Harris Tahoe *}
 .  bfd_arch_i860,      {* Intel 860 *}
 .  bfd_arch_romp,      {* IBM ROMP PC/RT *}
@@ -97,15 +97,14 @@ DESCRIPTION
 .  bfd_arch_h8300,     {* Hitachi H8/300 *}
 .  bfd_arch_rs6000,    {* IBM RS/6000 *}
 .  bfd_arch_hppa,      {* HP PA RISC *}
+.  bfd_arch_z8k,       {* Zilog Z8000 *}
+.#define bfd_mach_z8001		1
+.#define bfd_mach_z8002		2
 .  bfd_arch_last
 .  };
 
 
 */
-
-
-
-/* $Id$ */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -120,7 +119,6 @@ DESCRIPTION
 	This structure contains information on architectures for use
 	within BFD.
 
-.typedef int bfd_reloc_code_type;
 .
 .typedef struct bfd_arch_info 
 .{
@@ -134,16 +132,18 @@ DESCRIPTION
 .  unsigned int section_align_power;
 . {* true if this is the default machine for the architecture *}
 .  boolean the_default;	
-.  CONST struct bfd_arch_info * EXFUN((*compatible),
-.	(CONST struct bfd_arch_info *a,
-.	 CONST struct bfd_arch_info *b));
+.  CONST struct bfd_arch_info * (*compatible)
+.	PARAMS ((CONST struct bfd_arch_info *a,
+.	         CONST struct bfd_arch_info *b));
 .
-.  boolean EXFUN((*scan),(CONST struct bfd_arch_info *,CONST char *));
-.  unsigned int EXFUN((*disassemble),(bfd_vma addr, CONST char *data,
-.				     PTR stream));
-.
-.  unsigned int segment_size;
-.  unsigned int page_size;
+.  boolean (*scan) PARAMS ((CONST struct bfd_arch_info *, CONST char *));
+.  {* How to disassemble an instruction, producing a printable
+.     representation on a specified stdio stream.  This isn't
+.     defined for most processors at present, because of the size
+.     of the additional tables it would drag in, and because gdb
+.     wants to use a different interface.  *}
+.  unsigned int (*disassemble) PARAMS ((bfd_vma addr, CONST char *data,
+.				        PTR stream));
 .
 .  struct bfd_arch_info *next;
 .} bfd_arch_info_type;
@@ -402,22 +402,22 @@ unsigned int DEFUN(bfd_arch_bits_per_address, (abfd), bfd *abfd)
 
 
 
-extern void EXFUN(bfd_h8300_arch,(void));
-extern void EXFUN(bfd_i960_arch,(void));
-extern void EXFUN(bfd_empty_arch,(void));
-extern void EXFUN(bfd_sparc_arch,(void));
-extern void EXFUN(bfd_m88k_arch,(void));
-extern void EXFUN(bfd_m68k_arch,(void));
-extern void EXFUN(bfd_vax_arch,(void));
-extern void EXFUN(bfd_a29k_arch,(void));
-extern void EXFUN(bfd_mips_arch,(void));
-extern void EXFUN(bfd_i386_arch,(void));
-extern void EXFUN(bfd_rs6000_arch,(void));
-extern void EXFUN(bfd_hppa_arch,(void));
+extern void bfd_h8300_arch PARAMS ((void));
+extern void bfd_i960_arch PARAMS ((void));
+extern void bfd_empty_arch PARAMS ((void));
+extern void bfd_sparc_arch PARAMS ((void));
+extern void bfd_m88k_arch PARAMS ((void));
+extern void bfd_m68k_arch PARAMS ((void));
+extern void bfd_vax_arch PARAMS ((void));
+extern void bfd_a29k_arch PARAMS ((void));
+extern void bfd_mips_arch PARAMS ((void));
+extern void bfd_i386_arch PARAMS ((void));
+extern void bfd_rs6000_arch PARAMS ((void));
+extern void bfd_hppa_arch PARAMS ((void));
+extern void bfd_z8k_arch PARAMS ((void));
+extern void bfd_we32k_arch PARAMS ((void));
 
-
-
-static void EXFUN((*archures_init_table[]),()) = 
+static void (*archures_init_table[]) PARAMS ((void)) = 
 {
 #ifdef SELECT_ARCHITECTURES
   SELECT_ARCHITECTURES,
@@ -433,6 +433,8 @@ static void EXFUN((*archures_init_table[]),()) =
   bfd_vax_arch,
   bfd_rs6000_arch,
   bfd_hppa_arch,
+  bfd_z8k_arch,
+  bfd_we32k_arch,
 #endif
   0
   };
@@ -455,7 +457,7 @@ DESCRIPTION
 void
 DEFUN_VOID(bfd_arch_init)
 {
-    void EXFUN((**ptable),());
+    void (**ptable) PARAMS ((void));
     for (ptable = archures_init_table; 
 	 *ptable ;
 	 ptable++)
@@ -580,27 +582,36 @@ CONST char *string)
       case 386: 
       case 80386:
       case 486:
+      case 80486:
 	arch = bfd_arch_i386;
 	break;
       case 29000: 
 	arch = bfd_arch_a29k;
 	break;
 
-      case 32016:
-      case 32032:
-      case 32132:
-      case 32232:
-      case 32332:
-      case 32432:
-      case 32532:  
-      case 32000: 
-	arch = bfd_arch_ns32k; 
+       case 8000:
+	arch = bfd_arch_z8k;
+	break;
+
+      case 32000:
+	arch = bfd_arch_we32k;
 	break;
 
       case 860:
       case 80860: 
 	arch = bfd_arch_i860; 
 	break;
+      case 960:
+      case 80960:
+	arch = bfd_arch_i960;
+	break;
+
+      case 2000:
+      case 3000:
+      case 4000:
+      case 4400:
+        arch = bfd_arch_mips;
+        break;
 
       case 6000:
 	arch = bfd_arch_rs6000;
