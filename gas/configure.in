@@ -66,6 +66,7 @@ changequote(,)dnl
 changequote([,])dnl
 
     # check for architecture variants
+    arch=
     endian=
     case ${cpu} in
       armeb)		cpu_type=arm endian=big ;;
@@ -85,8 +86,10 @@ changequote([,])dnl
       powerpcle*)	cpu_type=ppc endian=little ;;
       powerpc*)		cpu_type=ppc endian=big ;;
       rs6000*)		cpu_type=ppc ;;
-      sparc64)		cpu_type=sparc want_sparc_v9=true ;;
-      sparc*)		cpu_type=sparc ;;
+      sparclite*)	cpu_type=sparc arch=sparclite ;;
+      sparclet*)	cpu_type=sparc arch=sparclet ;;
+      sparc64*)		cpu_type=sparc arch=v9 ;;
+      sparc*)		cpu_type=sparc arch=sparclite ;; # ??? See tc-sparc.c.
       v850*)		cpu_type=v850 ;;
       *)		cpu_type=${cpu} ;;
     esac
@@ -341,12 +344,6 @@ changequote([,])dnl
 	;;
     esac
 
-    test -n "$want_sparc_v9" && AC_DEFINE(SPARC_V9)
-
-    case ${cpu}-${vendor}-${os} in
-      sparc64-*-elf*) AC_DEFINE(SPARC_ARCH64) ;;
-    esac
-
     case ${cpu_type} in
       m32r)
 	case ${extra_objects} in
@@ -379,6 +376,10 @@ changequote([,])dnl
 	if test $? -ne 0 ; then
 	  extra_objects="$extra_objects itbl-ops.o"
 	fi
+	;;
+
+      sparc)
+	AC_DEFINE_UNQUOTED(DEFAULT_ARCH, "${arch}")
 	;;
 
       *)

@@ -13,6 +13,23 @@ Thu Sep 18 11:24:01 1997  Doug Evans  <dje@canuck.cygnus.com>
 	(parse_keyword_arg): Allow numbers in reg names.
 	(SPECIAL_CASE_NONE): New macro.
 	(md_assemble): Use it.
+	(lookup_arch,init_default_arch): New functions.
+	(default_arch,default_init_p,sparc_arch_table): New static locals.
+	(sparc_arch_size): New static local.
+	(max_architecture): Initialize in init_default_arch.
+	(md_parse_options): Call init_default_arch if necessary.
+	Rewrite -xarch/-A processing.
+	(md_show_usage): Print -A values from sparc_arch_table.
+	(md_begin): Call init_default_arch if necessary.
+	(sparc_md_end): Handle both 32 and 64 bit environments.
+	* config/tc-sparc.h (TARGET_FORMAT): Likewise.
+	* acconfig.h (SPARC_V9,SPARC_ARCH64): Delete.
+	(DEFAULT_ARCH): Add.
+	* config.in: Regenerate.
+	* configure.in (sparc): Default DEFAULT_ARCH based on target cpu.
+	(SPARC_V9,SPARC_ARCH64): Delete.
+	* configure: Regenerate.
+	* config/vms-conf.h (SPARC_V9,SPARC_ARCH64): Delete.
 
 Wed Sep 17 16:54:20 1997  Nick Clifton  <nickc@cygnus.com>
 

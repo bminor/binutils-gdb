@@ -70,8 +70,7 @@
 #undef USING_CGEN
 
 /* Needed only for sparc configuration.  */
-#undef SPARC_V9
-#undef SPARC_ARCH64
+#undef DEFAULT_ARCH
 
 /* Needed only for PowerPC Solaris.  */
 #undef TARGET_SOLARIS_COMMENT
