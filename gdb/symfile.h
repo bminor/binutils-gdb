@@ -1,5 +1,6 @@
 /* Definitions for reading symbol files into GDB.
-   Copyright (C) 1990, 1991, 1992  Free Software Foundation, Inc.
+   Copyright (C) 1990, 1991, 1992, 1993, 1994, 1996
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -15,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #if !defined (SYMFILE_H)
 #define SYMFILE_H
@@ -33,18 +34,10 @@ struct psymbol_allocation_list {
 
 struct sym_fns {
 
-  /* is the name, or name prefix, of the BFD "target type" that this
-     set of functions handles.  E.g. "a.out" or "sunOs" or "coff" or "elf".  */
+  /* BFD flavour that we handle, or (as a special kludge, see xcoffread.c,
+     (enum bfd_flavour)-1 for xcoff).  */
 
-  char *sym_name;
-
-  /* counts how many bytes of sym_name should be checked against the
-     BFD target type of the file being read.  If an exact match is
-     desired, specify the number of characters in sym_name plus 1 for
-     the NULL.  If a prefix match is desired, specify the number of
-     characters in sym_name.  */
-
-  int sym_namelen;
+  enum bfd_flavour sym_flavour;
 
   /* Initializes anything that is global to the entire symbol table.  It is
      called during symbol_file_add, when we begin debugging an entirely new
@@ -100,8 +93,13 @@ extend_psymbol_list PARAMS ((struct psymbol_allocation_list *,
 /* Add any kind of symbol to a psymbol_allocation_list. */
 
 #ifndef INLINE_ADD_PSYMBOL
-#define INLINE_ADD_PSYMBOL 1
+/* Default this to off for now, and probably eventually remove support for inlining via
+   macros.  Real world tests show no performance improvements by inlining, and the macros
+   just make debugging gdb more complicated and make gdb larger by up to 150 Kb. */
+#define INLINE_ADD_PSYMBOL 0
 #endif
+
+#include "demangle.h"
 
 #if !INLINE_ADD_PSYMBOL
 
@@ -115,12 +113,9 @@ extend_psymbol_list PARAMS ((struct psymbol_allocation_list *,
 
 #else	/* !INLINE_ADD_PSYMBOL */
 
-#include "demangle.h"
-
 #define	ADD_PSYMBOL_VT_TO_LIST(NAME,NAMELENGTH,NAMESPACE,CLASS,LIST,VALUE,VT,LANGUAGE, OBJFILE) \
   do {		        						\
     register struct partial_symbol *psym;				\
-    register char *demangled_name;					\
     if ((LIST).next >= (LIST).list + (LIST).size)			\
       extend_psymbol_list (&(LIST),(OBJFILE));				\
     psym = (LIST).next++;						\
@@ -130,11 +125,13 @@ extend_psymbol_list PARAMS ((struct psymbol_allocation_list *,
     memcpy (SYMBOL_NAME (psym), (NAME), (NAMELENGTH));			\
     SYMBOL_NAME (psym)[(NAMELENGTH)] = '\0';				\
     SYMBOL_NAMESPACE (psym) = (NAMESPACE);				\
+    SYMBOL_SECTION (psym) = 0;						\
     PSYMBOL_CLASS (psym) = (CLASS);					\
     VT (psym) = (VALUE); 						\
     SYMBOL_LANGUAGE (psym) = (LANGUAGE);				\
-    SYMBOL_INIT_DEMANGLED_NAME (psym, &objfile->psymbol_obstack);	\
-  } while (0);
+    SYMBOL_INIT_LANGUAGE_SPECIFIC (psym, LANGUAGE);			\
+    OBJSTAT (objfile, n_psyms++);					\
+  } while (0)
 
 /* Add a symbol with an integer value to a psymtab. */
 
@@ -148,7 +145,7 @@ extend_psymbol_list PARAMS ((struct psymbol_allocation_list *,
 
 #endif	/* INLINE_ADD_PSYMBOL */
 
-			/*   Functions   */
+extern void init_psymbol_list PARAMS ((struct objfile *, int));
 
 extern void
 sort_pst_symbols PARAMS ((struct partial_symtab *));
@@ -188,9 +185,6 @@ sort_block_syms PARAMS ((struct block *));
 extern void
 sort_symtab_syms PARAMS ((struct symtab *));
 
-extern void
-sort_all_symtab_syms PARAMS ((void));
-
 /* Make a copy of the string at PTR with SIZE characters in the symbol obstack
    (and add a null character at the end in the copy).
    Returns the address of the copy.  */
@@ -207,10 +201,17 @@ obconcat PARAMS ((struct obstack *obstackp, const char *, const char *,
 
 			/*   Variables   */
 
+/* whether to auto load solibs at startup time:  0/1. */
+
+extern int auto_solib_add;
+
 /* From symfile.c */
 
 extern struct partial_symtab *
 allocate_psymtab PARAMS ((char *, struct objfile *));
+
+/* Remote targets may wish to use this as their load function.  */
+extern void generic_load PARAMS ((char *name, int from_tty));
 
 /* From dwarfread.c */
 
@@ -218,14 +219,25 @@ extern void
 dwarf_build_psymtabs PARAMS ((struct objfile *, struct section_offsets *, int,
 			      file_ptr, unsigned int, file_ptr, unsigned int));
 
-/* From dbxread.c */
+/* From mdebugread.c */
+
+/* Hack to force structures to exist before use in parameter list.  */
+struct ecoff_debug_hack
+{
+  struct ecoff_debug_swap *a;
+  struct ecoff_debug_info *b;
+};
+extern void
+mdebug_build_psymtabs PARAMS ((struct objfile *,
+			       const struct ecoff_debug_swap *,
+			       struct ecoff_debug_info *,
+			       struct section_offsets *));
 
 extern void
-elfstab_build_psymtabs PARAMS ((struct objfile *objfile,
-	struct section_offsets *section_offsets,
-	int mainline,
-	file_ptr staboff, unsigned int stabsize,
-	file_ptr stabstroffset, unsigned int stabstrsize));
+elfmdebug_build_psymtabs PARAMS ((struct objfile *,
+				  const struct ecoff_debug_swap *,
+				  asection *,
+				  struct section_offsets *));
 
 /* From demangle.c */
 
