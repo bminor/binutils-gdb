@@ -98,7 +98,7 @@ sim_handle_breakpoint (sd, cpu, cia)
   struct sim_breakpoint *bp;
 
   for (bp = STATE_BREAKPOINTS (sd); bp; bp = bp->next)
-    if (bp->addr == cia)
+    if (bp->addr == CIA_ADDR (cia))
       break;
 
   if (!bp || !(bp->flags & SIM_BREAK_INSERTED))
