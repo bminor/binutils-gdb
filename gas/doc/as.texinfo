@@ -6039,6 +6039,9 @@ subject, see the hardware manufacturer's manual.
 @ifset I960
 * i960-Dependent::              Intel 80960 Dependent Features
 @end ifset
+@ifset IA64
+* IA-64-Dependent::             Intel IA-64 Dependent Features
+@end ifset
 @ifset IP2K
 * IP2K-Dependent::              IP2K Dependent Features
 @end ifset

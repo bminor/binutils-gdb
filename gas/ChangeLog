@@ -1,3 +1,10 @@
+2005-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* doc/all.texi: Add IA64.
+	* doc/as.texinfo: Likewise.
+
+	* doc/c-ia64.texi: Fix typos.
+
 2005-02-10  Julian Brown  <julian@codesourcery.com>
 
 	* config/tc-arm.c (do_t_ldmstm): Change BFD_RELOC_NONE to
