@@ -1,3 +1,8 @@
+Sun Dec  6 16:33:33 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.tgt (m68*-*-gnu*): New target.  From Aymeric Vincent
+	<aymeric.vincent@emi.u-bordeaux.fr>.
+
 1998-12-04  Nick Clifton  <nickc@cygnus.com>
 
 	* emulparams/fr30.sh (TEXT_START_ADDR): Change TEXT_START_ADDR

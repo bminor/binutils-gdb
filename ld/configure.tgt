@@ -101,7 +101,7 @@ i[3456]86-*-msdos*)	targ_emul=i386msdos; targ_extra_emuls=i386aout ;;
 i[3456]86-*-moss*)	targ_emul=i386moss; targ_extra_emuls=i386msdos ;;
 i[3456]86-*-winnt*)	targ_emul=i386pe ;;
 i[3456]86-*-pe)		targ_emul=i386pe ;;
-i[3456]86-*-cygwin32*)	targ_emul=i386pe ;
+i[3456]86-*-cygwin*)	targ_emul=i386pe ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 i[3456]86-*-mingw32*)	targ_emul=i386pe ;;
 # start-sanitize-beos
@@ -146,6 +146,7 @@ m68k-*-linux-gnu*)	targ_emul=m68kelf
 			targ_extra_emuls=m68klinux
 			tdir_m68klinux=`echo ${targ_alias} | sed -e 's/linux/linuxaout/'`
 			;;
+m68*-*-gnu*)		targ_emul=m68kelf ;;
 m68*-*-lynxos*)		targ_emul=m68klynx ;;
 m68*-hp*-netbsd*)	targ_emul=m68k4knbsd ;;
 m68*-*-netbsd*)		targ_emul=m68knbsd ;;
@@ -164,6 +165,10 @@ mips*-*-ecoff*)		targ_emul=mipsidt ;;
 mips*-dec-bsd*)		targ_emul=mipsbsd ;;
 mips*-dec-netbsd*)	targ_emul=elf32lmip ;;
 mips*-*-bsd*)		targ_emul=mipsbig ;;
+# start-sanitize-vr4xxx
+mips*vr4xxxel-*-elf*)	targ_emul=elf32l4300 ;;
+mips*vr4xxx-*-elf*)	targ_emul=elf32b4300 ;;
+# end-sanitize-vr4xxx
 # start-sanitize-vr4320
 mips*vr4320el-*-elf*)	targ_emul=elf32l4300 ;;
 mips*vr4320-*-elf*)	targ_emul=elf32b4300 ;;
@@ -218,7 +223,7 @@ powerpc-*-macos*)	targ_emul=ppcmacos ;;
 powerpc-*-netware*)	targ_emul=ppcnw ;;
 powerpcle-*-pe)         targ_emul=ppcpe ;;
 powerpcle-*-winnt*)     targ_emul=ppcpe ;;
-powerpcle-*-cygwin32)   targ_emul=ppcpe ;;
+powerpcle-*-cygwin*)   targ_emul=ppcpe ;;
 powerpc-*-aix*)		targ_emul=aixppc ;;
 powerpc-*-beos*)	targ_emul=aixppc ;;
 rs6000-*-aix*)		targ_emul=aixrs6 ;;
