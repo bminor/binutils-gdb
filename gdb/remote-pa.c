@@ -240,7 +240,7 @@ int icache;
 /* Descriptor for I/O to remote machine.  Initialize it to NULL so that
    remote_open knows that we don't have a file open when the program
    starts.  */
-serial_t remote_desc = NULL;
+serial_t remote_hppro_desc = NULL;
 
 /* Having this larger than 400 causes us to be incompatible with m68k-stub.c
    and i386-stub.c.  Normally, no one would notice because it only matters
@@ -274,9 +274,9 @@ static void
 remote_close (quitting)
      int quitting;
 {
-  if (remote_desc)
-    SERIAL_CLOSE (remote_desc);
-  remote_desc = NULL;
+  if (remote_hppro_desc)
+    SERIAL_CLOSE (remote_hppro_desc);
+  remote_hppro_desc = NULL;
 }
 
 /* Query the remote side for the text, data and bss offsets. */
@@ -346,7 +346,7 @@ remote_start_remote (dummy)
 
   /* Ack any packet which the remote side has already sent.  */
 
-  SERIAL_WRITE (remote_desc, "+", 1);
+  SERIAL_WRITE (remote_hppro_desc, "+", 1);
 
   get_offsets ();		/* Get text, data & bss offsets */
 
@@ -379,24 +379,24 @@ device is attached to the remote system (e.g. /dev/ttya).");
 
   remote_dcache = dcache_init (remote_read_bytes, remote_write_bytes);
 
-  remote_desc = SERIAL_OPEN (name);
-  if (!remote_desc)
+  remote_hppro_desc = SERIAL_OPEN (name);
+  if (!remote_hppro_desc)
     perror_with_name (name);
 
   if (baud_rate != -1)
     {
-      if (SERIAL_SETBAUDRATE (remote_desc, baud_rate))
+      if (SERIAL_SETBAUDRATE (remote_hppro_desc, baud_rate))
 	{
-	  SERIAL_CLOSE (remote_desc);
+	  SERIAL_CLOSE (remote_hppro_desc);
 	  perror_with_name (name);
 	}
     }
 
-  SERIAL_RAW (remote_desc);
+  SERIAL_RAW (remote_hppro_desc);
 
   /* If there is something sitting in the buffer we might take it as a
      response to a command, which would be bad.  */
-  SERIAL_FLUSH_INPUT (remote_desc);
+  SERIAL_FLUSH_INPUT (remote_hppro_desc);
 
   if (from_tty)
     {
@@ -513,7 +513,7 @@ remote_interrupt (signo)
   if (remote_debug)
     printf_unfiltered ("remote_interrupt called\n");
 
-  SERIAL_WRITE (remote_desc, "\003", 1); /* Send a ^C */
+  SERIAL_WRITE (remote_hppro_desc, "\003", 1); /* Send a ^C */
 }
 
 static void (*ofunc)();
@@ -1063,7 +1063,7 @@ readchar (timeout)
 {
   int ch;
 
-  ch = SERIAL_READCHAR (remote_desc, timeout);
+  ch = SERIAL_READCHAR (remote_hppro_desc, timeout);
 
   switch (ch)
     {
@@ -1138,7 +1138,7 @@ putpkt (buf)
 	  printf_unfiltered ("Sending packet: %s...", buf2);
 	  gdb_flush(gdb_stdout);
 	}
-      if (SERIAL_WRITE (remote_desc, buf2, p - buf2))
+      if (SERIAL_WRITE (remote_hppro_desc, buf2, p - buf2))
 	perror_with_name ("putpkt: write failed");
 
       /* read until either a timeout occurs (-2) or '+' is read */
@@ -1347,19 +1347,19 @@ getpkt (buf, forever)
 	{
 	  if (remote_debug)
 	    fprintf_unfiltered (gdb_stderr, "Packet received: %s\n", buf);
-	  SERIAL_WRITE (remote_desc, "+", 1);
+	  SERIAL_WRITE (remote_hppro_desc, "+", 1);
 	  return;
 	}
 
       /* Try the whole thing again.  */
 retry:
-      SERIAL_WRITE (remote_desc, "-", 1);
+      SERIAL_WRITE (remote_hppro_desc, "-", 1);
     }
 
   /* We have tried hard enough, and just can't receive the packet.  Give up. */
 
   printf_unfiltered ("Ignoring packet error, continuing...\n");
-  SERIAL_WRITE (remote_desc, "+", 1);
+  SERIAL_WRITE (remote_hppro_desc, "+", 1);
 }
 
 static void
@@ -1428,8 +1428,8 @@ remote_remove_breakpoint (addr, contents_cache)
 
 /* Define the target subroutine names */
 
-struct target_ops remote_ops = {
-  "remote",			/* to_shortname */
+struct target_ops remote_hppro_ops = {
+  "hppro",			/* to_shortname */
   "Remote serial target in gdb-specific protocol",	/* to_longname */
   "Use a remote computer via a serial line, using a gdb-specific protocol.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya). or telnet port",  /* to_doc */
@@ -1472,8 +1472,37 @@ Specify the serial device it is connected to (e.g. /dev/ttya). or telnet port", 
   OPS_MAGIC			/* to_magic */
 };
 
+/* sets the download protocol, choices are srec, generic, boot */
+char *loadtype;
+static char *loadtype_str;
+static void set_loadtype_command
+  PARAMS ((char *, int, struct cmd_list_element *));
+
 void
-_initialize_remote ()
+_initialize_remote_hppro ()
 {
-  add_target (&remote_ops);
+  struct cmd_list_element *c;
+  add_target (&remote_hppro_ops);
+
+  /* this sets the type of download protocol */
+  c = add_set_cmd ("loadtype", no_class, var_string, (char *)&loadtype_str,
+       "Set the type of the remote load protocol.\n", &setlist);
+  c->function.sfunc =  set_loadtype_command;
+  add_show_from_set (c, &showlist);
+  c->var = "generic";
+  if (getenv ("LOADTYPE"))
+    c->var = savestring (getenv ("LOADTYPE"), strlen ("LOADTYPE"));
 }
+
+static void
+set_loadtype_command (newtype, from_tty, c)
+     char *newtype;
+     int from_tty;
+     struct cmd_list_element *c;
+{
+  loadtype_str = savestring (newtype, strlen (newtype));
+}
+
+
+
+
