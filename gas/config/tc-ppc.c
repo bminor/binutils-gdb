@@ -758,9 +758,9 @@ md_begin ()
 		 -many/-mcom, the comparison instructions are a harmless
 		 special case.  */
 	      if (strcmp (retval, "exists") != 0
-		  || (((ppc_cpu & PPC_OPCODE_601) == 0
-		       || ((ppc_cpu & ~PPC_OPCODE_POWER2)
-			   != (PPC_OPCODE_POWER | PPC_OPCODE_PPC))
+		  || ((((ppc_cpu & PPC_OPCODE_601) == 0
+			&& ((ppc_cpu & ~PPC_OPCODE_POWER2)
+			    == (PPC_OPCODE_POWER | PPC_OPCODE_PPC)))
 		       || strcmp (op->name, "mfdec") != 0)
 		      && (((ppc_cpu & ~PPC_OPCODE_POWER2)
 			  != (PPC_OPCODE_POWER | PPC_OPCODE_PPC))
