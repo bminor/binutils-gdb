@@ -1,3 +1,12 @@
+start-sanitize-v850
+Fri Aug 30 18:06:04 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
+
+	* elf32-v850.c (reloc_type): Add R_V850_HI16_S.
+	(elf_v850_howto_table): Add info for HI16_S reloc.
+	(v850_reloc_map): Add HI_16_S reloc.
+	* reloc.c: Define BFD_RELOC_V850_* relocs.
+
+end-sanitize-v850
 Fri Aug 30 11:49:19 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	Add SH ELF support.
