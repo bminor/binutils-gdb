@@ -576,8 +576,7 @@ DEFUN_VOID (cg_assemble)
   Sym *parent, **time_sorted_syms, **top_sorted_syms;
   long index;
   Arc *arc;
-  extern void find_call PARAMS ((Sym * parent,
-				 bfd_vma p_lowpc, bfd_vma p_highpc));
+
   /*
    * initialize various things:
    *      zero out child times.

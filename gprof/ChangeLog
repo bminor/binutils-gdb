@@ -1,3 +1,9 @@
+Sat Mar 15 19:17:31 1997  H.J. Lu  <hjl@lucon.org>
+
+	* symtab.h (find_call): Declare.
+	* cg_arcs.c (cg_assemble): Don't declare find_call.
+	* hist.c (scale_and_align_entries): Declare.
+
 Thu Feb 27 12:46:53 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Define BSD44_FORMAT if the target looks like a
