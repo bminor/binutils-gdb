@@ -1,3 +1,8 @@
+Wed Nov 11 21:20:14 1992  John Gilmore  (gnu@cygnus.com)
+
+	* configure.in:  Reformat to one-case-per-line.
+	Handle SunOS 3.5, as per Karl Berry, <karl@claude.cs.umb.edu>.
+
 Wed Nov  4 15:32:31 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* sysdep-norm.h:  Remove some crud, install dire warning.
