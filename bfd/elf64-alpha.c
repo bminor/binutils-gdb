@@ -888,8 +888,8 @@ elf64_alpha_do_reloc_gpdisp (abfd, gpdisp, p_ldah, p_lda)
 
   gpdisp += addend;
 
-  if ((bfd_signed_vma) gpdisp < -(bfd_signed_vma)0x80000000
-      || gpdisp >= 0x7fff8000)
+  if ((bfd_signed_vma) gpdisp < -(bfd_signed_vma) 0x80000000
+      || (bfd_signed_vma) gpdisp >= (bfd_signed_vma) 0x7fff8000)
     ret = bfd_reloc_overflow;
 
   /* compensate for the sign extension again.  */
@@ -1062,7 +1062,7 @@ static boolean elf64_alpha_relax_section
 	  boolean *again));
 
 static Elf_Internal_Rela *
-elf64_alpha_relax_find_reloc_ofs (rel, relend, offset, type)
+elf64_alpha_find_reloc_at_ofs (rel, relend, offset, type)
      Elf_Internal_Rela *rel, *relend;
      bfd_vma offset;
      int type;
@@ -1212,7 +1212,7 @@ elf64_alpha_relax_with_lituse (info, symval, irel, irelend)
 		info->changed_relocs = true;
 
 		/* Kill any HINT reloc that might exist for this insn.  */
-		xrel = (elf64_alpha_relax_find_reloc_ofs
+		xrel = (elf64_alpha_find_reloc_at_ofs
 			(info->relocs, info->relend, urel->r_offset, 
 			 R_ALPHA_HINT));
 		if (xrel)
@@ -1732,25 +1732,25 @@ elf64_alpha_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
       /* Common symbols less than or equal to -G nn bytes are
 	 automatically put into .sbss.  */
 
-      asection *sbss = bfd_get_section_by_name (abfd, ".sbss");
+      asection *scomm = bfd_get_section_by_name (abfd, ".scommon");
 
-      if (sbss == NULL)
+      if (scomm == NULL)
 	{
-	  sbss = bfd_make_section (abfd, ".sbss");
-	  if (sbss == NULL
-	      || !bfd_set_section_flags (abfd, sbss, (SEC_ALLOC | SEC_LOAD
-						      | SEC_IS_COMMON
-						      | SEC_LINKER_CREATED)))
+	  scomm = bfd_make_section (abfd, ".scommon");
+	  if (scomm == NULL
+	      || !bfd_set_section_flags (abfd, scomm, (SEC_ALLOC | SEC_LOAD
+						       | SEC_IS_COMMON
+						       | SEC_LINKER_CREATED)))
 	    return false;
 	}
 
-      if (bfd_get_section_alignment (abfd, sbss) < sym->st_value)
+      if (bfd_get_section_alignment (abfd, scomm) < sym->st_value)
 	{
-	  if (!bfd_set_section_alignment (abfd, sbss, sym->st_value))
+	  if (!bfd_set_section_alignment (abfd, scomm, sym->st_value))
 	    return false;
 	}
 
-      *secp = sbss;
+      *secp = scomm;
       *valp = sym->st_size;
     }
 
@@ -2952,7 +2952,9 @@ elf64_alpha_size_got_sections (output_bfd, info)
 
       if (cur_got_obj)
 	{
-	  if (elf64_alpha_can_merge_gots (cur_got_obj, i))
+	  if (this_got == cur_got_obj)
+	    ; /* Some previous pass merged us already.  */
+	  else if (elf64_alpha_can_merge_gots (cur_got_obj, i))
 	    {
 	      elf64_alpha_merge_gots (cur_got_obj, i);
 	      *cur_got_tail = i;

@@ -1,3 +1,16 @@
+Tue Apr 21 00:11:51 1998  Richard Henderson  <rth@cygnus.com>
+
+	* archive.c (_bfd_generic_read_ar_hdr_mag): Simplify end-of-name test.
+
+	* elf64-alpha.c (elf64_alpha_find_reloc_at_ofs): Renamed from
+	elf64_alpha_relax_find_reloc_ofs.  Changed all callers.
+	(elf64_alpha_add_symbol_hook): Put small commons in .scommon not .sbss.
+	(elf64_alpha_size_got_sections): Don't merge .got sections twice.
+
+Sat Apr 18 01:21:04 1998  Stan Cox  <scox@cygnus.com>
+
+	* config.bfd: Added sparc86x support.
+	
 Fri Apr 17 22:29:04 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-mips.c (mips_elf_relocate_section): Do not complain about
