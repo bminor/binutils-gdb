@@ -2664,12 +2664,16 @@ obj_coff_init_stab_section (seg)
 {
   char *file;
   char *p;
+  char *stabstr_name;
   unsigned int stroff;
 
   /* Make space for this first symbol. */
   p = frag_more (12);
   as_where (&file, (unsigned int *) NULL);
-  stroff = get_stab_string_offset (file, segment_info[seg].scnhdr.s_name);
+  stabstr_name = alloca (strlen (segment_info[seg].scnhdr.s_name) + 4);
+  strcpy (stabstr_name, segment_info[seg].scnhdr.s_name);
+  strcat (stabstr_name, "str");
+  stroff = get_stab_string_offset (file, stabstr_name);
   know (stroff == 1);
   md_number_to_chars (p, stroff, 4);
 }
