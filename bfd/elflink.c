@@ -6710,10 +6710,9 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			}
 		      else if (complain)
 			{
-			  char *r_sec
-			    = bfd_get_section_ident (o);
-			  char *d_sec
-			    = bfd_get_section_ident (sec);
+			  char *r_sec = bfd_get_section_ident (o);
+			  char *d_sec = bfd_get_section_ident (sec);
+
 			  finfo->info->callbacks->error_handler
 			    (LD_DEFINITION_IN_DISCARDED_SECTION,
 			     _("`%T' referenced in section `%s' of %B: "
@@ -8366,10 +8365,10 @@ typedef asection * (*gc_mark_hook_fn)
   (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
    struct elf_link_hash_entry *, Elf_Internal_Sym *);
 
-static bfd_boolean
-elf_gc_mark (struct bfd_link_info *info,
-	     asection *sec,
-	     gc_mark_hook_fn gc_mark_hook)
+bfd_boolean
+_bfd_elf_gc_mark (struct bfd_link_info *info,
+		  asection *sec,
+		  gc_mark_hook_fn gc_mark_hook)
 {
   bfd_boolean ret;
   asection *group_sec;
@@ -8379,7 +8378,7 @@ elf_gc_mark (struct bfd_link_info *info,
   /* Mark all the sections in the group.  */
   group_sec = elf_section_data (sec)->next_in_group;
   if (group_sec && !group_sec->gc_mark)
-    if (!elf_gc_mark (info, group_sec, gc_mark_hook))
+    if (!_bfd_elf_gc_mark (info, group_sec, gc_mark_hook))
       return FALSE;
 
   /* Look through the section relocs.  */
@@ -8460,7 +8459,7 @@ elf_gc_mark (struct bfd_link_info *info,
 	    {
 	      if (bfd_get_flavour (rsec->owner) != bfd_target_elf_flavour)
 		rsec->gc_mark = 1;
-	      else if (!elf_gc_mark (info, rsec, gc_mark_hook))
+	      else if (!_bfd_elf_gc_mark (info, rsec, gc_mark_hook))
 		{
 		  ret = FALSE;
 		  goto out2;
@@ -8767,7 +8766,7 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 		 EH frame section.  */  
 	      if (strcmp (o->name, ".eh_frame") == 0)
 		o->gc_mark = 1;
-	      else if (!elf_gc_mark (info, o, gc_mark_hook))
+	      else if (!_bfd_elf_gc_mark (info, o, gc_mark_hook))
 		return FALSE;
 	    }
 	}

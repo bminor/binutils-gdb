@@ -85,18 +85,6 @@ ppc_create_output_section_statements (void)
 }
 
 static void
-ppc_after_open (void)
-{
-  if (!ppc64_elf_mark_entry_syms (&link_info))
-    {
-      einfo ("%X%P: can not mark entry symbols %E\n");
-      return;
-    }
-
-  gld${EMULATION_NAME}_after_open ();
-}
-
-static void
 ppc_before_allocation (void)
 {
   if (stub_file != NULL)
@@ -523,7 +511,6 @@ PARSE_AND_LIST_ARGS_CASES='
 
 # Put these extra ppc64elf routines in ld_${EMULATION_NAME}_emulation
 #
-LDEMUL_AFTER_OPEN=ppc_after_open
 LDEMUL_BEFORE_ALLOCATION=ppc_before_allocation
 LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation
 LDEMUL_FINISH=gld${EMULATION_NAME}_finish

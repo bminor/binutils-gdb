@@ -2776,7 +2776,6 @@ struct ppc_link_hash_entry
   /* Flag function code and descriptor symbols.  */
   unsigned int is_func:1;
   unsigned int is_func_descriptor:1;
-  unsigned int is_entry:1;
 
   /* Whether global opd sym has been adjusted or not.  */
   unsigned int adjust_done:1;
@@ -2986,7 +2985,6 @@ link_hash_newfunc (struct bfd_hash_entry *entry,
       eh->oh = NULL;
       eh->is_func = 0;
       eh->is_func_descriptor = 0;
-      eh->is_entry = 0;
       eh->adjust_done = 0;
       eh->tls_mask = 0;
     }
@@ -3372,7 +3370,6 @@ ppc64_elf_copy_indirect_symbol
 
   edir->is_func |= eind->is_func;
   edir->is_func_descriptor |= eind->is_func_descriptor;
-  edir->is_entry |= eind->is_entry;
   edir->tls_mask |= eind->tls_mask;
 
   mask = (ELF_LINK_HASH_REF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR
@@ -3462,27 +3459,6 @@ ppc64_elf_copy_indirect_symbol
     }
   else
     BFD_ASSERT (eind->elf.dynindx == -1);
-}
-
-/* Set a flag, used by ppc64_elf_gc_mark_hook, on the entry symbol and
-   symbols undefined on the command-line.  */
-
-bfd_boolean
-ppc64_elf_mark_entry_syms (struct bfd_link_info *info)
-{
-  struct ppc_link_hash_table *htab;
-  struct bfd_sym_chain *sym;
-
-  htab = ppc_hash_table (info);
-  for (sym = info->gc_sym_list; sym; sym = sym->next)
-    {
-      struct elf_link_hash_entry *h;
-
-      h = elf_link_hash_lookup (&htab->elf, sym->name, FALSE, FALSE, FALSE);
-      if (h != NULL)
-	((struct ppc_link_hash_entry *) h)->is_entry = 1;
-    }
-  return TRUE;
 }
 
 /* Hack symbols defined in .opd sections to be function type.  */
@@ -4121,17 +4097,59 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 static asection *
 ppc64_elf_gc_mark_hook (asection *sec,
-			struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			struct bfd_link_info *info,
 			Elf_Internal_Rela *rel,
 			struct elf_link_hash_entry *h,
 			Elf_Internal_Sym *sym)
 {
-  asection *rsec = NULL;
+  asection *rsec;
+
+  /* First mark all our entry sym sections.  */
+  if (info->gc_sym_list != NULL)
+    {
+      struct ppc_link_hash_table *htab = ppc_hash_table (info);
+      struct bfd_sym_chain *sym = info->gc_sym_list;
+
+      info->gc_sym_list = NULL;
+      do
+	{
+	  struct ppc_link_hash_entry *eh;
+
+	  eh = (struct ppc_link_hash_entry *)
+	    elf_link_hash_lookup (&htab->elf, sym->name, FALSE, FALSE, FALSE);
+	  if (eh == NULL)
+	    continue;
+	  if (eh->elf.root.type != bfd_link_hash_defined
+	      && eh->elf.root.type != bfd_link_hash_defweak)
+	    continue;
+
+	  if (eh->is_func_descriptor)
+	    rsec = eh->oh->elf.root.u.def.section;
+	  else
+	    continue;
+
+	  if (!rsec->gc_mark)
+	    _bfd_elf_gc_mark (info, rsec, ppc64_elf_gc_mark_hook);
+
+	  rsec = eh->elf.root.u.def.section;
+	  if (!rsec->gc_mark)
+	    _bfd_elf_gc_mark (info, rsec, ppc64_elf_gc_mark_hook);
+
+	  sym = sym->next;
+	}
+      while (sym != NULL);
+    }
+
+  /* Syms return NULL if we're marking .opd, so we avoid marking all
+     function sections, as all functions are referenced in .opd.  */
+  rsec = NULL;
+  if (get_opd_info (sec) != NULL)
+    return rsec;
 
   if (h != NULL)
     {
       enum elf_ppc64_reloc_type r_type;
-      struct ppc_link_hash_entry *fdh;
+      struct ppc_link_hash_entry *eh;
 
       r_type = ELF64_R_TYPE (rel->r_info);
       switch (r_type)
@@ -4145,19 +4163,22 @@ ppc64_elf_gc_mark_hook (asection *sec,
 	    {
 	    case bfd_link_hash_defined:
 	    case bfd_link_hash_defweak:
-	      fdh = (struct ppc_link_hash_entry *) h;
+	      eh = (struct ppc_link_hash_entry *) h;
+	      if (eh->oh != NULL && eh->oh->is_func_descriptor)
+		eh = eh->oh;
 
 	      /* Function descriptor syms cause the associated
 		 function code sym section to be marked.  */
-	      if (fdh->is_func_descriptor)
-		rsec = fdh->oh->elf.root.u.def.section;
+	      if (eh->is_func_descriptor)
+		{
+		  /* They also mark their opd section.  */
+		  if (!eh->elf.root.u.def.section->gc_mark)
+		    _bfd_elf_gc_mark (info, eh->elf.root.u.def.section,
+				      ppc64_elf_gc_mark_hook);
 
-	      /* Function entry syms return NULL if they are in .opd
-		 and are not ._start (or others undefined on the ld
-		 command line).  Thus we avoid marking all function
-		 sections, as all functions are referenced in .opd.  */
-	      else if ((fdh->oh != NULL && fdh->oh->is_entry)
-		       || ppc64_elf_section_data (sec)->opd.func_sec == NULL)
+		  rsec = eh->oh->elf.root.u.def.section;
+		}
+	      else
 		rsec = h->root.u.def.section;
 	      break;
 
@@ -4175,11 +4196,14 @@ ppc64_elf_gc_mark_hook (asection *sec,
       asection **opd_sym_section;
 
       rsec = bfd_section_from_elf_index (sec->owner, sym->st_shndx);
-      opd_sym_section = ppc64_elf_section_data (rsec)->opd.func_sec;
+      opd_sym_section = get_opd_info (rsec);
       if (opd_sym_section != NULL)
-	rsec = opd_sym_section[sym->st_value / 24];
-      else if (ppc64_elf_section_data (sec)->opd.func_sec != NULL)
-	rsec = NULL;
+	{
+	  if (!rsec->gc_mark)
+	    _bfd_elf_gc_mark (info, rsec, ppc64_elf_gc_mark_hook);
+
+	  rsec = opd_sym_section[sym->st_value / 24];
+	}
     }
 
   return rsec;

@@ -1,3 +1,8 @@
+2004-08-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/ppc64elf.em (ppc_after_open): Delete.
+	(LDEMUL_AFTER_OPEN): Don't define.
+
 2004-08-02  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* ld.texinfo (Top): Document specific options of 68HC11 and 68HC12.

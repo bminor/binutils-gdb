@@ -1710,6 +1710,11 @@ extern bfd_boolean bfd_elf_gc_record_vtinherit
 extern bfd_boolean bfd_elf_gc_record_vtentry
   (bfd *, asection *, struct elf_link_hash_entry *, bfd_vma);
 
+extern bfd_boolean _bfd_elf_gc_mark
+  (struct bfd_link_info *, asection *,
+   asection * (*) (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
+		   struct elf_link_hash_entry *, Elf_Internal_Sym *));
+
 extern bfd_boolean bfd_elf_gc_common_finalize_got_offsets
   (bfd *, struct bfd_link_info *);
 
