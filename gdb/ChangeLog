@@ -1,3 +1,9 @@
+2002-02-15  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbserver/linux-mips-low.c (cannot_fetch_register): Use find_regno
+	instead of find_register_by_number.
+	(cannot_store_register): Likewise.
+
 2002-02-14  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* dwarf2read.c: Replace fprintf (stderr, ...) by 

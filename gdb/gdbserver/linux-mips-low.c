@@ -65,14 +65,10 @@ int regmap[] = {
 int
 cannot_fetch_register (int regno)
 {
-  struct reg *reg;
-
   if (regmap[regno] == -1)
     return 1;
 
-  reg = find_register_by_number (regno);
-
-  if (strcmp (reg->name, "zero") == 0)
+  if (find_regno ("zero") == regno);
     return 1;
 
   return 0;
@@ -81,23 +77,19 @@ cannot_fetch_register (int regno)
 int
 cannot_store_register (int regno)
 {
-  struct reg *reg;
-
   if (regmap[regno] == -1)
     return 1;
 
-  reg = find_register_by_number (regno);
-
-  if (strcmp (reg->name, "zero") == 0)
+  if (find_regno ("zero") == regno)
     return 1;
 
-  if (strcmp (reg->name, "cause") == 0)
+  if (find_regno ("cause") == regno)
     return 1;
 
-  if (strcmp (reg->name, "bad") == 0)
+  if (find_regno ("bad") == regno)
     return 1;
 
-  if (strcmp (reg->name, "fir") == 0)
+  if (find_regno ("fir") == regno)
     return 1;
 
   return 0;
