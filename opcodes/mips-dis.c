@@ -388,7 +388,7 @@ _print_insn_mips (memaddr, word, info)
 	    {
 	      register const char *d;
 
-	      if (! OPCODE_IS_MEMBER (op, mips_isa, target_processor))
+	      if (! OPCODE_IS_MEMBER (op, mips_isa, target_processor, 0))
 		continue;
 
 	      (*info->fprintf_func) (info->stream, "%s", op->name);

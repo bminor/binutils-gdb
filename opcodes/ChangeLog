@@ -1,3 +1,10 @@
+1999-12-30  Andrew Haley  <aph@cygnus.com>
+
+	* mips-dis.c (_print_insn_mips): New arg for OPCODE_IS_MEMBER:
+	force gp32 to zero.
+	* mips-opc.c (G6): New define.
+	(mips_builtin_op): Add "move" definition for -gp32.
+
 2000-02-22  Ian Lance Taylor  <ian@zembu.com>
 
 	From Grant Erickson <gerickso@Brocade.COM>:
