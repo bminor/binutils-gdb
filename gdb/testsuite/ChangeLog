@@ -1,3 +1,10 @@
+2002-08-23  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.threads/print-threads.c: New file.
+	* gdb.threads/print-threads.exp: New file.
+	* gdb.threads/schedlock.c: New file.
+	* gdb.threads/schedlock.exp: New file.
+
 2002-08-22  Elena Zannoni  <ezannoni@redhat.com>
 
         * gdb.arch/altivec-abi.exp: The source C file is altivec-abi.c,
