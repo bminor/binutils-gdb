@@ -1,3 +1,18 @@
+Tue Jan 28 21:10:51 1992  Fred Fish  (fnf at cygnus.com)
+
+	* Makefile.in:  Add dependencies for various coff-*.o files.
+
+	* elf.c:  Remove extraneous paren from core_prpsinfo and
+	core_prpstatus macros, rename core_prpstatus to core_prstatus.
+	Replace references to old section "size" member with new
+	"_raw_size" member.  Implement elf_make_empty_symbol, which
+	is now used.
+
+Tue Jan 28 14:51:40 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* trad-core.c, bfd.c, ../include/bfd.h:  Various fixes for PMAX
+	core reading.
+
 Tue Jan 28 10:46:32 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* coffcode.h (bfd_coff_relax_section): now static.

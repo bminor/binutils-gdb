@@ -106,8 +106,8 @@ typedef struct elf_core_tdata_struct
   void *prpsinfo;		/* The raw /proc prpsinfo structure */
 } elf_core_tdata;
 
-#define core_prpsinfo(bfd) (((bfd)->tdata.elf_core_data))->prpsinfo)
-#define core_prpstatus(bfd) (((bfd)->tdata.elf_core_data))->prpstatus)
+#define core_prpsinfo(bfd) (((bfd)->tdata.elf_core_data) -> prpsinfo)
+#define core_prstatus(bfd) (((bfd)->tdata.elf_core_data) -> prstatus)
 
 
 typedef struct elf_obj_tdata_struct
@@ -357,7 +357,7 @@ DEFUN(bfd_prstatus,(abfd, descdata, descsz, filepos),
   if (descsz == sizeof (prstatus_t))
     {
       newsect = bfd_make_section (abfd, ".reg");
-      newsect -> size = sizeof (gregset_t);
+      newsect -> _raw_size = sizeof (gregset_t);
       newsect -> filepos = filepos + (long) (((prstatus_t *)0) -> pr_reg);
       newsect -> flags = SEC_ALLOC | SEC_HAS_CONTENTS;
       newsect -> alignment_power = 2;
@@ -400,7 +400,7 @@ DEFUN(bfd_fpregset,(abfd, descdata, descsz, filepos),
   if (descsz == sizeof (fpregset_t))
     {
       newsect = bfd_make_section (abfd, ".reg2");
-      newsect -> size = sizeof (fpregset_t);
+      newsect -> _raw_size = sizeof (fpregset_t);
       newsect -> filepos = filepos;
       newsect -> flags = SEC_ALLOC | SEC_HAS_CONTENTS;
       newsect -> alignment_power = 2;
@@ -1157,13 +1157,22 @@ DEFUN (elf_get_symtab, (abfd, alocation),
 }
 
 static asymbol *
-elf_make_empty_symbol(abfd)
-bfd            *abfd;
+DEFUN (elf_make_empty_symbol, (abfd),
+       bfd *abfd)
 {
-  fprintf (stderr, "elf_make_empty_symbol unimplemented\n");
-  fflush (stderr);
-  abort ();
-  return (NULL);
+  elf_symbol_type *new;
+
+  new = (elf_symbol_type *) bfd_zalloc (abfd, sizeof (elf_symbol_type));
+  if (new == NULL)
+    {
+      bfd_error = no_memory;
+      return (NULL);
+    }
+  else
+    {
+      new -> symbol.the_bfd = abfd;
+      return (&new -> symbol);
+    }
 }
 
 static void 
@@ -1263,7 +1272,7 @@ DEFUN (elf_sizeof_headers, (abfd, reloc),
 #define elf_bfd_debug_info_accumulate	(PROTO(void,(*),(bfd*, struct sec *))) bfd_void
 #define elf_bfd_get_relocated_section_contents \
  bfd_generic_get_relocated_section_contents
-
+#define elf_bfd_relax_section bfd_generic_relax_section
 bfd_target elf_big_vec =
 {
   /* name: identify kind of target */
