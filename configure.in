@@ -127,15 +127,15 @@ case "${host}" in
   mips*-sgi-irix3*)       host_makefile_frag=config/mh-sysv ;;
   mips*-*-sysv4*)	  host_makefile_frag=config/mh-sysv4 ;;
   mips*-*-sysv*)	  host_makefile_frag=config/mh-riscos ;;
-  i[345]86-ncr-sysv4.3)   host_makefile_frag=config/mh-ncrsvr43 ;;
-  i[345]86-ncr-sysv4*)    host_makefile_frag=config/mh-ncr3000 ;;
-  i[345]86-*-sco3.2v5*)   host_makefile_frag=config/mh-sysv ;;
-  i[345]86-*-sco*)        host_makefile_frag=config/mh-sco ;;
-  i[345]86-*-isc*)	  host_makefile_frag=config/mh-sysv ;;
-  i[345]86-*-linux*)      host_makefile_frag=config/mh-linux ;;
-  i[345]86-*-solaris2*)   host_makefile_frag=config/mh-sysv4 ;;
-  i[345]86-*-aix*)	  host_makefile_frag=config/mh-aix386 ;;
-  i[345]86-*-go32*)	  host_makefile_frag=config/mh-go32 ;;
+  i[3456]86-ncr-sysv4.3)  host_makefile_frag=config/mh-ncrsvr43 ;;
+  i[3456]86-ncr-sysv4*)   host_makefile_frag=config/mh-ncr3000 ;;
+  i[3456]86-*-sco3.2v5*)  host_makefile_frag=config/mh-sysv ;;
+  i[3456]86-*-sco*)       host_makefile_frag=config/mh-sco ;;
+  i[3456]86-*-isc*)	  host_makefile_frag=config/mh-sysv ;;
+  i[3456]86-*-linux*)     host_makefile_frag=config/mh-linux ;;
+  i[3456]86-*-solaris2*)  host_makefile_frag=config/mh-sysv4 ;;
+  i[3456]86-*-aix*)	  host_makefile_frag=config/mh-aix386 ;;
+  i[3456]86-*-go32*)	  host_makefile_frag=config/mh-go32 ;;
   *-cygwin32*)	  	  host_makefile_frag=config/mh-cygwin32 ;;
   vax-*-ultrix2*)         host_makefile_frag=config/mh-vaxult2 ;;
   *-*-solaris2*)          host_makefile_frag=config/mh-solaris ;;
@@ -193,7 +193,7 @@ if [ x${shared} = xyes ]; then
   waugh=
   case "${host}" in
     hppa*)		waugh=config/mh-papic ;;
-    i[345]86-*)		waugh=config/mh-x86pic ;;
+    i[3456]86-*)	waugh=config/mh-x86pic ;;
     sparc64-*)		waugh=config/mh-sparcpic ;;
     *)			waugh=config/mh-${host_cpu}pic ;;
   esac
@@ -212,7 +212,7 @@ fi
 
 case "${target}" in
   v810*)		target_makefile_frag=config/mt-v810 ;;
-  i[345]86-*-netware*)  target_makefile_frag=config/mt-netware ;;
+  i[3456]86-*-netware*) target_makefile_frag=config/mt-netware ;;
   powerpc-*-netware*)   target_makefile_frag=config/mt-netware ;;
   powerpc*-*-eabi* | \
   powerpc*-*-elf* | \
@@ -321,7 +321,7 @@ fi
 # Default to using --with-stabs for certain targets.
 if [ x${with_stabs} = x ]; then
   case "${target}" in
-  mips*-*-* | alpha*-*-osf* | i[345]86*-*-sysv4* | i[345]86*-*-unixware*)
+  mips*-*-* | alpha*-*-osf* | i[3456]86*-*-sysv4* | i[3456]86*-*-unixware*)
     with_stabs=yes;
     withoptions="${withoptions} --with-stabs"
     ;;
@@ -362,7 +362,7 @@ done
 # Configure extra directories which are host specific
 
 case "${host}" in
-	i[345]86-*-go32*)
+	i[3456]86-*-go32*)
 	  configdirs="$configdirs dosrel" ;;
 	*-cygwin32*)
 	  configdirs="$configdirs dosrel" ;;
@@ -375,10 +375,10 @@ esac
 noconfigdirs=""
 
 case "${host}" in
-  i[345]86-*-vsta)
+  i[3456]86-*-vsta)
     noconfigdirs="tcl expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet"
     ;;
-  i[345]86-*-go32)
+  i[3456]86-*-go32)
     noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet"
 	;;
   *-*-cygwin32)
@@ -444,7 +444,7 @@ case "${target}" in
     esac
     noconfigdirs="$noconfigdirs ld shellutils"
     ;;
-  i[345]86-*-go32)
+  i[3456]86-*-go32)
     # but don't build gdb
     noconfigdirs="$noconfigdirs gdb target-libg++ target-libstdc++ target-libio target-librx"
     ;;
@@ -460,24 +460,24 @@ case "${target}" in
       *) noconfigdirs="$noconfigdirs gdb"
     esac
     ;;    
-  i[345]86-*-pe)
+  i[3456]86-*-pe)
     noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio target-librx target-libgloss"
     ;;
-  i[345]86-*-sco3.2v5*)
+  i[3456]86-*-sco3.2v5*)
     # The linker does not yet know about weak symbols in COFF,
     # and is not configured to handle mixed ELF and COFF.
     noconfigdirs="$noconfigdirs gprof ld target-libgloss"
     ;;
-  i[345]86-*-sco*)
+  i[3456]86-*-sco*)
     noconfigdirs="$noconfigdirs gprof target-libgloss"
     ;;
-  i[345]86-*-solaris2*)
+  i[3456]86-*-solaris2*)
     # The linker does static linking correctly, but the Solaris C library
     # has bugs such that some important functions won't work when statically
     # linked.  (See man pages for getpwuid, for example.)
     noconfigdirs="$noconfigdirs ld target-libgloss"
     ;;
-  i[345]86-*-sysv4*)
+  i[3456]86-*-sysv4*)
     # The SYSV4 C compiler doesn't handle Emacs correctly
     case "${CC}" in
 	"" | cc*) noconfigdirs="$noconfigdirs emacs emacs19" ;;
@@ -543,8 +543,8 @@ case "${target}" in
     ;;
   sh-*-*)
     case "${host}" in
-      i[345]86-*-vsta) ;; # don't add gprof back in
-      i[345]86-*-go32) ;; # don't add gprof back in
+      i[3456]86-*-vsta) ;; # don't add gprof back in
+      i[3456]86-*-go32) ;; # don't add gprof back in
       *) skipdirs=`echo " ${skipdirs} " | sed -e 's/ gprof / /'` ;;
     esac
     noconfigdirs="$noconfigdirs target-libgloss"
@@ -740,7 +740,7 @@ fi
 if [ x${shared} = xyes ]; then
   case "${target}" in
     hppa*)		target_makefile_frag=config/mt-papic ;;
-    i[345]86-*)		target_makefile_frag=config/mt-x86pic ;;
+    i[3456]86-*)		target_makefile_frag=config/mt-x86pic ;;
     *)			target_makefile_frag=config/mt-${target_cpu}pic ;;
   esac
 fi

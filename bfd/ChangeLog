@@ -1,3 +1,22 @@
+Thu Aug 29 16:52:17 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (i[345]86-*-*): Recognize i686 for pentium pro.
+	* configure.host (i[345]86-*-*): Ditto.
+	* config.bfd (i[345]86-*-*): Ditto.
+	* configure: Regenerate.
+
+	* config.bfd (i[3456]86-*-dgux*): Recognize as a synonym for x86
+	elf.
+
+Tue Aug 27 09:18:18 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* elf32-hppa.c (hppa_elf_gen_reloc_type): Add new argument.
+	* elf32-hppa.h (hppa_elf_gen_reloc_type): Update prototype.
+	* som.c (hppa_som_gen_reloc_type): Add new argument.  If
+	we encounter an R_DATA_ONE_SYMBOL reloc against a symbol that
+	will have an ST_CODE type, change the symbol's type to ST_DATA.
+	* som.c (hppa_som_gen_reloc_type): Update prototype.
+
 Tue Aug 27 00:12:22 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-mips.c (mips_elf_check_relocs): Set dynobj if needed for

@@ -1342,8 +1342,8 @@ EOF
  ;;
 esac
 
-echo $ac_n "checking whether malloc must be declared""... $ac_c" 1>&6
-if eval "test \"`echo '$''{'bfd_cv_decl_needed_malloc'+set}'`\" = set"; then
+echo $ac_n "checking whether strstr must be declared""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'bfd_cv_decl_needed_strstr'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
@@ -1351,6 +1351,60 @@ else
 #include "confdefs.h"
 
 #include <stdio.h>
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+int main() { return 0; }
+int t() {
+char *(*pfn) = (char *(*)) strstr
+; return 0; }
+EOF
+if { (eval echo configure:1373: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  bfd_cv_decl_needed_strstr=no
+else
+  rm -rf conftest*
+  bfd_cv_decl_needed_strstr=yes
+fi
+rm -f conftest*
+
+fi
+
+echo "$ac_t""$bfd_cv_decl_needed_strstr" 1>&6
+if test $bfd_cv_decl_needed_strstr = yes; then
+  bfd_tr_decl=NEED_DECLARATION_`echo strstr | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
+  cat >> confdefs.h <<EOF
+#define $bfd_tr_decl 1
+EOF
+
+fi
+
+echo $ac_n "checking whether malloc must be declared""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'bfd_cv_decl_needed_malloc'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1398 "configure"
+#include "confdefs.h"
+
+#include <stdio.h>
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#endif
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -1362,7 +1416,7 @@ int t() {
 char *(*pfn) = (char *(*)) malloc
 ; return 0; }
 EOF
-if { (eval echo configure:1366: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1420: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_decl_needed_malloc=no
 else
@@ -1382,15 +1436,69 @@ EOF
 
 fi
 
+echo $ac_n "checking whether realloc must be declared""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'bfd_cv_decl_needed_realloc'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1445 "configure"
+#include "confdefs.h"
+
+#include <stdio.h>
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+int main() { return 0; }
+int t() {
+char *(*pfn) = (char *(*)) realloc
+; return 0; }
+EOF
+if { (eval echo configure:1467: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  bfd_cv_decl_needed_realloc=no
+else
+  rm -rf conftest*
+  bfd_cv_decl_needed_realloc=yes
+fi
+rm -f conftest*
+
+fi
+
+echo "$ac_t""$bfd_cv_decl_needed_realloc" 1>&6
+if test $bfd_cv_decl_needed_realloc = yes; then
+  bfd_tr_decl=NEED_DECLARATION_`echo realloc | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
+  cat >> confdefs.h <<EOF
+#define $bfd_tr_decl 1
+EOF
+
+fi
+
 echo $ac_n "checking whether free must be declared""... $ac_c" 1>&6
 if eval "test \"`echo '$''{'bfd_cv_decl_needed_free'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1391 "configure"
+#line 1492 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#endif
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -1402,7 +1510,7 @@ int t() {
 char *(*pfn) = (char *(*)) free
 ; return 0; }
 EOF
-if { (eval echo configure:1406: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1514: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_decl_needed_free=no
 else
@@ -1441,61 +1549,61 @@ EOF
   hppa*-*-hiux*)	COREFILE=hpux-core.o ;;
   hppa*-*-bsd*)		COREFILE="hpux-core.o hppabsd-core.o"
 			COREFLAG="-DHPUX_CORE -DHPPABSD_CORE" ;;
-  i[345]86-sequent-bsd*)
+  i[3456]86-sequent-bsd*)
 	COREFILE=trad-core.o;
 	cat >> confdefs.h <<\EOF
 #define TRAD_HEADER "hosts/symmetry.h"
 EOF
 
 	;;
-  i[345]86-sequent-sysv4*) ;;
-  i[345]86-sequent-sysv*)
+  i[3456]86-sequent-sysv4*) ;;
+  i[3456]86-sequent-sysv*)
 	COREFILE=trad-core.o
 	cat >> confdefs.h <<\EOF
 #define TRAD_HEADER "hosts/symmetry.h"
 EOF
 
 	;;
-  i[345]86-*-bsd* | i[345]86-*-freebsd*)
+  i[3456]86-*-bsd* | i[3456]86-*-freebsd*)
 	COREFILE=trad-core.o
 	cat >> confdefs.h <<\EOF
 #define TRAD_HEADER "hosts/i386bsd.h"
 EOF
 
 	;;
-  i[345]86-*-netbsd*)
+  i[3456]86-*-netbsd*)
 	COREFILE=netbsd-core.o
 	;;
-  i[345]86-esix-sysv3*)
+  i[3456]86-esix-sysv3*)
 	COREFILE=trad-core.o
 	cat >> confdefs.h <<\EOF
 #define TRAD_HEADER "hosts/esix.h"
 EOF
 
 	;;
-  i[345]86-*-sco* | i[345]86-*-isc*)
+  i[3456]86-*-sco* | i[3456]86-*-isc*)
 	COREFILE=trad-core.o
 	cat >> confdefs.h <<\EOF
 #define TRAD_HEADER "hosts/i386sco.h"
 EOF
 
 	;;
-  i[345]86-*-mach3*)
+  i[3456]86-*-mach3*)
 	COREFILE=trad-core.o
 	cat >> confdefs.h <<\EOF
 #define TRAD_HEADER "hosts/i386mach3.h"
 EOF
 
 	;;
-  i[345]86-*-linux*)
+  i[3456]86-*-linux*)
 	COREFILE=trad-core.o
 	cat >> confdefs.h <<\EOF
 #define TRAD_HEADER "hosts/i386linux.h"
 EOF
 
 	;;
-  i[345]86-*-isc*)	COREFILE=trad-core.o ;;
-  i[345]86-*-aix*)	COREFILE=aix386-core.o ;;
+  i[3456]86-*-isc*)	COREFILE=trad-core.o ;;
+  i[3456]86-*-aix*)	COREFILE=aix386-core.o ;;
   i860-*-mach3* | i860-*-osf1*)
 	COREFILE=trad-core.o
 	cat >> confdefs.h <<\EOF
@@ -1674,7 +1782,7 @@ EOF
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1678 "configure"
+#line 1786 "configure"
 #include "confdefs.h"
 #include <sys/procfs.h>
 int main() { return 0; }
@@ -1682,7 +1790,7 @@ int t() {
 prstatus_t t;
 ; return 0; }
 EOF
-if { (eval echo configure:1686: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1794: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_header_sys_procfs_h=yes
 else
@@ -1820,6 +1928,9 @@ do
     bfd_elf32_powerpc_vec)	tb="$tb elf32-ppc.o elf32.o $elf" ;;
     bfd_elf32_powerpcle_vec)	tb="$tb elf32-ppc.o elf32.o $elf" ;;
     bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.o elf32.o $elf" ;;
+# start-sanitize-v850
+    bfd_elf32_v850_vec)		tb="$tb elf32-v850.o elf32.o $elf" ;;
+# end-sanitize-v850
     bfd_elf64_big_generic_vec) 	tb="$tb elf64-gen.o elf64.o $elf"
 				target64=true ;;
     bfd_elf64_little_generic_vec) tb="$tb elf64-gen.o elf64.o $elf"
@@ -1975,7 +2086,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1979 "configure"
+#line 2090 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1999,7 +2110,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:2003: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:2114: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -2029,7 +2140,7 @@ else
   ac_cv_func_mmap=no
 else
 cat > conftest.$ac_ext <<EOF
-#line 2033 "configure"
+#line 2144 "configure"
 #include "confdefs.h"
 
 /* Thanks to Mike Haertel and Jim Avera for this test. */
@@ -2098,7 +2209,7 @@ main()
 }
 
 EOF
-{ (eval echo configure:2102: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
+{ (eval echo configure:2213: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
 if test -s conftest && (./conftest; exit) 2>/dev/null; then
   ac_cv_func_mmap=yes
 else
@@ -2123,7 +2234,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2127 "configure"
+#line 2238 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -2147,7 +2258,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:2151: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:2262: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else

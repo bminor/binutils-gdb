@@ -1,3 +1,21 @@
+Thu Aug 29 16:44:58 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (i[345]86): Recognize i686 for pentium pro.
+	* config.guess (i[345]86): Ditto.
+
+start-sanitize-d10v
+Mon Aug 26 18:34:42 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* configure.in (noconfigdirs): Removed gdb for D10V.
+
+end-sanitize-d10v
+start-sanitize-v850
+Thu Aug 22 17:13:52 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* configure.in: Remove ld, target-libio, target-libg++, and
+	target-libstdc++ from noconfigdirs.
+
+end-sanitize-v850
 Wed Aug 21 18:56:38 1996  Fred Fish  <fnf@cygnus.com>
 
 	* configure: Fix three locations where shell scripts were

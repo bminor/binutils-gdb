@@ -139,7 +139,9 @@ AC_CHECK_FUNCS(fcntl getpagesize setitimer sysconf)
 
 BFD_BINARY_FOPEN
 
+BFD_NEED_DECLARATION(strstr)
 BFD_NEED_DECLARATION(malloc)
+BFD_NEED_DECLARATION(realloc)
 BFD_NEED_DECLARATION(free)
 
 # If we are configured native, pick a core file support file.
@@ -158,56 +160,56 @@ if test "${target}" = "${host}"; then
   hppa*-*-bsd*)		COREFILE="hpux-core.o hppabsd-core.o"
 			COREFLAG="-DHPUX_CORE -DHPPABSD_CORE" ;;
 changequote(,)dnl
-  i[345]86-sequent-bsd*)
+  i[3456]86-sequent-bsd*)
 changequote([,])dnl
 	COREFILE=trad-core.o;
 	AC_DEFINE(TRAD_HEADER,"hosts/symmetry.h")
 	;;
 changequote(,)dnl
-  i[345]86-sequent-sysv4*) ;;
-  i[345]86-sequent-sysv*)
+  i[3456]86-sequent-sysv4*) ;;
+  i[3456]86-sequent-sysv*)
 changequote([,])dnl
 	COREFILE=trad-core.o
 	AC_DEFINE(TRAD_HEADER,"hosts/symmetry.h")
 	;;
 changequote(,)dnl
-  i[345]86-*-bsd* | i[345]86-*-freebsd*)
+  i[3456]86-*-bsd* | i[3456]86-*-freebsd*)
 changequote([,])dnl
 	COREFILE=trad-core.o
 	AC_DEFINE(TRAD_HEADER,"hosts/i386bsd.h")
 	;;
 changequote(,)dnl
-  i[345]86-*-netbsd*)
+  i[3456]86-*-netbsd*)
 changequote([,])dnl
 	COREFILE=netbsd-core.o
 	;;
 changequote(,)dnl
-  i[345]86-esix-sysv3*)
+  i[3456]86-esix-sysv3*)
 changequote([,])dnl
 	COREFILE=trad-core.o
 	AC_DEFINE(TRAD_HEADER,"hosts/esix.h")
 	;;
 changequote(,)dnl
-  i[345]86-*-sco* | i[345]86-*-isc*)
+  i[3456]86-*-sco* | i[3456]86-*-isc*)
 changequote([,])dnl
 	COREFILE=trad-core.o
 	AC_DEFINE(TRAD_HEADER,"hosts/i386sco.h")
 	;;
 changequote(,)dnl
-  i[345]86-*-mach3*)
+  i[3456]86-*-mach3*)
 changequote([,])dnl
 	COREFILE=trad-core.o
 	AC_DEFINE(TRAD_HEADER,"hosts/i386mach3.h")
 	;;
 changequote(,)dnl
-  i[345]86-*-linux*)
+  i[3456]86-*-linux*)
 changequote([,])dnl
 	COREFILE=trad-core.o
 	AC_DEFINE(TRAD_HEADER,"hosts/i386linux.h")
 	;;
 changequote(,)dnl
-  i[345]86-*-isc*)	COREFILE=trad-core.o ;;
-  i[345]86-*-aix*)	COREFILE=aix386-core.o ;;
+  i[3456]86-*-isc*)	COREFILE=trad-core.o ;;
+  i[3456]86-*-aix*)	COREFILE=aix386-core.o ;;
 changequote([,])dnl
   i860-*-mach3* | i860-*-osf1*)
 	COREFILE=trad-core.o
@@ -454,6 +456,9 @@ do
     bfd_elf32_powerpc_vec)	tb="$tb elf32-ppc.o elf32.o $elf" ;;
     bfd_elf32_powerpcle_vec)	tb="$tb elf32-ppc.o elf32.o $elf" ;;
     bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.o elf32.o $elf" ;;
+# start-sanitize-v850
+    bfd_elf32_v850_vec)		tb="$tb elf32-v850.o elf32.o $elf" ;;
+# end-sanitize-v850
     bfd_elf64_big_generic_vec) 	tb="$tb elf64-gen.o elf64.o $elf"
 				target64=true ;;
     bfd_elf64_little_generic_vec) tb="$tb elf64-gen.o elf64.o $elf"
