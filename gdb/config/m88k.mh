@@ -1,3 +1,0 @@
-# Host: Motorola 88000 running DGUX
-XDEPFILES= infptrace.o m88k-xdep.o
-XM_FILE= xm-m88k.h

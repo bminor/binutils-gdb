@@ -1,3 +1,0 @@
-# Host: Hewlett-Packard 9000 series 300, running BSD
-XDEPFILES= infptrace.o coredep.o
-XM_FILE= xm-hp300bsd.h

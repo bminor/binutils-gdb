@@ -1,6 +1,0 @@
-ALL := $(shell ls -d =*)
-
-%:
-	$(foreach subdir,$(ALL),$(MAKE) -C $(subdir) $@ &&) true
-
-gas:

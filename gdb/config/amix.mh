@@ -1,6 +1,0 @@
-# Host: Commodore Amiga running SVR4.
-XDEPFILES= procfs.o
-XM_FILE= xm-amix.h
-SYSV_DEFINE=-DSYSV
-REGEX=regex.o
-REGEX1=regex.o

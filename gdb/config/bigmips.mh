@@ -1,3 +1,0 @@
-# Host: Big-endian MIPS machine such as Sony News
-XDEPFILES= infptrace.o mips-xdep.o coredep.o
-XM_FILE= xm-bigmips.h

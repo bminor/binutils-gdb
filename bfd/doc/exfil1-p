@@ -1,5 +1,0 @@
-#
-# Locate and coalesce adjacent comments
-/\*\/$/N
-s/\*\/\n\/\*/\
-/

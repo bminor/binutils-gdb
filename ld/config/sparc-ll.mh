@@ -1,8 +1,0 @@
-HDEFINES=-DHOST_64_BIT="long long"
-YACC=yacc -tvd
-CC=/usr/latest/bin/gcc -Wall -ansi
-#stuff for self hosting
-HOSTING_CRT0=/lib/crt0.o
-HOSTING_LIBS=/limbo/latest/=sun4/lib/gcc/sparc/1.93/gnulib  -lc
-HOSTING_EMU=LDEMULATION=gld; export LDEMULATION
-

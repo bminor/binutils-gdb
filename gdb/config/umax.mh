@@ -1,3 +1,0 @@
-# Host: Encore running umax 4.2
-XDEPFILES= infptrace.o umax-xdep.o
-XM_FILE= xm-umax.h

@@ -1,7 +1,0 @@
-RANLIB = echo >/dev/null
-# Sorry about this, but my machine runs out of memory .
-MINUS_G = 
-CC=gcc -O2
-
-
-

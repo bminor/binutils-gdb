@@ -1,7 +1,0 @@
-# Host: Intel 386 running SCO Unix (pre-SVR4)
-XDEPFILES= infptrace.o coredep.o i386-xdep.o i387-tdep.o
-XM_FILE= xm-i386sco.h
-XM_CLIBS= -lPW
-SYSV_DEFINE=-DSYSV
-REGEX=regex.o
-REGEX1=regex.o

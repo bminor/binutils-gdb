@@ -1,8 +1,0 @@
-#CC=gcc -ansi -Wall
-CC=cc
-YACC=yacc -d
-
-
-HOSTING_CRT0=/lib/crt0.o
-HOSTING_LIBS=-lc
-HOSTING_EMU=LDEMULATION=gldnews; export LDEMULATION

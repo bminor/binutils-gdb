@@ -1,8 +1,0 @@
-CC = gcc -b$(target) -Wall -nostdinc -nostdlib \
-	-I$(srcdir)/../clib/ansi/include -I$(srcdir)/../os-layer/include
-
-CLIB = $(srcdir)/../clib/Host-$(host)/Target-$(target)/libc.a \
-	$(srcdir)/../gcc/Host-sun4/Target-$(target)/gnulib
-
-LDFLAGS = /lib/crt0.o
-

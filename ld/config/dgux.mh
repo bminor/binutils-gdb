@@ -1,9 +1,0 @@
-HDEFINES = -D__using_DGUX
-
-CC = gcc -Wall -ansi
-YACC=yacc -tvd
-
-HOSTING_CRT0=/lib/crt0.o -X
-HOSTING_LIBS=/usr/sde/m88kbcs/lib/libc.a
-HOSTING_EMU=LDEMULATION=gldm88kbcs; export LDEMULATION
-

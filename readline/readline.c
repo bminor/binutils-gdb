@@ -36,7 +36,13 @@ static char *xmalloc (), *xrealloc ();
 #include <sys/file.h>
 #include <signal.h>
 
-#include "sysdep.h"
+#ifdef __GNUC__
+#define alloca __builtin_alloca
+#else
+#if defined (sparc) && defined (sun)
+#include <alloca.h>
+#endif
+#endif
 
 #define NEW_TTY_DRIVER
 #if defined (SYSV) || defined (hpux)  || defined (Xenix)
@@ -1497,7 +1503,7 @@ update_line (old, new, current_line)
   wsatend = 1;			/* flag for trailing whitespace */
   ols = oe - 1;			/* find last same */
   nls = ne - 1;
-  while ((ols > ofd) && (nls > nfd) && (*ols == *nls))
+  while ((*ols == *nls) && (ols > ofd) && (nls > nfd))
     {
       if (*ols != ' ')
 	wsatend = 0;
@@ -1833,7 +1839,8 @@ init_terminal_io (terminal_name)
       return;
     }
 
-  PC = tgetstr ("pc", &buffer)? *buffer : 0;
+  BC = tgetstr ("pc", &buffer);
+  PC = buffer ? *buffer : 0;
 
   term_backspace = tgetstr ("le", &buffer);
 
@@ -2204,12 +2211,12 @@ rl_deprep_terminal ()
 
 int allow_pathname_alphabetic_chars = 0;
 char *pathname_alphabetic_chars = "/-_=~.#$";
-char *rindex ();
+
 int
 alphabetic (c)
      int c;
 {
-
+  char *rindex ();
   if (pure_alphabetic (c) || (numeric (c)))
     return (1);
 
@@ -3322,7 +3329,7 @@ rl_complete_internal (what_to_do)
 	    /* Handle simple case first.  What if there is only one answer? */
 	    if (!matches[1])
 	      {
-		char  *temp;
+		char *rindex (), *temp;
 
 		if (rl_filename_completion_desired)
 		  temp = rindex (matches[0], '/');
@@ -3345,7 +3352,7 @@ rl_complete_internal (what_to_do)
 	       is. */
 	    for (i = 1; matches[i]; i++)
 	      {
-		char  *temp = (char *)NULL;
+		char *rindex (), *temp = (char *)NULL;
 
 		/* If we are hacking filenames, then only count the characters
 		   after the last slash in the pathname. */
@@ -3412,7 +3419,7 @@ rl_complete_internal (what_to_do)
 		      }
 		    else
 		      {
-			char  *temp = (char *)NULL;
+			char *rindex (), *temp = (char *)NULL;
 
 			if (rl_filename_completion_desired)
 			  temp = rindex (matches[l], '/');
@@ -4639,7 +4646,7 @@ filename_completion_function (text, state)
   /* If we don't have any state, then do some initialization. */
   if (!state)
     {
-      char  *temp;
+      char *rindex (), *temp;
 
       if (dirname) free (dirname);
       if (filename) free (filename);
@@ -5195,7 +5202,7 @@ rl_parse_and_bind (string)
      char *string;
 {
   extern char *possible_control_prefixes[], *possible_meta_prefixes[];
-  char  *funname, *kname;
+  char *rindex (), *funname, *kname;
   static int substring_member_of_array ();
   register int c;
   int key, i;

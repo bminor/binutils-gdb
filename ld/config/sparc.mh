@@ -1,7 +1,0 @@
-YACC=yacc -tvd
-#CC=gcc -Wall -ansi
-#stuff for self hosting
-HOSTING_CRT0=/lib/crt0.o
-HOSTING_LIBS=/usr/latest/lib/gcc/sun4/1.95.02/libgnu.a  -lc
-HOSTING_EMU=LDEMULATION=gld; export LDEMULATION
-

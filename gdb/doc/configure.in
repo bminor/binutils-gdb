@@ -1,8 +1,0 @@
-srcname="GDB doc"
-srctrigger=gdb.texinfo
-# per-host:
-
-# per-target:
-
-files="gdbinv-m.m4.in gdbinv-s.m4.in"
-links="gdbinv-m.m4 gdbinv-s.m4"
