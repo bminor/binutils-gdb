@@ -1,3 +1,8 @@
+2001-05-25  H.J. Lu  <hjl@gnu.org>
+
+	* bfd-in2.h: Regenerated.
+	* libcoff.h: Likewise.
+
 2001-05-25  Alan Modra  <amodra@one.net.au>
 
 	* elf32-hppa.c (elf32_hppa_relocate_section): Don't allow

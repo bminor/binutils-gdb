@@ -298,7 +298,7 @@ typedef struct lineno_cache_entry {
   unsigned int line_number;	/* Linenumber from start of function*/
   union {
     struct symbol_cache_entry *sym; /* Function name */
-    unsigned long offset;	/* Offset into section */
+    bfd_vma offset;	    /* Offset into section */
   } u;
 } alent;
 

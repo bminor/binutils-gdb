@@ -163,10 +163,10 @@ struct xcoff_tdata
   short cputype;
 
   /* maxdata from optional header.  */
-  bfd_size_type maxdata;
+  bfd_vma maxdata;
 
   /* maxstack from optional header.  */
-  bfd_size_type maxstack;
+  bfd_vma maxstack;
 
   /* Used by the XCOFF backend linker.  */
   asection **csects;
@@ -556,6 +556,24 @@ extern boolean _bfd_coff_reloc_link_order
 
 #define coff_get_section_contents_in_window \
   _bfd_generic_get_section_contents_in_window
+
+/* Functions in xcofflink.c.  */
+
+extern long _bfd_xcoff_get_dynamic_symtab_upper_bound PARAMS ((bfd *));
+extern long _bfd_xcoff_canonicalize_dynamic_symtab
+  PARAMS ((bfd *, asymbol **));
+extern long _bfd_xcoff_get_dynamic_reloc_upper_bound PARAMS ((bfd *));
+extern long _bfd_xcoff_canonicalize_dynamic_reloc
+  PARAMS ((bfd *, arelent **, asymbol **));
+extern struct bfd_link_hash_table *_bfd_xcoff_bfd_link_hash_table_create
+  PARAMS ((bfd *));
+extern boolean _bfd_xcoff_bfd_link_add_symbols
+  PARAMS ((bfd *, struct bfd_link_info *));
+extern boolean _bfd_xcoff_bfd_final_link
+  PARAMS ((bfd *, struct bfd_link_info *));
+extern boolean _bfd_ppc_xcoff_relocate_section
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
+	   struct internal_reloc *, struct internal_syment *, asection **));
 
 /* Functions in coff-ppc.c.  FIXME: These are called be pe.em in the
    linker, and so should start with bfd and be declared in bfd.h.  */
