@@ -1066,9 +1066,16 @@ md_assemble (str)
     }
   else
     {
-      if (opcode->arg[0] != A_END)
+      if (opcode->arg[0] == A_END)
 	{
-	  get_operands (opcode, op_end, operand);
+	  /* Ignore trailing whitespace.  If there is any, it has already
+	     been compressed to a single space.  */
+	  if (*op_end == ' ')
+	    op_end++;
+	}
+      else
+	{
+	  op_end = get_operands (opcode, op_end, operand);
 	}
       opcode = get_specific (opcode, operand);
 
@@ -1082,6 +1089,9 @@ md_assemble (str)
 	  as_bad (_("invalid operands for opcode"));
 	  return;
 	}
+
+      if (*op_end)
+	as_bad (_("excess operands: '%s'"), op_end);
 
       build_Mytes (opcode, operand);
     }
