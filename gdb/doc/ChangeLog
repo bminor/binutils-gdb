@@ -1,3 +1,8 @@
+2001-08-30  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (`add-symbol-file'): Correct synopsis.
+	Explain what it means to load relocatable files.
+
 2001-08-28  Jim Blandy  <jimb@redhat.com>
 
 	* gdbint.texinfo: Bring the HTML `top' menu into sync with the

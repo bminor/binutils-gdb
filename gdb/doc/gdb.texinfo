@@ -127,6 +127,7 @@ Copyright (C) 1988-2001 Free Software Foundation, Inc.
 * Source::                      Examining source files
 * Data::                        Examining data
 * Tracepoints::                 Debugging remote targets non-intrusively
+* Overlays::                    Debugging programs that use overlays
 
 * Languages::                   Using @value{GDBN} with different languages
 
@@ -179,6 +180,7 @@ Copyright (C) 1988-2000 Free Software Foundation, Inc.
 * Source::                      Examining source files
 * Data::                        Examining data
 * Tracepoints::                 Debugging remote targets non-intrusively
+* Overlays::                    Debugging programs that use overlays
 
 * Languages::                   Using @value{GDBN} with different languages
 
@@ -6280,6 +6282,83 @@ data.
 > end
 @end smallexample
 
+@node Overlays
+@chapter Debugging Programs That Use Overlays
+@cindex overlays
+@kindex overlay
+@kindex ovly @r{(@code{ovly})}
+
+If your program is too large to fit completely in your target system's
+memory, you can sometimes use @dfn{overlays} to work around this
+problem.  @value{GDBN} provides some support for programs that use
+overlays.
+
+@menu
+* How Overlays Work::           A general explanation of overlays.
+@end menu
+
+@node How Overlays Work
+@section How Overlays Work
+
+Suppose you have a computer whose instruction address space is only 64
+kilobytes long, but which has much more memory that can be accessed by
+other means: special instructions, segment registers, or bank switch
+registers, for example.  Suppose further that you want to adapt a
+program which is larger than 64 kilobytes to run on this system.
+
+One solution is to identify modules of your program which are relatively
+independent, and need not call each other directly; call these modules
+@dfn{overlays}.  Separate the overlays from the main program, and place
+their machine code in the larger memory.  Place your main program in
+instruction memory, but leave at least enough space there to hold the
+largest overlay as well.  Now, to call a function located in an overlay,
+you must first copy that overlay's machine code from the large memory
+into the space set aside for it in the instruction memory, and then jump
+to its code.
+
+An overlay loaded into instruction memory and ready for use is called a
+@dfn{mapped} overlay; its @dfn{mapped address} is its address in the
+instruction memory.  An overlay not present (or only partial present) in
+instruction memory is called @dfn{unmapped}; its @dfn{load address} is
+its address in the larger memory.
+
+Overlays introduce a number of complications:
+@itemize bullet
+
+@item
+Since you cannot have all your overlays loaded at once, 
+
+
+This will probably overwrite the
+previous overlay loaded in that space; you will need to re-load 
+
+
+
+
+modify your main program such that, before it calls a function located
+in an overlay, it first copies that overlay from the large memory into
+the instruction memory.
+
+
+
+
+copy the overlay into
+place
+
+
+want to run which is larger than 64 kilobytes.
+
+
+
+  a 64kb instruction address
+space.  
+
+to run on a system which has a small
+amount of memory available from which it can execute machine
+instructions, and a large amount of separate data memory,
+
+
+
 @node Languages
 @chapter Using @value{GDBN} with Different Languages
 @cindex languages
@@ -8858,7 +8937,7 @@ the program is running.  To do this, use the @code{kill} command
 @cindex dynamic linking
 @item add-symbol-file @var{filename} @var{address}
 @itemx add-symbol-file @var{filename} @var{address} @r{[} -readnow @r{]} @r{[} -mapped @r{]}
-@itemx add-symbol-file @var{filename} @r{-s}@var{section} @var{address}
+@itemx add-symbol-file @var{filename} @r{-s}@var{section} @var{address} @dots{}
 The @code{add-symbol-file} command reads additional symbol table
 information from the file @var{filename}.  You would use this command
 when @var{filename} has been dynamically loaded (by some other means)
@@ -8874,6 +8953,40 @@ originally read with the @code{symbol-file} command.  You can use the
 @code{add-symbol-file} command any number of times; the new symbol data
 thus read keeps adding to the old.  To discard all old symbol data
 instead, use the @code{symbol-file} command without any arguments.
+
+@cindex relocatable object files, reading symbols from
+@cindex object files, relocatable, reading symbols from
+@cindex reading symbols from relocatable object files
+@cindex symbols, reading from relocatable object files
+@cindex @file{.o} files, reading symbols from
+Although @var{filename} is typically a shared library file, an
+executable file, or some other object file which has been fully
+relocated for loading into a process, you can also load symbolic
+information from relocatable @file{.o} files, as long as:
+
+@itemize @bullet
+@item
+the file's symbolic information refers only to linker symbols defined in
+that file, not to symbols defined by other object files,
+@item
+every section the file's symbolic information refers to has actually
+been loaded into the inferior, as it appears in the file, and
+@item
+you can determine the address at which every section was loaded, and
+provide these to the @code{add-symbol-file} command.
+@end itemize
+
+@noindent
+Some embedded operating systems, like Sun Chorus and VxWorks, can load
+relocatable files into an already running program; such systems
+typically make the requirements above easy to meet.  However, it's
+important to recognize that many native systems use complex link
+procedures (@code{.linkonce} section factoring and C++ constructor table
+assembly, for example) that make the requirements difficult to meet.  In
+general, one cannot assume that using @code{add-symbol-file} to read a
+relocatable object file's symbolic information will have the same effect
+as linking the relocatable object file into the program in the normal
+way.
 
 @code{add-symbol-file} does not repeat if you press @key{RET} after using it.
 
