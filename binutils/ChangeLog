@@ -1,5 +1,10 @@
 2002-01-29  Daniel Jacobowitz  <drow@mvista.com>
 
+	* unwind-ia64.c (unw_decoder): Change second argument
+	to unsigned int, to match function prototypes.
+
+2002-01-29  Daniel Jacobowitz  <drow@mvista.com>
+
 	* objdump.c: Include "getopt.h" after "bucomm.h" so that
 	__GNU_LIBRARY__ will be defined.
 	* size.c: Likewise.
