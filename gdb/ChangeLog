@@ -1,3 +1,11 @@
+Mon Aug 29 14:39:42 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* Makefile.in (ns32k-opcode.h): Remove reference.
+	(ns32k-pinsn.o): Update dependencies.
+	* ns32k-opcode.h: Remove file.
+	* ns32k-pinsn.c (print_insn): Call version in libopcodes, remove
+	all other code in this file. 
+
 Mon Aug 29 12:04:07 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* nlm/configure.in:  Stop using cpu.c.  Put it in TDEPFILES instead.
