@@ -1,3 +1,40 @@
+Mon Feb 12 14:19:59 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c: Extensive changes to write code to put types in the
+	global type block when possible, to output ranges for all memory
+	occupied by the module, and to improve efficiency.
+
+	* debug.c (struct debug_handle): Remove class_mark field.  Add
+	id_list and compare_list fields.
+	(struct debug_class_id): Define.
+	(struct debug_type_compare_list): Define.
+	(debug_write): Initialize info->id_list
+	(debug_write_name): Remove reference to info->class_mark.
+	(debug_write_type): Get id for all structs and classes.  Simplify
+	test for whether struct has already been written.
+	(debug_write_class_type): Get id for all classes.  Simplify test
+	for whether class has already been written.
+	(debug_write_block): Don't write out blocks other than the top
+	level block if they have no local variables.
+	(debug_set_class_id): New static function.
+	(debug_type_samep): New static function.
+	(debug_class_type_samep): New static function.
+	* prdbg.c (pr_start_struct_type): Always print id.
+	(pr_start_class_type): Likewise.
+	(pr_tag_type): Likewise.
+
+	* stabs.c (struct stab_handle): Add syms and symcount fields.
+	(start_stab): Add syms and symcount parameters.  Change all
+	callers.
+	(parse_stab_string): Look up global variables in the symbol table
+	to get the right value.
+	* budbg.h (start_stab): Update declaration.
+	* rddbg.c (read_section_stabs_debugging_info): Add syms and
+	symcount parameters.  Change all callers.
+
+	* stabs.c (parse_stab_array_type): If the index type is 0, use
+	int.
+
 Wed Feb  7 14:17:45 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ieee.c (ieee_start_compilation_unit): Clear modified and
