@@ -231,6 +231,13 @@ static struct
       auto_align : 1,
       keep_pending_output : 1;
 
+    /* What to do when something is wrong with unwind directives.  */
+    enum
+      {
+	unwind_check_warning,
+	unwind_check_error
+      } unwind_check;
+
     /* Each bundle consists of up to three instructions.  We keep
        track of four most recent instructions so we can correctly set
        the end_of_insn_group for the last instruction in a bundle.  */
@@ -3048,14 +3055,25 @@ dot_special_section (which)
   set_section ((char *) special_section_name[which]);
 }
 
+static void
+unwind_diagnostic (const char * region, const char *directive)
+{
+  if (md.unwind_check == unwind_check_warning)
+    as_warn (".%s outside of %s", directive, region);
+  else
+    {
+      as_bad (".%s outside of %s", directive, region);
+      ignore_rest_of_line ();
+    }
+}
+
 static int
 in_procedure (const char *directive)
 {
   if (unwind.proc_start
       && (!unwind.saved_text_seg || strcmp (directive, "endp") == 0))
     return 1;
-  as_bad (".%s outside of procedure", directive);
-  ignore_rest_of_line ();
+  unwind_diagnostic ("procedure", directive);
   return 0;
 }
 
@@ -3064,10 +3082,10 @@ in_prologue (const char *directive)
 {
   if (in_procedure (directive))
     {
+      /* We are in a procedure. Check if we are in a prologue.  */
       if (unwind.prologue)
 	return 1;
-      as_bad (".%s outside of prologue", directive);
-      ignore_rest_of_line ();
+      unwind_diagnostic ("prologue", directive);
     }
   return 0;
 }
@@ -3077,10 +3095,10 @@ in_body (const char *directive)
 {
   if (in_procedure (directive))
     {
+      /* We are in a procedure. Check if we are in a body.  */
       if (unwind.body)
 	return 1;
-      as_bad (".%s outside of body region", directive);
-      ignore_rest_of_line ();
+      unwind_diagnostic ("body region", directive);
     }
   return 0;
 }
@@ -4292,11 +4310,14 @@ dot_endp (dummy)
   long where;
   segT saved_seg;
   subsegT saved_subseg;
-  char *name, *p, c;
+  char *name, *default_name, *p, c;
   symbolS *sym;
+  int unwind_check = md.unwind_check;
 
+  md.unwind_check = unwind_check_error;
   if (!in_procedure ("endp"))
     return;
+  md.unwind_check = unwind_check;
 
   if (unwind.saved_text_seg)
     {
@@ -4368,6 +4389,11 @@ dot_endp (dummy)
 
   subseg_set (saved_seg, saved_subseg);
 
+  if (unwind.proc_start)
+    default_name = (char *) S_GET_NAME (unwind.proc_start);
+  else
+    default_name = NULL;
+
   /* Parse names of main and alternate entry points and set symbol sizes.  */
   while (1)
     {
@@ -4376,10 +4402,35 @@ dot_endp (dummy)
       c = get_symbol_end ();
       p = input_line_pointer;
       if (!*name)
-	as_bad ("Empty argument of .endp");
-      else
+	{
+	  if (md.unwind_check == unwind_check_warning)
+	    {
+	      if (default_name)
+		{
+		  as_warn ("Empty argument of .endp. Use the default name `%s'",
+			   default_name);
+		  name = default_name;
+		}
+	      else
+		as_warn ("Empty argument of .endp");
+	    }
+	  else
+	    as_bad ("Empty argument of .endp");
+	}
+      if (*name)
 	{
 	  sym = symbol_find (name);
+	  if (!sym
+	      && md.unwind_check == unwind_check_warning
+	      && default_name
+	      && default_name != name)
+	    {
+	      /* We have a bad name. Try the default one if needed.  */
+	      as_warn ("`%s' was not defined within procedure. Use the default name `%s'",
+		       name, default_name);
+	      name = default_name;
+	      sym = symbol_find (name);
+	    }
 	  if (!sym || !S_IS_DEFINED (sym))
 	    as_bad ("`%s' was not defined within procedure", name);
 	  else if (unwind.proc_start
@@ -6689,6 +6740,16 @@ md_parse_option (c, arg)
 	  md.flags |= EF_IA_64_BE;
 	  default_big_endian = 1;
 	}
+      else if (strncmp (arg, "unwind-check=", 13) == 0)
+	{
+	  arg += 13;
+	  if (strcmp (arg, "warning") == 0)
+	    md.unwind_check = unwind_check_warning;
+	  else if (strcmp (arg, "error") == 0)
+	    md.unwind_check = unwind_check_error;
+	  else
+	    return 0;
+	}
       else
 	return 0;
       break;
@@ -6792,6 +6853,8 @@ IA-64 options:\n\
 			  EF_IA_64_NOFUNCDESC_CONS_GP)\n\
   -milp32|-milp64|-mlp64|-mp64	select data model (default -mlp64)\n\
   -mle | -mbe		  select little- or big-endian byte order (default -mle)\n\
+  -munwind-check=[warning|error]\n\
+			  unwind directive check (default -munwind-check=warning)\n\
   -x | -xexplicit	  turn on dependency violation checking (default)\n\
   -xauto		  automagically remove dependency violations\n\
   -xdebug		  debug dependency violation checker\n"),
@@ -7126,10 +7189,9 @@ md_begin ()
   md.entry_labels = NULL;
 }
 
-/* Set the elf type to 64 bit ABI by default.  Cannot do this in md_begin
-   because that is called after md_parse_option which is where we do the
-   dynamic changing of md.flags based on -mlp64 or -milp32.  Also, set the
-   default endianness.  */
+/* Set the default options in md.  Cannot do this in md_begin because
+   that is called after md_parse_option which is where we set the
+   options in md based on command line options.  */
 
 void
 ia64_init (argc, argv)
@@ -7137,6 +7199,8 @@ ia64_init (argc, argv)
      char **argv ATTRIBUTE_UNUSED;
 {
   md.flags = MD_FLAGS_DEFAULT;
+  /* FIXME: We should change it to unwind_check_error someday.  */
+  md.unwind_check = unwind_check_warning;
 }
 
 /* Return a string for the target object file format.  */

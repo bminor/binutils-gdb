@@ -1,5 +1,8 @@
 -*- text -*-
 
+* New command line option -munwind-check=[warning|error] for IA64
+  targets.
+
 * Port to MAXQ processor contributed by HCL Tech.
 
 * Added support for generating unwind tables for ARM ELF targets.

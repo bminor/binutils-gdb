@@ -1,3 +1,27 @@
+2005-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention "-munwind-check=[warning|error]".
+
+	* config/tc-ia64.c (md): Add unwind_check.
+	(unwind_diagnostic): New.
+	(in_procedure): Call unwind_diagnostic when a directive isn't
+	in procedure.
+	(in_prologue): Call unwind_diagnostic when a directive isn't in
+	prologue.
+	(in_body): Call unwind_diagnostic when a directive isn't in
+	body region.
+	(dot_endp): Set md.unwind_check to error before calling
+	in_procedure and restore it after. When the name is missing or
+	couldn't be found, use the one from the last .proc if
+	md.unwind_check isn't error. Warn if md.unwind_check is
+	warning.
+	(md_parse_option): Handle "-munwind-check=[warning|error]".
+	(md_show_usage): Add "-munwind-check=[warning|error]".
+	(ia64_init): Set md.unwind_check to warning.
+
+	* doc/as.texinfo: Add "-munwind-check=[none|warning|error]".
+	* doc/c-ia64.texi: Likewise.
+
 2005-02-11  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-ia64.h (LEX_AT): Include LEX_BEGIN_NAME.

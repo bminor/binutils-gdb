@@ -65,6 +65,14 @@ These options select the byte order.  The @code{-mle} option selects little-endi
 byte order (default) and @code{-mbe} selects big-endian byte order.  Note that
 IA-64 machine code always uses little-endian byte order.
 
+@item -munwind-check=warning
+@item -munwind-check=error
+These options control what the assembler will do when performing
+consistency checks on unwind directives.  @code{-munwind-check=warning}
+will make the assembler issue a warning when an unwind directive check
+fails.  This is the default.  @code{-munwind-check=error} will make the
+assembler issue an error when an unwind directive check fails.
+
 @item -x
 @item -xexplicit
 These options turn on dependency violation checking.  This checking is turned on by
