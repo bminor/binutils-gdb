@@ -1,3 +1,7 @@
+2004-10-19  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* NEWS: GDB works with GCC -feliminate-dwarf2-dups.
+
 2004-10-19  Andrew Cagney  <cagney@gnu.org>
 
 	GDB 6.3 branch created.

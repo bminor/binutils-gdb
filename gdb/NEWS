@@ -1,7 +1,15 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 6.2:
+*** Changes in GDB 6.3:
+
+* GDB works with GCC -feliminate-dwarf2-dups
+
+GDB now supports a more compact representation of DWARF-2 debug
+information using DW_FORM_ref_addr references.  These are produced
+by GCC with the option -feliminate-dwarf2-dups and also by some
+proprietary compilers.  With GCC, you must use GCC 3.3.4 or later
+to use -feliminate-dwarf2-dups.
 
 *** Changes in GDB 6.2.1:
 
