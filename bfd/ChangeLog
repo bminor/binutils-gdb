@@ -1,3 +1,9 @@
+Sun Feb 22 20:39:00 1998  Richard Henderson  <rth@cygnus.com>
+
+	* elf32-sparc.c (elf32_sparc_adjust_dynamic_symbol): Don't create
+	a plt entry when we can determine that we authoritatively define 
+	the symbol.
+
 Sun Feb 22 20:33:05 1998  Richard Henderson  <rth@cygnus.com>
 
 	* configure.in (COREFILE selection): Remove sparc-*-linux*.  They
