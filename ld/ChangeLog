@@ -1,3 +1,8 @@
+2004-01-13  Nick Clifton  <nickc@redhat.com>
+
+	* ldlang.c (lang_size_sections_1): If dot is advanced, then
+	assume that the section should be allocated.
+
 2004-01-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (IGNORE_SECTION): Don't ignore SEC_ALLOC && !SEC_LOAD
