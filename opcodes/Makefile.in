@@ -42,7 +42,7 @@ docdir = $(srcdir)/doc
 
 SHELL = /bin/sh
 
-INSTALL = install -c
+INSTALL = `cd $(srcdir)/..; pwd`/install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
 
@@ -64,11 +64,18 @@ TARGETLIB = libopcodes.a
 # To circumvent a Sun make VPATH bug, each file listed here
 # should also have a foo.o: foo.c line further along in this file.
 
-DIS_LIBS = i386-dis.o z8k-dis.o m68k-dis.o mips-dis.o h8500-dis.o \
-	h8300-dis.o dis-buf.o sparc-dis.o a29k-dis.o i960-dis.o \
-	alpha-dis.o sh-dis.o hppa-dis.o m88k-dis.o
+ALL_MACHINES = a29k-dis.o alpha-dis.o h8300-dis.o h8500-dis.o \
+	$(start-sanitize-arc) \
+	arc-dis.o arc-opc.o \
+	$(end-sanitize-arc) \
+	hppa-dis.o i386-dis.o i960-dis.o m68k-dis.o \
+	m88k-dis.o mips-dis.o mips-opc.o sh-dis.o sparc-dis.o \
+	sparc-opc.o z8k-dis.o ns32k-dis.o ppc-dis.o ppc-opc.o \
+	arm-dis.o w65-dis.o
 
-OFILES = $(DIS_LIBS) sparc-opc.o m68881-ext.o
+# BFD_MACHINES is set by configure.in.
+OFILES = $(BFD_MACHINES) dis-buf.o disassemble.o
+
 #### host and target dependent Makefile fragments come in here.
 ###
 
@@ -90,7 +97,7 @@ FLAGS_TO_PASS = \
 
 
 # C source files that correspond to .o's.
-CFILES = i386-dis.c z8k-dis.c m68k-dis.c mips-dis.c
+CFILES = i386-dis.c z8k-dis.c m68k-dis.c mips-dis.c ns32k-dis.c ppc-dis.c
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
 
@@ -114,23 +121,31 @@ $(TARGETLIB): $(OFILES)
 	 $(AR) $(AR_FLAGS) $(TARGETLIB) $(OFILES)
 	 $(RANLIB) $(TARGETLIB)
 
+disassemble.o: disassemble.c $(INCDIR)/dis-asm.h
+	$(CC) -c $(CFLAGS) $(ARCHDEFS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) $<
+
 a29k-dis.o: a29k-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/a29k.h
 dis-buf.o: dis-buf.c $(INCDIR)/dis-asm.h
 h8500-dis.o: h8500-dis.c h8500-opc.h $(INCDIR)/dis-asm.h
 h8300-dis.o: h8300-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/h8300.h
 i386-dis.o: i386-dis.c $(INCDIR)/dis-asm.h
 i960-dis.o: i960-dis.c $(INCDIR)/dis-asm.h
-m68881-ext.o: m68881-ext.c $(INCDIR)/ieee-float.h
-m68k-dis.o: m68k-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/ieee-float.h \
+w65-dis.o: w65-dis.c
+m68k-dis.o: m68k-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/floatformat.h \
 	$(INCDIR)/opcode/m68k.h
 mips-dis.o: mips-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/mips.h
+mips-opc.o: mips-opc.c $(INCDIR)/opcode/mips.h
+ppc-dis.o: ppc-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/ppc.h
+ppc-opc.o: ppc-opc.c $(INCDIR)/opcode/ppc.h
 sparc-dis.o: sparc-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/sparc.h
 sparc-opc.o: sparc-opc.c $(INCDIR)/opcode/sparc.h
 z8k-dis.o: z8k-dis.c z8k-opc.h $(INCDIR)/dis-asm.h
+ns32k-dis.o: ns32k-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/ns32k.h
 sh-dis.o: sh-dis.c sh-opc.h $(INCDIR)/dis-asm.h
 alpha-dis.o: alpha-dis.c alpha-opc.h $(INCDIR)/dis-asm.h
 hppa-dis.o: hppa-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/hppa.h
 m88k-dis.o: m88k-dis.c $(INCDIR)/dis-asm.h $(INCDIR)/opcode/m88k.h
+arm-dis.o: arm-dis.c arm-opc.h $(INCDIR)/dis-asm.h
 
 tags etags: TAGS
 
@@ -138,7 +153,7 @@ TAGS: force
 	etags $(INCDIR)/*.h $(srcdir)/*.h $(srcdir)/*.c
 
 MOSTLYCLEAN = *.o core *.E *.p *.ip
-mostyclean:
+mostlyclean:
 	rm -rf $(MOSTLYCLEAN)
 clean:
 	rm -f *.a $(MOSTLYCLEAN)
