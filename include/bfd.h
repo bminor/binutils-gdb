@@ -1154,6 +1154,7 @@ struct _bfd
       struct bout_data_struct *bout_data;
       struct sun_core_struct *sun_core_data;
       struct trad_core_struct *trad_core_data;
+      struct hppa_data_struct *hppa_data;
       PTR any;
       } tdata;
   
