@@ -107,14 +107,14 @@ int regno;
   else
     {
       /* FIXME: Until read_register() returns LONGEST, we have this.  */
-      char value[MAX_REGISTER_RAW_SIZE];
-      read_register_gen (regno, value);
-      sim_store_register (regno, value);
+      char tmp[MAX_REGISTER_RAW_SIZE];
+      read_register_gen (regno, tmp);
+      sim_store_register (regno, tmp);
       if (sr_get_debug ())
 	{
 	  printf_filtered ("gdbsim_store_register: %d", regno);
 	  /* FIXME: We could print something more intelligible.  */
-	  dump_mem (value, REGISTER_RAW_SIZE (regno));
+	  dump_mem (tmp, REGISTER_RAW_SIZE (regno));
 	}
     }
 }

@@ -1,3 +1,8 @@
+Fri Oct 29 09:31:38 1993  Steve Chamberlain  (sac@rtl.cygnus.com)
+
+	* remote-sim.c (gdbsim_store_register):  Change var name so
+	it compiles with non-ANSI compilers.
+
 Fri Oct 29 08:11:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* TODO: Add idea for "disassemble" with source.
