@@ -53,10 +53,8 @@ here.  */
 #define BFD64
 #endif
 
-#ifndef FOPEN_AUT /* WAG */
-/* INSERT SYSDEP HERE */
-/* END OF SYSDEP */
-#endif
+/* 64-bit type definition (if any) from bfd's sysdep.h goes here */
+
 
 /* forward declaration */
 typedef struct _bfd bfd;
