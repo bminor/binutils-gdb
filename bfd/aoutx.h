@@ -1006,10 +1006,14 @@ adjust_z_magic (abfd, execp)
     }
   if (abdp && abdp->zmagic_mapped_contiguous)
     {
-      text_pad = (obj_datasec(abfd)->vma
-		  - obj_textsec(abfd)->vma
-		  - obj_textsec(abfd)->_raw_size);
-      obj_textsec(abfd)->_raw_size += text_pad;
+      asection * text = obj_textsec (abfd);
+      asection * data = obj_datasec (abfd);
+
+      text_pad = data->vma - (text->vma + text->_raw_size);
+      /* Only pad the text section if the data
+	 section is going to be placed after it.  */
+      if (text_pad > 0)
+	text->_raw_size += text_pad;
     }
   obj_datasec(abfd)->filepos = (obj_textsec(abfd)->filepos
 				+ obj_textsec(abfd)->_raw_size);

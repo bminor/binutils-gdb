@@ -1,3 +1,8 @@
+2001-06-13  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* aoutx.h (adjust_z_magic): Only pad the tesxt section if the data
+	section is going to follow it.
+
 2001-06-12  Catherine Moore  <clm@redhat.com>
 
         * elflink.h (elf_gc_propagate_vtable_entries): Replace FILE_ALIGN
