@@ -23,7 +23,7 @@ Do-first:
 
 Things-to-keep:
 
-ld.exp
+ld-lib.exp
 
 Things-to-lose:
 
