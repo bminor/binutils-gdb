@@ -1,3 +1,18 @@
+Thu Jul  9 16:16:47 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-tdep.c (mn10300_generic_register_names): New variable.
+	(set_machine_hook): New function.  Copy the appropriate register
+	names into reg_names.
+	(_initialize_mn10300_tdep): Set up to call set_machine_hook.
+	* tm-mn10300 (NUM_REGS): Bump to 32.
+	(REGISTER_NAMES): Updated accordingly.
+
+start-sanitize-am33
+	* mn10300-tdep.c (am33_register_names): New variable.
+	(mn10300_analyze_prologue): Handle regs saved by am33 prologues.
+	* tm-mn10300.h (E0_REGNUM): Define.
+end-sanitize-am33
+
 Tue Jul 7 7:40:13 1998  Ron Unrau  <runrau@cygnus.com>
 
 	* symtab.c (find_pc_sect_psymbol): allow case where textlow is 0

@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* All registers are 32bits (phew!).  */
 #define REGISTER_SIZE 4
 #define MAX_REGISTER_RAW_SIZE 4
-#define NUM_REGS 14
+#define NUM_REGS 32
 
 #define REGISTER_VIRTUAL_TYPE(REG) builtin_type_int
 
@@ -39,7 +39,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define REGISTER_NAMES \
 { "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3", \
-  "sp", "pc", "mdr", "psw", "lir", "lar" }
+  "sp", "pc", "mdr", "psw", "lir", "lar", "", "", \
+  "", "", "", "", "", "", "", "", \
+  "", "", "", "", "", "", "", "" }
 
 #define SP_REGNUM 8
 #define PC_REGNUM 9
@@ -47,6 +49,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define PSW_REGNUM 11
 #define LIR_REGNUM 12
 #define LAR_REGNUM 13
+/* start-sanitize-am33 */
+#define E0_REGNUM 14
+/* end-sanitize-am33 */
 
 #define FP_REGNUM 7
 
