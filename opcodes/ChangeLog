@@ -1,4 +1,10 @@
 start-sanitize-sky
+Fri Feb 27 10:04:19 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dvp-opc.c (vif_operands): Add unpack[u] support.
+	(vif_opcodes): Ditto.
+	(*_vif_imrubits): Renamed from *_vif_imrbits.
+
 Wed Feb 25 00:27:44 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* dvp-dis.c (print_insn): Handle word number.
