@@ -63,7 +63,6 @@ keep-cri	avoids removing the cray research inc changes to emacs.
 keep-chill	avoids removing CHILL support.
 keep-mpw	avoids removing MPW host support.
 keep-gm		avoids removing GM-specific stuff.
-keep-powerpc-netware	avoids removing PPC NetWare stuff.
 
 for-intel	builds a distribution in the style that Intel likes.
 for-fsf		builds a distribution in the style that the FSF likes.
