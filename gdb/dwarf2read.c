@@ -37,7 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "language.h"
 
 #include <fcntl.h>
-#include <string.h>
+#include "gdb_string.h"
 #include <sys/types.h>
 
 /* .debug_info header for a compilation unit 

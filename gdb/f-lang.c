@@ -434,7 +434,7 @@ static const struct op_print f_op_print_tab[] = {
   { NULL,    0, 0, 0 }
 };
 
-struct type ** const (f_builtin_types[]) = 
+struct type ** CONST_PTR (f_builtin_types[]) = 
 {
   &builtin_type_f_character,
   &builtin_type_f_logical,

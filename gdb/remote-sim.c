@@ -36,6 +36,43 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "remote-utils.h"
 #include "callback.h"
 
+/* Prototypes */
+
+static void dump_mem PARAMS ((char *buf, int len));
+
+static void gdbsim_fetch_register PARAMS ((int regno));
+
+static void gdbsim_store_register PARAMS ((int regno));
+
+static void gdbsim_kill PARAMS ((void));
+
+static void gdbsim_load PARAMS ((char *prog, int fromtty));
+
+static void gdbsim_create_inferior PARAMS ((char *exec_file, char *args, char **env));
+
+static void gdbsim_open PARAMS ((char *args, int from_tty));
+
+static void gdbsim_close PARAMS ((int quitting));
+
+static void gdbsim_detach PARAMS ((char *args, int from_tty));
+
+static void gdbsim_resume PARAMS ((int pid, int step, enum target_signal siggnal));
+
+static int gdbsim_wait PARAMS ((int pid, struct target_waitstatus *status));
+
+static void gdbsim_prepare_to_store PARAMS ((void));
+
+static int gdbsim_xfer_inferior_memory PARAMS ((CORE_ADDR memaddr,
+						char *myaddr, int len,
+						int write,
+						struct target_ops *target));
+
+static void gdbsim_files_info PARAMS ((struct target_ops *target));
+
+static void gdbsim_mourn_inferior PARAMS ((void));
+
+static void simulator_command PARAMS ((char *args, int from_tty));
+
 /* Naming convention:
 
    sim_* are the interface to the simulator (see remote-sim.h).
@@ -186,7 +223,7 @@ gdbsim_create_inferior (exec_file, args, env)
 
   entry_pt = (CORE_ADDR) bfd_get_start_address (exec_bfd);
 
-  gdbsim_kill (NULL, NULL);	 
+  gdbsim_kill ();	 
   remove_breakpoints ();
   init_wait_for_inferior ();
 

@@ -1274,7 +1274,7 @@ unk_lang_value_print (val, stream, format, pretty)
   error ("internal error - unimplemented function unk_lang_value_print called.");
 }
 
-static struct type ** const (unknown_builtin_types[]) = { 0 };
+static struct type ** CONST_PTR (unknown_builtin_types[]) = { 0 };
 static const struct op_print unk_op_print_tab[] = {
     {NULL, OP_NULL, PREC_NULL, 0}
 };

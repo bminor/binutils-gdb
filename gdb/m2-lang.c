@@ -403,7 +403,7 @@ struct type *builtin_type_m2_card;
 struct type *builtin_type_m2_real;
 struct type *builtin_type_m2_bool;
 
-struct type ** const (m2_builtin_types[]) = 
+struct type ** CONST_PTR (m2_builtin_types[]) = 
 {
   &builtin_type_m2_char,
   &builtin_type_m2_int,

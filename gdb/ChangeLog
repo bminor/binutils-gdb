@@ -1,3 +1,52 @@
+Mon Aug 12 16:20:58 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* defs.h:  Define CONST_PTR as blank if compiling with Microsoft
+	C, else it's `const'.
+	* c-lang.c c-lang.h ch-lang.c f-lang.c language.c m2-lang.c
+	scm-lang.c: Microsoft C can't hack const pointers.  Use CONST_PTR
+	macro instead.
+	* configure configure.in defs.h:  Use AC_C_CONST to figure out if
+	the compiler supports const.  Gets rid of some cruft in defs.h.
+	* dwarf2read.c:  <string.h> -> "gdb_string.h"
+	* remote-sim.c:  Add prototypes.  Fix call to gdbsim_kill.
+	* sparcl-tdep.c (download):  Add prototypes to write_routine and
+	start_routine args.
+
+	* mswin/gdbwin.c:  Don't include both varargs.h AND stdarg.h.  Get
+	rid of varargs.h  Include string.h.
+	* (gdbwin_update gdbwin_fputs regs_changed_f bpt_changed_f
+	update):  Fix prototypes, fix calls.
+	* (update):  Return value for catch_errors.
+	* (run_execute_command togdb_command_from_tty togdb_command):
+	Cleanup catching of errors from calls to execute_command.  Also,
+	dup command string to avoid modifying const strings.
+	* (togdb_breakinfo_i_init togdb_breakinfo_i_next):  Use 0 instead
+	of NULL when see if b->address isn't set.
+	* (bi_disable_bpt bi_enable_bpt bi_delete_all
+	bi_delete_breakpoint):  Add arg to calls to update.
+	* (gui_command):  Add prototype.
+	* (mswin_query):  Fix prototype.
+	* (_initialize_gdbwin):  Dup string to avoid modifying const.
+	* (info_path togdb_get_info_path):  Remove const from decls cuz
+	this can't be const (it points at malloc'ed memory).
+	* (togdb_searchpath):  Remove const from path.  Dup string to
+	avoid modifying const strings.
+	* rindex -> strrchr.
+	* (gdbwin_list_symbols):  Regexp param is const.
+	* Fix lots of refs to psymtabs to deref correct pointers.
+	* (togdb_set_breakpoint_sal):  Call set_breakpoint_sal with sal,
+	not &sal.
+	* mswin/gdbwin.h (togdb_searchpath togdb_get_info_path
+	toget_set_info_path):  Fix prototypes to match reality.
+	* mswin/gui.cpp:  Define _beginthreadex and _endthreadex routines
+	with proper prototypes.
+	* mswin/iface.cpp (gdbwin_fputs):  Define with correct number of args.
+	* mswin/ser-win32s.c:  Fix defs of min and max.
+	* mswin/serdll32.c (OpenComm16):  Make cbInQueue and cbOutQueue be
+	USHORT.
+	* (WriteComm16):  Change lpBug from LPVOID to LPCSTR.
+	* mswin/serdll32.h:  Fix prototypes for OpenComm16 and WriteComm16.
+
 Sun Aug 11 20:54:16 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* main.c (main):  Make sure command loop is used with cygwin32.
