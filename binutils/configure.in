@@ -1,23 +1,107 @@
-# This file is a shell script that supplies the information necessary
-# to tailor a template configure script into the configure script
-# appropriate for this directory.  For more information, check any
-# existing configure script.
+dnl Process this file with autoconf to produce a configure script.
+dnl
+AC_PREREQ(2.0)
+AC_INIT(ar.c)
 
-srctrigger=ar.c
-srcname="Binutils"
+AC_ARG_ENABLE(targets,
+[  --enable-targets        alternative target configurations],
+[case "${enableval}" in
+  yes | "") AC_ERROR(enable-targets option must specify target names or 'all')
+            ;;
+  no)       enable_targets= ;;
+  *)        enable_targets=$enableval ;;
+esac])dnl
 
-# per-host:
+AC_CONFIG_HEADER(config.h)
+
+AC_CONFIG_AUX_DIR(`cd $srcdir/..; pwd`)
+AC_CANONICAL_SYSTEM
+if test -z "$target" ; then
+    AC_MSG_ERROR(Unrecognized target system type; please check config.sub.)
+fi
+if test -z "$host" ; then
+    AC_MSG_ERROR(Unrecognized host system type; please check config.sub.)
+fi
+AC_ARG_PROGRAM
+
+# host-specific stuff:
+
+HDEFINES=
+LDFLAGS=
 
 . ${srcdir}/../bfd/configure.host
 
-# per-target:
+AC_PROG_CC
+AC_SUBST(CFLAGS)
+AC_SUBST(HDEFINES)
+AC_SUBST(LDFLAGS)
+AR=${AR-ar}
+AC_SUBST(AR)
+AC_PROG_RANLIB
+AC_PROG_INSTALL
+
+AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h fcntl.h sys/file.h)
+AC_CHECK_FUNCS(sbrk utimes)
+
+AC_MSG_CHECKING(for time_t in time.h)
+AC_CACHE_VAL(bu_cv_decl_time_t_time_h,
+[AC_TRY_COMPILE([#include <time.h>], [time_t i;],
+bu_cv_decl_time_t_time_h=yes, bu_cv_decl_time_t_time_h=no)])
+AC_MSG_RESULT($bu_cv_decl_time_t_time_h)
+if test $bu_cv_decl_time_t_time_h = yes; then
+  AC_DEFINE([HAVE_TIME_T_IN_TIME_H])
+fi
+
+AC_MSG_CHECKING(for time_t in sys/types.h)
+AC_CACHE_VAL(bu_cv_decl_time_t_types_h,
+[AC_TRY_COMPILE([#include <sys/types.h>], [time_t i;],
+bu_cv_decl_time_t_types_h=yes, bu_cv_decl_time_t_types_h=no)])
+AC_MSG_RESULT($bu_cv_decl_time_t_types_h)
+if test $bu_cv_decl_time_t_types_h = yes; then
+  AC_DEFINE([HAVE_TIME_T_IN_TYPES_H])
+fi
+
+# Under Next 3.2 <utime.h> apparently does not define struct utimbuf
+# by default.
+AC_MSG_CHECKING([for utime.h])
+AC_CACHE_VAL(bu_cv_header_utime_h,
+[AC_TRY_COMPILE([#include <sys/types.h>
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+#include <utime.h>],
+[struct utimbuf s;],
+bu_cv_header_utime_h=yes, bu_cv_header_utime_h=no)])
+AC_MSG_RESULT($bu_cv_header_utime_h)
+if test $bu_cv_header_utime_h = yes; then
+  AC_DEFINE(HAVE_GOOD_UTIME_H)
+fi
+
+AC_MSG_CHECKING([whether fprintf must be declared])
+AC_CACHE_VAL(bu_cv_decl_needed_fprintf,
+[AC_TRY_COMPILE([#include <stdio.h>],
+[int (*pfn) = (int (*)) fprintf],
+bu_cv_decl_needed_fprintf=no, bu_cv_decl_needed_fprintf=yes)])
+AC_MSG_RESULT($bu_cv_decl_needed_fprintf)
+if test $bu_cv_decl_needed_fprintf = yes; then
+  AC_DEFINE(NEED_DECLARATION_FPRINTF)
+fi
+
+dnl FIXME: We should check this in some central place somehow
+case "${host}" in
+i[345]86-*-msdos* | i[345]86-*-go32* | i[345]86-*-win32)
+  AC_DEFINE(USE_BINARY_FOPEN) ;;
+esac
+
+# target-specific stuff:
 
 # Canonicalize the secondary target names.
-if [ -n "$enable_targets" ]; then
+target_makefile_fragment=/dev/null
+if test -n "$enable_targets"; then
     for targ in `echo $enable_targets | sed 's/,/ /g'`
     do
-	result=`$configsub $targ 2>/dev/null`
-	if [ -n "$result" ]; then
+	result=`$ac_config_sub $targ 2>/dev/null`
+	if test -n "$result"; then
 	    canon_targets="$canon_targets $result"
 	else
 	    # Allow targets that config.sub doesn't recognize, like "all".
@@ -25,98 +109,80 @@ if [ -n "$enable_targets" ]; then
 	fi
     done
 else
-# If our target is rs6000 _and nothing else_ then we build only nm!
+    # If our target is rs6000 _and nothing else_ then we build only nm!
     case $target in
-	rs6000-*-lynx*) target_makefile_frag=config/rslynx ;;
+    rs6000-*-lynx*) target_makefile_fragment=${srcdir}/config/rslynx ;;
     esac
 fi
+AC_SUBST_FILE(target_makefile_fragment)
 
 all_targets=false
-build_nlmconv=false
-nlmconv_defs=
-build_srconv=false
-build_dlltool=false
-dlltool_defs=
+BUILD_NLMCONV=
+NLMCONV_DEFS=
+BUILD_SRCONV=
+BUILD_DLLTOOL=
+DLLTOOL_DEFS=
 
 for targ in $target $canon_targets
 do
-    if [ "x$targ" = "xall" ]; then
+    if test "x$targ" = "xall"; then
         all_targets=true
-	build_nlmconv=true
-	build_srconv=true
-	nlmconv_defs="-DNLMCONV_I386 -DNLMCONV_ALPHA -DNLMCONV_POWERPC -DNLMCONV_SPARC"
+	BUILD_NLMCONV='$(NLMCONV_PROG)'
+	BUILD_SRCONV='$(SRCONV_PROG)'
+	NLMCONV_DEFS="-DNLMCONV_I386 -DNLMCONV_ALPHA -DNLMCONV_POWERPC -DNLMCONV_SPARC"
     else
 	case $targ in
+changequote(,)dnl
 	i[345]86*-*-netware*) 
-	  build_nlmconv=true 
-	  nlmconv_defs="$nlmconv_defs -DNLMCONV_I386"
+changequote([,])dnl
+	  BUILD_NLMCONV='$(NLMCONV_PROG)'
+	  NLMCONV_DEFS="$NLMCONV_DEFS -DNLMCONV_I386"
 	  ;;
 	alpha*-*-netware*)
-	  build_nlmconv=true
-	  nlmconv_defs="$nlmconv_defs -DNLMCONV_ALPHA"
+	  BUILD_NLMCONV='$(NLMCONV_PROG)'
+	  NLMCONV_DEFS="$NLMCONV_DEFS -DNLMCONV_ALPHA"
 	  ;;
 	powerpc*-*-netware*)
-	  build_nlmconv=true
-	  nlmconv_defs="$nlmconv_defs -DNLMCONV_POWERPC"
+	  BUILD_NLMCONV='$(NLMCONV_PROG)'
+	  NLMCONV_DEFS="$NLMCONV_DEFS -DNLMCONV_POWERPC"
 	  ;;
 	sparc*-*-netware*)
-	  build_nlmconv=true
-	  nlmconv_defs="$nlmconv_defs -DNLMCONV_SPARC"
+	  BUILD_NLMCONV='$(NLMCONV_PROG)'
+	  NLMCONV_DEFS="$NLMCONV_DEFS -DNLMCONV_SPARC"
 	  ;;
 	esac
 	case $targ in
-	*-*-hms*) build_srconv=true ;;
+	*-*-hms*) BUILD_SRCONV='$(SRCONV_PROG)' ;;
 	esac
 	case $targ in
 	arm-*pe*)
-  	  build_dlltool=true;
-	  dlltool_defs="$dlltool_defs -DDLLTOOL_ARM"
+  	  BUILD_DLLTOOL='$(DLLTOOL_PROG)'
+	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_ARM"
 	 ;;
+changequote(,)dnl
 	i[3-6]86-*pe* | i[3-6]86-*-win32)
-  	  build_dlltool=true;
-	  dlltool_defs="$dlltool_defs -DDLLTOOL_I386"
+changequote([,])dnl
+  	  BUILD_DLLTOOL='$(DLLTOOL_PROG)'
+	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_I386"
 	 ;;
 	esac
     fi
 done
 
-# We don't do any links based on the target system, just makefile config.
-
-# post-target:
-
-rm -f Makefile.tmp Makefile.2
-mv Makefile Makefile.tmp
-
-if [ "x${build_nlmconv}" = "xtrue" ]; then
-    echo 'BUILD_NLMCONV = $(NLMCONV_PROG)' >> Makefile.2
-    echo "NLMCONV_DEFS = ${nlmconv_defs}" >> Makefile.2
-fi
-
-if [ "x${build_srconv}" = "xtrue" ]; then
-    echo 'BUILD_SRCONV = $(SRCONV_PROG)' >> Makefile.2
-fi
-
-if [ "x${build_dlltool}" = "xtrue" ]; then
-    echo 'BUILD_DLLTOOL = $(DLLTOOL_PROG)' >> Makefile.2
-    echo "DLLTOOL_DEFS = ${dlltool_defs}" >> Makefile.2
-fi
+AC_SUBST(NLMCONV_DEFS)
+AC_SUBST(BUILD_NLMCONV)
+AC_SUBST(BUILD_SRCONV)
+AC_SUBST(BUILD_DLLTOOL)
+AC_SUBST(DLLTOOL_DEFS)
 
 targ=$target
 . $srcdir/../bfd/config.bfd
 if test "x$targ_underscore" = "xyes"; then
-    underscore=1
+    UNDERSCORE=1
 else
-    underscore=0
+    UNDERSCORE=0
 fi
-echo "UNDERSCORE = ${underscore}" >> Makefile.2
+AC_SUBST(UNDERSCORE)
 
-test -z "$CC" && CC=`egrep '^CC *=' ../Makefile | tail -1 | sed 's/^CC *= *//'`
-test -z "$CC" && CC=cc
-test -z "$CFLAGS" && CFLAGS=-g
-sed -e "s%@CC@%${CC}%" \
-    -e "s%@CFLAGS@%${CFLAGS}%" \
-    -e "s%@HDEFINES@%${HDEFINES}%" \
-    -e "s%@LDFLAGS@%${LDFLAGS}%" < Makefile.tmp >> Makefile.2
-
-rm -f Makefile.tmp
-mv Makefile.2 Makefile
+AC_OUTPUT(Makefile,
+[case x$CONFIG_HEADERS in xconfig.h) echo > stamp-h ;; esac])

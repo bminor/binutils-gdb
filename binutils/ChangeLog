@@ -1,3 +1,52 @@
+Tue Sep  5 20:22:42 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Rewrite to use autoconf.
+	* aclocal.m4: New file.
+	* configure: New file, built by autoconf.
+	* acconfig.h: New file.
+	* config.h.in: New file, built by autoheader.
+	* Makefile.in: Various changes for new configure script.  Also:
+	(PROGS): Remove $(SYSINFO_PROG).
+	(ALL_CFLAGS): Remove $(TDEFINES).
+	(version.o): Use $(ALL_CFLAGS).
+	(cplus-dem.o, dlltool.o, nlmconv.o): Likewise.
+	(sysdump.o): Depend upon bucomm.h and config.h.
+	(srconv.o, arsup.o, strings.o): Depend upon config.h.
+	(filemode.o): Don't depend upon ../bfd/sysdep.h.
+	(bucomm.o): Depend upon config.h, not ../bfd/sysdep.h.
+	(size.o, objdump.o, nm.o, ar.o, objcopy.o): Likewise.
+	(nlmheader.o, nlmconv.o): Likewise.
+	(distclean): Don't remove sysdep.h.
+	* bucomm.h: Include "ansidecl.h", <stdio.h>, and "config.h".
+  	Include "fopen-same.h" or "fopen-bin.h", based on
+ 	USE_BINARY_FOPEN.  Include <errno.h>, and declare errno if it is
+ 	not a macro.  Include <unistd.h>, <string.h>, <strings.h>,
+ 	<stdlib.h>, and <fcntl.h> if they are present.  Declare strchr,
+ 	strrchr, and strstr if no string header file exists.  Include
+	<sys/file.h> if it exists and <fcntl.h> does not.  Define
+	O_RDONLY and O_RDWR if necessary.
+	* ar.c:  Don't include "sysdep.h".  Do include <sys/types.h> and
+	<sys/stat.h>.  Use HAVE_GOOD_UTIME_H rather than POSIX_UTIME.  Use
+	HAVE_UTIMES rather than !USE_UTIME.  Don't include <errno.h>, and
+	don't declare errno.
+	* arsup.c: Don't include <sysdep.h>.
+	* bucomm.c: Don't include "sysdep.h".  Include <stdio.h>,
+	<sys/types.h>, and <sys/stat.h>.  Include <time.h> if it defines
+	time_t.  Define time_t if necessary.
+	* coffdump.c: Don't include "sysdep.h".
+	* coffgrok.c, filemode.c, nlmconv.c, size.c: Likewise.
+	* srconv.c, strings.c: Likewise.
+	* nm.c: Don't include "sysdep.h".  Don't try to define HAVE_SBRK.
+	* objcopy.c: Don't include "sysdep.h".  Include <sys/types.h> and
+	<sys/stat.h>.
+	(simple_copy): Use creat rather than assuming that O_CREAT is
+	defined.
+	* objdump.c: Don't include "sysdep.h".  Use
+	NEED_DECLARATION_PRINTF rather than !FPRINTF_ALREADY_DECLARED.
+	* sysdump.c: Include "bfd.h" and "bucomm.h".  Don't include
+	"sysdep.h" or <stdlib.h>.
+	(dump_symbol_info): Rename from symbol_info.  Change all callers.
+	
 Mon Sep  4 14:30:00 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in (host_makefile_frag): Don't set.  Substitute for

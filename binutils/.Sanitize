@@ -28,6 +28,8 @@ Makefile.in
 NEWS
 README
 TODO
+acconfig.h
+aclocal.m4
 alloca.c
 ar.1
 ar.c
@@ -42,6 +44,8 @@ coffdump.c
 coffgrok.c
 coffgrok.h
 config
+config.h.in
+configure
 configure.bat
 configure.in
 cxxfilt.man
