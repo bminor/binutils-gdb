@@ -1,3 +1,7 @@
+Thu Aug 31 12:48:04 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* config/sh/sh.mt (SIM): Add -lm.
+
 Wed Aug 30 18:10:57 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* rmote-nindy.c (non_dle, nidy_resume, nindy_wait): Changes to 
