@@ -18,3 +18,4 @@ Disassembly of section .text:
   23:[	 ]*f3 0f a7 e8 [	 ]*repz xcryptofb 
   27:[	 ]*0f a7 c0 [	 ]*xstorerng 
   2a:[	 ]*f3 0f a7 c0 [	 ]*repz xstorerng 
+[ 	]*\.\.\.
