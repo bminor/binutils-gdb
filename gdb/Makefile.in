@@ -1190,6 +1190,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	m68k-tdep.c \
 	m88k-nat.c m88k-tdep.c mac-nat.c \
 	mcore-tdep.c \
+	mips-linux-nat.c mips-linux-tdep.c \
 	mips-nat.c \
 	mips-tdep.c mipsm3-nat.c mipsv4-nat.c news-xdep.c \
 	nindy-share/Onindy.c nindy-share/nindy.c \
@@ -1206,7 +1207,8 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	rs6000-nat.c rs6000-tdep.c \
 	s390-tdep.c s390-nat.c \
 	ser-go32.c ser-pipe.c ser-tcp.c \
-	sh-tdep.c solib.c solib-svr4.c solib-sunos.c sparc-nat.c \
+	sh-tdep.c solib.c solib-svr4.c solib-sunos.c sparc-linux-nat.c \
+	sparc-nat.c \
 	sparc-tdep.c sparcl-tdep.c sun3-nat.c \
 	symm-tdep.c symm-nat.c \
 	vax-tdep.c \
@@ -1721,6 +1723,11 @@ mem-break.o: mem-break.c $(defs_h)
 minsyms.o: minsyms.c $(bfd_h) $(defs_h) $(objfiles_h) $(symfile_h) \
 	$(symtab_h) $(gdb_string_h) $(value_h) $(cp_abi_h)
 
+mips-linux-nat.o: mips-linux-nat.c $(defs_h)
+
+mips-linux-tdep.o: mips-linux-tdep.c $(defs_h) $(gdbcore_h) $(target_h) \
+	solib-svr4.h
+
 mips-nat.o: mips-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 
 mips-tdep.o: mips-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
@@ -2019,6 +2026,8 @@ source.o: source.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(language_h) $(objfiles_h) gdb_regex.h $(symfile_h) \
 	$(symtab_h) $(gdb_string_h) $(source_h) $(completer_h) $(linespec_h) \
 	$(ui_out_h)
+
+sparc-linux-nat.o: sparc-linux-nat.c $(defs_h) $(regcache_h)
 
 sparc-nat.o: sparc-nat.c $(bfd_h) $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(target_h) $(regcache_h)

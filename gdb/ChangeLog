@@ -1,3 +1,10 @@
+2001-11-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in: Add mips-linux-nat.c, mips-linux-tdep.c,
+	and sparc-linux-nat.c to ALLDEPFILES.  Add dependencies.
+	* config/sparc/linux.mh: Add sparc-linux-nat.o to NATDEPFILES.
+	* sparc-linux-nat.c: New file, from Mark Kettenis.
+
 2001-11-16  Jakub Jelinek  <jakub@redhat.com>
 
 	* dwarf2read.c (dwarf_str_buffer): New.
