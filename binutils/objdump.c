@@ -24,6 +24,7 @@ Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <ctype.h>
 #include "dis-asm.h"
 #include "libiberty.h"
+#include "demangle.h"
 #include "debug.h"
 #include "budbg.h"
 
@@ -59,6 +60,7 @@ static int with_line_numbers;		/* -l */
 static boolean with_source_code;	/* -S */
 static int show_raw_insn;		/* --show-raw-insn */
 static int dump_stab_section_info;	/* --stabs */
+static int do_demangle;			/* -C, --demangle */
 static boolean disassemble;		/* -d */
 static boolean disassemble_all;		/* -D */
 static int disassemble_zeroes;		/* --disassemble-zeroes */
@@ -127,6 +129,9 @@ display_bfd PARAMS ((bfd *abfd));
 static void
 objdump_print_value PARAMS ((bfd_vma, struct disassemble_info *, boolean));
 
+static void
+objdump_print_symname PARAMS ((bfd *, struct disassemble_info *, asymbol *));
+
 static asymbol *
 find_symbol_for_address PARAMS ((bfd *, asection *, bfd_vma, boolean, long *));
 
@@ -160,7 +165,7 @@ usage (stream, status)
      int status;
 {
   fprintf (stream, "\
-Usage: %s [-ahifdDprRtTxsSlw] [-b bfdname] [-m machine] [-j section-name]\n\
+Usage: %s [-ahifCdDprRtTxsSlw] [-b bfdname] [-m machine] [-j section-name]\n\
        [--archive-headers] [--target=bfdname] [--debugging] [--disassemble]\n\
        [--disassemble-all] [--disassemble-zeroes] [--file-headers]\n\
        [--section-headers] [--headers]\n\
@@ -171,8 +176,8 @@ Usage: %s [-ahifdDprRtTxsSlw] [-b bfdname] [-m machine] [-j section-name]\n\
        [--syms] [--all-headers] [--dynamic-syms] [--dynamic-reloc]\n\
        [--wide] [--version] [--help] [--private-headers]\n\
        [--start-address=addr] [--stop-address=addr]\n\
-       [--prefix-addresses] [--[no-]show-raw-insn] [--adjust-vma=offset]\n\
-       [-EB|-EL] [--endian={big|little}] objfile...\n\
+       [--prefix-addresses] [--[no-]show-raw-insn] [--demangle]\n\
+       [--adjust-vma=offset] [-EB|-EL] [--endian={big|little}] objfile...\n\
 at least one option besides -l (--line-numbers) must be given\n");
   list_supported_targets (program_name, stream);
   if (status == 0)
@@ -195,6 +200,7 @@ static struct option long_options[]=
   {"architecture", required_argument, NULL, 'm'},
   {"archive-headers", no_argument, NULL, 'a'},
   {"debugging", no_argument, &dump_debugging, 1},
+  {"demangle", no_argument, &do_demangle, 1},
   {"disassemble", no_argument, NULL, 'd'},
   {"disassemble-all", no_argument, NULL, 'D'},
   {"disassemble-zeroes", no_argument, &disassemble_zeroes, 1},
@@ -561,6 +567,44 @@ objdump_print_value (vma, info, skip_zeroes)
   (*info->fprintf_func) (info->stream, "%s", p);
 }
 
+/* Print the name of a symbol.  */
+
+static void
+objdump_print_symname (abfd, info, sym)
+     bfd *abfd;
+     struct disassemble_info *info;
+     asymbol *sym;
+{
+  char *alloc;
+  const char *name;
+  const char *print;
+
+  alloc = NULL;
+  name = bfd_asymbol_name (sym);
+  if (! do_demangle || name[0] == '\0')
+    print = name;
+  else
+    {
+      /* Demangle the name.  */
+      if (bfd_get_symbol_leading_char (abfd) == name[0])
+	++name;
+
+      alloc = cplus_demangle (name, DMGL_ANSI | DMGL_PARAMS);
+      if (alloc == NULL)
+	print = name;
+      else
+	print = alloc;
+    }
+
+  if (info != NULL)
+    (*info->fprintf_func) (info->stream, "%s", print);
+  else
+    printf ("%s", print);
+
+  if (alloc != NULL)
+    free (alloc);
+}
+
 /* Locate a symbol given a bfd, a section, and a VMA.  If REQUIRE_SEC
    is true, then always require the symbol to be in the section.  This
    returns NULL if there is no suitable symbol.  If PLACE is not NULL,
@@ -720,7 +764,8 @@ objdump_print_addr_with_sym (abfd, sec, sym, vma, info, skip_zeroes)
     }
   else
     {
-      (*info->fprintf_func) (info->stream, " <%s", sym->name);
+      (*info->fprintf_func) (info->stream, " <");
+      objdump_print_symname (abfd, info, sym);
       if (bfd_asymbol_value (sym) > vma)
 	{
 	  (*info->fprintf_func) (info->stream, "-");
@@ -1278,7 +1323,6 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 		     && (**relppp)->address < (bfd_vma) i + bytes))
 	    {
 	      arelent *q;
-	      const char *sym_name;
 
 	      q = **relppp;
 
@@ -1291,24 +1335,26 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 
 	      printf (": %s\t", q->howto->name);
 
-	      if (q->sym_ptr_ptr != NULL
-		  && *q->sym_ptr_ptr != NULL)
+	      if (q->sym_ptr_ptr == NULL || *q->sym_ptr_ptr == NULL)
+		printf ("*unknown*");
+	      else
 		{
+		  const char *sym_name;
+
 		  sym_name = bfd_asymbol_name (*q->sym_ptr_ptr);
-		  if (sym_name == NULL || *sym_name == '\0')
+		  if (sym_name != NULL && *sym_name != '\0')
+		    objdump_print_symname (aux->abfd, info, *q->sym_ptr_ptr);
+		  else
 		    {
 		      asection *sym_sec;
 
 		      sym_sec = bfd_get_section (*q->sym_ptr_ptr);
-		      sym_name = bfd_get_section_name (abfd, sym_sec);
+		      sym_name = bfd_get_section_name (aux->abfd, sym_sec);
 		      if (sym_name == NULL || *sym_name == '\0')
 			sym_name = "*unknown*";
+		      printf ("%s", sym_name);
 		    }
 		}
-	      else
-		sym_name = "*unknown*";
-
-	      printf ("%s", sym_name);
 
 	      if (q->addend)
 		{
@@ -2063,12 +2109,40 @@ dump_symbols (abfd, dynamic)
     {
       if (*current)
 	{
-	  bfd *cur_bfd = bfd_asymbol_bfd(*current);
-	  if (cur_bfd)
+	  bfd *cur_bfd = bfd_asymbol_bfd (*current);
+
+	  if (cur_bfd != NULL)
 	    {
-	      bfd_print_symbol (cur_bfd,
-				stdout,
-				*current, bfd_print_symbol_all);
+	      const char *name;
+	      char *alloc;
+
+	      name = bfd_asymbol_name (*current);
+	      alloc = NULL;
+	      if (do_demangle && name != NULL && *name != '\0')
+		{
+		  const char *n;
+
+		  /* If we want to demangle the name, we demangle it
+                     here, and temporarily clobber it while calling
+                     bfd_print_symbol.  FIXME: This is a gross hack.  */
+
+		  n = name;
+		  if (bfd_get_symbol_leading_char (cur_bfd) == *n)
+		    ++n;
+		  alloc = cplus_demangle (n, DMGL_ANSI | DMGL_PARAMS);
+		  if (alloc != NULL)
+		    (*current)->name = alloc;
+		  else
+		    (*current)->name = n;
+		}
+
+	      bfd_print_symbol (cur_bfd, stdout, *current,
+				bfd_print_symbol_all);
+
+	      (*current)->name = name;
+	      if (alloc != NULL)
+		free (alloc);
+
 	      printf ("\n");
 	    }
 	}
@@ -2260,9 +2334,9 @@ dump_reloc_set (abfd, sec, relpp, relcount)
       if (sym_name)
 	{
 	  printf_vma (q->address);
-	  printf (" %-16s  %s",
-		  q->howto->name,
-		  sym_name);
+	  printf (" %-16s  ", q->howto->name);
+	  objdump_print_symname (abfd, (struct disassemble_info *) NULL,
+				 *q->sym_ptr_ptr);
 	}
       else
 	{
@@ -2473,7 +2547,7 @@ main (argc, argv)
   bfd_init ();
   set_default_bfd_target ();
 
-  while ((c = getopt_long (argc, argv, "pib:m:VdDlfahrRtTxsSj:wE:",
+  while ((c = getopt_long (argc, argv, "pib:m:VCdDlfahrRtTxsSj:wE:",
 			   long_options, (int *) 0))
 	 != EOF)
     {
@@ -2517,6 +2591,9 @@ main (argc, argv)
 	  break;
 	case 'T':
 	  dump_dynamic_symtab = 1;
+	  break;
+	case 'C':
+	  do_demangle = 1;
 	  break;
 	case 'd':
 	  disassemble = true;

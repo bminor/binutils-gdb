@@ -1,5 +1,18 @@
 Sat Mar 15 15:35:56 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	Based on patches from Jamie Lokier <jamie@rebellion.co.uk>:
+	* objdump.c: Include "demangle.h".
+	(do_demangle): New static variable.
+	(usage): Mention -C/--demangle.
+	(long_options): Add "demangle".
+	(objdump_print_symname): New static function.
+	(objdump_print_addr_with_sym): Use objdump_print_symname.
+	(disassemble_bytes): Likewise.
+	(dump_reloc_set): Likewise.
+	(dump_symbols): Demangle symbol name.
+	(main): Handle -C.
+	* binutils.texi, objdump.1: Document -C/--demangle.
+
 	* objdump.c (usage): Mention --no-show-raw-insn.
 	(long_options): Add "no-show-raw-insn".
 	(disassemble_bytes): Handle --no-show-raw-insn.

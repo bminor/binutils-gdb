@@ -693,7 +693,7 @@ The same as @samp{--format=bsd} (for compatibility with the MIPS @code{nm}).
 
 @item -C
 @itemx --demangle
-@cindex demangling C++ symbols
+@cindex demangling in nm
 Decode (@dfn{demangle}) low-level symbol names into user-level names.
 Besides removing any initial underscore prepended by the system, this
 makes C++ function names readable.  @xref{c++filt}, for more information
@@ -1037,8 +1037,8 @@ Show a summary of the options to @code{objcopy}.
 @smallexample
 objdump [ -a | --archive-headers ] 
         [ -b @var{bfdname} | --target=@var{bfdname} ] [ --debugging ]
-        [ -d | --disassemble ]  [ -D | --disassemble-all ] 
-        [ --disassemble-zeroes ]
+        [ -C | --demangle ] [ -d | --disassemble ]
+        [ -D | --disassemble-all ] [ --disassemble-zeroes ]
         [ -EB | -EL | --endian=@{big | little @} ]
         [ -f | --file-headers ]
         [ -h | --section-headers | --headers ]  [ -i | --info ]
@@ -1104,6 +1104,14 @@ displays summary information from the section headers (@samp{-h}) of
 file in the format produced by Oasys compilers.  You can list the
 formats available with the @samp{-i} option.
 @xref{Target Selection}, for more information.
+
+@item -C
+@itemx --demangle
+@cindex demangling in objdump
+Decode (@dfn{demangle}) low-level symbol names into user-level names.
+Besides removing any initial underscore prepended by the system, this
+makes C++ function names readable.  @xref{c++filt}, for more information
+on demangling.
 
 @item --debugging
 Display debugging information.  This attempts to parse debugging
