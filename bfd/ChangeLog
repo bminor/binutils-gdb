@@ -1,3 +1,12 @@
+Mon Nov 22 10:54:27 1993  Fred Fish  (fnf@cygnus.com)
+
+	Merged changes from kev@spuds.geg.mot.com (Kevin A. Buettner):
+	* bfd/config/delta88.mh (HDEFINES): Define this to be -DPTRACE_CORE.
+	* bfd/config/delta88.mh (HDEPFILES): Defined to be ptrace-core.o.
+	* bfd/ptrace-core.c:  New file for dealing with core files with
+	start with the ptrace_user structure found on BCS compliant systems.
+	* bfd/targets.c (ptrace_core_vec):  New vector.
+
 Mon Nov 22 02:33:12 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* Minimal support for reading SOM fixup streams.  Allows
