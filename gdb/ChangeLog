@@ -1,3 +1,14 @@
+2005-02-09  Andrew Cagney  <cagney@gnu.org>
+
+	* config/sh/linux.mt (TDEPFILES): Add symfile-mem.o.
+	* config/powerpc/linux.mt (TDEPFILES): Ditto.
+	* config/pa/linux.mt (TDEPFILES): Ditto.
+	* config/mips/linux.mt (TDEPFILES): Ditto.
+	* config/m68k/linux.mt (TDEPFILES): Ditto.
+	* config/m32r/linux.mt (TDEPFILES): Ditto.
+	* config/ia64/linux.mt (TDEPFILES): Ditto.
+	* config/arm/linux.mt (TDEPFILES): Ditto.
+
 2005-02-08  Andrew Cagney  <cagney@gnu.org>
 
 	* value.h (METHOD_PTR_IS_VIRTUAL, METHOD_PTR_FROM_VOFFSET) 
