@@ -1782,7 +1782,9 @@ extern void DEFUN_VOID(write_object_file)
   }
     coff_header_append(abfd, &filehdr, &aouthdr);
 
-    bfd_close_all_done(abfd);
+    if (bfd_close_all_done(abfd) == false)
+      as_fatal ("Can't close %s: %s", out_file_name,
+		bfd_errmsg (bfd_error));
 }
 
 

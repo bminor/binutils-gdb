@@ -1,3 +1,8 @@
+Fri Oct 23 14:40:38 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* obj-coffbfd.c (write_object_file): check return value of
+	bfd_close_all_done.
+
 Tue Oct 20 13:02:25 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Support for i386-sysv.
