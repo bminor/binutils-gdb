@@ -1,3 +1,8 @@
+2003-03-17  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.texinfo (DATE): Delete.  Remove date from titles.  Mention
+	that GNU Press update the manual version number.
+
 2003-03-12  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Delete

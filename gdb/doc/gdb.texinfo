@@ -28,10 +28,8 @@
 @syncodeindex fn cp
 
 @c !!set GDB manual's edition---not the same as GDB version!
+@c This is updated by GNU Press.
 @set EDITION Ninth
-
-@c !!set GDB manual's revision date
-@set DATE June 2002
 
 @c !!set GDB edit command default editor
 @set EDITOR /bin/ex
@@ -49,9 +47,9 @@
 This file documents the @sc{gnu} debugger @value{GDBN}.
 
 
-This is the @value{EDITION} Edition, @value{DATE},
-of @cite{Debugging with @value{GDBN}: the @sc{gnu} Source-Level Debugger}
-for @value{GDBN} Version @value{GDBVN}.
+This is the @value{EDITION} Edition, of @cite{Debugging with
+@value{GDBN}: the @sc{gnu} Source-Level Debugger} for @value{GDBN}
+Version @value{GDBVN}.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,@*
               1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
@@ -74,7 +72,6 @@ development.''
 @subtitle The @sc{gnu} Source-Level Debugger
 @sp 1
 @subtitle @value{EDITION} Edition, for @value{GDBN} version @value{GDBVN}
-@subtitle @value{DATE}
 @author Richard Stallman, Roland Pesch, Stan Shebs, et al.
 @page
 @tex
@@ -115,7 +112,7 @@ development.''
 
 This file describes @value{GDBN}, the @sc{gnu} symbolic debugger.
 
-This is the @value{EDITION} Edition, @value{DATE}, for @value{GDBN} Version
+This is the @value{EDITION} Edition, for @value{GDBN} Version
 @value{GDBVN}.
 
 Copyright (C) 1988-2003 Free Software Foundation, Inc.
