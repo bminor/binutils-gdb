@@ -1,5 +1,16 @@
 2003-06-16  Corinna Vinschen  <vinschen@redhat.com>
 
+	* h8300-tdep.c (h8300_push_arguments): Remove.  Substitute by...
+	(h8300_push_dummy_call): ...this function.  Some minor optimization.
+	(h8300_push_return_address): Remove.
+	(h8300_gdbarch_init): Remove calls to
+	set_gdbarch_deprecated_dummy_write_sp,
+	set_gdbarch_deprecated_push_arguments and
+	set_gdbarch_deprecated_push_return_address.
+	Add call to set_gdbarch_push_dummy_call.
+
+2003-06-16  Corinna Vinschen  <vinschen@redhat.com>
+
 	* h8300-tdep.c (E_PSEUDO_CCR_REGNUM): New define.
 	(E_PSEUDO_EXR_REGNUM): Ditto.
 	(h8300_is_argument_spill): Check for instructions moving argument

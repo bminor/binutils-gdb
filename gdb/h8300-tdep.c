@@ -564,7 +564,7 @@ h8300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 #define round_up(n, unit)   (((n) + (unit) - 1) & -(unit))
 #define round_down(n, unit) ((n) & -(unit))
 
-/* Function: push_arguments
+/* Function: push_dummy_call
    Setup the function arguments for calling a function in the inferior.
    In this discussion, a `word' is 16 bits on the H8/300s, and 32 bits
    on the H8/300H.
@@ -629,12 +629,14 @@ h8300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
      to begin with.  */
 
 static CORE_ADDR
-h8300_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
-		      int struct_return, CORE_ADDR struct_addr)
+h8300_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+		       struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
+		       struct value **args, CORE_ADDR sp, int struct_return,
+		       CORE_ADDR struct_addr)
 {
-  int stack_align, stack_alloc, stack_offset;
+  int stack_alloc = 0, stack_offset = 0;
   int wordsize = BINWORD;
-  int reg;
+  int reg = E_ARG0_REGNUM;
   int argument;
 
   /* First, make sure the stack is properly aligned.  */
@@ -642,22 +644,18 @@ h8300_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
   /* Now make sure there's space on the stack for the arguments.  We
      may over-allocate a little here, but that won't hurt anything.  */
-  stack_alloc = 0;
   for (argument = 0; argument < nargs; argument++)
     stack_alloc += round_up (TYPE_LENGTH (VALUE_TYPE (args[argument])),
                              wordsize);
   sp -= stack_alloc;
 
   /* Now load as many arguments as possible into registers, and push
-     the rest onto the stack.  */
-  reg = E_ARG0_REGNUM;
-  stack_offset = 0;
-
-  /* If we're returning a structure by value, then we must pass a
+     the rest onto the stack.
+     If we're returning a structure by value, then we must pass a
      pointer to the buffer for the return value as an invisible first
      argument.  */
   if (struct_return)
-    write_register (reg++, struct_addr);
+    regcache_cooked_write_unsigned (regcache, reg++, struct_addr);
 
   for (argument = 0; argument < nargs; argument++)
     {
@@ -701,7 +699,7 @@ h8300_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
                 {
                   ULONGEST word = extract_unsigned_integer (padded + offset, 
 							    wordsize);
-                  write_register (reg++, word);
+		  regcache_cooked_write_unsigned (regcache, reg++, word);
                 }
             }
         }
@@ -717,24 +715,13 @@ h8300_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
         }
     }
 
-  return sp;
-}
-
-/* Function: push_return_address
-   Setup the return address for a dummy frame, as called by
-   call_function_by_hand.  Only necessary when you are using an
-   empty CALL_DUMMY, ie. the target will not actually be executing
-   a JSR/BSR instruction.  */
-
-static CORE_ADDR
-h8300_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
-{
-  unsigned char buf[4];
-  int wordsize = BINWORD;
-
+  /* Store return address.  */
   sp -= wordsize;
-  store_unsigned_integer (buf, wordsize, CALL_DUMMY_ADDRESS ());
-  write_memory (sp, buf, wordsize);
+  write_memory_unsigned_integer (sp, wordsize, bp_addr);
+
+  /* Update stack pointer.  */
+  regcache_cooked_write_unsigned (regcache, E_SP_REGNUM, sp);
+
   return sp;
 }
 
@@ -1297,6 +1284,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, 
 					      h8300_saved_pc_after_call);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, h8300_frame_saved_pc);
+  set_gdbarch_deprecated_pop_frame (gdbarch, h8300_pop_frame);
 
   /* 
    * Miscelany
@@ -1318,6 +1306,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
   set_gdbarch_breakpoint_from_pc (gdbarch, h8300_breakpoint_from_pc);
   set_gdbarch_push_dummy_code (gdbarch, h8300_push_dummy_code);
+  set_gdbarch_push_dummy_call (gdbarch, h8300_push_dummy_call);
 
   set_gdbarch_int_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
@@ -1327,18 +1316,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* set_gdbarch_stack_align (gdbarch, SOME_stack_align); */
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
-
-  /*
-   * Call Dummies
-   * 
-   * These values and methods are used when gdb calls a target function.  */
-  /* Can all be replaced by push_dummy_call */
-  set_gdbarch_deprecated_push_return_address (gdbarch, 
-					      h8300_push_return_address);
-  set_gdbarch_deprecated_push_arguments (gdbarch, h8300_push_arguments);
-  set_gdbarch_deprecated_pop_frame (gdbarch, h8300_pop_frame);
-  set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
-
 
   return gdbarch;
 }
