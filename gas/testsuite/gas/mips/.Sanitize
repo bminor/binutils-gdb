@@ -129,6 +129,8 @@ lif-svr4pic.d
 lif-xgot.d
 lifloat.d
 lifloat.s
+lineno.d
+lineno.s
 mips.exp
 mips16.d
 mips16.s
