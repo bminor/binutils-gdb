@@ -40,7 +40,7 @@ PROGS	= $(HOSTDIR)/ld.new
 # for self hosting
 GNUTARGET=a.out-generic-big
 LDEMULATION=gld
-BFDLIB=$(srcdir)/../bfd/libbfd.a
+BFDLIB=$(srcdir)/../bfd$(subdir)/libbfd.a
 
 OBJS= ldgram.o ldlex.o ldlang.o ldmain.o ldwrite.o ldexp.o ld-lnk960.o ld-gld68k.o \
 	ld-gld.o ld-gld960.o ld-emul.o ldversion.o ldmisc.o ldsym.o ldfile.o
@@ -113,7 +113,7 @@ ldmisc.o: ldmisc.c
 ldsym.o: ldsym.c 
 
 clean:
-	- rm -f $(OBJS) $(GENERATED_SOURCES) $(GENERATED_HEADERS)
+	- rm -f TAGS $(OBJS) $(GENERATED_SOURCES) $(GENERATED_HEADERS)
 	- rm -f ld ld1 ld2 ld3 ld.new
 
 
@@ -194,7 +194,8 @@ make:
 #
 
 Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
-	(cd $(srcdir) ; ./configure -host=$(host) $(target))
+	(cd $(srcdir) ; \
+		./configure `if [ "$(srcdir)" != "." ] ; then echo +f; fi` -host=$(host) $(target))
 
 ### Local Variables: ***
 ### mode:fundamental ***

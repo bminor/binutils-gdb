@@ -49,12 +49,14 @@ symbolic_link='ln -s'
 #symbolic_link="echo ln -s"
 
 # clear some things potentially inherited from environment.
-target=
-template=
-removing=
-norecurse=
 ansi=
+hostsubdir=
+norecurse=
+removing=
 srcdir=
+target=
+targetsubdir=
+template=
 
 for arg in $*;
 do
@@ -62,17 +64,8 @@ do
 	-ansi | +ansi)
 		ansi=true
 		;;
-	-template=* | +template=*)
-		template=`echo $arg | sed 's/[+-]template=//'`
-		;;
-	-norecurse | +norecurse)
-		norecurse=true
-		;;
-	-rm | +rm)
-		removing=$arg
-		;;
-	-srcdir=* | +srcdir=* | +srcdi=* | +srcd=* | +src=* | +sr=* | +s=*)
-		srcdir=`echo $arg | sed 's/[+-]s[a-z]*=//'`
+	-forcesubdirs | +f*)
+		forcesubdirs=${arg}
 		;;
 	-host=* | +host=* | +hos=* | +ho=* | +h=*)
 		host=`echo $arg | sed 's/[+-]h[a-z]*=//'`
@@ -88,6 +81,18 @@ do
 	-nfp | +nfp | +nf | +n)
 		nfp=yes
 		;;
+	-norecurse | +norecurse)
+		norecurse=true
+		;;
+	-rm | +rm)
+		removing=$arg
+		;;
+	-srcdir=* | +srcdir=* | +srcdi=* | +srcd=* | +src=* | +sr=* | +s=*)
+		srcdir=`echo $arg | sed 's/[+-]s[a-z]*=//'`
+		;;
+	-template=* | +template=*)
+		template=`echo $arg | sed 's/[+-]template=//'`
+		;;
 	*)
 # Allow configure HOST TARGET
 		if [ x$host = x ] ; then host=$target ; fi
@@ -96,7 +101,7 @@ do
 	esac
 done
 
-# process host and target only if not rebuilding configure itself.
+# process host and target only if not rebuilding configure itself or removing.
 if [ -z "$template" -a -z "$removing" ]
 then
 	# Complain if an arg is missing
@@ -111,13 +116,12 @@ then
 		fi
 		exit 1
 	fi
+fi
 
-	# Default other arg
-	if [ -z "$host" ]
-	then
-		host=$target
-	fi
-
+# Default other arg
+if [ -z "$host" ]
+then
+	host=$target
 fi
 
 #### configure.in files come in here.
@@ -190,28 +194,47 @@ then
 fi
 
 # Temporarily, we support only direct subdir builds.
-hostsubdir=Host-$host
-targetsubdir=Target-$target
+hostsubdir=Host-${host}
+targetsubdir=Target-${target}
 
-if [ -n "$removing" ]
+if [ -n "${removing}" ]
 then
-#	rm -rf $hostsubdir/$targetsubdir
-#
-#	if [ -z "`(ls $hostsubdir) 2>&1 | grep Target-`" ]
-#	then
-#		rm -rf $hostsubdir
-#	fi
+	if [ -d "${hostsubdir}/${targetsubdir}" ]
+	then
+		rm -rf ${hostsubdir}/${targetsubdir}
 
-	rm -f .gdbinit Makefile config.status $links
-
+		if [ -z "`(ls ${hostsubdir}) 2>&1 | grep Target-`" ]
+		then
+			rm -rf ${hostsubdir}
+		fi
+	else
+		rm -f .gdbinit Makefile config.status $links
+	fi
 else
-#	if [ ! -d $hostsubdir ] ; then mkdir $hostsubdir ; fi
-#	cd $hostsubdir
-#
-#	if [ ! -d $targetsubdir ] ; then mkdir $targetsubdir ; fi
-#	cd $targetsubdir
-#
-#	srcdir=../..
+	if [ -n "$forcesubdirs" ]
+	then
+		# check for existing status before allowing forced subdirs.
+		if [ -f Makefile ]
+		then
+			echo "Makefile already exists in source directory.  `pwd` not configured."
+			exit 1
+		fi
+
+		if [ ! -d $hostsubdir ] ; then mkdir $hostsubdir ; fi
+		cd $hostsubdir
+	
+		if [ ! -d $targetsubdir ] ; then mkdir $targetsubdir ; fi
+		cd $targetsubdir
+	
+		srcdir=../..
+	else
+		# if not subdir builds, then make sure none exist.
+		if [ -n "`(ls .) 2>&1 | grep Host-`" ]
+		then
+			echo "Configured subdirs exist.  `pwd` not configured."
+			exit 1
+		fi
+	fi
 
 	# Find the source files, if location was not specified.
 	if [ x$srcdir = x ]
@@ -265,57 +288,26 @@ else
 		echo "Linked \"$link\" to \"${srcdir}/${file}\"."
 	done
 
-	# Install a makefile, and make it set VPATH
-	# if necessary so that the sources are found.
-	# Also change its value of srcdir.
-	# Also create a .gdbinit file which runs the one in srcdir
+	# Create a .gdbinit file which runs the one in srcdir
 	# and tells GDB to look there for source files.
+
 	case $srcdir in
 	.)
 		;;
 	*)
-		echo "VPATH = ${srcdir}" > x
-		cat x ${srcdir}/Makefile.in | sed "s@^srcdir = \.@srcdir = ${srcdir}@" > Makefile.in
-		rm x
 		echo "dir ." > .gdbinit
 		echo "dir ${srcdir}" >> .gdbinit
 		echo "source ${srcdir}/.gdbinit" >> .gdbinit
 		;;
 	esac
 
-	host_var_file=hmake-${host}
-	target_var_file=tmake-${target}
+	# Install a makefile, and make it set VPATH
+	# if necessary so that the sources are found.
+	# Also change its value of srcdir.
 
-	# Conditionalize the makefile for this machine.
-	if [ -f ${srcdir}/config/${host_var_file} ]
-	then
-		sed -e "/^####/  r ${srcdir}/config/${host_var_file}" Makefile.in > Makefile.tem
-	else
-		cp Makefile.in Makefile.tem
-	fi
-
-	if [ -f ${srcdir}/config/${target_var_file} ]
-	then
-		sed -e "/^####/  r ${srcdir}/config/${target_var_file}" Makefile.tem > Makefile.tem1
-		mv Makefile.tem1 Makefile.tem
-	fi
-
-	# Remove all formfeeds, since some Makes get confused by them.
-	sed "s///" Makefile.tem >> Makefile.tem1
-	mv Makefile.tem1 Makefile.tem
-
-	# reset SUBDIRS
-	sed "s:^SUBDIRS =.*$:SUBDIRS = ${configdirs}:" Makefile.tem > Makefile.tem1
-	mv Makefile.tem1 Makefile.tem
-
-	# reset NONSUBDIRS
-	sed "s:^NONSUBDIRS =.*$:NONSUBDIRS = ${noconfigdirs}:" Makefile.tem > Makefile.tem1
-	mv Makefile.tem1 Makefile.tem
-
-	# Delete the intermediate files
-	if [ x$srcdir != x. ] ; then rm Makefile.in ; fi
-
-	rm -f Makefile
+# FIXME-someday: This business of always writing to .tem and mv back
+# is so that I don't screw things up while developing.  Once this
+# template is stable, these should be optimized. xoxorich.
 
 	# Define macro CROSS_COMPILE in compilation if this is a cross-compiler.
 	if [ x$host != x$target ]
@@ -326,12 +318,54 @@ else
 		echo "ALL=all.internal" > Makefile
 	fi
 
-	# set target and host
+	# set target, host, VPATH
 	echo "host = $host" >> Makefile
 	echo "target = $target" >> Makefile
 
-	cat Makefile.tem >> Makefile
-	rm Makefile.tem
+	if [ -n "${forcesubdirs}" ]
+	then
+		echo "subdir = /${hostsubdir}/${targetsubdir}" >> Makefile
+	else
+		echo "subdir =" >> Makefile
+	fi
+
+#	echo "workdir = `pwd`" >> Makefile
+	echo "VPATH = ${srcdir}" >> Makefile
+
+	# add Makefile.in
+	cat ${srcdir}/Makefile.in >> Makefile
+
+	# and shake thoroughly.
+	host_var_file=hmake-${host}
+	target_var_file=tmake-${target}
+
+	# Conditionalize the makefile for this machine.
+	if [ -f ${srcdir}/config/${host_var_file} ]
+	then
+		sed -e "/^####/  r ${srcdir}/config/${host_var_file}" Makefile > Makefile.tem
+		mv Makefile.tem Makefile
+	fi
+
+	if [ -f ${srcdir}/config/${target_var_file} ]
+	then
+		sed -e "/^####/  r ${srcdir}/config/${target_var_file}" Makefile > Makefile.tem
+		mv Makefile.tem Makefile
+	fi
+
+	sed "s@^srcdir = \.@srcdir = ${srcdir}@" Makefile > Makefile.tem
+	mv Makefile.tem Makefile
+
+	# Remove all formfeeds, since some Makes get confused by them.
+	sed "s///" Makefile >> Makefile.tem
+	mv Makefile.tem Makefile
+
+	# reset SUBDIRS
+	sed "s:^SUBDIRS =.*$:SUBDIRS = ${configdirs}:" Makefile > Makefile.tem
+	mv Makefile.tem Makefile
+
+	# reset NONSUBDIRS
+	sed "s:^NONSUBDIRS =.*$:NONSUBDIRS = ${noconfigdirs}:" Makefile > Makefile.tem
+	mv Makefile.tem Makefile
 
 	using=
 	if [ -f ${srcdir}/config/${host_var_file} ]
@@ -364,6 +398,7 @@ else
 #			| tee ${srcdir}/config.status
 	fi
 
+	originaldir=`pwd`
 	cd ${srcdir}
 fi
 
@@ -384,12 +419,8 @@ do
 	fi
 
 	echo Configuring ${configdir}...
-#	(cd ${configdir} ;
-#		configure +host=${host} ${target} ${removing}) \
-#		| sed 's/^/	/'
-
 	(cd ${configdir} ;
-		./configure +host=${host} ${target} ${removing}) \
+		./configure ${forcesubdirs} ${removing} +host=${host} ${target}) \
 		| sed 's/^/	/'
 done
 
@@ -397,8 +428,8 @@ exit 0
 
 #
 # $Log$
-# Revision 1.2  1991/04/09 23:20:12  rich
-# First minimally usable checkin.
+# Revision 1.3  1991/04/10 22:56:14  rich
+# Cut 2.  Subdirs.
 #
 #
 #

@@ -162,4 +162,6 @@ make:
 	sed "s/^#__$(HOST)__#//" < Makefile.old			>>Makefile
 
 Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
-	(cd $(srcdir) ; ./configure -host=$(host) $(target))
+	(cd $(srcdir) ; \
+		./configure `if [ "$(srcdir)" != "." ] ; then echo +f; fi` -host=$(host) $(target))
+
