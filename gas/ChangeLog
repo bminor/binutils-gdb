@@ -1,5 +1,7 @@
 Wed Aug 31 17:43:06 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* atof-generic.c: Deleted alloca handling here.
+
 	* Makefile.in (prefix, exec_prefix): Use @-subtitutions.
 
 	* aclocal.m4 (AC_OUTPUT_LINKS): Deleted redefinition, since
