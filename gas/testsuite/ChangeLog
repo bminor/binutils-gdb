@@ -1,3 +1,7 @@
+2001-01-03  Philip Blundell  <pb@futuretv.com>
+
+	* gas/vtable/vtable.exp: Don't run tests on Alpha.
+
 Sat Jan  6 13:34:07 MET 2001  Jan Hubicka  <jh@suse.cz>
 
 	* i386.exp: Add tests for presence of 32bit versus 64bit output
