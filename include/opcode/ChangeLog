@@ -1,3 +1,10 @@
+Mon Mar  6 10:02:00 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppa.h (delay_type): Delete unused enumeration.
+	(pa_opcode): Replace unused delayed field with an architecture
+	field.
+	(pa_opcodes): Mark each instruction as either PA1.0 or PA1.1.
+
 Fri Mar  3 16:10:24 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips.h (INSN_ISA4): Define.
