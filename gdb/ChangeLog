@@ -1,3 +1,10 @@
+2003-05-13  Ian Lance Taylor  <ian@airs.com>
+
+	* ser-pipe.c (_initialize_ser_pipe): Correct call to memset--swap
+	second and third arguments.
+	* ser-tcp.c (_initialize_ser_tcp): Likewise.
+	* ser-unix.c (_initialize_ser_hardwire): Likewise.
+
 2003-05-13  Andrew Cagney  <cagney@redhat.com>
 
 	* defs.h (store_address): Delete declaration.
