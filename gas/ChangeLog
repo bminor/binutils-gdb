@@ -1,3 +1,8 @@
+1999-09-02  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-mcore.c (mcore_s_section): Do not dump literals if a
+	.section .line directive is encountered.
+
 1999-09-01  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (md_section_align): Do not align sections in ELF

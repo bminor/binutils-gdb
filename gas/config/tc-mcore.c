@@ -40,6 +40,7 @@ static void   mcore_s_literals PARAMS ((int));
 static void   mcore_cons PARAMS ((int));
 static void   mcore_float_cons PARAMS ((int));
 static void   mcore_stringer PARAMS ((int));
+static void   mcore_fill   PARAMS ((int));
 static int    log2 PARAMS ((unsigned int));
 static char * parse_reg PARAMS ((char *, unsigned *));
 static char * parse_creg PARAMS ((char *, unsigned *));
@@ -178,11 +179,11 @@ const pseudo_typeS md_pseudo_table[] =
   { "byte",     mcore_cons,           1 },
   { "dc",       mcore_cons,           2 },
   { "dc.b",     mcore_cons,           1 },
-  { "dc.d",     mcore_float_cons,    'd' },
+  { "dc.d",     mcore_float_cons,    'd'},
   { "dc.l",     mcore_cons,           4 },
-  { "dc.s",     mcore_float_cons,    'f' },
+  { "dc.s",     mcore_float_cons,    'f'},
   { "dc.w",     mcore_cons,           2 },
-  { "dc.x",     mcore_float_cons,    'x' },
+  { "dc.x",     mcore_float_cons,    'x'},
   { "double",   mcore_float_cons,    'd'},
   { "float",    mcore_float_cons,    'f'},
   { "hword",    mcore_cons,           2 },
@@ -194,6 +195,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "single",   mcore_float_cons,    'f'},
   { "string",   mcore_stringer,       1 },
   { "word",     mcore_cons,           2 },
+  { "fill",     mcore_fill,           0 },
 
   /* Allow for the effect of section changes.  */
   { "text",      mcore_s_text,    0 },
@@ -307,6 +309,40 @@ mcore_stringer (append_zero)
   check_literals (2, 0);
 }
 
+static void
+mcore_fill (unused)
+     int unused;
+{
+  if (now_seg == text_section)
+    {
+      char * str = input_line_pointer;
+      int    size = 1;
+      int    repeat;
+
+      repeat = atoi (str);
+      
+      /* Look to see if a size has been specified.  */
+      while (*str != '\n' && *str != 0 && *str != ',')
+	++ str;
+      
+      if (* str == ',')
+	{
+	  size = atoi (str + 1);
+
+	  if (size > 8)
+	    size = 8;
+	  else if (size < 0)
+	    size = 0;
+	}
+
+      poolspan += size * repeat;
+    }
+  
+  s_fill (unused);
+
+  check_literals (2, 0);
+}
+
 /* Handle the section changing pseudo-ops.  These call through to the
    normal implementations, but they dump the literal pool first.  */
 
@@ -340,7 +376,22 @@ static void
 mcore_s_section (ignore)
      int ignore;
 {
-  dump_literals (0);
+  /* Scan forwards to find the name of the section.  If the section
+     being switched to is ".line" then this is a DWARF1 debug section
+     which is arbitarily placed inside generated code.  In this case
+     do not dump the literal pool because it is a) inefficient and
+     b) would require the generation of extra code to jump around the
+     pool.  */
+  char * ilp = input_line_pointer;
+
+  while (*ilp != 0 && isspace(*ilp))
+    ++ ilp;
+
+  if (strncmp (ilp, ".line", 5) == 0
+      && (isspace (ilp[5]) || *ilp == '\n' || *ilp == '\r'))
+    ;
+  else
+    dump_literals (0);
 
 #ifdef OBJ_ELF
   obj_elf_section (ignore);
@@ -371,7 +422,7 @@ mcore_s_comm (needs_align)
 #endif
 
 /* This function is called once, at assembler startup time.  This should
-  set up all the tables, etc that the MD part of the assembler needs.  */
+   set up all the tables, etc that the MD part of the assembler needs.  */
 void
 md_begin ()
 {
@@ -1466,7 +1517,7 @@ md_assemble (str)
     case JL:
       inst = MCORE_INST_JSRI;		/* jsri */
       input_line_pointer = parse_rt (op_end + 1, & output, 1, & e);
-      /* parse_rt() calls frag_more for us */
+      /* parse_rt() calls frag_more for us.  */
       
       /* Only do this if we know how to do it ... */
       if (e.X_op != O_absent && do_jsri2bsr)
@@ -1725,7 +1776,7 @@ md_convert_frag (abfd, sec, fragP)
     case C (COND_JUMP, COND12):
     case C (UNCD_JUMP, UNCD12):
       {
-	/* Get the address of the end of the instruction */
+	/* Get the address of the end of the instruction.  */
 	int next_inst = fragP->fr_fix + fragP->fr_address + 2;
 	unsigned char t0;
 	int disp = targ_addr - next_inst;
@@ -1847,7 +1898,7 @@ md_convert_frag (abfd, sec, fragP)
 	    buffer[6] = 0;
 	    buffer[7] = 0;
 	    
-	    /* Make reloc for the long disp */
+	    /* Make reloc for the long disp.  */
 	    fix_new (fragP, fragP->fr_fix + 4, 4,
 		     fragP->fr_symbol, fragP->fr_offset, 0, BFD_RELOC_32);
 	    
@@ -1861,7 +1912,7 @@ md_convert_frag (abfd, sec, fragP)
 	    buffer[4] = 0;
 	    buffer[5] = 0;
 	    
-	    /* Make reloc for the long disp */
+	    /* Make reloc for the long disp.  */
 	    fix_new (fragP, fragP->fr_fix + 2, 4,
 		     fragP->fr_symbol, fragP->fr_offset, 0, BFD_RELOC_32);
 	    fragP->fr_fix += U32_LEN;
@@ -2071,7 +2122,7 @@ md_estimate_size_before_relax (fragP, segment_type)
   return fragP->fr_var;
 }
 
-/* Put number into target byte order */
+/* Put number into target byte order.  */
 void
 md_number_to_chars (ptr, use, nbytes)
      char * ptr;
