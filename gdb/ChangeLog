@@ -1,3 +1,7 @@
+1998-12-08  James E Wilson  <wilson@wilson-pc.cygnus.com>
+
+	* config/i960/mon960.mt (SIM_OBJS, SIM): Define.
+
 Tue Dec  8 16:49:24 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* NEWS: Add mentions of newly-added configurations.
