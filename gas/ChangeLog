@@ -1,3 +1,8 @@
+Wed Jun 21 18:07:59 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/tc-sparc.c (sparc_ip, case 'A'): If ASI is not a "#"
+	value, don't shift it an extra time.
+
 Wed Jun 21 14:18:37 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* gasp.c (do_print, do_form, buffer_and_nest): Use case insensitive
