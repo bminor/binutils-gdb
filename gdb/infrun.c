@@ -294,6 +294,24 @@ proceed (addr, siggnal, step)
   else
     write_pc (addr);
 
+#ifdef PREPARE_TO_PROCEED
+  /* In a multi-threaded task we may select another thread and then continue.
+     
+     In this case the thread that stopped at a breakpoint will immediately
+     cause another stop, if it is not stepped over first. On the other hand,
+     if (ADDR != -1) we only want to single step over the breakpoint if we did
+     switch to another thread.
+
+     If we are single stepping, don't do any of the above.
+     (Note that in the current implementation single stepping another
+     thread after a breakpoint and then continuing will cause the original
+     breakpoint to be hit again, but you can always continue, so it's not
+     a big deal.)  */
+
+  if (! step && PREPARE_TO_PROCEED && breakpoint_here_p (read_pc ()))
+    oneproc = 1;
+#endif /* PREPARE_TO_PROCEED */
+
   if (trap_expected_after_continue)
     {
       /* If (step == 0), a trap will be automatically generated after
@@ -437,11 +455,25 @@ wait_for_inferior ()
 
   while (1)
     {
+      /* We have to invalidate the registers BEFORE calling target_wait because
+	 they can be loaded from the target while in target_wait.  This makes
+	 remote debugging a bit more efficient for those targets that provide
+	 critical registers as part of their normal status mechanism. */
+
+      registers_changed ();
+
       pid = target_wait (-1, &w);
 
-      /* Clean up saved state that will become invalid.  */
       flush_cached_frames ();
-      registers_changed ();
+
+      /* If it's a new process, add it to the thread database */
+
+      if (pid != inferior_pid
+	  && !in_thread_list (pid))
+	{
+	  fprintf_unfiltered (gdb_stderr, "[New %s]\n", target_pid_to_str (pid));
+	  add_thread (pid);
+	}
 
       switch (w.kind)
 	{
@@ -507,125 +539,104 @@ wait_for_inferior ()
 
       stop_signal = w.value.sig;
 
-      if (pid != inferior_pid)
-	{
-	  int save_pid = inferior_pid;
+      stop_pc = read_pc_pid (pid);
 
-	  inferior_pid = pid;	/* Setup for target memory/regs */
-	  registers_changed ();
-	  stop_pc = read_pc ();
-	  inferior_pid = save_pid;
-	  registers_changed ();
-	}
-      else
-	stop_pc = read_pc ();
+      /* See if a thread hit a thread-specific breakpoint that was meant for
+	 another thread.  If so, then step that thread past the breakpoint,
+	 and continue it.  */
 
       if (stop_signal == TARGET_SIGNAL_TRAP
+	  && breakpoints_inserted
 	  && breakpoint_here_p (stop_pc - DECR_PC_AFTER_BREAK))
 	{
+	  random_signal = 0;
 	  if (!breakpoint_thread_match (stop_pc - DECR_PC_AFTER_BREAK, pid))
 	    {
 	      /* Saw a breakpoint, but it was hit by the wrong thread.  Just continue. */
-	      if (breakpoints_inserted)
-		{
-		  if (pid != inferior_pid)
-		    {
-		      int save_pid = inferior_pid;
+	      write_pc (stop_pc - DECR_PC_AFTER_BREAK);
 
-		      inferior_pid = pid;
-		      registers_changed ();
-		      write_pc (stop_pc - DECR_PC_AFTER_BREAK);
-		      inferior_pid = save_pid;
-		      registers_changed ();
-		    }
-		  else
-		    write_pc (stop_pc - DECR_PC_AFTER_BREAK);
-
-		  remove_breakpoints ();
-		  target_resume (pid, 1, TARGET_SIGNAL_0); /* Single step */
-		  /* FIXME: What if a signal arrives instead of the single-step
-		     happening?  */
-		  target_wait (pid, &w);
-		  insert_breakpoints ();
-		}
-	      target_resume (-1, 0, TARGET_SIGNAL_0);
+	      remove_breakpoints ();
+	      target_resume (pid, 1, TARGET_SIGNAL_0); /* Single step */
+	      /* FIXME: What if a signal arrives instead of the single-step
+		 happening?  */
+	      target_wait (pid, &w);
+	      insert_breakpoints ();
+	      target_resume (pid, 0, TARGET_SIGNAL_0);
 	      continue;
 	    }
-	  else
-	    if (pid != inferior_pid)
-	      goto switch_thread;
 	}
+      else
+	random_signal = 1;
+
+      /* See if something interesting happened to the non-current thread.  If
+         so, then switch to that thread, and eventually give control back to
+	 the user.  */
 
       if (pid != inferior_pid)
 	{
 	  int printed = 0;
 
-	  if (!in_thread_list (pid))
-	    {
-	      fprintf_unfiltered (gdb_stderr, "[New %s]\n", target_pid_to_str (pid));
-	      add_thread (pid);
+	  /* If it's a random signal for a non-current thread, notify user
+	     if he's expressed an interest.  */
 
-	      target_resume (-1, 0, TARGET_SIGNAL_0);
+	  if (random_signal
+	      && signal_print[stop_signal])
+	    {
+	      printed = 1;
+	      target_terminal_ours_for_output ();
+	      printf_filtered ("\nProgram received signal %s, %s.\n",
+			       target_signal_to_name (stop_signal),
+			       target_signal_to_string (stop_signal));
+	      gdb_flush (gdb_stdout);
+	    }
+
+	  /* If it's not SIGTRAP and not a signal we want to stop for, then
+	     continue the thread. */
+
+	  if (stop_signal != TARGET_SIGNAL_TRAP
+	      && !signal_stop[stop_signal])
+	    {
+	      if (printed)
+		target_terminal_inferior ();
+
+	      /* Clear the signal if it should not be passed.  */
+	      if (signal_program[stop_signal] == 0)
+		stop_signal = TARGET_SIGNAL_0;
+
+	      target_resume (pid, 0, stop_signal);
 	      continue;
 	    }
-	  else
+
+	  /* It's a SIGTRAP or a signal we're interested in.  Switch threads,
+	     and fall into the rest of wait_for_inferior().  */
+
+	  inferior_pid = pid;
+	  printf_filtered ("[Switching to %s]\n", target_pid_to_str (pid));
+
+	  flush_cached_frames ();
+	  trap_expected = 0;
+	  if (step_resume_breakpoint)
 	    {
-	      if (signal_print[stop_signal])
-		{
-		  printed = 1;
-		  target_terminal_ours_for_output ();
-		  printf_filtered ("\nProgram received signal %s, %s.\n",
-				   target_signal_to_name (stop_signal),
-				   target_signal_to_string (stop_signal));
-		  gdb_flush (gdb_stdout);
-		}
-
-	      if (stop_signal == TARGET_SIGNAL_TRAP
-		  || signal_stop[stop_signal])
-		{
-switch_thread:
-		  inferior_pid = pid;
-		  printf_filtered ("[Switching to %s]\n", target_pid_to_str (pid));
-
-		  flush_cached_frames ();
-		  registers_changed ();
-		  trap_expected = 0;
-		  if (step_resume_breakpoint)
-		    {
-		      delete_breakpoint (step_resume_breakpoint);
-		      step_resume_breakpoint = NULL;
-		    }
-
-		  /* Not sure whether we need to blow this away too,
-		     but probably it is like the step-resume
-		     breakpoint.  */
-		  if (through_sigtramp_breakpoint)
-		    {
-		      delete_breakpoint (through_sigtramp_breakpoint);
-		      through_sigtramp_breakpoint = NULL;
-		    }
-		  prev_pc = 0;
-		  prev_sp = 0;
-		  prev_func_name = NULL;
-		  step_range_start = 0;
-		  step_range_end = 0;
-		  step_frame_address = 0;
-		  handling_longjmp = 0;
-		  another_trap = 0;
-		}
-	      else
-		{
-		  if (printed)
-		    target_terminal_inferior ();
-
-		  /* Clear the signal if it should not be passed.  */
-		  if (signal_program[stop_signal] == 0)
-		    stop_signal = TARGET_SIGNAL_0;
-
-		  target_resume (pid, 0, stop_signal);
-		  continue;
-		}
+	      delete_breakpoint (step_resume_breakpoint);
+	      step_resume_breakpoint = NULL;
 	    }
+
+	  /* Not sure whether we need to blow this away too,
+	     but probably it is like the step-resume
+	     breakpoint.  */
+	  if (through_sigtramp_breakpoint)
+	    {
+	      delete_breakpoint (through_sigtramp_breakpoint);
+	      through_sigtramp_breakpoint = NULL;
+	    }
+	  prev_pc = 0;
+	  prev_sp = 0;
+	  prev_func_name = NULL;
+	  step_range_start = 0;
+	  step_range_end = 0;
+	  step_frame_address = 0;
+	  handling_longjmp = 0;
+	  another_trap = 0;
 	}
 
 #ifdef NO_SINGLE_STEP
@@ -1061,12 +1072,19 @@ switch_thread:
 	  goto keep_going;
 	}
 
+#if 1
       if (stop_func_start)
 	{
+	  struct symtab *s;
+
 	  /* Do this after the IN_SIGTRAMP check; it might give
 	     an error.  */
 	  prologue_pc = stop_func_start;
-	  SKIP_PROLOGUE (prologue_pc);
+
+	  /* Don't skip the prologue if this is assembly source */
+	  s = find_pc_symtab (stop_pc);
+	  if (s && s->language != language_asm)
+	    SKIP_PROLOGUE (prologue_pc);
 	}
 
       if ((/* Might be a non-recursive call.  If the symbols are missing
@@ -1105,6 +1123,14 @@ switch_thread:
 		 which can no longer happen here as long as the
 		 handling_longjmp stuff is working.  */
 	      ))
+#else
+/* This is experimental code which greatly simplifies the subroutine call
+   test.  I've actually tested on the Alpha, and it works great. -Stu */
+
+	if (in_prologue (stop_pc, NULL)
+	    || (prev_func_start != 0
+		&& stop_func_start == 0))
+#endif
 	{
 	  /* It's a subroutine call.  */
 
@@ -1166,7 +1192,13 @@ step_over_function:
 step_into_function:
 	  /* Subroutine call with source code we should not step over.
 	     Do step to the first line of code in it.  */
-	  SKIP_PROLOGUE (stop_func_start);
+	  {
+	    struct symtab *s;
+
+	    s = find_pc_symtab (stop_pc);
+	    if (s && s->language != language_asm)
+	      SKIP_PROLOGUE (stop_func_start);
+	  }
 	  sal = find_pc_line (stop_func_start, 0);
 	  /* Use the step_resume_break to step until
 	     the end of the prologue, even if that involves jumps

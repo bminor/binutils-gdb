@@ -1,3 +1,14 @@
+Tue Jun 28 15:28:01 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* dbxread.c, partial-stab.h (near N_SO):  SO stabs with blank
+	names mean end of .o file.
+	* infrun.c (wait_for_inferior):  Clean up multi-thread logic near
+	top of routine.  Handle new thread notification cleanly.
+	* lynx-nat.c (child_wait):  General cleanups, handle new LynxOS
+	thread notification scheme.
+	* (child_resume):  General cleanups, handle resumption of all
+	threads properly.
+
 Mon Jun 27 09:57:23 1994  Steve Chamberlain  (sac@cirdan.cygnus.com)
 
 	* ser-go32.c: Rewrite to run under windows.

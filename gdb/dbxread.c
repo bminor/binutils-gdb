@@ -1903,10 +1903,15 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	  end_symtab (valu, 0, 0, objfile, SECT_OFF_TEXT);
 	  end_stabs ();
 	}
+
+      /* Null name means this just marks the end of text for this .o file.
+	 Don't start a new symtab in this case.  */
+      if (*name == '\000')
+	break;
+
       start_stabs ();
       start_symtab (name, NULL, valu);
       break;
-
 
     case N_SOL:
       /* This type of symbol indicates the start of data for
@@ -2358,12 +2363,13 @@ elfstab_build_psymtabs (objfile, section_offsets, mainline,
 
 void
 stabsect_build_psymtabs (objfile, section_offsets, mainline, stab_name,
-			 stabstr_name)
+			 stabstr_name, text_name)
      struct objfile *objfile;
      struct section_offsets *section_offsets;
      int mainline;
      char *stab_name;
      char *stabstr_name;
+     char *text_name;
 {
   int val;
   bfd *sym_bfd = objfile->obfd;
@@ -2384,9 +2390,9 @@ stabsect_build_psymtabs (objfile, section_offsets, mainline, stab_name,
   objfile->sym_stab_info = (PTR) xmalloc (sizeof (struct dbx_symfile_info));
   memset (DBX_SYMFILE_INFO (objfile), 0, sizeof (struct dbx_symfile_info));
 
-  DBX_TEXT_SECT (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
+  DBX_TEXT_SECT (objfile) = bfd_get_section_by_name (sym_bfd, text_name);
   if (!DBX_TEXT_SECT (objfile))
-    error ("Can't find .text section in symbol file");
+    error ("Can't find %s section in symbol file", text_name);
 
   DBX_SYMBOL_SIZE    (objfile) = sizeof (struct external_nlist);
   DBX_SYMCOUNT       (objfile) = bfd_section_size (sym_bfd, stabsect)
@@ -2420,36 +2426,6 @@ stabsect_build_psymtabs (objfile, section_offsets, mainline, stab_name,
 
   processing_acc_compilation = 1;
   dbx_symfile_read (objfile, section_offsets, 0);
-}
-
-/* Scan and build partial symbols for a SOM symbol file.
-   This SOM file has already been processed to get its minimal symbols.
-
-   OBJFILE is the object file we are reading symbols from.
-   ADDR is the address relative to which the symbols are (e.g.
-   the base address of the text segment).
-   MAINLINE is true if we are reading the main symbol
-   table (as opposed to a shared lib or dynamically loaded file).
-
-   */
-
-void
-somstab_build_psymtabs (objfile, section_offsets, mainline)
-     struct objfile *objfile;
-     struct section_offsets *section_offsets;
-     int mainline;
-{
-  free_header_files ();
-  init_header_files ();
-
-  /* This is needed to debug objects assembled with gas2.  */
-  processing_acc_compilation = 1;
-
-  /* In a SOM file, we've already installed the minimal symbols that came
-     from the SOM (non-stab) symbol table, so always act like an
-     incremental load here. */
-
-  dbx_symfile_read (objfile, section_offsets, mainline);
 }
 
 /* Parse the user's idea of an offset for dynamic linking, into our idea

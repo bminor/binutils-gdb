@@ -597,7 +597,7 @@ child_wait (pid, ourstatus)
 {
   int save_errno;
   int thread;
-  int status;
+  union wait status;
 
   while (1)
     {
@@ -632,8 +632,7 @@ child_wait (pid, ourstatus)
       if (pid != PIDGET (inferior_pid))	/* Some other process?!? */
 	continue;
 
-/*      thread = WIFTID (status);*/
-      thread = status >> 16;
+      thread = status.w_tid;	/* Get thread id from status */
 
       /* Initial thread value can only be acquired via wait, so we have to
 	 resort to this hack.  */
@@ -646,7 +645,26 @@ child_wait (pid, ourstatus)
 
       pid = BUILDPID (pid, thread);
 
-      store_waitstatus (ourstatus, status);
+      if (WIFSTOPPED(status)
+	  && WSTOPSIG(status) == SIGTRAP
+	  && !in_thread_list (pid))
+	{
+	  int realsig;
+
+	  realsig = ptrace (PTRACE_GETTRACESIG, pid, 0);
+
+	  if (realsig == SIGNEWTHREAD)
+	    {
+	      /* Simply ignore new thread notification, as we can't do anything
+		 useful with such threads.  All ptrace calls at this point just
+		 fail for no apparent reason.  The thread will eventually get a
+		 real signal when it becomes real.  */
+	      child_resume (pid, 0, TARGET_SIGNAL_0);
+	      continue;
+	    }
+	}
+
+      store_waitstatus (ourstatus, status.w_status);
 
       return pid;
     }
@@ -662,13 +680,18 @@ child_resume (pid, step, signal)
      int step;
      enum target_signal signal;
 {
+  int func;
+
   errno = 0;
 
   if (pid == -1)
-    /* Resume all threads.  */
-    /* I think this only gets used in the non-threaded case, where "resume
-       all threads" and "resume inferior_pid" are the same.  */
-    pid = inferior_pid;
+    {
+      /* Resume all threads.  */
+
+      pid = inferior_pid;
+    }
+
+  func = step ? PTRACE_SINGLESTEP_ONE : PTRACE_CONT;
 
   /* An address of (PTRACE_ARG3_TYPE)1 tells ptrace to continue from where
      it was.  (If GDB wanted it to start some other way, we have already
@@ -679,12 +702,7 @@ child_resume (pid, step, signal)
      continue request (by setting breakpoints on all possible successor
      instructions), so we don't have to worry about that here.  */
 
-  if (step)
-    ptrace (PTRACE_SINGLESTEP_ONE,     pid, (PTRACE_ARG3_TYPE) 1,
-	    target_signal_to_host (signal));
-  else
-    ptrace (PTRACE_CONT_ONE, pid, (PTRACE_ARG3_TYPE) 1,
-	    target_signal_to_host (signal));
+  ptrace (func, pid, (PTRACE_ARG3_TYPE) 1, target_signal_to_host (signal));
 
   if (errno)
     perror_with_name ("ptrace");
