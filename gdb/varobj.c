@@ -1726,6 +1726,7 @@ type_changeable (struct varobj *var)
     {
       case TYPE_CODE_STRUCT:
       case TYPE_CODE_UNION:
+      case TYPE_CODE_ARRAY:
 	r = 0;
 	break;
 

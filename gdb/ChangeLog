@@ -1,5 +1,11 @@
 2000-10-13  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
+	* varobj.c (type_changeable): Arrays are not changeable.
+	Trying to check for updates was causing an error if the array lived
+	in a register as gdb value_equal() cannot handle that case yet.
+
+2000-10-13  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
 	* varobj.c (varobj_update): Prevent uninitialized error code to be
 	returned on type_changed.  Also, prevent value_equal() to be called
 	for the types we do not want to test for updates.
