@@ -672,6 +672,9 @@ print_insn_args (d, l, pc, info)
      struct disassemble_info *info;
 {
   int op, delta;
+  unsigned int lsb, msb, msbd;
+
+  lsb = 0;
 
   for (; *d != '\0'; d++)
     {
@@ -697,21 +700,18 @@ print_insn_args (d, l, pc, info)
 	      return;
 
 	    case 'A':
-	      (*info->fprintf_func) (info->stream, "0x%x",
-				     (l >> OP_SH_SHAMT) & OP_MASK_SHAMT);
+	      lsb = (l >> OP_SH_SHAMT) & OP_MASK_SHAMT;
+	      (*info->fprintf_func) (info->stream, "0x%x", lsb);
 	      break;
 	
 	    case 'B':
-	      (*info->fprintf_func) (info->stream, "0x%x",
-				     (((l >> OP_SH_INSMSB) & OP_MASK_INSMSB)
-				      - ((l >> OP_SH_SHAMT) & OP_MASK_SHAMT)
-				      + 1));
+	      msb = (l >> OP_SH_INSMSB) & OP_MASK_INSMSB;
+	      (*info->fprintf_func) (info->stream, "0x%x", msb - lsb + 1);
 	      break;
 
 	    case 'C':
-	      (*info->fprintf_func) (info->stream, "0x%x",
-				     (((l >> OP_SH_EXTMSBD) & OP_MASK_EXTMSBD)
-				      + 1));
+	      msbd = (l >> OP_SH_EXTMSBD) & OP_MASK_EXTMSBD;
+	      (*info->fprintf_func) (info->stream, "0x%x", msbd + 1);
 	      break;
 
 	    case 'D':

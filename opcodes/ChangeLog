@@ -1,5 +1,11 @@
 2003-01-02  Chris Demetriou  <cgd@broadcom.com>
 
+	* mips-dis.c (print_insn_args): Use position extracted by "+A"
+	to calculate size for "+B".  Redo code for "+C" so it shares
+	the same style as "+A" and "+B" now do.
+
+2003-01-02  Chris Demetriou  <cgd@broadcom.com>
+
 	* mips-dis.c: Update copyright years.
 	(print_insn_arg): Rename to...
 	(print_insn_args): This, returning void.  Process the whole
