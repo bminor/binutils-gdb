@@ -1,3 +1,9 @@
+2005-03-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/exec_changed/first.adb: New file.
+	* gdb.ada/exec_changed/second.adb: New file.
+	* gdb.ada/exec_changed.exp: New testcase.
+
 2005-03-08  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gdb.cp/userdef.cc (A1::operator+): New unary plus.
