@@ -1,3 +1,16 @@
+Sun May 23 08:44:55 1993  Fred Fish  (fnf@cygnus.com)
+
+	* configure.in (configdirs):  Add gdb.t24 for C++ tests that
+	should work on any system, regardless of debugging format.
+	* gdb.t21/demangle.exp:  Move to gdb.t24.
+	* gdb.t24/demangle.exp:  Move from gdb.t21.
+	* gdb.t24/{Makefile.in, configure.in}:  New files.
+
+Thu May 20 19:39:03 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* configure.in: Do gdb.stabs and C++ tests only for stabs.
+	* gdb.stabs: New directory.
+
 Tue May 18 21:12:09 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/{mips,nind,udi,unix,vx}-gdb.exp: Look for "Quit anyway.*?"
