@@ -450,6 +450,10 @@ read_type_number (pp, typenums)
 
 static char *type_synonym_name;
 
+#if !defined (REG_STRUCT_HAS_ADDR)
+#define REG_STRUCT_HAS_ADDR(gcc_p) 0
+#endif
+
 /* ARGSUSED */
 struct symbol *
 define_symbol (valu, string, desc, type, objfile)
@@ -925,16 +929,27 @@ define_symbol (valu, string, desc, type, objfile)
 	  SYMBOL_VALUE (sym) = SP_REGNUM;  /* Known safe, though useless */
 	}
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
-      if (within_function)
+      if (within_function
+	  && REG_STRUCT_HAS_ADDR (processing_gcc_compilation)
+	  && (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT
+	      || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION))
 	{
 	  /* Sun cc uses a pair of symbols, one 'p' and one 'r' with the same
 	     name to represent an argument passed in a register.
 	     GCC uses 'P' for the same case.  So if we find such a symbol pair
 	     we combine it into one 'P' symbol.
+
+	     But we only do this in the REG_STRUCT_HAS_ADDR case, so that
+	     we can still get information about what is going on with the
+	     stack (VAX for computing args_printed, possible future changes
+	     to use stack slots instead of saved registers in backtraces,
+	     etc.).
+	     
 	     Note that this code illegally combines
-	       main(argc) int argc; { register int argc = 1; }
+	       main(argc) struct foo argc; { register struct foo argc; }
 	     but this case is considered pathological and causes a warning
 	     from a decent compiler.  */
+
 	  if (local_symbols
 	      && local_symbols->nsyms > 0)
 	    {
@@ -1123,13 +1138,9 @@ define_symbol (valu, string, desc, type, objfile)
      If REG_STRUCT_HAS_ADDR yields non-zero we have to convert LOC_REGPARM
      to LOC_REGPARM_ADDR for structures and unions.  */
 
-#if !defined (REG_STRUCT_HAS_ADDR)
-#define REG_STRUCT_HAS_ADDR(gcc_p) 0
-#endif
-
   if (SYMBOL_CLASS (sym) == LOC_REGPARM
       && REG_STRUCT_HAS_ADDR (processing_gcc_compilation)
-      && (   (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT)
+      && ((TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT)
 	  || (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION)))
     SYMBOL_CLASS (sym) = LOC_REGPARM_ADDR;
 

@@ -1,3 +1,8 @@
+Sat Dec 25 13:39:21 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabsread.c (define_symbol): Only combine a p/r pair into a
+	LOC_REGPARM if REG_STRUCT_HAS_ADDR.
+
 Sat Dec 25 09:50:29 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* valops.c (value_struct_elt): Check for (value)-1 return from
