@@ -1,6 +1,11 @@
 2001-06-25  Andrew Cagney  <ac131313@redhat.com>
 
-	* mi-regs.exp: Update patters matching register-values.  Outputs a
+	* mi-read-memory.exp: Update patterns matching data-read-memory.
+	Outputs a list.
+
+2001-06-25  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-regs.exp: Update patterns matching register-values.  Outputs a
 	list.
 
 2001-06-25  Andrew Cagney  <ac131313@redhat.com>

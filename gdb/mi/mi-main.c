@@ -892,7 +892,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
     struct ui_stream *stream = ui_out_stream_new (uiout);
     int row;
     int row_byte;
-    ui_out_tuple_begin (uiout, "memory");
+    ui_out_list_begin (uiout, "memory");
     for (row = 0, row_byte = 0;
 	 row < nr_rows;
 	 row++, row_byte += nr_cols * word_size)
@@ -902,7 +902,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 	ui_out_tuple_begin (uiout, NULL);
 	ui_out_field_core_addr (uiout, "addr", addr + row_byte);
 	/* ui_out_field_core_addr_symbolic (uiout, "saddr", addr + row_byte); */
-	ui_out_tuple_begin (uiout, "data");
+	ui_out_list_begin (uiout, "data");
 	for (col = 0, col_byte = row_byte;
 	     col < nr_cols;
 	     col++, col_byte += word_size)
@@ -919,7 +919,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 		ui_out_field_stream (uiout, NULL, stream);
 	      }
 	  }
-	ui_out_tuple_end (uiout);
+	ui_out_list_end (uiout);
 	if (aschar)
 	  {
 	    int byte;
@@ -942,7 +942,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 	ui_out_tuple_end (uiout);
       }
     ui_out_stream_delete (stream);
-    ui_out_tuple_end (uiout);
+    ui_out_list_end (uiout);
   }
   do_cleanups (cleanups);
   return MI_CMD_DONE;
