@@ -196,7 +196,7 @@ DEFUN (get_src_info, (addr, filename, name, line_num),
 
   if (bfd_find_nearest_line (core_bfd, core_text_sect, core_syms,
 			     addr - core_text_sect->vma,
-			     &fname, &func_name, &l)
+			     &fname, &func_name, (unsigned int *) &l)
       && fname && func_name && l)
     {
       DBG (AOUTDEBUG, printf ("[get_src_info] 0x%lx -> %s:%d (%s)\n",

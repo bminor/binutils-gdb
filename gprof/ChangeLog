@@ -1,3 +1,8 @@
+Wed Jul 19 18:46:13 1995  Fred Fish  <fnf@cygnus.com>
+
+	* core.c (get_src_info): Cast arg 7 of bfd_find_nearest_line
+	to proper type of "unsigned int *".
+
 Fri Jun 16 15:29:36 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* configure.in: Use changequote around use of [].
