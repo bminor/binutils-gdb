@@ -93,9 +93,6 @@ extern void aix_process_linenos (void);
 	      prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
 #define INIT_FRAME_PC(fromleaf, prev)	/* nothing */
 
-/* Default offset from SP where the LR is stored */
-#define	DEFAULT_LR_SAVE 8
-
 /* Flag for machine-specific stuff in shared files.  FIXME */
 #define IBM6000_TARGET
 

@@ -1,3 +1,12 @@
+2002-04-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* ppc-tdep.h (struct gdbarch_tdep): Add new member ``lr_frame_offset''.
+	* rs6000-tdep.c (rs6000_frame_saved_pc): Use ``lr_frame_offset''
+	from tdep struct instead of DEFAULT_LR_SAVE.
+	(rs6000_gdbarch_init): Initialize ``lr_frame_offset''.
+	* config/powerpc/tm-ppc-eabi.h (DEFAULT_LR_SAVE): Delete.
+	* config/rs6000/tm-rs6000.h (DEFAULT_LR_SAVE): Delete.
+
 2002-04-12  Michael Snyder  <msnyder@redhat.com>
 
 	* source.c: White space fix-up.

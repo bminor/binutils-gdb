@@ -1319,7 +1319,8 @@ rs6000_frame_saved_pc (struct frame_info *fi)
 {
   CORE_ADDR func_start;
   struct rs6000_framedata fdata;
-  int wordsize = TDEP->wordsize;
+  struct gdbarch_tdep *tdep = TDEP;
+  int wordsize = tdep->wordsize;
 
   if (fi->signal_handler_caller)
     return read_memory_addr (fi->frame + SIG_FRAME_PC_OFFSET, wordsize);
@@ -1342,7 +1343,7 @@ rs6000_frame_saved_pc (struct frame_info *fi)
 	return read_memory_addr (fi->next->frame + SIG_FRAME_LR_OFFSET,
 				 wordsize);
       else
-	return read_memory_addr (FRAME_CHAIN (fi) + DEFAULT_LR_SAVE,
+	return read_memory_addr (FRAME_CHAIN (fi) + tdep->lr_frame_offset,
 				 wordsize);
     }
 
@@ -2585,7 +2586,15 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	break;
       }   
 
-  /* Calculate byte offsets in raw register array. */
+  /* Set lr_frame_offset.  */
+  if (wordsize == 8)
+    tdep->lr_frame_offset = 16;
+  else if (sysv_abi)
+    tdep->lr_frame_offset = 4;
+  else
+    tdep->lr_frame_offset = 8;
+
+  /* Calculate byte offsets in raw register array.  */
   tdep->regoff = xmalloc (v->nregs * sizeof (int));
   for (i = off = 0; i < v->nregs; i++)
     {

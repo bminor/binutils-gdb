@@ -67,6 +67,8 @@ struct gdbarch_tdep
     int ppc_mq_regnum;		/* Multiply/Divide extension register */
     int ppc_vr0_regnum;		/* First AltiVec register */
     int ppc_vrsave_regnum;	/* Last AltiVec register */
+    int lr_frame_offset;	/* Offset to ABI specific location where
+                                   link register is saved.  */
 };
 
 #endif
