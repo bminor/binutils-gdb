@@ -855,7 +855,13 @@ print_insn_sh (memaddr, info)
 		  else
 		    val = bfd_getb32 (bytes);
 		}
-	      fprintf_fn (stream, "\t! 0x%x", val);
+	      if ((*info->symbol_at_address_func) (val, info))
+		{
+		  fprintf_fn (stream, "\t! 0x");
+		  (*info->print_address_func) (val, info);
+		}
+	      else
+		fprintf_fn (stream, "\t! 0x%x", val);
 	    }
 	}
 

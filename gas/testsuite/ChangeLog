@@ -1,3 +1,10 @@
+2004-04-22  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* gas/sh/pcrel2.d: Update.
+	* gas/sh/tlsd.d: Update.
+	* gas/sh/tlsnopic.d: Update.
+	* gas/sh/tlspic.d: Update.
+
 2004-04-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* lib/gas-defs.exp (is_elf_format): Add OpenBSD support.

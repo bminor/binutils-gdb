@@ -1,3 +1,8 @@
+2004-04-22  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* sh-dis.c (print_insn_sh): Print the value in constant pool
+	as a symbol if it looks like a symbol.
+
 2004-04-22  Peter Barada <peter@the-baradas.com>
 
 	* m68k-dis.c(print_insn_m68k): Set mfcmac/mcfemac on
