@@ -2651,6 +2651,7 @@ display_target_list ()
 	{
 	  if (bfd_get_error () != bfd_error_invalid_operation)
 	    nonfatal (p->name);
+	  bfd_close (abfd);
 	  continue;
 	}
 
@@ -2658,6 +2659,7 @@ display_target_list ()
 	if (bfd_set_arch_mach (abfd, (enum bfd_architecture) a, 0))
 	  printf ("  %s\n",
 		  bfd_printable_arch_mach ((enum bfd_architecture) a, 0));
+      bfd_close (abfd);
     }
   unlink (dummy_name);
   free (dummy_name);
@@ -2725,6 +2727,8 @@ display_info_table (first, last)
 		  putchar ('-');
 		putchar (' ');
 	      }
+	    if (abfd != NULL)
+	      bfd_close (abfd);
 	  }
 	putchar ('\n');
       }
