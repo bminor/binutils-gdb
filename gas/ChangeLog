@@ -1,3 +1,9 @@
+Thu Apr 10 14:40:00 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/tc-m32r.c (md_begin): Set cgen_asm_parse_operand_fn.
+	(md_assemble): Call cgen_asm_init_parse.
+	Update call to m32r_cgen_assemble_insn, call as_bad if assembly failed.
+
 Wed Apr  9 11:49:41 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-m68k.c (m68k_ip): Handle #j.

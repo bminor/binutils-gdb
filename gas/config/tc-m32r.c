@@ -252,6 +252,10 @@ md_begin ()
   subsegT subseg;
 
   /* Initialize the `cgen' interface.  */
+
+  /* This is a callback from cgen to gas to parse operands.  */
+  cgen_asm_parse_operand_fn = cgen_asm_parse_operand;
+  /* Set the machine number and endian.  */
   CGEN_SYM (init_asm) (0 /* mach number */,
 		       target_big_endian ? CGEN_ENDIAN_BIG : CGEN_ENDIAN_LITTLE);
 
@@ -306,10 +310,17 @@ md_assemble (str)
 #endif
   struct cgen_fields fields;
   const struct cgen_insn *insn;
+  char *errmsg;
 
-  insn = CGEN_SYM (assemble_insn) (str, &fields, buffer);
+  /* Initialize GAS's cgen interface for a new instruction.  */
+  cgen_asm_init_parse ();
+
+  insn = CGEN_SYM (assemble_insn) (str, &fields, buffer, &errmsg);
   if (!insn)
-    return;
+    {
+      as_bad (errmsg);
+      return;
+    }
 
   if (CGEN_INSN_BITSIZE (insn) == 32)
     {
