@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add "-N/--full-section-name" to readelf to display full section name.
+
 * Add "-M entry:<addr>" switch to objdump to specify a function entry address
   when disassembling VAX binaries.
 
@@ -7,6 +9,8 @@
   to objcopy to convert local symbols into global symbols.
 
 Changes in 2.16:
+
+* Add "-g/--section-groups" to readelf to display section group.
 
 * objcopy recognizes two new options --strip-unneeded-symbol and
   --strip-unneeded-symbols, namely for use together with the wildcard

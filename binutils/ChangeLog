@@ -1,3 +1,11 @@
+2005-04-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention new readelf options, "-N/--full-section-name"
+	and "-g/--section-groups".
+
+	* doc/binutils.texi: Document new readelf options,
+	"-N/--full-section-name" and "-g/--section-groups".
+
 2005-03-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (do_full_section_name): New.
