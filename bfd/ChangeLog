@@ -1,5 +1,8 @@
 Tue Jul 11 15:19:53 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf.c (bfd_section_from_shdr): In case SHT_REL[A], only get the
+        BFD section for the sh_link section if it is a SYMTAB section.
+
 	* aoutx.h (NAME(aout,link_add_symbols)): Don't bother to check
 	that archives hold a.out objects.
 	* cf-i386lynx.c (coff_bfd_link_add_symbols): Don't define.
@@ -338,7 +341,7 @@ Wed Jun 21 10:16:10 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 Mon Jun 19 08:40:45 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* syms.c (coff_section_type): Compare only the front part
-	of a section name. (bfd/7238)
+	of a section name.
 
 Sat Jun 17 09:40:44 1995  Jeff Law  (law@snake.cs.utah.edu)
 
