@@ -1,3 +1,8 @@
+Mon Jun  9 12:52:44 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-m68k.c (md_section_align): If a.out and BFD, force
+	section size to be aligned.
+
 Fri Jun  6 17:15:55 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-sh.h (md_cons_align): Define.

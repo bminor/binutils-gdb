@@ -2373,6 +2373,7 @@ m68k_ip (instring)
 	      tmpreg &= 0xFF;
 	    case '8':
 	    case 'C':
+	    case 'j':
 	      install_operand (s[1], tmpreg);
 	      break;
 	    default:
@@ -4855,7 +4856,11 @@ mri_chip ()
   int i;
 
   s = input_line_pointer;
-  c = get_symbol_end ();
+  /* We can't use get_symbol_end since the processor names are not proper
+     symbols.  */
+  while (is_part_of_name (c = *input_line_pointer++))
+    ;
+  *--input_line_pointer = 0;
   for (i = 0; i < n_archs; i++)
     if (strcasecmp (s, archs[i].name) == 0)
       break;
@@ -4878,7 +4883,11 @@ mri_chip ()
     {
       ++input_line_pointer;
       s = input_line_pointer;
-      c = get_symbol_end ();
+      /* We can't use get_symbol_end since the processor names are not
+	 proper symbols.  */
+      while (is_part_of_name (c = *input_line_pointer++))
+	;
+      *--input_line_pointer = 0;
       if (strcmp (s, "68881") == 0)
 	current_architecture |= m68881;
       else if (strcmp (s, "68851") == 0)
@@ -6799,7 +6808,21 @@ md_section_align (segment, size)
      segT segment;
      valueT size;
 {
-  return size;			/* Byte alignment is fine */
+#ifdef OBJ_AOUT
+#ifdef BFD_ASSEMBLER
+  /* For a.out, force the section size to be aligned.  If we don't do
+     this, BFD will align it for us, but it will not write out the
+     final bytes of the section.  This may be a bug in BFD, but it is
+     easier to fix it here since that is how the other a.out targets
+     work.  */
+  int align;
+
+  align = bfd_get_section_alignment (stdoutput, segment);
+  size = ((size + (1 << align) - 1) & ((valueT) -1 << align));
+#endif
+#endif
+
+  return size;
 }
 
 /* Exactly what point is a PC-relative offset relative TO?
@@ -6821,6 +6844,8 @@ md_pcrel_from (fixP)
 }
 
 #ifndef BFD_ASSEMBLER
+#ifdef OBJ_COFF
+
 /*ARGSUSED*/
 void
 tc_coff_symbol_emit_hook (ignore)
@@ -6845,6 +6870,8 @@ tc_coff_sizemachdep (frag)
       return 0;
     }
 }
+
+#endif
 #endif
 
 /* end of tc-m68k.c */
