@@ -1,3 +1,26 @@
+Mon Jul 24 11:23:14 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* dwarf2read.c (address_size): Delete file wide global.
+	(struct comp_unit_head): Add signed_addr_p;
+	(read_comp_unit_head): New function.
+	(psymtab_to_symtab_1, dwarf2_build_psymtabs_hard): Use
+ 	read_comp_unit_head to parse the debug_info header.
+	(read_address): Add parameters cu_header and bytes_read.  When
+ 	specified, sign extend the address.
+	
+	* dwarf2read.c (add_partial_symbol, decode_locdesc,
+ 	die_containing_type, die_type, dwarf_decode_lines,
+ 	dwarf2_add_field, dwarf2_add_member_fn,
+ 	dwarf2_build_psymtabs_hard, dwarf2_const_value, new_symbol,
+ 	process_die, psymtab_to_symtab_1, read_array_type,
+ 	read_enumeration, read_attribute, read_common_block,
+ 	read_comp_unit, read_file_scope, read_full_die, read_func_scope,
+ 	read_lexical_block_scope, read_partial_die, scan_partial_symbols,
+ 	read_structure_scope, read_subroutine_type, read_tag_const_type,
+ 	read_tag_pointer_type, read_tag_ptr_to_member_type,
+ 	read_tag_reference_type, read_type_die, read_typedef,
+ 	tag_type_to_type): Pass cu_header parameter.
+
 2000-07-21  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
         * regcache.c (read_register, read_register_bytes): Fix typos.
