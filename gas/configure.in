@@ -173,7 +173,7 @@ changequote([,])dnl
       i386-*-coff | i386-*-sysv* | i386-*-sco* | i386-*-isc*)
 			    fmt=coff ;;
       i386-*-vsta)          fmt=aout ;;
-      i386-*-msdosdjgpp* | i386-*-go32*)
+      i386-*-msdosdjgpp* | i386-*-go32* | i386-go32-rtems*)
 			    fmt=coff em=go32;;
       i386-*-rtems*)        fmt=coff ;;
       i386-*-gnu*)          fmt=elf ;;
@@ -291,7 +291,7 @@ changequote([,])dnl
 
 # start-sanitize-v850e
       v850e-*-*)	    fmt=elf bfd_gas=yes ;;
-      v850eq-*-*)	    fmt=elf bfd_gas=yes ;;
+      v850ea-*-*)	    fmt=elf bfd_gas=yes ;;
 # end-sanitize-v850e
       vax-*-bsd* | vax-*-ultrix*)
 			    fmt=aout ;;

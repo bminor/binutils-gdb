@@ -1,3 +1,9 @@
+Mon Dec 22 13:06:05 1997  Joel Sherrill  <joel@oarcorp.com>
+
+        * configure.in (i386*-go32-rtems*): Fix to be the same as
+	i[3456]86-go32.
+	* configure: Rebuild.
+
 Mon Dec 22 12:54:07 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (macro): The 4650 doesn't permit M_LDC1_AB,
