@@ -1,3 +1,12 @@
+Sat Sep 27 12:51:34 1997  Fred Fish  <fnf@cygnus.com>
+
+	* interp.c (pc_addr): Discard upper bit(s) of PC in case
+	IMAP1 selects unified memory.
+
+Wed Sep 24 17:38:57 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Tue Sep 23 11:04:38 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
