@@ -16,16 +16,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  
-    ----
-
-    Code to output system call traces Copyright (C) 1991 Gordon Irlam.
-    All rights reserved.
-
-    This tool is part of the Spa(7) package.  The Spa(7) package
-    may  be redistributed and/or modified under the terms of the
-    GNU General Public License Version 2 (GPL(7))  as  published
-    by the Free Software Foundation.
-
     */
 
 
@@ -39,33 +29,32 @@
 #endif
 
 
-INLINE_EMUL_GENERIC void
-emul_enter_call(emulation *emul,
-		int call,
-		int arg0,
-		cpu *processor,
-		unsigned_word cia)
+STATIC_INLINE_EMUL_GENERIC void
+emul_syscall_enter(emul_syscall *emul,
+		   int call,
+		   int arg0,
+		   cpu *processor,
+		   unsigned_word cia)
 {
-  printf_filtered("%d:0x%x:%s(",
+  printf_filtered("%d:0x%lx:%s(",
 		  cpu_nr(processor) + 1,
-		  cia, 
-		  emul->call_descriptor[call].name);
+		  (long)cia, 
+		  emul->syscall_descriptor[call].name);
 }
 
 
-INLINE_EMUL_GENERIC void
-emul_exit_call(emulation *emul,
-	       int call,
-	       int arg0,
-	       cpu *processor,
-	       unsigned_word cia)
+STATIC_INLINE_EMUL_GENERIC void
+emul_syscall_exit(emul_syscall *emul,
+		  int call,
+		  int arg0,
+		  cpu *processor,
+		  unsigned_word cia)
 {
   int status = cpu_registers(processor)->gpr[3];
   int error = cpu_registers(processor)->gpr[0];
   printf_filtered(")=%d", status);
   if (error > 0 && error < emul->nr_error_names)
-    printf_filtered("[%s]",
-		    emul->error_names[cpu_registers(processor)->gpr[0]]);
+    printf_filtered("[%s]", emul->error_names[error]);
   printf_filtered("\n");
 }
 
@@ -117,12 +106,9 @@ emul_read_string(char *dest,
   if (addr == 0)
     return NULL;
   while (1) {
-    if (vm_data_map_read_buffer(cpu_data_map(processor),
-				&dest[nr_moved],
-				addr + nr_moved,
-				sizeof(dest[nr_moved]))
-	!= sizeof(dest[nr_moved]))
-      return NULL;
+    dest[nr_moved] = vm_data_map_read_1(cpu_data_map(processor),
+					addr + nr_moved,
+					processor, cia);
     if (dest[nr_moved] == '\0' || nr_moved >= nr_bytes)
       break;
     nr_moved++;
@@ -145,24 +131,27 @@ emul_write_status(cpu *processor,
 }
 
 
+INLINE_EMUL_GENERIC unsigned_word
+emul_read_word(unsigned_word addr,
+	       cpu *processor,
+	       unsigned_word cia)
+{
+  return vm_data_map_read_word(cpu_data_map(processor),
+			       addr,
+			       processor, cia);
+}
+
+
 INLINE_EMUL_GENERIC void
 emul_write_word(unsigned_word addr,
 		unsigned_word buf,
 		cpu *processor,
 		unsigned_word cia)
 {
-  int nr_moved;
-  H2T(buf);
-  nr_moved = vm_data_map_write_buffer(cpu_data_map(processor),
-				      &buf,
-				      addr,
-				      sizeof(buf),
-				      0/*violate_ro*/);
-  if (nr_moved != sizeof(buf)) {
-    printf_filtered("emul_write_word() write failed, %d out of %d written\n",
-		    nr_moved, sizeof(buf));
-    cpu_halt(processor, cia, was_exited, 14/*EFAULT*/);
-  }
+  vm_data_map_write_word(cpu_data_map(processor),
+			 addr,
+			 buf,
+			 processor, cia);
 }
 
 
@@ -173,15 +162,12 @@ emul_write_buffer(const void *source,
 		  cpu *processor,
 		  unsigned_word cia)
 {
-  int nr_moved = vm_data_map_write_buffer(cpu_data_map(processor),
-					  source,
-					  addr,
-					  nr_bytes,
-					  0/*violate_ro*/);
-  if (nr_moved != nr_bytes) {
-    printf_filtered("emul_write_buffer() write failed %d out of %d written\n",
-		    nr_moved, nr_bytes);
-    cpu_halt(processor, cia, was_exited, 14/*EFAULT*/);
+  int nr_moved;
+  for (nr_moved = 0; nr_moved < nr_bytes; nr_moved++) {
+    vm_data_map_write_1(cpu_data_map(processor),
+			addr + nr_moved,
+			((const char*)source)[nr_moved],
+			processor, cia);
   }
 }
 
@@ -193,38 +179,39 @@ emul_read_buffer(void *dest,
 		 cpu *processor,
 		 unsigned_word cia)
 {
-  int nr_moved = vm_data_map_read_buffer(cpu_data_map(processor),
-					 dest,
-					 addr,
-					 nr_bytes);
-  if (nr_moved != nr_bytes) {
-    printf_filtered("emul_read_buffer() read failed %d out of %d read\n",
-		    nr_moved, nr_bytes);
-    cpu_halt(processor, cia, was_exited, 14/*EFAULT*/);
+  int nr_moved;
+  for (nr_moved = 0; nr_moved < nr_bytes; nr_moved++) {
+    ((char*)dest)[nr_moved] = vm_data_map_read_1(cpu_data_map(processor),
+						 addr + nr_moved,
+						 processor, cia);
   }
 }
 
 
 INLINE_EMUL_GENERIC void
-emul_do_call(emulation *emul,
-	     unsigned call,
-	     const int arg0,
-	     cpu *processor,
-	     unsigned_word cia)
+emul_do_system_call(os_emul_data *emul_data,
+		    emul_syscall *emul,
+		    unsigned call,
+		    const int arg0,
+		    cpu *processor,
+		    unsigned_word cia)
 {
-  emul_call_handler *handler = NULL;
+  emul_syscall_handler *handler = NULL;
   if (call >= emul->nr_system_calls)
     error("do_call() os_emul call %d out-of-range\n", call);
 
-  handler = emul->call_descriptor[call].handler;
+  handler = emul->syscall_descriptor[call].handler;
   if (handler == NULL)
     error("do_call() unimplemented call %d\n", call);
 
-  ENTER_CALL;
-  cpu_registers(processor)->gpr[0] = 0; /* default success */
-  handler(emul, call, arg0, processor, cia);
-  EXIT_CALL;
-}
+  if (WITH_TRACE && ppc_trace[trace_os_emul])
+    emul_syscall_enter(emul, call, arg0, processor, cia);
 
+  cpu_registers(processor)->gpr[0] = 0; /* default success */
+  handler(emul_data, call, arg0, processor, cia);
+
+  if (WITH_TRACE && ppc_trace[trace_os_emul])
+    emul_syscall_exit(emul, call, arg0, processor, cia);
+}
 
 #endif /* _SYSTEM_C_ */

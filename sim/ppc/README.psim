@@ -1,5 +1,5 @@
 
-		PSIM - model of a PowerPC platform
+		PSIM - model a PowerPC platform
 
     Copyright (C) 1994-1995, Andrew Cagney <cagney@highland.com.au>.
 
@@ -18,15 +18,17 @@
     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
-This directory contains the program PSIM that implements a model of a
-PowerPC platform.  PSIM can either be built standalone or as part of
-the debugger GDB.
+This directory contains the source code to the program PSIM that
+implements a model of a PowerPC platform.  PSIM can either be built
+standalone or as part of the debugger GDB.
 
 
 What is PSIM?
 
-	PSIM is an ANSI C program that models a PowerPC platform.
-	The platform it implements can vary from:
+	PSIM is an ANSI C program that can be configured to model
+	various PowerPC platforms.
+
+	The platform that is modeled can vary from:
 
 		o	A user program environment (UEA) complete
 			with emulated system calls
@@ -34,7 +36,17 @@ What is PSIM?
 	to
 
 		o	A hardware platform with several processors
-			interacting with each other and modeled hardware.
+			interacting with each other and various
+			modeled hardware devices.
+
+
+Is the source code available?
+
+	Yes.
+
+	The source code to PSIM is available under the terms of
+	the GNU Public Licence.  This allows you to distribute
+	the source code for free but with certain conditions.
 
 
 What motivated PSIM?
@@ -155,31 +167,40 @@ What features does PSIM have?
 		
 	ENDIAN SUPORT
 
-		PSIM implements all of Big-endian, little-endian
-		and PowerPC little endian (XOR endian).
+		PSIM implements the PowerPC's big and little (xor
+		endian) modes and correctly simulates code that
+		switches between these two modes.
 
-	ISA models
+		In addition, psim can model a true little-endian
+		machine.
 
-		PSIM includes a model of UEA, VEA and OEA.  This
+	ISA models (Instruction Set Architecture)
+
+		PSIM includes a model of the UEA, VEA and OEA.  This
 		inclues the time base registers (VEA) and HTAB
 		and BATS (OEA).
 
 		In addition, a preliminary model of the 64 bit
-		PowerPC architecture is included.
+		PowerPC architecture is implemented.
 
 	Hardware
 
 		PSIM's internals are based around the concept
 		of a Device Tree.  This tree intentionaly
 		resembles that of the Device Tree found in
-		OpenBoot firmware.  Psim is flexable enough
+		OpenBoot firmware.  PSIM is flexable enough
 		to allow the user to fully configure the
 		actual hardware model from a device tree
-		specification taken from a file.
+		specification that is read in from a file.
 
-		PSIM also contains several built in device
-		trees.
-		
+		A user can either run a program using one of
+		PSIM's built in hardware models specify a
+		custom hardware model that should be simulated.
+
+		A user is also able to quickly add a model
+		of new hardware devices so that they can be
+		included in a custom hardware model.
+
 	Emulation
 
 		PSIM is able (UEA) to emulate UNIX calls
@@ -187,30 +208,49 @@ What features does PSIM have?
 		the ROM rom calls found in common firmware
 		(OpenBoot and BUGAPI).
 
-	floating point
+	Floating point
 
 		Preliminary suport for floating point is included.
 		Real kernels don't need floating point.
 
 
-Can PSIM model a CHRP a.k.a. PowerPC Platform machine?
+Is PSIM CHRP Compliant?
 
-	No. but that is now one of its main objectives. (Did you notice
-	it was written PowerPC Platform instead of PowerPC platform?).
+	No.
+
+	However, PSIM does include all the hooks that are needed to
+	construct a model of a CHRP compliant platform.
+
+	That is:
+
+		o	OpenBoot client software
+
+		o	OpenPIC interrupt controller
+
+		o	Hooks to implement a RTAS interface
+
+		o	the ability to add a model of each of the
+			hardware devices required by a CHRP compliant
+			desktop.
 
 
 How do I build PSIM?
 
-	To build PSIM you will need the following:
+	To build PSIM you will need the following files:
+
 
 	gdb-4.15.tar.gz		From your favorite GNU ftp site.
 				I've also tested psim-951016 with
-				gdb-4.15.1.
+				gdb-4.15.1.  If you would prefer
+				a graphical development environment
+				then PSIM can also be built with
+				gdbtk.
 
 
 	ftp://ftp.ci.com.au/pub/clayton/README.pim
 
 				This file.
+
 
 	ftp://ftp.ci.com.au/pub/clayton/gdb-4.15+psim-951016.diff.gz
 
@@ -218,53 +258,47 @@ How do I build PSIM?
 				gdb-4.15 so that will include psim
 				when it is built.
 
-	ftp://ftp.ci.com.au/pub/clayton/gdb-4.15+psim-951016.tar.gz
-
-				This contains the psim files propper.
 
 	ftp://ftp.ci.com.au/pub/clayton/psim-test-951016.tar.gz
 
 				(Optional) A scattering of pre-compiled
 				programs that run under the simulator.
 
+
+	ftp://ftp.ci.com.au/pub/clayton/gdb-4.15+psim-951016.tar.gz
+
+				This contains the psim files proper.
+
+
 	gcc			Again available from your favorite
 				GNU ftp site.
 
+
 	patch			Sun's patch behaves a little wierd
 				and doesn't appear to like creating
-				empty files.
+				empty files.  You may want to consider
+				installing gnu's patch.
 
 
-	Since PSIM is still being developed, from time to time, to meet
-	a specific analysts needsfurther psim snap shots are occasionally
-	made available.  These snapshots may or may not work with GDB-4.15.
-	Several of the more recent snapshots are:
-
-	ftp://ftp.ci.com.au/pub/clayton/psim-951218.tar.gz
-
-				Hopefully merges in Michael stuff
-				with mine,  adds multiple emulations
-				(OpenBoot and NetBSD),  revamps
-				inline stuff, rearanges devices so
-				that phandls and ihandles can be
-				implemented.
-
-	ftp://ftp.ci.com.au/pub/clayton/psim-951203.tar.gz
-
-				A good snapshot
-
-				This includes extensions from Michael
-				Meissner that add monitoring of the
-				PowerPC's register and bus architectures.
+	In addition, I'm slowly building up a set of useful patches
+	to gdb-4.15 that are useful.  You will want to also apply
+	these patches:
 
 
-	ftp://ftp.ci.com.au/pub/clayton/psim-test-951218.tar.gz
+	ftp://ftp.ci.com.au/pub/clayton/gdb-4.15+attach.diff.gz
 
-				Prebuilt test programs for PSIM.
-				Includes examples of UEA, VEA and
-				OEA code.
-				Requires gcc-2.7.2 and binutils-2.6
-				to rebuild.
+				Patch to gdb that allows the `attach'
+				command to be used when connecting to a
+				simulator.
+
+				See that file for more information.
+
+	ftp://ftp.ci.com.au/pub/clayton/gdb-4.15+note.diff.gz
+
+				Patch to gdb's bfd that adds basic support
+				for a .note section. OpenBoot makes
+				use of a .note section when loading a
+				boot image.
 
 
 	Procedure:
@@ -293,6 +327,15 @@ How do I build PSIM?
 
 		$ gunzip < ../gdb-4.15+psim-951016.tar.gz | tar tvf -
 		$ gunzip < ../gdb-4.15+psim-951016.tar.gz | tar xvf -
+
+		You may also want to consider applying the `attach' and
+		`note' patches that are available vis:
+
+		$ gunzip < ../gdb-4.15+attach.diff.gz | more
+		$ gunzip < ../gdb-4.15+attach.diff.gz | patch -p
+
+		$ gunzip < ../gdb-4.15+note.diff.gz | more
+		$ gunzip < ../gdb-4.15+note.diff.gz | patch -p
 
 
 	3.	Configure gdb
@@ -329,24 +372,97 @@ How do I build PSIM?
 		$ cp sim/ppc/run ~/bin/powerpc-unknown-eabisim-run
 
 
+Is there a more recent version of PSIM and if so, how would I build it?
+
+	A PSIM is an ongoing development, occasional snapshots
+	(that include new features) are made available.  Several of
+	the more recent snapshots are:
+
+	ftp://ftp.ci.com.au/pub/clayton/psim-951219.tar.gz
+
+				Hopefully merges in Michael stuff
+				with mine,  adds multiple emulations
+				(OpenBoot and NetBSD),  revamps
+				inline stuff, rearanges devices so
+				that phandls and ihandles can be
+				implemented.
+
+	ftp://ftp.ci.com.au/pub/clayton/psim-951203.tar.gz
+
+				A good snapshot
+
+				This includes extensions from Michael
+				Meissner that add monitoring of the
+				PowerPC's register and bus architectures.
+
+
+	To build/install one of these snapshots, you replace the
+	current gdb/sim/ppc directory with the one in the update,
+	re-configure and rebuild.
+
+	Procedure:
+
+	0.	A starting point
+
+		$ cd gdb-4.15
+
+
+	1.	Remove the old psim directory
+
+		$ mv sim/ppc sim/old.ppc
+
+
+	2.	Unpack the new one
+
+		$ gunzip < ../psim-960105.tar.gz | tar tf -
+		$ gunzip < ../psim-960105.tar.gz | tar tf -
+
+
+	3.	Reconfig/rebuild (as seen above):
+
+		$ CC=gcc ./configure --target=powerpc-unknown-eabisim
+		$ make CC=gcc
+
+
+Are there any example programs that can be run on PSIM?
+
+	Psim has a simple test suite that is used to ensure
+	that fixes do not introduce new bugs.  This test suite
+	like psim is updated:
+
+	ftp://ftp.ci.com.au/pub/clayton/psim-test-951218.tar.gz
+
+				Prebuilt test programs for PSIM.
+				Includes examples of UEA, VEA and
+				OEA code.
+				Requires gcc-2.7.2 and binutils-2.6
+				to rebuild.
+
+	ftp://ftp.ci.com.au/pub/clayton/psim-test-951016.tar.gz
+
+				(Optional) A scattering of pre-compiled
+				programs that run under the simulator.
+
+
 How do I use the simulator?
 
 
-	(I assume that you've unpacked the psim-test archive).
+	I assume that you've unpacked a psim-test archive.
+
 
 	1.	As a standalone program
 
 		Print out the users environment:
 
-		$ powerpc-unknown-eabisim-run envp
+		$ powerpc-unknown-eabisim-run psim-test/uea/envp
 
 		Print out the arguments:
 
-		$ powerpc-unknown-eabisim-run argv a b c
+		$ powerpc-unknown-eabisim-run psim-test/uea/argv a b c
 
 		Check that sbrk works:
 
-		$ powerpc-unknown-eabisim-run break
+		$ powerpc-unknown-eabisim-run psim-test/uea/break
 
 
 	2.	Example of running GDB:	
@@ -354,7 +470,7 @@ How do I use the simulator?
 		The main thing to note is that before you can run the simulator
 		you must enable it.  The example below illustrates this:
 
-		$ powerpc-unknown-eabisim-gdb envp
+		$ powerpc-unknown-eabisim-gdb psim-test/uea/envp
 		(gdb) target sim
 		(gdb) load
 		(gdb) break main
@@ -363,6 +479,21 @@ How do I use the simulator?
 		.
 		.
 
+
+	3.	Using a device tree as a description of a machine
+		(I assume that you have applied the attach bug).
+
+		$ cd psim-test/tree
+		$ powerpc-unknown-eabisim-gdb
+		(gdb) target sim
+		(gdb) attach device-tree
+		(gdb) run
+
+		or
+
+		$ cd psim-test/tree
+		$ powerpc-unknown-eabisim-run device-tree
+		
 
 Where do I send bugs or report problems?
 
@@ -376,40 +507,10 @@ Where do I send bugs or report problems?
 	that e-mail list.
 
 
-Are there any known problems?
+Does PSIM have any limitations or problems?
 
-	See the ChangeLog file looking for lines taged with the word FIXME.
-
-	COREFILE.C: The implementation of corefile.c (defined by
-	corefile.h) isn't the best.  It is intended to be functionaly
-	correct rather than fast.  One option being considered
-	is to add a data cache to reduce the overhead of the most
-	common case of data read/writes.
-
-	HTAB (page) code for OEA model untested.  Some of the vm code
-	instructions unimplemented.
-
-	Lacks PowerOpen (a.k.a. XCOFF a.k.a. AIX) and NT startups.  The
-	PowerOpen worked until I added the ELF one.
-
-	Missing VEA system calls.
-
-	Missing or commented out instructions.
-
-	64bit target untested.
-
-	64bit host broken.  For instance use of scanf "%x", &long long.
-
-	Event code for pending events from within signal handlers not
-	finished/tested.
-
-	Better and more devices.
-
-	PORTABILITY (Notes taken from Michael Meissner): Heavy use of the ##
-	operator - fix using the clasic X/**/Y hack; Use of the signed
-	keyword.  In particular, signed char has no analogue in classic C
-	(though most implementations of classic C use signed chars); Use of
-	long long which restricts the target compiler to be GCC.
+	See the file PROBLEMS (included in the distribution) for any
+	outstanding issues.
 
 
 Who helped?

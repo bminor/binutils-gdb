@@ -156,15 +156,15 @@ emul_bugapi_create(device *root,
 	device_tree_add_found_uw_u_u(init, "",
 				     "data",
 				     OEA_SYSTEM_CALL_ADDRESS,
-				     4, 0x1); /*emul-call*/
+				     4, emul_call_instruction);
 	device_tree_add_found_uw_u_u(init, "",
 				     "data",
 				     OEA_SYSTEM_CALL_ADDRESS + 4,
-				     4, 0x4c000064); /*rfi*/
+				     4, emul_rfi_instruction);
 	device_tree_add_found_uw_u_u(init, "",
 				     "data",
 				     OEA_STALL_CPU_LOOP_ADDRESS,
-				     4, 0x48000000); /*b .*/
+				     4, emul_loop_instruction);
       }
       {
 	device *init_stack = device_tree_add_found(init, "", "stack");
@@ -204,7 +204,7 @@ emul_bugapi_instruction_call(cpu *processor,
     return 0;
   switch (call_id) {
   case _OUTCHR:
-    printf_filtered("%c", cpu_registers(processor)->gpr[3]);
+    printf_filtered("%c", (char)cpu_registers(processor)->gpr[3]);
     break;
   case _OUTLN:
     printf_filtered("\n");

@@ -73,7 +73,7 @@ AC_ARG_ENABLE(sim-switch,
 esac
 if test x"$silent" != x"yes" && test x"$sim_switch" != x""; then
   echo "Setting switch flags = $sim_switch" 6>&1
-fi],[sim_switch="-s";
+fi],[sim_switch="";
 if test x"$silent" != x"yes"; then
   echo "Setting switch flags = $sim_switch" 6>&1
 fi])dnl

@@ -28,6 +28,7 @@ COPYING.LIB
 ChangeLog
 Makefile.in
 README.psim
+PROBLEMS
 basics.h
 bits.c
 bits.h

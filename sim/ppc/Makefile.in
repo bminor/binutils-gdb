@@ -417,7 +417,7 @@ distclean realclean: clean
 	rm -f TAGS Makefile config.cache config.status config.h stamp-h
 
 maintainer-clean: distclean
-	rm -f *~ ppc-config.h
+	rm -f *~ *.log ppc-config.h core *.core
 
 Makefile: Makefile.in config.status
 	CONFIG_FILES=Makefile CONFIG_HEADERS= $(SHELL) ./config.status

@@ -685,7 +685,7 @@ register_init(device *me,
   if (isdigit(name[0]) && name[1] == '.') {
     processor = atol(name);
     name += 2;
-    DTRACE(register, ("%ld.%s=0x%lx\n", (long)name, processor, (unsigned long)value));
+    DTRACE(register, ("%d.%s=0x%lx\n", processor, name, (unsigned long)value));
   }    
   else {
     processor = -1;
