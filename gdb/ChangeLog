@@ -1,5 +1,7 @@
 Wed Jul  3 15:56:08 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
+	* configure:  Re-build with autoconf-2.10.
+
 	* sparcl-tdep.c (_initialize_sparc_tdep) config/sparc/tm-sparc.h,
 	config/sparc/tm-sparclite.h:  Initialize tm_print_insn from
 	TM_PRINT_INSN, which comes from the tm file.
