@@ -11,8 +11,7 @@ Sun Oct 24 09:31:05 1993  Fred Fish  (fnf@lisa.cygnus.com)
 	initialized and uninitialized data sections have the SEC_ALLOC
 	flag bit set, but only initialized sections have SEC_LOAD set.
 	SEC_DATA is ignored since it only gets set for initialized 
-	data.  Likewise, SEC_HAS_CONTENTS is ignored now because it
-	never gets set.
+	data.
 
 Sat Oct 23 14:48:18 1993  Doug Evans  (dje@canuck.cygnus.com)
 
