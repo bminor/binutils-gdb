@@ -39,14 +39,86 @@
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include <a.out.h>
 #include <sys/file.h>
 #include "gdb_stat.h"
 #include <sys/core.h>
+#define __LDINFO_PTRACE32__	/* for __ld_info32 */
+#define __LDINFO_PTRACE64__	/* for __ld_info64 */
 #include <sys/ldr.h>
+#include <sys/systemcfg.h>
 
-extern int errno;
+/* On AIX4.3+, sys/ldr.h provides different versions of struct ld_info for
+   debugging 32-bit and 64-bit processes.  Define a typedef and macros for
+   accessing fields in the appropriate structures. */
+
+/* In 32-bit compilation mode (which is the only mode from which ptrace()
+   works on 4.3), __ld_info32 is #defined as equivalent to ld_info. */
+
+#ifdef __ld_info32
+# define ARCH3264
+#endif
+
+/* Return whether the current architecture is 64-bit. */
+
+#ifndef ARCH3264
+# define ARCH64() 0
+#else
+# define ARCH64() (REGISTER_RAW_SIZE (0) == 8)
+#endif
+
+/* Union of 32-bit and 64-bit ".reg" core file sections. */
+
+typedef union {
+#ifdef ARCH3264
+  struct __context64 r64;
+#else
+  struct mstsave r64;
+#endif
+  struct mstsave r32;
+} CoreRegs;
+
+/* Union of 32-bit and 64-bit versions of ld_info. */
+
+typedef union {
+#ifndef ARCH3264
+  struct ld_info l32;
+  struct ld_info l64;
+#else
+  struct __ld_info32 l32;
+  struct __ld_info64 l64;
+#endif
+} LdInfo;
+
+/* If compiling with 32-bit and 64-bit debugging capability (e.g. AIX 4.x),
+   declare and initialize a variable named VAR suitable for use as the arch64
+   parameter to the various LDI_*() macros. */
+
+#ifndef ARCH3264
+# define ARCH64_DECL(var)
+#else
+# define ARCH64_DECL(var) int var = ARCH64 ()
+#endif
+
+/* Return LDI's FIELD for a 64-bit process if ARCH64 and for a 32-bit process
+   otherwise.  This technique only works for FIELDs with the same data type in
+   32-bit and 64-bit versions of ld_info. */
+
+#ifndef ARCH3264
+# define LDI_FIELD(ldi, arch64, field) (ldi)->l32.ldinfo_##field
+#else
+# define LDI_FIELD(ldi, arch64, field) \
+  (arch64 ? (ldi)->l64.ldinfo_##field : (ldi)->l32.ldinfo_##field)
+#endif
+
+/* Return various LDI fields for a 64-bit process if ARCH64 and for a 32-bit
+   process otherwise. */
+
+#define LDI_NEXT(ldi, arch64)		LDI_FIELD(ldi, arch64, next)
+#define LDI_FD(ldi, arch64)		LDI_FIELD(ldi, arch64, fd)
+#define LDI_FILENAME(ldi, arch64)	LDI_FIELD(ldi, arch64, filename)
 
 extern struct vmap *map_vmap (bfd * bf, bfd * arch);
 
@@ -54,11 +126,11 @@ extern struct target_ops exec_ops;
 
 static void vmap_exec (void);
 
-static void vmap_ldinfo (struct ld_info *);
+static void vmap_ldinfo (LdInfo *);
 
-static struct vmap *add_vmap (struct ld_info *);
+static struct vmap *add_vmap (LdInfo *);
 
-static int objfile_symbol_add (char *);
+static int objfile_symbol_add (void *);
 
 static void vmap_symtab (struct vmap *);
 
@@ -69,7 +141,7 @@ static void exec_one_dummy_insn (void);
 extern void
 fixup_breakpoints (CORE_ADDR low, CORE_ADDR high, CORE_ADDR delta);
 
-/* Conversion from gdb-to-system special purpose register numbers.. */
+/* Conversion from gdb-to-system special purpose register numbers. */
 
 static int special_regs[] =
 {
@@ -82,161 +154,152 @@ static int special_regs[] =
   MQ				/* MQ_REGNUM    */
 };
 
-void
-fetch_inferior_registers (regno)
-     int regno;
+/* Call ptrace(REQ, ID, ADDR, DATA, BUF). */
+
+static int
+ptrace32 (int req, int id, int *addr, int data, int *buf)
 {
-  int ii;
+  int ret = ptrace (req, id, (int *)addr, data, buf);
+#if 0
+  printf ("ptrace32 (%d, %d, 0x%x, %08x, 0x%x) = 0x%x\n",
+	  req, id, (unsigned int)addr, data, (unsigned int)buf, ret);
+#endif
+  return ret;
+}
 
-  if (regno < 0)
-    {				/* for all registers */
+/* Call ptracex(REQ, ID, ADDR, DATA, BUF). */
 
-      /* read 32 general purpose registers. */
+static int
+ptrace64 (int req, int id, long long addr, int data, int *buf)
+{
+#ifdef ARCH3264
+  int ret = ptracex (req, id, addr, data, buf);
+#else
+  int ret = 0;
+#endif
+#if 0
+  printf ("ptrace64 (%d, %d, 0x%llx, %08x, 0x%x) = 0x%x\n",
+	  req, id, addr, data, (unsigned int)buf, ret);
+#endif
+  return ret;
+}
 
-      for (ii = 0; ii < 32; ++ii)
-	*(int *) &registers[REGISTER_BYTE (ii)] =
-	  ptrace (PT_READ_GPR, inferior_pid, (PTRACE_ARG3_TYPE) ii, 0, 0);
+/* Fetch register REGNO from the inferior. */
 
-      /* read general purpose floating point registers. */
+static void
+fetch_register (int regno)
+{
+  int *addr = (int *) &registers[REGISTER_BYTE (regno)];
+  int nr;
 
-      for (ii = 0; ii < 32; ++ii)
-	ptrace (PT_READ_FPR, inferior_pid,
-	    (PTRACE_ARG3_TYPE) & registers[REGISTER_BYTE (FP0_REGNUM + ii)],
-		FPR0 + ii, 0);
+  /* Retrieved values may be -1, so infer errors from errno. */
+  errno = 0;
 
-      /* read special registers. */
-      for (ii = 0; ii <= LAST_UISA_SP_REGNUM - FIRST_UISA_SP_REGNUM; ++ii)
-	*(int *) &registers[REGISTER_BYTE (FIRST_UISA_SP_REGNUM + ii)] =
-	  ptrace (PT_READ_GPR, inferior_pid, (PTRACE_ARG3_TYPE) special_regs[ii],
-		  0, 0);
-
-      registers_fetched ();
-      return;
+  /* Floating-point registers. */
+  if (regno >= FP0_REGNUM && regno <= FPLAST_REGNUM)
+    {
+      nr = regno - FP0_REGNUM + FPR0;
+      ptrace32 (PT_READ_FPR, inferior_pid, addr, nr, 0);
     }
 
-  /* else an individual register is addressed. */
-
-  else if (regno < FP0_REGNUM)
-    {				/* a GPR */
-      *(int *) &registers[REGISTER_BYTE (regno)] =
-	ptrace (PT_READ_GPR, inferior_pid, (PTRACE_ARG3_TYPE) regno, 0, 0);
-    }
-  else if (regno <= FPLAST_REGNUM)
-    {				/* a FPR */
-      ptrace (PT_READ_FPR, inferior_pid,
-	      (PTRACE_ARG3_TYPE) & registers[REGISTER_BYTE (regno)],
-	      (regno - FP0_REGNUM + FPR0), 0);
-    }
-  else if (regno <= LAST_UISA_SP_REGNUM)
-    {				/* a special register */
-      *(int *) &registers[REGISTER_BYTE (regno)] =
-	ptrace (PT_READ_GPR, inferior_pid,
-	      (PTRACE_ARG3_TYPE) special_regs[regno - FIRST_UISA_SP_REGNUM],
-		0, 0);
-    }
-  else
+  /* Bogus register number. */
+  else if (regno > LAST_UISA_SP_REGNUM)
     fprintf_unfiltered (gdb_stderr,
 			"gdb error: register no %d not implemented.\n",
 			regno);
 
-  register_valid[regno] = 1;
+  /* Fixed-point registers. */
+  else
+    {
+      if (regno >= FIRST_UISA_SP_REGNUM)
+	nr = special_regs[regno - FIRST_UISA_SP_REGNUM];
+      else
+	nr = regno;
+
+      if (!ARCH64 ())
+	*addr = ptrace32 (PT_READ_GPR, inferior_pid, (int *)nr, 0, 0);
+      else
+	{
+	  /* PT_READ_GPR requires the buffer parameter to point to long long,
+	     even if the register is really only 32 bits. */
+	  long long buf;
+	  ptrace64 (PT_READ_GPR, inferior_pid, nr, 0, (int *)&buf);
+	  if (REGISTER_RAW_SIZE (regno) == 8)
+	    memcpy (addr, &buf, 8);
+	  else
+	    *addr = buf;
+	}
+    }
+
+  if (!errno)
+    register_valid[regno] = 1;
+  else
+    {
+#if 0
+      /* FIXME: this happens 3 times at the start of each 64-bit program. */
+      perror ("ptrace read");
+#endif
+      errno = 0;
+    }
 }
 
-/* Store our register values back into the inferior.
-   If REGNO is -1, do this for all registers.
-   Otherwise, REGNO specifies which register (so we can save time).  */
+/* Store register REGNO back into the inferior. */
 
-void
-store_inferior_registers (regno)
-     int regno;
+static void
+store_register (int regno)
 {
+  int *addr = (int *) &registers[REGISTER_BYTE (regno)];
+  int nr;
 
+  /* -1 can be a successful return value, so infer errors from errno. */
   errno = 0;
 
-  if (regno == -1)
-    {				/* for all registers..  */
-      int ii;
-
-      /* execute one dummy instruction (which is a breakpoint) in inferior
-         process. So give kernel a chance to do internal house keeping.
-         Otherwise the following ptrace(2) calls will mess up user stack
-         since kernel will get confused about the bottom of the stack (%sp) */
-
-      exec_one_dummy_insn ();
-
-      /* write general purpose registers first! */
-      for (ii = GPR0; ii <= GPR31; ++ii)
-	{
-	  ptrace (PT_WRITE_GPR, inferior_pid, (PTRACE_ARG3_TYPE) ii,
-		  *(int *) &registers[REGISTER_BYTE (ii)], 0);
-	  if (errno)
-	    {
-	      perror ("ptrace write_gpr");
-	      errno = 0;
-	    }
-	}
-
-      /* write floating point registers now. */
-      for (ii = 0; ii < 32; ++ii)
-	{
-	  ptrace (PT_WRITE_FPR, inferior_pid,
-	    (PTRACE_ARG3_TYPE) & registers[REGISTER_BYTE (FP0_REGNUM + ii)],
-		  FPR0 + ii, 0);
-	  if (errno)
-	    {
-	      perror ("ptrace write_fpr");
-	      errno = 0;
-	    }
-	}
-
-      /* write special registers. */
-      for (ii = 0; ii <= LAST_UISA_SP_REGNUM - FIRST_UISA_SP_REGNUM; ++ii)
-	{
-	  ptrace (PT_WRITE_GPR, inferior_pid,
-		  (PTRACE_ARG3_TYPE) special_regs[ii],
-	     *(int *) &registers[REGISTER_BYTE (FIRST_UISA_SP_REGNUM + ii)],
-		  0);
-	  if (errno)
-	    {
-	      perror ("ptrace write_gpr");
-	      errno = 0;
-	    }
-	}
+  /* Floating-point registers. */
+  if (regno >= FP0_REGNUM && regno <= FPLAST_REGNUM)
+    {
+      nr = regno - FP0_REGNUM + FPR0;
+      ptrace32 (PT_WRITE_FPR, inferior_pid, addr, nr, 0);
     }
 
-  /* else, a specific register number is given... */
+  /* Bogus register number. */
+  else if (regno > LAST_UISA_SP_REGNUM)
+    {
+      if (regno >= NUM_REGS)
+	fprintf_unfiltered (gdb_stderr,
+			    "gdb error: register no %d not implemented.\n",
+			    regno);
+    }
 
-  else if (regno < FP0_REGNUM)	/* a GPR */
+  /* Fixed-point registers. */
+  else
     {
       if (regno == SP_REGNUM)
+	/* Execute one dummy instruction (which is a breakpoint) in inferior
+	   process to give kernel a chance to do internal housekeeping.
+	   Otherwise the following ptrace(2) calls will mess up user stack
+	   since kernel will get confused about the bottom of the stack
+	   (%sp). */
 	exec_one_dummy_insn ();
-      ptrace (PT_WRITE_GPR, inferior_pid, (PTRACE_ARG3_TYPE) regno,
-	      *(int *) &registers[REGISTER_BYTE (regno)], 0);
-    }
 
-  else if (regno <= FPLAST_REGNUM)	/* a FPR */
-    {
-      ptrace (PT_WRITE_FPR, inferior_pid,
-	      (PTRACE_ARG3_TYPE) & registers[REGISTER_BYTE (regno)],
-	      regno - FP0_REGNUM + FPR0, 0);
-    }
+      if (regno >= FIRST_UISA_SP_REGNUM)
+	nr = special_regs[regno - FIRST_UISA_SP_REGNUM];
+      else
+	nr = regno;
 
-  else if (regno <= LAST_UISA_SP_REGNUM)	/* a special register */
-    {
-      ptrace (PT_WRITE_GPR, inferior_pid,
-	      (PTRACE_ARG3_TYPE) special_regs[regno - FIRST_UISA_SP_REGNUM],
-	      *(int *) &registers[REGISTER_BYTE (regno)], 0);
+      if (!ARCH64 ())
+	ptrace32 (PT_WRITE_GPR, inferior_pid, (int *)nr, *addr, 0);
+      else
+	{
+	  /* PT_WRITE_GPR requires the buffer parameter to point to an 8-byte
+	     area, even if the register is really only 32 bits. */
+	  long long buf;
+	  if (REGISTER_RAW_SIZE (regno) == 8)
+	    memcpy (&buf, addr, 8);
+	  else
+	    buf = *addr;
+	  ptrace64 (PT_WRITE_GPR, inferior_pid, nr, 0, (int *)&buf);
+	}
     }
-
-  else if (regno < NUM_REGS)
-    {
-      /* Ignore it.  */
-    }
-
-  else
-    fprintf_unfiltered (gdb_stderr,
-			"Gdb error: register no %d not implemented.\n",
-			regno);
 
   if (errno)
     {
@@ -245,17 +308,161 @@ store_inferior_registers (regno)
     }
 }
 
+/* Read from the inferior all registers if REGNO == -1 and just register
+   REGNO otherwise. */
+
+void
+fetch_inferior_registers (int regno)
+{
+  if (regno != -1)
+    fetch_register (regno);
+
+  else
+    {
+      /* read 32 general purpose registers. */
+      for (regno = 0; regno < 32; regno++)
+	fetch_register (regno);
+
+      /* read general purpose floating point registers. */
+      for (regno = FP0_REGNUM; regno <= FPLAST_REGNUM; regno++)
+	fetch_register (regno);
+
+      /* read special registers. */
+      for (regno = FIRST_UISA_SP_REGNUM; regno <= LAST_UISA_SP_REGNUM; regno++)
+	fetch_register (regno);
+    }
+}
+
+/* Store our register values back into the inferior.
+   If REGNO is -1, do this for all registers.
+   Otherwise, REGNO specifies which register (so we can save time).  */
+
+void
+store_inferior_registers (int regno)
+{
+  if (regno != -1)
+    store_register (regno);
+
+  else
+    {
+      /* write general purpose registers first! */
+      for (regno = GPR0; regno <= GPR31; regno++)
+	store_register (regno);
+
+      /* write floating point registers now. */
+      for (regno = FP0_REGNUM; regno <= FPLAST_REGNUM; regno++)
+	store_register (regno);
+
+      /* write special registers. */
+
+      for (regno = FIRST_UISA_SP_REGNUM; regno <= LAST_UISA_SP_REGNUM; regno++)
+	store_register (regno);
+    }
+}
+
+/* Store in *TO the 32-bit word at 32-bit-aligned ADDR in the child
+   process, which is 64-bit if ARCH64 and 32-bit otherwise.  Return
+   success. */
+
+static int
+read_word (CORE_ADDR from, int *to, int arch64)
+{
+  /* Retrieved values may be -1, so infer errors from errno. */
+  errno = 0;
+
+  if (arch64)
+    *to = ptrace64 (PT_READ_I, inferior_pid, from, 0, NULL);
+  else
+    *to = ptrace32 (PT_READ_I, inferior_pid, (int *)(long) from, 0, NULL);
+
+  return !errno;
+}
+
+/* Copy LEN bytes to or from inferior's memory starting at MEMADDR
+   to debugger memory starting at MYADDR.  Copy to inferior if
+   WRITE is nonzero.
+
+   Returns the length copied, which is either the LEN argument or zero.
+   This xfer function does not do partial moves, since child_ops
+   doesn't allow memory operations to cross below us in the target stack
+   anyway.  */
+
+int
+child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
+		   int write, struct target_ops *target)
+{
+  /* Round starting address down to 32-bit word boundary. */
+  int mask = sizeof (int) - 1;
+  CORE_ADDR addr = memaddr & ~(CORE_ADDR)mask;
+
+  /* Round ending address up to 32-bit word boundary. */
+  int count = ((memaddr + len - addr + mask) & ~(CORE_ADDR)mask)
+    / sizeof (int);
+
+  /* Allocate word transfer buffer. */
+  int *buf = (int *) alloca (count * sizeof (int));
+
+  int arch64 = ARCH64 ();
+  int i;
+
+  if (!write)
+    {
+      /* Retrieve memory a word at a time. */
+      for (i = 0; i < count; i++, addr += sizeof (int))
+	{
+	  if (!read_word (addr, buf + i, arch64))
+	    return 0;
+	  QUIT;
+	}
+
+      /* Copy memory to supplied buffer. */
+      addr -= count * sizeof (int);
+      memcpy (myaddr, (char *)buf + (memaddr - addr), len);
+    }
+  else
+    {
+      /* Fetch leading memory needed for alignment. */
+      if (addr < memaddr)
+	if (!read_word (addr, buf, arch64))
+	  return 0;
+
+      /* Fetch trailing memory needed for alignment. */
+      if (addr + count * sizeof (int) > memaddr + len)
+	if (!read_word (addr, buf + count - 1, arch64))
+	  return 0;
+
+      /* Copy supplied data into memory buffer. */
+      memcpy ((char *)buf + (memaddr - addr), myaddr, len);
+
+      /* Store memory one word at a time. */
+      for (i = 0, errno = 0; i < count; i++, addr += sizeof (int))
+	{
+	  if (arch64)
+	    ptrace64 (PT_WRITE_D, inferior_pid, addr, buf[i], NULL);
+	  else
+	    ptrace32 (PT_WRITE_D, inferior_pid, (int *)(long) addr,
+		      buf[i], NULL);
+
+	  if (errno)
+	    return 0;
+	  QUIT;
+	}
+    }
+
+  return len;
+}
+
 /* Execute one dummy breakpoint instruction.  This way we give the kernel
    a chance to do some housekeeping and update inferior's internal data,
    including u_area. */
 
 static void
-exec_one_dummy_insn ()
+exec_one_dummy_insn (void)
 {
 #define	DUMMY_INSN_ADDR	(TEXT_SEGMENT_BASE)+0x200
 
   char shadow_contents[BREAKPOINT_MAX];		/* Stash old bkpt addr contents */
-  int status, pid;
+  int ret, status, pid;
   CORE_ADDR prev_pc;
 
   /* We plant one dummy breakpoint into DUMMY_INSN_ADDR address. We
@@ -264,8 +471,6 @@ exec_one_dummy_insn ()
 
   target_insert_breakpoint (DUMMY_INSN_ADDR, shadow_contents);
 
-  errno = 0;
-
   /* You might think this could be done with a single ptrace call, and
      you'd be correct for just about every platform I've ever worked
      on.  However, rs6000-ibm-aix4.1.3 seems to have screwed this up --
@@ -273,9 +478,12 @@ exec_one_dummy_insn ()
      powerpc-ibm-aix4.1.3 works correctly).  */
   prev_pc = read_pc ();
   write_pc (DUMMY_INSN_ADDR);
-  ptrace (PT_CONTINUE, inferior_pid, (PTRACE_ARG3_TYPE) 1, 0, 0);
+  if (ARCH64 ())
+    ret = ptrace64 (PT_CONTINUE, inferior_pid, 1, 0, NULL);
+  else
+    ret = ptrace32 (PT_CONTINUE, inferior_pid, (int *)1, 0, NULL);
 
-  if (errno)
+  if (ret != 0)
     perror ("pt_continue");
 
   do
@@ -288,45 +496,100 @@ exec_one_dummy_insn ()
   target_remove_breakpoint (DUMMY_INSN_ADDR, shadow_contents);
 }
 
-static void
-fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-     CORE_ADDR reg_addr;	/* Unused in this version */
-{
-  /* fetch GPRs and special registers from the first register section
-     in core bfd. */
-  if (which == 0)
-    {
-      /* copy GPRs first. */
-      memcpy (registers, core_reg_sect, 32 * 4);
+/* Fetch registers from the register section in core bfd. */
 
-      /* gdb's internal register template and bfd's register section layout
-         should share a common include file. FIXMEmgo */
-      /* then comes special registes. They are supposed to be in the same
-         order in gdb template and bfd `.reg' section. */
-      core_reg_sect += (32 * 4);
-      memcpy (&registers[REGISTER_BYTE (FIRST_UISA_SP_REGNUM)],
-	      core_reg_sect,
-	      (LAST_UISA_SP_REGNUM - FIRST_UISA_SP_REGNUM + 1) * 4);
+static void
+fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
+		      int which, CORE_ADDR reg_addr)
+{
+  CoreRegs *regs;
+  double *fprs;
+  int arch64, i, size;
+  void *gprs, *sprs[7];
+
+  if (which != 0)
+    {
+      fprintf_unfiltered
+	(gdb_stderr,
+	 "Gdb error: unknown parameter to fetch_core_registers().\n");
+      return;
     }
 
-  /* fetch floating point registers from register section 2 in core bfd. */
-  else if (which == 2)
-    memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], core_reg_sect, 32 * 8);
+  arch64 = ARCH64 ();
+  regs = (CoreRegs *) core_reg_sect;
 
+  /* Retrieve register pointers. */
+
+  if (arch64)
+    {
+      gprs = regs->r64.gpr;
+      fprs = regs->r64.fpr;
+      sprs[0] = &regs->r64.iar;
+      sprs[1] = &regs->r64.msr;
+      sprs[2] = &regs->r64.cr;
+      sprs[3] = &regs->r64.lr;
+      sprs[4] = &regs->r64.ctr;
+      sprs[5] = &regs->r64.xer;
+    }
   else
-    fprintf_unfiltered
-      (gdb_stderr,
-       "Gdb error: unknown parameter to fetch_core_registers().\n");
+    {
+      gprs = regs->r32.gpr;
+      fprs = regs->r32.fpr;
+      sprs[0] = &regs->r32.iar;
+      sprs[1] = &regs->r32.msr;
+      sprs[2] = &regs->r32.cr;
+      sprs[3] = &regs->r32.lr;
+      sprs[4] = &regs->r32.ctr;
+      sprs[5] = &regs->r32.xer;
+      sprs[6] = &regs->r32.mq;
+    }
+
+  /* Copy from pointers to registers[]. */
+
+  memcpy (registers, gprs, 32 * (arch64 ? 8 : 4));
+  memcpy (registers + REGISTER_BYTE (FP0_REGNUM), fprs, 32 * 8);
+  for (i = FIRST_UISA_SP_REGNUM; i <= LAST_UISA_SP_REGNUM; i++)
+    {
+      size = REGISTER_RAW_SIZE (i);
+      if (size)
+	memcpy (registers + REGISTER_BYTE (i),
+		sprs[i - FIRST_UISA_SP_REGNUM], size);
+    }
 }
 
+
+/* Copy information about text and data sections from LDI to VP for a 64-bit
+   process if ARCH64 and for a 32-bit process otherwise. */
+
+static void
+vmap_secs (struct vmap *vp, LdInfo *ldi, int arch64)
+{
+  if (arch64)
+    {
+      vp->tstart = (CORE_ADDR) ldi->l64.ldinfo_textorg;
+      vp->tend = vp->tstart + ldi->l64.ldinfo_textsize;
+      vp->dstart = (CORE_ADDR) ldi->l64.ldinfo_dataorg;
+      vp->dend = vp->dstart + ldi->l64.ldinfo_datasize;
+    }
+  else
+    {
+      vp->tstart = (unsigned long) ldi->l32.ldinfo_textorg;
+      vp->tend = vp->tstart + ldi->l32.ldinfo_textsize;
+      vp->dstart = (unsigned long) ldi->l32.ldinfo_dataorg;
+      vp->dend = vp->dstart + ldi->l32.ldinfo_datasize;
+    }
+
+  /* The run time loader maps the file header in addition to the text
+     section and returns a pointer to the header in ldinfo_textorg.
+     Adjust the text start address to point to the real start address
+     of the text section.  */
+  vp->tstart += vp->toffs;
+}
+
 /* handle symbol translation on vmapping */
 
 static void
-vmap_symtab (vp)
-     register struct vmap *vp;
+vmap_symtab (struct vmap *vp)
 {
   register struct objfile *objfile;
   struct section_offsets *new_offsets;
@@ -360,8 +623,7 @@ vmap_symtab (vp)
 /* Add symbols for an objfile.  */
 
 static int
-objfile_symbol_add (arg)
-     char *arg;
+objfile_symbol_add (void *arg)
 {
   struct objfile *obj = (struct objfile *) arg;
 
@@ -378,28 +640,31 @@ objfile_symbol_add (arg)
    Return the vmap new entry.  */
 
 static struct vmap *
-add_vmap (ldi)
-     register struct ld_info *ldi;
+add_vmap (LdInfo *ldi)
 {
   bfd *abfd, *last;
-  register char *mem, *objname;
+  register char *mem, *objname, *filename;
   struct objfile *obj;
   struct vmap *vp;
+  int fd;
+  ARCH64_DECL (arch64);
 
   /* This ldi structure was allocated using alloca() in 
      xcoff_relocate_symtab(). Now we need to have persistent object 
      and member names, so we should save them. */
 
-  mem = ldi->ldinfo_filename + strlen (ldi->ldinfo_filename) + 1;
+  filename = LDI_FILENAME (ldi, arch64);
+  mem = filename + strlen (filename) + 1;
   mem = savestring (mem, strlen (mem));
-  objname = savestring (ldi->ldinfo_filename, strlen (ldi->ldinfo_filename));
+  objname = savestring (filename, strlen (filename));
 
-  if (ldi->ldinfo_fd < 0)
+  fd = LDI_FD (ldi, arch64);
+  if (fd < 0)
     /* Note that this opens it once for every member; a possible
        enhancement would be to only open it once for every object.  */
     abfd = bfd_openr (objname, gnutarget);
   else
-    abfd = bfd_fdopenr (objname, gnutarget, ldi->ldinfo_fd);
+    abfd = bfd_fdopenr (objname, gnutarget, fd);
   if (!abfd)
     error ("Could not open `%s' as an executable file: %s",
 	   objname, bfd_errmsg (bfd_get_error ()));
@@ -445,7 +710,7 @@ add_vmap (ldi)
   vp->objfile = obj;
 
 #ifndef SOLIB_SYMBOLS_MANUAL
-  if (catch_errors (objfile_symbol_add, (char *) obj,
+  if (catch_errors (objfile_symbol_add, obj,
 		    "Error while reading shared library symbols:\n",
 		    RETURN_MASK_ALL))
     {
@@ -461,13 +726,14 @@ add_vmap (ldi)
    Input is ptr to ldinfo() results.  */
 
 static void
-vmap_ldinfo (ldi)
-     register struct ld_info *ldi;
+vmap_ldinfo (LdInfo *ldi)
 {
   struct stat ii, vi;
   register struct vmap *vp;
   int got_one, retried;
   int got_exec_file = 0;
+  uint next;
+  int arch64 = ARCH64 ();
 
   /* For each *ldi, see if we have a corresponding *vp.
      If so, update the mapping, and symbol table.
@@ -475,18 +741,19 @@ vmap_ldinfo (ldi)
 
   do
     {
-      char *name = ldi->ldinfo_filename;
+      char *name = LDI_FILENAME (ldi, arch64);
       char *memb = name + strlen (name) + 1;
+      int fd = LDI_FD (ldi, arch64);
 
       retried = 0;
 
-      if (fstat (ldi->ldinfo_fd, &ii) < 0)
+      if (fstat (fd, &ii) < 0)
 	{
 	  /* The kernel sets ld_info to -1, if the process is still using the
 	     object, and the object is removed. Keep the symbol info for the
 	     removed object and issue a warning.  */
 	  warning ("%s (fd=%d) has disappeared, keeping its symbols",
-		   name, ldi->ldinfo_fd);
+		   name, fd);
 	  continue;
 	}
     retry:
@@ -522,23 +789,13 @@ vmap_ldinfo (ldi)
 	    continue;
 
 	  if (!retried)
-	    close (ldi->ldinfo_fd);
+	    close (fd);
 
 	  ++got_one;
 
 	  /* Found a corresponding VMAP.  Remap!  */
 
-	  /* We can assume pointer == CORE_ADDR, this code is native only.  */
-	  vp->tstart = (CORE_ADDR) ldi->ldinfo_textorg;
-	  vp->tend = vp->tstart + ldi->ldinfo_textsize;
-	  vp->dstart = (CORE_ADDR) ldi->ldinfo_dataorg;
-	  vp->dend = vp->dstart + ldi->ldinfo_datasize;
-
-	  /* The run time loader maps the file header in addition to the text
-	     section and returns a pointer to the header in ldinfo_textorg.
-	     Adjust the text start address to point to the real start address
-	     of the text section.  */
-	  vp->tstart += vp->toffs;
+	  vmap_secs (vp, ldi, arch64);
 
 	  /* The objfile is only NULL for the exec file.  */
 	  if (vp->objfile == NULL)
@@ -558,8 +815,8 @@ vmap_ldinfo (ldi)
 	  goto retry;
 	}
     }
-  while (ldi->ldinfo_next
-	 && (ldi = (void *) (ldi->ldinfo_next + (char *) ldi)));
+  while ((next = LDI_NEXT (ldi, arch64))
+	 && (ldi = (void *) (next + (char *) ldi)));
 
   /* If we don't find the symfile_objfile anywhere in the ldinfo, it
      is unlikely that the symbol file is relocated to the proper
@@ -592,7 +849,7 @@ symbols to the proper address).\n", gdb_stderr);
  */
 
 static void
-vmap_exec ()
+vmap_exec (void)
 {
   static bfd *execbfd;
   int i;
@@ -624,32 +881,68 @@ vmap_exec ()
 	}
     }
 }
+
+/* Set the current architecture from the host running GDB.  Called when
+   starting a child process. */
+
+static void
+set_host_arch (int pid)
+{
+  enum bfd_architecture arch;
+  unsigned long mach;
+  bfd abfd;
+  struct gdbarch_info info;
+
+  if (__power_rs ())
+    {
+      arch = bfd_arch_rs6000;
+      mach = bfd_mach_rs6k;
+    }
+  else
+    {
+      arch = bfd_arch_powerpc;
+      mach = bfd_mach_ppc;
+    }
+  bfd_default_set_arch_mach (&abfd, arch, mach);
+
+  memset (&info, 0, sizeof info);
+  info.bfd_arch_info = bfd_get_arch_info (&abfd);
+
+  gdbarch_update (info);
+}
+
 
 /* xcoff_relocate_symtab -      hook for symbol table relocation.
    also reads shared libraries.. */
 
 void
-xcoff_relocate_symtab (pid)
-     unsigned int pid;
+xcoff_relocate_symtab (unsigned int pid)
 {
   int load_segs = 64; /* number of load segments */
   int rc;
-  struct ld_info *ldi = NULL;
+  LdInfo *ldi = NULL;
+  int arch64 = ARCH64 ();
+  int ldisize = arch64 ? sizeof (ldi->l64) : sizeof (ldi->l32);
+  int size;
 
   do
     {
-      ldi = (void *) xrealloc (ldi, load_segs * sizeof (*ldi));
+      size = load_segs * ldisize;
+      ldi = (void *) xrealloc (ldi, load_segs * size);
 
+#if 0
       /* According to my humble theory, AIX has some timing problems and
          when the user stack grows, kernel doesn't update stack info in time
          and ptrace calls step on user stack. That is why we sleep here a
          little, and give kernel to update its internals. */
-
       usleep (36000);
+#endif
 
-      errno = 0;
-      rc = ptrace (PT_LDINFO, pid, (PTRACE_ARG3_TYPE) ldi,
-                  load_segs * sizeof (*ldi), (int *) ldi);
+      if (arch64)
+	rc = ptrace64 (PT_LDINFO, pid, (unsigned long) ldi, size, NULL);
+      else
+	rc = ptrace32 (PT_LDINFO, pid, (int *) ldi, size, NULL);
+
       if (rc == -1)
         {
           if (errno == ENOMEM)
@@ -673,24 +966,19 @@ xcoff_relocate_symtab (pid)
    from the core file.  */
 
 void
-xcoff_relocate_core (target)
-     struct target_ops *target;
+xcoff_relocate_core (struct target_ops *target)
 {
-/* Offset of member MEMBER in a struct of type TYPE.  */
-#ifndef offsetof
-#define offsetof(TYPE, MEMBER) ((int) &((TYPE *)0)->MEMBER)
-#endif
-
-/* Size of a struct ld_info except for the variable-length filename.  */
-#define LDINFO_SIZE (offsetof (struct ld_info, ldinfo_filename))
-
   sec_ptr ldinfo_sec;
   int offset = 0;
-  struct ld_info *ldip;
+  LdInfo *ldi;
   struct vmap *vp;
+  int arch64 = ARCH64 ();
+
+  /* Size of a struct ld_info except for the variable-length filename. */
+  int nonfilesz = (int)LDI_FILENAME ((LdInfo *)0, arch64);
 
   /* Allocated size of buffer.  */
-  int buffer_size = LDINFO_SIZE;
+  int buffer_size = nonfilesz;
   char *buffer = xmalloc (buffer_size);
   struct cleanup *old = make_cleanup (free_current_contents, &buffer);
 
@@ -716,11 +1004,11 @@ xcoff_relocate_core (target)
 
       /* Read in everything but the name.  */
       if (bfd_get_section_contents (core_bfd, ldinfo_sec, buffer,
-				    offset, LDINFO_SIZE) == 0)
+				    offset, nonfilesz) == 0)
 	goto bfd_err;
 
       /* Now the name.  */
-      i = LDINFO_SIZE;
+      i = nonfilesz;
       do
 	{
 	  if (i == buffer_size)
@@ -736,30 +1024,22 @@ xcoff_relocate_core (target)
 	}
       while (names_found < 2);
 
-      ldip = (struct ld_info *) buffer;
+      ldi = (LdInfo *) buffer;
 
       /* Can't use a file descriptor from the core file; need to open it.  */
-      ldip->ldinfo_fd = -1;
+      if (arch64)
+	ldi->l64.ldinfo_fd = -1;
+      else
+	ldi->l32.ldinfo_fd = -1;
 
       /* The first ldinfo is for the exec file, allocated elsewhere.  */
       if (offset == 0)
 	vp = vmap;
       else
-	vp = add_vmap (ldip);
+	vp = add_vmap (ldi);
 
-      offset += ldip->ldinfo_next;
-
-      /* We can assume pointer == CORE_ADDR, this code is native only.  */
-      vp->tstart = (CORE_ADDR) ldip->ldinfo_textorg;
-      vp->tend = vp->tstart + ldip->ldinfo_textsize;
-      vp->dstart = (CORE_ADDR) ldip->ldinfo_dataorg;
-      vp->dend = vp->dstart + ldip->ldinfo_datasize;
-
-      /* The run time loader maps the file header in addition to the text
-         section and returns a pointer to the header in ldinfo_textorg.
-         Adjust the text start address to point to the real start address
-         of the text section.  */
-      vp->tstart += vp->toffs;
+      offset += LDI_NEXT (ldi, arch64);
+      vmap_secs (vp, ldi, arch64);
 
       /* Unless this is the exec file,
          add our sections to the section table for the core target.  */
@@ -784,14 +1064,14 @@ xcoff_relocate_core (target)
 
       vmap_symtab (vp);
     }
-  while (ldip->ldinfo_next != 0);
+  while (LDI_NEXT (ldi, arch64) != 0);
   vmap_exec ();
   breakpoint_re_set ();
   do_cleanups (old);
 }
 
 int
-kernel_u_size ()
+kernel_u_size (void)
 {
   return (sizeof (struct user));
 }
@@ -802,10 +1082,10 @@ kernel_u_size ()
    and add the current load address of the data segment from the vmap.  */
 
 static CORE_ADDR
-find_toc_address (pc)
-     CORE_ADDR pc;
+find_toc_address (CORE_ADDR pc)
 {
   struct vmap *vp;
+  extern CORE_ADDR get_toc_offset (struct objfile *);	/* xcoffread.c */
 
   for (vp = vmap; vp; vp = vp->nxt)
     {
@@ -824,7 +1104,7 @@ find_toc_address (pc)
 
 static struct core_fns rs6000_core_fns =
 {
-  bfd_target_coff_flavour,		/* core_flavour */
+  bfd_target_xcoff_flavour,		/* core_flavour */
   default_check_format,			/* check_format */
   default_core_sniffer,			/* core_sniffer */
   fetch_core_registers,			/* core_read_registers */
@@ -832,15 +1112,19 @@ static struct core_fns rs6000_core_fns =
 };
 
 void
-_initialize_core_rs6000 ()
+_initialize_core_rs6000 (void)
 {
   /* Initialize hook in rs6000-tdep.c for determining the TOC address when
      calling functions in the inferior.  */
-  find_toc_address_hook = &find_toc_address;
+  rs6000_find_toc_address_hook = find_toc_address;
+
+  /* Initialize hook in rs6000-tdep.c to set the current architecture when
+     starting a child process. */
+  rs6000_set_host_arch_hook = set_host_arch;
 
   /* For native configurations, where this module is included, inform
      the xcoffsolib module where it can find the function for symbol table
      relocation at runtime. */
-  xcoff_relocate_symtab_hook = &xcoff_relocate_symtab;
+  xcoff_relocate_symtab_hook = xcoff_relocate_symtab;
   add_core_fns (&rs6000_core_fns);
 }

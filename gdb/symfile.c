@@ -1143,11 +1143,6 @@ find_sym_fns (objfile)
   enum bfd_flavour our_flavour = bfd_get_flavour (objfile->obfd);
   char *our_target = bfd_get_target (objfile->obfd);
 
-  /* Special kludge for RS/6000 and PowerMac.  See xcoffread.c.  */
-  if (STREQ (our_target, "aixcoff-rs6000") ||
-      STREQ (our_target, "xcoff-powermac"))
-    our_flavour = (enum bfd_flavour) -1;
-
   /* Special kludge for apollo.  See dstread.c.  */
   if (STREQN (our_target, "apollo", 6))
     our_flavour = (enum bfd_flavour) -2;
@@ -1492,51 +1487,54 @@ add_symbol_file_command (args, from_tty)
 	  filename = tilde_expand (arg);
 	  my_cleanups = make_cleanup (free, filename);
 	}
-      else if (argcnt == 1)
-	{
-	  /* The second argument is always the text address at which
-	     to load the program. */
-	  sect_opts[section_index].name = ".text";
-	  sect_opts[section_index].value = arg;
-	  section_index++;		  
-	}
       else
-	{
-	  /* It's an option (starting with '-') or it's an argument
-	     to an option */
+	if (argcnt == 1)
+	  {
+	    /* The second argument is always the text address at which
+               to load the program. */
+	    sect_opts[section_index].name = ".text";
+	    sect_opts[section_index].value = arg;
+	    section_index++;		  
+	  }
+	else
+	  {
+	    /* It's an option (starting with '-') or it's an argument
+	       to an option */
 
-	  if (*arg == '-')
-	    {
-	      if (strcmp (arg, "-mapped") == 0)
-		flags |= OBJF_MAPPED;
-	      else if (strcmp (arg, "-readnow") == 0)
-		flags |= OBJF_READNOW;
-	      else if (strcmp (arg, "-s") == 0)
-		{
-		  if (section_index >= SECT_OFF_MAX)
-		    error ("Too many sections specified.");
-		  expecting_sec_name = 1;
-		  expecting_sec_addr = 1;
-		}
-	    }
-	  else
-	    {
-	      if (expecting_sec_name)
-		{
-		  sect_opts[section_index].name = arg;
-		  expecting_sec_name = 0;
-		}
-	      else
-		if (expecting_sec_addr)
+	    if (*arg == '-')
+	      {
+		if (strcmp (arg, "-mapped") == 0)
+		  flags |= OBJF_MAPPED;
+		else 
+		  if (strcmp (arg, "-readnow") == 0)
+		    flags |= OBJF_READNOW;
+		  else 
+		    if (strcmp (arg, "-s") == 0)
+		      {
+			if (section_index >= SECT_OFF_MAX)
+			  error ("Too many sections specified.");
+			expecting_sec_name = 1;
+			expecting_sec_addr = 1;
+		      }
+	      }
+	    else
+	      {
+		if (expecting_sec_name)
 		  {
-		    sect_opts[section_index].value = arg;
-		    expecting_sec_addr = 0;
-		    section_index++;		  
+		    sect_opts[section_index].name = arg;
+		    expecting_sec_name = 0;
 		  }
 		else
-		  error ("USAGE: add-symbol-file <filename> <textaddress> [-mapped] [-readnow] [-s <secname> <addr>]*");
-	    }
-	}
+		  if (expecting_sec_addr)
+		    {
+		      sect_opts[section_index].value = arg;
+		      expecting_sec_addr = 0;
+		      section_index++;		  
+		    }
+		  else
+		    error ("USAGE: add-symbol-file <filename> <textaddress> [-mapped] [-readnow] [-s <secname> <addr>]*");
+	      }
+	  }
       argcnt++;
     }
 

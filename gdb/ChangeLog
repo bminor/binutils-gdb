@@ -1,3 +1,69 @@
+2000-06-16  Nicholas Duffek  <nsd@redhat.com>
+
+	* rs6000-tdep.c: Changes throughout for multi-arch 64-bit
+	support.  Incorporate most of tm-rs6000.h.
+	(find_toc_address_hook): Rename to rs6000_find_toc_address_hook.
+	(rs6000_set_host_arch_hook): Declare.
+	(read_memory_addr): Define.
+	(pop_frame): Rename to rs6000_pop_frame.
+	(rs6000_pop_frame, rs6000_fix_call_dummy, rs6000_push_arguments,
+	rs6000_frame_saved_pc, rs6000_frame_chain): Remove non-generic
+	dummy frame handling.
+	(branch_dest, rs6000_pop_frame, rs6000_skip_trampoline_code,
+	rs6000_frame_saved_pc, frame_get_saved_regs,
+	frame_initial_stack_address, rs6000_frame_chain,
+	rs6000_convert_from_func_ptr_addr): Call read_memory_addr instead
+	of read_memory_integer.
+	(branch_dest, rs6000_pop_frame, rs6000_push_arguments,
+	rs6000_skip_trampoline_code, rs6000_frame_saved_pc,
+	frame_get_saved_regs, frame_initial_stack_address,
+	rs6000_frame_chain): Replace 4 with TDEP->wordsize.
+	(skip_prologue): Recognize some 64-bit stack adjustments.
+	(push_dummy_frame, pop_dummy_frame, set_processor,
+	show_processor): Delete.
+	(frame_get_saved_regs): Manipulate saved register addresses using
+	CORE_ADDR instead of int.
+	(rs6000_create_inferior): New function.
+	(register_names_*[]): Change to struct reg registers_*[].
+	(variants[]): Assimilate into multi-arch approach.
+	(register_names_*[], variants[]): Refer to pre-PowerPC
+	architectures as POWER instead of RS6000.
+	* rs6000-nat.c: Ubiquitous changes for 64-bit support.
+	(vmap_secs, xcoff_relocate_symtab): Cast addresses
+	to unsigned long to avoid sign-extension errors.
+	(set_host_arch): New function.
+	(xcoff_relocate_symtab): Try disabling usleep(36000) workaround.
+	(rs6000_core_fns): Use new bfd_target_xcoff_flavour.
+	(_initialize_core_rs6000): Initialize rs6000_set_host_arch_hook.
+	* symfile.c (find_sym_fns): Remove special xcoff kludge.
+	* xcoffread.c (secnum_to_bfd_section): Initialize args.objfile.
+	(process_linenos): Query line struct size from coff
+	backend instead of using compile-time constant.
+	(enter_line_range): Likewise.
+	(read_xcoff_symtab): Pass "XCOFF64" instead of "XCOFF" to
+	record_debugformat() if appropriate.
+	(process_xcoff_symbol): Access symbol addresses using
+	SYMBOL_VALUE_ADDRESS instead of SYMBOL_VALUE.
+	(read_symbol_lineno): Retrieve XCOFF64 symbol names from strtbl.
+	(scan_xcoff_symtab): Likewise.  Query syment struct size from
+	coff backend instead of using compile-time constant.
+	(xcoff_sym_fns): Set flavour to bfd_target_xcoff_flavour.
+	* Makefile.in (INTERNAL_LDFLAGS): Add $(MH_LDFLAGS) to list of flags
+	that this Makefile variable get set to.  (From Kevin Buettner.)
+	* config/powerpc/aix.mh (MH_LDFLAGS): Add linker flags so that
+	the TOC doesn't overflow.  (From Kevin Buettner.)
+	* config/powerpc/tm-ppc-aix.h: Move config decisions to
+	multi-arched rs6000-tdep.c.
+	* config/rs6000/tm-rs6000.h: Likewise.
+	(GDB_MULTI_ARCH): Define.
+	(skip_trampoline_code): Rename to rs6000_skip_trampoline_code.
+	(is_magic_function_pointer): Replace with
+	rs6000_convert_from_func_ptr_addr.
+	(TARGET_CREATE_INFERIOR_HOOK): Define.
+	(find_toc_address_hook): Rename to rs6000_find_toc_address_hook.
+	(rs6000_set_host_arch_hook): Declare.
+	* config/rs6000/nm-rs6000.h (CHILD_XFER_MEMORY): Define.
+
 2000-06-15  Kevin Buettner  <kevinb@redhat.com>
 
 	* v850ice.c: Eliminate use of PARAMS from this file.

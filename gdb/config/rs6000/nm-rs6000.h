@@ -29,6 +29,10 @@
 
 #define FETCH_INFERIOR_REGISTERS
 
+/* Override child_xfer_memory in infptrace.c. */
+
+#define CHILD_XFER_MEMORY
+
 /* When a child process is just starting, we sneak in and relocate
    the symbol table (and other stuff) after the dynamic linker has
    figured out where they go.  */
