@@ -1,3 +1,11 @@
+Wed Jun 29 00:26:17 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* dbxread.c (dbx_symfile_read):  Unconditionally add dynamic
+	symbols for all symbol files.  Makes skipping over the
+	trampoline code work when stepping from a function in a shared
+	library into a function in a different shared library.
+	(read_dbx_dynamic_symtab):  Relocate mst_solib_trampoline address.
+
 Tue Jun 28 15:28:01 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* dbxread.c, partial-stab.h (near N_SO):  SO stabs with blank
