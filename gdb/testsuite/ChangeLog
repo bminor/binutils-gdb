@@ -1,3 +1,18 @@
+2004-09-24  Andrew Cagney  <cagney@redhat.com>
+	    David Anderson <anderson@redhat.com>
+
+	* gdb.base/bigcore.exp (extract_heap): If the expect "file size"
+	command fails, assume things will work.
+	* gdb.base/bigcore.c: Include <sys/stat.h> and <fcntl.h>.
+	(_GNU_SOURCE): Define.
+	(print_unsigned, print_hex): Change parameter to "long long".
+	(print_byte_count): New function, use to print byte counts.
+	(large_off_t, large_lseek, O_LARGEFILE): Define dependant on
+	O_LARGEFILE.
+	(main): Compute an upper bound on a corefile in max_core_size.
+	Limit memory chunk size to max_core_size.  Limit total memory
+	allocated to max_core_size.
+
 2004-09-23  Andrew Cagney  <cagney@gnu.org>
 
 	* gdb.base/bigcore.exp: Replace the code that creates a corefile

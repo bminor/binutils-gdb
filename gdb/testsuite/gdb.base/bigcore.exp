@@ -169,16 +169,24 @@ if { $file == "" } {
 # necessarily the "good" one.  And we must use GDB for the comparison,
 # similarly.
 
-set core_ok 0
 if {[catch {file size $corefile} core_size] == 0} {
+    set core_ok 0
     gdb_test_multiple "print bytes_allocated < $core_size" "check core size" {
 	-re " = 1\r\n$gdb_prompt $" {
 	    pass "check core size"
 	    set core_ok 1
 	}
     }
+} { 
+    # Probably failed due to the TCL build having problems with very
+    # large values.  Since GDB uses a 64-bit off_t (when possible) it
+    # shouldn't have this problem.  Assume that things are going to
+    # work.  Without this assumption the test is skiped on systems
+    # (such as i386 GNU/Linux with patched kernel) which do pass.
+    pass "check core size"
+    set core_ok 1
 }
-if {$core_ok == 0} {
+if {! $core_ok} {
     untested "check core size (system does not support large corefiles)"
     return 0
 }
