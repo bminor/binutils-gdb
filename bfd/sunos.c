@@ -1731,6 +1731,10 @@ sunos_write_dynamic_symbol (output_bfd, info, harg)
       s = bfd_get_section_by_name (sunos_hash_table (info)->dynobj, ".dynrel");
       BFD_ASSERT (s != NULL);
 
+      r_address = (h->root.root.u.def.section->output_section->vma
+		   + h->root.root.u.def.section->output_offset
+		   + h->root.root.u.def.value);
+
       switch (bfd_get_arch (output_bfd))
 	{
 	case bfd_arch_sparc:
@@ -1748,6 +1752,7 @@ sunos_write_dynamic_symbol (output_bfd, info, harg)
 	  bfd_put_16 (output_bfd, M68K_PLT_ENTRY_WORD0, p);
 	  bfd_put_32 (output_bfd, (- (h->root.root.u.def.value + 2)), p + 2);
 	  bfd_put_16 (output_bfd, s->reloc_count, p + 6);
+	  r_address += 2;
 	  break;
 
 	default:
@@ -1756,9 +1761,6 @@ sunos_write_dynamic_symbol (output_bfd, info, harg)
 
       /* We also need to add a jump table reloc.  */
       p = s->contents + s->reloc_count * obj_reloc_entry_size (output_bfd);
-      r_address = (h->root.root.u.def.section->output_section->vma
-		   + h->root.root.u.def.section->output_offset
-		   + h->root.root.u.def.value);
       if (obj_reloc_entry_size (output_bfd) == RELOC_STD_SIZE)
 	{
 	  struct reloc_std_external *srel;
