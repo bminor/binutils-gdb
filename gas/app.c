@@ -564,7 +564,14 @@ recycle:
       break;
 
     case LEX_IS_STRINGQUOTE:
-      if (state == 9 || state == 10)
+      if (state == 10)
+	{
+	  /* Preserve the whitespace in foo "bar" */
+	  (*unget) (ch);
+	  state = 3;
+	  return ' ';
+	}
+      else if (state == 9)
 	old_state = 3;
       else
 	old_state = state;
@@ -572,6 +579,13 @@ recycle:
       return ch;
 #ifndef IEEE_STYLE
     case LEX_IS_ONECHAR_QUOTE:
+      if (state == 10)
+	{
+	  /* Preserve the whitespace in foo 'b' */
+	  (*unget) (ch);
+	  state = 3;
+	  return ' ';
+	}
       ch = GET ();
       if (ch == EOF)
 	{
@@ -599,7 +613,7 @@ recycle:
 	{
 	  return out_buf[0];
 	}
-      if (state == 9 || state == 10)
+      if (state == 9)
 	old_state = 3;
       else
 	old_state = state;
