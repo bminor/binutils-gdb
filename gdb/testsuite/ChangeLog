@@ -1,5 +1,17 @@
 2004-07-13  Andrew Cagney  <cagney@gnu.org>
 
+	* gdb.gdb/observer.exp: Update copyright.
+	(setup_test): Use gdb_test_multiple.
+	(attach_first_observer, attach_second_observer)
+	(attach_third_observer, detach_first_observer)
+	(detach_second_observer, detach_third_observer)
+	(reset_counters, check_counters): Make $message a prefix.
+	(test_normal_stop_notifications): Add "args" parameter - a list of
+	init functions to be called.  Make $message a prefix,
+	(test_observer_normal_stop): Change the message prefixes so that
+	they are unique, pass the attach / detach procedures to
+	test_normal_stop_notifications.
+
 	* gdb.base/signull.exp (test_segv): Prefix all tests with
 	"${name}".  Clean up test messages.
 
