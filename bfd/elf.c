@@ -405,10 +405,12 @@ bfd_elf_get_elf_syms (bfd *ibfd,
 
 /* Look up a symbol name.  */
 const char *
-bfd_elf_sym_name (bfd *abfd, Elf_Internal_Sym *isym)
+bfd_elf_sym_name (bfd *abfd,
+		  Elf_Internal_Shdr *symtab_hdr,
+		  Elf_Internal_Sym *isym)
 {
   unsigned int iname = isym->st_name;
-  unsigned int shindex = elf_tdata (abfd)->symtab_hdr.sh_link;
+  unsigned int shindex = symtab_hdr->sh_link;
   if (iname == 0 && ELF_ST_TYPE (isym->st_info) == STT_SECTION
       /* Check for a bogus st_shndx to avoid crashing.  */
       && isym->st_shndx < elf_numsections (abfd)
@@ -451,7 +453,7 @@ group_signature (bfd *abfd, Elf_Internal_Shdr *ghdr)
 			    &isym, esym, &eshndx) == NULL)
     return NULL;
 
-  return bfd_elf_sym_name (abfd, &isym);
+  return bfd_elf_sym_name (abfd, hdr, &isym);
 }
 
 /* Set next_in_group list pointer, and group name for NEWSECT.  */

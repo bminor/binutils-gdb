@@ -1,6 +1,7 @@
 2004-12-10  Alan Modra  <amodra@bigpond.net.au>
 
-	* elf.c (bfd_elf_sym_name): Rename from bfd_elf_local_sym_name.
+	* elf.c (bfd_elf_sym_name): Rename from bfd_elf_local_sym_name and
+	add symtab_hdr param.
 	(group_signature): Update calls.
 	* elf-bfd.h (bfd_elf_sym_name): Update.
 	* elf32-ppc.c (ppc_elf_relocate_section): Update.

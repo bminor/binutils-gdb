@@ -4694,7 +4694,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	{
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
-	  sym_name = bfd_elf_sym_name (input_bfd, sym);
+	  sym_name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym);
 
 	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 	}
