@@ -1,3 +1,8 @@
+2002-12-24  David Carlton  <carlton@math.stanford.edu>
+
+	* config/sparc/tm-sparc.h: Delete duplicate definition of
+	DEPRECATED_PC_IN_CALL_DUMMY.
+
 2002-12-24  Kevin Buettner  <kevinb@redhat.com>
 
 	* Makefile.in (mips-linux-tdep.o): Add $(mips_tdep_h) and
