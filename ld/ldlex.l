@@ -429,7 +429,7 @@ lex_push_file (file, name)
 {
   if (include_stack_ptr >= MAX_INCLUDE_DEPTH) 
   {
-    einfo("%F:includes nested too deeply");
+    einfo("%F:includes nested too deeply\n");
   }
   file_name_stack[include_stack_ptr] = name;
   include_stack[include_stack_ptr] = YY_CURRENT_BUFFER;
@@ -489,7 +489,7 @@ lex_redirect (string)
   yy_init = 0  ;  
   if (include_stack_ptr >= MAX_INCLUDE_DEPTH) 
   {
-    einfo("%F: macros nested too deeply");
+    einfo("%F: macros nested too deeply\n");
   }
   file_name_stack[include_stack_ptr] = "redirect";
   include_stack[include_stack_ptr] = YY_CURRENT_BUFFER;
@@ -592,7 +592,7 @@ comment()
 
     if ( c == EOF )
     {
-      einfo( "%F%P :EOF in comment");
+      einfo( "%F%P :EOF in comment\n");
       break;
     }
   }

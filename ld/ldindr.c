@@ -101,7 +101,7 @@ add_indirect (ptr)
 
   if (lgs->sdefs_chain && lgs->sdefs_chain[0]) 
   {
-    einfo("indirect symbol already has definition %s",   lgs->sdefs_chain[0]);
+    einfo("indirect symbol already has definition %s\n",   lgs->sdefs_chain[0]);
   }
   new->scoms_chain = move_it(new->scoms_chain, lgs->scoms_chain);
   lgs->scoms_chain = 0;

@@ -1,3 +1,9 @@
+Wed Aug  4 17:52:32 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* ldlex.l (comment): Add missing newline in message.
+	* ldindr.c (add_indirect): Ditto.
+	* ldexp.c (exp_fold_tree): Ditto.
+
 Tue Aug  3 10:57:41 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ldgram.y, ldlex.l, mri.c, ldwrite.c: Change multiple commons
