@@ -35,10 +35,10 @@
   - labels are wrong if automatic alignment is introduced
     (e.g., checkout the second real10 definition in test-data.s)
   - DV-related stuff:
-        <reg>.safe_across_calls and any other DV-related directives I don't
-          have documentation for.
-        verify mod-sched-brs reads/writes are checked/marked (and other
-        notes)
+	<reg>.safe_across_calls and any other DV-related directives I don't
+	  have documentation for.
+	verify mod-sched-brs reads/writes are checked/marked (and other
+	notes)
 
  */
 
@@ -110,7 +110,7 @@ enum reg_symbol
     IND_PMC,
     IND_PMD,
     IND_RR,
-    /* The following pseudo-registers are used for unwind directives only: */
+    /* The following pseudo-registers are used for unwind directives only:  */
     REG_PSP,
     REG_PRIUNAT,
     REG_NUM
@@ -129,10 +129,10 @@ enum dynreg_type
    track of the list of labels that appear in front of each
    instruction.  */
 struct label_fix
-  {
-    struct label_fix *next;
-    struct symbol *sym;
-  };
+{
+  struct label_fix *next;
+  struct symbol *sym;
+};
 
 extern int target_big_endian;
 
@@ -154,7 +154,7 @@ const char EXP_CHARS[] = "eE";
    as in 0d1.0.  */
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
-/* ia64-specific option processing: */
+/* ia64-specific option processing:  */
 
 const char *md_shortopts = "M:N:x::";
 
@@ -248,13 +248,13 @@ static struct
 
     int path;                       /* number of alt. entry points seen */
     const char **entry_labels;      /* labels of all alternate paths in
-                                       the current DV-checking block.  */
+				       the current DV-checking block.  */
     int maxpaths;                   /* size currently allocated for
-                                       entry_labels */
+				       entry_labels */
   }
 md;
 
-/* application registers: */
+/* application registers:  */
 
 #define AR_K0		0
 #define AR_K7		7
@@ -306,7 +306,7 @@ ar[] =
 #define CR_LRR0         80
 #define CR_LRR1         81
 
-/* control registers: */
+/* control registers:  */
 static const struct
   {
     const char *name;
@@ -355,7 +355,7 @@ static const struct const_desc
   }
 const_bits[] =
   {
-    /* PSR constant masks: */
+    /* PSR constant masks:  */
 
     /* 0: reserved */
     {"psr.be",	((valueT) 1) << 1},
@@ -393,7 +393,7 @@ const_bits[] =
     {"psr.bn",	((valueT) 1) << 44},
   };
 
-/* indirect register-sets/memory: */
+/* indirect register-sets/memory:  */
 
 static const struct
   {
@@ -438,7 +438,7 @@ static struct
   }
 pseudo_func[] =
   {
-    /* reloc pseudo functions (these must come first!): */
+    /* reloc pseudo functions (these must come first!):  */
     { "fptr",	PSEUDO_FUNC_RELOC },
     { "gprel",	PSEUDO_FUNC_RELOC },
     { "ltoff",	PSEUDO_FUNC_RELOC },
@@ -449,14 +449,14 @@ pseudo_func[] =
     { "ltv",	PSEUDO_FUNC_RELOC },
     { 0, },		/* placeholder for FUNC_LT_FPTR_RELATIVE */
 
-    /* mbtype4 constants: */
+    /* mbtype4 constants:  */
     { "alt",	PSEUDO_FUNC_CONST, { 0xa } },
     { "brcst",	PSEUDO_FUNC_CONST, { 0x0 } },
     { "mix",	PSEUDO_FUNC_CONST, { 0x8 } },
     { "rev",	PSEUDO_FUNC_CONST, { 0xb } },
     { "shuf",	PSEUDO_FUNC_CONST, { 0x9 } },
 
-    /* fclass constants: */
+    /* fclass constants:  */
     { "nat",	PSEUDO_FUNC_CONST, { 0x100 } },
     { "qnan",	PSEUDO_FUNC_CONST, { 0x080 } },
     { "snan",	PSEUDO_FUNC_CONST, { 0x040 } },
@@ -469,16 +469,16 @@ pseudo_func[] =
 
     { "natval",	PSEUDO_FUNC_CONST, { 0x100 } }, /* old usage */
 
-    /* unwind-related constants: */
+    /* unwind-related constants:  */
     { "svr4",	PSEUDO_FUNC_CONST, { 0 } },
     { "hpux",	PSEUDO_FUNC_CONST, { 1 } },
     { "nt",	PSEUDO_FUNC_CONST, { 2 } },
 
-    /* unwind-related registers: */
+    /* unwind-related registers:  */
     { "priunat",PSEUDO_FUNC_REG, { REG_PRIUNAT } }
   };
 
-/* 41-bit nop opcodes (one per unit): */
+/* 41-bit nop opcodes (one per unit):  */
 static const bfd_vma nop[IA64_NUM_UNITS] =
   {
     0x0000000000LL,	/* NIL => break 0 */
@@ -527,7 +527,7 @@ static int regdepslen = 0;
 static int regdepstotlen = 0;
 static const char *dv_mode[] = { "RAW", "WAW", "WAR" };
 static const char *dv_sem[] = { "none", "implied", "impliedf",
-                                "data", "instr", "specific", "other" };
+				"data", "instr", "specific", "other" };
 
 /* Current state of PR mutexation */
 static struct qpmutex {
@@ -592,7 +592,7 @@ static struct
 
 typedef void (*vbyte_func) PARAMS ((int, char *, char *));
 
-/* Forward delarations: */
+/* Forward delarations:  */
 static int ar_is_in_integer_unit PARAMS ((int regnum));
 static void set_section PARAMS ((char *name));
 static unsigned int set_regstack PARAMS ((unsigned int, unsigned int,
@@ -650,7 +650,7 @@ static void dot_dv_mode PARAMS ((int));
 static void dot_entry PARAMS ((int));
 static void dot_mem_offset PARAMS ((int));
 static void add_unwind_entry PARAMS((unw_rec_list *ptr));
-static symbolS* declare_register PARAMS ((const char *name, int regnum));
+static symbolS *declare_register PARAMS ((const char *name, int regnum));
 static void declare_register_set PARAMS ((const char *, int, int));
 static unsigned int operand_width PARAMS ((enum ia64_opnd));
 static int operand_match PARAMS ((const struct ia64_opcode *idesc,
@@ -844,7 +844,8 @@ static unsigned int
 set_regstack (ins, locs, outs, rots)
      unsigned int ins, locs, outs, rots;
 {
-  unsigned int sof;	/* size of frame */
+  /* Size of frame.  */
+  unsigned int sof;
 
   sof = ins + locs + outs;
   if (sof > 96)
@@ -887,7 +888,7 @@ ia64_flush_insns ()
     emit_one_bundle ();		/* force out queued instructions */
 
   /* In case there are labels following the last instruction, resolve
-     those now: */
+     those now:  */
   for (lfix = CURR_SLOT.label_fixups; lfix; lfix = lfix->next)
     {
       S_SET_VALUE (lfix->sym, frag_now_fix ());
@@ -1048,7 +1049,7 @@ output_P3_format (f, rtype, reg)
   int r = 0;
   reg = (reg & 0x7f);
   switch (rtype)
-  {
+    {
     case psp_gr:
       r = 0;
       break;
@@ -1087,7 +1088,7 @@ output_P3_format (f, rtype, reg)
       break;
     default:
       as_bad ("Invalid record type for P3 format.");
-  }
+    }
   bytes[0] = (UNW_P3 | (r >> 1));
   bytes[1] = (((r & 1) << 7) | reg);
   (*f) (2, bytes, NULL);
@@ -1149,57 +1150,57 @@ output_P7_format (f, rtype, w1, w2)
   count += output_leb128 (bytes + 1, w1, 0);
   switch (rtype)
     {
-      case mem_stack_f:
-	r = 0;
-	count += output_leb128 (bytes + count, w2 >> 4, 0);
-	break;
-      case mem_stack_v:
-        r = 1;
-	break;
-      case spill_base:
-        r = 2;
-	break;
-      case psp_sprel:
-        r = 3;
-	break;
-      case rp_when:
-        r = 4;
-	break;
-      case rp_psprel:
-        r = 5;
-	break;
-      case pfs_when:
-        r = 6;
-	break;
-      case pfs_psprel:
-        r = 7;
-	break;
-      case preds_when:
-        r = 8;
-	break;
-      case preds_psprel:
-        r = 9;
-	break;
-      case lc_when:
-        r = 10;
-	break;
-      case lc_psprel:
-        r = 11;
-	break;
-      case unat_when:
-        r = 12;
-	break;
-      case unat_psprel:
-        r = 13;
-	break;
-      case fpsr_when:
-        r = 14;
-	break;
-      case fpsr_psprel:
-        r = 15;
-	break;
-      default:
-	break;
+    case mem_stack_f:
+      r = 0;
+      count += output_leb128 (bytes + count, w2 >> 4, 0);
+      break;
+    case mem_stack_v:
+      r = 1;
+      break;
+    case spill_base:
+      r = 2;
+      break;
+    case psp_sprel:
+      r = 3;
+      break;
+    case rp_when:
+      r = 4;
+      break;
+    case rp_psprel:
+      r = 5;
+      break;
+    case pfs_when:
+      r = 6;
+      break;
+    case pfs_psprel:
+      r = 7;
+      break;
+    case preds_when:
+      r = 8;
+      break;
+    case preds_psprel:
+      r = 9;
+      break;
+    case lc_when:
+      r = 10;
+      break;
+    case lc_psprel:
+      r = 11;
+      break;
+    case unat_when:
+      r = 12;
+      break;
+    case unat_psprel:
+      r = 13;
+      break;
+    case fpsr_when:
+      r = 14;
+      break;
+    case fpsr_psprel:
+      r = 15;
+      break;
+    default:
+      break;
     }
   bytes[0] = (UNW_P7 | r);
   (*f) (count, bytes, NULL);
@@ -1217,65 +1218,65 @@ output_P8_format (f, rtype, t)
   bytes[0] = UNW_P8;
   switch (rtype)
     {
-      case rp_sprel:
-        r = 1;
-	break;
-      case pfs_sprel:
-        r = 2;
-	break;
-      case preds_sprel:
-        r = 3;
-	break;
-      case lc_sprel:
-        r = 4;
-	break;
-      case unat_sprel:
-        r = 5;
-	break;
-      case fpsr_sprel:
-        r = 6;
-	break;
-      case bsp_when:
-        r = 7;
-	break;
-      case bsp_psprel:
-        r = 8;
-	break;
-      case bsp_sprel:
-        r = 9;
-	break;
-      case bspstore_when:
-        r = 10;
-	break;
-      case bspstore_psprel:
-        r = 11;
-	break;
-      case bspstore_sprel:
-        r = 12;
-	break;
-      case rnat_when:
-        r = 13;
-	break;
-      case rnat_psprel:
-        r = 14;
-	break;
-      case rnat_sprel:
-        r = 15;
-	break;
-      case priunat_when_gr:
-        r = 16;
-	break;
-      case priunat_psprel:
-        r = 17;
-	break;
-      case priunat_sprel:
-        r = 18;
-	break;
-      case priunat_when_mem:
-        r = 19;
-	break;
-      default:
-	break;
+    case rp_sprel:
+      r = 1;
+      break;
+    case pfs_sprel:
+      r = 2;
+      break;
+    case preds_sprel:
+      r = 3;
+      break;
+    case lc_sprel:
+      r = 4;
+      break;
+    case unat_sprel:
+      r = 5;
+      break;
+    case fpsr_sprel:
+      r = 6;
+      break;
+    case bsp_when:
+      r = 7;
+      break;
+    case bsp_psprel:
+      r = 8;
+      break;
+    case bsp_sprel:
+      r = 9;
+      break;
+    case bspstore_when:
+      r = 10;
+      break;
+    case bspstore_psprel:
+      r = 11;
+      break;
+    case bspstore_sprel:
+      r = 12;
+      break;
+    case rnat_when:
+      r = 13;
+      break;
+    case rnat_psprel:
+      r = 14;
+      break;
+    case rnat_sprel:
+      r = 15;
+      break;
+    case priunat_when_gr:
+      r = 16;
+      break;
+    case priunat_psprel:
+      r = 17;
+      break;
+    case priunat_sprel:
+      r = 18;
+      break;
+    case priunat_when_mem:
+      r = 19;
+      break;
+    default:
+      break;
     }
   bytes[1] = r;
   count += output_leb128 (bytes + 2, t, 0);
@@ -1394,8 +1395,8 @@ output_B4_format (f, rtype, label)
 
 static char
 format_ab_reg (ab, reg)
-  int ab;
-  int reg;
+     int ab;
+     int reg;
 {
   int ret;
   ab = (ab & 3);
@@ -1487,6 +1488,7 @@ output_X4_format (f, qp, ab, reg, x, y, treg, t)
 }
 
 /* This function allocates a record list structure, and initializes fields.  */
+
 static unw_rec_list *
 alloc_record (unw_record_type t)
 {
@@ -1499,11 +1501,12 @@ alloc_record (unw_record_type t)
 }
 
 /* This function frees an entire list of record structures.  */
+
 void
 free_list_records (unw_rec_list *first)
 {
   unw_rec_list *ptr;
-  for (ptr = first; ptr != NULL; )
+  for (ptr = first; ptr != NULL;)
     {
       unw_rec_list *tmp = ptr;
 
@@ -1573,7 +1576,7 @@ output_psp_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (psp_sprel);
-  ptr->r.record.p.spoff = offset/4;
+  ptr->r.record.p.spoff = offset / 4;
   return ptr;
 }
 
@@ -1607,7 +1610,7 @@ output_rp_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (rp_psprel);
-  ptr->r.record.p.pspoff = offset/4;
+  ptr->r.record.p.pspoff = offset / 4;
   return ptr;
 }
 
@@ -1616,7 +1619,7 @@ output_rp_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (rp_sprel);
-  ptr->r.record.p.spoff = offset/4;
+  ptr->r.record.p.spoff = offset / 4;
   return ptr;
 }
 
@@ -1641,7 +1644,7 @@ output_pfs_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (pfs_psprel);
-  ptr->r.record.p.pspoff = offset/4;
+  ptr->r.record.p.pspoff = offset / 4;
   return ptr;
 }
 
@@ -1650,7 +1653,7 @@ output_pfs_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (pfs_sprel);
-  ptr->r.record.p.spoff = offset/4;
+  ptr->r.record.p.spoff = offset / 4;
   return ptr;
 }
 
@@ -1675,7 +1678,7 @@ output_preds_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (preds_psprel);
-  ptr->r.record.p.pspoff = offset/4;
+  ptr->r.record.p.pspoff = offset / 4;
   return ptr;
 }
 
@@ -1684,7 +1687,7 @@ output_preds_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (preds_sprel);
-  ptr->r.record.p.spoff = offset/4;
+  ptr->r.record.p.spoff = offset / 4;
   return ptr;
 }
 
@@ -1752,7 +1755,7 @@ output_spill_base (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (spill_base);
-  ptr->r.record.p.pspoff = offset/4;
+  ptr->r.record.p.pspoff = offset / 4;
   return ptr;
 }
 
@@ -1777,7 +1780,7 @@ output_unat_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (unat_psprel);
-  ptr->r.record.p.pspoff = offset/4;
+  ptr->r.record.p.pspoff = offset / 4;
   return ptr;
 }
 
@@ -1786,7 +1789,7 @@ output_unat_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (unat_sprel);
-  ptr->r.record.p.spoff = offset/4;
+  ptr->r.record.p.spoff = offset / 4;
   return ptr;
 }
 
@@ -1811,7 +1814,7 @@ output_lc_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (lc_psprel);
-  ptr->r.record.p.pspoff = offset/4;
+  ptr->r.record.p.pspoff = offset / 4;
   return ptr;
 }
 
@@ -1820,7 +1823,7 @@ output_lc_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (lc_sprel);
-  ptr->r.record.p.spoff = offset/4;
+  ptr->r.record.p.spoff = offset / 4;
   return ptr;
 }
 
@@ -1845,7 +1848,7 @@ output_fpsr_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (fpsr_psprel);
-  ptr->r.record.p.pspoff = offset/4;
+  ptr->r.record.p.pspoff = offset / 4;
   return ptr;
 }
 
@@ -1854,7 +1857,7 @@ output_fpsr_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (fpsr_sprel);
-  ptr->r.record.p.spoff = offset/4;
+  ptr->r.record.p.spoff = offset / 4;
   return ptr;
 }
 
@@ -1886,7 +1889,7 @@ output_priunat_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (priunat_psprel);
-  ptr->r.record.p.pspoff = offset/4;
+  ptr->r.record.p.pspoff = offset / 4;
   return ptr;
 }
 
@@ -1895,7 +1898,7 @@ output_priunat_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (priunat_sprel);
-  ptr->r.record.p.spoff = offset/4;
+  ptr->r.record.p.spoff = offset / 4;
   return ptr;
 }
 
@@ -1920,7 +1923,7 @@ output_bsp_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (bsp_psprel);
-  ptr->r.record.p.pspoff = offset/4;
+  ptr->r.record.p.pspoff = offset / 4;
   return ptr;
 }
 
@@ -1929,7 +1932,7 @@ output_bsp_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (bsp_sprel);
-  ptr->r.record.p.spoff = offset/4;
+  ptr->r.record.p.spoff = offset / 4;
   return ptr;
 }
 
@@ -1954,7 +1957,7 @@ output_bspstore_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (bspstore_psprel);
-  ptr->r.record.p.pspoff = offset/4;
+  ptr->r.record.p.pspoff = offset / 4;
   return ptr;
 }
 
@@ -1963,7 +1966,7 @@ output_bspstore_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (bspstore_sprel);
-  ptr->r.record.p.spoff = offset/4;
+  ptr->r.record.p.spoff = offset / 4;
   return ptr;
 }
 
@@ -1988,7 +1991,7 @@ output_rnat_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (rnat_psprel);
-  ptr->r.record.p.pspoff = offset/4;
+  ptr->r.record.p.pspoff = offset / 4;
   return ptr;
 }
 
@@ -1997,7 +2000,7 @@ output_rnat_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (rnat_sprel);
-  ptr->r.record.p.spoff = offset/4;
+  ptr->r.record.p.spoff = offset / 4;
   return ptr;
 }
 
@@ -2045,7 +2048,7 @@ output_spill_psprel (ab, reg, offset)
   unw_rec_list *ptr = alloc_record (spill_psprel);
   ptr->r.record.x.ab = ab;
   ptr->r.record.x.reg = reg;
-  ptr->r.record.x.pspoff = offset/4;
+  ptr->r.record.x.pspoff = offset / 4;
   return ptr;
 }
 
@@ -2058,7 +2061,7 @@ output_spill_sprel (ab, reg, offset)
   unw_rec_list *ptr = alloc_record (spill_sprel);
   ptr->r.record.x.ab = ab;
   ptr->r.record.x.reg = reg;
-  ptr->r.record.x.spoff = offset/4;
+  ptr->r.record.x.spoff = offset / 4;
   return ptr;
 }
 
@@ -2072,7 +2075,7 @@ output_spill_psprel_p (ab, reg, offset, predicate)
   unw_rec_list *ptr = alloc_record (spill_psprel_p);
   ptr->r.record.x.ab = ab;
   ptr->r.record.x.reg = reg;
-  ptr->r.record.x.pspoff = offset/4;
+  ptr->r.record.x.pspoff = offset / 4;
   ptr->r.record.x.qp = predicate;
   return ptr;
 }
@@ -2087,7 +2090,7 @@ output_spill_sprel_p (ab, reg, offset, predicate)
   unw_rec_list *ptr = alloc_record (spill_sprel_p);
   ptr->r.record.x.ab = ab;
   ptr->r.record.x.reg = reg;
-  ptr->r.record.x.spoff = offset/4;
+  ptr->r.record.x.spoff = offset / 4;
   ptr->r.record.x.qp = predicate;
   return ptr;
 }
@@ -2126,6 +2129,7 @@ output_spill_reg_p (ab, reg, targ_reg, xy, predicate)
 
 /* Given a unw_rec_list process the correct format with the
    specified function.  */
+
 static void
 process_one_record (ptr, f)
      unw_rec_list *ptr;
@@ -2135,167 +2139,167 @@ process_one_record (ptr, f)
 
   switch (ptr->r.type)
     {
-      case gr_mem:
-      case fr_mem:
-      case br_mem:
-      case frgr_mem:
-	/* these are taken care of by prologue/prologue_gr */
-	break;
+    case gr_mem:
+    case fr_mem:
+    case br_mem:
+    case frgr_mem:
+      /* These are taken care of by prologue/prologue_gr.  */
+      break;
 
-      case prologue_gr:
-      case prologue:
-	if (ptr->r.type == prologue_gr)
-	  output_R2_format (f, ptr->r.record.r.grmask,
-			    ptr->r.record.r.grsave, ptr->r.record.r.rlen);
-	else
-	  output_R1_format (f, ptr->r.type, ptr->r.record.r.rlen);
-
-	/* output descriptor(s) for union of register spills (if any): */
-	gr_mask = ptr->r.record.r.mask.gr_mem;
-	fr_mask = ptr->r.record.r.mask.fr_mem;
-	if (fr_mask)
-	  {
-	    if ((fr_mask & ~0xfUL) == 0)
-	      output_P6_format (f, fr_mem, fr_mask);
-	    else
-	      {
-		output_P5_format (f, gr_mask, fr_mask);
-		gr_mask = 0;
-	      }
-	  }
-	if (gr_mask)
-	  output_P6_format (f, gr_mem, gr_mask);
-	if (ptr->r.record.r.mask.br_mem)
-	  output_P1_format (f, ptr->r.record.r.mask.br_mem);
-
-	/* output imask descriptor if necessary: */
-	if (ptr->r.record.r.mask.i)
-	  output_P4_format (f, ptr->r.record.r.mask.i,
-			    ptr->r.record.r.imask_size);
-	break;
-
-      case body:
+    case prologue_gr:
+    case prologue:
+      if (ptr->r.type == prologue_gr)
+	output_R2_format (f, ptr->r.record.r.grmask,
+			  ptr->r.record.r.grsave, ptr->r.record.r.rlen);
+      else
 	output_R1_format (f, ptr->r.type, ptr->r.record.r.rlen);
-	break;
-      case mem_stack_f:
-      case mem_stack_v:
-	output_P7_format (f, ptr->r.type, ptr->r.record.p.t,
-			  ptr->r.record.p.size);
-	break;
-      case psp_gr:
-      case rp_gr:
-      case pfs_gr:
-      case preds_gr:
-      case unat_gr:
-      case lc_gr:
-      case fpsr_gr:
-      case priunat_gr:
-      case bsp_gr:
-      case bspstore_gr:
-      case rnat_gr:
-	output_P3_format (f, ptr->r.type, ptr->r.record.p.gr);
-	break;
-      case rp_br:
-	output_P3_format (f, rp_br, ptr->r.record.p.br);
-	break;
-      case psp_sprel:
-	output_P7_format (f, psp_sprel, ptr->r.record.p.spoff, 0);
-	break;
-      case rp_when:
-      case pfs_when:
-      case preds_when:
-      case unat_when:
-      case lc_when:
-      case fpsr_when:
-	output_P7_format (f, ptr->r.type, ptr->r.record.p.t, 0);
-	break;
-      case rp_psprel:
-      case pfs_psprel:
-      case preds_psprel:
-      case unat_psprel:
-      case lc_psprel:
-      case fpsr_psprel:
-      case spill_base:
-	output_P7_format (f, ptr->r.type, ptr->r.record.p.pspoff, 0);
-	break;
-      case rp_sprel:
-      case pfs_sprel:
-      case preds_sprel:
-      case unat_sprel:
-      case lc_sprel:
-      case fpsr_sprel:
-      case priunat_sprel:
-      case bsp_sprel:
-      case bspstore_sprel:
-      case rnat_sprel:
-	output_P8_format (f, ptr->r.type, ptr->r.record.p.spoff);
-	break;
-      case gr_gr:
-	output_P9_format (f, ptr->r.record.p.grmask, ptr->r.record.p.gr);
-	break;
-      case br_gr:
-	output_P2_format (f, ptr->r.record.p.brmask, ptr->r.record.p.gr);
-	break;
-      case spill_mask:
-	as_bad ("spill_mask record unimplemented.");
-	break;
-      case priunat_when_gr:
-      case priunat_when_mem:
-      case bsp_when:
-      case bspstore_when:
-      case rnat_when:
-	output_P8_format (f, ptr->r.type, ptr->r.record.p.t);
-	break;
-      case priunat_psprel:
-      case bsp_psprel:
-      case bspstore_psprel:
-      case rnat_psprel:
-	output_P8_format (f, ptr->r.type, ptr->r.record.p.pspoff);
-	break;
-      case unwabi:
-	output_P10_format (f, ptr->r.record.p.abi, ptr->r.record.p.context);
-	break;
-      case epilogue:
-	output_B3_format (f, ptr->r.record.b.ecount, ptr->r.record.b.t);
-	break;
-      case label_state:
-      case copy_state:
-	output_B4_format (f, ptr->r.type, ptr->r.record.b.label);
-	break;
-      case spill_psprel:
-	output_X1_format (f, ptr->r.type, ptr->r.record.x.ab,
-			  ptr->r.record.x.reg, ptr->r.record.x.t,
-			  ptr->r.record.x.pspoff);
-	break;
-      case spill_sprel:
-	output_X1_format (f, ptr->r.type, ptr->r.record.x.ab,
-			  ptr->r.record.x.reg, ptr->r.record.x.t,
-			  ptr->r.record.x.spoff);
-	break;
-      case spill_reg:
-	output_X2_format (f, ptr->r.record.x.ab, ptr->r.record.x.reg,
-			  ptr->r.record.x.xy >> 1, ptr->r.record.x.xy,
-			  ptr->r.record.x.treg, ptr->r.record.x.t);
-	break;
-      case spill_psprel_p:
-	output_X3_format (f, ptr->r.type, ptr->r.record.x.qp,
-			  ptr->r.record.x.ab, ptr->r.record.x.reg,
-			  ptr->r.record.x.t, ptr->r.record.x.pspoff);
-	break;
-      case spill_sprel_p:
-	output_X3_format (f, ptr->r.type, ptr->r.record.x.qp,
-			  ptr->r.record.x.ab, ptr->r.record.x.reg,
-			  ptr->r.record.x.t, ptr->r.record.x.spoff);
-	break;
-      case spill_reg_p:
-	output_X4_format (f, ptr->r.record.x.qp, ptr->r.record.x.ab,
-			  ptr->r.record.x.reg, ptr->r.record.x.xy >> 1,
-			  ptr->r.record.x.xy, ptr->r.record.x.treg,
-			  ptr->r.record.x.t);
-	break;
-      default:
-	as_bad ("record_type_not_valid");
-	break;
+
+      /* Output descriptor(s) for union of register spills (if any).  */
+      gr_mask = ptr->r.record.r.mask.gr_mem;
+      fr_mask = ptr->r.record.r.mask.fr_mem;
+      if (fr_mask)
+	{
+	  if ((fr_mask & ~0xfUL) == 0)
+	    output_P6_format (f, fr_mem, fr_mask);
+	  else
+	    {
+	      output_P5_format (f, gr_mask, fr_mask);
+	      gr_mask = 0;
+	    }
+	}
+      if (gr_mask)
+	output_P6_format (f, gr_mem, gr_mask);
+      if (ptr->r.record.r.mask.br_mem)
+	output_P1_format (f, ptr->r.record.r.mask.br_mem);
+
+      /* output imask descriptor if necessary:  */
+      if (ptr->r.record.r.mask.i)
+	output_P4_format (f, ptr->r.record.r.mask.i,
+			  ptr->r.record.r.imask_size);
+      break;
+
+    case body:
+      output_R1_format (f, ptr->r.type, ptr->r.record.r.rlen);
+      break;
+    case mem_stack_f:
+    case mem_stack_v:
+      output_P7_format (f, ptr->r.type, ptr->r.record.p.t,
+			ptr->r.record.p.size);
+      break;
+    case psp_gr:
+    case rp_gr:
+    case pfs_gr:
+    case preds_gr:
+    case unat_gr:
+    case lc_gr:
+    case fpsr_gr:
+    case priunat_gr:
+    case bsp_gr:
+    case bspstore_gr:
+    case rnat_gr:
+      output_P3_format (f, ptr->r.type, ptr->r.record.p.gr);
+      break;
+    case rp_br:
+      output_P3_format (f, rp_br, ptr->r.record.p.br);
+      break;
+    case psp_sprel:
+      output_P7_format (f, psp_sprel, ptr->r.record.p.spoff, 0);
+      break;
+    case rp_when:
+    case pfs_when:
+    case preds_when:
+    case unat_when:
+    case lc_when:
+    case fpsr_when:
+      output_P7_format (f, ptr->r.type, ptr->r.record.p.t, 0);
+      break;
+    case rp_psprel:
+    case pfs_psprel:
+    case preds_psprel:
+    case unat_psprel:
+    case lc_psprel:
+    case fpsr_psprel:
+    case spill_base:
+      output_P7_format (f, ptr->r.type, ptr->r.record.p.pspoff, 0);
+      break;
+    case rp_sprel:
+    case pfs_sprel:
+    case preds_sprel:
+    case unat_sprel:
+    case lc_sprel:
+    case fpsr_sprel:
+    case priunat_sprel:
+    case bsp_sprel:
+    case bspstore_sprel:
+    case rnat_sprel:
+      output_P8_format (f, ptr->r.type, ptr->r.record.p.spoff);
+      break;
+    case gr_gr:
+      output_P9_format (f, ptr->r.record.p.grmask, ptr->r.record.p.gr);
+      break;
+    case br_gr:
+      output_P2_format (f, ptr->r.record.p.brmask, ptr->r.record.p.gr);
+      break;
+    case spill_mask:
+      as_bad ("spill_mask record unimplemented.");
+      break;
+    case priunat_when_gr:
+    case priunat_when_mem:
+    case bsp_when:
+    case bspstore_when:
+    case rnat_when:
+      output_P8_format (f, ptr->r.type, ptr->r.record.p.t);
+      break;
+    case priunat_psprel:
+    case bsp_psprel:
+    case bspstore_psprel:
+    case rnat_psprel:
+      output_P8_format (f, ptr->r.type, ptr->r.record.p.pspoff);
+      break;
+    case unwabi:
+      output_P10_format (f, ptr->r.record.p.abi, ptr->r.record.p.context);
+      break;
+    case epilogue:
+      output_B3_format (f, ptr->r.record.b.ecount, ptr->r.record.b.t);
+      break;
+    case label_state:
+    case copy_state:
+      output_B4_format (f, ptr->r.type, ptr->r.record.b.label);
+      break;
+    case spill_psprel:
+      output_X1_format (f, ptr->r.type, ptr->r.record.x.ab,
+			ptr->r.record.x.reg, ptr->r.record.x.t,
+			ptr->r.record.x.pspoff);
+      break;
+    case spill_sprel:
+      output_X1_format (f, ptr->r.type, ptr->r.record.x.ab,
+			ptr->r.record.x.reg, ptr->r.record.x.t,
+			ptr->r.record.x.spoff);
+      break;
+    case spill_reg:
+      output_X2_format (f, ptr->r.record.x.ab, ptr->r.record.x.reg,
+			ptr->r.record.x.xy >> 1, ptr->r.record.x.xy,
+			ptr->r.record.x.treg, ptr->r.record.x.t);
+      break;
+    case spill_psprel_p:
+      output_X3_format (f, ptr->r.type, ptr->r.record.x.qp,
+			ptr->r.record.x.ab, ptr->r.record.x.reg,
+			ptr->r.record.x.t, ptr->r.record.x.pspoff);
+      break;
+    case spill_sprel_p:
+      output_X3_format (f, ptr->r.type, ptr->r.record.x.qp,
+			ptr->r.record.x.ab, ptr->r.record.x.reg,
+			ptr->r.record.x.t, ptr->r.record.x.spoff);
+      break;
+    case spill_reg_p:
+      output_X4_format (f, ptr->r.record.x.qp, ptr->r.record.x.ab,
+			ptr->r.record.x.reg, ptr->r.record.x.xy >> 1,
+			ptr->r.record.x.xy, ptr->r.record.x.treg,
+			ptr->r.record.x.t);
+      break;
+    default:
+      as_bad ("record_type_not_valid");
+      break;
     }
 }
 
@@ -2347,7 +2351,7 @@ set_imask (region, regmask, t, type)
   imask_size = region->r.record.r.imask_size;
   if (!imask)
     {
-      imask_size = (region->r.record.r.rlen*2 + 7)/8 + 1;
+      imask_size = (region->r.record.r.rlen * 2 + 7) / 8 + 1;
       imask = xmalloc (imask_size);
       memset (imask, 0, imask_size);
 
@@ -2355,8 +2359,8 @@ set_imask (region, regmask, t, type)
       region->r.record.r.mask.i = imask;
     }
 
-  i = (t/4) + 1;
-  pos = 2*(3 - t%4);
+  i = (t / 4) + 1;
+  pos = 2 * (3 - t % 4);
   while (regmask)
     {
       if (i >= imask_size)
@@ -2393,7 +2397,7 @@ count_bits (unsigned long mask)
 unsigned long
 slot_index (unsigned long slot_addr, unsigned long first_addr)
 {
-  return (3*((slot_addr >> 4) - (first_addr >> 4))
+  return (3 * ((slot_addr >> 4) - (first_addr >> 4))
 	  + ((slot_addr & 0x3) - (first_addr & 0x3)));
 }
 
@@ -2401,6 +2405,7 @@ slot_index (unsigned long slot_addr, unsigned long first_addr)
    unresolved fields, (ie length counts for a prologue).  After
    this has been run, all neccessary information should be available
    within each record to generate an image.  */
+
 static void
 fixup_unw_records (list)
      unw_rec_list *list;
@@ -2411,154 +2416,154 @@ fixup_unw_records (list)
   for (ptr = list; ptr; ptr = ptr->next)
     {
       if (ptr->slot_number == SLOT_NUM_NOT_SET)
-        as_bad (" Insn slot not set in unwind record.");
+	as_bad (" Insn slot not set in unwind record.");
       t = slot_index (ptr->slot_number, first_addr);
       switch (ptr->r.type)
 	{
-	  case prologue:
-	  case prologue_gr:
-	  case body:
+	case prologue:
+	case prologue_gr:
+	case body:
+	  {
+	    unw_rec_list *last;
+	    int size, dir_len = 0;
+	    unsigned long last_addr;
+
+	    first_addr = ptr->slot_number;
+	    ptr->slot_number = 0;
+	    /* Find either the next body/prologue start, or the end of
+	       the list, and determine the size of the region.  */
+	    last_addr = unwind.next_slot_number;
+	    for (last = ptr->next; last != NULL; last = last->next)
+	      if (last->r.type == prologue || last->r.type == prologue_gr
+		  || last->r.type == body)
+		{
+		  last_addr = last->slot_number;
+		  break;
+		}
+	      else if (!last->next)
+		{
+		  /* In the absence of an explicit .body directive,
+		     the prologue ends after the last instruction
+		     covered by an unwind directive.  */
+		  if (ptr->r.type != body)
+		    {
+		      last_addr = last->slot_number;
+		      switch (last->r.type)
+			{
+			case frgr_mem:
+			  dir_len = (count_bits (last->r.record.p.frmask)
+				     + count_bits (last->r.record.p.grmask));
+			  break;
+			case fr_mem:
+			case gr_mem:
+			  dir_len += count_bits (last->r.record.p.rmask);
+			  break;
+			case br_mem:
+			case br_gr:
+			  dir_len += count_bits (last->r.record.p.brmask);
+			  break;
+			case gr_gr:
+			  dir_len += count_bits (last->r.record.p.grmask);
+			  break;
+			default:
+			  dir_len = 1;
+			  break;
+			}
+		    }
+		  break;
+		}
+	    size = slot_index (last_addr, first_addr) + dir_len;
+	    rlen = ptr->r.record.r.rlen = size;
+	    region = ptr;
+	    break;
+	  }
+	case epilogue:
+	  ptr->r.record.b.t = rlen - 1 - t;
+	  break;
+
+	case mem_stack_f:
+	case mem_stack_v:
+	case rp_when:
+	case pfs_when:
+	case preds_when:
+	case unat_when:
+	case lc_when:
+	case fpsr_when:
+	case priunat_when_gr:
+	case priunat_when_mem:
+	case bsp_when:
+	case bspstore_when:
+	case rnat_when:
+	  ptr->r.record.p.t = t;
+	  break;
+
+	case spill_reg:
+	case spill_sprel:
+	case spill_psprel:
+	case spill_reg_p:
+	case spill_sprel_p:
+	case spill_psprel_p:
+	  ptr->r.record.x.t = t;
+	  break;
+
+	case frgr_mem:
+	  if (!region)
 	    {
-	      unw_rec_list *last;
-	      int size, dir_len = 0;
-	      unsigned long last_addr;
-
-	      first_addr = ptr->slot_number;
-	      ptr->slot_number = 0;
-	      /* Find either the next body/prologue start, or the end of
-		 the list, and determine the size of the region.  */
-	      last_addr = unwind.next_slot_number;
-	      for (last = ptr->next; last != NULL; last = last->next)
-		if (last->r.type == prologue || last->r.type == prologue_gr
-		    || last->r.type == body)
-		  {
-		    last_addr = last->slot_number;
-		    break;
-		  }
-		else if (!last->next)
-		  {
-		    /* In the absence of an explicit .body directive,
-		       the prologue ends after the last instruction
-		       covered by an unwind directive.  */
-		    if (ptr->r.type != body)
-		      {
-			last_addr = last->slot_number;
-			switch (last->r.type)
-			  {
-			  case frgr_mem:
-			    dir_len = (count_bits (last->r.record.p.frmask)
-				       + count_bits (last->r.record.p.grmask));
-			    break;
-			  case fr_mem:
-			  case gr_mem:
-			    dir_len += count_bits (last->r.record.p.rmask);
-			    break;
-			  case br_mem:
-			  case br_gr:
-			    dir_len += count_bits (last->r.record.p.brmask);
-			    break;
-			  case gr_gr:
-			    dir_len += count_bits (last->r.record.p.grmask);
-			    break;
-			  default:
-			    dir_len = 1;
-			    break;
-			  }
-		      }
-		    break;
-		  }
-	      size = slot_index (last_addr, first_addr) + dir_len;
-	      rlen = ptr->r.record.r.rlen = size;
-	      region = ptr;
-	      break;
+	      as_bad ("frgr_mem record before region record!\n");
+	      return;
 	    }
-	  case epilogue:
-	    ptr->r.record.b.t = rlen - 1 - t;
-	    break;
+	  region->r.record.r.mask.fr_mem |= ptr->r.record.p.frmask;
+	  region->r.record.r.mask.gr_mem |= ptr->r.record.p.grmask;
+	  set_imask (region, ptr->r.record.p.frmask, t, 1);
+	  set_imask (region, ptr->r.record.p.grmask, t, 2);
+	  break;
+	case fr_mem:
+	  if (!region)
+	    {
+	      as_bad ("fr_mem record before region record!\n");
+	      return;
+	    }
+	  region->r.record.r.mask.fr_mem |= ptr->r.record.p.rmask;
+	  set_imask (region, ptr->r.record.p.rmask, t, 1);
+	  break;
+	case gr_mem:
+	  if (!region)
+	    {
+	      as_bad ("gr_mem record before region record!\n");
+	      return;
+	    }
+	  region->r.record.r.mask.gr_mem |= ptr->r.record.p.rmask;
+	  set_imask (region, ptr->r.record.p.rmask, t, 2);
+	  break;
+	case br_mem:
+	  if (!region)
+	    {
+	      as_bad ("br_mem record before region record!\n");
+	      return;
+	    }
+	  region->r.record.r.mask.br_mem |= ptr->r.record.p.brmask;
+	  set_imask (region, ptr->r.record.p.brmask, t, 3);
+	  break;
 
-	  case mem_stack_f:
-	  case mem_stack_v:
-	  case rp_when:
-	  case pfs_when:
-	  case preds_when:
-	  case unat_when:
-	  case lc_when:
-	  case fpsr_when:
-	  case priunat_when_gr:
-	  case priunat_when_mem:
-	  case bsp_when:
-	  case bspstore_when:
-	  case rnat_when:
-	    ptr->r.record.p.t = t;
-	    break;
+	case gr_gr:
+	  if (!region)
+	    {
+	      as_bad ("gr_gr record before region record!\n");
+	      return;
+	    }
+	  set_imask (region, ptr->r.record.p.grmask, t, 2);
+	  break;
+	case br_gr:
+	  if (!region)
+	    {
+	      as_bad ("br_gr record before region record!\n");
+	      return;
+	    }
+	  set_imask (region, ptr->r.record.p.brmask, t, 3);
+	  break;
 
-	  case spill_reg:
-	  case spill_sprel:
-	  case spill_psprel:
-	  case spill_reg_p:
-	  case spill_sprel_p:
-	  case spill_psprel_p:
-	    ptr->r.record.x.t = t;
-	    break;
-
-	  case frgr_mem:
-	    if (!region)
-	      {
-		as_bad ("frgr_mem record before region record!\n");
-		return;
-	      }
-	    region->r.record.r.mask.fr_mem |= ptr->r.record.p.frmask;
-	    region->r.record.r.mask.gr_mem |= ptr->r.record.p.grmask;
-	    set_imask (region, ptr->r.record.p.frmask, t, 1);
-	    set_imask (region, ptr->r.record.p.grmask, t, 2);
-	    break;
-	  case fr_mem:
-	    if (!region)
-	      {
-		as_bad ("fr_mem record before region record!\n");
-		return;
-	      }
-	    region->r.record.r.mask.fr_mem |= ptr->r.record.p.rmask;
-	    set_imask (region, ptr->r.record.p.rmask, t, 1);
-	    break;
-	  case gr_mem:
-	    if (!region)
-	      {
-		as_bad ("gr_mem record before region record!\n");
-		return;
-	      }
-	    region->r.record.r.mask.gr_mem |= ptr->r.record.p.rmask;
-	    set_imask (region, ptr->r.record.p.rmask, t, 2);
-	    break;
-	  case br_mem:
-	    if (!region)
-	      {
-		as_bad ("br_mem record before region record!\n");
-		return;
-	      }
-	    region->r.record.r.mask.br_mem |= ptr->r.record.p.brmask;
-	    set_imask (region, ptr->r.record.p.brmask, t, 3);
-	    break;
-
-	  case gr_gr:
-	    if (!region)
-	      {
-		as_bad ("gr_gr record before region record!\n");
-		return;
-	      }
-	    set_imask (region, ptr->r.record.p.grmask, t, 2);
-	    break;
-	  case br_gr:
-	    if (!region)
-	      {
-		as_bad ("br_gr record before region record!\n");
-		return;
-	      }
-	    set_imask (region, ptr->r.record.p.brmask, t, 3);
-	    break;
-
-	  default:
-	    break;
+	default:
+	  break;
 	}
     }
 }
@@ -2698,7 +2703,7 @@ dot_radix (dummy)
   if (radix != 'C' && !is_end_of_line[(unsigned char) radix])
     {
       as_bad ("Radix `%c' unsupported", *input_line_pointer);
-      ignore_rest_of_line  ();
+      ignore_rest_of_line ();
       return;
     }
 }
@@ -2810,55 +2815,55 @@ dot_save (dummy)
   /* Make sure its a valid ar.xxx reg, OR its br0, aka 'rp'.  */
   if (e1.X_op == O_register)
     {
-      if (e2.X_op == O_register && reg2 >=0 && reg2 < 128)
+      if (e2.X_op == O_register && reg2 >= 0 && reg2 < 128)
 	{
 	  switch (reg1)
 	    {
-	      case REG_AR + AR_BSP:
-	        add_unwind_entry (output_bsp_when ());
-	        add_unwind_entry (output_bsp_gr (reg2));
-		break;
-	      case REG_AR + AR_BSPSTORE:
-	        add_unwind_entry (output_bspstore_when ());
-	        add_unwind_entry (output_bspstore_gr (reg2));
-		break;
-	      case REG_AR + AR_RNAT:
-	        add_unwind_entry (output_rnat_when ());
-	        add_unwind_entry (output_rnat_gr (reg2));
-		break;
-	      case REG_AR+AR_UNAT:
-	        add_unwind_entry (output_unat_when ());
-	        add_unwind_entry (output_unat_gr (reg2));
-		break;
-	      case REG_AR+AR_FPSR:
-	        add_unwind_entry (output_fpsr_when ());
-	        add_unwind_entry (output_fpsr_gr (reg2));
-		break;
-	      case REG_AR+AR_PFS:
-	        add_unwind_entry (output_pfs_when ());
-		if (! (unwind.prologue_mask & 4))
-	          add_unwind_entry (output_pfs_gr (reg2));
-		break;
-	      case REG_AR+AR_LC:
-	        add_unwind_entry (output_lc_when ());
-	        add_unwind_entry (output_lc_gr (reg2));
-		break;
-	      case REG_BR:
-		add_unwind_entry (output_rp_when ());
-		if (! (unwind.prologue_mask & 8))
-		  add_unwind_entry (output_rp_gr (reg2));
-		break;
-	      case REG_PR:
-		add_unwind_entry (output_preds_when ());
-		if (! (unwind.prologue_mask & 1))
-		  add_unwind_entry (output_preds_gr (reg2));
-		break;
-	      case REG_PRIUNAT:
-		add_unwind_entry (output_priunat_when_gr ());
-		add_unwind_entry (output_priunat_gr (reg2));
-		break;
-	      default:
-	        as_bad ("First operand not a valid register");
+	    case REG_AR + AR_BSP:
+	      add_unwind_entry (output_bsp_when ());
+	      add_unwind_entry (output_bsp_gr (reg2));
+	      break;
+	    case REG_AR + AR_BSPSTORE:
+	      add_unwind_entry (output_bspstore_when ());
+	      add_unwind_entry (output_bspstore_gr (reg2));
+	      break;
+	    case REG_AR + AR_RNAT:
+	      add_unwind_entry (output_rnat_when ());
+	      add_unwind_entry (output_rnat_gr (reg2));
+	      break;
+	    case REG_AR + AR_UNAT:
+	      add_unwind_entry (output_unat_when ());
+	      add_unwind_entry (output_unat_gr (reg2));
+	      break;
+	    case REG_AR + AR_FPSR:
+	      add_unwind_entry (output_fpsr_when ());
+	      add_unwind_entry (output_fpsr_gr (reg2));
+	      break;
+	    case REG_AR + AR_PFS:
+	      add_unwind_entry (output_pfs_when ());
+	      if (! (unwind.prologue_mask & 4))
+		add_unwind_entry (output_pfs_gr (reg2));
+	      break;
+	    case REG_AR + AR_LC:
+	      add_unwind_entry (output_lc_when ());
+	      add_unwind_entry (output_lc_gr (reg2));
+	      break;
+	    case REG_BR:
+	      add_unwind_entry (output_rp_when ());
+	      if (! (unwind.prologue_mask & 8))
+		add_unwind_entry (output_rp_gr (reg2));
+	      break;
+	    case REG_PR:
+	      add_unwind_entry (output_preds_when ());
+	      if (! (unwind.prologue_mask & 1))
+		add_unwind_entry (output_preds_gr (reg2));
+	      break;
+	    case REG_PRIUNAT:
+	      add_unwind_entry (output_priunat_when_gr ());
+	      add_unwind_entry (output_priunat_gr (reg2));
+	      break;
+	    default:
+	      as_bad ("First operand not a valid register");
 	    }
 	}
       else
@@ -2970,7 +2975,7 @@ generate_unwind_image ()
       /* Set expression which points to start of unwind descriptor area.  */
       unwind.info = expr_build_dot ();
 
-      where = (unsigned char *)frag_more (size);
+      where = (unsigned char *) frag_more (size);
 
       /* Issue a label for this address, and keep track of it to put it
 	 in the unwind section.  */
@@ -2980,14 +2985,14 @@ generate_unwind_image ()
       memcpy (where, unw_rec, size);
       /* Add the personality address to the image.  */
       if (unwind.personality_routine != 0)
-        {
+	{
 	  exp.X_op  = O_symbol;
 	  exp.X_add_symbol = unwind.personality_routine;
 	  exp.X_add_number = 0;
 	  fix_new_exp (frag_now, frag_now_fix () - 8, 8,
 	  		     &exp, 0, BFD_RELOC_IA64_LTOFF_FPTR64LSB);
 	  unwind.personality_routine = 0;
-        }
+	}
       obj_elf_previous (0);
     }
 
@@ -2998,7 +3003,7 @@ generate_unwind_image ()
 }
 
 static void
-dot_handlerdata  (dummy)
+dot_handlerdata (dummy)
      int dummy;
 {
   generate_unwind_image ();
@@ -3050,68 +3055,68 @@ dot_savemem (psprel)
 	{
 	  switch (reg1)
 	    {
-	      case REG_AR + AR_BSP:
-	        add_unwind_entry (output_bsp_when ());
-	        add_unwind_entry ((psprel
-				   ? output_bsp_psprel
-				   : output_bsp_sprel) (val));
-		break;
-	      case REG_AR + AR_BSPSTORE:
-	        add_unwind_entry (output_bspstore_when ());
-	        add_unwind_entry ((psprel
-				   ? output_bspstore_psprel
-				   : output_bspstore_sprel) (val));
-		break;
-	      case REG_AR + AR_RNAT:
-	        add_unwind_entry (output_rnat_when ());
-	        add_unwind_entry ((psprel
-				   ? output_rnat_psprel
-				   : output_rnat_sprel) (val));
-		break;
-	      case REG_AR + AR_UNAT:
-	        add_unwind_entry (output_unat_when ());
-	        add_unwind_entry ((psprel
-				   ? output_unat_psprel
-				   : output_unat_sprel) (val));
-		break;
-	      case REG_AR + AR_FPSR:
-	        add_unwind_entry (output_fpsr_when ());
-	        add_unwind_entry ((psprel
-				   ? output_fpsr_psprel
-				   : output_fpsr_sprel) (val));
-		break;
-	      case REG_AR + AR_PFS:
-	        add_unwind_entry (output_pfs_when ());
-	        add_unwind_entry ((psprel
-				   ? output_pfs_psprel
-				   : output_pfs_sprel) (val));
-		break;
-	      case REG_AR + AR_LC:
-	        add_unwind_entry (output_lc_when ());
-	        add_unwind_entry ((psprel
-				   ? output_lc_psprel
-				   : output_lc_sprel) (val));
-		break;
-	      case REG_BR:
-		add_unwind_entry (output_rp_when ());
-		add_unwind_entry ((psprel
-				   ? output_rp_psprel
-				   : output_rp_sprel) (val));
-		break;
-	      case REG_PR:
-		add_unwind_entry (output_preds_when ());
-		add_unwind_entry ((psprel
-				   ? output_preds_psprel
-				   : output_preds_sprel) (val));
-		break;
-	      case REG_PRIUNAT:
-		add_unwind_entry (output_priunat_when_mem ());
-		add_unwind_entry ((psprel
-				   ? output_priunat_psprel
-				   : output_priunat_sprel) (val));
-		break;
-	      default:
-	        as_bad ("First operand not a valid register");
+	    case REG_AR + AR_BSP:
+	      add_unwind_entry (output_bsp_when ());
+	      add_unwind_entry ((psprel
+				 ? output_bsp_psprel
+				 : output_bsp_sprel) (val));
+	      break;
+	    case REG_AR + AR_BSPSTORE:
+	      add_unwind_entry (output_bspstore_when ());
+	      add_unwind_entry ((psprel
+				 ? output_bspstore_psprel
+				 : output_bspstore_sprel) (val));
+	      break;
+	    case REG_AR + AR_RNAT:
+	      add_unwind_entry (output_rnat_when ());
+	      add_unwind_entry ((psprel
+				 ? output_rnat_psprel
+				 : output_rnat_sprel) (val));
+	      break;
+	    case REG_AR + AR_UNAT:
+	      add_unwind_entry (output_unat_when ());
+	      add_unwind_entry ((psprel
+				 ? output_unat_psprel
+				 : output_unat_sprel) (val));
+	      break;
+	    case REG_AR + AR_FPSR:
+	      add_unwind_entry (output_fpsr_when ());
+	      add_unwind_entry ((psprel
+				 ? output_fpsr_psprel
+				 : output_fpsr_sprel) (val));
+	      break;
+	    case REG_AR + AR_PFS:
+	      add_unwind_entry (output_pfs_when ());
+	      add_unwind_entry ((psprel
+				 ? output_pfs_psprel
+				 : output_pfs_sprel) (val));
+	      break;
+	    case REG_AR + AR_LC:
+	      add_unwind_entry (output_lc_when ());
+	      add_unwind_entry ((psprel
+				 ? output_lc_psprel
+				 : output_lc_sprel) (val));
+	      break;
+	    case REG_BR:
+	      add_unwind_entry (output_rp_when ());
+	      add_unwind_entry ((psprel
+				 ? output_rp_psprel
+				 : output_rp_sprel) (val));
+	      break;
+	    case REG_PR:
+	      add_unwind_entry (output_preds_when ());
+	      add_unwind_entry ((psprel
+				 ? output_preds_psprel
+				 : output_preds_sprel) (val));
+	      break;
+	    case REG_PRIUNAT:
+	      add_unwind_entry (output_priunat_when_mem ());
+	      add_unwind_entry ((psprel
+				 ? output_priunat_psprel
+				 : output_priunat_sprel) (val));
+	      break;
+	    default:
+	      as_bad ("First operand not a valid register");
 	    }
 	}
       else
@@ -3139,9 +3144,9 @@ dot_saveg (dummy)
       if (sep != ',')
 	add_unwind_entry (output_gr_mem (grmask));
       else
-        {
+	{
 	  int reg = e2.X_add_number - REG_GR;
-	  if (e2.X_op == O_register && reg >=0 && reg < 128)
+	  if (e2.X_op == O_register && reg >= 0 && reg < 128)
 	    add_unwind_entry (output_gr_gr (grmask, reg));
 	  else
 	    as_bad ("Second operand is an invalid register.");
@@ -3487,7 +3492,7 @@ dot_proc (dummy)
 
   unwind.proc_start = expr_build_dot ();
   /* Parse names of main and alternate entry points and mark them as
-     function symbols: */
+     function symbols:  */
   while (1)
     {
       SKIP_WHITESPACE ();
@@ -3496,7 +3501,7 @@ dot_proc (dummy)
       p = input_line_pointer;
       sym = symbol_find_or_make (name);
       if (unwind.proc_start == 0)
-        {
+	{
 	  unwind.proc_start = sym;
 	}
       symbol_get_bfdsym (sym)->flags |= BSF_FUNCTION;
@@ -3539,10 +3544,10 @@ dot_prologue (dummy)
 	as_bad ("No second operand to .prologue");
       sep = parse_operand (&e2);
       if (!is_end_of_line[sep] && !is_it_end_of_statement ())
-	      ignore_rest_of_line ();
+	ignore_rest_of_line ();
 
       if (e1.X_op == O_constant)
-        {
+	{
 	  mask = e1.X_add_number;
 
 	  if (e2.X_op == O_constant)
@@ -3678,7 +3683,7 @@ dot_rot (type)
     default: break;
     }
 
-  /* first, remove existing names from hash table: */
+  /* First, remove existing names from hash table.  */
   for (dr = md.dynreg[type]; dr && dr->num_regs; dr = dr->next)
     {
       hash_delete (md.dynreg_hash, dr->name);
@@ -3830,7 +3835,7 @@ dot_ln (dummy)
   demand_empty_rest_of_line ();
 }
 
-static char*
+static char *
 parse_section_name ()
 {
   char *name;
@@ -3874,6 +3879,7 @@ dot_xdata (size)
 }
 
 /* Why doesn't float_cons() call md_cons_align() the way cons() does?  */
+
 static void
 stmt_float_cons (kind)
      int kind;
@@ -3964,9 +3970,10 @@ dot_xfloat_cons_ua (kind)
 }
 
 /* .reg.val <regname>,value */
+
 static void
 dot_reg_val (dummy)
-  int dummy;
+     int dummy;
 {
   expressionS reg;
 
@@ -3985,14 +3992,14 @@ dot_reg_val (dummy)
     {
       valueT value = get_absolute_expression ();
       int regno = reg.X_add_number;
-      if (regno < REG_GR || regno > REG_GR+128)
-        as_warn (_("Register value annotation ignored"));
+      if (regno < REG_GR || regno > REG_GR + 128)
+	as_warn (_("Register value annotation ignored"));
       else
-        {
-          gr_values[regno-REG_GR].known = 1;
-          gr_values[regno-REG_GR].value = value;
-          gr_values[regno-REG_GR].path = md.path;
-        }
+	{
+	  gr_values[regno - REG_GR].known = 1;
+	  gr_values[regno - REG_GR].value = value;
+	  gr_values[regno - REG_GR].path = md.path;
+	}
     }
   demand_empty_rest_of_line ();
 }
@@ -4004,9 +4011,10 @@ dot_reg_val (dummy)
 
    A stop is inserted when changing modes
  */
+
 static void
 dot_dv_mode (type)
-  int type;
+     int type;
 {
   if (md.manual_bundling)
     as_warn (_("Directive invalid within a bundle"));
@@ -4022,19 +4030,19 @@ dot_dv_mode (type)
     case 'A':
     case 'a':
       if (md.explicit_mode)
-        insn_group_break (1, 0, 0);
+	insn_group_break (1, 0, 0);
       md.explicit_mode = 0;
       break;
     case 'E':
     case 'e':
       if (!md.explicit_mode)
-        insn_group_break (1, 0, 0);
+	insn_group_break (1, 0, 0);
       md.explicit_mode = 1;
       break;
     default:
     case 'd':
       if (md.explicit_mode != md.default_explicit_mode)
-        insn_group_break (1, 0, 0);
+	insn_group_break (1, 0, 0);
       md.explicit_mode = md.default_explicit_mode;
       md.mode_explicitly_set = 0;
       break;
@@ -4043,17 +4051,17 @@ dot_dv_mode (type)
 
 static void
 print_prmask (mask)
-  valueT mask;
+     valueT mask;
 {
   int regno;
   char *comma = "";
-  for (regno = 0;regno < 64;regno++)
+  for (regno = 0; regno < 64; regno++)
     {
-      if (mask & ((valueT) 1<<regno))
-        {
-          fprintf (stderr, "%s p%d", comma, regno);
-          comma = ",";
-        }
+      if (mask & ((valueT) 1 << regno))
+	{
+	  fprintf (stderr, "%s p%d", comma, regno);
+	  comma = ",";
+	}
     }
 }
 
@@ -4063,9 +4071,10 @@ print_prmask (mask)
   .pred.rel.mutex p1, p2 [,...]         (also .pred.rel "mutex")
   .pred.safe_across_calls p1 [, p2 [,...]]
  */
+
 static void
 dot_pred_rel (type)
-  int type;
+     int type;
 {
   valueT mask = 0;
   int count = 0;
@@ -4074,30 +4083,30 @@ dot_pred_rel (type)
   if (type == 0)
     {
       if (*input_line_pointer != '"')
-        {
-          as_bad (_("Missing predicate relation type"));
-          ignore_rest_of_line ();
-          return;
-        }
+	{
+	  as_bad (_("Missing predicate relation type"));
+	  ignore_rest_of_line ();
+	  return;
+	}
       else
-        {
-          int len;
-          char *form = demand_copy_C_string (&len);
-          if (strcmp (form, "mutex") == 0)
-            type = 'm';
-          else if (strcmp (form, "clear") == 0)
-            type = 'c';
-          else if (strcmp (form, "imply") == 0)
-            type = 'i';
-          else
-            {
-              as_bad (_("Unrecognized predicate relation type"));
-              ignore_rest_of_line ();
-              return;
-            }
-        }
+	{
+	  int len;
+	  char *form = demand_copy_C_string (&len);
+	  if (strcmp (form, "mutex") == 0)
+	    type = 'm';
+	  else if (strcmp (form, "clear") == 0)
+	    type = 'c';
+	  else if (strcmp (form, "imply") == 0)
+	    type = 'i';
+	  else
+	    {
+	      as_bad (_("Unrecognized predicate relation type"));
+	      ignore_rest_of_line ();
+	      return;
+	    }
+	}
       if (*input_line_pointer == ',')
-        ++input_line_pointer;
+	++input_line_pointer;
       SKIP_WHITESPACE ();
     }
 
@@ -4108,55 +4117,57 @@ dot_pred_rel (type)
       int regno;
 
       if (toupper (*input_line_pointer) != 'P'
-          || (regno = atoi (++input_line_pointer)) < 0
-          || regno > 63)
-        {
-          as_bad (_("Predicate register expected"));
-          ignore_rest_of_line ();
-          return;
-        }
+	  || (regno = atoi (++input_line_pointer)) < 0
+	  || regno > 63)
+	{
+	  as_bad (_("Predicate register expected"));
+	  ignore_rest_of_line ();
+	  return;
+	}
       while (isdigit (*input_line_pointer))
-        ++input_line_pointer;
+	++input_line_pointer;
       if (p1 == -1)
-        p1 = regno;
+	p1 = regno;
       else if (p2 == -1)
-        p2 = regno;
+	p2 = regno;
       bit <<= regno;
       if (mask & bit)
-        as_warn (_("Duplicate predicate register ignored"));
-      mask |= bit; count++;
-      /* see if it's a range */
+	as_warn (_("Duplicate predicate register ignored"));
+      mask |= bit;
+      count++;
+      /* See if it's a range.  */
       if (*input_line_pointer == '-')
-        {
-          valueT stop = 1;
-          ++input_line_pointer;
+	{
+	  valueT stop = 1;
+	  ++input_line_pointer;
 
-          if (toupper (*input_line_pointer) != 'P'
-              || (regno = atoi (++input_line_pointer)) < 0
-              || regno > 63)
-            {
-              as_bad (_("Predicate register expected"));
-              ignore_rest_of_line ();
-              return;
-            }
-          while (isdigit (*input_line_pointer))
-            ++input_line_pointer;
-          stop <<= regno;
-          if (bit >= stop)
-            {
-              as_bad (_("Bad register range"));
-              ignore_rest_of_line ();
-              return;
-            }
-          while (bit < stop)
-            {
-              bit <<= 1;
-              mask |= bit; count++;
-            }
-          SKIP_WHITESPACE ();
-        }
+	  if (toupper (*input_line_pointer) != 'P'
+	      || (regno = atoi (++input_line_pointer)) < 0
+	      || regno > 63)
+	    {
+	      as_bad (_("Predicate register expected"));
+	      ignore_rest_of_line ();
+	      return;
+	    }
+	  while (isdigit (*input_line_pointer))
+	    ++input_line_pointer;
+	  stop <<= regno;
+	  if (bit >= stop)
+	    {
+	      as_bad (_("Bad register range"));
+	      ignore_rest_of_line ();
+	      return;
+	    }
+	  while (bit < stop)
+	    {
+	      bit <<= 1;
+	      mask |= bit;
+	      count++;
+	    }
+	  SKIP_WHITESPACE ();
+	}
       if (*input_line_pointer != ',')
-        break;
+	break;
       ++input_line_pointer;
       SKIP_WHITESPACE ();
     }
@@ -4165,44 +4176,44 @@ dot_pred_rel (type)
     {
     case 'c':
       if (count == 0)
-        mask = ~(valueT) 0;
+	mask = ~(valueT) 0;
       clear_qp_mutex (mask);
       clear_qp_implies (mask, (valueT) 0);
       break;
     case 'i':
       if (count != 2 || p1 == -1 || p2 == -1)
-        as_bad (_("Predicate source and target required"));
+	as_bad (_("Predicate source and target required"));
       else if (p1 == 0 || p2 == 0)
-        as_bad (_("Use of p0 is not valid in this context"));
+	as_bad (_("Use of p0 is not valid in this context"));
       else
-        add_qp_imply (p1, p2);
+	add_qp_imply (p1, p2);
       break;
     case 'm':
       if (count < 2)
-        {
-          as_bad (_("At least two PR arguments expected"));
-          break;
-        }
+	{
+	  as_bad (_("At least two PR arguments expected"));
+	  break;
+	}
       else if (mask & 1)
-        {
-          as_bad (_("Use of p0 is not valid in this context"));
-          break;
-        }
+	{
+	  as_bad (_("Use of p0 is not valid in this context"));
+	  break;
+	}
       add_qp_mutex (mask);
       break;
     case 's':
       /* note that we don't override any existing relations */
       if (count == 0)
-        {
-          as_bad (_("At least one PR argument expected"));
-          break;
-        }
+	{
+	  as_bad (_("At least one PR argument expected"));
+	  break;
+	}
       if (md.debug_dv)
-        {
-          fprintf (stderr, "Safe across calls: ");
-          print_prmask (mask);
-          fprintf (stderr, "\n");
-        }
+	{
+	  fprintf (stderr, "Safe across calls: ");
+	  print_prmask (mask);
+	  fprintf (stderr, "\n");
+	}
       qp_safe_across_calls = mask;
       break;
     }
@@ -4211,11 +4222,11 @@ dot_pred_rel (type)
 
 /* .entry label [, label [, ...]]
    Hint to DV code that the given labels are to be considered entry points.
-   Otherwise, only global labels are considered entry points.
- */
+   Otherwise, only global labels are considered entry points.  */
+
 static void
 dot_entry (dummy)
-  int dummy;
+     int dummy;
 {
   const char *err;
   char *name;
@@ -4230,8 +4241,8 @@ dot_entry (dummy)
 
       err = hash_insert (md.entry_hash, S_GET_NAME (symbolP), (PTR) symbolP);
       if (err)
-        as_fatal (_("Inserting \"%s\" into entry hint table failed: %s"),
-                    name, err);
+	as_fatal (_("Inserting \"%s\" into entry hint table failed: %s"),
+		  name, err);
 
       *input_line_pointer = c;
       SKIP_WHITESPACE ();
@@ -4250,8 +4261,8 @@ dot_entry (dummy)
 }
 
 /* .mem.offset offset, base
-   "base" is used to distinguish between offsets from a different base.
- */
+   "base" is used to distinguish between offsets from a different base.  */
+
 static void
 dot_mem_offset (dummy)
   int dummy;
@@ -4269,7 +4280,7 @@ dot_mem_offset (dummy)
   demand_empty_rest_of_line ();
 }
 
-/* ia64-specific pseudo-ops: */
+/* ia64-specific pseudo-ops:  */
 const pseudo_typeS md_pseudo_table[] =
   {
     { "radix", dot_radix, 0 },
@@ -4355,7 +4366,7 @@ const pseudo_typeS md_pseudo_table[] =
     { "xstring", dot_xstringer, 0 },
     { "xstringz", dot_xstringer, 1 },
 
-    /* unaligned versions: */
+    /* unaligned versions:  */
     { "xdata2.ua", dot_xdata_ua, 2 },
     { "xdata4.ua", dot_xdata_ua, 4 },
     { "xdata8.ua", dot_xdata_ua, 8 },
@@ -4398,7 +4409,7 @@ pseudo_opcode[] =
     { "string", stringer, 0 },
     { "stringz", stringer, 1 },
 
-    /* unaligned versions: */
+    /* unaligned versions:  */
     { "data2.ua", stmt_cons_ua, 2 },
     { "data4.ua", stmt_cons_ua, 4 },
     { "data8.ua", stmt_cons_ua, 8 },
@@ -4409,7 +4420,8 @@ pseudo_opcode[] =
 
 /* Declare a register by creating a symbol for it and entering it in
    the symbol table.  */
-static symbolS*
+
+static symbolS *
 declare_register (name, regnum)
      const char *name;
      int regnum;
@@ -4471,7 +4483,7 @@ operand_match (idesc, index, e)
 
   switch (opnd)
     {
-      /* constants: */
+      /* constants:  */
 
     case IA64_OPND_AR_CCV:
       if (e->X_op == O_register && e->X_add_number == REG_AR + 32)
@@ -4533,7 +4545,7 @@ operand_match (idesc, index, e)
 	return 1;
       break;
 
-      /* register operands: */
+      /* register operands:  */
 
     case IA64_OPND_AR3:
       if (e->X_op == O_register && e->X_add_number >= REG_AR
@@ -4584,7 +4596,7 @@ operand_match (idesc, index, e)
 	return 1;
       break;
 
-      /* indirect operands: */
+      /* indirect operands:  */
     case IA64_OPND_CPUID_R3:
     case IA64_OPND_DBR_R3:
     case IA64_OPND_DTR_R3:
@@ -4606,7 +4618,7 @@ operand_match (idesc, index, e)
 	return 1;
       break;
 
-      /* immediate operands: */
+      /* immediate operands:  */
     case IA64_OPND_CNT2a:
     case IA64_OPND_LEN4:
     case IA64_OPND_LEN6:
@@ -4642,15 +4654,15 @@ operand_match (idesc, index, e)
 
     case IA64_OPND_IMMU62:
       if (e->X_op == O_constant)
-        {
+	{
 	  if ((bfd_vma) e->X_add_number < ((bfd_vma) 1 << 62))
-            return 1;
-        }
+	    return 1;
+	}
       else
-        {
-          /* FIXME -- need 62-bit relocation type */
-          as_bad (_("62-bit relocation not yet implemented"));
-        }
+	{
+	  /* FIXME -- need 62-bit relocation type */
+	  as_bad (_("62-bit relocation not yet implemented"));
+	}
       break;
 
     case IA64_OPND_IMMU64:
@@ -4700,33 +4712,33 @@ operand_match (idesc, index, e)
       bits = operand_width (idesc->operands[index]);
       if (e->X_op == O_constant
 	  && (bfd_vma) e->X_add_number < ((bfd_vma) 1 << bits))
-        {
-          int lobits = e->X_add_number & 0x3;
-          if (((bfd_vma) e->X_add_number & 0x3C) != 0 && lobits == 0)
-            e->X_add_number |= (bfd_vma) 0x3;
-          return 1;
-        }
+	{
+	  int lobits = e->X_add_number & 0x3;
+	  if (((bfd_vma) e->X_add_number & 0x3C) != 0 && lobits == 0)
+	    e->X_add_number |= (bfd_vma) 0x3;
+	  return 1;
+	}
       break;
 
     case IA64_OPND_IMM44:
       /* least 16 bits must be zero */
       if ((e->X_add_number & 0xffff) != 0)
-        as_warn (_("lower 16 bits of mask ignored"));
+	as_warn (_("lower 16 bits of mask ignored"));
 
       if (e->X_op == O_constant
 	  && ((e->X_add_number >= 0
 	       && e->X_add_number < ((bfd_vma) 1 << 44))
 	      || (e->X_add_number < 0
 		  && -e->X_add_number <= ((bfd_vma) 1 << 44))))
-        {
-          /* sign-extend */
-          if (e->X_add_number >= 0
-              && (e->X_add_number & ((bfd_vma) 1 << 43)) != 0)
-            {
-              e->X_add_number |= ~(((bfd_vma) 1 << 44) - 1);
-            }
-          return 1;
-        }
+	{
+	  /* sign-extend */
+	  if (e->X_add_number >= 0
+	      && (e->X_add_number & ((bfd_vma) 1 << 43)) != 0)
+	    {
+	      e->X_add_number |= ~(((bfd_vma) 1 << 44) - 1);
+	    }
+	  return 1;
+	}
       break;
 
     case IA64_OPND_IMM17:
@@ -4736,15 +4748,15 @@ operand_match (idesc, index, e)
 	       && e->X_add_number < ((bfd_vma) 1 << 17))
 	      || (e->X_add_number < 0
 		  && -e->X_add_number <= ((bfd_vma) 1 << 17))))
-        {
-          /* sign-extend */
-          if (e->X_add_number >= 0
-              && (e->X_add_number & ((bfd_vma) 1 << 16)) != 0)
-            {
-              e->X_add_number |= ~(((bfd_vma) 1 << 17) - 1);
-            }
-          return 1;
-        }
+	{
+	  /* sign-extend */
+	  if (e->X_add_number >= 0
+	      && (e->X_add_number & ((bfd_vma) 1 << 16)) != 0)
+	    {
+	      e->X_add_number |= ~(((bfd_vma) 1 << 17) - 1);
+	    }
+	  return 1;
+	}
       break;
 
     case IA64_OPND_IMM14:
@@ -4872,7 +4884,7 @@ operand_match (idesc, index, e)
 	    fix->code = BFD_RELOC_IA64_PCREL21M;
 	  else if (opnd == IA64_OPND_TGT25c)
 	    fix->code = BFD_RELOC_IA64_PCREL21B;
-          else if (opnd == IA64_OPND_TGT64)
+	  else if (opnd == IA64_OPND_TGT64)
 	    fix->code = BFD_RELOC_IA64_PCREL60B;
 	  else
 	    abort ();
@@ -4950,7 +4962,8 @@ get_next_opcode (struct ia64_opcode *idesc)
 
 /* Parse the operands for the opcode and find the opcode variant that
    matches the specified operands, or NULL if no match is possible.  */
-static struct ia64_opcode*
+
+static struct ia64_opcode *
 parse_operands (idesc)
      struct ia64_opcode *idesc;
 {
@@ -5022,7 +5035,7 @@ parse_operands (idesc)
 			      CURR_SLOT.opnd[4].X_add_number,
 			      CURR_SLOT.opnd[5].X_add_number);
 
-	  /* now we can parse the first arg: */
+	  /* now we can parse the first arg:  */
 	  saved_input_pointer = input_line_pointer;
 	  input_line_pointer = first_arg;
 	  sep = parse_operand (CURR_SLOT.opnd + 0);
@@ -5116,11 +5129,11 @@ build_insn (slot, insnp)
 	  continue;
 
 	case IA64_OPND_IMMU62:
-          val &= 0x3fffffffffffffffULL;
-          if (val != slot->opnd[i].X_add_number)
-            as_warn (_("Value truncated to 62 bits"));
-          *insnp++ = (val >> 21) & 0x1ffffffffffLL;
-          insn |= (((val & 0xfffff) << 6) | (((val >> 20) & 0x1) << 36));
+	  val &= 0x3fffffffffffffffULL;
+	  if (val != slot->opnd[i].X_add_number)
+	    as_warn (_("Value truncated to 62 bits"));
+	  *insnp++ = (val >> 21) & 0x1ffffffffffLL;
+	  insn |= (((val & 0xfffff) << 6) | (((val >> 20) & 0x1) << 36));
 	  continue;
 
 	case IA64_OPND_TGT64:
@@ -5210,7 +5223,7 @@ emit_one_bundle ()
   enum ia64_unit required_unit, insn_unit = 0;
   enum ia64_insn_type type[3], insn_type;
   unsigned int template, orig_template;
-  bfd_vma insn[3] = {-1, -1, -1};
+  bfd_vma insn[3] = { -1, -1, -1 };
   struct ia64_opcode *idesc;
   int end_of_insn_group = 0, user_template = -1;
   int n, i, j, first, curr;
@@ -5227,7 +5240,7 @@ emit_one_bundle ()
   n = MIN (3, md.num_slots_in_use);
 
   /* Determine template: user user_template if specified, best match
-     otherwise: */
+     otherwise:  */
 
   if (md.slot[first].user_template >= 0)
     user_template = template = md.slot[first].user_template;
@@ -5246,13 +5259,13 @@ emit_one_bundle ()
       template = best_template[type[0]][type[1]][type[2]];
     }
 
-  /* initialize instructions with appropriate nops: */
+  /* initialize instructions with appropriate nops:  */
   for (i = 0; i < 3; ++i)
     insn[i] = nop[ia64_templ_desc[template].exec_unit[i]];
 
   f = frag_more (16);
 
-  /* now fill in slots with as many insns as possible: */
+  /* now fill in slots with as many insns as possible:  */
   curr = first;
   idesc = md.slot[curr].idesc;
   end_of_insn_group = 0;
@@ -5260,7 +5273,7 @@ emit_one_bundle ()
     {
       /* Set the slot number for prologue/body records now as those
 	 refer to the current point, not the point after the
-	 instruction has been issued: */
+	 instruction has been issued:  */
       /* Don't try to delete prologue/body records here, as that will cause
 	 them to also be deleted from the master list of unwind records.  */
       for (ptr = md.slot[curr].unwind_record; ptr; ptr = ptr->next)
@@ -5393,7 +5406,7 @@ emit_one_bundle ()
 	}
       required_unit = ia64_templ_desc[template].exec_unit[i];
 
-      /* resolve dynamic opcodes such as "break" and "nop": */
+      /* resolve dynamic opcodes such as "break" and "nop":  */
       if (idesc->type == IA64_TYPE_DYN)
 	{
 	  if ((strcmp (idesc->name, "nop") == 0)
@@ -5425,7 +5438,7 @@ emit_one_bundle ()
 	      if (required_unit == IA64_UNIT_I || required_unit == IA64_UNIT_M)
 		insn_unit = required_unit;
 	      break;
-            case IA64_TYPE_X: insn_unit = IA64_UNIT_L; break;
+	    case IA64_TYPE_X: insn_unit = IA64_UNIT_L; break;
 	    case IA64_TYPE_I: insn_unit = IA64_UNIT_I; break;
 	    case IA64_TYPE_M: insn_unit = IA64_UNIT_M; break;
 	    case IA64_TYPE_B: insn_unit = IA64_UNIT_B; break;
@@ -5437,7 +5450,7 @@ emit_one_bundle ()
       if (insn_unit != required_unit)
 	{
 	  if (required_unit == IA64_UNIT_L
-              && insn_unit == IA64_UNIT_I
+	      && insn_unit == IA64_UNIT_I
 	      && !(idesc->flags & IA64_OPCODE_X_IN_MLX))
 	    {
 	      /* we got ourselves an MLX template but the current
@@ -5449,7 +5462,7 @@ emit_one_bundle ()
 				md.slot[curr].src_line,
 				"`%s' can't go in X slot of "
 				"MLX template", idesc->name);
-		  /* drop this insn so we don't livelock: */
+		  /* drop this insn so we don't livelock:  */
 		  --md.num_slots_in_use;
 		}
 	      break;
@@ -5461,7 +5474,7 @@ emit_one_bundle ()
 	{
 	  bfd_vma addr;
 
-	  addr = frag_now->fr_address + frag_now_fix () - 16 + 1*i;
+	  addr = frag_now->fr_address + frag_now_fix () - 16 + 1 * i;
 	  dwarf2_gen_line_info (addr, &md.slot[curr].debug_line);
 	}
 
@@ -5483,7 +5496,7 @@ emit_one_bundle ()
 	}
       --md.num_slots_in_use;
 
-      /* now is a good time to fix up the labels for this insn: */
+      /* now is a good time to fix up the labels for this insn:  */
       for (lfix = md.slot[curr].label_fixups; lfix; lfix = lfix->next)
 	{
 	  S_SET_VALUE (lfix->sym, frag_now_fix () - 16);
@@ -5503,7 +5516,7 @@ emit_one_bundle ()
 
       end_of_insn_group = md.slot[curr].end_of_insn_group;
 
-      /* clear slot: */
+      /* clear slot:  */
       ia64_free_opcode (md.slot[curr].idesc);
       memset (md.slot + curr, 0, sizeof (md.slot[curr]));
       md.slot[curr].user_template = -1;
@@ -5569,7 +5582,7 @@ md_parse_option (c, arg)
     case 'N':
       if (strcmp (arg, "so") == 0)
 	{
-          /* Suppress signon message.  */
+	  /* Suppress signon message.  */
 	}
       else if (strcmp (arg, "pi") == 0)
 	{
@@ -5607,28 +5620,28 @@ md_parse_option (c, arg)
       /* -X conflicts with an ignored option, use -x instead */
       md.detect_dv = 1;
       if (!arg || strcmp (arg, "explicit") == 0)
-        {
-          /* set default mode to explicit */
-          md.default_explicit_mode = 1;
-          break;
-        }
+	{
+	  /* set default mode to explicit */
+	  md.default_explicit_mode = 1;
+	  break;
+	}
       else if (strcmp (arg, "auto") == 0)
-        {
-          md.default_explicit_mode = 0;
-        }
+	{
+	  md.default_explicit_mode = 0;
+	}
       else if (strcmp (arg, "debug") == 0)
-        {
-          md.debug_dv = 1;
-        }
+	{
+	  md.debug_dv = 1;
+	}
       else if (strcmp (arg, "debugx") == 0)
-        {
-          md.default_explicit_mode = 1;
-          md.debug_dv = 1;
-        }
+	{
+	  md.default_explicit_mode = 1;
+	  md.debug_dv = 1;
+	}
       else
-        {
-          as_bad (_("Unrecognized option '-x%s'"), arg);
-        }
+	{
+	  as_bad (_("Unrecognized option '-x%s'"), arg);
+	}
       break;
 
     case 'S':
@@ -5655,7 +5668,7 @@ void
 md_show_usage (stream)
      FILE *stream;
 {
-  fputs(_("\
+  fputs (_("\
 IA-64 options:\n\
   -Milp32|-Milp64|-Mlp64|-Mp64	select data model (default -Mlp64)\n\
   -Mle | -Mbe		  select little- or big-endian byte order (default -Mle)\n\
@@ -5720,40 +5733,40 @@ md_begin ()
 
   target_big_endian = 0;
   pseudo_func[FUNC_FPTR_RELATIVE].u.sym =
-      symbol_new (".<fptr>", undefined_section, FUNC_FPTR_RELATIVE,
-		  &zero_address_frag);
+    symbol_new (".<fptr>", undefined_section, FUNC_FPTR_RELATIVE,
+		&zero_address_frag);
 
   pseudo_func[FUNC_GP_RELATIVE].u.sym =
-      symbol_new (".<gprel>", undefined_section, FUNC_GP_RELATIVE,
-		  &zero_address_frag);
+    symbol_new (".<gprel>", undefined_section, FUNC_GP_RELATIVE,
+		&zero_address_frag);
 
   pseudo_func[FUNC_LT_RELATIVE].u.sym =
-      symbol_new (".<ltoff>", undefined_section, FUNC_LT_RELATIVE,
-		  &zero_address_frag);
+    symbol_new (".<ltoff>", undefined_section, FUNC_LT_RELATIVE,
+		&zero_address_frag);
 
   pseudo_func[FUNC_PC_RELATIVE].u.sym =
-      symbol_new (".<pcrel>", undefined_section, FUNC_PC_RELATIVE,
-		  &zero_address_frag);
+    symbol_new (".<pcrel>", undefined_section, FUNC_PC_RELATIVE,
+		&zero_address_frag);
 
   pseudo_func[FUNC_PLT_RELATIVE].u.sym =
-      symbol_new (".<pltoff>", undefined_section, FUNC_PLT_RELATIVE,
-		  &zero_address_frag);
+    symbol_new (".<pltoff>", undefined_section, FUNC_PLT_RELATIVE,
+		&zero_address_frag);
 
   pseudo_func[FUNC_SEC_RELATIVE].u.sym =
-      symbol_new (".<secrel>", undefined_section, FUNC_SEC_RELATIVE,
-		  &zero_address_frag);
+    symbol_new (".<secrel>", undefined_section, FUNC_SEC_RELATIVE,
+		&zero_address_frag);
 
   pseudo_func[FUNC_SEG_RELATIVE].u.sym =
-      symbol_new (".<segrel>", undefined_section, FUNC_SEG_RELATIVE,
-		  &zero_address_frag);
+    symbol_new (".<segrel>", undefined_section, FUNC_SEG_RELATIVE,
+		&zero_address_frag);
 
   pseudo_func[FUNC_LTV_RELATIVE].u.sym =
-      symbol_new (".<ltv>", undefined_section, FUNC_LTV_RELATIVE,
-		  &zero_address_frag);
+    symbol_new (".<ltv>", undefined_section, FUNC_LTV_RELATIVE,
+		&zero_address_frag);
 
   pseudo_func[FUNC_LT_FPTR_RELATIVE].u.sym =
-      symbol_new (".<ltoff.fptr>", undefined_section, FUNC_LT_FPTR_RELATIVE,
-		  &zero_address_frag);
+    symbol_new (".<ltoff.fptr>", undefined_section, FUNC_LT_FPTR_RELATIVE,
+		&zero_address_frag);
 
   /* Compute the table of best templates.  We compute goodness as a
      base 4 value, in which each match counts for 3, each F counts
@@ -5822,7 +5835,7 @@ md_begin ()
   md.const_hash = hash_new ();
   md.entry_hash = hash_new ();
 
-  /* general registers: */
+  /* general registers:  */
 
   total = 128;
   for (i = 0; i < total; ++i)
@@ -5831,7 +5844,7 @@ md_begin ()
       md.regsym[i] = declare_register (name, i);
     }
 
-  /* floating point registers: */
+  /* floating point registers:  */
   total += 128;
   for (; i < total; ++i)
     {
@@ -5839,7 +5852,7 @@ md_begin ()
       md.regsym[i] = declare_register (name, i);
     }
 
-  /* application registers: */
+  /* application registers:  */
   total += 128;
   ar_base = i;
   for (; i < total; ++i)
@@ -5848,7 +5861,7 @@ md_begin ()
       md.regsym[i] = declare_register (name, i);
     }
 
-  /* control registers: */
+  /* control registers:  */
   total += 128;
   cr_base = i;
   for (; i < total; ++i)
@@ -5857,7 +5870,7 @@ md_begin ()
       md.regsym[i] = declare_register (name, i);
     }
 
-  /* predicate registers: */
+  /* predicate registers:  */
   total += 64;
   for (; i < total; ++i)
     {
@@ -5865,7 +5878,7 @@ md_begin ()
       md.regsym[i] = declare_register (name, i);
     }
 
-  /* branch registers: */
+  /* branch registers:  */
   total += 8;
   for (; i < total; ++i)
     {
@@ -5887,12 +5900,12 @@ md_begin ()
       md.regsym[regnum] = declare_register (indirect_reg[i].name, regnum);
     }
 
-  /* define synonyms for application registers: */
+  /* define synonyms for application registers:  */
   for (i = REG_AR; i < REG_AR + NELEMS (ar); ++i)
     md.regsym[i] = declare_register (ar[i - REG_AR].name,
 				     REG_AR + ar[i - REG_AR].regnum);
 
-  /* define synonyms for control registers: */
+  /* define synonyms for control registers:  */
   for (i = REG_CR; i < REG_CR + NELEMS (cr); ++i)
     md.regsym[i] = declare_register (cr[i - REG_CR].name,
 				     REG_CR + cr[i - REG_CR].regnum);
@@ -5901,7 +5914,7 @@ md_begin ()
   declare_register ("sp", REG_GR + 12);
   declare_register ("rp", REG_BR +  0);
 
-  /* pseudo-registers used to specify unwind info: */
+  /* pseudo-registers used to specify unwind info:  */
   declare_register ("psp", REG_PSP);
 
   declare_register_set ("ret", 4, REG_GR + 8);
@@ -5930,10 +5943,10 @@ md_begin ()
 void
 ia64_end_of_source ()
 {
-  /* terminate insn group upon reaching end of file: */
+  /* terminate insn group upon reaching end of file:  */
   insn_group_break (1, 0, 0);
 
-  /* emits slots we haven't written yet: */
+  /* emits slots we haven't written yet:  */
   ia64_flush_insns ();
 
   bfd_set_private_flags (stdoutput, md.flags);
@@ -5955,9 +5968,9 @@ ia64_start_line ()
   if (input_line_pointer[0] == ';' && input_line_pointer[-1] == ';')
     {
       if (md.detect_dv && !md.explicit_mode)
-        as_warn (_("Explicit stops are ignored in auto mode"));
+	as_warn (_("Explicit stops are ignored in auto mode"));
       else
-        insn_group_break (1, 0, 0);
+	insn_group_break (1, 0, 0);
     }
 }
 
@@ -5993,16 +6006,16 @@ ia64_unrecognized_line (ch)
 	CURR_SLOT.manual_bundling_on = 1;
       md.manual_bundling = 1;
 
-      /* bundling is only acceptable in explicit mode
-         or when in default automatic mode */
+      /* Bundling is only acceptable in explicit mode
+	 or when in default automatic mode.  */
       if (md.detect_dv && !md.explicit_mode)
-        {
-          if (!md.mode_explicitly_set
-              && !md.default_explicit_mode)
-            dot_dv_mode ('E');
-          else
-            as_warn (_("Found '{' after explicit switch to automatic mode"));
-        }
+	{
+	  if (!md.mode_explicitly_set
+	      && !md.default_explicit_mode)
+	    dot_dv_mode ('E');
+	  else
+	    as_warn (_("Found '{' after explicit switch to automatic mode"));
+	}
       return 1;
 
     case '}':
@@ -6014,10 +6027,10 @@ ia64_unrecognized_line (ch)
 
       /* switch back to automatic mode, if applicable */
       if (md.detect_dv
-          && md.explicit_mode
-          && !md.mode_explicitly_set
-          && !md.default_explicit_mode)
-        dot_dv_mode ('A');
+	  && md.explicit_mode
+	  && !md.mode_explicitly_set
+	  && !md.default_explicit_mode)
+	dot_dv_mode ('A');
 
       /* Allow '{' to follow on the same line.  We also allow ";;", but that
 	 happens automatically because ';' is an end of line marker.  */
@@ -6034,7 +6047,9 @@ ia64_unrecognized_line (ch)
     default:
       break;
     }
-  return 0;	/* not a valid line */
+
+  /* Not a valid line.  */
+  return 0;
 }
 
 void
@@ -6051,13 +6066,14 @@ ia64_frob_label (sym)
       fix->next = CURR_SLOT.label_fixups;
       CURR_SLOT.label_fixups = fix;
 
-      /* keep track of how many code entry points we've seen */
+      /* Keep track of how many code entry points we've seen.  */
       if (md.path == md.maxpaths)
-        {
-          md.maxpaths += 20;
-          md.entry_labels = (const char **)
-            xrealloc ((void *)md.entry_labels, md.maxpaths * sizeof (char *));
-        }
+	{
+	  md.maxpaths += 20;
+	  md.entry_labels = (const char **)
+	    xrealloc ((void *) md.entry_labels,
+		      md.maxpaths * sizeof (char *));
+	}
       md.entry_labels[md.path++] = S_GET_NAME (sym);
     }
 }
@@ -6130,7 +6146,7 @@ ia64_parse_name (name, e)
   struct symbol *sym;
   char *end;
 
-  /* first see if NAME is a known register name: */
+  /* first see if NAME is a known register name:  */
   sym = hash_find (md.reg_hash, name);
   if (sym)
     {
@@ -6147,7 +6163,7 @@ ia64_parse_name (name, e)
       return 1;
     }
 
-  /* check for inN, locN, or outN: */
+  /* check for inN, locN, or outN:  */
   switch (name[0])
     {
     case 'i':
@@ -6180,7 +6196,7 @@ ia64_parse_name (name, e)
 
   if (dr)
     {
-      /* the name is inN, locN, or outN; parse the register number: */
+      /* The name is inN, locN, or outN; parse the register number.  */
       regnum = strtoul (name, &end, 10);
       if (end > name && *end == '\0')
 	{
@@ -6189,7 +6205,8 @@ ia64_parse_name (name, e)
 	      if (!dr->num_regs)
 		as_bad ("No current frame");
 	      else
-		as_bad ("Register number out of range 0..%u", dr->num_regs-1);
+		as_bad ("Register number out of range 0..%u",
+			dr->num_regs - 1);
 	      regnum = 0;
 	    }
 	  e->X_op = O_register;
@@ -6201,9 +6218,9 @@ ia64_parse_name (name, e)
   if ((dr = hash_find (md.dynreg_hash, name)))
     {
       /* We've got ourselves the name of a rotating register set.
-         Store the base register number in the low 16 bits of
-         X_add_number and the size of the register set in the top 16
-         bits.  */
+	 Store the base register number in the low 16 bits of
+	 X_add_number and the size of the register set in the top 16
+	 bits.  */
       e->X_op = O_register;
       e->X_add_number = dr->base | (dr->num_regs << 16);
       return 1;
@@ -6217,42 +6234,44 @@ char *
 ia64_canonicalize_symbol_name (name)
      char *name;
 {
-  size_t len = strlen(name);
-  if (len > 1 && name[len-1] == '#')
-    name[len-1] = '\0';
+  size_t len = strlen (name);
+  if (len > 1 && name[len - 1] == '#')
+    name[len - 1] = '\0';
   return name;
 }
 
 static int
 is_conditional_branch (idesc)
-  struct ia64_opcode *idesc;
+     struct ia64_opcode *idesc;
 {
   return (strncmp (idesc->name, "br", 2) == 0
-          && (strcmp (idesc->name, "br") == 0
-              || strncmp (idesc->name, "br.cond", 7) == 0
-              || strncmp (idesc->name, "br.call", 7) == 0
-              || strncmp (idesc->name, "br.ret", 6) == 0
-              || strcmp (idesc->name, "brl") == 0
-              || strncmp (idesc->name, "brl.cond", 7) == 0
-              || strncmp (idesc->name, "brl.call", 7) == 0
-              || strncmp (idesc->name, "brl.ret", 6) == 0));
+	  && (strcmp (idesc->name, "br") == 0
+	      || strncmp (idesc->name, "br.cond", 7) == 0
+	      || strncmp (idesc->name, "br.call", 7) == 0
+	      || strncmp (idesc->name, "br.ret", 6) == 0
+	      || strcmp (idesc->name, "brl") == 0
+	      || strncmp (idesc->name, "brl.cond", 7) == 0
+	      || strncmp (idesc->name, "brl.call", 7) == 0
+	      || strncmp (idesc->name, "brl.ret", 6) == 0));
 }
 
 /* Return whether the given opcode is a taken branch.  If there's any doubt,
-   returns zero */
+   returns zero.  */
+
 static int
 is_taken_branch (idesc)
-  struct ia64_opcode *idesc;
+     struct ia64_opcode *idesc;
 {
   return ((is_conditional_branch (idesc) && CURR_SLOT.qp_regno == 0)
-          || strncmp (idesc->name, "br.ia", 5) == 0);
+	  || strncmp (idesc->name, "br.ia", 5) == 0);
 }
 
 /* Return whether the given opcode is an interruption or rfi.  If there's any
-   doubt, returns zero */
+   doubt, returns zero.  */
+
 static int
 is_interruption_or_rfi (idesc)
-  struct ia64_opcode *idesc;
+     struct ia64_opcode *idesc;
 {
   if (strcmp (idesc->name, "rfi") == 0)
     return 1;
@@ -6261,17 +6280,18 @@ is_interruption_or_rfi (idesc)
 
 /* Returns the index of the given dependency in the opcode's list of chks, or
    -1 if there is no dependency.  */
+
 static int
 depends_on (depind, idesc)
-  int depind;
-  struct ia64_opcode *idesc;
+     int depind;
+     struct ia64_opcode *idesc;
 {
   int i;
   const struct ia64_opcode_dependency *dep = idesc->dependencies;
-  for (i = 0;i < dep->nchks; i++)
+  for (i = 0; i < dep->nchks; i++)
     {
-      if (depind == DEP(dep->chks[i]))
-        return i;
+      if (depind == DEP (dep->chks[i]))
+	return i;
     }
   return -1;
 }
@@ -6320,7 +6340,6 @@ depends_on (depind, idesc)
 
    Memory resources (i.e. locations in memory) are *not* marked or tracked by
    this code; there are no dependency violations based on memory access.
-
 */
 
 #define MAX_SPECS 256
@@ -6329,12 +6348,12 @@ depends_on (depind, idesc)
 
 static int
 specify_resource (dep, idesc, type, specs, note, path)
-  const struct ia64_dependency *dep;
-  struct ia64_opcode *idesc;
-  int type;                         /* is this a DV chk or a DV reg? */
-  struct rsrc specs[MAX_SPECS];     /* returned specific resources */
-  int note;                         /* resource note for this insn's usage */
-  int path;                         /* which execution path to examine */
+     const struct ia64_dependency *dep;
+     struct ia64_opcode *idesc;
+     int type;                         /* is this a DV chk or a DV reg? */
+     struct rsrc specs[MAX_SPECS];     /* returned specific resources */
+     int note;                         /* resource note for this insn's usage */
+     int path;                         /* which execution path to examine */
 {
   int count = 0;
   int i;
@@ -6369,29 +6388,29 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
     {
     case IA64_RS_AR_K:
       if (note == 1)
-        {
-          if (idesc->operands[!rsrc_write] == IA64_OPND_AR3)
-            {
-              int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_AR;
-              if (regno >= 0 && regno <= 7)
-                {
-                  specs[count] = tmpl;
-                  specs[count++].index = regno;
-                }
-            }
-        }
+	{
+	  if (idesc->operands[!rsrc_write] == IA64_OPND_AR3)
+	    {
+	      int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_AR;
+	      if (regno >= 0 && regno <= 7)
+		{
+		  specs[count] = tmpl;
+		  specs[count++].index = regno;
+		}
+	    }
+	}
       else if (note == 0)
-        {
-          for(i=0;i < 8;i++)
-            {
-              specs[count] = tmpl;
-              specs[count++].index = i;
-            }
-        }
+	{
+	  for (i = 0; i < 8; i++)
+	    {
+	      specs[count] = tmpl;
+	      specs[count++].index = i;
+	    }
+	}
       else
-        {
-          UNHANDLED;
-        }
+	{
+	  UNHANDLED;
+	}
       break;
 
     case IA64_RS_AR_UNAT:
@@ -6416,10 +6435,10 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 	  specs[count] = tmpl;
 	  if (md.mem_offset.hint)
 	    {
-              if (md.debug_dv)
-                fprintf (stderr, "  Using hint for spill/fill\n");
-	      /* the index isn't actually used, just set it to something
-		 approximating the bit index */
+	      if (md.debug_dv)
+		fprintf (stderr, "  Using hint for spill/fill\n");
+	      /* The index isn't actually used, just set it to something
+		 approximating the bit index.  */
 	      specs[count].index = (md.mem_offset.offset >> 3) & 0x3F;
 	      specs[count].mem_offset.hint = 1;
 	      specs[count].mem_offset.offset = md.mem_offset.offset;
@@ -6434,170 +6453,170 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 
     case IA64_RS_AR:
       if (note == 1)
-        {
-          if (idesc->operands[!rsrc_write] == IA64_OPND_AR3)
-            {
-              int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_AR;
-              if ((regno >= 8 && regno <= 15)
-                  || (regno >= 20 && regno <= 23)
-                  || (regno >= 31 && regno <= 39)
-                  || (regno >= 41 && regno <= 47)
-                  || (regno >= 67 && regno <= 111))
-                {
-                  specs[count] = tmpl;
-                  specs[count++].index = regno;
-                }
-            }
-        }
+	{
+	  if (idesc->operands[!rsrc_write] == IA64_OPND_AR3)
+	    {
+	      int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_AR;
+	      if ((regno >= 8 && regno <= 15)
+		  || (regno >= 20 && regno <= 23)
+		  || (regno >= 31 && regno <= 39)
+		  || (regno >= 41 && regno <= 47)
+		  || (regno >= 67 && regno <= 111))
+		{
+		  specs[count] = tmpl;
+		  specs[count++].index = regno;
+		}
+	    }
+	}
       else
-        {
-          UNHANDLED;
-        }
+	{
+	  UNHANDLED;
+	}
       break;
 
     case IA64_RS_ARb:
       if (note == 1)
-        {
-          if (idesc->operands[!rsrc_write] == IA64_OPND_AR3)
-            {
-              int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_AR;
-              if ((regno >= 48 && regno <= 63)
-                  || (regno >= 112 && regno <= 127))
-                {
-                  specs[count] = tmpl;
-                  specs[count++].index = regno;
-                }
-            }
-        }
+	{
+	  if (idesc->operands[!rsrc_write] == IA64_OPND_AR3)
+	    {
+	      int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_AR;
+	      if ((regno >= 48 && regno <= 63)
+		  || (regno >= 112 && regno <= 127))
+		{
+		  specs[count] = tmpl;
+		  specs[count++].index = regno;
+		}
+	    }
+	}
       else if (note == 0)
-        {
-          for (i=48;i < 64;i++)
-            {
-              specs[count] = tmpl;
-              specs[count++].index = i;
-            }
-          for (i=112;i < 128;i++)
-            {
-              specs[count] = tmpl;
-              specs[count++].index = i;
-            }
-        }
+	{
+	  for (i = 48; i < 64; i++)
+	    {
+	      specs[count] = tmpl;
+	      specs[count++].index = i;
+	    }
+	  for (i = 112; i < 128; i++)
+	    {
+	      specs[count] = tmpl;
+	      specs[count++].index = i;
+	    }
+	}
       else
-        {
-          UNHANDLED;
-        }
+	{
+	  UNHANDLED;
+	}
       break;
 
     case IA64_RS_BR:
       if (note != 1)
-        {
-          UNHANDLED;
-        }
+	{
+	  UNHANDLED;
+	}
       else
-        {
-          if (rsrc_write)
-            {
-              for (i=0;i < idesc->num_outputs;i++)
-                if (idesc->operands[i] == IA64_OPND_B1
-                    || idesc->operands[i] == IA64_OPND_B2)
-                  {
-                    specs[count] = tmpl;
-                    specs[count++].index =
-                      CURR_SLOT.opnd[i].X_add_number - REG_BR;
-                  }
-            }
-          else
-            {
-              for (i = idesc->num_outputs;i < NELEMS(idesc->operands);i++)
-                if (idesc->operands[i] == IA64_OPND_B1
-                    || idesc->operands[i] == IA64_OPND_B2)
-                  {
-                    specs[count] = tmpl;
-                    specs[count++].index =
-                      CURR_SLOT.opnd[i].X_add_number - REG_BR;
-                  }
-            }
-        }
+	{
+	  if (rsrc_write)
+	    {
+	      for (i = 0; i < idesc->num_outputs; i++)
+		if (idesc->operands[i] == IA64_OPND_B1
+		    || idesc->operands[i] == IA64_OPND_B2)
+		  {
+		    specs[count] = tmpl;
+		    specs[count++].index =
+		      CURR_SLOT.opnd[i].X_add_number - REG_BR;
+		  }
+	    }
+	  else
+	    {
+	      for (i = idesc->num_outputs;i < NELEMS (idesc->operands); i++)
+		if (idesc->operands[i] == IA64_OPND_B1
+		    || idesc->operands[i] == IA64_OPND_B2)
+		  {
+		    specs[count] = tmpl;
+		    specs[count++].index =
+		      CURR_SLOT.opnd[i].X_add_number - REG_BR;
+		  }
+	    }
+	}
       break;
 
     case IA64_RS_CPUID: /* four or more registers */
       if (note == 3)
-        {
-          if (idesc->operands[!rsrc_write] == IA64_OPND_CPUID_R3)
-            {
-              int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_GR;
-              if (regno >= 0 && regno < NELEMS(gr_values)
-                  && KNOWN(regno))
-                {
-                  specs[count] = tmpl;
-                  specs[count++].index = gr_values[regno].value & 0xFF;
-                }
-              else
-                {
-                  specs[count] = tmpl;
-                  specs[count++].specific = 0;
-                }
-            }
-        }
+	{
+	  if (idesc->operands[!rsrc_write] == IA64_OPND_CPUID_R3)
+	    {
+	      int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_GR;
+	      if (regno >= 0 && regno < NELEMS (gr_values)
+		  && KNOWN (regno))
+		{
+		  specs[count] = tmpl;
+		  specs[count++].index = gr_values[regno].value & 0xFF;
+		}
+	      else
+		{
+		  specs[count] = tmpl;
+		  specs[count++].specific = 0;
+		}
+	    }
+	}
       else
-        {
-          UNHANDLED;
-        }
+	{
+	  UNHANDLED;
+	}
       break;
 
     case IA64_RS_DBR: /* four or more registers */
       if (note == 3)
-        {
-          if (idesc->operands[!rsrc_write] == IA64_OPND_DBR_R3)
-            {
-              int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_GR;
-              if (regno >= 0 && regno < NELEMS(gr_values)
-                  && KNOWN(regno))
-                {
-                  specs[count] = tmpl;
-                  specs[count++].index = gr_values[regno].value & 0xFF;
-                }
-              else
-                {
-                  specs[count] = tmpl;
-                  specs[count++].specific = 0;
-                }
-            }
-        }
+	{
+	  if (idesc->operands[!rsrc_write] == IA64_OPND_DBR_R3)
+	    {
+	      int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_GR;
+	      if (regno >= 0 && regno < NELEMS (gr_values)
+		  && KNOWN (regno))
+		{
+		  specs[count] = tmpl;
+		  specs[count++].index = gr_values[regno].value & 0xFF;
+		}
+	      else
+		{
+		  specs[count] = tmpl;
+		  specs[count++].specific = 0;
+		}
+	    }
+	}
       else if (note == 0 && !rsrc_write)
-        {
-          specs[count] = tmpl;
-          specs[count++].specific = 0;
-        }
+	{
+	  specs[count] = tmpl;
+	  specs[count++].specific = 0;
+	}
       else
-        {
-          UNHANDLED;
-        }
+	{
+	  UNHANDLED;
+	}
       break;
 
     case IA64_RS_IBR: /* four or more registers */
       if (note == 3)
-        {
-          if (idesc->operands[!rsrc_write] == IA64_OPND_IBR_R3)
-            {
-              int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_GR;
-              if (regno >= 0 && regno < NELEMS(gr_values)
-                  && KNOWN(regno))
-                {
-                  specs[count] = tmpl;
-                  specs[count++].index = gr_values[regno].value & 0xFF;
-                }
-              else
-                {
-                  specs[count] = tmpl;
-                  specs[count++].specific = 0;
-                }
-            }
-        }
+	{
+	  if (idesc->operands[!rsrc_write] == IA64_OPND_IBR_R3)
+	    {
+	      int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_GR;
+	      if (regno >= 0 && regno < NELEMS (gr_values)
+		  && KNOWN (regno))
+		{
+		  specs[count] = tmpl;
+		  specs[count++].index = gr_values[regno].value & 0xFF;
+		}
+	      else
+		{
+		  specs[count] = tmpl;
+		  specs[count++].specific = 0;
+		}
+	    }
+	}
       else
-        {
-          UNHANDLED;
-        }
+	{
+	  UNHANDLED;
+	}
       break;
 
     case IA64_RS_MSR:
@@ -6616,237 +6635,238 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 
     case IA64_RS_PKR: /* 16 or more registers */
       if (note == 3 || note == 4)
-        {
-          if (idesc->operands[!rsrc_write] == IA64_OPND_PKR_R3)
-            {
-              int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_GR;
-              if (regno >= 0 && regno < NELEMS(gr_values)
-                  && KNOWN(regno))
-                {
-                  if (note == 3)
-                    {
-                      specs[count] = tmpl;
-                      specs[count++].index = gr_values[regno].value & 0xFF;
-                    }
-                  else for (i=0;i < NELEMS(gr_values);i++)
-                    {
-                      /* uses all registers *except* the one in R3 */
-                      if (i != (gr_values[regno].value & 0xFF))
-                        {
-                          specs[count] = tmpl;
-                          specs[count++].index = i;
-                        }
-                    }
-                }
-              else
-                {
-                  specs[count] = tmpl;
-                  specs[count++].specific = 0;
-                }
-            }
-        }
+	{
+	  if (idesc->operands[!rsrc_write] == IA64_OPND_PKR_R3)
+	    {
+	      int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_GR;
+	      if (regno >= 0 && regno < NELEMS (gr_values)
+		  && KNOWN (regno))
+		{
+		  if (note == 3)
+		    {
+		      specs[count] = tmpl;
+		      specs[count++].index = gr_values[regno].value & 0xFF;
+		    }
+		  else
+		    for (i = 0; i < NELEMS (gr_values); i++)
+		      {
+			/* Uses all registers *except* the one in R3.  */
+			if (i != (gr_values[regno].value & 0xFF))
+			  {
+			    specs[count] = tmpl;
+			    specs[count++].index = i;
+			  }
+		      }
+		}
+	      else
+		{
+		  specs[count] = tmpl;
+		  specs[count++].specific = 0;
+		}
+	    }
+	}
       else if (note == 0)
-        {
-          /* probe et al.  */
-          specs[count] = tmpl;
-          specs[count++].specific = 0;
-        }
+	{
+	  /* probe et al.  */
+	  specs[count] = tmpl;
+	  specs[count++].specific = 0;
+	}
       break;
 
     case IA64_RS_PMC: /* four or more registers */
       if (note == 3)
-        {
-          if (idesc->operands[!rsrc_write] == IA64_OPND_PMC_R3
-              || (!rsrc_write && idesc->operands[1] == IA64_OPND_PMD_R3))
+	{
+	  if (idesc->operands[!rsrc_write] == IA64_OPND_PMC_R3
+	      || (!rsrc_write && idesc->operands[1] == IA64_OPND_PMD_R3))
 
-            {
-              int index = ((idesc->operands[1] == IA64_OPND_R3 && !rsrc_write)
-                           ? 1 : !rsrc_write);
-              int regno = CURR_SLOT.opnd[index].X_add_number - REG_GR;
-              if (regno >= 0 && regno < NELEMS(gr_values)
-                  && KNOWN(regno))
-                {
-                  specs[count] = tmpl;
-                  specs[count++].index = gr_values[regno].value & 0xFF;
-                }
-              else
-                {
-                  specs[count] = tmpl;
-                  specs[count++].specific = 0;
-                }
-            }
-        }
+	    {
+	      int index = ((idesc->operands[1] == IA64_OPND_R3 && !rsrc_write)
+			   ? 1 : !rsrc_write);
+	      int regno = CURR_SLOT.opnd[index].X_add_number - REG_GR;
+	      if (regno >= 0 && regno < NELEMS (gr_values)
+		  && KNOWN (regno))
+		{
+		  specs[count] = tmpl;
+		  specs[count++].index = gr_values[regno].value & 0xFF;
+		}
+	      else
+		{
+		  specs[count] = tmpl;
+		  specs[count++].specific = 0;
+		}
+	    }
+	}
       else
-        {
-          UNHANDLED;
-        }
+	{
+	  UNHANDLED;
+	}
       break;
 
     case IA64_RS_PMD: /* four or more registers */
       if (note == 3)
-        {
-          if (idesc->operands[!rsrc_write] == IA64_OPND_PMD_R3)
-            {
-              int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_GR;
-              if (regno >= 0 && regno < NELEMS(gr_values)
-                  && KNOWN(regno))
-                {
-                  specs[count] = tmpl;
-                  specs[count++].index = gr_values[regno].value & 0xFF;
-                }
-              else
-                {
-                  specs[count] = tmpl;
-                  specs[count++].specific = 0;
-                }
-            }
-        }
+	{
+	  if (idesc->operands[!rsrc_write] == IA64_OPND_PMD_R3)
+	    {
+	      int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_GR;
+	      if (regno >= 0 && regno < NELEMS (gr_values)
+		  && KNOWN (regno))
+		{
+		  specs[count] = tmpl;
+		  specs[count++].index = gr_values[regno].value & 0xFF;
+		}
+	      else
+		{
+		  specs[count] = tmpl;
+		  specs[count++].specific = 0;
+		}
+	    }
+	}
       else
-        {
-          UNHANDLED;
-        }
+	{
+	  UNHANDLED;
+	}
       break;
 
     case IA64_RS_RR: /* eight registers */
       if (note == 6)
-        {
-          if (idesc->operands[!rsrc_write] == IA64_OPND_RR_R3)
-            {
-              int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_GR;
-              if (regno >= 0 && regno < NELEMS(gr_values)
-                  && KNOWN(regno))
-                {
-                  specs[count] = tmpl;
-                  specs[count++].index = (gr_values[regno].value >> 61) & 0x7;
-                }
-              else
-                {
-                  specs[count] = tmpl;
-                  specs[count++].specific = 0;
-                }
-            }
-        }
+	{
+	  if (idesc->operands[!rsrc_write] == IA64_OPND_RR_R3)
+	    {
+	      int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_GR;
+	      if (regno >= 0 && regno < NELEMS (gr_values)
+		  && KNOWN (regno))
+		{
+		  specs[count] = tmpl;
+		  specs[count++].index = (gr_values[regno].value >> 61) & 0x7;
+		}
+	      else
+		{
+		  specs[count] = tmpl;
+		  specs[count++].specific = 0;
+		}
+	    }
+	}
       else if (note == 0 && !rsrc_write)
-        {
-          specs[count] = tmpl;
-          specs[count++].specific = 0;
-        }
+	{
+	  specs[count] = tmpl;
+	  specs[count++].specific = 0;
+	}
       else
-        {
-          UNHANDLED;
-        }
+	{
+	  UNHANDLED;
+	}
       break;
 
     case IA64_RS_CR_IRR:
       if (note == 0)
-        {
-          /* handle mov-from-CR-IVR; it's a read that writes CR[IRR] */
-          int regno = CURR_SLOT.opnd[1].X_add_number - REG_CR;
-          if (rsrc_write
-              && idesc->operands[1] == IA64_OPND_CR3
-              && regno == CR_IVR)
-            {
-              for(i=0;i < 4;i++)
-                {
-                  specs[count] = tmpl;
-                  specs[count++].index = CR_IRR0 + i;
-                }
-            }
-        }
+	{
+	  /* handle mov-from-CR-IVR; it's a read that writes CR[IRR] */
+	  int regno = CURR_SLOT.opnd[1].X_add_number - REG_CR;
+	  if (rsrc_write
+	      && idesc->operands[1] == IA64_OPND_CR3
+	      && regno == CR_IVR)
+	    {
+	      for (i = 0; i < 4; i++)
+		{
+		  specs[count] = tmpl;
+		  specs[count++].index = CR_IRR0 + i;
+		}
+	    }
+	}
       else if (note == 1)
-        {
-          int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_CR;
-          if (idesc->operands[!rsrc_write] == IA64_OPND_CR3
-              && regno >= CR_IRR0
-              && regno <= CR_IRR3)
-            {
-              specs[count] = tmpl;
-              specs[count++].index = regno;
-            }
-        }
+	{
+	  int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_CR;
+	  if (idesc->operands[!rsrc_write] == IA64_OPND_CR3
+	      && regno >= CR_IRR0
+	      && regno <= CR_IRR3)
+	    {
+	      specs[count] = tmpl;
+	      specs[count++].index = regno;
+	    }
+	}
       else
-        {
-          UNHANDLED;
-        }
+	{
+	  UNHANDLED;
+	}
       break;
 
     case IA64_RS_CR_LRR:
       if (note != 1)
-        {
-          UNHANDLED;
-        }
+	{
+	  UNHANDLED;
+	}
       else
-        {
-          int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_CR;
-          if (idesc->operands[!rsrc_write] == IA64_OPND_CR3
-              && (regno == CR_LRR0 || regno == CR_LRR1))
-            {
-              specs[count] = tmpl;
-              specs[count++].index = regno;
-            }
-        }
+	{
+	  int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_CR;
+	  if (idesc->operands[!rsrc_write] == IA64_OPND_CR3
+	      && (regno == CR_LRR0 || regno == CR_LRR1))
+	    {
+	      specs[count] = tmpl;
+	      specs[count++].index = regno;
+	    }
+	}
       break;
 
     case IA64_RS_CR:
       if (note == 1)
-        {
-          if (idesc->operands[!rsrc_write] == IA64_OPND_CR3)
-            {
-              specs[count] = tmpl;
-              specs[count++].index =
-                CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_CR;
-            }
-        }
+	{
+	  if (idesc->operands[!rsrc_write] == IA64_OPND_CR3)
+	    {
+	      specs[count] = tmpl;
+	      specs[count++].index =
+		CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_CR;
+	    }
+	}
       else
-        {
-          UNHANDLED;
-        }
+	{
+	  UNHANDLED;
+	}
       break;
 
     case IA64_RS_FR:
     case IA64_RS_FRb:
       if (note != 1)
-        {
-          UNHANDLED;
-        }
+	{
+	  UNHANDLED;
+	}
       else if (rsrc_write)
-        {
-          if (dep->specifier == IA64_RS_FRb
-              && idesc->operands[0] == IA64_OPND_F1)
-            {
-              specs[count] = tmpl;
-              specs[count++].index = CURR_SLOT.opnd[0].X_add_number - REG_FR;
-            }
-        }
+	{
+	  if (dep->specifier == IA64_RS_FRb
+	      && idesc->operands[0] == IA64_OPND_F1)
+	    {
+	      specs[count] = tmpl;
+	      specs[count++].index = CURR_SLOT.opnd[0].X_add_number - REG_FR;
+	    }
+	}
       else
-        {
-          for (i=idesc->num_outputs;i < NELEMS(idesc->operands);i++)
-            {
-              if (idesc->operands[i] == IA64_OPND_F2
-                  || idesc->operands[i] == IA64_OPND_F3
-                  || idesc->operands[i] == IA64_OPND_F4)
-                {
-                  specs[count] = tmpl;
-                  specs[count++].index =
-                    CURR_SLOT.opnd[i].X_add_number - REG_FR;
-                }
-            }
-        }
+	{
+	  for (i = idesc->num_outputs; i < NELEMS (idesc->operands); i++)
+	    {
+	      if (idesc->operands[i] == IA64_OPND_F2
+		  || idesc->operands[i] == IA64_OPND_F3
+		  || idesc->operands[i] == IA64_OPND_F4)
+		{
+		  specs[count] = tmpl;
+		  specs[count++].index =
+		    CURR_SLOT.opnd[i].X_add_number - REG_FR;
+		}
+	    }
+	}
       break;
 
     case IA64_RS_GR:
       if (note == 13)
-        {
-          /* This reference applies only to the GR whose value is loaded with
-             data returned from memory */
-          specs[count] = tmpl;
-          specs[count++].index = CURR_SLOT.opnd[0].X_add_number - REG_GR;
-        }
+	{
+	  /* This reference applies only to the GR whose value is loaded with
+	     data returned from memory.  */
+	  specs[count] = tmpl;
+	  specs[count++].index = CURR_SLOT.opnd[0].X_add_number - REG_GR;
+	}
       else if (note == 1)
-        {
-          if (rsrc_write)
-            {
-              for (i= 0; i < idesc->num_outputs; i++)
+	{
+	  if (rsrc_write)
+	    {
+	      for (i = 0; i < idesc->num_outputs; i++)
 		if (idesc->operands[i] == IA64_OPND_R1
 		    || idesc->operands[i] == IA64_OPND_R2
 		    || idesc->operands[i] == IA64_OPND_R3)
@@ -6863,647 +6883,647 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 		      specs[count++].index =
 			CURR_SLOT.opnd[i].X_add_number - REG_GR;
 		    }
-            }
-          else
-            {
-              /* Look for anything that reads a GR */
-              for (i=0;i < NELEMS(idesc->operands);i++)
-                {
-                  if (idesc->operands[i] == IA64_OPND_MR3
-                      || idesc->operands[i] == IA64_OPND_CPUID_R3
-                      || idesc->operands[i] == IA64_OPND_DBR_R3
-                      || idesc->operands[i] == IA64_OPND_IBR_R3
+	    }
+	  else
+	    {
+	      /* Look for anything that reads a GR.  */
+	      for (i = 0; i < NELEMS (idesc->operands); i++)
+		{
+		  if (idesc->operands[i] == IA64_OPND_MR3
+		      || idesc->operands[i] == IA64_OPND_CPUID_R3
+		      || idesc->operands[i] == IA64_OPND_DBR_R3
+		      || idesc->operands[i] == IA64_OPND_IBR_R3
 		      || idesc->operands[i] == IA64_OPND_MSR_R3
-                      || idesc->operands[i] == IA64_OPND_PKR_R3
-                      || idesc->operands[i] == IA64_OPND_PMC_R3
-                      || idesc->operands[i] == IA64_OPND_PMD_R3
-                      || idesc->operands[i] == IA64_OPND_RR_R3
-                      || ((i >= idesc->num_outputs)
-                          && (idesc->operands[i] == IA64_OPND_R1
-                              || idesc->operands[i] == IA64_OPND_R2
-                              || idesc->operands[i] == IA64_OPND_R3
+		      || idesc->operands[i] == IA64_OPND_PKR_R3
+		      || idesc->operands[i] == IA64_OPND_PMC_R3
+		      || idesc->operands[i] == IA64_OPND_PMD_R3
+		      || idesc->operands[i] == IA64_OPND_RR_R3
+		      || ((i >= idesc->num_outputs)
+			  && (idesc->operands[i] == IA64_OPND_R1
+			      || idesc->operands[i] == IA64_OPND_R2
+			      || idesc->operands[i] == IA64_OPND_R3
 			      /* addl source register.  */
 			      || idesc->operands[i] == IA64_OPND_R3_2)))
-                    {
-                      specs[count] = tmpl;
-                      specs[count++].index =
-                        CURR_SLOT.opnd[i].X_add_number - REG_GR;
-                    }
-                }
-            }
-        }
+		    {
+		      specs[count] = tmpl;
+		      specs[count++].index =
+			CURR_SLOT.opnd[i].X_add_number - REG_GR;
+		    }
+		}
+	    }
+	}
       else
-        {
-          UNHANDLED;
-        }
+	{
+	  UNHANDLED;
+	}
       break;
 
     case IA64_RS_PR:
       if (note == 0)
-        {
-          if (idesc->operands[0] == IA64_OPND_PR_ROT)
-            {
-              for (i=16;i < 63;i++)
-                {
-                  specs[count] = tmpl;
-                  specs[count++].index = i;
-                }
-            }
-          else
-            {
-              for (i=1;i < 63;i++)
-                {
-                  specs[count] = tmpl;
-                  specs[count++].index = i;
-                }
-            }
-        }
+	{
+	  if (idesc->operands[0] == IA64_OPND_PR_ROT)
+	    {
+	      for (i = 16; i < 63; i++)
+		{
+		  specs[count] = tmpl;
+		  specs[count++].index = i;
+		}
+	    }
+	  else
+	    {
+	      for (i = 1; i < 63; i++)
+		{
+		  specs[count] = tmpl;
+		  specs[count++].index = i;
+		}
+	    }
+	}
       else if (note == 7)
-        {
-          valueT mask = 0;
-          /* mark only those registers indicated by the mask */
-          if (rsrc_write
-              && idesc->operands[0] == IA64_OPND_PR)
-            {
-              mask = CURR_SLOT.opnd[2].X_add_number;
-              if (mask & ((valueT) 1<<16))
-                mask |= ~(valueT) 0xffff;
-              for (i=1;i < 63;i++)
-                {
-                  if (mask & ((valueT) 1<<i))
-                    {
-                      specs[count] = tmpl;
-                      specs[count++].index = i;
-                    }
-                }
-            }
-          else if (rsrc_write
-                   && idesc->operands[0] == IA64_OPND_PR_ROT)
-            {
-              for (i=16;i < 63;i++)
-                {
-                  specs[count] = tmpl;
-                  specs[count++].index = i;
-                }
-            }
-          else
-            {
-              UNHANDLED;
-            }
-        }
+	{
+	  valueT mask = 0;
+	  /* Mark only those registers indicated by the mask.  */
+	  if (rsrc_write
+	      && idesc->operands[0] == IA64_OPND_PR)
+	    {
+	      mask = CURR_SLOT.opnd[2].X_add_number;
+	      if (mask & ((valueT) 1 << 16))
+		mask |= ~(valueT) 0xffff;
+	      for (i = 1; i < 63; i++)
+		{
+		  if (mask & ((valueT) 1 << i))
+		    {
+		      specs[count] = tmpl;
+		      specs[count++].index = i;
+		    }
+		}
+	    }
+	  else if (rsrc_write
+		   && idesc->operands[0] == IA64_OPND_PR_ROT)
+	    {
+	      for (i = 16; i < 63; i++)
+		{
+		  specs[count] = tmpl;
+		  specs[count++].index = i;
+		}
+	    }
+	  else
+	    {
+	      UNHANDLED;
+	    }
+	}
       else if (note == 11) /* note 11 implies note 1 as well */
-        {
-          if (rsrc_write)
-            {
-              for (i=0;i < idesc->num_outputs;i++)
-                {
-                  if (idesc->operands[i] == IA64_OPND_P1
-                      || idesc->operands[i] == IA64_OPND_P2)
-                    {
-                      int regno = CURR_SLOT.opnd[i].X_add_number - REG_P;
-                      if (regno != 0)
-                        {
-                          specs[count] = tmpl;
-                          specs[count++].index = regno;
-                        }
-                    }
-                }
-            }
-          else
-            {
-              UNHANDLED;
-            }
-        }
+	{
+	  if (rsrc_write)
+	    {
+	      for (i = 0; i < idesc->num_outputs; i++)
+		{
+		  if (idesc->operands[i] == IA64_OPND_P1
+		      || idesc->operands[i] == IA64_OPND_P2)
+		    {
+		      int regno = CURR_SLOT.opnd[i].X_add_number - REG_P;
+		      if (regno != 0)
+			{
+			  specs[count] = tmpl;
+			  specs[count++].index = regno;
+			}
+		    }
+		}
+	    }
+	  else
+	    {
+	      UNHANDLED;
+	    }
+	}
       else if (note == 12)
-        {
-          if (CURR_SLOT.qp_regno != 0)
-            {
-              specs[count] = tmpl;
-              specs[count++].index = CURR_SLOT.qp_regno;
-            }
-        }
+	{
+	  if (CURR_SLOT.qp_regno != 0)
+	    {
+	      specs[count] = tmpl;
+	      specs[count++].index = CURR_SLOT.qp_regno;
+	    }
+	}
       else if (note == 1)
-        {
-          if (rsrc_write)
-            {
-              int p1 = CURR_SLOT.opnd[0].X_add_number - REG_P;
-              int p2 = CURR_SLOT.opnd[1].X_add_number - REG_P;
-              if ((idesc->operands[0] == IA64_OPND_P1
-                   || idesc->operands[0] == IA64_OPND_P2)
-                  && p1 != 0 && p1 != 63)
-                {
-                  specs[count] = tmpl;
-                  specs[count++].index = p1;
-                }
-              if ((idesc->operands[1] == IA64_OPND_P1
-                   || idesc->operands[1] == IA64_OPND_P2)
-                  && p2 != 0 && p2 != 63)
-                {
-                  specs[count] = tmpl;
-                  specs[count++].index = p2;
-                }
-            }
-          else
-            {
-              if (CURR_SLOT.qp_regno != 0)
-                {
-                  specs[count] = tmpl;
-                  specs[count++].index = CURR_SLOT.qp_regno;
-                }
-              if (idesc->operands[1] == IA64_OPND_PR)
-                {
-                  for (i=1;i < 63;i++)
-                    {
-                      specs[count] = tmpl;
-                      specs[count++].index = i;
-                    }
-                }
-            }
-        }
+	{
+	  if (rsrc_write)
+	    {
+	      int p1 = CURR_SLOT.opnd[0].X_add_number - REG_P;
+	      int p2 = CURR_SLOT.opnd[1].X_add_number - REG_P;
+	      if ((idesc->operands[0] == IA64_OPND_P1
+		   || idesc->operands[0] == IA64_OPND_P2)
+		  && p1 != 0 && p1 != 63)
+		{
+		  specs[count] = tmpl;
+		  specs[count++].index = p1;
+		}
+	      if ((idesc->operands[1] == IA64_OPND_P1
+		   || idesc->operands[1] == IA64_OPND_P2)
+		  && p2 != 0 && p2 != 63)
+		{
+		  specs[count] = tmpl;
+		  specs[count++].index = p2;
+		}
+	    }
+	  else
+	    {
+	      if (CURR_SLOT.qp_regno != 0)
+		{
+		  specs[count] = tmpl;
+		  specs[count++].index = CURR_SLOT.qp_regno;
+		}
+	      if (idesc->operands[1] == IA64_OPND_PR)
+		{
+		  for (i = 1; i < 63; i++)
+		    {
+		      specs[count] = tmpl;
+		      specs[count++].index = i;
+		    }
+		}
+	    }
+	}
       else
-        {
-          UNHANDLED;
-        }
+	{
+	  UNHANDLED;
+	}
       break;
 
     case IA64_RS_PSR:
       /* Verify that the instruction is using the PSR bit indicated in
-         dep->regindex */
+	 dep->regindex.  */
       if (note == 0)
-        {
-          if (idesc->operands[!rsrc_write] == IA64_OPND_PSR_UM)
-            {
-              if (dep->regindex < 6)
-                {
-                  specs[count++] = tmpl;
-                }
-            }
-          else if (idesc->operands[!rsrc_write] == IA64_OPND_PSR)
-            {
-              if (dep->regindex < 32
-                  || dep->regindex == 35
-                  || dep->regindex == 36
-                  || (!rsrc_write && dep->regindex == PSR_CPL))
-                {
-                  specs[count++] = tmpl;
-                }
-            }
-          else if (idesc->operands[!rsrc_write] == IA64_OPND_PSR_L)
-            {
-              if (dep->regindex < 32
-                  || dep->regindex == 35
-                  || dep->regindex == 36
-                  || (rsrc_write && dep->regindex == PSR_CPL))
-                {
-                  specs[count++] = tmpl;
-                }
-            }
-          else
-            {
-              /* Several PSR bits have very specific dependencies.  */
-              switch (dep->regindex)
-                {
-                default:
-                  specs[count++] = tmpl;
-                  break;
-                case PSR_IC:
-                  if (rsrc_write)
-                    {
-                      specs[count++] = tmpl;
-                    }
-                  else
-                    {
-                      /* Only certain CR accesses use PSR.ic */
-                      if (idesc->operands[0] == IA64_OPND_CR3
-                          || idesc->operands[1] == IA64_OPND_CR3)
-                        {
-                          int index =
-                            ((idesc->operands[0] == IA64_OPND_CR3)
-                             ? 0 : 1);
-                          int regno =
-                            CURR_SLOT.opnd[index].X_add_number - REG_CR;
+	{
+	  if (idesc->operands[!rsrc_write] == IA64_OPND_PSR_UM)
+	    {
+	      if (dep->regindex < 6)
+		{
+		  specs[count++] = tmpl;
+		}
+	    }
+	  else if (idesc->operands[!rsrc_write] == IA64_OPND_PSR)
+	    {
+	      if (dep->regindex < 32
+		  || dep->regindex == 35
+		  || dep->regindex == 36
+		  || (!rsrc_write && dep->regindex == PSR_CPL))
+		{
+		  specs[count++] = tmpl;
+		}
+	    }
+	  else if (idesc->operands[!rsrc_write] == IA64_OPND_PSR_L)
+	    {
+	      if (dep->regindex < 32
+		  || dep->regindex == 35
+		  || dep->regindex == 36
+		  || (rsrc_write && dep->regindex == PSR_CPL))
+		{
+		  specs[count++] = tmpl;
+		}
+	    }
+	  else
+	    {
+	      /* Several PSR bits have very specific dependencies.  */
+	      switch (dep->regindex)
+		{
+		default:
+		  specs[count++] = tmpl;
+		  break;
+		case PSR_IC:
+		  if (rsrc_write)
+		    {
+		      specs[count++] = tmpl;
+		    }
+		  else
+		    {
+		      /* Only certain CR accesses use PSR.ic */
+		      if (idesc->operands[0] == IA64_OPND_CR3
+			  || idesc->operands[1] == IA64_OPND_CR3)
+			{
+			  int index =
+			    ((idesc->operands[0] == IA64_OPND_CR3)
+			     ? 0 : 1);
+			  int regno =
+			    CURR_SLOT.opnd[index].X_add_number - REG_CR;
 
-                          switch (regno)
-                            {
-                            default:
-                              break;
-                            case CR_ITIR:
-                            case CR_IFS:
-                            case CR_IIM:
-                            case CR_IIP:
-                            case CR_IPSR:
-                            case CR_ISR:
-                            case CR_IFA:
-                            case CR_IHA:
-                            case CR_IIPA:
-                              specs[count++] = tmpl;
-                              break;
-                            }
-                        }
-                    }
-                  break;
-                case PSR_CPL:
-                  if (rsrc_write)
-                    {
-                      specs[count++] = tmpl;
-                    }
-                  else
-                    {
-                      /* Only some AR accesses use cpl */
-                      if (idesc->operands[0] == IA64_OPND_AR3
-                          || idesc->operands[1] == IA64_OPND_AR3)
-                        {
-                          int index =
-                            ((idesc->operands[0] == IA64_OPND_AR3)
-                             ? 0 : 1);
-                          int regno =
-                            CURR_SLOT.opnd[index].X_add_number - REG_AR;
+			  switch (regno)
+			    {
+			    default:
+			      break;
+			    case CR_ITIR:
+			    case CR_IFS:
+			    case CR_IIM:
+			    case CR_IIP:
+			    case CR_IPSR:
+			    case CR_ISR:
+			    case CR_IFA:
+			    case CR_IHA:
+			    case CR_IIPA:
+			      specs[count++] = tmpl;
+			      break;
+			    }
+			}
+		    }
+		  break;
+		case PSR_CPL:
+		  if (rsrc_write)
+		    {
+		      specs[count++] = tmpl;
+		    }
+		  else
+		    {
+		      /* Only some AR accesses use cpl */
+		      if (idesc->operands[0] == IA64_OPND_AR3
+			  || idesc->operands[1] == IA64_OPND_AR3)
+			{
+			  int index =
+			    ((idesc->operands[0] == IA64_OPND_AR3)
+			     ? 0 : 1);
+			  int regno =
+			    CURR_SLOT.opnd[index].X_add_number - REG_AR;
 
-                          if (regno == AR_ITC
-                              || (index == 0
-                                  && (regno == AR_ITC
-                                      || regno == AR_RSC
-                                      || (regno >= AR_K0
-                                          && regno <= AR_K7))))
-                            {
-                              specs[count++] = tmpl;
-                            }
-                        }
-                      else
-                        {
-                          specs[count++] = tmpl;
-                        }
-                      break;
-                    }
-                }
-            }
-        }
+			  if (regno == AR_ITC
+			      || (index == 0
+				  && (regno == AR_ITC
+				      || regno == AR_RSC
+				      || (regno >= AR_K0
+					  && regno <= AR_K7))))
+			    {
+			      specs[count++] = tmpl;
+			    }
+			}
+		      else
+			{
+			  specs[count++] = tmpl;
+			}
+		      break;
+		    }
+		}
+	    }
+	}
       else if (note == 7)
-        {
-          valueT mask = 0;
-          if (idesc->operands[0] == IA64_OPND_IMMU24)
-            {
-              mask = CURR_SLOT.opnd[0].X_add_number;
-            }
-          else
-            {
-              UNHANDLED;
-            }
-          if (mask & ((valueT) 1<<dep->regindex))
-            {
-              specs[count++] = tmpl;
-            }
-        }
+	{
+	  valueT mask = 0;
+	  if (idesc->operands[0] == IA64_OPND_IMMU24)
+	    {
+	      mask = CURR_SLOT.opnd[0].X_add_number;
+	    }
+	  else
+	    {
+	      UNHANDLED;
+	    }
+	  if (mask & ((valueT) 1 << dep->regindex))
+	    {
+	      specs[count++] = tmpl;
+	    }
+	}
       else if (note == 8)
-        {
-          int min = dep->regindex == PSR_DFL ? 2 : 32;
-          int max = dep->regindex == PSR_DFL ? 31 : 127;
-          /* dfh is read on FR32-127; dfl is read on FR2-31 */
-          for (i=0;i < NELEMS(idesc->operands);i++)
-            {
-              if (idesc->operands[i] == IA64_OPND_F1
-                  || idesc->operands[i] == IA64_OPND_F2
-                  || idesc->operands[i] == IA64_OPND_F3
-                  || idesc->operands[i] == IA64_OPND_F4)
-                {
-                  int reg = CURR_SLOT.opnd[i].X_add_number - REG_FR;
-                  if (reg >= min && reg <= max)
-                    {
-                      specs[count++] = tmpl;
-                    }
-                }
-            }
-        }
+	{
+	  int min = dep->regindex == PSR_DFL ? 2 : 32;
+	  int max = dep->regindex == PSR_DFL ? 31 : 127;
+	  /* dfh is read on FR32-127; dfl is read on FR2-31 */
+	  for (i = 0; i < NELEMS (idesc->operands); i++)
+	    {
+	      if (idesc->operands[i] == IA64_OPND_F1
+		  || idesc->operands[i] == IA64_OPND_F2
+		  || idesc->operands[i] == IA64_OPND_F3
+		  || idesc->operands[i] == IA64_OPND_F4)
+		{
+		  int reg = CURR_SLOT.opnd[i].X_add_number - REG_FR;
+		  if (reg >= min && reg <= max)
+		    {
+		      specs[count++] = tmpl;
+		    }
+		}
+	    }
+	}
       else if (note == 9)
-        {
-          int min = dep->regindex == PSR_MFL ? 2 : 32;
-          int max = dep->regindex == PSR_MFL ? 31 : 127;
-          /* mfh is read on writes to FR32-127; mfl is read on writes to
-             FR2-31 */
-          for (i=0;i < idesc->num_outputs;i++)
-            {
-              if (idesc->operands[i] == IA64_OPND_F1)
-                {
-                  int reg = CURR_SLOT.opnd[i].X_add_number - REG_FR;
-                  if (reg >= min && reg <= max)
-                    {
-                      specs[count++] = tmpl;
-                    }
-                }
-            }
-        }
+	{
+	  int min = dep->regindex == PSR_MFL ? 2 : 32;
+	  int max = dep->regindex == PSR_MFL ? 31 : 127;
+	  /* mfh is read on writes to FR32-127; mfl is read on writes to
+	     FR2-31 */
+	  for (i = 0; i < idesc->num_outputs; i++)
+	    {
+	      if (idesc->operands[i] == IA64_OPND_F1)
+		{
+		  int reg = CURR_SLOT.opnd[i].X_add_number - REG_FR;
+		  if (reg >= min && reg <= max)
+		    {
+		      specs[count++] = tmpl;
+		    }
+		}
+	    }
+	}
       else if (note == 10)
-        {
-          for (i=0;i < NELEMS(idesc->operands);i++)
-            {
-              if (idesc->operands[i] == IA64_OPND_R1
-                  || idesc->operands[i] == IA64_OPND_R2
-                  || idesc->operands[i] == IA64_OPND_R3)
-                {
-                  int regno = CURR_SLOT.opnd[i].X_add_number - REG_GR;
-                  if (regno >= 16 && regno <= 31)
-                    {
-                      specs[count++] = tmpl;
-                    }
-                }
-            }
-        }
+	{
+	  for (i = 0; i < NELEMS (idesc->operands); i++)
+	    {
+	      if (idesc->operands[i] == IA64_OPND_R1
+		  || idesc->operands[i] == IA64_OPND_R2
+		  || idesc->operands[i] == IA64_OPND_R3)
+		{
+		  int regno = CURR_SLOT.opnd[i].X_add_number - REG_GR;
+		  if (regno >= 16 && regno <= 31)
+		    {
+		      specs[count++] = tmpl;
+		    }
+		}
+	    }
+	}
       else
-        {
-          UNHANDLED;
-        }
+	{
+	  UNHANDLED;
+	}
       break;
 
     case IA64_RS_AR_FPSR:
       if (idesc->operands[!rsrc_write] == IA64_OPND_AR3)
-        {
-          int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_AR;
-          if (regno == AR_FPSR)
-            {
-              specs[count++] = tmpl;
-            }
-        }
+	{
+	  int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_AR;
+	  if (regno == AR_FPSR)
+	    {
+	      specs[count++] = tmpl;
+	    }
+	}
       else
-        {
-          specs[count++] = tmpl;
-        }
+	{
+	  specs[count++] = tmpl;
+	}
       break;
 
     case IA64_RS_ARX:
       /* Handle all AR[REG] resources */
       if (note == 0 || note == 1)
-        {
-          int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_AR;
-          if (idesc->operands[!rsrc_write] == IA64_OPND_AR3
-              && regno == dep->regindex)
-            {
-              specs[count++] = tmpl;
-            }
-          /* other AR[REG] resources may be affected by AR accesses */
-          else if (idesc->operands[0] == IA64_OPND_AR3)
-            {
-              /* AR[] writes */
-              regno = CURR_SLOT.opnd[0].X_add_number - REG_AR;
-              switch (dep->regindex)
-                {
-                default:
-                  break;
-                case AR_BSP:
-                case AR_RNAT:
-                  if (regno == AR_BSPSTORE)
-                    {
-                      specs[count++] = tmpl;
-                    }
-                case AR_RSC:
-                  if (!rsrc_write &&
-                      (regno == AR_BSPSTORE
-                       || regno == AR_RNAT))
-                    {
-                      specs[count++] = tmpl;
-                    }
-                  break;
-                }
-            }
-          else if (idesc->operands[1] == IA64_OPND_AR3)
-            {
-              /* AR[] reads */
-              regno = CURR_SLOT.opnd[1].X_add_number - REG_AR;
-              switch (dep->regindex)
-                {
-                default:
-                  break;
-                case AR_RSC:
-                  if (regno == AR_BSPSTORE || regno == AR_RNAT)
-                    {
-                      specs[count++] = tmpl;
-                    }
-                  break;
-                }
-            }
-          else
-            {
-              specs[count++] = tmpl;
-            }
-        }
+	{
+	  int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_AR;
+	  if (idesc->operands[!rsrc_write] == IA64_OPND_AR3
+	      && regno == dep->regindex)
+	    {
+	      specs[count++] = tmpl;
+	    }
+	  /* other AR[REG] resources may be affected by AR accesses */
+	  else if (idesc->operands[0] == IA64_OPND_AR3)
+	    {
+	      /* AR[] writes */
+	      regno = CURR_SLOT.opnd[0].X_add_number - REG_AR;
+	      switch (dep->regindex)
+		{
+		default:
+		  break;
+		case AR_BSP:
+		case AR_RNAT:
+		  if (regno == AR_BSPSTORE)
+		    {
+		      specs[count++] = tmpl;
+		    }
+		case AR_RSC:
+		  if (!rsrc_write &&
+		      (regno == AR_BSPSTORE
+		       || regno == AR_RNAT))
+		    {
+		      specs[count++] = tmpl;
+		    }
+		  break;
+		}
+	    }
+	  else if (idesc->operands[1] == IA64_OPND_AR3)
+	    {
+	      /* AR[] reads */
+	      regno = CURR_SLOT.opnd[1].X_add_number - REG_AR;
+	      switch (dep->regindex)
+		{
+		default:
+		  break;
+		case AR_RSC:
+		  if (regno == AR_BSPSTORE || regno == AR_RNAT)
+		    {
+		      specs[count++] = tmpl;
+		    }
+		  break;
+		}
+	    }
+	  else
+	    {
+	      specs[count++] = tmpl;
+	    }
+	}
       else
-        {
-          UNHANDLED;
-        }
+	{
+	  UNHANDLED;
+	}
       break;
 
     case IA64_RS_CRX:
       /* Handle all CR[REG] resources */
       if (note == 0 || note == 1)
-        {
-          if (idesc->operands[!rsrc_write] == IA64_OPND_CR3)
-            {
-              int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_CR;
-              if (regno == dep->regindex)
-                {
-                  specs[count++] = tmpl;
-                }
-              else if (!rsrc_write)
-                {
-                  /* Reads from CR[IVR] affect other resources.  */
-                  if (regno == CR_IVR)
-                    {
-                      if ((dep->regindex >= CR_IRR0
-                           && dep->regindex <= CR_IRR3)
-                          || dep->regindex == CR_TPR)
-                        {
-                          specs[count++] = tmpl;
-                        }
-                    }
-                }
-            }
-          else
-            {
-              specs[count++] = tmpl;
-            }
-        }
+	{
+	  if (idesc->operands[!rsrc_write] == IA64_OPND_CR3)
+	    {
+	      int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_CR;
+	      if (regno == dep->regindex)
+		{
+		  specs[count++] = tmpl;
+		}
+	      else if (!rsrc_write)
+		{
+		  /* Reads from CR[IVR] affect other resources.  */
+		  if (regno == CR_IVR)
+		    {
+		      if ((dep->regindex >= CR_IRR0
+			   && dep->regindex <= CR_IRR3)
+			  || dep->regindex == CR_TPR)
+			{
+			  specs[count++] = tmpl;
+			}
+		    }
+		}
+	    }
+	  else
+	    {
+	      specs[count++] = tmpl;
+	    }
+	}
       else
-        {
-          UNHANDLED;
-        }
+	{
+	  UNHANDLED;
+	}
       break;
 
     case IA64_RS_INSERVICE:
       /* look for write of EOI (67) or read of IVR (65) */
       if ((idesc->operands[0] == IA64_OPND_CR3
-           && CURR_SLOT.opnd[0].X_add_number - REG_CR == CR_EOI)
-          || (idesc->operands[1] == IA64_OPND_CR3
-              && CURR_SLOT.opnd[1].X_add_number - REG_CR == CR_IVR))
-        {
-          specs[count++] = tmpl;
-        }
+	   && CURR_SLOT.opnd[0].X_add_number - REG_CR == CR_EOI)
+	  || (idesc->operands[1] == IA64_OPND_CR3
+	      && CURR_SLOT.opnd[1].X_add_number - REG_CR == CR_IVR))
+	{
+	  specs[count++] = tmpl;
+	}
       break;
 
     case IA64_RS_GR0:
       if (note == 1)
-        {
-          specs[count++] = tmpl;
-        }
+	{
+	  specs[count++] = tmpl;
+	}
       else
-        {
-          UNHANDLED;
-        }
+	{
+	  UNHANDLED;
+	}
       break;
 
     case IA64_RS_CFM:
       if (note != 2)
-        {
-          specs[count++] = tmpl;
-        }
+	{
+	  specs[count++] = tmpl;
+	}
       else
-        {
-          /* Check if any of the registers accessed are in the rotating region.
-             mov to/from pr accesses CFM only when qp_regno is in the rotating
-             region */
-          for (i=0;i < NELEMS(idesc->operands);i++)
-            {
-              if (idesc->operands[i] == IA64_OPND_R1
-                  || idesc->operands[i] == IA64_OPND_R2
-                  || idesc->operands[i] == IA64_OPND_R3)
-                {
-                  int num = CURR_SLOT.opnd[i].X_add_number - REG_GR;
-                  /* Assumes that md.rot.num_regs is always valid */
-                  if (md.rot.num_regs > 0
-                      && num > 31
-                      && num < 31 + md.rot.num_regs)
-                    {
-                      specs[count] = tmpl;
-                      specs[count++].specific = 0;
-                    }
-                }
-              else if (idesc->operands[i] == IA64_OPND_F1
-                       || idesc->operands[i] == IA64_OPND_F2
-                       || idesc->operands[i] == IA64_OPND_F3
-                       || idesc->operands[i] == IA64_OPND_F4)
-                {
-                  int num = CURR_SLOT.opnd[i].X_add_number - REG_FR;
-                  if (num > 31)
-                    {
-                      specs[count] = tmpl;
-                      specs[count++].specific = 0;
-                    }
-                }
-              else if (idesc->operands[i] == IA64_OPND_P1
-                       || idesc->operands[i] == IA64_OPND_P2)
-                {
-                  int num = CURR_SLOT.opnd[i].X_add_number - REG_P;
-                  if (num > 15)
-                    {
-                      specs[count] = tmpl;
-                      specs[count++].specific = 0;
-                    }
-                }
-            }
-          if (CURR_SLOT.qp_regno > 15)
-            {
-              specs[count] = tmpl;
-              specs[count++].specific = 0;
-            }
-        }
+	{
+	  /* Check if any of the registers accessed are in the rotating region.
+	     mov to/from pr accesses CFM only when qp_regno is in the rotating
+	     region */
+	  for (i = 0; i < NELEMS (idesc->operands); i++)
+	    {
+	      if (idesc->operands[i] == IA64_OPND_R1
+		  || idesc->operands[i] == IA64_OPND_R2
+		  || idesc->operands[i] == IA64_OPND_R3)
+		{
+		  int num = CURR_SLOT.opnd[i].X_add_number - REG_GR;
+		  /* Assumes that md.rot.num_regs is always valid */
+		  if (md.rot.num_regs > 0
+		      && num > 31
+		      && num < 31 + md.rot.num_regs)
+		    {
+		      specs[count] = tmpl;
+		      specs[count++].specific = 0;
+		    }
+		}
+	      else if (idesc->operands[i] == IA64_OPND_F1
+		       || idesc->operands[i] == IA64_OPND_F2
+		       || idesc->operands[i] == IA64_OPND_F3
+		       || idesc->operands[i] == IA64_OPND_F4)
+		{
+		  int num = CURR_SLOT.opnd[i].X_add_number - REG_FR;
+		  if (num > 31)
+		    {
+		      specs[count] = tmpl;
+		      specs[count++].specific = 0;
+		    }
+		}
+	      else if (idesc->operands[i] == IA64_OPND_P1
+		       || idesc->operands[i] == IA64_OPND_P2)
+		{
+		  int num = CURR_SLOT.opnd[i].X_add_number - REG_P;
+		  if (num > 15)
+		    {
+		      specs[count] = tmpl;
+		      specs[count++].specific = 0;
+		    }
+		}
+	    }
+	  if (CURR_SLOT.qp_regno > 15)
+	    {
+	      specs[count] = tmpl;
+	      specs[count++].specific = 0;
+	    }
+	}
       break;
 
     case IA64_RS_PR63:
       if (note == 0)
-        {
-          specs[count++] = tmpl;
-        }
+	{
+	  specs[count++] = tmpl;
+	}
       else if (note == 11)
-        {
-          if ((idesc->operands[0] == IA64_OPND_P1
-               && CURR_SLOT.opnd[0].X_add_number - REG_P == 63)
-              || (idesc->operands[1] == IA64_OPND_P2
-                  && CURR_SLOT.opnd[1].X_add_number - REG_P == 63))
-            {
-              specs[count++] = tmpl;
-            }
-        }
+	{
+	  if ((idesc->operands[0] == IA64_OPND_P1
+	       && CURR_SLOT.opnd[0].X_add_number - REG_P == 63)
+	      || (idesc->operands[1] == IA64_OPND_P2
+		  && CURR_SLOT.opnd[1].X_add_number - REG_P == 63))
+	    {
+	      specs[count++] = tmpl;
+	    }
+	}
       else if (note == 12)
-        {
-          if (CURR_SLOT.qp_regno == 63)
-            {
-              specs[count++] = tmpl;
-            }
-        }
+	{
+	  if (CURR_SLOT.qp_regno == 63)
+	    {
+	      specs[count++] = tmpl;
+	    }
+	}
       else if (note == 7)
-        {
-          valueT mask = 0;
-          if (idesc->operands[2] == IA64_OPND_IMM17)
-            mask = CURR_SLOT.opnd[2].X_add_number;
-          if (mask & ((valueT) 1<<63))
-            {
-              specs[count++] = tmpl;
-            }
-        }
+	{
+	  valueT mask = 0;
+	  if (idesc->operands[2] == IA64_OPND_IMM17)
+	    mask = CURR_SLOT.opnd[2].X_add_number;
+	  if (mask & ((valueT) 1 << 63))
+	    {
+	      specs[count++] = tmpl;
+	    }
+	}
       else if (note == 1)
-        {
-          if (rsrc_write)
-            {
-              for (i=0;i < idesc->num_outputs;i++)
-                if ((idesc->operands[i] == IA64_OPND_P1
-                     || idesc->operands[i] == IA64_OPND_P2)
-                    && CURR_SLOT.opnd[i].X_add_number - REG_P == 63)
-                  {
-                    specs[count++] = tmpl;
-                  }
-            }
-          else
-            {
-              if (CURR_SLOT.qp_regno == 63)
-                {
-                  specs[count++] = tmpl;
-                }
-            }
-        }
+	{
+	  if (rsrc_write)
+	    {
+	      for (i = 0; i < idesc->num_outputs; i++)
+		if ((idesc->operands[i] == IA64_OPND_P1
+		     || idesc->operands[i] == IA64_OPND_P2)
+		    && CURR_SLOT.opnd[i].X_add_number - REG_P == 63)
+		  {
+		    specs[count++] = tmpl;
+		  }
+	    }
+	  else
+	    {
+	      if (CURR_SLOT.qp_regno == 63)
+		{
+		  specs[count++] = tmpl;
+		}
+	    }
+	}
       else
-        {
-          UNHANDLED;
-        }
+	{
+	  UNHANDLED;
+	}
       break;
 
     case IA64_RS_RSE:
       /* FIXME we can identify some individual RSE written resources, but RSE
-         read resources have not yet been completely identified, so for now
-         treat RSE as a single resource */
+	 read resources have not yet been completely identified, so for now
+	 treat RSE as a single resource */
       if (strncmp (idesc->name, "mov", 3) == 0)
-        {
-          if (rsrc_write)
-            {
-              if (idesc->operands[0] == IA64_OPND_AR3
-                  && CURR_SLOT.opnd[0].X_add_number - REG_AR == AR_BSPSTORE)
-                {
-                  specs[count] = tmpl;
-                  specs[count++].index = 0; /* IA64_RSE_BSPLOAD/RNATBITINDEX */
-                }
-            }
-          else
-            {
-              if (idesc->operands[0] == IA64_OPND_AR3)
-                {
-                  if (CURR_SLOT.opnd[0].X_add_number - REG_AR == AR_BSPSTORE
-                      || CURR_SLOT.opnd[0].X_add_number - REG_AR == AR_RNAT)
-                    {
-                      specs[count++] = tmpl;
-                    }
-                }
-              else if (idesc->operands[1] == IA64_OPND_AR3)
-                {
-                  if (CURR_SLOT.opnd[1].X_add_number - REG_AR == AR_BSP
-                      || CURR_SLOT.opnd[1].X_add_number - REG_AR == AR_BSPSTORE
-                      || CURR_SLOT.opnd[1].X_add_number - REG_AR == AR_RNAT)
-                    {
-                      specs[count++] = tmpl;
-                    }
-                }
-            }
-        }
+	{
+	  if (rsrc_write)
+	    {
+	      if (idesc->operands[0] == IA64_OPND_AR3
+		  && CURR_SLOT.opnd[0].X_add_number - REG_AR == AR_BSPSTORE)
+		{
+		  specs[count] = tmpl;
+		  specs[count++].index = 0; /* IA64_RSE_BSPLOAD/RNATBITINDEX */
+		}
+	    }
+	  else
+	    {
+	      if (idesc->operands[0] == IA64_OPND_AR3)
+		{
+		  if (CURR_SLOT.opnd[0].X_add_number - REG_AR == AR_BSPSTORE
+		      || CURR_SLOT.opnd[0].X_add_number - REG_AR == AR_RNAT)
+		    {
+		      specs[count++] = tmpl;
+		    }
+		}
+	      else if (idesc->operands[1] == IA64_OPND_AR3)
+		{
+		  if (CURR_SLOT.opnd[1].X_add_number - REG_AR == AR_BSP
+		      || CURR_SLOT.opnd[1].X_add_number - REG_AR == AR_BSPSTORE
+		      || CURR_SLOT.opnd[1].X_add_number - REG_AR == AR_RNAT)
+		    {
+		      specs[count++] = tmpl;
+		    }
+		}
+	    }
+	}
       else
-        {
-          specs[count++] = tmpl;
-        }
+	{
+	  specs[count++] = tmpl;
+	}
       break;
 
     case IA64_RS_ANY:
@@ -7520,30 +7540,30 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 }
 
 /* Clear branch flags on marked resources.  This breaks the link between the
-   QP of the marking instruction and a subsequent branch on the same QP.
-*/
+   QP of the marking instruction and a subsequent branch on the same QP.  */
+
 static void
 clear_qp_branch_flag (mask)
-  valueT mask;
+     valueT mask;
 {
   int i;
-  for (i = 0;i < regdepslen;i++)
+  for (i = 0; i < regdepslen; i++)
     {
       valueT bit = ((valueT) 1 << regdeps[i].qp_regno);
       if ((bit & mask) != 0)
-        {
-          regdeps[i].link_to_qp_branch = 0;
-        }
+	{
+	  regdeps[i].link_to_qp_branch = 0;
+	}
     }
 }
 
 /* Remove any mutexes which contain any of the PRs indicated in the mask.
 
-   Any changes to a PR clears the mutex relations which include that PR.
-*/
+   Any changes to a PR clears the mutex relations which include that PR.  */
+
 static void
 clear_qp_mutex (mask)
-  valueT mask;
+     valueT mask;
 {
   int i;
 
@@ -7551,28 +7571,28 @@ clear_qp_mutex (mask)
   while (i < qp_mutexeslen)
     {
       if ((qp_mutexes[i].prmask & mask) != 0)
-        {
-          if (md.debug_dv)
-            {
-              fprintf (stderr, "  Clearing mutex relation");
-              print_prmask (qp_mutexes[i].prmask);
-              fprintf (stderr, "\n");
-            }
-          qp_mutexes[i] = qp_mutexes[--qp_mutexeslen];
-        }
+	{
+	  if (md.debug_dv)
+	    {
+	      fprintf (stderr, "  Clearing mutex relation");
+	      print_prmask (qp_mutexes[i].prmask);
+	      fprintf (stderr, "\n");
+	    }
+	  qp_mutexes[i] = qp_mutexes[--qp_mutexeslen];
+	}
       else
-        ++i;
+	++i;
     }
 }
 
 /* Clear implies relations which contain PRs in the given masks.
    P1_MASK indicates the source of the implies relation, while P2_MASK
-   indicates the implied PR.
-*/
+   indicates the implied PR.  */
+
 static void
 clear_qp_implies (p1_mask, p2_mask)
-  valueT p1_mask;
-  valueT p2_mask;
+     valueT p1_mask;
+     valueT p2_mask;
 {
   int i;
 
@@ -7580,50 +7600,51 @@ clear_qp_implies (p1_mask, p2_mask)
   while (i < qp_implieslen)
     {
       if ((((valueT) 1 << qp_implies[i].p1) & p1_mask) != 0
-          || (((valueT) 1 << qp_implies[i].p2) & p2_mask) != 0)
-        {
-          if (md.debug_dv)
-            fprintf (stderr, "Clearing implied relation PR%d->PR%d\n",
-                     qp_implies[i].p1, qp_implies[i].p2);
-          qp_implies[i] = qp_implies[--qp_implieslen];
-        }
+	  || (((valueT) 1 << qp_implies[i].p2) & p2_mask) != 0)
+	{
+	  if (md.debug_dv)
+	    fprintf (stderr, "Clearing implied relation PR%d->PR%d\n",
+		     qp_implies[i].p1, qp_implies[i].p2);
+	  qp_implies[i] = qp_implies[--qp_implieslen];
+	}
       else
-        ++i;
+	++i;
     }
 }
 
-/* add the PRs specified to the list of implied relations */
+/* Add the PRs specified to the list of implied relations.  */
+
 static void
 add_qp_imply (p1, p2)
-  int p1, p2;
+     int p1, p2;
 {
   valueT mask;
   valueT bit;
   int i;
 
-  /* p0 is not meaningful here */
+  /* p0 is not meaningful here.  */
   if (p1 == 0 || p2 == 0)
     abort ();
 
   if (p1 == p2)
     return;
 
-  /* if it exists already, ignore it */
-  for (i=0;i < qp_implieslen;i++)
+  /* If it exists already, ignore it.  */
+  for (i = 0; i < qp_implieslen; i++)
     {
       if (qp_implies[i].p1 == p1
-          && qp_implies[i].p2 == p2
-          && qp_implies[i].path == md.path
-          && !qp_implies[i].p2_branched)
-        return;
+	  && qp_implies[i].p2 == p2
+	  && qp_implies[i].path == md.path
+	  && !qp_implies[i].p2_branched)
+	return;
     }
 
   if (qp_implieslen == qp_impliestotlen)
     {
       qp_impliestotlen += 20;
       qp_implies = (struct qp_imply *)
-        xrealloc ((void *)qp_implies,
-                  qp_impliestotlen * sizeof (struct qp_imply));
+	xrealloc ((void *) qp_implies,
+		  qp_impliestotlen * sizeof (struct qp_imply));
     }
   if (md.debug_dv)
     fprintf (stderr, "  Registering PR%d implies PR%d\n", p1, p2);
@@ -7635,30 +7656,31 @@ add_qp_imply (p1, p2)
   /* Add in the implied transitive relations; for everything that p2 implies,
      make p1 imply that, too; for everything that implies p1, make it imply p2
      as well.  */
-  for (i=0;i < qp_implieslen;i++)
+  for (i = 0; i < qp_implieslen; i++)
     {
       if (qp_implies[i].p1 == p2)
-        add_qp_imply (p1, qp_implies[i].p2);
+	add_qp_imply (p1, qp_implies[i].p2);
       if (qp_implies[i].p2 == p1)
-        add_qp_imply (qp_implies[i].p1, p2);
+	add_qp_imply (qp_implies[i].p1, p2);
     }
   /* Add in mutex relations implied by this implies relation; for each mutex
      relation containing p2, duplicate it and replace p2 with p1.  */
   bit = (valueT) 1 << p1;
   mask = (valueT) 1 << p2;
-  for (i=0;i < qp_mutexeslen;i++)
+  for (i = 0; i < qp_mutexeslen; i++)
     {
       if (qp_mutexes[i].prmask & mask)
-        add_qp_mutex ((qp_mutexes[i].prmask & ~mask) | bit);
+	add_qp_mutex ((qp_mutexes[i].prmask & ~mask) | bit);
     }
 }
 
 /* Add the PRs specified in the mask to the mutex list; this means that only
    one of the PRs can be true at any time.  PR0 should never be included in
    the mask.  */
+
 static void
 add_qp_mutex (mask)
-  valueT mask;
+     valueT mask;
 {
   if (mask & 0x1)
     abort ();
@@ -7667,8 +7689,8 @@ add_qp_mutex (mask)
     {
       qp_mutexestotlen += 20;
       qp_mutexes = (struct qpmutex *)
-        xrealloc ((void *)qp_mutexes,
-                  qp_mutexestotlen * sizeof (struct qpmutex));
+	xrealloc ((void *) qp_mutexes,
+		  qp_mutexestotlen * sizeof (struct qpmutex));
     }
   if (md.debug_dv)
     {
@@ -7686,34 +7708,33 @@ clear_register_values ()
   int i;
   if (md.debug_dv)
     fprintf (stderr, "  Clearing register values\n");
-  for (i=1;i < NELEMS(gr_values);i++)
+  for (i = 1; i < NELEMS (gr_values); i++)
     gr_values[i].known = 0;
 }
 
 /* Keep track of register values/changes which affect DV tracking.
 
    optimization note: should add a flag to classes of insns where otherwise we
-   have to examine a group of strings to identify them.
+   have to examine a group of strings to identify them.  */
 
- */
 static void
 note_register_values (idesc)
-  struct ia64_opcode *idesc;
+     struct ia64_opcode *idesc;
 {
   valueT qp_changemask = 0;
   int i;
 
-  /* invalidate values for registers being written to */
-  for (i=0;i < idesc->num_outputs;i++)
+  /* Invalidate values for registers being written to.  */
+  for (i = 0; i < idesc->num_outputs; i++)
     {
       if (idesc->operands[i] == IA64_OPND_R1
-          || idesc->operands[i] == IA64_OPND_R2
-          || idesc->operands[i] == IA64_OPND_R3)
-        {
-          int regno = CURR_SLOT.opnd[i].X_add_number - REG_GR;
-          if (regno > 0 && regno < NELEMS(gr_values))
-            gr_values[regno].known = 0;
-        }
+	  || idesc->operands[i] == IA64_OPND_R2
+	  || idesc->operands[i] == IA64_OPND_R3)
+	{
+	  int regno = CURR_SLOT.opnd[i].X_add_number - REG_GR;
+	  if (regno > 0 && regno < NELEMS (gr_values))
+	    gr_values[regno].known = 0;
+	}
       else if (idesc->operands[i] == IA64_OPND_R3_2)
 	{
 	  int regno = CURR_SLOT.opnd[i].X_add_number - REG_GR;
@@ -7721,50 +7742,50 @@ note_register_values (idesc)
 	    gr_values[regno].known = 0;
 	}
       else if (idesc->operands[i] == IA64_OPND_P1
-               || idesc->operands[i] == IA64_OPND_P2)
-        {
-          int regno = CURR_SLOT.opnd[i].X_add_number - REG_P;
-          qp_changemask |= (valueT) 1 << regno;
-        }
+	       || idesc->operands[i] == IA64_OPND_P2)
+	{
+	  int regno = CURR_SLOT.opnd[i].X_add_number - REG_P;
+	  qp_changemask |= (valueT) 1 << regno;
+	}
       else if (idesc->operands[i] == IA64_OPND_PR)
-        {
-          if (idesc->operands[2] & (valueT) 0x10000)
-            qp_changemask = ~(valueT) 0x1FFFF | idesc->operands[2];
-          else
-            qp_changemask = idesc->operands[2];
-          break;
-        }
+	{
+	  if (idesc->operands[2] & (valueT) 0x10000)
+	    qp_changemask = ~(valueT) 0x1FFFF | idesc->operands[2];
+	  else
+	    qp_changemask = idesc->operands[2];
+	  break;
+	}
       else if (idesc->operands[i] == IA64_OPND_PR_ROT)
-        {
-          if (idesc->operands[1] & ((valueT) 1 << 43))
-            qp_changemask = ~(valueT) 0xFFFFFFFFFFF | idesc->operands[1];
-          else
-            qp_changemask = idesc->operands[1];
-          qp_changemask &= ~(valueT) 0xFFFF;
-          break;
-        }
+	{
+	  if (idesc->operands[1] & ((valueT) 1 << 43))
+	    qp_changemask = ~(valueT) 0xFFFFFFFFFFF | idesc->operands[1];
+	  else
+	    qp_changemask = idesc->operands[1];
+	  qp_changemask &= ~(valueT) 0xFFFF;
+	  break;
+	}
     }
 
-  /* Always clear qp branch flags on any PR change */
-  /* FIXME there may be exceptions for certain compares */
+  /* Always clear qp branch flags on any PR change.  */
+  /* FIXME there may be exceptions for certain compares.  */
   clear_qp_branch_flag (qp_changemask);
 
-  /* invalidate rotating registers on insns which affect RRBs in CFM */
+  /* Invalidate rotating registers on insns which affect RRBs in CFM.  */
   if (idesc->flags & IA64_OPCODE_MOD_RRBS)
     {
       qp_changemask |= ~(valueT) 0xFFFF;
       if (strcmp (idesc->name, "clrrrb.pr") != 0)
-        {
-          for (i=32;i < 32+md.rot.num_regs;i++)
-            gr_values[i].known = 0;
-        }
+	{
+	  for (i = 32; i < 32 + md.rot.num_regs; i++)
+	    gr_values[i].known = 0;
+	}
       clear_qp_mutex (qp_changemask);
       clear_qp_implies (qp_changemask, qp_changemask);
     }
-  /* after a call, all register values are undefined, except those marked
-     as "safe" */
+  /* After a call, all register values are undefined, except those marked
+     as "safe".  */
   else if (strncmp (idesc->name, "br.call", 6) == 0
-           || strncmp (idesc->name, "brl.call", 7) == 0)
+	   || strncmp (idesc->name, "brl.call", 7) == 0)
     {
       // FIXME keep GR values which are marked as "safe_across_calls"
       clear_register_values ();
@@ -7773,91 +7794,91 @@ note_register_values (idesc)
       clear_qp_branch_flag (~qp_safe_across_calls);
     }
   else if (is_interruption_or_rfi (idesc)
-           || is_taken_branch (idesc))
+	   || is_taken_branch (idesc))
     {
       clear_register_values ();
       clear_qp_mutex (~(valueT) 0);
       clear_qp_implies (~(valueT) 0, ~(valueT) 0);
     }
-  /* Look for mutex and implies relations */
+  /* Look for mutex and implies relations.  */
   else if ((idesc->operands[0] == IA64_OPND_P1
-            || idesc->operands[0] == IA64_OPND_P2)
-           && (idesc->operands[1] == IA64_OPND_P1
-               || idesc->operands[1] == IA64_OPND_P2))
+	    || idesc->operands[0] == IA64_OPND_P2)
+	   && (idesc->operands[1] == IA64_OPND_P1
+	       || idesc->operands[1] == IA64_OPND_P2))
     {
       int p1 = CURR_SLOT.opnd[0].X_add_number - REG_P;
       int p2 = CURR_SLOT.opnd[1].X_add_number - REG_P;
       valueT p1mask = (valueT) 1 << p1;
       valueT p2mask = (valueT) 1 << p2;
 
-      /* if one of the PRs is PR0, we can't really do anything */
+      /* If one of the PRs is PR0, we can't really do anything.  */
       if (p1 == 0 || p2 == 0)
-        {
-          if (md.debug_dv)
-            fprintf (stderr, "  Ignoring PRs due to inclusion of p0\n");
-        }
+	{
+	  if (md.debug_dv)
+	    fprintf (stderr, "  Ignoring PRs due to inclusion of p0\n");
+	}
       /* In general, clear mutexes and implies which include P1 or P2,
-         with the following exceptions */
+	 with the following exceptions.  */
       else if (strstr (idesc->name, ".or.andcm") != NULL)
-        {
-          add_qp_mutex (p1mask | p2mask);
-          clear_qp_implies (p2mask, p1mask);
-        }
+	{
+	  add_qp_mutex (p1mask | p2mask);
+	  clear_qp_implies (p2mask, p1mask);
+	}
       else if (strstr (idesc->name, ".and.orcm") != NULL)
-        {
-          add_qp_mutex (p1mask | p2mask);
-          clear_qp_implies (p1mask, p2mask);
-        }
+	{
+	  add_qp_mutex (p1mask | p2mask);
+	  clear_qp_implies (p1mask, p2mask);
+	}
       else if (strstr (idesc->name, ".and") != NULL)
-        {
-          clear_qp_implies (0, p1mask | p2mask);
-        }
+	{
+	  clear_qp_implies (0, p1mask | p2mask);
+	}
       else if (strstr (idesc->name, ".or") != NULL)
-        {
-          clear_qp_mutex (p1mask | p2mask);
-          clear_qp_implies (p1mask | p2mask, 0);
-        }
+	{
+	  clear_qp_mutex (p1mask | p2mask);
+	  clear_qp_implies (p1mask | p2mask, 0);
+	}
       else
-        {
-          clear_qp_implies (p1mask | p2mask, p1mask | p2mask);
-          if (strstr (idesc->name, ".unc") != NULL)
-            {
-              add_qp_mutex (p1mask | p2mask);
-              if (CURR_SLOT.qp_regno != 0)
-                {
-                  add_qp_imply (CURR_SLOT.opnd[0].X_add_number - REG_P,
-                                CURR_SLOT.qp_regno);
-                  add_qp_imply (CURR_SLOT.opnd[1].X_add_number - REG_P,
-                                CURR_SLOT.qp_regno);
-                }
-            }
-          else if (CURR_SLOT.qp_regno == 0)
-            {
-              add_qp_mutex (p1mask | p2mask);
-            }
-          else
-            {
-              clear_qp_mutex (p1mask | p2mask);
-            }
-        }
+	{
+	  clear_qp_implies (p1mask | p2mask, p1mask | p2mask);
+	  if (strstr (idesc->name, ".unc") != NULL)
+	    {
+	      add_qp_mutex (p1mask | p2mask);
+	      if (CURR_SLOT.qp_regno != 0)
+		{
+		  add_qp_imply (CURR_SLOT.opnd[0].X_add_number - REG_P,
+				CURR_SLOT.qp_regno);
+		  add_qp_imply (CURR_SLOT.opnd[1].X_add_number - REG_P,
+				CURR_SLOT.qp_regno);
+		}
+	    }
+	  else if (CURR_SLOT.qp_regno == 0)
+	    {
+	      add_qp_mutex (p1mask | p2mask);
+	    }
+	  else
+	    {
+	      clear_qp_mutex (p1mask | p2mask);
+	    }
+	}
     }
-  /* Look for mov imm insns into GRs */
+  /* Look for mov imm insns into GRs.  */
   else if (idesc->operands[0] == IA64_OPND_R1
-      && (idesc->operands[1] == IA64_OPND_IMM22
-          || idesc->operands[1] == IA64_OPND_IMMU64)
-      && (strcmp(idesc->name, "mov") == 0
-          || strcmp(idesc->name, "movl") == 0))
+	   && (idesc->operands[1] == IA64_OPND_IMM22
+	       || idesc->operands[1] == IA64_OPND_IMMU64)
+	   && (strcmp (idesc->name, "mov") == 0
+	       || strcmp (idesc->name, "movl") == 0))
     {
       int regno = CURR_SLOT.opnd[0].X_add_number - REG_GR;
-      if (regno > 0 && regno < NELEMS(gr_values))
-        {
-          gr_values[regno].known = 1;
-          gr_values[regno].value = CURR_SLOT.opnd[1].X_add_number;
-          gr_values[regno].path = md.path;
-          if (md.debug_dv)
-            fprintf (stderr, "  Know gr%d = 0x%llx\n",
-                     regno, gr_values[regno].value);
-        }
+      if (regno > 0 && regno < NELEMS (gr_values))
+	{
+	  gr_values[regno].known = 1;
+	  gr_values[regno].value = CURR_SLOT.opnd[1].X_add_number;
+	  gr_values[regno].path = md.path;
+	  if (md.debug_dv)
+	    fprintf (stderr, "  Know gr%d = 0x%llx\n",
+		     regno, gr_values[regno].value);
+	}
     }
   else
     {
@@ -7866,40 +7887,41 @@ note_register_values (idesc)
     }
 }
 
-/* Return whether the given predicate registers are currently mutex */
+/* Return whether the given predicate registers are currently mutex.  */
+
 static int
 qp_mutex (p1, p2, path)
-  int p1;
-  int p2;
-  int path;
+     int p1;
+     int p2;
+     int path;
 {
   int i;
   valueT mask;
 
   if (p1 != p2)
     {
-      mask = ((valueT) 1<<p1) | (valueT) 1<<p2;
-      for (i=0;i < qp_mutexeslen;i++)
-        {
-          if (qp_mutexes[i].path >= path
-              && (qp_mutexes[i].prmask & mask) == mask)
-            return 1;
-        }
+      mask = ((valueT) 1 << p1) | (valueT) 1 << p2;
+      for (i = 0; i < qp_mutexeslen; i++)
+	{
+	  if (qp_mutexes[i].path >= path
+	      && (qp_mutexes[i].prmask & mask) == mask)
+	    return 1;
+	}
     }
   return 0;
 }
 
 /* Return whether the given resource is in the given insn's list of chks
    Return 1 if the conflict is absolutely determined, 2 if it's a potential
-   conflict.
- */
+   conflict.  */
+
 static int
 resources_match (rs, idesc, note, qp_regno, path)
-  struct rsrc *rs;
-  struct ia64_opcode *idesc;
-  int note;
-  int qp_regno;
-  int path;
+     struct rsrc *rs;
+     struct ia64_opcode *idesc;
+     int note;
+     int qp_regno;
+     int path;
 {
   struct rsrc specs[MAX_SPECS];
   int count;
@@ -7916,25 +7938,25 @@ resources_match (rs, idesc, note, qp_regno, path)
     {
       /* UNAT checking is a bit more specific than other resources */
       if (rs->dependency->specifier == IA64_RS_AR_UNAT
-          && specs[count].mem_offset.hint
-          && rs->mem_offset.hint)
-        {
-          if (rs->mem_offset.base == specs[count].mem_offset.base)
-            {
-              if (((rs->mem_offset.offset >> 3) & 0x3F) ==
-                  ((specs[count].mem_offset.offset >> 3) & 0x3F))
-                return 1;
-              else
-                continue;
-            }
-        }
+	  && specs[count].mem_offset.hint
+	  && rs->mem_offset.hint)
+	{
+	  if (rs->mem_offset.base == specs[count].mem_offset.base)
+	    {
+	      if (((rs->mem_offset.offset >> 3) & 0x3F) ==
+		  ((specs[count].mem_offset.offset >> 3) & 0x3F))
+		return 1;
+	      else
+		continue;
+	    }
+	}
 
       /* If either resource is not specific, conservatively assume a conflict
        */
       if (!specs[count].specific || !rs->specific)
-        return 2;
+	return 2;
       else if (specs[count].index == rs->index)
-        return 1;
+	return 1;
     }
 #if 0
   if (md.debug_dv)
@@ -7949,14 +7971,13 @@ resources_match (rs, idesc, note, qp_regno, path)
    appropriately.  If QP_REGNO is non-zero, only apply the break to resources
    which use the same QP_REGNO and have the link_to_qp_branch flag set.
    If SAVE_CURRENT is non-zero, don't affect resources marked by the current
-   instruction.
-*/
+   instruction.  */
 
 static void
 insn_group_break (insert_stop, qp_regno, save_current)
-  int insert_stop;
-  int qp_regno;
-  int save_current;
+     int insert_stop;
+     int qp_regno;
+     int save_current;
 {
   int i;
 
@@ -7966,9 +7987,9 @@ insn_group_break (insert_stop, qp_regno, save_current)
   if (md.debug_dv)
     {
       fprintf (stderr, "  Insn group break%s",
-               (insert_stop ? " (w/stop)" : ""));
+	       (insert_stop ? " (w/stop)" : ""));
       if (qp_regno != 0)
-        fprintf (stderr, " effective for QP=%d", qp_regno);
+	fprintf (stderr, " effective for QP=%d", qp_regno);
       fprintf (stderr, "\n");
     }
 
@@ -7978,60 +7999,61 @@ insn_group_break (insert_stop, qp_regno, save_current)
       const struct ia64_dependency *dep = regdeps[i].dependency;
 
       if (qp_regno != 0
-          && regdeps[i].qp_regno != qp_regno)
-        {
-          ++i;
-          continue;
-        }
+	  && regdeps[i].qp_regno != qp_regno)
+	{
+	  ++i;
+	  continue;
+	}
 
       if (save_current
-          && CURR_SLOT.src_file == regdeps[i].file
-          && CURR_SLOT.src_line == regdeps[i].line)
-        {
-          ++i;
-          continue;
-        }
+	  && CURR_SLOT.src_file == regdeps[i].file
+	  && CURR_SLOT.src_line == regdeps[i].line)
+	{
+	  ++i;
+	  continue;
+	}
 
       /* clear dependencies which are automatically cleared by a stop, or
-         those that have reached the appropriate state of insn serialization */
+	 those that have reached the appropriate state of insn serialization */
       if (dep->semantics == IA64_DVS_IMPLIED
-          || dep->semantics == IA64_DVS_IMPLIEDF
-          || regdeps[i].insn_srlz == STATE_SRLZ)
-        {
-          print_dependency ("Removing", i);
-          regdeps[i] = regdeps[--regdepslen];
-        }
+	  || dep->semantics == IA64_DVS_IMPLIEDF
+	  || regdeps[i].insn_srlz == STATE_SRLZ)
+	{
+	  print_dependency ("Removing", i);
+	  regdeps[i] = regdeps[--regdepslen];
+	}
       else
-        {
-          if (dep->semantics == IA64_DVS_DATA
-              || dep->semantics == IA64_DVS_INSTR
+	{
+	  if (dep->semantics == IA64_DVS_DATA
+	      || dep->semantics == IA64_DVS_INSTR
 	      || dep->semantics == IA64_DVS_SPECIFIC)
-            {
-              if (regdeps[i].insn_srlz == STATE_NONE)
-                regdeps[i].insn_srlz = STATE_STOP;
-              if (regdeps[i].data_srlz == STATE_NONE)
-                regdeps[i].data_srlz = STATE_STOP;
-            }
-          ++i;
-        }
+	    {
+	      if (regdeps[i].insn_srlz == STATE_NONE)
+		regdeps[i].insn_srlz = STATE_STOP;
+	      if (regdeps[i].data_srlz == STATE_NONE)
+		regdeps[i].data_srlz = STATE_STOP;
+	    }
+	  ++i;
+	}
     }
 }
 
-/* Add the given resource usage spec to the list of active dependencies */
+/* Add the given resource usage spec to the list of active dependencies.  */
+
 static void
 mark_resource (idesc, dep, spec, depind, path)
-  struct ia64_opcode *idesc;
-  const struct ia64_dependency *dep;
-  struct rsrc *spec;
-  int depind;
-  int path;
+     struct ia64_opcode *idesc;
+     const struct ia64_dependency *dep;
+     struct rsrc *spec;
+     int depind;
+     int path;
 {
   if (regdepslen == regdepstotlen)
     {
       regdepstotlen += 20;
       regdeps = (struct rsrc *)
-        xrealloc ((void *)regdeps,
-                  regdepstotlen * sizeof(struct rsrc));
+	xrealloc ((void *) regdeps,
+		  regdepstotlen * sizeof(struct rsrc));
     }
 
   regdeps[regdepslen] = *spec;
@@ -8047,20 +8069,20 @@ mark_resource (idesc, dep, spec, depind, path)
 
 static void
 print_dependency (action, depind)
-  const char *action;
-  int depind;
+     const char *action;
+     int depind;
 {
   if (md.debug_dv)
     {
       fprintf (stderr, "  %s %s '%s'",
-               action, dv_mode[(regdeps[depind].dependency)->mode],
-               (regdeps[depind].dependency)->name);
+	       action, dv_mode[(regdeps[depind].dependency)->mode],
+	       (regdeps[depind].dependency)->name);
       if (regdeps[depind].specific && regdeps[depind].index != 0)
-        fprintf (stderr, " (%d)", regdeps[depind].index);
+	fprintf (stderr, " (%d)", regdeps[depind].index);
       if (regdeps[depind].mem_offset.hint)
-        fprintf (stderr, " 0x%llx+0x%llx",
-                 regdeps[depind].mem_offset.base,
-                 regdeps[depind].mem_offset.offset);
+	fprintf (stderr, " 0x%llx+0x%llx",
+		 regdeps[depind].mem_offset.base,
+		 regdeps[depind].mem_offset.offset);
       fprintf (stderr, "\n");
     }
 }
@@ -8071,7 +8093,7 @@ instruction_serialization ()
   int i;
   if (md.debug_dv)
     fprintf (stderr, "  Instruction serialization\n");
-  for (i=0;i < regdepslen;i++)
+  for (i = 0; i < regdepslen; i++)
     if (regdeps[i].insn_srlz == STATE_STOP)
       regdeps[i].insn_srlz = STATE_SRLZ;
 }
@@ -8085,22 +8107,23 @@ data_serialization ()
   while (i < regdepslen)
     {
       if (regdeps[i].data_srlz == STATE_STOP
-          /* Note: as of 991210, all "other" dependencies are cleared by a
-             data serialization.  This might change with new tables */
-          || (regdeps[i].dependency)->semantics == IA64_DVS_OTHER)
-        {
-          print_dependency ("Removing", i);
-          regdeps[i] = regdeps[--regdepslen];
-        }
+	  /* Note: as of 991210, all "other" dependencies are cleared by a
+	     data serialization.  This might change with new tables */
+	  || (regdeps[i].dependency)->semantics == IA64_DVS_OTHER)
+	{
+	  print_dependency ("Removing", i);
+	  regdeps[i] = regdeps[--regdepslen];
+	}
       else
-        ++i;
+	++i;
     }
 }
 
-/* Insert stops and serializations as needed to avoid DVs */
+/* Insert stops and serializations as needed to avoid DVs.  */
+
 static void
 remove_marked_resource (rs)
-  struct rsrc *rs;
+     struct rsrc *rs;
 {
   switch (rs->dependency->semantics)
     {
@@ -8110,51 +8133,51 @@ remove_marked_resource (rs)
       /* ...fall through...  */
     case IA64_DVS_INSTR:
       if (md.debug_dv)
-        fprintf (stderr, "Inserting instr serialization\n");
+	fprintf (stderr, "Inserting instr serialization\n");
       if (rs->insn_srlz < STATE_STOP)
-        insn_group_break (1, 0, 0);
+	insn_group_break (1, 0, 0);
       if (rs->insn_srlz < STATE_SRLZ)
-        {
-          int oldqp = CURR_SLOT.qp_regno;
-          struct ia64_opcode *oldidesc = CURR_SLOT.idesc;
-          /* Manually jam a srlz.i insn into the stream */
-          CURR_SLOT.qp_regno = 0;
-          CURR_SLOT.idesc = ia64_find_opcode ("srlz.i");
-          instruction_serialization ();
-          md.curr_slot = (md.curr_slot + 1) % NUM_SLOTS;
-          if (++md.num_slots_in_use >= NUM_SLOTS)
-            emit_one_bundle ();
-          CURR_SLOT.qp_regno = oldqp;
-          CURR_SLOT.idesc = oldidesc;
-        }
+	{
+	  int oldqp = CURR_SLOT.qp_regno;
+	  struct ia64_opcode *oldidesc = CURR_SLOT.idesc;
+	  /* Manually jam a srlz.i insn into the stream */
+	  CURR_SLOT.qp_regno = 0;
+	  CURR_SLOT.idesc = ia64_find_opcode ("srlz.i");
+	  instruction_serialization ();
+	  md.curr_slot = (md.curr_slot + 1) % NUM_SLOTS;
+	  if (++md.num_slots_in_use >= NUM_SLOTS)
+	    emit_one_bundle ();
+	  CURR_SLOT.qp_regno = oldqp;
+	  CURR_SLOT.idesc = oldidesc;
+	}
       insn_group_break (1, 0, 0);
       break;
     case IA64_DVS_OTHER: /* as of rev2 (991220) of the DV tables, all
-                            "other" types of DV are eliminated
-                            by a data serialization */
+			    "other" types of DV are eliminated
+			    by a data serialization */
     case IA64_DVS_DATA:
       if (md.debug_dv)
-        fprintf (stderr, "Inserting data serialization\n");
+	fprintf (stderr, "Inserting data serialization\n");
       if (rs->data_srlz < STATE_STOP)
-        insn_group_break (1, 0, 0);
+	insn_group_break (1, 0, 0);
       {
-        int oldqp = CURR_SLOT.qp_regno;
-        struct ia64_opcode *oldidesc = CURR_SLOT.idesc;
-        /* Manually jam a srlz.d insn into the stream */
-        CURR_SLOT.qp_regno = 0;
-        CURR_SLOT.idesc = ia64_find_opcode ("srlz.d");
-        data_serialization ();
-        md.curr_slot = (md.curr_slot + 1) % NUM_SLOTS;
-        if (++md.num_slots_in_use >= NUM_SLOTS)
-          emit_one_bundle ();
-        CURR_SLOT.qp_regno = oldqp;
-        CURR_SLOT.idesc = oldidesc;
+	int oldqp = CURR_SLOT.qp_regno;
+	struct ia64_opcode *oldidesc = CURR_SLOT.idesc;
+	/* Manually jam a srlz.d insn into the stream */
+	CURR_SLOT.qp_regno = 0;
+	CURR_SLOT.idesc = ia64_find_opcode ("srlz.d");
+	data_serialization ();
+	md.curr_slot = (md.curr_slot + 1) % NUM_SLOTS;
+	if (++md.num_slots_in_use >= NUM_SLOTS)
+	  emit_one_bundle ();
+	CURR_SLOT.qp_regno = oldqp;
+	CURR_SLOT.idesc = oldidesc;
       }
       break;
     case IA64_DVS_IMPLIED:
     case IA64_DVS_IMPLIEDF:
       if (md.debug_dv)
-        fprintf (stderr, "Inserting stop\n");
+	fprintf (stderr, "Inserting stop\n");
       insn_group_break (1, 0, 0);
       break;
     default:
@@ -8175,9 +8198,10 @@ remove_marked_resource (rs)
    L2:     add
    br.ret
 */
+
 static void
 check_dependencies (idesc)
-  struct ia64_opcode *idesc;
+     struct ia64_opcode *idesc;
 {
   const struct ia64_opcode_dependency *opdeps = idesc->dependencies;
   int path;
@@ -8195,112 +8219,113 @@ check_dependencies (idesc)
       int start_over = 0;
 
       if (dep->semantics == IA64_DVS_NONE
-          || (chkind = depends_on (rs->depind, idesc)) == -1)
-        {
-          ++i; continue;
-        }
+	  || (chkind = depends_on (rs->depind, idesc)) == -1)
+	{
+	  ++i;
+	  continue;
+	}
 
-      note = NOTE(opdeps->chks[chkind]);
+      note = NOTE (opdeps->chks[chkind]);
 
-      /* Check this resource against each execution path seen thus far */
-      for (path=0;path <= md.path;path++)
-        {
-          int matchtype;
+      /* Check this resource against each execution path seen thus far.  */
+      for (path = 0; path <= md.path; path++)
+	{
+	  int matchtype;
 
-          /* If the dependency wasn't on the path being checked, ignore it */
-          if (rs->path < path)
-            continue;
+	  /* If the dependency wasn't on the path being checked, ignore it.  */
+	  if (rs->path < path)
+	    continue;
 
-          /* If the QP for this insn implies a QP which has branched, don't
-             bother checking.  Ed. NOTE: I don't think this check is terribly
-             useful; what's the point of generating code which will only be
-             reached if its QP is zero?
-             This code was specifically inserted to handle the following code,
-             based on notes from Intel's DV checking code, where p1 implies p2.
+	  /* If the QP for this insn implies a QP which has branched, don't
+	     bother checking.  Ed. NOTE: I don't think this check is terribly
+	     useful; what's the point of generating code which will only be
+	     reached if its QP is zero?
+	     This code was specifically inserted to handle the following code,
+	     based on notes from Intel's DV checking code, where p1 implies p2.
 
-                  mov r4 = 2
-             (p2) br.cond L
-             (p1) mov r4 = 7
+		  mov r4 = 2
+	     (p2) br.cond L
+	     (p1) mov r4 = 7
+	  */
+	  if (CURR_SLOT.qp_regno != 0)
+	    {
+	      int skip = 0;
+	      int implies;
+	      for (implies = 0; implies < qp_implieslen; implies++)
+		{
+		  if (qp_implies[implies].path >= path
+		      && qp_implies[implies].p1 == CURR_SLOT.qp_regno
+		      && qp_implies[implies].p2_branched)
+		    {
+		      skip = 1;
+		      break;
+		    }
+		}
+	      if (skip)
+		continue;
+	    }
 
-          */
-          if (CURR_SLOT.qp_regno != 0)
-            {
-              int skip = 0;
-              int implies;
-              for (implies=0;implies < qp_implieslen;implies++)
-                {
-                  if (qp_implies[implies].path >= path
-                      && qp_implies[implies].p1 == CURR_SLOT.qp_regno
-                      && qp_implies[implies].p2_branched)
-                    {
-                      skip = 1;
-                      break;
-                    }
-                }
-              if (skip)
-                continue;
-            }
+	  if ((matchtype = resources_match (rs, idesc, note,
+					    CURR_SLOT.qp_regno, path)) != 0)
+	    {
+	      char msg[1024];
+	      char pathmsg[256] = "";
+	      char indexmsg[256] = "";
+	      int certain = (matchtype == 1 && CURR_SLOT.qp_regno == 0);
 
-          if ((matchtype = resources_match (rs, idesc, note,
-                                            CURR_SLOT.qp_regno, path)) != 0)
-            {
-              char msg[1024];
-              char pathmsg[256] = "";
-              char indexmsg[256] = "";
-              int certain = (matchtype == 1 && CURR_SLOT.qp_regno == 0);
+	      if (path != 0)
+		sprintf (pathmsg, " when entry is at label '%s'",
+			 md.entry_labels[path - 1]);
+	      if (rs->specific && rs->index != 0)
+		sprintf (indexmsg, ", specific resource number is %d",
+			 rs->index);
+	      sprintf (msg, "Use of '%s' %s %s dependency '%s' (%s)%s%s",
+		       idesc->name,
+		       (certain ? "violates" : "may violate"),
+		       dv_mode[dep->mode], dep->name,
+		       dv_sem[dep->semantics],
+		       pathmsg, indexmsg);
 
-              if (path != 0)
-                sprintf (pathmsg, " when entry is at label '%s'",
-                         md.entry_labels[path-1]);
-              if (rs->specific && rs->index != 0)
-                sprintf (indexmsg, ", specific resource number is %d",
-                         rs->index);
-              sprintf (msg, "Use of '%s' %s %s dependency '%s' (%s)%s%s",
-                       idesc->name,
-                       (certain ? "violates" : "may violate"),
-                       dv_mode[dep->mode], dep->name,
-                       dv_sem[dep->semantics],
-                       pathmsg, indexmsg);
+	      if (md.explicit_mode)
+		{
+		  as_warn ("%s", msg);
+		  if (path < md.path)
+		    as_warn (_("Only the first path encountering the conflict "
+			       "is reported"));
+		  as_warn_where (rs->file, rs->line,
+				 _("This is the location of the "
+				   "conflicting usage"));
+		  /* Don't bother checking other paths, to avoid duplicating
+		     the same warning */
+		  break;
+		}
+	      else
+		{
+		  if (md.debug_dv)
+		    fprintf (stderr, "%s @ %s:%d\n", msg, rs->file, rs->line);
 
-              if (md.explicit_mode)
-                {
-                  as_warn ("%s", msg);
-                  if (path < md.path)
-                    as_warn (_("Only the first path encountering the conflict "
-                               "is reported"));
-                  as_warn_where (rs->file, rs->line,
-                                 _("This is the location of the "
-                                   "conflicting usage"));
-                  /* Don't bother checking other paths, to avoid duplicating
-                     the same warning */
-                  break;
-                }
-              else
-                {
-                  if (md.debug_dv)
-                    fprintf(stderr, "%s @ %s:%d\n", msg, rs->file, rs->line);
+		  remove_marked_resource (rs);
 
-                  remove_marked_resource (rs);
-
-                  /* since the set of dependencies has changed, start over */
-                  /* FIXME -- since we're removing dvs as we go, we
-                     probably don't really need to start over...  */
-                  start_over = 1;
-                  break;
-                }
-            }
-        }
+		  /* since the set of dependencies has changed, start over */
+		  /* FIXME -- since we're removing dvs as we go, we
+		     probably don't really need to start over...  */
+		  start_over = 1;
+		  break;
+		}
+	    }
+	}
       if (start_over)
-        i = 0;
+	i = 0;
       else
-        ++i;
+	++i;
     }
 }
 
-/* register new dependencies based on the given opcode */
+/* Register new dependencies based on the given opcode.  */
+
 static void
 mark_resources (idesc)
-  struct ia64_opcode *idesc;
+     struct ia64_opcode *idesc;
 {
   int i;
   const struct ia64_opcode_dependency *opdeps = idesc->dependencies;
@@ -8318,7 +8343,7 @@ mark_resources (idesc)
   if (md.debug_dv)
     fprintf (stderr, "Registering '%s' resource usage\n", idesc->name);
 
-  for (i=0;i < opdeps->nregs;i++)
+  for (i = 0; i < opdeps->nregs; i++)
     {
       const struct ia64_dependency *dep;
       struct rsrc specs[MAX_SPECS];
@@ -8327,58 +8352,59 @@ mark_resources (idesc)
       int count;
 
       dep = ia64_find_dependency (opdeps->regs[i]);
-      note = NOTE(opdeps->regs[i]);
+      note = NOTE (opdeps->regs[i]);
 
       if (add_only_qp_reads
-          && !(dep->mode == IA64_DV_WAR
-               && (dep->specifier == IA64_RS_PR
-                   || dep->specifier == IA64_RS_PR63)))
-        continue;
+	  && !(dep->mode == IA64_DV_WAR
+	       && (dep->specifier == IA64_RS_PR
+		   || dep->specifier == IA64_RS_PR63)))
+	continue;
 
       count = specify_resource (dep, idesc, DV_REG, specs, note, md.path);
 
 #if 0
       if (md.debug_dv && !count)
-        fprintf (stderr, "  No %s %s usage found (path %d)\n",
-                 dv_mode[dep->mode], dep->name, md.path);
+	fprintf (stderr, "  No %s %s usage found (path %d)\n",
+		 dv_mode[dep->mode], dep->name, md.path);
 #endif
 
       while (count-- > 0)
-        {
-          mark_resource (idesc, dep, &specs[count],
-                         DEP(opdeps->regs[i]), md.path);
-        }
+	{
+	  mark_resource (idesc, dep, &specs[count],
+			 DEP (opdeps->regs[i]), md.path);
+	}
 
       /* The execution path may affect register values, which may in turn
-         affect which indirect-access resources are accessed.  */
+	 affect which indirect-access resources are accessed.  */
       switch (dep->specifier)
-        {
-        default:
-          break;
-        case IA64_RS_CPUID:
-        case IA64_RS_DBR:
-        case IA64_RS_IBR:
+	{
+	default:
+	  break;
+	case IA64_RS_CPUID:
+	case IA64_RS_DBR:
+	case IA64_RS_IBR:
 	case IA64_RS_MSR:
-        case IA64_RS_PKR:
-        case IA64_RS_PMC:
-        case IA64_RS_PMD:
-        case IA64_RS_RR:
-          for (path=0;path < md.path;path++)
-            {
-              count = specify_resource (dep, idesc, DV_REG, specs, note, path);
-              while (count-- > 0)
-                mark_resource (idesc, dep, &specs[count],
-                               DEP(opdeps->regs[i]), path);
-            }
-          break;
-        }
+	case IA64_RS_PKR:
+	case IA64_RS_PMC:
+	case IA64_RS_PMD:
+	case IA64_RS_RR:
+	  for (path = 0; path < md.path; path++)
+	    {
+	      count = specify_resource (dep, idesc, DV_REG, specs, note, path);
+	      while (count-- > 0)
+		mark_resource (idesc, dep, &specs[count],
+			       DEP (opdeps->regs[i]), path);
+	    }
+	  break;
+	}
     }
 }
 
-/* remove dependencies when they no longer apply */
+/* Remove dependencies when they no longer apply.  */
+
 static void
 update_dependencies (idesc)
-  struct ia64_opcode *idesc;
+     struct ia64_opcode *idesc;
 {
   int i;
 
@@ -8391,94 +8417,91 @@ update_dependencies (idesc)
       data_serialization ();
     }
   else if (is_interruption_or_rfi (idesc)
-           || is_taken_branch (idesc))
+	   || is_taken_branch (idesc))
     {
-      /* although technically the taken branch doesn't clear dependencies
-         which require a srlz.[id], we don't follow the branch; the next
-         instruction is assumed to start with a clean slate */
+      /* Although technically the taken branch doesn't clear dependencies
+	 which require a srlz.[id], we don't follow the branch; the next
+	 instruction is assumed to start with a clean slate.  */
       regdepslen = 0;
       md.path = 0;
     }
   else if (is_conditional_branch (idesc)
-           && CURR_SLOT.qp_regno != 0)
+	   && CURR_SLOT.qp_regno != 0)
     {
       int is_call = strstr (idesc->name, ".call") != NULL;
 
-      for (i=0;i < qp_implieslen;i++)
-        {
-          /* if the conditional branch's predicate is implied by the predicate
-             in an existing dependency, remove that dependency */
-          if (qp_implies[i].p2 == CURR_SLOT.qp_regno)
-            {
-              int depind = 0;
-              /* note that this implied predicate takes a branch so that if
-                 a later insn generates a DV but its predicate implies this
-                 one, we can avoid the false DV warning */
-              qp_implies[i].p2_branched = 1;
-              while (depind < regdepslen)
-                {
-                  if (regdeps[depind].qp_regno == qp_implies[i].p1)
-                    {
-                      print_dependency ("Removing", depind);
-                      regdeps[depind] = regdeps[--regdepslen];
-                    }
-                  else
-                    ++depind;
-                }
-            }
-        }
+      for (i = 0; i < qp_implieslen; i++)
+	{
+	  /* If the conditional branch's predicate is implied by the predicate
+	     in an existing dependency, remove that dependency.  */
+	  if (qp_implies[i].p2 == CURR_SLOT.qp_regno)
+	    {
+	      int depind = 0;
+	      /* Note that this implied predicate takes a branch so that if
+		 a later insn generates a DV but its predicate implies this
+		 one, we can avoid the false DV warning.  */
+	      qp_implies[i].p2_branched = 1;
+	      while (depind < regdepslen)
+		{
+		  if (regdeps[depind].qp_regno == qp_implies[i].p1)
+		    {
+		      print_dependency ("Removing", depind);
+		      regdeps[depind] = regdeps[--regdepslen];
+		    }
+		  else
+		    ++depind;
+		}
+	    }
+	}
       /* Any marked resources which have this same predicate should be
-         cleared, provided that the QP hasn't been modified between the
-         marking instruction and the branch.
-      */
+	 cleared, provided that the QP hasn't been modified between the
+	 marking instruction and the branch.  */
       if (is_call)
-        {
-          insn_group_break (0, CURR_SLOT.qp_regno, 1);
-        }
+	{
+	  insn_group_break (0, CURR_SLOT.qp_regno, 1);
+	}
       else
-        {
-          i = 0;
-          while (i < regdepslen)
-            {
-              if (regdeps[i].qp_regno == CURR_SLOT.qp_regno
-                  && regdeps[i].link_to_qp_branch
-                  && (regdeps[i].file != CURR_SLOT.src_file
-                      || regdeps[i].line != CURR_SLOT.src_line))
-                {
-                  /* Treat like a taken branch */
-                  print_dependency ("Removing", i);
-                  regdeps[i] = regdeps[--regdepslen];
-                }
-              else
-                ++i;
-            }
-        }
+	{
+	  i = 0;
+	  while (i < regdepslen)
+	    {
+	      if (regdeps[i].qp_regno == CURR_SLOT.qp_regno
+		  && regdeps[i].link_to_qp_branch
+		  && (regdeps[i].file != CURR_SLOT.src_file
+		      || regdeps[i].line != CURR_SLOT.src_line))
+		{
+		  /* Treat like a taken branch */
+		  print_dependency ("Removing", i);
+		  regdeps[i] = regdeps[--regdepslen];
+		}
+	      else
+		++i;
+	    }
+	}
     }
 }
 
 /* Examine the current instruction for dependency violations.  */
+
 static int
 check_dv (idesc)
-  struct ia64_opcode *idesc;
+     struct ia64_opcode *idesc;
 {
   if (md.debug_dv)
     {
       fprintf (stderr, "Checking %s for violations (line %d, %d/%d)\n",
-               idesc->name, CURR_SLOT.src_line,
-               idesc->dependencies->nchks,
-               idesc->dependencies->nregs);
+	       idesc->name, CURR_SLOT.src_line,
+	       idesc->dependencies->nchks,
+	       idesc->dependencies->nregs);
     }
 
   /* Look through the list of currently marked resources; if the current
      instruction has the dependency in its chks list which uses that resource,
-     check against the specific resources used.
-  */
+     check against the specific resources used.  */
   check_dependencies (idesc);
 
-  /*
-    Look up the instruction's regdeps (RAW writes, WAW writes, and WAR reads),
-    then add them to the list of marked resources.
-  */
+  /* Look up the instruction's regdeps (RAW writes, WAW writes, and WAR reads),
+     then add them to the list of marked resources.  */
   mark_resources (idesc);
 
   /* There are several types of dependency semantics, and each has its own
@@ -8523,7 +8546,7 @@ md_assemble (str)
   saved_input_line_pointer = input_line_pointer;
   input_line_pointer = str;
 
-  /* extract the opcode (mnemonic): */
+  /* extract the opcode (mnemonic):  */
 
   mnemonic = input_line_pointer;
   ch = get_symbol_end ();
@@ -8535,7 +8558,7 @@ md_assemble (str)
       goto done;
     }
 
-  /* find the instruction descriptor matching the arguments: */
+  /* Find the instruction descriptor matching the arguments.  */
 
   idesc = ia64_find_opcode (mnemonic);
   *input_line_pointer = ch;
@@ -8549,7 +8572,7 @@ md_assemble (str)
   if (!idesc)
     goto done;
 
-  /* Handle the dynamic ops we can handle now: */
+  /* Handle the dynamic ops we can handle now:  */
   if (idesc->type == IA64_TYPE_DYN)
     {
       if (strcmp (idesc->name, "add") == 0)
@@ -8607,7 +8630,7 @@ md_assemble (str)
       goto done;
     }
 
-  /* build the instruction: */
+  /* Build the instruction.  */
   CURR_SLOT.qp_regno = qp_regno;
   CURR_SLOT.idesc = idesc;
   as_where (&CURR_SLOT.src_file, &CURR_SLOT.src_line);
@@ -8621,9 +8644,9 @@ md_assemble (str)
       unwind.current_entry = NULL;
     }
 
-  /* check for dependency violations */
+  /* Check for dependency violations.  */
   if (md.detect_dv)
-    check_dv(idesc);
+    check_dv (idesc);
 
   md.curr_slot = (md.curr_slot + 1) % NUM_SLOTS;
   if (++md.num_slots_in_use >= NUM_SLOTS)
@@ -8640,7 +8663,8 @@ md_assemble (str)
 
 /* Called when symbol NAME cannot be found in the symbol table.
    Should be used for dynamic valued symbols only.  */
-symbolS*
+
+symbolS *
 md_undefined_symbol (name)
      char *name;
 {
@@ -8650,6 +8674,7 @@ md_undefined_symbol (name)
 /* Called for any expression that can not be recognized.  When the
    function is called, `input_line_pointer' will point to the start of
    the expression.  */
+
 void
 md_operand (e)
      expressionS *e;
@@ -8662,7 +8687,7 @@ md_operand (e)
   switch (*input_line_pointer)
     {
     case '@':
-      /* find what relocation pseudo-function we're dealing with: */
+      /* Find what relocation pseudo-function we're dealing with.  */
       pseudo_type = 0;
       ch = *++input_line_pointer;
       for (i = 0; i < NELEMS (pseudo_func); ++i)
@@ -8687,7 +8712,8 @@ md_operand (e)
 	      as_bad ("Expected '('");
 	      goto err;
 	    }
-	  ++input_line_pointer;	/* skip '(' */
+	  /* Skip '('.  */
+	  ++input_line_pointer;
 	  expression (e);
 	  if (*input_line_pointer++ != ')')
 	    {
@@ -8710,8 +8736,8 @@ md_operand (e)
 		  goto err;
 		}
 	    }
-	  /* make sure gas doesn't get rid of local symbols that are used
-	     in relocs: */
+	  /* Make sure gas doesn't get rid of local symbols that are used
+	     in relocs.  */
 	  e->X_op = O_pseudo_fixup;
 	  e->X_op_symbol = pseudo_func[i].u.sym;
 	  break;
@@ -9158,7 +9184,7 @@ md_apply_fix3 (fix, valuep, seg)
 	}
 
       /* ??? This is a hack copied from tc-i386.c to make PCREL relocs
-         work.  There should be a better way to handle this.  */
+	 work.  There should be a better way to handle this.  */
       if (adjust)
 	fix->fx_offset += fix->fx_where + fix->fx_frag->fr_address;
     }
@@ -9182,7 +9208,8 @@ md_apply_fix3 (fix, valuep, seg)
 
 /* Generate the BFD reloc to be stuck in the object file from the
    fixup used internally in the assembler.  */
-arelent*
+
+arelent *
 tc_gen_reloc (sec, fixp)
      asection *sec;
      fixS *fixp;
@@ -9212,7 +9239,7 @@ tc_gen_reloc (sec, fixp)
 
 #define MAX_LITTLENUMS 5
 
-char*
+char *
 md_atof (type, lit, size)
      int type;
      char *lit;

@@ -1,3 +1,8 @@
+2000-09-05  Kazu Hirata  <kazu@hxi.com>
+
+	* cgen.c: Fix formatting.
+	* config/tc-ia64.c: Likewise.
+
 2000-09-05  Nick Clifton  <nickc@redhat.com>
 
 	* aclocal.m4: Regenerate.
