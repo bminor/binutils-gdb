@@ -1,5 +1,7 @@
 Fri Aug 13 14:37:05 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	* serial.h: comment change.
+
 	* config/m88k/tm-m88k.h: comment change to remove embedded
 	  comment.
 	  (SKIP_PROLOGUE): skip_prologue returns a value which is expected

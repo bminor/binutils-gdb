@@ -116,9 +116,10 @@ serial_t serial_fdopen PARAMS ((int fd));
   ((*((SERIAL_T)->ops->noflush_set_tty_state)) \
     ((SERIAL_T), (NEW_TTYSTATE), (OLD_TTYSTATE)))
 
-/* Read one char from the serial device with TIMEOUT seconds timeout.
-   Returns char if ok, else one of the following codes.  Note that all
-   error codes are guaranteed to be < 0.  */
+/* Read one char from the serial device with TIMEOUT seconds to wait
+   or -1 to wait forever.  Use timeout of 0 to effect a poll. Returns
+   char if ok, else one of the following codes.  Note that all error
+   codes are guaranteed to be < 0.  */
 
 #define SERIAL_ERROR -1		/* General error, see errno for details */
 #define SERIAL_TIMEOUT -2
