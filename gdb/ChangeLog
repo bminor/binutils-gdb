@@ -1,3 +1,9 @@
+2002-07-11  Corinna Vinschen  <vinschen@redhat.com>
+
+	* stack.c (print_frame): Use result of frame_address_in_block()
+	instead of fi->pc when evaluating symbols.
+	(backtrace_command_1): Ditto.
+
 2002-07-11  Andrew Cagney  <cagney@redhat.com>
 
 	* cris-tdep.c (cris_saved_pc_after_call): Fix parameter type.
