@@ -1,5 +1,8 @@
 Fri Jul  3 14:19:06 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ldlang.c (wild_section): Don't get an assertion failure if the
+	section is discarded.
+
 	* scripttempl/pe.sc: Use SORT to sort sections appropriately.
 	* emultempl/pe.em (sort_by_file_name): Remove.
 	(sort_by_section_name): Remove.

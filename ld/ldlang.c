@@ -1133,15 +1133,21 @@ wild_section (ptr, section, file, output)
 
 		  lang_list_init (&list);
 		  wild_doit (&list, s, output, file);
-		  ASSERT (list.head != NULL && list.head->next == NULL);
 
-		  for (pp = &ptr->children.head;
-		       *pp != before;
-		       pp = &(*pp)->next)
-		    ASSERT (*pp != NULL);
+		  /* If we are discarding the section, LIST.HEAD will
+                     be NULL.  */
+		  if (list.head != NULL)
+		    {
+		      ASSERT (list.head->next == NULL);
 
-		  list.head->next = *pp;
-		  *pp = list.head;
+		      for (pp = &ptr->children.head;
+			   *pp != before;
+			   pp = &(*pp)->next)
+			ASSERT (*pp != NULL);
+
+		      list.head->next = *pp;
+		      *pp = list.head;
+		    }
 		}
 	    }
 	}
