@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO SET_MAKE AR ac_ct_AR RANLIB ac_ct_RANLIB LN_S STRIP ac_ct_STRIP LIBTOOL WARN_CFLAGS MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT INSTALL_LIBBFD_TRUE INSTALL_LIBBFD_FALSE bfdlibdir bfdincludedir CPP EGREP ALLOCA USE_NLS MSGFMT GMSGFMT XGETTEXT USE_INCLUDED_LIBINTL CATALOGS CATOBJEXT DATADIRNAME GMOFILES INSTOBJEXT INTLDEPS INTLLIBS INTLOBJS POFILES POSUB INCLUDE_LOCALE_H GT_NO GT_YES MKINSTALLDIRS l HDEFINES BFD_HOST_64BIT_LONG BFD_HOST_LONG_LONG BFD_HOST_64_BIT_DEFINED BFD_HOST_64_BIT BFD_HOST_U_64_BIT CC_FOR_BUILD EXEEXT_FOR_BUILD COREFILE COREFLAG WIN32LDFLAGS WIN32LIBADD TDEFINES wordsize bfd_libs all_backends bfd_backends bfd_machines bfd_default_target_size bfd_file_ptr bfd_ufile_ptr tdefaults LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO SET_MAKE AR ac_ct_AR RANLIB ac_ct_RANLIB LN_S STRIP ac_ct_STRIP LIBTOOL WARN_CFLAGS MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT INSTALL_LIBBFD_TRUE INSTALL_LIBBFD_FALSE host_noncanonical target_noncanonical bfdlibdir bfdincludedir CPP EGREP ALLOCA USE_NLS MSGFMT GMSGFMT XGETTEXT USE_INCLUDED_LIBINTL CATALOGS CATOBJEXT DATADIRNAME GMOFILES INSTOBJEXT INTLDEPS INTLLIBS INTLOBJS POFILES POSUB INCLUDE_LOCALE_H GT_NO GT_YES MKINSTALLDIRS l HDEFINES BFD_HOST_64BIT_LONG BFD_HOST_LONG_LONG BFD_HOST_64_BIT_DEFINED BFD_HOST_64_BIT BFD_HOST_U_64_BIT CC_FOR_BUILD EXEEXT_FOR_BUILD COREFILE COREFLAG WIN32LDFLAGS WIN32LIBADD TDEFINES wordsize bfd_libs all_backends bfd_backends bfd_machines bfd_default_target_size bfd_file_ptr bfd_ufile_ptr tdefaults LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -3942,6 +3942,21 @@ fi
   MAINT=$MAINTAINER_MODE_TRUE
 
 
+ case ${build_alias} in
+  "") build_noncanonical=${build} ;;
+  *) build_noncanonical=${build_alias} ;;
+esac
+
+ case ${host_alias} in
+  "") host_noncanonical=${build_noncanonical} ;;
+  *) host_noncanonical=${host_alias} ;;
+esac
+
+ case ${target_alias} in
+  "") target_noncanonical=${host_noncanonical} ;;
+  *) target_noncanonical=${target_alias} ;;
+esac
+
 echo "$as_me:$LINENO: checking whether to install libbfd" >&5
 echo $ECHO_N "checking whether to install libbfd... $ECHO_C" >&6
   # Check whether --enable-install-libbfd or --disable-install-libbfd was given.
@@ -3967,8 +3982,10 @@ else
   INSTALL_LIBBFD_FALSE=
 fi
   # Need _noncanonical variables for this.
-  ACX_HOST_NONCANONICAL
-  ACX_TARGET_NONCANONICAL
+
+
+
+
   # libbfd.a is a host library containing target dependent code
   bfdlibdir='$(libdir)'
   bfdincludedir='$(includedir)'
@@ -12905,6 +12922,8 @@ s,@MAINTAINER_MODE_FALSE@,$MAINTAINER_MODE_FALSE,;t t
 s,@MAINT@,$MAINT,;t t
 s,@INSTALL_LIBBFD_TRUE@,$INSTALL_LIBBFD_TRUE,;t t
 s,@INSTALL_LIBBFD_FALSE@,$INSTALL_LIBBFD_FALSE,;t t
+s,@host_noncanonical@,$host_noncanonical,;t t
+s,@target_noncanonical@,$target_noncanonical,;t t
 s,@bfdlibdir@,$bfdlibdir,;t t
 s,@bfdincludedir@,$bfdincludedir,;t t
 s,@CPP@,$CPP,;t t

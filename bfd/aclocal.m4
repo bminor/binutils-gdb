@@ -152,8 +152,8 @@ AC_DEFUN([AM_INSTALL_LIBBFD],
   AC_MSG_RESULT($install_libbfd_p)
   AM_CONDITIONAL(INSTALL_LIBBFD, test $install_libbfd_p = yes)
   # Need _noncanonical variables for this.
-  ACX_HOST_NONCANONICAL
-  ACX_TARGET_NONCANONICAL
+  ACX_NONCANONICAL_HOST
+  ACX_NONCANONICAL_TARGET
   # libbfd.a is a host library containing target dependent code
   bfdlibdir='$(libdir)'
   bfdincludedir='$(includedir)'
