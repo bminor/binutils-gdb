@@ -1,5 +1,5 @@
 /* BFD back-end for archive files (libraries).
-   Copyright 1990, 91, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
    Written by Cygnus Support.  Mostly Gumby Henkel-Wallace's fault.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -661,9 +661,11 @@ bfd_generic_archive_p (abfd)
       bfd *first;
 
       /* This archive has a map, so we may presume that the contents
-	 are object files.  Make sure that the first file in the
-	 archive can be recognized as an object file for this target.
-	 If not, assume that this is the wrong format.
+	 are object files.  Make sure that if the first file in the
+	 archive can be recognized as an object file, it is for this
+	 target.  If not, assume that this is the wrong format.  If
+	 the first file is not an object file, somebody is doing
+	 something weird, and we permit it so that ar -t will work.
 
 	 This is done because any normal format will recognize any
 	 normal archive, regardless of the format of the object files.
@@ -676,22 +678,13 @@ bfd_generic_archive_p (abfd)
 
 	  first->target_defaulted = false;
 	  fail = false;
-	  if (! bfd_check_format (first, bfd_object))
-	    fail = true;
-	  else if (first->xvec != abfd->xvec)
+	  if (bfd_check_format (first, bfd_object)
+	      && first->xvec != abfd->xvec)
 	    {
-	      bfd_set_error (bfd_error_wrong_format);
-	      fail = true;
-	    }
-	  if (fail)
-	    {
-	      bfd_error_type err;
-
-	      err = bfd_get_error ();
 	      (void) bfd_close (first);
 	      bfd_release (abfd, bfd_ardata (abfd));
 	      abfd->tdata.aout_ar_data = tdata_hold;
-	      bfd_set_error (err);
+	      bfd_set_error (bfd_error_wrong_format);
 	      return NULL;
 	    }
 
@@ -937,6 +930,12 @@ bfd_slurp_armap (abfd)
     return do_slurp_bsd_armap (abfd);
   else if (!strncmp (nextname, "/               ", 16))
     return do_slurp_coff_armap (abfd);
+  else if (!strncmp (nextname, "/SYM64/         ", 16))
+    {
+      /* Irix 6 archive--must be recognized by code in elf64-mips.c.  */
+      bfd_set_error (bfd_error_wrong_format);
+      return false;
+    }
 
   bfd_has_map (abfd) = false;
   return true;

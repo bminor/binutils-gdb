@@ -1,5 +1,31 @@
 Mon Jul 22 15:30:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf64-mips.c: Include "aout/ar.h".
+	(mips_elf64_slurp_armap): New static function.
+	(mips_elf64_write_armap): New static function.
+	(bfd_elf64_archive_*): Define.
+	* elfxx-target.h (bfd_elfNN_archive_p): Define if not defined.
+	Use instead of bfd_generic_archive_p.
+	(bfd_elfNN_write_archive_contents): Define if not defined.  Use
+	instead of _bfd_write_archive_contents.
+	(bfd_elfNN_mkdarchive): Define if not defined.  Use instead of
+	_bfd_generic_mkarchive.
+	(TARGET_BIG_SYM): If bfd_elfNN_archive_functions is defined, use
+	bfd_elfNN_archive in BFD_JUMP_TABLE_ARCHIVE rather than
+	_bfd_archive_coff.
+	(TARGET_LITTLE_SYM): Likewise.
+	* archive.c (bfd_slurp_armap): Check for and reject an archive map
+	name of /SYM64/.
+	* Makefile.in: Rebuild dependencies.
+
+	* elf32-mips.c (_bfd_mips_elf_final_write_processing): Handle
+	SHT_MIPS_LIBLIST, SHT_MIPS_CONTENT, SHT_MIPS_SYMBOL_LIB, and
+	SHT_MIPS_EVENTS sections.
+	(_bfd_mips_elf_section_from_shdr): Handle SHT_MIPS_IFACE,
+	SHT_MIPS_CONTENT, SHT_MIPS_SYMBOL_LIB, and SHT_MIPS_EVENTS
+	sections.
+	(_bfd_mips_elf_fake_sections): Likewise.
+
 	* libecoff.h (ecoff_data_type): Add rdata_in_text field.
 	* ecoff.c (ecoff_compute_section_file_positions): Copy
 	rdata_in_text from backend info to tdata.  Clear it if any data
