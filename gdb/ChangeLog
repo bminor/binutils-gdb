@@ -1,3 +1,8 @@
+Mon Jun 21 16:09:46 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* fork-child.c (fork_inferior): Quote exec_file so it can contain
+	funky characters.
+
 Mon Jun 21 16:56:47 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (INCLUDE_CFLAGS):  Add BFD_INCLUDES for now, since

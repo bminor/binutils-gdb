@@ -80,8 +80,11 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun)
   shell_file = getenv ("SHELL");
   if (shell_file == NULL)
     shell_file = default_shell_file;
-  
-  len = 5 + strlen (exec_file) + 1 + strlen (allargs) + 1 + /*slop*/ 10;
+
+  /* Multiplying the length of exec_file by 4 is to account for the fact
+     that it may expand when quoted; it is a worst-case number based on
+     every character being '.  */
+  len = 5 + 4 * strlen (exec_file) + 1 + strlen (allargs) + 1 + /*slop*/ 12;
   /* If desired, concat something onto the front of ALLARGS.
      SHELL_COMMAND is the result.  */
 #ifdef SHELL_COMMAND_CONCAT
@@ -92,7 +95,23 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun)
   shell_command[0] = '\0';
 #endif
   strcat (shell_command, "exec ");
-  strcat (shell_command, exec_file);
+
+  /* Now add exec_file, quoting as necessary.  Quoting in this style is
+     said to work with all shells.  */
+  {
+    char *p;
+
+    strcat (shell_command, "'");
+    for (p = exec_file; *p != '\0'; ++p)
+      {
+	if (*p == '\'')
+	  strcat (shell_command, "'\\''");
+	else
+	  strncat (shell_command, p, 1);
+      }
+    strcat (shell_command, "'");
+  }
+
   strcat (shell_command, " ");
   strcat (shell_command, allargs);
 
