@@ -1,3 +1,34 @@
+Thu May 23 12:48:41 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/callfuncs.exp: Remove the compiler info file prior to
+	attempting to regenerate it.  Eliminate use of a temporary file
+	and just generate the info file directly.  Source it immediately,
+	for consistency of use.
+	* gdb.base/corefile.exp: Ditto
+	* gdb.base/exprs.exp: Ditto.
+	* gdb.base/funcargs.exp: Ditto.
+	* gdb.base/langs.exp: Ditto.
+	* gdb.base/list.exp: Ditto.
+	* gdb.base/mips_pro.exp: Ditto.
+	* gdb.base/nodebug.exp: Ditto.
+	* gdb.base/opaque.exp: Ditto.
+	* gdb.base/ptype.exp: Ditto.
+	* gdb.base/scope.exp: Ditto.
+	* gdb.base/setvar.exp: Ditto.
+	* gdb.base/signals.exp: Ditto.
+	* gdb.base/whatis.exp: Ditto.
+	* gdb.c++/templates.exp: Ditto.
+	* gdb.c++/virtfunc.exp: Ditto.
+	* gdb.c++/virtfunc.exp: Use contents of gcc_compiled to decide
+ 	whether or not to add -lstdc++ to the compile command line args.
+
+Sat May 18 02:43:58 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.base/recurse.exp:  Remove setup_xfail for "sparc*-*-sunos4*",
+	it got fixed by the recent lookup_minimal_symbol_by_pc change.
+	Increase timeout, a lot of single stepping might be needed if the
+	target has no hardware watchpoints.
+
 Wed May 15 08:47:42 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gdb.base/break.exp: Ignore compiler warnings when compiling
