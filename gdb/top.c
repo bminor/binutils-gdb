@@ -703,12 +703,12 @@ execute_command (char *p, int from_tty)
 	execute_user_command (c, arg);
       else if (c->type == set_cmd || c->type == show_cmd)
 	do_setshow_command (arg, from_tty & caution, c);
-      else if (c->func == NULL)
+      else if (!cmd_func_p (c))
 	error ("That is not a command, just a help topic.");
       else if (call_command_hook)
 	call_command_hook (c, arg, from_tty & caution);
       else
-	(*c->func) (c, arg, from_tty & caution);
+	cmd_func (c, arg, from_tty & caution);
        
       /* If this command has been post-hooked, run the hook last. */
       execute_cmd_post_hook (c);
