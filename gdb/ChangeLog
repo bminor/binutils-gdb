@@ -1,3 +1,14 @@
+Fri Jun  3 09:15:00 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* main.c: Move entire file except for #ifndef MAIN_OVERRIDE code
+	to new file top.c.  Make things extern instead of static and
+	similar rearrangements to deal with this.
+	* top.h: New file.
+	* utils.c: Move fputs_unfiltered to main.c.  Remove 
+	FPUTS_UNFILTERED_OVERRIDE ifndef.
+	* Makefile.in: Change so that gdb uses main.c, utils.c, and top.c,
+	and libgdb uses utils.c and top.c.
+
 Thu Jun  2 23:19:10 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hppa-tdep.c (skip_trampoline_code): Fix typo.

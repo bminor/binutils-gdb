@@ -293,6 +293,8 @@ terminal.h
 testsuite
 thread.c
 thread.h
+top.c
+top.h
 typeprint.c
 typeprint.h
 ultra3-nat.c

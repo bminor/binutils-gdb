@@ -304,7 +304,8 @@ SFILES = blockframe.c breakpoint.c buildsym.c c-exp.y c-lang.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c main.c maint.c \
 	mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c parse.c \
 	printcmd.c remote.c source.c stabsread.c stack.c symfile.c symmisc.c \
-	symtab.c target.c thread.c typeprint.c utils.c valarith.c valops.c \
+	symtab.c target.c thread.c top.c \
+	typeprint.c utils.c valarith.c valops.c \
 	valprint.c values.c serial.c ser-unix.c mdebugread.c os9kread.c
 
 # Files that are not source code, but need to go into
@@ -398,7 +399,7 @@ HFILES_NO_SRCDIR = buildsym.h call-cmds.h coff-solib.h defs.h dst.h environ.h \
 	vx-share/dbgRpcLib.h vx-share/ptrace.h vx-share/vxTypes.h \
 	vx-share/vxWorks.h vx-share/wait.h vx-share/xdr_ld.h \
 	vx-share/xdr_ptrace.h vx-share/xdr_rdb.h thread.h \
-	dcache.h remote-utils.h remote-sim.h
+	dcache.h remote-utils.h remote-sim.h top.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -445,11 +446,11 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	dwarfread.o mipsread.o stabsread.o core.o c-lang.o ch-lang.o m2-lang.o \
 	complaints.o typeprint.o c-typeprint.o ch-typeprint.o m2-typeprint.o \
 	c-valprint.o cp-valprint.o ch-valprint.o m2-valprint.o nlmread.o \
-	serial.o mdebugread.o os9kread.o
+	serial.o mdebugread.o os9kread.o top.o utils.o
 
-OBS = $(COMMON_OBS) main.o utils.o annotate.o
+OBS = $(COMMON_OBS) main.o annotate.o
 
-LIBGDB_OBS = libmain.o libutils.o
+LIBGDB_OBS = 
 
 TSOBS = inflow.o
 
@@ -567,14 +568,6 @@ libgdb-files: $(LIBGDBDEPS) Makefile.in
 	for i in $(LIBGDBFILES); do\
 		echo $$i >> libgdb-files;\
 	done
-
-libmain.o: main.c
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/main.c -DMAIN_OVERRIDE \
-	  -o libmain.o
-
-libutils.o: utils.c
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/utils.c  -o libutils.o \
-	  -DFPUTS_UNFILTERED_OVERRIDE
 
 saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 	#setopt load_flags $(CFLAGS) $(BFD_CFLAGS) -DHOST_SYS=SUN4_SYS
@@ -1290,10 +1283,12 @@ m88k-nat.o: m88k-nat.c $(defs_h) $(gdbcore_h) $(inferior_h)
 m88k-pinsn.o: m88k-pinsn.c $(defs_h) $(symtab_h) 
 m88k-tdep.o: m88k-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
-main.o: main.c $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
+top.o: top.c top.h $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
 	$(defs_h) $(gdbcmd_h) $(inferior_h) language.h signals.h \
 	$(remote_utils_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(READLINE_CFLAGS) $(srcdir)/main.c
+	$(CC) -c $(INTERNAL_CFLAGS) $(READLINE_CFLAGS) $(srcdir)/top.c
+
+main.o: main.c top.h $(defs_h)
 
 maint.o: maint.c $(defs_h) $(gdbcmd_h) $(gdbtypes_h) $(symtab_h) language.h \
 	$(expression_h)
