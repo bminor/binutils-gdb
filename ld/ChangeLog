@@ -1,3 +1,7 @@
+Wed Nov 27 03:22:05 1996  Jason Merrill  <jason@yorick.cygnus.com>
+
+	* scripttempl/elf.sc: Add the remaining DWARF sections.
+
 Tue Nov 26 16:58:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Rebuild with autoconf 2.12.
