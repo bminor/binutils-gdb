@@ -31,7 +31,7 @@ host_libs="mmalloc libiberty opcodes bfd readline glob gash tcl tk tclX"
 host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
 	    prms send-pr gprof gdbtest tgas etc expect dejagnu sim
             m4 autoconf ispell grep diff rcs cvs fileutils shellutils
-	    textutils wdiff find emacs uudecode hello tar gzip indent
+	    textutils wdiff find emacs emacs19 uudecode hello tar gzip indent
 	    recode release sed utils"
 
 
@@ -60,7 +60,7 @@ target_tools="groff"
 
 # directories to be built in the native environment only
 #
-native_only="autoconf cvs emacs fileutils find grep groff gzip hello indent
+native_only="autoconf cvs emacs emacs19 fileutils find grep groff gzip hello indent
              ispell m4 rcs recode sed shellutils tar textutils gash tk uudecode wdiff 
 	     gprof"
 
@@ -202,7 +202,7 @@ esac
 
 case "${target}" in
   alpha-dec-osf1*)
-    noconfigdirs="$noconfigdirs emacs fileutils grep newlib"
+    noconfigdirs="$noconfigdirs emacs emacs19 fileutils grep newlib"
     ;;	
   alpha*-*-*)
     noconfigdirs="$noconfigdirs newlib"
@@ -217,9 +217,9 @@ case "${target}" in
   hppa*-*-*)
     # HP's C compiler doesn't handle Emacs correctly (but on BSD and Mach
     # cc is gcc, and on any system a user should be able to link cc to
-    # whatever they want.  FIXME, emacs).
+    # whatever they want.  FIXME, emacs emacs19).
     case "${CC}" in
-	"" | cc*) noconfigdirs="$noconfigdirs emacs" ;;
+	"" | cc*) noconfigdirs="$noconfigdirs emacs emacs19" ;;
         *) ;;
     esac
     noconfigdirs="$noconfigdirs ld shellutils"
@@ -242,11 +242,11 @@ case "${target}" in
   i[34]86-*-sysv4*)
     # The SYSV4 C compiler doesn't handle Emacs correctly
     case "${CC}" in
-	"" | cc*) noconfigdirs="$noconfigdirs emacs" ;;
+	"" | cc*) noconfigdirs="$noconfigdirs emacs emacs19" ;;
         *) ;;
     esac
     # but that's okay since emacs doesn't work anyway
-    noconfigdirs="$noconfigdirs emacs"
+    noconfigdirs="$noconfigdirs emacs emacs19"
     ;;
   powerpc-*-aix*)
     # copied from rs6000-*-* entry
