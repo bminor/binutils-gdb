@@ -31,6 +31,7 @@ h-dec3100.h
 h-dgux.h
 h-hp9000.h
 h-hp300bsd.h
+h-i386mach.h
 h-i386v.h
 h-irix3.h
 h-rs6000.h
@@ -50,7 +51,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.7  1991/09/20 03:42:22  gnu
+# Revision 1.8  1991/10/04 08:27:36  gnu
+# Add 386 Mach host support.
+#
+# Revision 1.7  1991/09/20  03:42:22  gnu
 # Undo precipitous changes.
 #
 # Revision 1.5  1991/09/17  06:57:44  grossman

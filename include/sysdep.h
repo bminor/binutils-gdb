@@ -56,6 +56,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	ULTRA3_SYS 20		/* NYU Ultracomputer */
 #define	NEWSOS3_SYS 21		/* Sony NewsOS 3.x (bsd-4.3 based) */
 #define	AMIX_SYS 22		/* Amiga Unix */
+#define	i386_MACH_SYS 23	/* Mach on Intel 386 */
 
 #include <ansidecl.h>
 
@@ -161,6 +162,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #if HOST_SYS == AMIX_SYS
 #include <sys/h-amix.h>
+#endif
+
+#if HOST_SYS == i386_MACH_SYS
+#include <sys/h-i386mach.h>
 #endif
 
 #endif /* _SYSDEP_H */
