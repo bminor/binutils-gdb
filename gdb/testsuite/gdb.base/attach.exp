@@ -36,7 +36,7 @@ if { [istarget "hppa*-*-hpux*"] } {
 }
 
 # are we on a target board
-if ![isnative] then {
+if [is_remote target] then {
     return 0
 }
 

@@ -1,3 +1,7 @@
+2002-04-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/attach.exp: Correct target board test.
+
 2002-04-08  Michael Chastain  <mec@shout.net>
 
 	* gdb.c++/method.exp: Require "const ... A * ..." for "ptype this"
