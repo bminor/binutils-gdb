@@ -1,7 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 sinclude(../common/aclocal.m4)
-dnl 2.12 botches SHELL substitution
-AC_PREREQ(2.12.1)dnl
+AC_PREREQ(2.59)dnl
 AC_INIT(Makefile.in)
 
 SIM_AC_COMMON

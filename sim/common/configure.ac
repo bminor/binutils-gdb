@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_PREREQ(2.5)dnl
+AC_PREREQ(2.59)dnl
 AC_INIT(Makefile.in)
 
 # This is intended for use by the target specific directories, and by us.

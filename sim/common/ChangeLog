@@ -1,3 +1,9 @@
+2005-01-07  Andrew Cagney  <cagney@gnu.org>
+
+	* configure.ac: Rename configure.in, require autoconf 2.59.
+	* aclocal.m4 (SIM_AC_COMMON): Delete call to AC_CONFIG_AUX_DIR.
+	* configure: Re-generate.
+
 2004-12-15  Hans-Peter Nilsson  <hp@axis.com>
 
 	* syscall.c (cb_syscall) <case CB_SYS_truncate>

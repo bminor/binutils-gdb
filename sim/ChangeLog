@@ -1,3 +1,9 @@
+2005-01-07  Andrew Cagney  <cagney@gnu.org>
+
+	* configure.ac: Replace configure.in.  Requires autoconf 2.59 and
+	correctly calls AC_CONFIG_SUBDIRS.
+	* configure: Re-generate.
+
 2004-12-01  Andrew Cagney  <cagney@gnu.org>
 
 	* i960, h8500: Delete directory.

@@ -1,3 +1,8 @@
+2005-01-07  Andrew Cagney  <cagney@gnu.org>
+
+	* configure.ac: Rename configure.in, require autoconf 2.59.
+	* configure: Re-generate.
+
 Tue Apr 18 16:32:07 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* t-rie-xx.s (test_rie_xx): New test.
