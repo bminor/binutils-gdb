@@ -168,9 +168,9 @@ MY(mkobject) (abfd)
 
 /* Copy private section data.  This actually does nothing with the
    sections.  It copies the subformat field.  We copy it here, because
-   we know whether this is a QMAGIC file before we set the section
-   contents, and copy_private_bfd_data is not called until after the
-   section contents have been set.  */
+   we need to know whether this is a QMAGIC file before we set the
+   section contents, and copy_private_bfd_data is not called until
+   after the section contents have been set.  */
 
 /*ARGSUSED*/
 static boolean
