@@ -2865,6 +2865,45 @@ pa_ip (str)
 		  continue;
 		}
 
+	    /* Handle a 22 bit branch displacement.  */
+	    case 'X':
+	      the_insn.field_selector = pa_chk_field_selector (&s);
+	      get_expression (s);
+	      s = expr_end;
+	      the_insn.pcrel = 1;
+	      if (!the_insn.exp.X_add_symbol
+		  || !strcmp (S_GET_NAME (the_insn.exp.X_add_symbol),
+			      "L$0\001"))
+		{
+		  unsigned int w3, w2, w1, w, result;
+
+		  num = evaluate_absolute (&the_insn);
+		  if (num % 4)
+		    {
+		      as_bad (_("Branch to unaligned address"));
+		      break;
+		    }
+		  CHECK_FIELD (num, 8388607, -8388608, 0);
+
+		  if (the_insn.exp.X_add_symbol)
+		    num -= 8;
+
+		  sign_unext (num >> 2, 22, &result);
+		  dis_assemble_22 (result, &w3, &w1, &w2, &w);
+		  INSERT_FIELD_AND_CONTINUE (opcode,
+					     ((w3 << 21) | (w2 << 2)
+					      | (w1 << 16) | w),
+					     0);
+		}
+	      else
+		{
+		  the_insn.reloc = R_HPPA_PCREL_CALL;
+		  the_insn.format = 22;
+		  the_insn.arg_reloc = last_call_desc.arg_reloc;
+		  memset (&last_call_desc, 0, sizeof (struct call_desc));
+		  continue;
+		}
+
 	    /* Handle an absolute 17 bit branch target.  */
 	    case 'z':
 	      the_insn.field_selector = pa_chk_field_selector (&s);
@@ -3958,6 +3997,29 @@ md_apply_fix (fixP, valp)
 	    sign_unext ((new_val - 8) >> 2, 17, &resulti);
 	    dis_assemble_17 (resulti, &w1, &w2, &w);
 	    result = ((w2 << 2) | (w1 << 16) | w);
+	    break;
+	  }
+
+	case 22:
+	  {
+	    int distance = *valp, w3;
+
+	    CHECK_FIELD (new_val, 8388607, -8388608, 0);
+
+	    /* If this is an absolute branch (ie no link) with an out of
+	       range target, then we want to complain.  */
+	    if (fixP->fx_r_type == R_HPPA_PCREL_CALL
+		&& (distance > 8388607 || distance < -8388608)
+		&& (bfd_get_32 (stdoutput, buf) & 0xffe00000) == 0xe8000000)
+	      CHECK_FIELD (distance, 8388607, -8388608, 0);
+
+	    /* Mask off 22 bits to be changed.  */
+	    bfd_put_32 (stdoutput,
+			bfd_get_32 (stdoutput, buf) & 0xfc00e002,
+			buf);
+	    sign_unext ((new_val - 8) >> 2, 22, &resulti);
+	    dis_assemble_22 (resulti, &w3, &w1, &w2, &w);
+	    result = ((w3 << 21) | (w2 << 2) | (w1 << 16) | w);
 	    break;
 	  }
 
