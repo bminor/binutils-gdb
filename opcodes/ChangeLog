@@ -1,8 +1,17 @@
+start-sanitize-sky
+Thu Jan 29 18:14:56 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* dvp-opc.c, fixed order of pkemscal/pkemscalf instructions
+	in the opcode table.  The pkemscalf instruction must come first.
+
+Thu Jan 29 16:47:24 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* dvp-opc.c, MAXIi should be VUOP6(0x1d) instead of 0x2d.
+
 Thu Jan 29 13:02:56 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* m32r-opc.h (HAVE_CPU_M32R): Define.
 
-start-sanitize-sky
 Wed Jan 28 13:46:19 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* dvp-dis.c, dvp-opc.c: New files.
