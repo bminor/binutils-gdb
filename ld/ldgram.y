@@ -50,7 +50,7 @@ static enum section_type sectype;
 lang_memory_region_type *region;
 
 boolean ldgram_want_filename = true;
-FILE *  saved_script_handle = false;
+FILE *  saved_script_handle = NULL;
 boolean force_make_executable = false;
 
 boolean ldgram_in_script = false;

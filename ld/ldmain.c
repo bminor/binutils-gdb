@@ -298,7 +298,7 @@ main (argc, argv)
 
   /* If we have not already opened and parsed a linker script
      read the emulation's appropriate default script.  */
-  if (saved_script_handle == false)
+  if (saved_script_handle == NULL)
     {
       int isfile;
       char *s = ldemul_get_script (& isfile);
