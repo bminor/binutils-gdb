@@ -1,3 +1,7 @@
+Mon Mar 22 23:59:13 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: add installcheck target
+
 Mon Mar 22 10:19:00 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config/tc-mips.c (macro): Use $AT for any floating point load.

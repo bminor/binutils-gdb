@@ -1,3 +1,7 @@
+Tue Mar 23 00:01:23 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: add installcheck target
+
 Mon Mar 22 16:17:58 1993  Fred Fish  (fnf@cygnus.com)
 
 	* config/{a29k, arm, convex, gould, h8300, i386, i860, i960, m68k,

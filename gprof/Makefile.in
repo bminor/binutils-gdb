@@ -46,7 +46,7 @@ CFLAGS=
 
 all:	diststuff $(PROG)
 
-.PHONY: check info install-info
+.PHONY: check installcheck info install-info
 .SUFFIXES: .m
 
 .m.c:
@@ -69,6 +69,7 @@ info: gprof.info
 dvi: gprof.dvi
 
 check:
+installcheck:
 
 install-info: info
 	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \

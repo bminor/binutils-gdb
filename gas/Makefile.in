@@ -219,7 +219,7 @@ STAGESTUFF = *.o as.new
 as.new: $(OBJS) $(LIBS)
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o as.new $(OBJS) $(LIBS) $(LOADLIBES)
 
-check:
+installcheck check:
 	@echo No checks are available yet for the GNU assembler.
 
 config.status:

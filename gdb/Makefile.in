@@ -421,6 +421,7 @@ YYOBJ = c-exp.tab.o m2-exp.tab.o ch-exp.tab.o
 all: gdb
 	$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=`echo $(SUBDIRS) | sed 's/testsuite//'`" subdir_do
 
+installcheck:
 check: force
 	rootme=`pwd`; export rootme; $(MAKE) $(TARGET_FLAGS_TO_PASS) DO=check DODIRS=testsuite subdir_do
 info: force
