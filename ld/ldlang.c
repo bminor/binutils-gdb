@@ -126,6 +126,7 @@ static void lang_common PARAMS ((void));
 static boolean lang_one_common PARAMS ((struct bfd_link_hash_entry *, PTR));
 static void lang_place_orphans PARAMS ((void));
 static int topower PARAMS ((int));
+static void lang_set_startof PARAMS ((void));
 static void reset_memory_regions PARAMS ((void));
 
 /* EXPORTS */
@@ -369,6 +370,7 @@ new_afile (name, file_type, target, add_to_list)
   p->next = (lang_statement_union_type *) NULL;
   p->symbol_count = 0;
   p->common_output_section = (asection *) NULL;
+  p->dynamic = config.dynamic_link;
   p->loaded = false;
   lang_statement_append (&input_file_chain,
 			 (lang_statement_union_type *) p,
@@ -448,7 +450,7 @@ lang_memory_region_lookup (name)
     }
   {
     lang_memory_region_type *new =
-    (lang_memory_region_type *) stat_alloc ((bfd_size_type) (sizeof (lang_memory_region_type)));
+    (lang_memory_region_type *) stat_alloc (sizeof (lang_memory_region_type));
 
     new->name = buystring (name);
     new->next = (lang_memory_region_type *) NULL;
@@ -591,7 +593,7 @@ init_os (s)
 /*  asection *section = bfd_get_section_by_name(output_bfd, s->name);*/
   section_userdata_type *new =
   (section_userdata_type *)
-  stat_alloc ((bfd_size_type) (sizeof (section_userdata_type)));
+  stat_alloc (sizeof (section_userdata_type));
 
   s->bfd_section = bfd_get_section_by_name (output_bfd, s->name);
   if (s->bfd_section == (asection *) NULL)
@@ -1080,8 +1082,8 @@ ldlang_add_undef (name)
      CONST char *CONST name;
 {
   ldlang_undef_chain_list_type *new =
-  (ldlang_undef_chain_list_type
-   *) stat_alloc ((bfd_size_type) (sizeof (ldlang_undef_chain_list_type)));
+    ((ldlang_undef_chain_list_type *)
+     stat_alloc (sizeof (ldlang_undef_chain_list_type)));
 
   new->next = ldlang_undef_chain_list_head;
   ldlang_undef_chain_list_head = new;
@@ -1623,8 +1625,8 @@ insert_pad (this_ptr, fill, power, output_section_statement, dot)
   if (alignment_needed != 0)
     {
       lang_statement_union_type *new =
-      (lang_statement_union_type *)
-      stat_alloc ((bfd_size_type) (sizeof (lang_padding_statement_type)));
+	((lang_statement_union_type *)
+	 stat_alloc (sizeof (lang_padding_statement_type)));
 
       /* Link into existing chain */
       new->header.next = *this_ptr;
@@ -2159,6 +2161,52 @@ lang_do_assignments (s, output_section_statement, fill, dot)
   return dot;
 }
 
+/* Fix any .startof. or .sizeof. symbols.  When the assemblers see the
+   operator .startof. (section_name), it produces an undefined symbol
+   .startof.section_name.  Similarly, when it sees
+   .sizeof. (section_name), it produces an undefined symbol
+   .sizeof.section_name.  For all the output sections, we look for
+   such symbols, and set them to the correct value.  */
+
+static void
+lang_set_startof ()
+{
+  asection *s;
+
+  for (s = output_bfd->sections; s != NULL; s = s->next)
+    {
+      const char *secname;
+      char *buf;
+      struct bfd_link_hash_entry *h;
+
+      secname = bfd_get_section_name (output_bfd, s);
+      buf = xmalloc (10 + strlen (secname));
+
+      sprintf (buf, ".startof.%s", secname);
+      h = bfd_link_hash_lookup (link_info.hash, buf, false, false, true);
+      if (h != NULL && h->type == bfd_link_hash_undefined)
+	{
+	  h->type = bfd_link_hash_defined;
+	  h->u.def.value = bfd_get_section_vma (output_bfd, s);
+	  h->u.def.section = bfd_abs_section_ptr;
+	}
+
+      sprintf (buf, ".sizeof.%s", secname);
+      h = bfd_link_hash_lookup (link_info.hash, buf, false, false, true);
+      if (h != NULL && h->type == bfd_link_hash_undefined)
+	{
+	  h->type = bfd_link_hash_defined;
+	  if (s->_cooked_size != 0)
+	    h->u.def.value = s->_cooked_size;
+	  else
+	    h->u.def.value = s->_raw_size;
+	  h->u.def.section = bfd_abs_section_ptr;
+	}
+
+      free (buf);
+    }
+}
+
 static void
 lang_finish ()
 {
@@ -2663,12 +2711,11 @@ lang_process ()
 			  abs_output_section,
 			  &(statement_list.head), 0, (bfd_vma) 0, false);
 
-
-      reset_memory_regions ();
-
       /* Keep relaxing until bfd_relax_section gives up.  */
       do
 	{
+	  reset_memory_regions ();
+
 	  relax_again = false;
 
 	  /* Do all the assignments with our current guesses as to
@@ -2696,6 +2743,9 @@ lang_process ()
   /* See if anything special should be done now we know how big
      everything is.  */
   ldemul_after_allocation ();
+
+  /* Fix any .startof. or .sizeof. symbols.  */
+  lang_set_startof ();
 
   /* Do all the assignments, now that we know the final restingplaces
      of all the symbols */
