@@ -1,3 +1,13 @@
+Thu Apr  4 18:49:09 1996  Fred Fish  <fnf@cygnus.com>
+
+	* configure.in (mips-sony-bsd*): Fix typo in AC_DEFINE.
+	(AC_CHECK_HEADERS): Check for sys/time.h
+	(AC_HEADER_TIME): Add macro.
+	* configure: Rebuild.
+	* sysdep.h: Use TIME_WITH_SYS_TIME and HAVE_SYS_TIME_H
+	to control what combination of <time> and <sys/time.h>
+	get included.
+	
 Tue Apr  2 13:11:53 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* aoutf1.h (sunos_32_set_arch_mach): Handle M_SPARCLET.

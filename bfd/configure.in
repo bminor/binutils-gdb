@@ -116,7 +116,8 @@ AC_SUBST(HOST_64BIT_LONG)
 BFD_CC_FOR_BUILD
 
 AC_CHECK_HEADERS(stddef.h string.h strings.h stdlib.h time.h unistd.h)
-AC_CHECK_HEADERS(fcntl.h sys/file.h)
+AC_CHECK_HEADERS(fcntl.h sys/file.h sys/time.h)
+AC_HEADER_TIME
 AC_CHECK_FUNCS(fcntl getpagesize)
 
 BFD_BINARY_FOPEN
@@ -223,7 +224,7 @@ changequote([,])dnl
 	;;
   mips-sony-bsd*)
 	COREFILE=trad-core.o
-	AC_DEFINE(TRAD_HEADER,"hosts/news-mips".h)
+	AC_DEFINE(TRAD_HEADER,"hosts/news-mips.h")
 	;;
   m68*-bull*-sysv*)
 	COREFILE=trad-core.o
