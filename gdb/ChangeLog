@@ -1,3 +1,9 @@
+2000-03-30  Fernando Nasser  <fnasser@cygnus.com>
+
+	* wrapper.c (gdb_value_subscript, wrap_value_subscript): New functions.
+	Safe version of value_subscript.
+	* varobj.c (): Use gdb_value_subscript() to get an array element value.
+
 2000-03-30  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* ui-file.c: Include "gdb_string.h"

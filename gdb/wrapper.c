@@ -55,6 +55,9 @@ int wrap_value_fetch_lazy PARAMS ((char *));
 int gdb_value_equal PARAMS ((value_ptr, value_ptr, int *));
 int wrap_value_equal PARAMS ((char *));
 
+int gdb_value_subscript PARAMS ((value_ptr, value_ptr, value_ptr * rval));
+int wrap_value_subscript PARAMS ((char *));
+
 int gdb_value_ind PARAMS ((value_ptr val, value_ptr * rval));
 int wrap_value_ind PARAMS ((char *opaque_arg));
 
@@ -178,6 +181,42 @@ wrap_value_equal (a)
   val2 = (value_ptr) (args)->args[1].pointer;
 
   (args)->result.integer = value_equal (val1, val2);
+  return 1;
+}
+
+int
+gdb_value_subscript (val1, val2, rval)
+     value_ptr val1;
+     value_ptr val2;
+     value_ptr * rval;
+{
+  struct gdb_wrapper_arguments args;
+
+  args.args[0].pointer = val1;
+  args.args[1].pointer = val2;
+
+  if (!catch_errors ((catch_errors_ftype *) wrap_value_subscript, &args,
+		     "", RETURN_MASK_ERROR))
+    {
+      /* An error occurred */
+      return 0;
+    }
+
+  *rval = (value_ptr) args.result.pointer;
+  return 1;
+}
+
+int
+wrap_value_subscript (a)
+     char *a;
+{
+  struct gdb_wrapper_arguments *args = (struct gdb_wrapper_arguments *) a;
+  value_ptr val1, val2;
+
+  val1 = (value_ptr) (args)->args[0].pointer;
+  val2 = (value_ptr) (args)->args[1].pointer;
+
+  (args)->result.pointer = value_subscript (val1, val2);
   return 1;
 }
 

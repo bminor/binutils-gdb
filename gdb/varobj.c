@@ -1954,7 +1954,7 @@ c_value_of_child (parent, index)
      struct varobj *parent;
      int index;
 {
-  value_ptr value, temp;
+  value_ptr value, temp, indval;
   struct type *type, *target;
   char *name;
 
@@ -1969,9 +1969,15 @@ c_value_of_child (parent, index)
       switch (TYPE_CODE (type))
 	{
 	case TYPE_CODE_ARRAY:
+#if 0
+          /* This breaks if the array lives in a (vector) register. */
 	  value = value_slice (temp, index, 1);
 	  temp = value_coerce_array (value);
 	  gdb_value_ind (temp, &value);
+#else
+	  indval = value_from_longest (builtin_type_int, (LONGEST) index);
+	  gdb_value_subscript (temp, indval, &value);
+#endif
 	  break;
 
 	case TYPE_CODE_STRUCT:
