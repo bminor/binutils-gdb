@@ -1,22 +1,14 @@
-	.SPACE $PRIVATE$
-	.SUBSPA $DATA$,QUAD=1,ALIGN=8,ACCESS=31
-	.SUBSPA $BSS$,QUAD=1,ALIGN=8,ACCESS=31,ZERO,SORT=82
-	.SPACE $TEXT$
-	.SUBSPA $LIT$,QUAD=0,ALIGN=8,ACCESS=44
-	.SUBSPA $CODE$,QUAD=0,ALIGN=8,ACCESS=44,CODE_ONLY
 	.IMPORT $global$,DATA
 	.IMPORT $$dyncall,MILLICODE
 ; gcc_compiled.:
-	.SPACE $PRIVATE$
-	.SUBSPA $DATA$
+	.data
 
 	.align 4
 tab___2
 	.word L$0002
 	.word L$0003
 	.word L$0004
-	.SPACE $TEXT$
-	.SUBSPA $CODE$
+	.code
 
 	.align 4
 	.EXPORT execute,CODE
@@ -64,16 +56,13 @@ L$0004
 	.PROCEND
 	.IMPORT __main,CODE
 	.IMPORT strcmp,CODE
-	.SPACE $TEXT$
-	.SUBSPA $LIT$
 
 	.align 4
 L$C0000
 	.STRING "xyxyz\x00"
 	.IMPORT abort,CODE
 	.IMPORT exit,CODE
-	.SPACE $TEXT$
-	.SUBSPA $CODE$
+	.code
 
 	.align 4
 	.EXPORT main,CODE
@@ -122,8 +111,7 @@ L$0011
 	nop
 	.EXIT
 	.PROCEND
-	.SPACE $PRIVATE$
-	.SUBSPA $BSS$
+	.data
 
 optab	.comm 10
 buf	.comm 10
