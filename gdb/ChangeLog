@@ -1,3 +1,9 @@
+Wed Nov 15 09:31:39 2000  David Taylor  <taylor@redhat.com>
+
+	* utils.c (strlen_paddr, paddr, paddr_nz): Use TARGET_ADDR_BIT,
+	not TARGET_PTR_BIT, since we are dealing with addresses, not
+	pointers.
+	
 2000-11-14  Daniel Berlin  <dberlin@redhat.com>
 
 	From Kenneth Block <kenneth.block@compaq.com>

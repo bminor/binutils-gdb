@@ -2720,19 +2720,19 @@ get_cell (void)
 int
 strlen_paddr (void)
 {
-  return (TARGET_PTR_BIT / 8 * 2);
+  return (TARGET_ADDR_BIT / 8 * 2);
 }
 
 char *
 paddr (CORE_ADDR addr)
 {
-  return phex (addr, TARGET_PTR_BIT / 8);
+  return phex (addr, TARGET_ADDR_BIT / 8);
 }
 
 char *
 paddr_nz (CORE_ADDR addr)
 {
-  return phex_nz (addr, TARGET_PTR_BIT / 8);
+  return phex_nz (addr, TARGET_ADDR_BIT / 8);
 }
 
 static void
