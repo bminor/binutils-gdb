@@ -1,3 +1,9 @@
+Wed Aug 24 13:08:08 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* configure.in: Change i[34]86 to i[345]86.
+	* nlm/configure.in: Likewise.
+	* gdbserver/configure.in: Likewise.
+
 Wed Aug 24 09:41:09 1994  J.T. Conklin  (jtc@cygnus.com)
 
 	* configure.in (i386-*-netware): Automatically configure nlm

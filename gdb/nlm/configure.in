@@ -11,7 +11,7 @@ case "${host_cpu}" in
 alpha)			gdb_host_cpu=alpha ;;
 c[12])			gdb_host_cpu=convex ;;
 hppa*)			gdb_host_cpu=pa ;;
-i[34]86)		gdb_host_cpu=i386 ;;
+i[345]86)		gdb_host_cpu=i386 ;;
 m68*)			gdb_host_cpu=m68k ;;
 np1)			gdb_host_cpu=gould ;;
 pyramid)		gdb_host_cpu=pyr ;;
@@ -33,23 +33,23 @@ c[12]-*-*)		gdb_host=convex ;;
 hppa*-hp-bsd*)		gdb_host=hppabsd ;;
 hppa*-hp-hpux*)		gdb_host=hppahpux ;;
 
-i[34]86-ncr-*)		gdb_host=ncr3000 ;;
-i[34]86-sequent-*)	gdb_host=symmetry ;;
+i[345]86-ncr-*)		gdb_host=ncr3000 ;;
+i[345]86-sequent-*)	gdb_host=symmetry ;;
 
-i[34]86-*-bsd*)		gdb_host=i386bsd ;;
-i[34]86-*-lynxos*)	gdb_host=i386lynx ;;
-i[34]86-*-go32)		gdb_host=go32
+i[345]86-*-bsd*)	gdb_host=i386bsd ;;
+i[345]86-*-lynxos*)	gdb_host=i386lynx ;;
+i[345]86-*-go32)	gdb_host=go32
 			gdb_serial_driver=ser-go32.c
 			;;
-i[34]86-*-linux)	gdb_host=linux ;;
-i[34]86-*-mach)		gdb_host=i386mach ;;
-i[34]86-*-sco3.2v4*)	gdb_host=i386sco4 ;;
-i[34]86-*-sco*)		gdb_host=i386sco ;;
-i[34]86-*-solaris*)	gdb_host=i386sol2 ;;
-i[34]86-*-sunos*)	gdb_host=sun386 ;;
-i[34]86-*-sysv3.2)	gdb_host=i386v32 ;;
-i[34]86-*-sysv4*)	gdb_host=i386v4 ;;
-i[34]86-*-sysv*)	gdb_host=i386v ;;
+i[345]86-*-linux)	gdb_host=linux ;;
+i[345]86-*-mach)	gdb_host=i386mach ;;
+i[345]86-*-sco3.2v4*)	gdb_host=i386sco4 ;;
+i[345]86-*-sco*)	gdb_host=i386sco ;;
+i[345]86-*-solaris*)	gdb_host=i386sol2 ;;
+i[345]86-*-sunos*)	gdb_host=sun386 ;;
+i[345]86-*-sysv3.2)	gdb_host=i386v32 ;;
+i[345]86-*-sysv4*)	gdb_host=i386v4 ;;
+i[345]86-*-sysv*)	gdb_host=i386v ;;
 
 m680[01]0-sun-sunos3*)	gdb_host=sun2os3 ;;
 m680[01]0-sun-sunos4*)	gdb_host=sun2os4 ;;
@@ -116,7 +116,7 @@ case "${target_cpu}" in
 alpha)			gdb_target_cpu=alpha ;;
 c[12])			gdb_target_cpu=convex ;;
 hppa*)			gdb_target_cpu=pa ;;
-i[34]86)		gdb_target_cpu=i386 ;;
+i[345]86)		gdb_target_cpu=i386 ;;
 m68*)			gdb_target_cpu=m68k ;;
 np1)			gdb_target_cpu=gould ;;
 pn)			gdb_target_cpu=gould ;;
@@ -153,22 +153,22 @@ sh-*-*)			gdb_target=sh ;;
 hppa*-*-bsd*)		gdb_target=hppabsd ;;
 hppa*-*-hpux*)		gdb_target=hppahpux ;;
 
-i[34]86-sequent-*)	gdb_target=symmetry ;;
-i[34]86-ncr-*)		gdb_target=ncr3000 ;;
+i[345]86-sequent-*)	gdb_target=symmetry ;;
+i[345]86-ncr-*)		gdb_target=ncr3000 ;;
 
-i[34]86-*-aout)		gdb_target=i386aout ;;
-i[34]86-*-coff)		gdb_target=i386v ;;
-i[34]86-*-elf)		gdb_target=i386v ;;
+i[345]86-*-aout)	gdb_target=i386aout ;;
+i[345]86-*-coff)	gdb_target=i386v ;;
+i[345]86-*-elf)		gdb_target=i386v ;;
 
-i[34]86-*-bsd*)		gdb_target=i386bsd ;;
-i[34]86-*-lynxos*)	gdb_target=i386lynx ;;
-i[34]86-*-go32)		gdb_target=i386aout ;;
-i[34]86-*-solaris*)	gdb_target=i386sol2 ;;
-i[34]86-*-sunos*)	gdb_target=sun386 ;;
-i[34]86-*-sysv4*)	gdb_target=i386v4 ;;
-i[34]86-*-sco*)		gdb_target=i386v ;;
-i[34]86-*-sysv*)	gdb_target=i386v ;;
-i[34]86-*-linux)	gdb_target=linux ;;
+i[345]86-*-bsd*)	gdb_target=i386bsd ;;
+i[345]86-*-lynxos*)	gdb_target=i386lynx ;;
+i[345]86-*-go32)	gdb_target=i386aout ;;
+i[345]86-*-solaris*)	gdb_target=i386sol2 ;;
+i[345]86-*-sunos*)	gdb_target=sun386 ;;
+i[345]86-*-sysv4*)	gdb_target=i386v4 ;;
+i[345]86-*-sco*)	gdb_target=i386v ;;
+i[345]86-*-sysv*)	gdb_target=i386v ;;
+i[345]86-*-linux)	gdb_target=linux ;;
 
 i960-*-bout)		gdb_target=vxworks960 ;;
 i960-*-coff)		gdb_target=nindy960 ;;
