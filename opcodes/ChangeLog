@@ -1,4 +1,12 @@
+Mon Feb 12 16:26:06 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* ppc-opc.c (PPC): Undef, so default defination on Windows NT
+	doesn't conflict.
+
 Wed Feb  7 13:59:54 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* m68k-opc.c (m68k_opcodes): The bkpt instruction is supported on
+	m68010up, not just m68020up | cpu32.
 
 	* Makefile.in (SONAME): New variable.
 	($(SHLINK)): Make a link to the transformed name, as well.
