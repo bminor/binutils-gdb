@@ -1,5 +1,10 @@
 Sat Apr  8 12:46:33 1995  Doug Evans  <dje@chestnut.cygnus.com>
 
+start-sanitize-arc
+	* gas/arc: Testsuite for ARC.
+	* gas/arc/{arc.exp,math.s,math.d,flag.s,flag.d,j.s,j.d}: New files.
+end-sanitize-arc
+
 	* lib/gas-defs.exp (run_dump_test): Handle arguments with paths.
 	Always resolve testcase status before returning.
 	If `slurp_options' fails, return and don't do test.
