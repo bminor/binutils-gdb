@@ -5,14 +5,15 @@ Fri Feb 13 16:41:42 1998  Ian Lance Taylor  <ian@cygnus.com>
 	* doc/Makefile.am (AUTOMAKE_OPTIONS): Define.
 	* doc/Makefile.in: Rebuild.
 
+start-sanitize-m32rx
 Fri Feb 13 09:57:11 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c (first_writes_to_seconds_operands): New
 	function.  Replaces get_src_reg(), check_for_side_effects(),
 	reads_from_src_reg().  Uses new insn operand features of cgen.
-	(writes_to_pc): New function.
+	(writes_to_pc): New function., but with new code suppressed for now.
 	(md_assemble): Call first_writes_to_seconds_operands().
-
+end-sanitize-m32rx
 Fri Feb 13 00:47:44 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (macro_build): Handle operand type 'C'.

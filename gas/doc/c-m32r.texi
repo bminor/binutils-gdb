@@ -70,7 +70,7 @@ There are several warning and error messages that can be produced by
 
 @table @code
 
-@item output of first instruction is the same as the input of second instruction - is this intentional ?
+@item output of 1st instruction is the same as an input to 2nd instruction - is this intentional ?
 This message is only produced if warnings for explicit parallel
 conflicts have been enabled.  It indicates that the assembler has
 encountered a parallel instruction in which the destination register of
@@ -79,7 +79,7 @@ instruction.  For example in this code fragment
 @samp{mv r1, r2 || neg r3, r1} register r1 is the destination of the
 move instruction and the input to the neg instruction.
 
-@item output of second instruction is the same as the input of first instruction - is this intentional ?
+@item output of 2nd instruction is the same as an input to 1st instruction - is this intentional ?
 This message is only produced if warnings for explicit parallel
 conflicts have been enabled.  It indicates that the assembler has
 encountered a parallel instruction in which the destination register of
@@ -109,31 +109,14 @@ executed in parallel.
 This message is produced when the assembler encounters a parallel
 instruction whoes components both use the same execution pipeline.
 
-@item Both instructions write to the link register
-This message is produced when the assembler encounters a parallel
-instruction whoes components both write to the link register, one of
-them as a side effect.  For example this code fragment will produce this
-message:  @samp{jl r0 || mv r14, r1}
-
-@item Destination of first instruction written to by side effect of second instruction.
-This message is produced when the assembler encounters a parallel
-instruction whoes right hand component has a side effect which modifes a
-register used as the destination by the left hand component.  For
-example this code fragment will produce this message:
-@samp{mv r1, r2 || ld r0, @@r1+} 
-
-@item Destination of second instruction written to by side effect of first instruction.
-This message is produced when the assembler encounters a parallel
-instruction whoes left hand component has a side effect which modifes a
-register used as the destination by the right hand component.  For
-example this code fragment will produce this message:
-@samp{st r2, @@-r1 || mv r1, r3} 
-
 @item Instructions write to the same destination register.
 This message is produced when the assembler encounters a parallel
 instruction where both components attempt to modify the same register.
-For example this code fragment will produce this message:
+For example these code fragments will produce this message:
 @samp{mv r1, r2 || neg r1, r3}
+@samp{jl r0 || mv r14, r1}
+@samp{st r2, @@-r1 || mv r1, r3} 
+@samp{mv r1, r2 || ld r0, @@r1+} 
 
 @end table
 @c end-sanitize-m32rx

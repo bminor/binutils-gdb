@@ -432,8 +432,9 @@ static int
 writes_to_pc (a)
      m32r_insn * a;
 {
+#if 0
   const CGEN_OPERAND_INSTANCE * a_operands;
-  
+
   for (a_operands = CGEN_INSN_OPERANDS (a->insn);
        CGEN_OPERAND_INSTANCE_TYPE (a_operands) != CGEN_OPERAND_INSTANCE_END;
        a_operands ++)
@@ -442,7 +443,11 @@ writes_to_pc (a)
 	  && CGEN_OPERAND_INDEX (CGEN_OPERAND_INSTANCE_OPERAND (a_operands)) == M32R_OPERAND_PC)
 	return 1;
     }
-
+#else
+  if (CGEN_INSN_ATTR (a->insn, CGEN_INSN_UNCOND_CTI)
+      || CGEN_INSN_ATTR (a->insn, CGEN_INSN_COND_CTI))
+    return 1;
+#endif
   return 0;
 }
 
