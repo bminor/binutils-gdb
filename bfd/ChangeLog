@@ -1,3 +1,28 @@
+Mon Dec 14 17:08:08 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* hppa.c:  #include "sysdep.h", not <sysdep.h>.
+	* libhppa.h:  Make millicode_start and millicode_end be unsigned
+	int to be same type as CORE_ADDR in GDB.  Why are these here?
+
+Sat Dec 12 15:54:36 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-i386.c (CALC_ADDEND): if reloc is PC relative, add the
+	vaddr of the section to the addend.
+	* targets.c: if MINIMIZE is 1, and SCO_CORE is defined, add
+	SCO_CORE to SELECT_VECS.
+	(target_vector): add sco_core_vec.
+	* sco-core.c (sco_core_vec): add leading underscore initializer.
+	* configure.in (i[34]86-*-sco*): use target i386-sco.
+	* config/i386-sco.mt: new file; define SCO_CORE.
+
+Thu Dec 10 02:13:15 1992  John Gilmore  (gnu@cygnus.com)
+
+	* aout-adobe.c (aout_adobe_object_p):  Fix !strcmp thinko.
+
+Fri Dec  4 14:02:49 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* coffcode.h (bfd_coff_std_swap_table): Now static and const.
+
 Thu Dec  3 16:54:58 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* hosts/i386linux.h: Include unistd.h.
