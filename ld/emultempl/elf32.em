@@ -1571,7 +1571,8 @@ cat >>e${EMULATION_NAME}.c <<EOF
 #define OPTION_ENABLE_NEW_DTAGS		(OPTION_DISABLE_NEW_DTAGS + 1)
 #define OPTION_GROUP			(OPTION_ENABLE_NEW_DTAGS + 1)
 #define OPTION_EH_FRAME_HDR		(OPTION_GROUP + 1)
-
+#define OPTION_EXCLUDE_LIBS		(OPTION_EH_FRAME_HDR + 1)
+  
 static void
 gld${EMULATION_NAME}_add_options
   (int ns, char **shortopts, int nl, struct option **longopts,
@@ -1586,6 +1587,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
     {"disable-new-dtags", no_argument, NULL, OPTION_DISABLE_NEW_DTAGS},
     {"enable-new-dtags", no_argument, NULL, OPTION_ENABLE_NEW_DTAGS},
     {"eh-frame-hdr", no_argument, NULL, OPTION_EH_FRAME_HDR},
+    {"exclude-libs", required_argument, NULL, OPTION_EXCLUDE_LIBS},
     {"Bgroup", no_argument, NULL, OPTION_GROUP},
 EOF
 fi
@@ -1636,6 +1638,10 @@ cat >>e${EMULATION_NAME}.c <<EOF
       /* Groups must be self-contained.  */
       link_info.unresolved_syms_in_objects = RM_GENERATE_ERROR;
       link_info.unresolved_syms_in_shared_libs = RM_GENERATE_ERROR;
+      break;
+
+    case OPTION_EXCLUDE_LIBS:
+      add_excluded_libs (optarg);
       break;
 
     case 'z':

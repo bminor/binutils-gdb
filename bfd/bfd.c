@@ -133,6 +133,9 @@ CODE_FRAGMENT
 .  {* Pointer to structure which contains architecture information.  *}
 .  const struct bfd_arch_info *arch_info;
 .
+.  {* Flag set if symbols from this BFD should not be exported.  *}
+.  bfd_boolean no_export;
+.
 .  {* Stuff only useful for archives.  *}
 .  void *arelt_data;
 .  struct bfd *my_archive;      {* The containing archive BFD.  *}

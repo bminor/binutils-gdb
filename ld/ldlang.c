@@ -1692,6 +1692,67 @@ lookup_name (const char *name)
   return search;
 }
 
+/* Save LIST as a list of libraries whose symbols should not be exported.  */
+
+struct excluded_lib
+{
+  char *name;
+  struct excluded_lib *next;
+};
+static struct excluded_lib *excluded_libs;
+
+void
+add_excluded_libs (const char *list)
+{
+  const char *p = list, *end;
+
+  while (*p != '\0')
+    {
+      struct excluded_lib *entry;
+      end = strpbrk (p, ",:");
+      if (end == NULL)
+	end = p + strlen (p);
+      entry = xmalloc (sizeof (*entry));
+      entry->next = excluded_libs;
+      entry->name = xmalloc (end - p + 1);
+      memcpy (entry->name, p, end - p);
+      entry->name[end - p] = '\0';
+      excluded_libs = entry;
+      if (*end == '\0')
+        break;
+      p = end + 1;
+    }
+}
+
+static void
+check_excluded_libs (bfd *abfd)
+{
+  struct excluded_lib *lib = excluded_libs;
+
+  while (lib)
+    {
+      int len = strlen (lib->name);
+      const char *filename = lbasename (abfd->filename);
+
+      if (strcmp (lib->name, "ALL") == 0)
+	{
+	  abfd->no_export = TRUE;
+	  return;
+	}
+
+      if (strncmp (lib->name, filename, len) == 0
+	  && (filename[len] == '\0'
+	      || (filename[len] == '.' && filename[len + 1] == 'a'
+		  && filename[len + 2] == '\0')))
+	{
+	  abfd->no_export = TRUE;
+	  return;
+	}
+
+      lib = lib->next;
+    }
+}
+
 /* Get the symbols for an input file.  */
 
 static bfd_boolean
@@ -1776,6 +1837,8 @@ load_symbols (lang_input_statement_type *entry,
       break;
 
     case bfd_archive:
+      check_excluded_libs (entry->the_bfd);
+
       if (entry->whole_archive)
 	{
 	  bfd *member = NULL;

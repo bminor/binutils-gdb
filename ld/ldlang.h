@@ -589,4 +589,6 @@ extern int lang_symbol_definition_iteration (const char *);
 extern void lang_update_definedness
   (const char *, struct bfd_link_hash_entry *);
 
+extern void add_excluded_libs (const char *);
+
 #endif

@@ -1,3 +1,7 @@
+2004-10-16  Daniel Jacobowitz  <dan@debian.org>
+
+	* ld-elf/exclude1.s, ld-elf/exclude2.s, ld-elf/exclude.exp: New.
+
 2004-10-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-crx/reloc-num8.d: Adjust for changed orphan placement.

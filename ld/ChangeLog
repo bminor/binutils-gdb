@@ -1,3 +1,15 @@
+2004-10-16  Daniel Jacobowitz  <dan@debian.org>
+
+	* ldlang.c (struct excluded_lib, excluded_libs, add_excluded_libs)
+	(check_excluded_libs): New.
+	(load_symbols): Call check_excluded_libs.
+	* ldlang.h (add_excluded_libs): New prototype.
+	* emultempl/elf32.em (OPTION_EXCLUDED_LIBS): Define.
+	(gld${EMULATION_NAME}_add_options): Add --exclude-libs.
+	(gld${EMULATION_NAME}_handle_option): Handle --exclude-libs.
+	* ld.texinfo (Command Line Variables): Document --exclude-libs.
+	(Options Specific to i386 PE Targets): Remove --exclude-libs.
+
 2004-10-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldexp.c (exp_fold_tree): Don't immediately exit ld on a

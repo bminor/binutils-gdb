@@ -3778,6 +3778,14 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	    (*bed->elf_backend_merge_symbol_attribute) (h, isym, definition,
 							dynamic);
 
+	  /* If this symbol has default visibility and the user has requested
+	     we not re-export it, then mark it as hidden.  */
+	  if (definition && !dynamic
+	      && (abfd->no_export
+		  || (abfd->my_archive && abfd->my_archive->no_export))
+	      && ELF_ST_VISIBILITY (isym->st_other) != STV_INTERNAL)
+	    isym->st_other = STV_HIDDEN | (isym->st_other & ~ ELF_ST_VISIBILITY (-1));
+
 	  if (isym->st_other != 0 && !dynamic)
 	    {
 	      unsigned char hvis, symvis, other, nvis;

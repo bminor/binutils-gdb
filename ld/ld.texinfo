@@ -449,6 +449,17 @@ base 10; you may use a leading @samp{0x} for base 16, or a leading
 @samp{0} for base 8).  @xref{Entry Point}, for a discussion of defaults
 and other ways of specifying the entry point.
 
+@kindex --exclude-libs
+@item --exclude-libs @var{lib},@var{lib},...
+Specifies a list of archive libraries from which symbols should not be automatically
+exported. The library names may be delimited by commas or colons.  Specifying
+@code{--exclude-libs ALL} excludes symbols in all archive libraries from
+automatic export.  This option is available only for the i386 PE targeted
+port of the linker and for ELF targeted ports.  For i386 PE, symbols
+explicitly listed in a .def file are still exported, regardless of this
+option.  For ELF targeted ports, symbols affected by this option will
+be treated as hidden.
+
 @cindex dynamic symbol table
 @kindex -E
 @kindex --export-dynamic
@@ -1882,15 +1893,6 @@ These cygwin-excludes are: @code{_cygwin_dll_entry@@12},
 @item --exclude-symbols @var{symbol},@var{symbol},...
 Specifies a list of symbols which should not be automatically
 exported.  The symbol names may be delimited by commas or colons.
-[This option is specific to the i386 PE targeted port of the linker]
-
-@kindex --exclude-libs
-@item --exclude-libs @var{lib},@var{lib},...
-Specifies a list of archive libraries from which symbols should not be automatically
-exported. The library names may be delimited by commas or colons.  Specifying
-@code{--exclude-libs ALL} excludes symbols in all archive libraries from
-automatic export. Symbols explicitly listed in a .def file are still exported,
-regardless of this option. 
 [This option is specific to the i386 PE targeted port of the linker]
 
 @kindex --file-alignment
