@@ -1,6 +1,6 @@
 2003-08-21  Nick Clifton  <nickc@redhat.com>
 
-	* cofflink.c: Update to IISO C90.
+	* cofflink.c: Update to ISO C90 and tidy up formatting.
 
 2003-08-21  Randolph Chung  <tausq@debian.org>
 
