@@ -1,3 +1,12 @@
+start-sanitize-r5900
+Mon May 18 11:44:00 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mips-dis.c (print_insn_arg): Handle ';' opcode completer.
+	(_print_insn_mips): Likewise.
+	* vu0.h (vopmula, vopmsub): Correctly handle opcode/operand
+	completers.
+
+end-sanitize-r5900
 Fri May 15 14:58:31 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen-opc.c (cgen_hw_lookup_by_name): Renamed from cgen_hw_lookup.

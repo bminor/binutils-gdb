@@ -1,5 +1,5 @@
 /* Print mips instructions for GDB, the GNU debugger, or for objdump.
-   Copyright 1989, 91-97, 1998 Free Software Foundation, Inc.
+   Copyright (c) 1989, 91-97, 1998 Free Software Foundation, Inc.
    Contributed by Nobuyuki Hikichi(hikichi@sra.co.jp).
 
 This file is part of GDB, GAS, and the GNU binutils.
@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "dis-asm.h"
 #include "opcode/mips.h"
+#include "opintl.h"
 
 /* FIXME: These are needed to figure out if this is a mips16 symbol or
    not.  It would be better to think of a cleaner way to do this.  */
@@ -87,7 +88,7 @@ print_insn_arg (d, l, pc, info)
       /* start-sanitize-r5900 */
     case '+':
     case '-':
-      /* end-santiize-r5900 */
+      /* end-sanitize-r5900 */
       (*info->fprintf_func) (info->stream, "%c", *d);
       break;
 
@@ -167,6 +168,12 @@ print_insn_arg (d, l, pc, info)
 			     (l >> OP_SH_CODE) & OP_MASK_CODE);
       break;
 
+
+    case 'q':
+      (*info->fprintf_func) (info->stream, "0x%x",
+			     (l >> OP_SH_CODE2) & OP_MASK_CODE2);
+      break;
+
     case 'C':
       (*info->fprintf_func) (info->stream, "0x%x",
 			     (l >> OP_SH_COPZ) & OP_MASK_COPZ);
@@ -241,6 +248,10 @@ print_insn_arg (d, l, pc, info)
     case 'K':
       break;
 
+    case ';':
+      (*info->fprintf_func) (info->stream, ".xyz\t");
+      break;
+	
     case '&':
       (*info->fprintf_func) (info->stream, ".");
       if (l & (1 << 21))
@@ -351,8 +362,10 @@ print_insn_arg (d, l, pc, info)
       /* end-sanitize-vr5400 */
 
     default:
+      /* xgettext:c-format */
       (*info->fprintf_func) (info->stream,
-			     "# internal error, undefined modifier(%c)", *d);
+			     _("# internal error, undefined modifier(%c)"),
+			     *d);
       break;
     }
 }
@@ -549,7 +562,7 @@ _print_insn_mips (memaddr, word, info)
 		  /* start-sanitize-r5900 */
 		  /* If this is an opcode completer, then do not emit
 		     a tab after the opcode.  */
-		  if (*d != '&')
+		  if (*d != '&' && *d != ';')
 		  /* end-sanitize-r5900 */
 		    (*info->fprintf_func) (info->stream, "\t");
 		  for (; *d != '\0'; d++)
