@@ -55,10 +55,10 @@ AR_FLAGS = qv
 CFLAGS = -g
 MAKEINFO = makeinfo
 RANLIB = ranlib
-BISONFLAGS = -tvd
+BISONFLAGS = -d
 TEXI2ROFF=texi2roff
 
-BISON = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/ ; else echo bison -y ; fi`
+BISON = `if [ -f ../byacc/byacc ] ; then echo ../byacc/byacc ; else echo byacc ; fi`
 # Comment these out if using lex.
 LEX_OPTIONS = -I -Cem 
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex -S../flex/flex.skel ; else echo flex ; fi`
@@ -163,13 +163,14 @@ $(OBJDUMP_PROG): $(ADDL_LIBS) size.o objdump.o $(DISASMS) $(BFD)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJDUMP_PROG) objdump.o $(DISASMS) $(ADDL_LIBS) $(LOADLIBES)
 
 arparse.c:arparse.y
-	$(BISON) $(BISONFLAGS)  $(VPATH)/arparse.y
-	mv y.tab.c arparse.c
-	mv y.tab.h arparse.h
+	$(BISON) $(BISONFLAGS)  $(srcdir)/arparse.y
+	-mv y.tab.c arparse.c
+	-mv y.tab.h arparse.h
 
 
-arlex.c:arlex.l
-	$(LEX) $(LEX_OPTIONS) -t $(VPATH)/arlex.l >arlex.c
+arlex.c: arlex.l
+	$(LEX) $(LEX_OPTIONS) $(srcdir)/arlex.l
+	mv lex.yy.c arlex.c
 
 $(AR_PROG): $(ADDL_LIBS) ar.o arparse.o arlex.o not-ranlib.o $(BFD) arsup.o
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(AR_PROG) ar.o arparse.o arlex.o arsup.o not-ranlib.o $(ADDL_LIBS) $(LOADLIBES)
