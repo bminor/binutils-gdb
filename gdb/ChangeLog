@@ -1,3 +1,8 @@
+2002-09-20  Corinna Vinschen  <vinschen@redhat.com>
+
+	* h8300-tdep.c (h8300_examine_prologue): Fix loop for saved regs in
+	multiple register push instruction.
+
 2002-09-19  Jim Blandy  <jimb@redhat.com>
 
 	Add support for distinct host and target character sets.
