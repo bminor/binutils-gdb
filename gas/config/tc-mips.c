@@ -2513,17 +2513,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		 frags for different purposes.  */
 	      || (! mips_opts.mips16
 		  && prev_insn_frag_type == rs_machine_dependent)
-	      /* If the branch reads the condition codes, we don't
-		 even try to swap, because in the sequence
-		   ctc1 $X,$31
-		   INSN
-		   INSN
-		   bc1t LABEL
-		 we can not swap, and I don't feel like handling that
-		 case.  */
-	      || (! mips_opts.mips16
-		  && (pinfo & INSN_READ_COND_CODE)
-		  && ! cop_interlocks)
 	      /* Check for conflicts between the branch and the instructions
 		 before the candidate delay slot.  */
 	      || nops_for_insn (history + 1, ip) > 0

@@ -1,5 +1,10 @@
 2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
 
+	* config/tc-mips.c (append_insn): Remove cop_interlocks test from
+	branch delay code.
+
+2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
+
 	* config/tc-mips.h (mips_flush_pending_output): Delete.
 	(mips_emit_delays): Declare.
 	(md_flush_pending_output): Use mips_emit_delays.
