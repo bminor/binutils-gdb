@@ -1,3 +1,7 @@
+Wed Oct 15 14:52:36 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* scripttempl/pe.sc: Put .stab and .stabstr sections at end.
+
 Wed Oct  8 12:37:05 1997  Richard Henderson  <rth@cygnus.com>
 
 	* configure.tgt, configure.host: Change alpha-*-* to alpha*-*-*;

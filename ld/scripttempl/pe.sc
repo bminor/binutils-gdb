@@ -83,17 +83,24 @@ SECTIONS
     /* Grouped sections are used to handle .CRT\$foo.  */
     *(.CRT\$)
   }
-  .rsrc BLOCK(__section_alignment__) :
-  { 					
-    /* Grouped sections are used to handle .rsrc\$0[12].  */
-    *(.rsrc\$)
-  }
 
   .endjunk BLOCK(__section_alignment__) :
   {
     /* end is deprecated, don't use it */
     ${RELOCATING+ end = .;}
     ${RELOCATING+ __end__ = .;}
+  }
+
+  .reloc BLOCK(__section_alignment__) :
+  { 					
+    *(.reloc)
+  }
+
+  .rsrc BLOCK(__section_alignment__) :
+  { 					
+    *(.rsrc)
+    /* Grouped sections are used to handle .rsrc\$0[12].  */
+    *(.rsrc\$)
   }
 
   .stab BLOCK(__section_alignment__)  ${RELOCATING+(NOLOAD)} : 
@@ -106,9 +113,5 @@ SECTIONS
     [ .stabstr ]
   }
 
-  .reloc BLOCK(__section_alignment__) :
-  { 					
-    *(.reloc)
-  }
 }
 EOF
