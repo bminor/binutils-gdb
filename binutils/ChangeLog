@@ -1,3 +1,24 @@
+Mon Sep 20 19:28:57 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* nlmconv.c (main): Adjust data section size to correspond to bss
+	alignment adjustment.  Clear BSF_SECTION_SYM if symbol is moved to
+	a different section.  Use time_t for time variable.
+	(setup_sections): Only put sections with contents in output NLM.
+	(i386_mangle_relocs): No symbols are common at this point.  Add
+	casts to avoid warnings.	
+
+Fri Sep 10 11:00:40 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* objdump.c: Made the --stabs option work for stabs-in-coff.
+	(ELF_STAB_DISPLAY): Removed.
+	(dump_elf_stabs): Renamed to dump_stabs, changed to run for
+	any object file format.
+	(dump_elf_stabs_1): Renamed to dump_stabs_1, added calls to
+	generic BFD routines for non-ELF case, changed format of message
+	for no-section-found case.
+	(display_bfd): Always call dump_stabs if requested.
+	(dump_data): Call bfd_section_size to get section size.
+
 Fri Sep 10 08:12:23 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* Makefile.in (install): Don't put strings in tooldir/bin.
