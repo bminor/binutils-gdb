@@ -1,5 +1,7 @@
 Mon Nov  1 09:40:21 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config/m88k/m88k.mh (NATDEPFILES): Remove exec.o.
+
 	* paread.c (pa_symtab_read): Change comments to say ignoring
 	labels really should be handled by the assembler/compiler.
 
