@@ -679,6 +679,30 @@ bfd_assert (file, line)
   (*_bfd_error_handler) (_("bfd assertion fail %s:%d"), file, line);
 }
 
+/* A more or less friendly abort message.  In libbfd.h abort is
+   defined to call this function.  */
+
+#ifndef EXIT_FAILURE
+#define EXIT_FAILURE 1
+#endif
+
+void
+_bfd_abort (file, line, fn)
+     const char *file;
+     int line;
+     const char *fn;
+{
+  if (fn != NULL)
+    (*_bfd_error_handler)
+      (_("BFD internal error, aborting at %s line %d in %s\n"),
+       file, line, fn);
+  else
+    (*_bfd_error_handler)
+      (_("BFD internal error, aborting at %s line %d\n"),
+       file, line);
+  (*_bfd_error_handler) (_("Please report this bug.\n"));
+  xexit (EXIT_FAILURE);
+}
 
 /*
 FUNCTION

@@ -7,6 +7,11 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* libbfd-in.h (_bfd_abort): Declare.
+	(abort): Define.
+	* bfd.c (_bfd_abort): New function.
+	* libbfd.h: Rebuild.
+
 	* coffcode.h (coff_set_alignment_hook): Delete POWERPC_LE_PE
 	special handling.
 

@@ -503,6 +503,17 @@ void	bfd_assert PARAMS ((const char*,int));
 #define BFD_FAIL() \
 { bfd_assert(__FILE__,__LINE__); }
 
+extern void _bfd_abort PARAMS ((const char *, int, const char *))
+     ATTRIBUTE_NORETURN;
+
+/* if gcc, we can give a function name, too */
+#if !defined (__GNUC__) || __GNUC_MINOR__ <= 5
+#define __PRETTY_FUNCTION__  ((char *) NULL)
+#endif
+
+#undef abort
+#define abort() _bfd_abort (__FILE__, __LINE__, __PRETTY_FUNCTION__)
+
 FILE *	bfd_cache_lookup_worker PARAMS ((bfd *));
 
 extern bfd *bfd_last_cache;
