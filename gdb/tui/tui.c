@@ -262,6 +262,7 @@ tui_enable (void)
   tui_version = 1;
   tui_active = 1;
   refresh ();
+  tui_update_gdb_sizes ();
 }
 
 /* Leave the tui mode.
@@ -286,6 +287,7 @@ tui_disable (void)
 
   tui_version = 0;
   tui_active = 0;
+  tui_update_gdb_sizes ();
 }
 
 /* Wrapper on top of free() to ensure that input address

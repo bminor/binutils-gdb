@@ -52,6 +52,7 @@
 #include "breakpoint.h"
 #include "frame.h"
 #include "cli/cli-cmds.h"
+#include "top.h"
 
 #include "tui.h"
 #include "tuiData.h"
@@ -62,11 +63,6 @@
 #include "tuiSource.h"
 #include "tuiSourceWin.h"
 #include "tuiDataWin.h"
-
-/*******************************
-** External Declarations
-********************************/
-extern void init_page_info ();
 
 /*******************************
 ** Static Local Decls
@@ -396,6 +392,22 @@ Usage: w <#lines>\n");
   add_show_from_set (c, &tui_showlist);
 }
 
+/* Update gdb's knowledge of the terminal size.  */
+void
+tui_update_gdb_sizes ()
+{
+  char cmd[50];
+  extern int screenheight, screenwidth;		/* in readline */
+
+  /* Set to TUI command window dimension or use readline values.  */
+  sprintf (cmd, "set width %d",
+           tui_active ? cmdWin->generic.width : screenwidth);
+  execute_command (cmd, 0);
+  sprintf (cmd, "set height %d",
+           tui_active ? cmdWin->generic.height : screenheight);
+  execute_command (cmd, 0);
+}
+
 
 /*
    ** tuiSetWinFocusTo
@@ -618,7 +630,7 @@ tuiResizeAll (void)
       /* turn keypad off while we resize */
       if (winWithFocus != cmdWin)
 	keypad (cmdWin->generic.handle, FALSE);
-      init_page_info ();
+      tui_update_gdb_sizes ();
       setTermHeightTo (screenheight);
       setTermWidthTo (screenwidth);
       if (curLayout == SRC_DISASSEM_COMMAND ||
@@ -1039,7 +1051,7 @@ The window name specified must be valid and visible.\n");
 			warning ("Invalid window height specified.\n%s",
 				 WIN_HEIGHT_USAGE);
 		      else
-			init_page_info ();
+                        tui_update_gdb_sizes ();
 		    }
 		  else
 		    warning ("Invalid window height specified.\n%s",
