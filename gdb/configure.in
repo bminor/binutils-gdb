@@ -304,6 +304,50 @@ else
 fi
 AC_SUBST(ENABLE_IDE)
 
+AC_ARG_WITH(foundry-libs,
+[  --with-foundry-libs=directory       use the Foundry SDK in directory],
+[FOUNDRY_LIB_BASE=${withval}])
+AC_SUBST(FOUNDRY_LIB_BASE)
+
+#
+# This is the Foundry SDK
+#
+# These variables are used to determine where the Foundry libs and
+# header files are located.
+#
+if test "$FOUNDRY_LIB_BASE" != ""; then
+    LIBGUI="${FOUNDRY_LIB_BASE}/lib/libgui.a"
+    GUI_CFLAGS_X="-I${FOUNDRY_LIB_BASE}/include"
+    if test x$enable_ide = xyes; then
+        IDE_CFLAGS_X="-I${FOUNDRY_LIB_BASE}/include -DIDE"
+	IDE_X="-L${FOUNDRY_LIB_BASE}/lib -lilu-Tk -lilu-c -lilu"
+    else
+        IDE_CFLAGS_X="-I${FOUNDRY_LIB_BASE}/include"
+    fi
+    LIBIDETCL="${FOUNDRY_LIB_BASE}/lib/libidetcl.a"
+    LIBIDE="${FOUNDRY_LIB_BASE}/lib/libide.a"
+    IDE_DEPS="${FOUNDRY_LIB_BASE}/lib/libilu-Tk.a ${FOUNDRY_LIB_BASE}/lib/libilu-c.a ${FOUNDRY_LIB_BASE}/lib/libilu.a"
+else
+    LIBGUI="../libgui/src/libgui.a"
+    GUI_CFLAGS_X="-I${srcdir}/../libgui/src"
+    if test x$enable_ide = xyes; then
+        IDE_CFLAGS_X="-I${srcdir}/../libidetcl/src -I${srcdir}/../libide/src -DIDE -I${srcdir}/../ilu/runtime/mainloop"
+	IDE_X="-L../ilu/runtime/mainloop -lilu-Tk -L../ilu/runtime/c -lilu-c -L../ilu/runtime/kernel -lilu"
+    else
+        IDE_CFLAGS_X="-I${srcdir}/../libidetcl/src -I${srcdir}/../libide/src"
+    fi
+    LIBIDETCL="../libidetcl/src/libidetcl.a"
+    LIBIDE="../libide/src/libide.a"
+    IDE_DEPS="../ilu/runtime/mainloop/libilu-Tk.a ../ilu/runtime/c/libilu-c.a ../ilu/runtime/kernel/libilu.a"
+fi
+AC_SUBST(LIBGUI)
+AC_SUBST(GUI_CFLAGS_X)
+AC_SUBST(IDE_CFLAGS_X)
+AC_SUBST(IDE_X)
+AC_SUBST(LIBIDETCL)
+AC_SUBST(LIBIDE)
+AC_SUBST(IDE_DEPS)
+
 ENABLE_GDBTK=
 
 AC_ARG_ENABLE(gdbtk,

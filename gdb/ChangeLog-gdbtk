@@ -1,3 +1,15 @@
+start-sanitize-ide
+Thu Aug 13 15:15:59 1998  Drew Moseley  <dmoseley@cygnus.com>
+
+	* Makefile.in (FOUNDRY_LIB_BASE): Added the Foundry SDK code that allows
+	gdbtk to be linked with the Foundry libraries provided by a prebuilt/released
+	binary version of Foundry.  The libraries and header files need to come from
+	the installed location of Foundry rather than the devo subdirectories.
+	* configure.in (ENABLE_IDE): Foundry SDK additions.  Added the "with-foundry-libs"
+	configure option.
+	* configure: Foundry SDK additions.  Regenerated from configure.in.
+	
+end-sanitize-ide
 Thu Aug 13 15:09:59 1998  Drew Moseley  <dmoseley@cygnus.com>
 
 	* gdbtk.c (gdbtk_cleanup): added a scope-level around the contents
