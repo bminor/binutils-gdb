@@ -3547,7 +3547,7 @@ load_address (counter, reg, ep, used_at)
 	  /* We don't do GP optimization for now because RELAX_ENCODE can't
 	     hold the data for such large chunks.  */
 
-	  if (*used_at == 0)
+	  if (*used_at == 0 && ! mips_opts.noat)
 	    {
 	      macro_build (p, counter, ep, "lui", "t,u",
 			   reg, (int) BFD_RELOC_MIPS_HIGHEST);
@@ -4259,7 +4259,7 @@ macro (ip)
 	  as_warn (_("Divide by zero."));
 	  if (mips_trap)
 	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "teq",
-			 "s,t", 0, 0);
+			 "s,t,q", 0, 0, 7);
 	  else
 	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "break",
 			 "c", 7);
@@ -4272,7 +4272,7 @@ macro (ip)
       if (mips_trap)
 	{
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "teq",
-		       "s,t", treg, 0);
+		       "s,t,q", treg, 0, 7);
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		       dbl ? "ddiv" : "div", "z,s,t", sreg, treg);
 	}
@@ -4308,7 +4308,7 @@ macro (ip)
       if (mips_trap)
 	{
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "teq",
-		       "s,t", sreg, AT);
+		       "s,t,q", sreg, AT, 6);
 	  /* We want to close the noreorder block as soon as possible, so
 	     that later insns are available for delay slot filling.  */
 	  --mips_opts.noreorder;
@@ -4371,7 +4371,7 @@ macro (ip)
 	  as_warn (_("Divide by zero."));
 	  if (mips_trap)
 	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "teq",
-			 "s,t", 0, 0);
+			 "s,t,q", 0, 0, 7);
 	  else
 	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "break",
 			 "c", 7);
@@ -4427,7 +4427,7 @@ macro (ip)
       if (mips_trap)
 	{
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "teq",
-		       "s,t", treg, 0);
+		       "s,t,q", treg, 0, 7);
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s, "z,s,t",
 		       sreg, treg);
 	  /* We want to close the noreorder block as soon as possible, so
@@ -4562,7 +4562,7 @@ macro (ip)
 	      /* We don't do GP optimization for now because RELAX_ENCODE can't
 		 hold the data for such large chunks.  */
 
-	      if (used_at == 0)
+	      if (used_at == 0 && ! mips_opts.noat)
 		{
 		  macro_build (p, &icnt, &offset_expr, "lui", "t,u",
 			       tempreg, (int) BFD_RELOC_MIPS_HIGHEST);
@@ -5515,7 +5515,7 @@ macro (ip)
 	      /* We don't do GP optimization for now because RELAX_ENCODE can't
 		 hold the data for such large chunks.  */
 
-	      if (used_at == 0)
+	      if (used_at == 0 && ! mips_opts.noat)
 		{
 		  macro_build (p, &icnt, &offset_expr, "lui", "t,u",
 			       tempreg, (int) BFD_RELOC_MIPS_HIGHEST);
@@ -6576,8 +6576,8 @@ macro2 (ip)
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "mfhi", "d",
 		   AT);
       if (mips_trap)
-	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "tne", "s,t",
-		     dreg, AT);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "tne",
+		     "s,t,q", dreg, AT, 6);
       else
 	{
 	  expr1.X_add_number = 8;
@@ -6615,8 +6615,8 @@ macro2 (ip)
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "mflo", "d",
 		   dreg);
       if (mips_trap)
-	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "tne", "s,t",
-		     AT, 0);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "tne",
+		     "s,t,q", AT, 0, 6);
       else
 	{
 	  expr1.X_add_number = 8;
