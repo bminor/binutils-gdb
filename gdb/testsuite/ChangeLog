@@ -1,3 +1,8 @@
+Mon Dec 19 00:32:55 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.base/list.exp:  Correct some alternate expect patterns
+	to reflect changes in list1.c.
+
 Sat Dec 17 14:20:03 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* TODO: Add item regarding large frames.
