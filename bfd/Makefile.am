@@ -144,6 +144,7 @@ BFD32_BACKENDS = \
 	coff-w65.lo \
 	coff-z8k.lo \
 	cofflink.lo \
+	dwarf1.lo \
 	dwarf2.lo \
 	ecoff.lo \
 	ecofflink.lo \
@@ -265,6 +266,7 @@ BFD32_BACKENDS_CFILES = \
 	coff-w65.c \
 	coff-z8k.c \
 	cofflink.c \
+	dwarf1.c \
 	dwarf2.c \
 	ecoff.c \
 	ecofflink.c \
@@ -798,6 +800,9 @@ coff-z8k.lo: coff-z8k.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/z8k.h \
   $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
 cofflink.lo: cofflink.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
   libcoff.h
+dwarf1.lo: dwarf1.c $(INCDIR)/libiberty.h elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/dwarf.h
 dwarf2.lo: dwarf2.c $(INCDIR)/libiberty.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/dwarf2.h
