@@ -60,8 +60,7 @@ struct host_callback_struct
   /* depreciated, use vprintf_filtered - Talk to the user on a console.  */
   void (*printf_filtered) PARAMS ((host_callback *, const char *, ...));
 
-  /* Talk to the user on a console.
-     The `void *' is actually `va_list *'.  */
+  /* Talk to the user on a console.  */
   void (*vprintf_filtered) PARAMS ((host_callback *, const char *, va_list));
 
   /* Same as vprintf_filtered but to stderr.  */
