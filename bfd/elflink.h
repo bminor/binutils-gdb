@@ -887,14 +887,20 @@ elf_link_add_object_symbols (abfd, info)
 	     library is a function, since common symbols always
 	     represent variables; this can cause confusion in
 	     principle, but any such confusion would seem to indicate
-	     an erroneous program or shared library.  */
+	     an erroneous program or shared library.  We also treat a
+	     common symbol as a definition if the symbol in the shared
+	     library is in an uninitialized section, and it has a
+	     smaller size.  */
 	  if (dynamic && definition)
 	    {
 	      if (h->root.type == bfd_link_hash_defined
 		  || h->root.type == bfd_link_hash_defweak
 		  || (h->root.type == bfd_link_hash_common
-		      && (bind == STB_WEAK
-			  || ELF_ST_TYPE (sym.st_info) == STT_FUNC)))
+		      && ((bind == STB_WEAK
+			   || ELF_ST_TYPE (sym.st_info) == STT_FUNC)
+			  || ((sec->flags & SEC_ALLOC) != 0
+			      && (sec->flags & SEC_LOAD) == 0
+			      && sym.st_size < h->size))))
 		{
 		  override = true;
 		  sec = bfd_und_section_ptr;
@@ -998,15 +1004,11 @@ elf_link_add_object_symbols (abfd, info)
 	    {
 	      if (h->size != 0 && h->size != sym.st_size && ! size_change_ok)
 		(*_bfd_error_handler)
-		  ("Warning: size of symbol `%s' was %lu, but in %s is %lu; using %lu",
-		   name, (unsigned long) h->size,
-		   bfd_get_filename (abfd), (unsigned long) sym.st_size,
-		   (h->size < sym.st_size
-		    ? (unsigned long) sym.st_size
-		    : (unsigned long) h->size));
+		  ("Warning: size of symbol `%s' changed from %lu to %lu in %s",
+		   name, (unsigned long) h->size, (unsigned long) sym.st_size,
+		   bfd_get_filename (abfd));
 
-	      if (h->size < sym.st_size)
-		h->size = sym.st_size;
+	      h->size = sym.st_size;
 	    }
 	  if (ELF_ST_TYPE (sym.st_info) != STT_NOTYPE
 	      && (definition || h->type == STT_NOTYPE))

@@ -6,8 +6,9 @@ Wed Apr  2 16:19:41 1997  Mike Meissner  <meissner@cygnus.com>
 
 Wed Apr  2 10:49:07 1997  Ian Lance Taylor  <ian@cygnus.com>
 
-	* elflink.h (elf_link_add_object_symbols): When there is a size
-	change, use the larger size.  From H.J. Lu <hjl@gnu.ai.mit.edu>.
+	* elflink.h (elf_link_add_object_symbols): Let a common symbol
+	override an uninitialized symbol from a shared library with a
+	smaller size.
 
 	* elf-m10200.c: Rename from elf32-mn10200.c.
 	* elf-m10300.c: Rename from elf32-mn10300.c.
