@@ -1,3 +1,10 @@
+start-sanitize-sky
+	Wed Mar 18 13:54:04 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* config/tc-dvp.c (s_dmadata): Force 16-byte alignment for ".dmadata"
+	pseudo-op.
+end-sanitize-sky
+	
 Wed Mar 18 09:29:51 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.in (emulations): Add thumb-pe target.
