@@ -51,6 +51,10 @@ struct stab_handle
 {
   /* True if this is stabs in sections.  */
   boolean sections;
+  /* The symbol table.  */
+  asymbol **syms;
+  /* The number of symbols.  */
+  long symcount;
   /* The accumulated file name string.  */
   char *so_string;
   /* The value of the last N_SO symbol.  */
@@ -342,15 +346,19 @@ warn_stab (p, err)
 
 /*ARGSUSED*/
 PTR
-start_stab (dhandle, sections)
+start_stab (dhandle, sections, syms, symcount)
      PTR dhandle;
      boolean sections;
+     asymbol **syms;
+     long symcount;
 {
   struct stab_handle *ret;
 
   ret = (struct stab_handle *) xmalloc (sizeof *ret);
   memset (ret, 0, sizeof *ret);
   ret->sections = sections;
+  ret->syms = syms;
+  ret->symcount = symcount;
   ret->files = 1;
   ret->file_types = (struct stab_types **) xmalloc (sizeof *ret->file_types);
   ret->file_types[0] = NULL;
@@ -800,15 +808,30 @@ parse_stab_string (dhandle, info, stabtype, desc, value, string)
       break;
 
     case 'G':
-      /* A global symbol.  The value must be extracted from the symbol
-         table.  */
-      dtype = parse_stab_type (dhandle, info, (const char *) NULL, &p,
-			       (debug_type **) NULL);
-      if (dtype == DEBUG_TYPE_NULL)
-	return false;
-      if (! stab_record_variable (dhandle, info, name, dtype, DEBUG_GLOBAL,
-				  (bfd_vma) -1))
-	return false;
+      {
+	long c;
+	asymbol **ps;
+
+	/* A global symbol.  The value must be extracted from the
+	   symbol table.  */
+	dtype = parse_stab_type (dhandle, info, (const char *) NULL, &p,
+				 (debug_type **) NULL);
+	if (dtype == DEBUG_TYPE_NULL)
+	  return false;
+	for (c = info->symcount, ps = info->syms; c > 0; --c, ++ps)
+	  {
+	    const char *n;
+
+	    n = bfd_asymbol_name (*ps);
+	    if (*n == *name && strcmp (n, name) == 0)
+	      break;
+	  }
+	if (c > 0)
+	  value = bfd_asymbol_value (*ps);
+	if (! stab_record_variable (dhandle, info, name, dtype, DEBUG_GLOBAL,
+				    value))
+	  return false;
+      }
       break;
 
       /* This case is faked by a conditional above, when there is no
@@ -1642,6 +1665,11 @@ parse_stab_range_type (dhandle, info, typename, pp, typenums)
          is void.  */
       if (self_subrange && n2 == 0 && n3 == 0)
 	return debug_make_void_type (dhandle);
+
+      /* A type defined as a subrange of itself, with n2 positive and
+	 n3 zero, is a complex type, and n2 is the number of bytes.  */
+      if (self_subrange && n3 == 0 && n2 > 0)
+	return debug_make_complex_type (dhandle, n2);
 
       /* If n3 is zero and n2 is positive, this is a floating point
          type, and n2 is the number of bytes.  */
@@ -2595,12 +2623,8 @@ parse_stab_members (dhandle, info, tagname, pp, typenums, retp)
 	    {
 	    case '*':
 	      /* virtual member function, followed by index.  The sign
-		 bit is set to distinguish pointers-to-methods from
-		 virtual function indicies.  Since the array is in
-		 words, the quantity must be shifted left by 1 on 16
-		 bit machine, and by 2 on 32 bit machine, forcing the
-		 sign bit out, and usable as a valid index into the
-		 array.  Remove the sign bit here.  */
+		 bit is supposedly set to distinguish
+		 pointers-to-methods from virtual function indicies.  */
 	      ++*pp;
 	      voffset = parse_number (pp, (boolean *) NULL);
 	      if (**pp != ';')
@@ -2610,7 +2634,6 @@ parse_stab_members (dhandle, info, tagname, pp, typenums, retp)
 		}
 	      ++*pp;
 	      voffset &= 0x7fffffff;
-	      voffset += 2;
 
 	      if (**pp == ';' || *pp == '\0')
 		{
@@ -2964,6 +2987,8 @@ parse_stab_array_type (dhandle, info, pp, stringp)
      boolean stringp;
 {
   const char *orig;
+  const char *p;
+  int typenums[2];
   debug_type index_type;
   boolean adjustable;
   bfd_signed_vma lower, upper;
@@ -2980,8 +3005,27 @@ parse_stab_array_type (dhandle, info, pp, stringp)
 
   /* FIXME: gdb checks os9k_stabs here.  */
 
-  index_type = parse_stab_type (dhandle, info, (const char *) NULL, pp,
-				(debug_type **) NULL);
+  /* If the index type is type 0, we take it as int.  */
+  p = *pp;
+  if (! parse_stab_type_number (&p, typenums))
+    return false;
+  if (typenums[0] == 0 && typenums[1] == 0 && **pp != '=')
+    {
+      index_type = debug_find_named_type (dhandle, "int");
+      if (index_type == DEBUG_TYPE_NULL)
+	{
+	  index_type = debug_make_int_type (dhandle, 4, false);
+	  if (index_type == DEBUG_TYPE_NULL)
+	    return false;
+	}
+      *pp = p;
+    }
+  else
+    {
+      index_type = parse_stab_type (dhandle, info, (const char *) NULL, pp,
+				    (debug_type **) NULL);
+    }
+
   if (**pp != ';')
     {
       bad_stab (orig);

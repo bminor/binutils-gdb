@@ -1,3 +1,9 @@
+Mon Mar 18 18:05:33 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* stabs.c (parse_stab_range_type): A complex type is defined as a
+	subrange of itself with the high bound zero.
+	* ieee.c (ieee_complex_type): Don't crash on sizes of 12 or 16.
+
 Tue Mar 12 12:09:43 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ieee.c (ieee_write_undefined_tag): Switch to global_types even

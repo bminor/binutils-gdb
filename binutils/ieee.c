@@ -5184,6 +5184,10 @@ ieee_complex_type (p, size)
     case 4:
       code = 'c';
       break;
+    case 12:
+    case 16:
+      /* These cases can be output by gcc -gstabs.  Outputting the
+         wrong type is better than crashing.  */
     case 8:
       code = 'd';
       break;
