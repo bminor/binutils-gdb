@@ -713,15 +713,8 @@ print_lines (list, lineno, string, address)
   while (src[cur] && idx < nchars)
     {
       int offset;
-#if TARGET_BYTES_BIG_ENDIAN != 0
       offset = cur;
       fprintf (list_file, "%c%c", src[offset], src[offset+1]);
-#else
-      offset = (cur & ~(LISTING_WORD_SIZE * 2 - 1)) 
-        + (LISTING_WORD_SIZE - octet_in_word - 1) * 2;
-      if (offset < end)
-        fprintf (list_file, "%c%c", src[offset], src[offset+1]);
-#endif
       cur += 2;
       octet_in_word++;
       
@@ -764,15 +757,8 @@ print_lines (list, lineno, string, address)
       while (src[cur] && idx < nchars)
 	{
           int offset;
-#if TARGET_BYTES_BIG_ENDIAN != 0
           offset = cur;
           fprintf (list_file, "%c%c", src[offset], src[offset+1]);
-#else
-          offset = (cur & ~(LISTING_WORD_SIZE * 2 - 1))
-            + (LISTING_WORD_SIZE - octet_in_word - 1) * 2;
-          if (offset < end)
-            fprintf (list_file, "%c%c", src[offset], src[offset+1]);
-#endif
 	  cur += 2;
 	  idx += 2;
 	  octet_in_word++;

@@ -1,3 +1,8 @@
+2000-02-04  Timothy Wall  <twall@redhat.com>
+
+	* listing.c (print_lines): Remove conditionals causing bug in
+	listings. 
+
 2000-02-03  Timothy Wall  <twall@cygnus.com>
 	
 	* as.h: Define OCTETS_PER_BYTE and OCTETS_PER_BYTE_POWER
