@@ -30,6 +30,7 @@ coff-a29k.mt
 coff-h8300.mt
 coff-h8500.mt
 coff-sh.mt
+coff-sparc.mt
 delta88.mh
 dgux.mh
 ebmon29k.mt
