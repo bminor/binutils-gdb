@@ -1,5 +1,8 @@
 2004-08-21  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.in: Check for ttrace function.
+	* configure, config.in: Regenerate.	
+
 	* gdb_ptrace.h: New file.
 	* infptrace.c: Include "gdb_ptrace.h" instead of <ptrace.h> or
 	<sys/ptrace.h>.

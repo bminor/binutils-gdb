@@ -260,6 +260,9 @@
 /* Define if you have the syscall function.  */
 #undef HAVE_SYSCALL
 
+/* Define if you have the ttrace function.  */
+#undef HAVE_TTRACE
+
 /* Define if you have the <argz.h> header file.  */
 #undef HAVE_ARGZ_H
 

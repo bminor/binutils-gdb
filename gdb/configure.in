@@ -483,6 +483,7 @@ AC_CHECK_FUNCS(setpgid setpgrp)
 AC_CHECK_FUNCS(sigaction sigprocmask sigsetmask)
 AC_CHECK_FUNCS(socketpair)
 AC_CHECK_FUNCS(syscall)
+AC_CHECK_FUNCS(ttrace)
 
 # Check the return and argument types of ptrace.  No canned test for
 # this, so roll our own.
