@@ -1,3 +1,7 @@
+Mon Sep 28 13:21:43 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gdb.base/default.exp: Add brace missing from previous delta.
+
 Mon Sep 21 14:39:27 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gdb.base/default.exp: Support test for info float for all

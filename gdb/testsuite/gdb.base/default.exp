@@ -273,7 +273,7 @@ gdb_test "info files" "" "info files"
 #test info float
 if [istarget "arm-*-*"] then {
     gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"
-else if [istarget "thumb-*-*"] then {
+} else if [istarget "thumb-*-*"] then {
     gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"
 } else {
     gdb_test "info float" "No floating point info available for this processor." "info float"
