@@ -84,6 +84,7 @@ extern void (*ui_loop_hook) PARAMS ((int));
 static void   gdbtk_create_tracepoint PARAMS ((struct tracepoint *));
 static void   gdbtk_delete_tracepoint PARAMS ((struct tracepoint *));
 static void   gdbtk_modify_tracepoint PARAMS ((struct tracepoint *));
+static void   gdbtk_trace_find  PARAMS ((char *arg, int from_tty));
 static void   gdbtk_create_breakpoint PARAMS ((struct breakpoint *));
 static void   gdbtk_delete_breakpoint PARAMS ((struct breakpoint *));
 static void   gdbtk_modify_breakpoint PARAMS ((struct breakpoint *));
@@ -160,6 +161,7 @@ gdbtk_add_hooks(void)
   create_tracepoint_hook = gdbtk_create_tracepoint;
   delete_tracepoint_hook = gdbtk_delete_tracepoint;
   modify_tracepoint_hook = gdbtk_modify_tracepoint;
+  trace_find_hook        = gdbtk_trace_find;
 
   pc_changed_hook = pc_changed;
   selected_frame_level_changed_hook = gdbtk_selected_frame_changed;
@@ -548,8 +550,9 @@ breakpoint_notify(b, action)
   if (filename == NULL)
     filename = "";
 
-  sprintf (buf, "gdbtk_tcl_breakpoint %s %d 0x%lx %d {%s}", action, b->number, 
-	   (long)b->address, b->line_number, filename);
+  sprintf (buf, "gdbtk_tcl_breakpoint %s %d 0x%lx %d {%s} {%s} %d %d",
+	   action, b->number, (long)b->address, b->line_number, filename,
+	   bpdisp[b->disposition], b->enable,  b->thread);
 
   v = Tcl_Eval (gdbtk_interp, buf);
 
@@ -690,6 +693,33 @@ tracepoint_notify(tp, action)
       gdbtk_fputs (gdbtk_interp->result, gdb_stdout);
       gdbtk_fputs ("\n", gdb_stdout);
     }
+}
+
+/*
+ * gdbtk_trace_find
+ *
+ * This is run by the trace_find_command.  arg is the argument that was passed
+ * to that command, from_tty is 1 if the command was run from a tty, 0 if it
+ * was run from a script.  It runs gdbtk_tcl_tfind_hook passing on these two
+ * arguments.
+ *
+ */
+
+static void
+gdbtk_trace_find (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  Tcl_Obj *cmdObj;
+  
+  Tcl_GlobalEval (gdbtk_interp, "debug {***In gdbtk_trace_find...}");
+  cmdObj = Tcl_NewListObj (0, NULL);
+  Tcl_ListObjAppendElement (gdbtk_interp, cmdObj,
+			   Tcl_NewStringObj ("gdbtk_tcl_trace_find_hook", -1));
+  Tcl_ListObjAppendElement (gdbtk_interp, cmdObj, Tcl_NewStringObj (arg, -1));
+  Tcl_ListObjAppendElement (gdbtk_interp, cmdObj, Tcl_NewIntObj(from_tty));
+  Tcl_GlobalEvalObj (gdbtk_interp, cmdObj);
+  
 }
 
 static void

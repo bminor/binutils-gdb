@@ -1,3 +1,13 @@
+Wed Nov  4 12:41:42 1998  Jim Ingham  <jingham@cygnus.com>
+
+	* gdbtk-cmds.c (gdb_set_bp_addr): Pass the type, enable & thread
+	to gdbtk_tcl_breakpoint.
+	* gdbtk-hooks.c (gdbtk_trace_find): Added this function.  It is
+	the hook function for tfind commands.
+	* tracepoint.c (trace_find_command): Added the trace_find_hook,
+	run when you do trace_find_command.
+	* tracepoint.h: Define the trace_find_hook.
+
 1998-11-03  Keith Seitz  <keiths@cygnus.com>
 
         * v850ice.c (do_gdb): New function.
@@ -5,11 +15,30 @@
         (ice_nexti): Use do_gdb to step properly.
         (view_source): Correct call to src window's location for new version.
 
+Mon Nov  2 11:16:10 1998  Jim Ingham  <jingham@cygnus.com>
+
+	* gdbtk-cmds (gdb_get_tracepoint_info): Demangle C++ function names.	
+
+Fri Oct 30 11:22:23 1998  Jim Ingham  <jingham@cygnus.com>
+
+	* gdbtk-cmds (gdb_get_tracepoint_info): Fixed typo.
+	
 Wed Oct 28 16:19:02 1998  Martin M. Hunt  <hunt@cygnus.com>
 
 	* gdbtk-cmds.c (gdb_set_bp_addr): For callback, send full 
 	pathname instead of just basename.
 
+Wed Oct 28 10:14:33 1998  Jim Ingham   <jingham@cygnus.com>
+
+	* gdbtk-cmds.c: Made the bdtypes & bpdisp arrays shared so they
+	could be used in gdbtk-hooks.c (breakpoint_notify).
+	Also fixed a few error messages to actually print the bp number
+	rather that #%d...	
+	* gdbtk-hooks.c (breakpoint_notify): pass more of the information
+	about the breakpoint into the Tcl command, so it does not have to
+	try and guess about information we have on the C side.
+	* gdbtk.h: Export the bptypes & pbdisp arrays.
+	
 1998-10-08  Keith Seitz  <keiths@cygnus.com>
 
 	* gdbtk-hooks.c (gdbtk_add_hooks): Install a hook for

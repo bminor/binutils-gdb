@@ -131,6 +131,18 @@ struct my_line_entry {
 
 static char old_regs[REGISTER_BYTES];
 
+/* These two lookup tables are used to translate the type & disposition fields
+   of the breakpoint structure (respectively) into something gdbtk understands.
+   They are also used in gdbtk-hooks.c */
+
+char *bptypes[] = {"breakpoint", "hardware breakpoint", "until",
+			      "finish", "watchpoint", "hardware watchpoint",
+			      "read watchpoint", "access watchpoint",
+			      "longjmp", "longjmp resume", "step resume",
+			      "through sigtramp", "watchpoint scope",
+			      "call dummy" };
+char *bpdisp[] = {"delete", "delstop", "disable", "donttouch"};
+
 /*
  * These are routines we need from breakpoint.c.
  * at some point make these static in breakpoint.c and move GUI code there
@@ -1820,7 +1832,7 @@ gdb_get_tracepoint_info (clientData, interp, objc, objv)
   struct tracepoint *tp;
   struct action_line *al;
   Tcl_Obj *action_list;
-  char *filename, *funcname;
+  char *filename, *funcname, *fname;
   char tmp[19];
   
   if (objc != 2)
@@ -1841,7 +1853,9 @@ gdb_get_tracepoint_info (clientData, interp, objc, objv)
 
   if (tp == NULL)
     {
-      Tcl_SetStringObj (result_ptr->obj_ptr, "Tracepoint #%d does not exist", -1);
+      char buff[64];
+      sprintf (buff, "Tracepoint #%d does not exist", tpnum);
+      Tcl_SetStringObj (result_ptr->obj_ptr, buff, -1);
       return TCL_ERROR;
     }
 
@@ -1852,8 +1866,19 @@ gdb_get_tracepoint_info (clientData, interp, objc, objv)
     filename = "N/A";
   Tcl_ListObjAppendElement (interp, result_ptr->obj_ptr,
                             Tcl_NewStringObj (filename, -1));
+  
   find_pc_partial_function (tp->address, &funcname, NULL, NULL);
-  Tcl_ListObjAppendElement (interp, result_ptr->obj_ptr, Tcl_NewStringObj (funcname, -1));
+  fname = cplus_demangle (funcname, 0);
+  if (fname)
+    {
+      Tcl_ListObjAppendElement (interp, result_ptr->obj_ptr, Tcl_NewStringObj
+			  (fname, -1));
+      free (fname);
+    }
+  else
+    Tcl_ListObjAppendElement (interp, result_ptr->obj_ptr, Tcl_NewStringObj
+			      (funcname, -1));
+  
   Tcl_ListObjAppendElement (interp, result_ptr->obj_ptr, Tcl_NewIntObj (sal.line));
   sprintf (tmp, "0x%lx", tp->address);
   Tcl_ListObjAppendElement (interp, result_ptr->obj_ptr, Tcl_NewStringObj (tmp, -1));
@@ -2688,7 +2713,7 @@ gdb_loadfile (clientData, interp, objc, objv)
               cur_cmd = &text_cmd_1;
               cur_prefix_len = prefix_len_1;
               Tcl_DStringAppend (cur_cmd, line_num_buf, -1);
-              Tcl_DStringAppend (cur_cmd, "} break_tag", 11);
+              Tcl_DStringAppend (cur_cmd, "} break_rgn_tag", 15);
             }
           else
             {
@@ -2708,7 +2733,7 @@ gdb_loadfile (clientData, interp, objc, objv)
     }
   else
     {
-      Tcl_DStringAppend (&text_cmd_1, " insert end {- } break_tag", -1);
+      Tcl_DStringAppend (&text_cmd_1, " insert end {- } break_rgn_tag", -1);
       prefix_len_1 = Tcl_DStringLength(&text_cmd_1);
       Tcl_DStringAppend (&text_cmd_2, " insert end {  } \"\"", -1);
       prefix_len_2 = Tcl_DStringLength(&text_cmd_2);
@@ -2853,6 +2878,12 @@ gdb_set_bp (clientData, interp, objc, objv)
   Tcl_DStringAppendElement (&cmd, buf);
   Tcl_DStringAppendElement (&cmd, Tcl_GetStringFromObj (objv[2], NULL));
   Tcl_DStringAppendElement (&cmd, Tcl_GetStringFromObj (objv[1], NULL));
+  Tcl_DStringAppendElement (&cmd, bpdisp[b->disposition]);
+  sprintf (buf, "%d", b->enable);
+  Tcl_DStringAppendElement (&cmd, buf);
+  sprintf (buf, "%d", b->thread);
+  Tcl_DStringAppendElement (&cmd, buf);
+  
 
   ret = Tcl_Eval (interp, Tcl_DStringValue (&cmd));
   Tcl_DStringFree (&cmd);
@@ -2889,7 +2920,7 @@ gdb_set_bp_addr (clientData, interp, objc, objv)
 
   if (objc != 4 && objc != 3)
     {
-      Tcl_WrongNumArgs(interp, 1, objv, "addr type [thread]");
+      Tcl_WrongNumArgs(interp, 1, objv, "addr type ?thread?");
       return TCL_ERROR; 
     }
   
@@ -2942,6 +2973,11 @@ gdb_set_bp_addr (clientData, interp, objc, objv)
   if (filename == NULL)
     filename = "";
   Tcl_DStringAppendElement (&cmd, filename);
+  Tcl_DStringAppendElement (&cmd, bpdisp[b->disposition]);
+  sprintf (buf, "%d", b->enable);
+  Tcl_DStringAppendElement (&cmd, buf);
+  sprintf (buf, "%d", b->thread);
+  Tcl_DStringAppendElement (&cmd, buf);
 
   ret = Tcl_Eval (interp, Tcl_DStringValue (&cmd));
   Tcl_DStringFree (&cmd);
@@ -3055,13 +3091,6 @@ gdb_get_breakpoint_info (clientData, interp, objc, objv)
      Tcl_Obj *CONST objv[];
 {
   struct symtab_and_line sal;
-  static char *bptypes[] = {"breakpoint", "hardware breakpoint", "until",
-			      "finish", "watchpoint", "hardware watchpoint",
-			      "read watchpoint", "access watchpoint",
-			      "longjmp", "longjmp resume", "step resume",
-			      "through sigtramp", "watchpoint scope",
-			      "call dummy" };
-  static char *bpdisp[] = {"delete", "delstop", "disable", "donttouch"};
   struct command_line *cmd;
   int bpnum;
   struct breakpoint *b;
@@ -3087,7 +3116,9 @@ gdb_get_breakpoint_info (clientData, interp, objc, objv)
 
   if (!b || b->type != bp_breakpoint)
     {
-      Tcl_SetStringObj (result_ptr->obj_ptr, "Breakpoint #%d does not exist", -1);
+      char err_buf[64];
+      sprintf(err_buf, "Breakpoint #%d does not exist.", bpnum);
+      Tcl_SetStringObj (result_ptr->obj_ptr, err_buf, -1);
       return TCL_ERROR;
     }
 

@@ -1928,6 +1928,9 @@ trace_find_command (args, from_tty)
 
   if (target_is_remote ())
     {
+      if (trace_find_hook)
+	trace_find_hook (args, from_tty);  
+      
       if (args == 0 || *args == 0)
 	{ /* TFIND with no args means find NEXT trace frame. */
 	  if (traceframe_number == -1)

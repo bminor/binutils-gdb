@@ -78,6 +78,12 @@ extern int load_in_progress;
 
 extern Tcl_Interp *gdbtk_interp;
 
+/* These two are lookup tables for elements of the breakpoint structure that
+   gdbtk knows by string name.  They are defined in gdbtk-cmds.c */
+
+extern char *bptypes[];
+extern char *bpdisp[];
+
 /*
  * This structure controls how the gdb output is fed into call_wrapper invoked
  * commands.  See the explanation of gdbtk_fputs in gdbtk_hooks.c for more details.
