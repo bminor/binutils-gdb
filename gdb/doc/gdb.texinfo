@@ -10205,9 +10205,9 @@ On systems with memory-mapped files, an auxiliary file named
 @var{filename}.  If so, @value{GDBN} maps in the symbol table from
 @file{@var{filename}.syms}, starting up more quickly.  See the
 descriptions of the file options @samp{-mapped} and @samp{-readnow}
-(available on the command line, see @ref{File Options}, and with the
-commands @code{file}, @code{symbol-file}, or @code{add-symbol-file},
-described below), for more information.
+(available on the command line, see @ref{File Options, , -readnow},
+and with the commands @code{file}, @code{symbol-file}, or
+@code{add-symbol-file}, described below), for more information.
 
 @item file
 @code{file} with no argument makes @value{GDBN} discard any information it
