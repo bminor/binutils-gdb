@@ -383,8 +383,10 @@ fr30_final_link_relocate (howto, input_bfd, input_section, contents, rel, reloca
 
     case R_FR30_9_PCREL:
       contents   += rel->r_offset + 1;
-      relocation += rel->r_addend;
       srel = (bfd_signed_vma) relocation;
+      srel += rel->r_addend;
+      srel -= rel->r_offset;
+      srel -= 2;  /* Branch instructions add 2 to the PC... */
       srel -= (input_section->output_section->vma +
 		     input_section->output_offset);
       
@@ -392,14 +394,16 @@ fr30_final_link_relocate (howto, input_bfd, input_section, contents, rel, reloca
 	return bfd_reloc_outofrange;
       if (srel > ((1 << 8) - 1) || (srel < - (1 << 8)))
 	return bfd_reloc_overflow;
-      
+
       bfd_put_8 (input_bfd, srel >> 1, contents);
       break;
 
     case R_FR30_12_PCREL:
       contents   += rel->r_offset;
-      relocation += rel->r_addend;
       srel = (bfd_signed_vma) relocation;
+      srel += rel->r_addend;
+      srel -= rel->r_offset;
+      srel -= 2; /* Branch instructions add 2 to the PC... */
       srel -= (input_section->output_section->vma +
 		     input_section->output_offset);
       

@@ -1,3 +1,9 @@
+1998-12-08  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-fr30.c (fr30_final_link_relocate): Fix PC relative
+	relocations to include offset of 2 included in the insns, and the
+	offset of the relocs within the section.
+
 Wed Dec  2 15:03:59 1998  David Taylor  <taylor@texas.cygnus.com>
 
 	The following changes were made by David Taylor
