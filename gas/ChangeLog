@@ -1,6 +1,7 @@
 Wed Mar 24 02:16:22 1993  david d `zoo' zuhn  (zoo at poseidon.cygnus.com)
 
-	* Makefile.in: add dvi target
+	* Makefile.in: add dvi target; as-$(config).texinfo might live in
+	srcdir, might be in objdir.
 
 	* doc/Makefile.in: dvi depends on as.dvi
 
