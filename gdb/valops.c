@@ -465,7 +465,7 @@ value_at (type, addr, sect)
       store_address (VALUE_CONTENTS_RAW (val), 4, num);
     }
   else
-    read_memory_section (addr, VALUE_CONTENTS_ALL_RAW (val), TYPE_LENGTH (type), sect);
+    read_memory (addr, VALUE_CONTENTS_ALL_RAW (val), TYPE_LENGTH (type));
 
   VALUE_LVAL (val) = lval_memory;
   VALUE_ADDRESS (val) = addr;
@@ -540,8 +540,8 @@ value_fetch_lazy (val)
       store_address (VALUE_CONTENTS_RAW (val), 4, num);
     }
   else if (length)
-    read_memory_section (addr, VALUE_CONTENTS_ALL_RAW (val), length,
-			 VALUE_BFD_SECTION (val));
+    read_memory (addr, VALUE_CONTENTS_ALL_RAW (val), length);
+  
   VALUE_LAZY (val) = 0;
   return 0;
 }

@@ -224,7 +224,7 @@ get_java_utf8_name (obstack, name)
     + TYPE_LENGTH (VALUE_TYPE (temp));
   chrs = obstack_alloc (obstack, name_length + 1);
   chrs[name_length] = '\0';
-  read_memory_section (data_addr, chrs, name_length, NULL);
+  read_memory (data_addr, chrs, name_length);
   return chrs;
 }
 

@@ -615,10 +615,6 @@ extern int
 target_read_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len));
 
 extern int
-target_read_memory_section PARAMS ((CORE_ADDR memaddr, char *myaddr, int len,
-				    asection * bfd_section));
-
-extern int
 target_write_memory PARAMS ((CORE_ADDR, char *, int));
 
 extern int
@@ -1388,7 +1384,6 @@ extern int baud_rate;
 /* Timeout limit for response from target. */
 extern int remote_timeout;
 
-extern asection *target_memory_bfd_section;
 
 /* Functions for helping to write a native target.  */
 

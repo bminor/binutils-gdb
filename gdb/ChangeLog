@@ -1,3 +1,23 @@
+2000-05-20  J.T. Conklin  <jtc@redback.com>
+
+	* target.h (target_memory_bfd_section): Removed declaration.
+	* target.c (target_memory_bfd_section): Removed.
+	* exec.c (xfer_memory): Removed #if'ed-out code which referenced
+ 	target_memory_bfd_section.
+	
+	* target.h (target_read_memory_section): Removed declaration.
+	* target.c (target_read_memory_section): Removed.
+	(target_xfer_memory): Update, removed bfd_section argument.
+	(target_read_string, target_read_memory, target_write_memory):
+	Update for above change.
+
+	* gdbcore.h (read_memory_section): Removed declaration.
+	* corefile.c (read_memory_section): Removed.
+	* jv-lang.c (get_java_utf8_name): Changed calls to
+ 	read_memory_section to read_memory.
+	* printcmd.c (printf_command): Likewise.
+	* valops.c (value_at, value_fetch_lazy): Likewise.
+	
 2000-05-18  J.T. Conklin  <jtc@redback.com>
 
 	* configure.host, configure.tgt (powerpc-*-netbsd*): New entry.

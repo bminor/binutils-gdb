@@ -51,9 +51,6 @@ extern void memory_error PARAMS ((int status, CORE_ADDR memaddr));
 
 extern void read_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len));
 
-extern void read_memory_section PARAMS ((CORE_ADDR memaddr, char *myaddr,
-					 int len, asection * bfd_section));
-
 /* Read an integer from debugged memory, given address and number of
    bytes.  */
 

@@ -95,7 +95,7 @@ static void normal_target_post_startup_inferior PARAMS ((int pid));
 
 static int
 target_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len,
-			    int write, asection * bfd_section));
+			    int write));
 
 static void init_dummy_target PARAMS ((void));
 
@@ -836,7 +836,7 @@ target_read_string (memaddr, string, len, errnop)
       tlen = MIN (len, 4 - (memaddr & 3));
       offset = memaddr & 3;
 
-      errcode = target_xfer_memory (memaddr & ~3, buf, 4, 0, NULL);
+      errcode = target_xfer_memory (memaddr & ~3, buf, 4, 0);
       if (errcode != 0)
 	{
 	  /* The transfer request might have crossed the boundary to an
@@ -844,7 +844,7 @@ target_read_string (memaddr, string, len, errnop)
 	     a single byte.  */
 	  tlen = 1;
 	  offset = 0;
-	  errcode = target_xfer_memory (memaddr, buf, 1, 0, NULL);
+	  errcode = target_xfer_memory (memaddr, buf, 1, 0);
 	  if (errcode != 0)
 	    goto done;
 	}
@@ -896,17 +896,7 @@ target_read_memory (memaddr, myaddr, len)
      char *myaddr;
      int len;
 {
-  return target_xfer_memory (memaddr, myaddr, len, 0, NULL);
-}
-
-int
-target_read_memory_section (memaddr, myaddr, len, bfd_section)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     asection *bfd_section;
-{
-  return target_xfer_memory (memaddr, myaddr, len, 0, bfd_section);
+  return target_xfer_memory (memaddr, myaddr, len, 0);
 }
 
 int
@@ -915,14 +905,8 @@ target_write_memory (memaddr, myaddr, len)
      char *myaddr;
      int len;
 {
-  return target_xfer_memory (memaddr, myaddr, len, 1, NULL);
+  return target_xfer_memory (memaddr, myaddr, len, 1);
 }
-
-/* This variable is used to pass section information down to targets.  This
-   *should* be done by adding an argument to the target_xfer_memory function
-   of all the targets, but I didn't feel like changing 50+ files.  */
-
-asection *target_memory_bfd_section = NULL;
 
 /* Move memory to or from the targets.  Iterate until all of it has
    been moved, if necessary.  The top target gets priority; anything
@@ -935,12 +919,11 @@ asection *target_memory_bfd_section = NULL;
    Result is 0 or errno value.  */
 
 static int
-target_xfer_memory (memaddr, myaddr, len, write, bfd_section)
+target_xfer_memory (memaddr, myaddr, len, write)
      CORE_ADDR memaddr;
      char *myaddr;
      int len;
      int write;
-     asection *bfd_section;
 {
   int curlen;
   int res;
@@ -950,8 +933,6 @@ target_xfer_memory (memaddr, myaddr, len, write, bfd_section)
   /* Zero length requests are ok and require no work.  */
   if (len == 0)
     return 0;
-
-  target_memory_bfd_section = bfd_section;
 
   /* to_xfer_memory is not guaranteed to set errno, even when it returns
      0.  */

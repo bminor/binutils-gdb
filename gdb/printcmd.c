@@ -2319,15 +2319,14 @@ printf_command (arg, from_tty)
 		{
 		  char c;
 		  QUIT;
-		  read_memory_section (tem + j, &c, 1,
-				       VALUE_BFD_SECTION (val_args[i]));
+		  read_memory (tem + j, &c, 1);
 		  if (c == 0)
 		    break;
 		}
 
 	      /* Copy the string contents into a string inside GDB.  */
 	      str = (char *) alloca (j + 1);
-	      read_memory_section (tem, str, j, VALUE_BFD_SECTION (val_args[i]));
+	      read_memory (tem, str, j);
 	      str[j] = 0;
 
 	      printf_filtered (current_substring, str);
