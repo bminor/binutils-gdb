@@ -3,6 +3,8 @@ Fri Oct  6 09:55:33 1995  Doug Evans  <dje@canuck.cygnus.com>
 	* Makefile.in (site.exp): Fix setting of $srcdir.
 
 	* config/tc-arm.c (md_atof): Fix little-endian output.
+	* config/tc-arm.h (ARM_BI_ENDIAN): Move definition so defined for
+	all coff targets.
 
 Thu Oct  5 20:17:30 1995  Ken Raeburn  <raeburn@cygnus.com>
 
