@@ -109,7 +109,11 @@ set_loadtype_command (ignore, from_tty, c)
 {
   char *tmp;
   char *type;
-  if (STREQ (LOADTYPES, "")) {
+
+  if (current_monitor == 0x0)
+    return;
+
+    if (STREQ (LOADTYPES, "")) {
     error ("No loadtype set");
     return;
   }
@@ -141,6 +145,10 @@ set_loadproto_command (ignore, from_tty, c)
 {
   char *tmp;
   char *type;
+
+  if (current_monitor == 0x0)
+    return;
+
   if (STREQ (LOADPROTOS, "")) {
     error ("No load protocols set");
     return;
@@ -1056,11 +1064,15 @@ monitor_load (file, fromtty)
     monitor_load_srec(file, 0);			/* if from a binary */
   }
 
-  if (STREQ (loadtype_str, "ascii-srec")) {	/* load an srecord file */
+  if (STREQ (loadtype_str, "none")) {		/* load an srecord by converting */
+    error ("Unimplemented");
+  }
+
+  if (STREQ (loadproto_str, "none")) {	/* load an srecord file */
     monitor_load_ascii_srec(file, fromtty);		/* if from a binary */
   }
 
-  if (STREQ (loadtype_str, "xmodem-srec")) {	/* load an srecord using the */
+  if (STREQ (loadproto_str, "xmodem")) {		/* load an srecord using the */
     monitor_load_srec(file, XMODEM);
   }
 }
