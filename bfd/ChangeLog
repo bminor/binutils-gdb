@@ -1,5 +1,12 @@
 Thu Oct 14 01:10:35 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* coffcode.h (styp_to_sec_flags): Don't set SEC_DEBUGGING until it
+	is made to work.
+	(coff_compute_section_file_positions): Remove check for
+	USE_DISCARDED_SECTIONS_COUNT.
+	* coff-i386.c: Don't define USE_DISCARDED_SECTIONS_COUNT.  Basing
+	it on host defines is wrong.
+
 	* ecoff.c (ecoff_bfd_seclet_link): Don't link a .reginfo section.
 	(ecoff_write_object_contents): Don't require the .reginfo section
 	to be a particular size.
