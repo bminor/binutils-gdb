@@ -20,6 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "doublest.h"
 #include "frame.h"
 #include "frame-unwind.h"
 #include "frame-base.h"
@@ -34,7 +35,7 @@
 #include "gdb_string.h"
 #include "linespec.h"
 #include "regcache.h"
-#include "doublest.h"
+#include "reggroups.h"
 #include "arch-utils.h"
 #include "osabi.h"
 #include "block.h"
@@ -90,6 +91,39 @@ alpha_register_virtual_type (int regno)
 {
   return ((regno >= FP0_REGNUM && regno < (FP0_REGNUM+31))
 	  ? builtin_type_double : builtin_type_long);
+}
+
+/* Is REGNUM a member of REGGROUP?  */
+
+static int
+alpha_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
+			   struct reggroup *group)
+{
+  /* Filter out any registers eliminated, but whose regnum is 
+     reserved for backward compatibility, e.g. the vfp.  */
+  if (REGISTER_NAME (regnum) == NULL || *REGISTER_NAME (regnum) == '\0')
+    return 0;
+
+  /* Since we implement no pseudo registers, save/restore is equal to all. */
+  if (group == all_reggroup
+      || group == save_reggroup
+      || group == restore_reggroup)
+    return 1;
+
+  /* All other groups are non-overlapping.  */
+
+  /* Since this is really a PALcode memory slot...  */
+  if (regnum == ALPHA_UNIQUE_REGNUM)
+    return group == system_reggroup;
+
+  /* Force the FPCR to be considered part of the floating point state.  */
+  if (regnum == ALPHA_FPCR_REGNUM)
+    return group == float_reggroup;
+
+  if (regnum >= ALPHA_FP0_REGNUM && regnum < ALPHA_FP0_REGNUM + 31)
+    return group == float_reggroup;
+  else
+    return group == general_reggroup;
 }
 
 static int
@@ -1259,6 +1293,8 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_convert_to_virtual (gdbarch,
                                            alpha_register_convert_to_virtual);
   set_gdbarch_register_convert_to_raw (gdbarch, alpha_register_convert_to_raw);
+
+  set_gdbarch_register_reggroup_p (gdbarch, alpha_register_reggroup_p);
 
   /* Prologue heuristics.  */
   set_gdbarch_skip_prologue (gdbarch, alpha_skip_prologue);
