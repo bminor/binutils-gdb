@@ -2025,7 +2025,7 @@ void
 _initialize_remote ()
 {
   init_remote_ops() ;
-  init_extended__remote_ops() ;
+  init_extended_remote_ops() ;
   add_target (&remote_ops);
   add_target (&extended_remote_ops);
 
