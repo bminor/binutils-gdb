@@ -26,20 +26,10 @@ Do-first:
 
 Things-to-keep:
 
-all
-alpha
-arm
-h8300
-hppa
-i386
-ieee-fp
-m68k
-m68k-coff
-mips
-sparc-solaris
-sun4
-template
-vax
+h8300.exp
+cmpsi2.s
+ffxx1.d
+ffxx1.s
 
 Things-to-lose:
 
