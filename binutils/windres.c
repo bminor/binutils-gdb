@@ -712,7 +712,7 @@ Options:\n\
   --include-dir DIR           Include directory when preprocessing rc file\n\
   -DSYM[=VAL], --define SYM[=VAL]\n\
                               Define SYM when preprocessing rc file\n\
-  -v                          Verbose - tells you what it's doing\n\n
+  -v                          Verbose - tells you what it's doing\n\
   --language VAL              Set language when reading rc file\n"));
 #ifdef YYDEBUG
   fprintf (stream, _("\
