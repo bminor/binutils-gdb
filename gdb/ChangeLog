@@ -1,3 +1,50 @@
+Thu Oct  6 18:10:41 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* nlm/i386.c (flush_i_cache): New function, does nothing.
+	(frame_to_registers, registers_to_frame, set_step_traps,
+	clear_step_traps, do_status): Make non-static.
+
+Thu Oct  6 12:26:42 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* config/mips/tm-mips.h (GDB_TARGET_IS_MIPS64): If not already
+	defined, define as 0.
+	(FIX_CALL_DUMMY): Rewrite to remove presumption that host and
+	target are similar.
+	* config/mips/tm-idt.h (TARGET_BYTE_ORDER_SELECTABLE): Define.
+	* config/mips/tm-idtl.h (TARGET_BYTE_ORDER_SELECTABLE): Define.
+	* config/mips/tm-idt64.h (TARGET_BYTE_ORDER_SELECTABLE): Define.
+	(BREAKPOINT): Remove definition.
+	* config/mips/tm-idtl64.h (TARGET_BYTE_ORDER_SELECTABLE): Define.
+	(BREAKPOINT): Remove definition.
+	* config/mips/tm-mips64.h (GDB_TARGET_IS_MIPS64): Define with a
+	value of 1, rather than without a value.
+	* config/mips/tm-bigmips64.h (GDB_TARGET_IS_MIPS64): Likewise.
+	* mips-tdep.c: Rewrite uses of GDB_TARGET_IS_MIPS64 to switch at
+	run time rather than at compile time.
+
+	* remote-mips.c (break_insn): Remove.
+	(BREAK_INSN, BREAK_INSN_SIZE): Define.
+	(mips_insert_breakpoint): Use BREAK_INSN, not break_insn.
+	(mips_remove_breakpoint): Likewise.
+
+	* defs.h: If TARGET_BYTE_ORDER_SELECTABLE is defined by tm.h,
+	define TARGET_BYTE_ORDER as target_byte_order, and declare
+	target_byte_order as an extern int, and define BITS_BIG_ENDIAN as
+	a test of TARGET_BYTE_ORDER.
+	* top.c: Several additions if TARGET_BYTE_ORDER_SELECTABLE is
+	defined:
+	(endianlist, target_byte_order): New variables.
+	(set_endian, set_endian_big, set_endian_little): New functions.
+	(show_endian): New function.
+	(init_cmd_lists): Initialize endianlist.
+	(init_main): Add commands ``set endian big'', ``set endian
+	little'', and ``show endian''.
+	* a29k-pinsn.c: Rewrite uses of TARGET_BYTE_ORDER and
+	BITS_BIG_ENDIAN to switch at run time rather than at compile time.
+	* coffread.c, dwarfread.c, findvar.c, mips-tdep.c: Likewise.
+	* remote-os9k.c, stabsread.c, valarith.c, valprint.c: Likewise.
+	* values.c: Likewise.
+
 Wed Oct  5 11:41:24 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* nlm/configure.in: ${gdb_host_cpu} defaults to ${host_cpu}.

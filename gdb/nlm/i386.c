@@ -11,9 +11,18 @@
 #include <errno.h>
 #include "i386.h"
 
+extern char *mem2hex (void *mem, char *buf, int count, int may_fault);
+extern char *hex2mem (char *buf, void *mem, int count, int may_fault);
+extern int computeSignal (int exceptionVector);
+
+void
+flush_i_cache()
+{
+}
+
 /* Get the registers out of the frame information.  */
 
-static void
+void
 frame_to_registers (frame, regs)
      struct StackFrame *frame;
      char *regs;
@@ -36,7 +45,7 @@ frame_to_registers (frame, regs)
 
 /* Put the registers back into the frame information.  */
 
-static void
+void
 registers_to_frame (regs, frame)
      char *regs;
      struct StackFrame *frame;
@@ -57,21 +66,21 @@ registers_to_frame (regs, frame)
   hex2mem (&regs[14 * 4 * 2], &frame->ExceptionFS, 4 * 2, 0);
 }
 
-static void
+void
 set_step_traps (frame)
      struct StackFrame *frame;
 {
   frame->ExceptionSystemFlags |= 0x100;
 }
 
-static void
+void
 clear_step_traps (frame)
      struct StackFrame *frame;
 {
   frame->ExceptionSystemFlags &= ~0x100;
 }
 
-static void
+void
 do_status (ptr, frame)
      char *ptr;
      struct StackFrame *frame;
