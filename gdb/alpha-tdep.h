@@ -43,9 +43,10 @@
 #define ALPHA_GCC_FP_REGNUM 15  /* Used by gcc as frame register */
 #define ALPHA_A0_REGNUM     16  /* Loc of first arg during a subr call */
 #define ALPHA_T9_REGNUM     23  /* Return address register for OSF/1 __div* */
-#define ALPHA_T12_REGNUM    27  /* Contains start addr of current proc */
-#define ALPHA_SP_REGNUM     30  /* Contains address of top of stack */
 #define ALPHA_RA_REGNUM     26  /* Contains return address value */
+#define ALPHA_T12_REGNUM    27  /* Contains start addr of current proc */
+#define ALPHA_GP_REGNUM     29  /* Contains the global pointer */
+#define ALPHA_SP_REGNUM     30  /* Contains address of top of stack */
 #define ALPHA_ZERO_REGNUM   31  /* Read-only register, always 0 */
 #define ALPHA_FP0_REGNUM    32  /* Floating point register 0 */
 #define ALPHA_FPA0_REGNUM   48  /* First float arg during a subr call */

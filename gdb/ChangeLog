@@ -1,5 +1,12 @@
 2003-06-02  Richard Henderson  <rth@redhat.com>
 
+        * alpha-tdep.c (alpha_register_virtual_type): Use void_data_ptr
+        for SP, GP; void_func_ptr for PC; non-language-specific types
+        for all others.
+        * alpha-tdep.h (ALPHA_GP_REGNUM): New.
+
+2003-06-02  Richard Henderson  <rth@redhat.com>
+
 	* top.h (lim_at_start): Declare.
 	* main.c (captured_main): Set it.
 	* top.c (lim_at_start): Define.

@@ -89,8 +89,17 @@ alpha_register_convertible (int regno)
 static struct type *
 alpha_register_virtual_type (int regno)
 {
-  return ((regno >= FP0_REGNUM && regno < (FP0_REGNUM+31))
-	  ? builtin_type_double : builtin_type_long);
+  if (regno == ALPHA_SP_REGNUM || regno == ALPHA_GP_REGNUM)
+    return builtin_type_void_data_ptr;
+  if (regno == ALPHA_PC_REGNUM)
+    return builtin_type_void_func_ptr;
+
+  /* Don't need to worry about little vs big endian until 
+     some jerk tries to port to alpha-unicosmk.  */
+  if (regno >= FP0_REGNUM && regno < FP0_REGNUM + 31)
+    return builtin_type_ieee_double_little;
+
+  return builtin_type_int64;
 }
 
 /* Is REGNUM a member of REGGROUP?  */
