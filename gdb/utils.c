@@ -983,42 +983,6 @@ request_quit (int signo)
     quit ();
 }
 
-/* Memory management stuff (malloc friends).  */
-
-static void *
-mmalloc (void *md, size_t size)
-{
-  return malloc (size);		/* NOTE: GDB's only call to malloc() */
-}
-
-static void *
-mrealloc (void *md, void *ptr, size_t size)
-{
-  if (ptr == 0)			/* Guard against old realloc's */
-    return mmalloc (md, size);
-  else
-    return realloc (ptr, size);	/* NOTE: GDB's only call to ralloc() */
-}
-
-static void *
-mcalloc (void *md, size_t number, size_t size)
-{
-  return calloc (number, size);	/* NOTE: GDB's only call to calloc() */
-}
-
-static void
-mfree (void *md, void *ptr)
-{
-  free (ptr);			/* NOTE: GDB's only call to free() */
-}
-
-/* This used to do something interesting with USE_MMALLOC.
- * It can be retired any time.  -- chastain 2004-01-19.  */
-void
-init_malloc (void *md)
-{
-}
-
 /* Called when a memory allocation fails, with the number of bytes of
    memory requested in SIZE. */
 

@@ -1,5 +1,10 @@
 2004-08-10  Andrew Cagney  <cagney@gnu.org>
 
+	* main.c (captured_main): Delete call to init_malloc.
+	* defs.h (init_malloc): Delete declaration.
+	* utils.c (mmalloc, mrealloc, mcalloc, mfree)
+	(init_malloc): Delete functions.
+
 	* defs.h (xmfree): Delete.
 	* utils.c (xmfree): Delete function.
 	(xfree): Inline calls to xmfree and mfree.

@@ -358,8 +358,6 @@ extern int subset_compare (char *, char *);
 
 extern char *safe_strerror (int);
 
-extern void init_malloc (void *);
-
 extern void request_quit (int);
 
 extern void do_cleanups (struct cleanup *);

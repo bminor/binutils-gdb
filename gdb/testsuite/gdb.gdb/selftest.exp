@@ -105,10 +105,6 @@ proc do_steps_and_nexts {} {
 		set description "next over mac_init and everything it calls"
 		set command "next"
 	    }
-	    -re ".*init_malloc.*$gdb_prompt $" {
-		set description "next over init_malloc and everything it calls"
-		set command "next"
-	    }
 	    -re ".*lim_at_start.*$gdb_prompt $" {
 		set description "next over lim_at_start initialization"
 		set command "next"

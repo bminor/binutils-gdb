@@ -157,9 +157,6 @@ captured_main (void *data)
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 
-  /* This needs to happen before the first use of malloc.  */
-  init_malloc (NULL);
-
 #ifdef HAVE_SBRK
   lim_at_start = (char *) sbrk (0);
 #endif

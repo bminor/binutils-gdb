@@ -1,3 +1,8 @@
+2004-08-10  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.gdb/selftest.exp (do_steps_and_nexts): Remove code to skip
+	init_malloc call.
+
 2004-08-10  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* ChangeLog: Add copyright notice.  The notice is copied
