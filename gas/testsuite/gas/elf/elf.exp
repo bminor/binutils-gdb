@@ -8,7 +8,8 @@ proc run_list_test { name suffix opts } {
     set testname "elf $name list"
     set file $srcdir/$subdir/$name
     gas_run ${name}.s "$opts -o dump.o" ">&dump.out"
-    if { [regexp_diff "dump.out" "${file}.l"] } then {
+    if { ![string match "" $opts]
+	  && [regexp_diff "dump.out" "${file}.l"] } then {
 	fail $testname
 	verbose "output is [file_contents "dump.out"]" 2
 	return
@@ -54,4 +55,5 @@ if { ([istarget "*-*-elf*"]
     run_dump_test "section1" 
     run_list_test "section2" "$target_machine" "-al"
     run_dump_test "symver" 
+    run_list_test "type" "$target_machine" ""
 }

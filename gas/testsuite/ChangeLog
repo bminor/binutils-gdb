@@ -1,5 +1,16 @@
 2003-05-01  H.J. Lu <hjl@gnu.org>
 
+	* gas/elf/elf.exp (run_list_test): Accept empty $opts.
+	Add type test.
+
+	* gas/elf/type.e: New file.
+	* gas/elf/type.s: Likewise.
+	* gas/elf/type.e-m32r: Likewise.
+	* gas/elf/type.e-mips: Likewise.
+	* gas/elf/type.e-miwmmxt: Likewise.
+
+2003-05-01  H.J. Lu <hjl@gnu.org>
+
 	* gas/ia64/ia64.exp: Add secname.
 
 	* gas/ia64/secname.s: New. Test the trailing '#' in section
