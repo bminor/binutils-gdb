@@ -124,6 +124,13 @@ if { [istarget "*-*-netbsdelf*"]
     set asm-note "netbsd"
 }
 
+# On OpenBSD/ELF we need a similar note section.  We make no attempt
+# of handing a.out here since most OpenBSD/a.out systems use a rather
+# outdated assembler that doesn't assemble this test's code anyway.
+if { [istarget "*-*-openbsd*"] } then {
+    set asm-note "openbsd"
+}
+
 # Watch out, we are invoking the assembler, but the testsuite sets multilib
 # switches according to compiler syntax.  If we pass these options straight
 # to the assembler, they won't always make sense.  If we don't pass them to
