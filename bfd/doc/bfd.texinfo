@@ -1,6 +1,20 @@
-\input fsf-texi.tex
+\input texinfo.tex
 @setfilename bfd.info
 @c $Id$
+@tex
+% NOTE LOCAL KLUGE TO AVOID TOO MUCH WHITESPACE
+\global\long\def\example{%
+\begingroup
+\let\aboveenvbreak=\par
+\let\afterenvbreak=\par
+\parskip=0pt
+\lisp}
+\global\long\def\Eexample{%
+\Elisp
+\endgroup
+\vskip -\parskip% to cancel out effect of following \par
+}
+@end tex
 @synindex fn cp
 
 @ifinfo
@@ -45,7 +59,7 @@ into another language, under the above conditions for modified versions.
 @title{libbfd}
 @subtitle{The Binary File Descriptor Library}
 @sp 1
-@subtitle First Edition---BFD version < 2.0
+@subtitle First Edition---BFD version < 3.0
 @subtitle April 1991
 @author {Steve Chamberlain}
 @author {Cygnus Support}
@@ -56,7 +70,7 @@ into another language, under the above conditions for modified versions.
 \xdef\manvers{\$Revision$}  % For use in headers, footers too
 {\parskip=0pt
 \hfill Cygnus Support\par
-\hfill steve\@cygnus.com\par
+\hfill sac\@cygnus.com\par
 \hfill {\it BFD}, \manvers\par
 \hfill \TeX{}info \texinfoversion\par
 }
@@ -97,16 +111,17 @@ This file documents the binary file descriptor library libbfd.
 @chapter Introduction
 @cindex BFD
 @cindex what is it?
-Simply put, BFD is a package which allows applications to use the
+BFD is a package which allows applications to use the
 same routines to operate on object files whatever the object file
-format.  A different object file format can be supported simply by
+format.  A new object file format can be supported simply by
 creating a new BFD back end and adding it to the library.
 
-BFD is split into two parts; the front end and the many back ends.
+BFD is split into two parts: the front end, and the back ends (one for
+each object file format).
 @itemize @bullet
 @item The front end of BFD provides the interface to the user. It manages
-memory, and various canonical data structures. The front end also
-decides which back end to use, and when to call back end routines.
+memory and various canonical data structures. The front end also
+decides which back end to use and when to call back end routines.
 @item The back ends provide BFD its view of the real world. Each back
 end provides a set of calls which the BFD front end can use to maintain
 its canonical form. The back ends also may keep around information for
@@ -115,7 +130,7 @@ their own use, for greater efficiency.
 @menu
 * History::			History
 * How It Works::		How It Works
-* What BFD Version 1 Can Do::	What BFD Version 1 Can Do
+* What BFD Version 2 Can Do::	What BFD Version 2 Can Do
 @end menu
 
 @node History, How It Works, Overview, Overview
@@ -124,7 +139,7 @@ their own use, for greater efficiency.
 One spur behind BFD was the desire, on the part of the GNU 960 team at
 Intel Oregon, for interoperability of applications on their COFF and
 b.out file formats.  Cygnus was providing GNU support for the team, and
-Cygnus was contracted to provide the required functionality.
+was contracted to provide the required functionality.
 
 The name came from a conversation David Wallace was having with Richard
 Stallman about the library: RMS said that it would be quite hard---David
@@ -134,29 +149,31 @@ At the same time, Ready Systems wanted much the same thing, but for
 different object file formats: IEEE-695, Oasys, Srecords, a.out and 68k
 coff.
 
-BFD was first implemented by Steve Chamberlain (steve@@cygnus.com),
-John Gilmore (gnu@@cygnus.com),  K. Richard Pixley (rich@@cygnus.com) and
-David Wallace (gumby@@cygnus.com) at Cygnus Support in Palo Alto,
-California.
+BFD was first implemented by members of Cygnus Support; Steve
+Chamberlain (@file{sac@@cygnus.com}), John Gilmore
+(@file{gnu@@cygnus.com}), K.  Richard Pixley (@file{rich@@cygnus.com})
+and David Henkel-Wallace (@file{gumby@@cygnus.com}).
 
-@node How It Works, What BFD Version 1 Can Do, History, Overview
-@section How It Works
 
-To use the library, include @code{bfd.h} and link with @code{libbfd.a}.	
+
+@node How It Works, What BFD Version 2 Can Do, History, Overview
+@section How To Use BFD
+
+To use the library, include @file{bfd.h} and link with @file{libbfd.a}.	
 
 BFD provides a common interface to the parts of an object file
 for a calling application. 
 
-When an application sucessfully opens a target file (object, archive or
+When an application sucessfully opens a target file (object, archive, or
 whatever) a pointer to an internal structure is returned. This pointer
 points to a structure called @code{bfd}, described in
-@code{include/bfd.h}.  Our convention is to call this pointer a BFD, and
+@file{include/bfd.h}.  Our convention is to call this pointer a BFD, and
 instances of it within code @code{abfd}.  All operations on
 the target object file are applied as methods to the BFD.  The mapping is
 defined within @code{bfd.h} in a set of macros, all beginning
-@samp{bfd}_.
+with @samp{bfd_} to reduce namespace pollution.
 
-For example, this sequence would do what you would probably expect:
+For example, this sequence does what you would probably expect:
 return the number of sections in an object file attached to a BFD
 @code{abfd}. 
 
@@ -179,11 +196,11 @@ additional attribute of an index and contain subordinate BFDs. This approach is
 fine for a.out and coff, but loses efficiency when applied to formats
 such as S-records and IEEE-695. 
 
-@node What BFD Version 1 Can Do,  , How It Works, Overview
-@section What BFD Version 1 Can Do
+@node What BFD Version 2 Can Do,  , How It Works, Overview
+@section What BFD Version 2 Can Do
 As different information from the the object files is required,
 BFD reads from different sections of the file and processes them.
-For example a very common operation for the linker is processing symbol
+For example, a very common operation for the linker is processing symbol
 tables.  Each BFD back end provides a routine for converting
 between the object file's representation of symbols and an internal
 canonical format. When the linker asks for the symbol table of an object
@@ -191,19 +208,19 @@ file, it calls through the memory pointer to the relevant BFD
 back end routine which reads and converts the table into a canonical
 form.  The linker then operates upon the canonical form. When the link is
 finished and the linker writes the output file's symbol table,
-another BFD back end routine is called which takes the newly
-created symbol table and converts it into the chosen output format.
+another BFD back end routine is called to take the newly
+created symbol table and convert it into the chosen output format.
 
 @menu
 * BFD information loss::	Information Loss
 * Mechanism::			Mechanism 
 @end menu
 
-@node BFD information loss, Mechanism, What BFD Version 1 Can Do, What BFD Version 1 Can Do
+@node BFD information loss, Mechanism, What BFD Version 2 Can Do, What BFD Version 2 Can Do
 @subsection Information Loss
 @emph{Some information is lost due to the nature of the file format.} The output targets
 supported by BFD do not provide identical facilities, and
-information which may be described in one form has nowhere to go in
+information which can be described in one form has nowhere to go in
 another format. One example of this is alignment information in
 @code{b.out}. There is nowhere in an @code{a.out} format file to store
 alignment information on the contained data, so when a file is linked
@@ -214,8 +231,8 @@ correctly).
 
 Another example is COFF section names. COFF files may contain an
 unlimited number of sections, each one with a textual section name. If
-the target of the link is a format which does not have many sections (eg
-@code{a.out}) or has sections without names (eg the Oasys format) the
+the target of the link is a format which does not have many sections (e.g.,
+@code{a.out}) or has sections without names (e.g., the Oasys format), the
 link cannot be done simply. You can circumvent this problem by
 describing the desired input-to-output section mapping with the linker command
 language.
@@ -237,13 +254,13 @@ same time, the back end saves away any information which may otherwise
 be lost. If the data is then written back in the same format, the back
 end routine will be able to use the canonical form provided by the
 BFD core as well as the information it prepared earlier.  Since
-there is a great deal of commonality between back ends, this mechanism
-is very useful. There is no information lost for this reason when
+there is a great deal of commonality between back ends,
+there is no information lost when
 linking or copying big endian COFF to little endian COFF, or @code{a.out} to
 @code{b.out}.  When a mixture of formats is linked, the information is
 only lost from the files whose format differs from the destination.
 
-@node Mechanism,  , BFD information loss, What BFD Version 1 Can Do
+@node Mechanism,  , BFD information loss, What BFD Version 2 Can Do
 @subsection Mechanism 
 The greatest potential for loss of information is when there is least
 overlap between the information provided by the source format, that
@@ -263,8 +280,7 @@ information like Unix magic numbers is not stored here---only the magic
 numbers' meaning, so a @code{ZMAGIC} file would have both the demand
 pageable bit and the write protected text bit set.  The byte order of
 the target is stored on a per-file basis, so that big- and little-endian
-object files may be linked with one another.
-@c FIXME: generalize above from "link"?
+object files may be used with one another.
 
 @item sections
 Each section in the input file contains the name of the section, the
@@ -298,7 +314,7 @@ IEEE, Oasys) and the type is simple enough to fit within one word
 
 @item relocation level
 Each canonical BFD relocation record contains a pointer to the symbol to
-relocate to, the offset of the data to relocate, the section the data
+relocate to (if any), the offset of the data to relocate, the section the data
 is in and a pointer to a relocation type descriptor. Relocation is
 performed effectively by message passing through the relocation type
 descriptor and symbol pointer. It allows relocations to be performed
@@ -306,7 +322,7 @@ on output data using a relocation method only available in one of the
 input formats. For instance, Oasys provides a byte relocation format.
 A relocation record requesting this relocation type would point
 indirectly to a routine to perform this, so the relocation may be
-performed on a byte being written to a COFF file, even though 68k COFF
+performed on a byte being written to a 68k COFF file, even though 68k COFF
 has no such relocation type.
 
 @item line numbers
@@ -353,7 +369,7 @@ between formats (COFF, IEEE and Oasys).
 BFD keeps all its internal structures in obstacks. There is one obstack
 per open BFD file, into which the current state is stored. When a BFD is
 closed, the obstack is deleted, and so everything which has been
-allocated by libbfd for the closing file will be thrown away.
+allocated by @code{libbfd} for the closing file will be thrown away.
 
 BFD will not free anything created by an application, but pointers into
 @code{bfd} structures will be invalidated on a @code{bfd_close}; for example,
@@ -364,11 +380,12 @@ lost.
 
 The general rule is not to close a BFD until all operations dependent
 upon data from the BFD have been completed, or all the data from within
-the file has been copied. To help with the management of memory, there is a function
-(@code{bfd_alloc_size}) which returns the number of bytes in obstacks
-associated with the supplied BFD. This could be used to select the
-greediest open BFD, close it to reclaim the memory, perform some
-operation and reopen the BFD again, to get a fresh copy of the data structures.
+the file has been copied. To help with the management of memory, there
+is a function (@code{bfd_alloc_size}) which returns the number of bytes
+in obstacks associated with the supplied BFD. This could be used to
+select the greediest open BFD, close it to reclaim the memory, perform
+some operation and reopen the BFD again, to get a fresh copy of the data
+structures.
 
 @node Initialization, Sections, Memory Usage, BFD front end
 @include  init.texi
@@ -412,7 +429,7 @@ operation and reopen the BFD again, to get a fresh copy of the data structures.
 @node BFD back end, Index, BFD front end, Top
 @chapter BFD back end
 @menu
-* What to put where::
+* What to Put Where::
 * aout ::	a.out backends
 * coff ::	coff backends
 @ignore
