@@ -102,7 +102,9 @@ const struct d10v_operand d10v_operands[] =
   { 4, 1, OPERAND_GPR|OPERAND_REG },
 #define RSRC_SP (RSRC + 1)
   { 4, 1, OPERAND_SP|OPERAND_GPR|OPERAND_REG },
-#define RDST	(RSRC_SP + 1)
+#define RSRC_NOSP (RSRC_SP + 1)
+  { 4, 1, OPERAND_NOSP|OPERAND_GPR|OPERAND_REG },
+#define RDST	(RSRC_NOSP + 1)
   { 4, 5, OPERAND_DEST|OPERAND_GPR|OPERAND_REG },
 #define ASRC	(RDST + 1)
   { 1, 4, OPERAND_ACC0|OPERAND_ACC1|OPERAND_REG },
@@ -315,13 +317,13 @@ const struct d10v_opcode d10v_opcodes[] = {
   { "st", SHORT_2, 1, MU, PAR|WMEM, 0x6800, 0x7e01, { RSRC2, ATSIGN, RSRC } },
   { "st", SHORT_2, 1, MU, PAR|WMEM, 0x6c1f, 0x7e1f, { RSRC2, ATMINUS, RSRC_SP } },
   { "st", SHORT_2, 1, MU, PAR|WMEM, 0x6801, 0x7e01, { RSRC2, ATSIGN, RSRC, PLUS } },
-  { "st", SHORT_2, 1, MU, PAR|WMEM, 0x6c01, 0x7e01, { RSRC2, ATSIGN, RSRC, MINUS } },
+  { "st", SHORT_2, 1, MU, PAR|WMEM, 0x6c01, 0x7e01, { RSRC2, ATSIGN, RSRC_NOSP, MINUS } },
   { "st", LONG_L, 1, MU, SEQ, 0x36010000, 0x3f0f0000, { RSRC2, ATSIGN, NUM16 } },
   { "st2w", LONG_L, 1, MU, SEQ, 0x35000000, 0x3f100000, { RSRC2E, ATPAR, NUM16, RSRC } },
   { "st2w", SHORT_2, 1, MU, PAR|WMEM, 0x6a00, 0x7e21, { RSRC2E, ATSIGN, RSRC } },
   { "st2w", SHORT_2, 1, MU, PAR|WMEM, 0x6e1f, 0x7e3f, { RSRC2E, ATMINUS, RSRC_SP } },
   { "st2w", SHORT_2, 1, MU, PAR|WMEM, 0x6a01, 0x7e21, { RSRC2E, ATSIGN, RSRC, PLUS } },
-  { "st2w", SHORT_2, 1, MU, PAR|WMEM, 0x6e01, 0x7e21, { RSRC2E, ATSIGN, RSRC, MINUS } },
+  { "st2w", SHORT_2, 1, MU, PAR|WMEM, 0x6e01, 0x7e21, { RSRC2E, ATSIGN, RSRC_NOSP, MINUS } },
   { "st2w", LONG_L, 1, MU, SEQ, 0x37010000, 0x3f1f0000, { RSRC2E, ATSIGN, NUM16 } },
   { "stb", LONG_L, 1, MU, SEQ, 0x3c000000, 0x3f000000, { RSRC2, ATPAR, NUM16, RSRC } },
   { "stb", SHORT_2, 1, MU, PAR|WMEM, 0x7800, 0x7e01, { RSRC2, ATSIGN, RSRC } },

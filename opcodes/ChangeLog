@@ -1,3 +1,9 @@
+2001-12-04  Alexandre Oliva  <aoliva@redhat.com>
+
+	* d10v-opc.c (RSRC_NOSP): New macro.
+	(d10v_operands): Add it.
+	(d10v_opcodes): Use RSRC_NOSP in post-decrement "st" and "st2w".
+
 2001-11-29  Alexandre Oliva  <aoliva@redhat.com>
 
 	* d10v-opc.c (d10v_predefined_registers): Mark `sp' as OPERAND_SP.
