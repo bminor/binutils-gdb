@@ -144,14 +144,15 @@ interp.o:interp.c config.h
 ######################################################################
 
 mostlyclean:
-	-rm -f *.o *~ \#* core binutils.?? binutils.??? case.c config.log
+	-rm -f *.o *~ \#* core binutils.?? binutils.??? case.c
 
 clean: mostlyclean
 	-rm -f $(PROGS) *.o *.a
 
 distclean:
 	-rm -f Makefile config.status sysdep.h *.o *~ \#* core y.* \
-		binutils.?? binutils.??s binutils.aux binutils.log binutils.toc gencode run
+		binutils.?? binutils.??s binutils.aux binutils.log \
+		binutils.toc gencode run config.log
 	-rm -f $(PROGS) config.h stamp-h
 
 maintainer-clean realclean: clean distclean
