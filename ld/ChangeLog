@@ -1,3 +1,7 @@
+Tue Nov 10 21:28:19 1998  DJ Delorie  <dj@cygnus.com>
+
+	* ld.texinfo: added i386pe option summary
+
 Tue Nov 10 17:53:17 1998  DJ Delorie  <dj@cygnus.com>
 
 	* pe-dll.c (process_def_file): properly note undefined exported
