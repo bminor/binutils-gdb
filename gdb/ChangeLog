@@ -1,3 +1,8 @@
+Fri Aug 12 11:47:10 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* sparclite/aload.c (sys_error, error): Use vfprintf to variable
+	  argument lists.
+
 Thu Aug 11 04:06:42 1994  Doug Evans  (dje@canuck.cygnus.com)
 
 	* defs.h (concat, basename, buildargv, freeargv, strerrno, strsigno,
