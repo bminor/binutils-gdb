@@ -1,3 +1,11 @@
+Tue Apr  9 01:23:05 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+
+	* eval.c (evaluate_subexp_standard): In case of TYPE_CODE_SET:
+	Add some checks for powerset compatibility.
+
+	* valops.c (value_slice): Use lowbound instead of lowerbound for
+	call to slice_range_type to get correct bounds.
+
 Mon Apr  8 12:53:56 1996  Fred Fish  <fnf@phydeaux.cygnus.com>
 
 	* Makefile.in (scm-exp.o, scm-lang.o, scm-valprint.o): Add targets and

@@ -550,27 +550,54 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	  value_ptr set = allocate_value (expect_type);
 	  char *valaddr = VALUE_CONTENTS_RAW (set);
 	  struct type *element_type = TYPE_INDEX_TYPE (type);
+	  struct type *check_type = element_type;
 	  LONGEST low_bound, high_bound;
+
+	  /* get targettype of elementtype */
+	  while (TYPE_CODE (check_type) == TYPE_CODE_RANGE ||
+		 TYPE_CODE (check_type) == TYPE_CODE_TYPEDEF)
+	    check_type = TYPE_TARGET_TYPE (check_type);
+
 	  if (get_discrete_bounds (element_type, &low_bound, &high_bound) < 0)
 	    error ("(power)set type with unknown size");
 	  memset (valaddr, '\0', TYPE_LENGTH (type));
 	  for (tem = 0; tem < nargs; tem++)
 	    {
 	      LONGEST range_low, range_high;
+	      struct type *range_low_type, *range_high_type;
 	      value_ptr elem_val;
 	      if (exp->elts[*pos].opcode == BINOP_RANGE)
 		{
 		  (*pos)++;
 		  elem_val = evaluate_subexp (element_type, exp, pos, noside);
+		  range_low_type = VALUE_TYPE (elem_val);
 		  range_low = value_as_long (elem_val);
 		  elem_val = evaluate_subexp (element_type, exp, pos, noside);
+		  range_high_type = VALUE_TYPE (elem_val);
 		  range_high = value_as_long (elem_val);
 		}
 	      else
 		{
 		  elem_val = evaluate_subexp (element_type, exp, pos, noside);
+		  range_low_type = range_high_type = VALUE_TYPE (elem_val);
 		  range_low = range_high = value_as_long (elem_val);
 		}
+	      /* check types of elements to avoid mixture of elements from
+		 different types. Also check if type of element is "compatible"
+		 with element type of powerset */
+	      if (TYPE_CODE (range_low_type) == TYPE_CODE_RANGE)
+		range_low_type = TYPE_TARGET_TYPE (range_low_type);
+	      if (TYPE_CODE (range_high_type) == TYPE_CODE_RANGE)
+		range_high_type = TYPE_TARGET_TYPE (range_high_type);
+	      if ((TYPE_CODE (range_low_type) != TYPE_CODE (range_high_type)) ||
+		  (TYPE_CODE (range_low_type) == TYPE_CODE_ENUM &&
+		   (range_low_type != range_high_type)))
+		/* different element modes */
+		error ("POWERSET tuple elements of different mode");
+	      if ((TYPE_CODE (check_type) != TYPE_CODE (range_low_type)) ||
+		  (TYPE_CODE (check_type) == TYPE_CODE_ENUM &&
+		   range_low_type != check_type))
+		error ("incompatible POWERSET tuple elements");
 	      if (range_low > range_high)
 		{
 		  warning ("empty POWERSET tuple range");
