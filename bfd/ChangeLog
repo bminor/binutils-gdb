@@ -1,3 +1,16 @@
+Wed May  5 16:08:32 1993  Per Bothner  (bothner@cygnus.com)
+
+	* elf32-hppa.c (elf_hppa_reloc_type_lookup):  Cast enums to
+	int, for the sake of the old Portable C Compiler.
+
+Mon May  3 14:37:01 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* Makefile.in (CFILES):  Add cpu-sh.c and coff-sh.c.
+
+Mon May  3 14:03:21 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* configure.in: Get target name right for m68*-*-hpux.
+
 Sun May  2 11:39:44 1993  Fred Fish  (fnf@cygnus.com)
 
 	* trad-core.c (NO_SIGNED_GET):  New macro.
