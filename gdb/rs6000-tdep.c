@@ -1669,7 +1669,7 @@ e500_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
   if (reg_nr >= tdep->ppc_gp0_regnum 
-      && reg_nr <= tdep->ppc_gplast_regnum)
+      && reg_nr < tdep->ppc_gp0_regnum + ppc_num_gprs)
     {
       base_regnum = reg_nr - tdep->ppc_gp0_regnum + tdep->ppc_ev0_regnum;
 
@@ -1692,7 +1692,7 @@ e500_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
   if (reg_nr >= tdep->ppc_gp0_regnum 
-      && reg_nr <= tdep->ppc_gplast_regnum)
+      && reg_nr < tdep->ppc_gp0_regnum + ppc_num_gprs)
     {
       base_regnum = reg_nr - tdep->ppc_gp0_regnum + tdep->ppc_ev0_regnum;
       /* reg_nr is 32 bit here, and base_regnum is 64 bits.  */
@@ -2701,7 +2701,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->regs = v->regs;
 
   tdep->ppc_gp0_regnum = 0;
-  tdep->ppc_gplast_regnum = 31;
   tdep->ppc_toc_regnum = 2;
   tdep->ppc_ps_regnum = 65;
   tdep->ppc_cr_regnum = 66;
@@ -2746,7 +2745,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	break;
       case bfd_mach_ppc_e500:
         tdep->ppc_gp0_regnum = 41;
-        tdep->ppc_gplast_regnum = tdep->ppc_gp0_regnum + 32 - 1;
         tdep->ppc_toc_regnum = -1;
         tdep->ppc_ps_regnum = 1;
         tdep->ppc_cr_regnum = 2;

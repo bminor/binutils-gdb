@@ -144,7 +144,6 @@ struct gdbarch_tdep
     int *regoff;               /* byte offsets in register arrays */
     const struct reg *regs;    /* from current variant */
     int ppc_gp0_regnum;		/* GPR register 0 */
-    int ppc_gplast_regnum;	/* GPR register 31 */
     int ppc_toc_regnum;		/* TOC register */
     int ppc_ps_regnum;	        /* Processor (or machine) status (%msr) */
     int ppc_cr_regnum;		/* Condition register */
@@ -166,6 +165,7 @@ struct gdbarch_tdep
 /* Constants for register set sizes.  */
 enum
   {
+    ppc_num_gprs = 32,          /* 32 general-purpose registers */
     ppc_num_fprs = 32           /* 32 floating-point registers */
   };
 

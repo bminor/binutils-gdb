@@ -156,7 +156,8 @@ regmap (int regno, int *isfloat)
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   *isfloat = 0;
-  if (tdep->ppc_gp0_regnum <= regno && regno <= tdep->ppc_gplast_regnum)
+  if (tdep->ppc_gp0_regnum <= regno
+      && regno < tdep->ppc_gp0_regnum + ppc_num_gprs)
     return regno;
   else if (FP0_REGNUM <= regno && regno < FP0_REGNUM + ppc_num_fprs)
     {
@@ -350,7 +351,7 @@ fetch_inferior_registers (int regno)
 
       /* Read 32 general purpose registers.  */
       for (regno = tdep->ppc_gp0_regnum;
-           regno <= tdep->ppc_gplast_regnum;
+           regno < tdep->ppc_gp0_regnum + ppc_num_gprs;
 	   regno++)
 	{
 	  fetch_register (regno);
@@ -389,7 +390,7 @@ store_inferior_registers (int regno)
 
       /* Write general purpose registers first.  */
       for (regno = tdep->ppc_gp0_regnum;
-           regno <= tdep->ppc_gplast_regnum;
+           regno < tdep->ppc_gp0_regnum + ppc_num_gprs;
 	   regno++)
 	{
 	  store_register (regno);

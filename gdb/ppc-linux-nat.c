@@ -132,7 +132,8 @@ ppc_register_u_addr (int regno)
   int wordsize = sizeof (PTRACE_XFER_TYPE);
 
   /* General purpose registers occupy 1 slot each in the buffer */
-  if (regno >= tdep->ppc_gp0_regnum && regno <= tdep->ppc_gplast_regnum )
+  if (regno >= tdep->ppc_gp0_regnum 
+      && regno < tdep->ppc_gp0_regnum + ppc_num_gprs)
     u_addr = ((regno - tdep->ppc_gp0_regnum + PT_R0) * wordsize);
 
   /* Floating point regs: eight bytes each in both 32- and 64-bit
