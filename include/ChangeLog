@@ -1,9 +1,14 @@
+Mon Jul 22 13:16:13 1996  Richard Henderson  <rth@tamu.edu>
+
+	* dis-asm.h (print_insn_alpha): Don't declare.
+	(print_insn_alpha_osf, print_insn_alpha_vms): Declare.
+
 start-sanitize-d10v
-	Wed Jul 17 14:45:12 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+Wed Jul 17 14:45:12 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* dis-asm.h: (print_insn_d10v): Declare.
+
 end-sanitize-d10v
-	
 Mon Jul 15 16:55:38 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* dis-asm.h:  Get rid of decls for print_insn_i8086,

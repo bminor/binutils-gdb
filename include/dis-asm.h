@@ -115,7 +115,8 @@ extern int print_insn_h8300		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_h8300h		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_h8300s		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_h8500		PARAMS ((bfd_vma, disassemble_info*));
-extern int print_insn_alpha		PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_alpha_osf		PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_alpha_vms		PARAMS ((bfd_vma, disassemble_info*));
 /* start-sanitize-arc */
 extern disassembler_ftype arc_get_disassembler PARAMS ((int, int));
 /* end-sanitize-arc */
