@@ -1,3 +1,7 @@
+2002-02-20  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* NEWS: Mark 2.12 branch.
+
 2002-02-18  Timothy Daly  <remote_bob@yahoo.com>
 
 	* readelf.c (dump_relocations): Display 2nd and 3rd reloc 
