@@ -233,7 +233,7 @@ usage (stream, status)
   -S  --source             Intermix source code with disassembly\n\
   -s  --full-contents      Display the full contents of all sections requested\n\
   -g  --debugging          Display debug information in object file\n\
-  -G  --stabs              Display the STABS contents of an ELF format file\n\
+  -G  --stabs              Display (in raw form) any STABS info in the file\n\
   -t  --syms               Display the contents of the symbol table(s)\n\
   -T  --dynamic-syms       Display the contents of the dynamic symbol table\n\
   -r  --reloc              Display the relocation entries in the file\n\
