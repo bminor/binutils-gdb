@@ -1,3 +1,11 @@
+Thu Oct 31 16:33:21 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-coff.c (do_relocs_for): Call resolve_symbol_value on
+	a symbol found in a reloc.
+
+	* symbols.c (resolve_symbol_value): Improve the error message if
+	an undefined symbol is used in an expression.
+
 Wed Oct 30 20:15:35 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* doc/internals.texi: Rewrite, and add a lot of documentation.
