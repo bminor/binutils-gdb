@@ -325,16 +325,7 @@ to any specific release.
 
 --
 
-Revised UDP support (was: Re: [Fwd: [patch] UDP transport support])
-http://sourceware.cygnus.com/ml/gdb-patches/2000-04/msg00000.html
-
-(Broken) support for GDB's remote protocol across UDP is to be
-included in the follow-on release.
-
-It should be noted that UDP can only work when the [Gg] packet fits in
-a single UDP packet.
-
-There is also much debate over the merit of this.
+Rename read_register{,_pid}() to read_unsigned_register{,_pid}().
 
 --
 
@@ -920,19 +911,6 @@ Robert Lipe writes:
 
 --
 
-Migrate qfThreadInfo packet -> qThreadInfo. (Andrew Cagney)
-
-Add support for packet enable/disable commands with these thread
-packets.  General cleanup.
-
-[PATCH] Document the ThreadInfo remote protocol queries
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00832.html
-
-[PATCH] "info threads" queries for remote.c
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00831.html
-
---
-
 			Language Support
 			================
 
@@ -972,6 +950,32 @@ Get DEC/Compaq to contribute their Modula-3 support.
 
 --
 
+Revised UDP support (was: Re: [Fwd: [patch] UDP transport support])
+http://sourceware.cygnus.com/ml/gdb-patches/2000-04/msg00000.html
+
+(Broken) support for GDB's remote protocol across UDP is to be
+included in the follow-on release.
+
+It should be noted that UDP can only work when the [Gg] packet fits in
+a single UDP packet.
+
+There is also much debate over the merit of this.
+
+--
+
+Migrate qfThreadInfo packet -> qThreadInfo. (Andrew Cagney)
+
+Add support for packet enable/disable commands with these thread
+packets.  General cleanup.
+
+[PATCH] Document the ThreadInfo remote protocol queries
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00832.html
+
+[PATCH] "info threads" queries for remote.c
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00831.html
+
+--
+
 Remote protocol doco feedback.
 
 Too much feedback to mention needs to be merged in (901660).  Search
@@ -998,6 +1002,32 @@ fixed so that it builds on 16 bit machines.
 
 --
 
+Fix the ``!'' packet.
+
+JT reported that the existing targets do, in fact return ``OK'' so it
+is possible to merge remote and extended-remote targets.
+
+--
+
+Drop ``<address>'' from the [SsCc] packets.
+
+I don't think that GDB generates them so having it in the protocol is
+silly.
+
+--
+
+Fix doco on the ``q'' packet.
+
+It has evolved into a generic RPC.  The notes should reflect this and,
+perhaps, the ``Q'' packet can be deprecated.
+
+The doco should mention that ``OK'' is a valid packet response.
+
+The doco should explain why ``OK'' needs to be a valid packet
+response.
+
+--
+
 Add the cycle step command.
 
 http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00237.html
@@ -1013,10 +1043,6 @@ on the fly - should it be returned in the ``T'' packet?
 
 Underlying problem is that the register file is target endian.  If the
 target endianess changes gdb doesn't know.
-
---
-
-Rename read_register{,_pid}() to read_unsigned_register{,_pid}().
 
 --
 
