@@ -1,3 +1,7 @@
+Sun Aug  8 12:41:22 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in ({dist,real}clean): Use $(MAKE), not make.
+
 Sat Aug  7 09:14:21 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* config/st2000.mt (TDEFINES): Don't define MRI; not used.
