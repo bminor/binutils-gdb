@@ -1,3 +1,17 @@
+Wed Aug  7 12:03:25 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* config/slite-gdb.exp (gdb_start): Use "full_buffer", not
+	"buffer_full".
+
+	* config/nind-gdb.exp (gdb_start): Use "full_buffer", not
+	"buffer_full".
+
+	* config/mips-gdb.exp (gdb_start): Use "full_buffer", not
+	"buffer_full".
+
+	* lib/gdb.exp (gdb_test): Correct pattern is "full_buffer", not
+	"buffer_full".
+
 Wed Aug  7 11:05:47 1996  Fred Fish  <fnf@cygnus.com>
 
 	* configure.in (configdirs): Add gdb.threads.

@@ -68,7 +68,7 @@ proc gdb_start { } {
 expect_after {
     "<return>"		   { send "\n"; clone_output "ERROR: Window too small" }
     -re "\(y or n\) " 	   { send "n\n"; clone_output "ERROR: Got interactive prompt" }
-    buffer_full		   { clone_output "ERROR: internal buffer is full" }
+    full_buffer		   { clone_output "ERROR: internal buffer is full" }
     eof			   { clone_output "ERROR: eof -- pty is hosed" }
     timeout			   { clone_output "ERROR: timeout" }
     "virtual memory exhausted" { clone_output "ERROR: virtual memory exhausted" }

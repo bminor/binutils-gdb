@@ -252,7 +252,7 @@ proc gdb_start { } {
 expect_after {
     "<return>"		   { send "\n"; perror "Window too small." }
     -re "\(y or n\) " 	   { send "n\n"; perror "Got interactive prompt." }
-    buffer_full		   { perror "internal buffer is full." }
+    full_buffer		   { perror "internal buffer is full." }
     eof			   { perror "eof -- pty is hosed." }
     timeout			   { perror "timeout." }
     "virtual memory exhausted" { perror "virtual memory exhausted." }
