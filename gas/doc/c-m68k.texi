@@ -84,6 +84,13 @@ to instead assume that the displacement is 16 bits.  In this case,
 @samp{disp} is a 16 bit value.  You may use the
 @samp{--disp-size-default-32} option to restore the default behaviour.
 
+@cindex @samp{--pcrel}
+Always generate PC relative branches.  Actually what this option really
+does is to prevent PC relative branches from being turned into absolute
+jumps.  If this cannot be done (because the specific architecture does
+not have a suitable PC relative branch instruction), the assembler will
+generate an error message.
+
 @cindex @samp{-m68000} and related options
 @cindex architecture options, M680x0
 @cindex M680x0 architecture options

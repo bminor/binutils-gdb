@@ -74,6 +74,7 @@ int flag_want_pic;
 
 static int flag_short_refs;	/* -l option */
 static int flag_long_jumps;	/* -S option */
+static int flag_keep_pcrel;	/* --pcrel option.  */
 
 #ifdef REGISTER_PREFIX_OPTIONAL
 int flag_reg_prefix_optional = REGISTER_PREFIX_OPTIONAL;
@@ -4317,8 +4318,11 @@ md_convert_frag_1 (fragP)
       ext = 2;
       break;
     case TAB (ABRANCH, LONG):
-      if (!HAVE_LONG_BRANCH(current_architecture))
+      if (!HAVE_LONG_BRANCH (current_architecture))
 	{
+	  if (flag_keep_pcrel)
+	    as_bad (_("long branch not supported"));
+	  
 	  if (fragP->fr_opcode[0] == 0x61)
 	    /* BSR */
 	    {
@@ -4363,6 +4367,9 @@ md_convert_frag_1 (fragP)
     case TAB (BCC68000, LONG):
       /* only Bcc 68000 instructions can come here */
       /* change bcc into b!cc/jmp absl long */
+      if (flag_keep_pcrel)
+	as_bad (_("long branch not supported"));
+      
       fragP->fr_opcode[0] ^= 0x01;	/* invert bcc */
       fragP->fr_opcode[1] = 0x6;/* branch offset = 6 */
 
@@ -4379,18 +4386,30 @@ md_convert_frag_1 (fragP)
       break;
     case TAB (DBCC, LONG):
       /* only DBcc 68000 instructions can come here */
-      /* change dbcc into dbcc/jmp absl long */
+      /* Change dbcc into dbcc/bral.  */
+      if (! HAVE_LONG_BRANCH (current_architecture) && flag_keep_pcrel)
+	as_bad (_("long branch not supported"));
+
       /* JF: these used to be fr_opcode[2-7], but that's wrong */
       *buffer_address++ = 0x00;	/* branch offset = 4 */
       *buffer_address++ = 0x04;
       *buffer_address++ = 0x60;	/* put in bra pc+6 */
       *buffer_address++ = 0x06;
-      *buffer_address++ = 0x4e;	/* put in jmp long (0x4ef9) */
-      *buffer_address++ = (char) 0xf9;
+      if (HAVE_LONG_BRANCH (current_architecture))
+	{
+	  *buffer_address++ = 0x60;     /* Put in bral (0x60ff).  */
+	  *buffer_address++ = (char) 0xff;
+	}
+      else
+	{
+	  *buffer_address++ = 0x4e;     /* Put in jmp long (0x4ef9).  */
+	  *buffer_address++ = (char) 0xf9;
+	}
 
       fragP->fr_fix += 6;	/* account for bra/jmp instructions */
       fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
-	       fragP->fr_offset, 0, NO_RELOC);
+	       fragP->fr_offset, HAVE_LONG_BRANCH (current_architecture),
+	       NO_RELOC);
       fragP->fr_fix += 4;
       ext = 0;
       break;
@@ -4532,7 +4551,8 @@ md_estimate_size_before_relax (fragP, segment)
 	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), BYTE);
 	    break;
 	  }
-	else if ((fragP->fr_symbol != NULL) && flag_short_refs)
+	else if ((fragP->fr_symbol != NULL)
+		 && (flag_short_refs || flag_keep_pcrel))
 	  {			/* Symbol is undefined and we want short ref */
 	    fix_new (fragP, (int) (fragP->fr_fix), 2, fragP->fr_symbol,
 		     fragP->fr_offset, 1, NO_RELOC);
@@ -4630,7 +4650,7 @@ md_estimate_size_before_relax (fragP, segment)
 	    break;
 	  }
 	/* only Bcc 68000 instructions can come here */
-	if ((fragP->fr_symbol != NULL) && flag_short_refs)
+	if ((fragP->fr_symbol != NULL) && (flag_short_refs || flag_keep_pcrel))
 	  {
 	    /* the user wants short refs, so emit one */
 	    fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
@@ -4666,7 +4686,10 @@ md_estimate_size_before_relax (fragP, segment)
 	  }
 	/* only DBcc 68000 instructions can come here */
 
-	if (fragP->fr_symbol != NULL && flag_short_refs)
+	if (fragP->fr_symbol != NULL
+	    && (flag_short_refs
+		|| (! HAVE_LONG_BRANCH (current_architecture)
+		    && flag_keep_pcrel)))
 	  {
 	    /* the user wants short refs, so emit one */
 	    fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
@@ -4675,18 +4698,27 @@ md_estimate_size_before_relax (fragP, segment)
 	  }
 	else
 	  {
-	    /* change dbcc into dbcc/jmp absl long */
+	    /* Change dbcc into dbcc/bral.  */
 	    /* JF: these used to be fr_opcode[2-4], which is wrong. */
 	    buffer_address[0] = 0x00;	/* branch offset = 4 */
 	    buffer_address[1] = 0x04;
 	    buffer_address[2] = 0x60;	/* put in bra pc + ... */
 	    /* JF: these were fr_opcode[5-7] */
 	    buffer_address[3] = 0x06;	/* Plus 6 */
-	    buffer_address[4] = 0x4e;	/* put in jmp long (0x4ef9) */
-	    buffer_address[5] = (char) 0xf9;
+	    if (HAVE_LONG_BRANCH (current_architecture))
+	      {
+		buffer_address[4] = 0x60;       /* Put in bral (0x60ff).  */
+		buffer_address[5] = (char) 0xff;
+	      }
+	    else
+	      {
+		buffer_address[4] = 0x4e;       /* Put in jmp long (0x4ef9).  */
+		buffer_address[5] = (char) 0xf9;
+	      }
 	    fragP->fr_fix += 6;	/* account for bra/jmp instruction */
 	    fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
-		     fragP->fr_offset, 0, NO_RELOC);
+		     fragP->fr_offset, HAVE_LONG_BRANCH (current_architecture),
+		     NO_RELOC);
 	    fragP->fr_fix += 4;
 	  }
 
@@ -6745,6 +6777,7 @@ s_mri_endw (ignore)
  *
  *	-pic	Indicates PIC.
  *	-k	Indicates PIC.  (Sun 3 only.)
+ *      --pcrel Never turn PC-relative branches into absolute jumps.
  *
  *	--bitwise-or
  *		Permit `|' to be used in expressions.
@@ -6773,6 +6806,8 @@ struct option md_longopts[] = {
   {"disp-size-default-16", no_argument, NULL, OPTION_DISP_SIZE_DEFAULT_16},
 #define OPTION_DISP_SIZE_DEFAULT_32 (OPTION_MD_BASE + 6)
   {"disp-size-default-32", no_argument, NULL, OPTION_DISP_SIZE_DEFAULT_32},
+#define OPTION_PCREL (OPTION_MD_BASE + 7)
+  {"pcrel", no_argument, NULL, OPTION_PCREL},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof(md_longopts);
@@ -6792,6 +6827,11 @@ md_parse_option (c, arg)
     case 'S':			/* -S means that jbsr's always turn into
 				   jsr's.  */
       flag_long_jumps = 1;
+      break;
+
+    case OPTION_PCREL:		/* --pcrel means never turn PC-relative
+				   branches into absolute jumps.  */
+      flag_keep_pcrel = 1;
       break;
 
     case 'A':
@@ -6950,6 +6990,7 @@ md_show_usage (stream)
 			[default yes for 68020 and up]\n\
 -pic, -k		generate position independent code\n\
 -S			turn jbsr into jsr\n\
+--pcrel                 never turn PC-relative branches into absolute jumps\n\
 --register-prefix-optional\n\
 			recognize register names without prefix character\n\
 --bitwise-or		do not treat `|' as a comment character\n"));

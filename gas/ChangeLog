@@ -1,3 +1,12 @@
+2000-07-31  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+        * config/tc-m68k.c (flag_keep_pcrel, OPTION_PCREL): Add --pcrel option.
+        (md_convert_frag_1, md_estimate_size_before_relax): When making DBcc
+        long emit a long branch if available instead of an absolute jump, never
+        emit absolute jumps for anything with --pcrel.
+
+	* doc/c-m68k.texi: Document new command line option.
+	
 2000-07-28  Jason Eckhardt  <jle@cygnus.com>
 
         * configure.in: Add bits for i860-stardent-{sysv4, elf}*.
