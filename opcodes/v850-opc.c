@@ -62,7 +62,7 @@ const struct v850_operand v850_operands[] = {
 
 #define B3	(D22+1)
 /* The 3 bit immediate field in format 8 insn.  */
-  { 3, 11, 0, 0, V850_OPERAND_SIGNED },
+  { 3, 11, 0, 0, 0 },
 
 #define CCCC	(B3+1)
 /* The 4 bit condition code in a setf instruction */
