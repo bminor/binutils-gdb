@@ -35,7 +35,7 @@
 #define endian_le2h_N XCONCAT2(endian_le2h_,N)
 
 
-INLINE_SIM_ENDIAN\
+INLINE_PSIM_ENDIAN\
 (unsigned_N)
 endian_t2h_N(unsigned_N raw_in)
 {
@@ -48,7 +48,7 @@ endian_t2h_N(unsigned_N raw_in)
 }
 
 
-INLINE_SIM_ENDIAN\
+INLINE_PSIM_ENDIAN\
 (unsigned_N)
 endian_h2t_N(unsigned_N raw_in)
 {
@@ -61,7 +61,7 @@ endian_h2t_N(unsigned_N raw_in)
 }
 
 
-INLINE_SIM_ENDIAN\
+INLINE_PSIM_ENDIAN\
 (unsigned_N)
 swap_N(unsigned_N raw_in)
 {
@@ -70,7 +70,7 @@ swap_N(unsigned_N raw_in)
 
 
 
-INLINE_SIM_ENDIAN\
+INLINE_PSIM_ENDIAN\
 (unsigned_N)
 endian_h2be_N(unsigned_N raw_in)
 {
@@ -83,7 +83,7 @@ endian_h2be_N(unsigned_N raw_in)
 }
 
 
-INLINE_SIM_ENDIAN\
+INLINE_PSIM_ENDIAN\
 (unsigned_N)
 endian_be2h_N(unsigned_N raw_in)
 {
@@ -96,7 +96,7 @@ endian_be2h_N(unsigned_N raw_in)
 }
 
 
-INLINE_SIM_ENDIAN\
+INLINE_PSIM_ENDIAN\
 (unsigned_N)
 endian_h2le_N(unsigned_N raw_in)
 {
@@ -109,7 +109,7 @@ endian_h2le_N(unsigned_N raw_in)
 }
 
 
-INLINE_SIM_ENDIAN\
+INLINE_PSIM_ENDIAN\
 (unsigned_N)
 endian_le2h_N(unsigned_N raw_in)
 {

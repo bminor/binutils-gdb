@@ -38,7 +38,7 @@ print_support_function_name(lf *file,
 			    int is_function_definition)
 {
   if (it_is("internal", function->fields[insn_flags])) {
-    lf_print_function_type(file, SEMANTIC_FUNCTION_TYPE, "INLINE_SUPPORT",
+    lf_print_function_type(file, SEMANTIC_FUNCTION_TYPE, "PSIM_INLINE_SUPPORT",
 			   (is_function_definition ? "\n" : " "));
     print_function_name(file,
 			function->fields[function_name],
@@ -52,7 +52,7 @@ print_support_function_name(lf *file,
   else {
     lf_print_function_type(file,
 			   function->fields[function_type],
-			   "INLINE_SUPPORT",
+			   "PSIM_INLINE_SUPPORT",
 			   (is_function_definition ? "\n" : " "));
     lf_printf(file, "%s\n(%s)%s",
 	      function->fields[function_name],

@@ -25,40 +25,40 @@
 
 /* C byte conversion functions */
 
-INLINE_SIM_ENDIAN(unsigned_1) endian_h2t_1(unsigned_1 x);
-INLINE_SIM_ENDIAN(unsigned_2) endian_h2t_2(unsigned_2 x);
-INLINE_SIM_ENDIAN(unsigned_4) endian_h2t_4(unsigned_4 x);
-INLINE_SIM_ENDIAN(unsigned_8) endian_h2t_8(unsigned_8 x);
+INLINE_PSIM_ENDIAN(unsigned_1) endian_h2t_1(unsigned_1 x);
+INLINE_PSIM_ENDIAN(unsigned_2) endian_h2t_2(unsigned_2 x);
+INLINE_PSIM_ENDIAN(unsigned_4) endian_h2t_4(unsigned_4 x);
+INLINE_PSIM_ENDIAN(unsigned_8) endian_h2t_8(unsigned_8 x);
 
-INLINE_SIM_ENDIAN(unsigned_1) endian_t2h_1(unsigned_1 x);
-INLINE_SIM_ENDIAN(unsigned_2) endian_t2h_2(unsigned_2 x);
-INLINE_SIM_ENDIAN(unsigned_4) endian_t2h_4(unsigned_4 x);
-INLINE_SIM_ENDIAN(unsigned_8) endian_t2h_8(unsigned_8 x);
+INLINE_PSIM_ENDIAN(unsigned_1) endian_t2h_1(unsigned_1 x);
+INLINE_PSIM_ENDIAN(unsigned_2) endian_t2h_2(unsigned_2 x);
+INLINE_PSIM_ENDIAN(unsigned_4) endian_t2h_4(unsigned_4 x);
+INLINE_PSIM_ENDIAN(unsigned_8) endian_t2h_8(unsigned_8 x);
 
-INLINE_SIM_ENDIAN(unsigned_1) swap_1(unsigned_1 x);
-INLINE_SIM_ENDIAN(unsigned_2) swap_2(unsigned_2 x);
-INLINE_SIM_ENDIAN(unsigned_4) swap_4(unsigned_4 x);
-INLINE_SIM_ENDIAN(unsigned_8) swap_8(unsigned_8 x);
+INLINE_PSIM_ENDIAN(unsigned_1) swap_1(unsigned_1 x);
+INLINE_PSIM_ENDIAN(unsigned_2) swap_2(unsigned_2 x);
+INLINE_PSIM_ENDIAN(unsigned_4) swap_4(unsigned_4 x);
+INLINE_PSIM_ENDIAN(unsigned_8) swap_8(unsigned_8 x);
 
-INLINE_SIM_ENDIAN(unsigned_1) endian_h2be_1(unsigned_1 x);
-INLINE_SIM_ENDIAN(unsigned_2) endian_h2be_2(unsigned_2 x);
-INLINE_SIM_ENDIAN(unsigned_4) endian_h2be_4(unsigned_4 x);
-INLINE_SIM_ENDIAN(unsigned_8) endian_h2be_8(unsigned_8 x);
+INLINE_PSIM_ENDIAN(unsigned_1) endian_h2be_1(unsigned_1 x);
+INLINE_PSIM_ENDIAN(unsigned_2) endian_h2be_2(unsigned_2 x);
+INLINE_PSIM_ENDIAN(unsigned_4) endian_h2be_4(unsigned_4 x);
+INLINE_PSIM_ENDIAN(unsigned_8) endian_h2be_8(unsigned_8 x);
 
-INLINE_SIM_ENDIAN(unsigned_1) endian_be2h_1(unsigned_1 x);
-INLINE_SIM_ENDIAN(unsigned_2) endian_be2h_2(unsigned_2 x);
-INLINE_SIM_ENDIAN(unsigned_4) endian_be2h_4(unsigned_4 x);
-INLINE_SIM_ENDIAN(unsigned_8) endian_be2h_8(unsigned_8 x);
+INLINE_PSIM_ENDIAN(unsigned_1) endian_be2h_1(unsigned_1 x);
+INLINE_PSIM_ENDIAN(unsigned_2) endian_be2h_2(unsigned_2 x);
+INLINE_PSIM_ENDIAN(unsigned_4) endian_be2h_4(unsigned_4 x);
+INLINE_PSIM_ENDIAN(unsigned_8) endian_be2h_8(unsigned_8 x);
 
-INLINE_SIM_ENDIAN(unsigned_1) endian_h2le_1(unsigned_1 x);
-INLINE_SIM_ENDIAN(unsigned_2) endian_h2le_2(unsigned_2 x);
-INLINE_SIM_ENDIAN(unsigned_4) endian_h2le_4(unsigned_4 x);
-INLINE_SIM_ENDIAN(unsigned_8) endian_h2le_8(unsigned_8 x);
+INLINE_PSIM_ENDIAN(unsigned_1) endian_h2le_1(unsigned_1 x);
+INLINE_PSIM_ENDIAN(unsigned_2) endian_h2le_2(unsigned_2 x);
+INLINE_PSIM_ENDIAN(unsigned_4) endian_h2le_4(unsigned_4 x);
+INLINE_PSIM_ENDIAN(unsigned_8) endian_h2le_8(unsigned_8 x);
 
-INLINE_SIM_ENDIAN(unsigned_1) endian_le2h_1(unsigned_1 x);
-INLINE_SIM_ENDIAN(unsigned_2) endian_le2h_2(unsigned_2 x);
-INLINE_SIM_ENDIAN(unsigned_4) endian_le2h_4(unsigned_4 x);
-INLINE_SIM_ENDIAN(unsigned_8) endian_le2h_8(unsigned_8 x);
+INLINE_PSIM_ENDIAN(unsigned_1) endian_le2h_1(unsigned_1 x);
+INLINE_PSIM_ENDIAN(unsigned_2) endian_le2h_2(unsigned_2 x);
+INLINE_PSIM_ENDIAN(unsigned_4) endian_le2h_4(unsigned_4 x);
+INLINE_PSIM_ENDIAN(unsigned_8) endian_le2h_8(unsigned_8 x);
 
 
 /* Host dependant:

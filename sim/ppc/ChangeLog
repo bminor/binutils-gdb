@@ -1,3 +1,42 @@
+2001-12-14  matthew green  <mrg@redhat.com>
+
+	* Makefile.in (LIB_OBJ): Add @sim_fpu@.
+	(ICACHE_CFLAGS, SEMANTICS_CFLAGS): New variables.
+	(icache.o, semantics.o): Add new ICACHE_FLAGS & SEMANTICS_FLAGS.
+	(sim-fpu.o, sim-bits.o, tconfig.h): New targets.
+	* configure.in: Rename INLINE_LOCALS to PSIM_INLINE_LOCALS.  Add a
+	check for sim/common/sim-fpu.c.  Output sim_fpu and sim_fpu_cflags.
+	* configure: Regenerate.
+	* device.h (device_find_integer_array_property): Match function definition.
+	* gen-icache.c (print_icache_internal_function_declaration): Rename
+	INLINE_ICACHE to PSIM_INLINE_ICACHE.
+	* gen-idecode.c (print_idecode_run_function_header): Rename INLINE_IDECODE
+	to PSIM_INLINE_IDECODE.
+	* gen-semantics.c (print_semantic_function_header): Rename
+	EXTERN_SEMANTICS to PSIM_EXTERN_SEMANTICS.
+	* gen-support.c (print_support_function_name): Rename INLINE_SUPPORT to
+	PSIM_INLINE_SUPPORT.
+	* igen.c (print_function_name): Also escape `(' and `)'.
+	(gen_semantics_h): Rename EXTERN_SEMANTICS to PSIM_EXTERN_SEMANTICS.
+	(gen_semantics_c): Likewise.  Also output includes for "sim-fpu.h"
+	* inline.h (INLINE_SIM_ENDIAN): Renamed INLINE_PSIM_ENDIAN.
+	(EXTERN_SIM_ENDIAN): Renamed EXTERN_PSIM_ENDIAN.
+	(STATIC_INLINE_SIM_ENDIAN): Renamed STATIC_INLINE_PSIM_ENDIAN.
+	(INLINE_LOCALS): Renamed PSIM_INLINE_LOCALS.
+	(EXTERN_SUPPORT): Renamed PSIM_EXTERN_SUPPORT.
+	(INLINE_SUPPORT): Renamed PSIM_INLINE_SUPPORT.
+	(EXTERN_SEMANTICS): Renamed PSIM_EXTERN_SEMANTICS.
+	(INLINE_SEMANTICS): Renamed PSIM_INLINE_SEMANTICS.
+	(EXTERN_IDECODE): Renamed PSIM_EXTERN_IDECODE.
+	(INLINE_IDECODE): Renamed PSIM_INLINE_IDECODE.
+	(EXTERN_ICACHE): Renamed PSIM_EXTERN_ICACHE.
+	(INLINE_ICACHE): Renamed PSIM_INLINE_ICACHE.
+	* options.c (options_inline): Fix names.
+	* sim-endian-n.h: Change INLINE_SIM_ENDIAN to INLINE_PSIM_ENDIAN.
+	* sim-endian.h: Likewise.
+	* sim-main.h: New file.
+	* std-config.h: Rename INLINE_LOCALS to PSIM_INLINE_LOCALS.
+
 2001-12-01  Andrew Cagney  <ac131313@redhat.com>
 
 	From Mark Peek.

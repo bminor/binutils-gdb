@@ -107,6 +107,8 @@ print_function_name(lf *file,
       switch (*pos) {
       case '/':
       case '-':
+      case '(':
+      case ')':
 	break;
       case ' ':
 	nr += lf_putchr(file, '_');
@@ -184,7 +186,7 @@ gen_semantics_h(insn_table *table,
     lf_printf(file, "extern int option_mpc860c0;\n");
     lf_printf(file, "#define PAGE_SIZE 0x1000\n");
     lf_printf(file, "\n");
-    lf_printf(file, "EXTERN_SEMANTICS(void)\n");
+    lf_printf(file, "PSIM_EXTERN_SEMANTICS(void)\n");
     lf_printf(file, "semantic_init(device* root);\n");
     lf_printf(file, "\n");
     if (generate_expanded_instructions)
@@ -219,10 +221,12 @@ gen_semantics_c(insn_table *table,
     lf_printf(file, "#include \"idecode.h\"\n");
     lf_printf(file, "#include \"semantics.h\"\n");
     lf_printf(file, "#include \"support.h\"\n");
+    lf_printf(file, "#include \"sim-inline.h\"\n");
+    lf_printf(file, "#include \"sim-fpu.h\"\n");
     lf_printf(file, "\n");
     lf_printf(file, "int option_mpc860c0 = 0;\n");
     lf_printf(file, "\n");
-    lf_printf(file, "EXTERN_SEMANTICS(void)\n");
+    lf_printf(file, "PSIM_EXTERN_SEMANTICS(void)\n");
     lf_printf(file, "semantic_init(device* root)\n");
     lf_printf(file, "{\n");
     lf_printf(file, "  option_mpc860c0 = 0;\n");
@@ -303,6 +307,8 @@ gen_icache_c(insn_table *table,
     lf_printf(file, "#include \"semantics.h\"\n");
     lf_printf(file, "#include \"icache.h\"\n");
     lf_printf(file, "#include \"support.h\"\n");
+    lf_printf(file, "#include \"sim-inline.h\"\n");
+    lf_printf(file, "#include \"sim-fpu.h\"\n");
     lf_printf(file, "\n");
     insn_table_traverse_function(table,
 				 file, NULL,

@@ -335,7 +335,7 @@ INLINE_DEVICE\
 (device *me,
  const char *property,
  unsigned index,
- signed_word *integer);
+ signed_cell *integer);
 
 
 

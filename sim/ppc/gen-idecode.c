@@ -1448,7 +1448,7 @@ print_idecode_run_function_header(lf *file,
 {
   int indent;
   lf_printf(file, "\n");
-  lf_print_function_type(file, "void", "INLINE_IDECODE", (is_definition ? " " : "\n"));
+  lf_print_function_type(file, "void", "PSIM_INLINE_IDECODE", (is_definition ? " " : "\n"));
   indent = lf_putstr(file, (can_stop ? "idecode_run_until_stop" : "idecode_run"));
   if (is_definition)
     lf_putstr(file, "\n");

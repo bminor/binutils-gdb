@@ -623,7 +623,7 @@ print_icache_internal_function_declaration(insn_table *table,
   ASSERT((code & generate_with_icache) != 0);
   if (it_is("internal", function->fields[insn_flags])) {
     lf_printf(file, "\n");
-    lf_print_function_type(file, ICACHE_FUNCTION_TYPE, "INLINE_ICACHE",
+    lf_print_function_type(file, ICACHE_FUNCTION_TYPE, "PSIM_INLINE_ICACHE",
 			   "\n");
     print_function_name(file,
 			function->fields[insn_name],
@@ -643,7 +643,7 @@ print_icache_internal_function_definition(insn_table *table,
   ASSERT((code & generate_with_icache) != 0);
   if (it_is("internal", function->fields[insn_flags])) {
     lf_printf(file, "\n");
-    lf_print_function_type(file, ICACHE_FUNCTION_TYPE, "INLINE_ICACHE",
+    lf_print_function_type(file, ICACHE_FUNCTION_TYPE, "PSIM_INLINE_ICACHE",
 			   "\n");
     print_function_name(file,
 			function->fields[insn_name],

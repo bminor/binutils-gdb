@@ -44,7 +44,7 @@ print_semantic_function_header(lf *file,
 {
   int indent;
   lf_printf(file, "\n");
-  lf_print_function_type(file, SEMANTIC_FUNCTION_TYPE, "EXTERN_SEMANTICS",
+  lf_print_function_type(file, SEMANTIC_FUNCTION_TYPE, "PSIM_EXTERN_SEMANTICS",
 			 (is_function_definition ? "\n" : " "));
   indent = print_function_name(file,
 			       basename,

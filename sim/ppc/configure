@@ -3242,7 +3242,7 @@ case "$enableval" in
   no)		sim_inline="-DDEFAULT_INLINE=0";;
   0)		sim_inline="-DDEFAULT_INLINE=0";;
   yes | 2)	sim_inline="-DDEFAULT_INLINE=ALL_INLINE";;
-  1)		sim_inline="-DDEFAULT_INLINE=INLINE_LOCALS";;
+  1)		sim_inline="-DDEFAULT_INLINE=PSIM_INLINE_LOCALS";;
   *) for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
        new_flag=""
        case "$x" in
@@ -3263,7 +3263,7 @@ if test x"$silent" != x"yes" && test x"$sim_inline" != x""; then
 fi
 else
   if test x"$GCC" != ""; then
-  sim_inline="-DDEFAULT_INLINE=INLINE_LOCALS"
+  sim_inline="-DDEFAULT_INLINE=PSIM_INLINE_LOCALS"
   if test x"$silent" != x"yes"; then
     echo "Setting inline flags = $sim_inline" 6>&1
   fi
@@ -4663,13 +4663,25 @@ else
   sim_targ_vals=""
 fi
 
+echo $ac_n "checking for common simulator directory fpu implementation""... $ac_c" 1>&6
+echo "configure:4668: checking for common simulator directory fpu implementation" >&5
+if test -f "${srcdir}/../common/sim-fpu.c"; then
+  echo "$ac_t""yes" 1>&6
+  sim_fpu_cflags="-DHAVE_COMMON_FPU -I${srcdir}/../common"
+  sim_fpu="sim-fpu.o sim-bits.o"
+else
+  echo "$ac_t""no" 1>&6
+  sim_fpu_cflags=
+  sim_fpu=
+fi
+
 echo $ac_n "checking for Cygwin environment""... $ac_c" 1>&6
-echo "configure:4668: checking for Cygwin environment" >&5
+echo "configure:4680: checking for Cygwin environment" >&5
 if eval "test \"`echo '$''{'ac_cv_cygwin'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4673 "configure"
+#line 4685 "configure"
 #include "confdefs.h"
 
 int main() {
@@ -4680,7 +4692,7 @@ int main() {
 return __CYGWIN__;
 ; return 0; }
 EOF
-if { (eval echo configure:4684: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:4696: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_cygwin=yes
 else
@@ -4697,19 +4709,19 @@ echo "$ac_t""$ac_cv_cygwin" 1>&6
 CYGWIN=
 test "$ac_cv_cygwin" = yes && CYGWIN=yes
 echo $ac_n "checking for mingw32 environment""... $ac_c" 1>&6
-echo "configure:4701: checking for mingw32 environment" >&5
+echo "configure:4713: checking for mingw32 environment" >&5
 if eval "test \"`echo '$''{'ac_cv_mingw32'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4706 "configure"
+#line 4718 "configure"
 #include "confdefs.h"
 
 int main() {
 return __MINGW32__;
 ; return 0; }
 EOF
-if { (eval echo configure:4713: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:4725: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_mingw32=yes
 else
@@ -4728,7 +4740,7 @@ test "$ac_cv_mingw32" = yes && MINGW32=yes
 
 
 echo $ac_n "checking for executable suffix""... $ac_c" 1>&6
-echo "configure:4732: checking for executable suffix" >&5
+echo "configure:4744: checking for executable suffix" >&5
 if eval "test \"`echo '$''{'ac_cv_exeext'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4738,7 +4750,7 @@ else
   rm -f conftest*
   echo 'int main () { return 0; }' > conftest.$ac_ext
   ac_cv_exeext=
-  if { (eval echo configure:4742: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+  if { (eval echo configure:4754: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
     for file in conftest.*; do
       case $file in
       *.c | *.o | *.obj | *.ilk | *.pdb) ;;
@@ -4767,7 +4779,7 @@ AR=${AR-ar}
 # Extract the first word of "ranlib", so it can be a program name with args.
 set dummy ranlib; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4771: checking for $ac_word" >&5
+echo "configure:4783: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_RANLIB'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4793,6 +4805,8 @@ if test -n "$RANLIB"; then
 else
   echo "$ac_t""no" 1>&6
 fi
+
+
 
 
 
@@ -5069,6 +5083,8 @@ s%@sim_termio@%$sim_termio%g
 s%@sim_devzero@%$sim_devzero%g
 s%@sim_callback@%$sim_callback%g
 s%@sim_targ_vals@%$sim_targ_vals%g
+s%@sim_fpu_cflags@%$sim_fpu_cflags%g
+s%@sim_fpu@%$sim_fpu%g
 
 CEOF
 EOF
@@ -5077,7 +5093,7 @@ cat >> $CONFIG_STATUS <<\EOF
 
 # Split the substitutions into bite-sized pieces for seds with
 # small command number limits, like on Digital OSF/1 and HP-UX.
-ac_max_sed_cmds=90 # Maximum number of lines to put in a sed script.
+ac_max_sed_cmds=60 # Maximum number of lines to put in a sed script.
 ac_file=1 # Number of current file.
 ac_beg=1 # First line for current file.
 ac_end=$ac_max_sed_cmds # Line after last line for current file.

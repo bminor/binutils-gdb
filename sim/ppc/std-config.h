@@ -340,7 +340,7 @@ extern int current_stdio;
          the module is included into a file being compiled, calls to
 	 its funtions can be eliminated. 2 implies 1.
 
-      INLINE_LOCALS:
+      PSIM_INLINE_LOCALS:
 
          Make internal (static) functions within the module `inline'.
 
@@ -348,7 +348,7 @@ extern int current_stdio;
 
       INCLUDE_MODULE == (REVEAL_MODULE | INLINE_MODULE)
 
-      ALL_INLINE == (REVEAL_MODULE | INLINE_MODULE | INLINE_LOCALS)
+      ALL_INLINE == (REVEAL_MODULE | INLINE_MODULE | PSIM_INLINE_LOCALS)
 
    In addition to this, modules have been put into two categories.
 
@@ -449,7 +449,7 @@ extern int current_stdio;
 #define REVEAL_MODULE			1
 #define INLINE_MODULE			2
 #define INCLUDE_MODULE			(INLINE_MODULE | REVEAL_MODULE)
-#define INLINE_LOCALS			4
+#define PSIM_INLINE_LOCALS			4
 #define ALL_INLINE			7
 
 /* Your compilers inline reserved word */
@@ -506,7 +506,7 @@ extern int current_stdio;
 /* Default macro to simplify control several of key the inlines */
 
 #ifndef DEFAULT_INLINE
-#define	DEFAULT_INLINE			INLINE_LOCALS
+#define	DEFAULT_INLINE			PSIM_INLINE_LOCALS
 #endif
 
 /* Code that converts between hosts and target byte order.  Used on
@@ -580,7 +580,7 @@ extern int current_stdio;
    a jump table. */
 
 #ifndef DEVICE_INLINE
-#define DEVICE_INLINE			(DEFAULT_INLINE ? INLINE_LOCALS : 0)
+#define DEVICE_INLINE			(DEFAULT_INLINE ? PSIM_INLINE_LOCALS : 0)
 #endif
 
 /* Code called used while the device tree is being built.
@@ -588,7 +588,7 @@ extern int current_stdio;
    Inlining this is of no benefit */
 
 #ifndef TREE_INLINE
-#define TREE_INLINE			(DEFAULT_INLINE ? INLINE_LOCALS : 0)
+#define TREE_INLINE			(DEFAULT_INLINE ? PSIM_INLINE_LOCALS : 0)
 #endif
 
 /* Code called whenever information on a Special Purpose Register is
@@ -628,7 +628,7 @@ extern int current_stdio;
    code is reduced. */
 
 #ifndef SUPPORT_INLINE
-#define SUPPORT_INLINE			INLINE_LOCALS
+#define SUPPORT_INLINE			PSIM_INLINE_LOCALS
 #endif
 
 /* Model specific code used in simulating functional units.  Note, it actaully
@@ -653,13 +653,13 @@ extern int current_stdio;
    into this file */
 
 #ifndef IDECOCE_INLINE
-#define IDECODE_INLINE			INLINE_LOCALS
+#define IDECODE_INLINE			PSIM_INLINE_LOCALS
 #endif
 
 /* psim, isn't actually inlined */
 
 #ifndef PSIM_INLINE
-#define PSIM_INLINE			INLINE_LOCALS
+#define PSIM_INLINE			PSIM_INLINE_LOCALS
 #endif
 
 /* Code to emulate os or rom compatibility.  This code is called via a

@@ -306,6 +306,7 @@ LIB_OBJ = \
 	semantics.o \
 	idecode.o \
 	support.o \
+	@sim_fpu@ \
 	psim.o \
 	$(PACKAGE_OBJ) \
 	$(HW_OBJ) \
@@ -313,6 +314,9 @@ LIB_OBJ = \
 
 
 GDB_OBJ = sim_calls.o @sim_callback@
+
+ICACHE_CFLAGS = @sim_fpu_cflags@
+SEMANTICS_CFLAGS = @sim_fpu_cflags@
 
 HW_SRC = @sim_hw_src@
 HW_OBJ = @sim_hw_obj@
@@ -386,10 +390,10 @@ device_table.o: device_table.c $(DEVICE_TABLE_H) events.h hw.c
 cap.o: cap.c cap.h $(BASICS_H)
 
 semantics.o: semantics.c semantics.h $(CPU_H) $(IDECODE_H)
-	$(CC) -c $(NOWARN_CFLAGS) $<
+	$(CC) -c $(SEMANTICS_CFLAGS) $(NOWARN_CFLAGS) $<
 
 icache.o: icache.c icache.h $(IDECODE_H) $(CPU_H)
-	$(CC) -c $(NOWARN_CFLAGS) $<
+	$(CC) -c $(ICACHE_CFLAGS) $(NOWARN_CFLAGS) $<
 
 support.o: support.c support.h $(IDECODE_H) $(CPU_H)
 
@@ -421,6 +425,16 @@ callback.o: ../common/callback.c targ-vals.h config.h
 	$(CC) -c $(STD_CFLAGS) -DHAVE_CONFIG_H $<
 
 targ-map.o: targ-map.c targ-vals.h
+
+sim-fpu.o: $(srcdir)/../common/sim-fpu.c config.h tconfig.h
+	$(CC) -c $(STD_CFLAGS) -DHAVE_CONFIG_H $(srcdir)/../common/sim-fpu.c 
+
+sim-bits.o: $(srcdir)/../common/sim-bits.c config.h tconfig.h
+	$(CC) -c $(STD_CFLAGS) -DHAVE_CONFIG_H $(srcdir)/../common/sim-bits.c 
+
+tconfig.h:
+	rm -f tconfig.h
+	echo > tconfig.h
 
 # Rebuild options whenever something changes so the date/time is up to date.
 options.o: options.c $(BASICS_H) $(CPU_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC) config.status Makefile defines.h
