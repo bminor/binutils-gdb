@@ -1,5 +1,7 @@
 Tue Nov 26 15:43:41 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* simops.c: Implement "movm" and "bCC" insns.
+
 	* mn10300_sim.h (_state): Add another register (MDR).
 	(REG_MDR): Define.
 	* simops.c: Implement "cmp", "calls", "rets", "jmp" and

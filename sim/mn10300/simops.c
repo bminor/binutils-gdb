@@ -92,13 +92,13 @@ void OP_90 ()
 {
 }
 
-/* mov sp, an*/
+/* mov sp, an */
 void OP_3C ()
 {
   State.regs[REG_A0 + (insn & 0x3)] = State.regs[REG_SP];
 }
 
-/* mov am, sp*/
+/* mov am, sp */
 void OP_F2F0 ()
 {
   State.regs[REG_SP] = State.regs[REG_A0 + ((insn & 0xc) >> 2)];
@@ -349,7 +349,7 @@ void OP_240000 ()
 {
 }
 
-/* mov imm32, an*/
+/* mov imm32, an */
 void OP_FCDC0000 ()
 {
   unsigned long value;
@@ -585,14 +585,114 @@ void OP_1C ()
 {
 }
 
-/* movm */
+/* movm (sp), reg_list */
 void OP_CE00 ()
 {
+  unsigned long sp = State.regs[REG_SP];
+  unsigned long mask;
+
+  mask = insn & 0xff;
+
+  if (mask & 0x8)
+    {
+      sp += 4;
+      State.regs[REG_LAR] = load_mem (sp, 4);
+      sp += 4;
+      State.regs[REG_LIR] = load_mem (sp, 4);
+      sp += 4;
+      State.regs[REG_MDR] = load_mem (sp, 4);
+      sp += 4;
+      State.regs[REG_A0 + 1] = load_mem (sp, 4);
+      sp += 4;
+      State.regs[REG_A0] = load_mem (sp, 4);
+      sp += 4;
+      State.regs[REG_D0 + 1] = load_mem (sp, 4);
+      sp += 4;
+      State.regs[REG_D0] = load_mem (sp, 4);
+      sp += 4;
+    }
+
+  if (mask & 0x10)
+    {
+      State.regs[REG_A0 + 3] = load_mem (sp, 4);
+      sp += 4;
+    }
+
+  if (mask & 0x20)
+    {
+      State.regs[REG_A0 + 2] = load_mem (sp, 4);
+      sp += 4;
+    }
+
+  if (mask & 0x40)
+    {
+      State.regs[REG_D0 + 3] = load_mem (sp, 4);
+      sp += 4;
+    }
+
+  if (mask & 0x80)
+    {
+      State.regs[REG_D0 + 2] = load_mem (sp, 4);
+      sp += 4;
+    }
+
+  /* And make sure to update the stack pointer.  */
+  State.regs[REG_SP] = sp;
 }
 
-/* movm */
+/* movm reg_list, (sp) */
 void OP_CF00 ()
 {
+  unsigned long sp = State.regs[REG_SP];
+  unsigned long mask;
+
+  mask = insn & 0xff;
+
+  if (mask & 0x80)
+    {
+      sp -= 4;
+      store_mem (sp, 4, State.regs[REG_D0 + 2]);
+    }
+
+  if (mask & 0x40)
+    {
+      sp -= 4;
+      store_mem (sp, 4, State.regs[REG_D0 + 3]);
+    }
+
+  if (mask & 0x20)
+    {
+      sp -= 4;
+      store_mem (sp, 4, State.regs[REG_A0 + 2]);
+    }
+
+  if (mask & 0x10)
+    {
+      sp -= 4;
+      store_mem (sp, 4, State.regs[REG_A0 + 3]);
+    }
+
+  if (mask & 0x8)
+    {
+      sp -= 4;
+      store_mem (sp, 4, State.regs[REG_D0]);
+      sp -= 4;
+      store_mem (sp, 4, State.regs[REG_D0 + 1]);
+      sp -= 4;
+      store_mem (sp, 4, State.regs[REG_A0]);
+      sp -= 4;
+      store_mem (sp, 4, State.regs[REG_A0 + 1]);
+      sp -= 4;
+      store_mem (sp, 4, State.regs[REG_MDR]);
+      sp -= 4;
+      store_mem (sp, 4, State.regs[REG_LIR]);
+      sp -= 4;
+      store_mem (sp, 4, State.regs[REG_LAR]);
+      sp -= 4;
+    }
+
+  /* And make sure to update the stack pointer.  */
+  State.regs[REG_SP] = sp;
 }
 
 /* clr dn */
@@ -1386,66 +1486,117 @@ void OP_C900 ()
 /* bgt */
 void OP_C100 ()
 {
+  /* The dispatching code will add 2 after we return, so
+     we subtract two here to make things right.  */
+  if (!(((PSW & PSW_Z) != 0)
+        || (((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0))))
+    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
 /* bge */
 void OP_C200 ()
 {
+  /* The dispatching code will add 2 after we return, so
+     we subtract two here to make things right.  */
+  if (!(((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0)))
+    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
 /* ble */
 void OP_C300 ()
 {
+  /* The dispatching code will add 2 after we return, so
+     we subtract two here to make things right.  */
+  if (((PSW & PSW_Z) != 0)
+      || (((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0)))
+    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
 /* blt */
 void OP_C000 ()
 {
+  /* The dispatching code will add 2 after we return, so
+     we subtract two here to make things right.  */
+  if (((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0))
+    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
 /* bhi */
 void OP_C500 ()
 {
+  /* The dispatching code will add 2 after we return, so
+     we subtract two here to make things right.  */
+  if (!(((PSW & PSW_C) != 0) || ((PSW & PSW_Z) != 0)))
+    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
 /* bcc */
 void OP_C600 ()
 {
+  /* The dispatching code will add 2 after we return, so
+     we subtract two here to make things right.  */
+  if (!((PSW & PSW_C) != 0))
+    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
 /* bls */
 void OP_C700 ()
 {
+  /* The dispatching code will add 2 after we return, so
+     we subtract two here to make things right.  */
+  if (((PSW & PSW_C) != 0) || ((PSW & PSW_Z) != 0))
+    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
 /* bcs */
 void OP_C400 ()
 {
+  /* The dispatching code will add 2 after we return, so
+     we subtract two here to make things right.  */
+  if ((PSW & PSW_C) != 0)
+    State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
 /* bvc */
 void OP_F8E800 ()
 {
+  /* The dispatching code will add 3 after we return, so
+     we subtract two here to make things right.  */
+  if (!((PSW & PSW_V) != 0))
+    State.pc += SEXT8 (insn & 0xff) - 3;
 }
 
 /* bvs */
 void OP_F8E900 ()
 {
+  /* The dispatching code will add 3 after we return, so
+     we subtract two here to make things right.  */
+  if ((PSW & PSW_V) != 0)
+    State.pc += SEXT8 (insn & 0xff) - 3;
 }
 
 /* bnc */
 void OP_F8EA00 ()
 {
+  /* The dispatching code will add 3 after we return, so
+     we subtract two here to make things right.  */
+  if (!((PSW & PSW_C) != 0))
+    State.pc += SEXT8 (insn & 0xff) - 3;
 }
 
 /* bns */
 void OP_F8EB00 ()
 {
+  /* The dispatching code will add 3 after we return, so
+     we subtract two here to make things right.  */
+  if ((PSW & PSW_N) != 0)
+    State.pc += SEXT8 (insn & 0xff) - 3;
 }
 
 /* bra */
 void OP_CA00 ()
 {
+  State.pc += SEXT8 (insn & 0xff) - 2;
 }
 
 /* leq */
