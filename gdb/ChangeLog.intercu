@@ -1,3 +1,19 @@
+2004-08-07  Daniel Jacobowitz  <dan@debian.org>
+
+	* dwarf2read.c (struct dwarf2_per_objfile): Replace cu_tree
+	with all_comp_units and n_comp_units.
+	(dwarf2_find_containing_comp_unit): Take an objfile argument
+	instead of a dwarf2_cu.  Search all_comp_units.
+	(dwarf2_find_comp_unit): New function.
+	(create_all_comp_units): Renamed from create_comp_unit_tree.
+	Create a list instead of a splay tree.
+	(dwarf2_build_psymtabs_hard): Call create_comp_unit_tree
+	and dwarf2_find_comp_unit.
+	(psymtab_to_symtab_1): Check all_comp_units.  Use
+	dwarf2_find_comp_unit.
+	(find_partial_die, read_full_die, follow_die_ref): Update calls
+	to dwarf2_find_containing_comp_unit.
+
 2004-04-19  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2read.c (free_comp_units_worker): Remove incorrect aging.

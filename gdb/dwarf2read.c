@@ -170,10 +170,13 @@ struct dwarf2_per_objfile
   char *ranges_buffer;
   char *loc_buffer;
 
-  /* A tree of all the compilation units.  Each member is a pointer
-     to a struct dwarf2_cu.  This will be set if and only if we have
-     encountered a compilation unit with inter-CU references.  */
-  splay_tree cu_tree;
+  /* A list of all the compilation units.  This will be set if and
+     only if we have encountered a compilation unit with inter-CU
+     references.  */
+  struct dwarf2_per_cu_data **all_comp_units;
+
+  /* The number of compilation units in ALL_COMP_UNITS.  */
+  int n_comp_units;
 
   /* A chain of compilation units that are currently read in, so that
      they can be freed later.  */
@@ -1010,7 +1013,10 @@ static char *skip_one_die (char *info_ptr, struct abbrev_info *abbrev,
 			   struct dwarf2_cu *cu);
 
 static struct dwarf2_per_cu_data *dwarf2_find_containing_comp_unit
-  (unsigned long offset, struct dwarf2_cu *cu);
+  (unsigned long offset, struct objfile *objfile);
+
+static struct dwarf2_per_cu_data *dwarf2_find_comp_unit
+  (unsigned long offset, struct objfile *objfile);
 
 static struct partial_symtab *dwarf2_find_comp_unit_psymtab
   (unsigned int offset, struct objfile *objfile);
@@ -1031,7 +1037,7 @@ static void set_die_type (struct die_info *, struct type *,
 static void reset_die_and_siblings_types (struct die_info *,
 					  struct dwarf2_cu *);
 
-static splay_tree create_comp_unit_tree (struct objfile *);
+static void create_all_comp_units (struct objfile *);
 
 static struct dwarf2_cu *load_full_comp_unit (struct partial_symtab *,
 					      struct dwarf2_per_cu_data *);
@@ -1327,7 +1333,6 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
   struct partial_symtab *pst;
   struct cleanup *back_to;
   CORE_ADDR lowpc, highpc, baseaddr;
-  splay_tree cu_tree = NULL;
 
   info_ptr = dwarf2_per_objfile->info_buffer;
 
@@ -1383,8 +1388,8 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
       dwarf2_read_abbrevs (abfd, &cu);
       make_cleanup (dwarf2_free_abbrev_table, &cu);
 
-      if (cu.has_form_ref_addr && cu_tree == NULL)
-	cu_tree = create_comp_unit_tree (objfile);
+      if (cu.has_form_ref_addr && dwarf2_per_objfile->all_comp_units == NULL)
+	create_all_comp_units (objfile);
 
       /* Read the compilation unit die */
       abbrev = peek_die_abbrev (info_ptr, &bytes_read, &cu);
@@ -1410,14 +1415,11 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
       /* Store the function that reads in the rest of the symbol table */
       pst->read_symtab = dwarf2_psymtab_to_symtab;
 
-      if (cu_tree != NULL)
+      if (dwarf2_per_objfile->all_comp_units != NULL)
 	{
-	  splay_tree_node node;
 	  struct dwarf2_per_cu_data *per_cu;
 
-	  node = splay_tree_lookup (cu_tree, cu.header.offset);
-	  gdb_assert (node != NULL);
-	  per_cu = (struct dwarf2_per_cu_data *) node->value;
+	  per_cu = dwarf2_find_comp_unit (cu.header.offset, objfile);
 
 	  /* If we were already read in, free ourselves to read in again.
 	     Yes, this is pointless duplication.  Fixing this will provide
@@ -1542,25 +1544,24 @@ load_comp_unit (struct dwarf2_per_cu_data *this_cu, struct objfile *objfile)
   do_cleanups (back_to);
 }
 
-/* Create a tree of all compilation units in OBJFILE.  We do this only
+/* Create a list of all compilation units in OBJFILE.  We do this only
    if an inter-comp-unit reference is found; presumably if there is one,
    there will be many, and one will occur early in the .debug_info section.
-   So there's no point in building this tree incrementally.  */
+   So there's no point in building this list incrementally.  */
 
-static splay_tree
-create_comp_unit_tree (struct objfile *objfile)
+static void
+create_all_comp_units (struct objfile *objfile)
 {
-  splay_tree cu_tree;
+  int n_allocated;
+  int n_comp_units;
+  struct dwarf2_per_cu_data **all_comp_units;
   char *info_ptr = dwarf2_per_objfile->info_buffer;
 
-  /* Initialize the compilation unit tree.  */
-  cu_tree = splay_tree_new_with_allocator (splay_tree_compare_ints,
-					   NULL, NULL,
-					   splay_tree_obstack_allocate,
-					   dummy_obstack_deallocate,
-					   &objfile->objfile_obstack);
-  dwarf2_per_objfile->cu_tree = cu_tree;
-
+  n_comp_units = 0;
+  n_allocated = 10;
+  all_comp_units = xmalloc (n_allocated
+			    * sizeof (struct dwarf2_per_cu_data *));
+  
   while (info_ptr < dwarf2_per_objfile->info_buffer + dwarf2_per_objfile->info_size)
     {
       struct comp_unit_head cu_header;
@@ -1582,12 +1583,26 @@ create_comp_unit_tree (struct objfile *objfile)
       memset (this_cu, 0, sizeof (*this_cu));
       this_cu->offset = offset;
       this_cu->length = cu_header.length + cu_header.initial_length_size;
-      splay_tree_insert (cu_tree, this_cu->offset, (splay_tree_value) this_cu);
+
+      if (n_comp_units == n_allocated)
+	{
+	  n_allocated *= 2;
+	  all_comp_units = xrealloc (all_comp_units,
+				     n_allocated
+				     * sizeof (struct dwarf2_per_cu_data *));
+	}
+      all_comp_units[n_comp_units++] = this_cu;
 
       info_ptr = info_ptr + this_cu->length;
     }
 
-  return cu_tree;
+  dwarf2_per_objfile->all_comp_units
+    = obstack_alloc (&objfile->objfile_obstack,
+		     n_comp_units * sizeof (struct dwarf2_per_cu_data *));
+  memcpy (dwarf2_per_objfile->all_comp_units, all_comp_units,
+	  n_comp_units * sizeof (struct dwarf2_per_cu_data *));
+  xfree (all_comp_units);
+  dwarf2_per_objfile->n_comp_units = n_comp_units;
 }
 
 /* Process all loaded DIEs for compilation unit CU, starting at FIRST_DIE.
@@ -2358,7 +2373,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
 {
   struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
 
-  if (dwarf2_per_objfile->cu_tree == NULL)
+  if (dwarf2_per_objfile->all_comp_units == NULL)
     {
       struct dwarf2_cu *cu;
       cu = load_full_comp_unit (pst, NULL);
@@ -2367,14 +2382,11 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
     }
   else
     {
-      splay_tree_node node;
       struct dwarf2_per_cu_data *per_cu;
       unsigned long offset;
 
       offset = DWARF_INFO_OFFSET (pst);
-      node = splay_tree_lookup (dwarf2_per_objfile->cu_tree, offset);
-      gdb_assert (node != NULL);
-      per_cu = (struct dwarf2_per_cu_data *) node->value;
+      per_cu = dwarf2_find_comp_unit (offset, pst->objfile);
 
       per_cu->psymtab = pst;
 
@@ -5329,7 +5341,7 @@ find_partial_die (unsigned long offset, struct dwarf2_cu *cu,
       return find_partial_die_in_comp_unit (offset, cu);
     }
 
-  per_cu = dwarf2_find_containing_comp_unit (offset, cu);
+  per_cu = dwarf2_find_containing_comp_unit (offset, cu->objfile);
   gdb_assert (per_cu != NULL);
 
   if (per_cu->cu == NULL)
@@ -5446,7 +5458,7 @@ read_full_die (struct die_info **diep, bfd *abfd, char *info_ptr,
 	{
 	  struct dwarf2_per_cu_data *per_cu;
 	  per_cu = dwarf2_find_containing_comp_unit (DW_ADDR (&die->attrs[i]),
-						     cu);
+						     cu->objfile);
 
 	  dwarf2_add_dependence (cu, per_cu);
 
@@ -8328,7 +8340,7 @@ follow_die_ref (struct attribute *attr, struct dwarf2_cu *cu,
     {
       struct dwarf2_per_cu_data *per_cu;
       per_cu = dwarf2_find_containing_comp_unit (DW_ADDR (attr),
-						 cu);
+						 cu->objfile);
       *spec_cu = per_cu->cu;
     }
   else
@@ -9071,30 +9083,52 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 }
 
 /* Locate the compilation unit from CU's objfile which contains the
-   DIE at OFFSET.  Returns NULL on failure.
-
-   We assume that OFFSET is not the start of the compilation unit header
-   (it can be the compilation unit DIE, though, which comes after the
-   header).  */
+   DIE at OFFSET.  Returns NULL on failure.  */
 
 static struct dwarf2_per_cu_data *
 dwarf2_find_containing_comp_unit (unsigned long offset,
-				  struct dwarf2_cu *cu)
+				  struct objfile *objfile)
 {
-  struct objfile *objfile = cu->objfile;
   struct dwarf2_per_cu_data *this_cu;
-  splay_tree cu_tree;
-  splay_tree_node node;
+  int low, high;
 
-  cu_tree = dwarf2_per_objfile->cu_tree;
-  gdb_assert (cu_tree != NULL);
-  
-  node = splay_tree_predecessor (cu_tree, offset);
-  gdb_assert (node != NULL);
+  gdb_assert (dwarf2_per_objfile->all_comp_units != NULL);
 
-  this_cu = (struct dwarf2_per_cu_data *) node->value;
-  gdb_assert (offset >= this_cu->offset);
-  gdb_assert (offset < this_cu->offset + this_cu->length);
+  low = 0;
+  high = dwarf2_per_objfile->n_comp_units - 1;
+  while (high > low)
+    {
+      int mid = low + (high - low) / 2;
+      if (dwarf2_per_objfile->all_comp_units[mid]->offset >= offset)
+	high = mid;
+      else
+	low = mid + 1;
+    }
+  gdb_assert (low == high);
+  if (dwarf2_per_objfile->all_comp_units[low]->offset > offset)
+    {
+      gdb_assert (low > 0);
+      gdb_assert (dwarf2_per_objfile->all_comp_units[low-1]->offset <= offset);
+      return dwarf2_per_objfile->all_comp_units[low-1];
+    }
+  else
+    {
+      this_cu = dwarf2_per_objfile->all_comp_units[low];
+      if (low == dwarf2_per_objfile->n_comp_units - 1
+	  && offset >= this_cu->offset + this_cu->length)
+	error ("invalid dwarf2 offset %ld", offset);
+      gdb_assert (offset < this_cu->offset + this_cu->length);
+      return this_cu;
+    }
+}
+
+static struct dwarf2_per_cu_data *
+dwarf2_find_comp_unit (unsigned long offset, struct objfile *objfile)
+{
+  struct dwarf2_per_cu_data *this_cu;
+  this_cu = dwarf2_find_containing_comp_unit (offset, objfile);
+  if (this_cu->offset != offset)
+    error ("no compilation unit with offset %ld\n", offset);
   return this_cu;
 }
 
