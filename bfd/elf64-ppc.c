@@ -4153,6 +4153,20 @@ ppc_build_one_stub (gen_entry, in_arg)
       htab->sglink->_cooked_size = p - htab->sglink->contents;
       htab->sglink->reloc_count += 1;
 
+      /* Do the best we can for shared libraries built without
+	 exporting ".foo" for each "foo".  This can happen when symbol
+	 versioning scripts strip all bar a subset of symbols.  */
+      if (stub_entry->h->oh->root.type != bfd_link_hash_defined
+	  && stub_entry->h->oh->root.type != bfd_link_hash_defweak)
+	{
+	  /* Point the symbol at the stub.  There may be multiple stubs,
+	     we don't really care;  The main thing is to make this sym
+	     defined somewhere.  */
+	  stub_entry->h->oh->root.type = bfd_link_hash_defined;
+	  stub_entry->h->oh->root.u.def.section = stub_entry->stub_sec;
+	  stub_entry->h->oh->root.u.def.value = stub_entry->stub_offset;
+	}
+
       /* Now build the stub.  */
       off = stub_entry->h->elf.plt.offset;
       if (off >= (bfd_vma) -2)
