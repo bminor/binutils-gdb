@@ -1,5 +1,9 @@
 2004-08-13  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/inherit.exp: Use cp_test_ptype_class.
+
+2004-08-13  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.cp/classes.exp: Remove unused declarations.  Just let
 	test names default instead of providing special names.  Remove
 	extraneous demangler test.
