@@ -1,3 +1,7 @@
+2003-05-25  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* ld-mips-elf/mips-elf.exp: Make all NetBSD targets match as elf.
+
 2003-05-20  Jakub Jelinek  <jakub@redhat.com>
 
 	* ld-elfvsb/common.c: New file.

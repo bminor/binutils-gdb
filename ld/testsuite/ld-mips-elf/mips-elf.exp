@@ -20,7 +20,7 @@ if { [istarget mips*-*-*] } then {
     set has_newabi [expr [istarget *-*-irix6*] || [istarget mips64*-*-linux*]]
 
     set elf [expr [istarget mips*-*-elf] || [istarget mips*-*-linux*] || \
-		  [istarget mips*-*-netbsd] || [istarget mips*-*-irix*]]
+		  [istarget mips*-*-netbsd*] || [istarget mips*-*-irix*]]
     set linux_gnu [expr [istarget mips*-*-linux*]]
     set embedded_elf [expr [istarget mips*-*-elf]]
 
