@@ -545,7 +545,7 @@ F:DEPRECATED_STORE_STRUCT_RETURN:void:deprecated_store_struct_return:CORE_ADDR a
 # the predicate with default hack to avoid calling STORE_RETURN_VALUE
 # (via legacy_return_value), when a small struct is involved.
 
-M:::enum return_value_convention:return_value:struct type *valtype, struct regcache *regcache, void *readbuf, const void *writebuf:valtype, regcache, readbuf, writebuf:::legacy_return_value
+M::enum return_value_convention:return_value:struct type *valtype, struct regcache *regcache, void *readbuf, const void *writebuf:valtype, regcache, readbuf, writebuf:::legacy_return_value
 
 # The deprecated methods EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE,
 # DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS and
@@ -725,8 +725,7 @@ exec > new-gdbarch.log
 function_list | while do_read
 do
     cat <<EOF
-${class} ${macro}(${actual})
-  ${returntype} ${function} ($formal)${attrib}
+${class} ${returntype} ${function} ($formal)${attrib}
 EOF
     for r in ${read}
     do
@@ -734,7 +733,7 @@ EOF
     done
     if class_is_predicate_p && fallback_default_p
     then
-	echo "Error: predicate function ${macro} can not have a non- multi-arch default" 1>&2
+	echo "Error: predicate function ${function} can not have a non- multi-arch default" 1>&2
 	kill $$
 	exit 1
     fi

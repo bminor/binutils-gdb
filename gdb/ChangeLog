@@ -1,5 +1,9 @@
 2004-06-20  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbarch.sh: Use the function, instead of macro name in
+	errors and the log file.
+	(return_value): Remove stray ":" in spec.
+
 	* gdbarch.sh (RETURN_VALUE): Default to legacy_return_value.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* Makefile.in (arch-utils.o): Update dependencies.
