@@ -3828,6 +3828,11 @@ bfd_boolean bfd_is_local_label_name (bfd *abfd, const char *name);
 #define bfd_is_local_label_name(abfd, name) \
   BFD_SEND (abfd, _bfd_is_local_label_name, (abfd, name))
 
+bfd_boolean bfd_is_target_special_symbol (bfd *abfd, asymbol *sym);
+
+#define bfd_is_target_special_symbol(abfd, sym) \
+  BFD_SEND (abfd, _bfd_is_target_special_symbol, (abfd, sym))
+
 #define bfd_canonicalize_symtab(abfd, location) \
   BFD_SEND (abfd, _bfd_canonicalize_symtab, (abfd, location))
 
@@ -4443,6 +4448,7 @@ typedef struct bfd_target
   NAME##_print_symbol, \
   NAME##_get_symbol_info, \
   NAME##_bfd_is_local_label_name, \
+  NAME##_bfd_is_target_special_symbol, \
   NAME##_get_lineno, \
   NAME##_find_nearest_line, \
   NAME##_bfd_make_debug_symbol, \
@@ -4461,7 +4467,7 @@ typedef struct bfd_target
     (bfd *, struct bfd_symbol *, symbol_info *);
 #define bfd_get_symbol_info(b,p,e) BFD_SEND (b, _bfd_get_symbol_info, (b,p,e))
   bfd_boolean (*_bfd_is_local_label_name) (bfd *, const char *);
-
+  bfd_boolean (*_bfd_is_target_special_symbol) (bfd *, asymbol *);
   alent *     (*_get_lineno) (bfd *, struct bfd_symbol *);
   bfd_boolean (*_bfd_find_nearest_line)
     (bfd *, struct bfd_section *, struct bfd_symbol **, bfd_vma,

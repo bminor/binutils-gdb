@@ -102,6 +102,7 @@ static bfd_vma start_address = (bfd_vma) -1; /* --start-address */
 static bfd_vma stop_address = (bfd_vma) -1;  /* --stop-address */
 static int dump_debugging;		/* --debugging */
 static int dump_debugging_tags;		/* --debugging-tags */
+static int dump_special_syms = 0;	/* --special-syms */
 static bfd_vma adjust_section_vma = 0;	/* --adjust-vma */
 static int file_start_context = 0;      /* --file-start-context */
 
@@ -217,6 +218,7 @@ usage (FILE *stream, int status)
       --prefix-addresses         Print complete address alongside disassembly\n\
       --[no-]show-raw-insn       Display hex alongside symbolic disassembly\n\
       --adjust-vma=OFFSET        Add OFFSET to all displayed section addresses\n\
+      --special-syms             Include special symbols in symbol dumps\n\
 \n"));
       list_supported_targets (program_name, stream);
       list_supported_architectures (program_name, stream);
@@ -268,6 +270,7 @@ static struct option long_options[]=
   {"section-headers", no_argument, NULL, 'h'},
   {"show-raw-insn", no_argument, &show_raw_insn, 1},
   {"source", no_argument, NULL, 'S'},
+  {"special-syms", no_argument, &dump_special_syms, 1},
   {"include", required_argument, NULL, 'I'},
   {"stabs", no_argument, NULL, 'G'},
   {"start-address", required_argument, NULL, OPTION_START_ADDRESS},
@@ -2282,6 +2285,10 @@ dump_symbols (bfd *abfd ATTRIBUTE_UNUSED, bfd_boolean dynamic)
       else if ((cur_bfd = bfd_asymbol_bfd (*current)) == NULL)
 	printf (_("could not determine the type of the %ld'th symbol"),
 		count);
+
+      else if (! dump_special_syms
+	       && bfd_is_target_special_symbol (cur_bfd, *current))
+	continue;
 
       else
 	{

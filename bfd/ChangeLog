@@ -1,3 +1,41 @@
+2004-10-08  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in: (AM_INIT_AUTOMAKE): Set version to 2.15.93.
+	* configure: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* syms.c (bfd_is_target_special_symbol): New interface function.
+	Returns true when a symbol should be considered to be special.
+	* targets.h (bfd_target): Include bfd_is_target_special_symbol in
+	the symbol jump table.
+	* elf32-arm.h (elf32_arm_is_target_special_symbol): New function.
+	Return true iff the symbol is a mapping symbol.
+	(bfd_elf32_bfd_is_target_special_symbol): Define.
+	* elfxx-target.h: Provide a default definition for
+	bfd_is_target_special_symbol.
+	* aout-target.h: Likewise.
+	* aout-tic30.c: Likewise.
+	* binary.c: LIkewise.
+	* coffcode.h: Likewise.
+	* i386msdos.c: Likewise.
+	* ieee.c: Likewise.
+	* ihex.c: LIkewise.
+	* libaout.h: Likewise.
+	* libbfd-in.h: Likewise
+	* libecoff.h: Likewise.
+	* mach-o.c: Likewise.
+	* mmo.c: Likewise.
+	* nlm-target.h: Likewise.
+	* oasys.c: Likewise.
+	* pef.c: Likewise.
+	* ppcboot.c: Likewise.
+	* srec.c: Likewise.
+	* tekhex.c: Likewise.
+	* versados.c: Likewise.
+	* vms.c: Likewise.
+	* xcoff-target.h: Likewise.
+	* xsym.c: Likewise.
+	* libbfd.h: Regenerate.
+
 2004-10-08  Daniel Jacobowitz  <dan@debian.org>
 
 	* config.bfd: Include 64-bit support for i[3-7]86-*-solaris2*.

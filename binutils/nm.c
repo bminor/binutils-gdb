@@ -152,6 +152,7 @@ static int show_version = 0;	/* Show the version number.  */
 static int show_stats = 0;	/* Show statistics.  */
 static int show_synthetic = 0;	/* Display synthesized symbols too.  */
 static int line_numbers = 0;	/* Print line numbers for symbols.  */
+static int allow_special_symbols = 0;  /* Allow special symbols.  */
 
 /* When to print the names of files.  Not mutually exclusive in SYSV format.  */
 static int filename_per_file = 0;	/* Once per file, on its own line.  */
@@ -205,6 +206,7 @@ static struct option long_options[] =
   {"radix", required_argument, 0, 't'},
   {"reverse-sort", no_argument, &reverse_sort, 1},
   {"size-sort", no_argument, &sort_by_size, 1},
+  {"special-syms", no_argument, &allow_special_symbols, 1},
   {"stats", no_argument, &show_stats, 1},
   {"synthetic", no_argument, &show_synthetic, 1},
   {"target", required_argument, 0, OPTION_TARGET},
@@ -246,6 +248,7 @@ usage (FILE *stream, int status)
   -S, --print-size       Print size of defined symbols\n\
   -s, --print-armap      Include index for symbols from archive members\n\
       --size-sort        Sort symbols by size\n\
+      --skip-special     Ignore special symbols\n\
       --synthetic        Display synthetic symbols as well\n\
   -t, --radix=RADIX      Use RADIX for printing symbol values\n\
       --target=BFDNAME   Specify the target object format as BFDNAME\n\
@@ -445,6 +448,11 @@ filter_symbols (bfd *abfd, bfd_boolean dynamic, void *minisyms,
 	  if (bfd_is_und_section (sym->section))
 	    keep = 0;
 	}
+
+      if (keep
+	  && bfd_is_target_special_symbol (abfd, sym)
+	  && ! allow_special_symbols)
+	keep = 0;
 
       if (keep)
 	{

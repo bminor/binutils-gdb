@@ -272,6 +272,8 @@ extern bfd_boolean _bfd_ecoff_write_armap
 #define _bfd_ecoff_get_elt_at_index _bfd_generic_get_elt_at_index
 #define _bfd_ecoff_generic_stat_arch_elt bfd_generic_stat_arch_elt
 #define _bfd_ecoff_update_armap_timestamp bfd_true
+#define _bfd_ecoff_bfd_is_target_special_symbol  \
+  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
 
 extern long _bfd_ecoff_get_symtab_upper_bound PARAMS ((bfd *abfd));
 extern long _bfd_ecoff_canonicalize_symtab PARAMS ((bfd *abfd, asymbol **alocation));

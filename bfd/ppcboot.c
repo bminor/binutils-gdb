@@ -345,6 +345,8 @@ ppcboot_get_symbol_info (ignore_abfd, symbol, ret)
   bfd_symbol_info (symbol, ret);
 }
 
+#define ppcboot_bfd_is_target_special_symbol \
+  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
 #define ppcboot_bfd_is_local_label_name bfd_generic_is_local_label_name
 #define ppcboot_get_lineno _bfd_nosymbols_get_lineno
 #define ppcboot_find_nearest_line _bfd_nosymbols_find_nearest_line

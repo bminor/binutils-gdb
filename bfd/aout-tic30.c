@@ -1036,6 +1036,11 @@ tic30_aout_set_arch_mach (abfd, arch, machine)
 #define MY_bfd_is_local_label_name bfd_generic_is_local_label_name
 #endif
 
+#ifndef MY_bfd_is_target_special_symbol
+#define MY_bfd_is_target_special_symbol  \
+  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
+#endif
+
 #ifndef MY_bfd_free_cached_info
 #define MY_bfd_free_cached_info NAME(aout,bfd_free_cached_info)
 #endif

@@ -1,5 +1,11 @@
 -*- text -*-
 
+* nm and objdump now have a switch "--special-syms" to enable the displaying of
+  symbols which the target considers to be special.  By default these symbols
+  are no longer displayed.  Currently the only special symbols are the Mapping
+  symbols used by the ARM port to mark transitions between text and data and
+  between ARM and THUMB code.
+
 * dlltool has a switch "--ext-prefix-alias <prefix>" to generate additional
   import and export symbols with <preifx> prepended to them.
 

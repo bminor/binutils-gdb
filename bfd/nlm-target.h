@@ -26,6 +26,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define nlm_print_symbol nlmNAME(print_symbol)
 #define nlm_get_symbol_info nlmNAME(get_symbol_info)
 #define nlm_bfd_is_local_label_name bfd_generic_is_local_label_name
+#define nlm_bfd_is_target_special_symbol  \
+  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
 #define nlm_get_lineno _bfd_nosymbols_get_lineno
 #define nlm_find_nearest_line _bfd_nosymbols_find_nearest_line
 #define nlm_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol

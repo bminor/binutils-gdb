@@ -338,6 +338,7 @@ BFD_JUMP_TABLE macros.
 .  NAME##_print_symbol, \
 .  NAME##_get_symbol_info, \
 .  NAME##_bfd_is_local_label_name, \
+.  NAME##_bfd_is_target_special_symbol, \
 .  NAME##_get_lineno, \
 .  NAME##_find_nearest_line, \
 .  NAME##_bfd_make_debug_symbol, \
@@ -356,7 +357,7 @@ BFD_JUMP_TABLE macros.
 .    (bfd *, struct bfd_symbol *, symbol_info *);
 .#define bfd_get_symbol_info(b,p,e) BFD_SEND (b, _bfd_get_symbol_info, (b,p,e))
 .  bfd_boolean (*_bfd_is_local_label_name) (bfd *, const char *);
-.
+.  bfd_boolean (*_bfd_is_target_special_symbol) (bfd *, asymbol *);
 .  alent *     (*_get_lineno) (bfd *, struct bfd_symbol *);
 .  bfd_boolean (*_bfd_find_nearest_line)
 .    (bfd *, struct bfd_section *, struct bfd_symbol **, bfd_vma,

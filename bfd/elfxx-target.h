@@ -188,6 +188,10 @@
 #ifndef bfd_elfNN_bfd_is_local_label_name
 #define bfd_elfNN_bfd_is_local_label_name _bfd_elf_is_local_label_name
 #endif
+#ifndef bfd_elfNN_bfd_is_target_special_symbol
+#define bfd_elfNN_bfd_is_target_special_symbol \
+  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
+#endif
 
 #ifndef bfd_elfNN_get_dynamic_reloc_upper_bound
 #define bfd_elfNN_get_dynamic_reloc_upper_bound \

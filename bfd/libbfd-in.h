@@ -299,6 +299,8 @@ extern bfd_boolean _bfd_archive_coff_construct_extended_name_table
   ((void (*) (bfd *, asymbol *, symbol_info *)) bfd_void)
 #define _bfd_nosymbols_bfd_is_local_label_name \
   ((bfd_boolean (*) (bfd *, const char *)) bfd_false)
+#define _bfd_nosymbols_bfd_is_target_special_symbol \
+  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
 #define _bfd_nosymbols_get_lineno \
   ((alent *(*) (bfd *, asymbol *)) bfd_nullvoidptr)
 #define _bfd_nosymbols_find_nearest_line \

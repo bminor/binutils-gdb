@@ -5547,6 +5547,10 @@ static const bfd_coff_backend_data ticoff1_swap_table =
 #define coff_bfd_is_local_label_name	    _bfd_coff_is_local_label_name
 #endif
 
+#ifndef coff_bfd_is_target_special_symbol
+#define coff_bfd_is_target_special_symbol   ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
+#endif
+
 #ifndef coff_read_minisymbols
 #define coff_read_minisymbols		    _bfd_generic_read_minisymbols
 #endif

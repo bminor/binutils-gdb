@@ -1489,6 +1489,7 @@ oasys_sizeof_headers (abfd, exec)
 #define oasys_update_armap_timestamp bfd_true
 
 #define oasys_bfd_is_local_label_name bfd_generic_is_local_label_name
+#define oasys_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
 #define oasys_get_lineno _bfd_nosymbols_get_lineno
 #define oasys_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
 #define oasys_read_minisymbols _bfd_generic_read_minisymbols

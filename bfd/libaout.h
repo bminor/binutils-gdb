@@ -606,6 +606,11 @@ extern bfd_boolean NAME(aout,bfd_free_cached_info)
 #define aout_32_bfd_is_local_label_name bfd_generic_is_local_label_name
 #endif
 
+#ifndef aout_32_bfd_is_target_special_symbol
+#define aout_32_bfd_is_target_special_symbol \
+  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
+#endif
+
 #ifndef WRITE_HEADERS
 #define WRITE_HEADERS(abfd, execp)					      \
       {									      \

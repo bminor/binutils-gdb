@@ -43,6 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define coff_mkobject _bfd_xcoff_mkobject
 #define coff_bfd_copy_private_bfd_data _bfd_xcoff_copy_private_bfd_data
 #define coff_bfd_is_local_label_name _bfd_xcoff_is_local_label_name
+#define coff_bfd_is_target_special_symbol  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
 #define coff_bfd_reloc_type_lookup _bfd_xcoff_reloc_type_lookup
 #define coff_relocate_section _bfd_ppc_xcoff_relocate_section
 

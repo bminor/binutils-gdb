@@ -4018,6 +4018,8 @@ ieee_bfd_debug_info_accumulate (abfd, section)
 #define ieee_update_armap_timestamp bfd_true
 #define ieee_get_elt_at_index _bfd_generic_get_elt_at_index
 
+#define ieee_bfd_is_target_special_symbol  \
+  ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
 #define ieee_bfd_is_local_label_name bfd_generic_is_local_label_name
 #define ieee_get_lineno _bfd_nosymbols_get_lineno
 #define ieee_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol

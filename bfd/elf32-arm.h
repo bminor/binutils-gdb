@@ -25,7 +25,7 @@
 typedef unsigned long int insn32;
 typedef unsigned short int insn16;
 
-/* In leiu of proper flags, assume all EABIv3 objects are interworkable.  */
+/* In lieu of proper flags, assume all EABIv3 objects are interworkable.  */
 #define INTERWORK_FLAG(abfd)  \
   (EF_ARM_EABI_VERSION (elf_elfheader (abfd)->e_flags) == EF_ARM_EABI_VER3 \
   || (elf_elfheader (abfd)->e_flags & EF_ARM_INTERWORK))
@@ -2328,6 +2328,7 @@ elf32_arm_object_p (bfd *abfd)
 }
 
 /* Function to keep ARM specific flags in the ELF header.  */
+
 static bfd_boolean
 elf32_arm_set_private_flags (bfd *abfd, flagword flags)
 {
@@ -3161,6 +3162,14 @@ is_arm_mapping_symbol_name (const char * name)
     && (name[0] == '$')
     && ((name[1] == 'a') || (name[1] == 't') || (name[1] == 'd'))
     && (name[2] == 0);
+}
+
+/* Treat mapping symbols as special target symbols.  */
+
+static bfd_boolean
+elf32_arm_is_target_special_symbol (bfd * abfd ATTRIBUTE_UNUSED, asymbol * sym)
+{
+  return is_arm_mapping_symbol_name (sym->name);
 }
 
 /* This is a copy of elf_find_function() from elf.c except that
@@ -4462,6 +4471,7 @@ elf32_arm_write_section (bfd *output_bfd ATTRIBUTE_UNUSED, asection *sec,
 #define bfd_elf32_bfd_reloc_type_lookup		elf32_arm_reloc_type_lookup
 #define bfd_elf32_find_nearest_line	        elf32_arm_find_nearest_line
 #define bfd_elf32_new_section_hook		elf32_arm_new_section_hook
+#define bfd_elf32_bfd_is_target_special_symbol	elf32_arm_is_target_special_symbol
 
 #define elf_backend_get_symbol_type             elf32_arm_get_symbol_type
 #define elf_backend_gc_mark_hook                elf32_arm_gc_mark_hook

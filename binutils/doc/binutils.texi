@@ -663,7 +663,7 @@ The @sc{gnu} linker @command{ld} is now described in a separate manual.
 nm [@option{-a}|@option{--debug-syms}] [@option{-g}|@option{--extern-only}]
    [@option{-B}] [@option{-C}|@option{--demangle}[=@var{style}]] [@option{-D}|@option{--dynamic}]
    [@option{-S}|@option{--print-size}] [@option{-s}|@option{--print-armap}]
-   [@option{-A}|@option{-o}|@option{--print-file-name}]
+   [@option{-A}|@option{-o}|@option{--print-file-name}][@option{--special-syms}]
    [@option{-n}|@option{-v}|@option{--numeric-sort}] [@option{-p}|@option{--no-sort}]
    [@option{-r}|@option{--reverse-sort}] [@option{--size-sort}] [@option{-u}|@option{--undefined-only}]
    [@option{-t} @var{radix}|@option{--radix=}@var{radix}] [@option{-P}|@option{--portability}]
@@ -878,6 +878,14 @@ the value of the symbol and the value of the symbol with the next higher
 value.  If the @code{bsd} output format is used the size of the symbol 
 is printed, rather than the value, and @samp{-S} must be used in order 
 both size and value to be printed.
+
+@item --special-syms
+Display symbols which have a target-specific special meaning.  These
+symbols are usually used by the target for some special processing and
+are not normally helpful when included included in the normal symbol
+lists.  For example for ARM targets this option would skip the mapping
+symbols used to mark transistions between ARM code, THUMB code and
+data.
 
 @item -t @var{radix}
 @itemx --radix=@var{radix}
@@ -1495,6 +1503,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{--prefix-addresses}]
         [@option{--[no-]show-raw-insn}]
         [@option{--adjust-vma=}@var{offset}]
+        [@option{--special-syms}]
         [@option{-V}|@option{--version}]
         [@option{-H}|@option{--help}]
         @var{objfile}@dots{}
@@ -1836,6 +1845,11 @@ Print the dynamic symbol table entries of the file.  This is only
 meaningful for dynamic objects, such as certain types of shared
 libraries.  This is similar to the information provided by the @samp{nm}
 program when given the @option{-D} (@option{--dynamic}) option.
+
+@item --special-syms
+When displaying symbols include those which the target considers to be
+special in some way and which would not normally be of interest to the
+user.
 
 @item -V
 @itemx --version

@@ -164,6 +164,7 @@ static bfd_boolean vms_bfd_merge_private_bfd_data
 static bfd_boolean vms_bfd_set_private_flags
   PARAMS ((bfd *abfd, flagword flags));
 
+#define vms_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
 #define vms_make_empty_symbol _bfd_generic_make_empty_symbol
 #define vms_bfd_link_just_syms _bfd_generic_link_just_syms
 #define vms_bfd_is_group_section bfd_generic_is_group_section

@@ -1,3 +1,15 @@
+2004-10-08  Nick Clifton  <nickc@redhat.com>
+
+	* nm.c: Add a new switch --special-syms which, if enabled, will
+	include the ARM Mapping symbols in nm's output.
+	(usage): Mention the switch.
+	(filter_symbols): Handle the switch.
+	* objdump.c: Add a similar switch.
+	(usage): Mention the switch.
+	(dump_symbols): Handle the switch.
+	* doc/binutils.texi: Document the new switches.
+	* NEWS: Mention the new switches.
+
 2004-10-08  Daniel Jacobowitz  <dan@debian.org>
 
 	* readelf.c (get_x86_64_section_type_name): New function.

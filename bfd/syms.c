@@ -382,6 +382,23 @@ DESCRIPTION
 
 /*
 FUNCTION
+	bfd_is_target_special_symbol
+
+SYNOPSIS
+        bfd_boolean bfd_is_target_special_symbol (bfd *abfd, asymbol *sym);
+
+DESCRIPTION
+	Return TRUE iff a symbol @var{sym} in the BFD @var{abfd} is something
+	special to the particular target represented by the BFD.  Such symbols
+	should normally not be mentioned to the user.
+
+.#define bfd_is_target_special_symbol(abfd, sym) \
+.  BFD_SEND (abfd, _bfd_is_target_special_symbol, (abfd, sym))
+.
+*/
+
+/*
+FUNCTION
 	bfd_canonicalize_symtab
 
 DESCRIPTION
