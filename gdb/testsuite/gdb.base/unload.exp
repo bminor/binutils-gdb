@@ -49,6 +49,7 @@ set dl_lib_flag ""
 switch -glob [istarget] {
     "hppa*-hp-hpux*" { }
     "*-*-linux*"     { set dl_lib_flag "libs=-ldl" }
+    "*-*-solaris*"   { set dl_lib_flag "libs=-ldl" }
     default          { }
 }
 
