@@ -323,16 +323,11 @@ general_open(args, name, from_tty)
      char *name;
      int from_tty;
 {
-  int n;
-  char junk[100];
+  if (args == NULL)
+    error ("Use `target %s DEVICE-NAME' to use a serial port, or \n\
+`target %s HOST-NAME:PORT-NUMBER' to use a network connection.", name, name);
 
   target_preopen(from_tty);
-  
-  n = sscanf(args, " %s %d %s", dev_name, &baudrate, junk);
-
-  if (n != 2)
-    error("Bad arguments.  Usage: target %s <device> <speed>\n\
-or target monitor <host> <port>\n", name);
 
   monitor_close(0);
 
@@ -341,7 +336,18 @@ or target monitor <host> <port>\n", name);
   if (!monitor_desc)
     perror_with_name(dev_name);
 
-  SERIAL_SETBAUDRATE(monitor_desc, baudrate);
+  /* The baud rate was specified when GDB was started.  */
+  if (baud_rate)
+    {
+      int rate;
+
+      if (sscanf (baud_rate, "%d", &rate) == 1)
+	if (SERIAL_SETBAUDRATE (monitor_desc, rate))
+	  {
+	    SERIAL_CLOSE (monitor_desc);
+	    perror_with_name (name);
+	  }
+    }
 
   SERIAL_RAW(monitor_desc);
 
@@ -1046,9 +1052,8 @@ struct monitor_ops mon68_cmds = {
 struct target_ops rom68k_ops = {
   "rom68k",
   "Integrated System's ROM68K remote debug monitor",
-  "Use a remote computer running the ROM68K debug monitor, connected by a\n\
-serial line. Arguments are the name of the device for the serial line,\n\
-the speed to connect at in bits per second.",
+  "Use a remote computer running the ROM68K debug monitor.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).",
   rom68k_open,
   monitor_close, 
   0,
@@ -1089,9 +1094,8 @@ the speed to connect at in bits per second.",
 struct target_ops bug_ops = {
   "bug",
   "Motorola's BUG remote serial debug monitor",
-  "Use a remote computer running Motorola's BUG debug monitor, connected by a\n\
-serial line. Arguments are the name of the device for the serial line,\n\
-the speed to connect at in bits per second.",
+  "Use a remote computer running Motorola's BUG debug monitor.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).",
   bug_open,
   monitor_close, 
   0,
@@ -1132,9 +1136,8 @@ the speed to connect at in bits per second.",
 struct target_ops mon68_ops = {
   "mon68",
   "Intermetric's MON68 remote serial debug monitor",
-  "Use a remote computer running the MON68 debug monitor, connected by a\n\
-serial line. Arguments are the name of the device for the serial line,\n\
-the speed to connect at in bits per second.",
+  "Use a remote computer running the MON68 debug monitor.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).",
   mon68_open,
   monitor_close, 
   0,
@@ -1193,9 +1196,11 @@ When enabled, a period \'.\' is displayed.",
   /* generic monitor command */
   add_com ("monitor <command>", class_obscure, monitor_command,
 	   "Send a command to the debug monitor."); 
+#if 0
   add_com ("connect", class_obscure, connect_command,
 	   "Connect the terminal directly up to a serial based command monitor.\n\
 Use <CR>~. or <CR>~^D to break out.");
+#endif
 
   add_target (&rom68k_ops);
 /*  add_target (&mon68_ops); */
