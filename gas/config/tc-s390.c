@@ -80,7 +80,7 @@ const pseudo_typeS md_pseudo_table[] =
 {
   { "align", s_align_bytes, 0 },
   /* Pseudo-ops which must be defined. */
-  { "bss",      s390_bss,       0 }, 
+  { "bss",      s390_bss,       0 },
   { "insn",     s390_insn,      0 },
   /* Pseudo-ops which must be overridden.  */
   { "byte",	s390_byte,	0 },
@@ -157,21 +157,21 @@ static const struct pd_reg pre_defined_registers[] =
   { "c9", 9 },
 
   { "f0", 0 },     /* Floating point registers */
-  { "f1", 1 }, 
-  { "f10", 10 }, 
-  { "f11", 11 }, 
-  { "f12", 12 }, 
-  { "f13", 13 }, 
-  { "f14", 14 }, 
-  { "f15", 15 }, 
-  { "f2", 2 }, 
-  { "f3", 3 }, 
-  { "f4", 4 }, 
-  { "f5", 5 }, 
-  { "f6", 6 }, 
-  { "f7", 7 }, 
-  { "f8", 8 }, 
-  { "f9", 9 }, 
+  { "f1", 1 },
+  { "f10", 10 },
+  { "f11", 11 },
+  { "f12", 12 },
+  { "f13", 13 },
+  { "f14", 14 },
+  { "f15", 15 },
+  { "f2", 2 },
+  { "f3", 3 },
+  { "f4", 4 },
+  { "f5", 5 },
+  { "f6", 6 },
+  { "f7", 7 },
+  { "f8", 8 },
+  { "f9", 9 },
 
   { "lit", 13 },   /* Pointer to literal pool */
 
@@ -265,11 +265,11 @@ register_name (expressionP)
   *input_line_pointer = c;
 
   /* Look to see if it's in the register table.  */
-  if (reg_number >= 0) 
+  if (reg_number >= 0)
     {
       expressionP->X_op = O_register;
       expressionP->X_add_number = reg_number;
-      
+
       /* Make the rest nice.  */
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
@@ -353,17 +353,17 @@ md_parse_option (c, arg)
     case 'm':
       if (arg != NULL && strcmp (arg, "regnames") == 0)
 	reg_names_p = true;
-    
+
       else if (arg != NULL && strcmp (arg, "no-regnames") == 0)
 	reg_names_p = false;
-    
+
       else
 	{
 	  as_bad (_("invalid switch -m%s"), arg);
 	  return 0;
 	}
       break;
-    
+
     case 'A':
       if (arg != NULL && strcmp (arg, "esa") == 0)
 	{
@@ -385,16 +385,16 @@ md_parse_option (c, arg)
     case 'V':
       print_version_id ();
       break;
-    
+
       /* -Qy, -Qn: SVR4 arguments controlling whether a .comment section
 	 should be emitted or not.  FIXME: Not implemented.  */
     case 'Q':
       break;
-      
+
     default:
       return 0;
     }
-  
+
   return 1;
 }
 
@@ -536,7 +536,7 @@ s390_insert_operand (insn, operand, val, file, line)
   else
     {
       addressT min, max;
-      
+
       max = (((addressT) 1 << (operand->bits - 1))<<1) - 1;
       min = (offsetT) 0;
       uval = (addressT) val;
@@ -549,7 +549,7 @@ s390_insert_operand (insn, operand, val, file, line)
 	  const char *err =
 	    "operand out of range (%s not between %ld and %ld)";
 	  char buf[100];
-    
+
 	  if (operand->flags & S390_OPERAND_LENGTH)
 	    {
 	      uval++;
@@ -709,7 +709,7 @@ s390_exp_compare(exp1, exp2)
       return exp1->X_add_number == exp2->X_add_number;
 
     case O_big:
-      as_bad (_("Can't handle O_big in s390_exp_compare")); 
+      as_bad (_("Can't handle O_big in s390_exp_compare"));
 
     case O_symbol:     /* X_add_symbol & X_add_number must be equal.  */
     case O_symbol_rva:
@@ -763,7 +763,7 @@ s390_lit_suffix (str_p, exp_p, suffix)
 
   if (*str++ != ':')
     return suffix;       /* No modification.  */
- 
+
   /* We look for a suffix of the form "@lit1", "@lit2", "@lit4" or "@lit8".  */
   ident = str;
   while (isalnum (*str))
@@ -877,7 +877,7 @@ s390_lit_suffix (str_p, exp_p, suffix)
       else
 	lpe_list = lpe_list_tail = lpe;
     }
-  
+
   /* Now change exp_p to the offset into the literal pool.
      Thats the expression: .L^Ax^By-.L^Ax   */
   exp_p->X_add_symbol = lpe->sym;
@@ -942,8 +942,10 @@ s390_elf_cons (nbytes)
 			reloc_howto->name, nbytes);
 	      where = frag_more (nbytes);
 	      md_number_to_chars (where, 0, size);
-	      fix_new_exp (frag_now, where - frag_now->fr_literal, 
-			   size, &exp, reloc_howto->pc_relative, reloc);
+	      /* To make fixup_segment do the pc relative conversion the
+		 pcrel parameter on the fix_new_exp call needs to be false.  */
+	      fix_new_exp (frag_now, where - frag_now->fr_literal,
+			   size, &exp, false, reloc);
 	    }
 	  else
 	    as_bad (_("relocation not applicable"));
@@ -1001,27 +1003,27 @@ md_gather_operands (str, insn, opcode)
       char *hold;
 
       operand = s390_operands + *opindex_ptr;
-    
+
       if (skip_optional && (operand->flags & S390_OPERAND_INDEX))
 	{
 	  /* We do an early skip. For D(X,B) constructions the index
-	     register is skipped (X is optional). For D(L,B) the base  
+	     register is skipped (X is optional). For D(L,B) the base
 	     register will be the skipped operand, because L is NOT
 	     optional.  */
 	  skip_optional = 0;
 	  continue;
 	}
-    
+
       /* Gather the operand.  */
       hold = input_line_pointer;
       input_line_pointer = str;
 
       if (! register_name (&ex))    /* parse the operand */
 	expression (&ex);
-    
+
       str = input_line_pointer;
       input_line_pointer = hold;
-    
+
       /* Write the operand to the insn.  */
       if (ex.X_op == O_illegal)
 	as_bad (_("illegal operand"));
@@ -1095,7 +1097,7 @@ md_gather_operands (str, insn, opcode)
 	  fixups[fc].reloc = reloc;
 	  ++fc;
 	}
- 
+
       /* Check the next character. The call to expression has advanced
 	 str past any whitespace.  */
       if (operand->flags & S390_OPERAND_DISP)
@@ -1113,7 +1115,7 @@ md_gather_operands (str, insn, opcode)
 	      /* Ok, skip all operands until S390_OPERAND_BASE.  */
 	      while (!(operand->flags & S390_OPERAND_BASE))
 		operand = s390_operands + *(++opindex_ptr);
-	
+
 	      /* If there is a next operand it must be seperated by a comma.  */
 	      if (opindex_ptr[1] != '\0')
 		{
@@ -1208,18 +1210,18 @@ md_gather_operands (str, insn, opcode)
 	  reloc_howto_type *reloc_howto;
 	  fixS *fixP;
 	  int size;
-      
+
 	  reloc_howto = bfd_reloc_type_lookup (stdoutput, fixups[i].reloc);
 	  if (!reloc_howto)
 	    abort ();
-      
+
 	  size = bfd_get_reloc_size (reloc_howto);
 
 	  if (size < 1 || size > 4)
 	    abort ();
-      
-	  fixP = fix_new_exp (frag_now, 
-			      f - frag_now->fr_literal + (operand->shift/8), 
+
+	  fixP = fix_new_exp (frag_now,
+			      f - frag_now->fr_literal + (operand->shift/8),
 			      size, &fixups[i].exp, reloc_howto->pc_relative,
 			      fixups[i].reloc);
 	  /* Turn off overflow checking in fixup_segment. This is necessary
@@ -1344,7 +1346,7 @@ s390_insn (ignore)
     }
   else if (exp.X_op == O_big)
     {
-      if (exp.X_add_number > 0 && 
+      if (exp.X_add_number > 0 &&
 	  opformat->oplen == 6 &&
 	  generic_bignum[3] == 0)
 	{
@@ -1404,7 +1406,7 @@ s390_byte (ignore)
 }
 
 /* The .ltorg pseudo-op.This emits all literals defined since the last
-   .ltorg or the invocation of gas. Literals are defined with the 
+   .ltorg or the invocation of gas. Literals are defined with the
    @lit suffix.  */
 
 static void
@@ -1432,7 +1434,7 @@ s390_literals (ignore)
       /* Emit literal pool entry.  */
       if (lpe->reloc != BFD_RELOC_UNUSED)
 	{
-	  reloc_howto_type *reloc_howto = 
+	  reloc_howto_type *reloc_howto =
 	    bfd_reloc_type_lookup (stdoutput, lpe->reloc);
 	  int size = bfd_get_reloc_size (reloc_howto);
 	  char *where;
@@ -1509,7 +1511,7 @@ md_atof (type, litp, sizep)
       md_number_to_chars (litp, (valueT) words[i], 2);
       litp += 2;
     }
-     
+
   return NULL;
 }
 
@@ -1647,7 +1649,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	  && S_GET_SEGMENT (fixp->fx_addsy) != undefined_section
 	  && ! bfd_is_com_section (S_GET_SEGMENT (fixp->fx_addsy)))
 	value -= S_GET_VALUE (fixp->fx_addsy);
-      
+
       if (fixp->fx_pcrel)
 	value += fixp->fx_frag->fr_address + fixp->fx_where;
     }
@@ -1658,10 +1660,10 @@ md_apply_fix3 (fixp, valuep, seg)
     {
       const struct s390_operand *operand;
       int opindex;
-    
+
       opindex = (int) fixp->fx_r_type - (int) BFD_RELOC_UNUSED;
       operand = &s390_operands[opindex];
-      
+
       if (fixp->fx_done)
 	{
 	  /* Insert the fully resolved operand value.  */
@@ -1670,7 +1672,7 @@ md_apply_fix3 (fixp, valuep, seg)
 
 	  return 1;
 	}
-    
+
       /* Determine a BFD reloc value based on the operand information.
 	 We are only prepared to turn a few of the operands into
 	 relocs.  */
@@ -1717,7 +1719,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	{
 	  char *sfile;
 	  unsigned int sline;
-      
+
 	  /* Use expr_symbol_where to see if this is an expression
 	     symbol.  */
 	  if (expr_symbol_where (fixp->fx_addsy, &sfile, &sline))
@@ -1749,9 +1751,9 @@ md_apply_fix3 (fixp, valuep, seg)
 	      mop = bfd_getb16 ((unsigned char *) where);
 	      mop |= (unsigned short) (value & 0xfff);
 	      bfd_putb16 ((bfd_vma) mop, (unsigned char *) where);
-	    } 
+	    }
 	  break;
-    
+
 	case BFD_RELOC_16:
 	case BFD_RELOC_GPREL16:
 	case BFD_RELOC_16_GOT_PCREL:
@@ -1840,7 +1842,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	default:
 	  {
 	    const char *reloc_name = bfd_get_reloc_code_name (fixp->fx_r_type);
-	    
+
 	    if (reloc_name != NULL)
 	      fprintf (stderr, "Gas failure, reloc type %s\n", reloc_name);
 	    else

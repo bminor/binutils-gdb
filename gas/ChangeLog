@@ -1,3 +1,8 @@
+2001-08-12  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* config/tc-s390.c (s390_elf_cons): Correct fixups for PLT
+	relocations.
+
 2001-08-12  TAKAI Kousuke  <takai@vlsi.kuee.kyoto-u.ac.jp>
 
 	* config/tc-sparc.c (cons_fix_new_sparc): Move
