@@ -1,3 +1,9 @@
+Thu Oct 14 01:10:35 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.c (ecoff_bfd_seclet_link): Don't link a .reginfo section.
+	(ecoff_write_object_contents): Don't require the .reginfo section
+	to be a particular size.
+
 Wed Oct 13 18:39:03 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* Makefile.in (dep-in): New rule, for editing dependencies into
