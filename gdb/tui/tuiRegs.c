@@ -639,7 +639,7 @@ _tuiRegisterFormat (char *buf, int bufLen, int regNum,
   stream = tui_sfileopen (bufLen);
   gdb_stdout = stream;
   cleanups = make_cleanup (tui_restore_gdbout, (void*) old_stdout);
-  do_registers_info (regNum, 0);
+  DO_REGISTERS_INFO (regNum, 0);
 
   /* Save formatted output in the buffer.  */
   p = tui_file_get_strbuf (stream);
