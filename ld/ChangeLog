@@ -1,5 +1,9 @@
 Tue Apr 26 12:41:03 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* scripttempl/mips.sc: Force _gp and .lit8 to be aligned to a 16
+	byte boundary, in case the global constructors do not take up an
+	even 16 bytes.
+
 	* config/i386v4.mh (HOSTING_CRT0): If ../gcc/crtbegin.o does not
 	exist, get crtbegin based on gcc -print-libgcc-file-name.
 	(HOSTING_LIBS): Similar change for ../gcc/crtend.o.
