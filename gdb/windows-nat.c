@@ -34,6 +34,7 @@
 #include "completer.h"
 #include "regcache.h"
 #include "top.h"
+#include "i386-tdep.h"
 #include <signal.h>
 #include <sys/types.h>
 #include <fcntl.h>

@@ -1,3 +1,7 @@
+2002-01-06  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* win32-nat.c: Add i386-tdep.h dependency.
+
 2002-01-07  Michael Snyder  <msnyder@redhat.com>
 
 	* cp-valprint.c (cp_print_value): FIXME comment, alloca size.
