@@ -131,6 +131,10 @@ case "${targ}" in
     targ_selvecs=armcoff_big_vec
     targ_underscore=yes
     ;;
+  armeb-*-elf | arm*b-*-linux-gnu*)
+    targ_defvec=bfd_elf32_bigarm_vec
+    targ_selvecs=bfd_elf32_littlearm_vec
+    ;;
   arm-*-elf | arm*-*-linux-gnu* | arm*-*-conix*)
     targ_defvec=bfd_elf32_littlearm_vec
     targ_selvecs=bfd_elf32_bigarm_vec

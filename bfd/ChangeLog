@@ -1,3 +1,7 @@
+2000-05-14  Philip Blundell  <philb@gnu.org>
+
+	* config.bfd (armeb-*-elf, arm*b-*-linux-gnu*): New targets.
+
 2000-05-12  Alan Modra  <alan@linuxcare.com.au>
 
 	* targets.c (bfd_target_vector): #ifdef BFD64 rs6000coff64_vec
