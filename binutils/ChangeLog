@@ -1,3 +1,12 @@
+2000-05-12  H.J. Lu  <hjl@gnu.org>
+
+	* nlmconv.c (temp_filename): Removed.
+
+	* nlmconv.c (link_inputs): Use make_temp_file () instead of
+	choose_temp_base ().
+	* objdump.c (display_target_list): Likewise.
+	(display_info_table): Likewise.
+
 2000-05-08  Alan Modra  <alan@linuxcare.com.au>
 
 	* objcopy.c (setup_section): Add const and gettext calls for err.
