@@ -1,5 +1,7 @@
 2000-07-25  Geoffrey Keating  <geoffk@cygnus.com>
 
+	* configure.host (*-*-aix*): AIX has 'long long' always.
+
 	* coff-rs6000.c (xcoff_write_one_armap_big): New procedure.
 	(xcoff_write_armap_big): Write both 32-bit and 64-bit armaps.
 	(xcoff_write_archive_contents_big): Don't update the offset

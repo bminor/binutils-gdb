@@ -48,6 +48,10 @@ mips*-*-riscos*)	HDEFINES="-G 4" ;;
 
 m68*-hp-hpux*)		HDEFINES=-DHOST_HP300HPUX ;;
 
+*-*-aix*)		HOST_64BIT_TYPE="long long"
+			HOST_U_64BIT_TYPE="unsigned long long"
+			;;
+
 *-*-solaris*)		HOST_64BIT_TYPE="long long"
 			HOST_U_64BIT_TYPE="unsigned long long"
 			;;
