@@ -2627,26 +2627,17 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      else
 		{
 		  /* This symbol is local, or marked to become local.  */
+		  outrel.r_addend = relocation + rel->r_addend;
 		  if (r_type == R_390_32)
 		    {
 		      relocate = TRUE;
 		      outrel.r_info = ELF32_R_INFO (0, R_390_RELATIVE);
-		      outrel.r_addend = relocation + rel->r_addend;
 		    }
 		  else
 		    {
 		      long sindx;
 
-		      if (h == NULL)
-			sec = local_sections[r_symndx];
-		      else
-			{
-			  BFD_ASSERT (h->root.type == bfd_link_hash_defined
-				      || (h->root.type
-					  == bfd_link_hash_defweak));
-			  sec = h->root.u.def.section;
-			}
-		      if (sec != NULL && bfd_is_abs_section (sec))
+		      if (bfd_is_abs_section (sec))
 			sindx = 0;
 		      else if (sec == NULL || sec->owner == NULL)
 			{
@@ -2660,9 +2651,16 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 			  osec = sec->output_section;
 			  sindx = elf_section_data (osec)->dynindx;
 			  BFD_ASSERT (sindx > 0);
+
+			  /* We are turning this relocation into one
+			     against a section symbol, so subtract out
+			     the output section's address but not the
+			     offset of the input section in the output
+			     section.  */
+
+			  outrel.r_addend -= osec->vma;
 			}
 		      outrel.r_info = ELF32_R_INFO (sindx, r_type);
-		      outrel.r_addend = relocation + rel->r_addend;
 		    }
 		}
 
