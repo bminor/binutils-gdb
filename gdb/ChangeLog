@@ -1,5 +1,20 @@
 2002-05-08  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* NEWS: Note new sh*-*-netbsdelf* configuration.
+	* configure.host: Set gdb_host_cpu to sh for all sh*.
+	(sh*-*-netbsdelf*): New host.
+	* configure.tgt: Set gdb_target_cpu to sh for all sh*.
+	(sh*-*-netbsdelf*): New target.
+	* sh-nbsd-nat.c: New file.
+	* sh-nbsd-tdep.c: New file.
+	* sh-nbsd-tdep.h: New file.
+	* config/sh/nbsd.mh: New file.
+	* config/sh/nbsd.mt: New file.
+	* config/sh/nm-nbsd.h: New file.
+	* config/sh/tm-nbsd.h: New file.
+
+2002-05-08  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* sh-tdep.c (sh_osabi_names): Declare.
 	(process_note_abi_tag_sections): New function.
 	(get_elfosabi): Ditto.
