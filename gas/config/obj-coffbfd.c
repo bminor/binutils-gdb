@@ -1125,7 +1125,6 @@ obj_coff_line (ignore)
       line_base = this_base;
     }
 
-
 #ifndef NO_LISTING
   {
     extern int listing;
@@ -1136,7 +1135,7 @@ obj_coff_line (ignore)
   }
 #endif
   S_SET_NUMBER_AUXILIARY (def_symbol_in_progress, 1);
-  SA_SET_SYM_LNNO (def_symbol_in_progress, line_base);
+  SA_SET_SYM_LNNO (def_symbol_in_progress, this_base);
 
   demand_empty_rest_of_line ();
 }
