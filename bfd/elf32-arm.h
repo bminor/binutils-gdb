@@ -25,8 +25,10 @@
 typedef unsigned long int insn32;
 typedef unsigned short int insn16;
 
+/* In leiu of proper flags, assume all EABIv3 objects are interworkable.  */
 #define INTERWORK_FLAG(abfd)  \
-  (elf_elfheader (abfd)->e_flags & EF_ARM_INTERWORK)
+  (EF_ARM_EABI_VERSION (elf_elfheader (abfd)->e_flags) == EF_ARM_EABI_VER3 \
+  || (elf_elfheader (abfd)->e_flags & EF_ARM_INTERWORK))
 
 /* The linker script knows the section names for placement.
    The entry_names are used to do simple name mangling on the stubs.

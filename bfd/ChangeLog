@@ -1,3 +1,7 @@
+2004-08-26  Paul Brook  <paul@codesourcery.com>
+
+	* INTERWORK_FLAG: Return true for EABIv3 objects.
+
 2004-08-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-m32r.c (m32r_elf_relocate_section): Don't compare with
