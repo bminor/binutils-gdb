@@ -1,3 +1,79 @@
+Tue Jul 23 18:52:43 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
+
+	* Minor, mostly mechanical, cleanup of doc subdir for clean 
+	makeinfo'ing and TeXing; also ensured gdb-all.texinfo (post-m4) 
+	and gdb.info (post- texinfo2 makeinfo) generated for distribution.
+
+Sun Jul 21 03:54:52 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	Mostly MIPS and general symbol-reading fixups.
+
+	* doc/gdbint.texinfo:  Add documentation on symbol-reading
+	interface.
+
+	* mipsread.c:  Remove kludges around #include "ecoff.h".
+	Remove redefinitions of a_magic, etc, no longer used.
+	(parse_symbol, ):  Convert "Internal:" printfs to complain()ts.
+	Fix global overview comments to match symfile.c protocol.
+	(mipscoff_new_init):  Eliminate cur_hdr if we have one.
+	(mipscoff_symfile_read):  Eliminate unused code.  Avoid
+	sorting all the symtabs, when all we have read here is psymtabs.
+	The symtabs are sorted as they are created anyway.  Tell
+	condense_misc_bunches whether we're mainline.
+	(psymtab_to_symtab_1):  Pass filename when recursing, to make
+	stack trace more informative.
+	(parse_partial_symbols):  Assume cur_hdr as argument.
+	(read_mips_symtab):  Don't clobber cur_hdr, so it can be freed.
+	Pass cur_hdr implicitly to parse_partial_symbols.  Avoid checking
+	the TYPE_NAME of char *, since that's done in symfile.c.
+	(free_numargs, parse_symbol, add_symbol, add_block,
+	shrink_linetable):  Declare these fns void. 
+	(upgrade_type):  Convert tree of if's to switch.  Clean up
+	bogus "off == 0" handling with a complaint.  Avoid setting
+	field bitpos and bitsize of array with lower and upper bounds.
+	Check specified bitsize of elements against their actual type's
+	bitsize, and complain if different.  Complain about unknown 
+	type qualifiers.
+	(parse_fdr):  Don't assume sizeof(char *) == sizeof (struct *).
+	(psymtab_to_symtab_1):  Print names of subsidiary files that
+	are being read in.  FIXME, we read far too many files.  This code
+	is not the problem, the problem is in parse_fdr where the psymtabs
+	are set up.
+	(cross_ref):  Result should indicate that we used one aux entry
+	normally, or two if we encountered a "next" entry.  This used
+	to leave the caller pointing at the wrong aux entry.
+	(add_symbol):  If overflowed cur_block, reallocate it larger,
+	chase all pointers to it, and complain(), rather than clobber memory.
+	(shrink_block):  Use xrealloc rather than xmalloc-and-copy.
+	(new_field):  Only allocate one field initially, not two.
+	Pull ++ out of macro argument.  Simplify.
+	(_initialize_mipsread):  Avoid initialization of importd
+	global_psymbols and static_psymbols. 
+
+	* symfile.c (psymtab_to_symtab):  Depend on XXX_psymtab_to_symtab
+	to properly set pst->symtab; avoid searching for it.
+	(symfile_fns):  Improve comments, add a FIXME.
+	* dbxread.c:  Update comments to reflect symfile protocol.
+	(read_ofile_symtab, end_symtab):  Return the symtab.
+	(psymtab_to_symtab_1):  Set pst->symtab.
+
+	* coffread.c (coff_symfile_read):  tell condense_misc_bunches
+	whether we're mainline.
+
+	* symfile.h (sym_fns):  Remove unused sym_discard member.
+	* coffread.c, mipsread.c, dbxread.c:  Remove XXX_symfile_discard.
+
+	* mtrace.c (mtrace):  Take effect if mallwatch is set, even if
+	the environment variable is not.
+	* infcmd.c (finish_command):  Use filtered printfs.
+	* cplus-dem.c:  Add struct tags to a few unnamed structs.
+	* valops.c (value_coerce_array):  Improve comments.
+	* valprint.c (type_print_varspec_suffix):  Print array size only
+	if greater than zero.
+	* m88k-tdep.c:  Shift some lines left by one space, that had
+	apparently been trashed at some point.
+	* TODO:  More things to do, a few got done.
+
 Thu Jul 18 22:46:05 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* symtab.h (LOC_EXTERNAL):  Eliminate in favor of LOC_STATIC.
