@@ -99,4 +99,9 @@ extern void sparc64_sol2_init_abi (struct gdbarch_info info,
 /* Register offsets for FreeBSD/sparc64.  */
 extern const struct sparc_gregset sparc64fbsd_gregset;
 
+/* Variables exported from sparc64nbsd-tdep.c.  */
+
+/* Register offsets for NetBSD/sparc64.  */
+extern const struct sparc_gregset sparc64nbsd_gregset;
+
 #endif /* sparc64-tdep.h */

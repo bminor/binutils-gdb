@@ -1,5 +1,19 @@
 2003-12-27  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc64-tdep.h (sparc64nbsd_gregset): Add extern declaration.
+	* sparc64nbsd-nat.c: Rewrite.
+	* sparc64nbsd-tdep.c: New file.
+	* configure.tgt: Add sparc64-*-netbsd*.
+	* configure.host: Add sparc64-*-netbsd*.
+	* Makefile.in (ALLDEPFILES): Add sparc64nbsd-tdep.c and
+	sparc64nbsd-nat.c.
+	(sparc64nbsd-tdep.o, sparc64nbsd-nat.o): New dependencies.
+	* config/sparc/nbsd64.mh (NATDEPFILES): Add sparc-nat.o.
+	* config/sparc/nbsd64.mt (TDEPFILES): Add sparc64-tdep.o and
+	sparc64nbsd-tdep.o.
+	(TM_FILE): Set to tm-nbsd.h.
+	* config/sparc/tm-nbsd64.h: Remove file.
+
 	* sparc64fbsd-tdep.c: Include "frame.h", "frame-unwind.h",
 	"trad-frame.h" and "gdb_assert.h".
 	(BIAS): New define.

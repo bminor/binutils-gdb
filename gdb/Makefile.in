@@ -2342,6 +2342,11 @@ sparc64fbsd-tdep.o: sparc64fbsd-tdep.c $(defs_h) $(gdbcore_h) $(osabi_h) \
 	$(regcache_h) $(target_h) $(gdb_string_h) $(sparc64_tdep_h)
 sparc64fbsd-nat.o: sparc64fbsd-nat.c $(defs_h) $(sparc64_tdep_h) \
 	$(sparc_nat_h)
+sparc64nbsd-tdep.o: sparc64nbsd-tdep.c $(defs_h) $(gdbcore_h) $(osabi_h) \
+	$(regcache_h) $(solib_svr4_h) $(gdb_string_h) $(sparc64_tdep_h) \
+	$(nbsd_tdep_h)
+sparc64nbsd-nat.o: sparc64nbsd-nat.c $(defs_h) $(sparc64_tdep_h) \
+	$(sparc_nat_h)
 sparc-stub.o: sparc-stub.c
 stabsread.o: stabsread.c $(defs_h) $(gdb_string_h) $(bfd_h) $(gdb_obstack_h) \
 	$(symtab_h) $(gdbtypes_h) $(expression_h) $(symfile_h) $(objfiles_h) \
