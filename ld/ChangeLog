@@ -1,3 +1,8 @@
+Thu Jan 28 15:12:04 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (install): Remove $(tooldir)/bin/gld before creating
+	the link to it.
+
 Tue Jan 26 11:49:50 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* ldmain.c, ldsym.c: Use new bfd_is_com_section macro rather than

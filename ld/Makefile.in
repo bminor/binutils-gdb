@@ -489,6 +489,7 @@ install: $(LD_PROG)
 	  rm -f $(tooldir)/bin/ld; \
 	  ln $(bindir)/$$n $(tooldir)/bin/ld \
 	   || $(INSTALL_PROGRAM) ld.new $(tooldir)/bin/ld; \
+	  rm -f $(tooldir)/bin/gld; \
 	  ln $(tooldir)/bin/ld $(tooldir)/bin/gld; \
 	else true; fi
 
