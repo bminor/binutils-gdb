@@ -102,7 +102,7 @@ TAGS: force
 	etags $(INCDIR)/*.h $(srcdir)/*.h $(srcdir)/*.c
 
 clean:
-	rm -f *.[oa] *~ core *.E
+	rm -f *.[oa] *~ core *.E *.p *.ip
 
 clobber realclean: clean
 	rm -f libbfd.a TAGS
@@ -185,7 +185,7 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 	(cd $(srcdir) ; \
 		./configure +norecurse \
 		+destdir=$(destdir) \
-		`if [ "$(srcdir)" != "." ] ; then echo +f; fi` \
+		`if [ "$(srcdir)" != "." ] ; then echo +subdirs; fi` \
 		$(host) +target=$(target);)
 
 dep: $(CFILES)
@@ -205,56 +205,49 @@ dep: $(CFILES)
 #	rebuilds the bfd.dvi manual
 #
 # make docs texinfo
-#	rebuilts the bfdinfo manual
+#	rebuilds the bfdinfo manual
 
 
-.SUFFIXES: .doc .o .c .h .proto
+.SUFFIXES: .texi .o .c .h .p .ip
 
-.c.doc:
-	makedoc <$< doc/$*.doc doc/$*.proto doc/$*.protointernal doc/$*.drop
+.c.texi:
+	scanit $< 
 
-.h.doc:
-	makedoc <$< doc/$*.doc doc/$*.proto doc/$*.protointernal doc/$*.drop
+.h.texi:
+	scanit $< 
 
-.proto.doc:
-	makedoc <$< doc/$*.doc doc/$*.proto doc/$*.protointernal doc/$*.drop
+.c.p:
+	scanph $<
+
+.h.p:
+	scanph $<
+
+.c.ip:
+	scanph -i $<
 
 
 DSRC=$(CFILES)
 
-docs: syms.doc bfd.doc cache.doc format.doc section.doc archive.doc \
-	core.doc libbfd.doc archures.doc reloc.doc opncls.doc \
-	targets.doc aoutx.doc coffcode.doc
+docs: syms.texi bfd.texi cache.texi format.texi section.texi \
+	archive.texi core.texi libbfd.texi archures.texi reloc.texi \
+	 opncls.texi targets.texi aoutx.texi coffcode.texi
 
 
-PROTOS = doc/opncls.proto doc/archures.proto doc/libbfd.proto doc/section.proto doc/syms.proto  doc/bfd.proto doc/archive.proto \
-	doc/reloc.proto doc/targets.proto doc/format.proto 
+PROTOS = opncls.p archures.p libbfd.p section.p syms.p bfd.p \
+	archive.p reloc.p targets.p format.p coffcode.p
 
+IPROTOS = libbfd.ip cache.ip 
 
-headers : $(PROTOS)
-	- mkdir  doc
+headers : $(PROTOS) $(IPROTOS)
 	# Rebuild prototypes in bfd.h
-	sed <$(BFD_H) >bfd.h.new -e '1,/THE FOLLOWING/!d'
-	cat doc/opncls.proto doc/archures.proto \
-	doc/libbfd.proto doc/section.proto doc/syms.proto \
-	doc/bfd.proto doc/archive.proto \
-	doc/core.proto \
-	doc/reloc.proto doc/targets.proto doc/format.proto >>bfd.h.new
-	echo >> bfd.h.new
-	echo "#endif" >> bfd.h.new
-	echo >> bfd.h.new
-	mv bfd.h.new $(BFD_H)
-
+	mv $(BFD_H) $(BFD_H).old
+	sed -f $(srcdir)/intobfd $(BFD_H).old > $(BFD_H)
 	# and libbfd.h
-	sed < libbfd.h >libbfd.h.new -e '1,/THE FOLLOWING/!d'
-	cat  doc/libbfd.protointernal doc/cache.protointernal doc/reloc.protointernal  >> libbfd.h.new
-	echo >> libbfd.h.new
-	mv libbfd.h.new libbfd.h
-	
+	mv $(srcdir)/libbfd.h libbfd.h.old
+	sed -f $(srcdir)/tolibbfd libbfd.h.old >$(srcdir)/libbfd.h
 	# and libcoff.h
-	sed < $(srcdir)/libcoff.h >libcoff.h.new -e '1,/THE FOLLOWING/!d'
-	cat doc/coffcode.proto >>libcoff.h.new
-	mv libcoff.h.new $(srcdir)/libcoff.h
+	mv $(srcdir)/libcoff.h libcoff.h.old
+	sed -f $(srcdir)/tolibcoff libcoff.h.old >$(srcdir)/libcoff.h
 
 
 texinfo:
@@ -264,6 +257,9 @@ texdoc:
 	tex bfd.texinfo
 	texindex bfd.??
 	tex bfd.texinfo
+
+psdoc:
+	dvips -f bfd.dvi >bfd.texi.ps
 	
 quickdoc: $(DSRC) docs
 	tex bfd.texinfo
