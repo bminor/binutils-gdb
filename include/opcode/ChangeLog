@@ -1,3 +1,12 @@
+Mon Aug 10 23:22:33 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* i386.h (i386_optab): Add fildq, fistpq aliases used by gcc.
+
+Sun Jun 28 13:29:03 1992  Fred Fish  (fnf@cygnus.com)
+
+	* h8300.h:  Finish filling in all the holes in the opcode table,
+	so that the Lucid C compiler can digest this as well...
+
 Fri Jun 26 21:27:17 1992  John Gilmore  (gnu at cygnus.com)
 
 	* i386.h:  Add setc, setnc, addr16, data16, repz, repnz aliases.
