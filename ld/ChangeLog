@@ -1,4 +1,16 @@
 2004-05-07  Brian Ford  <ford@vss.fsi.com>
+            DJ Delorie  <dj@redhat.com>
+
+	* emultempl/pe.em (real_flags): New static.
+	(OPTION_LARGE_ADDRESS_AWARE): New define.
+	(gld${EMULATION_NAME}_add_options): Add --large-address-aware option.
+	(gld_${EMULATION_NAME}_list_options): Likewise.
+	(gld${EMULATION_NAME}_handle_option): Likewise.
+	(gld_${EMULATION_NAME}_after_open): Pass real_flags to PE private data.
+	* ld.texinfo: Document it.
+	* NEWS: Mention it.
+
+2004-05-07  Brian Ford  <ford@vss.fsi.com>
 
 	* NEWS: Mention DWARF 2 support for i386pe.
 

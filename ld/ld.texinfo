@@ -1872,6 +1872,15 @@ If given, the stdcall suffixes (@@@var{nn}) will be stripped from
 symbols before they are exported.
 [This option is specific to the i386 PE targeted port of the linker]
 
+@kindex --large-address-aware
+@item --large-address-aware
+If given, the appropriate bit in the ``Charateristics'' field of the COFF
+header is set to indicate that this executable supports virtual addresses
+greater than 2 gigabytes.  This should be used in conjuction with the /3GB
+or /USERVA=@var{value} megabytes switch in the ``[operating systems]''
+section of the BOOT.INI.  Otherwise, this bit has no effect.
+[This option is specific to PE targeted ports of the linker]
+
 @kindex --major-image-version
 @item --major-image-version @var{value}
 Sets the major number of the ``image version''.  Defaults to 1.

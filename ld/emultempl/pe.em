@@ -62,6 +62,11 @@ cat >>e${EMULATION_NAME}.c <<EOF
 #include "ldctor.h"
 #include "coff/internal.h"
 
+/* FIXME: See bfd/peXXigen.c for why we include an architecture specific
+   header in generic PE code.  */
+#include "coff/i386.h"
+#include "coff/pe.h"
+
 /* FIXME: This is a BFD internal header file, and we should not be
    using it here.  */
 #include "../bfd/libcoff.h"
@@ -106,6 +111,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 
 static struct internal_extra_pe_aouthdr pe;
 static int dll;
+static flagword real_flags = 0;
 static int support_old_code = 0;
 static char * thumb_entry_symbol = NULL;
 static lang_assignment_statement_type *image_base_statement = 0;
@@ -182,6 +188,8 @@ gld_${EMULATION_NAME}_before_parse (void)
 					(OPTION_EXCLUDE_LIBS + 1)
 #define OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC	\
 					(OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC + 1)
+#define OPTION_LARGE_ADDRESS_AWARE \
+					(OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC + 1)
 
 static void
 gld${EMULATION_NAME}_add_options
@@ -235,6 +243,7 @@ gld${EMULATION_NAME}_add_options
     {"enable-runtime-pseudo-reloc", no_argument, NULL, OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC},
     {"disable-runtime-pseudo-reloc", no_argument, NULL, OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC},
 #endif
+    {"large-address-aware", no_argument, NULL, OPTION_LARGE_ADDRESS_AWARE},
     {NULL, no_argument, NULL, 0}
   };
 
@@ -335,6 +344,8 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
   fprintf (file, _("  --enable-extra-pe-debug            Enable verbose debug output when building\n\
                                        or linking to DLLs (esp. auto-import)\n"));
 #endif
+  fprintf (file, _("  --large-address-aware              Executable supports virtual addresses\n\
+                                       greater than 2 gigabytes\n"));
 }
 
 
@@ -597,6 +608,9 @@ gld${EMULATION_NAME}_handle_option (int optc)
       pe_dll_extra_pe_debug = 1;
       break;
 #endif
+    case OPTION_LARGE_ADDRESS_AWARE:
+      real_flags |= IMAGE_FILE_LARGE_ADDRESS_AWARE;
+      break;
     }
   return TRUE;
 }
@@ -949,6 +963,7 @@ gld_${EMULATION_NAME}_after_open (void)
 
   pe_data (output_bfd)->pe_opthdr = pe;
   pe_data (output_bfd)->dll = init[DLLOFF].value;
+  pe_data (output_bfd)->real_flags |= real_flags;
 
 #ifdef DLL_SUPPORT
   if (pe_enable_stdcall_fixup) /* -1=warn or 1=disable */
