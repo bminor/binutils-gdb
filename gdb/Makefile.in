@@ -779,17 +779,22 @@ clean:
 	rm -f gdb core make.log
 	rm -f gdb[0-9]
 
-distclean: clean c-exp.tab.c m2-exp.tab.c ch-exp.tab.c TAGS
+# This used to depend on c-exp.tab.c m2-exp.tab.c ch-exp.tab.c TAGS
+# I believe this is wrong; the makefile standards for distclean just
+# describe removing files; the only sort of "re-create a distribution"
+# functionality described is if the distributed files are unmodified.
+distclean: clean
 	@$(MAKE) $(FLAGS_TO_PASS) DO=distclean "DODIRS=$(SUBDIRS)" subdir_do 
-	rm -f tm.h xm.h config.status
+	rm -f nm.h tm.h xm.h config.status
 	rm -f y.output yacc.acts yacc.tmp
 	rm -f ${TESTS} Makefile depend
 
 realclean: clean
 	@$(MAKE) $(FLAGS_TO_PASS) DO=realclean "DODIRS=$(SUBDIRS)" subdir_do
 	rm -f c-exp.tab.c m2-exp.tab.c ch-exp.tab.c TAGS
-	rm -f tm.h xm.h config.status
-	rm -f Makefile depend
+	rm -f nm.h tm.h xm.h config.status
+	rm -f y.output yacc.acts yacc.tmp
+	rm -f ${TESTS} Makefile depend
 
 STAGESTUFF=${OBS} ${TSOBS} ${NTSOBS} ${ADD_FILES} init.c init.o version.c gdb
 
@@ -853,8 +858,9 @@ c-exp.tab.c: $(srcdir)/c-exp.y $(srcdir)/Makefile.in
 	     -e '/include.*malloc.h/d' \
 	     -e 's/malloc/xmalloc/g' \
 	     -e 's/realloc/xrealloc/g' \
-	  < y.tab.c > ././c-exp.tab.c
+	  < y.tab.c > c-exp.new
 	-rm y.tab.c
+	mv c-exp.new ././c-exp.tab.c
 
 # ch-exp.tab.c is generated in target dir from ch-exp.y if it doesn't exist
 # in srcdir, then compiled in target dir to ch-exp.tab.o.
@@ -869,8 +875,9 @@ ch-exp.tab.c: $(srcdir)/ch-exp.y $(srcdir)/Makefile.in
 	     -e '/include.*malloc.h/d' \
 	     -e 's/malloc/xmalloc/g' \
 	     -e 's/realloc/xrealloc/g' \
-	  < y.tab.c > ././ch-exp.tab.c
+	  < y.tab.c > ch-exp.new
 	-rm y.tab.c
+	mv ch-exp.new ././ch-exp.tab.c
 
 # m2-exp.tab.c is generated in target dir from m2-exp.y if it doesn't exist
 # in srcdir, then compiled in target dir to m2-exp.tab.o.
@@ -885,8 +892,12 @@ m2-exp.tab.c: $(srcdir)/m2-exp.y $(srcdir)/Makefile.in
 	     -e '/include.*malloc.h/d' \
 	     -e 's/malloc/xmalloc/g' \
 	     -e 's/realloc/xrealloc/g' \
-	  < y.tab.c > ././m2-exp.tab.c
+	  < y.tab.c > m2-exp.new
 	-rm y.tab.c
+	mv m2-exp.new ././m2-exp.tab.c
+
+# These files are updated atomically, so make never has to remove them
+.PRECIOUS: m2-exp.tab.c ch-exp.tab.c c-exp.tab.c
 
 lint: $(LINTFILES)
 	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \

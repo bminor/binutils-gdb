@@ -1,3 +1,11 @@
+Wed Jun  9 16:08:44 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* Makefile.in (*.tab.c): Use mv for atomic update.
+
+	* Makefile.in ({dist,real}clean): Also remove nm.h.
+	(realclean): Also remove ${TESTS}, y.output, yacc.{acts,tmp}.
+	(distclean): Don't rebuild *.tab.c or TAGS.
+
 Wed Jun  9 12:56:58 1993  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in (version.c): add host and target names to version.c.
