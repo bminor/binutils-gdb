@@ -1348,6 +1348,7 @@ utilities, since it is only useful for NLM targets.
 nlmconv [ -I @var{bfdname} | --input-target=@var{bfdname} ]
         [ -O @var{bfdname} | --output-target=@var{bfdname} ]
         [ -T @var{headerfile} | --header-file=@var{headerfile} ]
+        [ -d | --debug]  [ -l @var{linker} | --linker=@var{linker} ]
         [ -h | --help ]  [ -V | --version ]
         @var{infile} @var{outfile}
 @end smallexample
@@ -1362,6 +1363,11 @@ Developer's Kit (``NLM SDK''), available from Novell, Inc.
 @code{nlmconv} uses the @sc{gnu} Binary File Descriptor library to read
 @var{infile}; see @ref{BFD,,BFD,ld.info,Using LD}, for
 more information.
+
+@code{nlmconv} can perform a link step.  In other words, you can list
+more than one object file for input if you list them in the definitions
+file (rather than simply specifying one input file on the command line).
+In this case, @code{nlmconv} calls the linker for you.
 
 @table @code
 @item -I @var{bfdname}
@@ -1384,6 +1390,15 @@ writing the NLM command file language used in header files, see@ see the
 @samp{linkers} section, of the @cite{NLM Development and Tools
 Overview}, which is part of the NLM Software Developer's Kit, available
 from Novell, Inc.
+
+@item -d
+@itemx --debug
+Displays (on standard error) the linker command line used by @code{nlmconv}.
+
+@item -l @var{linker}
+@itemx --linker=@var{linker}
+Use @var{linker} for any linking.  @var{linker} can be an abosolute or a
+relative pathname.
 
 @item -h
 @itemx --help
