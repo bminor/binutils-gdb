@@ -57,6 +57,10 @@ SECTIONS
   .rela.rodata ${RELOCATING-0} : { *(.rela.rodata) 	}
   .rel.got     ${RELOCATING-0} : { *(.rel.got)		}
   .rela.got    ${RELOCATING-0} : { *(.rela.got)		}
+  .rel.got1    ${RELOCATING-0} : { *(.rel.got1)		}
+  .rela.got1   ${RELOCATING-0} : { *(.rela.got1)	}
+  .rel.got2    ${RELOCATING-0} : { *(.rel.got2)		}
+  .rela.got2   ${RELOCATING-0} : { *(.rela.got2)	}
   .rel.ctors   ${RELOCATING-0} : { *(.rel.ctors)	}
   .rela.ctors  ${RELOCATING-0} : { *(.rela.ctors)	}
   .rel.dtors   ${RELOCATING-0} : { *(.rel.dtors)	}
@@ -95,14 +99,19 @@ SECTIONS
   }
   .data1 ${RELOCATING-0} : { *(.data1) }
   ${RELOCATING+${OTHER_READWRITE_SECTIONS}}
-  .ctors       ${RELOCATING-0} : { *(.ctors)   }
-  .dtors       ${RELOCATING-0} : { *(.dtors)   }
+  .ctors       ${RELOCATING-0} : { *(.ctors) }
+  .dtors       ${RELOCATING-0} : { *(.dtors) }
 
-  /* FIXME: _GLOBAL_OFFSET_TABLE_ should really be set to the GOT + 32k on
-     machines whose addressing uses sign extended 16-bit literals (ie, most
-     RISC machines) and just the GOT on machines that either zero extend
-     literals (ie, the 88k), or use a full word literal field (ie, i386).  */
-  ${RELOCATING+_GLOBAL_OFFSET_TABLE_ = .;}
+  ${RELOCATING+_GOT1_START_ = .;}
+  .got1 ${RELOCATING-0} :  { *(.got1) }
+  ${RELOCATING+_GOT1_END_ = .;}
+
+  ${RELOCATING+_GOT2_START_ = .;}
+  .got2 ${RELOCATING-0} :  { *(.got2) }
+  ${RELOCATING+_GOT2_END_ = .;}
+
+  ${RELOCATING+_GOT_START_ = .;}
+  ${RELOCATING+_GLOBAL_OFFSET_TABLE_ = . + 32768;}
   ${RELOCATING+_SDA_BASE_ = .;}
   .got         ${RELOCATING-0} : { *(.got.plt) *(.got) }
   ${RELOCATING+_GOT_END_ = .;}
