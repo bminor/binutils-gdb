@@ -77,8 +77,15 @@ proc finish_void { } {
     gdb_test "continue" "Breakpoint.* void_func.*" \
 	    "continue to void_func"
     send_gdb "finish\n"
+    # Some architectures will have one or more instructions after the
+    # call instruction which still is part of the call sequence, so we
+    # must be prepared for a "finish" to show us the void_func call
+    # again as well as the statement after.
     gdb_expect {
 	-re ".*void_checkpoint.*$gdb_prompt $" {
+	    pass "finish from void_func"
+	}
+	-re ".*call to void_func.*$gdb_prompt $" {
 	    pass "finish from void_func"
 	}
 	-re ".*$gdb_prompt $" {
