@@ -115,6 +115,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define	YYDEBUG	0		/* Default to no yydebug support */
 #endif
 
+static void
+write_lower_upper_value PARAMS ((enum exp_opcode, struct type *type));
+
 int
 yyparse PARAMS ((void));
 
@@ -1781,7 +1784,7 @@ yylex ()
     return (ILLEGAL_TOKEN);
 }
 
-void
+static void
 write_lower_upper_value (opcode, type)
      enum exp_opcode opcode;  /* Either UNOP_LOWER or UNOP_UPPER */
      struct type *type;
