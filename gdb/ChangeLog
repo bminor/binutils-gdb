@@ -1,3 +1,9 @@
+2003-01-28  Andrew Cagney  <ac131313@redhat.com>
+
+	* complaints.c (complain): Delete function.
+	* complaints.h (struct deprecated_complaint): Delete definition.
+	(complain): Delete declaration.
+
 2003-01-28  Kevin Buettner  <kevinb@redhat.com>
 
 	* mips-tdep.c (mips_init_extra_frame_info): Return early for
