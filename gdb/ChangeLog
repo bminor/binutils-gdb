@@ -1,3 +1,13 @@
+2003-03-19  J. Brobecker  <brobecker@gnat.com>
+
+	Continuing work to convert the hppa targets to multiarch partial.
+
+	* hppa-tdep.c (hppa_gdbarch_init): Set the push_dummy_frame gdbarch
+	method, now that hppa_push_dummy_frame has a conformant prototype.
+	* config/pa/tm-hppa.h (DEPRECATED_PUSH_DUMMY_FRAME): Wrap macro
+	inside "#if !GDB_MULTI_ARCH ... #endif" conditional, in preparation
+	for the switch to multiarch partial.
+
 2003-03-19  Kevin Buettner  <kevinb@redhat.com>
 
 	* mdebugread.c (parse_symbol): For stEnd, we're done counting

@@ -450,10 +450,10 @@ extern void hppa_frame_find_saved_regs (struct frame_info *,
 
 /* Things needed for making the inferior call functions.  */
 
-/* Push an empty stack frame, to record the current PC, etc. */
-
+#if !GDB_MULTI_ARCH
 #define DEPRECATED_PUSH_DUMMY_FRAME hppa_push_dummy_frame ()
 extern void hppa_push_dummy_frame (void);
+#endif
 
 /* Discard from the stack the innermost frame, 
    restoring all saved registers.  */
