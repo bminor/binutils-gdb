@@ -1,3 +1,10 @@
+Fri Nov 11 14:27:23 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* ld.h (args_type): Add field export_dynamic.
+	* lexsup.c (parse_args): Recognize --export-dynamic.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation):
+	Pass export_dynamic argument to bfd_elf32_size_dynamic_sections.
+
 Wed Nov  9 12:47:11 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* ldlang.c (lang_one_common): Set SEC_ALLOC in any section where
