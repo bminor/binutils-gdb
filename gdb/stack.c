@@ -216,7 +216,7 @@ print_frame_info (struct frame_info *fi, int level, int source, int args)
       if (ui_out_is_mi_like_p (uiout))
         {
           annotate_frame_address ();
-          ui_out_field_core_addr (uiout, "addr", fi->pc);
+          ui_out_field_core_addr (uiout, "addr", get_frame_pc (fi));
           annotate_frame_address_end ();
         }
 
