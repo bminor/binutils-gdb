@@ -1,5 +1,7 @@
 Fri Mar 28 13:08:33 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* itbl-parse.y (yyerror): Make static.  Declare.
+
 	From Ralf Baechle <ralf@gnu.ai.mit.edu>:
 	* configure.in: Set emulations for mips-*-linux*-*.
 	* configure: Rebuild.
