@@ -240,7 +240,7 @@ SFILES_KGDB  = $(SFILES) stuff.c kdb-start.c
 HFILES=	breakpoint.h buildsym.h call-cmds.h command.h defs.h demangle.h \
 	environ.h expression.h frame.h gdbcmd.h gdbcore.h gdbtypes.h \
 	ieee-float.h inferior.h minimon.h objfiles.h partial-stab.h \
-	signals.h symfile.h symtab.h solib.h xcoffsolib.h \
+	serial.h signals.h symfile.h symtab.h solib.h xcoffsolib.h \
 	target.h terminal.h tm-68k.h tm-i960.h tm-sunos.h tm-sysv4.h \
 	xm-m68k.h xm-sysv4.h language.h parser-defs.h value.h xm-vax.h
 
@@ -625,18 +625,28 @@ version.c: Makefile
 
 # c-exp.tab.c is generated in target dir from c-exp.y if it doesn't exist
 # in srcdir, then compiled in target dir to c-exp.tab.o.
+# Remove bogus decls for malloc/realloc/free which conflict with everything
+# else.
 c-exp.tab.o: c-exp.tab.c
 c-exp.tab.c: $(srcdir)/c-exp.y
 	@echo 'Expect 4 shift/reduce conflicts.'
 	${YACC} $(srcdir)/c-exp.y
-	-mv y.tab.c c-exp.tab.c
+	-sed -e '/extern.*malloc/d' \
+	     -e '/extern.*realloc/d' \
+	     -e '/extern.*free/d' \
+	  < y.tab.c > c-exp.tab.c
+	-rm y.tab.c
 
 # m2-exp.tab.c is generated in target dir from m2-exp.y if it doesn't exist
 # in srcdir, then compiled in target dir to m2-exp.tab.o.
 m2-exp.tab.o: m2-exp.tab.c
 m2-exp.tab.c: $(srcdir)/m2-exp.y
 	${YACC} $(srcdir)/m2-exp.y
-	-mv y.tab.c m2-exp.tab.c
+	-sed -e '/extern.*malloc/d' \
+	     -e '/extern.*realloc/d' \
+	     -e '/extern.*free/d' \
+	  < y.tab.c > m2-exp.tab.c
+	-rm y.tab.c
 
 # The symbol-file readers have dependencies on BFD header files.
 dbxread.o: ${srcdir}/dbxread.c

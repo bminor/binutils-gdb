@@ -66,8 +66,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* /usr/include/stdlib.h always uses void* and void,
    even when __STDC__ isn't defined. */
 #define MALLOC_INCOMPATIBLE
-extern char *malloc();
-extern char *realloc();
-extern void free();
+extern void *malloc PARAMS ((size_t size));
+extern void *realloc PARAMS ((void *ptr, size_t size));
+extern void free PARAMS ((void *));
 
-extern char *strdup();
+/* AIX doesn't have strdup, so we need to declare it for libiberty */
+extern char *strdup PARAMS ((char *));

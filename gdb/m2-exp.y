@@ -104,6 +104,9 @@ struct block *modblock=0;
 
 /* #define	YYDEBUG	1 */
 
+/* !@&%ing AIX defines these!  Prevent cpp complaints by undeffing them */
+#undef TRUE
+#undef FALSE
 %}
 
 /* Although the yacc "value" of an expression is not used,
