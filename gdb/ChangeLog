@@ -1,6 +1,6 @@
 Sat Feb  1 04:15:41 1992  Stu Grossman  (grossman at cygnus.com)
 
-	* Makefile.in:  Increment version to 4.5.
+	* Makefile.in:  Increment version to 4.4.1.
 	* main.c (print_gdb_version):  Update copyright notice.
 
 Sat Feb  1 01:43:11 1992  Per Bothner  (bothner at cygnus.com)
