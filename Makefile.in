@@ -498,6 +498,9 @@ ALL_MODULES = \
 	all-findutils \
 	all-find \
 	all-flex \
+	$(start-sanitize-cygnus) \
+	all-flexlm \
+	$(end-sanitize-cygnus) \
 	all-gas \
 	all-gawk \
 	all-gettext \
@@ -581,6 +584,9 @@ CROSS_CHECK_MODULES = \
 	check-fileutils \
 	check-findutils \
 	check-find \
+	$(start-sanitize-cygnus) \
+	check-flexlm \
+	$(end-sanitize-cygnus) \
 	check-gas \
 	check-gawk \
 	check-gettext \
@@ -665,6 +671,9 @@ INSTALL_MODULES = \
 	install-findutils \
 	install-find \
 	install-flex \
+	$(start-sanitize-cygnus) \
+	install-flexlm \
+	$(end-sanitize-cygnus) \
 	install-gas \
 	install-gawk \
 	install-gettext \
@@ -841,6 +850,9 @@ CLEAN_MODULES = \
 	clean-findutils \
 	clean-find \
 	clean-flex \
+	$(start-sanitize-cygnus) \
+	clean-flexlm \
+	$(end-sanitize-cygnus) \
 	clean-gas \
 	clean-gawk \
 	clean-gettext \
@@ -1508,6 +1520,9 @@ all-fileutils: all-libiberty
 all-findutils:
 all-find:
 all-flex: all-libiberty all-bison all-byacc
+# start-sanitize-cygnus
+all-flexlm:
+# end-sanitize-cygnus
 all-gas: all-libiberty all-opcodes all-bfd all-intl
 all-gash: all-tcl
 all-gawk:
@@ -1579,7 +1594,7 @@ all-sed: all-libiberty
 all-send-pr: all-prms
 all-shellutils:
 all-sim: all-libiberty all-bfd all-opcodes all-readline
-all-snavigator: all-tcl all-tk all-tix all-itcl all-db all-grep
+all-snavigator: all-tcl all-tk all-tix all-itcl all-db all-grep all-flexlm
 all-tar: all-libiberty
 all-tcl:
 all-tclX: all-tcl all-tk
