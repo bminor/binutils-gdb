@@ -125,6 +125,10 @@ i[3456]86-pc-interix*)
   HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi` -L $$X/local_bin -L $$INTERIX_ROOT/usr/lib -lc -lcpsx -lc -lcpsx $$INTERIX_ROOT/usr/lib/psxdll.a $$INTERIX_ROOT/usr/lib/psxdll2.a'
   ;;
 
+i[3456]86-*-cygwin*)
+  HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi` -lcygwin -luser32 -lkernel32 -ladvapi32 -lshell32 `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi`'
+  ;;
+
 ia64-*-linux-gnu*)
   HOSTING_CRT0='-dynamic-linker `egrep "ld-linux-ia64.so" \`${CC} --print-file-name=specs\` | sed -e "s,.*-dynamic-linker[ 	][ 	]*\(.*/ld-linux-ia64.so..\).*,\1,"` `${CC} --print-file-name=crt1.o` `${CC} --print-file-name=crti.o` `if [ -f ../gcc/crtbegin.o ]; then echo ../gcc/crtbegin.o; else ${CC} --print-file-name=crtbegin.o; fi`'
   HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi` -L`dirname \`${CC} --print-file-name=libc.so\`` -lc `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi` `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else ${CC} --print-file-name=crtend.o; fi` `${CC} --print-file-name=crtn.o`'

@@ -1,3 +1,7 @@
+2001-01-12  Philip Blundell  <pb@futuretv.com>
+
+	* configure.host: Set HOSTING_LIBS appropriately for ix86-cygwin.
+
 2001-01-10  Kazu Hirata  <kazu@hxi.com>
 
 	* scripttempl/h8300.sc: Fix formatting.  Fix a comment typo.
