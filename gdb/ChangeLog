@@ -1,3 +1,12 @@
+Mon Oct 11 02:48:57 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* alpha-tdep.c (init_extra_frame_info):  Remove kludge for gcc,
+	gcc has to be compatible with the native tools.
+	* alpha-tdep.c (alpha_push_arguments):  Rename NUM_ARG_REGS to
+	ALPHA_NUM_ARG_REGS and move its definition to tm-alpha.h.
+	* config/alpha/tm-alpha.h (FRAME_ARGS_ADDRESS):  Change it to the
+	way the native tools define it, update comment.
+
 Fri Oct  8 15:54:06 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* osfsolib.c, remote-sim.c, remote.c, solib.c, xcoffexec.c, 

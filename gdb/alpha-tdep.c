@@ -71,8 +71,8 @@ static unsigned int heuristic_fence_post = 0;
    |  |localoff	|  Copies of 1st .. 6th		|
    |  |  |  |	|  argument if necessary.	|
    |  |  |  v	|				|
-   |  |  |  ---	|-------------------------------|<-- FRAME_ARGS_ADDRESS,
-   |  |  |      |				|    FRAME_LOCALS_ADDRESS
+   |  |  |  ---	|-------------------------------|<-- FRAME_LOCALS_ADDRESS
+   |  |  |      |				|
    |  |  |      |  Locals and temporaries.	|
    |  |  |      |				|
    |  |  |      |-------------------------------|
@@ -469,24 +469,6 @@ init_extra_frame_info(fci)
 	 even if we are in the middle of the prologue.  */
       fci->localoff = PROC_LOCALOFF(proc_desc);
 
-      /* FIXME: This is a kludge for gcc-2.4.5.
-	 gcc-2.4.5 builds frames for the alpha in a peculiar way.
-	 It uses $fp as a frame register (which seems to be identical to $sp
-	 in all procedures that do not use alloca).
-	 It has the arguments and the locals above the frame register, if
-	 there are few arguments then the locals are above the arguments,
-	 otherwise the arguments are above the local.
-	 Frame offsets for arguments and locals are relative to $fp and always
-	 positive.
-	 If we want to stay compatible with the native cc compiler we have
-	 to set localoff to frameoffset so that FRAME_ARGS_ADDRESS and
-	 FRAME_LOCALS_ADDRESS point to the right place in the frame.
-	 Please note that the setting of localoff in the compiler won't work
-	 as localoff is only 8 bits wide (which is enough for cc as it needs
-	 at most number_of_arg_regs * 8 == 48).  */
-      if (PROC_FRAME_REG(proc_desc) == GCC_FP_REGNUM)
-	fci->localoff = PROC_FRAME_OFFSET(proc_desc);
-
       /* Fixup frame-pointer - only needed for top frame */
       /* Fetch the frame pointer for a dummy frame from the procedure
 	 descriptor.  */
@@ -603,8 +585,6 @@ setup_arbitrary_frame (argc, argv)
    If the called function is returning a structure, the address of the
    structure to be returned is passed as a hidden first argument.  */
 
-#define NUM_ARG_REGS	6
-
 CORE_ADDR
 alpha_push_arguments (nargs, args, sp, struct_return, struct_addr)
   int nargs;
@@ -615,7 +595,7 @@ alpha_push_arguments (nargs, args, sp, struct_return, struct_addr)
 {
   register i;
   int accumulate_size = struct_return ? 8 : 0;
-  int arg_regs_size = NUM_ARG_REGS * 8;
+  int arg_regs_size = ALPHA_NUM_ARG_REGS * 8;
   struct alpha_arg { char *contents; int len; int offset; };
   struct alpha_arg *alpha_args =
       (struct alpha_arg*)alloca (nargs * sizeof (struct alpha_arg));
@@ -638,8 +618,8 @@ alpha_push_arguments (nargs, args, sp, struct_return, struct_addr)
   /* Determine required argument register loads, loading an argument register
      is expensive as it uses three ptrace calls.  */
   required_arg_regs = accumulate_size / 8;
-  if (required_arg_regs > NUM_ARG_REGS)
-    required_arg_regs = NUM_ARG_REGS;
+  if (required_arg_regs > ALPHA_NUM_ARG_REGS)
+    required_arg_regs = ALPHA_NUM_ARG_REGS;
 
   /* Make room for the arguments on the stack.  */
   if (accumulate_size < arg_regs_size)
