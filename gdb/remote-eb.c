@@ -28,7 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	 TM_FILE_OVERRIDE
 #include "defs.h"
 #include <string.h>
-#include "tm-29k.h"
+#include "a29k/tm-29k.h"
 
 #include "inferior.h"
 #include "wait.h"

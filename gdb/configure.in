@@ -4,6 +4,21 @@ srctrigger=main.c
 
 # per-host:
 
+# Map host cpu into the config cpu subdirectory name.
+# The default is $host_cpu.
+
+case "${host_cpu}" in
+
+c[12])			gdb_host_cpu=convex ;;
+hppa*)			gdb_host_cpu=pa ;;
+i[34]86)		gdb_host_cpu=i386 ;;
+m68*)			gdb_host_cpu=m68k ;;
+np1)			gdb_host_cpu=gould ;;
+pyramid)		gdb_host_cpu=pyr ;;
+*)			gdb_host_cpu=$host_cpu ;;
+
+esac
+
 # map host info into gdb names.
 
 case "${host}" in
@@ -88,15 +103,33 @@ vax-*-ultrix*)		gdb_host=vaxult ;;
 esac
 
 
-if [ ! -f ${srcdir}/config/${gdb_host}.mh ]; then
+if [ ! -f ${srcdir}/config/${gdb_host_cpu}/${gdb_host}.mh ]; then
 	echo '***' "Gdb does not support host ${host}" 1>&2
 	exit 1
 fi
 
 #  We really shouldn't depend on there being a space after XM_FILE= ...
-hostfile=`awk '$1 == "XM_FILE=" { print $2 }' <${srcdir}/config/${gdb_host}.mh`
+hostfile=`awk '$1 == "XM_FILE=" { print $2 }' <${srcdir}/config/${gdb_host_cpu}/${gdb_host}.mh`
 
 # per-target:
+
+# Map target cpu into the config cpu subdirectory name.
+# The default is $target_cpu.
+
+case "${target_cpu}" in
+
+c[12])			gdb_target_cpu=convex ;;
+hppa*)			gdb_target_cpu=pa ;;
+i[34]86)		gdb_target_cpu=i386 ;;
+m68*)			gdb_target_cpu=m68k ;;
+np1)			gdb_target_cpu=gould ;;
+pn)			gdb_target_cpu=gould ;;
+pyramid)		gdb_target_cpu=pyr ;;
+*)			gdb_target_cpu=$target_cpu ;;
+
+esac
+
+# map target info into gdb names.
 
 case "${target}" in
 
@@ -209,25 +242,25 @@ vax-*-*)		gdb_target=vax ;;
 z8k-unknown-sim)	gdb_target=z8ksim ;;
 esac
 
-if [ ! -f ${srcdir}/config/${gdb_target}.mt ]; then
+if [ ! -f ${srcdir}/config/${gdb_target_cpu}/${gdb_target}.mt ]; then
 	echo '***' "Gdb does not support target ${target}" 1>&2
 	exit 1
 fi
 
 if [ -z "${removing}" ] ; then
-	cat ${srcdir}/config/${gdb_host}.mh ${srcdir}/config/${gdb_target}.mt | awk '$1 == "#msg" {
+	cat ${srcdir}/config/${gdb_host_cpu}/${gdb_host}.mh ${srcdir}/config/${gdb_target_cpu}/${gdb_target}.mt | awk '$1 == "#msg" {
 		print substr($0,6)}'
 fi
 
 #  We really shouldn't depend on there being a space after TM_FILE= ...
-targetfile=`awk '$1 == "TM_FILE=" { print $2 }' <${srcdir}/config/${gdb_target}.mt`
+targetfile=`awk '$1 == "TM_FILE=" { print $2 }' <${srcdir}/config/${gdb_target_cpu}/${gdb_target}.mt`
 
 if [ "${target}" = "${host}" ] ; then
-	nativefile=`awk '$1 == "NAT_FILE=" { print $2 }' <${srcdir}/config/${gdb_host}.mh`
+	nativefile=`awk '$1 == "NAT_FILE=" { print $2 }' <${srcdir}/config/${gdb_host_cpu}/${gdb_host}.mh`
 fi
 
-host_makefile_frag=config/${gdb_host}.mh
-target_makefile_frag=config/${gdb_target}.mt
+host_makefile_frag=config/${gdb_host_cpu}/${gdb_host}.mh
+target_makefile_frag=config/${gdb_target_cpu}/${gdb_target}.mt
 
 # If hostfile (XM_FILE) and/or targetfile (TM_FILE) and/or nativefile
 # (NAT_FILE) is not set in the ?config/* file, we don't make the
@@ -239,22 +272,34 @@ files=
 links=
 rm -f xm.h
 if [ "${hostfile}" != "" ]; then
-	files="${files} ${hostfile}"
+	if [ -f ${srcdir}/config/${hostfile} ]; then
+		files="${files} config/${hostfile}"
+	else
+		files="${files} config/${gdb_host_cpu}/${hostfile}"
+	fi
 	links="${links} xm.h"
 fi
 rm -f tm.h
 if [ "${targetfile}" != "" ]; then
-	files="${files} ${targetfile}"
+	if [ -f ${srcdir}/config/${targetfile} ]; then
+		files="${files} config/${targetfile}"
+	else
+		files="${files} config/${gdb_target_cpu}/${targetfile}"
+	fi
 	links="${links} tm.h"
 fi
-rm -f nat.h
+rm -f nm.h
 if [ "${nativefile}" != "" ]; then
-	files="${files} ${nativefile}"
+	if [ -f ${srcdir}/config/${nativefile} ]; then
+		files="${files} config/${nativefile}"
+	else
+		files="${files} config/${gdb_host_cpu}/${nativefile}"
+	fi
 	links="${links} nm.h"
 # temporary scaffolding until all hosts have the host/target/native
 # split in place.
 else
-	files="${files} nm-trash.h"
+	files="${files} config/nm-trash.h"
 	links="${links} nm.h"
 fi
 

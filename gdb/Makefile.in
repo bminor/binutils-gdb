@@ -124,7 +124,8 @@ RL_LIB = ./../readline${subdir}/libreadline.a
 # All the includes used for CFLAGS and for lint.
 # -I. for config files.
 # -I${srcdir} possibly for regex.h also.
-INCLUDE_CFLAGS = -I. -I${srcdir} -I$(INCLUDE_DIR)
+# -I${srcdir}/config for more generic config files.
+INCLUDE_CFLAGS = -I. -I${srcdir} -I${srcdir}/config -I$(INCLUDE_DIR)
 
 # M{H,T}_CFLAGS, if defined, has host- and target-dependent CFLAGS
 # from the config/ directory.
@@ -340,7 +341,7 @@ LINTFILES = $(SFILES) $(YYFILES) init.c
 SFILES_STAND = $(SFILES) standalone.c
 SFILES_KGDB  = $(SFILES) stuff.c kdb-start.c
 
-# Header files that are not named in config/* Makefile fragments go here.
+# Header files that are not named in config/*/* Makefile fragments go here.
 HFILES=	breakpoint.h buildsym.h call-cmds.h command.h defs.h \
 	environ.h expression.h frame.h gdbcmd.h gdbcore.h gdbtypes.h \
 	ieee-float.h inferior.h language.h \
@@ -497,7 +498,7 @@ rapp: $(RAPP_OBS)
 
 alldeps.mak: ${srcdir}/config
 	rm -f alldeps.mak alldeps.tmp allparam.tmp allconfig.tmp
-	for i in `ls -d ${srcdir}/config/*.m[ht]` ; do \
+	for i in `ls -d ${srcdir}/config/*/*.m[ht]` ; do \
 	  echo $$i >>allconfig.tmp; \
 	  awk <$$i ' \
 	    $$1 == "TDEPFILES=" || $$1 == "XDEPFILES=" \
@@ -521,6 +522,9 @@ alldeps.mak: ${srcdir}/config
 	      -e 's!udip2soc.o!29k-share/udi/udip2soc.c!' \
 	      -e 's/\.o/.c/' \
 	    >alldeps2.tmp
+	for i in `cat allparam.tmp` ; do \
+	  find config -name $$i -print >>allparam2.tmp ; \
+	done
 	echo '# Start of "alldeps.mak" definitions' \
 	    >>alldeps.mak;
 	echo 'ALLDEPFILES = $$(ALLDEPFILES_MAINDIR) $$(ALLDEPFILES_SUBDIR) $$(ALLDEP_FILES_SUBSUBDIR)' \
@@ -540,7 +544,7 @@ alldeps.mak: ${srcdir}/config
 	    NR == 0 {printf $$0;} \
 	    NR != 0 {printf "\\\n" $$0} \
 	    END {printf "\n\n"}' >>alldeps.mak;
-	sort <allparam.tmp | uniq | awk 'BEGIN {printf "ALLPARAM="} \
+	sort <allparam2.tmp | uniq | awk 'BEGIN {printf "ALLPARAM="} \
 	    NR == 0 {printf $$0;} \
 	    NR != 0 {printf "\\\n" $$0} \
 	    END {printf "\n\n"}' >>alldeps.mak;
@@ -550,7 +554,7 @@ alldeps.mak: ${srcdir}/config
 	    END {printf "\n\n"}' >>alldeps.mak;
 	echo '# End of "alldeps.mak" definitions' \
 	    >>alldeps.mak;
-	rm -f alldeps.tmp alldeps2.tmp allparam.tmp allconfig.tmp
+	rm -f alldeps.tmp alldeps2.tmp allparam.tmp allparam2.tmp allconfig.tmp
 
 # The sed script makes everything which depends on {x,t}m.h depend on
 # config.status as well, in case someone reconfigures gdb out from

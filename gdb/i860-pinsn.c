@@ -22,7 +22,7 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include <stdio.h>
 
 #include "defs.h"
-#include "tm-i860.h"
+#include "i860/tm-i860.h"
 #include "i860-opcode.h"
 
 /* i860 instructions are never longer than this many bytes.  */

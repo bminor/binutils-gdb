@@ -1,3 +1,37 @@
+Mon Mar 22 16:17:58 1993  Fred Fish  (fnf@cygnus.com)
+
+	* config/{a29k, arm, convex, gould, h8300, i386, i860, i960, m68k,
+	m88k, mips, none, ns32k, pa, pyr, romp, rs6000, sparc, tahoe, vax,
+	z8k}:  New directories to hold cpu specific configuration files.
+	Naming follows gcc convention.
+	* config/{*.mt, *.mh}:  All target and host makefile fragment
+	config files moved to an appropriate config/<cpu> subdirectory.
+	* nm-*, xm-*, tm-*:  All native, host, and target files, which
+	get linked to nm.h, xm.h, and tm.h respectively by configure,
+	moved to appropriate config/<cpu> subdirectory.
+	* nm-sysv4.h, xm-sysv4.h, tm-sysv4.h, tm-sunos.h, nm-trash.h:
+	Native, host, and target files that are common across more than
+	one cpu architecture and included by one of the configured
+	native, host, or target files, get moved to config directory.
+	* Makefile.in (INCLUDE_CFLAGS):  Add -I${srcdir}/config to
+	pick up native, host, or target include files moved to one of
+	the config subdirectories, and that are included by other files.
+	* Makefile.in (alldeps.mak):  Modify to account for new config
+	directory structure.
+	* alldeps.mak, depend:  Update for new config directory structure.
+	* config/*/[ntx]m-*.h:  Modify all files that include other
+	[ntx]m-*.h files to use path relative to gdb/config.  I.E.
+	"a29k/tm-ultra3.h" includes "a29k/tm-29k.h" rather than just
+	"tm-29k.h".
+	* remote-eb.c (tm-29k.h):  Include a29k/tm-29k.h.
+	* mipsread.c (tm-mips.h):  Include mips/tm-mips.h.
+	* i860-pinsn.c (tm-i860.h):  Include i860/tm-i860.h.
+	* configure.in:  Default gdb_host_cpu to host_cpu, and remap
+	the ones where the default is not unique or different than the
+	config subdirectory name.  Similarly, handle gdb_target_cpu.
+	Modify configure.in as appropriate to make use of gdb_host_cpu
+	and gdb_target_cpu to find makefile fragments and make links.
+
 Mon Mar 22 12:36:24 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* mipsread.c (compare_blocks): Sort blocks with the same start

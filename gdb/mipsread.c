@@ -47,7 +47,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define	TM_FILE_OVERRIDE
 #include "defs.h"
-#include "tm-mips.h"
+#include "mips/tm-mips.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "gdbcore.h"
