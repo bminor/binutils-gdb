@@ -1,5 +1,5 @@
 /* Support routines for decoding "stabs" debugging information format.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
              Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -185,6 +185,9 @@ struct complaint unrecognized_cplus_name_complaint =
 
 struct complaint rs6000_builtin_complaint =
   {"Unknown builtin type %d", 0, 0};
+
+struct complaint unresolved_sym_chain_complaint =
+  {"%s: `%s' from global_sym_chain unresolved", 0, 0};
 
 struct complaint stabs_general_complaint =
   {"%s", 0, 0};
@@ -3801,18 +3804,31 @@ GDB internal error.  cleanup_undefined_types with bad type %d.", 0, 0};
 
 /* Scan through all of the global symbols defined in the object file,
    assigning values to the debugging symbols that need to be assigned
-   to.  Get these symbols from the minimal symbol table.  */
+   to.  Get these symbols from the minimal symbol table.
+   Return 1 if there might still be unresolved debugging symbols, else 0.  */
 
-void
-scan_file_globals (objfile)
+static int scan_file_globals_1 PARAMS ((struct objfile *));
+
+static int
+scan_file_globals_1 (objfile)
      struct objfile *objfile;
 {
   int hash;
   struct minimal_symbol *msymbol;
   struct symbol *sym, *prev;
 
+  /* Avoid expensive loop through all minimal symbols if there are
+     no unresolved symbols.  */
+  for (hash = 0; hash < HASHSIZE; hash++)
+    {
+      if (global_sym_chain[hash])
+	break;
+    }
+  if (hash >= HASHSIZE)
+    return 0;
+
   if (objfile->msymbols == 0)		/* Beware the null file.  */
-    return;
+    return 1;
 
   for (msymbol = objfile -> msymbols; SYMBOL_NAME (msymbol) != NULL; msymbol++)
     {
@@ -3883,6 +3899,42 @@ scan_file_globals (objfile)
 	    }
 	}
     }
+  return 1;
+}
+
+/* Assign values to global debugging symbols.
+   Search the passed objfile first, then try the runtime common symbols.
+   Complain about any remaining unresolved symbols and remove them
+   from the chain.  */
+
+void
+scan_file_globals (objfile)
+     struct objfile *objfile;
+{
+  int hash;
+  struct symbol *sym, *prev;
+
+  if (scan_file_globals_1 (objfile) == 0)
+    return;
+  if (rt_common_objfile && scan_file_globals_1 (rt_common_objfile) == 0)
+    return;
+
+  for (hash = 0; hash < HASHSIZE; hash++)
+    {
+      sym = global_sym_chain[hash];
+      while (sym)
+	{
+	  complain (&unresolved_sym_chain_complaint,
+		    objfile->name, SYMBOL_NAME (sym));
+
+	  /* Change the symbol address from the misleading chain value
+	     to address zero.  */
+	  prev = sym;
+	  sym = SYMBOL_VALUE_CHAIN (sym);
+	  SYMBOL_VALUE_ADDRESS (prev) = 0;
+	}
+    }
+  memset (global_sym_chain, 0, sizeof (global_sym_chain));
 }
 
 /* Initialize anything that needs initializing when starting to read

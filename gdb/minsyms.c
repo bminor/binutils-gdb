@@ -1,5 +1,5 @@
 /* GDB routines for manipulating the minimal symbol tables.
-   Copyright 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
 This file is part of GDB.
@@ -260,6 +260,22 @@ lookup_minimal_symbol_by_pc (pc)
   return (best_symbol);
 }
 
+/* Return leading symbol character for a BFD. If BFD is NULL,
+   return the leading symbol character from the main objfile.  */
+
+static int get_symbol_leading_char PARAMS ((bfd *));
+
+static int
+get_symbol_leading_char (abfd)
+     bfd * abfd;
+{
+  if (abfd != NULL)
+    return bfd_get_symbol_leading_char (abfd);
+  if (symfile_objfile != NULL && symfile_objfile->obfd != NULL)
+    return bfd_get_symbol_leading_char (symfile_objfile->obfd);
+  return 0;
+}
+
 /* Prepare to start collecting minimal symbols.  Note that presetting
    msym_bunch_index to BUNCH_SIZE causes the first call to save a minimal
    symbol to allocate the memory for the first bunch. */
@@ -331,7 +347,7 @@ prim_record_minimal_symbol_and_info (name, address, ms_type, info, section,
 
       {
 	const char *tempstring = name;
-	if (tempstring[0] == bfd_get_symbol_leading_char (objfile->obfd))
+	if (tempstring[0] == get_symbol_leading_char (objfile->obfd))
 	  ++tempstring;
 	if (STREQN (tempstring, "__gnu_compiled", 14))
 	  return;
@@ -539,7 +555,7 @@ install_minimal_symbols (objfile)
 	 each bunch is full. */
       
       mcount = objfile->minimal_symbol_count;
-      leading_char = bfd_get_symbol_leading_char (objfile->obfd);
+      leading_char = get_symbol_leading_char (objfile->obfd);
       
       for (bunch = msym_bunch; bunch != NULL; bunch = bunch -> next)
 	{

@@ -1,3 +1,35 @@
+Sat Jan  7 07:23:53 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* dbxread.c (process_one_symbol):  Handle N_FUN symbols
+	for Sun acc 3.0 under SunOS4.
+
+	Changes to improve handling of runtime common symbols
+	under SunOS4.
+	* minsyms.c (get_symbol_leading_char):  New routine to determine
+	the leading symbol character for an objfile.
+	(prim_record_minimal_symbol_and_info, install_minimal_symbols):
+	Use it.
+	* objfiles.h (rt_common_objfile):  New global, points to objfile
+	containing the runtime common minimal symbols.
+	* objfiles.c (free_objfile):  Mark rt_common_objfile as
+	unallocated before freeing it.
+	* solib.c (allocate_rt_common_objfile):  New routine to allocate
+	an objfile for the runtime common minimal symbols.
+	(solib_add_common_symbols):  Allocate an objfile for the runtime
+	common symbols if necessary and put common symbols into it.
+	Clean up code and comments.
+	(solib_add, special_symbol_handling):  Cleanup comments regarding
+	runtime common symbols.
+	* stabsread.c (scan_file_globals_1):  New routine, contains
+	old scan_file_globals code. Checks if there are any unresolved
+	global symbols before starting the expensive minimal symbol table
+	search.
+	(scan_file_globals):  Now calls scan_file_globals_1 for the passed
+	objfile and eventually for the runtime common objfile. Complains
+	about any unresolved global symbols and removes them from the
+	global symbol chain to avoid dangling pointers into the symbol
+	table if the symbol table is reread.
+
 Thu Jan  5 17:38:29 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* Makefile.in (install_only uninstall):  Indent for clarity.

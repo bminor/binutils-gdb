@@ -1,5 +1,5 @@
 /* Definitions for symbol file management in GDB.
-   Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -208,8 +208,8 @@ struct objfile
 
   struct partial_symtab *free_psymtabs;
 
-  /* The object file's BFD.  Can be null, in which case bfd_open (name) and
-     put the result here.  */
+  /* The object file's BFD.  Can be null if the objfile contains only
+     minimal symbols, e.g. the run time common symbols for SunOS4.  */
 
   bfd *obfd;
 
@@ -355,6 +355,11 @@ struct objfile
    argument to the "symbol-file" or "file" command).  */
 
 extern struct objfile *symfile_objfile;
+
+/* The object file that contains the runtime common minimal symbols
+   for SunOS4. Note that this objfile has no associated BFD.  */
+
+extern struct objfile *rt_common_objfile;
 
 /* When we need to allocate a new type, we need to know which type_obstack
    to allocate the type on, since there is one for each objfile.  The places

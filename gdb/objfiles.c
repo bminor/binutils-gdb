@@ -1,5 +1,5 @@
 /* GDB routines for manipulating objfiles.
-   Copyright 1992 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
 This file is part of GDB.
@@ -59,6 +59,7 @@ extern char *error_pre_print;
 struct objfile *object_files;		/* Linked list of all objfiles */
 struct objfile *current_objfile;	/* For symbol file being read in */
 struct objfile *symfile_objfile;	/* Main symbol table loaded from */
+struct objfile *rt_common_objfile;	/* For runtime common symbols */
 
 int mapped_symbol_files;		/* Try to use mapped symbol files */
 
@@ -371,6 +372,12 @@ free_objfile (objfile)
   /* Remove it from the chain of all objfiles. */
 
   unlink_objfile (objfile);
+
+  /* If we are going to free the runtime common objfile, mark it
+     as unallocated.  */
+
+  if (objfile == rt_common_objfile)
+    rt_common_objfile = NULL;
 
   /* Before the symbol table code was redone to make it easier to
      selectively load and remove information particular to a specific
