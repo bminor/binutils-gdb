@@ -941,8 +941,9 @@ int
 tc_i386_fix_adjustable(fixP)
      fixS * fixP;
 {
-#ifdef OBJ_ELF
-  /* Prevent all adjustments to global symbols. */
+#if defined (OBJ_ELF) || defined (TE_PE)
+  /* Prevent all adjustments to global symbols, or else dynamic
+     linking will not work correctly.  */
   if (S_IS_EXTERN (fixP->fx_addsy))
     return 0;
   if (S_IS_WEAK (fixP->fx_addsy))

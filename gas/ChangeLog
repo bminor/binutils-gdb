@@ -5,6 +5,9 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* config/tc-i386.c (tc_i386_fix_adjustable): Don't adjust
+	relocations against global symbols if TE_PE.
+
 	* config/obj-coff.c (obj_coff_ident): Add BFD_ASSEMBLER version.
 	(obj_pseudo_table): Always handle ".ident" with obj-coff_ident.
 
