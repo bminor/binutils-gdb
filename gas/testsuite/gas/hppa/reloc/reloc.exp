@@ -254,7 +254,6 @@ proc do_cross_space_fixup_test {} {
 
 	# Make sure GAS generated a fixup/relocation for the cross-space
 	# branch/call
-	setup_xfail hppa*-*-*
 	while 1 {
 	    expect {
 	        -re "^00000000\[^\n\]*PCREL_CALL\[^\n\]*\n" 

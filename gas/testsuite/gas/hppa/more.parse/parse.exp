@@ -139,6 +139,8 @@ if [istarget hppa*-*-*] then {
 
     # This file has code and assembler directives before switching into any
     # space/subspace pair.  This should report an error.
+    setup_xfail hppa*-*-hpux*
+    setup_xfail hppa*-*-bsd*
     gas_test_error "nosubspace.s" "" "Check for error if no subspace directive"
 
     # This file should return errors for both the ENTRY_GR and ENTRY_FR

@@ -1,3 +1,11 @@
+Tue Nov 30 13:43:21 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/more.parse/parse.exp: Test for error on for subspace
+	directive is an XFAIL for SOM assmeblers.
+
+	* gas/hppa/reloc/reloc.exp: Remove XFAIL for relocation on
+	cross-subspace call test.
+
 Sun Nov 28 12:12:50 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/more.parse/appbug.s: New test.
