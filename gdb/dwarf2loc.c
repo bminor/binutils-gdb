@@ -53,11 +53,14 @@ static char *
 find_location_expression (struct dwarf2_loclist_baton *baton,
 			  size_t *locexpr_length, CORE_ADDR pc)
 {
-  CORE_ADDR base_address = baton->base_address;
   CORE_ADDR low, high;
   char *loc_ptr, *buf_end;
   unsigned int addr_size = TARGET_ADDR_BIT / TARGET_CHAR_BIT, length;
   CORE_ADDR base_mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
+  /* Adjust base_address for relocatable objects.  */
+  CORE_ADDR base_offset = ANOFFSET (baton->objfile->section_offsets,
+				    SECT_OFF_TEXT (baton->objfile));
+  CORE_ADDR base_address = baton->base_address + base_offset;
 
   loc_ptr = baton->data;
   buf_end = baton->data + baton->size;
