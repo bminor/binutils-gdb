@@ -189,5 +189,13 @@ if [istarget hppa*-*-*] then {
     # section is created...
     setup_xfail hppa*-*-osf*
     gas_test "ssbug.s" "" "" "Check for acceptance of non-default subspaces"
+
+    # To be compatable with certain "features" of the HP compiler
+    # non-existant registers should default to %r0.
+    gas_test "defbug.s" "" "" "Missing register should default to %%r0"
+
+    # Make sure GAS understands a reasonable set of standard predefined
+    # registers.  eg %rp, %dp, %sp, etc.
+    gas_test "stdreg.s" "" "" "Test standard predefined registers"
 }
 

@@ -31,6 +31,7 @@ align2.s
 block1.s
 block2.s
 calldatabug.s
+defbug.s
 entrybug.s
 exportbug.s
 exprbug.s
@@ -43,6 +44,7 @@ parse.exp
 procbug.s
 spacebug.s
 ssbug.s
+stdreg.s
 stringer.s
 undefbug.s
 versionbug.s
