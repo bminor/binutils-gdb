@@ -540,15 +540,15 @@ DEFUN_VOID (write_object_file)
        frchain_ptr = frchain_ptr->frch_next)
     {
       /* Run through all the sub-segments and align them up. Also close any
-		   open frags. We tack a .fill onto the end of the frag chain so
-		   that any .align's size can be worked by looking at the next
-		   frag */
+	 open frags. We tack a .fill onto the end of the frag chain so
+	 that any .align's size can be worked by looking at the next
+	 frag.  */
 
       subseg_new (frchain_ptr->frch_seg, frchain_ptr->frch_subseg);
 #ifndef SUB_SEGMENT_ALIGN
-#define SUB_SEGMENT_ALIGN 2
+#define SUB_SEGMENT_ALIGN(SEG) 2
 #endif
-      frag_align (SUB_SEGMENT_ALIGN, 0);
+      frag_align (SUB_SEGMENT_ALIGN (now_seg), 0);
       frag_wane (frag_now);
       frag_now->fr_fix = 0;
       know (frag_now->fr_next == NULL);

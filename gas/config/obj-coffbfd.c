@@ -1834,9 +1834,9 @@ DEFUN_VOID (write_object_file)
 
       subseg_new (frchain_ptr->frch_seg, frchain_ptr->frch_subseg);
 #ifndef SUB_SEGMENT_ALIGN
-#define SUB_SEGMENT_ALIGN 1
+#define SUB_SEGMENT_ALIGN(SEG) 1
 #endif
-      frag_align (SUB_SEGMENT_ALIGN, NOP_OPCODE);
+      frag_align (SUB_SEGMENT_ALIGN (now_seg), NOP_OPCODE);
       frag_wane (frag_now);
       frag_now->fr_fix = 0;
       know (frag_now->fr_next == NULL);
