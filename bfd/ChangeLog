@@ -1,3 +1,8 @@
+Fri May  5 16:51:03 2000  Clinton Popetz  <cpopetz@cygnus.com>
+
+	* coffcode.h (coff_set_arch_mach_hook, coff_set_flags):
+	Change U802TOC64MAGIC to U803XTOCMAGIC.
+
 2000-05-04  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* elf.c (bfd_elf_get_arch_size): New function, return 32 | 64 | -1.
@@ -127,6 +132,7 @@ Mon May  1 16:56:47 2000  Jim Wilson  <wilson@cygnus.com>
 	* coff-sh.c (bfd_coff_small_swap_table): Fix Fri Apr 28 change.
 	* vms.c (vms_openr_next_archived_file): Return NULL.
 
+>>>>>>> 1.419
 Fri Apr 28 21:34:44 2000  Clinton Popetz  <cpopetz@cygnus.com>
 
 	* coffcode.h Copy changes mistakenly done to libcoff.h in

@@ -1910,7 +1910,7 @@ coff_set_arch_mach_hook (abfd, filehdr)
 
 #ifdef RS6000COFF_C
 #ifdef XCOFF64
-    case U802TOC64MAGIC:
+    case U803XTOCMAGIC:
 #else
     case U802ROMAGIC:
     case U802WRMAGIC:
@@ -2694,7 +2694,7 @@ coff_set_flags (abfd, magicp, flagsp)
 #endif
 #ifdef XCOFF64
       if (bfd_get_mach (abfd) == 620 && !strncmp (abfd->xvec->name,"aix", 3))
-	*magicp = U802TOC64MAGIC; 
+	*magicp = U803XTOCMAGIC; 
       else
 #else
     	*magicp = U802TOCMAGIC; 
