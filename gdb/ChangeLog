@@ -1,5 +1,9 @@
 2002-06-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386gnu-nat.c (supply_gregset, gnu_fetch_registers,
+	gnu_store_registers): Replace usage of NUM_GREGS with
+	I386_NUM_GREGS.
+
 	* i386-linux-nat.c (OLD_CANNOT_FETCH_REGISTER,
 	OLD_CANNOT_STORE_REGISTER, supply_gregset, fill_gregset): Replace
 	usage of NUM_GREGS with I386_NUM_GREGS.
