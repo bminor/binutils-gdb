@@ -1,3 +1,7 @@
+Thu May 21 14:24:11 1998  Gavin Koch  <gavin@cygnus.com>
+
+	* gencode.c: Mark BEGEZALL as LIKELY.
+
 Thu May 21 18:57:19 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-main.h (ALU32_END): Sign extend 32 bit results.

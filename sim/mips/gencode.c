@@ -579,7 +579,7 @@ struct instruction MIPS_DECODE[] = {
  {"BEQL",   G4,"010100sssssgggggllllllllllllllll",NORMAL, BRANCH,   (EQ | LIKELY)},
  {"BGEZ",    1,"000001sssss00001llllllllllllllll",REGIMM, BRANCH,   (GT | EQ)},
  {"BGEZAL",  1,"000001sssss10001llllllllllllllll",REGIMM, BRANCH,   (GT | EQ | LINK)},
- {"BGEZALL",G4,"000001sssss10011llllllllllllllll",REGIMM, BRANCH,   (GT | EQ | LINK)},
+ {"BGEZALL",G4,"000001sssss10011llllllllllllllll",REGIMM, BRANCH,   (GT | EQ | LINK | LIKELY)},
  {"BGEZL",  G4,"000001sssss00011llllllllllllllll",REGIMM, BRANCH,   (GT | EQ | LIKELY)},
  {"BGTZ",    1,"000111sssss00000llllllllllllllll",NORMAL, BRANCH,   (GT)},
  {"BGTZL",  G4,"010111sssss00000llllllllllllllll",NORMAL, BRANCH,   (GT | LIKELY)},
