@@ -52,6 +52,8 @@
 @V@/gdb/ChangeLog-2000 @V@/gdb/ChangeLog.000
 @V@/gdb/ChangeLog-2001 @V@/gdb/ChangeLog.001
 @V@/gdb/ChangeLog-3.x @V@/gdb/ChangeLog.3-x
+@V@/gdb/alphabsd-nat.c @V@/gdb/alphb-nat.c
+@V@/gdb/alphabsd-tdep.c @V@/gdb/alphb-tdep.c
 @V@/gdb/alphanbsd-nat.c @V@/gdb/alphnb-nat.c
 @V@/gdb/alphanbsd-tdep.c @V@/gdb/alphnb-tdep.c
 @V@/gdb/arm-linux-nat.c @V@/gdb/armlin-nat.c
@@ -126,6 +128,8 @@
 @V@/gdb/m68knbsd-tdep.c @V@/gdb/m6nbsd-tdep.c
 @V@/gdb/mips-linux-nat.c @V@/gdb/mipslnxnat.c
 @V@/gdb/mips-linux-tdep.c @V@/gdb/mipslnxtdep.c
+@V@/gdb/mipsnbsd-nat.c @V@/gdb/mipsnbnat.c
+@V@/gdb/mipsnbsd-tdep.c @V@/gdb/mipsnbtdep.c
 @V@/gdb/nindy-share/b.out.h @V@/gdb/nindy-share/b_out.h
 @V@/gdb/osf-share/cma_stack_int.h @V@/gdb/osf-share/cma_stkint.h
 @V@/gdb/p-exp.tab.c @V@/gdb/p-exp_tab.c

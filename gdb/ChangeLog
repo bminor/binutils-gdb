@@ -1,3 +1,8 @@
+2002-05-24  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* config/djgpp/fnchange.lst: Add alphabsd-nat.c,
+	alphabsd-tdep.c, mipsnbsd-nat.c, and mipsnbsd-tdep.c
+
 2002-05-23  Andrew Cagney  <ac131313@redhat.com>
 
 	* PROBLEMS: Mention s390 and FreeBSD 4.4 build problems.
