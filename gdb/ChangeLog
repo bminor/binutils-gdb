@@ -1,3 +1,8 @@
+2004-01-19  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv-tdep.c (frv_push_arguments, frv_saved_pc_after_call): Delete
+	unused declarations.
+
 2004-01-19  Andrew Cagney  <cagney@redhat.com>
 
 	* top.h (mapped_symbol_files): Delete declaration.

@@ -44,8 +44,6 @@ static gdbarch_breakpoint_from_pc_ftype frv_breakpoint_from_pc;
 static gdbarch_adjust_breakpoint_address_ftype frv_gdbarch_adjust_breakpoint_address;
 static gdbarch_skip_prologue_ftype frv_skip_prologue;
 static gdbarch_frameless_function_invocation_ftype frv_frameless_function_invocation;
-static gdbarch_deprecated_push_arguments_ftype frv_push_arguments;
-static gdbarch_deprecated_saved_pc_after_call_ftype frv_saved_pc_after_call;
 
 /* Register numbers.  The order in which these appear define the
    remote protocol, so take care in changing them.  */
