@@ -1,5 +1,9 @@
 2001-08-30  Jim Blandy  <jimb@redhat.com>
 
+	* symfile.c (sections_overlap): New function.
+	(map_overlay_command): Call sections_overlap, instead of using
+	incorrect logic to recognize overlapping sections.
+
 	* symfile.c (load_command): Invalidate the overlay cache.
 
 2001-08-30  Mark Kettenis  <kettenis@gnu.org>

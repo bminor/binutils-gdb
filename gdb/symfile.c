@@ -2490,6 +2490,7 @@ init_psymbol_list (struct objfile *objfile, int total_symbols)
    section_is_overlay(sect):      true if section's VMA != LMA
    pc_in_mapped_range(pc,sec):    true if pc belongs to section's VMA
    pc_in_unmapped_range(...):     true if pc belongs to section's LMA
+   sections_overlap(sec1, sec2):  true if mapped sec1 and sec2 ranges overlap
    overlay_mapped_address(...):   map an address from section's LMA to VMA
    overlay_unmapped_address(...): map an address from section's VMA to LMA
    symbol_overlayed_address(...): Return a "current" address for symbol:
@@ -2627,6 +2628,20 @@ pc_in_mapped_range (CORE_ADDR pc, asection *section)
 	  return 1;
       }
   return 0;
+}
+
+
+/* Return true if the mapped ranges of sections A and B overlap, false
+   otherwise.  */
+int
+sections_overlap (asection *a, asection *b)
+{
+  CORE_ADDR a_start = a->vma;
+  CORE_ADDR a_end = a->vma + bfd_get_section_size_before_reloc (a);
+  CORE_ADDR b_start = b->vma;
+  CORE_ADDR b_end = b->vma + bfd_get_section_size_before_reloc (b);
+
+  return (a_start < b_end && b_start < a_end);
 }
 
 /* Function: overlay_unmapped_address (PC, SECTION)
@@ -2807,11 +2822,11 @@ the 'overlay manual' command.");
       /* Next, make a pass and unmap any sections that are
          overlapped by this new section: */
       ALL_OBJSECTIONS (objfile2, sec2)
-	if (sec2->ovly_mapped &&
-	    sec != sec2 &&
-	    sec->the_bfd_section != sec2->the_bfd_section &&
-	    (pc_in_mapped_range (sec2->addr, sec->the_bfd_section) ||
-	     pc_in_mapped_range (sec2->endaddr, sec->the_bfd_section)))
+	if (sec2->ovly_mapped
+            && sec != sec2
+            && sec->the_bfd_section != sec2->the_bfd_section
+            && sections_overlap (sec->the_bfd_section,
+                                 sec2->the_bfd_section))
 	{
 	  if (info_verbose)
 	    printf_filtered ("Note: section %s unmapped by overlap\n",
