@@ -2530,7 +2530,7 @@ set_arm_command (char *args, int from_tty)
 static void
 show_arm_command (char *args, int from_tty)
 {
-  help_list (showarmcmdlist, "show arm ", all_commands, gdb_stdout);
+  cmd_show_list (showarmcmdlist, from_tty, "");
 }
 
 /* If the user changes the register disassembly style used for info
@@ -3015,7 +3015,7 @@ _initialize_arm_tdep (void)
 {
   struct ui_file *stb;
   long length;
-  struct cmd_list_element *new_cmd;
+  struct cmd_list_element *new_set, *new_show;
   const char *setname;
   const char *setdesc;
   const char **regnames;
@@ -3088,27 +3088,39 @@ _initialize_arm_tdep (void)
   ui_file_delete (stb);
 
   /* Add the deprecated disassembly-flavor command.  */
-  new_cmd = add_set_enum_cmd ("disassembly-flavor", no_class,
+  new_set = add_set_enum_cmd ("disassembly-flavor", no_class,
 			      valid_disassembly_styles,
 			      &disassembly_style,
 			      helptext,
 			      &setlist);
-  set_cmd_sfunc (new_cmd, set_disassembly_style_sfunc);
-  deprecate_cmd (new_cmd, "set arm disassembly");
-  deprecate_cmd (add_show_from_set (new_cmd, &showlist),
+  set_cmd_sfunc (new_set, set_disassembly_style_sfunc);
+  deprecate_cmd (new_set, "set arm disassembly");
+  deprecate_cmd (add_show_from_set (new_set, &showlist),
 		 "show arm disassembly");
 
   /* And now add the new interface.  */
-  new_cmd = add_set_enum_cmd ("disassembly", no_class, valid_disassembly_styles,
-			      &disassembly_style, helptext, &setarmcmdlist);
+  new_set = add_set_enum_cmd ("disassembly", no_class,
+			      valid_disassembly_styles, &disassembly_style,
+			      helptext, &setarmcmdlist);
 
-  add_show_from_set (new_cmd, &showarmcmdlist);
+  add_show_from_set (new_set, &showarmcmdlist);
 
-  /* ??? Maybe this should be a boolean.  */
-  add_show_from_set (add_set_cmd ("apcs32", no_class,
-				  var_zinteger, (char *) &arm_apcs_32,
-				  "Set usage of ARM 32-bit mode.\n", &setlist),
-		     &showlist);
+  add_setshow_cmd_full ("apcs32", no_class,
+			var_boolean, (char *) &arm_apcs_32,
+			"Set usage of ARM 32-bit mode.",
+			"Show usage of ARM 32-bit mode.",
+			NULL, NULL,
+			&setlist, &showlist, &new_set, &new_show);
+  deprecate_cmd (new_set, "set arm apcs32");
+  deprecate_cmd (new_show, "show arm apcs32");
+
+  add_setshow_boolean_cmd ("apcs32", no_class, &arm_apcs_32,
+			   "Set usage of ARM 32-bit mode.  "
+			   "When off, a 26-bit PC will be used.",
+			   "Show usage of ARM 32-bit mode.  "
+			   "When off, a 26-bit PC will be used.",
+			   NULL, NULL,
+			   &setarmcmdlist, &showarmcmdlist);
 
   /* Add the deprecated "othernames" command.  */
   deprecate_cmd (add_com ("othernames", class_obscure, arm_othernames,
@@ -3116,8 +3128,11 @@ _initialize_arm_tdep (void)
 		 "set arm disassembly");
 
   /* Debugging flag.  */
-  add_show_from_set (add_set_cmd ("arm", class_maintenance, var_zinteger,
-				  &arm_debug, "Set arm debugging.\n"
-				  "When non-zero, arm specific debugging is enabled.",
-				  &setdebuglist), &showdebuglist);
+  add_setshow_boolean_cmd ("arm", class_maintenance, &arm_debug,
+			   "Set ARM debugging.  "
+			   "When on, arm-specific debugging is enabled.",
+			   "Show ARM debugging.  "
+			   "When on, arm-specific debugging is enabled.",
+			   NULL, NULL,
+			   &setdebuglist, &showdebuglist);
 }

@@ -1,5 +1,14 @@
 2003-03-22  Richard Earnshaw  <rearnsha@arm.com>
 
+	* arm-tdep.c (show_arm_command): Don't print out help.  Instead, show
+	the current setting of each value.
+	(_initialize_arm_tdep): Delete variable new_cmd and add new vars
+	new_set and new_show.  Use add_setshow_cmd_full and 
+	add_setshow_boolean_cmd as appropriate.  Deprecate "set/show apcs32"
+	commands and add new version as subcommands of "set/show arm".
+
+2003-03-22  Richard Earnshaw  <rearnsha@arm.com>
+
 	* arm-tdep.c (setarmcmdlist, showarmcmdlist): New command lists.
 	(set_arm_command, show_arm_command): New functions.
 	(_initialize_arm_tdep): Add them.
