@@ -3470,7 +3470,7 @@ write_object_file ()
 
       subseg_set (frchain_ptr->frch_seg, frchain_ptr->frch_subseg);
 
-      alignment = SUB_SEGMENT_ALIGN (now_seg, frchain_ptr)
+      alignment = SUB_SEGMENT_ALIGN (now_seg, frchain_ptr);
 
 #ifdef md_do_align
       md_do_align (alignment, (char *) NULL, 0, 0, alignment_done);
