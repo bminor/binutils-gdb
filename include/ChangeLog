@@ -15,6 +15,13 @@ Mon Nov 17 14:00:51 1997  Doug Evans  <devans@seba.cygnus.com>
 	(CB_SYSCALL): New type.
 	(CB_RC): New enum.
 
+Fri Nov  7 10:34:09 1997  Rob Savoye  <rob@darkstar.cygnus.com>
+
+	* libiberty.h: Add extern "C" { so it can be used with C++
+	programs.
+	* remote-sim.h:  Add extern "C" { so it can be used with C++
+	programs.
+
 Tue Oct 14 16:07:51 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* dis-asm.h (struct disassemble_info): New field
