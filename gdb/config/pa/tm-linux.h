@@ -24,7 +24,6 @@
 #include "pa/tm-hppa.h"
 #include "config/tm-linux.h"
 
-#undef IN_SOLIB_CALL_TRAMPOLINE
 #undef SKIP_TRAMPOLINE_CODE
 
 #endif /* #ifndef TM_LINUX_H */

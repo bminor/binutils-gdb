@@ -20,17 +20,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* For SVR4 shared libraries, each call to a library routine goes through
-   a small piece of trampoline code in the ".plt" section.
-   The horribly ugly wait_for_inferior() routine uses this macro to detect
-   when we have stepped into one of these fragments.
-   We do not use lookup_solib_trampoline_symbol_by_pc, because
-   we cannot always find the shared library trampoline symbols
-   (e.g. on Irix5).  */
-
-#define IN_SOLIB_CALL_TRAMPOLINE(pc, name) in_plt_section((pc), (name))
-extern int in_plt_section (CORE_ADDR, char *);
-
 /* If PC is in a shared library trampoline code, return the PC
    where the function itself actually starts.  If not, return 0.  */
 
