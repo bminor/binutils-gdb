@@ -3569,7 +3569,10 @@ ppc64_elf_archive_symbol_lookup (bfd *abfd,
    new ABI object defines "bar".  Well, at least, undefined dot symbols
    are made weak.  This stops later archive searches from including an
    object if we already have a function descriptor definition.  It also
-   prevents the linker complaining about undefined symbols.  */
+   prevents the linker complaining about undefined symbols.
+   We also check and correct mismatched symbol visibility here.  The
+   most restrictive visibility of the function descriptor and the
+   function entry symbol is used.  */
 
 static bfd_boolean
 add_symbol_adjust (struct elf_link_hash_entry *h, void *inf)
@@ -3585,8 +3588,7 @@ add_symbol_adjust (struct elf_link_hash_entry *h, void *inf)
   if (h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-  if (h->root.type != bfd_link_hash_undefined
-      || h->root.root.string[0] != '.')
+  if (h->root.root.string[0] != '.')
     return TRUE;
 
   info = inf;
@@ -3595,9 +3597,19 @@ add_symbol_adjust (struct elf_link_hash_entry *h, void *inf)
   fdh = get_fdh (eh, htab);
   if (fdh != NULL)
     {
-      eh->elf.root.type = bfd_link_hash_undefweak;
-      eh->was_undefined = 1;
-      htab->twiddled_syms = 1;
+      unsigned entry_vis = ELF_ST_VISIBILITY (eh->elf.other) - 1;
+      unsigned descr_vis = ELF_ST_VISIBILITY (fdh->elf.other) - 1;
+      if (entry_vis < descr_vis)
+	fdh->elf.other += entry_vis - descr_vis;
+      else if (entry_vis > descr_vis)
+	eh->elf.other += descr_vis - entry_vis;
+
+      if (eh->elf.root.type == bfd_link_hash_undefined)
+	{
+	  eh->elf.root.type = bfd_link_hash_undefweak;
+	  eh->was_undefined = 1;
+	  htab->twiddled_syms = 1;
+	}
     }
 
   return TRUE;
@@ -3608,8 +3620,14 @@ ppc64_elf_check_directives (bfd *abfd ATTRIBUTE_UNUSED,
 			    struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
+  extern const bfd_target bfd_elf64_powerpc_vec;
+  extern const bfd_target bfd_elf64_powerpcle_vec;
 
   htab = ppc_hash_table (info);
+  if (htab->elf.root.creator != &bfd_elf64_powerpc_vec
+      && htab->elf.root.creator != &bfd_elf64_powerpcle_vec)
+    return TRUE;
+
   elf_link_hash_traverse (&htab->elf, add_symbol_adjust, info);
 
   /* We need to fix the undefs list for any syms we have twiddled to

@@ -1,5 +1,12 @@
 2004-08-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (add_symbol_adjust): Correct mismatched function
+	symbol visibility.
+	(ppc64_elf_check_directives): Check that we have the right hash
+	table before proceeding.
+
+2004-08-17  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (struct ppc64_elf_obj_tdata): Add "deleted_section".
 	(adjust_opd_syms): Attach opd syms for deleted entries to one of
 	the sections that will be discarded.
