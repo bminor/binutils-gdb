@@ -1,3 +1,10 @@
+start-sanitize-vr4xxx
+1998-12-13  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* configure.in,mips.igen,vr.igen: Add vr4121.
+	* configure: Rebuilt.
+
+end-sanitize-vr4xxx
 1998-12-12  Gavin Romig-Koch  <gavin@cygnus.com>
 
 start-sanitize-vr4xxx

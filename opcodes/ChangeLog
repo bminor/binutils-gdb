@@ -1,3 +1,10 @@
+start-sanitize-vr4xxx
+1998-12-13  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* mips-dis.c (set_mips_isa_type): Add bfd_mach_mips4121.
+	(_print_insn_mips): Same.
+	* mips-opc.c: Add vr4121.
+
 start-sanitize-fr30
 Thu Dec 10 18:39:46 1998  Dave Brolley  <brolley@cygnus.com>
 

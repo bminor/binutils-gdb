@@ -1,3 +1,13 @@
+start-sanitize-vr4xxx
+1998-12-13  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* mips.h (E_MIPS_MACH_4121): New.
+
+end-sanitize-vr4xxx
+1998-12-03  Nick Clifton  <nickc@cygnus.com>
+
+	* fr30.h: Add R_FR30_48 reloc.
+
 1998-12-02  Ulrich Drepper  <drepper@cygnus.com>
 
 	* mips.h: Add external data type for conflict section.

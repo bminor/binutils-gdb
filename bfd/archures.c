@@ -120,6 +120,9 @@ DESCRIPTION
 .#define bfd_mach_mips4000		4000
 .#define bfd_mach_mips4010		4010
 .#define bfd_mach_mips4100		4100
+. {* start-sanitize-vr4xxx *}
+.#define bfd_mach_mips4121		4121
+. {* end-sanitize-vr4xxx *}
 .#define bfd_mach_mips4300		4300
 .#define bfd_mach_mips4400		4400
 .#define bfd_mach_mips4600		4600
@@ -131,7 +134,7 @@ DESCRIPTION
 .#define bfd_mach_mips4900		4900
 . {* end-sanitize-tx49 *}
 .#define bfd_mach_mips5000		5000
-. {* start-sanitize-cygnus *} {* CYGNUS LOCAL vr5400/raeburn *}
+. {* start-sanitize-cygnus *}
 .#define bfd_mach_mips5400		5400
 . {* end-sanitize-cygnus *}
 . {* start-sanitize-r5900 *}
@@ -179,6 +182,9 @@ DESCRIPTION
 .#define bfd_mach_sh3e       0x3e
 .#define bfd_mach_sh4        0x40
 .  bfd_arch_alpha,     {* Dec Alpha *}
+.#define bfd_mach_alpha_ev4  0x10
+.#define bfd_mach_alpha_ev5  0x20
+.#define bfd_mach_alpha_ev6  0x30
 .  bfd_arch_arm,       {* Advanced Risc Machines ARM *}
 .#define bfd_mach_arm_2		1
 .#define bfd_mach_arm_2a		2
@@ -211,6 +217,8 @@ DESCRIPTION
 . {* start-sanitize-am33 *}
 .#define bfd_mach_am33		330
 . {* end-sanitize-am33 *}
+.  bfd_arch_fr30,
+.#define bfd_mach_fr30		0x46523330
 .  bfd_arch_last
 .  };
 
@@ -281,6 +289,7 @@ extern const bfd_arch_info_type bfd_z8k_arch;
 extern const bfd_arch_info_type bfd_ns32k_arch;
 extern const bfd_arch_info_type bfd_w65_arch;
 extern const bfd_arch_info_type bfd_v850_arch;
+extern const bfd_arch_info_type bfd_fr30_arch;
 
 static const bfd_arch_info_type * const bfd_archures_list[] =
 {
@@ -319,6 +328,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
   &bfd_ns32k_arch,
   &bfd_w65_arch,
   &bfd_v850_arch,
+  & bfd_fr30_arch,
 #endif
   0
 };

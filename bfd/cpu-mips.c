@@ -44,6 +44,9 @@ I_mips3900,
 I_mips4000, 
 I_mips4010, 
 I_mips4100, 
+  /* start-sanitize-vr4xxx */
+I_mips4121,
+  /* end-sanitize-vr4xxx */
 I_mips4300, 
 I_mips4400, 
 I_mips4600, 
@@ -62,7 +65,6 @@ I_mips4320,
 I_mips4900,
   /* end-sanitize-tx49 */
   /* start-sanitize-cygnus */
-  /* CYGNUS LOCAL vr5400/raeburn */
 I_mips5400,
   /* end-sanitize-cygnus */
   /* start-sanitize-r5900 */
@@ -87,6 +89,9 @@ static const bfd_arch_info_type arch_info_struct[] =
   N (64, 64, bfd_mach_mips4000, "mips:4000", false, NN(I_mips4000)),
   N (64, 64, bfd_mach_mips4010, "mips:4010", false, NN(I_mips4010)),
   N (64, 64, bfd_mach_mips4100, "mips:4100", false, NN(I_mips4100)),
+  /* start-sanitize-vr4xxx */
+  N (64, 64, bfd_mach_mips4121, "mips:4121", false, NN(I_mips4121)),
+  /* end-sanitize-vr4xxx */
   N (64, 64, bfd_mach_mips4300, "mips:4300", false, NN(I_mips4300)),
   N (64, 64, bfd_mach_mips4400, "mips:4400", false, NN(I_mips4400)),
   N (64, 64, bfd_mach_mips4600, "mips:4600", false, NN(I_mips4600)),
@@ -106,7 +111,6 @@ static const bfd_arch_info_type arch_info_struct[] =
   N (64, 64, bfd_mach_mips4900, "mips:4900", false, NN(I_mips4900)),
   /* end-sanitize-tx49 */
   /* start-sanitize-cygnus */
-  /* CYGNUS LOCAL vr5400/raeburn */
   N (64, 64, bfd_mach_mips5400, "mips:5400", false, NN(I_mips5400)),
   /* end-sanitize-cygnus */
   /* start-sanitize-r5900 */

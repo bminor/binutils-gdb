@@ -207,6 +207,11 @@ static int mips_4010 = -1;
 /* Whether the 4100 MADD16 and DMADD16 are permitted. */
 static int mips_4100 = -1;
 
+/* start-sanitize-vr4xxx */
+/* Whether NEC 4121 instructions are permitted. */
+static int mips_4121 = -1;
+
+/* end-sanitize-vr4xxx */
 /* start-sanitize-vr4320 */
 /* Whether NEC vr4320 instructions are permitted. */
 static int mips_4320 = -1;
@@ -947,6 +952,12 @@ md_begin ()
       else if (strcmp (cpu, "mips64vr4100") == 0)
         mips_cpu = 4100;
 
+      /* start-sanitize-vr4xxx */
+      else if (strcmp (cpu, "vr4121") == 0
+	       || strcmp (cpu, "mips64vr4121") == 0)
+	mips_cpu = 4121;
+
+      /* end-sanitize-vr4xxx */
       else if (strcmp (cpu, "r4010") == 0)
         mips_cpu = 4010;
 
@@ -997,6 +1008,9 @@ md_begin ()
 
       else if (mips_cpu == 4000
                || mips_cpu == 4100
+	       /* start-sanitize-vr4xxx */
+               || mips_cpu == 4121
+	       /* end-sanitize-vr4xxx */
                || mips_cpu == 4400
                || mips_cpu == 4300
                /* start-sanitize-vr4320 */
@@ -1041,6 +1055,11 @@ md_begin ()
   if (mips_4100 < 0)
     mips_4100 = (mips_cpu == 4100);
 
+  /* start-sanitize-vr4xxx */
+  if (mips_4121 < 0)
+    mips_4121 = (mips_cpu == 4121);
+
+  /* end-sanitize-vr4xxx */
   /* start-sanitize-vr4320 */
   if (mips_4320 < 0)
     mips_4320 = (mips_cpu == 4320);
@@ -2595,6 +2614,10 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 		  && (insn.insn_mo->membership & INSN_4010) != 0)
 	      || (mips_4100
 		  && (insn.insn_mo->membership & INSN_4100) != 0)
+	      /* start-sanitize-vr4xxx */
+	      || (mips_4121
+		  && (insn.insn_mo->membership & INSN_4121) != 0)
+	      /* end-sanitize-vr4xxx */
 	      /* start-sanitize-vr4320 */
 	      || (mips_4320
 		  && (insn.insn_mo->membership & INSN_4320) != 0)
@@ -7264,6 +7287,9 @@ mips_ip (str, ip)
       else if ((mips_4650 && (insn->membership & INSN_4650) != 0)
 	       || (mips_4010 && (insn->membership & INSN_4010) != 0)
 	       || (mips_4100 && (insn->membership & INSN_4100) != 0)
+	       /* start-sanitize-vr4xxx */
+	       || (mips_4121 && (insn->membership & INSN_4121) != 0)
+	       /* end-sanitize-vr4xxx */
 	       /* start-sanitize-vr4320 */
 	       || (mips_4320 && (insn->membership & INSN_4320) != 0)
 	       /* end-sanitize-vr4320 */
@@ -9424,6 +9450,14 @@ struct option md_longopts[] = {
 #define OPTION_NO_FIX_4011_BRANCH_BUG (OPTION_MD_BASE + 35)
   {"no-fix-4011-branch-bug", no_argument, NULL, OPTION_NO_FIX_4011_BRANCH_BUG},
   /* end-sanitize-branchbug4011 */
+
+  /* start-sanitize-vr4xxx */
+#define OPTION_M4121 (OPTION_MD_BASE + 36)
+  {"m4121", no_argument, NULL, OPTION_M4121},
+#define OPTION_NO_M4121 (OPTION_MD_BASE + 37)
+  {"no-m4121", no_argument, NULL, OPTION_NO_M4121},
+
+  /* end-sanitize-vr4xxx */
 #define OPTION_CALL_SHARED (OPTION_MD_BASE + 7)
 #define OPTION_NON_SHARED (OPTION_MD_BASE + 8)
 #define OPTION_XGOT (OPTION_MD_BASE + 19)
@@ -9561,6 +9595,10 @@ md_parse_option (c, arg)
 		  mips_cpu = 4000;
 		else if (strcmp (p, "4100") == 0)
                     mips_cpu = 4100;
+		/* start-sanitize-vr4xxx */
+		else if (strcmp (p, "4121") == 0)
+                    mips_cpu = 4121;
+		/* end-sanitize-vr4xxx */
 		else if (strcmp (p, "4300") == 0)
 		  mips_cpu = 4300;
 		/* start-sanitize-vr4320 */
@@ -9619,6 +9657,9 @@ md_parse_option (c, arg)
 	    if (sv
 		&& (mips_cpu != 4300
 		    && mips_cpu != 4100
+		    /* start-sanitize-vr4xxx */
+		    && mips_cpu != 4121
+		    /* end-sanitize-vr4xxx */
 		    /* start-sanitize-vr4320 */
 		    && mips_cpu != 4320
 		    /* end-sanitize-vr4320 */
@@ -9664,6 +9705,16 @@ md_parse_option (c, arg)
       mips_4100 = 0;
       break;
 
+      /* start-sanitize-vr4xxx */
+    case OPTION_M4121:
+      mips_4121 = 1;
+      break;
+
+    case OPTION_NO_M4121:
+      mips_4121 = 0;
+      break;
+
+      /* end-sanitize-vr4xxx */
       /* start-sanitize-r5900 */
     case OPTION_M5900:
       mips_5900 = 1;
@@ -9846,6 +9897,12 @@ MIPS options:\n\
 -no-m4010		do not permit R4010 instructions\n\
 -m4100                  permit VR4100 instructions\n\
 -no-m4100		do not permit VR4100 instructions\n"));
+  /* start-sanitize-vr4xxx */
+  fprintf(stream, _("\
+-mcpu=vr4121		generate code for vr4121\n\
+-m4121                  permit VR4121 instructions\n\
+-no-m4121		do not permit VR4121 instructions\n"));
+  /* end-sanitize-vr4xxx */
   fprintf(stream, _("\
 -mips16			generate mips16 instructions\n\
 -no-mips16		do not generate mips16 instructions\n"));

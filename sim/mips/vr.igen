@@ -14,6 +14,9 @@
 
 :function:::unsigned64:MulAcc:
 *vr4100:
+// start-sanitize-vr4xxx
+*vr4121:
+// end-sanitize-vr4xxx
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
@@ -27,6 +30,9 @@
 
 :function:::void:SET_MulAcc:unsigned64 value
 *vr4100:
+// start-sanitize-vr4xxx
+*vr4121:
+// end-sanitize-vr4xxx
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
@@ -41,6 +47,9 @@
 
 :function:::signed64:SignedMultiply:signed32 l, signed32 r
 *vr4100:
+// start-sanitize-vr4xxx
+*vr4121:
+// end-sanitize-vr4xxx
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
@@ -54,6 +63,9 @@
 
 :function:::unsigned64:UnsignedMultiply:unsigned32 l, unsigned32 r
 *vr4100:
+// start-sanitize-vr4xxx
+*vr4121:
+// end-sanitize-vr4xxx
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
@@ -65,11 +77,34 @@
   return result;
 }
 
+// start-sanitize-vr4xxx
+:function:::signed64:SaturatedAdd:signed32 l, signed32 r
+*vr4121:
+{
+  signed64 result = (signed64) l + (signed64) r;
+  if (result < 0)
+    result = 0xFFFFFFFF8000000LL;
+  else if (result > 0x000000007FFFFFFFLL)
+    result = 0x000000007FFFFFFFLL;
+  return result;
+}
+
+:function:::unsigned64:SaturatedUnsignedAdd:unsigned32 l, unsigned32 r
+*vr4121:
+{
+  unsigned64 result = (unsigned64) l + (unsigned64) r;
+  if (result > 0x000000007FFFFFFFLL)
+    result = 0xFFFFFFFFFFFFFFFFLL;
+  return result;
+}
+
+
+// end-sanitize-vr4xxx
 :function:::unsigned64:Low32Bits:unsigned64 value
 *vr4100:
-// start-sanitize-vr4320
-*vr4320:
-// end-sanitize-vr4320
+// start-sanitize-vr4xxx
+*vr4121:
+// end-sanitize-vr4xxx
 // start-sanitize-cygnus
 *vr5400:
 // end-sanitize-cygnus
@@ -80,6 +115,9 @@
 
 :function:::unsigned64:High32Bits:unsigned64 value
 *vr4100:
+// start-sanitize-vr4xxx
+*vr4121:
+// end-sanitize-vr4xxx
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
@@ -94,7 +132,7 @@
 
 
 // Multiply, Accumulate
-000000,5.RS,5.RT,00000,00000,101000::::MAC
+000000,5.RS,5.RT,00000,00000,101000::64::MAC
 "mac r<RS>, r<RT>"
 *vr4100:
 // start-sanitize-vr4320
@@ -106,7 +144,7 @@
 
 
 // D-Multiply, Accumulate
-000000,5.RS,5.RT,00000,00000,101001::::DMAC
+000000,5.RS,5.RT,00000,00000,101001::64::DMAC
 "dmac r<RS>, r<RT>"
 *vr4100:
 // start-sanitize-vr4320
@@ -119,7 +157,7 @@
 
 // start-sanitize-vr4320
 // Count Leading Zeros
-000000,5.RS,00000,5.RD,00000,110101::::CLZ
+000000,5.RS,00000,5.RD,00000,110101::64::CLZ
 "clz r<RD>, r<RS>"
 // end-sanitize-vr4320
 // start-sanitize-vr4320
@@ -144,7 +182,7 @@
 // end-sanitize-vr4320
 // start-sanitize-vr4320
 // D-Count Leading Zeros
-000000,5.RS,00000,5.RD,00000,111101::::DCLZ
+000000,5.RS,00000,5.RD,00000,111101::64::DCLZ
 "dclz r<RD>, r<RS>"
 // end-sanitize-vr4320
 // start-sanitize-vr4320
@@ -173,85 +211,85 @@
 
 
 // end-sanitize-vr4320
-// start-sanitize-vrXXXX
+// start-sanitize-cygnus
 // Multiply and Move LO.
-000000,5.RS,5.RT,5.RD,00100,101000::::MUL
+000000,5.RS,5.RT,5.RD,00100,101000::64::MUL
 "mul r<RD>, r<RS>, r<RT>"
-// end-sanitize-vrXXXX
+// end-sanitize-cygnus
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
 // start-sanitize-cygnus
 *vr5400:
 // end-sanitize-cygnus
-// start-sanitize-vrXXXX
+// start-sanitize-cygnus
 {
   SET_MulAcc (SD_, 0 + SignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = Low32Bits (SD_, MulAcc (SD_));
 }
 
 
-// end-sanitize-vrXXXX
-// start-sanitize-vrXXXX
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 // Unsigned Multiply and Move LO.
-000000,5.RS,5.RT,5.RD,00101,101000::::MULU
+000000,5.RS,5.RT,5.RD,00101,101000::64::MULU
 "mulu r<RD>, r<RS>, r<RT>"
-// end-sanitize-vrXXXX
+// end-sanitize-cygnus
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
 // start-sanitize-cygnus
 *vr5400:
 // end-sanitize-cygnus
-// start-sanitize-vrXXXX
+// start-sanitize-cygnus
 {
   SET_MulAcc (SD_, 0 + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
 }
 
 
-// end-sanitize-vrXXXX
-// start-sanitize-vrXXXX
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 // Multiply and Move HI.
-000000,5.RS,5.RT,5.RD,01100,101000::::MULHI
+000000,5.RS,5.RT,5.RD,01100,101000::64::MULHI
 "mulhi r<RD>, r<RS>, r<RT>"
-// end-sanitize-vrXXXX
+// end-sanitize-cygnus
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
 // start-sanitize-cygnus
 *vr5400:
 // end-sanitize-cygnus
-// start-sanitize-vrXXXX
+// start-sanitize-cygnus
 {
   SET_MulAcc (SD_, 0 + SignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = High32Bits (SD_, MulAcc (SD_));
 }
 
 
-// end-sanitize-vrXXXX
-// start-sanitize-vrXXXX
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 // Unsigned Multiply and Move HI.
-000000,5.RS,5.RT,5.RD,01101,101000::::MULHIU
+000000,5.RS,5.RT,5.RD,01101,101000::64::MULHIU
 "mulhiu r<RD>, r<RS>, r<RT>"
-// end-sanitize-vrXXXX
+// end-sanitize-cygnus
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
 // start-sanitize-cygnus
 *vr5400:
 // end-sanitize-cygnus
-// start-sanitize-vrXXXX
+// start-sanitize-cygnus
 {
   SET_MulAcc (SD_, 0 + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = High32Bits (SD_, MulAcc (SD_));
 }
 
 
-// end-sanitize-vrXXXX
+// end-sanitize-cygnus
 // start-sanitize-cygnus
 // Multiply, Negate and Move LO.
-000000,5.RS,5.RT,5.RD,00011,011000::::MULS
+000000,5.RS,5.RT,5.RD,00011,011000::64::MULS
 "muls r<RD>, r<RS>, r<RT>"
 // end-sanitize-cygnus
 // start-sanitize-cygnus
@@ -267,7 +305,7 @@
 // end-sanitize-cygnus
 // start-sanitize-cygnus
 // Unsigned Multiply, Negate and Move LO.
-000000,5.RS,5.RT,5.RD,00011,011001::::MULSU
+000000,5.RS,5.RT,5.RD,00011,011001::64::MULSU
 "mulsu r<RD>, r<RS>, r<RT>"
 // end-sanitize-cygnus
 // start-sanitize-cygnus
@@ -283,7 +321,7 @@
 // end-sanitize-cygnus
 // start-sanitize-cygnus
 // Multiply, Negate and Move HI.
-000000,5.RS,5.RT,5.RD,01011,011000::::MULSHI
+000000,5.RS,5.RT,5.RD,01011,011000::64::MULSHI
 "mulshi r<RD>, r<RS>, r<RT>"
 // end-sanitize-cygnus
 // start-sanitize-cygnus
@@ -299,7 +337,7 @@
 // end-sanitize-cygnus
 // start-sanitize-cygnus
 // Unsigned Multiply, Negate and Move HI.
-000000,5.RS,5.RT,5.RD,01011,011001::::MULSHIU
+000000,5.RS,5.RT,5.RD,01011,011001::64::MULSHIU
 "mulshiu r<RD>, r<RS>, r<RT>"
 // end-sanitize-cygnus
 // start-sanitize-cygnus
@@ -312,103 +350,214 @@
 }
 
 
-
-
-
 // end-sanitize-cygnus
+// start-sanitize-cygnus
+//
 // Multiply, Accumulate and Move LO.
-000000,5.RS,5.RT,5.RD,00010,101000::::MACC
+//
+000000,5.RS,5.RT,5.RD,00010,101000::64::MACC
 "macc r<RD>, r<RS>, r<RT>"
+// end-sanitize-cygnus
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
 // start-sanitize-cygnus
 *vr5400:
 // end-sanitize-cygnus
+// start-sanitize-cygnus
+{
+  SET_MulAcc (SD_, MulAcc (SD_) + SignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
+}
+// end-sanitize-cygnus
+
+// start-sanitize-vr4xxx
+000000,5.RS,5.RT,5.RD,00000,101000::::MACC
+"macc r<RD>, r<RS>, r<RT>"
+*vr4121:
 {
   SET_MulAcc (SD_, MulAcc (SD_) + SignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
 }
 
+000000,5.RS,5.RT,5.RD,00000,101001::::DMACC
+"dmacc r<RD>, r<RS>, r<RT>"
+*vr4121:
+{
+  LO =  LO + SignedMultiply (SD_, GPR[RS], GPR[RT]);
+  GPR[RD] = LO;
+}
 
-// start-sanitize-vrXXXX
+000000,5.RS,5.RT,5.RD,10000,101000::::MACCS
+"maccs r<RD>, r<RS>, r<RT>"
+*vr4121:
+{
+  SET_MulAcc (SD_, SaturatedAdd (SD_, MulAcc (SD_), 
+				 SignedMultiply (SD_, GPR[RS], GPR[RT])));
+  GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
+}
+
+000000,5.RS,5.RT,5.RD,10000,101001::::DMACCS
+"dmaccs r<RD>, r<RS>, r<RT>"
+*vr4121:
+{
+  LO = SaturatedAdd (SD_, LO, SignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = LO;
+}
+
+
+
+
+
+// end-sanitize-vr4xxx
+// start-sanitize-cygnus
+//
 // Unsigned Multiply, Accumulate and Move LO.
-000000,5.RS,5.RT,5.RD,00011,101000::::MACCU
+//
+000000,5.RS,5.RT,5.RD,00011,101000::64::MACCU
 "maccu r<RD>, r<RS>, r<RT>"
-// end-sanitize-vrXXXX
+// end-sanitize-cygnus
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
 // start-sanitize-cygnus
 *vr5400:
 // end-sanitize-cygnus
-// start-sanitize-vrXXXX
+// start-sanitize-cygnus
 {
   SET_MulAcc (SD_, MulAcc (SD_) + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
 }
 
+// end-sanitize-cygnus
+// start-sanitize-vr4xxx
+000000,5.RS,5.RT,5.RD,00001,101000::64::MACCU
+"maccu r<RD>, r<RS>, r<RT>"
+*vr4121:
+{
+  SET_MulAcc (SD_, MulAcc (SD_) + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
+}
 
-// end-sanitize-vrXXXX
-// start-sanitize-vrXXXX
+000000,5.RS,5.RT,5.RD,00001,101001::64::DMACCU
+"dmaccu r<RD>, r<RS>, r<RT>"
+*vr4121:
+{
+  LO = LO + UnsignedMultiply (SD_, GPR[RS], GPR[RT]);
+  GPR[RD] = LO;
+}
+
+000000,5.RS,5.RT,5.RD,10001,101000::64::MACCUS
+"maccus r<RD>, r<RS>, r<RT>"
+*vr4121:
+{
+  SET_MulAcc (SD_, 
+	      SaturatedUnsignedAdd (SD_, MulAcc (SD_),
+				    UnsignedMultiply (SD_, GPR[RS], GPR[RT])));
+  GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
+}
+
+000000,5.RS,5.RT,5.RD,10001,101001::64::DMACCUS
+"dmaccus r<RD>, r<RS>, r<RT>"
+*vr4121:
+{
+  LO = SaturatedUnsignedAdd (SD_, LO, 
+			     UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = LO;
+}
+
+
+
+// end-sanitize-vr4xxx
+// start-sanitize-cygnus
+//
 // Multiply, Accumulate and Move HI.
-000000,5.RS,5.RT,5.RD,01010,101000::::MACCHI
+//
+000000,5.RS,5.RT,5.RD,01010,101000::64::MACCHI
 "macchi r<RD>, r<RS>, r<RT>"
-// end-sanitize-vrXXXX
+// end-sanitize-cygnus
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
 // start-sanitize-cygnus
 *vr5400:
 // end-sanitize-cygnus
-// start-sanitize-vrXXXX
+// start-sanitize-cygnus
 {
   SET_MulAcc (SD_, MulAcc (SD_) + SignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = High32Bits (SD_, MulAcc (SD_));
 }
 
+// end-sanitize-cygnus
+// start-sanitize-vr4xxx
+000000,5.RS,5.RT,5.RD,01000,101000::64::MACCHI
+"macchi r<RD>, r<RS>, r<RT>"
+*vr4121:
+{
+  SET_MulAcc (SD_, MulAcc (SD_) + SignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = High32Bits (SD_, MulAcc (SD_));
+}
 
-// end-sanitize-vrXXXX
-// start-sanitize-vrXXXX
+000000,5.RS,5.RT,5.RD,11000,101000::64::MACCHIS
+"macchis r<RD>, r<RS>, r<RT>"
+*vr4121:
+{
+  SET_MulAcc (SD_, SaturatedAdd (SD_, MulAcc (SD_),
+				 SignedMultiply (SD_, GPR[RS], GPR[RT])));
+  GPR[RD] = High32Bits (SD_, MulAcc (SD_));
+}
+
+
+
+// end-sanitize-vr4xxx
+// start-sanitize-cygnus
+//
 // Unsigned Multiply, Accumulate and Move HI.
-000000,5.RS,5.RT,5.RD,01011,101000::::MACCHIU
+//
+000000,5.RS,5.RT,5.RD,01011,101000::64::MACCHIU
 "macchiu r<RD>, r<RS>, r<RT>"
-// end-sanitize-vrXXXX
+// end-sanitize-cygnus
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
 // start-sanitize-cygnus
 *vr5400:
 // end-sanitize-cygnus
-// start-sanitize-vrXXXX
+// start-sanitize-cygnus
 {
   SET_MulAcc (SD_, MulAcc (SD_) + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = High32Bits (SD_, MulAcc (SD_));
 
 }
 
-
-
-// end-sanitize-vrXXXX
-// start-sanitize-cygnus
-// Multiply, Negate, Accumulate and Move LO.
-000000,5.RS,5.RT,5.RD,00111,011000::::MSAC
-"msac r<RD>, r<RS>, r<RT>"
 // end-sanitize-cygnus
-// start-sanitize-cygnus
-*vr5400:
-// end-sanitize-cygnus
-// start-sanitize-cygnus
+// start-sanitize-vr4xxx
+000000,5.RS,5.RT,5.RD,01001,101000::64::MACCHIU
+"macchiu r<RD>, r<RS>, r<RT>"
+*vr4121:
 {
-  SET_MulAcc (SD_, MulAcc (SD_) - SignedMultiply (SD_, GPR[RS], GPR[RT]));
-  GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
+  SET_MulAcc (SD_, MulAcc (SD_) + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = High32Bits (SD_, MulAcc (SD_));
+
+}
+
+000000,5.RS,5.RT,5.RD,11001,101000::64::MACCHIUS
+"macchius r<RD>, r<RS>, r<RT>"
+*vr4121:
+{
+  SET_MulAcc (SD_, 
+	      SaturatedUnsignedAdd (SD_, MulAcc (SD_),
+				    UnsignedMultiply (SD_, GPR[RS], GPR[RT])));
+  GPR[RD] = High32Bits (SD_, MulAcc (SD_));
+
 }
 
 
-// end-sanitize-cygnus
+
+// end-sanitize-vr4xxx
 // start-sanitize-cygnus
 // Unsigned Multiply, Negate, Accumulate and Move LO.
-000000,5.RS,5.RT,5.RD,00111,011001::::MSACU
+000000,5.RS,5.RT,5.RD,00111,011001::64::MSACU
 "msacu r<RD>, r<RS>, r<RT>"
 // end-sanitize-cygnus
 // start-sanitize-cygnus
@@ -439,7 +588,7 @@
 // end-sanitize-cygnus
 // start-sanitize-cygnus
 // Unsigned Multiply, Negate, Accumulate and Move HI.
-000000,5.RS,5.RT,5.RD,01111,011001::::MSACHIU
+000000,5.RS,5.RT,5.RD,01111,011001::64::MSACHIU
 "msachiu r<RD>, r<RS>, r<RT>"
 // end-sanitize-cygnus
 // start-sanitize-cygnus
@@ -455,7 +604,7 @@
 // end-sanitize-cygnus
 // start-sanitize-cygnus
 // Rotate Right.
-000000,00001,5.RT,5.RD,5.SHIFT,000010::::ROR
+000000,00001,5.RT,5.RD,5.SHIFT,000010::64::ROR
 "ror r<RD>, r<RT>, <SHIFT>"
 // end-sanitize-cygnus
 // start-sanitize-cygnus
@@ -471,7 +620,7 @@
 // end-sanitize-cygnus
 // start-sanitize-cygnus
 // Rotate Right Variable.
-000000,5.RS,5.RT,5.RD,00001,000110::::RORV
+000000,5.RS,5.RT,5.RD,00001,000110::64::RORV
 "rorv r<RD>, r<RT>, <RS>"
 // end-sanitize-cygnus
 // start-sanitize-cygnus
@@ -487,7 +636,7 @@
 // end-sanitize-cygnus
 // start-sanitize-cygnus
 // Double Rotate Right.
-000000,00001,5.RT,5.RD,5.SHIFT,111010::::DROR
+000000,00001,5.RT,5.RD,5.SHIFT,111010::64::DROR
 "dror r<RD>, r<RT>, <SHIFT>"
 // end-sanitize-cygnus
 // start-sanitize-cygnus
@@ -503,7 +652,7 @@
 // end-sanitize-cygnus
 // start-sanitize-cygnus
 // Double Rotate Right Plus 32.
-000000,00001,5.RT,5.RD,5.SHIFT,111110::::DROR32
+000000,00001,5.RT,5.RD,5.SHIFT,111110::64::DROR32
 "dror32 r<RD>, r<RT>, <SHIFT>"
 // end-sanitize-cygnus
 // start-sanitize-cygnus
@@ -519,7 +668,7 @@
 // end-sanitize-cygnus
 // start-sanitize-cygnus
 // Double Rotate Right Variable.
-000000,5.RS,5.RT,5.RD,00001,010110::::DRORV
+000000,5.RS,5.RT,5.RD,00001,010110::64::DRORV
 "drorv r<RD>, r<RT>, <RS>"
 // end-sanitize-cygnus
 // start-sanitize-cygnus

@@ -1662,6 +1662,11 @@ elf_mips_mach (flags)
 
     case E_MIPS_MACH_4100:
       return bfd_mach_mips4100;
+      /* start-sanitize-vr4xxx */
+
+    case E_MIPS_MACH_4121:
+      return bfd_mach_mips4121;
+      /* end-sanitize-vr4xxx */
       /* start-sanitize-vr4320 */
 
     case E_MIPS_MACH_4320:
@@ -2104,6 +2109,12 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
     case bfd_mach_mips4100:
       val = E_MIPS_ARCH_3 | E_MIPS_MACH_4100;
       break;
+      /* start-sanitize-vr4xxx */
+
+    case bfd_mach_mips4121:
+      val = E_MIPS_ARCH_3 | E_MIPS_MACH_4121;
+      break;
+      /* end-sanitize-vr4xxx */
       /* start-sanitize-vr4320 */
 
     case bfd_mach_mips4320:

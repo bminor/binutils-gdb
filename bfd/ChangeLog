@@ -1,3 +1,12 @@
+start-sanitize-vr4xxx
+1998-12-13  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* archures.c,bfd-in2.h (bfd_mach_mips4121): New.
+	* cpu-mips.c: Added vr4121.
+	* elf32-mips.c (elf_mips_mach): Same.
+	(_bfd_mips_elf_final_write_processing): Same.
+	
+start-sanitize-vr4xxx
 1998-12-12  Gavin Romig-Koch  <gavin@cygnus.com>
 
 	* elf32-mips.c (_bfd_mips_elf_final_write_processing): 

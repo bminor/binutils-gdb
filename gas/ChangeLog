@@ -1,4 +1,11 @@
-1998-12-11  Ken Raeburn  <raeburn@cygnus.com>
+start-sanitize-vr4xxx
+1998-12-13  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* config/tc-mips.c (mips_4121): New.
+	(md_begin,mips_ip,md_longopts,md_parse_option): Add vr4121.
+
+end-sanitize-vr4xxx
+98-12-11  Ken Raeburn  <raeburn@cygnus.com>
 
 	* config/tc-h8300.c (build_bytes): Change message given if the
 	instruction requires H8/300H mode and we're not in Hmode, to

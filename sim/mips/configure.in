@@ -169,7 +169,7 @@ case "${target}" in
 # end-sanitize-cygnus
 # start-sanitize-vr4xxx
   mips64vr4xxx-*-*)	sim_gen=IGEN
-			sim_igen_machine="-M mipsIV,vr4100 -G gen-multi-sim=mipsIV"
+			sim_igen_machine="-M mipsIV,vr4100,vr4121 -G gen-multi-sim=mipsIV"
                         ;;
 # end-sanitize-vr4xxx
   mips64vr41*)		sim_gen=M16

@@ -1257,6 +1257,9 @@ enum bfd_architecture
 #define bfd_mach_mips4000              4000
 #define bfd_mach_mips4010              4010
 #define bfd_mach_mips4100              4100
+  /* start-sanitize-vr4xxx */
+#define bfd_mach_mips4121              4121
+  /* end-sanitize-vr4xxx */
 #define bfd_mach_mips4300              4300
 #define bfd_mach_mips4400              4400
 #define bfd_mach_mips4600              4600

@@ -87,10 +87,10 @@ print_insn_arg (d, l, pc, info)
     case ',':
     case '(':
     case ')':
-      /* start-sanitize-vr5400 */
+      /* start-sanitize-cygnus */
     case '[':
     case ']':
-      /* end-sanitize-vr5400 */
+      /* end-sanitize-cygnus */
       /* start-sanitize-r5900 */
     case '+':
     case '-':
@@ -355,7 +355,7 @@ print_insn_arg (d, l, pc, info)
 			     (l >> OP_SH_PERFREG) & OP_MASK_PERFREG);
       break;
 
-      /* start-sanitize-vr5400 */
+      /* start-sanitize-cygnus */
     case 'e':
       (*info->fprintf_func) (info->stream, "%d",
 			     (l >> OP_SH_VECBYTE) & OP_MASK_VECBYTE);
@@ -365,7 +365,7 @@ print_insn_arg (d, l, pc, info)
       (*info->fprintf_func) (info->stream, "%d",
 			     (l >> OP_SH_VECALIGN) & OP_MASK_VECALIGN);
       break;
-      /* end-sanitize-vr5400 */
+      /* end-sanitize-cygnus */
 
     default:
       /* xgettext:c-format */
@@ -418,6 +418,12 @@ set_mips_isa_type (mach, isa, cputype)
 	target_processor = 4100;
 	mips_isa = 3;
 	break;
+	/* start-sanitize-vr4xxx */
+      case bfd_mach_mips4121:
+	target_processor = 4121;
+	mips_isa = 3;
+	break;
+	/* end-sanitize-vr4xxx */
       case bfd_mach_mips4300:
 	target_processor = 4300;
 	mips_isa = 3;
@@ -450,12 +456,12 @@ set_mips_isa_type (mach, isa, cputype)
 	target_processor = 5000;
 	mips_isa = 4;
 	break;
-      /* start-sanitize-vr5400 */
+      /* start-sanitize-cygnus */
       case bfd_mach_mips5400:
 	target_processor = 5400;
 	mips_isa = 3;
 	break;
-      /* end-sanitize-vr5400 */
+      /* end-sanitize-cygnus */
       /* start-sanitize-r5900 */
       case bfd_mach_mips5900:
 	target_processor = 5900;
@@ -535,7 +541,7 @@ _print_insn_mips (memaddr, word, info)
   target_processor = mips_target_info.processor;
   mips_isa = mips_target_info.isa;
 #else  
-  set_mips_isa_type (info->mach, &target_processor, &mips_isa);
+  set_mips_isa_type (info->mach, &mips_isa, &target_processor);
 #endif  
 
   info->bytes_per_chunk = 4;
@@ -569,14 +575,18 @@ _print_insn_mips (memaddr, word, info)
 		      && op->membership & INSN_4010) == 0
 		  && (target_processor == 4100
 		      && op->membership & INSN_4100) == 0
+		  /* start-sanitize-vr4xxx */
+		  && (target_processor == 4121
+		      && op->membership & INSN_4121) == 0
+		  /* end-sanitize-vr4xxx */
 		  /* start-sanitize-vr4320 */
 		  && (target_processor == 4320
 		      && op->membership & INSN_4320) == 0
 		  /* end-sanitize-vr4320 */
-		  /* start-sanitize-vr5400 */
+		  /* start-sanitize-cygnus */
 		  && (target_processor == 5400
 		      && op->membership & INSN_5400) == 0
-		  /* end-sanitize-vr5400 */
+		  /* end-sanitize-cygnus */
 		  /* start-sanitize-r5900 */
 		  && (target_processor == 5900
 		      && op->membership & INSN_5900) == 0

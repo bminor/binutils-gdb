@@ -142,6 +142,9 @@ END_RELOC_NUMBERS
 /* start-sanitize-tx49 */
 #define E_MIPS_MACH_4900	0x00860000
 /* end-sanitize-tx49 */
+/* start-sanitize-vr4xxx */
+#define E_MIPS_MACH_4121	0x00870000
+/* end-sanitize-vr4xxx */
 
 /* start-sanitize-cygnus */
 #define E_MIPS_MACH_5400	0x00910000
@@ -360,6 +363,10 @@ typedef struct
 /* A section of type SHT_MIPS_CONFLICT is an array of indices into the
    .dynsym section.  Each element has the following type.  */
 typedef unsigned long Elf32_Conflict;
+typedef unsigned char Elf32_External_Conflict[4];
+
+typedef unsigned long Elf64_Conflict;
+typedef unsigned char Elf64_External_Conflict[8];
 
 /* A section of type SHT_MIPS_GPTAB contains information about how
    much GP space would be required for different -G arguments.  This
