@@ -1,3 +1,8 @@
+2000-11-14  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris-dis.c (cris_get_disassembler): If abfd is NULL, return
+	print_insn_cris_with_register_prefix.
+
 2000-11-11  Alexandre Oliva  <aoliva@redhat.com>
 
 	* sh-opc.h: The operand of `mov.w r0, (<disp>,GBR)' is IMM1, not 0.

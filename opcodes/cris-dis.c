@@ -1387,7 +1387,10 @@ disassembler_ftype
 cris_get_disassembler (abfd)
      bfd *abfd;
 {
-  if (bfd_get_symbol_leading_char (abfd) == 0)
+  /* If there's no bfd in sight, we return what is valid as input in all
+     contexts if fed back to the assembler: disassembly *with* register
+     prefix.  */
+  if (abfd == NULL || bfd_get_symbol_leading_char (abfd) == 0)
     return print_insn_cris_with_register_prefix;
 
   return print_insn_cris_without_register_prefix;
