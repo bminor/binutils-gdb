@@ -1,3 +1,12 @@
+Tue Jul 14 08:34:34 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* ldlang.c (lang_map): print changes in sizes due to relaxing
+	(size_input_section): maintain the delta information. 
+	* ldlang.h: add new field to struct to contain delta info.
+	* relax.c  (relax_section): complain if input not relaxable.
+	* ldlex.l : add '_', ',' and '$' to chars which can appear at the
+	start of a filename
+
 Mon Jul 13 17:33:00 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* ldmain.c(main): prevent -r and -relax from being on at the same

@@ -107,7 +107,7 @@ DEFUN(build_it,(statement),
 	seclet->type = bfd_indirect_seclet;
 	seclet->u.indirect.section = i;
 	seclet->u.indirect.symbols = statement->input_section.ifile->asymbols;
-	seclet->size = bfd_get_section_size_before_reloc(i);
+	seclet->size = i->_cooked_size;
 	seclet->offset = i->output_offset;
 	seclet->next = 0;
       }
@@ -175,6 +175,10 @@ DEFUN(relax_section,(this_ptr),
 
   lang_input_section_type *is = &((*this_ptr)->input_section);
   asection *i = is->section;
+  if (!(i->owner->flags & BFD_IS_RELAXABLE)) 
+  {
+    einfo("%B: not assembled with -linkrelax\n", i->owner);    
+  }
 
   return bfd_relax_section(i->owner, i, is->ifile->asymbols);
   
