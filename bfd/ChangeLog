@@ -3,6 +3,7 @@
 	* reloc.c: Add BFD_RELOC_CRX_SWITCH8, BFD_RELOC_CRX_SWITCH16,
 	BFD_RELOC_CRX_SWITCH32.
 	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
 	* elf32-crx.c: Support relocation/relaxation of
 	BFD_RELOC_CRX_SWITCH* types.
 
