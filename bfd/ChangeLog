@@ -28,6 +28,11 @@
 	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame): Pad the
 	last CIE/FDE if needed.
 
+2003-10-06  Nick Clifton  <nickc@redhat.com>
+
+	* targets.c (_bfd_target_vector): Include bfd_elf64_sparc_vec if
+	BFD64 is enabled.
+
 2003-10-06  Matt Thomas <matt@3am-software.com>
 
          config.bfd: Move the hppa*-*-netbsd* case to the hppa*-*-linux* case.

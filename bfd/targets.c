@@ -898,9 +898,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf64_sh64nbsd_vec,
 	&bfd_elf64_sh64lin_vec,
 	&bfd_elf64_sh64blin_vec,
-#if 0
 	&bfd_elf64_sparc_vec,
-#endif
 	&bfd_elf64_tradbigmips_vec,
 	&bfd_elf64_tradlittlemips_vec,
 	&bfd_elf64_x86_64_vec,
