@@ -1882,11 +1882,21 @@ write_object_file (void)
   if (symbol_rootP)
     {
       symbolS *symp;
+      bfd_boolean skip_next_symbol = FALSE;
 
       for (symp = symbol_rootP; symp; symp = symbol_next (symp))
 	{
 	  int punt = 0;
 	  const char *name;
+
+	  if (skip_next_symbol)
+	    {
+	      /* Don't do anything besides moving the value of the
+		 symbol from the GAS value-field to the BFD value-field.  */
+	      symbol_get_bfdsym (symp)->value = S_GET_VALUE (symp);
+	      skip_next_symbol = FALSE;
+	      continue;
+	    }
 
 	  if (symbol_mri_common_p (symp))
 	    {
@@ -1972,6 +1982,12 @@ write_object_file (void)
 	  /* Set the value into the BFD symbol.  Up til now the value
 	     has only been kept in the gas symbolS struct.  */
 	  symbol_get_bfdsym (symp)->value = S_GET_VALUE (symp);
+
+	  /* A warning construct is a warning symbol followed by the
+	     symbol warned about.  Don't let anything object-format or
+	     target-specific muck with it; it's ready for output.  */
+	  if (symbol_get_bfdsym (symp)->flags & BSF_WARNING)
+	    skip_next_symbol = TRUE;
 	}
     }
 

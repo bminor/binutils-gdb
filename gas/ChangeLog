@@ -1,3 +1,8 @@
+2005-02-07  Hans-Peter Nilsson  <hp@axis.com>
+
+	* write.c (write_object_file): Recognize warning-symbol construct
+	and skip object- and target- handling for the second symbol.
+
 2005-02-02  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-ia64.c (dot_pred_rel): Update comment. Handle @-prefixed
