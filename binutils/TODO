@@ -8,6 +8,8 @@ o - See also ../ld/TODO and ../bfd/TODO.
 
 o - ar q is flakey: e.g. doesn't handle long file names properly.
 
+o - objdump -d:  Print relocatable addresses intelligently.
+
 OLD:
 
 o - make the long options more consistent.
