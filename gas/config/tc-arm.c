@@ -32,6 +32,10 @@
 #include "symbols.h"
 #include "listing.h"
 
+#ifdef OBJ_ELF
+#include "elf/arm.h"
+#endif
+
 /* ??? This is currently unused.  */
 #ifdef __STDC__
 #define internalError() \
@@ -87,8 +91,8 @@
 
 static unsigned long	cpu_variant = CPU_DEFAULT | FPU_DEFAULT;
 
-#ifdef OBJ_COFF
-/* Flags stored in private area of BFD COFF structure */
+#if defined OBJ_COFF || defined OBJ_ELF
+/* Flags stored in private area of BFD structure */
 static boolean		uses_apcs_26 = false;
 static boolean		support_interwork = false;
 static boolean		uses_apcs_float = false;
@@ -1130,7 +1134,7 @@ s_ltorg (internal)
   symbol_table_insert (current_poolP);
 
   ARM_SET_THUMB (current_poolP, thumb_mode);
-#ifdef OBJ_COFF
+#if defined OBJ_COFF || defined OBJ_ELF
   ARM_SET_INTERWORK (current_poolP, support_interwork);
 #endif
   
@@ -4790,7 +4794,7 @@ md_begin ()
 
   set_constant_flonums ();
 
-#ifdef OBJ_COFF
+#if defined OBJ_COFF || defined OBJ_ELF
   {
     unsigned int flags = 0;
     
@@ -4799,7 +4803,7 @@ md_begin ()
     if (support_interwork) flags |= F_INTERWORK;
     if (uses_apcs_float)   flags |= F_APCS_FLOAT;
     if (pic_code)          flags |= F_PIC;
-    
+
     bfd_set_private_flags (stdoutput, flags);
   }
 #endif
@@ -6000,7 +6004,7 @@ md_parse_option (c, arg)
           else if (! strcmp (str, "thumb-interwork"))
             {
               cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_THUMB | ARM_ARCHv4;
-#ifdef OBJ_COFF
+#if defined OBJ_COFF || defined OBJ_ELF
               support_interwork = true;
 #endif
             }
@@ -6014,7 +6018,7 @@ md_parse_option (c, arg)
 	      cpu_variant = ARM_ALL | FPU_ALL;
 	      return 1;
 	    }
-#ifdef OBJ_COFF
+#if defined OBJ_COFF || defined OBJ_ELF
 	  if (! strncmp (str, "apcs-", 5))
 	    {
 	      /* GCC passes on all command line options starting "-mapcs-..."
@@ -6214,26 +6218,31 @@ md_show_usage (fp)
      FILE *fp;
 {
   fprintf (fp,
-_("-m[arm][<processor name>] select processor variant\n\
--m[arm]v[2|2a|3|3m|4|4t] select architecture variant\n\
--mthumb\t\t\tonly allow Thumb instructions\n\
--mthumb-interwork\tmark the assembled code as supporting interworking\n\
--mall\t\t\tallow any instruction\n\
--mfpa10, -mfpa11\tselect floating point architecture\n\
--mfpe-old\t\tdon't allow floating-point multiple instructions\n\
--mno-fpu\t\tdon't allow any floating-point instructions.\n"));
-#ifdef OBJ_COFF
+_("\
+  -m[arm][<processor name>] select processor variant\n\
+  -m[arm]v[2|2a|3|3m|4|4t]  select architecture variant\n\
+  -mthumb                   only allow Thumb instructions\n\
+  -mthumb-interwork         mark the assembled code as supporting interworking\n\
+  -mall                     allow any instruction\n\
+  -mfpa10, -mfpa11          select floating point architecture\n\
+  -mfpe-old                 don't allow floating-point multiple instructions\n\
+  -mno-fpu                  don't allow any floating-point instructions.\n"));
+#if defined OBJ_COFF || defined OBJ_ELF
   fprintf (fp,
-_("-mapcs-32, -mapcs-26\tspecify which ARM Procedure Calling Standard is in use\n"));
+_("\
+  -mapcs-32, -mapcs-26      specify which ARM Procedure Calling Standard is in use\n"));
   fprintf (fp,
-_("-mapcs-float\t\tfloating point args are passed in floating point regs\n"));
+_("\
+  -mapcs-float              floating point args are passed in floating point regs\n"));
   fprintf (fp,
-_("-mapcs-reentrant\tposition independent/reentrant code has been generated\n"));
+_("\
+  -mapcs-reentrant          position independent/reentrant code has been generated\n"));
 #endif
 #ifdef ARM_BI_ENDIAN
   fprintf (fp,
-_("-EB\t\t\tassemble code for a big endian cpu\n\
--EL\t\t\tassemble code for a little endian cpu\n"));
+_("\
+  -EB                       assemble code for a big endian cpu\n\
+  -EL                       assemble code for a little endian cpu\n"));
 #endif
 }
 
@@ -6305,7 +6314,7 @@ arm_frob_label (sym)
 {
   last_label_seen = sym;
   ARM_SET_THUMB (sym, thumb_mode);
-#ifdef OBJ_COFF
+#if defined OBJ_COFF || defined OBJ_ELF
   ARM_SET_INTERWORK (sym, support_interwork);
 #endif
   
@@ -6328,8 +6337,8 @@ arm_frob_label (sym)
 void
 arm_adjust_symtab ()
 {
-#ifdef OBJ_COFF
-  symbolS *sym;
+#if defined OBJ_COFF 
+  symbolS * sym;
 
   for (sym = symbol_rootP; sym != NULL; sym = symbol_next (sym))
     {
@@ -6363,9 +6372,7 @@ arm_adjust_symtab ()
         }
       
       if (ARM_IS_INTERWORK (sym))
-	{
-	  coffsymbol(sym->bsym)->native->u.syment.n_flags = 0xFF;
-	}
+	coffsymbol(sym->bsym)->native->u.syment.n_flags = 0xFF;
     }
 #endif
 }
