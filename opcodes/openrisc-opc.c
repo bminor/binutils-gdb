@@ -35,11 +35,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* The hash functions are recorded here to help keep assembler code out of
    the disassembler and vice versa.  */
 
-static int           asm_hash_insn_p     PARAMS ((const CGEN_INSN *));
-static unsigned int  asm_hash_insn       PARAMS ((const char *));
-static int           dis_hash_insn_p     PARAMS ((const CGEN_INSN *));
-static unsigned int  dis_hash_insn       PARAMS ((const char *, CGEN_INSN_INT));
-static void          set_fields_bitsize  PARAMS ((CGEN_FIELDS *, int));
+static int asm_hash_insn_p PARAMS ((const CGEN_INSN *));
+static unsigned int asm_hash_insn PARAMS ((const char *));
+static int dis_hash_insn_p PARAMS ((const CGEN_INSN *));
+static unsigned int dis_hash_insn PARAMS ((const char *, CGEN_INSN_INT));
 
 /* Instruction formats.  */
 
@@ -645,11 +644,13 @@ asm_hash_insn (mnem)
 
 static unsigned int
 dis_hash_insn (buf, value)
-     const char * buf;
+     const char * buf ATTRIBUTE_UNUSED;
      CGEN_INSN_INT value ATTRIBUTE_UNUSED;
 {
   return CGEN_DIS_HASH (buf, value);
 }
+
+static void set_fields_bitsize PARAMS ((CGEN_FIELDS *, int));
 
 /* Set the recorded length of the insn in the CGEN_FIELDS struct.  */
 

@@ -35,6 +35,7 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #include "@prefix@-opc.h"
 #include "opintl.h"
 #include "xregex.h"
+#include "libiberty.h"
 
 #undef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
@@ -57,14 +58,13 @@ static const char * parse_insn_normal
   It then compiles the regex and stores it in the opcode, for
   later use by @arch@_cgen_assemble_insn
 
-  returns NULL for success, an error message for failure 
-*/
+  Returns NULL for success, an error message for failure. */
 
 char * 
 @arch@_cgen_build_insn_regex (insn)
      CGEN_INSN *insn;
 {  
-  CGEN_OPCODE *opc = CGEN_INSN_OPCODE (insn);
+  CGEN_OPCODE *opc = (CGEN_OPCODE *) CGEN_INSN_OPCODE (insn);
   const char *mnem = CGEN_INSN_MNEMONIC (insn);
   int mnem_len;
   char rxbuf[CGEN_MAX_RX_ELEMENTS];

@@ -25,6 +25,7 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
    Keep that in mind.  */
 
 #include "sysdep.h"
+#include <ctype.h>
 #include <stdio.h>
 #include "ansidecl.h"
 #include "dis-asm.h"
@@ -59,27 +60,15 @@ static int extract_insn_normal
 static void put_insn_int_value
      PARAMS ((CGEN_CPU_DESC, CGEN_INSN_BYTES_PTR, int, int, CGEN_INSN_INT));
 #endif
-static CGEN_INLINE int fill_cache
-     PARAMS ((CGEN_CPU_DESC, CGEN_EXTRACT_INFO *, int, int, bfd_vma));
-static CGEN_INLINE long extract_1
-     PARAMS ((CGEN_CPU_DESC, CGEN_EXTRACT_INFO *, int, int, int, unsigned char *,
-	      bfd_vma));
+#if ! CGEN_INT_INSN_P
 static CGEN_INLINE void insert_1
      PARAMS ((CGEN_CPU_DESC, unsigned long, int, int, int, unsigned char *));
-const char * fr30_cgen_insert_operand
-     PARAMS ((CGEN_CPU_DESC, int, CGEN_FIELDS *, CGEN_INSN_BYTES_PTR, bfd_vma));
-int fr30_cgen_extract_operand
-     PARAMS ((CGEN_CPU_DESC, int, CGEN_EXTRACT_INFO *, CGEN_INSN_INT, CGEN_FIELDS *,
-	      bfd_vma));
-int fr30_cgen_get_int_operand
-     PARAMS ((CGEN_CPU_DESC, int, const CGEN_FIELDS *));
-bfd_vma fr30_cgen_get_vma_operand
-     PARAMS ((CGEN_CPU_DESC, int, const CGEN_FIELDS *));
-void fr30_cgen_set_int_operand
-     PARAMS ((CGEN_CPU_DESC, int, CGEN_FIELDS *, int));
-void fr30_cgen_set_vma_operand
-     PARAMS ((CGEN_CPU_DESC, int, CGEN_FIELDS *, bfd_vma));
-
+static CGEN_INLINE int fill_cache
+     PARAMS ((CGEN_CPU_DESC, CGEN_EXTRACT_INFO *,  int, int, bfd_vma));
+static CGEN_INLINE long extract_1
+     PARAMS ((CGEN_CPU_DESC, CGEN_EXTRACT_INFO *, int, int, int,
+	      unsigned char *, bfd_vma));
+#endif
 
 /* Operand insertion.  */
 
@@ -96,9 +85,8 @@ insert_1 (cd, value, start, length, word_length, bufp)
 {
   unsigned long x,mask;
   int shift;
-  int big_p = CGEN_CPU_INSN_ENDIAN (cd) == CGEN_ENDIAN_BIG;
 
-  x = bfd_get_bits (bufp, word_length, big_p);
+  x = cgen_get_insn_value (cd, bufp, word_length);
 
   /* Written this way to avoid undefined behaviour.  */
   mask = (((1L << (length - 1)) - 1) << 1) | 1;
@@ -108,7 +96,7 @@ insert_1 (cd, value, start, length, word_length, bufp)
     shift = (word_length - (start + length));
   x = (x & ~(mask << shift)) | ((value & mask) << shift);
 
-  bfd_put_bits ((bfd_vma) x, bufp, word_length, big_p);
+  cgen_put_insn_value (cd, bufp, word_length, (bfd_vma) x);
 }
 
 #endif /* ! CGEN_INT_INSN_P */
@@ -268,7 +256,7 @@ insert_insn_normal (cd, insn, fields, buffer, pc)
 
 #else
 
-  cgen_put_insn_value (cd, buffer, min (cd->base_insn_bitsize,
+  cgen_put_insn_value (cd, buffer, min ((unsigned) cd->base_insn_bitsize,
 					(unsigned) CGEN_FIELDS_BITSIZE (fields)),
 		       value);
 
@@ -385,10 +373,11 @@ extract_1 (cd, ex_info, start, length, word_length, bufp, pc)
 {
   unsigned long x;
   int shift;
+#if 0
   int big_p = CGEN_CPU_INSN_ENDIAN (cd) == CGEN_ENDIAN_BIG;
 
-  x = bfd_get_bits (bufp, word_length, big_p);
-
+  x = cgen_get_insn_value (cd, bufp, word_length);
+#endif
   if (CGEN_INSN_LSB0_P)
     shift = (start + 1) - length;
   else
@@ -550,6 +539,9 @@ extract_insn_normal (cd, insn, ex_info, insn_value, fields, pc)
 
 /* machine generated code added here */
 
+const char * fr30_cgen_insert_operand
+  PARAMS ((CGEN_CPU_DESC, int, CGEN_FIELDS *, CGEN_INSN_BYTES_PTR, bfd_vma));
+
 /* Main entry point for operand insertion.
 
    This function is basically just a big switch statement.  Earlier versions
@@ -571,7 +563,7 @@ fr30_cgen_insert_operand (cd, opindex, fields, buffer, pc)
      int opindex;
      CGEN_FIELDS * fields;
      CGEN_INSN_BYTES_PTR buffer;
-     bfd_vma pc;
+     bfd_vma pc ATTRIBUTE_UNUSED;
 {
   const char * errmsg = NULL;
   unsigned int total_length = CGEN_FIELDS_BITSIZE (fields);
@@ -743,6 +735,10 @@ fr30_cgen_insert_operand (cd, opindex, fields, buffer, pc)
 
   return errmsg;
 }
+
+int fr30_cgen_extract_operand
+  PARAMS ((CGEN_CPU_DESC, int, CGEN_EXTRACT_INFO *, CGEN_INSN_INT,
+           CGEN_FIELDS *, bfd_vma));
 
 /* Main entry point for operand extraction.
    The result is <= 0 for error, >0 for success.
@@ -957,6 +953,11 @@ cgen_extract_fn * const fr30_cgen_extract_handlers[] =
 {
   extract_insn_normal,
 };
+
+int fr30_cgen_get_int_operand
+  PARAMS ((CGEN_CPU_DESC, int, const CGEN_FIELDS *));
+bfd_vma fr30_cgen_get_vma_operand
+  PARAMS ((CGEN_CPU_DESC, int, const CGEN_FIELDS *));
 
 /* Getting values from cgen_fields is handled by a collection of functions.
    They are distinguished by the type of the VALUE argument they return.
@@ -1220,6 +1221,11 @@ fr30_cgen_get_vma_operand (cd, opindex, fields)
 
   return value;
 }
+
+void fr30_cgen_set_int_operand
+  PARAMS ((CGEN_CPU_DESC, int, CGEN_FIELDS *, int));
+void fr30_cgen_set_vma_operand
+  PARAMS ((CGEN_CPU_DESC, int, CGEN_FIELDS *, bfd_vma));
 
 /* Stuffing values in cgen_fields is handled by a collection of functions.
    They are distinguished by the type of the VALUE argument they accept.

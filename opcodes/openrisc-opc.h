@@ -26,11 +26,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define OPENRISC_OPC_H
 
 /* -- opc.h */
-#undef CGEN_DIS_HASH_SIZE
+#undef  CGEN_DIS_HASH_SIZE
 #define CGEN_DIS_HASH_SIZE 64
-#undef CGEN_DIS_HASH
+#undef  CGEN_DIS_HASH
 #define CGEN_DIS_HASH(buffer, value) (((unsigned char *) (buffer))[0] >> 2)
 
+extern long openrisc_sign_extend_16bit PARAMS ((long));
 /* -- */
 /* Enum declaration for openrisc instruction types.  */
 typedef enum cgen_insn_type {

@@ -26,9 +26,9 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
    Keep that in mind.  */
 
 #include "sysdep.h"
+#include <ctype.h>
 #include <stdio.h>
 #include "ansidecl.h"
-#include "safe-ctype.h"
 #include "bfd.h"
 #include "symcat.h"
 #include "fr30-desc.h"
@@ -42,19 +42,26 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #undef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
 
-static const char * parse_insn_normal          PARAMS ((CGEN_CPU_DESC, const CGEN_INSN *, const char **, CGEN_FIELDS *));
-static int parse_register_number               PARAMS ((const char **));
-static const char * parse_register_list        PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *, int, int));
-static const char * parse_low_register_list_ld PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
-static const char * parse_hi_register_list_ld  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
-static const char * parse_low_register_list_st PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
-static const char * parse_hi_register_list_st  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
-       const char * fr30_cgen_parse_operand    PARAMS ((CGEN_CPU_DESC, int, const char **, CGEN_FIELDS *));
+static const char * parse_insn_normal
+     PARAMS ((CGEN_CPU_DESC, const CGEN_INSN *, const char **, CGEN_FIELDS *));
 
 /* -- assembler routines inserted here */
 
 /* -- asm.c */
-/* Handle register lists for LDMx and STMx  */
+/* Handle register lists for LDMx and STMx.  */
+
+static int parse_register_number
+  PARAMS ((const char **));
+static const char * parse_register_list
+  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *, int, int));
+static const char * parse_low_register_list_ld
+  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
+static const char * parse_hi_register_list_ld
+  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
+static const char * parse_low_register_list_st
+  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
+static const char * parse_hi_register_list_st
+  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
 
 static int
 parse_register_number (strp)
@@ -62,7 +69,7 @@ parse_register_number (strp)
 {
   int regno;
   if (**strp < '0' || **strp > '9')
-    return -1; /* error */
+    return -1; /* error.  */
   regno = **strp - '0';
   ++*strp;
 
@@ -85,6 +92,7 @@ parse_register_list (cd, strp, opindex, valuep, high_low, load_store)
      int load_store; /* 0 == load, 1 == store */
 {
   int regno;
+
   *valuep = 0;
   while (**strp && **strp != ')')
     {
@@ -103,7 +111,7 @@ parse_register_list (cd, strp, opindex, valuep, high_low, load_store)
       if (high_low)
 	regno -= 8;
 
-      if (load_store) /* mask is reversed for store */
+      if (load_store) /* Mask is reversed for store.  */
 	*valuep |= 0x80 >> regno;
       else
 	*valuep |= 1 << regno;
@@ -164,6 +172,9 @@ parse_hi_register_list_st (cd, strp, opindex, valuep)
 
 /* -- */
 
+const char * fr30_cgen_parse_operand
+  PARAMS ((CGEN_CPU_DESC, int, const char **, CGEN_FIELDS *));
+
 /* Main entry point for operand parsing.
 
    This function is basically just a big switch statement.  Earlier versions
@@ -175,7 +186,8 @@ parse_hi_register_list_st (cd, strp, opindex, valuep)
 
    This function could be moved into `parse_insn_normal', but keeping it
    separate makes clear the interface between `parse_insn_normal' and each of
-   the handlers.  */
+   the handlers.
+*/
 
 const char *
 fr30_cgen_parse_operand (cd, opindex, strp, fields)
@@ -186,7 +198,7 @@ fr30_cgen_parse_operand (cd, opindex, strp, fields)
 {
   const char * errmsg = NULL;
   /* Used by scalar operands that still need to be parsed.  */
-  long junk;
+  long junk ATTRIBUTE_UNUSED;
 
   switch (opindex)
     {
@@ -343,8 +355,7 @@ fr30_cgen_init_asm (cd)
   It then compiles the regex and stores it in the opcode, for
   later use by fr30_cgen_assemble_insn
 
-  returns NULL for success, an error message for failure 
-*/
+  Returns NULL for success, an error message for failure. */
 
 char * 
 fr30_cgen_build_insn_regex (insn)
@@ -467,14 +478,14 @@ parse_insn_normal (cd, insn, strp, fields)
      GAS's input scrubber will ensure mnemonics are lowercase, but we may
      not be called from GAS.  */
   p = CGEN_INSN_MNEMONIC (insn);
-  while (*p && TOLOWER (*p) == TOLOWER (*str))
+  while (*p && tolower (*p) == tolower (*str))
     ++p, ++str;
 
   if (* p)
     return _("unrecognized instruction");
 
 #ifndef CGEN_MNEMONIC_OPERANDS
-  if (* str && !ISSPACE (* str))
+  if (* str && !isspace (* str))
     return _("unrecognized instruction");
 #endif
 
@@ -503,7 +514,7 @@ parse_insn_normal (cd, insn, strp, fields)
 	     first char after the mnemonic part is a space.  */
 	  /* FIXME: We also take inappropriate advantage of the fact that
 	     GAS's input scrubber will remove extraneous blanks.  */
-	  if (TOLOWER (*str) == TOLOWER (CGEN_SYNTAX_CHAR (* syn)))
+	  if (tolower (*str) == tolower (CGEN_SYNTAX_CHAR (* syn)))
 	    {
 #ifdef CGEN_MNEMONIC_OPERANDS
 	      if (CGEN_SYNTAX_CHAR(* syn) == ' ')
@@ -550,7 +561,7 @@ parse_insn_normal (cd, insn, strp, fields)
 	 blanks now.  IE: We needn't try again with a longer version of
 	 the insn and it is assumed that longer versions of insns appear
 	 before shorter ones (eg: lsr r2,r3,1 vs lsr r2,r3).  */
-      while (ISSPACE (* str))
+      while (isspace (* str))
 	++ str;
 
       if (* str != '\0')
@@ -599,7 +610,7 @@ fr30_cgen_assemble_insn (cd, str, fields, buf, errmsg)
   int recognized_mnemonic = 0;
 
   /* Skip leading white space.  */
-  while (ISSPACE (* str))
+  while (isspace (* str))
     ++ str;
 
   /* The instructions are stored in hashed lists.

@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "sysdep.h"
+#include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include "ansidecl.h"
@@ -32,14 +33,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "fr30-opc.h"
 #include "opintl.h"
 #include "libiberty.h"
-
-static void              init_tables              PARAMS ((void));
-static const CGEN_MACH * lookup_mach_via_bfd_name PARAMS ((const CGEN_MACH *, const char *));
-static void              build_hw_table           PARAMS ((CGEN_CPU_TABLE *));
-static void              build_ifield_table       PARAMS ((CGEN_CPU_TABLE *));
-static void              build_operand_table      PARAMS ((CGEN_CPU_TABLE *));
-static void              build_insn_table         PARAMS ((CGEN_CPU_TABLE *));
-static void              fr30_cgen_rebuild_tables PARAMS ((CGEN_CPU_TABLE *));
 
 /* Attributes.  */
 
@@ -1368,11 +1361,20 @@ static const CGEN_IBASE fr30_cgen_insn_table[MAX_INSNS] =
 #undef A
 
 /* Initialize anything needed to be done once, before any cpu_open call.  */
+static void init_tables PARAMS ((void));
 
 static void
 init_tables ()
 {
 }
+
+static const CGEN_MACH * lookup_mach_via_bfd_name
+  PARAMS ((const CGEN_MACH *, const char *));
+static void build_hw_table  PARAMS ((CGEN_CPU_TABLE *));
+static void build_ifield_table  PARAMS ((CGEN_CPU_TABLE *));
+static void build_operand_table PARAMS ((CGEN_CPU_TABLE *));
+static void build_insn_table    PARAMS ((CGEN_CPU_TABLE *));
+static void fr30_cgen_rebuild_tables PARAMS ((CGEN_CPU_TABLE *));
 
 /* Subroutine of fr30_cgen_cpu_open to look up a mach via its bfd name.  */
 

@@ -36,9 +36,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #else
 #define OP_ENT(op) M32R_OPERAND_/**/op
 #endif
-#define INPUT    CGEN_OPINST_INPUT
-#define OUTPUT   CGEN_OPINST_OUTPUT
-#define END      CGEN_OPINST_END, "", 0, 0, 0, 0, 0 
+#define INPUT CGEN_OPINST_INPUT
+#define OUTPUT CGEN_OPINST_OUTPUT
+#define END CGEN_OPINST_END
 #define COND_REF CGEN_OPINST_COND_REF
 
 static const CGEN_OPINST sfmt_empty_ops[] = {

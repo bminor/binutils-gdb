@@ -26,9 +26,9 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
    Keep that in mind.  */
 
 #include "sysdep.h"
+#include <ctype.h>
 #include <stdio.h>
 #include "ansidecl.h"
-#include "safe-ctype.h"
 #include "bfd.h"
 #include "symcat.h"
 #include "m32r-desc.h"
@@ -42,16 +42,20 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #undef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
 
-static const char * parse_insn_normal       PARAMS ((CGEN_CPU_DESC, const CGEN_INSN *, const char **, CGEN_FIELDS *));
-static const char * parse_hash              PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
-static const char * parse_hi16              PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
-static const char * parse_slo16             PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
-static const char * parse_ulo16             PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
-       const char * m32r_cgen_parse_operand PARAMS ((CGEN_CPU_DESC, int, const char **, CGEN_FIELDS *));
+static const char * parse_insn_normal
+     PARAMS ((CGEN_CPU_DESC, const CGEN_INSN *, const char **, CGEN_FIELDS *));
 
 /* -- assembler routines inserted here */
 
 /* -- asm.c */
+static const char * parse_hash
+  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
+static const char * parse_hi16
+  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
+static const char * parse_slo16
+  PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
+static const char * parse_ulo16
+  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
 
 /* Handle '#' prefixes (i.e. skip over them).  */
 
@@ -201,6 +205,9 @@ parse_ulo16 (cd, strp, opindex, valuep)
 
 /* -- */
 
+const char * m32r_cgen_parse_operand
+  PARAMS ((CGEN_CPU_DESC, int, const char **, CGEN_FIELDS *));
+
 /* Main entry point for operand parsing.
 
    This function is basically just a big switch statement.  Earlier versions
@@ -224,7 +231,7 @@ m32r_cgen_parse_operand (cd, opindex, strp, fields)
 {
   const char * errmsg = NULL;
   /* Used by scalar operands that still need to be parsed.  */
-  long junk;
+  long junk ATTRIBUTE_UNUSED;
 
   switch (opindex)
     {
@@ -350,8 +357,7 @@ m32r_cgen_init_asm (cd)
   It then compiles the regex and stores it in the opcode, for
   later use by m32r_cgen_assemble_insn
 
-  returns NULL for success, an error message for failure 
-*/
+  Returns NULL for success, an error message for failure. */
 
 char * 
 m32r_cgen_build_insn_regex (insn)
@@ -474,14 +480,14 @@ parse_insn_normal (cd, insn, strp, fields)
      GAS's input scrubber will ensure mnemonics are lowercase, but we may
      not be called from GAS.  */
   p = CGEN_INSN_MNEMONIC (insn);
-  while (*p && TOLOWER (*p) == TOLOWER (*str))
+  while (*p && tolower (*p) == tolower (*str))
     ++p, ++str;
 
   if (* p)
     return _("unrecognized instruction");
 
 #ifndef CGEN_MNEMONIC_OPERANDS
-  if (* str && !ISSPACE (* str))
+  if (* str && !isspace (* str))
     return _("unrecognized instruction");
 #endif
 
@@ -510,7 +516,7 @@ parse_insn_normal (cd, insn, strp, fields)
 	     first char after the mnemonic part is a space.  */
 	  /* FIXME: We also take inappropriate advantage of the fact that
 	     GAS's input scrubber will remove extraneous blanks.  */
-	  if (TOLOWER (*str) == TOLOWER (CGEN_SYNTAX_CHAR (* syn)))
+	  if (tolower (*str) == tolower (CGEN_SYNTAX_CHAR (* syn)))
 	    {
 #ifdef CGEN_MNEMONIC_OPERANDS
 	      if (CGEN_SYNTAX_CHAR(* syn) == ' ')
@@ -557,7 +563,7 @@ parse_insn_normal (cd, insn, strp, fields)
 	 blanks now.  IE: We needn't try again with a longer version of
 	 the insn and it is assumed that longer versions of insns appear
 	 before shorter ones (eg: lsr r2,r3,1 vs lsr r2,r3).  */
-      while (ISSPACE (* str))
+      while (isspace (* str))
 	++ str;
 
       if (* str != '\0')
@@ -606,7 +612,7 @@ m32r_cgen_assemble_insn (cd, str, fields, buf, errmsg)
   int recognized_mnemonic = 0;
 
   /* Skip leading white space.  */
-  while (ISSPACE (* str))
+  while (isspace (* str))
     ++ str;
 
   /* The instructions are stored in hashed lists.
