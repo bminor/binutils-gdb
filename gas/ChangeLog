@@ -1,3 +1,8 @@
+2002-12-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* doc/as.texinfo (Invoking): Typo fix.
+	* config/tc-tic54x.c (encode_operand): Comment typo fix.
+
 2002-11-30  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* config/tc-sh.c (md_apply_fix3): Take account of fx_offset

@@ -1367,7 +1367,7 @@ gcc -c -g -O -Wa,-alh,-L file.c
 
 @noindent
 This passes two options to the assembler: @samp{-alh} (emit a listing to
-standard output with with high-level and assembly source) and @samp{-L} (retain
+standard output with high-level and assembly source) and @samp{-L} (retain
 local symbols in the symbol table).
 
 Usually you do not need to use this @samp{-Wa} mechanism, since many compiler
