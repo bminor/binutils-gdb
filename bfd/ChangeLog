@@ -1,3 +1,16 @@
+Mon Nov 16 22:19:21 1998  DJ Delorie  <dj@indy.delorie.com>
+
+	* archive.c (bfd_ar_hdr_from_filesystem): support BFD_IN_MEMORY
+ 	bfds; they have no "file" so we fake it.
+	* bfd-in2.h: add bfd_make_writable and bfd_make_readable (regen)
+	* libbfd.c (bfd_write): Allow writing to BFD_IN_MEMORY bfds by
+ 	resizing the memory buffer.
+	* opncls.c (bfd_make_writable): New function; lets you write a
+ 	bfd_create'd bfd to an in-memory buffer.
+	(bfd_make_readable): New function; lets you read back that buffer
+ 	as if it were from bfd_openr.  Used to build generated archive
+ 	members (winsup's ld's dlltool)
+
 Mon Nov 16 19:15:19 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* po/bfd.pot: Regenerated.

@@ -220,16 +220,17 @@ bfd_fdopenr (filename, target, fd)
       return NULL;
     }
 
-#if defined(VMS) || defined(__GO32__)
-  nbfd->iostream = (PTR)fopen(filename, FOPEN_RB);
+#ifndef HAVE_FDOPEN
+  nbfd->iostream = (PTR) fopen (filename, FOPEN_RB);
 #else
   /* (O_ACCMODE) parens are to avoid Ultrix header file bug */
-  switch (fdflags & (O_ACCMODE)) {
-  case O_RDONLY: nbfd->iostream = (PTR) fdopen (fd, FOPEN_RB);   break;
-  case O_WRONLY: nbfd->iostream = (PTR) fdopen (fd, FOPEN_RUB);  break;
-  case O_RDWR:   nbfd->iostream = (PTR) fdopen (fd, FOPEN_RUB);  break;
-  default: abort ();
-  }
+  switch (fdflags & (O_ACCMODE))
+    {
+    case O_RDONLY: nbfd->iostream = (PTR) fdopen (fd, FOPEN_RB);   break;
+    case O_WRONLY: nbfd->iostream = (PTR) fdopen (fd, FOPEN_RUB);  break;
+    case O_RDWR:   nbfd->iostream = (PTR) fdopen (fd, FOPEN_RUB);  break;
+    default: abort ();
+    }
 #endif
 
   if (nbfd->iostream == NULL)
@@ -271,7 +272,7 @@ FUNCTION
 	bfd_openstreamr
 
 SYNOPSIS
-	bfd *bfd_openstreamr();
+	bfd *bfd_openstreamr(const char *, const char *, PTR);
 
 DESCRIPTION
 
@@ -280,11 +281,12 @@ DESCRIPTION
 */
 
 bfd *
-bfd_openstreamr (filename, target, stream)
+bfd_openstreamr (filename, target, streamarg)
      const char *filename;
      const char *target;
-     FILE *stream;
+     PTR streamarg;
 {
+  FILE *stream = (FILE *) streamarg;
   bfd *nbfd;
   const bfd_target *target_vec;
 
@@ -526,6 +528,84 @@ bfd_create (filename, templ)
   nbfd->direction = no_direction;
   bfd_set_format (nbfd, bfd_object);
   return nbfd;
+}
+
+/*
+FUNCTION
+	bfd_make_writable
+
+SYNOPSIS
+	boolean bfd_make_writable(bfd *abfd);
+
+DESCRIPTION
+	Takes a BFD as created by <<bfd_create>> and converts it
+	into one like as returned by <<bfd_openw>>.  It does this
+	by converting the BFD to BFD_IN_MEMORY.  It's assumed that
+	you will call <<bfd_make_readable>> on this bfd later.
+
+RETURNS
+	<<true>> is returned if all is ok, otherwise <<false>>.
+*/
+
+boolean
+bfd_make_writable(abfd)
+     bfd *abfd;
+{
+  struct bfd_in_memory *bim;
+
+  if (abfd->direction != no_direction)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return false;
+    }
+
+  bim = (struct bfd_in_memory *) bfd_malloc (sizeof (struct bfd_in_memory));
+  abfd->iostream = (PTR) bim;
+  /* bfd_write will grow these as needed */
+  bim->size = 0;
+  bim->buffer = 0;
+
+  abfd->flags |= BFD_IN_MEMORY;
+  abfd->direction = write_direction;
+  abfd->where = 0;
+
+  return true;
+}
+
+/*
+FUNCTION
+	bfd_make_readable
+
+SYNOPSIS
+	boolean bfd_make_readable(bfd *abfd);
+
+DESCRIPTION
+	Takes a BFD as created by <<bfd_create>> and
+	<<bfd_make_writable>> and converts it into one like as
+	returned by <<bfd_openr>>.  It does this by writing the
+	contents out to the memory buffer, then reversing the
+	direction.
+
+RETURNS
+	<<true>> is returned if all is ok, otherwise <<false>>.  */
+
+boolean
+bfd_make_readable(abfd)
+     bfd *abfd;
+{
+  if (abfd->direction != write_direction || !(abfd->flags & BFD_IN_MEMORY))
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return false;
+    }
+
+  if (! BFD_SEND_FMT (abfd, _bfd_write_contents, (abfd)))
+    return false;
+
+  abfd->where = 0;
+  abfd->direction = read_direction;
+
+  return true;
 }
 
 /*
