@@ -814,8 +814,7 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	    }
 	}
       else if ((opcode1->op->flags_used & (FLAG_JMP | FLAG_JSR)
-		&& ((opcode1->op->flags_used & FLAG_DELAY) == 0)
-		&& ((opcode1->ecc == ECC_AL) || ! Optimizing))
+		&& ((opcode1->op->flags_used & FLAG_DELAY) == 0))
 	       || opcode1->op->flags_used & FLAG_RP)
 	{
 	  /* We must emit (non-delayed) branch type instructions
