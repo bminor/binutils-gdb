@@ -1,3 +1,12 @@
+2003-04-09  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* doc/c-m68hc11.texi (M68HC11-Opts): Document -m68hcs12, -mshort,
+	-mlong, -mshort-double and -mlong-double options; use table @code.
+	(M68HC11-Syntax): Update to document 68HC12 operands.
+	(M68HC11-Modifiers): New section for operand modifiers.
+	(M68HC11-Directives): New section for specific assembler directives.
+	(M68HC11-Branch): Fix Overfull hbox error.
+
 2003-04-09  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-mips.c (macro): Add comments explaining the rationale
