@@ -582,6 +582,10 @@ md_parse_option (c, arg)
 	  ppc_cpu = PPC_OPCODE_PPC;
 	  ppc_size = PPC_OPCODE_64;
 	}
+      /* -mcom means assemble for the common intersection between Power
+	 and PowerPC.  */
+      else if (strcmp (arg, "com") == 0)
+	ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_PPC;
       /* -many means to assemble for any architecture (PWR/PWRX/PPC).  */
       else if (strcmp (arg, "any") == 0)
 	ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_POWER2 | PPC_OPCODE_PPC;
@@ -656,6 +660,7 @@ PowerPC options:\n\
 -mppc, -mppc32, -m403, -m603, -m604\n\
 			generate code for Motorola PowerPC 603/604\n\
 -mppc64, -m620		generate code for Motorola PowerPC 620\n\
+-mcom			generate code Power/PowerPC common instructions\n
 -many			generate code for any architecture (PWR/PWRX/PPC)\n");
 #ifdef OBJ_ELF
   fprintf(stream, "\
@@ -737,7 +742,10 @@ md_begin ()
 
       if ((op->flags & ppc_cpu) != 0
 	  && ((op->flags & (PPC_OPCODE_32 | PPC_OPCODE_64)) == 0
-	      || (op->flags & (PPC_OPCODE_32 | PPC_OPCODE_64)) == ppc_size))
+	      || (op->flags & (PPC_OPCODE_32 | PPC_OPCODE_64)) == ppc_size)
+	  /* If -mcom, check for instructions not in both Power/PowerPC */
+	  && (ppc_cpu != (PPC_OPCODE_POWER | PPC_OPCODE_PPC)
+	      || (op->flags & (PPC_OPCODE_POWER | PPC_OPCODE_PPC)) == ppc_cpu))
 	{
 	  const char *retval;
 
@@ -1648,7 +1656,7 @@ ppc_macro (str, macro)
      const struct powerpc_macro *macro;
 {
   char *operands[10];
-  int count;
+  unsigned int count;
   char *s;
   unsigned int len;
   const char *format;
@@ -2342,18 +2350,19 @@ ppc_biei (ei)
 
   name = demand_copy_C_string (&len);
 
+  /* The value of these symbols is actually file offset.  Here we set
+     the value to the index into the line number entries.  In
+     ppc_frob_symbols we set the fix_line field, which will cause BFD
+     to do the right thing.  */
+
   sym = symbol_make (name);
-  S_SET_SEGMENT (sym, ppc_coff_debug_section);
+  S_SET_SEGMENT (sym, now_seg);
+  S_SET_VALUE (sym, coff_n_line_nos);
   sym->bsym->flags |= BSF_DEBUGGING;
 
-  /* FIXME: The value of the .bi or .ei symbol is supposed to be the
-     offset in the file to the line number entry to use.  That is
-     quite difficult to implement using BFD, so I'm just not doing it.
-     Sorry.  Please add it if you can figure out how.  Note that this
-     approach is the only way to support multiple files in COFF, since
-     line numbers are associated with function symbols.  Note further
-     that it still doesn't work, since the line numbers are stored as
-     offsets from a base line number.  */
+  /* obj-coff.c currently only handles line numbers correctly in the
+     .text section.  */
+  assert (now_seg == text_section);
 
   S_SET_STORAGE_CLASS (sym, ei ? C_EINCL : C_BINCL);
   sym->sy_tc.output = 1;
@@ -3431,6 +3440,8 @@ ppc_frob_symbol (sym)
       && S_GET_STORAGE_CLASS (sym) != C_FCN
       && S_GET_STORAGE_CLASS (sym) != C_BSTAT
       && S_GET_STORAGE_CLASS (sym) != C_ESTAT
+      && S_GET_STORAGE_CLASS (sym) != C_BINCL
+      && S_GET_STORAGE_CLASS (sym) != C_EINCL
       && S_GET_SEGMENT (sym) != ppc_coff_debug_section)
     S_SET_STORAGE_CLASS (sym, C_HIDEXT);
 
@@ -3574,6 +3585,14 @@ ppc_frob_symbol (sym)
       csect = block->sy_tc.within;
       resolve_symbol_value (csect);
       S_SET_VALUE (sym, S_GET_VALUE (sym) - S_GET_VALUE (csect));
+    }
+  else if (S_GET_STORAGE_CLASS (sym) == C_BINCL
+	   || S_GET_STORAGE_CLASS (sym) == C_EINCL)
+    {
+      /* We want the value to be a file offset into the line numbers.
+         BFD will do that for us if we set the right flags.  We have
+         already set the value correctly.  */
+      coffsymbol (sym->bsym)->native->fix_line = 1;
     }
 
   return 0;
