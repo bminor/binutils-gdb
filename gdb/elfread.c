@@ -84,12 +84,12 @@ DEFUN(elf_locate_sections, (abfd, sectp, ei),
   if (STREQ (sectp -> name, ".debug"))
     {
       ei -> dboffset = sectp -> filepos;
-      ei -> dbsize = sectp -> size;
+      ei -> dbsize = bfd_get_section_size_before_reloc (sectp);
     }
   else if (STREQ (sectp -> name, ".line"))
     {
       ei -> lnoffset = sectp -> filepos;
-      ei -> lnsize = sectp -> size;
+      ei -> lnsize = bfd_get_section_size_before_reloc (sectp);
     }
 }
 
@@ -198,7 +198,7 @@ DEFUN (elf_symtab_read, (abfd, addr, mainline),
 	  /* Select global symbols that are defined in a specific section
 	     or are absolute. */
 	  if (sym -> flags & BSF_GLOBAL
-	      && ((sym -> section != NULL) || (sym -> flags & BSF_ABSOLUTE)))
+	      && (sym -> section == &bfd_abs_section))
 	    {
 	      symaddr = sym -> value;
 	      if (!mainline)
