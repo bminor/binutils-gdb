@@ -1,5 +1,10 @@
 2004-08-09  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_finish): Error if
+	.toc is too large on relocatable linking.
+
+2004-08-09  Alan Modra  <amodra@bigpond.net.au>
+
 	* emultempl/ppc64elf.em (ppc_after_open): Delete.
 	(LDEMUL_AFTER_OPEN): Don't define.
 

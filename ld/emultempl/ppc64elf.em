@@ -352,6 +352,14 @@ gld${EMULATION_NAME}_finish (void)
   if (need_laying_out)
     ppc_layout_sections_again ();
 
+  if (link_info.relocatable)
+    {
+      asection *toc = bfd_get_section_by_name (output_bfd, ".toc");
+      if (toc != NULL
+	  && bfd_section_size (output_bfd, toc) > 0x10000)
+	einfo ("%X%P: TOC section size exceeds 64k\n");
+    }
+
   if (stub_added)
     {
       char *msg = NULL;
