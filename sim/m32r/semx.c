@@ -2405,7 +2405,7 @@ do {
   TRACE_RESULT (current_cpu, "h-ie-0", 'x', CPU (h_ie));
   CPU (h_cond) = OPRND (h_bcond_0);
   TRACE_RESULT (current_cpu, "condbit", 'x', CPU (h_cond));
-  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, OPRND (h_bpc_0)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, ANDSI (OPRND (h_bpc_0), -4)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 } while (0);
 
@@ -3021,10 +3021,10 @@ SEM_FN_NAME (m32rx,trap) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
 do {
 m32rx_h_cr_set (current_cpu, 6, ADDSI (OPRND (pc), 4));
   TRACE_RESULT (current_cpu, "h-cr-6", 'x', m32rx_h_cr_get (current_cpu, 6));
-m32rx_h_cr_set (current_cpu, 0, ANDSI (SRLSI (OPRND (h_cr_0), 8), 33488896));
+m32rx_h_cr_set (current_cpu, 0, ANDSI (SLLSI (OPRND (h_cr_0), 8), 65408));
   TRACE_RESULT (current_cpu, "h-cr-0", 'x', m32rx_h_cr_get (current_cpu, 0));
-do_trap (current_cpu, OPRND (uimm4));
-; /*clobber*/
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, do_trap (current_cpu, OPRND (uimm4))));
+  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 } while (0);
 
 #if WITH_PROFILE_MODEL_P

@@ -1,3 +1,32 @@
+Sat Mar 14 20:53:36 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* config.in (HAVE_FCNTL_H): Add.
+	* configure: Regenerate.
+	* Makefile.in (SIM_OBJS): Add devices.o.
+	* m32r-sim.h (m32r_devices): Renamed from m32r_mspr_device.
+	(UART_*): Define m32r serial port parameters.
+	(M32R_DEVICE_ADDR,M32R_DEVICE_LEN): Define.
+	* m32r.c (device_io_{read,write}_buffer,device_error): Move from here,
+	* devices.c: To here.
+	* sim-if.c: Don't include signal.h,sim-core.h.
+	(sim_open): Use M32R_DEVICE_{ADDR,LEN} in sim_core_attach call.
+	(sim_resume): Call sim_module_{resume,suspend}.
+	* m32r.c (m32r_h_cr_{get,set}): Use register number enums.
+
+	* tconfig.in (SIM_HANDLES_LMA): Define.
+
+	* sim-if.c (do_trap): Result is new pc.
+	Handle --environment=operating.
+	* sem-switch.c,sem.c: Regenerate.
+start-sanitize-m32rx
+	* semx.c: Regenerate.
+end-sanitize-m32rx
+
+Wed Mar 11 14:07:39 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-if.c (syscall_read_mem, syscall_write_mem): Replace
+ 	sim_core_*_map with read_map, write_map, exec_map resp.
+
 Wed Mar  4 11:36:51 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* Makefile.in (SIM_EXTRA_DEPS): Add cpu-opc.h.

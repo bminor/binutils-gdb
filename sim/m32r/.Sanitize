@@ -45,6 +45,7 @@ cpu.h
 cpuall.h
 decode.c
 decode.h
+devices.c
 extract.c
 m32r-sim.h
 m32r.c
