@@ -1,3 +1,9 @@
+Fri Sep 10 12:56:36 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* coff-mips.c: Don't warn about overflow for MIPS_R_JMPADDR reloc.
+	Correct overflow detection requires matching the upper four bits
+	of the destination against the PC.
+
 Thu Sep  9 16:57:46 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* configure.in: Make 64-bit stuff work with "--with-targets=all".
