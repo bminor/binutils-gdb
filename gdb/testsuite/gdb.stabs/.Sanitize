@@ -1,5 +1,3 @@
-# .Sanitize for deja-gnu.
-
 # Each directory to survive it's way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
 # and must exist in the order specified by this file.  Each directory
@@ -28,10 +26,9 @@ alpha.mt
 aout.mt
 configure.in
 ecoff.mt
-weird-aout.S
+weird-aout.sed
 weird-ecoff.sed
-weird-ecoff.S
-weird-xcoff.S
+weird-xcoff.sed
 weird.def
 weird.exp
 xcoff.mt

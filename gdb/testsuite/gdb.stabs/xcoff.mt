@@ -1,6 +1,3 @@
-WEIRDSTABS_S=weird-xcoff.S
-
-weird.o: ${srcdir}/${WEIRDSTABS_S} ${srcdir}/weird.def
-	cp ${srcdir}/${WEIRDSTABS_S} tmp.c
-	$(CC) -I${srcdir} -E tmp.c >weird.s
+weird.o: $(srcdir)/weird.def $(srcdir)/weird-xcoff.sed
+	sed -f $(srcdir)/weird-xcoff.sed <$(srcdir)/weird.def >weird.s
 	$(CC) -c weird.s

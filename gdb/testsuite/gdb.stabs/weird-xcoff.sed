@@ -11,7 +11,8 @@ s/\.begin_common/.bc/
 # The AIX assembler doesn't want the name in a .ec directive
 s/\.end_common.*/.ec/
 s/\.align_it/.align 1/
+/\.data/d
 /^#/d
-/.if alpha/,/.endif alpha/d
-/.if/d
-/.endif/d
+/\.if alpha/,/\.endif alpha/d
+/\.if/d
+/\.endif/d
