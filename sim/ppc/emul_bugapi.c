@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994-1995, Andrew Cagney <cagney@highland.com.au>
+    Copyright (C) 1994-1996, Andrew Cagney <cagney@highland.com.au>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,28 +50,23 @@
 #include "emul_generic.h"
 #include "emul_bugapi.h"
 
-/* Any starting address less than this is assumed to be an OEA program
-   rather than VEA.  */
+
 #ifndef OEA_START_ADDRESS
-#define OEA_START_ADDRESS 0x4000
+#define OEA_START_ADDRESS 0x100000
 #endif
 
-#ifndef OEA_MEMORY_SIZE
-#define OEA_MEMORY_SIZE 0x100000
-#endif
 
-/* All but CPU 0 are put into an infinate loop, this loop instruction
-   is stored at the address below */
-#ifndef OEA_STALL_CPU_LOOP_ADDRESS
-#define OEA_STALL_CPU_LOOP_ADDRESS 0x00c10
-#endif
 
-/* At initiallization, the system call exception branches to the BUG
-   emulation code */
-
-#ifndef OEA_SYSTEM_CALL_ADDRESS
-#define OEA_SYSTEM_CALL_ADDRESS 0x00c00
-#endif
+struct _os_emul_data {
+  unsigned_word memory_size;
+  unsigned_word top_of_stack;
+  int interrupt_prefix;
+  unsigned_word interrupt_vector_address;
+  unsigned_word system_call_address;
+  unsigned_word stall_cpu_loop_address;
+  int little_endian;
+  int floating_point_available;
+};
 
 
 static os_emul_data *
@@ -79,6 +74,9 @@ emul_bugapi_create(device *root,
 		   bfd *image,
 		   const char *name)
 {
+  int elf_binary;
+  device *node;
+  os_emul_data *bugapi;
 
   /* check it really is for us */
   if (name != NULL
@@ -90,99 +88,85 @@ emul_bugapi_create(device *root,
       && bfd_get_start_address(image) > OEA_START_ADDRESS)
     return NULL;
 
-  {
-    
-    const memory_size = OEA_MEMORY_SIZE;
-    const elf_binary = (image != NULL 
-			&& image->xvec->flavour == bfd_target_elf_flavour);
-#ifdef bfd_little_endian	/* new bfd */
-    const little_endian = (image != NULL && bfd_little_endian(image));
-#else
-    const little_endian = (image != NULL &&
-			   !image->xvec->byteorder_big_p);
-#endif
-    
-    { /* options */
-      device *options = device_tree_add_found(root, "/", "options");
-      device_add_integer_property(options,
-				  "smp",
-				  MAX_NR_PROCESSORS);
-      device_add_boolean_property(options,
-				  "little-endian?",
-				  little_endian);
-      device_add_string_property(options,
-				 "env",
-				 "operating");
-      device_add_boolean_property(options,
-				  "strict-alignment?",
-				  (WITH_ALIGNMENT == STRICT_ALIGNMENT
-				   || little_endian));
-      device_add_boolean_property(options,
-				  "floating-point?",
-				  WITH_FLOATING_POINT);
-      device_add_string_property(options,
-				 "os-emul",
-				 "bugapi");
-    }
-    
-    /* hardware */
-    device_tree_add_found_uw_u_u(root, "/", "memory",
-				 0, memory_size, access_read_write_exec);
-    device_tree_add_found(root, "/", "iobus@0x400000");
-    device_tree_add_found(root, "/iobus", "console@0x000000,16");
-    device_tree_add_found(root, "/iobus", "halt@0x100000,4");
-    device_tree_add_found(root, "/iobus", "icu@0x200000,4");
-    
-    { /* initialization */
-      device *init = device_tree_add_found(root, "/", "init");
-      {
-	device *init_register = device_tree_add_found(init, "", "register");
-	device_add_integer_property(init_register,
-				    "pc",
-				    OEA_STALL_CPU_LOOP_ADDRESS);
-	device_add_integer_property(init_register,
-				    "0.pc",
-				    bfd_get_start_address(image));
-	device_add_integer_property(init_register,
-				    "sp",
-				    memory_size-16);
-	device_add_integer_property(init_register,
-				    "msr",
-				    (msr_recoverable_interrupt
-				     | (little_endian
-					? msr_little_endian_mode
-					: 0)
-				     ));
-	device_tree_add_found_uw_u_u(init, "",
-				     "data",
-				     OEA_SYSTEM_CALL_ADDRESS,
-				     4, emul_call_instruction);
-	device_tree_add_found_uw_u_u(init, "",
-				     "data",
-				     OEA_SYSTEM_CALL_ADDRESS + 4,
-				     4, emul_rfi_instruction);
-	device_tree_add_found_uw_u_u(init, "",
-				     "data",
-				     OEA_STALL_CPU_LOOP_ADDRESS,
-				     4, emul_loop_instruction);
-      }
-      {
-	device *init_stack = device_tree_add_found(init, "", "stack");
-	device_add_null_property(init_stack,
-				 (elf_binary
-				  ? "elf"
-				  : "aix"));
-      }
-      {
-	device *init_load_binary = device_tree_add_found(init, "",
-							"load-binary");
-	device_add_null_property(init_load_binary,
-				 bfd_get_filename(image));
-      }
-    }
-  }
+  bugapi = ZALLOC(os_emul_data);
+
+  /* some defaults */
+  elf_binary = image->xvec->flavour == bfd_target_elf_flavour;
+
+  /* options */
+  emul_add_tree_options(root, image, "bug", "oea",
+			1 /*oea-interrupt-prefix*/);
   
-  return (os_emul_data*)-1;
+  /* add some real hardware */
+  emul_add_tree_hardware(root);
+
+  bugapi->memory_size
+    = device_find_integer_property(root, "/openprom/options/oea-memory-size");
+  bugapi->interrupt_prefix =
+    device_find_integer_property(root, "/openprom/options/oea-interrupt-prefix");
+  bugapi->interrupt_vector_address = (bugapi->interrupt_prefix
+				      ? MASK(0, 43)
+				      : 0);
+  bugapi->system_call_address = (bugapi->interrupt_vector_address + 0x00c00);
+  bugapi->stall_cpu_loop_address = (bugapi->system_call_address + 0x000f0);
+  bugapi->top_of_stack = bugapi->memory_size - 0x1000;
+  bugapi->little_endian
+    = device_find_boolean_property(root, "/options/little-endian?");
+  bugapi->floating_point_available
+    = device_find_boolean_property(root, "/openprom/options/floating-point?");
+
+  /* initialization */
+  device_tree_add_parsed(root, "/openprom/init/register/0.pc 0x%lx",
+			 (unsigned long)bfd_get_start_address(image));
+  device_tree_add_parsed(root, "/openprom/init/register/pc 0x%lx",
+			 (unsigned long)bugapi->stall_cpu_loop_address);
+  device_tree_add_parsed(root, "/openprom/init/register/sp 0x%lx",
+			 (unsigned long)(bugapi->top_of_stack - 16));
+  device_tree_add_parsed(root, "/openprom/init/register/msr 0x%x",
+			 (msr_recoverable_interrupt
+			  | (bugapi->little_endian
+			     ? (msr_little_endian_mode
+				| msr_interrupt_little_endian_mode)
+			     : 0)
+			  | (bugapi->floating_point_available
+			     ? msr_floating_point_available
+			     : 0)
+			  | (bugapi->interrupt_prefix
+			     ? msr_interrupt_prefix
+			     : 0)
+			  ));
+  
+  /* patch the system call instruction to call this emulation and then
+     do an rfi */
+  node = device_tree_add_parsed(root, "/openprom/init/data@0x%lx",
+				(long)bugapi->system_call_address);
+  device_tree_add_parsed(node, "./real-address 0x%lx",
+			 (long)bugapi->system_call_address);
+  device_tree_add_parsed(node, "./data 0x%x",
+			 emul_call_instruction);
+  node = device_tree_add_parsed(root, "/openprom/init/data@0x%lx",
+				(long)(bugapi->system_call_address + 4));
+  device_tree_add_parsed(node, "./real-address 0x%lx",
+			 (long)(bugapi->system_call_address + 4));
+  device_tree_add_parsed(node, "./data 0x%x",
+			 emul_rfi_instruction);
+
+  /* patch the end of the system call instruction so that it contains
+     a loop to self instruction and point all the cpu's at this */
+  node = device_tree_add_parsed(root, "/openprom/init/data@0x%lx",
+				(unsigned long)bugapi->stall_cpu_loop_address);
+  device_tree_add_parsed(node, "./real-address 0x%lx",
+			 (unsigned long)bugapi->stall_cpu_loop_address);
+  device_tree_add_parsed(node, "./data 0x%lx",
+			 (unsigned long)emul_loop_instruction);
+    
+  device_tree_add_parsed(root, "/openprom/init/stack/stack-type %s",
+			 elf_binary ? "elf" : "aix");
+    
+  device_tree_add_parsed(root, "/openprom/init/load-binary/file-name \"%s",
+			 bfd_get_filename(image));
+
+  return bugapi;
 }
 
 static void
@@ -200,7 +184,7 @@ emul_bugapi_instruction_call(cpu *processor,
 {
   const int call_id = cpu_registers(processor)->gpr[10];
   /* check that this isn't an invalid instruction */
-  if (cia != OEA_SYSTEM_CALL_ADDRESS)
+  if (cia != emul_data->system_call_address)
     return 0;
   switch (call_id) {
   case _OUTCHR:

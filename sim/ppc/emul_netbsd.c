@@ -45,8 +45,17 @@
 #include <sys/errno.h>
 #include <sys/param.h>
 #include <sys/time.h>
+
+#ifdef HAVE_GETRUSAGE
+#ifndef HAVE_SYS_RESOURCE_H
+#undef HAVE_GETRUSAGE
+#endif
+#endif
+
+#ifdef HAVE_GETRUSAGE
 #include <sys/resource.h>
 int getrusage();
+#endif
 
 #include <sys/ioctl.h>
 #include <sys/mount.h>
@@ -224,6 +233,7 @@ write_direntries(unsigned_word addr,
 #endif
 
 
+#ifdef HAVE_GETRUSAGE
 STATIC_INLINE_EMUL_NETBSD void
 write_rusage(unsigned_word addr,
 	     struct rusage rusage,
@@ -250,7 +260,7 @@ write_rusage(unsigned_word addr,
   H2T(rusage.ru_nivcsw);          /* involuntary context switches */
   emul_write_buffer(&rusage, addr, sizeof(rusage), processor, cia);
 }
-
+#endif
   
 static void
 do_exit(os_emul_data *emul,
@@ -648,6 +658,9 @@ do_gettimeofday(os_emul_data *emul,
 }
 
 
+#ifndef HAVE_GETRUSAGE
+#define do_getrusage 0
+#else
 static void
 do_getrusage(os_emul_data *emul,
 	     unsigned call,
@@ -670,6 +683,7 @@ do_getrusage(os_emul_data *emul,
       write_rusage(rusage_addr, rusage, processor, cia);
   }
 }
+#endif
 
 
 #if !WITH_NetBSD_HOST
@@ -1277,7 +1291,8 @@ emul_netbsd_create(device *root,
   /* options */
   emul_add_tree_options(root, image, "netbsd",
 			(WITH_ENVIRONMENT == USER_ENVIRONMENT
-			 ? "user" : "virtual"));
+			 ? "user" : "virtual"),
+			0 /*oea-interrupt-prefix*/);
 
   /* virtual memory - handles growth of stack/heap */
   vm = device_tree_add_parsed(root, "/openprom/vm@0x%lx",

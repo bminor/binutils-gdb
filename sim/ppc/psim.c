@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994-1995, Andrew Cagney <cagney@highland.com.au>
+    Copyright (C) 1994-1996, Andrew Cagney <cagney@highland.com.au>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,25 +22,20 @@
 #ifndef _PSIM_C_
 #define _PSIM_C_
 
+#include "inline.c"
+
 #include <stdio.h>
 #include <ctype.h>
 
-#include "config.h"
-#include "ppc-config.h"
-#include "inline.h"
-
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
-
-#ifndef STATIC_INLINE_PSIM
-#define STATIC_INLINE_PSIM STATIC_INLINE
 #endif
 
 #include <setjmp.h>
 
 #include "cpu.h" /* includes psim.h */
 #include "idecode.h"
+#include "options.h"
 
 #ifdef HAVE_STRING_H
 #include <string.h>
@@ -53,39 +48,24 @@
 #include "bfd.h"
 
 
-#include "inline.c"
-
-/* Any starting address less than this is assumed to be an OEA program
-   rather than VEA.  */
-#ifndef OEA_START_ADDRESS
-#define OEA_START_ADDRESS 4096
-#endif
-
-/* Any starting address greater than this is assumed to be an OpenBoot
-   rather than VEA */
-#ifndef OPENBOOT_START_ADDRESS
-#define OPENBOOT_START_ADDRESS 0x80000000
-#endif
-
-#ifndef OEA_MEMORY_SIZE
-#define OEA_MEMORY_SIZE 0x100000
-#endif
-
-
 /* system structure, actual size of processor array determined at
    runtime */
 
 struct _psim {
   event_queue *events;
-  device_tree *devices;
+  device *devices;
   mon *monitor;
+  os_emul *os_emulation;
   core *memory;
+
   /* escape routine for inner functions */
   void *path_to_halt;
   void *path_to_restart;
+
   /* status from last halt */
   psim_status halt_status;
-  /* the processes proper */
+
+  /* the processors proper */
   int nr_cpus;
   int last_cpu; /* CPU that last (tried to) execute an instruction */
   cpu *processors[MAX_NR_PROCESSORS];
@@ -101,306 +81,207 @@ int current_model_issue = MODEL_ISSUE_IGNORE;
 model_enum current_model = WITH_DEFAULT_MODEL;
 
 
-/* create a device tree from the image */
+/* create the device tree */
 
-
-
-/* Raw hardware tree:
-
-   A small default set of devices are configured.  Each section of the
-   image is loaded directly into physical memory. */
-
-STATIC_INLINE_PSIM void
-create_hardware_device_tree(bfd *image,
-			    device_tree *root)
+INLINE_PSIM\
+(device *)
+psim_tree(void)
 {
-  char *name;
-  const memory_size = OEA_MEMORY_SIZE;
-
-  /* options */
-  device_tree_add_passthrough(root, "/options");
-  device_tree_add_integer(root, "/options/smp",
-			  MAX_NR_PROCESSORS);
-  device_tree_add_boolean(root, "/options/little-endian?",
-			  !image->xvec->byteorder_big_p);
-  device_tree_add_string(root, "/options/env",
-			 "operating");
-  device_tree_add_boolean(root, "/options/strict-alignment?",
-			  (WITH_ALIGNMENT == STRICT_ALIGNMENT
-			   || !image->xvec->byteorder_big_p));
-  device_tree_add_boolean(root, "/options/floating-point?",
-			  WITH_FLOATING_POINT);
-
-  /* hardware */
-  name = printd_uw_u_u("/memory", 0, memory_size, access_read_write_exec);
-  device_tree_add_found_device(root, name);
-  zfree(name);
-  device_tree_add_found_device(root, "/iobus@0x400000");
-  device_tree_add_found_device(root, "/iobus/console@0x000000,16");
-  device_tree_add_found_device(root, "/iobus/halt@0x100000,4");
-  device_tree_add_found_device(root, "/iobus/icu@0x200000,4");
-
-  /* initialization */
-  device_tree_add_passthrough(root, "/init");
-  device_tree_add_found_device(root, "/init/register@pc,0x0");
-  name = printd_c_uw("/init/register", "sp", memory_size);
-  device_tree_add_found_device(root, name);
-  zfree(name);
-  name = printd_c_uw("/init/register", "msr",
-		     (image->xvec->byteorder_big_p
-		      ? 0
-		      : msr_little_endian_mode));
-  device_tree_add_found_device(root, name);
-  zfree(name);
-  /* AJC puts the PC at zero and wants a stack while MM puts it above
-     zero and doesn't. Really there should be no stack *but* this
-     makes testing easier */
-  device_tree_add_found_device(root,
-			       (bfd_get_start_address(image) == 0
-				? "/init/stack@elf"
-				: "/init/stack@none"));
-  name = printd_c("/init/load-binary", bfd_get_filename(image));
-  device_tree_add_found_device(root, name);
-  zfree(name);
-}
-
-
-/* Openboot model (under development):
-
-   An extension of the hardware model.  The image is read into memory
-   as a single block.  Sections of the image are then mapped as
-   required using a HTAB. */
-
-STATIC_INLINE_PSIM void
-create_openboot_device_tree(bfd *image,
-			    device_tree *root)
-{
-  create_hardware_device_tree(image, root);
-}
-
-
-/* User mode model:
-
-   Image sections loaded into virtual addresses as specified.  A
-   (large) stack is reserved (but only allocated as needed). System
-   calls that include suport for heap growth are attached. */
-
-STATIC_INLINE_PSIM void
-create_vea_device_tree(bfd *image,
-		       device_tree *root)
-{
-  unsigned_word top_of_stack;
-  unsigned stack_size;
-  int elf_binary;
-  char *name;
-
-  /* establish a few defaults */
-  if (image->xvec->flavour == bfd_target_elf_flavour) {
-    elf_binary = 1;
-    top_of_stack = 0xe0000000;
-    stack_size =   0x00100000;
-  }
-  else {
-    elf_binary = 0;
-    top_of_stack = 0x20000000;
-    stack_size =   0x00100000;
-  }
-
-  /* options */
-  device_tree_add_passthrough(root, "/options");
-  device_tree_add_integer(root, "/options/smp", 1); /* always */
-  device_tree_add_boolean(root, "/options/little-endian?",
-			  !image->xvec->byteorder_big_p);
-  device_tree_add_string(root, "/options/env",
-			 (WITH_ENVIRONMENT == USER_ENVIRONMENT
-			  ? "user" : "virtual"));
-  device_tree_add_boolean(root, "/options/strict-alignment?",
-			  (WITH_ALIGNMENT == STRICT_ALIGNMENT
-			    || !image->xvec->byteorder_big_p));
-  device_tree_add_boolean(root, "/options/floating-point?",
-			  WITH_FLOATING_POINT);
-
-  /* virtual memory - handles growth of stack/heap */
-  name = printd_uw_u("/vm", top_of_stack - stack_size, stack_size);
-  device_tree_add_found_device(root, name);
-  zfree(name);
-  name = printd_c("/vm/map-binary", bfd_get_filename(image));
-  device_tree_add_found_device(root, name);
-  zfree(name);
-
-  /* finish the init */
-  device_tree_add_passthrough(root, "/init");
-  name = printd_c_uw("/init/register", "pc", bfd_get_start_address(image));
-  device_tree_add_found_device(root, name); /*pc*/
-  zfree(name);
-  name = printd_c_uw("/init/register", "sp", top_of_stack);
-  device_tree_add_found_device(root, name);
-  zfree(name);
-  name = printd_c_uw("/init/register", "msr",
-		     (image->xvec->byteorder_big_p
-		      ? 0
-		      : msr_little_endian_mode));
-  device_tree_add_found_device(root, name);
-  zfree(name);
-  device_tree_add_found_device(root, (elf_binary
-				      ? "/init/stack@elf"
-				      : "/init/stack@xcoff"));
-}
-
-
-/* File device:
-
-   The file contains lines that specify the describe the device tree
-   to be created, read them in and load them into the tree */
-
-STATIC_INLINE_PSIM void
-create_filed_device_tree(const char *file_name,
-			 device_tree *root)
-{
-  FILE *description = fopen(file_name, "r");
-  int line_nr = 0;
-  char device_path[1000];
-  while (fgets(device_path, sizeof(device_path), description)) {
-    /* check all of line was read */
-    {
-      char *end = strchr(device_path, '\n');
-      if (end == NULL) {
-	fclose(description);
-	error("create_filed_device_tree() line %d to long: %s\n",
-	      line_nr, device_path);
-      }
-      line_nr++;
-      *end = '\0';
-    }
-    /* check for leading comment */
-    if (device_path[0] != '/')
-      continue;
-    /* enter it in varying ways */
-    if (strchr(device_path, '@') != NULL) {
-      device_tree_add_found_device(root, device_path);
-    }
-    else {
-      char *space = strchr(device_path, ' ');
-      if (space == NULL) {
-	/* intermediate node */
-	device_tree_add_passthrough(root, device_path);
-      }
-      else if (space[-1] == '?') {
-	/* boolean */
-	*space = '\0';
-	device_tree_add_boolean(root, device_path, space[1] != '0');
-      }
-      else if (isdigit(space[1])) {
-	/* integer */
-	*space = '\0';
-	device_tree_add_integer(root, device_path, strtoul(space+1, 0, 0));
-      }
-      else if (space[1] == '"') {
-	/* quoted string */
-	char *end = strchr(space+2, '\0');
-	if (end[-1] == '"')
-	  end[-1] = '\0';
-	*space = '\0';
-	device_tree_add_string(root, device_path, space + 2);
-      }
-      else {
-	/* any thing else */
-	*space = '\0';
-	device_tree_add_string(root, device_path, space + 1);
-      }
-    }
-  }
-  fclose(description);
-}
-
-
-/* Given the file containing the `image', create a device tree that
-   defines the machine to be modeled */
-
-STATIC_INLINE_PSIM device_tree *
-create_device_tree(const char *file_name,
-		   core *memory)
-{
-  bfd *image;
-  const device *core_device = core_device_create(memory);
-  device_tree *root = device_tree_add_device(NULL, "/", core_device);
-
-  bfd_init(); /* could be redundant but ... */
-
-  /* open the file */
-  image = bfd_openr(file_name, NULL);
-  if (image == NULL) {
-    bfd_perror("open failed:");
-    error("nothing loaded\n");
-  }
-
-  /* check it is valid */
-  if (!bfd_check_format(image, bfd_object)) {
-    printf_filtered("create_device_tree() - FIXME - should check more bfd bits\n");
-    printf_filtered("create_device_tree() - %s not an executable, assume device file\n", file_name);
-    bfd_close(image);
-    image = NULL;
-  }
-
-  /* depending on what was found about the file, load it */
-  if (image != NULL) {
-    if (bfd_get_start_address(image) < OEA_START_ADDRESS) {
-      TRACE(trace_device_tree, ("create_device_tree() - hardware image\n"));
-      create_hardware_device_tree(image, root);
-    }
-    else if (bfd_get_start_address(image) < OPENBOOT_START_ADDRESS) {
-      TRACE(trace_device_tree, ("create_device_tree() - vea image\n"));
-      create_vea_device_tree(image, root);
-    }
-    else {
-      TRACE(trace_device_tree, ("create_device_tree() - openboot? image\n"));
-      create_openboot_device_tree(image, root);
-    }
-    bfd_close(image);
-  }
-  else {
-    TRACE(trace_device_tree, ("create_device_tree() - text image\n"));
-    create_filed_device_tree(file_name, root);
-  }
-
+  device *root = core_device_create();
+  device_tree_add_parsed(root, "/aliases");
+  device_tree_add_parsed(root, "/options");
+  device_tree_add_parsed(root, "/chosen");
+  device_tree_add_parsed(root, "/packages");
+  device_tree_add_parsed(root, "/cpus");
+  device_tree_add_parsed(root, "/openprom");
+  device_tree_add_parsed(root, "/openprom/init");
+  device_tree_add_parsed(root, "/openprom/trace");
+  device_tree_add_parsed(root, "/openprom/options");
   return root;
 }
 
+STATIC_INLINE_PSIM\
+(char *)
+find_arg(char *err_msg,
+	 int *ptr_to_argp,
+	 char **argv)
+{
+  *ptr_to_argp += 1;
+  if (argv[*ptr_to_argp] == NULL)
+    error(err_msg);
+  return argv[*ptr_to_argp];
+}
+
+INLINE_PSIM\
+(void)
+psim_usage(int verbose)
+{
+  printf_filtered("Usage:\n");
+  printf_filtered("\n");
+  printf_filtered("\tpsim [ <psim-option> ... ] <image> [ <image-arg> ... ]\n");
+  printf_filtered("\n");
+  printf_filtered("Where\n");
+  printf_filtered("\n");
+  printf_filtered("\t<image>       Name of the PowerPC program to run.\n");
+  if (verbose) {
+  printf_filtered("\t              This can either be a PowerPC binary or\n");
+  printf_filtered("\t              a text file containing a device tree\n");
+  printf_filtered("\t              specification.\n");
+  printf_filtered("\t              PSIM will attempt to determine from the\n");
+  printf_filtered("\t              specified <image> the intended emulation\n");
+  printf_filtered("\t              environment.\n");
+  printf_filtered("\t              If PSIM gets it wrong, the emulation\n");
+  printf_filtered("\t              environment can be specified using the\n");
+  printf_filtered("\t              `-e' option (described below).\n");
+  printf_filtered("\n"); }
+  printf_filtered("\t<image-arg>   Argument to be passed to <image>\n");
+  if (verbose) {
+  printf_filtered("\t              These arguments will be passed to\n");
+  printf_filtered("\t              <image> (as standard C argv, argc)\n");
+  printf_filtered("\t              when <image> is started.\n");
+  printf_filtered("\n"); }
+  printf_filtered("\t<psim-option> See below\n");
+  printf_filtered("\n");
+  printf_filtered("The following are valid <psim-option>s:\n");
+  printf_filtered("\n");
+  printf_filtered("\t-m <model>    Specify the processor to model (604)\n");
+  if (verbose) {
+  printf_filtered("\t              Selects the processor to use when\n");
+  printf_filtered("\t              modeling execution units.  Includes:\n");
+  printf_filtered("\t              604, 603 and 603e\n");
+  printf_filtered("\n"); }
+  printf_filtered("\t-e <os-emul>  specify an OS or platform to model\n");
+  if (verbose) {
+  printf_filtered("\t              Can be any of the following:\n");
+  printf_filtered("\t              bug - OEA + MOTO BUG ROM calls\n");
+  printf_filtered("\t              netbsd - UEA + NetBSD system calls\n");
+  printf_filtered("\t              chirp - OEA + a few OpenBoot calls\n");
+  printf_filtered("\n"); }
+  printf_filtered("\t-i            Print instruction counting statistics\n");
+  if (verbose) { printf_filtered("\n"); }
+  printf_filtered("\t-I            Print execution unit statistics\n");
+  if (verbose) { printf_filtered("\n"); }
+  printf_filtered("\t-r <size>     Set RAM size in bytes (OEA environments)\n");
+  if (verbose) { printf_filtered("\n"); }
+  printf_filtered("\t-t [!]<trace> Enable (disable) <trace> option\n");
+  if (verbose) { printf_filtered("\n"); }
+  printf_filtered("\t-o <spec>     add device <spec> to the device tree\n");
+  if (verbose) { printf_filtered("\n"); }
+  printf_filtered("\t-h -? -H      give more detailed usage\n");
+  if (verbose) { printf_filtered("\n"); }
+  printf_filtered("\n");
+  trace_usage(verbose);
+  device_usage(verbose);
+  if (verbose > 1) {
+    printf_filtered("\n");
+    print_options();
+  }
+  error("");
+}
+
+INLINE_PSIM\
+(char **)
+psim_options(device *root,
+	     char **argv)
+{
+  device *current = root;
+  int argp;
+  if (argv == NULL)
+    return NULL;
+  argp = 0;
+  while (argv[argp] != NULL && argv[argp][0] == '-') {
+    char *p = argv[argp] + 1;
+    char *param;
+    while (*p != '\0') {
+      switch (*p) {
+      default:
+	psim_usage(0);
+	error ("");
+	break;
+      case 'e':
+	param = find_arg("Missing <emul> option for -e\n", &argp, argv);
+	device_tree_add_parsed(root, "/openprom/options/os-emul %s", param);
+	break;
+      case 'h':
+      case '?':
+	psim_usage(1);
+	break;
+      case 'H':
+	psim_usage(2);
+	break;
+      case 'i':
+	device_tree_add_parsed(root, "/openprom/trace/print-info 1");
+	break;
+      case 'I':
+	device_tree_add_parsed(root, "/openprom/trace/print-info 2");
+	device_tree_add_parsed(root, "/openprom/options/model-issue %d",
+			       MODEL_ISSUE_PROCESS);
+	break;
+      case 'm':
+	param = find_arg("Missing <model> option for -m\n", &argp, argv);
+	device_tree_add_parsed(root, "/openprom/options/model %s", param);
+	break;
+      case 'o':
+	param = find_arg("Missing <device> option for -o\n", &argp, argv);
+	current = device_tree_add_parsed(current, "%s", param);
+	break;
+      case 'r':
+	param = find_arg("Missing <ram-size> option for -r\n", &argp, argv);
+	device_tree_add_parsed(root, "/openprom/options/oea-memory-size 0x%lx",
+			       atol(param));
+	break;
+      case 't':
+	param = find_arg("Missing <trace> option for -t\n", &argp, argv);
+	if (param[0] == '!')
+	  device_tree_add_parsed(root, "/openprom/trace/%s 0", param+1);
+	else
+	  device_tree_add_parsed(root, "/openprom/trace/%s 1", param);
+	break;
+      }
+      p += 1;
+    }
+    argp += 1;
+  }
+  /* force the trace node to (re)process its options */
+  device_init_data(device_tree_find_device(root, "/openprom/trace"), NULL);
+  /* return where the options end */
+  return argv + argp;
+}
 
 
-INLINE_PSIM psim *
-psim_create(const char *file_name)
+/* create the simulator proper from the device tree and executable */
+
+INLINE_PSIM\
+(psim *)
+psim_create(const char *file_name,
+	    device *root)
 {
   int cpu_nr;
   const char *env;
   psim *system;
+  os_emul *os_emulation;
+  int nr_cpus;
 
-  /* create things */
-  system = ZALLOC(psim);
-  system->events = event_queue_create();
-  system->memory = core_create();
-  system->monitor = mon_create();
-  system->devices = create_device_tree(file_name, system->memory);
-  for (cpu_nr = 0; cpu_nr < MAX_NR_PROCESSORS; cpu_nr++) {
-    system->processors[cpu_nr] = cpu_create(system,
-					    system->memory,
-					    system->events,
-					    mon_cpu(system->monitor,
-						    cpu_nr),
-					    cpu_nr);
-  }
+  /* given this partially populated device tree, os_emul_create() uses
+     it and file_name to determine the selected emulation and hence
+     further populate the tree with any other required nodes. */
+
+  os_emulation = os_emul_create(file_name, root);
+  if (os_emulation == NULL)
+    error("psim: either file %s was not reconized or unreconized or unknown os-emulation type\n", file_name);
 
   /* fill in the missing real number of CPU's */
-  system->nr_cpus = device_tree_find_integer(system->devices,
-					     "/options/smp");
+  nr_cpus = device_find_integer_property(root, "/openprom/options/smp");
+  if (MAX_NR_PROCESSORS < nr_cpus)
+    error("target and configured number of cpus conflict\n");
 
   /* fill in the missing TARGET BYTE ORDER information */
-  current_target_byte_order = (device_tree_find_boolean(system->devices,
-							"/options/little-endian?")
-			       ? LITTLE_ENDIAN
-			       : BIG_ENDIAN);
+  current_target_byte_order
+    = (device_find_boolean_property(root, "/options/little-endian?")
+       ? LITTLE_ENDIAN
+       : BIG_ENDIAN);
   if (CURRENT_TARGET_BYTE_ORDER != current_target_byte_order)
-    error("target byte order conflict\n");
+    error("target and configured byte order conflict\n");
 
   /* fill in the missing HOST BYTE ORDER information */
   current_host_byte_order = (current_host_byte_order = 1,
@@ -408,11 +289,10 @@ psim_create(const char *file_name)
 			      ? LITTLE_ENDIAN
 			      : BIG_ENDIAN));
   if (CURRENT_HOST_BYTE_ORDER != current_host_byte_order)
-    error("host byte order conflict\n");
+    error("host and configured byte order conflict\n");
 
   /* fill in the missing OEA/VEA information */
-  env = device_tree_find_string(system->devices,
-				"/options/env");
+  env = device_find_string_property(root, "/openprom/options/env");
   current_environment = ((strcmp(env, "user") == 0
 			  || strcmp(env, "uea") == 0)
 			 ? USER_ENVIRONMENT
@@ -424,25 +304,67 @@ psim_create(const char *file_name)
 			 ? OPERATING_ENVIRONMENT
 			 : 0);
   if (current_environment == 0)
-    error("unreconized /options/env\n");
+    error("unreconized /options env property\n");
   if (CURRENT_ENVIRONMENT != current_environment)
-    error("target environment conflict\n");
+    error("target and configured environment conflict\n");
 
   /* fill in the missing ALLIGNMENT information */
-  current_alignment = (device_tree_find_boolean(system->devices,
-						"/options/strict-alignment?")
-		       ? STRICT_ALIGNMENT
-		       : NONSTRICT_ALIGNMENT);
+  current_alignment
+    = (device_find_boolean_property(root, "/openprom/options/strict-alignment?")
+       ? STRICT_ALIGNMENT
+       : NONSTRICT_ALIGNMENT);
   if (CURRENT_ALIGNMENT != current_alignment)
-    error("target alignment conflict\n");
+    error("target and configured alignment conflict\n");
 
   /* fill in the missing FLOATING POINT information */
-  current_floating_point = (device_tree_find_boolean(system->devices,
-						     "/options/floating-point?")
-			    ? HARD_FLOATING_POINT
-			    : SOFT_FLOATING_POINT);
+  current_floating_point
+    = (device_find_boolean_property(root, "/openprom/options/floating-point?")
+       ? HARD_FLOATING_POINT
+       : SOFT_FLOATING_POINT);
   if (CURRENT_FLOATING_POINT != current_floating_point)
-    error("target floating-point conflict\n");
+    error("target and configured floating-point conflict\n");
+
+  /* sort out the level of detail for issue modeling */
+  current_model_issue
+    = device_find_integer_property(root, "/openprom/options/model-issue");
+  if (CURRENT_MODEL_ISSUE != current_model_issue)
+    error("target and configured model-issue conflict\n");
+
+  /* sort out our model architecture - wrong.
+
+     FIXME: this should be obtaining the required information from the
+     device tree via the "/chosen" property "cpu" which is an instance
+     (ihandle) for the only executing processor. By converting that
+     ihandle into the corresponding cpu's phandle and then querying
+     the "name" property, the cpu type can be determined. Ok? */
+
+  model_set(device_find_string_property(root, "/openprom/options/model"));
+
+  /* create things */
+  system = ZALLOC(psim);
+  system->events = event_queue_create();
+  system->memory = core_create(root);
+  system->monitor = mon_create();
+  system->nr_cpus = nr_cpus;
+  system->os_emulation = os_emulation;
+  system->devices = root;
+
+  /* now all the processors attaching to each their per-cpu information */
+  for (cpu_nr = 0; cpu_nr < MAX_NR_PROCESSORS; cpu_nr++) {
+    system->processors[cpu_nr] = cpu_create(system,
+					    system->memory,
+					    system->events,
+					    mon_cpu(system->monitor,
+						    cpu_nr),
+					    system->os_emulation,
+					    cpu_nr);
+  }
+
+  /* dump out the contents of the device tree */
+  if (ppc_trace[trace_print_device_tree] || ppc_trace[trace_dump_device_tree])
+    device_tree_traverse(root, device_tree_print_device, NULL, NULL);
+  if (ppc_trace[trace_dump_device_tree])
+    error("");
 
   return system;
 }
@@ -450,7 +372,8 @@ psim_create(const char *file_name)
 
 /* allow the simulation to stop/restart abnormaly */
 
-STATIC_INLINE_PSIM void
+STATIC_INLINE_PSIM\
+(void)
 psim_set_halt_and_restart(psim *system,
 			  void *halt_jmp_buf,
 			  void *restart_jmp_buf)
@@ -459,14 +382,16 @@ psim_set_halt_and_restart(psim *system,
   system->path_to_restart = restart_jmp_buf;
 }
 
-STATIC_INLINE_PSIM void
+STATIC_INLINE_PSIM\
+(void)
 psim_clear_halt_and_restart(psim *system)
 {
   system->path_to_halt = NULL;
   system->path_to_restart = NULL;
 }
 
-INLINE_PSIM void
+INLINE_PSIM\
+(void)
 psim_restart(psim *system,
 	     int current_cpu)
 {
@@ -475,7 +400,8 @@ psim_restart(psim *system,
 }
 
 
-INLINE_PSIM void
+INLINE_PSIM\
+(void)
 psim_halt(psim *system,
 	  int current_cpu,
 	  unsigned_word cia,
@@ -490,14 +416,16 @@ psim_halt(psim *system,
   longjmp(*(jmp_buf*)(system->path_to_halt), current_cpu + 1);
 }
 
-INLINE_PSIM psim_status
+INLINE_PSIM\
+(psim_status)
 psim_get_status(psim *system)
 {
   return system->halt_status;
 }
 
 
-cpu *
+INLINE_PSIM\
+(cpu *)
 psim_cpu(psim *system,
 	 int cpu_nr)
 {
@@ -508,7 +436,8 @@ psim_cpu(psim *system,
 }
 
 
-const device *
+INLINE_PSIM\
+(device *)
 psim_device(psim *system,
 	    const char *path)
 {
@@ -517,43 +446,55 @@ psim_device(psim *system,
 
 
 
-INLINE_PSIM void
+INLINE_PSIM\
+(void)
 psim_init(psim *system)
 {
   int cpu_nr;
 
   /* scrub the monitor */
   mon_init(system->monitor, system->nr_cpus);
+  os_emul_init(system->os_emulation, system->nr_cpus);
+  event_queue_init(system->events);
 
   /* scrub all the cpus */
   for (cpu_nr = 0; cpu_nr < system->nr_cpus; cpu_nr++)
     cpu_init(system->processors[cpu_nr]);
 
-  /* init all the devices */
+  /* init all the devices (which updates the cpus) */
   device_tree_init(system->devices, system);
+
+  /* now sync each cpu against the initialized state of its registers */
+  for (cpu_nr = 0; cpu_nr < system->nr_cpus; cpu_nr++) {
+    cpu_synchronize_context(system->processors[cpu_nr]);
+    cpu_page_tlb_invalidate_all(system->processors[cpu_nr]);
+  }
 
   /* force loop to restart */
   system->last_cpu = system->nr_cpus - 1;
 }
 
-INLINE_PSIM void
+INLINE_PSIM\
+(void)
 psim_stack(psim *system,
 	   char **argv,
 	   char **envp)
 {
   /* pass the stack device the argv/envp and let it work out what to
      do with it */
-  const device *stack_device = device_tree_find_device(system->devices,
-						       "/init/stack");
-  unsigned_word stack_pointer;
-  psim_read_register(system, 0, &stack_pointer, "sp", cooked_transfer);
-  stack_device->callback->ioctl(stack_device,
-				system,
-				NULL, /*cpu*/
-				0, /*cia*/
-				stack_pointer,
-				argv,
-				envp);
+  device *stack_device = device_tree_find_device(system->devices,
+						 "/openprom/init/stack");
+  if (stack_device != (device*)0) {
+    unsigned_word stack_pointer;
+    psim_read_register(system, 0, &stack_pointer, "sp", cooked_transfer);
+    device_ioctl(stack_device,
+		 system,
+		 NULL, /*cpu*/
+		 0, /*cia*/
+		 stack_pointer,
+		 argv,
+		 envp);
+  }
 }
 
 
@@ -566,14 +507,15 @@ psim_stack(psim *system,
 
    Consequently this function is written in multiple different ways */
 
-STATIC_INLINE_PSIM void
+STATIC_INLINE_PSIM\
+(void)
 run_until_stop(psim *system,
 	       volatile int *keep_running)
 {
   jmp_buf halt;
   jmp_buf restart;
-  int cpu_nr;
 #if WITH_IDECODE_CACHE_SIZE
+  int cpu_nr;
   for (cpu_nr = 0; cpu_nr < system->nr_cpus; cpu_nr++)
     cpu_flush_icache(system->processors[cpu_nr]);
 #endif
@@ -655,7 +597,8 @@ run_until_stop(psim *system,
 							 cia,
 							 cache_entry);
 
-	      mon_event(mon_event_icache_miss, processor, cia);
+	      if (WITH_MON != 0)
+		mon_event(mon_event_icache_miss, processor, cia);
 	      cache_entry->address = cia;
 	      cache_entry->semantic = semantic;
 	      cia = semantic(processor, cache_entry, cia);
@@ -750,7 +693,8 @@ run_until_stop(psim *system,
 						 cia,
 						 cache_entry);
 
-	    mon_event(mon_event_icache_miss, system->processors[current_cpu], cia);
+	    if (WITH_MON != 0)
+	      mon_event(mon_event_icache_miss, system->processors[current_cpu], cia);
 	    cache_entry->address = cia;
 	    cache_entry->semantic = semantic;
 	    cpu_set_program_counter(processor,
@@ -771,20 +715,23 @@ run_until_stop(psim *system,
 /* SIMULATE INSTRUCTIONS, various different ways of achieving the same
    thing */
 
-INLINE_PSIM void
+INLINE_PSIM\
+(void)
 psim_step(psim *system)
 {
   volatile int keep_running = 0;
   run_until_stop(system, &keep_running);
 }
 
-INLINE_PSIM void
+INLINE_PSIM\
+(void)
 psim_run(psim *system)
 {
   run_until_stop(system, NULL);
 }
 
-INLINE_PSIM void
+INLINE_PSIM\
+(void)
 psim_run_until_stop(psim *system,
 		    volatile int *keep_running)
 {
@@ -795,7 +742,8 @@ psim_run_until_stop(psim *system,
 
 /* storage manipulation functions */
 
-INLINE_PSIM void
+INLINE_PSIM\
+(void)
 psim_read_register(psim *system,
 		   int which_cpu,
 		   void *buf,
@@ -884,7 +832,8 @@ psim_read_register(psim *system,
 
 
 
-INLINE_PSIM void
+INLINE_PSIM\
+(void)
 psim_write_register(psim *system,
 		    int which_cpu,
 		    const void *buf,
@@ -980,7 +929,8 @@ psim_write_register(psim *system,
 
 
 
-INLINE_PSIM unsigned
+INLINE_PSIM\
+(unsigned)
 psim_read_memory(psim *system,
 		 int which_cpu,
 		 void *buffer,
@@ -998,7 +948,8 @@ psim_read_memory(psim *system,
 }
 
 
-INLINE_PSIM unsigned
+INLINE_PSIM\
+(unsigned)
 psim_write_memory(psim *system,
 		  int which_cpu,
 		  const void *buffer,
@@ -1017,11 +968,38 @@ psim_write_memory(psim *system,
 }
 
 
-INLINE_PSIM void
+INLINE_PSIM\
+(void)
 psim_print_info(psim *system,
 		int verbose)
 {
   mon_print_info(system, system->monitor, verbose);
+}
+
+
+/* Merge a device tree and a device file. */
+
+INLINE_PSIM\
+(void)
+psim_merge_device_file(device *root,
+		       const char *file_name)
+{
+  FILE *description = fopen(file_name, "r");
+  int line_nr = 0;
+  char device_path[1000];
+  device *current = root;
+  while (fgets(device_path, sizeof(device_path), description)) {
+    /* check all of line was read */
+    if (strchr(device_path, '\n') == NULL) {
+      fclose(description);
+      error("create_filed_device_tree() line %d to long: %s\n",
+	    line_nr, device_path);
+    }
+    line_nr++;
+    /* parse this line */
+    current = device_tree_add_parsed(current, "%s", device_path);
+  }
+  fclose(description);
 }
 
 

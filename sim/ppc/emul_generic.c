@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994-1995, Andrew Cagney <cagney@highland.com.au>
+    Copyright (C) 1994-1996, Andrew Cagney <cagney@highland.com.au>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -212,6 +212,84 @@ emul_do_system_call(os_emul_data *emul_data,
 
   if (WITH_TRACE && ppc_trace[trace_os_emul])
     emul_syscall_exit(emul, call, arg0, processor, cia);
+}
+
+
+/* default size for the first bank of memory */
+
+#ifndef OEA_MEMORY_SIZE
+#define OEA_MEMORY_SIZE 0x100000
+#endif
+
+
+/* Add options to the device tree */
+
+INLINE_EMUL_GENERIC void
+emul_add_tree_options(device *tree,
+		      bfd *image,
+		      const char *emul,
+		      const char *env,
+		      int oea_interrupt_prefix)
+{
+  int little_endian = 0;
+
+  /* sort out little endian */
+  if (device_find_property(tree, "/options/little-endian?"))
+    little_endian = device_find_boolean_property(tree, "/options/little-endian?");
+  else {
+#ifdef bfd_little_endian	/* new bfd */
+    little_endian = (image != NULL && bfd_little_endian(image));
+#else
+    little_endian = (image != NULL &&
+		     !image->xvec->byteorder_big_p);
+#endif
+    device_tree_add_parsed(tree, "/options/little-endian? %s",
+			   little_endian ? "true" : "false");
+  }
+
+  /* misc other stuff */
+  device_tree_add_parsed(tree, "/openprom/options/oea-memory-size 0x%x",
+			 OEA_MEMORY_SIZE);
+  device_tree_add_parsed(tree, "/openprom/options/oea-interrupt-prefix %d",
+			 oea_interrupt_prefix);
+  device_tree_add_parsed(tree, "/openprom/options/smp 1");
+  device_tree_add_parsed(tree, "/openprom/options/env %s", env);
+  device_tree_add_parsed(tree, "/openprom/options/os-emul %s", emul);
+  device_tree_add_parsed(tree, "/openprom/options/strict-alignment? %s",
+			 (WITH_ALIGNMENT == STRICT_ALIGNMENT || little_endian)
+			 ? "true" : "false");
+  device_tree_add_parsed(tree, "/openprom/options/floating-point? %s",
+			 WITH_FLOATING_POINT ? "true" : "false");
+  device_tree_add_parsed(tree, "/openprom/options/model \"%s",
+			 model_name[WITH_DEFAULT_MODEL]);
+  device_tree_add_parsed(tree, "/openprom/options/model-issue %d",
+			 MODEL_ISSUE_IGNORE);
+}
+
+INLINE_EMUL_GENERIC void
+emul_add_tree_hardware(device *root)
+{
+  /* add some memory */
+  if (device_tree_find_device(root, "/memory") == NULL) {
+    unsigned_word memory_size =
+      device_find_integer_property(root, "/openprom/options/oea-memory-size");
+    device_tree_add_parsed(root, "/memory@0/reg { 0x0 0x%lx",
+			   (unsigned long)memory_size);
+    /* what about allocated? */
+  }
+  /* an eeprom */
+  device_tree_add_parsed(root, "/openprom/eeprom@0xfff00000/reg { 0xfff00000 0x3000");
+  /* the IO bus */
+  device_tree_add_parsed(root, "/iobus@0x400000/reg { 0x400000 0x400000");
+  device_tree_add_parsed(root, "/iobus/console@0x000000/reg { 0x000000 16");
+  device_tree_add_parsed(root, "/iobus/halt@0x100000/reg    { 0x100000  4");
+  device_tree_add_parsed(root, "/iobus/icu@0x200000/reg     { 0x200000  8");
+  device_tree_add_parsed(root, "/iobus/icu > 0 0 /iobus/icu");
+  device_tree_add_parsed(root, "/iobus/icu > 1 1 /iobus/icu");
+  /* chosen etc */
+  device_tree_add_parsed(root, "/chosen/stdin */iobus/console");
+  device_tree_add_parsed(root, "/chosen/stdout !/chosen/stdin");
+  device_tree_add_parsed(root, "/chosen/memory */memory");
 }
 
 #endif /* _SYSTEM_C_ */

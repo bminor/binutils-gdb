@@ -22,10 +22,6 @@
 #ifndef _CPU_C_
 #define _CPU_C_
 
-#ifndef STATIC_INLINE_CPU
-#define STATIC_INLINE_CPU STATIC_INLINE
-#endif
-
 #include <setjmp.h>
 
 #include "cpu.h"
@@ -58,6 +54,7 @@ struct _cpu {
 
   /* the system this processor is contained within */
   cpu_mon *monitor;
+  os_emul *os_emulation;
   psim *system;
   event_queue *events;
   int cpu_nr;
@@ -81,12 +78,13 @@ struct _cpu {
 
 };
 
-
-INLINE_CPU cpu *
+INLINE_CPU\
+(cpu *)
 cpu_create(psim *system,
 	   core *memory,
 	   event_queue *events,
 	   cpu_mon *monitor,
+	   os_emul *os_emulation,
 	   int cpu_nr)
 {
   cpu *processor = ZALLOC(cpu);
@@ -105,17 +103,19 @@ cpu_create(psim *system,
   processor->events = events;
   processor->cpu_nr = cpu_nr;
   processor->monitor = monitor;
+  processor->os_emulation = os_emulation;
 
   return processor;
 }
 
 
-INLINE_CPU void
+INLINE_CPU\
+(void)
 cpu_init(cpu *processor)
 {
   memset(&processor->regs, 0, sizeof(processor->regs));
-  /* FIXME - should any of VM be inited also ? */
-
+  /* vm init is delayed until after the device tree has been init as
+     the devices may further init the cpu */
   if (CURRENT_MODEL_ISSUE > 0)
     model_init (processor->model_ptr);
 }
@@ -123,31 +123,43 @@ cpu_init(cpu *processor)
 
 /* find ones way home */
 
-INLINE_CPU psim *
+INLINE_CPU\
+(psim *)
 cpu_system(cpu *processor)
 {
   return processor->system;
 }
 
-INLINE_CPU int
+INLINE_CPU\
+(int)
 cpu_nr(cpu *processor)
 {
   return processor->cpu_nr;
 }
 
-INLINE_CPU event_queue *
+INLINE_CPU\
+(event_queue *)
 cpu_event_queue(cpu *processor)
 {
   return processor->events;
 }
 
-INLINE_CPU cpu_mon *
+INLINE_CPU\
+(cpu_mon *)
 cpu_monitor(cpu *processor)
 {
   return processor->monitor;
 }
 
-INLINE_CPU model_data *
+INLINE_CPU\
+(os_emul *)
+cpu_os_emulation(cpu *processor)
+{
+  return processor->os_emulation;
+}
+
+INLINE_CPU\
+(model_data *)
 cpu_model(cpu *processor)
 {
   return processor->model_ptr;
@@ -155,14 +167,16 @@ cpu_model(cpu *processor)
 
 /* The processors local concept of time */
 
-INLINE_CPU signed64
+INLINE_CPU\
+(signed64)
 cpu_get_time_base(cpu *processor)
 {
   return (event_queue_time(processor->events)
 	  - processor->time_base_local_time);
 }
 
-INLINE_CPU void
+INLINE_CPU\
+(void)
 cpu_set_time_base(cpu *processor,
 		  signed64 time_base)
 {
@@ -170,14 +184,16 @@ cpu_set_time_base(cpu *processor,
 				     - time_base);
 }
 
-INLINE_CPU signed32
+INLINE_CPU\
+(signed32)
 cpu_get_decrementer(cpu *processor)
 {
   return (processor->decrementer_local_time
 	  - event_queue_time(processor->events));
 }
 
-STATIC_INLINE_CPU void
+STATIC_INLINE_CPU\
+(void)
 cpu_decrement_event(event_queue *queue,
 		    void *data)
 {
@@ -190,7 +206,8 @@ cpu_decrement_event(event_queue *queue,
   }
 }
 
-INLINE_CPU void
+INLINE_CPU\
+(void)
 cpu_set_decrementer(cpu *processor,
 		    signed32 decrementer)
 {
@@ -216,20 +233,23 @@ cpu_set_decrementer(cpu *processor,
 
 /* program counter manipulation */
 
-INLINE_CPU void
+INLINE_CPU\
+(void)
 cpu_set_program_counter(cpu *processor,
 			unsigned_word new_program_counter)
 {
   processor->program_counter = new_program_counter;
 }
 
-INLINE_CPU unsigned_word
+INLINE_CPU\
+(unsigned_word)
 cpu_get_program_counter(cpu *processor)
 {
   return processor->program_counter;
 }
 
-INLINE_CPU void
+INLINE_CPU\
+(void)
 cpu_restart(cpu *processor,
 	    unsigned_word nia)
 {
@@ -237,7 +257,8 @@ cpu_restart(cpu *processor,
   psim_restart(processor->system, processor->cpu_nr);
 }
 
-INLINE_CPU void
+INLINE_CPU\
+(void)
 cpu_halt(cpu *processor,
 	 unsigned_word cia,
 	 stop_reason reason,
@@ -261,7 +282,8 @@ cpu_halt(cpu *processor,
 
 #if WITH_IDECODE_CACHE_SIZE
 /* allow access to the cpu's instruction cache */
-INLINE_CPU idecode_cache *
+INLINE_CPU\
+(idecode_cache *)
 cpu_icache_entry(cpu *processor,
 		 unsigned_word cia)
 {
@@ -269,7 +291,8 @@ cpu_icache_entry(cpu *processor,
 }
 
 
-INLINE_CPU void
+INLINE_CPU\
+(void)
 cpu_flush_icache(cpu *processor)
 {
   int i;
@@ -282,22 +305,40 @@ cpu_flush_icache(cpu *processor)
 
 /* address map revelation */
 
-INLINE_CPU vm_instruction_map *
+INLINE_CPU\
+(vm_instruction_map *)
 cpu_instruction_map(cpu *processor)
 {
   return processor->instruction_map;
 }
 
-INLINE_CPU vm_data_map *
+INLINE_CPU\
+(vm_data_map *)
 cpu_data_map(cpu *processor)
 {
   return processor->data_map;
 }
 
+INLINE_CPU\
+(void)
+cpu_page_tlb_invalidate_entry(cpu *processor,
+			      unsigned_word ea)
+{
+  vm_page_tlb_invalidate_entry(processor->virtual, ea);
+}
+
+INLINE_CPU\
+(void)
+cpu_page_tlb_invalidate_all(cpu *processor)
+{
+  vm_page_tlb_invalidate_all(processor->virtual);
+}
+
 
 /* reservation access */
 
-INLINE_CPU memory_reservation *
+INLINE_CPU\
+(memory_reservation *)
 cpu_reservation(cpu *processor)
 {
   return &processor->reservation;
@@ -306,13 +347,15 @@ cpu_reservation(cpu *processor)
 
 /* register access */
 
-INLINE_CPU registers *
+INLINE_CPU\
+(registers *)
 cpu_registers(cpu *processor)
 {
   return &processor->regs;
 }
 
-INLINE_CPU void
+INLINE_CPU\
+(void)
 cpu_synchronize_context(cpu *processor)
 {
 #if (WITH_IDECODE_CACHE)
@@ -330,7 +373,8 @@ cpu_synchronize_context(cpu *processor)
 
 /* might again be useful one day */
 
-INLINE_CPU void
+INLINE_CPU\
+(void)
 cpu_print_info(cpu *processor, int verbose)
 {
 }

@@ -1,3 +1,49 @@
+Wed Feb 21 10:39:35 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* emul_bugapi.c (emul_bugapi_create): Make formats type
+	compatible.
+
+Mon Feb 19 22:54:40 1996  Andrew Cagney  <cagney@highland.com.au>
+
+	* ppc-instructions (TLB Invalidate Entry, TLB Invalidate ALL):
+        Implement by passing on request to all processors.
+	* ppc-instructions (TLB Synchronize): Implement as empty, processor
+	tlb's are always in sync.
+
+	* cpu.c (cpu_page_tlb_invalidate_all): New function.  Pass on TLB
+        invalidate request to processors VM sub-system.
+	* cpu.c (cpu_page_tlb_invalidate_entry): Ditto.
+
+	* vm.c (vm_page_tlb_invalidate_all): New function. Mark all page
+        TLB entries as invalid.
+	* vm.c (vm_page_tlb_invalidate_entry): New function. Ditt but only
+	invalidate one TLB entry.
+
+	* psim.c (psim_init): Invalidate TLB's before (re)starting.
+
+Mon Feb 19 21:25:56 1996  Andrew Cagney  <cagney@highland.com.au>
+
+	* emul_generic.c (emul_add_tree_options): Add argument
+        oea_interrupt_prefix (0 or 1) that specifies the prefix MSR[IP]
+        and hence the location of the interrupt vectors.  Add this to the
+        device tree.
+
+	* emul_chirp.c (emul_chirp_create): Allow configuration of
+        floating-point and interrupt prefix (default 0) using the above.
+
+	* emul_netbsd.c (emul_netbsd_create): Pass dummy arg for
+        interrupt-prefix.
+
+	* emul_bugapi.c (emul_bugapi_create): Allow configuration of
+        interrupt prefix (default 1) and configure interrupt table traps
+        accordingly.
+
+	* emul_generic.c (emul_add_tree_hardware): Include a small eeprom
+        in the list of devices.
+
+	* device_table.c: For moment fake eeprom device by a memory
+        device.  In future will need a proper eeprom device.
+
 Tue Feb 20 17:01:26 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* config.in: Regenerated.
