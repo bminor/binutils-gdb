@@ -1,2 +1,2 @@
-	.section	.eh_frame,"a",@progbits
+	.section	.eh_frame,"a",%progbits
 	.4byte	0

@@ -1,3 +1,12 @@
+2004-05-18  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/frame.s: Replace @ with % so that the file can be
+	compiled by an ARM targeted GAS.
+	* ld-elf/table.s: Likewise.
+	* ld-elf/tbss.s: Likewise.  Also replace .align <foo> with
+	.p2align (log2 <foo>) to cope with the fact that the ARM .align
+	directive takes a power-of-two argument.
+
 2004-05-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/frame.exp: New file. Test read-only .eh_frame and
