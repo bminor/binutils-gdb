@@ -1,3 +1,8 @@
+2000-02-14  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* lib/gdb.exp: Tell the testsuite that now gdbtk is in the
+ 	gdbtk/library directory, not in gdbtcl2.
+
 2000-02-04  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.c++/templates.exp: ("ptype T5<int>"): Remove extraneous

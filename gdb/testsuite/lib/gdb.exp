@@ -1618,7 +1618,7 @@ proc gdbtk_start {test} {
   }
 
   set wd [pwd]
-  cd [file join $srcdir .. gdbtcl2]
+  cd [file join $srcdir .. gdbtk library]
   set env(GDBTK_LIBRARY) [pwd]
   cd [file join $srcdir .. .. tcl library]
   set env(TCL_LIBRARY) [pwd]
