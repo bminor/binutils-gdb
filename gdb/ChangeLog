@@ -1,3 +1,9 @@
+Thu Apr 20 18:15:08 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d10v-tdep.c (d10v_gdbarch_init): Initialize stack_align.
+	(d10v_stack_align): Make static.
+	* config/d10v/tm-d10v.h (STACK_ALIGN): Delete.
+
 Thu Apr 20 14:35:46 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* valops.c (hand_function_call): Replace #ifdef STACK_ALIGN with

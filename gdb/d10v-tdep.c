@@ -104,7 +104,7 @@ d10v_frame_chain_valid (chain, frame)
   return ((chain) != 0 && (frame) != 0 && (frame)->pc > IMEM_START);
 }
 
-CORE_ADDR
+static CORE_ADDR
 d10v_stack_align (CORE_ADDR len)
 {
   return (len + 1) & ~1;
@@ -1655,6 +1655,7 @@ d10v_gdbarch_init (info, arches)
   set_gdbarch_frame_locals_address (gdbarch, d10v_frame_locals_address);
   set_gdbarch_saved_pc_after_call (gdbarch, d10v_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
+  set_gdbarch_stack_align (gdbarch, d10v_stack_align);
 
   return gdbarch;
 }
