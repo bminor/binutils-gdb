@@ -1,3 +1,16 @@
+Thu Feb  2 16:11:04 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* config/arc/.Sanitize: New file for config/arc directory.
+	* config/arc/arc.mt: new target makefile for arc processor.
+	* config/arc/tm-arc.h: new target header for arc processor.
+	* config/arc/go32.mh: new go32 host makefile for arc processor.
+	* config/arc/xm-go32.h: new go32 host header for arc processor.
+	* arc-tdep.c: new target dependent codes for arc processor.
+	* remote-arc.c: new file for arc-specific protocol through
+	parallel line.
+	* ser-go32-para.c: new file for go32 parallel port communication.
+	* .Sanitize: sanitize arc specific files out.
+
 Thu Feb  2 13:58:40 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* Makefile.in (VERSION): Bump to 4.13.2.
