@@ -15,12 +15,6 @@
 
 Do-first:
 
-if ( echo $* | grep keep\-chill > /dev/null ) ; then
-	keep_these_too="chillrt test-chill"
-else
-	lose_these_too="chillrt test-chill"
-fi
-
 if ( echo $* | grep keep\-cygnus > /dev/null) ; then
 	keep_these_too="${keep_these_too} release release-info build-all.mk"
 else
