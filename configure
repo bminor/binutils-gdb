@@ -3,7 +3,7 @@
 ### WARNING: this file contains embedded tabs.  Do not run untabify on this file.
 
 # Configuration script
-#   Copyright (C) 1988, 1990-1993 Free Software Foundation, Inc.
+#   Copyright (C) 1988, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -117,7 +117,7 @@ do
         if [ -n "${next_prefix}" ] ; then prefix=${arg} ; prefixoption="-prefix=${prefix}" ; next_prefix=
         elif [ -n "${next_exec_prefix}" ] ; then
                 exec_prefix=${arg}
-                exec_prefixoption="-exec_prefix=${exec_prefix}"
+                exec_prefixoption="-exec-prefix=${exec_prefix}"
                 next_exec_prefix=
         elif [ -n "${next_site}" ] ; then site=${arg} ; site_option=-site=${site} ; next_site=
         # remove any possible trailing slash from srcdir.  See note below.
@@ -362,20 +362,20 @@ if [ -n "${fatal}" -o "${host_alias}" = "help" ] ; then
         (echo "Usage: configure HOST" ;
         echo ;
         echo "Options: [defaults in brackets]" ;
-        echo " -prefix=MYDIR            configure for installation of host dependent files into MYDIR. [\"/usr/local\"]" ;
-        echo " -exec-prefix=MYDIR       configure for installation of host dependent files into MYDIR. [\"/usr/local\"]" ;
-        echo " -help                    print this message. [normal config]" ;
-        echo " -norecursion             configure this directory only. [recurse]" ;
-        echo " -program-prefix=FOO      install programs with FOO prepended to their names. [ \"\" ]" ;
-        echo " -program-suffix=FOO      install programs with FOO appended to their names. [ \"\" ]" ;
-        echo " -program-transform-name=FOO      install programs with names transformed by sed pattern FOO. [ \"\" ]" ;
-        echo " -site=SITE               configure with site specific makefile for SITE" ;
-        echo " -srcdir=DIR              find the sources in DIR. [\".\" or \"..\"]" ;
-        echo " -target=TARGET           configure for TARGET.  [TARGET = HOST]" ;
-        echo " -tmpdir=TMPDIR           create temporary files in TMPDIR.  [ TMPDIR = \"/tmp\" ]" ;
-        echo " -nfp                     configure the compilers default to soft floating point. [hard float]" ;
-        echo " -with-FOO, -with-FOO=BAR specify that FOO is available"
-        echo " -without-FOO             specify that FOO is NOT available"
+        echo " --prefix=MYDIR            configure for installation of host dependent files into MYDIR. [\"/usr/local\"]" ;
+        echo " --exec-prefix=MYDIR       configure for installation of host dependent files into MYDIR. [\"/usr/local\"]" ;
+        echo " --help                    print this message. [normal config]" ;
+        echo " --norecursion             configure this directory only. [recurse]" ;
+        echo " --program-prefix=FOO      install programs with FOO prepended to their names. [ \"\" ]" ;
+        echo " --program-suffix=FOO      install programs with FOO appended to their names. [ \"\" ]" ;
+        echo " --program-transform-name=FOO      install programs with names transformed by sed pattern FOO. [ \"\" ]" ;
+        echo " --site=SITE               configure with site specific makefile for SITE" ;
+        echo " --srcdir=DIR              find the sources in DIR. [\".\" or \"..\"]" ;
+        echo " --target=TARGET           configure for TARGET.  [TARGET = HOST]" ;
+        echo " --tmpdir=TMPDIR           create temporary files in TMPDIR.  [ TMPDIR = \"/tmp\" ]" ;
+        echo " --nfp                     configure the compilers default to soft floating point. [hard float]" ;
+        echo " --with-FOO, --with-FOO=BAR specify that FOO is available"
+        echo " --without-FOO             specify that FOO is NOT available"
         echo ;
         echo "Where HOST and TARGET are something like \"vax\", \"sun3\", \"encore\", etc." ;
         echo ;
@@ -529,7 +529,9 @@ if [ ! -r ${srcdir}/${srctrigger} ] ; then
         exit 1
 fi
 
-tooldir="\$(exec_prefix)/${target_alias}"
+# Some systems (e.g., one of the i386-aix systems the gas testers are
+# using) don't handle "\$" correctly, so don't use it here.
+tooldir='$(exec_prefix)'/${target_alias}
 
 if [ "${host_alias}" != "${target_alias}" ] ; then
     if [ "${program_prefixoption}" = "" ] ; then
@@ -798,7 +800,7 @@ EOF
                     -e "s///" \
                     -e "s:^program_prefix[ 	]*=.*$:program_prefix = ${program_prefix}:" \
                     -e "s:^program_suffix[ 	]*=.*$:program_suffix = ${program_suffix}:" \
-                    -e "s:^program_transform_name[ 	]*=.*$:program_transform_name = ${program_transform_name}:" \
+                    -e "s:^program_transform_name[ 	]*=.*$:program_transform_name = \"${program_transform_name}\":" \
                     -e "s:^tooldir[ 	]*=.*$:tooldir = ${tooldir}:" \
                     ${subdir}/Makefile.tem >> ${Makefile}
             # final copy now in ${Makefile}

@@ -1,3 +1,7 @@
+Thu Jun 17 16:58:50 1993  david d `zoo' zuhn  (zoo at majipoor.cygnus.com)
+
+	* configure: put quotes around the final value of program_transform_name
+
 Tue Jun 15 16:48:51 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* Makefile.in: new install.sh support; update install-info rules
