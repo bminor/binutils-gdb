@@ -1,3 +1,9 @@
+2004-04-30  Andrew Cagney  <cagney@redhat.com>
+
+	* arm-tdep.c (arm_sigtramp_unwind_sniffer): Call
+	legacy_pc_in_sigtramp.
+	* ia64-tdep.c (ia64_sigtramp_frame_sniffer): Ditto.
+
 2004-05-01  Mark Kettenis  <kettenis@gnu.org>
 
 	Add OpenBSD/m68k support.

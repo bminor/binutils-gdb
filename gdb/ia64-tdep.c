@@ -2048,7 +2048,7 @@ ia64_sigtramp_frame_sniffer (struct frame_info *next_frame)
   CORE_ADDR pc = frame_pc_unwind (next_frame);
 
   find_pc_partial_function (pc, &name, NULL, NULL);
-  if (DEPRECATED_PC_IN_SIGTRAMP (pc, name))
+  if (legacy_pc_in_sigtramp (pc, name))
     return &ia64_sigtramp_frame_unwind;
 
   return NULL;

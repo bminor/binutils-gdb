@@ -1135,13 +1135,8 @@ struct frame_unwind arm_sigtramp_unwind = {
 static const struct frame_unwind *
 arm_sigtramp_unwind_sniffer (struct frame_info *next_frame)
 {
-  /* Note: If an ARM DEPRECATED_PC_IN_SIGTRAMP method ever needs to
-     compare against the name of the function, the code below will
-     have to be changed to first fetch the name of the function and
-     then pass this name to DEPRECATED_PC_IN_SIGTRAMP.  */
-
   if (SIGCONTEXT_REGISTER_ADDRESS_P ()
-      && DEPRECATED_PC_IN_SIGTRAMP (frame_pc_unwind (next_frame), (char *) 0))
+      && legacy_pc_in_sigtramp (frame_pc_unwind (next_frame), (char *) 0))
     return &arm_sigtramp_unwind;
 
   return NULL;
