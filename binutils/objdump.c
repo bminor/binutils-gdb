@@ -39,7 +39,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	BYTES_IN_WORD	32
 #include "aout/aout64.h"
 #include "elf/internal.h"
-extern Elf32_Internal_Shdr *bfd_elf32_find_section();
+extern Elf_Internal_Shdr *bfd_elf_find_section();
 #endif	/* ELF_STAB_DISPLAY */
 
 extern char *xmalloc ();
@@ -284,11 +284,19 @@ objdump_print_address (vma, info)
       fprintf (info->stream, " <%s", syms[thisplace]->name);
       if (syms[thisplace]->value > vma)
 	{
-	  fprintf (info->stream, "-%04x", syms[thisplace]->value - vma);
+	  char buf[30], *p = buf;
+	  sprintf_vma (buf, syms[thisplace]->value - vma);
+	  while (*p == '0')
+	    p++;
+	  fprintf (info->stream, "-%s", p);
 	}
       else if (vma > syms[thisplace]->value)
 	{
-	  fprintf (info->stream, "+%04x", vma - syms[thisplace]->value);
+	  char buf[30], *p = buf;
+	  sprintf_vma (buf, vma - syms[thisplace]->value);
+	  while (*p == '0')
+	    p++;
+	  fprintf (info->stream, "+%s", p);
 	}
       fprintf (info->stream, ">");
     }
@@ -564,20 +572,20 @@ dump_elf_stabs_1 (abfd, name1, name2)
      char *name1;		/* Section name of .stab */
      char *name2;		/* Section name of its string section */
 {
-  Elf32_Internal_Shdr *stab_hdr, *stabstr_hdr;
+  Elf_Internal_Shdr *stab_hdr, *stabstr_hdr;
   char *strtab;
   struct internal_nlist *stabs, *stabs_end;
   int i;
   unsigned file_string_table_offset, next_file_string_table_offset;
 
-  stab_hdr = bfd_elf32_find_section (abfd, name1);
+  stab_hdr = bfd_elf_find_section (abfd, name1);
   if (0 == stab_hdr)
     {
       printf ("Contents of %s section:  none.\n\n", name1);
       return;
     }
 
-  stabstr_hdr = bfd_elf32_find_section (abfd, name2);
+  stabstr_hdr = bfd_elf_find_section (abfd, name2);
   if (0 == stabstr_hdr)
     {
       fprintf (stderr, "%s: %s has no %s section.\n", program_name,

@@ -1,3 +1,12 @@
+Fri Jun 25 20:44:43 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
+
+	* objdump.c: Use size-independend bfd elf section names.
+
+Sun Jun 20 23:09:06 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
+
+	* objdump.c (objdump_print_address): Handle wide offsets by
+	calling sprintf_vma.
+
 Fri Jun 18 14:29:12 1993  Per Bothner  (bothner@deneb.cygnus.com)
 
 	* objdump.c (syms2):  Removed unused variable.
