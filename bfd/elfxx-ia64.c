@@ -3963,7 +3963,6 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 		      (!info->shared || info->no_undefined
 		       || ELF_ST_VISIBILITY (h->other)))))
 		return FALSE;
-	      ret_val = FALSE;
 	      continue;
 	    }
 	}

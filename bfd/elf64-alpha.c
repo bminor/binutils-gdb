@@ -4514,7 +4514,6 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		     (!info->shared || info->no_undefined
 		      || ELF_ST_VISIBILITY (h->root.other)))))
 		return FALSE;
-	      ret_val = FALSE;
 	      continue;
 	    }
 

@@ -1,3 +1,9 @@
+2003-04-09  H.J. Lu <hjl@gnu.org>
+
+	* elf64-alpha.c (elf64_alpha_relocate_section): Don't return
+	FALSE for undefined symbols.
+	* elfxx-ia64.c (elfNN_ia64_relocate_section): Likewise.
+
 2003-04-09  Alexandre Oliva  <aoliva@redhat.com>
 
 	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Try DWARF3-standard
