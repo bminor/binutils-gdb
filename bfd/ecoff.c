@@ -1,5 +1,5 @@
 /* Generic ECOFF (Extended-COFF) routines.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
    Original version by Per Bothner.
    Full support added by Ian Lance Taylor, ian@cygnus.com.
 
@@ -262,7 +262,7 @@ ecoff_get_magic (abfd)
 	  break;
 	}
 
-      return abfd->xvec->byteorder_big_p ? big : little;
+      return bfd_big_endian (abfd) ? big : little;
 
     case bfd_arch_alpha:
       return ALPHA_MAGIC;
@@ -1813,12 +1813,6 @@ _bfd_ecoff_find_nearest_line (abfd, section, ignore_symbols, offset,
   struct ecoff_debug_info * const debug_info = &ecoff_data (abfd)->debug_info;
   struct ecoff_find_line *line_info;
 
-  /* If we're not in the .text section, we don't have any line
-     numbers.  */
-  if (strcmp (section->name, _TEXT) != 0
-      || offset >= bfd_section_size (abfd, section))
-    return false;
-
   /* Make sure we have the FDR's.  */
   if (! _bfd_ecoff_slurp_symbolic_info (abfd, (asection *) NULL, debug_info)
       || bfd_get_symcount (abfd) == 0)
@@ -2619,7 +2613,7 @@ _bfd_ecoff_write_object_contents (abfd)
   if (abfd->flags & EXEC_P)
     internal_f.f_flags |= F_EXEC;
 
-  if (! abfd->xvec->byteorder_big_p)
+  if (bfd_little_endian (abfd))
     internal_f.f_flags |= F_AR32WR;
   else
     internal_f.f_flags |= F_AR32W;
@@ -2970,9 +2964,9 @@ _bfd_ecoff_slurp_armap (abfd)
 
   /* Make sure we have the right byte ordering.  */
   if (((nextname[ARMAP_HEADER_ENDIAN_INDEX] == ARMAP_BIG_ENDIAN)
-       ^ (abfd->xvec->header_byteorder_big_p != false))
+       ^ (bfd_header_big_endian (abfd)))
       || ((nextname[ARMAP_OBJECT_ENDIAN_INDEX] == ARMAP_BIG_ENDIAN)
-	  ^ (abfd->xvec->byteorder_big_p != false)))
+	  ^ (bfd_big_endian (abfd))))
     {
       bfd_set_error (bfd_error_wrong_format);
       return false;
@@ -3129,12 +3123,12 @@ _bfd_ecoff_write_armap (abfd, elength, map, orl_count, stridx)
   strcpy (hdr.ar_name, ecoff_backend (abfd)->armap_start);
   hdr.ar_name[ARMAP_HEADER_MARKER_INDEX] = ARMAP_MARKER;
   hdr.ar_name[ARMAP_HEADER_ENDIAN_INDEX] =
-    (abfd->xvec->header_byteorder_big_p
+    (bfd_header_big_endian (abfd)
      ? ARMAP_BIG_ENDIAN
      : ARMAP_LITTLE_ENDIAN);
   hdr.ar_name[ARMAP_OBJECT_MARKER_INDEX] = ARMAP_MARKER;
   hdr.ar_name[ARMAP_OBJECT_ENDIAN_INDEX] =
-    abfd->xvec->byteorder_big_p ? ARMAP_BIG_ENDIAN : ARMAP_LITTLE_ENDIAN;
+    bfd_big_endian (abfd) ? ARMAP_BIG_ENDIAN : ARMAP_LITTLE_ENDIAN;
   memcpy (hdr.ar_name + ARMAP_END_INDEX, ARMAP_END, sizeof ARMAP_END - 1);
 
   /* Write the timestamp of the archive header to be just a little bit
