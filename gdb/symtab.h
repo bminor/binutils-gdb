@@ -94,13 +94,6 @@ struct general_symbol_info
       char *demangled_name;
     }
     objc_specific;
-#if 0
-/* OBSOLETE struct chill_specific        *//* For Chill */
-    /* OBSOLETE   { */
-    /* OBSOLETE     char *demangled_name; */
-    /* OBSOLETE   } */
-    /* OBSOLETE chill_specific; */
-#endif
   }
   language_specific;
 
@@ -164,9 +157,6 @@ extern void symbol_init_demangled_name (struct general_symbol_info *symbol,
 #define SYMBOL_DEMANGLED_NAME(symbol) \
   (symbol_demangled_name (&(symbol)->ginfo))
 extern char *symbol_demangled_name (struct general_symbol_info *symbol);
-
-/* OBSOLETE #define SYMBOL_CHILL_DEMANGLED_NAME(symbol) */
-/* OBSOLETE (symbol)->ginfo.language_specific.chill_specific.demangled_name */
 
 #define SYMBOL_OBJC_DEMANGLED_NAME(symbol)				\
    (symbol)->ginfo.language_specific.objc_specific.demangled_name

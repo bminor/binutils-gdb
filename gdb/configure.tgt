@@ -19,7 +19,6 @@ hppa*)			gdb_target_cpu=pa ;;
 i[3456]86*)		gdb_target_cpu=i386 ;;
 m68hc11*|m6811*)	gdb_target_cpu=m68hc11 ;;
 m68*)			gdb_target_cpu=m68k ;;
-# OBSOLETE m88*)			gdb_target_cpu=m88k ;;
 mips*)			gdb_target_cpu=mips ;;
 powerpc*)		gdb_target_cpu=powerpc ;;
 sparc*)			gdb_target_cpu=sparc ;;
@@ -46,8 +45,6 @@ alpha*-*-linux*)	gdb_target=alpha-linux ;;
 alpha*-*-netbsd*)	gdb_target=nbsd ;;
 alpha*-*-*)		gdb_target=alpha ;;
 
-# OBSOLETE arc-*-*)		gdb_target=arc ;;
-
 arm*-wince-pe)		gdb_target=wince ;;
 arm*-*-linux*)		gdb_target=linux
 			build_gdbserver=yes
@@ -69,13 +66,10 @@ avr-*-*)		gdb_target=avr
 cris*)                  gdb_target=cris ;;
 
 d10v-*-*)		gdb_target=d10v ;;
-# OBSOLETE d30v-*-*)		gdb_target=d30v ;;
 
 h8300-*-*)		gdb_target=h8300 ;;
 h8500-*-*)		gdb_target=h8500 ;;
 
-
-# OBSOLETE fr30-*-elf*)		gdb_target=fr30 ;;
 
 frv-*-*)		gdb_target=frv ;;
 
@@ -91,11 +85,9 @@ i[3456]86-sequent-bsd*)	gdb_target=symmetry ;;
 i[3456]86-sequent-sysv4*) gdb_target=ptx4 ;;
 i[3456]86-sequent-sysv*) gdb_target=ptx ;;
 i[3456]86-ncr-*)	gdb_target=ncr3000 ;;
-# OBSOLETE i[3456]86-*-aix*)	gdb_target=i386aix ;;
 i[3456]86-*-bsd*)	gdb_target=i386bsd ;;
 i[3456]86-*-netbsd*)	gdb_target=nbsd ;;
 i[3456]86-*-openbsd*)	gdb_target=obsd ;;
-# OBSOLETE i[3456]86-*-os9k)	gdb_target=i386os9k ;;
 i[3456]86-*-go32*)	gdb_target=i386aout ;;
 i[3456]86-*-msdosdjgpp*) gdb_target=go32 ;;
 i[3456]86-*-lynxos*)	gdb_target=i386lynx ;;
@@ -111,22 +103,12 @@ i[3456]86-*-linux*)	gdb_target=linux
 			build_gdbserver=yes
 			;;
 i[3456]86-*-isc*)	gdb_target=i386v ;;
-# OBSOLETE i[3456]86-*-mach3*)	gdb_target=i386m3 ;;
 i[3456]86-*-gnu*)	gdb_target=i386gnu ;;
 i[3456]86-*-netware*)	gdb_target=i386nw
 		configdirs="${configdirs} nlm" ;;
-# OBSOLETE i[3456]86-*-osf1mk*)	gdb_target=i386mk ;;
 i[3456]86-*-cygwin*)	gdb_target=cygwin  ;;
 i[3456]86-*-vxworks*)	gdb_target=vxworks ;;
 i[3456]86-*-*)		gdb_target=embed ;;
-
-# OBSOLETE i960-*-bout*)		gdb_target=vxworks960 ;;
-# OBSOLETE i960-nindy-coff*)	gdb_target=nindy960 ;;
-# OBSOLETE i960-*-coff*)		gdb_target=mon960 ;;
-# OBSOLETE i960-nindy-elf*)	gdb_target=nindy960 ;;
-# OBSOLETE i960-*-elf*)		gdb_target=mon960 ;;
-# OBSOLETE i960-*-nindy*)		gdb_target=nindy960 ;;
-# OBSOLETE i960-*-vxworks*)	gdb_target=vxworks960 ;;
 
 ia64-*-aix*)		gdb_target=aix ;;
 ia64-*-linux*)		gdb_target=linux
@@ -141,10 +123,7 @@ m68hc11*-*-*|m6811*-*-*)	gdb_target=m68hc11 ;;
 m68000-*-sunos3*)	gdb_target=sun2os3 ;;
 m68000-*-sunos4*)	gdb_target=sun2os4 ;;
 
-# OBSOLETE m68*-apollo*-bsd*)	gdb_target=apollo68b ;;
 m68*-bull-sysv*)	gdb_target=dpx2 ;;
-# OBSOLETE m68*-hp-bsd*)		gdb_target=hp300bsd ;;
-# OBSOLETE m68*-hp-hpux*)		gdb_target=hp300hpux ;;
 m68*-att-*)		gdb_target=3b1 ;;
 m68*-cisco*-*)		gdb_target=cisco ;;
 m68*-ericsson-*)	gdb_target=es1800 ;;
@@ -164,10 +143,6 @@ m68*-*-sunos3*)		gdb_target=sun3os3 ;;
 m68*-*-sunos4*)		gdb_target=sun3os4 ;;
 m68*-*-sysv4*)		gdb_target=m68kv4 ;;
 m68*-*-vxworks*)	gdb_target=vxworks68 ;;
-
-# OBSOLETE m88*-motorola-sysv4*)	gdb_target=delta88v4 ;;
-# OBSOLETE m88*-motorola-*)	gdb_target=delta88 ;;
-# OBSOLETE m88*-*-*)		gdb_target=m88k ;;
 
 mcore*-*-*)		gdb_target=mcore ;;
 mips64*-big-*)		gdb_target=bigmips64 ;;
@@ -277,9 +252,6 @@ sparcv9-*-* | sparc64-*-*) gdb_target=sp64 ;;
 xstormy16-*-*)          gdb_target=xstormy16 ;;
 
 vax-*-*)		gdb_target=vax ;;
-
-# OBSOLETE fr30-*-*)		gdb_target=fr30
-# OBSOLETE 			;;
 
 v850*-*-*)		gdb_target=v850
 			case ${gdb_host} in

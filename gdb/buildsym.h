@@ -276,12 +276,6 @@ extern int hashname (char *name);
 
 extern void free_pending_blocks (void);
 
-/* OBSOLETE FIXME: Note that this is used only in buildsym.c and dstread.c, */
-/* OBSOLETE which should be fixed to not need direct access to */
-/* OBSOLETE make_blockvector. */
-
-/* OBSOLETE extern struct blockvector *make_blockvector (struct objfile *objfile); */
-
 /* FIXME: Note that this is used only in buildsym.c and dstread.c,
    which should be fixed to not need direct access to
    record_pending_block. */

@@ -1,3 +1,45 @@
+2003-01-02  Andrew Cagney  <ac131313@redhat.com>
+
+	* valarith.c (value_binop): Delete obsolete code and comments.
+	* configure.host: Ditto.
+	* buildsym.h (make_blockvector): Ditto.
+	* buildsym.c (make_blockvector): Ditto.
+	* defs.h (enum language): Ditto.
+	(chill_demangle): Ditto.
+	* elfread.c (elf_symtab_read): Ditto.
+	* dwarfread.c (CHILL_PRODUCER): Ditto.
+	(set_cu_language): Ditto.
+	(handle_producer): Ditto.
+	* expprint.c (print_subexp): Ditto.
+	* gdbtypes.c (chill_varying_type): Ditto.
+	* gdbtypes.h (builtin_type_chill_bool): Ditto.
+	(builtin_type_chill_char, builtin_type_chill_long): Ditto.
+	(builtin_type_chill_ulong, builtin_type_chill_real): Ditto.
+	(chill_varying_type): Ditto.
+	* language.h (_LANG_chill): Ditto.
+	* language.c (binop_result_type, integral_type): Ditto.
+	(character_type, string_type, structured_type): Ditto.
+	(lang_bool_type, binop_type_check): Ditto.
+	* stabsread.h (os9k_stabs): Ditto.
+	* stabsread.c (os9k_type_vector, dbx_lookup_type): Ditto.
+	(define_symbol, read_type, read_struct_fields): Ditto.
+	(read_array_type, read_enum_type, read_huge_number): Ditto.
+	(read_range_type, start_stabs): Ditto.
+	* symfile.c (init_filename_language_table): Ditto.
+	(add_psymbol_with_dem_name_to_list): Ditto.
+	* symtab.c (symbol_init_language_specific): Ditto.
+	(symbol_init_demangled_name, symbol_demangled_name): Ditto.
+	* symtab.h (struct general_symbol_info): Ditto.
+	(SYMBOL_CHILL_DEMANGLED_NAME): Ditto.
+	* typeprint.c (typedef_print): Ditto.
+	* utils.c (fprintf_symbol_filtered): Ditto.
+	* valops.c (value_cast, search_struct_field, value_slice): Delete
+	obsolete code.
+	(varying_to_slice): Delete function.
+	* value.h (COERCE_VARYING_ARRAY): Delete obsolete macro contents.
+	(varying_to_slice): Delete declaration.
+	* MAINTAINERS: Update.
+
 2003-01-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.in: Reorganize "Checks for library functions section"

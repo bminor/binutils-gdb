@@ -207,7 +207,6 @@ enum language
     language_cplus,		/* C++ */
     language_objc,		/* Objective-C */
     language_java,		/* Java */
-    /* OBSOLETE language_chill,	*/	/* Chill */
     language_fortran,		/* Fortran */
     language_m2,		/* Modula-2 */
     language_asm,		/* Assembly language */
@@ -297,10 +296,6 @@ extern int inside_entry_func (CORE_ADDR);
 extern int inside_entry_file (CORE_ADDR addr);
 
 extern int inside_main_func (CORE_ADDR pc);
-
-/* OBSOLETE From ch-lang.c, for the moment. (FIXME) */
-
-/* OBSOLETE extern char *chill_demangle (const char *); */
 
 /* From utils.c */
 

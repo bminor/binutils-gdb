@@ -17,9 +17,29 @@ Fix for gdb/672: update changelist is now output in mi list format.
 Fix for gdb/702: a -var-assign that updates the value now shows up
                  in a subsequent -var-update.
 
+* OBSOLETE configurations and files
+
+Configurations that have been declared obsolete in this release have
+been commented out.  Unless there is activity to revive these
+configurations, the next release of GDB will have their sources
+permanently REMOVED.
+
 * REMOVED configurations and files
 
 V850EA ISA				
+Motorola Delta 88000 running Sys V		m88k-motorola-sysv  or  delta88
+IBM AIX PS/2					i[3456]86-*-aix
+i386 running Mach 3.0				i[3456]86-*-mach3*
+i386 running Mach				i[3456]86-*-mach*
+i386 running OSF/1				i[3456]86-*osf1mk*
+HP/Apollo 68k Family				m68*-apollo*-sysv*,
+						m68*-apollo*-bsd*,
+						m68*-hp-bsd*, m68*-hp-hpux*
+Argonaut Risc Chip (ARC)			arc-*-*
+Mitsubishi D30V					d30v-*-*
+Fujitsu FR30					fr30-*-elf*
+OS/9000						i[34]86-*-os9k
+I960 with MON960				i960-*-coff
 
 * MIPS $fp behavior changed
 

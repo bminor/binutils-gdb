@@ -346,10 +346,10 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 		    /* Looks like a compiler-generated label.  Skip
 		       it.  The assembler should be skipping these (to
 		       keep executables small), but apparently with
-		       gcc on the (OBSOLETE) delta m88k SVR4, it
-		       loses.  So to have us check too should be
-		       harmless (but I encourage people to fix this in
-		       the assembler instead of adding checks here).  */
+		       gcc on the (deleted) delta m88k SVR4, it loses.
+		       So to have us check too should be harmless (but
+		       I encourage people to fix this in the assembler
+		       instead of adding checks here).  */
 		    continue;
 		  else
 		    {

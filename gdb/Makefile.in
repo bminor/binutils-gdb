@@ -482,26 +482,6 @@ CXX_FOR_TARGET = ` \
     fi; \
   fi`
 
-# OBSOLETE CHILLFLAGS = $(CFLAGS)
-# OBSOLETE CHILL = gcc
-# OBSOLETE CHILL_FOR_TARGET = ` \
-# OBSOLETE   if [ -f $${rootme}/../gcc/Makefile ] ; then \
-# OBSOLETE     echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/ -L$${rootme}/../gcc/ch/runtime/; \
-# OBSOLETE   else \
-# OBSOLETE     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
-# OBSOLETE       echo $(CC); \
-# OBSOLETE     else \
-# OBSOLETE       t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
-# OBSOLETE     fi; \
-# OBSOLETE   fi`
-# OBSOLETE CHILL_LIB = ` \
-# OBSOLETE   if [ -f $${rootme}/../gcc/ch/runtime/libchill.a ] ; then \
-# OBSOLETE     echo $${rootme}/../gcc/ch/runtime/chillrt0.o \
-# OBSOLETE       $${rootme}/../gcc/ch/runtime/libchill.a; \
-# OBSOLETE   else \
-# OBSOLETE       echo -lchill; \
-# OBSOLETE   fi`
-
 # The use of $$(x_FOR_TARGET) reduces the command line length by not
 # duplicating the lengthy definition.
 TARGET_FLAGS_TO_PASS = \
@@ -1360,11 +1340,6 @@ force_update:
 # will remove them.
 MAKEOVERRIDES=
 
-## This is ugly, but I don't want GNU make to put these variables in
-## the environment.  Older makes will see this as a set of targets
-## with no dependencies and no actions.
-# OBSOLETE unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
-
 ALLDEPFILES = a68v-nat.c \
 	aix-thread.c \
 	alpha-nat.c alphabsd-nat.c \
@@ -1539,7 +1514,6 @@ alphanbsd-tdep.o: alphanbsd-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
 	$(alphabsd_tdep_h) $(nbsd_tdep_h)
 annotate.o: annotate.c $(defs_h) $(annotate_h) $(value_h) $(target_h) \
 	$(gdbtypes_h) $(breakpoint_h)
-# OBSOLETE arc-tdep.o: arc-tdep.c
 arch-utils.o: arch-utils.c $(defs_h) $(arch_utils_h) $(gdbcmd_h) \
 	$(inferior_h) $(symtab_h) $(frame_h) $(inferior_h) $(breakpoint_h) \
 	$(gdb_wait_h) $(gdbcore_h) $(gdbcmd_h) $(target_h) $(annotate_h) \
@@ -1593,10 +1567,6 @@ c-typeprint.o: c-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 c-valprint.o: c-valprint.c $(defs_h) $(gdb_string_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(valprint_h) $(language_h) \
 	$(c_lang_h) $(cp_abi_h)
-# OBSOLETE ch-exp.o: ch-exp.c
-# OBSOLETE ch-lang.o: ch-lang.c
-# OBSOLETE ch-typeprint.o: ch-typeprint.c
-# OBSOLETE ch-valprint.o: ch-valprint.c
 charset.o: charset.c $(defs_h) $(charset_h) $(gdbcmd_h) gdb_assert.h
 cli-out.o: cli-out.c $(defs_h) $(ui_out_h) $(cli_out_h) $(gdb_string_h) \
 	$(gdb_assert_h)
@@ -1636,13 +1606,11 @@ cris-tdep.o: cris-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(inferior_h) \
 	$(gdbtypes_h) $(gdbcore_h) $(gdbcmd_h) $(target_h) $(value_h) \
 	$(opcode_cris_h) $(arch_utils_h) $(regcache_h) $(symfile_h) \
 	$(solib_h) $(solib_svr4_h) $(gdb_string_h)
-# OBSOLETE cxux-nat.o: cxux-nat.c
 d10v-tdep.o: d10v-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(gdbtypes_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(gdb_string_h) $(value_h) $(inferior_h) \
 	$(dis_asm_h) $(symfile_h) $(objfiles_h) $(language_h) \
 	$(arch_utils_h) $(regcache_h) $(floatformat_h) $(gdb_sim_d10v_h) \
 	$(sim_regno_h)
-# OBSOLETE d30v-tdep.o: d30v-tdep.c
 dbug-rom.o: dbug-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(regcache_h) $(m68k_tdep_h)
 dbxread.o: dbxread.c $(defs_h) $(gdb_string_h) $(gdb_obstack_h) \
@@ -1663,7 +1631,6 @@ doublest.o: doublest.c $(defs_h) $(doublest_h) $(floatformat_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(gdbtypes_h)
 dpx2-nat.o: dpx2-nat.c $(defs_h) $(gdbcore_h) $(gdb_string_h)
 dsrec.o: dsrec.c $(defs_h) $(serial_h) $(srec_h)
-# OBSOLETE dstread.o: dstread.c
 dummy-frame.o: dummy-frame.c $(defs_h) $(dummy_frame_h) $(regcache_h) \
 	$(frame_h) $(inferior_h) $(gdb_assert_h)
 dve3900-rom.o: dve3900-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
@@ -1714,7 +1681,6 @@ findvar.o: findvar.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(frame_h) \
 fork-child.o: fork-child.c $(defs_h) $(gdb_string_h) $(frame_h) \
 	$(inferior_h) $(target_h) $(gdb_wait_h) $(gdb_vfork_h) $(gdbcore_h) \
 	$(terminal_h) $(gdbthread_h) $(command_h)
-# OBSOLETE fr30-tdep.o: fr30-tdep.c
 frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \
 	$(regcache_h) $(gdb_assert_h) $(gdb_string_h) $(builtin_regs_h) \
 	$(gdb_obstack_h) $(dummy_frame_h) $(gdbcore_h) $(annotate_h) \
@@ -1787,7 +1753,6 @@ i386-tdep.o: i386-tdep.c $(defs_h) $(gdb_string_h) $(frame_h) $(inferior_h) \
 	$(symtab_h) $(gdbcmd_h) $(command_h) $(arch_utils_h) $(regcache_h) \
 	$(doublest_h) $(value_h) $(gdb_assert_h) $(i386_tdep_h) \
 	$(i387_tdep_h)
-# OBSOLETE i386aix-nat.o: i386aix-nat.c
 i386b-nat.o: i386b-nat.c $(defs_h)
 i386bsd-nat.o: i386bsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(gdb_assert_h) $(gregset_h) $(i386_tdep_h) $(i387_tdep_h)
@@ -1800,8 +1765,6 @@ i386gnu-nat.o: i386gnu-nat.c $(defs_h) $(inferior_h) $(floatformat_h) \
 i386gnu-tdep.o: i386gnu-tdep.c $(defs_h) $(i386_tdep_h)
 i386ly-tdep.o: i386ly-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(regcache_h) $(target_h) $(i386_tdep_h)
-# OBSOLETE i386m3-nat.o: i386m3-nat.c
-# OBSOLETE i386mach-nat.o: i386mach-nat.c
 i386nbsd-tdep.o: i386nbsd-tdep.c $(defs_h) $(gdbtypes_h) $(gdbcore_h) \
 	$(regcache_h) $(arch_utils_h) $(i386_tdep_h) $(i387_tdep_h) \
 	$(nbsd_tdep_h) $(solib_svr4_h)
@@ -1815,7 +1778,6 @@ i386v4-nat.o: i386v4-nat.c $(defs_h) $(value_h) $(inferior_h) $(regcache_h) \
 i387-tdep.o: i387-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(language_h) \
 	$(value_h) $(gdbcore_h) $(floatformat_h) $(regcache_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(doublest_h) $(i386_tdep_h)
-# OBSOLETE i960-tdep.o: i960-tdep.c
 ia64-aix-nat.o: ia64-aix-nat.c $(defs_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h) $(regcache_h) $(symtab_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(gdb_stat_h)
@@ -1910,8 +1872,6 @@ m68klinux-tdep.o: m68klinux-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
 m68knbsd-nat.o: m68knbsd-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(regcache_h)
 m68knbsd-tdep.o: m68knbsd-tdep.c $(defs_h) $(gdbtypes_h) $(regcache_h)
-# OBSOLETE m88k-nat.o: m88k-nat.c
-# OBSOLETE m88k-tdep.o: m88k-tdep.c
 macrocmd.o: macrocmd.c $(defs_h) $(macrotab_h) $(macroexp_h) $(macroscope_h) \
 	$(command_h) $(gdbcmd_h)
 macroexp.o: macroexp.c $(defs_h) $(gdb_obstack_h) $(bcache_h) $(macrotab_h) \
@@ -2002,7 +1962,6 @@ ocd.o: ocd.c $(defs_h) $(gdbcore_h) $(gdb_string_h) $(frame_h) $(inferior_h) \
 	$(gdb_stabs_h) $(serial_h) $(ocd_h) $(regcache_h)
 op50-rom.o: op50-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h)
-# OBSOLETE os9kread.o: os9kread.c
 osabi.o: osabi.c $(defs_h) $(gdb_string_h) $(osabi_h) $(elf_bfd_h)
 p-lang.o: p-lang.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(parser_defs_h) $(language_h) $(p_lang_h) \
@@ -2064,7 +2023,6 @@ reggroups.o: reggroups.c $(defs_h) $(reggroups_h) $(gdbtypes_h) \
 remote-array.o: remote-array.c $(defs_h) $(gdbcore_h) $(target_h) \
 	$(gdb_string_h) $(command_h) $(serial_h) $(monitor_h) \
 	$(remote_utils_h) $(inferior_h) $(version_h) $(regcache_h)
-# OBSOLETE remote-bug.o: remote-bug.c
 remote-e7000.o: remote-e7000.c $(defs_h) $(gdbcore_h) $(gdbarch_h) \
 	$(inferior_h) $(target_h) $(value_h) $(command_h) $(gdb_string_h) \
 	$(gdbcmd_h) $(serial_h) $(remote_utils_h) $(symfile_h) $(regcache_h)
@@ -2078,9 +2036,6 @@ remote-hms.o: remote-hms.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 remote-mips.o: remote-mips.c $(defs_h) $(inferior_h) $(bfd_h) $(symfile_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(serial_h) $(target_h) $(remote_utils_h) \
 	$(gdb_string_h) $(gdb_stat_h) $(regcache_h)
-# OBSOLETE remote-nindy.o: remote-nindy.c
-# OBSOLETE remote-nrom.o: remote-nrom.c
-# OBSOLETE remote-os9k.o: remote-os9k.c
 remote-rdi.o: remote-rdi.c $(defs_h) $(gdb_string_h) $(frame_h) \
 	$(inferior_h) $(bfd_h) $(symfile_h) $(target_h) $(gdbcmd_h) \
 	$(objfiles_h) $(gdb_stabs_h) $(gdbthread_h) $(gdbcore_h) \
@@ -2112,7 +2067,6 @@ remote-vx68.o: remote-vx68.c $(defs_h) $(vx_share_regPacket_h) $(frame_h) \
 	$(symfile_h) $(regcache_h) $(gdb_string_h) $(vx_share_ptrace_h) \
 	$(vx_share_xdr_ptrace_h) $(vx_share_xdr_ld_h) $(vx_share_xdr_rdb_h) \
 	$(vx_share_dbgRpcLib_h)
-# OBSOLETE remote-vx960.o: remote-vx960.c
 remote-vxmips.o: remote-vxmips.c $(defs_h) $(vx_share_regPacket_h) \
 	$(frame_h) $(inferior_h) $(target_h) $(gdbcore_h) $(command_h) \
 	$(symtab_h) $(symfile_h) $(regcache_h) $(gdb_string_h) \

@@ -568,8 +568,6 @@ binop_result_type (struct value *v1, struct value *v2)
          not needed. */
       return l1 > l2 ? VALUE_TYPE (v1) : VALUE_TYPE (v2);
       break;
-      /* OBSOLETE case language_chill: */
-      /* OBSOLETE    error ("Missing Chill support in function binop_result_check.");  */	/*FIXME */
     }
   internal_error (__FILE__, __LINE__, "failed internal consistency check");
   return (struct type *) 0;	/* For lint */
@@ -793,8 +791,6 @@ integral_type (struct type *type)
     case language_m2:
     case language_pascal:
       return TYPE_CODE (type) != TYPE_CODE_INT ? 0 : 1;
-      /* OBSOLETE case language_chill: */
-      /* OBSOLETE   error ("Missing Chill support in function integral_type.");	*//*FIXME */
     default:
       error ("Language not supported.");
     }
@@ -823,7 +819,6 @@ character_type (struct type *type)
   CHECK_TYPEDEF (type);
   switch (current_language->la_language)
     {
-      /* OBSOLETE case language_chill: */
     case language_m2:
     case language_pascal:
       return TYPE_CODE (type) != TYPE_CODE_CHAR ? 0 : 1;
@@ -846,7 +841,6 @@ string_type (struct type *type)
   CHECK_TYPEDEF (type);
   switch (current_language->la_language)
     {
-      /* OBSOLETE case language_chill: */
     case language_m2:
     case language_pascal:
       return TYPE_CODE (type) != TYPE_CODE_STRING ? 0 : 1;
@@ -874,7 +868,7 @@ boolean_type (struct type *type)
     case language_cplus:
     case language_objc:
       /* Might be more cleanly handled by having a
-         TYPE_CODE_INT_NOT_BOOL for (OBSOLETE) CHILL and such
+         TYPE_CODE_INT_NOT_BOOL for (the deleted) CHILL and such
          languages, or a TYPE_CODE_INT_OR_BOOL for C.  */
       if (TYPE_CODE (type) == TYPE_CODE_INT)
 	return 1;
@@ -922,8 +916,6 @@ structured_type (struct type *type)
       return (TYPE_CODE (type) == TYPE_CODE_STRUCT) ||
 	(TYPE_CODE (type) == TYPE_CODE_SET) ||
 	(TYPE_CODE (type) == TYPE_CODE_ARRAY);
-      /* OBSOLETE case language_chill: */
-      /* OBSOLETE     error ("Missing Chill support in function structured_type.");	*//*FIXME */
     default:
       return (0);
     }
@@ -937,10 +929,6 @@ lang_bool_type (void)
   struct type *type;
   switch (current_language->la_language)
     {
-#if 0
-      /* OBSOLETE case language_chill: */
-      /* OBSOLETE    return builtin_type_chill_bool; */
-#endif
     case language_fortran:
       sym = lookup_symbol ("logical", NULL, VAR_NAMESPACE, NULL, NULL);
       if (sym)
@@ -1169,11 +1157,6 @@ binop_type_check (struct value *arg1, struct value *arg2, int op)
 	       type_op_error ("Arguments to %s must be of integral type.",op);
 	    break;
 	 }
-#endif
-
-#ifdef _LANG_chill /* OBSOLETE */
-	 /* OBSOLETE case language_chill: */
-	 /* OBSOLETE   error ("Missing Chill support in function binop_type_check.");	*//*FIXME */
 #endif
 
 	}

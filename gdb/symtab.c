@@ -418,10 +418,6 @@ symbol_init_language_specific (struct general_symbol_info *gsymbol,
     {
       gsymbol->language_specific.objc_specific.demangled_name = NULL;
     }
-  /* OBSOLETE else if (SYMBOL_LANGUAGE (symbol) == language_chill) */
-  /* OBSOLETE   { */
-  /* OBSOLETE     SYMBOL_CHILL_DEMANGLED_NAME (symbol) = NULL; */
-  /* OBSOLETE   } */
   else
     {
       memset (&gsymbol->language_specific, 0,
@@ -483,26 +479,6 @@ symbol_init_demangled_name (struct general_symbol_info *gsymbol,
           gsymbol->language_specific.cplus_specific.demangled_name = NULL;
         }
     }
-#if 0
-  /* OBSOLETE if (demangled == NULL */
-  /* OBSOLETE     && (gsymbol->language == language_chill */
-  /* OBSOLETE         || gsymbol->language == language_auto)) */
-  /* OBSOLETE   { */
-  /* OBSOLETE     demangled = */
-  /* OBSOLETE       chill_demangle (gsymbol->name); */
-  /* OBSOLETE     if (demangled != NULL) */
-  /* OBSOLETE       { */
-  /* OBSOLETE         gsymbol->language = language_chill; */
-  /* OBSOLETE         gsymbol->language_specific.chill_specific.demangled_name = */
-  /* OBSOLETE           obsavestring (demangled, strlen (demangled), obstack); */
-  /* OBSOLETE         xfree (demangled); */
-  /* OBSOLETE       } */
-  /* OBSOLETE     else */
-  /* OBSOLETE       { */
-  /* OBSOLETE         gsymbol->language_specific.chill_specific.demangled_name = NULL; */
-  /* OBSOLETE       } */
-  /* OBSOLETE   } */
-#endif
 }
 
 /* Return the demangled name for a symbol based on the language for
@@ -519,9 +495,6 @@ symbol_demangled_name (struct general_symbol_info *gsymbol)
 
   else 
     return NULL;
-
-  /* OBSOLETE (SYMBOL_LANGUAGE (symbol) == language_chill */
-  /* OBSOLETE ? SYMBOL_CHILL_DEMANGLED_NAME (symbol) */
 }
 
 /* Initialize the structure fields to zero values.  */

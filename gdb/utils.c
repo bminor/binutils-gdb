@@ -2313,11 +2313,6 @@ fprintf_symbol_filtered (struct ui_file *stream, char *name, enum language lang,
 	      /* Commented out until ObjC handling is enabled.  */
 	      /*demangled = objc_demangle (name);*/
 	      /*break;*/
-#if 0
-	      /* OBSOLETE case language_chill: */
-	      /* OBSOLETE   demangled = chill_demangle (name); */
-	      /* OBSOLETE   break; */
-#endif
 	    default:
 	      demangled = NULL;
 	      break;

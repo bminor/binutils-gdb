@@ -241,9 +241,9 @@ do { COERCE_REF(arg);							\
 #define COERCE_NUMBER(arg)  \
   do { COERCE_ARRAY(arg);  COERCE_ENUM(arg); } while (0)
 
-#define COERCE_VARYING_ARRAY(arg, real_arg_type)	\
-/* OBSOLETE { if (chill_varying_type (real_arg_type)) */  \
-/* OBSOLETE     arg = varying_to_slice (arg), real_arg_type = VALUE_TYPE (arg); } */ 
+/* NOTE: cagney/2002-12-17: This macro was handling a chill language
+   problem but that language has gone away.  */
+#define COERCE_VARYING_ARRAY(arg, real_arg_type)
 
 /* If ARG is an enum, convert it to an integer.  */
 
