@@ -117,6 +117,11 @@ static void dbx_psymtab_to_symtab ();
 #define GCC_COMPILED_FLAG_SYMBOL "gcc_compiled."
 #endif
 
+/* Macro for name of symbol to indicate a file compiled with gcc2. */
+#ifndef GCC2_COMPILED_FLAG_SYMBOL
+#define GCC2_COMPILED_FLAG_SYMBOL "gcc2_compiled."
+#endif
+
 /* Define this as 1 if a pcc declaration of a char or short argument
    gives the correct address.  Otherwise assume pcc gives the
    address of the corresponding int, which is not the same on a
@@ -1211,8 +1216,8 @@ read_ofile_symtab (objfile, stringtab, stringtab_size, sym_offset,
 
       processing_gcc_compilation =
 	(bufp->n_type == N_TEXT
-	 && !strcmp (namestring, GCC_COMPILED_FLAG_SYMBOL));
-      /* FIXME!!!  Check for gcc2_compiled... */
+	 && (strcmp (namestring, GCC_COMPILED_FLAG_SYMBOL) == 0
+	     || strcmp(namestring, GCC2_COMPILED_FLAG_SYMBOL) == 0));
     }
   else
     {
@@ -1265,7 +1270,8 @@ read_ofile_symtab (objfile, stringtab, stringtab_size, sym_offset,
       /* We skip checking for a new .o or -l file; that should never
          happen in this routine. */
       else if (type == N_TEXT
-	       && !strcmp (namestring, GCC_COMPILED_FLAG_SYMBOL))
+	       && (strcmp (namestring, GCC_COMPILED_FLAG_SYMBOL) == 0
+		   || strcmp (namestring, GCC2_COMPILED_FLAG_SYMBOL) == 0))
 	/* I don't think this code will ever be executed, because
 	   the GCC_COMPILED_FLAG_SYMBOL usually is right before
 	   the N_SO symbol which starts this source file.
@@ -1322,7 +1328,7 @@ process_one_symbol (type, desc, valu, name)
      char *name;
 {
 #ifndef SUN_FIXED_LBRAC_BUG
-  /* This records the last pc address we've seen.  We depend on their being
+  /* This records the last pc address we've seen.  We depend on there being
      an SLINE or FUN or SO before the first LBRAC, since the variable does
      not get reset in between reads of different symbol files.  */
   static CORE_ADDR last_pc_address;
@@ -1431,7 +1437,8 @@ process_one_symbol (type, desc, valu, name)
       /* Some compilers put the variable decls inside of an
          LBRAC/RBRAC block.  This macro should be nonzero if this
 	 is true.  DESC is N_DESC from the N_RBRAC symbol.
-	 GCC_P is true if we've detected the GCC_COMPILED_SYMBOL.  */
+	 GCC_P is true if we've detected the GCC_COMPILED_SYMBOL
+	 or the GCC2_COMPILED_SYMBOL.  */
 #if !defined (VARIABLES_INSIDE_BLOCK)
 #define VARIABLES_INSIDE_BLOCK(desc, gcc_p) 0
 #endif

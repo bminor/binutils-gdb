@@ -1,3 +1,9 @@
+Mon Jan 13 14:57:11 1992  Per Bothner  (bothner at cygnus.com)
+
+	* tm-mips.h:  Removed BLOCK_ADDRESS_ABSOLUTE, now that
+	mips-tfile has been hacked to act more "traditionally."
+	* dbxread.c:  Fixed typo in comment.
+
 Sun Jan 12 13:08:36 1992  Per Bothner  (bothner at cygnus.com)
 
 	* mips-tdep.c (mips_skip_prologue):  Add some number of
