@@ -1,3 +1,8 @@
+Mon Feb 17 12:04:36 1992  Per Bothner  (bothner at cygnus.com)
+
+	* Makefile.in, and new files hp300bsd.sh, config/mh-hp300bsd,
+	config/mt-hp300bsd:  New port to hp300 running BSD.
+
 Sat Feb 15 13:59:54 1992  Per Bothner  (bothner at cygnus.com)
 
 	Major rewrite of how ld is configured.  The major idea

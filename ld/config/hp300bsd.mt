@@ -1,0 +1,2 @@
+EMUL=hp300bsd
+

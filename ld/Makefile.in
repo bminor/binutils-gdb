@@ -98,7 +98,7 @@ BFDLIB=$(unsubdir)/../bfd$(subdir)/libbfd.a
 LIBIBERTY=$(unsubdir)/../libiberty$(subdir)/libiberty.a
 
 ALL_EMULATIONS=ld__lnk960.o ld__sun3.o ld__i386aout.o \
-	ld__m88kbcs.o ld__a29k.o ld__news.o ld__h8300hms.o ld__ebmon29k.o \
+	ld__m88kbcs.o ld__a29k.o ld__news.o ld__hp300bsd.o ld__h8300hms.o ld__ebmon29k.o \
 	ld__sun4.o ld__gld960.o ld__vanilla.o
 
 EMULATION_OFILES=${ALL_EMULATIONS}
@@ -182,6 +182,9 @@ ld__sun3.c: $(srcdir)/sun3.sh \
 ld__news.c: $(srcdir)/news.sh \
   $(srcdir)/generic.em $(srcdir)/aout.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} news.sh
+ld__hp300bsd.c: $(srcdir)/hp300bsd.sh \
+  $(srcdir)/generic.em $(srcdir)/aout.sc-sh ${GEN_DEPENDS}
+	${GENSCRIPTS} hp300bsd.sh
 ld__i386aout.c: $(srcdir)/i386aout.sh \
   $(srcdir)/generic.em $(srcdir)/aout.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} i386aout.sh
