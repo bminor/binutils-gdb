@@ -156,7 +156,6 @@ f-valprint.c
 findvar.c
 fork-child.c
 frame.h
-gcc.patch
 gdb_stat.h
 gdb_string.h
 gdb-stabs.h
