@@ -621,24 +621,21 @@ source is itself synthesized from other files.
 @kindex .o
 Every time you run @code{@value{AS}} it produces an output file, which is
 your assembly language program translated into numbers.  This file
-is the object file, named
-@ifset BOUT
-@code{b.out},
-@ifset GENERIC
-if @code{@value{AS}} is configured for the Intel 80960, or
-@end ifset
-@end ifset
+is the object file.  Its default name is
 @ifclear BOUT
-@code{a.out},
+@code{a.out}.
 @end ifclear
-unless you tell @code{@value{AS}} to
-give it another name by using the @code{-o} option.  Conventionally,
-object file names end with @file{.o}.  The default name of
-@file{a.out} is used for historical reasons:  older assemblers were
-capable of assembling self-contained programs directly into a
-runnable program.
-(For some formats, this isn't currently possible, but it can be done for
-@code{a.out} format.)
+@ifset BOUT
+@ifset GENERIC
+@code{a.out}, or 
+@end ifset
+@code{b.out} when @code{@value{AS}} is configured for the Intel 80960.
+@end ifset
+You can give it another name by using the @code{-o} option.  Conventionally,
+object file names end with @file{.o}.  The default name is used for historical
+reasons: older assemblers were capable of assembling self-contained programs
+directly into a runnable program.  (For some formats, this isn't currently
+possible, but it can be done for the @code{a.out} format.)
 
 @cindex linker
 @kindex ld
@@ -1750,8 +1747,13 @@ In fact, every address @code{@value{AS}} ever uses is expressed as
 (@var{section}) + (@var{offset into section})
 @end display
 @noindent
-Further, every expression @code{@value{AS}} computes is of this section-relative
-nature.  @dfn{Absolute expression} means an expression with section
+Further, most expressions @code{@value{AS}} computes have this section-relative
+nature.
+@ifset SOM
+(For some object formats, such as SOM for the HPPA, some expressions are
+symbol-relative instead.)
+@end ifset
+@dfn{Absolute expression} means an expression with section
 ``absolute'' (@pxref{Ld Sections}).  A @dfn{pass1 expression} means
 an expression with section ``pass1'' (@pxref{As Sections,,@value{AS}
 Internal Sections}).  In this manual we use the notation @{@var{secname}
@@ -3185,8 +3187,7 @@ for compatibility with existing assembler programs.
 @ifset GENERIC
 @ifset A29K
 @emph{Warning:} In the AMD29K configuration of @value{AS}, this command is
-only available with the name @code{.ln}, rather than as either
-@code{.line} or @code{.ln}.
+not available; use the synonym @code{.ln} in that context.
 @end ifset
 @end ifset
 @end ifset
