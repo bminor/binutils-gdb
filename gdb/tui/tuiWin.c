@@ -1406,7 +1406,7 @@ _makeVisibleWithNewHeight (TuiWinInfoPtr winInfo)
 	  struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
 
-	  s = find_pc_symtab (deprecated_selected_frame->pc);
+	  s = find_pc_symtab (get_frame_pc (deprecated_selected_frame));
 	  if (winInfo->generic.type == SRC_WIN)
 	    line.lineNo = cursal.line;
 	  else

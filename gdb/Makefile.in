@@ -2704,7 +2704,7 @@ tuiDataWin.o: $(srcdir)/tui/tuiDataWin.c $(config_h) $(defs_h) $(tui_h) \
 tuiDisassem.o: $(srcdir)/tui/tuiDisassem.c $(config_h) $(defs_h) $(symtab_h) \
 	$(breakpoint_h) $(frame_h) $(value_h) $(tui_h) $(tuiData_h) \
 	$(tuiWin_h) $(tuiLayout_h) $(tuiSourceWin_h) $(tuiStack_h) \
-	$(tui_file_h)
+	$(tui_file_h) $(disasm_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiDisassem.c
 tuiGeneralWin.o: $(srcdir)/tui/tuiGeneralWin.c $(config_h) $(defs_h) \
 	$(tui_h) $(tuiData_h) $(tuiGeneralWin_h) $(tuiWin_h)

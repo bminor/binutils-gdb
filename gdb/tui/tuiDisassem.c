@@ -45,6 +45,7 @@
 #include "frame.h"
 #include "value.h"
 #include "source.h"
+#include "disasm.h"
 
 #include "tui.h"
 #include "tuiData.h"
@@ -408,7 +409,7 @@ tuiVerticalDisassemScroll (TuiScrollDirection scrollDirection,
 
       content = (TuiWinContent) disassemWin->generic.content;
       if (cursal.symtab == (struct symtab *) NULL)
-	s = find_pc_symtab (deprecated_selected_frame->pc);
+	s = find_pc_symtab (get_frame_pc (deprecated_selected_frame));
       else
 	s = cursal.symtab;
 

@@ -1,3 +1,7 @@
+2003-06-12  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.in (tuiDisassem.o): Update dependencies.
+
 2003-06-12  David Carlton  <carlton@bactrian.org>
 
 	* symtab.h: Delete declaration of make_symbol_overload_list.

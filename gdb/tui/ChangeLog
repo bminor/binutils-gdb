@@ -1,3 +1,14 @@
+2003-06-12  Andreas Schwab  <schwab@suse.de>
+
+	* tuiSource.c (tuiVerticalSourceScroll): Use get_frame_pc.
+	* tuiSourceWin.c (tuiHorizontalSourceScroll): Likewise.
+	* tuiStack.c (tui_get_function_from_frame): Likewise.
+	(tuiShowFrameInfo): Likewise.
+	* tuiWin.c (_makeVisibleWithNewHeight): Likewise.
+	* tui-hooks.c (tui_selected_frame_level_changed_hook): Likewise.
+	* tuiDisassem.c (tuiVerticalDisassemScroll): Likewise.
+	Include "disasm.h".
+
 2003-05-08  Andrew Cagney  <cagney@redhat.com>
 
 	* tuiRegs.c: Use MAX_REGISTER_SIZE instead of
