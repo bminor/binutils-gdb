@@ -3761,6 +3761,47 @@ allows you to examine the overall state of the program, including
 switching between threads, without worrying that things may change
 underfoot.
 
+@cindex thread breakpoints and system calls
+@cindex system calls and thread breakpoints
+@cindex premature return from system calls
+There is an unfortunate side effect.  If one thread stops for a
+breakpoint, or for some other reason, and another thread is blocked in a
+system call, then the system call may return prematurely.  This is a
+consequence of the interaction between multiple threads and the signals
+that @value{GDBN} uses to implement breakpoints and other events that
+stop execution.
+
+To handle this problem, your program should check the return value of
+each system call and react appropriately.  This is good programming
+style anyways.
+
+For example, do not write code like this:
+
+@smallexample
+  sleep (10);
+@end smallexample
+
+The call to @code{sleep} will return early if a different thread stops
+at a breakpoint or for some other reason.
+
+Instead, write this:
+
+@smallexample
+  int unslept = 10;
+  while (unslept > 0)
+    unslept = sleep (unslept);
+@end smallexample
+
+A system call is allowed to return early, so the system is still
+conforming to its specification.  But @value{GDBN} does cause your
+multi-threaded program to behave differently than it would without
+@value{GDBN}.
+
+Also, @value{GDBN} uses internal breakpoints in the thread library to
+monitor certain events such as thread creation and thread destruction.
+When such an event happens, a system call in another thread may return
+prematurely, even though your program does not appear to stop.
+
 @cindex continuing threads
 @cindex threads, continuing
 Conversely, whenever you restart the program, @emph{all} threads start

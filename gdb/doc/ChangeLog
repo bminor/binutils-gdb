@@ -1,3 +1,8 @@
+2003-10-26  Michael Chastain  <mec@shout.net>
+
+	* gdb.texinfo (Thread Stops): Document the issue with
+	premature return from system calls in multi-threaded programs.
+
 2003-10-24  Andrew Cagney  <cagney@redhat.com>
 
 	* annotate.texinfo: Fix "fortunatly"[sic].
