@@ -1,3 +1,8 @@
+Fri Sep 22 17:16:41 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (disassemble_data): Don't use the old BFD based
+	disassembler interface.  Make info a const pointer.
+
 Wed Sep 13 18:33:44 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objdump.c (start_address): New variable.
