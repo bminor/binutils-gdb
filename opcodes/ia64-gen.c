@@ -56,6 +56,7 @@
 const char * program_name = NULL;
 int debug = 0;
 
+#define NELEMS(a) (sizeof (a) / sizeof ((a)[0]))
 #define tmalloc(X) (X *) xmalloc (sizeof (X))
 
 /* The main opcode table entry.  Each entry is a unique combination of
@@ -2725,7 +2726,26 @@ shrink (table)
   int curr_opcode;
 
   for (curr_opcode = 0; table[curr_opcode].name != NULL; curr_opcode++)
-    add_opcode_entry (table + curr_opcode);
+    {
+      add_opcode_entry (table + curr_opcode);
+      if (table[curr_opcode].num_outputs == 2
+	  && ((table[curr_opcode].operands[0] == IA64_OPND_P1
+	       && table[curr_opcode].operands[1] == IA64_OPND_P2)
+	      || (table[curr_opcode].operands[0] == IA64_OPND_P2
+		  && table[curr_opcode].operands[1] == IA64_OPND_P1)))
+	{
+	  struct ia64_opcode *alias = tmalloc(struct ia64_opcode);
+	  unsigned i;
+
+	  *alias = table[curr_opcode];
+	  for (i = 2; i < NELEMS (alias->operands); ++i)
+	    alias->operands[i - 1] = alias->operands[i];
+	  alias->operands[NELEMS (alias->operands) - 1] = IA64_OPND_NIL;
+	  --alias->num_outputs;
+	  alias->flags |= PSEUDO;
+	  add_opcode_entry (alias);
+	}
+    }
 }
 
 

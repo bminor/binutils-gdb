@@ -1,3 +1,8 @@
+2005-01-31  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-ia64.c (parse_operands): Also handle alloc without first
+	input being ar.pfs.
+
 2005-01-28  Christian Groessler  <chris@groessler.org>
 
 	* config/tc-z8k.c (md_assemble): Improve error detection.

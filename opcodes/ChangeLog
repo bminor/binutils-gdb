@@ -1,3 +1,21 @@
+2005-01-31  Jan Beulich  <jbeulich@novell.com>
+
+	* ia64-gen.c (NELEMS): Define.
+	(shrink): Generate alias with missing second predicate register when
+	opcode has two outputs and these are both predicates.
+	* ia64-opc-i.c (FULL17): Define.
+	(ia64_opcodes_i): Add mov-to-pr alias without second input. Use FULL17
+	here to generate output template.
+	(TBITCM, TNATCM): Undefine after use.
+	* ia64-opc-m.c (ia64_opcodes_i): Add alloc alias without ar.pfs as
+	first input. Add ld16 aliases without ar.csd as second output. Add
+	st16 aliases without ar.csd as second input. Add cmpxchg aliases
+	without ar.ccv as third input. Add cmp8xchg16 aliases without ar.csd/
+	ar.ccv as third/fourth inputs. Consolidate through...
+	(CMPXCHG_acq, CMPXCHG_rel, CMPXCHG_1, CMPXCHG_2, CMPXCHG_4, CMPXCHG_8,
+	CMPXCHGn, CMP8XCHG16, CMPXCHG_ALL): Define.
+	* ia64-asmtab.c: Regenerate.
+
 2005-01-27  Andrew Cagney  <cagney@gnu.org>
 
 	* configure: Regenerate to track ../gettext.m4 change.

@@ -5782,7 +5782,8 @@ parse_operands (idesc)
   assert (strlen (idesc->name) <= 128);
 
   strcpy (mnemonic, idesc->name);
-  if (idesc->operands[2] == IA64_OPND_SOF)
+  if (idesc->operands[2] == IA64_OPND_SOF
+      || idesc->operands[1] == IA64_OPND_SOF)
     {
       /* To make the common idiom "alloc loc?=ar.pfs,0,1,0,0" work, we
 	 can't parse the first operand until we have parsed the
@@ -5825,20 +5826,23 @@ parse_operands (idesc)
       return 0;
     }
 
-  if (idesc->operands[2] == IA64_OPND_SOF)
+  if (idesc->operands[2] == IA64_OPND_SOF
+      || idesc->operands[1] == IA64_OPND_SOF)
     {
       /* map alloc r1=ar.pfs,i,l,o,r to alloc r1=ar.pfs,(i+l+o),(i+l),r */
       know (strcmp (idesc->name, "alloc") == 0);
-      if (num_operands == 5 /* first_arg not included in this count! */
-	  && CURR_SLOT.opnd[2].X_op == O_constant
-	  && CURR_SLOT.opnd[3].X_op == O_constant
-	  && CURR_SLOT.opnd[4].X_op == O_constant
-	  && CURR_SLOT.opnd[5].X_op == O_constant)
+      i = (CURR_SLOT.opnd[1].X_op == O_register
+          && CURR_SLOT.opnd[1].X_add_number == REG_AR + AR_PFS) ? 2 : 1;
+      if (num_operands == i + 3 /* first_arg not included in this count! */
+	  && CURR_SLOT.opnd[i].X_op == O_constant
+	  && CURR_SLOT.opnd[i + 1].X_op == O_constant
+	  && CURR_SLOT.opnd[i + 2].X_op == O_constant
+	  && CURR_SLOT.opnd[i + 3].X_op == O_constant)
 	{
-	  sof = set_regstack (CURR_SLOT.opnd[2].X_add_number,
-			      CURR_SLOT.opnd[3].X_add_number,
-			      CURR_SLOT.opnd[4].X_add_number,
-			      CURR_SLOT.opnd[5].X_add_number);
+	  sof = set_regstack (CURR_SLOT.opnd[i].X_add_number,
+			      CURR_SLOT.opnd[i + 1].X_add_number,
+			      CURR_SLOT.opnd[i + 2].X_add_number,
+			      CURR_SLOT.opnd[i + 3].X_add_number);
 
 	  /* now we can parse the first arg:  */
 	  saved_input_pointer = input_line_pointer;
@@ -5848,10 +5852,10 @@ parse_operands (idesc)
 	    --num_outputs;	/* force error */
 	  input_line_pointer = saved_input_pointer;
 
-	  CURR_SLOT.opnd[2].X_add_number = sof;
-	  CURR_SLOT.opnd[3].X_add_number
-	    = sof - CURR_SLOT.opnd[4].X_add_number;
-	  CURR_SLOT.opnd[4] = CURR_SLOT.opnd[5];
+	  CURR_SLOT.opnd[i].X_add_number = sof;
+	  CURR_SLOT.opnd[i + 1].X_add_number
+	    = sof - CURR_SLOT.opnd[i + 2].X_add_number;
+	  CURR_SLOT.opnd[i + 2] = CURR_SLOT.opnd[i + 3];
 	}
     }
 
