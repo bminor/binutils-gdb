@@ -27,8 +27,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/v850.h"
+#include "libiberty.h"
 
-/* sign-extend a 24-bit number */
+/* Sign-extend a 24-bit number.  */
 #define SEXT24(x)	((((x) & 0xffffff) ^ (~ 0x7fffff)) + 0x800000)
 
 static reloc_howto_type *v850_elf_reloc_type_lookup
@@ -81,9 +82,16 @@ static boolean v850_elf_link_output_symbol_hook
 	   Elf_Internal_Sym *, asection *));
 static boolean v850_elf_section_from_shdr
   PARAMS ((bfd *, Elf_Internal_Shdr *, char *));
+static boolean v850_elf_gc_sweep_hook
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
+static asection * v850_elf_gc_mark_hook
+  PARAMS ((bfd *, struct bfd_link_info *,
+	   Elf_Internal_Rela *, struct elf_link_hash_entry *,
+	   Elf_Internal_Sym *));
 
-/* Note: It is REQUIRED that the 'type' value of each entry in this array
-   match the index of the entry in the array.  */
+/* Note: It is REQUIRED that the 'type' value of each entry
+   in this array match the index of the entry in the array.  */
 static reloc_howto_type v850_elf_howto_table[] =
 {
   /* This reloc does nothing.  */
@@ -503,7 +511,8 @@ static const struct v850_elf_reloc_map v850_elf_reloc_map[] =
 
 };
 
-/* Map a bfd relocation into the appropriate howto structure */
+/* Map a bfd relocation into the appropriate howto structure.  */
+
 static reloc_howto_type *
 v850_elf_reloc_type_lookup (abfd, code)
      bfd *                     abfd ATTRIBUTE_UNUSED;
@@ -511,22 +520,19 @@ v850_elf_reloc_type_lookup (abfd, code)
 {
   unsigned int i;
 
-  for (i = 0;
-       i < sizeof (v850_elf_reloc_map) / sizeof (struct v850_elf_reloc_map);
-       i++)
-    {
-      if (v850_elf_reloc_map[i].bfd_reloc_val == code)
-	{
-	  BFD_ASSERT (v850_elf_howto_table[v850_elf_reloc_map[i].elf_reloc_val].type == v850_elf_reloc_map[i].elf_reloc_val);
+  for (i = ARRAY_SIZE (v850_elf_reloc_map); i --;)
+    if (v850_elf_reloc_map[i].bfd_reloc_val == code)
+      {
+	BFD_ASSERT (v850_elf_howto_table[code].type == v850_elf_reloc_map[i].elf_reloc_val);
 
-	  return & v850_elf_howto_table[v850_elf_reloc_map[i].elf_reloc_val];
-	}
-    }
+	return v850_elf_howto_table + code;
+      }
 
   return NULL;
 }
 
 /* Set the howto pointer for an V850 ELF reloc.  */
+
 static void
 v850_elf_info_to_howto_rel (abfd, cache_ptr, dst)
      bfd *                 abfd ATTRIBUTE_UNUSED;
@@ -626,8 +632,8 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
             return false;
           break;
 
-        /* This relocation describes which C++ vtable entries are actually
-           used.  Record for later use during GC.  */
+        /* This relocation describes which C++ vtable entries
+	   are actually used.  Record for later use during GC.  */
         case R_V850_GNU_VTENTRY:
           if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_addend))
             return false;
@@ -662,7 +668,8 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
 	small_data_common:
 	  if (h)
 	    {
-	      h->other |= other;	/* flag which type of relocation was used */
+	      /* Flag which type of relocation was used.  */
+	      h->other |= other;
 	      if ((h->other & V850_OTHER_MASK) != (other & V850_OTHER_MASK)
 		  && (h->other & V850_OTHER_ERROR) == 0)
 		{
@@ -702,7 +709,9 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
 	      && h->root.u.c.p
 	      && !strcmp (bfd_get_section_name (abfd, h->root.u.c.p->section), "COMMON"))
 	    {
-	      asection *section = h->root.u.c.p->section = bfd_make_section_old_way (abfd, common);
+	      asection * section;
+
+	      section = h->root.u.c.p->section = bfd_make_section_old_way (abfd, common);
 	      section->flags |= SEC_IS_COMMON;
 	    }
 
@@ -719,20 +728,18 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
   return ret;
 }
 
-/*
- * In the old version, when an entry was checked out from the table,
- * it was deleted.  This produced an error if the entry was needed
- * more than once, as the second attempted retry failed.
- *
- * In the current version, the entry is not deleted, instead we set
- * the field 'found' to true.  If a second lookup matches the same
- * entry, then we know that the hi16s reloc has already been updated
- * and does not need to be updated a second time.
- *
- * TODO - TOFIX: If it is possible that we need to restore 2 different
- * addresses from the same table entry, where the first generates an
- * overflow, whilst the second do not, then this code will fail.
- */
+/* In the old version, when an entry was checked out from the table,
+   it was deleted.  This produced an error if the entry was needed
+   more than once, as the second attempted retry failed.
+
+   In the current version, the entry is not deleted, instead we set
+   the field 'found' to true.  If a second lookup matches the same
+   entry, then we know that the hi16s reloc has already been updated
+   and does not need to be updated a second time.
+
+   TODO - TOFIX: If it is possible that we need to restore 2 different
+   addresses from the same table entry, where the first generates an
+   overflow, whilst the second do not, then this code will fail.  */
 
 typedef struct hi16s_location
 {
@@ -825,6 +832,7 @@ find_remembered_hi16s_reloc (addend, already_found)
 
 /* FIXME:  The code here probably ought to be removed and the code in reloc.c
    allowed to do its  stuff instead.  At least for most of the relocs, anwyay.  */
+
 static bfd_reloc_status_type
 v850_elf_perform_relocation (abfd, r_type, addend, address)
      bfd *      abfd;
@@ -1029,9 +1037,7 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
 	     0x00000000
 	   + 0x00006fff   (bit 15 not set, so the top half is zero)
 	   ------------
-	     0x00006fff   which is wrong (assuming that fred is at 0xffff)
-	 */
-
+	     0x00006fff   which is wrong (assuming that fred is at 0xffff).  */
       {
 	long result;
 
@@ -1243,6 +1249,7 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
 }
 
 /* Insert the addend into the instruction.  */
+
 static bfd_reloc_status_type
 v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
      bfd *       abfd ATTRIBUTE_UNUSED;
@@ -1258,7 +1265,7 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
   /* If there is an output BFD,
      and the symbol is not a section name (which is only defined at final link time),
      and either we are not putting the addend into the instruction
-         or the addend is zero, so there is nothing to add into the instruction
+      or the addend is zero, so there is nothing to add into the instruction
      then just fixup the address and return.  */
   if (obfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
@@ -1270,9 +1277,7 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
     }
 #if 0
   else if (obfd != NULL)
-    {
-      return bfd_reloc_continue;
-    }
+    return bfd_reloc_continue;
 #endif
 
   /* Catch relocs involving undefined symbols.  */
@@ -1314,15 +1319,14 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
 	        .section ".foo","ax"
 		nop
 	foo:
-        	nop
-      */
+        	nop      */
   if (reloc->howto->pc_relative == true)
     {
       /* Here the variable relocation holds the final address of the
 	 symbol we are relocating against, plus any addend.  */
       relocation -= isection->output_section->vma + isection->output_offset;
 
-      /* Deal with pcrel_offset */
+      /* Deal with pcrel_offset.  */
       relocation -= reloc->address;
     }
 #endif
@@ -1340,6 +1344,7 @@ v850_elf_is_local_label_name (abfd, name)
 }
 
 /* Perform a relocation as part of a final link.  */
+
 static bfd_reloc_status_type
 v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
 				    input_section, contents, offset, value,
@@ -1377,7 +1382,8 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
       if (((value & 0xff000000) != 0x0) && ((value & 0xff000000) != 0xff000000))
 	return bfd_reloc_overflow;
 
-      value = SEXT24 (value);  /* Only the bottom 24 bits of the PC are valid */
+      /* Only the bottom 24 bits of the PC are valid */
+      value = SEXT24 (value);
       break;
 
     case R_V850_HI16_S:
@@ -1436,7 +1442,8 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
 	h = bfd_link_hash_lookup (info->hash, "__ep", false, false, true);
 	if (h == (struct bfd_link_hash_entry *) NULL
 	    || h->type != bfd_link_hash_defined)
-	  return bfd_reloc_continue;  /* Actually this indicates that __ep could not be found.  */
+	  /* Actually this indicates that __ep could not be found.  */
+	  return bfd_reloc_continue;
 
 	ep = (h->u.def.value
 	      + h->u.def.section->output_section->vma
@@ -1455,7 +1462,8 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
 	h = bfd_link_hash_lookup (info->hash, "__ctbp", false, false, true);
 	if (h == (struct bfd_link_hash_entry *) NULL
 	    || h->type != bfd_link_hash_defined)
-	  return (bfd_reloc_dangerous + 1);  /* Actually this indicates that __ctbp could not be found.  */
+	  /* Actually this indicates that __ctbp could not be found.  */
+	  return bfd_reloc_dangerous + 1;
 
 	ctbp = (h->u.def.value
 	      + h->u.def.section->output_section->vma
@@ -1501,6 +1509,7 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
 }
 
 /* Relocate an V850 ELF section.  */
+
 static boolean
 v850_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			   contents, relocs, local_syms, local_sections)
@@ -1589,11 +1598,12 @@ v850_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 #if 0
 	  {
 	    char * name;
+
 	    name = bfd_elf_string_from_elf_section (input_bfd, symtab_hdr->sh_link, sym->st_name);
 	    name = (name == NULL) ? "<none>" : name;
-fprintf (stderr, "local: sec: %s, sym: %s (%d), value: %x + %x + %x addend %x\n",
-	 sec->name, name, sym->st_name,
-	 sec->output_section->vma, sec->output_offset, sym->st_value, rel->r_addend);
+	    fprintf (stderr, "local: sec: %s, sym: %s (%d), value: %x + %x + %x addend %x\n",
+		     sec->name, name, sym->st_name,
+		     sec->output_section->vma, sec->output_offset, sym->st_value, rel->r_addend);
 	  }
 #endif
 	}
@@ -1613,15 +1623,15 @@ fprintf (stderr, "local: sec: %s, sym: %s (%d), value: %x + %x + %x addend %x\n"
 			    + sec->output_section->vma
 			    + sec->output_offset);
 #if 0
-fprintf (stderr, "defined: sec: %s, name: %s, value: %x + %x + %x gives: %x\n",
-	 sec->name, h->root.root.string, h->root.u.def.value, sec->output_section->vma, sec->output_offset, relocation);
+	      fprintf (stderr, "defined: sec: %s, name: %s, value: %x + %x + %x gives: %x\n",
+		       sec->name, h->root.root.string, h->root.u.def.value, sec->output_section->vma, sec->output_offset, relocation);
 #endif
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    {
 #if 0
-fprintf (stderr, "undefined: sec: %s, name: %s\n",
-	 sec->name, h->root.root.string);
+	      fprintf (stderr, "undefined: sec: %s, name: %s\n",
+		       sec->name, h->root.root.string);
 #endif
 	      relocation = 0;
 	    }
@@ -1632,14 +1642,13 @@ fprintf (stderr, "undefined: sec: %s, name: %s\n",
 		      input_section, rel->r_offset, true)))
 		return false;
 #if 0
-fprintf (stderr, "unknown: name: %s\n", h->root.root.string);
+	      fprintf (stderr, "unknown: name: %s\n", h->root.root.string);
 #endif
 	      relocation = 0;
 	    }
 	}
 
-      /* FIXME: We should use the addend, but the COFF relocations
-         don't.  */
+      /* FIXME: We should use the addend, but the COFF relocations don't.  */
       r = v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
 					input_section,
 					contents, rel->r_offset,
@@ -1725,7 +1734,7 @@ v850_elf_gc_sweep_hook (abfd, info, sec, relocs)
      asection *sec ATTRIBUTE_UNUSED;
      const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
 {
-  /* No got and plt entries for v850-elf */
+  /* No got and plt entries for v850-elf.  */
   return true;
 }
 
@@ -1772,7 +1781,9 @@ v850_elf_gc_mark_hook (abfd, info, rel, h, sym)
       }
   return NULL;
 }
+
 /* Set the right machine number.  */
+
 static boolean
 v850_elf_object_p (abfd)
      bfd *abfd;
@@ -1788,6 +1799,7 @@ v850_elf_object_p (abfd)
 }
 
 /* Store the machine number in the flags field.  */
+
 static void
 v850_elf_final_write_processing (abfd, linker)
      bfd *   abfd;
@@ -1808,6 +1820,7 @@ v850_elf_final_write_processing (abfd, linker)
 }
 
 /* Function to keep V850 specific file flags.  */
+
 static boolean
 v850_elf_set_private_flags (abfd, flags)
      bfd *    abfd;
@@ -1821,7 +1834,8 @@ v850_elf_set_private_flags (abfd, flags)
   return true;
 }
 
-/* Copy backend specific data from one object module to another */
+/* Copy backend specific data from one object module to another.  */
+
 static boolean
 v850_elf_copy_private_bfd_data (ibfd, obfd)
      bfd * ibfd;
@@ -1838,11 +1852,12 @@ v850_elf_copy_private_bfd_data (ibfd, obfd)
   elf_gp (obfd) = elf_gp (ibfd);
   elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
   elf_flags_init (obfd) = true;
+
   return true;
 }
 
-/* Merge backend specific data from an object file to the output
-   object file when linking.  */
+/* Merge backend specific data from an object file
+   to the output object file when linking.  */
 static boolean
 v850_elf_merge_private_bfd_data (ibfd, obfd)
      bfd * ibfd;
@@ -1874,9 +1889,7 @@ v850_elf_merge_private_bfd_data (ibfd, obfd)
 
       if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
 	  && bfd_get_arch_info (obfd)->the_default)
-	{
-	  return bfd_set_arch_mach (obfd, bfd_get_arch (ibfd), bfd_get_mach (ibfd));
-	}
+	return bfd_set_arch_mach (obfd, bfd_get_arch (ibfd), bfd_get_mach (ibfd));
 
       return true;
     }
@@ -1892,7 +1905,8 @@ v850_elf_merge_private_bfd_data (ibfd, obfd)
 
   return true;
 }
-/* Display the flags field */
+
+/* Display the flags field.  */
 
 static boolean
 v850_elf_print_private_bfd_data (abfd, ptr)
@@ -1938,8 +1952,8 @@ static asection  v850_elf_zcom_section;
 static asymbol   v850_elf_zcom_symbol;
 static asymbol * v850_elf_zcom_symbol_ptr;
 
-/* Given a BFD section, try to locate the corresponding ELF section
-   index.  */
+/* Given a BFD section, try to locate the
+   corresponding ELF section index.  */
 
 static boolean
 v850_elf_section_from_bfd_section (abfd, hdr, sec, retval)
@@ -2119,7 +2133,6 @@ v850_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
   return true;
 }
 
-/*ARGSIGNORED*/
 static boolean
 v850_elf_link_output_symbol_hook (abfd, info, name, sym, input_sec)
      bfd *                  abfd ATTRIBUTE_UNUSED;
@@ -2173,8 +2186,9 @@ v850_elf_section_from_shdr (abfd, hdr, name)
   return true;
 }
 
-/* Set the correct type for a V850 ELF section.  We do this by the
-   section name, which is a hack, but ought to work.  */
+/* Set the correct type for a V850 ELF section.  We do this
+   by the section name, which is a hack, but ought to work.  */
+
 static boolean
 v850_elf_fake_sections (abfd, hdr, sec)
      bfd *                 abfd ATTRIBUTE_UNUSED;
