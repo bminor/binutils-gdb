@@ -13,6 +13,30 @@ END-INFO-DIR-ENTRY
 @end format
 @end ifinfo
 
+@ifinfo
+Copyright @copyright{} 1991 Free Software Foundation, Inc.
+
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+@ignore
+Permission is granted to process this file through TeX and print the
+results, provided the printed document carries a copying permission
+notice identical to this one except for the removal of this paragraph
+(this paragraph not being relevant to the printed manual).
+
+@end ignore
+
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided also that
+the entire resulting derived work is distributed under the terms of a
+permission notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions.
+@end ifinfo
+
 @synindex ky cp
 @c
 @c This file documents the GNU binary utilities "ar", "ld", "objdump", "nm", 
@@ -68,6 +92,8 @@ into another language, under the above conditions for modified versions.
 @cindex version
 This brief manual contains preliminary documentation for the GNU binary
 utilities (collectively version 1.97): 
+
+@iftex
 @table @code
 @item ar
 Create, modify, and extract from archives
@@ -87,50 +113,20 @@ List section sizes and total size
 @item strip
 Discard symbols
 @end table
-
-@ifinfo
-Copyright @copyright{} 1991 Free Software Foundation, Inc.
-
-Permission is granted to make and distribute verbatim copies of
-this manual provided the copyright notice and this permission notice
-are preserved on all copies.
-
-@ignore
-Permission is granted to process this file through TeX and print the
-results, provided the printed document carries a copying permission
-notice identical to this one except for the removal of this paragraph
-(this paragraph not being relevant to the printed manual).
-
-@end ignore
-
-Permission is granted to copy and distribute modified versions of this
-manual under the conditions for verbatim copying, provided also that
-the entire resulting derived work is distributed under the terms of a
-permission notice identical to this one.
-
-Permission is granted to copy and distribute translations of this manual
-into another language, under the above conditions for modified versions.
-@end ifinfo
+@end iftex
 
 @menu
-* ar::                          ar
-* ld::                          ld
-* nm::                          nm
-* objdump::                     objdump
-* ranlib::                      ranlib
-* size::                        size
-* strip::                       strip
-* Index::                       Index
-
- --- The Detailed Node Listing ---
-
-ar
-
-* ar-cmdline::                  Controlling @code{ar} on the command line
-* ar-scripts::                  Controlling @code{ar} with a script
+* ar::                          Create, modify, and extract from archives
+* ld:(ld)Overview.              Combine object and archive files
+* nm::                          List symbols from object files
+* objdump::                     Display information from object files
+* ranlib::                      Generate index to archive contents
+* size::                        List section sizes and total size
+* strip::                       Discard symbols
+* Index::                       
 @end menu
 
-@node ar, ld, Top, Top
+@node ar, nm, Top, Top
 @chapter ar
 
 @kindex ar
@@ -539,15 +535,16 @@ Requires prior use of @code{OPEN} or @code{CREATE}.
 
 @end table
 
-
-@node ld, nm, ar, Top
+@iftex
+@node ld
 @chapter ld
 @cindex linker
 @kindex ld
 The GNU linker @code{ld} is now described in a separate manual.
 @xref{Top,, Overview,, Using LD: the GNU linker}.
+@end iftex
 
-@node nm, objdump, ld, Top
+@node nm, objdump, ar, Top
 @chapter nm
 @cindex symbols
 @kindex nm
