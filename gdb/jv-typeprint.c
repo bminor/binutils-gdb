@@ -111,7 +111,7 @@ java_type_print_base (type, stream, show, level)
       if (TYPE_TAG_NAME (type) != NULL && TYPE_TAG_NAME (type)[0] == '[')
 	{ /* array type */
 	  char *name = java_demangle_type_signature (TYPE_TAG_NAME (type));
-	  fputs (name, stream);
+	  fputs_filtered (name, stream);
 	  free (name);
 	  break;
 	}

@@ -1839,7 +1839,7 @@ return_command (retval_exp, from_tty)
 
 /* Sets the scope to input function name, provided that the
    function is within the current stack frame */
-typedef struct function_bounds
+struct function_bounds
 {
     CORE_ADDR low, high;
 };

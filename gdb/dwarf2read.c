@@ -5458,7 +5458,7 @@ dump_die (die)
 	case DW_FORM_ref_addr:
 	case DW_FORM_addr:
 	  fprintf (stderr, "address: ");
-	  print_address_numeric (DW_ADDR (&die->attrs[i]), 1, stderr);
+	  print_address_numeric (DW_ADDR (&die->attrs[i]), 1, gdb_stderr);
 	  break;
 	case DW_FORM_block2:
 	case DW_FORM_block4:

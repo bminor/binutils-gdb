@@ -1,3 +1,13 @@
+Mon Jan 11 13:45:57 1999  Stu Grossman  <grossman@babylon-5.cygnus.com>
+
+	* dwarf2read.c (dump_die):  Change stderr gdb_stderr.
+	* expprint.c (print_subexp):  fprintf => fprintf_unfiltered.
+	* jv-typeprint.c (java_type_print_base):  fputs => fputs_filtered.
+	* stack.c (struct function_bounds):  Remove superfluous `typedef'.
+	* symfile.c (list_overlays_command):  stdout => gdb_stdout.
+	* symmisc.c (maintenance_check_symtabs):  stdout => gdb_stdout.
+	* utils.c (print_spaces):  Make more efficient.
+	
 Mon Jan 11 13:55:51 1999  David Taylor  <taylor@texas.cygnus.com>
 
 	* utils (print_spaces): fix arg to strcat; fix formatting.
