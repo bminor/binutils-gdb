@@ -3146,6 +3146,12 @@ print_insn_i386 (pc, info)
       reg = (*codep >> 3) & 7;
       rm = *codep & 7;
     }
+  else
+    {
+      mod = 0;
+      reg = 0;
+      rm = 0;
+    }
 
   if (dp->name == NULL && dp->bytemode1 == FLOATCODE)
     {

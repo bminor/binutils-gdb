@@ -1,3 +1,8 @@
+2001-05-12  H.J. Lu  <hjl@gnu.org>
+
+	* i386-dis.c (print_insn_i386): Always set `mod', `reg' and
+	`rm'.
+
 2001-05-12  Peter Targett  <peter.targett@arccores.com>
 
 	* arc-opc.c (arc_reg_names): Correct attribute for lp_count
