@@ -5,6 +5,8 @@
 	Fix typo in BEDIT warning.
 
 	* rclex.l: "\xhex" encoding in strings corrected.
+	"\a" escape (used for right justified key definitions in menus) is
+	encodes as binary 8.
 
 2002-04-09  Gunnar Degnbol <degnbol@danbbs.dk>
 

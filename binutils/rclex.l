@@ -331,7 +331,7 @@ handle_quotes (input, len)
 	      break;
 
 	    case 'a':
-	      *s++ = ESCAPE_A;
+	      *s++ = ESCAPE_B; /* Strange, but true...  */
 	      ++t;
 	      break;
 
