@@ -385,30 +385,27 @@ som_solib_add (arg_string, from_tty, target)
       status = target_read_memory (text_addr, buf, 4);
       if (status != 0)
 	{
-	  int old;
+	  int old, new;
 
+	  new = new_so->sections_end - new_so->sections;
 	  /* Add sections from the shared library to the core target.  */
 	  if (target->to_sections)
 	    {
 	      old = target->to_sections_end - target->to_sections;
 	      target->to_sections = (struct section_table *)
 		xrealloc ((char *)target->to_sections,
-			  ((sizeof (struct section_table))
-			    * (old + bfd_count_sections (new_so->abfd))));
+			  ((sizeof (struct section_table)) * (old + new)));
 	    }
 	  else
 	    {
 	      old = 0;
 	      target->to_sections = (struct section_table *)
-		xmalloc ((sizeof (struct section_table))
-			 * bfd_count_sections (new_so->abfd));
+		xmalloc ((sizeof (struct section_table)) * new);
 	    }
-	  target->to_sections_end = (target->to_sections
-				+ old + bfd_count_sections (new_so->abfd));
+	  target->to_sections_end = (target->to_sections + old + new);
 	  memcpy ((char *)(target->to_sections + old),
 		  new_so->sections,
-		  ((sizeof (struct section_table))
-		   * bfd_count_sections (new_so->abfd)));
+		  ((sizeof (struct section_table)) * new));
 	}
     }
 

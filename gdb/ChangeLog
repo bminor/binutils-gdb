@@ -1,3 +1,9 @@
+Thu Mar 23 23:20:00 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+        * somsolib.c (som_solib_add): Handle case where a shared library
+        referenced by a core file has sections without the SEC_ALLOC bit
+        set (eg stabs sections).
+
 Thu Mar 23 15:07:08 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* breakpoint.c (bpstat_do_actions): For each element in the bpstat
