@@ -1,3 +1,19 @@
+2003-06-29  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (mips_set_options,mips_opts): Support for
+	.set arch=FOO.
+	(file_mips_arch): Rename mips_arch.
+	(mips_arch_info,mips_tune_info): Remove.
+	(hilo_interlocks,gpr_interlocks,cop_interlocks): Use mips_opts.arch.
+	(mips_cpu_info_from_arch): New function.
+	(md_begin): Use file_mips_arch.
+	(macro_build,macro,mips_ip): Use mips_opts.arch.
+	(mips_set_architecture): Init file_mips_arch and mips_opts.arch.
+	(mips_after_parse_args): Remove mips_arch_info and mips_tune_info.
+	Use file_mips_arch.
+	(s_mipsset): Support for .set arch=FOO.
+	(mips_cpu_info_table): Fix typo.
+
 2003-06-26  H.J. Lu <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (md_assemble): Declare "exp" before "if".

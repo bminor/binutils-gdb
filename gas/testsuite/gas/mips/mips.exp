@@ -562,6 +562,8 @@ if { [istarget mips*-*-*] } then {
 
     run_dump_test_arches "mips64"	[mips_arch_list_matching mips64]
 
+    run_dump_test "set-arch"
+
     if { !$addr32 } {
 	run_dump_test "mips64-mips3d"
 	run_dump_test_arches "mips64-mips3d-incl" [mips_arch_list_matching mips3d]

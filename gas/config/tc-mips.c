@@ -180,6 +180,9 @@ struct mips_set_options
      is passed but can changed if the assembler code uses .set mipsN.  */
   int gp32;
   int fp32;
+  /* MIPS architecture (CPU) type.  Changed by .set arch=FOO, the -march
+     command line option, and the default CPU.  */
+  int arch;
 };
 
 /* True if -mgp32 was passed.  */
@@ -194,7 +197,7 @@ static int file_mips_fp32 = -1;
 
 static struct mips_set_options mips_opts =
 {
-  ISA_UNKNOWN, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0
+  ISA_UNKNOWN, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, CPU_UNKNOWN
 };
 
 /* These variables are filled in with the masks of registers used.
@@ -219,15 +222,13 @@ static int file_ase_mips3d;
 static int file_ase_mdmx;
 
 /* The argument of the -march= flag.  The architecture we are assembling.  */
-static int mips_arch = CPU_UNKNOWN;
+static int file_mips_arch = CPU_UNKNOWN;
 static const char *mips_arch_string;
-static const struct mips_cpu_info *mips_arch_info;
 
 /* The argument of the -mtune= flag.  The architecture for which we
    are optimizing.  */
 static int mips_tune = CPU_UNKNOWN;
 static const char *mips_tune_string;
-static const struct mips_cpu_info *mips_tune_info;
 
 /* True when generating 32-bit code for a 64-bit processor.  */
 static int mips_32bitmode = 0;
@@ -338,26 +339,26 @@ static int mips_32bitmode = 0;
    reads from the HI and LO registers, and thus does not
    require nops to be inserted.  */
 
-#define hilo_interlocks (mips_arch == CPU_R4010                       \
-                         || mips_arch == CPU_VR5500                   \
-                         || mips_arch == CPU_SB1                      \
+#define hilo_interlocks (mips_opts.arch == CPU_R4010                       \
+                         || mips_opts.arch == CPU_VR5500                   \
+                         || mips_opts.arch == CPU_SB1                      \
                          )
 
 /* Whether the processor uses hardware interlocks to protect reads
    from the GPRs, and thus does not require nops to be inserted.  */
 #define gpr_interlocks \
   (mips_opts.isa != ISA_MIPS1  \
-   || mips_arch == CPU_VR5400  \
-   || mips_arch == CPU_VR5500  \
-   || mips_arch == CPU_R3900)
+   || mips_opts.arch == CPU_VR5400  \
+   || mips_opts.arch == CPU_VR5500  \
+   || mips_opts.arch == CPU_R3900)
 
 /* As with other "interlocks" this is used by hardware that has FP
    (co-processor) interlocks.  */
 /* Itbl support may require additional care here.  */
-#define cop_interlocks (mips_arch == CPU_R4300                        \
-                        || mips_arch == CPU_VR5400                    \
-                        || mips_arch == CPU_VR5500                    \
-                        || mips_arch == CPU_SB1                       \
+#define cop_interlocks (mips_opts.arch == CPU_R4300                        \
+                        || mips_opts.arch == CPU_VR5400                    \
+                        || mips_opts.arch == CPU_VR5500                    \
+                        || mips_opts.arch == CPU_SB1                       \
 			)
 
 /* Is this a mfhi or mflo instruction?  */
@@ -998,6 +999,8 @@ static const struct mips_cpu_info *mips_parse_cpu
   PARAMS ((const char *, const char *));
 static const struct mips_cpu_info *mips_cpu_info_from_isa
   PARAMS ((int));
+static const struct mips_cpu_info *mips_cpu_info_from_arch
+  PARAMS ((int));
 
 /* Pseudo-op table.
 
@@ -1202,7 +1205,7 @@ md_begin ()
   int i = 0;
   int broken = 0;
 
-  if (! bfd_set_arch_mach (stdoutput, bfd_arch_mips, mips_arch))
+  if (! bfd_set_arch_mach (stdoutput, bfd_arch_mips, file_mips_arch))
     as_warn (_("Could not set architecture and machine"));
 
   op_hash = hash_new ();
@@ -2984,8 +2987,8 @@ macro_build (place, counter, ep, name, fmt, va_alist)
   	  && OPCODE_IS_MEMBER (insn.insn_mo,
   			       (mips_opts.isa
 	      		        | (file_ase_mips16 ? INSN_MIPS16 : 0)),
-			       mips_arch)
-	  && (mips_arch != CPU_R4650 || (insn.insn_mo->pinfo & FP_D) == 0))
+			       mips_opts.arch)
+	  && (mips_opts.arch != CPU_R4650 || (insn.insn_mo->pinfo & FP_D) == 0))
 	break;
 
       ++insn.insn_mo;
@@ -5899,7 +5902,7 @@ macro (ip)
       lr = 1;
       goto ld;
     case M_LDC1_AB:
-      if (mips_arch == CPU_R4650)
+      if (mips_opts.arch == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -5988,7 +5991,7 @@ macro (ip)
       s = "scd";
       goto st;
     case M_SDC1_AB:
-      if (mips_arch == CPU_R4650)
+      if (mips_opts.arch == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -6675,7 +6678,7 @@ macro (ip)
 	}
 
     case M_L_DOB:
-      if (mips_arch == CPU_R4650)
+      if (mips_opts.arch == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -6716,7 +6719,7 @@ macro (ip)
        * But, the resulting address is the same after relocation so why
        * generate the extra instruction?
        */
-      if (mips_arch == CPU_R4650)
+      if (mips_opts.arch == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -6734,7 +6737,7 @@ macro (ip)
       goto ldd_std;
 
     case M_S_DAB:
-      if (mips_arch == CPU_R4650)
+      if (mips_opts.arch == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -7318,7 +7321,7 @@ macro2 (ip)
       break;
 
     case M_DROL:
-      if (ISA_HAS_DROR (mips_opts.isa) || CPU_HAS_DROR (mips_arch))
+      if (ISA_HAS_DROR (mips_opts.isa) || CPU_HAS_DROR (mips_opts.arch))
 	{
 	  if (dreg == sreg)
 	    {
@@ -7349,7 +7352,7 @@ macro2 (ip)
       break;
 
     case M_ROL:
-      if (ISA_HAS_ROR (mips_opts.isa) || CPU_HAS_ROR (mips_arch))
+      if (ISA_HAS_ROR (mips_opts.isa) || CPU_HAS_ROR (mips_opts.arch))
 	{
 	  if (dreg == sreg)
 	    {
@@ -7387,7 +7390,7 @@ macro2 (ip)
 	if (imm_expr.X_op != O_constant)
 	  as_bad (_("Improper rotate count"));
 	rot = imm_expr.X_add_number & 0x3f;
-	if (ISA_HAS_DROR (mips_opts.isa) || CPU_HAS_DROR (mips_arch))
+	if (ISA_HAS_DROR (mips_opts.isa) || CPU_HAS_DROR (mips_opts.arch))
 	  {
 	    rot = (64 - rot) & 0x3f;
 	    if (rot >= 32)
@@ -7423,7 +7426,7 @@ macro2 (ip)
 	if (imm_expr.X_op != O_constant)
 	  as_bad (_("Improper rotate count"));
 	rot = imm_expr.X_add_number & 0x1f;
-	if (ISA_HAS_ROR (mips_opts.isa) || CPU_HAS_ROR (mips_arch))
+	if (ISA_HAS_ROR (mips_opts.isa) || CPU_HAS_ROR (mips_opts.arch))
 	  {
 	    macro_build ((char *) NULL, &icnt, NULL, "ror",
 			 "d,w,<", dreg, sreg, (32 - rot) & 0x1f);
@@ -7445,7 +7448,7 @@ macro2 (ip)
       break;
 
     case M_DROR:
-      if (ISA_HAS_DROR (mips_opts.isa) || CPU_HAS_DROR (mips_arch))
+      if (ISA_HAS_DROR (mips_opts.isa) || CPU_HAS_DROR (mips_opts.arch))
 	{
 	  macro_build ((char *) NULL, &icnt, NULL, "drorv",
 		       "d,t,s", dreg, sreg, treg);
@@ -7462,7 +7465,7 @@ macro2 (ip)
       break;
 
     case M_ROR:
-      if (ISA_HAS_ROR (mips_opts.isa) || CPU_HAS_ROR (mips_arch))
+      if (ISA_HAS_ROR (mips_opts.isa) || CPU_HAS_ROR (mips_opts.arch))
 	{
 	  macro_build ((char *) NULL, &icnt, NULL, "rorv",
 		       "d,t,s", dreg, sreg, treg);
@@ -7486,7 +7489,7 @@ macro2 (ip)
 	if (imm_expr.X_op != O_constant)
 	  as_bad (_("Improper rotate count"));
 	rot = imm_expr.X_add_number & 0x3f;
-	if (ISA_HAS_DROR (mips_opts.isa) || CPU_HAS_DROR (mips_arch))
+	if (ISA_HAS_DROR (mips_opts.isa) || CPU_HAS_DROR (mips_opts.arch))
 	  {
 	    if (rot >= 32)
 	      macro_build ((char *) NULL, &icnt, NULL, "dror32",
@@ -7521,7 +7524,7 @@ macro2 (ip)
 	if (imm_expr.X_op != O_constant)
 	  as_bad (_("Improper rotate count"));
 	rot = imm_expr.X_add_number & 0x1f;
-	if (ISA_HAS_ROR (mips_opts.isa) || CPU_HAS_ROR (mips_arch))
+	if (ISA_HAS_ROR (mips_opts.isa) || CPU_HAS_ROR (mips_opts.arch))
 	  {
 	    macro_build ((char *) NULL, &icnt, NULL, "ror",
 			 "d,w,<", dreg, sreg, rot);
@@ -7543,7 +7546,7 @@ macro2 (ip)
       break;
 
     case M_S_DOB:
-      if (mips_arch == CPU_R4650)
+      if (mips_opts.arch == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -8555,14 +8558,14 @@ mips_ip (str, ip)
 			     | (file_ase_mips16 ? INSN_MIPS16 : 0)
 	      		     | (mips_opts.ase_mdmx ? INSN_MDMX : 0)
 			     | (mips_opts.ase_mips3d ? INSN_MIPS3D : 0)),
-			    mips_arch))
+			    mips_opts.arch))
 	ok = TRUE;
       else
 	ok = FALSE;
 
       if (insn->pinfo != INSN_MACRO)
 	{
-	  if (mips_arch == CPU_R4650 && (insn->pinfo & FP_D) != 0)
+	  if (mips_opts.arch == CPU_R4650 && (insn->pinfo & FP_D) != 0)
 	    ok = FALSE;
 	}
 
@@ -8579,15 +8582,10 @@ mips_ip (str, ip)
 	      if (!insn_error)
 		{
 		  static char buf[100];
-		  if (mips_arch_info->is_isa)
-		    sprintf (buf,
-			     _("opcode not supported at this ISA level (%s)"),
-			     mips_cpu_info_from_isa (mips_opts.isa)->name);
-		  else
-		    sprintf (buf,
-			     _("opcode not supported on this processor: %s (%s)"),
-			     mips_arch_info->name,
-			     mips_cpu_info_from_isa (mips_opts.isa)->name);
+		  sprintf (buf,
+			   _("opcode not supported on this processor: %s (%s)"),
+			   mips_cpu_info_from_arch (mips_opts.arch)->name,
+			   mips_cpu_info_from_isa (mips_opts.isa)->name);
 		  insn_error = buf;
 		}
 	      if (save_c)
@@ -11089,8 +11087,8 @@ mips_set_architecture (info)
 {
   if (info != 0)
     {
-      mips_arch_info = info;
-      mips_arch = info->cpu;
+      file_mips_arch = info->cpu;
+      mips_opts.arch = info->cpu;
       mips_opts.isa = info->isa;
     }
 }
@@ -11103,16 +11101,16 @@ mips_set_tune (info)
      const struct mips_cpu_info *info;
 {
   if (info != 0)
-    {
-      mips_tune_info = info;
-      mips_tune = info->cpu;
-    }
+    mips_tune = info->cpu;
 }
 
 
 void
 mips_after_parse_args ()
 {
+  const struct mips_cpu_info *arch_info = 0;
+  const struct mips_cpu_info *tune_info = 0;
+
   /* GP relative stuff not working for PE */
   if (strncmp (TARGET_OS, "pe", 2) == 0
       && g_switch_value != 0)
@@ -11131,41 +11129,44 @@ mips_after_parse_args ()
      as much as possible.  */
 
   if (mips_arch_string != 0)
-    mips_set_architecture (mips_parse_cpu ("-march", mips_arch_string));
-
-  if (mips_tune_string != 0)
-    mips_set_tune (mips_parse_cpu ("-mtune", mips_tune_string));
+    arch_info = mips_parse_cpu ("-march", mips_arch_string);
 
   if (file_mips_isa != ISA_UNKNOWN)
     {
       /* Handle -mipsN.  At this point, file_mips_isa contains the
-	 ISA level specified by -mipsN, while mips_opts.isa contains
+	 ISA level specified by -mipsN, while arch_info->isa contains
 	 the -march selection (if any).  */
-      if (mips_arch_info != 0)
+      if (arch_info != 0)
 	{
 	  /* -march takes precedence over -mipsN, since it is more descriptive.
 	     There's no harm in specifying both as long as the ISA levels
 	     are the same.  */
-	  if (file_mips_isa != mips_opts.isa)
+	  if (file_mips_isa != arch_info->isa)
 	    as_bad (_("-%s conflicts with the other architecture options, which imply -%s"),
 		    mips_cpu_info_from_isa (file_mips_isa)->name,
-		    mips_cpu_info_from_isa (mips_opts.isa)->name);
+		    mips_cpu_info_from_isa (arch_info->isa)->name);
 	}
       else
-	mips_set_architecture (mips_cpu_info_from_isa (file_mips_isa));
+	arch_info = mips_cpu_info_from_isa (file_mips_isa);
     }
 
-  if (mips_arch_info == 0)
-    mips_set_architecture (mips_parse_cpu ("default CPU",
-					   MIPS_CPU_STRING_DEFAULT));
+  if (arch_info == 0)
+    arch_info = mips_parse_cpu ("default CPU", MIPS_CPU_STRING_DEFAULT);
 
-  if (ABI_NEEDS_64BIT_REGS (mips_abi) && !ISA_HAS_64BIT_REGS (mips_opts.isa))
+  if (ABI_NEEDS_64BIT_REGS (mips_abi) && !ISA_HAS_64BIT_REGS (arch_info->isa))
     as_bad ("-march=%s is not compatible with the selected ABI",
-	    mips_arch_info->name);
+	    arch_info->name);
 
-  /* Optimize for mips_arch, unless -mtune selects a different processor.  */
-  if (mips_tune_info == 0)
-    mips_set_tune (mips_arch_info);
+  mips_set_architecture (arch_info);
+
+  /* Optimize for file_mips_arch, unless -mtune selects a different processor.  */
+  if (mips_tune_string != 0)
+    tune_info = mips_parse_cpu ("-mtune", mips_tune_string);
+
+  if (tune_info == 0)
+    mips_set_tune (arch_info);
+  else
+    mips_set_tune (tune_info);
 
   if (file_mips_gp32 >= 0)
     {
@@ -11210,11 +11211,11 @@ mips_after_parse_args ()
   /* If the selected architecture includes support for ASEs, enable
      generation of code for them.  */
   if (mips_opts.mips16 == -1)
-    mips_opts.mips16 = (CPU_HAS_MIPS16 (mips_arch)) ? 1 : 0;
+    mips_opts.mips16 = (CPU_HAS_MIPS16 (file_mips_arch)) ? 1 : 0;
   if (mips_opts.ase_mips3d == -1)
-    mips_opts.ase_mips3d = (CPU_HAS_MIPS3D (mips_arch)) ? 1 : 0;
+    mips_opts.ase_mips3d = (CPU_HAS_MIPS3D (file_mips_arch)) ? 1 : 0;
   if (mips_opts.ase_mdmx == -1)
-    mips_opts.ase_mdmx = (CPU_HAS_MDMX (mips_arch)) ? 1 : 0;
+    mips_opts.ase_mdmx = (CPU_HAS_MDMX (file_mips_arch)) ? 1 : 0;
 
   file_mips_isa = mips_opts.isa;
   file_ase_mips16 = mips_opts.mips16;
@@ -12462,6 +12463,47 @@ s_mipsset (x)
 	  mips_opts = s->options;
 	  mips_opts_stack = s->next;
 	  free (s);
+	}
+    }
+  else if (strncmp (name, "arch=", 5) == 0)
+    {
+      /* Permit the user to change the architecture on the fly.  Needless
+	 to say, misuse can cause serious problems.  */
+      if (strcmp (name + 5, "default") == 0)
+	{
+	  mips_opts.arch = file_mips_arch;
+	  mips_opts.isa = file_mips_isa;
+	  mips_opts.gp32 = file_mips_gp32;
+	  mips_opts.fp32 = file_mips_fp32;
+	}
+      else
+	{
+	  const struct mips_cpu_info *p;
+
+	  p = mips_parse_cpu("internal use", name + 5);
+	  if (!p)
+	    as_bad (_("unknown architecture %s"), name + 5);
+	  else
+	    {
+	      mips_opts.arch = p->cpu;
+	      mips_opts.isa = p->isa;
+	    }
+
+	  switch (mips_opts.arch)
+	    {
+	      case CPU_R3000:
+	      case CPU_R3900:
+	      case CPU_R6000:
+	      case CPU_MIPS32:
+	      case CPU_MIPS32R2:
+		mips_opts.gp32 = 1;
+		mips_opts.fp32 = 1;
+		break;
+	      default:
+		mips_opts.gp32 = 0;
+		mips_opts.fp32 = 0;
+		break;
+	    }
 	}
     }
   else
@@ -14738,7 +14780,7 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "r7000",          0,      ISA_MIPS4,      CPU_R5000 },
 
   /* MIPS 32 */
-  { "4kc",            0,      ISA_MIPS32,     CPU_MIPS32, },
+  { "4kc",            0,      ISA_MIPS32,     CPU_MIPS32 },
   { "4km",            0,      ISA_MIPS32,     CPU_MIPS32 },
   { "4kp",            0,      ISA_MIPS32,     CPU_MIPS32 },
 
@@ -14868,6 +14910,19 @@ mips_cpu_info_from_isa (isa)
   for (i = 0; mips_cpu_info_table[i].name != NULL; i++)
     if (mips_cpu_info_table[i].is_isa
 	&& isa == mips_cpu_info_table[i].isa)
+      return (&mips_cpu_info_table[i]);
+
+  return NULL;
+}
+
+static const struct mips_cpu_info *
+mips_cpu_info_from_arch (arch)
+     int arch;
+{
+  int i;
+
+  for (i = 0; mips_cpu_info_table[i].name != NULL; i++)
+    if (arch == mips_cpu_info_table[i].cpu)
       return (&mips_cpu_info_table[i]);
 
   return NULL;
