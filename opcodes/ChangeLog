@@ -1,7 +1,7 @@
 Fri May 15 14:58:31 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen-opc.c (cgen_hw_lookup_by_name): Renamed from cgen_hw_lookup.
-	(cgen_hw_lookup_by_enum): New function.
+	(cgen_hw_lookup_by_num): New function.
 
 start-sanitize-m32rx
 	* m32r-opc.c, m32r-opc.h: Regenerate, delete h-abort.
