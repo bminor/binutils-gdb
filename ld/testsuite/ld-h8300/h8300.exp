@@ -28,4 +28,7 @@ run_dump_test relax
 
 if {[istarget *-elf]} {
     run_dump_test relax-2
+    run_dump_test relax-3
+} else {
+    run_dump_test relax-3-coff
 }

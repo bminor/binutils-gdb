@@ -1,5 +1,17 @@
 2003-07-11  Richard Sandiford  <rsandifo@redhat.com>
 
+	* bfd-in.h (bfd_h8300_pad_address): Declare.
+	* bfd-in2.h: Regenerate.
+	* cpu-h8300.c (bfd_h8300_pad_address): New function.
+	* coff-h8300.c (h8300_reloc16_estimate): Use it to canonicalize
+	addresses before checking whether they can be relaxed.
+	(h8300_reloc16_extra_cases): Likewise for the R_MOVL2 sanity check.
+	Don't complain about overflows in general 8-bit relocations.
+	* elf32-h8300.c (elf32_h8_relax_section): Use bfd_h8300_pad_address.
+	Fix handling of R_H8_DIR24A8.
+
+2003-07-11  Richard Sandiford  <rsandifo@redhat.com>
+
 	* elf32-h8300.c: Convert function prototypes and definitions
 	to C90 syntax.
 	* coff-h8300.c: Likewise.

@@ -573,17 +573,11 @@ h8300_reloc16_estimate (bfd *abfd, asection *input_section, arelent *reloc,
     case R_MOV16B1:
       /* Get the address of the data referenced by this mov.b insn.  */
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
+      value = bfd_h8300_pad_address (abfd, value);
 
-      /* The address is in 0xff00..0xffff inclusive on the h8300 or
-	 0xffff00..0xffffff inclusive on the h8300h, then we can
-	 relax this mov.b  */
-      if ((bfd_get_mach (abfd) == bfd_mach_h8300
-	   && value >= 0xff00
-	   && value <= 0xffff)
-	  || ((bfd_get_mach (abfd) == bfd_mach_h8300h
-	       || bfd_get_mach (abfd) == bfd_mach_h8300s)
-	      && value >= 0xffff00
-	      && value <= 0xffffff))
+      /* If the address is in the top 256 bytes of the address space
+	 then we can relax this instruction.  */
+      if (value >= 0xffffff00u)
 	{
 	  /* Change the reloc type.  */
 	  reloc->howto = reloc->howto + 1;
@@ -600,13 +594,9 @@ h8300_reloc16_estimate (bfd *abfd, asection *input_section, arelent *reloc,
     case R_MOV24B1:
       /* Get the address of the data referenced by this mov.b insn.  */
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
+      value = bfd_h8300_pad_address (abfd, value);
 
-      /* The address is in 0xffff00..0xffffff inclusive on the h8300h,
-	 then we can relax this mov.b  */
-      if ((bfd_get_mach (abfd) == bfd_mach_h8300h
-	   || bfd_get_mach (abfd) == bfd_mach_h8300s)
-	  && value >= 0xffff00
-	  && value <= 0xffffff)
+      if (value >= 0xffffff00u)
 	{
 	  /* Change the reloc type.  */
 	  reloc->howto = reloc->howto + 1;
@@ -627,10 +617,11 @@ h8300_reloc16_estimate (bfd *abfd, asection *input_section, arelent *reloc,
     case R_MOVL1:
       /* Get the address of the data referenced by this mov insn.  */
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
+      value = bfd_h8300_pad_address (abfd, value);
 
-      /* If this address is in 0x0000..0x7fff inclusive or
-	 0xff8000..0xffffff inclusive, then it can be relaxed.  */
-      if (value <= 0x7fff || value >= 0xff8000)
+      /* If the address is a sign-extended 16-bit value then we can
+         relax this instruction.  */
+      if (value <= 0x7fff || value >= 0xffff8000u)
 	{
 	  /* Change the reloc type.  */
 	  reloc->howto = howto_table + 17;
@@ -737,26 +728,9 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       /* Get the address of the object referenced by this insn.  */
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
 
-      /* Sanity check.  */
-      if (value <= 0xff
-	  || (value >= 0x0000ff00 && value <= 0x0000ffff)
-	  || (value >= 0x00ffff00 && value <= 0x00ffffff)
-	  || (value >= 0xffffff00 && value <= 0xffffffff))
-	{
-	  /* Everything looks OK.  Apply the relocation and update the
-	     src/dst address appropriately.  */
-	  bfd_put_8 (abfd, value & 0xff, data + dst_address);
-	  dst_address += 1;
-	  src_address += 1;
-	}
-      else
-	{
-	  if (! ((*link_info->callbacks->reloc_overflow)
-		 (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
-		  reloc->howto->name, reloc->addend, input_section->owner,
-		  input_section, reloc->address)))
-	    abort ();
-	}
+      bfd_put_8 (abfd, value & 0xff, data + dst_address);
+      dst_address += 1;
+      src_address += 1;
 
       /* All done.  */
       break;
@@ -798,9 +772,10 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
        absolute relocation.  */
     case R_MOVL2:
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
+      value = bfd_h8300_pad_address (abfd, value);
 
       /* Sanity check.  */
-      if (value <= 0x7fff || value >= 0xff8000)
+      if (value <= 0x7fff || value >= 0xffff8000u)
 	{
 	  /* Insert the 16bit value into the proper location.  */
 	  bfd_put_16 (abfd, value, data + dst_address);

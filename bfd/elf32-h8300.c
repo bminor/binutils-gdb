@@ -1004,18 +1004,10 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 	   become an 8 bit absolute address if its in the right range.  */
 	case R_H8_DIR16A8:
 	  {
-	    bfd_vma value = symval + irel->r_addend;
+	    bfd_vma value;
 
-	    if ((bfd_get_mach (abfd) == bfd_mach_h8300
-		 && value >= 0xff00
-		 && value <= 0xffff)
-		|| ((bfd_get_mach (abfd) == bfd_mach_h8300h
-		     /* FIXME: h8300hn? */
-		     || bfd_get_mach (abfd) == bfd_mach_h8300s
-		     /* FIXME: h8300sn? */
-		     || bfd_get_mach (abfd) == bfd_mach_h8300sx)
-		    && value >= 0xffff00
-		    && value <= 0xffffff))
+	    value = bfd_h8300_pad_address (abfd, symval + irel->r_addend);
+	    if (value >= 0xffffff00u)
 	      {
 		unsigned char code;
 
@@ -1068,20 +1060,11 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 	   become an 8 bit absolute address if its in the right range.  */
 	case R_H8_DIR24A8:
 	  {
-	    bfd_vma value = symval + irel->r_addend;
+	    bfd_vma value;
 
-	    if ((bfd_get_mach (abfd) == bfd_mach_h8300
-		 && value >= 0xff00
-		 && value <= 0xffff)
-		|| ((bfd_get_mach (abfd) == bfd_mach_h8300h
-		     /* FIXME: h8300hn? */
-		     || bfd_get_mach (abfd) == bfd_mach_h8300s
-		     /* FIXME: h8300sn? */
-		     || bfd_get_mach (abfd) == bfd_mach_h8300sx)
-		    && value >= 0xffff00
-		    && value <= 0xffffff))
+	    value = bfd_h8300_pad_address (abfd, symval + irel->r_addend);
+	    if (value >= 0xffffff00u)
 	      {
-		bfd_boolean skip = FALSE;
 		unsigned char code;
 
 		/* Note that we've changed the relocs, section contents,
@@ -1101,37 +1084,32 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 
 		switch (code & 0xf0)
 		  {
-		  case 0x00:
+		  case 0x20:
 		    bfd_put_8 (abfd, (code & 0xf) | 0x20,
 			       contents + irel->r_offset - 2);
 		    break;
-		  case 0x80:
+		  case 0xa0:
 		    bfd_put_8 (abfd, (code & 0xf) | 0x30,
 			       contents + irel->r_offset - 2);
-		    break;
-		  case 0x20:
-		  case 0xa0:
-		    /* Skip 32bit versions.  */
-		    skip = TRUE;
 		    break;
 		  default:
 		    abort ();
 		  }
 
-		if (skip)
-		  break;
-
 		/* Fix the relocation's type.  */
 		irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
 					     R_H8_DIR8);
+		irel->r_offset--;
 
 		/* Delete two bytes of data.  */
-		if (!elf32_h8_relax_delete_bytes (abfd, sec, irel->r_offset, 2))
+		if (!elf32_h8_relax_delete_bytes (abfd, sec,
+						  irel->r_offset + 1, 4))
 		  goto error_return;
 
 		/* That will change things, so, we should relax again.
 		   Note that this is not required, and it may be slow.  */
 		*again = TRUE;
+		break;
 	      }
 	  }
 
@@ -1141,9 +1119,10 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 	   become a 16bit absoulte address if it is in the right range.  */
 	case R_H8_DIR32A16:
 	  {
-	    bfd_vma value = symval + irel->r_addend;
+	    bfd_vma value;
 
-	    if (value <= 0x7fff || value >= 0xff8000)
+	    value = bfd_h8300_pad_address (abfd, symval + irel->r_addend);
+	    if (value <= 0x7fff || value >= 0xffff8000u)
 	      {
 		unsigned char code;
 
