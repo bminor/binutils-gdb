@@ -1086,19 +1086,6 @@ sparc64_return_value (struct gdbarch *gdbarch, struct type *type,
 
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
-
-/* Extract from REGCACHE, which contains the (raw) register state, the
-   address in which a function should return its structure value, as a
-   CORE_ADDR.  */
-
-static CORE_ADDR
-sparc64_extract_struct_value_address (struct regcache *regcache)
-{
-  ULONGEST addr;
-
-  regcache_cooked_read_unsigned (regcache, SPARC_O0_REGNUM, &addr);
-  return addr;
-}
 
 
 void
@@ -1130,8 +1117,6 @@ sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_push_dummy_call (gdbarch, sparc64_push_dummy_call);
 
   set_gdbarch_return_value (gdbarch, sparc64_return_value);
-  set_gdbarch_extract_struct_value_address
-    (gdbarch, sparc64_extract_struct_value_address);
   set_gdbarch_stabs_argument_has_addr
     (gdbarch, default_stabs_argument_has_addr);
 

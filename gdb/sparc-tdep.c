@@ -834,6 +834,18 @@ sparc32_return_value (struct gdbarch *gdbarch, struct type *type,
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
+#if 0
+/* NOTE: cagney/2004-01-17: For the moment disable this method.  The
+   architecture and CORE-gdb will need new code (and a replacement for
+   EXTRACT_STRUCT_VALUE_ADDRESS) before this can be made to work
+   robustly.  Here is a possible function signature: */
+/* NOTE: cagney/2004-01-17: So far only the 32-bit SPARC ABI has been
+   identifed as having a way to robustly recover the address of a
+   struct-convention return-value (after the function has returned).
+   For all other ABIs so far examined, the calling convention makes no
+   guarenteed that the register containing the return-value will be
+   preserved and hence that the return-value's address can be
+   recovered.  */
 /* Extract from REGCACHE, which contains the (raw) register state, the
    address in which a function should return its structure value, as a
    CORE_ADDR.  */
@@ -846,6 +858,7 @@ sparc32_extract_struct_value_address (struct regcache *regcache)
   regcache_cooked_read_unsigned (regcache, SPARC_SP_REGNUM, &sp);
   return read_memory_unsigned_integer (sp + 64, 4);
 }
+#endif
 
 static int
 sparc32_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
@@ -1069,8 +1082,6 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_dummy_call (gdbarch, sparc32_push_dummy_call);
 
   set_gdbarch_return_value (gdbarch, sparc32_return_value);
-  set_gdbarch_extract_struct_value_address
-    (gdbarch, sparc32_extract_struct_value_address);
   set_gdbarch_stabs_argument_has_addr
     (gdbarch, sparc32_stabs_argument_has_addr);
 

@@ -1,7 +1,8 @@
 /* Intel 386 target-dependent stuff.
 
    Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1274,19 +1275,6 @@ i386_store_return_value (struct gdbarch *gdbarch, struct type *type,
 
 #undef I387_ST0_REGNUM
 }
-
-/* Extract from REGCACHE, which contains the (raw) register state, the
-   address in which a function should return its structure value, as a
-   CORE_ADDR.  */
-
-static CORE_ADDR
-i386_extract_struct_value_address (struct regcache *regcache)
-{
-  char buf[4];
-
-  regcache_cooked_read (regcache, I386_EAX_REGNUM, buf);
-  return extract_unsigned_integer (buf, 4);
-}
 
 
 /* This is the variable that is set with "set struct-convention", and
@@ -1995,8 +1983,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_value_to_register (gdbarch, i386_value_to_register);
 
   set_gdbarch_return_value (gdbarch, i386_return_value);
-  set_gdbarch_extract_struct_value_address (gdbarch,
-					    i386_extract_struct_value_address);
 
   set_gdbarch_skip_prologue (gdbarch, i386_skip_prologue);
 

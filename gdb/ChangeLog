@@ -1,3 +1,22 @@
+2004-01-17  Andrew Cagney  <cagney@redhat.com>
+
+	* x86-64-tdep.c (x86_64_init_abi): No need to clear
+	extract_struct_value_address, i386 does not set it.
+	* sparc64-tdep.c (sparc64_init_abi): Do not set
+	extract_struct_value_address, never called.
+	(sparc64_extract_struct_value_address): Delete function.
+	* m68hc11-tdep.c: Update copyright.
+	(m68hc11_gdbarch_init): Delete redundant assignment of
+	extract_struct_value_address.
+	* i386-tdep.c: Update copyright.
+	(i386_gdbarch_init): Do not set extract_struct_value_address,
+	never called.
+	(i386_extract_struct_value_address): Delete function.
+	* sparc-tdep.c (sparc32_gdbarch_init): Do not set
+	extract_struct_value_address, never called.
+	(sparc32_extract_struct_value_address): #if 0 function.  Add
+	comments explaining its future.
+
 2004-01-17  Daniel Jacobowitz  <drow@mvista.com>
 
 	* arm-tdep.c (arm_write_pc): New function.

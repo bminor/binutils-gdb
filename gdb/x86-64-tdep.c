@@ -1109,8 +1109,6 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_value_to_register (gdbarch, i387_value_to_register);
 
   set_gdbarch_return_value (gdbarch, amd64_return_value);
-  /* Override, since this is handled by amd64_extract_return_value.  */
-  set_gdbarch_extract_struct_value_address (gdbarch, NULL);
 
   set_gdbarch_skip_prologue (gdbarch, amd64_skip_prologue);
 
