@@ -3203,12 +3203,31 @@ get_field (data, order, total_len, start, len)
   int cur_bitshift;
 
   /* Start at the least significant part of the field.  */
-  cur_byte = (start + len) / FLOATFORMAT_CHAR_BIT;
   if (order == floatformat_little || order == floatformat_littlebyte_bigword)
-    cur_byte = (total_len / FLOATFORMAT_CHAR_BIT) - cur_byte - 1;
-  cur_bitshift =
-    ((start + len) % FLOATFORMAT_CHAR_BIT) - FLOATFORMAT_CHAR_BIT;
-  result = *(data + cur_byte) >> (-cur_bitshift);
+    {
+      /* We start counting from the other end (i.e, from the high bytes
+	 rather than the low bytes).  As such, we need to be concerned
+	 with what happens if bit 0 doesn't start on a byte boundary. 
+	 I.e, we need to properly handle the case where total_len is
+	 not evenly divisible by 8.  So we compute ``excess'' which
+	 represents the number of bits from the end of our starting
+	 byte needed to get to bit 0. */
+      int excess = FLOATFORMAT_CHAR_BIT - (total_len % FLOATFORMAT_CHAR_BIT);
+      cur_byte = (total_len / FLOATFORMAT_CHAR_BIT) 
+                 - ((start + len + excess) / FLOATFORMAT_CHAR_BIT);
+      cur_bitshift = ((start + len + excess) % FLOATFORMAT_CHAR_BIT) 
+                     - FLOATFORMAT_CHAR_BIT;
+    }
+  else
+    {
+      cur_byte = (start + len) / FLOATFORMAT_CHAR_BIT;
+      cur_bitshift =
+	((start + len) % FLOATFORMAT_CHAR_BIT) - FLOATFORMAT_CHAR_BIT;
+    }
+  if (cur_bitshift > -FLOATFORMAT_CHAR_BIT)
+    result = *(data + cur_byte) >> (-cur_bitshift);
+  else
+    result = 0;
   cur_bitshift += FLOATFORMAT_CHAR_BIT;
   if (order == floatformat_little || order == floatformat_littlebyte_bigword)
     ++cur_byte;
@@ -3218,20 +3237,16 @@ get_field (data, order, total_len, start, len)
   /* Move towards the most significant part of the field.  */
   while (cur_bitshift < len)
     {
-      if (len - cur_bitshift < FLOATFORMAT_CHAR_BIT)
-	/* This is the last byte; zero out the bits which are not part of
-	   this field.  */
-	result |=
-	  (*(data + cur_byte) & ((1 << (len - cur_bitshift)) - 1))
-	  << cur_bitshift;
-      else
-	result |= *(data + cur_byte) << cur_bitshift;
+      result |= (unsigned long)*(data + cur_byte) << cur_bitshift;
       cur_bitshift += FLOATFORMAT_CHAR_BIT;
       if (order == floatformat_little || order == floatformat_littlebyte_bigword)
 	++cur_byte;
       else
 	--cur_byte;
     }
+  if (len < sizeof(result) * FLOATFORMAT_CHAR_BIT)
+    /* Mask out bits which are not part of the field */
+    result &= ((1UL << len) - 1);
   return result;
 }
 
@@ -3368,15 +3383,28 @@ put_field (data, order, total_len, start, len, stuff_to_put)
   int cur_bitshift;
 
   /* Start at the least significant part of the field.  */
-  cur_byte = (start + len) / FLOATFORMAT_CHAR_BIT;
   if (order == floatformat_little || order == floatformat_littlebyte_bigword)
-    cur_byte = (total_len / FLOATFORMAT_CHAR_BIT) - cur_byte - 1;
-  cur_bitshift =
-    ((start + len) % FLOATFORMAT_CHAR_BIT) - FLOATFORMAT_CHAR_BIT;
-  *(data + cur_byte) &=
-    ~(((1 << ((start + len) % FLOATFORMAT_CHAR_BIT)) - 1) << (-cur_bitshift));
-  *(data + cur_byte) |=
-    (stuff_to_put & ((1 << FLOATFORMAT_CHAR_BIT) - 1)) << (-cur_bitshift);
+    {
+      int excess = FLOATFORMAT_CHAR_BIT - (total_len % FLOATFORMAT_CHAR_BIT);
+      cur_byte = (total_len / FLOATFORMAT_CHAR_BIT) 
+                 - ((start + len + excess) / FLOATFORMAT_CHAR_BIT);
+      cur_bitshift = ((start + len + excess) % FLOATFORMAT_CHAR_BIT) 
+                     - FLOATFORMAT_CHAR_BIT;
+    }
+  else
+    {
+      cur_byte = (start + len) / FLOATFORMAT_CHAR_BIT;
+      cur_bitshift =
+	((start + len) % FLOATFORMAT_CHAR_BIT) - FLOATFORMAT_CHAR_BIT;
+    }
+  if (cur_bitshift > -FLOATFORMAT_CHAR_BIT)
+    {
+      *(data + cur_byte) &=
+	~(((1 << ((start + len) % FLOATFORMAT_CHAR_BIT)) - 1)
+	  << (-cur_bitshift));
+      *(data + cur_byte) |=
+	(stuff_to_put & ((1 << FLOATFORMAT_CHAR_BIT) - 1)) << (-cur_bitshift);
+    }
   cur_bitshift += FLOATFORMAT_CHAR_BIT;
   if (order == floatformat_little || order == floatformat_littlebyte_bigword)
     ++cur_byte;

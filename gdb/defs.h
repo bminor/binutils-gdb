@@ -1345,5 +1345,6 @@ enum gdb_rc gdb_breakpoint_query (/* struct {ui,gdb}_out *output, */ int bnum);
 enum gdb_rc gdb_breakpoint (char *address, char *condition,
 			    int hardwareflag, int tempflag,
 			    int thread, int ignore_count);
+enum gdb_rc gdb_thread_select (/* output object */ char *tidstr);
 
 #endif /* #ifndef DEFS_H */

@@ -1,4 +1,4 @@
-/* System includes and definitions used by the Motorolla MCore simulator.
+/* System includes and definitions used by the Motorola MCore simulator.
    Copyright (C) 1999 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions.
 

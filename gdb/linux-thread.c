@@ -1800,4 +1800,6 @@ _initialize_linuxthreads ()
   sigprocmask(SIG_BLOCK, 
 	      &linuxthreads_wait_mask, 
 	      &linuxthreads_block_mask);
+  /* Make sure that linuxthreads_block_mask is not blocking SIGCHLD */
+  sigdelset (&linuxthreads_block_mask, SIGCHLD);
 }

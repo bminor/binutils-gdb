@@ -1,4 +1,4 @@
-/* Simulator for Motorolla's MCore processor
+/* Simulator for Motorola's MCore processor
    Copyright (C) 1999 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions.
 

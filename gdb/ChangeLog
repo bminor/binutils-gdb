@@ -1,3 +1,63 @@
+2000-01-24  Kevin Buettner  <kevinb@redhat.com>
+
+	* utils.c (get_field, put_field): Fix buffer underruns and
+	overruns.  Also, handle case where total_len is not evenly
+	divisible by 8.
+	(getfield): Make sure zeroing of unwanted bits occurs even
+	when bit field to extract does not straddle two or more
+	bytes.
+
+2000-01-23   Christopher Faylor  <cgf@cygnus.com>
+
+	* defs.h: Add gdb_thread_select declaration.
+
+2000-01-23  Kevin Buettner  <kevinb@redhat.com>
+
+	* linux-thread.c (_initialize_linuxthreads): Make sure that
+	linuxthreads_block_mask does not block SIGCHLD.
+
+2000-01-20  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* rdi-share/devsw.c (openLogFile): On cygwin, set the log mode to
+	text so that new lines work properly.
+
+2000-01-18  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* proc-utils.h: New file. Export functions from proc-*.c.
+
+	* proc_api.c: Rename to:
+	* proc-api.c: New file. Add include of proc-utils.h.
+
+	* proc_events.c: Rename to:
+	* proc-events.c: New file.
+
+	* proc_flags.c: Rename to:
+	* proc-flags.c: New file.
+
+	* proc_why.c: Rename to:
+	* proc-why.c: New file. Add include of proc-utils.h.
+
+	* procfs.c: Add includes of gdbthread.h, sys/wait.h, signal.h,
+ 	ctype.h, proc-utils.h.
+	(find_procinfo_or_die): Add braces to avoid ambiguous else clause.
+	(open_procinfo_files): Conditionalize local variable tmp, to avoid
+ 	compiler warnings.
+	(proc_iterate_over_mappings): Conditionalize local vars mapfd and
+ 	pathname.
+	(procfs_wait): Adjust format in some printf_filetered calls to
+ 	avoid compiler warnings.
+	(make_signal_thread_runnable): Ifdef 0. The calls to this function
+ 	are also ifdef'd 0 .
+	(procfs_resume): Add parentheses around '&&' operation.
+	(procfs_set_exec_trap): Remove unused variable.
+	(info_proc_cmd): Add braces to avoid ambiguous else clause.
+
+	* Makefile.in (procfs.o, proc-api.o, proc-events.o, proc-flags.o,
+ 	proc-why.o): Update dependencies.
+
+	* config/sparc/sun4sol2.mh (NATDEPFILES): Change proc_*.o files to
+	proc-*.o.
+
 2000-01-17  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* configure.in (NEW_PROC_API): Fix Unixware-matching regexp.
@@ -31,6 +91,11 @@ Sun Jan 16 17:58:00 2000  David Taylor  <taylor@texas.cygnus.com>
 
 	* v850-tdep.c (v850_target_architecture_hook): Setup correct
  	machine id for disassembly.
+
+2000-01-13  Jim Blandy  <jimb@cygnus.com>
+
+	* i386-linux-nat.c (fill_gregset): Pass the correct arguments to
+	convert_to_regset, when regno indicates a specific register.
 
 Thu Jan 13 23:34:17 EST 2000  Nicholas Duffek <nsd@cygnus.com>
 

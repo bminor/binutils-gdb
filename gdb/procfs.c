@@ -24,6 +24,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "target.h"
 #include "gdbcore.h"
 #include "gdbcmd.h"
+#include "gdbthread.h"
 
 #if defined (NEW_PROC_API)
 #define _STRUCTURED_PROC 1	/* Should be done by configure script. */
@@ -33,6 +34,11 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/fault.h>
 #include <sys/syscall.h>
 #include <sys/errno.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <ctype.h>
+
+#include "proc-utils.h"
 
 /* 
  * PROCFS.C
@@ -403,11 +409,13 @@ find_procinfo_or_die (pid, tid)
   procinfo *pi = find_procinfo (pid, tid);
 
   if (pi == NULL)
-    if (tid)
-      error ("procfs: couldn't find pid %d (kernel thread %d) in procinfo list.", 
-	     pid, tid);
-    else
-      error ("procfs: couldn't find pid %d in procinfo list.", pid);
+    {
+      if (tid)
+	error ("procfs: couldn't find pid %d (kernel thread %d) in procinfo list.", 
+	       pid, tid);
+      else
+	error ("procfs: couldn't find pid %d in procinfo list.", pid);
+    }
   return pi;
 }
 
@@ -431,7 +439,9 @@ open_procinfo_files (pi, which)
      procinfo *pi;
      int       which;
 {
+#ifdef NEW_PROC_API
   char tmp[MAX_PROC_NAME_SIZE];
+#endif
   int  fd;
 
   /* 
@@ -2627,11 +2637,14 @@ proc_iterate_over_mappings (func)
   struct prmap *map;
   procinfo *pi;
 #ifndef NEW_PROC_API	/* avoid compiler warning */
-  int nmaps = 0, i;
+  int nmaps = 0;
+  int i;
+#else
+  int map_fd;
+  char pathname[MAX_PROC_NAME_SIZE];
 #endif
   int funcstat = 0;
-  int fd, map_fd;
-  char pathname[MAX_PROC_NAME_SIZE];
+  int fd;
 
   pi = find_procinfo_or_die (PIDGET (inferior_pid), 0);
 
@@ -3762,9 +3775,9 @@ wait_again:
 		    if ((nsysargs = proc_nsysarg (pi)) > 0 &&
 			(sysargs  = proc_sysargs (pi)) != NULL)
 		      {
-			printf_filtered ("%d syscall arguments:\n", nsysargs);
+			printf_filtered ("%ld syscall arguments:\n", nsysargs);
 			for (i = 0; i < nsysargs; i++)
-			  printf_filtered ("#%d: 0x%08x\n", 
+			  printf_filtered ("#%ld: 0x%08x\n", 
 					   i, sysargs[i]);
 		      }
 
@@ -3876,9 +3889,9 @@ wait_again:
 		    if ((nsysargs = proc_nsysarg (pi)) > 0 &&
 			(sysargs  = proc_sysargs (pi)) != NULL)
 		      {
-			printf_filtered ("%d syscall arguments:\n", nsysargs);
+			printf_filtered ("%ld syscall arguments:\n", nsysargs);
 			for (i = 0; i < nsysargs; i++)
-			  printf_filtered ("#%d: 0x%08x\n", 
+			  printf_filtered ("#%ld: 0x%08x\n", 
 					   i, sysargs[i]);
 		      }
 		  }
@@ -4141,6 +4154,7 @@ invalidate_cache (parent, pi, ptr)
   return 0;
 }
 
+#if 0
 /*
  * Function: make_signal_thread_runnable
  *
@@ -4165,6 +4179,7 @@ make_signal_thread_runnable (process, pi, ptr)
 #endif
   return 0;
 }
+#endif
 
 /*
  * Function: target_resume
@@ -4216,7 +4231,7 @@ procfs_resume (pid, step, signo)
 
   /* Convert signal to host numbering.  */
   if (signo == 0 ||
-      signo == TARGET_SIGNAL_STOP && pi->ignore_next_sigstop)
+      (signo == TARGET_SIGNAL_STOP && pi->ignore_next_sigstop))
     native_signo = 0;
   else
     native_signo = target_signal_to_host (signo);
@@ -4603,7 +4618,6 @@ procfs_set_exec_trap ()
 
   procinfo *pi;
   sysset_t exitset;
-  sysset_t entryset;
 
   if ((pi = create_procinfo (getpid (), 0)) == NULL)
     perror_with_name ("procfs: create_procinfo failed in child.");
@@ -5027,11 +5041,12 @@ info_proc_cmd (args, from_tty)
 
   old_chain = make_cleanup (null_cleanup, 0);
   if (args)
-    if ((argv = buildargv (args)) == NULL)
-      nomem (0);
-    else
-      make_cleanup ((make_cleanup_func) freeargv, argv);
-
+    {
+      if ((argv = buildargv (args)) == NULL)
+	nomem (0);
+      else
+	make_cleanup ((make_cleanup_func) freeargv, argv);
+    }
   while (argv != NULL && *argv != NULL)
     {
       if (isdigit (argv[0][0]))

@@ -74,6 +74,7 @@ extern QI ROLQI (QI, int);
 #define NEGQI(x) (- (x))
 #define NOTQI(x) (! (QI) (x))
 #define INVQI(x) (~ (x))
+#define ABSQI(x) ((x) < 0 ? -(x) : (x))
 #define EQQI(x, y) ((QI) (x) == (QI) (y))
 #define NEQI(x, y) ((QI) (x) != (QI) (y))
 #define LTQI(x, y) ((QI) (x) < (QI) (y))
@@ -103,6 +104,7 @@ extern HI ROLHI (HI, int);
 #define NEGHI(x) (- (x))
 #define NOTHI(x) (! (HI) (x))
 #define INVHI(x) (~ (x))
+#define ABSHI(x) ((x) < 0 ? -(x) : (x))
 #define EQHI(x, y) ((HI) (x) == (HI) (y))
 #define NEHI(x, y) ((HI) (x) != (HI) (y))
 #define LTHI(x, y) ((HI) (x) < (HI) (y))
@@ -132,6 +134,7 @@ extern SI ROLSI (SI, int);
 #define NEGSI(x) (- (x))
 #define NOTSI(x) (! (SI) (x))
 #define INVSI(x) (~ (x))
+#define ABSSI(x) ((x) < 0 ? -(x) : (x))
 #define EQSI(x, y) ((SI) (x) == (SI) (y))
 #define NESI(x, y) ((SI) (x) != (SI) (y))
 #define LTSI(x, y) ((SI) (x) < (SI) (y))
@@ -191,6 +194,7 @@ extern DI ROLDI (DI, int);
 #define NEGDI(x) (- (x))
 #define NOTDI(x) (! (DI) (x))
 #define INVDI(x) (~ (x))
+#define ABSDI(x) ((x) < 0 ? -(x) : (x))
 #define EQDI(x, y) ((DI) (x) == (DI) (y))
 #define NEDI(x, y) ((DI) (x) != (DI) (y))
 #define LTDI(x, y) ((DI) (x) < (DI) (y))
@@ -219,6 +223,7 @@ extern DI EXTQIDI (QI);
 #define EXTQIDI(x) ((DI) (QI) (x))
 #endif
 #define EXTHISI(x) ((SI) (HI) (x))
+#define EXTSISI(x) ((SI) (SI) (x))
 #if defined (DI_FN_SUPPORT)
 extern DI EXTHIDI (HI);
 #else
@@ -246,6 +251,8 @@ extern DI ZEXTQIDI (QI);
 #define ZEXTQIDI(x) ((DI) (UQI) (x))
 #endif
 #define ZEXTHISI(x) ((SI) (UHI) (x))
+#define ZEXTHIHI(x) ((HI) (UHI) (x))
+#define ZEXTSISI(x) ((SI) (USI) (x))
 #if defined (DI_FN_SUPPORT)
 extern DI ZEXTHIDI (HI);
 #else
@@ -453,6 +460,53 @@ SUBOFSI (SI a, SI b, BI c)
   return res;
 }
 
+SEMOPS_INLINE HI
+ADDCHI (HI a, HI b, BI c)
+{
+  HI res = ADDHI (a, ADDHI (b, c));
+  return res;
+}
+
+SEMOPS_INLINE BI
+ADDCFHI (HI a, HI b, BI c)
+{
+  HI tmp = ADDHI (a, ADDHI (b, c));
+  BI res = ((UHI) tmp < (UHI) a) || (c && tmp == a);
+  return res;
+}
+
+SEMOPS_INLINE BI
+ADDOFHI (HI a, HI b, BI c)
+{
+  HI tmp = ADDHI (a, ADDHI (b, c));
+  BI res = (((a < 0) == (b < 0))
+	    && ((a < 0) != (tmp < 0)));
+  return res;
+}
+
+SEMOPS_INLINE HI
+SUBCHI (HI a, HI b, BI c)
+{
+  HI res = SUBHI (a, ADDHI (b, c));
+  return res;
+}
+
+SEMOPS_INLINE BI
+SUBCFHI (HI a, HI b, BI c)
+{
+  BI res = ((UHI) a < (UHI) b) || (c && a == b);
+  return res;
+}
+
+SEMOPS_INLINE BI
+SUBOFHI (HI a, HI b, BI c)
+{
+  HI tmp = SUBHI (a, ADDHI (b, c));
+  BI res = (((a < 0) != (b < 0))
+	    && ((a < 0) != (tmp < 0)));
+  return res;
+}
+
 #else
 
 SI ADDCSI (SI, SI, BI);
@@ -461,6 +515,12 @@ UBI ADDOFSI (SI, SI, BI);
 SI SUBCSI (SI, SI, BI);
 UBI SUBCFSI (SI, SI, BI);
 UBI SUBOFSI (SI, SI, BI);
+HI ADDCHI (HI, HI, BI);
+UBI ADDCFHI (HI, HI, BI);
+UBI ADDOFHI (HI, HI, BI);
+HI SUBCHI (HI, HI, BI);
+UBI SUBCFHI (HI, HI, BI);
+UBI SUBOFHI (HI, HI, BI);
 
 #endif
 
