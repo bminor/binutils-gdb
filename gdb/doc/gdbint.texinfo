@@ -57,6 +57,8 @@ are preserved on all copies.
 * Releases::			Configuring GDB for release
 * README::			The README file
 * New Architectures::		Defining a new host or target architecture
+* Host versus Target::		What features are in which files
+* Symbol Reading::		Defining new symbol readers
 
 @end menu
 
@@ -132,7 +134,7 @@ warnings are a good example.
 @chapter Configuring GDB for release
 
 
-GDB should be released after doing @samp{config.gdb none} in the top level
+GDB should be released after doing @samp{./configure none} in the top level
 directory.  This will leave a makefile there, but no tm- or xm- files.
 The makefile is needed, for example, for @samp{make gdb.tar.Z}@dots{}  If you
 have tm- or xm-files in the main source directory, C's include rules
@@ -140,10 +142,22 @@ cause them to be used in preference to tm- and xm-files in the
 subdirectories where the user will actually configure and build the
 binaries.
 
-@samp{config.gdb none} is also a good way to rebuild the top level Makefile
-after changing Makefile.dist, alldeps.mak, etc.
+@samp{./configure none} is also a good way to rebuild the top level Makefile
+after changing Makefile.in, alldeps.mak, etc.
 
+@emph{TEMPORARY RELEASE PROCEDURE FOR DOCUMENTATION}
+@file{gdb.texinfo} is currently marked up using the texinfo-2 macros,
+which are not yet a default for anything (but we have to start using
+them sometime).  
 
+For making paper, the only thing this implies is the right generation of
+texinfo.tex needs to be included in the distribution.
+
+For making info files, however, rather than duplicating the texinfo2
+distribution, generate gdb.texinfo locally, and include the files
+gdb.info* in the distribution.  Note the plural; 
+@samp{M-x texinfo-format-buffer} will split the document into one overall file
+and five or so include files.
 
 @node README, New Architectures, Releases, Top
 @chapter The README file
@@ -154,7 +168,7 @@ appear anywhere else in the directory.
 
 
 
-@node New Architectures,  , README, Top
+@node New Architectures, Host versus Target, README, Top
 @chapter Defining a new host or target architecture
 
 
@@ -212,6 +226,117 @@ on the target system.  These functions open and examine an exec file,
 extract data from one, write data to one, print information about one,
 etc.  Now that executable files are handled with BFD, every architecture
 should be able to use the generic exec.c rather than its own custom code.
+
+@node Host versus Target, Symbol Reading, New Architectures, Top
+@chapter What is considered ``host-dependent'' versus ``target-dependent''?
+
+The xconfig/*, xm-*.h and *-xdep.c files are for host support.  The
+question is, what features or aspects of a debugging or cross-debugging
+environment are considered to be ``host'' support.
+
+Defines and include files needed to build on the host are host support.
+Examples are tty support, system defined types, host byte order, host
+float format.
+
+Unix child process support is considered an aspect of the host.  Since
+when you fork on the host you are still on the host, the various macros
+needed for finding the registers in the upage, running ptrace, and such
+are all in the host-dependent files.
+
+This is still somewhat of a grey area; I (John Gilmore) didn't do the
+xm- and tm- split for gdb (it was done by Jim Kingdon) so I have had to
+figure out the grounds on which it was split, and make my own choices
+as I evolve it.  I have moved many things out of the xdep files
+actually, partly as a result of BFD and partly by removing duplicated
+code.
+
+
+@node Symbol Reading, , Host Versus Target, Top
+@chapter Symbol Reading
+
+GDB reads symbols from "symbol files".  The usual symbol file is the
+file containing the program which gdb is debugging.  GDB can be directed
+to use a different file for symbols (with the ``symbol-file''
+command), and it can also read more symbols via the ``add-file'' and ``load''
+commands, or while reading symbols from shared libraries.
+
+Symbol files are initially opened by @file{symfile.c} using the BFD
+library.  BFD identifies the type of the file by examining its header.
+@code{symfile_init} then uses this identification to locate a
+set of symbol-reading functions.
+
+Symbol reading modules identify themselves to GDB by calling
+@code{add_symtab_fns} during their module initialization.  The argument
+to @code{add_symtab_fns} is a @code{struct sym_fns} which contains
+the name (or name prefix) of the symbol format, the length of the prefix,
+and pointers to four functions.  These functions are called at various
+times to process symbol-files whose identification matches the specified
+prefix.
+
+The functions supplied by each module are:
+
+@table @code
+@item XXX_symfile_init(struct sym_fns *sf)
+
+Called from @code{symbol_file_add} when we are about to read a new
+symbol file.  This function should clean up any internal state
+(possibly resulting from half-read previous files, for example)
+and prepare to read a new symbol file. Note that the symbol file
+which we are reading might be a new "main" symbol file, or might
+be a secondary symbol file whose symbols are being added to the
+existing symbol table.
+
+The argument to @code{XXX_symfile_init} is a newly allocated
+@code{struct sym_fns} whose @code{bfd} field contains the BFD
+for the new symbol file being read.  Its @code{private} field
+has been zeroed, and can be modified as desired.  Typically,
+a struct of private information will be @code{malloc}'d, and
+a pointer to it will be placed in the @code{private} field.
+
+There is no result from @code{XXX_symfile_init}, but it can call
+@code{error} if it detects an unavoidable problem.
+
+@item XXX_new_init()
+
+Called from @code{symbol_file_add} when discarding existing symbols.
+This function need only handle 
+the symbol-reading module's internal state; the symbol table data
+structures visible to the rest of GDB will be discarded by
+@code{symbol_file_add}.  It has no arguments and no result.
+It may be called after @code{XXX_symfile_init}, if a new symbol
+table is being read, or may be called alone if all symbols are
+simply being discarded.
+
+@item XXX_symfile_read(struct sym_fns *sf, CORE_ADDR addr, int mainline)
+
+Called from @code{symbol_file_add} to actually read the symbols from a
+symbol-file into a set of psymtabs or symtabs.
+
+@code{sf} points to the struct sym_fns originally passed to @code{XXX_sym_init} for possible initialization.  
+@code{addr} is the offset between the file's specified start address and
+its true address in memory.  @code{mainline} is 1 if this is the
+main symbol table being read, and 0 if a secondary
+symbol file (e.g. shared library or dynamically loaded file)
+is being read.
+
+@end table
+
+In addition, if a symbol-reading module creates psymtabs when
+XXX_symfile_read is called, these psymtabs will contain a pointer to
+a function @code{XXX_psymtab_to_symtab}, which can be called from
+any point in the GDB symbol-handling code.
+
+@table @code
+@item XXX_psymtab_to_symtab (struct partial_symtab *pst)
+
+Called from @code{psymtab_to_symtab} (or the PSYMTAB_TO_SYMTAB
+macro) if the psymtab has not already been read in and had its
+@code{pst->symtab} pointer set.  The argument is the psymtab
+to be fleshed-out into a symtab.  Upon return, pst->readin
+should have been set to 1, and pst->symtab should contain a
+pointer to the new corresponding symtab, or zero if there
+were no symbols in that part of the symbol file.
+@end table
 
 @contents
 @bye
