@@ -36,7 +36,53 @@
 
    Each dictionary starts with a 'virtual function table' that
    contains the functions that actually implement the various
-   operations that dictionaries provide.  */
+   operations that dictionaries provide.
+
+   To add a new dictionary implementation <impl>, what you should do
+   is:
+
+   * Add a new element DICT_<IMPL> to dict_type.
+   
+   * Create a new structure dictionary_<impl>.  If your new
+   implementation is a variant of an existing one, make sure that
+   their structs have the same initial data members.  Define accessor
+   macros for your new data members.
+
+   * Implement all the functions in dict_vtbl as static functions,
+   whose name is the same as the corresponding member of dict_vtbl
+   plus _<impl>.  You don't have to do this for those members where
+   you can reuse existing generic functions
+   (e.g. add_symbol_nonexpandable, free_obstack) or in the case where
+   your new implementation is a variant of an existing implementation
+   and where the variant doesn't affect the member function in
+   question.
+
+   * Define a static const struct dict_vtbl dict_<impl>_vtbl.
+
+   * Define a function dict_create_<impl> to create these
+   gizmos.  Add its declaration to dictionary.h.
+
+   To add a new operation <op> on all existing implementations, what
+   you should do is:
+
+   * Add a new member <op> to struct dict_vtbl.
+
+   * If there is useful generic behavior <op>, define a static
+   function <op>_something_informative that implements that behavior.
+   (E.g. add_symbol_nonexpandable, free_obstack.)
+
+   * For every implementation <impl> that should have its own specific
+   behavior for <op>, define a static function <op>_<impl>
+   implementing it.
+
+   * Modify all existing dict_vtbl_<impl>'s to include the appropriate
+   member.
+
+   * Define a function dict_<op> that looks up <op> in the dict_vtbl
+   and calls the appropriate function.  Add a declaration for
+   dict_<op> to dictionary.h.
+   
+*/
 
 /* NOTE: carlton/2002-09-20: Originally, I'd had each dictionary start
    with a dict_type member, and had implemented the various functions

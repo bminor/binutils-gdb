@@ -23,7 +23,9 @@
 
 /* FIXME: carlton/2002-09-24: because of namespace_enum, you have to
    include symtab.h before including this file.  But I'm leaving in
-   opaque declarations as if that weren't true.  */
+   opaque declarations as if that weren't true.  (Probably the
+   'namespace' argument to dict_lookup should eventually be moved back
+   into lookup_block_symbol, I think.)  */
 
 /* An opaque type for dictionaries; only dictionary.c should know
    about its innards.  */
