@@ -2368,10 +2368,8 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 	{
 	  if (s->_raw_size != 0)
 	    {
-	      /* Remember whether there are any reloc sections other
-		 than .rela.plt.  */
-	      if (s != htab->srelplt)
-		relocs = true;
+	      /* Remember whether there are any reloc sections.  */
+	      relocs = true;
 
 	      /* We use the reloc_count field as a counter if we need
 		 to copy relocs into the output file.  */
