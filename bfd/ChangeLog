@@ -1,3 +1,14 @@
+Sat Jun 29 16:18:51 1996  Kim Knuttila  <krk@cygnus.com>
+
+	* peicode.h (coff_swap_aouthdr_in): Missing initializations of
+	first_thunk_address, thunk_size, and import_table_size.
+	* peicode.h: Improved some diagnostics regarding edata sections.
+
+	* coff-ppc.c (coff_ppc_relocate_section): Earlier error check
+	on IMGLUE relocs.
+	(coff_ppc_relocate_section): Improved diagnostic for large TOCDEFN's.
+	(TARGET_LITTLE_SYM): Added missing D_PAGED.
+
 Fri Jun 28 13:48:45 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c (xcoff_link_check_ar_symbols): An undefined symbol
