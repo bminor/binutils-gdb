@@ -1,3 +1,8 @@
+2000-03-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb_wait.h: add definitions of WSETSTOP and WSETEXIT for Linux.
+	* linux-thread.c: Use WSETSTOP instead of W_STOPCODE.
+
 Fri Mar 17 11:06:59 2000  Philippe De Muyter  <phdm@macqel.be>
 
 	* language.c (set_lang_str): Do not call `free' for a null pointer.

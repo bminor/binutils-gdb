@@ -86,11 +86,19 @@
 #endif
 
 #ifndef	WSETEXIT
+# ifdef	W_EXITCODE
+#define	WSETEXIT(w,status) ((w) = W_EXITCODE(status,0))
+# else
 #define WSETEXIT(w,status) ((w) = (0 | ((status) << 8)))
+# endif
 #endif
 
 #ifndef	WSETSTOP
+# ifdef	W_STOPCODE
+#define	WSETSTOP(w,status) ((w) = W_STOPCODE(status,0))
+# else
 #define WSETSTOP(w,sig)	   ((w) = (0177 | ((sig) << 8)))
+# endif
 #endif
 
 /*
