@@ -84,7 +84,6 @@ block_all_usings (const struct block *block)
   return using;
 }
 
-
 /* Set block_using (BLOCK) to USING; if needed, allocate memory via
    OBSTACK.  */
 

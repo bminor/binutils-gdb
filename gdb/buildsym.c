@@ -478,20 +478,6 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		 want to make sure I'm not running into surprises.  */
 	      gdb_assert (*next == '\0');
 	    }
-	  
-#if 0	  
-	  for (next = cp_find_first_component (name);
-	       *next == ':';
-	       /* The '+ 2' is to skip the '::'.  */
-	       next = cp_find_first_component (next + 2))
-	    {
-	      block_set_using (block,
-			       cp_add_using_obstack (name, 0, next - name,
-						     block_using (block),
-						     &objfile->symbol_obstack),
-			       &objfile->symbol_obstack);
-	    }
-#endif
 	}
     }
   else

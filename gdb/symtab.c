@@ -137,6 +137,7 @@ struct symbol *lookup_symbol_aux_using_loop (const char *name,
 					     const char *scope,
 					     int scope_len,
 					     struct using_direct_node *using);
+
 static
 struct symbol *lookup_symbol_namespace (const char *prefix,
 					int prefix_len,
@@ -1299,6 +1300,11 @@ symbol *lookup_symbol_aux_using_loop (const char *name,
    C::E::var.  I don't think this can be fixed without making
    namespaces first-class objects.  (Which is certainly a good idea
    for other reasons, but it will take a little while.)  */
+
+/* NOTE: carlton/2002-11-19: This is optimistically called
+   lookup_symbol_namespace instead of lookup_symbol_aux_namespace in
+   hopes that it or something like it might eventually be useful
+   outside of lookup_symbol.  */
 
 static struct symbol *
 lookup_symbol_namespace (const char *prefix,

@@ -1,3 +1,10 @@
+2002-11-19  David Carlton  <carlton@math.stanford.edu>
+
+	* block.c: Whitespace cleanup.
+	* buildsym.c (finish_block): Delete #if'd out code.
+	* symtab.c (lookup_symbol_namespace): Add comment.
+	* dwarf2read.c (scan_partial_symbols): Fix typo.
+
 2002-11-15  David Carlton  <carlton@math.stanford.edu>
 
 	* symtab.c (lookup_symbol_aux): Get at static block via

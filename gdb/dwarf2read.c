@@ -1348,7 +1348,7 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
   /* We only want to read in symbols corresponding to variables or
      other similar objects that are global or static.  Normally, these
      are all children of the DW_TAG_compile_unit die, so are all at
-     level 1.  But C++ namespaces give ries to DW_TAG_namespace dies
+     level 1.  But C++ namespaces give rise to DW_TAG_namespace dies
      whose children are global objects.  So we keep track of what
      level we currently think of as referring to file scope; this
      should always equal 1 plus the number of namespaces that we are
