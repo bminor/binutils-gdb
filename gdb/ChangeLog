@@ -1,3 +1,11 @@
+Mon Dec 12 16:59:29 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.tcl (reg_config_menu create_registers_window
+	recompute_reg_display_list):  Use array instead of individual vars
+	for register display list.
+	* (recompute_reg_display_list update_registers):  Fix bug with not
+	displaying all registers.
+
 Mon Dec 12 13:06:59 1994  Jim Kingdon  <kingdon@deneb.cygnus.com>
 
 	* f-lang.c: Remove duplicate declaration of

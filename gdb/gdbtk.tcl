@@ -1151,7 +1151,7 @@ proc reg_config_menu {} {
 	for {set regnum 0} {$regnum < $num_regs} {incr regnum} {
 		set regname [lindex $regnames $regnum]
 		checkbutton .reg.config.col$col.$row -text $regname -pady 0 \
-			-variable regena.$regnum -relief flat -anchor w -bd 1 \
+			-variable regena($regnum) -relief flat -anchor w -bd 1 \
 			-command "recompute_reg_display_list $num_regs
 				  populate_reg_window
 				  update_registers all"
@@ -1186,12 +1186,12 @@ proc create_registers_window {} {
 	if ![info exists reg_format] {
 		global reg_display_list
 		global changed_reg_list
+		global regena
 
 		set reg_format {}
 		set num_regs [llength [gdb_regnames]]
 		for {set regnum 0} {$regnum < $num_regs} {incr regnum} {
-			global regena.$regnum
-			set regena.$regnum 1
+			set regena($regnum) 1
 		}
 		recompute_reg_display_list $num_regs
 		set changed_reg_list $reg_display_list
@@ -1239,17 +1239,22 @@ proc create_registers_window {} {
 	populate_reg_window
 }
 
-# Convert all of the regena.$regnums into a list of the enabled $regnums
+# Convert regena into a list of the enabled $regnums
 
 proc recompute_reg_display_list {num_regs} {
 	global reg_display_list
+	global regmap
+	global regena
 
 	catch {unset reg_display_list}
-	for {set regnum 0} {$regnum < $num_regs} {incr regnum} {
-		global regena.$regnum
 
-		if {[set regena.$regnum] != 0} {
+	set line 1
+	for {set regnum 0} {$regnum < $num_regs} {incr regnum} {
+
+		if {[set regena($regnum)] != 0} {
 			lappend reg_display_list $regnum
+			set regmap($regnum) $line
+			incr line
 		}
 	}
 }
@@ -1308,6 +1313,7 @@ proc update_registers {which} {
 	global reg_display_list
 	global changed_reg_list
 	global highlight
+	global regmap
 
 	set margin [expr $max_regname_width + 1]
 	set win .reg.text
@@ -1317,13 +1323,13 @@ proc update_registers {which} {
 	$win configure -state normal
 
 	if {$which == "all"} {
-		set row 1
+		set lineindex 1
 		foreach regnum $reg_display_list {
 			set regval [gdb_fetch_registers $reg_format $regnum]
 			set regval [format "%-*s" $valwidth $regval]
-			$win delete $row.$margin "$row.0 lineend"
-			$win insert $row.$margin $regval
-			incr row
+			$win delete $lineindex.$margin "$lineindex.0 lineend"
+			$win insert $lineindex.$margin $regval
+			incr lineindex
 		}
 		$win configure -state disabled
 		return
@@ -1339,11 +1345,12 @@ proc update_registers {which} {
 
 	set changed_reg_list [eval gdb_changed_register_list $reg_display_list]
 
+	set lineindex 1
 	foreach regnum $changed_reg_list {
 		set regval [gdb_fetch_registers $reg_format $regnum]
 		set regval [format "%-*s" $valwidth $regval]
-		set lineindex $regnum
-		incr lineindex
+
+		set lineindex $regmap($regnum)
 		$win delete $lineindex.$margin "$lineindex.0 lineend"
 		$win insert $lineindex.$margin $regval
 		$win tag add $win.$regnum $lineindex.0 "$lineindex.0 lineend"
