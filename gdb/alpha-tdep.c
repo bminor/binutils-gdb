@@ -80,14 +80,8 @@ alpha_cannot_store_register (int regno)
   return regno == ALPHA_ZERO_REGNUM;
 }
 
-static int
-alpha_register_convertible (int regno)
-{
-  return (regno >= FP0_REGNUM && regno <= FP0_REGNUM + 31);
-}
-
 static struct type *
-alpha_register_virtual_type (int regno)
+alpha_register_type (struct gdbarch *gdbarch, int regno)
 {
   if (regno == ALPHA_SP_REGNUM || regno == ALPHA_GP_REGNUM)
     return builtin_type_void_data_ptr;
@@ -153,73 +147,91 @@ alpha_register_virtual_size (int regno)
   return 8;
 }
 
+/* The following represents exactly the conversion performed by
+   the LDS instruction.  This applies to both single-precision
+   floating point and 32-bit integers.  */
+
+static void
+alpha_lds (void *out, const void *in)
+{
+  ULONGEST mem     = extract_unsigned_integer (in, 4);
+  ULONGEST frac    = (mem >>  0) & 0x7fffff;
+  ULONGEST sign    = (mem >> 31) & 1;
+  ULONGEST exp_msb = (mem >> 30) & 1;
+  ULONGEST exp_low = (mem >> 23) & 0x7f;
+  ULONGEST exp, reg;
+
+  exp = (exp_msb << 10) | exp_low;
+  if (exp_msb)
+    {
+      if (exp_low == 0x7f)
+	exp = 0x7ff;
+    }
+  else
+    {
+      if (exp_low != 0x00)
+	exp |= 0x380;
+    }
+
+  reg = (sign << 63) | (exp << 52) | (frac << 29);
+  store_unsigned_integer (out, 8, reg);
+}
+
+/* Similarly, this represents exactly the conversion performed by
+   the STS instruction.  */
+
+static inline void
+alpha_sts (void *out, const void *in)
+{
+  ULONGEST reg, mem;
+
+  reg = extract_unsigned_integer (in, 8);
+  mem = ((reg >> 32) & 0xc0000000) | ((reg >> 29) & 0x3fffffff);
+  store_unsigned_integer (out, 4, mem);
+}
+
 /* The alpha needs a conversion between register and memory format if the
    register is a floating point register and memory format is float, as the
    register format must be double or memory format is an integer with 4
    bytes or less, as the representation of integers in floating point
    registers is different. */
 
-static void
-alpha_convert_flt_dbl (void *out, const void *in)
+static int
+alpha_convert_register_p (int regno)
 {
-  DOUBLEST d = extract_typed_floating (in, builtin_type_ieee_single_little);
-  store_typed_floating (out, builtin_type_ieee_double_little, d);
+  return (regno >= ALPHA_FP0_REGNUM && regno < ALPHA_FP0_REGNUM + 31);
 }
 
 static void
-alpha_convert_dbl_flt (void *out, const void *in)
+alpha_register_to_value (int regnum, struct type *valtype, char *in, char *out)
 {
-  DOUBLEST d = extract_typed_floating (in, builtin_type_ieee_double_little);
-  store_typed_floating (out, builtin_type_ieee_single_little, d);
+  switch (TYPE_LENGTH (valtype))
+    {
+    case 4:
+      alpha_sts (out, in);
+      break;
+    case 8:
+      memcpy (out, in, 8);
+      break;
+    default:
+      error ("Cannot retrieve value from floating point register");
+    }
 }
 
 static void
-alpha_register_convert_to_virtual (int regnum, struct type *valtype,
-				   char *raw_buffer, char *virtual_buffer)
+alpha_value_to_register (struct type *valtype, int regnum, char *in, char *out)
 {
-  if (TYPE_LENGTH (valtype) >= ALPHA_REGISTER_SIZE)
+  switch (TYPE_LENGTH (valtype))
     {
-      memcpy (virtual_buffer, raw_buffer, ALPHA_REGISTER_SIZE);
-      return;
+    case 4:
+      alpha_lds (out, in);
+      break;
+    case 8:
+      memcpy (out, in, 8);
+      break;
+    default:
+      error ("Cannot store value in floating point register");
     }
-
-  /* Note that everything below is less than 8 bytes long.  */
-
-  if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
-    alpha_convert_dbl_flt (virtual_buffer, raw_buffer);
-  else if (TYPE_CODE (valtype) == TYPE_CODE_INT)
-    {
-      ULONGEST l;
-      l = extract_unsigned_integer (raw_buffer, ALPHA_REGISTER_SIZE);
-      l = ((l >> 32) & 0xc0000000) | ((l >> 29) & 0x3fffffff);
-      store_unsigned_integer (virtual_buffer, TYPE_LENGTH (valtype), l);
-    }
-  else
-    error ("Cannot retrieve value from floating point register");
-}
-
-static void
-alpha_register_convert_to_raw (struct type *valtype, int regnum,
-			       char *virtual_buffer, char *raw_buffer)
-{
-  if (TYPE_LENGTH (valtype) >= ALPHA_REGISTER_SIZE)
-    {
-      memcpy (raw_buffer, virtual_buffer, ALPHA_REGISTER_SIZE);
-      return;
-    }
-
-  /* Note that everything below is less than 8 bytes long.  */
-
-  if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
-    alpha_convert_flt_dbl (raw_buffer, virtual_buffer);
-  else if (TYPE_CODE (valtype) == TYPE_CODE_INT)
-    {
-      ULONGEST l = unpack_long (valtype, virtual_buffer);
-      l = ((l & 0xc0000000) << 32) | ((l & 0x3fffffff) << 29);
-      store_unsigned_integer (raw_buffer, ALPHA_REGISTER_SIZE, l);
-    }
-  else
-    error ("Cannot store value in floating point register");
 }
 
 
@@ -425,7 +437,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 	{
 	case 4:
 	  regcache_cooked_read (regcache, ALPHA_FP0_REGNUM, raw_buffer);
-	  alpha_convert_dbl_flt (valbuf, raw_buffer);
+	  alpha_sts (valbuf, raw_buffer);
 	  break;
 
 	case 8:
@@ -502,7 +514,7 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
       switch (length)
 	{
 	case 4:
-	  alpha_convert_flt_dbl (raw_buffer, valbuf);
+	  alpha_lds (raw_buffer, valbuf);
 	  regcache_cooked_write (regcache, ALPHA_FP0_REGNUM, raw_buffer);
 	  break;
 
@@ -1497,15 +1509,14 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_byte (gdbarch, alpha_register_byte);
   set_gdbarch_register_raw_size (gdbarch, alpha_register_raw_size);
   set_gdbarch_register_virtual_size (gdbarch, alpha_register_virtual_size);
-  set_gdbarch_register_virtual_type (gdbarch, alpha_register_virtual_type);
+  set_gdbarch_register_type (gdbarch, alpha_register_type);
 
   set_gdbarch_cannot_fetch_register (gdbarch, alpha_cannot_fetch_register);
   set_gdbarch_cannot_store_register (gdbarch, alpha_cannot_store_register);
 
-  set_gdbarch_register_convertible (gdbarch, alpha_register_convertible);
-  set_gdbarch_register_convert_to_virtual (gdbarch,
-                                           alpha_register_convert_to_virtual);
-  set_gdbarch_register_convert_to_raw (gdbarch, alpha_register_convert_to_raw);
+  set_gdbarch_convert_register_p (gdbarch, alpha_convert_register_p);
+  set_gdbarch_register_to_value (gdbarch, alpha_register_to_value);
+  set_gdbarch_value_to_register (gdbarch, alpha_value_to_register);
 
   set_gdbarch_register_reggroup_p (gdbarch, alpha_register_reggroup_p);
 

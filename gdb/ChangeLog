@@ -1,5 +1,18 @@
 2003-06-02  Richard Henderson  <rth@redhat.com>
 
+	* alpha-tdep.c (alpha_register_type): Change from _virtual_type.
+	(alpha_convert_flt_dbl, alpha_convert_dbl_flt): Remove.
+	(alpha_lds, alpha_sts): New.
+	(alpha_convert_register_p): Change from _register_convertible.
+	(alpha_register_to_value): Change from _convert_to_virtual; 
+	restructure and fail for type sizes other than 4 or 8.
+	(alpha_value_to_register): Similarly.
+	(alpha_extract_return_value): Use alpha_sts.
+	(alpha_store_return_value): Use alpha_lds.
+	(alpha_gdbarch_init): Update hooks.
+
+2003-06-02  Richard Henderson  <rth@redhat.com>
+
 	* alpha-tdep.c (alpha_register_virtual_type): Use alpha-specific
 	regnum identifiers.
 	(alpha_sigtramp_register_address): Likewise.
