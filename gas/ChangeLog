@@ -1,9 +1,18 @@
+start-sanitize-d30v
+Thu Mar 27 00:29:46 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d30v.c (md_apply_fix3): Get the relocs right.
+
+end-sanitize-d30v	
 Wed Mar 26 13:35:15 1997  H.J. Lu  <hjl@lucon.org>
 
 	* config/tc-i386.c (tc_i386_fix_adjustable): Only define if
 	BFD_ASSEMBLER.
 
 Wed Mar 26 11:32:51 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* input-scrub.c (input_scrub_next_buffer): Handle very long input
+	lines correctly.
 
 	* listing.c (print_lines): Add lineno parameter.  Change all
 	callers.
