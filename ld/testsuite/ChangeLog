@@ -1,3 +1,10 @@
+1999-06-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* ld-scripts/phdrs.exp: Change target check from "*-*-linuxaout*"
+	to "*-*-linux*aout*".
+	* ld-scripts/weak.exp: Likewise.
+	* ld-shared/shared.exp: Likewise.  Simplify condition a bit.
+
 Wed Jun  9 12:02:33 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 	* ld-cdtest/cdtest-main.cc: Avoid `implicit int' warning.
