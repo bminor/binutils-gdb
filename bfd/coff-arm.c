@@ -900,6 +900,11 @@ coff_arm_reloc_type_lookup (abfd, code)
 #define BADMAG(x) ARMBADMAG(x)
 #define ARM 1			/* Customize coffcode.h */
 
+/* Make sure that the 'r_offset' field is copied properly
+    so that identical binaries will compare the same.  */
+#define SWAP_IN_RELOC_OFFSET	H_GET_32
+#define SWAP_OUT_RELOC_OFFSET	H_PUT_32
+
 /* Extend the coff_link_hash_table structure with a few ARM specific fields.
    This allows us to store global data here without actually creating any
    global variables, which is a no-no in the BFD world.  */

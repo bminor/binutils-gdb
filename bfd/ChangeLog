@@ -1,3 +1,8 @@
+2002-03-27  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* coff-arm.c (SWAP_IN_RELOC_OFFSET): Define.
+	(SWAP_OUT_RELOC_OFFSET): Define.
+
 2002-03-27  Gregory Steuck <greg@nest.cx>
 
 	* elf.c (_bfd_elf_get_symtab_upper_bound): Leave space for
