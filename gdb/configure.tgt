@@ -38,9 +38,11 @@ esac
 
 case "${target}" in
 
+*-*-freebsd*)		gdb_target=fbsd
+			;;
+
 alpha*-*-osf*)		gdb_target=alpha-osf1 ;;
 alpha*-*-linux*)	gdb_target=alpha-linux ;;
-alpha*-*-freebsd*)	gdb_target=fbsd ;;
 alpha*-*-netbsd*)	gdb_target=nbsd ;;
 alpha*-*-*)		gdb_target=alpha ;;
 
@@ -91,7 +93,6 @@ i[3456]86-sequent-sysv*) gdb_target=ptx ;;
 i[3456]86-ncr-*)	gdb_target=ncr3000 ;;
 # OBSOLETE i[3456]86-*-aix*)	gdb_target=i386aix ;;
 i[3456]86-*-bsd*)	gdb_target=i386bsd ;;
-i[3456]86-*-freebsd*)	gdb_target=fbsd ;;
 i[3456]86-*-netbsd*)	gdb_target=nbsd ;;
 i[3456]86-*-openbsd*)	gdb_target=nbsd ;;	# FIXME: needs its own target
 # OBSOLETE i[3456]86-*-os9k)	gdb_target=i386os9k ;;
@@ -268,8 +269,6 @@ sparc86x-*-*)		gdb_target=sparclite ;;
 # regs (some of which are usable in v8plus) so sp64sol.mt hasn't been
 # deleted though presumably it should be eventually.
 #sparc64-*-solaris2*)	gdb_target=sp64sol2 ;;
-sparc64-*-freebsd*|ultrasparc-*-freebsd*|sparcv9-*-freebsd*)
-			gdb_target=fbsd ;;
 sparc64-*-linux*)	gdb_target=sp64linux ;;
 sparc64-*-netbsd*)	gdb_target=nbsd64 ;;
 sparcv9-*-* | sparc64-*-*) gdb_target=sp64 ;;
@@ -292,7 +291,6 @@ v850*-*-*)		gdb_target=v850
 x86_64-*-linux*)	gdb_target=x86-64linux
 			build_gdbserver=yes
 			;;
-
 
 z8k-*-coff*)		gdb_target=z8k ;;
 
