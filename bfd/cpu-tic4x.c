@@ -23,6 +23,10 @@
 #include "sysdep.h"
 #include "libbfd.h"
 
+static boolean c4x_scan
+    PARAMS ((const struct bfd_arch_info *, const char * ));
+
+
 static boolean
 c4x_scan (info, string)
      const struct bfd_arch_info *info;
