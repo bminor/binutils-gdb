@@ -164,6 +164,8 @@ enum i386_regnum
   I386_EDI_REGNUM,		/* %edi */
   I386_EIP_REGNUM,		/* %eip */
   I386_EFLAGS_REGNUM,		/* %eflags */
+  I386_CS_REGNUM,		/* %cs */
+  I386_SS_REGNUM,		/* %ss */
   I386_ST0_REGNUM = 16,		/* %st(0) */
 };
 

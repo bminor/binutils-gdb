@@ -1,3 +1,8 @@
+2003-12-28  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.h (i386_regnum): Add I386_CS_REGNUM and
+	I386_SS_REGNUM.
+
 2003-12-27  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2-frame.c (dwarf2_reg_rule): Add REG_RA and REG_CFA.
