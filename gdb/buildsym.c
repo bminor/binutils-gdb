@@ -34,6 +34,7 @@
 #include "gdbtypes.h"
 #include "complaints.h"
 #include "gdb_string.h"
+#include "expression.h"		/* For "enum exp_opcode" used by... */
 #include "language.h"		/* For "longest_local_hex_string_custom" */
 
 /* Ask buildsym.h to define the vars it normally declares `extern'.  */

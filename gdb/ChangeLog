@@ -1,6 +1,6 @@
 Mon Feb 21 12:50:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	* buildsym.c: Include "language.h" for
+	* buildsym.c: Include "language.h" and "expression.h" for
  	longest_local_hex_string_custom.
 
 Mon Feb 21 11:17:18 2000  Andrew Cagney  <cagney@b1.cygnus.com>
