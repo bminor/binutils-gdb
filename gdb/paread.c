@@ -325,7 +325,7 @@ pa_symfile_read (objfile, section_offsets, mainline)
   do_cleanups (back_to);
 }
 
-/* This cleans up the objfile's sym_private pointer, and the chain of
+/* This cleans up the objfile's sym_stab_info pointer, and the chain of
    stab_section_info's, that might be dangling from it.  */
 
 static void
@@ -334,7 +334,7 @@ free_painfo (objp)
 {
   struct objfile *objfile = (struct objfile *)objp;
   struct dbx_symfile_info *dbxinfo = (struct dbx_symfile_info *)
-				     objfile->sym_private;
+				     objfile->sym_stab_info;
   struct stab_section_info *ssi, *nssi;
 
   ssi = dbxinfo->stab_section_info;
@@ -371,9 +371,9 @@ static void
 pa_symfile_finish (objfile)
      struct objfile *objfile;
 {
-  if (objfile -> sym_private != NULL)
+  if (objfile -> sym_stab_info != NULL)
     {
-      mfree (objfile -> md, objfile -> sym_private);
+      mfree (objfile -> md, objfile -> sym_stab_info);
     }
 }
 
@@ -401,10 +401,10 @@ pa_symfile_init (objfile)
   stringsect = bfd_get_section_by_name (sym_bfd, "$GDB_STRINGS$");
 
   /* Allocate struct to keep track of the symfile */
-  objfile->sym_private = (PTR)
+  objfile->sym_stab_info = (PTR)
     xmmalloc (objfile -> md, sizeof (struct dbx_symfile_info));
 
-  memset ((PTR) objfile->sym_private, 0, sizeof (struct dbx_symfile_info));
+  memset ((PTR) objfile->sym_stab_info, 0, sizeof (struct dbx_symfile_info));
 
   if (!stabsect)
     return;

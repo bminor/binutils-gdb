@@ -251,7 +251,7 @@ elf_symtab_read (abfd, addr, objfile)
      seen any section info for it yet.  */
   asymbol *filesym = 0;
   struct dbx_symfile_info *dbx = (struct dbx_symfile_info *)
-				 objfile->sym_private;
+				 objfile->sym_stab_info;
   unsigned long size;
   
   storage_needed = get_symtab_upper_bound (abfd);
@@ -472,13 +472,13 @@ elf_symfile_read (objfile, section_offsets, mainline)
   memset ((char *) &ei, 0, sizeof (ei));
 
   /* Allocate struct to keep track of the symfile */
-  objfile->sym_private = (PTR)
+  objfile->sym_stab_info = (PTR)
     xmmalloc (objfile -> md, sizeof (struct dbx_symfile_info));
-  memset ((char *) objfile->sym_private, 0, sizeof (struct dbx_symfile_info));
+  memset ((char *) objfile->sym_stab_info, 0, sizeof (struct dbx_symfile_info));
   make_cleanup (free_elfinfo, (PTR) objfile);
 
   /* Process the normal ELF symbol table first.  This may write some 
-     chain of info into the dbx_symfile_info in objfile->sym_private,
+     chain of info into the dbx_symfile_info in objfile->sym_stab_info,
      which can later be used by elfstab_offset_sections.  */
 
   /* FIXME, should take a section_offsets param, not just an offset.  */
@@ -535,7 +535,7 @@ elf_symfile_read (objfile, section_offsets, mainline)
   do_cleanups (back_to);
 }
 
-/* This cleans up the objfile's sym_private pointer, and the chain of
+/* This cleans up the objfile's sym_stab_info pointer, and the chain of
    stab_section_info's, that might be dangling from it.  */
 
 static void
@@ -544,7 +544,7 @@ free_elfinfo (objp)
 {
   struct objfile *objfile = (struct objfile *)objp;
   struct dbx_symfile_info *dbxinfo = (struct dbx_symfile_info *)
-				     objfile->sym_private;
+				     objfile->sym_stab_info;
   struct stab_section_info *ssi, *nssi;
 
   ssi = dbxinfo->stab_section_info;
@@ -582,9 +582,9 @@ static void
 elf_symfile_finish (objfile)
      struct objfile *objfile;
 {
-  if (objfile -> sym_private != NULL)
+  if (objfile -> sym_stab_info != NULL)
     {
-      mfree (objfile -> md, objfile -> sym_private);
+      mfree (objfile -> md, objfile -> sym_stab_info);
     }
 }
 
@@ -642,7 +642,7 @@ elfstab_offset_sections (objfile, pst)
 {
   char *filename = pst->filename;
   struct dbx_symfile_info *dbx = (struct dbx_symfile_info *)
-				 objfile->sym_private;
+				 objfile->sym_stab_info;
   struct stab_section_info *maybe = dbx->stab_section_info;
   struct stab_section_info *questionable = 0;
   int i;

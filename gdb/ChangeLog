@@ -1,3 +1,13 @@
+Sun Oct  3 15:54:51 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* objfiles.h (objfile): New slot sym_stab_info, use by all
+	stab-reading formats.
+	* gdb-stabs.h (DBX_SYMFILE_INFO): Access sym_stab_info instead of
+	sym_private.
+	* coffread.c (coff_symfile_init): Alloc struct for sym_stab_info.
+	* dbxread.c, elfread.c, paread.c: Change sym_private references to
+	sym_stab_info references.
+
 Sat Oct  2 19:28:35 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* mipsread.c, objfiles.c, utils.c: Use PTR not void *.  RISC/OS

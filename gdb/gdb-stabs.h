@@ -51,7 +51,7 @@ struct stab_section_info {
 };
 
 /* Information is passed among various dbxread routines for accessing
-   symbol files.  A pointer to this structure is kept in the sym_private
+   symbol files.  A pointer to this structure is kept in the sym_stab_info
    field of the objfile struct.  */
  
 struct dbx_symfile_info {
@@ -65,7 +65,7 @@ struct dbx_symfile_info {
 				   of the original .o files before linking. */
 };
 
-#define DBX_SYMFILE_INFO(o)	((struct dbx_symfile_info *)((o)->sym_private))
+#define DBX_SYMFILE_INFO(o)	((struct dbx_symfile_info *)((o)->sym_stab_info))
 #define DBX_TEXT_SECT(o)	(DBX_SYMFILE_INFO(o)->text_sect)
 #define DBX_SYMCOUNT(o)		(DBX_SYMFILE_INFO(o)->symcount)
 #define DBX_STRINGTAB(o)	(DBX_SYMFILE_INFO(o)->stringtab)

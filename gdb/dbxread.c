@@ -594,7 +594,7 @@ dbx_symfile_init (objfile)
   unsigned char size_temp[DBX_STRINGTAB_SIZE_SIZE];
 
   /* Allocate struct to keep track of the symfile */
-  objfile->sym_private = (PTR)
+  objfile->sym_stab_info = (PTR)
     xmmalloc (objfile -> md, sizeof (struct dbx_symfile_info));
 
   /* FIXME POKING INSIDE BFD DATA STRUCTURES */
@@ -696,9 +696,9 @@ static void
 dbx_symfile_finish (objfile)
      struct objfile *objfile;
 {
-  if (objfile->sym_private != NULL)
+  if (objfile->sym_stab_info != NULL)
     {
-      mfree (objfile -> md, objfile->sym_private);
+      mfree (objfile -> md, objfile->sym_stab_info);
     }
   free_header_files ();
 }
@@ -2056,6 +2056,10 @@ copy_pending (beg, endi, end)
   return new;
 }
 
+/* FIXME: The only difference between this and elfstab_build_psymtabs is
+   the call to install_minimal_symbols for elf.  If the differences are
+   really that small, the code should be shared.  */
+
 /* Scan and build partial symbols for an coff symbol file.
    The coff file has already been processed to get its minimal symbols.
 
@@ -2094,7 +2098,7 @@ coffstab_build_psymtabs (objfile, section_offsets, mainline,
 
   /* There is already a dbx_symfile_info allocated by our caller.
      It might even contain some info from the coff symtab to help us.  */
-  info = (struct dbx_symfile_info *) objfile->sym_private;
+  info = (struct dbx_symfile_info *) objfile->sym_stab_info;
 
   DBX_TEXT_SECT (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
   if (!DBX_TEXT_SECT (objfile))
@@ -2172,7 +2176,7 @@ elfstab_build_psymtabs (objfile, section_offsets, mainline,
 
   /* There is already a dbx_symfile_info allocated by our caller.
      It might even contain some info from the ELF symtab to help us.  */
-  info = (struct dbx_symfile_info *) objfile->sym_private;
+  info = (struct dbx_symfile_info *) objfile->sym_stab_info;
 
   DBX_TEXT_SECT (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
   if (!DBX_TEXT_SECT (objfile))
