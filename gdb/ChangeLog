@@ -1,5 +1,8 @@
 2003-03-20  Andrew Cagney  <cagney@redhat.com>
 
+	* main.c (gdb_main): Return 1.
+	(captured_main): Call error to report an invalid interpreter.
+
 	* Makefile.in (alpha-osf1-tdep.o): Update dependencies.
 	* alpha-osf1-tdep.c: Include "gdb_string.h".
 
