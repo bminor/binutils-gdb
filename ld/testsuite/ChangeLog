@@ -1,3 +1,8 @@
+2003-10-08  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-scripts/defined2.d, ld-scripts/defined2.t: New test.
+	* ld-scripts/defined.exp: Run defined2.
+
 2003-10-07  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* ld-elfvsb/elfvsb.exp: xfail non-pic shared library tests for
