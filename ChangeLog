@@ -1,3 +1,7 @@
+Fri Jun 18 12:03:10 1993  david d `zoo' zuhn  (zoo at majipoor.cygnus.com)
+
+	* install.sh: don't use dirname anymore (replaced with sed usage)
+
 Thu Jun 17 18:43:42 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in:  Change extension for gzip'd files from '.z' to

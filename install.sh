@@ -114,7 +114,8 @@ fi
 
 # Make a temp file name in the proper directory.
 
-dstdir=`dirname $dst`
+## this sed command emulates the dirname command
+dstdir=`echo $dst | sed -e 's,[^/]*$,,;s,/$,,;s,^$,.,'`
 dsttmp=$dstdir/#inst.$$#
 
 # Make sure that the destination directory exists.
