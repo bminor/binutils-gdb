@@ -86,11 +86,17 @@ static void
 free_symtab_block (struct objfile *objfile, struct block *b)
 {
   register int i, n;
-  n = BLOCK_NSYMS (b);
+  struct symbol *sym, *next_sym;
+
+  n = BLOCK_BUCKETS (b);
   for (i = 0; i < n; i++)
     {
-      xmfree (objfile->md, SYMBOL_NAME (BLOCK_SYM (b, i)));
-      xmfree (objfile->md, (PTR) BLOCK_SYM (b, i));
+      for (sym = BLOCK_BUCKET (b, i); sym; sym = next_sym)
+	{
+	  next_sym = sym->hash_next;
+	  xmfree (objfile->md, SYMBOL_NAME (sym));
+	  xmfree (objfile->md, (PTR) sym);
+	}
     }
   xmfree (objfile->md, (PTR) b);
 }
@@ -457,8 +463,14 @@ dump_symtab (struct objfile *objfile, struct symtab *symtab,
 	      fprintf_filtered (outfile, " under ");
 	      gdb_print_host_address (BLOCK_SUPERBLOCK (b), outfile);
 	    }
-	  blen = BLOCK_NSYMS (b);
-	  fprintf_filtered (outfile, ", %d syms in ", blen);
+	  /* drow/2002-07-10: We could save the total symbols count
+	     even if we're using a hashtable, but nothing else but this message
+	     wants it.  */
+	  blen = BLOCK_BUCKETS (b);
+	  if (BLOCK_HASHTABLE (b))
+	    fprintf_filtered (outfile, ", %d buckets in ", blen);
+	  else
+	    fprintf_filtered (outfile, ", %d syms in ", blen);
 	  print_address_numeric (BLOCK_START (b), 1, outfile);
 	  fprintf_filtered (outfile, "..");
 	  print_address_numeric (BLOCK_END (b), 1, outfile);
@@ -474,8 +486,8 @@ dump_symtab (struct objfile *objfile, struct symtab *symtab,
 	  if (BLOCK_GCC_COMPILED (b))
 	    fprintf_filtered (outfile, ", compiled with gcc%d", BLOCK_GCC_COMPILED (b));
 	  fprintf_filtered (outfile, "\n");
-	  /* Now print each symbol in this block.  */
-	  /* FIXMED: Sort?  */
+	  /* Now print each symbol in this block (in no particular order, if
+	     we're using a hashtable).  */
 	  ALL_BLOCK_SYMBOLS (b, j, sym)
 	    {
 	      struct print_symbol_args s;

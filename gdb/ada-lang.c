@@ -3560,6 +3560,7 @@ symtab_for_sym (sym)
   struct symtab* s;
   struct objfile *objfile;
   struct block *b;
+  struct symbol *tmp_sym;
   int i, j;
 
   ALL_SYMTABS (objfile, s)
@@ -3574,12 +3575,12 @@ symtab_for_sym (sym)
 	case LOC_BLOCK:
 	case LOC_CONST_BYTES:
 	  b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
-	  for (i = 0; i < BLOCK_NSYMS (b); i += 1)
-	    if (sym == BLOCK_SYM (b, i))
+	  ALL_BLOCK_SYMBOLS (b, i, tmp_sym)
+	    if (sym == tmp_sym)
 	      return s;
 	  b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
-	  for (i = 0; i < BLOCK_NSYMS (b); i += 1)
-	    if (sym == BLOCK_SYM (b, i))
+	  ALL_BLOCK_SYMBOLS (b, i, tmp_sym)
+	    if (sym == tmp_sym)
 	      return s;
 	  break;
 	default:
@@ -3601,8 +3602,8 @@ symtab_for_sym (sym)
 	       j < BLOCKVECTOR_NBLOCKS (BLOCKVECTOR (s)); j += 1)
 	    {
 	      b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), j);
-	      for (i = 0; i < BLOCK_NSYMS (b); i += 1)
-		if (sym == BLOCK_SYM (b, i))
+	      ALL_BLOCK_SYMBOLS (b, i, tmp_sym)
+		if (sym == tmp_sym)
 		  return s;
 	    }
 	  break;
@@ -4094,14 +4095,14 @@ ada_add_block_symbols (block, name, namespace, objfile, wild)
   /* Set true when we find a matching non-argument symbol */
   int found_sym;
   int is_sorted = BLOCK_SHOULD_SORT (block);
+  struct symbol *sym;
 
   arg_sym = NULL; found_sym = 0;
   if (wild)
     {
-      for (i = 0; i < BLOCK_NSYMS (block); i += 1)
+      struct symbol *sym;
+      ALL_BLOCK_SYMBOLS (block, i, sym)
 	{
-	  struct symbol *sym = BLOCK_SYM (block, i);
-
 	  if (SYMBOL_NAMESPACE (sym) == namespace &&
 	      wild_match (name, name_len, SYMBOL_NAME (sym)))
 	    {
@@ -4149,44 +4150,46 @@ ada_add_block_symbols (block, name, namespace, objfile, wild)
       else
 	i = 0;
 
-      for (; i < BLOCK_NSYMS (block); i += 1)
-	{
-	  struct symbol *sym = BLOCK_SYM (block, i);
+      for (; i < BLOCK_BUCKETS (block); i += 1)
+	for (sym = BLOCK_BUCKET (block, i); sym != NULL; sym = sym->hash_next)
+	  {
+	    if (SYMBOL_NAMESPACE (sym) == namespace)
+	      {
+		int cmp = strncmp (name, SYMBOL_NAME (sym), name_len);
 
-	  if (SYMBOL_NAMESPACE (sym) == namespace)
-	    {
-	      int cmp = strncmp (name, SYMBOL_NAME (sym), name_len);
-	
-	      if (cmp < 0) 
-		{
-		  if (is_sorted)
-		    break;
-		}
-	      else if (cmp == 0 
-		       && is_name_suffix (SYMBOL_NAME (sym) + name_len)) 
-		{
-		  switch (SYMBOL_CLASS (sym))
-		    {
-		    case LOC_ARG:
-		    case LOC_LOCAL_ARG:
-		    case LOC_REF_ARG:
-		    case LOC_REGPARM:
-		    case LOC_REGPARM_ADDR:
-		    case LOC_BASEREG_ARG:
-		      arg_sym = sym;
-		      break;
-		    case LOC_UNRESOLVED:
-		      break;
-		    default:
-		      found_sym = 1;
-		      fill_in_ada_prototype (sym);
-		      add_defn_to_vec (fixup_symbol_section (sym, objfile),
-				       block);
-		      break;
-		    }
-		}
-	    }
-	}
+		if (cmp < 0) 
+		  {
+		    if (is_sorted)
+		      {
+			i = BLOCK_BUCKETS (block);
+			break;
+		      }
+		  }
+		else if (cmp == 0 
+			 && is_name_suffix (SYMBOL_NAME (sym) + name_len)) 
+		  {
+		    switch (SYMBOL_CLASS (sym))
+		      {
+		      case LOC_ARG:
+		      case LOC_LOCAL_ARG:
+		      case LOC_REF_ARG:
+		      case LOC_REGPARM:
+		      case LOC_REGPARM_ADDR:
+		      case LOC_BASEREG_ARG:
+			arg_sym = sym;
+			break;
+		      case LOC_UNRESOLVED:
+			break;
+		      default:
+			found_sym = 1;
+			fill_in_ada_prototype (sym);
+			add_defn_to_vec (fixup_symbol_section (sym, objfile),
+					 block);
+			break;
+		      }
+		  }
+	      }
+	  }
     }
 
   if (! found_sym && arg_sym != NULL)
@@ -4219,53 +4222,57 @@ ada_add_block_symbols (block, name, namespace, objfile, wild)
       else
 	i = 0;
 
-      for (; i < BLOCK_NSYMS (block); i += 1)
-	{
-	  struct symbol *sym = BLOCK_SYM (block, i);
+      for (; i < BLOCK_BUCKETS (block); i += 1)
+	for (sym = BLOCK_BUCKET (block, i); sym != NULL; sym = sym->hash_next)
+	  {
+	    struct symbol *sym = BLOCK_SYM (block, i);
 
-	  if (SYMBOL_NAMESPACE (sym) == namespace)
-	    {
-	      int cmp;
+	    if (SYMBOL_NAMESPACE (sym) == namespace)
+	      {
+		int cmp;
 
-	      cmp = (int) '_' - (int) SYMBOL_NAME (sym)[0];
-	      if (cmp == 0) 
-		{
-		  cmp = strncmp ("_ada_", SYMBOL_NAME (sym), 5);
-		  if (cmp == 0)
-		    cmp = strncmp (name, SYMBOL_NAME (sym) + 5, name_len);
-		}
-	
-	      if (cmp < 0) 
-		{
-		  if (is_sorted)
-		    break;
-		}
-	      else if (cmp == 0 
-		       && is_name_suffix (SYMBOL_NAME (sym) + name_len + 5)) 
-		{
-		  switch (SYMBOL_CLASS (sym))
-		    {
-		    case LOC_ARG:
-		    case LOC_LOCAL_ARG:
-		    case LOC_REF_ARG:
-		    case LOC_REGPARM:
-		    case LOC_REGPARM_ADDR:
-		    case LOC_BASEREG_ARG:
-		      arg_sym = sym;
-		      break;
-		    case LOC_UNRESOLVED:
-		      break;
-		    default:
-		      found_sym = 1;
-		      fill_in_ada_prototype (sym);
-		      add_defn_to_vec (fixup_symbol_section (sym, objfile),
-				       block);
-		      break;
-		    }
-		}
-	    }
-	}
-      
+		cmp = (int) '_' - (int) SYMBOL_NAME (sym)[0];
+		if (cmp == 0) 
+		  {
+		    cmp = strncmp ("_ada_", SYMBOL_NAME (sym), 5);
+		    if (cmp == 0)
+		      cmp = strncmp (name, SYMBOL_NAME (sym) + 5, name_len);
+		  }
+
+		if (cmp < 0) 
+		  {
+		    if (is_sorted)
+		      {
+			i = BLOCK_BUCKETS (block);
+			break;
+		      }
+		  }
+		else if (cmp == 0 
+			 && is_name_suffix (SYMBOL_NAME (sym) + name_len + 5)) 
+		  {
+		    switch (SYMBOL_CLASS (sym))
+		      {
+		      case LOC_ARG:
+		      case LOC_LOCAL_ARG:
+		      case LOC_REF_ARG:
+		      case LOC_REGPARM:
+		      case LOC_REGPARM_ADDR:
+		      case LOC_BASEREG_ARG:
+			arg_sym = sym;
+			break;
+		      case LOC_UNRESOLVED:
+			break;
+		      default:
+			found_sym = 1;
+			fill_in_ada_prototype (sym);
+			add_defn_to_vec (fixup_symbol_section (sym, objfile),
+					 block);
+			break;
+		      }
+		  }
+	      }
+	  }
+  
       /* NOTE: This really shouldn't be needed for _ada_ symbols.
 	 They aren't parameters, right? */
       if (! found_sym && arg_sym != NULL)
@@ -4292,6 +4299,7 @@ fill_in_ada_prototype (func)
   struct type* ftype;
   struct type* rtype;
   size_t max_fields;
+  struct symbol *sym;
 
   if (func == NULL
       || TYPE_CODE (SYMBOL_TYPE (func)) != TYPE_CODE_FUNC
@@ -4308,16 +4316,13 @@ fill_in_ada_prototype (func)
   SYMBOL_TYPE (func) = ftype;
 
   b = SYMBOL_BLOCK_VALUE (func);
-  nsyms = BLOCK_NSYMS (b);
 
   nargs = 0;
   max_fields = 8; 
   TYPE_FIELDS (ftype) = 
     (struct field*) xmalloc (sizeof (struct field) * max_fields);
-  for (i = 0; i < nsyms; i += 1)
+  ALL_BLOCK_SYMBOLS (b, i, sym)
     {
-      struct symbol *sym = BLOCK_SYM (b, i);
-
       GROW_VECT (TYPE_FIELDS (ftype), max_fields, nargs+1);
 	
       switch (SYMBOL_CLASS (sym)) 
@@ -4903,6 +4908,8 @@ debug_print_block (b)
      struct block* b;
 {
   int i;
+  struct symbol *i;
+
   fprintf (stderr, "Block: %p; [0x%lx, 0x%lx]", 
 	   b, BLOCK_START(b), BLOCK_END(b));
   if (BLOCK_FUNCTION(b) != NULL)
@@ -4910,11 +4917,11 @@ debug_print_block (b)
   fprintf (stderr, "\n");
   fprintf (stderr, "\t    Superblock: %p\n", BLOCK_SUPERBLOCK(b));
   fprintf (stderr, "\t    Symbols:");
-  for (i = 0; i < BLOCK_NSYMS (b); i += 1)
+  ALL_BLOCK_SYMBOLS (b, i, sym)
     {
       if (i > 0 && i % 4 == 0)
 	fprintf (stderr, "\n\t\t    ");
-      fprintf (stderr, " %s", SYMBOL_NAME (BLOCK_SYM (b, i)));
+      fprintf (stderr, " %s", SYMBOL_NAME (sym));
     }
   fprintf (stderr, "\n");
 }

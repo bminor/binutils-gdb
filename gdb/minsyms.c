@@ -91,7 +91,7 @@ msymbol_hash_iw (const char *string)
 	  ++string;
 	}
     }
-  return hash % MINIMAL_SYMBOL_HASH_SIZE;
+  return hash;
 }
 
 /* Compute a hash code for a string.  */
@@ -102,7 +102,7 @@ msymbol_hash (const char *string)
   unsigned int hash = 0;
   for (; *string; ++string)
     hash = hash * 67 + *string - 113;
-  return hash % MINIMAL_SYMBOL_HASH_SIZE;
+  return hash;
 }
 
 /* Add the minimal symbol SYM to an objfile's minsym hash table, TABLE.  */
@@ -112,7 +112,7 @@ add_minsym_to_hash_table (struct minimal_symbol *sym,
 {
   if (sym->hash_next == NULL)
     {
-      unsigned int hash = msymbol_hash (SYMBOL_NAME (sym));
+      unsigned int hash = msymbol_hash (SYMBOL_NAME (sym)) % MINIMAL_SYMBOL_HASH_SIZE;
       sym->hash_next = table[hash];
       table[hash] = sym;
     }
@@ -126,7 +126,7 @@ add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
 {
   if (sym->demangled_hash_next == NULL)
     {
-      unsigned int hash = msymbol_hash_iw (SYMBOL_DEMANGLED_NAME (sym));
+      unsigned int hash = msymbol_hash_iw (SYMBOL_DEMANGLED_NAME (sym)) % MINIMAL_SYMBOL_HASH_SIZE;
       sym->demangled_hash_next = table[hash];
       table[hash] = sym;
     }
@@ -154,8 +154,8 @@ lookup_minimal_symbol (register const char *name, const char *sfile,
   struct minimal_symbol *found_file_symbol = NULL;
   struct minimal_symbol *trampoline_symbol = NULL;
 
-  unsigned int hash = msymbol_hash (name);
-  unsigned int dem_hash = msymbol_hash_iw (name);
+  unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
+  unsigned int dem_hash = msymbol_hash_iw (name) % MINIMAL_SYMBOL_HASH_SIZE;
 
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
   if (sfile != NULL)

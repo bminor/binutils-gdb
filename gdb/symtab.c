@@ -1328,6 +1328,22 @@ lookup_block_symbol (register const struct block *block, const char *name,
   register struct symbol *sym_found = NULL;
   register int do_linear_search = 1;
 
+  if (BLOCK_HASHTABLE (block))
+    {
+      unsigned int hash_index;
+      hash_index = msymbol_hash_iw (name);
+      hash_index = hash_index % BLOCK_BUCKETS (block);
+      for (sym = BLOCK_BUCKET (block, hash_index); sym; sym = sym->hash_next)
+	{
+	  if (SYMBOL_NAMESPACE (sym) == namespace 
+	      && (mangled_name
+		  ? strcmp (SYMBOL_NAME (sym), mangled_name) == 0
+		  : SYMBOL_MATCHES_NAME (sym, name)))
+	    return sym;
+	}
+      return NULL;
+    }
+
   /* If the blocks's symbols were sorted, start with a binary search.  */
 
   if (BLOCK_SHOULD_SORT (block))
@@ -1582,14 +1598,15 @@ find_pc_sect_symtab (CORE_ADDR pc, asection *section)
 	if (section != 0)
 	  {
 	    int i;
+	    struct symbol *sym = NULL;
 
-	    for (i = 0; i < b->nsyms; i++)
+	    ALL_BLOCK_SYMBOLS (b, i, sym)
 	      {
-		fixup_symbol_section (b->sym[i], objfile);
-		if (section == SYMBOL_BFD_SECTION (b->sym[i]))
+		fixup_symbol_section (sym, objfile);
+		if (section == SYMBOL_BFD_SECTION (sym))
 		  break;
 	      }
-	    if (i >= b->nsyms)
+	    if ((i >= BLOCK_BUCKETS (b)) && (sym == NULL))
 	      continue;		/* no symbol in this symtab matches section */
 	  }
 	distance = BLOCK_END (b) - BLOCK_START (b);
@@ -1661,10 +1678,8 @@ find_addr_symbol (CORE_ADDR addr, struct symtab **symtabp, CORE_ADDR *symaddrp)
       {
 	QUIT;
 	block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), blocknum);
-	top = BLOCK_NSYMS (block);
-	for (bot = 0; bot < top; bot++)
+	ALL_BLOCK_SYMBOLS (block, bot, sym)
 	  {
-	    sym = BLOCK_SYM (block, bot);
 	    switch (SYMBOL_CLASS (sym))
 	      {
 	      case LOC_STATIC:
@@ -2795,10 +2810,9 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 	  struct symbol_search *prevtail = tail;
 	  int nfound = 0;
 	  b = BLOCKVECTOR_BLOCK (bv, i);
-	  for (j = 0; j < BLOCK_NSYMS (b); j++)
+	  ALL_BLOCK_SYMBOLS (b, j, sym)
 	    {
 	      QUIT;
-	      sym = BLOCK_SYM (b, j);
 	      if (file_matches (s->filename, files, nfiles)
 		  && ((regexp == NULL || SYMBOL_MATCHES_REGEXP (sym))
 		      && ((kind == VARIABLES_NAMESPACE && SYMBOL_CLASS (sym) != LOC_TYPEDEF

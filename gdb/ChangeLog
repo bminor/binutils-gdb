@@ -1,3 +1,41 @@
+2002-07-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	Based on patch from Daniel Berlin <dberlin@dberlin.org>.
+	* buildsym.c: Include "demangle.h" for SYMBOL_INIT_DEMANGLED_NAME.
+	(finish_block) For non-function blocks, hash the symbol table.  For
+	function blocks, mark the symbol table as unhashed.
+	* minsyms.c (msymbol_hash): Return hash value without taking modulus.
+	(msymbol_hash_iw): Likewise.
+	(add_minsym_to_hash_table): Take modulus of msymbol_hash's return
+	value.
+	(add_minsym_to_demangled_hash_table): Likewise for msymbol_hash_iw.
+	(lookup_minimal_symbol): Likewise for both.
+	* symtab.h (struct block): Add `hashtable' flag.  Comment the
+	hashtable.
+	(BLOCK_HASHTABLE, BLOCK_BUCKETS, BLOCK_BUCKET): New macro.
+	(ALL_BLOCK_SYMBOLS): Update.
+	(BLOCK_SHOULD_SORT): Do not sort hashed blocks.
+	(struct symbol): Add `hash_next' pointer.
+	* symtab.c (lookup_block_symbol): Search using the hash table when
+	possible.
+	(find_pc_sect_symtab): Use ALL_BLOCK_SYMBOLS.
+	(search_symbols, find_addr_symbol): Likewise.
+
+	* dstread.c (process_dst_block): Clear hashtable bit for new block.
+	(read_dst_symtab): Likewise.
+	* jv-lang.c (get_java_class_symtab): Likewise.
+	* mdebugread.c: Include "gdb_assert.h".
+	(shrink_block): Assert that the block being modified is not hashed.
+	* coffread.c (patch_opaque_types): Use ALL_BLOCK_SYMBOLS.
+	* symmisc.c (free_symtab_block): Walk the hash table when freeing
+	symbols.
+	(dump_symtab): Recognize hashed blocks.
+	* printcmd.c (print_frame_args):  Assert that function blocks do not
+	have hashed symbol tables.
+	* ada-lang.c (symtab_for_sym): Use ALL_BLOCK_SYMBOLS.
+	(fill_in_ada_prototype, debug_print_block): Likewise.
+	(ada_add_block_symbols): Use ALL_BLOCK_SYMBOLS.  Handle hash tables.
+
 2002-07-11  Corinna Vinschen  <vinschen@redhat.com>
 
 	* stack.c (print_frame): Use result of frame_address_in_block()

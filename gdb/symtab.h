@@ -386,6 +386,25 @@ struct block
 
     unsigned char gcc_compile_flag;
 
+    /* The symbols for this block are either in a simple linear list or
+       in a simple hashtable.  Blocks which correspond to a function
+       (which have a list of symbols corresponding to arguments) use
+       a linear list, as do some older symbol readers (currently only
+       mdebugread and dstread).  Other blocks are hashed.
+
+       The hashtable uses the same hash function as the minsym hashtables,
+       found in minsyms.c:minsym_hash_iw.  Symbols are hashed based on
+       their demangled name if appropriate, and on their name otherwise.
+       The hash function ignores space, and stops at the beginning of the
+       argument list if any.
+
+       The table is laid out in NSYMS/5 buckets and symbols are chained via
+       their hash_next field.  */
+
+    /* If this is really a hashtable of the symbols, this flag is 1.  */
+
+    unsigned char hashtable;
+
     /* Number of local symbols.  */
 
     int nsyms;
@@ -398,30 +417,38 @@ struct block
 
 #define BLOCK_START(bl)		(bl)->startaddr
 #define BLOCK_END(bl)		(bl)->endaddr
-#define BLOCK_NSYMS(bl)		(bl)->nsyms
-#define BLOCK_SYM(bl, n)	(bl)->sym[n]
 #define BLOCK_FUNCTION(bl)	(bl)->function
 #define BLOCK_SUPERBLOCK(bl)	(bl)->superblock
 #define BLOCK_GCC_COMPILED(bl)	(bl)->gcc_compile_flag
+#define BLOCK_HASHTABLE(bl)	(bl)->hashtable
 
-/* Macro to loop through all symbols in a block BL.
-   i counts which symbol we are looking at, and sym points to the current
-   symbol.
-   The contortion at the end is to avoid reading past the last valid
-   BLOCK_SYM.  */
-#define ALL_BLOCK_SYMBOLS(bl, i, sym)			\
-	for ((i) = 0, (sym) = BLOCK_SYM ((bl), (i));	\
-	     (i) < BLOCK_NSYMS ((bl));			\
-	     ++(i), (sym) = ((i) < BLOCK_NSYMS ((bl)))	\
-			    ? BLOCK_SYM ((bl), (i))	\
-			    : NULL)
+/* For blocks without a hashtable (BLOCK_HASHTABLE (bl) == 0) only.  */
+#define BLOCK_NSYMS(bl)		(bl)->nsyms
+#define BLOCK_SYM(bl, n)	(bl)->sym[n]
+
+/* For blocks with a hashtable, but these are valid for non-hashed blocks as
+   well - each symbol will appear to be one bucket by itself.  */
+#define BLOCK_BUCKETS(bl)	(bl)->nsyms
+#define BLOCK_BUCKET(bl, n)	(bl)->sym[n]
+
+/* Macro used to set the size of a hashtable for N symbols.  */
+#define BLOCK_HASHTABLE_SIZE(n)	((n)/5 + 1)
+
+/* Macro to loop through all symbols in a block BL, in no particular order.
+   i counts which bucket we are in, and sym points to the current symbol.  */
+
+#define ALL_BLOCK_SYMBOLS(bl, i, sym)				\
+	for ((i) = 0; (i) < BLOCK_BUCKETS ((bl)); (i)++)	\
+	  for ((sym) = BLOCK_BUCKET ((bl), (i)); (sym);		\
+	       (sym) = (sym)->hash_next)
 
 /* Nonzero if symbols of block BL should be sorted alphabetically.
    Don't sort a block which corresponds to a function.  If we did the
    sorting would have to preserve the order of the symbols for the
-   arguments.  */
+   arguments.  Also don't sort any block that we chose to hash.  */
 
-#define BLOCK_SHOULD_SORT(bl) ((bl)->nsyms >= 40 && BLOCK_FUNCTION (bl) == NULL)
+#define BLOCK_SHOULD_SORT(bl) (! BLOCK_HASHTABLE (bl) \
+			       && BLOCK_FUNCTION (bl) == NULL)
 
 
 /* Represent one symbol name; a variable, constant, function or typedef.  */
@@ -671,6 +698,8 @@ struct symbol
     /* List of ranges where this symbol is active.  This is only
        used by alias symbols at the current time.  */
     struct range_list *ranges;
+
+    struct symbol *hash_next;
   };
 
 

@@ -40,6 +40,7 @@
 #include "objfiles.h"		/* ditto */
 #include "completer.h"		/* for completion functions */
 #include "ui-out.h"
+#include "gdb_assert.h"
 
 extern int asm_demangle;	/* Whether to demangle syms in asm printouts */
 extern int addressprint;	/* Whether to print hex addresses in HLL " */
@@ -1785,6 +1786,10 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
   if (func)
     {
       b = SYMBOL_BLOCK_VALUE (func);
+      /* Function blocks are order sensitive, and thus should not be
+	 hashed.  */
+      gdb_assert (BLOCK_HASHTABLE (b) == 0);
+
       ALL_BLOCK_SYMBOLS (b, i, sym)
         {
 	  QUIT;
