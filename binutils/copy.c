@@ -144,7 +144,7 @@ copy_archive(ibfd, obfd)
 bfd *ibfd;
 bfd *obfd;
 {
-    bfd **ptr =&( obfd->archive_head);
+    bfd **ptr = &obfd->archive_head;
     bfd *this_element;
     /* Read each archive element in turn from the input, copy the
        contents to a temp file, and keep the temp file handle */
@@ -178,7 +178,7 @@ bfd *obfd;
 
 	*ptr = output_bfd;
 
-	ptr =&( output_bfd->next);
+	ptr = &output_bfd->next;
 	this_element->next = bfd_openr_next_archived_file(ibfd, this_element);
 	this_element = this_element->next;
 
