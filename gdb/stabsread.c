@@ -212,7 +212,7 @@ static struct complaint const_vol_complaint =
 {"const/volatile indicator missing, got '%c'", 0, 0};
 
 static struct complaint error_type_complaint =
-{"During symbol reading, couldn't parse type; debugger out of date?", 0, 0};
+{"couldn't parse type; debugger out of date?", 0, 0};
 
 static struct complaint invalid_member_complaint =
 {"invalid (minimal) member type data format at symtab pos %d.", 0, 0};
