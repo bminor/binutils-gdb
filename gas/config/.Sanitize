@@ -29,6 +29,7 @@ Things-to-keep:
 
 a.out.h
 atof-ieee.c
+atof-ns32k.c
 atof-vax.c
 coff.gnu.h
 cplus-dem.c
@@ -121,7 +122,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.16  1992/02/17 16:02:58  rich
+# Revision 1.17  1992/02/18 10:13:57  rich
+# keep the new file
+#
+# Revision 1.16  1992/02/17  16:02:58  rich
 # record that files were removed
 #
 # Revision 1.15  1992/02/17  15:53:46  rich
