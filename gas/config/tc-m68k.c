@@ -2261,6 +2261,19 @@ m68k_ip (instring)
 
 	      nextword = get_num (&opP->disp, 90);
 
+	      /* Convert mode 5 addressing with a zero offset into
+		 mode 2 addressing to reduce the instruction size by a
+		 word.  */
+	      if (! isvar (&opP->disp)
+		  && (nextword == 0)
+		  && (opP->disp.size == SIZE_UNSPEC)
+		  && (opP->reg >= ADDR0)
+		  && (opP->reg <= ADDR7))
+		{
+		  tmpreg = 0x10 + opP->reg - ADDR; /* 2.areg */
+		  break;
+		}
+
 	      if (opP->reg == PC
 		  && ! isvar (&opP->disp)
 		  && m68k_abspcadd)

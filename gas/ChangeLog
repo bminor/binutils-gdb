@@ -1,3 +1,8 @@
+2004-05-28  Peter Barada <peter@the-baradas.com>
+
+	* config/gc-m68k.c(m68k_ip): Convert mode 5 addressing
+	with zero offset into mode 2 addressing to save a word.
+
 2004-05-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-ia64.c (ar_is_in_integer_unit): Removed.

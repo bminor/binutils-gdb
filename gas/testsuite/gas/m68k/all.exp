@@ -35,6 +35,7 @@ if [istarget m68*-*-*] then {
     run_dump_test link
     run_dump_test fmoveml
     run_dump_test mcf-mov3q
+    run_dump_test mode5
     run_dump_test mcf-mac
     run_dump_test mcf-emac
 
