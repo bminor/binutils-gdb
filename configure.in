@@ -173,10 +173,10 @@ esac
 
 case "${target}" in
   alpha-dec-osf1*)
-    noconfigdirs="$noconfigdirs emacs fileutils grep gas libg++ libio newlib"
+    noconfigdirs="$noconfigdirs emacs fileutils grep libg++ libio newlib"
     ;;	
   alpha*-*-*)
-    noconfigdirs="$noconfigdirs gas libg++ libio newlib"
+    noconfigdirs="$noconfigdirs libg++ libio newlib"
     ;;    
   h8300*-*-* | \
   h8500-*-*)
