@@ -230,6 +230,7 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
  [ -nocpp ] [ -EL ] [ -EB ] [ -G @var{num} ] [ -mcpu=@var{CPU} ]
  [ -mips1 ] [ -mips2 ] [ -mips3 ] [ -m4650 ] [ -no-m4650 ]
  [ --trap ] [ --break ]
+ [ --emulation=@var{name} ]
 @end ifset
  [ -- | @var{files} @dots{} ]
 @end smallexample
@@ -438,6 +439,31 @@ instructions around accesses to the @samp{HI} and @samp{LO} registers.
 @item -mcpu=@var{CPU}
 Generate code for a particular MIPS cpu.  This has little effect on the
 assembler, but it is passed by @code{@value{GCC}}.
+
+@cindex emulation
+@item --emulation=@var{name}
+This option causes @code{@value{AS}} to emulated @code{@value{AS}} configured
+for some other target, in all respects, including output format (choosing
+between ELF and ECOFF only), handling of pseudo-opcodes which may generate
+debugging information or store symbol table information, and default
+endianness.  The available configuration names are: @samp{mipsecoff},
+@samp{mipself}, @samp{mipslecoff}, @samp{mipsbecoff}, @samp{mipslelf},
+@samp{mipsbelf}.  The first two do not alter the default endianness from that
+of the primary target for which the assembler was configured; the others change
+the default to little- or big-endian as indicated by the @samp{b} or @samp{l}
+in the name.  Using @samp{-EB} or @samp{-EL} will override the endianness
+selection in any case.
+
+This option is currently supported only when the primary target
+@code{@value{AS}} is configured for is a MIPS ELF or ECOFF target.
+Furthermore, the primary target or others specified with
+@samp{--enable-targets=@dots{}} at configuration time must include support for
+the other format, if both are to be available.  For example, the Irix 5
+configuration includes support for both.
+
+Eventually, this option will support more configurations, with more
+fine-grained control over the assembler's behavior, and will be supported for
+more processors.
 
 @item -nocpp
 @code{@value{AS}} ignores this option.  It is accepted for compatibility with
