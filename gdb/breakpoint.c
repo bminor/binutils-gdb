@@ -1763,6 +1763,7 @@ bpstat_clear (bpstat *bsp)
       q = p->next;
       if (p->old_val != NULL)
 	value_free (p->old_val);
+      free_command_lines (&p->commands);
       xfree (p);
       p = q;
     }
@@ -1875,7 +1876,7 @@ bpstat_clear_actions (bpstat bs)
 {
   for (; bs != NULL; bs = bs->next)
     {
-      bs->commands = NULL;
+      free_command_lines (&bs->commands);
       if (bs->old_val != NULL)
 	{
 	  value_free (bs->old_val);
@@ -1944,11 +1945,9 @@ top:
 	   to look at, so start over.  */
 	goto top;
       else
-	bs->commands = NULL;
+	free_command_lines (&bs->commands);
     }
-
-  executing_breakpoint_commands = 0;
-  discard_cleanups (old_chain);
+  do_cleanups (old_chain);
 }
 
 /* This is the normal print function for a bpstat.  In the future,
@@ -2730,7 +2729,7 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
 	    /* We will stop here */
 	    if (b->disposition == disp_disable)
 	      b->enable_state = bp_disabled;
-	    bs->commands = b->commands;
+	    bs->commands = copy_command_lines (b->commands);
 	    if (b->silent)
 	      bs->print = 0;
 	    if (bs->commands &&
@@ -6787,14 +6786,8 @@ delete_breakpoint (struct breakpoint *bpt)
     if (bs->breakpoint_at == bpt)
       {
 	bs->breakpoint_at = NULL;
-
-	/* we'd call bpstat_clear_actions, but that free's stuff and due
-	   to the multiple pointers pointing to one item with no
-	   reference counts found anywhere through out the bpstat's (how
-	   do you spell fragile?), we don't want to free things twice --
-	   better a memory leak than a corrupt malloc pool! */
-	bs->commands = NULL;
 	bs->old_val = NULL;
+	/* bs->commands will be freed later.  */
       }
   /* On the chance that someone will soon try again to delete this same
      bp, we mark it as deleted before freeing its storage. */

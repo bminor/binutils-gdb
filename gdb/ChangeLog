@@ -1,3 +1,23 @@
+2002-08-26  Joel Brobecker  <brobecker@gnat.com>
+
+	* cli/cli-script.c (copy_command_lines): New function.
+	* defs.h (copy_command_lines): Export.
+	* testsuite/gdb.base/commands.exp: New tests for commands
+	attached to a temporary breakpoint, and for commands that
+	delete the breakpoint they are attached to.
+	
+2002-08-26  Michael Snyder  <msnyder@redhat.com>
+
+	* breakpoint.c (bpstat_stop_status): Instead of copying the 
+	pointer to the breakpoint commands struct, make a new copy
+	of the struct and point to that.
+	(bpstat_clear): Free the commands struct.
+	(bpstat_clear_actions): Free the commands struct.
+	(bpstat_do_actions): Free the command actions.  Also execute
+	the local cleanups, instead of deleting them.
+	(delete_breakpoint): Leave the commands field of the bpstat
+	chain alone -- it will be freed later.
+
 2002-08-26  Kevin Buettner  <kevinb@redhat.com>
 
 	* rs6000-tdep.c (altivec_register_p): Restore function inadvertently
