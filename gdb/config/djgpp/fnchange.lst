@@ -18,6 +18,10 @@
 @V@/bfd/elf32-m68hc11.c @V@/bfd/em68hc11.c
 @V@/bfd/elf32-m68hc12.c @V@/bfd/em68hc12.c
 @V@/bfd/elf32-m68k.c @V@/bfd/em68k.c
+@V@/bfd/elf32-ppc.c @V@/bfd/e32ppc.c
+@V@/bfd/elf32-ppcqnx.c @V@/bfd/e32ppcq.c
+@V@/bfd/elf32-sh.c @V@/bfd/e32sh.c
+@V@/bfd/elf32-shqnx.c @V@/bfd/e32shq.c
 @V@/bfd/elf32-sh-lin.c @V@/bfd/e32shlin.c
 @V@/bfd/elf32-sh-nbsd.c @V@/bfd/e32shn.c
 @V@/bfd/elf32-sh64.c @V@/bfd/e32sh64.c
