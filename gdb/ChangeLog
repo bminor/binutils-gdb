@@ -1,5 +1,7 @@
 Wed Apr 14 17:12:51 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* Version 4.8.3.
+
 	* xcoffread.c (record_include_{begin,end}): Change fatal to complain.
 
 Wed Apr 14 14:03:18 1993  Per Bothner  (bothner@cygnus.com)

@@ -164,7 +164,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${NAT_CDEPS} \
 ADD_FILES = ${REGEX} ${ALLOCA}  ${XM_ADD_FILES} ${TM_ADD_FILES} ${NAT_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES} ${NAT_ADD_FILES}
 
-VERSION = 4.8.2
+VERSION = 4.8.3
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -509,9 +509,7 @@ alldeps.mak: force
 depend: $(SOURCES) Makefile.in
 	@echo Ignore errors about non-existent system-supplied include files
 	@echo for systems other than the one you are using.
-	@echo Also ignore parse errors in valops.c, and any errors in
-	@echo arm-convert.s.
-	touch xm.h tm.h nm.h
+	@echo Also ignore any errors in arm-convert.s.
 	-$(GCC) -MM -nostdinc -I/usr/include $(CFLAGS) -I$(BFD_DIR) \
 	  -I${READLINE_DIR} $(INCLUDE_CFLAGS) \
 	  `ls $(SOURCES) | grep -v '\.[hy]$$' | \
