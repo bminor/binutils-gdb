@@ -1,5 +1,17 @@
 Wed May  4 02:29:21 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
+	* as.h (strstr): Restore declaration.
+	(subseg_get) [BFD_ASSEMBLER]: Declare.
+
+	* write.c (write_object_file): If obj_adjust_symtab is defined,
+	invoke it.  Then call set_symtab, and finally invoke *_frob_file
+	hooks.
+	* config/obj-coff.c (coff_adjust_symtab): Renamed from
+	coff_frob_file.
+	* config/obj-coff.h (coff_adjust_symtab): Changed declaration
+	accordingly.
+	(obj_adjust_symtab): Macro also changed.
+
 	* configure.in (i386-*-gnu*): New target, handled like i386-mach.
 
 Tue May  3 21:04:16 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
