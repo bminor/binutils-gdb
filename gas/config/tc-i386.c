@@ -949,7 +949,10 @@ tc_i386_fix_adjustable(fixP)
 #define BFD_RELOC_386_GOTOFF	0
 #endif
 
-int
+static int
+intel_float_operand PARAMS ((char *mnemonic));
+
+static int
 intel_float_operand (mnemonic)
      char *mnemonic;
 {
@@ -1245,7 +1248,6 @@ md_assemble (line)
 
   {
     register unsigned int overlap0, overlap1;
-    expressionS *exp;
     unsigned int overlap2;
     unsigned int found_reverse_match;
     int suffix_check;
@@ -1969,6 +1971,8 @@ md_assemble (line)
 		      {
 			/* Fakes a zero displacement assuming that i.types[op]
 			   holds the correct displacement size. */
+			expressionS *exp;
+
 			exp = &disp_expressions[i.disp_operands++];
 			i.disps[op] = exp;
 			exp->X_op = O_constant;
@@ -2359,30 +2363,28 @@ md_assemble (line)
 		  {
 		    if (i.disps[n]->X_op == O_constant)
 		      {
-			if (i.types[n] & Disp8)
+			int size = 4;
+			long val = (long) i.disps[n]->X_add_number;
+
+			if (i.types[n] & (Disp8 | Disp16))
 			  {
-			    insn_size += 1;
-			    p = frag_more (1);
-			    md_number_to_chars (p,
-						(valueT) i.disps[n]->X_add_number,
-						1);
+			    long mask;
+
+			    size = 2;
+			    mask = ~ (long) 0xffff;
+			    if (i.types[n] & Disp8)
+			      {
+				size = 1;
+				mask = ~ (long) 0xff;
+			      }
+
+			    if ((val & mask) != 0 && (val & mask) != mask)
+				as_warn (_("%ld shortened to %ld"),
+					 val, val & ~mask);
 			  }
-			else if (i.types[n] & Disp16)
-			  {
-			    insn_size += 2;
-			    p = frag_more (2);
-			    md_number_to_chars (p,
-						(valueT) i.disps[n]->X_add_number,
-						2);
-			  }
-			else
-			  {	/* Disp32 */
-			    insn_size += 4;
-			    p = frag_more (4);
-			    md_number_to_chars (p,
-						(valueT) i.disps[n]->X_add_number,
-						4);
-			  }
+			insn_size += size;
+			p = frag_more (size);
+			md_number_to_chars (p, (valueT) val, size);
 		      }
 		    else if (i.types[n] & Disp32)
 		      {
@@ -2415,30 +2417,27 @@ md_assemble (line)
 		  {
 		    if (i.imms[n]->X_op == O_constant)
 		      {
-			if (i.types[n] & (Imm8 | Imm8S))
+			int size = 4;
+			long val = (long) i.imms[n]->X_add_number;
+
+			if (i.types[n] & (Imm8 | Imm8S | Imm16))
 			  {
-			    insn_size += 1;
-			    p = frag_more (1);
-			    md_number_to_chars (p,
-						(valueT) i.imms[n]->X_add_number,
-						1);
+			    long mask;
+
+			    size = 2;
+			    mask = ~ (long) 0xffff;
+			    if (i.types[n] & (Imm8 | Imm8S))
+			      {
+				size = 1;
+				mask = ~ (long) 0xff;
+			      }
+			    if ((val & mask) != 0 && (val & mask) != mask)
+				as_warn (_("%ld shortened to %ld"),
+					 val, val & ~mask);
 			  }
-			else if (i.types[n] & Imm16)
-			  {
-			    insn_size += 2;
-			    p = frag_more (2);
-			    md_number_to_chars (p,
-						(valueT) i.imms[n]->X_add_number,
-						2);
-			  }
-			else
-			  {
-			    insn_size += 4;
-			    p = frag_more (4);
-			    md_number_to_chars (p,
-						(valueT) i.imms[n]->X_add_number,
-						4);
-			  }
+			insn_size += size;
+			p = frag_more (size);
+			md_number_to_chars (p, (valueT) val, size);
 		      }
 		    else
 		      {		/* not absolute_section */
@@ -2613,9 +2612,13 @@ i386_immediate (imm_start)
     }
   else if (exp->X_op == O_constant)
     {
+      int bigimm = Imm32;
+      if (flag_16bit_code ^ (i.prefix[DATA_PREFIX] != 0))
+	bigimm = Imm16;
+
       i.types[this_operand] |=
-	smallest_imm_type ((long) exp->X_add_number);
-  
+	(bigimm | smallest_imm_type ((long) exp->X_add_number));
+
       /* If a suffix is given, this operand may be shortended. */
       switch (i.suffix)
         {
@@ -3450,6 +3453,11 @@ i386_operand (operand_string)
   else if (*op_string == IMMEDIATE_PREFIX)
     {				/* ... or an immediate */
       ++op_string;
+      if (i.types[this_operand] & JumpAbsolute)
+	{
+	  as_bad (_("Immediate operand illegal with absolute jump"));
+	  return 0;
+	}
       if (!i386_immediate (op_string))
         return 0;
     }

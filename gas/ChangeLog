@@ -1,3 +1,13 @@
+1999-07-16  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (intel_float_operand): Add prototype, make static.
+	(md_assemble): Localize *exp variable to if (fake_zero_displacement)
+	block.  Print a warning if an 8-bit or 16-bit constant
+	displacement or immediate is truncated on output.
+	(i386_immediate): Ensure Imm16 is always legal for a 16-bit mode
+	immediate.
+	(i386_operand): Disallow immediate jump absolute operand.
+
 1999-07-15  Ian Lance Taylor  <ian@zembu.com>
 
 	* configure.in: Bump version number to 2.9.5.
