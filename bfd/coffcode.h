@@ -369,6 +369,10 @@ DEFUN(styp_to_sec_flags, (styp_flags),
     if ((styp_flags & STYP_LIT) == STYP_LIT)
 	sec_flags = (SEC_LOAD | SEC_ALLOC | SEC_READONLY);
 #endif  /* STYP_LIT */
+#ifdef STYP_OTHER_LOAD	/* Other loaded sections */
+    if (styp_flags & STYP_OTHER_LOAD)
+	sec_flags = (SEC_LOAD | SEC_ALLOC);
+#endif  /* STYP_SDATA */
 
     return(sec_flags);
 }

@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
-#include "ecoff.h"
+#include "coff-mips.h"
 #include "internalcoff.h"
 #include "libcoff.h"		/* to allow easier abstraction-breaking */
 #include "trad-core.h"
@@ -34,6 +34,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	NO_COFF_LINENOS
 /* Define MIPS to get MIPS magic numbers and such */
 #define MIPS 1
+/* Define additional MIPS section types */
+#define STYP_OTHER_LOAD	0x98000300
 #include "coffcode.h"
 
 /* We do not implement symbols for ecoff. */
@@ -43,12 +45,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
     (PROTO(void,(*),(bfd *, PTR, asymbol *, enum bfd_print_symbol))) bfd_void
 #define	coff_swap_sym_in (PROTO(void,(*),(bfd *,PTR,PTR))) bfd_void
 #define	coff_swap_aux_in (PROTO(void,(*),(bfd *,PTR,int,int,PTR))) bfd_void
+#define	coff_swap_sym_out (PROTO(unsigned,(*),(bfd *,PTR,PTR))) bfd_void
+#define	coff_swap_aux_out (PROTO(unsigned,(*),(bfd *,PTR,int,int,PTR))) bfd_void
 
 /* We do not implement linenos for ecoff. */
 #define coff_get_lineno (struct lineno_cache_entry *(*)()) bfd_nullvoidptr
 #define	coff_swap_lineno_in (PROTO(void,(*),(bfd *,PTR,PTR))) bfd_void
 #define coff_find_nearest_line (PROTO(boolean, (*),(bfd*,asection*,asymbol**,bfd_vma, CONST char**, CONST char**, unsigned int *))) bfd_false
-
+#define coff_swap_lineno_out  (PROTO(unsigned,(*),(bfd *,PTR,PTR))) bfd_void
 bfd_target ecoff_little_vec =
     {"ecoff-littlemips",      /* name */
 	bfd_target_coff_flavour,
