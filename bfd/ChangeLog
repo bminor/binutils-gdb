@@ -1,3 +1,9 @@
+Fri Dec  9 12:43:05 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Don't compute
+	relocation in cases where we won't use it.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
+
 Thu Dec  8 14:19:41 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* pc532-mach.c (NAME): Define to use ns32kaout prefix.
