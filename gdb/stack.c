@@ -1356,7 +1356,7 @@ print_block_frame_labels (struct block *b, int *have_default,
 
   ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
-      if (STREQ (DEPRECATED_SYMBOL_NAME (sym), "default"))
+      if (DEPRECATED_STREQ (DEPRECATED_SYMBOL_NAME (sym), "default"))
 	{
 	  if (*have_default)
 	    continue;

@@ -31,7 +31,7 @@
 
 /* The signal handler trampoline is called _sigtramp.  */
 #undef IN_SIGTRAMP
-#define IN_SIGTRAMP(pc, name) ((name) && STREQ ("_sigtramp", name))
+#define IN_SIGTRAMP(pc, name) ((name) && DEPRECATED_STREQ ("_sigtramp", name))
 
 /* Irix 5 saves a full 64 bits for each register.  We skip 2 * 4 to
    get to the saved PC (the register mask and status register are both

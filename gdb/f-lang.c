@@ -799,7 +799,8 @@ find_common_for_function (char *name, char *funcname)
 
   while (tmp != NULL)
     {
-      if (STREQ (tmp->name, name) && STREQ (tmp->owning_function, funcname))
+      if (DEPRECATED_STREQ (tmp->name, name)
+	  && DEPRECATED_STREQ (tmp->owning_function, funcname))
 	return (tmp);
       else
 	tmp = tmp->next;

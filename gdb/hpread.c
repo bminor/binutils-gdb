@@ -3897,7 +3897,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	      fn_p = fn_list;
 	      while (fn_p)
 		{
-		  if (STREQ (fn_p->field.name, method_name))
+		  if (DEPRECATED_STREQ (fn_p->field.name, method_name))
 		    break;
 		  fn_p = fn_p->next;
 		}
@@ -6303,7 +6303,7 @@ hpread_get_next_skip_over_anon_unions (int skip_fields, dnttpointer field,
       /* Do we have another anonymous union? If so, adjust the bitoffsets
          of its members and skip over its members. */
       if ((TYPE_CODE (anon_type) == TYPE_CODE_UNION) &&
-	  (!name || STREQ (name, "")))
+	  (!name || DEPRECATED_STREQ (name, "")))
 	{
 	  hpread_adjust_bitoffsets (anon_type, bitoffset);
 	  field = hpread_get_next_skip_over_anon_unions (TYPE_NFIELDS (anon_type), field, fieldp, objfile);

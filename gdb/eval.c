@@ -227,7 +227,7 @@ evaluate_struct_tuple (struct value *struct_val,
 		   fieldno++)
 		{
 		  char *field_name = TYPE_FIELD_NAME (struct_type, fieldno);
-		  if (field_name != NULL && STREQ (field_name, label))
+		  if (field_name != NULL && DEPRECATED_STREQ (field_name, label))
 		    {
 		      variantno = -1;
 		      subfieldno = fieldno;
@@ -255,7 +255,7 @@ evaluate_struct_tuple (struct value *struct_val,
 				 subfieldno < TYPE_NFIELDS (substruct_type);
 				   subfieldno++)
 				{
-				  if (STREQ (TYPE_FIELD_NAME (substruct_type,
+				  if (DEPRECATED_STREQ (TYPE_FIELD_NAME (substruct_type,
 							      subfieldno),
 					     label))
 				    {

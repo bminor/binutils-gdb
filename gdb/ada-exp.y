@@ -823,7 +823,7 @@ write_object_renaming (orig_left_context, renaming)
 	  simple_tail += 1;
 	  break;
 	} 
-      else if (STREQN (simple_tail, "__", 2))
+      else if (DEPRECATED_STREQN (simple_tail, "__", 2))
 	{
 	  simple_tail += 2;
 	  break;
@@ -962,7 +962,7 @@ convert_char_literal (struct type* type, LONGEST val)
   sprintf (name, "QU%02x", (int) val);
   for (f = 0; f < TYPE_NFIELDS (type); f += 1) 
     {
-      if (STREQ (name, TYPE_FIELD_NAME (type, f)))
+      if (DEPRECATED_STREQ (name, TYPE_FIELD_NAME (type, f)))
 	return TYPE_FIELD_BITPOS (type, f);
     }
   return val;

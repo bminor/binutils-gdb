@@ -2659,7 +2659,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   /* Look up member function name in fieldlist.  */
   for (i = 0; i < fip->nfnfields; i++)
     {
-      if (STREQ (fip->fnfieldlists[i].name, fieldname))
+      if (DEPRECATED_STREQ (fip->fnfieldlists[i].name, fieldname))
 	break;
     }
 
@@ -2938,7 +2938,7 @@ read_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 		    {
 		      char *fieldname = TYPE_FIELD_NAME (t, i);
 
-		      if (STREQN (fieldname, vptr_name, strlen (vptr_name) - 1)
+		      if (DEPRECATED_STREQN (fieldname, vptr_name, strlen (vptr_name) - 1)
 			  && is_cplus_marker (fieldname[strlen (vptr_name)]))
 			{
 			  TYPE_VPTR_FIELDNO (type) = i;

@@ -170,7 +170,7 @@ unset_in_environ (struct environ *e, char *var)
 
   for (; (s = *vector) != NULL; vector++)
     {
-      if (STREQN (s, var, len) && s[len] == '=')
+      if (DEPRECATED_STREQN (s, var, len) && s[len] == '=')
 	{
 	  xfree (s);
 	  /* Walk through the vector, shuffling args down by one, including

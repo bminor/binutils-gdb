@@ -835,7 +835,7 @@ yylex ()
 
   /* See if it is a special token of length 2 */
   for( i = 0 ; i < (int) (sizeof tokentab2 / sizeof tokentab2[0]) ; i++)
-     if(STREQN(tokentab2[i].name, tokstart, 2))
+     if(DEPRECATED_STREQN(tokentab2[i].name, tokstart, 2))
      {
 	lexptr += 2;
 	return tokentab2[i].token;
@@ -992,7 +992,7 @@ yylex ()
 
   /*  Lookup special keywords */
   for(i = 0 ; i < (int) (sizeof(keytab) / sizeof(keytab[0])) ; i++)
-     if(namelen == strlen(keytab[i].keyw) && STREQN(tokstart,keytab[i].keyw,namelen))
+     if(namelen == strlen(keytab[i].keyw) && DEPRECATED_STREQN(tokstart,keytab[i].keyw,namelen))
 	   return keytab[i].token;
 
   yylval.sval.ptr = tokstart;
@@ -1066,12 +1066,12 @@ yylex ()
     else
     {
        /* Built-in BOOLEAN type.  This is sort of a hack. */
-       if(STREQN(tokstart,"TRUE",4))
+       if(DEPRECATED_STREQN(tokstart,"TRUE",4))
        {
 	  yylval.ulval = 1;
 	  return M2_TRUE;
        }
-       else if(STREQN(tokstart,"FALSE",5))
+       else if(DEPRECATED_STREQN(tokstart,"FALSE",5))
        {
 	  yylval.ulval = 0;
 	  return M2_FALSE;

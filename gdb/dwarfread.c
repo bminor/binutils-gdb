@@ -1802,7 +1802,7 @@ handle_producer (char *producer)
   /* If this compilation unit was compiled with g++ or gcc, then set the
      processing_gcc_compilation flag. */
 
-  if (STREQN (producer, GCC_PRODUCER, strlen (GCC_PRODUCER)))
+  if (DEPRECATED_STREQN (producer, GCC_PRODUCER, strlen (GCC_PRODUCER)))
     {
       char version = producer[strlen (GCC_PRODUCER)];
       processing_gcc_compilation = (version == '2' ? 2 : 1);
@@ -1820,7 +1820,7 @@ handle_producer (char *producer)
 
   if (AUTO_DEMANGLING)
     {
-      if (STREQN (producer, GPLUS_PRODUCER, strlen (GPLUS_PRODUCER)))
+      if (DEPRECATED_STREQN (producer, GPLUS_PRODUCER, strlen (GPLUS_PRODUCER)))
 	{
 #if 0
 	  /* For now, stay with AUTO_DEMANGLING for g++ output, as we don't
@@ -1828,7 +1828,7 @@ handle_producer (char *producer)
 	  set_demangling_style (GNU_DEMANGLING_STYLE_STRING);
 #endif
 	}
-      else if (STREQN (producer, LCC_PRODUCER, strlen (LCC_PRODUCER)))
+      else if (DEPRECATED_STREQN (producer, LCC_PRODUCER, strlen (LCC_PRODUCER)))
 	{
 	  set_demangling_style (LUCID_DEMANGLING_STYLE_STRING);
 	}

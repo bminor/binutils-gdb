@@ -1104,7 +1104,7 @@ is_in_import_list (char *name, struct objfile *objfile)
     return 0;
 
   for (i = 0; i < objfile->import_list_size; i++)
-    if (objfile->import_list[i] && STREQ (name, objfile->import_list[i]))
+    if (objfile->import_list[i] && DEPRECATED_STREQ (name, objfile->import_list[i]))
       return 1;
   return 0;
 }

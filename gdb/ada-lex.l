@@ -759,7 +759,7 @@ name_lookup (name0, err_name, token_type)
       if (segments == 0)
 	{
 	  type = lookup_primitive_typename (name);
-	  if (type == NULL && STREQ ("system__address", name))
+	  if (type == NULL && DEPRECATED_STREQ ("system__address", name))
 	    type = builtin_type_ada_system_address;
 	  if (type != NULL)
 	    {

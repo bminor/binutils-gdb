@@ -139,8 +139,8 @@ void
 pascal_type_print_method_args (char *physname, char *methodname,
 			       struct ui_file *stream)
 {
-  int is_constructor = STREQN (physname, "__ct__", 6);
-  int is_destructor = STREQN (physname, "__dt__", 6);
+  int is_constructor = DEPRECATED_STREQN (physname, "__ct__", 6);
+  int is_destructor = DEPRECATED_STREQN (physname, "__dt__", 6);
 
   if (is_constructor || is_destructor)
     {
@@ -559,7 +559,7 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 	    {
 	      QUIT;
 	      /* Don't print out virtual function table.  */
-	      if (STREQN (TYPE_FIELD_NAME (type, i), "_vptr", 5)
+	      if (DEPRECATED_STREQN (TYPE_FIELD_NAME (type, i), "_vptr", 5)
 		  && is_cplus_marker ((TYPE_FIELD_NAME (type, i))[5]))
 		continue;
 
@@ -637,8 +637,8 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 		{
 		  char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
 
-		  int is_constructor = STREQN (physname, "__ct__", 6);
-		  int is_destructor = STREQN (physname, "__dt__", 6);
+		  int is_constructor = DEPRECATED_STREQN (physname, "__ct__", 6);
+		  int is_destructor = DEPRECATED_STREQN (physname, "__dt__", 6);
 
 		  QUIT;
 		  if (TYPE_FN_FIELD_PROTECTED (f, j))

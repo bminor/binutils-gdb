@@ -1,7 +1,18 @@
 2003-11-23  Andrew Cagney  <cagney@redhat.com>
 
-	* symfile.c (symbol_file_command): Replace STREQ with strcmp.
+	* defs.h (DEPRECATED_STREQN): Rename STREQN.
+	(DEPRECATED_STREQ): Rename STREQ.
+	* ada-exp.y, ada-lang.c, ada-lex.l, coffread.c: Update.
+	* config/mips/tm-irix5.h, config/mips/tm-irix6.h: Update.
+	* config/mips/tm-mipsv4.h, config/sparc/tm-sun4sol2.h: Update.
+	* dbxread.c, dwarf2read.c, dwarfread.c, environ.c: Update.
+	* eval.c, exec.c, f-lang.c, hppa-tdep.c, hpread.c: Update.
+	* jv-exp.y, language.c, m2-exp.y, mcore-rom.c: Update.
+	* mdebugread.c, mipsread.c, objc-exp.y, objfiles.c: Update.
+	* p-exp.y, p-typeprint.c, p-valprint.c, rs6000-nat.c: Update.
+	* source.c, sparc-tdep.c, stack.c, target.c: Update.
 
+	* symfile.c (symbol_file_command): Replace STREQ with strcmp.
 	* elfread.c (elf_symtab_read): Delete STREQ from comment.
 
 2003-11-22  Andrew Cagney  <cagney@redhat.com>

@@ -1133,34 +1133,34 @@ yylex ()
   switch (namelen)
     {
     case 7:
-      if (STREQN (tokstart, "boolean", 7))
+      if (DEPRECATED_STREQN (tokstart, "boolean", 7))
 	return BOOLEAN;
       break;
     case 6:
-      if (STREQN (tokstart, "double", 6))      
+      if (DEPRECATED_STREQN (tokstart, "double", 6))      
 	return DOUBLE;
       break;
     case 5:
-      if (STREQN (tokstart, "short", 5))
+      if (DEPRECATED_STREQN (tokstart, "short", 5))
 	return SHORT;
-      if (STREQN (tokstart, "false", 5))
+      if (DEPRECATED_STREQN (tokstart, "false", 5))
 	{
 	  yylval.lval = 0;
 	  return BOOLEAN_LITERAL;
 	}
-      if (STREQN (tokstart, "super", 5))
+      if (DEPRECATED_STREQN (tokstart, "super", 5))
 	return SUPER;
-      if (STREQN (tokstart, "float", 5))
+      if (DEPRECATED_STREQN (tokstart, "float", 5))
 	return FLOAT;
       break;
     case 4:
-      if (STREQN (tokstart, "long", 4))
+      if (DEPRECATED_STREQN (tokstart, "long", 4))
 	return LONG;
-      if (STREQN (tokstart, "byte", 4))
+      if (DEPRECATED_STREQN (tokstart, "byte", 4))
 	return BYTE;
-      if (STREQN (tokstart, "char", 4))
+      if (DEPRECATED_STREQN (tokstart, "char", 4))
 	return CHAR;
-      if (STREQN (tokstart, "true", 4))
+      if (DEPRECATED_STREQN (tokstart, "true", 4))
 	{
 	  yylval.lval = 1;
 	  return BOOLEAN_LITERAL;

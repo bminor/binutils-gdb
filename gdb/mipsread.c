@@ -197,19 +197,19 @@ alphacoff_locate_sections (bfd *ignore_abfd, asection *sectp, void *sip)
 
   si = (struct alphacoff_dynsecinfo *) sip;
 
-  if (STREQ (sectp->name, ".dynsym"))
+  if (DEPRECATED_STREQ (sectp->name, ".dynsym"))
     {
       si->sym_sect = sectp;
     }
-  else if (STREQ (sectp->name, ".dynstr"))
+  else if (DEPRECATED_STREQ (sectp->name, ".dynstr"))
     {
       si->str_sect = sectp;
     }
-  else if (STREQ (sectp->name, ".dynamic"))
+  else if (DEPRECATED_STREQ (sectp->name, ".dynamic"))
     {
       si->dyninfo_sect = sectp;
     }
-  else if (STREQ (sectp->name, ".got"))
+  else if (DEPRECATED_STREQ (sectp->name, ".got"))
     {
       si->got_sect = sectp;
     }

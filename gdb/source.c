@@ -260,7 +260,7 @@ select_source_symtab (struct symtab *s)
 	{
 	  char *name = s->filename;
 	  int len = strlen (name);
-	  if (!(len > 2 && (STREQ (&name[len - 2], ".h"))))
+	  if (!(len > 2 && (DEPRECATED_STREQ (&name[len - 2], ".h"))))
 	    {
 	      current_source_symtab = s;
 	    }
@@ -277,7 +277,7 @@ select_source_symtab (struct symtab *s)
 	{
 	  char *name = ps->filename;
 	  int len = strlen (name);
-	  if (!(len > 2 && (STREQ (&name[len - 2], ".h"))))
+	  if (!(len > 2 && (DEPRECATED_STREQ (&name[len - 2], ".h"))))
 	    {
 	      cs_pst = ps;
 	    }

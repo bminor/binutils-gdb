@@ -759,7 +759,7 @@ add_vmap (LdInfo *ldi)
       last = 0;
       /* FIXME??? am I tossing BFDs?  bfd? */
       while ((last = bfd_openr_next_archived_file (abfd, last)))
-	if (STREQ (mem, last->filename))
+	if (DEPRECATED_STREQ (mem, last->filename))
 	  break;
 
       if (!last)
@@ -843,8 +843,8 @@ vmap_ldinfo (LdInfo *ldi)
 
 	  /* The filenames are not always sufficient to match on. */
 
-	  if ((name[0] == '/' && !STREQ (name, vp->name))
-	      || (memb[0] && !STREQ (memb, vp->member)))
+	  if ((name[0] == '/' && !DEPRECATED_STREQ (name, vp->name))
+	      || (memb[0] && !DEPRECATED_STREQ (memb, vp->member)))
 	    continue;
 
 	  /* See if we are referring to the same file.
@@ -941,17 +941,17 @@ vmap_exec (void)
 
   for (i = 0; &exec_ops.to_sections[i] < exec_ops.to_sections_end; i++)
     {
-      if (STREQ (".text", exec_ops.to_sections[i].the_bfd_section->name))
+      if (DEPRECATED_STREQ (".text", exec_ops.to_sections[i].the_bfd_section->name))
 	{
 	  exec_ops.to_sections[i].addr += vmap->tstart - vmap->tvma;
 	  exec_ops.to_sections[i].endaddr += vmap->tstart - vmap->tvma;
 	}
-      else if (STREQ (".data", exec_ops.to_sections[i].the_bfd_section->name))
+      else if (DEPRECATED_STREQ (".data", exec_ops.to_sections[i].the_bfd_section->name))
 	{
 	  exec_ops.to_sections[i].addr += vmap->dstart - vmap->dvma;
 	  exec_ops.to_sections[i].endaddr += vmap->dstart - vmap->dvma;
 	}
-      else if (STREQ (".bss", exec_ops.to_sections[i].the_bfd_section->name))
+      else if (DEPRECATED_STREQ (".bss", exec_ops.to_sections[i].the_bfd_section->name))
 	{
 	  exec_ops.to_sections[i].addr += vmap->dstart - vmap->dvma;
 	  exec_ops.to_sections[i].endaddr += vmap->dstart - vmap->dvma;

@@ -30,7 +30,7 @@
 /* There are two different signal handler trampolines in Solaris2.  */
 #define IN_SIGTRAMP(pc, name) \
   ((name) \
-   && (STREQ ("sigacthandler", name) || STREQ ("ucbsigvechandler", name)))
+   && (DEPRECATED_STREQ ("sigacthandler", name) || DEPRECATED_STREQ ("ucbsigvechandler", name)))
 
 /* The signal handler gets a pointer to an ucontext as third argument
    if it is called from sigacthandler.  This is the offset to the saved

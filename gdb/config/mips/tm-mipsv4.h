@@ -23,7 +23,7 @@
 
 /* The signal handler trampoline is called _sigtramp.  */
 #undef IN_SIGTRAMP
-#define IN_SIGTRAMP(pc, name) ((name) && STREQ ("_sigtramp", name))
+#define IN_SIGTRAMP(pc, name) ((name) && DEPRECATED_STREQ ("_sigtramp", name))
 
 /* On entry to the signal handler trampoline, an ucontext is already
    pushed on the stack. We can get at the saved registers via the
