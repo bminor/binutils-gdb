@@ -185,8 +185,8 @@ emulation environment on a sun4 such that programs built in a sun3
 development environment actually run on the sun4.  This technique is
 often used within individual programs to remedy deficiencies in the host
 operating system.  For example, some operating systems do not provide
-the @code{bcopy()} function and so it is emulated using the
-@code{memset()} funtion.
+the @code{bcopy} function and so it is emulated using the
+@code{memcpy} funtion.
 
 Host environment simply refers to the environment in which the program
 will be built from the source.
@@ -230,7 +230,7 @@ capable of one configuration at a time.  Otherwise, a second
 configuration would write over the first.  We've chosen to retain this
 behaviour so the @code{-subdirs} configuration option is necessary to
 get the new behaviour.  The order of the arguments doesn't matter.
-There should be exactly one argument without a leading '@minus{}' sign
+There should be exactly one argument without a leading @samp{-} sign
 and that argument will be assumed to be the host name.
 
 From here on the examples will assume that you want to build the tools
@@ -422,11 +422,11 @@ that you used the native development environment that came with your
 sun4 to bootstrap the Cygnus Support release and let's call the new
 development environment @emph{stage1}.
 
-Why bother?  Well, most people find that the Cygnus Support release
-builds programs that run faster and take up less space than the native
-development environments that came with their machines.  Some people
-didn't get development environments with their machines and some people
-just like using the @sc{gnu} tools better than using other tools.
+Why bother?  Well, most people find that the @sc{gnu} development
+environment builds programs that run faster and take up less space than
+the native development environments that came with their machines.  Some
+people didn't get development environments with their machines and some
+people just like using the @sc{gnu} tools better than using other tools.
 
 @cindex Stage2
 While you're at it, if the @sc{gnu} tools produce better programs, maybe you
