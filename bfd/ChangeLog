@@ -1,3 +1,8 @@
+Thu Jul 23 11:38:05 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-sparc.c (elf_backend_got_header_size): Define as 4.
+	* elf64-sparc.c (elf_backend_got_header_size): Define as 8.
+
 1998-07-22  Ulrich Drepper  <drepper@cygnus.com>
 
 	* elf32-ppc.c: Change use of pp_reloc_type to elf_ppc_reloc_type.
