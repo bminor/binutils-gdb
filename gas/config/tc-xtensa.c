@@ -6013,7 +6013,7 @@ opcode_funcUnit_use_stage (void *data, xtensa_opcode opcode, int idx)
    solely whether the hardware is available to execute the given
    instructions together.  It also doesn't check if the tinsns 
    write the same state, or access the same tieports.  That is
-   checked by check_t1_t2_read_write.  */
+   checked by check_t1_t2_reads_and_writes.  */
 
 static bfd_boolean
 resources_conflict (vliw_insn *vinsn)
@@ -6069,7 +6069,10 @@ finish_vinsn (vliw_insn *vinsn)
   int line;
 
   if (find_vinsn_conflicts (vinsn))
-    return;
+    {
+      xg_clear_vinsn (vinsn);
+      return;
+    }
 
   /* First, find a format that works.  */
   if (vinsn->format == XTENSA_UNDEFINED)
@@ -6326,7 +6329,7 @@ find_vinsn_conflicts (vliw_insn *vinsn)
 }
 
 
-/* Check how the result registers of t1 and t2 relate.
+/* Check how the state used by t1 and t2 relate.
    Cases found are:
 
    case A: t1 reads a register t2 writes (an antidependency within a bundle)
@@ -6336,7 +6339,7 @@ find_vinsn_conflicts (vliw_insn *vinsn)
            bundle)
    case D: t1 writes a state that t2 also writes
    case E: t1 writes a tie queue that t2 also writes
-   case F: two volatile queue writes
+   case F: two volatile queue accesses
 */
 
 static char
@@ -6459,18 +6462,24 @@ check_t1_t2_reads_and_writes (TInsn *t1, TInsn *t2)
     {
       xtensa_interface t2_int
 	= xtensa_interfaceOperand_interface (isa, t2->opcode, j);
+      int t2_class = xtensa_interface_class_id (isa, t2_int);
+
       t2_inout = xtensa_interface_inout (isa, j);
-      if (xtensa_interface_has_side_effect (isa, t2_int) == 1 
-	  && t2_inout != 'i')
+      if (xtensa_interface_has_side_effect (isa, t2_int) == 1)
 	t2_volatile = TRUE;
+
       for (i = 0; i < t1_interfaces; i++)
 	{
 	  xtensa_interface t1_int
 	    = xtensa_interfaceOperand_interface (isa, t1->opcode, j);
+	  int t1_class = xtensa_interface_class_id (isa, t2_int);
+
 	  t1_inout = xtensa_interface_inout (isa, i);
-	  if (xtensa_interface_has_side_effect (isa, t1_int) == 1 
-	      && t1_inout != 'i')
+	  if (xtensa_interface_has_side_effect (isa, t1_int) == 1)
 	    t1_volatile = TRUE;
+
+	  if (t1_volatile && t2_volatile && (t1_class == t2_class))
+	    return 'f';
 	  
 	  if (t1_int != t2_int)
 	    continue;
@@ -6491,9 +6500,6 @@ check_t1_t2_reads_and_writes (TInsn *t1, TInsn *t2)
 	    return 'e';
 	}
     }
-
-  if (t1_volatile && t2_volatile)
-    return 'f';
   
   return conflict;
 }

@@ -1,3 +1,7 @@
+2004-11-12  Bob Wilson  <bob.wilson@acm.org>
+
+	* xtensa-isa.c (xtensa_interface_class_id): New.
+
 2004-11-11  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (property_table_compare): Remove assertion about

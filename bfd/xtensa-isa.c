@@ -1677,6 +1677,15 @@ xtensa_interface_has_side_effect (xtensa_isa isa, xtensa_interface intf)
   return 0;
 }
 
+
+int
+xtensa_interface_class_id (xtensa_isa isa, xtensa_interface intf)
+{
+  xtensa_isa_internal *intisa = (xtensa_isa_internal *) isa;
+  CHECK_INTERFACE (intisa, intf, XTENSA_UNDEFINED);
+  return intisa->interfaces[intf].class_id;
+}
+
 
 /* Functional Units.  */
 
