@@ -65,9 +65,8 @@ struct target_ops op50n_ops = {
   "Debug on a Oki OP50N eval board.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya).",
   op50n_open,
-
   monitor_close, 
-  0,
+  monitor_attach,
   monitor_detach,
   monitor_resume,
   monitor_wait,
@@ -137,7 +136,8 @@ struct monitor_ops op50n_cmds = {
   " ",					/* end-of-command delimitor */
   ".\n",				/* optional command terminator */
   &op50n_ops,				/* target operations */
-  "srec,ascii-srec,default",		/* load types */
+  "none,srec,default",			/* load types */
+  "none",				/* load types */
   op50n_regnames
 };
 

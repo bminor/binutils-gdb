@@ -77,7 +77,9 @@ static serial_t monitor_desc = NULL;
 /* sets the download protocol, choices are srec, generic, boot */
 char *loadtype;
 static char *loadtype_str;
+static char *loadproto_str;
 static void set_loadtype_command();
+static void set_loadproto_command();
 static void monitor_load_srec();
 static int monitor_write_srec();
 
@@ -126,6 +128,38 @@ set_loadtype_command (ignore, from_tty, c)
   }
   free (tmp);
   error ("Loadtype \"%s\" does not exist.", (*(char **) c->var));
+}
+/*
+ * set_loadproto_command -- set the protocol for downloading. Check to make
+ *	sure you have a supported protocol for this target.
+ */
+static void
+set_loadproto_command (ignore, from_tty, c)
+     char *ignore;
+     int from_tty;
+     struct cmd_list_element *c;
+{
+  char *tmp;
+  char *type;
+  if (STREQ (LOADPROTOS, "")) {
+    error ("No load protocols set");
+    return;
+  }
+  
+  tmp = savestring (LOADPROTOS, strlen(LOADPROTOS));
+  type = strtok(tmp, ",");
+  if (STREQ (type, (*(char **) c->var))) {
+      loadproto_str = savestring (*(char **) c->var, strlen (*(char **) c->var));
+      return;
+    }
+  
+  while ((type = strtok (NULL, ",")) != (char *)NULL) {
+    if (STREQ (type, (*(char **) c->var)))
+      loadproto_str = savestring (*(char **) c->var, strlen (*(char **) c->var));
+    return;
+  }
+  free (tmp);
+  error ("Load protocol \"%s\" does not exist.", (*(char **) c->var));
 }
 
 /*
@@ -642,7 +676,7 @@ get_reg_name (regno)
   static char buf[50];
   const char *p;
   char *b;
-
+ 
   b = buf;
 
   if (regno < 0)
@@ -1253,7 +1287,7 @@ getacknak (byte)
   i = 0;
   while (i++ < 60) {
     character = (char)readchar (0);
-    if (character == 0xfffffffe) {		/* empty uart */
+    if ((character == 0xfffffffe) || (character == 0x7f)) {		/* empty uart */
       if (sr_get_debug() > 3)
 	putchar ('.');
       fflush (stdout);
@@ -1474,11 +1508,18 @@ _initialize_remote_monitors ()
   struct cmd_list_element *c;
 
   /* this sets the type of download protocol */
-  c = add_set_cmd ("loadtype", no_class, var_string, (char *)&loadtype_str,
+  c = add_set_cmd ("remoteloadprotocol", no_class, var_string, (char *)&loadproto_str,
+       "Set the type of the remote load protocol.\n", &setlist);
+  c->function.sfunc =  set_loadproto_command;
+  add_show_from_set (c, &showlist);
+  loadproto_str = savestring ("none", 5);
+
+  /* this sets the conversion type when loading */
+  c = add_set_cmd ("remoteloadtype", no_class, var_string, (char *)&loadtype_str,
        "Set the type of the remote load protocol.\n", &setlist);
   c->function.sfunc =  set_loadtype_command;
   add_show_from_set (c, &showlist);
-  loadtype_str = savestring ("default", 8);
+  loadtype_str = savestring ("srec", 5);
 
   add_show_from_set (add_set_cmd ("hash", no_class, var_boolean,
                                   (char *)&hashmark,

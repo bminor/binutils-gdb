@@ -1,3 +1,9 @@
+Tue Nov 15 01:03:56 1994  Rob Savoye  (rob@slipknot.cygnus.com)
+
+	* op50-rom.c, w89k-rom.c, monitor.c: Modify to usr two variables
+	to set remote load type and protocol.
+	* rom68k-rom.c: Add to_stop in target_ops.
+
 Mon Nov 14 08:51:29 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* Makefile.in:  Install gdbtk.tcl.

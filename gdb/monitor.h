@@ -47,6 +47,7 @@ struct monitor_ops {
   char	*cmd_end;		/* optional command terminator */
   struct target_ops *target;	/* target operations */
   char	*loadtypes;		/* the load types that are supported */
+  char	*loadprotos;		/* the load protocols that are supported */
   char  **regnames;		/* array of register names in ascii */
 };
 
@@ -54,6 +55,7 @@ extern struct monitor_ops        *current_monitor;
 
 #define PROTO_TYPE		(current_monitor->type)
 #define LOADTYPES		(current_monitor->loadtypes)
+#define LOADPROTOS		(current_monitor->loadprotos)
 #define INIT_CMD 		(current_monitor->init)
 #define GO_CMD 			(current_monitor->execute)
 #define CONT_CMD		(current_monitor->resume)

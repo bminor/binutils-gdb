@@ -89,6 +89,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   monitor_mourn_inferior,
   0,				/* can_run */
   0, 				/* notice_signals */
+  0,                            /* to_stop */
   process_stratum,
   0,				/* next */
   1,
@@ -98,7 +99,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   1,				/* all mem, mem, stack, regs, exec */
   0,
   0,				/* Section pointers */
-  OPS_MAGIC,			/* Always the last thing */
+  OPS_MAGIC			/* Always the last thing */
 };
 
 struct monitor_ops rom68k_cmds = {
@@ -135,7 +136,8 @@ struct monitor_ops rom68k_cmds = {
   "=",					/* end-of-command delimitor */
   ".\n",				/* optional command terminator */
   &rom68k_ops,				/* target operations */
-  "srec,xmodem-ascii,xmodem-srec,default",/* load types */
+  "none,srec,default",			/* load types */
+  "none",				/* load protocols */
   rom68k_regnames			/* registers names */
 };
 
@@ -158,7 +160,3 @@ _initialize_rom68k ()
   /* this is the default, since it's the only baud rate supported by the hardware */
   baud_rate = 9600;
 }
-
-
-
-

@@ -1,7 +1,6 @@
 /* Remote target glue for the WinBond ROM monitor running on the "Cougar"
 W89k eval board.
 
-
    Copyright 1988, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -137,7 +136,8 @@ struct monitor_ops w89k_cmds = {
   "",					/* end-of-command delimitor */
   "",					/* optional command terminator */
   &w89k_ops,				/* target operations */
-  "srec,xmodem-ascii,xmodem-srec,default",/* load types */
+  "none,srec,default",			/* load types */
+  "none,xmodem",			/* load protocols */
   w89k_regnames				/* registers names */
 };
 
@@ -160,7 +160,3 @@ _initialize_w89k ()
   /* this is the default, since it's the only baud rate supported by the hardware */
   baud_rate = 9600;
 }
-
-
-
-
