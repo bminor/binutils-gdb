@@ -1,5 +1,8 @@
 Thu Mar 16 11:38:48 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* genscripts.sh (EMULATION_NAME): Set LIB_PATH to empty when not
+	using the default emulation.
+
 	* config/dgux.mh (HOSTING_EMU): Use -m rather than trying to set
 	LDEMULATION.
 	* config/hppaelf.mh (HOSTING_EMU): Likewise.
