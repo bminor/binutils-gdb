@@ -34,29 +34,48 @@ if ![file exists $binfile] then {
 	# being told they are ints or functions returning int like old
 	# versions of gdb used to do.
 
-	gdb_test "p top" "{<text variable without -g>} \[0-9a-fx]* <top>"
-	gdb_test "whatis top" "<text variable without -g>"
+	# On alpha (and presumably other ecoff systems, even stabs in ecoff)
+	# GCC puts out stProc and related symbols which cause GDB to think
+	# it knows the type.  GDB probably could be fixed to do better, but
+	# for now xfail these tests.
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	gdb_test "p top" "{<text variable, no debug info>} \[0-9a-fx]* <top>"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	gdb_test "whatis top" "<text variable, no debug info>"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
 	gdb_test "ptype top" "int \\(\\)"
 
-	gdb_test "p middle" "{<text variable without -g>} \[0-9a-fx]* <middle>"
-	gdb_test "whatis middle" "<text variable without -g>"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	gdb_test "p middle" \
+	    "{<text variable, no debug info>} \[0-9a-fx]* <middle>"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	gdb_test "whatis middle" "<text variable, no debug info>"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
 	gdb_test "ptype middle" "int \\(\\)"
 
 	gdb_test "p dataglobal" "= 3"
-	gdb_test "whatis dataglobal" "<data variable without -g>"
-	gdb_test "ptype dataglobal" "<data variable without -g>"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	gdb_test "whatis dataglobal" "<data variable, no debug info>"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	gdb_test "ptype dataglobal" "<data variable, no debug info>"
 
 	gdb_test "p datalocal" "= 4"
-	gdb_test "whatis datalocal" "<data variable without -g>"
-	gdb_test "ptype datalocal" "<data variable without -g>"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	gdb_test "whatis datalocal" "<data variable, no debug info>"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	gdb_test "ptype datalocal" "<data variable, no debug info>"
 
 	gdb_test "p bssglobal" "= 0"
-	gdb_test "whatis bssglobal" "<data variable without -g>"
-	gdb_test "ptype bssglobal" "<data variable without -g>"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	gdb_test "whatis bssglobal" "<data variable, no debug info>"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	gdb_test "ptype bssglobal" "<data variable, no debug info>"
 
 	gdb_test "p bsslocal" "= 0"
-	gdb_test "whatis bsslocal" "<data variable without -g>"
-	gdb_test "ptype bsslocal" "<data variable without -g>"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	gdb_test "whatis bsslocal" "<data variable, no debug info>"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	gdb_test "ptype bsslocal" "<data variable, no debug info>"
 
 	gdb_test "backtrace" "#0.*inner.*#1.*middle.*#2.*top.*#3.*main"
 	# Or if that doesn't work, at least hope for the external symbols

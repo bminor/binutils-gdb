@@ -1,3 +1,7 @@
+Sat Jan 21 15:34:52 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/nodebug.exp: xfail most of the new tests for ecoff systems.
+
 Fri Jan 20 12:14:23 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.c++/classes.exp, gdb.c++/cplusfuncs.exp,
