@@ -5103,7 +5103,7 @@ break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_b
 
 	  error_output_message (NULL, err_msg);
 	  xfree (err_msg);
-	  if (!query ("Make breakpoint pending on future shared library load? "))
+	  if (!nquery ("Make breakpoint pending on future shared library load? "))
 	    return rc;
 	  copy_arg = xstrdup (addr_start);
 	  addr_string = &copy_arg;
