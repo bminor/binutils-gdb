@@ -1,19 +1,19 @@
 # This file is configure.in
 #
 #   Copyright (C) 1987-1992 Free Software Foundation, Inc.
-#   
+#
 #  This file is part of GAS, the GNU Assembler.
-#   
+#
 #   GAS is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
 #   the Free Software Foundation; either version 2, or (at your option)
 #   any later version.
-#   
+#
 #   GAS is distributed in the hope that it will be useful,
 #   but WITHOUT ANY WARRANTY; without even the implied warranty of
 #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #   GNU General Public License for more details.
-#   
+#
 #   You should have received a copy of the GNU General Public License
 #   along with GAS; see the file COPYING.  If not, write to
 #   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
@@ -65,6 +65,8 @@ case "${host}" in
   vax-*-vms*)			gas_host=vms		;;
   vax-*-bsd*)			gas_host=vax		;;
 
+  *-*-sysv4*)			gas_host=sysv		;;
+
   *-*-ansi | *-*-ultrix | *-*-hpux | *-*-sysv*)
 				gas_host=${host_os}	;;
 
@@ -96,15 +98,18 @@ emulation=generic
 
 # check for architecture variants
 case ${target_cpu} in
-  sparclite*)   cpu_type=sparc ;;
-  sparc64)	cpu_type=sparc64 obj_format=elf ;; # v9
-  m680[01234]0) cpu_type=m68k ;;
-  m683??)       cpu_type=m68k ;;
-  i486)		cpu_type=i386 ;;
   h8300h)	cpu_type=h8300 ;;
   # Actually we've only got support for the 1.1, so we shouldn't generalize,
   # but this is what the support files are named...
-  hppa1.1)	cpu_type=hppa ;;
+  hppa*)	cpu_type=hppa ;;
+  i486)		cpu_type=i386 ;;
+  m680[01234]0) cpu_type=m68k ;;
+  m68008)	cpu_type=m68k ;;
+  m683??)       cpu_type=m68k ;;
+  m8*)		cpu_type=m88k ;;
+  mips*)	cpu_type=mips ;;
+  sparc64)	cpu_type=sparc64 obj_format=elf ;; # v9
+  sparclite*)   cpu_type=sparc ;;
   *)		cpu_type=${target_cpu} ;;
 esac
 
@@ -112,13 +117,15 @@ gas_target=${cpu_type}
 
 generic_target=${cpu_type}-${target_vendor}-${target_os}
 
+dev=no
+
 # assign object format
 case ${generic_target} in
   a29k-amd-udi)		obj_format=coffbfd gas_target=ebmon29k ;;
   a29k-amd-ebmon)	obj_format=coffbfd gas_target=ebmon29k ;;
   a29k-amd-ebmonold)	obj_format=coff gas_target=ebmon29k ;;
 
-  hppa-*-osf)		obj_format=elf emulation=hppa ;;
+  hppa-*-osf)		obj_format=elf emulation=hppa dev=yes ;;
   hppa-*-hpux*)		obj_format=som emulation=hppa ;;
 
   h8300-*-coff)		obj_format=coffbfd ;;
@@ -126,20 +133,29 @@ case ${generic_target} in
   i386-ibm-aix*)	obj_format=coffbfd gas_target=i386coff
 			 emulation=i386aix ;;
   i386-*-bsd*)		obj_format=aout emulation=386bsd ;;
+  i386-*-linux*elf*)	obj_format=elf  emulation=linux ;;
+  i386-*-linux*coff*)	obj_format=coffbfd emulation=linux
+			 gas_target=i386coff ;;
   i386-*-linux*)	obj_format=aout emulation=linux ;;
-  i386-*-lynxos* | i386-*-coff | i386-*-sysv* | i386-*-sco* | i386-*-isc*)
-			obj_format=coffbfd gas_target=i386coff ;; 
+  i386-*-lynxos*)	obj_format=coffbfd gas_target=i386coff
+			 emulation=lynx ;;
+  i386-*-sysv4* | i386-*-solaris* | i386-*-elf)
+			obj_format=elf ;;
+  i386-*-coff | i386-*-sysv* | i386-*-sco* | i386-*-isc*)
+			obj_format=coffbfd gas_target=i386coff ;;
   i386-*-go32)		obj_format=aout ;;
 
-  i960-wrs-vxworks)	obj_format=bout ;;
+  i960-wrs-vxworks | i960-*-nindy*)
+			obj_format=bout ;;
   i960-*-coff)		obj_format=coff emulation=ic960 ;;
 
-  m68k-wrs-vxworks)	obj_format=aout emulation=sun3 ;;    
-  m68k-ericsson-[Oo][Ss][Ee])
+  m68k-wrs-vxworks | m68k-ericsson-ose | m68k-*-sunos*)
 			obj_format=aout emulation=sun3 ;;
-  m68k-*-coff | m68*-*-sysv*)
+  m68k-*-coff | m68k-*-sysv*)
 			obj_format=coffbfd gas_target=m68kcoff ;;
   m68k-*-hpux)		obj_format=hp300 emulation=hp300 ;;
+  m68k-*-lynxos*)	obj_format=coffbfd gas_target=m68kcoff
+			 emulation=lynx ;;
 
   m88k-*-coff*)		obj_format=coffbfd gas_target=m88kcoff ;;
 
@@ -149,23 +165,38 @@ case ${generic_target} in
   mips-*-ecoffl*)	obj_format=ecoff gas_target=mips-lit ;;
   mips-*-ecoff*)	obj_format=ecoff gas_target=mips-big ;;
   mips-*-irix*)		obj_format=ecoff gas_target=mips-big emulation=irix ;;
+  mips-*-riscos*)	obj_format=ecoff gas_target=mips-big ;;
+  mips-*-sysv*)		obj_format=ecoff gas_target=mips-big ;;
+  mips-*-elfl*)		obj_format=elf gas_target=mips-lit ;;
+  mips-*-elf*)		obj_format=elf gas_target=mips-big ;;
 
-  sparc*-*-sunos4*)	bfd_gas=preferred obj_format=aout emulation=sun3 ;;
-
-  sparc*-fujitsu-none)	obj_format=aout ;;
-
+  sparc*-*-sunos4*)	obj_format=aout emulation=sun3 bfd_gas=yes ;;
+  sparc*-*-aout | sparc*-*-vxworks)
+			obj_format=aout bfd_gas=yes ;;
+  sparc*-*-coff)	obj_format=coff bfd_gas=yes ;;
+  sparc*-fujitsu-none)	obj_format=aout bfd_gas=yes ;;
+  sparc*-*-elf | sparc*-*-solaris*)
+			obj_format=elf ;;
   sparc64-*-aout*)	obj_format=aout bfd_gas=yes ;; # v9
 
-  *-*-aout | *-*-scout | *-*-linux)
+  vax-*-vms)		obj_format=vms ;;
+
+  z8k-*-coff | z8k-*-sim)
+			obj_format=coffbfd ;;
+
+  *-*-aout | *-*-scout)
 			obj_format=aout ;;
-  *-*-bout* | *-*-nindy*)
+  *-*-nindy*)
 			obj_format=bout ;;
-  *-*-bsd* | *-*-sunos*)
+  *-*-bsd*)
 			obj_format=aout emulation=sun3 ;;
   *-*-generic)		obj_format=generic ;;
   *-*-xray | *-*-hms)	obj_format=coffbfd ;;
   *-*-sysv32)		obj_format=coff emulation=sysv32 ;;
   *-*-sim)		obj_format=coffbfd ;;
+  *-*-elf | *-*-sysv4* | *-*-solaris*)
+	echo '*** Warning: GAS support for ELF format is incomplete' 1>&2
+			obj_format=elf dev=yes ;;
   *-*-coff* | *-sysv* | *-*-sco*)
 			obj_format=coff
 			case ${target_vendor} in
@@ -174,14 +205,11 @@ case ${generic_target} in
 			esac
 			;;
   *-*-vxworks)		obj_format=aout ;;
-  *-*-coff)		obj_format=coff ;;
-  *-*-elf | *-*-solaris*)
-	echo '*** Warning: GAS support for ELF format is incomplete' 1>&2
-			obj_format=elf ;;
-  *-*-vms)		obj_format=vms ;;
 esac
 
-# assign floating point type
+# Assign floating point type.  Most processors with FP support
+# IEEE FP.  On those that don't support FP at all, usually IEEE
+# is emulated.
 case ${target_cpu} in
   ns32k | vax | tahoe )	atof=${target_cpu} ;;
   *)			atof=ieee ;;
@@ -192,10 +220,12 @@ if [ ! -r ${srcdir}/config/tc-${cpu_type}.c ]; then
   exit 1
 fi
 
-if [ x${obj_format} = x ]; then
-  echo "*** GAS doesn't know what format to use for target" ${target}	1>&2
-  exit 1
-fi
+case "${obj_format}" in
+  "")
+      echo "*** GAS doesn't know what format to use for target" ${target} 1>&2
+      exit 1
+      ;;
+esac
 
 if [ ! -r ${srcdir}/config/obj-${obj_format}.c ]; then
   echo '*** GAS does not have support for object file format' ${obj_format} 1>&2
@@ -233,6 +263,15 @@ case ${with_bfd_assembler}-${bfd_gas} in
     ;;
 esac
 
+reject_dev_configs=yes
+
+case ${reject_dev_configs}-${dev} in
+  yes-yes) # Oops.
+    echo "*** GAS does not support the ${generic_target} configuration" 1>&2
+    exit 1
+    ;;
+esac
+
 files="config/ho-${gas_host}.h config/tc-${cpu_type}.c \
 	config/tc-${cpu_type}.h config/te-${emulation}.h \
 	config/obj-${obj_format}.h config/obj-${obj_format}.c \
@@ -243,38 +282,25 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 # post-target:
 
 case ${bfd_gas} in
-  yes)
-    rm -f Makefile.tem
-    mv Makefile Makefile.tem
-    echo BFDDEF=-DBFD_ASSEMBLER > Makefile
-    cat Makefile.tem >> Makefile
-    rm -f Makefile.tem
-    need_bfd=yes
-    ;;
-  *)
-    ;;
+  yes)	bfddef="BFDDEF=-DBFD_ASSEMBLER" need_bfd=yes	;;
+  *)    bfddef=""					;;
 esac
 
 case ${need_bfd} in
-  yes)
-    rm -f Makefile.tem
-    mv Makefile Makefile.tem
-    echo BFDLIB=../bfd/libbfd.a > Makefile
-    cat Makefile.tem >> Makefile
-    rm -f Makefile.tem
-    ;;
-  *)
-    ;;
+  yes)	bfdlib="BFDLIB=../bfd/libbfd.a"			;;
+  *)	bfdlib=""					;;
 esac
 
-if [ x${host} != x${target} ] ; then
-    rm -f Makefile.tem
-    mv Makefile Makefile.tem
-    echo CROSS=-DCROSS_COMPILE > Makefile
-    cat Makefile.tem >> Makefile
-    rm -f Makefile.tem
-else
-    true
-fi
+case "x${host}" in
+  "x${target}")	cross=""				;;
+  *)		cross="CROSS=-DCROSS_COMPILE"		;;
+esac
+
+rm -f Makefile.tem
+echo $bfddef >  Makefile.tem
+echo $bfdlib >> Makefile.tem
+echo $cross  >> Makefile.tem
+cat Makefile >> Makefile.tem
+mv -f Makefile.tem Makefile
 
 # end of gas/configure.in
