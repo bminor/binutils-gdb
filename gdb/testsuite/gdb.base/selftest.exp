@@ -342,6 +342,11 @@ proc test_with_self { executable } {
 	    send_gdb "step\n"
 	    exp_continue
 	}
+        -re ".*cmdarg = .* xmalloc.*$gdb_prompt $" {
+	    set stepped_back 1
+	    send_gdb "step\n"
+	    exp_continue
+        }
 	-re "dirsize = 1;.*$gdb_prompt $" {
 	    set stepped_back 1
 	    send_gdb "step\n"
