@@ -1,5 +1,5 @@
-/* Opcode table for m68000/m68020 and m68881.
-   Copyright (C) 1989, Free Software Foundation.
+/* Opcode table for m680[01234]0/m6888[12].
+   Copyright (C) 1989, 1991 Free Software Foundation.
 
 This file is part of GDB, the GNU Debugger and GAS, the GNU Assembler.
 
@@ -16,14 +16,30 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with GDB or GAS; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
-   
 
-struct m68k_opcode
-{
-  char *name;
-  unsigned long opcode;
-  unsigned long  match;
-  char *args;
+enum m68k_architecture {
+	ARCH_68000 = 0,
+	ARCH_68010,
+	ARCH_68020,
+	ARCH_68030,
+	ARCH_68040,
+};
+
+static const char *architecture_pname[] = {
+	"68000",
+	"68010",
+	"68020",
+	"68030",
+	"68040",
+	NULL,
+};
+
+struct m68k_opcode {
+	char *name;
+	unsigned long opcode;
+	unsigned long match;
+	char *args;
+	enum m68k_architecture arch;
 };
 
 /* We store four bytes of opcode for all opcodes because that
@@ -204,18 +220,18 @@ struct m68k_opcode
  */
 struct m68k_opcode m68k_opcodes[] =
 {
-{"abcd",	one(0140400),		one(0170770),		"DsDd"},
-{"abcd",	one(0140410),		one(0170770),		"-s-d"},
+{"abcd",	one(0140400),		one(0170770), "DsDd", m68000 },
+{"abcd",	one(0140410),		one(0170770), "-s-d", m68000 },
 
 		/* Add instructions */
-{"addal",	one(0150700),		one(0170700),		"*lAd"},
-{"addaw",	one(0150300),		one(0170700),		"*wAd"},
-{"addib",	one(0003000),		one(0177700),		"#b$b"},
-{"addil",	one(0003200),		one(0177700),		"#l$l"},
-{"addiw",	one(0003100),		one(0177700),		"#w$w"},
-{"addqb",	one(0050000),		one(0170700),		"Qd$b"},
-{"addql",	one(0050200),		one(0170700),		"Qd%l"},
-{"addqw",	one(0050100),		one(0170700),		"Qd%w"},
+{"addal",	one(0150700),		one(0170700), "*lAd", m68000 },
+{"addaw",	one(0150300),		one(0170700), "*wAd", m68000 },
+{"addib",	one(0003000),		one(0177700), "#b$b", m68000 },
+{"addil",	one(0003200),		one(0177700), "#l$l", m68000 },
+{"addiw",	one(0003100),		one(0177700), "#w$w", m68000 },
+{"addqb",	one(0050000),		one(0170700), "Qd$b", m68000 },
+{"addql",	one(0050200),		one(0170700), "Qd%l", m68000 },
+{"addqw",	one(0050100),		one(0170700), "Qd%w", m68000 },
 
 {"addb",	one(0050000),		one(0170700),		"Qd$b"},	/* addq written as add */
 {"addb",	one(0003000),		one(0177700),		"#b$b"},	/* addi written as add */
@@ -1732,3 +1748,11 @@ struct m68k_opcode m68k_opcodes[] =
 int numopcodes=sizeof(m68k_opcodes)/sizeof(m68k_opcodes[0]);
 
 struct m68k_opcode *endop = m68k_opcodes+sizeof(m68k_opcodes)/sizeof(m68k_opcodes[0]);
+
+/*
+ * Local Variables:
+ * fill-column: 131
+ * End:
+ */
+
+/* end of m68k-opcode.h */
