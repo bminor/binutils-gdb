@@ -1,5 +1,7 @@
 Tue Oct 18 11:12:01 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* Makefile.in (mostlyclean): Remove tmpdir.
+
 	* objcopy.c (struct section_list): Add fields used, adjust, val.
 	(adjust_start, set_start_set, set_start): New static variables.
 	(adjust_section_vma, adjust_sections): New static variables.

@@ -70,7 +70,7 @@ LEX_OPTIONS = -I -Cem
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo flex ; fi`
 
 # Distribution version
-VERSION=cygnus-2.4.1
+VERSION=cygnus-2.5
 # Distribution name
 DIST_NAME=binutils-${VERSION}
 
@@ -515,6 +515,7 @@ binutils.me: $(srcdir)/binutils.texi
 
 mostlyclean:
 	-rm -f *.o *~ \#* core binutils.?? binutils.???
+	-rm -rf tmpdir
 clean: mostlyclean
 	-rm -f $(PROGS) underscore.c
 distclean:
