@@ -1,7 +1,7 @@
 Thu Oct  3 17:17:02 1996  Ian Lance Taylor  <ian@cygnus.com>
 
-	* Makefile.in (ALL_MACHINES): Add mn10200-dis.o, mn10200-opc.o,
-	mn10300-dis.o, and mn10300-opc.o.
+	* mn10300-opc.c (mn10300_opcodes): Start fleshing out the
+	opcode table.
 
 Thu Oct  3 10:06:07 1996  Jeffrey A Law  (law@cygnus.com)
 
