@@ -398,7 +398,7 @@ the command you want to undeprecate.\n");
    This function deprecates a command and optionally assigns it a
    replacement.  */
 
-static void 
+static void
 maintenance_do_deprecate (char *text, int deprecate)
 {
 
