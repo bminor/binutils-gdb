@@ -1,3 +1,10 @@
+2005-03-12  Zack Weinberg  <zack@codesourcery.com>
+
+	* arm-dis.c (arm_opcodes): Document %E and %V.
+	Add entries for v6T2 ARM instructions:
+	bfc bfi mls strht ldrht ldrsht ldrsbt movw movt rbit ubfx sbfx.
+	(print_insn_arm): Add support for %E and %V.
+
 2005-03-10  Jeff Baker  <jbaker@qnx.com>
 	    Alan Modra  <amodra@bigpond.net.au>
 
@@ -5,7 +12,7 @@
 	(powerpc_operands <SPRG>): Call the above.  Bit field is 5 bits.
 	(SPRG_MASK): Delete.
 	(XSPRG_MASK): Mask off extra bits now part of sprg field.
-        (powerpc_opcodes): Asjust mfsprg and mtsprg to suit new mask.  Move
+	(powerpc_opcodes): Asjust mfsprg and mtsprg to suit new mask.  Move
 	mfsprg4..7 after msprg and consolidate.
 
 2005-03-09  Jan-Benedict Glaw  <jbglaw@lug-owl.de>

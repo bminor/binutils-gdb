@@ -81,6 +81,8 @@
    %m			print register mask for ldm/stm instruction
    %C			print the PSR sub type.
    %F			print the COUNT field of a LFM/SFM instruction.
+   %E			print the LSB and WIDTH fields of a BFI or BFC instruction.
+   %V                   print the 16-bit immediate field of a MOVT or MOVW instruction.
 IWMMXT specific format options:
    %<bitfield>g         print as an iWMMXt 64-bit register
    %<bitfield>G         print as an iWMMXt general purpose or control register
@@ -117,6 +119,17 @@ static const struct arm_opcode arm_opcodes[] =
   {ARM_EXT_V2S, 0x01000090, 0x0fb00ff0, "swp%c%22'b\t%12-15r, %0-3r, [%16-19r]"},
   {ARM_EXT_V3M, 0x00800090, 0x0fa000f0, "%22?sumull%c%20's\t%12-15r, %16-19r, %0-3r, %8-11r"},
   {ARM_EXT_V3M, 0x00a00090, 0x0fa000f0, "%22?sumlal%c%20's\t%12-15r, %16-19r, %0-3r, %8-11r"},
+
+  /* ARM V6T2 instructions.  */
+  {ARM_EXT_V6T2, 0x07c0001f, 0x0fe0007f, "bfc%c\t%12-15r, %E"},
+  {ARM_EXT_V6T2, 0x07c00010, 0x0fe00070, "bfi%c\t%12-15r, %0-3r, %E"},
+  {ARM_EXT_V6T2, 0x00600090, 0x0ff000f0, "mls%c\t%16-19r, %0-3r, %8-11r, %12-15r"},
+  {ARM_EXT_V6T2, 0x006000b0, 0x0f7000f0, "str%cht\t%12-15r, %s"},
+  {ARM_EXT_V6T2, 0x00300090, 0x0f300090, "ldr%c%6's%5?hbt\t%12-15r, %s"},
+  {ARM_EXT_V6T2, 0x03000000, 0x0ff00000, "movw%c\t%12-15r, %V"},
+  {ARM_EXT_V6T2, 0x03400000, 0x0ff00000, "movt%c\t%12-15r, %V"},
+  {ARM_EXT_V6T2, 0x03ff0f30, 0x0fff0ff0, "rbit%c\t%12-15r, %0-3r"},
+  {ARM_EXT_V6T2, 0x07a00050, 0x0fa00070, "%22?usbfx%c\t%12-15r, %0-3r, #%7-11d, #%16-20W"},
 
   /* ARM V6Z instructions.  */
   {ARM_EXT_V6Z, 0x01600070, 0x0ff000f0, "smi%c\t%e"},
@@ -622,6 +635,13 @@ static const struct thumb_opcode thumb_opcodes[] =
 {
   /* Thumb instructions.  */
 
+  /* ARM V6K no-argument instructions.  */
+  {ARM_EXT_V6K, 0xbf00, 0xffff, "nop"},
+  {ARM_EXT_V6K, 0xbf10, 0xffff, "yield"},
+  {ARM_EXT_V6K, 0xbf20, 0xffff, "wfe"},
+  {ARM_EXT_V6K, 0xbf30, 0xffff, "wfi"},
+  {ARM_EXT_V6K, 0xbf40, 0xffff, "sev"},
+
   /* ARM V6.  */
   {ARM_EXT_V6, 0xb660, 0xfff8, "cpsie\t%2'a%1'i%0'f"},
   {ARM_EXT_V6, 0xb670, 0xfff8, "cpsid\t%2'a%1'i%0'f"},
@@ -929,7 +949,13 @@ print_insn_arm (pc, info, given)
 	  && info->mach != bfd_mach_arm_iWMMXt)
 	insn = insn + IWMMXT_INSN_COUNT;
 
-      if ((given & insn->mask) == insn->value)
+      if ((given & insn->mask) == insn->value
+	  /* Special case: an instruction with all bits set in the condition field
+	     (0xFnnn_nnnn) is only matched if all those bits are set in insn->mask,
+	     or by the catchall at the end of the table.  */
+	  && ((given & 0xF0000000) != 0xF0000000
+	      || (insn->mask & 0xF0000000) == 0xF0000000
+	      || (insn->mask == 0 && insn->value == 0)))
 	{
 	  char * c;
 
@@ -1610,6 +1636,32 @@ print_insn_arm (pc, info, given)
 
 			  imm = (given & 0xf) | ((given & 0xfff00) >> 4);
 			  func (stream, "%d", imm);
+			}
+			break;
+
+		      case 'E':
+			/* LSB and WIDTH fields of BFI or BFC.  The machine-
+			   language instruction encodes LSB and MSB.  */
+			{
+			  long msb = (given & 0x001f0000) >> 16;
+			  long lsb = (given & 0x00000f80) >> 7;
+
+			  long width = msb - lsb + 1;
+			  if (width > 0)
+			    func (stream, "#%lu, #%lu", lsb, width);
+			  else
+			    func (stream, "(invalid: %lu:%lu)", lsb, msb);
+			}
+			break;
+
+		      case 'V':
+			/* 16-bit unsigned immediate from a MOVT or MOVW
+			   instruction, encoded in bits 0:11 and 15:19.  */
+			{
+			  long hi = (given & 0x000f0000) >> 4;
+			  long lo = (given & 0x00000fff);
+			  long imm16 = hi | lo;
+			  func (stream, "#%lu\t; 0x%lx", imm16, imm16);
 			}
 			break;
 
