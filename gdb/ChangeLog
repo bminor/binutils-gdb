@@ -1,3 +1,15 @@
+Sat Mar 30 11:00:22 1996  Fred Fish  <fnf@cygnus.com>
+
+	* configure.in: Check whether printf family supports printing
+	long doubles or not and define PRINTF_HAS_LONG_DOUBLE if so.
+	* acconfig.h: Provide default undef for PRINTF_HAS_LONG_DOUBLE.
+	* configure: Regenerate.
+	* valprint.c (print_floating): Use PRINTF_HAS_LONG_DOUBLE.
+	* c-exp.y (parse_number): Use PRINTF_HAS_LONG_DOUBLE.
+	* configure.in: Fix have_gregset and have_fpregset autoconf
+	variable names so that they match the pattern required to
+	cache them.
+
 Fri Mar 29 21:39:56 1996  Fred Fish  <fnf@cygnus.com>
 
 	* core-aout.c (fetch_core_registers): Cast core_reg_size to int

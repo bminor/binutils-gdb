@@ -41,20 +41,20 @@ AC_CHECK_HEADERS(limits.h memory.h string.h strings.h unistd.h termios.h termio.
 AC_HEADER_STAT
 
 AC_MSG_CHECKING([for gregset_t type])
-AC_CACHE_VAL(gdb_have_gregset_t,
+AC_CACHE_VAL(gdb_cv_have_gregset_t,
 [AC_TRY_LINK([#include <sys/procfs.h>],[gregset_t *gregsetp = 0],
-gdb_have_gregset_t=yes, gdb_have_gregset_t=no)])
-AC_MSG_RESULT($gdb_have_gregset_t)
-if test $gdb_have_gregset_t = yes; then
+gdb_cv_have_gregset_t=yes, gdb_cv_have_gregset_t=no)])
+AC_MSG_RESULT($gdb_cv_have_gregset_t)
+if test $gdb_cv_have_gregset_t = yes; then
   AC_DEFINE(HAVE_GREGSET_T)
 fi
 
 AC_MSG_CHECKING([for fpregset_t type])
-AC_CACHE_VAL(gdb_have_fpregset_t,
+AC_CACHE_VAL(gdb_cv_have_fpregset_t,
 [AC_TRY_LINK([#include <sys/procfs.h>],[fpregset_t *fpregsetp = 0],
-gdb_have_fpregset_t=yes, gdb_have_fpregset_t=no)])
-AC_MSG_RESULT($gdb_have_fpregset_t)
-if test $gdb_have_fpregset_t = yes; then
+gdb_cv_have_fpregset_t=yes, gdb_cv_have_fpregset_t=no)])
+AC_MSG_RESULT($gdb_cv_have_fpregset_t)
+if test $gdb_cv_have_fpregset_t = yes; then
   AC_DEFINE(HAVE_FPREGSET_T)
 fi
 
@@ -62,7 +62,7 @@ dnl See if compiler supports "long double" type.  Can't use AC_C_LONG_DOUBLE
 dnl because autoconf complains about cross-compilation issues.  However, this
 dnl code uses the same variables as the macro for compatibility.
 
-AC_MSG_CHECKING(for long double)
+AC_MSG_CHECKING(for long double support in compiler)
 AC_CACHE_VAL(ac_cv_c_long_double,
 [AC_TRY_COMPILE(, [long double foo;],
 ac_cv_c_long_double=yes, ac_cv_c_long_double=no)])
@@ -70,6 +70,25 @@ AC_MSG_RESULT($ac_cv_c_long_double)
 if test $ac_cv_c_long_double = yes; then
   AC_DEFINE(HAVE_LONG_DOUBLE)
 fi
+
+dnl See if the compiler and runtime support printing long doubles
+
+AC_MSG_CHECKING(for long double support in printf)
+AC_CACHE_VAL(gdb_cv_printf_has_long_double,
+[AC_TRY_RUN([
+int main () {
+  char buf[16];
+  long double f = 3.141592653;
+  sprintf (buf, "%Lg", f);
+  return (strncmp ("3.14159", buf, 7));
+}],
+gdb_cv_printf_has_long_double=yes,
+gdb_cv_printf_has_long_double=no,
+gdb_cv_printf_has_long_double=no)])
+if test $gdb_cv_printf_has_long_double = yes; then
+  AC_DEFINE(PRINTF_HAS_LONG_DOUBLE)
+fi
+AC_MSG_RESULT($gdb_cv_printf_has_long_double)
 
 AC_FUNC_MMAP
 

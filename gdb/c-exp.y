@@ -942,7 +942,18 @@ parse_number (p, len, parsed_float, putithere)
       else if (sizeof (putithere->typed_val_float.dval) <= sizeof (double))
 	sscanf (p, "%lg", &putithere->typed_val_float.dval);
       else
-	sscanf (p, "%Lg", &putithere->typed_val_float.dval);
+	{
+#ifdef PRINTF_HAS_LONG_DOUBLE
+	  sscanf (p, "%Lg", &putithere->typed_val_float.dval);
+#else
+	  /* Scan it into a double, then assign it to the long double.
+	     This at least wins with values representable in the range
+	     of doubles. */
+	  double temp;
+	  sscanf (p, "%lg", &temp);
+	  putithere->typed_val_float.dval = temp;
+#endif
+	}
 
       /* See if it has `f' or `l' suffix (float or long double).  */
 
