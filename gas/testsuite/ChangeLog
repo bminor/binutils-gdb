@@ -1,3 +1,8 @@
+2000-04-25  Alan Modra  <alan@linuxcare.com.au>
+
+	* gas/i386/general.l: Allow for DISP32 pe relocs.
+	* gas/i386/jump.d: Similarly.
+
 Mon Apr 24 16:35:08 2000  Jim Wilson  <wilson@cygnus.com>
 
 	* gas/ia64/opc-i.d: Change pmin2.u to pmin2.  Change pmax2.u to pmax2.

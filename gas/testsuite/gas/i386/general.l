@@ -39,7 +39,7 @@
    2                       	.text
    3                       	#test jumps and calls
    4 0000 EBFE              	1:	jmp	1b
-   5 0002 E9F(CF|9F)FFF FF       		jmp	xxx
+   5 0002 E9((FC|F9)FFFF FF|000000 00)       		jmp	xxx
    6 0007 FF250000 0000     		jmp	\*xxx
    7 000d FF250000 0000     		jmp	xxx\(,1\)
 .*Warning:.*
@@ -58,7 +58,7 @@
   16 0035 EA000000 003412   		ljmp	\$0x1234,\$xxx
   17                       	
   18 003c E8BFFFFF FF       		call	1b
-  19 0041 E8(FC|BA)FFFF FF       		call	xxx
+  19 0041 E8((FC|BA)FFFF FF|000000 00)       		call	xxx
   20 0046 FF150000 0000     		call	\*xxx
   21 004c FF150000 0000     		call	xxx\(,1\)
 .*Warning:.*
