@@ -17,6 +17,11 @@
 	* ppc-linux-nat.c (ppc_register_u_addr): Don't assume that r0 is
 	register number zero.
 
+2004-04-21  Michael Snyder  <msnyder@redhat.com>
+
+	* mips-tdep.c (heuristic_proc_start): 
+	Warning() already prefixes "Warning: ".
+
 2004-04-21  Andrew Cagney  <cagney@redhat.com>
 
 	* annotate.h (deprecated_annotate_starting_hook)
@@ -99,6 +104,7 @@
 
 	* rs6000-tdep.c (registers_e500, registers_7400): Doc fixes.
 
+>>>>>>> 1.5719
 2004-04-19  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2read.c (dwarf2_tmp_obstack, dwarf2_free_tmp_obstack):
@@ -4448,7 +4454,7 @@
 	variable `funcaddr'.  Fix some coding-standards problems.
 
 	* sparc-tdep.c (sparc_regset_from_core_section): Check whether
-	SECT_SIZE is large enough, not wheter it's exactly the right size.
+	SECT_SIZE is large enough, not whether it's exactly the right size.
 	(sparc32_gdbarch_init): Initialize TDEP->sizeof_gregset and
 	TDEP->fpregset to zero.
 

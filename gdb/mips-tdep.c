@@ -1887,7 +1887,7 @@ heuristic_proc_start (CORE_ADDR pc)
 	    static int blurb_printed = 0;
 
 	    warning
-	      ("Warning: GDB can't find the start of the function at 0x%s.",
+	      ("GDB can't find the start of the function at 0x%s.",
 	       paddr_nz (pc));
 
 	    if (!blurb_printed)
