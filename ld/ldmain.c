@@ -187,6 +187,11 @@ main (argc, argv)
   ldsym_init ();
   ldfile_add_arch ("");
 
+  /* Set the default directory for finding script files.
+     Libraries will be searched for here too, but we want
+     them to be, anyway.  */
+  ldfile_add_library_path (SCRIPTDIR);
+
   config.make_executable = true;
   force_make_executable = false;
 

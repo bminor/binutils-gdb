@@ -1,3 +1,16 @@
+Fri Jul  2 18:06:05 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* genscripts.sh: Put the scripts in the ldscripts directory, not
+	emulations. 
+	* configure.in (ldscripts): Make, instead of emulations.
+	* Makefile.in (scriptdir): Take off the "ld" part.
+	(install, clean, distclean): Use ldscripts, not emulations.
+	In tests, pass -L., not -Lemulations.
+	Don't pass tooldir/lib to genscripts.sh.
+	* genscripts.sh: Don't take tooldir/lib arg.
+	* ldlang.c (lang_process): Add "ldscripts/" to the name of the
+	default script file.
+
 Fri Jul  2 17:13:35 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* scripttempl/h8300.sc: Add .tors section for constructor/destructors.

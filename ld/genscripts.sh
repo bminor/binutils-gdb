@@ -1,19 +1,18 @@
 # genscripts.sh
 # This shell script does the work of generating the ld-emulation-target
 # specific information from a specific file of paramaters.
-# Usage: genscripts.sh srcdir tooldirlib libdir host_alias target_alias emulation_name
+# Usage: genscripts.sh srcdir libdir host_alias target_alias emulation_name
 # Sample usage:
-# genscripts.sh /offsite/djm/work/devo/ld /usr/local/sparc-sun-sunos4.1.3/lib /usr/local/lib sparc-sun-sunos4.1.3 sparc-sun-sunos4.1.3 sun3.sh
+# genscripts.sh /offsite/djm/work/devo/ld /usr/local/lib sparc-sun-sunos4.1.3 sparc-sun-sunos4.1.3 sun3.sh
 # produces sun3.x sun3.xbn sun3.xn sun3.xr sun3.xu em_sun3.c
 
 srcdir=$1
-tooldirlib=$2
-libdir=$3
-host_alias=$4
-target_alias=$5
+libdir=$2
+host_alias=$3
+target_alias=$4
 
 # Include the emulation-specific parameters:
-. ${srcdir}/emulparams/$6
+. ${srcdir}/emulparams/$5
 
 # Set the library search path, for libraries named by -lfoo.
 # If LIB_PATH is defined (e.g., by Makefile) and non-empty, it is used.
@@ -25,13 +24,13 @@ target_alias=$5
 if [ "x${LIB_PATH}" = "x" ] ; then
    if [ "x${host_alias}" = "x${target_alias}" ] ; then
       # Native.
-      LIB_PATH=/lib:/usr/lib:${tooldirlib}:${libdir}
+      LIB_PATH=/lib:/usr/lib:${libdir}
       if [ "${libdir}" != /usr/local/lib ] ; then
         LIB_PATH=${LIB_PATH}:/usr/local/lib
       fi
    else
       # Cross.
-      LIB_PATH=${tooldirlib}
+      LIB_PATH=
    fi
 fi
 LIB_SEARCH_DIRS=`echo ${LIB_PATH} | tr ':' ' ' | sed -e 's/\([^ ][^ ]*\)/SEARCH_DIR(\1);/g'`
