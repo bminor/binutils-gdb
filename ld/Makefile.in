@@ -242,9 +242,6 @@ em_hppaosf.c: $(srcdir)/emulparams/hppaosf.sh \
 em_i386aout.c: $(srcdir)/emulparams/i386aout.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386aout.sh
-em_i386linux.c: $(srcdir)/emulparams/i386linux.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} i386linux.sh
 em_ebmon29k.c: $(srcdir)/emulparams/ebmon29k.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/ebmon29k.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} ebmon29k.sh
