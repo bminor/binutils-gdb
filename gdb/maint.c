@@ -1,5 +1,5 @@
 /* Support for GDB maintenance commands.
-   Copyright (C) 1992 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
 This file is part of GDB.
@@ -287,5 +287,9 @@ If a SOURCE file is specified, dump only that file's partial symbols.",
   add_cmd ("objfiles", class_maintenance, maintenance_print_objfiles,
 	   "Print dump of current object file definitions.",
 	   &maintenanceprintlist);
+
+  add_cmd ("check-symtabs", class_maintenance, maintenance_check_symtabs,
+	   "Check consistency of psymtabs and symtabs.",
+	   &maintenancelist);
 #endif	/* MAINTENANCE_CMDS */
 }
