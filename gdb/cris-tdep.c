@@ -351,8 +351,6 @@ static void cris_version_update (char *ignore_args, int from_tty,
 static void cris_mode_update (char *ignore_args, int from_tty, 
                               struct cmd_list_element *c);
 
-static CORE_ADDR bfd_lookup_symbol (bfd *, const char *);
-
 static CORE_ADDR cris_scan_prologue (CORE_ADDR pc, 
 				     struct frame_info *next_frame,
 				     struct cris_unwind_cache *info);
@@ -3718,42 +3716,6 @@ cris_mode_update (char *ignore_args, int from_tty,
       if (!gdbarch_update_p (info))
         internal_error (__FILE__, __LINE__, "cris_gdbarch_update: failed to update architecture.");
     }
-}
-
-/* Copied from pa64solib.c, with a couple of minor changes.  */
-
-static CORE_ADDR
-bfd_lookup_symbol (bfd *abfd, const char *symname)
-{
-  unsigned int storage_needed;
-  asymbol *sym;
-  asymbol **symbol_table;
-  unsigned int number_of_symbols;
-  unsigned int i;
-  struct cleanup *back_to;
-  CORE_ADDR symaddr = 0;
-
-  storage_needed = bfd_get_symtab_upper_bound (abfd);
-
-  if (storage_needed > 0)
-    {
-      symbol_table = (asymbol **) xmalloc (storage_needed);
-      back_to = make_cleanup (free, symbol_table);
-      number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
-
-      for (i = 0; i < number_of_symbols; i++)
-	{
-	  sym = *symbol_table++;
-	  if (!strcmp (sym->name, symname))
-	    {
-	      /* Bfd symbols are section relative.  */
-	      symaddr = sym->value + sym->section->vma;
-	      break;
-	    }
-	}
-      do_cleanups (back_to);
-    }
-  return (symaddr);
 }
 
 static struct gdbarch *
