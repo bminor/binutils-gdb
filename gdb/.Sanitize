@@ -28,6 +28,7 @@ fi
 Things-to-keep:
 
 .gdbinit
+29k-share
 COPYING
 ChangeLog
 ChangeLog-3.x
@@ -233,6 +234,7 @@ sparc-nat.c
 sparc-pinsn.c
 sparc-stub.c
 sparc-tdep.c
+sparclite
 stabsread.c
 stabsread.h
 stack.c
