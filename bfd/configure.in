@@ -376,7 +376,7 @@ AC_SUBST(TDEFINES)
 # 64-bit support needs to be compiled in.  Currently, it will be included if
 # the default or any other explicitly requested target requires it; it
 # will not be included on a 32-bit host if no 64-bit target is requested, and
-# no "--with-64-bit-bfd" option is given, even if "--with-targets=all" is
+# no "--with-64-bit-bfd" option is given, even if "--enable-targets=all" is
 # used.
 
 # uniq the default and selected vectors in all the configured targets.
