@@ -1171,7 +1171,8 @@ elf_frob_symbol (symp, puntp)
 #ifdef TC_PPC
   /* Frob the PowerPC, so that the symbol always has object type
      if it is not some other type.  VxWorks needs this.  */
-  if ((symp->bsym->flags & (BSF_FUNCTION | BSF_FILE | BSF_SECTION_SYM)) == 0)
+  if ((symp->bsym->flags & (BSF_FUNCTION | BSF_FILE | BSF_SECTION_SYM)) == 0
+      && S_IS_DEFINED (symp))
     symp->bsym->flags |= BSF_OBJECT;
 #endif
 }
