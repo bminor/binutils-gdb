@@ -3,19 +3,19 @@
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #if !defined (DEFS_H)
 #define DEFS_H
@@ -129,7 +129,6 @@ extern void restore_cleanups ();
 extern void free_current_contents ();
 extern int myread ();
 extern int query ();
-extern int lines_to_list ();
 extern void wrap_here (
 #ifdef __STDC__
 		       char *
@@ -227,5 +226,21 @@ char *baud_rate;
 #define longest_to_int(x) ((int) (x))
 #endif /* No LONG_LONG.  */
 #endif /* No longest_to_int.  */
+
+/* Return a format string for printf that will print a number in the local
+   (language-specific) hexadecimal format.  Result is static and is
+   overwritten by the next call.  local_hex_format_custom takes printf
+   options like "08" or "l" (to produce e.g. %08x or %lx).  */
+
+#define local_hex_format() local_hex_format_custom("")
+char *local_hex_format_custom();		/* language.c */
+
+/* Return a string that contains a number formatted in the local
+   (language-specific) hexadecimal format.  Result is static and is
+   overwritten by the next call.  local_hex_string_custom takes printf
+   options like "08" or "l".  */
+
+#define local_hex_string(n) local_hex_string_custom((n),"")
+char *local_hex_string_custom();		/* language.c */
 
 #endif /* no DEFS_H */
