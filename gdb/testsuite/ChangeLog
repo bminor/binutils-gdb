@@ -1,3 +1,9 @@
+Sat Mar 16 15:02:24 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.c++/misc.exp: Add note to message for
+	"print s.a for foo struct" that this is a known gcc 2.7.2
+	and earlier bug.
+
 Fri Mar 15 17:49:57 1996  Fred Fish  (fnf@cygnus.com)
 
 	* gdb.base/break.exp: Fix pattern for matching "Delete all
