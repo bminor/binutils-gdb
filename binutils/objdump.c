@@ -1572,7 +1572,8 @@ disassemble_section (bfd *abfd, asection *section, void *info)
      code are not normally disassembled.  */
   if (! disassemble_all
       && only == NULL
-      && (section->flags & SEC_CODE) == 0)
+      && ((section->flags & (SEC_CODE | SEC_HAS_CONTENTS))
+	  != (SEC_CODE | SEC_HAS_CONTENTS)))
     return;
 
   if (! process_section_p (section))

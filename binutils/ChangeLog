@@ -1,3 +1,8 @@
+2004-04-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* objdump.c (disassemble_section): Don't disassemble sections
+	without SEC_HAS_CONTENTS.
+
 2004-04-22  Jakub Jelinek  <jakub@redhat.com>
 
 	* objdump.c (synthsyms, synthcount): New variables.
