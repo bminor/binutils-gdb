@@ -1974,6 +1974,7 @@ reread_symbols (void)
 	      memset (&objfile->msymbol_demangled_hash, 0,
 		      sizeof (objfile->msymbol_demangled_hash));
 	      objfile->fundamental_types = NULL;
+	      clear_objfile_data (objfile);
 	      if (objfile->sf != NULL)
 		{
 		  (*objfile->sf->sym_finish) (objfile);

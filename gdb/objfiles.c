@@ -1162,6 +1162,13 @@ objfile_free_data (struct objfile *objfile)
 }
 
 void
+clear_objfile_data (struct objfile *objfile)
+{
+  gdb_assert (objfile->data != NULL);
+  memset (objfile->data, 0, objfile->num_data * sizeof (void *));
+}
+
+void
 set_objfile_data (struct objfile *objfile, const struct objfile_data *data,
 		  void *value)
 {

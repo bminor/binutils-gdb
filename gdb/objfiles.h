@@ -576,6 +576,7 @@ extern int is_in_import_list (char *, struct objfile *);
    modules.  */
 
 extern const struct objfile_data *register_objfile_data (void);
+extern void clear_objfile_data (struct objfile *objfile);
 extern void set_objfile_data (struct objfile *objfile,
 			      const struct objfile_data *data, void *value);
 extern void *objfile_data (struct objfile *objfile,
