@@ -20,13 +20,27 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #if !defined (REMOTE_SIM_H)
 #define REMOTE_SIM_H 1
 
+/* This file is used when building stand-alone simulators, so isolate this
+   file from gdb.  */
+
+/* Pick up CORE_ADDR_TYPE if defined (from gdb), otherwise use same value as
+   gdb does (unsigned int - from defs.h).  */
+
+#ifndef CORE_ADDR_TYPE
+typedef unsigned int SIM_ADDR;
+#else
+typedef CORE_ADDR_TYPE SIM_ADDR;
+#endif
+
 /* Main simulator globals ... */
 
 extern int sim_verbose;
 
 /* Main simulator entry points ...
 
-   All functions return 0 for success and non-zero for failure.  */
+   Except where noted, all functions return 0 for success and non-zero for
+   failure.  Sometimes there won't be much possibility of error, but maybe
+   in the future.  */
 
 /* Initialize the simulator.  This function is called when the simulator
    is selected from the command line. ARGS is passed from the command line
@@ -52,11 +66,11 @@ int sim_set_args PARAMS ((char **argv, char **env));
 
 /* Fetch register REGNO and store the raw value in BUF.  */
 
-int sim_fetch_register PARAMS ((int regno, char *buf));
+int sim_fetch_register PARAMS ((int regno, unsigned char *buf));
 
 /* Store register REGNO from BUF (in raw format).  */
 
-int sim_store_register PARAMS ((int regno, char *buf));
+int sim_store_register PARAMS ((int regno, unsigned char *buf));
 
 /* Kill the running program.
    This may involve closing any open files and deleting any mmap'd areas.  */
@@ -66,27 +80,28 @@ int sim_kill PARAMS ((void));
 /* Read LENGTH bytes of the simulated program's memory and store in BUF.
    Result is number of bytes read, or zero if error.  */
 
-int sim_read PARAMS ((CORE_ADDR mem, char *buf, int length));
+int sim_read PARAMS ((SIM_ADDR mem, unsigned char *buf, int length));
 
 /* Store LENGTH bytes from BUF in the simulated program's memory.
    Result is number of bytes write, or zero if error.  */
 
-int sim_write PARAMS ((CORE_ADDR mem, char *buf, int length));
+int sim_write PARAMS ((SIM_ADDR mem, unsigned char *buf, int length));
 
-/* Print some interesting information about the simulator.  */
+/* Print some interesting information about the simulator.
+   VERBOSE is non-zero for the wordy version.  */
 
-int sim_info PARAMS ((void));
+int sim_info PARAMS ((void (*printf_fn)(), int verbose));
 
 /* Set the simulated cpu's program counter to PC.  */
 
-int sim_set_pc PARAMS ((CORE_ADDR pc));
+int sim_set_pc PARAMS ((SIM_ADDR pc));
 
 /* Fetch why the program stopped.
    SIGRC will contain either the argument to exit() or the signal number.  */
 
 enum sim_stop { sim_exited, sim_stopped, sim_signalled };
 
-enum sim_stop sim_stop_signal PARAMS ((int *sigrc));
+int sim_stop_reason PARAMS ((enum sim_stop *reason, int *sigrc));
 
 /* Run (or resume) the program.  */
 

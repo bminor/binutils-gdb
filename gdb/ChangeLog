@@ -1,3 +1,14 @@
+Tue Oct 26 08:36:07 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* remote-sim.h (SIM_ADDR): New type (same as CORE_ADDR).
+	(sim_set_pc): Update prototype.
+	(sim_read, sim_write): Ditto, and use unsigned char *buf.
+	(sim_fetch_register, sim_store_register): Use unsigned char *buf.
+	(sim_info): Pass printf function as argument, add verbose argument.
+	(sim_stop_reason): Renamed from sim_stop_signal, fix prototype.
+	* remote-sim.c (gdbsim_wait): Update call to sim_stop_reason.
+	(gdbsim_files_info): Update call to sim_info.
+
 Tue Oct 26 10:41:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* valops.c (value_assign): Call reinit_frame_cache when assigning

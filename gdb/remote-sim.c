@@ -350,10 +350,12 @@ gdbsim_wait (pid, status)
      WAITTYPE *status;
 {
   int sigrc;
+  enum sim_stop reason;
 
   if (sr_get_debug ())
     printf_filtered ("gdbsim_wait: ");
-  if (sim_stop_signal (&sigrc) == sim_exited)
+  sim_stop_reason (&reason, &sigrc);
+  if (reason == sim_exited)
     WSETEXIT (*status, sigrc);
   else
     WSETSTOP (*status, sigrc);
@@ -422,7 +424,7 @@ gdbsim_files_info (target)
     {
       printf_filtered ("\tAttached to %s running program %s\n",
 		       target_shortname, file);
-      sim_info ();
+      sim_info (printf_filtered, 0);
     }
 }
 
