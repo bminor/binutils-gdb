@@ -295,6 +295,21 @@ coff_swap_filehdr_in (abfd, src, dst)
   filehdr_dst->f_flags = bfd_h_get_16(abfd, (bfd_byte *)filehdr_src-> f_flags);
   filehdr_dst->f_symptr = bfd_h_get_32 (abfd, (bfd_byte *) filehdr_src->f_symptr);
 
+#ifdef COFF_IMAGE_WITH_PE
+  /* There are really two magic numbers involved; the magic number
+     that says this is a NT executable (PEI) and the magic number that
+     determines the architecture.  The former is DOSMAGIC, stored in
+     the e_magic field.  The latter is stored in the f_magic field.
+     If the NT magic number isn't valid, the architecture magic number
+     could be mimicked by some other field (specifically, the number
+     of relocs in section 3).  Since this routine can only be called
+     correctly for a PEI file, check the e_magic number here, and, if
+     it doesn't match, clobber the f_magic number so that we don't get
+     a false match.  */
+  if (bfd_h_get_16 (abfd, (bfd_byte *) filehdr_src->e_magic) != DOSMAGIC)
+    filehdr_dst->f_magic = -1;
+#endif
+
   /* Other people's tools sometimes generate headers with an nsyms but
      a zero symptr.  */
   if (filehdr_dst->f_nsyms != 0 && filehdr_dst->f_symptr == 0)

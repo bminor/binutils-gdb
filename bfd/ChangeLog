@@ -7,6 +7,9 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* peicode.h (coff_swap_filehdr_in): Check the NT executable magic
+	number if COFF_IMAGE_WITH_PE.
+
 	* coffcode.h (coff_mkobject_hook): If COFF_WITH_PE, set HAS_DEBUG
 	to the reverse of IMAGE_FILE_DEBUG_STRIPPED.
 	(coff_write_object_contents): Set IMAGE_FILE_DEBUG_STRIPPED if
