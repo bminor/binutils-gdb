@@ -1,5 +1,9 @@
 Sat Nov 21 17:15:40 1998  Philippe De Muyter  <phdm@macqel.be>
 
+	* coffread.c (coff_symtab_read): Discard C_LABEL's that are not
+	function entry points, to avoid getting them in the stack dump
+	instead of the actual function.
+
 	* config/m68k/delta68.mh (NAT_FILE): Undo 1998-08-18 change;
  	without NAT_FILE definition, configure will assume that GDB cannot
  	run native.

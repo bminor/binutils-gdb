@@ -1,5 +1,5 @@
 /* Read coff symbol tables and convert to internal format, for GDB.
-   Copyright 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996, 1997
+   Copyright 1987, 88, 89, 90, 91, 92, 93, 94, 96, 97, 1998
              Free Software Foundation, Inc.
    Contributed by David D. Johnson, Brown University (ddj@cs.brown.edu).
 
@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "defs.h"
 #include "symtab.h"
 #include "gdbtypes.h"
+#include "demangle.h"
 #include "breakpoint.h"
 
 #include "bfd.h"
@@ -249,7 +250,7 @@ static void coff_end_symtab PARAMS ((struct objfile *));
 
 static void complete_symtab PARAMS ((char *, CORE_ADDR, unsigned int));
 
-static void coff_start_symtab PARAMS ((void));
+static void coff_start_symtab PARAMS ((char *));
 
 static void coff_record_line PARAMS ((int, CORE_ADDR));
 
@@ -468,14 +469,15 @@ coff_record_line (line, pc)
    it indicates the start of data for one original source file.  */
 
 static void
-coff_start_symtab ()
+coff_start_symtab (name)
+    char *name;
 {
   start_symtab (
 		/* We fill in the filename later.  start_symtab puts
 		   this pointer into last_source_file and we put it in
 		   subfiles->name, which end_symtab frees; that's why
 		   it must be malloc'd.  */
-		savestring ("", 0),
+		savestring (name, strlen(name)),
 		/* We never know the directory name for COFF.  */
 		NULL,
 		/* The start address is irrelevant, since we set
@@ -544,7 +546,6 @@ coff_end_symtab (objfile)
      before (or because doing it now is simply an artifact of how this
      file used to be written).  */
   subfiles->line_vector = line_vector;
-  subfiles->name = last_source_file;
 
   symtab = end_symtab (current_source_end_addr, objfile, 0);
 
@@ -588,7 +589,7 @@ coff_symfile_init (objfile)
      struct objfile *objfile;
 {
   /* Allocate struct to keep track of stab reading. */
-  objfile->sym_stab_info = (PTR)
+  objfile->sym_stab_info = (struct dbx_symfile_info *)
     xmmalloc (objfile->md, sizeof (struct dbx_symfile_info));
 
   memset ((PTR) objfile->sym_stab_info, 0, sizeof (struct dbx_symfile_info));
@@ -696,7 +697,7 @@ coff_symfile_read (objfile, section_offsets, mainline)
   temp_sym = (char *) xmalloc
 	 (cdata->local_symesz + cdata->local_auxesz);
   temp_aux = temp_sym + cdata->local_symesz;
-  back_to = make_cleanup (free_current_contents, &temp_sym);
+  back_to = make_cleanup ((make_cleanup_func) free_current_contents, &temp_sym);
 
   /* We need to know whether this is a PE file, because in PE files,
      unlike standard COFF files, symbol values are stored as offsets
@@ -712,7 +713,7 @@ coff_symfile_read (objfile, section_offsets, mainline)
   info->max_lineno_offset = 0;
   bfd_map_over_sections (abfd, find_linenos, (PTR) info);
 
-  make_cleanup (free_linetab, 0);
+  make_cleanup ((make_cleanup_func) free_linetab, 0);
   val = init_lineno (abfd, info->min_lineno_offset, 
 		     info->max_lineno_offset - info->min_lineno_offset);
   if (val < 0)
@@ -720,13 +721,13 @@ coff_symfile_read (objfile, section_offsets, mainline)
 
   /* Now read the string table, all at once.  */
 
-  make_cleanup (free_stringtab, 0);
+  make_cleanup ((make_cleanup_func) free_stringtab, 0);
   val = init_stringtab (abfd, stringtab_offset);
   if (val < 0)
     error ("\"%s\": can't get string table", name);
 
   init_minimal_symbol_collection ();
-  make_cleanup (discard_minimal_symbols, 0);
+  make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
 
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */
@@ -859,7 +860,7 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
     xmalloc (type_vector_length * sizeof (struct type *));
   memset (type_vector, 0, type_vector_length * sizeof (struct type *));
 
-  coff_start_symtab ();
+  coff_start_symtab ("");
 
   symnum = 0;
   while (symnum < nsyms)
@@ -873,7 +874,7 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
 	  if (last_source_file)
 	    coff_end_symtab (objfile);
 
-	  coff_start_symtab ();
+	  coff_start_symtab ("_globals_");
 	  complete_symtab ("_globals_", 0, 0);
 	  /* done with all files, everything from here on out is globals */
 	}
@@ -924,7 +925,7 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
 	    if (last_source_file)
 	      {
 		coff_end_symtab (objfile);
-		coff_start_symtab ();
+		coff_start_symtab (filestring);
 	      }
 	    in_source_file = 1;
 	    break;
@@ -933,6 +934,10 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
 	     it here allows gdb to see static functions when no debug
 	     info is available.  */
 	  case C_LABEL:
+	    /* However, labels within a function can make weird backtraces,
+	       so filter them out (from phdm@macquel.be). */
+	    if (within_function)
+	      break;
           case C_STAT:
 	  case C_THUMBLABEL:
 	  case C_THUMBSTAT:
@@ -1038,10 +1043,17 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
 		}
 
 	      if (cs->c_name[0] != '@' /* Skip tdesc symbols */)
-		prim_record_minimal_symbol_and_info
+		{
+		  struct minimal_symbol *msym;
+
+		  msym = prim_record_minimal_symbol_and_info
 		  (cs->c_name, tmpaddr, ms_type, (char *)cs->c_sclass, sec,
 		   NULL, objfile);
-
+#ifdef COFF_MAKE_MSYMBOL_SPECIAL
+		  if(msym)
+		    COFF_MAKE_MSYMBOL_SPECIAL(cs->c_sclass, msym);		
+#endif
+		}
 	      if (SDB_TYPE (cs->c_type))
 		{
 		  struct symbol *sym;
@@ -1559,6 +1571,8 @@ process_coff_symbol (cs, aux, section_offsets, objfile)
   name = EXTERNAL_NAME (name, objfile->obfd);
   SYMBOL_NAME (sym) = obsavestring (name, strlen (name),
 				    &objfile->symbol_obstack);
+  SYMBOL_LANGUAGE (sym) = language_auto;
+  SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->symbol_obstack);
 
   /* default assumptions */
   SYMBOL_VALUE (sym) = cs->c_value;
@@ -1900,7 +1914,11 @@ decode_base_type (cs, c_type, aux)
 	return lookup_fundamental_type (current_objfile, FT_INTEGER);
 
       case T_LONG:
-	return lookup_fundamental_type (current_objfile, FT_LONG);
+	if (cs->c_sclass == C_FIELD
+	    && aux->x_sym.x_misc.x_lnsz.x_size > TARGET_LONG_BIT)
+	  return lookup_fundamental_type (current_objfile, FT_LONG_LONG);
+	else
+	  return lookup_fundamental_type (current_objfile, FT_LONG);
 
       case T_FLOAT:
 	return lookup_fundamental_type (current_objfile, FT_FLOAT);
@@ -1996,7 +2014,11 @@ decode_base_type (cs, c_type, aux)
 	return lookup_fundamental_type (current_objfile, FT_UNSIGNED_INTEGER);
 
       case T_ULONG:
-	return lookup_fundamental_type (current_objfile, FT_UNSIGNED_LONG);
+	if (cs->c_sclass == C_FIELD
+	    && aux->x_sym.x_misc.x_lnsz.x_size > TARGET_LONG_BIT)
+	  return lookup_fundamental_type (current_objfile, FT_UNSIGNED_LONG_LONG);
+	else
+	  return lookup_fundamental_type (current_objfile, FT_UNSIGNED_LONG);
     }
   complain (&unexpected_type_complaint, cs->c_name);
   return lookup_fundamental_type (current_objfile, FT_VOID);
