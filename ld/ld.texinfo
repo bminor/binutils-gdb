@@ -17,7 +17,7 @@ END-INFO-DIR-ENTRY
 @ifinfo
 This file documents the GNU linker LD.
 
-Copyright (C) 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+Copyright (C) 1991, 92, 93, 94, 1995 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -65,7 +65,7 @@ notice identical to this one except for the removal of this paragraph
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 92, 93, 94, 1995 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -183,7 +183,8 @@ ld [ -o @var{output} ]  @var{objfile}@dots{}
   [ -Ttext @var{org} ]  [ -Tdata @var{org} ]
   [ -Tbss @var{org} ]  [ -t ] [ -traditional-format ]
   [ -u @var{symbol}]  [-V]  [-v]  [ -verbose]  [ -version ]
-  [ -warn-common ]  [ -warn-once ] [ -y @var{symbol} ]  [ -X ]  [-x ]
+  [ -warn-common ] [ -warn-constructors] [ -warn-once ]
+  [ -y @var{symbol} ]  [ -X ]  [-x ]
   [ -( [ archives ] -) ] [ --start-group [ archives ] --end-group ]
   [ -split-by-reloc @var{count} ] [ -split-by-file ] [ --whole-archive ]
 @end smallexample
@@ -447,7 +448,11 @@ specified.
 @itemx -L @var{searchdir} 
 Add path @var{searchdir} to the list of paths that @code{ld} will search
 for archive libraries and @code{ld} control scripts.  You may use this
-option any number of times.
+option any number of times.  The directories are searched in the order
+in which they are specified on the command line.  Directories specified
+on the command line are searched before the default directories.  All
+@code{-L} options apply to all @code{-l} options, regardless of the
+order in which the options appear.
 
 @ifset UsesEnvVars
 The default set of paths searched (without being specified with
@@ -456,7 +461,8 @@ some cases also on how it was configured.  @xref{Environment}.
 @end ifset
 
 The paths can also be specified in a link script with the
-@code{SEARCH_DIR} command.
+@code{SEARCH_DIR} command.  Directories specified this way are searched
+at the point in which the linker script appears in the command line.
 
 @cindex link map
 @kindex -M
@@ -591,10 +597,18 @@ line.  It overrides @samp{-s} and @samp{-S}.
 @item -rpath @var{dir}
 @cindex runtime library search path
 @kindex -rpath
-Add a directory to the runtime library search path.  This is only
-meaningful when linking an ELF executable with shared objects.  All
--rpath arguments are concatenated and passed to the runtime linker,
-which uses them to locate shared objects at runtime.
+Add a directory to the runtime library search path.  This is used when
+linking an ELF executable with shared objects.  All @code{-rpath}
+arguments are concatenated and passed to the runtime linker, which uses
+them to locate shared objects at runtime.
+
+The @code{-rpath} option may also be used on SunOS.  By default, on
+SunOS, the linker will form a runtime search patch out of all the
+@code{-L} options it is given.  If a @code{rpath} option is used, the
+runtime search path will be formed exclusively using the @code{-rpath}
+options, ignoring the @code{-L} options.  This can be useful when using
+gcc, which adds many @code{-L} options which may be on NFS mounted
+filesystems.
 @end ifset
 
 @cindex partial link
@@ -839,6 +853,12 @@ encountered in a different order.
 @var{file}(@var{section}): warning: smaller common is here
 @end smallexample
 @end enumerate
+
+@kindex -warn-constructors
+@item -warn-constructors
+Warn if any global constructors are used.  This is only useful for a few
+object file formats.  For formats like COFF or ELF, the linker can not
+detect the use of global constructors.
 
 @kindex -warn-once
 @cindex warnings, on undefined symbols

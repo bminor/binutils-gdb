@@ -1,4 +1,14 @@
+Fri Sep 29 12:00:18 1995  Doug Evans  <dje@deneb.cygnus.com>
+
+	* scripttempl/armcoff.sc: Start .text at 0x8000.
+	Start .data at 0x40000.
+
 Fri Sep 29 11:09:46 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/sunos.em (gld${EMULATION_NAME}_before_allocation): If
+	command_line.rpath is set, use it, rather than the -L options, to
+	build the rules section.
+	* ld.texinfo: Document this use of -rpath.
 
 	* lexsup.c (parse_args): Don't set link_info.shared for -assert
 	pure-text.  Pass true, not 1, to lang_add_entry.
