@@ -1,5 +1,9 @@
 Thu Sep 10 10:43:19 1992  Ian Lance Taylor  (ian@cygnus.com)
 
+	* configure.in, config.sub: added new target m68010-adobe-scout,
+	with alias of adobe68k.  Changed configure.in to check for
+	-scout before -sco* to avoid a false match.
+
 	* Makefile.in: added AS_FOR_TARGET, passed down in
 	TARGET_FLAGS_TO_PASS.  Added CC_FOR_BUILD, which is intended to be
 	the C compiler to use to create programs which are run in the

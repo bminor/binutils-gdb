@@ -63,6 +63,8 @@ case $os in
 		os=
 		basic_machine=$1
 		;;
+	-scout)
+		;;
 	-sco*)
 		os=-scosysv322
 		basic_machine=i386-unknown
@@ -532,6 +534,10 @@ case $basic_machine in
 		basic_machine=sparclitefrwcompat-fujitsu
 		os=-none
 		;;
+	adobe68k)
+		basic_machine=m68010-adobe
+		os=-scout
+		;;
 
 	none)
 		basic_machine=none-none
@@ -572,7 +578,8 @@ case $os in
 	# First accept the basic system types.
 	# The portable systems comes first.
 	# Each alternative must end in a *, to match a version number.
-	-bsd* | -sysv* | -mach* | -minix* | -genix* | -ultrix* | -aout | -coff \
+	-bsd* | -sysv* | -mach* | -minix* | -genix* | -ultrix* \
+	      | -aout | -coff | -elf \
 	      | -vms* | -sco* | -esix* | -isc* | -aix* | -sunos* | -hpux* \
 	      | -unos* | -osf* | -v88r* | -luna* | -dgux* | -solaris* | -sym* \
 	      | -newsos | -amigados* | -msdos* | -none* | -os68k* | -irix* \
