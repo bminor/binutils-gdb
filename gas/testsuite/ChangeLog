@@ -1,4 +1,10 @@
 2002-01-18  Richard Earnshaw  <rearnsha@arm.com>
+	    Keith Walker  <keith.walker@arm.com>
+
+	* gas/arm/arch5tej.s gas/arm/arch5tej.d: New files.
+	* gas/arm/arm.exp (arch5tej): New dump test.
+
+2002-01-18  Richard Earnshaw  <rearnsha@arm.com>
 
 	* gas/arm/vfp1.d: Use new command-line options.
 	* gas/arm/vfp1xD.d: Likewise.

@@ -54,6 +54,7 @@
 #define ARM_EXT_V5T	 0x00000100	/* Thumb v2.               */
 #define ARM_EXT_V5ExP	 0x00000200	/* DSP core set.           */
 #define ARM_EXT_V5E	 0x00000400	/* DSP Double transfers.   */
+#define ARM_EXT_V5J	 0x00000800	/* Jazelle extension.	   */
 
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE   0x00800000	/* Allow MIA etc.          */
@@ -79,6 +80,7 @@
 #define ARM_ARCH_V5T	(ARM_ARCH_V5	| ARM_EXT_V4T | ARM_EXT_V5T)
 #define ARM_ARCH_V5TExP	(ARM_ARCH_V5T	| ARM_EXT_V5ExP)
 #define ARM_ARCH_V5TE	(ARM_ARCH_V5TExP | ARM_EXT_V5E)
+#define ARM_ARCH_V5TEJ	(ARM_ARCH_V5TE	| ARM_EXT_V5J)
 
 /* Processors with specific extensions in the co-processor space.  */
 #define ARM_ARCH_XSCALE	(ARM_ARCH_V5TE	| ARM_CEXT_XSCALE)
@@ -746,7 +748,7 @@ static void do_ldstv4		PARAMS ((char *));
 /* ARM v4T.  */
 static void do_bx               PARAMS ((char *));
 
-/* ARM v5.  */
+/* ARM v5T.  */
 static void do_blx		PARAMS ((char *));
 static void do_bkpt		PARAMS ((char *));
 static void do_clz		PARAMS ((char *));
@@ -754,16 +756,19 @@ static void do_lstc2		PARAMS ((char *));
 static void do_cdp2		PARAMS ((char *));
 static void do_co_reg2		PARAMS ((char *));
 
-/* ARM v5ExP.  */
+/* ARM v5TExP.  */
 static void do_smla		PARAMS ((char *));
 static void do_smlal		PARAMS ((char *));
 static void do_smul		PARAMS ((char *));
 static void do_qadd		PARAMS ((char *));
 
-/* ARM v5E.  */
+/* ARM v5TE.  */
 static void do_pld		PARAMS ((char *));
 static void do_ldrd		PARAMS ((char *));
 static void do_co_reg2c		PARAMS ((char *));
+
+/* ARM v5TEJ.  */
+static void do_bxj		PARAMS ((char *));
 
 /* Coprocessor Instructions.  */
 static void do_cdp		PARAMS ((char *));
@@ -1105,7 +1110,7 @@ static const struct asm_opcode insns[] =
      not support Thumb.  */
   {"bx",         0xe12fff10, 2,  ARM_EXT_V4T | ARM_EXT_V5, do_bx},
 
-  /*  ARM Architecture 5.  */
+  /*  ARM Architecture 5T.  */
   /* Note: blx has 2 variants, so the .value is set dynamically.
      Only one of the variants has conditional execution.  */
   {"blx",        0xe0000000, 3,  ARM_EXT_V5,       do_blx},
@@ -1119,7 +1124,7 @@ static const struct asm_opcode insns[] =
   {"mcr2",       0xfe000010, 0,  ARM_EXT_V5,       do_co_reg2},
   {"mrc2",       0xfe100010, 0,  ARM_EXT_V5,       do_co_reg2},
 
-  /*  ARM Architecture 5ExP.  */
+  /*  ARM Architecture 5TExP.  */
   {"smlabb",     0xe1000080, 6,  ARM_EXT_V5ExP,    do_smla},
   {"smlatb",     0xe10000a0, 6,  ARM_EXT_V5ExP,    do_smla},
   {"smlabt",     0xe10000c0, 6,  ARM_EXT_V5ExP,    do_smla},
@@ -1146,13 +1151,16 @@ static const struct asm_opcode insns[] =
   {"qsub",       0xe1200050, 4,  ARM_EXT_V5ExP,    do_qadd},
   {"qdsub",      0xe1600050, 5,  ARM_EXT_V5ExP,    do_qadd},
 
-  /*  ARM Architecture 5E.  */
+  /*  ARM Architecture 5TE.  */
   {"pld",        0xf450f000, 0,  ARM_EXT_V5E,      do_pld},
   {"ldrd",       0xe00000d0, 3,  ARM_EXT_V5E,      do_ldrd},
   {"strd",       0xe00000f0, 3,  ARM_EXT_V5E,      do_ldrd},
 
   {"mcrr",       0xec400000, 4,  ARM_EXT_V5E,      do_co_reg2c},
   {"mrrc",       0xec500000, 4,  ARM_EXT_V5E,      do_co_reg2c},
+
+  /*  ARM Architecture 5TEJ.  */
+  {"bxj",	 0xe12fff20, 3,  ARM_EXT_V5J,	   do_bxj},
 
   /* Core FPA instruction set (V1).  */
   {"wfs",        0xee200110, 3,  FPU_FPA_EXT_V1,   do_fpa_ctrl},
@@ -3872,6 +3880,28 @@ do_co_reg2 (str)
 	  return;
 	}
     }
+
+  end_of_line (str);
+}
+
+/* ARM v5TEJ.  Jump to Jazelle code.  */
+static void
+do_bxj (str)
+     char * str;
+{
+  int reg;
+
+  skip_whitespace (str);
+
+  if ((reg = reg_required_here (&str, 0)) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+
+  /* Note - it is not illegal to do a "bxj pc".  Useless, but not illegal.  */
+  if (reg == REG_PC)
+    as_tsktsk (_("use of r15 in bxj is not really useful"));
 
   end_of_line (str);
 }
@@ -10741,6 +10771,7 @@ static struct arm_cpu_option_table arm_cpus[] =
      should really set the FPU type explicitly.  */
   {"arm9e-r0",		ARM_ARCH_V5TExP, FPU_ARCH_VFP_V2},
   {"arm9e",		ARM_ARCH_V5TE,   FPU_ARCH_VFP_V2},
+  {"arm926ej",		ARM_ARCH_V5TEJ,	 FPU_ARCH_VFP_V2},
   {"arm946e-r0",	ARM_ARCH_V5TExP, FPU_ARCH_VFP_V2},
   {"arm946e",		ARM_ARCH_V5TE,   FPU_ARCH_VFP_V2},
   {"arm966e-r0",	ARM_ARCH_V5TExP, FPU_ARCH_VFP_V2},
@@ -10785,6 +10816,7 @@ static struct arm_arch_option_table arm_archs[] =
   {"armv5txm",		ARM_ARCH_V5TxM,	 FPU_ARCH_VFP},
   {"armv5te",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP},
   {"armv5texp",		ARM_ARCH_V5TExP, FPU_ARCH_VFP},
+  {"armv5tej",		ARM_ARCH_V5TEJ,  FPU_ARCH_VFP},
   {"xscale",		ARM_ARCH_XSCALE, FPU_ARCH_VFP},
   {NULL, 0, 0}
 };

@@ -1,4 +1,13 @@
 2002-01-18  Richard Earnshaw  <rearnsha@arm.com>
+	    Keith Walker  <keith.walker@arm.com>
+
+	* tc-arm.c (ARM_EXT_V5J, ARM_ARCH_V5TEJ): Define.
+	(insns): Add pattern for bxj instruction.
+	(do_bxj): New function.
+	(arm_cpus): Add arm926ej.
+	(arm_archs): Add armv5tej.
+
+2002-01-18  Richard Earnshaw  <rearnsha@arm.com>
 
 	* doc/c-arm.texi: Add new fpe options to list of supported flags.
 

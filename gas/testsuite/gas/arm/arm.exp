@@ -35,6 +35,8 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
 
     gas_test "arch4t.s" "-marmv4t" $stdoptlist "Arm architecture 4t instructions"
 
+    run_dump_test "arch5tej"
+
     gas_test "copro.s" "" $stdoptlist "Co processor instructions"
 
     gas_test "immed.s" "" $stdoptlist "immediate expressions"
