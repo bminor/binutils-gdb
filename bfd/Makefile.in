@@ -229,7 +229,7 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 coff-m88k.c coff-mips.c coff-sh.c trad-core.c cisco-core.c newsos3.c \
 	 i386aout.c i386linux.c netbsd386.c i386mach3.c i386os9k.c \
 	 bout.c aout-adobe.c coff-we32k.c \
-	 i386bsd.c cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c \
+	 i386bsd.c i386dynix.c cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c \
 	 cpu-m88k.c cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c cpu-powerpc.c \
 	 cpu-rs6000.c coff-h8300.c som.c cpu-hppa.c cpu-we32k.c reloc16.c \
 	 mipsbsd.c cpu-sh.c \
@@ -602,6 +602,9 @@ coff-we32k.o : coff-we32k.c $(INCDIR)/coff/we32k.h \
   $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
 i386bsd.o : i386bsd.c libaout.h aout-target.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
+i386dynix.o : i386dynix.c libaout.h aout-target.h $(INCDIR)/aout/aout64.h \
+  $(INCDIR)/aout/dynix3.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
+  $(INCDIR)/aout/ar.h
 cpu-h8300.o : cpu-h8300.c
 cpu-i960.o : cpu-i960.c
 cpu-sparc.o : cpu-sparc.c

@@ -153,6 +153,7 @@ hppabsd-core.c
 hpux-core.c
 i386aout.c
 i386bsd.c
+i386dynix.c
 i386linux.c
 i386lynx.c
 i386mach3.c

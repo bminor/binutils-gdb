@@ -269,6 +269,9 @@ Standard stuff.
 .  boolean       (*_bfd_get_section_contents) PARAMS ((bfd *, sec_ptr, PTR, 
 .                                            file_ptr, bfd_size_type));
 .  boolean       (*_new_section_hook) PARAMS ((bfd *, sec_ptr));
+.  boolean       (*_bfd_copy_private_section_data) PARAMS ((bfd *, sec_ptr,
+.							bfd *, sec_ptr));
+.  boolean	 (*_bfd_copy_private_bfd_data) PARAMS ((bfd *, bfd *));
 
 Symbols and relocations.
 
@@ -288,6 +291,7 @@ Symbols and relocations.
 .                                      struct symbol_cache_entry *,
 .                                      symbol_info *));
 .#define bfd_get_symbol_info(b,p,e) BFD_SEND(b, _bfd_get_symbol_info, (b,p,e))
+.  boolean	 (*_bfd_is_local_label) PARAMS ((bfd *, asymbol *));
 
 .  alent *    (*_get_lineno) PARAMS ((bfd *, struct symbol_cache_entry *));
 .
@@ -315,7 +319,7 @@ Symbols and relocations.
 .                    struct symbol_cache_entry **));
 .
 .  boolean    (*_bfd_relax_section) PARAMS ((bfd *, struct sec *,
-.                    struct bfd_link_info *, struct symbol_cache_entry **));
+.                    struct bfd_link_info *, boolean *again));
 .
 . {* See documentation on reloc types.  *}
 . CONST struct reloc_howto_struct *
@@ -389,6 +393,7 @@ extern bfd_target hp300hpux_vec;
 extern bfd_target som_vec;
 extern bfd_target i386aout_vec;
 extern bfd_target i386bsd_vec;
+extern bfd_target i386dynix_vec;
 extern bfd_target i386os9k_vec;
 extern bfd_target netbsd386_vec;
 extern bfd_target i386coff_vec;
@@ -428,6 +433,7 @@ extern bfd_target symbolsrec_vec;
 
 /* All of the xvecs for core files.  */
 extern bfd_target aix386_core_vec;
+extern bfd_target cisco_core_vec;
 extern bfd_target hpux_core_vec;
 extern bfd_target hppabsd_core_vec;
 extern bfd_target irix_core_vec;
@@ -485,6 +491,9 @@ bfd_target *bfd_target_vector[] = {
 	&bfd_elf64_sparc_vec,
 #endif
 /* end-sanitize-v9 */
+	/* We don't include cisco_core_vec.  Although it has a magic number,
+	   the magic number isn't at the beginning of the file, and thus
+	   might spuriously match other kinds of files.  */
 #ifdef BFD64
 	&demo_64_vec,	/* Only compiled if host has long-long support */
 #endif

@@ -1,3 +1,15 @@
+Wed Mar 30 00:31:49 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* i386dynix.c, config/i386-dynix.mt:  New files, handling Dynix
+	variant of a.out.
+	* configure.in, config.bfd:  Use them for Dynix.
+	* Makefile.in:  Add dependencies for i386dynix.o. 
+	* targets.c:  Add definition for i386dynix_vec.
+	* hosts/symmetry.h:  Do not define TRAD_CORE_USER_OFFSET for Dynix.
+	Define HOST_DATA_START_ADDR and TRAD_UNIX_CORE_FILE_FAILING_SIGNAL
+	for Dynix. Remove inclusion of dynix3.h, Dynix bfd is now handled by
+	i386dynix.c
+
 Mon Mar 28 12:53:27 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* Makefile.in (BFD32_BACKENDS): Add coff-sparc.o.

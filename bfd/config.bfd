@@ -35,6 +35,7 @@ case "${canon}" in
   i[34]86-*-sysv*)	bfd_name=i386-coff ;;
   i[34]86-*-isc*)	bfd_name=i386-coff ;;
   i[34]86-*-sco*)	bfd_name=i386-coff ;;
+  i[34]86-sequent-bsd*)	bfd_name=i386-dynix ;;
   i[34]86-*-bsd*)	bfd_name=i386-bsd ;;
   i[34]86-*-coff)	bfd_name=i386-coff ;;
   i[34]86-*-aix*)	bfd_name=i386-coff ;;
