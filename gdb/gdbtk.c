@@ -1009,6 +1009,10 @@ tk_command (cmd, from_tty)
   char *result;
   struct cleanup *old_chain;
 
+  /* Catch case of no argument, since this will make the tcl interpreter dump core. */
+  if (cmd == NULL)
+    error_no_arg ("tcl command to interpret");
+
   retval = Tcl_Eval (interp, cmd);
 
   result = strdup (interp->result);

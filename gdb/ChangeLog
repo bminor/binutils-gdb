@@ -1,3 +1,10 @@
+start-sanitize-gdbtk
+Mon May 13 13:43:25 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.c (tk_command): Catch case where no argument is given
+	since this will cause the tcl interpreter to dump core.
+end-sanitize-gdbtk
+
 Mon May 13 17:40:58 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* top.c (execute_control_command, case while_control): Allow
@@ -75,7 +82,9 @@ Wed May  8 20:33:24 1996  Fred Fish  <fnf@cygnus.com>
 	(enable_delete_breakpoint): Ditto.
 	* breakpoint.h (clear_momentary_breakpoints): Remove prototype.
 	* symtab.c (find_pc_line): Improve comments.
+start-sanitize-gdbtk
 	* gdbtk.c: Fix a couple of misspellings.
+end-sanitize-gdbtk
 	* xcoffread.c: Ditto.
 
 Tue May  7 18:37:06 1996  Stan Shebs  <shebs@andros.cygnus.com>
