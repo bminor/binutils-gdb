@@ -1,3 +1,12 @@
+Fri Jul 30 15:43:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	From Jeffrey Law:
+	* tm-hppa.h (TARGET_WRITE_PC): Define.
+	* hppa-tdep.c (hppa_fix_call_dummy): If in a syscall,
+	then return the address of the dummy itself rather than
+	the address of $$dyncall.
+	(target_write_pc): New function to store a new PC.
+
 Fri Jul 30 12:51:27 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 			  and Jim Kingdon (kingdon@cygnus.com)
 

@@ -817,6 +817,7 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 {
   CORE_ADDR dyncall_addr, sr4export_addr;
   struct minimal_symbol *msymbol;
+  int flags = read_register (FLAGS_REGNUM);
 
   msymbol = lookup_minimal_symbol ("$$dyncall", (struct objfile *) NULL);
   if (msymbol == NULL)
@@ -837,7 +838,16 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 
   write_register (22, pc);
 
-  return dyncall_addr;
+  /* If we are in a syscall, then we should call the stack dummy
+     directly.  $$dyncall is not needed as the kernel sets up the
+     space id registers properly based on the value in %r31.  In
+     fact calling $$dyncall will not work because the value in %r22
+     will be clobbered on the syscall exit path.  */
+  if (flags & 2)
+    return pc;
+  else
+    return dyncall_addr;
+
 }
 
 /* Get the PC from %r31 if currently in a syscall.  Also mask out privilege
@@ -850,6 +860,23 @@ target_read_pc ()
   if (flags & 2)
     return read_register (31) & ~0x3;
   return read_register (PC_REGNUM) & ~0x3;
+}
+
+/* Write out the PC.  If currently in a syscall, then also write the new
+   PC value into %r31.  */
+void
+target_write_pc (v)
+     CORE_ADDR v;
+{
+  int flags = read_register (FLAGS_REGNUM);
+
+  /* If in a syscall, then set %r31.  Also make sure to get the 
+     privilege bits set correctly.  */
+  if (flags & 2)
+    write_register (31, (long) (v | 0x3));
+
+  write_register (PC_REGNUM, (long) v);
+  write_register (NPC_REGNUM, (long) v + 4);
 }
 
 /* return the alignment of a type in bytes. Structures have the maximum
