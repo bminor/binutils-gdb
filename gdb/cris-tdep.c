@@ -172,12 +172,6 @@ cris_mode (void)
   return (gdbarch_tdep (current_gdbarch)->cris_mode);
 }
 
-static const char *
-cris_abi (void)
-{
-  return (gdbarch_tdep (current_gdbarch)->cris_abi);
-}
-
 struct frame_extra_info
 {
   CORE_ADDR return_pc;
@@ -293,18 +287,6 @@ cris_get_operand1 (unsigned short insn)
 /* Additional functions in order to handle opcodes.  */
 
 static int
-cris_get_wide_opcode (unsigned short insn)
-{
-  return ((insn & 0x03E0) >> 5);
-}
-
-static int
-cris_get_short_size (unsigned short insn)
-{
-  return ((insn & 0x0010) >> 4);
-}
-
-static int
 cris_get_quick_value (unsigned short insn)
 {
   return (insn & 0x003F);
@@ -326,12 +308,6 @@ static int
 cris_get_asr_shift_steps (unsigned long value)
 {
   return (value & 0x3F);
-}
-
-static int
-cris_get_asr_quick_shift_steps (unsigned short insn)
-{
-  return (insn & 0x1F);
 }
 
 static int
@@ -715,16 +691,6 @@ static CORE_ADDR
 cris_skip_prologue (CORE_ADDR pc)
 {
   return cris_skip_prologue_main (pc, 0);
-}
-
-/* As cris_skip_prologue, but stops as soon as it knows that the function 
-   has a frame.  Its result is equal to its input pc if the function is 
-   frameless, unequal otherwise.  */
-
-static CORE_ADDR
-cris_skip_prologue_frameless_p (CORE_ADDR pc)
-{
-  return cris_skip_prologue_main (pc, 1);
 }
 
 /* Given a PC value corresponding to the start of a function, return the PC
@@ -2769,63 +2735,6 @@ move_reg_to_mem_movem_op (unsigned short inst, inst_env_type *inst_env)
             }
           inst_env->reg[REG_PC] += 4 * (cris_get_operand2 (inst) + 1);
         }
-    }
-  inst_env->slot_needed = 0;
-  inst_env->prefix_found = 0;
-  inst_env->xflag_found = 0;
-  inst_env->disable_interrupt = 0;
-}
-
-/* Handles the pop instruction to a general register. 
-   POP is a assembler macro for MOVE.D [SP+], Rd.  */
-
-static void 
-reg_pop_op (unsigned short inst, inst_env_type *inst_env)
-{
-  /* POP can't have a prefix.  */
-  if (inst_env->prefix_found)
-    {
-      inst_env->invalid = 1;
-      return;
-    }
-  if (cris_get_operand2 (inst) == REG_PC)
-    {
-      /* It's invalid to change the PC in a delay slot.  */
-      if (inst_env->slot_needed)
-        {
-          inst_env->invalid = 1;
-          return;
-        }
-      inst_env->reg[REG_PC] = 
-        read_memory_unsigned_integer (inst_env->reg[REG_SP], 4);
-    }
-  inst_env->slot_needed = 0;
-  inst_env->prefix_found = 0;
-  inst_env->xflag_found = 0;
-  inst_env->disable_interrupt = 0;
-}
-
-/* Handles moves from register to memory.  */
-
-static void 
-move_reg_to_mem_index_inc_op (unsigned short inst, inst_env_type *inst_env)
-{
-  /* Check if we have a prefix.  */
-  if (inst_env->prefix_found)
-    {
-      /* The only thing that can change the PC is an assign.  */
-      check_assign (inst, inst_env);
-    }
-  else if ((cris_get_operand1 (inst) == REG_PC) 
-           && (cris_get_mode (inst) == AUTOINC_MODE))
-    {
-      /* It's invalid to change the PC in a delay slot.  */
-      if (inst_env->slot_needed)
-        {
-          inst_env->invalid = 1;
-          return;
-        }
-      process_autoincrement (cris_get_size (inst), inst, inst_env);
     }
   inst_env->slot_needed = 0;
   inst_env->prefix_found = 0;

@@ -1188,51 +1188,6 @@ arm_unwind_sp (struct gdbarch *gdbarch, struct frame_info *this_frame)
   return frame_unwind_register_unsigned (this_frame, ARM_SP_REGNUM);
 }
 
-/* Set the return address for a generic dummy frame.  ARM uses the
-   entry point.  */
-
-static CORE_ADDR
-arm_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
-{
-  write_register (ARM_LR_REGNUM, entry_point_address ());
-  return sp;
-}
-
-/* Push an empty stack frame, to record the current PC, etc.  */
-
-static void
-arm_push_dummy_frame (void)
-{
-  CORE_ADDR old_sp = read_register (ARM_SP_REGNUM);
-  CORE_ADDR sp = old_sp;
-  CORE_ADDR fp, prologue_start;
-  int regnum;
-
-  /* Push the two dummy prologue instructions in reverse order,
-     so that they'll be in the correct low-to-high order in memory.  */
-  /* sub     fp, ip, #4 */
-  sp = push_word (sp, 0xe24cb004);
-  /*  stmdb   sp!, {r0-r10, fp, ip, lr, pc} */
-  prologue_start = sp = push_word (sp, 0xe92ddfff);
-
-  /* Push a pointer to the dummy prologue + 12, because when stm
-     instruction stores the PC, it stores the address of the stm
-     instruction itself plus 12.  */
-  fp = sp = push_word (sp, prologue_start + 12);
-
-  /* Push the processor status.  */
-  sp = push_word (sp, read_register (ARM_PS_REGNUM));
-
-  /* Push all 16 registers starting with r15.  */
-  for (regnum = ARM_PC_REGNUM; regnum >= 0; regnum--)
-    sp = push_word (sp, read_register (regnum));
-
-  /* Update fp (for both Thumb and ARM) and sp.  */
-  write_register (ARM_FP_REGNUM, fp);
-  write_register (THUMB_FP_REGNUM, fp);
-  write_register (ARM_SP_REGNUM, sp);
-}
-
 /* DEPRECATED_CALL_DUMMY_WORDS:
    This sequence of words is the instructions
 
@@ -1264,70 +1219,6 @@ arm_set_call_dummy_breakpoint_offset (void)
     set_gdbarch_deprecated_call_dummy_breakpoint_offset (current_gdbarch, 4);
   else
     set_gdbarch_deprecated_call_dummy_breakpoint_offset (current_gdbarch, 8);
-}
-
-/* Fix up the call dummy, based on whether the processor is currently
-   in Thumb or ARM mode, and whether the target function is Thumb or
-   ARM.  There are three different situations requiring three
-   different dummies:
-
-   * ARM calling ARM: uses the call dummy in tm-arm.h, which has already
-   been copied into the dummy parameter to this function.
-   * ARM calling Thumb: uses the call dummy in tm-arm.h, but with the
-   "mov pc,r4" instruction patched to be a "bx r4" instead.
-   * Thumb calling anything: uses the Thumb dummy defined below, which
-   works for calling both ARM and Thumb functions.
-
-   All three call dummies expect to receive the target function
-   address in R4, with the low bit set if it's a Thumb function.  */
-
-static void
-arm_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
-		    struct value **args, struct type *type, int gcc_p)
-{
-  static short thumb_dummy[4] =
-  {
-    0xf000, 0xf801,		/*        bl      label */
-    0xdf18,			/*        swi     24 */
-    0x4720,			/* label: bx      r4 */
-  };
-  static unsigned long arm_bx_r4 = 0xe12fff14;	/* bx r4 instruction */
-
-  /* Set flag indicating whether the current PC is in a Thumb function.  */
-  caller_is_thumb = arm_pc_is_thumb (read_pc ());
-  arm_set_call_dummy_breakpoint_offset ();
-
-  /* If the target function is Thumb, set the low bit of the function
-     address.  And if the CPU is currently in ARM mode, patch the
-     second instruction of call dummy to use a BX instruction to
-     switch to Thumb mode.  */
-  target_is_thumb = arm_pc_is_thumb (fun);
-  if (target_is_thumb)
-    {
-      fun |= 1;
-      if (!caller_is_thumb)
-	store_unsigned_integer (dummy + 4, sizeof (arm_bx_r4), arm_bx_r4);
-    }
-
-  /* If the CPU is currently in Thumb mode, use the Thumb call dummy
-     instead of the ARM one that's already been copied.  This will
-     work for both Thumb and ARM target functions.  */
-  if (caller_is_thumb)
-    {
-      int i;
-      char *p = dummy;
-      int len = sizeof (thumb_dummy) / sizeof (thumb_dummy[0]);
-
-      for (i = 0; i < len; i++)
-	{
-	  store_unsigned_integer (p, sizeof (thumb_dummy[0]), thumb_dummy[i]);
-	  p += sizeof (thumb_dummy[0]);
-	}
-    }
-
-  /* Put the target address in r4; the call dummy will copy this to
-     the PC.  */
-  write_register (4, fun);
 }
 
 /* When arguments must be pushed onto the stack, they go on in reverse

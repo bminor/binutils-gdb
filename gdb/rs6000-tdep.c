@@ -2046,17 +2046,6 @@ rs6000_extract_struct_value_address (struct regcache *regcache)
   return 0;
 }
 
-/* Return whether PC is in a dummy function call.
-
-   FIXME: This just checks for the end of the stack, which is broken
-   for things like stepping through gcc nested function stubs.  */
-
-static int
-rs6000_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
-{
-  return sp < pc && pc < fp;
-}
-
 /* Hook called when a new child process is started.  */
 
 void

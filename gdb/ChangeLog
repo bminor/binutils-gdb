@@ -1,5 +1,21 @@
 2004-02-12  Andrew Cagney  <cagney@redhat.com>
 
+	* remote-rdi.c (arm_rdi_start_remote): Delete unused function.
+	(arm_rdi_interrupt, arm_rdi_interrupt_twice): Ditto.
+	(interrupt_query): Ditto.
+	(ofunc): Delete unused variable.
+	* cris-tdep.c (cris_abi): Delete unused function.
+	(reg_pop_op, move_reg_to_mem_index_inc_op): Ditto.
+	(cris_get_wide_opcode, cris_get_short_size): Ditto.
+	(cris_get_asr_quick_shift_steps): Ditto.
+	(cris_skip_prologue_frameless_p): Ditto.
+	* arm-tdep.c (arm_push_return_address): Delete unused function.
+	(arm_push_dummy_frame, arm_fix_call_dummy): Ditto.
+	* rs6000-tdep.c (rs6000_pc_in_call_dummy): Delete unused function.
+	* s390-tdep.c (s390_function_start): Delete unused function.
+
+2004-02-12  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (PROLOGUE_FRAMELESS_P): Delete.
 	gdbarch.h, gdbarch.c: Re-generate.
 	* cris-tdep.c (cris_gdbarch_init): Do not set prologue_frameless_p

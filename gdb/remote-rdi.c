@@ -66,8 +66,6 @@ static void arm_rdi_fetch_registers (int regno);
 static void arm_rdi_resume (ptid_t pid, int step,
                             enum target_signal siggnal);
 
-static int arm_rdi_start_remote (char *dummy);
-
 static void arm_rdi_open (char *name, int from_tty);
 
 static void arm_rdi_create_inferior (char *exec_file, char *args, char **env);
@@ -81,12 +79,6 @@ static ptid_t arm_rdi_wait (ptid_t ptid, struct target_waitstatus *status);
 static void arm_rdi_kill (void);
 
 static void arm_rdi_detach (char *args, int from_tty);
-
-static void arm_rdi_interrupt (int signo);
-
-static void arm_rdi_interrupt_twice (int signo);
-
-static void interrupt_query (void);
 
 static int arm_rdi_insert_breakpoint (CORE_ADDR, char *);
 
@@ -130,15 +122,6 @@ static struct local_bp_list_entry
   }
  *local_bp_list;
 
-
-/* Stub for catch_errors.  */
-
-static int
-arm_rdi_start_remote (char *dummy)
-{
-  return 1;
-}
-
 /* Helper callbacks for the "host interface" structure.  RDI functions call
    these to forward output from the target system and so forth.  */
 
@@ -479,29 +462,6 @@ arm_rdi_resume (ptid_t ptid, int step, enum target_signal siggnal)
     }
 }
 
-/* Send ^C to target to halt it.  Target will respond, and send us a
-   packet.  */
-
-static void
-arm_rdi_interrupt (int signo)
-{
-}
-
-static void (*ofunc) ();
-
-/* The user typed ^C twice.  */
-static void
-arm_rdi_interrupt_twice (int signo)
-{
-}
-
-/* Ask the user what to do when an interrupt is received.  */
-
-static void
-interrupt_query (void)
-{
-}
-
 /* Wait until the remote machine stops, then return, storing status in
    STATUS just as `wait' would.  Returns "pid" (though it's not clear
    what, if anything, that means in the case of this target).  */
