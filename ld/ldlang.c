@@ -1943,7 +1943,8 @@ void
 DEFUN_VOID(lang_final)
 {
   if (had_output_filename == false) {
-    lang_add_output("a.out");
+    extern CONST char *output_filename;
+    lang_add_output(output_filename);
   }
 }
 
