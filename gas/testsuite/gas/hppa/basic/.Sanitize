@@ -38,6 +38,7 @@ deposit.s
 ds.s
 extract.s
 fmem.s
+fmemLRbug.s
 fp_comp.s
 fp_conv.s
 fp_fcmp.s

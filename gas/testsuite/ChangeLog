@@ -1,3 +1,19 @@
+Mon Feb 14 09:24:03 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/basic/fmemLRbug.s: New test.
+	* gas/hppa/basic/basic.exp: Run it.
+
+Thu Feb 10 00:34:26 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* gas/alpha/fp.*: New files.
+	* lib/gas-defs.exp (regexp_diff): Report noted mismatch at
+	verbosity level 3 or above only.
+
+Mon Feb  7 15:53:10 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/*/*.exp: Change xfails to check for PA ELF rather than
+	PA OSF1.
+
 Fri Feb  4 23:42:14 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/more.parse/xmpyubug.s: New test.
