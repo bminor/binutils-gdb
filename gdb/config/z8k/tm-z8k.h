@@ -291,7 +291,6 @@ extern void z8k_pop_frame PARAMS ((void));
 #define SP_ARG0 (1 * 4)
 
 #define ADDR_BITS_REMOVE(x) addr_bits_remove(x)
-#define ADDR_BITS_SET(x) addr_bits_set(x)
 int z8001_mode;
 #define BIG (z8001_mode)
 

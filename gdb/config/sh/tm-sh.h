@@ -226,7 +226,6 @@ extern CORE_ADDR sh_skip_prologue ();
 typedef unsigned short INSN_WORD;
 
 #define ADDR_BITS_REMOVE(addr) ((addr) & 0xffffff)
-#define ADDR_BITS_SET(addr)    (addr)
 
 #define CALL_DUMMY_LENGTH 10
 

@@ -66,7 +66,6 @@ extern CORE_ADDR skip_prologue ();
    of an instruction.  Shrug.  */
 
 #define ADDR_BITS_REMOVE(addr) ((addr) & ~3)
-#define ADDR_BITS_SET(addr) (((addr) | 0x00000002) - 4)
 
 /* Immediately after a function call, return the saved pc.
    Can't always go through the frames for this because on some machines
@@ -523,15 +522,103 @@ void frame_find_saved_regs PARAMS((struct frame_info *fi,
         frame_find_saved_regs (frame_info, &frame_saved_regs)
 
 
-/* There is not currently a functioning way to call functions in the
-   inferior.  */
-
-/* But if there was this is where we'd put the call dummy.  */
-/* #define CALL_DUMMY_LOCATION AFTER_TEXT_END */
-
-/* When popping a frame on the 88k (say when doing a return command), the
-   calling function only expects to have the "preserved" registers restored.
-   Thus, those are the only ones that we even try to restore here.   */
-
 #define POP_FRAME pop_frame ()
 extern void pop_frame ();
+
+/* Call function stuff contributed by Kevin Buettner of Motorola.  */
+
+#define CALL_DUMMY_LOCATION AFTER_TEXT_END
+
+extern void m88k_push_dummy_frame();
+#define PUSH_DUMMY_FRAME	m88k_push_dummy_frame()
+
+#define CALL_DUMMY { 				\
+0x67ff00c0,	/*   0:   subu	#sp,#sp,0xc0 */ \
+0x243f0004,	/*   4:   st	#r1,#sp,0x4 */ \
+0x245f0008,	/*   8:   st	#r2,#sp,0x8 */ \
+0x247f000c,	/*   c:   st	#r3,#sp,0xc */ \
+0x249f0010,	/*  10:   st	#r4,#sp,0x10 */ \
+0x24bf0014,	/*  14:   st	#r5,#sp,0x14 */ \
+0x24df0018,	/*  18:   st	#r6,#sp,0x18 */ \
+0x24ff001c,	/*  1c:   st	#r7,#sp,0x1c */ \
+0x251f0020,	/*  20:   st	#r8,#sp,0x20 */ \
+0x253f0024,	/*  24:   st	#r9,#sp,0x24 */ \
+0x255f0028,	/*  28:   st	#r10,#sp,0x28 */ \
+0x257f002c,	/*  2c:   st	#r11,#sp,0x2c */ \
+0x259f0030,	/*  30:   st	#r12,#sp,0x30 */ \
+0x25bf0034,	/*  34:   st	#r13,#sp,0x34 */ \
+0x25df0038,	/*  38:   st	#r14,#sp,0x38 */ \
+0x25ff003c,	/*  3c:   st	#r15,#sp,0x3c */ \
+0x261f0040,	/*  40:   st	#r16,#sp,0x40 */ \
+0x263f0044,	/*  44:   st	#r17,#sp,0x44 */ \
+0x265f0048,	/*  48:   st	#r18,#sp,0x48 */ \
+0x267f004c,	/*  4c:   st	#r19,#sp,0x4c */ \
+0x269f0050,	/*  50:   st	#r20,#sp,0x50 */ \
+0x26bf0054,	/*  54:   st	#r21,#sp,0x54 */ \
+0x26df0058,	/*  58:   st	#r22,#sp,0x58 */ \
+0x26ff005c,	/*  5c:   st	#r23,#sp,0x5c */ \
+0x271f0060,	/*  60:   st	#r24,#sp,0x60 */ \
+0x273f0064,	/*  64:   st	#r25,#sp,0x64 */ \
+0x275f0068,	/*  68:   st	#r26,#sp,0x68 */ \
+0x277f006c,	/*  6c:   st	#r27,#sp,0x6c */ \
+0x279f0070,	/*  70:   st	#r28,#sp,0x70 */ \
+0x27bf0074,	/*  74:   st	#r29,#sp,0x74 */ \
+0x27df0078,	/*  78:   st	#r30,#sp,0x78 */ \
+0x63df0000,	/*  7c:   addu	#r30,#sp,0x0 */ \
+0x145f0000,	/*  80:   ld	#r2,#sp,0x0 */ \
+0x147f0004,	/*  84:   ld	#r3,#sp,0x4 */ \
+0x149f0008,	/*  88:   ld	#r4,#sp,0x8 */ \
+0x14bf000c,	/*  8c:   ld	#r5,#sp,0xc */ \
+0x14df0010,	/*  90:   ld	#r6,#sp,0x10 */ \
+0x14ff0014,	/*  94:   ld	#r7,#sp,0x14 */ \
+0x151f0018,	/*  98:   ld	#r8,#sp,0x18 */ \
+0x153f001c,	/*  9c:   ld	#r9,#sp,0x1c */ \
+0x5c200000,	/*  a0:   or.u	#r1,#r0,0x0 */ \
+0x58210000,	/*  a4:   or	#r1,#r1,0x0 */ \
+0xf400c801,	/*  a8:   jsr	#r1 */ \
+0xf000d1ff	/*  ac:   tb0	0x0,#r0,0x1ff */ \
+}
+
+#define CALL_DUMMY_START_OFFSET 0x80
+#define CALL_DUMMY_LENGTH 0xb0
+
+/* FIXME: byteswapping.  */
+#define FIX_CALL_DUMMY(dummy, pc, fun, nargs, args, type, gcc_p)	\
+{ 									\
+  *(unsigned long *)((char *) (dummy) + 0xa0) |=			\
+	(((unsigned long) (fun)) >> 16);				\
+  *(unsigned long *)((char *) (dummy) + 0xa4) |=			\
+	(((unsigned long) (fun)) & 0xffff);				\
+  pc = text_end;							\
+}
+
+#define STACK_ALIGN(addr) (((addr)+7) & -8)
+
+#define STORE_STRUCT_RETURN(addr, sp) \
+    write_register (SRA_REGNUM, (addr))
+
+#define NEED_TEXT_START_END 1
+
+/* According to the MC88100 RISC Microprocessor User's Manual, section
+   6.4.3.1.2:
+
+   	... can be made to return to a particular instruction by placing a
+	valid instruction address in the SNIP and the next sequential
+	instruction address in the SFIP (with V bits set and E bits clear).
+	The rte resumes execution at the instruction pointed to by the 
+	SNIP, then the SFIP.
+
+   The E bit is the least significant bit (bit 0).  The V (valid) bit is
+   bit 1.  This is why we logical or 2 into the values we are writing
+   below.  It turns out that SXIP plays no role when returning from an
+   exception so nothing special has to be done with it.  We could even
+   (presumably) give it a totally bogus value.
+
+   -- Kevin Buettner
+*/
+ 
+#define TARGET_WRITE_PC(val)	{				\
+  write_register(SXIP_REGNUM, (long) val);			\
+  write_register(SNIP_REGNUM, (long) val | 2);			\
+  write_register(SFIP_REGNUM, ((long) val | 2) + 4);		\
+}

@@ -1,3 +1,18 @@
+Thu Sep 23 10:49:37 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* infcmd.c (step_1), infrun.c (wait_for_inferior): Add comments
+	about SHIFT_INST_REGS.
+
+	* exec.c (exec_file_command): Set text_end based on all code readonly
+	sections, not just ".text".
+
+	* defs.h, infcmd.c, config/z8k/tm-z8k.h, config/m88k/tm-m88k.h,
+	config/sh/tm-sh.h, config/h8300/tm-h8300.h, config/h8500/tm-h8500.h,
+	z8k-tdep.c: Remove all references to ADDR_BITS_SET.
+	* config/m88k/tm-m88k.h: Define TARGET_WRITE_PC.
+
+	* config/m88k/tm-m88k.h: Add definitions for calling functions.
+
 Thu Sep 23 00:13:06 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config/mips/tm-mips.h (STORE_STRUCT_RETURN):  Define as noop as

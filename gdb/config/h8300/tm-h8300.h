@@ -284,7 +284,6 @@ extern CORE_ADDR h8300_skip_prologue ();
 typedef unsigned short INSN_WORD;
 
 #define ADDR_BITS_REMOVE(addr) ((addr) & 0xffff)
-#define ADDR_BITS_SET(addr) (((addr)))
 
 #define DONT_USE_REMOTE
 

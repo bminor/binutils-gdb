@@ -296,12 +296,6 @@ frame_find_saved_regs (fip, fsrp)
 
 }
 
-void
-addr_bits_set ()
-{
-  abort ();
-}
-
 int
 saved_pc_after_call ()
 {
