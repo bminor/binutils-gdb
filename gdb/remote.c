@@ -43,9 +43,6 @@
 
 #include <ctype.h>
 #include <sys/time.h>
-#ifdef USG
-#include <sys/types.h>
-#endif
 
 #include "event-loop.h"
 #include "event-top.h"

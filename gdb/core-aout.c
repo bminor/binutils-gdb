@@ -41,12 +41,10 @@
 #include "regcache.h"
 
 /* These are needed on various systems to expand REGISTER_U_ADDR.  */
-#ifndef USG
 #include "gdb_dirent.h"
 #include <sys/file.h>
 #include "gdb_stat.h"
 #include <sys/user.h>
-#endif
 
 #ifndef CORE_REGISTER_ADDR
 #define CORE_REGISTER_ADDR(regno, regptr) register_addr(regno, regptr)

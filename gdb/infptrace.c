@@ -32,10 +32,6 @@
 #include "gdb_wait.h"
 #include "gdb_string.h"
 
-#ifdef USG
-#include <sys/types.h>
-#endif
-
 #include <sys/param.h>
 #include "gdb_dirent.h"
 #include <signal.h>

@@ -1,3 +1,20 @@
+2004-09-07  Andrew Cagney  <cagney@gnu.org>
+
+	* vx-share/wait.h: Delete #ifdef USG.
+	* utils.c (request_quit): Ditto.
+	* tui/tui.c (tui_reset): Ditto.
+	* remote.c: Ditto.
+	* remote-sds.c: Ditto.
+	* remote-rdi.c: Ditto.
+	* mdebugread.c: Ditto.
+	* m68klinux-nat.c: Ditto.
+	* infttrace.c: Ditto.
+	* infptrace.c: Ditto.
+	* i386v-nat.c: Ditto.
+	* exec.c: Ditto.
+	* dbxread.c: Ditto.
+	* core-aout.c: Ditto.
+
 2004-09-05  Joel Brobecker  <brobecker@gnat.com>
 
 	* mips-tdep.c (mips_insn16_frame_cache): Fix parameter in call to

@@ -37,7 +37,7 @@
 #include "defs.h"
 #include "gdb_string.h"
 
-#if defined(USG) || defined(__CYGNUSCLIB__)
+#if defined(__CYGNUSCLIB__)
 #include <sys/types.h>
 #include <fcntl.h>
 #endif

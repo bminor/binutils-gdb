@@ -76,10 +76,6 @@ typedef struct mips_extra_func_info
 #endif
 #endif
 
-#ifdef USG
-#include <sys/types.h>
-#endif
-
 #include "gdb_stat.h"
 #include "gdb_string.h"
 

@@ -46,10 +46,6 @@
 #undef  NO_FLAGS
 #endif
 
-#ifdef USG
-#include <sys/types.h>
-#endif
-
 #include <sys/param.h>
 #include <sys/dir.h>
 #include <signal.h>

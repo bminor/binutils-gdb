@@ -40,10 +40,6 @@
 #include "gdbcore.h"
 #include "regcache.h"
 
-#ifdef USG
-#include <sys/types.h>
-#endif
-
 #include <signal.h>
 #include "serial.h"
 

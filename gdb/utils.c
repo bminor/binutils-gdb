@@ -974,9 +974,8 @@ void
 request_quit (int signo)
 {
   quit_flag = 1;
-  /* Restore the signal handler.  Harmless with BSD-style signals, needed
-     for System V-style signals.  So just always do it, rather than worrying
-     about USG defines and stuff like that.  */
+  /* Restore the signal handler.  Harmless with BSD-style signals,
+     needed for System V-style signals.  */
   signal (signo, request_quit);
 
   if (immediate_quit)

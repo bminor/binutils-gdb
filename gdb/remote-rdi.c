@@ -38,10 +38,6 @@
 #include "regcache.h"
 #include "arm-tdep.h"
 
-#ifdef USG
-#include <sys/types.h>
-#endif
-
 #include <signal.h>
 
 #include "rdi-share/ardi.h"

@@ -33,10 +33,6 @@
 #include "value.h"
 #include "exec.h"
 
-#ifdef USG
-#include <sys/types.h>
-#endif
-
 #include <fcntl.h>
 #include "readline/readline.h"
 #include "gdb_string.h"
