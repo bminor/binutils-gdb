@@ -27,7 +27,7 @@
 # or run runtest with --target_board unix/gdb:debug_flags="..."
 # to choose the compiler flags.
 #
-# The interesting compiler flags are: "aCC +A -Wl,-a-archive" .
+# The interesting compiler flags are: "aCC +A -Wl,-a,-archive" .
 # Static-linked executables use a different mechanism to get the
 # address of the notification hook in the C++ support library.
 
