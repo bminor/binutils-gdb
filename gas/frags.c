@@ -303,9 +303,10 @@ frag_align (alignment, fill_character, max)
   if (now_seg == absolute_section)
     {
       addressT new_off;
+      addressT mask;
 
-      new_off = ((abs_section_offset + alignment - 1)
-		 &~ ((1 << alignment) - 1));
+      mask = (~ (addressT) 0) << alignment;
+      new_off = (abs_section_offset + ~ mask) & mask;
       if (max == 0 || new_off - abs_section_offset <= (addressT) max)
 	abs_section_offset = new_off;
     }

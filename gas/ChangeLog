@@ -1,3 +1,7 @@
+2000-07-22  Alan Modra  <alan@linuxcare.com.au>
+
+	* frags.c (frag_align): Correct absolute section alignment.
+
 2000-07-20  DJ Delorie  <dj@redhat.com>
 
 	* config/obj-coff.c (obj_frob_symbol): revert previous change,
