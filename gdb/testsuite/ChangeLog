@@ -1,3 +1,11 @@
+2003-02-01  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/advance.c (marker1): New marker function.
+	* gdb.base/advance.exp: When the 'advance' command lands on the
+	return breakpoint, it can legitimately stop on either the
+	current line or the next line.  Accommodate both outcomes.
+	* gdb.base/until.exp: Likewise.
+
 2003-02-02  Andrew Cagney  <ac131313@redhat.com>
 
 	2002-11-10 Jason Molenda (jason-cl@molenda.com):
