@@ -286,8 +286,7 @@ nlm_symfile_offsets (objfile, addr)
 
 static struct sym_fns nlm_sym_fns =
 {
-  "nlm",		/* sym_name: name or name prefix of BFD target type */
-  3,			/* sym_namelen: number of significant sym_name chars */
+  bfd_target_nlm_flavour,
   nlm_new_init,		/* sym_new_init: init anything gbl to entire symtab */
   nlm_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
   nlm_symfile_read,	/* sym_read: read a symbol file into symtab */

@@ -699,8 +699,7 @@ elfstab_offset_sections (objfile, pst)
 
 static struct sym_fns elf_sym_fns =
 {
-  "elf",		/* sym_name: name or name prefix of BFD target type */
-  3,			/* sym_namelen: number of significant sym_name chars */
+  bfd_target_elf_flavour,
   elf_new_init,		/* sym_new_init: init anything gbl to entire symtab */
   elf_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
   elf_symfile_read,	/* sym_read: read a symbol file into symtab */

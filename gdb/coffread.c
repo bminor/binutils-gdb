@@ -2062,8 +2062,7 @@ coff_symfile_offsets (objfile, addr)
 
 static struct sym_fns coff_sym_fns =
 {
-  "coff",		/* sym_name: name or name prefix of BFD target type */
-  4,			/* sym_namelen: number of significant sym_name chars */
+  bfd_target_coff_flavour,
   coff_new_init,	/* sym_new_init: init anything gbl to entire symtab */
   coff_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
   coff_symfile_read,	/* sym_read: read a symbol file into symtab */

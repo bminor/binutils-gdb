@@ -2188,36 +2188,9 @@ dbx_symfile_offsets (objfile, addr)
   return section_offsets;
 }
 
-/* Register our willingness to decode symbols for SunOS and a.out and
-   NetBSD and b.out files handled by BFD... */
-static struct sym_fns sunos_sym_fns =
-{
-  "sunOs",		/* sym_name: name or name prefix of BFD target type */
-  6,			/* sym_namelen: number of significant sym_name chars */
-  dbx_new_init,		/* sym_new_init: init anything gbl to entire symtab */
-  dbx_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
-  dbx_symfile_read,	/* sym_read: read a symbol file into symtab */
-  dbx_symfile_finish,	/* sym_finish: finished with file, cleanup */
-  dbx_symfile_offsets,	/* sym_offsets: parse user's offsets to internal form */
-  NULL			/* next: pointer to next struct sym_fns */
-};
-
 static struct sym_fns aout_sym_fns =
 {
-  "a.out",		/* sym_name: name or name prefix of BFD target type */
-  5,			/* sym_namelen: number of significant sym_name chars */
-  dbx_new_init,		/* sym_new_init: init anything gbl to entire symtab */
-  dbx_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
-  dbx_symfile_read,	/* sym_read: read a symbol file into symtab */
-  dbx_symfile_finish,	/* sym_finish: finished with file, cleanup */
-  dbx_symfile_offsets,	/* sym_offsets: parse user's offsets to internal form */
-  NULL			/* next: pointer to next struct sym_fns */
-};
-
-static struct sym_fns bout_sym_fns =
-{
-  "b.out",		/* sym_name: name or name prefix of BFD target type */
-  5,			/* sym_namelen: number of significant sym_name chars */
+  bfd_target_aout_flavour,
   dbx_new_init,		/* sym_new_init: init anything gbl to entire symtab */
   dbx_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
   dbx_symfile_read,	/* sym_read: read a symbol file into symtab */
@@ -2229,7 +2202,5 @@ static struct sym_fns bout_sym_fns =
 void
 _initialize_dbxread ()
 {
-  add_symtab_fns(&sunos_sym_fns);
   add_symtab_fns(&aout_sym_fns);
-  add_symtab_fns(&bout_sym_fns);
 }

@@ -1,5 +1,9 @@
 Sun Oct 31 09:28:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* symfile.h (sym_fns), symfile.c (find_sym_fns), xcoffread.c,
+	coffread.c, dbxread.c, elfread.c, mipsread.c, nlmread.c, paread.c:
+	Change from using bfd target name to using the flavour.
+
 	* objfiles.h, infcmd.c, symfile.c: Add comments about how various
 	objfiles get created and when we should blow them away.
 

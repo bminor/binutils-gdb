@@ -3633,8 +3633,7 @@ mipscoff_symfile_offsets (objfile, addr)
 
 static struct sym_fns ecoff_sym_fns =
 {
-  "ecoff",			/* sym_name: name or name prefix of BFD target type */
-  5,				/* sym_namelen: number of significant sym_name chars */
+  bfd_target_ecoff_flavour,
   mipscoff_new_init,		/* sym_new_init: init anything gbl to entire symtab */
   mipscoff_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
   mipscoff_symfile_read,	/* sym_read: read a symbol file into symtab */

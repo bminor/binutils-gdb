@@ -2140,12 +2140,20 @@ xcoff_symfile_offsets (objfile, addr)
   
   return section_offsets;
 }
-/* Register our ability to parse symbols for xcoff BFD files. */
+
+/* Register our ability to parse symbols for xcoff BFD files.  */
 
 static struct sym_fns xcoff_sym_fns =
 {
-  "aixcoff-rs6000",	/* sym_name: name or name prefix of BFD target type */
-  15,			/* sym_namelen: number of significant sym_name chars */
+
+  /* Because the bfd uses coff_flavour, we need to specially kludge
+     the flavour.  FIXME: coff and xcoff and fundamentally similar
+     except for debug format, and we should see if we can merge this
+     file with coffread.c.  For example, the extra storage classes
+     used for stabs could presumably be recognized in any COFF file.  */
+
+  (bfd_flavour)-1,
+
   xcoff_new_init,	/* sym_new_init: init anything gbl to entire symtab */
   xcoff_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
   xcoff_symfile_read,	/* sym_read: read a symbol file into symtab */

@@ -796,11 +796,15 @@ find_sym_fns (objfile)
      struct objfile *objfile;
 {
   struct sym_fns *sf;
+  enum bfd_flavour our_flavour = bfd_get_flavour (objfile -> obfd);
+
+  /* Special kludge for RS/6000.  See xcoffread.c.  */
+  if (STREQ (bfd_get_target (objfile -> obfd), "aixcoff-rs6000"))
+    our_flavour = (enum bfd_flavour)-1;
 
   for (sf = symtab_fns; sf != NULL; sf = sf -> next)
     {
-      if (strncmp (bfd_get_target (objfile -> obfd),
-		    sf -> sym_name, sf -> sym_namelen) == 0)
+      if (our_flavour == sf -> sym_flavour)
 	{
 	  objfile -> sf = sf;
 	  return;
