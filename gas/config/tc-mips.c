@@ -131,6 +131,9 @@ enum mips_abi_level
 /* MIPS ABI we are using for this output file.  */
 static enum mips_abi_level mips_abi = NO_ABI;
 
+/* Whether or not we have code that can call pic code.  */
+int mips_abicalls = FALSE;
+
 /* This is the set of options which may be modified by the .set
    pseudo-op.  We use a struct so that .set push and .set pop are more
    reliable.  */
@@ -11038,6 +11041,7 @@ md_parse_option (c, arg)
 	  return 0;
 	}
       mips_pic = SVR4_PIC;
+      mips_abicalls = TRUE;
       if (g_switch_seen && g_switch_value != 0)
 	{
 	  as_bad (_("-G may not be used with SVR4 PIC code"));
@@ -11053,6 +11057,7 @@ md_parse_option (c, arg)
 	  return 0;
 	}
       mips_pic = NO_PIC;
+      mips_abicalls = FALSE;
       break;
 
       /* The -xgot option tells the assembler to use 32 offsets when
@@ -12430,7 +12435,10 @@ s_option (x)
       if (i == 0)
 	mips_pic = NO_PIC;
       else if (i == 2)
+	{
 	mips_pic = SVR4_PIC;
+	  mips_abicalls = TRUE;
+	}
       else
 	as_bad (_(".option pic%d not supported"), i);
 
@@ -12654,6 +12662,7 @@ s_abicalls (ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
   mips_pic = SVR4_PIC;
+  mips_abicalls = TRUE;
   if (USE_GLOBAL_POINTER_OPT)
     {
       if (g_switch_seen && g_switch_value != 0)
@@ -14440,7 +14449,12 @@ mips_elf_final_processing ()
   if (mips_any_noreorder)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_NOREORDER;
   if (mips_pic != NO_PIC)
+    {
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_PIC;
+      elf_elfheader (stdoutput)->e_flags |= EF_MIPS_CPIC;
+    }
+  if (mips_abicalls)
+    elf_elfheader (stdoutput)->e_flags |= EF_MIPS_CPIC;
 
   /* Set MIPS ELF flags for ASEs.  */
   if (file_ase_mips16)

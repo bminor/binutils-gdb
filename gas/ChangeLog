@@ -1,3 +1,12 @@
+2003-05-07  Eric Christopher  <echristo@redhat.com>
+
+        * config/tc-mips.c (mips_abicalls): New variable.
+        (md_parse_option): Use.
+        (s_option): Ditto.
+        (s_abicalls): Ditto.
+        (mips_elf_final_processing): Set EF_MIPS_PIC and
+        EF_MIPS_CPIC dependent on above.
+
 2003-05-21  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* tc-hppa.c (hppa_symbol_chars): Remove `,' and `!'.
@@ -32,7 +41,7 @@
         * configure: Regenerate.
         * po/POTFILES.in: Regenerate.
         * po/gas.pot: Regenerate.
-               
+
 2003-05-21  Nick Clifton  <nickc@redhat.com>
 
 	* dw2gencfi.c (cfi_get_label): Use symbol_make for non
@@ -44,7 +53,7 @@
 2003-05-20  Michal Ludvig  <mludvig@suse.cz>
 
 	* as.c (main): Remove tc_cfi_init().
-	* dw2gencfi.c (cfi_parse_arg): Allow regnames beginning 
+	* dw2gencfi.c (cfi_parse_arg): Allow regnames beginning
 	with '%'.
 	(cfi_pseudo_table): Add "cfi_register" entry.
 	(cfi_make_insn): Handle CFA_register.

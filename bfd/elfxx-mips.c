@@ -163,8 +163,7 @@ struct mips_elf_hash_sort_data
   long min_got_dynindx;
   /* The greatest dynamic symbol table index corresponding to a symbol
      with a GOT entry that is not referenced (e.g., a dynamic symbol
-     with dynamic relocations pointing to it from non-primary
-     GOTs).  */
+     with dynamic relocations pointing to it from non-primary     GOTs).  */
   long max_unref_got_dynindx;
   /* The greatest dynamic symbol table index not corresponding to a
      symbol without a GOT entry.  */
@@ -246,8 +245,7 @@ struct mips_elf_link_hash_table
 
 struct extsym_info
 {
-  bfd *abfd;
-  struct bfd_link_info *info;
+  bfd *abfd;  struct bfd_link_info *info;
   struct ecoff_debug_info *debug;
   const struct ecoff_debug_swap *swap;
   bfd_boolean failed;
@@ -1719,15 +1717,15 @@ mips_elf_get_global_gotsym_index (abfd)
 
   if (abfd == NULL)
     return 0;
-  
+
   sgot = mips_elf_got_section (abfd, TRUE);
   if (sgot == NULL || mips_elf_section_data (sgot) == NULL)
     return 0;
-  
+
   g = mips_elf_section_data (sgot)->u.got_info;
   if (g == NULL || g->global_gotsym == NULL)
     return 0;
-    
+
   return g->global_gotsym->dynindx;
 }
 
@@ -1770,7 +1768,7 @@ mips_elf_global_got_index (abfd, ibfd, h)
   if (g->bfd2got && ibfd)
     {
       struct mips_got_entry e, *p;
-      
+
       BFD_ASSERT (h->dynindx >= 0);
 
       g = mips_elf_got_for_ibfd (g, ibfd);
@@ -1828,7 +1826,7 @@ mips_elf_got_page (abfd, ibfd, info, value, offsetp)
 
   if (!entry)
     return MINUS_ONE;
-  
+
   index = entry->gotidx;
 
   if (offsetp)
@@ -1886,7 +1884,7 @@ mips_elf_got_offset_from_index (dynobj, output_bfd, input_bfd, index)
   g = mips_elf_got_info (dynobj, &sgot);
   gp = _bfd_get_gp_value (output_bfd)
     + mips_elf_adjust_gp (output_bfd, g, input_bfd);
-  
+
   return sgot->output_section->vma + sgot->output_offset + index - gp;
 }
 
@@ -1918,14 +1916,14 @@ mips_elf_create_local_got_entry (abfd, ibfd, gg, sgot, value)
 						   INSERT);
   if (*loc)
     return *loc;
-      
+
   entry.gotidx = MIPS_ELF_GOT_SIZE (abfd) * g->assigned_gotno++;
 
   *loc = (struct mips_got_entry *)bfd_alloc (abfd, sizeof entry);
 
   if (! *loc)
     return NULL;
-	      
+
   memcpy (*loc, &entry, sizeof entry);
 
   if (g->assigned_gotno >= g->local_gotno)
@@ -1965,7 +1963,7 @@ mips_elf_sort_hash_table (info, max_local)
   g = mips_elf_got_info (dynobj, NULL);
 
   hsd.low = NULL;
-  hsd.max_unref_got_dynindx = 
+  hsd.max_unref_got_dynindx =
   hsd.min_got_dynindx = elf_hash_table (info)->dynsymcount
     /* In the multi-got case, assigned_gotno of the master got_info
        indicate the number of entries that aren't referenced in the
@@ -2079,7 +2077,7 @@ mips_elf_record_global_got_symbol (h, abfd, info, g)
 
   if (! *loc)
     return FALSE;
-	      
+
   entry.gotidx = -1;
   memcpy (*loc, &entry, sizeof entry);
 
@@ -2121,7 +2119,7 @@ mips_elf_record_local_got_symbol (abfd, symndx, addend, g)
 
   if (! *loc)
     return FALSE;
-	      
+
   memcpy (*loc, &entry, sizeof entry);
 
   return TRUE;
@@ -2187,7 +2185,7 @@ mips_elf_make_got_per_bfd (entryp, p)
   struct mips_got_info *g;
   struct mips_elf_bfd2got_hash bfdgot_entry, *bfdgot;
   void **bfdgotp;
-  
+
   /* Find the got_info for this GOT entry's input bfd.  Create one if
      none exists.  */
   bfdgot_entry.bfd = entry->abfd;
@@ -2239,7 +2237,7 @@ mips_elf_make_got_per_bfd (entryp, p)
   entryp = htab_find_slot (g->got_entries, entry, INSERT);
   if (*entryp != NULL)
     return 1;
-  
+
   *entryp = entry;
 
   if (entry->symndx >= 0 || entry->d.h->forced_local)
@@ -2268,7 +2266,7 @@ mips_elf_merge_gots (bfd2got_, p)
   unsigned int lcount = bfd2got->g->local_gotno;
   unsigned int gcount = bfd2got->g->global_gotno;
   unsigned int maxcnt = arg->max_count;
-  
+
   /* If we don't have a primary GOT and this is not too big, use it as
      a starting point for the primary GOT.  */
   if (! arg->primary && lcount + gcount <= maxcnt)
@@ -2336,7 +2334,7 @@ mips_elf_merge_gots (bfd2got_, p)
     {
       bfd2got->g->next = arg->current;
       arg->current = bfd2got->g;
-      
+
       arg->current_count = lcount + gcount;
     }
 
@@ -2417,7 +2415,7 @@ mips_elf_resolve_final_got_entry (entryp, p)
 
       if (entry->d.h == h)
 	return 1;
-      
+
       entry->d.h = h;
 
       /* If we can't find this entry with the new bfd hash, re-insert
@@ -2437,7 +2435,7 @@ mips_elf_resolve_final_got_entry (entryp, p)
       /* We might want to decrement the global_gotno count, but it's
 	 either too early or too late for that at this point.  */
     }
-  
+
   return 1;
 }
 
@@ -2478,7 +2476,7 @@ mips_elf_adjust_gp (abfd, g, ibfd)
   BFD_ASSERT (g->next);
 
   g = g->next;
-  
+
   return (g->local_gotno + g->global_gotno) * MIPS_ELF_GOT_SIZE (abfd);
 }
 
@@ -2566,7 +2564,7 @@ mips_elf_multi_got (abfd, info, g, got, pages)
   {
     struct mips_elf_bfd2got_hash *bfdgot;
     void **bfdgotp;
-  
+
     bfdgot = (struct mips_elf_bfd2got_hash *)bfd_alloc
       (abfd, sizeof (struct mips_elf_bfd2got_hash));
 
@@ -2592,7 +2590,7 @@ mips_elf_multi_got (abfd, info, g, got, pages)
      the cache.  Also, knowing that every external symbol has a GOT
      helps speed up the resolution of local symbols too, so GNU/Linux
      follows IRIX's practice.
-     
+
      The number 2 is used by mips_elf_sort_hash_table_f to count
      global GOT symbols that are unreferenced in the primary GOT, with
      an initial dynamic index computed from gg->assigned_gotno, where
@@ -2665,10 +2663,10 @@ mips_elf_multi_got (abfd, info, g, got, pages)
 
   got->_raw_size = (gg->next->local_gotno
 		    + gg->next->global_gotno) * MIPS_ELF_GOT_SIZE (abfd);
-  
+
   return TRUE;
 }
-     
+
 
 /* Returns the first relocation of type r_type found, beginning with
    RELOCATION.  RELEND is one-past-the-end of the relocation table.  */
@@ -5370,12 +5368,12 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 	    {
 	      struct mips_elf_link_hash_entry *hmips =
 		(struct mips_elf_link_hash_entry *) h;
-	      
+
 	      while (hmips->root.root.type == bfd_link_hash_indirect
 		     || hmips->root.root.type == bfd_link_hash_warning)
 		hmips = (struct mips_elf_link_hash_entry *)
 		  hmips->root.root.u.i.link;
-	  
+
 	      if ((hmips->root.root.type == bfd_link_hash_defined
 		   || hmips->root.root.type == bfd_link_hash_defweak)
 		  && hmips->root.root.u.def.section
@@ -5599,7 +5597,7 @@ _bfd_mips_relax_section (abfd, sec, link_info, again)
 	  while (h->root.root.type == bfd_link_hash_indirect
 		 || h->root.root.type == bfd_link_hash_warning)
 	    h = (struct mips_elf_link_hash_entry *) h->root.root.u.i.link;
-	  
+
 	  /* If a symbol is undefined, or if it may be overridden,
 	     skip it.  */
 	  if (! ((h->root.root.type == bfd_link_hash_defined
@@ -5662,7 +5660,7 @@ _bfd_mips_relax_section (abfd, sec, link_info, again)
       /* Check that it's in range.  */
       if (sym_offset < -0x8000 || sym_offset >= 0x8000)
 	continue;
-      
+
       /* Get the section contents if we haven't done so already.  */
       if (contents == NULL)
 	{
@@ -5711,7 +5709,7 @@ _bfd_mips_relax_section (abfd, sec, link_info, again)
     }
   return TRUE;
 
- relax_return:  
+ relax_return:
   if (free_contents != NULL)
     free (free_contents);
   return FALSE;
@@ -5857,7 +5855,7 @@ _bfd_mips_elf_always_size_sections (output_bfd, info)
   if (dynobj == NULL)
     /* Relocatable links don't have it.  */
     return TRUE;
-  
+
   g = mips_elf_got_info (dynobj, &s);
   if (s == NULL)
     return TRUE;
@@ -6022,7 +6020,7 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
 	  struct mips_got_info *g = gg;
 	  struct mips_elf_set_global_got_offset_arg set_got_offset_arg;
 	  unsigned int needed_relocs = 0;
-	  
+
 	  if (gg->next)
 	    {
 	      set_got_offset_arg.value = MIPS_ELF_GOT_SIZE (output_bfd);
@@ -6782,7 +6780,7 @@ _bfd_mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       e.abfd = output_bfd;
       e.symndx = -1;
       e.d.h = (struct mips_elf_link_hash_entry *)h;
-      
+
       if (info->shared
 	  || h->root.type == bfd_link_hash_undefined
 	  || h->root.type == bfd_link_hash_undefweak)
@@ -8380,17 +8378,6 @@ _bfd_mips_elf_final_link (abfd, info)
     scRData, scSData, scSBss, scBss
   };
 
-  /* If all the things we linked together were PIC, but we're
-     producing an executable (rather than a shared object), then the
-     resulting file is CPIC (i.e., it calls PIC code.)  */
-  if (!info->shared
-      && !info->relocateable
-      && elf_elfheader (abfd)->e_flags & EF_MIPS_PIC)
-    {
-      elf_elfheader (abfd)->e_flags &= ~EF_MIPS_PIC;
-      elf_elfheader (abfd)->e_flags |= EF_MIPS_CPIC;
-    }
-
   /* We'd carefully arranged the dynamic symbol indices, and then the
      generic size_dynamic_sections renumbered them out from under us.
      Rather than trying somehow to prevent the renumbering, just do
@@ -9250,25 +9237,22 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
 
   ok = TRUE;
 
-  if ((new_flags & EF_MIPS_PIC) != (old_flags & EF_MIPS_PIC))
+  if (((new_flags & (EF_MIPS_PIC | EF_MIPS_CPIC)) != 0)
+      != ((old_flags & (EF_MIPS_PIC | EF_MIPS_CPIC)) != 0))
     {
-      new_flags &= ~EF_MIPS_PIC;
-      old_flags &= ~EF_MIPS_PIC;
       (*_bfd_error_handler)
-	(_("%s: linking PIC files with non-PIC files"),
+	(_("%s: warning: linking PIC files with non-PIC files"),
 	 bfd_archive_filename (ibfd));
-      ok = FALSE;
+      ok = TRUE;
     }
 
-  if ((new_flags & EF_MIPS_CPIC) != (old_flags & EF_MIPS_CPIC))
-    {
-      new_flags &= ~EF_MIPS_CPIC;
-      old_flags &= ~EF_MIPS_CPIC;
-      (*_bfd_error_handler)
-	(_("%s: linking abicalls files with non-abicalls files"),
-	 bfd_archive_filename (ibfd));
-      ok = FALSE;
-    }
+  if (new_flags & (EF_MIPS_PIC | EF_MIPS_CPIC))
+    elf_elfheader (obfd)->e_flags |= EF_MIPS_CPIC;
+  if (! (new_flags & EF_MIPS_PIC))
+    elf_elfheader (obfd)->e_flags &= ~EF_MIPS_PIC;
+
+  new_flags &= ~ (EF_MIPS_PIC | EF_MIPS_CPIC);
+  old_flags &= ~ (EF_MIPS_PIC | EF_MIPS_CPIC);
 
   /* Compare the ISAs.  */
   if (mips_32bit_flags_p (old_flags) != mips_32bit_flags_p (new_flags))

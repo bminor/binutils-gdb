@@ -1,3 +1,10 @@
+2003-05-07  Eric Christopher  <echristo@redhat.com>
+	    Alexandre Oliva   <aoliva@redhat.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_merge_private_bfd_data): Adjust
+	pic tests, change to warning.
+	(_bfd_mips_elf_final_link): Remove EF_MIPS_CPIC flag setting.
+
 2003-05-21  Marcus Comstedt  <marcus@mc.pp.se>
 
 	* config.bfd: Check for a target triplet of shl-...-netbsdelf as
