@@ -2884,7 +2884,7 @@ gdb_set_bp_addr (clientData, interp, objc, objv)
   int line, flags, ret, thread = -1;
   long addr;
   struct breakpoint *b;
-  char buf[64];
+  char *filename, buf[64];
   Tcl_DString cmd;
 
   if (objc != 4 && objc != 3)
@@ -2937,7 +2937,11 @@ gdb_set_bp_addr (clientData, interp, objc, objv)
   Tcl_DStringAppendElement (&cmd, buf);
   sprintf (buf, "%d", b->line_number);
   Tcl_DStringAppendElement (&cmd, buf);
-  Tcl_DStringAppendElement (&cmd, b->source_file);
+
+  filename = symtab_to_filename (sal.symtab);
+  if (filename == NULL)
+    filename = "";
+  Tcl_DStringAppendElement (&cmd, filename);
 
   ret = Tcl_Eval (interp, Tcl_DStringValue (&cmd));
   Tcl_DStringFree (&cmd);

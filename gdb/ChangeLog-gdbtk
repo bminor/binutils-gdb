@@ -1,3 +1,8 @@
+Wed Oct 28 16:19:02 1998  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk-cmds.c (gdb_set_bp_addr): For callback, send full 
+	pathname instead of just basename.
+
 1998-10-08  Keith Seitz  <keiths@cygnus.com>
 
 	* gdbtk-hooks.c (gdbtk_add_hooks): Install a hook for
